@@ -22,7 +22,7 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
 
 cgeom = configure('TF',Ndp=0,Nloop=0)
 cmap = coil_map(cgeom)
-cgeom.segment(cmap.loops,Nseg=100)
+cgeom.segment(cmap.loops,Nseg=20)
 
 nTF = 18
 theta = np.linspace(0,2*np.pi,nTF,endpoint=False)

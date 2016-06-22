@@ -15,7 +15,7 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
 pl.clf()
 
 
-setup = Setup('SXex')
+setup = Setup('SN')
 sf = SF(setup.filename)
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
@@ -31,10 +31,9 @@ sf.contour()
 
 pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
 
-rb.firstwall(calc=True,plot=True,debug=True)
-'''
-#rb.vessel()
-#rb.TFcoil(False)
-#rb.trim_sol(plot=True)
+rb.firstwall(calc=False,plot=True,debug=False)
 
-'''
+rb.vessel()
+rb.TFcoil(False)
+rb.trim_sol(plot=True)
+

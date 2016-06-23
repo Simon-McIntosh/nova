@@ -20,9 +20,15 @@ sf = SF(setup.filename)
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
 
+pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
+
+pf.coil['Coil8']['I'] *= 0.9
+
+pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
 
 
-#eq = EQ(sf,pf,sigma=0.1,boundary=rb.get_fw(expand=0.25),n=2e4)  
+eq = EQ(sf,pf,sigma=0.1,boundary=rb.get_fw(expand=0.25),n=2e4)  
+
 #eq.plotj()
 
 #pf.plot(coils=eq.coil,label=False,plasma=False) 
@@ -30,10 +36,8 @@ pf = PF(sf.eqdsk)
 sf.contour()
 
 pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
-
 rb.firstwall(calc=False,plot=True,debug=False)
-
-rb.vessel()
-rb.TFcoil(False)
-rb.trim_sol(plot=True)
+#rb.vessel()
+#rb.TFcoil(False)
+#rb.trim_sol(plot=True)
 

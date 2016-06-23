@@ -373,7 +373,7 @@ class EQ(object):
         self.coil_core()
         
     def edgeBC(self,update=True,external_coils=True):
-        if not update or self.sf.eq['ncoil'] == 0:   # edge BC from sf
+        if not update or self.sf.eqdsk['ncoil'] == 0:   # edge BC from sf
             psi = self.psi_edge()
         else:
             psi = self.psi_pl()  # plasma component

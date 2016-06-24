@@ -2,7 +2,7 @@ import pylab as pl
 import numpy as np
 from scipy.sparse import lil_matrix
 from scipy.sparse.linalg.dsolve.linsolve import spsolve
-import cross_coil as cc
+import nova.cross_coil as cc
 import scipy.optimize as op
 from copy import deepcopy
 from scipy.optimize import minimize

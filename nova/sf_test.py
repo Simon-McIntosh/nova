@@ -1,9 +1,9 @@
 import pylab as pl
-from config import Setup
-from streamfunction import SF
-from radial_build import RB
-from elliptic import EQ
-from coils import PF
+from nova.config import Setup
+from nova.streamfunction import SF
+from nova.radial_build import RB
+from nova.elliptic import EQ
+from nova.coils import PF
 
 import seaborn as sns
 rc = {'figure.figsize':[10,10*12/16],'savefig.dpi':100, # 

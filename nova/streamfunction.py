@@ -5,7 +5,7 @@ from scipy.interpolate import UnivariateSpline as spline
 from scipy.interpolate import InterpolatedUnivariateSpline as sinterp
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize
-import geqdsk
+import nova.geqdsk
 import seaborn as sns
 from matplotlib._cntr import Cntr as cntr
 from collections import OrderedDict
@@ -15,7 +15,7 @@ class SF(object):
     def __init__(self,filename,upsample=1,**kwargs):
         self.filename = filename
         self.set_kwargs(kwargs)
-        eqdsk = geqdsk.read('../eqdsk/'+self.filename)
+        eqdsk = nova.geqdsk.read('../eqdsk/'+self.filename)
         self.eqdsk = eqdsk
         self.normalise()  # unit normalisation
         self.set_plasma(eqdsk,contour=False)

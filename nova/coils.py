@@ -8,6 +8,28 @@ import seaborn as sns
 import matplotlib
 import collections
 
+def loop_vol(R,Z,plot=False):
+    imin,imax = np.argmin(Z),np.argmax(Z)
+    Rin = np.append(R[::-1][:imin+1][::-1],R[:imin+1])
+    Zin = np.append(Z[::-1][:imin+1][::-1],Z[:imin+1])
+    Rout = R[imin:imax+1]
+    Zout = Z[imin:imax+1]
+    if plot:
+        pl.plot(R[0],Z[0],'bo')
+        pl.plot(R[20],Z[20],'bd')
+        pl.plot(Rin,Zin,'bx-')
+        pl.plot(Rout,Zout,'gx-')
+    return vol_calc(Rout,Zout)-vol_calc(Rin,Zin)
+    
+def vol_calc(R,Z):
+    dR = np.diff(R)
+    dZ = np.diff(Z)
+    V = 0
+    for r,dr,dz in zip(R[:-1],dR,dZ):
+        V += np.abs((r+dr/2)**2*dz)
+    V *= np.pi
+    return V
+    
 class PF(object):
     def __init__(self,eqdsk):
         self.set_coils(eqdsk)
@@ -288,15 +310,6 @@ class TF(object):
         self.rzGet()
         self.fill(**kwargs)
         
-    def vol_calc(self,R,Z):
-        dR = np.diff(R)
-        dZ = np.diff(Z)
-        V = 0
-        for r,dr,dz in zip(R[:-1],dR,dZ):
-            V += np.abs((r+dr/2)**2*dz)
-        V *= np.pi
-        return V
-    
     def volume_ratio(self):
         #pl.plot(self.Rp,self.Zp,'rx-')
         self.Pvol = self.loop_vol(self.Rp,self.Zp,plot=False)
@@ -310,19 +323,6 @@ class TF(object):
         R,Z = self.offset(Rtf,Ztf,self.dRsteel+self.dRcoil/2)
         self.TFlength = self.length(R,Z,norm=False)[-1]
         self.Rlength = self.TFlength/self.Plength
-    
-    def loop_vol(self,R,Z,plot=False):
-        imin,imax = np.argmin(Z),np.argmax(Z)
-        Rin = np.append(R[::-1][:imin+1][::-1],R[:imin+1])
-        Zin = np.append(Z[::-1][:imin+1][::-1],Z[:imin+1])
-        Rout = R[imin:imax+1]
-        Zout = Z[imin:imax+1]
-        if plot:
-            pl.plot(R[0],Z[0],'bo')
-            pl.plot(R[20],Z[20],'bd')
-            pl.plot(Rin,Zin,'bx-')
-            pl.plot(Rout,Zout,'gx-')
-        return self.vol_calc(Rout,Zout)-self.vol_calc(Rin,Zin)
     
     def fitTF(self,xCoil):
         Rtf,Ztf,L = self.drawTF(xCoil, Nspace=500)

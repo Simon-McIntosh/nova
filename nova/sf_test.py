@@ -35,9 +35,15 @@ eq = EQ(sf,pf,sigma=0.1,boundary=rb.get_fw(expand=0.25),n=2e4)
 
 sf.contour()
 
+
+
 pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
 rb.firstwall(calc=False,plot=True,debug=False)
 #rb.vessel()
 #rb.TFcoil(False)
 #rb.trim_sol(plot=True)
+
+shape = sf.shape_parameters()
+print(shape)
+
 

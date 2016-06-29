@@ -23,14 +23,14 @@ def delete_row_csr(mat, i):
 # element stiffness matrix
 class FE(object):
     
-    def __init__(self,X,frame='1D',nShape=21,*args):
+    def __init__(self,frame='1D',*args):
         self.coordinate = ['x','y','z','tx','ty','tz']
         self.set_mat(args)
-        self.X = X
         self.frame = frame 
-        self.grid()
-        self.set_stiffness()
+        self.set_stiffness()  # set stiffness matrix + problem dofs
         self.initalize_BC()  # boundary conditions
+
+    def initalise(self,nShape=21):
         self.initalize_F()  # load
         self.initalize_D()  # displacment
         self.initalize_shape_coefficents(nShape=nShape)  # shape function coefficients
@@ -59,10 +59,13 @@ class FE(object):
             values.append(self.mat[m])
         return values
         
-    def grid(self):
+    def grid(self,X):
         from amigo.geom import vector_length
         from scipy.interpolate import interp1d
+        self.X = X
         self.nel = np.shape(self.X)[0]-1  # element number
+        self.nK = int((self.nel-1)*self.ndof+2*self.ndof)  # stiffness matrix
+        
         self.L = vector_length(self.X,norm=False)  # loop length
         self.Ln = interp1d(self.L/self.L[-1],range(self.nel+1))  # normalised
         dx = np.array(np.diff(self.X,axis=0))  # element aligned coordinate
@@ -93,70 +96,62 @@ class FE(object):
             
     def initalize_shape_coefficents(self,nShape=21):
         self.nShape = nShape
-        self.S = {}
-        self.S['s'] = np.linspace(0,1,nShape)  # inter-element spacing
-        self.S['Nv'] = np.zeros((nShape,4))  #  Hermite shape functions
-        self.S['Nv'][:,0] = 1-3*self.S['s']**2+2*self.S['s']**3
-        self.S['Nv'][:,0] = self.S['s']-2*self.S['s']**2+self.S['s']**3
-        self.S['Nv'][:,0] = 3*self.S['s']**2-2*self.S['s']**3
-        self.S['Nv'][:,0] = -self.S['s']**2+self.S['s']**3
-        
-        
-        self.S['a'] = np.zeros((4,2,self.nel))
-        self.S['mo'] = np.matrix([[1,0,0,0],
-                                  [0,1,0,0],
-                                  [1,1,1,1],
-                                  [0,1,2,3]])
-        self.S['m'] = np.copy(self.S['mo'])
-        
-        
-        
-        self.S['mv'] = np.zeros((nShape,4))
-        for i in range(4):
-            self.S['mv'][:,i] = self.S['s']**i
-        self.S['mdv'] = np.zeros((nShape,3))
-        for i,c in enumerate([1,2,3]):
-            self.S['mdv'][:,i] = c*self.S['s']**i
-        self.S['md2v'] = np.zeros((nShape,2))    
-        for i,c in enumerate([2,6]):
-            self.S['md2v'][:,i] = c*self.S['s']**i    
-        self.S['u'] = np.zeros((2,self.nel))
-            
-    def shape_coefficents(self):
-        for el in range(self.nel):
-            d = self.displace(el)  # local 12 dof nodal displacment 
-            for i in range(2):
-                self.S['u'][i,el] = d[6*i]  # axial displacment
-            for i in [1,3]:
-                self.S['m'][i,:] = self.S['mo'][i,:]/self.dL[el]
-            for i,label in enumerate([['y','tz'],['z','ty']]):
-                if label[0] in self.disp:
-                    d1D = self.displace_1D(d,label)
-                    self.S['a'][:,i,el] = np.linalg.solve(self.S['m'],d1D)
-
-    def shapes(self):
         nsh = 1+(self.nShape-1)*self.nel
         self.shape = {}
         self.shape['x'] = np.zeros(nsh)
         for label in ['u','du','d2u','U']:
             self.shape[label] = np.zeros((nsh,3))
-        for el in range(self.nel):
-            self.get_shapes(el)
+        self.S = {}
+        self.S['s'] = np.linspace(0,1,nShape)  # inter-element spacing
+        self.S['Nv'] = np.zeros((nShape,4))  #  Hermite shape functions (disp)
+        self.S['Nv'][:,0] = 1-3*self.S['s']**2+2*self.S['s']**3
+        self.S['Nv'][:,1] = self.S['s']-2*self.S['s']**2+self.S['s']**3
+        self.S['Nv'][:,2] = 3*self.S['s']**2-2*self.S['s']**3
+        self.S['Nv'][:,3] = -self.S['s']**2+self.S['s']**3
+        self.S['Nv_dL'] = np.zeros((nShape,2)) 
+        self.S['Nv_dL'][:,0] = np.copy(self.S['Nv'][:,1])
+        self.S['Nv_dL'][:,1] = np.copy(self.S['Nv'][:,3])
+        self.S['Nd2v'] = np.zeros((nShape,4))  #  Hermite shape functions (curve)
+        self.S['Nd2v'][:,0] = -6+12*self.S['s']
+        self.S['Nd2v'][:,1] = -4+6*self.S['s']
+        self.S['Nd2v'][:,2] = 6-12*self.S['s']
+        self.S['Nd2v'][:,3] = -2+6*self.S['s']
+        self.S['Nd2v_dL'] = np.zeros((nShape,2)) 
+        self.S['Nd2v_dL'][:,0] = np.copy(self.S['Nd2v'][:,1])
+        self.S['Nd2v_dL'][:,1] = np.copy(self.S['Nd2v'][:,3])
 
-    def get_shapes(self,el):
+    def interpolate(self):
+        for el in range(self.nel):
+            d = self.displace(el)  # local 12 dof nodal displacment 
+            u = np.zeros(2)
+            for i in range(2):  # axial displacment
+                u[i] = d[6*i]
+            for i,j in enumerate([1,3]):  # adjust for element length
+                self.S['Nv'][:,j] = self.S['Nv_dL'][:,i]*self.dL[el]
+                self.S['Nd2v'][:,j] = self.S['Nd2v_dL'][:,i]*self.dL[el]
+            v = np.zeros((self.nShape,2))
+            d2v = np.zeros((self.nShape,2))
+            for i,label in enumerate([['y','tz'],['z','ty']]):
+                if label[0] in self.disp:
+                    d1D = self.displace_1D(d,label)
+                    v[:,i] = np.dot(self.S['Nv'],d1D)
+                    d2v[:,i] = np.dot(self.S['Nd2v'],d1D)/self.dL[el]**2
+            self.store_shape(el,u,v,d2v)
+
+    def store_shape(self,el,u,v,d2v):
         i = el*(self.nShape-1)
         nS = self.nShape
         self.shape['x'][i:i+nS] = np.linspace(self.L[el],self.L[el+1],nS)
-        self.shape['u'][i:i+nS,0] = np.linspace(self.S['u'][0,el],
-                                                self.S['u'][1,el],nS)
-        self.shape['u'][i:i+nS,1] = np.dot(self.S['mv'],self.S['a'][:,0,el])
-        self.shape['u'][i:i+nS,2] = np.dot(self.S['mv'],self.S['a'][:,1,el])
+        self.shape['u'][i:i+nS,0] = np.linspace(u[0],u[1],nS)
+        self.shape['u'][i:i+nS,1] = v[:,0]  # displacment
+        self.shape['u'][i:i+nS,2] = v[:,1]
         self.shape['U'][i:i+nS,:] = np.dot(self.T3[:,:,el].T,\
-        self.shape['u'][i:i+nS,:].T).T #+self.X[el,:]
+        self.shape['u'][i:i+nS,:].T).T #  transform to global
         for j in range(3):
             self.shape['U'][i:i+nS,j] += np.linspace(self.X[el,j],
                                                      self.X[el+1,j],nS)
-        self.shape['d2u'][i:i+nS,1] = np.dot(self.S['md2v'],self.S['a'][2:,0,el])
+        self.shape['d2u'][i:i+nS,1] = d2v[:,0]  # curvature
+        self.shape['d2u'][i:i+nS,2] = d2v[:,1]
     
     def displace(self,el):
         d = np.zeros(12)
@@ -170,10 +165,12 @@ class FE(object):
             
     def displace_1D(self,d,label):
         d1D = np.zeros(4)
-        for i in range(2):
-            for j in range(2):
+        for i in range(2):  # node
+            for j in range(2):  # label
                 index = self.coordinate.index(label[j])
                 d1D[2*i+j] = d[6*i+index]
+                if label[j] == 'ty':  # displacment in z
+                    d1D[2*i+j] *= -1
         return d1D
         
     def set_stiffness(self):  # set element stiffness matrix
@@ -190,16 +187,14 @@ class FE(object):
             stiffness = self.stiffness_2D
         else:
             dof = ['u','v','w','rx','ry','rz']
-            disp = ['x','y','z','tz','ty','tz']
+            disp = ['x','y','z','tx','ty','tz']
             load = ['fx','fy','fz','mx','my','mz']
             stiffness = self.stiffness_3D  
         self.dof = dof
         self.disp = disp
         self.load = load
         self.ndof = len(dof)  # degrees of fredom per node
-        self.nK = int((self.nel-1)*self.ndof+2*self.ndof)
         self.stiffness = stiffness
-        return dof
         
     def stiffness_1D(self,el):  # dof [v,rz]
         a = self.dL[el]/2
@@ -213,18 +208,18 @@ class FE(object):
     def stiffness_2D(self,el):  # dof [u,v,rz]
         a = self.dL[el]/2
         E,A,Iz = self.get_mat()
-        k = E*np.matrix([[A/(2*a), 0,             0,
-                         -A/(2*a), 0,             0],
-                         [0,       3*Iz/(2*a**3), 3*Iz/(2*a**2),
-                          0,      -3*Iz/(2*a**3), 3*Iz/(2*a**2)],
-                         [0,       3*Iz/(2*a**2), 2*Iz/a,
-                          0,      -3*Iz/(2*a**2), Iz/a],
-                         [-A/(2*a),0,             0,
-                          A/(2*a), 0,             0],
-                         [0,      -3*Iz/(2*a**3),-3*Iz/(2*a**2),
-                          0,       3*Iz/(2*a**3),-3*Iz/(2*a**2)],
-                         [0,       3*Iz/(2*a**2), Iz/a,
-                          0,      -3*Iz/(2*a**2), 2*Iz/a]])
+        k = np.matrix([[A*E/(2*a), 0,               0,
+                       -A*E/(2*a), 0,               0],
+                       [0,         3*E*Iz/(2*a**3), 3*E*Iz/(2*a**2),
+                        0,        -3*E*Iz/(2*a**3), 3*E*Iz/(2*a**2)],
+                       [0,         3*E*Iz/(2*a**2), 2*E*Iz/a,
+                        0,        -3*E*Iz/(2*a**2), E*Iz/a],
+                       [-A*E/(2*a),0,               0,
+                         A*E/(2*a),0,               0],
+                       [0,        -3*E*Iz/(2*a**3),-3*E*Iz/(2*a**2),
+                        0,         3*E*Iz/(2*a**3),-3*E*Iz/(2*a**2)],
+                       [0,         3*E*Iz/(2*a**2), E*Iz/a,
+                        0,        -3*E*Iz/(2*a**2), 2*E*Iz/a]])
         k = self.rotate_matrix(k,el)  # transfer to global coordinates
         return k
         
@@ -312,19 +307,25 @@ class FE(object):
         return k
         
     def assemble(self):  # assemble global stiffness matrix
-        self.Ko = np.zeros((self.nK,self.nK))
+        self.Ko = np.zeros((self.nK,self.nK))  # matrix without constraints
         for el in range(self.nel):
             ke = self.stiffness(el)
-            j = el*self.ndof
+            j = el*self.ndof  # node index here
+            #####    ######
             self.Ko[j:j+2*self.ndof,j:j+2*self.ndof] += ke
         self.K = np.copy(self.Ko)
         
-    def check_input(self,vector,label):  # 'dof','disp','load'
+    def check_input(self,vector,label,terminate=True):  # 'dof','disp','load'
         attributes = getattr(self,vector)
+        error_code = 0
         if label not in attributes and not (vector == 'dof' and label == 'fix'):
-            err_txt = 'attribute \''+label+'\' not present in frame='+self.frame
-            err_txt +=' ['+', '.join(attributes)+']'
-            raise ValueError(err_txt)
+            error_code = 1
+            if terminate:
+                err_txt = 'attribute \''+label+'\' not present'
+                err_txt += 'in frame='+self.frame
+                err_txt +=' ['+', '.join(attributes)+']'
+                raise ValueError(err_txt)
+        return error_code
             
     def add_force(self,L,F):  # l, [Fx,Fy,Fz], global force vector, split to pair
         L = self.Ln(L)
@@ -380,9 +381,10 @@ class FE(object):
             print(w)
     '''    
         
-    def addBC(self,dof,nodes):
-        self.check_input('dof',dof)
-        self.BC[dof] = np.append(self.BC[dof],np.array(nodes))
+    def addBC(self,dof,nodes,terminate=True):
+        error_code = self.check_input('dof',dof,terminate=terminate)
+        if not error_code:
+            self.BC[dof] = np.append(self.BC[dof],np.array(nodes))
         
     def setBC(self):  # colapse constrained dof
         self.extractBC()
@@ -413,12 +415,9 @@ class FE(object):
         for i,disp in enumerate(self.disp):
             self.D[disp] = self.Dn[i::self.ndof]
 
-    def plot(self):
-        #fig = pl.figure()
-        #ax = fig.add_subplot(111)  #, projection='3d'
-        pl.plot(self.X[:,0],self.X[:,1],'o')
-        pl.plot(self.X[:,0]+self.D['x'],
-                self.X[:,1]+self.D['y'],'o')
-        #ax.auto_scale_xyz([4,18], [-11,11], [-11,11])
-        #ax.axis('equal')
+    def plot_nodes(self):
+        ms = 5
+        pl.plot(self.X[:,0],self.X[:,1],'o',markersize=ms)
+        #pl.plot(self.X[:,0]+self.D['x'],
+        #        self.X[:,1]+self.D['y'],'o',markersize=ms) 
         sns.despine()

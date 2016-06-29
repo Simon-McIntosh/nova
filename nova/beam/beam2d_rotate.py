@@ -5,7 +5,8 @@ from nova import coils
 
 tf = coils.TF()
 
-r,z = tf.drawTF([6.42769145,1.26028077,4.51906176,4.53712734,-2.22330594])[:2]
+xCoil = [6.42769145,1.26028077,4.51906176,4.53712734,-2.22330594]
+r,z = tf.drawTF(xCoil,Nspace=100)[:2]
 
 '''
 L = 1
@@ -18,14 +19,27 @@ X = np.zeros((len(r),3))
 X[:,0] = r
 X[:,1] = z
 
-fe = FE(X,frame='3D')
+fe = FE(frame='3D')
+fe.grid(X)
+fe.initalise()
+
 fe.addBC('fix',[0,fe.nel])  # fix left hand node
-fe.add_nodal_load('v',fe.nel/2,0.1)
-fe.add_nodal_load('u',fe.nel/2,0.1)
-fe.add_nodal_load('w',fe.nel/2,0.1)
+
+fe.add_force(0.5,[0,-1e-2,0]) 
+fe.add_force(0.2,[-1e-2,-1e-2,1e-2])  # l, [Fx,Fy,Fz], global
+fe.add_force(0.9,[3e-2,1e-2,-1e-2])  # l, [Fx,Fy,Fz], global
+fe.add_force(0.1,[0,1e-2,1e-2])  # l, [Fx,Fy,Fz], global
+
 fe.solve()
-fe.plot()
+fe.interpolate()
 
+fe.plot_nodes()
+pl.plot(fe.shape['U'][:,0],fe.shape['U'][:,1])
 
-#print('2D',fe.L[-2]*L**3/(3*fe.E*fe.Iz),fe.D['y'][-1])
+pl.axis('equal')
+
+pl.figure()
+pl.plot(fe.shape['x'],fe.shape['d2u'][:,1],'-')
+pl.plot(fe.shape['x'],fe.shape['d2u'][:,2],'-')
+
 

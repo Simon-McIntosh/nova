@@ -406,7 +406,13 @@ class FE(object):
         self.BCindex = list(map(int,set(self.BCindex)))
         self.Dindex = np.arange(0,self.nK)
         self.Dindex = np.delete(self.Dindex,self.BCindex)
-        
+    '''
+    def plotBC(self):
+        # P.arrow( x, y, dx, dy, **kwargs )
+        P.arrow( 0.5, 0.8, 0.0, -0.2, fc="k", ec="k",
+        head_width=0.05, head_length=0.1 )
+        P.show()
+    '''    
     def solve(self):
         self.assemble()  # assemble stiffness matrix
         self.setBC()  # remove constrained equations from stiffness + load 
@@ -417,7 +423,7 @@ class FE(object):
 
     def plot_nodes(self):
         ms = 5
-        pl.plot(self.X[:,0],self.X[:,1],'o',markersize=ms)
+        pl.plot(self.X[:,0],self.X[:,1],'-',markersize=ms)
         #pl.plot(self.X[:,0]+self.D['x'],
         #        self.X[:,1]+self.D['y'],'o',markersize=ms) 
         sns.despine()

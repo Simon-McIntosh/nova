@@ -2,11 +2,17 @@ import numpy as np
 import pylab as pl
 from finite_element import FE
 from nova import coils
+from nova.beam import Dcoil
+
 
 tf = coils.TF()
 
 xCoil = [6.42769145,1.26028077,4.51906176,4.53712734,-2.22330594]
 r,z = tf.drawTF(xCoil,Nspace=100)[:2]
+
+r1,r2 = 4.486,15.708  # DEMO baseline
+r,z = Dcoil.pD(r1,r2,npoints=200)
+
 
 '''
 L = 1
@@ -25,9 +31,9 @@ fe.initalise()
 
 fe.addBC('fix',[0,fe.nel])  # fix left hand node
 
-fe.add_force(0.5,[0,-1e-2,0]) 
+fe.add_force(0.5,[1e-2,-1e-2,0]) 
 fe.add_force(0.2,[-1e-2,-1e-2,1e-2])  # l, [Fx,Fy,Fz], global
-fe.add_force(0.9,[3e-2,1e-2,-1e-2])  # l, [Fx,Fy,Fz], global
+fe.add_force(0.9,[6e-2,6e-2,-1e-2])  # l, [Fx,Fy,Fz], global
 fe.add_force(0.1,[0,1e-2,1e-2])  # l, [Fx,Fy,Fz], global
 
 fe.solve()

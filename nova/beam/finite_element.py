@@ -6,6 +6,8 @@ from collections import OrderedDict
 import seaborn as sns
 from mpl_toolkits.mplot3d import Axes3D
 import itertools 
+from amigo.geom import vector_length
+from scipy.interpolate import interp1d
 
 def delete_row_csr(mat, i):
     if not isinstance(mat, csr_matrix):
@@ -44,12 +46,11 @@ class FE(object):
         self.nmat = 0
         self.mat = np.zeros((nmat_max),dtype=[('E','float'),('G','float'),
                                               ('J','float'),('Iy','float'),
-                                              ('Iz','float'),('A','float')])
+                                              ('Iz','float'),('A','float'),
+                                              ('rho','float')])
         
-    def add_mat(self,**kwargs):
-        if 'nmat' in kwargs:
-            self.nmat = kwargs.get('nmat')
-            
+    def add_mat(self,nmat,**kwargs):
+        self.nmat = nmat  # set material number
         if self.nmat >= self.nmat_max:
             err_txt = 'nmat=={:d}>=nmat_max=={:1d}'.format(self.nmat,
                                                            self.nmat_max)
@@ -82,7 +83,8 @@ class FE(object):
         
     def initalise_grid(self,npart_max=10):
         self.X = []
-        self.npart = 0
+        self.npart = 0  # part number
+        self.part = {}  # part dict
         self.nnd = 0  # node number
         self.nel = 0  # element number
         self.el = {}
@@ -97,9 +99,11 @@ class FE(object):
         else:
             self.X = np.append(self.X,X,axis=0)
         
-    def add_elements(self,n=[],nmat=0):  # list of node pairs shape==[n,2]
+    def add_elements(self,n=[],nmat=0,part_name=''):  # list of node pairs shape==[n,2]
+        if len(part_name) == 0:
+            part_name = 'part_{:1d}'.format(self.npart)
         n = np.array(n)
-        if len(n) == 0:
+        if len(n) == 0:  # construct from last input node set
             n = np.zeros((self.nnd-self.nndo-1,2),dtype='int')
             n[:,1] = np.arange(self.nndo+1,self.nnd)
             n[:,0] = n[:,1]-1
@@ -108,7 +112,7 @@ class FE(object):
         if len(n) == 0:
             err_txt = 'zero length node pair array'
             raise ValueError(err_txt)
-            
+        self.nelo = self.nel  # start index    
         self.nel += len(n)  # element number
         dx = self.X[n[:,1],:]-self.X[n[:,0],:] # element aligned coordinate
         self.check_frame(dx)
@@ -124,6 +128,7 @@ class FE(object):
         self.el_append('dl',dl)
         self.el_append('mat',nmat*np.ones(len(n)))
         self.el_append('n',n)
+        self.add_part(part_name)
         
     def el_append(self,key,value):
         if key in self.el:
@@ -131,14 +136,36 @@ class FE(object):
         else:
             self.el[key] = value
             
-    #self.add_part()
-
-    def grid(self):
-        from amigo.geom import vector_length
-        from scipy.interpolate import interp1d
-
-        self.L = vector_length(self.X,norm=False)  # loop length
-        self.Ln = interp1d(self.L/self.L[-1],range(self.nel+1))  # normalised
+    def check_name(self,name):  # ensure unique part name
+        if name in self.part:
+            count = 1
+            name = name+'_{:02d}'.format(count)
+            while name in self.part:
+                count += 1
+                name = list(name)
+                name[-2:] = '{:02d}'.format(count)
+                name = ''.join(name)
+                if count == 99:
+                    raise ValueError('too many duplicate part names')
+        return name
+        
+    def add_part(self,name,iel=[]):
+        self.npart += 1
+        name = self.check_name(name)
+        self.part[name] = {}  # initalise dict
+        if len(iel) == 0:  # construct from last input element set
+            iel = np.arange(self.nelo,self.nel)
+        self.part[name]['el'] = iel  # construct from input element list
+        self.part[name]['nel'] = len(iel)
+        self.part[name]['L'] = np.append(0,np.cumsum(self.el['dl'][iel]))
+        n = 2*(len(iel))
+        L,nd = np.zeros(n),np.zeros(n)
+        L[::2] = self.part[name]['L'][:-1]
+        L[1::2] = self.part[name]['L'][1:]
+        L /= self.part[name]['L'][-1]  # normalise
+        nd[::2] = self.el['n'][iel,0]
+        nd[1::2] = self.el['n'][iel,1]
+        self.part[name]['Ln'] = interp1d(L,nd)  # node interpolator
         
     def initalize_D(self):  # initalize displacment vector [u,v,w,rx,ry,rz]
         self.D = {}
@@ -150,17 +177,19 @@ class FE(object):
 
     def initalize_BC(self):
         self.BC = OrderedDict()
-        self.BC['fix'] = np.array([])# type:[node,...] 
+        self.BC['fix'] = np.array([]) # type:[node,...] 
+        self.BC['pin'] = np.array([]) # type:[node,...] 
         for key in self.dof:
             self.BC[key] = np.array([])# type:[node,...] 
             
     def initalize_shape_coefficents(self,nShape=21):
         self.nShape = nShape
-        nsh = 1+(self.nShape-1)*self.nel
+        #nsh = 1+(self.nShape-1)*self.nel
+        nsh = self.nel
         self.shape = {}
         self.shape['x'] = np.zeros(nsh)
-        for label in ['u','du','d2u','U']:
-            self.shape[label] = np.zeros((nsh,3))
+        for label in ['u','d2u','U']:
+            self.shape[label] = np.zeros((nsh,3,self.nShape))
         self.S = {}
         self.S['s'] = np.linspace(0,1,nShape)  # inter-element spacing
         self.S['Nv'] = np.zeros((nShape,4))  #  Hermite shape functions (disp)
@@ -197,24 +226,34 @@ class FE(object):
                     v[:,i] = np.dot(self.S['Nv'],d1D)
                     d2v[:,i] = np.dot(self.S['Nd2v'],d1D)/self.el['dl'][el]**2
             self.store_shape(el,u,v,d2v)
+        self.shape_part()  # set deformed part shape
 
     def store_shape(self,el,u,v,d2v):
-        i = el*(self.nShape-1)
         nS = self.nShape
-        #### check x def ###
-        #self.shape['x'][i:i+nS] = np.linspace(0,self.el['dl'][el],nS)
-        self.shape['u'][i:i+nS,0] = np.linspace(u[0],u[1],nS)
-        self.shape['u'][i:i+nS,1] = v[:,0]  # displacment
-        self.shape['u'][i:i+nS,2] = v[:,1]
-        self.shape['U'][i:i+nS,:] = np.dot(self.T3[:,:,el].T,\
-        self.shape['u'][i:i+nS,:].T).T #  transform to global
+        self.shape['u'][el,0] = np.linspace(u[0],u[1],nS)
+        self.shape['u'][el,1] = v[:,0]  # displacment
+        self.shape['u'][el,2] = v[:,1]
+        self.shape['U'][el] = np.dot(self.T3[:,:,el].T,  #  to global
+                                           self.shape['u'][el,:,:])
         for j in range(3):
             n = self.el['n'][el]
-            self.shape['U'][i:i+nS,j] += np.linspace(self.X[n[0],j],
-                                                     self.X[n[1],j],nS)
-        self.shape['d2u'][i:i+nS,1] = d2v[:,0]  # curvature
-        self.shape['d2u'][i:i+nS,2] = d2v[:,1]
-    
+            self.shape['U'][el,j,:] += np.linspace(self.X[n[0],j],
+                                                   self.X[n[1],j],nS)
+        self.shape['d2u'][el,1] = d2v[:,0]  # curvature
+        self.shape['d2u'][el,2] = d2v[:,1]
+        
+    def shape_part(self):
+        for part in self.part:
+            nS = self.part[part]['nel']*(self.nShape-1)+1
+            self.part[part]['l'] = np.linspace(0,1,nS)
+            for label in ['u','U','d2u']:
+                self.part[part][label] = np.zeros((nS,3))
+            for nel,el in enumerate(self.part[part]['el']):
+                i = nel*(self.nShape-1)
+                for label in ['u','U','d2u']:
+                    self.part[part][label][i:i+self.nShape,:] = \
+                    self.shape[label][el,:,:].T
+                
     def displace(self,el):
         d = np.zeros(12)
         for i,n in enumerate(self.el['n'][el]):  # each node in element
@@ -241,7 +280,6 @@ class FE(object):
             disp = ['y','tz']
             load = ['fy','mz']
             stiffness = self.stiffness_1D
-            
         elif self.frame=='2D':
             dof = ['u','v','rz']
             disp = ['x','y','tz']
@@ -383,7 +421,8 @@ class FE(object):
     def check_input(self,vector,label,terminate=True):  # 'dof','disp','load'
         attributes = getattr(self,vector)
         error_code = 0
-        if label not in attributes and not (vector == 'dof' and label == 'fix'):
+        if label not in attributes and not \
+        (vector == 'dof' and (label == 'fix' or label == 'pin')):
             error_code = 1
             if terminate:
                 err_txt = 'attribute \''+label+'\' not present'
@@ -391,17 +430,54 @@ class FE(object):
                 err_txt +=' ['+', '.join(attributes)+']'
                 raise ValueError(err_txt)
         return error_code
-            
-    def add_force(self,L,F):  # l, [Fx,Fy,Fz], global force vector, split to pair
-        Ln = self.Ln(L)
-        el = int(np.floor(Ln))
-        s = Ln-el  # fraction along element
-        if el == self.nel:
-            el -= 1
-            s = 1
-        f = np.linalg.solve(self.T3[:,:,el].T,F)  # to local cord
-        fn = np.zeros((6,2))  # 6 dof local nodal load vector
         
+    def set_s(self,**kwargs):
+        if 's' in kwargs:
+            s = kwargs.get('s')
+        else:
+            s = 0.5
+        return s
+        
+    def add_load(self,**kwargs):  # distribute load to adjacent nodes
+        csys = ''  # coodrdinate system unset 
+        if 'f' in kwargs or 'F' in kwargs:  # point load
+            load_type = 'point'
+            if 'L' in kwargs and 'part' in kwargs:  # identify element
+                L,part = kwargs.get('L'),kwargs.get('part')
+                Ln = self.part[part]['Ln'](L)  # length along part
+                el = int(np.floor(Ln))  # element index
+                s = Ln-el  # fraction along element
+            elif 'el' in kwargs:
+                el = kwargs.get('el')
+                s = self.set_s(**kwargs)
+            else:
+                raise ValueError('define element index or length and part')
+            if 'F' in kwargs:
+                csys = 'global'
+                f = kwargs.get('F')
+            elif 'f' in kwargs:
+                csys = 'local'
+                f = kwargs.get('f')
+        elif 'w' in kwargs or 'W' in kwargs:  # distributed load
+            load_type = 'dist'
+            if 'el' in kwargs:
+                el = kwargs.get('el')
+            else:
+                raise ValueError('define element index')
+            s = self.set_s(**kwargs)
+            if 'W' in kwargs:
+                csys = 'global'
+                w = np.array(kwargs.get('W'))
+            elif 'w' in kwargs:                
+                csys = 'local'
+                w = np.array(kwargs.get('w'))
+            f = w*self.el['dl'][el]
+        if len(csys) == 0:
+            raise ValueError('load vector unset')
+        elif csys == 'global':       
+            f = np.linalg.solve(self.T3[:,:,el].T,f)  # rotate to local csys
+        fn = np.zeros((6,2))  # 6 dof local nodal load vector
+        print(s)
         for i,label in enumerate(['fx','fy','fz']):  # split point load into F,M
             if label in self.load:
                 if label == 'fx':
@@ -413,6 +489,8 @@ class FE(object):
                     mi = 5 if label == 'fy' else 4
                     fn[mi,0] = f[i]*(1-s)**2*s*self.el['dl'][el]
                     fn[mi,1] = -f[i]*s**2*(1-s)*self.el['dl'][el]
+                    if load_type == 'dist':
+                        fn[mi,:] *= 8/12  # reduce moment for distributed load
             else:
                 if f[i] != 0:            
                     err_txt = 'non zero load \''+label+'\''
@@ -421,9 +499,12 @@ class FE(object):
                     raise ValueError(err_txt)
         for i in range(2):  # each node
             node = el+i
-            F = np.zeros((6))
-            for j in range(2):  # force,moment
-                F[j*3:j*3+3] = np.dot(self.T3[:,:,el].T,fn[j*3:j*3+3,i])  # global
+            if csys == 'global':
+                F = np.zeros((6))
+                for j in range(2):  # force,moment
+                    F[j*3:j*3+3] = np.dot(self.T3[:,:,el].T,fn[j*3:j*3+3,i])
+            else:
+                F = fn[:,i]
             for index,label in enumerate(['fx','fy','fz','mx','my','mz']):
                 if label in self.load:
                     self.add_nodal_load(node,label,F[index])
@@ -432,27 +513,39 @@ class FE(object):
         self.check_input('load',label)
         index = self.load.index(label)
         self.F[node*self.ndof+index] += load
+        
+    def add_weight(self):
+        for part in self.part:
+            for el in self.part[part]['el']:
+                nm = self.el['mat'][el]  # material index
+                w = -9.81*self.mat['rho'][nm]*self.mat['A'][nm]
+                self.add_load(el=el,W=[0,w,0])  # self weight
 
-        '''
-        distributed
-        point
-        gravity
-        '''
+    def check_part(self,part):
+        if part not in self.part:
+            err_txt = part+' not present in ['+', '.join(self.part.keys())+']'
+            raise ValueError(err_txt)
         
-    '''
-    def add_distributed_load(self):  # global
-        W = np.zeros((self.nel,3))
-        W[:,1] = -1
-        for i,(w,dl) in enumerate(zip(W,self.dL)):
-            for dof in self.load
-            self.add_nodal_load()
-            print(w)
-    '''    
+    def part_node(self,nodes,part):
+        if not isinstance(nodes,list):  # convert to list
+            nodes = [nodes]
+        self.check_part(part)
+        if len(part) > 0:  # node index relitive to part
+            for i in range(len(nodes)):
+                node = nodes[i]
+                el = self.part[part]['el'][node]
+                el_end = 0 if node >= 0 else 1  # chose side of element
+                nodes[i] = self.el['n'][el,el_end]
+        return nodes
         
-    def addBC(self,dof,nodes,terminate=True):
-        error_code = self.check_input('dof',dof,terminate=terminate)
-        if not error_code:
-            self.BC[dof] = np.append(self.BC[dof],np.array(nodes))
+    def addBC(self,dof,nodes,part='',terminate=True):
+        nodes = self.part_node(nodes,part)  # part relitive node format
+        if isinstance(dof,str):  # convert to list
+            dof = [dof]
+        for constrn in dof:  # constrain nodes
+            error_code = self.check_input('dof',constrn,terminate=terminate)
+            if not error_code:
+                self.BC[constrn] = np.append(self.BC[constrn],np.array(nodes))
         
     def setBC(self):  # colapse constrained dof
         self.extractBC()
@@ -466,11 +559,15 @@ class FE(object):
         for j,key in enumerate(self.BC.keys()):
             ui = self.ndof*self.BC[key]  # node dof
             if len(ui) > 0:
+                print(ui,j)
                 if key == 'fix':  # fix all dofs
                     for i in range(self.ndof):
                         self.BCindex = np.append(self.BCindex,ui+i)
+                elif key == 'pin':  # pin node (u,v,w)
+                    for i in range(int(self.ndof/2)):
+                        self.BCindex = np.append(self.BCindex,ui+i)
                 else:
-                    self.BCindex = np.append(self.BCindex,ui+j-1)
+                    self.BCindex = np.append(self.BCindex,ui+j-2)  # skip-fix,pin
         self.BCindex = list(map(int,set(self.BCindex)))
         self.Dindex = np.arange(0,self.nK)
         self.Dindex = np.delete(self.Dindex,self.BCindex)

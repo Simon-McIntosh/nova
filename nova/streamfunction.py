@@ -15,6 +15,7 @@ class SF(object):
     def __init__(self,filename,upsample=1,**kwargs):
         self.filename = filename
         self.set_kwargs(kwargs)
+        print('../eqdsk/'+self.filename,filename)
         eqdsk = nova.geqdsk.read('../eqdsk/'+self.filename)
         self.eqdsk = eqdsk
         self.normalise()  # unit normalisation

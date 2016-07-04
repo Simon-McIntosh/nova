@@ -47,7 +47,6 @@ def read(f):
     -------
     
     """
-    
     if isinstance(f, str):
         # If the input is a string, treat as file name
         with open(f) as fh: # Ensure file is closed

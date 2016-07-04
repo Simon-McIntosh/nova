@@ -559,7 +559,6 @@ class RB(object):
         R,Z = R[index],Z[index]  # remove duplicates
         nRloop,nZloop = self.normal(Rloop,Zloop)
         Rin,Zin = np.array([]),np.array([])
-
         for r,z in zip(R,Z):
             i = np.argmin((r-Rloop)**2+(z-Zloop)**2)
             dr = [Rloop[i]-r,Zloop[i]-z]  

@@ -322,8 +322,8 @@ class EQ(object):
             lbdry = self.sf.length(rbdry,zbdry)
             rc = np.mean([rbdry.min(),rbdry.max()])
             zc = np.mean([zbdry.min(),zbdry.max()])
-            radius = interp1(lbdry,((rbdry-rc)**2+(zbdry-zc)**2)**0.5)
-            theta = interp1(lbdry,np.arctan2(zbdry-zc, rbdry-rc))
+            radius = interp1d(lbdry,((rbdry-rc)**2+(zbdry-zc)**2)**0.5)
+            theta = interp1d(lbdry,np.arctan2(zbdry-zc, rbdry-rc))
             Length = np.linspace(lbdry[0],lbdry[-1],len(lbdry))
             Radius = radius(Length)
             Theta = theta(Length)
@@ -361,7 +361,7 @@ class EQ(object):
                 'dr':self.dr*np.sqrt(n),'dz':self.dz*np.sqrt(n),
                 'rc':np.sqrt(n*self.dr**2+n*self.dz**2)/2,
                 'I':I,'indx':indx}
-        self.sf.plasma_coil = self.plasma_coil
+        self.pf.plasma_coil = self.plasma_coil
        
     def get_plasma_coil(self,delta=0):
         self.b *= 0

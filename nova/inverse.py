@@ -1,25 +1,27 @@
 import numpy as np
 import pylab as pl
-import cross_coil as cc
+import nova.cross_coil as cc
 from collections import OrderedDict as od
 from scipy.interpolate import RectBivariateSpline as RBS
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 from scipy.interpolate import interp1d as interp1
 import seaborn as sns
-from radial_build import RB
+from nova.radial_build import RB
 import scipy.optimize as op
 from itertools import cycle
 import copy
 import time
 import multiprocessing
+#from nova.config import Setup
 
 mu_o = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
 
 class INV(object):
     
-    def __init__(self,sf,eq,configTF='SN',config='SN'):
+    def __init__(self,sf,pf,rb,eq,configTF='SN',config='SN'):
         self.ncpu = multiprocessing.cpu_count()
         self.sf = sf
+        self.pf = pf
         self.eq = eq
         self.fix = {'r':np.array([]),'z':np.array([]),'BC':np.array([]),
                     'value':np.array([]),'Bdir':np.array([[],[]]).T,
@@ -29,10 +31,11 @@ class INV(object):
         self.add_active([],empty=True)  # all coils active
         self.update_coils()
         self.initalise_current()
-        conf = Config(config)
-        conf.TF(self.sf)
-        self.rb = RB(conf,self.sf,Np=150)  # load radial build
-        self.interpTF(config=configTF,Ltrim=[0.15,0.85])  # TF interpolators [0.08,0.85]
+        #conf = Config(config)
+        #conf.TF(self.sf)
+        #self.rb = RB(conf,self.sf,Np=150)  # load radial build
+        self.rb = rb
+        #self.interpTF(config=configTF,Ltrim=[0.15,0.85])  # TF interpolators [0.08,0.85]
         self.log_scalar = ['Fr_max','Fz_max','F_max','FzCS','Fsep','rms',
                            'rms_bndry','rmsID','Isum','Imax','z_offset',
                            'FrPF','FzPF','dTpol']
@@ -60,20 +63,20 @@ class INV(object):
                 elif Ctype == 'CS' and name not in self.CS_coils:
                     self.CS_coils.append(name)
         else:
-            self.adjust_coils = list(self.sf.coil.keys())  # add all
+            self.adjust_coils = list(self.pf.coil.keys())  # add all
             if Ctype == 'PF': 
-                self.PF_coils = list(self.sf.coil.keys())
+                self.PF_coils = list(self.pf.coil.keys())
             elif Ctype == 'CS': 
-                self.CS_coils = list(self.sf.coil.keys())    
+                self.CS_coils = list(self.pf.coil.keys())    
         self.update_coils()  # update
 
     def remove_active(self,Clist,Ctype=None,full=False):  # list of coil names
         if full: 
-            self.adjust_coils = list(self.sf.coil.keys())  # add all
+            self.adjust_coils = list(self.pf.coil.keys())  # add all
             if Ctype == 'PF':
-                self.PF_coils = list(self.sf.coil.keys())
+                self.PF_coils = list(self.pf.coil.keys())
             elif Ctype == 'CS':
-                self.CS_coils = list(self.sf.coil.keys())  
+                self.CS_coils = list(self.pf.coil.keys())  
         if Clist:
             for coil in Clist:
                 name = self.Cname(coil)
@@ -110,7 +113,7 @@ class INV(object):
     def remove_coil(self,Clist):
         for coil in Clist:
             name = self.Cname(coil)
-            if name in self.sf.coil.keys():
+            if name in self.pf.coil.keys():
                 del self.sf.coil[name]
                 for i in range(self.eq.coil[name+'_0']['Nf']):
                     del self.eq.coil[name+'_{:1.0f}'.format(i)]
@@ -141,8 +144,8 @@ class INV(object):
         
     def add_coil(self,Ctype=None,**kwargs):
         r,z = self.get_point(**kwargs)
-        index,i = np.zeros(len(self.sf.coil.keys())),-1
-        for i,name in enumerate(self.sf.coil.keys()):
+        index,i = np.zeros(len(self.pf.coil.keys())),-1
+        for i,name in enumerate(self.pf.coil.keys()):
             index[i] = name.split('Coil')[-1]
         try:
             Cid = index.max()+1

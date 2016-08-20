@@ -1,8 +1,16 @@
 import pylab as pl
 import numpy as np
-from scipy.special import iv as besl
+from scipy.special import iv as besl  #iv
 from scipy.interpolate import interp1d
 from amigo import geom
+
+
+import seaborn as sns
+rc = {'figure.figsize':[4,4*8/16],'savefig.dpi':120, # 
+      'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
+      'lines.linewidth':2}
+sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
+        font_scale=7/8,rc=rc)
 
 def pD(r1,r2,npoints=200):
     ro=np.sqrt(r1*r2)

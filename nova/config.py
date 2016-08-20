@@ -3,7 +3,8 @@ import collections
 
 class Setup(object):
     
-    def __init__(self,configuration=''):
+    def __init__(self,configuration='',eqdir='../eqdsk'):
+        self.eqdir = eqdir
         self.configuration = configuration
         self.set_defaults()
         self.update(configuration)
@@ -50,9 +51,9 @@ class Setup(object):
         self.configuration = configuration
         if configuration == 'SFm':
             self.dataname = 'SFm'
-            self.filename = '../eqdsk/Equil_AR3d1_16coils_SFminus_v4_2015'+\
+            self.filename = '/Equil_AR3d1_16coils_SFminus_v4_2015'+\
             '_09_bt_1d03li_0d8_Ipl_20d25_SOF.eqdsk'
-            #self.filename = '../eqdsk/2015_SFminus_eqdsk_2MCQRZ_v1_0_IDM.eqdsk'
+            #self.filename = '/2015_SFminus_eqdsk_2MCQRZ_v1_0_IDM.eqdsk'
             self.targets['default']['dPlate'] = 0.35 # target plate length
             self.targets['inner1'] = {'L2D':[1.1+0.52],'open':True,'dR':0}
             self.targets['inner2'] = {'L2D':[1.2-0.08],'open':False,'dR':-1}
@@ -65,7 +66,7 @@ class Setup(object):
             
         elif configuration == 'SFp':
             self.dataname = 'SFp'
-            self.filename = '../eqdsk/Equil_AR3d1_16coils_SFplus_v4_2015'+\
+            self.filename = '/Equil_AR3d1_16coils_SFplus_v4_2015'+\
             '_09_bt_1d03li_0d8_Ipl_20d25_SOF.eqdsk'
             self.targets['default']['dPlate'] = 0.35 # target plate length
             self.targets['inner1'] = {'L2D':[1.1],'open':True,'dR':0.1}
@@ -80,12 +81,12 @@ class Setup(object):
             
         if configuration == 'SX':
             self.dataname = 'SX8'
-            self.filename = '../eqdsk/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
+            self.filename = '/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
             self.filename += 'pl_20d25_SX_on_SFgeom_NOEDDY_EOF_fine_iter5_v3.eqdsk'
-            #self.filename = '../eqdsk/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
+            #self.filename = '/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
             #self.filename += 'pl_20d25_SX_on_SFgeom_NOEDDY_EOF_fine_iter5_v3_new.eqdsk'
-            self.filename = '../eqdsk/2015_SX_ext_coils_eqdk_2MK6XX_v1_0.eqdsk'  # IDM
-            #self.filename = '../eqdsk/Equil_AR3d1_16coils_bt_1d03li_0d8_Ipl_'
+            self.filename = '/2015_SX_ext_coils_eqdk_2MK6XX_v1_0.eqdsk'  # IDM
+            #self.filename = '/Equil_AR3d1_16coils_bt_1d03li_0d8_Ipl_'
             #self.filename += '20d25_SX_on_SFgeom_NOEDDY_EOF_fine_iter3_v5_old.eqdsk'
             self.targets['inner'] = {'L2D':[1.1]}
             self.targets['outer'] = {'L2D':[3.55]} 
@@ -96,7 +97,7 @@ class Setup(object):
         
         elif configuration == 'SXex':
             self.dataname = 'SXex'
-            self.filename = '../eqdsk/SXex.eqdsk'
+            self.filename = '/SXex.eqdsk'
             self.targets['inner'] = {'L2D':[1.1]}
             self.targets['outer'] = {'L2D':[3.55]} 
             self.firstwall['div_ex'] = 1.3
@@ -108,7 +109,7 @@ class Setup(object):
                 
         elif configuration == 'X':
             self.dataname = 'X'
-            self.filename = '../eqdsk/Equil_AR3d1_16coils_v3_bt_1d03li_'
+            self.filename = '/Equil_AR3d1_16coils_v3_bt_1d03li_'
             self.filename += '0d8_Ipl_20d25_XDext_v4_NOEDDY_SOF_FINAL3_v1.eqdsk'
             self.targets['default']['dPlate'] = 0.2  # target plate length
             self.targets['inner'] = {'L2D':[1.1]}
@@ -122,8 +123,8 @@ class Setup(object):
         
         elif configuration == 'Xic':
             self.dataname = 'X'
-            self.filename = '../eqdsk/Equil_AR3d1_XD_2015_Invess_5d0MA_EOF_v2.eqdsk'
-            self.filename = '../eqdsk/2015_XD_eqdk_2MJ4JW_v2_1.eqdsk'
+            self.filename = '/Equil_AR3d1_XD_2015_Invess_5d0MA_EOF_v2.eqdsk'
+            self.filename = '/2015_XD_eqdk_2MJ4JW_v2_1.eqdsk'
             self.targets['default']['dPlate'] = 0.2  # target plate length
             self.targets['inner'] = {'L2D':1.1,'dR':0}
             self.targets['outer'] = {'L2D':2.44}
@@ -135,8 +136,8 @@ class Setup(object):
                                    
         elif configuration == 'SN':
             self.dataname = 'SND'
-            self.filename = '../eqdsk/2015_SN_eqdk_2MG9A4_v1_0.eqdsk'
-            self.filename = '../eqdsk/2015_SN_eqdk_2MG9A4_v1_0_IDM.eqdsk'
+            self.filename = '/2015_SN_eqdk_2MG9A4_v1_0.eqdsk'
+            self.filename = '/2015_SN_eqdk_2MG9A4_v1_0_IDM.eqdsk'
             self.targets['inner'] = {'L2D':[1.1]}
             self.targets['outer'] = {'L2D':[3.55]} 
             self.firstwall['div_ex'] = 0.25
@@ -144,5 +145,11 @@ class Setup(object):
             self.coils['external']['id'] = [0,4]
             self.targets['inner'] = {'L2D':0.6}
             self.targets['outer'] = {'L2D':0.65}
+            
+        elif configuration =='DEMO_SN':
+            self.dataname = 'DEMO_SN'
+            self.filename = 'Equil_AR3d1_2015_04_v2_EOF_CSred_fine_final.eqdsk'
+            
+        self.filename = self.eqdir+self.filename
 
                 

@@ -12,8 +12,6 @@ rc = {'figure.figsize':[10,10*12/16],'savefig.dpi':100, #
 sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 
-pl.clf()
-
 
 setup = Setup('SFp')
 sf = SF(setup.filename)

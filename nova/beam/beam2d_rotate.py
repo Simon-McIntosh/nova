@@ -3,49 +3,103 @@ import pylab as pl
 from finite_element import FE
 from nova import coils
 from nova.beam import Dcoil
+from amigo.addtext import linelabel
+from time import time
 
+from nova.config import Setup
+from nova.streamfunction import SF
+from nova.radial_build import RB
+from nova.elliptic import EQ
+from nova.coils import PF
+from nova.inverse import INV
 
-tf = coils.TF()
+import seaborn as sns
+rc = {'figure.figsize':[8*12/16,8],'savefig.dpi':120, # 
+      'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
+      'lines.linewidth':2}
+sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
+        font_scale=7/8,rc=rc)
 
-xCoil = [6.42769145,1.26028077,4.51906176,4.53712734,-2.22330594]
-r,z = tf.drawTF(xCoil,Nspace=100)[:2]
+setup = Setup('DEMO_SN',eqdir='../../eqdsk/')
+sf = SF(setup.filename)
+
+rb = RB(setup,sf)
+pf = PF(sf.eqdsk)
+eq = EQ(sf,pf,limit=[5,14,-7,7],n=5e3)  
+
+eq.get_plasma_coil()
+inv = INV(sf,pf,rb,eq,configTF='SN',config='SN')
+
+pf.plot(coils=pf.coil,label=True,plasma=True,current=False) 
+sf.contour()
+
+to = time()
 
 r1,r2 = 4.486,15.708  # DEMO baseline
-r,z = Dcoil.pD(r1,r2,npoints=200)
+r,z = Dcoil.pD(r1,r2,npoints=100)
+#r,z = np.append(r,r[0]),np.append(z,z[0])
 
 
-'''
-L = 1
-Nel = 20
-X = np.zeros((Nel+1,3))
-X[:,0] = np.linspace(0,L,Nel+1)
-X[:,1] = np.linspace(0,L/3,Nel+1)
-'''
+
 X = np.zeros((len(r),3))
 X[:,0] = r
 X[:,1] = z
 
 fe = FE(frame='3D')
-fe.grid(X)
-fe.initalise()
+fe.add_mat(0,E=1,I=1,A=1,G=1,J=1,rho=1e-4)
 
-fe.addBC('fix',[0,fe.nel])  # fix left hand node
+fe.add_nodes(X)
+fe.add_elements(part_name='outerD')  # outer d coil
 
-fe.add_force(0.5,[1e-2,-1e-2,0]) 
-fe.add_force(0.2,[-1e-2,-1e-2,1e-2])  # l, [Fx,Fy,Fz], global
-fe.add_force(0.9,[6e-2,6e-2,-1e-2])  # l, [Fx,Fy,Fz], global
-fe.add_force(0.1,[0,1e-2,1e-2])  # l, [Fx,Fy,Fz], global
+'''
+fe.add_elements(n=[fe.part['outerD']['el'][-1]+1,fe.part['outerD']['el'][0]],
+                part_name='innerD')  # straight segment
+'''
+
+
+#fe.add_nodes([13,-12,0])
+#fe.add_elements(n=[fe.part['outerD']['el'][30],fe.nndo],part_name='support')
+
+
+fe.freeze()
+
+fe.addBC(['fix'],[0,-1],part='outerD')  
+
+#fe.addBC(['fix'],[-1],part='support') 
+
+
+#fe.add_weight()  # add weight to all elements
+
+bm = sf.bcentr*sf.rcentr
+for el in fe.part['outerD']['el']:
+    nm = fe.el['mat'][el]  # material index
+    n = fe.el['n'][el]
+    r = np.mean(fe.X[n,0])
+    b = np.array([0,0,bm/r])
+    w = -2e-3*np.cross(fe.el['dx'][el],b)
+    fe.add_load(el=el,W=w)  # self weight
+
 
 fe.solve()
-fe.interpolate()
+t1 = time()
+
+print('time {:1.3f}'.format(t1-to))
 
 fe.plot_nodes()
-pl.plot(fe.shape['U'][:,0],fe.shape['U'][:,1])
+fe.plot_F(scale=1e2)
 
+color = sns.color_palette('Set2',6)
+for i,part in enumerate(fe.part):
+    pl.plot(fe.part[part]['U'][:,0],fe.part[part]['U'][:,1],color=color[i+1])
 pl.axis('equal')
 
-pl.figure()
-pl.plot(fe.shape['x'],fe.shape['d2u'][:,1],'-')
-pl.plot(fe.shape['x'],fe.shape['d2u'][:,2],'-')
-
-
+pl.figure(figsize=([4,3*12/16]))
+text = linelabel(value='',postfix='',Ndiv=10) 
+color = sns.color_palette('Set2',6)
+for i,part in enumerate(fe.part):
+    pl.plot(fe.part[part]['l'],fe.part[part]['d2u'][:,1],color=color[i+1])
+    text.add(part)
+text.plot()
+sns.despine()
+pl.xlabel('part length')
+pl.ylabel('part curvature')

@@ -15,8 +15,7 @@ class SF(object):
     def __init__(self,filename,upsample=1,**kwargs):
         self.filename = filename
         self.set_kwargs(kwargs)
-        print('../eqdsk/'+self.filename,filename)
-        eqdsk = nova.geqdsk.read('../eqdsk/'+self.filename)
+        eqdsk = nova.geqdsk.read(self.filename)
         self.eqdsk = eqdsk
         self.normalise()  # unit normalisation
         self.set_plasma(eqdsk,contour=False)
@@ -400,7 +399,7 @@ class SF(object):
             lines.append(psi_line)
         return lines
         
-    def get_boundary(self,alpha=1,delta_loop=1):
+    def get_boundary(self,alpha=1-1e-3,delta_loop=1):
         self.Spsi = alpha*(self.Xpsi-self.Mpsi)+self.Mpsi
         psi_line = self.get_contour([self.Spsi],boundary=True)[0]
         R,Z = np.array([]),np.array([])

@@ -44,6 +44,9 @@ class PF(object):
                 name = 'Coil{:1.0f}'.format(next(nC))
                 self.coil[name] = {'r':r,'z':z,'dr':dr,'dz':dz,'I':I,
                                    'rc':np.sqrt(dr**2+dz**2)/2}
+                if i>=10:
+                    print('exit set_coil loop - coils')
+                    break
          
     def unpack_coils(self):
         nc = len(self.coil.keys())
@@ -65,7 +68,7 @@ class PF(object):
         else:
             color = coil_color  # color itterator
         
-        color = sns.color_palette('Set3',30)
+        color = sns.color_palette('Set3',300)
         for i,name in enumerate(coils.keys()):
             coil = coils[name]
             if label and current:

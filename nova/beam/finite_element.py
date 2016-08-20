@@ -34,7 +34,7 @@ class FE(object):
         self.initalize_BC()  # boundary conditions
         self.initalise_grid()  # grid
 
-    def initalise(self,nShape=21):
+    def freeze(self,nShape=21):
         self.nK = int((self.nel-1)*self.ndof+2*self.ndof)  # stiffness matrix
         self.initalize_F()  # load
         self.initalize_D()  # displacment
@@ -447,6 +447,9 @@ class FE(object):
                 Ln = self.part[part]['Ln'](L)  # length along part
                 el = int(np.floor(Ln))  # element index
                 s = Ln-el  # fraction along element
+                if L == 1:
+                    el -= 1
+                    s = 1
             elif 'el' in kwargs:
                 el = kwargs.get('el')
                 s = self.set_s(**kwargs)
@@ -474,10 +477,9 @@ class FE(object):
             f = w*self.el['dl'][el]
         if len(csys) == 0:
             raise ValueError('load vector unset')
-        elif csys == 'global':       
+        elif csys == 'global':   
             f = np.linalg.solve(self.T3[:,:,el].T,f)  # rotate to local csys
         fn = np.zeros((6,2))  # 6 dof local nodal load vector
-        print(s)
         for i,label in enumerate(['fx','fy','fz']):  # split point load into F,M
             if label in self.load:
                 if label == 'fx':
@@ -508,7 +510,7 @@ class FE(object):
             for index,label in enumerate(['fx','fy','fz','mx','my','mz']):
                 if label in self.load:
                     self.add_nodal_load(node,label,F[index])
-
+        
     def add_nodal_load(self,node,label,load):
         self.check_input('load',label)
         index = self.load.index(label)
@@ -549,6 +551,7 @@ class FE(object):
         
     def setBC(self):  # colapse constrained dof
         self.extractBC()
+        self.Fo = np.copy(self.F)
         if len(self.BCindex) > 0:
             self.F = np.delete(self.F,self.BCindex)
             for i in range(2):  # rows and cols
@@ -559,7 +562,6 @@ class FE(object):
         for j,key in enumerate(self.BC.keys()):
             ui = self.ndof*self.BC[key]  # node dof
             if len(ui) > 0:
-                print(ui,j)
                 if key == 'fix':  # fix all dofs
                     for i in range(self.ndof):
                         self.BCindex = np.append(self.BCindex,ui+i)
@@ -571,13 +573,15 @@ class FE(object):
         self.BCindex = list(map(int,set(self.BCindex)))
         self.Dindex = np.arange(0,self.nK)
         self.Dindex = np.delete(self.Dindex,self.BCindex)
-    '''
-    def plotBC(self):
-        # P.arrow( x, y, dx, dy, **kwargs )
-        P.arrow( 0.5, 0.8, 0.0, -0.2, fc="k", ec="k",
-        head_width=0.05, head_length=0.1 )
-        P.show()
-    '''    
+    
+    def plot_F(self,scale=1):
+        for i,X in enumerate(self.X):
+            j = i*self.ndof
+            pl.arrow(X[0],X[1],
+                     scale*self.Fo[j],scale*self.Fo[j+1],
+            head_width=scale*0.0015, head_length=scale*0.003 )
+
+
     def solve(self):
         self.assemble()  # assemble stiffness matrix
         self.setBC()  # remove constrained equations from stiffness + load 
@@ -585,6 +589,7 @@ class FE(object):
         self.Dn[self.Dindex] = np.linalg.solve(self.K,self.F)  # global displacment
         for i,disp in enumerate(self.disp):
             self.D[disp] = self.Dn[i::self.ndof]
+        self.interpolate()
 
     def plot_nodes(self):
         ms = 5

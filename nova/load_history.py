@@ -1,5 +1,6 @@
 import pylab as pl
 from shelf import PKL
+import seaborn as sns
 
 rc = {'figure.figsize':[3*3.14,3*3.14*1/3],'savefig.dpi':100,
       'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
@@ -24,7 +25,7 @@ pl.yscale('linear')
 pl.xlabel('Position update')
 pl.ylabel('RMS error')
 sns.despine()
-pl.savefig('../Figs/rms_error')
+#pl.savefig('../Figs/rms_error')
 
 '''
 pl.figure()

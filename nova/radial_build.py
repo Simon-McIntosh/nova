@@ -5,6 +5,9 @@ from scipy.interpolate import interp1d as interp1
 from scipy.interpolate import UnivariateSpline as spline
 import seaborn as sns
 from itertools import cycle
+from amigo.geom import Loop
+import amigo.geom as geom
+
 
 class RB(object):
     
@@ -13,7 +16,6 @@ class RB(object):
         self.sf = sf
         self.Np = Np
         self.dataname = setup.configuration+'_dev'
-        #self.TFwidth(sf)
 
         if not hasattr (sf,'Xpoint'):
             sf.get_Xpsi()  
@@ -21,11 +23,11 @@ class RB(object):
         r,z = sf.get_boundary()
         sf.set_boundary(r,z,n=Np)
         self.Rp,self.Zp = self.sf.rbdry,self.sf.zbdry
-        self.Lp = self.length(self.Rp,self.Zp,norm=False)[-1]
+        self.loop = Loop(self.Rp,self.Zp,self.xo)  # plasma boundary
+        self.Lp = geom.length(self.Rp,self.Zp,norm=False)[-1]
         self.Rfw,self.Zfw,self.psi_fw = self.first_wall(self.setup.firstwall['dRfw']) 
-        self.R,self.Z = self.Rfw,self.Zfw
+        self.loop = Loop(self.Rfw,self.Zfw,self.xo)  # first wall contour
 
-        
     def set_target(self,leg,**kwargs):
         if leg not in self.setup.targets:
             self.setup.targets[leg] = {}
@@ -35,76 +37,6 @@ class RB(object):
             elif key not in self.setup.targets[leg]:  #  prevent overwrite
                 self.setup.targets[leg][key] = self.setup.targets['default'][key]  # default
    
-    def theta_sort(self,R,Z,origin='lfs'):
-        if origin == 'lfs':
-            theta = np.arctan2(Z-self.xo[1],R-self.xo[0])
-        elif origin == 'top':
-            theta = np.arctan2(self.xo[0]-R,Z-self.xo[1])
-        index = np.argsort(theta)
-        R,Z = R[index],Z[index]
-        return R,Z
-
-    def rt(self,R,Z,**kwargs):
-        if 'point' in kwargs.keys():
-            point = kwargs.get('point')
-        else:
-            point = self.xo
-        theta = np.unwrap(np.arctan2(Z-point[1],R-point[0]))
-        radius = np.sqrt((Z-point[1])**2+(R-point[0])**2)
-        index = np.argsort(theta)
-        radius,theta = radius[index],theta[index]
-        return radius,theta
-        
-    def rz(self,radius,theta,point):
-        if not point: point = self.xo
-        R = point[0]+radius*np.cos(theta)
-        Z = point[1]+radius*np.sin(theta)
-        return R,Z
-        
-    def rzSpline(self,R,Z,Np,w=None,s=0.005):
-        radius,theta = self.rt(R,Z)
-        Ts = np.linspace(theta[0],theta[-1],Np)
-        if w is None:
-            radius = spline(theta,radius,s=s)(Ts)
-        else:
-            radius = spline(theta,radius,w=w,s=s)(Ts)
-        Rs,Zs = self.rz(radius,Ts)
-        return Rs,Zs,Ts
-        
-    def rzSLine(self,R,Z,Np=0,s=0,Hres=False):
-        if Np == 0: Np=self.Np
-        L = self.length(R,Z)
-        if Hres: Np *= 10
-        Linterp = np.linspace(0,1,Np)
-        if s == 0:
-            R = interp1(L,R)(Linterp)
-            Z = interp1(L,Z)(Linterp)
-        else:
-            R = spline(L,R,s=s)(Linterp)
-            Z = spline(L,Z,s=s)(Linterp)
-        return R,Z
-        
-    def rzInterp(self,R,Z,Np=0,ends=True):
-        if Np == 0: Np=self.Np
-        L = self.length(R,Z)
-        Linterp = np.linspace(0,1,Np)
-        R = interp1(L,R)(Linterp)
-        Z = interp1(L,Z)(Linterp)
-        if not ends:
-            R,Z = R[:-1],Z[:-1]
-        return R,Z
-        
-    def rzCirc(self,R,Z):
-        radius,theta = self.rt(R,Z)
-        R,Z = self.rz(radius,theta)
-        return R,Z
-        
-    def rzPut(self):
-        self.Rstore,self.Zstore = self.R,self.Z
-        
-    def rzGet(self):
-        self.R,self.Z = self.Rstore,self.Zstore
-
     def first_wall_psi(self,req,zeq):
         psi = self.sf.Pcoil([req,zeq])  # low feild
         contours = self.sf.get_contour([psi])    
@@ -134,8 +66,8 @@ class RB(object):
         self.sf.HFfwr,self.sf.HFfwz = self.sf.HFPr-dr,self.sf.HFPz
         r_lfs,z_lfs,psi_lfs = self.first_wall_psi(self.sf.LFfwr,self.sf.LFfwz)
         r_hfs,z_hfs,psi_hfs = self.first_wall_psi(self.sf.HFfwr,self.sf.HFfwz)
-        r_top,z_top = self.offset(self.sf.rbdry,self.sf.zbdry,-dr)
-        r_top,z_top = self.theta_sort(r_top,z_top,origin='top')
+        r_top,z_top = geom.offset(self.sf.rbdry,self.sf.zbdry,-dr)
+        r_top,z_top = geom.theta_sort(r_top,z_top,self.xo,origin='top')
         index = z_top>=self.sf.LFPz
         r_top,z_top = r_top[index],z_top[index]
         istart = np.argmin((r_top-self.sf.HFfwr)**2+(z_top-self.sf.HFfwz)**2)
@@ -151,31 +83,14 @@ class RB(object):
         R = ro+ro/A*np.cos(theta+delta*np.sin(theta))
         Z = zo+ro/A*k*np.sin(theta)
         return (R,Z)
-        
-    def normal(self,R,Z):
-        dR,dZ = np.gradient(R),np.gradient(Z)
-        mag = np.sqrt(dR**2+dZ**2)
-        index = mag>0
-        dR,dZ,mag = dR[index],dZ[index],mag[index]  # clear duplicates
-        R,Z = R[index],Z[index]
-        t = np.zeros((len(R),3))
-        t[:,0],t[:,1] = dR/mag,dZ/mag
-        n = np.cross(t, [0,0,1])
-        nR,nZ = n[:,0],n[:,1]
-        return (nR,nZ)
-        
-    def length(self,R,Z,norm=True):
-        L = np.append(0,np.cumsum(np.sqrt(np.diff(R)**2+np.diff(Z)**2)))
-        if norm: L = L/L[-1]
-        return L
 
     def inflate(self,R,Z,dR):
         s = 1e-3
-        L = self.length(R,Z)
-        nR,nZ = self.normal(R,Z)
+        L = geom.length(R,Z)
+        nR,nZ = geom.normal(R,Z)
         Rdr,Zdr = R+dR*nR,Z+dR*nZ  # radial offset
         Rloop,Zloop = self.reorder(Rdr,Zdr)  # spline loop
-        Lloop = self.length(Rloop,Zloop)
+        Lloop = geom.length(Rloop,Zloop)
         Rloop = interp1(Lloop,Rloop)(L)  # respace
         Zloop = interp1(Lloop,Zloop)(L)
         Lend = np.zeros(2)
@@ -194,49 +109,14 @@ class RB(object):
         R = self.xo[0]+radius*np.cos(self.theta)
         Z = self.xo[1]+radius*np.sin(self.theta)
         return (R,Z)
-    
-    def max_steps(self,dR,dr_max):
-        dRbar = np.mean(dR)
-        nr=int(np.ceil(dRbar/dr_max))
-        if nr < 3: nr = 3
-        dr=dR/nr
-        return dr,nr
-        
-    def offset(self,R,Z,dR):
-        dr_max = 0.02  # maximum step size
-        if np.mean(dR) != 0:
-            dr,nr = self.max_steps(dR,dr_max)
-            for i in range(nr):
-                nR,nZ = self.normal(R,Z)
-                R = R+dr*nR    
-                Z = Z+dr*nZ 
-        return R,Z   
-        
+  
     def trim(self,trim,R,Z):
-        L = self.length(R,Z,norm=True)
+        L = geom.length(R,Z,norm=True)
         index = []
         for t in trim:
             index.append(np.argmin(np.abs(L-t)))
         return index
-        
-    def fill(self,trim=None,dR=0,dt=0,ref_o=4/8*np.pi,dref=np.pi/4,
-             edge=True,ends=True,
-             color='k',label=None,alpha=0.8,referance='theta',part_fill=True,
-             loop=False,s=0,offset=0):
-
-        dt_max = 0.5
-        if not part_fill:
-            dt_max = dt
-        if isinstance(dt,list):
-            dt = self.blend(dt,ref_o=ref_o,dref=dref,referance=referance,
-                            offset=offset)
-        dt,nt = self.max_steps(dt,dt_max)
-        Rin,Zin = self.offset(self.R,self.Z,dR)  # gap offset
-        for i in range(nt):
-            self.part_fill(trim=trim,dt=dt,ref_o=ref_o,dref=dref,
-             edge=edge,ends=ends,color=color,label=label,alpha=alpha,
-             referance=referance,loop=loop,s=s)
-             
+         
     def coil_sheild(self,coils=[],dt=0.8):
         self.rzPut()
         for coil in coils:
@@ -245,48 +125,10 @@ class RB(object):
             z,dz = self.sf.coil[name]['z'],self.sf.coil[name]['dz']
             r = [r-dr/2,r-dr/2,r+dr/2,r+dr/2,r-dr/2]
             z = [z-dz/2,z+dz/2,z+dz/2,z-dz/2,z-dz/2]
-            self.R,self.Z = self.rzInterp(r,z,Np=100)
-            self.R,self.Z = self.R[::-1],self.Z[::-1]
-            self.fill(dt=dt,loop=True,alpha=0.1,color='k',s=5e-3)
+            self.loop.R,self.loop.Z = self.rzInterp(r,z,Np=100)
+            self.loop.R,self.loop.Z = self.loop.R[::-1],self.loop.Z[::-1]
+            self.loop.fill(dt=dt,loop=True,alpha=0.1,color='k',s=5e-3)
         self.rzGet()
-
-    def part_fill(self,trim=None,dt=0,ref_o=4/8*np.pi,dref=np.pi/4,
-             edge=True,ends=True,
-             color='k',label=None,alpha=0.8,referance='theta',loop=False,
-             s=0):
-        Rin,Zin = self.R,self.Z
-        if loop:
-            Napp = 5  # Nappend
-            R = np.append(self.R,self.R[:Napp])
-            R = np.append(self.R[-Napp:],R)
-            Z = np.append(self.Z,self.Z[:Napp])
-            Z = np.append(self.Z[-Napp:],Z)
-            R,Z = self.rzSLine(R,Z,Np=len(R),s=s)
-            if isinstance(dt,(np.ndarray,list)):
-                dt = np.append(dt,dt[:Napp])
-                dt = np.append(dt[-Napp:],dt)
-            Rout,Zout = self.offset(R,Z,dt)
-            Rout,Zout = Rout[Napp:-Napp],Zout[Napp:-Napp]
-            Rout[-1],Zout[-1] = Rout[0],Zout[0]
-        else:
-            R,Z = self.rzSLine(self.R,self.Z,Np=len(self.R),s=s)
-            Rout,Zout = self.offset(R,Z,dt)
-        self.R,self.Z = Rout,Zout  # update
-        if trim is None:
-            Lindex = [0,len(Rin)]
-        else:
-            Lindex = self.trim(trim)
-        flag = 0
-        for i in np.arange(Lindex[0],Lindex[1]-1):
-            Rfill = np.array([Rin[i],Rout[i],Rout[i+1],Rin[i+1]])
-            Zfill = np.array([Zin[i],Zout[i],Zout[i+1],Zin[i+1]])
-            if flag is 0 and label is not None:
-                flag = 1
-                pl.fill(Rfill,Zfill,facecolor=color,alpha=alpha,
-                        edgecolor='none',label=label)
-            else:
-                pl.fill(Rfill,Zfill,facecolor=color,alpha=alpha,
-                        edgecolor='none')
 
     def rotateB(self,B,theta):
         Bmag = np.sqrt(B[0]**2+B[1]**2)
@@ -294,7 +136,7 @@ class RB(object):
                         [np.sin(theta),np.cos(theta)]])
         Bhat = (R*np.matrix([[B[0]],[B[1]]])).getA1()/Bmag
         return Bhat
-        
+   
     def firstwall(self,calc=True,color=[0.5,0.5,0.5],plot=True,debug=False):
         if calc:
             self.Rb,self.Zb = self.target_fill(debug=debug)
@@ -307,7 +149,7 @@ class RB(object):
                 self.setup.targets = pickle.load(input)
                 self.Rb = pickle.load(input)
                 self.Zb = pickle.load(input)
-        self.R,self.Z = self.trim_contour(self.Rb,self.Zb) # update fw
+        self.loop.R,self.loop.Z = self.trim_contour(self.Rb,self.Zb) # update fw
         self.sf.nlim = len(self.Rb)  # update sf
         self.sf.xlim,self.sf.ylim = self.Rb,self.Zb
         if plot:
@@ -315,7 +157,7 @@ class RB(object):
             (self.Zb <= self.sf.z.max()) & (self.Zb >= self.sf.z.min())
             pl.plot(self.Rb[index],self.Zb[index],
                     '-',color=color,alpha=0.75,linewidth=1.25)
-            
+       
     def get_fw(self,expand=0):  # generate boundary dict for elliptic
         self.firstwall(calc=False,plot=False,debug=False)
         boundary = {'R':self.Rb,'Z':self.Zb,'expand':expand}
@@ -411,7 +253,7 @@ class RB(object):
             Rb = np.append(Rb,self.setup.targets['outer1']['R'][::-1])
             Zb = np.append(Zb,self.setup.targets['outer1']['Z'][::-1])
             r,z = self.connect(self.psi_fw[1],['outer1','inner2'],[0,0],
-                               loop=(self.R[::-1],self.Z[::-1]))
+                               loop=(self.loop.R[::-1],self.loop.Z[::-1]))
             Rb,Zb = self.append(Rb,Zb,r,z)
         else:
             Rb = np.append(Rb,self.setup.targets['inner']['R'][1:])
@@ -422,7 +264,7 @@ class RB(object):
             Rb = np.append(Rb,self.setup.targets['outer']['R'][1:])
             Zb = np.append(Zb,self.setup.targets['outer']['Z'][1:])
             r,z = self.connect(self.psi_fw[1],['outer','inner'],[-1,0],
-                               loop=(self.R,self.Z))
+                               loop=(self.loop.R,self.loop.Z))
             Rb,Zb = self.append(Rb,Zb,r,z)
         self.Rb,self.Zb = self.midplane_loop(Rb,Zb)
         self.get_sol()  # trim sol to targets and store values
@@ -481,21 +323,21 @@ class RB(object):
 
     def trim_contour(self,Rb,Zb):
         Rt,Zt = np.array([]),np.array([])  # trim contour for BB
-        Lnorm = self.length(self.R,self.Z,norm=False)[-1]
+        Lnorm = geom.length(self.loop.R,self.loop.Z,norm=False)[-1]
         for flip,trim in zip([1,-1],[0.275*self.setup.firstwall['trim'][1],
                               0.725*self.setup.firstwall['trim'][0]]):
-            L = self.length(Rb[::flip],Zb[::flip],norm=False)
+            L = geom.length(Rb[::flip],Zb[::flip],norm=False)
             i = np.argmin(np.abs(L/Lnorm-trim))
             Rt = np.append(Rt,Rb[::flip][:i][::-flip])
             Zt = np.append(Zt,Zb[::flip][:i][::-flip])
-        Rt,Zt = self.rzSLine(Rt,Zt,self.Np)
+        Rt,Zt = geom.rzSLine(Rt,Zt,Np=self.Np)
         return Rt,Zt
-        
+
     def midplane_loop(self,Rb,Zb):
         index = np.argmin((Rb-self.sf.LFfwr)**2+(Zb-self.sf.LFfwz)**2)
         Rb = np.append(Rb[:index+1][::-1],Rb[index:][::-1])
         Zb = np.append(Zb[:index+1][::-1],Zb[index:][::-1])
-        Lb = self.length(Rb,Zb)
+        Lb = geom.length(Rb,Zb)
         index = np.append(np.diff(Lb)!=0,True)
         Rb,Zb = Rb[index],Zb[index]  # remove duplicates
         return Rb,Zb
@@ -554,10 +396,10 @@ class RB(object):
         return index
                 
     def inloop(self,Rloop,Zloop,R,Z):
-        L = self.length(R,Z)
+        L = geom.length(R,Z)
         index = np.append(np.diff(L)!=0,True)
         R,Z = R[index],Z[index]  # remove duplicates
-        nRloop,nZloop = self.normal(Rloop,Zloop)
+        nRloop,nZloop = geom.normal(Rloop,Zloop)
         Rin,Zin = np.array([]),np.array([])
         for r,z in zip(R,Z):
             i = np.argmin((r-Rloop)**2+(z-Zloop)**2)
@@ -680,39 +522,40 @@ class RB(object):
     def vessel(self):  # radial build from firstwall
         Color = cycle(sns.color_palette('Set2',12)[1:])
         self.FWfill(dt=self.setup.build['tfw'],color=next(Color))  # first wall 
-        self.fill(dt=self.setup.build['BB'][::-1],alpha=0.7,ref_o=0.3,dref=0.2,
-                  referance='length',color=next(Color))  # blanket+sheild
-        self.fill(dt=self.setup.build['tBBsupport'],alpha=0.7,
+        self.loop.fill(dt=self.setup.build['BB'][::-1],alpha=0.7,ref_o=0.3,dref=0.2,
+                  referance='geom.length',color=next(Color))  # blanket+sheild
+        self.loop.fill(dt=self.setup.build['tBBsupport'],alpha=0.7,
                   color=next(Color))  # blanket support
         self.BBsheild_fill(dt=self.setup.build['sheild'],
                            ref_o=0.35*np.pi,dref=0.2*np.pi,
-                           offset=1/10*np.pi,alpha=0.7,color=next(Color))
+                           gap=1/10*np.pi,alpha=0.7,color=next(Color))
         self.VVfill(dt=self.setup.build['VV'],ref_o=0.25*np.pi,  # vessel
-                    dref=0.25*np.pi,offset=0.5/10*np.pi,alpha=0.7,
+                    dref=0.25*np.pi,gap=0.5/10*np.pi,alpha=0.7,
                     loop=True,color=next(Color))  # ref_o=0.385
         pl.axis('equal')
         
     def FWfill(self,**kwargs):
-        self.R,self.Z = self.rzSLine(self.Rb[::-1],self.Zb[::-1],Hres=False)
-        self.fill(loop=True,alpha=0.7,**kwargs)
-        self.R,self.Z = self.rzSLine(self.R,self.Z)
-        self.R,self.Z = self.trim_contour(self.R[::-1],self.Z[::-1]) # update fw
+        self.loop.R,self.loop.Z = geom.rzSLine(self.Rb[::-1],self.Zb[::-1],
+                                     Np=self.Np,Hres=False)
+        self.loop.fill(loop=True,alpha=0.7,**kwargs)
+        self.loop.R,self.loop.Z = geom.rzSLine(self.loop.R,self.loop.Z,Np=self.Np)
+        self.loop.R,self.loop.Z = self.trim_contour(self.loop.R[::-1],self.loop.Z[::-1]) # update 
 
     def BBsheild_fill(self,**kwargs):
         if 'sheild_connect' in self.setup.build:
             connect = self.setup.build['sheild_connect']
         else:
             connect=[0,1]
-        index = self.trim(connect,self.R,self.Z)
-        rVV = self.R[index[0]:index[1]+1]
-        zVV = self.Z[index[0]:index[1]+1]
+        index = self.trim(connect,self.loop.R,self.loop.Z)
+        rVV = self.loop.R[index[0]:index[1]+1]
+        zVV = self.loop.Z[index[0]:index[1]+1]
         ni = 10  #  number of trim nodes
         rp,zp = rVV[-ni:],zVV[-ni:] 
         if self.setup.build['Dsheild']:
             Rleg,Zleg = [],[]
             Rd = self.Rb[self.Zb<self.sf.Xpoint[1]][::-1]
             Zd = self.Zb[self.Zb<self.sf.Xpoint[1]][::-1]
-            Ld = self.length(Rd,Zd)
+            Ld = geom.length(Rd,Zd)
             index = (Ld>self.conf.Dsheild[0]) & (Ld<self.conf.Dsheild[1])
             Rleg.append(Rd[index])
             Zleg.append(Zd[index])
@@ -727,13 +570,13 @@ class RB(object):
                                       ('Tleg','float'),('dR','float')])
             for i,leg in enumerate(list(self.setup.targets)[1:]):
                 Rt,Zt = self.setup.targets[leg]['R'],self.setup.targets[leg]['Z']
-                R,Z = self.offset(Rt,Zt,self.setup.build['tfw'])
+                R,Z = geom.offset(Rt,Zt,self.setup.build['tfw'])
                 dRt = np.mean((Rt-self.sf.Xpoint[0])**2+
                               (Zt-self.sf.Xpoint[1])**2)
                 dR = np.mean((R-self.sf.Xpoint[0])**2+
                               (Z-self.sf.Xpoint[1])**2)
                 if  dR<dRt:
-                    Rt,Zt = self.offset(Rt,Zt,-self.setup.build['tfw'])
+                    Rt,Zt = geom.offset(Rt,Zt,-self.setup.build['tfw'])
                 else:
                     Rt,Zt = R,Z
                 if self.setup.targets[leg]['Zo'] > self.sf.Xpoint[1]:
@@ -754,11 +597,11 @@ class RB(object):
                 sp['Tleg'][i] = theta
                 sp['dR'][i] = self.setup.targets[leg]['dR']
             
-            L = self.length(self.Rb,self.Zb,norm=False)[-1]
-            Rt,Zt = self.offset(self.Rb,self.Zb,self.setup.build['tfw'])
-            Lt = self.length(Rt,Zt,norm=False)[-1]
+            L = geom.length(self.Rb,self.Zb,norm=False)[-1]
+            Rt,Zt = geom.offset(self.Rb,self.Zb,self.setup.build['tfw'])
+            Lt = geom.length(Rt,Zt,norm=False)[-1]
             if Lt<L:
-               Rt,Zt = self.offset(self.Rb,self.Zb,-self.setup.build['tfw']) 
+               Rt,Zt = geom.offset(self.Rb,self.Zb,-self.setup.build['tfw']) 
             argmin = np.argmin(Zt)
             radius = np.sqrt((Rt-self.sf.Xpoint[0])**2+
                                  (Zt-self.sf.Xpoint[1])**2)
@@ -780,11 +623,11 @@ class RB(object):
                     Zleg.append(sp['Zleg'][i])
         rp,zp = np.append(rp,Rleg[::-1]),np.append(zp,Zleg[::-1])
         rp,zp = np.append(rp,rVV[:ni]),np.append(zp,zVV[:ni])
-        rs,zs = self.rzSLine(rp,zp,Np=260,s=5e-6)
+        rs,zs = geom.rzSLine(rp,zp,Np=260,s=5e-6)
         R,Z = np.append(rVV[ni+1:-ni],rs),np.append(zVV[ni+1:-ni],zs)
         R,Z = np.append(R,R[0]),np.append(Z,Z[0])
-        self.R,self.Z = self.rzSLine(R,Z,len(R),s=5e-4)
-        self.fill(trim=None,loop=True,s=2e-4,**kwargs)
+        self.loop.R,self.loop.Z = geom.rzSLine(R,Z,len(R),s=5e-4)
+        self.loop.fill(trim=None,loop=True,s=2e-4,**kwargs)
  
     def support_fill(self,coils=[],r=[],z=[],**kwargs):
         k = 3
@@ -807,63 +650,41 @@ class RB(object):
         rs = spline(L,rp,w=wp,k=k)(Ls)
         zs = spline(L,zp,w=wp,k=k)(Ls)
         
-        self.R,self.Z = rs,zs
+        self.loop.R,self.loop.Z = rs,zs
         self.rzPut()
-        self.fill(trim=None,**kwargs)
+        self.loop.fill(trim=None,**kwargs)
         
-        rs,zs = self.offset(rs,zs,kwargs['dR'])
+        rs,zs = geom.offset(rs,zs,kwargs['dR'])
         return rs,zs
    
     def sheild_fill(self,dR=0.05,**kwargs):
-        rs,zs = self.offset(self.Rstore,self.Zstore,dR)
-        dr_end = (rs[0]-self.R[0])/2
-        dz_end = (zs[0]-self.Z[0])/2
+        rs,zs = geom.offset(self.Rstore,self.Zstore,dR)
+        dr_end = (rs[0]-self.loop.R[0])/2
+        dz_end = (zs[0]-self.loop.Z[0])/2
         radius_end = np.sqrt(dr_end**2+dz_end**2)
-        ro_end = self.R[0]+dr_end
-        zo_end = self.Z[0]+dz_end
+        ro_end = self.loop.R[0]+dr_end
+        zo_end = self.loop.Z[0]+dz_end
         theta_o = np.arctan2(zs[0]-zo_end,rs[0]-ro_end)
         theta_end = np.linspace(theta_o,theta_o+np.pi,20)
         r_end = ro_end+radius_end*np.cos(theta_end)
         z_end = zo_end+radius_end*np.sin(theta_end)
         r_sheild = np.append(rs[::-1],r_end[1:-1])
-        r_sheild = np.append(r_sheild,self.R)
+        r_sheild = np.append(r_sheild,self.loop.R)
         z_sheild = np.append(zs[::-1],z_end[1:-1])
-        z_sheild = np.append(z_sheild,self.Z)
-        self.R,self.Z = r_sheild,z_sheild
-        self.fill(trim=None,**kwargs)
+        z_sheild = np.append(z_sheild,self.loop.Z)
+        self.loop.R,self.loop.Z = r_sheild,z_sheild
+        self.loop.fill(trim=None,**kwargs)
         
     def VVfill(self,**kwargs):
-        VVinR,VVinZ = self.R,self.Z
-        self.fill(**kwargs)
-        VVoutR,VVoutZ = self.R,self.Z
+        VVinR,VVinZ = self.loop.R,self.loop.Z
+        self.loop.fill(**kwargs)
+        VVoutR,VVoutZ = self.loop.R,self.loop.Z
         with open('../Data/'+self.setup.configuration+'_VV.txt','w') as f:
             f.write('Rin m\t\tZin m\t\tRout m\t\tZout m\n')
             for rin,zin,rout,zout in zip(VVinR,VVinZ,VVoutR,VVoutZ):
                 f.write('{:1.6f}\t{:1.6f}\t{:1.6f}\t{:1.6f}\n'.format(\
                 rin,zin,rout,zout))
-        
-    def blend(self,dt,ref_o=4/8*np.pi,dref=np.pi/4,offset=0,referance='theta'):
-        if referance is 'theta':
-            theta = np.arctan2(self.Z-self.xo[1],self.R-self.xo[0])-offset
-            theta[theta>np.pi] = theta[theta>np.pi]-2*np.pi
-            tblend = dt[0]*np.ones(len(theta))  # inner 
-            tblend[(theta>-ref_o) & (theta<ref_o)] = dt[1]  # outer 
-            if dref > 0:
-                for updown in [-1,1]:
-                    blend_index = (updown*theta>=ref_o) &\
-                                    (updown*theta<ref_o+dref)
-                    tblend[blend_index] = dt[1]+(dt[0]-dt[1])/dref*\
-                                        (updown*theta[blend_index]-ref_o)
-        else:
-            L = self.length(self.R,self.Z)
-            tblend = dt[0]*np.ones(len(L))  # start
-            tblend[L>ref_o] = dt[1]  # end
-            if dref > 0:
-                blend_index = (L>=ref_o) & (L<ref_o+dref)
-                tblend[blend_index] = dt[0]+(dt[1]-dt[0])/dref*(L[blend_index]-
-                                                                ref_o)
-        return tblend
-        
+ 
     def wblend(self,N):
         L = np.linspace(-0.5,0.5,N)
         w = 0.5+np.sin(np.pi*L)/2
@@ -898,8 +719,8 @@ class RB(object):
             R,Z = R[i:],Z[i:]
             Rb,Zb = Rb[:j][::-1],Zb[:j][::-1]
             Rt,Zt = Rbo[:ib][j:][::-1],Zbo[:ib][j:][::-1]
-        Lb = self.length(Rb,Zb,norm=False)
-        L = self.length(R,Z,norm=False)
+        Lb = geom.length(Rb,Zb,norm=False)
+        L = geom.length(R,Z,norm=False)
         N = np.argmin(abs(Lb-Lblend))
         w = self.wblend(N)
         Rc = (1-w)*Rb[:N]+w*interp1(L,R)(Lb[:N])
@@ -911,8 +732,8 @@ class RB(object):
     
     def fw_offset(self,Rb,Zb,dr=0.66):
         Rbo,Zbo = Rb[::-1],Zb[::-1]
-        R,Z = self.offset(self.Rp,self.Zp,dr)
-        R,Z = self.rzSLine(R,Z)
+        R,Z = geom.offset(self.Rp,self.Zp,dr)
+        R,Z = geom.rzSLine(R,Z)
         R,Z,Rtout,Ztout = self.wall_offset(Rbo,Zbo,R,Z,-1)
         R,Z,Rtin,Ztin = self.wall_offset(Rbo,Zbo,R,Z,1)
         R,Z = np.append(Rtin,R),np.append(Ztin,Z)

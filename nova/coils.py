@@ -7,6 +7,8 @@ from itertools import cycle,count
 import seaborn as sns
 import matplotlib
 import collections
+from amigo.geom import Loop
+import amigo.geom as geom
 
 def loop_vol(R,Z,plot=False):
     imin,imax = np.argmin(Z),np.argmax(Z)
@@ -44,9 +46,9 @@ class PF(object):
                 name = 'Coil{:1.0f}'.format(next(nC))
                 self.coil[name] = {'r':r,'z':z,'dr':dr,'dz':dz,'I':I,
                                    'rc':np.sqrt(dr**2+dz**2)/2}
-                if i>=10:
-                    print('exit set_coil loop - coils')
-                    break
+                #if i>=10:
+                #    print('exit set_coil loop - coils')
+                #    break
          
     def unpack_coils(self):
         nc = len(self.coil.keys())
@@ -124,10 +126,10 @@ class PF(object):
         if len(coils['dZ'])>0: 
             dZ[Nc-len(coils['dZ']):]=coils['dZ']
         for Cid,Cdr,Cdz in zip(coils['id'],dR,dZ):
-            r = self.sf.coil['Coil'+str(Cid)]['r']
-            z = self.sf.coil['Coil'+str(Cid)]['z']
-            dr = self.sf.coil['Coil'+str(Cid)]['dr']
-            dz = self.sf.coil['Coil'+str(Cid)]['dz']
+            r = self.coil['Coil'+str(Cid)]['r']
+            z = self.coil['Coil'+str(Cid)]['z']
+            dr = self.coil['Coil'+str(Cid)]['dr']
+            dz = self.coil['Coil'+str(Cid)]['dz']
             if Cdr==0 and Cdz==0:
                 R = np.append(R,[r+dr/2,r+dr/2,r-dr/2,r-dr/2])
                 Z = np.append(Z,[z+dz/2,z-dz/2,z+dz/2,z-dz/2])
@@ -196,10 +198,16 @@ class PF(object):
 
 class TF(object):
     
-    def __init__(self):
-        a = 1
+    def __init__(self,setup,fit=False,Np=200,objective='V',**kwargs):
+        self.objective = objective
+        self.Np = Np
+        self.setup = setup
+        self.dataname = setup.dataname
+        self.width()
+        self.calc(fit,**kwargs)
+        self.fill(write=False)
 
-    def drawTF(self,xCoil,Nspace=100):
+    def draw(self,xCoil,Nspace=100):
         zCoil = xCoil[0]
         fone = xCoil[1]  # r0 == fone*zCoil
         ftwo = xCoil[2]  # r1 == ftwo*r0
@@ -243,106 +251,94 @@ class TF(object):
         L = np.cumsum(np.sqrt(np.diff(Rtf)**2+np.diff(Ztf)**2))
         L = np.append(0,L)
         return (Rtf,Ztf,L[-1])
-        
-    def TFcoil(self,calc=True,plot_bounds=False):
-        self.set_TFbound()  # TF boundary conditions
-        self.TFbound['ro_min'] -= 0.5  # offset minimum radius
-        if plot_bounds:
-            self.plot_TFbounds()          
-        self.TFopp(calc)
-        self.TFfill()
 
-    def TFopp(self,TFopp,**kwargs):
-        if 'objF' not in kwargs:
-            self.TFobj = self.setup.TF['opp']
-        if TFopp:
-            #xCoilo = [5.12950249,1.89223928,4.13904361,4.52853726,-1.08407415]  
+    def calc(self,fit,plot_bounds=False,**kwargs):
+        #if 'objF' not in kwargs:
+        #    self.TFobj = self.setup.TF['opp']
+        if fit: 
+            self.set_bound(**kwargs)  # TF boundary conditions
+            self.bound['ro_min'] -= 0.5  # offset minimum radius
+            if plot_bounds:
+                self.plot_bounds() 
             xCoilo = [ 6.42769145,1.26028077,4.51906176,4.53712734,-2.22330594] 
-            #xCoilo = [ 4.36308341,3.00229706,3.66983675, 4.56925003,-0.15107878]
-            # [zCoil,r1,r2,ro,zo]  
-            #xCoilo = [ 4.77411362,0.70016516,1.15501718,4.66075124,-1.03606014]
-            #xCoilo = [ 3,0.71389467,1.46209824,4.42292996,-1.04186448]
-            constraint = {'type':'ineq','fun':self.dotTF}
+            constraint = {'type':'ineq','fun':self.dot}
             limit = 1e2
             bounds = [(0.1,limit),(1,limit),(1,limit),  # (0.7,None),(0.1,None)
-                      (self.TFbound['ro_min'],limit),(-limit,limit)]  # 
-            self.xCoil = op.minimize(self.fitTF,xCoilo,bounds=bounds,
+                      (self.bound['ro_min'],limit),(-limit,limit)]  # 
+            self.xCoil = op.minimize(self.fit,xCoilo,bounds=bounds,
                                      options={'disp':True,'maxiter':500},
                                      method='SLSQP',constraints=constraint,
                                      tol=1e-2).x
-            
             with open('../Data/'+self.dataname+'_TF.pkl', 'wb') as output:
                 pickle.dump(self.xCoil,output,-1)
         else:
             with open('../Data/'+self.dataname+'_TF.pkl', 'rb') as input:
                 self.xCoil = pickle.load(input)
-        self.volume_ratio()
-        self.length_ratio()
         
-    def TFwidth(self,sf):
-        '''
-        Icoil = 2*np.pi*sf.rcentr*\
-        np.abs(sf.bcentr)/(4*np.pi*1e-7)/self.nTF # coil amp-turns
-        Acoil = Icoil/self.Jmax
-        self.dRcoil = np.sqrt(Acoil)
-        '''
+    def width(self):
         self.dRcoil = 0.489
         self.dRsteel = 0.15*self.dRcoil
  
-    def TFfill(self,part_fill=True):
-        self.fitTF(self.xCoil)
-        self.R,self.Z,L = self.drawTF(self.xCoil, Nspace=self.Np)  
-        self.TFinR,self.TFinZ = self.R,self.Z
-        self.rzPut()
-        self.fill(dR=0,dt=self.dRsteel,trim=None,color='k',alpha=0.6,
-                  part_fill=False,loop=True)
-        self.fill(dt=self.dRcoil,trim=None,color='k',alpha=0.3,
-                  label='TF coil',part_fill=False,loop=True)
-        self.fill(dt=self.dRsteel,trim=None,color='k',alpha=0.6,
-                  label='TF support',part_fill=False,loop=True)
-        self.TFoutR,self.TFoutZ = self.R,self.Z
+    def fill(self,write=True,plot=True):
+        #self.fitTF(self.xCoil)
+        R,Z,L = self.draw(self.xCoil,Nspace=self.Np) 
+        loop = Loop(R,Z,[np.mean(R),np.mean(Z)])
+        self.Rin,self.Zin = loop.R,loop.Z
         
-        with open('../Data/'+self.dataname+'_TFcoil.txt','w') as f:
-            f.write('Rin m\t\tZin m\t\tRout m\t\tZout m\n')
-            for rin,zin,rout,zout in zip(self.TFinR,self.TFinZ,
-                                         self.TFoutR,self.TFoutZ):
-                f.write('{:1.6f}\t{:1.6f}\t{:1.6f}\t{:1.6f}\n'.format(\
-                rin,zin,rout,zout))            
+        loop.rzPut()
+        loop.fill(dR=0,dt=self.dRsteel,trim=None,color='k',alpha=0.6,
+                  part_fill=False,loop=True,plot=plot)
+        loop.fill(dt=self.dRcoil/2,trim=None,color='k',alpha=0.3,
+                  label='TF coil',part_fill=False,loop=True,plot=plot)
+        self.Rmid,self.Zmid = loop.R,loop.Z  
+        loop.fill(dt=self.dRcoil/2,trim=None,color='k',alpha=0.3,
+                  label='TF coil',part_fill=False,loop=True,plot=plot)
+        loop.fill(dt=self.dRsteel,trim=None,color='k',alpha=0.6,
+                  label='TF support',part_fill=False,loop=True,plot=plot)
+        self.Rout,self.Zout = loop.R,loop.Z
         
-    def TFsupport(self,**kwargs):
+        if write:
+            with open('../Data/'+self.dataname+'_TFcoil.txt','w') as f:
+                f.write('Rin m\t\tZin m\t\tRout m\t\tZout m\n')
+                for rin,zin,rout,zout in zip(self.TFinR,self.TFinZ,
+                                             self.TFoutR,self.TFoutZ):
+                    f.write('{:1.6f}\t{:1.6f}\t{:1.6f}\t{:1.6f}\n'.format(\
+                    rin,zin,rout,zout))            
+        
+    def support(self,**kwargs):
         self.rzGet()
         self.fill(**kwargs)
         
-    def volume_ratio(self):
+    def volume_ratio(self,Rp,Zp):
         #pl.plot(self.Rp,self.Zp,'rx-')
-        self.Pvol = self.loop_vol(self.Rp,self.Zp,plot=False)
+        self.Pvol = loop_vol(Rp,Zp,plot=False)
         Rtf,Ztf,L = self.drawTF(self.xCoil, Nspace=300)
-        self.TFvol = self.loop_vol(Rtf,Ztf,plot=False)
+        self.TFvol = loop_vol(Rtf,Ztf,plot=False)
         self.Rvol = self.TFvol/self.Pvol
         
     def length_ratio(self):
         self.Plength = self.length(self.Rp,self.Zp,norm=False)[-1]
         Rtf,Ztf,L = self.drawTF(self.xCoil, Nspace=300)
-        R,Z = self.offset(Rtf,Ztf,self.dRsteel+self.dRcoil/2)
+        R,Z = geom.offset(Rtf,Ztf,self.dRsteel+self.dRcoil/2)
         self.TFlength = self.length(R,Z,norm=False)[-1]
         self.Rlength = self.TFlength/self.Plength
     
-    def fitTF(self,xCoil):
-        Rtf,Ztf,L = self.drawTF(xCoil, Nspace=500)
-        if self.TFobj is 'L':  # coil length
+    def fit(self,xCoil):
+        Rtf,Ztf,L = self.draw(xCoil, Nspace=500)
+        if self.objective is 'L':  # coil length
             objF = L
         else:  # coil volume
-            objF = self.loop_vol(Rtf,Ztf)
+            objF = loop_vol(Rtf,Ztf)
         return objF
         
     def dot_diffrence(self,xCoil,Side):
-        Rloop,Zloop,L = self.drawTF(xCoil, Nspace=500)
+        Rloop,Zloop,L = self.draw(xCoil, Nspace=500)
         switch = 1 if Side is 'in' else -1
         if Side is 'out':
-            Rloop,Zloop = self.offset(Rloop,Zloop,self.dRcoil+
+            Rloop,Zloop = geom.offset(Rloop,Zloop,self.dRcoil+
                                       2*self.dRsteel)
-        nRloop,nZloop = self.normal(Rloop,Zloop)
-        R,Z = self.TFbound[Side]['R'],self.TFbound[Side]['Z']
+        nRloop,nZloop = geom.normal(Rloop,Zloop)
+        R,Z = self.bound[Side]['R'],self.bound[Side]['Z']
         dsum = 0
         for r,z in zip(R,Z):
             i = np.argmin((r-Rloop)**2+(z-Zloop)**2)
@@ -353,23 +349,26 @@ class TF(object):
                 dsum -= (dr[0]**2+dr[1]**2)
         return dsum
         
-    def dotTF(self,xCoil):
+    def dot(self,xCoil):
         dsum = 0
         for Side in ['in','out']:
             dsum += self.dot_diffrence(xCoil,Side) 
         return dsum
         
-    def set_TFbound(self):
-        Rin,Zin = self.coil_corners(self.setup.coils['internal'])  # internal    
-        Rex,Zex = self.coil_corners(self.setup.coils['external'])  # external 
+    def set_bound(self,**kwargs):
+        pf = kwargs.get('pf')  # requre loop,pf
+        loop = kwargs.get('loop')
+        Rin,Zin = pf.coil_corners(self.setup.coils['internal'])  # internal    
+        Rex,Zex = pf.coil_corners(self.setup.coils['external'])  # external 
         ro_min = 4.35  # minimum TF radius
-        internal = {'R':np.append(self.R,Rin),'Z':np.append(self.Z,Zin)}
+        internal = {'R':np.append(loop.R,Rin),'Z':np.append(loop.Z,Zin)}
         external = {'R':Rex,'Z':Zex}
-        self.TFbound = {'in':internal,'out':external,'ro_min':ro_min}
+        self.bound = {'in':internal,'out':external,'ro_min':ro_min}
         
-    def plot_TFbounds(self):
-        pl.plot(self.TFbound['in']['R'],self.TFbound['in']['Z'],'d',
+    def plot_bounds(self):
+        pl.plot(self.bound['in']['R'],self.TFbound['in']['Z'],'d',
                 markersize=3)
-        pl.plot(self.TFbound['out']['R'],self.TFbound['out']['Z'],'o',
+        pl.plot(self.bound['out']['R'],self.TFbound['out']['Z'],'o',
                 markersize=3)
-        pl.plot(self.TFbound['ro_min'],0,'*',markersize=3)
+        pl.plot(self.bound['ro_min'],0,'*',markersize=3)
+        

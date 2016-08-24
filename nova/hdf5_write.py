@@ -1,6 +1,13 @@
 import h5py
 import numpy as np
 
+
+'''
+    path = PATH(jobname)
+    path.new()
+    path.go()
+    wd = path.job
+'''
 with h5py.File("mytestfile.hdf5", "w") as f:
     dset = f.create_dataset("mydataset", (100,), dtype='float')
     dset[...] = np.arange(100)

@@ -1,6 +1,5 @@
-from amigo.IO import PATH,qsub
+from amigo.IO import qsub
 
 
 qsub('hdf5_write',t=3) 
 
-#path = PATH('test')

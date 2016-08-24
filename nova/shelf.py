@@ -3,7 +3,7 @@ from collections import OrderedDict as od
 
 class PKL(object):
     
-    def __init__(self,file,directory='./plot_data/'):
+    def __init__(self,file,directory='../Data/'):
         self.file = directory+file+'.pkl'
         self.data = {'rb':None,'sf':None,'eq':None,'cc':None,'inv':None,
                      'ax':None}

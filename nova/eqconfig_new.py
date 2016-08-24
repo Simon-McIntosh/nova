@@ -1,14 +1,70 @@
 import numpy as np
 import collections
 
-class Config(object):
+class Setup(object):
     
-    def __init__(self,config,inside=False):
+    def __init__(self,config=''):
+        self.config
+        self.set_defaults()
+        self.update()
+        self.backfill()
+
+    def set_defaults(self):
+        self.filename = ''
+        self.dataname = ''
+        self.targets = collections.OrderedDict()  # targets structure (ordered)
+        self.targets['default'] = {}
+        self.targets['default']['L2D'] = 2
+        self.targets['default']['open'] = False
+        self.targets['default']['graze'] = 1.5*np.pi/180
+        self.targets['default']['dPlate'] = 0.5
+        self.targets['default']['dR'] = 0.1
+        self.firstwall = {}  # initalise firstwall data structure
+        self.firstwall['dRfw'] = 0.25
+        self.firstwall['div_ex'] = 0.18
+        self.firstwall['trim'] = [0.75,0.7]
+        self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},  # coils structure
+                      'external':{'id':[],'dR':[],'dZ':[]}}
+        
+    def backfill(self):
+        for key in list(self.targets)[1:]:  # backfill defaults
+            for default in list(self.targets['default']):
+                if default not in self.targets[key]:
+                    self.targets[key][default] = self.targets['default'][default]
+    
+    def update(self):  # update 
+    
+        if self.config == 'SFm':
+            self.filename = '../eqdsk/Equil_AR3d1_16coils_SFminus_v4_2015'+\
+            '_09_bt_1d03li_0d8_Ipl_20d25_SOF.eqdsk'
+            #self.filename = '../eqdsk/2015_SFminus_eqdsk_2MCQRZ_v1_0_IDM.eqdsk'
+            self.dataname = 'SFm'
+                
+            self.targets['default']['dPlate'] = 0.35 # target plate length
+            self.targets['inner1'] = {'L2D':[1.1+0.52],'open':True,'dR':0.0}
+            self.targets['inner2'] = {'L2D':[1.2-0.08],'open':False,'dR':-1}
+            self.targets['outer1'] = {'L2D':[1.65-0.7],'open':False,'dR':-1}
+            self.targets['outer2'] = {'L2D':[1.1+0.15],'open':True,'dR':0.0}  
+                
+            self.firstwall['div_ex'] = 0.18
+            self.firstwall['trim'] = [0.75,0.7]  # trim fraction (in/out)
+              
+            self.coils['external']['id'] = list(range(0,16))
+            '''
+            self.TFopp = 'V'
+            self.sheild_connect=[0,1]  # 0.3,0.95
+            #self.Dsheild =[0,0.84]  # inner outer 0-1
+            self.Dsheild =[]  # inner outer 0-1
+            '''
+            print(self.targets)
+
+
+    '''
         self.conformal = True
-        self.dSOL=0.003  # [m]
-        self.Nsol=5
+        self.dSOL=0.005  # [m]
+        self.Nsol=51
         self.dRfw = 0.25  # [m]
-        self.div_ex = 0.3
+        #self.div_ex = 0.3
         self.TFopp = 'V'  # TF shape optimisation 'L'==length, 'V'==volume
         self.sheild_base = -1
         self.tfw = 0.1  # first wall thickness
@@ -16,10 +72,10 @@ class Config(object):
         #self.BS = np.array([1.075,1.56])  # blanket+sheild (in/out)
         self.BS = np.array([0.78-0.2,1.304-0.2])  # blanket+sheild (in/out) #PMI xls
         self.BS -= (self.tfw+self.tBBsupport)
-        BBfrac = np.array([0.8,0.65])
-        BBfrac = np.array([1,1])
-        self.BB = list(BBfrac*self.BS)  # breeding blanket thickness (in/out)
-        self.sheild = list((1-BBfrac)*self.BS)  # neutron sheilding
+        self.BBfrac = np.array([0.8,0.65])
+        self.BBfrac = np.array([1,1])
+        self.BB = list(self.BBfrac*self.BS)  # breeding blanket thickness (in/out)
+        self.sheild = list((1-self.BBfrac)*self.BS)  # neutron sheilding
         #self.sheild = [0.2,0.6]
         #self.VV = 0.32  # vacumn vessel thickness (in/out)
         self.VV = [0.587,1.2]  # vacumn vessel thickness (in/out)
@@ -29,34 +85,16 @@ class Config(object):
         self.nTF = 18  # number of TF coils
         self.Jmax = 30e6  # 15e6  # max current density
         self.trim = [0.93,0.81]  # trim fraction (in/out)
-        self.inside = inside
         self.config = config
+        
+        self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},
+                      'external':{'id':list(range(10,16)),'dR':[],'dZ':[]}}
         self.targets = collections.OrderedDict()
-        if inside:
-            self.config += '_inside'
         
-        if config == 'SX8':
-            self.dRfw = 0.25  # [m]
-            self.TFopp = 'L'
-            self.inflate = 0
-            self.div_ex = 1
-            self.dPlate = 0.5  # target plate length
-            self.sheild_connect=[0.15,0.9]
-            self.sheild_base = -1
-            self.Dsheild =[0,1]  # inner outer 0-1
-            self.Dsheild =[]  # inner outer 0-1
-            self.trim = [0.71,0.74]  # trim fraction (in/out)
-            self.filename = './eqlib_data/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
-            self.filename += 'pl_20d25_SX_on_SFgeom_NOEDDY_EOF_fine_iter5_v3.eqdsk'
-            self.dataname = 'SX'
-            self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},
-                     'external':{'id':list(range(10,16)),'dR':[],'dZ':[]}}
-            self.targets['inner'] = {'L2D':[1.1],'open':False,
-                                     'graze':self.graze,'dR':0}
-            self.targets['outer'] = {'L2D':[3.55],'open':False,
-                                     'graze':self.graze,'dR':0}
-                                     
-        
+        self.targets['inner'] = {'L2D':[1.1],'open':False,'graze':self.graze,'dR':0.1}
+        self.targets['outer'] = {'L2D':[3.55],'open':False,'graze':self.graze,'dR':0.1}
+            
+                
         if config == 'vde':
             self.dRfw = 0.25  # [m]
             self.TFopp = 'L'
@@ -68,12 +106,62 @@ class Config(object):
             self.Dsheild =[0,1]  # inner outer 0-1
             self.Dsheild =[]  # inner outer 0-1
             self.trim = [0.71,0.74]  # trim fraction (in/out)
-            self.filename = './eqlib_data/vde.eqdsk'
+            self.filename = '../eqdsk/vde.eqdsk'
             self.dataname = 'SX7'
             self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},
-                     'external':{'id':list(range(10,16)),'dR':[],'dZ':[]}}
+                          'external':{'id':list(range(10,16)),'dR':[],'dZ':[]}}
             self.targets['inner'] = {'L2D':[1.1],'open':False,'graze':self.graze,'dR':0.1}
             self.targets['outer'] = {'L2D':[3.55],'open':False,'graze':self.graze,'dR':0.1}
+            
+        if config == 'SX8_IDM':
+            self.dRfw = 0.25  # [m]
+            self.TFopp = 'L'
+            self.inflate = 0
+            self.div_ex = 1
+            self.dPlate = 0.5  # target plate length
+            self.sheild_connect=[0.15,0.9]
+            self.sheild_base = -1
+            self.Dsheild =[0,1]  # inner outer 0-1
+            self.Dsheild =[]  # inner outer 0-1
+            self.trim = [0.71,0.74]  # trim fraction (in/out)
+
+            self.filename = '../eqdsk/2015_SX_ext_coils_eqdk_2MK6XX_v1_0.eqdsk'  # IDM
+
+            self.dataname = 'SX8_IDM'
+            self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},
+                     'external':{'id':list(range(10,16)),'dR':[],'dZ':[]}}
+            self.targets['inner'] = {'L2D':[1.1],'open':False,
+                                     'graze':self.graze,'dR':0}
+            self.targets['outer'] = {'L2D':[3.55],'open':False,
+                                     'graze':self.graze,'dR':0} 
+                                     
+        if config == 'SX8':
+            self.dRfw = 0.25  # [m]
+            self.TFopp = 'L'
+            self.inflate = 0
+            self.div_ex = 1
+            self.dPlate = 0.5  # target plate length
+            self.sheild_connect=[0.15,0.9]
+            self.sheild_base = -1
+            self.Dsheild =[0,1]  # inner outer 0-1
+            self.Dsheild =[]  # inner outer 0-1
+            self.trim = [0.71,0.74]  # trim fraction (in/out)
+            self.filename = '../eqdsk/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
+            self.filename += 'pl_20d25_SX_on_SFgeom_NOEDDY_EOF_fine_iter5_v3.eqdsk'
+            
+            #self.filename = '../eqdsk/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
+            #self.filename += 'pl_20d25_SX_on_SFgeom_NOEDDY_EOF_fine_iter5_v3_new.eqdsk'
+            self.filename = '../eqdsk/2015_SX_ext_coils_eqdk_2MK6XX_v1_0.eqdsk'  # IDM
+            #self.filename = '../eqdsk/Equil_AR3d1_16coils_bt_1d03li_0d8_Ipl_'
+            #self.filename += '20d25_SX_on_SFgeom_NOEDDY_EOF_fine_iter3_v5_old.eqdsk'
+
+            self.dataname = 'SX8'
+            self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},
+                     'external':{'id':list(range(10,16)),'dR':[],'dZ':[]}}
+            self.targets['inner'] = {'L2D':[1.1],'open':False,
+                                     'graze':self.graze,'dR':0}
+            self.targets['outer'] = {'L2D':[3.55],'open':False,
+                                     'graze':self.graze,'dR':0}   
 
         if config == 'SX7':
             self.dRfw = 0.25  # [m]
@@ -86,7 +174,7 @@ class Config(object):
             self.Dsheild =[0,1]  # inner outer 0-1
             self.Dsheild =[]  # inner outer 0-1
             self.trim = [0.71,0.74]  # trim fraction (in/out)
-            self.filename = './eqlib_data/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
+            self.filename = '../eqdsk/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
             self.filename += 'pl_20d25_SX_on_SFgeom_NOEDDY_EOF_fine_iter5_v2.eqdsk'
             self.dataname = 'SX7'
             self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},
@@ -105,7 +193,7 @@ class Config(object):
             self.Dsheild =[0,1]  # inner outer 0-1
             self.Dsheild =[]  # inner outer 0-1
             self.trim = [0.71,0.74]  # trim fraction (in/out)
-            self.filename = './eqlib_data/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
+            self.filename = '../eqdsk/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
             self.filename += 'pl_20d25_SX_on_SFgeom_NOEDDY_EOF_fine_iter4_v3.eqdsk'
             self.dataname = 'SX6'
             self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},
@@ -125,7 +213,7 @@ class Config(object):
             self.Dsheild =[0,1]  # inner outer 0-1
             self.Dsheild =[]  # inner outer 0-1
             self.trim = [0.71,0.74]  # trim fraction (in/out)
-            self.filename = './eqlib_data/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
+            self.filename = '../eqdsk/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
             self.filename += 'pl_20d25_SX_on_SFgeom_NOEDDY_EOF_fine_iter3_v5.eqdsk'
             self.dataname = 'SX5'
             self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},
@@ -144,7 +232,7 @@ class Config(object):
             self.Dsheild =[0,1]  # inner outer 0-1
             self.Dsheild =[]  # inner outer 0-1
             self.trim = [0.715,0.72]  # trim fraction (in/out)
-            self.filename = './eqlib_data/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
+            self.filename = '../eqdsk/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
             self.filename += 'pl_20d25_SX_on_SFgeom_NOEDDY_EOF_fine_iter2.eqdsk'
             self.dataname = 'SX4'
             self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},
@@ -162,7 +250,7 @@ class Config(object):
             self.Dsheild =[0,1]  # inner outer 0-1
             self.Dsheild =[]  # inner outer 0-1
             self.trim = [0.76,0.72]  # trim fraction (in/out)
-            self.filename = './eqlib_data/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
+            self.filename = '../eqdsk/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
             self.filename += 'pl_20d25_SX_on_SFgeom_NOEDDY_EOF_fine_v2.eqdsk'
 
             self.dataname = 'SX3'
@@ -182,7 +270,7 @@ class Config(object):
             self.Dsheild =[0.045,0.68]  # inner outer 0-1
             self.Dsheild =[]  # inner outer 0-1
             self.trim = [0.58,0.48]  # trim fraction (in/out)
-            self.filename = './eqlib_data/redtosx4_1.eqdsk'
+            self.filename = '../eqdsk/redtosx4_1.eqdsk'
             self.dataname = 'SX2'
             self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},
                      'external':{'id':[],'dR':[],'dZ':[]}}
@@ -203,7 +291,7 @@ class Config(object):
             self.Dsheild =[0.04,0.58]  # inner outer 0-1
             self.Dsheild =[]  # inner outer 0-1
             self.trim = [0.62,0.59]  # trim fraction (in/out)
-            self.filename = './eqlib_data/Super-X_equilibrium_2MC43F_v1_0.eqdsk'
+            self.filename = '../eqdsk/Super-X_equilibrium_2MC43F_v1_0.eqdsk'
             self.dataname = 'SX'
             #self.coils = {'internal':{'id':[11,12,12],'dR':[0.6],'dZ':[]},
             #         'external':{'id':list(range(0,11))+[13],'dR':[],'dZ':[]}}
@@ -223,7 +311,7 @@ class Config(object):
             self.Dsheild =[]  # inner outer 0-1
             self.sheild_base = 0  # 0.25
             self.trim = [0.63,0.68]  # trim fraction (in/out)
-            #self.filename = './eqlib_data/Super-X_equilibrium_2MC43F_v1_0.eqdsk'
+            #self.filename = '../eqdsk/Super-X_equilibrium_2MC43F_v1_0.eqdsk'
             self.filename = './plot_data/SXex.eqdsk'
             self.dataname = 'SXex'
             #self.coils = {'internal':{'id':[11,12,12],'dR':[0.6],'dZ':[]},
@@ -246,25 +334,25 @@ class Config(object):
             self.trim = [0.81,0.81]  # trim fraction (in/out)
             self.sheild_connect=[0,1]
             self.sheild_base = -1
-            #self.filename = './eqlib_data/Equil_AR3d1_bt_1d03li_0d8_Ipl_'+\
+            #self.filename = '../eqdsk/Equil_AR3d1_bt_1d03li_0d8_Ipl_'+\
             #'20d25_XD_N_2LAT7R_v1_0.eqdsk'
-            self.filename = './eqlib_data/Equil_AR3d1_XD_2015_Invess_5d0MA_EOF.eqdsk'
-            self.filename = './eqlib_data/Equil_AR3d1_XD_2015_Invess_5d0MA_EOF_v2.eqdsk'
-            self.filename = './eqlib_data/2015_XD_eqdk_2MJ4JW_v2_1.eqdsk'
-            self.filename = './eqlib_data/Equil_AR3d1_16coils_v3_bt_'
+            self.filename = '../eqdsk/Equil_AR3d1_XD_2015_Invess_5d0MA_EOF.eqdsk'
+            self.filename = '../eqdsk/Equil_AR3d1_XD_2015_Invess_5d0MA_EOF_v2.eqdsk'
+            self.filename = '../eqdsk/2015_XD_eqdk_2MJ4JW_v2_1.eqdsk'
+            self.filename = '../eqdsk/Equil_AR3d1_16coils_v3_bt_'
             self.filename += '1d03li_0d8_Ipl_20d25_SF_NOEDDY_SOF_FINAL3_v9.eqdsk'
-            self.filename = './eqlib_data/Equil_AR3d1_16coils_v3_bt_1d03li_'
+            self.filename = '../eqdsk/Equil_AR3d1_16coils_v3_bt_1d03li_'
             self.filename += '0d8_Ipl_20d25_SF_NOEDDY_SOF_FINAL3_v12.eqdsk'
-            self.filename = './eqlib_data/Equil_AR3d1_16coils_v3_bt_1d03li_0d8_'
+            self.filename = '../eqdsk/Equil_AR3d1_16coils_v3_bt_1d03li_0d8_'
             self.filename += 'Ipl_20d25_XDext_NOEDDY_SOF_FINAL3_v11.eqdsk'
-            self.filename = './eqlib_data/Equil_AR3d1_16coils_v3_bt_1d03li_'
+            self.filename = '../eqdsk/Equil_AR3d1_16coils_v3_bt_1d03li_'
             self.filename += '0d8_Ipl_20d25_XDext_v4_NOEDDY_SOF_FINAL3_v1.eqdsk'
             self.dataname = 'X'
             self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},  # 12  0.85*2
                      'external':{'id':range(10,16),'dR':[],'dZ':[]}}  # list(range(0,13))
             self.targets['inner'] = {'L2D':[0.95],'open':False,  #0.85
                                      'graze':self.graze,'dR':-1}
-            self.targets['outer'] = {'L2D':[1.95],'open':False,  # 1.9
+            self.targets['outer'] = {'L2D':[1.92],'open':False,  # 1.9,1.95
                                      'graze':1.0*np.pi/180,'dR':0} #2.433 386
                                      
                                      
@@ -278,11 +366,11 @@ class Config(object):
             self.trim = [0.78,0.7]  # trim fraction (in/out)
             self.sheild_connect=[0,1]
             self.sheild_base = 0.05
-            #self.filename = './eqlib_data/Equil_AR3d1_bt_1d03li_0d8_Ipl_'+\
+            #self.filename = '../eqdsk/Equil_AR3d1_bt_1d03li_0d8_Ipl_'+\
             #'20d25_XD_N_2LAT7R_v1_0.eqdsk'
-            self.filename = './eqlib_data/Equil_AR3d1_XD_2015_Invess_5d0MA_EOF.eqdsk'
-            self.filename = './eqlib_data/Equil_AR3d1_XD_2015_Invess_5d0MA_EOF_v2.eqdsk'
-            self.filename = './eqlib_data/2015_XD_eqdk_2MJ4JW_v2_1.eqdsk'
+            self.filename = '../eqdsk/Equil_AR3d1_XD_2015_Invess_5d0MA_EOF.eqdsk'
+            self.filename = '../eqdsk/Equil_AR3d1_XD_2015_Invess_5d0MA_EOF_v2.eqdsk'
+            self.filename = '../eqdsk/2015_XD_eqdk_2MJ4JW_v2_1.eqdsk'
             self.dataname = 'X'
             self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},  # 12  0.85*2
                      'external':{'id':[],'dR':[],'dZ':[]}}  # list(range(0,13))
@@ -298,9 +386,10 @@ class Config(object):
             self.Dsheild =[]
             self.sheild_connect=[0,1]
             self.sheild_base = -1
-            #self.filename = './eqlib_data/Equil_AR3d1_bt_1d03li_0d8_Ipl'+\
+            #self.filename = '../eqdsk/Equil_AR3d1_bt_1d03li_0d8_Ipl'+\
             #'_20d25_EOF_2M56U8_v1_0.eqdsk'
-            self.filename = './eqlib_data/2015_SN_eqdk_2MG9A4_v1_0.eqdsk'
+            self.filename = '../eqdsk/2015_SN_eqdk_2MG9A4_v1_0.eqdsk'
+            self.filename = '../eqdsk/2015_SN_eqdk_2MG9A4_v1_0_IDM.eqdsk'
             self.dataname = 'SND'
             self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},
                      'external':{'id':[0,4],'dR':[],'dZ':[]}}  #list(range(0,11))
@@ -310,7 +399,7 @@ class Config(object):
                                      'graze':self.graze,'dR':0.0}
         
         elif config == 'SF':
-            self.filename = './eqlib_data/Equil_AR3d1_bt_1d03li_0d8_Ipl_'+\
+            self.filename = '../eqdsk/Equil_AR3d1_bt_1d03li_0d8_Ipl_'+\
             '20d25_26co_2L2R9C_v1_0.eqdsk'
             self.dataname = 'SFD'
             self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},
@@ -320,29 +409,7 @@ class Config(object):
             self.targets['outer1'] = {'L2D':[2],'open':False,'graze':self.graze}
             self.targets['outer2'] = {'L2D':[2],'open':False,'graze':self.graze} 
         
-        elif config == 'SFm':
-            self.TFopp = 'V'
-            self.div_ex = 0.18
-            self.dPlate = 0.35 # target plate length
-            self.sheild_connect=[0,1]  # 0.3,0.95
-            #self.Dsheild =[0,0.84]  # inner outer 0-1
-            self.Dsheild =[]  # inner outer 0-1
-            self.trim = [0.75,0.7]  # trim fraction (in/out)
-            
-            self.filename = './eqlib_data/Equil_AR3d1_16coils_SFminus_v4_2015'+\
-            '_09_bt_1d03li_0d8_Ipl_20d25_SOF.eqdsk'
 
-            self.dataname = 'SFm'
-            self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},
-                     'external':{'id':list(range(0,16)),'dR':[],'dZ':[]}} 
-            self.targets['inner1'] = {'L2D':[1.1+0.52],'open':True,
-                                      'graze':self.graze,'dR':0.0}
-            self.targets['inner2'] = {'L2D':[1.2-0.08],'open':False,
-                                      'graze':self.graze,'dR':-1}
-            self.targets['outer1'] = {'L2D':[1.65-0.7],'open':False,
-                                      'graze':self.graze,'dR':-1}
-            self.targets['outer2'] = {'L2D':[1.1+0.15],'open':True,
-                                      'graze':self.graze,'dR':0.0}  
 
         elif config == 'SFp':
             self.TFopp = 'V'
@@ -353,7 +420,7 @@ class Config(object):
             self.Dsheild =[]  # inner outer 0-1
             self.trim = [0.75,0.75]  # trim fraction (in/out)
             
-            self.filename = './eqlib_data/Equil_AR3d1_16coils_SFplus_v4_2015'+\
+            self.filename = '../eqdsk/Equil_AR3d1_16coils_SFplus_v4_2015'+\
             '_09_bt_1d03li_0d8_Ipl_20d25_SOF.eqdsk'
 
             self.dataname = 'SFp'
@@ -363,13 +430,14 @@ class Config(object):
             self.targets['inner2'] = {'L2D':[1.2],'open':False,'graze':self.graze,'dR':-1}
             self.targets['outer1'] = {'L2D':[1.65],'open':False,'graze':self.graze,'dR':-1}
             self.targets['outer2'] = {'L2D':[1.1],'open':True,'graze':self.graze,'dR':0.1}  
-                     
-    def TF(self,sf):
-        Icoil = 2*np.pi*sf.rcentr*\
-        np.abs(sf.bcentr)/(4*np.pi*1e-7)/self.nTF # coil amp-turns
-        Acoil = Icoil/self.Jmax
-        self.dRcoil = np.sqrt(Acoil)
-        self.dRcoil = 0.489
-        self.dRsteel = 0.15*self.dRcoil
-                 
-        
+                    
+        keys = ['conformal','dSOL','Nsol','dRfw','div_ex','TFopp',
+                'sheild_base','tfw','tBBsupport','BS','BBfrac','BB',
+                'sheild','VV','graze','dPlate','nTF','Jmax','trim',
+                'config','targets']
+        config = {}
+        for key in keys:  # package as dict
+            config[key] = getattr(self,key)
+        print(config)
+        return config         
+'''        

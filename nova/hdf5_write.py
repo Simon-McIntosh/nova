@@ -1,5 +1,9 @@
 import h5py
 import numpy as np
+from amigo.IO import PATH
+
+path = PATH('test')
+path.go()
 
 
 '''

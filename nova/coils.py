@@ -9,6 +9,8 @@ import matplotlib
 import collections
 from amigo.geom import Loop
 import amigo.geom as geom
+import nova.geqdsk
+from inductance import neumann
 
 def loop_vol(R,Z,plot=False):
     imin,imax = np.argmin(Z),np.argmax(Z)
@@ -198,14 +200,31 @@ class PF(object):
 
 class TF(object):
     
-    def __init__(self,setup,fit=False,Np=200,objective='V',**kwargs):
+    def __init__(self,Np=200,objective='V',**kwargs):
+        self.setargs(**kwargs)
         self.objective = objective
         self.Np = Np
-        self.setup = setup
-        self.dataname = setup.dataname
         self.width()
-        self.calc(fit,**kwargs)
-        self.fill(write=False)
+        self.get_datatype(**kwargs)
+        self.calc(**kwargs)
+        
+    def setargs(self,**kwargs):
+        if 'setup' in kwargs:
+            self.setup = kwargs['setup']
+            self.dataname = self.setup.dataname
+            self.filename = self.setup.filename
+        else:
+            for name in ['dataname','filename']:
+                if name in kwargs:
+                    setattr(self,name,kwargs[name])
+        
+    def get_datatype(self,**kwargs):  # set input data based on kwarg contents
+        if 'R' in kwargs and 'Z' in kwargs:
+            self.datatype = 'array'
+        elif 'loop' in kwargs and 'pf' in kwargs:
+            self.datatype = 'fit'
+        else:
+            self.datatype = 'file'
 
     def draw(self,xCoil,Nspace=100):
         zCoil = xCoil[0]
@@ -252,10 +271,8 @@ class TF(object):
         L = np.append(0,L)
         return (Rtf,Ztf,L[-1])
 
-    def calc(self,fit,plot_bounds=False,**kwargs):
-        #if 'objF' not in kwargs:
-        #    self.TFobj = self.setup.TF['opp']
-        if fit: 
+    def calc(self,plot_bounds=False,**kwargs):
+        if self.datatype == 'fit': 
             self.set_bound(**kwargs)  # TF boundary conditions
             self.bound['ro_min'] -= 0.5  # offset minimum radius
             if plot_bounds:
@@ -271,29 +288,38 @@ class TF(object):
                                      tol=1e-2).x
             with open('../Data/'+self.dataname+'_TF.pkl', 'wb') as output:
                 pickle.dump(self.xCoil,output,-1)
-        else:
+        elif self.datatype == 'file':
             with open('../Data/'+self.dataname+'_TF.pkl', 'rb') as input:
                 self.xCoil = pickle.load(input)
+      
+        if self.datatype == 'array':
+            self.Rmid,self.Zmid = kwargs['R'],kwargs['Z']
+            self.Rmid = np.append(self.Rmid,self.Rmid[0])
+            self.Zmid = np.append(self.Zmid,self.Zmid[0])
+            self.Rmid,self.Zmid = geom.rzSLine(self.Rmid,self.Zmid,Np=self.Np)
+            self.Rin,self.Zin = geom.offset(self.Rmid,self.Zmid,
+                                            -0.5*(self.dRcoil+2*self.dRsteel))
+        else:
+            self.Rin,self.Zin,self.Lin = self.draw(self.xCoil,Nspace=self.Np)
+            self.fill(plot=False)
         
     def width(self):
         self.dRcoil = 0.489
         self.dRsteel = 0.15*self.dRcoil
  
-    def fill(self,write=True,plot=True):
-        #self.fitTF(self.xCoil)
-        R,Z,L = self.draw(self.xCoil,Nspace=self.Np) 
-        loop = Loop(R,Z,[np.mean(R),np.mean(Z)])
+    def fill(self,write=False,plot=True):
+        loop = Loop(self.Rin,self.Zin,[np.mean(self.Rin),np.mean(self.Zin)])
         self.Rin,self.Zin = loop.R,loop.Z
         
         loop.rzPut()
-        loop.fill(dR=0,dt=self.dRsteel,trim=None,color='k',alpha=0.6,
+        loop.fill(dR=0,dt=self.dRsteel,trim=None,color=0.4*np.ones(3),alpha=1,
                   part_fill=False,loop=True,plot=plot)
-        loop.fill(dt=self.dRcoil/2,trim=None,color='k',alpha=0.3,
+        loop.fill(dt=self.dRcoil/2,trim=None,color=0.7*np.ones(3),alpha=1,
                   label='TF coil',part_fill=False,loop=True,plot=plot)
         self.Rmid,self.Zmid = loop.R,loop.Z  
-        loop.fill(dt=self.dRcoil/2,trim=None,color='k',alpha=0.3,
+        loop.fill(dt=self.dRcoil/2,trim=None,color=0.7*np.ones(3),alpha=1,
                   label='TF coil',part_fill=False,loop=True,plot=plot)
-        loop.fill(dt=self.dRsteel,trim=None,color='k',alpha=0.6,
+        loop.fill(dt=self.dRsteel,trim=None,color=0.4*np.ones(3),alpha=1,
                   label='TF support',part_fill=False,loop=True,plot=plot)
         self.Rout,self.Zout = loop.R,loop.Z
         
@@ -372,3 +398,37 @@ class TF(object):
                 markersize=3)
         pl.plot(self.bound['ro_min'],0,'*',markersize=3)
         
+    def amp_turns(self,nTF):
+        eqdsk = nova.geqdsk.read(self.filename)
+        mu_o = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
+        self.Iturn = 2*np.pi*eqdsk['rcentr']*np.abs(eqdsk['bcentr'])/(mu_o*nTF) 
+
+    def energy(self,nTF,plot=False,Jmax=7.2e7,Nseg=100,**kwargs):
+        if 'Iturn' in kwargs:
+            self.Iturn = kwargs['Iturn']
+        else:
+            self.amp_turns(nTF)
+        self.Acs = self.Iturn/Jmax
+        R,Z = geom.rzSLine(self.Rmid,self.Zmid,Np=Nseg)  # re-space
+        Xo = np.zeros((Nseg,3))
+        Xo[:,0],Xo[:,2] = R,Z
+        theta = np.linspace(0,2*np.pi,nTF,endpoint=False)
+        r = np.sqrt(self.Acs)
+        nturn = 1
+        neu = neumann()
+        M = np.zeros((nTF))
+        if plot:
+            fig = pl.figure()
+            ax = fig.gca(projection='3d')
+        for i in np.arange(0,nTF):
+            X = np.dot(Xo,geom.rotate(theta[i]))
+            neu.setX(X)
+            neu.setr(r)
+            neu.setX_(Xo)
+            M[i] = nturn**2*neu.calculate()
+            if plot:
+                ax.plot(np.append(X[:,0],X[0,0]),np.append(X[:,1],X[0,1]),
+                        np.append(X[:,2],X[0,2]))
+        self.Ecage = 0.5*self.Iturn**2*nTF*np.sum(M)
+        print('E {:1.2f}'.format(1e-9*self.Ecage))
+

@@ -28,6 +28,9 @@ nTF = 18
 theta = np.linspace(0,2*np.pi,nTF,endpoint=False)
  
 r_coil = cgeom.pn*np.sqrt(134/np.pi)
+
+
+'''
 r_strand = cgeom.r_cond
 #r_strand = np.sqrt(235.3e-6/np.pi)
 cage = coil_cage(cgeom.profile,cmap.loops,theta,r_coil,r_strand)
@@ -78,5 +81,5 @@ print(M)
 print(np.sum(M))
 
 
-
+'''
 

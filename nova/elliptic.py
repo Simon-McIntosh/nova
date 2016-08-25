@@ -612,10 +612,10 @@ class EQ(object):
         c = pl.colorbar(orientation='horizontal')
         c.set_xlabel(r'$j$ MAm$^{-1}$')
         
-    def plotj(self,sigma=0):
+    def plotj(self,sigma=0,trim=False):
         #self.GSoper()
         j = self.getj(sigma=sigma)
-        self.plot_matrix(j,scale=1e-6,trim=False)
+        self.plot_matrix(j,scale=1e-6,trim=trim)
         
         
     def plot_matrix(self,m,midpoint=0,scale=1,trim=True):
@@ -624,15 +624,24 @@ class EQ(object):
             rlim,zlim = [self.r[1],self.r[-2]],[self.z[1],self.z[-2]]
         else:
             rlim,zlim = [self.r[0],self.r[-1]],[self.z[0],self.z[-1]]
+        '''
         cmap = pl.get_cmap('RdBu_r')
         caxis = np.round([scale*m.min(),scale*m.max()],decimals=3)
         norm = MidpointNormalize(midpoint=midpoint,vmin=caxis[0],vmax=caxis[1])
+        cmap.set_over(color='r',alpha=1)
+
         pl.imshow(scale*m.T,cmap=cmap,norm=norm,
                   extent=[rlim[0],rlim[-1],zlim[0],zlim[-1]],
                   interpolation='nearest',origin='lower',alpha=1) 
         c = pl.colorbar(orientation='horizontal',shrink=.6, pad=0.025, aspect=15)
         c.ax.set_xlabel(r'$J$ MAm$^{-2}$')
         c.set_ticks([caxis[0],0,caxis[1]])
+        '''    
+        cmap = pl.get_cmap('Purples_r')
+        cmap.set_under(color='w',alpha=0)
+        pl.imshow(scale*m.T,cmap=cmap,vmin=0.1,
+                  extent=[rlim[0],rlim[-1],zlim[0],zlim[-1]],
+                  interpolation='nearest',origin='lower',alpha=0.4)
 
           
     def plot(self,levels=[]):

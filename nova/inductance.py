@@ -1,55 +1,31 @@
 import numpy as np
 from itertools import combinations_with_replacement as cr
 from itertools import combinations as cm
+import sys
+import datetime
+from mpl_toolkits.mplot3d import Axes3D
+import amigo.geom as geom
+import pylab as pl
 
 mu_o = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
 
-def caclulate(R,Z,nTF=18,Acs=,nturn=)
 
-Xo = np.zeros((len(R),3))
-Xo[:,0],Xo[:,2] = R,Z
-theta = np.linspace(0,2*np.pi,nTF,endpoint=False)
- 
 
-r = np.sqrt(0.625*1.24)
-nturn = 180
-
-neu = neumann()
-    
-fig = pl.figure()
-ax = fig.gca(projection='3d')
-
-N = 18
-M = np.zeros((N,N))
-to = time()
-for i in np.arange(0,N):
-    X = np.dot(Xo,geom.rotate(theta[i]))
-    neu.setX(X)
-    neu.setr(r)
-    ax.plot(np.append(X[:,0],X[0,0]),np.append(X[:,1],X[0,1]),
-            np.append(X[:,2],X[0,2]))
-
-    neu.setX_(Xo)
-    M[i,0] = nturn**2*neu.calculate()
-    '''
-    for j in np.arange(i,N):
-        X_ = np.dot(Xo,geom.rotate(theta[j]))
-        neu.setX_(X_)
-        M[i,j] = nturn**2*neu.calculate()
-        if i != j:
-            M[j,i] = M[i,j]  # copy to lower
-    '''
-    
-    t1 = time()
-    t_fraction = 2*((i+1)*(N-(i+1)/2))/N**2
-    t_wall = t1-to
-    t_total = t_wall/t_fraction
-    t_remain = t_total-t_wall
-    t_str = '\rtotal: '+str(datetime.timedelta(seconds=np.round(t_total)))+'\t'
-    t_str += 'complete:{:3.0f}%\t'.format(100*t_fraction)
-    t_str += 'remaining: '+str(datetime.timedelta(seconds=np.round(t_remain)))
-    sys.stdout.write(t_str)
-    sys.stdout.flush()
+            
+def time_remaining(i,N,to,time):
+    if time:
+        t1 = time()
+        t_fraction = 2*((i+1)*(N-(i+1)/2))/N**2
+        t_wall = t1-to
+        t_total = t_wall/t_fraction
+        t_remain = t_total-t_wall
+        t_str = '\rtotal: '+str(datetime.timedelta(\
+        seconds=np.round(t_total)))+'\t'
+        t_str += 'complete:{:3.0f}%\t'.format(100*t_fraction)
+        t_str += 'remaining: '+str(datetime.timedelta(\
+        seconds=np.round(t_remain)))
+        sys.stdout.write(t_str)
+        sys.stdout.flush()
     
 class neumann(object):
     def __init__(self,**kwargs):

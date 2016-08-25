@@ -15,7 +15,7 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 
 def Dshape(x,r1=4.486,r2=15.708,npoints=120):
-    zscale = x[0]
+    #zscale = x[0]
     b = x[1:]
     b = np.append(np.append(0,b),0)  # zero offset
     #b = np.append(np.append(0,b),0)  # zero gradient
@@ -34,7 +34,6 @@ def Dshape(x,r1=4.486,r2=15.708,npoints=120):
     z -= zshift
     znorm = zd.max()/z.max()
     z *= znorm
-
     return r,z
     
 def Dsolve(r,z):

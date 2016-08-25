@@ -6,11 +6,6 @@ from nova.elliptic import EQ
 from nova.coils import PF,TF,loop_vol
 import amigo.geom as geom
 import numpy as np
-from etna.coil_geom import configure,coil_cage
-from etna.coil_apdl import coil_map
-from nova.beam import Dcoil
-
-from time import time
 
 import seaborn as sns
 rc = {'figure.figsize':[10,10*12/16],'savefig.dpi':100, # 

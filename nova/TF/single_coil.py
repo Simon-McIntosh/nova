@@ -1,4 +1,4 @@
-import cross_coil as cc
+import nova.cross_coil as cc
 import pylab as pl
 import numpy as np
 mu_o = 4*np.pi*1e-7

@@ -3,7 +3,7 @@ import collections
 
 class Setup(object):
     
-    def __init__(self,configuration='',eqdir='../eqdsk'):
+    def __init__(self,configuration='',eqdir='../../eqdsk'):
         self.eqdir = eqdir
         self.configuration = configuration
         self.set_defaults()

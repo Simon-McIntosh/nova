@@ -10,7 +10,7 @@ import collections
 from amigo.geom import Loop
 import amigo.geom as geom
 import nova.geqdsk
-from inductance import neumann
+from nova.inductance import neumann
 
 def loop_vol(R,Z,plot=False):
     imin,imax = np.argmin(Z),np.argmax(Z)
@@ -200,13 +200,15 @@ class PF(object):
 
 class TF(object):
     
-    def __init__(self,Np=200,objective='V',**kwargs):
+    def __init__(self,Np=200,objective='V',nTF=18,**kwargs):
         self.setargs(**kwargs)
         self.objective = objective
         self.Np = Np
         self.width()
         self.get_datatype(**kwargs)
         self.calc(**kwargs)
+        self.nTF = nTF
+        self.amp_turns()
         
     def setargs(self,**kwargs):
         if 'setup' in kwargs:
@@ -286,10 +288,10 @@ class TF(object):
                                      options={'disp':True,'maxiter':500},
                                      method='SLSQP',constraints=constraint,
                                      tol=1e-2).x
-            with open('../Data/'+self.dataname+'_TF.pkl', 'wb') as output:
+            with open('../../Data/'+self.dataname+'_TF.pkl', 'wb') as output:
                 pickle.dump(self.xCoil,output,-1)
         elif self.datatype == 'file':
-            with open('../Data/'+self.dataname+'_TF.pkl', 'rb') as input:
+            with open('../../Data/'+self.dataname+'_TF.pkl', 'rb') as input:
                 self.xCoil = pickle.load(input)
       
         if self.datatype == 'array':
@@ -398,29 +400,33 @@ class TF(object):
                 markersize=3)
         pl.plot(self.bound['ro_min'],0,'*',markersize=3)
         
-    def amp_turns(self,nTF):
+    def amp_turns(self):
         eqdsk = nova.geqdsk.read(self.filename)
         mu_o = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
-        self.Iturn = 2*np.pi*eqdsk['rcentr']*np.abs(eqdsk['bcentr'])/(mu_o*nTF) 
+        self.Iturn = 2*np.pi*eqdsk['rcentr']*np.abs(eqdsk['bcentr'])/\
+        (mu_o*self.nTF) 
 
-    def energy(self,nTF,plot=False,Jmax=7.2e7,Nseg=100,**kwargs):
+    def energy(self,plot=False,Jmax=7.2e7,Nseg=100,**kwargs):
+        if 'nTF' in kwargs:
+            self.nTF = kwargs['nTF']
         if 'Iturn' in kwargs:
             self.Iturn = kwargs['Iturn']
         else:
-            self.amp_turns(nTF)
+            self.amp_turns(self.nTF)
+
         self.Acs = self.Iturn/Jmax
         R,Z = geom.rzSLine(self.Rmid,self.Zmid,Np=Nseg)  # re-space
         Xo = np.zeros((Nseg,3))
         Xo[:,0],Xo[:,2] = R,Z
-        theta = np.linspace(0,2*np.pi,nTF,endpoint=False)
+        theta = np.linspace(0,2*np.pi,self.nTF,endpoint=False)
         r = np.sqrt(self.Acs)
         nturn = 1
         neu = neumann()
-        M = np.zeros((nTF))
+        M = np.zeros((self.nTF))
         if plot:
             fig = pl.figure()
             ax = fig.gca(projection='3d')
-        for i in np.arange(0,nTF):
+        for i in np.arange(0,self.nTF):
             X = np.dot(Xo,geom.rotate(theta[i]))
             neu.setX(X)
             neu.setr(r)
@@ -429,6 +435,6 @@ class TF(object):
             if plot:
                 ax.plot(np.append(X[:,0],X[0,0]),np.append(X[:,1],X[0,1]),
                         np.append(X[:,2],X[0,2]))
-        self.Ecage = 0.5*self.Iturn**2*nTF*np.sum(M)
+        self.Ecage = 0.5*self.Iturn**2*self.nTF*np.sum(M)
         print('E {:1.2f}'.format(1e-9*self.Ecage))
 

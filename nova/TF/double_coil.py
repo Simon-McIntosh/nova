@@ -1,6 +1,6 @@
 import numpy as np
 import pylab as pl
-from cross_coil import Bcoil
+from nova.cross_coil import Bcoil
 
 coil = {'a':{'I':8e6, 'r':5, 'z':5, 'rc':0.5},
         'b':{'I':8e6, 'r':5, 'z':0, 'rc':0.5}}

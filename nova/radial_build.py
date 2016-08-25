@@ -140,12 +140,12 @@ class RB(object):
     def firstwall(self,calc=True,color=[0.5,0.5,0.5],plot=True,debug=False):
         if calc:
             self.Rb,self.Zb = self.target_fill(debug=debug)
-            with open('../Data/'+self.dataname+'_FW.pkl', 'wb') as output:
+            with open('../../Data/'+self.dataname+'_FW.pkl', 'wb') as output:
                 pickle.dump(self.setup.targets,output,-1)
                 pickle.dump(self.Rb,output,-1)
                 pickle.dump(self.Zb,output,-1)
         else:
-            with open('../Data/'+self.dataname+'_FW.pkl', 'rb') as input:
+            with open('../../Data/'+self.dataname+'_FW.pkl', 'rb') as input:
                 self.setup.targets = pickle.load(input)
                 self.Rb = pickle.load(input)
                 self.Zb = pickle.load(input)

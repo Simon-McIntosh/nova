@@ -91,8 +91,9 @@ class PF(object):
                 ic = int(name.split('_')[0].split('Coil')[-1])
             except:
                 ic = 0  # plasma coils
-            coil_color = color[ic]   
-            pl.fill(Rfill,Zfill,facecolor=coil_color,alpha=0.75,
+            coil_color = color[ic] 
+            coil_color = color[8]
+            pl.fill(Rfill,Zfill,facecolor=coil_color,alpha=1,
                     edgecolor=edgecolor)
             if label: 
                 pl.text(r,z+zshift,name.replace('Coil',''),fontsize=fs*0.6,
@@ -409,10 +410,11 @@ class TF(object):
     def energy(self,plot=False,Jmax=7.2e7,Nseg=100,**kwargs):
         if 'nTF' in kwargs:
             self.nTF = kwargs['nTF']
+            self.amp_turns()
         if 'Iturn' in kwargs:
             self.Iturn = kwargs['Iturn']
         else:
-            self.amp_turns(self.nTF)
+            self.amp_turns()
 
         self.Acs = self.Iturn/Jmax
         R,Z = geom.rzSLine(self.Rmid,self.Zmid,Np=Nseg)  # re-space
@@ -436,5 +438,5 @@ class TF(object):
                 ax.plot(np.append(X[:,0],X[0,0]),np.append(X[:,1],X[0,1]),
                         np.append(X[:,2],X[0,2]))
         self.Ecage = 0.5*self.Iturn**2*self.nTF*np.sum(M)
-        print('E {:1.2f}'.format(1e-9*self.Ecage))
+        
 

@@ -32,37 +32,22 @@ pf = PF(sf.eqdsk)
 rb = RB(setup,sf)
 
 
-eq = EQ(sf,pf,sigma=0.2,boundary=rb.get_fw(expand=0.25),n=5e3)  
-
-#eq = EQ(sf,pf) 
+eq = EQ(sf,pf,sigma=0.2,boundary=rb.get_fw(expand=0.25),n=7.5e4)  
 eq.plotj(trim=True)
 pl.plot(sf.rbdry,sf.zbdry,color=0.75*np.ones(3),lw=1.5)
 
 
-for conf in ['SN','SXex']:  #
+for conf in ['SN','SXex']:  #  
     setup = Setup(conf)
     sf = SF(setup.filename)
-    tf = TF(setup=setup)
+    tf = TF(setup=setup,nTF=18)
     tf.fill()
     
     L = geom.length(tf.Rmid,tf.Zmid,norm=False)[-1]
     V = loop_vol(tf.Rmid,tf.Zmid)
     print('L {:1.2f}m, V {:1.0f}m3'.format(L,V))
-    
-    tf.energy(nTF)
-    tf.fill()
-    #pl.plot(tf.Rmid,tf.Zmid)
-    
-
-#rd,zd = Dcoil.pD(r1=4.486,r2=15.708,npoints=200)  # DEMO referance D-coil 
-#tf = TF(filename=setup.filename,R=rd,Z=zd)
-#tf.fill()
-#tf.energy(nTF) 
-#pl.plot(rd,zd)
-
 
 pl.axis('equal')
-
 
     
     

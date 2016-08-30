@@ -314,7 +314,7 @@ class RB(object):
                         self.sf.legs[leg]['Z'][i] = Z
                         if plot:
                             if color != 'k' and i > 0:
-                                pl.plot(R,Z,'-',color=color[c+3])
+                                pl.plot(R,Z,'-',color=0.7*np.ones(3))  # color[c+3]
                             elif color == 'k':
                                 pl.plot(R,Z,'-',color='k',alpha=0.15)
                             else:
@@ -679,7 +679,7 @@ class RB(object):
         VVinR,VVinZ = self.loop.R,self.loop.Z
         self.loop.fill(**kwargs)
         VVoutR,VVoutZ = self.loop.R,self.loop.Z
-        with open('../Data/'+self.setup.configuration+'_VV.txt','w') as f:
+        with open('../../Data/'+self.setup.configuration+'_VV.txt','w') as f:
             f.write('Rin m\t\tZin m\t\tRout m\t\tZout m\n')
             for rin,zin,rout,zout in zip(VVinR,VVinZ,VVoutR,VVoutZ):
                 f.write('{:1.6f}\t{:1.6f}\t{:1.6f}\t{:1.6f}\n'.format(\

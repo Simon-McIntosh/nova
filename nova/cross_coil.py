@@ -35,9 +35,7 @@ def green_feild_loop(loop,point,smooth=True,Nss=100,rc=0.25):  # 3D feild from a
     point = np.array(point)*np.ones((N,3))  # point array
     r = point-loop  # point-segment vectors
     r_mag = np.transpose(np.sum(r*r,axis=1)**0.5*np.ones((3,N)))
-    
     core = 1-np.exp(-r_mag**3/rc**3)  # magnet core
-
     feild = np.sum(core*np.cross(dL,r)/r_mag**3,axis=0)/(4*np.pi)  # Bfeild 
     return feild
     

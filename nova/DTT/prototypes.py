@@ -3,12 +3,14 @@ import numpy as np
 from matplotlib import gridspec
 import matplotlib
 from itertools import cycle
-from eqConfig import Config
-from radial_build import RB
-from streamfunction import SF
-import pickle
+from nova.config import Setup
+from nova.streamfunction import SF
+from nova.radial_build import RB
+from nova.elliptic import EQ
+from nova.coils import PF,TF,loop_vol
+
 import seaborn as sns
-rc = {'figure.figsize':[4*3.14,4*3.14*3.25/10.5],'savefig.dpi':200, #*12/16
+rc = {'figure.figsize':[4*3.14,4*3.14*3.25/10.5],'savefig.dpi':150, #*12/16
       'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
       'lines.linewidth':0.75}
 sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
@@ -24,7 +26,7 @@ pl.axis('off')
 fig = pl.figure(1)
 fs = matplotlib.rcParams['legend.fontsize']
 nr,nc = 1,5
-gs = gridspec.GridSpec(nr,nc,wspace=0,hspace=0)
+gs = gridspec.GridSpec(nr,nc,wspace=0.075,hspace=0)
 ax = [[] for i in range(nr)]
 for i in range(nr):
     for j in range(nc):
@@ -37,12 +39,34 @@ for i in range(nr):
         
         ax[i][j].axis('off')
 
+
 title = ['SN','X','SF','SX','SXex']
-for j,config in enumerate(['SN','X','SFm','SX8','SXex']):
+for j,config in enumerate(['SN','X','SFm','SX','SXex']):
     print(config)
     pl.sca(ax[0][j])
     pl.title(title[j])
     Color = cycle(sns.color_palette('Set2'))
+
+    setup = Setup(config)
+    sf = SF(setup.filename)
+    rb = RB(setup,sf)
+    pf = PF(sf.eqdsk)
+    #eq = EQ(sf,pf,sigma=0.1,boundary=rb.get_fw(expand=0.25),n=5e4)  
+    eq = EQ(sf,pf,sigma=0.1,limit=[5,14,-8,6],n=5e3)
+    sf.contour(lw=0.5)
+
+    pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
+    rb.firstwall(calc=False,plot=True,debug=False)
+    '''
+    rb.vessel()
+    rb.trim_sol(plot=True)  # ,color=0.3*np.ones(3)
+    #shape = sf.shape_parameters()
+    tf = TF(setup=setup)
+    tf.fill()
+    '''
+
+'''
+    
     conf = Config(config)
     sf = SF(conf)
     
@@ -81,3 +105,4 @@ for j,config in enumerate(['SN','X','SFm','SX8','SXex']):
              cellColours=cell_colours.decode())
 
 pl.savefig('../Figs/prototypes_radial_build_numbers.png')
+'''

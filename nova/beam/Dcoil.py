@@ -1,9 +1,8 @@
 import pylab as pl
 import numpy as np
-from scipy.special import iv as besl  #iv
+from scipy.special import iv as besl  
 from scipy.interpolate import interp1d
 from amigo import geom
-
 
 import seaborn as sns
 rc = {'figure.figsize':[4,4*8/16],'savefig.dpi':120, # 

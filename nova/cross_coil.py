@@ -26,7 +26,7 @@ def green_feild(R,Z,Rc,Zc):
     feild[1] = Rc/(4*np.pi)*((Rc+R*A/B)*I2-R/B*I1)
     return feild
     
-def green_feild_loop(loop,point,smooth=True,Nss=100,rc=0.25):  # 3D feild from arbitrary loop
+def green_feild_loop(loop,point,smooth=False,Nss=100,rc=0.25):  # 3D feild from arbitrary loop
     if np.sum((loop[0,:]-loop[-1,:])**2) != 0:  # close loop
         loop = np.append(loop, np.reshape(loop[0,:],(1,3)),axis=0)  
     dL = cut_corners(loop,smooth=smooth,Nss=Nss)

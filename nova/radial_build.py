@@ -11,17 +11,17 @@ import amigo.geom as geom
 
 class RB(object):
     
-    def __init__(self,setup,sf,Np=500):
+    def __init__(self,setup,sf,npoints=500):
         self.setup = setup
         self.sf = sf
-        self.Np = Np
+        self.npoints = npoints
         self.dataname = setup.configuration+'_dev'
 
         if not hasattr (sf,'Xpoint'):
             sf.get_Xpsi()  
         self.xo = [sf.Xpoint[0],self.sf.eqdsk['zmagx']]
         r,z = sf.get_boundary()
-        sf.set_boundary(r,z,n=Np)
+        sf.set_boundary(r,z,n=npoints)
         self.Rp,self.Zp = self.sf.rbdry,self.sf.zbdry
         self.loop = Loop(self.Rp,self.Zp,self.xo)  # plasma boundary
         self.Lp = geom.length(self.Rp,self.Zp,norm=False)[-1]
@@ -125,7 +125,7 @@ class RB(object):
             z,dz = self.sf.coil[name]['z'],self.sf.coil[name]['dz']
             r = [r-dr/2,r-dr/2,r+dr/2,r+dr/2,r-dr/2]
             z = [z-dz/2,z+dz/2,z+dz/2,z-dz/2,z-dz/2]
-            self.loop.R,self.loop.Z = self.rzInterp(r,z,Np=100)
+            self.loop.R,self.loop.Z = self.rzInterp(r,z,npoints=100)
             self.loop.R,self.loop.Z = self.loop.R[::-1],self.loop.Z[::-1]
             self.loop.fill(dt=dt,loop=True,alpha=0.1,color='k',s=5e-3)
         self.rzGet()
@@ -330,7 +330,7 @@ class RB(object):
             i = np.argmin(np.abs(L/Lnorm-trim))
             Rt = np.append(Rt,Rb[::flip][:i][::-flip])
             Zt = np.append(Zt,Zb[::flip][:i][::-flip])
-        Rt,Zt = geom.rzSLine(Rt,Zt,Np=self.Np)
+        Rt,Zt = geom.rzSLine(Rt,Zt,npoints=self.npoints)
         return Rt,Zt
 
     def midplane_loop(self,Rb,Zb):
@@ -536,9 +536,9 @@ class RB(object):
         
     def FWfill(self,**kwargs):
         self.loop.R,self.loop.Z = geom.rzSLine(self.Rb[::-1],self.Zb[::-1],
-                                     Np=self.Np,Hres=False)
+                                     npoints=self.npoints,Hres=False)
         self.loop.fill(loop=True,alpha=0.7,**kwargs)
-        self.loop.R,self.loop.Z = geom.rzSLine(self.loop.R,self.loop.Z,Np=self.Np)
+        self.loop.R,self.loop.Z = geom.rzSLine(self.loop.R,self.loop.Z,npoints=self.npoints)
         self.loop.R,self.loop.Z = self.trim_contour(self.loop.R[::-1],self.loop.Z[::-1]) # update 
 
     def BBsheild_fill(self,**kwargs):
@@ -623,7 +623,7 @@ class RB(object):
                     Zleg.append(sp['Zleg'][i])
         rp,zp = np.append(rp,Rleg[::-1]),np.append(zp,Zleg[::-1])
         rp,zp = np.append(rp,rVV[:ni]),np.append(zp,zVV[:ni])
-        rs,zs = geom.rzSLine(rp,zp,Np=260,s=5e-6)
+        rs,zs = geom.rzSLine(rp,zp,npoints=260,s=5e-6)
         R,Z = np.append(rVV[ni+1:-ni],rs),np.append(zVV[ni+1:-ni],zs)
         R,Z = np.append(R,R[0]),np.append(Z,Z[0])
         self.loop.R,self.loop.Z = geom.rzSLine(R,Z,len(R),s=5e-4)

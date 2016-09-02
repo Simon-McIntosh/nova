@@ -6,13 +6,11 @@ from scipy.interpolate import RectBivariateSpline as RBS
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 from scipy.interpolate import interp1d as interp1
 import seaborn as sns
-from nova.radial_build import RB
 import scipy.optimize as op
 from itertools import cycle
 import copy
 import time
 import multiprocessing
-#from nova.config import Setup
 
 mu_o = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
 

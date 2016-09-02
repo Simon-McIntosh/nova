@@ -13,30 +13,29 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 
 setup = Setup('SN')
-
 sf = SF(setup.filename)
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
 
-
-
-
 #eq = EQ(sf,pf,sigma=0.1,boundary=rb.get_fw(expand=0.25),n=2e3)  
-
 #eq.plotj()
-
 #pf.plot(coils=eq.coil,label=False,plasma=False) 
 
 sf.contour()
-
-
 pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
 rb.firstwall(calc=False,plot=True,debug=False)
+
 rb.vessel()
 
 #rb.trim_sol(plot=True)
 
-shape = sf.shape_parameters()
+#sp = sf.shape_parameters()
+#print(sp)
 
-tf = TF(setup,fit=True,loop=rb.loop,pf=pf)
-#print(shape)
+tf = TF(shape={'vessel':rb.loop,'pf':pf,'fit':True,'setup':setup,
+               'plot':False})  
+tf.fill()
+
+
+
+

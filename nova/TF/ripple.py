@@ -17,11 +17,9 @@ sns.set(context='poster',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 color = sns.color_palette('Set2')
 
-
 mu_o = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
 
 class ripple(object):
-    
     def __init__(self,plasma={},coil={}):
         self.get_seperatrix(alpha=0.95,**plasma)
         self.get_coil(**coil)
@@ -43,27 +41,32 @@ class ripple(object):
             errtxt += '3) seperatrix profile, {\'r\':[],\'z\':[]}'
             raise ValueError(errtxt)
         (self.plasma_loop[:,0],self.plasma_loop[:,2]) = \
-        geom.rzSLine(r,z,Np=nsep)
+        geom.rzSLine(r,z,npoints=nsep)
         
     def get_boundary(filename,alpha=0.95):
         sf = SF(filename)
         r,z = sf.get_boundary(alpha=alpha)
         return r,z
-        
+     
+
     def get_coil(self,npoints=100,**kwargs):
         self.coil_loop = np.zeros((npoints,3))
-        if 'setup' in kwargs:
-            tf = TF(setup=kwargs.get('setup'))
+
+        tf = TF(shape=kwargs)  # load tf coil
+        self.coil_loop[:,0],self.coil_loop[:,2] = \
+        geom.rzSLine(tf.Rcl,tf.Zcl,npoints=npoints)  # TFcoil centerline
+        
+        '''
             r,z = tf.Rmid,tf.Zmid
             self.nTF = tf.nTF
             self.Iturn = tf.Iturn
-        else:
-            
-
-        (self.coil_loop[:,0],self.coil_loop[:,2]) = \
-        geom.rzSLine(r,z,Np=npoints)  # TFcoil (r,z)
+        elif 'config' in kwargs:
+            tf = TF(shape={'dataname':kwargs.get('dataname')})
+            print('loaded dataname')
+        '''
+        #
         
-        
+   
     def plot_loops(self):
         pl.plot(self.plasma_loop[:,0],self.plasma_loop[:,2])
         pl.plot(self.coil_loop[:,0],self.coil_loop[:,2])
@@ -80,7 +83,7 @@ class ripple(object):
         ripple = (B[0]-B[1])/(B[1]+B[0])
         return ripple
 
-rip = ripple(plasma={'config':'SN'})  
+rip = ripple(plasma={'config':'SN'},coil={'config':'tmp','coil_type':'S'})  
 rip.plot_loops()
 '''
 # prepare coil loop

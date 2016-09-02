@@ -11,7 +11,8 @@ from amigo.geom import Loop
 import amigo.geom as geom
 import nova.geqdsk
 from nova.inductance import neumann
-from nova.TF.TFloop import Acoil,Dcoil,Scoil
+from nova.TF.TFcoil import Acoil,Dcoil,Scoil
+import time
 
 def loop_vol(R,Z,plot=False):
     imin,imax = np.argmin(Z),np.argmax(Z)
@@ -209,9 +210,12 @@ class TF(object):
         self.width()
         self.generate()
         self.nTF = nTF
-        self.amp_turns()  # calculate amp turns with eqdsk filename
+        self.amp_turns()  # calculate amp turns (only with eqdsk filename)
         
     def setargs(self,shape):  # set input data based on shape contents
+        fit = shape.get('fit',True)  # fit coil if parameters avalible
+        self.coil_type = shape.get('coil_type','unset')    
+        self.config = shape.get('config','tmp')
         if 'setup' in shape:
             self.setup = shape['setup']
             self.dataname = self.setup.dataname
@@ -220,7 +224,6 @@ class TF(object):
             for name in ['dataname','filename']:
                 if name in shape:
                     setattr(self,name,shape.get(name))
-        fit = shape.get('fit',True)  # fit coil if parameters avalible
         if 'R' in shape and 'Z' in shape:  # define coil by R,Z arrays
             self.datatype = 'array'
             self.Rmid,self.Zmid = shape['R'],shape['Z']
@@ -231,13 +234,31 @@ class TF(object):
             if 'plot' in shape:
                 if shape['plot']:
                     self.plot_bounds() 
-        else:
+        elif 'config' in shape and 'coil_type' in shape:
             self.datatype = 'file'  # load coil from file
-            
+        else:
+            errtxt = '\n'
+            errtxt += 'unable to load TF coil\n'
+            raise ValueError(errtxt)
+     
+    def load_coil(self):
+        if self.coil_type == 'A':  # tripple arc (5-7 parameter)
+            self.coil = Acoil()
+        elif self.coil_type == 'D':  # princton D (3 parameter)
+            self.coil = Dcoil()
+        elif self.coil_type == 'S':  # polybezier (8-15 parameter)
+            self.coil = Scoil(symetric=False,nl=8)
+        else:
+            errtxt = '\n'
+            errtxt += 'coil type \''+self.coil_type+'\'\n'
+            errtxt += 'select from [A,D,S]\n'
+            raise ValueError(errtxt)
+         
     def set_bound(self,shape):
         if 'pf' in shape and 'vessel' in shape:  # requre vessel,pf
             pf = shape['pf']
-            incoil = shape['vessel']
+            vv = shape['vessel']
+            Rvv,Zvv = geom.rzSLine(vv.R,vv.Z,npoints=30)
         else:
             errtxt = '\n'
             errtxt += 'Require following input,'
@@ -246,47 +267,56 @@ class TF(object):
         Rin,Zin = pf.coil_corners(self.setup.coils['internal'])  # internal    
         Rex,Zex = pf.coil_corners(self.setup.coils['external'])  # external 
         ro_min = 4.35  # minimum TF radius
-        internal = {'R':np.append(incoil.R,Rin),'Z':np.append(incoil.Z,Zin)}
+        internal = {'R':np.append(Rvv,Rin),'Z':np.append(Zvv,Zin)}
         external = {'R':Rex,'Z':Zex}
         self.bound = {'in':internal,'out':external,'ro_min':ro_min}
+        
+    def get_oppvar(self):
+        xo,bounds = [],[]
+        for var in self.coil.oppvar:
+            xo.append(self.coil.xo[var]['value'])
+            bounds.append((self.coil.xo[var]['lb'],
+                           self.coil.xo[var]['ub'])) 
+        return xo,bounds
 
     def generate(self):
-        if self.datatype == 'fit': 
-            self.coil = Scoil(symetric=True)
-
-            xo,bounds = [],[]
-            #self.coil.oppvar = list(self.coil.oppvar).remove('l')
-            for var in self.coil.oppvar:
-                xo.append(self.coil.xo[var]['value'])
-                bounds.append((self.coil.xo[var]['lb'],
-                               self.coil.xo[var]['ub']))
-                               
-            print(self.coil.oppvar)
-
-            constraints = {'type':'ineq','fun':self.dot}
-            xo = op.minimize(self.fit,xo,bounds=bounds,
-                                     options={'disp':True,'maxiter':500},
-                                     method='SLSQP',constraints=constraints,
-                                     tol=1e-2).x  # tol=1e-3
-            self.coil.set_input(xo=xo)
-            print(xo)
-            #with open('../../Data/'+self.dataname+'_TF.pkl', 'wb') as output:
-            #    pickle.dump(self.xCoil,output,-1)
-        elif self.datatype == 'file':
-            with open('../../Data/'+self.dataname+'_TF.pkl', 'rb') as input:
-                self.xCoil = pickle.load(input)
-      
         if self.datatype == 'array':  # from input array
-            self.Rmid = np.append(self.Rmid,self.Rmid[0])  # close loop
-            self.Zmid = np.append(self.Zmid,self.Zmid[0])
             self.Rmid,self.Zmid = geom.rzSLine(self.Rmid,self.Zmid,
                                                npoints=self.npoints)
             self.Rin,self.Zin = geom.offset(self.Rmid,self.Zmid,
                                             -0.5*(self.dRcoil+2*self.dRsteel))
-        else:  # tripple arc from xCoil
+        else:
+            self.load_coil()  # load coil object
+            if self.datatype == 'fit': 
+                tic = time.time()
+                xo,bounds = self.get_oppvar()
+                constraints = {'type':'ineq','fun':self.dot}
+                xo = op.minimize(self.fit,xo,bounds=bounds,
+                                 options={'disp':True,'maxiter':500},
+                                 method='SLSQP',constraints=constraints,
+                                 tol=1e-2).x
+                self.coil.set_input(xo=xo)
+                print('optimisation time {:1.1f}s'.format(time.time()-tic))
+                print('noppvar {:1.0f}'.format(len(self.coil.oppvar)))
+                dataname = '../../Data/'+self.config+'_'+\
+                self.coil_type+'TF.pkl'
+                with open(dataname, 'wb') as output:
+                    pickle.dump(self.coil.xo,output,-1)
+                    pickle.dump(self.coil.oppvar,output,-1)
+            elif self.datatype == 'file':
+                dataname = '../../Data/'+self.config+'_'+\
+                self.coil_type+'TF.pkl'
+                try:
+                    with open(dataname, 'rb') as input:
+                        self.coil.xo = pickle.load(input)
+                        self.coil.oppvar = pickle.load(input)
+                except:
+                    errtxt = '\n'
+                    errtxt += 'file \''+dataname+'\' not found\n'
+                    errtxt += 'regenerate coil profile, fit=True\n'
+                    raise ValueError(errtxt)
             x = self.coil.draw()
             self.Rin,self.Zin = x['r'],x['z']
-            #self.fill(plot=False)
 
     def fit(self,xo):
         x = self.coil.draw(xo=xo)
@@ -303,8 +333,8 @@ class TF(object):
         return dsum
         
     def dot_diffrence(self,xo,side):
-        x = self.coil.draw(xo=xo)
-        Rloop,Zloop = x['r'],x['z']
+        x = self.coil.draw(xo=xo)  
+        Rloop,Zloop = x['r'],x['z']  # inside coil loop
         switch = 1 if side is 'in' else -1
         if side is 'out':
             Rloop,Zloop = geom.offset(Rloop,Zloop,self.dRcoil+2*self.dRsteel)

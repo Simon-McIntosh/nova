@@ -25,7 +25,10 @@ sf.contour()
 pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
 rb.firstwall(calc=False,plot=True,debug=False)
 
+import time
+tic = time.time()
 rb.vessel()
+print(time.time()-tic)
 
 #rb.trim_sol(plot=True)
 
@@ -33,9 +36,9 @@ rb.vessel()
 #print(sp)
 
 tf = TF(shape={'vessel':rb.loop,'pf':pf,'fit':True,'setup':setup,
-               'plot':False})  
+               'plot':True,'coil_type':'S'})  
 tf.fill()
 
-
+tf.coil.plot()
 
 

@@ -172,9 +172,9 @@ class Scoil(object):  # polybezier
         self.xo['z2'] = {'value':0,'lb':-0.3,'ub':0.3} # outer node vertical shift
         self.xo['height'] = {'value':17.367,'lb':0.1,'ub':50} # full coil height
         self.xo['top'] = {'value':0.33,'lb':0.1,'ub':0.6}  # horizontal shift
-        self.xo['upper'] = {'value':0.62,'lb':0.75,'ub':1}  # vertical shift
+        self.xo['upper'] = {'value':0.62,'lb':0.62,'ub':1}  # vertical shift
         self.set_lower()  # lower coil parameters (bottom,lower)
-        self.set_control_lengths({'value':0.8,'lb':0.75,'ub':1.5})  # 1/tesion
+        self.set_control_lengths({'value':0.8,'lb':0.2,'ub':1.5})  # 1/tesion
         self.xo['dz'] = {'value':0,'lb':-10,'ub':10}  # vertical offset
         self.oppvar = list(self.xo.keys())
         self.oppvar.remove('r1')
@@ -326,10 +326,10 @@ class Scoil(object):  # polybezier
         
     def plot(self,inputs={}):
         color = cycle(sns.color_palette('Set2',5))
-        #x = self.draw(inputs=inputs)
+        x = self.draw(inputs=inputs)
         r,z,theta = self.verticies()
         pl.plot(r,z,'s',color=next(color))
-        #pl.plot(x['r'],x['z'],color=next(color))
+        pl.plot(x['r'],x['z'],color=next(color))
         c1,c2 = next(color),next(color)
         for p in self.p:
             pl.plot([p['p0']['r'],p['p1']['r']],
@@ -343,8 +343,8 @@ if __name__ is '__main__':  # plot coil classes
     #coil = Acoil()
     #x = coil.plot()
     
-    coil = Scoil()
-    x = coil.plot({'top':0.33,'l':0.75})
+    coil = Dcoil()
+    x = coil.plot()
     '''
     coil = Dcoil()
     x = coil.draw()

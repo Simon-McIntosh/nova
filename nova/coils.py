@@ -1,7 +1,6 @@
 import numpy as np
 import pylab as pl
 import pickle
-from scipy.interpolate import interp1d as interp1
 import scipy.optimize as op
 from itertools import cycle,count
 import seaborn as sns
@@ -12,7 +11,9 @@ import amigo.geom as geom
 import nova.geqdsk
 from nova.inductance import neumann
 from nova.TF.TFcoil import Acoil,Dcoil,Scoil
+from nova.TF.ripple import ripple
 import time
+from nova.config import Setup
 
 def loop_vol(R,Z,plot=False):
     imin,imax = np.argmin(Z),np.argmax(Z)
@@ -208,16 +209,17 @@ class TF(object):
         self.objective = objective
         self.npoints = npoints
         self.width()
-        self.generate()
         self.nTF = nTF
         self.amp_turns()  # calculate amp turns (only with eqdsk filename)
+        self.generate()
+
         
     def setargs(self,shape):  # set input data based on shape contents
         fit = shape.get('fit',True)  # fit coil if parameters avalible
         self.coil_type = shape.get('coil_type','unset')    
         self.config = shape.get('config','tmp')
-        if 'setup' in shape:
-            self.setup = shape['setup']
+        if 'config' in shape:
+            self.setup = Setup(shape.get('config'))
             self.dataname = self.setup.dataname
             self.filename = self.setup.filename
         else:
@@ -226,7 +228,7 @@ class TF(object):
                     setattr(self,name,shape.get(name))
         if 'R' in shape and 'Z' in shape:  # define coil by R,Z arrays
             self.datatype = 'array'
-            self.Rmid,self.Zmid = shape['R'],shape['Z']
+            self.Rcl,self.Zcl = shape['R'],shape['Z']  # coil centreline
         elif 'vessel' in shape and 'pf' in shape and fit:
             self.datatype = 'fit'  # fit coil to internal incoil + pf coils
             self.set_bound(shape)  # TF boundary conditions
@@ -247,7 +249,7 @@ class TF(object):
         elif self.coil_type == 'D':  # princton D (3 parameter)
             self.coil = Dcoil()
         elif self.coil_type == 'S':  # polybezier (8-15 parameter)
-            self.coil = Scoil(symetric=False,nl=8)
+            self.coil = Scoil(symetric=True,nl=1)
         else:
             errtxt = '\n'
             errtxt += 'coil type \''+self.coil_type+'\'\n'
@@ -278,13 +280,26 @@ class TF(object):
             bounds.append((self.coil.xo[var]['lb'],
                            self.coil.xo[var]['ub'])) 
         return xo,bounds
-
+    
+    def get_coil_loops(self,R,Z,profile='cl'):
+        width = self.dRcoil+2*self.dRsteel
+        self.R,self.Z = geom.rzSLine(R,Z,npoints=self.npoints)
+        if profile == 'cl':
+            self.Rcl,self.Zcl =  R,Z
+            self.Rin,self.Zin = geom.offset(R,Z,-width/2)
+            #self.Rout,self.Zout = geom.offset(R,Z,width/2)
+        elif profile == 'in':
+            self.Rin,self.Zin =  R,Z
+            self.Rcl,self.Zcl = geom.offset(R,Z,width/2)
+            #self.Rout,self.Zout = geom.offset(R,Z,width)
+        elif profile == 'out':
+            #self.Rout,self.Zout =  R,Z
+            self.Rcl,self.Zcl = geom.offset(R,Z,-width/2)
+            self.Rin,self.Zin = geom.offset(R,Z,-width)
+        
     def generate(self):
         if self.datatype == 'array':  # from input array
-            self.Rmid,self.Zmid = geom.rzSLine(self.Rmid,self.Zmid,
-                                               npoints=self.npoints)
-            self.Rin,self.Zin = geom.offset(self.Rmid,self.Zmid,
-                                            -0.5*(self.dRcoil+2*self.dRsteel))
+            self.get_coil_loops(self.Rcl,self.Zcl,profile='cl')
         else:
             self.load_coil()  # load coil object
             if self.datatype == 'fit': 
@@ -295,7 +310,7 @@ class TF(object):
                                  options={'disp':True,'maxiter':500},
                                  method='SLSQP',constraints=constraints,
                                  tol=1e-2).x
-                self.coil.set_input(xo=xo)
+                self.coil.set_input(xo=xo)  # coil centerline
                 print('optimisation time {:1.1f}s'.format(time.time()-tic))
                 print('noppvar {:1.0f}'.format(len(self.coil.oppvar)))
                 dataname = '../../Data/'+self.config+'_'+\
@@ -315,8 +330,28 @@ class TF(object):
                     errtxt += 'file \''+dataname+'\' not found\n'
                     errtxt += 'regenerate coil profile, fit=True\n'
                     raise ValueError(errtxt)
+
             x = self.coil.draw()
-            self.Rin,self.Zin = x['r'],x['z']
+
+            self.get_coil_loops(x['r'],x['z'],profile='in')
+            print('nTF',self.nTF,'Iturn',self.Iturn)
+            coil = {'Rcl':self.Rcl,'Zcl':self.Zcl,
+                    'nTF':self.nTF,'Iturn':self.Iturn}
+            rp = ripple(plasma={'config':'SN'},coil=coil)
+            print('ripple',rp.get_ripple())
+            rp.plot_loops()
+            #self.fill()
+            '''
+            referance = Dcoil()
+            x = referance.draw()
+            referance.plot()
+            self.get_coil_loops(x['r'],x['z'],profile='in')
+            coil = {'Rcl':self.Rcl,'Zcl':self.Zcl,
+                    'nTF':self.nTF,'Iturn':self.Iturn}
+            rp = ripple(plasma={'config':'SN'},coil=coil)
+            print('ref ripple',rp.get_ripple())
+            '''
+            
 
     def fit(self,xo):
         x = self.coil.draw(xo=xo)
@@ -328,12 +363,20 @@ class TF(object):
         
     def dot(self,xo):
         dsum = 0
+        x = self.coil.draw(xo=xo) 
+        self.get_coil_loops(x['r'],x['z'],profile='in')
+        coil = {'Rcl':self.Rcl,'Zcl':self.Zcl,
+                'nTF':self.nTF,'Iturn':self.Iturn}
+        rp = ripple(plasma={'config':'SN'},coil=coil)
+        max_ripple = rp.get_ripple()
+        if max_ripple > 2.5:
+            dsum -= max_ripple-2.5
+            
         for side in ['in','out']:
-            dsum += self.dot_diffrence(xo,side) 
+            dsum += self.dot_diffrence(x,side) 
         return dsum
         
-    def dot_diffrence(self,xo,side):
-        x = self.coil.draw(xo=xo)  
+    def dot_diffrence(self,x,side):
         Rloop,Zloop = x['r'],x['z']  # inside coil loop
         switch = 1 if side is 'in' else -1
         if side is 'out':

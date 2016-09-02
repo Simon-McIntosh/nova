@@ -36,7 +36,7 @@ print(time.time()-tic)
 #print(sp)
 
 tf = TF(shape={'vessel':rb.loop,'pf':pf,'fit':True,'setup':setup,
-               'plot':True,'coil_type':'S'})  
+               'plot':True,'config':'SN','coil_type':'S'})  
 tf.fill()
 
 tf.coil.plot()

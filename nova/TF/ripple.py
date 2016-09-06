@@ -47,6 +47,9 @@ class ripple(object):
                                          self.plasma_loop[:,2])
         rfun,zfun = geom.rzfun(r,z)
         self.plasma_interp = {'r':rfun,'z':zfun}
+        
+        sf = SF(Setup(kwargs.get('config')).filename)
+        self.eqdsk = sf.eqdsk
       
     def get_boundary(filename,alpha=0.95):
         sf = SF(filename)
@@ -77,15 +80,31 @@ class ripple(object):
  
     def point_ripple(self,s):  # s==3D point vector
         B = np.zeros(2)
+        n = np.array([0,1,0])
         for j,theta in enumerate([0,np.pi/self.nTF]):  # rotate (inline, ingap)
             sr = np.dot(s,geom.rotate(theta))
+            nr = np.dot(n,geom.rotate(theta))
             Bo = np.zeros(3)
-            for tcoil in np.linspace(0,2*np.pi,self.nTF):
+            for tcoil in np.linspace(0,2*np.pi,self.nTF,endpoint=False):
                 coil_loop = np.dot(self.coil_loop,geom.rotate(tcoil))
                 Bo += cc.mu_o*self.Iturn*cc.green_feild_loop(coil_loop,sr)
             B[j] = norm(Bo)
+            B[j] = np.dot(nr,Bo)
         ripple = 1e2*(B[0]-B[1])/(B[1]+B[0])
         return ripple
+        
+    def point_feild(self,s):  # s==3D point vector
+        B = np.zeros(2)
+        n = np.array([0,1,0])
+        for j,theta in enumerate([0,np.pi/self.nTF]):  # rotate (inline, ingap)
+            sr = np.dot(s,geom.rotate(theta))
+            nr = np.dot(n,geom.rotate(theta))
+            Bo = np.zeros(3)
+            for tcoil in np.linspace(0,2*np.pi,self.nTF,endpoint=False):
+                coil_loop = np.dot(self.coil_loop,geom.rotate(tcoil))
+                Bo += cc.mu_o*self.Iturn*cc.green_feild_loop(coil_loop,sr)
+            B[j] = np.dot(nr,Bo)
+        return B
         
     def loop_ripple(self):
         self.ripple = np.zeros(self.nplasma)
@@ -106,6 +125,7 @@ class ripple(object):
         
     def plot_loops(self,scale=0.15):
         self.loop_ripple()
+        self.get_ripple()
         rpl,zpl = self.plasma_loop[:,0],self.plasma_loop[:,2]
         rr,zr = geom.offset(rpl,zpl,scale*self.ripple)
         for i in range(self.nplasma):  # ripple sticks
@@ -127,12 +147,26 @@ if __name__ is '__main__':
     
     import time
     tic = time.time()
-    rip.get_ripple()
+    print(rip.get_ripple())
     print('get_ripple',time.time()-tic)
     
     tic = time.time()
     rip.plot_loops()
     print('rip.plot_loops()',time.time()-tic)
 
+    print(rip.point_feild([rip.eqdsk['rcentr'],0,0]))
+    print(rip.eqdsk['bcentr'],rip.eqdsk['rcentr'])
 
+    fig = pl.figure()
+    ax = fig.gca(projection='3d')
+    
+    for j,theta in enumerate([0,np.pi/rip.nTF]):  # rotate (inline, ingap)
+        plr = np.dot(rip.plasma_loop,geom.rotate(theta))
+        ax.plot(plr[:,0],plr[:,1],plr[:,2])
+    
+    for tcoil in np.linspace(0,2*np.pi,rip.nTF,endpoint=False):
+        cl = np.dot(rip.coil_loop,geom.rotate(tcoil))
+        ax.plot(cl[:,0],cl[:,1],cl[:,2])
+
+    ax.auto_scale_xyz([-20,20],[-20,20],[-20,20])
 

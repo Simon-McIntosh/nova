@@ -9,6 +9,7 @@ import nova.geqdsk
 import seaborn as sns
 from matplotlib._cntr import Cntr as cntr
 from collections import OrderedDict
+from amigo import geom
 
 class SF(object):
     
@@ -141,7 +142,9 @@ class SF(object):
         if norm: L = L/L[-1]
         return L
         
-    def set_boundary(self,r,z,n=0): 
+    def set_boundary(self,r,z,n=5e2): 
+        self.rbdry,self.zbdry = geom.rzSLine(r,z,npoints=n)
+        '''
         L = self.length(r,z)
         if n==0:
             self.nbdry = 5e2
@@ -152,7 +155,7 @@ class SF(object):
         self.zbdry = spline(L,z,s=1e-3)(Lsp)
         #self.rbdry[0] = self.rbdry[-1]
         #self.zbdry[0] = self.zbdry[-1]
-         
+         '''
     def set_current(self,eqdsk):
         for key in ['cpasma']: 
             setattr(self,key,eqdsk[key])
@@ -350,9 +353,15 @@ class SF(object):
             Xpoint[:,i] = self.getX(xo=xo)
             Xpsi[i] = self.Pcoil(Xpoint[:,i])
         i = np.argmax(Xpsi)
+        i = 0  # force lower Xpoint
         self.Xpsi = Xpsi[i]
         self.Xpoint = Xpoint[:,i]
-        if i == 0: xo[1] *= -1  # re-flip
+        if i == 0: 
+            xo[1] *= -1  # re-flip
+        if self.Xpoint[1] < self.mo[1]:
+            self.Xloc = 'lower'
+        else:
+            self.Xloc = 'upper'
         return (self.Xpsi,self.Xpoint)
    
     def getM(self,mo=None):
@@ -376,14 +385,8 @@ class SF(object):
         
     def set_contour(self):
         psi_boundary = 1.1*(self.Xpsi-self.Mpsi)+self.Mpsi
-        try:
-            psi_bndry = np.pad(self.psi[:,1:-1],((0,0),(1,1)),
-                       mode='constant',constant_values=psi_boundary)
-        except:
-            psi_boundary = ((psi_boundary,psi_boundary),
-                            (psi_boundary,psi_boundary))
-            psi_bndry = np.pad(self.psi[:,1:-1],((0,0),(1,1)),
-                       mode='constant',constant_values=psi_boundary)
+        psi_bndry = np.pad(self.psi[1:-1,1:-1],(1,),
+                           mode='constant',constant_values=psi_boundary)
         self.cfeild = cntr(self.r2d,self.z2d,self.psi)
         self.cfeild_bndry = cntr(self.r2d,self.z2d,psi_bndry)
         
@@ -405,7 +408,11 @@ class SF(object):
         R,Z = np.array([]),np.array([])
         for line in psi_line:
             r,z = line[:,0],line[:,1]
-            index = z >= self.Xpoint[1]
+            
+            if self.Xloc == 'lower':  # lower Xpoint
+                index = z >= self.Xpoint[1]
+            elif self.Xloc == 'upper':  # upper Xpoint
+                index = z <= self.Xpoint[1]
             if sum(index) > 0:
                 r,z = r[index],z[index]
                 loop = np.sqrt((r[0]-r[-1])**2+(z[0]-z[-1])**2) < delta_loop

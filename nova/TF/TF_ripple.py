@@ -6,6 +6,7 @@ from nova.elliptic import EQ
 from nova.coils import PF,TF,loop_vol
 import amigo.geom as geom
 import numpy as np
+from nova.TF.ripple import ripple
 
 import seaborn as sns
 rc = {'figure.figsize':[10,10*12/16],'savefig.dpi':100, # 
@@ -26,25 +27,37 @@ tf.energy(nTF,Iturn=134*68e3)
 pl.plot(tf.Rmid,tf.Zmid)
 '''
 
-setup = Setup('SN')
-sf = SF(setup.filename)
-pf = PF(sf.eqdsk)
-rb = RB(setup,sf)
+#setup = Setup('SN')
+#sf = SF(setup.filename)
 
 
-eq = EQ(sf,pf,sigma=0.2,boundary=rb.get_fw(expand=0.25),n=7.5e4)  
-eq.plotj(trim=True)
-pl.plot(sf.rbdry,sf.zbdry,color=0.75*np.ones(3),lw=1.5)
+
+#eq = EQ(sf,pf,sigma=0.2,boundary=rb.get_fw(expand=0.25),n=7.5e4)  
+#eq.plotj(trim=True)
+#pl.plot(sf.rbdry,sf.zbdry,color=0.75*np.ones(3),lw=1.5)
 
 
-for conf in ['SN','SXex']:  #  
+for conf in ['SN','X','SFm','SX','SXex']:  # 
+    print(conf) 
     setup = Setup(conf)
     sf = SF(setup.filename)
-    tf = TF(setup=setup,nTF=18)
+    pf = PF(sf.eqdsk)
+    rb = RB(setup,sf)
+    rb.firstwall(calc=False,plot=True,debug=False)
+    rb.vessel()
+    pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
+    tf = TF(nTF=18,shape={'vessel':rb.loop,'pf':pf,'fit':False,'setup':setup,
+               'plot':True,'config':conf,'coil_type':'A'})
     tf.fill()
     
-    L = geom.length(tf.Rmid,tf.Zmid,norm=False)[-1]
-    V = loop_vol(tf.Rmid,tf.Zmid)
+    pl.plot(tf.Rcl,tf.Zcl)
+    coil = {'Rcl':tf.Rcl,'Zcl':tf.Zcl,
+            'nTF':tf.nTF,'Iturn':1}
+    rp = ripple(plasma={'config':'SN'},coil=coil)
+    rp.plot_loops()
+    print(conf,'ripple',rp.get_ripple())
+    L = geom.length(tf.Rcl,tf.Zcl,norm=False)[-1]
+    V = loop_vol(tf.Rcl,tf.Zcl)
     print('L {:1.2f}m, V {:1.0f}m3'.format(L,V))
 
 pl.axis('equal')

@@ -30,6 +30,14 @@ def close_loop(x,npoints):
         x[var] = np.append(x[var],x[var][0])
     x['r'],x['z'] = geom.rzSLine(x['r'],x['z'],npoints=npoints)
     return x
+    
+def set_limit(xo):
+    if xo['value'] < xo['lb']:
+        xo['value'] = xo['lb']
+    if xo['value'] > xo['ub']:
+        xo['value'] = xo['ub']
+    return xo
+                    
 
 class Acoil(object):  # tripple arc coil
     def  __init__(self,npoints=200):
@@ -50,6 +58,7 @@ class Acoil(object):  # tripple arc coil
         self.oppvar = list(self.xo.keys())
         for rmvar in ['a1','a2']:  # remove arc angles from oppvar
             self.oppvar.remove(rmvar)
+        self.oppvar.remove('ro')
            
     def set_input(self,**kwargs): 
         inputs = get_input(self.oppvar,**kwargs)     
@@ -60,6 +69,7 @@ class Acoil(object):  # tripple arc coil
                         self.xo[key][k] = inputs[key][k]
                 except:  # single value
                     self.xo[key]['value'] = inputs[key]
+                self.xo[key] = set_limit(self.xo[key])
             
     def get_xo(self):
         values = []
@@ -122,6 +132,7 @@ class Dcoil(object):  # Princton D
                         self.xo[key][k] = inputs[key][k]
                 except:  # single value
                     self.xo[key]['value'] = inputs[key]
+                self.xo[key] = set_limit(self.xo[key])
             
     def get_xo(self):
         values = []
@@ -171,10 +182,10 @@ class Scoil(object):  # polybezier
         self.xo['r2'] = {'value':15.708,'lb':10,'ub':25}  # outer radius 
         self.xo['z2'] = {'value':0,'lb':-0.3,'ub':0.3} # outer node vertical shift
         self.xo['height'] = {'value':17.367,'lb':0.1,'ub':50} # full coil height
-        self.xo['top'] = {'value':0.33,'lb':0.1,'ub':0.6}  # horizontal shift
-        self.xo['upper'] = {'value':0.62,'lb':0.62,'ub':1}  # vertical shift
+        self.xo['top'] = {'value':0.33,'lb':0,'ub':1}  # horizontal shift
+        self.xo['upper'] = {'value':0.62,'lb':0.55,'ub':1}  # vertical shift
         self.set_lower()  # lower coil parameters (bottom,lower)
-        self.set_control_lengths({'value':0.8,'lb':0.2,'ub':1.5})  # 1/tesion
+        self.set_control_lengths({'value':0.8,'lb':0.6,'ub':1.5})  # 1/tesion
         self.xo['dz'] = {'value':0,'lb':-10,'ub':10}  # vertical offset
         self.oppvar = list(self.xo.keys())
         self.oppvar.remove('r1')
@@ -269,9 +280,11 @@ class Scoil(object):  # polybezier
                         self.xo[key][k] = inputs[key][k]
                 except:  # single value
                     self.xo[key]['value'] = inputs[key]
+                self.xo[key] = set_limit(self.xo[key])
         for u,l in zip(['top','upper'],['bottom','lower']):
             if u in inputs and l not in inputs:
                 self.xo[l] = self.xo[u]  # set lower equal to upper
+            
   
     def verticies(self):
         r1,r2,z2,height,top,bottom,upper,lower,dz = self.get_xo()
@@ -343,8 +356,8 @@ if __name__ is '__main__':  # plot coil classes
     #coil = Acoil()
     #x = coil.plot()
     
-    coil = Dcoil()
-    x = coil.plot()
+    coil = Scoil()
+    x = coil.plot({'l1s':1.5,'top':0.8})
     '''
     coil = Dcoil()
     x = coil.draw()

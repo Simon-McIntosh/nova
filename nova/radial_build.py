@@ -15,7 +15,7 @@ class RB(object):
         self.setup = setup
         self.sf = sf
         self.npoints = npoints
-        self.dataname = setup.configuration+'_dev'
+        self.dataname = setup.configuration
 
         if not hasattr (sf,'Xpoint'):
             sf.get_Xpsi()  
@@ -176,7 +176,7 @@ class RB(object):
             select = np.argmin(gap)
             line = psi_line[select]
             r,z = line[:,0],line[:,1]
-        index = np.zeros(2)
+        index = np.zeros(2,dtype=int)
         index[0] = np.argmin((self.setup.targets[target_pair[0]]['R'][ends[0]]-r)**2+
                  (self.setup.targets[target_pair[0]]['Z'][ends[0]]-z)**2)
         index[1] = np.argmin((self.setup.targets[target_pair[1]]['R'][ends[1]]-r)**2+
@@ -358,7 +358,7 @@ class RB(object):
                 f.write('{:1.4f}\t{:1.4f}\n'.format(Bp,Bphi))
         
     def write_boundary(self,Rb,Zb):
-        with open('../Data/'+self.dataname+'_bdry.txt','w') as f:
+        with open('../../Data/'+self.dataname+'_bdry.txt','w') as f:
             f.write(self.sf.filename.split('/')[-1]+'\n')
             f.write('boundary placed {:1.0f}'\
             .format(1e3*self.setup.firstwall['dRfw']))
@@ -477,7 +477,7 @@ class RB(object):
                                      target=True)  # constant graze 
             Ninterp = int(dPlate/(2*dL))
             if Ninterp < 2: Ninterp = 2
-            R,Z = self.rzInterp(R,Z,Ninterp)
+            R,Z = geom.rzInterp(R,Z,Ninterp)
             graze = self.sf.get_graze([R[-1],Z[-1]],
                                       [R[-1]-R[-2],Z[-1]-Z[-2]])  # update graze
             N = np.int(L/dL+1)

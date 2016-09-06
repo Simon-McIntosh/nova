@@ -77,7 +77,7 @@ class Setup(object):
             self.firstwall['trim'] = [0.75,0.7]  # trim fraction (in/out)
             self.build['sheild_connect'] = [0.22,1]
             self.TF['opp'] = 'L'
-            self.coils['external']['id'] = list(range(0,10)) 
+            self.coils['external']['id'] = list(range(0,16)) 
             
         if configuration == 'SX':
             self.dataname = 'SX8'

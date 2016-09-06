@@ -220,6 +220,8 @@ class TF(object):
         self.config = shape.get('config','tmp')
         if 'config' in shape:
             self.setup = Setup(shape.get('config'))
+            self.setup.coils['external']['id']=[]
+
             self.dataname = self.setup.dataname
             self.filename = self.setup.filename
         else:
@@ -249,7 +251,7 @@ class TF(object):
         elif self.coil_type == 'D':  # princton D (3 parameter)
             self.coil = Dcoil()
         elif self.coil_type == 'S':  # polybezier (8-15 parameter)
-            self.coil = Scoil(symetric=True,nl=1)
+            self.coil = Scoil(symetric=False,nl=8)
         else:
             errtxt = '\n'
             errtxt += 'coil type \''+self.coil_type+'\'\n'
@@ -287,13 +289,13 @@ class TF(object):
         if profile == 'cl':
             self.Rcl,self.Zcl =  R,Z
             self.Rin,self.Zin = geom.offset(R,Z,-width/2)
-            #self.Rout,self.Zout = geom.offset(R,Z,width/2)
+            self.Rout,self.Zout = geom.offset(R,Z,width/2)
         elif profile == 'in':
             self.Rin,self.Zin =  R,Z
             self.Rcl,self.Zcl = geom.offset(R,Z,width/2)
-            #self.Rout,self.Zout = geom.offset(R,Z,width)
+            self.Rout,self.Zout = geom.offset(R,Z,width)
         elif profile == 'out':
-            #self.Rout,self.Zout =  R,Z
+            self.Rout,self.Zout =  R,Z
             self.Rcl,self.Zcl = geom.offset(R,Z,-width/2)
             self.Rin,self.Zin = geom.offset(R,Z,-width)
         
@@ -306,10 +308,17 @@ class TF(object):
                 tic = time.time()
                 xo,bounds = self.get_oppvar()
                 constraints = {'type':'ineq','fun':self.dot}
+                xo = op.minimize(self.fit,xo,  #,bounds=bounds
+                                 options={'disp':True,'maxiter':500},
+                                 method='COBYLA',constraints=constraints,
+                                 tol=1e-4).x
+                '''
+                print('optimisation time {:1.1f}s'.format(time.time()-tic))
                 xo = op.minimize(self.fit,xo,bounds=bounds,
                                  options={'disp':True,'maxiter':500},
                                  method='SLSQP',constraints=constraints,
                                  tol=1e-2).x
+                '''
                 self.coil.set_input(xo=xo)  # coil centerline
                 print('optimisation time {:1.1f}s'.format(time.time()-tic))
                 print('noppvar {:1.0f}'.format(len(self.coil.oppvar)))
@@ -330,18 +339,19 @@ class TF(object):
                     errtxt += 'file \''+dataname+'\' not found\n'
                     errtxt += 'regenerate coil profile, fit=True\n'
                     raise ValueError(errtxt)
-
+            
             x = self.coil.draw()
-
             self.get_coil_loops(x['r'],x['z'],profile='in')
+            
+            '''
             print('nTF',self.nTF,'Iturn',self.Iturn)
             coil = {'Rcl':self.Rcl,'Zcl':self.Zcl,
                     'nTF':self.nTF,'Iturn':self.Iturn}
             rp = ripple(plasma={'config':'SN'},coil=coil)
             print('ripple',rp.get_ripple())
-            rp.plot_loops()
+            #rp.plot_loops()
             #self.fill()
-            '''
+            
             referance = Dcoil()
             x = referance.draw()
             referance.plot()
@@ -364,14 +374,15 @@ class TF(object):
     def dot(self,xo):
         dsum = 0
         x = self.coil.draw(xo=xo) 
+        
         self.get_coil_loops(x['r'],x['z'],profile='in')
         coil = {'Rcl':self.Rcl,'Zcl':self.Zcl,
                 'nTF':self.nTF,'Iturn':self.Iturn}
-        rp = ripple(plasma={'config':'SN'},coil=coil)
+        rp = ripple(plasma={'config':self.config},coil=coil)
         max_ripple = rp.get_ripple()
-        if max_ripple > 2.5:
-            dsum -= max_ripple-2.5
-            
+        if max_ripple > 0.6:
+            dsum -= max_ripple-0.6
+        
         for side in ['in','out']:
             dsum += self.dot_diffrence(x,side) 
         return dsum
@@ -465,7 +476,7 @@ class TF(object):
             self.amp_turns()
 
         self.Acs = self.Iturn/Jmax
-        R,Z = geom.rzSLine(self.Rmid,self.Zmid,npoints=Nseg)  # re-space
+        R,Z = geom.rzSLine(self.Rcl,self.Zcl,npoints=Nseg)  # re-space
         Xo = np.zeros((Nseg,3))
         Xo[:,0],Xo[:,2] = R,Z
         theta = np.linspace(0,2*np.pi,self.nTF,endpoint=False)

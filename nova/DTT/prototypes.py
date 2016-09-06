@@ -8,9 +8,11 @@ from nova.streamfunction import SF
 from nova.radial_build import RB
 from nova.elliptic import EQ
 from nova.coils import PF,TF,loop_vol
+from nova.TF.ripple import ripple
+from amigo import geom
 
 import seaborn as sns
-rc = {'figure.figsize':[4*3.14,4*3.14*3.25/10.5],'savefig.dpi':150, #*12/16
+rc = {'figure.figsize':[8,2],'savefig.dpi':200, #*12/16
       'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
       'lines.linewidth':0.75}
 sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
@@ -25,7 +27,7 @@ pl.axis('off')
 #LS = [50,100,130]
 fig = pl.figure(1)
 fs = matplotlib.rcParams['legend.fontsize']
-nr,nc = 1,5
+nr,nc = 1,6
 gs = gridspec.GridSpec(nr,nc,wspace=0.075,hspace=0)
 ax = [[] for i in range(nr)]
 for i in range(nr):
@@ -33,15 +35,16 @@ for i in range(nr):
         ax[i].append(pl.subplot(gs[i,j]))
         ax[i][j].set_xticks([])
         ax[i][j].set_yticks([])
-        #ax[i][j].axis('equal')
-        ax[i][j].set_xlim([2.6000000000000001, 17.699999999999999])
-        ax[i][j].set_ylim([-14.292150967273809, 9.0768966517738079])
+        ax[i][j].axis('equal')
+        #ax[i][j].set_xlim([2.6000000000000001, 17.699999999999999])
+        #ax[i][j].set_ylim([-14.292150967273809, 9.0768966517738079])
         
         ax[i][j].axis('off')
 
 
-title = ['SN','X','SF','SX','SXex']
-for j,config in enumerate(['SN','X','SFm','SX','SXex']):
+title = ['SN','X','SF-','SF+','SX','SXex']
+for j,config in enumerate(['SN','X','SFm','SFp','SX','SXex']):
+    print('')
     print(config)
     pl.sca(ax[0][j])
     pl.title(title[j])
@@ -51,12 +54,31 @@ for j,config in enumerate(['SN','X','SFm','SX','SXex']):
     sf = SF(setup.filename)
     rb = RB(setup,sf)
     pf = PF(sf.eqdsk)
-    #eq = EQ(sf,pf,sigma=0.1,boundary=rb.get_fw(expand=0.25),n=5e4)  
-    eq = EQ(sf,pf,sigma=0.1,limit=[5,14,-8,6],n=5e3)
-    sf.contour(lw=0.5)
+    eq = EQ(sf,pf,sigma=0.1,boundary=rb.get_fw(expand=0.25),n=5e4)  
+    #eq = EQ(sf,pf,sigma=0.1,boundary=rb.get_fw(expand=0.25),n=5e3)
+    sf.contour(Nlevel=21,lw=0.5)
+    
+    pl.plot([14,14],[-14.5,9.5],'o',alpha=0)
 
-    pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
+    pf.plot(coils=pf.coil,label=False,plasma=False,current=False) 
     rb.firstwall(calc=False,plot=True,debug=False)
+    
+    rb.vessel()
+    tf = TF(nTF=16,shape={'vessel':rb.loop,'pf':pf,'fit':True,'setup':setup,
+               'plot':False,'config':config,'coil_type':'S'})
+               
+    tf.energy()
+    tf.fill()
+    
+    coil = {'Rcl':tf.Rcl,'Zcl':tf.Zcl,
+            'nTF':tf.nTF,'Iturn':1}
+    rp = ripple(plasma={'config':config},coil=coil)
+    L = geom.length(tf.Rcl,tf.Zcl,norm=False)[-1]
+    V = loop_vol(tf.Rcl,tf.Zcl)
+    print('L {:1.2f}m, V {:1.0f}m3, E {:1.1f}GJ, ripple {:1.2f}'.\
+    format(L,V,tf.Ecage*1e-9,rp.get_ripple()))
+    
+    
     '''
     rb.vessel()
     rb.trim_sol(plot=True)  # ,color=0.3*np.ones(3)

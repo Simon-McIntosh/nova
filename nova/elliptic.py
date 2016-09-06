@@ -15,6 +15,8 @@ from scipy.ndimage.filters import gaussian_filter
 from scipy.interpolate import interp1d
 from scipy.interpolate import RectBivariateSpline as RBS
 from scipy.linalg import lstsq
+from scipy import optimize 
+
 
 class MidpointNormalize(Normalize):
     def __init__(self, vmin=None, vmax=None, midpoint=None, clip=False):
@@ -318,7 +320,7 @@ class EQ(object):
     def set_plasma_coil(self,delta=0):
         self.plasma_coil = {} 
         if delta > 0:
-            rbdry,zbdry = self.sf.get_boundary()
+            rbdry,zbdry = self.sf.get_boundary(alpha=1-1e-3)
             lbdry = self.sf.length(rbdry,zbdry)
             rc = np.mean([rbdry.min(),rbdry.max()])
             zc = np.mean([zbdry.min(),zbdry.max()])
@@ -327,7 +329,7 @@ class EQ(object):
             Length = np.linspace(lbdry[0],lbdry[-1],len(lbdry))
             Radius = radius(Length)
             Theta = theta(Length)
-            nr = np.ceil(Radius.max()/delta)
+            nr = np.ceil((Radius.max()-Radius.min())/delta)
             R,Z = np.array([]),np.array([])
             for rfact in np.linspace(1/(2*nr),1-1/(2*nr),nr):
                 r,z = rfact*Radius*np.cos(Theta),rfact*Radius*np.sin(Theta)
@@ -403,7 +405,6 @@ class EQ(object):
         self.coreBC(update=update)
         self.edgeBC()
         self.psi = self.solve()
-        print('run')
         self.set_eq_psi()
             
     def set_eq_psi(self):  # set psi from eq
@@ -420,40 +421,73 @@ class EQ(object):
         self.edgeBC(external_coils=False)
         self.psi_plasma = self.solve()
         self.set_plasma_coil()
-
-    def gen(self,kp=2.5,ki=0.25,Nmax=100,Verr=1e-4,**kwargs): 
-        self.get_Vcoil()
-        if 'Vtarget' in kwargs.keys():
-            self.Vtarget = kwargs['Vtarget']
+        
+    def set_control_current(self,index=-1,**kwargs):  # set filliment currents
+        if 'I' in kwargs:
+            I = kwargs['I']
+        elif 'factor' in kwargs:
+            I = (1+kwargs['factor'])*self.Vcoil['Io'][index]
         else:
-            self.Vtarget = self.sf.Mpoint[1]
-        M,Mflag = np.zeros(Nmax),False
+            errtxt = '\n'
+            errtxt += 'kw input \'I\' or \'factor\'\n'
+            raise ValueError(errtxt)
+        for subcoil in range(self.Vcoil['Nf'][index]):
+            subname = self.Vcoil['name'][index].decode()
+            subname += '_{:1.0f}'.format(subcoil)
+            self.coil[subname]['I'] = I/self.Vcoil['Nf'][index]
+            
+    def reset_control_current(self):
+        self.cc = 0
+        for index in [0,-1]:
+            self.set_control_current(index=index,factor=0)
+
+    def gen(self,ztarget,Zerr=1e-3,kp=1.5,ki=0.15,Nmax=100,**kwargs): 
+        self.ztarget = ztarget
+        Mflag = False
+        self.reset_control_current()
         for i in range(Nmax):
             self.run()
-            Merr = self.sf.Mpoint[1]-self.Vtarget
-            M[i] = Merr
-            if abs(Merr) <= Verr:
+            Merr = self.sf.Mpoint[1]-self.ztarget
+            if abs(Merr) <= Zerr:
                 if Mflag:
-                    print('Vtarget {:1.5f} i={:1.0f} Merr={:1.6e}'.format(\
-                    self.Vtarget,i,Merr))
+                    print('Zt {:1.5f} i {:1.0f} err {:1.6e} cc {:1.3f}KA'.\
+                    format(self.ztarget,i,Merr,1e-3*self.cc))
                     break
                 Mflag = True
             else:
                 Mflag = False
-            for index in [-1]:  # vertical stability coil pair [0,-1]
+            self.cc = 0  # control current
+            for index,sign in zip([0,-1],[1,-1]):  # stability coil pair [0,-1]
                 self.Vcoil['Ip'][index] = np.sign(self.Vcoil['value'][index])*\
                 kp*self.Vcoil['Io'][index]*Merr  
-                dIi = np.sign(self.Vcoil['value'][index])*ki*self.Vcoil['Io'][index]*Merr 
-                if np.sign(self.Vcoil['Ii'][index])*np.sign(self.Vcoil['Ii'][index]+dIi)<0:
-                    self.Vcoil['Ii'][index] = 0
-                else:
-                    self.Vcoil['Ii'][index] += dIi
-                for subcoil in range(self.Vcoil['Nf'][index]):
-                    subname = self.Vcoil['name'][index].decode()
-                    subname += '_{:1.0f}'.format(subcoil)
-                    self.coil[subname]['I'] = (self.Vcoil['Io'][index]+\
-                    self.Vcoil['Ip'][index]+self.Vcoil['Ii'][index])/self.Vcoil['Nf'][index]
+                dIi = np.sign(self.Vcoil['value'][index])*\
+                ki*self.Vcoil['Io'][index]*Merr 
+                self.Vcoil['Ii'][index] += dIi
+                Icontrol = self.Vcoil['Ip'][index]+self.Vcoil['Ii'][index]
+                I = self.Vcoil['Io'][index]+Icontrol
+                self.cc += sign*Icontrol
+                self.set_control_current(index=index,I=I)
         self.set_plasma_coil()
+        return self.cc
+        
+
+    def gen_opp(self,z=0,dz=0.3,Zerr=5e-3,Nmax=100):
+        self.get_Vcoil()
+        f,zt,dzdf= np.zeros(Nmax),np.zeros(Nmax),2e-7
+        zt[0] = z
+        for i in range(Nmax):
+            f[i] = self.gen(zt[i],Zerr=Zerr)
+            if i == 0:
+                zt[i+1] = zt[i]-f[i]*dzdf  # estimate second step
+            elif i < Nmax-1:
+                fdash = (f[i]-f[i-1])/(zt[i]-zt[i-1])
+                dz = f[i]/fdash
+                if abs(dz) < Zerr:
+                    break
+                else:
+                    zt[i+1] = zt[i]-dz  # Newton's method
+            else: 
+                print('warning: vertical position itteration limit reached')
         
     def fit(self,inv,N=5):
         for i in range(N):

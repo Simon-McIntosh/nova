@@ -76,7 +76,7 @@ def cut_corners(loop,smooth=True,Nss=100):
         dL = (dL[1:]+dL[:-1])/2  # average segment length 
     return dL
 
-def Gtorque(eq_coil,sf_coil,source,sink,multi_filament):  # source-sink 
+def Gtorque(eq_coil,pf_coil,source,sink,multi_filament):  # source-sink 
     if multi_filament:
         coil = eq_coil
         Nbundle = 1
@@ -85,7 +85,7 @@ def Gtorque(eq_coil,sf_coil,source,sink,multi_filament):  # source-sink
         name_source = lambda i:source+'_{:1.0f}'.format(i)
         name_sink = lambda j:sink+'_{:1.0f}'.format(j)
     else:  # single-filament
-        coil = sf_coil
+        coil = pf_coil
         Nbundle = eq_coil[source+'_0']['Nf']*eq_coil[sink+'_0']['Nf']
         Nsource,Nsink = 1,1
         name_source = lambda i:source
@@ -116,16 +116,16 @@ def Gtorque(eq_coil,sf_coil,source,sink,multi_filament):  # source-sink
             feild += Nbundle*r*dfeild  # feild couple, rG
     return feild
     
-def Btorque(eq,passive_coils,sink):
-    Csink = eq.coil
+def Btorque(eq_coil,plasma_coil,passive_coils,sink):
+    Csink = eq_coil
     Nsink = Csink[sink+'_0']['Nf']
     feild = np.zeros(2)
     for source in passive_coils:
         if source == 'Plasma':
-            Csource = eq.plasma_coil
+            Csource = plasma_coil
             Nsource = len(Csource)
         else:
-            Csource = eq.coil
+            Csource = eq_coil
             Nsource = Csource[source+'_0']['Nf']
         for i in range(Nsource):
             source_strand = source+'_{:1.0f}'.format(i)

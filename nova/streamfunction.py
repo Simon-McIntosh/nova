@@ -144,18 +144,7 @@ class SF(object):
         
     def set_boundary(self,r,z,n=5e2): 
         self.rbdry,self.zbdry = geom.rzSLine(r,z,npoints=n)
-        '''
-        L = self.length(r,z)
-        if n==0:
-            self.nbdry = 5e2
-        else:
-            self.nbdry = n
-        Lsp = np.linspace(L[0],L[-1],self.nbdry)
-        self.rbdry = spline(L,r,s=1e-3)(Lsp)
-        self.zbdry = spline(L,z,s=1e-3)(Lsp)
-        #self.rbdry[0] = self.rbdry[-1]
-        #self.zbdry[0] = self.zbdry[-1]
-         '''
+
     def set_current(self,eqdsk):
         for key in ['cpasma']: 
             setattr(self,key,eqdsk[key])
@@ -408,7 +397,6 @@ class SF(object):
         R,Z = np.array([]),np.array([])
         for line in psi_line:
             r,z = line[:,0],line[:,1]
-            
             if self.Xloc == 'lower':  # lower Xpoint
                 index = z >= self.Xpoint[1]
             elif self.Xloc == 'upper':  # upper Xpoint
@@ -420,6 +408,11 @@ class SF(object):
                     R,Z = np.append(R,r),np.append(Z,z)    
         R,Z = self.clock(R,Z)
         return R,Z
+        
+    def get_sep(self,expand=0):  # generate boundary dict for elliptic
+        R,Z = self.get_boundary()
+        boundary = {'R':R,'Z':Z,'expand':expand}
+        return boundary
         
     def clock(self,R,Z,anti=False):
         rc,zc = self.Mpoint  

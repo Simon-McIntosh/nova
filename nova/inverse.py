@@ -4,19 +4,18 @@ import nova.cross_coil as cc
 from collections import OrderedDict as od
 from scipy.interpolate import RectBivariateSpline as RBS
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
-from scipy.interpolate import interp1d as interp1
+from scipy.interpolate import interp1d
 import seaborn as sns
 import scipy.optimize as op
 from itertools import cycle
 import copy
 import time
 import multiprocessing
-
-mu_o = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
+from amigo import geom
 
 class INV(object):
     
-    def __init__(self,sf,pf,rb,eq,configTF='SN',config='SN'):
+    def __init__(self,sf,pf,eq):
         self.ncpu = multiprocessing.cpu_count()
         self.sf = sf
         self.pf = pf
@@ -29,10 +28,10 @@ class INV(object):
         self.add_active([],empty=True)  # all coils active
         self.update_coils()
         self.initalise_current()
+        #,configTF='SN',config='SN'
         #conf = Config(config)
         #conf.TF(self.sf)
         #self.rb = RB(conf,self.sf,Np=150)  # load radial build
-        self.rb = rb
         #self.interpTF(config=configTF,Ltrim=[0.15,0.85])  # TF interpolators [0.08,0.85]
         self.log_scalar = ['Fr_max','Fz_max','F_max','FzCS','Fsep','rms',
                            'rms_bndry','rmsID','Isum','Imax','z_offset',
@@ -112,7 +111,7 @@ class INV(object):
         for coil in Clist:
             name = self.Cname(coil)
             if name in self.pf.coil.keys():
-                del self.sf.coil[name]
+                del self.pf.coil[name]
                 for i in range(self.eq.coil[name+'_0']['Nf']):
                     del self.eq.coil[name+'_{:1.0f}'.format(i)]
         self.regenVcoil(Clist)
@@ -155,7 +154,7 @@ class INV(object):
         for i,dx in enumerate(['dr','dz']):
             if dx in kwargs.keys():
                 delta[i] = kwargs.get(dx)
-        self.sf.coil[name] = {'r':r,'z':z,'dr':delta[0],'dz':delta[1],'I':1e6,
+        self.pf.coil[name] = {'r':r,'z':z,'dr':delta[0],'dz':delta[1],'I':1e6,
                               'rc':np.sqrt(delta[0]**2+delta[1]**2)/2}
 
     def append_coil(self,coils):
@@ -191,18 +190,10 @@ class INV(object):
                     color = next(Color)
                     for r,z in zip(self.coil[state][name]['r'],
                                    self.coil[state][name]['z']):
-                        pl.plot(r,z,marker,color=color,markersize=3)
+                        pl.plot(r,z,marker,color=color,markersize=6)
                         if state == 'passive':  # empty marker
-                            pl.plot(r,z,marker,color='w',markersize=1.5)
-                            
-    def add_cnstr(self,r,z,BC,condition,value):
-        var = {'r':r,'z':z,'value':value,'condition':condition,'BC':BC}
-        nvar = len(r)
-        for name in ['value','condition','BC']:
-            if np.shape(var[name])[0] != nvar:
-                var[name] = np.array([var[name]]*nvar)
-        for name in var.keys(): 
-                self.cnstr[name] = np.append(self.cnstr[name],var[name])                        
+                            pl.plot(r,z,marker,color='w',markersize=3)
+                        
             
     def add_fix(self,r,z,value,Bdir,BC,factor):
         var = {'r':r,'z':z,'value':value,'Bdir':Bdir,'BC':BC,'factor':factor}
@@ -234,13 +225,13 @@ class INV(object):
         nz = -self.psi.ev(r,z,dx=0,dy=1)
         L = self.sf.length(r,z)
         Lc = np.linspace(0,1,N+1)[:-1]
-        rb,zb = interp1(L,r)(Lc),interp1(L,z)(Lc)
-        Bdir = np.array([interp1(L,nr)(Lc),interp1(L,nz)(Lc)]).T
+        rb,zb = interp1d(L,r)(Lc),interp1d(L,z)(Lc)
+        Bdir = np.array([interp1d(L,nr)(Lc),interp1d(L,nz)(Lc)]).T
         return rb,zb,Bdir
         
     def get_psi(self,alpha):
-        Xpsi = self.sf.Xpsi  # self.eq.Pcoil(self.sf.Xpoint)
-        Mpsi = self.sf.Mpsi  # self.eq.Pcoil(self.sf.Mpoint)
+        Xpsi = self.sf.Xpsi  
+        Mpsi = self.sf.Mpsi  
         psi = Mpsi+alpha*(Xpsi-Mpsi)
         return psi
         
@@ -376,9 +367,9 @@ class INV(object):
         
     def add_value_coil(self,bc,rf,zf,r,z,I,bdir):
         if 'psi' in bc:
-            value = mu_o*I*cc.green(rf,zf,r,z)
+            value = cc.mu_o*I*cc.green(rf,zf,r,z)
         else:
-            B = mu_o*I*cc.green_feild(rf,zf,r,z)
+            B = cc.mu_o*I*cc.green_feild(rf,zf,r,z)
             value = self.Bfeild(bc,B[0],B[1],bdir)
         return value
         
@@ -440,17 +431,17 @@ class INV(object):
         self.Fa = np.zeros((self.Nadj,self.Nadj,2))  # active
         for i,sink in enumerate(active_coils):
             for j,source in enumerate(active_coils):
-                rG = cc.Gtorque(self.eq.coil,self.sf.coil,
+                rG = cc.Gtorque(self.eq.coil,self.pf.coil,
                                 source,sink,multi_filament)
-                self.Fa[i,j,0] = 2*np.pi*mu_o*rG[1]  #  cross product
-                self.Fa[i,j,1] = -2*np.pi*mu_o*rG[0]
+                self.Fa[i,j,0] = 2*np.pi*cc.mu_o*rG[1]  #  cross product
+                self.Fa[i,j,1] = -2*np.pi*cc.mu_o*rG[0]
         
     def set_passive_force_feild(self,active_coils,passive_coils):
         self.Fp = np.zeros((self.Nadj,2))  # passive
         for i,sink in enumerate(active_coils):
-            rB = cc.Btorque(self.eq,passive_coils,sink)
-            self.Fp[i,0] = 2*np.pi*mu_o*rB[1]  #  cross product
-            self.Fp[i,1] = -2*np.pi*mu_o*rB[0]  
+            rB = cc.Btorque(self.eq.coil,self.eq.plasma_coil,passive_coils,sink)
+            self.Fp[i,0] = 2*np.pi*cc.mu_o*rB[1]  #  cross product
+            self.Fp[i,1] = -2*np.pi*cc.mu_o*rB[0]  
   
     def add_value_plasma(self,bc,rf,zf,bdir):
         if 'psi' in bc:
@@ -554,18 +545,18 @@ class INV(object):
         return Rout,Zout
         
     def TFinterpolator(self,R,Z,dr=0,Ltrim=[0.1,0.9]):
-        R,Z = self.rb.offset(R,Z,dr)
-        L = self.rb.length(R,Z)
+        R,Z = geom.offset(R,Z,dr)
+        L = geom.length(R,Z)
         Lt = np.linspace(Ltrim[0],Ltrim[1],int((1-np.diff(Ltrim))*len(L)))
         R,Z = interp1(L,R)(Lt),interp1(L,Z)(Lt)
         L = np.linspace(0,1,len(R))
         return IUS(L,R),IUS(L,Z)
-        
+    '''  # replace rb.tf with coil.TF object
     def interpTF(self,config='SN',Ltrim=[0.1,0.9]):
-        self.rb.TFopp(False,config=config)  #  load TF outline
-        self.rb.TFfill()  # construct TF geometory
-        self.TFinR,self.TFinZ =  self.TFinterpolator(self.rb.TFinR,
-                                                     self.rb.TFinZ,Ltrim=Ltrim)
+        #self.rb.TFopp(False,config=config)  #  load TF outline
+        #self.rb.TFfill()  # construct TF geometory
+        #self.TFinR,self.TFinZ =  self.TFinterpolator(self.rb.TFinR,
+        #                                             self.rb.TFinZ,Ltrim=Ltrim)
         self.TFindR = self.TFinR.derivative(n=1) 
         self.TFindZ = self.TFinZ.derivative(n=1)                                             
         self.TFoutR,self.TFoutZ =  self.TFinterpolator(self.rb.TFoutR,
@@ -573,7 +564,7 @@ class INV(object):
                                                        Ltrim=Ltrim)
         self.TFoutdR = self.TFoutR.derivative(n=1) 
         self.TFoutdZ = self.TFoutZ.derivative(n=1) 
-        
+    '''    
     def arange_CS(self,Z,L,dL):
         Z *= self.CS_Znorm
         L *= self.CS_Lnorm
@@ -646,12 +637,12 @@ class INV(object):
             r,z = self.get_point(**kwargs)
         elif 'delta' in kwargs.keys():
             ref,dr,dz = kwargs['delta']
-            coil = self.sf.coil[self.Cname(ref)]
+            coil = self.pf.coil[self.Cname(ref)]
             rc,zc = coil['r'],coil['z']
             r,z = rc+dr,zc+dz
         elif 'L' in kwargs.keys():
             ref,dL = kwargs['dL']
-            coil = self.sf.coil[self.Cname(ref)]
+            coil = self.pf.coil[self.Cname(ref)]
             rc,zc = coil['r'],coil['z'] 
         ARmax = 3
         if abs(AR) > ARmax: AR = ARmax*np.sign(AR)
@@ -659,16 +650,16 @@ class INV(object):
             AR = 1+AR
         else:
             AR = 1/(1-AR)
-        dA = self.sf.coil[name]['dr']*self.sf.coil[name]['dz']
-        self.sf.coil[name]['dr'] = np.sqrt(AR*dA)
-        self.sf.coil[name]['dz'] = self.sf.coil[name]['dr']/AR
-        dr = r-self.sf.coil[name]['r']
-        dz = z-self.sf.coil[name]['z']
-        self.sf.coil[name]['r'] += dr
-        self.sf.coil[name]['z'] += dz
-        drTF,dzTF = self.rb.Cshift(self.sf.coil[name],'out',self.TFoffset)  # fit-TF
-        self.sf.coil[name]['r'] += drTF
-        self.sf.coil[name]['z'] += dzTF
+        dA = self.pf.coil[name]['dr']*self.pf.coil[name]['dz']
+        self.pf.coil[name]['dr'] = np.sqrt(AR*dA)
+        self.pf.coil[name]['dz'] = self.pf.coil[name]['dr']/AR
+        dr = r-self.pf.coil[name]['r']
+        dz = z-self.pf.coil[name]['z']
+        self.pf.coil[name]['r'] += dr
+        self.pf.coil[name]['z'] += dz
+        drTF,dzTF = self.pf.Cshift(self.pf.coil[name],'out',self.TFoffset)  # fit-TF
+        self.pf.coil[name]['r'] += drTF
+        self.pf.coil[name]['z'] += dzTF
         self.coil['active'][name]['r'] += dr+drTF
         self.coil['active'][name]['z'] += dz+dzTF
         for i in range(self.eq.coil[name+'_0']['Nf']):
@@ -678,8 +669,8 @@ class INV(object):
         self.update_bundle(name)
                 
     def move_CS(self,name,z,dz):
-        self.sf.coil[name]['z'] = z
-        self.sf.coil[name]['dz'] = dz
+        self.pf.coil[name]['z'] = z
+        self.pf.coil[name]['dz'] = dz
         self.update_bundle(name)
         
     def tails(self,x,dx=0.1):  # contiuous PF position limit
@@ -713,26 +704,26 @@ class INV(object):
         
     def reset_current(self):
         for j,name in enumerate(self.coil['active'].keys()):
-            self.sf.coil[name]['I'] = 0
+            self.pf.coil[name]['I'] = 0
         
     def update_area(self,relax=0.1,max_factor=0.2):
         for name in self.PF_coils:
-            Ic = abs(self.sf.coil[name]['I'])
+            Ic = abs(self.pf.coil[name]['I'])
             if Ic > 150e6: Ic = 150e6  # coil area upper bound
             dA = Ic/12.5e6  # apply current density limit
-            factor = dA/(self.sf.coil[name]['dr']*self.sf.coil[name]['dz'])-1
+            factor = dA/(self.pf.coil[name]['dr']*self.pf.coil[name]['dz'])-1
             if factor > max_factor: factor=max_factor
             scale = 1+relax*factor
-            self.sf.coil[name]['dr'] *= scale
-            self.sf.coil[name]['dz'] *= scale
-            drTF,dzTF = self.rb.Cshift(self.sf.coil[name],'out',self.TFoffset)  # fit-TF
-            self.sf.coil[name]['r'] += drTF
-            self.sf.coil[name]['z'] += dzTF
+            self.pf.coil[name]['dr'] *= scale
+            self.pf.coil[name]['dz'] *= scale
+            drTF,dzTF = self.pf.Cshift(self.pf.coil[name],'out',self.TFoffset)  # fit-TF
+            self.pf.coil[name]['r'] += drTF
+            self.pf.coil[name]['z'] += dzTF
             self.update_bundle(name)
                     
     def update_bundle(self,name):
         Nold = self.eq.coil[name+'_0']['Nf']
-        bundle = self.eq.size_coil(self.sf.coil,name,self.eq.dCoil)
+        bundle = self.eq.size_coil(self.pf.coil,name,self.eq.dCoil)
         N = self.eq.coil[name+'_0']['Nf']
         self.coil['active'][name] = {}
         for key in bundle.keys():
@@ -759,7 +750,7 @@ class INV(object):
             if name in self.PF_coils:  # PF current limit
                 ieqcon[i] = Imax-abs(self.Icoil[i])
             if name in self.CS_coils:  # CS current density limit
-                dA = self.sf.coil[name]['dr']*self.sf.coil[name]['dz']
+                dA = self.pf.coil[name]['dr']*self.pf.coil[name]['dz']
                 ImaxCS = 12.5e6*dA
                 ieqcon[i] = ImaxCS-abs(self.Icoil[i])
         for j,name in enumerate(self.PF_coils):  # PF vertical force limit
@@ -838,7 +829,7 @@ class INV(object):
         self.z_offset = np.mean(z_offset)
         for name,I in zip(self.coil['active'].keys(),Icoil):
             if name in self.PF_coils: 
-                self.sf.coil[name]['I'] = I # set maximum current (for area)
+                self.pf.coil[name]['I'] = I # set maximum current (for area)
         self.update_area()  
         self.store_update()
         return self.rms
@@ -979,15 +970,15 @@ class INV(object):
     def update_current(self):
         self.Isum,self.Ics = 0,0
         self.Icoil = np.zeros(len(self.coil['active'].keys()))
-        for j,name in enumerate(self.coil['active'].keys()):
+        for j,name in enumerate(self.coil['active']):
             Nfilament = self.eq.coil[name+'_0']['Nf']
-            self.sf.coil[name]['I'] = self.I[j][0]*Nfilament  # update sf 
-            self.coil['active'][name]['I_sum'] = self.I[j][0]*Nfilament  # inv
-            self.Icoil[j] = self.sf.coil[name]['I']  # store current
+            self.pf.coil[name]['I'] = self.I[j]*Nfilament  # update sf 
+            self.coil['active'][name]['I_sum'] = self.I[j]*Nfilament  # inv
+            self.Icoil[j] = self.pf.coil[name]['I']  # store current
             for i in range(Nfilament):
                 sub_name = name+'_{:1.0f}'.format(i)
-                self.eq.coil[sub_name]['I'] = self.I[j][0]  # update eq
-                self.coil['active'][name]['I'][i] = self.I[j][0]  # update inv
+                self.eq.coil[sub_name]['I'] = self.I[j]  # update eq
+                self.coil['active'][name]['I'][i] = self.I[j]  # update inv
             self.Isum += abs(self.Icoil[j])  # sum absolute current
             if name in self.CS_coils:
                 self.Ics += abs(self.Icoil[j])
@@ -1002,6 +993,8 @@ class INV(object):
     def update_coils(self,plot=False):
         self.coil = {'active':od(),'passive':od()}
         self.append_coil(self.eq.coil)
+        if not hasattr(self.eq,'plasma_coil'):
+            self.eq.get_plasma_coil()
         self.append_coil(self.eq.plasma_coil)
         if plot:
             self.plot_coils()
@@ -1017,10 +1010,10 @@ class INV(object):
             f.write('Coil\tr [m]\tz [m]\tdr [m]\tdz [m]')
             f.write('\tI SOF [A]\tI EOF [A]\n')
             for j,name in enumerate(self.coil['active'].keys()):
-                r = float(self.sf.coil[name]['r'])
-                z = float(self.sf.coil[name]['z'])
-                dr = self.sf.coil[name]['dr']
-                dz = self.sf.coil[name]['dz']
+                r = float(self.pf.coil[name]['r'])
+                z = float(self.pf.coil[name]['z'])
+                dr = self.pf.coil[name]['dr']
+                dz = self.pf.coil[name]['dz']
                 position = '\t{:1.3f}\t{:1.3f}'.format(r,z)
                 size = '\t{:1.3f}\t{:1.3f}'.format(dr,dz)
                 current = '\t{:1.3f}\t{:1.3f}\n'.format(Icoil[0,j],Icoil[1,j])

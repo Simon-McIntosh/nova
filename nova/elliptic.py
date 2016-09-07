@@ -101,6 +101,7 @@ class EQ(object):
         self.N = self.nr*self.nz
         self.b = np.zeros(self.N)
         self.bpl = np.zeros(self.N)
+        self.psi_plasma = np.zeros((self.nr,self.nz))
         self.dr = (self.r[-1]-self.r[0])/(self.nr-1)
         self.dz = (self.z[-1]-self.z[0])/(self.nz-1)    
         self.rc = np.linspace(ro[0]-self.dr/2,ro[1]+self.dr/2,self.nr+1)
@@ -184,12 +185,26 @@ class EQ(object):
             self.Vcoil['Nf'][i] = self.coil[name+'_0']['Nf']  
             Mpoint = self.sf.Mpoint
             r,z = self.pf.coil[name]['r'],self.pf.coil[name]['z']
-            I = self.pf.coil[name]['I']
-            self.Vcoil['value'][i] = np.sign(I)*cc.green_feild(Mpoint[0],Mpoint[1],
-                                                      r,z)[0]  
+            self.Vcoil['value'][i] = cc.green_feild(Mpoint[0],Mpoint[1],r,z)[0]  
         self.Vcoil = np.sort(self.Vcoil,order='value')
-        self.Vcoil['value'] *= abs(self.Vcoil['Io'])
         
+    def set_Vcoil(self):  # set fixed vertical control coils
+        names = ['upper','lower']
+        rvs = self.sf.Mpoint[0]*np.ones(2)
+        zvs = self.sf.Mpoint[1]+12*np.array([-1,1])
+        self.Vcoil = np.zeros((2,),dtype=[('name','S10'),('value','float'),
+                                          ('Io','float'),('Ip','float'),
+                                          ('Ii','float'),('Nf','int')])
+        for i,(name,r,z) in enumerate(zip(names,rvs,zvs)):
+            self.Vcoil['name'][i] = name
+            name += '_0'
+            self.coil[name] = {'r':r,'z':z,'dr':0.5,'dz':0.5,
+                               'I':0,'rc':1,'Nf':1}
+            self.Vcoil['Io'][i] = self.coil[name]['I']
+            self.Vcoil['Nf'][i] = self.coil[name]['Nf']  
+            Mpoint = self.sf.Mpoint
+            self.Vcoil['value'][i] = cc.green_feild(Mpoint[0],Mpoint[1],r,z)[0]  
+
     def indx(self,i,j):
         return i*self.nz+j
         
@@ -313,9 +328,9 @@ class EQ(object):
             #scale_plasma = 1
             #print(scale_plasma)
             self.sf.b_scale = scale_plasma
-            for i,indx in zip(range(self.Nplasma),self.plasma_index):
-                self.bpl[indx] *= scale_plasma
-                self.b[indx] = self.bpl[indx]
+        for i,indx in zip(range(self.Nplasma),self.plasma_index):
+            self.bpl[indx] *= self.sf.b_scale
+            self.b[indx] = self.bpl[indx]
         
     def set_plasma_coil(self,delta=0):
         self.plasma_coil = {} 
@@ -441,42 +456,41 @@ class EQ(object):
         for index in [0,-1]:
             self.set_control_current(index=index,factor=0)
 
-    def gen(self,ztarget,Zerr=1e-3,kp=1.5,ki=0.15,Nmax=100,**kwargs): 
+    def gen(self,ztarget,Zerr=1e-3,kp=1.5,ki=0.125,Nmax=20,**kwargs): 
         self.ztarget = ztarget
         Mflag = False
+        self.Zerr = np.zeros(Nmax)
         self.reset_control_current()
         for i in range(Nmax):
             self.run()
-            Merr = self.sf.Mpoint[1]-self.ztarget
-            if abs(Merr) <= Zerr:
+            self.Zerr[i] = self.sf.Mpoint[1]-self.ztarget
+            if abs(self.Zerr[i]) <= Zerr:
                 if Mflag:
-                    print('Zt {:1.5f} i {:1.0f} err {:1.6e} cc {:1.3f}KA'.\
-                    format(self.ztarget,i,Merr,1e-3*self.cc))
+                    print('i:{:1.0f} z_target {:1.3f}m Icontrol {:1.1f}KA'.\
+                    format(i,self.ztarget,1e-3*self.Ic))
                     break
                 Mflag = True
+            elif i == Nmax-1: 
+                print('warning: gen vertical position itteration limit reached')
             else:
                 Mflag = False
-            self.cc = 0  # control current
+            self.Ic = 0  # control current
             for index,sign in zip([0,-1],[1,-1]):  # stability coil pair [0,-1]
-                self.Vcoil['Ip'][index] = np.sign(self.Vcoil['value'][index])*\
-                kp*self.Vcoil['Io'][index]*Merr  
-                dIi = np.sign(self.Vcoil['value'][index])*\
-                ki*self.Vcoil['Io'][index]*Merr 
-                self.Vcoil['Ii'][index] += dIi
-                Icontrol = self.Vcoil['Ip'][index]+self.Vcoil['Ii'][index]
-                I = self.Vcoil['Io'][index]+Icontrol
-                self.cc += sign*Icontrol
+                gain = 1e5/self.Vcoil['value'][index]
+                self.Vcoil['Ip'][index] = gain*kp*self.Zerr[i]  # proportional
+                self.Vcoil['Ii'][index] += gain*ki*self.Zerr[i]  # intergral
+                dI = self.Vcoil['Ip'][index]+self.Vcoil['Ii'][index]
+                I = self.Vcoil['Io'][index]+dI
                 self.set_control_current(index=index,I=I)
+                self.Ic += sign*(dI)                
         self.set_plasma_coil()
-        return self.cc
+        return self.Ic
         
-
     def gen_opp(self,z=0,dz=0.3,Zerr=5e-3,Nmax=100):
-        self.get_Vcoil()
-        f,zt,dzdf= np.zeros(Nmax),np.zeros(Nmax),2e-7
+        f,zt,dzdf= np.zeros(Nmax),np.zeros(Nmax),-3e-7
         zt[0] = z
         for i in range(Nmax):
-            f[i] = self.gen(zt[i],Zerr=Zerr)
+            f[i] = self.gen(zt[i],Zerr=Zerr/2)
             if i == 0:
                 zt[i+1] = zt[i]-f[i]*dzdf  # estimate second step
             elif i < Nmax-1:
@@ -487,7 +501,7 @@ class EQ(object):
                 else:
                     zt[i+1] = zt[i]-dz  # Newton's method
             else: 
-                print('warning: vertical position itteration limit reached')
+                print('warning: opp vertical position itteration limit reached')
         
     def fit(self,inv,N=5):
         for i in range(N):
@@ -643,8 +657,8 @@ class EQ(object):
         pl.imshow(b, cmap=cmap, norm=norm,#vmin=b.min(),vmax=b.max()
                   extent=[rlim[0],rlim[-1],zlim[0],zlim[-1]],
                   interpolation='nearest', origin='lower',alpha=alpha) 
-        c = pl.colorbar(orientation='horizontal')
-        c.set_xlabel(r'$j$ MAm$^{-1}$')
+        #c = pl.colorbar(orientation='horizontal')
+        #c.set_xlabel(r'$j$ MAm$^{-1}$')
         
     def plotj(self,sigma=0,trim=False):
         #self.GSoper()

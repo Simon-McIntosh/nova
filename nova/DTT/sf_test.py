@@ -16,7 +16,7 @@ rc = {'figure.figsize':[6,6*12/16],'savefig.dpi':100, #
 sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 
-config = 'SN'
+config = 'SFm'
 setup = Setup(config)
 sf = SF(setup.filename)
 rb = RB(setup,sf)
@@ -33,7 +33,9 @@ eq = EQ(sf,pf,dCoil=0.5,sigma=0,boundary=sf.get_sep(expand=1.25),n=1e4)
 #eq.set_Vcoil()
                                   
 #eq.gen(sf.Mpoint[1],Zerr=5e-4)    
-eq.gen_opp(z=sf.Mpoint[1],Zerr=1e-3)
+eq.gen_opp(z=sf.Mpoint[1],Zerr=5e-4)
+#eq.resample(n=1e4)
+#eq.gen_opp(z=sf.Mpoint[1],Zerr=5e-4)
 
 #print('cc {:1.3f}KA'.format(1e-3*eq.cc))
 
@@ -41,7 +43,11 @@ sf.contour(levels=levels,color=sns.color_palette('Set2',1)[0])
 pf.plot(coils=eq.coil,label=False) 
 
 
-
+pl.figure()
+pl.plot(eq.Zerr)
+pl.xlabel(r'itteration number, $i$')
+pl.ylabel('vertical position error, m')
+sns.despine()
 
 '''
 

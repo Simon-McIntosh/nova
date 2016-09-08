@@ -305,7 +305,7 @@ class EQ(object):
         r,z = r[index],z[index]
         return r,z
                 
-    def plasma_core(self,update=True):
+    def plasma_core(self,update=True,dz=0):
         if update:  # calculate plasma contribution
             rbdry,zbdry = self.sf.get_boundary(alpha=1-1e-3)
             #rbdry,zbdry = self.sf.get_boundary(alpha=0.8)  # !!!!!!!! # for vde
@@ -315,7 +315,7 @@ class EQ(object):
             self.plasma_index = np.zeros(self.N,dtype=int)
             for r,z in zip(R,Z):
                 i = np.argmin(np.abs(r-self.r))
-                j = np.argmin(np.abs(z-self.z))
+                j = np.argmin(np.abs(z-self.z+dz))  # plasma vertical offset
                 indx = self.indx(i,j)
                 psi = (self.psi[i,j]-self.sf.Mpsi)/(self.sf.Xpsi-self.sf.Mpsi)
                 if psi<1:
@@ -385,8 +385,8 @@ class EQ(object):
         self.plasma_core()
         self.set_plasma_coil(delta=delta)
         
-    def coreBC(self,update=True):
-        self.plasma_core(update=update)
+    def coreBC(self,update=True,dz=0):
+        self.plasma_core(update=update,dz=dz)
         self.coil_core()
         
     def edgeBC(self,update=True,external_coils=True):
@@ -415,9 +415,9 @@ class EQ(object):
             self.psio = self.psi
         self.psi = self.psio 
           
-    def run(self,update=True):
+    def run(self,update=True,dz=0):
         self.resetBC()
-        self.coreBC(update=update)
+        self.coreBC(update=update,dz=dz)
         self.edgeBC()
         self.psi = self.solve()
         self.set_eq_psi()
@@ -456,7 +456,7 @@ class EQ(object):
         for index in [0,-1]:
             self.set_control_current(index=index,factor=0)
 
-    def gen(self,ztarget,Zerr=1e-3,kp=1.5,ki=0.125,Nmax=20,**kwargs): 
+    def gen(self,ztarget,Zerr=1e-3,kp=1.5,ki=0.15,Nmax=50,**kwargs): 
         self.ztarget = ztarget
         Mflag = False
         self.Zerr = np.zeros(Nmax)
@@ -487,7 +487,7 @@ class EQ(object):
         return self.Ic
         
     def gen_opp(self,z=0,dz=0.3,Zerr=5e-3,Nmax=100):
-        f,zt,dzdf= np.zeros(Nmax),np.zeros(Nmax),-3e-7
+        f,zt,dzdf= np.zeros(Nmax),np.zeros(Nmax),-2.2e-7
         zt[0] = z
         for i in range(Nmax):
             f[i] = self.gen(zt[i],Zerr=Zerr/2)

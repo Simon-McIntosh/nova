@@ -67,7 +67,7 @@ class RB(object):
         r_lfs,z_lfs,psi_lfs = self.first_wall_psi(self.sf.LFfwr,self.sf.LFfwz)
         r_hfs,z_hfs,psi_hfs = self.first_wall_psi(self.sf.HFfwr,self.sf.HFfwz)
         r_top,z_top = geom.offset(self.sf.rbdry,self.sf.zbdry,-dr)
-        r_top,z_top = geom.theta_sort(r_top,z_top,self.xo,origin='top')
+        r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,origin='top')
         index = z_top>=self.sf.LFPz
         r_top,z_top = r_top[index],z_top[index]
         istart = np.argmin((r_top-self.sf.HFfwr)**2+(z_top-self.sf.HFfwz)**2)

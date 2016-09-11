@@ -7,6 +7,7 @@ from collections import OrderedDict
 import seaborn as sns
 from itertools import cycle,count
 import scipy as sp
+from matplotlib.collections import PolyCollection
 
 def get_label(label,label_array,force=False,part=None):
     if label != None:
@@ -25,15 +26,16 @@ def get_label(label,label_array,force=False,part=None):
         else:
             flag = False
     return flag
-    
-def read_loop(part,loop,npoints=100):
-    r,z = part[loop]['r'],part[loop]['z']
-    if len(r) > 0:
-        r,z = geom.theta_sort(r,z)  # sort azimuth
-        #r,z = np.append(r,r[0]),np.append(z,z[0])  # close loop
-        #r,z = geom.rzInterp(r,z,ends=True,npoints=npoints)
-    return r,z
             
+def add_segment(lines,k):
+    segment = '{:1.0f}'.format(next(k))
+    lines[segment] = {'r':np.array([]),'z':np.array([])}
+    return segment
+    
+def append_value(lines,segment,r,z):
+    lines[segment]['r'] = np.append(lines[segment]['r'],r)
+    lines[segment]['z'] = np.append(lines[segment]['z'],z)
+                    
 def set_figure():
     pl.axis('off')
     pl.axis('equal')
@@ -80,25 +82,63 @@ class DEMO(object):
     def process(self):
         for part in self.parts:
             for loop in self.parts[part]:
-                r,z = read_loop(self.parts[part],loop)
+                r,z = geom.read_loop(self.parts[part],loop)
                 
-                if part == 'Blanket':
-                    r,z = geom.theta_sort(r,z,xo=(np.mean(r)-1,np.mean(z)-3),
-                                          origin='top')
-                    
-                    n = len(r)
-                    r_,z_ = np.zeros(n),np.zeros(n)
-                    r_[0],z_[0] = r[0],z[0]
-                    for i in range(n-1):
-                        dr = sp.linalg.norm([r-r_[i],z-z_[i]],axis=0)
-                        j = np.argmin(dr)
-                        r_[i+1],z_[i+1] = r[j],z[j]
-                        r,z = np.delete(r,j),np.delete(z,j)
-                    r,z = r_,z_
+                if part in ['Plasma']:
                     pl.plot(r,z)
-                    set_figure()
+                    #r,z = geom.point_loop(r,z)
+                    
+                    '''
+                    verts = np.array([r,z])
+                    verts = [np.swapaxes(verts,0,1)]
+                    coll = PolyCollection(verts,edgecolors='none')
+                    ax = pl.gca()
+                    ax.add_collection(coll)
+                    ax.autoscale_view()
+                    '''                    
+                    
+                    '''
+                    n = len(r)-1
+                    dR = np.array([r[1:]-r[:-1],z[1:]-z[:-1]])
+                    dR = np.array([np.gradient(r),np.gradient(z)])
+                    dL = sp.linalg.norm(dR,axis=0)
+                    
+                    k,kflag = count(0),False
+                    lines = {}
+                    segment = add_segment(lines,k)
+                    for i in range(n):
+                        kink = np.arccos(np.dot(dR[:,i]/dL[i],
+                                                dR[:,i+1]/dL[i+1]))*180/np.pi
+                        append_value(lines,segment,r[i+1],z[i+1])
+                        if kink > 30 and kflag == False:  # angle, deg
+                            segment = add_segment(lines,k)
+                            append_value(lines,segment,r[i+1],z[i+1])
+                            kflag = True
+                        else:
+                            kflag = False
+
+
+                        
+                    segments = list(lines.keys())
+                    l = np.zeros(len(segments))
+                    for i,seg in enumerate(segments):
+                        l[i] = len(lines[seg]['r'])
+                        
+                    seg = np.argsort(l)[-2:]  # select loops (in/out)
+                    rmax = np.zeros(2)
+                    for i,s in enumerate(seg):
+                        rmax[i] = np.max(lines[segments[s]]['r'])
+                    seg = seg[np.argsort(rmax)]
                     
                     
+                    r = lines[segments[seg[0]]]['r']
+                    z = lines[segments[seg[0]]]['z']
+
+
+                    #pl.plot(r,z)
+                    '''
+                        
+                    '''
                     n = len(r)
                     ro,zo,jo = np.zeros(n),np.zeros(n),count(0)
                     r1,z1,j1 = np.zeros(n),np.zeros(n),count(0)
@@ -134,7 +174,7 @@ class DEMO(object):
                     pl.plot(ro[0],zo[0],'o')
                     pl.plot(r1,z1,'.-')
                     set_figure()
-                    
+                    '''
 
         
             
@@ -157,4 +197,31 @@ if __name__ is '__main__':
         demo.plot()
         '''
         demo.process()
-        #
+        '''
+        from nova.config import Setup
+        from nova.streamfunction import SF
+        from nova.radial_build import RB
+        from nova.elliptic import EQ
+        from nova.coils import PF
+        from nova.inverse import INV
+        
+        import seaborn as sns
+        rc = {'figure.figsize':[8*12/16,8],'savefig.dpi':120, # 
+              'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
+              'lines.linewidth':2}
+        sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
+                font_scale=7/8,rc=rc)
+        
+        setup = Setup('DEMO_SN',eqdir='../../eqdsk/')
+        sf = SF(setup.filename)
+        
+        rb = RB(setup,sf)
+        pf = PF(sf.eqdsk)
+        eq = EQ(sf,pf,limit=[5,14,-7,7],n=5e3)  
+        
+        eq.get_plasma_coil()
+        #inv = INV(sf,pf,rb,eq,configTF='SN',config='SN')
+        
+        pf.plot(coils=pf.coil,label=True,plasma=True,current=False) 
+        sf.contour()
+        '''

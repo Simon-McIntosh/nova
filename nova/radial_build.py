@@ -109,13 +109,6 @@ class RB(object):
         R = self.xo[0]+radius*np.cos(self.theta)
         Z = self.xo[1]+radius*np.sin(self.theta)
         return (R,Z)
-  
-    def trim(self,trim,R,Z):
-        L = geom.length(R,Z,norm=True)
-        index = []
-        for t in trim:
-            index.append(np.argmin(np.abs(L-t)))
-        return index
          
     def coil_sheild(self,coils=[],dt=0.8):
         self.rzPut()

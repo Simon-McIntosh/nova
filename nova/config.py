@@ -3,7 +3,7 @@ import collections
 
 class Setup(object):
     
-    def __init__(self,configuration='',eqdir='../../eqdsk'):
+    def __init__(self,configuration='',eqdir='../../eqdsk/'):
         self.eqdir = eqdir
         self.configuration = configuration
         self.set_defaults()
@@ -146,7 +146,7 @@ class Setup(object):
             self.targets['inner'] = {'L2D':0.6}
             self.targets['outer'] = {'L2D':0.65}
             
-        elif configuration =='DEMO_SN':
+        elif configuration == 'DEMO_SN':
             self.dataname = 'DEMO_SN'
             self.filename = 'Equil_AR3d1_2015_04_v2_EOF_CSred_fine_final.eqdsk'
             

@@ -13,7 +13,7 @@ def green(R,Z,Rc,Zc):
     ellipk(m)-2*m**-0.5*ellipe(m))/(2*np.pi))
     g[r==0] = 0
     return g
-    
+
 def green_feild(R,Z,Rc,Zc):
     feild = np.zeros(2)
     a = np.sqrt((R+Rc)**2+(Z-Zc)**2)

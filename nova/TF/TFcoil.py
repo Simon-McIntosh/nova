@@ -122,7 +122,8 @@ class Dcoil(object):  # Princton D
         self.xo['r2'] = {'value':15.708,'lb':10,'ub':20}  # outer radius
         self.xo['dz'] = {'value':0,'lb':-10,'ub':10}  # vertical offset
         self.oppvar = list(self.xo.keys())
-                   
+        #self.oppvar.remove('r1')
+           
     def set_input(self,**kwargs): 
         inputs = get_input(self.oppvar,**kwargs)   
         for key in inputs:

@@ -20,9 +20,11 @@ color = sns.color_palette('Set2')
 #mu_o = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
 
 class ripple(object):
-    def __init__(self,plasma={},coil={}):
-        self.get_seperatrix(alpha=0.95,**plasma)
-        self.get_coil(**coil)
+    def __init__(self,**kwargs):
+        if 'plasma' in kwargs:
+            self.get_seperatrix(alpha=0.95,**kwargs['plasma'])
+        if 'coil' in kwargs:
+            self.set_TFcoil(**kwargs['coil'])
         
     def get_seperatrix(self,nplasma=100,alpha=0.95,**kwargs):
         self.nplasma = nplasma
@@ -52,32 +54,24 @@ class ripple(object):
         self.eqdsk = sf.eqdsk
       
     def get_boundary(filename,alpha=0.95):
+        print(filename)
         sf = SF(filename)
         r,z = sf.get_boundary(alpha=alpha)
         r,z = sf.clock(r,z,anti=True)
         return r,z
      
-    def get_coil(self,npoints=100,**kwargs):
+    def set_TFcoil(self,npoints=100,**kwargs):
         self.coil_loop = np.zeros((npoints,3))
-        if 'Rcl' in kwargs and 'Zcl' in kwargs and 'nTF' in kwargs \
-        and 'Iturn' in kwargs:
-            for var in ['Rcl','Zcl','nTF','Iturn']:
+        if 'Rcl' in kwargs and 'Zcl' in kwargs and 'nTF' in kwargs:
+            for var in ['Rcl','Zcl','nTF']:
                 setattr(self,var,kwargs.get(var))
             self.coil_loop[:,0],self.coil_loop[:,2] = \
             geom.rzSLine(self.Rcl,self.Zcl,npoints=npoints)  # coil centerline
         else:
             errtxt = '\n'
-            errtxt += 'coil input error, require [Rcl,Zcl,nTF,Iturn]\n'
+            errtxt += 'coil input error, require [Rcl,Zcl,nTF]\n'
             raise ValueError(errtxt)
 
-        '''
-        tf = TF(shape=kwargs)  # load tf coil
-        self.coil_loop[:,0],self.coil_loop[:,2] = \
-        geom.rzSLine(tf.Rcl,tf.Zcl,npoints=npoints)  # TFcoil centerline
-        self.nTF = tf.nTF
-        self.Iturn = tf.Iturn
-        '''
- 
     def point_ripple(self,s):  # s==3D point vector
         B = np.zeros(2)
         n = np.array([0,1,0])
@@ -87,7 +81,7 @@ class ripple(object):
             Bo = np.zeros(3)
             for tcoil in np.linspace(0,2*np.pi,self.nTF,endpoint=False):
                 coil_loop = np.dot(self.coil_loop,geom.rotate(tcoil))
-                Bo += cc.mu_o*self.Iturn*cc.green_feild_loop(coil_loop,sr)
+                Bo += cc.mu_o*cc.green_feild_loop(coil_loop,sr)
             B[j] = norm(Bo)
             B[j] = np.dot(nr,Bo)
         ripple = 1e2*(B[0]-B[1])/(B[1]+B[0])
@@ -102,7 +96,7 @@ class ripple(object):
             Bo = np.zeros(3)
             for tcoil in np.linspace(0,2*np.pi,self.nTF,endpoint=False):
                 coil_loop = np.dot(self.coil_loop,geom.rotate(tcoil))
-                Bo += cc.mu_o*self.Iturn*cc.green_feild_loop(coil_loop,sr)
+                Bo += cc.mu_o*cc.green_feild_loop(coil_loop,sr)
             B[j] = np.dot(nr,Bo)
         return B
         

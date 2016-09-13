@@ -40,7 +40,7 @@ class INV(object):
         self.log_iter = ['current_iter','plasma_iter','position_iter']
         self.log_plasma = ['plasma_coil']
         self.CS_Lnorm,self.CS_Znorm = 2,1
-        self.TFoffset = 0.1
+        self.TFoffset = 0.1  # offset coils from outer TF loop
         
     def Cname(self,coil):
         return 'Coil{:1.0f}'.format(coil)
@@ -316,9 +316,9 @@ class INV(object):
                 direction = np.array([d_dr,d_dz])/np.sqrt(d_dr**2+d_dz**2)
             if 'psi' in bc:
                 norm = psi_norm
-                marker,size,color = 'o',10.0,Color[0]
+                marker,size,color = 'o',7.5,Color[0]
                 pl.plot(r,z,marker,color=color,markersize=size)
-                pl.plot(r,z,marker,color=[1,1,1],markersize=0.5*size)
+                pl.plot(r,z,marker,color=[1,1,1],markersize=0.3*size)
                 #pl.plot([r,r+direction[0]*norm*w],[z,z+direction[1]*norm*w],
                 #        color=color,linewidth=2)
             else:
@@ -330,7 +330,7 @@ class INV(object):
                     marker,size,color,mew = 'o',2,Color[2],0.0
                 elif bc == 'Br' or bc == 'Bz':
                     norm = Brz_norm
-                    marker,size,color,mew = 'x',8,Color[2],1
+                    marker,size,color,mew = 'x',8,Color[2],0.0
                 pl.plot(r,z,marker,color=color,markersize=size,
                         markeredgewidth=mew)
 
@@ -548,9 +548,10 @@ class INV(object):
         R,Z = geom.offset(R,Z,dr)
         L = geom.length(R,Z)
         Lt = np.linspace(Ltrim[0],Ltrim[1],int((1-np.diff(Ltrim))*len(L)))
-        R,Z = interp1(L,R)(Lt),interp1(L,Z)(Lt)
+        R,Z = interp1d(L,R)(Lt),interp1d(L,Z)(Lt)
         L = np.linspace(0,1,len(R))
         return IUS(L,R),IUS(L,Z)
+        
     '''  # replace rb.tf with coil.TF object
     def interpTF(self,config='SN',Ltrim=[0.1,0.9]):
         #self.rb.TFopp(False,config=config)  #  load TF outline
@@ -657,7 +658,8 @@ class INV(object):
         dz = z-self.pf.coil[name]['z']
         self.pf.coil[name]['r'] += dr
         self.pf.coil[name]['z'] += dz
-        drTF,dzTF = self.pf.Cshift(self.pf.coil[name],'out',self.TFoffset)  # fit-TF
+        drTF,dzTF = self.pf.Cshift(self.pf.coil[name],
+                                   'out',self.TFoffset)  # fit-TF
         self.pf.coil[name]['r'] += drTF
         self.pf.coil[name]['z'] += dzTF
         self.coil['active'][name]['r'] += dr+drTF
@@ -716,7 +718,8 @@ class INV(object):
             scale = 1+relax*factor
             self.pf.coil[name]['dr'] *= scale
             self.pf.coil[name]['dz'] *= scale
-            drTF,dzTF = self.pf.Cshift(self.pf.coil[name],'out',self.TFoffset)  # fit-TF
+            drTF,dzTF = self.pf.Cshift(self.pf.coil[name],'out',
+                                       self.TFoffset)  # fit-TF
             self.pf.coil[name]['r'] += drTF
             self.pf.coil[name]['z'] += dzTF
             self.update_bundle(name)
@@ -770,8 +773,8 @@ class INV(object):
         self.solve()  # sead 
         I,niter = op.fmin_slsqp(self.return_rms,self.I*norm,full_output=True,
                                args=(norm,Imax,Ics,FzPF,FzCS,Fsep),
-                               f_ieqcons=self.Ilimit,
-                               disp=0,iter=5e2)[:3:2]
+                               #f_ieqcons=self.Ilimit,
+                               disp=1,iter=5e2)[:3:2]
         self.I = I.reshape(-1,1)/norm
         self.update_current()
         self.get_rms()

@@ -16,17 +16,16 @@ class RB(object):
         self.sf = sf
         self.npoints = npoints
         self.dataname = setup.configuration
-
         if not hasattr (sf,'Xpoint'):
             sf.get_Xpsi()  
         self.xo = [sf.Xpoint[0],self.sf.eqdsk['zmagx']]
         r,z = sf.get_boundary()
         sf.set_boundary(r,z,n=npoints)
         self.Rp,self.Zp = self.sf.rbdry,self.sf.zbdry
-        self.loop = Loop(self.Rp,self.Zp,self.xo)  # plasma boundary
+        self.loop = Loop(self.Rp,self.Zp,xo=self.xo)  # plasma boundary
         self.Lp = geom.length(self.Rp,self.Zp,norm=False)[-1]
         self.Rfw,self.Zfw,self.psi_fw = self.first_wall(self.setup.firstwall['dRfw']) 
-        self.loop = Loop(self.Rfw,self.Zfw,self.xo)  # first wall contour
+        self.loop = Loop(self.Rfw,self.Zfw,xo=self.xo)  # first wall contour
 
     def set_target(self,leg,**kwargs):
         if leg not in self.setup.targets:
@@ -392,7 +391,7 @@ class RB(object):
         L = geom.length(R,Z)
         index = np.append(np.diff(L)!=0,True)
         R,Z = R[index],Z[index]  # remove duplicates
-        nRloop,nZloop = geom.normal(Rloop,Zloop)
+        nRloop,nZloop,Rloop,Zloop = geom.normal(Rloop,Zloop)
         Rin,Zin = np.array([]),np.array([])
         for r,z in zip(R,Z):
             i = np.argmin((r-Rloop)**2+(z-Zloop)**2)
@@ -539,7 +538,7 @@ class RB(object):
             connect = self.setup.build['sheild_connect']
         else:
             connect=[0,1]
-        index = self.trim(connect,self.loop.R,self.loop.Z)
+        index = self.loop.trim(connect,self.loop.R,self.loop.Z)
         rVV = self.loop.R[index[0]:index[1]+1]
         zVV = self.loop.Z[index[0]:index[1]+1]
         ni = 10  #  number of trim nodes

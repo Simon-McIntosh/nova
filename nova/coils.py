@@ -2,6 +2,7 @@ import numpy as np
 import pylab as pl
 import pickle
 import scipy.optimize as op
+from scipy.optimize import fmin_slsqp
 from itertools import cycle,count
 import seaborn as sns
 import matplotlib
@@ -14,6 +15,7 @@ from nova.TF.TFcoil import Acoil,Dcoil,Scoil
 from nova.TF.ripple import ripple
 import time
 from nova.config import Setup
+colors = sns.color_palette('Set2',12)
 
 def loop_vol(R,Z,plot=False):
     imin,imax = np.argmin(Z),np.argmax(Z)
@@ -51,9 +53,9 @@ class PF(object):
                 name = 'Coil{:1.0f}'.format(next(nC))
                 self.coil[name] = {'r':r,'z':z,'dr':dr,'dz':dz,'I':I,
                                    'rc':np.sqrt(dr**2+dz**2)/2}
-                #if i>=10:
-                #    print('exit set_coil loop - coils')
-                #    break
+                if i>=10:
+                    print('exit set_coil loop - coils')
+                    break
          
     def unpack_coils(self):
         nc = len(self.coil.keys())
@@ -204,42 +206,48 @@ class PF(object):
 
 class TF(object):
     
-    def __init__(self,npoints=200,objective='L',nTF=18,shape={}):
+    def __init__(self,npoints=200,objective='V',nTF=18,shape={}):
         self.setargs(shape)
         self.objective = objective
         self.npoints = npoints
         self.width()
         self.nTF = nTF
-        self.amp_turns()  # calculate amp turns (only with eqdsk filename)
+        #self.amp_turns()  # calculate amp turns (only with eqdsk filename)
         self.generate()
 
-        
     def setargs(self,shape):  # set input data based on shape contents
         fit = shape.get('fit',True)  # fit coil if parameters avalible
         self.coil_type = shape.get('coil_type','unset')    
         self.config = shape.get('config','tmp')
+        
+        '''
         if 'config' in shape:
-            self.setup = Setup(shape.get('config'))
-            self.setup.coils['external']['id']=[]
 
-            self.dataname = self.setup.dataname
-            self.filename = self.setup.filename
         else:
             for name in ['dataname','filename']:
                 if name in shape:
                     setattr(self,name,shape.get(name))
+        '''
+        
+        self.rp = ripple(plasma={'config':self.config})
+            
         if 'R' in shape and 'Z' in shape:  # define coil by R,Z arrays
             self.datatype = 'array'
             self.Rcl,self.Zcl = shape['R'],shape['Z']  # coil centreline
+            
         elif 'vessel' in shape and 'pf' in shape and fit:
             self.datatype = 'fit'  # fit coil to internal incoil + pf coils
             self.set_bound(shape)  # TF boundary conditions
-            self.bound['ro_min'] -= 0.5  # offset minimum radius
+            #self.bound['ro_min'] -= 0.5  # offset minimum radius
             if 'plot' in shape:
                 if shape['plot']:
                     self.plot_bounds() 
         elif 'config' in shape and 'coil_type' in shape:
             self.datatype = 'file'  # load coil from file
+            self.setup = Setup(shape.get('config'))
+            self.setup.coils['external']['id']=[]
+            self.dataname = self.setup.dataname  # TF coil geometory
+            self.filename = self.setup.filename  # eqdsk file
         else:
             errtxt = '\n'
             errtxt += 'unable to load TF coil\n'
@@ -259,29 +267,41 @@ class TF(object):
             raise ValueError(errtxt)
          
     def set_bound(self,shape):
-        if 'pf' in shape and 'vessel' in shape:  # requre vessel,pf
-            pf = shape['pf']
-            vv = shape['vessel']
-            Rvv,Zvv = geom.rzSLine(vv.R,vv.Z,npoints=30)
-        else:
+        self.bound = {}
+        for side in ['internal','external']:
+            R,Z = np.array([]),np.array([])
+            if side == 'internal' and 'vessel' in shape:
+                vv = shape['vessel']  # add vessel loop
+                R,Z = np.append(R,vv.R),np.append(Z,vv.Z)
+            if 'pf' in shape and hasattr(self,'setup'):
+                Rpf,Zpf = shape['pf'].coil_corners(self.setup.coils[side])
+                R,Z = np.append(R,Rpf),np.append(Z,Zpf)
+            self.bound[side] = {'R':R,'Z':Z}
+        #self.bound['ro_min'] = 4.35  # minimum TF radius
+        if len(self.bound) == 0:
             errtxt = '\n'
-            errtxt += 'Require following input,'
-            errtxt += 'bounds={\'pf\':pf,\'vessel\':rb.loop}:\n'
+            errtxt += 'Require TF bounds input,'
+            errtxt += 'shape[\'vessel\'] and or shape[\'pf\'] + self.setup:\n'
             raise ValueError(errtxt)
-        Rin,Zin = pf.coil_corners(self.setup.coils['internal'])  # internal    
-        Rex,Zex = pf.coil_corners(self.setup.coils['external'])  # external 
-        ro_min = 4.35  # minimum TF radius
-        internal = {'R':np.append(Rvv,Rin),'Z':np.append(Zvv,Zin)}
-        external = {'R':Rex,'Z':Zex}
-        self.bound = {'in':internal,'out':external,'ro_min':ro_min}
+  
+    def set_oppvar(self):  # set optimization bounds and normalize
+        nopp = len(self.coil.oppvar)
+        xo,self.bounds = np.zeros(nopp),np.zeros((nopp,2))
+        xnorm,bnorm = np.zeros(nopp),np.zeros((nopp,2))
+        for i,var in enumerate(self.coil.oppvar):
+            xo[i] = self.coil.xo[var]['value']
+            self.bounds[i,:] = (self.coil.xo[var]['lb'],
+                                self.coil.xo[var]['ub'])
+            xnorm[i] = (xo[i]-self.bounds[i,0])/(self.bounds[i,1]-
+                                                 self.bounds[i,0])
+            bnorm[i,:] = [0,1]
+        return xnorm,bnorm
         
-    def get_oppvar(self):
-        xo,bounds = [],[]
-        for var in self.coil.oppvar:
-            xo.append(self.coil.xo[var]['value'])
-            bounds.append((self.coil.xo[var]['lb'],
-                           self.coil.xo[var]['ub'])) 
-        return xo,bounds
+    def get_oppvar(self,xnorm):
+        xo = np.copy(xnorm)
+        for i in range(len(xnorm)):
+            xo[i] = xo[i]*(self.bounds[i,1]-self.bounds[i,0])+self.bounds[i,0]
+        return xo
     
     def get_coil_loops(self,R,Z,profile='cl'):
         width = self.dRcoil+2*self.dRsteel
@@ -306,20 +326,28 @@ class TF(object):
             self.load_coil()  # load coil object
             if self.datatype == 'fit': 
                 tic = time.time()
-                xo,bounds = self.get_oppvar()
-                constraints = {'type':'ineq','fun':self.dot}
-                xo = op.minimize(self.fit,xo,  #,bounds=bounds
-                                 options={'disp':True,'maxiter':500},
-                                 method='COBYLA',constraints=constraints,
-                                 tol=1e-4).x
+                xnorm,bnorm = self.set_oppvar()  # normalized inputs
+
+                constraints = [{'type':'ineq','fun':self.dot},
+                               {'type':'ineq','fun':self.ripple}]
                 '''
+                xo = op.minimize(self.fit,xo,  #,bounds=bounds
+                                 options={'disp':True,'maxiter':500,
+                                          'catol':1e-6,'rhobeg':1e-3},
+                                 method='COBYLA',constraints=constraints).x
                 print('optimisation time {:1.1f}s'.format(time.time()-tic))
-                xo = op.minimize(self.fit,xo,bounds=bounds,
+                
+                xnorm = op.minimize(self.fit,xnorm,bounds=bnorm,
                                  options={'disp':True,'maxiter':500},
                                  method='SLSQP',constraints=constraints,
                                  tol=1e-2).x
-                '''
+                '''                    
+                xnorm = fmin_slsqp(self.fit,xnorm,f_ieqcons=self.carray,
+                                   bounds=bnorm).x
+                xo = self.get_oppvar(xnorm)
+                print(xo)
                 self.coil.set_input(xo=xo)  # coil centerline
+                
                 print('optimisation time {:1.1f}s'.format(time.time()-tic))
                 print('noppvar {:1.0f}'.format(len(self.coil.oppvar)))
                 dataname = '../../Data/'+self.config+'_'+\
@@ -342,28 +370,19 @@ class TF(object):
             
             x = self.coil.draw()
             self.get_coil_loops(x['r'],x['z'],profile='in')
+            self.rp.set_TFcoil(Rcl=self.Rcl,Zcl=self.Zcl,nTF=self.nTF)
+            print('ripple',self.rp.get_ripple())
             
-            '''
-            print('nTF',self.nTF,'Iturn',self.Iturn)
-            coil = {'Rcl':self.Rcl,'Zcl':self.Zcl,
-                    'nTF':self.nTF,'Iturn':self.Iturn}
-            rp = ripple(plasma={'config':'SN'},coil=coil)
-            print('ripple',rp.get_ripple())
-            #rp.plot_loops()
-            #self.fill()
-            
-            referance = Dcoil()
-            x = referance.draw()
-            referance.plot()
-            self.get_coil_loops(x['r'],x['z'],profile='in')
-            coil = {'Rcl':self.Rcl,'Zcl':self.Zcl,
-                    'nTF':self.nTF,'Iturn':self.Iturn}
-            rp = ripple(plasma={'config':'SN'},coil=coil)
-            print('ref ripple',rp.get_ripple())
-            '''
-            
-
-    def fit(self,xo):
+    def constraint_array(self):
+        dsum = 0
+        xo = self.get_oppvar(xnorm)  # de-normalize
+        x = self.coil.draw(xo=xo) 
+        for side in ['internal','external']:
+            dsum += self.dot_diffrence(x,side) 
+        return dsum
+        
+    def fit(self,xnorm):
+        xo = self.get_oppvar(xnorm)  # de-normalize
         x = self.coil.draw(xo=xo)
         if self.objective is 'L':  # coil length
             objF = geom.length(x['r'],x['z'],norm=False)[-1]
@@ -371,37 +390,41 @@ class TF(object):
             objF = loop_vol(x['r'],x['z'])
         return objF
         
-    def dot(self,xo):
+    def ripple(self,xnorm,ripple_limit=0.6):
         dsum = 0
+        xo = self.get_oppvar(xnorm)  # de-normalize
         x = self.coil.draw(xo=xo) 
-        
         self.get_coil_loops(x['r'],x['z'],profile='in')
-        coil = {'Rcl':self.Rcl,'Zcl':self.Zcl,
-                'nTF':self.nTF,'Iturn':self.Iturn}
-        rp = ripple(plasma={'config':self.config},coil=coil)
-        max_ripple = rp.get_ripple()
-        if max_ripple > 0.6:
-            dsum -= max_ripple-0.6
+        self.rp.set_TFcoil(Rcl=self.Rcl,Zcl=self.Zcl,nTF=self.nTF)
+        max_ripple = self.rp.get_ripple()
+        if max_ripple > ripple_limit:
+            dsum -= max_ripple-ripple_limit
+        return dsum
         
-        for side in ['in','out']:
+    def dot(self,xnorm):
+        dsum = 0
+        xo = self.get_oppvar(xnorm)  # de-normalize
+        x = self.coil.draw(xo=xo) 
+        for side in ['internal','external']:
             dsum += self.dot_diffrence(x,side) 
         return dsum
         
     def dot_diffrence(self,x,side):
         Rloop,Zloop = x['r'],x['z']  # inside coil loop
-        switch = 1 if side is 'in' else -1
-        if side is 'out':
+        switch = 1 if side is 'internal' else -1
+        if side is 'external':
             Rloop,Zloop = geom.offset(Rloop,Zloop,self.dRcoil+2*self.dRsteel)
-        nRloop,nZloop = geom.normal(Rloop,Zloop)
+        nRloop,nZloop,Rloop,Zloop = geom.normal(Rloop,Zloop)
         R,Z = self.bound[side]['R'],self.bound[side]['Z']
-        dsum = 0
+        #dsum = 0
+        dot = np.zeros(len(R))
         for r,z in zip(R,Z):
             i = np.argmin((r-Rloop)**2+(z-Zloop)**2)
             dr = [Rloop[i]-r,Zloop[i]-z]  
             dn = [nRloop[i],nZloop[i]]
             dot = switch*np.dot(dr,dn)
-            if dot < 0:
-                dsum -= (dr[0]**2+dr[1]**2)
+            #if dot < 0:
+            #    dsum -= (dr[0]**2+dr[1]**2)
         return dsum
         
     def width(self):
@@ -409,21 +432,16 @@ class TF(object):
         self.dRsteel = 0.15*self.dRcoil
  
     def fill(self,write=False,plot=True):
-        loop = Loop(self.Rin,self.Zin,[np.mean(self.Rin),np.mean(self.Zin)])
+        loop = Loop(self.Rin,self.Zin,xo=[np.mean(self.Rin),np.mean(self.Zin)])
         self.Rin,self.Zin = loop.R,loop.Z
+        self.Rmid,self.Zmid = geom.offset(self.Rin,self.Zin,
+                                          self.dRsteel+self.dRcoil/2)
+        self.Rout,self.Zout = geom.offset(self.Rmid,self.Zmid,
+                                          self.dRsteel+self.dRcoil/2)
         
-        loop.rzPut()
-        loop.fill(dR=0,dt=self.dRsteel,trim=None,color=0.4*np.ones(3),alpha=1,
-                  part_fill=False,loop=True,plot=plot)
-        loop.fill(dt=self.dRcoil/2,trim=None,color=0.7*np.ones(3),alpha=1,
-                  label='TF coil',part_fill=False,loop=True,plot=plot)
-        self.Rmid,self.Zmid = loop.R,loop.Z  
-        loop.fill(dt=self.dRcoil/2,trim=None,color=0.7*np.ones(3),alpha=1,
-                  label='TF coil',part_fill=False,loop=True,plot=plot)
-        loop.fill(dt=self.dRsteel,trim=None,color=0.4*np.ones(3),alpha=1,
-                  label='TF support',part_fill=False,loop=True,plot=plot)
-        self.Rout,self.Zout = loop.R,loop.Z
-        
+        x = geom.polyloop({'in':{'r':self.Rin,'z':self.Zin},
+                           'out':{'r':self.Rout,'z':self.Zout}})
+        geom.polyfill(x['r'],x['z'])
         if write:
             with open('../Data/'+self.dataname+'_TFcoil.txt','w') as f:
                 f.write('Rin m\t\tZin m\t\tRout m\t\tZout m\n')
@@ -437,7 +455,6 @@ class TF(object):
         self.fill(**kwargs)
         
     def volume_ratio(self,Rp,Zp):
-        #pl.plot(self.Rp,self.Zp,'rx-')
         self.Pvol = loop_vol(Rp,Zp,plot=False)
         Rtf,Ztf,L = self.drawTF(self.xCoil, npoints=300)
         self.TFvol = loop_vol(Rtf,Ztf,plot=False)
@@ -451,12 +468,11 @@ class TF(object):
         self.Rlength = self.TFlength/self.Plength
 
     def plot_bounds(self):
-        pl.plot(self.bound['in']['R'],self.bound['in']['Z'],'d',
-                markersize=3)
-        pl.plot(self.bound['out']['R'],self.bound['out']['Z'],'o',
-                markersize=3)
-        pl.plot(self.bound['ro_min'],0,'*',markersize=3)
-        
+        for side,marker in zip(['internal','external'],['.','x']):
+            pl.plot(self.bound[side]['R'],self.bound[side]['Z'],
+                    marker,markersize=6,color=colors[9])
+    
+    '''    
     def amp_turns(self):
         if hasattr(self,'filename'):
             eqdsk = nova.geqdsk.read(self.filename)
@@ -465,7 +481,7 @@ class TF(object):
             (mu_o*self.nTF) 
         else:
             self.Iturn = 0
-
+    
     def energy(self,plot=False,Jmax=7.2e7,Nseg=100,**kwargs):
         if 'Iturn' in kwargs:
             self.Iturn = kwargs['Iturn']
@@ -497,5 +513,5 @@ class TF(object):
                 ax.plot(np.append(X[:,0],X[0,0]),np.append(X[:,1],X[0,1]),
                         np.append(X[:,2],X[0,2]))
         self.Ecage = 0.5*self.Iturn**2*self.nTF*np.sum(M)
-        
+    '''
 

@@ -229,6 +229,9 @@ class SF(object):
         
     def contour(self,Nstd=1.5,Nlevel=31,Xnorm=True,lw=1,**kwargs):
         alpha,lw = np.array([1,0.5]),lw*np.array([2.25,1.75])   
+        plot_vac = kwargs.get('plot_vac',True)
+        r,z = self.get_boundary()
+        self.set_boundary(r,z)
         if not hasattr(self,'Xpsi'):
             self.get_Xpsi()
         if not hasattr(self,'Mpsi'):
@@ -256,20 +259,30 @@ class SF(object):
             color = 'k'
         if 'linetype' in kwargs.keys():
             linetype = kwargs['linetype']
-        if color == 'k': alpha *= 0.25
-        if Xnorm: levels = levels+self.Xpsi
+        if color == 'k': 
+            alpha *= 0.25
+        if Xnorm: 
+            levels = levels+self.Xpsi
         contours = self.get_contour(levels)
-        for psi_line in contours:
+        for psi_line,level in zip(contours,levels):
+            if Xnorm: 
+                level = level-self.Xpsi
             for line in psi_line:
                 r,z = line[:,0],line[:,1]
-                pindex=0 if self.inPlasma(r,z) else 1
-                pl.plot(r,z,linetype,linewidth=lw[pindex],
-                        color=color,alpha=alpha[pindex])
+                if self.inPlasma(r,z):
+                    pindex = 0
+                else:
+                    pindex = 1
+                if (not plot_vac and pindex==0) or plot_vac:
+                    pl.plot(r,z,linetype,linewidth=lw[pindex],
+                            color=color,alpha=alpha[pindex])
+        pl.plot(self.rbdry,self.zbdry,linetype,linewidth=lw[pindex],
+                            color=color,alpha=alpha[pindex])
         pl.axis('equal')
         pl.axis('off')
         return levels
         
-    def inPlasma(self,R,Z,delta=0.2):
+    def inPlasma(self,R,Z,delta=0):
         return R.min()>=self.rbdry.min()-delta and \
         R.max()<=self.rbdry.max()+delta and \
         Z.min()>=self.zbdry.min()-delta and \
@@ -391,7 +404,7 @@ class SF(object):
             lines.append(psi_line)
         return lines
         
-    def get_boundary(self,alpha=1-1e-3,delta_loop=1):
+    def get_boundary(self,alpha=1-1e-3,delta_loop=0.1):
         self.Spsi = alpha*(self.Xpsi-self.Mpsi)+self.Mpsi
         psi_line = self.get_contour([self.Spsi],boundary=True)[0]
         R,Z = np.array([]),np.array([])

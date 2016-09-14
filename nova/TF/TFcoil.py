@@ -37,6 +37,11 @@ def set_limit(xo):
     if xo['value'] > xo['ub']:
         xo['value'] = xo['ub']
     return xo
+    
+def loops(x):
+    R1,Z1 = geom.offset(x['r'],x['z'],0.5)
+    pl.plot(R1,Z1)
+    
                     
 
 class Acoil(object):  # tripple arc coil
@@ -181,15 +186,15 @@ class Scoil(object):  # polybezier
         self.xo = OrderedDict()
         self.xo['r1'] = {'value':4.486,'lb':4,'ub':6}  # inner radius
         self.xo['r2'] = {'value':15.708,'lb':10,'ub':25}  # outer radius 
-        self.xo['z2'] = {'value':0,'lb':-0.3,'ub':0.3} # outer node vertical shift
+        self.xo['z2'] = {'value':0,'lb':-0.2,'ub':0.5} # outer node vertical shift
         self.xo['height'] = {'value':17.367,'lb':0.1,'ub':50} # full coil height
-        self.xo['top'] = {'value':0.33,'lb':0,'ub':1}  # horizontal shift
-        self.xo['upper'] = {'value':0.62,'lb':0.55,'ub':1}  # vertical shift
+        self.xo['top'] = {'value':0.33,'lb':0.1,'ub':1}  # horizontal shift
+        self.xo['upper'] = {'value':0.62,'lb':0.3,'ub':1}  # vertical shift
         self.set_lower()  # lower coil parameters (bottom,lower)
-        self.set_control_lengths({'value':0.8,'lb':0.6,'ub':1.5})  # 1/tesion
-        self.xo['dz'] = {'value':0,'lb':-10,'ub':10}  # vertical offset
+        self.set_control_lengths({'value':0.8,'lb':0.7,'ub':1.5})  # 1/tesion
+        self.xo['dz'] = {'value':0,'lb':-2,'ub':2}  # vertical offset
         self.oppvar = list(self.xo.keys())
-        self.oppvar.remove('r1')
+        #self.oppvar.remove('r1')
         
     def check_tension_length(self,nl):
         if nl in [1,2,4,8]:
@@ -358,7 +363,7 @@ if __name__ is '__main__':  # plot coil classes
     #x = coil.plot()
     
     coil = Scoil()
-    x = coil.plot({'l1s':1.5,'top':0.8})
+    x = coil.plot({'l1s':0.5,'top':0.5})
     '''
     coil = Dcoil()
     x = coil.draw()

@@ -48,9 +48,11 @@ class SF(object):
         self.dataname = conf.dataname
               
     def normalise(self):
+        print(self.eqdsk['name'])
         if 'Fiesta' in self.eqdsk['name'] or 'Nova' in self.eqdsk['name']\
         or 'disr' in self.eqdsk['name']:
             self.norm = 1
+            self.eqdsk['cpasma'] *= -1  # check NOVA output - CREATE-NL version? 
         else:  # CREATE
             self.eqdsk['cpasma'] *= -1
             self.norm = 2*np.pi
@@ -418,7 +420,7 @@ class SF(object):
                 r,z = r[index],z[index]
                 loop = np.sqrt((r[0]-r[-1])**2+(z[0]-z[-1])**2) < delta_loop
                 if (z>self.Mpoint[1]).any() and (z<self.Mpoint[1]).any() and loop:
-                    R,Z = np.append(R,r),np.append(Z,z)    
+                    R,Z = np.append(R,r),np.append(Z,z) 
         R,Z = self.clock(R,Z)
         return R,Z
         

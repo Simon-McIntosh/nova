@@ -1,5 +1,6 @@
 import numpy as np
 import pylab as pl
+import scipy as sp
 import pickle
 import scipy.optimize as op
 from scipy.optimize import fmin_slsqp
@@ -16,28 +17,6 @@ from nova.TF.ripple import ripple
 import time
 from nova.config import Setup
 colors = sns.color_palette('Set2',12)
-
-def loop_vol(R,Z,plot=False):
-    imin,imax = np.argmin(Z),np.argmax(Z)
-    Rin = np.append(R[::-1][:imin+1][::-1],R[:imin+1])
-    Zin = np.append(Z[::-1][:imin+1][::-1],Z[:imin+1])
-    Rout = R[imin:imax+1]
-    Zout = Z[imin:imax+1]
-    if plot:
-        pl.plot(R[0],Z[0],'bo')
-        pl.plot(R[20],Z[20],'bd')
-        pl.plot(Rin,Zin,'bx-')
-        pl.plot(Rout,Zout,'gx-')
-    return vol_calc(Rout,Zout)-vol_calc(Rin,Zin)
-    
-def vol_calc(R,Z):
-    dR = np.diff(R)
-    dZ = np.diff(Z)
-    V = 0
-    for r,dr,dz in zip(R[:-1],dR,dZ):
-        V += np.abs((r+dr/2)**2*dz)
-    V *= np.pi
-    return V
     
 class PF(object):
     def __init__(self,eqdsk):
@@ -78,6 +57,7 @@ class PF(object):
             color = coil_color  # color itterator
         
         color = sns.color_palette('Set3',300)
+        r_med = sp.median([coils[coil]['r'] for coil in coils])
         for i,name in enumerate(coils.keys()):
             coil = coils[name]
             if label and current:
@@ -104,7 +84,7 @@ class PF(object):
                 pl.text(r,z+zshift,name.replace('Coil',''),fontsize=fs*0.6,
                         ha='center',va='center',color=[0.25,0.25,0.25])
             if current: 
-                if r<self.Xpoint[0]:
+                if r < r_med:
                     drs = -2/3*dr
                     ha = 'right'
                 else:
@@ -206,7 +186,7 @@ class PF(object):
 
 class TF(object):
     
-    def __init__(self,npoints=200,objective='V',nTF=18,shape={}):
+    def __init__(self,npoints=200,objective='L',nTF=18,shape={}):
         self.setargs(shape)
         self.objective = objective
         self.npoints = npoints
@@ -217,8 +197,9 @@ class TF(object):
 
     def setargs(self,shape):  # set input data based on shape contents
         fit = shape.get('fit',True)  # fit coil if parameters avalible
-        self.coil_type = shape.get('coil_type','unset')    
-        self.config = shape.get('config','tmp')
+        self.coil_type = shape.get('coil_type','A')  # arc type default    
+        self.config = shape.get('config','tmp')  # save file prefix
+        
         
         '''
         if 'config' in shape:
@@ -229,7 +210,7 @@ class TF(object):
                     setattr(self,name,shape.get(name))
         '''
         
-        self.rp = ripple(plasma={'config':self.config})
+        self.rp = ripple(plasma={'sf':shape.get('sf',None)})
             
         if 'R' in shape and 'Z' in shape:  # define coil by R,Z arrays
             self.datatype = 'array'
@@ -327,10 +308,10 @@ class TF(object):
             if self.datatype == 'fit': 
                 tic = time.time()
                 xnorm,bnorm = self.set_oppvar()  # normalized inputs
-
+                '''
                 constraints = [{'type':'ineq','fun':self.dot},
                                {'type':'ineq','fun':self.ripple}]
-                '''
+                
                 xo = op.minimize(self.fit,xo,  #,bounds=bounds
                                  options={'disp':True,'maxiter':500,
                                           'catol':1e-6,'rhobeg':1e-3},
@@ -342,11 +323,13 @@ class TF(object):
                                  method='SLSQP',constraints=constraints,
                                  tol=1e-2).x
                 '''                    
-                xnorm = fmin_slsqp(self.fit,xnorm,f_ieqcons=self.carray,
-                                   bounds=bnorm).x
+                xnorm = fmin_slsqp(self.fit,xnorm,
+                                   f_ieqcons=self.constraint_array,
+                                   bounds=bnorm,acc=0.01)
+                #print(xnorm)
                 xo = self.get_oppvar(xnorm)
-                print(xo)
-                self.coil.set_input(xo=xo)  # coil centerline
+                #print(xo)
+                self.coil.set_input(xo=xo)  # TFcoil inner loop
                 
                 print('optimisation time {:1.1f}s'.format(time.time()-tic))
                 print('noppvar {:1.0f}'.format(len(self.coil.oppvar)))
@@ -373,13 +356,17 @@ class TF(object):
             self.rp.set_TFcoil(Rcl=self.Rcl,Zcl=self.Zcl,nTF=self.nTF)
             print('ripple',self.rp.get_ripple())
             
-    def constraint_array(self):
-        dsum = 0
+    def constraint_array(self,xnorm,ripple_limit=0.6):
         xo = self.get_oppvar(xnorm)  # de-normalize
         x = self.coil.draw(xo=xo) 
+        dot = np.array([])
         for side in ['internal','external']:
-            dsum += self.dot_diffrence(x,side) 
-        return dsum
+            dot = np.append(dot,self.dot_diffrence(x,side))
+        self.get_coil_loops(x['r'],x['z'],profile='in')
+        self.rp.set_TFcoil(Rcl=self.Rcl,Zcl=self.Zcl,nTF=self.nTF)
+        max_ripple = self.rp.get_ripple()
+        dot = np.append(dot,ripple_limit-max_ripple)
+        return dot
         
     def fit(self,xnorm):
         xo = self.get_oppvar(xnorm)  # de-normalize
@@ -418,14 +405,14 @@ class TF(object):
         R,Z = self.bound[side]['R'],self.bound[side]['Z']
         #dsum = 0
         dot = np.zeros(len(R))
-        for r,z in zip(R,Z):
+        for j,(r,z) in enumerate(zip(R,Z)):
             i = np.argmin((r-Rloop)**2+(z-Zloop)**2)
             dr = [Rloop[i]-r,Zloop[i]-z]  
             dn = [nRloop[i],nZloop[i]]
-            dot = switch*np.dot(dr,dn)
+            dot[j] = switch*np.dot(dr,dn)
             #if dot < 0:
             #    dsum -= (dr[0]**2+dr[1]**2)
-        return dsum
+        return dot
         
     def width(self):
         self.dRcoil = 0.489

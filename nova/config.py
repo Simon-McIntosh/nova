@@ -97,7 +97,8 @@ class Setup(object):
         
         elif configuration == 'SXex':
             self.dataname = 'SXex'
-            self.filename = '/SXex.eqdsk'
+            #self.filename = '/SXex.eqdsk'
+            self.filename = 'SXMOF.eqdsk'
             self.targets['inner'] = {'L2D':[1.1]}
             self.targets['outer'] = {'L2D':[3.55]} 
             self.firstwall['div_ex'] = 1.3

@@ -1,15 +1,14 @@
 import pylab as pl
-from streamfunction import SF
-from elliptic import EQ
-from inverse import INV
-from eqConfig import Config
+from nova.streamfunction import SF
+from nova.elliptic import EQ
+from nova.inverse import INV
+from nova.config import Setup
 from itertools import cycle
 import numpy as np
-from radial_build import RB
-import copy
-from shelf import PKL
-
-import cross_coil as cc
+from nova.radial_build import RB
+from nova.shelf import PKL
+import nova.cross_coil as cc
+from nova.coils import PF,TF
 
 pkl = PKL('moveSX_Dev2')
 
@@ -25,38 +24,40 @@ pl.axis('equal')
 pl.axis('off')
 
 
-conf = Config('SN')
-sf = SF(conf)
+'''
+setup = Setup('SN')
+sf = SF(setup.filename)
 
-#sf.contour()
-#pl.plot(sf.rbdry,sf.zbdry)
+rb = RB(setup,sf,npoints=200)
+pf = PF(sf.eqdsk)
+eq = EQ(sf,pf,dCoil=0.5,sigma=0,boundary=rb.get_fw(expand=0.5),n=5e4)
 
-#eq = EQ(sf,dCoil=1,limit=[4,15.5,-13,5.5],n=1e4)
-#eq.plasma()
+eq.run(update=False)
+rb.firstwall(calc=True,plot=True,debug=False)
 
-conf = Config('SXex')
-sf.conf = conf
-conf.TF(sf)
-rb = RB(conf,sf,Np=200)
-rb.divertor_outline(False,plot=False,debug=False)
-eq = EQ(sf,dCoil=0.5,limit=[4,15.5,-13,5.5],n=1e4)
-#eq = EQ(sf,dCoil=1,boundary={'R':rb.Rb,'Z':rb.Zb,
-#                             'rmin':4,'expand':1.5},n=5e3)
-eq.set_sf_psi()  # set psi
-eq.gen()
+'''
 
-#eq.set_coil_psi()
-#eq.get_Xpsi()
-#eq.get_Mpsi()
+config = 'SXex'
+setup = Setup(config)
 
-inv = INV(sf,eq,configTF='SXex',config='SXex')
+sf = SF(setup.filename)
+rb = RB(setup,sf)
+pf = PF(sf.eqdsk)
+
+eq = EQ(sf,pf,dCoil=0.5,sigma=0,boundary=rb.get_fw(expand=0.5),n=1e4) 
+#eq.gen_opp(sf.Mpoint[1])
+rb.firstwall(calc=False,plot=True,debug=False)
+sf.contour()
+
+inv = INV(sf,pf,eq)
 Lpf = inv.grid_PF(nPF=5)
 Lcs = inv.grid_CS(nCS=5)
 Lo = np.append(Lpf,Lcs)
 inv.eq.coils()  # re-grid
 inv.update_coils()
 
-
+pf.plot(coils=pf.coil,label=False,plasma=False,current=True) 
+'''
 inv.fix_boundary_psi(N=31,alpha=1-1e-4,factor=1)  # add boundary points
 inv.fix_boundary_feild(N=31,alpha=1-1e-4,factor=1)  # add boundary points
 inv.add_null(factor=1,point=sf.Xpoint)
@@ -99,7 +100,7 @@ sf.plot_coils(coils=sf.coil,label=False,plasma=False,current=False)
 #eq.plotb()
 #sf.eqwrite(config='SXex')
 #pl.plot(sf.rbdry,sf.zbdry,'--')
-
+'''
 
 
 '''

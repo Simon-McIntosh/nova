@@ -26,21 +26,24 @@ def green_feild(R,Z,Rc,Zc):
     feild[1] = Rc/(4*np.pi)*((Rc+R*A/B)*I2-R/B*I1)
     return feild
     
-def green_feild_loop(loop,point,smooth=False,Nss=100,rc=0.25):  # 3D feild from arbitrary loop
-    if np.sum((loop[0,:]-loop[-1,:])**2) != 0:  # close loop
-        loop = np.append(loop, np.reshape(loop[0,:],(1,3)),axis=0)  
-    dL = cut_corners(loop,smooth=smooth,Nss=Nss)
-    loop = loop[:-1,:]  # re-open loop
-    N = len(loop)
-    point = np.array(point)*np.ones((N,3))  # point array
-    r = point-loop  # point-segment vectors
-    r_mag = np.transpose(np.sum(r*r,axis=1)**0.5*np.ones((3,N)))
-    core = 1-np.exp(-r_mag**3/rc**3)  # magnet core
-    feild = np.sum(core*np.cross(dL,r)/r_mag**3,axis=0)/(4*np.pi)  # Bfeild 
-    return feild
+class GreenFeildLoop(object):
+    def  __init__(self,loop,smooth=True,Nss=100,rc=0.25):
+        self.rc = rc
+        if np.sum((loop[0,:]-loop[-1,:])**2) != 0:  # close loop
+            loop = np.append(loop, np.reshape(loop[0,:],(1,3)),axis=0)  
+        self.dL = cut_corners(loop,smooth=smooth,Nss=Nss)
+        self.loop = loop[:-1,:]  # re-open loop
+        self.N = len(self.loop)
+
+    def B(self,point):  # 3D feild from arbitrary loop
+        point = np.array(point)*np.ones((self.N,3))  # point array
+        r = point-self.loop  # point-segment vectors
+        r_mag = np.transpose(np.sum(r*r,axis=1)**0.5*np.ones((3,self.N)))
+        core = 1-np.exp(-r_mag**3/self.rc**3)  # magnet core
+        Bfeild = np.sum(core*np.cross(self.dL,r)/r_mag**3,axis=0)/(4*np.pi) 
+        return Bfeild
     
 def green_feild_circle(coil,point,N=20):  # 3D feild from arbitrary loop
-
     theta,dtheta = np.linspace(0,2*np.pi,N,endpoint=False,retstep=True)  # angle
     c = np.transpose(np.array([coil['r']*np.cos(theta),coil['r']*np.sin(theta),
                                np.array([coil['z']]*N)]))  # position                     
@@ -51,6 +54,20 @@ def green_feild_circle(coil,point,N=20):  # 3D feild from arbitrary loop
     feild = np.sum(np.cross(dL,r)/r_mag**3,axis=0)/(4*np.pi)  # Bfeild 
     return feild
     
+def curve_length(loop,smooth=True,Nss=100):
+    if smooth and Nss > len(loop):  # round edges of segmented coil    
+        loop_ss = np.zeros((Nss,3))
+        L = geom.vector_length(loop,norm=False)
+        l = L/L[-1]
+        lss = np.linspace(0,1,Nss)
+        for i in range(3):
+            loop_ss[:,i] = interp1d(l,loop[:,i],kind='quadratic')(lss)
+        Lss = geom.vector_length(loop_ss,norm=False)
+        factor =  Lss[-1]/L[-1]
+    else:
+        factor = 1
+    return factor
+   
 def cut_corners(loop,smooth=True,Nss=100):
     if smooth and Nss > len(loop):  # round edges of segmented coil    
         N = np.shape(loop)[0]
@@ -164,153 +181,3 @@ def normal(R,Z,norm=True):
     n = np.cross(t, [0,0,1])
     nR,nZ = n[:,0],n[:,1]
     return nR,nZ,R,Z
-
-'''    
-def Fcoil(coil,plasma_coil,name):
-    point = (coil[name]['r'],coil[name]['z'])
-    B = Bfeild(coil,plasma_coil,point)
-    Fr = 2*np.pi*coil[name]['r']*B[1]*coil[name]['I']
-    Fz = -2*np.pi*coil[name]['r']*B[0]*coil[name]['I']
-    return Fr,Fz
-'''
-    
-'''    
-def tolist(var):
-    if type(var) is not list:
-        var = [var]
-    return var
-    
-def Pcalc(r,z,ri,zi,I):
-    m = 4*r*ri/((r+ri)**2+(z-zi)**2)
-    psi = mu_o*I/(2*np.pi)*(ri*r)**0.5*\
-        ((2*m**-0.5-m**0.5)*K(m)-2*m**-0.5*E(m))
-    return psi
-
-def Bfield(coil,r,ri,z,zi):
-    feild = np.zeros(2)
-    a = ((r+ri)**2+(z-zi)**2)**0.5
-    m = 4*r*ri/a**2
-    I1 = 4/a*K(m)
-    I2 = 4/a**3*E(m)/(1-m)
-    A = (z-zi)**2+r**2+ri**2
-    B = -2*r*ri
-    feild[0] = mu_o*coil['I']/(4*np.pi)*ri*(z-zi)/B*(I1-A*I2)
-    feild[1] = mu_o*coil['I']/(4*np.pi)*ri*((ri+r*A/B)*I2-r/B*I1) 
-    return feild
-    
-
-    
-
-    
-def Pcoil(coil,point):
-    psi = 0
-    for name in coil.keys():
-        ri,zi = (coil[name]['r'], coil[name]['z'])
-        r,z = point
-        I = coil[name]['I']
-        psi += Pcalc(r,z,ri,zi,I)
-    return psi
-
-def Bcoil_a(coil, point):
-
-    nArc, B, Clist = 20, [], {} 
-    for key in coil.keys():
-        Clist[key] = tolist(coil[key])
-        
-    for cr, cz, I, rc in zip(Clist['r'],Clist['z'],Clist['I'],Clist['rc']):
-        psi, dpsi = np.linspace(0, 2*np.pi, nArc, endpoint=False, retstep=True)  # angle
-        c = np.transpose(np.array([cr*np.cos(psi),cr*np.sin(psi),np.array([cz]*len(psi))]))  # position
-        dL = cr*np.transpose(np.array([-np.sin(psi),np.cos(psi),np.array([0]*len(psi))]))*dpsi  # segment
-        p = np.array(point)*np.ones((len(psi),3))  # point
-        r = p-c  # vectors
-        r_mag = np.transpose(np.sum(r*r,axis=1)**0.5*np.ones((3,len(psi))))
-        core = 1-np.exp(-r_mag**3/rc**3)  # magnet core
-        for i,mag in enumerate(r_mag):
-            if mag[0] < 1e-8:
-                r_mag[i] = 3*[1e-8]
-        r_hat = r/r_mag
-        B.append(I*mu_o/(4*np.pi)*np.sum(core*np.cross(dL,r_hat)/r_mag**2, axis=0))  # Bfeild 
-    return np.sum(B, axis=0)
-    
-    from xalglib import incompleteellipticintegralk as iK  # first kind
-    from xalglib import incompleteellipticintegrale as iE  # second kind
-        
-    def elliptic(kind, r, rc, r_mag, m):
-        if r_mag>rc:
-            if 'K' in kind:
-                intergral = K(m)    
-            else:
-                intergral = E(m)
-        else:
-            dtheta = rc/r*(1-r_mag/rc)/2
-            if 'K' in kind:
-                intergral = iK(np.pi/2-dtheta, m)    
-            else:
-                intergral = iE(np.pi/2-dtheta, m)
-        return intergral
-  
-  def green_loop(coil, point): 
-    nArc, B = 1000, []
-    for name in coil.keys():
-        #print(name)
-        psi, dpsi = np.linspace(0, 2*np.pi, nArc, endpoint=False, retstep=True)  # angle
-        c = np.transpose(np.array([coil[name]['r']*np.cos(psi),
-                                   coil[name]['r']*np.sin(psi),
-                                   np.array([coil[name]['z']]*len(psi))
-                                   ]))  # position
-        dL = coil[name]['r']*np.transpose(np.array([-np.sin(psi),
-                                                    np.cos(psi),
-                                                    np.array([0]*len(psi))]))*dpsi  # segment
-        p = np.array(point)*np.ones((len(psi),3))  # point
-        r = p-c  # vectors
-        r_mag = np.transpose(np.sum(r*r,axis=1)**0.5*np.ones((3,len(psi))))
-        core = 1-np.exp(-r_mag**3/coil[name]['rc']**3)  # magnet core
-
-        for i,mag in enumerate(r_mag):
-            #print(mag)
-            if mag[0] < 1e-16:
-                r_mag[i] = 3*[1e-16]
-        #print('')
-        r_hat = r/r_mag
-        B.append(coil[name]['I']*mu_o/(4*np.pi)*
-                 np.sum(core*np.cross(dL,r_hat)/r_mag**2, 
-                 axis=0))  # Bfeild 
-    return np.sum(B, axis=0)
-    
-def Bcoil_c(coil, point):
-    feild = np.zeros(2)
-    for name in coil.keys():
-        ri,zi = (coil[name]['r'], coil[name]['z'])
-        r,z = point
-        r_mag = ((r-ri)**2+(z-zi)**2)**0.5
-
-        if r_mag > 1e-6:
-            if r_mag > coil[name]['rc']:
-                dfeild = Bfield(coil[name], r, ri, z, zi)
-            else:
-                r_theta = np.arctan2(z-zi,r-ri)
-                B = np.zeros((2,2))
-                for i,theta in enumerate([0,np.pi]):
-                    rc = ri+coil[name]['rc']*np.cos(theta+r_theta)
-                    zc = zi+coil[name]['rc']*np.sin(theta+r_theta)
-                    B[:,i] = Bfield(coil[name], rc, ri, zc, zi)
-                dfeild = B[:,0] + (B[:,0]-B[:,1])/2*(r_mag/coil[name]['rc']-1)
-
-        if r_mag > coil[name]['rc']:
-            dfeild = Bfield(coil[name], r, ri, z, zi)
-        else:
-            if r_mag > 1e-3:
-                r_theta = np.arctan2(z-zi,r-ri)
-            else:
-                r_theta = 0 
-            B = np.zeros((2,2))
-            for i,theta in enumerate([0,np.pi]):
-                rc = ri+coil[name]['rc']*np.cos(theta+r_theta)
-                zc = zi+coil[name]['rc']*np.sin(theta+r_theta)
-                B[:,i] = Bfield(coil[name], rc, ri, zc, zi)
-            dfeild = B[:,0] + (B[:,0]-B[:,1])/2*(r_mag/coil[name]['rc']-1)
-         
-        feild += dfeild
-    return feild
-'''
-

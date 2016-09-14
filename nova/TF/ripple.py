@@ -29,7 +29,9 @@ class ripple(object):
     def get_seperatrix(self,nplasma=100,alpha=0.95,**kwargs):
         self.nplasma = nplasma
         self.plasma_loop = np.zeros((self.nplasma,3))  # initalise loop array
-        if 'config' in kwargs:
+        if 'sf' in kwargs:  # seperatrix directly from sf object
+            r,z = kwargs['sf'].get_boundary(alpha=alpha)
+        elif 'config' in kwargs:
             setup = Setup(kwargs.get('config'))
             r,z = ripple.get_boundary(setup.filename,alpha=alpha)
         elif 'filename' in kwargs:  # seperatrix from eqdsk
@@ -50,11 +52,10 @@ class ripple(object):
         rfun,zfun = geom.rzfun(r,z)
         self.plasma_interp = {'r':rfun,'z':zfun}
         
-        sf = SF(Setup(kwargs.get('config')).filename)
-        self.eqdsk = sf.eqdsk
+        #sf = SF(Setup(kwargs.get('config')).filename)
+        #self.eqdsk = sf.eqdsk
       
     def get_boundary(filename,alpha=0.95):
-        print(filename)
         sf = SF(filename)
         r,z = sf.get_boundary(alpha=alpha)
         r,z = sf.clock(r,z,anti=True)

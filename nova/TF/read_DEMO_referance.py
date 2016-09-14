@@ -8,6 +8,7 @@ from collections import OrderedDict
 from itertools import cycle,count
 from scipy.linalg import norm 
 from matplotlib.collections import PolyCollection
+import pandas as pd
 import seaborn as sns
 rc = {'figure.figsize':[7,7*12/9],'savefig.dpi':100, # 
       'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
@@ -111,8 +112,8 @@ def set_figure():
 class DEMO(object):
     
     def __init__(self):
-        filename = 'DEMO1_Reference_Design_-_2015_April_(_EU_2MG46D_v1_0'
-        self.read(filename)
+        self.filename = 'DEMO1_Reference_Design_-_2015_April_(_EU_2MG46D_v1_0'
+        self.read(self.filename)
         self.process()
         
     def read(self,filename):
@@ -157,18 +158,13 @@ class DEMO(object):
                  
             for loop,side in zip(self.parts[part],['out','in','ports']):
                 r,z = geom.read_loop(self.parts[part],loop)
-                x[side]['r'],x[side]['z'] = r,z # ,x[side]['n'],len(r)
+                x[side]['r'],x[side]['z'] = r,z 
                 
             if part in ['TF_Coil','Vessel','Blanket']:
                 if side != 'out':
                     x = geom.polyloop(x)
-                    #for var in ['r','z']:
-                    #    x[var] = np.append(x['in'][var],x['out'][var][::-1])
-                     #   x[var] = np.append(x[var],x['in'][var][0])
                 else:
-
-                    x['r'],x['z'] = geom.pointloop(x['out']['r'],
-                                                    x['out']['z'])
+                    x['r'],x['z'] = geom.pointloop(x['out']['r'],x['out']['z'])
                     lines = cutcorners(x['r'],x['z'])  # select halfs
                     for seg,side in zip(lines,['in','out']):
                         x[side] = {'r':lines[seg]['r'],'z':lines[seg]['z']}
@@ -178,6 +174,7 @@ class DEMO(object):
     def get_ports(self,plot=True):
         x = self.parts['Vessel']['ports']
         clusters = cluster_points(x['r'],x['z'])
+        self.port = OrderedDict()
         for i,cl in enumerate(clusters): 
             r,z = clusters[cl]['r'],clusters[cl]['z']
             switch = r.max()-r.min() < 0.5*(z.max()-z.min())  
@@ -197,7 +194,6 @@ class DEMO(object):
             n_hat = np.array([-(z_fit[-1]-z_fit[0]),
                               r_fit[-1]-r_fit[0]])
             n_hat /= norm(n_hat)
-            self.port = OrderedDict()
             n = len(r)
             count = {'left':0,'right':0}
             p = 'P{:1.0f}'.format(i)
@@ -264,6 +260,55 @@ class DEMO(object):
             for loop in self.parts[part]:
                 pl.plot(self.parts[part][loop]['r'],
                         self.parts[part][loop]['z'],'.',markersize=5.0)
+                        
+    def write(self):
+        filename = 'DEMO1_sorted'
+        wb = load_workbook(filename='./referance/'+self.filename+'.xlsx')
+                           
+        ws = wb[wb.get_sheet_names()[0]]
+        
+        part = iter(self.parts)
+        component = cycle(['r','z'])
+        for row in ws.columns:
+            if row[0].value is not None:
+                pt = next(part)
+                row[0].value = pt
+                loop = iter(['out','in','ports'])
+            if row[1].value is not None:
+                lp = next(loop)
+                row[1].value = lp
+            if row[2].value is not None:
+                cp = next(component)
+                row[2].value = cp
+            '''    
+            for i,r in enumerate(row[3:]):
+                if r.value is not None:
+                    print(pt,lp,cp,i)
+                    r.value = self.parts[pt][lp][cp][i]
+            '''    
+                
+            '''
+            new_loop = get_label(row[1].value,loop,force=new_part,part=part[-1])
+            p,l = part[-1],loop[-1]
+            if new_loop:
+                self.parts[p][l] = OrderedDict()
+            
+            comp,start = row[2].value,2
+            while comp == None:
+                start += 1
+                comp = row[start].value
+            if comp == 'Rad':  # replace confusing 'Rad' label
+                comp = 'r'
+                
+            self.parts[p][l][comp] = np.zeros(len(row)-1)
+            for i,r in enumerate(row[start+1:]):
+                try:
+                    self.parts[p][l][comp][i] = 1e-3*float(r.value)  # m
+                except:
+                    break
+            self.parts[p][l][comp] = self.parts[p][l][comp][:i]
+            '''
+        wb.save('./referance/'+filename+'.xlsx')
         
 if __name__ is '__main__':          
         demo = DEMO()
@@ -273,9 +318,13 @@ if __name__ is '__main__':
         demo.get_ports()
         demo.get_fw()
         
+        #demo.write()
+
         #demo.plot()
         set_figure()
         
+        
+        print(pd.DataFrame(demo.parts))
 
         from nova.config import Setup
         from nova.streamfunction import SF
@@ -306,12 +355,60 @@ if __name__ is '__main__':
         r,z = geom.rzSLine(r,z,npoints=20)
         rb.loop = geom.Loop(r,z)
         
-
-        tf = TF(shape={'vessel':rb.loop,'pf':pf,'fit':True,'setup':setup,
-                       'plot':True,'coil_type':'S','config':config})  # ,'config':config
-        tf.fill()
-
+        tf = TF(shape={'vessel':rb.loop,'pf':pf,'sf':sf,
+                       'fit':False,'setup':setup,
+                       'coil_type':'S',
+                       'config':config})  # ,'config':config
         
+        #tf.coil.plot()
+        tf.load_coil()
+        x = tf.coil.draw()
+        tf.get_coil_loops(x['r'],x['z'],profile='in')
+        tf.fill()
+        
+        xnorm,bnorm = tf.set_oppvar()
+
+        for var in tf.coil.xo:
+            tf.coil.xo[var]['xnorm'] = (tf.coil.xo[var]['value']-
+                                        tf.coil.xo[var]['lb'])/\
+                                        (tf.coil.xo[var]['ub']-
+                                        tf.coil.xo[var]['lb'])
+        data = pd.DataFrame(tf.coil.xo).T
+        data.reset_index(level=0,inplace=True)
+        print(data)
+        
+
+        pl.figure(figsize=(8,4))
+        sns.set_color_codes("muted")
+        sns.barplot(x='xnorm',y='index',data=data,color="b")
+        sns.despine(bottom=True)
+        pl.ylabel('')
+        ax = pl.gca()
+        ax.get_xaxis().set_visible(False)
+        patch = ax.patches
+
+        eps = 1e-2
+        values = [tf.coil.xo[var]['value'] for var in tf.coil.xo]
+        xnorms = [tf.coil.xo[var]['xnorm'] for var in tf.coil.xo]
+        for p,value,xnorm in zip(patch,values,xnorms):
+            
+            x = p.get_width()
+            print(xnorm,x)
+            y = p.get_y() 
+            if xnorm < eps or xnorm > 1-eps:
+                color = 'r'
+            else:
+                color = 'k'
+            ax.text(x,y,' {:1.3f}'.format(value),ha='left',va='top',
+                    size='small',color=color)
+        pl.plot(0.5*np.ones(2),np.sort(ax.get_ylim()),'--',color=0.5*np.ones(3),
+                zorder=0,lw=1)
+        pl.plot(np.ones(2),np.sort(ax.get_ylim()),'-',color=0.5*np.ones(3),
+                zorder=0,lw=2)
+        pl.xlim([0,1])
+
+
+
         '''
         referance = Dcoil()
         x = referance.draw()
@@ -322,13 +419,10 @@ if __name__ is '__main__':
         rp = ripple(plasma={'config':'SN'},coil=coil)
         print('ref ripple',rp.get_ripple())
         '''  
-
+        
+        '''
         rb.Rb,rb.Zb = demo.fw['r'],demo.fw['z']  # set radial build first wall
-        
-        
-
         rb.trim_sol(Nsol=3,update=False,plot=False)
-        
         inv = INV(sf,pf,eq)
         
         inv.fix_boundary_psi(N=23,alpha=1-1e-4,factor=1)  # add boundary points
@@ -341,6 +435,7 @@ if __name__ is '__main__':
             inv.add_alpha(1,factor=1,point=point)
         #inv.fix['z'] += 0.3
         inv.plot_fix()
+        '''
         
         '''
         Lpf = inv.grid_PF(nPF=5)
@@ -356,10 +451,12 @@ if __name__ is '__main__':
         inv.swing_fix(0)
         inv.solve_slsqp()
         '''
+        
+        '''
         pf.plot(coils=pf.coil,label=False,plasma=False,current=False) 
         
         #eq.gen_opp()
-        eq.run()
+        #eq.run()
         rb.trim_sol(Nsol=3,update=True,plot=True)
         sf.contour(Nlevel=31,plot_vac=False)
-
+        '''

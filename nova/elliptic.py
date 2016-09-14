@@ -33,6 +33,7 @@ class EQ(object):
         self.pf = pf
         self.coils(dCoil=dCoil)  # multi-filiment coils 
         self.get_Vcoil()  # identify vertical stability coils
+        #self.set_Vcoil()
         self.resample(sigma=sigma,**kwargs)
         
     def resample(self,sigma=0,**kwargs):  # resample current density
@@ -189,8 +190,8 @@ class EQ(object):
         
     def set_Vcoil(self):  # set fixed vertical control coils
         names = ['upper','lower']
-        rvs = self.sf.Mpoint[0]*np.ones(2)
-        zvs = self.sf.Mpoint[1]+12*np.array([-1,1])
+        rvs = 5+self.sf.Mpoint[0]*np.ones(2)
+        zvs = self.sf.Mpoint[1]+16*np.array([-1,1])
         self.Vcoil = np.zeros((2,),dtype=[('name','S10'),('value','float'),
                                           ('Io','float'),('Ip','float'),
                                           ('Ii','float'),('Nf','int')])
@@ -325,7 +326,7 @@ class EQ(object):
                     self.Ip -= self.dA*self.bpl[indx]/(self.mu_o*r)
             scale_plasma = self.sf.cpasma/self.Ip
             #scale_plasma = 1
-            #print(scale_plasma)
+            #print('scale_plasma',scale_plasma)
             self.sf.b_scale = scale_plasma
         for i,indx in zip(range(self.Nplasma),self.plasma_index):
             self.bpl[indx] *= self.sf.b_scale
@@ -481,7 +482,8 @@ class EQ(object):
                 dI = self.Vcoil['Ip'][index]+self.Vcoil['Ii'][index]
                 I = self.Vcoil['Io'][index]+dI
                 self.set_control_current(index=index,I=I)
-                self.Ic += sign*(dI)                
+                self.Ic += sign*(dI)
+            #self.sf.contour()                
         self.set_plasma_coil()
         return self.Ic
         

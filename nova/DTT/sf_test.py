@@ -23,12 +23,9 @@ sf = SF(setup.filename)
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
 
-eq = EQ(sf,pf,dCoil=0.5,sigma=0,boundary=rb.get_fw(expand=0.5),n=1e4)  
+#eq = EQ(sf,pf,dCoil=0.5,sigma=0,boundary=rb.get_fw(expand=1.5),n=1e4)  
 
 
-
-
-  
 #eq.gen_opp(z=sf.Mpoint[1],Zerr=5e-4)
 
 

@@ -8,6 +8,7 @@ from itertools import cycle,count
 import seaborn as sns
 import matplotlib
 import collections
+import pandas as pd
 from amigo.geom import Loop
 import amigo.geom as geom
 import nova.geqdsk
@@ -186,12 +187,12 @@ class PF(object):
 
 class TF(object):
     
-    def __init__(self,npoints=200,objective='L',nTF=18,shape={}):
+    def __init__(self,npoints=100,objective='L',nTF=18,shape={}):
+        self.nTF = nTF
         self.setargs(shape)
         self.objective = objective
         self.npoints = npoints
         self.width()
-        self.nTF = nTF
         #self.amp_turns()  # calculate amp turns (only with eqdsk filename)
         self.generate()
 
@@ -210,7 +211,7 @@ class TF(object):
                     setattr(self,name,shape.get(name))
         '''
         
-        self.rp = ripple(plasma={'sf':shape.get('sf',None)})
+        self.rp = ripple(nTF=self.nTF,plasma={'sf':shape.get('sf',None)})
             
         if 'R' in shape and 'Z' in shape:  # define coil by R,Z arrays
             self.datatype = 'array'
@@ -239,8 +240,8 @@ class TF(object):
             self.coil = Acoil()
         elif self.coil_type == 'D':  # princton D (3 parameter)
             self.coil = Dcoil()
-        elif self.coil_type == 'S':  # polybezier (8-15 parameter)
-            self.coil = Scoil(symetric=False,nl=8)
+        elif self.coil_type == 'S':  # polybezier (8-16 parameter)
+            self.coil = Scoil(symetric=True,nl=1)
         else:
             errtxt = '\n'
             errtxt += 'coil type \''+self.coil_type+'\'\n'
@@ -325,10 +326,9 @@ class TF(object):
                 '''                    
                 xnorm = fmin_slsqp(self.fit,xnorm,
                                    f_ieqcons=self.constraint_array,
-                                   bounds=bnorm,acc=0.01)
-                #print(xnorm)
+                                   bounds=bnorm,acc=0.02)
+
                 xo = self.get_oppvar(xnorm)
-                #print(xo)
                 self.coil.set_input(xo=xo)  # TFcoil inner loop
                 
                 print('optimisation time {:1.1f}s'.format(time.time()-tic))
@@ -350,12 +350,50 @@ class TF(object):
                     errtxt += 'file \''+dataname+'\' not found\n'
                     errtxt += 'regenerate coil profile, fit=True\n'
                     raise ValueError(errtxt)
-            
+                    
             x = self.coil.draw()
             self.get_coil_loops(x['r'],x['z'],profile='in')
-            self.rp.set_TFcoil(Rcl=self.Rcl,Zcl=self.Zcl,nTF=self.nTF)
+
+            self.rp.set_TFcoil(Rcl=self.Rcl,Zcl=self.Zcl)
             print('ripple',self.rp.get_ripple())
             
+    def plot_oppvar(self,eps=1e-2):
+        xnorm,bnorm = self.set_oppvar()
+        for var in self.coil.xo:
+            self.coil.xo[var]['xnorm'] = (self.coil.xo[var]['value']-
+                                          self.coil.xo[var]['lb'])/\
+                                         (self.coil.xo[var]['ub']-
+                                          self.coil.xo[var]['lb'])
+        data = pd.DataFrame(self.coil.xo).T
+        data.reset_index(level=0,inplace=True)
+        pl.figure(figsize=(8,4))
+        sns.set_color_codes("muted")
+        sns.barplot(x='xnorm',y='index',data=data,color="b")
+        sns.despine(bottom=True)
+        pl.ylabel('')
+        ax = pl.gca()
+        ax.get_xaxis().set_visible(False)
+        patch = ax.patches
+        values = [self.coil.xo[var]['value'] for var in self.coil.xo]
+        xnorms = [self.coil.xo[var]['xnorm'] for var in self.coil.xo]
+        for p,value,xnorm,var in zip(patch,values,xnorms,self.coil.xo):
+            x = p.get_width()
+            y = p.get_y() 
+            if xnorm < eps or xnorm > 1-eps:
+                color = 'r'
+            else:
+                color = 'k'
+            text =' {:1.3f}'.format(value)
+            if var not in self.coil.oppvar:
+                 text += '*'
+            ax.text(x,y,text,ha='left',va='top',
+                    size='small',color=color)
+        pl.plot(0.5*np.ones(2),np.sort(ax.get_ylim()),'--',color=0.5*np.ones(3),
+                zorder=0,lw=1)
+        pl.plot(np.ones(2),np.sort(ax.get_ylim()),'-',color=0.5*np.ones(3),
+                zorder=0,lw=2)
+        pl.xlim([0,1])
+
     def constraint_array(self,xnorm,ripple_limit=0.6):
         xo = self.get_oppvar(xnorm)  # de-normalize
         x = self.coil.draw(xo=xo) 
@@ -363,7 +401,7 @@ class TF(object):
         for side in ['internal','external']:
             dot = np.append(dot,self.dot_diffrence(x,side))
         self.get_coil_loops(x['r'],x['z'],profile='in')
-        self.rp.set_TFcoil(Rcl=self.Rcl,Zcl=self.Zcl,nTF=self.nTF)
+        self.rp.set_TFcoil(Rcl=self.Rcl,Zcl=self.Zcl)
         max_ripple = self.rp.get_ripple()
         dot = np.append(dot,ripple_limit-max_ripple)
         return dot
@@ -374,7 +412,7 @@ class TF(object):
         if self.objective is 'L':  # coil length
             objF = geom.length(x['r'],x['z'],norm=False)[-1]
         else:  # coil volume
-            objF = loop_vol(x['r'],x['z'])
+            objF = geom.loop_vol(x['r'],x['z'])
         return objF
         
     def ripple(self,xnorm,ripple_limit=0.6):
@@ -418,7 +456,7 @@ class TF(object):
         self.dRcoil = 0.489
         self.dRsteel = 0.15*self.dRcoil
  
-    def fill(self,write=False,plot=True):
+    def fill(self,write=False,plot=True,text=True):
         loop = Loop(self.Rin,self.Zin,xo=[np.mean(self.Rin),np.mean(self.Zin)])
         self.Rin,self.Zin = loop.R,loop.Z
         self.Rmid,self.Zmid = geom.offset(self.Rin,self.Zin,
@@ -429,6 +467,9 @@ class TF(object):
         x = geom.polyloop({'in':{'r':self.Rin,'z':self.Zin},
                            'out':{'r':self.Rout,'z':self.Zout}})
         geom.polyfill(x['r'],x['z'])
+        xt = [x['r'][np.argmax(x['z'])],np.mean(x['z'])]
+        pl.text(xt[0],xt[1],'nTF={:1.0f}'.format(self.nTF),
+                ha='center',va='center',size='large',color=0.5*np.ones(3))
         if write:
             with open('../Data/'+self.dataname+'_TFcoil.txt','w') as f:
                 f.write('Rin m\t\tZin m\t\tRout m\t\tZout m\n')

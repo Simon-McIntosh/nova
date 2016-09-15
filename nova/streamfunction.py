@@ -421,27 +421,14 @@ class SF(object):
                 loop = np.sqrt((r[0]-r[-1])**2+(z[0]-z[-1])**2) < delta_loop
                 if (z>self.Mpoint[1]).any() and (z<self.Mpoint[1]).any() and loop:
                     R,Z = np.append(R,r),np.append(Z,z) 
-        R,Z = self.clock(R,Z)
+        R,Z = geom.clock(R,Z)
         return R,Z
         
     def get_sep(self,expand=0):  # generate boundary dict for elliptic
         R,Z = self.get_boundary()
         boundary = {'R':R,'Z':Z,'expand':expand}
         return boundary
-        
-    def clock(self,R,Z,anti=False):
-        rc,zc = self.Mpoint  
-        radius = ((R-rc)**2+(Z-zc)**2)**0.5
-        theta = np.arctan2(Z-zc, R-rc)
-        index = theta.argsort()
-        index = index[::-1]
-        radius,theta = radius[index],theta[index] 
-        R,Z = rc+radius*np.cos(theta),zc+radius*np.sin(theta)
-        R,Z = np.append(R,R[0]),np.append(Z,Z[0])
-        if anti:
-            R,Z = R[::-1],Z[::-1]
-        return R,Z
-        
+      
     def get_midplane(self,r,z):
         def psi_err(r,*args):
             z = args[0]

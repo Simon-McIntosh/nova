@@ -63,7 +63,7 @@ class Acoil(object):  # tripple arc coil
         self.oppvar = list(self.xo.keys())
         for rmvar in ['a1','a2']:  # remove arc angles from oppvar
             self.oppvar.remove(rmvar)
-        self.oppvar.remove('ro')
+        #self.oppvar.remove('ro')
            
     def set_input(self,**kwargs): 
         inputs = get_input(self.oppvar,**kwargs)     
@@ -186,15 +186,18 @@ class Scoil(object):  # polybezier
         self.xo = OrderedDict()
         self.xo['r1'] = {'value':4.486,'lb':4,'ub':6}  # inner radius
         self.xo['r2'] = {'value':15.708,'lb':10,'ub':25}  # outer radius 
-        self.xo['z2'] = {'value':0,'lb':-0.2,'ub':0.5} # outer node vertical shift
+        self.xo['z2'] = {'value':0,'lb':-0.8,'ub':0.8} # outer node vertical shift
         self.xo['height'] = {'value':17.367,'lb':0.1,'ub':50} # full coil height
         self.xo['top'] = {'value':0.33,'lb':0.1,'ub':1}  # horizontal shift
         self.xo['upper'] = {'value':0.62,'lb':0.3,'ub':1}  # vertical shift
         self.set_lower()  # lower coil parameters (bottom,lower)
-        self.set_control_lengths({'value':0.8,'lb':0.7,'ub':1.5})  # 1/tesion
+        self.set_control_lengths({'value':0.8,'lb':0.1,'ub':1.5})  # 1/tesion
         self.xo['dz'] = {'value':0,'lb':-2,'ub':2}  # vertical offset
+        self.xo['ds'] = {'value':0,'lb':0,'ub':0.8}  # fraction outboard straight
+        self.xo['alpha_s'] = {'value':0,'lb':-45,'ub':45}  # outboard angle [deg]
         self.oppvar = list(self.xo.keys())
-        #self.oppvar.remove('r1')
+        self.oppvar.remove('ds')
+        self.oppvar.remove('alpha_s')
         
     def check_tension_length(self,nl):
         if nl in [1,2,4,8]:
@@ -238,7 +241,7 @@ class Scoil(object):  # polybezier
     def get_xo(self):
         values = []
         for var in ['r1','r2','z2','height','top',
-                    'bottom','upper','lower','dz']:
+                    'bottom','upper','lower','dz','ds','alpha_s']:
             if var not in self.xo:
                 if var == 'bottom':
                     var = 'top'
@@ -293,13 +296,17 @@ class Scoil(object):  # polybezier
             
   
     def verticies(self):
-        r1,r2,z2,height,top,bottom,upper,lower,dz = self.get_xo()
-        r,z,theta = np.zeros(5),np.zeros(5),np.zeros(5)
+        r1,r2,z2,height,top,bottom,upper,lower,dz,ds,alpha_s = self.get_xo()
+        r,z,theta = np.zeros(6),np.zeros(6),np.zeros(6)
+        alpha_s *= np.pi/180
+        ds_z = ds*height/2*np.cos(alpha_s)
+        ds_r = ds*height/2*np.sin(alpha_s)
         r[0],z[0],theta[0] = r1,upper*height/2,np.pi/2  # upper sholder
         r[1],z[1],theta[1] = r1+top*(r2-r1),height/2,0  # top
-        r[2],z[2],theta[2] = r2,z2*height/2,-np.pi/2  # outer
-        r[3],z[3],theta[3] = r1+bottom*(r2-r1),-height/2,-np.pi  # bottom
-        r[4],z[4],theta[4] = r1,-lower*height/2,np.pi/2  # lower sholder
+        r[2],z[2],theta[2] = r2+ds_r,z2*height/2+ds_z,-np.pi/2-alpha_s  # outer, upper
+        r[3],z[3],theta[3] = r2-ds_r,z2*height/2-ds_z,-np.pi/2-alpha_s # outer, lower
+        r[4],z[4],theta[4] = r1+bottom*(r2-r1),-height/2,-np.pi  # bottom
+        r[5],z[5],theta[5] = r1,-lower*height/2,np.pi/2  # lower sholder
         z += dz  # vertical coil offset
         return r,z,theta
             
@@ -322,9 +329,9 @@ class Scoil(object):  # polybezier
         self.p = []
         self.linear_loop_length(r,z)
         ls,le = self.get_l()
-        for i in range(len(r)-1):
-            p0 = {'r':r[i],'z':z[i],'t':theta[i],'l':ls[i]}
-            p3 = {'r':r[i+1],'z':z[i+1],'t':theta[i+1]-np.pi,'l':le[i]}
+        for i,j,k in zip(range(len(r)-1),[0,1,3,4],[1,2,4,5]):
+            p0 = {'r':r[j],'z':z[j],'t':theta[j],'l':ls[i]}
+            p3 = {'r':r[k],'z':z[k],'t':theta[k]-np.pi,'l':le[i]}
             p1,p2,dl = Scoil.control(p0,p3)
             curve = self.segment([p0,p1,p2,p3],dl)
             self.p.append({'p0':p0,'p1':p1,'p2':p2,'p3':p3})
@@ -343,20 +350,23 @@ class Scoil(object):  # polybezier
         x = close_loop(x,self.npoints)
         return x    
         
-    def plot(self,inputs={}):
-        color = cycle(sns.color_palette('Set2',5))
+    def plot(self,inputs={},ms=3):
+        #color = cycle(sns.color_palette('Set2',5))
         x = self.draw(inputs=inputs)
         r,z,theta = self.verticies()
-        pl.plot(r,z,'s',color=next(color))
-        pl.plot(x['r'],x['z'],color=next(color))
-        c1,c2 = next(color),next(color)
+        c1,c2 = 0.75*np.ones(3),0.4*np.ones(3)
+        pl.plot(r,z,'s',color=c1,ms=2*ms,zorder=10)
+        pl.plot(r,z,'s',color=c2,ms=ms,zorder=10)
+        pl.plot(x['r'],x['z'],color=c2,ms=ms)
         for p in self.p:
             pl.plot([p['p0']['r'],p['p1']['r']],
-                    [p['p0']['z'],p['p1']['z']],color=c1)
-            pl.plot(p['p1']['r'],p['p1']['z'],'o',color=c2)
+                    [p['p0']['z'],p['p1']['z']],color=c1,ms=ms,zorder=5)
+            pl.plot(p['p1']['r'],p['p1']['z'],'o',color=c1,ms=2*ms,zorder=6)
+            pl.plot(p['p1']['r'],p['p1']['z'],'o',color=c2,ms=ms,zorder=7)
             pl.plot([p['p3']['r'],p['p2']['r']],
-                    [p['p3']['z'],p['p2']['z']],color=c1)
-            pl.plot(p['p2']['r'],p['p2']['z'],'o',color=c2)
+                    [p['p3']['z'],p['p2']['z']],color=c1,ms=ms,zorder=5)
+            pl.plot(p['p2']['r'],p['p2']['z'],'o',color=c1,ms=2*ms,zorder=6)
+            pl.plot(p['p2']['r'],p['p2']['z'],'o',color=c2,ms=ms,zorder=7)
 
 if __name__ is '__main__':  # plot coil classes
     #coil = Acoil()

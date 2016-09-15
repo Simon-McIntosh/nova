@@ -8,7 +8,6 @@ from collections import OrderedDict
 from itertools import cycle,count
 from scipy.linalg import norm 
 from matplotlib.collections import PolyCollection
-import pandas as pd
 import seaborn as sns
 rc = {'figure.figsize':[7,7*12/9],'savefig.dpi':100, # 
       'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
@@ -211,7 +210,8 @@ class DEMO(object):
                     self.port[p][side][var] = self.port[p][side][var][:n]
                 if plot:
                     pl.plot(self.port[p][side]['r'],self.port[p][side]['z'],
-                            color=0.65*np.ones(3))
+                            zorder=3,
+                            color=sns.color_palette('Set2',7)[6])
                         
     def get_limiters(self,plot=True):
         x = self.parts['Plasma']['out']
@@ -319,12 +319,9 @@ if __name__ is '__main__':
         demo.get_fw()
         
         #demo.write()
-
+        
         #demo.plot()
         set_figure()
-        
-        
-        print(pd.DataFrame(demo.parts))
 
         from nova.config import Setup
         from nova.streamfunction import SF
@@ -350,62 +347,22 @@ if __name__ is '__main__':
         
         r = demo.parts['Vessel']['out']['r']  # set vessel boundary
         z = demo.parts['Vessel']['out']['z']
-
+        
         r,z = geom.offset(r,z,0.2)  # 200mm offset from vessel 
         r,z = geom.rzSLine(r,z,npoints=20)
         rb.loop = geom.Loop(r,z)
         
-        tf = TF(shape={'vessel':rb.loop,'pf':pf,'sf':sf,
-                       'fit':False,'setup':setup,
-                       'coil_type':'S',
-                       'config':config})  # ,'config':config
-        
-        #tf.coil.plot()
-        tf.load_coil()
-        x = tf.coil.draw()
-        tf.get_coil_loops(x['r'],x['z'],profile='in')
-        tf.fill()
-        
-        xnorm,bnorm = tf.set_oppvar()
+        nTF = 18
+        tf = TF(shape={'vessel':rb.loop,'pf':pf,'sf':sf,'fit':True,
+                       'setup':setup,'coil_type':'S','config':config},nTF=nTF)
 
-        for var in tf.coil.xo:
-            tf.coil.xo[var]['xnorm'] = (tf.coil.xo[var]['value']-
-                                        tf.coil.xo[var]['lb'])/\
-                                        (tf.coil.xo[var]['ub']-
-                                        tf.coil.xo[var]['lb'])
-        data = pd.DataFrame(tf.coil.xo).T
-        data.reset_index(level=0,inplace=True)
-        print(data)
-        
+        #tf = TF(shape={'coil_type':'S','config':config,'sf':sf})  
+                       
 
-        pl.figure(figsize=(8,4))
-        sns.set_color_codes("muted")
-        sns.barplot(x='xnorm',y='index',data=data,color="b")
-        sns.despine(bottom=True)
-        pl.ylabel('')
-        ax = pl.gca()
-        ax.get_xaxis().set_visible(False)
-        patch = ax.patches
+        tf.coil.plot()
+        tf.fill(text=True)
+        tf.plot_oppvar()
 
-        eps = 1e-2
-        values = [tf.coil.xo[var]['value'] for var in tf.coil.xo]
-        xnorms = [tf.coil.xo[var]['xnorm'] for var in tf.coil.xo]
-        for p,value,xnorm in zip(patch,values,xnorms):
-            
-            x = p.get_width()
-            print(xnorm,x)
-            y = p.get_y() 
-            if xnorm < eps or xnorm > 1-eps:
-                color = 'r'
-            else:
-                color = 'k'
-            ax.text(x,y,' {:1.3f}'.format(value),ha='left',va='top',
-                    size='small',color=color)
-        pl.plot(0.5*np.ones(2),np.sort(ax.get_ylim()),'--',color=0.5*np.ones(3),
-                zorder=0,lw=1)
-        pl.plot(np.ones(2),np.sort(ax.get_ylim()),'-',color=0.5*np.ones(3),
-                zorder=0,lw=2)
-        pl.xlim([0,1])
 
 
 

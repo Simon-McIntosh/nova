@@ -3,6 +3,7 @@ from scipy.special import ellipk, ellipe
 from amigo import geom
 from scipy.interpolate import interp1d
 from scipy.linalg import norm
+import pylab as pl
 
 mu_o = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
  
@@ -31,17 +32,31 @@ class GreenFeildLoop(object):
         self.rc = rc
         if np.sum((loop[0,:]-loop[-1,:])**2) != 0:  # close loop
             loop = np.append(loop, np.reshape(loop[0,:],(1,3)),axis=0)  
-        self.dL = cut_corners(loop,smooth=smooth,Nss=Nss)
-        self.loop = loop[:-1,:]  # re-open loop
+        self.dL,self.loop_ss = cut_corners(loop,smooth=smooth,Nss=Nss)
+        self.loop_cl = np.copy(loop)
+        self.loop = self.loop_cl[:-1,:]  # re-open loop
         self.N = len(self.loop)
 
-    def B(self,point):  # 3D feild from arbitrary loop
+    def B(self,point,theta=0):  # 3D feild from arbitrary loop
+        if theta != 0:  # rotate about z-axis
+            loop = np.dot(self.loop,geom.rotate(theta))
+            dL = np.dot(self.dL,geom.rotate(theta))
+        else:
+            loop,dL = self.loop,self.dL
         point = np.array(point)*np.ones((self.N,3))  # point array
-        r = point-self.loop  # point-segment vectors
+        r = point-loop  # point-segment vectors
         r_mag = np.transpose(np.sum(r*r,axis=1)**0.5*np.ones((3,self.N)))
         core = 1-np.exp(-r_mag**3/self.rc**3)  # magnet core
-        Bfeild = np.sum(core*np.cross(self.dL,r)/r_mag**3,axis=0)/(4*np.pi) 
+        Bfeild = np.sum(core*np.cross(dL,r)/r_mag**3,axis=0)/(4*np.pi) 
         return Bfeild
+        
+    def plot(self):
+        pl.figure()
+        pl.plot(self.loop_cl[:,0],self.loop_cl[:,1])
+        pl.plot(self.loop_ss[:,0],self.loop_ss[:,1])
+        pl.axis('equal')
+        pl.axis('off')
+        
     
 def green_feild_circle(coil,point,N=20):  # 3D feild from arbitrary loop
     theta,dtheta = np.linspace(0,2*np.pi,N,endpoint=False,retstep=True)  # angle
@@ -54,28 +69,20 @@ def green_feild_circle(coil,point,N=20):  # 3D feild from arbitrary loop
     feild = np.sum(np.cross(dL,r)/r_mag**3,axis=0)/(4*np.pi)  # Bfeild 
     return feild
     
-def curve_length(loop,smooth=True,Nss=100):
-    if smooth and Nss > len(loop):  # round edges of segmented coil    
-        loop_ss = np.zeros((Nss,3))
-        L = geom.vector_length(loop,norm=False)
-        l = L/L[-1]
-        lss = np.linspace(0,1,Nss)
-        for i in range(3):
-            loop_ss[:,i] = interp1d(l,loop[:,i],kind='quadratic')(lss)
-        Lss = geom.vector_length(loop_ss,norm=False)
-        factor =  Lss[-1]/L[-1]
-    else:
-        factor = 1
-    return factor
-   
 def cut_corners(loop,smooth=True,Nss=100):
-    if smooth and Nss > len(loop):  # round edges of segmented coil    
+    if smooth:  # round edges of segmented coil    
+        if Nss < len(loop):
+            Nss = len(loop)
         N = np.shape(loop)[0]
         loop_ss = np.zeros((Nss,3))
         l = geom.vector_length(loop)
         lss = np.linspace(0,1,Nss)
+        npad = 2  # mirror loop for cubic interpolant
         for i in range(3):
-            loop_ss[:,i] = interp1d(l,loop[:,i],kind='quadratic')(lss)
+            loop_m = np.pad(loop[:-1,i],npad,'wrap')
+            l_m = np.pad(l[:-1],npad,'linear_ramp',
+                         end_values=[-npad*l[1],l[-2]+npad*(l[-1]-l[-2])])
+            loop_ss[:,i] = interp1d(l_m,loop_m,kind='cubic')(lss)
         Lss = geom.vector_length(loop_ss,norm=False)
         L = interp1d(lss,Lss)(l)  # cumulative length
         dL_seg = L[1:]-L[:-1]  # segment length
@@ -91,7 +98,8 @@ def cut_corners(loop,smooth=True,Nss=100):
         dL = loop[1:]-loop[:-1]
         dL = np.append(np.reshape(dL[-1,:],(1,3)),dL,axis=0)  # prepend
         dL = (dL[1:]+dL[:-1])/2  # average segment length 
-    return dL
+        loop_ss = loop
+    return dL,loop_ss
 
 def Gtorque(eq_coil,pf_coil,source,sink,multi_filament):  # source-sink 
     if multi_filament:

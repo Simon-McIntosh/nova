@@ -4,7 +4,6 @@ import numpy as np
 import seaborn as sns
 from nova.config import Setup
 from nova.streamfunction import SF
-#from nova.coils import TF
 from amigo import geom
 from scipy.linalg import norm
 from scipy.optimize import minimize_scalar
@@ -20,13 +19,14 @@ color = sns.color_palette('Set2')
 #mu_o = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
 
 class ripple(object):
-    def __init__(self,**kwargs):
+    def __init__(self,nTF=18,**kwargs):
+        self.nTF = nTF
         if 'plasma' in kwargs:
             self.get_seperatrix(alpha=0.95,**kwargs['plasma'])
         if 'coil' in kwargs:
             self.set_TFcoil(**kwargs['coil'])
-        
-    def get_seperatrix(self,nplasma=100,alpha=0.95,**kwargs):
+
+    def get_seperatrix(self,nplasma=80,alpha=0.95,**kwargs):
         self.nplasma = nplasma
         self.plasma_loop = np.zeros((self.nplasma,3))  # initalise loop array
         if 'sf' in kwargs:  # seperatrix directly from sf object
@@ -45,33 +45,24 @@ class ripple(object):
             errtxt += '2) eqdsk filename, {\'filename\':\'\'} \n'
             errtxt += '3) seperatrix profile, {\'r\':[],\'z\':[]}'
             raise ValueError(errtxt)
+        r,z = geom.clock(r,z,anti=True)
         (self.plasma_loop[:,0],self.plasma_loop[:,2]) = \
         geom.rzSLine(r,z,npoints=self.nplasma)
         self.plasma_length = geom.length(self.plasma_loop[:,0],
                                          self.plasma_loop[:,2])
         rfun,zfun = geom.rzfun(r,z)
         self.plasma_interp = {'r':rfun,'z':zfun}
-        
-        #sf = SF(Setup(kwargs.get('config')).filename)
-        #self.eqdsk = sf.eqdsk
       
     def get_boundary(filename,alpha=0.95):
         sf = SF(filename)
         r,z = sf.get_boundary(alpha=alpha)
-        r,z = sf.clock(r,z,anti=True)
         return r,z
      
-    def set_TFcoil(self,npoints=100,**kwargs):
+    def set_TFcoil(self,Rcl,Zcl,npoints=80):
         self.coil_loop = np.zeros((npoints,3))
-        if 'Rcl' in kwargs and 'Zcl' in kwargs and 'nTF' in kwargs:
-            for var in ['Rcl','Zcl','nTF']:
-                setattr(self,var,kwargs.get(var))
-            self.coil_loop[:,0],self.coil_loop[:,2] = \
-            geom.rzSLine(self.Rcl,self.Zcl,npoints=npoints)  # coil centerline
-        else:
-            errtxt = '\n'
-            errtxt += 'coil input error, require [Rcl,Zcl,nTF]\n'
-            raise ValueError(errtxt)
+        self.coil_loop[:,0],self.coil_loop[:,2] = \
+        geom.rzSLine(Rcl,Zcl,npoints=npoints)  # coil centerline
+        self.green_feild_loop = cc.GreenFeildLoop(self.coil_loop,smooth=False)
 
     def point_ripple(self,s):  # s==3D point vector
         B = np.zeros(2)
@@ -81,26 +72,12 @@ class ripple(object):
             nr = np.dot(n,geom.rotate(theta))
             Bo = np.zeros(3)
             for tcoil in np.linspace(0,2*np.pi,self.nTF,endpoint=False):
-                coil_loop = np.dot(self.coil_loop,geom.rotate(tcoil))
-                Bo += cc.mu_o*cc.green_feild_loop(coil_loop,sr)
+                Bo += cc.mu_o*self.green_feild_loop.B(sr,theta=tcoil)
             B[j] = norm(Bo)
             B[j] = np.dot(nr,Bo)
         ripple = 1e2*(B[0]-B[1])/(B[1]+B[0])
         return ripple
-        
-    def point_feild(self,s):  # s==3D point vector
-        B = np.zeros(2)
-        n = np.array([0,1,0])
-        for j,theta in enumerate([0,np.pi/self.nTF]):  # rotate (inline, ingap)
-            sr = np.dot(s,geom.rotate(theta))
-            nr = np.dot(n,geom.rotate(theta))
-            Bo = np.zeros(3)
-            for tcoil in np.linspace(0,2*np.pi,self.nTF,endpoint=False):
-                coil_loop = np.dot(self.coil_loop,geom.rotate(tcoil))
-                Bo += cc.mu_o*cc.green_feild_loop(coil_loop,sr)
-            B[j] = np.dot(nr,Bo)
-        return B
-        
+  
     def loop_ripple(self):
         self.ripple = np.zeros(self.nplasma)
         for i,plasma_point in enumerate(self.plasma_loop):
@@ -113,55 +90,57 @@ class ripple(object):
         return -ripple
         
     def get_ripple(self):
-        self.res = minimize_scalar(self.ripple_opp,bounds=[0,1],method='bounded',
-                              options={'xatol':0.001})
+        self.res = minimize_scalar(self.ripple_opp,method='bounded',
+                                   bounds=[0,1],options={'xatol':0.1})
         self.res['fun'] *= -1  # negate minimum (max ripple)
         return self.res['fun']
         
-    def plot_loops(self,scale=0.15):
+    def plot_loops(self,scale=1.5):
         self.loop_ripple()
         self.get_ripple()
         rpl,zpl = self.plasma_loop[:,0],self.plasma_loop[:,2]
         rr,zr = geom.offset(rpl,zpl,scale*self.ripple)
         for i in range(self.nplasma):  # ripple sticks
             pl.plot([rpl[i],rr[i]],[zpl[i],zr[i]],lw=1,color=0.5*np.ones(3))
-        pl.plot(self.plasma_loop[:,0],self.plasma_loop[:,2])
+        pl.plot(self.plasma_loop[:,0],self.plasma_loop[:,2],'-')
         pl.plot(self.coil_loop[:,0],self.coil_loop[:,2])
         x = self.res['x']
-        pl.plot(self.plasma_interp['r'](x),self.plasma_interp['z'](x),'o')
+        pl.plot(self.plasma_interp['r'](x),self.plasma_interp['z'](x),'.',
+                ms=10)
         pl.axis('equal')
         pl.axis('off')
-        
+
     def plot_ripple(self):
         pl.figure(figsize=(8,4))
         pl.plot(self.plasma_length,self.ripple)
         pl.plot(self.res['x'],self.res['fun'],'o')
 
 if __name__ is '__main__':  
-    rip = ripple(plasma={'config':'SN'},coil={'config':'SN','coil_type':'S'})  
+    from nova.coils import PF,TF
+    
+    tf = TF(shape={'config':'DEMO_SN','coil_type':'S'})
+    
+    rp = ripple(plasma={'config':'DEMO_SN'},coil={'Rcl':tf.Rcl,'Zcl':tf.Zcl})  
     
     import time
     tic = time.time()
-    print(rip.get_ripple())
-    print('get_ripple',time.time()-tic)
+    print('ripple {:1.3f}%'.format(rp.get_ripple()))
+    print('time',time.time()-tic)
     
-    tic = time.time()
-    rip.plot_loops()
-    print('rip.plot_loops()',time.time()-tic)
 
-    print(rip.point_feild([rip.eqdsk['rcentr'],0,0]))
-    print(rip.eqdsk['bcentr'],rip.eqdsk['rcentr'])
+    rp.plot_loops()
 
+    '''
     fig = pl.figure()
     ax = fig.gca(projection='3d')
     
-    for j,theta in enumerate([0,np.pi/rip.nTF]):  # rotate (inline, ingap)
-        plr = np.dot(rip.plasma_loop,geom.rotate(theta))
+    for j,theta in enumerate([0,np.pi/rp.nTF]):  # rotate (inline, ingap)
+        plr = np.dot(rp.plasma_loop,geom.rotate(theta))
         ax.plot(plr[:,0],plr[:,1],plr[:,2])
     
-    for tcoil in np.linspace(0,2*np.pi,rip.nTF,endpoint=False):
-        cl = np.dot(rip.coil_loop,geom.rotate(tcoil))
+    for tcoil in np.linspace(0,2*np.pi,rp.nTF,endpoint=False):
+        cl = np.dot(rp.coil_loop,geom.rotate(tcoil))
         ax.plot(cl[:,0],cl[:,1],cl[:,2])
 
     ax.auto_scale_xyz([-20,20],[-20,20],[-20,20])
-
+    '''

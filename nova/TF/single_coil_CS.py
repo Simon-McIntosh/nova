@@ -28,7 +28,7 @@ Br_circle = np.zeros(np.shape(r))
 Bz_circle = np.zeros(np.shape(r))
 
 # prepare coil loop
-nArc = 6
+nArc = 8
 
 #loop = np.zeros((nArc,3))
 
@@ -38,6 +38,7 @@ loop = np.transpose(np.array([coil['r']*np.cos(theta),coil['r']*np.sin(theta),
                            np.array([coil['z']]*nArc)]))  # position
 
 gfl = cc.GreenFeildLoop(loop)
+gfl.plot()
 
 for i,ri in enumerate(r):
 
@@ -63,21 +64,5 @@ pl.figure()
 pl.plot(r,Bz)
 pl.plot(r,Bz_loop,'--')
 pl.plot(r,Bz_circle,':')
-
-pl.figure()
-
-Nss = 150
-if np.sum((loop[0,:]-loop[-1,:])**2) != 0:  # close loop
-    loop = np.append(loop, np.reshape(loop[0,:],(1,3)),axis=0)  
-    
-loop_ss = np.zeros((Nss,3))
-l = geom.vector_length(loop)
-lss = np.linspace(0,1,Nss)
-for i in range(3):
-    loop_ss[:,i] = interp1d(l,loop[:,i],kind='quadratic')(lss)
-
-pl.plot(np.append(loop[:,0],loop[0,0]),np.append(loop[:,1],loop[0,1]))
-pl.plot(np.append(loop_ss[:,0],loop_ss[0,0]),np.append(loop_ss[:,1],loop_ss[0,1]))
-pl.axis('equal')
 
 print(2*np.pi*coil['r'])

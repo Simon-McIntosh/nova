@@ -65,7 +65,7 @@ class RB(object):
         self.sf.HFfwr,self.sf.HFfwz = self.sf.HFPr-dr,self.sf.HFPz
         r_lfs,z_lfs,psi_lfs = self.first_wall_psi(self.sf.LFfwr,self.sf.LFfwz)
         r_hfs,z_hfs,psi_hfs = self.first_wall_psi(self.sf.HFfwr,self.sf.HFfwz)
-        r_top,z_top = geom.offset(self.sf.rbdry,self.sf.zbdry,-dr)
+        r_top,z_top = geom.offset(self.sf.rbdry,self.sf.zbdry,dr)
         r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,origin='top')
         index = z_top>=self.sf.LFPz
         r_top,z_top = r_top[index],z_top[index]
@@ -185,7 +185,6 @@ class RB(object):
             self.set_target(leg)
             Rsol,Zsol = self.sf.snip(leg,layer_index,L2D=self.setup.targets[leg]['L2D'])
             Ro,Zo = Rsol[-1],Zsol[-1]
-            
             Flip = [-1,1]
             Direction = [1,-1]
             Theta_end = [0,np.pi]
@@ -426,7 +425,7 @@ class RB(object):
     def match_psi(self,Ro,Zo,direction,theta_end,theta_sign,phi_target,graze,
                   dPlate,leg,debug=False):        
         color = sns.color_palette('Set2',2)
-        gain = 0.15  # 0.25
+        gain = 0.25  # 0.25
         Nmax = 500
         Lo = [5,0.015]  # [blend,turn]  5,0.015
         r2m = [-1.5,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)

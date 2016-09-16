@@ -12,18 +12,18 @@ import scipy
 import seaborn as sns
 rc = {'figure.figsize':[12,12*12/16],'savefig.dpi':100, # 
       'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
-      'lines.linewidth':0.5}
+      'lines.linewidth':1.5}
 sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 
-config = 'SXex'
+config = 'SN'
 setup = Setup(config)
 
 sf = SF(setup.filename)
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
 
-#eq = EQ(sf,pf,dCoil=0.5,sigma=0,boundary=rb.get_fw(expand=1.5),n=1e4)  
+eq = EQ(sf,pf,dCoil=0.5,sigma=0,boundary=rb.get_fw(expand=0.5),n=5e3)  
 
 
 #eq.gen_opp(z=sf.Mpoint[1],Zerr=5e-4)
@@ -31,12 +31,13 @@ pf = PF(sf.eqdsk)
 
 sf.contour()
 pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
+
 rb.firstwall(calc=True,plot=True,debug=False)
 
 rb.vessel()
 
 
-rb.trim_sol(plot=True)
+#rb.trim_sol(plot=True)
 
 
 '''

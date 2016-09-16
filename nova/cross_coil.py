@@ -28,7 +28,7 @@ def green_feild(R,Z,Rc,Zc):
     return feild
     
 class GreenFeildLoop(object):
-    def  __init__(self,loop,smooth=True,Nss=100,rc=0.25):
+    def  __init__(self,loop,smooth=True,Nss=100,rc=0.5):
         self.rc = rc
         if np.sum((loop[0,:]-loop[-1,:])**2) != 0:  # close loop
             loop = np.append(loop, np.reshape(loop[0,:],(1,3)),axis=0)  
@@ -45,9 +45,18 @@ class GreenFeildLoop(object):
             loop,dL = self.loop,self.dL
         point = np.array(point)*np.ones((self.N,3))  # point array
         r = point-loop  # point-segment vectors
-        r_mag = np.transpose(np.sum(r*r,axis=1)**0.5*np.ones((3,self.N)))
-        core = 1-np.exp(-r_mag**3/self.rc**3)  # magnet core
-        Bfeild = np.sum(core*np.cross(dL,r)/r_mag**3,axis=0)/(4*np.pi) 
+        r1 = r-dL/2 
+        r1_hat = r1/np.tile(norm(r1,axis=1),(3,1)).T
+        r2 = r+dL/2 
+        r2_hat = r2/np.tile(norm(r2,axis=1),(3,1)).T
+        dL_hat = np.tile(norm(dL,axis=1),(3,1)).T
+        ds = np.cross(dL,r)/dL_hat
+        ds_mag = np.tile(norm(ds,axis=1),(3,1)).T
+        ds = np.cross(dL,ds)/dL_hat
+        ds_mag[ds_mag<1e-16] = 1e-16
+        core = ds_mag**2/self.rc**2
+        core[ds_mag>self.rc] = 1
+        Bfeild = sum(core*np.cross(ds,r2_hat-r1_hat)/ds_mag**2)/(4*np.pi)
         return Bfeild
         
     def plot(self):

@@ -16,6 +16,7 @@ from scipy.interpolate import interp1d
 from scipy.interpolate import RectBivariateSpline as RBS
 from scipy.linalg import lstsq
 from scipy import optimize 
+from amigo import geom
 
 class MidpointNormalize(Normalize):
     def __init__(self, vmin=None, vmax=None, midpoint=None, clip=False):
@@ -239,31 +240,7 @@ class EQ(object):
             return True
         else:
             return False
-            
-    def normal(self,R,Z):
-        dR,dZ = np.gradient(R),np.gradient(Z)
-        mag = np.sqrt(dR**2+dZ**2)
-        index = mag>0
-        dR,dZ,mag = dR[index],dZ[index],mag[index]  # clear duplicates
-        R,Z = R[index],Z[index]
-        t = np.zeros((len(dR),3))
-        t[:,0],t[:,1] = dR/mag,dZ/mag
-        n = np.cross(t, [0,0,1])
-        nR,nZ = n[:,0],n[:,1]
-        return R,Z,nR,nZ
-        
-    def inloop(self,Rloop,Zloop,R,Z):
-        Rloop,Zloop = self.orientate(Rloop,Zloop)
-        Rloop,Zloop,nRloop,nZloop = self.normal(Rloop,Zloop)
-        Rin,Zin = np.array([]),np.array([])
-        for r,z in zip(R,Z):
-            i = np.argmin((r-Rloop)**2+(z-Zloop)**2)
-            dr = [Rloop[i]-r,Zloop[i]-z]  
-            dn = [nRloop[i],nZloop[i]]
-            if np.dot(dr,dn) > 0:
-                Rin,Zin = np.append(Rin,r),np.append(Zin,z)
-        return Rin,Zin
-            
+          
     def psi_ex(self):
         psi = np.zeros(self.Ne)
         for name in self.coil.keys():
@@ -298,18 +275,12 @@ class EQ(object):
                 i = np.argmin(np.abs(r-self.r))
                 j = np.argmin(np.abs(z-self.z))
                 self.b[self.indx(i,j)] += -self.mu_o*I*self.r[i]/(self.dA)
-    
-    def orientate(self,r,z):
-        theta = np.arctan2(z-self.sf.Mpoint[1],r-self.sf.Mpoint[0])
-        index = np.argsort(theta)
-        r,z = r[index],z[index]
-        return r,z
-                
+               
     def plasma_core(self,update=True,dz=0):
         if update:  # calculate plasma contribution
             rbdry,zbdry = self.sf.get_boundary(alpha=1-1e-3)
             #rbdry,zbdry = self.sf.get_boundary(alpha=0.8)  # !!!!!!!! # for vde
-            R,Z = self.inloop(rbdry,zbdry,
+            R,Z = geom.inloop(rbdry,zbdry,
                               self.r2d.flatten(),self.z2d.flatten())
             self.Ip,self.Nplasma = 0,0
             self.plasma_index = np.zeros(self.N,dtype=int)

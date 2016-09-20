@@ -3,15 +3,9 @@ from itertools import combinations_with_replacement as cr
 from itertools import combinations as cm
 import sys
 import datetime
-from mpl_toolkits.mplot3d import Axes3D
-import amigo.geom as geom
-import pylab as pl
+import nova.cross_coil as cc
+from amigo import geom
 
-mu_o = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
-
-
-
-            
 def time_remaining(i,N,to,time):
     if time:
         t1 = time()
@@ -50,6 +44,10 @@ class neumann(object):
         
     def setr(self,r):
         self.r = r
+        
+    def rotateX_(self,theta):
+        self.X_ = np.dot(self.X,geom.rotate(theta))
+        self.dX_ = np.dot(self.dX,geom.rotate(theta))
         
     def intergrate(self,ij,X,X_,dX,dX_,r):
         dr = np.linalg.norm(X[ij[0],:]-X_[ij[1],:])
@@ -92,6 +90,6 @@ class neumann(object):
                 if dl > self.r:
                     L += 2*np.log(dl/self.r)
                 #L += self.substeps(ij)  # self inductance sub-calc
-        L *= mu_o/(4*np.pi) 
+        L *= cc.mu_o/(4*np.pi) 
         return L
     

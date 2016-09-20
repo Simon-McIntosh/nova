@@ -23,7 +23,7 @@ def delete_row_csr(mat, i):
     mat.indptr = mat.indptr[:-1]
     mat._shape = (mat._shape[0]-1, mat._shape[1])
 
-# element stiffness matrix
+
 class FE(object):
     
     def __init__(self,frame='1D',*args):
@@ -35,7 +35,7 @@ class FE(object):
         self.initalise_grid()  # grid
 
     def freeze(self,nShape=21):
-        self.nK = int((self.nel-1)*self.ndof+2*self.ndof)  # stiffness matrix
+        self.nK = int(self.nnd*self.ndof)  # stiffness matrix (node number)
         self.initalize_F()  # load
         self.initalize_D()  # displacment
         self.initalize_shape_coefficents(nShape=nShape)  # shape function 
@@ -581,7 +581,6 @@ class FE(object):
                      scale*self.Fo[j],scale*self.Fo[j+1],
             head_width=scale*0.0015, head_length=scale*0.003 )
 
-
     def solve(self):
         self.assemble()  # assemble stiffness matrix
         self.setBC()  # remove constrained equations from stiffness + load 
@@ -594,6 +593,11 @@ class FE(object):
     def plot_nodes(self):
         ms = 5
         pl.plot(self.X[:,0],self.X[:,1],'o',markersize=ms)
+        
+        for el in self.el['n']:
+            pl.plot([self.X[el[0],0],self.X[el[1],0]],
+                    [self.X[el[0],1],self.X[el[1],1]])
+    
         #pl.plot(self.X[:,0]+self.D['x'],
         #        self.X[:,1]+self.D['y'],'o',markersize=ms) 
         sns.despine()

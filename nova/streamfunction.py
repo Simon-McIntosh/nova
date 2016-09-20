@@ -21,7 +21,6 @@ class SF(object):
         self.normalise()  # unit normalisation
         self.set_plasma(eqdsk,contour=False)
         self.set_boundary(eqdsk['rbdry'],eqdsk['zbdry'])
-        #self.set_coils(eqdsk)
         self.set_flux(eqdsk)  # calculate flux profiles
         self.set_TF(eqdsk)  
         self.set_current(eqdsk)
@@ -40,13 +39,7 @@ class SF(object):
     def set_kwargs(self,kwargs):
         for key in kwargs:
             setattr(self,key,kwargs[key])
-            
-    def read_config(self,conf):
-        self.Nsol = conf.Nsol
-        self.dSOL = conf.dSOL
-        self.filename = conf.filename
-        self.dataname = conf.dataname
-              
+   
     def normalise(self):
         print(self.eqdsk['name'])
         if 'Fiesta' in self.eqdsk['name'] or 'Nova' in self.eqdsk['name']\
@@ -161,7 +154,7 @@ class SF(object):
         self.set_contour()  # calculate cfeild
         r,z = self.get_boundary()
         self.set_boundary(r,z)
-        #self.get_sol_psi()  # re-calculate sol_psi
+        self.get_sol_psi()  # re-calculate sol_psi
         
     def set_plasma(self,eq,contour=False):
         for key in ['r','z','psi']: 
@@ -172,6 +165,7 @@ class SF(object):
         self.Bfeild()
         if contour:
             self.get_Xpsi()
+            self.get_Mpsi()
             self.set_contour()  # calculate cfeild
      
     def upsample(self,sample):
@@ -229,9 +223,9 @@ class SF(object):
         psi = self.Pspline.ev(point[0],point[1])
         return psi
         
-    def contour(self,Nstd=1.5,Nlevel=31,Xnorm=True,lw=1,**kwargs):
+    def contour(self,Nstd=1.5,Nlevel=31,Xnorm=True,lw=1,plot_vac=True,
+                **kwargs):
         alpha,lw = np.array([1,0.5]),lw*np.array([2.25,1.75])   
-        plot_vac = kwargs.get('plot_vac',True)
         r,z = self.get_boundary()
         self.set_boundary(r,z)
         if not hasattr(self,'Xpsi'):
@@ -406,7 +400,7 @@ class SF(object):
             lines.append(psi_line)
         return lines
         
-    def get_boundary(self,alpha=1-1e-3,delta_loop=0.1):
+    def get_boundary(self,alpha=1-1e-3,delta_loop=0.1,plot=False):
         self.Spsi = alpha*(self.Xpsi-self.Mpsi)+self.Mpsi
         psi_line = self.get_contour([self.Spsi],boundary=True)[0]
         R,Z = np.array([]),np.array([])
@@ -422,6 +416,8 @@ class SF(object):
                 if (z>self.Mpoint[1]).any() and (z<self.Mpoint[1]).any() and loop:
                     R,Z = np.append(R,r),np.append(Z,z) 
         R,Z = geom.clock(R,Z)
+        if plot:
+            pl.plot(R,Z)
         return R,Z
         
     def get_sep(self,expand=0):  # generate boundary dict for elliptic
@@ -485,10 +481,11 @@ class SF(object):
             self.Zsol[i] = sinterp(l,z,k=k)(L)
         
         
-    def sol(self,dr=0,Nsol=0,plot=False,update=False,debug=False):  # dr [m]
+    def sol(self,dr=3e-3,Nsol=15,plot=False,update=False,debug=False):  # dr [m]
         if update or not hasattr(self,'sol_psi') or dr > self.dSOL\
         or Nsol > self.Nsol: 
-            self.get_sol_psi(dr=dr,Nsol=Nsol)  # re-calculcate LFP
+            print('recalculate',dr)
+            self.get_sol_psi(dSOL=dr,Nsol=Nsol)  # re-calculcate LFP
         elif (Nsol>0 and Nsol != self.Nsol) or \
         (dr>0 and dr != self.dSOL):  # update  
             if dr>0: self.dSOL = dr
@@ -619,7 +616,6 @@ class SF(object):
         if self.sf.z.min() > self.sf.Xpoint[1]-self.sf.rcirc:
             print('grid out of bounds')
 
-    
     def get_legs(self,debug=False):
         if debug:
             theta = np.linspace(-np.pi,np.pi,100)
@@ -656,7 +652,7 @@ class SF(object):
             tend = bins[-1]
             self.tleg = np.append(self.tleg,(tstart+tend)/2)
             self.nleg += 1
-
+            
         if self.nleg == 6:  # snow flake
             self.legs = {\
             'inner1':{'R':[[] for i in range(self.Nsol)],
@@ -682,7 +678,7 @@ class SF(object):
             'core2':{'R':[[] for i in range(self.Nsol)],
             'Z':[[] for i in range(self.Nsol)],'i':0}}
         self.legs = OrderedDict(sorted(self.legs.items(), key=lambda t: t[0]))
-        
+
         self.tID = np.arange(self.nleg)
         self.tID = np.append(self.nleg-1,self.tID)
         self.tID = np.append(self.tID,0)
@@ -738,7 +734,7 @@ class SF(object):
                     r,t = [],[]
                 else:
                     r,t = r[ncut:],t[ncut:]
-                    
+          
     def strike_point(self,Xi,graze):
         ratio = np.sin(graze)*np.sqrt(Xi[-1]**2+1)
         if np.abs(ratio) > 1:

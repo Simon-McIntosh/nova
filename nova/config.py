@@ -1,9 +1,25 @@
 import numpy as np
 import collections
+import os.path
 
+def trim_dir(check_dir):
+    nlevel,dir_found = 3,False
+    for i in range(nlevel):
+        if os.path.isdir(check_dir):
+            dir_found = True
+            break
+        else:
+            if '../' in check_dir:
+                check_dir = check_dir.replace('../','',1)
+    if not dir_found:
+        errtxt = check_dir+' not found\n'
+        raise ValueError(errtxt)
+    return check_dir
+            
 class Setup(object):
     
     def __init__(self,configuration='',eqdir='../../eqdsk/'):
+        eqdir = trim_dir(eqdir)
         self.eqdir = eqdir
         self.configuration = configuration
         self.set_defaults()
@@ -150,7 +166,11 @@ class Setup(object):
         elif configuration == 'DEMO_SN':
             self.dataname = 'DEMO_SN'
             self.filename = 'Equil_AR3d1_2015_04_v2_EOF_CSred_fine_final.eqdsk'
-            
+
+        elif configuration == 'DEMO_SNb':
+            self.dataname = 'DEMO_SN'
+            self.filename = 'Equil_AR3d1_2016_01_v1_SN_SOF_baseline_2016_opt.eqdsk'
+
         self.filename = self.eqdir+self.filename
 
                 

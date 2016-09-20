@@ -23,11 +23,11 @@ class ripple(object):
     def __init__(self,nTF=18,**kwargs):
         self.nTF = nTF
         if 'plasma' in kwargs:
-            self.get_seperatrix(alpha=0.95,**kwargs['plasma'])
+            self.get_seperatrix(alpha=1-1e-3,**kwargs['plasma'])
         if 'coil' in kwargs:
             self.set_TFcoil(**kwargs['coil'])
 
-    def get_seperatrix(self,nplasma=80,alpha=0.95,**kwargs):
+    def get_seperatrix(self,nplasma=80,alpha=1-1e-3,**kwargs):
         self.nplasma = nplasma
         self.plasma_loop = np.zeros((self.nplasma,3))  # initalise loop array
         if 'sf' in kwargs:  # seperatrix directly from sf object
@@ -55,19 +55,19 @@ class ripple(object):
         rfun,zfun = geom.rzfun(r,z)
         self.plasma_interp = {'r':rfun,'z':zfun}
       
-    def get_boundary(filename,alpha=0.95):
+    def get_boundary(filename,alpha=1e-3):
         sf = SF(filename)
         r,z = sf.get_boundary(alpha=alpha)
         return r,z
      
-    def set_TFcoil(self,Rcl,Zcl,npoints=80,smooth=False):
-        Rcl,Zcl = geom.clock(Rcl,Zcl)
+    def set_TFcoil(self,cl,npoints=80,smooth=False):
+        r,z = geom.clock(cl['r'],cl['z'])
         self.coil_loop = np.zeros((npoints,3))
         self.coil_loop[:,0],self.coil_loop[:,2] = \
-        geom.rzSLine(Rcl,Zcl,npoints=npoints)  # coil centerline
+        geom.rzSLine(r,z,npoints=npoints)  # coil centerline
         self.gfl = cc.GreenFeildLoop(self.coil_loop,smooth=smooth)
 
-    def point(self,s,variable='ripple'):  # s==3D point vector
+    def point(self,s,variable='ripple'):  # s==3D point vector 
         B = np.zeros(2)
         n = np.array([0,1,0])
         if variable == 'ripple':
@@ -90,7 +90,7 @@ class ripple(object):
             return ripple
         else:
             return Bo
-  
+
     def loop_ripple(self):
         self.ripple = np.zeros(self.nplasma)
         for i,plasma_point in enumerate(self.plasma_loop):
@@ -123,7 +123,7 @@ class ripple(object):
         pl.axis('equal')
         pl.axis('off')
         
-    def plot_ripple_contours(self,n=2e3,offset=-1):
+    def plot_ripple_contours(self,n=3e3,offset=-1):
         xlim,dx = np.zeros((3,2)),np.zeros(3)
         xl = np.zeros((len(self.coil_loop),3))
         xl[:,0],xl[:,2] = geom.offset(self.coil_loop[:,0],
@@ -152,28 +152,39 @@ class ripple(object):
         
         geom.polyfill(self.plasma_loop[:,0],self.plasma_loop[:,2],
               alpha=0.3,color=sns.color_palette('Set2',5)[3])
-        self.get_ripple()  # get max ripple on 95% plasma contour
+        self.get_ripple()  # get max ripple on plasma contour
         rpl_max = self.res['fun']
-        i95 = np.argmin(abs(np.log10(levels)-np.log10(rpl_max)))
-        levels[i95] = rpl_max  # select edge contour
+        iplasma = np.argmin(abs(np.log10(levels)-np.log10(rpl_max)))
+        levels[iplasma] = rpl_max  # select edge contour
         CS = pl.contour(R,Z,rpl,levels=levels,colors=[0.6*np.ones(3)])
-        zc = CS.collections[i95]
+        zc = CS.collections[iplasma]
         pl.setp(zc, color=[0.4*np.ones(3)])
         pl.clabel(CS, inline=1, fontsize='xx-small',fmt='%1.2f')
 
-
-
 if __name__ is '__main__':  
-    from nova.coils import PF,TF
+    from nova.coils import TF
     
-    config = 'SN'
+    config = 'DEMO_SN'
     
-    tf = TF(shape={'config':config,'coil_type':'S'})
-    rp = ripple(nTF=18,plasma={'config':config},
-                coil={'Rcl':tf.Rcl,'Zcl':tf.Zcl})  
+    tf = TF(config,coil_type='S',npoints=100)
+
+    #tf.coil.set_input(inputs={'upper':0.8,'top':0.5})
     
+    tf.coil.plot()
+            
+    x = tf.coil.draw()
+    tf.get_loops(x)
+    tf.fill() 
+    
+    
+    rp = ripple(nTF=6,plasma={'config':config},coil={'cl':tf.x['cl']})  
+
     setup = Setup(config)
     eqdsk = geqdsk.read(setup.filename)
+    Bo = rp.point((eqdsk['rcentr'],0,eqdsk['zmagx']),variable='feild')
+    I = eqdsk['bcentr']/Bo[1]
+    
+
     
     import time
     tic = time.time()
@@ -181,12 +192,32 @@ if __name__ is '__main__':
     print('time',time.time()-tic)
 
     
-    pl.figure(figsize=(8,8))
-    pl.axis('equal')
-    pl.axis('off')
+    #rp.plot_ripple_contours(n=3e3)
     
-    rp.plot_ripple_contours(n=1e3)
-    tf.fill(text=False)          
+    #tf.coil.set_input()
+         
+    
+    B = np.zeros((tf.npoints,3))
+    for i,(r,z) in enumerate(zip(tf.x['cl']['r'],tf.x['cl']['z'])):
+        B[i,:] = I*rp.point((r,0,z),variable='feild')
+        
+    npoints = 100
+    rcl = np.linspace(np.min(tf.x['cl']['r']),np.max(tf.x['cl']['r']),npoints)
+    zcl = eqdsk['zmagx']*np.ones(npoints)
+    Bcl = np.zeros((npoints,3))
+    
+    for i,(r,z) in enumerate(zip(rcl,zcl)):
+        Bcl[i,:] = I*rp.point((r,0,z),variable='feild')
+        
+    pl.figure()
+    a = np.mean(tf.x['cl']['r']*abs(B[:,1]))
+    pl.plot(tf.x['cl']['r'],abs(B[:,1]))
+    pl.plot(tf.x['cl']['r'],abs(B[:,0]))
+    pl.plot(tf.x['cl']['r'],abs(B[:,2]))
+    pl.plot(tf.x['cl']['r'],a/tf.x['cl']['r'],'--')
+    pl.plot(rcl,abs(Bcl[:,1]))
+    
+    pl.plot(eqdsk['rcentr'],abs(eqdsk['bcentr']),'o')
 
 
 

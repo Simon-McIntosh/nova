@@ -2,6 +2,7 @@ from openpyxl import load_workbook
 import numpy as np
 import pylab as pl
 from amigo import geom
+from nova.config import trim_dir
 import scipy as sp
 from scipy.interpolate import interp1d
 from collections import OrderedDict
@@ -114,9 +115,13 @@ class DEMO(object):
         self.filename = 'DEMO1_Reference_Design_-_2015_April_(_EU_2MG46D_v1_0'
         self.read(self.filename)
         self.process()
+        self.get_limiters()
+        self.get_ports()
+        self.get_fw()
         
     def read(self,filename):
-        wb = load_workbook(filename='./referance/'+filename+
+        ref = trim_dir('../../TF/referance/')
+        wb = load_workbook(filename=ref+filename+
                            '.xlsx',read_only=True,
                    data_only=True)
         ws = wb[wb.get_sheet_names()[0]]
@@ -161,7 +166,7 @@ class DEMO(object):
                 
             if part in ['TF_Coil','Vessel','Blanket']:
                 if side != 'out':
-                    x = geom.polyloop(x['in'],x['out'])
+                    x['r'],x['z'] = geom.polyloop(x['in'],x['out'])
                 else:
                     x['r'],x['z'] = geom.pointloop(x['out']['r'],x['out']['z'])
                     lines = cutcorners(x['r'],x['z'])  # select halfs
@@ -170,7 +175,7 @@ class DEMO(object):
             for key in x:
                 self.parts[part][key] = x[key]
                                   
-    def get_ports(self,plot=True):
+    def get_ports(self,plot=False):
         x = self.parts['Vessel']['ports']
         clusters = cluster_points(x['r'],x['z'])
         self.port = OrderedDict()
@@ -213,7 +218,7 @@ class DEMO(object):
                             zorder=3,
                             color=sns.color_palette('Set2',7)[6])
                         
-    def get_limiters(self,plot=True):
+    def get_limiters(self,plot=False):
         x = self.parts['Plasma']['out']
         self.limiter = OrderedDict()
         clusters = cluster_points(x['r'],x['z'])
@@ -223,7 +228,7 @@ class DEMO(object):
             if plot:
                 pl.plot(r,z,color=0.5*np.ones(3))
                 
-    def get_fw(self,plot=True):
+    def get_fw(self,plot=False):
         rbl = self.parts['Blanket']['in']['r']  # read blanket
         zbl = self.parts['Blanket']['in']['z']
         zmin = np.zeros(len(self.limiter))  # select divertor limiter
@@ -254,6 +259,12 @@ class DEMO(object):
                               self.parts[part]['z'],color=next(color))       
             except:
                 pass
+        set_figure()
+        
+    def fill_part(self,part):
+        cindex = list(self.parts.keys()).index(part)
+        geom.polyfill(self.parts[part]['r'],self.parts[part]['z'],
+                      color=sns.color_palette('Set2',5)[cindex])   
 
     def plot(self):
         for part in self.parts:
@@ -314,9 +325,7 @@ if __name__ is '__main__':
         demo = DEMO()
         
         #demo.fill_loops()
-        demo.get_limiters()
-        #demo.get_ports()
-        demo.get_fw()
+
         
         #demo.write()
         

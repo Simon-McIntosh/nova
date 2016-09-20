@@ -35,15 +35,30 @@ class GreenFeildLoop(object):
         self.dL,self.loop_ss = cut_corners(loop,smooth=smooth,Nss=Nss)
         self.loop_cl = np.copy(loop)
         self.loop = self.loop_cl[:-1,:]  # re-open loop
-        self.N = len(self.loop)
-
-    def B(self,point,theta=0):  # 3D feild from arbitrary loop
+        self.npoints = len(self.loop)
+        
+    def rotate(self,theta):
         if theta != 0:  # rotate about z-axis
             loop = np.dot(self.loop,geom.rotate(theta))
             dL = np.dot(self.dL,geom.rotate(theta))
         else:
             loop,dL = self.loop,self.dL
-        point = np.array(point)*np.ones((self.N,3))  # point array
+        return loop,dL
+        
+    def A(self,point,theta=0):
+        loop,dL = self.rotate(theta)
+        point = np.array(point)*np.ones((self.npoints,3))  # point array
+        r = point-loop  # point-segment vectors
+        r_mag = np.tile(norm(r,axis=1),(3,1)).T
+        r_mag[r_mag<1e-16] = 1e-16
+        core = r_mag/self.rc
+        core[r_mag>self.rc] = 1
+        Apot = np.sum(core*dL/r_mag,axis=0)/(4*np.pi)
+        return Apot
+        
+    def B(self,point,theta=0):  # 3D feild from arbitrary loop
+        loop,dL = self.rotate(theta)
+        point = np.array(point)*np.ones((self.npoints,3))  # point array
         r = point-loop  # point-segment vectors
         r1 = r-dL/2 
         r1_hat = r1/np.tile(norm(r1,axis=1),(3,1)).T

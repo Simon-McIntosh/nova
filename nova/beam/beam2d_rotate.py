@@ -12,6 +12,7 @@ from nova.radial_build import RB
 from nova.elliptic import EQ
 from nova.coils import PF
 from nova.inverse import INV
+from nova.coils import TF
 
 import seaborn as sns
 rc = {'figure.figsize':[8*12/16,8],'savefig.dpi':120, # 
@@ -28,17 +29,24 @@ pf = PF(sf.eqdsk)
 eq = EQ(sf,pf,limit=[5,14,-7,7],n=5e3)  
 
 eq.get_plasma_coil()
-inv = INV(sf,pf,rb,eq,configTF='SN',config='SN')
+inv = INV(sf,pf,eq)
 
-pf.plot(coils=pf.coil,label=True,plasma=True,current=False) 
+pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
+#inv.plot_coils()
 sf.contour()
 
 to = time()
 
-r1,r2 = 4.486,15.708  # DEMO baseline
-r,z = Dcoil.pD(r1,r2,npoints=100)
-#r,z = np.append(r,r[0]),np.append(z,z[0])
+config = 'DEMO_SN'
+tf = TF(config,coil_type='S',npoints=12)
 
+
+tf.load(nTF=18,objective='L')
+
+    
+
+
+r,z = tf.x['cl']['r'][:-1],tf.x['cl']['z'][:-1]
 
 
 X = np.zeros((len(r),3))
@@ -51,14 +59,14 @@ fe.add_mat(0,E=1,I=1,A=1,G=1,J=1,rho=1e-4)
 fe.add_nodes(X)
 fe.add_elements(part_name='outerD')  # outer d coil
 
-'''
-fe.add_elements(n=[fe.part['outerD']['el'][-1]+1,fe.part['outerD']['el'][0]],
+
+fe.add_elements(n=[fe.part['outerD']['el'][-2],fe.part['outerD']['el'][2]],
                 part_name='innerD')  # straight segment
-'''
 
 
-#fe.add_nodes([13,-12,0])
-#fe.add_elements(n=[fe.part['outerD']['el'][30],fe.nndo],part_name='support')
+
+fe.add_nodes([13,-12,0])
+fe.add_elements(n=[fe.part['outerD']['el'][5],fe.nndo],part_name='support')
 
 
 fe.freeze()
@@ -80,21 +88,25 @@ for el in fe.part['outerD']['el']:
     fe.add_load(el=el,W=w)  # self weight
 
 
+fe.plot_nodes()
+
 fe.solve()
 t1 = time()
 
 print('time {:1.3f}'.format(t1-to))
 
-fe.plot_nodes()
-fe.plot_F(scale=1e2)
+
+#fe.plot_F(scale=1e2)
+
 
 color = sns.color_palette('Set2',6)
 for i,part in enumerate(fe.part):
     pl.plot(fe.part[part]['U'][:,0],fe.part[part]['U'][:,1],color=color[i+1])
 pl.axis('equal')
 
+
 pl.figure(figsize=([4,3*12/16]))
-text = linelabel(value='',postfix='',Ndiv=10) 
+text = linelabel(value='',postfix='',Ndiv=5) 
 color = sns.color_palette('Set2',6)
 for i,part in enumerate(fe.part):
     pl.plot(fe.part[part]['l'],fe.part[part]['d2u'][:,1],color=color[i+1])

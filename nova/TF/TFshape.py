@@ -67,23 +67,9 @@
                 self.coil.set_input(xo=xo)  # TFcoil inner loop
                 print('optimisation time {:1.1f}s'.format(time.time()-tic))
                 print('noppvar {:1.0f}'.format(len(self.coil.oppvar)))
-                dataname = '../../Data/'+self.config+'_'+\
-                self.coil_type+'TF.pkl'
-                with open(dataname, 'wb') as output:
-                    pickle.dump(self.coil.xo,output,-1)
-                    pickle.dump(self.coil.oppvar,output,-1)
-            elif self.datatype == 'file':
-                dataname = '../../Data/'+self.config+'_'+\
-                self.coil_type+'TF.pkl'
-                try:
-                    with open(dataname, 'rb') as input:
-                        self.coil.xo = pickle.load(input)
-                        self.coil.oppvar = pickle.load(input)
-                except:
-                    errtxt = '\n'
-                    errtxt += 'file \''+dataname+'\' not found\n'
-                    errtxt += 'regenerate coil profile, fit=True\n'
-                    raise ValueError(errtxt)
+                # tf.save_loop here...
+                
+
                     
             x = self.coil.draw()
             self.get_coil_loops(x['r'],x['z'],profile='in')

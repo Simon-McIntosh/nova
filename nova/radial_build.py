@@ -1,7 +1,7 @@
 import numpy as np
 import pylab as pl
 import pickle
-from scipy.interpolate import interp1d as interp1
+from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline as spline
 import seaborn as sns
 from itertools import cycle
@@ -27,6 +27,10 @@ class RB(object):
         self.Rfw,self.Zfw,self.psi_fw = self.first_wall(self.setup.firstwall['dRfw']) 
         self.loop = Loop(self.Rfw,self.Zfw,xo=self.xo)  # first wall contour
 
+    def set_firstwall(self,r,z):
+        r,z = geom.order(r,z,anti=False)
+        self.Rb,self.Zb = r,z
+        
     def set_target(self,leg,**kwargs):
         if leg not in self.setup.targets:
             self.setup.targets[leg] = {}
@@ -90,8 +94,8 @@ class RB(object):
         Rdr,Zdr = R+dR*nR,Z+dR*nZ  # radial offset
         Rloop,Zloop = self.reorder(Rdr,Zdr)  # spline loop
         Lloop = geom.length(Rloop,Zloop)
-        Rloop = interp1(Lloop,Rloop)(L)  # respace
-        Zloop = interp1(Lloop,Zloop)(L)
+        Rloop = interp1d(Lloop,Rloop)(L)  # respace
+        Zloop = interp1d(Lloop,Zloop)(L)
         Lend = np.zeros(2)
         for i in [0,-1]:
             Lend[i] = L[np.argmin((Rloop-Rdr[i])**2+(Zloop-Zdr[i])**2)]
@@ -270,15 +274,24 @@ class RB(object):
             r,z = r[::-1],z[::-1]
         return np.append(R,r[1:-1]),np.append(Z,z[1:-1]) 
         
-    def get_sol(self):
-        self.trim_sol(plot=False)
+    def get_sol(self,plot=False):
+        self.trim_sol(plot=plot)
         for leg in list(self.sf.legs)[2:]:
             L2D,L3D,Rsol,Zsol = self.sf.connection(leg,0)
             Ro,Zo = Rsol[-1],Zsol[-1]
             L2Dedge,L3Dedge = self.sf.connection(leg,-1)[:2]
+            if leg not in self.setup.targets:
+                self.setup.targets[leg] = {}
             Xi = self.sf.expansion([Ro],[Zo])
-            theta = self.sf.strike_point(Xi,self.setup.targets[leg]['graze'])
-            self.setup.targets[leg]['theta'] = theta
+            graze,theta = np.zeros(self.sf.Nsol),np.zeros(self.sf.Nsol)
+            pannel = self.sf.legs[leg]['pannel']
+            for i in range(self.sf.Nsol):
+                ro = self.sf.legs[leg]['R'][i][-1]
+                zo = self.sf.legs[leg]['Z'][i][-1]
+                graze[i] = self.sf.get_graze((ro,zo),pannel[i])
+                theta[i] = self.sf.strike_point(Xi,graze[i])                             
+            self.setup.targets[leg]['graze_deg'] = graze*180/np.pi
+            self.setup.targets[leg]['theta_deg'] = theta*180/np.pi
             self.setup.targets[leg]['L2Do'] = L2D
             self.setup.targets[leg]['L3Do'] = L3D
             self.setup.targets[leg]['L2Dedge'] = L2Dedge
@@ -296,13 +309,15 @@ class RB(object):
             if 'core' not in leg:
                 Rsol = self.sf.legs[leg]['R']
                 Zsol = self.sf.legs[leg]['Z']
+                self.sf.legs[leg]['pannel'] = [[] for i in range(self.sf.Nsol)]
                 for i in range(self.sf.Nsol):
                     if len(Rsol[i]) > 0:
                         R,Z = Rsol[i],Zsol[i]
                         for j in range(2):  # predict - correct
-                            R,Z = self.inloop(self.Rb[::-1],self.Zb[::-1],R,Z)
+                            R,Z,pannel = self.inloop(self.Rb,self.Zb,R,Z)
                         self.sf.legs[leg]['R'][i] = R  # update sf
                         self.sf.legs[leg]['Z'][i] = Z
+                        self.sf.legs[leg]['pannel'][i] = pannel
                         if plot:
                             if color != 'k' and i > 0:
                                 pl.plot(R,Z,'-',color=0.7*np.ones(3))  # color[c+3]
@@ -387,6 +402,7 @@ class RB(object):
         return index
                 
     def inloop(self,Rloop,Zloop,R,Z):
+        Rloop,Zloop = geom.order(Rloop,Zloop)
         L = geom.length(R,Z)
         index = np.append(np.diff(L)!=0,True)
         R,Z = R[index],Z[index]  # remove duplicates
@@ -415,7 +431,7 @@ class RB(object):
         if step < 0:  # step back
             Rin,Zin = Rin[:-1],Zin[:-1]
         Rin,Zin = np.append(Rin,intersect[0]),np.append(Zin,intersect[1])
-        return Rin,Zin
+        return Rin,Zin,db
         
     def get_bstep(self,s,ds,b,Rloop,Zloop,j):
         db = np.array([Rloop[j[1]]-Rloop[j[0]],Zloop[j[1]]-Zloop[j[0]]])
@@ -714,8 +730,8 @@ class RB(object):
         L = geom.length(R,Z,norm=False)
         N = np.argmin(abs(Lb-Lblend))
         w = self.wblend(N)
-        Rc = (1-w)*Rb[:N]+w*interp1(L,R)(Lb[:N])
-        Zc = (1-w)*Zb[:N]+w*interp1(L,Z)(Lb[:N])   
+        Rc = (1-w)*Rb[:N]+w*interp1d(L,R)(Lb[:N])
+        Zc = (1-w)*Zb[:N]+w*interp1d(L,Z)(Lb[:N])   
         N = np.argmin(abs(L-Lblend))
         Rc = np.append(Rc,R[N:])
         Zc = np.append(Zc,Z[N:])

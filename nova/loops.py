@@ -7,13 +7,71 @@ import pylab as pl
 from collections import OrderedDict
 import seaborn as sns
 from itertools import cycle
+import pandas as pd
+
+def check_var(var,xo):
+    if var not in xo:
+        var = next((v for v in xo if var in v))  # match sub-string
+    return var
+
+def set_oppvar(xo,oppvar):  # set optimization bounds and normalize
+    nopp = len(oppvar)
+    xnorm,bnorm = np.zeros(nopp),np.zeros((nopp,2))
+    for i,var in enumerate(oppvar):
+        var = check_var(var,xo)
+        xnorm[i] = (xo[var]['value']-xo[var]['lb'])/(xo[var]['ub']-
+                                                     xo[var]['lb'])
+        bnorm[i,:] = [0,1]
+    return xnorm,bnorm
+    
+def get_oppvar(xo,oppvar,xnorm):
+    x = np.copy(xnorm)
+    for i,var in enumerate(oppvar):
+        var = check_var(var,xo)
+        x[i] = x[i]*(xo[var]['ub']-xo[var]['lb'])+xo[var]['lb']
+    return x
+
+def plot_oppvar(xo,oppvar,eps=1e-2):
+    xnorm,bnorm = set_oppvar(xo,oppvar)
+    for var in xo:
+        xo[var]['xnorm'] = (xo[var]['value']-xo[var]['lb'])/(xo[var]['ub']-
+                                                             xo[var]['lb'])
+    data = pd.DataFrame(xo).T
+    data.reset_index(level=0,inplace=True)
+    pl.figure(figsize=(8,4))
+    sns.set_color_codes("muted")
+    sns.barplot(x='xnorm',y='index',data=data,color="b")
+    sns.despine(bottom=True)
+    pl.ylabel('')
+    ax = pl.gca()
+    ax.get_xaxis().set_visible(False)
+    patch = ax.patches
+    values = [xo[var]['value'] for var in xo]
+    xnorms = [xo[var]['xnorm'] for var in xo]
+    for p,value,xnorm,var in zip(patch,values,xnorms,xo):
+        x = p.get_width()
+        y = p.get_y() 
+        if xnorm < eps or xnorm > 1-eps:
+            color = 'r'
+        else:
+            color = 'k'
+        text =' {:1.3f}'.format(value)
+        if var not in oppvar:
+             text += '*'
+        ax.text(x,y,text,ha='left',va='top',
+                size='small',color=color)
+    pl.plot(0.5*np.ones(2),np.sort(ax.get_ylim()),'--',color=0.5*np.ones(3),
+            zorder=0,lw=1)
+    pl.plot(np.ones(2),np.sort(ax.get_ylim()),'-',color=0.75*np.ones(3),
+            zorder=0,lw=4)
+    pl.xlim([0,1])
 
 def get_input(oppvar=[],**kwargs):
-    if 'xo' in kwargs:
+    if 'x' in kwargs:
         inputs = {}
-        xo = kwargs.get('xo')
+        X = kwargs.get('x')
         try:
-            for var,x in zip(oppvar,xo):
+            for var,x in zip(oppvar,X):
                 inputs[var] = x
         except:
             errtxt = '\n'
@@ -31,39 +89,34 @@ def close_loop(x,npoints):
     x['r'],x['z'] = geom.rzSLine(x['r'],x['z'],npoints=npoints)
     return x
     
-def set_limit(xo):
-    if xo['value'] < xo['lb']:
-        xo['value'] = xo['lb']
-    if xo['value'] > xo['ub']:
-        xo['value'] = xo['ub']
+def set_limit(xo,limits=True):
+    if limits:
+        if xo['value'] < xo['lb']:
+            xo['value'] = xo['lb']
+        if xo['value'] > xo['ub']:
+            xo['value'] = xo['ub']
     return xo
-    
-def loops(x):
-    R1,Z1 = geom.offset(x['r'],x['z'],0.5)
-    pl.plot(R1,Z1)
-    
-                    
 
 class Acoil(object):  # tripple arc coil
-    def  __init__(self,npoints=200):
+    def  __init__(self,npoints=200,limits=True):
         self.npoints = npoints
         self.initalise_parameters()
         self.name = 'Acoil'
+        self.limits = limits
         
     def initalise_parameters(self):
-        limit = 1e2
         self.xo = OrderedDict()
         self.xo['ro'] = {'value':4.486,'lb':3,'ub':5}  # r origin
-        self.xo['zo'] = {'value':0,'lb':-limit,'ub':limit}  # z origin
-        self.xo['sl'] = {'value':6.428,'lb':0.1,'ub':limit}  # straight length
-        self.xo['f1'] = {'value':2,'lb':0,'ub':limit}  # rs == f1*z small
-        self.xo['f2'] = {'value':5,'lb':0,'ub':limit}  # rm == f2*rs mid
-        self.xo['a1'] = {'value':45,'lb':30,'ub':60}  # small arc angle, deg
-        self.xo['a2'] = {'value':75,'lb':30,'ub':120}  # middle arc angle, deg
+        self.xo['zo'] = {'value':0,'lb':-1,'ub':1}  # z origin
+        self.xo['sl'] = {'value':6.428,'lb':0.5,'ub':10}  # straight length
+        self.xo['f1'] = {'value':2,'lb':0,'ub':10}  # rs == f1*z small
+        self.xo['f2'] = {'value':5,'lb':0,'ub':10}  # rm == f2*rs mid
+        self.xo['a1'] = {'value':45,'lb':5,'ub':60}  # small arc angle, deg
+        self.xo['a2'] = {'value':75,'lb':5,'ub':120}  # middle arc angle, deg
         self.oppvar = list(self.xo.keys())
-        for rmvar in ['a1','a2']:  # remove arc angles from oppvar
-            self.oppvar.remove(rmvar)
-        #self.oppvar.remove('ro')
+        #for rmvar in ['a1','a2']:  # remove arc angles from oppvar
+        #    self.oppvar.remove(rmvar)
+        #self.oppvar.remove('a2')
            
     def set_input(self,**kwargs): 
         inputs = get_input(self.oppvar,**kwargs)     
@@ -74,8 +127,8 @@ class Acoil(object):  # tripple arc coil
                         self.xo[key][k] = inputs[key][k]
                 except:  # single value
                     self.xo[key]['value'] = inputs[key]
-                self.xo[key] = set_limit(self.xo[key])
-            
+                self.xo[key] = set_limit(self.xo[key],limits=self.limits)
+      
     def get_xo(self):
         values = []
         for n in ['ro','zo','sl','f1','f2','a1','a2']:
@@ -109,6 +162,8 @@ class Acoil(object):  # tripple arc coil
         z = np.append(z,-z[::-1]+2*zo)[::-1] 
         r,z = geom.rzSLine(r,z,self.npoints)  # distribute points
         x = {'r':r,'z':z}
+        x = close_loop(x,self.npoints)
+        x['r'],x['z'] = geom.clock(x['r'],x['z'])
         return x
         
     def plot(self,inputs={}):
@@ -116,10 +171,11 @@ class Acoil(object):  # tripple arc coil
         pl.plot(x['r'],x['z'])
 
 class Dcoil(object):  # Princton D
-    def  __init__(self,npoints=100):
+    def  __init__(self,npoints=100,limits=True):
         self.npoints = npoints
         self.initalise_radii()
         self.name = 'Dcoil'
+        self.limits = limits
         
     def initalise_radii(self):
         self.xo = OrderedDict()
@@ -138,8 +194,8 @@ class Dcoil(object):  # Princton D
                         self.xo[key][k] = inputs[key][k]
                 except:  # single value
                     self.xo[key]['value'] = inputs[key]
-                self.xo[key] = set_limit(self.xo[key])
-            
+                self.xo[key] = set_limit(self.xo[key],limits=self.limits)
+                
     def get_xo(self):
         values = []
         for n in ['r1','r2','dz']:
@@ -168,6 +224,7 @@ class Dcoil(object):  # Princton D
         z += dz  # vertical shift
         x = {'r':r,'z':z}
         x = close_loop(x,self.npoints)
+        x['r'],x['z'] = geom.clock(x['r'],x['z'])
         return x
         
     def plot(self,inputs={}):
@@ -175,12 +232,13 @@ class Dcoil(object):  # Princton D
         pl.plot(x['r'],x['z'])
         
 class Scoil(object):  # polybezier
-    def  __init__(self,npoints=200,symetric=True,nl=8):
-        self.npoints = npoints
-        self.symetric = symetric
-        self.check_tension_length(nl)
-        self.initalise_nodes()
+    def  __init__(self,npoints=200,symetric=False,tension='full',limits=False):
         self.name = 'Scoil'
+        self.limits = limits
+        self.npoints = npoints
+        self.initalise_nodes()
+        self.set_symetric(symetric)
+        self.set_tension(tension)
 
     def initalise_nodes(self):
         self.xo = OrderedDict()
@@ -191,57 +249,86 @@ class Scoil(object):  # polybezier
         self.xo['top'] = {'value':0.33,'lb':0.1,'ub':1}  # horizontal shift
         self.xo['upper'] = {'value':0.62,'lb':0.3,'ub':1}  # vertical shift
         self.set_lower()  # lower coil parameters (bottom,lower)
-        self.set_control_lengths({'value':0.8,'lb':0.1,'ub':1.5})  # 1/tesion
         self.xo['dz'] = {'value':0,'lb':-2,'ub':2}  # vertical offset
-        self.xo['ds'] = {'value':0,'lb':0,'ub':0.8}  # fraction outboard straight
-        self.xo['alpha_s'] = {'value':0,'lb':-45,'ub':45}  # outboard angle [deg]
+        self.xo['flat'] = {'value':0,'lb':0,'ub':0.8}  # fraction outboard straight
+        self.xo['tilt'] = {'value':0,'lb':-45,'ub':45}  # outboard angle [deg]
         self.oppvar = list(self.xo.keys())
-        self.oppvar.remove('ds')
-        self.oppvar.remove('alpha_s')
-        
-    def check_tension_length(self,nl):
-        if nl in [1,2,4,8]:
-            self.nl = nl
+        self.set_l({'value':0.8,'lb':0.5,'ub':1.5})  # 1/tesion
+        #self.oppvar.remove('flat')
+        #self.oppvar.remove('tilt')
+
+    def check_tension_length(self,tension):
+        tension = tension.lower()
+        options = OrderedDict()
+        options['full'] = 8
+        options['half'] = 4
+        options['dual'] = 2
+        options['single'] = 1
+        if tension in options:
+            self.nl = options[tension]
         else:
             errtxt = '\n'
-            errtxt += 'Select Scoil tension length from [1,2,4,8]\n'
+            errtxt += 'Select Scoil tension length multiple from:\n'
+            for option in options:
+                errtxt += '\'{}\''.format(option)
+                errtxt += ' (nl={:1.0f})\n'.format(options[option])
             raise ValueError(errtxt)
             
     def set_lower(self):
-        if not self.symetric:
-            for u,l in zip(['top','upper'],['bottom','lower']):
-                self.xo[l] = {}
-                for key in self.xo[u]:
-                    self.xo[l][key] = self.xo[u][key]
+        for u,l in zip(['top','upper'],['bottom','lower']):
+            self.xo[l] = {}
+            for key in self.xo[u]:
+                self.xo[l][key] = self.xo[u][key]
                     
-    def set_control_lengths(self,l):
-        if self.nl == 1:
-            self.xo['l'] = l.copy() 
+    def set_symetric(self,symetric):
+        self.symetric = symetric
+        if self.symetric:  # set lower equal to upper
+            for u,l in zip(['top','upper'],['bottom','lower']):
+                self.xo[l] = self.xo[u]
+                #if l in self.oppvar:  # remove lower from oppvar
+                #    self.oppvar.remove(l)
+        
+    def set_tension(self,tension):
+        tension = tension.lower()
+        if self.symetric:
+            if tension == 'full':
+                self.tension = 'half'
+            elif tension == 'half':
+                self.tension = 'dual'
+            else:
+                self.tension = tension 
+        else:
+            self.tension = tension
+            
+        self.check_tension_length(self.tension)
+        if self.tension == 'single':
             self.lkey = ['l','l','l','l','l','l','l','l']
-        elif self.nl == 2:
-            for i in range(2):
-                self.xo['l{:1.0f}'.format(i)] = l.copy()  # inner / outer seg
+        elif self.tension == 'dual':
             self.lkey = ['l0','l0','l1','l1','l1','l1','l0','l0']
-        elif self.nl == 4:
+        elif self.tension == 'half':
             if self.symetric:
-                for i in range(2):  # 4 controls, up/down symetric
-                    self.xo['l{:1.0f}s'.format(i)] = l.copy()  # start
-                    self.xo['l{:1.0f}e'.format(i)] = l.copy()  # end
                 self.lkey = ['l0s','l0e','l1s','l1e','l1e','l1s','l0e','l0s']
             else:
-                for i in range(4):
-                    self.xo['l{:1.0f}'.format(i)] = l.copy()  # all segments
                 self.lkey = ['l0','l0','l1','l1','l2','l2','l3','l3']
-        elif self.nl == 8:
-            for i in range(4):  # full control (8)
-                self.xo['l{:1.0f}s'.format(i)] = l.copy()  # start
-                self.xo['l{:1.0f}e'.format(i)] = l.copy()  # end
+        elif self.tension == 'full':
             self.lkey = ['l0s','l0e','l1s','l1e','l2s','l2e','l3s','l3e']
-           
+        oppvar = np.copy(self.oppvar)  # remove all length keys
+        for var in oppvar:
+            if var[0] == 'l' and var != 'lower':
+                self.oppvar.remove(var)
+        for oppkey in np.unique(self.lkey):  # re-populate
+            self.oppvar.append(oppkey)
+        for i,(lkey,lkeyo) in enumerate(zip(self.lkey,self.lkeyo)):
+            if len(lkey)==1:
+                lkey += '0s'
+            elif len(lkey)==2:
+                lkey += 's'
+            self.xo[lkeyo] = self.xo[lkey].copy()
+
     def get_xo(self):
         values = []
         for var in ['r1','r2','z2','height','top',
-                    'bottom','upper','lower','dz','ds','alpha_s']:
+                    'bottom','upper','lower','dz','flat','tilt']:
             if var not in self.xo:
                 if var == 'bottom':
                     var = 'top'
@@ -249,12 +336,17 @@ class Scoil(object):  # polybezier
                     var = 'upper'
             values.append(self.xo[var]['value'])
         return values
+        
+    def set_l(self,l):
+        self.lkeyo = ['l0s','l0e','l1s','l1e','l2s','l2e','l3s','l3e']
+        for lkey in self.lkeyo:
+            self.xo[lkey] = l.copy()  
 
     def get_l(self):
         ls,le = [],[]  # start,end
         for i in range(4):
-            ls.append(self.xo[self.lkey[2*i]]['value'])
-            le.append(self.xo[self.lkey[2*i+1]]['value'])
+            ls.append(self.xo['l{:1.0f}s'.format(i)]['value'])
+            le.append(self.xo['l{:1.0f}e'.format(i)]['value'])
         return ls,le
 
     def basis(self,t,v):
@@ -279,22 +371,36 @@ class Scoil(object):  # polybezier
                 p['t'] = np.arctan2(ym-p['y'],xm-p['x'])
             pm['r'],pm['z'] = Scoil.midpoints(p)
         return p1,p2,dl
+        
+    def append_keys(self,key):
+        if key[0] == 'l' and key != 'lower':
+            length = len(key)
+            if length == 1:
+                key = self.lkeyo  #  control all nodes
+            elif length == 2:
+                key = [key+'s',key+'e']
+            else:
+                key = [key]
+        else:
+            key = [key]
+        return key
             
     def set_input(self,**kwargs): 
-        inputs = get_input(self.oppvar,**kwargs)    
+        inputs = get_input(self.oppvar,**kwargs)   
         for key in inputs:
-            if key in self.xo:
-                try:  # dict
-                    for k in inputs[key]:
-                        self.xo[key][k] = inputs[key][k]
-                except:  # single value
-                    self.xo[key]['value'] = inputs[key]
-                self.xo[key] = set_limit(self.xo[key])
-        for u,l in zip(['top','upper'],['bottom','lower']):
-            if u in inputs and l not in inputs:
-                self.xo[l] = self.xo[u]  # set lower equal to upper
+            keyo = self.append_keys(key)
+            for keyo_ in keyo:
+                if keyo_ in self.xo:
+                    try:  # dict
+                        for k in inputs[key]:
+                            self.xo[keyo_][k] = inputs[key][k]
+                    except:  # single value
+                        self.xo[keyo_]['value'] = inputs[key]
+                    self.xo[keyo_] = set_limit(self.xo[keyo_],
+                                               limits=self.limits)
+        self.set_symetric(self.symetric)
+        self.set_tension(self.tension)
             
-  
     def verticies(self):
         r1,r2,z2,height,top,bottom,upper,lower,dz,ds,alpha_s = self.get_xo()
         r,z,theta = np.zeros(6),np.zeros(6),np.zeros(6)
@@ -348,7 +454,8 @@ class Scoil(object):  # polybezier
         r,z,theta = self.verticies()
         x = self.polybezier(r,z,theta)
         x = close_loop(x,self.npoints)
-        return x    
+        x['r'],x['z'] = geom.clock(x['r'],x['z'])
+        return x
         
     def plot(self,inputs={},ms=3):
         #color = cycle(sns.color_palette('Set2',5))
@@ -367,13 +474,18 @@ class Scoil(object):  # polybezier
                     [p['p3']['z'],p['p2']['z']],color=c1,ms=ms,zorder=5)
             pl.plot(p['p2']['r'],p['p2']['z'],'o',color=c1,ms=2*ms,zorder=6)
             pl.plot(p['p2']['r'],p['p2']['z'],'o',color=c2,ms=ms,zorder=7)
-
+            
+            
 if __name__ is '__main__':  # plot coil classes
     #coil = Acoil()
     #x = coil.plot()
     
-    coil = Scoil()
-    x = coil.plot({'l1s':0.5,'top':0.5})
+    coil = Scoil(limits=False,symetric=False,tension='single')
+    coil.set_tension('full')
+    x = coil.plot({'l2':1.5})
+    
+    coil.draw()
+
     '''
     coil = Dcoil()
     x = coil.draw()

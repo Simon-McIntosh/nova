@@ -16,7 +16,6 @@ class coil_cage(object):
     def __init__(self,nTF=18,rc=0.5,**kwargs):
         self.nTF = nTF
         self.rc = rc
-        self.Iturn = 0  # initalise with zero current
         if 'plasma' in kwargs:
             self.get_seperatrix(alpha=1-1e-3,**kwargs['plasma'])
         if 'coil' in kwargs:
@@ -66,6 +65,7 @@ class coil_cage(object):
         
     def amp_turns(self):
         rc,zc = self.eqdsk['rcentr'],self.eqdsk['zmagx']
+        self.Iturn = 1
         Bo = self.point((rc,0,zc),variable='feild')
         self.Iturn = self.eqdsk['bcentr']/Bo[1]  # single coil amp-turns
 
@@ -85,7 +85,7 @@ class coil_cage(object):
             nr = np.dot(n,geom.rotate(theta))
             Bo = np.zeros(3)
             for tcoil in np.linspace(0,2*np.pi,self.nTF,endpoint=False):
-                Bo += cc.mu_o*self.gfl.B(sr,theta=tcoil)
+                Bo += self.Iturn*cc.mu_o*self.gfl.B(sr,theta=tcoil)
             B[j] = np.dot(nr,Bo)
         if variable == 'ripple':
             ripple = 1e2*(B[0]-B[1])/np.sum(B)
@@ -230,7 +230,7 @@ if __name__ is '__main__':
     color = sns.color_palette('Set2')
     
     demo = DEMO()
-    #demo.fill_loops()
+    demo.fill_loops()
     
 
     

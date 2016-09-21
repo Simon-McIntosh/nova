@@ -188,7 +188,7 @@ class TF(object):
     
     def __init__(self,config,coil_type='S',npoints=100):
         self.x = {}
-        for loop in ['in','wp_in','cl','wp_out','out']:
+        for loop in ['in','wp_in','cl','wp_out','out','nose','loop']:
             self.x[loop] = {'r':[],'z':[]}
         self.npoints = npoints  # number of loop divisions
         self.cross_section()
@@ -343,6 +343,20 @@ class TF(object):
             r,z = geom.offset(r,z,dt,close_loop=True)
             self.x[loop]['r'],self.x[loop]['z'] = r,z
         return self.x
+        
+    def split_loop(self):  # split inboard/outboard for fe model
+        r,z = self.x['cl']['r'],self.x['cl']['z']
+        index = self.transition_index(r,z)
+        upper,lower = index['upper']+2,index['lower']+1
+        self.x['nose']['r'] = np.append(r[upper:],r[1:lower+1])
+        self.x['nose']['z'] = np.append(z[upper:],z[1:lower+1])
+        self.x['loop']['r'] = r[lower+1:upper]
+        self.x['loop']['z'] = z[lower+1:upper]
+        
+    def get_loop(self,expand=0):  # generate boundary dict for elliptic
+        R,Z = self.x['cl']['r'],self.x['cl']['z']
+        boundary = {'R':R,'Z':Z,'expand':expand}
+        return boundary
 
     def fill(self,write=False,plot=True):
         geom.polyloopfill(self.x['in'],self.x['wp_in'],color=0.4*np.ones(3))
@@ -381,7 +395,7 @@ class TF(object):
 if __name__ is '__main__':  # test functions
 
     config = 'DEMO_SN'
-    tf = TF(config,coil_type='S',npoints=200)
+    tf = TF(config,coil_type='S',npoints=80)
     
     tf.avalible_data()
     
@@ -390,10 +404,14 @@ if __name__ is '__main__':  # test functions
     #tf.write(nTF=18,objective='E')
     
     tf.load(nTF=18,objective='L')
-    pl.plot(tf.x['cl']['r'],tf.x['cl']['z'])
+    
+    tf.split_loop()
+    #pl.plot(tf.x['cl']['r'],tf.x['cl']['z'])
+    pl.plot(tf.x['nose']['r'],tf.x['nose']['z'])
+    pl.plot(tf.x['loop']['r'],tf.x['loop']['z'])
     
     tf.load(nTF=16,objective='L')
-    pl.plot(tf.x['cl']['r'],tf.x['cl']['z'])
+    #pl.plot(tf.x['cl']['r'],tf.x['cl']['z'])
     
     
     pl.axis('equal')

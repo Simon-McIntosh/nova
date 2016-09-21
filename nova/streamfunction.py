@@ -198,7 +198,7 @@ class SF(object):
         self.Br = -psi_z/rm
         self.Bz = psi_r/rm
         
-    def Bcoil(self,point):  # magnetic feild at point
+    def Bpoint(self,point):  # magnetic feild at point, re-name (was Bcoil)
         feild = np.zeros(2)
         if not hasattr(self, 'Bspline'):
             self.Bspline = [[],[]]
@@ -213,7 +213,7 @@ class SF(object):
         Z = radius*np.cos(theta)+self.Xpoint[1]
         B = np.zeros(len(R))
         for i,(r,z) in enumerate(zip(R,Z)):
-            feild = self.Bcoil((r,z))
+            feild = self.Bpoint((r,z))
             B[i] = np.sqrt(feild[0]**2+feild[1]**2)
         return np.argmin(B)
     
@@ -331,7 +331,7 @@ class SF(object):
         
     def getX(self,xo=None):
         def feild(x):
-            B = self.Bcoil(x)
+            B = self.Bpoint(x)
             return sum(B*B)**0.5
         res = minimize(feild, np.array(xo), method='nelder-mead', 
                        options={'xtol': 1e-7, 'disp': False})  
@@ -789,7 +789,7 @@ class SF(object):
         
     def get_graze(self,point,target):
         T = target / np.sqrt(target[0]**2+target[1]**2)  # target vector
-        B = self.Bcoil([point[0],point[1]])
+        B = self.Bpoint([point[0],point[1]])
         B /= np.sqrt(B[0]**2+B[1]**2)  # poloidal feild line vector
         theta = np.arccos(np.dot(B,T))
         if theta > np.pi/2: theta = np.pi-theta
@@ -807,7 +807,7 @@ class SF(object):
         Xi = np.array([])
         Bm = np.abs(self.bcentr*self.rcentr)
         for r,z in zip(Rsol,Zsol):
-            B = self.Bcoil([r,z])
+            B = self.Bpoint([r,z])
             Bp = np.sqrt(B[0]**2+B[1]**2)  # polodial feild
             Bphi = Bm/r  # torodal field
             Xi = np.append(Xi,Bphi/Bp)  # feild expansion

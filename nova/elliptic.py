@@ -737,7 +737,7 @@ class EQ(object):
             psi += self.add_Pcoil(point[0],point[1],self.plasma_coil[name])
         return psi
         
-    def Bfeild(self,point):
+    def Bpoint(self,point):  # re-named, was Bfeild
         feild = np.zeros(2)
         for name in self.coil.keys():
             feild += self.add_Bcoil(point[0],point[1],self.coil[name])
@@ -746,7 +746,7 @@ class EQ(object):
         return feild
         
     def Bmag(self,point):
-        feild = self.Bfeild(point)
+        feild = self.Bpoint(point)
         B = np.sqrt(feild[0]**2+feild[1]**2)
         return B
         

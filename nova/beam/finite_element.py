@@ -8,6 +8,9 @@ from mpl_toolkits.mplot3d import Axes3D
 import itertools 
 from amigo.geom import vector_length
 from scipy.interpolate import interp1d
+from amigo.addtext import linelabel
+from mpl_toolkits.mplot3d import Axes3D
+color = sns.color_palette('Set2',12)
 
 def delete_row_csr(mat, i):
     if not isinstance(mat, csr_matrix):
@@ -84,34 +87,52 @@ class FE(object):
     def initalise_grid(self,npart_max=10):
         self.X = []
         self.npart = 0  # part number
-        self.part = {}  # part dict
+        self.part = OrderedDict()  # part ordered dict
         self.nnd = 0  # node number
         self.nel = 0  # element number
         self.el = {}
         
     def add_nodes(self,X):
+        self.close_loop = False
         if np.size(X) == 3:
             X = np.reshape(X,(1,3))  # single node
+        else:
+            if np.linalg.norm(X[0,:]-X[-1,:]) == 0:  # loop
+                X = X[:-1,:]  # remove repeated node
+                self.close_loop = True
         self.nndo = self.nnd  # start index
         self.nnd += len(X)  # increment node index
         if len(self.X) == 0:
             self.X = X
+            self.nd_topo = np.zeros(len(X))
         else:
             self.X = np.append(self.X,X,axis=0)
+            self.nd_topo = np.append(self.nd_topo,np.zeros(len(X)))
+            
+    def get_nodes(self):
+        n = np.zeros((self.nnd-self.nndo-1,2),dtype='int')
+        n[:,1] = np.arange(self.nndo+1,self.nnd)
+        n[:,0] = n[:,1]-1
+        return n
         
     def add_elements(self,n=[],nmat=0,part_name=''):  # list of node pairs shape==[n,2]
         if len(part_name) == 0:
             part_name = 'part_{:1d}'.format(self.npart)
         n = np.array(n)
         if len(n) == 0:  # construct from last input node set
-            n = np.zeros((self.nnd-self.nndo-1,2),dtype='int')
-            n[:,1] = np.arange(self.nndo+1,self.nnd)
-            n[:,0] = n[:,1]-1
+            n = self.get_nodes()
+        elif len(np.shape(n)) == 1:  # single dimension node list
+            nl = np.copy(n)  # node list
+            n = np.zeros((len(n)-1,2),dtype='int')
+            n[:,0],n[:,1] = nl[:-1],nl[1:]
         elif np.size(n) == 2:
             n = np.reshape(n,(1,2))
         if len(n) == 0:
             err_txt = 'zero length node pair array'
             raise ValueError(err_txt)
+        if self.close_loop:
+            n = np.append(n,np.array([n[-1,1],n[0,0]],dtype=int,ndmin=2),
+                                     axis=0)
         self.nelo = self.nel  # start index    
         self.nel += len(n)  # element number
         dx = self.X[n[:,1],:]-self.X[n[:,0],:] # element aligned coordinate
@@ -126,9 +147,14 @@ class FE(object):
         self.el_append('dy',dy)
         self.el_append('dz',dz)
         self.el_append('dl',dl)
-        self.el_append('mat',nmat*np.ones(len(n)))
+        self.el_append('mat',nmat*np.ones(len(n),dtype=int))
         self.el_append('n',n)
+        self.nd_connect(n)
         self.add_part(part_name)
+        
+    def nd_connect(self,n):
+        for nd in np.ravel(n):
+            self.nd_topo[nd] += 1
         
     def el_append(self,key,value):
         if key in self.el:
@@ -184,7 +210,6 @@ class FE(object):
             
     def initalize_shape_coefficents(self,nShape=21):
         self.nShape = nShape
-        #nsh = 1+(self.nShape-1)*self.nel
         nsh = self.nel
         self.shape = {}
         self.shape['x'] = np.zeros(nsh)
@@ -494,13 +519,12 @@ class FE(object):
                     if load_type == 'dist':
                         fn[mi,:] *= 8/12  # reduce moment for distributed load
             else:
-                if f[i] != 0:            
+                if abs(f[i]) > 1e-12:            
                     err_txt = 'non zero load \''+label+'\''
                     err_txt += ' not present in frame='+self.frame
                     err_txt +=' ['+', '.join(self.load)+']'
                     raise ValueError(err_txt)
-        for i in range(2):  # each node
-            node = el+i
+        for i,node in enumerate(self.el['n'][el]):  # each node
             if csys == 'global':
                 F = np.zeros((6))
                 for j in range(2):  # force,moment
@@ -529,18 +553,25 @@ class FE(object):
             raise ValueError(err_txt)
         
     def part_node(self,nodes,part):
+        append = False
+        if nodes == 'all':
+            append = True
+            if len(part) > 0:  # node index relitive to part
+                nodes = list(range(self.part[part]['nel']))
         if not isinstance(nodes,list):  # convert to list
             nodes = [nodes]
-        self.check_part(part)
         if len(part) > 0:  # node index relitive to part
             for i in range(len(nodes)):
                 node = nodes[i]
                 el = self.part[part]['el'][node]
                 el_end = 0 if node >= 0 else 1  # chose side of element
                 nodes[i] = self.el['n'][el,el_end]
+            if append:
+                nodes = np.append(nodes,self.el['n'][el,1])
         return nodes
         
     def addBC(self,dof,nodes,part='',terminate=True):
+        self.check_part(part)
         nodes = self.part_node(nodes,part)  # part relitive node format
         if isinstance(dof,str):  # convert to list
             dof = [dof]
@@ -550,12 +581,20 @@ class FE(object):
                 self.BC[constrn] = np.append(self.BC[constrn],np.array(nodes))
         
     def setBC(self):  # colapse constrained dof
-        self.extractBC()
+        self.extractBC()  # remove BC dofs
+        self.extractND()  # remove unconnected nodes
         self.Fo = np.copy(self.F)
+        self.Dindex = np.arange(0,self.nK)  # all nodes (include unconnected)
         if len(self.BCindex) > 0:
             self.F = np.delete(self.F,self.BCindex)
             for i in range(2):  # rows and cols
                 self.K = np.delete(self.K,self.BCindex,i)
+            self.Dindex = np.delete(self.Dindex,self.BCindex)
+                
+    def extractND(self):
+        for nd in np.where(self.nd_topo==0)[0]:  # remove unconnected nodes
+            self.BCindex = np.append(self.BCindex,
+                                     nd*self.ndof+np.arange(0,self.ndof))
         
     def extractBC(self):  # extract matrix indicies for constraints
         self.BCindex = np.array([])
@@ -571,15 +610,6 @@ class FE(object):
                 else:
                     self.BCindex = np.append(self.BCindex,ui+j-2)  # skip-fix,pin
         self.BCindex = list(map(int,set(self.BCindex)))
-        self.Dindex = np.arange(0,self.nK)
-        self.Dindex = np.delete(self.Dindex,self.BCindex)
-    
-    def plot_F(self,scale=1):
-        for i,X in enumerate(self.X):
-            j = i*self.ndof
-            pl.arrow(X[0],X[1],
-                     scale*self.Fo[j],scale*self.Fo[j+1],
-            head_width=scale*0.0015, head_length=scale*0.003 )
 
     def solve(self):
         self.assemble()  # assemble stiffness matrix
@@ -589,15 +619,83 @@ class FE(object):
         for i,disp in enumerate(self.disp):
             self.D[disp] = self.Dn[i::self.ndof]
         self.interpolate()
+        
+    def plot_3D(self):
+        ms = 5
+        fig = pl.figure()
+        ax = fig.gca(projection='3d')
+        ax.plot(self.X[:,0],self.X[:,2],self.X[:,1],'o',markersize=ms,
+                color=0.75*np.ones(3))
+        for i,(part,c) in enumerate(zip(self.part,color)):
+            ax.plot(self.part[part]['U'][:,0],
+                    self.part[part]['U'][:,2],
+                    self.part[part]['U'][:,1],color=c)
+                
+        #ax.axis('off')
+                
+    def plot_twin(self,scale=5e-1):
+        ms = 5
+        pl.figure(figsize=(10,5))
+        ax1 = pl.subplot(121)
+        ax2 = pl.subplot(122, sharey=ax1)
+        ax1.plot(self.X[:,0],self.X[:,1],'o',markersize=ms,
+                color=0.75*np.ones(3))
+        ax2.plot(self.X[:,2],self.X[:,1],'o',markersize=ms,
+                color=0.75*np.ones(3))
+        for i,(part,c) in enumerate(zip(self.part,color)):
+            ax1.plot(self.part[part]['U'][:,0],
+                     self.part[part]['U'][:,1],color=c)
+            ax2.plot(self.part[part]['U'][:,2],
+                     self.part[part]['U'][:,1],color=c)
+        for i,(X,dx,dy,dz) in enumerate(zip(self.X,self.D['x'],
+                                          self.D['y'],self.D['z'])):
+            j = i*self.ndof
+            if np.linalg.norm([self.Fo[j],self.Fo[j+1]]) != 0:
+                ax1.arrow(X[0]+dx,X[1]+dy,
+                          scale*self.Fo[j],scale*self.Fo[j+1],
+                          head_width=0.15,head_length=0.3) 
+            if np.linalg.norm([self.Fo[j+2],self.Fo[j+1]]) != 0:              
+                ax2.arrow(X[2]+dz,X[1]+dy,
+                          scale*self.Fo[j+2],scale*self.Fo[j+1],
+                          head_width=0.15,head_length=0.3) 
+        ax1.axis('equal')
+        ax2.axis('equal')
 
     def plot_nodes(self):
         ms = 5
-        pl.plot(self.X[:,0],self.X[:,1],'o',markersize=ms)
-        
-        for el in self.el['n']:
-            pl.plot([self.X[el[0],0],self.X[el[1],0]],
-                    [self.X[el[0],1],self.X[el[1],1]])
-    
-        #pl.plot(self.X[:,0]+self.D['x'],
-        #        self.X[:,1]+self.D['y'],'o',markersize=ms) 
+        pl.plot(self.X[:,0],self.X[:,1],'o',markersize=ms,
+                color=0.75*np.ones(3))
+        for part,c in zip(self.part,color):
+            for el in self.part[part]['el']:
+                nd = self.el['n'][el]
+                pl.plot([self.X[nd[0],0],self.X[nd[1],0]],
+                        [self.X[nd[0],1],self.X[nd[1],1]],color=c,alpha=0.5)
         sns.despine()
+        
+    def plot_F(self,scale=1):
+        for i,(X,dx,dy) in enumerate(zip(self.X,self.D['x'],self.D['y'])):
+            j = i*self.ndof
+            if np.linalg.norm([self.Fo[j],self.Fo[j+1]]) != 0:
+                pl.arrow(X[0]+dx,X[1]+dy,
+                         scale*self.Fo[j],scale*self.Fo[j+1],
+                         head_width=0.15,head_length=0.3)        
+        
+    def plot_displacment(self):
+        for i,(part,c) in enumerate(zip(self.part,color)):
+            pl.plot(self.part[part]['U'][:,0],
+                    self.part[part]['U'][:,1],color=c)
+        pl.axis('equal')
+        
+    def plot_curvature(self):
+        pl.figure(figsize=([4,3*12/16]))
+        text = linelabel(value='',postfix='',Ndiv=5) 
+        for i,(part,c) in enumerate(zip(self.part,color)):
+            pl.plot(self.part[part]['l'],
+                    self.part[part]['d2u'][:,2],'--',color=c)
+            pl.plot(self.part[part]['l'],
+                    self.part[part]['d2u'][:,1],color=c)
+            text.add(part)
+        text.plot()
+        sns.despine()
+        pl.xlabel('part length')
+        pl.ylabel('part curvature')

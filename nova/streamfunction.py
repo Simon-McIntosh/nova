@@ -198,15 +198,21 @@ class SF(object):
         self.Br = -psi_z/rm
         self.Bz = psi_r/rm
         
-    def Bpoint(self,point):  # magnetic feild at point, re-name (was Bcoil)
-        feild = np.zeros(2)
+    def Bpoint(self,point,check_bounds=False):  # magnetic feild at point
+        feild = np.zeros(2)  # function re-name (was Bcoil)
         if not hasattr(self, 'Bspline'):
             self.Bspline = [[],[]]
             self.Bspline[0] = RectBivariateSpline(self.r,self.z,self.Br)
             self.Bspline[1] = RectBivariateSpline(self.r,self.z,self.Bz)
-        for i in range(2):
-            feild[i] = self.Bspline[i](point[0],point[1])[0]
-        return feild
+        if check_bounds:
+            inbound = point[0]>=np.min(self.r) and point[0]<=np.max(self.r) \
+            and point[1]>=np.min(self.z) and point[1]<=np.max(self.z)
+            return inbound
+        else:
+            for i in range(2):
+                #feild[i] = self.Bspline[i](point[0],point[1])[0]
+                feild[i] = self.Bspline[i].ev(point[0],point[1])
+            return feild
         
     def minimum_feild(self,radius,theta):
         R = radius*np.sin(theta)+self.Xpoint[0]

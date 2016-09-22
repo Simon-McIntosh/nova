@@ -10,6 +10,8 @@ from amigo.geom import vector_length
 from scipy.interpolate import interp1d
 from amigo.addtext import linelabel
 from mpl_toolkits.mplot3d import Axes3D
+from nova.coil_cage import coil_cage
+from amigo import geom
 color = sns.color_palette('Set2',12)
 
 def delete_row_csr(mat, i):
@@ -29,21 +31,33 @@ def delete_row_csr(mat, i):
 
 class FE(object):
     
-    def __init__(self,frame='1D',*args):
+    def __init__(self,frame='1D',nShape=11):
+        self.nShape = nShape  # element shape function resolution
         self.coordinate = ['x','y','z','tx','ty','tz']
         self.initalise_mat()
         self.frame = frame 
         self.set_stiffness()  # set stiffness matrix + problem dofs
         self.initalize_BC()  # boundary conditions
         self.initalise_grid()  # grid
-
-    def freeze(self,nShape=21):
-        self.nK = int(self.nnd*self.ndof)  # stiffness matrix (node number)
-        self.initalize_F()  # load
-        self.initalize_D()  # displacment
-        self.initalize_shape_coefficents(nShape=nShape)  # shape function 
-        self.get_rotation()  # evaluate rotation matricies
+        #self.initalise_D()  # nodal displacment dictionary
+        #self.F = np.array([])  # nodal force vector
+        #self.frozen = False
+    '''
+    def freeze(self):
+        if not self.frozen: 
+            self.nK = int(self.nnd*self.ndof)  # stiffness matrix 
+            #self.initalize_F()  # load
+            #self.initalize_D()  # displacment
+            self.initalize_shape_coefficents(nShape=self.nShape)   
+            self.update_rotation()  # evaluate/update rotation matricies
+            self.frozen = True
     
+            
+    def initalize_D(self):  # initalize displacment vector [u,v,w,rx,ry,rz]
+        self.D = {}
+        for disp in ['x','y','z','tx','ty','tz']:
+            self.D[disp] = np.array([])  # np.zeros(self.nel+1)
+    '''
     def initalise_mat(self,nmat_max=10):
         self.nmat_max = nmat_max
         self.nmat = 0
@@ -59,7 +73,6 @@ class FE(object):
                                                            self.nmat_max)
             err_txt += ' increase size of material array (initalise_mat)'
             raise ValueError(err_txt)
-        
         if 'mat' in kwargs:
             mat = kwargs.get('mat')
             for p in mat:
@@ -91,7 +104,14 @@ class FE(object):
         self.nnd = 0  # node number
         self.nel = 0  # element number
         self.el = {}
-        
+     
+    '''
+    def check_frozen(self):
+        if self.frozen:
+            errtxt = 'model frozen\n'
+            errtxt = 'add all nodes/elements before applying BCs\n'
+            raise ValueError(errtxt)
+    '''          
     def add_nodes(self,X):
         self.close_loop = False
         if np.size(X) == 3:
@@ -100,15 +120,23 @@ class FE(object):
             if np.linalg.norm(X[0,:]-X[-1,:]) == 0:  # loop
                 X = X[:-1,:]  # remove repeated node
                 self.close_loop = True
+        nX = len(X)        
         self.nndo = self.nnd  # start index
-        self.nnd += len(X)  # increment node index
-        if len(self.X) == 0:
+        self.nnd += nX  # increment node index
+        if len(self.X) == 0:  # initalise
             self.X = X
-            self.nd_topo = np.zeros(len(X))
+            self.nd_topo = np.zeros(nX)
+            self.F = np.zeros(nX*self.ndof)
+            self.D = {}
+            for disp in ['x','y','z','tx','ty','tz']:
+                self.D[disp] = np.zeros(nX) 
         else:
             self.X = np.append(self.X,X,axis=0)
-            self.nd_topo = np.append(self.nd_topo,np.zeros(len(X)))
-            
+            self.nd_topo = np.append(self.nd_topo,np.zeros(nX))
+            self.F = np.append(self.F,np.zeros(nX*self.ndof))
+            for disp in self.D:
+                self.D[disp] = np.append(self.D[disp],np.zeros(nX))
+         
     def get_nodes(self):
         n = np.zeros((self.nnd-self.nndo-1,2),dtype='int')
         n[:,1] = np.arange(self.nndo+1,self.nnd)
@@ -192,14 +220,6 @@ class FE(object):
         nd[::2] = self.el['n'][iel,0]
         nd[1::2] = self.el['n'][iel,1]
         self.part[name]['Ln'] = interp1d(L,nd)  # node interpolator
-        
-    def initalize_D(self):  # initalize displacment vector [u,v,w,rx,ry,rz]
-        self.D = {}
-        for disp in ['x','y','z','tx','ty','tz']:
-            self.D[disp] = np.zeros(self.nel+1)
-            
-    def initalize_F(self):
-        self.F = np.zeros(self.nK)  # loading vector
 
     def initalize_BC(self):
         self.BC = OrderedDict()
@@ -413,6 +433,14 @@ class FE(object):
                 err_txt = 'error: rotation in y for 2D element'
                 err_txt += ' - select frame=3D'
                 raise ValueError(err_txt)
+                
+    def update_rotation(self):
+        if not hasattr(self,'T3'):
+            self.get_rotation()
+            print('initalise rotation')
+        elif np.shape(self.T3)[2] != self.nel:
+            self.get_rotation()
+            print('get rotation',np.shape(self.T3),self.nel)
         
     def get_rotation(self):
         dx_,dy_,dz_ = self.el['dx'],self.el['dy'],self.el['dz']
@@ -541,11 +569,43 @@ class FE(object):
         self.F[node*self.ndof+index] += load
         
     def add_weight(self):
+        self.update_rotation()  # check / update rotation matrix
         for part in self.part:
             for el in self.part[part]['el']:
                 nm = self.el['mat'][el]  # material index
                 w = -9.81*self.mat['rho'][nm]*self.mat['A'][nm]
                 self.add_load(el=el,W=[0,w,0])  # self weight
+                
+    def add_tf(self,config,tf,Bpoint,parts=['loop','nose'],
+               method='feild'):
+        cage = coil_cage(nTF=tf.nTF,rc=tf.rc,
+                         plasma={'config':config},coil={'cl':tf.x['cl']})
+
+        #if 'elliptic' in Bpoint.__str__():  # point calculated eq method (slow)
+        
+        #if 'streamfunction' in Bpoint.__str__():  # interpolated sf (fast)
+            
+        #if method == '1/r'
+
+        i = np.argmax(tf.x['cl']['r'])
+        ro,zo = tf.x['cl']['r'][i],tf.x['cl']['z'][i]
+        bm = -ro*cage.point((ro,0,zo),variable='feild')[1]  # TF feild
+        
+        #Rp = geom.rotate(np.pi/2,'x')
+        #Rm = geom.rotate(-np.pi/2,'x')
+        self.update_rotation()  # check / update rotation matrix
+        for part in parts:
+            for el in self.part[part]['el']:
+                n = self.el['n'][el]  # node index pair
+                point = np.zeros(3)
+                for i in range(3):  # calculate load at element mid-point
+                    point[i] = np.mean(self.X[n,i])   
+                b = np.zeros(3)
+                b[2] = bm/point[0]  # TF feild (fast version)
+                #b = np.dot(Rm,cage.point(np.dot(Rp,point),variable='feild'))  # TF
+                b[:2] += Bpoint((point[:2]))  # PF feild (sf-fast, eq-slow)
+                w = np.cross(self.el['dx'][el],b)
+                self.add_load(el=el,W=w)  # bursting/toppling load
 
     def check_part(self,part):
         if part not in self.part:
@@ -612,6 +672,9 @@ class FE(object):
         self.BCindex = list(map(int,set(self.BCindex)))
 
     def solve(self):
+        self.nK = int(self.nnd*self.ndof)  # stiffness matrix 
+        self.initalize_shape_coefficents(nShape=self.nShape)   
+        self.update_rotation()  # evaluate/update rotation matricies
         self.assemble()  # assemble stiffness matrix
         self.setBC()  # remove constrained equations from stiffness + load 
         self.Dn = np.zeros(self.nK)

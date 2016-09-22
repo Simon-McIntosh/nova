@@ -232,6 +232,7 @@ class TF(object):
             errtxt += self.avalible_data(verbose=False)
             raise ValueError(errtxt)
         self.get_loops(self.coil.draw())
+        self.nTF = nTF
         
     def avalible_data(self,verbose=True):
         if len(self.coil_dict) == 0:

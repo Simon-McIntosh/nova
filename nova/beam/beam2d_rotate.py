@@ -13,7 +13,6 @@ from nova.elliptic import EQ
 from nova.coils import PF
 from nova.inverse import INV
 from nova.coils import TF
-from nova.coil_cage import coil_cage
 import nova.cross_coil as cc
 from amigo import geom
 
@@ -43,8 +42,6 @@ sf.contour()
 
 to = time()
 
-
- 
 tf.split_loop()
 #tf.fill()
     
@@ -68,43 +65,20 @@ fe.add_elements(n=nodes['nose'],part_name='nose')
  
 #fe.add_nodes([13,-12,-2])
 fe.add_nodes([13,-12,0])
-fe.add_elements(n=[fe.part['loop']['el'][20],fe.nndo],
-                part_name='support')
+fe.add_elements(n=[fe.part['loop']['el'][20],fe.nndo],part_name='support')
      
-
-fe.freeze()
+#fe.freeze()
 
 fe.addBC(['u','w','rx','ry','rz'],'all',part='nose')
-fe.addBC(['fix'],[-1],part='support') 
 
 
-#fe.add_weight()  # add weight to all elements
-
-cage = coil_cage(nTF=18,rc=tf.rc,plasma={'config':config},
-                 coil={'cl':tf.x['cl']})
+fe.addBC(['pin'],[-1],part='support') 
 
 
-Rp = geom.rotate(np.pi/2,'x')
-Rm = geom.rotate(-np.pi/2,'x')
+fe.add_weight()  # add weight to all elements
 
-i = np.argmax(tf.x['cl']['r'])
-ro,zo = tf.x['cl']['r'][i],tf.x['cl']['z'][i]
-bm = -ro*cage.point((ro,0,zo),variable='feild')[1]  # TF feild
+fe.add_tf(config,tf,sf.Bpoint)  # bursting and toppling loads
 
-for part in ['loop','nose']:
-    for el in fe.part[part]['el']:
-        n = fe.el['n'][el]  # node index pair
-        point = np.zeros(3)
-        for i in range(3):  # calculate load at element mid-point
-            point[i] = np.mean(fe.X[n,i])   
-        b = np.zeros(3)
-        b[2] = bm/point[0]  # TF feild (fast version)
-        #b = np.dot(Rm,cage.point(np.dot(Rp,point),variable='feild'))  # TF
-        b[:2] += sf.Bpoint((point[:2]))  # PF feild (sf, fast version)
-        w = np.cross(fe.el['dx'][el],b)
-        fe.add_load(el=el,W=w)  # bursting/toppling load
-        
-print(w[2])
 
 fe.plot_nodes()
 
@@ -118,7 +92,6 @@ fe.plot_F(scale=5e-1)
 fe.plot_displacment()
 pl.axis('off')
 
-fe.plot_twin()
-
+#fe.plot_twin()
 fe.plot_curvature()
 

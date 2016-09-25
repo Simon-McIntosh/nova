@@ -1,12 +1,14 @@
 import pickle
 from collections import OrderedDict as od
+from nova.config import trim_dir
 
 class PKL(object):
     
-    def __init__(self,file,directory='../Data/'):
+    def __init__(self,file,directory='../../Data/'):
+        directory = trim_dir(directory)
         self.file = directory+file+'.pkl'
         self.data = {'rb':None,'sf':None,'eq':None,'cc':None,'inv':None,
-                     'ax':None}
+                     'ax':None,'pf':None}
         self.data = od(sorted(self.data.items(),key=lambda x:x[0]))
         self.inmemory = False
         

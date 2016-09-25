@@ -41,7 +41,7 @@ class RB(object):
                 self.setup.targets[leg][key] = self.setup.targets['default'][key]  # default
    
     def first_wall_psi(self,req,zeq):
-        psi = self.sf.Pcoil([req,zeq])  # low feild
+        psi = self.sf.Ppoint([req,zeq])  # low feild
         contours = self.sf.get_contour([psi])    
         R,Z = self.sf.pick_contour(contours)
         min_contour = np.empty(len(R))
@@ -502,7 +502,7 @@ class RB(object):
                 accute = False
             R,Z = self.extend_target(R,Z,dL,N,r2s,theta_end,theta_sign,
                                 direction,graze,accute)  # transition graze
-            phi = self.sf.Pcoil([R[-1],Z[-1]])
+            phi = self.sf.Ppoint([R[-1],Z[-1]])
             return R,Z,phi
             
     def extend_target(self,R,Z,dL,N,r2s,theta_end,theta_sign,direction,graze,

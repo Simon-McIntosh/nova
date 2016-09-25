@@ -27,7 +27,7 @@ config = 'DEMO_SN'
 
 setup = Setup(config,eqdir='../../eqdsk/')
 sf = SF(setup.filename)
-tf = TF(config,coil_type='D')
+tf = TF(config,coil_type='S')
 tf.load(nTF=18,objective='L')
 
 rb = RB(setup,sf)
@@ -42,11 +42,10 @@ sf.contour()
 
 to = time()
 
-tf.split_loop()
-#tf.fill()
-    
 
-fe = FE(frame='3D')
+tf.split_loop()
+    
+fe = FE(frame='2D')
 fe.add_mat(0,E=1e2,I=1e2,A=1,G=5,J=5,rho=5e-2)
 
 nodes = {}
@@ -58,35 +57,26 @@ for part in ['loop','nose']:  # ,'nose'
     X[:,0],X[:,1] = x,y
     fe.add_nodes(X)
     nodes[part] = np.arange(fe.nndo,fe.nnd)
-    
 n = np.append(np.append(nodes['nose'][-1],nodes['loop']),nodes['nose'][0])
 fe.add_elements(n=n,part_name='loop')  
-fe.add_elements(n=nodes['nose'],part_name='nose')  
+fe.add_elements(n=nodes['nose'],part_name='nose') 
+fe.addBC(['u','w','rx','ry','rz'],'all',part='nose') 
  
 #fe.add_nodes([13,-12,-2])
 fe.add_nodes([13,-12,0])
 fe.add_elements(n=[fe.part['loop']['el'][20],fe.nndo],part_name='support')
-     
-#fe.freeze()
-
-fe.addBC(['u','w','rx','ry','rz'],'all',part='nose')
-
-
-fe.addBC(['pin'],[-1],part='support') 
-
+fe.addBC(['fix'],[-1],part='support') 
 
 fe.add_weight()  # add weight to all elements
-
-fe.add_tf(config,tf,sf.Bpoint)  # bursting and toppling loads
-
-
-fe.plot_nodes()
-
+fe.add_tf_load(config,tf,sf.Bpoint,method='function')  # bursting and toppling loads
 
 fe.solve()
+
+
+
 print('time {:1.3f}'.format(time()-to))
 
-
+fe.plot_nodes()
 fe.plot_F(scale=5e-1)
 
 fe.plot_displacment()
@@ -94,4 +84,5 @@ pl.axis('off')
 
 #fe.plot_twin()
 fe.plot_curvature()
+
 

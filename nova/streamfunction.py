@@ -16,17 +16,16 @@ class SF(object):
     def __init__(self,filename,upsample=1,**kwargs):
         self.filename = filename
         self.set_kwargs(kwargs)
-        eqdsk = nova.geqdsk.read(self.filename)
-        self.eqdsk = eqdsk
+        self.eqdsk = nova.geqdsk.read(self.filename)
         self.normalise()  # unit normalisation
-        self.set_plasma(eqdsk,contour=False)
-        self.set_boundary(eqdsk['rbdry'],eqdsk['zbdry'])
-        self.set_flux(eqdsk)  # calculate flux profiles
-        self.set_TF(eqdsk)  
-        self.set_current(eqdsk)
+        self.set_plasma(self.eqdsk,contour=False)
+        self.set_boundary(self.eqdsk['rbdry'],self.eqdsk['zbdry'])
+        self.set_flux(self.eqdsk)  # calculate flux profiles
+        self.set_TF(self.eqdsk)  
+        self.set_current(self.eqdsk)
         xo_arg = np.argmin(self.zbdry)
         self.xo = [self.rbdry[xo_arg],self.zbdry[xo_arg]]
-        self.mo = [eqdsk['rmagx'],eqdsk['zmagx']]
+        self.mo = [self.eqdsk['rmagx'],self.eqdsk['zmagx']]
         self.upsample(upsample)
         self.get_Xpsi()
         self.get_Mpsi()
@@ -34,7 +33,9 @@ class SF(object):
         self.get_sol_psi(dSOL=3e-3,Nsol=15,verbose=False)
         self.rcirc = 0.2*(self.Mpoint[1]-self.Xpoint[1])  # leg search radius
         self.drcirc = 0.1*self.rcirc  # leg search width
-        self.xlim,self.ylim,self.nlim = eqdsk['xlim'],eqdsk['ylim'],eqdsk['nlim']
+        self.xlim = self.eqdsk['xlim']
+        self.ylim = self.eqdsk['ylim']
+        self.nlim = self.eqdsk['nlim']
 
     def set_kwargs(self,kwargs):
         for key in kwargs:
@@ -93,7 +94,7 @@ class SF(object):
               'nlim':self.nlim,'xlim':self.xlim,'ylim':self.ylim,  # first wall
               'ncoil':nc,'rc':rc,'zc':zc,'drc':drc,'dzc':dzc,'Ic':Ic} # coils
         print('writing eqdsk','./plot_data/'+config+'.eqdsk')
-        geqdsk.write('./plot_data/'+config+'.eqdsk',eq)
+        self.eqdsk.write('./plot_data/'+config+'.eqdsk',eq)
         
     def write_flux(self):
         psi_norm = np.linspace(0,1,self.nr)
@@ -109,22 +110,15 @@ class SF(object):
         P_ff = eqdsk['pressure']
         n = len(F_ff)
         psi_ff = np.linspace(0,1,n)
-        #F_ff = spline(psi_ff,F_ff,s=1e-7)(psi_ff)
-        #P_ff = spline(psi_ff,P_ff,s=1e6)(psi_ff)
-        
         F_ff = interp1d(psi_ff,F_ff)(psi_ff)
         P_ff = interp1d(psi_ff,P_ff)(psi_ff)
         dF_ff = np.gradient(F_ff,1/(n-1))
         dP_ff = np.gradient(P_ff,1/(n-1))
         self.Fpsi = interp1d(psi_ff,F_ff)
-        self.dFpsi = interp1d(psi_ff,dP_ff)
+        self.dFpsi = interp1d(psi_ff,dF_ff)
         self.dPpsi = interp1d(psi_ff,dP_ff)
         FFp = spline(psi_ff,eqdsk['ffprim'],s=1e-5)(psi_ff)
         Pp = spline(psi_ff,eqdsk['pprime'],s=1e2)(psi_ff) # s=1e5
-        
-        #self.FFprime = interp1d(psi_ff,F_ff*dF_ff,fill_value=0,bounds_error=False)
-        #self.Pprime = interp1d(psi_ff,dP_ff,fill_value=0,bounds_error=False)
-        
         self.FFprime = interp1d(psi_ff,FFp,fill_value=0,bounds_error=False)
         self.Pprime = interp1d(psi_ff,Pp,fill_value=0,bounds_error=False)
 
@@ -154,7 +148,16 @@ class SF(object):
         self.set_contour()  # calculate cfeild
         r,z = self.get_boundary()
         self.set_boundary(r,z)
-        self.get_sol_psi()  # re-calculate sol_psi
+        #self.get_Plimit()  # limit plasma extent
+        #self.get_sol_psi()  # re-calculate sol_psi
+            
+    def get_Plimit(self):
+        psi = np.zeros(self.nlim)
+        for i,(r,z) in enumerate(zip(self.xlim,self.ylim)):
+            psi[i] = self.Ppoint((r,z))
+        self.Xpsi = np.max(psi)
+        #i = np.argmax(psi)
+        #self.Xpoint = np.array([self.xlim[i],self.ylim[i]])
         
     def set_plasma(self,eq,contour=False):
         for key in ['r','z','psi']: 
@@ -223,17 +226,18 @@ class SF(object):
             B[i] = np.sqrt(feild[0]**2+feild[1]**2)
         return np.argmin(B)
     
-    def Pcoil(self,point):
+    def Ppoint(self,point):  # was Pcoil
         if not hasattr(self, 'Pspline'):
             self.Pspline = RectBivariateSpline(self.r,self.z,self.psi)    
         psi = self.Pspline.ev(point[0],point[1])
         return psi
         
     def contour(self,Nstd=1.5,Nlevel=31,Xnorm=True,lw=1,plot_vac=True,
-                **kwargs):
-        alpha,lw = np.array([1,0.5]),lw*np.array([2.25,1.75])   
-        r,z = self.get_boundary()
-        self.set_boundary(r,z)
+                boundary=True,**kwargs):
+        alpha,lw = np.array([1,0.5]),lw*np.array([2.25,1.75]) 
+        if boundary:
+            r,z = self.get_boundary()
+            self.set_boundary(r,z)
         if not hasattr(self,'Xpsi'):
             self.get_Xpsi()
         if not hasattr(self,'Mpsi'):
@@ -271,15 +275,16 @@ class SF(object):
                 level = level-self.Xpsi
             for line in psi_line:
                 r,z = line[:,0],line[:,1]
-                if self.inPlasma(r,z):
+                if self.inPlasma(r,z) and boundary:
                     pindex = 0
                 else:
                     pindex = 1
                 if (not plot_vac and pindex==0) or plot_vac:
                     pl.plot(r,z,linetype,linewidth=lw[pindex],
                             color=color,alpha=alpha[pindex])
-        pl.plot(self.rbdry,self.zbdry,linetype,linewidth=lw[pindex],
-                            color=color,alpha=alpha[pindex])
+        if boundary:
+            pl.plot(self.rbdry,self.zbdry,linetype,linewidth=lw[pindex],
+                    color=color,alpha=alpha[pindex])
         pl.axis('equal')
         pl.axis('off')
         return levels
@@ -355,7 +360,7 @@ class SF(object):
         for i,flip in enumerate([1,-1]):
             xo[1] *= flip
             Xpoint[:,i] = self.getX(xo=xo)
-            Xpsi[i] = self.Pcoil(Xpoint[:,i])
+            Xpsi[i] = self.Ppoint(Xpoint[:,i])
         i = np.argmax(Xpsi)
         i = 0  # force lower Xpoint
         self.Xpsi = Xpsi[i]
@@ -366,20 +371,24 @@ class SF(object):
             self.Xloc = 'lower'
         else:
             self.Xloc = 'upper'
+        
         return (self.Xpsi,self.Xpoint)
+        
+    #def limit_Xpoint(self):
+    #    if 
    
     def getM(self,mo=None):
         if mo is None:
             mo = self.mo
         def psi(m):
-            return -self.Pcoil(m)
+            return -self.Ppoint(m)
         res = minimize(psi, np.array(mo), method='nelder-mead', 
                        options={'xtol': 1e-7, 'disp': False})  
         return res.x
         
     def get_Mpsi(self, mo=None):
         self.Mpoint = self.getM(mo=mo)
-        self.Mpsi = self.Pcoil(self.Mpoint)
+        self.Mpsi = self.Ppoint(self.Mpoint)
         return (self.Mpsi,self.Mpoint)
         
     def remove_contour(self):
@@ -434,7 +443,7 @@ class SF(object):
     def get_midplane(self,r,z):
         def psi_err(r,*args):
             z = args[0]
-            psi = self.Pcoil((r,z))
+            psi = self.Ppoint((r,z))
             return abs(psi-self.Xpsi)
         res = minimize(psi_err,np.array(r),method='nelder-mead', 
                        args=(z),options={'xtol': 1e-7,'disp': False})  
@@ -476,7 +485,7 @@ class SF(object):
         z = self.LFPz*np.ones(len(r))
         self.sol_psi = np.zeros(len(r))
         for i,(rp,zp) in enumerate(zip(r,z)):
-            self.sol_psi[i] = self.Pcoil([rp,zp])
+            self.sol_psi[i] = self.Ppoint([rp,zp])
     
     def upsample_sol(self,nmult=10):
         k = 1  # smoothing factor

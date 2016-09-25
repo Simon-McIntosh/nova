@@ -9,8 +9,8 @@ from nova.radial_build import RB
 from nova.shelf import PKL
 import nova.cross_coil as cc
 from nova.coils import PF,TF
-
-pkl = PKL('moveSX_Dev2')
+from time import time
+from nova import loops
 
 import seaborn as sns
 rc = {'figure.figsize':[7*12/16,7],'savefig.dpi':150, #*12/16
@@ -23,19 +23,7 @@ pl.figure()
 pl.axis('equal')
 pl.axis('off')
 
-
-'''
-setup = Setup('SN')
-sf = SF(setup.filename)
-
-rb = RB(setup,sf,npoints=200)
-pf = PF(sf.eqdsk)
-eq = EQ(sf,pf,dCoil=0.5,sigma=0,boundary=rb.get_fw(expand=0.5),n=5e4)
-
-eq.run(update=False)
-rb.firstwall(calc=True,plot=True,debug=False)
-
-'''
+pkl = PKL('moveSX_Dev3')
 
 config = 'SXex'
 setup = Setup(config)
@@ -44,20 +32,29 @@ sf = SF(setup.filename)
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
 
-eq = EQ(sf,pf,dCoil=0.5,sigma=0,boundary=rb.get_fw(expand=0.5),n=1e4) 
-#eq.gen_opp(sf.Mpoint[1])
-rb.firstwall(calc=False,plot=True,debug=False)
-sf.contour()
+tf = TF(config,coil_type='S')
+tf.fill()
 
-inv = INV(sf,pf,eq)
+eq = EQ(sf,pf,dCoil=0.5,sigma=0,boundary=sf.get_sep(expand=0.25),n=5e2) 
+eq.get_plasma_coil()
+eq.run(update=False)
+#eq.gen_opp(sf.Mpoint[1])
+#rb.firstwall(calc=False,plot=True,debug=False)
+
+
+inv = INV(sf,eq,tf)
+
 Lpf = inv.grid_PF(nPF=5)
 Lcs = inv.grid_CS(nCS=5)
 Lo = np.append(Lpf,Lcs)
-inv.eq.coils()  # re-grid
 inv.update_coils()
 
-pf.plot(coils=pf.coil,label=False,plasma=False,current=True) 
-'''
+#inv.remove_active(Clist=inv.CS_coils)
+
+
+inv.fit_PF(offset=0.3)
+
+
 inv.fix_boundary_psi(N=31,alpha=1-1e-4,factor=1)  # add boundary points
 inv.fix_boundary_feild(N=31,alpha=1-1e-4,factor=1)  # add boundary points
 inv.add_null(factor=1,point=sf.Xpoint)
@@ -65,28 +62,60 @@ inv.add_null(factor=1,point=sf.Xpoint)
 Rex,arg = 1.5,40
 R = sf.Xpoint[0]*(Rex-1)/np.sin(arg*np.pi/180)
 target = (R,arg)
-
 inv.add_alpha(1,factor=3,polar=target)  # 20
 inv.add_B(0,[-15],factor=3,polar=target)  # -30
+inv.plot_fix()
 
-Vtarget = sf.Mpoint[1]  # height of magnetic centre
+Scentre = 25 # np.mean([-37.5,90.11])
+inv.Swing = Scentre+np.array([-0.5,0.5])*363/(2*np.pi)
+inv.Swing = [25]
+
+
+to = time()
 Lo = inv.optimize(Lo)[1]
+print('time {:1.2f}s'.format(time()-to))
 
-sf.conf = Config('SXex')
-inv.write_swing()
+#eq = EQ(sf,pf,dCoil=0.5,sigma=0,boundary=rb.get_fw(expand=0.25),n=1e3)
 
-eq.run(update=False)  
+#eq.gen_opp(sf.Mpoint[1])
+eq.run()
 sf.contour()
 
+inv.plot_coils()
+inv.plot_fix(tails=True)
+pf.plot(coils=pf.coil,label=True,plasma=True,current=True) 
+
+loops.plot_oppvar(inv.Io,inv.adjust_coils,scale=1e-6,postfix='MA')
+
 pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
-#sf,eq,inv = pkl.fetch(['sf','eq','inv'])
+
+
+'''
+
+#Vtarget = sf.Mpoint[1]  # height of magnetic centre
+#
+
+#sf.conf = Config(config)
+#inv.write_swing()
+
+#eq.run(update=False) 
+eq.gen(sf.Mpoint[1]) 
+sf.contour()
+r,z = sf.get_boundary()
+pl.plot(r,z)
+pl.plot(sf.Xpoint[0],sf.Xpoint[1],'o')
+
+
+
+pf.plot(coils=pf.coil,label=True,plasma=True,current=True)
+'''
+'''
 
 
 inv.plot_coils()
 sf.plot_coils(coils=sf.coil,label=False,plasma=False,current=False) 
 #sf.plot_coils(Color,coils=eq.coil,label=False,plasma=False) 
 
-#inv.plot_fix()
 
 
 

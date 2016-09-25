@@ -23,18 +23,25 @@ sf = SF(setup.filename)
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
 
+pf.coil['Coil9']['I'] *= 0.7
+
 eq = EQ(sf,pf,dCoil=0.5,sigma=0,boundary=rb.get_fw(expand=0.5),n=5e3)  
 
 
 #eq.gen_opp(z=sf.Mpoint[1],Zerr=5e-4)
 
+#sf.get_Plimit()
+
+
+eq.gen_opp(z=0.4)  # ,Zerr=5e-4
 
 sf.contour()
 pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
 
-rb.firstwall(calc=True,plot=True,debug=False)
+pl.plot(sf.xlim,sf.ylim)
 
-rb.vessel()
+#rb.firstwall(calc=True,plot=True,debug=False)
+#rb.vessel()
 
 
 #rb.trim_sol(plot=True)

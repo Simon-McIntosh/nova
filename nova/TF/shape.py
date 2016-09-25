@@ -116,6 +116,7 @@ if __name__ is '__main__':
     shp = shape(config,tf,nTF=16,objective='L')
 
     demo = DEMO()
+    demo.fill_loops()
     demo.fill_part('Vessel')
     vv = demo.parts['Vessel']['out']
     rvv,zvv = geom.rzSLine(vv['r'],vv['z'],30)
@@ -128,7 +129,7 @@ if __name__ is '__main__':
     x = tf.coil.draw()
     tf.get_loops(x)
     tf.fill()
-    shp.cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)
+    #shp.cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)
     
     plot_oppvar(shp.coil.xo,shp.coil.oppvar)
 

@@ -141,6 +141,8 @@ class EQ(object):
     def size_coil(self,coil,name,dCoil):
         rc,zc = coil[name]['r'],coil[name]['z']
         Dr,Dz = coil[name]['dr'],coil[name]['dz']
+        Dr = abs(Dr)
+        Dz = abs(Dz)
         if coil[name]['I'] != 0:
             if Dr>0 and Dz>0 and 'plasma' not in name:
                 nr,nz = np.ceil(Dr/dCoil),np.ceil(Dz/dCoil)
@@ -264,7 +266,7 @@ class EQ(object):
     def psi_edge(self):
         psi = np.zeros(self.Ne)
         for i,(r,z) in enumerate(zip(self.Re,self.Ze)):
-            psi[i] = self.sf.Pcoil((r,z))
+            psi[i] = self.sf.Ppoint((r,z))
         return psi
 
     def coil_core(self):
@@ -276,7 +278,7 @@ class EQ(object):
                 j = np.argmin(np.abs(z-self.z))
                 self.b[self.indx(i,j)] += -self.mu_o*I*self.r[i]/(self.dA)
                
-    def plasma_core(self,update=True,dz=0):
+    def plasma_core(self,update=True):
         if update:  # calculate plasma contribution
             rbdry,zbdry = self.sf.get_boundary(alpha=1-1e-3)
             #rbdry,zbdry = self.sf.get_boundary(alpha=0.8)  # !!!!!!!! # for vde
@@ -286,7 +288,7 @@ class EQ(object):
             self.plasma_index = np.zeros(self.N,dtype=int)
             for r,z in zip(R,Z):
                 i = np.argmin(np.abs(r-self.r))
-                j = np.argmin(np.abs(z-self.z+dz))  # plasma vertical offset
+                j = np.argmin(np.abs(z-self.z))  # plasma vertical offset
                 indx = self.indx(i,j)
                 psi = (self.psi[i,j]-self.sf.Mpsi)/(self.sf.Xpsi-self.sf.Mpsi)
                 if psi<1:
@@ -300,8 +302,8 @@ class EQ(object):
             #print('scale_plasma',scale_plasma)
             self.sf.b_scale = scale_plasma
         for i,indx in zip(range(self.Nplasma),self.plasma_index):
-            self.bpl[indx] *= self.sf.b_scale
-            self.b[indx] = self.bpl[indx]
+            #self.bpl[indx] *= self.sf.b_scale
+            self.b[indx] = self.bpl[indx]*self.sf.b_scale
         
     def set_plasma_coil(self,delta=0):
         self.plasma_coil = {} 
@@ -356,17 +358,18 @@ class EQ(object):
         self.plasma_core()
         self.set_plasma_coil(delta=delta)
         
-    def coreBC(self,update=True,dz=0):
-        self.plasma_core(update=update,dz=dz)
+    def coreBC(self,update=True):
+        self.plasma_core(update=update)
         self.coil_core()
         
     def edgeBC(self,update=True,external_coils=True):
-        if not update or self.sf.eqdsk['ncoil'] == 0:   # edge BC from sf
-            psi = self.psi_edge()
-        else:
-            psi = self.psi_pl()  # plasma component
-            if external_coils: 
-                psi += self.psi_ex()  # coils external to grid           
+        #if not update:# or self.sf.eqdsk['ncoil'] == 0:   # edge BC from sf
+        #    psi = self.psi_edge()
+        #else:
+        psi = self.psi_pl()  # plasma component
+        if external_coils: 
+            psi += self.psi_ex()  # coils external to grid    
+                
         self.b[self.indx(0,np.arange(self.nz))] = \
         psi[2*self.nr+self.nz:2*self.nr+2*self.nz][::-1]
         self.b[self.indx(np.arange(self.nr),0)] = psi[:self.nr]
@@ -386,20 +389,22 @@ class EQ(object):
             self.psio = self.psi
         self.psi = self.psio 
           
-    def run(self,update=True,dz=0):
+    def run(self,update=True,verbose=True):
         self.resetBC()
-        self.coreBC(update=update,dz=dz)
-        self.edgeBC()
+        self.coreBC(update=update)
+        self.edgeBC(update=update)
         self.psi = self.solve()
-        self.set_eq_psi()
+        self.set_eq_psi(verbose=verbose)
             
-    def set_eq_psi(self):  # set psi from eq
+    def set_eq_psi(self,verbose=True):  # set psi from eq
         eqdsk = {'r':self.r,'z':self.z,'psi':self.psi}
         try:
             self.sf.update_plasma(eqdsk)  # include boundary update
         except:
-            print('boundary update failed')
+            if verbose:
+                print('boundary update failed')
             self.sf.set_plasma(eqdsk,contour=True)
+
     
     def plasma(self):
         self.resetBC()
@@ -446,29 +451,30 @@ class EQ(object):
             else:
                 Mflag = False
             self.Ic = 0  # control current
-            for index,sign in zip([0,-1],[1,-1]):  # stability coil pair [0,-1]
+            for index,sign in zip([0],[1]):  # stability coil pair [0,-1],[1,-1]
                 gain = 1e5/self.Vcoil['value'][index]
                 self.Vcoil['Ip'][index] = gain*kp*self.Zerr[i]  # proportional
                 self.Vcoil['Ii'][index] += gain*ki*self.Zerr[i]  # intergral
                 dI = self.Vcoil['Ip'][index]+self.Vcoil['Ii'][index]
                 I = self.Vcoil['Io'][index]+dI
                 self.set_control_current(index=index,I=I)
-                self.Ic += sign*(dI)
-            #self.sf.contour()                
+                self.Ic += sign*(dI)               
         self.set_plasma_coil()
         return self.Ic
         
     def gen_opp(self,z=0,dz=0.3,Zerr=5e-3,Nmax=100):
         f,zt,dzdf= np.zeros(Nmax),np.zeros(Nmax),-2.2e-7
         zt[0] = z
+        self.set_Vcoil()
         for i in range(Nmax):
             f[i] = self.gen(zt[i],Zerr=Zerr/2)
             if i == 0:
                 zt[i+1] = zt[i]-f[i]*dzdf  # estimate second step
             elif i < Nmax-1:
-                fdash = (f[i]-f[i-1])/(zt[i]-zt[i-1])
+                fdash = (f[i]-f[i-1])/(zt[i]-zt[i-1])  # Newtons method
                 dz = f[i]/fdash
                 if abs(dz) < Zerr:
+                    print('vertical position converged < {}m'.format(Zerr))
                     break
                 else:
                     zt[i+1] = zt[i]-dz  # Newton's method
@@ -680,7 +686,7 @@ class EQ(object):
         self.psi = np.zeros(np.shape(self.r2d))
         for i in range(self.nr):
             for j in range(self.nz):
-                self.psi[i,j] = self.sf.Pcoil((self.r[i],self.z[j]))
+                self.psi[i,j] = self.sf.Ppoint((self.r[i],self.z[j]))
  
     def add_Pcoil(self,r,z,coil):
         rc,zc,I = coil['r'],coil['z'],coil['I']
@@ -729,7 +735,7 @@ class EQ(object):
             cs.set_linestyle('solid')
             cs.set_alpha(0.5)
             
-    def Pcoil(self,point):
+    def Ppoint(self,point):
         psi = 0
         for name in self.coil.keys():
             psi += self.add_Pcoil(point[0],point[1],self.coil[name])
@@ -754,11 +760,11 @@ class EQ(object):
         self.sf.Xpoint = minimize(self.Bmag,np.array(self.sf.Xpoint),
                                   method='nelder-mead',
                                   options={'xtol':1e-4,'disp':False}).x
-        self.sf.Xpsi = self.Pcoil(self.sf.Xpoint)
+        self.sf.Xpsi = self.Ppoint(self.sf.Xpoint)
 
     def get_Mpsi(self):
         self.sf.Mpoint = minimize(self.Bmag,np.array(self.sf.Mpoint),
                                   method='nelder-mead',
                                   options={'xtol':1e-4,'disp':False}).x
-        self.sf.Mpsi = self.Pcoil(self.sf.Mpoint)
+        self.sf.Mpsi = self.Ppoint(self.sf.Mpoint)
         

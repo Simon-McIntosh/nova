@@ -29,9 +29,10 @@ def get_oppvar(xo,oppvar,xnorm):
     for i,var in enumerate(oppvar):
         var = check_var(var,xo)
         x[i] = x[i]*(xo[var]['ub']-xo[var]['lb'])+xo[var]['lb']
+        xo[var]['value'] = x[i]
     return x
 
-def plot_oppvar(xo,oppvar,eps=1e-2):
+def plot_oppvar(xo,oppvar,eps=1e-2,fmt='1.2f',scale=1,postfix=''):
     xnorm,bnorm = set_oppvar(xo,oppvar)
     for var in xo:
         xo[var]['xnorm'] = (xo[var]['value']-xo[var]['lb'])/(xo[var]['ub']-
@@ -55,7 +56,8 @@ def plot_oppvar(xo,oppvar,eps=1e-2):
             color = 'r'
         else:
             color = 'k'
-        text =' {:1.3f}'.format(value)
+        text =' {:{fmt}}'.format(scale*value,fmt=fmt)
+        text += postfix
         if var not in oppvar:
              text += '*'
         ax.text(x,y,text,ha='left',va='top',
@@ -474,6 +476,8 @@ class Scoil(object):  # polybezier
                     [p['p3']['z'],p['p2']['z']],color=c1,ms=ms,zorder=5)
             pl.plot(p['p2']['r'],p['p2']['z'],'o',color=c1,ms=2*ms,zorder=6)
             pl.plot(p['p2']['r'],p['p2']['z'],'o',color=c2,ms=ms,zorder=7)
+        pl.axis('equal')
+        pl.axis('off')
             
             
 if __name__ is '__main__':  # plot coil classes

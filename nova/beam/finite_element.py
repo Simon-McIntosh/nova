@@ -28,7 +28,6 @@ def delete_row_csr(mat, i):
     mat.indptr = mat.indptr[:-1]
     mat._shape = (mat._shape[0]-1, mat._shape[1])
 
-
 class FE(object):
     
     def __init__(self,frame='1D',nShape=11):
@@ -39,25 +38,7 @@ class FE(object):
         self.set_stiffness()  # set stiffness matrix + problem dofs
         self.initalize_BC()  # boundary conditions
         self.initalise_grid()  # grid
-        #self.initalise_D()  # nodal displacment dictionary
-        #self.F = np.array([])  # nodal force vector
-        #self.frozen = False
-    '''
-    def freeze(self):
-        if not self.frozen: 
-            self.nK = int(self.nnd*self.ndof)  # stiffness matrix 
-            #self.initalize_F()  # load
-            #self.initalize_D()  # displacment
-            self.initalize_shape_coefficents(nShape=self.nShape)   
-            self.update_rotation()  # evaluate/update rotation matricies
-            self.frozen = True
-    
-            
-    def initalize_D(self):  # initalize displacment vector [u,v,w,rx,ry,rz]
-        self.D = {}
-        for disp in ['x','y','z','tx','ty','tz']:
-            self.D[disp] = np.array([])  # np.zeros(self.nel+1)
-    '''
+
     def initalise_mat(self,nmat_max=10):
         self.nmat_max = nmat_max
         self.nmat = 0
@@ -104,14 +85,7 @@ class FE(object):
         self.nnd = 0  # node number
         self.nel = 0  # element number
         self.el = {}
-     
-    '''
-    def check_frozen(self):
-        if self.frozen:
-            errtxt = 'model frozen\n'
-            errtxt = 'add all nodes/elements before applying BCs\n'
-            raise ValueError(errtxt)
-    '''          
+           
     def add_nodes(self,X):
         self.close_loop = False
         if np.size(X) == 3:
@@ -437,10 +411,8 @@ class FE(object):
     def update_rotation(self):
         if not hasattr(self,'T3'):
             self.get_rotation()
-            print('initalise rotation')
         elif np.shape(self.T3)[2] != self.nel:
             self.get_rotation()
-            print('get rotation',np.shape(self.T3),self.nel)
         
     def get_rotation(self):
         dx_,dy_,dz_ = self.el['dx'],self.el['dy'],self.el['dz']
@@ -576,33 +548,48 @@ class FE(object):
                 w = -9.81*self.mat['rho'][nm]*self.mat['A'][nm]
                 self.add_load(el=el,W=[0,w,0])  # self weight
                 
-    def add_tf(self,config,tf,Bpoint,parts=['loop','nose'],
-               method='feild'):
+    def add_tf_load(self,config,tf,Bpoint,parts=['loop','nose'],
+                    method='function'):
         cage = coil_cage(nTF=tf.nTF,rc=tf.rc,
                          plasma={'config':config},coil={'cl':tf.x['cl']})
-
-        #if 'elliptic' in Bpoint.__str__():  # point calculated eq method (slow)
-        
-        #if 'streamfunction' in Bpoint.__str__():  # interpolated sf (fast)
-            
-        #if method == '1/r'
-
-        i = np.argmax(tf.x['cl']['r'])
-        ro,zo = tf.x['cl']['r'][i],tf.x['cl']['z'][i]
-        bm = -ro*cage.point((ro,0,zo),variable='feild')[1]  # TF feild
-        
-        #Rp = geom.rotate(np.pi/2,'x')
-        #Rm = geom.rotate(-np.pi/2,'x')
+        # eq.Bpoint == point calculated method (slow)
+        # sf.Bpoint == spline interpolated method (fast)
+        if 'streamfunction' in Bpoint.__str__():  
+            topright = Bpoint((np.max(tf.x['cl']['r']),
+                               np.max(tf.x['cl']['z'])),
+                              check_bounds=True)    
+            bottomleft = Bpoint((np.max(tf.x['cl']['r']),
+                                 np.max(tf.x['cl']['z'])),
+                                check_bounds=True)
+            if not(topright and bottomleft):
+                errtxt = 'TF coil extends outside Bpoint interpolation grid\n'
+                errtxt = 'extend sf grid\n'
+                raise ValueError(errtxt)
+                
+        if method == 'function':  # calculate tf feild as fitted 1/r function
+            i = np.argmax(tf.x['cl']['z'])
+            ro,zo = tf.x['cl']['r'][i],tf.x['cl']['z'][i]
+            bm = -ro*cage.point((ro,0,zo),variable='feild')[1]  # TF moment
+        elif method == 'BS':  # calculate tf feild with full Biot-Savart
+            Rp = geom.rotate(np.pi/2,'x')
+            Rm = geom.rotate(-np.pi/2,'x')
+        else:
+            errtxt = 'invalid tf feild method {}\n'.format(method)
+            errtxt += 'select method from \'function\' or \'BS\'\n'
+            raise ValueError(errtxt)
         self.update_rotation()  # check / update rotation matrix
         for part in parts:
             for el in self.part[part]['el']:
                 n = self.el['n'][el]  # node index pair
                 point = np.zeros(3)
                 for i in range(3):  # calculate load at element mid-point
-                    point[i] = np.mean(self.X[n,i])   
-                b = np.zeros(3)
-                b[2] = bm/point[0]  # TF feild (fast version)
-                #b = np.dot(Rm,cage.point(np.dot(Rp,point),variable='feild'))  # TF
+                    point[i] = np.mean(self.X[n,i])  
+                if method == 'function':
+                    b = np.zeros(3)
+                    b[2] = bm/point[0]  # TF feild (fast version)
+                else:
+                    b = np.dot(Rm,cage.point(np.dot(Rp,point),  # (slow)
+                                             variable='feild'))
                 b[:2] += Bpoint((point[:2]))  # PF feild (sf-fast, eq-slow)
                 w = np.cross(self.el['dx'][el],b)
                 self.add_load(el=el,W=w)  # bursting/toppling load

@@ -17,6 +17,7 @@ from nova.TF.ripple import ripple
 from nova.config import Setup,trim_dir
 colors = sns.color_palette('Set2',12)
 import pandas as pd
+from scipy.interpolate import InterpolatedUnivariateSpline as IUS
     
 class PF(object):
     def __init__(self,eqdsk):
@@ -125,35 +126,7 @@ class PF(object):
                 R = np.append(R,r+Cdr)
                 Z = np.append(Z,z+Cdz)
         return R,Z
-              
-    def Cshift(self,coil,side,dL):
-        if 'in' in side:
-            R,Z = self.TFinR,self.TFinZ
-        else:
-            R,Z = self.TFoutR,self.TFoutZ
-        rc,zc = coil['r'],coil['z']
-        drc,dzc = coil['dr'],coil['dz']
-        rp = rc+np.array([-drc,drc,drc,-drc])/2
-        zp = zc+np.array([-dzc,-dzc,dzc,dzc])/2
-        nR,nZ = self.normal(R,Z)       
-        mag = np.sqrt(nR**2+nZ**2)
-        nR /= mag
-        nZ /= mag
-        i = []
-        L = np.empty(len(rp))
-        dn = np.empty((2,len(rp)))
-        for j,(r,z) in enumerate(zip(rp,zp)):
-            i.append(np.argmin((R-r)**2+(Z-z)**2))
-            dr = [r-R[i[-1]],z-Z[i[-1]]]  
-            dn[:,j] = [nR[i[-1]],nZ[i[-1]]]
-            L[j] = np.dot(dr,dn[:,j])
-            if 'in' in side: L[j] *= -1
-        jc = np.argmin(L)
-        fact = dL-L[jc]
-        if 'in' in side: fact *= -1
-        delta = fact*dn[:,jc]
-        return delta[0],delta[1]
-    
+
     def fit_coils(self,Cmove,dLo=0.1):
         coils = collections.OrderedDict()
         for side in Cmove.keys():
@@ -186,7 +159,7 @@ class PF(object):
 
 class TF(object):
     
-    def __init__(self,config,coil_type='S',npoints=100):
+    def __init__(self,config,coil_type='S',npoints=100,**kwargs):
         self.x = {}
         for loop in ['in','wp_in','cl','wp_out','out','nose','loop']:
             self.x[loop] = {'r':[],'z':[]}
@@ -194,9 +167,15 @@ class TF(object):
         self.cross_section()
         self.config = config  # save file prefix
         self.load_coil(coil_type)  # initalize coil object
+        self.get_loops(self.coil.draw())  # initalize loops
         data_dir = trim_dir('../../Data/')
         self.dataname = data_dir+self.config+'_TF.pkl'
         self.read_coil_dict()
+        try:  # try to load coil using kwargs or unset data
+            self.load(nTF=kwargs.get('nTF','unset'),
+                    objective=kwargs.get('objective','unset'))
+        except:
+            pass
         
     def read_coil_dict(self):
         try:
@@ -287,36 +266,12 @@ class TF(object):
             errtxt += 'coil type \''+self.coil_type+'\'\n'
             errtxt += 'select from [A,D,S]\n'
             raise ValueError(errtxt)
-
-    def setargs(self,shape):  # set input data based on shape contents
-
-        if 'R' in shape and 'Z' in shape:  # define coil by R,Z arrays
-            self.datatype = 'array'
-            self.Rcl,self.Zcl = shape['R'],shape['Z']  # coil centreline
-            
-        elif 'vessel' in shape and 'pf' in shape:
-            self.datatype = 'fit'  # fit coil to internal incoil + pf coils
-            self.set_bound(shape)  # TF boundary conditions
-            #self.bound['ro_min'] -= 0.5  # offset minimum radius
-            if 'plot' in shape:
-                if shape['plot']:
-                    self.plot_bounds() 
-        elif 'config' in shape and 'coil_type' in shape:
-            self.datatype = 'file'  # load coil from file
-            self.setup = Setup(shape.get('config'))
-            self.setup.coils['external']['id']=[]
-            self.dataname = self.setup.dataname  # TF coil geometory
-            self.filename = self.setup.filename  # eqdsk file
-        else:
-            errtxt = '\n'
-            errtxt += 'unable to load TF coil\n'
-            raise ValueError(errtxt)
-            
+     
     def transition_index(self,r_in,z_in,eps=1e-6):
         npoints = len(r_in)
         r_cl = r_in[0]+eps
-        upper = npoints-next((i for i,r_in_ in enumerate(r_in) if r_in_>r_cl))-1
-        lower = next((i for i,r_in_ in enumerate(r_in) if r_in_>r_cl))-1
+        upper = npoints-next((i for i,r_in_ in enumerate(r_in) if r_in_>r_cl))+1
+        lower = next((i for i,r_in_ in enumerate(r_in) if r_in_>r_cl))
         top,bottom = np.argmax(z_in), np.argmin(z_in)
         index = {'upper':upper,'lower':lower,'top':top,'bottom':bottom}
         return index
@@ -348,11 +303,56 @@ class TF(object):
     def split_loop(self):  # split inboard/outboard for fe model
         r,z = self.x['cl']['r'],self.x['cl']['z']
         index = self.transition_index(r,z)
-        upper,lower = index['upper']+2,index['lower']+1
+        upper,lower = index['upper'],index['lower']
         self.x['nose']['r'] = np.append(r[upper:],r[1:lower+1])
         self.x['nose']['z'] = np.append(z[upper:],z[1:lower+1])
         self.x['loop']['r'] = r[lower+1:upper]
         self.x['loop']['z'] = z[lower+1:upper]
+
+    def loop_interpolators(self,trim=[0,1]):  # outer loop coordinate interpolators
+        r,z = self.x['cl']['r'],self.x['cl']['z']
+        index = self.transition_index(r,z)
+        self.fun = {'in':{},'out':{}}
+        for side,dr in zip(['in','out'],[0,0.75]):  # outer coil offset
+            r,z = self.x[side]['r'],self.x[side]['z']
+            r = r[index['lower']+1:index['upper']]
+            z = z[index['lower']+1:index['upper']]
+            r,z = geom.offset(r,z,dr)
+            l = geom.length(r,z)
+            lt = np.linspace(trim[0],trim[1],int(np.diff(trim)*len(l)))
+            r,z = interp1d(l,r)(lt),interp1d(l,z)(lt)
+            l = np.linspace(0,1,len(r))
+            self.fun[side] = {'r':IUS(l,r),'z':IUS(l,z)}
+            self.fun[side]['dr'] = self.fun[side]['r'].derivative(n=1)
+            self.fun[side]['dz'] = self.fun[side]['r'].derivative(n=1)
+     
+    def Cshift(self,coil,side,dL):  # shift pf coils to tf track
+        if 'in' in side:
+            R,Z = self.x['in']['r'],self.x['in']['z']
+        else:
+            R,Z = self.x['out']['r'],self.x['out']['z']
+        rc,zc = coil['r'],coil['z']
+        drc,dzc = coil['dr'],coil['dz']
+        rp = rc+np.array([-drc,drc,drc,-drc])/2
+        zp = zc+np.array([-dzc,-dzc,dzc,dzc])/2
+        nR,nZ = geom.normal(R,Z)[:2]       
+        mag = np.sqrt(nR**2+nZ**2)
+        nR /= mag
+        nZ /= mag
+        i = []
+        L = np.empty(len(rp))
+        dn = np.empty((2,len(rp)))
+        for j,(r,z) in enumerate(zip(rp,zp)):
+            i.append(np.argmin((R-r)**2+(Z-z)**2))
+            dr = [r-R[i[-1]],z-Z[i[-1]]]  
+            dn[:,j] = [nR[i[-1]],nZ[i[-1]]]
+            L[j] = np.dot(dr,dn[:,j])
+            if 'in' in side: L[j] *= -1
+        jc = np.argmin(L)
+        fact = dL-L[jc]
+        if 'in' in side: fact *= -1
+        delta = fact*dn[:,jc]
+        return delta[0],delta[1]
         
     def get_loop(self,expand=0):  # generate boundary dict for elliptic
         R,Z = self.x['cl']['r'],self.x['cl']['z']
@@ -396,24 +396,27 @@ class TF(object):
 if __name__ is '__main__':  # test functions
 
     config = 'DEMO_SN'
-    tf = TF(config,coil_type='S',npoints=80)
+    tf = TF(config,coil_type='S',npoints=100)
     
+
+    #tf.coil.plot({'dz':-2.5})
+    #tf.write()
+    
+
     tf.avalible_data()
     
     
     #tf.coil.set_input(inputs={'l':1.5})
     #tf.write(nTF=18,objective='E')
     
-    tf.load(nTF=18,objective='L')
+    #tf.load(nTF=18,objective='L')
+    #tf.split_loop()
     
-    tf.split_loop()
     #pl.plot(tf.x['cl']['r'],tf.x['cl']['z'])
-    pl.plot(tf.x['nose']['r'],tf.x['nose']['z'])
-    pl.plot(tf.x['loop']['r'],tf.x['loop']['z'])
+    #pl.plot(tf.x['nose']['r'],tf.x['nose']['z'])
+    #pl.plot(tf.x['loop']['r'],tf.x['loop']['z'])
     
-    tf.load(nTF=16,objective='L')
-    #pl.plot(tf.x['cl']['r'],tf.x['cl']['z'])
+    #tf.loop_interpolators()
     
+
     
-    pl.axis('equal')
-    pl.axis('off')

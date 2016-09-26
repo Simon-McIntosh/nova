@@ -51,7 +51,8 @@ class PF(object):
             names.append(name)
         return nc,rc,zc,drc,dzc,Ic,names
         
-    def plot_coil(self,coils,label=False,current=False,coil_color=None,fs=12):
+    def plot_coil(self,coils,label=False,current=False,coil_color=None,fs=12,
+                  alpha=1):
         if coil_color==None:
             color = cycle(sns.color_palette('Set2',len(coils.keys())))
         else:
@@ -79,7 +80,7 @@ class PF(object):
                 ic = 0  # plasma coils
             coil_color = color[ic] 
             coil_color = color[8]
-            pl.fill(Rfill,Zfill,facecolor=coil_color,alpha=1,
+            pl.fill(Rfill,Zfill,facecolor=coil_color,alpha=alpha,
                     edgecolor=edgecolor)
             if label: 
                 pl.text(r,z+zshift,name.replace('Coil',''),fontsize=fs*0.6,
@@ -96,15 +97,15 @@ class PF(object):
                         color=[0.25,0.25,0.25])
                                   
     def plot(self,color=None,coils=None,label=False,plasma=False,
-                   current=False):
+                   current=False,alpha=1):
         fs = matplotlib.rcParams['legend.fontsize']
         if coils is None:
             coils = self.coil
         self.plot_coil(coils,label=label,current=current,fs=fs,
-                       coil_color=color)
+                       coil_color=color,alpha=alpha)
         if plasma:
             coils = self.plasma_coil                
-            self.plot_coil(coils,coil_color=color)
+            self.plot_coil(coils,coil_color=color,alpha=alpha)
             
     def coil_corners(self,coils):
         R,Z = np.array([]),np.array([])
@@ -395,12 +396,12 @@ class TF(object):
         
 if __name__ is '__main__':  # test functions
 
-    config = 'DEMO_SN'
+    config = 'SXex'
     tf = TF(config,coil_type='S',npoints=100)
     
 
-    #tf.coil.plot({'dz':-2.5})
-    #tf.write()
+    tf.coil.plot({'dz':-2.5})
+    tf.write()
     
 
     tf.avalible_data()

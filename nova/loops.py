@@ -39,7 +39,7 @@ def plot_oppvar(xo,oppvar,eps=1e-2,fmt='1.2f',scale=1,postfix=''):
                                                              xo[var]['lb'])
     data = pd.DataFrame(xo).T
     data.reset_index(level=0,inplace=True)
-    pl.figure(figsize=(8,4))
+    pl.figure(figsize=(6,3))
     sns.set_color_codes("muted")
     sns.barplot(x='xnorm',y='index',data=data,color="b")
     sns.despine(bottom=True)

@@ -37,7 +37,7 @@ class INV(object):
         self.log_array = ['Lo','Iswing']
         self.log_iter = ['current_iter','plasma_iter','position_iter']
         self.log_plasma = ['plasma_coil']
-        self.CS_Lnorm,self.CS_Znorm = 20,1e1
+        self.CS_Lnorm,self.CS_Znorm = 2,1
         self.TFoffset = 0.1  # offset coils from outer TF loop
         self.force_feild_active = False
         
@@ -64,11 +64,11 @@ class INV(object):
         
     def update_coils(self,plot=False):  # full coil update
         self.initalise_coil()
-        self.eq.coils()  # re-grid elliptic coils
         self.append_coil(self.eq.coil)
         if not hasattr(self.eq,'plasma_coil'):
             self.eq.get_plasma_coil()
         self.append_coil(self.eq.plasma_coil)
+        self.eq.coils()  # re-grid elliptic coils
         if plot:
             self.plot_coils()
             
@@ -542,6 +542,7 @@ class INV(object):
     def get_weight(self):
         Rf,Zf,BC,Bdir = self.unpack_fix()
         self.weight = np.ones(len(BC))
+        '''
         for i,(rf,zf,bc,bdir,factor) in enumerate(zip(Rf,Zf,BC,Bdir,
                                                       self.fix['factor'])):
             d_dr,d_dz = self.get_gradients(bc,rf,zf)
@@ -549,7 +550,7 @@ class INV(object):
                 self.weight[i] = 1/abs(np.sqrt(d_dr**2+d_dz**2))
             else:
                 self.weight[i] = 1/abs(np.dot([d_dr,d_dz],bdir))
-        
+        '''
     def gain_weight(self):
         factor = np.reshape(self.fix['factor'],(-1,1))
         weight = np.reshape(self.weight,(-1,1))
@@ -578,7 +579,7 @@ class INV(object):
             zbase += dz
         return Z,dZ
         
-    def grid_CS(self,nCS=3,L=19,Ro=2.9,Zo=-1,dr=1.5):  #dr=1.0, dr=1.25,Ro=3.2,dr=0.818
+    def grid_CS(self,nCS=3,L=19,Ro=2.9,Zo=-1,dr=0.818):  #dr=1.0, dr=1.25,Ro=3.2,dr=0.818
         Zo /= self.CS_Znorm
         L /= self.CS_Lnorm
         #dL = np.sin(np.pi/nCS*(np.arange(nCS)+0.5))  # sinusodal spacing
@@ -714,16 +715,18 @@ class INV(object):
         for j,name in enumerate(self.coil['active'].keys()):
             self.eq.pf.coil[name]['I'] = 0
         
-    def update_area(self,relax=0.1,max_factor=0.2):
+    def update_area(self,relax=1,max_factor=1.2):  #relax=0.1,max_factor=0.2
         for name in self.PF_coils:
             Ic = abs(self.eq.pf.coil[name]['I'])
             if Ic > 150e6: Ic = 150e6  # coil area upper bound
             dA = Ic/self.Jmax  # apply current density limit
-            factor = dA/(self.eq.pf.coil[name]['dr']*self.eq.pf.coil[name]['dz'])-1
-            if factor > max_factor: factor=max_factor
-            scale = 1+relax*factor
-            self.eq.pf.coil[name]['dr'] *= scale
-            self.eq.pf.coil[name]['dz'] *= scale
+            factor = dA/(self.eq.pf.coil[name]['dr']*self.eq.pf.coil[name]['dz'])
+            #if abs(factor) > max_factor: 
+            #    factor = max_factor*np.sign(factor)
+            #scale = 1+relax*factor
+            scale = (1.2*factor)**0.5
+            #self.eq.pf.coil[name]['dr'] *= scale
+            #self.eq.pf.coil[name]['dz'] *= scale
         self.fit_PF()
                     
     def update_bundle(self,name):
@@ -783,12 +786,18 @@ class INV(object):
         Imax,Ics,FzPF,FzCS,Fsep=30e6,500e6,350e6,350e6,300e6  # 250e6 
         self.solve()  # sead coil currents
         self.set_Io()  # set coil current and bounds
+
         Inorm = loops.set_oppvar(self.Io,self.adjust_coils)[0]
+        self.Ilimit(Inorm,Imax,Ics,FzPF,FzCS,Fsep)
+        '''
         Inorm,niter = op.fmin_slsqp(self.return_rms,Inorm,full_output=True,\
         args=(Imax,Ics,FzPF,FzCS,Fsep),f_ieqcons=self.Ilimit,disp=0,\
-        iter=5e2,acc=5e-3)[:3:2]
+        iter=5e2,acc=5e-5)[:3:2]
+        
         I = loops.get_oppvar(self.Io,self.adjust_coils,Inorm)
         self.I = I.reshape(-1,1)
+        '''
+        self.I,niter = self.I.reshape(-1,1),1
         self.update_current()
         self.get_rms()
         return niter
@@ -818,11 +827,6 @@ class INV(object):
         self.iter['current'] == 0
         self.iter['position'] += 1
         self.update_position(Lo) 
-        
-        self.Swing = [-37.5,90.11] # [-25,105]  # -20,80
-        Scentre = 25 # np.mean([-37.5,90.11])
-        self.Swing = Scentre+np.array([-0.5,0.5])*363/(2*np.pi)
-        #self.Swing = [25]
         
         nC,nS = len(self.adjust_coils),len(self.Swing)
         self.Iswing,rms = np.zeros((nS,nC)),np.zeros(nS)
@@ -900,12 +904,15 @@ class INV(object):
         
     def minimize(self,Lo,rhobeg=0.1,rhoend=1e-4):  # rhobeg=0.1,rhoend=1e-4
         self.iter['position'] == 0 
+        #Lo = Lo[:5]
+        '''
         Lo = op.fmin_cobyla(self.position_coils,Lo,
-                            [self.PFspace,self.CSzmax,self.CSzmin],args=([False]),
+                            [self.PFspace],args=([False]),
                             rhobeg=rhobeg,rhoend=rhoend)  # ,disp=3,maxfun=30
-                            
-        #Lo,nitter = op.fmin_slsqp(self.position_coils,Lo,disp=3,epsilon=0.001,
-        #                   full_output=True,acc=0.1)[:3:2]  #,ieqcons=[self.PFspace,self.CSzmax,self.CSzmin]
+                            #[,self.CSzmax,self.CSzmin
+        '''
+        Lo,nitter = op.fmin_slsqp(self.position_coils,Lo,disp=3,
+                           full_output=True,args=(0,))[:3:2]  #,ieqcons=[self.PFspace,self.CSzmax,self.CSzmin]
         rms = self.position_coils(Lo,True)
         text = 'Isum {:1.0f} Ics {:1.0f}'.format(self.Isum*1e-6,self.Ics*1e-6)
         text += ' rms {:1.4f} rmsID {:1.0f}'.format(self.rms,self.rmsID)
@@ -937,10 +944,10 @@ class INV(object):
             self.log[var] = []
         self.iter = {'plasma':0,'position':0,'current':0}
             
-    def optimize(self,Lo,Nmax=6):
+    def optimize(self,Lo,Nmax=1):
         fun = 0
-        rhobeg = [0.05,0.01]  # start,min
-        rhoend = [5e-2,1e-4]  # start,min
+        rhobeg = [1,1]  # start,min
+        rhoend = [5e-5,5e-5]  # start,min
         self.initialize_log()
         self.ztarget = self.sf.Mpoint[1]
         self.initalise_plasma = True
@@ -954,8 +961,8 @@ class INV(object):
             Lo,fun = self.minimize(Lo,rhobeg=rhobeg[0],rhoend=rhoend[0])
             self.store_update(extent='position')
             self.tock()
-            rhobeg = self.rhobound(rhobeg)
-            rhoend = self.rhobound(rhoend)
+            #rhobeg = self.rhobound(rhobeg)
+            #rhoend = self.rhobound(rhoend)
             err = abs(fun-fun_o) 
             if err < 1e-3:
                 break
@@ -976,14 +983,17 @@ class INV(object):
     def set_plasma(self):
         if self.initalise_plasma:
             self.initalise_plasma = False
-        else:
-            self.swing_fix(np.mean(self.Swing))
-            self.solve_slsqp()
-            self.eq.get_Vcoil()  # select vertical stability coil
-            self.eq.gen(self.ztarget)
-        self.set_background()
-        self.get_weight()
-        self.set_force_feild(state='both')
+            self.set_background()
+            self.get_weight()
+            self.set_force_feild(state='both')
+        #else:
+            #self.swing_fix(np.mean(self.Swing))
+            #self.solve_slsqp()
+            #self.eq.get_Vcoil()  # select vertical stability coil
+            #self.eq.gen(self.ztarget)
+        #self.set_background()
+        #self.get_weight()
+        #self.set_force_feild(state='both')
 
     def update_current(self):
         self.Isum,self.Ics = 0,0

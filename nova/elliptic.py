@@ -48,7 +48,7 @@ class EQ(object):
         self.GS = GSspline.ev(self.r2d,self.z2d)  # interpolate b
         self.GS = self.convolve(self.GS,sigma=sigma)  # post interpolation filter
         self.b = np.copy(np.reshape(self.GS,self.nr*self.nz))  # set core
-        self.edgeBC(update=False)  # set edge
+        self.edgeBC(update_edge=False)  # set edge
         self.psi = self.solve()  # re-solve
         self.set_eq_psi()  # pass grid and psi back to sf
 
@@ -249,11 +249,12 @@ class EQ(object):
             r,z = self.coil[name]['r'],self.coil[name]['z']
             I = self.coil[name]['I']
             if not self.ingrid(r,z):
-                psi += self.mu_o*I*cc.green(self.Re,self.Ze,r,z)
+                psi += cc.mu_o*I*cc.green(self.Re,self.Ze,r,z)
         self.psi_external = psi
         return psi   
     
     def psi_pl(self):
+        self.b[self.core_indx==False] = 0  # zero edge BC
         psi_core = self.solve()  # solve with zero edgeBC
         dgdn = self.boundary_normal(psi_core)
         psi = np.zeros(self.Ne)
@@ -354,7 +355,6 @@ class EQ(object):
         self.pf.plasma_coil = self.plasma_coil
        
     def get_plasma_coil(self,delta=0):
-        self.b *= 0
         self.plasma_core()
         self.set_plasma_coil(delta=delta)
         
@@ -362,14 +362,13 @@ class EQ(object):
         self.plasma_core(update=update)
         self.coil_core()
         
-    def edgeBC(self,update=True,external_coils=True):
-        #if not update:# or self.sf.eqdsk['ncoil'] == 0:   # edge BC from sf
-        #    psi = self.psi_edge()
-        #else:
-        psi = self.psi_pl()  # plasma component
-        if external_coils: 
-            psi += self.psi_ex()  # coils external to grid    
-                
+    def edgeBC(self,update_edge=True,external_coils=True):
+        if not update_edge:# or self.sf.eqdsk['ncoil'] == 0:   # edge BC from sf
+            psi = self.psi_edge()
+        else:
+            psi = self.psi_pl()  # plasma component
+            if external_coils: 
+                psi += self.psi_ex()  # coils external to grid   
         self.b[self.indx(0,np.arange(self.nz))] = \
         psi[2*self.nr+self.nz:2*self.nr+2*self.nz][::-1]
         self.b[self.indx(np.arange(self.nr),0)] = psi[:self.nr]
@@ -392,7 +391,7 @@ class EQ(object):
     def run(self,update=True,verbose=True):
         self.resetBC()
         self.coreBC(update=update)
-        self.edgeBC(update=update)
+        self.edgeBC()
         self.psi = self.solve()
         self.set_eq_psi(verbose=verbose)
             
@@ -451,7 +450,7 @@ class EQ(object):
             else:
                 Mflag = False
             self.Ic = 0  # control current
-            for index,sign in zip([0],[1]):  # stability coil pair [0,-1],[1,-1]
+            for index,sign in zip([0,-1],[1,-1]):  # stability coil pair [0,-1],[1,-1]
                 gain = 1e5/self.Vcoil['value'][index]
                 self.Vcoil['Ip'][index] = gain*kp*self.Zerr[i]  # proportional
                 self.Vcoil['Ii'][index] += gain*ki*self.Zerr[i]  # intergral
@@ -465,7 +464,7 @@ class EQ(object):
     def gen_opp(self,z=0,dz=0.3,Zerr=5e-3,Nmax=100):
         f,zt,dzdf= np.zeros(Nmax),np.zeros(Nmax),-2.2e-7
         zt[0] = z
-        self.set_Vcoil()
+        self.get_Vcoil()  # or set_Vcoil for virtual pair
         for i in range(Nmax):
             f[i] = self.gen(zt[i],Zerr=Zerr/2)
             if i == 0:
@@ -489,7 +488,22 @@ class EQ(object):
             inv.get_weight()
             inv.set_force_feild(state='both')
             self.run()  # with coils
-            print(self.sf.Mpoint[1])
+            
+    def GSoper_spline(self):  # apply GS operator
+        psi_sp = RBS(self.r,self.z,self.psi)  # construct spline interpolator
+        dpsi_r = psi_sp.ev(self.r2d,self.z2d,dx=1,dy=0)
+        dpsi_z = psi_sp.ev(self.r2d,self.z2d,dx=0,dy=1)
+        GSr = self.r2d*RBS(self.r,self.z,dpsi_r/self.r2d).\
+        ev(self.r2d,self.z2d,dx=1,dy=0)
+        GSz = RBS(self.r,self.z,dpsi_z).ev(self.r2d,self.z2d,dx=0,dy=1)
+        self.GS = GSr+GSz 
+        '''
+        edge_order = 2
+        dpsi = np.gradient(self.psi,edge_order=edge_order)
+        dpsi_r,dpsi_z = dpsi[0]/self.dr,dpsi[1]/self.dz
+        GSr = self.r2d*np.gradient(dpsi_r/self.r2d,edge_order=edge_order)[0]/self.dr
+        GSz = np.gradient(dpsi_z,edge_order=edge_order)[1]/self.dz
+        '''
             
     def GSoper(self):  # apply GS operator
         edge_order = 2
@@ -618,8 +632,8 @@ class EQ(object):
         -(psi[1,1:][::-1]+psi[1,:-1][::-1])/(2*self.dr)
         return dgdn
         
-    def plotb(self,trim=True,alpha=0.5):
-        b = self.b.reshape((self.nr,self.nz)).T
+    def plotb(self,trim=True,alpha=1):
+        b = np.copy(np.reshape(self.b,(self.nr,self.nz))).T
         if trim:  # trim edge
             b = b[1:-1,1:-1]
             rlim,zlim = [self.r[1],self.r[-2]],[self.z[1],self.z[-2]]
@@ -632,14 +646,14 @@ class EQ(object):
         #cmap._lut[0,:-1] = 1  # set zero value clear
 
         norm = MidpointNormalize(midpoint=0)
-        pl.imshow(b, cmap=cmap, norm=norm,#vmin=b.min(),vmax=b.max()
+        pl.imshow(b,cmap=cmap,norm=norm,#vmin=b.min(),vmax=b.max(),
                   extent=[rlim[0],rlim[-1],zlim[0],zlim[-1]],
                   interpolation='nearest', origin='lower',alpha=alpha) 
         #c = pl.colorbar(orientation='horizontal')
         #c.set_xlabel(r'$j$ MAm$^{-1}$')
         
     def plotj(self,sigma=0,trim=False):
-        #self.GSoper()
+        self.GSoper()
         j = self.getj(sigma=sigma)
         self.plot_matrix(j,scale=1e-6,trim=trim)
         
@@ -664,10 +678,11 @@ class EQ(object):
         c.set_ticks([caxis[0],0,caxis[1]])
         '''    
         cmap = pl.get_cmap('Purples_r')
-        cmap.set_under(color='w',alpha=0)
-        pl.imshow(scale*m.T,cmap=cmap,vmin=0.1,
+        cmap = pl.get_cmap('RdBu')
+        #cmap.set_under(color='w',alpha=0)
+        pl.imshow(scale*m.T,cmap=cmap,#vmin=0.1,
                   extent=[rlim[0],rlim[-1],zlim[0],zlim[-1]],
-                  interpolation='nearest',origin='lower',alpha=0.4)
+                  interpolation='nearest',origin='lower',alpha=1)
 
           
     def plot(self,levels=[]):

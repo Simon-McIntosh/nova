@@ -27,25 +27,43 @@ config = 'DEMO_SN'
 
 setup = Setup(config,eqdir='../../eqdsk/')
 sf = SF(setup.filename)
+
+levels = sf.contour()
+
+
 tf = TF(config,coil_type='S')
 tf.load(nTF=18,objective='L')
 
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
-eq = EQ(sf,pf,boundary=tf.get_loop(expand=0.5),n=5e3)  
+eq = EQ(sf,pf,boundary=sf.get_sep(expand=1.5),n=1e4,sigma=0)  
+
+        
 eq.get_plasma_coil()
+
+
+
+#eq.run()
+#eq.plotj()
+#pf.coil['Coil6']['r'] -= 1.5
+#eq.coils()
+eq.gen_opp(sf.Mpoint[1])
+eq.resample()
+eq.plotb(alpha=1)
+
 #inv = INV(sf,pf,eq)
 
-pf.plot(coils=eq.coil,label=False,plasma=True,current=False) 
+pf.plot(coils=eq.coil,label=False,plasma=True,current=False,alpha=0.5) 
 #inv.plot_coils()
-sf.contour()
+sf.contour(levels=levels)
 
+'''
 to = time()
 
 
 tf.split_loop()
     
-fe = FE(frame='2D')
+fe = FE(frame='3D')
 fe.add_mat(0,E=1e2,I=1e2,A=1,G=5,J=5,rho=5e-2)
 
 nodes = {}
@@ -82,7 +100,7 @@ fe.plot_F(scale=5e-1)
 fe.plot_displacment()
 pl.axis('off')
 
-#fe.plot_twin()
+fe.plot_twin()
 fe.plot_curvature()
 
-
+'''

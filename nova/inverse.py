@@ -45,7 +45,7 @@ class INV(object):
         self.force_feild_active = False
      
     def set_swing(self,centre=25,width=363):
-        flux = centre+np.array([-0.5,0.5])*width/(2*np.pi)  # Webber/rad
+        flux = centre+np.array([-0.05,0.05])*width/(2*np.pi)  # Webber/rad
         
         nC,nS = self.nC,len(flux)
         self.swing = {'flux':flux,'I':np.zeros((nS,nC)),'rms':np.zeros(nS),
@@ -536,7 +536,7 @@ class INV(object):
         weight = np.reshape(weight,(-1,1))
         self.wsqrt = np.sqrt(factor*weight)
         
-    def arange_CS(self,Z,dZmin=0.2):
+    def arange_CS(self,Z,dZmin=0.01):
         Z = np.sort(Z)
         L = Z[-1]-Z[0]-self.gap*self.nCS
         dZ = np.diff(Z)-self.gap
@@ -755,17 +755,9 @@ class INV(object):
         self.get_rms()
         self.update_current()
              
-    def set_Io(self):  # set lower/upper bounds on coil currents (Jmax)
-        self.Io = OrderedDict()
-        for name in self.all_coils:  # all coils
-            coil = self.eq.pf.coil[name]
-            Imax = coil['dr']*coil['dz']*self.Jmax
-            Imin = -Imax
-            Nf = self.eq.coil[name+'_0']['Nf']  # fillament number
-            self.Io[name] = {'value':coil['I']/Nf,'lb':Imin/Nf,'ub':Imax/Nf}
-
     def frms(self,Inorm,grad):
-        I = loops.get_oppvar(self.Io,self.adjust_coils,Inorm)
+        self.Io['norm'] = Inorm
+        I = self.get_oppvar(self.Io)
         d = np.append(self.wG,-self.wT,axis=1)  # delta
         ms = np.zeros((self.nC+1,self.nC+1))  # mean square
         Is = np.dot(np.append(I,1).reshape(-1,1),
@@ -782,48 +774,71 @@ class INV(object):
             for i in range(self.nC):
                 jac[i] *= (2*II[i]*I[i]+2*(np.dot(ms[i,:-1].reshape((1,-1)),
                                                   I.reshape((-1,1)))+ms[i,-1]))
+            jac /= (self.Io['ub']-self.Io['lb'])
             grad[:] = jac
         return rms
         
-    ''''    
-    def frms(self,I):
-
-        #I = loops.get_oppvar(self.Io,self.adjust_coils,Inorm)
+    def set_Io(self):  # set lower/upper bounds on coil currents PF and CS
+        self.Io = {'value':np.zeros(self.nC),'norm':np.zeros(self.nC),
+                   'lb':np.zeros(self.nC),'ub':np.zeros(self.nC)}
+        for i,name in enumerate(self.adjust_coils):
+            coil = self.eq.pf.coil[name]
+            Nf = self.eq.coil[name+'_0']['Nf']  # fillament number
+            self.Io['value'][i] = coil['I']/Nf  # sead current from solve
+            if name in self.PF_coils:
+                self.Io['lb'][i] = -30e6/Nf
+                self.Io['ub'][i] = 30e6/Nf
+            elif name in self.CS_coils:
+                Ilim = coil['dr']*coil['dz']*self.Jmax
+                self.Io['lb'][i] = -Ilim/Nf
+                self.Io['ub'][i] = Ilim/Nf
+            else:
+                errtxt = 'unknown coil \'{}\' in adjust_coils\n'
+                raise ValueError(errtxt)
+        self.set_oppvar(self.Io)
+                
+    def set_oppvar(self,xo,bound=True):
+        xo['norm'] = (xo['value']-xo['lb'])/(xo['ub']-xo['lb'])
+        if bound:
+            xo['norm'][xo['norm']<xo['lb']] = xo['lb'][xo['norm']<xo['lb']]
+            xo['norm'][xo['norm']>xo['ub']] = xo['ub'][xo['norm']>xo['ub']]
         
-        d = np.append(self.wG,-self.wT,axis=1)  # delta
-        ms = np.zeros((self.nC+1,self.nC+1))  # mean square
-        Is = np.dot(np.append(I,1).reshape(-1,1),
-                    np.append(I,1).reshape(1,-1))  # I square
-        for i in range(self.fix['n']):
-            ms += np.dot(d[i,:].reshape((-1,1)),d[i,:].reshape((1,-1)))
-        ms /= self.fix['n']  # mean square
-        rms = np.sum(ms*Is)**0.5  # check rms
-        return rms
-    '''
-
+    def get_oppvar(self,xo):  # norm to value
+        xo['value'] = xo['norm']*(xo['ub']-xo['lb'])+xo['lb']
+        return xo['value']
         
     def solve_slsqp(self):
         self.solve()  # sead coil currents
         
-        
 
-        opt = nlopt.opt(nlopt.LD_SLSQP,1)
-        
+        opt = nlopt.opt(nlopt.LD_SLSQP,self.nC)
         opt.set_min_objective(self.frms)
         
         self.set_Io()  # set coil current and bounds
-        Inorm,bounds = loops.set_oppvar(self.Io,self.adjust_coils)
+
+        jac_aprx = op.approx_fprime(self.Io['norm'],self.frms,1e-9,np.array([]))
+        jac = np.ones(self.nC)
+        self.frms(self.Io['norm'],jac)
+        print('compare',jac_aprx)
+        print(jac)
         
-        opt.set_lower_bounds(bounds[:,0])
-        opt.set_upper_bounds(bounds[:,1])
-        opt.set_ftol_rel(1e-2)
         
-        Inorm = opt.optimize([3])
+
+        opt.set_lower_bounds(self.Io['lb'])
+        opt.set_upper_bounds(self.Io['ub'])
+        opt.set_ftol_rel(1e-9)
         
-        I = loops.get_oppvar(self.Io,self.adjust_coils,Inorm)
+        to = time.time()
+        self.Io['norm'] = opt.optimize(self.Io['norm'])
+        self.I = self.get_oppvar(self.Io).reshape(-1,1)
+        print('t {:1.4f}'.format(time.time()-to))
+
         
-        print(xopt)
-        
+        #print(self.rms,opt.last_optimum_value())
+        rms_o = self.rms
+        self.rms = opt.last_optimum_value()
+        self.update_current()
+        print('rms {:1.4f}mm, rms_o {:1.4f}'.format(1e3*self.rms,1e3*rms_o))
 
         '''
         rms = self.rms

@@ -93,7 +93,7 @@ class PF(object):
                     drs = 2/3*dr
                     ha = 'left'
                 pl.text(r+drs,z-zshift,'{:1.1f}MA'.format(coil['I']*1e-6),
-                        fontsize=fs*0.6,ha=ha,va='center',
+                        fontsize=fs*1.1,ha=ha,va='center',
                         color=[0.25,0.25,0.25])
                                   
     def plot(self,color=None,coils=None,label=False,plasma=False,
@@ -314,7 +314,7 @@ class TF(object):
         r,z = self.x['cl']['r'],self.x['cl']['z']
         index = self.transition_index(r,z)
         self.fun = {'in':{},'out':{}}
-        for side,dr in zip(['in','out'],[0,0.75]):  # outer coil offset
+        for side,dr in zip(['in','out'],[0,0.75]):  # inner/outer coil offset
             r,z = self.x[side]['r'],self.x[side]['z']
             r = r[index['lower']+1:index['upper']]
             z = z[index['lower']+1:index['upper']]
@@ -361,9 +361,9 @@ class TF(object):
         return boundary
 
     def fill(self,write=False,plot=True):
-        geom.polyloopfill(self.x['in'],self.x['wp_in'],color=0.4*np.ones(3))
-        geom.polyloopfill(self.x['wp_in'],self.x['wp_out'],color=0.6*np.ones(3))
-        geom.polyloopfill(self.x['wp_out'],self.x['out'],color=0.4*np.ones(3))
+        geom.polyparrot(self.x['in'],self.x['wp_in'],color=0.4*np.ones(3))
+        geom.polyparrot(self.x['wp_in'],self.x['wp_out'],color=0.6*np.ones(3))
+        geom.polyparrot(self.x['wp_out'],self.x['out'],color=0.4*np.ones(3))
         pl.plot(self.x['cl']['r'],self.x['cl']['z'],'-.',color=0.5*np.ones(3))
         pl.axis('equal')
         pl.axis('off')

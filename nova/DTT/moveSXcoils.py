@@ -40,13 +40,13 @@ eq.get_plasma_coil()
 eq.run(update=False)
 #eq.gen_opp(sf.Mpoint[1])
 
-rb.firstwall(calc=False,plot=True,debug=False)
+#rb.firstwall(calc=False,plot=True,debug=False)
 
 
 inv = INV(sf,eq,tf)
 
 Lpf = inv.grid_PF(nPF=5)
-Lcs = inv.grid_CS(nCS=5)
+Lcs = inv.grid_CS(nCS=5,Zbound=[-10,8],gap=0.1)
 Lo = np.append(Lpf,Lcs)
 inv.update_coils()
 
@@ -55,10 +55,10 @@ inv.update_coils()
 
 inv.fit_PF(offset=0.3)
 
-
 inv.fix_boundary_psi(N=31,alpha=1-1e-4,factor=1)  # add boundary points
-#inv.fix_boundary_feild(N=31,alpha=1-1e-4,factor=1)  # add boundary points
+#inv.fix_boundary_feild(N=11,alpha=1-1e-4,factor=1)  # add boundary points
 inv.add_null(factor=1,point=sf.Xpoint)
+
 
 Rex,arg = 1.5,40
 R = sf.Xpoint[0]*(Rex-1)/np.sin(arg*np.pi/180)
@@ -66,30 +66,34 @@ target = (R,arg)
 inv.add_alpha(1,factor=3,polar=target)  # 20
 inv.add_B(0,[-15],factor=3,polar=target)  # -30
 
-inv.plot_fix(tails=True)
 
-Scentre = 25 # np.mean([-37.5,90.11])
-inv.Swing = Scentre+np.array([-0.5,0.5])*363/(2*np.pi)
-inv.Swing = [25]
+
+
+
 
 
 to = time()
 Lo = inv.optimize(Lo)[1]
 print('time {:1.2f}s'.format(time()-to))
 
-eq = EQ(sf,pf,dcoil=2.5,sigma=0,boundary=rb.get_fw(expand=0.25),n=1e3)
+eq = EQ(sf,pf,dCoil=2.5,sigma=0,boundary=tf.get_loop(expand=0),n=5e3)
 
-#eq.gen_opp(sf.Mpoint[1])
-eq.run()
+eq.get_Vcoil() 
+eq.gen_opp(sf.Mpoint[1])
+#eq.run()
 sf.contour()
 
 inv.plot_coils()
 pf.plot(coils=pf.coil,label=True,plasma=True,current=True) 
-pf.plot(coils=eq.coil,label=True,plasma=False,current=True) 
 
-loops.plot_oppvar(inv.Io,inv.adjust_coils,scale=1e-6,postfix='MA')
+#inv.update_coils()
+pf.plot(coils=eq.coil,label=False,plasma=False,current=False) 
+inv.plot_fix(tails=True)
 
-pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
+#loops.plot_oppvar(inv.Io,inv.adjust_coils,scale=1e-6,postfix='MA')
+loops.plot_oppvar(inv.Lo,inv.position_coils,scale=1)
+
+#pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
 
 
 '''

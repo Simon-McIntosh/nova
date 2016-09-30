@@ -51,22 +51,31 @@ def plot_oppvar(xo,oppvar,eps=1e-2,fmt='1.2f',scale=1,postfix=''):
     xnorms = [xo[var]['xnorm'] for var in xo]
     for p,value,xnorm,var in zip(patch,values,xnorms,xo):
         x = p.get_width()
-        y = p.get_y() 
+        if xnorm < 0:
+            x = 0
+        y = p.get_y()+p.get_height()/2
+        size = 'small'
         if xnorm < eps or xnorm > 1-eps:
-            color = 'r'
-        else:
-            color = 'k'
+            size = 'large'
         text =' {:{fmt}}'.format(scale*value,fmt=fmt)
-        text += postfix
+        text += postfix+' '
         if var not in oppvar:
              text += '*'
-        ax.text(x,y,text,ha='left',va='top',
-                size='small',color=color)
+        if value < 0.5:
+            ha = 'left'
+            color = 0.25*np.ones(3)
+        else:
+            ha = 'right'
+            color = 0.75*np.ones(3)
+        ax.text(x,y,text,ha=ha,va='center',
+                size=size,color=color)
     pl.plot(0.5*np.ones(2),np.sort(ax.get_ylim()),'--',color=0.5*np.ones(3),
             zorder=0,lw=1)
-    pl.plot(np.ones(2),np.sort(ax.get_ylim()),'-',color=0.75*np.ones(3),
-            zorder=0,lw=4)
-    pl.xlim([0,1])
+    pl.plot(np.ones(2),np.sort(ax.get_ylim()),'-',color=0.25*np.ones(3),
+            zorder=0,lw=1.5)
+    xlim = ax.get_xlim()
+    xmin,xmax = np.min([0,xlim[0]]),np.max([1,xlim[1]])
+    pl.xlim([xmin,xmax])
 
 def get_input(oppvar=[],**kwargs):
     if 'x' in kwargs:

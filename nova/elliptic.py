@@ -168,7 +168,7 @@ class EQ(object):
                 bundle['Ro'] = np.mean(bundle['r'])
                 bundle['Zo'] = np.mean(bundle['z'])
             else:
-                print(name)
+                print('coil bundle not foiund',name)
                 self.coil[name] = coil[name]
                 bundle = coil[name]
         return bundle

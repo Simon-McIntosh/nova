@@ -42,18 +42,38 @@ inv.add_null(factor=1,point=sf.Xpoint)
 
 inv.set_background()
 inv.get_weight()
+inv.set_foreground()
+inv.set_target()
 inv.solve()
 
 
 inv.set_Io()  # set coil current and bounds
 Inorm = loops.set_oppvar(inv.Io,inv.adjust_coils)[0]
 
-#jac = op.approx_fprime(Inorm,inv.fprime,1e-4)
+#I = np.copy(inv.I.reshape(-1))
+#I = (I+30e6)/60e6
 
 
+jac_approx = op.approx_fprime(Inorm,inv.frms,1e-9)
+print(jac_approx)
+print(inv.rms)
 
-print(op.check_grad(inv.frms,inv.fprime,Inorm,epsilon=1e-9))
+eps = 1e-4
+for i in range(len(Inorm)):
+    In = np.copy(Inorm)
+    In_ = np.copy(Inorm)
+    In_[i] += eps
+    print((inv.frms(In_)-inv.frms(In))/eps)
+'''
+jac = inv.fprime(Inorm)
+rms = inv.frms(Inorm)
 
+
+print(jac)
+
+print(rms,inv.rms)
+#print(op.check_grad(inv.frms,inv.fprime,Inorm,epsilon=10))
+'''
 
 
 

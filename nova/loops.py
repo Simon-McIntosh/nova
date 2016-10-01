@@ -29,7 +29,7 @@ def get_oppvar(xo,oppvar,xnorm):
     for i,var in enumerate(oppvar):
         var = check_var(var,xo)
         x[i] = x[i]*(xo[var]['ub']-xo[var]['lb'])+xo[var]['lb']
-        xo[var]['value'] = x[i]
+        #xo[var]['value'] = x[i]
     return x
 
 def plot_oppvar(xo,oppvar,eps=1e-2,fmt='1.2f',scale=1,postfix=''):

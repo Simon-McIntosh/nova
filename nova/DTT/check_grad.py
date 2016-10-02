@@ -47,31 +47,63 @@ inv.set_target()
 inv.solve()
 
 
+
+
 inv.set_Io()  # set coil current and bounds
-Inorm = loops.set_oppvar(inv.Io,inv.adjust_coils)[0]
+
 
 #I = np.copy(inv.I.reshape(-1))
-#I = (I+30e6)/60e6
+#Inorm = (Inorm+30e6)/60e6
+
+eps = 1e-2
+inv.I -= 1e4
 
 
-jac_approx = op.approx_fprime(Inorm,inv.frms,1e-9)
+print(inv.get_r(inv.I))
+
+grad = np.zeros(inv.nC)
+jac_approx = op.approx_fprime(inv.I.reshape(-1),inv.get_r,eps)
 print(jac_approx)
-print(inv.rms)
+#print(inv.rms)
 
-eps = 1e-4
-for i in range(len(Inorm)):
-    In = np.copy(Inorm)
-    In_ = np.copy(Inorm)
-    In_[i] += eps
-    print((inv.frms(In_)-inv.frms(In))/eps)
+inv.frms(inv.I,grad)
+
+
+#inv.get_rms()
+
+
+#print(inv.rms,inv.frms(inv.I,grad),inv.get_r(inv.I))
+
+
+j1 = np.zeros(100)
+eps = 10**np.linspace(-8,2,100)
+
+for j in range(inv.nC):
+    for i,e in enumerate(eps):
+        j1[i] = op.approx_fprime(inv.I.reshape(-1),inv.get_r,e)[j]
+        
+    pl.plot(eps,j1)
+pl.xscale('log')
+#pl.yscale('log')
 '''
-jac = inv.fprime(Inorm)
+Io = inv.I.reshape(-1)*cc.mu_o
+
+eps = 1000000
+
+fx = inv.get_r(Io)
+
+Io[0] += eps
+fx1 = inv.get_r(Io)
+
+print((fx1-fx)/eps,fx,fx1,eps)
+
+
 rms = inv.frms(Inorm)
 
 
 print(jac)
 
-print(rms,inv.rms)
+
 #print(op.check_grad(inv.frms,inv.fprime,Inorm,epsilon=10))
 '''
 

@@ -46,7 +46,7 @@ eq.run(update=False)
 inv = INV(sf,eq,tf)
 
 Lpf = inv.grid_PF(nPF=5)
-Lcs = inv.grid_CS(nCS=5,Zbound=[-10,8],gap=0.1)
+Lcs = inv.grid_CS(nCS=5,Zbound=[-14,12],gap=0.1)
 Lo = np.append(Lpf,Lcs)
 inv.update_coils()
 
@@ -79,7 +79,7 @@ print('time {:1.2f}s'.format(time()-to))
 eq = EQ(sf,pf,dCoil=2.5,sigma=0,boundary=tf.get_loop(expand=0),n=5e3)
 
 eq.get_Vcoil() 
-eq.gen_opp(sf.Mpoint[1])
+eq.gen(sf.Mpoint[1])
 #eq.run()
 sf.contour()
 

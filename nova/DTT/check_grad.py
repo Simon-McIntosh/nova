@@ -12,6 +12,7 @@ from nova.coils import PF,TF
 from time import time
 from nova import loops
 import scipy.optimize as op
+from amigo.addtext import linelabel
 
 config = 'SXex'
 setup = Setup(config)
@@ -44,10 +45,8 @@ inv.set_background()
 inv.get_weight()
 inv.set_foreground()
 inv.set_target()
+
 inv.solve()
-
-
-
 
 inv.set_Io()  # set coil current and bounds
 
@@ -55,36 +54,64 @@ inv.set_Io()  # set coil current and bounds
 #I = np.copy(inv.I.reshape(-1))
 #Inorm = (Inorm+30e6)/60e6
 
-eps = 1e-2
-inv.I -= 1e4
+eps = 1e-6
+inv.I -= 0.05
+
+alpha = np.linalg.solve(inv.V,inv.I.reshape(-1))
+
+print('rms {:1.6f}'.format(inv.get_rms(alpha)))
 
 
-print(inv.get_r(inv.I))
+#jac_approx = op.approx_fprime(inv.I.reshape(-1),inv.get_r,eps)
 
-grad = np.zeros(inv.nC)
-jac_approx = op.approx_fprime(inv.I.reshape(-1),inv.get_r,eps)
+jac_approx = op.approx_fprime(alpha,inv.get_rms,eps)
 print(jac_approx)
+
 #print(inv.rms)
 
-inv.frms(inv.I,grad)
-
+grad = np.zeros(inv.nC) 
+rms = inv.frms(alpha,grad)
+print(grad)
+print('rms_frms {:1.6f}'.format(rms))
 
 #inv.get_rms()
 
 
+inv.initialize_log()
+inv.set_Lo(Lo)  # set position bounds
+Lnorm = loops.normalize_variables(inv.Lo)
+
+print('L grad',op.approx_fprime(Lnorm,inv.update_position,1e-6))
+print('L grad2',op.approx_fprime(Lnorm,inv.update_position,1e-6))
+'''
 #print(inv.rms,inv.frms(inv.I,grad),inv.get_r(inv.I))
 
+def get_I(alpha,inv):
+    I = np.dot(inv.V,alpha)
+    return I[3]
+    
+print('dIda',op.approx_fprime(alpha,get_I,eps,inv))
+print('V',inv.V[3,:])
+'''
+Neps = 7
+jac = np.zeros((Neps,inv.nL))
+eps = 10**np.linspace(-8,-2,Neps)
 
-j1 = np.zeros(100)
-eps = 10**np.linspace(-8,2,100)
 
-for j in range(inv.nC):
-    for i,e in enumerate(eps):
-        j1[i] = op.approx_fprime(inv.I.reshape(-1),inv.get_r,e)[j]
-        
-    pl.plot(eps,j1)
+for i,e in enumerate(eps):
+    #j1[i] = op.approx_fprime(alpha,inv.get_rms,e)[j] 
+    jac[i,:] = op.approx_fprime(Lnorm,inv.update_position,e)
+
+text = linelabel(Ndiv=30,value='')
+for name,j in zip(inv.Lo['name'],jac.T):
+    pl.plot(eps,j)
+    text.add(name)
+
 pl.xscale('log')
+text.plot()    
 #pl.yscale('log')
+
+print('L grad',op.approx_fprime(Lnorm,inv.update_position,1e-6))
 '''
 Io = inv.I.reshape(-1)*cc.mu_o
 

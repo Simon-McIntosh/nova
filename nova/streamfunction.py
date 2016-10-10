@@ -31,7 +31,7 @@ class SF(object):
         self.get_Mpsi()
         self.set_contour()  # set cfeild
         self.get_sol_psi(dSOL=3e-3,Nsol=15,verbose=False)
-        self.rcirc = 0.2*(self.Mpoint[1]-self.Xpoint[1])  # leg search radius
+        self.rcirc = 0.3*(self.Mpoint[1]-self.Xpoint[1])  # leg search radius
         self.drcirc = 0.1*self.rcirc  # leg search width
         self.xlim = self.eqdsk['xlim']
         self.ylim = self.eqdsk['ylim']
@@ -236,7 +236,7 @@ class SF(object):
                 boundary=True,**kwargs):
         alpha,lw = np.array([1,0.5]),lw*np.array([2.25,1.75]) 
         if boundary:
-            r,z = self.get_boundary()
+            r,z = self.get_boundary(1-1e-2)
             self.set_boundary(r,z)
         if not hasattr(self,'Xpsi'):
             self.get_Xpsi()
@@ -282,9 +282,9 @@ class SF(object):
                 if (not plot_vac and pindex==0) or plot_vac:
                     pl.plot(r,z,linetype,linewidth=lw[pindex],
                             color=color,alpha=alpha[pindex])
-        if boundary:
-            pl.plot(self.rbdry,self.zbdry,linetype,linewidth=lw[pindex],
-                    color=color,alpha=alpha[pindex])
+        #if boundary:
+        #    pl.plot(self.rbdry,self.zbdry,linetype,linewidth=lw[pindex],
+        #            color=color,alpha=alpha[pindex])
         pl.axis('equal')
         pl.axis('off')
         return levels

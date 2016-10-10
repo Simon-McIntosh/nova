@@ -9,6 +9,69 @@ import seaborn as sns
 from itertools import cycle
 import pandas as pd
 
+def add_value(Xo,i,name,value,lb,ub,clip=True):
+    if clip:
+        if value<lb:
+            value = lb
+        if value>ub:
+            value = ub
+    Xo['name'][i] = name
+    Xo['value'][i] = value
+    Xo['lb'][i] = lb
+    Xo['ub'][i] = ub
+
+            
+def normalize_variables(Xo):
+    X = (Xo['value']-Xo['lb'])/(Xo['ub']-Xo['lb'])
+    return X
+    
+def denormalize_variables(x,Xo):
+    Xo['value'] = x*(Xo['ub']-Xo['lb'])+Xo['lb']
+    return Xo['value']
+    
+def plot_variables(Xo,eps=1e-2,fmt='1.2f',scale=1,postfix=''):
+    xo = normalize_variables(Xo)
+    Xo['norm'] = xo
+    data = pd.DataFrame(Xo)
+    data.reset_index(level=0,inplace=True)
+    pl.figure(figsize=(6,3))
+    sns.set_color_codes("muted")
+    sns.barplot(x='norm',y='name',data=data,color="b")
+    sns.despine(bottom=True)
+    pl.ylabel('')
+    ax = pl.gca()
+    ax.get_xaxis().set_visible(False)
+    patch = ax.patches
+    #values = [xo[var]['value'] for var in xo]
+    #xnorms = [xo[var]['xnorm'] for var in xo]
+    for p,value,norm,var in zip(patch,Xo['value'],Xo['norm'],Xo['name']):
+        x = p.get_width()
+        if norm < 0:
+            x = 0
+        y = p.get_y()+p.get_height()/2
+        size = 'small'
+        if norm < eps or norm > 1-eps:
+            size = 'large'
+        text =' {:{fmt}}'.format(scale*value,fmt=fmt)
+        text += postfix+' '
+        #if var not in oppvar:
+        #     text += '*'
+        if value < 0.5:
+            ha = 'left'
+            color = 0.25*np.ones(3)
+        else:
+            ha = 'right'
+            color = 0.75*np.ones(3)
+        ax.text(x,y,text,ha=ha,va='center',
+                size=size,color=color)
+    pl.plot(0.5*np.ones(2),np.sort(ax.get_ylim()),'--',color=0.5*np.ones(3),
+            zorder=0,lw=1)
+    pl.plot(np.ones(2),np.sort(ax.get_ylim()),'-',color=0.25*np.ones(3),
+            zorder=0,lw=1.5)
+    xlim = ax.get_xlim()
+    xmin,xmax = np.min([0,xlim[0]]),np.max([1,xlim[1]])
+    pl.xlim([xmin,xmax])
+
 def check_var(var,xo):
     if var not in xo:
         var = next((v for v in xo if var in v))  # match sub-string

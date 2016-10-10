@@ -19,9 +19,6 @@ rc = {'figure.figsize':[7*12/16,7],'savefig.dpi':150, #*12/16
 sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 Color = cycle(sns.color_palette('Set2'))
-pl.figure()
-pl.axis('equal')
-pl.axis('off')
 
 pkl = PKL('moveSX_Dev3')
 
@@ -33,9 +30,8 @@ rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
 
 tf = TF(config,coil_type='S')
-tf.fill()
 
-eq = EQ(sf,pf,dCoil=2.5,sigma=0,boundary=sf.get_sep(expand=0.5),n=5e2) 
+eq = EQ(sf,pf,dCoil=2.0,sigma=0,boundary=sf.get_sep(expand=0.5),n=2e2) 
 eq.get_plasma_coil()
 eq.run(update=False)
 #eq.gen_opp(sf.Mpoint[1])
@@ -45,8 +41,8 @@ eq.run(update=False)
 
 inv = INV(sf,eq,tf)
 
-Lpf = inv.grid_PF(nPF=5)
-Lcs = inv.grid_CS(nCS=5,Zbound=[-14,12],gap=0.1)
+Lpf = inv.grid_PF(nPF=6)
+Lcs = inv.grid_CS(nCS=3,Zbound=[-9,7],gap=0.1)
 Lo = np.append(Lpf,Lcs)
 inv.update_coils()
 
@@ -56,42 +52,65 @@ inv.update_coils()
 inv.fit_PF(offset=0.3)
 
 inv.fix_boundary_psi(N=31,alpha=1-1e-4,factor=1)  # add boundary points
-#inv.fix_boundary_feild(N=11,alpha=1-1e-4,factor=1)  # add boundary points
-inv.add_null(factor=1,point=sf.Xpoint)
+inv.fix_boundary_feild(N=31,alpha=1-1e-4,factor=1)  # add boundary points
+inv.add_null(factor=3,point=sf.Xpoint)
 
 
 Rex,arg = 1.5,40
 R = sf.Xpoint[0]*(Rex-1)/np.sin(arg*np.pi/180)
 target = (R,arg)
-inv.add_alpha(1,factor=3,polar=target)  # 20
-inv.add_B(0,[-15],factor=3,polar=target)  # -30
+inv.add_alpha(1,factor=1,polar=target)  # 20
+inv.add_B(0,[-15],factor=1,polar=target)  # -30
 
+'''
+inv.set_background()
+inv.get_weight()
+inv.set_foreground()
+inv.fix_flux(inv.swing['flux'][0])
+alpha = np.linalg.solve(inv.V,inv.I)  # initalise alpha
+rms = inv.get_rms(alpha)
+print('RMS {:1.6f}'.format(rms))
 
+inv.frms(alpha,np.array([]))
 
+to = time()
+rms = inv.solve_slsqp()
+print('time {:1.3f}s'.format(time()-to))
+#print('rms {:1.1f}mm'.format(1e3*inv.rms))
 
+'''
 
+inv.set_swing(centre=15)
+Lo = inv.optimize(Lo)
 
-
+'''
 to = time()
 Lo = inv.optimize(Lo)[1]
 print('time {:1.2f}s'.format(time()-to))
+'''
+inv.fix_flux(inv.swing['flux'][0])
+inv.solve_slsqp()
 
-eq = EQ(sf,pf,dCoil=2.5,sigma=0,boundary=tf.get_loop(expand=0),n=5e3)
+eq = EQ(sf,pf,dCoil=2,sigma=0,boundary=tf.get_loop(expand=0),n=5e3)
+
+tf.fill()
+#inv.plot_coils()
+pf.plot(coils=pf.coil,label=True,plasma=True,current=True) 
+
+#inv.update_coils()
+#pf.plot(coils=eq.coil,label=False,plasma=False,current=False) 
+inv.plot_fix(tails=True)
+
 
 eq.get_Vcoil() 
 eq.gen(sf.Mpoint[1])
 #eq.run()
 sf.contour()
 
-inv.plot_coils()
-pf.plot(coils=pf.coil,label=True,plasma=True,current=True) 
 
-#inv.update_coils()
-pf.plot(coils=eq.coil,label=False,plasma=False,current=False) 
-inv.plot_fix(tails=True)
 
-#loops.plot_oppvar(inv.Io,inv.adjust_coils,scale=1e-6,postfix='MA')
-loops.plot_oppvar(inv.Lo,inv.position_coils,scale=1)
+loops.plot_variables(inv.Io,scale=1,postfix='MA')
+loops.plot_variables(inv.Lo,scale=1)
 
 #pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
 

@@ -53,12 +53,12 @@ class PF(object):
         
     def plot_coil(self,coils,label=False,current=False,coil_color=None,fs=12,
                   alpha=1):
-        if coil_color==None:
-            color = cycle(sns.color_palette('Set2',len(coils.keys())))
-        else:
-            color = coil_color  # color itterator
+        #if coil_color==None:
+        #    color = cycle(sns.color_palette('Set2',len(coils.keys())))
+        #else:
+        #    color = coil_color  # color itterator
         
-        color = sns.color_palette('Set3',300)
+        #color = sns.color_palette('Set3',300)
         r_med = sp.median([coils[coil]['r'] for coil in coils])
         for i,name in enumerate(coils.keys()):
             coil = coils[name]
@@ -78,8 +78,8 @@ class PF(object):
                 ic = int(name.split('_')[0].split('Coil')[-1])
             except:
                 ic = 0  # plasma coils
-            coil_color = color[ic] 
-            coil_color = color[8]
+            #coil_color = color[ic] 
+            #coil_color = color[8]
             pl.fill(Rfill,Zfill,facecolor=coil_color,alpha=alpha,
                     edgecolor=edgecolor)
             if label: 

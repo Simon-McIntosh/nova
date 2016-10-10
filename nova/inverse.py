@@ -20,13 +20,14 @@ slsqp = copy.deepcopy(op.fmin_slsqp)
 
 class INV(object):
     
-    def __init__(self,sf,eq,tf,Jmax=12.5e6,TFoffset=0.3):
+    def __init__(self,sf,eq,tf,Jmax=12.5,TFoffset=0.3):
+        self.Iscale = 1e6  # current in MA
         self.ncpu = multiprocessing.cpu_count()
         self.sf = sf
         self.eq = eq
         self.tf = tf
         self.tf.loop_interpolators()
-        self.Jmax = Jmax
+        self.Jmax = Jmax  # MAm-2
         self.fix = {'r':np.array([]),'z':np.array([]),'BC':np.array([]),
                     'value':np.array([]),'Bdir':np.array([[],[]]).T,
                     'factor':np.array([]),'n':0}  
@@ -34,7 +35,6 @@ class INV(object):
                      'value':np.array([]),'condition':np.array([])}  
         self.add_active([],empty=True)  # all coils active
         self.update_coils()
-        self.initalise_current()
         self.log_scalar = ['Fr_max','Fz_max','F_max','FzCS','Fsep','rms',
                            'rms_bndry','rmsID','Isum','Imax','z_offset',
                            'FrPF','FzPF','dTpol']
@@ -47,7 +47,6 @@ class INV(object):
      
     def set_swing(self,centre=25,width=363):
         flux = centre+np.array([-0.5,0.5])*width/(2*np.pi)  # Webber/rad
-        
         nC,nS = self.nC,len(flux)
         self.swing = {'flux':flux,'I':np.zeros((nS,nC)),'rms':np.zeros(nS),
                       'FrPF':np.zeros(nS),'FzPF':np.zeros(nS),
@@ -78,6 +77,13 @@ class INV(object):
             'dr':np.array([]),'dz':np.array([]),'sub_name':np.array([]),\
             'I':np.array([]),'Fr':np.array([]),'Fz':np.array([]),\
             'Fr_sum':0,'Fz_sum':0,'I_sum':0,'Ro':0,'Zo':0,'Nf':0}
+            
+    def initalise_current(self):
+        adjust_coils = self.coil['active'].keys()
+        self.I = np.zeros((len(adjust_coils)))  
+        for i,name in enumerate(adjust_coils):
+            self.I[i] = self.eq.coil[name+'_0']['I']/self.Iscale
+        self.alpha = np.zeros(self.nC)  # initalise alpha
         
     def update_coils(self,plot=False):  # full coil update
         self.initalise_coil()
@@ -87,6 +93,7 @@ class INV(object):
         self.append_coil(self.eq.plasma_coil)
         for coil in self.all_coils:
             self.update_bundle(coil)  # re-grid elliptic coils
+        self.initalise_current()
         self.set_swing()
         if plot:
             self.plot_coils()
@@ -150,7 +157,6 @@ class INV(object):
             self.adjust_coils = []  # remove all
             self.PF_coils = []
             self.CS_coils = []
-        #self.update_coils()
         
     def delete_active(self):
         Clist = []
@@ -381,7 +387,9 @@ class INV(object):
                            len(self.coil['active'].keys())))  # [G][I] = [T] 
         self.add_value('active')
         self.wG = self.wsqrt*self.G
-        
+        self.U,self.S,self.V = np.linalg.svd(self.wG)  # singular value dec.
+        self.wGV = np.dot(self.wG,self.V)  # solve in terms of alpha
+
     def add_value(self,state):
         Rf,Zf,BC,Bdir = self.unpack_fix()
         for i,(rf,zf,bc,bdir) in enumerate(zip(Rf,Zf,BC,Bdir)):
@@ -391,13 +399,12 @@ class INV(object):
                 else:
                     coil = self.coil[state][name]
                     R,Z,current = coil['r'],coil['z'],coil['I']
-                    #if state == 'active': current = np.ones(np.shape(current))
                     for r,z,I in zip(R,Z,current):
                         value = self.add_value_coil(bc,rf,zf,r,z,bdir)
                         if state == 'active':
                             self.G[i,j] += value
                         elif state == 'passive':
-                            self.BG[i] += I*value
+                            self.BG[i] += I/self.Iscale*value
                         else:
                             errtxt = 'specify coil state'
                             errtxt += '\'active\', \'passive\'\n'
@@ -405,9 +412,9 @@ class INV(object):
                             
     def add_value_coil(self,bc,rf,zf,r,z,bdir):
         if 'psi' in bc:
-            value = cc.mu_o*cc.green(rf,zf,r,z)  
+            value = self.Iscale*cc.mu_o*cc.green(rf,zf,r,z)  
         else:
-            B = cc.mu_o*cc.green_feild(rf,zf,r,z)
+            B = self.Iscale*cc.mu_o*cc.green_feild(rf,zf,r,z)
             value = self.Bfeild(bc,B[0],B[1],bdir)
         return value
         
@@ -740,43 +747,49 @@ class INV(object):
         fun = Zmin-zmin
         return fun
             
-    def get_rms(self):
-        err = np.dot(self.wG,self.I)-self.wT
-        self.rms = np.sqrt(np.mean(err**2))
-        return err
-        
-    def get_r(self,I):
-        I = I.reshape(-1,1)
-        err = np.dot(self.wG,I)-self.wT
+    def get_rms(self,alpha,error=False):
+        err = np.dot(self.wGV,alpha.reshape(-1,1))-self.wT
         rms = np.sqrt(np.mean(err**2))
-        return rms
+        if error:  # return error
+            return rms,err
+        else:
+            return rms
         
     def solve(self):
-        self.I = np.linalg.lstsq(self.wG,self.wT)[0]  # least squares solve
-        self.get_rms()
+        print('solve')
+        self.alpha = np.linalg.lstsq(self.wGV,self.wT)[0].reshape(-1)
+        print(np.shape(self.alpha))
+        self.rms = self.get_rms(self.alpha)
+        self.I = np.dot(self.V,self.alpha)
         self.update_current()
 
-    def frms(self,I,grad):
-        I = I.reshape(-1,1)
-        err = np.dot(self.wG,I)-self.wT
-        rms = np.sqrt(np.mean(err**2))
+    def frms(self,alpha,grad):
+        rms,err = self.get_rms(alpha,error=True)
         if grad.size>0:
             jac = np.ones(self.nC)/(rms*self.fix['n'])
             for i in range(self.nC):
-                jac[i] *= np.dot(self.wG[:,i],err)
+                jac[i] *= np.dot(self.wGV[:,i],err)
             grad[:] = jac
         return rms
         
+    def Ilimit(self,result,alpha,grad):
+        if grad.size > 0:
+            grad[:self.nC] = -self.V  # lower bound
+            grad[self.nC:] = self.V  # upper boun
+        I = np.dot(self.V,alpha)
+        result[:self.nC] = self.Io['lb']-I  # lower bound
+        result[self.nC:] = I-self.Io['ub']  # upper bound
+     
     def set_Io(self):  # set lower/upper bounds on coil currents (Jmax)
         self.Io = {'name':self.adjust_coils,'value':np.zeros(self.nC),
                    'lb':np.zeros(self.nC),'ub':np.zeros(self.nC)}
-        for i,name in enumerate(self.adjust_coils):  
+        for i,name in enumerate(self.adjust_coils):  # limits in MA
             coil = self.eq.pf.coil[name]
             Nf = self.eq.coil[name+'_0']['Nf']  # fillament number
-            self.Io['value'][i] = coil['I']/Nf
+            self.Io['value'][i] = coil['I']/(Nf*self.Iscale)
             if name in self.PF_coils:
-                self.Io['lb'][i] = -30e6/Nf
-                self.Io['ub'][i] = 30e6/Nf
+                self.Io['lb'][i] = -25/Nf
+                self.Io['ub'][i] = 25/Nf
             if name in self.CS_coils:
                 Ilim = coil['dr']*coil['dz']*self.Jmax
                 self.Io['lb'][i] = -Ilim/Nf
@@ -787,31 +800,30 @@ class INV(object):
             self.Io['value'][uindex] = self.Io['ub'][uindex]
         
     def solve_slsqp(self):
-        self.solve()  # sead coil currents
-        
-        rms_o = self.rms
-        
+        #self.solve()  # sead coil currents
+        self.set_Io()  # set coil current and bounds
+
         opt = nlopt.opt(nlopt.LD_SLSQP,self.nC)
+        opt.add_inequality_mconstraint(self.Ilimit,1e-6*np.ones(2*self.nC))
+        
         opt.set_min_objective(self.frms)
         
-        self.set_Io()  # set coil current and bounds
-        #print(self.adjust_coils)
-        #print((self.Io['value']-self.Io['lb'])/(self.Io['ub']-self.Io['lb']))
-        opt.set_lower_bounds(self.Io['lb'])
-        opt.set_upper_bounds(self.Io['ub'])
-        opt.set_ftol_rel(1e-6)
-
-        #to = time.time()
-        #print(self.I)
         
-        self.I = opt.optimize(self.Io['value']).reshape(-1,1)
+        #opt.set_lower_bounds([-1e3 for _ in range(self.nC)])
+        #opt.set_upper_bounds([1e3 for _ in range(self.nC)])
+        #opt.set_lower_bounds(self.Io['lb'])
+        #opt.set_upper_bounds(self.Io['ub'])
+        opt.set_ftol_abs(1e-9)
+
+        #self.I = opt.optimize(self.Io['value']).reshape(-1,1)
+
+        self.alpha = opt.optimize(self.alpha)
+        self.I = np.dot(self.V,self.alpha).reshape(-1,1)
+        self.Io['value'] = self.I.reshape(-1)
         self.rms = opt.last_optimum_value()
         self.update_current()
-        #print('t {:1.4f}'.format(time.time()-to))
 
-        
         #print('rms {:1.4f}mm, rms_o {:1.4f}'.format(1e3*self.rms,1e3*rms_o))
-        
         return self.rms
    
     def update_area(self,Imax=50e6,margin=0.1):
@@ -834,13 +846,20 @@ class INV(object):
                 self.eq.pf.coil[name]['dz'] *= scale
         self.fit_PF()  # fit re-sized coils to TF
             
+    def update_position_grad(self,Lnorm,grad):
+        if grad.size > 0:
+            grad[:] = op.approx_fprime(Lnorm,self.update_position,1e-7)
+        rms = self.update_position(Lnorm)
+        #print('rms {:1.1f}mm'.format(1e3*rms))
+        return rms
+                        
     def update_position(self,Lnorm):
         self.iter['current'] == 0
         self.iter['position'] += 1
-        L = loops.get_oppvar(self.Lo,self.position_coils,Lnorm)
+        L = loops.denormalize_variables(Lnorm,self.Lo)
         Lpf = L[:self.nPF]
         for name,lpf in zip(self.PF_coils,Lpf):
-            lpf = self.tails(lpf)
+            #lpf = self.tails(lpf)
             r,z = self.tf.fun['out']['r'](lpf),self.tf.fun['out']['z'](lpf)
             ref = int(name.split('Coil')[-1])
             self.move_PF(ref,point=(r,z))
@@ -849,11 +868,12 @@ class INV(object):
             Z,dZ = self.arange_CS(Lcs)
             for name,z,dz in zip(self.CS_coils,Z,dZ):
                 self.move_CS(name,z,dz)
-        self.update_area()
-        self.set_force_feild(state='active')  # update active force feild
+        #self.update_area()
+        #self.set_force_feild(state='active')  # update active force feild
         self.set_foreground()
 
-        rms_o = self.swing_flux()
+        rms = self.swing_flux()
+        '''
         imax,err = 15,1e-6
         for i in range(imax):
             rms = self.swing_flux()
@@ -863,6 +883,7 @@ class INV(object):
                 rms_o = rms
         if i==imax-1:
             print('warning coil areas not converged')
+        '''
         return rms
 
     def swing_flux(self,bndry=False):
@@ -870,12 +891,12 @@ class INV(object):
             self.fix_flux(flux)  # swing
             #self.iter['current'] += self.solve_slsqp()
             self.swing['rms'][i] = self.solve_slsqp()
-            self.swing['Fcoil'][i] = self.get_force()
+            #self.swing['Fcoil'][i] = self.get_force()
             self.swing['Tpol'][i] = self.poloidal_angle()
             self.swing['I'][i] = self.Icoil
             #self.swing['rms'][i] = self.rms
-        self.update_area()
-        self.set_force_feild(state='active') 
+        #self.update_area()
+        #self.set_force_feild(state='active') 
         self.set_foreground()
         self.rmsID = np.argmax(self.swing['rms'])
         self.rms = self.swing['rms'][self.rmsID]
@@ -934,21 +955,22 @@ class INV(object):
         return ieqcon
         
     def set_Lo(self,L):  # set lower/upper bounds on coil positions
-        self.Lo = OrderedDict()
-        self.position_coils = []
-        for name,l in zip(self.PF_coils,L[:self.nPF]):  # PF coils
-            self.position_coils.append(name)
-            self.Lo[name] = {'value':l,'lb':0.1,'ub':0.9}
+        self.nL = len(L)  # length of coil position vector
+        self.Lo = {'name':[[] for _ in range(self.nL)],
+                   'value':np.zeros(self.nL),
+                   'lb':np.zeros(self.nL),'ub':np.zeros(self.nL)}
+        for i,l in enumerate(L[:self.nPF]):  # PF coils
+            name = 'Lpf{:1.0f}'.format(i)
+            loops.add_value(self.Lo,i,name,l,0.1,0.9)
         for i,l in enumerate(L[self.nPF:]):  # PF coils
             name = 'Zcs{:1.0f}'.format(i)
-            self.position_coils.append(name)
-            self.Lo[name] = {'value':l,'lb':-15,'ub':15}    
-        
+            loops.add_value(self.Lo,i+self.nPF,name,l,-15,8)
+
     def minimize(self,L,rhobeg=0.1,rhoend=1e-4):  # rhobeg=0.1,rhoend=1e-4
         self.iter['position'] == 0 
         
         self.set_Lo(L)  # set position bounds
-        Lnorm,bounds = loops.set_oppvar(self.Lo,self.position_coils)
+        Lnorm = loops.normalize_variables(self.Lo)
 
         '''
         Lo,nitter = op.fmin_slsqp(self.position_coils,Lo,disp=3,
@@ -956,11 +978,31 @@ class INV(object):
                                   full_output=True)[:3:2]  
                            #,ieqcons=[self.PFspace,self.CSzmax,self.CSzmin]
         '''                        
-        res = op.minimize(self.update_position,Lnorm,method='COBYLA',
-                          #bounds=bounds,
-                          options={'disp':True})
-                          #bounds=[(0.1,0.2),(0.2,0.3),(0.3,0.4),(0.4,0.5),(0.5,0.9)])
-        Lo = res.x
+        #Lnorm = op.minimize(self.update_position,Lnorm,method='SLSQP',
+        #                  bounds=[[0,1] for i in range(len(Lnorm))],
+        #                  options={'disp':True}).x      
+        #self.rms = self.update_position(Lnorm)
+        #loops.denormalize_variables(Lnorm,self.Lo)
+
+        '''
+        opt_local = nlopt.opt(nlopt.LD_SLSQP,self.nL)
+        opt_local.set_ftol_abs(1e-4)
+        opt = nlopt.opt(nlopt.G_MLSL_LDS,self.nL)
+        opt.set_local_optimizer(opt_local)
+        '''
+        #opt = nlopt.opt(nlopt.GN_ISRES,self.nL)
+        opt = nlopt.opt(nlopt.LD_SLSQP,self.nL)
+        #opt = nlopt.opt(nlopt.LN_COBYLA,self.nL)
+        opt.set_min_objective(self.update_position_grad)
+        opt.set_lower_bounds([0 for _ in range(self.nL)])
+        opt.set_upper_bounds([1 for _ in range(self.nL)])
+        opt.set_ftol_abs(1e-4)
+        
+
+        Lnorm = opt.optimize(Lnorm)
+        loops.denormalize_variables(Lnorm,self.Lo)
+        self.rms = opt.last_optimum_value()
+
         '''
         #if bndry: rms_bndry[i],z_offset[i] = self.get_rms_bndry()
         self.rms_bndry = np.max(rms_bndry)
@@ -974,8 +1016,8 @@ class INV(object):
         text += ' dTpol {:1.3f}'.format(self.dTpol)
         print(text)
         '''
-        rms=0
-        return Lo,rms
+        print('rms {:1.2f}mm'.format(1e3*self.rms))
+        return self.Lo['value'],self.rms
         
     def tick(self):
         self.tloop = time.time()
@@ -1021,7 +1063,7 @@ class INV(object):
             err = abs(fun-fun_o) 
             if err < 1e-3:
                 break
-        return fun,Lo
+        return Lo
         
     def rhobound(self,rho):
         if rho[0] > rho[1]:
@@ -1054,24 +1096,19 @@ class INV(object):
         self.Icoil = np.zeros(len(self.coil['active'].keys()))
         for j,name in enumerate(self.coil['active']):
             Nfilament = self.eq.coil[name+'_0']['Nf']
-            self.eq.pf.coil[name]['I'] = self.I[j,0]*Nfilament  # update sf 
-            self.coil['active'][name]['I_sum'] = self.I[j]*Nfilament  # inv
-            self.Icoil[j] = self.eq.pf.coil[name]['I']  # store current
+            self.Icoil[j] = self.I[j]*Nfilament  # store current
+            self.eq.pf.coil[name]['I'] = self.Icoil[j]*self.Iscale  
+            self.coil['active'][name]['I_sum'] = self.Icoil[j]*self.Iscale
+            
             for i in range(Nfilament):
                 sub_name = name+'_{:1.0f}'.format(i)
-                self.eq.coil[sub_name]['I'] = self.I[j,0]  # update eq
-                self.coil['active'][name]['I'][i] = self.I[j,0]  # update inv
+                self.eq.coil[sub_name]['I'] = self.I[j]*self.Iscale  
+                self.coil['active'][name]['I'][i] = self.I[j]*self.Iscale  
             self.Isum += abs(self.Icoil[j])  # sum absolute current
             if name in self.CS_coils:
                 self.Ics += abs(self.Icoil[j])
         self.Imax = self.Icoil.max()
-        
-    def initalise_current(self):
-        adjust_coils = self.coil['active'].keys()
-        self.I = np.zeros((len(adjust_coils)))  # ,1
-        for i,name in enumerate(adjust_coils):
-            self.I[i] = self.eq.coil[name+'_0']['I']
-           
+     
     def write_swing(self):
         nC,nS = len(self.adjust_coils),len(self.Swing)
         Icoil = np.zeros((nS,nC))

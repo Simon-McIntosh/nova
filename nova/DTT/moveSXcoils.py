@@ -50,7 +50,6 @@ inv.update_coils()
 
 
 inv.fit_PF(offset=0.3)
-
 inv.fix_boundary_psi(N=31,alpha=1-1e-4,factor=1)  # add boundary points
 inv.fix_boundary_feild(N=31,alpha=1-1e-4,factor=1)  # add boundary points
 inv.add_null(factor=3,point=sf.Xpoint)
@@ -103,7 +102,7 @@ inv.plot_fix(tails=True)
 
 
 eq.get_Vcoil() 
-eq.gen_opp(sf.Mpoint[1])
+eq.gen_opp(sf.Mpoint[0])
 #eq.run()
 sf.contour()
 

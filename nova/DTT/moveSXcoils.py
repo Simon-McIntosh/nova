@@ -31,7 +31,7 @@ pf = PF(sf.eqdsk)
 
 tf = TF(config,coil_type='S')
 
-eq = EQ(sf,pf,dCoil=2.0,sigma=0,boundary=sf.get_sep(expand=0.5),n=2e2) 
+eq = EQ(sf,pf,dCoil=2.0,sigma=0,boundary=sf.get_sep(expand=0.5),n=2e3) 
 eq.get_plasma_coil()
 eq.run(update=False)
 #eq.gen_opp(sf.Mpoint[1])
@@ -41,7 +41,7 @@ eq.run(update=False)
 
 inv = INV(sf,eq,tf)
 
-Lpf = inv.grid_PF(nPF=6)
+Lpf = inv.grid_PF(nPF=5)
 Lcs = inv.grid_CS(nCS=3,Zbound=[-9,7],gap=0.1)
 Lo = np.append(Lpf,Lcs)
 inv.update_coils()
@@ -88,7 +88,7 @@ to = time()
 Lo = inv.optimize(Lo)[1]
 print('time {:1.2f}s'.format(time()-to))
 '''
-inv.fix_flux(inv.swing['flux'][0])
+inv.fix_flux(inv.swing['flux'][-1])
 inv.solve_slsqp()
 
 eq = EQ(sf,pf,dCoil=2,sigma=0,boundary=tf.get_loop(expand=0),n=5e3)
@@ -103,7 +103,7 @@ inv.plot_fix(tails=True)
 
 
 eq.get_Vcoil() 
-eq.gen(sf.Mpoint[1])
+eq.gen_opp(sf.Mpoint[1])
 #eq.run()
 sf.contour()
 

@@ -81,69 +81,78 @@ for i,c in enumerate(cube):
 with open('../../Data/rms_cube_5L.pkl', 'rb') as input:
     cube = pickle.load(input)
     rms = pickle.load(input)
-    
 cube[:,:inv.nPF] = np.sort(cube[:,:inv.nPF])
 cube[:,inv.nPF:] = np.sort(cube[:,inv.nPF:])
 
 import matplotlib.animation as manimation
 FFMpegWriter = manimation.writers['ffmpeg']
-writer = FFMpegWriter(fps=20, bitrate=1000)
+writer = FFMpegWriter(fps=10, bitrate=1000)
 
 pca = PCA(n_components=inv.nL)
 pca.fit(cube[np.argsort(rms)[:200]])
 Leig = pca.components_
 
-index = np.argsort(rms)
-Lo = cube[index[200],:]
+#with open('../../Data/{}_Leig.pkl'.format(config),'wb') as output:
+#    pickle.dump(Leig,output,-1)
 
+index = np.argsort(rms)
+Lo = cube[index[0],:]
+
+'''
 loops.denormalize_variables(Lo,inv.Lo)
 inv.optimize(inv.Lo['value'])
 Lopp = loops.normalize_variables(inv.Lo)
+'''
+Lopp = [0.03006534,0.22812546,0.39390136,0.7788757,0.96460743,
+        0.02300626,0.44926846,0.78848084,0.9652009]
+Lopp = cube[index[0],:]
 
+N = 1
+perturb = np.linspace(0,0.1,N,endpoint=False)
+perturb = np.append(perturb,np.linspace(0.1,-0.1,2*N,endpoint=False))
+perturb = np.append(perturb,np.linspace(-0.1,0,N,endpoint=False))
 
+nr,nc = 2,5
+fig = pl.figure(figsize=(10,6))
 
-N = 10
-perturb = np.linspace(0,0.1,N)
-perturb = np.append(perturb,np.linspace(0.1,-0.1,2*N))
-perturb = np.append(perturb,np.linspace(-0.1,0,N))
-
-
-nr,nc = 2,4
-fig = pl.figure(figsize=(10.5,9))
 grid = gridspec.GridSpec(nr,nc,wspace=0.0,hspace=0.0)
 
 ax = [[] for _ in range(nr*nc)]    
 for i in range(nr*nc):
     ax[i] = pl.subplot(grid[i])
+pl.tight_layout()    
 color = cycle(sns.color_palette('Set2',nr*nc))    
 
 pl.sca(ax[0])       
 levels = sf.contour()  # freeze contour levels
-
+Mpoint = np.copy(sf.Mpoint)
 with writer.saving(fig,'../../Figs/coils_pca.wmv',100):  # wmv
     for p in perturb:
         print(p)
-        for eig in range(nr*nc):  # inv.nL
+        for eig in range(nr*nc):
             c = next(color)
-        
-            Lnorm = Lopp + p*Leig[eig]
-            inv.update_position(Lnorm)
-            pl.sca(ax[eig])
-            pl.cla()
-            pl.axis('equal')
-            #pl.axis('off')
-            #inv.plot_fix()
-            pf.plot(coils=pf.coil,color=c)
-            tf.fill()
-            eq.run(update=False)
-            sf.contour(levels=levels,plot_vac=True,lw=0.5)
-            pl.plot(sf.Xpoint[0],sf.Xpoint[1],'x',color=0.25*np.ones(3),
-                    mew=1.5,ms=4)
-            pl.plot(2.4,-15.5,'o',alpha=0)
-            pl.plot(18,8.5,'o',alpha=0)
-            pl.text(sf.Mpoint[0],sf.Mpoint[1],
-                    '{:1.0f}'.format(eig),fontsize=10,
-                    va='center',ha='center')
+            if eig < len(Leig): 
+                Lnorm = Lopp + p*Leig[eig]
+                inv.update_position(Lnorm)
+                pl.sca(ax[eig])
+                pl.cla()
+                pl.axis('equal')
+                #pl.axis('off')
+                #inv.plot_fix()
+                pf.plot(coils=pf.coil,color=c)
+                tf.fill()
+                eq.run(update=False)
+                sf.contour(levels=levels,plot_vac=True,lw=0.5)
+                pl.plot(sf.Xpoint[0],sf.Xpoint[1],'x',color=0.25*np.ones(3),
+                        mew=1.5,ms=4)
+                pl.plot(2.4,-15.5,'o',alpha=0)
+                pl.plot(18,8.5,'o',alpha=0)
+                pl.text(Mpoint[0],Mpoint[1],'{:1.0f}'.format(eig),fontsize=10,
+                        va='center',ha='center')
+            else:
+                pl.sca(ax[eig])
+                pl.cla()
+                pl.axis('off')
         writer.grab_frame()
     
 

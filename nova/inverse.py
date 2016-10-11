@@ -14,9 +14,8 @@ import multiprocessing
 from amigo import geom
 from nova import loops
 import nlopt
-from math import fsum
-
-slsqp = copy.deepcopy(op.fmin_slsqp)
+import pickle
+from nova.config import trim_dir
 
 class INV(object):
     
@@ -44,6 +43,20 @@ class INV(object):
         self.CS_Lnorm,self.CS_Znorm = 2,1
         self.TFoffset = TFoffset  # offset coils from outer TF loop
         self.force_feild_active = False
+   
+    def position_vectors(self,config=None):
+        if config is not None:
+            datadir = trim_dir('../../Data/')
+            #try:
+            with open(datadir+'{}_Leig.pkl'.format(config),'rb')\
+            as input:
+                self.Leigenvector = pickle.load(input)
+            #except:
+            #    print(datadir+'{}_Leig.pkl'.format(config))
+            #    print('coil Eigenvectors not found')
+            #    self.Leigenvector = np.identity(self.nL)  
+        else:
+            self.Leigenvector = np.identity(self.nL)  
      
     def set_swing(self,centre=25,width=363):
         flux = centre+np.array([-0.5,0.5])*width/(2*np.pi)  # Webber/rad
@@ -846,11 +859,12 @@ class INV(object):
                 self.eq.pf.coil[name]['dz'] *= scale
         self.fit_PF()  # fit re-sized coils to TF
             
-    def update_position_grad(self,Lnorm,grad):
+    def update_position_vector(self,Leigenvalue,grad):
+        Lnorm = np.dot(self.Leigenvector,Leigenvalue)
         if grad.size > 0:
-            grad[:] = op.approx_fprime(Lnorm,self.update_position,1e-7)
+            jac = op.approx_fprime(Lnorm,self.update_position,1e-7)
+            grad[:] = np.linalg.solve(self.Leigenvector,jac)
         rms = self.update_position(Lnorm)
-        #print('rms {:1.1f}mm'.format(1e3*rms))
         return rms
                         
     def update_position(self,Lnorm):
@@ -964,13 +978,26 @@ class INV(object):
             loops.add_value(self.Lo,i,name,l,0.1,0.9)
         for i,l in enumerate(L[self.nPF:]):  # PF coils
             name = 'Zcs{:1.0f}'.format(i)
-            loops.add_value(self.Lo,i+self.nPF,name,l,-15,8)
+            loops.add_value(self.Lo,i+self.nPF,name,l,-12,8)
+            
+    def Llimit(self,result,Leig,grad):
+        if grad.size > 0:
+            grad[:self.nL] = -self.Leigenvector  # lower bound
+            grad[self.nL:] = self.Leigenvector  # upper boun
+        Lnorm = np.dot(self.Leigenvector,Leig)
+        result[:self.nL] = 0-Lnorm  # lower bound
+        result[self.nL:] = Lnorm-1  # upper bound
 
     def minimize(self,L,rhobeg=0.1,rhoend=1e-4):  # rhobeg=0.1,rhoend=1e-4
         self.iter['position'] == 0 
-        
+
         self.set_Lo(L)  # set position bounds
+        self.position_vectors('SXex')
         Lnorm = loops.normalize_variables(self.Lo)
+        
+        Lnorm = [0.03006534,0.22812546,0.39390136,0.7788757,0.96460743,
+                 0.02300626,0.44926846,0.78848084,0.9652009]
+        Leig = np.linalg.solve(self.Leigenvector,Lnorm)
 
         '''
         Lo,nitter = op.fmin_slsqp(self.position_coils,Lo,disp=3,
@@ -992,14 +1019,17 @@ class INV(object):
         '''
         #opt = nlopt.opt(nlopt.GN_ISRES,self.nL)
         opt = nlopt.opt(nlopt.LD_SLSQP,self.nL)
-        #opt = nlopt.opt(nlopt.LN_COBYLA,self.nL)
-        opt.set_min_objective(self.update_position_grad)
-        opt.set_lower_bounds([0 for _ in range(self.nL)])
-        opt.set_upper_bounds([1 for _ in range(self.nL)])
+        opt.add_inequality_mconstraint(self.Llimit,1e-3*np.ones(2*self.nL))
+        opt.set_min_objective(self.update_position_vector)
+        
+        #opt.set_lower_bounds([0 for _ in range(self.nL)])
+        #opt.set_upper_bounds([1 for _ in range(self.nL)])
+        
         opt.set_ftol_abs(1e-4)
         
-
-        Lnorm = opt.optimize(Lnorm)
+        Leig = opt.optimize(Leig)
+        Lnorm = np.dot(self.Leigenvector,Leig)
+        
         loops.denormalize_variables(Lnorm,self.Lo)
         self.rms = opt.last_optimum_value()
 

@@ -450,7 +450,7 @@ class EQ(object):
             else:
                 Mflag = False
             self.Ic = 0  # control current
-            for index,sign in zip([0,-1],[1,-1]):  # stability coil pair [0,-1],[1,-1]
+            for index,sign in zip([0],[1]):  # stability coil pair [0,-1],[1,-1]
                 gain = 1e5/self.Vcoil['value'][index]
                 self.Vcoil['Ip'][index] = gain*kp*self.Zerr[i]  # proportional
                 self.Vcoil['Ii'][index] += gain*ki*self.Zerr[i]  # intergral

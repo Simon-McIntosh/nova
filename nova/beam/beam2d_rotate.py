@@ -27,8 +27,7 @@ config = 'DEMO_SN'
 
 setup = Setup(config,eqdir='../../eqdsk/')
 sf = SF(setup.filename)
-
-levels = sf.contour()
+#levels = sf.contour()
 
 
 tf = TF(config,coil_type='S')
@@ -36,12 +35,9 @@ tf.load(nTF=18,objective='L')
 
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
-eq = EQ(sf,pf,boundary=sf.get_sep(expand=1.5),n=1e4,sigma=0)  
+eq = EQ(sf,pf,boundary=tf.get_loop(expand=0.5),n=1e3,sigma=0)  
 
-        
 eq.get_plasma_coil()
-
-
 
 #eq.run()
 #eq.plotj()
@@ -49,18 +45,16 @@ eq.get_plasma_coil()
 #eq.coils()
 eq.gen_opp(sf.Mpoint[1])
 eq.resample()
-eq.plotb(alpha=1)
+#eq.plotb(alpha=1)
 
 #inv = INV(sf,pf,eq)
 
 pf.plot(coils=eq.coil,label=False,plasma=True,current=False,alpha=0.5) 
 #inv.plot_coils()
-sf.contour(levels=levels)
+#sf.contour(levels=levels)
 
-'''
+
 to = time()
-
-
 tf.split_loop()
     
 fe = FE(frame='3D')
@@ -80,9 +74,10 @@ fe.add_elements(n=n,part_name='loop')
 fe.add_elements(n=nodes['nose'],part_name='nose') 
 fe.addBC(['u','w','rx','ry','rz'],'all',part='nose') 
  
-#fe.add_nodes([13,-12,-2])
-fe.add_nodes([13,-12,0])
-fe.add_elements(n=[fe.part['loop']['el'][20],fe.nndo],part_name='support')
+fe.add_nodes([13,-12,-2])
+fe.add_nodes([13,-12,2])
+fe.add_elements(n=[fe.nndo-1,fe.part['loop']['el'][20],fe.nndo],part_name='support')
+fe.addBC(['fix'],[0],part='support') 
 fe.addBC(['fix'],[-1],part='support') 
 
 fe.add_weight()  # add weight to all elements
@@ -103,4 +98,4 @@ pl.axis('off')
 fe.plot_twin()
 fe.plot_curvature()
 
-'''
+

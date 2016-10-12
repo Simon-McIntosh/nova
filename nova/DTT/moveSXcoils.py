@@ -41,72 +41,42 @@ eq.run(update=False)
 
 inv = INV(sf,eq,tf)
 
+
 Lpf = inv.grid_PF(nPF=5)
-Lcs = inv.grid_CS(nCS=3,Zbound=[-9,7],gap=0.1)
+Lcs = inv.grid_CS(nCS=5,Zbound=[-12,8],gap=0.1)
 Lo = np.append(Lpf,Lcs)
 inv.update_coils()
 
 #inv.remove_active(Clist=inv.CS_coils)
 
 
-inv.fit_PF(offset=0.3)
+inv.fit_PF(offset=0.3)  # fit PF coils to TF
 inv.fix_boundary_psi(N=31,alpha=1-1e-4,factor=1)  # add boundary points
 inv.fix_boundary_feild(N=31,alpha=1-1e-4,factor=1)  # add boundary points
 inv.add_null(factor=3,point=sf.Xpoint)
 
-
 Rex,arg = 1.5,40
 R = sf.Xpoint[0]*(Rex-1)/np.sin(arg*np.pi/180)
 target = (R,arg)
-inv.add_alpha(1,factor=1,polar=target)  # 20
-inv.add_B(0,[-15],factor=1,polar=target)  # -30
-
-'''
-inv.set_background()
-inv.get_weight()
-inv.set_foreground()
-inv.fix_flux(inv.swing['flux'][0])
-alpha = np.linalg.solve(inv.V,inv.I)  # initalise alpha
-rms = inv.get_rms(alpha)
-print('RMS {:1.6f}'.format(rms))
-
-inv.frms(alpha,np.array([]))
-
-to = time()
-rms = inv.solve_slsqp()
-print('time {:1.3f}s'.format(time()-to))
-#print('rms {:1.1f}mm'.format(1e3*inv.rms))
-
-'''
+inv.add_alpha(1,factor=1,polar=target)  # X-point psi
+inv.add_B(0,[-15],factor=1,polar=target)  # X-point feild
 
 inv.set_swing(centre=15)
+inv.update_limits(LCS=[-12,8])
 Lo = inv.optimize(Lo)
 
-'''
-to = time()
-Lo = inv.optimize(Lo)[1]
-print('time {:1.2f}s'.format(time()-to))
-'''
-inv.fix_flux(inv.swing['flux'][-1])
+inv.fix_flux(inv.swing['flux'][0])
 inv.solve_slsqp()
 
 eq = EQ(sf,pf,dCoil=2,sigma=0,boundary=tf.get_loop(expand=0),n=5e3)
 
-tf.fill()
-#inv.plot_coils()
-pf.plot(coils=pf.coil,label=True,plasma=True,current=True) 
-
-#inv.update_coils()
-#pf.plot(coils=eq.coil,label=False,plasma=False,current=False) 
-inv.plot_fix(tails=True)
-
-
 eq.get_Vcoil() 
-eq.gen_opp(sf.Mpoint[0])
-#eq.run()
+eq.gen_opp(sf.Mpoint[1])
 sf.contour()
 
-
+tf.fill()
+pf.plot(coils=pf.coil,label=True,plasma=True,current=True) 
+inv.plot_fix(tails=True)
 
 loops.plot_variables(inv.Io,scale=1,postfix='MA')
 loops.plot_variables(inv.Lo,scale=1)
@@ -116,52 +86,13 @@ loops.plot_variables(inv.Lo,scale=1)
 
 '''
 
-#Vtarget = sf.Mpoint[1]  # height of magnetic centre
-#
-
-#sf.conf = Config(config)
 #inv.write_swing()
-
-#eq.run(update=False) 
-eq.gen(sf.Mpoint[1]) 
-sf.contour()
-r,z = sf.get_boundary()
-pl.plot(r,z)
-pl.plot(sf.Xpoint[0],sf.Xpoint[1],'o')
-
-
-
-pf.plot(coils=pf.coil,label=True,plasma=True,current=True)
-'''
-'''
-
-
-inv.plot_coils()
-sf.plot_coils(coils=sf.coil,label=False,plasma=False,current=False) 
-#sf.plot_coils(Color,coils=eq.coil,label=False,plasma=False) 
-
-
-
-
-#eq.gen(Vtarget=Vtarget,Nmax=1)
-
-
-#eq.run()
-
-#sf.contour()
-#eq.plasma()
-#eq.plotb()
 #sf.eqwrite(config='SXex')
-#pl.plot(sf.rbdry,sf.zbdry,'--')
-'''
 
-
-'''
 for swing in np.linspace(-20,80,5):
     pl.figure()
     pl.axis('equal')
     pl.axis('off')
-
 
     inv.swing_fix(swing)
     inv.solve() 
@@ -178,32 +109,7 @@ for swing in np.linspace(-20,80,5):
     #sf.eqwrite(config='SXex')
     pl.plot(sf.rbdry,sf.zbdry,'--')
     inv.plot_fix()
-'''
 
-
-#inv.rb.sol.plot()
-#sf.sol()
-#Rsol,Zsol = inv.rb.sol.legs('outer')
-'''
-from eqConfig import Config
-conf = Config('SXex')
-
-conf.TF(sf)
-rb = RB(conf,sf,Np=100)
-rb.divertor_outline(True,plot=True,debug=False)
-
-
-rb.FWfill(dt=conf.tfw,loop=True,alpha=0.7,color=next(Color),s=2e-3)
-rb.fill(dt=conf.BB[::-1],alpha=0.7,ref_o=0.3,dref=0.2,
-        referance='length',color=next(Color))
-rb.fill(dt=conf.tBBsupport,alpha=0.7,color=next(Color))
-rb.BBsheild_fill(dt=conf.sheild,ref_o=0.35*np.pi,dref=0.2*np.pi,offset=1/10*np.pi,
-                 alpha=0.7,color=next(Color))
-rb.VVfill(dt=conf.VV,ref_o=0.25*np.pi,dref=0.25*np.pi,offset=0.5/10*np.pi,
-          alpha=0.7,loop=True,color=next(Color))  # ref_o=0.385
-'''
-
-'''
 print('L3D',inv.rb.sol.connection('outer',0)[-1][-1])
 print('R',Rsol[-1])
 print('R/X',Rsol[-1]/sf.Xpoint[0])
@@ -212,27 +118,3 @@ print('R',rb.targets['outer']['Rsol'][-1],'Z',
       rb.targets['outer']['Zsol'][-1])
 '''
 
-'''
-conf.TFopp = 'V'
-rb.set_TFbound()  # TF boundary conditions
-rb.TFbound['ro_min'] -= 0.5
-#rb.plot_TFbounds()          
-rb.TFopp(True,objF=conf.TFopp)  # L==length, V==volume
-rb.TFfill()
-'''
-
-'''
-pl.figure(figsize=(3.14,3.14*12/16))
-pl.semilogy(I,LS,'o-',markersize=2.5)
-pl.xlabel(r'current sum $I$ MA')
-pl.ylabel('error m')
-
-pl.figure(figsize=(3.14,3.14*12/16))
-pl.plot(np.log10(Mix),Fun,'o-',markersize=2.5)
-
-pl.figure(figsize=(3.14,3.14*12/16))
-pl.plot(np.log10(Mix),I,'o-',markersize=2.5)
-
-pl.figure(figsize=(3.14,3.14*12/16))
-pl.plot(np.log10(Mix),LS,'o-',markersize=2.5)
-'''

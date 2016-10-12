@@ -28,6 +28,7 @@ eq.get_plasma_coil()
 eq.run(update=False)
 
 inv = INV(sf,eq,tf)
+inv.initialize_log()
 
 Lpf = inv.grid_PF(nPF=5)
 Lcs = inv.grid_CS(nCS=5)
@@ -44,6 +45,7 @@ inv.add_null(factor=1,point=sf.Xpoint)
 inv.set_background()
 inv.get_weight()
 inv.set_foreground()
+inv.set_force_feild(state='both') 
 inv.set_target()
 
 inv.solve()
@@ -54,23 +56,27 @@ inv.set_Io()  # set coil current and bounds
 #I = np.copy(inv.I.reshape(-1))
 #Inorm = (Inorm+30e6)/60e6
 
-eps = 1e-6
+eps = 1e-8
 inv.I -= 0.05
 
-alpha = np.linalg.solve(inv.V,inv.I.reshape(-1))
 
-print('rms {:1.6f}'.format(inv.get_rms(alpha)))
+inv.get_force()
+
+'''
+jac_approx = op.approx_fprime(inv.I,inv.set_force,eps)
+print(jac_approx)
+print(inv.set_force(inv.I,grad=True))
 
 
 #jac_approx = op.approx_fprime(inv.I.reshape(-1),inv.get_r,eps)
 
-jac_approx = op.approx_fprime(alpha,inv.get_rms,eps)
+jac_approx = op.approx_fprime(inv.I,inv.get_rms,eps)
 print(jac_approx)
 
 #print(inv.rms)
 
 grad = np.zeros(inv.nC) 
-rms = inv.frms(alpha,grad)
+rms = inv.frms(inv.I,grad)
 print(grad)
 print('rms_frms {:1.6f}'.format(rms))
 
@@ -83,16 +89,7 @@ Lnorm = loops.normalize_variables(inv.Lo)
 
 print('L grad',op.approx_fprime(Lnorm,inv.update_position,1e-6))
 print('L grad2',op.approx_fprime(Lnorm,inv.update_position,1e-6))
-'''
-#print(inv.rms,inv.frms(inv.I,grad),inv.get_r(inv.I))
 
-def get_I(alpha,inv):
-    I = np.dot(inv.V,alpha)
-    return I[3]
-    
-print('dIda',op.approx_fprime(alpha,get_I,eps,inv))
-print('V',inv.V[3,:])
-'''
 Neps = 7
 jac = np.zeros((Neps,inv.nL))
 eps = 10**np.linspace(-8,-2,Neps)
@@ -112,31 +109,8 @@ text.plot()
 #pl.yscale('log')
 
 print('L grad',op.approx_fprime(Lnorm,inv.update_position,1e-6))
+
 '''
-Io = inv.I.reshape(-1)*cc.mu_o
-
-eps = 1000000
-
-fx = inv.get_r(Io)
-
-Io[0] += eps
-fx1 = inv.get_r(Io)
-
-print((fx1-fx)/eps,fx,fx1,eps)
-
-
-rms = inv.frms(Inorm)
-
-
-print(jac)
-
-
-#print(op.check_grad(inv.frms,inv.fprime,Inorm,epsilon=10))
-'''
-
-
-
-
 
 
 

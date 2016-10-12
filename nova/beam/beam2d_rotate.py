@@ -35,7 +35,7 @@ tf.load(nTF=18,objective='L')
 
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
-eq = EQ(sf,pf,boundary=tf.get_loop(expand=0.5),n=1e3,sigma=0)  
+eq = EQ(sf,pf,boundary=tf.get_loop(expand=0.5),n=5e3,sigma=0)  
 
 eq.get_plasma_coil()
 
@@ -80,7 +80,7 @@ fe.add_elements(n=[fe.nndo-1,fe.part['loop']['el'][20],fe.nndo],part_name='suppo
 fe.addBC(['fix'],[0],part='support') 
 fe.addBC(['fix'],[-1],part='support') 
 
-fe.add_weight()  # add weight to all elements
+#fe.add_weight()  # add weight to all elements
 fe.add_tf_load(config,tf,sf.Bpoint,method='function')  # bursting and toppling loads
 
 fe.solve()

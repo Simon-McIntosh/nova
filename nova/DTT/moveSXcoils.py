@@ -20,7 +20,7 @@ sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 Color = cycle(sns.color_palette('Set2'))
 
-pkl = PKL('moveSX_Dev3')
+pkl = PKL('SX54')
 
 config = 'SXex'
 setup = Setup(config)
@@ -43,12 +43,11 @@ inv = INV(sf,eq,tf)
 
 
 Lpf = inv.grid_PF(nPF=5)
-Lcs = inv.grid_CS(nCS=5,Zbound=[-12,8],gap=0.1)
+Lcs = inv.grid_CS(nCS=4,Zbound=[-12,8],gap=0.1)
 Lo = np.append(Lpf,Lcs)
 inv.update_coils()
 
 #inv.remove_active(Clist=inv.CS_coils)
-
 
 inv.fit_PF(offset=0.3)  # fit PF coils to TF
 inv.fix_boundary_psi(N=31,alpha=1-1e-4,factor=1)  # add boundary points
@@ -81,7 +80,7 @@ inv.plot_fix(tails=True)
 loops.plot_variables(inv.Io,scale=1,postfix='MA')
 loops.plot_variables(inv.Lo,scale=1)
 
-#pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
+pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
 
 
 '''

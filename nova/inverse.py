@@ -35,10 +35,10 @@ class INV(object):
                      'value':np.array([]),'condition':np.array([])}  
         self.add_active([],empty=True)  # all coils active
         self.update_coils()
-        self.log_scalar = ['Fr_max','Fz_max','F_max','FzCS','Fsep','rms',
-                           'rms_bndry','rmsID','Isum','Imax','z_offset',
-                           'FrPF','FzPF','dTpol']
-        self.log_array = ['Lo','Iswing']
+        self.log_scalar = ['rms','rmsID']  
+        #'Fr_max','Fz_max','F_max','FzCS','Fsep','rms_bndry','Isum',
+        #'Imax','z_offset','FrPF','FzPF','dTpol'
+        self.log_array = ['Lo']  # ,'Iswing'
         self.log_iter = ['current_iter','plasma_iter','position_iter']
         self.log_plasma = ['plasma_coil']
         self.CS_Lnorm,self.CS_Znorm = 2,1
@@ -889,18 +889,18 @@ class INV(object):
             
     def update_position_vector(self,Lnorm,grad):
         if grad.size > 0:
-            grad[:] = op.approx_fprime(Lnorm,self.update_position,1e-7)
-        rms = self.update_position(Lnorm,update_area=True)
+            grad[:] = op.approx_fprime(Lnorm,self.update_position,5e-4)
+        rms = self.update_position(Lnorm,store_update=True)
         return rms
         
     def update_position_scipy(self,Lnorm):
-        jac = op.approx_fprime(Lnorm,self.update_position,1e-7)
-        rms = self.update_position(Lnorm,update_area=True)
+        jac = op.approx_fprime(Lnorm,self.update_position,5e-4)
+        rms = self.update_position(Lnorm,store_update=True)
         return rms,jac
                         
-    def update_position(self,Lnorm,update_area=False):
+    def update_position(self,Lnorm,update_area=True,store_update=False):
         self.iter['current'] == 0
-        self.iter['position'] += 1
+        self.Lo['norm'] = np.copy(Lnorm)
         L = loops.denormalize_variables(Lnorm,self.Lo)
         Lpf = L[:self.nPF]
         for name,lpf in zip(self.PF_coils,Lpf):
@@ -930,6 +930,9 @@ class INV(object):
             self.set_force_feild(state='active')  
             self.set_foreground()
             rms = self.swing_flux()
+        if store_update:
+            self.iter['position'] += 1
+            self.store_update()
         return rms
 
     def swing_flux(self,bndry=False):
@@ -941,8 +944,6 @@ class INV(object):
             self.swing['I'][i] = self.Icoil
         self.rmsID = np.argmax(self.swing['rms'])
         self.rms = self.swing['rms'][self.rmsID]
-        
-        #self.store_update()
         return self.rms
    
     def set_Lo(self,L):  # set lower/upper bounds on coil positions
@@ -958,7 +959,7 @@ class INV(object):
             loops.add_value(self.Lo,i+self.nPF,name,l,
                             self.limit['L']['CS'][0],self.limit['L']['CS'][1])
 
-    def minimize(self,L,method='ls'):  # rhobeg=0.1,rhoend=1e-4
+    def minimize(self,L,method='bh'):  # rhobeg=0.1,rhoend=1e-4
         self.iter['position'] == 0 
         self.set_Lo(L)  # set position bounds
         Lnorm = loops.normalize_variables(self.Lo)
@@ -972,10 +973,10 @@ class INV(object):
             minimizer = {'method':'L-BFGS-B','jac':True,
                          'bounds':[[0,1] for _ in range(self.nL)]}             
                          
-            res = op.basinhopping(self.update_position_scipy,Lnorm,niter=4,
-                                    T=1e-3,stepsize=0.01,disp=True,
+            res = op.basinhopping(self.update_position_scipy,Lnorm,niter=1e4,
+                                    T=1e-3,stepsize=0.05,disp=True,
                                     minimizer_kwargs=minimizer,
-                                    interval=5,niter_success=10)
+                                    interval=50,niter_success=100)
             Lnorm,self.rms = res.x,res.fun
         elif method == 'de':  # differential_evolution
             bounds = [[0,1] for _ in range(self.nL)]
@@ -1032,25 +1033,18 @@ class INV(object):
             self.log[var] = []
         self.iter = {'plasma':0,'position':0,'current':0}
             
-    def optimize(self,Lo,Nmax=1):
-        fun = 0
+    def optimize(self,Lo):
         self.initialize_log()
         self.ztarget = self.sf.Mpoint[1]
         self.initalise_plasma = True
         self.ttotal,self.ttotal_cpu = 0,0
         self.tstart,self.tstart_cpu = time.time(),time.process_time()
-        for _ in range(Nmax):
-            self.iter['plasma'] += 1
-            self.tick()
-            fun_o = fun
-            self.set_plasma()
-            Lo,fun = self.minimize(Lo)
-            self.store_update(extent='position')
-            self.tock()
-
-            err = abs(fun-fun_o) 
-            if err < 1e-3:
-                break
+        self.iter['plasma'] += 1
+        self.tick()
+        self.set_plasma()
+        Lo,fun = self.minimize(Lo)
+        self.store_update(extent='position')
+        self.tock()
         return Lo
 
     def set_plasma(self):

@@ -113,7 +113,7 @@ if __name__ is '__main__':
     config = 'DEMO_SN'
     tf = TF(config,coil_type='S',npoints=130)
     
-    shp = shape(config,tf,nTF=16,objective='L')
+    shp = shape(config,tf,nTF=16,objective='E')
 
     demo = DEMO()
     demo.fill_loops()
@@ -129,7 +129,7 @@ if __name__ is '__main__':
     x = tf.coil.draw()
     tf.get_loops(x)
     tf.fill()
-    shp.cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)
+    #shp.cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)
     
     plot_oppvar(shp.coil.xo,shp.coil.oppvar)
 

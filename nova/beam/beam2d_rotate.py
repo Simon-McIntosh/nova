@@ -35,7 +35,7 @@ tf.load(nTF=18,objective='L')
 
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
-eq = EQ(sf,pf,boundary=tf.get_loop(expand=0.5),n=5e3,sigma=0)  
+eq = EQ(sf,pf,boundary=tf.get_loop(expand=0.5),n=1e4,sigma=0)  
 
 eq.get_plasma_coil()
 
@@ -51,14 +51,14 @@ eq.resample()
 
 pf.plot(coils=eq.coil,label=False,plasma=True,current=False,alpha=0.5) 
 #inv.plot_coils()
-#sf.contour(levels=levels)
+sf.contour()
 
 
 to = time()
 tf.split_loop()
     
 fe = FE(frame='3D')
-fe.add_mat(0,E=1e2,I=1e2,A=1,G=5,J=5,rho=5e-2)
+fe.add_mat(0,E=5e2,I=5e2,A=1,G=5,J=5,rho=5e-2)
 
 nodes = {}
 for part in ['loop','nose']:  # ,'nose'

@@ -166,10 +166,29 @@ class Setup(object):
         elif configuration == 'DEMO_SN':
             self.dataname = 'DEMO_SN'
             self.filename = 'Equil_AR3d1_2015_04_v2_EOF_CSred_fine_final.eqdsk'
+            self.firstwall['div_ex'] = 0.25
+            self.firstwall['trim'] = [0.88,0.95]  # trim fraction (in/out)
+            self.targets['inner'] = {'L2D':0.6}
+            self.targets['outer'] = {'L2D':0.65}
 
         elif configuration == 'DEMO_SNb':
             self.dataname = 'DEMO_SN'
             self.filename = 'Equil_AR3d1_2016_01_v1_SN_SOF_baseline_2016_opt.eqdsk'
+
+        elif configuration == 'DEMO_SNc':
+            self.dataname = 'DEMO_SN'
+            self.filename = 'Equil_AR3d1_SN_v2_2015_09_bt_1d03li_0d8_Ipl_20d25_SOF.eqdsk'
+            self.firstwall['div_ex'] = 0.25
+            self.targets['inner'] = {'L2D':0.6}
+            self.targets['outer'] = {'L2D':0.65}
+            self.targets['default']['dPlate'] = 0.25
+
+        elif configuration == 'DN':
+            self.dataname = 'DN'
+            self.firstwall['div_ex'] = 0.5
+            self.targets['inner'] = {'L2D':0.8}
+            self.targets['outer'] = {'L2D':0.85}
+            self.filename = 'Equil_FT_R0_9d197_k95_1d59_delta95_0d33_final_opt.eqdsk'
 
         self.filename = self.eqdir+self.filename
 

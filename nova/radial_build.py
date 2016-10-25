@@ -7,22 +7,21 @@ import seaborn as sns
 from itertools import cycle
 from amigo.geom import Loop
 import amigo.geom as geom
-
+from nova.loops import Profile
+from nova.shape import Shape
 
 class RB(object):
-    
     def __init__(self,setup,sf,npoints=500):
         self.setup = setup
         self.sf = sf
         self.npoints = npoints
         self.dataname = setup.configuration
-        if not hasattr (sf,'Xpoint'):
-            sf.get_Xpsi()  
-        self.xo = [sf.Xpoint[0],self.sf.eqdsk['zmagx']]
-        r,z = sf.get_boundary()
-        sf.set_boundary(r,z,n=npoints)
-        self.Rp,self.Zp = self.sf.rbdry,self.sf.zbdry
-        self.loop = Loop(self.Rp,self.Zp,xo=self.xo)  # plasma boundary
+        
+    def update_sf(self):
+        if not hasattr (self.sf,'Xpoint'):
+            self.sf.get_Xpsi()  
+        self.xo = [self.sf.Xpoint[0],self.sf.eqdsk['zmagx']]
+        self.Rp,self.Zp = self.sf.get_boundary()
         self.Lp = geom.length(self.Rp,self.Zp,norm=False)[-1]
         self.Rfw,self.Zfw,self.psi_fw = self.first_wall(self.setup.firstwall['dRfw']) 
         self.loop = Loop(self.Rfw,self.Zfw,xo=self.xo)  # first wall contour
@@ -61,7 +60,7 @@ class RB(object):
         if istart > 0:
             r,z = r[::-1],z[::-1]
         return r,z,psi
-        
+  
     def first_wall(self,dr):  # dr [m]
         if not hasattr(self.sf,'LFPr'):
             self.sf.get_LFP()
@@ -69,7 +68,7 @@ class RB(object):
         self.sf.HFfwr,self.sf.HFfwz = self.sf.HFPr-dr,self.sf.HFPz
         r_lfs,z_lfs,psi_lfs = self.first_wall_psi(self.sf.LFfwr,self.sf.LFfwz)
         r_hfs,z_hfs,psi_hfs = self.first_wall_psi(self.sf.HFfwr,self.sf.HFfwz)
-        r_top,z_top = geom.offset(self.sf.rbdry,self.sf.zbdry,dr)
+        r_top,z_top = geom.offset(self.Rp,self.Zp,dr)
         r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,origin='top')
         index = z_top>=self.sf.LFPz
         r_top,z_top = r_top[index],z_top[index]
@@ -134,6 +133,7 @@ class RB(object):
         return Bhat
    
     def firstwall(self,calc=True,color=[0.5,0.5,0.5],plot=True,debug=False):
+        self.update_sf()  # update streamfunction
         if calc:
             self.Rb,self.Zb = self.target_fill(debug=debug)
             with open('../../Data/'+self.dataname+'_FW.pkl', 'wb') as output:
@@ -184,7 +184,7 @@ class RB(object):
 
     def target_fill(self,debug=False,**kwargs):
         layer_index = 0  # construct from first open flux surface
-        self.sf.sol()
+        self.sf.sol(update=True)
         for leg in list(self.sf.legs)[2:]:
             self.set_target(leg)
             Rsol,Zsol = self.sf.snip(leg,layer_index,L2D=self.setup.targets[leg]['L2D'])
@@ -262,9 +262,42 @@ class RB(object):
                                loop=(self.loop.R,self.loop.Z))
             Rb,Zb = self.append(Rb,Zb,r,z)
         self.Rb,self.Zb = self.midplane_loop(Rb,Zb)
+
+        #self.Rb,self.Zb = self.first_wall_fit(self.setup.firstwall['dRfw'])
         self.get_sol()  # trim sol to targets and store values
         self.write_boundary(self.Rb,self.Zb)
         return self.Rb,self.Zb
+        
+    def first_wall_fit(self,dr):
+        profile = Profile(self.setup.configuration,family='S',part='fwf')
+        shp = Shape(profile,objective='L')
+        #shp.loop.set_l({'value':0.8,'lb':0.5,'ub':0.9})
+        #shp.loop.oppvar.remove('z2')
+        #shp.loop.oppvar.remove('tilt')
+        shp.loop.set_symetric(True)
+        rfw,zfw = geom.offset(self.Rp,self.Zp,dr)  # offset from sep
+        rfw,zfw = geom.rzSLine(rfw,zfw,30)  # sub-sample
+        shp.add_bound({'r':rfw,'z':zfw},'internal')  # vessel inner bounds
+        shp.add_bound({'r':self.sf.Xpoint[0],
+                       'z':self.sf.Xpoint[1]-dr*np.cos(np.pi/2)},'internal')
+        shp.plot_bounds()
+        shp.minimise()
+        x = profile.loop.draw()
+        r,z = geom.clock(x['r'],x['z'],reverse=False)
+        istart = np.argmin((r-self.sf.Xpoint[0])**2+(z-self.sf.Xpoint[1])**2)
+        r = np.append(r[istart:],r[:istart+1])
+        z = np.append(z[istart:],z[:istart+1])
+        
+        zmin = np.min(z)
+        rd,zd = self.Rb[self.Zb<zmin],self.Zb[self.Zb<zmin]  # divertor
+ 
+        istart = np.argmin((r-rd[-1])**2+(z-zd[-1])**2)
+        iend = np.argmin((r-rd[0])**2+(z-zd[0])**2)
+        r = np.append(rd,r[istart+1:iend-istart])
+        z = np.append(zd,z[istart+1:iend-istart])
+        r,z = np.append(r,r[0]),np.append(z,z[0])
+        pl.plot(r,z)
+        return r,z
         
     def append(self,R,Z,r,z):
         dr = np.zeros(2)
@@ -301,8 +334,8 @@ class RB(object):
             self.setup.targets[leg]['Rsol'] = Rsol
             self.setup.targets[leg]['Zsol'] = Zsol 
         
-    def trim_sol(self,dr=0,Nsol=0,update=False,color='k',plot=True):
-        self.sf.sol(dr=dr,Nsol=Nsol,update=update)
+    def trim_sol(self,color='k',plot=True):
+        self.sf.sol()
         color = sns.color_palette('Set2',self.sf.nleg+5)
         #color = 'k'
         for c,leg in enumerate(self.sf.legs.keys()):
@@ -375,14 +408,14 @@ class RB(object):
             for leg in list(self.sf.legs)[2:]:
                 target = self.setup.targets[leg]
                 f.write(leg+'\t')
-                f.write('{:1.2f}\t\t'.format(target['graze']*180/np.pi))
+                f.write('{:1.2f}\t\t'.format(target['graze_deg'][0]))
                 if target['open']:
                     f.write('open\t')
                 else:
                     f.write('closed\t')
                 f.write('{:1.6f}\t'.format(target['Ro']))
                 f.write('{:1.6f}\t'.format(target['Zo']))
-                f.write('{:1.2f}\t'.format(target['theta']*180/np.pi))
+                f.write('{:1.2f}\t'.format(target['theta_deg'][0]))
                 f.write('{:1.3f}\t'.format(target['L2Dedge'][-1]))
                 f.write('{:1.3f}\t\n'.format(target['L3Dedge'][-1]))
             f.write('\n')
@@ -441,9 +474,9 @@ class RB(object):
     def match_psi(self,Ro,Zo,direction,theta_end,theta_sign,phi_target,graze,
                   dPlate,leg,debug=False):        
         color = sns.color_palette('Set2',2)
-        gain = 0.25  # 0.25
+        gain = 0.15  # 0.25
         Nmax = 500
-        Lo = [5,0.015]  # [blend,turn]  5,0.015
+        Lo = [5,0.005]  # [blend,turn]  5,0.015
         r2m = [-1.5,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
         Nplate = 1 # number of target plate divisions (1==flat)
         L = Lo[0] if theta_end == 0 else Lo[1]
@@ -453,10 +486,10 @@ class RB(object):
             R,Z,phi = self.blend_target(Ro,Zo,dPlate,L,direction,theta_end,
                                         theta_sign,graze,r2m,Nplate)
             L -= gain*(phi_target-phi)
-            if debug: pl.plot(R,Z,color=color[0])
+            if debug: pl.plot(R,Z,color=color[0],lw=1)
             if np.abs(phi_target-phi) < 1e-4:
                 if debug: 
-                    pl.plot(R,Z,'r',color=color[1])
+                    pl.plot(R,Z,'r',color=color[1],lw=3)
                     print('rz',Ro,Zo,'N',i)
                 break
             if L < 0:
@@ -493,7 +526,7 @@ class RB(object):
             target_angle = np.arctan2((Z[-1]-Z[-2]),(R[-1]-R[-2]))
             Xi = self.sf.expansion([R[-1]],[Z[-1]])
             theta = self.sf.strike_point(Xi,graze)
-            B = direction*self.sf.Bcoil((R[-1],Z[-1]))
+            B = direction*self.sf.Bpoint((R[-1],Z[-1]))
             Bhat = self.rotateB(B,theta_sign*theta)
             trans_angle = np.arctan2(Bhat[1],Bhat[0])
             if abs(target_angle-trans_angle) > 0.01*np.pi:
@@ -520,11 +553,25 @@ class RB(object):
             theta = self.sf.strike_point(Xi,graze)
             if accute: theta = np.pi-theta
             theta = Lhat*theta_end+(1-Lhat)*theta
-            B = direction*self.sf.Bcoil((R[-1],Z[-1]))
+            B = direction*self.sf.Bpoint((R[-1],Z[-1]))
             Bhat = self.rotateB(B,theta_sign*theta)
             R = np.append(R,R[-1]+dL*Bhat[0])
             Z = np.append(Z,Z[-1]+dL*Bhat[1])
         return R,Z
+        
+    def vessel_fit(self):
+        profile = Profile(self.setup.configuration,family='S',part='VV')
+        shp = Shape(profile,objective='L')
+        #shp.loop.set_l({'value':0.8,'lb':0.5,'ub':0.9})
+        shp.loop.oppvar.remove('z2')
+        #shp.loop.oppvar.remove('tilt')
+        shp.loop.set_symetric(True)
+        rvv,zvv = geom.rzSLine(self.loop.R,self.loop.Z,30)
+        rvv,zvv = geom.offset(rvv,zvv,0.05)  # offset from blanket
+        shp.add_bound({'r':rvv,'z':zvv},'internal')  # vessel inner bounds
+        shp.minimise()
+        x = profile.loop.draw()
+        self.loop.R,self.loop.Z = x['r'],x['z']
         
     def vessel(self):  # radial build from firstwall
         Color = cycle(sns.color_palette('Set2',12)[1:])
@@ -533,22 +580,25 @@ class RB(object):
                   referance='geom.length',color=next(Color))  # blanket+sheild
         self.loop.fill(dt=self.setup.build['tBBsupport'],alpha=0.7,
                   color=next(Color))  # blanket support
-        self.BBsheild_fill(dt=self.setup.build['sheild'],
+        self.sheild_fill(dt=self.setup.build['sheild'],
                            ref_o=0.35*np.pi,dref=0.2*np.pi,
                            gap=1/10*np.pi,alpha=0.7,color=next(Color))
+        self.vessel_fit()
         self.VVfill(dt=self.setup.build['VV'],ref_o=0.25*np.pi,  # vessel
                     dref=0.25*np.pi,gap=0.5/10*np.pi,alpha=0.7,
                     loop=True,color=next(Color))  # ref_o=0.385
         pl.axis('equal')
         
     def FWfill(self,**kwargs):
+        if not hasattr(self,'Rb'):
+            self.firstwall(calc=False,plot=False,debug=False)  # load fw
         self.loop.R,self.loop.Z = geom.rzSLine(self.Rb[::-1],self.Zb[::-1],
                                      npoints=self.npoints,Hres=False)
         self.loop.fill(loop=True,alpha=0.7,**kwargs)
         self.loop.R,self.loop.Z = geom.rzSLine(self.loop.R,self.loop.Z,npoints=self.npoints)
         self.loop.R,self.loop.Z = self.trim_contour(self.loop.R[::-1],self.loop.Z[::-1]) # update 
 
-    def BBsheild_fill(self,**kwargs):
+    def sheild_fill(self,**kwargs):  # 
         if 'sheild_connect' in self.setup.build:
             connect = self.setup.build['sheild_connect']
         else:
@@ -634,7 +684,7 @@ class RB(object):
         R,Z = np.append(rVV[ni+1:-ni],rs),np.append(zVV[ni+1:-ni],zs)
         R,Z = np.append(R,R[0]),np.append(Z,Z[0])
         self.loop.R,self.loop.Z = geom.rzSLine(R,Z,len(R),s=5e-4)
-        self.loop.fill(trim=None,loop=True,s=2e-4,**kwargs)
+        #self.loop.fill(trim=None,loop=True,s=2e-4,**kwargs)
  
     def support_fill(self,coils=[],r=[],z=[],**kwargs):
         k = 3
@@ -663,25 +713,7 @@ class RB(object):
         
         rs,zs = geom.offset(rs,zs,kwargs['dR'])
         return rs,zs
-   
-    def sheild_fill(self,dR=0.05,**kwargs):
-        rs,zs = geom.offset(self.Rstore,self.Zstore,dR)
-        dr_end = (rs[0]-self.loop.R[0])/2
-        dz_end = (zs[0]-self.loop.Z[0])/2
-        radius_end = np.sqrt(dr_end**2+dz_end**2)
-        ro_end = self.loop.R[0]+dr_end
-        zo_end = self.loop.Z[0]+dz_end
-        theta_o = np.arctan2(zs[0]-zo_end,rs[0]-ro_end)
-        theta_end = np.linspace(theta_o,theta_o+np.pi,20)
-        r_end = ro_end+radius_end*np.cos(theta_end)
-        z_end = zo_end+radius_end*np.sin(theta_end)
-        r_sheild = np.append(rs[::-1],r_end[1:-1])
-        r_sheild = np.append(r_sheild,self.loop.R)
-        z_sheild = np.append(zs[::-1],z_end[1:-1])
-        z_sheild = np.append(z_sheild,self.loop.Z)
-        self.loop.R,self.loop.Z = r_sheild,z_sheild
-        self.loop.fill(trim=None,**kwargs)
-        
+
     def VVfill(self,**kwargs):
         VVinR,VVinZ = self.loop.R,self.loop.Z
         self.loop.fill(**kwargs)

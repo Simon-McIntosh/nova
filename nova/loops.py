@@ -6,8 +6,10 @@ from amigo import geom
 import pylab as pl
 from collections import OrderedDict
 import seaborn as sns
-from itertools import cycle
 import pandas as pd
+from nova.config import trim_dir
+import pickle
+import json
 
 def add_value(Xo,i,name,value,lb,ub,clip=True):
     if clip:
@@ -20,7 +22,6 @@ def add_value(Xo,i,name,value,lb,ub,clip=True):
     Xo['lb'][i] = lb
     Xo['ub'][i] = ub
 
-            
 def normalize_variables(Xo):
     X = (Xo['value']-Xo['lb'])/(Xo['ub']-Xo['lb'])
     return X
@@ -73,6 +74,8 @@ def plot_variables(Xo,eps=1e-2,fmt='1.2f',scale=1,postfix=''):
     pl.xlim([xmin,xmax])
 
 def check_var(var,xo):
+    if var == 'l':
+        var = 'l0s'
     if var not in xo:
         var = next((v for v in xo if var in v))  # match sub-string
     return var
@@ -94,6 +97,10 @@ def get_oppvar(xo,oppvar,xnorm):
         x[i] = x[i]*(xo[var]['ub']-xo[var]['lb'])+xo[var]['lb']
         #xo[var]['value'] = x[i]
     return x
+    
+def remove_oppvar(oppvar,var):
+    if var in oppvar:
+        oppvar.remove(var)
 
 def plot_oppvar(xo,oppvar,eps=1e-2,fmt='1.2f',scale=1,postfix=''):
     xnorm,bnorm = set_oppvar(xo,oppvar)
@@ -171,11 +178,11 @@ def set_limit(xo,limits=True):
             xo['value'] = xo['ub']
     return xo
 
-class Acoil(object):  # tripple arc coil
+class Aloop(object):  # tripple arc loop
     def  __init__(self,npoints=200,limits=True):
         self.npoints = npoints
         self.initalise_parameters()
-        self.name = 'Acoil'
+        self.name = 'Aloop'
         self.limits = limits
         
     def initalise_parameters(self):
@@ -244,11 +251,11 @@ class Acoil(object):  # tripple arc coil
         x = self.draw(inputs=inputs)
         pl.plot(x['r'],x['z'])
 
-class Dcoil(object):  # Princton D
+class Dloop(object):  # Princton D
     def  __init__(self,npoints=100,limits=True):
         self.npoints = npoints
         self.initalise_radii()
-        self.name = 'Dcoil'
+        self.name = 'Dloop'
         self.limits = limits
         
     def initalise_radii(self):
@@ -305,9 +312,9 @@ class Dcoil(object):  # Princton D
         x = self.draw(inputs=inputs)
         pl.plot(x['r'],x['z'])
         
-class Scoil(object):  # polybezier
-    def  __init__(self,npoints=200,symetric=False,tension='full',limits=False):
-        self.name = 'Scoil'
+class Sloop(object):  # polybezier
+    def  __init__(self,npoints=200,symetric=False,tension='full',limits=True):
+        self.name = 'Sloop'
         self.limits = limits
         self.npoints = npoints
         self.initalise_nodes()
@@ -319,15 +326,15 @@ class Scoil(object):  # polybezier
         self.xo['r1'] = {'value':4.486,'lb':4,'ub':6}  # inner radius
         self.xo['r2'] = {'value':15.708,'lb':10,'ub':25}  # outer radius 
         self.xo['z2'] = {'value':0,'lb':-0.8,'ub':0.8} # outer node vertical shift
-        self.xo['height'] = {'value':17.367,'lb':0.1,'ub':50} # full coil height
+        self.xo['height'] = {'value':17.367,'lb':0.1,'ub':50} # full loop height
         self.xo['top'] = {'value':0.33,'lb':0.1,'ub':1}  # horizontal shift
         self.xo['upper'] = {'value':0.62,'lb':0.3,'ub':1}  # vertical shift
-        self.set_lower()  # lower coil parameters (bottom,lower)
+        self.set_lower()  # lower loop parameters (bottom,lower)
         self.xo['dz'] = {'value':0,'lb':-2,'ub':2}  # vertical offset
         self.xo['flat'] = {'value':0,'lb':0,'ub':0.8}  # fraction outboard straight
         self.xo['tilt'] = {'value':0,'lb':-45,'ub':45}  # outboard angle [deg]
         self.oppvar = list(self.xo.keys())
-        self.set_l({'value':0.8,'lb':0.5,'ub':1.5})  # 1/tesion
+        self.set_l({'value':0.8,'lb':0.75,'ub':1.5})  # 1/tesion
         #self.oppvar.remove('flat')
         #self.oppvar.remove('tilt')
 
@@ -342,7 +349,7 @@ class Scoil(object):  # polybezier
             self.nl = options[tension]
         else:
             errtxt = '\n'
-            errtxt += 'Select Scoil tension length multiple from:\n'
+            errtxt += 'Select Sloop tension length multiple from:\n'
             for option in options:
                 errtxt += '\'{}\''.format(option)
                 errtxt += ' (nl={:1.0f})\n'.format(options[option])
@@ -443,7 +450,7 @@ class Scoil(object):  # polybezier
                 p['l'] *= dl/2
             if 't' not in p:  # add midpoint angle
                 p['t'] = np.arctan2(ym-p['y'],xm-p['x'])
-            pm['r'],pm['z'] = Scoil.midpoints(p)
+            pm['r'],pm['z'] = Sloop.midpoints(p)
         return p1,p2,dl
         
     def append_keys(self,key):
@@ -487,7 +494,7 @@ class Scoil(object):  # polybezier
         r[3],z[3],theta[3] = r2-ds_r,z2*height/2-ds_z,-np.pi/2-alpha_s # outer, lower
         r[4],z[4],theta[4] = r1+bottom*(r2-r1),-height/2,-np.pi  # bottom
         r[5],z[5],theta[5] = r1,-lower*height/2,np.pi/2  # lower sholder
-        z += dz  # vertical coil offset
+        z += dz  # vertical loop offset
         return r,z,theta
             
     def linear_loop_length(self,r,z):
@@ -512,7 +519,7 @@ class Scoil(object):  # polybezier
         for i,j,k in zip(range(len(r)-1),[0,1,3,4],[1,2,4,5]):
             p0 = {'r':r[j],'z':z[j],'t':theta[j],'l':ls[i]}
             p3 = {'r':r[k],'z':z[k],'t':theta[k]-np.pi,'l':le[i]}
-            p1,p2,dl = Scoil.control(p0,p3)
+            p1,p2,dl = Sloop.control(p0,p3)
             curve = self.segment([p0,p1,p2,p3],dl)
             self.p.append({'p0':p0,'p1':p1,'p2':p2,'p3':p3})
             for var in ['r','z']:
@@ -550,22 +557,123 @@ class Scoil(object):  # polybezier
             pl.plot(p['p2']['r'],p['p2']['z'],'o',color=c2,ms=ms,zorder=7)
         pl.axis('equal')
         pl.axis('off')
-            
-            
-if __name__ is '__main__':  # plot coil classes
-    #coil = Acoil()
-    #x = coil.plot()
+        
+class Profile(object):
     
-    coil = Scoil(limits=False,symetric=False,tension='single')
-    coil.set_tension('full')
-    x = coil.plot({'l2':1.5})
-    
-    coil.draw()
+    def __init__(self,config,family='S',part='TF',npoints=100,**kwargs):
+        self.config = config
+        self.part = part
+        self.initalise_loop(family,npoints)  # initalize loop object
+        data_dir = trim_dir('../../Data/')
+        self.dataname = data_dir+self.config+'_{}.pkl'.format(part)
+        self.read_loop_dict()
+        try:  # try to load loop using kwargs or unset data
+            self.load(nTF=kwargs.get('nTF','unset'),
+                      objective=kwargs.get('objective','unset'))
+        except:
+            pass
+        
+    def initalise_loop(self,family,npoints=100):
+        self.family = family  # A==arc, D==Princton-D, S==spline
+        if self.family == 'A':  # tripple arc (5-7 parameter)
+            self.loop = Aloop(npoints=npoints)
+        elif self.family == 'D':  # princton D (3 parameter)
+            self.loop = Dloop(npoints=npoints)
+        elif self.family == 'S':  # polybezier (8-16 parameter)
+            self.loop = Sloop(npoints=npoints)
+        else:
+            errtxt = '\n'
+            errtxt += 'loop type \''+self.family+'\'\n'
+            errtxt += 'select from [A,D,S]\n'
+            raise ValueError(errtxt)
+        
+    def read_loop_dict(self):
+        try:
+            with open(self.dataname,'rb') as input:
+                self.loop_dict = pickle.load(input)
+        except:
+            print('file '+self.dataname+' not found')
+            print('initializing new loop_dict')
+            self.loop_dict = {}
+        self.frame_data()
+            
+    def frame_data(self):
+        self.data_frame = {}   
+        for family in self.loop_dict:
+            data = {}
+            for nTF in self.loop_dict[family]:
+                data[nTF] = {}
+                for obj in self.loop_dict[family][nTF]:
+                    data[nTF][obj] = True
+            self.data_frame[family] = pd.DataFrame(data)
+ 
+    def load(self,nTF='unset',objective='unset'):
+        if objective in self.loop_dict.get(self.family,{}).get(nTF,{}):
+            loop_dict = self.loop_dict[self.family][nTF][objective]
+            for key in loop_dict:
+                if hasattr(self.loop,key):
+                    setattr(self.loop,key,loop_dict[key])
+        else:
+            errtxt = '\n'
+            errtxt += 'data not found:\n'
+            errtxt += 'loop type {}, nTF {}, objective {}\n'.\
+            format(self.family,nTF,objective)
+            errtxt += self.avalible_data(verbose=False)
+            raise ValueError(errtxt)
+     
+    def avalible_data(self,verbose=True):
+        if len(self.loop_dict) == 0:
+            datatxt = 'no data avalible'
+        else:
+            datatxt ='\n{}: data avalible [objective,nTF]'.format(self.config)
+            for family in self.data_frame:
+                datatxt += '\n\nloop type {}:\n{}'.\
+                format(family,self.data_frame[family].fillna(''))
+        if verbose:
+            print(datatxt)
+        else:
+            return datatxt
+            
+    def clear_data(self):
+        with open(self.dataname, 'wb') as output:
+            self.loop_dict = {}
+            pickle.dump(self.loop_dict,output,-1)
+        
+    def write(self,nTF='unset',objective='unset'):  # write xo and oppvar to file
+        if self.family in self.loop_dict:
+            if nTF not in self.loop_dict[self.family]:
+                self.loop_dict[self.family][nTF] = {objective:[]}
+        else:
+            self.loop_dict[self.family] = {nTF:{objective:[]}}
+        cdict = {}
+        for key in ['xo','oppvar','family','symetric','tension','limits']:
+            if hasattr(self.loop,key):
+                cdict[key] = getattr(self.loop,key)
+        self.loop_dict[self.family][nTF][objective] = cdict
+        with open(self.dataname, 'wb') as output:
+            pickle.dump(self.loop_dict,output,-1)
+        self.frame_data()
+        
+    def write_SALOME(self):
+        self.loop.draw()
+        with open('../Data/test_sal.vi','w') as f:
+            json.dump(self.loop.p,f)
+            
 
-    '''
-    coil = Dcoil()
-    x = coil.draw()
-    pl.plot(x['r'],x['z'])
-    '''
-    pl.axis('equal')
+if __name__ is '__main__':  # plot loop classes
+    #loop = Aloop()
+    #x = loop.plot()
+    
+    loop = Sloop(limits=False,symetric=False,tension='single')
+    loop.set_tension('full')
+    #x = loop.plot({'l2':1.5})
+    #loop.draw()
+    
+    profile = Profile('DEMO_SN',family='S',part='TF',nTF=18,objective='L')
+    profile.write_SALOME()
+    
+    with open('../Data/test_sal.vi','r') as f:
+        p = json.load(f)
+    
+
 

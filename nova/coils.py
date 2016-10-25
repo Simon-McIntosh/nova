@@ -1,22 +1,17 @@
 import numpy as np
 import pylab as pl
 import scipy as sp
-import pickle
 from scipy.interpolate import interp1d
 import scipy.optimize as op
 from itertools import cycle,count
 import seaborn as sns
 import matplotlib
 import collections
-from amigo.geom import Loop
 import amigo.geom as geom
-import nova.geqdsk
-from nova.inductance import neumann
-from nova.loops import Acoil,Dcoil,Scoil
-from nova.TF.ripple import ripple
-from nova.config import Setup,trim_dir
+from nova.loops import Profile
+import json
+
 colors = sns.color_palette('Set2',12)
-import pandas as pd
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
     
 class PF(object):
@@ -33,7 +28,7 @@ class PF(object):
                 name = 'Coil{:1.0f}'.format(next(nC))
                 self.coil[name] = {'r':r,'z':z,'dr':dr,'dz':dz,'I':I,
                                    'rc':np.sqrt(dr**2+dz**2)/2}
-                if i>=10:
+                if eqdsk['ncoil'] > 100 and i>=eqdsk['ncoil']-101:
                     print('exit set_coil loop - coils')
                     break
          
@@ -59,7 +54,7 @@ class PF(object):
         #    color = coil_color  # color itterator
         
         #color = sns.color_palette('Set3',300)
-        r_med = sp.median([coils[coil]['r'] for coil in coils])
+        rmin = np.min([coils[coil]['r'] for coil in coils])
         for i,name in enumerate(coils.keys()):
             coil = coils[name]
             if label and current:
@@ -86,7 +81,7 @@ class PF(object):
                 pl.text(r,z+zshift,name.replace('Coil',''),fontsize=fs*0.6,
                         ha='center',va='center',color=[0.25,0.25,0.25])
             if current: 
-                if r < r_med:
+                if r < rmin+1e-3:
                     drs = -2/3*dr
                     ha = 'right'
                 else:
@@ -160,114 +155,31 @@ class PF(object):
 
 class TF(object):
     
-    def __init__(self,config,coil_type='S',npoints=100,**kwargs):
-        self.x = {}
-        for loop in ['in','wp_in','cl','wp_out','out','nose','loop']:
-            self.x[loop] = {'r':[],'z':[]}
-        self.npoints = npoints  # number of loop divisions
-        self.cross_section()
-        self.config = config  # save file prefix
-        self.load_coil(coil_type)  # initalize coil object
-        self.get_loops(self.coil.draw())  # initalize loops
-        data_dir = trim_dir('../../Data/')
-        self.dataname = data_dir+self.config+'_TF.pkl'
-        self.read_coil_dict()
-        try:  # try to load coil using kwargs or unset data
-            self.load(nTF=kwargs.get('nTF','unset'),
-                    objective=kwargs.get('objective','unset'))
-        except:
-            pass
-        
-    def read_coil_dict(self):
-        try:
-            with open(self.dataname,'rb') as input:
-                self.coil_dict = pickle.load(input)
-        except:
-            print('file '+self.dataname+' not found')
-            print('initializing new coil_dict')
-            self.coil_dict = {}
-        self.frame_data()
-            
-    def frame_data(self):
-        self.data_frame = {}   
-        for coil_type in self.coil_dict:
-            data = {}
-            for nTF in self.coil_dict[coil_type]:
-                data[nTF] = {}
-                for obj in self.coil_dict[coil_type][nTF]:
-                    data[nTF][obj] = True
-            self.data_frame[coil_type] = pd.DataFrame(data)
- 
-    def load(self,nTF='unset',objective='unset'):
-        if objective in self.coil_dict.get(self.coil_type,{}).get(nTF,{}):
-            coil_dict = self.coil_dict[self.coil_type][nTF][objective]
-            for key in coil_dict:
-                if hasattr(self.coil,key):
-                    setattr(self.coil,key,coil_dict[key])
-        else:
-            errtxt = '\n'
-            errtxt += 'data not found:\n'
-            errtxt += 'coil type {}, nTF {}, objective {}\n'.\
-            format(self.coil_type,nTF,objective)
-            errtxt += self.avalible_data(verbose=False)
-            raise ValueError(errtxt)
-        self.get_loops(self.coil.draw())
-        self.nTF = nTF
-        
-    def avalible_data(self,verbose=True):
-        if len(self.coil_dict) == 0:
-            datatxt = 'no data avalible'
-        else:
-            datatxt ='\n{}: data avalible [objective,nTF]'.format(self.config)
-            for coil_type in self.data_frame:
-                datatxt += '\n\ncoil type {}:\n{}'.\
-                format(coil_type,self.data_frame[coil_type].fillna(''))
-        if verbose:
-            print(datatxt)
-        else:
-            return datatxt
-            
-    def clear_data(self):
-        with open(self.dataname, 'wb') as output:
-            self.coil_dict = {}
-            pickle.dump(self.coil_dict,output,-1)
-        
-    def write(self,nTF='unset',objective='unset'):  # write xo and oppvar to fil
-        if self.coil_type in self.coil_dict:
-            if nTF not in self.coil_dict[self.coil_type]:
-                self.coil_dict[self.coil_type][nTF] = {objective:[]}
-        else:
-            self.coil_dict[self.coil_type] = {nTF:{objective:[]}}
-        cdict = {}
-        for key in ['xo','oppvar','coil_type','symetric','tension','limits']:
-            if hasattr(self.coil,key):
-                cdict[key] = getattr(self.coil,key)
-        self.coil_dict[self.coil_type][nTF][objective] = cdict
-        with open(self.dataname, 'wb') as output:
-            pickle.dump(self.coil_dict,output,-1)
-        self.frame_data()
+    def __init__(self,profile):
+        self.cross_section()  # coil cross-sections
+        self.initalise_loops()  # initalise loop family
+        self.profile = profile  # loop profile
+        self.get_loops(profile.loop.draw())
 
     def cross_section(self):
         self.section = {}
+        nTFo = 18
         self.section['winding_pack'] = {'width':0.625,'depth':1.243}
         self.section['case'] = {'side':0.1,'nose':0.51,'inboard':0.04,
                                 'outboard':0.19,'external':0.225}
         self.rc = self.section['winding_pack']['width']/2
-        
-    def load_coil(self,coil_type):
-        self.coil_type = coil_type  # A==arc, D==Princton-D, S==spline
-        if self.coil_type == 'A':  # tripple arc (5-7 parameter)
-            self.coil = Acoil(npoints=self.npoints)
-        elif self.coil_type == 'D':  # princton D (3 parameter)
-            self.coil = Dcoil(npoints=self.npoints)
-        elif self.coil_type == 'S':  # polybezier (8-16 parameter)
-            self.coil = Scoil(npoints=self.npoints)
-        else:
-            errtxt = '\n'
-            errtxt += 'coil type \''+self.coil_type+'\'\n'
-            errtxt += 'select from [A,D,S]\n'
-            raise ValueError(errtxt)
-     
+
+        #theta_space = 2*np.pi-
+
+    def write_cross_section(self):
+        with open('../Data/CS_sal.vi','w') as f:
+            json.dump(self.section,f)
+
+    def initalise_loops(self):
+        self.x = {}
+        for loop in ['in','wp_in','cl','wp_out','out','nose','loop']:
+            self.x[loop] = {'r':[],'z':[]}
+
     def transition_index(self,r_in,z_in,eps=1e-6):
         npoints = len(r_in)
         r_cl = r_in[0]+eps
@@ -314,7 +226,7 @@ class TF(object):
         r,z = self.x['cl']['r'],self.x['cl']['z']
         index = self.transition_index(r,z)
         self.fun = {'in':{},'out':{}}
-        for side,dr in zip(['in','out'],[0,0.75]):  # inner/outer coil offset
+        for side,dr in zip(['in','out'],[0,0.75]):  # inner/outer loop offset
             r,z = self.x[side]['r'],self.x[side]['z']
             r = r[index['lower']+1:index['upper']]
             z = z[index['lower']+1:index['upper']]
@@ -368,46 +280,52 @@ class TF(object):
         pl.axis('equal')
         pl.axis('off')
 
-        '''
-        if write:
-            with open('../Data/'+self.dataname+'_TFcoil.txt','w') as f:
-                f.write('Rin m\t\tZin m\t\tRout m\t\tZout m\n')
-                for rin,zin,rout,zout in zip(self.TFinR,self.TFinZ,
-                                             self.TFoutR,self.TFoutZ):
-                    f.write('{:1.6f}\t{:1.6f}\t{:1.6f}\t{:1.6f}\n'.format(\
-                    rin,zin,rout,zout))            
-        '''
     def support(self,**kwargs):
         self.rzGet()
         self.fill(**kwargs)
-        
+    '''    
     def volume_ratio(self,Rp,Zp):
         self.Pvol = loop_vol(Rp,Zp,plot=False)
         Rtf,Ztf,L = self.drawTF(self.xCoil, npoints=300)
         self.TFvol = loop_vol(Rtf,Ztf,plot=False)
         self.Rvol = self.TFvol/self.Pvol
-        
+       
     def length_ratio(self):
         self.Plength = self.length(self.Rp,self.Zp,norm=False)[-1]
         Rtf,Ztf,L = self.drawTF(self.xCoil, npoints=300)
         R,Z = geom.offset(Rtf,Ztf,self.dRsteel+self.dRcoil/2)
         self.TFlength = self.length(R,Z,norm=False)[-1]
         self.Rlength = self.TFlength/self.Plength
-        
+    '''    
 if __name__ is '__main__':  # test functions
 
-    config = 'SXex'
-    tf = TF(config,coil_type='S',npoints=100)
-    
+    config = 'DN'
+    setup = Setup(config)
 
-    tf.coil.plot({'dz':-2.5})
-    tf.write()
+    sf = SF(setup.filename)
+    pf = PF(sf.eqdsk)
+    pf.plot(coils=pf.coil,label=True,plasma=False,current=True) 
+    levels = sf.contour()
     
-
-    tf.avalible_data()
+    #self.get_loops(self.loop.draw())  # initalize loops
+    
+    profile = Profile(config,family='S',part='TF')
+    tf = TF(profile)
+    
+    tf.write_cross_section()
     
     
-    #tf.coil.set_input(inputs={'l':1.5})
+    #self.get_loops(self.loop.draw())
+    #self.nTF = nTF
+    
+    profile.loop.plot({'dz':0})
+    
+    profile.write()
+    
+    profile.avalible_data()
+    
+    
+    #tf.loop.set_input(inputs={'l':1.5})
     #tf.write(nTF=18,objective='E')
     
     #tf.load(nTF=18,objective='L')

@@ -688,6 +688,10 @@ class FE(object):
         pl.figure(figsize=(10,5))
         ax1 = pl.subplot(121)
         ax2 = pl.subplot(122, sharey=ax1)
+        ax1.set_aspect('equal')
+        ax1.set_axis_off()
+        ax2.set_aspect('equal')
+        ax2.set_axis_off()
         ax1.plot(self.X[:,0],self.X[:,1],'o',markersize=ms,
                 color=0.75*np.ones(3))
         ax2.plot(self.X[:,2],self.X[:,1],'o',markersize=ms,
@@ -708,8 +712,7 @@ class FE(object):
                 ax2.arrow(X[2]+dz,X[1]+dy,
                           scale*self.Fo[j+2],scale*self.Fo[j+1],
                           head_width=0.15,head_length=0.3) 
-        ax1.axis('equal')
-        ax2.axis('equal')
+
 
     def plot_nodes(self):
         ms = 5
@@ -739,7 +742,8 @@ class FE(object):
     def plot_curvature(self):
         pl.figure(figsize=([4,3*12/16]))
         text = linelabel(value='',postfix='',Ndiv=5) 
-        for i,(part,c) in enumerate(zip(self.part,color)):
+        part = ['loop','nose']  # self.part
+        for i,(part,c) in enumerate(zip(part,color)):
             pl.plot(self.part[part]['l'],
                     self.part[part]['d2u'][:,2],'--',color=c)
             pl.plot(self.part[part]['l'],

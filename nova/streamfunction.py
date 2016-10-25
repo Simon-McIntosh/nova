@@ -18,7 +18,7 @@ class SF(object):
         self.set_kwargs(kwargs)
         self.eqdsk = nova.geqdsk.read(self.filename)
         self.normalise()  # unit normalisation
-        self.set_plasma(self.eqdsk,contour=False)
+        self.set_plasma(self.eqdsk)
         self.set_boundary(self.eqdsk['rbdry'],self.eqdsk['zbdry'])
         self.set_flux(self.eqdsk)  # calculate flux profiles
         self.set_TF(self.eqdsk)  
@@ -30,9 +30,9 @@ class SF(object):
         self.get_Xpsi()
         self.get_Mpsi()
         self.set_contour()  # set cfeild
-        self.get_sol_psi(dSOL=3e-3,Nsol=15,verbose=False)
-        self.rcirc = 0.3*(self.Mpoint[1]-self.Xpoint[1])  # leg search radius
-        self.drcirc = 0.1*self.rcirc  # leg search width
+        #self.get_sol_psi(dSOL=3e-3,Nsol=15,verbose=False)
+        self.rcirc = 0.1*(self.Mpoint[1]-self.Xpoint[1])  # leg search radius
+        self.drcirc = 0.25*self.rcirc  # leg search width
         self.xlim = self.eqdsk['xlim']
         self.ylim = self.eqdsk['ylim']
         self.nlim = self.eqdsk['nlim']
@@ -46,7 +46,7 @@ class SF(object):
         if 'Fiesta' in self.eqdsk['name'] or 'Nova' in self.eqdsk['name']\
         or 'disr' in self.eqdsk['name']:
             self.norm = 1
-            self.eqdsk['cpasma'] *= -1  # check NOVA output - CREATE-NL version? 
+            #self.eqdsk['cpasma'] *= -1  # check NOVA output - CREATE-NL version? 
         else:  # CREATE
             self.eqdsk['cpasma'] *= -1
             self.norm = 2*np.pi
@@ -62,12 +62,17 @@ class SF(object):
             self.r = self.r[i:]
             self.psi = self.psi[i:,:]
      
-    def eqwrite(self,prefix='Nova',config=''):
+    def eqwrite(self,pf,CREATE=False,prefix='Nova',config=''):
         if len(config) > 0: 
             name = prefix+'_'+config
         else:
             name = prefix
-        nc,rc,zc,drc,dzc,Ic = self.unpack_coils()[:-1]
+        if CREATE:  # save with create units (Webber/loop, negated Iplasma)
+            name += '_CREATE_units'
+            norm,Ip_dir = 2*np.pi,-1  # reformat: webber/loop, reverse plasma current
+        else:
+            norm,Ip_dir = 1,1  # no change
+        nc,rc,zc,drc,dzc,Ic = pf.unpack_coils()[:-1]
         psi_ff = np.linspace(0,1,self.nr)
         pad = np.zeros(self.nr)
         eq = {'name':name,
@@ -81,20 +86,20 @@ class SF(object):
               'zmid':self.z[0]+(self.z[-1]-self.z[0])/2,  # Z at the middle of the domain
               'rmagx':self.Mpoint[0],  # Location of magnetic axis
               'zmagx':self.Mpoint[1],  # Location of magnetic axis
-              'simagx':self.Mpsi,  # Poloidal flux at the axis (Weber / rad)
-              'sibdry':self.Xpsi,  # Poloidal flux at plasma boundary (Weber / rad)
-              'cpasma':self.eqdsk['cpasma'], 
-              'psi':np.transpose(self.psi).reshape((-1,)),  # Poloidal flux in Weber/rad on grid points
+              'simagx':float(self.Mpsi)*norm,  # Poloidal flux at the axis (Weber / rad)
+              'sibdry':self.Xpsi*norm,  # Poloidal flux at plasma boundary (Weber / rad)
+              'cpasma':self.eqdsk['cpasma']*Ip_dir, 
+              'psi':np.transpose(self.psi).reshape((-1,))*norm,  # Poloidal flux in Weber/rad on grid points
               'fpol':self.Fpsi(psi_ff),  # Poloidal current function on uniform flux grid
-              'ffprim':self.b_scale*self.FFprime(psi_ff),  # "FF'(psi) in (mT)^2/(Weber/rad) on uniform flux grid"
-              'pprime':self.b_scale*self.Pprime(psi_ff),  # "P'(psi) in (N/m2)/(Weber/rad) on uniform flux grid"
+              'ffprim':self.b_scale*self.FFprime(psi_ff)/norm,  # "FF'(psi) in (mT)^2/(Weber/rad) on uniform flux grid"
+              'pprime':self.b_scale*self.Pprime(psi_ff)/norm,  # "P'(psi) in (N/m2)/(Weber/rad) on uniform flux grid"
               'pressure':pad,  # Plasma pressure in N/m^2 on uniform flux grid
               'qpsi':pad,  # q values on uniform flux grid
               'nbdry':self.nbdry,'rbdry':self.rbdry, 'zbdry':self.zbdry, # Plasma boundary
               'nlim':self.nlim,'xlim':self.xlim,'ylim':self.ylim,  # first wall
               'ncoil':nc,'rc':rc,'zc':zc,'drc':drc,'dzc':dzc,'Ic':Ic} # coils
-        print('writing eqdsk','./plot_data/'+config+'.eqdsk')
-        self.eqdsk.write('./plot_data/'+config+'.eqdsk',eq)
+        print('writing eqdsk','./Data/'+config+'.eqdsk')
+        nova.geqdsk.write('../../Data/'+config+'.eqdsk',eq)
         
     def write_flux(self):
         psi_norm = np.linspace(0,1,self.nr)
@@ -132,6 +137,7 @@ class SF(object):
         return L
         
     def set_boundary(self,r,z,n=5e2): 
+        self.nbdry = int(n)
         self.rbdry,self.zbdry = geom.rzSLine(r,z,npoints=n)
 
     def set_current(self,eqdsk):
@@ -139,7 +145,7 @@ class SF(object):
             setattr(self,key,eqdsk[key])
             
     def update_plasma(self,eq):  # update requres full separatrix
-        for attr in ['Bspline','Pspline','Xpsi','Mpsi','Br','Bz']:
+        for attr in ['Bspline','Pspline','Xpsi','Mpsi','Br','Bz','LFPr']:
             if hasattr(self, attr):
                 delattr(self,attr)
         self.set_plasma(eq)
@@ -159,18 +165,14 @@ class SF(object):
         #i = np.argmax(psi)
         #self.Xpoint = np.array([self.xlim[i],self.ylim[i]])
         
-    def set_plasma(self,eq,contour=False):
+    def set_plasma(self,eq):
         for key in ['r','z','psi']: 
             if key in eq.keys():
                 setattr(self,key,eq[key])
         self.trim_r()
         self.space()       
         self.Bfeild()
-        if contour:
-            self.get_Xpsi()
-            self.get_Mpsi()
-            self.set_contour()  # calculate cfeild
-     
+
     def upsample(self,sample):
         if sample>1:
             '''
@@ -203,7 +205,7 @@ class SF(object):
         
     def Bpoint(self,point,check_bounds=False):  # magnetic feild at point
         feild = np.zeros(2)  # function re-name (was Bcoil)
-        if not hasattr(self, 'Bspline'):
+        if not hasattr(self,'Bspline'):
             self.Bspline = [[],[]]
             self.Bspline[0] = RectBivariateSpline(self.r,self.z,self.Br)
             self.Bspline[1] = RectBivariateSpline(self.r,self.z,self.Bz)
@@ -213,7 +215,6 @@ class SF(object):
             return inbound
         else:
             for i in range(2):
-                #feild[i] = self.Bspline[i](point[0],point[1])[0]
                 feild[i] = self.Bspline[i].ev(point[0],point[1])
             return feild
         
@@ -236,7 +237,8 @@ class SF(object):
                 boundary=True,**kwargs):
         alpha,lw = np.array([1,0.5]),lw*np.array([2.25,1.75]) 
         if boundary:
-            r,z = self.get_boundary(1-1e-2)
+            r,z = self.get_boundary(1-1e-3)
+            #pl.plot(r,z,linewidth=lw[0],color='k',alpha=0.25)
             self.set_boundary(r,z)
         if not hasattr(self,'Xpsi'):
             self.get_Xpsi()
@@ -371,11 +373,7 @@ class SF(object):
             self.Xloc = 'lower'
         else:
             self.Xloc = 'upper'
-        
         return (self.Xpsi,self.Xpoint)
-        
-    #def limit_Xpoint(self):
-    #    if 
    
     def getM(self,mo=None):
         if mo is None:
@@ -499,7 +497,6 @@ class SF(object):
     def sol(self,dr=3e-3,Nsol=15,plot=False,update=False,debug=False):  # dr [m]
         if update or not hasattr(self,'sol_psi') or dr > self.dSOL\
         or Nsol > self.Nsol: 
-            print('recalculate',dr)
             self.get_sol_psi(dSOL=dr,Nsol=Nsol)  # re-calculcate LFP
         elif (Nsol>0 and Nsol != self.Nsol) or \
         (dr>0 and dr != self.dSOL):  # update  
@@ -507,7 +504,7 @@ class SF(object):
             if Nsol>0: self.Nsol = Nsol
             Dsol = np.linspace(0,self.dSOL,self.Nsol)
             self.sol_psi = interp1d(self.Dsol,self.sol_psi)(Dsol)
-            self.Dsol = Dsol
+            self.Dsol = Dsol    
         contours = self.get_contour(self.sol_psi)    
         self.Rsol,self.Zsol = self.pick_contour(contours,Xpoint=True,
                                                 Midplane=False,Plasma=False)

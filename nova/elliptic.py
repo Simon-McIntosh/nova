@@ -175,8 +175,9 @@ class EQ(object):
                           
     def get_Vcoil(self):
         ex_coil = []
+        rmin = np.min([self.pf.coil[name]['r'] for name in self.pf.coil])
         for name in self.pf.coil.keys():
-            if 'plasma' not in name:  
+            if self.pf.coil[name]['r'] > rmin+1e-3:  # exclude CS  
                 ex_coil.append(name)
         Nex = len(ex_coil)
         self.Vcoil = np.zeros((Nex,),dtype=[('name','S10'),('value','float'),
@@ -309,7 +310,7 @@ class EQ(object):
     def set_plasma_coil(self,delta=0):
         self.plasma_coil = {} 
         if delta > 0:
-            rbdry,zbdry = self.sf.get_boundary(alpha=1-1e-3)
+            rbdry,zbdry = self.sf.get_boundary(alpha=1-1e-2)  # 1e-3 (DN)
             lbdry = self.sf.length(rbdry,zbdry)
             rc = np.mean([rbdry.min(),rbdry.max()])
             zc = np.mean([zbdry.min(),zbdry.max()])
@@ -380,14 +381,7 @@ class EQ(object):
     def solve(self):
         psi = spsolve(self.A,self.b)
         return np.reshape(psi,(self.nr,self.nz))
-        
-    def damp_psi(self,alpha=0.95):
-        if hasattr(self,'psio'):
-            self.psio = alpha*self.psi + (1-alpha)*self.psio 
-        else:
-            self.psio = self.psi
-        self.psi = self.psio 
-          
+             
     def run(self,update=True,verbose=True):
         self.resetBC()
         self.coreBC(update=update)
@@ -397,13 +391,15 @@ class EQ(object):
             
     def set_eq_psi(self,verbose=True):  # set psi from eq
         eqdsk = {'r':self.r,'z':self.z,'psi':self.psi}
+        self.sf.update_plasma(eqdsk)  # include boundary update
+        '''
         try:
-            self.sf.update_plasma(eqdsk)  # include boundary update
+            
         except:
             if verbose:
                 print('boundary update failed')
-            self.sf.set_plasma(eqdsk,contour=True)
-
+            self.sf.set_plasma(eqdsk)
+        '''
     
     def plasma(self):
         self.resetBC()
@@ -450,7 +446,7 @@ class EQ(object):
             else:
                 Mflag = False
             self.Ic = 0  # control current
-            for index,sign in zip([0],[1]):  # stability coil pair [0,-1],[1,-1]
+            for index,sign in zip([0,-1],[1,-1]):  # stability coil pair [0,-1],[1,-1]
                 gain = 1e5/self.Vcoil['value'][index]
                 self.Vcoil['Ip'][index] = gain*kp*self.Zerr[i]  # proportional
                 self.Vcoil['Ii'][index] += gain*ki*self.Zerr[i]  # intergral
@@ -461,7 +457,9 @@ class EQ(object):
         self.set_plasma_coil()
         return self.Ic
         
-    def gen_opp(self,z=0,dz=0.3,Zerr=5e-3,Nmax=100):
+    def gen_opp(self,z=None,dz=0.3,Zerr=5e-3,Nmax=100):
+        if z == None:  # sead plasma magnetic centre vertical target
+            z = self.sf.Mpoint[1]
         f,zt,dzdf= np.zeros(Nmax),np.zeros(Nmax),-2.2e-7
         zt[0] = z
         self.get_Vcoil()  # or set_Vcoil for virtual pair

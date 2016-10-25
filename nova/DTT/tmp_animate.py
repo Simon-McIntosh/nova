@@ -1,7 +1,8 @@
 import pylab as pl
 import numpy as np
 from matplotlib import animation
-from shelf import PKL
+from nova.shelf import PKL
+from nova.coils import TF
 import pickle
 import matplotlib.animation as manimation
 
@@ -9,65 +10,59 @@ FFMpegWriter = manimation.writers['ffmpeg']
 writer = FFMpegWriter(fps=5, bitrate=1000)
 
 import seaborn as sns
-rc = {'figure.figsize':[15,15*7.5/15],'savefig.dpi':50, #*12/16
+rc = {'figure.figsize':[12,5],'savefig.dpi':175, #*12/16
       'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
       'lines.linewidth':1.75}
 sns.set(context='poster',style='white',font='sans-serif',palette='Set2',
         font_scale=1,rc=rc)
 color = sns.color_palette('Set2')
-from addtext import linelabel
+from amigo.addtext import linelabel
 
 from itertools import cycle
 Color = cycle(sns.color_palette('Set2'))
-from radial_build import RB
-from eqConfig import Config
+from nova.radial_build import RB
+tf = TF('DEMO_SN',coil_type='S',nTF=16,objective='L')
+#from eqConfig import Config
+#conf = Config('SXex')
 
-conf = Config('SXex')
-
-pkl = PKL('moveSX_dev2')
+pkl = PKL('DEMO_SN54')
 sf,eq,inv = pkl.fetch(['sf','eq','inv'])
 
-sf.conf = conf
-conf.TF(sf)
+#sf.conf = conf
+#conf.TF(sf)
 
-fig,ax = pl.subplots()
+fig,ax = pl.subplots(figsize=(10,5))
 
-ax1 = pl.subplot2grid((2,5),(0,0),rowspan=2,colspan=2)
-ax2 = pl.subplot2grid((2,5),(0,2),colspan=3)
-ax3 = pl.subplot2grid((2,5),(1,2),colspan=3)
+ax1 = pl.subplot2grid((2,4),(0,0),rowspan=2,colspan=2)
+ax2 = pl.subplot2grid((2,4),(0,2),colspan=3)
+ax3 = pl.subplot2grid((2,4),(1,2),colspan=3)
 
-'''
-pl.sca(ax1)
-pl.axis('equal')
-pl.axis('off')
-'''
 #cont = ax.contour(sf.r,sf.z,sf.psi.T,25)
 
 #pl.sca(ax2)
 
-Swing =  np.linspace(np.max(inv.Swing),np.min(inv.Swing),20)#-10
+Swing =  np.linspace(inv.swing['flux'][-1],inv.swing['flux'][0],20)#-20
 nSwing = len(Swing)
 nPF = len(inv.PF_coils)
-F = np.zeros((nPF,nSwing,2))
-I = np.zeros((nPF,nSwing))
+F = np.zeros((inv.nC,nSwing,2))
+I = np.zeros((inv.nC,nSwing))
 Fcs = np.zeros((nSwing,2))
 
+
 for j,swing in enumerate(Swing):
-    inv.swing_fix(swing)
+    inv.fix_flux(swing) 
     inv.solve_slsqp()
-    print(inv.Fsep*1e-6)
-    for i,name in enumerate(inv.PF_coils):
-        F[i,j,0] = inv.coil['active'][name]['Fr_sum']
-        F[i,j,1] = inv.coil['active'][name]['Fz_sum']
-        I[i,j] = inv.coil['active'][name]['I_sum']
-    Fcs[j,0] = inv.Fsep
-    Fcs[j,1] = inv.FzCS
+    Fcoil = inv.get_force()
+    
+    F[:,j] = Fcoil['F']
+    Fcs[j,0] = Fcoil['CS']['sep']
+    Fcs[j,1] = Fcoil['CS']['zsum']
 
 from eqConfig import Config
 conf = Config('SXex')
 
-conf.TF(sf)
-rb = RB(conf,sf,Np=150)
+#conf.TF(sf)
+#rb = RB(conf,sf,Np=150)
     
 # animation function
 def animate(swing): #,data,ax
@@ -75,36 +70,28 @@ def animate(swing): #,data,ax
     
     pl.sca(ax1)
     ax1.cla()
-    ax1.set_axis_off()
-    ax.set_xlim([2,18])
-    pl.axis('equal')
-    
-    #eq.plasma()
-    #inv.set_background()
-    #inv.get_weight()
+    #ax1.set_axis_off()
+    ax.set_ylim([3,14])
+    #pl.axis('equal')
 
-    inv.swing_fix(swing)
-    inv.plot_fix()
-    #pl.plot(eq.rbdry,eq.zbdry)
-    pl.plot(sf.rbdry,sf.zbdry)
+
+    inv.fix_flux(swing) 
     inv.solve_slsqp()
+    
+    print(inv.I[-3])
+    pl.plot(sf.rbdry,sf.zbdry)
+    tf.fill()
 
     #print(swing,sf.Xpsi,sf.Mpoint[1],inv.rms)
-    B = eq.Bfeild([inv.fix['r'][-1],inv.fix['z'][-1]])
-    arg = 180*np.arctan2(B[1],B[0])/np.pi
-    print('swing {:1.0f} arg {:1.2f} rms {:1.3f}'.format(swing,arg,inv.rms))
+    #B = eq.Bfeild([inv.fix['r'][-1],inv.fix['z'][-1]])
+    #arg = 180*np.arctan2(B[1],B[0])/np.pi
+    #print('swing {:1.0f} arg {:1.2f} rms {:1.3f}'.format(swing,arg,inv.rms))
 
     eq.run(update=False)
-    sf.sol(plot=True)
-    '''
-    #sf.Bsf()
-    '''
-    
-    sf.plot_coils(next(Color),coils=sf.coil,label=True,plasma=False,current=False) 
-    #sf.plot_coils(color[3],coils=eq.coil,label=False,plasma=False) 
-    
+    #sf.sol(plot=True)
+    #inv.eq.pf.plot(coils=inv.eq.pf.coil,label=False,plasma=False,current=False) 
+
     #inv.plot_force()
-    
     #eq.plasma(sep=False)
     #eq.plotb()
     sf.contour(levels=np.linspace(-150,150,60),Xnorm=False)
@@ -137,12 +124,12 @@ def animate(swing): #,data,ax
     ax2.cla()
     text = linelabel(Ndiv=10,value='',postfix='') 
     for i,name in enumerate(inv.PF_coils):
-        pl.plot(-2*np.pi*(Swing-Swing[0]),abs(F[i,:,1])*1e-6)
+        pl.plot(-2*np.pi*(Swing-Swing[0]),abs(F[i,:,1]))
         text.add(name)
         pl.plot(-2*np.pi*(swing*np.ones(2)-Swing[0]),[0,450],'k--',alpha=0.25)
-    pl.plot(-2*np.pi*(Swing-Swing[0]),Fcs[:,0]*1e-6)
+    pl.plot(-2*np.pi*(Swing-Swing[0]),Fcs[:,0])
     text.add('Fsep')
-    pl.plot(-2*np.pi*(Swing-Swing[0]),abs(Fcs[:,1])*1e-6)
+    pl.plot(-2*np.pi*(Swing-Swing[0]),abs(Fcs[:,1]))
     text.add('FzCS')
     pl.ylabel(r'$|Fz|$ MN')
     pl.ylim([0,450])
@@ -150,7 +137,7 @@ def animate(swing): #,data,ax
     #pl.xlabel(r'Swing Wb')
     sns.despine()
     text.plot()
-    pl.tight_layout()
+    #pl.tight_layout()
     
     pl.sca(ax3)
     ax3.cla()
@@ -166,7 +153,7 @@ def animate(swing): #,data,ax
     text.plot()
     #pl.tight_layout()
     
-with writer.saving(fig,'../Figs/SX_swing.wmv',100):
+with writer.saving(fig,'../../Figs/SN_swing.wmv',100):
     for s in Swing: #inv.log['position_iter'][-1]
         animate(s)
         writer.grab_frame()

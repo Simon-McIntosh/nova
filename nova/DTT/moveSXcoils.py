@@ -31,10 +31,10 @@ pf = PF(sf.eqdsk)
 
 tf = TF(config,coil_type='S')
 
-eq = EQ(sf,pf,dCoil=2.0,sigma=0,boundary=sf.get_sep(expand=0.5),n=2e3) 
-eq.get_plasma_coil()
-eq.run(update=False)
-#eq.gen_opp(sf.Mpoint[1])
+eq = EQ(sf,pf,dCoil=2.0,sigma=0,boundary=sf.get_sep(expand=0.5),n=5e3) 
+#eq.get_plasma_coil()
+#eq.run(update=False)
+eq.gen_opp()
 
 #rb.firstwall(calc=False,plot=True,debug=False)
 
@@ -43,11 +43,9 @@ inv = INV(sf,eq,tf)
 
 
 Lpf = inv.grid_PF(nPF=5)
-Lcs = inv.grid_CS(nCS=4,Zbound=[-12,8],gap=0.1)
+Lcs = inv.grid_CS(nCS=3,Zbound=[-12,8],gap=0.1)
 Lo = np.append(Lpf,Lcs)
 inv.update_coils()
-
-#inv.remove_active(Clist=inv.CS_coils)
 
 inv.fit_PF(offset=0.3)  # fit PF coils to TF
 inv.fix_boundary_psi(N=31,alpha=1-1e-4,factor=1)  # add boundary points
@@ -60,17 +58,17 @@ target = (R,arg)
 inv.add_alpha(1,factor=1,polar=target)  # X-point psi
 inv.add_B(0,[-15],factor=1,polar=target)  # X-point feild
 
-inv.set_swing(centre=15)
-inv.update_limits(LCS=[-12,8])
+inv.set_swing()
+inv.update_limits(LCS=[-12,14])
 Lo = inv.optimize(Lo)
 
 inv.fix_flux(inv.swing['flux'][0])
 inv.solve_slsqp()
 
-eq = EQ(sf,pf,dCoil=2,sigma=0,boundary=tf.get_loop(expand=0),n=5e3)
+eq = EQ(sf,pf,dCoil=2,sigma=0,boundary=tf.get_loop(expand=0),n=2e4)
 
 eq.get_Vcoil() 
-eq.gen_opp(sf.Mpoint[1])
+eq.gen_opp()
 sf.contour()
 
 tf.fill()

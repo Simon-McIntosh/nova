@@ -13,15 +13,17 @@ from time import time
 from nova import loops
 import scipy.optimize as op
 from amigo.addtext import linelabel
+from nova.loops import Profile
 
-config = 'SXex'
+config = 'SN'
 setup = Setup(config)
 
 sf = SF(setup.filename)
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
 
-tf = TF(config,coil_type='S')
+profile = Profile(config,family='S',part='TF',nTF=18,objective='L')
+tf = TF(profile)
 
 eq = EQ(sf,pf,dCoil=2.5,sigma=0,boundary=sf.get_sep(expand=0.5),n=5e2) 
 eq.get_plasma_coil()
@@ -62,10 +64,10 @@ inv.I -= 0.05
 
 inv.get_force()
 
-'''
-jac_approx = op.approx_fprime(inv.I,inv.set_force,eps)
-print(jac_approx)
-print(inv.set_force(inv.I,grad=True))
+
+#jac_approx = op.approx_fprime(inv.I,inv.set_force,eps)
+#print(jac_approx)
+#print(inv.set_force(inv.I,grad=True))
 
 
 #jac_approx = op.approx_fprime(inv.I.reshape(-1),inv.get_r,eps)
@@ -87,8 +89,23 @@ inv.initialize_log()
 inv.set_Lo(Lo)  # set position bounds
 Lnorm = loops.normalize_variables(inv.Lo)
 
-print('L grad',op.approx_fprime(Lnorm,inv.update_position,1e-6))
+inv.update_position(Lnorm)
+
+for name in inv.PF_coils:
+    print('dA {:1.4f}'.format(pf.coil[name]['dr']*pf.coil[name]['dz']))
+
 print('L grad2',op.approx_fprime(Lnorm,inv.update_position,1e-6))
+
+for name in inv.PF_coils:
+    print('dA {:1.4f}'.format(pf.coil[name]['dr']*pf.coil[name]['dz']))
+    
+print('L grad',op.approx_fprime(Lnorm,inv.update_position,1e-6))
+
+for name in inv.PF_coils:
+    print('dA {:1.4f}'.format(pf.coil[name]['dr']*pf.coil[name]['dz']))
+    
+print('L grad3',op.approx_fprime(Lnorm,inv.update_position,1e-6))
+
 
 Neps = 7
 jac = np.zeros((Neps,inv.nL))
@@ -97,6 +114,7 @@ eps = 10**np.linspace(-8,-2,Neps)
 
 for i,e in enumerate(eps):
     #j1[i] = op.approx_fprime(alpha,inv.get_rms,e)[j] 
+    inv.update_position(Lnorm)
     jac[i,:] = op.approx_fprime(Lnorm,inv.update_position,e)
 
 text = linelabel(Ndiv=30,value='')
@@ -110,7 +128,6 @@ text.plot()
 
 print('L grad',op.approx_fprime(Lnorm,inv.update_position,1e-6))
 
-'''
 
 
 

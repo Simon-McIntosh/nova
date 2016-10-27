@@ -23,43 +23,33 @@ sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
 Color = cycle(sns.color_palette('Set2'))
 
 pkl = PKL('DEMO_SN54')
+nTF = 12
 
-config = 'DEMO_SN'
-setup = Setup(config)
+config = {'TF':'SN','eq':'DEMO_SN'}
+setup = Setup(config['eq'])
 sf = SF(setup.filename)
 
-sf.contour()
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
-tf = TF(Profile(config,family='S',part='TF',nTF=16,objective='L'))
+tf = TF(Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L'))
 
-eq = EQ(sf,pf,dCoil=2.0,sigma=0,boundary=sf.get_sep(expand=0.5),n=1e4) 
-#eq.get_plasma_coil()
-#eq.run(update=False)
+eq = EQ(sf,pf,dCoil=2.0,sigma=0,boundary=sf.get_sep(expand=1.5),n=1e4) 
 eq.gen_opp()
-#rb.firstwall(calc=False,plot=True,debug=False)
+
 
 inv = INV(sf,eq,tf)
 Lpf = inv.grid_PF(nPF=3)
-Lcs = inv.grid_CS(nCS=3,Zbound=[-12,8],gap=0.1)
+Lcs = inv.grid_CS(nCS=3,Zbound=[-8.2,11],gap=0.1)
 Lo = np.append(Lpf,Lcs)
 inv.update_coils()
 
-#inv.remove_active(Clist=inv.CS_coils)
-
 inv.fit_PF(offset=0.3)  # fit PF coils to TF
 inv.fix_boundary_psi(N=25,alpha=1-1e-4,factor=1)  # add boundary points
-#inv.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary points
+inv.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary points
 inv.add_null(factor=1,point=sf.Xpoint)
-
-#Rex,arg = 1.5,40
-#R = sf.Xpoint[0]*(Rex-1)/np.sin(arg*np.pi/180)
-#target = (R,arg)
-#inv.add_alpha(1,factor=1,polar=target)  # X-point psi
-#inv.add_B(0,[-15],factor=1,polar=target)  # X-point feild
-         
+        
 inv.set_swing()
-inv.update_limits(LCS=[-12,14])
+inv.update_limits(LCS=[-9.5,11])
 
 Lo = inv.optimize(Lo)
 
@@ -70,8 +60,8 @@ inv.solve_slsqp()
 
 eq.get_Vcoil() 
 eq.gen_opp()
+rb.firstwall(calc=True,plot=True,debug=False)
 sf.contour()
-
 
 pf.plot(coils=pf.coil,label=True,plasma=True,current=True) 
 sf.contour(boundary=False)
@@ -88,6 +78,8 @@ pl.tight_layout()
 loops.plot_variables(inv.Io,scale=1,postfix='MA')
 loops.plot_variables(inv.Lo,scale=1)
 pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
+
+sf.eqwrite(pf,config=config['TF']+'_{:d}PF_{:d}TF'.format(inv.nPF,nTF))
 
 '''
 

@@ -1,17 +1,16 @@
 import numpy as np
 import pylab as pl
-import scipy as sp
 from scipy.interpolate import interp1d
-import scipy.optimize as op
-from itertools import cycle,count
+from itertools import count
 import seaborn as sns
 import matplotlib
 import collections
 import amigo.geom as geom
 from nova.loops import Profile
-import json
-
-colors = sns.color_palette('Set2',12)
+from nova.config import Setup
+from nova.streamfunction import SF
+import nova.cross_coil as cc
+colors = sns.color_palette('Set3',12)
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
     
 class PF(object):
@@ -19,13 +18,21 @@ class PF(object):
         self.set_coils(eqdsk)
         
     def set_coils(self,eqdsk):
-        self.coil = {}
+        self.coil = collections.OrderedDict()
+        self.CS_coils = []
+        self.PF_coils = []
         if eqdsk['ncoil'] > 0: 
             nC = count(0)
+            CSindex = np.argmin(eqdsk['rc'])
+            rCS,drCS = eqdsk['rc'][CSindex],eqdsk['drc'][CSindex]
             for i,(r,z,dr,dz,I) in enumerate(zip(eqdsk['rc'],eqdsk['zc'],
                                                  eqdsk['drc'],eqdsk['dzc'],
                                                  eqdsk['Ic'])):
                 name = 'Coil{:1.0f}'.format(next(nC))
+                if r < rCS+drCS:
+                    self.CS_coils.append(name)
+                else:
+                    self.PF_coils.append(name)
                 self.coil[name] = {'r':r,'z':z,'dr':dr,'dz':dz,'I':I,
                                    'rc':np.sqrt(dr**2+dz**2)/2}
                 if eqdsk['ncoil'] > 100 and i>=eqdsk['ncoil']-101:
@@ -48,10 +55,10 @@ class PF(object):
         
     def plot_coil(self,coils,label=False,current=False,coil_color=None,fs=12,
                   alpha=1):
-        #if coil_color==None:
-        #    color = cycle(sns.color_palette('Set2',len(coils.keys())))
-        #else:
-        #    color = coil_color  # color itterator
+        if coil_color==None:
+            color = colors[1:]
+        else:
+            color = coil_color  # color itterator
         
         #color = sns.color_palette('Set3',300)
         rmin = np.min([coils[coil]['r'] for coil in coils])
@@ -73,7 +80,7 @@ class PF(object):
                 ic = int(name.split('_')[0].split('Coil')[-1])
             except:
                 ic = 0  # plasma coils
-            #coil_color = color[ic] 
+            coil_color = color[ic] 
             #coil_color = color[8]
             pl.fill(Rfill,Zfill,facecolor=coil_color,alpha=alpha,
                     edgecolor=edgecolor)
@@ -155,25 +162,32 @@ class PF(object):
 
 class TF(object):
     
-    def __init__(self,profile):
-        self.cross_section()  # coil cross-sections
+    def __init__(self,profile,**kwargs):
         self.initalise_loops()  # initalise loop family
         self.profile = profile  # loop profile
+        self.cross_section(**kwargs)  # coil cross-sections
         self.get_loops(profile.loop.draw())
 
-    def cross_section(self):
+    def cross_section(self,J=18.25,twall=0.05,**kwargs):  # MA/m2 TF current density
         self.section = {}
-        nTFo = 18
-        self.section['winding_pack'] = {'width':0.625,'depth':1.243}
         self.section['case'] = {'side':0.1,'nose':0.51,'inboard':0.04,
                                 'outboard':0.19,'external':0.225}
+        if 'sf' in kwargs and hasattr(self.profile,'nTF'):
+            sf = kwargs.get('sf')
+            BR = sf.eqdsk['bcentr']*sf.eqdsk['rcentr']
+            Iturn = 1e-6*abs(2*np.pi*BR/(self.profile.nTF*cc.mu_o))
+            Acs = Iturn/J
+            ro = np.min(self.profile.loop.draw()['r'])
+            rwp1 = ro-self.section['case']['inboard']
+            theta = np.pi/self.profile.nTF
+            rwall = twall/np.sin(theta)
+            depth = np.tan(theta)*(rwp1-rwall+\
+            np.sqrt((rwall-rwp1)**2-4*Acs/(2*np.tan(theta))))
+            width = Acs/depth
+            self.section['winding_pack'] = {'width':width,'depth':depth}
+        else:
+            self.section['winding_pack'] = {'width':0.625,'depth':1.243}
         self.rc = self.section['winding_pack']['width']/2
-
-        #theta_space = 2*np.pi-
-
-    def write_cross_section(self):
-        with open('../Data/CS_sal.vi','w') as f:
-            json.dump(self.section,f)
 
     def initalise_loops(self):
         self.x = {}
@@ -222,20 +236,21 @@ class TF(object):
         self.x['loop']['r'] = r[lower+1:upper]
         self.x['loop']['z'] = z[lower+1:upper]
 
-    def loop_interpolators(self,trim=[0,1]):  # outer loop coordinate interpolators
+    def loop_interpolators(self,trim=[0,1],offset=0.75):  # outer loop coordinate interpolators
         r,z = self.x['cl']['r'],self.x['cl']['z']
         index = self.transition_index(r,z)
         self.fun = {'in':{},'out':{}}
-        for side,dr in zip(['in','out'],[0,0.75]):  # inner/outer loop offset
+        for side,sign in zip(['in','out','cl'],[-1,1,1]):  # inner/outer loop offset
             r,z = self.x[side]['r'],self.x[side]['z']
             r = r[index['lower']+1:index['upper']]
             z = z[index['lower']+1:index['upper']]
-            r,z = geom.offset(r,z,dr)
+            r,z = geom.offset(r,z,sign*offset)
             l = geom.length(r,z)
             lt = np.linspace(trim[0],trim[1],int(np.diff(trim)*len(l)))
             r,z = interp1d(l,r)(lt),interp1d(l,z)(lt)
             l = np.linspace(0,1,len(r))
             self.fun[side] = {'r':IUS(l,r),'z':IUS(l,z)}
+            self.fun[side]['L'] = geom.length(r,z,norm=False)[-1]
             self.fun[side]['dr'] = self.fun[side]['r'].derivative(n=1)
             self.fun[side]['dz'] = self.fun[side]['r'].derivative(n=1)
      
@@ -298,22 +313,22 @@ class TF(object):
         self.Rlength = self.TFlength/self.Plength
     '''    
 if __name__ is '__main__':  # test functions
-
+    '''
     config = 'DN'
     setup = Setup(config)
-
     sf = SF(setup.filename)
     pf = PF(sf.eqdsk)
     pf.plot(coils=pf.coil,label=True,plasma=False,current=True) 
     levels = sf.contour()
-    
+    '''
     #self.get_loops(self.loop.draw())  # initalize loops
+    config = {'TF':'SN','eq':'SN_3PF_12TF'}
+    setup = Setup(config['eq'])
+    sf = SF(setup.filename)
+    profile = Profile(config['TF'],family='S',part='TF',nTF=12,obj='L')
+    tf = TF(profile,sf=sf)
     
-    profile = Profile(config,family='S',part='TF')
-    tf = TF(profile)
-    
-    tf.write_cross_section()
-    
+
     
     #self.get_loops(self.loop.draw())
     #self.nTF = nTF

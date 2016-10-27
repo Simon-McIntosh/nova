@@ -560,16 +560,17 @@ class Sloop(object):  # polybezier
         
 class Profile(object):
     
-    def __init__(self,config,family='S',part='TF',npoints=100,**kwargs):
-        self.config = config
+    def __init__(self,name,family='S',part='TF',npoints=100,**kwargs):
+        self.name = name
         self.part = part
         self.initalise_loop(family,npoints)  # initalize loop object
         data_dir = trim_dir('../../Data/')
-        self.dataname = data_dir+self.config+'_{}.pkl'.format(part)
+        self.dataname = data_dir+self.name+'_{}.pkl'.format(part)
         self.read_loop_dict()
+        self.nTF=kwargs.get('nTF','unset')
+        self.obj=kwargs.get('obj','unset')
         try:  # try to load loop using kwargs or unset data
-            self.load(nTF=kwargs.get('nTF','unset'),
-                      objective=kwargs.get('objective','unset'))
+            self.load(nTF=self.nTF,obj=self.obj)
         except:
             pass
         
@@ -607,17 +608,17 @@ class Profile(object):
                     data[nTF][obj] = True
             self.data_frame[family] = pd.DataFrame(data)
  
-    def load(self,nTF='unset',objective='unset'):
-        if objective in self.loop_dict.get(self.family,{}).get(nTF,{}):
-            loop_dict = self.loop_dict[self.family][nTF][objective]
+    def load(self,nTF='unset',obj='unset'):
+        if obj in self.loop_dict.get(self.family,{}).get(nTF,{}):
+            loop_dict = self.loop_dict[self.family][nTF][obj]
             for key in loop_dict:
                 if hasattr(self.loop,key):
                     setattr(self.loop,key,loop_dict[key])
         else:
             errtxt = '\n'
             errtxt += 'data not found:\n'
-            errtxt += 'loop type {}, nTF {}, objective {}\n'.\
-            format(self.family,nTF,objective)
+            errtxt += 'loop type {}, nTF {}, obj {}\n'.\
+            format(self.family,nTF,obj)
             errtxt += self.avalible_data(verbose=False)
             raise ValueError(errtxt)
      
@@ -625,7 +626,7 @@ class Profile(object):
         if len(self.loop_dict) == 0:
             datatxt = 'no data avalible'
         else:
-            datatxt ='\n{}: data avalible [objective,nTF]'.format(self.config)
+            datatxt ='\n{}: data avalible [obj,nTF]'.format(self.name)
             for family in self.data_frame:
                 datatxt += '\n\nloop type {}:\n{}'.\
                 format(family,self.data_frame[family].fillna(''))
@@ -639,41 +640,31 @@ class Profile(object):
             self.loop_dict = {}
             pickle.dump(self.loop_dict,output,-1)
         
-    def write(self,nTF='unset',objective='unset'):  # write xo and oppvar to file
+    def write(self,nTF='unset',obj='unset'):  # write xo and oppvar to file
         if self.family in self.loop_dict:
             if nTF not in self.loop_dict[self.family]:
-                self.loop_dict[self.family][nTF] = {objective:[]}
+                self.loop_dict[self.family][nTF] = {obj:[]}
         else:
-            self.loop_dict[self.family] = {nTF:{objective:[]}}
+            self.loop_dict[self.family] = {nTF:{obj:[]}}
         cdict = {}
         for key in ['xo','oppvar','family','symetric','tension','limits']:
             if hasattr(self.loop,key):
                 cdict[key] = getattr(self.loop,key)
-        self.loop_dict[self.family][nTF][objective] = cdict
+        self.loop_dict[self.family][nTF][obj] = cdict
         with open(self.dataname, 'wb') as output:
             pickle.dump(self.loop_dict,output,-1)
         self.frame_data()
-        
-    def write_SALOME(self):
-        self.loop.draw()
-        with open('../Data/test_sal.vi','w') as f:
-            json.dump(self.loop.p,f)
-            
 
 if __name__ is '__main__':  # plot loop classes
     #loop = Aloop()
     #x = loop.plot()
-    
     loop = Sloop(limits=False,symetric=False,tension='single')
     loop.set_tension('full')
     #x = loop.plot({'l2':1.5})
     #loop.draw()
+    profile = Profile('DEMO_SN',family='S',part='TF',nTF=18,obj='L')
     
-    profile = Profile('DEMO_SN',family='S',part='TF',nTF=18,objective='L')
-    profile.write_SALOME()
-    
-    with open('../Data/test_sal.vi','r') as f:
-        p = json.load(f)
+
     
 
 

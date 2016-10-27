@@ -186,10 +186,11 @@ class Setup(object):
         elif configuration == 'DN':
             self.dataname = 'DN'
             self.firstwall['div_ex'] = 0.5
-            self.targets['inner'] = {'L2D':0.8}
-            self.targets['outer'] = {'L2D':0.85}
+            self.targets['inner'] = {'L2D':0.6}
+            self.targets['outer'] = {'L2D':0.65}
             self.filename = 'Equil_FT_R0_9d197_k95_1d59_delta95_0d33_final_opt.eqdsk'
-
+        else:
+            self.filename = configuration+'.eqdsk'
         self.filename = self.eqdir+self.filename
 
                 

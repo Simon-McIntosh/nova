@@ -13,29 +13,29 @@ from nova.streamfunction import SF
 
 class Shape(object):
     
-    def __init__(self,profile,objective='L',nTF='unset',**kwargs):
+    def __init__(self,profile,obj='L',nTF='unset',eqconf='unset',**kwargs):
         self.profile = profile
         self.loop = self.profile.loop
         self.nTF = nTF
-        self.objective = objective
+        self.obj = obj
         self.bound = {}  # initalise bounds
         for side in ['internal','external']:
             self.bound[side] = {'r':[],'z':[]}
             if side in kwargs:
                 self.add_bound(kwargs[side],side)
-        if nTF is not 'unset':
+        if nTF is not 'unset' and eqconf is not 'unset':
             self.tf = TF(self.profile)      
             self.cage = coil_cage(nTF=nTF,rc=self.tf.rc,
-                                  plasma={'config':profile.config})
+                                  plasma={'config':eqconf})
         else:
-            if self.objective is 'E':
-                errtxt = 'tf object not set\n'
+            if self.obj is 'E':
+                errtxt = 'nTF and SFconfig keywords not set\n'
                 errtxt += 'unable to calculate stored energy\n'
                 errtxt += 'initalise with \'nTF\' keyword'
                 raise ValueError(errtxt)
                 
     def update(self):
-        self.profile.load(objective=self.objective,nTF=self.nTF)
+        self.profile.load(obj=self.obj,nTF=self.nTF)
         if 'nTF' is not 'unset':
             self.tf = TF(self.profile) 
             
@@ -55,7 +55,7 @@ class Shape(object):
                            bounds=bnorm,acc=0.005,iprint=-1)
         xo = get_oppvar(self.loop.xo,self.loop.oppvar,xnorm)  # de-normalize
         self.loop.set_input(x=xo)  # inner loop
-        self.profile.write(nTF=self.nTF,objective=self.objective)  # store loop
+        self.profile.write(nTF=self.nTF,obj=self.obj)  # store loop
         if verbose:
             self.toc(tic,xo)
 
@@ -88,9 +88,9 @@ class Shape(object):
     def fit(self,xnorm):
         x = get_oppvar(self.loop.xo,self.loop.oppvar,xnorm)  # de-normalize
         x = self.loop.draw(x=x)
-        if self.objective is 'L':  # coil length
+        if self.obj is 'L':  # coil length
             objF = geom.length(x['r'],x['z'],norm=False)[-1]
-        elif self.objective is 'E':  # stored energy
+        elif self.obj is 'E':  # stored energy
             x = self.tf.get_loops(x=x)
             self.cage.set_TFcoil(x['cl'])
             objF = 1e-9*self.cage.energy()
@@ -114,13 +114,14 @@ class Shape(object):
 if __name__ is '__main__': 
 
     config = 'DEMO_SN'
-    setup = Setup(config)
-    sf = SF(setup.filename)
-    sf.get_boundary(plot=True)
+    config = {'TF':'SN','eq':'SN_3PF_12TF'}
+    #setup = Setup(config)
+    #sf = SF(setup.filename)
+    #sf.get_boundary(plot=True)
     
-    profile = Profile(config,family='S',part='TF')
-    shp = Shape(profile,objective='L',nTF=18)
-    
+    profile = Profile(config['TF'],family='S',part='TF')
+    shp = Shape(profile,obj='L',nTF=12,eqconf=config['eq'])
+
     demo = DEMO()
     #demo.fill_loops()
     demo.fill_part('Blanket')
@@ -128,8 +129,12 @@ if __name__ is '__main__':
     vv = demo.parts['Vessel']['out']
     rvv,zvv = geom.rzSLine(vv['r'],vv['z'],30)
     rvv,zvv = geom.offset(rvv,zvv,0.2)
+    rmin = np.min(rvv)
+    rvv[rvv<=rmin+0.12] = rmin+0.12
     shp.add_bound({'r':rvv,'z':zvv},'internal')  # vessel
-    #shp.minimise()
+    shp.plot_bounds()
+    shp.minimise()
+    
     shp.update()
     shp.tf.fill()
     #shp.cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)

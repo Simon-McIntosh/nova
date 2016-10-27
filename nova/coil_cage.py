@@ -19,7 +19,7 @@ class coil_cage(object):
         if 'plasma' in kwargs:
             self.get_seperatrix(alpha=1-1e-3,**kwargs['plasma'])
         if 'coil' in kwargs:
-            self.set_TFcoil(**kwargs['coil'])
+            self.set_TFcoil(kwargs['coil'])
 
     def get_seperatrix(self,nplasma=80,alpha=1-1e-3,**kwargs):
         self.nplasma = nplasma
@@ -100,7 +100,6 @@ class coil_cage(object):
             r,z = self.plasma_interp['r'](l),self.plasma_interp['z'](l)
             ripple[i] = self.point((r,0,z),variable='ripple')
         return ripple
-            
 
     def loop_ripple(self):
         self.ripple = np.zeros(self.nplasma)

@@ -10,6 +10,7 @@ import seaborn as sns
 from matplotlib._cntr import Cntr as cntr
 from collections import OrderedDict
 from amigo import geom
+from nova.config import trim_dir
 
 class SF(object):
     
@@ -98,8 +99,11 @@ class SF(object):
               'nbdry':self.nbdry,'rbdry':self.rbdry, 'zbdry':self.zbdry, # Plasma boundary
               'nlim':self.nlim,'xlim':self.xlim,'ylim':self.ylim,  # first wall
               'ncoil':nc,'rc':rc,'zc':zc,'drc':drc,'dzc':dzc,'Ic':Ic} # coils
-        print('writing eqdsk','./Data/'+config+'.eqdsk')
-        nova.geqdsk.write('../../Data/'+config+'.eqdsk',eq)
+        
+        eqdir = trim_dir('../../eqdsk') 
+        filename = eqdir+'/'+config+'.eqdsk'
+        print('writing eqdsk',filename)
+        nova.geqdsk.write(filename,eq)
         
     def write_flux(self):
         psi_norm = np.linspace(0,1,self.nr)

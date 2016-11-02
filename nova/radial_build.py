@@ -132,22 +132,28 @@ class RB(object):
         Bhat = (R*np.matrix([[B[0]],[B[1]]])).getA1()/Bmag
         return Bhat
    
-    def firstwall(self,calc=True,color=[0.5,0.5,0.5],plot=True,debug=False):
+    def firstwall(self,mode='calc',color=[0.5,0.5,0.5],plot=True,debug=False):
         self.update_sf()  # update streamfunction
-        if calc:
+        if mode == 'eqdsk':  # read first wall from eqdsk
+            self.Rb,self.Zb = self.sf.xlim,self.sf.ylim
+        elif mode == 'calc':
             self.Rb,self.Zb = self.target_fill(debug=debug)
             with open('../../Data/'+self.dataname+'_FW.pkl', 'wb') as output:
                 pickle.dump(self.setup.targets,output,-1)
                 pickle.dump(self.Rb,output,-1)
                 pickle.dump(self.Zb,output,-1)
-        else:
+        elif mode == 'read':
             with open('../../Data/'+self.dataname+'_FW.pkl', 'rb') as input:
                 self.setup.targets = pickle.load(input)
                 self.Rb = pickle.load(input)
                 self.Zb = pickle.load(input)
+        else:
+            errtxt = 'set input mode \'eqdsk\',\'calc\',\'read\''
+            raise ValueError(errtxt)
+        if mode != 'eqdsk':  # update eqdsk
+            self.sf.nlim = len(self.Rb)  # update sf
+            self.sf.xlim,self.sf.ylim = self.Rb,self.Zb
         self.loop.R,self.loop.Z = self.trim_contour(self.Rb,self.Zb) # update fw
-        self.sf.nlim = len(self.Rb)  # update sf
-        self.sf.xlim,self.sf.ylim = self.Rb,self.Zb
         if plot:
             index = (self.Rb <= self.sf.r.max()) & (self.Rb >= self.sf.r.min()) &\
             (self.Zb <= self.sf.z.max()) & (self.Zb >= self.sf.z.min())
@@ -155,7 +161,8 @@ class RB(object):
                     '-',color=color,alpha=0.75,linewidth=1.25)
        
     def get_fw(self,expand=0):  # generate boundary dict for elliptic
-        self.firstwall(calc=False,plot=False,debug=False)
+        if not hasattr(self,'Rb'):  # first wall not set
+            self.firstwall(mode='read',plot=False,debug=False)
         boundary = {'R':self.Rb,'Z':self.Zb,'expand':expand}
         return boundary
         
@@ -184,7 +191,7 @@ class RB(object):
 
     def target_fill(self,debug=False,**kwargs):
         layer_index = 0  # construct from first open flux surface
-        self.sf.sol(update=True)
+        self.sf.sol(update=True,plot=True)
         for leg in list(self.sf.legs)[2:]:
             self.set_target(leg)
             Rsol,Zsol = self.sf.snip(leg,layer_index,L2D=self.setup.targets[leg]['L2D'])
@@ -590,8 +597,8 @@ class RB(object):
         pl.axis('equal')
         
     def FWfill(self,**kwargs):
-        if not hasattr(self,'Rb'):
-            self.firstwall(calc=False,plot=False,debug=False)  # load fw
+        if not hasattr(self,'Rb'):  # first wall not set
+            self.firstwall(mode='read',plot=False,debug=False)  # load fw
         self.loop.R,self.loop.Z = geom.rzSLine(self.Rb[::-1],self.Zb[::-1],
                                      npoints=self.npoints,Hres=False)
         self.loop.fill(loop=True,alpha=0.7,**kwargs)

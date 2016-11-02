@@ -44,8 +44,8 @@ class SF(object):
    
     def normalise(self):
         print(self.eqdsk['name'])
-        if 'Fiesta' in self.eqdsk['name'] or 'Nova' in self.eqdsk['name']\
-        or 'disr' in self.eqdsk['name']:
+        if ('Fiesta' in self.eqdsk['name'] or 'Nova' in self.eqdsk['name']\
+        or 'disr' in self.eqdsk['name']) and 'CREATE' not in self.eqdsk['name']:
             self.norm = 1
             #self.eqdsk['cpasma'] *= -1  # check NOVA output - CREATE-NL version? 
         else:  # CREATE
@@ -55,6 +55,7 @@ class SF(object):
                 self.eqdsk[key] /= self.norm  # per radian
             for key in ['ffprim','pprime']:
                 self.eqdsk[key] *= self.norm  # per Webber/radian  
+        print(self.norm)
         self.b_scale = 1  # flux function scaling
 
     def trim_r(self,rmin=1.5):
@@ -69,10 +70,12 @@ class SF(object):
         else:
             name = prefix
         if CREATE:  # save with create units (Webber/loop, negated Iplasma)
-            name += '_CREATE_units'
-            norm,Ip_dir = 2*np.pi,-1  # reformat: webber/loop, reverse plasma current
+            name = 'CREATE_format_'+name
+            norm = 2*np.pi  # reformat: webber/loop
+            Ip_dir = -1  # reformat: reverse plasma current
+            psi_offset = self.get_Xpsi()[0]  # reformat: boundary psi=0
         else:
-            norm,Ip_dir = 1,1  # no change
+            norm,Ip_dir,psi_offset = 1,1,0  # no change
         nc,rc,zc,drc,dzc,Ic = pf.unpack_coils()[:-1]
         psi_ff = np.linspace(0,1,self.nr)
         pad = np.zeros(self.nr)
@@ -90,7 +93,7 @@ class SF(object):
               'simagx':float(self.Mpsi)*norm,  # Poloidal flux at the axis (Weber / rad)
               'sibdry':self.Xpsi*norm,  # Poloidal flux at plasma boundary (Weber / rad)
               'cpasma':self.eqdsk['cpasma']*Ip_dir, 
-              'psi':np.transpose(self.psi).reshape((-1,))*norm,  # Poloidal flux in Weber/rad on grid points
+              'psi':(np.transpose(self.psi).reshape((-1,))-psi_offset)*norm,  # Poloidal flux in Weber/rad on grid points
               'fpol':self.Fpsi(psi_ff),  # Poloidal current function on uniform flux grid
               'ffprim':self.b_scale*self.FFprime(psi_ff)/norm,  # "FF'(psi) in (mT)^2/(Weber/rad) on uniform flux grid"
               'pprime':self.b_scale*self.Pprime(psi_ff)/norm,  # "P'(psi) in (N/m2)/(Weber/rad) on uniform flux grid"
@@ -779,6 +782,9 @@ class SF(object):
             index = np.argmin(np.abs(Lsol-L2D))
         if Lsol[index] > L2D: 
             index -= 1
+        if L2D > Lsol[-1]:
+            L2D = Lsol[-1]
+            print('warning: targent requested outside grid')
         Rend,Zend = interp1d(Lsol,Rsol)(L2D),interp1d(Lsol,Zsol)(L2D)
         Rsol,Zsol = Rsol[:index],Zsol[:index]  # trim to strike point
         Rsol,Zsol = np.append(Rsol,Rend),np.append(Zsol,Zend)

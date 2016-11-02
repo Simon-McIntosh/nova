@@ -23,8 +23,7 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
 
 config = 'DEMO_SNc'
 #config = 'DN'
-
-config = 'SN_3PF_12TF'
+#config = 'SN_3PF_12TF'
 setup = Setup(config)
 
 sf = SF(setup.filename)
@@ -33,8 +32,8 @@ pf.plot(coils=pf.coil,label=True,plasma=False,current=True)
 levels = sf.contour()
 
 
-#rb = RB(setup,sf)
-#rb.firstwall(calc=True,plot=True,debug=True)
+rb = RB(setup,sf)
+rb.firstwall('eqdsk',plot=True,debug=True)
 #rb.vessel()
 '''
 demo = DEMO()
@@ -42,16 +41,19 @@ demo.fill_loops()
 demo.get_ports(plot=True)
 '''
 
-#eq = EQ(sf,pf,dCoil=0.5,sigma=0,boundary=rb.get_fw(expand=0.25),n=2e4)  
-#eq.gen_opp()
+eq = EQ(sf,pf,dCoil=0.25,sigma=0,boundary=rb.get_fw(expand=0.25),n=2e4)  
+eq.gen_opp()
+
+pf.plot(coils=eq.coil,label=False,plasma=True,current=False) 
 
 sf.contour(levels=levels)
+#pl.plot(sf.eqdsk['xlim'],sf.eqdsk['ylim'])
 
-rb = RB(setup,sf)
-rb.firstwall(calc=True,plot=True,debug=False)
-pl.axis('equal')
+#rb = RB(setup,sf)
+#rb.firstwall(calc=True,plot=True,debug=False)
+#pl.axis('equal')
 
-#sf.eqwrite(pf,config=config,CREATE=True)
+sf.eqwrite(pf,config=config,CREATE=True)
 
 #pf.plot(coils=pf.coil,label=True,plasma=False,current=True) 
 

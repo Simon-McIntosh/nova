@@ -195,22 +195,22 @@ def carrage_return(f,i):
     if np.mod(i+1,5)==0:
         f.write('\n')
     else:
-        f.write('\t')
+        f.write(' ')
         
 def write_line(f,data,var):
     for i,v in enumerate(var):
-        fmat = '{:12.8f}' if v != 'cpasma' else '{:10.8e}'
+        fmat = '{:16.9f}' if v != 'cpasma' else '{:16.9e}'
         num = 0 if len(v) == 0 else data[v]
         f.write(fmat.format(num))
         carrage_return(f,i)
             
 def write_array(f,val,c):
     if np.size(val) == 1:
-        f.write('{:10.8e}'.format(val))
+        f.write('{:16.9e}'.format(val))
         carrage_return(f,next(c))
         return
     for v in val:
-        f.write('{:10.8e}'.format(v))
+        f.write('{:16.9e}'.format(v))
         carrage_return(f,next(c))
         
 def write(f,data):  # write a G-EQDSK file
@@ -220,9 +220,8 @@ def write(f,data):  # write a G-EQDSK file
     if isinstance(f, str):
         with open(f, "w") as fh: # Ensure file is closed
             return write(fh,data) # Call again with file object
-    
-    f.write(data['name']+' '+time.strftime("%d%m%Y"))  # write description
-    f.write(' {:1.0f} {:1.0f}\n'.format(data['nx'],data['ny']))
+    f.write('{:48s} '.format(data['name']+'_'+time.strftime("%d%m%Y")))  
+    f.write('{:4d} {:4d} {:4d}\n'.format(0,data['nx'],data['ny']))
     write_line(f,data,['rdim','zdim','rcentr','rgrid1','zmid'])
     write_line(f,data,['rmagx','zmagx','simagx','sibdry','bcentr'])
     write_line(f,data,['cpasma','simagx','','rmagx',''])
@@ -235,7 +234,7 @@ def write(f,data):  # write a G-EQDSK file
     write_array(f,data['psi'],c)
     write_array(f,data['qpsi'],c)
     
-    f.write('{:1.0f} {:1.0f}\n'.format(data['nbdry'],data['nlim']))
+    f.write('{:5d} {:5d}\n'.format(data['nbdry'],data['nlim']))
     bdry = np.zeros(2*data['nbdry'])
     bdry[::2],bdry[1::2] = data['rbdry'],data['zbdry']
     write_array(f,bdry,c)
@@ -243,7 +242,7 @@ def write(f,data):  # write a G-EQDSK file
     lim[::2],lim[1::2] = data['xlim'],data['ylim']
     write_array(f,lim,c)
     
-    f.write('{:1.0f}\n'.format(data['ncoil']))
+    f.write('{:5d}\n'.format(data['ncoil']))
     coil = np.zeros(5*data['ncoil'])
     for i,v in enumerate(['rc','zc','drc','dzc','Ic']):
         coil[i::5] = data[v]

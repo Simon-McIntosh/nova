@@ -26,10 +26,58 @@ class SALOME(object):
         self.tf = TF(self.profile,sf=self.sf)   
         self.pf = PF(self.sf.eqdsk)
         self.PF_support()  # calculate PF support seats
+        self.CS_support()  # calculate CS support seats
         self.cage = coil_cage(nTF=nTF,rc=self.tf.rc,
                               plasma={'config':config['eq']},
                               coil=self.tf.x['cl'])
         
+    def write(self):
+        print('writing',self.filename,self.nTF)
+        color = sns.color_palette('Set2',12)
+        data = {'p':self.profile.loop.p,'section':self.tf.section,
+                'pf':self.pf.coil,'nTF':self.nTF,'color':color,
+                'PFsupport':self.PFsupport,'CSsupport':self.CSsupport}
+        with open(self.filename,'w') as f:
+            json.dump(data,f,indent=4)
+
+    def CS_support(self):
+        depth = self.tf.section['winding_pack']['depth']
+        side = self.tf.section['case']['side']
+        width = self.tf.section['winding_pack']['width']
+        inboard = self.tf.section['case']['inboard']
+        nose = self.tf.section['case']['nose']
+        segment = self.profile.loop.p[0]
+        ro,zo = segment['p0']['r'],segment['p0']['z']
+        theta = np.pi/self.nTF
+        rsep = (depth/2+side)/np.tan(theta)
+        rnose = ro-(width+inboard+nose)
+        rwp = ro-(width+inboard)
+        if rsep <= rnose:
+            ynose = depth/2+side
+        else:
+            ynose = rnose*np.tan(theta)
+        if rsep <= rwp:
+            ywp = depth/2+side
+        else:
+            ywp = rwp*np.tan(theta)
+        
+        self.tf.loop_interpolators(offset=0)  # construct TF interpolators
+        TFloop = self.tf.fun['out']
+        L = minimize_scalar(SALOME.cs_top,method='bounded',
+                            args=(rwp,TFloop),bounds=[0.5,1]).x
+        ztop = float(TFloop['z'](L))
+        
+        self.CSsupport = {'rnose':rnose,'ynose':ynose,'rwp':rwp,'ywp':ywp,
+                          'ztop':ztop,'zo':zo,'dt':side}
+                     
+        pl.plot(TFloop['r'](L),TFloop['z'](L),'d')
+        pl.plot(rnose,zo,'o')
+        pl.plot(rwp,zo,'o')
+        
+    def cs_top(L,rwp,TFloop):
+        err = abs(TFloop['r'](L)-rwp)
+        return err
+    
     def support_arm(L,coil,TFloop):
         dl = np.sqrt((coil['r']-TFloop['r'](L))**2+
                      (coil['z']-TFloop['z'](L))**2)
@@ -81,19 +129,6 @@ class SALOME(object):
         for delta in [-1,0,1]:
             pl.plot(TFloop['r'](lo+delta*dl/2),TFloop['z'](lo+delta*dl/2),'o')
 
-    #def CSsupport(self):
-        
-                                
-                    
-    def write(self):
-        print('writing',self.filename,self.nTF)
-        color = sns.color_palette('Set2',12)
-        data = {'p':self.profile.loop.p,'section':self.tf.section,
-                'pf':self.pf.coil,'nTF':self.nTF,'color':color,
-                'PFsupport':self.PFsupport}
-        with open(self.filename,'w') as f:
-            json.dump(data,f,indent=4)
-
     def plot(self):
         self.tf.fill()
         self.pf.plot(coils=self.pf.coil,label=True,current=True)
@@ -109,6 +144,7 @@ if __name__ is '__main__':
     sal.OIS()
     sal.write()
     sal.plot()
+    
     
     demo = DEMO()
     demo.fill_part('Vessel')

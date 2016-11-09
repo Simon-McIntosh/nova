@@ -3,7 +3,6 @@ import pylab as pl
 import nova.cross_coil as cc
 from collections import OrderedDict
 from scipy.interpolate import RectBivariateSpline as RBS
-from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 from scipy.interpolate import interp1d
 import seaborn as sns
 import scipy.optimize as op
@@ -11,17 +10,15 @@ from itertools import cycle
 import copy
 import time
 import multiprocessing
-from amigo import geom
 from nova import loops
 import nlopt
-import pickle
-from nova.config import trim_dir
+from nova.force import force_feild
 
 class INV(object):
     
     def __init__(self,sf,eq,tf,Jmax=12.5,TFoffset=0.3,svd=False):
-        self.svd = svd  # use coil current singular value decomposition
-        self.Iscale = 1e6  # current in MA
+        self.svd = svd  # coil current singular value decomposition flag
+        self.Iscale = 1e6  # set current units to MA
         self.ncpu = multiprocessing.cpu_count()
         self.sf = sf
         self.eq = eq
@@ -112,8 +109,12 @@ class INV(object):
         self.append_coil(self.eq.plasma_coil)
         for coil in self.all_coils:
             self.update_bundle(coil)  # re-grid elliptic coils
+        self.eq.pf.categorize_coils()  # index pf coils
         self.initalise_current()
         self.initalise_limits()
+        self.ff = force_feild(self.eq.pf.index,self.eq.pf.coil,
+                              self.eq.coil,self.eq.plasma_coil,
+                              multi_filament=True)
         self.set_swing()
         if plot:
             self.plot_coils()
@@ -449,58 +450,6 @@ class INV(object):
             Br,Bz = self.B_plasma[0].ev(rf,zf),self.B_plasma[1].ev(rf,zf)
             value = self.Bfeild(bc,Br,Bz,bdir)
         return value
-        
-    def check_force_feild(self):
-        if not self.force_feild_active:
-            errtxt = 'no force feild\n'
-            errtxt += 'set_force_feild\n'
-            raise ValueError(errtxt)
-        if self.nPF == 0:
-            errtxt = 'PF_coils empty\n'
-            raise ValueError(errtxt)
-        if self.nCS == 0:
-            errtxt = 'CS_coils empty\n'
-            raise ValueError(errtxt)
-        
-    def plot_force(self,scale=3):
-        coil = self.coil['active']
-        color = sns.color_palette('Set2',2)
-        for name in coil.keys():
-            Ro,Zo = coil[name]['Ro'],coil[name]['Zo']
-            pl.arrow(Ro,Zo,0,scale*coil[name]['Fz_sum']/self.F_max,
-                     linewidth=1,head_width=0.1,head_length=0.1,
-                     color=color[0])
-            pl.arrow(Ro,Zo,scale*coil[name]['Fr_sum']/self.F_max,0,
-                     linewidth=1,head_width=0.1,head_length=0.1,
-                     color=color[1])
-        
-    def set_force_feild(self,state='both',multi_filament=False):
-        # [I]T([Fa][I]+[Fp]) = F
-        self.force_feild_active = True
-        active_coils = self.coil['active'].keys()
-        passive_coils = self.coil['passive'].keys()
-        if state == 'both' or state == 'active':
-            self.set_active_force_feild(active_coils,
-                                        multi_filament=multi_filament)
-        if state == 'both' or state == 'passive':
-            self.set_passive_force_feild(active_coils,passive_coils)
-
-    def set_active_force_feild(self,active_coils,multi_filament=False):  
-        self.Fa = np.zeros((self.nC,self.nC,2))  # active
-        for i,sink in enumerate(active_coils):
-            for j,source in enumerate(active_coils):
-                rG = cc.Gtorque(self.eq.coil,self.eq.pf.coil,
-                                source,sink,multi_filament)*self.Iscale**2
-                self.Fa[i,j,0] = 2*np.pi*cc.mu_o*rG[1]  #  cross product
-                self.Fa[i,j,1] = -2*np.pi*cc.mu_o*rG[0]
-        
-    def set_passive_force_feild(self,active_coils,passive_coils):
-        self.Fp = np.zeros((self.nC,2))  # passive
-        for i,sink in enumerate(active_coils):
-            rB = cc.Btorque(self.eq.coil,self.eq.plasma_coil,
-                            passive_coils,sink)*self.Iscale
-            self.Fp[i,0] = 2*np.pi*cc.mu_o*rB[1]  #  cross product
-            self.Fp[i,1] = -2*np.pi*cc.mu_o*rB[0]  
 
     def Bfeild(self,bc,Br,Bz,Bdir):
         if bc == 'Br':
@@ -692,7 +641,6 @@ class INV(object):
         if Nold > N:
             for i in range(N,Nold):
                 del self.eq.coil[name+'_{:1.0f}'.format(i)]
-
     def copy_coil(self,coil_read):
         coil_copy = {}
         for strand in coil_read.keys():
@@ -784,41 +732,13 @@ class INV(object):
         self.Io['value'][lindex] = self.Io['lb'][lindex]
         uindex = self.Io['value']>self.Io['ub']
         self.Io['value'][uindex] = self.Io['ub'][uindex]
-            
-    def set_force(self,I):  # evaluate coil force and force jacobian 
-        F = np.zeros((self.nC,2))
-        dF = np.zeros((self.nC,self.nC,2))
-        Im = np.dot(I.reshape(-1,1),np.ones((1,self.nC)))  # current matrix
-        for i in range(2):  # coil force (bundle of eq elements)
-            F[:,i] = 1e-6*(I*(np.dot(self.Fa[:,:,i],I)+self.Fp[:,i]))  # MN
-            dF[:,:,i] = Im*self.Fa[:,:,i]       
-            diag = np.dot(self.Fa[:,:,i],I)+\
-            I*np.diag(self.Fa[:,:,i])+self.Fp[:,i]
-            np.fill_diagonal(dF[:,:,i],diag)
-        dF *= 1e-6  # force jacobian MN/MA
-        return F,dF
-            
-    def get_force(self):
-        self.check_force_feild()
-        F,dF = self.set_force(self.I)
-        Fcoil = {'PF':{'r':0,'z':0},'CS':{'sep':0,'zsum':0},'F':F,'dF':dF}    
-        Fcoil['PF']['r'] = np.max(abs(F[:self.nPF,0]))
-        Fcoil['PF']['z'] = np.max(abs(F[:self.nPF,1]))
-        FzCS = F[self.nPF:,1] 
-        if self.nCS > 1:
-            Fsep = np.zeros(self.nCS-1)  # seperation force
-            for j in range(self.nCS-1):  # evaluate each gap
-                Fsep[j] = np.sum(FzCS[j+1:])-np.sum(FzCS[:j+1])
-            Fcoil['CS']['sep'] = np.max(Fsep)
-        Fcoil['CS']['zsum'] = np.sum(FzCS)
-        return Fcoil
-        
+
     def Flimit(self,constraint,vector,grad):
         if self.svd:  # convert eigenvalues to current vector
             I = np.dot(self.V,vector)
         else:
             I = vector
-        F,dF = self.set_force(I)  # set coil force and jacobian
+        F,dF = self.ff.set_force(I)  # set coil force and jacobian
         if grad.size > 0:  # calculate constraint jacobian
             grad[:self.nPF] = -dF[:self.nPF,:,1]  # PFz lower bound
             grad[self.nPF:2*self.nPF] = dF[:self.nPF,:,1]  # PFz upper bound
@@ -914,7 +834,7 @@ class INV(object):
             for i in range(imax):
                 dl = self.update_area(relax=relax)
                 dL.append(dl)
-                self.set_force_feild(state='active')  
+                self.ff.set_force_feild(state='active')  
                 self.set_foreground()
                 rms = self.swing_flux()
                 if abs(dl-dl_o) < err:  # coil areas converged
@@ -928,7 +848,7 @@ class INV(object):
                     print(dL)
         else:
             self.fit_PF()  # fit coils to TF
-            self.set_force_feild(state='active')  
+            self.ff.set_force_feild(state='active')  
             self.set_foreground()
             rms = self.swing_flux()
         if store_update:
@@ -940,7 +860,7 @@ class INV(object):
         for i,flux in enumerate(self.swing['flux']):
             self.fix_flux(flux)  # swing
             self.swing['rms'][i] = self.solve_slsqp()
-            self.swing['Fcoil'][i] = self.get_force()
+            self.swing['Fcoil'][i] = self.ff.get_force()
             self.swing['Tpol'][i] = self.poloidal_angle()
             self.swing['I'][i] = self.Icoil
         self.rmsID = np.argmax(self.swing['rms'])
@@ -975,7 +895,13 @@ class INV(object):
                 grad[i+self.nPF-1,i+self.nPF+1] = -1
         constraint[:self.nPF-1] = L[:self.nPF-1]-L[1:self.nPF]+PFdL  # PF 
         constraint[self.nPF-1:] = L[self.nPF:-1]-L[self.nPF+1:]+CSdL  # CS 
-        
+    '''    
+    def update_position_vector(self,Lnorm,grad):
+        rms = self.update_position(Lnorm,update_area=True,store_update=True)
+        if grad.size > 0:
+            grad[:] = op.approx_fprime(Lnorm,self.update_position,1e-7)
+        return rms
+    '''    
     def minimize(self,L,method='ls'):  # rhobeg=0.1,rhoend=1e-4
         self.iter['position'] == 0 
         self.set_Lo(L)  # set position bounds
@@ -1071,7 +997,7 @@ class INV(object):
         #self.initalise_plasma = False
         self.set_background()
         self.get_weight()
-        self.set_force_feild(state='both')
+        #self.set_force_feild(state='both')
         #else:
             #self.swing_fix(np.mean(self.Swing))
             #self.solve_slsqp()
@@ -1083,6 +1009,7 @@ class INV(object):
 
     def update_current(self):
         self.Isum,self.Ics = 0,0
+        self.ff.I = self.I  # pass current to force feild
         self.Icoil = np.zeros(len(self.coil['active'].keys()))
         for j,name in enumerate(self.coil['active']):
             Nfilament = self.eq.coil[name+'_0']['Nf']

@@ -10,35 +10,50 @@ from nova.loops import Profile
 from nova.config import Setup
 from nova.streamfunction import SF
 import nova.cross_coil as cc
-colors = sns.color_palette('Set3',12)
+colors = sns.color_palette('Paired',12)
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
+from nova.TF.DEMOxlsx import DEMO
     
 class PF(object):
     def __init__(self,eqdsk):
         self.set_coils(eqdsk)
+        self.categorize_coils()
         
     def set_coils(self,eqdsk):
         self.coil = collections.OrderedDict()
-        self.CS_coils = []
-        self.PF_coils = []
         if eqdsk['ncoil'] > 0: 
             nC = count(0)
-            CSindex = np.argmin(eqdsk['rc'])
-            rCS,drCS = eqdsk['rc'][CSindex],eqdsk['drc'][CSindex]
+            CSindex = np.argmin(eqdsk['rc'])  # CS radius and width
+            self.rCS,self.drCS = eqdsk['rc'][CSindex],eqdsk['drc'][CSindex]
             for i,(r,z,dr,dz,I) in enumerate(zip(eqdsk['rc'],eqdsk['zc'],
                                                  eqdsk['drc'],eqdsk['dzc'],
                                                  eqdsk['Ic'])):
                 name = 'Coil{:1.0f}'.format(next(nC))
-                if r < rCS+drCS:
-                    self.CS_coils.append(name)
-                else:
-                    self.PF_coils.append(name)
+
                 self.coil[name] = {'r':r,'z':z,'dr':dr,'dz':dz,'I':I,
                                    'rc':np.sqrt(dr**2+dz**2)/2}
                 if eqdsk['ncoil'] > 100 and i>=eqdsk['ncoil']-101:
                     print('exit set_coil loop - coils')
                     break
-         
+        
+    def categorize_coils(self):
+        self.CS_coils,self.PF_coils = [],[]
+        catogory = np.zeros(len(self.coil),dtype=[('r','float'),('z','float'),
+                                            ('index','int'),('name','object')])
+        for i,name in enumerate(self.coil):
+            catogory[i]['r'] = self.coil[name]['r']
+            catogory[i]['z'] = self.coil[name]['z']
+            catogory[i]['index'] = i
+            catogory[i]['name'] = name
+        CSsort = np.sort(catogory,order=['r','z'])  # sort CS, r then z
+        CSsort = CSsort[CSsort['r'] < self.rCS+self.drCS]
+        PFsort = np.sort(catogory,order='z')  # sort PF,  z
+        PFsort = PFsort[PFsort['r'] > self.rCS+self.drCS]
+        self.index = {'PF':{'n':len(PFsort['index']),
+                            'index':PFsort['index'],'name':PFsort['name']},
+                      'CS':{'n':len(CSsort['index']),
+                            'index':CSsort['index'],'name':CSsort['name']}}
+      
     def unpack_coils(self):
         nc = len(self.coil.keys())
         Ic = np.zeros(nc)
@@ -56,18 +71,12 @@ class PF(object):
     def plot_coil(self,coils,label=False,current=False,coil_color=None,fs=12,
                   alpha=1):
         if coil_color==None:
-            color = colors[1:]
+            color = colors
         else:
             color = coil_color  # color itterator
         
-        #color = sns.color_palette('Set3',300)
-        rmin = np.min([coils[coil]['r'] for coil in coils])
         for i,name in enumerate(coils.keys()):
             coil = coils[name]
-            if label and current:
-                zshift = coil['dz']/4
-            else:
-                zshift = 0
             r,z,dr,dz = coil['r'],coil['z'],coil['dr'],coil['dz']
             Rfill = [r+dr/2,r+dr/2,r-dr/2,r-dr/2]
             Zfill = [z-dz/2,z+dz/2,z+dz/2,z-dz/2]
@@ -75,28 +84,29 @@ class PF(object):
                 edgecolor = 'k'
             else:
                 edgecolor = 'r'  
-            #coil_color = next(color)
-            try:
-                ic = int(name.split('_')[0].split('Coil')[-1])
-            except:
-                ic = 0  # plasma coils
-            coil_color = color[ic] 
-            #coil_color = color[8]
+            coil_color = color[4] 
+            if name in self.index['CS']['name']:
+                drs = -2.5/3*dr
+                ha = 'right'
+                coil_color = color[5]
+            elif name in self.index['PF']['name']:
+                drs = 2.5/3*dr
+                ha = 'left'
+                coil_color = color[5]
             pl.fill(Rfill,Zfill,facecolor=coil_color,alpha=alpha,
                     edgecolor=edgecolor)
+            
+            if label and current:
+                zshift = max([coil['dz']/4,0.4])
+            else:
+                zshift = 0
             if label: 
-                pl.text(r,z+zshift,name.replace('Coil',''),fontsize=fs*0.6,
-                        ha='center',va='center',color=[0.25,0.25,0.25])
+                pl.text(r+drs,z+zshift,name,fontsize=fs*1.1,
+                        ha=ha,va='center',color=0.5*np.ones(3))
             if current: 
-                if r < rmin+1e-3:
-                    drs = -2/3*dr
-                    ha = 'right'
-                else:
-                    drs = 2/3*dr
-                    ha = 'left'
                 pl.text(r+drs,z-zshift,'{:1.1f}MA'.format(coil['I']*1e-6),
                         fontsize=fs*1.1,ha=ha,va='center',
-                        color=[0.25,0.25,0.25])
+                        color=0.5*np.ones(3))
                                   
     def plot(self,color=None,coils=None,label=False,plasma=False,
                    current=False,alpha=1):
@@ -168,7 +178,7 @@ class TF(object):
         self.cross_section(**kwargs)  # coil cross-sections
         self.get_loops(profile.loop.draw())
 
-    def cross_section(self,J=18.25,twall=0.05,**kwargs):  # MA/m2 TF current density
+    def cross_section(self,J=18.25,twall=0.045,**kwargs):  # MA/m2 TF current density
         self.section = {}
         self.section['case'] = {'side':0.1,'nose':0.51,'inboard':0.04,
                                 'outboard':0.19,'external':0.225}
@@ -246,6 +256,7 @@ class TF(object):
             z = z[index['lower']+1:index['upper']]
             r,z = geom.offset(r,z,sign*offset)
             l = geom.length(r,z)
+            l[(l>0.5) & (l<0.7)] = 0.5
             lt = np.linspace(trim[0],trim[1],int(np.diff(trim)*len(l)))
             r,z = interp1d(l,r)(lt),interp1d(l,z)(lt)
             l = np.linspace(0,1,len(r))
@@ -287,10 +298,13 @@ class TF(object):
         boundary = {'R':R,'Z':Z,'expand':expand}
         return boundary
 
-    def fill(self,write=False,plot=True):
-        geom.polyparrot(self.x['in'],self.x['wp_in'],color=0.4*np.ones(3))
-        geom.polyparrot(self.x['wp_in'],self.x['wp_out'],color=0.6*np.ones(3))
-        geom.polyparrot(self.x['wp_out'],self.x['out'],color=0.4*np.ones(3))
+    def fill(self,write=False,plot=True,alpha=1):
+        geom.polyparrot(self.x['in'],self.x['wp_in'],
+                        color=0.4*np.ones(3),alpha=alpha)
+        geom.polyparrot(self.x['wp_in'],self.x['wp_out'],
+                        color=0.6*np.ones(3),alpha=alpha)
+        geom.polyparrot(self.x['wp_out'],self.x['out'],
+                        color=0.4*np.ones(3),alpha=alpha)
         pl.plot(self.x['cl']['r'],self.x['cl']['z'],'-.',color=0.5*np.ones(3))
         pl.axis('equal')
         pl.axis('off')
@@ -313,44 +327,38 @@ class TF(object):
         self.Rlength = self.TFlength/self.Plength
     '''    
 if __name__ is '__main__':  # test functions
-    '''
-    config = 'DN'
-    setup = Setup(config)
-    sf = SF(setup.filename)
-    pf = PF(sf.eqdsk)
-    pf.plot(coils=pf.coil,label=True,plasma=False,current=True) 
-    levels = sf.contour()
-    '''
-    #self.get_loops(self.loop.draw())  # initalize loops
-    config = {'TF':'SN','eq':'SN_3PF_12TF'}
+
+    nPF,nTF = 6,16
+    config = {'TF':'SN','eq':'SN_{:d}PF_{:d}TF'.format(nPF,nTF)}
     setup = Setup(config['eq'])
     sf = SF(setup.filename)
-    profile = Profile(config['TF'],family='S',part='TF',nTF=12,obj='L')
+    profile = Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L',
+                      load=True)
+    #profile.loop.plot()
     tf = TF(profile,sf=sf)
-    
+    tf.fill()
 
-    
-    #self.get_loops(self.loop.draw())
-    #self.nTF = nTF
-    
-    profile.loop.plot({'dz':0})
-    
-    profile.write()
-    
-    profile.avalible_data()
-    
-    
-    #tf.loop.set_input(inputs={'l':1.5})
-    #tf.write(nTF=18,objective='E')
-    
-    #tf.load(nTF=18,objective='L')
-    #tf.split_loop()
-    
-    #pl.plot(tf.x['cl']['r'],tf.x['cl']['z'])
-    #pl.plot(tf.x['nose']['r'],tf.x['nose']['z'])
-    #pl.plot(tf.x['loop']['r'],tf.x['loop']['z'])
-    
-    #tf.loop_interpolators()
-    
+    demo = DEMO()
+    demo.fill_part('Vessel')
+    demo.fill_part('Blanket')
+    demo.plot_ports()
+  
+
+    rp,zp = demo.port['P0']['right']['r'],demo.port['P0']['right']['z']                  
+    pl.plot(rp,zp,'k',lw=3)
+    '''
+    xc = [rp[0],zp[0]]
+    nhat = np.array([rp[1]-rp[0],zp[1]-zp[0]])
+    sal.tf.loop_interpolators(offset=0)  # construct TF interpolators
+    loop = sal.tf.fun['out']
+
+    Lo = minimize_scalar(SALOME.OIS_placment,method='bounded',
+                         args=(loop,(rp[0],zp[0])),bounds=[0,1]).x
+    xo = [Lo,0]             
+    L = minimize(SALOME.intersect,xo,method='L-BFGS-B', 
+                 bounds=([0.1,0.9],[0,15]),args=(xc,nhat,loop)).x
+    pl.plot(loop['r'](L[0]),loop['z'](L[0]),'o')
+    '''
+
 
     

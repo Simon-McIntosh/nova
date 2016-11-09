@@ -334,7 +334,7 @@ class Sloop(object):  # polybezier
         self.xo['flat'] = {'value':0,'lb':0,'ub':0.8}  # fraction outboard straight
         self.xo['tilt'] = {'value':0,'lb':-45,'ub':45}  # outboard angle [deg]
         self.oppvar = list(self.xo.keys())
-        self.set_l({'value':0.8,'lb':0.75,'ub':1.5})  # 1/tesion
+        self.set_l({'value':0.8,'lb':0.65,'ub':1.5})  # 1/tesion
         #self.oppvar.remove('flat')
         #self.oppvar.remove('tilt')
 
@@ -560,7 +560,8 @@ class Sloop(object):  # polybezier
         
 class Profile(object):
     
-    def __init__(self,name,family='S',part='TF',npoints=100,**kwargs):
+    def __init__(self,name,family='S',part='TF',npoints=100,
+                 load=False,**kwargs):
         self.name = name
         self.part = part
         self.initalise_loop(family,npoints)  # initalize loop object
@@ -569,10 +570,11 @@ class Profile(object):
         self.read_loop_dict()
         self.nTF=kwargs.get('nTF','unset')
         self.obj=kwargs.get('obj','unset')
-        try:  # try to load loop using kwargs or unset data
-            self.load(nTF=self.nTF,obj=self.obj)
-        except:
-            pass
+        if load:
+            try:  # try to load loop using kwargs or unset data
+                self.load(nTF=self.nTF,obj=self.obj)
+            except:
+                pass
         
     def initalise_loop(self,family,npoints=100):
         self.family = family  # A==arc, D==Princton-D, S==spline

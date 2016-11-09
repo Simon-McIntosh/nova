@@ -21,7 +21,7 @@ rc = {'figure.figsize':[8/ar,8],'savefig.dpi':100, #*12/16
       'lines.linewidth':0.75}
 sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
         font_scale=1.5,rc=rc)
-config = 'SFm'
+config = 'DEMO_SN54'
 pkl = PKL(config)
 sf,eq,inv = pkl.fetch(['sf','eq','inv'])
 

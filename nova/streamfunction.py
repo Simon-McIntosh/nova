@@ -55,7 +55,6 @@ class SF(object):
                 self.eqdsk[key] /= self.norm  # per radian
             for key in ['ffprim','pprime']:
                 self.eqdsk[key] *= self.norm  # per Webber/radian  
-        print(self.norm)
         self.b_scale = 1  # flux function scaling
 
     def trim_r(self,rmin=1.5):

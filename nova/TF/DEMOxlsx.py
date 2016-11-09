@@ -15,6 +15,8 @@ rc = {'figure.figsize':[7,7*12/9],'savefig.dpi':100, #
       'lines.linewidth':1.5}
 sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
+color = sns.color_palette('Paired',12)
+ic = count(0)
         
 def get_label(label,label_array,force=False,part=None):
     if label != None:
@@ -85,8 +87,7 @@ def cluster_points(r,z):
         dx = []
         for cl in cluster:
             rc,zc = cluster[cl]['r'],cluster[cl]['z']
-            dx.append(np.min(norm([r-rc,z-zc],
-                                            axis=0)))
+            dx.append(np.min(norm([r-rc,z-zc],axis=0)))
         if len(dx) == 0 or np.min(dx) > 2*dx_median:  # new
             cl = 'group{:1.0f}'.format(next(i))
             cluster[cl] = {}
@@ -178,7 +179,7 @@ class DEMO(object):
     def get_ports(self,plot=False):
         x = self.parts['Vessel']['ports']
         clusters = cluster_points(x['r'],x['z'])
-        self.port = OrderedDict()
+        port = OrderedDict()
         for i,cl in enumerate(clusters): 
             r,z = clusters[cl]['r'],clusters[cl]['z']
             switch = r.max()-r.min() < 0.5*(z.max()-z.min())  
@@ -201,23 +202,44 @@ class DEMO(object):
             n = len(r)
             count = {'left':0,'right':0}
             p = 'P{:1.0f}'.format(i)
-            self.port[p] = {'left':{'r':np.zeros(n),'z':np.zeros(n)},
+            port[p] = {'left':{'r':np.zeros(n),'z':np.zeros(n)},
                             'right':{'r':np.zeros(n),'z':np.zeros(n)}}
             for r_,z_ in zip(r,z):   
                 for dot,side in zip([1,-1],['left','right']):
                     if dot*np.dot([r_-r_fit[0],z_-z_fit[0]],n_hat) > 0:
-                        self.port[p][side]['r'][count[side]] = r_
-                        self.port[p][side]['z'][count[side]] = z_
+                        port[p][side]['r'][count[side]] = r_
+                        port[p][side]['z'][count[side]] = z_
                         count[side] += 1
             for side in ['left','right']:
                 for var in ['r','z']:  # trim
                     n = count[side]
-                    self.port[p][side][var] = self.port[p][side][var][:n]
-                if plot:
-                    pl.plot(self.port[p][side]['r'],self.port[p][side]['z'],
-                            zorder=3,
-                            color=sns.color_palette('Set2',7)[6])
-                        
+                    port[p][side][var] = port[p][side][var][:n]
+        ro = np.mean(self.parts['Blanket']['r'])
+        zo = np.mean(self.parts['Blanket']['z'])
+        theta = np.zeros(len(port))
+        for i,p in enumerate(port):
+            theta[i] = np.arctan2(port[p]['left']['z'][0]-zo,
+                                  port[p]['left']['r'][0]-ro)
+        index = list(np.argsort(theta))
+        pkey = list(port.keys())
+        self.port = OrderedDict()
+        for i,indx in enumerate(index):
+            psort = 'P{:1.0f}'.format(i)
+            self.port[psort] = port[pkey[indx]] 
+        
+        if plot:
+            self.plot_ports()
+ 
+    def plot_ports(self):
+        for p in self.port:
+            for s in self.port[p]:
+                if s == 'left':
+                    c=color[8]
+                else:
+                    c=color[8]
+                pl.plot(self.port[p][s]['r'],self.port[p][s]['z'],
+                        zorder=3,color=c,lw=1)
+                    
     def get_limiters(self,plot=False):
         x = self.parts['Plasma']['out']
         self.limiter = OrderedDict()
@@ -252,25 +274,30 @@ class DEMO(object):
             pl.plot(r,z,color=0.5*np.ones(3))
           
     def fill_loops(self):
-        color = cycle(sns.color_palette('Set2',5))
         for part in self.parts:
             try:
                 geom.polyfill(self.parts[part]['r'],
-                              self.parts[part]['z'],color=next(color))       
+                              self.parts[part]['z'],color=color(next(ic)))       
             except:
                 pass
         set_figure()
         
     def fill_part(self,part):
-        cindex = list(self.parts.keys()).index(part)
+        if part == 'TF_Coil':
+            cindex = len(self.parts.keys())
+        else:
+            cindex = list(self.parts.keys()).index(part)-1
         geom.polyfill(self.parts[part]['r'],self.parts[part]['z'],
-                      color=sns.color_palette('Set2',5)[cindex])   
+                      color=color[cindex])   
 
     def plot(self):
         for part in self.parts:
             for loop in self.parts[part]:
-                pl.plot(self.parts[part][loop]['r'],
-                        self.parts[part][loop]['z'],'.',markersize=5.0)
+                try:
+                    pl.plot(self.parts[part][loop]['r'],
+                            self.parts[part][loop]['z'],'.',markersize=5.0)
+                except:
+                    pass
                         
     def write(self):
         filename = 'DEMO1_sorted'
@@ -324,131 +351,11 @@ class DEMO(object):
 if __name__ is '__main__':          
         demo = DEMO()
         
-        #demo.fill_loops()
+        demo.fill_loops()
 
-        
+        demo.plot()
+        demo.plot_ports()
         #demo.write()
         
-        #demo.plot()
-        set_figure()
-
-        from nova.config import Setup
-        from nova.streamfunction import SF
-        from nova.radial_build import RB
-        from nova.elliptic import EQ
-        from nova.coils import PF,TF
-        from nova.inverse import INV
-        
-        import seaborn as sns
-        rc = {'figure.figsize':[8*12/16,8],'savefig.dpi':120, # 
-              'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
-              'lines.linewidth':2}
-        sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
-                font_scale=7/8,rc=rc)
-        
-        config = 'DEMO_SN'
-        setup = Setup(config)
-        sf = SF(setup.filename)
-        sf.get_boundary(plot=True)
-        
-        config = 'DEMO_SNb'
-        setup = Setup(config)
-        sf = SF(setup.filename)
-        sf.get_boundary(plot=True)
-        
-        pf = PF(sf.eqdsk)
-        eq = EQ(sf,pf,limit=[4.5,14.5,-8,8],n=1e4) 
-        rb = RB(setup,sf)
-        #sf.contour(plot_vac=True)
         
         
-        #sf.get_legs(debug=True)
-        
-        
-        rb.set_firstwall(sf.eqdsk['xlim'],sf.eqdsk['ylim'])
-        pl.plot(rb.Rb,rb.Zb)
-
-        
-        sf.sol(dr=3e-3)
-        rb.get_sol(plot=True)
-       
-        
-        pl.plot(sf.eqdsk['xlim'],sf.eqdsk['ylim'])
-        
-        r = demo.parts['Vessel']['r']  # set vessel boundary
-        z = demo.parts['Vessel']['z']
-        
-        r,z = geom.offset(r,z,0.2)  # 200mm offset from vessel 
-        r,z = geom.rzSLine(r,z,npoints=20)
-        rb.loop = geom.Loop(r,z)
-        
-
-
-        #sf.sol(plot=True)
-        
-        '''
-        nTF = 18
-        tf = TF(shape={'vessel':rb.loop,'pf':pf,'sf':sf,'fit':True,
-                       'setup':setup,'coil_type':'S','config':config},nTF=nTF)
-        
-        #tf = TF(shape={'coil_type':'S','config':config,'sf':sf})  
-                       
-
-        tf.coil.plot()
-        tf.fill(text=True)
-        tf.plot_oppvar()
-        '''
-
-
-
-        '''
-        referance = Dcoil()
-        x = referance.draw()
-        referance.plot()
-        self.get_coil_loops(x['r'],x['z'],profile='in')
-        coil = {'Rcl':self.Rcl,'Zcl':self.Zcl,
-                'nTF':self.nTF,'Iturn':self.Iturn}
-        rp = ripple(plasma={'config':'SN'},coil=coil)
-        print('ref ripple',rp.get_ripple())
-        '''  
-        
-        '''
-        rb.Rb,rb.Zb = demo.fw['r'],demo.fw['z']  # set radial build first wall
-        rb.trim_sol(Nsol=3,update=False,plot=False)
-        inv = INV(sf,pf,eq)
-        
-        inv.fix_boundary_psi(N=23,alpha=1-1e-4,factor=1)  # add boundary points
-        inv.fix_boundary_feild(N=23,alpha=1-1e-4,factor=1)  # add boundary points
-        inv.add_null(factor=1,point=sf.Xpoint)
-        for leg in ['inner','outer']:
-            point = [sf.legs[leg]['R'][0][-1],sf.legs[leg]['Z'][0][-1]]
-            #if leg == 'inner':
-            #    point[1] += 0.4
-            inv.add_alpha(1,factor=1,point=point)
-        #inv.fix['z'] += 0.3
-        inv.plot_fix()
-        '''
-        
-        '''
-        Lpf = inv.grid_PF(nPF=5)
-        Lcs = inv.grid_CS(nCS=5)
-        Lo = np.append(Lpf,Lcs)
-        inv.eq.coils()  # re-grid
-        inv.update_coils()
-        '''
-
-        '''
-        inv.initalise_plasma = True
-        inv.set_plasma()
-        inv.swing_fix(0)
-        inv.solve_slsqp()
-        '''
-        
-        '''
-        pf.plot(coils=pf.coil,label=False,plasma=False,current=False) 
-        
-        #eq.gen_opp()
-        #eq.run()
-        rb.trim_sol(Nsol=3,update=True,plot=True)
-        sf.contour(Nlevel=31,plot_vac=False)
-        '''

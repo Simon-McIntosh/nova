@@ -27,6 +27,8 @@ class Shape(object):
             self.tf = TF(self.profile)      
             self.cage = coil_cage(nTF=nTF,rc=self.tf.rc,
                                   plasma={'config':eqconf})
+            x = self.tf.get_loops(self.loop.draw())
+            self.cage.set_TFcoil(x['cl'])
         else:
             if self.obj is 'E':
                 errtxt = 'nTF and SFconfig keywords not set\n'
@@ -113,14 +115,16 @@ class Shape(object):
         
 if __name__ is '__main__': 
 
-    config = 'DEMO_SN'
-    config = {'TF':'SN','eq':'SN_3PF_12TF'}
+
+    config = {'TF':'SN','eq':'DEMO_SN'}
     #setup = Setup(config)
     #sf = SF(setup.filename)
     #sf.get_boundary(plot=True)
     
     profile = Profile(config['TF'],family='S',part='TF')
-    shp = Shape(profile,obj='L',nTF=12,eqconf=config['eq'])
+    shp = Shape(profile,obj='L',nTF=16,eqconf=config['eq'])
+          
+    #shp.cage.pattern(plot=True)
 
     demo = DEMO()
     #demo.fill_loops()

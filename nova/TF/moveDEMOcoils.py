@@ -23,7 +23,7 @@ sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
 Color = cycle(sns.color_palette('Set2'))
 
 pkl = PKL('DEMO_SN54')
-nTF = 12
+nTF = 16
 
 config = {'TF':'SN','eq':'DEMO_SN'}
 setup = Setup(config['eq'])
@@ -31,14 +31,14 @@ sf = SF(setup.filename)
 
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
-tf = TF(Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L'))
+tf = TF(Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L',load=True))
 
 eq = EQ(sf,pf,dCoil=2.0,sigma=0,boundary=sf.get_sep(expand=1.5),n=1e4) 
 eq.gen_opp()
 
 
 inv = INV(sf,eq,tf)
-Lpf = inv.grid_PF(nPF=3)
+Lpf = inv.grid_PF(nPF=4)
 Lcs = inv.grid_CS(nCS=3,Zbound=[-8.2,11],gap=0.1)
 Lo = np.append(Lpf,Lcs)
 inv.update_coils()
@@ -49,7 +49,7 @@ inv.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary points
 inv.add_null(factor=1,point=sf.Xpoint)
         
 inv.set_swing()
-inv.update_limits(LCS=[-9.5,11])
+inv.update_limits(LCS=[-9.5,9.5])
 
 Lo = inv.optimize(Lo)
 
@@ -60,7 +60,7 @@ inv.solve_slsqp()
 
 eq.get_Vcoil() 
 eq.gen_opp()
-rb.firstwall(calc=True,plot=True,debug=False)
+rb.firstwall(mode='calc',plot=True,debug=False)
 sf.contour()
 
 pf.plot(coils=pf.coil,label=True,plasma=True,current=True) 
@@ -77,6 +77,7 @@ pl.tight_layout()
 
 loops.plot_variables(inv.Io,scale=1,postfix='MA')
 loops.plot_variables(inv.Lo,scale=1)
+
 pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
 
 sf.eqwrite(pf,config=config['TF']+'_{:d}PF_{:d}TF'.format(inv.nPF,nTF))

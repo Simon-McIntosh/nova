@@ -11,10 +11,13 @@ from nova.inductance import neumann
 import time
 from nova.coils import TF
 from nova.TF.DEMOxlsx import DEMO
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 class coil_cage(object):
-    def __init__(self,nTF=18,rc=0.5,**kwargs):
-        self.nTF = nTF
+    def __init__(self,nTF=18,rc=0.5,ny=3,**kwargs):
+        self.nTF = nTF  # TF coil number
+        self.ny = ny  #  winding pack depth discritization
         self.rc = rc
         if 'plasma' in kwargs:
             self.get_seperatrix(alpha=1-1e-3,**kwargs['plasma'])
@@ -61,15 +64,44 @@ class coil_cage(object):
         self.coil_loop[:,0],self.coil_loop[:,2] = \
         geom.rzSLine(r,z,npoints=self.npoints)  # coil centerline
         self.gfl = cc.GreenFeildLoop(self.coil_loop,rc=self.rc,smooth=smooth)
+        self.pattern()
         self.amp_turns()  # set coil cage amp-turns
-        
+
+    def pattern(self,plot=False):  # generate winding-pack pattern
+        ro = self.coil_loop[0,0]  # inboard centreline
+        rlim = 0.6*np.max(self.coil_loop[:,0])
+        dL = ro*np.tan(np.pi/self.nTF)  # toroidal winding-pack width
+        self.dYwp = np.linspace(dL*(1/self.ny-1),dL*(1-1/self.ny),self.ny) 
+        self.Tcoil = np.linspace(0,2*np.pi,self.nTF,endpoint=False)
+        if plot:
+            fig = plt.figure(figsize=(8,6))
+            ax1 = fig.add_subplot(121,projection='3d')
+            ax1.axis('equal')
+            ax1.axis('off')
+            ax2 = fig.add_subplot(122)
+            ax2.axis('equal')
+            ax2.axis('off')
+            color = sns.color_palette('Set2',self.nTF)
+            for i,tcoil in enumerate(self.Tcoil):
+                for dy in self.dYwp:  # wp pattern
+                    loop = self.gfl.transform(tcoil,dy)[0]  # close loop
+                    loop = np.append(loop,np.reshape(loop[0,:],(1,-1)),axis=0)  
+                    ax1.plot(loop[:,0],loop[:,1],loop[:,2],color=color[i])
+                    ax2.plot(loop[:,0],loop[:,1],color=color[i])     
+            ax1.set_xlim(-rlim,rlim)
+            ax1.set_ylim(-rlim,rlim)
+            ax1.set_zlim(-rlim,rlim)
+            ax2.set_xlim(-rlim,rlim)
+            ax2.set_ylim(-rlim,rlim)   
+            pl.tight_layout()
+            
     def amp_turns(self):
         rc,zc = self.eqdsk['rcentr'],self.eqdsk['zmagx']
         self.Iturn = 1
         Bo = self.point((rc,0,zc),variable='feild')
         self.Iturn = self.eqdsk['bcentr']/Bo[1]  # single coil amp-turns
 
-    def point(self,s,variable='ripple'):  # s==3D point vector 
+    def point(self,s,variable='ripple',ny=3):  # s==3D point vector 
         B = np.zeros(2)
         n = np.array([0,1,0])
         if variable == 'ripple':
@@ -84,8 +116,9 @@ class coil_cage(object):
             sr = np.dot(s,geom.rotate(theta))
             nr = np.dot(n,geom.rotate(theta))
             Bo = np.zeros(3)
-            for tcoil in np.linspace(0,2*np.pi,self.nTF,endpoint=False):
-                Bo += self.Iturn*cc.mu_o*self.gfl.B(sr,theta=tcoil)
+            for tcoil in self.Tcoil:
+                for dy in self.dYwp:  # wp pattern
+                    Bo += self.Iturn*cc.mu_o*self.gfl.B(sr,theta=tcoil,dy=dy)/ny
             B[j] = np.dot(nr,Bo)
         if variable == 'ripple':
             ripple = 1e2*(B[0]-B[1])/np.sum(B)
@@ -179,7 +212,7 @@ class coil_cage(object):
             CS = pl.contour(R,Z,rpl,levels=levels,colors=[0.6*np.ones(3)])
             zc = CS.collections[iplasma]
             pl.setp(zc, color=[0.4*np.ones(3)])
-            pl.clabel(CS, inline=1, fontsize='xx-small',fmt='%1.2f')
+            pl.clabel(CS, inline=1, fontsize='x-small',fmt='%1.2f')
         else:
             pl.contour(R,Z,rpl)
             

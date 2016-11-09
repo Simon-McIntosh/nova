@@ -13,6 +13,7 @@ import amigo.geom as geom
 from nova.loops import Profile
 from nova.shape import Shape
 from nova.TF.DEMOxlsx import DEMO
+from nova.force import force_feild
 
 import seaborn as sns
 rc = {'figure.figsize':[12,12*12/16],'savefig.dpi':100, # 
@@ -28,6 +29,8 @@ setup = Setup(config)
 
 sf = SF(setup.filename)
 pf = PF(sf.eqdsk)
+
+
 pf.plot(coils=pf.coil,label=True,plasma=False,current=True) 
 levels = sf.contour()
 
@@ -35,18 +38,20 @@ levels = sf.contour()
 rb = RB(setup,sf)
 rb.firstwall('eqdsk',plot=True,debug=True)
 #rb.vessel()
-'''
-demo = DEMO()
-demo.fill_loops()
-demo.get_ports(plot=True)
-'''
 
-eq = EQ(sf,pf,dCoil=0.25,sigma=0,boundary=rb.get_fw(expand=0.25),n=2e4)  
+#demo = DEMO()
+#demo.fill_loops()
+#demo.get_ports(plot=True)
+
+
+eq = EQ(sf,pf,dCoil=0.25,sigma=0,boundary=rb.get_fw(expand=0.25),n=1e4)  
 eq.gen_opp()
 
-pf.plot(coils=eq.coil,label=False,plasma=True,current=False) 
+#ff = force_feild(pf.index,pf.coil,eq.coil,eq.plasma_coil,plot=True)
 
+pf.plot(coils=eq.coil,label=False,plasma=True,current=False) 
 sf.contour(levels=levels)
+
 #pl.plot(sf.eqdsk['xlim'],sf.eqdsk['ylim'])
 
 #rb = RB(setup,sf)

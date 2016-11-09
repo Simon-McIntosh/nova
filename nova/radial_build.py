@@ -162,7 +162,7 @@ class RB(object):
        
     def get_fw(self,expand=0):  # generate boundary dict for elliptic
         if not hasattr(self,'Rb'):  # first wall not set
-            self.firstwall(mode='read',plot=False,debug=False)
+            self.firstwall(mode='eqdsk',plot=False,debug=False)
         boundary = {'R':self.Rb,'Z':self.Zb,'expand':expand}
         return boundary
         
@@ -598,7 +598,7 @@ class RB(object):
         
     def FWfill(self,**kwargs):
         if not hasattr(self,'Rb'):  # first wall not set
-            self.firstwall(mode='read',plot=False,debug=False)  # load fw
+            self.firstwall(mode='eqdsk',plot=False,debug=False)  # load fw
         self.loop.R,self.loop.Z = geom.rzSLine(self.Rb[::-1],self.Zb[::-1],
                                      npoints=self.npoints,Hres=False)
         self.loop.fill(loop=True,alpha=0.7,**kwargs)

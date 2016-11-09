@@ -37,16 +37,17 @@ class GreenFeildLoop(object):
         self.loop = self.loop_cl[:-1,:]  # re-open loop
         self.npoints = len(self.loop)
         
-    def rotate(self,theta):
+    def transform(self,theta,dy):  # translate / rotate
+        loop,dL = np.copy(self.loop),np.copy(self.dL)
+        if dy != 0:  # translate in y
+            loop[:,1] += dy
         if theta != 0:  # rotate about z-axis
-            loop = np.dot(self.loop,geom.rotate(theta))
-            dL = np.dot(self.dL,geom.rotate(theta))
-        else:
-            loop,dL = self.loop,self.dL
+            loop = np.dot(loop,geom.rotate(theta))
+            dL = np.dot(dL,geom.rotate(theta))
         return loop,dL
-        
-    def A(self,point,theta=0):
-        loop,dL = self.rotate(theta)
+  
+    def A(self,point,theta=0,dy=0):  # vector potential
+        loop,dL = self.transform(theta,dy)
         point = np.array(point)*np.ones((self.npoints,3))  # point array
         r = point-loop  # point-segment vectors
         r_mag = np.tile(norm(r,axis=1),(3,1)).T
@@ -56,8 +57,8 @@ class GreenFeildLoop(object):
         Apot = np.sum(core*dL/r_mag,axis=0)/(4*np.pi)
         return Apot
         
-    def B(self,point,theta=0):  # 3D feild from arbitrary loop
-        loop,dL = self.rotate(theta)
+    def B(self,point,theta=0,dy=0):  # 3D feild from arbitrary loop
+        loop,dL = self.transform(theta,dy)
         point = np.array(point)*np.ones((self.npoints,3))  # point array
         r = point-loop  # point-segment vectors
         r1 = r-dL/2 

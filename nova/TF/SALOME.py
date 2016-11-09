@@ -204,7 +204,7 @@ class SALOME(object):
         
 if __name__ is '__main__':
     
-    nPF,nTF = 4,16
+    nPF,nTF = 3,16
     config = {'TF':'SN','eq':'SN_{:d}PF_{:d}TF'.format(nPF,nTF)}
     sal = SALOME(config,nTF=nTF)
     

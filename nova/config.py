@@ -174,6 +174,10 @@ class Setup(object):
         elif configuration == 'DEMO_SNb':
             self.dataname = 'DEMO_SN'
             self.filename = 'Equil_AR3d1_2016_01_v1_SN_SOF_baseline_2016_opt.eqdsk'
+            self.firstwall['div_ex'] = 0.25
+            self.firstwall['trim'] = [0.88,0.95]  # trim fraction (in/out)
+            self.targets['inner'] = {'L2D':0.6}
+            self.targets['outer'] = {'L2D':0.65}
 
         elif configuration == 'DEMO_SNc':
             self.dataname = 'DEMO_SN'

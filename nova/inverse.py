@@ -13,6 +13,8 @@ import multiprocessing
 from nova import loops
 import nlopt
 from nova.force import force_feild
+from scipy.optimize import minimize_scalar
+from copy import deepcopy
 
 class INV(object):
     
@@ -158,14 +160,14 @@ class INV(object):
             elif Ctype == 'CS': 
                 self.CS_coils = list(self.eq.pf.coil.keys())    
 
-    def remove_active(self,Clist,Ctype='all',full=False):  # list of coil names
+    def remove_active(self,Clist=[],Ctype='all',full=False):  # list of coil names
         if full: 
             self.adjust_coils = list(self.eq.pf.coil.keys())  # add all
             if Ctype == 'PF':
                 self.PF_coils = list(self.eq.pf.coil.keys())
             elif Ctype == 'CS':
                 self.CS_coils = list(self.eq.pf.coil.keys())  
-        if Clist:
+        if len(Clist)>0:
             for name in Clist.copy():
                 if isinstance(name,int):
                     name = self.Cname(name)  # prepend 'Coil'
@@ -216,26 +218,7 @@ class INV(object):
             r += delta[1]
             z -= delta[0]
         return r,z
-        
-    def add_coil(self,Ctype=None,**kwargs):
-        r,z = self.get_point(**kwargs)
-        index,i = np.zeros(len(self.eq.pf.coil.keys())),-1
-        for i,name in enumerate(self.eq.pf.coil.keys()):
-            index[i] = name.split('Coil')[-1]
-        try:
-            Cid = index.max()+1
-        except:
-            Cid = 0
-        name = 'Coil{:1.0f}'.format(Cid)
-        self.add_active([Cid],Ctype=Ctype)
-        delta = np.ones(2)
-        for i,dx in enumerate(['dr','dz']):
-            if dx in kwargs.keys():
-                delta[i] = kwargs.get(dx)
-        self.eq.pf.coil[name] = {'r':r,'z':z,
-                                 'dr':delta[0],'dz':delta[1],'I':1e6,
-                                 'rc':np.sqrt(delta[0]**2+delta[1]**2)/2}
-     
+
     def plot_coils(self):
         Color = cycle(sns.color_palette('Set2',12))
         for state,marker in zip(['passive','active'],['o','d']):
@@ -526,6 +509,26 @@ class INV(object):
             Zc[i] = Z[i]+self.gap/2+dZ[i]/2
         return Zc,dZ
         
+    def add_coil(self,Ctype=None,**kwargs):
+        r,z = self.get_point(**kwargs)
+        index,i = np.zeros(len(self.eq.pf.coil.keys())),-1
+        for i,name in enumerate(self.eq.pf.coil.keys()):
+            index[i] = name.split('Coil')[-1]
+        try:
+            Cid = index.max()+1
+        except:
+            Cid = 0
+        name = 'Coil{:1.0f}'.format(Cid)
+        self.add_active([Cid],Ctype=Ctype)
+        delta = np.ones(2)
+        for i,dx in enumerate(['dr','dz']):
+            if dx in kwargs.keys():
+                delta[i] = kwargs.get(dx)
+        I = kwargs.get('I',1e6)
+        self.eq.pf.coil[name] = {'r':r,'z':z,
+                                 'dr':delta[0],'dz':delta[1],'I':I,
+                                 'rc':np.sqrt(delta[0]**2+delta[1]**2)/2}
+        
     def grid_CS(self,nCS=3,Ro=2.9,Zbound=[-10,9],dr=0.818,gap=0.1):  #dr=1.0, dr=1.25,Ro=3.2,dr=0.818
         self.gap = gap
         dz = (np.diff(Zbound)-gap*(nCS-1))/nCS  # coil height
@@ -542,6 +545,42 @@ class INV(object):
         for L in Lo:
             self.add_coil(Lout=L,Ctype='PF',norm=self.TFoffset)    
         return Lo
+        
+    def grid_coils(self,nCS=None,Zbound=None,gap=0.1):  # fit PF and CS coils to updated TF coil
+        self.gap = gap
+        coil = deepcopy(self.eq.pf.coil)  # copy pf coilset
+        self.delete_active()
+        TFloop = self.tf.fun['out']
+        def norm(L,loop,point):
+            return (loop['r'](L)-point[0])**2+(loop['z'](L)-point[1])**2
+        Lpf = np.zeros(self.eq.pf.index['PF']['n'])
+        for i,name in enumerate(self.eq.pf.index['PF']['name']):
+            c = coil[name]
+            Lpf[i] = minimize_scalar(norm,method='bounded',
+                        args=(TFloop,(c['r'],c['z'])),bounds=[0,1]).x
+            self.add_coil(Lout=Lpf[i],Ctype='PF',norm=self.TFoffset,
+                          dr=c['dr'],dz=c['dz'],I=c['I']) 
+        if Zbound == None:
+            zmin = [coil[name]['z']-coil[name]['dz']/2 
+                    for name in self.eq.pf.index['CS']['name']]
+            zmax = [coil[name]['z']+coil[name]['dz']/2 
+                    for name in self.eq.pf.index['CS']['name']]
+            Zbound = [np.min(zmin)-gap/2,np.max(zmax)+gap/2]
+            self.update_limits(LCS=Zbound)    
+        if nCS == None:
+            Lcs = np.zeros(self.eq.pf.index['CS']['n']+1)
+            for i,name in enumerate(self.eq.pf.index['CS']['name']):
+                c = coil[name]
+                self.add_coil(point=(c['r'],c['z']),Ctype='CS',
+                              dr=c['dr'],dz=c['dz'],I=c['I']) 
+                if i == 0:
+                    Lcs[0] = c['z']-c['dz']/2-gap/2
+                Lcs[i+1] = c['z']+c['dz']/2+gap/2
+        else:
+            nCS = self.eq.pf.index['CS']['n']
+            Lcs = self.grid_CS(nCS=nCS,Zbound=Zbound,gap=gap)
+        return np.append(Lpf,Lcs)
+                                
   
     def get_rms_bndry(self):
         self.eq.run(update=False)
@@ -895,22 +934,11 @@ class INV(object):
                 grad[i+self.nPF-1,i+self.nPF+1] = -1
         constraint[:self.nPF-1] = L[:self.nPF-1]-L[1:self.nPF]+PFdL  # PF 
         constraint[self.nPF-1:] = L[self.nPF:-1]-L[self.nPF+1:]+CSdL  # CS 
-    '''    
-    def update_position_vector(self,Lnorm,grad):
-        rms = self.update_position(Lnorm,update_area=True,store_update=True)
-        if grad.size > 0:
-            grad[:] = op.approx_fprime(Lnorm,self.update_position,1e-7)
-        return rms
-    '''    
-    def minimize(self,L,method='ls'):  # rhobeg=0.1,rhoend=1e-4
+
+    def minimize(self,L,method='ls'):
         self.iter['position'] == 0 
         self.set_Lo(L)  # set position bounds
         Lnorm = loops.normalize_variables(self.Lo)
-        
-        #Lnorm = [0.03006534,0.22812546,0.39390136,0.7788757,0.96460743,
-        #         0.02300626,0.44926846,0.78848084,0.9652009]
-        #Lnorm = [0.09391703,0.19395199,0.40216251,0.63473425,0.76778217,
-        #         0.95275842,0.10705636,0.33720631,0.59022256,0.80220632]
         
         if method == 'bh':  # basinhopping
             #minimizer = {'method':'SLSQP','jac':True,#'args':True,'options':{'eps':1e-3}, #'jac':True,

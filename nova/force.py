@@ -2,6 +2,7 @@ import nova.cross_coil as cc
 import pylab as pl
 import numpy as np
 import matplotlib
+from amigo import geom
 
 class force_feild(object):
     
@@ -116,6 +117,41 @@ class force_feild(object):
                     va = 'top' 
                 pl.text(r,z+zarrow,'{:1.2f}MN'.format(F[1]),
                         ha='center',va=va,fontsize=1.1*fs,color=0.5*np.ones(3))
+                
+    def topple(self,point,J,cage,Bpoint,method='function',**kwargs):
+        # eq.Bpoint == point calculated method (slow)
+        # sf.Bpoint == spline interpolated method (fast)
+        x = {'cl':{'r':cage.coil_loop[:,0],'z':cage.coil_loop[:,2]}}
+        if 'streamfunction' in Bpoint.__str__():  
+            topright = Bpoint((np.max(x['cl']['r']),
+                               np.max(x['cl']['z'])),
+                              check_bounds=True)    
+            bottomleft = Bpoint((np.max(x['cl']['r']),
+                                 np.max(x['cl']['z'])),
+                                check_bounds=True)
+            if not(topright and bottomleft):
+                errtxt = 'TF coil extends outside Bpoint interpolation grid\n'
+                errtxt = 'extend sf grid\n'
+                raise ValueError(errtxt)
+        if method == 'function':  # calculate tf feild as fitted 1/r function
+            i = np.argmax(x['cl']['z'])
+            ro,zo = x['cl']['r'][i],x['cl']['z'][i]
+            bm = ro*cage.point((ro,0,zo),variable='feild')[1]  # TF moment
+        elif method != 'BS':  # calculate tf feild with full Biot-Savart
+            errtxt = 'invalid tf feild method {}\n'.format(method)
+            errtxt += 'select method from \'function\' or \'BS\'\n'
+            raise ValueError(errtxt) 
+        if method == 'function':
+            b = np.zeros(3)
+            b[1] = bm/point[0]  # TF feild (fast version / only good for TF cl)
+        else:
+            b = cage.point(point,variable='feild') # (slow / correct)
+        theta = np.arctan2(point[1],point[0])
+        pf_point = np.dot(geom.rotate(-theta,'z'),point)  # rotate to PF plane
+        pf_b = Bpoint([pf_point[0],pf_point[2]])  # PF feild (sf-fast, eq-slow)
+        b += np.dot(geom.rotate(theta,'z'),[pf_b[0],0,pf_b[1]])  # add PF
+        Fbody = np.cross(J,b)  # body force
+        return Fbody
 
 if __name__ is '__main__':  # test functions
     from nova.config import Setup

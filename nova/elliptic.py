@@ -283,7 +283,6 @@ class EQ(object):
     def plasma_core(self,update=True):
         if update:  # calculate plasma contribution
             rbdry,zbdry = self.sf.get_boundary(alpha=1-1e-3)
-            #rbdry,zbdry = self.sf.get_boundary(alpha=0.8)  # !!!!!!!! # for vde
             R,Z = geom.inloop(rbdry,zbdry,
                               self.r2d.flatten(),self.z2d.flatten())
             self.Ip,self.Nplasma = 0,0
@@ -300,11 +299,8 @@ class EQ(object):
                     -self.sf.FFprime(psi)
                     self.Ip -= self.dA*self.bpl[indx]/(self.mu_o*r)
             scale_plasma = self.sf.cpasma/self.Ip
-            #scale_plasma = 1
-            #print('scale_plasma',scale_plasma)
             self.sf.b_scale = scale_plasma
         for i,indx in zip(range(self.Nplasma),self.plasma_index):
-            #self.bpl[indx] *= self.sf.b_scale
             self.b[indx] = self.bpl[indx]*self.sf.b_scale
         
     def set_plasma_coil(self,delta=0):
@@ -427,8 +423,11 @@ class EQ(object):
         for index in [0,-1]:
             self.set_control_current(index=index,factor=0)
 
-    def gen(self,ztarget,Zerr=1e-3,kp=1.5,ki=0.15,Nmax=50,**kwargs): 
-        self.ztarget = ztarget
+    def gen(self,ztarget=None,Zerr=1e-3,kp=1.5,ki=0.15,Nmax=50,**kwargs): 
+        if ztarget == None:  # sead plasma magnetic centre vertical target
+            self.ztarget = self.sf.Mpoint[1]
+        else:
+            self.ztarget = ztarget
         Mflag = False
         self.Zerr = np.zeros(Nmax)
         self.reset_control_current()

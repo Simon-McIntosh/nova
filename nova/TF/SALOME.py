@@ -3,6 +3,7 @@ from nova.coils import PF,TF
 from nova.loops import Profile
 from nova.coil_cage import coil_cage
 from nova.streamfunction import SF
+from nova.elliptic import EQ
 from nova.config import Setup
 from scipy.optimize import minimize_scalar,minimize
 import numpy as np
@@ -12,16 +13,19 @@ import seaborn as sns
 import pylab as pl
 from DEMOxlsx import DEMO
 from amigo import geom
+from amigo.ANSYS import table
+from nova.force import force_feild
 
 class SALOME(object):
     
     def __init__(self,config,family='S',nTF=16,obj='L'):
         self.nTF = nTF
+        self.config = config
         datadir = trim_dir('../../Data') 
         file = 'salome_input' #  config #  +'_{}{}{}'.format(family,nTF,obj)
         self.filename = datadir+'/'+file+'.json'
         self.profile = Profile(config['TF'],family=family,load=True,part='TF',
-                               nTF=nTF,obj=obj)
+                               nTF=nTF,obj=obj,npoints=250)
         setup = Setup(config['eq'])
         self.sf = SF(setup.filename)
         self.tf = TF(self.profile,sf=self.sf)   
@@ -32,6 +36,11 @@ class SALOME(object):
         self.cage = coil_cage(nTF=nTF,rc=self.tf.rc,
                               plasma={'config':config['eq']},
                               coil=self.tf.x['cl'])
+        self.eq = EQ(self.sf,self.pf,dCoil=1.0,sigma=0,
+                     boundary=self.sf.get_sep(expand=0.5),n=1e3) 
+        self.eq.plasma()
+        self.ff = force_feild(self.pf.index,self.pf.coil,
+                              self.eq.coil,self.eq.plasma_coil)
         
     def write(self):
         print('writing',self.filename,self.nTF)
@@ -147,37 +156,46 @@ class SALOME(object):
     def OIS_placment(L,TFloop,point):
         err = (point[0]-TFloop['r'](L))**2+(point[1]-TFloop['z'](L))**2
         return err
+        
+    def draw_OIS(self,L,width,thickness,TFloop):
+        dl = width/TFloop['L']
+        rcl = np.array([TFloop['r'](L-dl/2),TFloop['r'](L+dl/2)])
+        zcl = np.array([TFloop['z'](L-dl/2),TFloop['z'](L+dl/2)])
+        ro,zo = np.mean(rcl),np.mean(zcl)
+        L = minimize_scalar(SALOME.OIS_placment,method='bounded',
+                            args=(TFloop,(ro,zo)),bounds=[0,1]).x
+        dr,dz = TFloop['r'](L)-ro,TFloop['z'](L)-zo
+        rcl += dr/2
+        zcl += dz/2
+        dt = np.array([rcl[1]-rcl[0],0,zcl[1]-zcl[0]])
+        dt /= np.linalg.norm(dt)
+        dn = np.cross(dt,np.array([0,1,0]))
+        
+        rcl = np.append(rcl+dn[0]*thickness/2,
+                        rcl[::-1]-dn[0]*thickness/2)
+        zcl = np.append(zcl+dn[2]*thickness/2,
+                        zcl[::-1]-dn[2]*thickness/2)
+        nodes = [[rcl[i],zcl[i]] for i in range(4)]
+        return nodes
 
     def OIS(self,width=3.5,thickness=0.15,rmin=10):
         self.tf.loop_interpolators(offset=0)  # construct TF interpolators
         TFloop = self.tf.fun['cl']
-        dl = width/TFloop['L']
         self.OISsupport = {}
+        '''
         for coil in self.PFsupport:
             node = self.PFsupport[coil]
             r = np.mean([node[2][0],node[3][0]])
             z = np.mean([node[2][1],node[3][1]])
-            if r>rmin and ('Coil1' in coil or 'Coil4' in coil):
+            if r>rmin:# and ('Coil1' in coil or 'Coil4' in coil):
                 L = minimize_scalar(SALOME.OIS_placment,method='bounded',
                                 args=(TFloop,(r,z)),bounds=[0,1]).x
-                rcl = np.array([TFloop['r'](L-dl/2),TFloop['r'](L+dl/2)])
-                zcl = np.array([TFloop['z'](L-dl/2),TFloop['z'](L+dl/2)])
-                ro,zo = np.mean(rcl),np.mean(zcl)
-                L = minimize_scalar(SALOME.OIS_placment,method='bounded',
-                                    args=(TFloop,(ro,zo)),bounds=[0,1]).x
-                dr,dz = TFloop['r'](L)-ro,TFloop['z'](L)-zo
-                rcl += dr/2
-                zcl += dz/2
-                dt = np.array([rcl[1]-rcl[0],0,zcl[1]-zcl[0]])
-                dt /= np.linalg.norm(dt)
-                dn = np.cross(dt,np.array([0,1,0]))
-                
-                rcl = np.append(rcl+dn[0]*thickness/2,
-                                rcl[::-1]-dn[0]*thickness/2)
-                zcl = np.append(zcl+dn[2]*thickness/2,
-                                zcl[::-1]-dn[2]*thickness/2)
-                nodes = [[rcl[i],zcl[i]] for i in range(4)]
+                nodes = self.draw_OIS(L,width,thickness,TFloop)                    
                 self.OISsupport[coil] = nodes
+        '''
+        for i,(L,width) in enumerate(zip([0.4,0.64],[4.5,2.5])):
+            nodes = self.draw_OIS(L,width,thickness,TFloop)                    
+            self.OISsupport['OIS{:d}'.format(i)] = nodes
 
     def plot(self):
         self.tf.fill()
@@ -200,27 +218,179 @@ class SALOME(object):
         rCS = [rnose,rwp,rwp,rnose]
         zCS = [zo,zo,ztop,ztop]
         geom.polyfill(rCS,zCS,color=0.4*np.ones(3))
+        
+    def ansys(self,plot=False):
+        filename = '../../Data/TFload_{:d}'.format(self.nTF)
+        ans = table(filename)
+        ans.f.write('! loading tables for {:d}TF coil concept\n'.format(self.nTF))
+        ans.f.write('! loop length parameterized from 0-1\n')
+        ans.f.write('! loop starts at the inboard midplane\n')
+        ans.f.write('! loop progresses in the anti-clockwise direction\n')
+        ans.f.write('! tables defined with cylindrical coordinate system\n')
+        ans.f.write('! body applied to nodes of winding-pack in cartisean system x,y,z\n')
+        ans.f.write('! winding-pack must be labled as named-selection \'wp\'\n')
+        ans.f.write('\nlocal,11,1,{:1.9f},0,{:1.9f},0,90,0'\
+                    .format(self.sf.mo[0],self.sf.mo[1]))
+        ans.f.write('  ! define local cylindrical coordinate system\n')
+        ans.f.write('csys,0  ! restore to cartesian\n')
+        
+        ans.f.write('\n! per-TF PF coil forces (Fr,Fz) [N]\n')
+        ans.f.write('! order as numbered in plots\n')
+        F = self.ff.get_force()['F']
+        ans.load('F_coil',F/self.nTF)
+        ans.write_array()
+        ans.f.write('\n/nopr  ! suppress large table output\n')
+        
+        self.tf.loop_interpolators(offset=0,full=True)  # construct TF interpolators
+        TFloop = self.tf.fun['cl']
+        
+        ngrid = {'nr':20,'nt':150} #  coordinate interpolation grid
+        ndata = {'nl':150,'nr':3,'ny':3} #  coordinate interpolation grid
+        l = np.linspace(0,1,250)
+        xin,zin = self.tf.fun['in']['r'](l),self.tf.fun['in']['z'](l)
+        rin = np.sqrt((xin-self.sf.mo[0])**2+(zin-self.sf.mo[1])**2)
+        rmin = np.min(rin)
+        xout,zout = self.tf.fun['out']['r'](l),self.tf.fun['out']['z'](l)
+        rout = np.sqrt((xout-self.sf.mo[0])**2,(zout-self.sf.mo[1])**2)
+        rmax = np.max(rout)
+
+        radius = np.linspace(rmin,rmax,ngrid['nr'])
+        theta = np.linspace(-np.pi,np.pi,ngrid['nt'])
+        l_map = np.zeros((ngrid['nr'],ngrid['nt']))
+        dr_map = np.zeros((ngrid['nr'],ngrid['nt']))
+        for i in range(ngrid['nr']):
+            for j in range(ngrid['nt']):
+                x = self.sf.mo[0]+radius[i]*np.cos(theta[j])
+                z = self.sf.mo[1]+radius[i]*np.sin(theta[j])
+                L = minimize_scalar(SALOME.OIS_placment,method='bounded',
+                                        args=(TFloop,(x,z)),bounds=[0,1]).x
+                xl,zl = TFloop['r'](L),TFloop['z'](L)
+                l_map[i,j] = L
+                dr_map[i,j] = np.sqrt((x-xl)**2+(z-zl)**2)*\
+                np.sign(np.dot([x-xl,z-zl],[x-self.sf.mo[0],z-self.sf.mo[1]]))
+                
+        width = self.tf.section['winding_pack']['width']
+        depth = self.tf.section['winding_pack']['depth']
+        cross_section = width*depth
+        l_data = np.linspace(0,1,ndata['nl'])
+        if ndata['nr']>1:
+            dr_data = np.linspace(-width/2,width/2,ndata['nr'])
+        else:
+            dr_data = np.array([0])
+        if ndata['ny']>1:
+            dy_data = np.linspace(-depth/2,depth/2,ndata['ny'])
+        else:
+            dy_data = np.array([0])
+        Fbody = {}
+        for var in ['x','y','z']:
+            Fbody[var] = np.zeros((ndata['nl'],ndata['nr'],ndata['ny']))
+        
+        self.tf.loop_interpolators(offset=0,full=True)  # centreline
+        Jturn = self.cage.Iturn/cross_section
+        for i,l in enumerate(l_data):   
+            print(i)
+            xo = self.tf.fun['cl']['r'](l)
+            zo = self.tf.fun['cl']['z'](l)
+            dxo = self.tf.fun['cl']['dr'](l)
+            dzo = self.tf.fun['cl']['dz'](l)
+            nhat = np.array([dxo,0,dzo])
+            nhat /= np.linalg.norm(nhat)
+            that = np.array([nhat[2],0,-nhat[0]])
+            for j,dr in enumerate(dr_data):
+                for k,dy in enumerate(dy_data):
+                    point = np.array([xo,dy,zo])+dr*nhat
+                    J = Jturn*nhat  # current density vector
+                    Fb = self.ff.topple(point,J,self.cage,self.eq.Bpoint,
+                                           method='BS')  # body force
+                    for m,var in enumerate(['x','y','z']):  # store
+                        Fbody[var][i,j,k] = Fb[m]
+                    if plot:
+                        Fvec = Fb/2*np.linalg.norm(Fb)
+                        pl.arrow(point[0],point[2],Fvec[0],Fvec[2],
+                                 head_width=0.15,head_length=0.3) 
+        print(np.sum(Fbody['x'])*1e-9,np.sum(Fbody['y'])*1e-9,np.sum(Fbody['z'])*1e-9)
+
+        ans.f.write('\n! parametric coil length, fn(theta)\n')
+        ans.load('l_map',l_map,[radius,theta])
+        ans.write(['radus','theta'])
+        ans.f.write('\n! parametric coil offset, fn(theta)\n')
+        ans.load('dr_map',dr_map,[radius,theta])
+        ans.write(['radus','theta'])
+        for var in ['x','y','z']:
+            ans.f.write('\n! winding-pack body force, Fbody_{} [N/m3]\n'.format(var))
+            ans.load('Fbody_{}'.format(var),Fbody[var],
+                     [l_data,dr_data,dy_data])
+            ans.write(['l_map','dr_map','offset'])
+        ans.f.write('/gopr  ! enable output\n')    
+            
+        apdlstr = '''
+pi = 4*atan(1)
+csys,11  ! switch to cylindrical coordinate system
+esel,s,elem,,wp  ! select winding pack (requires named selection 'wp')
+*get,nel,elem,0,count
+*vget,el_sel,elem,,esel  ! selection mask
+*vget,el_id,elem,,elist  ! winding pack selection array
+*vget,el_vol,elem,,geom  ! element volume
+*vget,el_radius,elem,,cent,x  ! element radius
+*vget,el_theta,elem,,cent,y  ! element theta
+*vget,el_offset,elem,,cent,z  ! element axial offset
+*voper,el_theta,el_theta,mult,pi/180  ! convert to radians
+csys,0  ! return coordinate system
+
+! compress selections
+*dim,el_v,array,nel
+*dim,el_r,array,nel
+*dim,el_t,array,nel
+*dim,el_o,array,nel
+*dim,el_l,array,nel
+*dim,el_dr,array,nel
+
+*vmask,el_sel
+*vfun,el_v,comp,el_vol  ! volume
+*vmask,el_sel
+*vfun,el_r,comp,el_radius  ! radius
+*vmask,el_sel
+*vfun,el_t,comp,el_theta  ! theta
+*vmask,el_sel
+*vfun,el_o,comp,el_offset  ! offset
+*vitrp,el_l,l_map,el_r,el_t  ! interpolate l_map table
+*vitrp,el_dr,dr_map,el_r,el_t !  interpolate dr_map table
+
+xyz = 'x','y','z'  ! axes
+fcum,add  ! accumulate nodal forces
+*do,i,1,nel  ! apply forces to loads
+  esel,s,elem,,el_id(i)
+  nsle  ! select nodes attached to element
+  nsel,r,node,,wp  ! ensure all nodes from winding pack
+  *get,nnd,node,0,count  ! count nodes
+  *do,j,1,3  ! Fx,Fy,Fz - all nodes attached to element
+      F,all,F%xyz(j)%,Fbody_%xyz(j)%(el_l(i),el_dr(i),el_o(i))/nnd
+  *enddo
+*enddo
+allsel  
+        '''
+        ans.f.write(apdlstr)
+        ans.close()
 
         
 if __name__ is '__main__':
     
-    nPF,nTF = 3,16
+    nPF,nTF = 6,18
     config = {'TF':'SN','eq':'SN_{:d}PF_{:d}TF'.format(nPF,nTF)}
     sal = SALOME(config,nTF=nTF)
     
     sal.OIS()
     sal.write()
+    sal.ansys()
     sal.plot()
-    
     demo = DEMO()
     demo.fill_part('Vessel')
     demo.fill_part('Blanket')
     demo.plot_ports()
   
+    '''
     rp,zp = demo.port['P4']['right']['r'],demo.port['P4']['right']['z']
 
-
-                                    
     pl.plot(rp,zp,'k',lw=3)
     xc = [rp[0],zp[0]]
     nhat = np.array([rp[1]-rp[0],zp[1]-zp[0]])
@@ -239,7 +409,7 @@ if __name__ is '__main__':
     pl.plot(loop['r'](0.6),loop['z'](0.6),'d')
     pl.plot(loop['r'](0.7),loop['z'](0.7),'d')
     pl.plot(loop['r'](0.8),loop['z'](0.8),'d')
-    
+    '''
 
 
     

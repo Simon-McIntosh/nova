@@ -250,6 +250,10 @@ class DEMO(object):
             if plot:
                 pl.plot(r,z,color=0.5*np.ones(3))
                 
+    def plot_limiter(self):
+        pl.plot(self.limiter['L3']['r'],
+                self.limiter['L3']['z'],color=0.6*np.ones(3)) 
+                
     def get_fw(self,plot=False):
         rbl = self.parts['Blanket']['in']['r']  # read blanket
         zbl = self.parts['Blanket']['in']['z']

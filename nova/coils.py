@@ -246,7 +246,7 @@ class TF(object):
         self.x['loop']['r'] = r[lower+1:upper]
         self.x['loop']['z'] = z[lower+1:upper]
 
-    def loop_interpolators(self,trim=[0,1],offset=0.75):  # outer loop coordinate interpolators
+    def loop_interpolators(self,trim=[0,1],offset=0.75,full=False):  # outer loop coordinate interpolators
         r,z = self.x['cl']['r'],self.x['cl']['z']
         index = self.transition_index(r,z)
         self.fun = {'in':{},'out':{}}
@@ -255,15 +255,20 @@ class TF(object):
             r = r[index['lower']+1:index['upper']]
             z = z[index['lower']+1:index['upper']]
             r,z = geom.offset(r,z,sign*offset)
+            if full:  # full loop (including nose)
+                rmid,zmid = np.mean([r[0],r[-1]]),np.mean([z[0],z[-1]])
+                r = np.append(rmid,r)
+                r = np.append(r,rmid)
+                z = np.append(zmid,z)
+                z = np.append(z,zmid)
             l = geom.length(r,z)
-            l[(l>0.5) & (l<0.7)] = 0.5
             lt = np.linspace(trim[0],trim[1],int(np.diff(trim)*len(l)))
             r,z = interp1d(l,r)(lt),interp1d(l,z)(lt)
             l = np.linspace(0,1,len(r))
             self.fun[side] = {'r':IUS(l,r),'z':IUS(l,z)}
             self.fun[side]['L'] = geom.length(r,z,norm=False)[-1]
-            self.fun[side]['dr'] = self.fun[side]['r'].derivative(n=1)
-            self.fun[side]['dz'] = self.fun[side]['r'].derivative(n=1)
+            self.fun[side]['dr'] = self.fun[side]['r'].derivative()
+            self.fun[side]['dz'] = self.fun[side]['z'].derivative()
      
     def Cshift(self,coil,side,dL):  # shift pf coils to tf track
         if 'in' in side:
@@ -312,20 +317,7 @@ class TF(object):
     def support(self,**kwargs):
         self.rzGet()
         self.fill(**kwargs)
-    '''    
-    def volume_ratio(self,Rp,Zp):
-        self.Pvol = loop_vol(Rp,Zp,plot=False)
-        Rtf,Ztf,L = self.drawTF(self.xCoil, npoints=300)
-        self.TFvol = loop_vol(Rtf,Ztf,plot=False)
-        self.Rvol = self.TFvol/self.Pvol
-       
-    def length_ratio(self):
-        self.Plength = self.length(self.Rp,self.Zp,norm=False)[-1]
-        Rtf,Ztf,L = self.drawTF(self.xCoil, npoints=300)
-        R,Z = geom.offset(Rtf,Ztf,self.dRsteel+self.dRcoil/2)
-        self.TFlength = self.length(R,Z,norm=False)[-1]
-        self.Rlength = self.TFlength/self.Plength
-    '''    
+   
 if __name__ is '__main__':  # test functions
 
     nPF,nTF = 6,16

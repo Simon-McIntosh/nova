@@ -562,6 +562,7 @@ class Profile(object):
     
     def __init__(self,name,family='S',part='TF',npoints=100,
                  load=False,**kwargs):
+        self.npoints = npoints
         self.name = name
         self.part = part
         self.initalise_loop(family,npoints)  # initalize loop object

@@ -245,7 +245,7 @@ class SALOME(object):
         TFloop = self.tf.fun['cl']
         
         ngrid = {'nr':20,'nt':150} #  coordinate interpolation grid
-        ndata = {'nl':150,'nr':3,'ny':3} #  coordinate interpolation grid
+        ndata = {'nl':250,'nr':5,'ny':5} #  coordinate interpolation grid
         l = np.linspace(0,1,250)
         xin,zin = self.tf.fun['in']['r'](l),self.tf.fun['in']['z'](l)
         rin = np.sqrt((xin-self.sf.mo[0])**2+(zin-self.sf.mo[1])**2)
@@ -364,7 +364,7 @@ fcum,add  ! accumulate nodal forces
   nsel,r,node,,wp  ! ensure all nodes from winding pack
   *get,nnd,node,0,count  ! count nodes
   *do,j,1,3  ! Fx,Fy,Fz - all nodes attached to element
-      F,all,F%xyz(j)%,Fbody_%xyz(j)%(el_l(i),el_dr(i),el_o(i))/nnd
+      F,all,F%xyz(j)%,Fbody_%xyz(j)%(el_l(i),el_dr(i),el_o(i))*el_v(i)/nnd
   *enddo
 *enddo
 allsel  

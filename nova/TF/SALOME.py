@@ -381,7 +381,7 @@ if __name__ is '__main__':
     
     sal.OIS()
     sal.write()
-    sal.ansys()
+    #sal.ansys()
     sal.plot()
     demo = DEMO()
     demo.fill_part('Vessel')

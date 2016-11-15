@@ -1,25 +1,12 @@
 import numpy as np
 import collections
-import os.path
-
-def trim_dir(check_dir):
-    nlevel,dir_found = 3,False
-    for i in range(nlevel):
-        if os.path.isdir(check_dir):
-            dir_found = True
-            break
-        else:
-            if '../' in check_dir:
-                check_dir = check_dir.replace('../','',1)
-    if not dir_found:
-        errtxt = check_dir+' not found\n'
-        raise ValueError(errtxt)
-    return check_dir
+from nova.TF.DEMOxlsx import DEMO
+from amigo import IO
             
 class Setup(object):
     
     def __init__(self,configuration='',eqdir='../../eqdsk/'):
-        eqdir = trim_dir(eqdir)
+        eqdir = IO.trim_dir(eqdir)
         self.eqdir = eqdir
         self.configuration = configuration
         self.set_defaults()
@@ -31,14 +18,14 @@ class Setup(object):
         self.dataname = ''
         self.targets = collections.OrderedDict()  # targets structure (ordered)
         self.targets['default'] = {}
-        self.targets['default']['L2D'] = 2
+        self.targets['default']['L2D'] = 0.8
         self.targets['default']['open'] = False
         self.targets['default']['graze'] = 1.5*np.pi/180
         self.targets['default']['dPlate'] = 0.5
         self.targets['default']['dR'] = 0
         self.firstwall = {}  # initalise firstwall data structure
         self.firstwall['dRfw'] = 0.25
-        self.firstwall['div_ex'] = 0.18
+        self.firstwall['div_ex'] = 0.25
         self.firstwall['trim'] = [0.75,0.7]
         self.build = {}  # initalise build data structure
         self.build['tfw'] = 0.1  # first wall thickness
@@ -46,7 +33,12 @@ class Setup(object):
         self.build['BS'] = np.array([0.78-0.2,1.304-0.2])  # blanket+sheild #PMI
         self.build['BS'] -= (self.build['tfw']+self.build['tBBsupport'])
         BBfrac = np.array([1,1])
-        self.build['BB'] = list(BBfrac*self.build['BS'])  # blanket (in/out) 
+        try:
+            demo = DEMO()  # load from xls baseline file
+            self.build['BB'] = demo.blanket_thickness()  # min/max 
+        except:
+            print('warning: load from baseline failed')
+            self.build['BB'] = list(BBfrac*self.build['BS'])  # blanket (in/out) 
         self.build['sheild'] = list((1-BBfrac)*self.build['BS'])  # sheilding
         self.build['sheild_connect']=[0,1]
         self.build['Dsheild'] =[]  # wrap sheild around divertor [0,1] 
@@ -95,7 +87,7 @@ class Setup(object):
             self.TF['opp'] = 'L'
             self.coils['external']['id'] = list(range(0,16)) 
             
-        if configuration == 'SX':
+        elif configuration == 'SX':
             self.dataname = 'SX8'
             self.filename = '/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
             self.filename += 'pl_20d25_SX_on_SFgeom_NOEDDY_EOF_fine_iter5_v3.eqdsk'

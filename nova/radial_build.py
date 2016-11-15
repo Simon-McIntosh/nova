@@ -4,11 +4,14 @@ import pickle
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline as spline
 import seaborn as sns
+colors = sns.color_palette('Paired',12)
 from itertools import cycle
 from amigo.geom import Loop
 import amigo.geom as geom
-from nova.loops import Profile
+from nova.loops import Profile,plot_oppvar
 from nova.shape import Shape
+from scipy.interpolate import InterpolatedUnivariateSpline as IUS
+from scipy.optimize import minimize
 
 class RB(object):
     def __init__(self,setup,sf,npoints=500):
@@ -16,6 +19,7 @@ class RB(object):
         self.sf = sf
         self.npoints = npoints
         self.dataname = setup.configuration
+        self.segment = {}  # store section segments (divertor,fw,blanket...)
         
     def update_sf(self):
         if not hasattr (self.sf,'Xpoint'):
@@ -191,7 +195,7 @@ class RB(object):
 
     def target_fill(self,debug=False,**kwargs):
         layer_index = 0  # construct from first open flux surface
-        self.sf.sol(update=True,plot=True)
+        self.sf.sol(update=True,plot=False)
         for leg in list(self.sf.legs)[2:]:
             self.set_target(leg)
             Rsol,Zsol = self.sf.snip(leg,layer_index,L2D=self.setup.targets[leg]['L2D'])
@@ -254,6 +258,7 @@ class RB(object):
             Rb,Zb = self.append(Rb,Zb,r,z)
             Rb = np.append(Rb,self.setup.targets['outer1']['R'][::-1])
             Zb = np.append(Zb,self.setup.targets['outer1']['Z'][::-1])
+            self.segment['divertor'] = {'r':Rb,'z':Zb}  # store diveror
             r,z = self.connect(self.psi_fw[1],['outer1','inner2'],[0,0],
                                loop=(self.loop.R[::-1],self.loop.Z[::-1]))
             Rb,Zb = self.append(Rb,Zb,r,z)
@@ -263,49 +268,129 @@ class RB(object):
             r,z = self.connect(self.sf.Xpsi-self.setup.firstwall['div_ex']*self.dpsi,
                                ['inner','outer'],[-1,0])                
             Rb,Zb = self.append(Rb,Zb,r,z)
+            self.segment['divertor'] = {'r':Rb,'z':Zb}  # store diveror
             Rb = np.append(Rb,self.setup.targets['outer']['R'][1:])
             Zb = np.append(Zb,self.setup.targets['outer']['Z'][1:])
+            self.segment['divertor'] = {'r':Rb,'z':Zb}  # store diveror
             r,z = self.connect(self.psi_fw[1],['outer','inner'],[-1,0],
                                loop=(self.loop.R,self.loop.Z))
             Rb,Zb = self.append(Rb,Zb,r,z)
         self.Rb,self.Zb = self.midplane_loop(Rb,Zb)
 
-        #self.Rb,self.Zb = self.first_wall_fit(self.setup.firstwall['dRfw'])
+        self.Rb,self.Zb = self.first_wall_fit(self.setup.firstwall['dRfw'])
+        self.blanket_fit()
         self.get_sol()  # trim sol to targets and store values
         self.write_boundary(self.Rb,self.Zb)
         return self.Rb,self.Zb
         
     def first_wall_fit(self,dr):
-        profile = Profile(self.setup.configuration,family='S',part='fwf')
+        profile = Profile(self.setup.configuration,family='S',part='fwf',
+                          npoints=200)
         shp = Shape(profile,objective='L')
-        #shp.loop.set_l({'value':0.8,'lb':0.5,'ub':0.9})
         #shp.loop.oppvar.remove('z2')
         #shp.loop.oppvar.remove('tilt')
-        shp.loop.set_symetric(True)
+        #shp.loop.set_symetric(True)
+        shp.loop.set_l({'value':0.5,'lb':0.85,'ub':1.5})  # 1/tesion)
         rfw,zfw = geom.offset(self.Rp,self.Zp,dr)  # offset from sep
         rfw,zfw = geom.rzSLine(rfw,zfw,30)  # sub-sample
         shp.add_bound({'r':rfw,'z':zfw},'internal')  # vessel inner bounds
         shp.add_bound({'r':self.sf.Xpoint[0],
                        'z':self.sf.Xpoint[1]-dr*np.cos(np.pi/2)},'internal')
-        shp.plot_bounds()
         shp.minimise()
         x = profile.loop.draw()
-        r,z = geom.clock(x['r'],x['z'],reverse=False)
+        r,z = geom.order(x['r'],x['z'],anti=True)
         istart = np.argmin((r-self.sf.Xpoint[0])**2+(z-self.sf.Xpoint[1])**2)
         r = np.append(r[istart:],r[:istart+1])
         z = np.append(z[istart:],z[:istart+1])
-        
-        zmin = np.min(z)
-        rd,zd = self.Rb[self.Zb<zmin],self.Zb[self.Zb<zmin]  # divertor
- 
-        istart = np.argmin((r-rd[-1])**2+(z-zd[-1])**2)
+        r,z,l = geom.unique(r,z)
+        self.segment['inner_loop'] = {'r':r,'z':z}
+        rd,zd = self.segment['divertor']['r'],self.segment['divertor']['z']
+        rd,zd = geom.unique(rd,zd)[:2]
+        zindex = zd <= self.sf.Xpoint[1]+0.5*(self.sf.mo[1]-self.sf.Xpoint[1])
+        rd,zd = rd[zindex],zd[zindex]  # remove upper points
+        rd,zd = geom.rzInterp(rd,zd)  # resample
+        rd,zd = geom.inloop(r,z,rd,zd,side='out')  # divertor external to fw
+        istart = np.argmin((r-rd[-1])**2+(z-zd[-1])**2)  # connect to fw
         iend = np.argmin((r-rd[0])**2+(z-zd[0])**2)
-        r = np.append(rd,r[istart+1:iend-istart])
-        z = np.append(zd,z[istart+1:iend-istart])
-        r,z = np.append(r,r[0]),np.append(z,z[0])
-        pl.plot(r,z)
+        r = np.append(np.append(rd,r[istart:iend]),rd[0])
+        z = np.append(np.append(zd,z[istart:iend]),zd[0])
+        self.segment['first_wall'] = {'r':r,'z':z} 
         return r,z
         
+    def blanket_fit(self):
+        rin = self.segment['first_wall']['r']
+        zin = self.segment['first_wall']['z']
+        imin = np.argmin(zin)
+        rin = np.append(rin[imin:],rin[:imin])
+        zin = np.append(zin[imin:],zin[:imin])
+        rin,zin,lin = geom.unique(rin,zin)
+        inner = {'r':IUS(lin,rin),'z':IUS(lin,zin)}
+        loop = geom.Loop(self.segment['inner_loop']['r'],
+                         self.segment['inner_loop']['z'])
+        rout,zout = loop.fill(dt=self.setup.build['BB'][::-1],ref_o=0.2,dref=0.3,
+                        referance='length',plot=False,color=colors[3])
+        lout = geom.length(rout,zout)
+        outer = {'r':IUS(lout,rout),'z':IUS(lout,zout)}
+
+        def cross(L,inner,outer):
+            err = (inner['r'](L[0])-outer['r'](L[1]))**2+\
+                  (inner['z'](L[0])-outer['z'](L[1]))**2
+            return err
+            
+        def index(L,r,z,loop):
+            i = np.argmin((r-loop['r'](L))**2+(z-loop['z'](L))**2)
+            return i
+            
+        def inside(L,inner,outer):
+            l = np.linspace(0,1,80)
+            rin,zin = inner['r'](l),inner['z'](l)
+            nRloop,nZloop,Rloop,Zloop = geom.normal(rin,zin)
+            r,z = outer['r'](L[1]),outer['z'](L[1])
+            i = np.argmin((r-Rloop)**2+(z-Zloop)**2)
+            dr = [Rloop[i]-r,Zloop[i]-z]  
+            dn = [nRloop[i],nZloop[i]]
+            dot = np.dot(dr,dn)
+            pl.plot(r,z,'o')
+            print(dot)
+            return np.sign(dot)
+          
+        i_in,i_out = np.zeros(2),np.zeros(2)
+        L = minimize(cross,[0,0],method='SLSQP',  # low feild
+                     bounds=([0,1],[0,1]),
+                     #constraints={'type':'ineq',
+                     #'fun':inside,'args':(inner,outer)},
+                     args=(inner,outer)).x 
+                     
+        pl.plot(inner['r'](L[0]),inner['z'](L[0]),'o')
+        pl.plot(outer['r'](L[1]),outer['z'](L[1]),'d')
+                     
+        i_in[0] = index(L[0],rin,zin,inner)
+        i_out[0] = index(L[1],rout,zout,outer)
+        L = minimize(cross,[1,1],method='SLSQP',  # high feild
+                     bounds=([0,1],[0,1]),
+                     #constraints={'type':'ineq','fun':inside,
+                     #'args':(inner,outer)},
+                     args=(inner,outer)).x
+                     
+        pl.plot(inner['r'](L[0]),inner['z'](L[0]),'o')
+        pl.plot(outer['r'](L[1]),outer['z'](L[1]),'d')
+        
+        i_in[1] = index(L[0],rin,zin,inner)
+        i_out[1] = index(L[1],rout,zout,outer)
+        
+        r = np.append(rout[i_out[0]:i_out[1]],rin[i_in[0]:i_in[1]][::-1])
+        #r = np.append(r,rin[i_in[1]:][::-1])
+        z = np.append(zout[i_out[0]:i_out[1]],zin[i_in[0]:i_in[1]][::-1])
+        #z = np.append(z,zin[i_in[1]:][::-1])
+        geom.polyfill(r,z,color=colors[0])
+        
+        pl.plot(rin,zin)
+        pl.plot(rout,zout)
+
+        pl.plot(self.segment['first_wall']['r'],
+                self.segment['first_wall']['z']) 
+        print(i_in)
+    
     def append(self,R,Z,r,z):
         dr = np.zeros(2)
         for i,end in enumerate([0,-1]):

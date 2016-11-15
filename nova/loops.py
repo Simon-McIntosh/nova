@@ -7,7 +7,7 @@ import pylab as pl
 from collections import OrderedDict
 import seaborn as sns
 import pandas as pd
-from nova.config import trim_dir
+from amigo.IO import trim_dir
 import pickle
 import json
 
@@ -131,7 +131,7 @@ def plot_oppvar(xo,oppvar,eps=1e-2,fmt='1.2f',scale=1,postfix=''):
         text += postfix+' '
         if var not in oppvar:
              text += '*'
-        if value < 0.5:
+        if xnorm < 0.1:
             ha = 'left'
             color = 0.25*np.ones(3)
         else:
@@ -323,12 +323,12 @@ class Sloop(object):  # polybezier
 
     def initalise_nodes(self):
         self.xo = OrderedDict()
-        self.xo['r1'] = {'value':4.486,'lb':4,'ub':6}  # inner radius
-        self.xo['r2'] = {'value':15.708,'lb':10,'ub':25}  # outer radius 
-        self.xo['z2'] = {'value':0,'lb':-0.8,'ub':0.8} # outer node vertical shift
+        self.xo['r1'] = {'value':4.486,'lb':3,'ub':8}  # inner radius
+        self.xo['r2'] = {'value':15.708,'lb':5,'ub':25}  # outer radius 
+        self.xo['z2'] = {'value':0,'lb':-0.9,'ub':0.9} # outer node vertical shift
         self.xo['height'] = {'value':17.367,'lb':0.1,'ub':50} # full loop height
-        self.xo['top'] = {'value':0.33,'lb':0.1,'ub':1}  # horizontal shift
-        self.xo['upper'] = {'value':0.62,'lb':0.3,'ub':1}  # vertical shift
+        self.xo['top'] = {'value':0.33,'lb':0.05,'ub':1}  # horizontal shift
+        self.xo['upper'] = {'value':0.62,'lb':0.05,'ub':1}  # vertical shift
         self.set_lower()  # lower loop parameters (bottom,lower)
         self.xo['dz'] = {'value':0,'lb':-2,'ub':2}  # vertical offset
         self.xo['flat'] = {'value':0,'lb':0,'ub':0.8}  # fraction outboard straight

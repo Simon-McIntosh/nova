@@ -10,7 +10,7 @@ import seaborn as sns
 from matplotlib._cntr import Cntr as cntr
 from collections import OrderedDict
 from amigo import geom
-from nova.config import trim_dir
+from amigo.IO import trim_dir
 
 class SF(object):
     
@@ -32,7 +32,7 @@ class SF(object):
         self.get_Mpsi()
         self.set_contour()  # set cfeild
         #self.get_sol_psi(dSOL=3e-3,Nsol=15,verbose=False)
-        self.rcirc = 0.1*(self.Mpoint[1]-self.Xpoint[1])  # leg search radius
+        self.rcirc = 0.3*(self.Mpoint[1]-self.Xpoint[1])  # leg search radius
         self.drcirc = 0.25*self.rcirc  # leg search width
         self.xlim = self.eqdsk['xlim']
         self.ylim = self.eqdsk['ylim']
@@ -500,7 +500,7 @@ class SF(object):
             self.Zsol[i] = sinterp(l,z,k=k)(L)
         
         
-    def sol(self,dr=3e-3,Nsol=15,plot=False,update=False,debug=False):  # dr [m]
+    def sol(self,dr=3e-3,Nsol=5,plot=False,update=False,debug=False):  # dr [m]
         if update or not hasattr(self,'sol_psi') or dr > self.dSOL\
         or Nsol > self.Nsol: 
             self.get_sol_psi(dSOL=dr,Nsol=Nsol)  # re-calculcate LFP

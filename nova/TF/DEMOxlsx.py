@@ -2,13 +2,16 @@ from openpyxl import load_workbook
 import numpy as np
 import pylab as pl
 from amigo import geom
-from nova.config import trim_dir
+from amigo.IO import trim_dir
 import scipy as sp
 from scipy.interpolate import interp1d
 from collections import OrderedDict
 from itertools import cycle,count
 from scipy.linalg import norm 
 from matplotlib.collections import PolyCollection
+from scipy.optimize import minimize
+from scipy.interpolate import InterpolatedUnivariateSpline as IUS
+from scipy.signal import savgol_filter
 import seaborn as sns
 rc = {'figure.figsize':[7,7*12/9],'savefig.dpi':100, # 
       'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
@@ -252,8 +255,43 @@ class DEMO(object):
                 
     def plot_limiter(self):
         pl.plot(self.limiter['L3']['r'],
-                self.limiter['L3']['z'],color=0.6*np.ones(3)) 
-                
+                self.limiter['L3']['z'],color=0.6*np.ones(3))
+        
+    def blanket_thickness(self,Nt=100,plot=False):
+        bl,loop = {},{}  # read blanket
+        for side in ['in','out']:
+            bl[side],c = {},{}
+            for x in ['r','z']:
+                c[x] = self.parts['Blanket'][side][x]
+            r,z = geom.order(c['r'],c['z'],anti=True)
+            r,z,l = geom.unique(r,z)  # remove repeats
+            bl[side]['r'],bl[side]['z'] = r,z
+            loop[side] = {'r':IUS(l,r),'z':IUS(l,z)}  # interpolator
+            
+        def thickness(L,Lo,loop,norm):
+            r = loop['in']['r'](Lo)+L[0]*norm['nr'](Lo)
+            z = loop['in']['z'](Lo)+L[0]*norm['nz'](Lo)
+            err = (r-loop['out']['r'](L[1]))**2+\
+                  (z-loop['out']['z'](L[1]))**2
+            return err
+
+        r,z = geom.unique(bl['in']['r'],bl['in']['z'])[:2]  # remove repeats
+        nr,nz,r,z = geom.normal(r,z)
+        l = geom.length(r,z)
+        norm = {'nr':IUS(l,nr),'nz':IUS(l,nz)}  # interpolator
+        
+        dt,Lo = np.zeros(Nt),np.linspace(0,1,Nt)
+        for i,lo in enumerate(Lo):
+            L = minimize(thickness,[0,lo],method='L-BFGS-B', 
+                         bounds=([0,5],[0,1]),args=(lo,loop,norm)).x
+            dt[i] = np.sqrt((loop['in']['r'](lo)-loop['out']['r'](L[1]))**2+
+                            (loop['in']['z'](lo)-loop['out']['z'](L[1]))**2)
+            dt[i] = L[0]
+        dt = savgol_filter(dt,7,2)  # filter
+        if plot:
+            pl.plot(Lo,dt)
+        return [np.min(dt),np.max(dt)]
+   
     def get_fw(self,plot=False):
         rbl = self.parts['Blanket']['in']['r']  # read blanket
         zbl = self.parts['Blanket']['in']['z']

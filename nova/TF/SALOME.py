@@ -8,7 +8,7 @@ from nova.config import Setup
 from scipy.optimize import minimize_scalar,minimize
 import numpy as np
 import json
-from nova.config import trim_dir
+from amigo.IO import trim_dir
 import seaborn as sns
 import pylab as pl
 from DEMOxlsx import DEMO
@@ -364,7 +364,7 @@ fcum,add  ! accumulate nodal forces
   nsel,r,node,,wp  ! ensure all nodes from winding pack
   *get,nnd,node,0,count  ! count nodes
   *do,j,1,3  ! Fx,Fy,Fz - all nodes attached to element
-      F,all,F%xyz(j)%,Fbody_%xyz(j)%(el_l(i),el_dr(i),el_o(i))*el_v(i)/nnd
+      F,all,F%xyz(j)%,Fbody_%xyz(j)%(el_l(i),el_dr(i),el_o(i))*el_v(i)*el_v(i)/nnd
   *enddo
 *enddo
 allsel  
@@ -375,7 +375,7 @@ allsel
         
 if __name__ is '__main__':
     
-    nPF,nTF = 6,18
+    nPF,nTF = 3,13
     config = {'TF':'SN','eq':'SN_{:d}PF_{:d}TF'.format(nPF,nTF)}
     sal = SALOME(config,nTF=nTF)
     

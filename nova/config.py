@@ -44,6 +44,7 @@ class Setup(object):
         self.build['Dsheild'] =[]  # wrap sheild around divertor [0,1] 
         self.build['sheild_base'] = -1  # if Dsheild [], base gap divertor-sheild
         self.build['VV'] = [0.587,1.2]  # vacumn vessel thickness (in/out)
+        self.build['VV'] = [0.5,1.2]  # vacumn vessel thickness (in/out)
         self.TF = {}
         self.TF['opp'] = 'L'  # L==length, V==volume
         self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},  # coils structure
@@ -87,7 +88,7 @@ class Setup(object):
             self.TF['opp'] = 'L'
             self.coils['external']['id'] = list(range(0,16)) 
             
-        elif configuration == 'SX':
+        elif configuration == 'SX_old':
             self.dataname = 'SX8'
             self.filename = '/Equil_AR3d1_16coils_bt_1d03li_0d8_I'
             self.filename += 'pl_20d25_SX_on_SFgeom_NOEDDY_EOF_fine_iter5_v3.eqdsk'
@@ -103,7 +104,7 @@ class Setup(object):
             self.build['sheild_connect'] = [0.15,0.9]
             self.coils['external']['id'] = list(range(10,16)) 
         
-        elif configuration == 'SXex':
+        elif configuration == 'SX':
             self.dataname = 'SXex'
             #self.filename = '/SXex.eqdsk'
             self.filename = 'SXMOF.eqdsk'
@@ -143,7 +144,7 @@ class Setup(object):
             self.build['sheild_base'] = 0
             self.coils['internal']['id'] = [11,12] 
                                    
-        elif configuration == 'SN':
+        elif configuration == 'SN_old':
             self.dataname = 'SND'
             self.filename = '/2015_SN_eqdk_2MG9A4_v1_0.eqdsk'
             self.filename = '/2015_SN_eqdk_2MG9A4_v1_0_IDM.eqdsk'
@@ -163,7 +164,7 @@ class Setup(object):
             self.targets['inner'] = {'L2D':0.6}
             self.targets['outer'] = {'L2D':0.65}
 
-        elif configuration == 'DEMO_SNb':
+        elif configuration == 'SN':
             self.dataname = 'DEMO_SN'
             self.filename = 'Equil_AR3d1_2016_01_v1_SN_SOF_baseline_2016_opt.eqdsk'
             self.firstwall['div_ex'] = 0.25

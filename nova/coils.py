@@ -207,7 +207,7 @@ class TF(object):
     def transition_index(self,r_in,z_in,eps=1e-6):
         npoints = len(r_in)
         r_cl = r_in[0]+eps
-        upper = npoints-next((i for i,r_in_ in enumerate(r_in) if r_in_>r_cl))+1
+        upper = npoints-next((i for i,r_in_ in enumerate(r_in) if r_in_>r_cl))#+1
         lower = next((i for i,r_in_ in enumerate(r_in) if r_in_>r_cl))
         top,bottom = np.argmax(z_in), np.argmin(z_in)
         index = {'upper':upper,'lower':lower,'top':top,'bottom':bottom}

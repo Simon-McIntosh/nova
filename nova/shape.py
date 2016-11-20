@@ -19,14 +19,14 @@ class Shape(object):
         self.nTF = nTF
         self.obj = obj
         self.bound = {}  # initalise bounds
-        for side in ['internal','external']:
+        for side in ['internal','interior','external']:
             self.bound[side] = {'r':[],'z':[]}
             if side in kwargs:
                 self.add_bound(kwargs[side],side)
         if nTF is not 'unset' and eqconf is not 'unset':
             self.tf = TF(self.profile)      
             self.cage = coil_cage(nTF=nTF,rc=self.tf.rc,
-                                  plasma={'config':eqconf})
+                                  plasma={'config':eqconf},ny=1)
             x = self.tf.get_loops(self.loop.draw())
             self.cage.set_TFcoil(x['cl'])
         else:
@@ -44,17 +44,31 @@ class Shape(object):
     def add_bound(self,x,side):
         for var in ['r','z']:
             self.bound[side][var] = np.append(self.bound[side][var],x[var])
-
+            
+    def clear_bound(self):
+        for side in self.bound:
+            for var in ['r','z']:
+                self.bound[side][var] = np.array([])
+            
     def plot_bounds(self):
-        for side,marker in zip(['internal','external'],['.','x']):
+        for side,marker in zip(['internal','interior','external'],
+                               ['.','d','s']):
             pl.plot(self.bound[side]['r'],self.bound[side]['z'],
                     marker,markersize=6,color=sns.color_palette('Set2',10)[9])
   
-    def minimise(self,verbose=False):
+    def minimise(self,verbose=False,ripple_limit=0.6,ripple=False,acc=0.002):
         tic = time.time()
-        xnorm,bnorm = set_oppvar(self.loop.xo,self.loop.oppvar)  # normalized inputs             
+        xnorm,bnorm = set_oppvar(self.loop.xo,self.loop.oppvar)  # normalize
         xnorm = fmin_slsqp(self.fit,xnorm,f_ieqcons=self.constraint_array,
-                           bounds=bnorm,acc=0.005,iprint=-1)
+                           bounds=bnorm,acc=acc,iprint=-1,
+                           args=(False,ripple_limit))
+        if ripple:  # re-solve with ripple constraint
+            if self.nTF == 'unset':
+                raise ValueError('requre \'nTF\' to solve ripple constraint')
+            print('with ripple')
+            xnorm = fmin_slsqp(self.fit,xnorm,f_ieqcons=self.constraint_array,
+                               bounds=bnorm,acc=acc,iprint=-1,
+                               args=(True,ripple_limit))     
         xo = get_oppvar(self.loop.xo,self.loop.oppvar,xnorm)  # de-normalize
         self.loop.set_input(x=xo)  # inner loop
         self.profile.write(nTF=self.nTF,obj=self.obj)  # store loop
@@ -70,24 +84,28 @@ class Shape(object):
             print('ripple',self.cage.get_ripple())
             print('energy {:1.2f}GJ'.format(1e-9*self.cage.energy()))
 
-    def constraint_array(self,xnorm,ripple_limit=0.6):
+    def constraint_array(self,xnorm,*args):
+        ripple,ripple_limit = args
         xo = get_oppvar(self.loop.xo,self.loop.oppvar,xnorm)  # de-normalize
-        if self.nTF is 'unset':  # without tf object (no ripple or energy)
-            x = self.loop.draw(x=xo)
-            dot = self.dot_diffrence(x,'internal')
-        else:  # with tf object
+        if ripple:  # constrain ripple contour
             x = self.tf.get_loops(self.loop.draw(x=xo))
             dot = np.array([])
-            for side,key in zip(['internal','external'],['in','out']):
+            for side,key in zip(['internal','interior','external'],
+                                ['in','in','out']):
                 dot = np.append(dot,self.dot_diffrence(x[key],side))
-            self.cage.set_TFcoil(x['cl'])
+            r,z = geom.rzInterp(x['cl']['r'],x['cl']['z'],npoints=50)
+            self.cage.set_TFcoil({'r':r,'z':z})
             max_ripple = self.cage.get_ripple()
             edge_ripple = self.cage.edge_ripple(npoints=10)
             dot = np.append(dot,ripple_limit-edge_ripple)
             dot = np.append(dot,ripple_limit-max_ripple)
+        else:  # without tf object (no ripple or energy)
+            x = self.loop.draw(x=xo)
+            dot = self.dot_diffrence(x,'internal')
+            dot = np.append(dot,self.dot_diffrence(x,'interior'))
         return dot
         
-    def fit(self,xnorm):
+    def fit(self,xnorm,*args):
         x = get_oppvar(self.loop.xo,self.loop.oppvar,xnorm)  # de-normalize
         x = self.loop.draw(x=x)
         if self.obj is 'L':  # coil length

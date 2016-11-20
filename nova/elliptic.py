@@ -77,6 +77,9 @@ class EQ(object):
     def grid(self,**kwargs):
         if 'boundary' in kwargs:
             limit = self.limits(kwargs.get('boundary'))
+            for i,lim in enumerate(['rmin','rmax','zmin','zmax']):
+                if lim in kwargs:
+                    limit[i] = kwargs[lim]
         elif 'limit' in kwargs:
             limit = kwargs.get('limit')
         elif 'delta' in kwargs:

@@ -71,7 +71,10 @@ class coil_cage(object):
         ro = self.coil_loop[0,0]  # inboard centreline
         rlim = 0.6*np.max(self.coil_loop[:,0])
         dL = ro*np.tan(np.pi/self.nTF)  # toroidal winding-pack width
-        self.dYwp = np.linspace(dL*(1/self.ny-1),dL*(1-1/self.ny),self.ny) 
+        if self.ny > 1:
+            self.dYwp = np.linspace(dL*(1/self.ny-1),dL*(1-1/self.ny),self.ny) 
+        else:
+            self.dYwp = [0]  # coil centreline
         self.Tcoil = np.linspace(0,2*np.pi,self.nTF,endpoint=False)
         if plot:
             fig = plt.figure(figsize=(8,6))
@@ -101,7 +104,7 @@ class coil_cage(object):
         Bo = self.point((rc,0,zc),variable='feild')
         self.Iturn = self.eqdsk['bcentr']/Bo[1]  # single coil amp-turns
 
-    def point(self,s,variable='ripple',ny=3):  # s==3D point vector 
+    def point(self,s,variable='ripple'):  # s==3D point vector 
         B = np.zeros(2)
         n = np.array([0,1,0])
         if variable == 'ripple':
@@ -118,7 +121,8 @@ class coil_cage(object):
             Bo = np.zeros(3)
             for tcoil in self.Tcoil:
                 for dy in self.dYwp:  # wp pattern
-                    Bo += self.Iturn*cc.mu_o*self.gfl.B(sr,theta=tcoil,dy=dy)/ny
+                    Bo += self.Iturn*cc.mu_o*\
+                    self.gfl.B(sr,theta=tcoil,dy=dy)/self.ny
             B[j] = np.dot(nr,Bo)
         if variable == 'ripple':
             ripple = 1e2*(B[0]-B[1])/np.sum(B)

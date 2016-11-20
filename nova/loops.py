@@ -327,14 +327,14 @@ class Sloop(object):  # polybezier
         self.xo['r2'] = {'value':15.708,'lb':5,'ub':25}  # outer radius 
         self.xo['z2'] = {'value':0,'lb':-0.9,'ub':0.9} # outer node vertical shift
         self.xo['height'] = {'value':17.367,'lb':0.1,'ub':50} # full loop height
-        self.xo['top'] = {'value':0.33,'lb':0.05,'ub':1}  # horizontal shift
-        self.xo['upper'] = {'value':0.62,'lb':0.05,'ub':1}  # vertical shift
+        self.xo['top'] = {'value':0.5,'lb':0.05,'ub':1}  # horizontal shift
+        self.xo['upper'] = {'value':0.7,'lb':0,'ub':1}  # vertical shift
         self.set_lower()  # lower loop parameters (bottom,lower)
-        self.xo['dz'] = {'value':0,'lb':-2,'ub':2}  # vertical offset
+        self.xo['dz'] = {'value':0,'lb':-5,'ub':5}  # vertical offset
         self.xo['flat'] = {'value':0,'lb':0,'ub':0.8}  # fraction outboard straight
         self.xo['tilt'] = {'value':0,'lb':-45,'ub':45}  # outboard angle [deg]
         self.oppvar = list(self.xo.keys())
-        self.set_l({'value':0.8,'lb':0.65,'ub':1.5})  # 1/tesion
+        self.set_l({'value':0.8,'lb':0.45,'ub':1.8})  # 1/tesion
         #self.oppvar.remove('flat')
         #self.oppvar.remove('tilt')
 
@@ -560,7 +560,7 @@ class Sloop(object):  # polybezier
         
 class Profile(object):
     
-    def __init__(self,name,family='S',part='TF',npoints=100,
+    def __init__(self,name,family='S',part='TF',npoints=200,
                  load=False,**kwargs):
         self.npoints = npoints
         self.name = name

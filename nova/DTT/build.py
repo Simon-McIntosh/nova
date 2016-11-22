@@ -23,7 +23,7 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 
 
-nTF = 13
+nTF = 18
 config = {'TF':'dtt','eq':'SFm'}
 config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
 setup = Setup(config['eq'])
@@ -39,10 +39,10 @@ levels = sf.contour()
 rb = RB(setup,sf)
 rb.firstwall(plot=True,debug=False)
 
-profile = Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L')
+profile = Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L',load=True)
 
+'''
 shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'])  # 
-
 rvv,zvv = geom.rzSLine(rb.segment['vessel']['r'],rb.segment['vessel']['z'],80)
 rvv,zvv = geom.offset(rvv,zvv,0.2)
 rmin = np.min(rvv)
@@ -52,7 +52,7 @@ shp.loop.set_l({'value':0.8,'lb':0.65,'ub':1.8})  # 1/tesion
 shp.add_bound({'r':rvv,'z':zvv},'internal')  # vessel
 shp.add_bound({'r':np.min(rvv)-0.01,'z':0},'interior')  # vessel
 shp.minimise(ripple=True,verbose=True)
-
+'''
 
 tf = TF(profile,sf=sf)
 tf.fill()

@@ -244,7 +244,7 @@ class SF(object):
         alpha,lw = np.array([1,0.5]),lw*np.array([2.25,1.75]) 
         if boundary:
             r,z = self.get_boundary(1-1e-3)
-            #pl.plot(r,z,linewidth=lw[0],color='k',alpha=0.25)
+            pl.plot(r,z,linewidth=lw[0],color=0.75*np.ones(3))
             self.set_boundary(r,z)
         if not hasattr(self,'Xpsi'):
             self.get_Xpsi()

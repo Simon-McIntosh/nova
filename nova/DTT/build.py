@@ -24,15 +24,19 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
 
 
 nTF = 18
-config = {'TF':'dtt','eq':'SFm'}
+config = {'TF':'dtt','eq':'SN'}
 config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
+
+config['eq'] = 'SNdtt18_4PF_2CS'
 setup = Setup(config['eq'])
+setup.targets['inner'] = {'L2D':0.8}
+setup.targets['outer'] = {'L2D':0.85}
 
 sf = SF(setup.filename)
 pf = PF(sf.eqdsk)
 
 
-#pf.plot(coils=pf.coil,label=True,plasma=False,current=True) 
+pf.plot(coils=pf.coil,label=True,plasma=False,current=True) 
 levels = sf.contour()
 
 

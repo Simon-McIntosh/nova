@@ -18,7 +18,7 @@ sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
 Color = cycle(sns.color_palette('Set2'))
 
 
-nPF,nCS,nTF = 3,3,18
+nPF,nCS,nTF = 4,3,18
 config = {'TF':'dtt','eq':'SN'}
 config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
 setup = Setup(config['eq'])
@@ -45,10 +45,10 @@ inv.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary points
 inv.add_null(factor=1,point=sf.Xpoint)
         
 inv.set_swing()
-inv.update_limits(LCS=[-9.5,9.5])
+inv.update_limits(LCS=[-10.5,10.5])
 
 L = inv.optimize(L)
-#inv.plot_fix(tails=True)
+inv.plot_fix(tails=True)
 inv.fix_flux(inv.swing['flux'][0]) 
 inv.solve_slsqp()
 
@@ -56,6 +56,7 @@ eq.gen_opp()
 sf.contour(boundary=True,plot_vac=False)
 pf.plot(coils=pf.coil,label=True,plasma=False,current=True) 
 rb.firstwall(mode='calc',plot=True,debug=False)
+rb.trim_sol()
 
 loops.plot_variables(inv.Io,scale=1,postfix='MA')
 loops.plot_variables(inv.Lo,scale=1)

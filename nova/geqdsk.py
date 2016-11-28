@@ -60,11 +60,16 @@ def read(f):
     s = desc.split() # Split by whitespace
     if len(s) < 3:
         raise IOError("First line must contain at least 3 numbers")
-    
     name = s[0]
-    idum = int(s[-3])
-    nxefit = int(s[-2])
-    nyefit = int(s[-1])
+    sint = []  # extract intergers from first line
+    for s_ in s:
+        try:
+            sint.append(int(s_))
+        except:
+            pass
+    idum = int(sint[-3])
+    nxefit = int(sint[-2])
+    nyefit = int(sint[-1])
     
     # Use a generator to read numbers
     token = file_numbers(f)
@@ -158,7 +163,8 @@ def read(f):
             drc[i] = float(next(token))
             dzc[i] = float(next(token))
             Ic[i] = float(next(token))
-
+    else:
+        print('no coils')
     # Construct R-Z mesh
     r = np.zeros(nxefit)
     z = np.zeros(nyefit)

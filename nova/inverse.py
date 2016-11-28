@@ -15,17 +15,23 @@ import nlopt
 from nova.force import force_feild
 from scipy.optimize import minimize_scalar
 from copy import deepcopy
+from warnings import warn
 
 class INV(object):
     
-    def __init__(self,sf,eq,tf,Jmax=12.5,TFoffset=0.3,svd=False):
+    def __init__(self,sf,eq,tf=None,Jmax=12.5,TFoffset=0.3,svd=False,
+                 Iscale=1e6):
+        self.wsqrt = 1
         self.svd = svd  # coil current singular value decomposition flag
-        self.Iscale = 1e6  # set current units to MA
+        self.Iscale = Iscale  # set current units to MA
         self.ncpu = multiprocessing.cpu_count()
         self.sf = sf
         self.eq = eq
         self.tf = tf
-        self.tf.loop_interpolators()
+        try:
+            self.tf.loop_interpolators()
+        except:
+            warn('tf coil interpolators not set')
         self.Jmax = Jmax  # MAm-2
         self.fix = {'r':np.array([]),'z':np.array([]),'BC':np.array([]),
                     'value':np.array([]),'Bdir':np.array([[],[]]).T,
@@ -114,9 +120,9 @@ class INV(object):
         self.eq.pf.categorize_coils()  # index pf coils
         self.initalise_current()
         self.initalise_limits()
-        self.ff = force_feild(self.eq.pf.index,self.eq.pf.coil,
-                              self.eq.coil,self.eq.plasma_coil,
-                              multi_filament=True)
+        #self.ff = force_feild(self.eq.pf.index,self.eq.pf.coil,
+        #                      self.eq.coil,self.eq.plasma_coil,
+        #                      multi_filament=True)
         self.set_swing()
         if plot:
             self.plot_coils()
@@ -402,9 +408,6 @@ class INV(object):
         Rf,Zf,BC,Bdir = self.unpack_fix()
         for i,(rf,zf,bc,bdir) in enumerate(zip(Rf,Zf,BC,Bdir)):
             for j,name in enumerate(self.coil[state].keys()):
-                #if name == 'Plasma' and self.eq.ingrid(rf,zf):  # only passive
-                #    self.BG[i] += self.add_value_plasma(bc,rf,zf,bdir)
-                #else:
                 coil = self.coil[state][name]
                 R,Z,Ic = coil['r'],coil['z'],coil['I']
                 for r,z,ic in zip(R,Z,Ic):
@@ -1040,7 +1043,8 @@ class INV(object):
         self.ff.I = self.I  # pass current to force feild
         self.Icoil = np.zeros(len(self.coil['active'].keys()))
         for j,name in enumerate(self.coil['active']):
-            Nfilament = self.eq.coil[name+'_0']['Nf']
+            #Nfilament = self.eq.coil[name+'_0']['Nf']
+            Nfilament = self.coil[name]['Nf']
             self.Icoil[j] = self.I[j]*Nfilament  # store current
             self.eq.pf.coil[name]['I'] = self.Icoil[j]*self.Iscale  
             self.coil['active'][name]['I_sum'] = self.Icoil[j]*self.Iscale

@@ -548,9 +548,9 @@ class RB(object):
     def match_psi(self,Ro,Zo,direction,theta_end,theta_sign,phi_target,graze,
                   dPlate,leg,debug=False):        
         color = sns.color_palette('Set2',2)
-        gain = 0.15  # 0.25
+        gain = 0.05  # 0.25
         Nmax = 500
-        Lo = [5,0.005]  # [blend,turn]  5,0.015
+        Lo = [0.5,0.005]  # [blend,turn]  5,0.015
         r2m = [-1.5,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
         Nplate = 1 # number of target plate divisions (1==flat)
         L = Lo[0] if theta_end == 0 else Lo[1]

@@ -11,19 +11,18 @@ import json
 from amigo.IO import trim_dir
 import seaborn as sns
 import pylab as pl
-from DEMOxlsx import DEMO
 from amigo import geom
 from amigo.ANSYS import table
 from nova.force import force_feild
 import sys
 
-class SALOME(object):
+class OCC(object):
     
     def __init__(self,config,family='S',nTF=16,obj='L'):
         self.nTF = nTF
         self.config = config
         datadir = trim_dir('../../Data') 
-        file = 'salome_input' #  config #  +'_{}{}{}'.format(family,nTF,obj)
+        file = 'occ_input' #  config #  +'_{}{}{}'.format(family,nTF,obj)
         self.filename = datadir+'/'+file+'.json'
         self.profile = Profile(config['TF'],family=family,load=True,part='TF',
                                nTF=nTF,obj=obj,npoints=250)
@@ -77,7 +76,7 @@ class SALOME(object):
         
         self.tf.loop_interpolators(offset=0)  # construct TF interpolators
         TFloop = self.tf.fun['out']
-        L = minimize_scalar(SALOME.cs_top,method='bounded',
+        L = minimize_scalar(OCC.cs_top,method='bounded',
                             args=(rwp,TFloop),bounds=[0.5,1]).x
         ztop = float(TFloop['z'](L))  
         self.CSsupport = {'rnose':rnose,'ynose':ynose,'rwp':rwp,'ywp':ywp,
@@ -100,7 +99,7 @@ class SALOME(object):
         return err
         
     def connect(self,coil,loop,edge=0.15,hover=0.1,argmin=60):
-        L = minimize_scalar(SALOME.support_arm,method='bounded',
+        L = minimize_scalar(OCC.support_arm,method='bounded',
                                 args=(coil,loop),bounds=[0,1]).x 
         rTF,zTF = loop['r'](L),loop['z'](L)                    
         nhat = np.array([rTF-coil['r'],zTF-coil['z']])
@@ -117,7 +116,7 @@ class SALOME(object):
             nodes[i] = [rc,zc]
             xc = np.array([rc,zc])
             xo = np.array([L,0.5])
-            res = minimize(SALOME.intersect,xo,method='L-BFGS-B', 
+            res = minimize(OCC.intersect,xo,method='L-BFGS-B', 
                            bounds=([0,1],[0,15]),args=(xc,nhat,loop)) 
             rs,zs = res.x[1]*nhat+xc
             nodes[3-i] = [rs,zs]
@@ -140,7 +139,7 @@ class SALOME(object):
         TFloop = self.tf.fun['out']
         self.tf.loop_interpolators(offset=0)
         Sloop = self.tf.fun['out']
-        L = minimize_scalar(SALOME.GS_placement,method='bounded',
+        L = minimize_scalar(OCC.GS_placement,method='bounded',
                                 args=(radius-width/2,Sloop),bounds=[0,0.5]).x
         coil = {'r':Sloop['r'](L)+width/2,'z':Sloop['z'](L)-width/2,
                 'dr':width,'dz':width}
@@ -163,7 +162,7 @@ class SALOME(object):
         rcl = np.array([TFloop['r'](L-dl/2),TFloop['r'](L+dl/2)])
         zcl = np.array([TFloop['z'](L-dl/2),TFloop['z'](L+dl/2)])
         ro,zo = np.mean(rcl),np.mean(zcl)
-        L = minimize_scalar(SALOME.OIS_placment,method='bounded',
+        L = minimize_scalar(OCC.OIS_placment,method='bounded',
                             args=(TFloop,(ro,zo)),bounds=[0,1]).x
         dr,dz = TFloop['r'](L)-ro,TFloop['z'](L)-zo
         rcl += dr/2
@@ -211,7 +210,8 @@ class SALOME(object):
         geom.polyfill(rCS,zCS,color=0.4*np.ones(3))
         
     def ansys(self,plot=False,nl=250,nr=5,ny=5):
-        filename = '../../Data/TFload_{:d}'.format(self.nTF)
+        datadir = trim_dir('../../Data/')
+        filename = datadir+'TFload_{:d}'.format(self.nTF)
         ans = table(filename)
         ans.f.write('! loading tables for {:d}TF coil concept\n'.format(self.nTF))
         ans.f.write('! loop length parameterized from 0-1\n')
@@ -253,7 +253,7 @@ class SALOME(object):
             for j in range(ngrid['nt']):
                 x = self.sf.mo[0]+radius[i]*np.cos(theta[j])
                 z = self.sf.mo[1]+radius[i]*np.sin(theta[j])
-                L = minimize_scalar(SALOME.OIS_placment,method='bounded',
+                L = minimize_scalar(OCC.OIS_placment,method='bounded',
                                         args=(TFloop,(x,z)),bounds=[0,1]).x
                 xl,zl = TFloop['r'](L),TFloop['z'](L)
                 l_map[i,j] = L
@@ -300,7 +300,7 @@ class SALOME(object):
                         Fbody[var][i,j,k] = Fb[m]
                     if plot:
                         Fvec = Fb/np.linalg.norm(Fb)
-                        Fvec = that
+                        #Fvec = that
                         pl.arrow(point[0],point[2],Fvec[0],Fvec[2],
                                  head_width=0.15,head_length=0.3)       
         print('\n',np.sum(Fbody['x'][:-1,:,:])*1e-9,
@@ -361,7 +361,7 @@ fcum,add  ! accumulate nodal forces
   nsel,r,node,,wp  ! ensure all nodes from winding pack
   *get,nnd,node,0,count  ! count nodes
   *do,j,1,3  ! Fx,Fy,Fz - all nodes attached to element
-      F,all,F%xyz(j)%,Fbody_%xyz(j)%(el_l(i),el_dr(i),el_o(i))*el_v(i)*el_v(i)/nnd
+      F,all,F%xyz(j)%,Fbody_%xyz(j)%(el_l(i),el_dr(i),el_o(i))*el_v(i)/nnd
   *enddo
 *enddo
 allsel  
@@ -382,41 +382,13 @@ if __name__ is '__main__':
     config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
     config['eq'] = 'SNdtt{:d}_{:d}PF_{:d}CS'.format(nTF,nPF,nCS)
 
-    sal = SALOME(config,nTF=nTF)
+    occ = OCC(config,nTF=nTF)
     
-    sal.OIS()
-    sal.write()
-    sal.ansys(plot=True,nl=50,nr=1,ny=3)
-    sal.plot()
+    occ.OIS()
+    occ.write()
+    occ.ansys(plot=True,nl=50,nr=1,ny=1)
+    occ.plot()
     
-    '''
-    demo = DEMO()
-    demo.fill_part('Vessel')
-    demo.fill_part('Blanket')
-    demo.plot_ports()
-  
-    
-    rp,zp = demo.port['P4']['right']['r'],demo.port['P4']['right']['z']
-
-    pl.plot(rp,zp,'k',lw=3)
-    xc = [rp[0],zp[0]]
-    nhat = np.array([rp[1]-rp[0],zp[1]-zp[0]])
-    sal.tf.loop_interpolators(offset=0)  # construct TF interpolators
-    loop = sal.tf.fun['out']
-
-    Lo = minimize_scalar(SALOME.OIS_placment,method='bounded',
-                         args=(loop,(rp[0],zp[0])),bounds=[0,1]).x
-    xo = [Lo,0]             
-    L = minimize(SALOME.intersect,xo,method='L-BFGS-B', 
-                 bounds=([0.1,0.9],[0,15]),args=(xc,nhat,loop)).x
-    pl.plot(loop['r'](L[0]),loop['z'](L[0]),'o')
-    
-    pl.plot(loop['r'](0.4),loop['z'](0.4),'d')
-    pl.plot(loop['r'](0.5),loop['z'](0.5),'d')
-    pl.plot(loop['r'](0.6),loop['z'](0.6),'d')
-    pl.plot(loop['r'](0.7),loop['z'](0.7),'d')
-    pl.plot(loop['r'](0.8),loop['z'](0.8),'d')
-    '''
 
 
     

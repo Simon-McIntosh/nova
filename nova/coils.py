@@ -303,14 +303,16 @@ class TF(object):
         boundary = {'R':R,'Z':Z,'expand':expand}
         return boundary
 
-    def fill(self,write=False,plot=True,alpha=1):
+    def fill(self,write=False,plot=True,alpha=1,plot_cl=False):
         geom.polyparrot(self.x['in'],self.x['wp_in'],
                         color=0.4*np.ones(3),alpha=alpha)
         geom.polyparrot(self.x['wp_in'],self.x['wp_out'],
                         color=0.6*np.ones(3),alpha=alpha)
         geom.polyparrot(self.x['wp_out'],self.x['out'],
                         color=0.4*np.ones(3),alpha=alpha)
-        pl.plot(self.x['cl']['r'],self.x['cl']['z'],'-.',color=0.5*np.ones(3))
+        if plot_cl:  # plot winding pack centre line
+            pl.plot(self.x['cl']['r'],self.x['cl']['z'],
+                    '-.',color=0.5*np.ones(3))
         pl.axis('equal')
         pl.axis('off')
 

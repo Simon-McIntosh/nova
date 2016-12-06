@@ -18,7 +18,7 @@ sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
 Color = cycle(sns.color_palette('Set2'))
 
 
-nPF,nCS,nTF = 4,3,18
+nPF,nCS,nTF = 4,1,18
 config = {'TF':'dtt','eq':'SN'}
 config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
 setup = Setup(config['eq'])
@@ -49,7 +49,7 @@ inv.update_limits(LCS=[-10.5,10.5])
 
 L = inv.optimize(L)
 inv.plot_fix(tails=True)
-inv.fix_flux(inv.swing['flux'][0]) 
+inv.fix_flux(inv.swing['flux'][1]) 
 inv.solve_slsqp()
 
 eq.gen_opp()

@@ -47,14 +47,13 @@ class SF(object):
         if ('Fiesta' in self.eqdsk['name'] or 'Nova' in self.eqdsk['name']\
         or 'disr' in self.eqdsk['name']) and 'CREATE' not in self.eqdsk['name']:
             self.norm = 1
-            #self.eqdsk['cpasma'] *= -1  # check NOVA output - CREATE-NL version? 
         else:  # CREATE
             self.eqdsk['cpasma'] *= -1
             self.norm = 2*np.pi
             for key in ['psi','simagx','sibdry']:
-                self.eqdsk[key] /= self.norm  # per radian
+                self.eqdsk[key] /= self.norm  # Webber/loop to Webber/radian
             for key in ['ffprim','pprime']:
-                self.eqdsk[key] *= self.norm  # per Webber/radian  
+                self.eqdsk[key] *= self.norm  # []/(Webber/loop) to []/(Webber/radian)  
         self.b_scale = 1  # flux function scaling
 
     def trim_r(self,rmin=1.5):
@@ -352,8 +351,8 @@ class SF(object):
         def feild(x):
             B = self.Bpoint(x)
             return sum(B*B)**0.5
-        res = minimize(feild, np.array(xo), method='nelder-mead', 
-                       options={'xtol': 1e-7, 'disp': False})  
+        res = minimize(feild,np.array(xo),method='nelder-mead', 
+                       options={'xtol':1e-7,'disp':False})  
         return res.x
             
     def get_Xpsi(self,xo=None):

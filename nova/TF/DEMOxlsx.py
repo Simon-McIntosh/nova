@@ -324,13 +324,13 @@ class DEMO(object):
                 pass
         set_figure()
         
-    def fill_part(self,part):
+    def fill_part(self,part,alpha=1):
         if part == 'TF_Coil':
-            cindex = len(self.parts.keys())
+            cindex = len(self.parts.keys())-1
         else:
             cindex = list(self.parts.keys()).index(part)-1
         geom.polyfill(self.parts[part]['r'],self.parts[part]['z'],
-                      color=color[cindex])   
+                      color=color[cindex],alpha=alpha)   
 
     def plot(self):
         for part in self.parts:

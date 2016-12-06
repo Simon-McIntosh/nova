@@ -137,14 +137,14 @@ class force_feild(object):
             i = np.argmax(x['cl']['z'])
             ro,zo = x['cl']['r'][i],x['cl']['z'][i]
             bm = ro*cage.point((ro,0,zo),variable='feild')[1]  # TF moment
-        elif method != 'BS':  # calculate tf feild with full Biot-Savart
+        elif method != 'BS':  # raise error if method not 'function' or 'BS'
             errtxt = 'invalid tf feild method {}\n'.format(method)
             errtxt += 'select method from \'function\' or \'BS\'\n'
             raise ValueError(errtxt) 
         if method == 'function':
             b = np.zeros(3)
             b[1] = bm/point[0]  # TF feild (fast version / only good for TF cl)
-        else:
+        elif method == 'BS':  # calculate tf feild with full Biot-Savart
             b = cage.point(point,variable='feild') # (slow / correct)
         theta = np.arctan2(point[1],point[0])
         pf_point = np.dot(geom.rotate(-theta,'z'),point)  # rotate to PF plane

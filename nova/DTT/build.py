@@ -27,10 +27,17 @@ nTF = 18
 config = {'TF':'dtt','eq':'SN'}
 config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
 
-config['eq'] = 'SNdtt18_4PF_2CS'
+config['eq'] = 'SNdtt18_4PF_1CS'
+#config['eq'] = 'SFmdtt18_5PF_3CS'
 setup = Setup(config['eq'])
-setup.targets['inner'] = {'L2D':0.8}
-setup.targets['outer'] = {'L2D':0.85}
+
+'''
+setup.targets['inner1'] = {'L2D':[1.1],'open':True,'dR':0}
+setup.targets['inner2'] = {'L2D':[1.2-0.08],'open':False,'dR':-1}
+setup.targets['outer1'] = {'L2D':[1.85],'open':False,'dR':-1}
+setup.targets['outer2'] = {'L2D':[1.0],'open':True,'dR':0}  
+setup.firstwall['div_ex'] = 0.18
+'''
 
 sf = SF(setup.filename)
 pf = PF(sf.eqdsk)
@@ -42,24 +49,20 @@ levels = sf.contour()
 
 rb = RB(setup,sf)
 rb.firstwall(plot=True,debug=False)
+rb.trim_sol()
 
 profile = Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L',load=True)
 
-'''
-shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'])  # 
-rvv,zvv = geom.rzSLine(rb.segment['vessel']['r'],rb.segment['vessel']['z'],80)
-rvv,zvv = geom.offset(rvv,zvv,0.2)
-rmin = np.min(rvv)
-rvv[rvv<=rmin+0.12] = rmin+0.12
-#shp.loop.oppvar.remove('flat')
-shp.loop.set_l({'value':0.8,'lb':0.65,'ub':1.8})  # 1/tesion
-shp.add_bound({'r':rvv,'z':zvv},'internal')  # vessel
-shp.add_bound({'r':np.min(rvv)-0.01,'z':0},'interior')  # vessel
+
+shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'],ny=3)
+shp.add_vessel(rb.segment['vessel'])
 shp.minimise(ripple=True,verbose=True)
-'''
 
 tf = TF(profile,sf=sf)
 tf.fill()
+
+sf.eqwrite(pf,config=config['eq'],CREATE=True)
+
 #shp.plot_bounds()
 #shp.loop.plot()
 #plot_oppvar(shp.loop.xo,shp.loop.oppvar)

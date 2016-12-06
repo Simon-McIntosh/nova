@@ -1,6 +1,6 @@
 import pickle
 from collections import OrderedDict as od
-from nova.config import trim_dir
+from amigo.IO import trim_dir
 
 class PKL(object):
     

@@ -13,7 +13,8 @@ from nova.streamfunction import SF
 
 class Shape(object):
     
-    def __init__(self,profile,obj='L',nTF='unset',eqconf='unset',**kwargs):
+    def __init__(self,profile,obj='L',nTF='unset',eqconf='unset',
+                 sep='unset',**kwargs):
         self.profile = profile
         self.loop = self.profile.loop
         self.nTF = nTF
@@ -23,10 +24,14 @@ class Shape(object):
             self.bound[side] = {'r':[],'z':[]}
             if side in kwargs:
                 self.add_bound(kwargs[side],side)
-        if nTF is not 'unset' and eqconf is not 'unset':
+        if nTF is not 'unset' and (eqconf is not 'unset' or sep is not 'unset'):
             self.tf = TF(self.profile)      
-            self.cage = coil_cage(nTF=nTF,rc=self.tf.rc,
-                                  plasma={'config':eqconf},ny=1)
+            if eqconf is not 'unset':
+                plasma = {'config':eqconf}
+            else:
+                plasma = {'r':sep['r'],'z':sep['z']}
+            ny = kwargs.get('ny',3)  # TF filament number (y-dir)
+            self.cage = coil_cage(nTF=nTF,rc=self.tf.rc,plasma=plasma,ny=ny)
             x = self.tf.get_loops(self.loop.draw())
             self.cage.set_TFcoil(x['cl'])
         else:
@@ -44,6 +49,15 @@ class Shape(object):
     def add_bound(self,x,side):
         for var in ['r','z']:
             self.bound[side][var] = np.append(self.bound[side][var],x[var])
+            
+    def add_vessel(self,vessel,npoint=80,offset=[0.12,0.2]):
+        rvv,zvv = geom.rzSLine(vessel['r'],vessel['z'],npoint)
+        rvv,zvv = geom.offset(rvv,zvv,offset[1])
+        rmin = np.min(rvv)
+        rvv[rvv<=rmin+offset[0]] = rmin+offset[0]
+        self.loop.set_l({'value':0.8,'lb':0.65,'ub':1.8})  # 1/tesion
+        self.add_bound({'r':rvv,'z':zvv},'internal')  # vessel
+        self.add_bound({'r':np.min(rvv)-5e-3,'z':0},'interior')  # vessel
             
     def clear_bound(self):
         for side in self.bound:
@@ -139,8 +153,8 @@ if __name__ is '__main__':
     #sf = SF(setup.filename)
     #sf.get_boundary(plot=True)
     
-    profile = Profile(config['TF'],family='S',part='TF')
-    shp = Shape(profile,obj='L',nTF=16,eqconf=config['eq'])
+    profile = Profile(config['TF'],family='S',part='TF',load=True)
+    shp = Shape(profile,obj='L',nTF=18,eqconf=config['eq'])
           
     #shp.cage.pattern(plot=True)
 
@@ -148,17 +162,19 @@ if __name__ is '__main__':
     #demo.fill_loops()
     demo.fill_part('Blanket')
     demo.fill_part('Vessel')
+    demo.fill_part('TF_Coil')
     vv = demo.parts['Vessel']['out']
     rvv,zvv = geom.rzSLine(vv['r'],vv['z'],30)
     rvv,zvv = geom.offset(rvv,zvv,0.2)
     rmin = np.min(rvv)
     rvv[rvv<=rmin+0.12] = rmin+0.12
     shp.add_bound({'r':rvv,'z':zvv},'internal')  # vessel
-    shp.plot_bounds()
-    shp.minimise()
+    #shp.plot_bounds()
+    #shp.minimise(ripple=True)
     
     shp.update()
     shp.tf.fill()
+    demo.fill_part('TF_Coil',alpha=0.8)
     #shp.cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)
     
     plot_oppvar(shp.loop.xo,shp.loop.oppvar)

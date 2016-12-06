@@ -16,6 +16,7 @@ from nova.force import force_feild
 from scipy.optimize import minimize_scalar
 from copy import deepcopy
 from warnings import warn
+import sys
 
 class INV(object):
     
@@ -120,9 +121,9 @@ class INV(object):
         self.eq.pf.categorize_coils()  # index pf coils
         self.initalise_current()
         self.initalise_limits()
-        #self.ff = force_feild(self.eq.pf.index,self.eq.pf.coil,
-        #                      self.eq.coil,self.eq.plasma_coil,
-        #                      multi_filament=True)
+        self.ff = force_feild(self.eq.pf.index,self.eq.pf.coil,
+                              self.eq.coil,self.eq.plasma_coil,
+                              multi_filament=True)
         self.set_swing()
         if plot:
             self.plot_coils()
@@ -326,10 +327,12 @@ class INV(object):
 
     def add_psi(self,psi,factor=1,**kwargs):
         r,z = self.get_point(**kwargs)
-        self.add_fix([r],[z],[psi],np.array([[0],[0]]).T,['psi'],[factor])
+        label = kwargs.get('label','psi')
+        self.add_fix([r],[z],[psi],np.array([[0],[0]]).T,[label],[factor])
         
     def add_alpha(self,alpha,factor=1,**kwargs):
         psi = self.get_psi(alpha)
+        psi -= self.sf.Xpsi  # normalise
         self.add_psi(psi,factor=factor,**kwargs)
         
     def add_Bcon(self,B,**kwargs):
@@ -337,6 +340,7 @@ class INV(object):
         self.add_cnstr([r],[z],['B'],['gt'],[B])
         
     def plot_fix(self,tails=True):
+        self.get_weight()
         if hasattr(self,'wsqrt'):
             weight = self.wsqrt/np.mean(self.wsqrt)
         else:
@@ -356,11 +360,13 @@ class INV(object):
         if len(Brz) > 0: Brz_norm = tail_length/np.mean(Brz)
         for r,z,bc,bdir,w in zip(self.fix['r'],self.fix['z'],
                                  self.fix['BC'],self.fix['Bdir'],weight):
-            if bdir[0]**2+bdir[1]**2 > 0:  # tails    
-                direction = bdir
+            if bdir[0]**2+bdir[1]**2 == 0:  # tails  
+                direction = [0,-1]
             else:
-                d_dr,d_dz = self.get_gradients(bc,r,z)
-                direction = np.array([d_dr,d_dz])/np.sqrt(d_dr**2+d_dz**2)
+                direction = bdir
+            #else:
+            #    d_dr,d_dz = self.get_gradients(bc,r,z)
+            #    direction = np.array([d_dr,d_dz])/np.sqrt(d_dr**2+d_dz**2)
             if 'psi' in bc:
                 norm = psi_norm
                 marker,size,color = 'o',7.5,Color[0]
@@ -492,14 +498,20 @@ class INV(object):
         
     def get_weight(self):
         Rf,Zf,BC,Bdir = self.unpack_fix()
-        weight = np.ones(len(BC))
+        weight = np.zeros(len(BC))
         for i,(rf,zf,bc,bdir,factor) in enumerate(zip(Rf,Zf,BC,Bdir,
                                                       self.fix['factor'])):
             d_dr,d_dz = self.get_gradients(bc,rf,zf)
-            if bdir[0]**2+bdir[1]**2 == 0 or 'psi' not in bc:
+            if 'psi' not in bc:  # (Br,Bz)
                 weight[i] = 1/abs(np.sqrt(d_dr**2+d_dz**2))
-            else:
+            elif bc == 'psi_bndry':
                 weight[i] = 1/abs(np.dot([d_dr,d_dz],bdir))
+        wbar = np.mean([weight[i] for i,bc in enumerate(self.fix['BC']) \
+                                if bc == 'psi_bndry'])
+        for i,bc in enumerate(BC):
+            if bc == 'psi_x':  # Xpoint weights
+                weight[i] = wbar  # mean boundary weight
+
         factor = np.reshape(self.fix['factor'],(-1,1))
         weight = np.reshape(weight,(-1,1))
         self.wsqrt = np.sqrt(factor*weight)
@@ -848,6 +860,11 @@ class INV(object):
         rms = self.update_position(Lnorm,update_area=True,store_update=True)
         if grad.size > 0:
             grad[:] = op.approx_fprime(Lnorm,self.update_position,1e-7)
+        rms_str = '\r{:d}) rms {:1.2f}mm '.format(self.iter['position'],1e3*rms)
+        rms_str += 'time {:1.0f}s'.format(time.time()-self.tstart)
+        rms_str += '\t\t\t'  # white space
+        sys.stdout.write(rms_str)
+        sys.stdout.flush()
         return rms
         
     def update_position_scipy(self,Lnorm):
@@ -961,8 +978,12 @@ class INV(object):
             mutation=(0.5,1),recombination=0.7,polish=True,disp=True)
             Lnorm,self.rms = res.x,res.fun
         elif method == 'ls':  # sequential least squares
-            opt = nlopt.opt(nlopt.LD_SLSQP,self.nL)
-            opt.set_ftol_abs(1e-4)
+            print('Optimising configuration:')
+            #opt = nlopt.opt(nlopt.LD_SLSQP,self.nL)
+            opt = nlopt.opt(nlopt.LD_MMA,self.nL)
+            opt.set_ftol_abs(5e-4)
+            #opt.set_ftol_rel(1e-2)
+            #opt.set_stopval(30e-3)  # <x [m]
             opt.set_min_objective(self.update_position_vector)
             opt.set_lower_bounds([0 for _ in range(self.nL)])
             opt.set_upper_bounds([1 for _ in range(self.nL)])
@@ -984,7 +1005,7 @@ class INV(object):
         text += ' dTpol {:1.3f}'.format(self.dTpol)
         print(text)
         '''
-        print('rms {:1.2f}mm'.format(1e3*self.rms))
+        print('\nrms {:1.2f}mm'.format(1e3*self.rms))
         return self.Lo['value'],self.rms
         
     def tick(self):
@@ -1044,7 +1065,7 @@ class INV(object):
         self.Icoil = np.zeros(len(self.coil['active'].keys()))
         for j,name in enumerate(self.coil['active']):
             #Nfilament = self.eq.coil[name+'_0']['Nf']
-            Nfilament = self.coil[name]['Nf']
+            Nfilament = self.coil['active'][name]['Nf']
             self.Icoil[j] = self.I[j]*Nfilament  # store current
             self.eq.pf.coil[name]['I'] = self.Icoil[j]*self.Iscale  
             self.coil['active'][name]['I_sum'] = self.Icoil[j]*self.Iscale

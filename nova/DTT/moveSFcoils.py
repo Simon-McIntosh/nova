@@ -6,13 +6,12 @@ from nova.config import Setup
 from itertools import cycle
 import numpy as np
 from nova.radial_build import RB
-from nova.shelf import PKL
-import nova.cross_coil as cc
 from nova.coils import PF,TF
-from time import time
 from nova import loops
-from nova.TF.DEMOxlsx import DEMO
 from nova.loops import Profile
+from nova.shelf import PKL
+from amigo import geom
+from scipy.interpolate import griddata
 
 import seaborn as sns
 rc = {'figure.figsize':[7*10/16,7],'savefig.dpi':150, #*12/16
@@ -22,118 +21,113 @@ sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 Color = cycle(sns.color_palette('Set2'))
 
-pkl = PKL('SFm')
-
-config = 'SFm'
-setup = Setup(config)
+nPF,nCS,nTF = 5,5,18
+config = {'TF':'dtt','eq':'SFm'}
+config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
+setup = Setup(config['eq'])
 sf = SF(setup.filename)
-rb = RB(setup,sf)
-rb.firstwall(calc=False,plot=True,debug=False)
-pf = PF(sf.eqdsk)
-profile = Profile(config,family='S',part='TF',nTF=18,objective='L')
-tf = TF(profile)
 
-eq = EQ(sf,pf,dCoil=2.0,sigma=0,boundary=rb.get_fw(expand=0.5),n=1e4)
-#eq.get_plasma_coil()
-#eq.run(update=False)
+rb = RB(setup,sf)
+pf = PF(sf.eqdsk)
+tf = TF(Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L',load=True))
+
+eq = EQ(sf,pf,dCoil=2.0,sigma=0,n=1e4,
+        boundary=sf.get_sep(expand=0.75),
+        rmin=sf.Xpoint[0]-3.5,zmin=sf.Xpoint[1]-3.5) 
 eq.gen_opp()
 
-#sf.contour()
+theta,dXpoint = -5*np.pi/180,[0.5,-1]
+pivot = np.argmin(sf.rbdry)  # rotate/translate eqdsk
+rp,zp = sf.rbdry[pivot],sf.zbdry[pivot]
+TRT = geom.rotate2D(theta,xo=rp,yo=zp)[1]  # trial rotate/translate
+zref = sf.Mpoint[1]
+dz = zref-np.dot(TRT,np.append(sf.Mpoint,1))[1]  # correct z-shift
+R,TRT = geom.rotate2D(theta,xo=rp,yo=zp,dy=dz)
+
+points = np.zeros((eq.nr*eq.nz,2))
+values = eq.psi.flatten()
+for i,r in enumerate(eq.r):
+    for j,z in enumerate(eq.z):
+        points[i*eq.nz+j,:] = np.dot(TRT,np.array([r,z,1]))  # rotate psi grid
+sf.xo = np.dot(TRT,np.append(sf.xo,1))  # rotate/translate X-point sead
+sf.xo[0] -= 0.5
+dXpoint = np.dot(R,dXpoint)  # rotate X-point deta
+eq.psi = griddata(points,values,(eq.r2d,eq.z2d),method='cubic',fill_value=0)
+eq.set_eq_psi()
+eq.plasma()  # update core-b and plasma coils
+
+#eq.plotb()
+'''
+sf.contour(boundary=False)
+pl.plot(sf.xo[0],sf.xo[1],'o')
+pl.plot(sf.Xpoint[0],sf.Xpoint[1],'d')
+inv.plot_fix(tails=True)
+'''
+#pf.plot(coils=pf.coil,label=True,plasma=True,current=True)
 
 inv = INV(sf,eq,tf)
-Lpf = inv.grid_PF(nPF=4)
-Lcs = inv.grid_CS(nCS=3,Zbound=[-12,8],gap=0.1)
-Lo = np.append(Lpf,Lcs)
+Lpf = inv.grid_PF(nPF=nPF)
+Lcs = inv.grid_CS(nCS=nCS,Zbound=[-10.5,7],gap=0.1)
+L = np.append(Lpf,Lcs)
 inv.update_coils()
+inv.update_coils()
+inv.fit_PF(offset=0.3)
 
-#inv.remove_active(Clist=inv.CS_coils)
-
-inv.fit_PF(offset=0.3)  # fit PF coils to TF
 inv.fix_boundary_psi(N=25,alpha=1-1e-4,factor=1)  # add boundary points
-inv.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary points
+#inv.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary points
+inv.add_null(factor=1,point=sf.Xpoint)
+inv.add_alpha(1,factor=1,point=sf.Xpoint,label='psi_x')
 
-sf.get_Xpsi()
-pl.plot(sf.Xpoint[0],sf.Xpoint[1],'o')
-inv.add_null(factor=3,point=sf.Xpoint)
-#inv.add_psi(sf.Xpsi,factor=1,point=sf.Xpoint)  # X-point psi
+'''
+#sf.get_Xpsi(xo=sf.Xpoint+dXpoint)
+target = (0.75,30)
+inv.add_null(factor=1,polar=target)
+#inv.add_alpha(1+0.1,factor=1,polar=target,label='psi_x')
+#sf.get_Xpsi(xo=sf.Xpoint-dXpoint)
+'''
 
-sf.get_Xpsi(xo=sf.Xpoint+[2,-2])
-pl.plot(sf.Xpoint[0],sf.Xpoint[1],'s')
-inv.add_null(factor=3,point=sf.Xpoint)
-#inv.add_psi(sf.Xpsi,factor=1,point=sf.Xpoint)  # X-point psi
-sf.get_Xpsi(xo=sf.Xpoint-[2,-2])
+sf.get_Xpsi(xo=sf.Xpoint+dXpoint)
+inv.add_null(factor=1,point=sf.Xpoint)
+inv.add_alpha(1,factor=1,point=sf.Xpoint,label='psi_x')
+sf.get_Xpsi(xo=sf.Xpoint-dXpoint)
 
-#Rex,arg = 1.5,40
-#R = sf.Xpoint[0]*(Rex-1)/np.sin(arg*np.pi/180)
-#target = (R,arg)
-#inv.add_alpha(1,factor=1,polar=target)  # X-point psi
-#inv.add_B(0,[-15],factor=1,polar=target)  # X-point feild
-         
-inv.set_swing()
-inv.update_limits(LCS=[-14,14])
+inv.set_swing(width=150)  # width=363
+inv.update_limits(LCS=[-11.5,11.5])
 
+for i in range(2):
+    L = inv.optimize(L)
+    inv.fix_flux(inv.swing['flux'][1]) 
+    inv.solve_slsqp()
+    eq.gen_opp()
+    #eq.get_Vcoil()
+    #eq.gen(ztarget=zref)
 
-Lo = inv.optimize(Lo)
-inv.plot_fix(tails=True)
-inv.fix_flux(inv.swing['flux'][0]) 
-inv.solve_slsqp()
-
-#eq = EQ(sf,pf,dCoil=2,sigma=0,boundary=tf.get_loop(expand=0),n=1e4)
-#eq.get_plasma_coil()
-#eq.run(update=False)
-eq.gen_opp()
-sf.contour()
-
-
-pf.plot(coils=pf.coil,label=True,plasma=True,current=True) 
-sf.contour(boundary=False)
-
-
+sf.contour(boundary=False,plot_vac=True)
+pf.plot(coils=pf.coil,label=True,plasma=True,current=True)
+#inv.plot_fix(tails=True)
+rb.firstwall(mode='calc',plot=True,debug=False)
+rb.trim_sol()
 tf.fill()
 
-'''
-demo = DEMO()
-demo.fill_part('Vessel')
-demo.fill_part('Blanket')
-pl.plot(demo.limiter['L3']['r'],demo.limiter['L3']['z'])
-pl.axis('equal')
-pl.tight_layout()
-'''
 loops.plot_variables(inv.Io,scale=1,postfix='MA')
 loops.plot_variables(inv.Lo,scale=1)
-pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
+
+sf.eqwrite(pf,config=config['TF']+'_{:d}PF_{:d}CS'.format(inv.nPF,inv.nCS),
+           CREATE=True)
+
+#pkl = PKL('SF',directory='../../Movies/')
+#pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
+
 
 '''
+inv.fix_flux(inv.swing['flux'][1]) 
+inv.solve_slsqp()
+#eq.run()
+eq.gen_opp()
 
-#inv.write_swing()
-#sf.eqwrite(config='SXex')
-
-for swing in np.linspace(-20,80,5):
-    pl.figure()
-    pl.axis('equal')
-    pl.axis('off')
-
-    inv.swing_fix(swing)
-    inv.solve() 
-    
-    inv.update_coils(plot=True)
-    sf.plot_coils(Color,coils=sf.coil,label=False,plasma=False,current=True) 
-    sf.plot_coils(Color,coils=eq.coil,label=False,plasma=False) 
- 
-    eq.run()
-    
-    sf.contour()
-    eq.plasma()
-    #eq.plotb()
-    #sf.eqwrite(config='SXex')
-    pl.plot(sf.rbdry,sf.zbdry,'--')
-    inv.plot_fix()
-
-print('L3D',inv.rb.sol.connection('outer',0)[-1][-1])
-print('R',Rsol[-1])
-print('R/X',Rsol[-1]/sf.Xpoint[0])
-print('Itotal',inv.Itotal*1e-6,'MA')
-print('R',rb.targets['outer']['Rsol'][-1],'Z',
-      rb.targets['outer']['Zsol'][-1])
+pf.plot(coils=inv.eq.pf.coil,label=True,plasma=True,current=True)
+tf.fill()
+sf.contour(boundary=False)
+pl.plot(sf.Xpoint[0],sf.Xpoint[1],'d')
+inv.plot_fix(tails=True)
 '''
-

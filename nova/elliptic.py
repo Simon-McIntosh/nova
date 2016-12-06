@@ -185,15 +185,18 @@ class EQ(object):
         Nex = len(ex_coil)
         self.Vcoil = np.zeros((Nex,),dtype=[('name','S10'),('value','float'),
                                             ('Io','float'),('Ip','float'),
-                                            ('Ii','float'),('Nf','int')])
+                                            ('Ii','float'),('Nf','int'),
+                                            ('z','float')])
         for i,name in enumerate(ex_coil):
             self.Vcoil['name'][i] = name
             self.Vcoil['Io'][i] = self.pf.coil[name]['I']
-            self.Vcoil['Nf'][i] = self.coil[name+'_0']['Nf']  
+            self.Vcoil['z'][i] = -self.pf.coil[name]['z']
+            self.Vcoil['Nf'][i] = self.coil[name+'_0']['Nf'] 
             Mpoint = self.sf.Mpoint
             r,z = self.pf.coil[name]['r'],self.pf.coil[name]['z']
             self.Vcoil['value'][i] = cc.green_feild(Mpoint[0],Mpoint[1],r,z)[0]  
-        self.Vcoil = np.sort(self.Vcoil,order='value')
+        #self.Vcoil = np.sort(self.Vcoil,order='value')
+        self.Vcoil = np.sort(self.Vcoil,order='z')
         
     def set_Vcoil(self):  # set fixed vertical control coils
         names = ['upper','lower']
@@ -448,7 +451,7 @@ class EQ(object):
             else:
                 Mflag = False
             self.Ic = 0  # control current
-            for index,sign in zip([0],[1]):  # stability coil pair [0,-1],[1,-1]
+            for index,sign in zip([0,-1],[1,-1]):  # stability coil pair [0,-1],[1,-1]
                 gain = 1e5/self.Vcoil['value'][index]
                 self.Vcoil['Ip'][index] = gain*kp*self.Zerr[i]  # proportional
                 self.Vcoil['Ii'][index] += gain*ki*self.Zerr[i]  # intergral
@@ -462,7 +465,7 @@ class EQ(object):
     def gen_opp(self,z=None,dz=0.3,Zerr=5e-3,Nmax=100):
         if z == None:  # sead plasma magnetic centre vertical target
             z = self.sf.Mpoint[1]
-        f,zt,dzdf= np.zeros(Nmax),np.zeros(Nmax),-2.2e-7
+        f,zt,dzdf= np.zeros(Nmax),np.zeros(Nmax),-0.7e-7#-2.2e-7
         zt[0] = z
         self.get_Vcoil()  # or set_Vcoil for virtual pair
         for i in range(Nmax):

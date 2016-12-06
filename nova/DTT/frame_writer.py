@@ -12,7 +12,7 @@ from nova.radial_build import RB
 from nova.shelf import PKL
 from eqConfig import Config
 import pylab as pl
-import sys
+
 
 import seaborn as sns
 ar = 1.2  # figure aspect
@@ -21,8 +21,9 @@ rc = {'figure.figsize':[8/ar,8],'savefig.dpi':100, #*12/16
       'lines.linewidth':0.75}
 sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
         font_scale=1.5,rc=rc)
-config = 'DEMO_SN54'
-pkl = PKL(config)
+
+config = 'SF'
+pkl = PKL(config,directory='../../Movies/')
 sf,eq,inv = pkl.fetch(['sf','eq','inv'])
 
 FFMpegWriter = manimation.writers['ffmpeg']
@@ -61,7 +62,7 @@ def animate(index):
     inv.tf.fill()
     
 fig,ax = pl.subplots()
-with writer.saving(fig,'../../Figs/{}.wmv'.format(config),100):  # wmv
+with writer.saving(fig,'../../Movies/{}.wmv'.format(config),100):  # wmv
     for i in np.arange(0,inv.log['position_iter'][-1]):  # 
         animate(i)
         writer.grab_frame()

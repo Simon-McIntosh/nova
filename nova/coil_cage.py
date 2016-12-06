@@ -41,7 +41,7 @@ class coil_cage(object):
             r,z = self.eqdsk['rbdry'],self.eqdsk['zbdry']
         elif 'r' in kwargs and 'z' in kwargs:  # separatrix from input
             r,z = kwargs.get('r'),kwargs.get('z')
-            self.eqdsk = {}
+            self.eqdsk = {'rcentr':9.0735,'zmagx':0.15295,'bcentr':-5.6211}
         else:
             errtxt = '\n'
             errtxt += 'Require plasma={} input of following types:\n'

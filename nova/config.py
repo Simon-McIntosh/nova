@@ -3,6 +3,13 @@ import collections
 from nova.TF.DEMOxlsx import DEMO
 from amigo import IO
             
+def select(base={'TF':'dtt','eq':'SN'},nTF=18,nPF=4,nCS=1):
+    config = {}
+    config['TF'] = '{}{}{:d}'.format(base['eq'],base['TF'],nTF)
+    config['eq'] = '{:s}{:s}{:d}_{:d}PF_{:d}CS'.format(base['eq'],base['TF'],
+                                                       nTF,nPF,nCS)
+    return config
+    
 class Setup(object):
     
     def __init__(self,configuration='',eqdir='../../eqdsk/'):

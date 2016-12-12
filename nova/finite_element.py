@@ -117,7 +117,8 @@ class FE(object):
         n[:,0] = n[:,1]-1
         return n
         
-    def add_elements(self,n=[],nmat=0,part_name=''):  # list of node pairs shape==[n,2]
+    def add_elements(self,n=[],nmat=0,part_name=''):  
+        # list of node pairs shape==[n,2]
         if len(part_name) == 0:
             part_name = 'part_{:1d}'.format(self.npart)
         n = np.array(n)
@@ -141,7 +142,8 @@ class FE(object):
         self.check_frame(dx)
         dl = np.linalg.norm(dx,axis=1)  # element length
         norm = np.dot(np.matrix(dl).T,np.ones((1,3)))
-        dx /= norm  # unit length
+        print(dx,dl,norm)
+        dx = dx/norm  # unit length
         dz = np.zeros(np.shape(dx))
         dz[:,2] = 1  # points lie in z-plane
         dy = np.cross(dz,dx)  # right hand coordinates
@@ -219,7 +221,7 @@ class FE(object):
         self.S['Nv_dL'] = np.zeros((nShape,2)) 
         self.S['Nv_dL'][:,0] = np.copy(self.S['Nv'][:,1])
         self.S['Nv_dL'][:,1] = np.copy(self.S['Nv'][:,3])
-        self.S['Nd2v'] = np.zeros((nShape,4))  #  Hermite shape functions (curve)
+        self.S['Nd2v'] = np.zeros((nShape,4))  #  Hermite functions (curve)
         self.S['Nd2v'][:,0] = -6+12*self.S['s']
         self.S['Nd2v'][:,1] = -4+6*self.S['s']
         self.S['Nd2v'][:,2] = 6-12*self.S['s']
@@ -421,9 +423,10 @@ class FE(object):
         Y = np.array([0,1,0]).T
         Z = np.array([0,0,1]).T
         for i,(dx,dy,dz) in enumerate(zip(dx_,dy_,dz_)):
-            self.T3[:,:,i] = np.matrix([[np.dot(dx,X),np.dot(dx,Y),np.dot(dx,Z)],
-                                       [np.dot(dy,X),np.dot(dy,Y),np.dot(dy,Z)],
-                                       [np.dot(dz,X),np.dot(dz,Y),np.dot(dz,Z)]])
+            self.T3[:,:,i] = \
+            np.matrix([[np.dot(dx,X),np.dot(dx,Y),np.dot(dx,Z)],
+                       [np.dot(dy,X),np.dot(dy,Y),np.dot(dy,Z)],
+                       [np.dot(dz,X),np.dot(dz,Y),np.dot(dz,Z)]])
         
     def rotate_matrix(self,M,el):
         T = np.zeros((2*self.ndof,2*self.ndof))                
@@ -456,13 +459,6 @@ class FE(object):
                 raise ValueError(err_txt)
         return error_code
         
-    def set_s(self,**kwargs):
-        if 's' in kwargs:
-            s = kwargs.get('s')
-        else:
-            s = 0.5
-        return s
-        
     def add_load(self,**kwargs):  # distribute load to adjacent nodes
         csys = ''  # coodrdinate system unset 
         if 'f' in kwargs or 'F' in kwargs:  # point load
@@ -477,7 +473,7 @@ class FE(object):
                     s = 1
             elif 'el' in kwargs:
                 el = kwargs.get('el')
-                s = self.set_s(**kwargs)
+                s = kwargs.get('s',0.5)
             else:
                 raise ValueError('define element index or length and part')
             if 'F' in kwargs:
@@ -492,7 +488,7 @@ class FE(object):
                 el = kwargs.get('el')
             else:
                 raise ValueError('define element index')
-            s = self.set_s(**kwargs)
+            s = kwargs.get('s',0.5)
             if 'W' in kwargs:
                 csys = 'global'
                 w = np.array(kwargs.get('W'))
@@ -505,7 +501,7 @@ class FE(object):
         elif csys == 'global':   
             f = np.linalg.solve(self.T3[:,:,el].T,f)  # rotate to local csys
         fn = np.zeros((6,2))  # 6 dof local nodal load vector
-        for i,label in enumerate(['fx','fy','fz']):  # split point load into F,M
+        for i,label in enumerate(['fx','fy','fz']):  # split point load to F,M
             if label in self.load:
                 if label == 'fx':
                     fn[i,0] = (1-s)*f[i]
@@ -513,7 +509,7 @@ class FE(object):
                 else:  # fy,fz
                     fn[i,0] = (1-s)**2*(1+2*s)*f[i]
                     fn[i,1] = s**2*(3-2*s)*f[i]
-                    mi = 5 if label == 'fy' else 4
+                    mi = 5 if label == 'fy' else 4  # moment index
                     fn[mi,0] = f[i]*(1-s)**2*s*self.el['dl'][el]
                     fn[mi,1] = -f[i]*s**2*(1-s)*self.el['dl'][el]
                     if load_type == 'dist':
@@ -550,7 +546,7 @@ class FE(object):
                 
     def add_tf_load(self,config,tf,Bpoint,parts=['loop','nose'],
                     method='function'):
-        cage = coil_cage(nTF=tf.nTF,rc=tf.rc,
+        cage = coil_cage(nTF=tf.profile.nTF,rc=tf.rc,
                          plasma={'config':config},coil={'cl':tf.x['cl']})
         # eq.Bpoint == point calculated method (slow)
         # sf.Bpoint == spline interpolated method (fast)
@@ -599,27 +595,38 @@ class FE(object):
             err_txt = part+' not present in ['+', '.join(self.part.keys())+']'
             raise ValueError(err_txt)
         
-    def part_node(self,nodes,part):
-        append = False
-        if nodes == 'all':
-            append = True
-            if len(part) > 0:  # node index relitive to part
-                nodes = list(range(self.part[part]['nel']))
-        if not isinstance(nodes,list):  # convert to list
-            nodes = [nodes]
-        if len(part) > 0:  # node index relitive to part
-            for i in range(len(nodes)):
-                node = nodes[i]
-                el = self.part[part]['el'][node]
-                el_end = 0 if node >= 0 else 1  # chose side of element
-                nodes[i] = self.el['n'][el,el_end]
-            if append:
-                nodes = np.append(nodes,self.el['n'][el,1])
+    def part_nodes(self,index,part,ends=2):  # el ends, 0==start,1==end,2==both
+        if len(part) > 0:  # element index relitive to part
+            index_type = 'element'
+        else:  # node index
+            index_type = 'node'
+        if index_type == 'element':
+            if index == 'all':
+                if len(part) > 0:  # node index relitive to part
+                    elements = list(range(self.part[part]['nel']))
+            else:
+                elements = index
+                if not isinstance(elements,list):  # convert to list
+                    elements = [elements]
+            nodes = -1*np.ones(2*len(elements))  # node array
+            for i,element in enumerate(elements):
+                el = self.part[part]['el'][element]
+                if ends==0 or ends==2:  # start or both
+                    nodes[2*i] = self.el['n'][el,0]
+                if ends==1 or ends==2:  # end or both
+                    nodes[2*i+1] = self.el['n'][el,1]
+            nodes = np.unique(nodes)
+            nodes = nodes[nodes>-1]
+        elif index_type == 'node':
+            nodes = index
+            if not isinstance(nodes,list):  # convert to list
+                nodes = [nodes]
         return nodes
         
-    def addBC(self,dof,nodes,part='',terminate=True):
+    def addBC(self,dof,index,part='',ends=2,terminate=True):
+        # part='' then index=nodes, part=part then index=elements
         self.check_part(part)
-        nodes = self.part_node(nodes,part)  # part relitive node format
+        nodes = self.part_nodes(index,part,ends=ends)  # select nodes
         if isinstance(dof,str):  # convert to list
             dof = [dof]
         for constrn in dof:  # constrain nodes
@@ -655,7 +662,8 @@ class FE(object):
                     for i in range(int(self.ndof/2)):
                         self.BCindex = np.append(self.BCindex,ui+i)
                 else:
-                    self.BCindex = np.append(self.BCindex,ui+j-2)  # skip-fix,pin
+                    # skip-fix,pin
+                    self.BCindex = np.append(self.BCindex,ui+j-2)  
         self.BCindex = list(map(int,set(self.BCindex)))
 
     def solve(self):
@@ -665,13 +673,13 @@ class FE(object):
         self.assemble()  # assemble stiffness matrix
         self.setBC()  # remove constrained equations from stiffness + load 
         self.Dn = np.zeros(self.nK)
-        self.Dn[self.Dindex] = np.linalg.solve(self.K,self.F)  # global displacment
+        
+        self.Dn[self.Dindex] = np.linalg.solve(self.K,self.F) # global
         for i,disp in enumerate(self.disp):
             self.D[disp] = self.Dn[i::self.ndof]
         self.interpolate()
         
-    def plot_3D(self):
-        ms = 5
+    def plot_3D(self,ms=5):
         fig = pl.figure()
         ax = fig.gca(projection='3d')
         ax.plot(self.X[:,0],self.X[:,2],self.X[:,1],'o',markersize=ms,
@@ -683,8 +691,7 @@ class FE(object):
                 
         #ax.axis('off')
                 
-    def plot_twin(self,scale=5e-1):
-        ms = 5
+    def plot_twin(self,scale=5e-1,ms=5):
         pl.figure(figsize=(10,5))
         ax1 = pl.subplot(121)
         ax2 = pl.subplot(122, sharey=ax1)
@@ -713,9 +720,7 @@ class FE(object):
                           scale*self.Fo[j+2],scale*self.Fo[j+1],
                           head_width=0.15,head_length=0.3) 
 
-
-    def plot_nodes(self):
-        ms = 5
+    def plot_nodes(self,ms=5):
         pl.plot(self.X[:,0],self.X[:,1],'o',markersize=ms,
                 color=0.75*np.ones(3))
         for part,c in zip(self.part,color):
@@ -728,10 +733,14 @@ class FE(object):
     def plot_F(self,scale=1):
         for i,(X,dx,dy) in enumerate(zip(self.X,self.D['x'],self.D['y'])):
             j = i*self.ndof
-            if np.linalg.norm([self.Fo[j],self.Fo[j+1]]) != 0:
-                pl.arrow(X[0]+dx,X[1]+dy,
-                         scale*self.Fo[j],scale*self.Fo[j+1],
-                         head_width=0.15,head_length=0.3)        
+            if self.frame == '1D':
+                F = [0,self.Fo[j]]
+            else:
+                F = [self.Fo[j],self.Fo[j+1]]
+            nF = np.linalg.norm(F)
+            if nF != 0:
+                pl.arrow(X[0]+dx,X[1]+dy,scale*F[0],scale*F[1],
+                         head_width=scale*0.2*nF,head_length=scale*0.3*nF)        
         
     def plot_displacment(self):
         for i,(part,c) in enumerate(zip(self.part,color)):
@@ -742,7 +751,7 @@ class FE(object):
     def plot_curvature(self):
         pl.figure(figsize=([4,3*12/16]))
         text = linelabel(value='',postfix='',Ndiv=5) 
-        part = ['loop','nose']  # self.part
+        part = self.part #  ['loop','nose']  # 
         for i,(part,c) in enumerate(zip(part,color)):
             pl.plot(self.part[part]['l'],
                     self.part[part]['d2u'][:,2],'--',color=c)

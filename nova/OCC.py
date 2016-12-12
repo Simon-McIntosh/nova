@@ -277,7 +277,7 @@ class OCC(object):
             Fbody[var] = np.zeros((ndata['nl'],ndata['nr'],ndata['ny']))
         
         self.tf.loop_interpolators(offset=0,full=True)  # centreline
-        Jturn = self.cage.Iturn/cross_section
+        Jturn = self.cage.Iturn/cross_section  # current density magnitude
         for i,l in enumerate(l_data): 
             iter_str = '\rcalculating TF body force:'
             iter_str += 'segment {:d} of {:d}'.format(i,ndata['nl'])

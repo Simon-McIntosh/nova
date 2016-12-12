@@ -1,12 +1,12 @@
 import numpy as np
 import pylab as pl
-from finite_element import FE
+from nova.finite_element import FE
 from nova import coils
 from nova.beam import Dcoil
 from amigo.addtext import linelabel
 from time import time
 
-from nova.config import Setup
+from nova.config import Setup,select
 from nova.streamfunction import SF
 from nova.radial_build import RB
 from nova.elliptic import EQ
@@ -15,7 +15,7 @@ from nova.inverse import INV
 from nova.coils import TF
 import nova.cross_coil as cc
 from amigo import geom
-
+from nova.loops import Profile
 import seaborn as sns
 rc = {'figure.figsize':[8*12/16,8],'savefig.dpi':120, # 
       'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
@@ -23,15 +23,16 @@ rc = {'figure.figsize':[8*12/16,8],'savefig.dpi':120, #
 sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 
-config = 'DEMO_SN'
+nTF,nPF,nCS = 18,4,1
+config = {'TF':'dtt','eq':'SN'}
+config = select(config,nTF=nTF,nPF=nPF,nCS=nCS)
 
-setup = Setup(config,eqdir='../../eqdsk/')
+profile = Profile(config['TF'],family='S',part='TF',
+                  nTF=nTF,obj='L',load=True)
+setup = Setup(config['eq'])
 sf = SF(setup.filename)
-#levels = sf.contour()
-
-
-tf = TF(config,coil_type='S')
-tf.load(nTF=18,objective='L')
+tf = TF(profile,sf=sf)
+tf.fill()
 
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
@@ -43,8 +44,8 @@ eq.get_plasma_coil()
 #eq.plotj()
 #pf.coil['Coil6']['r'] -= 1.5
 #eq.coils()
-eq.gen_opp(sf.Mpoint[1])
-eq.resample()
+#eq.gen_opp(sf.Mpoint[1])
+#eq.resample()
 #eq.plotb(alpha=1)
 
 #inv = INV(sf,pf,eq)
@@ -58,7 +59,7 @@ to = time()
 tf.split_loop()
     
 fe = FE(frame='3D')
-fe.add_mat(0,E=5e2,I=5e2,A=1,G=5,J=5,rho=5e-2)
+fe.add_mat(0,E=5e2,I=5e1,A=1,G=5,J=5,rho=5e-2)
 
 nodes = {}
 for part in ['loop','nose']:  # ,'nose'
@@ -76,12 +77,13 @@ fe.addBC(['u','w','rx','ry','rz'],'all',part='nose')
  
 fe.add_nodes([13,-12,-2])
 fe.add_nodes([13,-12,2])
-fe.add_elements(n=[fe.nndo-1,fe.part['loop']['el'][20],fe.nndo],part_name='support')
+fe.add_elements(n=[fe.nndo-1,fe.part['loop']['el'][20],fe.nndo],
+                part_name='support')
 fe.addBC(['fix'],[0],part='support') 
 fe.addBC(['fix'],[-1],part='support') 
 
-#fe.add_weight()  # add weight to all elements
-fe.add_tf_load(config,tf,sf.Bpoint,method='function')  # bursting and toppling loads
+fe.add_weight()  # add weight to all elements
+#fe.add_tf_load(config,tf,sf.Bpoint,method='function')  # burst and topple
 
 fe.solve()
 
@@ -95,7 +97,7 @@ fe.plot_F(scale=5e-1)
 fe.plot_displacment()
 pl.axis('off')
 
-fe.plot_twin()
-fe.plot_curvature()
 
+#fe.plot_twin()
+fe.plot_curvature()
 

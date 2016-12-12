@@ -13,6 +13,7 @@ import nova.cross_coil as cc
 colors = sns.color_palette('Paired',12)
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 from nova.TF.DEMOxlsx import DEMO
+from warnings import warn
     
 class PF(object):
     def __init__(self,eqdsk):
@@ -196,6 +197,7 @@ class TF(object):
             width = Acs/depth
             self.section['winding_pack'] = {'width':width,'depth':depth}
         else:
+            warn('using default winding pack dimensions')
             self.section['winding_pack'] = {'width':0.625,'depth':1.243}
         self.rc = self.section['winding_pack']['width']/2
 

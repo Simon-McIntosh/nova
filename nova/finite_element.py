@@ -38,6 +38,7 @@ class FE(object):
         self.set_stiffness()  # set stiffness matrix + problem dofs
         self.initalize_BC()  # boundary conditions
         self.initalise_grid()  # grid
+        self.cp = CP(self.dof)  # node coupling
 
     def initalise_mat(self,nmat_max=10):
         self.nmat_max = nmat_max
@@ -435,17 +436,6 @@ class FE(object):
         k = T.T*M*T
         return k
         
-    def assemble(self):  # assemble global stiffness matrix
-        self.Ko = np.zeros((self.nK,self.nK))  # matrix without constraints
-        for el in range(self.nel):
-            ke = self.stiffness(el)            
-            ke_index = itertools.product([0,self.ndof],repeat=2)
-            ko_index = itertools.product(self.ndof*self.el['n'][el],repeat=2)
-            for i,j in zip(ko_index,ke_index):
-                self.Ko[i[0]:i[0]+self.ndof,i[1]:i[1]+self.ndof] += \
-                ke[j[0]:j[0]+self.ndof,j[1]:j[1]+self.ndof]
-        self.K = np.copy(self.Ko)
-        
     def check_input(self,vector,label,terminate=True):  # 'dof','disp','load'
         attributes = getattr(self,vector)
         error_code = 0
@@ -633,17 +623,6 @@ class FE(object):
             error_code = self.check_input('dof',constrn,terminate=terminate)
             if not error_code:
                 self.BC[constrn] = np.append(self.BC[constrn],np.array(nodes))
-        
-    def setBC(self):  # colapse constrained dof
-        self.extractBC()  # remove BC dofs
-        self.extractND()  # remove unconnected nodes
-        self.Fo = np.copy(self.F)
-        self.Dindex = np.arange(0,self.nK)  # all nodes (include unconnected)
-        if len(self.BCindex) > 0:
-            self.F = np.delete(self.F,self.BCindex)
-            for i in range(2):  # rows and cols
-                self.K = np.delete(self.K,self.BCindex,i)
-            self.Dindex = np.delete(self.Dindex,self.BCindex)
                 
     def extractND(self):
         for nd in np.where(self.nd_topo==0)[0]:  # remove unconnected nodes
@@ -665,13 +644,82 @@ class FE(object):
                     # skip-fix,pin
                     self.BCindex = np.append(self.BCindex,ui+j-2)  
         self.BCindex = list(map(int,set(self.BCindex)))
+        
+    def assemble(self):  # assemble global stiffness matrix
+        self.Ko = np.zeros((self.nK,self.nK))  # matrix without constraints
+        for el in range(self.nel):
+            ke = self.stiffness(el)            
+            ke_index = itertools.product([0,self.ndof],repeat=2)
+            ko_index = itertools.product(self.ndof*self.el['n'][el],repeat=2)
+            for i,j in zip(ko_index,ke_index):
+                self.Ko[i[0]:i[0]+self.ndof,i[1]:i[1]+self.ndof] += \
+                ke[j[0]:j[0]+self.ndof,j[1]:j[1]+self.ndof]
+        self.K = np.copy(self.Ko)
+        
+    def setBC(self):  # colapse constrained dof
+        self.extractBC()  # remove BC dofs
+        self.extractND()  # remove unconnected nodes
+        self.Fo = np.copy(self.F)
+        self.Dindex = np.arange(0,self.nK)  # all nodes (include unconnected)
+        if len(self.BCindex) > 0:
+            self.F = np.delete(self.F,self.BCindex)
+            for i in range(2):  # rows and cols
+                self.K = np.delete(self.K,self.BCindex,i)
+            self.Dindex = np.delete(self.Dindex,self.BCindex)
 
     def solve(self):
         self.nK = int(self.nnd*self.ndof)  # stiffness matrix 
         self.initalize_shape_coefficents(nShape=self.nShape)   
         self.update_rotation()  # evaluate/update rotation matricies
         self.assemble()  # assemble stiffness matrix
+        
+        ###
+        self.extractBC()  # remove BC dofs
+        self.extractND()  # remove unconnected nodes
+        
+        self.nd = {}  # node index
+
+        self.nd['do'] = np.arange(0,self.nK)  # all nodes (include unconnected)
+        self.nd['mask'] = np.in1d(self.nd['do'],self.BCindex)  # condense mask
+        
+        # add to condensed mask
+        self.cp.add([1,2],dof='fix')
+        self.cp.add([3,4],dof='fix')
+        
+        self.cp.check()
+        ###
+
+        self.nd['dc'] = self.nd['do'][self.nd['mask']]  # condensed
+        self.nd['dr'] = self.nd['do'][~self.nd['mask']]  # retained
+
+        self.nd['nc'] = np.sum(self.nd['mask'])
+        self.nd['nr'] = np.sum(~self.nd['mask'])
+
+
+
+        T = np.append(np.identity(self.nd['nr']),
+                      np.zeros((self.nd['nc'],self.nd['nr'])),axis=0)
+        
+        print(np.shape(T))
+        print(T)
+        
+        # sort K
+        K = np.append(self.K[self.nd['dr'],:],self.K[self.nd['dc'],:],axis=0)  
+        K = np.append(K[:,self.nd['dr']],self.K[:,self.nd['dc']],axis=1)
+        # sort F
+        F = np.append(self.F[self.nd['dr']],self.F[self.nd['dc']],axis=0)  
+        
+        F = np.dot(T.T,F)
+        
+
+        print('F',F)
+        print(self.F)
+        ###
+        
+        
         self.setBC()  # remove constrained equations from stiffness + load 
+        
+        print('K',self.K)
         self.Dn = np.zeros(self.nK)
         
         self.Dn[self.Dindex] = np.linalg.solve(self.K,self.F) # global
@@ -762,3 +810,54 @@ class FE(object):
         sns.despine()
         pl.xlabel('part length')
         pl.ylabel('part curvature')
+        
+class CP(object):  # couple node dofs
+    
+    def __init__(self,model_dof):
+        self.n = 0
+        self.mpc = OrderedDict()  # multi-point constraint
+        self.model_dof = model_dof  # model dof list
+        
+    def add(self,nodes,dof='fix',nset='next'):  # first node retained
+        if nset == 'next':  # (default)
+            self.n += 1
+        elif isinstance(nset,int):
+            self.n = nset
+        else:
+            errtxt = 'nset must be interger or string, \'high\' or \'next\''
+            raise ValueError(errtxt)
+        if self.n == 0:
+            self.n = 1
+        self.label = 'cp{:d}'.format(self.n)  # cp set label
+        if self.label not in self.mpc:  # create dof set
+            dof = self.extract_dof(dof)
+            self.mpc[self.label] = {'dof':dof,'nodes':np.array([])}
+        self.mpc[self.label]['nodes'] = \
+        np.append(self.mpc[self.label]['nodes'],nodes)
+        self.check()
+            
+    def extract_dof(self,dof):
+        if isinstance(dof,str):  # convert to list
+                dof = [dof]
+        if dof[0] == 'fix':  # fix all dofs
+            dof = self.model_dof
+        elif dof[0] == 'pin':  # fix translational dofs
+            dof = [dof for dof in self.model_dof if 'r' not in dof]
+        elif dof[0][0] == 'n':  # free rotation 'nrz'
+            mask = np.in1d(self.model_dof,dof[0])
+            dof = self.model_dof[~mask]
+        else:
+            dof = dof
+        return dof
+            
+    def check(self):  # check for node repeats in constraints
+        nodes = np.array([])
+        for label in self.mpc:
+            nodes = np.append(nodes,self.mpc[label]['nodes'])
+        if len(nodes) != len(np.unique(nodes)):
+            errtxt = 'repeated node in cp defnition:\n'
+            for label in self.mpc:
+                errtxt += label+' '+str(self.mpc[label]['nodes'])+'\n'
+            raise ValueError(errtxt)
+            
+            

@@ -24,6 +24,8 @@ fe.addBC(['fix'],[0],part='s2',ends=1)
 fe.add_weight()  # add weight to all elements
 #fe.add_tf_load(config,tf,sf.Bpoint,method='function')  # burst and topple
 
+fe.cp.add([1,2],dof='fix')  # couple nodes
+
 fe.solve()
 
 

@@ -678,15 +678,16 @@ class FE(object):
         self.extractND()  # remove unconnected nodes
         
         self.nd = {}  # node index
-
         self.nd['do'] = np.arange(0,self.nK)  # all nodes (include unconnected)
         self.nd['mask'] = np.in1d(self.nd['do'],self.BCindex)  # condense mask
         
-        # add to condensed mask
-        self.cp.add([1,2],dof='fix')
-        self.cp.add([3,4],dof='fix')
+        # add to condensed mask   
+         
+        self.cp.extract_nodes()
         
-        self.cp.check()
+        self.nd['mask'] = self.nd['mask'] | np.in1d(self.nd['do'],
+                                                     self.cp.nodes['dc'])
+        
         ###
 
         self.nd['dc'] = self.nd['do'][self.nd['mask']]  # condensed
@@ -817,6 +818,7 @@ class CP(object):  # couple node dofs
         self.n = 0
         self.mpc = OrderedDict()  # multi-point constraint
         self.model_dof = model_dof  # model dof list
+        self.ndof = len(model_dof)
         
     def add(self,nodes,dof='fix',nset='next'):  # first node retained
         if nset == 'next':  # (default)
@@ -849,6 +851,19 @@ class CP(object):  # couple node dofs
         else:
             dof = dof
         return dof
+        
+    def extract_nodes(self):
+        self.nodes = {'dr':np.array([],dtype=int),'dc':np.array([],dtype=int)}
+        for i,name in enumerate(self.mpc):
+            dof = self.mpc[name]['dof']
+            row = self.mpc[name]['nodes']*self.ndof  # retain first node
+            for j,mdof in enumerate(self.model_dof):
+                if mdof in dof:
+                    self.nodes['dr'] = np.append(self.nodes['dr'],row[0]+j)
+                    self.nodes['dc'] = np.append(self.nodes['dc'],row[1:]+j)
+        print(self.nodes)
+                    
+                
             
     def check(self):  # check for node repeats in constraints
         nodes = np.array([])

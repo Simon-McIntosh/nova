@@ -3,6 +3,11 @@ import pylab as pl
 from nova.finite_element import FE
 from time import time
 
+rc = {'figure.figsize':[4*16/12,4],'savefig.dpi':120, # 
+      'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
+      'lines.linewidth':2}
+sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
+        font_scale=7/8,rc=rc)
 
 to = time() 
 fe = FE(frame='1D')

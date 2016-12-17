@@ -623,12 +623,7 @@ class FE(object):
             error_code = self.check_input('dof',constrn,terminate=terminate)
             if not error_code:
                 self.BC[constrn] = np.append(self.BC[constrn],np.array(nodes))
-                
-    def extractND(self):
-        for nd in np.where(self.nd_topo==0)[0]:  # remove unconnected nodes
-            self.BCindex = np.append(self.BCindex,
-                                     nd*self.ndof+np.arange(0,self.ndof))
-        
+
     def extractBC(self):  # extract matrix indicies for constraints
         self.BCindex = np.array([])
         for j,key in enumerate(self.BC.keys()):
@@ -644,6 +639,11 @@ class FE(object):
                     # skip-fix,pin
                     self.BCindex = np.append(self.BCindex,ui+j-2)  
         self.BCindex = list(map(int,set(self.BCindex)))
+        
+    def extractND(self):
+        for nd in np.where(self.nd_topo==0)[0]:  # remove unconnected nodes
+            self.BCindex = np.append(self.BCindex,
+                                     nd*self.ndof+np.arange(0,self.ndof))
         
     def assemble(self):  # assemble global stiffness matrix
         self.Ko = np.zeros((self.nK,self.nK))  # matrix without constraints
@@ -681,13 +681,14 @@ class FE(object):
         self.nd['do'] = np.arange(0,self.nK)  # all nodes (include unconnected)
         self.nd['mask'] = np.in1d(self.nd['do'],self.BCindex)  # condense mask
         
-        # add to condensed mask   
-         
+        # add to condensed mask
+
         self.cp.extract_nodes()
         
+        print(self.nd['mask'])
         self.nd['mask'] = self.nd['mask'] | np.in1d(self.nd['do'],
                                                      self.cp.nodes['dc'])
-        
+        print(self.nd['mask'])
         ###
 
         self.nd['dc'] = self.nd['do'][self.nd['mask']]  # condensed
@@ -707,12 +708,13 @@ class FE(object):
         # sort K
         K = np.append(self.K[self.nd['dr'],:],self.K[self.nd['dc'],:],axis=0)  
         K = np.append(K[:,self.nd['dr']],self.K[:,self.nd['dc']],axis=1)
+        
         # sort F
         F = np.append(self.F[self.nd['dr']],self.F[self.nd['dc']],axis=0)  
         
         F = np.dot(T.T,F)
         
-
+        K = np.dot(np.dot(T.T,K),T)
         print('F',F)
         print(self.F)
         ###
@@ -720,6 +722,7 @@ class FE(object):
         
         self.setBC()  # remove constrained equations from stiffness + load 
         
+        print('K-',K)
         print('K',self.K)
         self.Dn = np.zeros(self.nK)
         

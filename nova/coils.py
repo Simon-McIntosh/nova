@@ -75,7 +75,9 @@ class PF(object):
             color = colors
         else:
             color = coil_color  # color itterator
-        
+        if len(np.shape(color)) == 1:
+            color = color*np.ones((6,1))
+             
         for i,name in enumerate(coils.keys()):
             coil = coils[name]
             r,z,dr,dz = coil['r'],coil['z'],coil['dr'],coil['dz']
@@ -93,7 +95,7 @@ class PF(object):
             elif name in self.index['PF']['name']:
                 drs = 2.5/3*dr
                 ha = 'left'
-                coil_color = color[5]
+                coil_color = color[4] 
             pl.fill(Rfill,Zfill,facecolor=coil_color,alpha=alpha,
                     edgecolor=edgecolor)
             

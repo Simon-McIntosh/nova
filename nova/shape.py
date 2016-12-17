@@ -120,8 +120,12 @@ class Shape(object):
         return dot
         
     def fit(self,xnorm,*args):
-        x = get_oppvar(self.loop.xo,self.loop.oppvar,xnorm)  # de-normalize
-        x = self.loop.draw(x=x)
+        xo = get_oppvar(self.loop.xo,self.loop.oppvar,xnorm)  # de-normalize
+        if hasattr(self,'xo'):
+            self.xo = np.vstack([self.xo,xo])
+        else:
+            self.xo = xo
+        x = self.loop.draw(x=xo)
         if self.obj is 'L':  # coil length
             objF = geom.length(x['r'],x['z'],norm=False)[-1]
         elif self.obj is 'E':  # stored energy
@@ -170,7 +174,7 @@ if __name__ is '__main__':
     rvv[rvv<=rmin+0.12] = rmin+0.12
     shp.add_bound({'r':rvv,'z':zvv},'internal')  # vessel
     #shp.plot_bounds()
-    #shp.minimise(ripple=True)
+    shp.minimise(ripple=False)
     
     shp.update()
     shp.tf.fill()

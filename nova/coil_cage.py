@@ -155,18 +155,25 @@ class coil_cage(object):
         self.res['fun'] *= -1  # negate minimum (max ripple)
         return self.res['fun']
         
-    def plot_loops(self,scale=1.5):
-        self.get_ripple()
-        pl.plot(self.res['x'],self.res['fun'],'o',color=0.8*np.ones(3))
+    def plot_loops(self,scale=1.5,sticks=False):
+        self.loop_ripple()
+        ripple = self.get_ripple()
+        #pl.plot(self.res['x'],self.res['fun'],'o',color=0.8*np.ones(3))
         rpl,zpl = self.plasma_loop[:,0],self.plasma_loop[:,2]
         rr,zr = geom.offset(rpl,zpl,scale*self.ripple)
-        for i in range(self.nplasma):  # ripple sticks
-            pl.plot([rpl[i],rr[i]],[zpl[i],zr[i]],lw=1,color=0.5*np.ones(3))
-        pl.plot(self.plasma_loop[:,0],self.plasma_loop[:,2],'-')
-        pl.plot(self.coil_loop[:,0],self.coil_loop[:,2])
+        if sticks:  # ripple sticks
+            for i in range(self.nplasma):
+                pl.plot([rpl[i],rr[i]],[zpl[i],zr[i]],
+                        lw=1,color=0.5*np.ones(3))
+        #pl.plot(self.plasma_loop[:,0],self.plasma_loop[:,2],'-')
+        #pl.plot(self.coil_loop[:,0],self.coil_loop[:,2])
         x = self.res['x']
         pl.plot(self.plasma_interp['r'](x),self.plasma_interp['z'](x),'.',
-                ms=10)
+                ms=15,color=0.5*np.ones(3))
+        pl.text(self.plasma_interp['r'](x),
+                self.plasma_interp['z'](x),
+                '{:1.2f}%- '.format(ripple),ha='right',va='center',
+                color=0.5*np.ones(3))
         pl.axis('equal')
         pl.axis('off')
         
@@ -213,10 +220,10 @@ class coil_cage(object):
             rpl_max = self.res['fun']
             iplasma = np.argmin(abs(np.log10(levels)-np.log10(rpl_max)))
             levels[iplasma] = rpl_max  # select edge contour
-            CS = pl.contour(R,Z,rpl,levels=levels,colors=[0.6*np.ones(3)])
+            CS = pl.contour(R,Z,rpl,levels=levels,colors=[0.6*np.ones(3)],lw=3)
             zc = CS.collections[iplasma]
-            pl.setp(zc, color=[0.4*np.ones(3)])
-            pl.clabel(CS, inline=1, fontsize='x-small',fmt='%1.2f')
+            pl.setp(zc,color=[0.4*np.ones(3)])
+            pl.clabel(CS,inline=1,fontsize='medium',fmt='%1.2f')
         else:
             pl.contour(R,Z,rpl)
             

@@ -18,6 +18,9 @@ from time import time
 from nova.loops import Profile
 import sys
 import datetime
+import matplotlib.animation as manimation
+import matplotlib
+
 
 import seaborn as sns
 rc = {'figure.figsize':[6,6*12/16],'savefig.dpi':150, #*12/16
@@ -43,7 +46,7 @@ profile = Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L',
 tf = TF(profile,sf=sf)
 eq = EQ(sf,pf,dCoil=2.0,limit=[5.2,13,-6.5,6],n=5e3)  # 
 eq.get_plasma_coil()
-eq.run(update=False)  # update=False
+eq.run(update=False)
 
 inv = INV(sf,eq,tf)
 Lpf = inv.grid_PF(nPF=nPF)
@@ -79,7 +82,7 @@ inv.initialize_log()
 
 nS = 3e5
 filename = 'rms_cube_{}_{:1.0e}'.format(config['TF'],nS).replace('+','')
-
+'''
 width = 35
 to = time()
 cube = lhs(inv.nC+1,samples=int(nS))
@@ -103,16 +106,12 @@ with open('../../BigData/{}.pkl'.format(filename), 'wb') as output:
     pickle.dump(cube,output,-1)
     pickle.dump(rms,output,-1)    
 print('')
-
+'''
 with open('../../BigData/{}.pkl'.format(filename), 'rb') as input:
     cube = pickle.load(input)
     rms = pickle.load(input)
-cube[:,:inv.nPF] = np.sort(cube[:,:inv.nPF])
-cube[:,inv.nPF:] = np.sort(cube[:,inv.nPF:])
-
-import matplotlib.animation as manimation
-FFMpegWriter = manimation.writers['ffmpeg']
-writer = FFMpegWriter(fps=10, bitrate=1000)
+#cube[:,:inv.nPF] = np.sort(cube[:,:inv.nPF])
+#cube[:,inv.nPF:] = np.sort(cube[:,inv.nPF:])
 
 pca = PCA(n_components=inv.nL)
 pca.fit(cube[np.argsort(rms)[:50]])
@@ -123,22 +122,26 @@ Leig = pca.components_
 
 index = np.argsort(rms)
 Lo = cube[index[0],:]
-'''
 loops.denormalize_variables(Lo,inv.Lo)
 inv.optimize(inv.Lo['value'])
 Lopp = loops.normalize_variables(inv.Lo)
-Lopp = cube[index[0],:]
-'''
-Lopp = [ 0.07979704,  0.3748644 ,  0.67958023,  0.92493359,  0.23493315,
-        0.95440231]
 
-N,L = 3,0.05
+#Lopp = cube[index[0],:]
+#Lopp = [ 0.08480096,  0.37595893,  0.686798  ,  0.9607147 ,  0.05430536,
+#        0.24645849,  0.40159608,  0.87988169]
+
+N,L = 5,0.1
 perturb = np.linspace(0,L,N,endpoint=False)
 perturb = np.append(perturb,np.linspace(L,-L,2*N,endpoint=False))
 perturb = np.append(perturb,np.linspace(-L,0,N,endpoint=False))
 
-nr,nc = 2,3
-fig = pl.figure(figsize=(8,6))
+nr,nc = 2,4
+
+figwidth = 15  # 25
+ar = 25/16.5
+matplotlib.rcParams['figure.figsize'] = (figwidth,figwidth/ar)
+
+fig = pl.figure()
 
 grid = gridspec.GridSpec(nr,nc,wspace=0.0,hspace=0.0)
 
@@ -146,14 +149,22 @@ ax = [[] for _ in range(nr*nc)]
 for i in range(nr*nc):
     ax[i] = pl.subplot(grid[i])
     ax[i].axis('equal')
-grid.tight_layout(fig)  
+#grid.tight_layout(fig)  
   
 color = cycle(sns.color_palette('Set2',nr*nc))    
 
 pl.sca(ax[0])       
 levels = sf.contour()  # freeze contour levels
 Mpoint = np.copy(sf.Mpoint)
-with writer.saving(fig,'../../Figs/coils_pca.wmv',100):  # wmv
+
+
+moviename = '../../Movies/{}'.format(filename)
+moviename += '.mp4'
+FFMpegWriter = manimation.writers['ffmpeg']
+writer = FFMpegWriter(fps=10, bitrate=5000,codec='libx264',
+                      extra_args=['-pix_fmt','yuv420p'])
+
+with writer.saving(fig,moviename,100):  
     for p in perturb:
         print(p)
         for eig in range(nr*nc):

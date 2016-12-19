@@ -23,11 +23,11 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 
 
-nTF = 18
+nPF,nCS,nTF = 4,3,16
 config = {'TF':'dtt','eq':'SN'}
 config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
 
-config['eq'] = 'SNdtt18_4PF_1CS'
+config['eq'] = 'SNdtt{:d}_{:d}PF_{:d}CS'.format(nTF,nPF,nCS)
 #config['eq'] = 'SFmdtt18_5PF_3CS'
 setup = Setup(config['eq'])
 
@@ -43,7 +43,7 @@ sf = SF(setup.filename)
 pf = PF(sf.eqdsk)
 
 
-pf.plot(coils=pf.coil,label=True,plasma=False,current=True) 
+pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
 levels = sf.contour()
 
 
@@ -51,20 +51,23 @@ rb = RB(setup,sf)
 rb.firstwall(plot=True,debug=False)
 rb.trim_sol()
 
-profile = Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L',load=True)
+profile = Profile(config['TF'],family='S',part='TF',
+                  nTF=nTF,obj='L',load=False)
 
-
-shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'],ny=3)
+shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'],ny=1)
 shp.add_vessel(rb.segment['vessel'])
+#shp.loop.oppvar.remove('flat')
 shp.minimise(ripple=True,verbose=True)
 
 tf = TF(profile,sf=sf)
 tf.fill()
 
+pl.savefig('../../Figs/'+config['eq']+'_coils.png')
+
 sf.eqwrite(pf,config=config['eq'],CREATE=True)
 
 #shp.plot_bounds()
 #shp.loop.plot()
-#plot_oppvar(shp.loop.xo,shp.loop.oppvar)
+plot_oppvar(shp.loop.xo,shp.loop.oppvar)
 
 

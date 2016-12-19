@@ -190,16 +190,17 @@ class Aloop(object):  # tripple arc loop
         self.xo['ro'] = {'value':4.486,'lb':3,'ub':5}  # r origin
         self.xo['zo'] = {'value':0,'lb':-1,'ub':1}  # z origin
         self.xo['sl'] = {'value':6.428,'lb':0.5,'ub':10}  # straight length
-        self.xo['f1'] = {'value':2,'lb':0,'ub':10}  # rs == f1*z small
-        self.xo['f2'] = {'value':5,'lb':0,'ub':10}  # rm == f2*rs mid
-        self.xo['a1'] = {'value':45,'lb':5,'ub':60}  # small arc angle, deg
-        self.xo['a2'] = {'value':75,'lb':5,'ub':120}  # middle arc angle, deg
+        self.xo['f1'] = {'value':2,'lb':0.1,'ub':10}  # rs == f1*z small
+        self.xo['f2'] = {'value':5,'lb':0.1,'ub':10}  # rm == f2*rs mid
+        self.xo['a1'] = {'value':45,'lb':5,'ub':65}  # small arc angle, deg
+        self.xo['a2'] = {'value':75,'lb':5,'ub':110}  # middle arc angle, deg
         self.oppvar = list(self.xo.keys())
         #for rmvar in ['a1','a2']:  # remove arc angles from oppvar
         #    self.oppvar.remove(rmvar)
         #self.oppvar.remove('a2')
            
     def set_input(self,**kwargs): 
+        print(kwargs)
         inputs = get_input(self.oppvar,**kwargs)     
         for key in inputs:
             if key in self.xo:

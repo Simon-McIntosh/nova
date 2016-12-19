@@ -544,8 +544,10 @@ class INV(object):
                                  'dr':delta[0],'dz':delta[1],'I':I,
                                  'rc':np.sqrt(delta[0]**2+delta[1]**2)/2}
         
-    def grid_CS(self,nCS=3,Ro=2.9,Zbound=[-10,9],dr=0.818,gap=0.1):  #dr=1.0, dr=1.25,Ro=3.2,dr=0.818
+    def grid_CS(self,nCS=3,Ro=2.9,Zbound=[-10,9],dr=0.818,gap=0.1,fdr=1):  #dr=1.0, dr=1.25,Ro=3.2,dr=0.818
         self.gap = gap
+        dr *= fdr  # thicken CS
+        Ro -= dr*(fdr-1)/2  # shift centre inwards
         dz = (np.diff(Zbound)-gap*(nCS-1))/nCS  # coil height
         Zc = np.linspace(Zbound[0]+dz/2,Zbound[-1]-dz/2,nCS)  # coil centres
         for zc in Zc:
@@ -771,7 +773,8 @@ class INV(object):
     def set_Io(self):  # set lower/upper bounds on coil currents (Jmax)
         self.Io = {'name':self.adjust_coils,'value':np.zeros(self.nC),
                    'lb':np.zeros(self.nC),'ub':np.zeros(self.nC)}
-        for i,name in enumerate(self.adjust_coils):  # limits in MA
+        for name in self.adjust_coils:  # limits in MA
+            i = int(name.replace('Coil',''))
             coil = self.eq.pf.coil[name]
             Nf = self.eq.coil[name+'_0']['Nf']  # fillament number
             self.Io['value'][i] = coil['I']/(Nf*self.Iscale)

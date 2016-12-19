@@ -208,7 +208,7 @@ class TF(object):
         for loop in ['in','wp_in','cl','wp_out','out','nose','loop']:
             self.x[loop] = {'r':[],'z':[]}
 
-    def transition_index(self,r_in,z_in,eps=1e-6):
+    def transition_index(self,r_in,z_in,eps=1e-4):
         npoints = len(r_in)
         r_cl = r_in[0]+eps
         upper = npoints-next((i for i,r_in_ in enumerate(r_in) if r_in_>r_cl))#+1

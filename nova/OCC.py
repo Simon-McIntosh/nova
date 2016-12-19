@@ -37,7 +37,7 @@ class OCC(object):
                               plasma={'config':config['eq']},
                               coil=self.tf.x['cl'])
         self.eq = EQ(self.sf,self.pf,dCoil=0.5,sigma=0,
-                     boundary=self.sf.get_sep(expand=0.5),n=1e3) 
+                     boundary=self.sf.get_sep(expand=0.4),n=2e3) 
         self.eq.plasma()
         self.ff = force_feild(self.pf.index,self.pf.coil,
                               self.eq.coil,self.eq.plasma_coil)
@@ -208,6 +208,7 @@ class OCC(object):
         rCS = [rnose,rwp,rwp,rnose]
         zCS = [zo,zo,ztop,ztop]
         geom.polyfill(rCS,zCS,color=0.4*np.ones(3))
+        self.ff.plot()
         
     def ansys(self,plot=False,nl=250,nr=5,ny=5):
         datadir = trim_dir('../../Data/')
@@ -228,8 +229,18 @@ class OCC(object):
         ans.f.write('\n! per-TF PF coil forces (Fr,Fz) [N]\n')
         ans.f.write('! order as numbered in plots\n')
         F = self.ff.get_force()['F']
-        ans.load('F_coil',F/self.nTF)
+        ans.load('F_coil',1e6*F/self.nTF)
         ans.write_array()
+        
+        apdlstr = '''
+        nPF = 4
+        *do,i,1,nPF
+          F,c%i-1%,Fz,1e6*F_coil(i,2)
+        *enddo
+        F,cs,Fz,1e6*F_coil(i+1,2)
+        '''
+        
+
         ans.f.write('\n/nopr  ! suppress large table output\n')
         
         self.tf.loop_interpolators(offset=0,full=True)  # construct TF interpolators
@@ -299,7 +310,7 @@ class OCC(object):
                     for m,var in enumerate(['x','y','z']):  # store
                         Fbody[var][i,j,k] = Fb[m]
                     if plot:
-                        Fvec = Fb/np.linalg.norm(Fb)
+                        Fvec = 1e-8*Fb#/np.linalg.norm(Fb)
                         #Fvec = that
                         pl.arrow(point[0],point[2],Fvec[0],Fvec[2],
                                  head_width=0.15,head_length=0.3)       
@@ -375,7 +386,7 @@ if __name__ is '__main__':
     #nPF,nTF = 3,13
     #config = {'TF':'SN','eq':'SN_{:d}PF_{:d}TF'.format(nPF,nTF)}
 
-    nTF,nPF,nCS = 18,4,1
+    nTF,nPF,nCS = 16,4,3
     #config = {'TF':'NTP','eq':'SN'}
 
     config = {'TF':'dtt','eq':'SN'}
@@ -389,6 +400,7 @@ if __name__ is '__main__':
     occ.ansys(plot=True,nl=50,nr=1,ny=1)
     occ.plot()
     
+    #pl.savefig('../Figs/CoilForces.png')
 
 
     

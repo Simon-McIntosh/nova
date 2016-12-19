@@ -19,6 +19,7 @@ class Shape(object):
         self.loop = self.profile.loop
         self.nTF = nTF
         self.obj = obj
+        self.update()
         self.bound = {}  # initalise bounds
         for side in ['internal','interior','external']:
             self.bound[side] = {'r':[],'z':[]}
@@ -55,7 +56,10 @@ class Shape(object):
         rvv,zvv = geom.offset(rvv,zvv,offset[1])
         rmin = np.min(rvv)
         rvv[rvv<=rmin+offset[0]] = rmin+offset[0]
-        self.loop.set_l({'value':0.8,'lb':0.65,'ub':1.8})  # 1/tesion
+        try:
+            self.loop.set_l({'value':0.8,'lb':0.8,'ub':1.8})  # 1/tesion
+        except:
+            pass
         self.add_bound({'r':rvv,'z':zvv},'internal')  # vessel
         self.add_bound({'r':np.min(rvv)-5e-3,'z':0},'interior')  # vessel
             
@@ -152,35 +156,30 @@ class Shape(object):
 if __name__ is '__main__': 
 
 
-    config = {'TF':'SN','eq':'DEMO_SN'}
-    #setup = Setup(config)
-    #sf = SF(setup.filename)
-    #sf.get_boundary(plot=True)
-    
-    profile = Profile(config['TF'],family='S',part='TF',load=True)
-    shp = Shape(profile,obj='L',nTF=18,eqconf=config['eq'])
-          
-    #shp.cage.pattern(plot=True)
+    nTF = 18
+    family='S'
 
+    config = {'TF':'dtt','eq':'SN'}
+    config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
+    
     demo = DEMO()
-    #demo.fill_loops()
     demo.fill_part('Blanket')
     demo.fill_part('Vessel')
-    demo.fill_part('TF_Coil')
-    vv = demo.parts['Vessel']['out']
-    rvv,zvv = geom.rzSLine(vv['r'],vv['z'],30)
-    rvv,zvv = geom.offset(rvv,zvv,0.2)
-    rmin = np.min(rvv)
-    rvv[rvv<=rmin+0.12] = rmin+0.12
-    shp.add_bound({'r':rvv,'z':zvv},'internal')  # vessel
-    #shp.plot_bounds()
-    shp.minimise(ripple=False)
+    #demo.fill_part('TF_Coil')
+    
+    profile = Profile(config['TF'],family=family,
+                      part='TF',load=False)
+    shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'],ny=3)
+    shp.add_vessel(demo.parts['Vessel']['out'])
+    #shp.minimise(ripple=True,verbose=True)
     
     shp.update()
-    shp.tf.fill()
-    demo.fill_part('TF_Coil',alpha=0.8)
+    #shp.tf.fill()
+    shp.loop.plot()
+    #demo.fill_part('TF_Coil',alpha=0.8)
     #shp.cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)
-    
-    plot_oppvar(shp.loop.xo,shp.loop.oppvar)
+    #shp.cage.pattern(plot=True)
+    #plot_oppvar(shp.loop.xo,shp.loop.oppvar)
 
-
+    shp.cage.pattern(plot=True)
+    pl.savefig('../Figs/TFpattern.png')

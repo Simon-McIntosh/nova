@@ -27,7 +27,7 @@ nPF,nCS,nTF = 4,3,16
 config = {'TF':'dtt','eq':'SN'}
 config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
 
-config['eq'] = 'SNdtt{:d}_{:d}PF_{:d}CS'.format(nTF,nPF,nCS)
+#config['eq'] = 'SNdtt{:d}_{:d}PF_{:d}CS'.format(nTF,nPF,nCS)
 #config['eq'] = 'SFmdtt18_5PF_3CS'
 setup = Setup(config['eq'])
 
@@ -52,12 +52,11 @@ rb.firstwall(plot=True,debug=False)
 rb.trim_sol()
 
 profile = Profile(config['TF'],family='S',part='TF',
-                  nTF=nTF,obj='L',load=False)
+                  nTF=nTF,obj='L',load=True)
 
 shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'],ny=1)
 shp.add_vessel(rb.segment['vessel'])
-#shp.loop.oppvar.remove('flat')
-shp.minimise(ripple=True,verbose=True)
+#shp.minimise(ripple=True,verbose=True)
 
 tf = TF(profile,sf=sf)
 tf.fill()

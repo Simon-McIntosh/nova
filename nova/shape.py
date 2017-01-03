@@ -10,6 +10,10 @@ from nova.loops import set_oppvar,get_oppvar,plot_oppvar,remove_oppvar,Profile
 from nova.coil_cage import coil_cage
 from nova.config import Setup
 from nova.streamfunction import SF
+import matplotlib.animation as manimation
+import sys
+import datetime
+
 
 class Shape(object):
     
@@ -19,7 +23,7 @@ class Shape(object):
         self.loop = self.profile.loop
         self.nTF = nTF
         self.obj = obj
-        self.update()
+        #self.update()
         self.bound = {}  # initalise bounds
         for side in ['internal','interior','external']:
             self.bound[side] = {'r':[],'z':[]}
@@ -56,10 +60,6 @@ class Shape(object):
         rvv,zvv = geom.offset(rvv,zvv,offset[1])
         rmin = np.min(rvv)
         rvv[rvv<=rmin+offset[0]] = rmin+offset[0]
-        try:
-            self.loop.set_l({'value':0.8,'lb':0.8,'ub':1.8})  # 1/tesion
-        except:
-            pass
         self.add_bound({'r':rvv,'z':zvv},'internal')  # vessel
         self.add_bound({'r':np.min(rvv)-5e-3,'z':0},'interior')  # vessel
             
@@ -153,33 +153,79 @@ class Shape(object):
             dot[j] = switch*np.dot(dr,dn)
         return dot
         
+    def movie(self,filename):
+        fig,ax = pl.subplots(1,2,figsize=(12,8))
+        demo = DEMO()
+        moviename = '../Movies/{}'.format(filename)
+        moviename += '.mp4'
+        FFMpegWriter = manimation.writers['ffmpeg']
+        writer = FFMpegWriter(fps=20, bitrate=5000,codec='libx264',
+                              extra_args=['-pix_fmt','yuv420p'])
+        with writer.saving(fig,moviename,100): 
+            nS = len(self.xo)
+            to = time.time()
+            width = 35
+            for i,xo in enumerate(self.xo):
+                pl.sca(ax[0])
+                pl.cla()
+                pl.plot([3,18],[-10,10],'ko',alpha=0)
+                self.loop.set_input(x=xo)
+                demo.fill_part('Blanket')
+                demo.fill_part('Vessel')
+                self.plot_bounds()
+                self.update()
+                self.tf.fill()
+                geom.polyfill(self.cage.plasma_loop[:,0],
+                              self.cage.plasma_loop[:,2],
+                              alpha=0.3,color=sns.color_palette('Set2',5)[3])
+                #self.cage.plot_loops(sticks=False)
+                pl.sca(ax[1])
+                pl.cla()
+                plot_oppvar(shp.loop.xo,shp.loop.oppvar)
+                writer.grab_frame()
+                
+                if i%1 == 0 and i > 0:
+                    elapsed = time.time()-to
+                    remain = int((nS-i)/i*elapsed)
+                    prog_str = '\r{:1.0e}'.format(i)
+                    prog_str += ' elapsed {:0>8}s'.format(str(\
+                    datetime.timedelta(seconds=int(elapsed))))
+                    prog_str += ' remain {:0>8}s'.format(str(\
+                    datetime.timedelta(seconds=remain)))
+                    prog_str += ' complete {:1.1f}%'.format(1e2*i/nS)
+                    nh = int(i/nS*width)
+                    prog_str += ' |'+nh*'#'+(width-nh)*'-'+'|'
+                    sys.stdout.write(prog_str)
+                    sys.stdout.flush()
+                
 if __name__ is '__main__': 
-
 
     nTF = 18
     family='S'
+    ripple = True
 
     config = {'TF':'dtt','eq':'SN'}
     config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
-    
+
     demo = DEMO()
     demo.fill_part('Blanket')
     demo.fill_part('Vessel')
     #demo.fill_part('TF_Coil')
-    
-    profile = Profile(config['TF'],family=family,
-                      part='TF',load=False)
+
+    profile = Profile(config['TF'],family=family,part='tmp',load=False)
     shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'],ny=3)
     shp.add_vessel(demo.parts['Vessel']['out'])
-    #shp.minimise(ripple=True,verbose=True)
+    shp.minimise(ripple=ripple,verbose=True)
     
     shp.update()
-    #shp.tf.fill()
-    shp.loop.plot()
+    shp.tf.fill()
+    #shp.loop.plot({'flat':0.3,'tilt':13})
+    #shp.loop.plot()
     #demo.fill_part('TF_Coil',alpha=0.8)
     #shp.cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)
     #shp.cage.pattern(plot=True)
     #plot_oppvar(shp.loop.xo,shp.loop.oppvar)
 
-    shp.cage.pattern(plot=True)
-    pl.savefig('../Figs/TFpattern.png')
+    moviename = '{}_{}_{}'.format(config['TF'],family,ripple)
+    shp.movie(moviename)
+    #pl.savefig('../Figs/TFloop_{}.png'.format(family))

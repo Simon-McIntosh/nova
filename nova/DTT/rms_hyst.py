@@ -24,13 +24,14 @@ filename = 'rms_cube_{}_{:1.0e}'.format(config['TF'],nS).replace('+','')
 with open('../../BigData/{}.pkl'.format(filename), 'rb') as input:
     cube = pickle.load(input)
     rms = pickle.load(input)
-#cube[:,:nPF] = np.sort(cube[:,:nPF])
-#cube[:,nPF:] = np.sort(cube[:,nPF:])
+cube[:,:nPF] = np.sort(cube[:,:nPF])
+cube[:,nPF:] = np.sort(cube[:,nPF:])
 
 pca = PCA(n_components=(nPF+nCS+1))
 pca.fit(cube[np.argsort(rms)[:50]])
 Leig = pca.components_
 
+N = 200
 
 nr,nc = 3,3
 fig = pl.figure()
@@ -38,12 +39,18 @@ grid = gridspec.GridSpec(nr,nc,wspace=0.1,hspace=0.1)
 
 label = ['Coil0','Coil1','Coil2','Coil3','CS0','CS1','CS2','CS3']
 ax = [[] for _ in range(nr*nc)]    
-for i,c in enumerate(cube.T):
+
+sub_cube = cube[np.argsort(rms)[:N],:]
+sub_cube = np.sort(sub_cube,axis=1)
+for i,c in enumerate(sub_cube.T):
     ax[i] = pl.subplot(grid[i])
-    ax[i].axis('off')
-    pl.plot(c,rms,'k.',ms=0.5)
-    pl.text(0,1,label[i],color=0.9*np.ones(3))
-pl.savefig('../../Figs/'+filename+'_points'+'.png')
+    #ax[i].axis('off')
+    ax[i].set_xticks([])
+    ax[i].set_yticks([])
+    ax[i].set_xlim([0,1])
+    pl.plot(c,rms[np.argsort(rms)[:N]],'k.',ms=5)
+    pl.text(0,0.11,label[i],color=0.5*np.ones(3))
+pl.savefig('../../Figs/'+filename+'_sub_points'+'.png')
 #grid.tight_layout(fig)  
 
 '''

@@ -21,11 +21,15 @@ from amigo.addtext import linelabel
 from itertools import cycle
 Color = cycle(sns.color_palette('Set2'))
 from nova.radial_build import RB
-tf = TF('DEMO_SN',coil_type='S',nTF=16,objective='L')
+#tf = TF('DEMO_SN',coil_type='S',nTF=16,objective='L')
 #from eqConfig import Config
 #conf = Config('SXex')
 
-pkl = PKL('DEMO_SN54')
+#pkl = PKL('DEMO_SN54')
+#sf,eq,inv = pkl.fetch(['sf','eq','inv'])
+
+config = 'SXdtt_18TF_5PF_3CS'
+pkl = PKL(config,directory='../../Movies/')
 sf,eq,inv = pkl.fetch(['sf','eq','inv'])
 
 #sf.conf = conf
@@ -52,8 +56,8 @@ Fcs = np.zeros((nSwing,2))
 for j,swing in enumerate(Swing):
     inv.fix_flux(swing) 
     inv.solve_slsqp()
-    Fcoil = inv.get_force()
     
+    Fcoil = inv.ff.get_force()
     F[:,j] = Fcoil['F']
     Fcs[j,0] = Fcoil['CS']['sep']
     Fcs[j,1] = Fcoil['CS']['zsum']
@@ -80,7 +84,7 @@ def animate(swing): #,data,ax
     
     print(inv.I[-3])
     pl.plot(sf.rbdry,sf.zbdry)
-    tf.fill()
+    #tf.fill()
 
     #print(swing,sf.Xpsi,sf.Mpoint[1],inv.rms)
     #B = eq.Bfeild([inv.fix['r'][-1],inv.fix['z'][-1]])

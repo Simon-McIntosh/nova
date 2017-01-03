@@ -26,11 +26,16 @@ sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
 
 config = 'SF'
 config = 'SNdtt18_6PF_5CS'
-#config = 'SNdtt18_5PF_5CS'
-#config = 'SNdtt18_4PF_5CS'
+config = 'SNdtt18_5PF_5CS'
+config = 'SNdtt18_4PF_5CS'
 pkl = PKL(config,directory='../../Movies/')
 sf,eq,inv = pkl.fetch(['sf','eq','inv'])
 
+print(config)
+print('rms {:1.1f}mm'.format(1e3*inv.rms))
+print('Isum {:1.1f}MA'.format(inv.Isum))
+
+'''
 FFMpegWriter = manimation.writers['ffmpeg']
 writer = FFMpegWriter(fps=5, bitrate=-1,codec='libx264',
                       extra_args=['-pix_fmt','yuv420p'])
@@ -94,3 +99,4 @@ with writer.saving(fig,'../../Movies/{}.mp4'.format(config),100):
         animate(i)
         #pl.tight_layout()
         writer.grab_frame()
+'''

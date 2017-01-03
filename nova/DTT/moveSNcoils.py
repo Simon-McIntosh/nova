@@ -1,7 +1,7 @@
 from nova.streamfunction import SF
 from nova.elliptic import EQ
 from nova.inverse import INV
-from nova.config import Setup
+from nova.config import Setup,select
 from itertools import cycle
 import numpy as np
 from nova.radial_build import RB
@@ -19,38 +19,31 @@ sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 Color = cycle(sns.color_palette('Set2'))
 
-
-nPF,nCS,nTF = 4,3,16
-config = {'TF':'dtt','eq':'SN'}
-config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
-setup = Setup(config['eq'])
+base = {'TF':'dtt','eq':'SN'}
+config,setup = select(base=base,update=False,nTF=18,nPF=5,nCS=3)
 sf = SF(setup.filename)
-
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
-tf = TF(Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L',load=True))
+tf = TF(Profile(config['TF'],family='S',part='TF',
+                nTF=config['nTF'],obj='L',load=True))
 tf.fill()
-
-eq = EQ(sf,pf,dCoil=1.5,sigma=0,n=1e4,
-        boundary=sf.get_sep(expand=1.1),zmin=sf.Xpoint[1]-1.5) 
-#eq.gen_opp()
-eq.get_plasma_coil()
-eq.run(update=False)
+eq = EQ(sf,pf,dCoil=1.0,sigma=0,n=2e4,
+        boundary=sf.get_sep(expand=1.1),zmin=sf.Xpoint[1]-2) 
+eq.gen_opp()
 
 inv = INV(sf,eq,tf)
-Lpf = inv.grid_PF(nPF=nPF)
-Lcs = inv.grid_CS(nCS=nCS,Zbound=[-8,8],gap=0.1,fdr=1)
+Lpf = inv.grid_PF(nPF=config['nPF'])
+Lcs = inv.grid_CS(nCS=config['nCS'],Zbound=[-8,8],gap=0.1,fdr=1)
 L = np.append(Lpf,Lcs)
-inv.update_coils()
 inv.update_coils()
 inv.fit_PF(offset=0.3)
 
 inv.fix_boundary_psi(N=25,alpha=1-1e-4,factor=1)  # add boundary points
-#inv.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary points
+inv.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary points
 inv.add_null(factor=1,point=sf.Xpoint)
         
 inv.set_swing()
-inv.update_limits(LCS=[-12.5,7])
+inv.update_limits(LCS=[-11.5,10.5])
 
 L = inv.optimize(L)
 #inv.plot_fix(tails=True)
@@ -63,12 +56,9 @@ pf.plot(coils=pf.coil,label=True,plasma=False,current=True)
 rb.firstwall(mode='calc',plot=True,debug=False)
 rb.trim_sol()
 
-loops.plot_variables(inv.Io,scale=1,postfix='MA')
-loops.plot_variables(inv.Lo,scale=1)
+#loops.plot_variables(inv.Io,scale=1,postfix='MA')
+#loops.plot_variables(inv.Lo,scale=1)
 
-pl.savefig('../../Figs/'+config['eq']+'_opp.png')
-
-config['eq'] = config['TF']+'_{:d}PF_{:d}CS'.format(inv.nPF,inv.nCS)
 sf.eqwrite(pf,config=config['eq'])
 
 pkl = PKL(config['eq'],directory='../../Movies/')

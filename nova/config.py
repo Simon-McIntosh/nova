@@ -3,12 +3,16 @@ import collections
 from nova.TF.DEMOxlsx import DEMO
 from amigo import IO
             
-def select(base={'TF':'dtt','eq':'SN'},nTF=18,nPF=4,nCS=1):
-    config = {}
-    config['TF'] = '{}{}{:d}'.format(base['eq'],base['TF'],nTF)
-    config['eq'] = '{:s}{:s}{:d}_{:d}PF_{:d}CS'.format(base['eq'],base['TF'],
-                                                       nTF,nPF,nCS)
-    return config
+def select(base={'TF':'dtt','eq':'SN'},nTF=18,nPF=4,nCS=1,update=True):
+    config = {'nTF':nTF,'nPF':nPF,'nCS':nCS}
+    label = base.get('label',base.get('eq'))
+    config['TF'] = '{}{}'.format(label,base['TF'])
+    config['eq'] = '{:s}{:s}_{:d}TF_{:d}PF_{:d}CS'.format(\
+    label,base['TF'],nTF,nPF,nCS)
+    setup = Setup(base['eq'])
+    if update:  # update eqdsk filename
+        setup.filename = setup.eqdir+config['eq']+'.eqdsk'
+    return config,setup
     
 class Setup(object):
     
@@ -174,10 +178,10 @@ class Setup(object):
         elif configuration == 'SN':
             self.dataname = 'DEMO_SN'
             self.filename = 'Equil_AR3d1_2016_01_v1_SN_SOF_baseline_2016_opt.eqdsk'
-            self.firstwall['div_ex'] = 0.25
+            self.firstwall['div_ex'] = 0.5  # 0.25
             self.firstwall['trim'] = [0.88,0.95]  # trim fraction (in/out)
-            self.targets['inner'] = {'L2D':0.6}
-            self.targets['outer'] = {'L2D':0.65}
+            self.targets['inner'] = {'L2D':1.0}  # 0.6
+            self.targets['outer'] = {'L2D':1.36}  # 0.65
 
         elif configuration == 'DEMO_SNc':
             self.dataname = 'DEMO_SN'
@@ -190,8 +194,8 @@ class Setup(object):
         elif configuration == 'DN':
             self.dataname = 'DN'
             self.firstwall['div_ex'] = 0.5
-            self.targets['inner'] = {'L2D':0.6}
-            self.targets['outer'] = {'L2D':0.65}
+            self.targets['inner'] = {'L2D':1.0}
+            self.targets['outer'] = {'L2D':1.36}
             self.filename = 'Equil_FT_R0_9d197_k95_1d59_delta95_0d33_final_opt.eqdsk'
         else:
             self.filename = configuration+'.eqdsk'

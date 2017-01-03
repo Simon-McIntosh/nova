@@ -28,7 +28,7 @@ NTF = np.arange(13,19)[::-1]  #13,
 pl.plot([3,20],[-10,13],'ko',alpha=1)
 
 nTF = 18
-family='A'
+family='D'
 
 config['TF'] = 'dtt'
 config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
@@ -37,7 +37,9 @@ shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'],ny=3)
 #shp.update()
 shp.tf.fill()
 
-shp.cage.plot_contours(variable='ripple',n=3e3,loop=shp.loop.draw())
+shp.cage.plot_loops(sticks=True)
+#shp.cage.plot_contours(variable='ripple',n=3e3,loop=shp.loop.draw())
 
 pl.tight_layout()
-pl.savefig('../../Figs/TF{:d}{}_contour.png'.format(nTF,family))
+pl.savefig('../../Figs/TFripple.png')
+#pl.savefig('../../Figs/TF{:d}{}_contour.png'.format(nTF,family))

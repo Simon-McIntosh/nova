@@ -54,7 +54,12 @@ class RB(object):
             min_contour[i] = np.min((R[i]-req)**2+(Z[i]-zeq)**2)
         imin = np.argmin(min_contour)
         r,z = R[imin],Z[imin]
-        r,z = r[z<=zeq],z[z<=zeq]
+        if self.sf.Xloc == 'lower':
+            r,z = r[z<=zeq],z[z<=zeq]
+        elif self.sf.Xloc == 'upper':
+            r,z = r[z>=zeq],z[z>=zeq]
+        else:
+            raise ValueError('Xloc not set (get_Xpsi)')
         if req > self.sf.Xpoint[0]:
             r,z = r[r>self.sf.Xpoint[0]],z[r>self.sf.Xpoint[0]]
         else:
@@ -75,8 +80,12 @@ class RB(object):
         r_lfs,z_lfs,psi_lfs = self.first_wall_psi(self.sf.LFfwr,self.sf.LFfwz)
         r_hfs,z_hfs,psi_hfs = self.first_wall_psi(self.sf.HFfwr,self.sf.HFfwz)
         r_top,z_top = geom.offset(self.Rp,self.Zp,dr)
-        r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,origin='top')
-        index = z_top>=self.sf.LFPz
+        if self.sf.Xloc == 'lower':
+            r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,origin='top')
+            index = z_top>=self.sf.LFPz
+        else:
+            r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,origin='bottom')
+            index = z_top<=self.sf.LFPz
         r_top,z_top = r_top[index],z_top[index]
         istart = np.argmin((r_top-self.sf.HFfwr)**2+(z_top-self.sf.HFfwz)**2)
         if istart > 0:
@@ -205,6 +214,11 @@ class RB(object):
             Flip = [-1,1]
             Direction = [1,-1]
             Theta_end = [0,np.pi]
+            theta_sign = 1
+            
+            if self.sf.Xloc == 'upper':
+                theta_sign *= -1
+                Direction = Direction[::-1]
             if 'inner' in leg:
                 psi_plasma = self.psi_fw[1]
             else:
@@ -216,11 +230,9 @@ class RB(object):
                 Phi_target[0] = self.sf.Xpsi+self.setup.firstwall['div_ex']*self.dpsi
 
             if self.setup.targets[leg]['open']:
-                theta_sign = -1
+                theta_sign *= -1
                 Direction = Direction[::-1]
                 Theta_end = Theta_end[::-1]
-            else:
-                theta_sign = 1
             if 'outer' in leg:
                 Direction = Direction[::-1]
                 theta_sign *= -1
@@ -277,13 +289,15 @@ class RB(object):
             r,z = self.connect(self.psi_fw[1],['outer','inner'],[-1,0],
                                loop=(self.loop.R,self.loop.Z))
             Rb,Zb = self.append(Rb,Zb,r,z)
+        
         self.Rb,self.Zb = self.midplane_loop(Rb,Zb)
 
+        pl.plot(self.Rb,self.Zb,'r')
         self.Rb,self.Zb = self.first_wall_fit(self.setup.firstwall['dRfw'])
-        self.blanket_fill()
-        self.vessel_fill()
-        self.get_sol()  # trim sol to targets and store values
-        self.write_boundary(self.Rb,self.Zb)
+        #self.blanket_fill()
+        #self.vessel_fill()
+        #self.get_sol()  # trim sol to targets and store values
+        #self.write_boundary(self.Rb,self.Zb)
         return self.Rb,self.Zb
         
     def first_wall_fit(self,dr):
@@ -300,8 +314,11 @@ class RB(object):
         shp.loop.xo['bottom'] = {'value':0.33,'lb':0.05,'ub':0.5}
         rfw,zfw = geom.offset(self.Rp,self.Zp,dr)  # offset from sep
         rfw,zfw = geom.rzSLine(rfw,zfw,100)  # sub-sample
-        index = zfw > self.sf.Xpoint[1]+0.2  # remove x-point points
-        rfw,zfw = rfw[index],zfw[index]
+        if self.sf.Xloc == 'lower':
+            index = zfw > self.sf.Xpoint[1]+0.2  # remove x-point points
+        else:
+            index = zfw < self.sf.Xpoint[1]-0.2
+        #rfw,zfw = rfw[index],zfw[index]
         shp.add_bound({'r':rfw,'z':zfw},'internal')  # vessel inner bounds
         shp.add_bound({'r':np.min(rfw)-0.001,'z':0},'interior')  # rmin
         shp.minimise()
@@ -316,8 +333,17 @@ class RB(object):
         self.segment['inner_loop'] = {'r':r,'z':z}
         rd,zd = self.segment['divertor']['r'],self.segment['divertor']['z']
         rd,zd = geom.unique(rd,zd)[:2]
-        zindex = zd <= self.sf.Xpoint[1]+0.5*(self.sf.mo[1]-self.sf.Xpoint[1])
+        if self.sf.Xloc == 'lower':
+            zindex = zd <= self.sf.Xpoint[1]+0.5*(self.sf.mo[1]-
+                                                  self.sf.Xpoint[1])
+        else:
+            zindex = zd >= self.sf.Xpoint[1]+0.5*(self.sf.mo[1]-
+                                                  self.sf.Xpoint[1])        
         rd,zd = rd[zindex],zd[zindex]  # remove upper points
+        
+        pl.plot(r,z,'b')
+        pl.plot(rd,zd,'k--')
+        print(np.shape(rd),np.shape(zd))
         rd,zd = geom.rzInterp(rd,zd)  # resample
         rd,zd = geom.inloop(r,z,rd,zd,side='out')  # divertor external to fw
         istart = np.argmin((r-rd[-1])**2+(z-zd[-1])**2)  # connect to fw
@@ -332,18 +358,20 @@ class RB(object):
         blanket.sort_zmin('inner')
         blanket.offset('outer',self.setup.build['BB'],
                        ref_o=3/10*np.pi,dref=np.pi/3)
-        self.segment['blanket'] = blanket.fill(color=colors[0])[0]
+        bfill = blanket.fill(color=colors[0])
+        self.segment['blanket_fw']  = bfill[0]
+        self.segment['blanket']  = bfill[1]
 
     def vessel_fill(self):
-        r,z = self.segment['blanket']['r'],self.segment['blanket']['z']
+        r,z = self.segment['blanket_fw']['r'],self.segment['blanket_fw']['z']
         loop = geom.Loop(r,z)
         r,z = loop.fill(dt=0.05)
         rb = np.append(r,r[0])
         zb = np.append(z,z[0])
         profile = Profile(self.setup.configuration,family='S',part='vv',
-                          npoints=200)
+                          npoints=400)
         shp = Shape(profile,objective='L')
-        #shp.loop.set_l({'value':0.5,'lb':0.65,'ub':1.5})  # 1/tesion)
+        shp.loop.set_l({'value':0.5,'lb':0.6,'ub':1.5})  # 1/tesion)
         shp.loop.xo['upper'] = {'value':0.33,'lb':0.5,'ub':1}  
         shp.loop.xo['lower'] = {'value':0.33,'lb':0.5,'ub':1}
         #shp.loop.oppvar.remove('flat')
@@ -371,7 +399,8 @@ class RB(object):
         vv.sort_zmin('inner')
         vv.sort_zmin('outer')
         vv.fill(color=colors[1])
-        self.segment['vessel'] = {'r':r,'z':z}
+        self.segment['vessel_inner'] = {'r':rin,'z':zin}
+        self.segment['vessel_outer'] = {'r':r,'z':z}
 
     def append(self,R,Z,r,z):
         dr = np.zeros(2)
@@ -548,7 +577,7 @@ class RB(object):
     def match_psi(self,Ro,Zo,direction,theta_end,theta_sign,phi_target,graze,
                   dPlate,leg,debug=False):        
         color = sns.color_palette('Set2',2)
-        gain = 0.05  # 0.25
+        gain = 0.15  # 0.25
         Nmax = 500
         Lo = [0.5,0.005]  # [blend,turn]  5,0.015
         r2m = [-1.5,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)

@@ -7,12 +7,14 @@ import pylab as pl
 
 mu_o = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
  
-def green(R,Z,Rc,Zc):
+def green(R,Z,Rc,Zc,dRc=0,dZc=0):
     r = np.array((R-Rc)**2+(Z-Zc)**2)
     m = 4*R*Rc/((R+Rc)**2+(Z-Zc)**2)
     g = np.array((Rc*R)**0.5*((2*m**-0.5-m**0.5)*\
     ellipk(m)-2*m**-0.5*ellipe(m))/(2*np.pi))
-    g[r==0] = 0
+    g[r<1e-16] = 0
+    if np.isnan(g):
+        print(r,m)
     return g
 
 def green_feild(R,Z,Rc,Zc):

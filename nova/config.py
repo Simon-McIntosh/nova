@@ -163,6 +163,14 @@ class Setup(object):
             self.targets['inner'] = {'L2D':0.6}
             self.targets['outer'] = {'L2D':0.65}
             
+        elif configuration == 'DEMO_FW':
+            self.dataname = 'DEMO_FW'
+            self.filename = 'Equil_AR3d1_2015_04_v2_SOF_CSred_fine_fi_2N246U_v1_0.eqdsk'
+            self.firstwall['div_ex'] = 0.25
+            self.firstwall['trim'] = [0.88,0.95]  # trim fraction (in/out)
+            self.targets['inner'] = {'L2D':0.6}
+            self.targets['outer'] = {'L2D':0.65}
+            
         elif configuration == 'DEMO_SN':
             self.dataname = 'DEMO_SN'
             self.filename = 'Equil_AR3d1_2015_04_v2_EOF_CSred_fine_final.eqdsk'

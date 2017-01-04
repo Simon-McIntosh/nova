@@ -45,8 +45,19 @@ class RB(object):
             elif key not in self.setup.targets[leg]:  #  prevent overwrite
                 self.setup.targets[leg][key] = self.setup.targets['default'][key]  # default
    
-    def first_wall_psi(self,req,zeq):
-        psi = self.sf.Ppoint([req,zeq])  # low feild
+    def first_wall_psi(self,trim=True,**kwargs):
+        if 'point' in kwargs:
+            req,zeq = kwargs.get('point')
+            psi = self.sf.Ppoint([req,zeq])
+        else:
+            req,zeq = self.sf.LFPr,self.sf.LFPz 
+            if 'psi_n' in kwargs:  # normalized psi
+                psi_n = kwargs.get('psi_n')
+                psi = psi_n*(self.sf.Xpsi-self.sf.Mpsi)+self.sf.Mpsi
+            elif 'psi' in kwargs:
+                psi = kwargs.get('psi')
+            else:
+                raise ValueError('set point=(r,z) or psi in kwargs')
         contours = self.sf.get_contour([psi])    
         R,Z = self.sf.pick_contour(contours)
         min_contour = np.empty(len(R))
@@ -54,14 +65,15 @@ class RB(object):
             min_contour[i] = np.min((R[i]-req)**2+(Z[i]-zeq)**2)
         imin = np.argmin(min_contour)
         r,z = R[imin],Z[imin]
-        r,z = r[z<=zeq],z[z<=zeq]
-        if req > self.sf.Xpoint[0]:
-            r,z = r[r>self.sf.Xpoint[0]],z[r>self.sf.Xpoint[0]]
-        else:
-            r,z = r[r<self.sf.Xpoint[0]],z[r<self.sf.Xpoint[0]]
-        istart = np.argmin((r-req)**2+(z-zeq)**2)
-        r = np.append(r[istart+1:],r[:istart])
-        z = np.append(z[istart+1:],z[:istart])
+        if trim:
+            r,z = r[z<=zeq],z[z<=zeq]
+            if req > self.sf.Xpoint[0]:
+                r,z = r[r>self.sf.Xpoint[0]],z[r>self.sf.Xpoint[0]]
+            else:
+                r,z = r[r<self.sf.Xpoint[0]],z[r<self.sf.Xpoint[0]]
+            istart = np.argmin((r-req)**2+(z-zeq)**2)
+            r = np.append(r[istart+1:],r[:istart])
+            z = np.append(z[istart+1:],z[:istart])
         istart = np.argmin((r-req)**2+(z-zeq)**2)
         if istart > 0:
             r,z = r[::-1],z[::-1]
@@ -70,10 +82,18 @@ class RB(object):
     def firstwall_loop(self,dr):  # dr [m]
         if not hasattr(self.sf,'LFPr'):
             self.sf.get_LFP()
+         
+        r,z,psi = self.first_wall_psi(psi_n=1.07,trim=False)
+        psi_lfs = psi_hfs = psi
+        self.sf.LFfwr,self.sf.LFfwz = self.sf.LFPr,self.sf.LFPz
+        self.sf.HFfwr,self.sf.HFfwz = self.sf.HFPr,self.sf.HFPz
+        '''
         self.sf.LFfwr,self.sf.LFfwz = self.sf.LFPr+dr,self.sf.LFPz    
         self.sf.HFfwr,self.sf.HFfwz = self.sf.HFPr-dr,self.sf.HFPz
-        r_lfs,z_lfs,psi_lfs = self.first_wall_psi(self.sf.LFfwr,self.sf.LFfwz)
-        r_hfs,z_hfs,psi_hfs = self.first_wall_psi(self.sf.HFfwr,self.sf.HFfwz)
+        r_lfs,z_lfs,psi_lfs = self.first_wall_psi(point=(self.sf.LFfwr,
+                                                         self.sf.LFfwz))
+        r_hfs,z_hfs,psi_hfs = self.first_wall_psi(point=(self.sf.HFfwr,
+                                                         self.sf.HFfwz))
         r_top,z_top = geom.offset(self.Rp,self.Zp,dr)
         r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,origin='top')
         index = z_top>=self.sf.LFPz
@@ -85,7 +105,9 @@ class RB(object):
         r = np.append(r,r_lfs)
         z = np.append(z_hfs[::-1],z_top)
         z = np.append(z,z_lfs)
-        return r[::-1],z[::-1],(psi_lfs,psi_hfs)  # r[::-1],z[::-1]
+        '''
+        pl.plot(r[::-1],z[::-1],'r')
+        return r[::-1],z[::-1],(psi_lfs,psi_hfs) 
   
     def elipsoid(self,theta,ro,zo,A,k,delta):
         R = ro+ro/A*np.cos(theta+delta*np.sin(theta))
@@ -209,12 +231,10 @@ class RB(object):
                 psi_plasma = self.psi_fw[1]
             else:
                 psi_plasma = self.psi_fw[0]
-
             self.dpsi = self.psi_fw[1]-self.sf.Xpsi
             Phi_target = [psi_plasma,self.sf.Xpsi-self.setup.firstwall['div_ex']*self.dpsi]  
             if leg is 'inner1' or leg is 'outer2':
                 Phi_target[0] = self.sf.Xpsi+self.setup.firstwall['div_ex']*self.dpsi
-
             if self.setup.targets[leg]['open']:
                 theta_sign = -1
                 Direction = Direction[::-1]
@@ -304,6 +324,12 @@ class RB(object):
         rfw,zfw = rfw[index],zfw[index]
         shp.add_bound({'r':rfw,'z':zfw},'internal')  # vessel inner bounds
         shp.add_bound({'r':np.min(rfw)-0.001,'z':0},'interior')  # rmin
+        
+        index = self.Zb > self.sf.LFfwz
+        rflux,zflux = self.Rb[index],self.Zb[index]
+        rflux,zflux = geom.rzSLine(rflux,zflux,80)  # sub-sample
+        shp.add_bound({'r':rflux,'z':zflux},'internal')  # flux inner bounds
+
         shp.minimise()
         #shp.loop.plot()
         #shp.plot_bounds()
@@ -548,7 +574,7 @@ class RB(object):
     def match_psi(self,Ro,Zo,direction,theta_end,theta_sign,phi_target,graze,
                   dPlate,leg,debug=False):        
         color = sns.color_palette('Set2',2)
-        gain = 0.05  # 0.25
+        gain = 0.15  # 0.25
         Nmax = 500
         Lo = [0.5,0.005]  # [blend,turn]  5,0.015
         r2m = [-1.5,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)

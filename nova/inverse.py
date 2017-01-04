@@ -416,9 +416,12 @@ class INV(object):
             for j,name in enumerate(self.coil[state].keys()):
                 coil = self.coil[state][name]
                 R,Z,Ic = coil['r'],coil['z'],coil['I']
-                for r,z,ic in zip(R,Z,Ic):
-                    value = self.add_value_coil(bc,rf,zf,r,z,bdir)
+                dR,dZ = coil['dr'],coil['dz']
+                for r,z,ic,dr,dz in zip(R,Z,Ic,dR,dZ):
+                    value = self.add_value_coil(bc,rf,zf,r,z,bdir,dr,dz)
                     if state == 'active':
+                        if np.isnan(value):
+                            print('nan',i,j)
                         self.G[i,j] += value
                     elif state == 'passive':
                         self.BG[i] += ic*value/self.Iscale
@@ -427,9 +430,9 @@ class INV(object):
                         errtxt += '\'active\', \'passive\'\n'
                         raise ValueError(errtxt)
                             
-    def add_value_coil(self,bc,rf,zf,r,z,bdir):
+    def add_value_coil(self,bc,rf,zf,r,z,bdir,dr,dz):
         if 'psi' in bc:
-            value = self.Iscale*cc.mu_o*cc.green(rf,zf,r,z)  
+            value = self.Iscale*cc.mu_o*cc.green(rf,zf,r,z,dr=dr,dz=dz)  
         else:
             B = self.Iscale*cc.mu_o*cc.green_feild(rf,zf,r,z)
             value = self.Bfeild(bc,B[0],B[1],bdir)

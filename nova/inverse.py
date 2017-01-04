@@ -512,8 +512,10 @@ class INV(object):
         wbar = np.mean([weight[i] for i,bc in enumerate(self.fix['BC']) \
                                 if bc == 'psi_bndry'])
         for i,bc in enumerate(BC):
-            if bc == 'psi_x':  # Xpoint weights
+            if bc == 'psi_x' or bc == 'psi':  # psi point weights
                 weight[i] = wbar  # mean boundary weight
+        if (weight==0).any():
+            raise ValueError('fix weight entry not set')
 
         factor = np.reshape(self.fix['factor'],(-1,1))
         weight = np.reshape(weight,(-1,1))

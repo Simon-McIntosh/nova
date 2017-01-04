@@ -161,19 +161,20 @@ class coil_cage(object):
         #pl.plot(self.res['x'],self.res['fun'],'o',color=0.8*np.ones(3))
         rpl,zpl = self.plasma_loop[:,0],self.plasma_loop[:,2]
         rr,zr = geom.offset(rpl,zpl,scale*self.ripple)
+        color = sns.color_palette('Set2',2)
         if sticks:  # ripple sticks
             for i in range(self.nplasma):
                 pl.plot([rpl[i],rr[i]],[zpl[i],zr[i]],
-                        lw=1,color=0.5*np.ones(3))
+                        color=color[0],lw=3)
         #pl.plot(self.plasma_loop[:,0],self.plasma_loop[:,2],'-')
         #pl.plot(self.coil_loop[:,0],self.coil_loop[:,2])
         x = self.res['x']
-        pl.plot(self.plasma_interp['r'](x),self.plasma_interp['z'](x),'.',
-                ms=15,color=0.5*np.ones(3))
+        pl.plot(self.plasma_interp['r'](x),self.plasma_interp['z'](x),'o',
+                ms=8,color=0.5*np.ones(3))
         pl.text(self.plasma_interp['r'](x),
                 self.plasma_interp['z'](x),
                 '{:1.2f}%- '.format(ripple),ha='right',va='center',
-                color=0.5*np.ones(3))
+                color=0.5*np.ones(3)) 
         pl.axis('equal')
         pl.axis('off')
         

@@ -109,7 +109,7 @@ def plot_oppvar(xo,oppvar,eps=1e-2,fmt='1.2f',scale=1,postfix=''):
                                                              xo[var]['lb'])
     data = pd.DataFrame(xo).T
     data.reset_index(level=0,inplace=True)
-    pl.figure(figsize=(8,8))
+    #pl.figure(figsize=(8,8))
     sns.set_color_codes("muted")
     sns.barplot(x='xnorm',y='index',data=data,color="b")
     sns.despine(bottom=True)
@@ -200,7 +200,6 @@ class Aloop(object):  # tripple arc loop
         #self.oppvar.remove('a2')
            
     def set_input(self,**kwargs): 
-        print(kwargs)
         inputs = get_input(self.oppvar,**kwargs)     
         for key in inputs:
             if key in self.xo:
@@ -220,6 +219,7 @@ class Aloop(object):  # tripple arc loop
     def draw(self,**kwargs): 
         self.npoints = kwargs.get('npoints',self.npoints)
         self.set_input(**kwargs)
+        self.segments = {'r':[],'z':[]}
         ro,zo,sl,f1,f2,a1,a2 = self.get_xo()
         a1 *= np.pi/180  # convert to radians
         a2 *= np.pi/180
@@ -227,19 +227,30 @@ class Aloop(object):  # tripple arc loop
           # straight section
         r = ro*np.ones(2)
         z = np.array([zo,zo+sl])
+        self.segments['r'].append(r)
+        self.segments['z'].append(z)
           # small arc
         theta = np.linspace(0,a1,round(0.5*self.npoints*a1/np.pi))
+        rx,zx = r[-1],z[-1]
         r = np.append(r,r[-1]+f1*(1-np.cos(theta)))
         z = np.append(z,z[-1]+f1*np.sin(theta))
+        self.segments['r'].append(rx+f1*(1-np.cos(theta)))
+        self.segments['z'].append(zx+f1*np.sin(theta))
           # mid arc
         theta = np.linspace(theta[-1],asum,round(0.5*self.npoints*a2/np.pi))
+        rx,zx = r[-1],z[-1]
         r = np.append(r,r[-1]+f2*(np.cos(a1)-np.cos(theta)))
         z = np.append(z,z[-1]+f2*(np.sin(theta)-np.sin(a1)))
+        self.segments['r'].append(rx+f2*(np.cos(a1)-np.cos(theta)))
+        self.segments['z'].append(zx+f2*(np.sin(theta)-np.sin(a1)))
           # large arc 
         rl = (z[-1]-zo)/np.sin(np.pi-asum)            
         theta = np.linspace(theta[-1],np.pi,60)
+        rx,zx = r[-1],z[-1]
         r = np.append(r, r[-1]+rl*(np.cos(np.pi-theta)-np.cos(np.pi-asum)))
         z = np.append(z,z[-1]-rl*(np.sin(asum)-np.sin(np.pi-theta)))
+        self.segments['r'].append(rx+rl*(np.cos(np.pi-theta)-np.cos(np.pi-asum)))
+        self.segments['z'].append(zx-rl*(np.sin(asum)-np.sin(np.pi-theta)))
         r = np.append(r,r[::-1])[::-1]
         z = np.append(z,-z[::-1]+2*zo)[::-1] 
         r,z = geom.rzSLine(r,z,self.npoints)  # distribute points
@@ -250,7 +261,11 @@ class Aloop(object):  # tripple arc loop
         
     def plot(self,inputs={}):
         x = self.draw(inputs=inputs)
-        pl.plot(x['r'],x['z'])
+        pl.plot(x['r'],x['z'],color=0.4*np.ones(3))
+        for r,z in zip(self.segments['r'],self.segments['z']):
+            pl.plot(r,z,lw=3)
+        pl.axis('equal')
+        pl.axis('off')
 
 class Dloop(object):  # Princton D
     def  __init__(self,npoints=100,limits=True):
@@ -287,6 +302,7 @@ class Dloop(object):  # Princton D
     def draw(self,**kwargs):
         self.npoints = kwargs.get('npoints',self.npoints)
         self.set_input(**kwargs)
+        self.segments = {'r':[],'z':[]}
         r1,r2,dz = self.get_xo()
         ro=np.sqrt(r1*r2)
         k=0.5*np.log(r2/r1)
@@ -304,6 +320,10 @@ class Dloop(object):  # Princton D
         z -= np.mean(z)
         r,z = geom.space(r,z,self.npoints)
         z += dz  # vertical shift
+        self.segments['r'].append([r[-1],r[0]])
+        self.segments['z'].append([z[-1],z[0]])
+        self.segments['r'].append(r)
+        self.segments['z'].append(z)
         x = {'r':r,'z':z}
         x = close_loop(x,self.npoints)
         x['r'],x['z'] = geom.clock(x['r'],x['z'])
@@ -311,8 +331,12 @@ class Dloop(object):  # Princton D
         
     def plot(self,inputs={}):
         x = self.draw(inputs=inputs)
-        pl.plot(x['r'],x['z'])
-        
+        pl.plot(x['r'],x['z'],color=0.4*np.ones(3))
+        for r,z in zip(self.segments['r'],self.segments['z']):
+            pl.plot(r,z,lw=3)
+            pl.axis('equal')
+            pl.axis('off')
+            
 class Sloop(object):  # polybezier
     def  __init__(self,npoints=200,symetric=False,tension='full',limits=True):
         self.name = 'Sloop'

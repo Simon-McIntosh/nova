@@ -17,6 +17,9 @@ from scipy.interpolate import RectBivariateSpline as RBS
 from scipy.linalg import lstsq
 from scipy import optimize 
 from amigo import geom
+from scipy.optimize import newton
+import sys
+from time import time
 
 class MidpointNormalize(Normalize):
     def __init__(self, vmin=None, vmax=None, midpoint=None, clip=False):
@@ -195,8 +198,8 @@ class EQ(object):
             Mpoint = self.sf.Mpoint
             r,z = self.pf.coil[name]['r'],self.pf.coil[name]['z']
             self.Vcoil['value'][i] = cc.green_feild(Mpoint[0],Mpoint[1],r,z)[0]  
-        #self.Vcoil = np.sort(self.Vcoil,order='value')
-        self.Vcoil = np.sort(self.Vcoil,order='z')
+        self.Vcoil = np.sort(self.Vcoil,order='value')
+        #self.Vcoil = np.sort(self.Vcoil,order='z')
         
     def set_Vcoil(self):  # set fixed vertical control coils
         names = ['upper','lower']
@@ -437,15 +440,21 @@ class EQ(object):
         Mflag = False
         self.Zerr = np.zeros(Nmax)
         self.reset_control_current()
+        to = time()
         for i in range(Nmax):
             self.run()
             self.Zerr[i] = self.sf.Mpoint[1]-self.ztarget
-            if abs(self.Zerr[i]) <= Zerr:
-                if Mflag:
-                    print('i:{:1.0f} z_target {:1.3f}m Icontrol {:1.1f}KA'.\
-                    format(i,self.ztarget,1e-3*self.Ic))
-                    break
-                Mflag = True
+            if i > 1:
+                if abs(self.Zerr[i-1]) <= Zerr and abs(self.Zerr[i]) <= Zerr :
+                    if Mflag:
+                        progress = '\ri:{:1.0f} z_target {:1.3f}m Icontrol {:1.1f}KA'.\
+                        format(i,self.ztarget,1e-3*self.Ic)
+                        progress += ' time {:1.0f}s'.format(time()-to)
+                        progress += '\t\t\t'  # white space
+                        sys.stdout.write(progress)
+                        sys.stdout.flush()
+                        break
+                    Mflag = True
             elif i == Nmax-1: 
                 print('warning: gen vertical position itteration limit reached')
             else:
@@ -458,31 +467,45 @@ class EQ(object):
                 dI = self.Vcoil['Ip'][index]+self.Vcoil['Ii'][index]
                 I = self.Vcoil['Io'][index]+dI
                 self.set_control_current(index=index,I=I)
-                self.Ic += sign*(dI)               
+                self.Ic += sign*(dI)   
         self.set_plasma_coil()
         return self.Ic
         
-    def gen_opp(self,z=None,dz=0.3,Zerr=5e-3,Nmax=100):
-        if z == None:  # sead plasma magnetic centre vertical target
+    def gen_opp(self,z=None,dz=0.3,Zerr=5e-3,Nmax=100,**kwargs):
+        print('balancing plasma:')
+        if z == None:  # sead plasma magnetic center vertical target
             z = self.sf.Mpoint[1]
         f,zt,dzdf= np.zeros(Nmax),np.zeros(Nmax),-0.7e-7#-2.2e-7
         zt[0] = z
         self.get_Vcoil()  # or set_Vcoil for virtual pair
         for i in range(Nmax):
-            f[i] = self.gen(zt[i],Zerr=Zerr/2)
+            f[i] = self.gen(zt[i],Zerr=Zerr/2,**kwargs)
             if i == 0:
                 zt[i+1] = zt[i]-f[i]*dzdf  # estimate second step
             elif i < Nmax-1:
                 fdash = (f[i]-f[i-1])/(zt[i]-zt[i-1])  # Newtons method
                 dz = f[i]/fdash
                 if abs(dz) < Zerr:
-                    print('vertical position converged < {}m'.format(Zerr))
+                    print('vertical position converged < {:1.2f}mm'.format(1e3*Zerr))
                     break
                 else:
                     zt[i+1] = zt[i]-dz  # Newton's method
             else: 
                 print('warning: opp vertical position itteration limit reached')
+        print('')  # escape line
         
+    def gen_bal(self,ztarget=None,Zerr=5e-4,tol=1e-4):  
+        # balance Xpoints (for double null)
+        print('balancing DN Xpoints:')
+        if ztarget == None:  # sead plasma magnetic center vertical target
+            ztarget = self.sf.Mpoint[1]
+        self.get_Vcoil()  # or set_Vcoil for virtual pair
+        def gen_err(ztarget):  # Xpoint pair error (balence)
+            self.gen(ztarget,Zerr=Zerr)
+            return self.sf.Xerr
+        newton(gen_err,ztarget,tol=tol)  # find root
+        print('')  # escape line
+
     def fit(self,inv,N=5):
         for i in range(N):
             self.plasma()  # without coils

@@ -32,7 +32,7 @@ class SF(object):
         self.get_Mpsi()
         self.set_contour()  # set cfeild
         #self.get_sol_psi(dSOL=3e-3,Nsol=15,verbose=False)
-        self.rcirc = 0.3*(self.Mpoint[1]-self.Xpoint[1])  # leg search radius
+        self.rcirc = 0.2*abs(self.Mpoint[1]-self.Xpoint[1])  # leg search radius
         self.drcirc = 0.25*self.rcirc  # leg search width
         self.xlim = self.eqdsk['xlim']
         self.ylim = self.eqdsk['ylim']
@@ -355,7 +355,7 @@ class SF(object):
                        options={'xtol':1e-7,'disp':False})  
         return res.x
             
-    def get_Xpsi(self,xo=None):
+    def get_Xpsi(self,xo=None,select='primary'):
         if xo is None:
             if hasattr(self,'xo'):
                 xo = self.xo
@@ -368,10 +368,19 @@ class SF(object):
             xo[1] *= flip
             Xpoint[:,i] = self.getX(xo=xo)
             Xpsi[i] = self.Ppoint(Xpoint[:,i])
-        i = np.argmax(Xpsi)
-        i = 0  # force lower Xpoint
+        index = np.argsort(Xpoint[1,:])
+        Xpoint = Xpoint[:,index]
+        Xpsi = Xpsi[index]
+        if select == 'lower':
+            i = 0  # lower Xpoint
+        elif select == 'upper':
+            i = 1  # upper Xpoint
+        elif select == 'primary':
+            i = np.argmax(Xpsi)  # primary Xpoint
+        self.Xerr = Xpsi[1]-Xpsi[0]
         self.Xpsi = Xpsi[i]
         self.Xpoint = Xpoint[:,i]
+        self.Xpoint_array = Xpoint
         if i == 0: 
             xo[1] *= -1  # re-flip
         if self.Xpoint[1] < self.mo[1]:
@@ -458,7 +467,7 @@ class SF(object):
             index = z>self.Xpoint[1]
         else:  # alowance for upper Xpoint
             index = z<self.Xpoint[1]
-        r_loop,z_loop = (r[index], z[index])
+        r_loop,z_loop = r[index],z[index]
         rc,zc = self.Mpoint  
         radius = ((r_loop-rc)**2+(z_loop-zc)**2)**0.5
         theta = np.arctan2(z_loop-zc, r_loop-rc)
@@ -509,7 +518,7 @@ class SF(object):
             if Nsol>0: self.Nsol = Nsol
             Dsol = np.linspace(0,self.dSOL,self.Nsol)
             self.sol_psi = interp1d(self.Dsol,self.sol_psi)(Dsol)
-            self.Dsol = Dsol    
+            self.Dsol = Dsol  
         contours = self.get_contour(self.sol_psi)    
         self.Rsol,self.Zsol = self.pick_contour(contours,Xpoint=True,
                                                 Midplane=False,Plasma=False)
@@ -517,7 +526,7 @@ class SF(object):
         self.get_legs(debug=debug)
         if plot:
             color = sns.color_palette('Set2',6)
-            for c,leg in enumerate(self.legs):
+            for c,leg in enumerate(['inner','outer']):#enumerate(self.legs):
                 for i in np.arange(self.legs[leg]['i'])[::-1]:
                     r,z = self.snip(leg,i)
                     r,z = self.legs[leg]['R'][i],self.legs[leg]['Z'][i]
@@ -568,7 +577,7 @@ class SF(object):
                     (np.min(Z) > np.min(self.zbdry)):
                         Pl = True
                     else:
-                        Pl = False          
+                        Pl = False   
                 if Xp and Mid and Pl:
                     R,Z = self.orientate(R,Z)
                     Rs.append(R)
@@ -578,7 +587,12 @@ class SF(object):
     def topolar(self,R,Z):
         x,y = R,Z
         r = np.sqrt((x-self.Xpoint[0])**2+(y-self.Xpoint[1])**2)
-        t = np.arctan2(x-self.Xpoint[0],y-self.Xpoint[1])
+        if self.Xloc == 'lower':
+            t = np.arctan2(x-self.Xpoint[0],y-self.Xpoint[1])
+        elif self.Xloc == 'upper':
+            t = np.arctan2(x-self.Xpoint[0],self.Xpoint[1]-y)
+        else:
+            raise ValueError('Xloc not set (get_Xpsi)')
         return r,t
         
     def store_leg(self,rloop,tloop):
@@ -612,7 +626,12 @@ class SF(object):
         if label:
             i = self.legs[label]['i']
             R = rloop*np.sin(tloop)+self.Xpoint[0]
-            Z = rloop*np.cos(tloop)+self.Xpoint[1] 
+            if self.Xloc == 'lower':
+                Z = rloop*np.cos(tloop)+self.Xpoint[1] 
+            elif self.Xloc == 'upper':
+                Z = -rloop*np.cos(tloop)+self.Xpoint[1]
+            else:
+                raise ValueError('Xloc not set (get_Xpsi)')
             if i > 0:
                 if R[0]**2+Z[0]**2 == (self.legs[label]['R'][i-1][0]**2+
                                        self.legs[label]['Z'][i-1][0]**2):
@@ -642,7 +661,6 @@ class SF(object):
             r = (self.rcirc+self.drcirc/2)*np.cos(theta)
             z = (self.rcirc+self.drcirc/2)*np.sin(theta)
             pl.plot(r+self.Xpoint[0],z+self.Xpoint[1],'k--',alpha=0.5)
-
         self.tleg = np.array([])
         for N in range(len(self.Rsol)):
             r,t = self.topolar(self.Rsol[N],self.Zsol[N])
@@ -669,7 +687,6 @@ class SF(object):
             tend = bins[-1]
             self.tleg = np.append(self.tleg,(tstart+tend)/2)
             self.nleg += 1
-            
         if self.nleg == 6:  # snow flake
             self.legs = {\
             'inner1':{'R':[[] for i in range(self.Nsol)],
@@ -695,7 +712,9 @@ class SF(object):
             'core2':{'R':[[] for i in range(self.Nsol)],
             'Z':[[] for i in range(self.Nsol)],'i':0}}
         self.legs = OrderedDict(sorted(self.legs.items(), key=lambda t: t[0]))
-
+        if self.nleg == 0:
+            err_txt = 'legs not found\n'
+            raise ValueError(err_txt)
         self.tID = np.arange(self.nleg)
         self.tID = np.append(self.nleg-1,self.tID)
         self.tID = np.append(self.tID,0)

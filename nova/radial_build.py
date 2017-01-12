@@ -29,7 +29,7 @@ class RB(object):
         self.xo = [self.sf.Xpoint[0],self.sf.eqdsk['zmagx']]
         self.Rp,self.Zp = self.sf.get_boundary()
         self.Lp = geom.length(self.Rp,self.Zp,norm=False)[-1]
-        self.Rfw,self.Zfw,self.psi_fw = self.firstwall_loop(self.setup.firstwall['dRfw']) 
+        self.Rfw,self.Zfw,self.psi_fw = self.firstwall_loop() 
         self.loop = Loop(self.Rfw,self.Zfw,xo=self.xo)  # first wall contour
 
     def set_firstwall(self,r,z):
@@ -84,38 +84,42 @@ class RB(object):
             r,z = r[::-1],z[::-1]
         return r,z,psi
   
-    def firstwall_loop(self,dr):  # dr [m]
+    def firstwall_loop(self): 
         if not hasattr(self.sf,'LFPr'):
             self.sf.get_LFP()
-         
-        r,z,psi = self.first_wall_psi(psi_n=1.07,trim=False)
-        psi_lfs = psi_hfs = psi
-        self.sf.LFfwr,self.sf.LFfwz = self.sf.LFPr,self.sf.LFPz
-        self.sf.HFfwr,self.sf.HFfwz = self.sf.HFPr,self.sf.HFPz
-        '''
-        self.sf.LFfwr,self.sf.LFfwz = self.sf.LFPr+dr,self.sf.LFPz    
-        self.sf.HFfwr,self.sf.HFfwz = self.sf.HFPr-dr,self.sf.HFPz
-        r_lfs,z_lfs,psi_lfs = self.first_wall_psi(point=(self.sf.LFfwr,
-                                                         self.sf.LFfwz))
-        r_hfs,z_hfs,psi_hfs = self.first_wall_psi(point=(self.sf.HFfwr,
-                                                         self.sf.HFfwz))
-        r_top,z_top = geom.offset(self.Rp,self.Zp,dr)
-        if self.sf.Xloc == 'lower':
-            r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,origin='top')
-            index = z_top>=self.sf.LFPz
+        if self.setup.firstwall['flux_fit']:
+            psi_n = self.setup.firstwall['psi_n']
+            r,z,psi = self.first_wall_psi(psi_n=psi_n,trim=False)
+            psi_lfs = psi_hfs = psi
+            self.sf.LFfwr,self.sf.LFfwz = self.sf.LFPr,self.sf.LFPz
+            self.sf.HFfwr,self.sf.HFfwz = self.sf.HFPr,self.sf.HFPz
+            pl.plot(r[::-1],z[::-1],'--',color=0.75*np.ones(3))
         else:
-            r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,origin='bottom')
-            index = z_top<=self.sf.LFPz
-        r_top,z_top = r_top[index],z_top[index]
-        istart = np.argmin((r_top-self.sf.HFfwr)**2+(z_top-self.sf.HFfwz)**2)
-        if istart > 0:
-            r_top,z_top = r_top[::-1],z_top[::-1]
-        r = np.append(r_hfs[::-1],r_top)
-        r = np.append(r,r_lfs)
-        z = np.append(z_hfs[::-1],z_top)
-        z = np.append(z,z_lfs)
-        '''
-        pl.plot(r[::-1],z[::-1],'r')
+            dr = self.setup.firstwall['dRfw'] # dr [m]
+            self.sf.LFfwr,self.sf.LFfwz = self.sf.LFPr+dr,self.sf.LFPz    
+            self.sf.HFfwr,self.sf.HFfwz = self.sf.HFPr-dr,self.sf.HFPz
+            r_lfs,z_lfs,psi_lfs = self.first_wall_psi(point=(self.sf.LFfwr,
+                                                             self.sf.LFfwz))
+            r_hfs,z_hfs,psi_hfs = self.first_wall_psi(point=(self.sf.HFfwr,
+                                                             self.sf.HFfwz))
+            r_top,z_top = geom.offset(self.Rp,self.Zp,dr)
+            if self.sf.Xloc == 'lower':
+                r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,
+                                              origin='top')
+                index = z_top>=self.sf.LFPz
+            else:
+                r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,
+                                              origin='bottom')
+                index = z_top<=self.sf.LFPz
+            r_top,z_top = r_top[index],z_top[index]
+            istart = np.argmin((r_top-self.sf.HFfwr)**2+
+                               (z_top-self.sf.HFfwz)**2)
+            if istart > 0:
+                r_top,z_top = r_top[::-1],z_top[::-1]
+            r = np.append(r_hfs[::-1],r_top)
+            r = np.append(r,r_lfs)
+            z = np.append(z_hfs[::-1],z_top)
+            z = np.append(z,z_lfs)
         return r[::-1],z[::-1],(psi_lfs,psi_hfs) 
   
     def elipsoid(self,theta,ro,zo,A,k,delta):
@@ -309,10 +313,7 @@ class RB(object):
             r,z = self.connect(self.psi_fw[1],['outer','inner'],[-1,0],
                                loop=(self.loop.R,self.loop.Z))
             Rb,Zb = self.append(Rb,Zb,r,z)
-        
         self.Rb,self.Zb = self.midplane_loop(Rb,Zb)
-
-        pl.plot(self.Rb,self.Zb,'r')
         self.Rb,self.Zb = self.first_wall_fit(self.setup.firstwall['dRfw'])
         #self.blanket_fill()
         #self.vessel_fill()
@@ -320,38 +321,38 @@ class RB(object):
         #self.write_boundary(self.Rb,self.Zb)
         return self.Rb,self.Zb
         
-    def first_wall_fit(self,dr):
-        profile = Profile(self.setup.configuration,family='S',part='fwf',
-                          npoints=200)
-        shp = Shape(profile,objective='L')
-        #shp.loop.oppvar.remove('z2')
-        shp.loop.oppvar.remove('flat')
-        #shp.loop.set_symetric(True)
-        shp.loop.set_l({'value':0.5,'lb':0.65,'ub':1.5})  # 1/tesion)
-        shp.loop.xo['upper'] = {'value':0.33,'lb':0.75,'ub':1}  
-        shp.loop.xo['lower'] = {'value':0.33,'lb':0.75,'ub':1}
-        shp.loop.xo['top'] = {'value':0.33,'lb':0.05,'ub':0.5}  # horizontal shift
-        shp.loop.xo['bottom'] = {'value':0.33,'lb':0.05,'ub':0.5}
-        rfw,zfw = geom.offset(self.Rp,self.Zp,dr)  # offset from sep
-        rfw,zfw = geom.rzSLine(rfw,zfw,100)  # sub-sample
-        if self.sf.Xloc == 'lower':
-            index = zfw > self.sf.Xpoint[1]+0.2  # remove x-point points
+    def first_wall_fit(self,dr,fit_flux=False,plot=False):
+        if self.setup.firstwall['conformal']:
+            index = self.Zb > self.sf.Xpoint[1]
+            r,z = self.Rb[index],self.Zb[index]
+            r,z = geom.clock(r,z,reverse=True)
         else:
-            index = zfw < self.sf.Xpoint[1]-0.2
-        #rfw,zfw = rfw[index],zfw[index]
-        shp.add_bound({'r':rfw,'z':zfw},'internal')  # vessel inner bounds
-        shp.add_bound({'r':np.min(rfw)-0.001,'z':0},'interior')  # rmin
+            profile = Profile(self.setup.configuration,family='S',part='fwf',
+                              npoints=200)
+            shp = Shape(profile,objective='L')
+            shp.loop.oppvar.remove('flat')
+            shp.loop.set_l({'value':0.5,'lb':0.65,'ub':1.5})  # 1/tesion)
+            shp.loop.xo['upper'] = {'value':0.33,'lb':0.75,'ub':1}  
+            shp.loop.xo['lower'] = {'value':0.33,'lb':0.75,'ub':1}
+            shp.loop.xo['top'] = {'value':0.33,'lb':0.05,'ub':0.5}  # h shift
+            shp.loop.xo['bottom'] = {'value':0.33,'lb':0.05,'ub':0.5}
+            rfw,zfw = geom.offset(self.Rp,self.Zp,dr)  # offset from sep
+            rfw,zfw = geom.rzSLine(rfw,zfw,100)  # sub-sample
+            shp.add_bound({'r':rfw,'z':zfw},'internal')  # vessel inner bounds
+            shp.add_bound({'r':np.min(rfw)-0.001,'z':0},'interior')  # rmin
+            if self.setup.firstwall['flux_fit']:
+                index = self.Zb > self.sf.LFfwz
+                rflux,zflux = self.Rb[index],self.Zb[index]
+                rflux,zflux = geom.rzSLine(rflux,zflux,80)  # sub-sample
+                shp.add_bound({'r':rflux,'z':zflux},'internal')  # inner bounds
+            shp.minimise()
+            if plot:
+                shp.loop.plot()
+                shp.plot_bounds()
+            x = profile.loop.draw()
+            r,z = x['r'],x['z']
+            r,z = geom.order(r,z,anti=True)
         
-        index = self.Zb > self.sf.LFfwz
-        rflux,zflux = self.Rb[index],self.Zb[index]
-        rflux,zflux = geom.rzSLine(rflux,zflux,80)  # sub-sample
-        shp.add_bound({'r':rflux,'z':zflux},'internal')  # flux inner bounds
-
-        shp.minimise()
-        #shp.loop.plot()
-        #shp.plot_bounds()
-        x = profile.loop.draw()
-        r,z = geom.order(x['r'],x['z'],anti=True)
         istart = np.argmin((r-self.sf.Xpoint[0])**2+(z-self.sf.Xpoint[1])**2)
         r = np.append(r[istart:],r[:istart+1])
         z = np.append(z[istart:],z[:istart+1])
@@ -367,9 +368,6 @@ class RB(object):
                                                   self.sf.Xpoint[1])        
         rd,zd = rd[zindex],zd[zindex]  # remove upper points
         
-        pl.plot(r,z,'b')
-        pl.plot(rd,zd,'k--')
-        print(np.shape(rd),np.shape(zd))
         rd,zd = geom.rzInterp(rd,zd)  # resample
         rd,zd = geom.inloop(r,z,rd,zd,side='out')  # divertor external to fw
         istart = np.argmin((r-rd[-1])**2+(z-zd[-1])**2)  # connect to fw
@@ -420,8 +418,8 @@ class RB(object):
         shp.minimise()
         x = profile.loop.draw()
         r,z = x['r'],x['z']
-        #vv = wrap({'r':rb,'z':zb},{'r':r,'z':z})
-        vv = wrap({'r':rin,'z':zin},{'r':r,'z':z})
+        vv = wrap({'r':rb,'z':zb},{'r':r,'z':z})
+        #vv = wrap({'r':rin,'z':zin},{'r':r,'z':z})
         vv.sort_zmin('inner')
         vv.sort_zmin('outer')
         vv.fill(color=colors[1])

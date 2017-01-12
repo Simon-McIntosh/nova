@@ -19,19 +19,19 @@ from amigo.IO import trim_dir
 from nova.shelf import PKL
 
 import seaborn as sns
-rc = {'figure.figsize':[8,8*16/12],'savefig.dpi':140, # 
+rc = {'figure.figsize':[7,7*16/12],'savefig.dpi':150, # 
       'savefig.jpeg_quality':200,'savefig.pad_inches':0.1,
       'lines.linewidth':1.5}
 sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 
-config,setup = select(base={'TF':'dtt','eq':'SN'},nTF=18,nPF=5,nCS=3)
+#config,setup = select(base={'TF':'dtt','eq':'SN'},nTF=18,nPF=5,nCS=3)
 #config,setup = select(base={'TF':'dtt','eq':'SX'},nTF=18,nPF=5,nCS=3)
-config,setup = select(base={'TF':'dtt','eq':'DN'},nTF=18,nPF=4,nCS=3)
+config,setup = select(base={'TF':'dtt','eq':'DEMO_FW_SOF'},nTF=18)
 
 sf = SF(setup.filename)  
 pf = PF(sf.eqdsk)
-pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
+pf.plot(coils=pf.coil,label=True,plasma=False,current=True) 
 levels = sf.contour()
 
 rb = RB(setup,sf)
@@ -39,44 +39,33 @@ rb = RB(setup,sf)
 sf.get_Xpsi(select='lower')
 rb.update_sf()  # update streamfunction
 
-sf.sol(plot=True)
-
 rb.firstwall(plot=True,debug=False)
-'''
 rb.trim_sol()
 
 nTF = 18#config['nTF']
 profile = Profile(config['TF'],family='S',part='TF',
                   nTF=nTF,obj='L',load=True)
-<<<<<<< HEAD
 
-shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'],ny=1)
-shp.add_vessel(rb.segment['vessel'])
-shp.minimise(ripple=False,verbose=True)
-
-tf = TF(profile,sf=sf)
-tf.fill()
-
-#pl.savefig('../../Figs/'+config['eq']+'_coils.png')
-#sf.eqwrite(pf,config=config['eq'],CREATE=True)
-
-#shp.plot_bounds()
-#shp.loop.plot()
-plot_oppvar(shp.loop.xo,shp.loop.oppvar)
-
-=======
 shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'],ny=3)
-shp.add_vessel(rb.segment['vessel_outer'])
-shp.loop.set_l({'value':0.8,'lb':0.75,'ub':1.8})  # 1/tesion
-shp.loop.xo['lower'] = {'value':0.7,'lb':0.5,'ub':1}  # vertical shift
-shp.minimise(ripple=False,verbose=True)
+#shp.add_vessel(rb.segment['vessel_outer'])
+#shp.loop.set_l({'value':0.8,'lb':0.75,'ub':1.8})  # 1/tesion
+#shp.loop.xo['lower'] = {'value':0.7,'lb':0.5,'ub':1}  # vertical shift
+#shp.minimise(ripple=True,verbose=True)
+shp.update()
 tf = TF(profile,sf=sf)
 tf.fill()
+
+'''
+demo = DEMO()
+demo.fill_part('Blanket',alpha=1)
+demo.fill_part('Vessel',alpha=1)
+demo.fill_part('TF_Coil',alpha=1)
+'''  
 pl.tight_layout()
+
+'''
 sf.eqwrite(pf,config=config['eq'],CREATE=True)
 
-'''
-'''
 pkl = PKL(config['eq'],directory='../../Movies/')
 sf,eq,inv = pkl.fetch(['sf','eq','inv'])
 for i,(flux,S) in enumerate(zip(inv.swing['flux'],['SOF','MOF','EOF'])):
@@ -100,4 +89,3 @@ with open(datadir+'{}.json'.format(config['eq']),'w') as f:
     json.dump(data,f,indent=4)
 
 '''
->>>>>>> 7794d945fa648939cd2adb2c0bb1b0614495cdcd

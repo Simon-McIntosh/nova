@@ -4,7 +4,7 @@ from amigo import geom
 import seaborn as sns
 from scipy.optimize import fmin_slsqp
 import time
-from nova.TF.DEMOxlsx import DEMO
+from nova.DEMOxlsx import DEMO
 from nova.coils import TF
 from nova.loops import set_oppvar,get_oppvar,plot_oppvar,remove_oppvar,Profile
 from nova.coil_cage import coil_cage

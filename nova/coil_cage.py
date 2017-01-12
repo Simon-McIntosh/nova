@@ -10,7 +10,7 @@ from nova import geqdsk
 from nova.inductance import neumann
 import time
 from nova.coils import TF
-from nova.TF.DEMOxlsx import DEMO
+from nova.DEMOxlsx import DEMO
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 

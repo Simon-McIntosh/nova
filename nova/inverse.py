@@ -203,6 +203,8 @@ class INV(object):
                 del self.eq.pf.coil[name]
                 for i in range(self.eq.coil[name+'_0']['Nf']):
                     del self.eq.coil[name+'_{:1.0f}'.format(i)]
+        self.remove_active(Clist)
+        self.update_coils()
    
     def get_point(self,**kwargs):
         keys = kwargs.keys()
@@ -420,8 +422,6 @@ class INV(object):
                 for r,z,ic,dr,dz in zip(R,Z,Ic,dR,dZ):
                     value = self.add_value_coil(bc,rf,zf,r,z,bdir,dr,dz)
                     if state == 'active':
-                        if np.isnan(value):
-                            print('nan',i,j)
                         self.G[i,j] += value
                     elif state == 'passive':
                         self.BG[i] += ic*value/self.Iscale
@@ -432,7 +432,7 @@ class INV(object):
                             
     def add_value_coil(self,bc,rf,zf,r,z,bdir,dr,dz):
         if 'psi' in bc:
-            value = self.Iscale*cc.mu_o*cc.green(rf,zf,r,z,dr=dr,dz=dz)  
+            value = self.Iscale*cc.mu_o*cc.green(rf,zf,r,z,dRc=dr,dZc=dz)  
         else:
             B = self.Iscale*cc.mu_o*cc.green_feild(rf,zf,r,z)
             value = self.Bfeild(bc,B[0],B[1],bdir)
@@ -491,12 +491,16 @@ class INV(object):
         return Rf,Zf,BC,Bdir
         
     def get_gradients(self,bc,rf,zf):
-        if 'psi' in bc:
-            d_dr = self.psi.ev(rf,zf,dx=1,dy=0)
-            d_dz = self.psi.ev(rf,zf,dx=0,dy=1)
-        else:
-            d_dr = self.B.ev(rf,zf,dx=1,dy=0)
-            d_dz = self.B.ev(rf,zf,dx=0,dy=1)
+        try:
+            if 'psi' in bc:
+                d_dr = self.psi.ev(rf,zf,dx=1,dy=0)
+                d_dz = self.psi.ev(rf,zf,dx=0,dy=1)
+            else:
+                d_dr = self.B.ev(rf,zf,dx=1,dy=0)
+                d_dz = self.B.ev(rf,zf,dx=0,dy=1)
+        except:
+            warn('gradient evaluation failed')
+            d_dr,d_dz = np.ones(len(bc)),np.ones(len(bc))
         return d_dr,d_dz
         
     def get_weight(self):

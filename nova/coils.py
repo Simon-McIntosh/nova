@@ -12,33 +12,42 @@ from nova.streamfunction import SF
 import nova.cross_coil as cc
 colors = sns.color_palette('Paired',12)
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
-from nova.TF.DEMOxlsx import DEMO
+from nova.DEMOxlsx import DEMO
 from warnings import warn
     
 class PF(object):
     def __init__(self,eqdsk):
+        self.nC = count(0)
         self.set_coils(eqdsk)
-        self.categorize_coils()
         
     def set_coils(self,eqdsk):
         self.coil = collections.OrderedDict()
         if eqdsk['ncoil'] > 0: 
-            nC = count(0)
             CSindex = np.argmin(eqdsk['rc'])  # CS radius and width
             self.rCS,self.drCS = eqdsk['rc'][CSindex],eqdsk['drc'][CSindex]
             for i,(r,z,dr,dz,I) in enumerate(zip(eqdsk['rc'],eqdsk['zc'],
                                                  eqdsk['drc'],eqdsk['dzc'],
                                                  eqdsk['Ic'])):
-                name = 'Coil{:1.0f}'.format(next(nC))
-
-                self.coil[name] = {'r':r,'z':z,'dr':dr,'dz':dz,'I':I,
-                                   'rc':np.sqrt(dr**2+dz**2)/2}
+                self.add_coil(r,z,dr,dz,I,categorize=False)
                 if eqdsk['ncoil'] > 100 and i>=eqdsk['ncoil']-101:
                     print('exit set_coil loop - coils')
                     break
+        self.categorize_coils()
+    
+    def add_coil(self,r,z,dr,dz,I,categorize=True):
+        name = 'Coil{:1.0f}'.format(next(self.nC))
+        self.coil[name] = {'r':r,'z':z,'dr':dr,'dz':dz,'I':I,
+                           'rc':np.sqrt(dr**2+dz**2)/2} 
+        if categorize:
+            self.categorize_coils()
+                
+    def remove_coil(self,Clist):
+        for c in Clist:
+            coil = 'Coil{:1.0f}'.format(c)
+            self.coil.pop(coil)
+        self.categorize_coils()
         
     def categorize_coils(self):
-        self.CS_coils,self.PF_coils = [],[]
         catogory = np.zeros(len(self.coil),dtype=[('r','float'),('z','float'),
                                             ('index','int'),('name','object')])
         for i,name in enumerate(self.coil):

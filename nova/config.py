@@ -54,12 +54,9 @@ class Setup(object):
         self.build['BS'] = np.array([0.78-0.2,1.304-0.2])  # blanket+sheild #PMI
         self.build['BS'] -= (self.build['tfw']+self.build['tBBsupport'])
         BBfrac = np.array([1,1])
-        try:
-            demo = DEMO()  # load from xls baseline file
-            self.build['BB'] = demo.blanket_thickness()  # min/max 
-        except:
-            print('warning: load from baseline failed')
-            self.build['BB'] = list(BBfrac*self.build['BS'])  # blanket (in/out) 
+        demo = DEMO()  # load from xls baseline file
+        self.build['BB'] = demo.blanket_thickness()  # min/max 
+        #self.build['BB'] = list(BBfrac*self.build['BS'])  # blanket (in/out) 
         self.build['sheild'] = list((1-BBfrac)*self.build['BS'])  # sheilding
         self.build['sheild_connect']=[0,1]
         self.build['Dsheild'] =[]  # wrap sheild around divertor [0,1] 

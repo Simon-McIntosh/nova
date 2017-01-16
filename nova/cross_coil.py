@@ -13,9 +13,10 @@ def green(R,Z,Rc,Zc,dRc=0,dZc=0):
     g = np.array((Rc*R)**0.5*((2*m**-0.5-m**0.5)*\
     ellipk(m)-2*m**-0.5*ellipe(m))/(2*np.pi))
     
-    if np.sqrt(r)<dRc/2:  # self inductance
-        g = dZc/(2*np.pi)**2*np.log((Rc+dRc/2)/(Rc-dRc/2))
-    #g[r<1e-16] = 0
+    index = np.sqrt(r)<dRc/2  # self inductance index
+    g_s = dZc/(2*np.pi)**2*np.log((Rc+dRc/2)/(Rc-dRc/2))
+    g[index] = g_s[index]
+
     return g
 
 def green_feild(R,Z,Rc,Zc):

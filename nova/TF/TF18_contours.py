@@ -3,7 +3,7 @@ from nova.loops import Profile
 from nova.shape import Shape
 from amigo.addtext import linelabel
 import pylab as pl
-from nova.TF.DEMOxlsx import DEMO
+from nova.DEMOxlsx import DEMO
 from nova.streamfunction import SF
 from nova.config import Setup
 

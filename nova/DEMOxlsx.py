@@ -4,11 +4,9 @@ import pylab as pl
 from amigo import geom
 from amigo.IO import trim_dir
 import scipy as sp
-from scipy.interpolate import interp1d
 from collections import OrderedDict
 from itertools import cycle,count
 from scipy.linalg import norm 
-from matplotlib.collections import PolyCollection
 from scipy.optimize import minimize
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 from scipy.signal import savgol_filter
@@ -20,6 +18,9 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 color = sns.color_palette('Paired',12)
 ic = count(0)
+import nova
+from amigo.IO import class_dir
+nova_root = class_dir(nova)  
         
 def get_label(label,label_array,force=False,part=None):
     if label != None:
@@ -124,10 +125,9 @@ class DEMO(object):
         self.get_fw()
         
     def read(self,filename):
-        ref = trim_dir('../../TF/referance/')
-        wb = load_workbook(filename=ref+filename+
-                           '.xlsx',read_only=True,
-                   data_only=True)
+        ref = nova_root+'/../Data/'
+        wb = load_workbook(filename=ref+filename+'.xlsx',
+                           read_only=True,data_only=True)
         ws = wb[wb.get_sheet_names()[0]]
         self.parts = OrderedDict()  # component parts    
         part,loop = [],[]

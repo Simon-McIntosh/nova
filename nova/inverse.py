@@ -513,13 +513,16 @@ class INV(object):
                 weight[i] = 1/abs(np.sqrt(d_dr**2+d_dz**2))
             elif bc == 'psi_bndry':
                 weight[i] = 1/abs(np.dot([d_dr,d_dz],bdir))
-        wbar = np.mean([weight[i] for i,bc in enumerate(self.fix['BC']) \
-                                if bc == 'psi_bndry'])
+        if 'psi_bndry' in self.fix['BC']:
+            wbar = np.mean([weight[i] for i,bc in enumerate(self.fix['BC']) \
+                                    if bc == 'psi_bndry'])
+        else:
+            wbar = np.mean(weight)
         for i,bc in enumerate(BC):
             if bc == 'psi_x' or bc == 'psi':  # psi point weights
                 weight[i] = wbar  # mean boundary weight
         if (weight==0).any():
-            raise ValueError('fix weight entry not set')
+            warn('fix weight entry not set')
 
         factor = np.reshape(self.fix['factor'],(-1,1))
         weight = np.reshape(weight,(-1,1))

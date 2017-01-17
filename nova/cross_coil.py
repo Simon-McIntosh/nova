@@ -14,7 +14,8 @@ def green(R,Z,Rc,Zc,dRc=0,dZc=0):
     ellipk(m)-2*m**-0.5*ellipe(m))/(2*np.pi))
     
     index = np.sqrt(r)<dRc/2  # self inductance index
-    g_s = dZc/(2*np.pi)**2*np.log((Rc+dRc/2)/(Rc-dRc/2))
+    #g_s = dZc/(2*np.pi)**2*np.log((Rc+dRc/2)/(Rc-dRc/2))
+    g_s = 4*np.pi*Rc/(0.2317*Rc+0.44*dZc+0.39*dRc)/(2*np.pi)
     g[index] = g_s[index]
 
     return g

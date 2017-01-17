@@ -23,7 +23,7 @@ class Shape(object):
         self.loop = self.profile.loop
         self.nTF = nTF
         self.obj = obj
-        #self.update()
+        self.update()
         self.bound = {}  # initalise bounds
         for side in ['internal','interior','external']:
             self.bound[side] = {'r':[],'z':[]}

@@ -386,7 +386,7 @@ if __name__ is '__main__':
     #nPF,nTF = 3,13
     #config = {'TF':'SN','eq':'SN_{:d}PF_{:d}TF'.format(nPF,nTF)}
 
-    nTF,nPF,nCS = 16,4,3
+    nTF,nPF,nCS = 13,4,1
     #config = {'TF':'NTP','eq':'SN'}
 
     config = {'TF':'dtt','eq':'SN'}

@@ -12,7 +12,7 @@ from time import time
 import amigo.geom as geom
 from nova.loops import Profile,plot_oppvar
 from nova.shape import Shape
-from nova.TF.DEMOxlsx import DEMO
+from nova.DEMOxlsx import DEMO
 from nova.force import force_feild
 import json
 from amigo.IO import trim_dir

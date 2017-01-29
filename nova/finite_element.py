@@ -6,12 +6,13 @@ from collections import OrderedDict
 import seaborn as sns
 from mpl_toolkits.mplot3d import Axes3D
 import itertools 
-from amigo.geom import vector_length
 from scipy.interpolate import interp1d
 from amigo.addtext import linelabel
 from mpl_toolkits.mplot3d import Axes3D
 from nova.coil_cage import coil_cage
 from amigo import geom
+from warnings import warn
+from itertools import count
 color = sns.color_palette('Set2',12)
 
 def delete_row_csr(mat, i):
@@ -143,7 +144,9 @@ class FE(object):
         self.check_frame(dx)
         dl = np.linalg.norm(dx,axis=1)  # element length
         norm = np.dot(np.matrix(dl).T,np.ones((1,3)))
+        
         print(dx,dl,norm)
+        
         dx = dx/norm  # unit length
         dz = np.zeros(np.shape(dx))
         dz[:,2] = 1  # points lie in z-plane
@@ -508,7 +511,8 @@ class FE(object):
                 if abs(f[i]) > 1e-12:            
                     err_txt = 'non zero load \''+label+'\''
                     err_txt += ' not present in frame='+self.frame
-                    err_txt +=' ['+', '.join(self.load)+']'
+                    err_txt += ' ['+', '.join(self.load)+']\n'
+                    err_txt += 'increase frame element dimension\n'
                     raise ValueError(err_txt)
         for i,node in enumerate(self.el['n'][el]):  # each node
             if csys == 'global':
@@ -613,10 +617,12 @@ class FE(object):
                 nodes = [nodes]
         return nodes
         
-    def addBC(self,dof,index,part='',ends=2,terminate=True):
-        # part='' then index=nodes, part=part then index=elements
-        self.check_part(part)
-        nodes = self.part_nodes(index,part,ends=ends)  # select nodes
+    def d(self,dof,index,part='',ends=2,terminate=True):  # constrain
+        if part:  # part='' then index=nodes, part=part then index=elements
+            self.check_part(part)
+            nodes = self.part_nodes(index,part,ends=ends)  # select nodes
+        else:
+            nodes = index
         if isinstance(dof,str):  # convert to list
             dof = [dof]
         for constrn in dof:  # constrain nodes
@@ -656,16 +662,48 @@ class FE(object):
                 ke[j[0]:j[0]+self.ndof,j[1]:j[1]+self.ndof]
         self.K = np.copy(self.Ko)
         
-    def setBC(self):  # colapse constrained dof
+    def constrain(self):  # apply and colapse constraints
         self.extractBC()  # remove BC dofs
         self.extractND()  # remove unconnected nodes
+        self.cp.assemble_nodes()
         self.Fo = np.copy(self.F)
-        self.Dindex = np.arange(0,self.nK)  # all nodes (include unconnected)
-        if len(self.BCindex) > 0:
-            self.F = np.delete(self.F,self.BCindex)
-            for i in range(2):  # rows and cols
-                self.K = np.delete(self.K,self.BCindex,i)
-            self.Dindex = np.delete(self.Dindex,self.BCindex)
+        self.nd = {}  # node index
+        self.nd['do'] = np.arange(0,self.nK,dtype=int)  # all nodes 
+        self.nd['mask'] = np.zeros(self.nK,dtype=bool)  # all nodes
+        #self.nd['mask'] = np.in1d(self.nd['do'],self.BCindex)  # condense mask
+        #self.nd['mask'] = self.nd['mask'] | \
+        #                  np.in1d(self.nd['do'],self.cp.nd['dc'])
+        self.nd['mask'][self.BCindex] = True  # remove
+        self.nd['mask'][self.cp.nd['dc']] = True  # condense     
+               
+               
+        self.nd['dc'] = self.nd['do'][self.nd['mask']]  # condensed
+        self.nd['dr'] = self.nd['do'][~self.nd['mask']]  # retained
+        self.nd['nc'] = np.sum(self.nd['mask'])
+        self.nd['nr'] = np.sum(~self.nd['mask'])
+        
+        Cc = np.zeros((self.cp.nd['n'],self.nK))
+        Cr = np.zeros((self.cp.nd['n'],self.nK))  
+        for i,name in enumerate(self.cp.couple):
+            couple = self.cp.couple[name]
+            Cr[i,couple['dr']] = couple['Cr']
+            Cc[i,couple['dr']] = couple['Cc']
+        Cr = Cr[:,~self.nd['mask']]   
+        Cc = Cc[:,~self.nd['mask']]
+        
+        # build transformation matrix
+        self.Tc = np.zeros((self.nd['nc'],self.nd['nr']))  # initalise
+        index = np.in1d(self.nd['dc'],self.cp.nd['dc'])
+        self.Tc[index,:] = np.dot(-np.linalg.inv(Cc),Cr)
+        self.T = np.append(np.identity(self.nd['nr']),self.Tc,axis=0)
+        
+        # sort and couple K and F
+        self.K = np.append(self.K[self.nd['dr'],:],self.K[self.nd['dc'],:],axis=0)  
+        self.K = np.append(self.K[:,self.nd['dr']],self.K[:,self.nd['dc']],axis=1)
+        self.K = np.dot(np.dot(self.T.T,self.K),self.T)
+        self.F = np.append(self.F[self.nd['dr']],self.F[self.nd['dc']],axis=0)  
+        self.F = np.dot(self.T.T,self.F)
+
 
     def solve(self):
         self.nK = int(self.nnd*self.ndof)  # stiffness matrix 
@@ -673,60 +711,11 @@ class FE(object):
         self.update_rotation()  # evaluate/update rotation matricies
         self.assemble()  # assemble stiffness matrix
         
-        ###
-        self.extractBC()  # remove BC dofs
-        self.extractND()  # remove unconnected nodes
+        self.constrain()  # apply and colapse constraints
+        self.Dn = np.zeros(self.nK)  # initalise displacment matrix
+        self.Dn[self.nd['dr']] = np.linalg.solve(self.K,self.F) # global
+        self.Dn[self.nd['dc']] = np.dot(self.Tc,self.Dn[self.nd['dr']]) # patch 
         
-        self.nd = {}  # node index
-        self.nd['do'] = np.arange(0,self.nK)  # all nodes (include unconnected)
-        self.nd['mask'] = np.in1d(self.nd['do'],self.BCindex)  # condense mask
-        
-        # add to condensed mask
-
-        self.cp.extract_nodes()
-        
-        print(self.nd['mask'])
-        self.nd['mask'] = self.nd['mask'] | np.in1d(self.nd['do'],
-                                                     self.cp.nodes['dc'])
-        print(self.nd['mask'])
-        ###
-
-        self.nd['dc'] = self.nd['do'][self.nd['mask']]  # condensed
-        self.nd['dr'] = self.nd['do'][~self.nd['mask']]  # retained
-
-        self.nd['nc'] = np.sum(self.nd['mask'])
-        self.nd['nr'] = np.sum(~self.nd['mask'])
-
-
-
-        T = np.append(np.identity(self.nd['nr']),
-                      np.zeros((self.nd['nc'],self.nd['nr'])),axis=0)
-        
-        print(np.shape(T))
-        print(T)
-        
-        # sort K
-        K = np.append(self.K[self.nd['dr'],:],self.K[self.nd['dc'],:],axis=0)  
-        K = np.append(K[:,self.nd['dr']],self.K[:,self.nd['dc']],axis=1)
-        
-        # sort F
-        F = np.append(self.F[self.nd['dr']],self.F[self.nd['dc']],axis=0)  
-        
-        F = np.dot(T.T,F)
-        
-        K = np.dot(np.dot(T.T,K),T)
-        print('F',F)
-        print(self.F)
-        ###
-        
-        
-        self.setBC()  # remove constrained equations from stiffness + load 
-        
-        print('K-',K)
-        print('K',self.K)
-        self.Dn = np.zeros(self.nK)
-        
-        self.Dn[self.Dindex] = np.linalg.solve(self.K,self.F) # global
         for i,disp in enumerate(self.disp):
             self.D[disp] = self.Dn[i::self.ndof]
         self.interpolate()
@@ -818,12 +807,12 @@ class FE(object):
 class CP(object):  # couple node dofs
     
     def __init__(self,model_dof):
-        self.n = 0
+        self.n = 0  # number of constraints
         self.mpc = OrderedDict()  # multi-point constraint
         self.model_dof = model_dof  # model dof list
         self.ndof = len(model_dof)
         
-    def add(self,nodes,dof='fix',nset='next'):  # first node retained
+    def add(self,nodes,dof='fix',nset='next',axis='z',theta=0):
         if nset == 'next':  # (default)
             self.n += 1
         elif isinstance(nset,int):
@@ -833,13 +822,73 @@ class CP(object):  # couple node dofs
             raise ValueError(errtxt)
         if self.n == 0:
             self.n = 1
-        self.label = 'cp{:d}'.format(self.n)  # cp set label
-        if self.label not in self.mpc:  # create dof set
-            dof = self.extract_dof(dof)
-            self.mpc[self.label] = {'dof':dof,'nodes':np.array([])}
-        self.mpc[self.label]['nodes'] = \
-        np.append(self.mpc[self.label]['nodes'],nodes)
-        self.check()
+        name,dof = self.initalise_set(dof)
+        self.mpc[name]['nodes'] = np.append(self.mpc[name]['nodes'],nodes)
+        self.mpc[name]['nc'] += len(nodes)-1    
+        self.mpc[name]['neq'] = self.mpc[name]['ndof']*self.mpc[name]['nc']
+        self.mpc[name]['Cc'] = -np.identity(self.mpc[name]['neq'])
+        if theta == 0:
+            self.mpc[name]['Cr'] = np.identity(self.mpc[name]['neq'])
+        else:  # populate Cr with rotational constraint
+            self.rotate(name,dof,theta,axis)
+        self.check_nodes()
+        self.extract_nodes(self.mpc[name])
+        
+    def rotate(self,name,dof,theta,axis):
+        self.check_rotation(dof,self.mpc[name]['neq'])
+        if self.ndof == 3:  # 2D elements
+            if axis != 'z':
+                warn('rotation switched to z-axis for 2D element')
+            R = geom.rotate(theta,axis='z')[:2,:2]
+        else:
+            R = geom.rotate(theta,axis=axis)  # 3x3 rotation matrix
+        iR = int(self.ndof/2)
+        self.mpc[name]['Cr'] = np.zeros((self.mpc[name]['neq'],
+                                         self.mpc[name]['neq']))
+        self.mpc[name]['Cr'][:iR,:iR] = R
+        if self.mpc[name]['neq'] == 2*iR:
+            self.mpc[name]['Cr'][iR:,iR:] = R
+        
+    def check_rotation(self,dof,neq):
+        if neq != self.ndof and neq != int(self.ndof/2):
+            errtxt = 'constraint dof \'{}\'\n'.format(dof)
+            errtxt += 'incompatable with rotation constraint\n'
+            errtxt += 'ndof {}, neq {}'.format(self.ndof,neq)
+            raise ValueError(errtxt)
+        elif neq == self.ndof:
+            if dof != self.model_dof:
+                errtxt = 'constraint dofs in wrong order\n'
+                errtxt += 'specified as :{}\n'.format(dof)
+                errtxt += 'required order: {}'.format(self.model_dof)
+                raise ValueError(errtxt)
+        elif neq == int(self.ndof/2):
+            if dof != self.model_dof[:int(self.ndof/2)] or \
+               dof != self.model_dof[int(self.ndof/2):]:
+                errtxt = 'constraint dofs in wrong order\n'
+                errtxt += 'specified as :{}\n'.format(dof)
+                errtxt += 'required order'
+                errtxt += ': {}\n'.format(self.model_dof[:int(self.ndof/2)])
+                errtxt += 'or'
+                errtxt += ': {}\n'.format(self.model_dof[int(self.ndof/2):])
+                raise ValueError(errtxt)
+        if self.ndof == 2:  # exclude 1D elements
+            errtxt = 'unable to apply rotational '
+            errtxt += 'boundary conditions to 1D model\n'
+            errtxt += 'set \'theta=0\' in cp.add'
+            raise ValueError(errtxt)
+        
+    def initalise_set(self,dof):
+        name = 'cp{:d}'.format(self.n)  # cp set name
+        dof = self.extract_dof(dof)
+        if name not in self.mpc:  # create dof set
+            self.mpc[name] = {'dof':dof,'nodes':np.array([],dtype=int)}
+            self.mpc[name]['ndof'] = len(dof)
+            self.mpc[name]['dr'] = np.array([],dtype=int)
+            self.mpc[name]['dc'] = np.array([],dtype=int)
+            self.mpc[name]['nc'] = 0
+        elif dof != self.mpc[name]['dof']:
+            raise ValueError('inconsistent dofs in repeated cp')
+        return name,dof
             
     def extract_dof(self,dof):
         if isinstance(dof,str):  # convert to list
@@ -855,20 +904,33 @@ class CP(object):  # couple node dofs
             dof = dof
         return dof
         
-    def extract_nodes(self):
-        self.nodes = {'dr':np.array([],dtype=int),'dc':np.array([],dtype=int)}
-        for i,name in enumerate(self.mpc):
-            dof = self.mpc[name]['dof']
-            row = self.mpc[name]['nodes']*self.ndof  # retain first node
-            for j,mdof in enumerate(self.model_dof):
-                if mdof in dof:
-                    self.nodes['dr'] = np.append(self.nodes['dr'],row[0]+j)
-                    self.nodes['dc'] = np.append(self.nodes['dc'],row[1:]+j)
-        print(self.nodes)
+    def extract_nodes(self,mpc):
+        dof = mpc['dof']
+        row = mpc['nodes']*self.ndof 
+        for j in range(mpc['nc']):
+            for k,mdof in enumerate(self.model_dof):
+                if mdof in dof:  # retain first node
+                    mpc['dr'] = np.append(mpc['dr'],row[0]+k) 
+                    mpc['dc'] = np.append(mpc['dc'],row[1+j]+k)
                     
-                
+    def assemble_nodes(self):
+        self.nd = {'dr':np.array([],dtype=int),'dc':np.array([],dtype=int),'n':0}
+        self.couple = OrderedDict()
+        ieq = count(0)
+        for name in self.mpc:
+            for node in ['dr','dc']:
+                self.nd[node] = np.append(self.nd[node],self.mpc[name][node])
+            self.nd['n'] += self.mpc[name]['neq']
             
-    def check(self):  # check for node repeats in constraints
+            for i,(Cr,Cc) in enumerate(zip(self.mpc[name]['Cr'],
+                                           self.mpc[name]['Cc'])):
+                eqname = 'eq{:d}'.format(next(ieq))
+                self.couple[eqname] = {'dr':self.mpc[name]['dr'],'Cr':Cr,
+                                       'dc':self.mpc[name]['dc'],'Cc':Cc,
+                                       'dro':self.mpc[name]['dr'][i]}
+            
+                           
+    def check_nodes(self):  # check for node repeats in constraints
         nodes = np.array([])
         for label in self.mpc:
             nodes = np.append(nodes,self.mpc[label]['nodes'])

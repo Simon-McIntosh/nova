@@ -13,7 +13,10 @@ from nova.coil_cage import coil_cage
 from amigo import geom
 from warnings import warn
 from itertools import count
-color = sns.color_palette('Set2',12)
+color = sns.color_palette('Set2',18)
+
+color = sns.color_palette(['#0072bd','#d95319','#edb120','#7e2f8e',
+                          '#77ac30','#4dbeee','#a2142f'],18)
 
 def delete_row_csr(mat, i):
     if not isinstance(mat, csr_matrix):
@@ -39,7 +42,11 @@ class FE(object):
         self.set_stiffness()  # set stiffness matrix + problem dofs
         self.initalize_BC()  # boundary conditions
         self.initalise_grid()  # grid
-        self.cp = CP(self.dof)  # node coupling
+        self.initalise_couple()  # node coupling
+        
+    def initalise_couple(self):
+        self.ncp = 0  # number of constraints
+        self.mpc = OrderedDict()  # multi-point constraint
 
     def initalise_mat(self,nmat_max=10):
         self.nmat_max = nmat_max
@@ -145,7 +152,7 @@ class FE(object):
         dl = np.linalg.norm(dx,axis=1)  # element length
         norm = np.dot(np.matrix(dl).T,np.ones((1,3)))
         
-        print(dx,dl,norm)
+        #print(dx,dl,norm)
         
         dx = dx/norm  # unit length
         dz = np.zeros(np.shape(dx))
@@ -662,39 +669,172 @@ class FE(object):
                 ke[j[0]:j[0]+self.ndof,j[1]:j[1]+self.ndof]
         self.K = np.copy(self.Ko)
         
+    def add_cp(self,nodes,dof='fix',nset='next',axis='z',rotate=False):
+        if nset == 'next':  # (default)
+            self.ncp += 1
+        elif isinstance(nset,int):
+            self.ncp = nset
+        else:
+            errtxt = 'nset must be interger or string, \'high\' or \'next\''
+            raise ValueError(errtxt)
+        if self.ncp == 0:
+            self.ncp = 1
+        name,dof = self.initalise_cp_set(dof)
+        self.mpc[name]['nodes'] = np.append(self.mpc[name]['nodes'],nodes)
+        self.mpc[name]['nc'] += len(nodes)-1    
+        self.mpc[name]['neq'] = self.mpc[name]['ndof']*self.mpc[name]['nc']
+        self.mpc[name]['Cc'] = -np.identity(self.mpc[name]['neq'])
+        if rotate:  # populate Cr with rotational constraint
+            axis = self.check_axis(axis)
+            mask = ~np.in1d(['x','y','z'],axis)
+            theta = np.arcsin(np.cross(self.X[nodes[0],mask],
+                                     self.X[nodes[1],mask])/\
+                    (np.linalg.norm(self.X[nodes[0],mask])*\
+                     np.linalg.norm(self.X[nodes[1],mask])))
+            if np.dot(self.X[nodes[0],mask],self.X[nodes[1],mask]) < 0:
+                theta = np.pi/2+(np.pi/2-theta)
+            print(180*theta/np.pi)
+            self.rotate_cp(name,dof,theta,axis)
+        else:
+            self.mpc[name]['Cr'] = np.identity(self.mpc[name]['neq'])
+        self.check_cp_nodes()
+        self.extract_cp_nodes(self.mpc[name])
+        
+    def check_axis(self,axis):
+        if self.ndof == 3:  # 2D elements
+            if axis != 'z':
+                warn('rotation switched to z-axis for 2D element')
+                axis = 'z'
+        return axis
+        
+    def rotate_cp(self,name,dof,theta,axis):
+        self.check_cp_rotation(dof,self.mpc[name]['neq'])
+        R = geom.rotate(theta,axis=axis)  # 3x3 rotation matrix
+        self.mpc[name]['Cr'] = np.zeros((self.mpc[name]['neq'],
+                                         self.mpc[name]['neq']))
+        self.mpc[name]['Cr'][:3,:3] = R
+        if self.mpc[name]['neq'] == 6:
+            self.mpc[name]['Cr'][3:,3:] = R
+        
+    def check_cp_rotation(self,dof,neq):
+        if neq != self.ndof and neq != int(self.ndof/2):
+            errtxt = 'constraint dof \'{}\'\n'.format(dof)
+            errtxt += 'incompatable with rotation constraint\n'
+            errtxt += 'ndof {}, neq {}'.format(self.ndof,neq)
+            raise ValueError(errtxt)
+        elif neq == self.ndof:
+            if dof != self.dof:
+                errtxt = 'constraint dofs in wrong order\n'
+                errtxt += 'specified as :{}\n'.format(dof)
+                errtxt += 'required order: {}'.format(self.dof)
+                raise ValueError(errtxt)
+        elif neq == int(self.ndof/2):
+            if dof != self.dof[:int(self.ndof/2)] or \
+               dof != self.dof[int(self.ndof/2):]:
+                errtxt = 'constraint dofs in wrong order\n'
+                errtxt += 'specified as :{}\n'.format(dof)
+                errtxt += 'required order'
+                errtxt += ': {}\n'.format(self.dof[:int(self.ndof/2)])
+                errtxt += 'or'
+                errtxt += ': {}\n'.format(self.dof[int(self.ndof/2):])
+                raise ValueError(errtxt)
+        if self.ndof == 2:  # exclude 1D elements
+            errtxt = 'unable to apply rotational '
+            errtxt += 'boundary conditions to 1D model\n'
+            errtxt += 'set \'theta=0\' in cp.add'
+            raise ValueError(errtxt)
+        
+    def initalise_cp_set(self,dof):
+        name = 'cp{:d}'.format(self.ncp)  # cp set name
+        dof = self.extract_cp_dof(dof)
+        if name not in self.mpc:  # create dof set
+            self.mpc[name] = {'dof':dof,'nodes':np.array([],dtype=int)}
+            self.mpc[name]['ndof'] = len(dof)
+            self.mpc[name]['dr'] = np.array([],dtype=int)
+            self.mpc[name]['dc'] = np.array([],dtype=int)
+            self.mpc[name]['nc'] = 0
+        elif dof != self.mpc[name]['dof']:
+            raise ValueError('inconsistent dofs in repeated cp')
+        return name,dof
+            
+    def extract_cp_dof(self,dof):
+        if isinstance(dof,str):  # convert to list
+                dof = [dof]
+        if dof[0] == 'fix':  # fix all dofs
+            dof = self.dof
+        elif dof[0] == 'pin':  # fix translational dofs
+            dof = [dof for dof in self.model_dof if 'r' not in dof]
+        elif dof[0][0] == 'n':  # free rotation 'nrz'
+            mask = np.in1d(self.model_dof,dof[0])
+            dof = self.model_dof[~mask]
+        else:
+            dof = dof
+        return dof
+        
+    def extract_cp_nodes(self,mpc):
+        dof = mpc['dof']
+        row = mpc['nodes']*self.ndof 
+        for j in range(mpc['nc']):
+            for k,mdof in enumerate(self.dof):
+                if mdof in dof:  # retain first node
+                    mpc['dr'] = np.append(mpc['dr'],row[0]+k) 
+                    mpc['dc'] = np.append(mpc['dc'],row[1+j]+k)
+                    
+    def assemble_cp_nodes(self):
+        self.cp_nd = {'dr':np.array([],dtype=int),
+                      'dc':np.array([],dtype=int),'n':0}
+        self.couple = OrderedDict()
+        ieq = count(0)
+        for name in self.mpc:
+            for node in ['dr','dc']:
+                self.cp_nd[node] = np.append(self.cp_nd[node],
+                                             self.mpc[name][node])
+            self.cp_nd['n'] += self.mpc[name]['neq']
+            
+            for i,(Cr,Cc) in enumerate(zip(self.mpc[name]['Cr'],
+                                           self.mpc[name]['Cc'])):
+                eqname = 'eq{:d}'.format(next(ieq))
+                self.couple[eqname] = {'dr':self.mpc[name]['dr'],'Cr':Cr,
+                                       'dc':self.mpc[name]['dc'],'Cc':Cc,
+                                       'dro':self.mpc[name]['dr'][i]}
+
+    def check_cp_nodes(self):  # check for node repeats in constraints
+        nodes = np.array([])
+        for label in self.mpc:
+            nodes = np.append(nodes,self.mpc[label]['nodes'])
+        if len(nodes) != len(np.unique(nodes)):
+            errtxt = 'repeated node in cp defnition:\n'
+            #for label in self.mpc:
+            #    errtxt += label+' '+str(self.mpc[label]['nodes'])+'\n'
+            #raise ValueError(errtxt)        
+        
     def constrain(self):  # apply and colapse constraints
         self.extractBC()  # remove BC dofs
         self.extractND()  # remove unconnected nodes
-        self.cp.assemble_nodes()
+        self.assemble_cp_nodes()
         self.Fo = np.copy(self.F)
         self.nd = {}  # node index
         self.nd['do'] = np.arange(0,self.nK,dtype=int)  # all nodes 
         self.nd['mask'] = np.zeros(self.nK,dtype=bool)  # all nodes
-        #self.nd['mask'] = np.in1d(self.nd['do'],self.BCindex)  # condense mask
-        #self.nd['mask'] = self.nd['mask'] | \
-        #                  np.in1d(self.nd['do'],self.cp.nd['dc'])
         self.nd['mask'][self.BCindex] = True  # remove
-        self.nd['mask'][self.cp.nd['dc']] = True  # condense     
-               
-               
+        self.nd['mask'][self.cp_nd['dc']] = True  # condense     
+                           
         self.nd['dc'] = self.nd['do'][self.nd['mask']]  # condensed
         self.nd['dr'] = self.nd['do'][~self.nd['mask']]  # retained
         self.nd['nc'] = np.sum(self.nd['mask'])
         self.nd['nr'] = np.sum(~self.nd['mask'])
         
-        Cc = np.zeros((self.cp.nd['n'],self.nK))
-        Cr = np.zeros((self.cp.nd['n'],self.nK))  
-        for i,name in enumerate(self.cp.couple):
-            couple = self.cp.couple[name]
-            Cr[i,couple['dr']] = couple['Cr']
-            Cc[i,couple['dr']] = couple['Cc']
-        Cr = Cr[:,~self.nd['mask']]   
-        Cc = Cc[:,~self.nd['mask']]
-        
+        self.Cc = np.zeros((self.cp_nd['n'],self.cp_nd['n']))
+        self.Cr = np.zeros((self.cp_nd['n'],self.nd['nr']))  
+        for i,name in enumerate(self.couple):
+            couple = self.couple[name]
+            self.Cr[i,np.in1d(self.nd['dr'],couple['dr'])] = couple['Cr']
+            self.Cc[i,np.in1d(self.cp_nd['dc'],couple['dc'])] = couple['Cc']
+
         # build transformation matrix
         self.Tc = np.zeros((self.nd['nc'],self.nd['nr']))  # initalise
-        index = np.in1d(self.nd['dc'],self.cp.nd['dc'])
-        self.Tc[index,:] = np.dot(-np.linalg.inv(Cc),Cr)
+        index = np.in1d(self.nd['dc'],self.cp_nd['dc'])
+        self.Tc[index,:] = np.dot(-np.linalg.inv(self.Cc),self.Cr)
         self.T = np.append(np.identity(self.nd['nr']),self.Tc,axis=0)
         
         # sort and couple K and F
@@ -781,7 +921,8 @@ class FE(object):
             nF = np.linalg.norm(F)
             if nF != 0:
                 pl.arrow(X[0]+dx,X[1]+dy,scale*F[0],scale*F[1],
-                         head_width=scale*0.2*nF,head_length=scale*0.3*nF)        
+                         head_width=scale*0.2*nF,head_length=scale*0.3*nF,
+                         color=color[1])        
         
     def plot_displacment(self):
         for i,(part,c) in enumerate(zip(self.part,color)):
@@ -804,140 +945,5 @@ class FE(object):
         pl.xlabel('part length')
         pl.ylabel('part curvature')
         
-class CP(object):  # couple node dofs
-    
-    def __init__(self,model_dof):
-        self.n = 0  # number of constraints
-        self.mpc = OrderedDict()  # multi-point constraint
-        self.model_dof = model_dof  # model dof list
-        self.ndof = len(model_dof)
-        
-    def add(self,nodes,dof='fix',nset='next',axis='z',theta=0):
-        if nset == 'next':  # (default)
-            self.n += 1
-        elif isinstance(nset,int):
-            self.n = nset
-        else:
-            errtxt = 'nset must be interger or string, \'high\' or \'next\''
-            raise ValueError(errtxt)
-        if self.n == 0:
-            self.n = 1
-        name,dof = self.initalise_set(dof)
-        self.mpc[name]['nodes'] = np.append(self.mpc[name]['nodes'],nodes)
-        self.mpc[name]['nc'] += len(nodes)-1    
-        self.mpc[name]['neq'] = self.mpc[name]['ndof']*self.mpc[name]['nc']
-        self.mpc[name]['Cc'] = -np.identity(self.mpc[name]['neq'])
-        if theta == 0:
-            self.mpc[name]['Cr'] = np.identity(self.mpc[name]['neq'])
-        else:  # populate Cr with rotational constraint
-            self.rotate(name,dof,theta,axis)
-        self.check_nodes()
-        self.extract_nodes(self.mpc[name])
-        
-    def rotate(self,name,dof,theta,axis):
-        self.check_rotation(dof,self.mpc[name]['neq'])
-        if self.ndof == 3:  # 2D elements
-            if axis != 'z':
-                warn('rotation switched to z-axis for 2D element')
-            R = geom.rotate(theta,axis='z')[:2,:2]
-        else:
-            R = geom.rotate(theta,axis=axis)  # 3x3 rotation matrix
-        iR = int(self.ndof/2)
-        self.mpc[name]['Cr'] = np.zeros((self.mpc[name]['neq'],
-                                         self.mpc[name]['neq']))
-        self.mpc[name]['Cr'][:iR,:iR] = R
-        if self.mpc[name]['neq'] == 2*iR:
-            self.mpc[name]['Cr'][iR:,iR:] = R
-        
-    def check_rotation(self,dof,neq):
-        if neq != self.ndof and neq != int(self.ndof/2):
-            errtxt = 'constraint dof \'{}\'\n'.format(dof)
-            errtxt += 'incompatable with rotation constraint\n'
-            errtxt += 'ndof {}, neq {}'.format(self.ndof,neq)
-            raise ValueError(errtxt)
-        elif neq == self.ndof:
-            if dof != self.model_dof:
-                errtxt = 'constraint dofs in wrong order\n'
-                errtxt += 'specified as :{}\n'.format(dof)
-                errtxt += 'required order: {}'.format(self.model_dof)
-                raise ValueError(errtxt)
-        elif neq == int(self.ndof/2):
-            if dof != self.model_dof[:int(self.ndof/2)] or \
-               dof != self.model_dof[int(self.ndof/2):]:
-                errtxt = 'constraint dofs in wrong order\n'
-                errtxt += 'specified as :{}\n'.format(dof)
-                errtxt += 'required order'
-                errtxt += ': {}\n'.format(self.model_dof[:int(self.ndof/2)])
-                errtxt += 'or'
-                errtxt += ': {}\n'.format(self.model_dof[int(self.ndof/2):])
-                raise ValueError(errtxt)
-        if self.ndof == 2:  # exclude 1D elements
-            errtxt = 'unable to apply rotational '
-            errtxt += 'boundary conditions to 1D model\n'
-            errtxt += 'set \'theta=0\' in cp.add'
-            raise ValueError(errtxt)
-        
-    def initalise_set(self,dof):
-        name = 'cp{:d}'.format(self.n)  # cp set name
-        dof = self.extract_dof(dof)
-        if name not in self.mpc:  # create dof set
-            self.mpc[name] = {'dof':dof,'nodes':np.array([],dtype=int)}
-            self.mpc[name]['ndof'] = len(dof)
-            self.mpc[name]['dr'] = np.array([],dtype=int)
-            self.mpc[name]['dc'] = np.array([],dtype=int)
-            self.mpc[name]['nc'] = 0
-        elif dof != self.mpc[name]['dof']:
-            raise ValueError('inconsistent dofs in repeated cp')
-        return name,dof
-            
-    def extract_dof(self,dof):
-        if isinstance(dof,str):  # convert to list
-                dof = [dof]
-        if dof[0] == 'fix':  # fix all dofs
-            dof = self.model_dof
-        elif dof[0] == 'pin':  # fix translational dofs
-            dof = [dof for dof in self.model_dof if 'r' not in dof]
-        elif dof[0][0] == 'n':  # free rotation 'nrz'
-            mask = np.in1d(self.model_dof,dof[0])
-            dof = self.model_dof[~mask]
-        else:
-            dof = dof
-        return dof
-        
-    def extract_nodes(self,mpc):
-        dof = mpc['dof']
-        row = mpc['nodes']*self.ndof 
-        for j in range(mpc['nc']):
-            for k,mdof in enumerate(self.model_dof):
-                if mdof in dof:  # retain first node
-                    mpc['dr'] = np.append(mpc['dr'],row[0]+k) 
-                    mpc['dc'] = np.append(mpc['dc'],row[1+j]+k)
-                    
-    def assemble_nodes(self):
-        self.nd = {'dr':np.array([],dtype=int),'dc':np.array([],dtype=int),'n':0}
-        self.couple = OrderedDict()
-        ieq = count(0)
-        for name in self.mpc:
-            for node in ['dr','dc']:
-                self.nd[node] = np.append(self.nd[node],self.mpc[name][node])
-            self.nd['n'] += self.mpc[name]['neq']
-            
-            for i,(Cr,Cc) in enumerate(zip(self.mpc[name]['Cr'],
-                                           self.mpc[name]['Cc'])):
-                eqname = 'eq{:d}'.format(next(ieq))
-                self.couple[eqname] = {'dr':self.mpc[name]['dr'],'Cr':Cr,
-                                       'dc':self.mpc[name]['dc'],'Cc':Cc,
-                                       'dro':self.mpc[name]['dr'][i]}
-            
-                           
-    def check_nodes(self):  # check for node repeats in constraints
-        nodes = np.array([])
-        for label in self.mpc:
-            nodes = np.append(nodes,self.mpc[label]['nodes'])
-        if len(nodes) != len(np.unique(nodes)):
-            errtxt = 'repeated node in cp defnition:\n'
-            for label in self.mpc:
-                errtxt += label+' '+str(self.mpc[label]['nodes'])+'\n'
-            raise ValueError(errtxt)
             
             

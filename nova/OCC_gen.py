@@ -1,4 +1,4 @@
-from nova.DEMOxlsx import DEMO
+Yfrom nova.DEMOxlsx import DEMO
 from nova.coils import PF,TF
 from nova.loops import Profile
 from nova.coil_cage import coil_cage

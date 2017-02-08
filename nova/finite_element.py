@@ -623,15 +623,34 @@ class FE(object):
             if not isinstance(nodes,list):  # convert to list
                 nodes = [nodes]
         return nodes
+    
+    def extract_dof(self,dof):
+        if isinstance(dof,str):  # convert to list
+                dof = [dof]
+        if dof[0] == 'fix':  # fix all dofs
+            dof = self.dof
+        elif dof[0] == 'pin':  # fix translational dofs
+            dof = [dof for dof in self.model_dof if 'r' not in dof]
+        elif 'n' in dof[0]:  # free constraint 'nu','nrx',...
+            for d in dof:
+                if 'n' not in d:
+                    errtxt = 'mixed constraints in negated cp '
+                    errtxt += 'dof: {} \n'.format(dof)
+                    errtxt += 'place\'n\' type constraints in exclusive set'
+                    raise ValueError(errtxt)
+                dof_free = [dof for dof in self.dof if d[1:] in dof]
+            dof = [dof for dof in self.dof if dof not in dof_free]
+        else:
+            dof = dof
+        return dof
         
-    def d(self,dof,index,part='',ends=2,terminate=True):  # constrain
-        if part:  # part='' then index=nodes, part=part then index=elements
+    def add_bc(self,dof,index,part='',ends=2,terminate=True):  # constrain
+        if part:  # part=part then index=elements
             self.check_part(part)
             nodes = self.part_nodes(index,part,ends=ends)  # select nodes
-        else:
+        else:  # part='' then index=nodes, 
             nodes = index
-        if isinstance(dof,str):  # convert to list
-            dof = [dof]
+        dof = self.extract_dof(dof)
         for constrn in dof:  # constrain nodes
             error_code = self.check_input('dof',constrn,terminate=terminate)
             if not error_code:
@@ -746,7 +765,7 @@ class FE(object):
         
     def initalise_cp_set(self,dof):
         name = 'cp{:d}'.format(self.ncp)  # cp set name
-        dof = self.extract_cp_dof(dof)
+        dof = self.extract_dof(dof)
         if name not in self.mpc:  # create dof set
             self.mpc[name] = {'dof':dof,'nodes':np.array([],dtype=int)}
             self.mpc[name]['ndof'] = len(dof)
@@ -756,20 +775,6 @@ class FE(object):
         elif dof != self.mpc[name]['dof']:
             raise ValueError('inconsistent dofs in repeated cp')
         return name,dof
-            
-    def extract_cp_dof(self,dof):
-        if isinstance(dof,str):  # convert to list
-                dof = [dof]
-        if dof[0] == 'fix':  # fix all dofs
-            dof = self.dof
-        elif dof[0] == 'pin':  # fix translational dofs
-            dof = [dof for dof in self.model_dof if 'r' not in dof]
-        elif dof[0][0] == 'n':  # free rotation 'nrz'
-            mask = np.in1d(self.model_dof,dof[0])
-            dof = self.model_dof[~mask]
-        else:
-            dof = dof
-        return dof
         
     def extract_cp_nodes(self,mpc):
         dof = mpc['dof']

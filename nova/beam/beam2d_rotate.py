@@ -23,13 +23,13 @@ rc = {'figure.figsize':[8*12/16,8],'savefig.dpi':120, #
 sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 
-nTF,nPF,nCS = 18,4,1
+nTF,nPF,nCS = 18,4,3
 config = {'TF':'dtt','eq':'SN'}
-config = select(config,nTF=nTF,nPF=nPF,nCS=nCS)
+config,setup = select(config,nTF=nTF,nPF=nPF,nCS=nCS)
 
 profile = Profile(config['TF'],family='S',part='TF',
                   nTF=nTF,obj='L',load=True)
-setup = Setup(config['eq'])
+
 sf = SF(setup.filename)
 tf = TF(profile,sf=sf)
 tf.fill()
@@ -59,7 +59,7 @@ to = time()
 tf.split_loop()
     
 fe = FE(frame='3D')
-fe.add_mat(0,E=5e2,I=5e1,A=1,G=5,J=5,rho=5e-2)
+fe.add_mat(0,E=5e1,I=5e1,A=1,G=5,J=5,rho=5e-2)
 
 nodes = {}
 for part in ['loop','nose']:  # ,'nose'
@@ -71,16 +71,23 @@ for part in ['loop','nose']:  # ,'nose'
     fe.add_nodes(X)
     nodes[part] = np.arange(fe.nndo,fe.nnd)
 n = np.append(np.append(nodes['nose'][-1],nodes['loop']),nodes['nose'][0])
-fe.add_elements(n=n,part_name='loop')  
+fe.add_elements(n=n,part_name='loop',nmat=0)
 fe.add_elements(n=nodes['nose'],part_name='nose') 
-fe.addBC(['u','w','rx','ry','rz'],'all',part='nose') 
+fe.add_bc('nv','all',part='nose') 
+
+
+nd_GS = fe.el['n'][fe.part['loop']['el'][30]][0]  # gravity support connect
  
-fe.add_nodes([13,-12,-2])
-fe.add_nodes([13,-12,2])
-fe.add_elements(n=[fe.nndo-1,fe.part['loop']['el'][20],fe.nndo],
-                part_name='support')
-fe.addBC(['fix'],[0],part='support') 
-fe.addBC(['fix'],[-1],part='support') 
+fe.add_nodes([13,-12,0])
+fe.add_nodes([13,-12,0])
+fe.add_nodes(fe.X[nd_GS])
+
+fe.add_elements(n=[fe.nndo-2,fe.nndo,fe.nndo-1],part_name='support')
+fe.add_bc('nz',[0],part='support',ends=0) 
+fe.add_bc('nz',[-1],part='support',ends=1) 
+
+
+fe.add_cp([fe.nndo,nd_GS],dof='nrx')
 
 fe.add_weight()  # add weight to all elements
 #fe.add_tf_load(config,tf,sf.Bpoint,method='function')  # burst and topple
@@ -92,7 +99,7 @@ fe.solve()
 print('time {:1.3f}'.format(time()-to))
 
 fe.plot_nodes()
-fe.plot_F(scale=5e-1)
+fe.plot_F(scale=5e0)
 
 fe.plot_displacment()
 pl.axis('off')

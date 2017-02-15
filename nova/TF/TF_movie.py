@@ -1,4 +1,4 @@
-from nova.TF.DEMOxlsx import DEMO
+from nova.DEMOxlsx import DEMO
 from nova.loops import Profile
 from nova.shape import Shape
 import pylab as pl
@@ -7,11 +7,6 @@ import numpy as np
 
 nTF = 18
 family='S'
-
-
-
-'''
-
 config = {'TF':'dtt','eq':'SN'}
 config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
 
@@ -25,10 +20,20 @@ shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'],ny=3)
 shp.add_vessel(demo.parts['Vessel']['out'])
 shp.minimise(ripple=False,verbose=True)
 
-shp.update()
+#shp.update()
+
+shp.loop.set_input(x=shp.xo[0])
 shp.tf.fill()
 
+shp.plot_bounds()
+
+
+'''
+filename = 'movie'
+moviename = '../Movies/{}'.format(filename)
+moviename += '.mp4'
 print(moviename)
+
 with writer.saving(fig,moviename,100): 
     for xo in shp.xo:
         pl.plot(xo[0],xo[1])
@@ -42,14 +47,13 @@ with writer.saving(fig,moviename,100):
         writer.grab_frame()
         
         fig,ax = pl.subplots()
-'''
+        
+
 def animate(i):
     pl.plot(1,1)
-'''
-filename = 'movie'
-moviename = '../Movies/{}'.format(filename)
-moviename += '.mp4'
-'''
+
+
+
 
 
 FFMpegWriter = manimation.writers['ffmpeg']
@@ -61,4 +65,4 @@ with writer.saving(pl.gcf(),'tmp.mp4',100):
         animate(i)
         #pl.tight_layout()
         writer.grab_frame()
-                
+'''                

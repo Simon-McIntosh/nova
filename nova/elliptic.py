@@ -433,6 +433,8 @@ class EQ(object):
             self.set_control_current(index=index,factor=0)
 
     def gen(self,ztarget=None,Zerr=1e-3,kp=1.5,ki=0.15,Nmax=50,**kwargs): 
+        if not hasattr(self,'to'):
+            self.to = time()  # start clock for single gen run
         if ztarget == None:  # sead plasma magnetic centre vertical target
             self.ztarget = self.sf.Mpoint[1]
         else:
@@ -449,7 +451,8 @@ class EQ(object):
                     if Mflag:
                         progress = '\ri:{:1.0f} z_target {:1.3f}m Icontrol {:1.1f}KA'.\
                         format(i,self.ztarget,1e-3*self.Ic)
-                        progress += ' time {:1.0f}s'.format(time()-to)
+                        progress += ' gen {:1.0f}s'.format(time()-to)
+                        progress += ' total {:1.0f}s'.format(time()-self.to)
                         progress += '\t\t\t'  # white space
                         sys.stdout.write(progress)
                         sys.stdout.flush()
@@ -472,7 +475,7 @@ class EQ(object):
         return self.Ic
         
     def gen_opp(self,z=None,dz=0.3,Zerr=5e-3,Nmax=100,**kwargs):
-        print('balancing plasma:')
+        self.to = time()  # time at start of gen opp loop
         if z == None:  # sead plasma magnetic center vertical target
             z = self.sf.Mpoint[1]
         f,zt,dzdf= np.zeros(Nmax),np.zeros(Nmax),-0.7e-7#-2.2e-7
@@ -486,7 +489,7 @@ class EQ(object):
                 fdash = (f[i]-f[i-1])/(zt[i]-zt[i-1])  # Newtons method
                 dz = f[i]/fdash
                 if abs(dz) < Zerr:
-                    print('vertical position converged < {:1.2f}mm'.format(1e3*Zerr))
+                    print('\nvertical position converged < {:1.2f}mm'.format(1e3*Zerr))
                     break
                 else:
                     zt[i+1] = zt[i]-dz  # Newton's method
@@ -496,6 +499,7 @@ class EQ(object):
         
     def gen_bal(self,ztarget=None,Zerr=5e-4,tol=1e-4):  
         # balance Xpoints (for double null)
+        self.to = time()  # time at start of gen bal loop
         print('balancing DN Xpoints:')
         if ztarget == None:  # sead plasma magnetic center vertical target
             ztarget = self.sf.Mpoint[1]

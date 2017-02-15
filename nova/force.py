@@ -143,7 +143,7 @@ class force_feild(object):
             raise ValueError(errtxt) 
         if method == 'function':
             b = np.zeros(3)
-            b[1] = bm/point[0]  # TF feild (fast version / only good for TF cl)
+            b[2] = -bm/point[0]  # TF feild (fast version / only good for TF cl)
         elif method == 'BS':  # calculate tf feild with full Biot-Savart
             b = cage.point(point,variable='feild') # (slow / correct)
         theta = np.arctan2(point[1],point[0])

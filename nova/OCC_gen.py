@@ -1,10 +1,10 @@
-Yfrom nova.DEMOxlsx import DEMO
+from nova.DEMOxlsx import DEMO
 from nova.coils import PF,TF
 from nova.loops import Profile
 from nova.coil_cage import coil_cage
 from nova.streamfunction import SF
 from nova.elliptic import EQ
-from nova.config import Setup
+from nova.config import select
 from scipy.optimize import minimize_scalar,minimize
 import numpy as np
 import json
@@ -14,11 +14,18 @@ import pylab as pl
 from amigo import geom
 from amigo.ANSYS import table
 from nova.force import force_feild
+color = sns.color_palette('Set2',12)
 import sys
+import seaborn as sns
+rc = {'figure.figsize':[6*12/16,6],'savefig.dpi':160, # 
+      'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
+      'lines.linewidth':2}
+sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
+        font_scale=7/8,rc=rc)
 
 class OCC(object):
     
-    def __init__(self,config,family='S',nTF=16,obj='L'):
+    def __init__(self,config,setup,family='S',nTF=16,obj='L'):
         self.nTF = nTF
         self.config = config
         datadir = trim_dir('../../Data') 
@@ -26,21 +33,88 @@ class OCC(object):
         self.filename = datadir+'/'+file+'.json'
         self.profile = Profile(config['TF'],family=family,load=True,part='TF',
                                nTF=nTF,obj=obj,npoints=250)
-        setup = Setup(config['eq'])
         self.sf = SF(setup.filename)
         self.tf = TF(self.profile,sf=self.sf)   
         self.pf = PF(self.sf.eqdsk)
+        self.cross_section()
         self.PF_support()  # calculate PF support seats
         self.CS_support()  # calculate CS support seats
         self.Gravity_support()
+
         self.cage = coil_cage(nTF=nTF,rc=self.tf.rc,ny=3,
-                              plasma={'config':config['eq']},
+                              plasma={'setup':setup},
                               coil=self.tf.x['cl'])
         self.eq = EQ(self.sf,self.pf,dCoil=0.5,sigma=0,
                      boundary=self.sf.get_sep(expand=0.4),n=2e3) 
         self.eq.plasma()
         self.ff = force_feild(self.pf.index,self.pf.coil,
                               self.eq.coil,self.eq.plasma_coil)
+
+        
+    def cross_section(self,plot=True):
+        depth = self.tf.section['winding_pack']['depth']
+        side = self.tf.section['case']['side']
+        width = self.tf.section['winding_pack']['width']
+        inboard = self.tf.section['case']['inboard']
+        outboard = self.tf.section['case']['outboard']
+        external = self.tf.section['case']['external']
+        nose = self.tf.section['case']['nose']
+        ro = self.profile.loop.p[0]['p0']['r']
+        theta = np.pi/self.nTF
+        rsep = (depth/2+side)/np.tan(theta)
+        rnose = ro-(width+inboard+nose)
+        if rsep <= rnose:
+            ynose = depth/2+side
+        else:
+            ynose = rnose*np.tan(theta)
+        dy = depth/2+side-ynose
+        dr = rsep-rnose
+        rpoint = rsep-(depth/2+side)/dy*dr-ro
+        rwp = ro-(width+inboard)
+        if rsep <= rwp:
+            ywp = depth/2+side
+        else:
+            ywp = rwp*np.tan(theta)
+        self.CSsupport = {'rnose':rnose,'ynose':ynose,'dt':side,
+                          'rwp':rwp,'ywp':ywp}
+        self.cs = {}
+        self.cs['wp'] = {'r':[-width/2,width/2],
+                         'y':depth/2*np.ones(2)}
+        self.cs['ca'] = {'in':{'r':[rpoint+width/2+inboard,
+                                    -(nose+width/2),
+                                    rsep-(ro-width/2-inboard),width/2+inboard],
+                               'y':[0,ynose,depth/2+side,depth/2+side]},
+                         'out':{'r':[-width/2-external,width/2+outboard],
+                                'y':depth/2+side*np.ones(2)}}
+        r,y = self.cs['wp']['r'],self.cs['wp']['y']
+        self.cs['wp']['pnt'] = {'r':[r[0],r[1],r[1],r[0]],
+                                   'y':[y[0],y[1],-y[1],-y[0]]}
+        r,y = self.cs['ca']['in']['r'],self.cs['ca']['in']['y']
+        self.cs['ca']['in']['pnt'] = {'r':[r[1],r[2],r[3],r[3],r[2],r[1]],
+                                   'y':[y[1],y[2],y[3],-y[3],-y[2],-y[1]]}
+        r,y = self.cs['ca']['out']['r'],self.cs['ca']['out']['y']
+        self.cs['ca']['out']['pnt'] = {'r':[r[0],r[1],r[1],r[0]],
+                                       'y':[y[0],y[1],-y[1],-y[0]]}
+        
+        if plot:
+            fig,ax = pl.subplots(1,2,sharex=True,figsize=(6,4))
+            pl.sca(ax[0])
+            pl.axis('equal')
+            pl.axis('off')
+            pl.xlim([-1,0.5])
+            geom.polyfill(self.cs['ca']['in']['pnt']['r'],
+                          self.cs['ca']['in']['pnt']['y'],
+                          color=color[0])
+            geom.polyfill(self.cs['wp']['pnt']['r'],self.cs['wp']['pnt']['y'],
+                          color=color[1])
+            pl.sca(ax[1])
+            pl.axis('equal')
+            pl.axis('off')
+            geom.polyfill(self.cs['ca']['out']['pnt']['r'],
+                          self.cs['ca']['out']['pnt']['y'],
+                          color=color[0])
+            geom.polyfill(self.cs['wp']['pnt']['r'],self.cs['wp']['pnt']['y'],
+                          color=color[1])
         
     def write(self):
         print('writing',self.filename,self.nTF)
@@ -54,33 +128,15 @@ class OCC(object):
             json.dump(data,f,indent=4)
 
     def CS_support(self):
-        depth = self.tf.section['winding_pack']['depth']
-        side = self.tf.section['case']['side']
-        width = self.tf.section['winding_pack']['width']
-        inboard = self.tf.section['case']['inboard']
-        nose = self.tf.section['case']['nose']
-        segment = self.profile.loop.p[0]
-        ro,zo = segment['p0']['r'],segment['p0']['z']
-        theta = np.pi/self.nTF
-        rsep = (depth/2+side)/np.tan(theta)
-        rnose = ro-(width+inboard+nose)
-        rwp = ro-(width+inboard)
-        if rsep <= rnose:
-            ynose = depth/2+side
-        else:
-            ynose = rnose*np.tan(theta)
-        if rsep <= rwp:
-            ywp = depth/2+side
-        else:
-            ywp = rwp*np.tan(theta)
-        
+        zo = self.profile.loop.p[0]['p0']['z']
         self.tf.loop_interpolators(offset=0)  # construct TF interpolators
         TFloop = self.tf.fun['out']
         L = minimize_scalar(OCC.cs_top,method='bounded',
-                            args=(rwp,TFloop),bounds=[0.5,1]).x
+                            args=(self.CSsupport['rwp'],TFloop),
+                            bounds=[0.5,1]).x
         ztop = float(TFloop['z'](L))  
-        self.CSsupport = {'rnose':rnose,'ynose':ynose,'rwp':rwp,'ywp':ywp,
-                          'ztop':ztop,'zo':zo,'dt':side}
+        self.CSsupport['ztop'] = ztop
+        self.CSsupport['zo'] = zo
 
     def cs_top(L,rwp,TFloop):
         err = abs(TFloop['r'](L)-rwp)
@@ -187,9 +243,11 @@ class OCC(object):
             self.OISsupport['OIS{:d}'.format(i)] = nodes
 
     def plot(self):
+        pl.figure()
         self.tf.fill()
-        self.pf.plot(coils=self.pf.coil,label=True,current=True)
-        self.pf.plot(coils=self.eq.coil,plasma=True)
+        #self.pf.plot(coils=self.pf.coil,label=True,current=True)
+        if hasattr(self,'eq'):
+            self.pf.plot(coils=self.eq.coil,plasma=True)
         for name in self.PFsupport:
             nodes = np.array(self.PFsupport[name])
             geom.polyfill(nodes[:,0],nodes[:,1],color=0.4*np.ones(3))
@@ -208,7 +266,8 @@ class OCC(object):
         rCS = [rnose,rwp,rwp,rnose]
         zCS = [zo,zo,ztop,ztop]
         geom.polyfill(rCS,zCS,color=0.4*np.ones(3))
-        self.ff.plot()
+        #if hasattr(self,'ff'):
+        #    self.ff.plot()
         
     def ansys(self,plot=False,nl=250,nr=5,ny=5):
         datadir = trim_dir('../../Data/')
@@ -239,8 +298,6 @@ class OCC(object):
         *enddo
         F,cs,Fz,1e6*F_coil(i+1,2)
         '''
-        
-
         ans.f.write('\n/nopr  ! suppress large table output\n')
         
         self.tf.loop_interpolators(offset=0,full=True)  # construct TF interpolators
@@ -313,7 +370,9 @@ class OCC(object):
                         Fvec = 1e-8*Fb#/np.linalg.norm(Fb)
                         #Fvec = that
                         pl.arrow(point[0],point[2],Fvec[0],Fvec[2],
-                                 head_width=0.15,head_length=0.3)       
+                                 head_width=0.3,head_length=0.6)
+                        pl.plot(point[0],point[2],'o',color=0.15*np.ones(3),
+                                ms=3)
         print('\n',np.sum(Fbody['x'][:-1,:,:])*1e-9,
               np.sum(Fbody['y'][:-1,:,:])*1e-9,
               np.sum(Fbody['z'][:-1,:,:])*1e-9)
@@ -332,50 +391,50 @@ class OCC(object):
         ans.f.write('/gopr  ! enable output\n')    
             
         apdlstr = '''
-pi = 4*atan(1)
-csys,11  ! switch to cylindrical coordinate system
-esel,s,elem,,wp  ! select winding pack (requires named selection 'wp')
-*get,nel,elem,0,count
-*vget,el_sel,elem,,esel  ! selection mask
-*vget,el_id,elem,,elist  ! winding pack selection array
-*vget,el_vol,elem,,geom  ! element volume
-*vget,el_radius,elem,,cent,x  ! element radius
-*vget,el_theta,elem,,cent,y  ! element theta
-*vget,el_offset,elem,,cent,z  ! element axial offset
-*voper,el_theta,el_theta,mult,pi/180  ! convert to radians
-csys,0  ! return coordinate system
-
-! compress selections
-*dim,el_v,array,nel
-*dim,el_r,array,nel
-*dim,el_t,array,nel
-*dim,el_o,array,nel
-*dim,el_l,array,nel
-*dim,el_dr,array,nel
-
-*vmask,el_sel
-*vfun,el_v,comp,el_vol  ! volume
-*vmask,el_sel
-*vfun,el_r,comp,el_radius  ! radius
-*vmask,el_sel
-*vfun,el_t,comp,el_theta  ! theta
-*vmask,el_sel
-*vfun,el_o,comp,el_offset  ! offset
-*vitrp,el_l,l_map,el_r,el_t  ! interpolate l_map table
-*vitrp,el_dr,dr_map,el_r,el_t !  interpolate dr_map table
-
-xyz = 'x','y','z'  ! axes
-fcum,add  ! accumulate nodal forces
-*do,i,1,nel  ! apply forces to loads
-  esel,s,elem,,el_id(i)
-  nsle  ! select nodes attached to element
-  nsel,r,node,,wp  ! ensure all nodes from winding pack
-  *get,nnd,node,0,count  ! count nodes
-  *do,j,1,3  ! Fx,Fy,Fz - all nodes attached to element
-      F,all,F%xyz(j)%,Fbody_%xyz(j)%(el_l(i),el_dr(i),el_o(i))*el_v(i)/nnd
-  *enddo
-*enddo
-allsel  
+        pi = 4*atan(1)
+        csys,11  ! switch to cylindrical coordinate system
+        esel,s,elem,,wp  ! select winding pack (requires named selection 'wp')
+        *get,nel,elem,0,count
+        *vget,el_sel,elem,,esel  ! selection mask
+        *vget,el_id,elem,,elist  ! winding pack selection array
+        *vget,el_vol,elem,,geom  ! element volume
+        *vget,el_radius,elem,,cent,x  ! element radius
+        *vget,el_theta,elem,,cent,y  ! element theta
+        *vget,el_offset,elem,,cent,z  ! element axial offset
+        *voper,el_theta,el_theta,mult,pi/180  ! convert to radians
+        csys,0  ! return coordinate system
+        
+        ! compress selections
+        *dim,el_v,array,nel
+        *dim,el_r,array,nel
+        *dim,el_t,array,nel
+        *dim,el_o,array,nel
+        *dim,el_l,array,nel
+        *dim,el_dr,array,nel
+        
+        *vmask,el_sel
+        *vfun,el_v,comp,el_vol  ! volume
+        *vmask,el_sel
+        *vfun,el_r,comp,el_radius  ! radius
+        *vmask,el_sel
+        *vfun,el_t,comp,el_theta  ! theta
+        *vmask,el_sel
+        *vfun,el_o,comp,el_offset  ! offset
+        *vitrp,el_l,l_map,el_r,el_t  ! interpolate l_map table
+        *vitrp,el_dr,dr_map,el_r,el_t !  interpolate dr_map table
+        
+        xyz = 'x','y','z'  ! axes
+        fcum,add  ! accumulate nodal forces
+        *do,i,1,nel  ! apply forces to loads
+          esel,s,elem,,el_id(i)
+          nsle  ! select nodes attached to element
+          nsel,r,node,,wp  ! ensure all nodes from winding pack
+          *get,nnd,node,0,count  ! count nodes
+          *do,j,1,3  ! Fx,Fy,Fz - all nodes attached to element
+              F,all,F%xyz(j)%,Fbody_%xyz(j)%(el_l(i),el_dr(i),el_o(i))*el_v(i)/nnd
+          *enddo
+        *enddo
+        allsel  
         '''
         ans.f.write(apdlstr)
         ans.close()
@@ -383,23 +442,22 @@ allsel
         
 if __name__ is '__main__':
     
-    #nPF,nTF = 3,13
-    #config = {'TF':'SN','eq':'SN_{:d}PF_{:d}TF'.format(nPF,nTF)}
+    nTF,nPF,nCS = 16,6,5
+    config = {'TF':'demo','eq':'SN'}
+    config,setup = select(config,nTF=nTF,nPF=nPF,nCS=nCS,update=False)
 
-    nTF,nPF,nCS = 13,4,1
-    #config = {'TF':'NTP','eq':'SN'}
-
-    config = {'TF':'dtt','eq':'SN'}
-    config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
-    config['eq'] = 'SNdtt{:d}_{:d}PF_{:d}CS'.format(nTF,nPF,nCS)
-
-    occ = OCC(config,nTF=nTF)
+    occ = OCC(config,setup,nTF=nTF)
     
+    '''
     occ.OIS()
     occ.write()
-    occ.ansys(plot=True,nl=50,nr=1,ny=1)
     occ.plot()
-    
+    occ.ansys(plot=True,nl=50,nr=3,ny=1)
+
+    pl.plot(0,-12,'o',alpha=0)
+    pl.plot(17,10,'o',alpha=0)
+    pl.tight_layout()
+    '''
     #pl.savefig('../Figs/CoilForces.png')
 
 

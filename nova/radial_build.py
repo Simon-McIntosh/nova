@@ -172,13 +172,59 @@ class RB(object):
                         [np.sin(theta),np.cos(theta)]])
         Bhat = (R*np.matrix([[B[0]],[B[1]]])).getA1()/Bmag
         return Bhat
+    
+    def upper_lower(self,Ru,Zu,Rl,Zl,Zjoin=0):
+        u_index = np.arange(len(Ru),dtype='int')
+        iu_lower = u_index[Zu<Zjoin]
+        iu_out,iu_in = iu_lower[0]-1,iu_lower[-1]+1
+        l_index = np.arange(len(Rl),dtype='int')
+        il_upper = l_index[Zl>Zjoin]
+        il_out,il_in = il_upper[0]-1,il_upper[-1]+1
+        R = np.append(Rl[:il_out],Ru[:iu_out][::-1])
+        R = np.append(R,Ru[iu_in:][::-1])
+        R = np.append(R,Rl[il_in:])
+        Z = np.append(Zl[:il_out],Zu[:iu_out][::-1])
+        Z = np.append(Z,Zu[iu_in:][::-1])
+        Z = np.append(Z,Zl[il_in:])
+        return R,Z
+    
+    def build_blanket(self):
+        blanket = wrap(self.segment['first_wall'],self.segment['inner_loop'])
+        blanket.sort_z('inner',select=self.sf.Xloc)
+        blanket.offset('outer',self.setup.build['BB'],
+                       ref_o=3/10*np.pi,dref=np.pi/3)
+        
+        bfill = blanket.fill(plot=False)  # color=colors[0]
+        self.segment['blanket_fw']  = bfill[0]
+        self.segment['blanket']  = bfill[1]
    
-    def firstwall(self,mode='calc',color=0.6*np.ones(3),plot=True,debug=False):
+    def firstwall(self,mode='calc',color=0.6*np.ones(3),
+                  plot=True,debug=False,symetric=False,DN=False):
         self.update_sf()  # update streamfunction
         if mode == 'eqdsk':  # read first wall from eqdsk
             self.Rb,self.Zb = self.sf.xlim,self.sf.ylim
         elif mode == 'calc':
-            self.Rb,self.Zb = self.target_fill(debug=debug)
+            
+            if DN:  # double null
+                self.sf.get_Xpsi(select='upper')  # upper X-point
+                self.update_sf()  # update streamfunction
+                Ru,Zu = self.target_fill(debug=debug,symetric=True)
+                self.sf.get_Xpsi(select='lower')  # lower X-point
+                self.update_sf()  # update streamfunction
+                Rl,Zl, = self.target_fill(debug=debug,symetric=True)
+                self.Rb,self.Zb = self.upper_lower(Ru,Zu,Rl,Zl,
+                                                   Zjoin=self.sf.Mpoint[1])
+
+                                    
+                pl.plot(self.Rb,self.Zb)    
+
+                self.blanket_fill()
+            else:
+                self.sf.get_Xpsi(select='lower')  # lower X-point
+                self.update_sf()  # update streamfunction
+                self.Rb,self.Zb = self.target_fill(debug=debug,
+                                                   symetric=symetric)
+            
             with open('../../Data/'+self.dataname+'_FW.pkl', 'wb') as output:
                 pickle.dump(self.setup.targets,output,-1)
                 pickle.dump(self.Rb,output,-1)
@@ -232,6 +278,7 @@ class RB(object):
 
     def target_fill(self,debug=False,**kwargs):
         layer_index = 0  # construct from first open flux surface
+        symetric = kwargs.get('symetric',False)
         self.sf.sol(update=True,plot=False)
         for leg in list(self.sf.legs)[2:]:
             self.set_target(leg)
@@ -314,28 +361,30 @@ class RB(object):
                                loop=(self.loop.R,self.loop.Z))
             Rb,Zb = self.append(Rb,Zb,r,z)
         self.Rb,self.Zb = self.midplane_loop(Rb,Zb)
-        self.Rb,self.Zb = self.first_wall_fit(self.setup.firstwall['dRfw'])
+        self.Rb,self.Zb = self.first_wall_fit(self.setup.firstwall['dRfw'],
+                                              symetric=symetric,debug=debug)
         #self.blanket_fill()
         #self.vessel_fill()
         #self.get_sol()  # trim sol to targets and store values
         #self.write_boundary(self.Rb,self.Zb)
         return self.Rb,self.Zb
         
-    def first_wall_fit(self,dr,fit_flux=False,plot=False):
+    def first_wall_fit(self,dr,fit_flux=False,debug=False,symetric=False):
         if self.setup.firstwall['conformal']:
             index = self.Zb > self.sf.Xpoint[1]
             r,z = self.Rb[index],self.Zb[index]
             r,z = geom.clock(r,z,reverse=True)
         else:
             profile = Profile(self.setup.configuration,family='S',part='fwf',
-                              npoints=200)
+                              npoints=200,symetric=symetric)
             shp = Shape(profile,objective='L')
-            shp.loop.oppvar.remove('flat')
-            shp.loop.set_l({'value':0.5,'lb':0.65,'ub':1.5})  # 1/tesion)
-            shp.loop.xo['upper'] = {'value':0.33,'lb':0.75,'ub':1}  
-            shp.loop.xo['lower'] = {'value':0.33,'lb':0.75,'ub':1}
-            shp.loop.xo['top'] = {'value':0.33,'lb':0.05,'ub':0.5}  # h shift
-            shp.loop.xo['bottom'] = {'value':0.33,'lb':0.05,'ub':0.5}
+
+            shp.loop.adjust_xo('upper',lb=0.75)
+            shp.loop.adjust_xo('top',lb=0.05,ub=0.5)
+            shp.loop.adjust_xo('lower',lb=0.75)
+            shp.loop.adjust_xo('bottom',lb=0.05,ub=0.5)
+            shp.loop.adjust_xo('l',lb=0.5,ub=1.5)
+
             rfw,zfw = geom.offset(self.Rp,self.Zp,dr)  # offset from sep
             rfw,zfw = geom.rzSLine(rfw,zfw,100)  # sub-sample
             shp.add_bound({'r':rfw,'z':zfw},'internal')  # vessel inner bounds
@@ -346,7 +395,7 @@ class RB(object):
                 rflux,zflux = geom.rzSLine(rflux,zflux,80)  # sub-sample
                 shp.add_bound({'r':rflux,'z':zflux},'internal')  # inner bounds
             shp.minimise()
-            if plot:
+            if debug:
                 shp.loop.plot()
                 shp.plot_bounds()
             x = profile.loop.draw()
@@ -367,24 +416,19 @@ class RB(object):
             zindex = zd >= self.sf.Xpoint[1]+0.5*(self.sf.mo[1]-
                                                   self.sf.Xpoint[1])        
         rd,zd = rd[zindex],zd[zindex]  # remove upper points
-        
         rd,zd = geom.rzInterp(rd,zd)  # resample
         rd,zd = geom.inloop(r,z,rd,zd,side='out')  # divertor external to fw
         istart = np.argmin((r-rd[-1])**2+(z-zd[-1])**2)  # connect to fw
         iend = np.argmin((r-rd[0])**2+(z-zd[0])**2)
-        r = np.append(np.append(rd,r[istart:iend]),rd[0])
-        z = np.append(np.append(zd,z[istart:iend]),zd[0])
+        
+        if self.sf.Xloc == 'lower':
+            r = np.append(np.append(rd,r[istart:iend]),rd[0])
+            z = np.append(np.append(zd,z[istart:iend]),zd[0])
+        else:
+            r = np.append(np.append(rd,r[iend:istart][::-1]),rd[0])
+            z = np.append(np.append(zd,z[iend:istart][::-1]),zd[0])
         self.segment['first_wall'] = {'r':r,'z':z} 
         return r,z
-        
-    def blanket_fill(self):
-        blanket = wrap(self.segment['first_wall'],self.segment['inner_loop'])
-        blanket.sort_zmin('inner')
-        blanket.offset('outer',self.setup.build['BB'],
-                       ref_o=3/10*np.pi,dref=np.pi/3)
-        bfill = blanket.fill(color=colors[0])
-        self.segment['blanket_fw']  = bfill[0]
-        self.segment['blanket']  = bfill[1]
 
     def vessel_fill(self):
         r,z = self.segment['blanket_fw']['r'],self.segment['blanket_fw']['z']
@@ -420,8 +464,8 @@ class RB(object):
         r,z = x['r'],x['z']
         vv = wrap({'r':rb,'z':zb},{'r':r,'z':z})
         #vv = wrap({'r':rin,'z':zin},{'r':r,'z':z})
-        vv.sort_zmin('inner')
-        vv.sort_zmin('outer')
+        vv.sort_z('inner',select=self.sf.Xloc)
+        vv.sort_z('outer',select=self.sf.Xloc)
         vv.fill(color=colors[1])
         self.segment['vessel_inner'] = {'r':rin,'z':zin}
         self.segment['vessel_outer'] = {'r':r,'z':z}
@@ -921,12 +965,17 @@ class wrap(object):
     def set_segment(self,loop,r,z):
         self.loops[loop]['points'] = {'r':r,'z':z}
         
-    def sort_zmin(self,loop):
+    def sort_z(self,loop,select='lower'):
         r,z = self.get_segment(loop)
         r,z = geom.order(r,z,anti=True)  # order points
-        imin = np.argmin(z)  # locate minimum
-        r = np.append(r[imin:],r[:imin])  # sort
-        z = np.append(z[imin:],z[:imin])
+        if select == 'lower':
+            imin = np.argmin(z)  # locate minimum
+            r = np.append(r[imin:],r[:imin])  # sort
+            z = np.append(z[imin:],z[:imin])
+        else:
+            imax = np.argmax(z)  # locate minimum
+            r = np.append(r[imax:],r[:imax])  # sort
+            z = np.append(z[imax:],z[:imax])
         self.set_segment(loop,r,z)
 
     def offset(self,loop,dt,**kwargs):

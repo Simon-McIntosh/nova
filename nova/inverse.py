@@ -30,7 +30,7 @@ class INV(object):
         self.eq = eq
         self.tf = tf
         try:
-            self.tf.loop_interpolators()
+            self.tf.loop_interpolators(offset=0.3)
         except:
             warn('tf coil interpolators not set')
         self.Jmax = Jmax  # MAm-2
@@ -575,30 +575,33 @@ class INV(object):
             self.add_coil(Lout=L,Ctype='PF',norm=self.TFoffset)    
         return Lo
         
-    def grid_coils(self,nCS=None,Zbound=None,gap=0.1):  # fit PF and CS coils to updated TF coil
+    def grid_coils(self,nCS=None,Zbound=None,gap=0.1,offset=0.3):  # fit PF and CS coils to updated TF coil
         self.gap = gap
         coil = deepcopy(self.eq.pf.coil)  # copy pf coilset
+        index = deepcopy(self.eq.pf.index)
         self.delete_active()
         TFloop = self.tf.fun['out']
         def norm(L,loop,point):
             return (loop['r'](L)-point[0])**2+(loop['z'](L)-point[1])**2
-        Lpf = np.zeros(self.eq.pf.index['PF']['n'])
-        for i,name in enumerate(self.eq.pf.index['PF']['name']):
+        Lpf = np.zeros(index['PF']['n'])
+        for i,name in enumerate(index['PF']['name']):
             c = coil[name]
             Lpf[i] = minimize_scalar(norm,method='bounded',
                         args=(TFloop,(c['r'],c['z'])),bounds=[0,1]).x
             self.add_coil(Lout=Lpf[i],Ctype='PF',norm=self.TFoffset,
                           dr=c['dr'],dz=c['dz'],I=c['I']) 
+        '''
         if Zbound == None:
             zmin = [coil[name]['z']-coil[name]['dz']/2 
                     for name in self.eq.pf.index['CS']['name']]
             zmax = [coil[name]['z']+coil[name]['dz']/2 
                     for name in self.eq.pf.index['CS']['name']]
             Zbound = [np.min(zmin)-gap/2,np.max(zmax)+gap/2]
-            self.update_limits(LCS=Zbound)    
+            self.update_limits(LCS=Zbound)   
+        '''
         if nCS == None:
-            Lcs = np.zeros(self.eq.pf.index['CS']['n']+1)
-            for i,name in enumerate(self.eq.pf.index['CS']['name']):
+            Lcs = np.zeros(index['CS']['n']+1)
+            for i,name in enumerate(index['CS']['name']):
                 c = coil[name]
                 self.add_coil(point=(c['r'],c['z']),Ctype='CS',
                               dr=c['dr'],dz=c['dz'],I=c['I']) 
@@ -606,8 +609,10 @@ class INV(object):
                     Lcs[0] = c['z']-c['dz']/2-gap/2
                 Lcs[i+1] = c['z']+c['dz']/2+gap/2
         else:
-            nCS = self.eq.pf.index['CS']['n']
+            nCS = index['CS']['n']
             Lcs = self.grid_CS(nCS=nCS,Zbound=Zbound,gap=gap)
+        self.update_coils()
+        self.fit_PF(offset=offset)
         return np.append(Lpf,Lcs)
                                 
   

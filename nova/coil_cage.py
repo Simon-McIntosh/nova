@@ -31,6 +31,11 @@ class coil_cage(object):
             sf = kwargs['sf']
             r,z = sf.get_boundary(alpha=alpha)
             self.eqdsk = sf.eqdsk
+        elif 'setup' in kwargs:
+            setup = kwargs.get('setup')
+            sf = SF(setup.filename)
+            r,z = sf.get_boundary(alpha=alpha)
+            self.eqdsk = sf.eqdsk
         elif 'config' in kwargs:
             setup = Setup(kwargs.get('config'))
             sf = SF(setup.filename)

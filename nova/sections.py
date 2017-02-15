@@ -7,6 +7,14 @@ color = cycle(sns.color_palette('Set2',12))
 sns.set_context('talk')
 sns.set_style(style='white')
 
+import seaborn as sns
+rc = {'figure.figsize':[5,5*10/16],'savefig.dpi':150, #*12/16
+      'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
+      'lines.linewidth':0.75}
+sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
+        font_scale=7/8,rc=rc)
+Color = cycle(sns.color_palette('Set2'))
+
 class build(object):
     
     def __init__(self):
@@ -124,6 +132,9 @@ if __name__ == '__main__':
     section['case'] = {'side':0.1,'nose':0.51,'inboard':0.04,
                                 'outboard':0.19,'external':0.225}
     section['winding_pack'] = {'width':0.625,'depth':1.243}
+    
+
+        
     
     w,d = 0.625,1.243
     i,o,s = 0.04,0.19,0.1

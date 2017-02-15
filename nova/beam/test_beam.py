@@ -22,7 +22,7 @@ nTF = 16
 for i,theta in enumerate(np.linspace(0,2*np.pi,nTF,endpoint=False)):
     fe.add_nodes([R*np.cos(theta),R*np.sin(theta),0])
     fe.add_elements(n=[0,i+1],part_name='s{:d}'.format(i))
-    fe.d(['fix'],[0],part='s{:d}'.format(i),ends=0) 
+    fe.add_bc(['fix'],[0],part='s{:d}'.format(i),ends=0) 
     if i>0:
         fe.add_cp([1,i+1],dof='fix',rotate=True)
 
@@ -34,8 +34,8 @@ for i,theta in enumerate(np.linspace(0,2*np.pi,nTF,endpoint=False)):
 #fe.d(['fix'],[0],part='s3',ends=1) 
 
 
-fe.add_nodal_load(1,'fy',1.75)
-fe.add_nodal_load(1,'fx',3.5)
+fe.add_nodal_load(1,'fy',0.5)
+fe.add_nodal_load(1,'fx',2)
 
 #fe.add_weight()  # add weight to all elements
 #fe.add_tf_load(config,tf,sf.Bpoint,method='function')  # burst and topple

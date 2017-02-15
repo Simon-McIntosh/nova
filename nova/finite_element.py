@@ -15,8 +15,8 @@ from warnings import warn
 from itertools import count
 color = sns.color_palette('Set2',18)
 
-color = sns.color_palette(['#0072bd','#d95319','#edb120','#7e2f8e',
-                          '#77ac30','#4dbeee','#a2142f'],18)
+#color = sns.color_palette(['#0072bd','#d95319','#edb120','#7e2f8e',
+#                          '#77ac30','#4dbeee','#a2142f'],18)
 
 def delete_row_csr(mat, i):
     if not isinstance(mat, csr_matrix):
@@ -34,8 +34,9 @@ def delete_row_csr(mat, i):
 
 class FE(object):
     
-    def __init__(self,frame='1D',nShape=11):
+    def __init__(self,frame='1D',nShape=11,scale=1):
         self.nShape = nShape  # element shape function resolution
+        self.scale = 1  # displacemnt scale factor (plotting)
         self.coordinate = ['x','y','z','tx','ty','tz']
         self.initalise_mat()
         self.frame = frame 
@@ -75,7 +76,7 @@ class FE(object):
                 for I in ['Iy','Iz']:
                     self.mat[self.nmat][I] = kwargs.get('I')
     
-    def get_mat(self,nmat=0):
+    def get_mat(self,nmat):
         if self.frame=='1D':
             mat = ['E','Iz']
         elif self.frame=='2D':
@@ -220,7 +221,7 @@ class FE(object):
         nsh = self.nel
         self.shape = {}
         self.shape['x'] = np.zeros(nsh)
-        for label in ['u','d2u','U']:
+        for label in ['u','d2u','U','D']:
             self.shape[label] = np.zeros((nsh,3,self.nShape))
         self.S = {}
         self.S['s'] = np.linspace(0,1,nShape)  # inter-element spacing
@@ -258,31 +259,36 @@ class FE(object):
                     v[:,i] = np.dot(self.S['Nv'],d1D)
                     d2v[:,i] = np.dot(self.S['Nd2v'],d1D)/self.el['dl'][el]**2
             self.store_shape(el,u,v,d2v)
-        self.shape_part()  # set deformed part shape
+        self.shape_part(labels=['u','U','d2u'])  # set deformed part shape
+        self.deform(scale=self.scale)
 
     def store_shape(self,el,u,v,d2v):
-        nS = self.nShape
-        self.shape['u'][el,0] = np.linspace(u[0],u[1],nS)
+        self.shape['u'][el,0] = np.linspace(u[0],u[1],self.nShape)
         self.shape['u'][el,1] = v[:,0]  # displacment
         self.shape['u'][el,2] = v[:,1]
         self.shape['U'][el] = np.dot(self.T3[:,:,el].T,  #  to global
                                            self.shape['u'][el,:,:])
-        for j in range(3):
-            n = self.el['n'][el]
-            self.shape['U'][el,j,:] += np.linspace(self.X[n[0],j],
-                                                   self.X[n[1],j],nS)
         self.shape['d2u'][el,1] = d2v[:,0]  # curvature
         self.shape['d2u'][el,2] = d2v[:,1]
         
-    def shape_part(self):
+    def deform(self,scale=1):
+        self.scale = scale
+        for el in range(self.nel):
+            for i in range(3):
+                n = self.el['n'][el]
+                self.shape['D'][el,i,:] = scale*self.shape['U'][el,i,:]+\
+                np.linspace(self.X[n[0],i],self.X[n[1],i],self.nShape)
+        self.shape_part(labels=['D'])
+        
+    def shape_part(self,labels=['u','U','D','d2u']):
         for part in self.part:
             nS = self.part[part]['nel']*(self.nShape-1)+1
             self.part[part]['l'] = np.linspace(0,1,nS)
-            for label in ['u','U','d2u']:
+            for label in labels:
                 self.part[part][label] = np.zeros((nS,3))
             for nel,el in enumerate(self.part[part]['el']):
                 i = nel*(self.nShape-1)
-                for label in ['u','U','d2u']:
+                for label in labels:
                     self.part[part][label][i:i+self.nShape,:] = \
                     self.shape[label][el,:,:].T
                 
@@ -330,7 +336,7 @@ class FE(object):
         
     def stiffness_1D(self,el):  # dof [v,rz]
         a = self.el['dl'][el]/2
-        E,Iz = self.get_mat()
+        E,Iz = self.get_mat(self.el['mat'][el])
         k = E*Iz/(2*a**3)*np.matrix([[3,  3*a,   -3,  3*a],
                                      [3*a,4*a**2,-3*a,2*a**2],
                                      [-3,-3*a,    3, -3*a],
@@ -339,7 +345,7 @@ class FE(object):
 
     def stiffness_2D(self,el):  # dof [u,v,rz]
         a = self.el['dl'][el]/2
-        E,A,Iz = self.get_mat()
+        E,A,Iz = self.get_mat(self.el['mat'][el])
         k = np.matrix([[A*E/(2*a), 0,               0,
                        -A*E/(2*a), 0,               0],
                        [0,         3*E*Iz/(2*a**3), 3*E*Iz/(2*a**2),
@@ -357,7 +363,7 @@ class FE(object):
         
     def stiffness_3D(self,el):  # dof [u,v,w,rx,ry,rz]
         a = self.el['dl'][el]/2
-        E,A,G,J,Iy,Iz = self.get_mat()
+        E,A,G,J,Iy,Iz = self.get_mat(self.el['mat'][el])
         k = np.matrix([[A*E/(2*a), 0,               0,
                         0,         0,               0,
                         -A*E/(2*a),0,               0,
@@ -545,50 +551,17 @@ class FE(object):
                 w = -9.81*self.mat['rho'][nm]*self.mat['A'][nm]
                 self.add_load(el=el,W=[0,w,0])  # self weight
                 
-    def add_tf_load(self,config,tf,Bpoint,parts=['loop','nose'],
+    def add_tf_load(self,config,ff,tf,Bpoint,parts=['loop','nose'],
                     method='function'):
         cage = coil_cage(nTF=tf.profile.nTF,rc=tf.rc,
-                         plasma={'config':config},coil={'cl':tf.x['cl']})
-        # eq.Bpoint == point calculated method (slow)
-        # sf.Bpoint == spline interpolated method (fast)
-        if 'streamfunction' in Bpoint.__str__():  
-            topright = Bpoint((np.max(tf.x['cl']['r']),
-                               np.max(tf.x['cl']['z'])),
-                              check_bounds=True)    
-            bottomleft = Bpoint((np.max(tf.x['cl']['r']),
-                                 np.max(tf.x['cl']['z'])),
-                                check_bounds=True)
-            if not(topright and bottomleft):
-                errtxt = 'TF coil extends outside Bpoint interpolation grid\n'
-                errtxt = 'extend sf grid\n'
-                raise ValueError(errtxt)
-                
-        if method == 'function':  # calculate tf feild as fitted 1/r function
-            i = np.argmax(tf.x['cl']['z'])
-            ro,zo = tf.x['cl']['r'][i],tf.x['cl']['z'][i]
-            bm = -ro*cage.point((ro,0,zo),variable='feild')[1]  # TF moment
-        elif method == 'BS':  # calculate tf feild with full Biot-Savart
-            Rp = geom.rotate(np.pi/2,'x')
-            Rm = geom.rotate(-np.pi/2,'x')
-        else:
-            errtxt = 'invalid tf feild method {}\n'.format(method)
-            errtxt += 'select method from \'function\' or \'BS\'\n'
-            raise ValueError(errtxt)
+                         plasma={'config':config},coil=tf.x['cl'])
         self.update_rotation()  # check / update rotation matrix
         for part in parts:
             for el in self.part[part]['el']:
-                n = self.el['n'][el]  # node index pair
-                point = np.zeros(3)
-                for i in range(3):  # calculate load at element mid-point
-                    point[i] = np.mean(self.X[n,i])  
-                if method == 'function':
-                    b = np.zeros(3)
-                    b[2] = bm/point[0]  # TF feild (fast version)
-                else:
-                    b = np.dot(Rm,cage.point(np.dot(Rp,point),  # (slow)
-                                             variable='feild'))
-                b[:2] += Bpoint((point[:2]))  # PF feild (sf-fast, eq-slow)
-                w = np.cross(self.el['dx'][el],b)
+                n = self.el['n'][el]  # node index pair 
+                point = np.mean(self.X[n,:],axis=0)   # load at element mid-point 
+                w = ff.topple(point,self.el['dx'][el],
+                              cage,Bpoint,method=method)[0]  # body force
                 self.add_load(el=el,W=w)  # bursting/toppling load
 
     def check_part(self,part):
@@ -689,6 +662,7 @@ class FE(object):
         self.K = np.copy(self.Ko)
         
     def add_cp(self,nodes,dof='fix',nset='next',axis='z',rotate=False):
+        nodes = np.copy(nodes)  # make local copy
         if nset == 'next':  # (default)
             self.ncp += 1
         elif isinstance(nset,int):
@@ -712,7 +686,6 @@ class FE(object):
                      np.linalg.norm(self.X[nodes[1],mask])))
             if np.dot(self.X[nodes[0],mask],self.X[nodes[1],mask]) < 0:
                 theta = np.pi/2+(np.pi/2-theta)
-            print(180*theta/np.pi)
             self.rotate_cp(name,dof,theta,axis)
         else:
             self.mpc[name]['Cr'] = np.identity(self.mpc[name]['neq'])
@@ -849,7 +822,6 @@ class FE(object):
         self.F = np.append(self.F[self.nd['dr']],self.F[self.nd['dc']],axis=0)  
         self.F = np.dot(self.T.T,self.F)
 
-
     def solve(self):
         self.nK = int(self.nnd*self.ndof)  # stiffness matrix 
         self.initalize_shape_coefficents(nShape=self.nShape)   
@@ -865,17 +837,22 @@ class FE(object):
             self.D[disp] = self.Dn[i::self.ndof]
         self.interpolate()
         
-    def plot_3D(self,ms=5):
-        fig = pl.figure()
+    def plot_3D(self,ms=5,bb=12,pattern=0):
+        fig = pl.figure(figsize=(8,8))
         ax = fig.gca(projection='3d')
-        ax.plot(self.X[:,0],self.X[:,2],self.X[:,1],'o',markersize=ms,
-                color=0.75*np.ones(3))
-        for i,(part,c) in enumerate(zip(self.part,color)):
-            ax.plot(self.part[part]['U'][:,0],
-                    self.part[part]['U'][:,2],
-                    self.part[part]['U'][:,1],color=c)
-                
-        #ax.axis('off')
+        
+        Theta = np.linspace(0,2*np.pi,pattern,endpoint=False)
+        for t in Theta:
+            R = geom.rotate(t,axis='y')
+            #X = np.dot(self.X,R)
+            #ax.plot(X[:,0],X[:,2],X[:,1],'o',markersize=ms,color=0.75*np.ones(3))
+            for i,(part,c) in enumerate(zip(self.part,color)):
+                D = np.dot(self.part[part]['D'],R)
+                ax.plot(D[:,0],D[:,2],D[:,1],color=c)
+        ax.set_xlim(-bb,bb)
+        ax.set_ylim(-bb,bb)
+        ax.set_zlim(-bb,bb)
+        ax.axis('off')
                 
     def plot_twin(self,scale=5e-1,ms=5):
         pl.figure(figsize=(10,5))
@@ -890,10 +867,10 @@ class FE(object):
         ax2.plot(self.X[:,2],self.X[:,1],'o',markersize=ms,
                 color=0.75*np.ones(3))
         for i,(part,c) in enumerate(zip(self.part,color)):
-            ax1.plot(self.part[part]['U'][:,0],
-                     self.part[part]['U'][:,1],color=c)
-            ax2.plot(self.part[part]['U'][:,2],
-                     self.part[part]['U'][:,1],color=c)
+            ax1.plot(self.part[part]['D'][:,0],
+                     self.part[part]['D'][:,1],color=c)
+            ax2.plot(self.part[part]['D'][:,2],
+                     self.part[part]['D'][:,1],color=c)
         for i,(X,dx,dy,dz) in enumerate(zip(self.X,self.D['x'],
                                           self.D['y'],self.D['z'])):
             j = i*self.ndof
@@ -925,14 +902,14 @@ class FE(object):
                 F = [self.Fo[j],self.Fo[j+1]]
             nF = np.linalg.norm(F)
             if nF != 0:
-                pl.arrow(X[0]+dx,X[1]+dy,scale*F[0],scale*F[1],
+                pl.arrow(X[0]+self.scale*dx,X[1]+self.scale*dy,scale*F[0],scale*F[1],
                          head_width=scale*0.2*nF,head_length=scale*0.3*nF,
                          color=color[1])        
         
     def plot_displacment(self):
         for i,(part,c) in enumerate(zip(self.part,color)):
-            pl.plot(self.part[part]['U'][:,0],
-                    self.part[part]['U'][:,1],color=c)
+            pl.plot(self.part[part]['D'][:,0],
+                    self.part[part]['D'][:,1],color=c)
         pl.axis('equal')
         
     def plot_curvature(self):

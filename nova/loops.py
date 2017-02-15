@@ -340,11 +340,13 @@ class Dloop(object):  # Princton D
 class Sloop(object):  # polybezier
     def  __init__(self,npoints=200,symetric=False,tension='full',limits=True):
         self.name = 'Sloop'
+        self.symetric = symetric
+        self.tension = tension
         self.limits = limits
         self.npoints = npoints
         self.initalise_nodes()
-        self.set_symetric(symetric)
-        self.set_tension(tension)
+        self.set_symetric()
+        self.set_tension()
 
     def initalise_nodes(self):
         self.xo = OrderedDict()
@@ -359,9 +361,20 @@ class Sloop(object):  # polybezier
         self.xo['flat'] = {'value':0,'lb':0,'ub':0.8}  # fraction outboard straight
         self.xo['tilt'] = {'value':0,'lb':-45,'ub':45}  # outboard angle [deg]
         self.oppvar = list(self.xo.keys())
+        self.lkeyo = ['l0s','l0e','l1s','l1e','l2s','l2e','l3s','l3e']
         self.set_l({'value':0.8,'lb':0.45,'ub':1.8})  # 1/tesion
         #self.oppvar.remove('flat')
         #self.oppvar.remove('tilt')
+        
+    def adjust_xo(self,name,**kwargs):  # value,lb,ub
+        for var in kwargs:
+            if name == 'l':
+                for lkey in self.lkeyo:
+                    self.xo[lkey][var] = kwargs[var]
+            else:
+                self.xo[name][var] = kwargs[var]
+        self.set_symetric()
+            
 
     def check_tension_length(self,tension):
         tension = tension.lower()
@@ -386,16 +399,17 @@ class Sloop(object):  # polybezier
             for key in self.xo[u]:
                 self.xo[l][key] = self.xo[u][key]
                     
-    def set_symetric(self,symetric):
-        self.symetric = symetric
+    def set_symetric(self):
         if self.symetric:  # set lower equal to upper
             for u,l in zip(['top','upper'],['bottom','lower']):
                 self.xo[l] = self.xo[u]
-                #if l in self.oppvar:  # remove lower from oppvar
-                #    self.oppvar.remove(l)
+                if l in self.oppvar:  # remove lower from oppvar
+                    self.oppvar.remove(l)
+            if 'tilt' in self.oppvar:
+                self.oppvar.remove('tilt')
         
-    def set_tension(self,tension):
-        tension = tension.lower()
+    def set_tension(self):
+        tension = self.tension.lower()
         if self.symetric:
             if tension == 'full':
                 self.tension = 'half'
@@ -444,7 +458,6 @@ class Sloop(object):  # polybezier
         return values
         
     def set_l(self,l):
-        self.lkeyo = ['l0s','l0e','l1s','l1e','l2s','l2e','l3s','l3e']
         for lkey in self.lkeyo:
             self.xo[lkey] = l.copy()  
 
@@ -504,8 +517,8 @@ class Sloop(object):  # polybezier
                         self.xo[keyo_]['value'] = inputs[key]
                     self.xo[keyo_] = set_limit(self.xo[keyo_],
                                                limits=self.limits)
-        self.set_symetric(self.symetric)
-        self.set_tension(self.tension)
+        self.set_symetric()
+        self.set_tension()
             
     def verticies(self):
         r1,r2,z2,height,top,bottom,upper,lower,dz,ds,alpha_s = self.get_xo()
@@ -586,30 +599,32 @@ class Sloop(object):  # polybezier
 class Profile(object):
     
     def __init__(self,name,family='S',part='TF',npoints=200,
-                 load=False,**kwargs):
+                 load=False,symetric=False,**kwargs):
         self.npoints = npoints
         self.name = name
         self.part = part
-        self.initalise_loop(family,npoints)  # initalize loop object
+        self.initalise_loop(family,npoints,symetric=symetric)  # initalize loop object
         data_dir = trim_dir('../../Data/')
         self.dataname = data_dir+self.name+'_{}.pkl'.format(part)
         self.read_loop_dict()
         self.nTF=kwargs.get('nTF','unset')
         self.obj=kwargs.get('obj','unset')
+        '''
         if load:
-            try:  # try to load loop using kwargs or unset data
-                self.load(nTF=self.nTF,obj=self.obj)
-            except:
-                pass
+            #try:  # try to load loop using kwargs or unset data
+            self.load(nTF=self.nTF,obj=self.obj)
+            #except:
+            #    pass
+        '''
         
-    def initalise_loop(self,family,npoints=100):
+    def initalise_loop(self,family,npoints=100,symetric=False):
         self.family = family  # A==arc, D==Princton-D, S==spline
         if self.family == 'A':  # tripple arc (5-7 parameter)
             self.loop = Aloop(npoints=npoints)
         elif self.family == 'D':  # princton D (3 parameter)
             self.loop = Dloop(npoints=npoints)
         elif self.family == 'S':  # polybezier (8-16 parameter)
-            self.loop = Sloop(npoints=npoints)
+            self.loop = Sloop(npoints=npoints,symetric=symetric)
         else:
             errtxt = '\n'
             errtxt += 'loop type \''+self.family+'\'\n'
@@ -679,6 +694,8 @@ class Profile(object):
             if hasattr(self.loop,key):
                 cdict[key] = getattr(self.loop,key)
         self.loop_dict[self.family][nTF][obj] = cdict
+                     
+        print(self.dataname)
         with open(self.dataname, 'wb') as output:
             pickle.dump(self.loop_dict,output,-1)
         self.frame_data()

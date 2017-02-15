@@ -19,7 +19,7 @@ from amigo.IO import trim_dir
 from nova.shelf import PKL
 
 import seaborn as sns
-rc = {'figure.figsize':[7,7*16/12],'savefig.dpi':150, # 
+rc = {'figure.figsize':[5,5*16/12],'savefig.dpi':150, # 
       'savefig.jpeg_quality':200,'savefig.pad_inches':0.1,
       'lines.linewidth':1.5}
 sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
@@ -27,21 +27,27 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
 
 #config,setup = select(base={'TF':'dtt','eq':'SN'},nTF=18,nPF=5,nCS=3)
 #config,setup = select(base={'TF':'dtt','eq':'SX'},nTF=18,nPF=5,nCS=3)
-config,setup = select(base={'TF':'dtt','eq':'DEMO_FW_SOF'},nTF=18)
+#config,setup = select(base={'TF':'dtt','eq':'DEMO_FW_SOF'},nTF=18)
+config,setup = select(base={'TF':'dtt','eq':'DN'},nTF=18)
 
 sf = SF(setup.filename)  
 pf = PF(sf.eqdsk)
+'''
+eq = EQ(sf,pf,dCoil=1.5,sigma=0,n=5e3,boundary=sf.get_sep(expand=1.1),
+        zmin=-abs(sf.Xpoint[1])-2,zmax=abs(sf.Xpoint[1])+2) 
+#eq.gen_opp(Zerr=5e-4)
+eq.gen_bal(Zerr=5e-4,tol=1e-4)
+'''
 pf.plot(coils=pf.coil,label=True,plasma=False,current=True) 
 levels = sf.contour()
 
 rb = RB(setup,sf)
 
-sf.get_Xpsi(select='lower')
-rb.update_sf()  # update streamfunction
+rb.firstwall(symetric=True,DN=True,plot=False)
 
-rb.firstwall(plot=True,debug=False)
-rb.trim_sol()
+#rb.trim_sol()
 
+'''
 nTF = 18#config['nTF']
 profile = Profile(config['TF'],family='S',part='TF',
                   nTF=nTF,obj='L',load=True)
@@ -54,6 +60,7 @@ shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'],ny=3)
 shp.update()
 tf = TF(profile,sf=sf)
 tf.fill()
+'''
 
 '''
 demo = DEMO()

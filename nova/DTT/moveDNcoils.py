@@ -2,16 +2,13 @@ import pylab as pl
 from nova.streamfunction import SF
 from nova.elliptic import EQ
 from nova.inverse import INV
-from nova.config import Setup,select
+from nova.config import select
 from itertools import cycle
 import numpy as np
 from nova.radial_build import RB
 from nova.shelf import PKL
-import nova.cross_coil as cc
 from nova.coils import PF,TF
-from time import time
 from nova import loops
-from nova.TF.DEMOxlsx import DEMO
 from nova.loops import Profile
 
 import seaborn as sns
@@ -34,13 +31,12 @@ tf = TF(Profile(config['TF'],family='S',part='TF',
                 nTF=config['nTF'],obj='L',load=True))
 #tf.fill()
 
-
-eq = EQ(sf,pf,dCoil=1.0,sigma=0,n=2e4,boundary=sf.get_sep(expand=1.1),
+eq = EQ(sf,pf,dCoil=1.5,sigma=0,n=5e3,boundary=sf.get_sep(expand=1.1),
         zmin=-abs(sf.Xpoint[1])-2,zmax=abs(sf.Xpoint[1])+2) 
 #eq.gen_opp(Zerr=5e-4)
 eq.gen_bal(Zerr=5e-4,tol=1e-4)
     
-
+'''
 inv = INV(sf,eq,tf)
 Lpf = inv.grid_PF(nPF=config['nPF'])
 Lcs = inv.grid_CS(nCS=config['nCS'],Zbound=[-8,8],gap=0.1,fdr=1)
@@ -76,4 +72,4 @@ sf.eqwrite(pf,config=config['eq'])
 
 pkl = PKL(config['eq'],directory='../../Movies/')
 pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
-
+'''

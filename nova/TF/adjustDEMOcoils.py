@@ -2,7 +2,7 @@ import pylab as pl
 from nova.streamfunction import SF
 from nova.elliptic import EQ
 from nova.inverse import INV
-from nova.config import Setup
+from nova.config import Setup,select
 from itertools import cycle
 import numpy as np
 from nova.radial_build import RB
@@ -11,7 +11,7 @@ import nova.cross_coil as cc
 from nova.coils import PF,TF
 from time import time
 from nova import loops
-from DEMOxlsx import DEMO
+from nova.DEMOxlsx import DEMO
 from nova.loops import Profile
 
 import seaborn as sns
@@ -23,32 +23,44 @@ sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
 Color = cycle(sns.color_palette('Set2'))
 
 
-nTF = 16
+nTF,nPF,nCS = 18,6,5
+config = {'TF':'demo','eq':'SN'}
+config,setup = select(config,nTF=nTF,nPF=nPF,nCS=nCS,update=False)
+    
 
-config = {'TF':'SN','eq':'DEMO_SNb'}
-setup = Setup(config['eq'])
 sf = SF(setup.filename)
 
 rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
 tf = TF(Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L',load=True))
 
-#pf.plot(coils=pf.coil,label=True,plasma=False,current=True) 
+#pf.plot(coils=pf.coil,label=False,plasma=False,current=True) 
 
 demo = DEMO()
 demo.fill_part('Vessel')
 demo.fill_part('Blanket')
-demo.fill_part('TF_Coil')
+#demo.fill_part('TF_Coil')
 demo.plot_ports()
-demo.plot_limiter()  
-tf.fill()
+demo.plot_limiter() 
 
-eq = EQ(sf,pf,dCoil=2.0,sigma=0,boundary=sf.get_sep(expand=1.5),n=5e3) 
+pl.axis('off')
+#tf.fill()
+
+sf.cpasma *= 1.1
+
+eq = EQ(sf,pf,dCoil=0.5,sigma=0,boundary=sf.get_sep(expand=1.5),n=5e3) 
+
 eq.gen_opp()
+
+sf.contour()
+
+eq.plotb()
+
+
+'''
 inv = INV(sf,eq,tf)
-L = inv.grid_coils()
-inv.update_coils()
-inv.fit_PF(offset=0.3)
+L = inv.grid_coils(offset=0.3)
+#pf.plot(coils=pf.coil,label=False,plasma=False,current=True) 
 
 inv.fix_boundary_psi(N=25,alpha=1-1e-4,factor=1)  # add boundary points
 inv.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary points
@@ -65,15 +77,13 @@ Lnorm = loops.normalize_variables(inv.Lo)
 inv.update_position(Lnorm,update_area=True)
 
 eq.gen_opp()
-rb.firstwall(mode='calc',plot=True,debug=False)
 
-pf.plot(coils=pf.coil,label=True,plasma=True,current=True) 
+#pf.plot(coils=pf.coil,label=False,current=True) 
+pf.plot(coils=eq.coil,label=False,plasma=True,current=False) 
 sf.contour(boundary=True)
-
 inv.plot_fix(tails=True)
-tf.fill()
 
-loops.plot_variables(inv.Io,scale=1,postfix='MA')
-loops.plot_variables(inv.Lo,scale=1)
+inv.ff.plot(scale=1.5)
 
-sf.eqwrite(pf,config=config['TF']+'_{:d}PF_{:d}TF'.format(inv.nPF,nTF))
+sf.eqwrite(pf,config=config['eq'])
+'''

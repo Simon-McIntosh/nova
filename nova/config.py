@@ -46,7 +46,7 @@ class Setup(object):
         self.firstwall['psi_n'] = 1.07
         self.firstwall['div_ex'] = 0.25
         self.firstwall['trim'] = [0.75,0.7]
-        self.firstwall['flux_fit'] = True
+        self.firstwall['flux_fit'] = False
         self.firstwall['conformal'] = False
         self.build = {}  # initalise build data structure
         self.build['tfw'] = 0.1  # first wall thickness
@@ -223,5 +223,4 @@ class Setup(object):
         else:
             self.filename = configuration+'.eqdsk'
         self.filename = self.eqdir+self.filename
-
                 

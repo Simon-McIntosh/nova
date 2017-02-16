@@ -20,11 +20,11 @@ class coil_cage(object):
         self.ny = ny  #  winding pack depth discritization
         self.rc = rc
         if 'plasma' in kwargs:
-            self.get_seperatrix(alpha=1-1e-3,**kwargs['plasma'])
+            self.get_seperatrix(alpha=0.95,**kwargs['plasma'])
         if 'coil' in kwargs:
             self.set_TFcoil(kwargs['coil'])
 
-    def get_seperatrix(self,nplasma=80,alpha=1-1e-3,**kwargs):
+    def get_seperatrix(self,nplasma=80,alpha=1-1e-3,plot=False,**kwargs):
         self.nplasma = nplasma
         self.plasma_loop = np.zeros((self.nplasma,3))  # initalise loop array
         if 'sf' in kwargs:  # seperatrix directly from sf object
@@ -61,6 +61,8 @@ class coil_cage(object):
                                          self.plasma_loop[:,2])
         rfun,zfun = geom.rzfun(r,z)
         self.plasma_interp = {'r':rfun,'z':zfun}
+        if plot:
+            pl.plot(self.plasma_loop[:,0],self.plasma_loop[:,2])
  
     def set_TFcoil(self,cl,smooth=False):
         r,z = geom.clock(cl['r'],cl['z'])
@@ -159,6 +161,12 @@ class coil_cage(object):
                                    bounds=[0,1],options={'xatol':0.1})
         self.res['fun'] *= -1  # negate minimum (max ripple)
         return self.res['fun']
+        
+    def get_volume(self):
+        V_TF = geom.loop_vol(self.coil_loop[:,0],self.coil_loop[:,2])
+        V_pl = geom.loop_vol(self.plasma_loop[:,0],self.plasma_loop[:,2])
+        ratio = V_TF/V_pl
+        return {'TF':V_TF,'plasma':V_pl,'ratio':ratio}
         
     def plot_loops(self,scale=1.5,sticks=False):
         self.loop_ripple()

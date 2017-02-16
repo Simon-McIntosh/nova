@@ -32,8 +32,8 @@ class SF(object):
         self.get_Mpsi()
         self.set_contour()  # set cfeild
         #self.get_sol_psi(dSOL=3e-3,Nsol=15,verbose=False)
-        self.rcirc = 0.2*abs(self.Mpoint[1]-self.Xpoint[1])  # leg search radius
-        self.drcirc = 0.25*self.rcirc  # leg search width
+        self.rcirc = 0.3*abs(self.Mpoint[1]-self.Xpoint[1])  # leg search radius
+        self.drcirc = 0.1*self.rcirc  # leg search width
         self.xlim = self.eqdsk['xlim']
         self.ylim = self.eqdsk['ylim']
         self.nlim = self.eqdsk['nlim']
@@ -361,7 +361,8 @@ class SF(object):
                 xo = self.xo
             else:
                 xo_arg = np.argmin(self.eqdsk['zbdry'])
-                xo = [self.eqdsk['rbdry'][xo_arg],self.eqdsk['zbdry'][xo_arg]]
+                xo = [self.eqdsk['rbdry'][xo_arg],
+                      self.eqdsk['zbdry'][xo_arg]]
         Xpoint = np.zeros((2,2))
         Xpsi = np.zeros(2)
         for i,flip in enumerate([1,-1]):

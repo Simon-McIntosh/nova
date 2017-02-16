@@ -28,9 +28,17 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
 #config,setup = select(base={'TF':'dtt','eq':'SN'},nTF=18,nPF=5,nCS=3)
 #config,setup = select(base={'TF':'dtt','eq':'SX'},nTF=18,nPF=5,nCS=3)
 #config,setup = select(base={'TF':'dtt','eq':'DEMO_FW_SOF'},nTF=18)
-config,setup = select(base={'TF':'dtt','eq':'DN'},nTF=18)
+config,setup = select(base={'TF':'dtt','eq':'SX'},nTF=18)
+
+if 'DN' in setup.configuration:
+    DN = True
+else:
+    DN = False
 
 sf = SF(setup.filename)  
+
+print(sf.eqdsk['bcentr']*sf.eqdsk['rmagx'])
+
 pf = PF(sf.eqdsk)
 '''
 eq = EQ(sf,pf,dCoil=1.5,sigma=0,n=5e3,boundary=sf.get_sep(expand=1.1),
@@ -38,37 +46,45 @@ eq = EQ(sf,pf,dCoil=1.5,sigma=0,n=5e3,boundary=sf.get_sep(expand=1.1),
 #eq.gen_opp(Zerr=5e-4)
 eq.gen_bal(Zerr=5e-4,tol=1e-4)
 '''
-pf.plot(coils=pf.coil,label=True,plasma=False,current=True) 
+
+'''
+#pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
 levels = sf.contour()
 
 rb = RB(setup,sf)
 
-rb.firstwall(symetric=True,DN=True,plot=False)
+rb.firstwall(symetric=DN,DN=DN,plot=True,debug=False)
+rb.trim_sol()
 
-#rb.trim_sol()
+if DN:
+    sf.get_Xpsi(select='upper')  # upper X-point
+    rb.trim_sol()
 
-'''
-nTF = 18#config['nTF']
+
+nTF = config['nTF']
 profile = Profile(config['TF'],family='S',part='TF',
-                  nTF=nTF,obj='L',load=True)
-
+                  nTF=nTF,obj='L',load=False,symetric=DN)
 shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'],ny=3)
-#shp.add_vessel(rb.segment['vessel_outer'])
-#shp.loop.set_l({'value':0.8,'lb':0.75,'ub':1.8})  # 1/tesion
-#shp.loop.xo['lower'] = {'value':0.7,'lb':0.5,'ub':1}  # vertical shift
-#shp.minimise(ripple=True,verbose=True)
+shp.add_vessel(rb.segment['vessel_outer'])
+#shp.plot_bounds()
+shp.loop.adjust_xo('l',lb=0.75)  # 1/tesion
+shp.loop.adjust_xo('lower',lb=0.5)
+shp.minimise(ripple=False,verbose=True)
 shp.update()
 tf = TF(profile,sf=sf)
 tf.fill()
-'''
 
+pl.plot(3,-11.5,'o',alpha=0)
+pl.plot(16,7.5,'o',alpha=0)
+pl.tight_layout()
+'''
 '''
 demo = DEMO()
 demo.fill_part('Blanket',alpha=1)
 demo.fill_part('Vessel',alpha=1)
 demo.fill_part('TF_Coil',alpha=1)
 '''  
-pl.tight_layout()
+
 
 '''
 sf.eqwrite(pf,config=config['eq'],CREATE=True)

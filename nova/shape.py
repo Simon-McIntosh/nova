@@ -103,9 +103,13 @@ class Shape(object):
         if self.nTF is not 'unset':
             x = self.tf.get_loops(self.loop.draw(x=xo))
             self.cage.set_TFcoil(x['cl'],smooth=True)
-            print('ripple',self.cage.get_ripple())
-            print('energy {:1.2f}GJ'.format(1e-9*self.cage.energy()))
-
+            Vol = self.cage.get_volume()
+            print('ripple {:1.3f}'.format(self.cage.get_ripple()))
+            print('energy {:1.2f} GJ'.format(1e-9*self.cage.energy()))
+            print(r'TF volume {:1.0f} m3'.format(Vol['TF']))
+            print(r'plasma volume {:1.0f} m3'.format(Vol['plasma']))
+            print('ratio {:1.2f}'.format(Vol['ratio']))
+            
     def constraint_array(self,xnorm,*args):
         ripple,ripple_limit = args
         xo = get_oppvar(self.loop.xo,self.loop.oppvar,xnorm)  # de-normalize
@@ -220,7 +224,7 @@ if __name__ is '__main__':
 
     nTF = 16
     family='S'
-    ripple = True
+    ripple = False
 
     config = {'TF':'demo','eq':'SN'}
     config,setup = select(config,nTF=nTF)

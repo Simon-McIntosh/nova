@@ -188,15 +188,16 @@ class RB(object):
         Z = np.append(Z,Zl[il_in:])
         return R,Z
     
-    def build_blanket(self):
+    def build_blanket(self,store=True,plot=False):
         blanket = wrap(self.segment['first_wall'],self.segment['inner_loop'])
         blanket.sort_z('inner',select=self.sf.Xloc)
         blanket.offset('outer',self.setup.build['BB'],
                        ref_o=3/10*np.pi,dref=np.pi/3)
-        
-        bfill = blanket.fill(plot=False)  # color=colors[0]
-        self.segment['blanket_fw']  = bfill[0]
-        self.segment['blanket']  = bfill[1]
+        bfill = blanket.fill(plot=plot,color=colors[0])
+        if store:
+            self.segment['blanket_fw']  = bfill[0]
+            self.segment['blanket']  = bfill[1]
+        return bfill
    
     def firstwall(self,mode='calc',color=0.6*np.ones(3),
                   plot=True,debug=False,symetric=False,DN=False):
@@ -209,22 +210,35 @@ class RB(object):
                 self.sf.get_Xpsi(select='upper')  # upper X-point
                 self.update_sf()  # update streamfunction
                 Ru,Zu = self.target_fill(debug=debug,symetric=True)
+                blanket_u = self.build_blanket(store=False)
                 self.sf.get_Xpsi(select='lower')  # lower X-point
                 self.update_sf()  # update streamfunction
                 Rl,Zl, = self.target_fill(debug=debug,symetric=True)
+                blanket_l = self.build_blanket(store=False)
                 self.Rb,self.Zb = self.upper_lower(Ru,Zu,Rl,Zl,
                                                    Zjoin=self.sf.Mpoint[1])
-
-                                    
-                pl.plot(self.Rb,self.Zb)    
-
-                self.blanket_fill()
+                self.segment['first_wall'] = {'r':self.Rb,'z':self.Zb} 
+                Rfw,Zfw = self.upper_lower(blanket_u[0]['r'][::-1],
+                                           blanket_u[0]['z'][::-1],
+                                           blanket_l[0]['r'],
+                                           blanket_l[0]['z'],
+                                           Zjoin=self.sf.Mpoint[1])
+                
+                blanket = wrap({'r':self.Rb,'z':self.Zb},{'r':Rfw,'z':Zfw})
+                for loop in ['inner','outer']:
+                    blanket.sort_z(loop,select='lower')
+                bfill = blanket.fill(plot=plot)
+                self.segment['blanket_fw']  = bfill[0]
+                self.segment['blanket']  = bfill[1]
             else:
                 self.sf.get_Xpsi(select='lower')  # lower X-point
                 self.update_sf()  # update streamfunction
                 self.Rb,self.Zb = self.target_fill(debug=debug,
                                                    symetric=symetric)
-            
+                self.build_blanket(plot=plot)
+            if plot:
+                self.vessel_fill()
+                
             with open('../../Data/'+self.dataname+'_FW.pkl', 'wb') as output:
                 pickle.dump(self.setup.targets,output,-1)
                 pickle.dump(self.Rb,output,-1)
@@ -279,7 +293,7 @@ class RB(object):
     def target_fill(self,debug=False,**kwargs):
         layer_index = 0  # construct from first open flux surface
         symetric = kwargs.get('symetric',False)
-        self.sf.sol(update=True,plot=False)
+        self.sf.sol(update=True,plot=False,debug=debug)
         for leg in list(self.sf.legs)[2:]:
             self.set_target(leg)
             Rsol,Zsol = self.sf.snip(leg,layer_index,L2D=self.setup.targets[leg]['L2D'])
@@ -363,15 +377,13 @@ class RB(object):
         self.Rb,self.Zb = self.midplane_loop(Rb,Zb)
         self.Rb,self.Zb = self.first_wall_fit(self.setup.firstwall['dRfw'],
                                               symetric=symetric,debug=debug)
-        #self.blanket_fill()
-        #self.vessel_fill()
         #self.get_sol()  # trim sol to targets and store values
         #self.write_boundary(self.Rb,self.Zb)
         return self.Rb,self.Zb
         
     def first_wall_fit(self,dr,fit_flux=False,debug=False,symetric=False):
         if self.setup.firstwall['conformal']:
-            index = self.Zb > self.sf.Xpoint[1]
+            index = self.Zb > 1.5+self.sf.Xpoint[1]
             r,z = self.Rb[index],self.Zb[index]
             r,z = geom.clock(r,z,reverse=True)
         else:
@@ -462,8 +474,10 @@ class RB(object):
         shp.minimise()
         x = profile.loop.draw()
         r,z = x['r'],x['z']
-        vv = wrap({'r':rb,'z':zb},{'r':r,'z':z})
-        #vv = wrap({'r':rin,'z':zin},{'r':r,'z':z})
+        if 'SX' in self.setup.configuration:
+            vv = wrap({'r':rin,'z':zin},{'r':r,'z':z})
+        else:
+            vv = wrap({'r':rb,'z':zb},{'r':r,'z':z})
         vv.sort_z('inner',select=self.sf.Xloc)
         vv.sort_z('outer',select=self.sf.Xloc)
         vv.fill(color=colors[1])
@@ -525,6 +539,7 @@ class RB(object):
                         if plot:
                             if color != 'k' and i > 0:
                                 pl.plot(R,Z,'-',color=0.7*np.ones(3))  # color[c+3]
+                                #pl.plot(R,Z,'-',color=color[c+3])  
                             elif color == 'k':
                                 pl.plot(R,Z,'-',color='k',alpha=0.15)
                             else:
@@ -643,11 +658,11 @@ class RB(object):
         return step,db
 
     def match_psi(self,Ro,Zo,direction,theta_end,theta_sign,phi_target,graze,
-                  dPlate,leg,debug=False):        
+                  dPlate,leg,debug=False): 
         color = sns.color_palette('Set2',2)
         gain = 0.15  # 0.25
         Nmax = 500
-        Lo = [0.5,0.005]  # [blend,turn]  5,0.015
+        Lo = [0.5,0.05]  # [blend,turn]  5,0.015
         r2m = [-1.5,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
         Nplate = 1 # number of target plate divisions (1==flat)
         L = Lo[0] if theta_end == 0 else Lo[1]

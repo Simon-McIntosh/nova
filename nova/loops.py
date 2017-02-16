@@ -609,14 +609,13 @@ class Profile(object):
         self.read_loop_dict()
         self.nTF=kwargs.get('nTF','unset')
         self.obj=kwargs.get('obj','unset')
-        '''
+        
         if load:
             #try:  # try to load loop using kwargs or unset data
             self.load(nTF=self.nTF,obj=self.obj)
             #except:
             #    pass
-        '''
-        
+
     def initalise_loop(self,family,npoints=100,symetric=False):
         self.family = family  # A==arc, D==Princton-D, S==spline
         if self.family == 'A':  # tripple arc (5-7 parameter)

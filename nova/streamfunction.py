@@ -11,6 +11,7 @@ from matplotlib._cntr import Cntr as cntr
 from collections import OrderedDict
 from amigo import geom
 from amigo.IO import trim_dir
+from amigo.geom import loop_vol
 
 class SF(object):
     
@@ -879,7 +880,7 @@ class SF(object):
         return L2D,L3D,Rsol,Zsol
         
     def shape_parameters(self,plot=False):
-        from nova.coils import loop_vol
+        self.get_LFP()
         a = (self.LFPr-self.HFPr)/2
         R = (self.LFPr+self.HFPr)/2
         AR = R/a
@@ -890,7 +891,7 @@ class SF(object):
         del_l = (R-rl)/a
         kappa = (np.max(z95)-np.min(z95))/(2*a)
         r,z = self.get_boundary(alpha=1)
-        r,z = self.clock(r,z,anti=True)
+        r,z = geom.clock(r,z,reverse=True)
         V = loop_vol(r,z,plot=plot)
         shape = {'AR':AR,'del_u':del_u,'del_l':del_l,'kappa':kappa,'volume':V}
         return shape

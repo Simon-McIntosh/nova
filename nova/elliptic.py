@@ -432,7 +432,7 @@ class EQ(object):
         for index in [0,-1]:
             self.set_control_current(index=index,factor=0)
 
-    def gen(self,ztarget=None,Zerr=1e-3,kp=1.5,ki=0.15,Nmax=50,**kwargs): 
+    def gen(self,ztarget=None,Zerr=1e-3,kp=1.5,ki=0.05,Nmax=50,**kwargs): 
         if not hasattr(self,'to'):
             self.to = time()  # start clock for single gen run
         if ztarget == None:  # sead plasma magnetic centre vertical target

@@ -391,11 +391,11 @@ class RB(object):
                               npoints=200,symetric=symetric)
             shp = Shape(profile,objective='L')
 
-            shp.loop.adjust_xo('upper',lb=0.75)
-            shp.loop.adjust_xo('top',lb=0.05,ub=0.5)
-            shp.loop.adjust_xo('lower',lb=0.75)
-            shp.loop.adjust_xo('bottom',lb=0.05,ub=0.5)
-            shp.loop.adjust_xo('l',lb=0.5,ub=1.5)
+            shp.loop.adjust_xo('upper',lb=0.7)
+            shp.loop.adjust_xo('top',lb=0.05,ub=0.75)
+            shp.loop.adjust_xo('lower',lb=0.7)
+            shp.loop.adjust_xo('bottom',lb=0.05,ub=0.75)
+            shp.loop.adjust_xo('l',lb=0.6,ub=1.5)
 
             rfw,zfw = geom.offset(self.Rp,self.Zp,dr)  # offset from sep
             rfw,zfw = geom.rzSLine(rfw,zfw,100)  # sub-sample

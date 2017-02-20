@@ -162,10 +162,14 @@ class INV(object):
                     self.CS_coils.append(name)
         else:
             self.adjust_coils = list(self.eq.pf.coil.keys())  # add all
+            self.PF_coils = self.eq.pf.index['PF']['name']
+            self.CS_coils = self.eq.pf.index['CS']['name']
+            '''
             if Ctype == 'PF': 
                 self.PF_coils = list(self.eq.pf.coil.keys())
             elif Ctype == 'CS': 
-                self.CS_coils = list(self.eq.pf.coil.keys())    
+                self.CS_coils = list(self.eq.pf.coil.keys()) 
+            '''
 
     def remove_active(self,Clist=[],Ctype='all',full=False):  # list of coil names
         if full: 
@@ -1053,7 +1057,6 @@ class INV(object):
     def optimize(self,Lo):
         self.initialize_log()
         self.ztarget = self.sf.Mpoint[1]
-        self.initalise_plasma = True
         self.ttotal,self.ttotal_cpu = 0,0
         self.tstart,self.tstart_cpu = time.time(),time.process_time()
         self.iter['plasma'] += 1

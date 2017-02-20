@@ -511,12 +511,16 @@ class EQ(object):
         print('')  # escape line
 
     def fit(self,inv,N=5):
+        inv.set_foreground()
         for i in range(N):
             self.plasma()  # without coils
-            inv.solve_slsqp()
+            
             inv.set_background()
+            inv.set_target()
+            inv.set_Io()
             inv.get_weight()
-            inv.set_force_feild(state='both')
+            #inv.set_force_feild(state='both')
+            inv.solve_slsqp()
             self.run()  # with coils
             
     def GSoper_spline(self):  # apply GS operator

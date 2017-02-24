@@ -93,7 +93,7 @@ class RB(object):
             psi_lfs = psi_hfs = psi
             self.sf.LFfwr,self.sf.LFfwz = self.sf.LFPr,self.sf.LFPz
             self.sf.HFfwr,self.sf.HFfwz = self.sf.HFPr,self.sf.HFPz
-            pl.plot(r[::-1],z[::-1],'--',color=0.75*np.ones(3))
+            #pl.plot(r[::-1],z[::-1],'--',color=0.75*np.ones(3))
         else:
             dr = self.setup.firstwall['dRfw'] # dr [m]
             self.sf.LFfwr,self.sf.LFfwz = self.sf.LFPr+dr,self.sf.LFPz    
@@ -663,7 +663,7 @@ class RB(object):
         gain = 0.15  # 0.25
         Nmax = 500
         Lo = [0.5,0.05]  # [blend,turn]  5,0.015
-        r2m = [-1.5,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
+        r2m = [+1.5,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
         Nplate = 1 # number of target plate divisions (1==flat)
         L = Lo[0] if theta_end == 0 else Lo[1]
         Lsead = L

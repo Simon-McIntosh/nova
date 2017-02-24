@@ -7,7 +7,6 @@ from nova.coils import PF,TF
 from nova.inverse import INV
 from nova.TF.ripple import ripple
 import numpy as np
-import scipy
 from time import time
 import amigo.geom as geom
 from nova.loops import Profile,plot_oppvar
@@ -28,7 +27,7 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
 #config,setup = select(base={'TF':'dtt','eq':'SN'},nTF=18,nPF=5,nCS=3)
 #config,setup = select(base={'TF':'dtt','eq':'SX'},nTF=18,nPF=5,nCS=3)
 #config,setup = select(base={'TF':'dtt','eq':'DEMO_FW_SOF'},nTF=18)
-config,setup = select(base={'TF':'dtt','eq':'SN2014_SOF'},nTF=18)
+config,setup = select(base={'TF':'dtt','eq':'dtt_SN'},nTF=18)
 
 if 'DN' in setup.configuration:
     DN = True
@@ -36,6 +35,7 @@ else:
     DN = False
 
 sf = SF(setup.filename)  
+sf.contour()
 print(sf.shape_parameters())
 
 print(sf.eqdsk['bcentr']*sf.eqdsk['rcentr'])
@@ -56,12 +56,13 @@ sf.contour()
 
 rb = RB(setup,sf)
 
-rb.firstwall(symetric=DN,DN=DN,plot=True,debug=False)
+rb.firstwall(symetric=DN,DN=DN,plot=True,debug=False)  # ,mode='eqdsk'
 rb.trim_sol()
 
 if DN:
     sf.get_Xpsi(select='upper')  # upper X-point
     rb.trim_sol()
+
 
 nTF = config['nTF']
 profile = Profile(config['TF'],family='S',part='TF',
@@ -72,7 +73,7 @@ shp.add_vessel(rb.segment['vessel_outer'])
 shp.loop.adjust_xo('l',lb=0.75)  # 1/tesion
 shp.loop.adjust_xo('upper',lb=0.5)
 shp.loop.adjust_xo('lower',lb=0.5)
-shp.minimise(ripple=True,verbose=True)
+shp.minimise(ripple=False,verbose=True)
 shp.update()
 tf = TF(profile,sf=sf)
 tf.fill()
@@ -80,6 +81,7 @@ tf.fill()
 pl.plot(3,-11.5,'o',alpha=0)
 pl.plot(16,7.5,'o',alpha=0)
 pl.tight_layout()
+
 
 '''
 demo = DEMO()
@@ -89,9 +91,9 @@ demo.fill_part('TF_Coil',alpha=1)
 '''  
 
 
-'''
 sf.eqwrite(pf,config=config['eq'],CREATE=True)
 
+'''
 pkl = PKL(config['eq'],directory='../../Movies/')
 sf,eq,inv = pkl.fetch(['sf','eq','inv'])
 for i,(flux,S) in enumerate(zip(inv.swing['flux'],['SOF','MOF','EOF'])):
@@ -99,6 +101,7 @@ for i,(flux,S) in enumerate(zip(inv.swing['flux'],['SOF','MOF','EOF'])):
     inv.solve_slsqp()
     inv.eq.gen_opp()
     sf.eqwrite(inv.eq.pf,config=config['eq']+'_{}'.format(S),CREATE=True)
+'''
 
 
 data = {}
@@ -113,5 +116,3 @@ for loop,label in zip(['in','out'],['TF_inner','TF_outer']):
 datadir = trim_dir('../../../Data/') 
 with open(datadir+'{}.json'.format(config['eq']),'w') as f:
     json.dump(data,f,indent=4)
-
-'''

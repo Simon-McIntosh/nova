@@ -19,7 +19,9 @@ sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
         font_scale=7/8,rc=rc)
 Color = cycle(sns.color_palette('Set2'))
 
-base = {'TF':'dtt','eq':'SN'}
+#base = {'TF':'dtt','eq':'SN'}
+base = {'TF':'dtt','eq':'SN2014_EOF'}
+#config,setup = select(base={'TF':'dtt','eq':'SN2014_EOF'},nTF=18)
 config,setup = select(base=base,update=False,nTF=18,nPF=5,nCS=3)
 sf = SF(setup.filename)
 rb = RB(setup,sf)
@@ -27,14 +29,16 @@ pf = PF(sf.eqdsk)
 tf = TF(Profile(config['TF'],family='S',part='TF',
                 nTF=config['nTF'],obj='L',load=True))
 tf.fill()
-eq = EQ(sf,pf,dCoil=1.0,sigma=0,n=2e4,
+eq = EQ(sf,pf,dCoil=1.0,sigma=0,n=1e4,
         boundary=sf.get_sep(expand=1.1),zmin=sf.Xpoint[1]-2) 
 eq.gen_opp()
 
 inv = INV(sf,eq,tf)
+#L = inv.grid_coils()
 Lpf = inv.grid_PF(nPF=config['nPF'])
 Lcs = inv.grid_CS(nCS=config['nCS'],Zbound=[-8,8],gap=0.1,fdr=1)
 L = np.append(Lpf,Lcs)
+
 inv.update_coils()
 inv.fit_PF(offset=0.3)
 

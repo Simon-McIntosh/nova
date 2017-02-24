@@ -162,8 +162,8 @@ class INV(object):
                     self.CS_coils.append(name)
         else:
             self.adjust_coils = list(self.eq.pf.coil.keys())  # add all
-            self.PF_coils = self.eq.pf.index['PF']['name']
-            self.CS_coils = self.eq.pf.index['CS']['name']
+            self.PF_coils = list(self.eq.pf.index['PF']['name'])
+            self.CS_coils = list(self.eq.pf.index['CS']['name'])
             '''
             if Ctype == 'PF': 
                 self.PF_coils = list(self.eq.pf.coil.keys())

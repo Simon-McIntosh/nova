@@ -36,7 +36,7 @@ else:
 
 sf = SF(setup.filename)  
 sf.contour()
-print(sf.shape_parameters())
+sf.shape_parameters()  #verbose=True
 
 print(sf.eqdsk['bcentr']*sf.eqdsk['rcentr'])
 

@@ -8,26 +8,24 @@ from nova.DEMOxlsx import DEMO
 from nova.coils import TF
 from nova.loops import set_oppvar,get_oppvar,plot_oppvar,remove_oppvar,Profile
 from nova.coil_cage import coil_cage
-from nova.config import Setup,select
-from nova.streamfunction import SF
+from nova.config import select
 import matplotlib.animation as manimation
 import sys
 import datetime
-
+from itertools import cycle
 
 class Shape(object):
     
     def __init__(self,profile,obj='L',nTF='unset',eqconf='unset',
                  sep='unset',**kwargs):
+        self.color = cycle(sns.color_palette('Set2',10))
         self.profile = profile
         self.loop = self.profile.loop
         self.nTF = nTF
         self.obj = obj
-        #try:
-        #    self.update()
-        #except:
-        #    pass
+        #self.update()
         self.bound = {}  # initalise bounds
+        self.bindex = {'internal':[0],'interior':[0],'external':[0]}  # index
         for side in ['internal','interior','external']:
             self.bound[side] = {'r':[],'z':[]}
             if side in kwargs:
@@ -57,6 +55,13 @@ class Shape(object):
     def add_bound(self,x,side):
         for var in ['r','z']:
             self.bound[side][var] = np.append(self.bound[side][var],x[var])
+        self.bindex[side].append(len(self.bound[side]['r']))
+        
+    def add_internal(self,r_gap=0.001):  # offset minimum internal radius
+        argmin = np.argmin(self.bound['internal']['r'])
+        self.add_bound({'r':self.bound['internal']['r'][argmin]-r_gap,
+                        'z':self.bound['internal']['z'][argmin]},
+                        'interior')  
             
     def add_vessel(self,vessel,npoint=80,offset=[0.12,0.2]):
         rvv,zvv = geom.rzSLine(vessel['r'],vessel['z'],npoint)
@@ -73,9 +78,13 @@ class Shape(object):
             
     def plot_bounds(self):
         for side,marker in zip(['internal','interior','external'],
-                               ['.','d','s']):
-            pl.plot(self.bound[side]['r'],self.bound[side]['z'],
-                    marker,markersize=6,color=sns.color_palette('Set2',10)[9])
+                               ['.-','d','s']):
+            index = self.bindex[side]
+            for i in range(len(index)-1):
+                print(self.bound[side],side)
+                pl.plot(self.bound[side]['r'][index[i]:index[i+1]],
+                        self.bound[side]['z'][index[i]:index[i+1]],
+                        marker,markersize=6,color=next(self.color))
   
     def minimise(self,verbose=False,ripple_limit=0.6,ripple=False,acc=0.002):
         tic = time.time()
@@ -222,8 +231,8 @@ class Shape(object):
                 
 if __name__ is '__main__': 
 
-    nTF = 16
-    family='S'
+    nTF = 17
+    family='D'
     ripple = False
 
     config = {'TF':'demo','eq':'SN'}

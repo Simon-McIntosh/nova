@@ -13,7 +13,8 @@ from nova.loops import Profile,plot_oppvar
 from nova.shape import Shape
 from nova.DEMOxlsx import DEMO
 from nova.force import force_feild
-import json
+from nova.firstwall import targets,firstwall
+
 from amigo.IO import trim_dir
 from nova.shelf import PKL
 
@@ -27,7 +28,9 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
 #config,setup = select(base={'TF':'dtt','eq':'SN'},nTF=18,nPF=5,nCS=3)
 #config,setup = select(base={'TF':'dtt','eq':'SX'},nTF=18,nPF=5,nCS=3)
 #config,setup = select(base={'TF':'dtt','eq':'DEMO_FW_SOF'},nTF=18)
-config,setup = select(base={'TF':'dtt','eq':'dtt_SN'},nTF=18)
+config,setup = select(base={'TF':'dtt','eq':'SN2014_EOF'},nTF=18)
+
+setup.firstwall['flux_fit'] = False
 
 if 'DN' in setup.configuration:
     DN = True
@@ -35,13 +38,20 @@ else:
     DN = False
 
 sf = SF(setup.filename)  
-sf.contour()
-sf.shape_parameters()  #verbose=True
 
-print(sf.eqdsk['bcentr']*sf.eqdsk['rcentr'])
+sf.shape_parameters()  #verbose=True
 
 pf = PF(sf.eqdsk)
 
+#target = targets(sf,setup.targets)
+
+#target.place(debug=True)
+
+sf = []
+for configuration in ['SN2014_SOF','SN2014_EOF']:
+    sf.append(SF(Setup(configuration).filename))
+
+firstwall('SNfw',sf,psi_n=1.07,flux_fit=False,debug=True)
 
 '''
 eq = EQ(sf,pf,dCoil=1.5,sigma=0,n=5e3,boundary=sf.get_sep(expand=1.1),
@@ -50,15 +60,18 @@ eq = EQ(sf,pf,dCoil=1.5,sigma=0,n=5e3,boundary=sf.get_sep(expand=1.1),
 eq.gen_bal(Zerr=5e-4,tol=1e-4)
 '''
 
-
 pf.plot(coils=pf.coil,label=True,plasma=False,current=False) 
-sf.contour()
 
+'''
 rb = RB(setup,sf)
 
 rb.firstwall(symetric=DN,DN=DN,plot=True,debug=False)  # ,mode='eqdsk'
 rb.trim_sol()
 
+rb.json()
+'''
+
+'''
 if DN:
     sf.get_Xpsi(select='upper')  # upper X-point
     rb.trim_sol()
@@ -77,6 +90,8 @@ shp.minimise(ripple=False,verbose=True)
 shp.update()
 tf = TF(profile,sf=sf)
 tf.fill()
+'''
+
 
 pl.plot(3,-11.5,'o',alpha=0)
 pl.plot(16,7.5,'o',alpha=0)
@@ -91,7 +106,7 @@ demo.fill_part('TF_Coil',alpha=1)
 '''  
 
 
-sf.eqwrite(pf,config=config['eq'],CREATE=True)
+#sf.eqwrite(pf,config=config['eq'],CREATE=True)
 
 '''
 pkl = PKL(config['eq'],directory='../../Movies/')
@@ -104,15 +119,4 @@ for i,(flux,S) in enumerate(zip(inv.swing['flux'],['SOF','MOF','EOF'])):
 '''
 
 
-data = {}
-for loop in ['first_wall','blanket','vessel_inner','vessel_outer']:
-    data[loop] = {}
-    for var in rb.segment[loop]:
-        data[loop][var] = list(rb.segment[loop][var])
-for loop,label in zip(['in','out'],['TF_inner','TF_outer']):
-    data[label] = {}
-    for var in tf.x[loop]:
-        data[label][var] = list(tf.x[loop][var])
-datadir = trim_dir('../../../Data/') 
-with open(datadir+'{}.json'.format(config['eq']),'w') as f:
-    json.dump(data,f,indent=4)
+

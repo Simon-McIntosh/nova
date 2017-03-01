@@ -1,178 +1,29 @@
 import numpy as np
 import pylab as pl
-import pickle
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline as spline
 import seaborn as sns
 colors = sns.color_palette('Paired',12)
 from itertools import cycle
-from amigo.geom import Loop
 import amigo.geom as geom
-from nova.loops import Profile,plot_oppvar
+from nova.loops import Profile
 from nova.shape import Shape
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 from scipy.optimize import minimize
 from collections import OrderedDict
-
+from amigo.IO import trim_dir
+import json
 
 class RB(object):
     def __init__(self,setup,sf,npoints=500):
         self.setup = setup
-        self.sf = sf
+        self.store_sf(sf)
         self.npoints = npoints
         self.dataname = setup.configuration
+        self.datadir = trim_dir('../../../Data/') 
         self.segment = {}  # store section segments (divertor,fw,blanket...)
         
-    def update_sf(self):
-        if not hasattr (self.sf,'Xpoint'):
-            self.sf.get_Xpsi()  
-        self.xo = [self.sf.Xpoint[0],self.sf.eqdsk['zmagx']]
-        self.Rp,self.Zp = self.sf.get_boundary()
-        self.Lp = geom.length(self.Rp,self.Zp,norm=False)[-1]
-        self.Rfw,self.Zfw,self.psi_fw = self.firstwall_loop() 
-        self.loop = Loop(self.Rfw,self.Zfw,xo=self.xo)  # first wall contour
 
-    def set_firstwall(self,r,z):
-        r,z = geom.order(r,z,anti=False)
-        self.Rb,self.Zb = r,z
-        
-    def set_target(self,leg,**kwargs):
-        if leg not in self.setup.targets:
-            self.setup.targets[leg] = {}
-        for key in self.setup.targets['default']:
-            if key in kwargs:
-                self.setup.targets[leg][key] = kwargs[key]  # update
-            elif key not in self.setup.targets[leg]:  #  prevent overwrite
-                self.setup.targets[leg][key] = self.setup.targets['default'][key]  # default
-   
-    def first_wall_psi(self,trim=True,**kwargs):
-        if 'point' in kwargs:
-            req,zeq = kwargs.get('point')
-            psi = self.sf.Ppoint([req,zeq])
-        else:
-            req,zeq = self.sf.LFPr,self.sf.LFPz 
-            if 'psi_n' in kwargs:  # normalized psi
-                psi_n = kwargs.get('psi_n')
-                psi = psi_n*(self.sf.Xpsi-self.sf.Mpsi)+self.sf.Mpsi
-            elif 'psi' in kwargs:
-                psi = kwargs.get('psi')
-            else:
-                raise ValueError('set point=(r,z) or psi in kwargs')
-        contours = self.sf.get_contour([psi])    
-        R,Z = self.sf.pick_contour(contours)
-        min_contour = np.empty(len(R))
-        for i in range(len(R)):
-            min_contour[i] = np.min((R[i]-req)**2+(Z[i]-zeq)**2)
-        imin = np.argmin(min_contour)
-        r,z = R[imin],Z[imin]
-        if trim:
-            if self.sf.Xloc == 'lower':
-                r,z = r[z<=zeq],z[z<=zeq]
-            elif self.sf.Xloc == 'upper':
-                r,z = r[z>=zeq],z[z>=zeq]
-            else:
-                raise ValueError('Xloc not set (get_Xpsi)')
-            if req > self.sf.Xpoint[0]:
-                r,z = r[r>self.sf.Xpoint[0]],z[r>self.sf.Xpoint[0]]
-            else:
-                r,z = r[r<self.sf.Xpoint[0]],z[r<self.sf.Xpoint[0]]
-            istart = np.argmin((r-req)**2+(z-zeq)**2)
-            r = np.append(r[istart+1:],r[:istart])
-            z = np.append(z[istart+1:],z[:istart])
-        istart = np.argmin((r-req)**2+(z-zeq)**2)
-        if istart > 0:
-            r,z = r[::-1],z[::-1]
-        return r,z,psi
-  
-    def firstwall_loop(self): 
-        if not hasattr(self.sf,'LFPr'):
-            self.sf.get_LFP()
-        if self.setup.firstwall['flux_fit']:
-            psi_n = self.setup.firstwall['psi_n']
-            r,z,psi = self.first_wall_psi(psi_n=psi_n,trim=False)
-            psi_lfs = psi_hfs = psi
-            self.sf.LFfwr,self.sf.LFfwz = self.sf.LFPr,self.sf.LFPz
-            self.sf.HFfwr,self.sf.HFfwz = self.sf.HFPr,self.sf.HFPz
-            #pl.plot(r[::-1],z[::-1],'--',color=0.75*np.ones(3))
-        else:
-            dr = self.setup.firstwall['dRfw'] # dr [m]
-            self.sf.LFfwr,self.sf.LFfwz = self.sf.LFPr+dr,self.sf.LFPz    
-            self.sf.HFfwr,self.sf.HFfwz = self.sf.HFPr-dr,self.sf.HFPz
-            r_lfs,z_lfs,psi_lfs = self.first_wall_psi(point=(self.sf.LFfwr,
-                                                             self.sf.LFfwz))
-            r_hfs,z_hfs,psi_hfs = self.first_wall_psi(point=(self.sf.HFfwr,
-                                                             self.sf.HFfwz))
-            r_top,z_top = geom.offset(self.Rp,self.Zp,dr)
-            if self.sf.Xloc == 'lower':
-                r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,
-                                              origin='top')
-                index = z_top>=self.sf.LFPz
-            else:
-                r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,
-                                              origin='bottom')
-                index = z_top<=self.sf.LFPz
-            r_top,z_top = r_top[index],z_top[index]
-            istart = np.argmin((r_top-self.sf.HFfwr)**2+
-                               (z_top-self.sf.HFfwz)**2)
-            if istart > 0:
-                r_top,z_top = r_top[::-1],z_top[::-1]
-            r = np.append(r_hfs[::-1],r_top)
-            r = np.append(r,r_lfs)
-            z = np.append(z_hfs[::-1],z_top)
-            z = np.append(z,z_lfs)
-        return r[::-1],z[::-1],(psi_lfs,psi_hfs) 
-  
-    def elipsoid(self,theta,ro,zo,A,k,delta):
-        R = ro+ro/A*np.cos(theta+delta*np.sin(theta))
-        Z = zo+ro/A*k*np.sin(theta)
-        return (R,Z)
-
-    def inflate(self,R,Z,dR):
-        s = 1e-3
-        L = geom.length(R,Z)
-        nR,nZ = geom.normal(R,Z)
-        Rdr,Zdr = R+dR*nR,Z+dR*nZ  # radial offset
-        Rloop,Zloop = self.reorder(Rdr,Zdr)  # spline loop
-        Lloop = geom.length(Rloop,Zloop)
-        Rloop = interp1d(Lloop,Rloop)(L)  # respace
-        Zloop = interp1d(Lloop,Zloop)(L)
-        Lend = np.zeros(2)
-        for i in [0,-1]:
-            Lend[i] = L[np.argmin((Rloop-Rdr[i])**2+(Zloop-Zdr[i])**2)]
-        Linterp = np.linspace(Lend[0],Lend[1],len(R))
-        R = spline(L,Rloop,s=s)(Linterp) 
-        Z = spline(L,Zloop,s=s)(Linterp)
-        return (R,Z)
-        
-    def reorder(self,R,Z):
-        s = 1e-2
-        theta = np.unwrap(np.arctan2(Z-self.xo[1],R-self.xo[0]))
-        radius = np.sqrt((Z-self.xo[1])**2+(R-self.xo[0])**2)
-        radius = spline(theta,radius,s=s)(self.theta)
-        R = self.xo[0]+radius*np.cos(self.theta)
-        Z = self.xo[1]+radius*np.sin(self.theta)
-        return (R,Z)
-         
-    def coil_sheild(self,coils=[],dt=0.8):
-        self.rzPut()
-        for coil in coils:
-            name = 'Coil'+str(coil)
-            r,dr = self.sf.coil[name]['r'],self.sf.coil[name]['dr']
-            z,dz = self.sf.coil[name]['z'],self.sf.coil[name]['dz']
-            r = [r-dr/2,r-dr/2,r+dr/2,r+dr/2,r-dr/2]
-            z = [z-dz/2,z+dz/2,z+dz/2,z-dz/2,z-dz/2]
-            self.loop.R,self.loop.Z = self.rzInterp(r,z,npoints=100)
-            self.loop.R,self.loop.Z = self.loop.R[::-1],self.loop.Z[::-1]
-            self.loop.fill(dt=dt,loop=True,alpha=0.1,color='k',s=5e-3)
-        self.rzGet()
-
-    def rotateB(self,B,theta):
-        Bmag = np.sqrt(B[0]**2+B[1]**2)
-        R = np.matrix([[np.cos(theta),-np.sin(theta)],
-                        [np.sin(theta),np.cos(theta)]])
-        Bhat = (R*np.matrix([[B[0]],[B[1]]])).getA1()/Bmag
-        return Bhat
-    
     def upper_lower(self,Ru,Zu,Rl,Zl,Zjoin=0):
         u_index = np.arange(len(Ru),dtype='int')
         iu_lower = u_index[Zu<Zjoin]
@@ -188,9 +39,9 @@ class RB(object):
         Z = np.append(Z,Zl[il_in:])
         return R,Z
     
-    def build_blanket(self,store=True,plot=False):
+    def place_blanket(self,select='upper',store=True,plot=False):
         blanket = wrap(self.segment['first_wall'],self.segment['inner_loop'])
-        blanket.sort_z('inner',select=self.sf.Xloc)
+        blanket.sort_z('inner',select=select)
         blanket.offset('outer',self.setup.build['BB'],
                        ref_o=3/10*np.pi,dref=np.pi/3)
         bfill = blanket.fill(plot=plot,color=colors[0])
@@ -201,20 +52,19 @@ class RB(object):
    
     def firstwall(self,mode='calc',color=0.6*np.ones(3),
                   plot=True,debug=False,symetric=False,DN=False):
-        self.update_sf()  # update streamfunction
+        
         if mode == 'eqdsk':  # read first wall from eqdsk
             self.Rb,self.Zb = self.sf.xlim,self.sf.ylim
         elif mode == 'calc':
-            
             if DN:  # double null
                 self.sf.get_Xpsi(select='upper')  # upper X-point
                 self.update_sf()  # update streamfunction
-                Ru,Zu = self.target_fill(debug=debug,symetric=True)
-                blanket_u = self.build_blanket(store=False)
+                Ru,Zu = self.place_target(debug=debug,symetric=True)
+                blanket_u = self.place_blanket(select='upper',store=False)
                 self.sf.get_Xpsi(select='lower')  # lower X-point
                 self.update_sf()  # update streamfunction
-                Rl,Zl, = self.target_fill(debug=debug,symetric=True)
-                blanket_l = self.build_blanket(store=False)
+                Rl,Zl, = self.place_target(debug=debug,symetric=True)
+                blanket_l = self.place_blanket(select='lower',store=False)
                 self.Rb,self.Zb = self.upper_lower(Ru,Zu,Rl,Zl,
                                                    Zjoin=self.sf.Mpoint[1])
                 self.segment['first_wall'] = {'r':self.Rb,'z':self.Zb} 
@@ -233,21 +83,22 @@ class RB(object):
             else:
                 self.sf.get_Xpsi(select='lower')  # lower X-point
                 self.update_sf()  # update streamfunction
-                self.Rb,self.Zb = self.target_fill(debug=debug,
+                self.Rb,self.Zb = self.place_target(debug=debug,
                                                    symetric=symetric)
-                self.build_blanket(plot=plot)
+                self.place_blanket(plot=plot)
             if plot:
                 self.vessel_fill()
-                
+            '''
             with open('../../Data/'+self.dataname+'_FW.pkl', 'wb') as output:
                 pickle.dump(self.setup.targets,output,-1)
                 pickle.dump(self.Rb,output,-1)
                 pickle.dump(self.Zb,output,-1)
-        elif mode == 'read':
-            with open('../../Data/'+self.dataname+'_FW.pkl', 'rb') as input:
-                self.setup.targets = pickle.load(input)
-                self.Rb = pickle.load(input)
-                self.Zb = pickle.load(input)
+            '''
+        #elif mode == 'read':
+        #    with open('../../Data/'+self.dataname+'_FW.pkl', 'rb') as input:
+        #        self.setup.targets = pickle.load(input)
+        #        self.Rb = pickle.load(input)
+        #        self.Zb = pickle.load(input)
         else:
             errtxt = 'set input mode \'eqdsk\',\'calc\',\'read\''
             raise ValueError(errtxt)
@@ -260,12 +111,6 @@ class RB(object):
             (self.Zb <= self.sf.z.max()) & (self.Zb >= self.sf.z.min())
             pl.plot(self.Rb[index],self.Zb[index],
                     '-',color=color,linewidth=1.75)
-       
-    def get_fw(self,expand=0):  # generate boundary dict for elliptic
-        if not hasattr(self,'Rb'):  # first wall not set
-            self.firstwall(mode='eqdsk',plot=False,debug=False)
-        boundary = {'R':self.Rb,'Z':self.Zb,'expand':expand}
-        return boundary
         
     def connect(self,psi,target_pair,ends,loop=[]):
         gap = []
@@ -288,158 +133,6 @@ class RB(object):
         if index[0]>index[1]:
             index = index[::-1]
         r,z = r[index[0]:index[1]+1],z[index[0]:index[1]+1] 
-        return r,z
-
-    def target_fill(self,debug=False,**kwargs):
-        layer_index = 0  # construct from first open flux surface
-        symetric = kwargs.get('symetric',False)
-        self.sf.sol(update=True,plot=False,debug=debug)
-        for leg in list(self.sf.legs)[2:]:
-            self.set_target(leg)
-            Rsol,Zsol = self.sf.snip(leg,layer_index,L2D=self.setup.targets[leg]['L2D'])
-            Ro,Zo = Rsol[-1],Zsol[-1]
-            Flip = [-1,1]
-            Direction = [1,-1]
-            Theta_end = [0,np.pi]
-            theta_sign = 1
-            
-            if self.sf.Xloc == 'upper':
-                theta_sign *= -1
-                Direction = Direction[::-1]
-            if 'inner' in leg:
-                psi_plasma = self.psi_fw[1]
-            else:
-                psi_plasma = self.psi_fw[0]
-            self.dpsi = self.psi_fw[1]-self.sf.Xpsi
-            Phi_target = [psi_plasma,self.sf.Xpsi-self.setup.firstwall['div_ex']*self.dpsi]  
-            if leg is 'inner1' or leg is 'outer2':
-                Phi_target[0] = self.sf.Xpsi+self.setup.firstwall['div_ex']*self.dpsi
-            if self.setup.targets[leg]['open']:
-                theta_sign *= -1
-                Direction = Direction[::-1]
-                Theta_end = Theta_end[::-1]
-            if 'outer' in leg:
-                Direction = Direction[::-1]
-                theta_sign *= -1
-            if leg is 'inner1' or leg is 'outer2':
-                Theta_end = Theta_end[::-1]
-
-            self.setup.targets[leg]['R'] = np.array([])
-            self.setup.targets[leg]['Z'] = np.array([])
-            dPlate = self.setup.targets[leg]['dPlate']
-            for flip,direction,theta_end,psi_target\
-            in zip(Flip,Direction,Theta_end,Phi_target):
-                R,Z = self.match_psi(Ro,Zo,direction,theta_end,theta_sign,
-                                     psi_target,self.setup.targets[leg]['graze'],
-                                     dPlate,leg,debug=debug)
-                self.setup.targets[leg]['R'] = np.append(self.setup.targets[leg]['R'],R[::flip])
-                self.setup.targets[leg]['Z'] = np.append(self.setup.targets[leg]['Z'],Z[::flip])
-            if leg is 'outer':
-                self.setup.targets[leg]['R'] = self.setup.targets[leg]['R'][::-1]
-                self.setup.targets[leg]['Z'] = self.setup.targets[leg]['Z'][::-1]
-        Rb,Zb = np.array([]),np.array([])
-
-        if self.sf.nleg == 6:  # SF
-            Rb = np.append(Rb,self.setup.targets['inner2']['R'][1:])
-            Zb = np.append(Zb,self.setup.targets['inner2']['Z'][1:])
-            r,z = self.connect(self.sf.Xpsi-self.setup.firstwall['div_ex']*self.dpsi,
-                               ['inner2','inner1'],[-1,-1])
-            Rb,Zb = self.append(Rb,Zb,r,z)
-            Rb = np.append(Rb,self.setup.targets['inner1']['R'][::-1])
-            Zb = np.append(Zb,self.setup.targets['inner1']['Z'][::-1])
-            r,z = self.connect(self.sf.Xpsi+self.setup.firstwall['div_ex']*self.dpsi,
-                               ['inner1','outer2'],[0,0])            
-            Rb,Zb = self.append(Rb,Zb,r,z)
-            Rb = np.append(Rb,self.setup.targets['outer2']['R'][1:])
-            Zb = np.append(Zb,self.setup.targets['outer2']['Z'][1:])
-            r,z = self.connect(self.sf.Xpsi-self.setup.firstwall['div_ex']*self.dpsi,
-                               ['outer2','outer1'],[-1,-1])            
-            Rb,Zb = self.append(Rb,Zb,r,z)
-            Rb = np.append(Rb,self.setup.targets['outer1']['R'][::-1])
-            Zb = np.append(Zb,self.setup.targets['outer1']['Z'][::-1])
-            self.segment['divertor'] = {'r':Rb,'z':Zb}  # store diveror
-            r,z = self.connect(self.psi_fw[1],['outer1','inner2'],[0,0],
-                               loop=(self.loop.R[::-1],self.loop.Z[::-1]))
-            Rb,Zb = self.append(Rb,Zb,r,z)
-        else:
-            Rb = np.append(Rb,self.setup.targets['inner']['R'][1:])
-            Zb = np.append(Zb,self.setup.targets['inner']['Z'][1:])
-            r,z = self.connect(self.sf.Xpsi-self.setup.firstwall['div_ex']*self.dpsi,
-                               ['inner','outer'],[-1,0])                
-            Rb,Zb = self.append(Rb,Zb,r,z)
-            self.segment['divertor'] = {'r':Rb,'z':Zb}  # store diveror
-            Rb = np.append(Rb,self.setup.targets['outer']['R'][1:])
-            Zb = np.append(Zb,self.setup.targets['outer']['Z'][1:])
-            self.segment['divertor'] = {'r':Rb,'z':Zb}  # store diveror
-            r,z = self.connect(self.psi_fw[1],['outer','inner'],[-1,0],
-                               loop=(self.loop.R,self.loop.Z))
-            Rb,Zb = self.append(Rb,Zb,r,z)
-        self.Rb,self.Zb = self.midplane_loop(Rb,Zb)
-        self.Rb,self.Zb = self.first_wall_fit(self.setup.firstwall['dRfw'],
-                                              symetric=symetric,debug=debug)
-        #self.get_sol()  # trim sol to targets and store values
-        #self.write_boundary(self.Rb,self.Zb)
-        return self.Rb,self.Zb
-        
-    def first_wall_fit(self,dr,fit_flux=False,debug=False,symetric=False):
-        if self.setup.firstwall['conformal']:
-            index = self.Zb > 1.5+self.sf.Xpoint[1]
-            r,z = self.Rb[index],self.Zb[index]
-            r,z = geom.clock(r,z,reverse=True)
-        else:
-            profile = Profile(self.setup.configuration,family='S',part='fwf',
-                              npoints=200,symetric=symetric)
-            shp = Shape(profile,objective='L')
-
-            shp.loop.adjust_xo('upper',lb=0.7)
-            shp.loop.adjust_xo('top',lb=0.05,ub=0.75)
-            shp.loop.adjust_xo('lower',lb=0.7)
-            shp.loop.adjust_xo('bottom',lb=0.05,ub=0.75)
-            shp.loop.adjust_xo('l',lb=0.6,ub=1.5)
-
-            rfw,zfw = geom.offset(self.Rp,self.Zp,dr)  # offset from sep
-            rfw,zfw = geom.rzSLine(rfw,zfw,100)  # sub-sample
-            shp.add_bound({'r':rfw,'z':zfw},'internal')  # vessel inner bounds
-            shp.add_bound({'r':np.min(rfw)-0.001,'z':0},'interior')  # rmin
-            if self.setup.firstwall['flux_fit']:
-                index = self.Zb > self.sf.LFfwz
-                rflux,zflux = self.Rb[index],self.Zb[index]
-                rflux,zflux = geom.rzSLine(rflux,zflux,80)  # sub-sample
-                shp.add_bound({'r':rflux,'z':zflux},'internal')  # inner bounds
-            shp.minimise()
-            if debug:
-                shp.loop.plot()
-                shp.plot_bounds()
-            x = profile.loop.draw()
-            r,z = x['r'],x['z']
-            r,z = geom.order(r,z,anti=True)
-        
-        istart = np.argmin((r-self.sf.Xpoint[0])**2+(z-self.sf.Xpoint[1])**2)
-        r = np.append(r[istart:],r[:istart+1])
-        z = np.append(z[istart:],z[:istart+1])
-        r,z,l = geom.unique(r,z)
-        self.segment['inner_loop'] = {'r':r,'z':z}
-        rd,zd = self.segment['divertor']['r'],self.segment['divertor']['z']
-        rd,zd = geom.unique(rd,zd)[:2]
-        if self.sf.Xloc == 'lower':
-            zindex = zd <= self.sf.Xpoint[1]+0.5*(self.sf.mo[1]-
-                                                  self.sf.Xpoint[1])
-        else:
-            zindex = zd >= self.sf.Xpoint[1]+0.5*(self.sf.mo[1]-
-                                                  self.sf.Xpoint[1])        
-        rd,zd = rd[zindex],zd[zindex]  # remove upper points
-        rd,zd = geom.rzInterp(rd,zd)  # resample
-        rd,zd = geom.inloop(r,z,rd,zd,side='out')  # divertor external to fw
-        istart = np.argmin((r-rd[-1])**2+(z-zd[-1])**2)  # connect to fw
-        iend = np.argmin((r-rd[0])**2+(z-zd[0])**2)
-        
-        if self.sf.Xloc == 'lower':
-            r = np.append(np.append(rd,r[istart:iend]),rd[0])
-            z = np.append(np.append(zd,z[istart:iend]),zd[0])
-        else:
-            r = np.append(np.append(rd,r[iend:istart][::-1]),rd[0])
-            z = np.append(np.append(zd,z[iend:istart][::-1]),zd[0])
-        self.segment['first_wall'] = {'r':r,'z':z} 
         return r,z
 
     def vessel_fill(self):
@@ -532,7 +225,7 @@ class RB(object):
                     if len(Rsol[i]) > 0:
                         R,Z = Rsol[i],Zsol[i]
                         for j in range(2):  # predict - correct
-                            R,Z,pannel = self.inloop(self.Rb,self.Zb,R,Z)
+                            R,Z,pannel = self.trim(self.Rb,self.Zb,R,Z)
                         self.sf.legs[leg]['R'][i] = R  # update sf
                         self.sf.legs[leg]['Z'][i] = Z
                         self.sf.legs[leg]['pannel'][i] = pannel
@@ -558,59 +251,6 @@ class RB(object):
         Rt,Zt = geom.rzSLine(Rt,Zt,npoints=self.npoints)
         return Rt,Zt
 
-    def midplane_loop(self,Rb,Zb):
-        index = np.argmin((Rb-self.sf.LFfwr)**2+(Zb-self.sf.LFfwz)**2)
-        Rb = np.append(Rb[:index+1][::-1],Rb[index:][::-1])
-        Zb = np.append(Zb[:index+1][::-1],Zb[index:][::-1])
-        Lb = geom.length(Rb,Zb)
-        index = np.append(np.diff(Lb)!=0,True)
-        Rb,Zb = Rb[index],Zb[index]  # remove duplicates
-        return Rb,Zb
-        
-    def write_boundary_feild(self,Rb,Zb):
-        Rb,Zb = Rb[::-1],Zb[::-1]  # flip boundary (clockwise)
-        with open('../Data/'+self.dataname+'_bdry_feild.txt','w') as f:
-            f.write(self.conf.filename.split('/')[-1]+'\n')
-            f.write('boundary clockwise from outboard midplane\n')
-            f.write('r[m]\tz[m]\tBp[T]\tBphi[T]\n')
-            f.write('{:1.0f}\n'.format(len(Rb)-1))
-            Bm = np.abs(self.sf.bcentr*self.sf.rcentr)
-            for r,z in zip(Rb,Zb):
-                B = self.sf.Bcoil([r,z])
-                Bp = np.sqrt(B[0]**2+B[1]**2)  # polodial feild
-                Bphi = Bm/r  # torodal field
-                f.write('{:1.4f}\t{:1.4f}\t'.format(r,z))
-                f.write('{:1.4f}\t{:1.4f}\n'.format(Bp,Bphi))
-        
-    def write_boundary(self,Rb,Zb):
-        with open('../../Data/'+self.dataname+'_bdry.txt','w') as f:
-            f.write(self.sf.filename.split('/')[-1]+'\n')
-            f.write('boundary placed {:1.0f}'\
-            .format(1e3*self.setup.firstwall['dRfw']))
-            f.write('mm from LCFS at LFS, upper==constant offset, lower==feild line conformal\n')
-            f.write('connection calculated from Xpoint at ')
-            f.write('{:1.2f}mm from LFS\n\n'.format(1e3*self.sf.Dsol[-1]))
-            f.write('target\tgraze[deg]\topen\tRo[m]\t\tZo[m]\t\tTo[deg]\tL2D[m]\tL3D[m]\n')
-            for leg in list(self.sf.legs)[2:]:
-                target = self.setup.targets[leg]
-                f.write(leg+'\t')
-                f.write('{:1.2f}\t\t'.format(target['graze_deg'][0]))
-                if target['open']:
-                    f.write('open\t')
-                else:
-                    f.write('closed\t')
-                f.write('{:1.6f}\t'.format(target['Ro']))
-                f.write('{:1.6f}\t'.format(target['Zo']))
-                f.write('{:1.2f}\t'.format(target['theta_deg'][0]))
-                f.write('{:1.3f}\t'.format(target['L2Dedge'][-1]))
-                f.write('{:1.3f}\t\n'.format(target['L3Dedge'][-1]))
-            f.write('\n')
-            f.write('boundary segments clockwise from outboard midplane\n')
-            f.write('r[m]\t\tz[m]\n')
-            f.write('{:1.0f}\n'.format(len(Rb)))
-            for i in range(len(Rb)):
-                f.write('{:1.6f}\t{:1.6f}\n'.format(Rb[i],Zb[i]))  # dp
-    
     def crossed_lines(self,Ro,Zo,R1,Z1):
         index = np.zeros(2)
         dl = np.zeros(len(Ro))
@@ -619,8 +259,8 @@ class RB(object):
         index[0] = np.argmin(dl)
         index[1] = np.argmin((R1-Ro[index[0]])**2+(Z1-Zo[index[0]])**2)
         return index
-                
-    def inloop(self,Rloop,Zloop,R,Z):
+    
+    def trim(self,Rloop,Zloop,R,Z):
         Rloop,Zloop = geom.order(Rloop,Zloop)
         L = geom.length(R,Z)
         index = np.append(np.diff(L)!=0,True)
@@ -713,7 +353,7 @@ class RB(object):
             Xi = self.sf.expansion([R[-1]],[Z[-1]])
             theta = self.sf.strike_point(Xi,graze)
             B = direction*self.sf.Bpoint((R[-1],Z[-1]))
-            Bhat = self.rotateB(B,theta_sign*theta)
+            Bhat = geom.rotate_vector2D(B,theta_sign*theta)
             trans_angle = np.arctan2(Bhat[1],Bhat[0])
             if abs(target_angle-trans_angle) > 0.01*np.pi:
                 accute = True
@@ -740,231 +380,27 @@ class RB(object):
             if accute: theta = np.pi-theta
             theta = Lhat*theta_end+(1-Lhat)*theta
             B = direction*self.sf.Bpoint((R[-1],Z[-1]))
-            Bhat = self.rotateB(B,theta_sign*theta)
+            Bhat = geom.rotate_vector2D(B,theta_sign*theta)
             R = np.append(R,R[-1]+dL*Bhat[0])
             Z = np.append(Z,Z[-1]+dL*Bhat[1])
         return R,Z
-        
-    def vessel_fit(self):
-        profile = Profile(self.setup.configuration,family='S',part='VV')
-        shp = Shape(profile,objective='L')
-        #shp.loop.set_l({'value':0.8,'lb':0.5,'ub':0.9})
-        shp.loop.oppvar.remove('z2')
-        #shp.loop.oppvar.remove('tilt')
-        shp.loop.set_symetric(True)
-        rvv,zvv = geom.rzSLine(self.loop.R,self.loop.Z,30)
-        rvv,zvv = geom.offset(rvv,zvv,0.05)  # offset from blanket
-        shp.add_bound({'r':rvv,'z':zvv},'internal')  # vessel inner bounds
-        shp.minimise()
-        x = profile.loop.draw()
-        self.loop.R,self.loop.Z = x['r'],x['z']
-        
-    def vessel(self):  # radial build from firstwall
-        Color = cycle(sns.color_palette('Set2',12)[1:])
-        self.FWfill(dt=self.setup.build['tfw'],color=next(Color))  # first wall 
-        self.loop.fill(dt=self.setup.build['BB'][::-1],alpha=0.7,ref_o=0.3,dref=0.2,
-                  referance='geom.length',color=next(Color))  # blanket+sheild
-        self.loop.fill(dt=self.setup.build['tBBsupport'],alpha=0.7,
-                  color=next(Color))  # blanket support
-        self.sheild_fill(dt=self.setup.build['sheild'],
-                           ref_o=0.35*np.pi,dref=0.2*np.pi,
-                           gap=1/10*np.pi,alpha=0.7,color=next(Color))
-        self.vessel_fit()
-        self.VVfill(dt=self.setup.build['VV'],ref_o=0.25*np.pi,  # vessel
-                    dref=0.25*np.pi,gap=0.5/10*np.pi,alpha=0.7,
-                    loop=True,color=next(Color))  # ref_o=0.385
-        pl.axis('equal')
-        
-    def FWfill(self,**kwargs):
-        if not hasattr(self,'Rb'):  # first wall not set
-            self.firstwall(mode='eqdsk',plot=False,debug=False)  # load fw
-        self.loop.R,self.loop.Z = geom.rzSLine(self.Rb[::-1],self.Zb[::-1],
-                                     npoints=self.npoints,Hres=False)
-        self.loop.fill(loop=True,alpha=0.7,**kwargs)
-        self.loop.R,self.loop.Z = geom.rzSLine(self.loop.R,self.loop.Z,npoints=self.npoints)
-        self.loop.R,self.loop.Z = self.trim_contour(self.loop.R[::-1],self.loop.Z[::-1]) # update 
 
-    def sheild_fill(self,**kwargs):  # 
-        if 'sheild_connect' in self.setup.build:
-            connect = self.setup.build['sheild_connect']
-        else:
-            connect=[0,1]
-        index = self.loop.trim(connect,self.loop.R,self.loop.Z)
-        rVV = self.loop.R[index[0]:index[1]+1]
-        zVV = self.loop.Z[index[0]:index[1]+1]
-        ni = 10  #  number of trim nodes
-        rp,zp = rVV[-ni:],zVV[-ni:] 
-        if self.setup.build['Dsheild']:
-            Rleg,Zleg = [],[]
-            Rd = self.Rb[self.Zb<self.sf.Xpoint[1]][::-1]
-            Zd = self.Zb[self.Zb<self.sf.Xpoint[1]][::-1]
-            Ld = geom.length(Rd,Zd)
-            index = (Ld>self.conf.Dsheild[0]) & (Ld<self.conf.Dsheild[1])
-            Rleg.append(Rd[index])
-            Zleg.append(Zd[index])
-        else:
-            Nsp = len(self.setup.targets.keys())-1  # ignore default
-            if self.setup.build['sheild_base'] >= 0: Nsp+=1
-            sp = np.zeros((Nsp,),  # spline points
-                               dtype=[('Rleg','float'),('Zleg','float'),
-                                      ('Tleg','float'),('dR','float')])
-            zmin = np.zeros((1,),  # spline points
-                               dtype=[('Rleg','float'),('Zleg','float'),
-                                      ('Tleg','float'),('dR','float')])
-            for i,leg in enumerate(list(self.setup.targets)[1:]):
-                Rt,Zt = self.setup.targets[leg]['R'],self.setup.targets[leg]['Z']
-                R,Z = geom.offset(Rt,Zt,self.setup.build['tfw'])
-                dRt = np.mean((Rt-self.sf.Xpoint[0])**2+
-                              (Zt-self.sf.Xpoint[1])**2)
-                dR = np.mean((R-self.sf.Xpoint[0])**2+
-                              (Z-self.sf.Xpoint[1])**2)
-                if  dR<dRt:
-                    Rt,Zt = geom.offset(Rt,Zt,-self.setup.build['tfw'])
-                else:
-                    Rt,Zt = R,Z
-                if self.setup.targets[leg]['Zo'] > self.sf.Xpoint[1]:
-                    index = Zt<self.setup.targets[leg]['Zo']
-                else:
-                    Zmax = self.setup.targets[leg]['Zo']+\
-                    (self.sf.Xpoint[1]-self.setup.targets[leg]['Zo'])/2
-                    index = Zt<Zmax  
-                Rt,Zt = Rt[index],Zt[index]              
-                radius = np.sqrt((Rt-self.sf.Xpoint[0])**2+
-                                 (Zt-self.sf.Xpoint[1])**2)
-                argmax = np.argmax(radius)
-                r = radius[argmax]+self.setup.targets[leg]['dR']
-                theta = np.arctan2(Rt[argmax]-self.sf.Xpoint[0],
-                                   self.sf.Xpoint[1]-Zt[argmax])
-                sp['Rleg'][i] = self.sf.Xpoint[0]+r*np.sin(theta)
-                sp['Zleg'][i] = self.sf.Xpoint[1]-r*np.cos(theta)
-                sp['Tleg'][i] = theta
-                sp['dR'][i] = self.setup.targets[leg]['dR']
+    def json(self,**kwargs):
+        data = {}
+        for loop in ['first_wall','blanket','vessel_inner','vessel_outer']:
+            data[loop] = {}
+            for var in self.segment[loop]:
+                data[loop][var] = self.segment[loop][var].tolist()
+        if 'tf' in kwargs:  # add tf profile
+            tf = kwargs.get('tf')
+            for loop,label in zip(['in','out'],['TF_inner','TF_outer']):
+                data[label] = {}
+                for var in tf.x[loop]:
+                    data[label][var] = tf.x[loop][var].tolist()
+
+        with open(self.datadir+'{}.json'.format(self.dataname),'w') as f:
+            json.dump(data,f,indent=4,sort_keys=True)
             
-            L = geom.length(self.Rb,self.Zb,norm=False)[-1]
-            Rt,Zt = geom.offset(self.Rb,self.Zb,self.setup.build['tfw'])
-            Lt = geom.length(Rt,Zt,norm=False)[-1]
-            if Lt<L:
-               Rt,Zt = geom.offset(self.Rb,self.Zb,-self.setup.build['tfw']) 
-            argmin = np.argmin(Zt)
-            radius = np.sqrt((Rt-self.sf.Xpoint[0])**2+
-                                 (Zt-self.sf.Xpoint[1])**2)
-            if self.setup.build['sheild_base'] >= 0:
-                r = radius[argmin]+self.setup.build['sheild_base']
-                theta = np.arctan2(Rt[argmin]-self.sf.Xpoint[0],
-                                   self.sf.Xpoint[1]-Zt[argmin])
-                zmin['Rleg'][0] = self.sf.Xpoint[0]+r*np.sin(theta)
-                zmin['Zleg'][0] = self.sf.Xpoint[1]-r*np.cos(theta)
-                zmin['Tleg'][0] = theta
-                zmin['dR'][0] = self.setup.build['sheild_base']
-                zmin = np.sort(zmin,order='Zleg')  
-                sp[-1] = zmin[0]
-            sp = np.sort(sp,order='Tleg')[::-1]
-            Rleg,Zleg = [],[]
-            for i,dr in enumerate(sp['dR']):  # remove -ive dR
-                if dr >= 0:
-                    Rleg.append(sp['Rleg'][i])
-                    Zleg.append(sp['Zleg'][i])
-        rp,zp = np.append(rp,Rleg[::-1]),np.append(zp,Zleg[::-1])
-        rp,zp = np.append(rp,rVV[:ni]),np.append(zp,zVV[:ni])
-        rs,zs = geom.rzSLine(rp,zp,npoints=260,s=5e-6)
-        R,Z = np.append(rVV[ni+1:-ni],rs),np.append(zVV[ni+1:-ni],zs)
-        R,Z = np.append(R,R[0]),np.append(Z,Z[0])
-        self.loop.R,self.loop.Z = geom.rzSLine(R,Z,len(R),s=5e-4)
-        #self.loop.fill(trim=None,loop=True,s=2e-4,**kwargs)
- 
-    def support_fill(self,coils=[],r=[],z=[],**kwargs):
-        k = 3
-        rp = np.array([])
-        zp = np.array([])
-        for name in coils:
-            rp = np.append(rp,self.geom.coil[name]['r'])
-            zp = np.append(zp,self.geom.coil[name]['z']-
-                           self.geom.coil[name]['rc'])
-        
-        zp[0] += 1.5*self.geom.coil[coils[0]]['rc']
-        rp[0] += 0.5*self.geom.coil[coils[0]]['rc']
-        rp = np.append(rp,r)
-        zp = np.append(zp,z)
-        wp = np.ones(len(rp))
-        wp[0] = 3
-        L = np.append(0,np.cumsum(np.sqrt(np.diff(rp)**2+np.diff(zp)**2)))
-        L = L/L[-1]
-        Ls = np.linspace(0,1,20)
-        rs = spline(L,rp,w=wp,k=k)(Ls)
-        zs = spline(L,zp,w=wp,k=k)(Ls)
-        
-        self.loop.R,self.loop.Z = rs,zs
-        self.rzPut()
-        self.loop.fill(trim=None,**kwargs)
-        
-        rs,zs = geom.offset(rs,zs,kwargs['dR'])
-        return rs,zs
-
-    def VVfill(self,**kwargs):
-        VVinR,VVinZ = self.loop.R,self.loop.Z
-        self.loop.fill(**kwargs)
-        VVoutR,VVoutZ = self.loop.R,self.loop.Z
-        with open('../../Data/'+self.setup.configuration+'_VV.txt','w') as f:
-            f.write('Rin m\t\tZin m\t\tRout m\t\tZout m\n')
-            for rin,zin,rout,zout in zip(VVinR,VVinZ,VVoutR,VVoutZ):
-                f.write('{:1.6f}\t{:1.6f}\t{:1.6f}\t{:1.6f}\n'.format(\
-                rin,zin,rout,zout))
- 
-    def wblend(self,N):
-        L = np.linspace(-0.5,0.5,N)
-        w = 0.5+np.sin(np.pi*L)/2
-        return w
-        
-    def window(self,N,start,end,trans):
-        L = np.linspace(0,1,N)
-        w = np.ones(N)
-        w[(L<start) | (L>end)] = 0
-        index = (L>=start) & (L<start+trans)
-        w[index] = 0.5+np.sin(np.pi*(L[index]-start)/trans-np.pi/2)/2
-        index = (L<=end) & (L>end-trans)
-        w[index] = 0.5+np.sin(np.pi*(end-L[index])/trans-np.pi/2)/2
-        return w
-        
-    def wall_offset(self,Rbo,Zbo,R,Z,flip,Lblend=1.5):
-        ib = np.argmin(Zbo)
-        if flip == 1:
-            Rb,Zb = Rbo[ib:],Zbo[ib:]
-        else:
-            Rb,Zb = Rbo[:ib],Zbo[:ib]
-        L = []
-        for r,z in zip(R,Z):
-            L.append(np.min(np.sqrt((Rb-r)**2+(Zb-z)**2)))
-        i = np.argmin(L)
-        j = np.argmin((Rb-R[i])**2+(Zb-Z[i])**2)  
-        if flip == 1:
-            R,Z = R[:i][::-1],Z[:i][::-1]
-            Rb,Zb = Rb[j:],Zb[j:]
-            Rt,Zt = Rbo[ib:][:j],Zbo[ib:][:j]
-        else:
-            R,Z = R[i:],Z[i:]
-            Rb,Zb = Rb[:j][::-1],Zb[:j][::-1]
-            Rt,Zt = Rbo[:ib][j:][::-1],Zbo[:ib][j:][::-1]
-        Lb = geom.length(Rb,Zb,norm=False)
-        L = geom.length(R,Z,norm=False)
-        N = np.argmin(abs(Lb-Lblend))
-        w = self.wblend(N)
-        Rc = (1-w)*Rb[:N]+w*interp1d(L,R)(Lb[:N])
-        Zc = (1-w)*Zb[:N]+w*interp1d(L,Z)(Lb[:N])   
-        N = np.argmin(abs(L-Lblend))
-        Rc = np.append(Rc,R[N:])
-        Zc = np.append(Zc,Z[N:])
-        return Rc,Zc,Rt,Zt
-    
-    def fw_offset(self,Rb,Zb,dr=0.66):
-        Rbo,Zbo = Rb[::-1],Zb[::-1]
-        R,Z = geom.offset(self.Rp,self.Zp,dr)
-        R,Z = geom.rzSLine(R,Z)
-        R,Z,Rtout,Ztout = self.wall_offset(Rbo,Zbo,R,Z,-1)
-        R,Z,Rtin,Ztin = self.wall_offset(Rbo,Zbo,R,Z,1)
-        R,Z = np.append(Rtin,R),np.append(Ztin,Z)
-        R,Z = np.append(R,Rtout[::-1]),np.append(Z,Ztout[::-1])   
-        return R[::-1],Z[::-1]
-
 
 class wrap(object):
     
@@ -1097,3 +533,9 @@ class wrap(object):
             for loop in self.loops:
                 r,z = self.get_segment(loop)
                 pl.plot(r,z,'-')
+    
+    
+
+        
+
+

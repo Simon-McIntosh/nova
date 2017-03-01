@@ -126,9 +126,9 @@ class DEMO(object):
         
     def read(self,filename):
         ref = nova_root+'/../Data/'
-        wb = load_workbook(filename=ref+filename+'.xlsx',
-                           read_only=True,data_only=True)
+        wb = load_workbook(filename=ref+filename+'.xlsx')  # read_only=True,data_only=True
         ws = wb[wb.get_sheet_names()[0]]
+
         self.parts = OrderedDict()  # component parts    
         part,loop = [],[]
         for row in ws.columns:

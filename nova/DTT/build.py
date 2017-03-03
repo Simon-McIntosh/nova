@@ -13,7 +13,7 @@ from nova.loops import Profile,plot_oppvar
 from nova.shape import Shape
 from nova.DEMOxlsx import DEMO
 from nova.force import force_feild
-from nova.firstwall import targets,firstwall
+from nova.firstwall import targets,main_chamber
 
 from amigo.IO import trim_dir
 from nova.shelf import PKL
@@ -43,15 +43,18 @@ sf.shape_parameters()  #verbose=True
 
 pf = PF(sf.eqdsk)
 
-#target = targets(sf,setup.targets)
 
-#target.place(debug=True)
 
-sf = []
-for configuration in ['SN2014_SOF','SN2014_EOF']:
-    sf.append(SF(Setup(configuration).filename))
+eq_names = ['SN2014_SOF','SN2014_EOF'] 
+mc = main_chamber('DTT',date='2017_03_03')
+mc.generate(eq_names,psi_n=1.07,flux_fit=True,debug=True)
 
-firstwall('SNfw',sf,psi_n=1.07,flux_fit=False,debug=True)
+mc.load_data()
+mc.draw(True)
+
+
+target = targets(sf,setup.targets)
+target.place(debug=True)
 
 '''
 eq = EQ(sf,pf,dCoil=1.5,sigma=0,n=5e3,boundary=sf.get_sep(expand=1.1),

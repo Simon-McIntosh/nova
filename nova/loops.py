@@ -374,7 +374,6 @@ class Sloop(object):  # polybezier
             else:
                 self.xo[name][var] = kwargs[var]
         self.set_symetric()
-            
 
     def check_tension_length(self,tension):
         tension = tension.lower()
@@ -398,7 +397,12 @@ class Sloop(object):  # polybezier
             self.xo[l] = {}
             for key in self.xo[u]:
                 self.xo[l][key] = self.xo[u][key]
-                    
+                
+    def enforce_symetric(self):
+        self.symetric = True
+        self.set_symetric()
+        self.set_tension()
+                        
     def set_symetric(self):
         if self.symetric:  # set lower equal to upper
             for u,l in zip(['top','upper'],['bottom','lower']):
@@ -606,12 +610,9 @@ class Profile(object):
         self.initalise_loop(family,npoints,symetric=symetric)  # initalize loop object
         data_dir = trim_dir('../../Data/')
         self.dataname = data_dir+self.name+'_{}.pkl'.format(part)
-        self.read_loop_dict()
         self.nTF=kwargs.get('nTF','unset')
-        self.obj=kwargs.get('obj','unset')   
-        if load:
-            self.load(nTF=self.nTF,obj=self.obj)
-
+        self.obj=kwargs.get('obj','L') 
+        self.read_loop_dict()
 
     def initalise_loop(self,family,npoints=100,symetric=False):
         self.family = family  # A==arc, D==Princton-D, S==spline
@@ -630,12 +631,20 @@ class Profile(object):
     def read_loop_dict(self):
         try:
             with open(self.dataname,'rb') as input:
-                self.loop_dict = pickle.load(input)
+                self.loop_dict = pickle.load(input)  
         except:
             print('file '+self.dataname+' not found')
             print('initializing new loop_dict')
             self.loop_dict = {}
         self.frame_data()
+        try:
+            self.load(nTF=self.nTF,obj=self.obj)
+        except:
+            wstr = 'loop parameters '
+            wstr += 'nTF:\'{}\', obj:\'{}\''.format(self.nTF,self.obj)
+            wstr += ' not avalible\n'
+            print(wstr)
+            self.avalible_data()
             
     def frame_data(self):
         self.data_frame = {}   
@@ -647,9 +656,12 @@ class Profile(object):
                     data[nTF][obj] = True
             self.data_frame[family] = pd.DataFrame(data)
  
-    def load(self,nTF='unset',obj='unset'):
-        if obj in self.loop_dict.get(self.family,{}).get(nTF,{}):
-            loop_dict = self.loop_dict[self.family][nTF][obj]
+    def load(self,nTF='unset',obj='L'):
+        data = self.loop_dict.get(self.family,{})
+        if nTF in self.loop_dict[self.family]:
+                data = data.get(nTF,{})
+        if obj in data:
+            loop_dict = data[obj]
             for key in loop_dict:
                 if hasattr(self.loop,key):
                     setattr(self.loop,key,loop_dict[key])
@@ -690,8 +702,6 @@ class Profile(object):
             if hasattr(self.loop,key):
                 cdict[key] = getattr(self.loop,key)
         self.loop_dict[self.family][nTF][obj] = cdict
-                     
-        print('loops',self.dataname)
         with open(self.dataname, 'wb') as output:
             pickle.dump(self.loop_dict,output,-1)
         self.frame_data()

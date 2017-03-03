@@ -31,7 +31,7 @@ class Shape(object):
             if side in kwargs:
                 self.add_bound(kwargs[side],side)
         if nTF is not 'unset' and (eqconf is not 'unset' or sep is not 'unset'):
-            self.tf = TF(self.profile)      
+            self.tf = TF(profile=self.profile)      
             if eqconf is not 'unset':
                 plasma = {'config':eqconf}
             else:
@@ -50,7 +50,7 @@ class Shape(object):
     def update(self):
         self.profile.load(obj=self.obj,nTF=self.nTF)
         if 'nTF' is not 'unset':
-            self.tf = TF(self.profile) 
+            self.tf = TF(profile=self.profile) 
             
     def add_bound(self,x,side):
         for var in ['r','z']:
@@ -81,7 +81,6 @@ class Shape(object):
                                ['.-','d','s']):
             index = self.bindex[side]
             for i in range(len(index)-1):
-                print(self.bound[side],side)
                 pl.plot(self.bound[side]['r'][index[i]:index[i+1]],
                         self.bound[side]['z'][index[i]:index[i+1]],
                         marker,markersize=6,color=next(self.color))
@@ -102,7 +101,6 @@ class Shape(object):
         xo = get_oppvar(self.loop.xo,self.loop.oppvar,xnorm)  # de-normalize
         self.loop.set_input(x=xo)  # inner loop
         self.profile.write(nTF=self.nTF,obj=self.obj)  # store loop
-        print('write')
         if verbose:
             self.toc(tic,xo)
 
@@ -204,47 +202,51 @@ class Shape(object):
         fig,ax = pl.subplots(1,2,figsize=(12,8))
         demo = DEMO()
         figname = '../Figs/{}'.format(filename)
-        self.frame(ax,demo,self.xo[0])
+        self.frame(ax,demo,xo=self.xo[0])
         pl.savefig(figname+'_s.png')
-        self.frame(ax,demo,self.xo[-1])
+        self.frame(ax,demo,xo=self.xo[-1])
         pl.savefig(figname+'_e.png')
         
                 
-    def frame(self,ax,demo,xo):
+    def frame(self,ax,demo,**kwargs):
+        xo = kwargs.get('xo',self.xo[-1])
         pl.sca(ax[0])
-        pl.cla()
+        #pl.cla()
         pl.plot([3,18],[-10,10],'ko',alpha=0)
-        self.loop.set_input(x=xo)
         demo.fill_part('Blanket')
         demo.fill_part('Vessel')
-        self.plot_bounds()
+        
+        self.loop.set_input(x=xo)
+        #self.plot_bounds()
         self.update()
-        self.tf.fill()
+        #self.tf.fill()
         geom.polyfill(self.cage.plasma_loop[:,0],
                       self.cage.plasma_loop[:,2],
                       alpha=0.3,color=sns.color_palette('Set2',5)[3])
         #self.cage.plot_loops(sticks=False)
-        pl.sca(ax[1])
-        pl.cla()
-        plot_oppvar(shp.loop.xo,shp.loop.oppvar)
+        if len(ax) > 1:
+            pl.sca(ax[1])
+            pl.cla()
+            plot_oppvar(shp.loop.xo,shp.loop.oppvar)
 
                 
 if __name__ is '__main__': 
 
-    nTF = 17
-    family='D'
-    ripple = False
+    nTF = 16
+    family='S'
+    ripple = True
 
     config = {'TF':'demo','eq':'SN'}
     config,setup = select(config,nTF=nTF)
     
 
     demo = DEMO()
-
-    profile = Profile(config['TF'],family=family,part='TF',load=False)
+    '''
+    profile = Profile(config['TF'],family=family,part='TF',nTF=nTF)  # ,load=False
     shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'],ny=3)
     shp.add_vessel(demo.parts['Vessel']['out'])
-    shp.minimise(ripple=ripple,verbose=True)
+    shp.minimise(ripple=ripple,verbose=False)
+    cage = shp.cage
     
     shp.update()
     #shp.tf.fill()
@@ -254,8 +256,41 @@ if __name__ is '__main__':
     #shp.cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)
     #shp.cage.pattern(plot=True)
     #plot_oppvar(shp.loop.xo,shp.loop.oppvar)
+    '''
 
+    x_in = demo.parts['TF_Coil']['in']
+    tf = TF(x_in=x_in,nTF=nTF)  
+    x = tf.get_loops(x_in)
+    cage = coil_cage(nTF=18,rc=tf.rc,plasma={'config':config['eq']},ny=3)
+    cage.set_TFcoil(x['cl'],smooth=True)
+
+    
+    Vol = cage.get_volume()
+    print('')
+    print('ref nTF {:1.0f}'.format(18))
+    print('ripple {:1.3f}'.format(cage.get_ripple()))
+    print('energy {:1.2f} GJ'.format(1e-9*cage.energy()))
+    print(r'TF volume {:1.0f} m3'.format(Vol['TF']))
+    print(r'plasma volume {:1.0f} m3'.format(Vol['plasma']))
+    print('ratio {:1.2f}'.format(Vol['ratio']))
+    
+    fig,ax = pl.subplots(1,1,figsize=(8,10))
+    pl.plot([3,18],[-10,10],'ko',alpha=0)
+    demo.fill_part('Blanket')
+    demo.fill_part('Vessel')
+    
+    demo.fill_part('TF_Coil',color=0.75*np.ones(3))
+    
+    #shp.tf.fill()
+    
+    cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)  # 2e5
+    pl.axis('off')
+    
+    pl.savefig('../Figs/ripple_referance')
+    
+    '''
     filename = '{}_{}_{}'.format(config['TF'],family,ripple)
     #shp.movie(filename)
     shp.frames(filename)
     #pl.savefig('../Figs/TFloop_{}.png'.format(family))
+    '''

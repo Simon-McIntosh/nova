@@ -184,24 +184,38 @@ class PF(object):
 
 class TF(object):
     
-    def __init__(self,profile,**kwargs):
+    def __init__(self,**kwargs):
         self.initalise_loops()  # initalise loop family
-        self.profile = profile  # loop profile
+        if 'profile' in kwargs:
+            profile = kwargs['profile']
+            x_in = profile.loop.draw()  # inner loop profile
+            if hasattr(profile,'nTF'):
+                self.nTF = profile.nTF
+            else:
+                self.nTF = 18
+                warn('using default nTF: {1.0f}'.format(self.nTF))
+        elif 'x_in' in kwargs and 'nTF' in kwargs:
+            x_in = kwargs['x_in']
+            self.nTF = kwargs['nTF']
+        else:
+            err_txt = 'insurficent key word inputs\n'
+            err_txt += 'set \'profile\' or \'x_in\' and \'nTF\''
+            raise ValueError(err_txt)
+        self.ro = np.min(x_in['r'])
         self.cross_section(**kwargs)  # coil cross-sections
-        self.get_loops(profile.loop.draw())
+        self.get_loops(x_in)
 
     def cross_section(self,J=18.25,twall=0.045,**kwargs):  # MA/m2 TF current density
         self.section = {}
         self.section['case'] = {'side':0.1,'nose':0.51,'inboard':0.04,
                                 'outboard':0.19,'external':0.225}
-        if 'sf' in kwargs and hasattr(self.profile,'nTF'):
+        if 'sf' in kwargs:
             sf = kwargs.get('sf')
             BR = sf.eqdsk['bcentr']*sf.eqdsk['rcentr']
-            Iturn = 1e-6*abs(2*np.pi*BR/(self.profile.nTF*cc.mu_o))
+            Iturn = 1e-6*abs(2*np.pi*BR/(self.nTF*cc.mu_o))
             Acs = Iturn/J
-            ro = np.min(self.profile.loop.draw()['r'])
-            rwp1 = ro-self.section['case']['inboard']
-            theta = np.pi/self.profile.nTF
+            rwp1 = self.ro-self.section['case']['inboard']
+            theta = np.pi/self.nTF
             rwall = twall/np.sin(theta)
             depth = np.tan(theta)*(rwp1-rwall+\
             np.sqrt((rwall-rwp1)**2-4*Acs/(2*np.tan(theta))))
@@ -342,7 +356,7 @@ if __name__ is '__main__':  # test functions
     profile = Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L',
                       load=True)
     #profile.loop.plot()
-    tf = TF(profile,sf=sf)
+    tf = TF(profile=profile,sf=sf)
     tf.fill()
 
     demo = DEMO()

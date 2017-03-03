@@ -5,6 +5,10 @@ from nova.loops import Profile
 from nova.shape import Shape
 import pylab as pl
 from warnings import warn
+import datetime
+import pickle
+from nova.streamfunction import SF
+from nova.config import Setup
 
 
 class targets(object):
@@ -120,35 +124,67 @@ class targets(object):
         return self.Rb,self.Zb
  
 
-class firstwall(object):
+class main_chamber(object):
     
-    def __init__(self,name,sf,dr=0.225,psi_n=1.07,conformal=False,
-                 flux_fit=False,debug=False,symetric=False):
-        self.name = name  # first wall chamber name
-        sf = self.set_sf(sf)
-        self.dr = dr  # geometric offset
-        self.flux_fit = flux_fit
-        self.psi_n = psi_n
-        self.debug = debug
-        self.Nsub = 100  # loop sub-sample point number
+    def __init__(self,name,**kwargs):
+        today = self.date(verbose=False)
+        date_str = kwargs.get('date',today)
+        self.name = '{}_{}'.format(date_str,name)  # chamber name
+        self.initalise_loop()
         
-        self.initalise_loop(symetric=symetric)
-        for sf in self.set_sf(sf):  # convert input to list
+    def date(self,verbose=True):
+        today = datetime.date.today().strftime('%Y_%m_%d')
+        if verbose:
+            print(today)
+        return today
+        
+    def generate(self,eq_names,dr=0.225,psi_n=1.07,
+                 flux_fit=False,symetric=False,debug=False):
+        if symetric:  # enforce symertic
+            self.profile.enforce_symetric()
+        self.config = {'dr':dr,'psi_n':psi_n,'flux_fit':flux_fit,'Nsub':100}
+        self.config['eqdsk'] = []  
+        sf_list = self.load_sf(eq_names)
+        for sf in sf_list:  # convert input to list
             self.add_bound(sf)
         self.shp.add_internal(r_gap=0.001)  # add internal bound
+        self.shp.minimise()
+        self.write()  # append config data to loop pickle
+        self.draw(debug)
         
-        self.fit(debug)
+    def load_sf(self,eq_names):
+        sf_dict,sf_list = {},[]
+        for configuration in eq_names:
+            sf = SF(Setup(configuration).filename)
+            sf_dict[configuration] = sf.filename.split('/')[-1]
+            sf_list.append(sf)
+        self.config['eqdsk'] = sf_dict
+        return sf_list
         
-    def set_sf(self,sf):
-        if not isinstance(sf,list):  # convert sf input to list
-            sf = [sf]
-        return sf
-    
-    def initalise_loop(self,symetric=False):
-        self.profile = Profile(self.name,family='S',part='fw',
-                               npoints=200,symetric=symetric)
+    def write(self):  # overwrite loop_dict + add extra chamber fields
+        with open(self.profile.dataname, 'wb') as output:
+            pickle.dump(self.profile.loop_dict,output,-1)
+            pickle.dump(self.config,output,-1)
+            pickle.dump(self.shp.bound,output,-1)  # boundary points
+            pickle.dump(self.shp.bindex,output,-1)  # boundary index
+
+    def load_data(self):
+        try:
+            with open(self.profile.dataname, 'rb') as input:
+                self.profile.loop_dict = pickle.load(input)
+                self.config = pickle.load(input) 
+                self.shp.bound = pickle.load(input) 
+                self.shp.bindex = pickle.load(input) 
+        except:
+            print('boundary information not found')
+        print(self.config['eqdsk'])
+        
+    def initalise_loop(self):
+        self.profile = Profile(self.name,family='S',part='chamber',npoints=200)
         self.shp = Shape(self.profile,objective='L')
-        # adjust parameter limits for spline loop
+        self.set_bounds()
+        
+    def set_bounds(self):
         self.shp.loop.adjust_xo('upper',lb=0.7)
         self.shp.loop.adjust_xo('top',lb=0.05,ub=0.75)
         self.shp.loop.adjust_xo('lower',lb=0.7)
@@ -157,15 +193,16 @@ class firstwall(object):
 
     def add_bound(self,sf): 
         rpl,zpl = sf.get_boundary()  # boundary points
-        rpl,zpl = geom.offset(rpl,zpl,self.dr)  # offset from sep
+        rpl,zpl = geom.offset(rpl,zpl,self.config['dr'])  # offset from sep
         index = zpl > sf.Xpoint[1]  # trim to Xpoint
         rpl,zpl = rpl[index],zpl[index]
-        rpl,zpl = geom.rzSLine(rpl,zpl,self.Nsub)  # sub-sample
+        rpl,zpl = geom.rzSLine(rpl,zpl,self.config['Nsub'])  # sub-sample
         self.shp.add_bound({'r':rpl,'z':zpl},'internal')  # vessel inner bounds
 
-        if self.flux_fit:  # add flux boundary points
+        if self.config['flux_fit']:  # add flux boundary points
             sf.get_LFP()  # get low feild point
-            rflux,zflux = self.first_wall_psi(sf,psi_n=self.psi_n,trim=False)[:2]
+            rflux,zflux = self.first_wall_psi(sf,\
+            psi_n=self.config['psi_n'],trim=False)[:2]
             rflux,zflux = self.midplane_loop(sf,rflux,zflux)
             rflux,zflux = geom.order(rflux,zflux)
             istop = next((i for i in range(len(zflux)) if zflux[i]<sf.LFPz),-1)
@@ -175,11 +212,12 @@ class firstwall(object):
             np.argmax(zflux) == len(zflux)-1:
                 wtxt = '\n\nOpen feild line detected\n'
                 wtxt += 'disabling flux fit for '
-                wtxt += '{:1.1f}% psi_n \n'.format(1e2*self.psi_n)
+                wtxt += '{:1.1f}% psi_n \n'.format(1e2*self.config['psi_n'])
                 wtxt += 'configuration: '+sf.filename+'\n'
                 warn(wtxt)
             else:  # add flux_fit bounds
-                rflux,zflux = geom.rzSLine(rflux,zflux,int(self.Nsub/2))  
+                rflux,zflux = geom.rzSLine(rflux,zflux,
+                                           int(self.config['Nsub']/2))  
                 self.shp.add_bound({'r':rflux,'z':zflux},'internal')  
   
     def midplane_loop(self,sf,r,z):
@@ -193,15 +231,13 @@ class firstwall(object):
         r,z = r[index],z[index]  # remove duplicates
         return r,z
 
-    def fit(self,debug):
-        self.shp.minimise()
+    def draw(self,debug):
         if debug:
             self.shp.loop.plot()
             self.shp.plot_bounds()
         x = self.profile.loop.draw()
         r,z = x['r'],x['z']
         r,z = geom.order(r,z,anti=True)
-            
         pl.plot(r,z)
         
     def first_wall_psi(self,sf,trim=True,single_contour=False,**kwargs):

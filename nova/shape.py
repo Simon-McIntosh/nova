@@ -16,41 +16,34 @@ from itertools import cycle
 
 class Shape(object):
     
-    def __init__(self,profile,obj='L',nTF='unset',eqconf='unset',
-                 sep='unset',**kwargs):
+    def __init__(self,profile,eqconf='unset',sep='unset',**kwargs):
         self.color = cycle(sns.color_palette('Set2',10))
         self.profile = profile
         self.loop = self.profile.loop
-        self.nTF = nTF
-        self.obj = obj
-        #self.update()
         self.bound = {}  # initalise bounds
         self.bindex = {'internal':[0],'interior':[0],'external':[0]}  # index
         for side in ['internal','interior','external']:
             self.bound[side] = {'r':[],'z':[]}
             if side in kwargs:
                 self.add_bound(kwargs[side],side)
-        if nTF is not 'unset' and (eqconf is not 'unset' or sep is not 'unset'):
+        if self.profile.nTF is not 'unset' and \
+        (eqconf is not 'unset' or sep is not 'unset'):
             self.tf = TF(profile=self.profile)      
             if eqconf is not 'unset':
                 plasma = {'config':eqconf}
             else:
                 plasma = {'r':sep['r'],'z':sep['z']}
             ny = kwargs.get('ny',3)  # TF filament number (y-dir)
-            self.cage = coil_cage(nTF=nTF,rc=self.tf.rc,plasma=plasma,ny=ny)
+            self.cage = coil_cage(nTF=self.profile.nTF,rc=self.tf.rc,
+                                  plasma=plasma,ny=ny)
             x = self.tf.get_loops(self.loop.draw())
-            self.cage.set_TFcoil(x['cl'])
+            self.cage.set_TFcoil(x['cl'],smooth=False)
         else:
-            if self.obj is 'E':
+            if self.profile.obj is 'E':
                 errtxt = 'nTF and SFconfig keywords not set\n'
                 errtxt += 'unable to calculate stored energy\n'
                 errtxt += 'initalise with \'nTF\' keyword'
                 raise ValueError(errtxt)
-                
-    def update(self):
-        self.profile.load(obj=self.obj,nTF=self.nTF)
-        if 'nTF' is not 'unset':
-            self.tf = TF(profile=self.profile) 
             
     def add_bound(self,x,side):
         for var in ['r','z']:
@@ -92,7 +85,7 @@ class Shape(object):
                            bounds=bnorm,acc=acc,iprint=-1,
                            args=(False,ripple_limit))
         if ripple:  # re-solve with ripple constraint
-            if self.nTF == 'unset':
+            if self.profile.nTF == 'unset':
                 raise ValueError('requre \'nTF\' to solve ripple constraint')
             print('with ripple')
             xnorm = fmin_slsqp(self.fit,xnorm,f_ieqcons=self.constraint_array,
@@ -100,34 +93,26 @@ class Shape(object):
                                args=(True,ripple_limit))     
         xo = get_oppvar(self.loop.xo,self.loop.oppvar,xnorm)  # de-normalize
         self.loop.set_input(x=xo)  # inner loop
-        self.profile.write(nTF=self.nTF,obj=self.obj)  # store loop
+        self.profile.write()  # store loop
         if verbose:
-            self.toc(tic,xo)
+            self.toc(tic)
 
-    def toc(self,tic,xo):
+    def toc(self,tic):
         print('optimisation time {:1.1f}s'.format(time.time()-tic))
         print('noppvar {:1.0f}'.format(len(self.loop.oppvar)))
-        if self.nTF is not 'unset':
-            x = self.tf.get_loops(self.loop.draw(x=xo))
-            self.cage.set_TFcoil(x['cl'],smooth=True)
-            Vol = self.cage.get_volume()
-            print('ripple {:1.3f}'.format(self.cage.get_ripple()))
-            print('energy {:1.2f} GJ'.format(1e-9*self.cage.energy()))
-            print(r'TF volume {:1.0f} m3'.format(Vol['TF']))
-            print(r'plasma volume {:1.0f} m3'.format(Vol['plasma']))
-            print('ratio {:1.2f}'.format(Vol['ratio']))
+        if self.profile.nTF is not 'unset':
+            self.cage.output()
             
     def constraint_array(self,xnorm,*args):
         ripple,ripple_limit = args
         xo = get_oppvar(self.loop.xo,self.loop.oppvar,xnorm)  # de-normalize
         if ripple:  # constrain ripple contour
-            x = self.tf.get_loops(self.loop.draw(x=xo))
+            x = self.tf.get_loops(self.loop.draw(x=xo))  #npoints
             dot = np.array([])
             for side,key in zip(['internal','interior','external'],
                                 ['in','in','out']):
                 dot = np.append(dot,self.dot_diffrence(x[key],side))
-            r,z = geom.rzInterp(x['cl']['r'],x['cl']['z'],npoints=50)
-            self.cage.set_TFcoil({'r':r,'z':z})
+            self.cage.set_TFcoil({'r':x['cl']['r'],'z':x['cl']['z']})
             max_ripple = self.cage.get_ripple()
             edge_ripple = self.cage.edge_ripple(npoints=10)
             dot = np.append(dot,ripple_limit-edge_ripple)
@@ -145,7 +130,7 @@ class Shape(object):
         else:
             self.xo = xo
         x = self.loop.draw(x=xo)
-        if self.obj is 'L':  # coil length
+        if self.profile.obj is 'L':  # coil length
             objF = geom.length(x['r'],x['z'],norm=False)[-1]
         elif self.obj is 'E':  # stored energy
             x = self.tf.get_loops(x=x)
@@ -234,21 +219,21 @@ if __name__ is '__main__':
 
     nTF = 16
     family='S'
-    ripple = True
+    ripple = False
 
     config = {'TF':'demo','eq':'SN'}
     config,setup = select(config,nTF=nTF)
     
 
     demo = DEMO()
-    '''
+
     profile = Profile(config['TF'],family=family,part='TF',nTF=nTF)  # ,load=False
-    shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'],ny=3)
+    shp = Shape(profile,nTF=nTF,obj='L',eqconf=config['eq'],ny=1)
     shp.add_vessel(demo.parts['Vessel']['out'])
     shp.minimise(ripple=ripple,verbose=False)
     cage = shp.cage
     
-    shp.update()
+    #shp.update()
     #shp.tf.fill()
     #shp.loop.plot({'flat':0.3,'tilt':13})
     #shp.loop.plot()
@@ -263,11 +248,11 @@ if __name__ is '__main__':
     x = tf.get_loops(x_in)
     cage = coil_cage(nTF=18,rc=tf.rc,plasma={'config':config['eq']},ny=3)
     cage.set_TFcoil(x['cl'],smooth=True)
-
+    '''
     
     Vol = cage.get_volume()
     print('')
-    print('ref nTF {:1.0f}'.format(18))
+    print('nTF {:1.0f}'.format(nTF))
     print('ripple {:1.3f}'.format(cage.get_ripple()))
     print('energy {:1.2f} GJ'.format(1e-9*cage.energy()))
     print(r'TF volume {:1.0f} m3'.format(Vol['TF']))
@@ -279,11 +264,11 @@ if __name__ is '__main__':
     demo.fill_part('Blanket')
     demo.fill_part('Vessel')
     
-    demo.fill_part('TF_Coil',color=0.75*np.ones(3))
+    #demo.fill_part('TF_Coil',color=0.75*np.ones(3))
     
-    #shp.tf.fill()
+    shp.tf.fill()
     
-    cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)  # 2e5
+    #cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)  # 2e5
     pl.axis('off')
     
     pl.savefig('../Figs/ripple_referance')

@@ -603,7 +603,7 @@ class Sloop(object):  # polybezier
 class Profile(object):
     
     def __init__(self,name,family='S',part='TF',npoints=200,
-                 load=False,symetric=False,**kwargs):
+                 symetric=False,**kwargs):
         self.npoints = npoints
         self.name = name
         self.part = part
@@ -614,7 +614,7 @@ class Profile(object):
         self.obj=kwargs.get('obj','L') 
         self.read_loop_dict()
 
-    def initalise_loop(self,family,npoints=100,symetric=False):
+    def initalise_loop(self,family,npoints=200,symetric=False):
         self.family = family  # A==arc, D==Princton-D, S==spline
         if self.family == 'A':  # tripple arc (5-7 parameter)
             self.loop = Aloop(npoints=npoints)
@@ -691,17 +691,18 @@ class Profile(object):
             self.loop_dict = {}
             pickle.dump(self.loop_dict,output,-1)
         
-    def write(self,nTF='unset',obj='unset'):  # write xo and oppvar to file
+    def write(self):  # write xo and oppvar to file
         if self.family in self.loop_dict:
-            if nTF not in self.loop_dict[self.family]:
-                self.loop_dict[self.family][nTF] = {obj:[]}
+            if self.nTF not in self.loop_dict[self.family]:
+                self.loop_dict[self.family][self.nTF] = {self.obj:[]}
         else:
-            self.loop_dict[self.family] = {nTF:{obj:[]}}
+            self.loop_dict[self.family] = {self.nTF:{self.obj:[]}}
         cdict = {}
         for key in ['xo','oppvar','family','symetric','tension','limits']:
             if hasattr(self.loop,key):
                 cdict[key] = getattr(self.loop,key)
-        self.loop_dict[self.family][nTF][obj] = cdict
+        self.loop_dict[self.family][self.nTF][self.obj] = cdict
+        print(self.dataname)
         with open(self.dataname, 'wb') as output:
             pickle.dump(self.loop_dict,output,-1)
         self.frame_data()

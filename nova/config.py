@@ -174,7 +174,7 @@ class Setup(object):
             self.targets['inner'] = {'L2D':0.6}
             self.targets['outer'] = {'L2D':0.65}
             
-        elif configuration == 'DEMO_FW_SOF':
+        elif configuration == 'SN2015_SOF':
             self.dataname = 'DEMO_FW'
             self.filename = 'Equil_AR3d1_2015_04_v2_SOF_CSred_fine_fi_2N246U_v1_0.eqdsk'
             self.firstwall['div_ex'] = 0.5
@@ -182,7 +182,7 @@ class Setup(object):
             self.targets['inner'] = {'L2D':1.0}
             self.targets['outer'] = {'L2D':1.36}
          
-        elif configuration == 'DEMO_FW_EOF':
+        elif configuration == 'SN2015_EOF':
             self.dataname = 'DEMO_FW'
             self.filename = 'Equil_AR3d1_2015_04_v2_EOF_CSred_fine_fi_2NDUNR_v1_0.eqdsk'
             self.firstwall['div_ex'] = 0.5
@@ -206,7 +206,7 @@ class Setup(object):
             self.targets['inner'] = {'L2D':1.0}  # 0.6
             self.targets['outer'] = {'L2D':1.36}  # 0.65
             
-        elif configuration == 'SN2014_SOF':
+        elif configuration == 'SN2017_SOF':
             self.dataname = 'DEMO_SN2014'
             self.filename = 'Equil_2016_DTT1_SN_2017_01_11PF_SOF_Ipl_20d25MA'
             self.filename += '_bt_1d03_li_0d8_R0_8d76m_final.eqdsk'
@@ -215,7 +215,7 @@ class Setup(object):
             self.targets['inner'] = {'L2D':1.0}  # 0.6
             self.targets['outer'] = {'L2D':1.36}  # 0.65         
             
-        elif configuration == 'SN2014_EOF':
+        elif configuration == 'SN2017_EOF':
             self.dataname = 'DEMO_SN2014'
             #self.filename = 'Equil_2016_DTT1_SN_2017_01_11PF_EOF_Ipl_20d25MA'
             #self.filename += '_bt_1d03_li_0d8_R0_8d76m_v2.eqdsk'

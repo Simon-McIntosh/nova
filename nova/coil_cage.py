@@ -15,12 +15,12 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 class coil_cage(object):
-    def __init__(self,nTF=18,rc=0.5,ny=3,**kwargs):
+    def __init__(self,nTF=18,rc=0.5,ny=3,alpha=1-1e-4,**kwargs):
         self.nTF = nTF  # TF coil number
         self.ny = ny  #  winding pack depth discritization
         self.rc = rc
         if 'plasma' in kwargs:
-            self.get_seperatrix(alpha=0.95,**kwargs['plasma'])
+            self.get_seperatrix(alpha=alpha,**kwargs['plasma'])
         if 'coil' in kwargs:
             self.set_TFcoil(kwargs['coil'])
 
@@ -167,6 +167,14 @@ class coil_cage(object):
         V_pl = geom.loop_vol(self.plasma_loop[:,0],self.plasma_loop[:,2])
         ratio = V_TF/V_pl
         return {'TF':V_TF,'plasma':V_pl,'ratio':ratio}
+    
+    def output(self):  # output cage parameters to screen
+        Vol = self.get_volume()
+        print('ripple {:1.3f}'.format(self.get_ripple()))
+        print('energy {:1.2f} GJ'.format(1e-9*self.energy()))
+        print(r'TF volume {:1.0f} m3'.format(Vol['TF']))
+        print(r'plasma volume {:1.0f} m3'.format(Vol['plasma']))
+        print('ratio {:1.2f}'.format(Vol['ratio']))
         
     def plot_loops(self,scale=1.5,sticks=False):
         self.loop_ripple()

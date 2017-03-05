@@ -97,14 +97,15 @@ class PF(object):
             else:
                 edgecolor = 'r'  
             coil_color = color[4] 
-            if name in self.index['CS']['name']:
+            if name.split('_')[0] in self.index['CS']['name']:
                 drs = -2.5/3*dr
                 ha = 'right'
                 coil_color = color[5]
-            elif name in self.index['PF']['name']:
+            elif name.split('_')[0] in self.index['PF']['name']:
                 drs = 2.5/3*dr
                 ha = 'left'
                 coil_color = color[4] 
+                
             pl.fill(Rfill,Zfill,facecolor=coil_color,alpha=alpha,
                     edgecolor=edgecolor)
             

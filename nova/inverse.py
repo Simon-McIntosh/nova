@@ -62,9 +62,9 @@ class INV(object):
                       
     def initalise_limits(self):
         self.limit = {'I':{},'L':[],'F':[]}
-        self.limit['I'] = {'PF':30,'CS_sum':500}  # MA 
+        self.limit['I'] = {'PF':50,'CS_sum':500}  # MA 
         self.limit['L'] = {'CS':[-12,8],'PF':[0.05,0.95]}  # m / fraction
-        self.limit['F'] = {'PFz':350,'CSz_sum':350,'CSz_sep':300}  # MN
+        self.limit['F'] = {'PFz':450,'CSz_sum':350,'CSz_sep':300}  # MN
         self.set_PF_limit()
         
     def set_PF_limit(self):

@@ -17,7 +17,7 @@ import json
 class RB(object):
     def __init__(self,setup,sf,npoints=500):
         self.setup = setup
-        self.store_sf(sf)
+        #self.store_sf(sf)
         self.npoints = npoints
         self.dataname = setup.configuration
         self.datadir = trim_dir('../../../Data/') 

@@ -13,49 +13,27 @@ from scipy.optimize import minimize
 from collections import OrderedDict
 from amigo.IO import trim_dir
 import json
+from nova.firstwall import divertor,main_chamber
 
 class RB(object):
-    def __init__(self,setup,sf,npoints=500):
+    def __init__(self,sf,setup,npoints=500):
         self.setup = setup
-        #self.store_sf(sf)
+        self.sf = sf
         self.npoints = npoints
         self.dataname = setup.configuration
         self.datadir = trim_dir('../../../Data/') 
         self.segment = {}  # store section segments (divertor,fw,blanket...)
         
-
-    def upper_lower(self,Ru,Zu,Rl,Zl,Zjoin=0):
-        u_index = np.arange(len(Ru),dtype='int')
-        iu_lower = u_index[Zu<Zjoin]
-        iu_out,iu_in = iu_lower[0]-1,iu_lower[-1]+1
-        l_index = np.arange(len(Rl),dtype='int')
-        il_upper = l_index[Zl>Zjoin]
-        il_out,il_in = il_upper[0]-1,il_upper[-1]+1
-        R = np.append(Rl[:il_out],Ru[:iu_out][::-1])
-        R = np.append(R,Ru[iu_in:][::-1])
-        R = np.append(R,Rl[il_in:])
-        Z = np.append(Zl[:il_out],Zu[:iu_out][::-1])
-        Z = np.append(Z,Zu[iu_in:][::-1])
-        Z = np.append(Z,Zl[il_in:])
-        return R,Z
-    
-    def place_blanket(self,select='upper',store=True,plot=False):
-        blanket = wrap(self.segment['first_wall'],self.segment['inner_loop'])
-        blanket.sort_z('inner',select=select)
-        blanket.offset('outer',self.setup.build['BB'],
-                       ref_o=3/10*np.pi,dref=np.pi/3)
-        bfill = blanket.fill(plot=plot,color=colors[0])
-        if store:
-            self.segment['blanket_fw']  = bfill[0]
-            self.segment['blanket']  = bfill[1]
-        return bfill
-   
     def firstwall(self,mode='calc',color=0.6*np.ones(3),
                   plot=True,debug=False,symetric=False,DN=False):
         
         if mode == 'eqdsk':  # read first wall from eqdsk
             self.Rb,self.Zb = self.sf.xlim,self.sf.ylim
         elif mode == 'calc':
+            mc = main_chamber('DTT',date='2017_03_06')  # load main chamber
+            #mc.generate(eq_names,psi_n=1.07,flux_fit=True,plot=True)
+            mc.load_data(plot=True)  # load from file
+
             if DN:  # double null
                 self.sf.get_Xpsi(select='upper')  # upper X-point
                 self.update_sf()  # update streamfunction
@@ -82,9 +60,14 @@ class RB(object):
                 self.segment['blanket']  = bfill[1]
             else:
                 self.sf.get_Xpsi(select='lower')  # lower X-point
-                self.update_sf()  # update streamfunction
-                self.Rb,self.Zb = self.place_target(debug=debug,
-                                                   symetric=symetric)
+                
+                div = divertor(self.sf,self.setup)
+                div.place(debug=False)
+                self.Rb,self.Zb = div.join(mc)                
+                #self.update_sf()  # update streamfunction
+                
+                #self.Rb,self.Zb = self.place_target(debug=debug,
+                #                                   symetric=symetric)
                 self.place_blanket(plot=plot)
             if plot:
                 self.vessel_fill()
@@ -111,29 +94,32 @@ class RB(object):
             (self.Zb <= self.sf.z.max()) & (self.Zb >= self.sf.z.min())
             pl.plot(self.Rb[index],self.Zb[index],
                     '-',color=color,linewidth=1.75)
-        
-    def connect(self,psi,target_pair,ends,loop=[]):
-        gap = []
-        if loop:
-            r,z = loop
-        else:
-            psi_line = self.sf.get_contour([psi])[0]
-            for line in psi_line:
-                r,z = line[:,0],line[:,1]
-                gap.append(np.min((self.setup.targets[target_pair[0]]['R'][ends[0]]-r)**2+
-                          (self.setup.targets[target_pair[0]]['Z'][ends[0]]-z)**2))
-            select = np.argmin(gap)
-            line = psi_line[select]
-            r,z = line[:,0],line[:,1]
-        index = np.zeros(2,dtype=int)
-        index[0] = np.argmin((self.setup.targets[target_pair[0]]['R'][ends[0]]-r)**2+
-                 (self.setup.targets[target_pair[0]]['Z'][ends[0]]-z)**2)
-        index[1] = np.argmin((self.setup.targets[target_pair[1]]['R'][ends[1]]-r)**2+
-                 (self.setup.targets[target_pair[1]]['Z'][ends[1]]-z)**2)
-        if index[0]>index[1]:
-            index = index[::-1]
-        r,z = r[index[0]:index[1]+1],z[index[0]:index[1]+1] 
-        return r,z
+            
+    def upper_lower(self,Ru,Zu,Rl,Zl,Zjoin=0):
+        u_index = np.arange(len(Ru),dtype='int')
+        iu_lower = u_index[Zu<Zjoin]
+        iu_out,iu_in = iu_lower[0]-1,iu_lower[-1]+1
+        l_index = np.arange(len(Rl),dtype='int')
+        il_upper = l_index[Zl>Zjoin]
+        il_out,il_in = il_upper[0]-1,il_upper[-1]+1
+        R = np.append(Rl[:il_out],Ru[:iu_out][::-1])
+        R = np.append(R,Ru[iu_in:][::-1])
+        R = np.append(R,Rl[il_in:])
+        Z = np.append(Zl[:il_out],Zu[:iu_out][::-1])
+        Z = np.append(Z,Zu[iu_in:][::-1])
+        Z = np.append(Z,Zl[il_in:])
+        return R,Z
+    
+    def place_blanket(self,select='upper',store=True,plot=False):
+        blanket = wrap(self.segment['first_wall'],self.segment['inner_loop'])
+        blanket.sort_z('inner',select=select)
+        blanket.offset('outer',self.setup.build['BB'],
+                       ref_o=3/10*np.pi,dref=np.pi/3)
+        bfill = blanket.fill(plot=plot,color=colors[0])
+        if store:
+            self.segment['blanket_fw']  = bfill[0]
+            self.segment['blanket']  = bfill[1]
+        return bfill
 
     def vessel_fill(self):
         r,z = self.segment['blanket_fw']['r'],self.segment['blanket_fw']['z']
@@ -176,15 +162,7 @@ class RB(object):
         vv.fill(color=colors[1])
         self.segment['vessel_inner'] = {'r':rin,'z':zin}
         self.segment['vessel_outer'] = {'r':r,'z':z}
-
-    def append(self,R,Z,r,z):
-        dr = np.zeros(2)
-        for i,end in enumerate([0,-1]):
-            dr[i] = (R[-1]-r[end])**2+(Z[-1]-z[end])**2
-        if dr[1] < dr[0]:
-            r,z = r[::-1],z[::-1]
-        return np.append(R,r[1:-1]),np.append(Z,z[1:-1]) 
-        
+      
     def get_sol(self,plot=False):
         self.trim_sol(plot=plot)
         for leg in list(self.sf.legs)[2:]:
@@ -296,94 +274,6 @@ class RB(object):
         db = np.array([Rloop[j[1]]-Rloop[j[0]],Zloop[j[1]]-Zloop[j[0]]])
         step = np.cross(b-s,ds)/np.cross(ds,db)
         return step,db
-
-    def match_psi(self,Ro,Zo,direction,theta_end,theta_sign,phi_target,graze,
-                  dPlate,leg,debug=False): 
-        color = sns.color_palette('Set2',2)
-        gain = 0.15  # 0.25
-        Nmax = 500
-        Lo = [0.5,0.05]  # [blend,turn]  5,0.015
-        r2m = [+1.5,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
-        Nplate = 1 # number of target plate divisions (1==flat)
-        L = Lo[0] if theta_end == 0 else Lo[1]
-        Lsead = L
-        flag = 0
-        for i in range(Nmax):
-            R,Z,phi = self.blend_target(Ro,Zo,dPlate,L,direction,theta_end,
-                                        theta_sign,graze,r2m,Nplate)
-            L -= gain*(phi_target-phi)
-            if debug: pl.plot(R,Z,color=color[0],lw=1)
-            if np.abs(phi_target-phi) < 1e-4:
-                if debug: 
-                    pl.plot(R,Z,'r',color=color[1],lw=3)
-                    print('rz',Ro,Zo,'N',i)
-                break
-            if L < 0:
-                L = 1
-                gain *= -1
-            if i == Nmax-1 or L>15:
-                print(leg,'dir',direction,'phi target convergence error')
-                print('Nmax',i+1,'L',L,'Lo',Lsead)
-                if flag == 0:
-                    break
-                    gain *= -1  # reverse gain
-                    flag = 1
-                else:
-                    break
-        return R,Z
-                        
-    def blend_target(self,Ro,Zo,dPlate,L,direction,theta_end,theta_sign,graze,
-                     r2m,Nplate):
-            r2s = r2m[0] if theta_end == 0 else r2m[1]
-            dL = 0.1 if theta_end == 0 else 0.05  # 0.005,0.005
-            R,Z = np.array([Ro]),np.array([Zo])
-            R,Z = self.extend_target(R,Z,dPlate/(2*Nplate),Nplate,r2s,
-                                     theta_end,theta_sign,
-                                     direction,graze,False,
-                                     target=True)  # constant graze 
-            Ninterp = int(dPlate/(2*dL))
-            if Ninterp < 2: Ninterp = 2
-            R,Z = geom.rzInterp(R,Z,Ninterp)
-            graze = self.sf.get_graze([R[-1],Z[-1]],
-                                      [R[-1]-R[-2],Z[-1]-Z[-2]])  # update graze
-            N = np.int(L/dL+1)
-            if N<30: N=30
-            dL = L/(N-1)
-            target_angle = np.arctan2((Z[-1]-Z[-2]),(R[-1]-R[-2]))
-            Xi = self.sf.expansion([R[-1]],[Z[-1]])
-            theta = self.sf.strike_point(Xi,graze)
-            B = direction*self.sf.Bpoint((R[-1],Z[-1]))
-            Bhat = geom.rotate_vector2D(B,theta_sign*theta)
-            trans_angle = np.arctan2(Bhat[1],Bhat[0])
-            if abs(target_angle-trans_angle) > 0.01*np.pi:
-                accute = True
-            else:
-                accute = False
-            R,Z = self.extend_target(R,Z,dL,N,r2s,theta_end,theta_sign,
-                                direction,graze,accute)  # transition graze
-            phi = self.sf.Ppoint([R[-1],Z[-1]])
-            return R,Z,phi
-            
-    def extend_target(self,R,Z,dL,N,r2s,theta_end,theta_sign,direction,graze,
-                      accute,target=False):
-        for i in range(N):
-            if target:
-                Lhat = 0
-            else:
-                Lhat = i/(N-1)
-                if r2s < 0:  # delayed transtion
-                    Lhat = Lhat**np.abs(r2s)
-                else:  # expedient transition
-                    Lhat = Lhat**(1/r2s)
-            Xi = self.sf.expansion([R[-1]],[Z[-1]])
-            theta = self.sf.strike_point(Xi,graze)
-            if accute: theta = np.pi-theta
-            theta = Lhat*theta_end+(1-Lhat)*theta
-            B = direction*self.sf.Bpoint((R[-1],Z[-1]))
-            Bhat = geom.rotate_vector2D(B,theta_sign*theta)
-            R = np.append(R,R[-1]+dL*Bhat[0])
-            Z = np.append(Z,Z[-1]+dL*Bhat[1])
-        return R,Z
 
     def json(self,**kwargs):
         data = {}

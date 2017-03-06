@@ -702,7 +702,6 @@ class Profile(object):
             if hasattr(self.loop,key):
                 cdict[key] = getattr(self.loop,key)
         self.loop_dict[self.family][self.nTF][self.obj] = cdict
-        print(self.dataname)
         with open(self.dataname, 'wb') as output:
             pickle.dump(self.loop_dict,output,-1)
         self.frame_data()

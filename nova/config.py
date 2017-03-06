@@ -10,7 +10,7 @@ def select(base={'TF':'dtt','eq':'SN'},nTF=18,update=True,**kwargs):
     if 'nPF' in kwargs:
         config['nPF'] = kwargs.get('nPF')
     label = base.get('label',base.get('eq'))
-    config['TF'] = '{}{}'.format(label,base['TF'])
+    config['TF'] = '{}_{}'.format(label,base['TF'])
     if 'nCS' in kwargs and 'nPF' in kwargs:
         config['eq'] = '{:s}{:s}_{:d}TF_{:d}PF_{:d}CS'.format(\
         label,base['TF'],nTF,config['nPF'],config['nCS'])
@@ -42,7 +42,7 @@ class Setup(object):
         self.targets['default']['dPlate'] = 0.5
         self.targets['default']['dR'] = 0
         self.firstwall = {}  # initalise firstwall data structure
-        self.firstwall['dRfw'] = 0.25
+        self.firstwall['dRfw'] = 0.225
         self.firstwall['psi_n'] = 1.07
         self.firstwall['div_ex'] = 0.25
         self.firstwall['trim'] = [0.75,0.7]
@@ -185,18 +185,26 @@ class Setup(object):
         elif configuration == 'SN2015_EOF':
             self.dataname = 'DEMO_FW'
             self.filename = 'Equil_AR3d1_2015_04_v2_EOF_CSred_fine_fi_2NDUNR_v1_0.eqdsk'
-            self.firstwall['div_ex'] = 0.5
+            self.firstwall['div_ex'] = 0.75
             self.firstwall['trim'] = [0.88,0.95]  # trim fraction (in/out)
             self.targets['inner'] = {'L2D':1.0}
             self.targets['outer'] = {'L2D':1.36}
             
-        elif configuration == 'DEMO_SN':
-            self.dataname = 'DEMO_SN'
+        elif configuration == 'DEMO_SN_SOF':
+            self.dataname = 'DEMO_SOF'
+            self.filename = 'Equil_AR3d1_2015_04_v2_SOF_CSred_fine_final.eqdsk'
+            self.firstwall['div_ex'] = 0.75
+            #self.firstwall['trim'] = [0.88,0.95]  # trim fraction (in/out)
+            self.targets['inner'] = {'L2D':1.0}  # 0.6
+            self.targets['outer'] = {'L2D':1.36}  # 0.65    
+            
+        elif configuration == 'DEMO_SN_EOF':
+            self.dataname = 'DEMO_EOF'
             self.filename = 'Equil_AR3d1_2015_04_v2_EOF_CSred_fine_final.eqdsk'
-            self.firstwall['div_ex'] = 0.25
-            self.firstwall['trim'] = [0.88,0.95]  # trim fraction (in/out)
-            self.targets['inner'] = {'L2D':0.6}
-            self.targets['outer'] = {'L2D':0.65}
+            self.firstwall['div_ex'] = 1.5
+            #self.firstwall['trim'] = [0.88,0.95]  # trim fraction (in/out)
+            self.targets['inner'] = {'L2D':1.0}  # 0.6
+            self.targets['outer'] = {'L2D':1.1}  # 0.65    
 
         elif configuration == 'SN':
             self.dataname = 'DEMO_SN'
@@ -204,13 +212,13 @@ class Setup(object):
             self.firstwall['div_ex'] = 0.5  # 0.25
             self.firstwall['trim'] = [0.88,0.95]  # trim fraction (in/out)
             self.targets['inner'] = {'L2D':1.0}  # 0.6
-            self.targets['outer'] = {'L2D':1.36}  # 0.65
+            self.targets['outer'] = {'L2D':1.1}  # 0.65
             
         elif configuration == 'SN2017_SOF':
             self.dataname = 'DEMO_SN2014'
             self.filename = 'Equil_2016_DTT1_SN_2017_01_11PF_SOF_Ipl_20d25MA'
             self.filename += '_bt_1d03_li_0d8_R0_8d76m_final.eqdsk'
-            self.firstwall['div_ex'] = 0.5  # 0.25
+            self.firstwall['div_ex'] = 0.25  # 0.25
             self.firstwall['trim'] = [0.88,0.95]  # trim fraction (in/out)
             self.targets['inner'] = {'L2D':1.0}  # 0.6
             self.targets['outer'] = {'L2D':1.36}  # 0.65         
@@ -221,7 +229,7 @@ class Setup(object):
             #self.filename += '_bt_1d03_li_0d8_R0_8d76m_v2.eqdsk'
             self.filename = 'Equil_2016_DTT1_SN_2017_01_11PF_EOF_Ipl_20d25MA'
             self.filename += '_bt_1d03_li_0d8_R0_8d76m_opt_v4.eqdsk'
-            self.firstwall['div_ex'] = 0.5  # 0.25
+            self.firstwall['div_ex'] = 0.25  # 0.25
             self.firstwall['trim'] = [0.88,0.95]  # trim fraction (in/out)
             self.targets['inner'] = {'L2D':1.0}  # 0.6
             self.targets['outer'] = {'L2D':1.36}  # 0.65  
@@ -232,7 +240,7 @@ class Setup(object):
             #self.filename += '_bt_1d03_li_0d8_R0_8d76m_v2.eqdsk'
             self.filename = 'Equil_AR3d1_SN_v2_2015_09_bt_1d03li_0d8_'
             self.filename += 'Ipl_20d25_EOF.eqdsk'
-            self.firstwall['div_ex'] = 0.5  # 0.25
+            self.firstwall['div_ex'] = 0.25  # 0.25
             self.firstwall['trim'] = [0.88,0.95]  # trim fraction (in/out)
             self.targets['inner'] = {'L2D':1.0}  # 0.6
             self.targets['outer'] = {'L2D':1.36}  # 0.65                          

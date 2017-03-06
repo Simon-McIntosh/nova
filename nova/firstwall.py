@@ -1,5 +1,4 @@
 import numpy as np
-from amigo.geom import Loop
 import amigo.geom as geom
 from nova.loops import Profile
 from nova.shape import Shape
@@ -9,16 +8,24 @@ import datetime
 import pickle
 from nova.streamfunction import SF
 from nova.config import Setup
+from collections import OrderedDict
+import seaborn as sns
 
-
-class targets(object):
+class divertor(object):
     
-    def __init__(self,sf,targets,**kwargs):
+    def __init__(self,sf,setup,flux_conformal=False):
         self.sf = sf
-        self.targets = targets  # target definition (graze, L2D, etc)
-        self.dRfw = kwargs.get('dRfw',0.225)
-        self.div_ex = kwargs.get('div_ex',0.25)
+        self.targets = setup.targets  # target definition (graze, L2D, etc)
+        self.div_ex = setup.firstwall['div_ex']
+        self.segment = {}
+        if flux_conformal:
+            self.Rfw,self.Zfw,self.psi_fw = sf.firstwall_loop(\
+            psi_n=setup.firstwall['psi_n'])
+        else:
+            self.Rfw,self.Zfw,self.psi_fw = sf.firstwall_loop(\
+            dr=setup.firstwall['dRfw'])
         
+
     def set_target(self,leg,**kwargs):
         if leg not in self.targets:
             self.targets[leg] = {}
@@ -30,7 +37,6 @@ class targets(object):
     
     def place(self,debug=False,**kwargs):
         layer_index = 0  # construct from first open flux surface
-        symetric = kwargs.get('symetric',False)
         self.sf.sol(update=True,plot=False,debug=debug)
         for leg in list(self.sf.legs)[2:]:
             self.set_target(leg)
@@ -41,7 +47,6 @@ class targets(object):
             Direction = [1,-1]
             Theta_end = [0,np.pi]
             theta_sign = 1
-            
             if self.sf.Xloc == 'upper':
                 theta_sign *= -1
                 Direction = Direction[::-1]
@@ -79,8 +84,8 @@ class targets(object):
             if leg is 'outer':
                 self.targets[leg]['R'] = self.targets[leg]['R'][::-1]
                 self.targets[leg]['Z'] = self.targets[leg]['Z'][::-1]
+                
         Rb,Zb = np.array([]),np.array([])
-
         if self.sf.nleg == 6:  # SF
             Rb = np.append(Rb,self.targets['inner2']['R'][1:])
             Zb = np.append(Zb,self.targets['inner2']['Z'][1:])
@@ -100,9 +105,11 @@ class targets(object):
             Rb = np.append(Rb,self.targets['outer1']['R'][::-1])
             Zb = np.append(Zb,self.targets['outer1']['Z'][::-1])
             self.segment['divertor'] = {'r':Rb,'z':Zb}  # store diveror
+            '''
             r,z = self.connect(self.psi_fw[1],['outer1','inner2'],[0,0],
-                               loop=(self.loop.R[::-1],self.loop.Z[::-1]))
+                               loop=(self.Rfw[::-1],self.Zfw[::-1]))
             Rb,Zb = self.append(Rb,Zb,r,z)
+            '''
         else:
             Rb = np.append(Rb,self.targets['inner']['R'][1:])
             Zb = np.append(Zb,self.targets['inner']['Z'][1:])
@@ -113,232 +120,22 @@ class targets(object):
             Rb = np.append(Rb,self.targets['outer']['R'][1:])
             Zb = np.append(Zb,self.targets['outer']['Z'][1:])
             self.segment['divertor'] = {'r':Rb,'z':Zb}  # store diveror
+            '''
             r,z = self.connect(self.psi_fw[1],['outer','inner'],[-1,0],
-                               loop=(self.loop.R,self.loop.Z))
+                               loop=(self.Rfw,self.Zfw))
             Rb,Zb = self.append(Rb,Zb,r,z)
-        self.Rb,self.Zb = self.midplane_loop(Rb,Zb)
+            '''
+            
+        '''
+        self.Rb,self.Zb = self.sf.midplane_loop(Rb,Zb)
         self.Rb,self.Zb = self.first_wall_fit(self.dRfw,symetric=symetric,
                                               debug=debug)
         #self.get_sol()  # trim sol to targets and store values
         #self.write_boundary(self.Rb,self.Zb)
-        return self.Rb,self.Zb
- 
-
-class main_chamber(object):
-    
-    def __init__(self,name,**kwargs):
-        today = self.date(verbose=False)
-        date_str = kwargs.get('date',today)
-        self.name = '{}_{}'.format(date_str,name)  # chamber name
-        self.initalise_loop()
-        
-    def date(self,verbose=True):
-        today = datetime.date.today().strftime('%Y_%m_%d')
-        if verbose:
-            print(today)
-        return today
-        
-    def generate(self,eq_names,dr=0.225,psi_n=1.07,
-                 flux_fit=False,symetric=False,debug=False):
-        if symetric:  # enforce symertic
-            self.profile.enforce_symetric()
-        self.config = {'dr':dr,'psi_n':psi_n,'flux_fit':flux_fit,'Nsub':100}
-        self.config['eqdsk'] = []  
-        sf_list = self.load_sf(eq_names)
-        for sf in sf_list:  # convert input to list
-            self.add_bound(sf)
-        self.shp.add_internal(r_gap=0.001)  # add internal bound
-        self.shp.minimise()
-        self.write()  # append config data to loop pickle
-        self.draw(debug)
-        
-    def load_sf(self,eq_names):
-        sf_dict,sf_list = {},[]
-        for configuration in eq_names:
-            sf = SF(Setup(configuration).filename)
-            sf_dict[configuration] = sf.filename.split('/')[-1]
-            sf_list.append(sf)
-        self.config['eqdsk'] = sf_dict
-        return sf_list
-        
-    def write(self):  # overwrite loop_dict + add extra chamber fields
-        with open(self.profile.dataname, 'wb') as output:
-            pickle.dump(self.profile.loop_dict,output,-1)
-            pickle.dump(self.config,output,-1)
-            pickle.dump(self.shp.bound,output,-1)  # boundary points
-            pickle.dump(self.shp.bindex,output,-1)  # boundary index
-
-    def load_data(self):
-        try:
-            with open(self.profile.dataname, 'rb') as input:
-                self.profile.loop_dict = pickle.load(input)
-                self.config = pickle.load(input) 
-                self.shp.bound = pickle.load(input) 
-                self.shp.bindex = pickle.load(input) 
-        except:
-            print('boundary information not found')
-        print(self.config['eqdsk'])
-        
-    def initalise_loop(self):
-        self.profile = Profile(self.name,family='S',part='chamber',npoints=200)
-        self.shp = Shape(self.profile,objective='L')
-        self.set_bounds()
-        
-    def set_bounds(self):
-        self.shp.loop.adjust_xo('upper',lb=0.7)
-        self.shp.loop.adjust_xo('top',lb=0.05,ub=0.75)
-        self.shp.loop.adjust_xo('lower',lb=0.7)
-        self.shp.loop.adjust_xo('bottom',lb=0.05,ub=0.75)
-        self.shp.loop.adjust_xo('l',lb=0.8,ub=1.5)
-
-    def add_bound(self,sf): 
-        rpl,zpl = sf.get_boundary()  # boundary points
-        rpl,zpl = geom.offset(rpl,zpl,self.config['dr'])  # offset from sep
-        index = zpl > sf.Xpoint[1]  # trim to Xpoint
-        rpl,zpl = rpl[index],zpl[index]
-        rpl,zpl = geom.rzSLine(rpl,zpl,self.config['Nsub'])  # sub-sample
-        self.shp.add_bound({'r':rpl,'z':zpl},'internal')  # vessel inner bounds
-
-        if self.config['flux_fit']:  # add flux boundary points
-            sf.get_LFP()  # get low feild point
-            rflux,zflux = self.first_wall_psi(sf,\
-            psi_n=self.config['psi_n'],trim=False)[:2]
-            rflux,zflux = self.midplane_loop(sf,rflux,zflux)
-            rflux,zflux = geom.order(rflux,zflux)
-            istop = next((i for i in range(len(zflux)) if zflux[i]<sf.LFPz),-1)
-            rflux,zflux = rflux[:istop],zflux[:istop]
-            dL = np.diff(geom.length(rflux,zflux))
-            if np.max(dL) > 3*np.median(dL) or \
-            np.argmax(zflux) == len(zflux)-1:
-                wtxt = '\n\nOpen feild line detected\n'
-                wtxt += 'disabling flux fit for '
-                wtxt += '{:1.1f}% psi_n \n'.format(1e2*self.config['psi_n'])
-                wtxt += 'configuration: '+sf.filename+'\n'
-                warn(wtxt)
-            else:  # add flux_fit bounds
-                rflux,zflux = geom.rzSLine(rflux,zflux,
-                                           int(self.config['Nsub']/2))  
-                self.shp.add_bound({'r':rflux,'z':zflux},'internal')  
-  
-    def midplane_loop(self,sf,r,z):
-        index = np.argmin((r-sf.LFPr)**2+(z-sf.LFPz)**2)
-        if z[index] <= sf.LFPz:
-            index -= 1
-        r = np.append(r[:index+1][::-1],r[index:][::-1])
-        z = np.append(z[:index+1][::-1],z[index:][::-1])
-        L = geom.length(r,z)
-        index = np.append(np.diff(L)!=0,True)
-        r,z = r[index],z[index]  # remove duplicates
-        return r,z
-
-    def draw(self,debug):
-        if debug:
-            self.shp.loop.plot()
-            self.shp.plot_bounds()
-        x = self.profile.loop.draw()
-        r,z = x['r'],x['z']
-        r,z = geom.order(r,z,anti=True)
-        pl.plot(r,z)
-        
-    def first_wall_psi(self,sf,trim=True,single_contour=False,**kwargs):
-        if 'point' in kwargs:
-            req,zeq = kwargs.get('point')
-            psi = sf.Ppoint([req,zeq])
-        else:
-            req,zeq = sf.LFPr,sf.LFPz 
-            if 'psi_n' in kwargs:  # normalized psi
-                psi_n = kwargs.get('psi_n')
-                psi = psi_n*(sf.Xpsi-sf.Mpsi)+sf.Mpsi
-            elif 'psi' in kwargs:
-                psi = kwargs.get('psi')
-            else:
-                raise ValueError('set point=(r,z) or psi in kwargs')
-        contours = sf.get_contour([psi])    
-        R,Z = sf.pick_contour(contours,Xpoint=True)
-        if single_contour:
-            min_contour = np.empty(len(R))
-            for i in range(len(R)):
-                min_contour[i] = np.min((R[i]-req)**2+(Z[i]-zeq)**2)
-            imin = np.argmin(min_contour)
-            r,z = R[imin],Z[imin]
-        else:
-            r,z = np.array([]),np.array([])
-            for i in range(len(R)):
-                r = np.append(r,R[i])
-                z = np.append(z,Z[i])
-        if trim:
-            if sf.Xloc == 'lower':
-                r,z = r[z<=zeq],z[z<=zeq]
-            elif sf.Xloc == 'upper':
-                r,z = r[z>=zeq],z[z>=zeq]
-            else:
-                raise ValueError('Xloc not set (get_Xpsi)')
-            if req > sf.Xpoint[0]:
-                r,z = r[r>sf.Xpoint[0]],z[r>sf.Xpoint[0]]
-            else:
-                r,z = r[r<sf.Xpoint[0]],z[r<sf.Xpoint[0]]
-            istart = np.argmin((r-req)**2+(z-zeq)**2)
-            r = np.append(r[istart+1:],r[:istart])
-            z = np.append(z[istart+1:],z[:istart])
-        istart = np.argmin((r-req)**2+(z-zeq)**2)
-        if istart > 0:
-            r,z = r[::-1],z[::-1]
-        return r,z,psi
-            
-    '''
-    def firstwall_loop(self,sf): 
-        if not hasattr(sf,'LFPr'):
-            sf.get_LFP()
-        if self.flux_fit:
-            r,z,psi = self.first_wall_psi(sf,psi_n=self.psi_n,trim=False)
-            psi_lfs = psi_hfs = psi
-            sf.LFfwr,sf.LFfwz = self.sf.LFPr,self.sf.LFPz
-            sf.HFfwr,sf.HFfwz = self.sf.HFPr,self.sf.HFPz
-            #pl.plot(r[::-1],z[::-1],'--',color=0.75*np.ones(3))
-        else:
-            dr = self.setup.firstwall['dRfw'] # dr [m]
-            self.sf.LFfwr,self.sf.LFfwz = self.sf.LFPr+dr,self.sf.LFPz    
-            self.sf.HFfwr,self.sf.HFfwz = self.sf.HFPr-dr,self.sf.HFPz
-            r_lfs,z_lfs,psi_lfs = self.first_wall_psi(point=(self.sf.LFfwr,
-                                                             self.sf.LFfwz))
-            r_hfs,z_hfs,psi_hfs = self.first_wall_psi(point=(self.sf.HFfwr,
-                                                             self.sf.HFfwz))
-            r_top,z_top = geom.offset(self.Rp,self.Zp,dr)
-            if self.sf.Xloc == 'lower':
-                r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,
-                                              origin='top')
-                index = z_top>=self.sf.LFPz
-            else:
-                r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,
-                                              origin='bottom')
-                index = z_top<=self.sf.LFPz
-            r_top,z_top = r_top[index],z_top[index]
-            istart = np.argmin((r_top-self.sf.HFfwr)**2+
-                               (z_top-self.sf.HFfwz)**2)
-            if istart > 0:
-                r_top,z_top = r_top[::-1],z_top[::-1]
-            r = np.append(r_hfs[::-1],r_top)
-            r = np.append(r,r_lfs)
-            z = np.append(z_hfs[::-1],z_top)
-            z = np.append(z,z_lfs)
-        return r[::-1],z[::-1],(psi_lfs,psi_hfs)         
-    '''
-'''
-    def update_sf(self):
-        if not hasattr (self.sf,'Xpoint'):
-            self.sf.get_Xpsi()  
-        self.xo = [self.sf.Xpoint[0],self.sf.eqdsk['zmagx']]
-        self.Rp,self.Zp = self.sf.get_boundary()
-        self.Lp = geom.length(self.Rp,self.Zp,norm=False)[-1]
-        self.Rfw,self.Zfw,self.psi_fw = self.firstwall_loop() 
-        self.loop = Loop(self.Rfw,self.Zfw,xo=self.xo)  # first wall contour
-        
-
-        
-    def add_bound(r,z):
-        
-        
-    def add_divertor():
+        '''
+        #return self.Rb,self.Zb
+    def join(self,main_chamber):
+        r,z = main_chamber.draw()
         istart = np.argmin((r-self.sf.Xpoint[0])**2+(z-self.sf.Xpoint[1])**2)
         r = np.append(r[istart:],r[:istart+1])
         z = np.append(z[istart:],z[:istart+1])
@@ -365,8 +162,254 @@ class main_chamber(object):
             r = np.append(np.append(rd,r[iend:istart][::-1]),rd[0])
             z = np.append(np.append(zd,z[iend:istart][::-1]),zd[0])
         self.segment['first_wall'] = {'r':r,'z':z} 
+
         return r,z
     
+    def connect(self,psi,target_pair,ends,loop=[]):
+        gap = []
+        if loop:
+            r,z = loop
+        else:
+            psi_line = self.sf.get_contour([psi])[0]
+            for line in psi_line:
+                r,z = line[:,0],line[:,1]
+                gap.append(np.min((self.targets[target_pair[0]]['R'][ends[0]]-r)**2+
+                          (self.targets[target_pair[0]]['Z'][ends[0]]-z)**2))
+            select = np.argmin(gap)
+            line = psi_line[select]
+            r,z = line[:,0],line[:,1]
+        index = np.zeros(2,dtype=int)
+        index[0] = np.argmin((self.targets[target_pair[0]]['R'][ends[0]]-r)**2+
+                 (self.targets[target_pair[0]]['Z'][ends[0]]-z)**2)
+        index[1] = np.argmin((self.targets[target_pair[1]]['R'][ends[1]]-r)**2+
+                 (self.targets[target_pair[1]]['Z'][ends[1]]-z)**2)
+        if index[0]>index[1]:
+            index = index[::-1]
+        r,z = r[index[0]:index[1]+1],z[index[0]:index[1]+1] 
+        return r,z
+    
+    def match_psi(self,Ro,Zo,direction,theta_end,theta_sign,phi_target,graze,
+                  dPlate,leg,debug=False): 
+        color = sns.color_palette('Set2',2)
+        gain = 0.15  # 0.25
+        Nmax = 500
+        Lo = [0.5,0.0015]  # [blend,turn]  5,0.015
+        r2m = [+1.5,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
+        Nplate = 1 # number of target plate divisions (1==flat)
+        L = Lo[0] if theta_end == 0 else Lo[1]
+        Lsead = L
+        flag = 0
+        for i in range(Nmax):
+            R,Z,phi = self.blend_target(Ro,Zo,dPlate,L,direction,theta_end,
+                                        theta_sign,graze,r2m,Nplate)
+            L -= gain*(phi_target-phi)
+            if debug: pl.plot(R,Z,color=color[0],lw=1)
+            if np.abs(phi_target-phi) < 1e-4:
+                if debug: 
+                    pl.plot(R,Z,'r',color=color[1],lw=3)
+                    print('rz',Ro,Zo,'N',i)
+                break
+            if L < 0:
+                L = 1
+                gain *= -1
+            if i == Nmax-1 or L>15:
+                print(leg,'dir',direction,'phi target convergence error')
+                print('Nmax',i+1,'L',L,'Lo',Lsead)
+                if flag == 0:
+                    break
+                    gain *= -1  # reverse gain
+                    flag = 1
+                else:
+                    break
+        return R,Z
+                        
+    def blend_target(self,Ro,Zo,dPlate,L,direction,theta_end,theta_sign,graze,
+                     r2m,Nplate):
+            r2s = r2m[0] if theta_end == 0 else r2m[1]
+            dL = 0.1 if theta_end == 0 else 0.05  # 0.005,0.005
+            R,Z = np.array([Ro]),np.array([Zo])
+            R,Z = self.extend_target(R,Z,dPlate/(2*Nplate),Nplate,r2s,
+                                     theta_end,theta_sign,
+                                     direction,graze,False,
+                                     target=True)  # constant graze 
+            Ninterp = int(dPlate/(2*dL))
+            if Ninterp < 2: Ninterp = 2
+            R,Z = geom.rzInterp(R,Z,Ninterp)
+            graze = self.sf.get_graze([R[-1],Z[-1]],
+                                      [R[-1]-R[-2],Z[-1]-Z[-2]])  # update graze
+            N = np.int(L/dL+1)
+            if N<30: N=30
+            dL = L/(N-1)
+            target_angle = np.arctan2((Z[-1]-Z[-2]),(R[-1]-R[-2]))
+            Xi = self.sf.expansion([R[-1]],[Z[-1]])
+            theta = self.sf.strike_point(Xi,graze)
+            B = direction*self.sf.Bpoint((R[-1],Z[-1]))
+            Bhat = geom.rotate_vector2D(B,theta_sign*theta)
+            trans_angle = np.arctan2(Bhat[1],Bhat[0])
+            if abs(target_angle-trans_angle) > 0.01*np.pi:
+                accute = True
+            else:
+                accute = False
+            R,Z = self.extend_target(R,Z,dL,N,r2s,theta_end,theta_sign,
+                                direction,graze,accute)  # transition graze
+            phi = self.sf.Ppoint([R[-1],Z[-1]])
+            return R,Z,phi
+            
+    def extend_target(self,R,Z,dL,N,r2s,theta_end,theta_sign,direction,graze,
+                      accute,target=False):
+        for i in range(N):
+            if target:
+                Lhat = 0
+            else:
+                Lhat = i/(N-1)
+                if r2s < 0:  # delayed transtion
+                    Lhat = Lhat**np.abs(r2s)
+                else:  # expedient transition
+                    Lhat = Lhat**(1/r2s)
+            Xi = self.sf.expansion([R[-1]],[Z[-1]])
+            theta = self.sf.strike_point(Xi,graze)
+            if accute: theta = np.pi-theta
+            theta = Lhat*theta_end+(1-Lhat)*theta
+            B = direction*self.sf.Bpoint((R[-1],Z[-1]))
+            Bhat = geom.rotate_vector2D(B,theta_sign*theta)
+            R = np.append(R,R[-1]+dL*Bhat[0])
+            Z = np.append(Z,Z[-1]+dL*Bhat[1])
+        return R,Z
+    
+    def append(self,R,Z,r,z):
+        dr = np.zeros(2)
+        for i,end in enumerate([0,-1]):
+            dr[i] = (R[-1]-r[end])**2+(Z[-1]-z[end])**2
+        if dr[1] < dr[0]:
+            r,z = r[::-1],z[::-1]
+        return np.append(R,r[1:-1]),np.append(Z,z[1:-1]) 
+
+
+class main_chamber(object):
+    
+    def __init__(self,name,**kwargs):
+        self.name = name
+        self.set_filename(**kwargs)
+        self.initalise_loop()
+        
+    def date(self,verbose=True):
+        today = datetime.date.today().strftime('%Y_%m_%d')
+        if verbose:
+            print(today)
+        return today
+    
+    def set_filename(self,update=False,**kwargs):
+        today = self.date(verbose=False)
+        if update:  # use today's date
+            date_str = today
+        else:
+            date_str = kwargs.get('date',today)
+        self.filename = '{}_{}'.format(date_str,self.name)  # chamber name
+        print(self.filename)
+        
+    def generate(self,eq_names,dr=0.225,psi_n=1.07,
+                 flux_fit=False,symetric=False,plot=False):
+        self.set_filename(update=True)  # update date in filename
+        if symetric:  # enforce symertic
+            self.profile.enforce_symetric()
+        self.config = {'dr':dr,'psi_n':psi_n,'flux_fit':flux_fit,'Nsub':100}
+        self.config['eqdsk'] = []  
+        sf_list = self.load_sf(eq_names)
+        for sf in sf_list:  # convert input to list
+            self.add_bound(sf)
+        self.shp.add_internal(r_gap=0.001)  # add internal bound
+        self.shp.minimise()
+        self.write()  # append config data to loop pickle
+        if plot:
+            self.plot_chamber()
+        
+    def load_sf(self,eq_names):
+        sf_dict,sf_list = OrderedDict(),[]
+        for configuration in eq_names:
+            sf = SF(Setup(configuration).filename)
+            sf_dict[configuration] = sf.filename.split('/')[-1]
+            sf_list.append(sf)
+        self.config['eqdsk'] = sf_dict
+        return sf_list
+        
+    def write(self):  # overwrite loop_dict + add extra chamber fields
+        with open(self.profile.dataname, 'wb') as output:
+            pickle.dump(self.profile.loop_dict,output,-1)
+            pickle.dump(self.config,output,-1)
+            pickle.dump(self.shp.bound,output,-1)  # boundary points
+            pickle.dump(self.shp.bindex,output,-1)  # boundary index
+
+    def load_data(self,plot=False):
+        try:
+            with open(self.profile.dataname, 'rb') as input:
+                self.profile.loop_dict = pickle.load(input)
+                self.config = pickle.load(input) 
+                self.shp.bound = pickle.load(input) 
+                self.shp.bindex = pickle.load(input) 
+        except:
+            errtxt = 'boundary information not found'
+            raise ValueError(errtxt)
+        if plot:
+            self.plot_chamber()
+
+    def plot_chamber(self):
+        self.shp.loop.plot()
+        self.shp.plot_bounds()
+        r,z = self.draw()
+        pl.plot(r,z)
+            
+    def initalise_loop(self):
+        self.profile = Profile(self.filename,family='S',part='chamber',npoints=200)
+        self.shp = Shape(self.profile,objective='L')
+        self.set_bounds()
+        
+    def set_bounds(self):
+        self.shp.loop.adjust_xo('upper',lb=0.7)
+        self.shp.loop.adjust_xo('top',lb=0.05,ub=0.75)
+        self.shp.loop.adjust_xo('lower',lb=0.7)
+        self.shp.loop.adjust_xo('bottom',lb=0.05,ub=0.75)
+        self.shp.loop.adjust_xo('l',lb=0.8,ub=1.5)
+        
+    def add_bound(self,sf): 
+        rpl,zpl = sf.get_offset(self.config['dr'],Nsub=self.config['Nsub'])
+        self.shp.add_bound({'r':rpl,'z':zpl},'internal')  # vessel inner bounds
+
+        if self.config['flux_fit']:  # add flux boundary points
+            sf.get_LFP()  # get low feild point
+            rflux,zflux = sf.first_wall_psi(psi_n=self.config['psi_n'],
+                                            trim=False)[:2]
+            rflux,zflux = sf.midplane_loop(rflux,zflux)
+            rflux,zflux = geom.order(rflux,zflux)
+            istop = next((i for i in range(len(zflux)) if zflux[i]<sf.LFPz),-1)
+            rflux,zflux = rflux[:istop],zflux[:istop]
+            dL = np.diff(geom.length(rflux,zflux))
+            if np.max(dL) > 3*np.median(dL) or \
+            np.argmax(zflux) == len(zflux)-1:
+                wtxt = '\n\nOpen feild line detected\n'
+                wtxt += 'disabling flux fit for '
+                wtxt += '{:1.1f}% psi_n \n'.format(1e2*self.config['psi_n'])
+                wtxt += 'configuration: '+sf.filename+'\n'
+                warn(wtxt)
+            else:  # add flux_fit bounds
+                rflux,zflux = geom.rzSLine(rflux,zflux,
+                                           int(self.config['Nsub']/2))  
+                self.shp.add_bound({'r':rflux,'z':zflux},'internal')  
+
+    def draw(self):
+        x = self.profile.loop.draw()
+        r,z = x['r'],x['z']
+        r,z = geom.order(r,z,anti=True)
+        return r,z
+
+'''
+    def update_sf(self):
+        if not hasattr (self.sf,'Xpoint'):
+            self.sf.get_Xpsi()  
+        self.xo = [self.sf.Xpoint[0],self.sf.eqdsk['zmagx']]
+        self.Rp,self.Zp = self.sf.get_boundary()
+        self.Lp = geom.length(self.Rp,self.Zp,norm=False)[-1]
+        self.Rfw,self.Zfw,self.psi_fw = self.firstwall_loop() 
+        self.loop = Loop(self.Rfw,self.Zfw,xo=self.xo)  # first wall contour
 '''    
 
 

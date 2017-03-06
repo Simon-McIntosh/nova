@@ -28,12 +28,14 @@ text = linelabel(Ndiv=20,value='')
 
 nTF = 18
 
-for eq in ['SN2015_SOF','SN2015_EOF','SN2017_SOF','SN2017_EOF']:
+for eq in ['DEMO_SN_SOF','DEMO_SN_EOF']:
     config = {'TF':'demo','eq':eq} 
     config,setup = select(config,nTF=nTF,update=False)
     sf = SF(setup.filename)
-    sf.get_boundary(plot=True)
+    sf.get_boundary(plot=True,alpha=1-1e-5)
     text.add(eq)
+    sf.sol(plot=True)
+    
 
 text.plot()
 pl.axis('equal')

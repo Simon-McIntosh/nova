@@ -5,11 +5,11 @@ from nova.config import select
 import pylab as pl
 import numpy as np
 
-nTF = 16
+nTF = 18
 family='S'
 ripple = True
 
-config = {'TF':'demo','eq':'SN2017_SOF'}
+config = {'TF':'demo','eq':'DEMO_SN_SOF'}
 config,setup = select(config,nTF=nTF)
 
 

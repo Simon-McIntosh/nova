@@ -28,7 +28,7 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
 #config,setup = select(base={'TF':'dtt','eq':'SN'},nTF=18,nPF=5,nCS=3)
 #config,setup = select(base={'TF':'dtt','eq':'SX'},nTF=18,nPF=5,nCS=3)
 #config,setup = select(base={'TF':'dtt','eq':'DEMO_FW_SOF'},nTF=18)
-config,setup = select(base={'TF':'dtt','eq':'SN2014_EOF'},nTF=18)
+#config,setup = select(base={'TF':'dtt','eq':'SN2014_EOF'},nTF=18)
 
 setup.firstwall['flux_fit'] = False
 
@@ -41,20 +41,20 @@ sf = SF(setup.filename)
 
 sf.shape_parameters()  #verbose=True
 
-pf = PF(sf.eqdsk)
+#pf = PF(sf.eqdsk)
 
 
 
-eq_names = ['SN2014_SOF','SN2014_EOF'] 
-mc = main_chamber('DTT',date='2017_03_03')
+eq_names = ['DEMO_SN_SOF','DEMO_SN_EOF'] 
+mc = main_chamber('DTT')  # ,date='2017_03_03'
 mc.generate(eq_names,psi_n=1.07,flux_fit=True,debug=True)
 
 mc.load_data()
 mc.draw(True)
 
 
-target = targets(sf,setup.targets)
-target.place(debug=True)
+#target = targets(sf,setup.targets)
+#target.place(debug=True)
 
 '''
 eq = EQ(sf,pf,dCoil=1.5,sigma=0,n=5e3,boundary=sf.get_sep(expand=1.1),

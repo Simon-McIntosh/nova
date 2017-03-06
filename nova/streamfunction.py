@@ -486,6 +486,107 @@ class SF(object):
         self.HFPr,self.HFPz = fLFSr(-np.pi),fLFSz(-np.pi)
         self.HFPr = self.get_midplane(self.HFPr,self.HFPz)
         return (self.LFPr,self.LFPz,self.HFPr,self.HFPz)
+    
+    def first_wall_psi(self,trim=True,single_contour=False,**kwargs):
+        if 'point' in kwargs:
+            req,zeq = kwargs.get('point')
+            psi = self.Ppoint([req,zeq])
+        else:
+            req,zeq = self.LFPr,self.LFPz 
+            if 'psi_n' in kwargs:  # normalized psi
+                psi_n = kwargs.get('psi_n')
+                psi = psi_n*(self.Xpsi-self.Mpsi)+self.Mpsi
+            elif 'psi' in kwargs:
+                psi = kwargs.get('psi')
+            else:
+                raise ValueError('set point=(r,z) or psi in kwargs')
+        contours = self.get_contour([psi])    
+        R,Z = self.pick_contour(contours,Xpoint=True)
+        if single_contour:
+            min_contour = np.empty(len(R))
+            for i in range(len(R)):
+                min_contour[i] = np.min((R[i]-req)**2+(Z[i]-zeq)**2)
+            imin = np.argmin(min_contour)
+            r,z = R[imin],Z[imin]
+        else:
+            r,z = np.array([]),np.array([])
+            for i in range(len(R)):
+                r = np.append(r,R[i])
+                z = np.append(z,Z[i])
+        if trim:
+            if self.Xloc == 'lower':
+                r,z = r[z<=zeq],z[z<=zeq]
+            elif self.Xloc == 'upper':
+                r,z = r[z>=zeq],z[z>=zeq]
+            else:
+                raise ValueError('Xloc not set (get_Xpsi)')
+            if req > self.Xpoint[0]:
+                r,z = r[r>self.Xpoint[0]],z[r>self.Xpoint[0]]
+            else:
+                r,z = r[r<self.Xpoint[0]],z[r<self.Xpoint[0]]
+            istart = np.argmin((r-req)**2+(z-zeq)**2)
+            r = np.append(r[istart+1:],r[:istart])
+            z = np.append(z[istart+1:],z[:istart])
+        istart = np.argmin((r-req)**2+(z-zeq)**2)
+        if istart > 0:
+            r,z = r[::-1],z[::-1]
+        return r,z,psi
+            
+    def firstwall_loop(self,plot=False,**kwargs): 
+        if not hasattr(self,'LFPr'):
+            self.get_LFP()
+        if 'psi_n' in kwargs:
+            r,z,psi = self.first_wall_psi(psi_n=kwargs['psi_n'],trim=False)
+            psi_lfs = psi_hfs = psi
+        elif 'dr' in kwargs:  # geometric offset
+            dr = kwargs.get('dr')
+            LFfwr,LFfwz = self.LFPr+dr,self.LFPz    
+            HFfwr,HFfwz = self.HFPr-dr,self.HFPz
+            r_lfs,z_lfs,psi_lfs = self.first_wall_psi(self,point=(LFfwr,LFfwz))
+            r_hfs,z_hfs,psi_hfs = self.first_wall_psi(self,point=(HFfwr,HFfwz))
+            r_top,z_top = self.get_offset(dr)
+            if self.Xloc == 'lower':
+                r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,
+                                              origin='top')
+                index = z_top>=self.LFPz
+            else:
+                r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,
+                                              origin='bottom')
+                index = z_top<=self.LFPz
+            r_top,z_top = r_top[index],z_top[index]
+            istart = np.argmin((r_top-HFfwr)**2+(z_top-HFfwz)**2)
+            if istart > 0:
+                r_top,z_top = r_top[::-1],z_top[::-1]
+            r = np.append(r_hfs[::-1],r_top)
+            r = np.append(r,r_lfs)
+            z = np.append(z_hfs[::-1],z_top)
+            z = np.append(z,z_lfs)
+        else:
+            errtxt = 'requre \'psi_n\' or \'dr\' in kwargs'
+            raise ValueError(errtxt)
+        if plot:
+            pl.plot(r,z)
+        return r[::-1],z[::-1],(psi_lfs,psi_hfs)    
+    
+    def get_offset(self,dr,Nsub=0):
+        rpl,zpl = self.get_boundary()  # boundary points
+        rpl,zpl = geom.offset(rpl,zpl,dr)  # offset from sep
+        if Nsub > 0:  # sub-sample
+            index = zpl > self.Xpoint[1]  # trim to Xpoint
+            rpl,zpl = rpl[index],zpl[index]
+            rpl,zpl = geom.rzSLine(rpl,zpl,Nsub)
+        return rpl,zpl
+    
+    def midplane_loop(self,r,z):
+        index = np.argmin((r-self.LFPr)**2+(z-self.LFPz)**2)
+        if z[index] <= self.LFPz:
+            index -= 1
+        r = np.append(r[:index+1][::-1],r[index:][::-1])
+        z = np.append(z[:index+1][::-1],z[index:][::-1])
+        L = geom.length(r,z)
+        index = np.append(np.diff(L)!=0,True)
+        r,z = r[index],z[index]  # remove duplicates
+        return r,z
         
     def get_sol_psi(self,verbose=True,**kwargs):
         for var in ['dSOL','Nsol']:

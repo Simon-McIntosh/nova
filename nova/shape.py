@@ -90,8 +90,11 @@ class Shape(object):
             print('with ripple')
             xnorm = fmin_slsqp(self.fit,xnorm,f_ieqcons=self.constraint_array,
                                bounds=bnorm,acc=acc,iprint=-1,
-                               args=(True,ripple_limit))     
+                               args=(True,ripple_limit))  
         xo = get_oppvar(self.loop.xo,self.loop.oppvar,xnorm)  # de-normalize
+        if hasattr(self,'tf'):
+            x = self.tf.get_loops(self.loop.draw(x=xo))  # update tf
+            self.cage.set_TFcoil(x['cl'])  # update coil cage
         self.loop.set_input(x=xo)  # inner loop
         self.profile.write()  # store loop
         if verbose:

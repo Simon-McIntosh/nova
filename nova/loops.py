@@ -363,8 +363,12 @@ class Sloop(object):  # polybezier
         self.oppvar = list(self.xo.keys())
         self.lkeyo = ['l0s','l0e','l1s','l1e','l2s','l2e','l3s','l3e']
         self.set_l({'value':0.8,'lb':0.45,'ub':1.8})  # 1/tesion
-        #self.oppvar.remove('flat')
-        #self.oppvar.remove('tilt')
+        
+    def reset_oppvar(self,symetric):
+        self.oppvar = list(self.xo.keys())
+        self.symetric = symetric
+        self.set_symetric()
+        self.set_tension()
         
     def adjust_xo(self,name,**kwargs):  # value,lb,ub
         for var in kwargs:
@@ -374,6 +378,7 @@ class Sloop(object):  # polybezier
             else:
                 self.xo[name][var] = kwargs[var]
         self.set_symetric()
+        self.set_tension()
 
     def check_tension_length(self,tension):
         tension = tension.lower()
@@ -405,12 +410,16 @@ class Sloop(object):  # polybezier
                         
     def set_symetric(self):
         if self.symetric:  # set lower equal to upper
+            self.xo['tilt']['value'] = 0
+            self.xo['z2']['value'] = self.xo['dz']['value']     
+            if 'z2' in self.oppvar:
+                self.oppvar.remove('z2')
             for u,l in zip(['top','upper'],['bottom','lower']):
                 self.xo[l] = self.xo[u]
                 if l in self.oppvar:  # remove lower from oppvar
                     self.oppvar.remove(l)
             if 'tilt' in self.oppvar:
-                self.oppvar.remove('tilt')
+                self.oppvar.remove('tilt')      
         
     def set_tension(self):
         tension = self.tension.lower()

@@ -501,7 +501,7 @@ class SF(object):
             else:
                 raise ValueError('set point=(r,z) or psi in kwargs')
         contours = self.get_contour([psi])    
-        R,Z = self.pick_contour(contours,Xpoint=True)
+        R,Z = self.pick_contour(contours,Xpoint=False)
         if single_contour:
             min_contour = np.empty(len(R))
             for i in range(len(R)):
@@ -542,8 +542,8 @@ class SF(object):
             dr = kwargs.get('dr')
             LFfwr,LFfwz = self.LFPr+dr,self.LFPz    
             HFfwr,HFfwz = self.HFPr-dr,self.HFPz
-            r_lfs,z_lfs,psi_lfs = self.first_wall_psi(self,point=(LFfwr,LFfwz))
-            r_hfs,z_hfs,psi_hfs = self.first_wall_psi(self,point=(HFfwr,HFfwz))
+            r_lfs,z_lfs,psi_lfs = self.first_wall_psi(point=(LFfwr,LFfwz))
+            r_hfs,z_hfs,psi_hfs = self.first_wall_psi(point=(HFfwr,HFfwz))
             r_top,z_top = self.get_offset(dr)
             if self.Xloc == 'lower':
                 r_top,z_top = geom.theta_sort(r_top,z_top,xo=self.xo,
@@ -572,8 +572,11 @@ class SF(object):
         rpl,zpl = self.get_boundary()  # boundary points
         rpl,zpl = geom.offset(rpl,zpl,dr)  # offset from sep
         if Nsub > 0:  # sub-sample
-            index = zpl > self.Xpoint[1]  # trim to Xpoint
-            rpl,zpl = rpl[index],zpl[index]
+            if self.Xloc == 'lower':
+                index = zpl > self.Xpoint_array[1][0]  # trim to lower Xpoint
+            elif self.Xloc == 'upper':
+                index = zpl < self.Xpoint_array[1][1]  # trim to upper Xpoint
+            #rpl,zpl = rpl[index],zpl[index]
             rpl,zpl = geom.rzSLine(rpl,zpl,Nsub)
         return rpl,zpl
     

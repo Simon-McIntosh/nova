@@ -17,6 +17,7 @@ from scipy.optimize import minimize_scalar
 from copy import deepcopy
 from warnings import warn
 import sys
+from scipy.optimize import brentq
 
 class INV(object):
     
@@ -56,9 +57,10 @@ class INV(object):
         nC,nS = self.nC,len(flux)
         self.swing = {'flux':flux,'I':np.zeros((nS,nC)),'rms':np.zeros(nS),
                       'FrPF':np.zeros(nS),'FzPF':np.zeros(nS),
+                      'FsepCS':np.zeros(nS),'FzCS':np.zeros(nS),               
                       'Tpol':np.zeros(nS),'rms_bndry':np.zeros(nS),
                       'z_offset':np.zeros(nS),'dTpol':0,
-                      'Fcoil':[[] for _ in range(nS)]}
+                      'Fcoil':[[] for _ in range(nS)]}      
                       
     def initalise_limits(self):
         self.limit = {'I':{},'L':[],'F':[]}
@@ -839,7 +841,8 @@ class INV(object):
             Fsep = np.sum(FzCS[j+1:])-np.sum(FzCS[:j+1])
             constraint[2*self.nPF+2+j] = Fsep-CSsep_limit  # CS seperation
         
-    def solve_slsqp(self):  # solve for constrained current vector 
+    def solve_slsqp(self,flux):  # solve for constrained current vector 
+        self.fix_flux(flux)  # swing
         self.set_Io()  # set coil current and bounds
         opt = nlopt.opt(nlopt.LD_SLSQP,self.nC)
         opt.set_min_objective(self.frms)
@@ -941,9 +944,13 @@ class INV(object):
 
     def swing_flux(self,bndry=False):
         for i,flux in enumerate(self.swing['flux']):
-            self.fix_flux(flux)  # swing
-            self.swing['rms'][i] = self.solve_slsqp()
-            self.swing['Fcoil'][i] = self.ff.get_force()
+            self.swing['rms'][i] = self.solve_slsqp(flux)
+            Fcoil = self.ff.get_force()
+            self.swing['FrPF'][i] = Fcoil['PF']['r']
+            self.swing['FzPF'][i] = Fcoil['PF']['z']
+            self.swing['FsepCS'][i] = Fcoil['CS']['sep']
+            self.swing['FzCS'][i] = Fcoil['CS']['zsum']
+            self.swing['Fcoil'][i] = {'F':Fcoil['F'],'dF':Fcoil['dF']}
             self.swing['Tpol'][i] = self.poloidal_angle()
             self.swing['I'][i] = self.Icoil
         self.rmsID = np.argmax(self.swing['rms'])
@@ -1068,19 +1075,14 @@ class INV(object):
         return Lo
 
     def set_plasma(self):
-        #if self.initalise_plasma:
-        #self.initalise_plasma = False
         self.set_background()
         self.get_weight()
-        #self.set_force_feild(state='both')
-        #else:
-            #self.swing_fix(np.mean(self.Swing))
-            #self.solve_slsqp()
-            #self.eq.get_Vcoil()  # select vertical stability coil
-            #self.eq.gen(self.ztarget)
-        #self.set_background()
-        #self.get_weight()
-        #self.set_force_feild(state='both')
+        
+    def snap_coils(self,offset=0.3):
+        L = self.grid_coils(offset=0.3)
+        self.set_Lo(L)  # set position bounds
+        Lnorm = loops.normalize_variables(self.Lo)
+        return Lnorm
 
     def update_current(self):
         self.Isum,self.Ics = 0,0
@@ -1105,9 +1107,8 @@ class INV(object):
     def write_swing(self):
         nC,nS = len(self.adjust_coils),len(self.Swing)
         Icoil = np.zeros((nS,nC))
-        for i,swing in enumerate(self.Swing[::-1]):
-            self.swing_fix(swing)  
-            self.solve_slsqp()
+        for i,flux in enumerate(self.Swing[::-1]):
+            self.solve_slsqp(flux)
             Icoil[i] = self.Icoil
         with open('../Data/'+
                   self.tf.dataname.replace('TF.pkl','_currents.txt'),'w') as f:
@@ -1122,3 +1123,50 @@ class INV(object):
                 size = '\t{:1.3f}\t{:1.3f}'.format(dr,dz)
                 current = '\t{:1.3f}\t{:1.3f}\n'.format(Icoil[0,j],Icoil[1,j])
                 f.write(name+position+size+current)
+                
+    def fix_boundary(self,plot=False):
+        self.fix_boundary_psi(N=25,alpha=1-1e-4,factor=1)  # add boundary points
+        self.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary points
+        self.add_null(factor=1,point=self.sf.Xpoint)
+        self.initialize_log()
+        self.set_background()
+        self.get_weight()
+        if plot:
+            self.plot_fix(tails=True)
+                
+class scenario(object):
+
+    def __init__(self,inv,rms_limit=0.02,plot=True):
+        self.inv = inv
+        self.rms_limit = rms_limit
+        self.inv.fix_boundary(plot=plot)
+        self.Lnorm = inv.snap_coils()
+        
+    def get_rms(self,centre):
+        self.inv.set_swing(centre=centre,width=0,array=[0])
+        rms = self.inv.update_position(self.Lnorm,update_area=True)
+        return float(self.rms_limit-rms)
+        
+    def find_root(self,slim):
+        swing = brentq(self.get_rms,slim[0],slim[1],xtol=0.1,maxiter=500,
+                       disp=True)
+        return swing
+        
+    def flat_top(self):
+        self.inv.set_swing(centre=0,width=0,array=[0])
+        self.inv.update_position(self.Lnorm,update_area=True)  # centre swing
+        
+        EOF = self.find_root([60,0])                        
+        SOF = self.find_root([-60,0])
+        
+        
+        
+        self.width = 2*np.pi*(EOF-SOF)
+        print('SOF {:1.0f}, EOF {:1.0f}'.format(SOF,EOF))
+        print('swing width {:1.0f}Vs'.format(self.width))
+        self.inv.set_swing(centre=np.mean([SOF,EOF]),width=self.width,
+                           array=np.linspace(-0.5,0.5,51))
+        self.inv.update_position(self.Lnorm,update_area=True)
+        
+        
+        

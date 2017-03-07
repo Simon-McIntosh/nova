@@ -24,76 +24,64 @@ class RB(object):
         self.datadir = trim_dir('../../../Data/') 
         self.segment = {}  # store section segments (divertor,fw,blanket...)
         
-    def firstwall(self,mode='calc',color=0.6*np.ones(3),
+    def generate(self,mc,mode='calc',color=0.6*np.ones(3),
                   plot=True,debug=False,symetric=False,DN=False):
         
         if mode == 'eqdsk':  # read first wall from eqdsk
             self.Rb,self.Zb = self.sf.xlim,self.sf.ylim
         elif mode == 'calc':
-            mc = main_chamber('DTT',date='2017_03_06')  # load main chamber
-            #mc.generate(eq_names,psi_n=1.07,flux_fit=True,plot=True)
-            mc.load_data(plot=True)  # load from file
-
+            div = divertor(self.sf,self.setup,debug=debug)
             if DN:  # double null
                 self.sf.get_Xpsi(select='upper')  # upper X-point
-                self.update_sf()  # update streamfunction
-                Ru,Zu = self.place_target(debug=debug,symetric=True)
-                blanket_u = self.place_blanket(select='upper',store=False)
+                div.place(debug=debug)
+                self.segment = div.join(mc)
+                ru = self.segment['first_wall']['r']
+                zu = self.segment['first_wall']['z']
+                blanket_u = self.place_blanket(select='upper',store=False)[0]
                 self.sf.get_Xpsi(select='lower')  # lower X-point
-                self.update_sf()  # update streamfunction
-                Rl,Zl, = self.place_target(debug=debug,symetric=True)
-                blanket_l = self.place_blanket(select='lower',store=False)
-                self.Rb,self.Zb = self.upper_lower(Ru,Zu,Rl,Zl,
-                                                   Zjoin=self.sf.Mpoint[1])
-                self.segment['first_wall'] = {'r':self.Rb,'z':self.Zb} 
-                Rfw,Zfw = self.upper_lower(blanket_u[0]['r'][::-1],
+                div.place(debug=debug)
+                self.segment = div.join(mc)
+                rl = self.segment['first_wall']['r']
+                zl = self.segment['first_wall']['z']
+                blanket_l = self.place_blanket(select='lower',store=False)[0]
+                r,z = self.upper_lower(ru,zu,rl,zl,Zjoin=self.sf.Mpoint[1])
+                self.segment['first_wall'] = {'r':r,'z':z} 
+                rfw,zfw = self.upper_lower(blanket_u[0]['r'][::-1],
                                            blanket_u[0]['z'][::-1],
                                            blanket_l[0]['r'],
                                            blanket_l[0]['z'],
                                            Zjoin=self.sf.Mpoint[1])
-                
-                blanket = wrap({'r':self.Rb,'z':self.Zb},{'r':Rfw,'z':Zfw})
+                self.blanket = wrap({'r':r,'z':z},{'r':rfw,'z':zfw})
                 for loop in ['inner','outer']:
-                    blanket.sort_z(loop,select='lower')
-                bfill = blanket.fill(plot=plot)
+                    self.blanket.sort_z(loop,select='lower')
+                bfill = self.blanket.fill(plot=False)
                 self.segment['blanket_fw']  = bfill[0]
                 self.segment['blanket']  = bfill[1]
             else:
                 self.sf.get_Xpsi(select='lower')  # lower X-point
-                
-                div = divertor(self.sf,self.setup)
-                div.place(debug=False)
-                self.Rb,self.Zb = div.join(mc)                
-                #self.update_sf()  # update streamfunction
-                
-                #self.Rb,self.Zb = self.place_target(debug=debug,
-                #                                   symetric=symetric)
-                self.place_blanket(plot=plot)
-            if plot:
-                self.vessel_fill()
-            '''
-            with open('../../Data/'+self.dataname+'_FW.pkl', 'wb') as output:
-                pickle.dump(self.setup.targets,output,-1)
-                pickle.dump(self.Rb,output,-1)
-                pickle.dump(self.Zb,output,-1)
-            '''
-        #elif mode == 'read':
-        #    with open('../../Data/'+self.dataname+'_FW.pkl', 'rb') as input:
-        #        self.setup.targets = pickle.load(input)
-        #        self.Rb = pickle.load(input)
-        #        self.Zb = pickle.load(input)
+                div.place(debug=debug)
+                self.segment = div.join(mc)   
+                self.blanket = self.place_blanket(select='lower')[-1]
+            self.vessel = self.vessel_fill()
+            self.Rb = self.segment['first_wall']['r']
+            self.Zb = self.segment['first_wall']['z']
         else:
-            errtxt = 'set input mode \'eqdsk\',\'calc\',\'read\''
+            errtxt = 'set input mode \'eqdsk\',\'calc\''
             raise ValueError(errtxt)
+
         if mode != 'eqdsk':  # update eqdsk
-            self.sf.nlim = len(self.Rb)  # update sf
-            self.sf.xlim,self.sf.ylim = self.Rb,self.Zb
-        self.loop.R,self.loop.Z = self.trim_contour(self.Rb,self.Zb) # update fw
+            self.sf.xlim = self.Rb
+            self.sf.ylim = self.Zb
+            self.sf.nlim = len(self.sf.xlim)
+            
         if plot:
-            index = (self.Rb <= self.sf.r.max()) & (self.Rb >= self.sf.r.min()) &\
-            (self.Zb <= self.sf.z.max()) & (self.Zb >= self.sf.z.min())
-            pl.plot(self.Rb[index],self.Zb[index],
-                    '-',color=color,linewidth=1.75)
+            pl.plot(self.segment['first_wall']['r'],
+                    self.segment['first_wall']['z'],
+                    lw=1.75,color=0.5*np.ones(3))
+            self.blanket.fill(plot=True,color=colors[0])
+            self.vessel.fill(plot=True,color=colors[1])
+            pl.axis('equal')
+            pl.axis('off')
             
     def upper_lower(self,Ru,Zu,Rl,Zl,Zjoin=0):
         u_index = np.arange(len(Ru),dtype='int')
@@ -119,7 +107,7 @@ class RB(object):
         if store:
             self.segment['blanket_fw']  = bfill[0]
             self.segment['blanket']  = bfill[1]
-        return bfill
+        return bfill,blanket
 
     def vessel_fill(self):
         r,z = self.segment['blanket_fw']['r'],self.segment['blanket_fw']['z']
@@ -159,9 +147,9 @@ class RB(object):
             vv = wrap({'r':rb,'z':zb},{'r':r,'z':z})
         vv.sort_z('inner',select=self.sf.Xloc)
         vv.sort_z('outer',select=self.sf.Xloc)
-        vv.fill(color=colors[1])
         self.segment['vessel_inner'] = {'r':rin,'z':zin}
         self.segment['vessel_outer'] = {'r':r,'z':z}
+        return vv
       
     def get_sol(self,plot=False):
         self.trim_sol(plot=plot)
@@ -216,18 +204,6 @@ class RB(object):
                             else:
                                 #pl.plot(R,Z,color=color[c])
                                 pl.plot(R,Z,'--',color=[0.5,0.5,0.5])
-
-    def trim_contour(self,Rb,Zb):
-        Rt,Zt = np.array([]),np.array([])  # trim contour for BB
-        Lnorm = geom.length(self.loop.R,self.loop.Z,norm=False)[-1]
-        for flip,trim in zip([1,-1],[0.275*self.setup.firstwall['trim'][1],
-                              0.725*self.setup.firstwall['trim'][0]]):
-            L = geom.length(Rb[::flip],Zb[::flip],norm=False)
-            i = np.argmin(np.abs(L/Lnorm-trim))
-            Rt = np.append(Rt,Rb[::flip][:i][::-flip])
-            Zt = np.append(Zt,Zb[::flip][:i][::-flip])
-        Rt,Zt = geom.rzSLine(Rt,Zt,npoints=self.npoints)
-        return Rt,Zt
 
     def crossed_lines(self,Ro,Zo,R1,Z1):
         index = np.zeros(2)
@@ -336,7 +312,7 @@ class wrap(object):
         interpolant = self.loops[loop]['fun']
         return interpolant['r'](l),interpolant['z'](l)
 
-    def sead(self,dl,N=50): # course search
+    def sead(self,dl,N=500): # course search
         l = np.linspace(dl[0],dl[1],N)
         r,z = np.zeros((N,2)),np.zeros((N,2))
         for i,loop in enumerate(self.loops):
@@ -379,7 +355,7 @@ class wrap(object):
         else:
             return False
         
-    def fill(self,plot=True,color=colors[0]):  # minimization focused search
+    def fill(self,plot=False,color=colors[0]):  # minimization focused search
         rin,zin = self.get_segment('inner')
         rout,zout = self.get_segment('outer')        
         concentric = self.concentric(rin,zin,rout,zout)
@@ -404,7 +380,7 @@ class wrap(object):
                       rin[self.indx['inner'][0]:self.indx['inner'][1]][::-1])
         z = np.append(zout[self.indx['outer'][0]:self.indx['outer'][1]],
                       zin[self.indx['inner'][0]:self.indx['inner'][1]][::-1])
-        self.fill = {'r':r,'z':z}
+        self.patch = {'r':r,'z':z}
         r = np.append(np.append(rin[:self.indx['inner'][0]],
                       rout[self.indx['outer'][0]:self.indx['outer'][1]]),
                       rin[self.indx['inner'][1]:])
@@ -414,10 +390,10 @@ class wrap(object):
         self.segment = {'r':r,'z':z}
         if plot:
             self.plot(color=color)
-        return self.segment,self.fill
+        return self.segment,self.patch
             
     def plot(self,plot_loops=False,color=colors[0]):
-        geom.polyfill(self.fill['r'],self.fill['z'],color=color)
+        geom.polyfill(self.patch['r'],self.patch['z'],color=color)
         if plot_loops:
             pl.plot(self.segment['r'],self.segment['z'],color=0.75*np.ones(3))
             for loop in self.loops:

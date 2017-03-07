@@ -13,7 +13,8 @@ import seaborn as sns
 
 class divertor(object):
     
-    def __init__(self,sf,setup,flux_conformal=False):
+    def __init__(self,sf,setup,flux_conformal=False,debug=False):
+        self.debug = debug
         self.sf = sf
         self.targets = setup.targets  # target definition (graze, L2D, etc)
         self.div_ex = setup.firstwall['div_ex']
@@ -35,9 +36,9 @@ class divertor(object):
             elif key not in self.targets[leg]:  #  prevent overwrite
                 self.targets[leg][key] = self.targets['default'][key]
     
-    def place(self,debug=False,**kwargs):
+    def place(self,**kwargs):
         layer_index = 0  # construct from first open flux surface
-        self.sf.sol(update=True,plot=False,debug=debug)
+        self.sf.sol(update=True,plot=False,debug=self.debug)
         for leg in list(self.sf.legs)[2:]:
             self.set_target(leg)
             Rsol,Zsol = self.sf.snip(leg,layer_index,
@@ -76,7 +77,7 @@ class divertor(object):
             in zip(Flip,Direction,Theta_end,Phi_target):
                 R,Z = self.match_psi(Ro,Zo,direction,theta_end,theta_sign,
                                      psi_target,self.targets[leg]['graze'],
-                                     dPlate,leg,debug=debug)
+                                     dPlate,leg,debug=self.debug)
                 self.targets[leg]['R'] = np.append(self.targets[leg]['R'],
                                                    R[::flip])
                 self.targets[leg]['Z'] = np.append(self.targets[leg]['Z'],
@@ -105,11 +106,6 @@ class divertor(object):
             Rb = np.append(Rb,self.targets['outer1']['R'][::-1])
             Zb = np.append(Zb,self.targets['outer1']['Z'][::-1])
             self.segment['divertor'] = {'r':Rb,'z':Zb}  # store diveror
-            '''
-            r,z = self.connect(self.psi_fw[1],['outer1','inner2'],[0,0],
-                               loop=(self.Rfw[::-1],self.Zfw[::-1]))
-            Rb,Zb = self.append(Rb,Zb,r,z)
-            '''
         else:
             Rb = np.append(Rb,self.targets['inner']['R'][1:])
             Zb = np.append(Zb,self.targets['inner']['Z'][1:])
@@ -120,26 +116,13 @@ class divertor(object):
             Rb = np.append(Rb,self.targets['outer']['R'][1:])
             Zb = np.append(Zb,self.targets['outer']['Z'][1:])
             self.segment['divertor'] = {'r':Rb,'z':Zb}  # store diveror
-            '''
-            r,z = self.connect(self.psi_fw[1],['outer','inner'],[-1,0],
-                               loop=(self.Rfw,self.Zfw))
-            Rb,Zb = self.append(Rb,Zb,r,z)
-            '''
-            
-        '''
-        self.Rb,self.Zb = self.sf.midplane_loop(Rb,Zb)
-        self.Rb,self.Zb = self.first_wall_fit(self.dRfw,symetric=symetric,
-                                              debug=debug)
-        #self.get_sol()  # trim sol to targets and store values
-        #self.write_boundary(self.Rb,self.Zb)
-        '''
-        #return self.Rb,self.Zb
+        
     def join(self,main_chamber):
-        r,z = main_chamber.draw()
+        r,z = main_chamber.draw(npoints=500)
         istart = np.argmin((r-self.sf.Xpoint[0])**2+(z-self.sf.Xpoint[1])**2)
         r = np.append(r[istart:],r[:istart+1])
         z = np.append(z[istart:],z[:istart+1])
-        r,z,l = geom.unique(r,z)
+        r,z = geom.unique(r,z)[:2]
         self.segment['inner_loop'] = {'r':r,'z':z}
         rd,zd = self.segment['divertor']['r'],self.segment['divertor']['z']
         rd,zd = geom.unique(rd,zd)[:2]
@@ -162,8 +145,7 @@ class divertor(object):
             r = np.append(np.append(rd,r[iend:istart][::-1]),rd[0])
             z = np.append(np.append(zd,z[iend:istart][::-1]),zd[0])
         self.segment['first_wall'] = {'r':r,'z':z} 
-
-        return r,z
+        return self.segment
     
     def connect(self,psi,target_pair,ends,loop=[]):
         gap = []
@@ -191,10 +173,10 @@ class divertor(object):
     def match_psi(self,Ro,Zo,direction,theta_end,theta_sign,phi_target,graze,
                   dPlate,leg,debug=False): 
         color = sns.color_palette('Set2',2)
-        gain = 0.15  # 0.25
+        gain = 0.25  # 0.25
         Nmax = 500
-        Lo = [0.5,0.0015]  # [blend,turn]  5,0.015
-        r2m = [+1.5,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
+        Lo = [5.0,0.0015]  # [blend,turn]  5,0.015
+        r2m = [-1,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
         Nplate = 1 # number of target plate divisions (1==flat)
         L = Lo[0] if theta_end == 0 else Lo[1]
         Lsead = L
@@ -292,6 +274,19 @@ class main_chamber(object):
         self.set_filename(**kwargs)
         self.initalise_loop()
         
+    def initalise_loop(self):
+        self.profile = Profile(self.filename,family='S',part='chamber',
+                               npoints=200)
+        self.shp = Shape(self.profile,objective='L')
+        self.set_bounds()
+        
+    def set_bounds(self):
+        self.shp.loop.adjust_xo('upper',lb=0.7)
+        self.shp.loop.adjust_xo('top',lb=0.05,ub=0.75)
+        self.shp.loop.adjust_xo('lower',lb=0.7)
+        self.shp.loop.adjust_xo('bottom',lb=0.05,ub=0.75)
+        self.shp.loop.adjust_xo('l',lb=0.8,ub=1.5)
+        
     def date(self,verbose=True):
         today = datetime.date.today().strftime('%Y_%m_%d')
         if verbose:
@@ -305,13 +300,11 @@ class main_chamber(object):
         else:
             date_str = kwargs.get('date',today)
         self.filename = '{}_{}'.format(date_str,self.name)  # chamber name
-        print(self.filename)
         
     def generate(self,eq_names,dr=0.225,psi_n=1.07,
                  flux_fit=False,symetric=False,plot=False):
         self.set_filename(update=True)  # update date in filename
-        if symetric:  # enforce symertic
-            self.profile.enforce_symetric()
+        self.profile.loop.reset_oppvar(symetric)  # reset loop oppvar
         self.config = {'dr':dr,'psi_n':psi_n,'flux_fit':flux_fit,'Nsub':100}
         self.config['eqdsk'] = []  
         sf_list = self.load_sf(eq_names)
@@ -357,19 +350,7 @@ class main_chamber(object):
         self.shp.plot_bounds()
         r,z = self.draw()
         pl.plot(r,z)
-            
-    def initalise_loop(self):
-        self.profile = Profile(self.filename,family='S',part='chamber',npoints=200)
-        self.shp = Shape(self.profile,objective='L')
-        self.set_bounds()
-        
-    def set_bounds(self):
-        self.shp.loop.adjust_xo('upper',lb=0.7)
-        self.shp.loop.adjust_xo('top',lb=0.05,ub=0.75)
-        self.shp.loop.adjust_xo('lower',lb=0.7)
-        self.shp.loop.adjust_xo('bottom',lb=0.05,ub=0.75)
-        self.shp.loop.adjust_xo('l',lb=0.8,ub=1.5)
-        
+      
     def add_bound(self,sf): 
         rpl,zpl = sf.get_offset(self.config['dr'],Nsub=self.config['Nsub'])
         self.shp.add_bound({'r':rpl,'z':zpl},'internal')  # vessel inner bounds
@@ -392,25 +373,12 @@ class main_chamber(object):
                 warn(wtxt)
             else:  # add flux_fit bounds
                 rflux,zflux = geom.rzSLine(rflux,zflux,
-                                           int(self.config['Nsub']/2))  
+                                           int(self.config['Nsub']/2))
                 self.shp.add_bound({'r':rflux,'z':zflux},'internal')  
 
-    def draw(self):
-        x = self.profile.loop.draw()
+    def draw(self,npoints=250):
+        x = self.profile.loop.draw(npoints=npoints)
         r,z = x['r'],x['z']
         r,z = geom.order(r,z,anti=True)
         return r,z
-
-'''
-    def update_sf(self):
-        if not hasattr (self.sf,'Xpoint'):
-            self.sf.get_Xpsi()  
-        self.xo = [self.sf.Xpoint[0],self.sf.eqdsk['zmagx']]
-        self.Rp,self.Zp = self.sf.get_boundary()
-        self.Lp = geom.length(self.Rp,self.Zp,norm=False)[-1]
-        self.Rfw,self.Zfw,self.psi_fw = self.firstwall_loop() 
-        self.loop = Loop(self.Rfw,self.Zfw,xo=self.xo)  # first wall contour
-'''    
-
-
 

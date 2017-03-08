@@ -52,12 +52,14 @@ class INV(object):
         self.TFoffset = TFoffset  # offset coils from outer TF loop
         self.force_feild_active = False
    
-    def set_swing(self,centre=0,width=363,array=[-0.5,0,0.5]): 
-        flux = centre+np.array(array)*width/(2*np.pi)  # Webber/rad 
+    def set_swing(self,centre=0,width=363/(2*np.pi),array=[-0.5,0,0.5]): 
+        flux = centre+np.array(array)*width  # Webber/rad 
         nC,nS = self.nC,len(flux)
         self.swing = {'flux':flux,'I':np.zeros((nS,nC)),'rms':np.zeros(nS),
                       'FrPF':np.zeros(nS),'FzPF':np.zeros(nS),
-                      'FsepCS':np.zeros(nS),'FzCS':np.zeros(nS),               
+                      'FsepCS':np.zeros(nS),'FzCS':np.zeros(nS),   
+                      'Isum':np.zeros(nS),'Ics':np.zeros(nS),
+                      'Imax':np.zeros(nS),
                       'Tpol':np.zeros(nS),'rms_bndry':np.zeros(nS),
                       'z_offset':np.zeros(nS),'dTpol':0,
                       'Fcoil':[[] for _ in range(nS)]}      
@@ -953,6 +955,9 @@ class INV(object):
             self.swing['Fcoil'][i] = {'F':Fcoil['F'],'dF':Fcoil['dF']}
             self.swing['Tpol'][i] = self.poloidal_angle()
             self.swing['I'][i] = self.Icoil
+            self.swing['Isum'][i] = self.Isum
+            self.swing['Ics'][i] = self.Ics
+            self.swing['Imax'][i] = self.Imax
         self.rmsID = np.argmax(self.swing['rms'])
         self.rms = self.swing['rms'][self.rmsID]
         return self.rms
@@ -1102,7 +1107,8 @@ class INV(object):
             self.Isum += abs(self.Icoil[j])  # sum absolute current
             if name in self.CS_coils:
                 self.Ics += abs(self.Icoil[j])
-        self.Imax = self.Icoil.max()
+        imax = np.argmax(abs(self.Icoil))
+        self.Imax = self.Icoil[imax]
      
     def write_swing(self):
         nC,nS = len(self.adjust_coils),len(self.Swing)
@@ -1136,14 +1142,16 @@ class INV(object):
                 
 class scenario(object):
 
-    def __init__(self,inv,rms_limit=0.02,plot=True):
+    def __init__(self,inv,rms_limit=0.02,wref=25,plot=True):
         self.inv = inv
         self.rms_limit = rms_limit
+        self.wref = wref
         self.inv.fix_boundary(plot=plot)
         self.Lnorm = inv.snap_coils()
         
     def get_rms(self,centre):
-        self.inv.set_swing(centre=centre,width=0,array=[0])
+        self.inv.set_swing(centre=centre,width=self.wref,
+                           array=np.linspace(-0.5,0.5,3))
         rms = self.inv.update_position(self.Lnorm,update_area=True)
         return float(self.rms_limit-rms)
         
@@ -1153,19 +1161,14 @@ class scenario(object):
         return swing
         
     def flat_top(self):
-        self.inv.set_swing(centre=0,width=0,array=[0])
-        self.inv.update_position(self.Lnorm,update_area=True)  # centre swing
+        SOF = self.find_root([-60,0])-self.wref/2
+        EOF = self.find_root([0,60])+self.wref/2                      
         
-        EOF = self.find_root([60,0])                        
-        SOF = self.find_root([-60,0])
-        
-        
-        
-        self.width = 2*np.pi*(EOF-SOF)
+        self.width = EOF-SOF
         print('SOF {:1.0f}, EOF {:1.0f}'.format(SOF,EOF))
-        print('swing width {:1.0f}Vs'.format(self.width))
+        print('swing width {:1.0f}Vs'.format(2*np.pi*self.width))
         self.inv.set_swing(centre=np.mean([SOF,EOF]),width=self.width,
-                           array=np.linspace(-0.5,0.5,51))
+                           array=np.linspace(-0.475,0.475,51))
         self.inv.update_position(self.Lnorm,update_area=True)
         
         

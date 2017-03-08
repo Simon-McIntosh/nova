@@ -31,7 +31,7 @@ mc.load_data(plot=False)  # load from file
 mc.shp.plot_bounds()
 
 
-nTF,ripple = 16,True
+nTF,ripple = 18,True
 config = {'TF':'dtt','eq':eq_names[0]}    
 config,setup = select(config,nTF=nTF,update=False)     
 sf = SF(setup.filename)   
@@ -48,16 +48,17 @@ shp.tf.fill()
 
 pf = PF(sf.eqdsk)
 eq = EQ(sf,pf,dCoil=0.5,sigma=0,boundary=sf.get_sep(expand=1.05),n=2.5e3) 
-#eq.gen_opp()
+eq.gen_opp()
 
 inv = INV(sf,eq,shp.tf)
 
 sc = scenario(inv)
 sc.flat_top()
 
+
 inv.solve_slsqp(inv.swing['flux'][0])
 eq.gen_opp()
-eq.run()
+#eq.run()
 sf.contour()
 
 

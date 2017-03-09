@@ -23,14 +23,14 @@ rc = {'figure.figsize':[5,5*16/12],'savefig.dpi':150, #
 sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
         font_scale=5/8,rc=rc)
 
-machine = 'dtt'
+machine = 'demo'
 nTF,ripple = 18,True
 
 if machine == 'demo':
     eq_names = ['DEMO_SN_SOF','DEMO_SN_EOF']
     date = '2017_03_08'
 elif machine == 'dtt':
-    eq_names = ['DTT_SN']
+    eq_names = [' DTT_SN']
     date = '2017_03_08'
 else:
     raise ValueError('list machine type')
@@ -41,11 +41,10 @@ mc.load_data(plot=False)  # load from file
 mc.shp.plot_bounds()
 
 
-config = {'TF':machine,'eq':eq_names[0]}    
+config = {'TF':machine,'eq':eq_names[1]}    
 config,setup = select(config,nTF=nTF,update=False)     
 sf = SF(setup.filename) 
 
-print(sf.shape['R'])
 
 rb = RB(sf,setup)
 rb.generate(mc,plot=True,DN=False,debug=False)
@@ -59,11 +58,8 @@ shp.tf.fill()
 
 
 pf = PF(sf.eqdsk)
-eq = EQ(sf,pf,dCoil=0.5,boundary=sf.get_sep(expand=1.05),n=2.5e3) 
+eq = EQ(sf,pf,dCoil=0.5,boundary=sf.get_sep(expand=1.05),n=5e3) 
 eq.gen_opp()
-
-sf.contour()
-
 
 inv = INV(sf,eq,shp.tf)
 sc = scenario(inv)
@@ -71,12 +67,15 @@ sc.flat_top()
 
 
 inv.solve_slsqp(inv.swing['flux'][15])
+#eq.run(update=False)
 eq.gen_opp()
 
 sf.contour()
 
 pf.plot(coils=pf.coil,label=True,current=True)
 pf.plot(coils=eq.coil,label=False,plasma=True,current=False) 
+#ff = force_feild(eq.pf.index,eq.pf.coil,eq.coil,eq.plasma_coil,
+#                 multi_filament=True)
 inv.ff.plot(scale=1.5)
 
 pl.figure(figsize=([5*16/12,5]))

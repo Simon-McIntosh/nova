@@ -109,14 +109,14 @@ class RB(object):
             self.segment['blanket']  = bfill[1]
         return bfill,blanket
 
-    def vessel_fill(self):
+    def vessel_fill(self,gap=True):
         r,z = self.segment['blanket_fw']['r'],self.segment['blanket_fw']['z']
         loop = geom.Loop(r,z)
         r,z = loop.fill(dt=0.05)
         rb = np.append(r,r[0])
         zb = np.append(z,z[0])
         profile = Profile(self.setup.configuration,family='S',part='vv',
-                          npoints=400)
+                          npoints=400,read_write=False)
         shp = Shape(profile,objective='L')
         shp.loop.set_l({'value':0.5,'lb':0.6,'ub':1.5})  # 1/tesion)
         shp.loop.xo['upper'] = {'value':0.33,'lb':0.5,'ub':1}  
@@ -141,7 +141,7 @@ class RB(object):
         shp.minimise()
         x = profile.loop.draw()
         r,z = x['r'],x['z']
-        if 'SX' in self.setup.configuration:
+        if 'SX' in self.setup.configuration or gap == True:
             vv = wrap({'r':rin,'z':zin},{'r':r,'z':z})
         else:
             vv = wrap({'r':rb,'z':zb},{'r':r,'z':z})

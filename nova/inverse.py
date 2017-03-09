@@ -1073,13 +1073,13 @@ class INV(object):
         self.tstart,self.tstart_cpu = time.time(),time.process_time()
         self.iter['plasma'] += 1
         self.tick()
-        self.set_plasma()
+        self.add_plasma()
         Lo,fun = self.minimize(Lo)
         self.store_update(extent='position')
         self.tock()
         return Lo
 
-    def set_plasma(self):
+    def add_plasma(self):
         self.set_background()
         self.get_weight()
         
@@ -1135,18 +1135,17 @@ class INV(object):
         self.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary points
         self.add_null(factor=1,point=self.sf.Xpoint)
         self.initialize_log()
-        self.set_background()
-        self.get_weight()
         if plot:
             self.plot_fix(tails=True)
                 
 class scenario(object):
 
-    def __init__(self,inv,rms_limit=0.02,wref=25,plot=True):
+    def __init__(self,inv,rms_limit=0.05,wref=25,plot=True):
         self.inv = inv
         self.rms_limit = rms_limit
         self.wref = wref
         self.inv.fix_boundary(plot=plot)
+        self.inv.add_plasma()
         self.Lnorm = inv.snap_coils()
         
     def get_rms(self,centre):
@@ -1164,11 +1163,10 @@ class scenario(object):
         SOF = self.find_root([-60,0])-self.wref/2
         EOF = self.find_root([0,60])+self.wref/2                      
         
-        self.width = EOF-SOF
-        print('SOF {:1.0f}, EOF {:1.0f}'.format(SOF,EOF))
+        self.width = 0.95*(EOF-SOF)
         print('swing width {:1.0f}Vs'.format(2*np.pi*self.width))
         self.inv.set_swing(centre=np.mean([SOF,EOF]),width=self.width,
-                           array=np.linspace(-0.475,0.475,51))
+                           array=np.linspace(-0.5,0.5,11))
         self.inv.update_position(self.Lnorm,update_area=True)
         
         

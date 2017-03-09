@@ -13,6 +13,8 @@ import matplotlib.animation as manimation
 import sys
 import datetime
 from itertools import cycle
+from nova.streamfunction import SF
+from nova.config import Setup
 
 class Shape(object):
     
@@ -28,11 +30,13 @@ class Shape(object):
                 self.add_bound(kwargs[side],side)
         if self.profile.nTF is not 'unset' and \
         (eqconf is not 'unset' or sep is not 'unset'):
-            self.tf = TF(profile=self.profile)      
             if eqconf is not 'unset':
                 plasma = {'config':eqconf}
+                sf = SF(Setup(eqconf).filename)
+                self.tf = TF(profile=self.profile,sf=sf)
             else:
                 plasma = {'r':sep['r'],'z':sep['z']}
+                self.tf = TF(profile=self.profile)
             ny = kwargs.get('ny',3)  # TF filament number (y-dir)
             self.cage = coil_cage(nTF=self.profile.nTF,rc=self.tf.rc,
                                   plasma=plasma,ny=ny)

@@ -16,6 +16,7 @@ from amigo.geom import loop_vol
 class SF(object):
     
     def __init__(self,filename,upsample=1,**kwargs):
+        self.shape = {}
         self.filename = filename
         self.set_kwargs(kwargs)
         self.eqdsk = nova.geqdsk.read(self.filename)
@@ -32,6 +33,7 @@ class SF(object):
         self.get_Xpsi()
         self.get_Mpsi()
         self.set_contour()  # set cfeild
+        self.get_LFP()
         #self.get_sol_psi(dSOL=3e-3,Nsol=15,verbose=False)
         self.rcirc = 0.3*abs(self.Mpoint[1]-self.Xpoint[1])  # leg search radius
         self.drcirc = 0.1*self.rcirc  # leg search width
@@ -158,6 +160,7 @@ class SF(object):
         self.get_Xpsi()
         self.get_Mpsi()
         self.set_contour()  # calculate cfeild
+        self.get_LFP()
         r,z = self.get_boundary()
         self.set_boundary(r,z)
         #self.get_Plimit()  # limit plasma extent
@@ -485,6 +488,9 @@ class SF(object):
         self.LFPr = self.get_midplane(self.LFPr,self.LFPz)
         self.HFPr,self.HFPz = fLFSr(-np.pi),fLFSz(-np.pi)
         self.HFPr = self.get_midplane(self.HFPr,self.HFPz)
+        self.shape['R']  = np.mean([self.HFPr,self.LFPr])
+        self.shape['a']  = (self.HFPr-self.LFPr)/2
+        self.shape['AR'] = self.shape['R']/self.shape['a']
         return (self.LFPr,self.LFPz,self.HFPr,self.HFPz)
     
     def first_wall_psi(self,trim=True,single_contour=False,**kwargs):
@@ -612,7 +618,6 @@ class SF(object):
             L = np.linspace(0,1,nmult*len(l))
             self.Rsol[i] = sinterp(l,r,k=k)(L)
             self.Zsol[i] = sinterp(l,z,k=k)(L)
-        
         
     def sol(self,dr=3e-3,Nsol=5,plot=False,update=False,debug=False):  # dr [m]
         if update or not hasattr(self,'sol_psi') or dr > self.dSOL\
@@ -985,19 +990,14 @@ class SF(object):
         
     def shape_parameters(self,plot=False):
         self.get_LFP()
-        a = (self.LFPr-self.HFPr)/2
-        R = (self.LFPr+self.HFPr)/2
-        AR = R/a
         r95,z95 = self.get_boundary(alpha=0.95)
         ru = r95[np.argmax(z95)]  # triangularity
         rl = r95[np.argmin(z95)]
-        del_u = (R-ru)/a
-        del_l = (R-rl)/a
-        kappa = (np.max(z95)-np.min(z95))/(2*a)
+        self.shape['del_u'] = (self.shape['R']-ru)/self.shape['a']
+        self.shape['del_l'] = (self.shape['R']-rl)/self.shape['a']
+        self.shape['kappa'] = (np.max(z95)-np.min(z95))/(2*self.shape['a'])
         r,z = self.get_boundary(alpha=1-1e-4)
         r,z = geom.clock(r,z,reverse=True)
-        V = loop_vol(r,z,plot=plot)
-        shape = {'AR':AR,'del_u':del_u,'del_l':del_l,'kappa':kappa,'volume':V,
-                 'R':R}
-        return shape
+        self.shape['V'] = loop_vol(r,z,plot=plot)
+        return self.shape
 

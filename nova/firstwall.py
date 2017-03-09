@@ -26,7 +26,6 @@ class divertor(object):
             self.Rfw,self.Zfw,self.psi_fw = sf.firstwall_loop(\
             dr=setup.firstwall['dRfw'])
         
-
     def set_target(self,leg,**kwargs):
         if leg not in self.targets:
             self.targets[leg] = {}
@@ -173,10 +172,10 @@ class divertor(object):
     def match_psi(self,Ro,Zo,direction,theta_end,theta_sign,phi_target,graze,
                   dPlate,leg,debug=False): 
         color = sns.color_palette('Set2',2)
-        gain = 0.25  # 0.25
+        gain = 0.15  # 0.25
         Nmax = 500
-        Lo = [5.0,0.0015]  # [blend,turn]  5,0.015
-        r2m = [-1,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
+        Lo = [1.0,0.0015]  # [blend,turn]  5,0.015
+        r2m = [-1.25,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
         Nplate = 1 # number of target plate divisions (1==flat)
         L = Lo[0] if theta_end == 0 else Lo[1]
         Lsead = L

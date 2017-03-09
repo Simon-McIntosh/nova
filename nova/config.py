@@ -201,10 +201,10 @@ class Setup(object):
         elif configuration == 'DEMO_SN_EOF':
             self.dataname = 'DEMO_EOF'
             self.filename = 'Equil_AR3d1_2015_04_v2_EOF_CSred_fine_final.eqdsk'
-            self.firstwall['div_ex'] = 1.5
+            self.firstwall['div_ex'] = 0.75
             #self.firstwall['trim'] = [0.88,0.95]  # trim fraction (in/out)
             self.targets['inner'] = {'L2D':1.0}  # 0.6
-            self.targets['outer'] = {'L2D':1.1}  # 0.65    
+            self.targets['outer'] = {'L2D':1.36}  # 0.65    
 
         elif configuration == 'SN':
             self.dataname = 'DEMO_SN'

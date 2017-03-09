@@ -36,8 +36,7 @@ class EQ(object):
         self.sf = sf
         self.pf = pf
         self.coils(dCoil=dCoil)  # multi-filiment coils 
-        self.get_Vcoil()  # identify vertical stability coils
-        #self.set_Vcoil()
+        self.select_control_coils()  # identify control coils
         self.resample(sigma=sigma,**kwargs)
         
     def resample(self,sigma=0,**kwargs):  # resample current density
@@ -140,8 +139,10 @@ class EQ(object):
                 self.coil[name]['rc'] = np.sqrt(coil[name]['dr']**2+
                                                 coil[name]['dr']**2)
         else:
-            self.coil = {}
+            self.coil,self.coil_o = {},{}
             for name in coil.keys():
+                self.coil_o[name] = {}
+                self.coil_o[name]['Io'] = self.pf.coil[name]['I']
                 self.size_coil(coil,name,self.dCoil)
                         
     def size_coil(self,coil,name,dCoil):
@@ -158,6 +159,7 @@ class EQ(object):
                 R,Z = np.meshgrid(r,z,indexing='ij')
                 R,Z = np.reshape(R,(-1,1)),np.reshape(Z,(-1,1))
                 Nf = len(R)  # filament number
+                self.coil_o[name]['Nf'] = Nf
                 I = coil[name]['I']/Nf
                 bundle = {'r':np.zeros(Nf),'z':np.zeros(Nf),
                           'dr':dr*np.ones(Nf),'dz':dz*np.ones(Nf),
@@ -174,49 +176,42 @@ class EQ(object):
                 bundle['Ro'] = np.mean(bundle['r'])
                 bundle['Zo'] = np.mean(bundle['z'])
             else:
-                print('coil bundle not foiund',name)
+                print('coil bundle not found',name)
                 self.coil[name] = coil[name]
                 bundle = coil[name]
         return bundle
-                          
-    def get_Vcoil(self):
-        ex_coil = []
-        rmin = np.min([self.pf.coil[name]['r'] for name in self.pf.coil])
-        for name in self.pf.coil.keys():
-            if self.pf.coil[name]['r'] > rmin+1e-3:  # exclude CS  
-                ex_coil.append(name)
-        Nex = len(ex_coil)
-        self.Vcoil = np.zeros((Nex,),dtype=[('name','S10'),('value','float'),
-                                            ('Io','float'),('Ip','float'),
-                                            ('Ii','float'),('Nf','int'),
-                                            ('z','float')])
-        for i,name in enumerate(ex_coil):
-            self.Vcoil['name'][i] = name
-            self.Vcoil['Io'][i] = self.pf.coil[name]['I']
-            self.Vcoil['z'][i] = -self.pf.coil[name]['z']
-            self.Vcoil['Nf'][i] = self.coil[name+'_0']['Nf'] 
-            Mpoint = self.sf.Mpoint
+                
+    def select_control_coils(self):
+        self.ccoil = {'vertical':{},'horizontal':{}}
+        self.ccoil['vertical'] = np.zeros((self.pf.index['PF']['n']),\
+        dtype=[('name','S10'),('value','float'),('Ip','float'),
+               ('Ii','float'),('z','float')])
+        self.ccoil['horizontal'] = np.zeros((self.pf.index['CS']['n']),\
+        dtype=[('name','S10'),('value','float'),('Ip','float'),
+               ('Ii','float'),('z','float')])
+        nV,nH = -1,-1
+        for name in self.pf.coil:
             r,z = self.pf.coil[name]['r'],self.pf.coil[name]['z']
-            self.Vcoil['value'][i] = cc.green_feild(Mpoint[0],Mpoint[1],r,z)[0]  
-        self.Vcoil = np.sort(self.Vcoil,order='value')
-        #self.Vcoil = np.sort(self.Vcoil,order='z')
-        
-    def set_Vcoil(self):  # set fixed vertical control coils
-        names = ['upper','lower']
-        rvs = 5+self.sf.Mpoint[0]*np.ones(2)
-        zvs = self.sf.Mpoint[1]+16*np.array([-1,1])
-        self.Vcoil = np.zeros((2,),dtype=[('name','S10'),('value','float'),
-                                          ('Io','float'),('Ip','float'),
-                                          ('Ii','float'),('Nf','int')])
-        for i,(name,r,z) in enumerate(zip(names,rvs,zvs)):
-            self.Vcoil['name'][i] = name
-            name += '_0'
-            self.coil[name] = {'r':r,'z':z,'dr':0.5,'dz':0.5,
-                               'I':0,'rc':1,'Nf':1}
-            self.Vcoil['Io'][i] = self.coil[name]['I']
-            self.Vcoil['Nf'][i] = self.coil[name]['Nf']  
-            Mpoint = self.sf.Mpoint
-            self.Vcoil['value'][i] = cc.green_feild(Mpoint[0],Mpoint[1],r,z)[0]  
+            feild = cc.green_feild(self.sf.Mpoint[0],self.sf.Mpoint[1],r,z)
+            if name in self.pf.index['PF']['name']:
+                nV += 1
+                direction,index,iB = 'vertical',nV,0
+            elif name in self.pf.index['CS']['name']:
+                nH += 1
+                direction,index,iB = 'horizontal',nH,1
+            self.ccoil[direction]['name'][index] = name
+            self.ccoil[direction]['z'][index] = self.pf.coil[name]['z']
+            self.ccoil[direction]['value'][index] = feild[iB]
+        for direction in ['vertical','horizontal']:        
+            self.ccoil[direction] = np.sort(self.ccoil[direction],
+                                            order='value')  # order='z'
+        self.ccoil['active'] = []
+        for index in [0,-1]:
+            self.ccoil['active'].append(\
+            self.ccoil['vertical']['name'][index].decode())
+        self.ccoil['active'].append(\
+        self.ccoil['horizontal']['name'][0].decode())
+        self.ccoil['rtarget'] = self.sf.shape['R']
 
     def indx(self,i,j):
         return i*self.nz+j
@@ -291,7 +286,7 @@ class EQ(object):
                
     def plasma_core(self,update=True):
         if update:  # calculate plasma contribution
-            rbdry,zbdry = self.sf.get_boundary(alpha=1-1e-3)
+            rbdry,zbdry = self.sf.get_boundary()
             R,Z = geom.inloop(rbdry,zbdry,
                               self.r2d.flatten(),self.z2d.flatten())
             self.Ip,self.Nplasma = 0,0
@@ -299,82 +294,55 @@ class EQ(object):
             for r,z in zip(R,Z):
                 i = np.argmin(np.abs(r-self.r))
                 j = np.argmin(np.abs(z-self.z))  # plasma vertical offset
-                indx = self.indx(i,j)
+                index = self.indx(i,j)
                 psi = (self.psi[i,j]-self.sf.Mpsi)/(self.sf.Xpsi-self.sf.Mpsi)
                 if psi<1:
                     self.Nplasma += 1
-                    self.plasma_index[self.Nplasma-1] = indx
-                    self.bpl[indx] = -self.mu_o*r**2*self.sf.Pprime(psi)\
+                    self.plasma_index[self.Nplasma-1] = index
+                    self.bpl[index] = -self.mu_o*r**2*self.sf.Pprime(psi)\
                     -self.sf.FFprime(psi)
-                    self.Ip -= self.dA*self.bpl[indx]/(self.mu_o*r)
+                    self.Ip -= self.dA*self.bpl[index]/(self.mu_o*r)
             scale_plasma = self.sf.cpasma/self.Ip
             self.sf.b_scale = scale_plasma
-        for i,indx in zip(range(self.Nplasma),self.plasma_index):
-            self.b[indx] = self.bpl[indx]*self.sf.b_scale
+        for i,index in zip(range(self.Nplasma),self.plasma_index):
+            self.b[index] = self.bpl[index]*self.sf.b_scale
         
-    def set_plasma_coil(self,delta=0):
+    def set_plasma_coil(self):
         self.plasma_coil = {} 
-        if delta > 0:
-            rbdry,zbdry = self.sf.get_boundary(alpha=1-1e-2)  # 1e-3 (DN)
-            lbdry = self.sf.length(rbdry,zbdry)
-            rc = np.mean([rbdry.min(),rbdry.max()])
-            zc = np.mean([zbdry.min(),zbdry.max()])
-            radius = interp1d(lbdry,((rbdry-rc)**2+(zbdry-zc)**2)**0.5)
-            theta = interp1d(lbdry,np.arctan2(zbdry-zc, rbdry-rc))
-            Length = np.linspace(lbdry[0],lbdry[-1],len(lbdry))
-            Radius = radius(Length)
-            Theta = theta(Length)
-            nr = np.ceil((Radius.max()-Radius.min())/delta)
-            R,Z = np.array([]),np.array([])
-            for rfact in np.linspace(1/(2*nr),1-1/(2*nr),nr):
-                r,z = rfact*Radius*np.cos(Theta),rfact*Radius*np.sin(Theta)
-                L = self.sf.length(r,z,norm=False)[-1]
-                nloop = np.ceil(L/delta)
-                length = np.linspace(1/nloop,1,nloop)
-                rinterp,tinterp = rfact*radius(length),theta(length)
-                R = np.append(R,rc+rinterp*np.cos(tinterp))
-                Z = np.append(Z,zc+rinterp*np.sin(tinterp))
-            Rp,Zp = R.flatten(),Z.flatten()
-            Ip,Np = np.zeros(len(R)),np.zeros(len(R))
-        else:
-            Rp,Zp = np.zeros(self.Nplasma),np.zeros(self.Nplasma)
-            Ip,Np = np.zeros(self.Nplasma),np.zeros(self.Nplasma)
-        for indx in range(self.Nplasma):
-            i,j = self.ij(self.plasma_index[indx])
+        Rp,Zp = np.zeros(self.Nplasma),np.zeros(self.Nplasma)
+        Ip,Np = np.zeros(self.Nplasma),np.zeros(self.Nplasma)
+        for index in range(self.Nplasma):
+            i,j = self.ij(self.plasma_index[index])
             r,z = self.r[i],self.z[j]
-            I = -self.dA*self.b[self.plasma_index[indx]]/(self.mu_o*r)
-            if delta > 0:
-                index = np.argmin((Rp-r)**2+(Zp-z)**2)
-            else:
-                index = indx
-                Rp[index],Zp[index] = r,z
-            Ip[index] += I
-            Np[index] += 1
-        indx = -1
+            I = -self.dA*self.b[self.plasma_index[index]]/(self.mu_o*r)
+
+            Rp[index],Zp[index] = r,z
+            Ip[index] = I
+            Np[index] = 1
+        index = -1
         for r,z,I,n in zip(Rp,Zp,Ip,Np):
             if n > 0:
-                indx += 1
-                self.plasma_coil['Plasma_{:1.0f}'.format(indx)] = {'r':r,'z':z,\
-                'dr':self.dr*np.sqrt(n),'dz':self.dz*np.sqrt(n),
-                'rc':np.sqrt(n*self.dr**2+n*self.dz**2)/2,
-                'I':I,'indx':indx}
+                index += 1
+                self.plasma_coil['Plasma_{:1.0f}'.format(index)] = \
+                {'r':r,'z':z,'dr':self.dr*np.sqrt(n),'dz':self.dz*np.sqrt(n),\
+                'rc':np.sqrt(n*self.dr**2+n*self.dz**2)/2,'I':I,'index':index}
         self.pf.plasma_coil = self.plasma_coil
        
-    def get_plasma_coil(self,delta=0):
+    def get_plasma_coil(self):
         self.plasma_core()
-        self.set_plasma_coil(delta=delta)
+        self.set_plasma_coil()
         
     def coreBC(self,update=True):
         self.plasma_core(update=update)
         self.coil_core()
         
     def edgeBC(self,update_edge=True,external_coils=True):
-        if not update_edge:# or self.sf.eqdsk['ncoil'] == 0:   # edge BC from sf
-            psi = self.psi_edge()
-        else:
+        if update_edge:
             psi = self.psi_pl()  # plasma component
             if external_coils: 
-                psi += self.psi_ex()  # coils external to grid   
+                psi += self.psi_ex()  # coils external to grid             
+        else:  # edge BC from sf  #  or self.sf.eqdsk['ncoil'] == 0:   
+            psi = self.psi_edge()
         self.b[self.indx(0,np.arange(self.nz))] = \
         psi[2*self.nr+self.nz:2*self.nr+2*self.nz][::-1]
         self.b[self.indx(np.arange(self.nr),0)] = psi[:self.nr]
@@ -387,72 +355,74 @@ class EQ(object):
         psi = spsolve(self.A,self.b)
         return np.reshape(psi,(self.nr,self.nz))
              
-    def run(self,update=True,verbose=True):
+    def run(self,update=True):
         self.resetBC()
         self.coreBC(update=update)
         self.edgeBC()
         self.psi = self.solve()
-        self.set_eq_psi(verbose=verbose)
+        self.set_eq_psi()
             
-    def set_eq_psi(self,verbose=True):  # set psi from eq
+    def set_eq_psi(self):  # set psi from eq
         eqdsk = {'r':self.r,'z':self.z,'psi':self.psi}
         self.sf.update_plasma(eqdsk)  # include boundary update
-        '''
-        try:
-            
-        except:
-            if verbose:
-                print('boundary update failed')
-            self.sf.set_plasma(eqdsk)
-        '''
     
     def plasma(self):
         self.resetBC()
         self.plasma_core()
         self.edgeBC(external_coils=False)
         self.psi_plasma = self.solve()
-        self.set_plasma_coil()
         
-    def set_control_current(self,index=-1,**kwargs):  # set filliment currents
+    def set_control_current(self,name,**kwargs):  # set filliment currents
         if 'I' in kwargs:
             I = kwargs['I']
         elif 'factor' in kwargs:
-            I = (1+kwargs['factor'])*self.Vcoil['Io'][index]
+            I = (1+kwargs['factor'])*self.coil_o[name]['Io']
         else:
             errtxt = '\n'
             errtxt += 'kw input \'I\' or \'factor\'\n'
             raise ValueError(errtxt)
-        for subcoil in range(self.Vcoil['Nf'][index]):
-            subname = self.Vcoil['name'][index].decode()
-            subname += '_{:1.0f}'.format(subcoil)
-            self.coil[subname]['I'] = I/self.Vcoil['Nf'][index]
+        for subcoil in range(self.coil_o[name]['Nf']):
+            subname = '{}_{:1.0f}'.format(name,subcoil)
+            self.coil[subname]['I'] = I/self.coil_o[name]['Nf']
             
     def reset_control_current(self):
         self.cc = 0
-        for index in [0,-1]:
-            self.set_control_current(index=index,factor=0)
+        for name in self.ccoil['active']:
+            self.set_control_current(name,factor=0)
 
-    def gen(self,ztarget=None,Zerr=1e-3,kp=1.5,ki=0.05,Nmax=50,**kwargs): 
+    def gen(self,ztarget=None,rtarget=None,Zerr=1e-3,kp=1.5,ki=0.05,
+            Nmax=50,**kwargs): 
         if not hasattr(self,'to'):
             self.to = time()  # start clock for single gen run
         if ztarget == None:  # sead plasma magnetic centre vertical target
             self.ztarget = self.sf.Mpoint[1]
         else:
             self.ztarget = ztarget
+        if rtarget == None:  # sead plasma major radius horizontal target
+            self.rtarget = self.ccoil['rtarget']
+        else:
+            self.rtarget = rtarget    
         Mflag = False
-        self.Zerr = np.zeros(Nmax)
+        self.Zerr,self.Rerr = np.zeros(Nmax),np.zeros(Nmax)
         self.reset_control_current()
         to = time()
         for i in range(Nmax):
+            print(self.sf.shape['R'],self.rtarget)
             self.run()
             self.Zerr[i] = self.sf.Mpoint[1]-self.ztarget
+            self.Rerr[i] = -(self.sf.shape['R']-self.rtarget)         
             if i > 1:
                 if abs(self.Zerr[i-1]) <= Zerr and abs(self.Zerr[i]) <= Zerr :
                     if Mflag:
-                        progress = '\ri:{:1.0f} z_target {:1.3f}m Icontrol {:1.1f}KA'.\
-                        format(i,self.ztarget,1e-3*self.Ic)
-                        progress += ' gen {:1.0f}s'.format(time()-to)
-                        progress += ' total {:1.0f}s'.format(time()-self.to)
+                        progress = '\ri:{:1.0f} '.format(i)
+                        progress += 'z {:1.3f}m'.format(self.ztarget)
+                        progress += '{:+1.3f}mm '.format(1e3*self.Zerr[i])
+                        progress += 'R {:1.3f}m'.format(self.sf.shape['R'])
+                        progress += '{:+1.3f}mm '.format(1e3*self.Rerr[i])
+                        progress += 'Ipf {:1.3f}KA '.format(1e-3*self.Ic['v'])
+                        progress += 'Ics {:1.3f}MA '.format(1e-6*self.Ic['h'])
+                        progress += 'gen {:1.0f}s '.format(time()-to)
+                        progress += 'total {:1.0f}s '.format(time()-self.to)
                         progress += '\t\t\t'  # white space
                         sys.stdout.write(progress)
                         sys.stdout.flush()
@@ -462,25 +432,31 @@ class EQ(object):
                 print('warning: gen vertical position itteration limit reached')
             else:
                 Mflag = False
-            self.Ic = 0  # control current
+            self.Ic = {'v':0,'h':0}  # control current
             for index,sign in zip([0,-1],[1,-1]):  # stability coil pair [0,-1],[1,-1]
-                gain = 1e5/self.Vcoil['value'][index]
-                self.Vcoil['Ip'][index] = gain*kp*self.Zerr[i]  # proportional
-                self.Vcoil['Ii'][index] += gain*ki*self.Zerr[i]  # intergral
-                dI = self.Vcoil['Ip'][index]+self.Vcoil['Ii'][index]
-                I = self.Vcoil['Io'][index]+dI
-                self.set_control_current(index=index,I=I)
-                self.Ic += sign*(dI)   
-        self.set_plasma_coil()
-        return self.Ic
-        
-    def gen_opp(self,z=None,dz=0.3,Zerr=5e-3,Nmax=100,**kwargs):
+                dI = self.PID(self.Zerr[i],'vertical',index,kp=kp,ki=ki)
+                self.Ic['v'] += sign*(dI)   
+            self.Ic['h'] = self.PID(self.Rerr[i],'horizontal',0,kp=kp,ki=ki)  
+        #self.set_plasma_coil()  # for independance + Vcoil at start
+        return self.Ic['v']
+    
+    def PID(self,error,feild,i,kp=1.5,ki=0.05):
+        name = self.ccoil[feild]['name'][i].decode()
+        gain = 1e5/self.ccoil[feild]['value'][i]
+        self.ccoil[feild]['Ip'][i] = gain*kp*error  # proportional
+        self.ccoil[feild]['Ii'][i] += gain*ki*error  # intergral
+        dI = self.ccoil[feild]['Ip'][i] + self.ccoil[feild]['Ii'][i]
+        I = self.coil_o[name]['Io']+dI
+        self.set_control_current(name,I=I)
+        return dI
+
+    def gen_opp(self,z=None,Zerr=5e-4,Nmax=100,**kwargs):
         self.to = time()  # time at start of gen opp loop
         if z == None:  # sead plasma magnetic center vertical target
             z = self.sf.Mpoint[1]
         f,zt,dzdf= np.zeros(Nmax),np.zeros(Nmax),-0.7e-7#-2.2e-7
         zt[0] = z
-        self.get_Vcoil()  # or set_Vcoil for virtual pair
+        self.select_control_coils()  # or set_Vcoil for virtual pair
         for i in range(Nmax):
             f[i] = self.gen(zt[i],Zerr=Zerr/2,**kwargs)
             if i == 0:
@@ -489,13 +465,15 @@ class EQ(object):
                 fdash = (f[i]-f[i-1])/(zt[i]-zt[i-1])  # Newtons method
                 dz = f[i]/fdash
                 if abs(dz) < Zerr:
-                    print('\nvertical position converged < {:1.2f}mm'.format(1e3*Zerr))
+                    print('\nvertical position converged < {:1.3f}mm'.format(1e3*Zerr))
+                    self.set_plasma_coil()
                     break
                 else:
                     zt[i+1] = zt[i]-dz  # Newton's method
             else: 
-                print('warning: opp vertical position itteration limit reached')
-        print('')  # escape line
+                errtxt = 'gen_opp vertical position itteration limit reached'
+                raise ValueError(errtxt)
+        print('')  # escape \r line
         
     def gen_bal(self,ztarget=None,Zerr=5e-4,tol=1e-4):  
         # balance Xpoints (for double null)
@@ -503,7 +481,7 @@ class EQ(object):
         print('balancing DN Xpoints:')
         if ztarget == None:  # sead plasma magnetic center vertical target
             ztarget = self.sf.Mpoint[1]
-        self.get_Vcoil()  # or set_Vcoil for virtual pair
+        self.select_control_coils()  # or set_Vcoil for virtual pair
         def gen_err(ztarget):  # Xpoint pair error (balence)
             self.gen(ztarget,Zerr=Zerr)
             return self.sf.Xerr

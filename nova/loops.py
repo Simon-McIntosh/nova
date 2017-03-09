@@ -355,7 +355,7 @@ class Sloop(object):  # polybezier
         self.xo['z2'] = {'value':0,'lb':-0.9,'ub':0.9} # outer node vertical shift
         self.xo['height'] = {'value':17.367,'lb':0.1,'ub':50} # full loop height
         self.xo['top'] = {'value':0.5,'lb':0.05,'ub':1}  # horizontal shift
-        self.xo['upper'] = {'value':0.7,'lb':0,'ub':1}  # vertical shift
+        self.xo['upper'] = {'value':0.7,'lb':0.2,'ub':1}  # vertical shift
         self.set_lower()  # lower loop parameters (bottom,lower)
         self.xo['dz'] = {'value':0,'lb':-5,'ub':5}  # vertical offset
         self.xo['flat'] = {'value':0,'lb':0,'ub':0.8}  # fraction outboard straight
@@ -612,10 +612,11 @@ class Sloop(object):  # polybezier
 class Profile(object):
     
     def __init__(self,name,family='S',part='TF',npoints=200,
-                 symetric=False,**kwargs):
+                 symetric=False,read_write=True,**kwargs):
         self.npoints = npoints
         self.name = name
         self.part = part
+        self.read_write =read_write
         self.initalise_loop(family,npoints,symetric=symetric)  # initalize loop object
         data_dir = trim_dir('../../Data/')
         self.dataname = data_dir+self.name+'_{}.pkl'.format(part)
@@ -638,22 +639,26 @@ class Profile(object):
             raise ValueError(errtxt)
         
     def read_loop_dict(self):
-        try:
-            with open(self.dataname,'rb') as input:
-                self.loop_dict = pickle.load(input)  
-        except:
-            print('file '+self.dataname+' not found')
-            print('initializing new loop_dict')
+        if self.read_write:  # atempt to read loop from file
+            try:
+                with open(self.dataname,'rb') as input:
+                    self.loop_dict = pickle.load(input)  
+            except:
+                print('file '+self.dataname+' not found')
+                print('initializing new loop_dict')
+                self.loop_dict = {}
+            self.frame_data()
+            try:
+                self.load(nTF=self.nTF,obj=self.obj)
+            except:
+                wstr = 'loop parameters '
+                wstr += 'nTF:\'{}\', obj:\'{}\''.format(self.nTF,self.obj)
+                wstr += ' not avalible\n'
+                print(wstr)
+                self.avalible_data()
+        else:
             self.loop_dict = {}
         self.frame_data()
-        try:
-            self.load(nTF=self.nTF,obj=self.obj)
-        except:
-            wstr = 'loop parameters '
-            wstr += 'nTF:\'{}\', obj:\'{}\''.format(self.nTF,self.obj)
-            wstr += ' not avalible\n'
-            print(wstr)
-            self.avalible_data()
             
     def frame_data(self):
         self.data_frame = {}   
@@ -711,8 +716,9 @@ class Profile(object):
             if hasattr(self.loop,key):
                 cdict[key] = getattr(self.loop,key)
         self.loop_dict[self.family][self.nTF][self.obj] = cdict
-        with open(self.dataname, 'wb') as output:
-            pickle.dump(self.loop_dict,output,-1)
+        if self.read_write:  # write loop to file
+            with open(self.dataname, 'wb') as output:
+                pickle.dump(self.loop_dict,output,-1)
         self.frame_data()
 
 if __name__ is '__main__':  # plot loop classes

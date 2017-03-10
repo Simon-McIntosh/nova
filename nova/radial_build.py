@@ -113,7 +113,7 @@ class RB(object):
 
     def vessel_fill(self,gap=True):
         r,z = self.segment['blanket_fw']['r'],self.segment['blanket_fw']['z']
-        loop = geom.Loop(r,z)
+        loop = Loop(r,z)
         r,z = loop.fill(dt=0.05)
         rb = np.append(r,r[0])
         zb = np.append(z,z[0])
@@ -136,7 +136,7 @@ class RB(object):
         #shp.loop.plot()
         x = profile.loop.draw()
         rin,zin = x['r'],x['z']
-        loop = geom.Loop(rin,zin)
+        loop = Loop(rin,zin)
         r,z = loop.fill(dt=self.setup.build['VV'],ref_o=2/8*np.pi,dref=np.pi/6)
         shp.clear_bound()
         shp.add_bound({'r':r,'z':z},'internal')  # vessel outer bounds
@@ -313,7 +313,7 @@ class wrap(object):
 
     def offset(self,loop,dt,**kwargs):
         r,z = self.get_segment(loop)
-        gloop = geom.Loop(r,z)
+        gloop = Loop(r,z)
         r,z = gloop.fill(dt=dt,**kwargs)
         self.set_segment(loop,r,z)
            
@@ -416,7 +416,109 @@ class wrap(object):
                 r,z = self.get_segment(loop)
                 pl.plot(r,z,'-')
     
+class Loop(object):
     
+    def __init__(self,R,Z,**kwargs):
+        self.R = R
+        self.Z = Z
+        self.xo = kwargs.get('xo',(np.mean(R),np.mean(Z)))
+    
+    def rzPut(self):
+        self.Rstore,self.Zstore = self.R,self.Z
+        
+    def rzGet(self):
+        self.R,self.Z = self.Rstore,self.Zstore
+        
+    def fill(self,trim=None,dR=0,dt=0,ref_o=4/8*np.pi,dref=np.pi/4,
+             edge=True,ends=True,
+             color='k',label=None,alpha=0.8,referance='theta',part_fill=True,
+             loop=False,s=0,gap=0,plot=False):
+        dt_max = 0.1  # 2.5
+        if not part_fill:
+            dt_max = dt
+        if isinstance(dt,list):
+            dt = self.blend(dt,ref_o=ref_o,dref=dref,referance=referance,
+                            gap=gap)
+        dt,nt = geom.max_steps(dt,dt_max)
+        Rin,Zin = geom.offset(self.R,self.Z,dR)  # gap offset
+        for i in range(nt):
+            self.part_fill(trim=trim,dt=dt,ref_o=ref_o,dref=dref,
+                           edge=edge,ends=ends,color=color,label=label,alpha=alpha,
+                           referance=referance,loop=loop,s=s,plot=False)
+        Rout,Zout = self.R,self.Z
+        if plot:
+            geom.polyparrot({'r':Rin,'z':Zin},{'r':Rout,'z':Zout},
+                            color=color,alpha=1)  # fill
+        return Rout,Zout
+             
+    def part_fill(self,trim=None,dt=0,ref_o=4/8*np.pi,dref=np.pi/4,
+             edge=True,ends=True,
+             color='k',label=None,alpha=0.8,referance='theta',loop=False,
+             s=0,plot=False):
+        Rin,Zin = self.R,self.Z
+        if loop:
+            Napp = 5  # Nappend
+            R = np.append(self.R,self.R[:Napp])
+            R = np.append(self.R[-Napp:],R)
+            Z = np.append(self.Z,self.Z[:Napp])
+            Z = np.append(self.Z[-Napp:],Z)
+            R,Z = geom.rzSLine(R,Z,npoints=len(R),s=s)
+            if isinstance(dt,(np.ndarray,list)):
+                dt = np.append(dt,dt[:Napp])
+                dt = np.append(dt[-Napp:],dt)
+            Rout,Zout = geom.offset(R,Z,dt)
+            print('part fill')
+            Rout,Zout = Rout[Napp:-Napp],Zout[Napp:-Napp]
+            Rout[-1],Zout[-1] = Rout[0],Zout[0]
+        else:
+            R,Z = geom.rzSLine(self.R,self.Z,npoints=len(self.R),s=s)
+            Rout,Zout = geom.offset(R,Z,dt)
+        self.R,self.Z = Rout,Zout  # update
+        if trim is None:
+            Lindex = [0,len(Rin)]
+        else:
+            Lindex = self.trim(trim)
+        if plot:
+            flag = 0
+            for i in np.arange(Lindex[0],Lindex[1]-1):
+                Rfill = np.array([Rin[i],Rout[i],Rout[i+1],Rin[i+1]])
+                Zfill = np.array([Zin[i],Zout[i],Zout[i+1],Zin[i+1]])
+                if flag is 0 and label is not None:
+                    flag = 1
+                    pl.fill(Rfill,Zfill,facecolor=color,alpha=alpha,
+                            edgecolor='none',label=label)
+                else:
+                    pl.fill(Rfill,Zfill,facecolor=color,alpha=alpha,
+                            edgecolor='none')
+             
+    def blend(self,dt,ref_o=4/8*np.pi,dref=np.pi/4,gap=0,referance='theta'):
+        if referance is 'theta':
+            theta = np.arctan2(self.Z-self.xo[1],self.R-self.xo[0])-gap
+            theta[theta>np.pi] = theta[theta>np.pi]-2*np.pi
+            tblend = dt[0]*np.ones(len(theta))  # inner 
+            tblend[(theta>-ref_o) & (theta<ref_o)] = dt[1]  # outer 
+            if dref > 0:
+                for updown in [-1,1]:
+                    blend_index = (updown*theta>=ref_o) &\
+                                    (updown*theta<ref_o+dref)
+                    tblend[blend_index] = dt[1]+(dt[0]-dt[1])/dref*\
+                                        (updown*theta[blend_index]-ref_o)
+        else:
+            L = geom.length(self.R,self.Z)
+            tblend = dt[0]*np.ones(len(L))  # start
+            tblend[L>ref_o] = dt[1]  # end
+            if dref > 0:
+                blend_index = (L>=ref_o) & (L<ref_o+dref)
+                tblend[blend_index] = dt[0]+(dt[1]-dt[0])/dref*(L[blend_index]-
+                                                                ref_o)
+        return tblend
+        
+    def trim(self,trim,R,Z):
+        L = geom.length(R,Z,norm=True)
+        index = []
+        for t in trim:
+            index.append(np.argmin(np.abs(L-t)))
+        return index    
 
         
 

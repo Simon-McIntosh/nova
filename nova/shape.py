@@ -54,7 +54,7 @@ class Shape(object):
             self.bound[side][var] = np.append(self.bound[side][var],x[var])
         self.bindex[side].append(len(self.bound[side]['r']))
         
-    def add_internal(self,r_gap=0.001):  # offset minimum internal radius
+    def add_interior(self,r_gap=0.001):  # offset minimum internal radius
         argmin = np.argmin(self.bound['internal']['r'])
         self.add_bound({'r':self.bound['internal']['r'][argmin]-r_gap,
                         'z':self.bound['internal']['z'][argmin]},

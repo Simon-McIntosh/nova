@@ -4,7 +4,7 @@ from scipy.special import binom as bn
 from scipy.special import iv as besl  
 from amigo import geom
 import pylab as pl
-from collections import OrderedDict
+import collections
 import seaborn as sns
 import pandas as pd
 from amigo.IO import trim_dir
@@ -186,7 +186,7 @@ class Aloop(object):  # tripple arc loop
         self.limits = limits
         
     def initalise_parameters(self):
-        self.xo = OrderedDict()
+        self.xo = collections.OrderedDict()
         self.xo['ro'] = {'value':4.486,'lb':3,'ub':5}  # r origin
         self.xo['zo'] = {'value':0,'lb':-1,'ub':1}  # z origin
         self.xo['sl'] = {'value':6.428,'lb':0.5,'ub':10}  # straight length
@@ -275,12 +275,11 @@ class Dloop(object):  # Princton D
         self.limits = limits
         
     def initalise_radii(self):
-        self.xo = OrderedDict()
+        self.xo = collections.OrderedDict()
         self.xo['r1'] = {'value':4.486,'lb':3,'ub':5}  # inner radius
         self.xo['r2'] = {'value':15.708,'lb':10,'ub':20}  # outer radius
         self.xo['dz'] = {'value':0,'lb':-10,'ub':10}  # vertical offset
         self.oppvar = list(self.xo.keys())
-        #self.oppvar.remove('r1')
            
     def set_input(self,**kwargs): 
         inputs = get_input(self.oppvar,**kwargs)   
@@ -349,7 +348,7 @@ class Sloop(object):  # polybezier
         self.set_tension()
 
     def initalise_nodes(self):
-        self.xo = OrderedDict()
+        self.xo = collections.OrderedDict()
         self.xo['r1'] = {'value':4.486,'lb':3,'ub':8}  # inner radius
         self.xo['r2'] = {'value':15.708,'lb':5,'ub':25}  # outer radius 
         self.xo['z2'] = {'value':0,'lb':-0.9,'ub':0.9} # outer node vertical shift
@@ -363,6 +362,15 @@ class Sloop(object):  # polybezier
         self.oppvar = list(self.xo.keys())
         self.lkeyo = ['l0s','l0e','l1s','l1e','l2s','l2e','l3s','l3e']
         self.set_l({'value':0.8,'lb':0.45,'ub':1.8})  # 1/tesion
+        
+    def remove_oppvar(self,name):
+        if not isinstance(name,collections.Iterable):
+            name = list(name)
+        for var in name:
+            try:
+                self.oppvar.remove(var)
+            except:
+                pass
         
     def reset_oppvar(self,symetric):
         self.oppvar = list(self.xo.keys())
@@ -382,7 +390,7 @@ class Sloop(object):  # polybezier
 
     def check_tension_length(self,tension):
         tension = tension.lower()
-        options = OrderedDict()
+        options = collections.OrderedDict()
         options['full'] = 8
         options['half'] = 4
         options['dual'] = 2

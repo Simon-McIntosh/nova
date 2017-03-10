@@ -489,7 +489,7 @@ class SF(object):
         self.HFPr,self.HFPz = fLFSr(-np.pi),fLFSz(-np.pi)
         self.HFPr = self.get_midplane(self.HFPr,self.HFPz)
         self.shape['R']  = np.mean([self.HFPr,self.LFPr])
-        self.shape['a']  = (self.HFPr-self.LFPr)/2
+        self.shape['a']  = (self.HFPr+self.LFPr)/2
         self.shape['AR'] = self.shape['R']/self.shape['a']
         return (self.LFPr,self.LFPz,self.HFPr,self.HFPz)
     
@@ -578,11 +578,6 @@ class SF(object):
         rpl,zpl = self.get_boundary()  # boundary points
         rpl,zpl = geom.offset(rpl,zpl,dr)  # offset from sep
         if Nsub > 0:  # sub-sample
-            if self.Xloc == 'lower':
-                index = zpl > self.Xpoint_array[1][0]  # trim to lower Xpoint
-            elif self.Xloc == 'upper':
-                index = zpl < self.Xpoint_array[1][1]  # trim to upper Xpoint
-            #rpl,zpl = rpl[index],zpl[index]
             rpl,zpl = geom.rzSLine(rpl,zpl,Nsub)
         return rpl,zpl
     
@@ -597,7 +592,7 @@ class SF(object):
         r,z = r[index],z[index]  # remove duplicates
         return r,z
         
-    def get_sol_psi(self,verbose=True,**kwargs):
+    def get_sol_psi(self,verbose=False,**kwargs):
         for var in ['dSOL','Nsol']:
             if var in kwargs:
                 setattr(self,var,kwargs[var])

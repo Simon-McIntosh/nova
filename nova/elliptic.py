@@ -20,6 +20,7 @@ from amigo import geom
 from scipy.optimize import newton
 import sys
 from time import time
+from nova.inverse import INV
 
 class MidpointNormalize(Normalize):
     def __init__(self, vmin=None, vmax=None, midpoint=None, clip=False):
@@ -36,8 +37,8 @@ class EQ(object):
         self.sf = sf
         self.pf = pf
         self.coils(dCoil=dCoil)  # multi-filiment coils 
-        self.select_control_coils()  # identify control coils
         self.resample(sigma=sigma,**kwargs)
+        self.select_control_coils()  # identify control coils
         
     def resample(self,sigma=0,**kwargs):  # resample current density
         self.r,self.z = self.sf.r,self.sf.z 
@@ -141,8 +142,6 @@ class EQ(object):
         else:
             self.coil,self.coil_o = {},{}
             for name in coil.keys():
-                self.coil_o[name] = {}
-                self.coil_o[name]['Io'] = self.pf.coil[name]['I']
                 self.size_coil(coil,name,self.dCoil)
                         
     def size_coil(self,coil,name,dCoil):
@@ -150,6 +149,7 @@ class EQ(object):
         Dr,Dz = coil[name]['dr'],coil[name]['dz']
         Dr = abs(Dr)
         Dz = abs(Dz)
+        self.coil_o[name] = {}
         if coil[name]['I'] != 0:
             if Dr>0 and Dz>0 and 'plasma' not in name:
                 nr,nz = np.ceil(Dr/dCoil),np.ceil(Dz/dCoil)
@@ -160,6 +160,7 @@ class EQ(object):
                 R,Z = np.reshape(R,(-1,1)),np.reshape(Z,(-1,1))
                 Nf = len(R)  # filament number
                 self.coil_o[name]['Nf'] = Nf
+                self.coil_o[name]['Io'] = self.pf.coil[name]['I']
                 I = coil[name]['I']/Nf
                 bundle = {'r':np.zeros(Nf),'z':np.zeros(Nf),
                           'dr':dr*np.ones(Nf),'dz':dz*np.ones(Nf),
@@ -209,10 +210,15 @@ class EQ(object):
         for index in [0,-1]:
             self.ccoil['active'].append(\
             self.ccoil['vertical']['name'][index].decode())
-        self.ccoil['active'].append(\
-        self.ccoil['horizontal']['name'][0].decode())
+        for index in range(3):
+            self.ccoil['active'].append(\
+            self.ccoil['horizontal']['name'][index].decode())
         self.ccoil['rtarget'] = self.sf.shape['R']
-
+        '''
+        inv = INV(self.sf,self)
+        inv.fix_boundary_feild(N=21,alpha=0.995,factor=1,Bdir=[1,0])
+        inv.plot_fix(tails=True)
+        '''
     def indx(self,i,j):
         return i*self.nz+j
         
@@ -390,7 +396,7 @@ class EQ(object):
         for name in self.ccoil['active']:
             self.set_control_current(name,factor=0)
 
-    def gen(self,ztarget=None,rtarget=None,Zerr=1e-3,kp=1.5,ki=0.05,
+    def gen(self,ztarget=None,rtarget=None,Zerr=1e-3,kp=0.05,ki=0.05,
             Nmax=50,**kwargs): 
         if not hasattr(self,'to'):
             self.to = time()  # start clock for single gen run
@@ -407,10 +413,11 @@ class EQ(object):
         self.reset_control_current()
         to = time()
         for i in range(Nmax):
-            print(self.sf.shape['R'],self.rtarget)
+            print(self.sf.shape['R'])
             self.run()
             self.Zerr[i] = self.sf.Mpoint[1]-self.ztarget
-            self.Rerr[i] = -(self.sf.shape['R']-self.rtarget)         
+            self.Rerr[i] = -(self.sf.shape['R']-self.rtarget) 
+            print(self.sf.shape['R'],self.Rerr[i],self.Zerr[i])
             if i > 1:
                 if abs(self.Zerr[i-1]) <= Zerr and abs(self.Zerr[i]) <= Zerr :
                     if Mflag:
@@ -436,7 +443,9 @@ class EQ(object):
             for index,sign in zip([0,-1],[1,-1]):  # stability coil pair [0,-1],[1,-1]
                 dI = self.PID(self.Zerr[i],'vertical',index,kp=kp,ki=ki)
                 self.Ic['v'] += sign*(dI)   
-            self.Ic['h'] = self.PID(self.Rerr[i],'horizontal',0,kp=kp,ki=ki)  
+            for index in range(1):
+                dI = self.PID(self.Rerr[i],'horizontal',index,kp=0.5*kp,ki=2*ki) 
+                self.Ic['h'] += dI
         #self.set_plasma_coil()  # for independance + Vcoil at start
         return self.Ic['v']
     

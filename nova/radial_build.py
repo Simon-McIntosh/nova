@@ -10,7 +10,7 @@ from nova.loops import Profile
 from nova.shape import Shape
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 from scipy.optimize import minimize
-from collections import OrderedDict
+import collections
 from amigo.IO import trim_dir
 import json
 from nova.firstwall import divertor,main_chamber
@@ -26,7 +26,7 @@ class RB(object):
         
     def generate(self,mc,mode='calc',color=0.6*np.ones(3),
                   plot=True,debug=False,symetric=False,DN=False):
-        
+        self.main_chamber = mc.filename
         if mode == 'eqdsk':  # read first wall from eqdsk
             self.Rb,self.Zb = self.sf.xlim,self.sf.ylim
         elif mode == 'calc':
@@ -65,6 +65,8 @@ class RB(object):
             self.vessel = self.vessel_fill()
             self.Rb = self.segment['first_wall']['r']
             self.Zb = self.segment['first_wall']['z']
+            rbl,zbl = self.blanket.get_segment('outer') 
+            self.segment['blanket_outer'] = {'r':rbl,'z':zbl}
         else:
             errtxt = 'set input mode \'eqdsk\',\'calc\''
             raise ValueError(errtxt)
@@ -118,10 +120,10 @@ class RB(object):
         profile = Profile(self.setup.configuration,family='S',part='vv',
                           npoints=400,read_write=False)
         shp = Shape(profile,objective='L')
-        shp.loop.set_l({'value':0.5,'lb':0.6,'ub':1.5})  # 1/tesion)
-        shp.loop.xo['upper'] = {'value':0.33,'lb':0.5,'ub':1}  
-        shp.loop.xo['lower'] = {'value':0.33,'lb':0.5,'ub':1}
-        #shp.loop.oppvar.remove('flat')
+        shp.loop.adjust_xo('upper',lb=0.5)
+        shp.loop.adjust_xo('lower',lb=0.5)
+        shp.loop.adjust_xo('l',lb=0.6)
+        shp.loop.remove_oppvar('flat')
         r,z = geom.rzSLine(rb,zb,200)  # sub-sample
         rup,zup = r[z>self.sf.Xpoint[1]],z[z>self.sf.Xpoint[1]]
         shp.add_bound({'r':rup,'z':zup},'internal')  # vessel inner bounds
@@ -147,8 +149,10 @@ class RB(object):
             vv = wrap({'r':rb,'z':zb},{'r':r,'z':z})
         vv.sort_z('inner',select=self.sf.Xloc)
         vv.sort_z('outer',select=self.sf.Xloc)
+
         self.segment['vessel_inner'] = {'r':rin,'z':zin}
         self.segment['vessel_outer'] = {'r':r,'z':z}
+        self.segment['vessel'] = vv.fill()[1]
         return vv
       
     def get_sol(self,plot=False):
@@ -251,9 +255,21 @@ class RB(object):
         step = np.cross(b-s,ds)/np.cross(ds,db)
         return step,db
 
-    def json(self,**kwargs):
+    def write_json(self,**kwargs):
         data = {}
-        for loop in ['first_wall','blanket','vessel_inner','vessel_outer']:
+        data['eqdsk'] = self.sf.eqdsk['name']
+        data['main_chamber'] = self.main_chamber
+        data['configuration'] = self.setup.configuration
+        data['targets'] = {}
+        for leg in self.setup.targets:  # store target data
+            data['targets'][leg] = {}
+            for name in self.setup.targets[leg]:
+                packet = self.setup.targets[leg][name]
+                if isinstance(packet,collections.Iterable):
+                    packet = packet.tolist()
+                data['targets'][leg][name] = packet
+        for loop in ['first_wall','divertor','blanket_inner','blanket_outer',
+                     'vessel_inner','vessel_outer']:
             data[loop] = {}
             for var in self.segment[loop]:
                 data[loop][var] = self.segment[loop][var].tolist()
@@ -271,7 +287,7 @@ class RB(object):
 class wrap(object):
     
     def __init__(self,inner_points,outer_points):
-        self.loops = OrderedDict()
+        self.loops = collections.OrderedDict()
         self.loops['inner'] = {'points':inner_points}
         self.loops['outer'] = {'points':outer_points}
         

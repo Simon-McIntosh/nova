@@ -298,8 +298,9 @@ class INV(object):
         psi -= self.sf.Xpsi  # normalise
         self.add_fix(r,z,psi,Bdir,['psi_bndry'],[factor])
 
-    def fix_boundary_feild(self,N=21,alpha=0.995,factor=1):
+    def fix_boundary_feild(self,N=21,alpha=0.995,factor=1,**kwargs):
         r,z,Bdir = self.set_boundary(N=N,alpha=alpha)
+        #Bdir = kwargs.get('Bdir',Bdir)
         self.add_fix(r,z,[0.0],Bdir,['Bdir'],[factor])
         
     def add_null(self,factor=1,**kwargs):

@@ -34,14 +34,21 @@ class divertor(object):
                 self.targets[leg][key] = kwargs[key]  # update
             elif key not in self.targets[leg]:  #  prevent overwrite
                 self.targets[leg][key] = self.targets['default'][key]
+                
+    def select_layer(self,leg,layer_index=[0,-1]):  # choose SOL layer 
+        sol,Xi = [],[]
+        for layer in layer_index:
+            r,z = self.sf.snip(leg,layer,L2D=self.targets[leg]['L2D'])
+            sol.append((r,z))
+            Xi.append(self.sf.expansion([r[-1]],[z[-1]]))
+        index = np.argmin(Xi)  # min expansion / min graze
+        return sol[index][0],sol[index][1]
     
     def place(self,**kwargs):
-        layer_index = 0  # construct from first open flux surface
         self.sf.sol(update=True,plot=False,debug=self.debug)
         for leg in list(self.sf.legs)[2:]:
             self.set_target(leg)
-            Rsol,Zsol = self.sf.snip(leg,layer_index,
-                                     L2D=self.targets[leg]['L2D'])
+            Rsol,Zsol = self.select_layer(leg)
             Ro,Zo = Rsol[-1],Zsol[-1]
             Flip = [-1,1]
             Direction = [1,-1]
@@ -115,7 +122,7 @@ class divertor(object):
             Rb = np.append(Rb,self.targets['outer']['R'][1:])
             Zb = np.append(Zb,self.targets['outer']['Z'][1:])
             self.segment['divertor'] = {'r':Rb,'z':Zb}  # store diveror
-        
+    
     def join(self,main_chamber):
         r,z = main_chamber.draw(npoints=500)
         istart = np.argmin((r-self.sf.Xpoint[0])**2+(z-self.sf.Xpoint[1])**2)
@@ -134,15 +141,18 @@ class divertor(object):
         rd,zd = rd[zindex],zd[zindex]  # remove upper points
         rd,zd = geom.rzInterp(rd,zd)  # resample
         rd,zd = geom.inloop(r,z,rd,zd,side='out')  # divertor external to fw
+        rd,zd = geom.cut(rd,zd)
         istart = np.argmin((r-rd[-1])**2+(z-zd[-1])**2)  # connect to fw
         iend = np.argmin((r-rd[0])**2+(z-zd[0])**2)
         
         if self.sf.Xloc == 'lower':
-            r = np.append(np.append(rd,r[istart:iend]),rd[0])
-            z = np.append(np.append(zd,z[istart:iend]),zd[0])
+            rc,zc = r[istart:iend],z[istart:iend]
         else:
-            r = np.append(np.append(rd,r[iend:istart][::-1]),rd[0])
-            z = np.append(np.append(zd,z[iend:istart][::-1]),zd[0])
+            rc,zc = r[iend:istart][::-1],z[iend:istart][::-1]
+        self.segment['blanket_inner'] = {'r':rc,'z':zc} 
+        self.segment['divertor'] = {'r':rd,'z':zd} 
+        r = np.append(np.append(rd,rc),rd[0])
+        z = np.append(np.append(zd,zc),zd[0])
         self.segment['first_wall'] = {'r':r,'z':z} 
         return self.segment
     
@@ -175,7 +185,7 @@ class divertor(object):
         gain = 0.15  # 0.25
         Nmax = 500
         Lo = [1.0,0.0015]  # [blend,turn]  5,0.015
-        r2m = [-1.25,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
+        r2m = [-1,-1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
         Nplate = 1 # number of target plate divisions (1==flat)
         L = Lo[0] if theta_end == 0 else Lo[1]
         Lsead = L
@@ -285,6 +295,7 @@ class main_chamber(object):
         self.shp.loop.adjust_xo('lower',lb=0.7)
         self.shp.loop.adjust_xo('bottom',lb=0.05,ub=0.75)
         self.shp.loop.adjust_xo('l',lb=0.8,ub=1.5)
+        self.shp.loop.remove_oppvar('flat')
         
     def date(self,verbose=True):
         today = datetime.date.today().strftime('%Y_%m_%d')
@@ -353,14 +364,20 @@ class main_chamber(object):
     def add_bound(self,sf): 
         rpl,zpl = sf.get_offset(self.config['dr'],Nsub=self.config['Nsub'])
         self.shp.add_bound({'r':rpl,'z':zpl},'internal')  # vessel inner bounds
+        self.shp.add_bound({'r':sf.Xpoint[0]+0.12*sf.shape['a'],
+                            'z':sf.Xpoint[1]},'internal')
+        self.shp.add_bound({'r':sf.Xpoint[0],
+                            'z':sf.Xpoint[1]-0.01*sf.shape['a']},'internal')
 
         if self.config['flux_fit']:  # add flux boundary points
             sf.get_LFP()  # get low feild point
             rflux,zflux = sf.first_wall_psi(psi_n=self.config['psi_n'],
                                             trim=False)[:2]
-            rflux,zflux = sf.midplane_loop(rflux,zflux)
-            rflux,zflux = geom.order(rflux,zflux)
-            istop = next((i for i in range(len(zflux)) if zflux[i]<sf.LFPz),-1)
+            rflux,zflux = geom.order(rflux,zflux)            
+            zcut = sf.LFPz
+            istart = next((i for i in range(len(zflux)) if zflux[i]>zcut),-1)
+            rflux,zflux = rflux[istart:],zflux[istart:]
+            istop = next((i for i in range(len(zflux)) if zflux[i]<zcut),-1)
             rflux,zflux = rflux[:istop],zflux[:istop]
             dL = np.diff(geom.length(rflux,zflux))
             if np.max(dL) > 3*np.median(dL) or \

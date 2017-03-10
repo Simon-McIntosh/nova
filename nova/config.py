@@ -241,7 +241,7 @@ class Setup(object):
             #self.filename = 'Equil_AR3d1_SN_v2_2015_09_bt_1d03li_0d8_'
             #self.filename += 'Ipl_20d25_EOF.eqdsk'
             self.filename = '2015_SND_eqdk_2MG9A4_v1_0.eqdsk'
-            self.firstwall['div_ex'] = 0.5
+            self.firstwall['div_ex'] = 0.6
             self.targets['inner'] = {'L2D':1.0}  
             self.targets['outer'] = {'L2D':1.36}                          
 

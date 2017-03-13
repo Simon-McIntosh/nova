@@ -36,7 +36,7 @@ else:
     raise ValueError('list machine type')
 
 mc = main_chamber(machine,date=date)  
-mc.generate(eq_names,psi_n=1.07,flux_fit=True,plot=True,symetric=False)
+mc.generate(eq_names,psi_n=1.07,flux_fit=True,plot=False,symetric=False)
 mc.load_data(plot=False)  # load from file
 mc.shp.plot_bounds()
 
@@ -58,7 +58,7 @@ rb.get_sol(plot=True)
 profile = Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L')
 shp = Shape(profile,eqconf=config['eq'],ny=3)
 shp.add_vessel(rb.segment['vessel_outer'])
-shp.minimise(ripple=ripple,verbose=True)
+#shp.minimise(ripple=ripple,verbose=True)
 shp.tf.fill()
 
 '''
@@ -92,3 +92,4 @@ pf.plot(coils=eq.coil,label=False,plasma=True,current=False)
 
 #pl.figure(figsize=([5*16/12,5]))
 #pl.plot(inv.swing['flux']*2*np.pi,inv.swing['rms'],'.-')
+'''

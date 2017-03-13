@@ -295,8 +295,9 @@ class main_chamber(object):
         self.shp.loop.adjust_xo('lower',lb=0.7)
         self.shp.loop.adjust_xo('bottom',lb=0.05,ub=0.75)
         self.shp.loop.adjust_xo('l',lb=0.8,ub=1.5)
-        self.shp.loop.remove_oppvar('flat')
-        self.shp.loop.remove_oppvar('tilt')
+        self.shp.loop.adjust_xo('tilt',lb=-25,ub=25)
+        #self.shp.loop.remove_oppvar('flat')
+        #self.shp.loop.remove_oppvar('tilt')
         
     def date(self,verbose=True):
         today = datetime.date.today().strftime('%Y_%m_%d')
@@ -317,7 +318,6 @@ class main_chamber(object):
         self.set_filename(update=True)  # update date in filename
         self.profile.loop.reset_oppvar(symetric)  # reset loop oppvar
         self.set_bounds()
-        print(self.shp.loop.oppvar)
         self.config = {'dr':dr,'psi_n':psi_n,'flux_fit':flux_fit,'Nsub':100}
         self.config['eqdsk'] = []  
         sf_list = self.load_sf(eq_names)

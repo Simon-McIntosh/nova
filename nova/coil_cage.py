@@ -23,7 +23,7 @@ class coil_cage(object):
             self.get_seperatrix(alpha=alpha,**kwargs['plasma'])
         if 'coil' in kwargs:
             self.set_TFcoil(kwargs['coil'])
-
+            
     def get_seperatrix(self,nplasma=80,alpha=1-1e-3,plot=False,**kwargs):
         self.nplasma = nplasma
         self.plasma_loop = np.zeros((self.nplasma,3))  # initalise loop array

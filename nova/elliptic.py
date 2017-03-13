@@ -20,7 +20,6 @@ from amigo import geom
 from scipy.optimize import newton
 import sys
 from time import time
-from nova.inverse import INV
 
 class MidpointNormalize(Normalize):
     def __init__(self, vmin=None, vmax=None, midpoint=None, clip=False):
@@ -36,9 +35,11 @@ class EQ(object):
         self.mu_o = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
         self.sf = sf
         self.pf = pf
-        self.coils(dCoil=dCoil)  # multi-filiment coils 
+        self.pf.grid_coils(dCoil=dCoil)  # multi-filiment coils 
         self.resample(sigma=sigma,**kwargs)
+        self.get_plasma_coil()  # plasma coils
         self.select_control_coils()  # identify control coils
+        
         
     def resample(self,sigma=0,**kwargs):  # resample current density
         self.r,self.z = self.sf.r,self.sf.z 
@@ -126,62 +127,7 @@ class EQ(object):
         self.core_indx[self.indx(np.arange(self.nr),0)] = 0
         self.core_indx[self.indx(self.nr-1, np.arange(self.nz))] = 0
         self.core_indx[self.indx(np.arange(self.nr),self.nz-1)] = 0
-        
-    def coils(self,dCoil=-1):
-        if dCoil < 0:  # dCoil not set, use stored value
-            if not hasattr(self,'dCoil'):
-                self.dCoil = 0
-        else:
-            self.dCoil = dCoil
-        coil = self.pf.coil
-        if self.dCoil==0:
-            self.coil = coil
-            for name in coil.keys():
-                self.coil[name]['rc'] = np.sqrt(coil[name]['dr']**2+
-                                                coil[name]['dr']**2)
-        else:
-            self.coil,self.coil_o = {},{}
-            for name in coil.keys():
-                self.size_coil(coil,name,self.dCoil)
-                        
-    def size_coil(self,coil,name,dCoil):
-        rc,zc = coil[name]['r'],coil[name]['z']
-        Dr,Dz = coil[name]['dr'],coil[name]['dz']
-        Dr = abs(Dr)
-        Dz = abs(Dz)
-        self.coil_o[name] = {}
-        if coil[name]['I'] != 0:
-            if Dr>0 and Dz>0 and 'plasma' not in name:
-                nr,nz = np.ceil(Dr/dCoil),np.ceil(Dz/dCoil)
-                dr,dz = Dr/nr,Dz/nz
-                r = rc+np.linspace(dr/2,Dr-dr/2,nr)-Dr/2
-                z = zc+np.linspace(dz/2,Dz-dz/2,nz)-Dz/2
-                R,Z = np.meshgrid(r,z,indexing='ij')
-                R,Z = np.reshape(R,(-1,1)),np.reshape(Z,(-1,1))
-                Nf = len(R)  # filament number
-                self.coil_o[name]['Nf'] = Nf
-                self.coil_o[name]['Io'] = self.pf.coil[name]['I']
-                I = coil[name]['I']/Nf
-                bundle = {'r':np.zeros(Nf),'z':np.zeros(Nf),
-                          'dr':dr*np.ones(Nf),'dz':dz*np.ones(Nf),
-                          'I':I*np.ones(Nf),'sub_name':np.array([]),
-                          'Nf':0}
-                for i,(r,z) in enumerate(zip(R,Z)):
-                    sub_name = name+'_{:1.0f}'.format(i)
-                    self.coil[sub_name] = {'r':r,'z':z,'dr':dr,'dz':dz,
-                                           'I':I,'Nf':Nf,
-                                           'rc':np.sqrt(dr**2+dz**2)/2}
-                    bundle['r'][i],bundle['z'][i] = r,z
-                    bundle['sub_name'] = np.append(bundle['sub_name'],sub_name)
-                bundle['Nf'] = i+1
-                bundle['Ro'] = np.mean(bundle['r'])
-                bundle['Zo'] = np.mean(bundle['z'])
-            else:
-                print('coil bundle not found',name)
-                self.coil[name] = coil[name]
-                bundle = coil[name]
-        return bundle
-                
+           
     def select_control_coils(self):
         self.ccoil = {'vertical':{},'horizontal':{}}
         self.ccoil['vertical'] = np.zeros((self.pf.index['PF']['n']),\
@@ -256,9 +202,9 @@ class EQ(object):
           
     def psi_ex(self):
         psi = np.zeros(self.Ne)
-        for name in self.coil.keys():
-            r,z = self.coil[name]['r'],self.coil[name]['z']
-            I = self.coil[name]['I']
+        for name in self.pf.sub_coil.keys():
+            r,z = self.pf.sub_coil[name]['r'],self.pf.sub_coil[name]['z']
+            I = self.pf.sub_coil[name]['I']
             if not self.ingrid(r,z):
                 psi += cc.mu_o*I*cc.green(self.Re,self.Ze,r,z)
         self.psi_external = psi
@@ -282,9 +228,9 @@ class EQ(object):
         return psi
 
     def coil_core(self):
-        for name in self.coil.keys():
-            r,z = self.coil[name]['r'],self.coil[name]['z']
-            I = self.coil[name]['I']
+        for name in self.pf.sub_coil.keys():
+            r,z = self.pf.sub_coil[name]['r'],self.pf.sub_coil[name]['z']
+            I = self.pf.sub_coil[name]['I']
             if self.ingrid(r,z):
                 i = np.argmin(np.abs(r-self.r))
                 j = np.argmin(np.abs(z-self.z))
@@ -321,7 +267,6 @@ class EQ(object):
             i,j = self.ij(self.plasma_index[index])
             r,z = self.r[i],self.z[j]
             I = -self.dA*self.b[self.plasma_index[index]]/(self.mu_o*r)
-
             Rp[index],Zp[index] = r,z
             Ip[index] = I
             Np[index] = 1
@@ -389,7 +334,7 @@ class EQ(object):
             raise ValueError(errtxt)
         for subcoil in range(self.coil_o[name]['Nf']):
             subname = '{}_{:1.0f}'.format(name,subcoil)
-            self.coil[subname]['I'] = I/self.coil_o[name]['Nf']
+            self.pf.sub_coil[subname]['I'] = I/self.coil_o[name]['Nf']
             
     def reset_control_current(self):
         self.cc = 0
@@ -734,8 +679,8 @@ class EQ(object):
         
     def get_coil_psi(self):
         self.psi = np.zeros(np.shape(self.r2d))
-        for name in self.coil.keys():
-            self.psi += self.add_Pcoil(self.r2d,self.z2d,self.coil[name])
+        for name in self.pf.sub_coil.keys():
+            self.psi += self.add_Pcoil(self.r2d,self.z2d,self.pf.sub_coil[name])
         for name in self.plasma_coil.keys():
             self.psi += self.add_Pcoil(self.r2d,self.z2d,
                                        self.plasma_coil[name])
@@ -773,16 +718,16 @@ class EQ(object):
             
     def Ppoint(self,point):
         psi = 0
-        for name in self.coil.keys():
-            psi += self.add_Pcoil(point[0],point[1],self.coil[name])
+        for name in self.pf.sub_coil.keys():
+            psi += self.add_Pcoil(point[0],point[1],self.pf.sub_coil[name])
         for name in self.plasma_coil.keys():
             psi += self.add_Pcoil(point[0],point[1],self.plasma_coil[name])
         return psi
         
     def Bpoint(self,point):  # re-named, was Bfeild
         feild = np.zeros(2)
-        for name in self.coil.keys():
-            feild += self.add_Bcoil(point[0],point[1],self.coil[name])
+        for name in self.pf.sub_coil.keys():
+            feild += self.add_Bcoil(point[0],point[1],self.pf.sub_coil[name])
         for name in self.plasma_coil.keys():
             feild += self.add_Bcoil(point[0],point[1],self.plasma_coil[name])
         return feild

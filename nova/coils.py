@@ -14,11 +14,14 @@ colors = sns.color_palette('Paired',12)
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 from nova.DEMOxlsx import DEMO
 from warnings import warn
-    
+from nova.inverse import INV
+
+  
 class PF(object):
     def __init__(self,eqdsk):
         self.nC = count(0)
         self.set_coils(eqdsk)
+        self.plasma_coil = collections.OrderedDict()
         
     def set_coils(self,eqdsk):
         self.coil = collections.OrderedDict()
@@ -33,6 +36,23 @@ class PF(object):
                     print('exit set_coil loop - coils')
                     break
         self.categorize_coils()
+        
+    def categorize_coils(self):
+        catogory = np.zeros(len(self.coil),dtype=[('r','float'),('z','float'),
+                                                ('index','int'),('name','object')])
+        for i,name in enumerate(self.coil):
+            catogory[i]['r'] = self.coil[name]['r']
+            catogory[i]['z'] = self.coil[name]['z']
+            catogory[i]['index'] = i
+            catogory[i]['name'] = name
+        CSsort = np.sort(catogory,order=['r','z'])  # sort CS, r then z
+        CSsort = CSsort[CSsort['r'] < self.rCS+self.drCS]
+        PFsort = np.sort(catogory,order='z')  # sort PF,  z
+        PFsort = PFsort[PFsort['r'] > self.rCS+self.drCS]
+        self.index = {'PF':{'n':len(PFsort['index']),'index':PFsort['index'],
+                      'name':PFsort['name']},
+                      'CS':{'n':len(CSsort['index']),'index':CSsort['index'],
+                      'name':CSsort['name']}}
     
     def add_coil(self,r,z,dr,dz,I,categorize=True):
         name = 'Coil{:1.0f}'.format(next(self.nC))
@@ -46,24 +66,7 @@ class PF(object):
             coil = 'Coil{:1.0f}'.format(c)
             self.coil.pop(coil)
         self.categorize_coils()
-        
-    def categorize_coils(self):
-        catogory = np.zeros(len(self.coil),dtype=[('r','float'),('z','float'),
-                                            ('index','int'),('name','object')])
-        for i,name in enumerate(self.coil):
-            catogory[i]['r'] = self.coil[name]['r']
-            catogory[i]['z'] = self.coil[name]['z']
-            catogory[i]['index'] = i
-            catogory[i]['name'] = name
-        CSsort = np.sort(catogory,order=['r','z'])  # sort CS, r then z
-        CSsort = CSsort[CSsort['r'] < self.rCS+self.drCS]
-        PFsort = np.sort(catogory,order='z')  # sort PF,  z
-        PFsort = PFsort[PFsort['r'] > self.rCS+self.drCS]
-        self.index = {'PF':{'n':len(PFsort['index']),
-                            'index':PFsort['index'],'name':PFsort['name']},
-                      'CS':{'n':len(CSsort['index']),
-                            'index':CSsort['index'],'name':CSsort['name']}}
-      
+    
     def unpack_coils(self):
         nc = len(self.coil.keys())
         Ic = np.zeros(nc)
@@ -77,10 +80,64 @@ class PF(object):
             Ic[i] = self.coil[name]['I']
             names.append(name)
         return nc,rc,zc,drc,dzc,Ic,names
+    
+    def grid_coils(self,dCoil=-1):
+        if dCoil < 0:  # dCoil not set, use stored value
+            if not hasattr(self,'dCoil'):
+                self.dCoil = 0
+        else:
+            self.dCoil = dCoil
+        if self.dCoil==0:
+            self.sub_coil = self.coil
+            for name in self.coil.keys():
+                self.sub_coil[name]['rc'] = np.sqrt(self.coil[name]['dr']**2+
+                                                    self.coil[name]['dr']**2)
+        else:
+            self.sub_coil = {}
+            for name in self.coil.keys():
+                self.size_coil(name,self.dCoil)
+                
+    def size_coil(self,name,dCoil):
+        rc,zc = self.coil[name]['r'],self.coil[name]['z']
+        Dr,Dz = self.coil[name]['dr'],self.coil[name]['dz']
+        Dr = abs(Dr)
+        Dz = abs(Dz)
+        #self.coil_o[name] = {}
+        if self.coil[name]['I'] != 0:
+            if Dr>0 and Dz>0 and 'plasma' not in name:
+                nr,nz = np.ceil(Dr/dCoil),np.ceil(Dz/dCoil)
+                dr,dz = Dr/nr,Dz/nz
+                r = rc+np.linspace(dr/2,Dr-dr/2,nr)-Dr/2
+                z = zc+np.linspace(dz/2,Dz-dz/2,nz)-Dz/2
+                R,Z = np.meshgrid(r,z,indexing='ij')
+                R,Z = np.reshape(R,(-1,1)),np.reshape(Z,(-1,1))
+                Nf = len(R)  # filament number
+                #self.coil_o[name]['Nf'] = Nf
+                #self.coil_o[name]['Io'] = self.pf.pf_coil[name]['I']
+                I = self.coil[name]['I']/Nf
+                bundle = {'r':np.zeros(Nf),'z':np.zeros(Nf),
+                          'dr':dr*np.ones(Nf),'dz':dz*np.ones(Nf),
+                          'I':I*np.ones(Nf),'sub_name':np.array([]),
+                          'Nf':0}
+                for i,(r,z) in enumerate(zip(R,Z)):
+                    sub_name = name+'_{:1.0f}'.format(i)
+                    self.sub_coil[sub_name] = {'r':r,'z':z,'dr':dr,'dz':dz,
+                                               'I':I,'Nf':Nf,
+                                               'rc':np.sqrt(dr**2+dz**2)/2}
+                    bundle['r'][i],bundle['z'][i] = r,z
+                    bundle['sub_name'] = np.append(bundle['sub_name'],sub_name)
+                bundle['Nf'] = i+1
+                bundle['Ro'] = np.mean(bundle['r'])
+                bundle['Zo'] = np.mean(bundle['z'])
+            else:
+                print('coil bundle not found',name)
+                self.sub_coil[name] = self.coil[name]
+                bundle = self.coil[name]
+        return bundle
         
     def plot_coil(self,coils,label=False,current=False,coil_color=None,fs=12,
                   alpha=1):
-        if coil_color==None:
+        if coil_color is None:
             color = colors
         else:
             color = coil_color  # color itterator
@@ -104,11 +161,9 @@ class PF(object):
             elif name.split('_')[0] in self.index['PF']['name']:
                 drs = 2.5/3*dr
                 ha = 'left'
-                coil_color = color[4] 
-                
+                coil_color = color[4]    
             pl.fill(Rfill,Zfill,facecolor=coil_color,alpha=alpha,
                     edgecolor=edgecolor)
-            
             if label and current:
                 zshift = max([coil['dz']/4,0.4])
             else:
@@ -120,7 +175,7 @@ class PF(object):
                 pl.text(r+drs,z-zshift,'{:1.1f}MA'.format(coil['I']*1e-6),
                         fontsize=fs*1.1,ha=ha,va='center',
                         color=0.5*np.ones(3))
-                                  
+                                            
     def plot(self,color=None,coils=None,label=False,plasma=False,
                    current=False,alpha=1):
         fs = matplotlib.rcParams['legend.fontsize']
@@ -131,7 +186,18 @@ class PF(object):
         if plasma:
             coils = self.plasma_coil                
             self.plot_coil(coils,coil_color=color,alpha=alpha)
-            
+
+    def inductance(self,Iscale=1):
+        inv = INV(self,Iscale=Iscale)
+        Nf = np.array([1/inv.coil['active'][coil]['Nf']
+                       for coil in inv.coil['active']])
+        for i,coil in enumerate(inv.adjust_coils):
+            r,z = inv.pf.coil[coil]['r'],inv.pf.coil[coil]['z']
+            inv.add_psi(1,point=(r,z))
+        inv.set_foreground()
+        fillaments = np.dot(np.ones((len(Nf),1)),Nf.reshape(1,-1))
+        self.M = 2*np.pi*inv.G*fillaments  # PF/CS inductance matrix
+         
     def coil_corners(self,coils):
         R,Z = np.array([]),np.array([])
         Nc = len(coils['id'])
@@ -275,11 +341,11 @@ class TF(object):
         self.x['loop']['z'] = z[lower+1:upper]
 
     def loop_interpolators(self,trim=[0,1],offset=0.75,full=False):  # outer loop coordinate interpolators
-        r,z = self.x['cl']['r'],self.x['cl']['z']
-        index = self.transition_index(r,z)
+        r,z = self.x['cl']['r'],self.x['cl']['z']        
         self.fun = {'in':{},'out':{}}
         for side,sign in zip(['in','out','cl'],[-1,1,1]):  # inner/outer loop offset
             r,z = self.x[side]['r'],self.x[side]['z']
+            index = self.transition_index(r,z)
             r = r[index['lower']+1:index['upper']]
             z = z[index['lower']+1:index['upper']]
             r,z = geom.offset(r,z,sign*offset)

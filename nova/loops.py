@@ -364,14 +364,13 @@ class Sloop(object):  # polybezier
         self.set_l({'value':0.8,'lb':0.45,'ub':1.8})  # 1/tesion
         
     def remove_oppvar(self,name):
-        print(name)
         try:
             self.oppvar.remove(name)
         except:
-            print(name,'not found')
             pass
         
     def reset_oppvar(self,symetric):
+        self.initalise_nodes()
         self.oppvar = list(self.xo.keys())
         self.symetric = symetric
         self.set_symetric()

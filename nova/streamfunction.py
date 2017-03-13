@@ -139,11 +139,6 @@ class SF(object):
         for key in ['rcentr','bcentr']: 
             setattr(self,key,eqdsk[key])
   
-    def length(self,R,Z,norm=True):
-        L = np.append(0,np.cumsum(np.sqrt(np.diff(R)**2+np.diff(Z)**2)))
-        if norm: L = L/L[-1]
-        return L
-        
     def set_boundary(self,r,z,n=5e2): 
         self.nbdry = int(n)
         self.rbdry,self.zbdry = geom.rzSLine(r,z,npoints=n)
@@ -609,7 +604,7 @@ class SF(object):
     def upsample_sol(self,nmult=10):
         k = 1  # smoothing factor
         for i,(r,z) in enumerate(zip(self.Rsol,self.Zsol)):
-            l = self.length(r,z)
+            l = geom.length(r,z)
             L = np.linspace(0,1,nmult*len(l))
             self.Rsol[i] = sinterp(l,r,k=k)(L)
             self.Zsol[i] = sinterp(l,z,k=k)(L)
@@ -890,13 +885,13 @@ class SF(object):
             self.sol()
         Rsol = self.legs[leg]['R'][layer_index]
         Zsol = self.legs[leg]['Z'][layer_index] 
-        Lsol = self.length(Rsol,Zsol,norm=False)
+        Lsol = geom.length(Rsol,Zsol,norm=False)
         if L2D == 0:
             L2D = Lsol[-1]
         if layer_index != 0:
             Rsolo = self.legs[leg]['R'][0]
             Zsolo = self.legs[leg]['Z'][0] 
-            Lsolo = self.length(Rsolo,Zsolo,norm=False)
+            Lsolo = geom.length(Rsolo,Zsolo,norm=False)
             indexo = np.argmin(np.abs(Lsolo-L2D))
             index = np.argmin((Rsol-Rsolo[indexo])**2+
                           (Zsol-Zsolo[indexo])**2)
@@ -964,7 +959,7 @@ class SF(object):
         else:  # rb.trim_sol to trim to targets
             Rsol = self.legs[leg]['R'][layer_index]
             Zsol = self.legs[leg]['Z'][layer_index] 
-        Lsol = self.length(Rsol,Zsol)
+        Lsol = geom.length(Rsol,Zsol)
         index = np.append(np.diff(Lsol)!=0,True)
         Rsol,Zsol = Rsol[index],Zsol[index]  # remove duplicates
         if len(Rsol) < 2:

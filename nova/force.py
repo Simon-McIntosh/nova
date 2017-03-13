@@ -98,24 +98,27 @@ class force_feild(object):
         if not hasattr(self,'F'):
             self.set_force(self.I)
         Fmax = np.max(np.linalg.norm(self.F,axis=1))
-        for i,name in enumerate(self.pf_coil):
+        index = np.append(self.index['PF']['index'],self.index['CS']['index'])
+        names = np.append(self.index['PF']['name'],self.index['CS']['name'])
+        for i,name in zip(index,names):
             r,z = self.pf_coil[name]['r'],self.pf_coil[name]['z']
             F = self.F[i]
-            pl.arrow(r,z,scale*F[0]/Fmax,0,  # Fr
-                     linewidth=2,head_width=0.3,head_length=0.4,
-                     ec=0.4*np.ones(3),fc=0.7*np.ones(3))
-            pl.arrow(r,z,0,scale*F[1]/Fmax,  # Fz
-                     linewidth=2,head_width=0.3,head_length=0.4,
-                     ec=0.4*np.ones(3),fc=0.7*np.ones(3))
+            zarrow = scale*F[1]/Fmax
+            #pl.arrow(r,z,scale*F[0]/Fmax,0,  # Fr
+            #         linewidth=2,head_width=0.3,head_length=0.4,
+            #         ec=0.4*np.ones(3),fc=0.7*np.ones(3))
+            pl.arrow(r,z,0,zarrow,  # Fz
+                     linewidth=2,head_width=0.12,head_length=0.1,
+                     ec=0.2*np.ones(3),fc=0.2*np.ones(3))
             if name in self.index['PF']['name']:
-                zarrow = scale*F[1]/Fmax
+                zarrow += np.sign(zarrow)*0.5
                 if abs(zarrow) < self.pf_coil[name]['dz']:
                     zarrow = np.sign(zarrow)*self.pf_coil[name]['dz']
                 if zarrow > 0:
                     va = 'bottom'
                 else:
                     va = 'top' 
-                pl.text(r,z+1.1*zarrow,'{:1.2f}MN'.format(F[1]),
+                pl.text(r,z+zarrow,'{:1.2f}MN'.format(F[1]),
                         ha='center',va=va,fontsize=1.1*fs,color=0.1*np.ones(3),
                         backgroundcolor=0.9*np.ones(3))
                 

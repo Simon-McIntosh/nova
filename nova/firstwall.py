@@ -296,6 +296,7 @@ class main_chamber(object):
         self.shp.loop.adjust_xo('bottom',lb=0.05,ub=0.75)
         self.shp.loop.adjust_xo('l',lb=0.8,ub=1.5)
         self.shp.loop.remove_oppvar('flat')
+        self.shp.loop.remove_oppvar('tilt')
         
     def date(self,verbose=True):
         today = datetime.date.today().strftime('%Y_%m_%d')
@@ -315,12 +316,14 @@ class main_chamber(object):
                  flux_fit=False,symetric=False,plot=False):
         self.set_filename(update=True)  # update date in filename
         self.profile.loop.reset_oppvar(symetric)  # reset loop oppvar
+        self.set_bounds()
+        print(self.shp.loop.oppvar)
         self.config = {'dr':dr,'psi_n':psi_n,'flux_fit':flux_fit,'Nsub':100}
         self.config['eqdsk'] = []  
         sf_list = self.load_sf(eq_names)
         for sf in sf_list:  # convert input to list
             self.add_bound(sf)
-        self.shp.add_internal(r_gap=0.001)  # add internal bound
+        self.shp.add_interior(r_gap=0.001)  # add internal bound
         self.shp.minimise()
         self.write()  # append config data to loop pickle
         if plot:
@@ -350,6 +353,7 @@ class main_chamber(object):
                 self.shp.bound = pickle.load(input) 
                 self.shp.bindex = pickle.load(input) 
         except:
+            print(self.profile.dataname)
             errtxt = 'boundary information not found'
             raise ValueError(errtxt)
         if plot:
@@ -364,20 +368,20 @@ class main_chamber(object):
     def add_bound(self,sf): 
         rpl,zpl = sf.get_offset(self.config['dr'],Nsub=self.config['Nsub'])
         self.shp.add_bound({'r':rpl,'z':zpl},'internal')  # vessel inner bounds
-        self.shp.add_bound({'r':sf.Xpoint[0]+0.12*sf.shape['a'],
-                            'z':sf.Xpoint[1]},'internal')
-        self.shp.add_bound({'r':sf.Xpoint[0],
-                            'z':sf.Xpoint[1]-0.01*sf.shape['a']},'internal')
+        Xpoint = sf.Xpoint_array[:,0]  # select lower
+        self.shp.add_bound({'r':Xpoint[0]+0.12*sf.shape['a'],
+                            'z':Xpoint[1]},'internal')
+        self.shp.add_bound({'r':Xpoint[0],
+                            'z':Xpoint[1]-0.01*sf.shape['a']},'internal')
 
         if self.config['flux_fit']:  # add flux boundary points
             sf.get_LFP()  # get low feild point
             rflux,zflux = sf.first_wall_psi(psi_n=self.config['psi_n'],
                                             trim=False)[:2]
-            rflux,zflux = geom.order(rflux,zflux)            
-            zcut = sf.LFPz
-            istart = next((i for i in range(len(zflux)) if zflux[i]>zcut),-1)
-            rflux,zflux = rflux[istart:],zflux[istart:]
-            istop = next((i for i in range(len(zflux)) if zflux[i]<zcut),-1)
+            
+            rflux,zflux = sf.midplane_loop(rflux,zflux)
+            rflux,zflux = geom.order(rflux,zflux)
+            istop = next((i for i in range(len(zflux)) if zflux[i]<sf.LFPz),-1)
             rflux,zflux = rflux[:istop],zflux[:istop]
             dL = np.diff(geom.length(rflux,zflux))
             if np.max(dL) > 3*np.median(dL) or \

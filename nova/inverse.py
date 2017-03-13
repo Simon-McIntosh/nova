@@ -425,19 +425,22 @@ class INV(object):
         Rf,Zf,BC,Bdir = self.unpack_fix()
         for i,(rf,zf,bc,bdir) in enumerate(zip(Rf,Zf,BC,Bdir)):
             for j,name in enumerate(self.coil[state].keys()):
-                coil = self.coil[state][name]
-                R,Z,Ic = coil['r'],coil['z'],coil['I']
-                dR,dZ = coil['dr'],coil['dz']
-                for r,z,ic,dr,dz in zip(R,Z,Ic,dR,dZ):
-                    value = self.add_value_coil(bc,rf,zf,r,z,bdir,dr,dz)
-                    if state == 'active':
-                        self.G[i,j] += value
-                    elif state == 'passive':
-                        self.BG[i] += ic*value/self.Iscale
-                    else:
-                        errtxt = 'specify coil state'
-                        errtxt += '\'active\', \'passive\'\n'
-                        raise ValueError(errtxt)
+                if name == 'Plasma' and False:
+                    self.BG[i] += self.add_value_plasma(bc,rf,zf,bdir)
+                else:
+                    coil = self.coil[state][name]
+                    R,Z,Ic = coil['r'],coil['z'],coil['I']
+                    dR,dZ = coil['dr'],coil['dz']
+                    for r,z,ic,dr,dz in zip(R,Z,Ic,dR,dZ):
+                        value = self.add_value_coil(bc,rf,zf,r,z,bdir,dr,dz)
+                        if state == 'active':
+                            self.G[i,j] += value
+                        elif state == 'passive':
+                            self.BG[i] += ic*value/self.Iscale
+                        else:
+                            errtxt = 'specify coil state'
+                            errtxt += '\'active\', \'passive\'\n'
+                            raise ValueError(errtxt)
                             
     def add_value_coil(self,bc,rf,zf,r,z,bdir,dr,dz):
         if 'psi' in bc:
@@ -1167,7 +1170,7 @@ class scenario(object):
         self.width = 0.95*(EOF-SOF)
         print('swing width {:1.0f}Vs'.format(2*np.pi*self.width))
         self.inv.set_swing(centre=np.mean([SOF,EOF]),width=self.width,
-                           array=np.linspace(-0.5,0.5,11))
+                           array=np.linspace(-0.5,0.5,3))
         self.inv.update_position(self.Lnorm,update_area=True)
         
         

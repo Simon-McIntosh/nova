@@ -60,6 +60,7 @@ shp.tf.fill()
 
 rb.write_json(tf=shp.tf)
 
+to = time()
 pf = PF(sf.eqdsk)
 eq = EQ(sf,pf,dCoil=0.5,boundary=sf.get_sep(expand=1.05),n=2.5e3) 
 
@@ -67,7 +68,7 @@ eq = EQ(sf,pf,dCoil=0.5,boundary=sf.get_sep(expand=1.05),n=2.5e3)
 #sf.contour()
 #pf.plot(coils=pf.coil,label=True,current=True)
 
-'''
+
 inv = INV(sf,eq,shp.tf)
 sc = scenario(inv)
 sc.flat_top()
@@ -76,6 +77,8 @@ sc.flat_top()
 inv.solve_slsqp(inv.swing['flux'][0])
 eq.run()
 #eq.gen_opp()
+
+print('t',time()-to)
 
 sf.contour()
 
@@ -86,4 +89,3 @@ pf.plot(coils=eq.coil,label=False,plasma=True,current=False)
 
 #pl.figure(figsize=([5*16/12,5]))
 #pl.plot(inv.swing['flux']*2*np.pi,inv.swing['rms'],'.-')
-'''

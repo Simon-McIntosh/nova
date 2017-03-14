@@ -46,7 +46,6 @@ class SF(object):
             setattr(self,key,kwargs[key])
    
     def normalise(self):
-        print(self.eqdsk['name'])
         if ('Fiesta' in self.eqdsk['name'] or 'Nova' in self.eqdsk['name']\
         or 'disr' in self.eqdsk['name']) and 'CREATE' not in self.eqdsk['name']:
             self.norm = 1

@@ -15,7 +15,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 from nova.DEMOxlsx import DEMO
 from warnings import warn
 from nova.inverse import INV
-
+from copy import deepcopy
   
 class PF(object):
     def __init__(self,eqdsk):
@@ -170,11 +170,11 @@ class PF(object):
                 zshift = 0
             if label: 
                 pl.text(r+drs,z+zshift,name,fontsize=fs*1.1,
-                        ha=ha,va='center',color=0.5*np.ones(3))
+                        ha=ha,va='center',color=0.2*np.ones(3))
             if current: 
                 pl.text(r+drs,z-zshift,'{:1.1f}MA'.format(coil['I']*1e-6),
                         fontsize=fs*1.1,ha=ha,va='center',
-                        color=0.5*np.ones(3))
+                        color=0.2*np.ones(3))
                                             
     def plot(self,color=None,coils=None,label=False,plasma=False,
                    current=False,alpha=1):
@@ -187,8 +187,9 @@ class PF(object):
             coils = self.plasma_coil                
             self.plot_coil(coils,coil_color=color,alpha=alpha)
 
-    def inductance(self,Iscale=1):
-        inv = INV(self,Iscale=Iscale)
+    def inductance(self,dCoil=0.5,Iscale=1):
+        pf = deepcopy(self)
+        inv = INV(pf,Iscale=Iscale,dCoil=dCoil)
         Nf = np.array([1/inv.coil['active'][coil]['Nf']
                        for coil in inv.coil['active']])
         for i,coil in enumerate(inv.adjust_coils):

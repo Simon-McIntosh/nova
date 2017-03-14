@@ -171,10 +171,10 @@ class coil_cage(object):
     def output(self):  # output cage parameters to screen
         Vol = self.get_volume()
         print('ripple {:1.3f}'.format(self.get_ripple()))
-        print('energy {:1.2f} GJ'.format(1e-9*self.energy()))
-        print(r'TF volume {:1.0f} m3'.format(Vol['TF']))
-        print(r'plasma volume {:1.0f} m3'.format(Vol['plasma']))
-        print('ratio {:1.2f}'.format(Vol['ratio']))
+        print('TF energy {:1.2f} GJ'.format(1e-9*self.energy()))
+        print(r'TF centre-line enclosed volume {:1.0f} m3'.format(Vol['TF']))
+        print(r'plasma enclosed volume {:1.0f} m3'.format(Vol['plasma']))
+        print('TF/plasma volume ratio {:1.2f}'.format(Vol['ratio']))
         
     def plot_loops(self,scale=1.5,sticks=False):
         self.loop_ripple()

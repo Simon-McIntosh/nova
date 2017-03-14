@@ -24,7 +24,7 @@ from nova.elliptic import EQ
 class INV(object):
     
     def __init__(self,pf,tf=None,Jmax=12.5,TFoffset=0.3,svd=False,
-                 Iscale=1e6,dCoil=1.5):
+                 Iscale=1e6,dCoil=0.5):
         self.wsqrt = 1
         self.svd = svd  # coil current singular value decomposition flag
         self.Iscale = Iscale  # set current units to MA
@@ -53,9 +53,10 @@ class INV(object):
         self.CS_Lnorm,self.CS_Znorm = 2,1
         self.force_feild_active = False
     
-    def load_equlibrium(self,sf,expand=1.05,n=2.5e3):
+    def load_equlibrium(self,sf,expand=1.01,n=2.5e3):
         self.eq = EQ(sf,self.pf,dCoil=self.dCoil,
                 boundary=sf.get_sep(expand=expand),n=n) 
+        self.update_coils()
         
     def set_force_feild(self):
         self.ff = force_feild(self.pf.index,self.pf.coil,
@@ -1146,7 +1147,7 @@ class INV(object):
                 
 class scenario(object):
 
-    def __init__(self,inv,sf,rms_limit=0.05,wref=25,plot=True):
+    def __init__(self,inv,sf,rms_limit=0.05,wref=25,plot=False):
         self.inv = inv
         self.rms_limit = rms_limit
         self.wref = wref
@@ -1172,26 +1173,43 @@ class scenario(object):
         EOF = self.find_root([0,60])+self.wref/2                      
         
         self.width = 0.95*(EOF-SOF)
-        print('swing width {:1.0f}Vs'.format(2*np.pi*self.width))
         self.inv.set_swing(centre=np.mean([SOF,EOF]),width=self.width,
                            array=np.linspace(-0.5,0.5,3))
         self.inv.update_position(self.Lnorm,update_area=True)
         
     def energy(self):
-        self.inv.pf.inductance(1)
+        self.inv.pf.inductance(dCoil=self.inv.dCoil,Iscale=1)
         E = np.zeros(len(self.inv.swing['flux']))
         for i,I in enumerate(self.inv.swing['I']):
             I *= self.inv.Iscale
             E[i] = 0.5*np.dot(np.dot(I,self.inv.pf.M),I)
-        print(E*1e-9)
+        return np.max(E)
         
     def output(self):
+        E = self.energy()
         PFvol = 0
         for name in self.inv.pf.coil:
-            coil = self.inv.pf.coil
+            coil = self.inv.pf.coil[name]
             r,dr,dz = coil['r'],coil['dr'],coil['dz']
             PFvol += 2*np.pi*r*dr*dz
-            
+        Ipf = np.max(self.inv.swing['IsumPF'])
+        Ics = np.max(self.inv.swing['IsumCS'])
+        FzPF = np.max(self.inv.swing['FzPF'])
+        FsepCS = np.max(self.inv.swing['FsepCS'])
+        FzCS = np.max(self.inv.swing['FzCS'])
+        
+        print('')
+        print('swing width {:1.0f}Vs'.format(2*np.pi*self.width))
+        print(r'PF stored energy {:1.1f}GJ'.format(1e-9*E))
+        print(r'max absolute PF current sum {:1.1f}MA'.format(Ipf))
+        print(r'max vertical PF force {:1.1f}MN'.format(FzPF))
+        print(r'max sum CS vertical force {:1.1f}MN'.format(FzCS))
+        print(r'max CS seperation force {:1.1f}MN'.format(FsepCS))
+        print(r'max absolute CS current sum {:1.1f}MA'.format(Ics))
+        print(r'PF material volume {:1.1f}m3'.format(PFvol))
+        
+
+        
         
         
         

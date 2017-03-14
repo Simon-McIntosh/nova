@@ -32,8 +32,9 @@ plot_demoTF = True
 config = {'TF':'demo_nTF','eq':'DEMO_SN_SOF'}    
 config,setup = select(config,nTF=nTF,update=False)     
 sf = SF(setup.filename) 
-pf = PF(sf.eqdsk)
-
+pf = PF(sf.eqdsk) 
+  
+   
 pf.plot(coils=pf.coil,color=0.75*np.ones(3),label=False,plasma=True)
 
 
@@ -45,18 +46,17 @@ shp = Shape(profile,eqconf=config['eq'],ny=3)
 shp.add_vessel(demo.parts['Vessel']['out'])
 #shp.minimise(ripple=ripple,verbose=False)
 
-
-#tf = TF(x_in=demo.parts['TF_Coil']['in'],nTF=nTF,sf=sf)
-#tf.x['out'] = demo.parts['TF_Coil']['out']
+tf = TF(x_in=demo.parts['TF_Coil']['in'],nTF=nTF,sf=sf)
+tf.x['out'] = demo.parts['TF_Coil']['out']
 
 tf = shp.tf
 
-inv = INV(pf,tf,dCoil=3.5)
 
-
+inv = INV(pf,tf,dCoil=0.5)
 sc = scenario(inv,sf)
 sc.flat_top()
-sc.energy()
+
+sc.output()
 
 
 inv.solve_slsqp(inv.swing['flux'][0])
@@ -71,14 +71,14 @@ cage.output()
 demo.fill_part('Blanket')
 demo.fill_part('Vessel')
 sf.contour()
-pf.plot(coils=pf.sub_coil,label=False,current=True,alpha=0.75)
+pf.plot(coils=pf.coil,label=False,current=True,plasma=True,alpha=0.75)
+pf.plot(coils=pf.sub_coil)
 inv.ff.plot(scale=3)
 
 
-if plot_demoTF:
-    demo.fill_part('TF_Coil',color=0.75*np.ones(3))
+#if plot_demoTF:
+#    demo.fill_part('TF_Coil',color=0.75*np.ones(3))
 tf.fill()
-
 
 
 '''

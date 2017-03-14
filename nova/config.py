@@ -20,6 +20,7 @@ def select(base={'TF':'dtt','eq':'SN'},nTF=18,update=True,**kwargs):
         config['eqdsk'] = '{:s}_{:s}_{:d}TF'.format(label,base['TF'],nTF)
     setup = Setup(base['eq'])
     if update:  # update eqdsk filename
+        config['eq'] = config['eqdsk']
         setup.filename = setup.eqdir+config['eq']+'.eqdsk'
     return config,setup
     

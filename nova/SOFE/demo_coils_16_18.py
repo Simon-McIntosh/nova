@@ -25,7 +25,7 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
         font_scale=5/8,rc=rc)
 
 
-nTF,ripple = 18,True
+nTF,ripple = 13,True
 base = {'TF':'demo_nTF','eq':'DEMO_SN_SOF'}    
 config,setup = select(base,nTF=nTF,update=False)     
 sf = SF(setup.filename) 
@@ -41,10 +41,10 @@ shp = Shape(profile,eqconf=config['eq'],ny=3)
 shp.add_vessel(demo.parts['Vessel']['out'])
 #shp.minimise(ripple=ripple,verbose=False)
 
-tf = TF(x_in=demo.parts['TF_Coil']['in'],nTF=nTF,sf=sf)
-tf.x['out'] = demo.parts['TF_Coil']['out']
-config['eqdsk'] += '_baseline'
-#tf = shp.tf
+#tf = TF(x_in=demo.parts['TF_Coil']['in'],nTF=nTF,sf=sf)
+#tf.x['out'] = demo.parts['TF_Coil']['out']
+#config['eqdsk'] += '_baseline'
+tf = shp.tf
 
 inv = INV(pf,tf,dCoil=0.5)
 sc = scenario(inv,sf)
@@ -72,7 +72,7 @@ pf.plot(coils=pf.coil,label=False,current=True,plasma=False,alpha=0.75)
 #pf.plot(coils=pf.sub_coil)
 inv.ff.plot(scale=3)
 
-shp.cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)
+cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)
 tf.fill()
 
 sf.eqwrite(pf,config=config['eqdsk'])

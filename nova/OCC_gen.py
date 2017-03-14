@@ -442,7 +442,7 @@ class OCC(object):
         
 if __name__ is '__main__':
     
-    nTF,ripple = 18,True
+    nTF,ripple = 13,True
     base = {'TF':'demo_nTF','eq':'DEMO_SN_SOF'}    
     config,setup = select(base,nTF=nTF,update=True)  
 

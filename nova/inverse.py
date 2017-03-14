@@ -1168,13 +1168,14 @@ class scenario(object):
                        disp=True)
         return swing
         
-    def flat_top(self):
+    def flat_top(self,n=3):
+        self.nswing = n
         SOF = self.find_root([-60,0])-self.wref/2
         EOF = self.find_root([0,60])+self.wref/2                      
         
         self.width = 0.95*(EOF-SOF)
         self.inv.set_swing(centre=np.mean([SOF,EOF]),width=self.width,
-                           array=np.linspace(-0.5,0.5,3))
+                           array=np.linspace(-0.5,0.5,self.nswing))
         self.inv.update_position(self.Lnorm,update_area=True)
         
     def energy(self):
@@ -1192,6 +1193,7 @@ class scenario(object):
             coil = self.inv.pf.coil[name]
             r,dr,dz = coil['r'],coil['dr'],coil['dz']
             PFvol += 2*np.pi*r*dr*dz
+        Isum = np.max(self.inv.swing['Isum'])
         Ipf = np.max(self.inv.swing['IsumPF'])
         Ics = np.max(self.inv.swing['IsumCS'])
         FzPF = np.max(self.inv.swing['FzPF'])
@@ -1199,7 +1201,9 @@ class scenario(object):
         FzCS = np.max(self.inv.swing['FzCS'])
         
         print('')
+        print('swing divisions: {:1.0f}'.format(self.nswing))
         print('swing width {:1.0f}Vs'.format(2*np.pi*self.width))
+        print(r'max absolute PF/CS current sum {:1.1f}MA'.format(Isum))
         print(r'PF stored energy {:1.1f}GJ'.format(1e-9*E))
         print(r'max absolute PF current sum {:1.1f}MA'.format(Ipf))
         print(r'max vertical PF force {:1.1f}MN'.format(FzPF))

@@ -34,7 +34,7 @@ class OCC(object):
         self.profile = Profile(config['TF'],family=family,load=True,part='TF',
                                nTF=nTF,obj=obj,npoints=250)
         self.sf = SF(setup.filename)
-        self.tf = TF(self.profile,sf=self.sf)   
+        self.tf = TF(profile=self.profile,sf=self.sf)   
         self.pf = PF(self.sf.eqdsk)
         self.cross_section()
         self.PF_support()  # calculate PF support seats
@@ -48,7 +48,7 @@ class OCC(object):
                      boundary=self.sf.get_sep(expand=0.4),n=2e3) 
         self.eq.plasma()
         self.ff = force_feild(self.pf.index,self.pf.coil,
-                              self.eq.coil,self.eq.plasma_coil)
+                              self.pf.sub_coil,self.pf.plasma_coil)
 
         
     def cross_section(self,plot=True):
@@ -238,7 +238,7 @@ class OCC(object):
         self.tf.loop_interpolators(offset=0)  # construct TF interpolators
         TFloop = self.tf.fun['cl']
         self.OISsupport = {}
-        for i,(L,width) in enumerate(zip([0.4,0.64],[4.5,2.5])):
+        for i,(L,width) in enumerate(zip([0.4,0.66],[4.5,3.75])):
             nodes = self.draw_OIS(L,width,thickness,TFloop)                    
             self.OISsupport['OIS{:d}'.format(i)] = nodes
 
@@ -247,7 +247,7 @@ class OCC(object):
         self.tf.fill()
         #self.pf.plot(coils=self.pf.coil,label=True,current=True)
         if hasattr(self,'eq'):
-            self.pf.plot(coils=self.eq.coil,plasma=True)
+            self.pf.plot(coils=self.pf.sub_coil,plasma=True)
         for name in self.PFsupport:
             nodes = np.array(self.PFsupport[name])
             geom.polyfill(nodes[:,0],nodes[:,1],color=0.4*np.ones(3))
@@ -442,22 +442,22 @@ class OCC(object):
         
 if __name__ is '__main__':
     
-    nTF,nPF,nCS = 16,6,5
-    config = {'TF':'demo','eq':'SN'}
-    config,setup = select(config,nTF=nTF,nPF=nPF,nCS=nCS,update=False)
+    nTF,ripple = 18,True
+    base = {'TF':'demo_nTF','eq':'DEMO_SN_SOF'}    
+    config,setup = select(base,nTF=nTF,update=True)  
 
     occ = OCC(config,setup,nTF=nTF)
     
-    '''
+
     occ.OIS()
     occ.write()
     occ.plot()
-    occ.ansys(plot=True,nl=50,nr=3,ny=1)
+    #occ.ansys(plot=True,nl=50,nr=3,ny=1)
 
     pl.plot(0,-12,'o',alpha=0)
     pl.plot(17,10,'o',alpha=0)
     pl.tight_layout()
-    '''
+
     #pl.savefig('../Figs/CoilForces.png')
 
 

@@ -5,6 +5,8 @@ from amigo import IO
             
 def select(base={'TF':'dtt','eq':'SN'},nTF=18,update=True,**kwargs):
     config = {'nTF':nTF}
+    config['eq'] = base['eq']
+    config['TF_base'] = base['TF']
     if 'nCS' in kwargs:
         config['nCS'] = kwargs.get('nCS')
     if 'nPF' in kwargs:
@@ -12,12 +14,12 @@ def select(base={'TF':'dtt','eq':'SN'},nTF=18,update=True,**kwargs):
     label = base.get('label',base.get('eq'))
     config['TF'] = '{}_{}'.format(label,base['TF'])
     if 'nCS' in kwargs and 'nPF' in kwargs:
-        config['eq'] = '{:s}{:s}_{:d}TF_{:d}PF_{:d}CS'.format(\
+        config['eqdsk'] = '{:s}_{:s}_{:d}TF_{:d}PF_{:d}CS'.format(\
         label,base['TF'],nTF,config['nPF'],config['nCS'])
     else:
-        config['eq'] = base['eq']
+        config['eqdsk'] = '{:s}_{:s}_{:d}TF'.format(label,base['TF'],nTF)
     setup = Setup(base['eq'])
-    if update and 'nCS' in kwargs and 'nPF' in kwargs:  # update eqdsk filename
+    if update:  # update eqdsk filename
         setup.filename = setup.eqdir+config['eq']+'.eqdsk'
     return config,setup
     

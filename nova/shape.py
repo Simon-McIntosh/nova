@@ -19,6 +19,8 @@ from nova.config import Setup
 class Shape(object):
     
     def __init__(self,profile,eqconf='unset',sep='unset',**kwargs):
+        self.ny = kwargs.get('ny',3)  # TF filament number (y-dir)
+        self.alpha = kwargs.get('alpha',1-1e-4)
         self.color = cycle(sns.color_palette('Set2',10))
         self.profile = profile
         self.loop = self.profile.loop
@@ -37,9 +39,8 @@ class Shape(object):
             else:
                 plasma = {'r':sep['r'],'z':sep['z']}
                 self.tf = TF(profile=self.profile)
-            ny = kwargs.get('ny',3)  # TF filament number (y-dir)
             self.cage = coil_cage(nTF=self.profile.nTF,rc=self.tf.rc,
-                                  plasma=plasma,ny=ny)
+                                  plasma=plasma,ny=self.ny,alpha=self.alpha)
             x = self.tf.get_loops(self.loop.draw())
             self.cage.set_TFcoil(x['cl'],smooth=False)
         else:

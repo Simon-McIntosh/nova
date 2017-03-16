@@ -42,8 +42,10 @@ class GreenFeildLoop(object):
         self.loop = self.loop_cl[:-1,:]  # re-open loop
         self.npoints = len(self.loop)
         
-    def transform(self,theta,dy):  # translate / rotate
+    def transform(self,theta,dy,dr):  # translate / rotate
         loop,dL = np.copy(self.loop),np.copy(self.dL)
+        if dr != 0:  # offset loop
+            loop[:,0],loop[:,2] = geom.offset(loop[:,0],loop[:,2],dr)
         if dy != 0:  # translate in y
             loop[:,1] += dy
         if theta != 0:  # rotate about z-axis
@@ -51,8 +53,8 @@ class GreenFeildLoop(object):
             dL = np.dot(dL,geom.rotate(theta))
         return loop,dL
   
-    def A(self,point,theta=0,dy=0):  # vector potential
-        loop,dL = self.transform(theta,dy)
+    def A(self,point,theta=0,dy=0,dr=0):  # vector potential
+        loop,dL = self.transform(theta,dy,dr)
         point = np.array(point)*np.ones((self.npoints,3))  # point array
         r = point-loop  # point-segment vectors
         r_mag = np.tile(norm(r,axis=1),(3,1)).T
@@ -62,8 +64,8 @@ class GreenFeildLoop(object):
         Apot = np.sum(core*dL/r_mag,axis=0)/(4*np.pi)
         return Apot
         
-    def B(self,point,theta=0,dy=0):  # 3D feild from arbitrary loop
-        loop,dL = self.transform(theta,dy)
+    def B(self,point,theta=0,dy=0,dr=0):  # 3D feild from arbitrary loop
+        loop,dL = self.transform(theta,dy,dr)
         point = np.array(point)*np.ones((self.npoints,3))  # point array
         r = point-loop  # point-segment vectors
         r1 = r-dL/2 
@@ -127,7 +129,7 @@ def cut_corners(loop,smooth=True,Nss=100):
     else:
         dL = loop[1:]-loop[:-1]
         dL = np.append(np.reshape(dL[-1,:],(1,3)),dL,axis=0)  # prepend
-        dL = (dL[1:]+dL[:-1])/2  # average segment length 
+        dL = (dL[1:]+dL[:-1])/2  # central diffrence average segment length 
         loop_ss = loop
     return dL,loop_ss
 

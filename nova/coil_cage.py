@@ -13,42 +13,55 @@ from nova.coils import TF
 from nova.DEMOxlsx import DEMO
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from warnings import warn
 
 class coil_cage(object):
     def __init__(self,nTF=18,rc=0.5,ny=3,nr=1,alpha=1-1e-4,**kwargs):
         self.nTF = nTF  # TF coil number
-        self.ny = ny  #  winding pack depth discritization
-        self.nr = nr  # winding pack radial discritization
+        self.ny = ny  #  winding pack depth discretization
+        self.nr = nr  # winding pack radial discretization
         self.rc = rc
         if 'plasma' in kwargs:
             self.get_seperatrix(alpha=alpha,**kwargs['plasma'])
         if 'coil' in kwargs:
             self.set_TFcoil(kwargs['coil'])
+        if 'wp' in kwargs:
+            self.dy = kwargs['wp']['depth']/2  # toroidal winding-pack half depth
+            self.dr = kwargs['wp']['width']/2  # radial winding-pack half width
+        else:
+            ro = self.coil_loop[0,0]  # inboard centreline
+            self.dy = ro*np.tan(np.pi/self.nTF)  # toroidal winding-pack depth
+            self.dr = 0
+            if self.nr > 1:
+                warn_txt = 'winding pack dimensions not set '
+                warn_txt += '\'wp=tf.section[\'winding_pack\']'
+                warn(warn_txt)
             
-    def get_seperatrix(self,nplasma=80,alpha=1-1e-3,plot=False,**kwargs):
+    def get_seperatrix(self,nplasma=80,alpha=1-1e-4,plot=False,**kwargs):
         self.nplasma = nplasma
         self.plasma_loop = np.zeros((self.nplasma,3))  # initalise loop array
-        if 'sf' in kwargs:  # seperatrix directly from sf object
-            sf = kwargs['sf']
+        if 'sf' in kwargs or 'setup' in kwargs or 'config' in kwargs:
+            if 'sf' in kwargs:  # seperatrix directly from sf object
+                sf = kwargs['sf']
+            elif 'setup' in kwargs:
+                setup = kwargs.get('setup')
+                sf = SF(setup.filename)
+            elif 'config' in kwargs:
+                setup = Setup(kwargs.get('config'))
+                sf = SF(setup.filename)
             r,z = sf.get_boundary(alpha=alpha)
             self.eqdsk = sf.eqdsk
-        elif 'setup' in kwargs:
-            setup = kwargs.get('setup')
-            sf = SF(setup.filename)
-            r,z = sf.get_boundary(alpha=alpha)
-            self.eqdsk = sf.eqdsk
-        elif 'config' in kwargs:
-            setup = Setup(kwargs.get('config'))
-            sf = SF(setup.filename)
-            r,z = sf.get_boundary(alpha=alpha)
-            self.eqdsk = sf.eqdsk
-        elif 'eqdsk' in kwargs:  # seperatrix from eqdsk
-            self.eqdsk = geqdsk.read(kwargs.get('eqdsk'))
-            r,z = self.eqdsk['rbdry'],self.eqdsk['zbdry']
-        elif 'r' in kwargs and 'z' in kwargs:  # separatrix from input
-            r,z = kwargs.get('r'),kwargs.get('z')
-            self.eqdsk = {'rcentr':9.0735,'zmagx':0.15295,'bcentr':-5.6211}
+            self.LFP = np.array([sf.LFPr,sf.LFPz])
         else:
+            if 'eqdsk' in kwargs:  # seperatrix from eqdsk
+                self.eqdsk = geqdsk.read(kwargs.get('eqdsk'))
+                r,z = self.eqdsk['rbdry'],self.eqdsk['zbdry']
+            elif 'r' in kwargs and 'z' in kwargs:  # separatrix from input
+                r,z = kwargs.get('r'),kwargs.get('z')
+                self.eqdsk = {'rcentr':9.0735,'zmagx':0.15295,'bcentr':-5.6211}
+            LFindex = np.argmax(r)
+            self.LFP = np.array([r[LFindex],z[LFindex]])
+        if not hasattr(self,'eqdsk'):
             errtxt = '\n'
             errtxt += 'Require plasma={} input of following types:\n'
             errtxt += '1) configuration flag, {\'config\':\'SN\'} \n'
@@ -76,29 +89,37 @@ class coil_cage(object):
         self.amp_turns()  # set coil cage amp-turns
 
     def pattern(self,plot=False):  # generate winding-pack pattern
-        ro = self.coil_loop[0,0]  # inboard centreline
-        rlim = 0.6*np.max(self.coil_loop[:,0])
-        dL = ro*np.tan(np.pi/self.nTF)  # toroidal winding-pack width
         if self.ny > 1:
-            self.dYwp = np.linspace(dL*(1/self.ny-1),dL*(1-1/self.ny),self.ny) 
+            self.dYwp = np.linspace(self.dy*(1/self.ny-1),
+                                    self.dy*(1-1/self.ny),self.ny) 
         else:
             self.dYwp = [0]  # coil centreline
+        if self.nr > 1:
+            self.dRwp = np.linspace(self.dr*(1/self.nr-1),
+                                    self.dr*(1-1/self.nr),self.nr)    
+        else:
+            self.dRwp = [0]
         self.Tcoil = np.linspace(0,2*np.pi,self.nTF,endpoint=False)
         if plot:
+            rlim = 0.6*np.max(self.coil_loop[:,0])
             fig = plt.figure(figsize=(8,6))
             ax1 = fig.add_subplot(121,projection='3d')
             ax1.axis('equal')
             ax1.axis('off')
             ax2 = fig.add_subplot(122)
             ax2.axis('equal')
-            ax2.axis('off')
+            ax2.axis('on')
+            ax2.set_xticks([])
+            ax2.set_yticks([])
             color = sns.color_palette('Set2',self.nTF)
             for i,tcoil in enumerate(self.Tcoil):
-                for dy in self.dYwp:  # wp pattern
-                    loop = self.gfl.transform(tcoil,dy)[0]  # close loop
-                    loop = np.append(loop,np.reshape(loop[0,:],(1,-1)),axis=0)  
-                    ax1.plot(loop[:,0],loop[:,1],loop[:,2],color=color[i])
-                    ax2.plot(loop[:,0],loop[:,1],color=color[i])     
+                for dy in self.dYwp:  # wp torodal pattern
+                    for dr in self.dRwp:  # wp radial pattern
+                        loop = self.gfl.transform(tcoil,dy,dr)[0]  # close loop
+                        loop = np.append(loop,np.reshape(loop[0,:],(1,-1)),
+                                         axis=0)  
+                        ax1.plot(loop[:,0],loop[:,1],loop[:,2],color=color[i])
+                        ax2.plot(loop[:,0],loop[:,1],color=color[i])     
             ax1.set_xlim(-rlim,rlim)
             ax1.set_ylim(-rlim,rlim)
             ax1.set_zlim(-rlim,rlim)
@@ -129,8 +150,9 @@ class coil_cage(object):
             Bo = np.zeros(3)
             for tcoil in self.Tcoil:
                 for dy in self.dYwp:  # wp pattern
-                    Bo += self.Iturn*cc.mu_o*\
-                    self.gfl.B(sr,theta=tcoil,dy=dy)/self.ny
+                    for dr in self.dRwp:  # wp radial pattern
+                        Bo += self.Iturn*cc.mu_o*\
+                        self.gfl.B(sr,theta=tcoil,dy=dy,dr=dr)/(self.ny*self.nr)
             B[j] = np.dot(nr,Bo)
         if variable == 'ripple':
             ripple = 1e2*(B[0]-B[1])/np.sum(B)
@@ -188,15 +210,18 @@ class coil_cage(object):
             for i in range(self.nplasma):
                 pl.plot([rpl[i],rr[i]],[zpl[i],zr[i]],
                         color=color[0],lw=3)
-        #pl.plot(self.plasma_loop[:,0],self.plasma_loop[:,2],'-')
+        pl.plot(self.plasma_loop[:,0],self.plasma_loop[:,2],'-')
         #pl.plot(self.coil_loop[:,0],self.coil_loop[:,2])
-        x = self.res['x']
-        pl.plot(self.plasma_interp['r'](x),self.plasma_interp['z'](x),'o',
-                ms=8,color=0.5*np.ones(3))
-        pl.text(self.plasma_interp['r'](x),
-                self.plasma_interp['z'](x),
-                '{:1.2f}%- '.format(ripple),ha='right',va='center',
-                color=0.5*np.ones(3)) 
+        x_max = np.array([self.plasma_interp['r'](self.res['x']),
+                          self.plasma_interp['z'](self.res['x'])])
+        dx = 1.5
+        for x in [x_max,self.LFP]:
+            ripple = self.point([x[0],0,x[1]],variable='ripple')
+            pl.plot(x[0],x[1],'o',ms=8,color=0.5*np.ones(3),zorder=10)
+            pl.plot([x[0]+0.1*dx,x[0]+0.9*dx],x[1]*np.ones(2),'-',
+                    lw=1,color=0.5*np.ones(3))
+            pl.text(x[0]+dx,x[1],' {:1.2f}%'.format(ripple),
+                    ha='left',va='center',color=0.5*np.ones(3)) 
         pl.axis('equal')
         pl.axis('off')
         

@@ -34,7 +34,7 @@ print('Isum {:1.1f}MA'.format(inv.Isum))
 
 
 FFMpegWriter = manimation.writers['ffmpeg']
-writer = FFMpegWriter(fps=5, bitrate=-1,codec='libx264',
+writer = FFMpegWriter(fps=2, bitrate=-1,codec='libx264',
                       extra_args=['-pix_fmt','yuv420p'])
 
 def animate(index): 
@@ -73,8 +73,8 @@ def animate(index):
     
     if index%1 == 0 and index > 0:
         elapsed = time()-to
-        remain = int((nS-index)/index*elapsed)
-        prog_str = '\r{:1.0e}'.format(index)
+        remain = int((nS-index+1)/(index+1)*elapsed)
+        prog_str = '{:1.0e}'.format(index)
         prog_str += ' elapsed {:0>8}s'.format(str(\
         datetime.timedelta(seconds=int(elapsed))))
         prog_str += ' remain {:0>8}s'.format(str(\

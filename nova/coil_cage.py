@@ -15,9 +15,10 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 class coil_cage(object):
-    def __init__(self,nTF=18,rc=0.5,ny=3,alpha=1-1e-4,**kwargs):
+    def __init__(self,nTF=18,rc=0.5,ny=3,nr=1,alpha=1-1e-4,**kwargs):
         self.nTF = nTF  # TF coil number
         self.ny = ny  #  winding pack depth discritization
+        self.nr = nr  # winding pack radial discritization
         self.rc = rc
         if 'plasma' in kwargs:
             self.get_seperatrix(alpha=alpha,**kwargs['plasma'])

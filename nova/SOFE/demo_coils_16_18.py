@@ -25,8 +25,8 @@ sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
         font_scale=5/8,rc=rc)
 
 
-nTF,ripple = 13,True
-base = {'TF':'demo_nTF','eq':'DEMO_SN_SOF'}    
+nTF,ripple = 18,True
+base = {'TF':'demo_nTF','eq':'DEMO_SN_EOF'}    
 config,setup = select(base,nTF=nTF,update=False)     
 sf = SF(setup.filename) 
 pf = PF(sf.eqdsk) 
@@ -37,14 +37,28 @@ pf.plot(coils=pf.coil,color=0.75*np.ones(3),label=False,plasma=False)
 
 demo = DEMO()
 profile = Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L')
-shp = Shape(profile,eqconf=config['eq'],ny=3)
+shp = Shape(profile,eqconf=config['eq'],ny=8)
 shp.add_vessel(demo.parts['Vessel']['out'])
 #shp.minimise(ripple=ripple,verbose=False)
 
-#tf = TF(x_in=demo.parts['TF_Coil']['in'],nTF=nTF,sf=sf)
-#tf.x['out'] = demo.parts['TF_Coil']['out']
-#config['eqdsk'] += '_baseline'
-tf = shp.tf
+tf = TF(x_in=demo.parts['TF_Coil']['in'],nTF=nTF,sf=sf)  
+tf.x['out'] = demo.parts['TF_Coil']['out']
+tf.x['cl']['r'],tf.x['cl']['z'] = geom.rzSLine(tf.x['cl']['r'],tf.x['cl']['z'])
+config['eqdsk'] += '_baseline'
+#tf = shp.tf
+
+cage = coil_cage(nTF=nTF,rc=tf.rc,plasma={'config':config['eq']},ny=shp.ny,
+                 smooth=False)
+cage.set_TFcoil(tf.x['cl'])
+cage.output()  
+
+cage.pattern(plot=True)
+
+s = np.zeros(3)
+s[0],s[2] = sf.LFPr,sf.LFPz
+ripple = cage.point(s,variable='ripple')
+print('ripple',ripple)
+'''
 
 inv = INV(pf,tf,dCoil=0.5)
 sc = scenario(inv,sf)
@@ -61,9 +75,7 @@ else:
 inv.solve_slsqp(inv.swing['flux'][swing_index])
 inv.eq.run(update=False)
 
-cage = coil_cage(nTF=nTF,rc=tf.rc,plasma={'config':config['eq']},ny=shp.ny)
-cage.set_TFcoil(tf.x['cl'])
-cage.output()            
+          
 
 #demo.fill_part('Blanket')
 demo.fill_part('Vessel')
@@ -78,4 +90,4 @@ tf.fill()
 sf.eqwrite(pf,config=config['eqdsk'])
 pl.savefig('../../Figs/{}.pdf'.format(config['eqdsk']))
 
-
+'''

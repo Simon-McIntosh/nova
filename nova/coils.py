@@ -152,7 +152,7 @@ class PF(object):
             if coil['I'] != 0:
                 edgecolor = 'k'
             else:
-                edgecolor = 'r'  
+                edgecolor = 'r' 
             coil_color = color[4] 
             if name.split('_')[0] in self.index['CS']['name']:
                 drs = -2.5/3*dr
@@ -176,10 +176,12 @@ class PF(object):
                         fontsize=fs*1.1,ha=ha,va='center',
                         color=0.2*np.ones(3))
                                             
-    def plot(self,color=None,coils=None,label=False,plasma=False,
+    def plot(self,color=None,subcoil=False,label=False,plasma=False,
                    current=False,alpha=1):
         fs = matplotlib.rcParams['legend.fontsize']
-        if coils is None:
+        if subcoil:
+            coils = self.sub_coil
+        else:
             coils = self.coil
         self.plot_coil(coils,label=label,current=current,fs=fs,
                        coil_color=color,alpha=alpha)
@@ -254,32 +256,44 @@ class TF(object):
     
     def __init__(self,**kwargs):
         self.initalise_loops()  # initalise loop family
+        if 'sf' in kwargs:
+            self.sf = kwargs['sf']
         if 'profile' in kwargs:
-            profile = kwargs['profile']
-            x_in = profile.loop.draw()  # inner loop profile
-            if hasattr(profile,'nTF'):
-                self.nTF = profile.nTF
-            else:
-                self.nTF = 18
-                warn('using default nTF: {1.0f}'.format(self.nTF))
+            self.profile = kwargs['profile']
+            self.update_profile()
         elif 'x_in' in kwargs and 'nTF' in kwargs:
-            x_in = kwargs['x_in']
+            self.x_in = kwargs['x_in']
             self.nTF = kwargs['nTF']
         else:
             err_txt = 'insurficent key word inputs\n'
             err_txt += 'set \'profile\' or \'x_in\' and \'nTF\''
             raise ValueError(err_txt)
-        self.ro = np.min(x_in['r'])
-        self.cross_section(**kwargs)  # coil cross-sections
-        self.get_loops(x_in)
-
-    def cross_section(self,J=18.25,twall=0.045,**kwargs):  # MA/m2 TF current density
+        self.set_inner_loop()
+        
+    def set_inner_loop(self):
+        self.ro = np.min(self.x_in['r'])
+        self.cross_section()  # coil cross-sections
+        self.get_loops(self.x_in)
+        
+    def update_profile(self):
+        self.x_in = self.profile.loop.draw()  # inner loop profile
+        if hasattr(self.profile,'nTF'):
+            self.nTF = self.profile.nTF
+        else:
+            self.nTF = 18
+            warn('using default nTF: {1.0f}'.format(self.nTF))
+        
+    def adjust_xo(self,name,**kwargs):
+        self.profile.loop.adjust_xo(name,**kwargs)
+        self.update_profile()
+        self.set_inner_loop()
+        
+    def cross_section(self,J=18.25,twall=0.045):  # MA/m2 TF current density
         self.section = {}
         self.section['case'] = {'side':0.1,'nose':0.51,'inboard':0.04,
                                 'outboard':0.19,'external':0.225}
-        if 'sf' in kwargs:
-            sf = kwargs.get('sf')
-            BR = sf.eqdsk['bcentr']*sf.eqdsk['rcentr']
+        if hasattr(self,'sf'):  # TF object initalised with sf
+            BR = self.sf.eqdsk['bcentr']*self.sf.eqdsk['rcentr']
             Iturn = 1e-6*abs(2*np.pi*BR/(self.nTF*cc.mu_o))
             Acs = Iturn/J
             rwp1 = self.ro-self.section['case']['inboard']

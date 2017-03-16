@@ -24,10 +24,7 @@ rc = {'figure.figsize':[8/ar,8],'savefig.dpi':100,
 sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
         font_scale=1.5,rc=rc)
 
-config = 'SF'
-config = 'SNdtt18_6PF_5CS'
-config = 'SNdtt18_5PF_5CS'
-config = 'SNdtt18_4PF_5CS'
+config = 'SXdev'
 pkl = PKL(config,directory='../../Movies/')
 sf,eq,inv = pkl.fetch(['sf','eq','inv'])
 
@@ -35,7 +32,7 @@ print(config)
 print('rms {:1.1f}mm'.format(1e3*inv.rms))
 print('Isum {:1.1f}MA'.format(inv.Isum))
 
-'''
+
 FFMpegWriter = manimation.writers['ffmpeg']
 writer = FFMpegWriter(fps=5, bitrate=-1,codec='libx264',
                       extra_args=['-pix_fmt','yuv420p'])
@@ -50,22 +47,22 @@ def animate(index):
     pl.plot(19,11,'o',alpha=0)
     
     inv.update_position(inv.log['Lo'][index]['norm'],update_area=True)
-    inv.swing_flux(inv.swing['flux'][0])  
-    inv.solve_slsqp()  
-
-    eq.run(update=False,verbose=False)
-    sf.contour(lw=1.25,boundary=False)
+    #inv.swing_flux(inv.swing['flux'][0])  
+    inv.solve_slsqp(inv.swing['flux'][0])  
+    inv.eq.pf = inv.pf
+    inv.eq.run(update=False)
+    inv.eq.sf.contour()
     inv.plot_fix()
     
     if inv.log['plasma_iter'][index] != inv.log['plasma_iter'][index-1] or\
     index ==inv.log['position_iter'][-1]-1:
-        inv.eq.pf.plasma_coil = inv.log['plasma_coil'][inv.log['plasma_iter'][index]-1]
+        inv.pf.plasma_coil = inv.log['plasma_coil'][inv.log['plasma_iter'][index]-1]
         plasma = True
-        print('GS {:1.0f} of {:1.0f}'.format(inv.log['plasma_iter'][index],
-                                             inv.log['plasma_iter'][-1]))
+        #print('GS {:1.0f} of {:1.0f}'.format(inv.log['plasma_iter'][index],
+        #                                     inv.log['plasma_iter'][-1]))
     else:
         plasma = False
-    inv.eq.pf.plot(coils=inv.eq.pf.coil,label=False,plasma=plasma,current=False) 
+    inv.pf.plot(subcoil=True,label=False,plasma=plasma,current=False) 
     text = 'Plasma update: {:1.0f}\n'.format(inv.log['plasma_iter'][index])
     text += 'Position update: {:1.0f}\n'.format(index)
     text += 'Current update: {:1.0f}\n'.format(inv.log['current_iter'][index])
@@ -99,4 +96,3 @@ with writer.saving(fig,'../../Movies/{}.mp4'.format(config),100):
         animate(i)
         #pl.tight_layout()
         writer.grab_frame()
-'''

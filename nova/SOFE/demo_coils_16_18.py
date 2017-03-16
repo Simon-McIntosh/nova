@@ -4,7 +4,7 @@ from nova.streamfunction import SF
 from nova.radial_build import RB
 from nova.elliptic import EQ
 from nova.coils import PF,TF
-from nova.inverse import INV,scenario
+from nova.inverse import INV,SWING
 import numpy as np
 from time import time
 import amigo.geom as geom

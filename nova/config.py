@@ -5,22 +5,21 @@ from amigo import IO
             
 def select(base={'TF':'dtt','eq':'SN'},nTF=18,update=True,**kwargs):
     config = {'nTF':nTF}
-    config['eq'] = base['eq']
+    config['eq_base'] = base['eq']
     config['TF_base'] = base['TF']
     if 'nCS' in kwargs:
         config['nCS'] = kwargs.get('nCS')
     if 'nPF' in kwargs:
         config['nPF'] = kwargs.get('nPF')
-    label = base.get('label',base.get('eq'))
-    config['TF'] = '{}_{}'.format(label,base['TF'])
+    name = base.get('name',base.get('eq'))
+    config['TF'] = '{}_{}'.format(name,base['TF'])
     if 'nCS' in kwargs and 'nPF' in kwargs:
-        config['eqdsk'] = '{:s}_{:s}_{:d}TF_{:d}PF_{:d}CS'.format(\
-        label,base['TF'],nTF,config['nPF'],config['nCS'])
+        config['eq'] = '{:s}_{:s}_{:d}TF_{:d}PF_{:d}CS'.format(\
+        name,base['TF'],nTF,config['nPF'],config['nCS'])
     else:
-        config['eqdsk'] = '{:s}_{:s}_{:d}TF'.format(label,base['TF'],nTF)
+        config['eq'] = '{:s}_{:s}_{:d}TF'.format(name,base['TF'],nTF)
     setup = Setup(base['eq'])
     if update:  # update eqdsk filename
-        config['eq'] = config['eqdsk']
         setup.filename = setup.eqdir+config['eq']+'.eqdsk'
     return config,setup
     
@@ -131,7 +130,7 @@ class Setup(object):
             self.filename = 'SXMOF.eqdsk'
             self.targets['inner'] = {'L2D':[1.1]}
             self.targets['outer'] = {'L2D':[3.55]} 
-            self.firstwall['div_ex'] = 1.3
+            self.firstwall['div_ex'] = 1.75
             self.firstwall['trim'] = [0.63,0.68]  # trim fraction (in/out)
             self.build['sheild_connect'] = [0.2,0.9]
             self.build['sheild_base'] = 0

@@ -1,39 +1,86 @@
-import pylab as pl
 from nova.streamfunction import SF
 from nova.elliptic import EQ
 from nova.inverse import INV
-from nova.config import Setup
+from nova.config import Setup,select
 from itertools import cycle
 import numpy as np
 from nova.radial_build import RB
 from nova.shelf import PKL
-import nova.cross_coil as cc
 from nova.coils import PF,TF
-from time import time
 from nova import loops
+from nova.loops import Profile
+import pylab as pl
+from nova.inverse import SWING
+from nova.firstwall import main_chamber
+from nova.shape import Shape
 
 import seaborn as sns
-rc = {'figure.figsize':[7*12/16,7],'savefig.dpi':150, #*12/16
-      'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
-      'lines.linewidth':0.75}
-sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
-        font_scale=7/8,rc=rc)
+sns.set(context='talk',style='white',font='sans-serif',font_scale=7/8)
 Color = cycle(sns.color_palette('Set2'))
 
-pkl = PKL('SX54')
+pkl = PKL('SXdev',directory='../../Movies/')
 
-config = 'SXex'
-setup = Setup(config)
+name = 'SX'
+
+nTF,ripple = 18,False
+base = {'TF':'dtt','eq':'DTT_SN','name':name}    
+config,setup = select(base,nTF=nTF,update=False)     
 
 sf = SF(setup.filename)
-rb = RB(setup,sf)
 pf = PF(sf.eqdsk)
 
-tf = TF(config,coil_type='S')
+profile = Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L')
+tf = TF(profile=profile,sf=sf)
+#tf.adjust_xo('dz',value=-2)
+#tf.fill()
 
-eq = EQ(sf,pf,dCoil=2.0,sigma=0,boundary=sf.get_sep(expand=0.5),n=5e3) 
-#eq.get_plasma_coil()
-#eq.run(update=False)
+eq = EQ(sf,pf,dCoil=2.0,sigma=0,boundary=sf.get_sep(expand=1.0),zmin=-10,n=2e3) 
+
+inv = INV(pf,tf,dCoil=0.25)
+inv.load_equlibrium(sf)
+
+inv.fix_boundary()
+inv.fix_target()
+inv.plot_fix(tails=True)
+            
+inv.add_plasma()
+Lnorm = inv.snap_coils()
+inv.set_swing(centre=10,width=20,array=np.linspace(-0.5,0.5,2))
+inv.set_force_feild()                   
+inv.update_position(Lnorm,update_area=True)  
+
+inv.optimize(Lnorm)
+
+
+#swing = SWING(inv,sf,plot=True)
+eq.run(update=False)
+sf.contour()
+pf.plot(subcoil=False,current=True,label=True)
+pf.plot(subcoil=True)
+
+inv.ff.plot()
+
+mc = main_chamber('dtt',date='2017_03_08')  
+mc.load_data(plot=True)  # load from file
+mc.shp.plot_bounds()
+
+
+rb = RB(sf,Setup(name))
+rb.generate(mc,debug=True)
+#profile = Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L')
+shp = Shape(tf.profile,eqconf=config['eq_base'],ny=3)
+shp.add_vessel(rb.segment['vessel_outer'])
+shp.minimise(ripple=ripple,verbose=True)
+shp.tf.fill()
+
+
+loops.plot_variables(inv.Io,scale=1,postfix='MA')
+loops.plot_variables(inv.Lo,scale=1)
+
+sf.eqwrite(pf,config='SXex')
+pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
+
+'''
 eq.gen_opp()
 
 #rb.firstwall(calc=False,plot=True,debug=False)
@@ -78,8 +125,8 @@ inv.plot_fix(tails=True)
 loops.plot_variables(inv.Io,scale=1,postfix='MA')
 loops.plot_variables(inv.Lo,scale=1)
 
-pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
-
+#
+'''
 
 '''
 

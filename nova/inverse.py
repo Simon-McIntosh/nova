@@ -996,10 +996,10 @@ class INV(object):
         constraint[:self.nPF-1] = L[:self.nPF-1]-L[1:self.nPF]+PFdL  # PF 
         constraint[self.nPF-1:] = L[self.nPF:-1]-L[self.nPF+1:]+CSdL  # CS 
 
-    def minimize(self,L,method='ls'):
+    def minimize(self,Lnorm,method='ls'):
         self.iter['position'] == 0 
-        self.set_Lo(L)  # set position bounds
-        Lnorm = loops.normalize_variables(self.Lo)
+        #self.set_Lo(L)  # set position bounds
+        #Lnorm = loops.normalize_variables(self.Lo)
         
         if method == 'bh':  # basinhopping
             #minimizer = {'method':'SLSQP','jac':True,#'args':True,'options':{'eps':1e-3}, #'jac':True,
@@ -1022,8 +1022,8 @@ class INV(object):
             print('Optimising configuration:')
             #opt = nlopt.opt(nlopt.LD_SLSQP,self.nL)
             opt = nlopt.opt(nlopt.LD_MMA,self.nL)
-            opt.set_ftol_abs(5e-4)
-            #opt.set_ftol_rel(1e-2)
+            opt.set_ftol_abs(5e-2)
+            opt.set_ftol_rel(1e-2)
             #opt.set_stopval(30e-3)  # <x [m]
             opt.set_min_objective(self.update_position_vector)
             opt.set_lower_bounds([0 for _ in range(self.nL)])
@@ -1034,18 +1034,6 @@ class INV(object):
             Lnorm = opt.optimize(Lnorm)
         loops.denormalize_variables(Lnorm,self.Lo)
         
-        '''
-        #if bndry: rms_bndry[i],z_offset[i] = self.get_rms_bndry()
-        self.rms_bndry = np.max(rms_bndry)
-        self.z_offset = np.mean(z_offset)
-        rms = self.position_coils(Lo,True)
-        text = 'Isum {:1.0f} Ics {:1.0f}'.format(self.Isum*1e-6,self.Ics*1e-6)
-        text += ' rms {:1.4f} rmsID {:1.0f}'.format(self.rms,self.rmsID)
-        text += ' rms_bndry {:1.3f}'.format(self.rms_bndry)
-        text += ' z_offset {:1.3f}'.format(self.z_offset)
-        text += ' dTpol {:1.3f}'.format(self.dTpol)
-        print(text)
-        '''
         print('\nrms {:1.2f}mm'.format(1e3*self.rms))
         return self.Lo['value'],self.rms
         
@@ -1137,17 +1125,23 @@ class INV(object):
                 current = '\t{:1.3f}\t{:1.3f}\n'.format(Icoil[0,j],Icoil[1,j])
                 f.write(name+position+size+current)
                 
-    def fix_boundary(self,plot=False):
+    def fix_boundary(self):
         self.fix_boundary_psi(N=25,alpha=1-1e-4,factor=1)  # add boundary points
-        self.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary points
+        #self.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary points
         self.add_null(factor=1,point=self.eq.sf.Xpoint)
         self.initialize_log()
-        if plot:
-            self.plot_fix(tails=True)
+            
+    def fix_target(self):
+        Rex,arg = 1.5,40
+        R = self.eq.sf.Xpoint[0]*(Rex-1)/np.sin(arg*np.pi/180)
+        target = (R,arg)
+        self.add_alpha(1,factor=1,polar=target)  # target psi
+        self.add_B(0,[-15],factor=1,polar=target)  # target alignment feild)
                 
-class scenario(object):
+class SWING(object):
 
-    def __init__(self,inv,sf,rms_limit=0.05,wref=25,plot=False):
+    def __init__(self,inv,sf,rms_limit=0.05,wref=25,nswing=2,plot=False):
+        self.nswing = nswing
         self.inv = inv
         self.rms_limit = rms_limit
         self.wref = wref
@@ -1155,11 +1149,14 @@ class scenario(object):
         self.inv.fix_boundary(plot=plot)
         self.inv.add_plasma()
         self.Lnorm = inv.snap_coils()
-        self.inv.set_force_feild()
+        self.inv.set_swing(centre=0,width=self.wref,
+                           array=np.linspace(-0.5,0.5,self.nswing))
+        self.inv.set_force_feild()                   
+        self.inv.update_position(self.Lnorm,update_area=True)                   
         
     def get_rms(self,centre):
         self.inv.set_swing(centre=centre,width=self.wref,
-                           array=np.linspace(-0.5,0.5,3))
+                           array=np.linspace(-0.5,0.5,2))
         rms = self.inv.update_position(self.Lnorm,update_area=True)
         return float(self.rms_limit-rms)
         
@@ -1168,8 +1165,7 @@ class scenario(object):
                        disp=True)
         return swing
         
-    def flat_top(self,n=3):
-        self.nswing = n
+    def flat_top(self):
         SOF = self.find_root([-60,0])-self.wref/2
         EOF = self.find_root([0,60])+self.wref/2                      
         

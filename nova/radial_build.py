@@ -120,10 +120,10 @@ class RB(object):
         profile = Profile(self.setup.configuration,family='S',part='vv',
                           npoints=400,read_write=False)
         shp = Shape(profile,objective='L')
-        shp.loop.adjust_xo('upper',lb=0.5)
-        shp.loop.adjust_xo('lower',lb=0.5)
+        shp.loop.adjust_xo('upper',lb=0.6)
+        shp.loop.adjust_xo('lower',lb=0.6)
         shp.loop.adjust_xo('l',lb=0.6)
-        shp.loop.remove_oppvar('flat')
+        #shp.loop.remove_oppvar('flat')
         r,z = geom.rzSLine(rb,zb,200)  # sub-sample
         rup,zup = r[z>self.sf.Xpoint[1]],z[z>self.sf.Xpoint[1]]
         shp.add_bound({'r':rup,'z':zup},'internal')  # vessel inner bounds

@@ -33,14 +33,17 @@ pf = PF(sf.eqdsk)
   
    
 pf.plot(subcoil=False,color=0.75*np.ones(3),label=False,plasma=False)
+sf.contour()
 
-demo = DEMO()
+
+#demo = DEMO()
+
 '''
 profile = Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L')
 shp = Shape(profile,eqconf=config['eq_base'],ny=3)
 shp.add_vessel(demo.parts['Vessel']['out'])
 #shp.minimise(ripple=ripple,verbose=False)
-'''
+
 tf = TF(x_in=demo.parts['TF_Coil']['in'],nTF=nTF,sf=sf)  
 tf.x['out'] = demo.parts['TF_Coil']['out']
 #tf.x['cl']['r'],tf.x['cl']['z'] = geom.rzSLine(tf.x['cl']['r'],tf.x['cl']['z'])
@@ -66,6 +69,7 @@ print('ripple',ripple)
 pl.figure()
 sf.contour(plot_vac=False)
 cage.plot_loops(sticks=True)
+'''
 
 '''
 

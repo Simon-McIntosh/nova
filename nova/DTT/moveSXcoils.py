@@ -9,7 +9,6 @@ from nova.shelf import PKL
 from nova.coils import PF,TF
 from nova import loops
 from nova.loops import Profile
-import pylab as pl
 from nova.inverse import SWING
 from nova.firstwall import main_chamber
 from nova.shape import Shape
@@ -22,12 +21,16 @@ pkl = PKL('SXdev',directory='../../Movies/')
 
 name = 'SX'
 
-nTF,ripple = 18,False
+nTF,ripple = 18,True
 base = {'TF':'dtt','eq':'DTT_SN','name':name}    
 config,setup = select(base,nTF=nTF,update=False)     
 
 sf = SF(setup.filename)
 pf = PF(sf.eqdsk)
+
+for coil in pf.index['CS']['name']:
+    pf.coil[coil]['r'] = 2.7
+    pf.coil[coil]['dr'] = 0.8
 
 profile = Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L')
 tf = TF(profile=profile,sf=sf)
@@ -45,10 +48,18 @@ inv.plot_fix(tails=True)
             
 inv.add_plasma()
 Lnorm = inv.snap_coils()
-inv.set_swing(centre=10,width=20,array=np.linspace(-0.5,0.5,2))
+
+'''
+Lpf = inv.grid_PF(nPF=4)
+Lcs = inv.grid_CS(nCS=5,Zbound=[-10,8],gap=0.1,Ro=2.7,dr=0.8)
+L = np.append(Lpf,Lcs)
+inv.set_Lo(L)  # set position bounds
+Lnorm = loops.normalize_variables(inv.Lo)
+'''
+
+inv.set_swing(centre=0,width=10,array=np.linspace(-0.5,0.5,3))
 inv.set_force_feild()                   
 inv.update_position(Lnorm,update_area=True)  
-
 inv.optimize(Lnorm)
 
 
@@ -66,19 +77,34 @@ mc.shp.plot_bounds()
 
 
 rb = RB(sf,Setup(name))
-rb.generate(mc,debug=True)
+rb.generate(mc,debug=False)
 #profile = Profile(config['TF'],family='S',part='TF',nTF=nTF,obj='L')
 shp = Shape(tf.profile,eqconf=config['eq_base'],ny=3)
 shp.add_vessel(rb.segment['vessel_outer'])
-shp.minimise(ripple=ripple,verbose=True)
+#shp.minimise(ripple=ripple,verbose=True)
 shp.tf.fill()
 
+sf.eqwrite(sf,config='SXex')
+'''
+inv.Lnorm = Lnorm
+sw = SWING(inv,sf)
+sw.flat_top()
+sw.output()
+
+for ends,name in zip([0,-1],['SOF','EOF']):
+    inv.solve_slsqp(inv.swing['flux'][ends])
+    eq.run(update=False)
+    sf.eqwrite(pf,config='SXex_{}'.format(name))
+'''
+
+rb.write_json(tf=shp.tf)
 
 loops.plot_variables(inv.Io,scale=1,postfix='MA')
 loops.plot_variables(inv.Lo,scale=1)
 
 sf.eqwrite(pf,config='SXex')
 pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
+
 
 '''
 eq.gen_opp()

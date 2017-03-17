@@ -1140,24 +1140,25 @@ class INV(object):
                 
 class SWING(object):
 
-    def __init__(self,inv,sf,rms_limit=0.05,wref=25,nswing=2,plot=False):
+    def __init__(self,inv,sf,rms_limit=0.1,wref=25,nswing=2,plot=False):
         self.nswing = nswing
         self.inv = inv
         self.rms_limit = rms_limit
         self.wref = wref
-        self.inv.load_equlibrium(sf)
-        self.inv.fix_boundary(plot=plot)
-        self.inv.add_plasma()
-        self.Lnorm = inv.snap_coils()
+        
+        #self.inv.load_equlibrium(sf)
+        #self.inv.fix_boundary()
+        #self.inv.add_plasma()
+        #self.Lnorm = inv.snap_coils()
         self.inv.set_swing(centre=0,width=self.wref,
                            array=np.linspace(-0.5,0.5,self.nswing))
-        self.inv.set_force_feild()                   
-        self.inv.update_position(self.Lnorm,update_area=True)                   
+        #self.inv.set_force_feild()                   
+        #self.inv.update_position(self.Lnorm,update_area=True)                   
         
     def get_rms(self,centre):
         self.inv.set_swing(centre=centre,width=self.wref,
                            array=np.linspace(-0.5,0.5,2))
-        rms = self.inv.update_position(self.Lnorm,update_area=True)
+        rms = self.inv.update_position(self.inv.Lnorm,update_area=True)
         return float(self.rms_limit-rms)
         
     def find_root(self,slim):
@@ -1170,7 +1171,8 @@ class SWING(object):
         EOF = self.find_root([0,60])+self.wref/2                      
         
         self.width = 0.95*(EOF-SOF)
-        self.inv.set_swing(centre=np.mean([SOF,EOF]),width=self.width,
+        self.centre = np.mean([SOF,EOF])
+        self.inv.set_swing(centre=self.centre,width=self.width,
                            array=np.linspace(-0.5,0.5,self.nswing))
         self.inv.update_position(self.Lnorm,update_area=True)
         

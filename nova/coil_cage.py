@@ -29,9 +29,6 @@ class coil_cage(object):
             self.dy = kwargs['wp']['depth']/2  # toroidal winding-pack half depth
             self.dr = kwargs['wp']['width']/2  # radial winding-pack half width
         else:
-            ro = self.coil_loop[0,0]  # inboard centreline
-            self.dy = ro*np.tan(np.pi/self.nTF)  # toroidal winding-pack depth
-            self.dr = 0
             if self.nr > 1:
                 warn_txt = 'winding pack dimensions not set '
                 warn_txt += '\'wp=tf.section[\'winding_pack\']'
@@ -89,6 +86,10 @@ class coil_cage(object):
         self.amp_turns()  # set coil cage amp-turns
 
     def pattern(self,plot=False):  # generate winding-pack pattern
+        if not hasattr(self,'dy'):  # winding pack not set
+            ro = self.coil_loop[0,0]  # inboard centreline
+            self.dy = ro*np.tan(np.pi/self.nTF)  # toroidal winding-pack depth
+            self.dr = 0
         if self.ny > 1:
             self.dYwp = np.linspace(self.dy*(1/self.ny-1),
                                     self.dy*(1-1/self.ny),self.ny) 

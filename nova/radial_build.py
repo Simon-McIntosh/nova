@@ -266,7 +266,8 @@ class RB(object):
             for name in self.setup.targets[leg]:
                 packet = self.setup.targets[leg][name]
                 if isinstance(packet,collections.Iterable):
-                    packet = packet.tolist()
+                    if not isinstance(packet,list):
+                        packet = packet.tolist()
                 data['targets'][leg][name] = packet
         for loop in ['first_wall','divertor','blanket_inner','blanket_outer',
                      'vessel_inner','vessel_outer']:

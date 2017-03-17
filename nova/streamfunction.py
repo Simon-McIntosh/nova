@@ -483,7 +483,7 @@ class SF(object):
         self.HFPr,self.HFPz = fLFSr(-np.pi),fLFSz(-np.pi)
         self.HFPr = self.get_midplane(self.HFPr,self.HFPz)
         self.shape['R']  = np.mean([self.HFPr,self.LFPr])
-        self.shape['a']  = (self.HFPr+self.LFPr)/2
+        self.shape['a']  = (self.LFPr-self.HFPr)/2
         self.shape['AR'] = self.shape['R']/self.shape['a']
         return (self.LFPr,self.LFPz,self.HFPr,self.HFPz)
     

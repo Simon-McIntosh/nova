@@ -9,7 +9,7 @@ font = {'family': 'serif', 'serif': 'Times', 'weight': 'normal', 'size': 12}
 matplotlib.rc('font', **font)
 fig_path = '../Figs/'
 
-config = 'DD3'  # 'DD1' 
+config = 'DD3'  # 'DD1'
 geom = extract_geom(config)
 I = 16e6  # plasma current [MA]
 delta = 0.4  # node spaceing [m]
@@ -25,7 +25,7 @@ plot.plasma()
 plot.coil_fill()
 plot.coil_sheild()
 
-sf = SF(geom.coil, res=0.2, rlim=[4,14], zlim=[-10,4.5])
+sf = SF(geom.coil, res=0.2, rlim=[4, 14], zlim=[-10, 4.5])
 sf.sol()
 sf.contour()
 pl.axis('equal')

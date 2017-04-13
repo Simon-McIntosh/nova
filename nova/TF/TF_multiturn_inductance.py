@@ -2,8 +2,8 @@ import pylab as pl
 from nova.config import Setup
 from nova.streamfunction import SF
 from nova.radial_build import RB
-from nova.coils import PF,TF
-from etna.coil_geom import configure,coil_cage
+from nova.coils import PF, TF
+from etna.coil_geom import configure, coil_cage
 from etna.coil_apdl import coil_map
 from inductance import neumann
 import numpy as np
@@ -14,20 +14,20 @@ import datetime
 import pickle
 
 import seaborn as sns
-rc = {'figure.figsize':[10,10*12/16],'savefig.dpi':100, # 
-      'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
-      'lines.linewidth':2}
-sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
-        font_scale=7/8,rc=rc)
+rc = {'figure.figsize': [10, 10 * 12 / 16], 'savefig.dpi': 100,
+      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
+      'lines.linewidth': 2}
+sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
+        font_scale=7 / 8, rc=rc)
 
-cgeom = configure('TF',Ndp=0,Nloop=0)
+cgeom = configure('TF', Ndp=0, Nloop=0)
 cmap = coil_map(cgeom)
-cgeom.segment(cmap.loops,Nseg=100)
+cgeom.segment(cmap.loops, Nseg=100)
 
 nTF = 18
-theta = np.linspace(0,2*np.pi,nTF,endpoint=False)
- 
-r_coil = cgeom.pn*np.sqrt(134/np.pi)
+theta = np.linspace(0, 2 * np.pi, nTF, endpoint=False)
+
+r_coil = cgeom.pn * np.sqrt(134 / np.pi)
 
 
 '''
@@ -82,4 +82,3 @@ print(np.sum(M))
 
 
 '''
-

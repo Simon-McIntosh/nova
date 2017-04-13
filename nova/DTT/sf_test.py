@@ -3,28 +3,28 @@ from nova.config import Setup
 from nova.streamfunction import SF
 from nova.radial_build import RB
 from nova.elliptic import EQ
-from nova.coils import PF,TF
+from nova.coils import PF, TF
 from nova.inverse import INV
 from nova.TF.ripple import ripple
 import numpy as np
 import scipy
 from time import time
 import amigo.geom as geom
-from nova.loops import Profile,plot_oppvar
+from nova.loops import Profile, plot_oppvar
 from nova.shape import Shape
 from nova.TF.DEMOxlsx import DEMO
 from nova.force import force_feild
 
 import seaborn as sns
-rc = {'figure.figsize':[8,8*16/12],'savefig.dpi':80, # 
-      'savefig.jpeg_quality':200,'savefig.pad_inches':0.1,
-      'lines.linewidth':1.5}
-sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
-        font_scale=7/8,rc=rc)
+rc = {'figure.figsize': [8, 8 * 16 / 12], 'savefig.dpi': 80,
+      'savefig.jpeg_quality': 200, 'savefig.pad_inches': 0.1,
+      'lines.linewidth': 1.5}
+sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
+        font_scale=7 / 8, rc=rc)
 
-nPF,nTF = 3,18
-config = {'TF':'SN_dtt','eq':'SN_{:d}PF_{:d}TF'.format(nPF,nTF)}
-config = {'TF':'SN_dtt','eq':'DEMO_SNb'}
+nPF, nTF = 3, 18
+config = {'TF': 'SN_dtt', 'eq': 'SN_{:d}PF_{:d}TF'.format(nPF, nTF)}
+config = {'TF': 'SN_dtt', 'eq': 'DEMO_SNb'}
 
 setup = Setup(config['eq'])
 
@@ -32,36 +32,39 @@ sf = SF(setup.filename)
 pf = PF(sf.eqdsk)
 
 
-pf.plot(coils=pf.coil,label=True,plasma=False,current=True) 
+pf.plot(coils=pf.coil, label=True, plasma=False, current=True)
 levels = sf.contour()
 
 
-rb = RB(setup,sf)
-rb.firstwall(plot=False,debug=False)
+rb = RB(setup, sf)
+rb.firstwall(plot=False, debug=False)
 
-profile = Profile(config['TF'],family='S',part='TF',nTF=18,obj='L',load=True)
+profile = Profile(config['TF'], family='S', part='TF',
+                  nTF=18, obj='L', load=True)
 
-shp = Shape(profile,obj='L',eqconf=config['eq'],load=True)  # ,nTF=18
+shp = Shape(profile, obj='L', eqconf=config['eq'], load=True)  # ,nTF=18
 
-rvv,zvv = geom.rzSLine(rb.segment['vessel']['r'],rb.segment['vessel']['z'],31)
-rvv,zvv = geom.offset(rvv,zvv,0.2)
+rvv, zvv = geom.rzSLine(
+    rb.segment['vessel']['r'], rb.segment['vessel']['z'], 31)
+rvv, zvv = geom.offset(rvv, zvv, 0.2)
 rmin = np.min(rvv)
-rvv[rvv<=rmin+0.12] = rmin+0.12
-shp.loop.xo['r1'] = {'value':4.486,'lb':np.min(rvv),'ub':8}  # inner radius
-shp.loop.xo['upper'] = {'value':0.33,'lb':0.5,'ub':1}  
-shp.loop.xo['lower'] = {'value':0.33,'lb':0.5,'ub':1}
-shp.add_bound({'r':rvv,'z':zvv},'internal')  # vessel
+rvv[rvv <= rmin + 0.12] = rmin + 0.12
+shp.loop.xo['r1'] = {'value': 4.486,
+                     'lb': np.min(rvv), 'ub': 8}  # inner radius
+shp.loop.xo['upper'] = {'value': 0.33, 'lb': 0.5, 'ub': 1}
+shp.loop.xo['lower'] = {'value': 0.33, 'lb': 0.5, 'ub': 1}
+shp.add_bound({'r': rvv, 'z': zvv}, 'internal')  # vessel
 shp.plot_bounds()
 shp.minimise()
-#shp.loop.plot()
+# shp.loop.plot()
 
-tf = TF(profile,sf=sf)
+tf = TF(profile, sf=sf)
 tf.fill()
 
-demo = DEMO() 
-#demo.fill_part('Blanket')
-#demo.fill_part('Vessel')
-#demo.plot_limiter()
+demo = DEMO()
+# demo.fill_part('Blanket')
+# demo.fill_part('Vessel')
+# demo.plot_limiter()
 
 '''
 rb.vessel()
@@ -79,15 +82,15 @@ rvv[rvv<=rmin+0.12] = rmin+0.12
 shp.add_bound({'r':rvv,'z':zvv},'internal')  # vessel
 shp.plot_bounds()
 '''
-#shp.minimise()
-#shp.update()
-#shp.tf.fill()
-#shp.cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)
-#plot_oppvar(shp.loop.xo,shp.loop.oppvar)
-    
+# shp.minimise()
+# shp.update()
+# shp.tf.fill()
+# shp.cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)
+# plot_oppvar(shp.loop.xo,shp.loop.oppvar)
+
 #demo = DEMO()
-#demo.fill_loops()
-#demo.get_ports(plot=True)
+# demo.fill_loops()
+# demo.get_ports(plot=True)
 
 '''
 

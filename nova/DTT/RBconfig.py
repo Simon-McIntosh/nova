@@ -4,58 +4,57 @@ import collections
 
 def eqconfig(config=''):
 
-        name = {}
-        name['file'] = ''
-        name['data'] = ''
-        
-        targets = collections.OrderedDict()  # targets data structure (ordered)
-        targets['default'] = {}
-        targets['default']['L2D'] = 2
-        targets['default']['open'] = False
-        targets['default']['graze'] = 1.5*np.pi/180
-        targets['default']['dPlate'] = 0.5
-        targets['default']['dR'] = 0.1
+    name = {}
+    name['file'] = ''
+    name['data'] = ''
 
-        firstwall = {}  # initalise firstwall data structure
-        firstwall['dRfw'] = 0.25
-        firstwall['div_ex'] = 0.18
-        firstwall['trim'] = [0.75,0.7]
-        
-        coils = {'internal':{'id':[],'dR':[],'dZ':[]},  # coils data structure
-                 'external':{'id':list(range(0,16)),'dR':[],'dZ':[]}}
-                
-        if config == 'SFm':
-            name['file'] = '../eqdsk/Equil_AR3d1_16coils_SFminus_v4_2015'+\
+    targets = collections.OrderedDict()  # targets data structure (ordered)
+    targets['default'] = {}
+    targets['default']['L2D'] = 2
+    targets['default']['open'] = False
+    targets['default']['graze'] = 1.5 * np.pi / 180
+    targets['default']['dPlate'] = 0.5
+    targets['default']['dR'] = 0.1
+
+    firstwall = {}  # initalise firstwall data structure
+    firstwall['dRfw'] = 0.25
+    firstwall['div_ex'] = 0.18
+    firstwall['trim'] = [0.75, 0.7]
+
+    coils = {'internal': {'id': [], 'dR': [], 'dZ': []},  # coils data structure
+             'external': {'id': list(range(0, 16)), 'dR': [], 'dZ': []}}
+
+    if config == 'SFm':
+        name['file'] = '../eqdsk/Equil_AR3d1_16coils_SFminus_v4_2015' +\
             '_09_bt_1d03li_0d8_Ipl_20d25_SOF.eqdsk'
-            #name['file'] = '../eqdsk/2015_SFminus_eqdsk_2MCQRZ_v1_0_IDM.eqdsk'
-            name['data'] = 'SFm'
-            
-            targets['default']['dPlate'] = 0.35 # target plate length
-            targets['inner1'] = {'L2D':[1.1+0.52],'open':True,'dR':0.0}
-            targets['inner2'] = {'L2D':[1.2-0.08],'open':False,'dR':-1}
-            targets['outer1'] = {'L2D':[1.65-0.7],'open':False,'dR':-1}
-            targets['outer2'] = {'L2D':[1.1+0.15],'open':True,'dR':0.0}  
-            
-            firstwall['div_ex'] = 0.18
-            firstwall['trim'] = [0.75,0.7]  # trim fraction (in/out)
-            
-            coils['external']['id'] = list(range(0,16))
-            '''
+        #name['file'] = '../eqdsk/2015_SFminus_eqdsk_2MCQRZ_v1_0_IDM.eqdsk'
+        name['data'] = 'SFm'
+
+        targets['default']['dPlate'] = 0.35  # target plate length
+        targets['inner1'] = {'L2D': [1.1 + 0.52], 'open': True, 'dR': 0.0}
+        targets['inner2'] = {'L2D': [1.2 - 0.08], 'open': False, 'dR': -1}
+        targets['outer1'] = {'L2D': [1.65 - 0.7], 'open': False, 'dR': -1}
+        targets['outer2'] = {'L2D': [1.1 + 0.15], 'open': True, 'dR': 0.0}
+
+        firstwall['div_ex'] = 0.18
+        firstwall['trim'] = [0.75, 0.7]  # trim fraction (in/out)
+
+        coils['external']['id'] = list(range(0, 16))
+        '''
             self.TFopp = 'V'
             self.sheild_connect=[0,1]  # 0.3,0.95
             #self.Dsheild =[0,0.84]  # inner outer 0-1
             self.Dsheild =[]  # inner outer 0-1
             '''
 
-            coils = {'internal':{'id':[],'dR':[],'dZ':[]},
-                     'external':{'id':list(range(0,16)),'dR':[],'dZ':[]}} 
-                     
+        coils = {'internal': {'id': [], 'dR': [], 'dZ': []},
+                 'external': {'id': list(range(0, 16)), 'dR': [], 'dZ': []}}
 
-        for key in list(targets)[1:]:
-            print(key)
-        return name,targets,firstwall
-        
-        
+    for key in list(targets)[1:]:
+        print(key)
+    return name, targets, firstwall
+
+
 '''
                              
         
@@ -440,4 +439,4 @@ def eqconfig(config=''):
             config[key] = getattr(self,key)
         print(config)
         return config         
-'''        
+'''

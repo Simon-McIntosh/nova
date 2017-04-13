@@ -1,5 +1,4 @@
 
-
         '''
         if 'config' in shape:
 
@@ -8,9 +7,9 @@
                 if name in shape:
                     setattr(self,name,shape.get(name))
         '''
-        
-        #self.rp = ripple(nTF=self.nTF,plasma={'sf':shape.get('sf',None)})
-            
+
+        # self.rp = ripple(nTF=self.nTF,plasma={'sf':shape.get('sf',None)})
+
     def set_bound(self,shape):
         self.bound = {}
         for side in ['internal','external']:
@@ -22,7 +21,7 @@
                 Rpf,Zpf = shape['pf'].coil_corners(self.setup.coils[side])
                 R,Z = np.append(R,Rpf),np.append(Z,Zpf)
             self.bound[side] = {'R':R,'Z':Z}
-        #self.bound['ro_min'] = 4.35  # minimum TF radius
+        # self.bound['ro_min'] = 4.35  # minimum TF radius
         if len(self.bound) == 0:
             errtxt = '\n'
             errtxt += 'Require TF bounds input,'
@@ -54,7 +53,7 @@
         return xo
         
 
-#generate
+# generate
     
                 self.load_coil()  # load coil object
             if self.datatype == 'fit': 
@@ -74,8 +73,8 @@
             x = self.coil.draw()
             self.get_coil_loops(x['r'],x['z'],profile='in')
 
-            #self.rp.set_TFcoil(Rcl=self.Rcl,Zcl=self.Zcl,smooth=True)
-            #print('ripple',self.rp.get_ripple())
+            # self.rp.set_TFcoil(Rcl=self.Rcl,Zcl=self.Zcl,smooth=True)
+            # print('ripple',self.rp.get_ripple())
 
     def plot_oppvar(self,eps=1e-2):
         xnorm,bnorm = self.set_oppvar()
@@ -161,14 +160,14 @@
             Rloop,Zloop = geom.offset(Rloop,Zloop,self.dRcoil+2*self.dRsteel)
         nRloop,nZloop,Rloop,Zloop = geom.normal(Rloop,Zloop)
         R,Z = self.bound[side]['R'],self.bound[side]['Z']
-        #dsum = 0
+        # dsum = 0
         dot = np.zeros(len(R))
         for j,(r,z) in enumerate(zip(R,Z)):
             i = np.argmin((r-Rloop)**2+(z-Zloop)**2)
             dr = [Rloop[i]-r,Zloop[i]-z]  
             dn = [nRloop[i],nZloop[i]]
             dot[j] = switch*np.dot(dr,dn)
-            #if dot < 0:
+            # if dot < 0:
             #    dsum -= (dr[0]**2+dr[1]**2)
         return dot
         

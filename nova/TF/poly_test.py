@@ -6,10 +6,10 @@ import matplotlib as mpl
 # Generate data. In this case, we'll make a bunch of center-points and generate
 # verticies by subtracting random offsets from those center-points
 numpoly, numverts = 100, 4
-centers = 100 * (np.random.random((numpoly,2)) - 0.5)
-offsets = 10 * (np.random.random((numverts,numpoly,2)) - 0.5)
+centers = 100 * (np.random.random((numpoly, 2)) - 0.5)
+offsets = 10 * (np.random.random((numverts, numpoly, 2)) - 0.5)
 verts = centers + offsets
-verts = np.swapaxes(verts,0,1)
+verts = np.swapaxes(verts, 0, 1)
 
 # In your case, "verts" might be something like:
 # verts = zip(zip(lon1, lat1), zip(lon2, lat2), ...)
@@ -23,8 +23,8 @@ z = np.random.random(numpoly) * 500
 
 fig, ax = plt.subplots()
 
-verts = np.array([[1,2,3,3,3,2,1],[0,3,3,2,6,6,1]])
-verts = np.swapaxes(verts,0,1)
+verts = np.array([[1, 2, 3, 3, 3, 2, 1], [0, 3, 3, 2, 6, 6, 1]])
+verts = np.swapaxes(verts, 0, 1)
 
 # Make the collection and add it to the plot.
 coll = PolyCollection(verts, array=z, cmap=mpl.cm.jet, edgecolors='none')

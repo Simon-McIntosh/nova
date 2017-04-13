@@ -7,35 +7,35 @@ from itertools import cycle
 import numpy as np
 from nova.radial_build import RB
 from nova.shelf import PKL
-from nova.coils import PF,TF
+from nova.coils import PF, TF
 from nova import loops
 from nova.loops import Profile
 
 import seaborn as sns
-rc = {'figure.figsize':[7*10/16,7],'savefig.dpi':150, #*12/16
-      'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
-      'lines.linewidth':0.75}
-sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
-        font_scale=7/8,rc=rc)
+rc = {'figure.figsize': [7 * 10 / 16, 7], 'savefig.dpi': 150,  # *12/16
+      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
+      'lines.linewidth': 0.75}
+sns.set(context='paper', style='white', font='sans-serif', palette='Set2',
+        font_scale=7 / 8, rc=rc)
 Color = cycle(sns.color_palette('Set2'))
 
-base = {'TF':'dtt','eq':'DN'}
-config,setup = select(base=base,update=False,nTF=18,nPF=4,nCS=3)
+base = {'TF': 'dtt', 'eq': 'DN'}
+config, setup = select(base=base, update=False, nTF=18, nPF=4, nCS=3)
 
-config['TF'] = config['TF'].replace('DN','SN')
+config['TF'] = config['TF'].replace('DN', 'SN')
 
 sf = SF(setup.filename)
-rb = RB(setup,sf)
+rb = RB(setup, sf)
 pf = PF(sf.eqdsk)
-tf = TF(Profile(config['TF'],family='S',part='TF',
-                nTF=config['nTF'],obj='L',load=True))
-#tf.fill()
+tf = TF(Profile(config['TF'], family='S', part='TF',
+                nTF=config['nTF'], obj='L', load=True))
+# tf.fill()
 
-eq = EQ(sf,pf,dCoil=1.5,sigma=0,n=5e3,boundary=sf.get_sep(expand=1.1),
-        zmin=-abs(sf.Xpoint[1])-2,zmax=abs(sf.Xpoint[1])+2) 
-#eq.gen_opp(Zerr=5e-4)
-eq.gen_bal(Zerr=5e-4,tol=1e-4)
-    
+eq = EQ(sf, pf, dCoil=1.5, sigma=0, n=5e3, boundary=sf.get_sep(expand=1.1),
+        zmin=-abs(sf.Xpoint[1]) - 2, zmax=abs(sf.Xpoint[1]) + 2)
+# eq.gen_opp(Zerr=5e-4)
+eq.gen_bal(Zerr=5e-4, tol=1e-4)
+
 '''
 inv = INV(sf,eq,tf)
 Lpf = inv.grid_PF(nPF=config['nPF'])

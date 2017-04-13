@@ -1,38 +1,38 @@
 import pylab as pl
-from nova.config import Setup,select
+from nova.config import Setup, select
 from nova.streamfunction import SF
 from nova.radial_build import RB
 from nova.elliptic import EQ
-from nova.coils import PF,TF
-from nova.inverse import INV,SWING
+from nova.coils import PF, TF
+from nova.inverse import INV, SWING
 import numpy as np
 from time import time
 import amigo.geom as geom
 from nova import loops
-from nova.loops import Profile,plot_oppvar
+from nova.loops import Profile, plot_oppvar
 from nova.shape import Shape
 from nova.DEMOxlsx import DEMO
 from nova.force import force_feild
-from nova.firstwall import divertor,main_chamber
+from nova.firstwall import divertor, main_chamber
 from amigo.IO import trim_dir
 from nova.coil_cage import coil_cage
 
 import seaborn as sns
-rc = {'figure.figsize':[5,5*16/12],'savefig.dpi':250, # 
-      'savefig.jpeg_quality':200,'savefig.pad_inches':0.1,
-      'lines.linewidth':1.5}
-sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
-        font_scale=7/8,rc=rc)
+rc = {'figure.figsize': [5, 5 * 16 / 12], 'savefig.dpi': 250,
+      'savefig.jpeg_quality': 200, 'savefig.pad_inches': 0.1,
+      'lines.linewidth': 1.5}
+sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
+        font_scale=7 / 8, rc=rc)
 
 
-nTF,ripple,ny,nr=18,True,6,6
-base = {'TF':'demo_nTF','eq':'DEMO_SN_EOF'}    
-config,setup = select(base,nTF=nTF,update=False)     
-sf = SF(setup.filename) 
-pf = PF(sf.eqdsk) 
-  
-   
-pf.plot(subcoil=False,color=0.75*np.ones(3),label=False,plasma=False)
+nTF, ripple, ny, nr = 18, True, 6, 6
+base = {'TF': 'demo_nTF', 'eq': 'DEMO_SN_EOF'}
+config, setup = select(base, nTF=nTF, update=False)
+sf = SF(setup.filename)
+pf = PF(sf.eqdsk)
+
+
+pf.plot(subcoil=False, color=0.75 * np.ones(3), label=False, plasma=False)
 sf.contour()
 
 

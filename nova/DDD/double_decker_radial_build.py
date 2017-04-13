@@ -3,46 +3,47 @@ import pylab as pl
 import pickle
 from radial_build import RB
 
-TFopp = False # optimise TF coil placment
+TFopp = False  # optimise TF coil placment
 config = 'DD3'  # DD1/DD3
 gap = 0.175
 tfw = 0.1
-BB = [0.56,0.8]  # breeding blanket thickness (in/out)
+BB = [0.56, 0.8]  # breeding blanket thickness (in/out)
 tBBsupport = 0.1  # blanket support
-VV = [0.34,.75]  # vacumn vessel thickness (in/out)
-sheild = [0.85,0.1]  # neutron sheilding
+VV = [0.34, .75]  # vacumn vessel thickness (in/out)
+sheild = [0.85, 0.1]  # neutron sheilding
 
 Icoil = 17.5e6  # coil amp-turns
 Jmax = 15e6  # max current density
-Acoil = Icoil/Jmax
+Acoil = Icoil / Jmax
 dRcoil = np.sqrt(Acoil)
-dRsteel = 0.15*dRcoil
+dRsteel = 0.15 * dRcoil
 
-graze = 1.5*np.pi/180  # toroidal grazing angle
+graze = 1.5 * np.pi / 180  # toroidal grazing angle
 dPlate = 1.2  # target plate lenght
 dCap = 0.1
 
 flip = 1
 
-with open('./plot_data/'+config+'_sol.pkl', 'rb') as input:
+with open('./plot_data/' + config + '_sol.pkl', 'rb') as input:
     sf = pickle.load(input)
     plot = pickle.load(input)
     geom = pickle.load(input)
 
-rb = RB(geom,sf,config,Np=400,flip=flip)
-plot.set_keys(['P6','P5','PS2','P6B','P5B','PS2','PS5'])  # internal coils
+rb = RB(geom, sf, config, Np=400, flip=flip)
+plot.set_keys(['P6', 'P5', 'PS2', 'P6B', 'P5B',
+               'PS2', 'PS5'])  # internal coils
 plot.flip = flip
 
-pl.figure(figsize=(10,14))
+pl.figure(figsize=(10, 14))
 pl.axis('equal')
-#pl.xlim([-15.5,15.5]),pl.ylim([-15,9])
-#pl.xlim([6,9]),pl.ylim([-5,-3])
-#pl.xlim([6,14]),pl.ylim([-10,-6])
-pl.xlim([2,17.5]),pl.ylim([-11,5])
-                              
-rb.fill(dR=gap,dt=tfw,alpha=0.7,color='r',label='first wall')
-rb.fill(dt=BB,alpha=0.7,color='b',label='blanket')
-rb.fill(dt=tBBsupport,alpha=0.4,color='g',label='blanket support')
+# pl.xlim([-15.5,15.5]),pl.ylim([-15,9])
+# pl.xlim([6,9]),pl.ylim([-5,-3])
+# pl.xlim([6,14]),pl.ylim([-10,-6])
+pl.xlim([2, 17.5]), pl.ylim([-11, 5])
+
+rb.fill(dR=gap, dt=tfw, alpha=0.7, color='r', label='first wall')
+rb.fill(dt=BB, alpha=0.7, color='b', label='blanket')
+rb.fill(dt=tBBsupport, alpha=0.4, color='g', label='blanket support')
 
 '''
 P6support = {}

@@ -5,16 +5,16 @@ from extract import extract_geom
 from streamfunction import SF
 
 
-config = 'DD3'  # 'DD1' 
+config = 'DD3'  # 'DD1'
 geom = extract_geom(config)
 I = 20e6  # plasma current [A]
 
-fig = pl.figure(figsize=(10,14))
-geom.plasma_coils(I,9)
+fig = pl.figure(figsize=(10, 14))
+geom.plasma_coils(I, 9)
 
 pl.axis('equal')
-#pl.xlim([5,10])
-#pl.ylim([-5,0])
+# pl.xlim([5,10])
+# pl.ylim([-5,0])
 plot = layout(geom)
 
 '''
@@ -27,12 +27,12 @@ plot.coil_fill()
 plot.coil_sheild()
 plot.plasma_coils()
 '''
-sf = SF(geom.coil, res=0.2, rlim=[4,14], zlim=[-10,4.5])
+sf = SF(geom.coil, res=0.2, rlim=[4, 14], zlim=[-10, 4.5])
 sf.sol()
 sf.contour()
 
-pl.plot(geom.plasma['LCFS']['r'],geom.plasma['LCFS']['z'],'r')
-#plot.sol()  # scrape-off layer
+pl.plot(geom.plasma['LCFS']['r'], geom.plasma['LCFS']['z'], 'r')
+# plot.sol()  # scrape-off layer
 
 '''
 with open('./plot_data/'+config+'_sol_LT.pkl', 'wb') as output:

@@ -14,11 +14,11 @@ import cross_coil as cc
 pkl = PKL('moveSX_Dev2')
 
 import seaborn as sns
-rc = {'figure.figsize':[7*12/16,7],'savefig.dpi':150, #*12/16
-      'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
-      'lines.linewidth':0.75}
-sns.set(context='paper',style='white',font='sans-serif',palette='Set2',
-        font_scale=7/8,rc=rc)
+rc = {'figure.figsize': [7 * 12 / 16, 7], 'savefig.dpi': 150,  # *12/16
+      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
+      'lines.linewidth': 0.75}
+sns.set(context='paper', style='white', font='sans-serif', palette='Set2',
+        font_scale=7 / 8, rc=rc)
 Color = cycle(sns.color_palette('Set2'))
 pl.figure()
 pl.axis('equal')
@@ -32,29 +32,29 @@ conf = Config('X')
 sf.conf = conf
 conf.TF(sf)
 #rb = RB(conf,sf,Np=200)
-#rb.divertor_outline(False,plot=False,debug=False)
-eq = EQ(sf,dCoil=0.5,limit=[5,12,-8,5.5],n=1e4)
+# rb.divertor_outline(False,plot=False,debug=False)
+eq = EQ(sf, dCoil=0.5, limit=[5, 12, -8, 5.5], n=1e4)
 eq.set_sf_psi()  # set psi
 eq.gen()
 
-inv = INV(sf,eq,configTF='X',config='X')
+inv = INV(sf, eq, configTF='X', config='X')
 Lpf = inv.grid_PF(nPF=5)
 Lcs = inv.grid_CS(nCS=5)
-Lo = np.append(Lpf,Lcs)
+Lo = np.append(Lpf, Lcs)
 inv.eq.coils()  # re-grid
 inv.update_coils()
 
-inv.fix_boundary_psi(N=31,alpha=1-1e-4,factor=1)  # add boundary points
-#inv.fix_boundary_feild(N=31,alpha=1-1e-4,factor=1)  # add boundary points
-inv.add_null(factor=1,point=sf.Xpoint)
+inv.fix_boundary_psi(N=31, alpha=1 - 1e-4, factor=1)  # add boundary points
+# inv.fix_boundary_feild(N=31,alpha=1-1e-4,factor=1)  # add boundary points
+inv.add_null(factor=1, point=sf.Xpoint)
 
-R,arg = 1.5,20
-target = (R,arg)
-pl.plot(sf.Xpoint[0]+R*np.sin(arg*np.pi/180),
-        sf.Xpoint[1]-R*np.cos(arg*np.pi/180),'s')
+R, arg = 1.5, 20
+target = (R, arg)
+pl.plot(sf.Xpoint[0] + R * np.sin(arg * np.pi / 180),
+        sf.Xpoint[1] - R * np.cos(arg * np.pi / 180), 's')
 
-#inv.add_alpha(1,factor=3,polar=target)
-#inv.add_B(0,[-15],factor=3,polar=target)
+# inv.add_alpha(1,factor=3,polar=target)
+# inv.add_B(0,[-15],factor=3,polar=target)
 
 '''
 inv.plot_fix()
@@ -67,34 +67,32 @@ Vtarget = sf.Mpoint[1]  # height of magnetic centre
 Lo = inv.optimize(Lo)[1]
 
 #sf.conf = Config('X')
-#inv.write_swing()
+# inv.write_swing()
 
-eq.run(update=False)  
+eq.run(update=False)
 sf.contour()
 
-#pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
+# pkl.write(data={'sf':sf,'eq':eq,'inv':inv})  # pickle data
 #sf,eq,inv = pkl.fetch(['sf','eq','inv'])
 
 
 inv.plot_coils()
-sf.plot_coils(coils=sf.coil,label=False,plasma=False,current=False) 
-#sf.plot_coils(Color,coils=eq.coil,label=False,plasma=False) 
+sf.plot_coils(coils=sf.coil, label=False, plasma=False, current=False)
+# sf.plot_coils(Color,coils=eq.coil,label=False,plasma=False)
 
-#inv.plot_fix()
-
-
-
-#eq.gen(Vtarget=Vtarget,Nmax=1)
+# inv.plot_fix()
 
 
-#eq.run()
+# eq.gen(Vtarget=Vtarget,Nmax=1)
 
-#sf.contour()
-#eq.plasma()
-#eq.plotb()
-#sf.eqwrite(config='SXex')
-#pl.plot(sf.rbdry,sf.zbdry,'--')
 
+# eq.run()
+
+# sf.contour()
+# eq.plasma()
+# eq.plotb()
+# sf.eqwrite(config='SXex')
+# pl.plot(sf.rbdry,sf.zbdry,'--')
 
 
 '''
@@ -122,8 +120,8 @@ for swing in np.linspace(-20,80,5):
 '''
 
 
-#inv.rb.sol.plot()
-#sf.sol()
+# inv.rb.sol.plot()
+# sf.sol()
 #Rsol,Zsol = inv.rb.sol.legs('outer')
 '''
 from eqConfig import Config

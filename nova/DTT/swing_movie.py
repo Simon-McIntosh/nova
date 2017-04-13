@@ -25,19 +25,17 @@ pl.axis('equal')
 pl.axis('off')
 
 
-
 pkl = PKL('moveSX')
-sf,eq,inv = pkl.fetch(['sf','eq','inv'])
-
+sf, eq, inv = pkl.fetch(['sf', 'eq', 'inv'])
 
 
 inv.swing_fix(60)
-inv.solve() 
+inv.solve()
 
 inv.update_coils(plot=True)
-sf.plot_coils(Color,coils=sf.coil,label=False,plasma=False,current=True) 
-sf.plot_coils(Color,coils=eq.coil,label=False,plasma=False) 
- 
+sf.plot_coils(Color, coils=sf.coil, label=False, plasma=False, current=True)
+sf.plot_coils(Color, coils=eq.coil, label=False, plasma=False)
+
 eq.run()
 sf.contour(Plasma=True)  # ,levels=np.linspace(-60,60,40)
 eq.plasma()
@@ -88,5 +86,3 @@ anim = FuncAnimation(fig, sf.contour, frames=np.arange(100), init_func=ud.init,
 pl.show()
 
 '''
-
-

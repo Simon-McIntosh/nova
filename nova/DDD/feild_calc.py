@@ -3,23 +3,27 @@ import pylab as pl
 from scipy.interpolate import interp1d as interp1
 from matplotlib.collections import LineCollection
 
-def cline(x,y,z,clim,cmap):  # color line
-    norm = pl.Normalize(clim[0],clim[1])
+
+def cline(x, y, z, clim, cmap):  # color line
+    norm = pl.Normalize(clim[0], clim[1])
     points = np.array([x, y]).T.reshape(-1, 1, 2)
-    segments = np.concatenate([points[:-1], points[1:]], axis=1)    
-    lc = LineCollection(segments,cmap=cmap,norm=norm)
+    segments = np.concatenate([points[:-1], points[1:]], axis=1)
+    lc = LineCollection(segments, cmap=cmap, norm=norm)
     if not hasattr(z, "__iter__"):  # single value check
         z = np.array([z])
     lc.set_array(z)
     lc.set_linewidth(1)
     pl.gca().add_collection(lc)
-    
+
+
 class FC(object):
-    
-    def __init__(self,sf,flip=1,targets=None):
+
+    def __init__(self, sf, flip=1, targets=None):
         self.sf = sf
         self.flip = flip
         self.targets = targets
+
+
 '''        
     def arc3(self,points):
         A = np.array(points[0])

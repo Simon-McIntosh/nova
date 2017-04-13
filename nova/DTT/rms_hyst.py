@@ -6,52 +6,52 @@ from matplotlib.collections import PatchCollection
 import matplotlib.gridspec as gridspec
 
 import seaborn as sns
-rc = {'figure.figsize':[6,6*10/16],'savefig.dpi':100, #*12/16
-      'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
-      'lines.linewidth':0.75}
-sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
-        font_scale=7/8,rc=rc)
-colors = sns.color_palette('Set2',5)
+rc = {'figure.figsize': [6, 6 * 10 / 16], 'savefig.dpi': 100,  # *12/16
+      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
+      'lines.linewidth': 0.75}
+sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
+        font_scale=7 / 8, rc=rc)
+colors = sns.color_palette('Set2', 5)
 
 
-nPF,nCS,nTF = 4,3,18
-config = {'TF':'dtt','eq':'SN'}
-config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],nTF)
+nPF, nCS, nTF = 4, 3, 18
+config = {'TF': 'dtt', 'eq': 'SN'}
+config['TF'] = '{}{}{:d}'.format(config['eq'], config['TF'], nTF)
 
 nS = 3e5
-filename = 'rms_cube_{}_{:1.0e}'.format(config['TF'],nS).replace('+','')
+filename = 'rms_cube_{}_{:1.0e}'.format(config['TF'], nS).replace('+', '')
 #filename = 'rms_cube_5L'
 with open('../../BigData/{}.pkl'.format(filename), 'rb') as input:
     cube = pickle.load(input)
     rms = pickle.load(input)
-cube[:,:nPF] = np.sort(cube[:,:nPF])
-cube[:,nPF:] = np.sort(cube[:,nPF:])
+cube[:, :nPF] = np.sort(cube[:, :nPF])
+cube[:, nPF:] = np.sort(cube[:, nPF:])
 
-pca = PCA(n_components=(nPF+nCS+1))
+pca = PCA(n_components=(nPF + nCS + 1))
 pca.fit(cube[np.argsort(rms)[:50]])
 Leig = pca.components_
 
 N = 200
 
-nr,nc = 3,3
+nr, nc = 3, 3
 fig = pl.figure()
-grid = gridspec.GridSpec(nr,nc,wspace=0.1,hspace=0.1)
+grid = gridspec.GridSpec(nr, nc, wspace=0.1, hspace=0.1)
 
-label = ['Coil0','Coil1','Coil2','Coil3','CS0','CS1','CS2','CS3']
-ax = [[] for _ in range(nr*nc)]    
+label = ['Coil0', 'Coil1', 'Coil2', 'Coil3', 'CS0', 'CS1', 'CS2', 'CS3']
+ax = [[] for _ in range(nr * nc)]
 
-sub_cube = cube[np.argsort(rms)[:N],:]
-sub_cube = np.sort(sub_cube,axis=1)
-for i,c in enumerate(sub_cube.T):
+sub_cube = cube[np.argsort(rms)[:N], :]
+sub_cube = np.sort(sub_cube, axis=1)
+for i, c in enumerate(sub_cube.T):
     ax[i] = pl.subplot(grid[i])
-    #ax[i].axis('off')
+    # ax[i].axis('off')
     ax[i].set_xticks([])
     ax[i].set_yticks([])
-    ax[i].set_xlim([0,1])
-    pl.plot(c,rms[np.argsort(rms)[:N]],'k.',ms=5)
-    pl.text(0,0.11,label[i],color=0.5*np.ones(3))
-pl.savefig('../../Figs/'+filename+'_sub_points'+'.png')
-#grid.tight_layout(fig)  
+    ax[i].set_xlim([0, 1])
+    pl.plot(c, rms[np.argsort(rms)[:N]], 'k.', ms=5)
+    pl.text(0, 0.11, label[i], color=0.5 * np.ones(3))
+pl.savefig('../../Figs/' + filename + '_sub_points' + '.png')
+# grid.tight_layout(fig)
 
 '''
 

@@ -10,47 +10,46 @@ from shelf import PKL
 from eqConfig import Config
 
 import seaborn as sns
-rc = {'figure.figsize':[8*12/16,8],'savefig.dpi':125, #*12/16
-      'savefig.jpeg_quality':100,'savefig.pad_inches':0.1,
-      'lines.linewidth':1.5}
-sns.set(context='poster',style='white',font='sans-serif',palette='Set2',
-        font_scale=1.5,rc=rc)
+rc = {'figure.figsize': [8 * 12 / 16, 8], 'savefig.dpi': 125,  # *12/16
+      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
+      'lines.linewidth': 1.5}
+sns.set(context='poster', style='white', font='sans-serif', palette='Set2',
+        font_scale=1.5, rc=rc)
 Color = cycle(sns.color_palette('Set2'))
 fig = pl.figure()
 pl.axis('equal')
 pl.axis('off')
 
 pkl = PKL('moveSX')
-sf,eq,inv = pkl.fetch(['sf','eq','inv'])
+sf, eq, inv = pkl.fetch(['sf', 'eq', 'inv'])
 sf.config = 'SXex'
 
 conf = Config('SXex')
 sf.conf = conf
 conf.TF(sf)
 #rb = RB(conf,sf,Np=100)
-#rb.divertor_outline(True,plot=False,debug=True)
-#eq.grid(boundary={'R':rb.Rb,'Z':rb.Zb},n=5e3)
-#eq.set_sf_psi()  # set psi
-#eq.gen()
+# rb.divertor_outline(True,plot=False,debug=True)
+# eq.grid(boundary={'R':rb.Rb,'Z':rb.Zb},n=5e3)
+# eq.set_sf_psi()  # set psi
+# eq.gen()
 
 inv.swing_fix(np.mean(inv.Swing[0]))
 inv.solve_slsqp()
 eq.run(update=False)
-#eq.gen(Vtarget=inv.Vtarget)
-    
-sf.contour(lw=1)
-#sf.eqwrite()
+# eq.gen(Vtarget=inv.Vtarget)
 
-#inv.plot_coils()
-#sf.plot_coils(next(Color),coils=sf.coil,label=True,plasma=False,current=False) 
-sf.plot_coils(next(Color),coils=eq.coil,label=False,plasma=False) 
+sf.contour(lw=1)
+# sf.eqwrite()
+
+# inv.plot_coils()
+# sf.plot_coils(next(Color),coils=sf.coil,label=True,plasma=False,current=False)
+sf.plot_coils(next(Color), coils=eq.coil, label=False, plasma=False)
 
 inv.plot_fix()
 
 
-
-#inv.rb.sol.plot()
-#sf.sol()
+# inv.rb.sol.plot()
+# sf.sol()
 #Rsol,Zsol = inv.rb.sol.legs('outer')
 
 from eqConfig import Config
@@ -60,7 +59,7 @@ conf.TF(sf)
 sf.conf = conf
 
 
-rb = RB(conf,sf,Np=100)
+rb = RB(conf, sf, Np=100)
 '''
 rb.divertor_outline(False,plot=True,debug=False)
 #rb.trim_sol(plot=True)
@@ -102,9 +101,8 @@ print(Pvol)
 
 
 '''
-rb.TFopp(False,config='SXex')  #  load TF outline
+rb.TFopp(False, config='SXex')  # load TF outline
 rb.TFfill()  # construct TF geometory
-
 
 
 '''
@@ -116,5 +114,5 @@ rb.TFopp(True,objF=conf.TFopp)  # L==length, V==volume
 rb.TFfill()  # construct TF geometory
 '''
 
-fig.tight_layout(rect=[-0.3,-0.54,1.1,1.5])
-pl.savefig('../Figs/SXcoils_const.png',dpi=300)
+fig.tight_layout(rect=[-0.3, -0.54, 1.1, 1.5])
+pl.savefig('../Figs/SXcoils_const.png', dpi=300)

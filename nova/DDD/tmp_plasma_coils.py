@@ -1,4 +1,4 @@
-    '''    
+    '''
     def plasma_coils(self,N=5,dL=0.25):
         alpha = np.linspace(1/(2*N),1-1/(2*N),N)
         I,fact = np.zeros(N),1
@@ -8,11 +8,11 @@
             for i,a in enumerate(alpha):
                 r,z = self.get_boundary(alpha=a)
                 L = self.length(r,z,norm=False)
-                #I[i] = L[-1]*fact*2*sf.eq['cpasma']/N*(1-a**2)
-                #I[i] = L[-1]*fact*sf.eq['cpasma']/N
+                # I[i] = L[-1]*fact*2*sf.eq['cpasma']/N*(1-a**2)
+                # I[i] = L[-1]*fact*sf.eq['cpasma']/N
                 I[i] = -L[-1]*fact*self.eq['cpasma']*ffprim(a)
-            fact = -self.eq['cpasma']/np.sum(I) 
-        for i,a in enumerate(alpha): 
+            fact = -self.eq['cpasma']/np.sum(I)
+        for i,a in enumerate(alpha):
             r,z = self.get_boundary(alpha=a)
             L = self.length(r,z,norm=False)
             Lp = np.arange(0,L[-1],dL)[:-1]
@@ -22,66 +22,65 @@
             for j,(rpc,zpc) in enumerate(zip(rp,zp)):
                 self.coil['plasma_'+str(i)+'_'+str(j)] = \
                 {'I':Ic,'r':rpc,'z':zpc,'dr':dL,'dz':dL}
-    '''  
+    '''
+
     def coil_core_old(self):
         for name in self.coil.keys():
-            r,z = self.coil[name]['r'],self.coil[name]['z']
-            dr,dz = self.coil[name]['dr'],self.coil[name]['dz']
+            r, z = self.coil[name]['r'], self.coil[name]['z']
+            dr, dz = self.coil[name]['dr'], self.coil[name]['dz']
             I = self.coil[name]['I']
-            if self.ingrid(r,z):
-                io = np.argmin(np.abs(r-dr/2-self.r))
-                i1 = np.argmin(np.abs(r+dr/2-self.r))
-                jo = np.argmin(np.abs(z-dz/2-self.z))
-                j1 = np.argmin(np.abs(z+dz/2-self.z))
-                irange = np.arange(io,i1+1)
-                jrange = np.arange(jo,j1+1)
-                ni,nj = len(irange),len(jrange)
-                n = ni*nj
-                dI = I/n
-                print(n,dI,self.dA,self.r[irange])
-                b = np.zeros((ni,nj))
+            if self.ingrid(r, z):
+                io = np.argmin(np.abs(r - dr / 2 - self.r))
+                i1 = np.argmin(np.abs(r + dr / 2 - self.r))
+                jo = np.argmin(np.abs(z - dz / 2 - self.z))
+                j1 = np.argmin(np.abs(z + dz / 2 - self.z))
+                irange = np.arange(io, i1 + 1)
+                jrange = np.arange(jo, j1 + 1)
+                ni, nj = len(irange), len(jrange)
+                n = ni * nj
+                dI = I / n
+                print(n, dI, self.dA, self.r[irange])
+                b = np.zeros((ni, nj))
                 for j in range(nj):
-                    b[:,j] += -mu_o*dI*self.r[irange]/(self.dA) 
+                    b[:, j] += -mu_o * dI * self.r[irange] / (self.dA)
                 for i in range(ni):
-                    b[i,:] = np.mean(b[i,:])*np.ones(nj)
-                for j,jr in enumerate(jrange):    
-                    self.b[self.indx(irange,jr)] += b[:,j]
-                    
-                    
+                    b[i, :] = np.mean(b[i, :]) * np.ones(nj)
+                for j, jr in enumerate(jrange):
+                    self.b[self.indx(irange, jr)] += b[:, j]
+
                         r = 0
         for i in range(self.Nplasma):
             indx = self.plasma_index[i]
-            i,j = self.ij(indx)   
+            i, j = self.ij(indx)
             r += self.r[i]
-        r_bar = r/self.Nplasma
+        r_bar = r / self.Nplasma
         print(r_bar)
 
         for i in range(self.Nplasma):
             indx = self.plasma_index[i]
-            i,j = self.ij(indx)
-            self.b[indx] *= (scale_plasma*self.r[i]/r_bar)
-            
-            
+            i, j = self.ij(indx)
+            self.b[indx] *= (scale_plasma * self.r[i] / r_bar)
+
             ****
-            
+
             '''
 sf.sol()
 sf.get_legs()
 targets = conf.targets
 sol = solCalc(sf,flip=1,targets=conf.targets)
-#L2D,L3D = sol.connection('outer',0)
-        
+# L2D,L3D = sol.connection('outer',0)
+
 R,Z = sf.legs['outer']['R'][0],sf.legs['outer']['Z'][0]
 dRsol = np.diff(R)
 dZsol = np.diff(Z)
 L2D = np.append(0,np.cumsum(np.sqrt(dRsol**2+dZsol**2)))
-      
-i = np.argmin(abs(L2D-2.3))  
-   
-'''   
+
+i = np.argmin(abs(L2D-2.3))
 
 '''
-sol = solCalc(sf,flip=1,targets=conf.targets)  
+
+'''
+sol = solCalc(sf,flip=1,targets=conf.targets)
 Ro,Zo = rb.targets['outer']['Rsol'][-1],rb.targets['outer']['Zsol'][-1]
 print(Ro,Zo,sf.Xpsi)
 Xi = sol.expansion([Ro],[Zo])
@@ -92,28 +91,28 @@ print(theta*180/np.pi)
 pl.plot(Ro,Zo,'o',markersize=3)
 
 
-graze = np.arcsin(np.sin(83.8488627351*np.pi/180)*(Xi[-1]**2+1)**-0.5)    
-            
+graze = np.arcsin(np.sin(83.8488627351*np.pi/180)*(Xi[-1]**2+1)**-0.5)
+
 print(graze*180/np.pi)
 '''
 
 
-#inv.move_coil(5,point=(6.67,8.98))
-#inv.move_coil(6,point=(14.10,8.35))
-#inv.move_coil(7,point=(17.17,3.90))
-#inv.move_coil(8,point=(17.51,-1.29))
-#inv.move_coil(9,point=(14.31,-9.25))
-#inv.move_coil(10,point=(9.47,-12.02))
-#inv.add_coil(15.82,-7.51,1,1)
-#inv.add_coil(4.5,-10.5,1,1)
+# inv.move_coil(5,point=(6.67,8.98))
+# inv.move_coil(6,point=(14.10,8.35))
+# inv.move_coil(7,point=(17.17,3.90))
+# inv.move_coil(8,point=(17.51,-1.29))
+# inv.move_coil(9,point=(14.31,-9.25))
+# inv.move_coil(10,point=(9.47,-12.02))
+# inv.add_coil(15.82,-7.51,1,1)
+# inv.add_coil(4.5,-10.5,1,1)
 
 
-#inv.move_coil(10,delta=(10,0.1,0))
+# inv.move_coil(10,delta=(10,0.1,0))
 
-#inv.move_coil(12,delta=(12,3,-1))
-#inv.move_coil(10,delta=(10,1,0))
-#inv.move_coil(9,delta=(10,2,0.5))
-#inv.remove_coil([9])
+# inv.move_coil(12,delta=(12,3,-1))
+# inv.move_coil(10,delta=(10,1,0))
+# inv.move_coil(9,delta=(10,2,0.5))
+# inv.remove_coil([9])
 
 '''
 inv.rb.get_legs()
@@ -127,44 +126,42 @@ for leg,npt in zip(inv.rb.targets.keys(),Np):
         inv.add_alpha(1,factor=1,point=(r,z))
 '''
 
-
-    def current_adjust_old(self,I,*args):
-        if not hasattr(self,'T'):  # background update
+    def current_adjust_old(self, I, *args):
+        if not hasattr(self, 'T'):  # background update
             self.get_weight()
             self.set_background()
-        self.I = 1e6*I.reshape(len(I),1)
+        self.I = 1e6 * I.reshape(len(I), 1)
         self.update_current(self.I)
         self.gain_weight()
         self.get_LSresidual()
         if args[0] == 'RMS':
-            return args[1]-self.LSresidual
+            return args[1] - self.LSresidual
         else:
-            return self.Itotal*1e-8
-            
-    def current_opp_old(self,LStarget=0.05,Ilim=[None,None],disp=True):
-        constraint = {'type':'ineq','fun':self.current_adjust,
-                      'args':['RMS',LStarget]}
+            return self.Itotal * 1e-8
+
+    def current_opp_old(self, LStarget=0.05, Ilim=[None, None], disp=True):
+        constraint = {'type': 'ineq', 'fun': self.current_adjust,
+                      'args': ['RMS', LStarget]}
         self.solve(BG=True)
-        Io = self.I*1e-8
-        bounds = np.array([Ilim]*len(Io))  # MA bounds
-        result = op.minimize(self.current_adjust,Io,bounds=bounds,
-                           tol=1e-6,args=('I'),constraints=constraint,
-                           options={'disp':disp,'maxiter':2e4},  # ,'eps':1e-4
+        Io = self.I * 1e-8
+        bounds = np.array([Ilim] * len(Io))  # MA bounds
+        result = op.minimize(self.current_adjust, Io, bounds=bounds,
+                           tol=1e-6, args=('I'), constraints=constraint,
+                           # ,'eps':1e-4
+                           options={'disp': disp, 'maxiter': 2e4},
                            method='SLSQP')
         self.I = result.x
         return result.success
-        
-        
-        
-    def position_sead(self,Ncoil=6,Isum=100,**kwargs):
+
+    def position_sead(self, Ncoil=6, Isum=100, **kwargs):
         self.LSresidual = 0
         self.get_weight()
         self.set_background()
         self.grid_PF(Ncoil=Ncoil)
-        
-        constraint = {'type':'ineq','fun':self.position_adjust,
-                      'args':['Isum',Isum]}
-        bounds = np.array([[0,1]]*Ncoil)
+
+        constraint = {'type': 'ineq', 'fun': self.position_adjust,
+                      'args': ['Isum', Isum]}
+        bounds = np.array([[0, 1]] * Ncoil)
         if 'Lo' in kwargs.keys():
             Lcoilo = kwargs['Lo']
         else:
@@ -175,38 +172,40 @@ for leg,npt in zip(inv.rb.targets.keys(),Np):
                            args=('LS'),
                            options={'disp':True,'maxiter':1e2},#,'eps':1e-3
                            method='SLSQP').x
-        
+
         method = 'Nelder-Mead'
         options = {'disp':True,'maxiter':1e2,'xtol':0.01}
         self.Lopp = op.minimize(self.position_adjust,Lcoilo,args=('LS'),
                            options=options,method=method).x
-        '''                   
+        '''
         method = 'COBYLA'
-        self.Lopp = op.minimize(self.position_adjust,Lcoilo,
+        self.Lopp = op.minimize(self.position_adjust, Lcoilo,
                            tol=2e-3,  # constraints=constraint,
                            args=('LS'),
-                           options={'disp':True,'maxiter':1e2},#,'eps':1e-3
+                           # ,'eps':1e-3
+                           options={'disp': True, 'maxiter': 1e2},
                            method=method).x
         return self.Lopp
-        
-    def position_opp(self,Ncoil=6,LStarget=0.05,Ilim=[None,None],**kwargs):
+
+    def position_opp(self, Ncoil=6, LStarget=0.05, Ilim=[None, None], **kwargs):
         self.LSresidual = 0
         self.get_weight()
         self.set_background()
         self.grid_PF(Ncoil=Ncoil)
-        
-        constraint = {'type':'ineq','fun':self.position_adjust,
-                      'args':['RMS',LStarget,Ilim]}
-        bounds = np.array([[0,1]]*Ncoil)
+
+        constraint = {'type': 'ineq', 'fun': self.position_adjust,
+                      'args': ['RMS', LStarget, Ilim]}
+        bounds = np.array([[0, 1]] * Ncoil)
         if 'Lo' in kwargs.keys():
             Lcoilo = kwargs['Lo']
         else:
             Lcoilo = self.Lo
 
-        self.Lopp = op.minimize(self.position_adjust,Lcoilo,bounds=bounds,
-                           tol=2e-3,constraints=constraint,
-                           args=('I',LStarget,Ilim),
-                           options={'disp':True,'maxiter':1e2},  # ,'eps':1e-4
+        self.Lopp = op.minimize(self.position_adjust, Lcoilo, bounds=bounds,
+                           tol=2e-3, constraints=constraint,
+                           args=('I', LStarget, Ilim),
+                           # ,'eps':1e-4
+                           options={'disp': True, 'maxiter': 1e2},
                            method='SLSQP').x
         print(self.Lopp)
 
@@ -215,15 +214,15 @@ for leg,npt in zip(inv.rb.targets.keys(),Np):
                                 options={'disp':True,'maxiter':10,'eps':1e5},
                                 method='SLSQP',constraints=constraint).x
         ll = -75e5*np.ones([len(self.adj_coils),1])
-        ul = +75e5*np.ones([len(self.adj_coils),1])    
+        ul = +75e5*np.ones([len(self.adj_coils),1])
         from pymls import bounded_lsq as blsq
         I = blsq(G,Tpsi,ll,ul)
         self.update_current(I)
         '''
         '''
         constraint = {'type':'ineq','fun':self.psi_err}
-        #bounds = [(0,None),(1,None),(1,None),  # (0.7,None),(0.1,None)
-        #              (self.TFbound['ro_min'],None),(None,None)]  # 
+        # bounds = [(0,None),(1,None),(1,None),  # (0.7,None),(0.1,None)
+        #              (self.TFbound['ro_min'],None),(None,None)]  #
         Io = np.copy(I).reshape((1,len(I)))
         Inew = op.minimize(self.update_current,Io,
                                 options={'disp':True,'maxiter':10,'eps':1e5},
@@ -231,7 +230,7 @@ for leg,npt in zip(inv.rb.targets.keys(),Np):
         print(Inew)
         self.update_current(Inew)
         '''
-        
+
             '''
     def psi_err(self,Lcoil,*args):
         ineq = 0
@@ -240,84 +239,84 @@ for leg,npt in zip(inv.rb.targets.keys(),Np):
         LSineq = LStarget-self.LSresidual
         if LSineq < 0:  # limit residual
             ineq += LSineq
-        #for i in range(len(Lcoil)-1):  # order coils
+        # for i in range(len(Lcoil)-1):  # order coils
         #    if Lcoil[i] > Lcoil[i+1]:
         #        ineq += Lcoil[i+1]-Lcoil[i]
         return ineq
         '''
-        
-            def position_adjust(self,Lcoil,*args):
-        for name,L in zip(self.coil['active'].keys(),Lcoil):
-            if L<0: L=0
-            if L>1: L=1
-            r,z = self.TFoutR(L),self.TFoutZ(L)
+
+            def position_adjust(self, Lcoil, *args):
+        for name, L in zip(self.coil['active'].keys(), Lcoil):
+            if L < 0: L = 0
+            if L > 1: L = 1
+            r, z = self.TFoutR(L), self.TFoutZ(L)
             ref = int(name.split('Coil')[-1])
-            self.move_coil(ref,point=(r,z))
-            #dr,dz = self.rb.Cshift(name,'out',0)
-            #self.move_coil(ref,delta=(ref,dr,dz))  # move outside TF
+            self.move_coil(ref, point=(r, z))
+            # dr,dz = self.rb.Cshift(name,'out',0)
+            # self.move_coil(ref,delta=(ref,dr,dz))  # move outside TF
         self.update_coils()
         self.get_weight()
         self.solve()
         if args[0] != 'Isum' and args[0] != 'LS':
-            Itotal,LStarget = self.Itotal,self.LSresidual
-            if self.LSresidual < args[1]-1e-3:
+            Itotal, LStarget = self.Itotal, self.LSresidual
+            if self.LSresidual < args[1] - 1e-3:
                 LStarget = args[1]
             else:
                 LStarget = self.LSresidual
-            success = self.current_opp(LStarget=args[1]-1e-3,
-                                          Ilim=args[2],disp=True)
-            if not success: 
-                self.Itotal,self.LSresidual = Itotal,LStarget
+            success = self.current_opp(LStarget=args[1] - 1e-3,
+                                          Ilim=args[2], disp=True)
+            if not success:
+                self.Itotal, self.LSresidual = Itotal, LStarget
         '''
         elif args[0] == 'Isum':
             Itotal,LStarget = self.Itotal,self.LSresidual
             success = self.current_opp(LStarget=LStarget,disp=False)
-            if not success: 
+            if not success:
                 self.Itotal = Itotal
             self.LSresidual = LStarget
         '''
         if args[0] == 'RMS':
-            val = args[1]-self.LSresidual
-            print(args[1],self.LSresidual)
+            val = args[1] - self.LSresidual
+            print(args[1], self.LSresidual)
         elif args[0] == 'I':
-            val = self.Itotal*1e-6   
+            val = self.Itotal * 1e-6
         elif args[0] == 'LS':
             val = self.LSresidual
-            #print('LS',val)
+            # print('LS',val)
         elif args[0] == 'Isum':
-            val = args[1]-self.Itotal*1e-6
-            print('Isum',val,self.LSresidual)
+            val = args[1] - self.Itotal * 1e-6
+            print('Isum', val, self.LSresidual)
         return val
 
-                def update_current_new(self,I):
+                def update_current_new(self, I):
         self.Itotal = 0
-        for j,name in enumerate(self.coil['active'].keys()):
-            if np.sum(abs(I))>0:
-                Nfilament = self.eq.coil[name+'_0']['Nf']
-                Icoil = I[j][0]*Nfilament  # update sf  I[j][0]
+        for j, name in enumerate(self.coil['active'].keys()):
+            if np.sum(abs(I)) > 0:
+                Nfilament = self.eq.coil[name + '_0']['Nf']
+                Icoil = I[j][0] * Nfilament  # update sf  I[j][0]
                 self.sf.coil[name]['I'] = Icoil
-                dA = Icoil/12.5e6  # apply current density limit
-                scale = dA/(self.sf.coil[name]['dr']*self.sf.coil[name]['dz'])
+                dA = Icoil / 12.5e6  # apply current density limit
+                scale = dA / (self.sf.coil[name]['dr']
+                              * self.sf.coil[name]['dz'])
                 self.sf.coil[name]['dr'] *= scale
                 self.sf.coil[name]['dz'] *= scale
-            
-            #self.eq.coils(delta=self.eq.delta)  # update eq (re-grid)  
-            #self.update_coils()  # update inv
-                rc,zc = self.sf.coil[name]['r'],self.sf.coil[name]['z']
+
+            # self.eq.coils(delta=self.eq.delta)  # update eq (re-grid)
+            # self.update_coils()  # update inv
+                rc, zc = self.sf.coil[name]['r'], self.sf.coil[name]['z']
                 for i in range(Nfilament):
-                    sub_name = name+'_{:1.0f}'.format(i)
+                    sub_name = name + '_{:1.0f}'.format(i)
                     self.eq.coil[sub_name]['I'] = I[j][0]  # update eq
                     self.eq.coil[sub_name]['dr'] *= scale
                     self.eq.coil[sub_name]['dz'] *= scale
                     r = self.eq.coil[sub_name]['r']
                     z = self.eq.coil[sub_name]['z']
-                    dr,dz = r-rc,z-zc
-                    self.eq.coil[sub_name]['r'] = rc+scale*dr
-                    self.eq.coil[sub_name]['z'] = zc+scale*dz
+                    dr, dz = r - rc, z - zc
+                    self.eq.coil[sub_name]['r'] = rc + scale * dr
+                    self.eq.coil[sub_name]['z'] = zc + scale * dz
                     self.coil['active'][name]['I'][i] = I[j][0]  # update inv
             self.Itotal += abs(self.sf.coil[name]['I'])  # sum current
-            
-            
+
                         '''
             for sign,leg in zip([-1,1],self.targets.keys()):
                 gap = []
@@ -333,7 +332,7 @@ for leg,npt in zip(inv.rb.targets.keys(),Np):
                               (self.targets['inner']['Z'][ends[-1]]-z)**2))
                 select = np.argmin(gap)
                 p = CS.collections[0].get_paths()[select]
-                r,z = p.vertices[:,0],p.vertices[:,1] 
+                r,z = p.vertices[:,0],p.vertices[:,1]
                 index = np.zeros(2)
                 index[0] = np.argmin((self.targets['inner']['R'][ends[1]]-r)**2+
                          (self.targets['inner']['Z'][ends[1]]-z)**2)
@@ -345,10 +344,10 @@ for leg,npt in zip(inv.rb.targets.keys(),Np):
                 if sign*r[0]<sign*r[-1]:
                     r,z = r[::-1],z[::-1]
                 Rb = np.append(Rb,self.targets[leg]['R'][1:])
-                Zb = np.append(Zb,self.targets[leg]['Z'][1:])    
+                Zb = np.append(Zb,self.targets[leg]['Z'][1:])
                 Rb,Zb = np.append(Rb,r[1:]),np.append(Zb,z[1:])
             '''
-            
+
                 def current_adjust(self,I,*args):
         if not hasattr(self,'T'):  # background update
             self.get_weight()
@@ -447,7 +446,7 @@ for leg,npt in zip(inv.rb.targets.keys(),Np):
     def feildlines(self,levels,norm,Plasma=False,color='k',
                    pcolor='w',linetype='-'):
         alpha,lw = np.array([1,0.5]),0.75
-        #if not Plasma: norm = 0
+        # if not Plasma: norm = 0
         if color == 'k': alpha *= 0.25
         c = cntr.Cntr(self.r,self.z,self.psi.T-self.Xpsi)
         for level in levels:
@@ -487,14 +486,14 @@ for leg,npt in zip(inv.rb.targets.keys(),Np):
                 Z = v[:,1][:]
                 
                 
-                        #pl.figure()
-        #nhist,bins,patches = pl.hist(self.tleg,bins=50)
-        #pl.close()
+                        # pl.figure()
+        # nhist,bins,patches = pl.hist(self.tleg,bins=50)
+        # pl.close()
                 
                 
-                            #L2Dspace = np.linspace(L2D[0],L2D[-1],len(L2D))  # uniform interpolation
-            #Rsol = interp1(L2D,Rsol,kind='linear')(L2Dspace)
-            #Zsol = interp1(L2D,Zsol,kind='linear')(L2Dspace)
+                            # L2Dspace = np.linspace(L2D[0],L2D[-1],len(L2D))  # uniform interpolation
+            # Rsol = interp1(L2D,Rsol,kind='linear')(L2Dspace)
+            # Zsol = interp1(L2D,Zsol,kind='linear')(L2Dspace)
                 
                 
                 
@@ -516,16 +515,16 @@ for swing in np.linspace(-20,80,5):
     
     sf.contour()
     eq.plasma()
-    #eq.plotb()
-    #sf.eqwrite(config='SXex')
+    # eq.plotb()
+    # sf.eqwrite(config='SXex')
     pl.plot(sf.rbdry,sf.zbdry,'--')
     inv.plot_fix()
 '''
 
 '''
-#inv.rb.sol.plot()
-#sf.sol()
-#Rsol,Zsol = inv.rb.sol.legs('outer')
+# inv.rb.sol.plot()
+# sf.sol()
+# Rsol,Zsol = inv.rb.sol.legs('outer')
 
 from eqConfig import Config
 conf = Config('SXex')
@@ -561,7 +560,7 @@ print('R',rb.targets['outer']['Rsol'][-1],'Z',
 conf.TFopp = 'V'
 rb.set_TFbound()  # TF boundary conditions
 rb.TFbound['ro_min'] -= 0.5
-#rb.plot_TFbounds()          
+# rb.plot_TFbounds()          
 rb.TFopp(True,objF=conf.TFopp)  # L==length, V==volume
 rb.TFfill()
 '''
@@ -613,5 +612,5 @@ sf.Bsf()
             
         i = np.argmin((Rin[-1]-Rloop)**2+(Zin[-1]-Zloop)**2)
         dl = np.sqrt((Rin[-1]-Rloop[i])**2+(Zin[-1]-Zloop[i])**2)
-        #if dl < np.sqrt((Rin[-1]-Rin[-2])**2+(Zin[-1]-Zin[-2])**2):
+        # if dl < np.sqrt((Rin[-1]-Rin[-2])**2+(Zin[-1]-Zin[-2])**2):
         #    Rin,Zin = np.append(Rin,Rloop[i]),np.append(Zin,Zloop[i])

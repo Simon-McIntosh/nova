@@ -2,28 +2,30 @@ import pickle
 from collections import OrderedDict as od
 from amigo.IO import trim_dir
 
+
 class PKL(object):
-    
-    def __init__(self,file,directory='../../Data/'):
+
+    def __init__(self, file, directory='../../Data/'):
         directory = trim_dir(directory)
-        self.file = directory+file+'.pkl'
-        self.data = {'rb':None,'sf':None,'eq':None,'cc':None,'inv':None,
-                     'ax':None,'pf':None}
-        self.data = od(sorted(self.data.items(),key=lambda x:x[0]))
+        self.file = directory + file + '.pkl'
+        self.data = {'rb': None, 'sf': None, 'eq': None, 'cc': None, 'inv': None,
+                     'ax': None, 'pf': None}
+        self.data = od(sorted(self.data.items(), key=lambda x: x[0]))
         self.inmemory = False
-        
-    def add(self,data):
+
+    def add(self, data):
         for key in data:
             if key in self.data.keys():
                 if key == 'sf':
                     data[key].remove_contour()
                 self.data[key] = data[key]
 
-    def write(self,**kwargs):
-        if 'data' in kwargs.keys(): self.add(kwargs.get('data'))  # add data
+    def write(self, **kwargs):
+        if 'data' in kwargs.keys():
+            self.add(kwargs.get('data'))  # add data
         with open(self.file, 'wb') as output:
             for key in self.data:
-                pickle.dump(self.data[key],output,-1)
+                pickle.dump(self.data[key], output, -1)
 
     def read(self):
         with open(self.file, 'rb') as input:
@@ -31,10 +33,10 @@ class PKL(object):
                 self.data[key] = pickle.load(input)
         self.inmemory = True
         self.cross_refernace()
-    
-    def notNone(self,key):
+
+    def notNone(self, key):
         return self.data[key] is not None
-        
+
     def cross_refernace(self):
         if self.notNone('eq'):
             if self.notNone('sf'):
@@ -44,9 +46,10 @@ class PKL(object):
                 self.data['inv'].sf = self.data['sf']
             if self.notNone('eq'):
                 self.data['inv'].eq = self.data['eq']
-           
-    def fetch(self,keys):
-        if not self.inmemory: self.read()
+
+    def fetch(self, keys):
+        if not self.inmemory:
+            self.read()
         data = []
         print(keys)
         for key in keys:
@@ -55,4 +58,3 @@ class PKL(object):
                     self.data[key].set_contour()
                 data.append(self.data[key])
         return data
-        

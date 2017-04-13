@@ -13,45 +13,45 @@ import matplotlib.gridspec as gridspec
 
 config = 'SX'  # SN,X,SX,SF
 
-#pl.figure(figsize=(8.5,12))
+# pl.figure(figsize=(8.5,12))
 
 #fig,ax = pl.subplots(1,3,figsize=(12,4.5))
-fig = pl.figure(figsize=(15,5))
-gd = gridspec.GridSpec(1,4,wspace=0.0, hspace=0.0)
+fig = pl.figure(figsize=(15, 5))
+gd = gridspec.GridSpec(1, 4, wspace=0.0, hspace=0.0)
 
 
-for i,config in enumerate(['SN','X','SF','SX']):
+for i, config in enumerate(['SN', 'X', 'SF', 'SX']):
     sns.set_palette('Set2')
 
-    ax = pl.Subplot(fig,gd[i])
+    ax = pl.Subplot(fig, gd[i])
     fig.add_subplot(ax)
     fig.sca(ax)
     pl.axis('equal')
     pl.axis('off')
     pl.tight_layout()
-    #pl.xlim([4,14]),pl.ylim([-13,8])
-    pl.xlim([3,17]),pl.ylim([-12,10])
-    
-    conf = Config(config,inside=False)
-    sf = SF(conf)  
+    # pl.xlim([4,14]),pl.ylim([-13,8])
+    pl.xlim([3, 17]), pl.ylim([-12, 10])
+
+    conf = Config(config, inside=False)
+    sf = SF(conf)
     sf.contour()
     sf.plot_coils(Color)
     conf.TF(sf)
-    rb = RB(conf,sf,Np=200)
+    rb = RB(conf, sf, Np=200)
     rb.divertor_outline(True)
-    rb.fill(dt=conf.tfw,alpha=0.7,color=next(Color))
-    rb.fill(dt=conf.BB,alpha=0.7,color=next(Color))
-    rb.fill(dt=conf.tBBsupport,alpha=0.7,color=next(Color))
-    rb.BBsheild_fill(dt=conf.sheild,ref_o=2/8*np.pi,alpha=0.7,
+    rb.fill(dt=conf.tfw, alpha=0.7, color=next(Color))
+    rb.fill(dt=conf.BB, alpha=0.7, color=next(Color))
+    rb.fill(dt=conf.tBBsupport, alpha=0.7, color=next(Color))
+    rb.BBsheild_fill(dt=conf.sheild, ref_o=2 / 8 * np.pi, alpha=0.7,
                      color=next(Color))
-    rb.fill(dt=conf.VV,alpha=0.7,color=next(Color),loop=True)
+    rb.fill(dt=conf.VV, alpha=0.7, color=next(Color), loop=True)
     rb.set_TFbound()  # TF boundary conditions
     #rb.TFbound['ro_min'] -= 0.25
-    #rb.plot_TFbounds()
-    rb.TFopp(False,objF='L')  # L==length, V==volume
+    # rb.plot_TFbounds()
+    rb.TFopp(False, objF='L')  # L==length, V==volume
     rb.TFfill()
-    
-    pl.text(16,9.5,config,fontsize=36,ha='right',va='top')
+
+    pl.text(16, 9.5, config, fontsize=36, ha='right', va='top')
     '''
     Color = cycle(sns.color_palette('Set2'))
     for leg in conf.targets.keys():
@@ -70,4 +70,4 @@ for i,config in enumerate(['SN','X','SF','SX']):
              alpha=1,bbox=[0.8, 0.05, 0.2, 0.15])
     '''
 
-pl.savefig('../Figs/DTT_bdrys.png',dpi=200)
+pl.savefig('../Figs/DTT_bdrys.png', dpi=200)

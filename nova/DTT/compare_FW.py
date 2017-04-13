@@ -11,41 +11,41 @@ from openpyxl import load_workbook
 from nova.DEMOxlsx import cluster_points
 
 import seaborn as sns
-rc = {'figure.figsize':[7,7*16/12],'savefig.dpi':125, # 
-      'savefig.jpeg_quality':200,'savefig.pad_inches':0.1,
-      'lines.linewidth':1.5}
-sns.set(context='talk',style='white',font='sans-serif',palette='Set2',
-        font_scale=7/8,rc=rc)
-color = sns.color_palette('Set2',5)
+rc = {'figure.figsize': [7, 7 * 16 / 12], 'savefig.dpi': 125,
+      'savefig.jpeg_quality': 200, 'savefig.pad_inches': 0.1,
+      'lines.linewidth': 1.5}
+sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
+        font_scale=7 / 8, rc=rc)
+color = sns.color_palette('Set2', 5)
 
 
-config,setup = select(base={'TF':'dtt','eq':'DEMO_FW_SOF'},nTF=18)
-sf = SF(setup.filename)  
+config, setup = select(base={'TF': 'dtt', 'eq': 'DEMO_FW_SOF'}, nTF=18)
+sf = SF(setup.filename)
 pf = PF(sf.eqdsk)
-pf.plot(coils=pf.coil,label=True,plasma=False,current=True) 
+pf.plot(coils=pf.coil, label=True, plasma=False, current=True)
 levels = sf.contour(plot_vac=False)
-rb = RB(setup,sf)
-rb.firstwall(plot=True,debug=False,color=color[1])
+rb = RB(setup, sf)
+rb.firstwall(plot=True, debug=False, color=color[1])
 rb.trim_sol()
 
 
-filename = trim_dir('../../Data/')+'CATIA_FW.xlsx'
-wb = load_workbook(filename=filename,read_only=True,data_only=True)
+filename = trim_dir('../../Data/') + 'CATIA_FW.xlsx'
+wb = load_workbook(filename=filename, read_only=True, data_only=True)
 ws = wb[wb.get_sheet_names()[0]]
 
 FW = {}
-for col,var in zip([5,6],['r','z']):
+for col, var in zip([5, 6], ['r', 'z']):
     row = ws.columns[col]
-    FW[var] = np.zeros(len(row)-1)
-    for i,r in enumerate(row[1:]):
+    FW[var] = np.zeros(len(row) - 1)
+    for i, r in enumerate(row[1:]):
         try:
-            FW[var][i] = 1e-3*float(r.value)  # m
+            FW[var][i] = 1e-3 * float(r.value)  # m
         except:
             break
-r,z = geom.pointloop(FW['r'],FW['z'],ref='min')
-pl.plot(r[:-1],z[:-1])
+r, z = geom.pointloop(FW['r'], FW['z'], ref='min')
+pl.plot(r[:-1], z[:-1])
 
-       
+
 '''
 self.parts = OrderedDict()  # component parts    
 part,loop = [],[]
@@ -60,7 +60,7 @@ for row in ws.columns:
     if new_loop:
         self.parts[p][l] = OrderedDict()
 '''
-                
+
 '''
 config,setup = select(base={'TF':'dtt','eq':'DEMO_FW_EOF'},nTF=18)
 sf = SF(setup.filename)  
@@ -69,7 +69,6 @@ rb = RB(setup,sf)
 rb.firstwall(plot=True,debug=False)
 rb.trim_sol()
 '''
-
 
 
 '''

@@ -1,9 +1,10 @@
 import numpy as np
 import collections
 
+
 class Setup(object):
-    
-    def __init__(self,config=''):
+
+    def __init__(self, config=''):
         self.config
         self.set_defaults()
         self.update()
@@ -16,40 +17,44 @@ class Setup(object):
         self.targets['default'] = {}
         self.targets['default']['L2D'] = 2
         self.targets['default']['open'] = False
-        self.targets['default']['graze'] = 1.5*np.pi/180
+        self.targets['default']['graze'] = 1.5 * np.pi / 180
         self.targets['default']['dPlate'] = 0.5
         self.targets['default']['dR'] = 0.1
         self.firstwall = {}  # initalise firstwall data structure
         self.firstwall['dRfw'] = 0.25
         self.firstwall['div_ex'] = 0.18
-        self.firstwall['trim'] = [0.75,0.7]
-        self.coils = {'internal':{'id':[],'dR':[],'dZ':[]},  # coils structure
-                      'external':{'id':[],'dR':[],'dZ':[]}}
-        
+        self.firstwall['trim'] = [0.75, 0.7]
+        self.coils = {'internal': {'id': [], 'dR': [], 'dZ': []},  # coils structure
+                      'external': {'id': [], 'dR': [], 'dZ': []}}
+
     def backfill(self):
         for key in list(self.targets)[1:]:  # backfill defaults
             for default in list(self.targets['default']):
                 if default not in self.targets[key]:
                     self.targets[key][default] = self.targets['default'][default]
-    
-    def update(self):  # update 
-    
+
+    def update(self):  # update
+
         if self.config == 'SFm':
-            self.filename = '../eqdsk/Equil_AR3d1_16coils_SFminus_v4_2015'+\
-            '_09_bt_1d03li_0d8_Ipl_20d25_SOF.eqdsk'
+            self.filename = '../eqdsk/Equil_AR3d1_16coils_SFminus_v4_2015' +\
+                '_09_bt_1d03li_0d8_Ipl_20d25_SOF.eqdsk'
             #self.filename = '../eqdsk/2015_SFminus_eqdsk_2MCQRZ_v1_0_IDM.eqdsk'
             self.dataname = 'SFm'
-                
-            self.targets['default']['dPlate'] = 0.35 # target plate length
-            self.targets['inner1'] = {'L2D':[1.1+0.52],'open':True,'dR':0.0}
-            self.targets['inner2'] = {'L2D':[1.2-0.08],'open':False,'dR':-1}
-            self.targets['outer1'] = {'L2D':[1.65-0.7],'open':False,'dR':-1}
-            self.targets['outer2'] = {'L2D':[1.1+0.15],'open':True,'dR':0.0}  
-                
+
+            self.targets['default']['dPlate'] = 0.35  # target plate length
+            self.targets['inner1'] = {
+                'L2D': [1.1 + 0.52], 'open': True, 'dR': 0.0}
+            self.targets['inner2'] = {
+                'L2D': [1.2 - 0.08], 'open': False, 'dR': -1}
+            self.targets['outer1'] = {
+                'L2D': [1.65 - 0.7], 'open': False, 'dR': -1}
+            self.targets['outer2'] = {
+                'L2D': [1.1 + 0.15], 'open': True, 'dR': 0.0}
+
             self.firstwall['div_ex'] = 0.18
-            self.firstwall['trim'] = [0.75,0.7]  # trim fraction (in/out)
-              
-            self.coils['external']['id'] = list(range(0,16))
+            self.firstwall['trim'] = [0.75, 0.7]  # trim fraction (in/out)
+
+            self.coils['external']['id'] = list(range(0, 16))
             '''
             self.TFopp = 'V'
             self.sheild_connect=[0,1]  # 0.3,0.95
@@ -57,7 +62,6 @@ class Setup(object):
             self.Dsheild =[]  # inner outer 0-1
             '''
             print(self.targets)
-
 
     '''
         self.conformal = True
@@ -440,4 +444,4 @@ class Setup(object):
             config[key] = getattr(self,key)
         print(config)
         return config         
-'''        
+'''

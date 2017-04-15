@@ -7,7 +7,6 @@ color = cycle(sns.color_palette('Set2', 12))
 sns.set_context('talk')
 sns.set_style(style='white')
 
-import seaborn as sns
 rc = {'figure.figsize': [5, 5 * 10 / 16], 'savefig.dpi': 150,  # *12/16
       'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
       'lines.linewidth': 0.75}
@@ -16,7 +15,7 @@ sns.set(context='paper', style='white', font='sans-serif', palette='Set2',
 Color = cycle(sns.color_palette('Set2'))
 
 
-class build(object):
+class second_moment(object):
 
     def __init__(self):
         self.patch = []
@@ -146,11 +145,13 @@ class build(object):
             for i in range(3):
                 b_mp[i] = b[i] - (t[i + 1] + t[i - 1]) / 2
             b_mp[-1] = b[-1] - (t[0] + t[2]) / 2
-            print(b_mp)
+
+    def report(self):
+        return self.C, self.I, self.A
 
     def plot(self):
         for p in self.patch:
-            geom.polyfill(p['y'], p['z'], color=next(color), alpha=0.5)
+            geom.polyfill(p['y'], p['z'], color=next(color), alpha=1)
         for h in self.hole:
             geom.polyfill(h['y'], h['z'], color=np.ones(3))
         pl.axis('equal')
@@ -160,46 +161,9 @@ class build(object):
 
 if __name__ == '__main__':
 
-    section = {}
-    section['case'] = {'side': 0.1, 'nose': 0.51, 'inboard': 0.04,
-                       'outboard': 0.19, 'external': 0.225}
-    section['winding_pack'] = {'width': 0.625, 'depth': 1.243}
-
     w, d = 0.625, 1.243
     i, o, s = 0.04, 0.19, 0.1
-
-    ey = build()
-    ey.add_shape('rect', b=d + 2 * s, h=w + i + o, dz=(i - o) / 2)
-    ey.remove_shape('rect', b=d, h=w)
-    l, f = 1.3, 0.45
-    ey.add_shape('tri', b=l / 2, h=d / 2 + s,
-                 flip_y=True, double=True, dz=+w / 2 + i)
-
-    ey.remove_shape('tri', b=(1 - f) * l, h=(1 - f) * (d / 2 + s), flip_y=True, double=True,
-                    dz=+w / 2 + i + f * l)
-
-    '''
-    ey.add_shape('rect',b=3,h=0.5,dx=-1.5)
-    ey.add_shape('rect',b=4,h=0.5,dx=-5)
-    ey.remove_shape('rect',b=14,h=0.5,dx=0)
-    '''
-    print(ey.I)
-
-    '''
-    #ey.add_shape('circ',r=5,ro=3,dx=3)
-    ey.add_shape('rect',
-                 b=1.3*section['winding_pack']['width'],
-                 h=1.3*section['winding_pack']['depth'])
-    ey.remove_shape('rect',
-                 b=section['winding_pack']['width'],
-                 h=section['winding_pack']['depth'])
-    ey.add_shape('rect',
-                 b=section['case']['inboard'],
-                 h=section['winding_pack']['depth']+\
-                          2*section['case']['side'],
-                 dx=section['winding_pack']['width']/2+\
-                 section['case']['inboard']/2)
-    #ey.add_shape('rect',b=7,h=0.5,dx=3.5)
-    #ey.add_shape('tri',b=10,h=4,dx=-3.0,dy=0.25)
-    '''
-    ey.plot()
+    sm = second_moment()
+    sm.add_shape('rect', b=d + 2 * s, h=w + i + o, dz=(i - o) / 2)
+    sm.remove_shape('rect', b=d, h=w)
+    sm.plot()

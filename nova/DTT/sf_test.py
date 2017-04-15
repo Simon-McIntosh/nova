@@ -12,7 +12,7 @@ from time import time
 import amigo.geom as geom
 from nova.loops import Profile, plot_oppvar
 from nova.shape import Shape
-from nova.TF.DEMOxlsx import DEMO
+from nova.DEMOxlsx import DEMO
 from nova.force import force_feild
 
 import seaborn as sns
@@ -22,7 +22,7 @@ rc = {'figure.figsize': [8, 8 * 16 / 12], 'savefig.dpi': 80,
 sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
         font_scale=7 / 8, rc=rc)
 
-nPF, nTF = 3, 18
+nPF, nTF = 6, 18
 config = {'TF': 'SN_dtt', 'eq': 'SN_{:d}PF_{:d}TF'.format(nPF, nTF)}
 config = {'TF': 'SN_dtt', 'eq': 'DEMO_SNb'}
 

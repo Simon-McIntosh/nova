@@ -50,78 +50,7 @@ class OCC(object):
                               self.pf.sub_coil,self.pf.plasma_coil)
         '''
 
-    def cross_section(self, plot=False):
-        depth = self.tf.section['winding_pack']['depth']
-        side = self.tf.section['case']['side']
-        width = self.tf.section['winding_pack']['width']
-        inboard = self.tf.section['case']['inboard']
-        outboard = self.tf.section['case']['outboard']
-        external = self.tf.section['case']['external']
-        nose = self.tf.section['case']['nose']
-        ro = self.profile.loop.p[0]['p0']['r']
-        theta = np.pi / self.nTF
-        rsep = (depth / 2 + side) / np.tan(theta)
-        rnose = ro - (width + inboard + nose)
-        if rsep <= rnose:
-            ynose = depth / 2 + side
-        else:
-            ynose = rnose * np.tan(theta)
-        dy = depth / 2 + side - ynose
-        dr = rsep - rnose
-        rpoint = rsep - (depth / 2 + side) / dy * dr - ro
-        rwp = ro - (width + inboard)
-        if rsep <= rwp:
-            ywp = depth / 2 + side
-        else:
-            ywp = rwp * np.tan(theta)
-        self.CSsupport = {'rnose': rnose, 'ynose': ynose, 'dt': side,
-                          'rwp': rwp, 'ywp': ywp}
-        self.cs = {}
-        self.cs['wp'] = {'z': [-width / 2, width / 2],
-                         'y': depth / 2 * np.ones(2)}
-        self.cs['ca'] = {'in': {'z': [rpoint + width / 2 + inboard,
-                                      -(nose + width / 2),
-                                      rsep - (ro - width / 2 - inboard),
-                                      width / 2 + inboard],
-                                'y': [0, ynose, depth / 2 + side,
-                                      depth / 2 + side]},
-                         'out': {'z': [-width / 2 - external,
-                                       width / 2 + outboard],
-                                 'y': depth / 2 + side * np.ones(2)}}
-        y, z = self.cs['wp']['y'], self.cs['wp']['z']
-        self.cs['wp']['pnt'] = {'z': [z[0], z[1], z[1], z[0]],
-                                'y': [y[0], y[1], -y[1], -y[0]]}
-        y, z = self.cs['ca']['in']['y'], self.cs['ca']['in']['z']
-        self.cs['ca']['in']['pnt'] = {'z': [z[1], z[2], z[3],
-                                            z[3], z[2], z[1]],
-                                      'y': [y[1], y[2], y[3],
-                                            -y[3], -y[2], -y[1]]}
-        z, y = self.cs['ca']['out']['z'], self.cs['ca']['out']['y']
-        self.cs['ca']['out']['pnt'] = {'z': [z[0], z[1], z[1], z[0]],
-                                       'y': [y[0], y[1], -y[1], -y[0]]}
 
-        if plot:
-            fig, ax = pl.subplots(1, 2, sharex=True, figsize=(6, 4))
-            pl.sca(ax[0])
-            pl.axis('equal')
-            pl.axis('off')
-            pl.xlim([-1, 0.5])
-            pl.plot(self.cs['ca']['in']['pnt']['y'],
-                    self.cs['ca']['in']['pnt']['z'])
-            geom.polyfill(self.cs['ca']['in']['pnt']['y'],
-                          self.cs['ca']['in']['pnt']['z'],
-                          color=color[0])
-            geom.polyfill(self.cs['wp']['pnt']['y'], self.cs['wp']['pnt']['z'],
-                          color=color[1])
-            pl.sca(ax[1])
-            pl.axis('equal')
-            pl.axis('off')
-            geom.polyfill(self.cs['ca']['out']['pnt']['y'],
-                          self.cs['ca']['out']['pnt']['z'],
-                          color=color[0])
-            geom.polyfill(self.cs['wp']['pnt']['y'], self.cs['wp']['pnt']['z'],
-                          color=color[1])
-            # pl.sca(ax[0])
 
     def write(self):
         print('writing', self.filename, self.nTF)

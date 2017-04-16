@@ -149,14 +149,15 @@ class second_moment(object):
     def report(self):
         return self.C, self.I, self.A
 
-    def plot(self):
+    def plot(self, centroid=True):
         for p in self.patch:
             geom.polyfill(p['y'], p['z'], color=next(color), alpha=1)
         for h in self.hole:
             geom.polyfill(h['y'], h['z'], color=np.ones(3))
         pl.axis('equal')
-        pl.plot(0, 0, 's')
-        pl.plot(self.C['y'], self.C['z'], 'o')
+        if centroid:
+            pl.plot(0, 0, 's')
+            pl.plot(self.C['y'], self.C['z'], 'o')
 
 
 if __name__ == '__main__':

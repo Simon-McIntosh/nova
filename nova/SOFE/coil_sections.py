@@ -6,8 +6,10 @@ from nova.loops import Profile
 from nova.streamfunction import SF
 from amigo import geom
 from amigo.addtext import linelabel
+from matplotlib import gridspec
 import pylab as pl
 import numpy as np
+from warnings import warn
 import seaborn as sns
 rc = {'figure.figsize': [10 * 12 / 16, 10], 'savefig.dpi': 350,
       'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
@@ -36,9 +38,9 @@ class architect(object):
                                part='TF', nTF=nTF, obj=obj, npoints=250)
         self.sf = SF(setup.filename)
         self.tf = TF(profile=self.profile, sf=self.sf)
+        self.initalise_cs()
+        self.tf_cs(plot=False)
         self.pf = PF(self.sf.eqdsk)
-
-        self.tf_section(plot=False)
 
         '''
         self.PF_support()  # calculate PF support seats
@@ -56,76 +58,107 @@ class architect(object):
                       'rwp': rwp, 'ywp': ywp}
     '''
 
-    def tf_section(self, plot=False):
-        side = self.tf.section['case']['side']
-        inboard = self.tf.section['case']['inboard']
-        outboard = self.tf.section['case']['outboard']
-        external = self.tf.section['case']['external']
-        nose = self.tf.section['case']['nose']
-        depth = self.tf.section['winding_pack']['depth']
-        width = self.tf.section['winding_pack']['width']
+    def initalise_cs(self):
+        '''
+        initalise cross section parameters
+        tf:    TF coil
+            side == side wall thickness
+            lf_in == inner tf surface wall thickness on low feild side
+            lf_out == outer tf surface wall thickness on low feild side
+            hf_in == inner tf surface wall thickness on high feild side
+            hf_out == outer tf surface wall thickness on high feild side (nose)
+        wp:    winding pack
+            d == winding pack depth, in toroidal direction
+            w == winding pack width, in poloidal direction
+        '''
+        self.cs = {}  # cross section parameter dict
+        self.cs['case'] = {'side': self.tf.section['case']['side'],
+                           'lf_in': self.tf.section['case']['outboard'],
+                           'lf_out': self.tf.section['case']['external'],
+                           'hf_in': self.tf.section['case']['inboard'],
+                           'hf_out': self.tf.section['case']['nose']}
+        self.cs['wp'] = {'d': self.tf.section['winding_pack']['depth'],
+                         'w': self.tf.section['winding_pack']['width'],
+                         'ro': self.profile.loop.p[0]['p0']['r']}
 
-        ro = self.profile.loop.p[0]['p0']['r']
+    def update_cs(self, **kwargs):
+        for var in kwargs:
+            set_var = False
+            for name in self.cs:
+                cs = self.cs[name]
+                if var in cs:  # update
+                    cs[var] = kwargs[var]
+                    set_var = True
+            if not set_var:
+                warn('update failed\n{} not found in Pcs'.format(var))
+        self.tf_cs()  # update tf cross-section
+
+    def tf_cs(self, plot=False):
+        wp, case = self.cs['wp'], self.cs['case']  # load parameters
         theta = np.pi / self.nTF
-        rsep = (depth / 2 + side) / np.tan(theta)
-        rnose = ro - (width + inboard + nose)
+        rsep = (wp['d'] / 2 + case['side']) / np.tan(theta)
+        rnose = wp['ro'] - (wp['w'] + case['hf_in'] + case['hf_out'])
         if rsep <= rnose:
-            ynose = depth / 2 + side
+            ynose = wp['d'] / 2 + case['side']
         else:
             ynose = rnose * np.tan(theta)
-        
-        self.cs = {}  # cross-sections
 
-        self.cs['wp'] = {'z': [-width / 2, width / 2],
-                         'y': depth / 2 * np.ones(2)}
-        self.cs['case_in'] = {'z': np.array([-(nose + width / 2),
-                                             rsep - (ro - width / 2 - inboard),
-                                             width / 2 + inboard]),
-                              'y': np.array([ynose, depth / 2 + side,
-                                             depth / 2 + side])}
-        self.cs['case_out'] = {'z': np.array([-width / 2 - external,
-                                              np.mean([external, outboard]),
-                                              width / 2 + outboard]),
-                               'y': depth / 2 + side * np.ones(3)}
+        self.loop = {}  # cross-section loops
+        self.loop['wp'] = {'z': [-wp['w'] / 2, wp['w'] / 2],
+                         'y': wp['d'] / 2 * np.ones(2)}
+        self.loop['case_in'] = {'z': np.array([-(case['hf_out'] + wp['w'] / 2),
+                                             rsep - (wp['ro'] - wp['w'] / 2 -
+                                                     case['hf_in']),
+                                             wp['w'] / 2 + case['hf_in']]),
+                              'y': np.array([ynose, wp['d'] / 2 + case['side'],
+                                             wp['d'] / 2 + case['side']])}
+        self.loop['case_out'] = {'z': np.array([-wp['w'] / 2 - case['lf_out'],
+                                              np.mean([case['lf_out'],
+                                                       case['lf_in']]),
+                                              wp['w'] / 2 + case['lf_in']]),
+                               'y': wp['d'] / 2 + case['side'] * np.ones(3)}
         for name in ['wp', 'case_in', 'case_out']:
             self.get_pnt(name)  # get loop points
         self.case_tc = torsion()  # initalise torsional constant object
-        self.case_tc.add_loop(self.cs['wp']['pnt'], 'in')
+        self.case_tc.add_loop(self.loop['wp']['pnt'], 'in')  # add winding pack
 
         if plot:
-            fig, ax = pl.subplots(1, 2, sharex=True, figsize=(6, 4))
-            pl.sca(ax[0])
-            pl.axis('equal')
-            pl.axis('off')
-            pl.xlim([-1, 0.5])
-            pl.plot(self.cs['case_in']['pnt'][0],
-                    self.cs['case_in']['pnt'][1])
-            geom.polyfill(self.cs['case_in']['pnt'][0],
-                          self.cs['case_in']['pnt'][1],
-                          color=color[0])
-            geom.polyfill(self.cs['wp']['pnt'][0], self.cs['wp']['pnt'][1],
-                          color=color[1])
-            pl.sca(ax[1])
-            pl.axis('equal')
-            pl.axis('off')
-            geom.polyfill(self.cs['case_out']['pnt'][0],
-                          self.cs['case_out']['pnt'][1],
-                          color=color[0])
-            geom.polyfill(self.cs['wp']['pnt'][0], self.cs['wp']['pnt'][1],
-                          color=color[1])
+            self.plot_tf_section()
+
+    def plot_tf_section(self):
+        fig, ax = pl.subplots(1, 2, sharex=True, figsize=(6, 4))
+        pl.sca(ax[0])
+        pl.axis('equal')
+        pl.axis('off')
+        pl.xlim([-1, 0.5])
+        pl.plot(self.loop['case_in']['pnt'][0],
+                self.loop['case_in']['pnt'][1])
+        geom.polyfill(self.loop['case_in']['pnt'][0],
+                      self.loop['case_in']['pnt'][1],
+                      color=color[0])
+        geom.polyfill(self.loop['wp']['pnt'][0], self.loop['wp']['pnt'][1],
+                      color=color[1])
+        pl.sca(ax[1])
+        pl.axis('equal')
+        pl.axis('off')
+        geom.polyfill(self.loop['case_out']['pnt'][0],
+                      self.loop['case_out']['pnt'][1],
+                      color=color[0])
+        geom.polyfill(self.loop['wp']['pnt'][0], self.loop['wp']['pnt'][1],
+                      color=color[1])
 
     def get_pnt(self, name):
-        y, z = self.cs[name]['y'], self.cs[name]['z']
+        y, z = self.loop[name]['y'], self.loop[name]['z']
         if len(y) != len(z):
             raise ValueError('unequal point number in {} dict'.format(name))
         elif len(y) == 2:  # wp or outer case
-            self.cs[name]['pnt'] = [[y[0], y[-1], -y[-1], -y[0]],
+            self.loop[name]['pnt'] = [[y[0], y[-1], -y[-1], -y[0]],
                                     [z[0], z[-1], z[-1], z[0]]]
         elif y[0] == y[1]:  # outer case
-            self.cs[name]['pnt'] = [[y[0], y[-1], -y[-1], -y[0]],
+            self.loop[name]['pnt'] = [[y[0], y[-1], -y[-1], -y[0]],
                                     [z[0], z[-1], z[-1], z[0]]]
         elif len(y) == 3:  # inner case
-            self.cs[name]['pnt'] = [[y[0], y[1], y[2], -y[2], -y[1],
+            self.loop[name]['pnt'] = [[y[0], y[1], y[2], -y[2], -y[1],
                                      -y[0]],
                                     [z[0], z[1], z[2], z[2], z[1], z[0]]]
 
@@ -135,13 +168,13 @@ class architect(object):
         fract == 1 returns outer loop
         frac > 0 & frac < 1 returns blended loop (transitional)
         '''
-        self.cs['case'] = {'y': np.zeros(3), 'z': np.zeros(3)}
+        self.loop['case'] = {'y': np.zeros(3), 'z': np.zeros(3)}
         for x in ['y', 'z']:
-            self.cs['case'][x] = self.cs['case_in'][x] + \
-                frac * (self.cs['case_out'][x] - self.cs['case_in'][x])
+            self.loop['case'][x] = self.loop['case_in'][x] + \
+                frac * (self.loop['case_out'][x] - self.loop['case_in'][x])
         self.get_pnt('case')
 
-    def case(self, frac=0, plot=False):
+    def case(self, frac=0, plot=False, centroid=True):
         '''
         build case cross-sectional properties
         frac==0, inboard
@@ -149,8 +182,8 @@ class architect(object):
         frac>0 & frac<1 transitional
         '''
         self.trans(frac)  # load case profile
-        y, z = self.cs['case']['pnt'][0], self.cs['case']['pnt'][1]
-        y_wp, z_wp = self.cs['wp']['pnt'][0], self.cs['wp']['pnt'][1]
+        y, z = self.loop['case']['pnt'][0], self.loop['case']['pnt'][1]
+        y_wp, z_wp = self.loop['wp']['pnt'][0], self.loop['wp']['pnt'][1]
         sm = second_moment()
         if frac < 1:  # inner or transitional
             sm.add_shape('tri', b=y[1] - y[0], h=z[1] - z[0],
@@ -159,22 +192,26 @@ class architect(object):
                          flip_z=True, flip_y=True, dz=z[-2], dy=y[-1])
             sm.add_shape('rect', b=y[0] - y[-1], h=z[1] - z[0],
                          dz=z[1] - (z[1] - z[0]) / 2)
-            sm.add_shape('rect', b=y[1] - y[-2], h=z[2] - z[1],
-                         dz=z[1] + (z[2] - z[1]) / 2)
+            if z[2] > z[1]:
+                sm.add_shape('rect', b=y[1] - y[-2], h=z[2] - z[1],
+                             dz=z[1] + (z[2] - z[1]) / 2)
+            else:
+                sm.remove_shape('rect', b=y[1] - y[-2], h=z[1] - z[2],
+                                dz=z[1] + (z[2] - z[1]) / 2)
         else:
             sm.add_shape('rect', b=y[1] - y[2], h=z[1] - z[0],
                          dz=np.mean([z[0], z[1]]))
         sm.remove_shape('rect', b=y_wp[1] - y_wp[2], h=z_wp[1] - z_wp[0])
         C, I, A = sm.report()
-        self.case_tc.add_loop(self.cs['case']['pnt'], 'out')
+        self.case_tc.add_loop(self.loop['case']['pnt'], 'out')
         J = self.case_tc.solve()
         if plot:
-            sm.plot()
+            sm.plot(centroid=centroid)
         return C, I, A, J
 
     def winding_pack(self, plot=False):  # winding pack sectional properties
         sm = second_moment()
-        y, z = self.cs['wp']['pnt'][0], self.cs['wp']['pnt'][1]
+        y, z = self.loop['wp']['pnt'][0], self.loop['wp']['pnt'][1]
         sm.add_shape('rect', b=y[1] - y[2], h=z[1] - z[0])
         C, I, A = sm.report()
         J = 0
@@ -207,6 +244,41 @@ class architect(object):
         if plot:
             sm.plot()
         return C, I, A, J 
+
+    def plot_transition(self):
+        fig, ax = pl.subplots(1, 1)
+        gs = gridspec.GridSpec(3, 3, wspace=0.0, hspace=0.0)
+        for i, (fact, txt) in enumerate(zip([0, 0.5, 1],
+                                            ['inboard', 'transition',
+                                             'outboard'])):
+            ax = pl.subplot(gs[i])
+            ax.axis('equal')
+            ax.axis('off')
+            pl.text(0, 0, txt, ha='center', va='center')
+            self.case(fact, plot=True, centroid=False)
+        ax = pl.subplot(gs[3:6])
+        pl.sca(ax)
+        N = 100
+        Im = np.zeros((3, N))
+        J = np.zeros(N)
+        fact = np.linspace(0, 1, N)
+        for i, f in enumerate(fact):
+            C, I, A, J[i] = atec.case(f)
+            Im[:, i] = I['xx'], I['yy'], I['zz']
+        text = linelabel(value='1.2f')
+        pl.plot(fact, Im[1, :])
+        text.add('Iyy')
+        pl.plot(fact, Im[2, :])
+        text.add('Izz')
+        pl.plot(fact, J)
+        text.add('J')
+        text.plot()
+        sns.despine()
+        ax.set_xticks([0, 0.5, 1])
+        ax.set_xticklabels(['inboard', 'transition', 'outboard'])
+        pl.ylabel(r'sectional properties, m$^2$')
+        pl.xlabel('cross-section position')
+
 
 class torsion(object):
 
@@ -241,32 +313,16 @@ class torsion(object):
             pl.plot(yin, zin)
             pl.plot(yout, zout)
         return J
-  
 
+if __name__ is '__main__':
 
-atec = architect(config, setup, nTF=nTF)
-# atec.winding_pack()
-atec.case(1,plot=True)
+    atec = architect(config, setup, nTF=nTF)
+    # atec.winding_pack()
 
-atec.gravity_support(plot=True)
+    atec.update_cs()  # side=0.1
 
-N = 100
-Im = np.zeros((3, N))
-J = np.zeros(N)
+    atec.case(0.5, plot=True)
 
-for i, f in enumerate(np.linspace(0, 1, N)):
-    C, I, A, J[i] = atec.case(f)
-    Im[:, i] = I['xx'], I['yy'], I['zz']
+    # atec.gravity_support(plot=True)
 
-pl.figure(figsize=(10, 10 * 12 / 16))
-text = linelabel(value = '1.2f')
-pl.plot(Im[0, :])
-text.add('Ixx')
-pl.plot(Im[1, :])
-text.add('Iyy')
-pl.plot(Im[2, :])
-text.add('Izz')
-pl.plot(J)
-text.add('J')
-text.plot()
-sns.despine()
+    atec.plot_transition()

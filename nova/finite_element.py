@@ -51,7 +51,7 @@ class FE(object):
         self.ncp = 0  # number of constraints
         self.mpc = OrderedDict()  # multi-point constraint
 
-    def initalise_mat(self, nmat_max=10):
+    def initalise_mat(self, nmat_max=20):
         self.nmat_max = nmat_max
         self.nmat = 0
         self.mat = np.zeros((nmat_max), dtype=[('E', 'float'), ('G', 'float'),
@@ -66,11 +66,11 @@ class FE(object):
                                                            self.nmat_max)
             err_txt += ' increase size of material array (initalise_mat)'
             raise ValueError(err_txt)
-        if 'mat' in kwargs:
+        if 'mat' in kwargs:  # mat as dict
             mat = kwargs.get('mat')
             for p in mat:
                 self.mat[self.nmat][p] = mat[p]
-        else:
+        else:  # materials as keyword pairs
             for p in self.mat.dtype.names:
                 if p in kwargs:
                     self.mat[self.nmat][p] = kwargs.get(p)
@@ -291,7 +291,8 @@ class FE(object):
         for el in range(self.nel):
             for i in range(3):
                 n = self.el['n'][el]
-                self.shape['D'][el, i, :] = scale * self.shape['U'][el, i, :] +\
+                self.shape['D'][el, i, :] = scale * \
+                    self.shape['U'][el, i, :] + \
                     np.linspace(self.X[n[0], i], self.X[n[1], i], self.nShape)
         self.shape_part(labels=['D'])
 
@@ -353,81 +354,81 @@ class FE(object):
     def stiffness_1D(self, el):  # dof [v,rz]
         a = self.el['dl'][el] / 2
         E, Iz = self.get_mat(self.el['mat'][el])
-        k = E * Iz / (2 * a**3) * np.matrix([[3,  3 * a,   -3,  3 * a],
-                                             [3 * a, 4 * a**2, -3 * a, 2 * a**2],
-                                             [-3, -3 * a,    3, -3 * a],
-                                             [3 * a, 2 * a**2, -3 * a, 4 * a**2]])
+        k = E * Iz / (2 * a**3) * np.matrix([[3,   3*a,   -3,  3*a],
+                                             [3*a, 4*a**2, -3*a, 2*a**2],
+                                             [-3, -3*a,    3, -3*a],
+                                             [3*a, 2*a**2, -3*a, 4*a**2]])
         return k
 
     def stiffness_2D(self, el):  # dof [u,v,rz]
         a = self.el['dl'][el] / 2
         E, A, Iz = self.get_mat(self.el['mat'][el])
-        k = np.matrix([[A * E / (2 * a), 0,               0,
-                        -A * E / (2 * a), 0,               0],
-                       [0,         3 * E * Iz / (2 * a**3), 3 * E * Iz / (2 * a**2),
-                        0,        -3 * E * Iz / (2 * a**3), 3 * E * Iz / (2 * a**2)],
-                       [0,         3 * E * Iz / (2 * a**2), 2 * E * Iz / a,
-                        0,        -3 * E * Iz / (2 * a**2), E * Iz / a],
-                       [-A * E / (2 * a), 0,               0,
-                        A * E / (2 * a), 0,               0],
-                       [0,        -3 * E * Iz / (2 * a**3), -3 * E * Iz / (2 * a**2),
-                        0,         3 * E * Iz / (2 * a**3), -3 * E * Iz / (2 * a**2)],
-                       [0,         3 * E * Iz / (2 * a**2), E * Iz / a,
-                        0,        -3 * E * Iz / (2 * a**2), 2 * E * Iz / a]])
+        k = np.matrix([[A*E/(2*a), 0,               0,
+                       -A*E/(2*a), 0,               0],
+                       [0,         3*E*Iz/(2*a**3), 3*E*Iz/(2*a**2),
+                        0,        -3*E*Iz/(2*a**3), 3*E*Iz/(2*a**2)],
+                       [0,         3*E*Iz/(2*a**2), 2*E*Iz/a,
+                        0,        -3*E*Iz/(2*a**2), E*Iz/a],
+                       [-A*E/(2*a), 0,               0,
+                        A*E/(2*a), 0,               0],
+                       [0,        -3*E*Iz/(2*a**3), -3*E*Iz/(2*a**2),
+                        0,         3*E*Iz/(2*a**3), -3*E*Iz/(2*a**2)],
+                       [0,         3*E*Iz/(2*a**2), E*Iz/a,
+                        0,        -3*E*Iz/(2*a**2), 2*E*Iz/a]])
         k = self.rotate_matrix(k, el)  # transfer to global coordinates
         return k
 
     def stiffness_3D(self, el):  # dof [u,v,w,rx,ry,rz]
         a = self.el['dl'][el] / 2
         E, A, G, J, Iy, Iz = self.get_mat(self.el['mat'][el])
-        k = np.matrix([[A * E / (2 * a), 0,               0,
+        k = np.matrix([[A*E/(2*a), 0,               0,
                         0,         0,               0,
-                        -A * E / (2 * a), 0,               0,
+                       -A*E/(2*a), 0,               0,
                         0,         0,               0],
-                       [0,         3 * E * Iz / (2 * a**3), 0,
-                        0,         0,               3 * E * Iz / (2 * a**2),
-                        0,        -3 * E * Iz / (2 * a**3), 0,
-                        0,         0,               3 * E * Iz / (2 * a**2)],
-                       [0,         0,               3 * E * Iy / (2 * a**3),
-                        0,        -3 * E * Iy / (2 * a**2), 0,
-                        0,         0,              -3 * E * Iy / (2 * a**3),
-                        0,        -3 * E * Iy / (2 * a**2), 0],
+                       [0,         3*E*Iz/(2*a**3), 0,
+                        0,         0,               3*E*Iz/(2*a**2),
+                        0,        -3*E*Iz/(2*a**3), 0,
+                        0,         0,               3*E*Iz/(2*a**2)],
+                       [0,         0,               3*E*Iy/(2*a**3),
+                        0,        -3*E*Iy/(2*a**2), 0,
+                        0,         0,              -3*E*Iy/(2*a**3),
+                        0,        -3*E*Iy/(2*a**2), 0],
                        [0,         0,               0,
-                        G * J / (2 * a), 0,               0,
+                        G*J/(2*a), 0,               0,
                         0,         0,               0,
-                        -G * J / (2 * a), 0,               0],
-                       [0,         0,              -3 * E * Iy / (2 * a**2),
-                        0,         2 * E * Iy / a,        0,
-                        0,         0,               3 * E * Iy / (2 * a**2),
-                        0,         E * Iy / a,          0],
-                       [0,         3 * E * Iz / (2 * a**2), 0,
-                        0,         0,               2 * E * Iz / a,
-                        0,        -3 * E * Iz / (2 * a**2), 0,
-                        0,         0,               E * Iz / a],
-                       [-A * E / (2 * a), 0,               0,
+                       -G*J/(2*a), 0,               0],
+                       [0,         0,              -3*E*Iy/(2*a**2),
+                        0,         2*E*Iy/a,        0,
+                        0,         0,               3*E*Iy/(2*a**2),
+                        0,         E*Iy/a,          0],
+                       [0,         3*E*Iz/(2*a**2), 0,
+                        0,         0,               2*E*Iz/a,
+                        0,        -3*E*Iz/(2*a**2), 0,
+                        0,         0,               E*Iz/a],
+                       [-A*E/(2*a), 0,               0,
                         0,         0,               0,
-                        A * E / (2 * a), 0,               0,
+                        A*E/(2*a), 0,               0,
                         0,         0,               0],
-                       [0,        -3 * E * Iz / (2 * a**3), 0,
-                        0,         0,              -3 * E * Iz / (2 * a**2),
-                        0,         3 * E * Iz / (2 * a**3), 0,
-                        0,         0,              -3 * E * Iz / (2 * a**2)],
-                       [0,         0,              -3 * E * Iy / (2 * a**3),
-                        0,         3 * E * Iy / (2 * a**2), 0,
-                        0,         0,               3 * E * Iy / (2 * a**3),
-                        0,         3 * E * Iy / (2 * a**2), 0],
+                       [0,        -3*E*Iz/(2*a**3), 0,
+                        0,         0,              -3*E*Iz/(2*a**2),
+                        0,         3*E*Iz/(2*a**3), 0,
+                        0,         0,              -3*E*Iz/(2*a**2)],
+                       [0,         0,              -3*E*Iy/(2*a**3),
+                        0,         3*E*Iy/(2*a**2), 0,
+                        0,         0,               3*E*Iy/(2*a**3),
+                        0,         3*E*Iy/(2*a**2), 0],
                        [0,         0,               0,
-                        -G * J / (2 * a), 0,               0,
+                       -G*J/(2*a), 0,               0,
                         0,         0,               0,
-                        G * J / (2 * a), 0,               0],
-                       [0,         0,              -3 * E * Iy / (2 * a**2),
-                        0,         E * Iy / a,          0,
-                        0,         0,               3 * E * Iy / (2 * a**2),
-                        0,         2 * E * Iy / a,        0],
-                       [0,         3 * E * Iz / (2 * a**2), 0,
-                        0,         0,               E * Iz / a,
-                        0,        -3 * E * Iz / (2 * a**2), 0,
-                        0,         0,               2 * E * Iz / a]])
+                        G*J/(2*a), 0,               0],
+                       [0,         0,              -3*E*Iy/(2*a**2),
+                        0,         E*Iy/a,          0,
+                        0,         0,               3*E*Iy/(2*a**2),
+                        0,         2*E*Iy/a,        0],
+                       [0,         3*E*Iz/(2*a**2), 0,
+                        0,         0,               E*Iz/a,
+                        0,        -3*E*Iz/(2*a**2), 0,
+                        0,         0,               2*E*Iz/a]])
         k = self.rotate_matrix(k, el)  # transfer to global coordinates
         return k
 

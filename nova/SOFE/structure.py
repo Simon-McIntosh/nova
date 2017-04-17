@@ -93,14 +93,15 @@ fe.add_elements(n=[fe.nndo - 1, nd_OISo, fe.nndo], part_name='OISo',
                 el_dy=np.cross(fe.el['dx'][nd_OISo], [0, 1, 0]), nmat=2)
 fe.add_cp([fe.nndo - 1, fe.nndo], dof='fix', rotate=True, axis='z')
 
-fe.add_nodes(
-    np.dot(fe.X[nd_OIS1], geom.rotate(-np.pi / config['nTF'], axis='z')))
-fe.add_nodes(np.dot(fe.X[nd_OIS1], geom.rotate(
-    np.pi / config['nTF'], axis='z')))
-fe.add_elements(n=[fe.nndo - 1, nd_OIS1, fe.nndo], part_name='OISo',
+fe.add_nodes(np.dot(fe.X[nd_OIS1],
+                    geom.rotate(-np.pi/config['nTF'], axis='z')))
+fe.add_nodes(np.dot(fe.X[nd_OIS1],
+                    geom.rotate(np.pi/config['nTF'], axis='z')))
+fe.add_elements(n=[fe.nndo-1, nd_OIS1, fe.nndo], part_name='OISo',
                 el_dy=np.cross(fe.el['dx'][nd_OIS1], [0, 1, 0]), nmat=2)
 fe.add_cp([fe.nndo - 1, fe.nndo], dof='fix', rotate=True, axis='z')
 
+print(np.cross(fe.el['dx'][nd_OIS1], [0, 1, 0]))
 
 fe.add_weight()  # add weight to all elements
 # burst and topple

@@ -39,7 +39,10 @@ class architect(object):
         self.sf = SF(setup.filename)
         self.tf = TF(profile=self.profile, sf=self.sf)
         self.initalise_cs()
-        self.tf_cs(plot=False)
+        self.tf_cs()
+        self.gs_cs()
+        self.initalize_mat()
+        self.define_materials()
         self.pf = PF(self.sf.eqdsk)
 
         '''
@@ -47,7 +50,35 @@ class architect(object):
         self.CS_support()  # calculate CS support seats
         self.Gravity_support()
         '''
-        
+
+    def initalize_mat(self, nmat_max=20, nsec_max=5):
+        self.nmat_max = nmat_max
+        self.nsec_max = nsec_max
+        self.nmat = 0
+        self.mtype = np.dtype({'names': ['name', 'E', 'G', 'rho',
+                                         'J', 'A', 'Iyy', 'Izz'],
+                               'formats': ['S24', 'float', 'float', 'float',
+                                           'float', 'float', 'float',
+                                           'float']})
+        self.mat = np.zeros((nmat_max), dtype=[('ID', 'int'), ('name', 'S24'),
+                                               ('nsection', 'int'),
+                                               ('mat_o', self.mtype),
+                                               ('mat_array',
+                                               (self.mtype, self.nsec_max))])
+
+    def define_materials(self):
+        # forged == inner leg, cast == outer + supports
+        self.mat_data = {}
+        self.mat_data['wp'] = {'E': 95e9, 'rho': 8940, 'v': 0.33}
+        self.mat_data['steel_forged'] = {'E': 205e9, 'rho': 7850, 'v': 0.29}
+        self.mat_data['steel_cast'] = {'E': 190e9, 'rho': 7850, 'v': 0.29}
+        self.update_shear_modulus()
+
+    def update_shear_modulus(self):
+        for name in self.mat_data:
+            E, v = self.mat_data[name]['E'], self.mat_data[name]['v']
+            self.mat_data[name]['G'] = E/(2*(1+v))
+
     '''
     rwp = ro - (width + inboard)
     if rsep <= rwp:
@@ -80,6 +111,7 @@ class architect(object):
         self.cs['wp'] = {'d': self.tf.section['winding_pack']['depth'],
                          'w': self.tf.section['winding_pack']['width'],
                          'ro': self.profile.loop.p[0]['p0']['r']}
+        self.cs['gs'] = {'r': 0.1, 't': 0.05}
 
     def update_cs(self, **kwargs):
         for var in kwargs:
@@ -90,8 +122,9 @@ class architect(object):
                     cs[var] = kwargs[var]
                     set_var = True
             if not set_var:
-                warn('update failed\n{} not found in Pcs'.format(var))
+                warn('update failed\n{} not found in cs'.format(var))
         self.tf_cs()  # update tf cross-section
+        self.gs_cs()  # update gravity support parameters
 
     def tf_cs(self, plot=False):
         wp, case = self.cs['wp'], self.cs['case']  # load parameters
@@ -102,26 +135,25 @@ class architect(object):
             ynose = wp['d'] / 2 + case['side']
         else:
             ynose = rnose * np.tan(theta)
-
         self.loop = {}  # cross-section loops
         self.loop['wp'] = {'z': [-wp['w'] / 2, wp['w'] / 2],
-                         'y': wp['d'] / 2 * np.ones(2)}
+                           'y': wp['d'] / 2 * np.ones(2)}
         self.loop['case_in'] = {'z': np.array([-(case['hf_out'] + wp['w'] / 2),
-                                             rsep - (wp['ro'] - wp['w'] / 2 -
-                                                     case['hf_in']),
-                                             wp['w'] / 2 + case['hf_in']]),
-                              'y': np.array([ynose, wp['d'] / 2 + case['side'],
-                                             wp['d'] / 2 + case['side']])}
+                                               rsep - (wp['ro'] - wp['w'] / 2 -
+                                                       case['hf_in']),
+                                               wp['w'] / 2 + case['hf_in']]),
+                                'y': np.array([ynose,
+                                               wp['d'] / 2 + case['side'],
+                                               wp['d'] / 2 + case['side']])}
         self.loop['case_out'] = {'z': np.array([-wp['w'] / 2 - case['lf_out'],
-                                              np.mean([case['lf_out'],
-                                                       case['lf_in']]),
-                                              wp['w'] / 2 + case['lf_in']]),
-                               'y': wp['d'] / 2 + case['side'] * np.ones(3)}
+                                                np.mean([case['lf_out'],
+                                                         case['lf_in']]),
+                                                wp['w'] / 2 + case['lf_in']]),
+                                 'y': wp['d'] / 2 + case['side'] * np.ones(3)}
         for name in ['wp', 'case_in', 'case_out']:
             self.get_pnt(name)  # get loop points
         self.case_tc = torsion()  # initalise torsional constant object
         self.case_tc.add_loop(self.loop['wp']['pnt'], 'in')  # add winding pack
-
         if plot:
             self.plot_tf_section()
 
@@ -153,14 +185,14 @@ class architect(object):
             raise ValueError('unequal point number in {} dict'.format(name))
         elif len(y) == 2:  # wp or outer case
             self.loop[name]['pnt'] = [[y[0], y[-1], -y[-1], -y[0]],
-                                    [z[0], z[-1], z[-1], z[0]]]
+                                      [z[0], z[-1], z[-1], z[0]]]
         elif y[0] == y[1]:  # outer case
             self.loop[name]['pnt'] = [[y[0], y[-1], -y[-1], -y[0]],
-                                    [z[0], z[-1], z[-1], z[0]]]
+                                      [z[0], z[-1], z[-1], z[0]]]
         elif len(y) == 3:  # inner case
             self.loop[name]['pnt'] = [[y[0], y[1], y[2], -y[2], -y[1],
-                                     -y[0]],
-                                    [z[0], z[1], z[2], z[2], z[1], z[0]]]
+                                      -y[0]],
+                                      [z[0], z[1], z[2], z[2], z[1], z[0]]]
 
     def trans(self, frac):  # set transitional points
         '''
@@ -207,7 +239,8 @@ class architect(object):
         J = self.case_tc.solve()
         if plot:
             sm.plot(centroid=centroid)
-        return C, I, A, J
+        section = {'C': C, 'I': I, 'A': A, 'J': J}
+        return section
 
     def winding_pack(self, plot=False):  # winding pack sectional properties
         sm = second_moment()
@@ -217,33 +250,52 @@ class architect(object):
         J = 0
         if plot:
             sm.plot()
-        return C, I, A, J
-    
-    def gravity_support(self, plot=False):
-        sm = second_moment()
-        r, ro = 0.6, 0.59
-        sm.add_shape('circ',r=r,ro=ro)
-        C, I, A = sm.report()
-        
-        theta = np.linspace(0,2*np.pi,50)
-        Lin = [ro*np.cos(theta), ro*np.sin(theta)]
-        Lout = [r*np.cos(theta), r*np.sin(theta)]
-        tc = torsion()  # initalise torsional constant object
-        tc.add_loop(Lin, 'in')
-        tc.add_loop(Lout, 'out')
-        J = tc.solve(plot=True)
-        print('J', J, I['xx'])
-        sm.plot()
+        section = {'C': C, 'I': I, 'A': A, 'J': J}
+        return section
 
-    def OIS(self):  # outer intercoil support
+    def gs_cs(self):
+        rm, t2 = self.cs['gs']['r'], self.cs['gs']['t']/2
+        if t2 > rm:  # half thickness mean radius
+            errtxt = 'gravity support thickness greater than mean radius'
+            raise ValueError(errtxt)
+        self.loop['gs'] = {'ro': rm-t2, 'r': rm+t2}
+
+    def gravity_support(self, plot=False, **kwargs):  # set t, or r
+        update = False
+        for var in ['r', 't']:
+            if var in kwargs:  # t==pipe thickness, r==mean radius
+                update = True
+                self.cs['gs'][var] = kwargs[var]
+        if update:
+            self.gs_cs()
         sm = second_moment()
-        sm.add_shape('rect', b=occ.OISsupport['OIS0']['thickness'],
-                     h=occ.OISsupport['OIS0']['width'])
+        ro, r = self.loop['gs']['ro'], self.loop['gs']['r']
+        sm.add_shape('circ', r=r, ro=ro)
         C, I, A = sm.report()
-        J = 0
+        J = I['xx']
         if plot:
             sm.plot()
-        return C, I, A, J 
+        section = {'C': C, 'I': I, 'A': A, 'J': J}
+        return section
+
+    def intercoil_support(self, plot=False):  # outer intercoil support
+        sm = second_moment()
+        thickness = 0.1
+        width = 2
+        sm.add_shape('rect', b=thickness, h=width)
+        C, I, A = sm.report()
+        pnt = {'y': [thickness/2, thickness/2, -thickness/2, -thickness/2],
+               'z': [-width/2, width/2, width/2, -width/2]}
+        J = 0
+
+        if plot:
+            sm.plot()
+        section = self.get_section(C, I, A, J, pnt)
+        return section
+    
+    def get_section(self, C, I, A, J, pnt):
+        section = {'C': C, 'I': I, 'A': A, 'J': J, 'pnt': pnt}
+        return section
 
     def plot_transition(self):
         fig, ax = pl.subplots(1, 1)
@@ -263,7 +315,8 @@ class architect(object):
         J = np.zeros(N)
         fact = np.linspace(0, 1, N)
         for i, f in enumerate(fact):
-            C, I, A, J[i] = atec.case(f)
+            section = atec.case(f)
+            J[i], I = section['J'], section['I']
             Im[:, i] = I['xx'], I['yy'], I['zz']
         text = linelabel(value='1.2f')
         pl.plot(fact, Im[1, :])
@@ -278,6 +331,16 @@ class architect(object):
         ax.set_xticklabels(['inboard', 'transition', 'outboard'])
         pl.ylabel(r'sectional properties, m$^2$')
         pl.xlabel('cross-section position')
+
+    def get_mat(self, material_name, section):
+        material = self.mat_data[material_name]
+        E, G, rho = material['E'], material['G'], material['rho']
+        mat = {'E': E, 'G': G, 'rho': rho,
+               'J': section['J'], 'A': section['A'], 'C': section['C'],
+               'Iyy': section['I']['yy'], 'Izz': section['I']['zz']}
+        return mat
+
+    #def add_mat(self):
 
 
 class torsion(object):
@@ -323,6 +386,9 @@ if __name__ is '__main__':
 
     atec.case(0.5, plot=True)
 
-    # atec.gravity_support(plot=True)
-
-    atec.plot_transition()
+    atec.gravity_support(plot=True)
+    
+    mat = atec.get_mat('wp', atec.winding_pack())
+    
+    print(mat)
+    # atec.plot_transition()

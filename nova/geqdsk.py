@@ -1,6 +1,6 @@
 """
 Read and write 'G' formatted equilibria. This is an R-Z free boundary
-format. 
+format.
 
 Format of G-EQDSK file is specified here:
   https://fusion.gat.com/THEORY/efit/g_eqdsk.html
@@ -169,6 +169,7 @@ def read(f):
             Ic[i] = float(next(token))
     else:
         print('no coils')
+        rc, zc, drc, dzc, Ic = 0, 0, 0, 0, 0
     # Construct R-Z mesh
     r = np.zeros(nxefit)
     z = np.zeros(nyefit)

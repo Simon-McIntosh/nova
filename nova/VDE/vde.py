@@ -1,17 +1,15 @@
 import pylab as pl
-from streamfunction import SF
-from elliptic import EQ
-from inverse import INV
-from eqConfig import Config
+from nova.streamfunction import SF
+from nova.elliptic import EQ
+from nova.inverse import INV
+from nova.config import Setup
 from itertools import cycle
 import numpy as np
-from radial_build import RB
-import copy
-from shelf import PKL
-import cross_coil as cc
+from nova.radial_build import RB
+from nova.shelf import PKL
+import nova.cross_coil as cc
 import scipy as sp
-from surface import bernstein
-from scipy.interpolate import interp1d
+#from nova.surface import bernstein
 import scipy.optimize as op
 
 import seaborn as sns
@@ -29,7 +27,7 @@ pl.axis('off')
 eqdsk = 'vde'
 #eqdsk = 'SN'
 
-sf = SF(Config(eqdsk))
+sf = SF(Setup(eqdsk).filename)
 
 
 sf.eq['ncoil'] = 0
@@ -59,7 +57,7 @@ def flux_fit(b, *args):
     b *= b_norm
     sf.Pprime = bern.spline(b[:bern.n+1])
     sf.FFprime = bern.spline(b[bern.n+1:])
-    
+
     #sf.FFprime = bern.spline(b[:bern.n+1])
     b /= b_norm
     '''

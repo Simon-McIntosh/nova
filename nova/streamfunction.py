@@ -34,7 +34,7 @@ class SF(object):
         self.get_Xpsi()
         self.get_Mpsi()
         self.set_contour()  # set cfeild
-        self.get_LFP()
+        #self.get_LFP()
         # self.get_sol_psi(dSOL=3e-3,Nsol=15,verbose=False)
         # leg search radius
         self.rcirc = 0.3 * abs(self.Mpoint[1] - self.Xpoint[1])
@@ -377,6 +377,7 @@ class SF(object):
                 xo_arg = np.argmin(self.eqdsk['zbdry'])
                 xo = [self.eqdsk['rbdry'][xo_arg],
                       self.eqdsk['zbdry'][xo_arg]]
+        print(xo)
         Xpoint = np.zeros((2, 2))
         Xpsi = np.zeros(2)
         for i, flip in enumerate([1, -1]):

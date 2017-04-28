@@ -122,7 +122,7 @@ class force_feild(object):
                     va = 'bottom'
                 else:
                     va = 'top'
-                pl.text(r, z + zarrow, '{:1.2f}MN'.format(F[1]),
+                pl.text(r, z + zarrow, '{:1.0f}MN'.format(F[1]),
                         ha='center', va=va, fontsize=1.1 * fs, color=0.1 * np.ones(3),
                         backgroundcolor=0.9 * np.ones(3))
 

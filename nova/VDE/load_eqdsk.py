@@ -18,7 +18,7 @@ Color = cycle(color)
 
 with open('../../eqdsk/ITER/ITER_15MA.eqdat','r') as f:
     line = 'start'
-    for i in range(25):
+    for i in range(50):
         line = f.readline()
         print(line[:-1])
         print(len(line))

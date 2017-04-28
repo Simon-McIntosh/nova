@@ -14,6 +14,8 @@ from nova import loops
 from nova.DEMOxlsx import DEMO
 from nova.loops import Profile
 from nova.force import force_feild
+from nova.shape import Shape
+from nova.firstwall import main_chamber
 
 import seaborn as sns
 rc = {'figure.figsize': [7 * 10 / 16, 7], 'savefig.dpi': 250,  # *12/16
@@ -25,61 +27,52 @@ Color = cycle(sns.color_palette('Set2'))
 
 
 nTF, nPF, nCS = 18, 6, 5
-config = {'TF': 'demo', 'eq': 'SN'}  # SN2017_SOF
+config = {'TF': 'dtt', 'eq': 'SN'}
 config, setup = select(config, nTF=nTF, nPF=nPF, nCS=nCS, update=False)
 
 sf = SF(setup.filename)
-
-print('b', sf.eqdsk['bcentr'], 'r', sf.eqdsk['rcentr'], 'br',
-      sf.eqdsk['bcentr'] * sf.eqdsk['rcentr'])
-
-
-rb = RB(setup, sf)
+rb = RB(sf, setup)
 pf = PF(sf.eqdsk)
+
+mc = main_chamber('dtt')
+# mc.load_data(plot=True)  # load from file
+mc.generate([config['eq_base']], psi_n=1.07, flux_fit=True,
+            plot=False, symetric=False)
+mc.shp.plot_bounds()
+
+rb.generate(mc, debug=False)
 profile = Profile(config['TF'], family='S', part='TF', nTF=nTF, obj='L')
-tf = TF(profile=profile)
-
-# pf.plot(coils=pf.coil,label=False,plasma=False,current=True)
-
-demo = DEMO()
-demo.fill_part('Vessel')
-demo.fill_part('Blanket')
-# demo.fill_part('TF_Coil')
-demo.plot_ports()
-demo.plot_limiter()
-
-pl.axis('off')
+shp = Shape(profile, eqconf=config['eq_base'], ny=3)
+shp.add_vessel(rb.segment['vessel_outer'])
+shp.minimise(ripple=True, verbose=True)
+tf = shp.tf
 tf.fill()
 
-eq = EQ(sf, pf, dCoil=1.5, sigma=0, boundary=sf.get_sep(expand=1.5), n=5e3)
-eq.gen_opp()
+demo = DEMO()
+demo.plot_ports()
+# demo.fill_part('Vessel')
+# demo.fill_part('Blanket')
+# demo.fill_part('TF_Coil')
+# demo.plot_limiter()
 
-
-'''
-inv = INV(sf,eq,tf)
-L = inv.grid_coils(offset=0.3)
-inv.fix_boundary_psi(N=25,alpha=1-1e-4,factor=1)  # add boundary points
-inv.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary points
-inv.add_null(factor=1,point=sf.Xpoint) 
-
-inv.set_swing(width=250)
-inv.initialize_log()
-inv.set_background()
-inv.get_weight()
-inv.set_Lo(L)  # set position bounds
-Lnorm = loops.normalize_variables(inv.Lo)
-inv.update_position(Lnorm,update_area=True)
+inv = INV(pf, tf=tf)
+inv.load_equlibrium(sf)
+inv.fix_boundary()
+# inv.fix_target()  # only for SX at the moment
 inv.plot_fix(tails=True)
-eq.gen_opp()
-'''
 
-pf.plot(coils=pf.coil, label=True, current=True)
-pf.plot(coils=eq.coil, label=False, plasma=True, current=False)
+inv.add_plasma()
+Lnorm = inv.snap_coils()
+
+inv.set_swing(centre=0, width=20, array=np.linspace(-0.5, 0.5, 3))
+inv.set_force_feild()
+inv.update_position(Lnorm, update_area=True)
+# inv.optimize(Lnorm)  # to optimise the position of the PF coils
+
+pf.plot(label=True, current=True)
+pf.plot(subcoil=True, label=False, plasma=True, current=False)
 sf.contour(boundary=True)
 
-ff = force_feild(eq.pf.index, eq.pf.coil, eq.coil, eq.plasma_coil,
-                 multi_filament=True)
-
-ff.plot(scale=1.5)
+inv.ff.plot(scale=1.5)
 
 # sf.eqwrite(pf,config=config['eq'])

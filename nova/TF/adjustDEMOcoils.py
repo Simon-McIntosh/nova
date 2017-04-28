@@ -18,7 +18,7 @@ from nova.shape import Shape
 from nova.firstwall import main_chamber
 
 import seaborn as sns
-rc = {'figure.figsize': [7 * 10 / 16, 7], 'savefig.dpi': 250,  # *12/16
+rc = {'figure.figsize': [7 * 10 / 16, 7], 'savefig.dpi': 150,  # *12/16
       'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
       'lines.linewidth': 0.75}
 sns.set(context='paper', style='white', font='sans-serif', palette='Set2',

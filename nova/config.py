@@ -4,7 +4,8 @@ from nova.DEMOxlsx import DEMO
 from amigo import IO
 
 
-def select(base={'TF': 'dtt', 'eq': 'SN'}, nTF=18, update=True, **kwargs):
+def select(base={'TF': 'dtt', 'eq': 'SN'}, nTF=18, update=True,
+           eqdir='../../eqdir', **kwargs):
     config = {'nTF': nTF}
     config['eq_base'] = base['eq']
     config['TF_base'] = base['TF']
@@ -19,7 +20,7 @@ def select(base={'TF': 'dtt', 'eq': 'SN'}, nTF=18, update=True, **kwargs):
             name, base['TF'], nTF, config['nPF'], config['nCS'])
     else:
         config['eq'] = '{:s}_{:s}_{:d}TF'.format(name, base['TF'], nTF)
-    setup = Setup(base['eq'])
+    setup = Setup(base['eq'], eqdir=eqdir)
     if update:  # update eqdsk filename
         setup.filename = setup.eqdir + config['eq'] + '.eqdsk'
     return config, setup

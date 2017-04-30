@@ -85,7 +85,7 @@ shp.add_vessel(rb.segment['vessel_outer'])
 # shp.minimise(ripple=ripple,verbose=True)
 shp.tf.fill()
 
-sf.eqwrite(sf, config='SXex')
+
 '''
 inv.Lnorm = Lnorm
 sw = SWING(inv,sf)
@@ -141,12 +141,12 @@ inv.solve_slsqp()
 
 eq = EQ(sf,pf,dCoil=2,sigma=0,boundary=tf.get_loop(expand=0),n=2e4)
 
-eq.get_Vcoil() 
+eq.get_Vcoil()
 eq.gen_opp()
 sf.contour()
 
 tf.fill()
-pf.plot(coils=pf.coil,label=True,plasma=True,current=True) 
+pf.plot(coils=pf.coil,label=True,plasma=True,current=True)
 inv.plot_fix(tails=True)
 
 loops.plot_variables(inv.Io,scale=1,postfix='MA')
@@ -166,14 +166,14 @@ for swing in np.linspace(-20,80,5):
     pl.axis('off')
 
     inv.swing_fix(swing)
-    inv.solve() 
-    
+    inv.solve()
+
     inv.update_coils(plot=True)
-    sf.plot_coils(Color,coils=sf.coil,label=False,plasma=False,current=True) 
-    sf.plot_coils(Color,coils=eq.coil,label=False,plasma=False) 
- 
+    sf.plot_coils(Color,coils=sf.coil,label=False,plasma=False,current=True)
+    sf.plot_coils(Color,coils=eq.coil,label=False,plasma=False)
+
     eq.run()
-    
+
     sf.contour()
     eq.plasma()
     #eq.plotb()

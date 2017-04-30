@@ -46,6 +46,7 @@ class FE(object):
         self.initalize_BC()  # boundary conditions
         self.initalise_grid()  # grid
         self.initalise_couple()  # node coupling
+        self.matID = {}
 
     def initalise_couple(self):
         self.ncp = 0  # number of constraints
@@ -580,7 +581,7 @@ class FE(object):
             for el in self.part[part]['el']:
                 n = self.el['n'][el]  # node index pair
                 point = np.mean(self.X[n, :], axis=0)   # load at el mid-point
-                w = ff.topple(point, self.el['dx'][el],
+                w = ff.topple(point, cage.Iturn*self.el['dx'][el],
                               cage, Bpoint, method=method)[0]  # body force
                 self.add_load(el=el, W=w)  # bursting/toppling load
 
@@ -590,7 +591,8 @@ class FE(object):
                 ' not present in [' + ', '.join(self.part.keys()) + ']'
             raise ValueError(err_txt)
 
-    def part_nodes(self, index, part, ends=2):  # el ends, 0==start,1==end,2==both
+    def part_nodes(self, index, part, ends=2):
+        # el ends, 0==start,1==end,2==both
         if len(part) > 0:  # element index relitive to part
             index_type = 'element'
         else:  # node index
@@ -880,7 +882,7 @@ class FE(object):
         ax.set_zlim(-bb, bb)
         ax.axis('off')
 
-    def plot_twin(self, scale=5e-1, ms=5):
+    def plot_twin(self, scale=3e-8, ms=5):
         pl.figure(figsize=(10, 5))
         ax1 = pl.subplot(121)
         ax2 = pl.subplot(122, sharey=ax1)
@@ -901,11 +903,11 @@ class FE(object):
                                                 self.D['y'], self.D['z'])):
             j = i * self.ndof
             if np.linalg.norm([self.Fo[j], self.Fo[j + 2]]) != 0:
-                ax1.arrow(X[0] + dx, X[2] + dz,
+                ax1.arrow(X[0] + self.scale * dx, X[2] + self.scale * dz,
                           scale * self.Fo[j], scale * self.Fo[j + 2],
                           head_width=0.15, head_length=0.3)
             if np.linalg.norm([self.Fo[j + 1], self.Fo[j + 2]]) != 0:
-                ax2.arrow(X[1] + dy, X[2] + dz,
+                ax2.arrow(X[1] + self.scale * dy, X[2] + self.scale * dz,
                           scale * self.Fo[j + 1], scale * self.Fo[j + 2],
                           head_width=0.15, head_length=0.3)
 

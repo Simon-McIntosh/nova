@@ -30,7 +30,7 @@ config, setup = select(config, nTF=nTF, update=False)
 
 sf = SF(setup.filename)
 
-rb = RB(setup, sf)
+rb = RB(sf, setup)
 pf = PF(sf.eqdsk)
 profile = Profile(config['TF'], family='S', part='TF', nTF=nTF, obj='L')
 tf = TF(profile=profile)
@@ -56,7 +56,7 @@ inv = INV(sf,eq,tf)
 L = inv.grid_coils(offset=0.3)
 inv.fix_boundary_psi(N=25,alpha=1-1e-4,factor=1)  # add boundary points
 inv.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary points
-inv.add_null(factor=1,point=sf.Xpoint) 
+inv.add_null(factor=1,point=sf.Xpoint)
 
 inv.set_swing(width=250)
 inv.initialize_log()

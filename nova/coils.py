@@ -29,9 +29,9 @@ class PF(object):
         if eqdsk['ncoil'] > 0:
             CSindex = np.argmin(eqdsk['rc'])  # CS radius and width
             self.rCS, self.drCS = eqdsk['rc'][CSindex], eqdsk['drc'][CSindex]
-            for i, (r, z, dr, dz, I) in enumerate(zip(eqdsk['rc'], eqdsk['zc'],
-                                                      eqdsk['drc'], eqdsk['dzc'],
-                                                      eqdsk['Ic'])):
+            for i, (r, z, dr, dz, I) in enumerate(
+                   zip(eqdsk['rc'], eqdsk['zc'], eqdsk['drc'],
+                       eqdsk['dzc'], eqdsk['Ic'])):
                 self.add_coil(r, z, dr, dz, I, categorize=False)
                 if eqdsk['ncoil'] > 100 and i >= eqdsk['ncoil'] - 101:
                     print('exit set_coil loop - coils')
@@ -39,8 +39,9 @@ class PF(object):
         self.categorize_coils()
 
     def categorize_coils(self):
-        catogory = np.zeros(len(self.coil), dtype=[('r', 'float'), ('z', 'float'),
-                                                   ('index', 'int'), ('name', 'object')])
+        catogory = np.zeros(len(self.coil), dtype=[('r', 'float'),
+                            ('z', 'float'), ('index', 'int'),
+                            ('name', 'object')])
         for i, name in enumerate(self.coil):
             catogory[i]['r'] = self.coil[name]['r']
             catogory[i]['z'] = self.coil[name]['z']
@@ -50,10 +51,10 @@ class PF(object):
         CSsort = CSsort[CSsort['r'] < self.rCS + self.drCS]
         PFsort = np.sort(catogory, order='z')  # sort PF,  z
         PFsort = PFsort[PFsort['r'] > self.rCS + self.drCS]
-        self.index = {'PF': {'n': len(PFsort['index']), 'index': PFsort['index'],
-                             'name': PFsort['name']},
-                      'CS': {'n': len(CSsort['index']), 'index': CSsort['index'],
-                             'name': CSsort['name']}}
+        self.index = {'PF': {'n': len(PFsort['index']),
+                             'index': PFsort['index'], 'name': PFsort['name']},
+                      'CS': {'n': len(CSsort['index']),
+                             'index': CSsort['index'], 'name': CSsort['name']}}
 
     def add_coil(self, r, z, dr, dz, I, categorize=True):
         name = 'Coil{:1.0f}'.format(next(self.nC))
@@ -104,7 +105,6 @@ class PF(object):
         Dr, Dz = self.coil[name]['dr'], self.coil[name]['dz']
         Dr = abs(Dr)
         Dz = abs(Dz)
-        #self.coil_o[name] = {}
         if self.coil[name]['I'] != 0:
             if Dr > 0 and Dz > 0 and 'plasma' not in name:
                 nr, nz = np.ceil(Dr / dCoil), np.ceil(Dz / dCoil)
@@ -138,8 +138,8 @@ class PF(object):
                 bundle = self.coil[name]
         return bundle
 
-    def plot_coil(self, coils, label=False, current=False, coil_color=None, fs=12,
-                  alpha=1):
+    def plot_coil(self, coils, label=False, current=False, coil_color=None,
+                  fs=12, alpha=1):
         if coil_color is None:
             color = colors
         else:
@@ -175,7 +175,8 @@ class PF(object):
                 pl.text(r + drs, z + zshift, name, fontsize=fs * 1.1,
                         ha=ha, va='center', color=0.2 * np.ones(3))
             if current:
-                pl.text(r + drs, z - zshift, '{:1.1f}MA'.format(coil['I'] * 1e-6),
+                pl.text(r + drs, z - zshift,
+                        '{:1.1f}MA'.format(coil['I'] * 1e-6),
                         fontsize=fs * 1.1, ha=ha, va='center',
                         color=0.2 * np.ones(3))
 
@@ -231,7 +232,7 @@ class PF(object):
         coils = collections.OrderedDict()
         for side in Cmove.keys():
             if isinstance(dLo, (list, tuple)):
-                if not 'in' in side:
+                if 'in' not in side:
                     dL = dLo[0]
                 else:
                     dL = dLo[-1]
@@ -306,7 +307,8 @@ class TF(object):
             theta = np.pi / self.nTF
             rwall = twall / np.sin(theta)
             depth = np.tan(theta) * (rwp1 - rwall +
-                                     np.sqrt((rwall - rwp1)**2 - 4 * Acs / (2 * np.tan(theta))))
+                                     np.sqrt((rwall - rwp1)**2 - 4 *
+                                             Acs / (2 * np.tan(theta))))
             width = Acs / depth
             self.section['winding_pack'] = {'width': width, 'depth': depth}
         else:
@@ -316,7 +318,8 @@ class TF(object):
 
     def initalise_loops(self):
         self.x = {}
-        for loop in ['in', 'wp_in', 'cl', 'wp_out', 'out', 'nose', 'loop']:
+        for loop in ['in', 'wp_in', 'cl', 'wp_out', 'out', 'nose', 'loop',
+                     'trans_lower', 'trans_upper']:
             self.x[loop] = {'r': [], 'z': []}
 
     def transition_index(self, r_in, z_in, eps=1e-4):
@@ -354,20 +357,32 @@ class TF(object):
             self.x[loop]['r'], self.x[loop]['z'] = r, z
         return self.x
 
-    def split_loop(self):  # split inboard/outboard for fe model
+    def split_loop(self, plot=True):  # split inboard/outboard for fe model
         r, z = self.x['cl']['r'], self.x['cl']['z']
         index = self.transition_index(r, z)
         upper, lower = index['upper'], index['lower']
-        self.x['nose']['r'] = np.append(r[upper:], r[1:lower + 1])
-        self.x['nose']['z'] = np.append(z[upper:], z[1:lower + 1])
-        self.x['loop']['r'] = r[lower + 1:upper]
-        self.x['loop']['z'] = z[lower + 1:upper]
+        top, bottom = index['top'], index['bottom']
+        self.x['nose']['r'] = np.append(r[upper-1:], r[1:lower + 1])
+        self.x['nose']['z'] = np.append(z[upper-1:], z[1:lower + 1])
+        self.x['trans_lower']['r'] = r[lower:bottom]
+        self.x['trans_lower']['z'] = z[lower:bottom]
+        self.x['trans_upper']['r'] = r[top:upper]
+        self.x['trans_upper']['z'] = z[top:upper]
+        self.x['loop']['r'] = r[bottom-1:top+1]
+        self.x['loop']['z'] = z[bottom-1:top+1]
+
+        if plot:
+            pl.plot(self.x['cl']['r'], self.x['cl']['z'], 'o')
+            for name in ['nose', 'loop', 'trans_lower', 'trans_upper']:
+                r, z = self.x[name]['r'], self.x[name]['z']
+                pl.plot(r, z)
 
     # outer loop coordinate interpolators
     def loop_interpolators(self, trim=[0, 1], offset=0.75, full=False):
         r, z = self.x['cl']['r'], self.x['cl']['z']
         self.fun = {'in': {}, 'out': {}}
-        for side, sign in zip(['in', 'out', 'cl'], [-1, 1, 1]):  # inner/outer loop offset
+        # inner/outer loop offset
+        for side, sign in zip(['in', 'out', 'cl'], [-1, 1, 1]):
             r, z = self.x[side]['r'], self.x[side]['z']
             index = self.transition_index(r, z)
             r = r[index['lower'] + 1:index['upper']]
@@ -468,8 +483,8 @@ if __name__ is '__main__':  # test functions
 
     Lo = minimize_scalar(SALOME.OIS_placment,method='bounded',
                          args=(loop,(rp[0],zp[0])),bounds=[0,1]).x
-    xo = [Lo,0]             
-    L = minimize(SALOME.intersect,xo,method='L-BFGS-B', 
+    xo = [Lo,0]
+    L = minimize(SALOME.intersect,xo,method='L-BFGS-B',
                  bounds=([0.1,0.9],[0,15]),args=(xc,nhat,loop)).x
     pl.plot(loop['r'](L[0]),loop['z'](L[0]),'o')
     '''

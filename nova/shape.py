@@ -6,15 +6,14 @@ from scipy.optimize import fmin_slsqp
 import time
 from nova.DEMOxlsx import DEMO
 from nova.coils import TF
-from nova.loops import set_oppvar, get_oppvar, plot_oppvar, remove_oppvar, Profile
+from nova.loops import set_oppvar, get_oppvar, plot_oppvar, Profile
 from nova.coil_cage import coil_cage
 from nova.config import select
 import matplotlib.animation as manimation
-import sys
-import datetime
 from itertools import cycle
 from nova.streamfunction import SF
 from nova.config import Setup
+from amigo.time import clock
 
 
 class Shape(object):
@@ -85,7 +84,8 @@ class Shape(object):
                         self.bound[side]['z'][index[i]:index[i + 1]],
                         marker, markersize=6, color=next(self.color))
 
-    def minimise(self, verbose=False, ripple_limit=0.6, ripple=False, acc=0.002):
+    def minimise(self, verbose=False, ripple_limit=0.6, ripple=False,
+                 acc=0.002):
         tic = time.time()
         xnorm, bnorm = set_oppvar(self.loop.xo, self.loop.oppvar)  # normalize
         xnorm = fmin_slsqp(self.fit, xnorm, f_ieqcons=self.constraint_array,
@@ -95,7 +95,8 @@ class Shape(object):
             if self.profile.nTF == 'unset':
                 raise ValueError('requre \'nTF\' to solve ripple constraint')
             print('with ripple')
-            xnorm = fmin_slsqp(self.fit, xnorm, f_ieqcons=self.constraint_array,
+            xnorm = fmin_slsqp(self.fit, xnorm,
+                               f_ieqcons=self.constraint_array,
                                bounds=bnorm, acc=acc, iprint=-1,
                                args=(True, ripple_limit))
         xo = get_oppvar(self.loop.xo, self.loop.oppvar, xnorm)  # de-normalize
@@ -171,27 +172,12 @@ class Shape(object):
         FFMpegWriter = manimation.writers['ffmpeg']
         writer = FFMpegWriter(fps=20, bitrate=5000, codec='libx264',
                               extra_args=['-pix_fmt', 'yuv420p'])
+        timer = clock(len(self.xo))
         with writer.saving(fig, moviename, 100):
-            nS = len(self.xo)
-            to = time.time()
-            width = 35
             for i, xo in enumerate(self.xo):
-                self.frame(ax, demo, xo)
+                self.frame(ax, demo, xo=xo)
                 writer.grab_frame()
-
-                if i % 1 == 0 and i > 0:
-                    elapsed = time.time() - to
-                    remain = int((nS - i) / i * elapsed)
-                    prog_str = '\r{:1.0e}'.format(i)
-                    prog_str += ' elapsed {:0>8}s'.format(str(
-                        datetime.timedelta(seconds=int(elapsed))))
-                    prog_str += ' remain {:0>8}s'.format(str(
-                        datetime.timedelta(seconds=remain)))
-                    prog_str += ' complete {:1.1f}%'.format(1e2 * i / nS)
-                    nh = int(i / nS * width)
-                    prog_str += ' |' + nh * '#' + (width - nh) * '-' + '|'
-                    sys.stdout.write(prog_str)
-                    sys.stdout.flush()
+                timer.ticktoc()
 
     def frames(self, filename):
         fig, ax = pl.subplots(1, 2, figsize=(12, 8))
@@ -212,7 +198,7 @@ class Shape(object):
 
         self.loop.set_input(x=xo)
         # self.plot_bounds()
-        self.update()
+        # self.update()
         # self.tf.fill()
         geom.polyfill(self.cage.plasma_loop[:, 0],
                       self.cage.plasma_loop[:, 2],
@@ -237,7 +223,7 @@ if __name__ is '__main__':
 
     profile = Profile(config['TF'], family=family,
                       part='TF', nTF=nTF)  # ,load=False
-    shp = Shape(profile, nTF=nTF, obj='L', eqconf=config['eq'], ny=1)
+    shp = Shape(profile, nTF=nTF, obj='L', eqconf=config['eq_base'], ny=1)
     shp.add_vessel(demo.parts['Vessel']['out'])
     shp.minimise(ripple=ripple, verbose=False)
     cage = shp.cage
@@ -253,7 +239,7 @@ if __name__ is '__main__':
     '''
 
     x_in = demo.parts['TF_Coil']['in']
-    tf = TF(x_in=x_in,nTF=nTF)  
+    tf = TF(x_in=x_in,nTF=nTF)
     x = tf.get_loops(x_in)
     cage = coil_cage(nTF=18,rc=tf.rc,plasma={'config':config['eq']},ny=3)
     cage.set_TFcoil(x['cl'],smooth=True)
@@ -282,9 +268,9 @@ if __name__ is '__main__':
 
     pl.savefig('../Figs/ripple_referance')
 
-    '''
+
     filename = '{}_{}_{}'.format(config['TF'],family,ripple)
-    #shp.movie(filename)
-    shp.frames(filename)
+    shp.movie(filename)
+    #shp.frames(filename)
     #pl.savefig('../Figs/TFloop_{}.png'.format(family))
-    '''
+

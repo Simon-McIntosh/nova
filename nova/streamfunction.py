@@ -83,7 +83,8 @@ class SF(object):
         psi_ff = np.linspace(0, 1, self.nr)
         pad = np.zeros(self.nr)
         eq = {'name': name,
-              'nx': self.nr, 'ny': self.nz,  # Number of horizontal and vertical points
+              # Number of horizontal and vertical points
+              'nx': self.nr, 'ny': self.nz,
               'r': self.r, 'z': self.z,  # Location of the grid-points
               'rdim': self.r[-1] - self.r[0],  # Size of the domain in meters
               'zdim': self.z[-1] - self.z[0],  # Size of the domain in meters

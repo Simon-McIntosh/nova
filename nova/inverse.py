@@ -46,17 +46,30 @@ class INV(object):
         self.add_active([], empty=True)  # all coils active
         self.update_coils()
         self.log_scalar = ['rms', 'rmsID']
-        #'Fr_max','Fz_max','F_max','FzCS','Fsep','rms_bndry','Isum',
-        #'Imax','z_offset','FrPF','FzPF','dTpol'
+        # 'Fr_max','Fz_max','F_max','FzCS','Fsep','rms_bndry','Isum',
+        # 'Imax','z_offset','FrPF','FzPF','dTpol'
         self.log_array = ['Lo']  # ,'Iswing'
         self.log_iter = ['current_iter', 'plasma_iter', 'position_iter']
         self.log_plasma = ['plasma_coil']
         self.CS_Lnorm, self.CS_Znorm = 2, 1
         self.force_feild_active = False
+        self.boundary_initalised = False
 
-    def load_equlibrium(self, sf, expand=1.01, n=2.5e3):
+    def initalise_boundary(self, sf, n=1e3, expand=0.1,
+                           centre=0, width=363/(2*np.pi)):
+        self.load_equlibrium(sf, n=n, expand=expand)
+        self.set_boundary()
+        self.add_plasma()
+        self.set_swing(centre=centre, width=width,
+                       array=np.linspace(-0.5, 0.5, 3))
+        self.set_force_feild()
+        self.boundary_initalised = True
+
+    def load_equlibrium(self, sf, expand=0.25, n=2.5e3):
         self.eq = EQ(sf, self.pf, dCoil=self.dCoil,
                      boundary=sf.get_sep(expand=expand), n=n)
+        ex = sf.get_sep(expand=expand)
+        pl.plot(ex['R'], ex['Z'])
         self.update_coils()
 
     def set_force_feild(self):
@@ -64,10 +77,11 @@ class INV(object):
                               self.pf.sub_coil, self.pf.plasma_coil,
                               multi_filament=True)
 
-    def set_swing(self, centre=0, width=363 / (2 * np.pi), array=[-0.5, 0, 0.5]):
+    def set_swing(self, centre=0, width=363/(2*np.pi), array=[-0.5, 0, 0.5]):
         flux = centre - np.array(array) * width  # Webber/rad
         nC, nS = self.nC, len(flux)
-        self.swing = {'flux': flux, 'I': np.zeros((nS, nC)), 'rms': np.zeros(nS),
+        self.swing = {'flux': flux, 'I': np.zeros((nS, nC)),
+                      'rms': np.zeros(nS),
                       'FrPF': np.zeros(nS), 'FzPF': np.zeros(nS),
                       'FsepCS': np.zeros(nS), 'FzCS': np.zeros(nS),
                       'Isum': np.zeros(nS),
@@ -116,9 +130,12 @@ class INV(object):
             else:
                 state = 'passive'
             self.coil[state][name] = {'r': np.array([]), 'z': np.array([]),
-                                      'dr': np.array([]), 'dz': np.array([]), 'sub_name': np.array([]),
-                                      'I': np.array([]), 'Fr': np.array([]), 'Fz': np.array([]),
-                                      'Fr_sum': 0, 'Fz_sum': 0, 'I_sum': 0, 'Ro': 0, 'Zo': 0, 'Nf': 0}
+                                      'dr': np.array([]), 'dz': np.array([]),
+                                      'sub_name': np.array([]),
+                                      'I': np.array([]), 'Fr': np.array([]),
+                                      'Fz': np.array([]),
+                                      'Fr_sum': 0, 'Fz_sum': 0, 'I_sum': 0,
+                                      'Ro': 0, 'Zo': 0, 'Nf': 0}
 
     def initalise_current(self):
         adjust_coils = self.coil['active'].keys()
@@ -279,7 +296,7 @@ class INV(object):
                 self.fix['value'][i] = value + flux
         self.set_target()  # adjust target flux
 
-    def set_boundary(self, N=21, alpha=0.995):
+    def get_boundary(self, N=21, alpha=0.995):
         r, z = self.eq.sf.get_boundary(alpha=alpha)
         self.eq_spline()
         nr = -self.psi.ev(r, z, dx=1, dy=0)
@@ -297,14 +314,13 @@ class INV(object):
         return psi
 
     def fix_boundary_psi(self, N=21, alpha=0.995, factor=1):
-        r, z, Bdir = self.set_boundary(N=N, alpha=alpha)
+        r, z, Bdir = self.get_boundary(N=N, alpha=alpha)
         psi = self.get_psi(alpha) * np.ones(N)
         psi -= self.eq.sf.Xpsi  # normalise
         self.add_fix(r, z, psi, Bdir, ['psi_bndry'], [factor])
 
-    def fix_boundary_feild(self, N=21, alpha=0.995, factor=1, **kwargs):
-        r, z, Bdir = self.set_boundary(N=N, alpha=alpha)
-        #Bdir = kwargs.get('Bdir',Bdir)
+    def fix_boundary_feild(self, N=21, alpha=0.995, factor=1):
+        r, z, Bdir = self.get_boundary(N=N, alpha=alpha)
         self.add_fix(r, z, [0.0], Bdir, ['Bdir'], [factor])
 
     def add_null(self, factor=1, **kwargs):
@@ -361,58 +377,62 @@ class INV(object):
 
     def plot_fix(self, tails=True):
         self.get_weight()
-        if hasattr(self, 'wsqrt'):
-            weight = self.wsqrt / np.mean(self.wsqrt)
-        else:
-            weight = np.ones(len(self.fix['BC']))
-        Color = sns.color_palette('Set2', 8)
-        psi, Bdir, Brz = [], [], []
-        tail_length = 0.75
-        for bc, w in zip(self.fix['BC'], weight):
-            if 'psi' in bc:
-                psi.append(w)
-            elif bc == 'Bdir':
-                Bdir.append(w)
-            elif bc == 'Br' or bc == 'Bz':
-                Brz.append(w)
-        if len(psi) > 0:
-            psi_norm = tail_length / np.mean(psi)
-        if len(Bdir) > 0:
-            Bdir_norm = tail_length / np.mean(Bdir)
-        if len(Brz) > 0:
-            Brz_norm = tail_length / np.mean(Brz)
-        for r, z, bc, bdir, w in zip(self.fix['r'], self.fix['z'],
-                                     self.fix['BC'], self.fix['Bdir'], weight):
-            if bdir[0]**2 + bdir[1]**2 == 0:  # tails
-                direction = [0, -1]
+        if self.fix['n'] > 0:
+            if hasattr(self, 'wsqrt'):
+                weight = self.wsqrt / np.mean(self.wsqrt)
             else:
-                direction = bdir
-            # else:
-            #    d_dr,d_dz = self.get_gradients(bc,r,z)
-            #    direction = np.array([d_dr,d_dz])/np.sqrt(d_dr**2+d_dz**2)
-            if 'psi' in bc:
-                norm = psi_norm
-                marker, size, color = 'o', 7.5, Color[0]
-                pl.plot(r, z, marker, color=color, markersize=size)
-                pl.plot(r, z, marker, color=[1, 1, 1], markersize=0.3 * size)
-            else:
-                if bc == 'Bdir':
-                    norm = Bdir_norm
-                    marker, size, color, mew = 'o', 4, Color[1], 0.0
-                elif bc == 'null':
-                    norm = Brz_norm
-                    marker, size, color, mew = 'o', 2, Color[2], 0.0
-                elif bc == 'Br':
-                    norm = Brz_norm
-                    marker, size, color, mew = '_', 10, Color[2], 1.75
-                elif bc == 'Bz':
-                    norm = Brz_norm
-                    marker, size, color, mew = '|', 10, Color[2], 1.75
-                pl.plot(r, z, marker, color=color, markersize=size,
-                        markeredgewidth=mew)
-            if tails:
-                pl.plot([r, r + direction[0] * norm * w], [z, z + direction[1] * norm * w],
-                        color=color, linewidth=2)
+                weight = np.ones(len(self.fix['BC']))
+            Color = sns.color_palette('Set2', 8)
+            psi, Bdir, Brz = [], [], []
+            tail_length = 0.75
+            for bc, w in zip(self.fix['BC'], weight):
+                if 'psi' in bc:
+                    psi.append(w)
+                elif bc == 'Bdir':
+                    Bdir.append(w)
+                elif bc == 'Br' or bc == 'Bz':
+                    Brz.append(w)
+            if len(psi) > 0:
+                psi_norm = tail_length / np.mean(psi)
+            if len(Bdir) > 0:
+                Bdir_norm = tail_length / np.mean(Bdir)
+            if len(Brz) > 0:
+                Brz_norm = tail_length / np.mean(Brz)
+            for r, z, bc, bdir, w in zip(self.fix['r'], self.fix['z'],
+                                         self.fix['BC'], self.fix['Bdir'],
+                                         weight):
+                if bdir[0]**2 + bdir[1]**2 == 0:  # tails
+                    direction = [0, -1]
+                else:
+                    direction = bdir
+                # else:
+                #    d_dr,d_dz = self.get_gradients(bc,r,z)
+                #    direction = np.array([d_dr,d_dz])/np.sqrt(d_dr**2+d_dz**2)
+                if 'psi' in bc:
+                    norm = psi_norm
+                    marker, size, color = 'o', 7.5, Color[0]
+                    pl.plot(r, z, marker, color=color, markersize=size)
+                    pl.plot(r, z, marker, color=[1, 1, 1],
+                            markersize=0.3 * size)
+                else:
+                    if bc == 'Bdir':
+                        norm = Bdir_norm
+                        marker, size, color, mew = 'o', 4, Color[1], 0.0
+                    elif bc == 'null':
+                        norm = Brz_norm
+                        marker, size, color, mew = 'o', 2, Color[2], 0.0
+                    elif bc == 'Br':
+                        norm = Brz_norm
+                        marker, size, color, mew = '_', 10, Color[2], 1.75
+                    elif bc == 'Bz':
+                        norm = Brz_norm
+                        marker, size, color, mew = '|', 10, Color[2], 1.75
+                    pl.plot(r, z, marker, color=color, markersize=size,
+                            markeredgewidth=mew)
+                if tails:
+                    pl.plot([r, r + direction[0] * norm * w],
+                            [z, z + direction[1] * norm * w],
+                            color=color, linewidth=2)
 
     def set_target(self):
         self.T = (self.fix['value'] - self.BG).reshape((len(self.BG), 1))
@@ -530,24 +550,27 @@ class INV(object):
 
     def get_weight(self):
         Rf, Zf, BC, Bdir = self.unpack_fix()
-        weight = np.zeros(len(BC))
-        for i, (rf, zf, bc, bdir, factor) in enumerate(zip(Rf, Zf, BC, Bdir,
-                                                           self.fix['factor'])):
-            d_dr, d_dz = self.get_gradients(bc, rf, zf)
-            if 'psi' not in bc:  # (Br,Bz)
-                weight[i] = 1 / abs(np.sqrt(d_dr**2 + d_dz**2))
-            elif bc == 'psi_bndry':
-                weight[i] = 1 / abs(np.dot([d_dr, d_dz], bdir))
-        if 'psi_bndry' in self.fix['BC']:
-            wbar = np.mean([weight[i] for i, bc in enumerate(self.fix['BC'])
-                            if bc == 'psi_bndry'])
-        else:
-            wbar = np.mean(weight)
-        for i, bc in enumerate(BC):
-            if bc == 'psi_x' or bc == 'psi':  # psi point weights
-                weight[i] = wbar  # mean boundary weight
-        if (weight == 0).any():
-            warn('fix weight entry not set')
+        n = self.fix['n']
+        weight = np.zeros(n)
+        if n > 0:
+            for i, (rf, zf, bc, bdir, factor) in \
+                    enumerate(zip(Rf, Zf, BC, Bdir, self.fix['factor'])):
+                d_dr, d_dz = self.get_gradients(bc, rf, zf)
+                if 'psi' not in bc:  # (Br,Bz)
+                    weight[i] = 1 / abs(np.sqrt(d_dr**2 + d_dz**2))
+                elif bc == 'psi_bndry':
+                    weight[i] = 1 / abs(np.dot([d_dr, d_dz], bdir))
+            if 'psi_bndry' in self.fix['BC']:
+                wbar = np.mean([weight[i]
+                                for i, bc in enumerate(self.fix['BC'])
+                                if bc == 'psi_bndry'])
+            else:
+                wbar = np.mean(weight)
+            for i, bc in enumerate(BC):
+                if bc == 'psi_x' or bc == 'psi':  # psi point weights
+                    weight[i] = wbar  # mean boundary weight
+            if (weight == 0).any():
+                warn('fix weight entry not set')
 
         factor = np.reshape(self.fix['factor'], (-1, 1))
         weight = np.reshape(weight, (-1, 1))
@@ -604,7 +627,7 @@ class INV(object):
         return Lo
 
     # fit PF and CS coils to updated TF coil
-    def grid_coils(self, nCS=None, Zbound=None, gap=0.1, offset=0.3):
+    def grid_coils(self, nCS=None, Zbound=None, gap=0.1):
         self.gap = gap
         coil = deepcopy(self.pf.coil)  # copy pf coilset
         index = deepcopy(self.pf.index)
@@ -622,12 +645,12 @@ class INV(object):
                           dr=c['dr'], dz=c['dz'], I=c['I'])
         '''
         if Zbound == None:
-            zmin = [coil[name]['z']-coil[name]['dz']/2 
+            zmin = [coil[name]['z']-coil[name]['dz']/2
                     for name in self.pf.index['CS']['name']]
-            zmax = [coil[name]['z']+coil[name]['dz']/2 
+            zmax = [coil[name]['z']+coil[name]['dz']/2
                     for name in self.pf.index['CS']['name']]
             Zbound = [np.min(zmin)-gap/2,np.max(zmax)+gap/2]
-            self.update_limits(LCS=Zbound)   
+            self.update_limits(LCS=Zbound)
         '''
         if nCS == None:
             Lcs = np.zeros(index['CS']['n'] + 1)
@@ -642,7 +665,7 @@ class INV(object):
             nCS = index['CS']['n']
             Lcs = self.grid_CS(nCS=nCS, Zbound=Zbound, gap=gap)
         self.update_coils()
-        self.fit_PF(offset=offset)
+        self.fit_PF(TFoffset=self.TFoffset)
         return np.append(Lpf, Lcs)
 
     def get_rms_bndry(self):
@@ -704,10 +727,10 @@ class INV(object):
         self.shift_coil(name, dr, dz)
 
     def fit_PF(self, **kwargs):  # offset PF coils from TF
-        offset = kwargs.get('offset', self.TFoffset)
+        TFoffset = kwargs.get('TFoffset', self.TFoffset)
         dl = 0
         for name in self.PF_coils:
-            dr, dz = self.tf.Cshift(self.pf.coil[name], 'out', offset)
+            dr, dz = self.tf.Cshift(self.pf.coil[name], 'out', TFoffset)
             dl += dr**2 + dz**2
             self.shift_coil(name, dr, dz)
         return np.sqrt(dl / self.nPF)
@@ -848,15 +871,18 @@ class INV(object):
             I = vector
         F, dF = self.ff.set_force(I)  # set coil force and jacobian
         if grad.size > 0:  # calculate constraint jacobian
-            grad[:self.nPF] = -dF[:self.nPF, :, 1]  # PFz lower bound
-            grad[self.nPF:2 * self.nPF] = dF[:self.nPF, :, 1]  # PFz upper bound
-            grad[2 * self.nPF] = - \
-                np.sum(dF[self.nPF:, :, 1], axis=0)  # CSsum lower
+            # PFz lower bound
+            grad[:self.nPF] = -dF[:self.nPF, :, 1]
+            # PFz upper bound
+            grad[self.nPF:2 * self.nPF] = dF[:self.nPF, :, 1]
+            # CSsum lower
+            grad[2 * self.nPF] = -np.sum(dF[self.nPF:, :, 1], axis=0)
             # CS_ upper
             grad[2 * self.nPF + 1] = np.sum(dF[self.nPF:, :, 1], axis=0)
             for j in range(self.nCS - 1):  # evaluate each gap in CS stack
-                grad[2 * self.nPF + 2 + j] = np.sum(dF[self.nPF + j + 1:, :, 1], axis=0) -\
-                    np.sum(dF[self.nPF:self.nPF + j + 1, :, 1], axis=0)
+                grad[2 * self.nPF + 2 + j] = \
+                    np.sum(dF[self.nPF+j+1:, :, 1], axis=0) -\
+                    np.sum(dF[self.nPF:self.nPF+j+1, :, 1], axis=0)
         PFz = F[:self.nPF, 1]  # vertical force on PF coils
         PFz_limit = self.limit['F']['PFz']  # limit force
         constraint[:self.nPF] = -PFz_limit - PFz  # PFz lower bound
@@ -933,7 +959,13 @@ class INV(object):
         rms = self.update_position(Lnorm, store_update=True)
         return rms, jac
 
+    def check_state(self):
+        if not self.boundary_initalised:
+            errtxt = 'object not initalised, run \'self.initalise_boundary\''
+            raise ValueError(errtxt)
+
     def update_position(self, Lnorm, update_area=False, store_update=False):
+        self.check_state()
         self.iter['current'] == 0
         self.Lo['norm'] = np.copy(Lnorm)
         L = loops.denormalize_variables(Lnorm, self.Lo)
@@ -1029,7 +1061,7 @@ class INV(object):
     def minimize(self, Lnorm, method='ls'):
         self.iter['position'] == 0
         # self.set_Lo(L)  # set position bounds
-        #Lnorm = loops.normalize_variables(self.Lo)
+        # Lnorm = loops.normalize_variables(self.Lo)
 
         if method == 'bh':  # basinhopping
             # minimizer = {'method':'SLSQP','jac':True,#'args':True,'options':{'eps':1e-3}, #'jac':True,
@@ -1045,12 +1077,15 @@ class INV(object):
         elif method == 'de':  # differential_evolution
             bounds = [[0, 1] for _ in range(self.nL)]
             res = op.differential_evolution(self.update_position, bounds,
-                                            args=(False,), strategy='best1bin', maxiter=100, popsize=15, tol=0.01,
-                                            mutation=(0.5, 1), recombination=0.7, polish=True, disp=True)
+                                            args=(False,), strategy='best1bin',
+                                            maxiter=100, popsize=15, tol=0.01,
+                                            mutation=(0.5, 1),
+                                            recombination=0.7, polish=True,
+                                            disp=True)
             Lnorm, self.rms = res.x, res.fun
         elif method == 'ls':  # sequential least squares
             print('Optimising configuration:')
-            #opt = nlopt.opt(nlopt.LD_SLSQP,self.nL)
+            # opt = nlopt.opt(nlopt.LD_SLSQP,self.nL)
             opt = nlopt.opt(nlopt.LD_MMA, self.nL)
             opt.set_ftol_abs(5e-2)
             opt.set_ftol_rel(1e-2)
@@ -1081,12 +1116,13 @@ class INV(object):
         print('dt {:1.0f}s speedup {:1.0f}%'.format(
             dt, 100 * dfcpu / self.ncpu))
         print('total {:1.0f}s speedup {:1.0f}%'.format(self.ttotal,
-                                                       100 * self.fcpu / self.ncpu))
+              100 * self.fcpu / self.ncpu))
         print('')
 
     def initialize_log(self):
         self.log = {}
-        for var in self.log_scalar + self.log_array + self.log_iter + self.log_plasma:
+        for var in self.log_scalar + self.log_array\
+                + self.log_iter + self.log_plasma:
             self.log[var] = []
         self.iter = {'plasma': 0, 'position': 0, 'current': 0}
 
@@ -1107,18 +1143,20 @@ class INV(object):
         self.set_background()
         self.get_weight()
 
-    def snap_coils(self, offset=0.3):
-        L = self.grid_coils(offset=0.3)
-        self.set_Lo(L)  # set position bounds
-        Lnorm = loops.normalize_variables(self.Lo)
-        return Lnorm
+    def snap_coils(self, update_current=True, **kwargs):
+        if 'TFoffset' in kwargs:  # option to update TFoffset via kwarg
+            self.TFoffset = kwargs['TFoffset']
+        L = self.grid_coils()
+        if update_current:
+            self.set_Lo(L)  # set position bounds
+            Lnorm = loops.normalize_variables(self.Lo)
+            self.update_position(Lnorm, update_area=True)
 
     def update_current(self):
         self.Isum, self.IsumCS, self.IsumPF = 0, 0, 0
         self.ff.I = self.I  # pass current to force feild
         self.Icoil = np.zeros(len(self.coil['active'].keys()))
         for j, name in enumerate(self.coil['active']):
-            #Nfilament = self.pf.sub_coil[name+'_0']['Nf']
             Nfilament = self.coil['active'][name]['Nf']
             self.Icoil[j] = self.I[j] * Nfilament  # store current
             self.pf.coil[name]['I'] = self.Icoil[j] * self.Iscale
@@ -1142,8 +1180,8 @@ class INV(object):
         for i, flux in enumerate(self.Swing[::-1]):
             self.solve_slsqp(flux)
             Icoil[i] = self.Icoil
-        with open('../Data/' +
-                  self.tf.dataname.replace('TF.pkl', '_currents.txt'), 'w') as f:
+        dataname = self.tf.dataname.replace('TF.pkl', '_currents.txt')
+        with open('../Data/'+dataname, 'w') as f:
             f.write('Coil\tr [m]\tz [m]\tdr [m]\tdz [m]')
             f.write('\tI SOF [A]\tI EOF [A]\n')
             for j, name in enumerate(self.coil['active'].keys()):
@@ -1157,17 +1195,17 @@ class INV(object):
                     Icoil[0, j], Icoil[1, j])
                 f.write(name + position + size + current)
 
-    def fix_boundary(self):
-        self.fix_boundary_psi(N=25, alpha=1 - 1e-4,
-                              factor=1)  # add boundary points
-        # self.fix_boundary_feild(N=25,alpha=1-1e-4,factor=1)  # add boundary
-        # points
+    def set_boundary(self):
+        # add boundary points
+        self.fix_boundary_psi(N=25, alpha=1-1e-4, factor=1)
+        # add boundary feild
+        self.fix_boundary_feild(N=25, alpha=1-1e-4, factor=1)
         self.add_null(factor=1, point=self.eq.sf.Xpoint)
         self.initialize_log()
 
     def fix_target(self):
         Rex, arg = 1.5, 40
-        R = self.eq.sf.Xpoint[0] * (Rex - 1) / np.sin(arg * np.pi / 180)
+        R = self.eq.sf.Xpoint[0] * (Rex-1) / np.sin(arg*np.pi/180)
         target = (R, arg)
         self.add_alpha(1, factor=1, polar=target)  # target psi
         self.add_B(0, [-15], factor=1, polar=target)  # target alignment feild)
@@ -1182,7 +1220,7 @@ class SWING(object):
         self.wref = wref
 
         # self.inv.load_equlibrium(sf)
-        # self.inv.fix_boundary()
+        # self.inv.set_boundary()
         # self.inv.add_plasma()
         #self.Lnorm = inv.snap_coils()
         self.inv.set_swing(centre=0, width=self.wref,

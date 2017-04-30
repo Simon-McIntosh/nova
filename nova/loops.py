@@ -9,7 +9,6 @@ import seaborn as sns
 import pandas as pd
 from amigo.IO import trim_dir
 import pickle
-import json
 
 
 def add_value(Xo, i, name, value, lb, ub, clip=True):
@@ -102,7 +101,14 @@ def get_oppvar(xo, oppvar, xnorm):
     for i, var in enumerate(oppvar):
         var = check_var(var, xo)
         x[i] = x[i] * (xo[var]['ub'] - xo[var]['lb']) + xo[var]['lb']
-        #xo[var]['value'] = x[i]
+        # xo[var]['value'] = x[i]
+    return x
+
+
+def get_value(xo):
+    x = np.zeros(len(xo))
+    for i, name in enumerate(xo):
+        x[i] = xo[name]['value']
     return x
 
 
@@ -183,6 +189,7 @@ def close_loop(x, npoints):
 
 
 def set_limit(xo, limits=True):
+    print(xo)
     if limits:
         if xo['value'] < xo['lb']:
             xo['value'] = xo['lb']
@@ -570,7 +577,8 @@ class Sloop(object):  # polybezier
         self.set_tension()
 
     def verticies(self):
-        r1, r2, z2, height, top, bottom, upper, lower, dz, ds, alpha_s = self.get_xo()
+        r1, r2, z2, height, top, bottom,\
+            upper, lower, dz, ds, alpha_s = self.get_xo()
         r, z, theta = np.zeros(6), np.zeros(6), np.zeros(6)
         alpha_s *= np.pi / 180
         ds_z = ds * height / 2 * np.cos(alpha_s)
@@ -631,7 +639,7 @@ class Sloop(object):  # polybezier
         return x
 
     def plot(self, inputs={}, ms=3):
-        #color = cycle(sns.color_palette('Set2',5))
+        # color = cycle(sns.color_palette('Set2',5))
         x = self.draw(inputs=inputs)
         r, z, theta = self.verticies()
         c1, c2 = 0.75 * np.ones(3), 0.4 * np.ones(3)

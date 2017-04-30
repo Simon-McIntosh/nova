@@ -25,10 +25,10 @@ config, setup = select(base=base, update=False, nTF=18, nPF=5, nCS=3)
 
 sf = SF(setup.filename)
 pf = PF(sf.eqdsk)
-tf = TF(Profile(config['TF'], family='S', part='TF',
+tf = TF(profile=Profile(config['TF'], family='S', part='TF',
                 nTF=config['nTF'], obj='L', load=True))
 tf.fill()
-
+'''
 
 eq = EQ(sf, pf, dCoil=1.0, sigma=0, n=2e4,
         boundary=sf.get_sep(expand=1.1), zmin=sf.Xpoint[1] - 6)
@@ -63,10 +63,12 @@ eq.gen_opp()
 sf.contour(boundary=True, plot_vac=True)
 pf.plot(coils=pf.coil, label=True, plasma=False, current=True)
 inv.plot_fix(tails=True)
-rb = RB(setup, sf)
+'''
+rb = RB(sf, setup)
 rb.firstwall(mode='calc', plot=True, debug=False)
 rb.trim_sol()
 
+'''
 loops.plot_variables(inv.Io, scale=1, postfix='MA')
 loops.plot_variables(inv.Lo, scale=1)
 
@@ -74,3 +76,4 @@ sf.eqwrite(pf, config=config['eq'])
 
 pkl = PKL(config['eq'], directory='../../Movies/')
 pkl.write(data={'sf': sf, 'eq': eq, 'inv': inv})  # pickle data
+'''

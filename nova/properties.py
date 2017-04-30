@@ -45,7 +45,7 @@ class second_moment(object):
         Iyy = np.pi / 4 * (r**4 - ro**4)
         Izz = Iyy
         Ixx = Iyy + Izz
-        t = np.linspace(0, 2 * np.pi, 50)  # draw
+        t = np.linspace(0, 2 * np.pi, 20)  # draw
         y = np.append(r * np.cos(t), ro * np.cos(t[::-1]))
         z = np.append(r * np.sin(t), ro * np.sin(t[::-1]))
         patch = {'y': y, 'z': z}
@@ -159,6 +159,13 @@ class second_moment(object):
             pl.plot(0, 0, 's')
             pl.plot(self.C['y'], self.C['z'], 'o')
 
+    def get_pnt(self):
+        y, z = [], []
+        for p in self.patch:
+            y.append(p['y'])
+            z.append(p['z'])
+        return [y, z]
+
 
 if __name__ == '__main__':
 
@@ -168,3 +175,9 @@ if __name__ == '__main__':
     sm.add_shape('rect', b=d + 2 * s, h=w + i + o, dz=(i - o) / 2)
     sm.remove_shape('rect', b=d, h=w)
     sm.plot()
+
+    sm = second_moment()
+    sm.add_shape('circ', r=1, ro=0)
+    sm.plot()
+
+

@@ -45,7 +45,8 @@ class EQ(object):
     def resample(self, sigma=0, **kwargs):  # resample current density
         self.r, self.z = self.sf.r, self.sf.z
         self.r2d, self.z2d = self.sf.r2d, self.sf.z2d
-        self.dr, self.dz, self.dA = self.sf.dr, self.sf.dz, self.sf.dr * self.sf.dz
+        self.dr, self.dz = self.sf.dr, self.sf.dz
+        self.dA = self.sf.dr * self.sf.dz
         self.psi = self.sf.psi  # copy psi
         self.GSoper()  # apply GS opperator to psi
         # construct spline interpolator
@@ -73,7 +74,7 @@ class EQ(object):
                     index = var < boundary.get(key)
                 R, Z = R[index], Z[index]
         lim = np.array([R.min(), R.max(), Z.min(), Z.max()])
-        if 'expand' in boundary.keys():
+        if 'expand' in boundary.keys():  # expansion from boundary in meters
             expand = boundary.get('expand')
         else:
             expand = 0.5
@@ -657,7 +658,7 @@ class EQ(object):
 
         pl.imshow(scale*m.T,cmap=cmap,norm=norm,
                   extent=[rlim[0],rlim[-1],zlim[0],zlim[-1]],
-                  interpolation='nearest',origin='lower',alpha=1) 
+                  interpolation='nearest',origin='lower',alpha=1)
         c = pl.colorbar(orientation='horizontal',shrink=.6, pad=0.025, aspect=15)
         c.ax.set_xlabel(r'$J$ MAm$^{-2}$')
         c.set_ticks([caxis[0],0,caxis[1]])

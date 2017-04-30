@@ -321,15 +321,14 @@ class main_chamber(object):
         self.filename = '{}_{}'.format(date_str, self.name)  # chamber name
 
     def generate(self, eq_names, dr=0.225, psi_n=1.07,
-                 flux_fit=False, symetric=False, plot=False,
-                 eqdir='../../eqdir'):
+                 flux_fit=False, symetric=False, plot=False):
         self.set_filename(update=True)  # update date in filename
         self.profile.loop.reset_oppvar(symetric)  # reset loop oppvar
         self.set_bounds()
         self.config = {'dr': dr, 'psi_n': psi_n,
                        'flux_fit': flux_fit, 'Nsub': 100}
         self.config['eqdsk'] = []
-        sf_list = self.load_sf(eq_names, eqdir=eqdir)
+        sf_list = self.load_sf(eq_names)
         for sf in sf_list:  # convert input to list
             self.add_bound(sf)
         self.shp.add_interior(r_gap=0.001)  # add internal bound
@@ -338,10 +337,10 @@ class main_chamber(object):
         if plot:
             self.plot_chamber()
 
-    def load_sf(self, eq_names, eqdir='../../eqdir'):
+    def load_sf(self, eq_names):
         sf_dict, sf_list = OrderedDict(), []
         for configuration in eq_names:
-            setup = Setup(configuration, eqdir=eqdir)
+            setup = Setup(configuration)
             sf = SF(setup.filename)
             sf_dict[configuration] = sf.filename.split('/')[-1]
             sf_list.append(sf)

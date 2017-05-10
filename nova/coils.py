@@ -6,16 +6,19 @@ import seaborn as sns
 import matplotlib
 import collections
 import amigo.geom as geom
-from nova.loops import Profile
+from nova.loops import Profile, set_oppvar, get_oppvar, get_value
 from nova.config import Setup
 from nova.streamfunction import SF
 import nova.cross_coil as cc
-colors = sns.color_palette('Paired', 12)
+from nova.coil_cage import coil_cage
+from nova.shape import Shape
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 from nova.DEMOxlsx import DEMO
 from warnings import warn
 from nova.inverse import INV
 from copy import deepcopy
+
+colors = sns.color_palette('Paired', 12)
 
 
 class PF(object):
@@ -25,6 +28,7 @@ class PF(object):
         self.plasma_coil = collections.OrderedDict()
 
     def set_coils(self, eqdsk):
+        self.xo = [eqdsk['rcentr'], eqdsk['zmid']]
         self.coil = collections.OrderedDict()
         if eqdsk['ncoil'] > 0:
             CSindex = np.argmin(eqdsk['rc'])  # CS radius and width
@@ -40,21 +44,34 @@ class PF(object):
 
     def categorize_coils(self):
         catogory = np.zeros(len(self.coil), dtype=[('r', 'float'),
-                            ('z', 'float'), ('index', 'int'),
-                            ('name', 'object')])
+                            ('z', 'float'), ('theta', 'float'),
+                            ('index', 'int'), ('name', 'object')])
         for i, name in enumerate(self.coil):
             catogory[i]['r'] = self.coil[name]['r']
             catogory[i]['z'] = self.coil[name]['z']
+            catogory[i]['theta'] = np.arctan2(self.coil[name]['z']-self.xo[1],
+                                              self.coil[name]['r']-self.xo[0])
             catogory[i]['index'] = i
             catogory[i]['name'] = name
         CSsort = np.sort(catogory, order=['r', 'z'])  # sort CS, r then z
         CSsort = CSsort[CSsort['r'] < self.rCS + self.drCS]
-        PFsort = np.sort(catogory, order='z')  # sort PF,  z
+        PFsort = np.sort(catogory, order='theta')  # sort PF,  z
         PFsort = PFsort[PFsort['r'] > self.rCS + self.drCS]
         self.index = {'PF': {'n': len(PFsort['index']),
                              'index': PFsort['index'], 'name': PFsort['name']},
                       'CS': {'n': len(CSsort['index']),
                              'index': CSsort['index'], 'name': CSsort['name']}}
+        self.sort()  # sort pf.coil dict [PF,CS]
+
+    def sort(self):  # order coil dict for use by inverse.py
+        coil = deepcopy(self.coil)
+        self.coil = collections.OrderedDict()
+        for name in np.append(self.index['PF']['name'],
+                              self.index['CS']['name']):
+            self.coil[name] = coil[name]
+        nPF, nCS = self.index['PF']['n'], self.index['CS']['n']
+        self.index['PF']['index'] = np.arange(0, nPF)
+        self.index['CS']['index'] = np.arange(nPF, nPF+nCS)
 
     def add_coil(self, r, z, dr, dz, I, categorize=True):
         name = 'Coil{:1.0f}'.format(next(self.nC))
@@ -84,7 +101,7 @@ class PF(object):
             names.append(name)
         return nc, rc, zc, drc, dzc, Ic, names
 
-    def grid_coils(self, dCoil=-1):
+    def mesh_coils(self, dCoil=-1):
         if dCoil < 0:  # dCoil not set, use stored value
             if not hasattr(self, 'dCoil'):
                 self.dCoil = 0
@@ -114,8 +131,8 @@ class PF(object):
                 R, Z = np.meshgrid(r, z, indexing='ij')
                 R, Z = np.reshape(R, (-1, 1)), np.reshape(Z, (-1, 1))
                 Nf = len(R)  # filament number
-                #self.coil_o[name]['Nf'] = Nf
-                #self.coil_o[name]['Io'] = self.pf.pf_coil[name]['I']
+                # self.coil_o[name]['Nf'] = Nf
+                # self.coil_o[name]['Io'] = self.pf.pf_coil[name]['I']
                 I = self.coil[name]['I'] / Nf
                 bundle = {'r': np.zeros(Nf), 'z': np.zeros(Nf),
                           'dr': dr * np.ones(Nf), 'dz': dz * np.ones(Nf),
@@ -123,9 +140,10 @@ class PF(object):
                           'Nf': 0}
                 for i, (r, z) in enumerate(zip(R, Z)):
                     sub_name = name + '_{:1.0f}'.format(i)
-                    self.sub_coil[sub_name] = {'r': r, 'z': z, 'dr': dr, 'dz': dz,
+                    self.sub_coil[sub_name] = {'r': r, 'z': z,
+                                               'dr': dr, 'dz': dz,
                                                'I': I, 'Nf': Nf,
-                                               'rc': np.sqrt(dr**2 + dz**2) / 2}
+                                               'rc': np.sqrt(dr**2 + dz**2)/2}
                     bundle['r'][i], bundle['z'][i] = r, z
                     bundle['sub_name'] = np.append(
                         bundle['sub_name'], sub_name)
@@ -263,11 +281,13 @@ class TF(object):
 
     def __init__(self, **kwargs):
         self.initalise_loops()  # initalise loop family
+        self.initalise_cage(**kwargs)
         if 'sf' in kwargs:
             self.sf = kwargs['sf']
         if 'profile' in kwargs:
             self.profile = kwargs['profile']
             self.update_profile()
+            self.nTF = self.profile.nTF
         elif 'x_in' in kwargs and 'nTF' in kwargs:
             self.x_in = kwargs['x_in']
             self.nTF = kwargs['nTF']
@@ -284,11 +304,47 @@ class TF(object):
 
     def update_profile(self):
         self.x_in = self.profile.loop.draw()  # inner loop profile
+        self.loop = self.profile.loop
         if hasattr(self.profile, 'nTF'):
             self.nTF = self.profile.nTF
         else:
             self.nTF = 18
             warn('using default nTF: {1.0f}'.format(self.nTF))
+
+    def initalise_cage(self, **kwargs):
+        self.sep = kwargs.get('sep', 'unset')
+        self.alpha = kwargs.get('alpha', 1-1e-4)
+        self.ripple = kwargs.get('ripple', True)
+        self.ripple_limit = kwargs.get('ripple_limit', 0.6)
+        self.nr = kwargs.get('nr', 1)
+        self.ny = kwargs.get('ny', 1)
+        self.update_cage = False
+
+    def set_cage(self):  # requires profile loop definition for TF
+        if hasattr(self, 'sf'):  # streamfunction set
+            plasma = {'sf': sf}
+        elif self.sep is not 'unset':  # seperatrix set
+            plasma = {'r': self.sep['r'], 'z': self.sep['z']}
+        else:
+            errtxt = 'TF cage requires ether:\n'
+            errtxt += 'streamfunction opject \'sf\' or\n'
+            errtxt += 'seperatrix boundary dict \'sep['r'] and sep[\'z\]\''
+            raise ValueError(errtxt)
+        self.cage = coil_cage(nTF=self.nTF, rc=self.rc, plasma=plasma,
+                              ny=self.ny, nr=self.nr, alpha=self.alpha)
+        self.update_cage = True
+        self.initalise_loop()
+
+    def initalise_loop(self):
+        x = get_value(self.loop.xo)
+        xloop = self.get_loops(self.loop.draw(x=x))  # update tf
+        if self.update_cage:
+            self.cage.set_TFcoil(xloop['cl'], smooth=False)  # update coil cage
+        return xloop
+
+    def update_attr(self, **kwargs):
+        for attr in ['sep', 'alpha', 'ripple', 'ripple_limit', 'ny', 'nr']:
+            setattr(self, attr, kwargs.get(attr, getattr(self, attr)))
 
     def adjust_xo(self, name, **kwargs):
         self.profile.loop.adjust_xo(name, **kwargs)
@@ -312,7 +368,9 @@ class TF(object):
             width = Acs / depth
             self.section['winding_pack'] = {'width': width, 'depth': depth}
         else:
-            warn('using default winding pack dimensions')
+            warntxt = 'using default winding pack dimensions'
+            warntxt += ('pass sf object to tf to enable wp sizing')
+            warn(warntxt)
             self.section['winding_pack'] = {'width': 0.625, 'depth': 1.243}
         self.rc = self.section['winding_pack']['width'] / 2
 
@@ -382,7 +440,7 @@ class TF(object):
         r, z = self.x['cl']['r'], self.x['cl']['z']
         self.fun = {'in': {}, 'out': {}}
         # inner/outer loop offset
-        for side, sign in zip(['in', 'out', 'cl'], [-1, 1, 1]):
+        for side, sign in zip(['in', 'out', 'cl'], [-1, 1, 0]):
             r, z = self.x[side]['r'], self.x[side]['z']
             index = self.transition_index(r, z)
             r = r[index['lower'] + 1:index['upper']]
@@ -402,6 +460,9 @@ class TF(object):
             self.fun[side]['L'] = geom.length(r, z, norm=False)[-1]
             self.fun[side]['dr'] = self.fun[side]['r'].derivative()
             self.fun[side]['dz'] = self.fun[side]['z'].derivative()
+
+    def norm(self, L, loop, point):
+        return (loop['r'](L) - point[0])**2 + (loop['z'](L) - point[1])**2
 
     def Cshift(self, coil, side, dL):  # shift pf coils to tf track
         if 'in' in side:
@@ -455,6 +516,105 @@ class TF(object):
         self.rzGet()
         self.fill(**kwargs)
 
+    def add_vessel(self, vessel, npoint=80, offset=[0.12, 0.2]):
+        rvv, zvv = geom.rzSLine(vessel['r'], vessel['z'], npoint)
+        rvv, zvv = geom.offset(rvv, zvv, offset[1])
+        rmin = np.min(rvv)
+        rvv[rvv <= rmin + offset[0]] = rmin + offset[0]
+        self.shp.add_bound({'r': rvv, 'z': zvv}, 'internal')  # vessel
+        self.shp.add_bound({'r': np.min(rvv) - 5e-3, 'z': 0}, 'interior')
+
+    def update_loop(self, xnorm, *args):
+        x = get_oppvar(self.loop.xo, self.loop.oppvar, xnorm)
+        xloop = self.get_loops(self.loop.draw(x=x))  # update tf
+        if self.update_cage:
+            self.cage.set_TFcoil(xloop['cl'], smooth=False)  # update coil cage
+        return xloop
+
+    def constraints(self, xnorm, *args):
+        ripple, ripple_limit = args
+        # de-normalize
+        if ripple:  # constrain ripple contour
+            xloop = self.update_loop(xnorm, *args)
+            constraint = np.array([])
+            for side, key in zip(['internal', 'interior', 'external'],
+                                 ['in', 'in', 'out']):
+                constraint = np.append(constraint,
+                                       self.shp.dot_diffrence(xloop[key],
+                                                              side))
+            self.cage.set_TFcoil({'r': xloop['cl']['r'],
+                                  'z': xloop['cl']['z']})
+            max_ripple = self.cage.get_ripple()
+            edge_ripple = self.cage.edge_ripple(npoints=10)
+            constraint = np.append(constraint, ripple_limit - edge_ripple)
+            constraint = np.append(constraint, ripple_limit - max_ripple)
+        else:  # constraint from shape
+            constraint = self.shp.geometric_constraints(xnorm, *args)
+        return constraint
+
+        '''
+
+        else:
+            if self.profile.obj is 'E':
+                errtxt = 'nTF and SFconfig keywords not set\n'
+                errtxt += 'unable to calculate stored energy\n'
+                errtxt += 'initalise with \'nTF\' keyword'
+                raise ValueError(errtxt)
+        '''
+
+    def objective(self, xnorm, *args):
+        # loop length or loop volume (torus)
+        if self.profile.obj == 'L' or self.profile.obj == 'V':
+            objF = self.shp.geometric_objective(xnorm, *args)
+        elif self.profile.obj == 'E':
+            objF = self.cage.energy()
+        return objF
+
+    def minimise(self, vessel, verbose=False, **kwargs):
+        if not hasattr(self, 'profile'):
+            raise ValueError('minimisation requires profile object')
+
+        self.set_cage()  # initalise cage if ripple=True
+        self.update_attr(**kwargs)
+        # call shape called from within tf (dog wags tail)
+        self.profile.initalise_loop(self.profile.family)  # forget previous
+        self.shp = Shape(self.profile, objective='L')
+        # tailor limits on loop parameters (l controls loop tension)
+        self.shp.loop.adjust_xo('upper', lb=0.6)
+        self.shp.loop.adjust_xo('lower', lb=0.6)
+        self.shp.loop.adjust_xo('l', lb=0.5)  # don't go too high (<1.2)
+        self.add_vessel(vessel)  # add vessel constraints
+
+        # pass constraint array and objective to loop optimiser
+        self.shp.args = (self.ripple, self.ripple_limit)
+        self.shp.constraints = self.constraints
+        self.shp.objective = self.objective
+        self.shp.update = self.update_loop  # called on exit from minimizer
+
+        self.shp.minimise(verbose=verbose)
+
+        '''
+        tic = time.time()
+        xnorm, bnorm = set_oppvar(self.loop.xo, self.loop.oppvar)  # normalize
+        xnorm = fmin_slsqp(self.fit, xnorm, f_ieqcons=self.constraint_array,
+                           bounds=bnorm, acc=acc, iprint=-1,
+                           args=(False, ripple_limit))
+        if ripple:  # re-solve with ripple constraint
+            if self.profile.nTF == 'unset':
+                raise ValueError('requre \'nTF\' to solve ripple constraint')
+            print('with ripple')
+            xnorm = fmin_slsqp(self.fit, xnorm,
+                               f_ieqcons=self.constraint_array,
+                               bounds=bnorm, acc=acc, iprint=-1,
+                               args=(True, ripple_limit))
+        xo = get_oppvar(self.loop.xo, self.loop.oppvar, xnorm)  # de-normalize
+
+        self.loop.set_input(x=xo)  # inner loop
+        self.profile.write()  # store loop
+        if verbose:
+            self.toc(tic)
+        '''
+
 
 if __name__ is '__main__':  # test functions
 
@@ -462,16 +622,18 @@ if __name__ is '__main__':  # test functions
     config = {'TF': 'SN', 'eq': 'SN_{:d}PF_{:d}TF'.format(nPF, nTF)}
     setup = Setup(config['eq'])
     sf = SF(setup.filename)
-    profile = Profile(config['TF'], family='S', part='TF', nTF=nTF, obj='L',
-                      load=True)
+    profile = Profile(config['TF'], family='S', part='TF', nTF=nTF,
+                      obj='E', load=True, npoints=20)
     # profile.loop.plot()
     tf = TF(profile=profile, sf=sf)
-    tf.fill()
 
     demo = DEMO()
     demo.fill_part('Vessel')
     demo.fill_part('Blanket')
     demo.plot_ports()
+
+    tf.minimise(demo.parts['Vessel']['out'], verbose=True, ripple=False)
+    tf.fill()
 
     rp, zp = demo.port['P0']['right']['r'], demo.port['P0']['right']['z']
     pl.plot(rp, zp, 'k', lw=3)

@@ -19,7 +19,7 @@ Color = cycle(sns.color_palette('Set2'))
 
 pkl = PKL('SXdev', directory='../../Movies/')
 
-name = 'SX'
+name = 'SN'
 
 nTF, ripple = 18, True
 base = {'TF': 'dtt', 'eq': 'DTT_SN', 'name': name}
@@ -28,40 +28,61 @@ config, setup = select(base, nTF=nTF, update=False)
 sf = SF(setup.filename)
 pf = PF(sf.eqdsk)
 
+
 for coil in pf.index['CS']['name']:
     pf.coil[coil]['r'] = 2.7
     pf.coil[coil]['dr'] = 0.8
 
 profile = Profile(config['TF'], family='S', part='TF', nTF=nTF, obj='L')
 tf = TF(profile=profile, sf=sf)
-# tf.adjust_xo('dz',value=-2)
-# tf.fill()
 
-eq = EQ(sf, pf, dCoil=2.0, sigma=0,
-        boundary=sf.get_sep(expand=1.0), zmin=-10, n=2e3)
 
-inv = INV(pf, tf, dCoil=0.25)
-inv.load_equlibrium(sf)
+inv = INV(pf, tf, dCoil=2.5)
+inv.colocate(sf, n=1e3, expand=0.5, centre=0, width=363/(2*np.pi))
 
-inv.fix_boundary()
-inv.fix_target()
-inv.plot_fix(tails=True)
+#inv.set_limit(FPFz=50)
 
-inv.add_plasma()
-Lnorm = inv.snap_coils()
+inv.grid_PF(nPF=4)
+
+
+#inv.wrap_PF(solve=True)
+
+inv.limit['L']['Coil8'] = [0.98,0.99]
+inv.optimize()
+#
+
+#pf.coil['Coil5']['I'] *= 1.3
+
+
+
+pf.plot(label=True, current=True)
+pf.plot(subcoil=True, plasma=True)
+tf.fill()
+
+inv.eq.run(update=False)
+sf.contour()
+
+inv.ff.plot()
+inv.plot_fix()
+inv.plot_coils()
+
+#loops.plot_variables(inv.Io, scale=1, postfix='MA')
+#loops.plot_variables(inv.Lo, scale=1)
+
 
 '''
 Lpf = inv.grid_PF(nPF=4)
 Lcs = inv.grid_CS(nCS=5,Zbound=[-10,8],gap=0.1,Ro=2.7,dr=0.8)
 L = np.append(Lpf,Lcs)
 inv.set_Lo(L)  # set position bounds
+
 Lnorm = loops.normalize_variables(inv.Lo)
-'''
+
 
 inv.set_swing(centre=0, width=10, array=np.linspace(-0.5, 0.5, 3))
 inv.set_force_feild()
 inv.update_position(Lnorm, update_area=True)
-inv.optimize(Lnorm)
+#inv.optimize(Lnorm)
 
 
 #swing = SWING(inv,sf,plot=True)
@@ -84,7 +105,7 @@ shp = Shape(tf.profile, eqconf=config['eq_base'], ny=3)
 shp.add_vessel(rb.segment['vessel_outer'])
 # shp.minimise(ripple=ripple,verbose=True)
 shp.tf.fill()
-
+'''
 
 '''
 inv.Lnorm = Lnorm
@@ -98,6 +119,7 @@ for ends,name in zip([0,-1],['SOF','EOF']):
     sf.eqwrite(pf,config='SXex_{}'.format(name))
 '''
 
+'''
 rb.write_json(tf=shp.tf)
 
 loops.plot_variables(inv.Io, scale=1, postfix='MA')
@@ -105,7 +127,7 @@ loops.plot_variables(inv.Lo, scale=1)
 
 sf.eqwrite(pf, config='SXex')
 pkl.write(data={'sf': sf, 'eq': eq, 'inv': inv})  # pickle data
-
+'''
 
 '''
 eq.gen_opp()

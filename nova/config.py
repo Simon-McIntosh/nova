@@ -2,6 +2,7 @@ import numpy as np
 import collections
 from nova.DEMOxlsx import DEMO
 from amigo import IO
+import nova
 
 
 def select(base={'TF': 'dtt', 'eq': 'SN'}, nTF=18, update=True, **kwargs):
@@ -27,9 +28,13 @@ def select(base={'TF': 'dtt', 'eq': 'SN'}, nTF=18, update=True, **kwargs):
 
 class Setup(object):
 
-    def __init__(self, configuration='', eqdir='../../eqdsk/'):
-        eqdir = IO.trim_dir(eqdir)
-        self.eqdir = eqdir
+    # preferance for all eqdsks should be stored in Nova/eqdsk/ or subdirs
+    # overide with eqdsk keyword
+    def __init__(self, configuration='', **kwargs):
+        eqdir = '/'.join(nova.__file__.split('/')[:-2])+'/eqdsk/'
+        self.eqdir = kwargs.get('eqdir', eqdir)
+        if 'subdir' in kwargs:
+            self.eqdir += kwargs['subdir']+'/'
         self.configuration = configuration
         self.set_defaults()
         self.update(configuration)

@@ -8,9 +8,6 @@ from amigo import geom
 from scipy.optimize import minimize_scalar
 from nova import geqdsk
 from nova.inductance import neumann
-import time
-from nova.coils import TF
-from nova.DEMOxlsx import DEMO
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from warnings import warn
@@ -234,7 +231,8 @@ class coil_cage(object):
         pl.axis('equal')
         pl.axis('off')
 
-    def plot_contours(self, variable='ripple', n=3e3, loop_offset=-1, **kwargs):
+    def plot_contours(self, variable='ripple', n=3e3, loop_offset=-1,
+                      **kwargs):
         if 'loop' in kwargs:
             loop_dict = kwargs['loop']
             loop = np.zeros((len(loop_dict['r']), 3))
@@ -333,6 +331,7 @@ if __name__ is '__main__':
             font_scale=7 / 8, rc=rc)
     color = sns.color_palette('Set2')
 
+    '''  # can not import tf object for example - place elsewhere
     demo = DEMO()
     demo.fill_loops()
 
@@ -359,20 +358,21 @@ if __name__ is '__main__':
     tic = time.time()
     print('energy {:1.3f}GJ'.format(1e-9 * cage.energy()))
     print('time A {:1.3f}s'.format(time.time() - tic))
+    '''
 
     '''
     B = np.zeros((tf.npoints,3))
     for i,(r,z) in enumerate(zip(tf.x['cl']['r'],tf.x['cl']['z'])):
         B[i,:] = cage.Iturn*cage.point((r,0,z),variable='feild')
-        
+
     npoints = 200
     rcl = np.linspace(np.min(tf.x['cl']['r']),np.max(tf.x['cl']['r']),npoints)
     zcl = cage.eqdsk['zmagx']*np.ones(npoints)
     Bcl = np.zeros((npoints,3))
-    
+
     for i,(r,z) in enumerate(zip(rcl,zcl)):
         Bcl[i,:] = cage.Iturn*cage.point((r,0,z),variable='feild')
-        
+
     pl.figure(figsize=(8,6))
     pl.plot(tf.x['cl']['r'],abs(B[:,1]))
     pl.plot(rcl,abs(Bcl[:,1]))

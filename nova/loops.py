@@ -46,8 +46,8 @@ def plot_variables(Xo, eps=1e-2, fmt='1.2f', scale=1, postfix=''):
     ax = pl.gca()
     ax.get_xaxis().set_visible(False)
     patch = ax.patches
-    #values = [xo[var]['value'] for var in xo]
-    #xnorms = [xo[var]['xnorm'] for var in xo]
+    # values = [xo[var]['value'] for var in xo]
+    # xnorms = [xo[var]['xnorm'] for var in xo]
     for p, value, norm, var in zip(patch, Xo['value'], Xo['norm'], Xo['name']):
         x = p.get_width()
         if norm < 0:
@@ -101,7 +101,6 @@ def get_oppvar(xo, oppvar, xnorm):
     for i, var in enumerate(oppvar):
         var = check_var(var, xo)
         x[i] = x[i] * (xo[var]['ub'] - xo[var]['lb']) + xo[var]['lb']
-        # xo[var]['value'] = x[i]
     return x
 
 
@@ -120,8 +119,8 @@ def remove_oppvar(oppvar, var):
 def plot_oppvar(xo, oppvar, eps=1e-2, fmt='1.2f', scale=1, postfix=''):
     xnorm, bnorm = set_oppvar(xo, oppvar)
     for var in xo:
-        xo[var]['xnorm'] = (xo[var]['value'] - xo[var]['lb']) / (xo[var]['ub'] -
-                                                                 xo[var]['lb'])
+        xo[var]['xnorm'] = (xo[var]['value'] - xo[var]['lb']) /\
+                           (xo[var]['ub'] - xo[var]['lb'])
     data = pd.DataFrame(xo).T
     data.reset_index(level=0, inplace=True)
     # pl.figure(figsize=(8,8))
@@ -189,7 +188,6 @@ def close_loop(x, npoints):
 
 
 def set_limit(xo, limits=True):
-    print(xo)
     if limits:
         if xo['value'] < xo['lb']:
             xo['value'] = xo['lb']

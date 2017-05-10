@@ -10,6 +10,7 @@ from amigo import geom
 from amigo.addtext import linelabel
 from matplotlib import gridspec
 from scipy.optimize import minimize_scalar, minimize
+from copy import deepcopy
 import pylab as pl
 import numpy as np
 from warnings import warn
@@ -36,11 +37,12 @@ class architect(object):
                                part='TF', nTF=nTF, obj=obj, npoints=50)
         self.sf = SF(setup.filename)
         self.pf = PF(self.sf.eqdsk)
+        self.coil_o = deepcopy(self.pf.coil)  # refernace coil positions
         self.tf = TF(profile=self.profile, sf=self.sf)
         #self.tf.split_loop()  # section tf for use in FE solver
         self.loop = self.tf.profile.loop
 
-        self.inv = INV(self.pf, self.tf, dCoil=2.5, TFoffset=2.3)
+        self.inv = INV(self.pf, self.tf, dCoil=2.5, TFoffset=0.3)
 
         self.initalise_cs()
         self.tf_cs()
@@ -56,7 +58,7 @@ class architect(object):
         # loop = self.tf.profile.loop
         # self.tf.get_loops(loop.draw(x=xo))  # update tf
 
-        self.build(update_current=True)
+        self.build(solve=True)
 
         '''
 
@@ -64,9 +66,43 @@ class architect(object):
         self.Gravity_support()
         '''
 
+    def build(self, solve=False):
+        if solve and not self.inv.boundary_initalised:
+            self.inv.initalise_boundary(self.sf, n=1e3, expand=0.1,
+                                        centre=0, width=363/(2*np.pi))
+
+        self.inv.update_limit(FPFz=100)
+
+        ##self.tf.profile.loop.xo['r2']['value'] = 16
+        #self.tf.update_profile()
+        #self.tf.set_inner_loop()
+
+        #self.inv.snap_PF(coil=self.coil_o, solve=solve)
+
+        print(self.inv.limit)
+        '''
+        self.tf.profile.loop.xo['r2']['value'] = 15.78
+        self.tf.update_profile()
+        self.tf.set_inner_loop()
+        self.inv.snap_PF(coil=self.coil_o)
+
+        self.tf.profile.loop.xo['r2']['value'] = 36
+        self.tf.update_profile()
+        self.tf.set_inner_loop()
+        self.inv.snap_PF(coil=self.coil_o)
+        '''
+        self.PF_support()  # calculate PF support seats
+        self.Gravity_support(radius=13, width=0.75)  # gravity support
+
+        self.tf.split_loop()
+        self.plot()
+
+        #self.inv.set_force_feild()
+        self.inv.ff.plot()
+
     def plot(self):
         self.tf.fill()
-        self.pf.plot(subcoil=True, plasma=True, current=True)
+        self.pf.plot(subcoil=False, plasma=True, current=True, label=True)
         self.pf.plot(subcoil=True)
         self.inv.plot_fix(tails=True)
         self.plot_connections()
@@ -97,24 +133,10 @@ class architect(object):
         # if hasattr(self,'ff'):
         #    self.ff.plot()
         '''
+
     def update_TF(self, xo):  # stripped ordered dict
         self.tf.get_loops(self.loop.draw(x=xo))  # update tf
         self.tf.split_loop()
-
-    def build(self, update_current=False):
-        if update_current and not self.inv.boundary_initalised:
-            self.inv.initalise_boundary(self.sf, n=1e3, expand=0.1,
-                                        centre=0, width=363/(2*np.pi))
-        self.inv.snap_coils(update_current=update_current)
-
-        self.PF_support()  # calculate PF support seats
-        self.Gravity_support(radius=13, width=0.75)  # gravity support
-
-        self.tf.split_loop()
-        self.plot()
-
-        self.inv.set_force_feild()
-        self.inv.ff.plot()
 
     def support_arm(L, coil, TFloop):
         dl = np.sqrt((coil['r'] - TFloop['r'](L))**2 +

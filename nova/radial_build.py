@@ -3,7 +3,6 @@ import pylab as pl
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline as spline
 import seaborn as sns
-colors = sns.color_palette('Paired', 12)
 from itertools import cycle
 import amigo.geom as geom
 from nova.loops import Profile
@@ -14,6 +13,7 @@ import collections
 from amigo.IO import trim_dir
 import json
 from nova.firstwall import divertor, main_chamber
+colors = sns.color_palette('Paired', 12)
 
 
 class RB(object):
@@ -147,7 +147,7 @@ class RB(object):
         shp.minimise()
         x = profile.loop.draw()
         r, z = x['r'], x['z']
-        if 'SX' in self.setup.configuration or gap == True:
+        if 'SX' in self.setup.configuration or gap is True:
             vv = wrap({'r': rin, 'z': zin}, {'r': r, 'z': z})
         else:
             vv = wrap({'r': rb, 'z': zb}, {'r': r, 'z': z})
@@ -189,7 +189,7 @@ class RB(object):
     def trim_sol(self, color='k', plot=True):
         self.sf.sol()
         color = sns.color_palette('Set2', self.sf.nleg + 5)
-        #color = 'k'
+        # color = 'k'
         for c, leg in enumerate(self.sf.legs.keys()):
             if 'core' not in leg:
                 Rsol = self.sf.legs[leg]['R']
@@ -237,9 +237,10 @@ class RB(object):
             if np.dot(dr, dn) > 0:
                 Rin, Zin = np.append(Rin, r), np.append(Zin, z)
         i = np.argmin((Rin[-1] - R)**2 + (Zin[-1] - Z)**2)
-        Rin, Zin = R[:i + 2], Z[:i + 2]  # extend past target
-        i = np.argmin((Rin[-1] - R)**2 + (Zin[-1] - Z)
-                      ** 2)  # sol crossing bndry
+        # extend past target
+        Rin, Zin = R[:i + 2], Z[:i + 2]
+        # sol crossing bndry
+        i = np.argmin((Rin[-1] - R)**2 + (Zin[-1] - Z) ** 2)
         jo = np.argmin((R[i] - Rloop)**2 + (Z[i] - Zloop)**2)
         j = np.array([jo, jo + 1])
         s = np.array([R[i], Z[i]])
@@ -275,8 +276,8 @@ class RB(object):
                     if not isinstance(packet, list):
                         packet = packet.tolist()
                 data['targets'][leg][name] = packet
-        for loop in ['first_wall', 'divertor', 'blanket_inner', 'blanket_outer',
-                     'vessel_inner', 'vessel_outer']:
+        for loop in ['first_wall', 'divertor', 'blanket_inner',
+                     'blanket_outer', 'vessel_inner', 'vessel_outer']:
             data[loop] = {}
             for var in self.segment[loop]:
                 data[loop][var] = self.segment[loop][var].tolist()
@@ -392,7 +393,8 @@ class wrap(object):
         if not concentric:
             self.indx = {'inner': np.zeros(2, dtype=int),
                          'outer': np.zeros(2, dtype=int)}
-            for i, dl in enumerate([[0, 0.5], [0.5, 1]]):  # low feild / high feild
+            # low feild / high feild
+            for i, dl in enumerate([[0, 0.5], [0.5, 1]]):
                 lo = self.sead(dl)
                 L = minimize(self.cross, lo, method='L-BFGS-B',
                              bounds=([0, 1], [0, 1])).x
@@ -404,12 +406,12 @@ class wrap(object):
         z = np.append(zout[self.indx['outer'][0]:self.indx['outer'][1]],
                       zin[self.indx['inner'][0]:self.indx['inner'][1]][::-1])
         self.patch = {'r': r, 'z': z}
-        r = np.append(np.append(rin[:self.indx['inner'][0]],
-                                rout[self.indx['outer'][0]:self.indx['outer'][1]]),
-                      rin[self.indx['inner'][1]:])
-        z = np.append(np.append(zin[:self.indx['inner'][0]],
-                                zout[self.indx['outer'][0]:self.indx['outer'][1]]),
-                      zin[self.indx['inner'][1]:])
+        r = np.append(rin[:self.indx['inner'][0]],
+                      rout[self.indx['outer'][0]:self.indx['outer'][1]])
+        r = np.append(r, rin[self.indx['inner'][1]:])
+        z = np.append(zin[:self.indx['inner'][0]],
+                      zout[self.indx['outer'][0]:self.indx['outer'][1]])
+        z = np.append(z, zin[self.indx['inner'][1]:])
         self.segment = {'r': r, 'z': z}
         if plot:
             self.plot(color=color)

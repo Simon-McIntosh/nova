@@ -37,7 +37,7 @@ class EQ(object):
         self.mu_o = 4 * np.pi * 1e-7  # magnetic constant [Vs/Am]
         self.sf = sf
         self.pf = pf
-        self.pf.grid_coils(dCoil=dCoil)  # multi-filiment coils
+        self.pf.mesh_coils(dCoil=dCoil)  # multi-filiment coils
         self.resample(sigma=sigma, **kwargs)
         self.get_plasma_coil()  # plasma coils
         self.select_control_coils()  # identify control coils

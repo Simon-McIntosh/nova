@@ -5,51 +5,30 @@ import seaborn as sns
 from scipy.optimize import fmin_slsqp
 import time
 from nova.DEMOxlsx import DEMO
-from nova.coils import TF
 from nova.loops import set_oppvar, get_oppvar, plot_oppvar, Profile
-from nova.coil_cage import coil_cage
 from nova.config import select
 import matplotlib.animation as manimation
 from itertools import cycle
-from nova.streamfunction import SF
-from nova.config import Setup
 from amigo.time import clock
 
 
 class Shape(object):
 
-    def __init__(self, profile, eqconf='unset', sep='unset', **kwargs):
-        self.ny = kwargs.get('ny', 3)  # TF filament number (y-dir)
-        self.alpha = kwargs.get('alpha', 1 - 1e-4)
+    def __init__(self, profile, **kwargs):
         self.color = cycle(sns.color_palette('Set2', 10))
         self.profile = profile
+        self.obj = kwargs.get('objective', profile.obj)
         self.loop = self.profile.loop
         self.bound = {}  # initalise bounds
-        self.bindex = {'internal': [0], 'interior': [
-            0], 'external': [0]}  # index
+        self.bindex = {'internal': [0], 'interior': [0], 'external': [0]}
         for side in ['internal', 'interior', 'external']:
             self.bound[side] = {'r': [], 'z': []}
             if side in kwargs:
                 self.add_bound(kwargs[side], side)
-        if self.profile.nTF is not 'unset' and \
-                (eqconf is not 'unset' or sep is not 'unset'):
-            if eqconf is not 'unset':
-                plasma = {'config': eqconf}
-                sf = SF(Setup(eqconf).filename)
-                self.tf = TF(profile=self.profile, sf=sf)
-            else:
-                plasma = {'r': sep['r'], 'z': sep['z']}
-                self.tf = TF(profile=self.profile)
-            self.cage = coil_cage(nTF=self.profile.nTF, rc=self.tf.rc,
-                                  plasma=plasma, ny=self.ny, alpha=self.alpha)
-            x = self.tf.get_loops(self.loop.draw())
-            self.cage.set_TFcoil(x['cl'], smooth=False)
-        else:
-            if self.profile.obj is 'E':
-                errtxt = 'nTF and SFconfig keywords not set\n'
-                errtxt += 'unable to calculate stored energy\n'
-                errtxt += 'initalise with \'nTF\' keyword'
-                raise ValueError(errtxt)
+        # define optimisation functions
+        self.objective = self.geometric_objective
+        self.constraints = self.geometric_constraints
+        self.args = ()
 
     def add_bound(self, x, side):
         for var in ['r', 'z']:
@@ -61,14 +40,6 @@ class Shape(object):
         self.add_bound({'r': self.bound['internal']['r'][argmin] - r_gap,
                         'z': self.bound['internal']['z'][argmin]},
                        'interior')
-
-    def add_vessel(self, vessel, npoint=80, offset=[0.12, 0.2]):
-        rvv, zvv = geom.rzSLine(vessel['r'], vessel['z'], npoint)
-        rvv, zvv = geom.offset(rvv, zvv, offset[1])
-        rmin = np.min(rvv)
-        rvv[rvv <= rmin + offset[0]] = rmin + offset[0]
-        self.add_bound({'r': rvv, 'z': zvv}, 'internal')  # vessel
-        self.add_bound({'r': np.min(rvv) - 5e-3, 'z': 0}, 'interior')  # vessel
 
     def clear_bound(self):
         for side in self.bound:
@@ -84,71 +55,21 @@ class Shape(object):
                         self.bound[side]['z'][index[i]:index[i + 1]],
                         marker, markersize=6, color=next(self.color))
 
-    def minimise(self, verbose=False, ripple_limit=0.6, ripple=False,
-                 acc=0.002):
-        tic = time.time()
-        xnorm, bnorm = set_oppvar(self.loop.xo, self.loop.oppvar)  # normalize
-        xnorm = fmin_slsqp(self.fit, xnorm, f_ieqcons=self.constraint_array,
-                           bounds=bnorm, acc=acc, iprint=-1,
-                           args=(False, ripple_limit))
-        if ripple:  # re-solve with ripple constraint
-            if self.profile.nTF == 'unset':
-                raise ValueError('requre \'nTF\' to solve ripple constraint')
-            print('with ripple')
-            xnorm = fmin_slsqp(self.fit, xnorm,
-                               f_ieqcons=self.constraint_array,
-                               bounds=bnorm, acc=acc, iprint=-1,
-                               args=(True, ripple_limit))
-        xo = get_oppvar(self.loop.xo, self.loop.oppvar, xnorm)  # de-normalize
-        if hasattr(self, 'tf'):
-            x = self.tf.get_loops(self.loop.draw(x=xo))  # update tf
-            self.cage.set_TFcoil(x['cl'])  # update coil cage
-        self.loop.set_input(x=xo)  # inner loop
-        self.profile.write()  # store loop
-        if verbose:
-            self.toc(tic)
-
-    def toc(self, tic):
-        print('optimisation time {:1.1f}s'.format(time.time() - tic))
-        print('noppvar {:1.0f}'.format(len(self.loop.oppvar)))
-        if self.profile.nTF is not 'unset':
-            self.cage.output()
-
-    def constraint_array(self, xnorm, *args):
-        ripple, ripple_limit = args
-        xo = get_oppvar(self.loop.xo, self.loop.oppvar, xnorm)  # de-normalize
-        if ripple:  # constrain ripple contour
-            x = self.tf.get_loops(self.loop.draw(x=xo))  # npoints
-            dot = np.array([])
-            for side, key in zip(['internal', 'interior', 'external'],
-                                 ['in', 'in', 'out']):
-                dot = np.append(dot, self.dot_diffrence(x[key], side))
-            self.cage.set_TFcoil({'r': x['cl']['r'], 'z': x['cl']['z']})
-            max_ripple = self.cage.get_ripple()
-            edge_ripple = self.cage.edge_ripple(npoints=10)
-            dot = np.append(dot, ripple_limit - edge_ripple)
-            dot = np.append(dot, ripple_limit - max_ripple)
-        else:  # without tf object (no ripple or energy)
-            x = self.loop.draw(x=xo)
-            dot = self.dot_diffrence(x, 'internal')
-            dot = np.append(dot, self.dot_diffrence(x, 'interior'))
-        return dot
-
-    def fit(self, xnorm, *args):
+    def geometric_objective(self, xnorm, *args):
         xo = get_oppvar(self.loop.xo, self.loop.oppvar, xnorm)  # de-normalize
         if hasattr(self, 'xo'):
             self.xo = np.vstack([self.xo, xo])
         else:
             self.xo = xo
         x = self.loop.draw(x=xo)
-        if self.profile.obj is 'L':  # coil length
+        if self.obj == 'L':  # loop length
             objF = geom.length(x['r'], x['z'], norm=False)[-1]
-        elif self.obj is 'E':  # stored energy
-            x = self.tf.get_loops(x=x)
-            self.cage.set_TFcoil(x['cl'])
-            objF = 1e-9 * self.cage.energy()
-        else:  # coil volume
+        elif self.obj == 'V':  # loop volume (torus)
             objF = geom.loop_vol(x['r'], x['z'])
+        else:
+            errtxt = 'objective {} '.format(self.profile.obj)
+            errtxt += 'not defined within gemetric_objective function'
+            raise ValueError(errtxt)
         return objF
 
     def dot_diffrence(self, x, side):
@@ -163,6 +84,34 @@ class Shape(object):
             dn = [nRloop[i], nZloop[i]]
             dot[j] = switch * np.dot(dr, dn)
         return dot
+
+    def geometric_constraints(self, xnorm, *args):
+        xo = get_oppvar(self.loop.xo, self.loop.oppvar, xnorm)  # de-normalize
+        x = self.loop.draw(x=xo)
+        constraint = np.array([])
+        for side in ['internal', 'interior']:
+            constraint = np.append(constraint, self.dot_diffrence(x, side))
+        return constraint
+
+    def update(self, xnorm, *args):
+        # empty function - overloaded externaly
+        return 0
+
+    def minimise(self, verbose=False, acc=0.002):
+        tic = time.time()
+        xnorm, bnorm = set_oppvar(self.loop.xo, self.loop.oppvar)  # normalize
+        xnorm = fmin_slsqp(self.objective, xnorm, f_ieqcons=self.constraints,
+                           bounds=bnorm, acc=acc, iprint=-1, args=self.args)
+        xo = get_oppvar(self.loop.xo, self.loop.oppvar, xnorm)  # de-normalize
+        self.loop.set_input(x=xo)  # inner loop
+        self.profile.write()  # store loop
+        self.update(xnorm, *self.args)  # update loop in calling function
+        if verbose:
+            self.toc(tic)
+
+    def toc(self, tic):
+        print('optimisation time {:1.1f}s'.format(time.time() - tic))
+        print('noppvar {:1.0f}'.format(len(self.loop.oppvar)))
 
     def movie(self, filename):
         fig, ax = pl.subplots(1, 2, figsize=(12, 8))
@@ -209,6 +158,37 @@ class Shape(object):
             pl.cla()
             plot_oppvar(shp.loop.xo, shp.loop.oppvar)
 
+    '''
+    def toc(self, tic):
+    print('optimisation time {:1.1f}s'.format(time.time() - tic))
+    print('noppvar {:1.0f}'.format(len(self.loop.oppvar)))
+    if self.profile.nTF is not 'unset':
+        self.cage.output()
+    '''
+
+
+
+
+
+    '''
+    def fit(self, xnorm, *args):
+        xo = get_oppvar(self.loop.xo, self.loop.oppvar, xnorm)  # de-normalize
+        if hasattr(self, 'xo'):
+            self.xo = np.vstack([self.xo, xo])
+        else:
+            self.xo = xo
+        x = self.loop.draw(x=xo)
+        if self.profile.obj is 'L':  # loop length
+            objF = geom.length(x['r'], x['z'], norm=False)[-1]
+        elif self.obj is 'E':  # stored energy
+            x = self.tf.get_loops(x=x)
+            self.cage.set_TFcoil(x['cl'])
+            objF = 1e-9 * self.cage.energy()
+        else:  # loop volume (torus)
+            objF = geom.loop_vol(x['r'], x['z'])
+        return objF
+    '''
+
 
 if __name__ is '__main__':
 
@@ -220,6 +200,14 @@ if __name__ is '__main__':
     config, setup = select(config, nTF=nTF)
 
     demo = DEMO()
+    profile = Profile(config['TF'], family=family, part='TF', nTF=nTF)
+    shp = Shape(profile, obj='L')
+
+    shp.add_vessel(demo.parts['Vessel']['out'])
+    shp.minimise(verbose=True)
+    shp.plot_bounds()
+
+    '''
 
     profile = Profile(config['TF'], family=family,
                       part='TF', nTF=nTF)  # ,load=False
@@ -236,14 +224,14 @@ if __name__ is '__main__':
     # shp.cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)
     # shp.cage.pattern(plot=True)
     # plot_oppvar(shp.loop.xo,shp.loop.oppvar)
-    '''
 
-    x_in = demo.parts['TF_Coil']['in']
-    tf = TF(x_in=x_in,nTF=nTF)
-    x = tf.get_loops(x_in)
-    cage = coil_cage(nTF=18,rc=tf.rc,plasma={'config':config['eq']},ny=3)
-    cage.set_TFcoil(x['cl'],smooth=True)
-    '''
+
+    #x_in = demo.parts['TF_Coil']['in']
+    #tf = TF(x_in=x_in,nTF=nTF)
+    #x = tf.get_loops(x_in)
+    #cage = coil_cage(nTF=18,rc=tf.rc,plasma={'config':config['eq']},ny=3)
+    #cage.set_TFcoil(x['cl'],smooth=True)
+
 
     Vol = cage.get_volume()
     print('')
@@ -273,4 +261,4 @@ if __name__ is '__main__':
     shp.movie(filename)
     #shp.frames(filename)
     #pl.savefig('../Figs/TFloop_{}.png'.format(family))
-
+    '''

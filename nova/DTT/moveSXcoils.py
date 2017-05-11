@@ -28,7 +28,6 @@ config, setup = select(base, nTF=nTF, update=False)
 sf = SF(setup.filename)
 pf = PF(sf.eqdsk)
 
-
 for coil in pf.index['CS']['name']:
     pf.coil[coil]['r'] = 2.7
     pf.coil[coil]['dr'] = 0.8

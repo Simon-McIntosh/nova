@@ -1,8 +1,8 @@
 import numpy as np
 import collections
 from nova.DEMOxlsx import DEMO
-from amigo import IO
 import nova
+import os.path
 
 
 def select(base={'TF': 'dtt', 'eq': 'SN'}, nTF=18, update=True, **kwargs):
@@ -31,7 +31,8 @@ class Setup(object):
     # preferance for all eqdsks should be stored in Nova/eqdsk/ or subdirs
     # overide with eqdsk keyword
     def __init__(self, configuration='', **kwargs):
-        eqdir = '/'.join(nova.__file__.split('/')[:-2])+'/eqdsk/'
+        eqdir = os.path.join(os.path.sep.join(nova.__file__.split('/')[:-2]),
+                             'eqdsk') + os.path.sep
         self.eqdir = kwargs.get('eqdir', eqdir)
         if 'subdir' in kwargs:
             self.eqdir += kwargs['subdir']+'/'

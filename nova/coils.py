@@ -322,7 +322,7 @@ class TF(object):
 
     def set_cage(self):  # requires profile loop definition for TF
         if hasattr(self, 'sf'):  # streamfunction set
-            plasma = {'sf': sf}
+            plasma = {'sf': self.sf}
         elif self.sep is not 'unset':  # seperatrix set
             plasma = {'r': self.sep['r'], 'z': self.sep['z']}
         else:
@@ -527,6 +527,10 @@ class TF(object):
     def update_loop(self, xnorm, *args):
         x = get_oppvar(self.loop.xo, self.loop.oppvar, xnorm)
         xloop = self.get_loops(self.loop.draw(x=x))  # update tf
+
+        self.loop.set_input(x=x)  # inner loop
+        self.profile.write()  # store loop
+
         if self.update_cage:
             self.cage.set_TFcoil(xloop['cl'], smooth=False)  # update coil cage
         return xloop
@@ -552,23 +556,19 @@ class TF(object):
             constraint = self.shp.geometric_constraints(xnorm, *args)
         return constraint
 
-        '''
-
-        else:
-            if self.profile.obj is 'E':
-                errtxt = 'nTF and SFconfig keywords not set\n'
-                errtxt += 'unable to calculate stored energy\n'
-                errtxt += 'initalise with \'nTF\' keyword'
-                raise ValueError(errtxt)
-        '''
-
     def objective(self, xnorm, *args):
         # loop length or loop volume (torus)
         if self.profile.obj == 'L' or self.profile.obj == 'V':
             objF = self.shp.geometric_objective(xnorm, *args)
         elif self.profile.obj == 'E':
-            objF = self.cage.energy()
+            objF = self.energy(xnorm, *args)
         return objF
+
+    def energy(self, xnorm, *args):
+        xloop = self.update_loop(xnorm, *args)
+        self.cage.set_TFcoil({'r': xloop['cl']['r'], 'z': xloop['cl']['z']})
+        E = self.cage.energy()
+        return 1e-9*E
 
     def minimise(self, vessel, verbose=False, **kwargs):
         if not hasattr(self, 'profile'):
@@ -588,33 +588,10 @@ class TF(object):
         # pass constraint array and objective to loop optimiser
         self.shp.args = (self.ripple, self.ripple_limit)
         self.shp.constraints = self.constraints
-        self.shp.objective = self.objective
+        self.shp.objective = self.objective  # objective function
         self.shp.update = self.update_loop  # called on exit from minimizer
 
         self.shp.minimise(verbose=verbose)
-
-        '''
-        tic = time.time()
-        xnorm, bnorm = set_oppvar(self.loop.xo, self.loop.oppvar)  # normalize
-        xnorm = fmin_slsqp(self.fit, xnorm, f_ieqcons=self.constraint_array,
-                           bounds=bnorm, acc=acc, iprint=-1,
-                           args=(False, ripple_limit))
-        if ripple:  # re-solve with ripple constraint
-            if self.profile.nTF == 'unset':
-                raise ValueError('requre \'nTF\' to solve ripple constraint')
-            print('with ripple')
-            xnorm = fmin_slsqp(self.fit, xnorm,
-                               f_ieqcons=self.constraint_array,
-                               bounds=bnorm, acc=acc, iprint=-1,
-                               args=(True, ripple_limit))
-        xo = get_oppvar(self.loop.xo, self.loop.oppvar, xnorm)  # de-normalize
-
-        self.loop.set_input(x=xo)  # inner loop
-        self.profile.write()  # store loop
-        if verbose:
-            self.toc(tic)
-        '''
-
 
 if __name__ is '__main__':  # test functions
 
@@ -623,7 +600,7 @@ if __name__ is '__main__':  # test functions
     setup = Setup(config['eq'])
     sf = SF(setup.filename)
     profile = Profile(config['TF'], family='S', part='TF', nTF=nTF,
-                      obj='E', load=True, npoints=20)
+                      obj='E', load=True, npoints=40)
     # profile.loop.plot()
     tf = TF(profile=profile, sf=sf)
 
@@ -632,7 +609,7 @@ if __name__ is '__main__':  # test functions
     demo.fill_part('Blanket')
     demo.plot_ports()
 
-    tf.minimise(demo.parts['Vessel']['out'], verbose=True, ripple=False)
+    tf.minimise(demo.parts['Vessel']['out'], verbose=True, ripple=True)
     tf.fill()
 
     rp, zp = demo.port['P0']['right']['r'], demo.port['P0']['right']['z']

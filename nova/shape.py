@@ -99,9 +99,11 @@ class Shape(object):
 
     def minimise(self, verbose=False, acc=0.002):
         tic = time.time()
+        iprint = 1 if verbose else -1
         xnorm, bnorm = set_oppvar(self.loop.xo, self.loop.oppvar)  # normalize
         xnorm = fmin_slsqp(self.objective, xnorm, f_ieqcons=self.constraints,
-                           bounds=bnorm, acc=acc, iprint=-1, args=self.args)
+                           bounds=bnorm, acc=acc, iprint=iprint,
+                           args=self.args)
         xo = get_oppvar(self.loop.xo, self.loop.oppvar, xnorm)  # de-normalize
         self.loop.set_input(x=xo)  # inner loop
         self.profile.write()  # store loop

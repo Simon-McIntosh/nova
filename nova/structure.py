@@ -42,7 +42,9 @@ class architect(object):
         #self.tf.split_loop()  # section tf for use in FE solver
         self.loop = self.tf.profile.loop
 
-        self.inv = INV(self.pf, self.tf, dCoil=2.5, TFoffset=0.3)
+        self.inv = INV(self.pf, self.tf, dCoil=2.5, offset=0.3)
+        self.inv.colocate(sf, n=1e3, expand=0.5, centre=0, width=363/(2*np.pi))
+
 
         self.initalise_cs()
         self.tf_cs()
@@ -67,11 +69,12 @@ class architect(object):
         '''
 
     def build(self, solve=False):
-        if solve and not self.inv.boundary_initalised:
-            self.inv.initalise_boundary(self.sf, n=1e3, expand=0.1,
-                                        centre=0, width=363/(2*np.pi))
+        if solve and not self.inv.rhs:
+            self.inv.colocate(self.sf, n=1e3, expand=0.1,
+                              centre=0, width=363/(2*np.pi))
 
-        self.inv.update_limit(FPFz=100)
+        self.inv.set_limit(FPFz=50)
+        self.inv.wrap_PF()
 
         ##self.tf.profile.loop.xo['r2']['value'] = 16
         #self.tf.update_profile()
@@ -79,7 +82,6 @@ class architect(object):
 
         #self.inv.snap_PF(coil=self.coil_o, solve=solve)
 
-        print(self.inv.limit)
         '''
         self.tf.profile.loop.xo['r2']['value'] = 15.78
         self.tf.update_profile()
@@ -221,8 +223,6 @@ class architect(object):
         self.Gsupport['zfloor'] = floor
         self.Gsupport['radius'] = radius
         self.Gsupport['width'] = width
-
-        print(self.Gsupport)
 
     def adjust_TFnode(self, r, z):
         i = np.argmin((self.tf.x['cl']['r']-r)**2 +

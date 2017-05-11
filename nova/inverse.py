@@ -1104,7 +1104,7 @@ class INV(object):
             opt = nlopt.opt(nlopt.LD_MMA, self.nL)
             opt.set_ftol_abs(5e-2)
             opt.set_ftol_rel(1e-2)
-            # opt.set_stopval(30e-3)  # <x [m]
+            opt.set_stopval(30e-3)  # <x [m]
             opt.set_min_objective(self.update_position_vector)
             opt.set_lower_bounds([0 for _ in range(self.nL)])
             opt.set_upper_bounds([1 for _ in range(self.nL)])

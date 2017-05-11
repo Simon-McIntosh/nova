@@ -31,8 +31,9 @@ class Setup(object):
     # preferance for all eqdsks should be stored in Nova/eqdsk/ or subdirs
     # overide with eqdsk keyword
     def __init__(self, configuration='', **kwargs):
-        eqdir = os.path.join(os.path.sep.join(nova.__file__.split('/')[:-2]),
-                             'eqdsk') + os.path.sep
+        sep = os.path.sep
+        eqdir = os.path.join(sep.join(nova.__file__.split(sep)[:-2]),
+                             'eqdsk') + sep
         self.eqdir = kwargs.get('eqdir', eqdir)
         if 'subdir' in kwargs:
             self.eqdir += kwargs['subdir']+'/'

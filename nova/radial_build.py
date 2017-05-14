@@ -1,9 +1,6 @@
 import numpy as np
 import pylab as pl
-from scipy.interpolate import interp1d
-from scipy.interpolate import UnivariateSpline as spline
 import seaborn as sns
-from itertools import cycle
 import amigo.geom as geom
 from nova.loops import Profile
 from nova.shape import Shape
@@ -12,7 +9,7 @@ from scipy.optimize import minimize
 import collections
 from amigo.IO import trim_dir
 import json
-from nova.firstwall import divertor, main_chamber
+from nova.firstwall import divertor
 colors = sns.color_palette('Paired', 12)
 
 
@@ -23,37 +20,37 @@ class RB(object):
         self.npoints = npoints
         self.dataname = setup.configuration
         self.datadir = trim_dir('../../../Data/')
-        self.segment = {}  # store section segments (divertor,fw,blanket...)
+        self.segment = {}  # store section segments (divertox,fw,blanket...)
 
     def generate(self, mc, mode='calc', color=0.6 * np.ones(3),
                  plot=True, debug=False, symetric=False, DN=False):
         self.main_chamber = mc.filename
         if mode == 'eqdsk':  # read first wall from eqdsk
-            self.Rb, self.Zb = self.sf.xlim, self.sf.ylim
+            self.Xb, self.Zb = self.sf.xlim, self.sf.ylim
         elif mode == 'calc':
             div = divertor(self.sf, self.setup, debug=debug)
             if DN:  # double null
                 self.sf.get_Xpsi(select='upper')  # upper X-point
                 div.place(debug=debug)
                 self.segment = div.join(mc)
-                ru = self.segment['first_wall']['r']
+                xu = self.segment['first_wall']['x']
                 zu = self.segment['first_wall']['z']
                 blanket_u = self.place_blanket(select='upper', store=False)[0]
                 self.sf.get_Xpsi(select='lower')  # lower X-point
                 div.place(debug=debug)
                 self.segment = div.join(mc)
-                rl = self.segment['first_wall']['r']
+                xl = self.segment['first_wall']['x']
                 zl = self.segment['first_wall']['z']
                 blanket_l = self.place_blanket(select='lower', store=False)[0]
-                r, z = self.upper_lower(
-                    ru, zu, rl, zl, Zjoin=self.sf.Mpoint[1])
-                self.segment['first_wall'] = {'r': r, 'z': z}
-                rfw, zfw = self.upper_lower(blanket_u[0]['r'][::-1],
+                x, z = self.upper_lower(
+                    xu, zu, xl, zl, Zjoin=self.sf.Mpoint[1])
+                self.segment['first_wall'] = {'x': x, 'z': z}
+                xfw, zfw = self.upper_lower(blanket_u[0]['x'][::-1],
                                             blanket_u[0]['z'][::-1],
-                                            blanket_l[0]['r'],
+                                            blanket_l[0]['x'],
                                             blanket_l[0]['z'],
                                             Zjoin=self.sf.Mpoint[1])
-                self.blanket = wrap({'r': r, 'z': z}, {'r': rfw, 'z': zfw})
+                self.blanket = wrap({'x': x, 'z': z}, {'x': xfw, 'z': zfw})
                 for loop in ['inner', 'outer']:
                     self.blanket.sort_z(loop, select='lower')
                 bfill = self.blanket.fill(plot=False)
@@ -65,21 +62,21 @@ class RB(object):
                 self.segment = div.join(mc)
                 self.blanket = self.place_blanket(select='lower')[-1]
             self.vessel = self.vessel_fill()
-            self.Rb = self.segment['first_wall']['r']
+            self.Xb = self.segment['first_wall']['x']
             self.Zb = self.segment['first_wall']['z']
-            rbl, zbl = self.blanket.get_segment('outer')
-            self.segment['blanket_outer'] = {'r': rbl, 'z': zbl}
+            xbl, zbl = self.blanket.get_segment('outer')
+            self.segment['blanket_outer'] = {'x': xbl, 'z': zbl}
         else:
             errtxt = 'set input mode \'eqdsk\',\'calc\''
             raise ValueError(errtxt)
 
         if mode != 'eqdsk':  # update eqdsk
-            self.sf.xlim = self.Rb
+            self.sf.xlim = self.Xb
             self.sf.ylim = self.Zb
             self.sf.nlim = len(self.sf.xlim)
 
         if plot:
-            pl.plot(self.segment['first_wall']['r'],
+            pl.plot(self.segment['first_wall']['x'],
                     self.segment['first_wall']['z'],
                     lw=1.75, color=0.5 * np.ones(3))
             self.blanket.fill(plot=True, color=colors[0])
@@ -87,20 +84,20 @@ class RB(object):
             pl.axis('equal')
             pl.axis('off')
 
-    def upper_lower(self, Ru, Zu, Rl, Zl, Zjoin=0):
-        u_index = np.arange(len(Ru), dtype='int')
+    def upper_lower(self, Xu, Zu, Xl, Zl, Zjoin=0):
+        u_index = np.arange(len(Xu), dtype='int')
         iu_lower = u_index[Zu < Zjoin]
         iu_out, iu_in = iu_lower[0] - 1, iu_lower[-1] + 1
-        l_index = np.arange(len(Rl), dtype='int')
+        l_index = np.arange(len(Xl), dtype='int')
         il_upper = l_index[Zl > Zjoin]
         il_out, il_in = il_upper[0] - 1, il_upper[-1] + 1
-        R = np.append(Rl[:il_out], Ru[:iu_out][::-1])
-        R = np.append(R, Ru[iu_in:][::-1])
-        R = np.append(R, Rl[il_in:])
+        X = np.append(Xl[:il_out], Xu[:iu_out][::-1])
+        X = np.append(X, Xu[iu_in:][::-1])
+        X = np.append(X, Xl[il_in:])
         Z = np.append(Zl[:il_out], Zu[:iu_out][::-1])
         Z = np.append(Z, Zu[iu_in:][::-1])
         Z = np.append(Z, Zl[il_in:])
-        return R, Z
+        return X, Z
 
     def place_blanket(self, select='upper', store=True, plot=False):
         blanket = wrap(self.segment['first_wall'], self.segment['inner_loop'])
@@ -114,10 +111,10 @@ class RB(object):
         return bfill, blanket
 
     def vessel_fill(self, gap=True):
-        r, z = self.segment['blanket_fw']['r'], self.segment['blanket_fw']['z']
-        loop = Loop(r, z)
-        r, z = loop.fill(dt=0.05)
-        rb = np.append(r, r[0])
+        x, z = self.segment['blanket_fw']['x'], self.segment['blanket_fw']['z']
+        loop = Loop(x, z)
+        x, z = loop.fill(dt=0.05)
+        xb = np.append(x, x[0])
         zb = np.append(z, z[0])
         profile = Profile(self.setup.configuration, family='S', part='vv',
                           npoints=400, read_write=False)
@@ -126,54 +123,54 @@ class RB(object):
         shp.loop.adjust_xo('lower', lb=0.6)
         shp.loop.adjust_xo('l', lb=0.6)
         # shp.loop.remove_oppvar('flat')
-        r, z = geom.rzSLine(rb, zb, 200)  # sub-sample
-        rup, zup = r[z > self.sf.Xpoint[1]], z[z > self.sf.Xpoint[1]]
-        shp.add_bound({'r': rup, 'z': zup}, 'internal')  # vessel inner bounds
-        rd, zd = r[z < self.sf.Xpoint[1]], z[z < self.sf.Xpoint[1]]
-        ro, zo = geom.offset(rd, zd, 0.1)  # divertor offset
-        shp.add_bound({'r': rd, 'z': zd}, 'internal')  # vessel inner bounds
-        shp.add_bound({'r': rd, 'z': zd - 0.25},
+        x, z = geom.rzSLine(xb, zb, 200)  # sub-sample
+        xup, zup = x[z > self.sf.Xpoint[1]], z[z > self.sf.Xpoint[1]]
+        shp.add_bound({'x': xup, 'z': zup}, 'internal')  # vessel inner bounds
+        xd, zd = x[z < self.sf.Xpoint[1]], z[z < self.sf.Xpoint[1]]
+        xo, zo = geom.offset(xd, zd, 0.1)  # divertor offset
+        shp.add_bound({'x': xd, 'z': zd}, 'internal')  # vessel inner bounds
+        shp.add_bound({'x': xd, 'z': zd - 0.25},
                       'internal')  # gap below divertor
         # shp.plot_bounds()
         shp.minimise()
         # shp.loop.plot()
         x = profile.loop.draw()
-        rin, zin = x['r'], x['z']
-        loop = Loop(rin, zin)
-        r, z = loop.fill(
+        xin, zin = x['x'], x['z']
+        loop = Loop(xin, zin)
+        x, z = loop.fill(
             dt=self.setup.build['VV'], ref_o=2 / 8 * np.pi, dref=np.pi / 6)
         shp.clear_bound()
-        shp.add_bound({'r': r, 'z': z}, 'internal')  # vessel outer bounds
+        shp.add_bound({'x': x, 'z': z}, 'internal')  # vessel outer bounds
         shp.minimise()
         x = profile.loop.draw()
-        r, z = x['r'], x['z']
+        x, z = x['x'], x['z']
         if 'SX' in self.setup.configuration or gap is True:
-            vv = wrap({'r': rin, 'z': zin}, {'r': r, 'z': z})
+            vv = wrap({'x': xin, 'z': zin}, {'x': x, 'z': z})
         else:
-            vv = wrap({'r': rb, 'z': zb}, {'r': r, 'z': z})
+            vv = wrap({'x': xb, 'z': zb}, {'x': x, 'z': z})
         vv.sort_z('inner', select=self.sf.Xloc)
         vv.sort_z('outer', select=self.sf.Xloc)
 
-        self.segment['vessel_inner'] = {'r': rin, 'z': zin}
-        self.segment['vessel_outer'] = {'r': r, 'z': z}
+        self.segment['vessel_inner'] = {'x': xin, 'z': zin}
+        self.segment['vessel_outer'] = {'x': x, 'z': z}
         self.segment['vessel'] = vv.fill()[1]
         return vv
 
     def get_sol(self, plot=False):
         self.trim_sol(plot=plot)
         for leg in list(self.sf.legs)[2:]:
-            L2D, L3D, Rsol, Zsol = self.sf.connection(leg, 0)
-            Ro, Zo = Rsol[-1], Zsol[-1]
+            L2D, L3D, Xsol, Zsol = self.sf.connection(leg, 0)
+            Xo, Zo = Xsol[-1], Zsol[-1]
             L2Dedge, L3Dedge = self.sf.connection(leg, -1)[:2]
             if leg not in self.setup.targets:
                 self.setup.targets[leg] = {}
-            Xi = self.sf.expansion([Ro], [Zo])
+            Xi = self.sf.expansion([Xo], [Zo])
             graze, theta = np.zeros(self.sf.Nsol), np.zeros(self.sf.Nsol)
             pannel = self.sf.legs[leg]['pannel']
             for i in range(self.sf.Nsol):
-                ro = self.sf.legs[leg]['R'][i][-1]
+                xo = self.sf.legs[leg]['X'][i][-1]
                 zo = self.sf.legs[leg]['Z'][i][-1]
-                graze[i] = self.sf.get_graze((ro, zo), pannel[i])
+                graze[i] = self.sf.get_graze((xo, zo), pannel[i])
                 theta[i] = self.sf.strike_point(Xi, graze[i])
             self.setup.targets[leg]['graze_deg'] = graze * 180 / np.pi
             self.setup.targets[leg]['theta_deg'] = theta * 180 / np.pi
@@ -181,9 +178,9 @@ class RB(object):
             self.setup.targets[leg]['L3Do'] = L3D
             self.setup.targets[leg]['L2Dedge'] = L2Dedge
             self.setup.targets[leg]['L3Dedge'] = L3Dedge
-            self.setup.targets[leg]['Ro'] = Ro
+            self.setup.targets[leg]['Xo'] = Xo
             self.setup.targets[leg]['Zo'] = Zo
-            self.setup.targets[leg]['Rsol'] = Rsol
+            self.setup.targets[leg]['Xsol'] = Xsol
             self.setup.targets[leg]['Zsol'] = Zsol
 
     def trim_sol(self, color='k', plot=True):
@@ -192,73 +189,73 @@ class RB(object):
         # color = 'k'
         for c, leg in enumerate(self.sf.legs.keys()):
             if 'core' not in leg:
-                Rsol = self.sf.legs[leg]['R']
+                Xsol = self.sf.legs[leg]['X']
                 Zsol = self.sf.legs[leg]['Z']
                 self.sf.legs[leg]['pannel'] = [[] for i in range(self.sf.Nsol)]
                 for i in range(self.sf.Nsol):
-                    if len(Rsol[i]) > 0:
-                        R, Z = Rsol[i], Zsol[i]
+                    if len(Xsol[i]) > 0:
+                        X, Z = Xsol[i], Zsol[i]
                         for j in range(2):  # predict - correct
-                            R, Z, pannel = self.trim(self.Rb, self.Zb, R, Z)
-                        self.sf.legs[leg]['R'][i] = R  # update sf
+                            X, Z, pannel = self.trim(self.Xb, self.Zb, X, Z)
+                        self.sf.legs[leg]['X'][i] = X  # update sf
                         self.sf.legs[leg]['Z'][i] = Z
                         self.sf.legs[leg]['pannel'][i] = pannel
                         if plot:
                             if color != 'k' and i > 0:
-                                pl.plot(R, Z, '-', color=0.7 *
+                                pl.plot(X, Z, '-', color=0.7 *
                                         np.ones(3))  # color[c+3]
-                                # pl.plot(R,Z,'-',color=color[c+3])
+                                # pl.plot(X,Z,'-',color=color[c+3])
                             elif color == 'k':
-                                pl.plot(R, Z, '-', color='k', alpha=0.15)
+                                pl.plot(X, Z, '-', color='k', alpha=0.15)
                             else:
-                                # pl.plot(R,Z,color=color[c])
-                                pl.plot(R, Z, '--', color=[0.5, 0.5, 0.5])
+                                # pl.plot(X,Z,color=color[c])
+                                pl.plot(X, Z, '--', color=[0.5, 0.5, 0.5])
 
-    def crossed_lines(self, Ro, Zo, R1, Z1):
+    def crossed_lines(self, Xo, Zo, X1, Z1):
         index = np.zeros(2)
-        dl = np.zeros(len(Ro))
-        for i, (ro, zo) in enumerate(zip(Ro, Zo)):
-            dl[i] = np.min((R1 - ro)**2 + (Z1 - zo)**2)
+        dl = np.zeros(len(Xo))
+        for i, (xo, zo) in enumerate(zip(Xo, Zo)):
+            dl[i] = np.min((X1 - xo)**2 + (Z1 - zo)**2)
         index[0] = np.argmin(dl)
-        index[1] = np.argmin((R1 - Ro[index[0]])**2 + (Z1 - Zo[index[0]])**2)
+        index[1] = np.argmin((X1 - Xo[index[0]])**2 + (Z1 - Zo[index[0]])**2)
         return index
 
-    def trim(self, Rloop, Zloop, R, Z):
-        Rloop, Zloop = geom.order(Rloop, Zloop)
-        L = geom.length(R, Z)
+    def trim(self, Xloop, Zloop, X, Z):
+        Xloop, Zloop = geom.order(Xloop, Zloop)
+        L = geom.length(X, Z)
         index = np.append(np.diff(L) != 0, True)
-        R, Z = R[index], Z[index]  # remove duplicates
-        nRloop, nZloop, Rloop, Zloop = geom.normal(Rloop, Zloop)
-        Rin, Zin = np.array([]), np.array([])
-        for r, z in zip(R, Z):
-            i = np.argmin((r - Rloop)**2 + (z - Zloop)**2)
-            dr = [Rloop[i] - r, Zloop[i] - z]
-            dn = [nRloop[i], nZloop[i]]
-            if np.dot(dr, dn) > 0:
-                Rin, Zin = np.append(Rin, r), np.append(Zin, z)
-        i = np.argmin((Rin[-1] - R)**2 + (Zin[-1] - Z)**2)
+        X, Z = X[index], Z[index]  # remove duplicates
+        nXloop, nZloop, Xloop, Zloop = geom.normal(Xloop, Zloop)
+        Xin, Zin = np.array([]), np.array([])
+        for x, z in zip(X, Z):
+            i = np.argmin((x - Xloop)**2 + (z - Zloop)**2)
+            dx = [Xloop[i] - x, Zloop[i] - z]
+            dn = [nXloop[i], nZloop[i]]
+            if np.dot(dx, dn) > 0:
+                Xin, Zin = np.append(Xin, x), np.append(Zin, z)
+        i = np.argmin((Xin[-1] - X)**2 + (Zin[-1] - Z)**2)
         # extend past target
-        Rin, Zin = R[:i + 2], Z[:i + 2]
+        Xin, Zin = X[:i + 2], Z[:i + 2]
         # sol crossing bndry
-        i = np.argmin((Rin[-1] - R)**2 + (Zin[-1] - Z) ** 2)
-        jo = np.argmin((R[i] - Rloop)**2 + (Z[i] - Zloop)**2)
+        i = np.argmin((Xin[-1] - X)**2 + (Zin[-1] - Z) ** 2)
+        jo = np.argmin((X[i] - Xloop)**2 + (Z[i] - Zloop)**2)
         j = np.array([jo, jo + 1])
-        s = np.array([R[i], Z[i]])
-        ds = np.array([R[i] - R[i - 1], Z[i] - Z[i - 1]])
-        b = np.array([Rloop[j[0]], Zloop[j[0]]])
-        bstep, db = self.get_bstep(s, ds, b, Rloop, Zloop, j)
+        s = np.array([X[i], Z[i]])
+        ds = np.array([X[i] - X[i - 1], Z[i] - Z[i - 1]])
+        b = np.array([Xloop[j[0]], Zloop[j[0]]])
+        bstep, db = self.get_bstep(s, ds, b, Xloop, Zloop, j)
         if bstep < 0:
             j = np.array([jo - 1, jo])  # switch target pannel
-            bstep, db = self.get_bstep(s, ds, b, Rloop, Zloop, j)
+            bstep, db = self.get_bstep(s, ds, b, Xloop, Zloop, j)
         step = np.cross(b - s, db) / np.cross(ds, db)
         intersect = s + step * ds  # predict - correct
         if step < 0:  # step back
-            Rin, Zin = Rin[:-1], Zin[:-1]
-        Rin, Zin = np.append(Rin, intersect[0]), np.append(Zin, intersect[1])
-        return Rin, Zin, db
+            Xin, Zin = Xin[:-1], Zin[:-1]
+        Xin, Zin = np.append(Xin, intersect[0]), np.append(Zin, intersect[1])
+        return Xin, Zin, db
 
-    def get_bstep(self, s, ds, b, Rloop, Zloop, j):
-        db = np.array([Rloop[j[1]] - Rloop[j[0]], Zloop[j[1]] - Zloop[j[0]]])
+    def get_bstep(self, s, ds, b, Xloop, Zloop, j):
+        db = np.array([Xloop[j[1]] - Xloop[j[0]], Zloop[j[1]] - Zloop[j[0]]])
         step = np.cross(b - s, ds) / np.cross(ds, db)
         return step, db
 
@@ -301,95 +298,95 @@ class wrap(object):
 
     def get_segment(self, loop):
         segment = self.loops[loop]['points']
-        return segment['r'], segment['z']
+        return segment['x'], segment['z']
 
-    def set_segment(self, loop, r, z):
-        self.loops[loop]['points'] = {'r': r, 'z': z}
+    def set_segment(self, loop, x, z):
+        self.loops[loop]['points'] = {'x': x, 'z': z}
 
     def sort_z(self, loop, select='lower'):
-        r, z = self.get_segment(loop)
-        r, z = geom.order(r, z, anti=True)  # order points
+        x, z = self.get_segment(loop)
+        x, z = geom.order(x, z, anti=True)  # order points
         if select == 'lower':
             imin = np.argmin(z)  # locate minimum
-            r = np.append(r[imin:], r[:imin])  # sort
+            x = np.append(x[imin:], x[:imin])  # sort
             z = np.append(z[imin:], z[:imin])
         else:
             imax = np.argmax(z)  # locate minimum
-            r = np.append(r[imax:], r[:imax])  # sort
+            x = np.append(x[imax:], x[:imax])  # sort
             z = np.append(z[imax:], z[:imax])
-        self.set_segment(loop, r, z)
+        self.set_segment(loop, x, z)
 
     def offset(self, loop, dt, **kwargs):
-        r, z = self.get_segment(loop)
-        gloop = Loop(r, z)
-        r, z = gloop.fill(dt=dt, **kwargs)
-        self.set_segment(loop, r, z)
+        x, z = self.get_segment(loop)
+        gloop = Loop(x, z)
+        x, z = gloop.fill(dt=dt, **kwargs)
+        self.set_segment(loop, x, z)
 
     def interpolate(self):
         for loop in self.loops:
-            r, z = self.get_segment(loop)
-            r, z, l = geom.unique(r, z)
-            interpolant = {'r': IUS(l, r), 'z': IUS(l, z)}
+            x, z = self.get_segment(loop)
+            x, z, l = geom.unique(x, z)
+            interpolant = {'x': IUS(l, x), 'z': IUS(l, z)}
             self.loops[loop]['fun'] = interpolant
 
     def interp(self, loop, l):
         interpolant = self.loops[loop]['fun']
-        return interpolant['r'](l), interpolant['z'](l)
+        return interpolant['x'](l), interpolant['z'](l)
 
     def sead(self, dl, N=500):  # course search
         l = np.linspace(dl[0], dl[1], N)
-        r, z = np.zeros((N, 2)), np.zeros((N, 2))
+        x, z = np.zeros((N, 2)), np.zeros((N, 2))
         for i, loop in enumerate(self.loops):
-            r[:, i], z[:, i] = self.interp(loop, l)
-        dr_min, i_in, i_out = np.max(r[:, 1]), 0, 0
-        for i, (rin, zin) in enumerate(zip(r[:, 0], z[:, 0])):
-            dR = np.sqrt((r[:, 1] - rin)**2 + (z[:, 1] - zin)**2)
-            dr = np.min(dR)
-            if dr < dr_min:
-                dr_min = dr
+            x[:, i], z[:, i] = self.interp(loop, l)
+        dx_min, i_in, i_out = np.max(x[:, 1]), 0, 0
+        for i, (xin, zin) in enumerate(zip(x[:, 0], z[:, 0])):
+            dX = np.sqrt((x[:, 1] - xin)**2 + (z[:, 1] - zin)**2)
+            dx = np.min(dX)
+            if dx < dx_min:
+                dx_min = dx
                 i_in = i
-                i_out = np.argmin(dR)
+                i_out = np.argmin(dX)
         return l[i_in], l[i_out]
 
     def cross(self, L):
-        r, z = np.zeros(2), np.zeros(2)
+        x, z = np.zeros(2), np.zeros(2)
         for i, (loop, l) in enumerate(zip(self.loops, L)):
-            r[i], z[i] = self.interp(loop, l)
-        err = (r[0] - r[1])**2 + (z[0] - z[1])**2
+            x[i], z[i] = self.interp(loop, l)
+        err = (x[0] - x[1])**2 + (z[0] - z[1])**2
         return err
 
     def index(self, loop, l):
         rp, zp = self.interp(loop, l)  # point
-        r, z = self.get_segment(loop)
-        i = np.argmin((r - rp)**2 + (z - zp)**2)
+        x, z = self.get_segment(loop)
+        i = np.argmin((x - rp)**2 + (z - zp)**2)
         return i
 
     def close_loop(self):
         for loop in self.loops:
-            r, z = self.get_segment(loop)
-            if (r[0] - r[-1])**2 + (z[0] - z[-1])**2 != 0:
-                r = np.append(r, r[0])
+            x, z = self.get_segment(loop)
+            if (x[0] - x[-1])**2 + (z[0] - z[-1])**2 != 0:
+                x = np.append(x, x[0])
                 z = np.append(z, z[0])
-                self.set_segment(loop, r, z)
+                self.set_segment(loop, x, z)
 
-    def concentric(self, rin, zin, rout, zout):
-        points = geom.inloop(rout, zout, rin, zin, side='out')
+    def concentric(self, xin, zin, xout, zout):
+        points = geom.inloop(xout, zout, xin, zin, side='out')
         if np.shape(points)[1] == 0:
             return True
         else:
             return False
 
     def fill(self, plot=False, color=colors[0]):  # minimization focused search
-        rin, zin = self.get_segment('inner')
-        rout, zout = self.get_segment('outer')
-        concentric = self.concentric(rin, zin, rout, zout)
+        xin, zin = self.get_segment('inner')
+        xout, zout = self.get_segment('outer')
+        concentric = self.concentric(xin, zin, xout, zout)
         if concentric:
             self.close_loop()
-            rin, zin = self.get_segment('inner')
-            rout, zout = self.get_segment('outer')
+            xin, zin = self.get_segment('inner')
+            xout, zout = self.get_segment('outer')
         self.interpolate()  # construct interpolators
-        self.indx = {'inner': np.array([0, len(rin)], dtype=int),
-                     'outer': np.array([0, len(rout)], dtype=int)}
+        self.indx = {'inner': np.array([0, len(xin)], dtype=int),
+                     'outer': np.array([0, len(xout)], dtype=int)}
         if not concentric:
             self.indx = {'inner': np.zeros(2, dtype=int),
                          'outer': np.zeros(2, dtype=int)}
@@ -401,49 +398,49 @@ class wrap(object):
                 for loop, l in zip(self.loops, L):
                     self.indx[loop][i] = self.index(loop, l)
 
-        r = np.append(rout[self.indx['outer'][0]:self.indx['outer'][1]],
-                      rin[self.indx['inner'][0]:self.indx['inner'][1]][::-1])
+        x = np.append(xout[self.indx['outer'][0]:self.indx['outer'][1]],
+                      xin[self.indx['inner'][0]:self.indx['inner'][1]][::-1])
         z = np.append(zout[self.indx['outer'][0]:self.indx['outer'][1]],
                       zin[self.indx['inner'][0]:self.indx['inner'][1]][::-1])
-        self.patch = {'r': r, 'z': z}
-        r = np.append(rin[:self.indx['inner'][0]],
-                      rout[self.indx['outer'][0]:self.indx['outer'][1]])
-        r = np.append(r, rin[self.indx['inner'][1]:])
+        self.patch = {'x': x, 'z': z}
+        x = np.append(xin[:self.indx['inner'][0]],
+                      xout[self.indx['outer'][0]:self.indx['outer'][1]])
+        x = np.append(x, xin[self.indx['inner'][1]:])
         z = np.append(zin[:self.indx['inner'][0]],
                       zout[self.indx['outer'][0]:self.indx['outer'][1]])
         z = np.append(z, zin[self.indx['inner'][1]:])
-        self.segment = {'r': r, 'z': z}
+        self.segment = {'x': x, 'z': z}
         if plot:
             self.plot(color=color)
         return self.segment, self.patch
 
     def plot(self, plot_loops=False, color=colors[0]):
-        geom.polyfill(self.patch['r'], self.patch['z'], color=color)
+        geom.polyfill(self.patch['x'], self.patch['z'], color=color)
         if plot_loops:
-            pl.plot(self.segment['r'], self.segment['z'],
+            pl.plot(self.segment['x'], self.segment['z'],
                     color=0.75 * np.ones(3))
             for loop in self.loops:
-                r, z = self.get_segment(loop)
-                pl.plot(r, z, '-')
+                x, z = self.get_segment(loop)
+                pl.plot(x, z, '-')
 
 
 class Loop(object):
 
-    def __init__(self, R, Z, **kwargs):
-        self.R = R
+    def __init__(self, X, Z, **kwargs):
+        self.X = X
         self.Z = Z
-        self.xo = kwargs.get('xo', (np.mean(R), np.mean(Z)))
+        self.xo = kwargs.get('xo', (np.mean(X), np.mean(Z)))
 
     def rzPut(self):
-        self.Rstore, self.Zstore = self.R, self.Z
+        self.Xstore, self.Zstore = self.X, self.Z
 
     def rzGet(self):
-        self.R, self.Z = self.Rstore, self.Zstore
+        self.X, self.Z = self.Xstore, self.Zstore
 
-    def fill(self, trim=None, dR=0, dt=0, ref_o=4 / 8 * np.pi, dref=np.pi / 4,
-             edge=True, ends=True,
-             color='k', label=None, alpha=0.8, referance='theta', part_fill=True,
-             loop=False, s=0, gap=0, plot=False):
+    def fill(self, trim=None, dX=0, dt=0, ref_o=4 / 8 * np.pi, dref=np.pi / 4,
+             edge=True, ends=True, color='k', label=None, alpha=0.8,
+             referance='theta', part_fill=True, loop=False, s=0, gap=0,
+             plot=False):
         dt_max = 0.1  # 2.5
         if not part_fill:
             dt_max = dt
@@ -451,60 +448,62 @@ class Loop(object):
             dt = self.blend(dt, ref_o=ref_o, dref=dref, referance=referance,
                             gap=gap)
         dt, nt = geom.max_steps(dt, dt_max)
-        Rin, Zin = geom.offset(self.R, self.Z, dR)  # gap offset
+        Xin, Zin = geom.offset(self.X, self.Z, dX)  # gap offset
         for i in range(nt):
             self.part_fill(trim=trim, dt=dt, ref_o=ref_o, dref=dref,
-                           edge=edge, ends=ends, color=color, label=label, alpha=alpha,
-                           referance=referance, loop=loop, s=s, plot=False)
-        Rout, Zout = self.R, self.Z
+                           edge=edge, ends=ends, color=color, label=label,
+                           alpha=alpha, referance=referance, loop=loop, s=s,
+                           plot=False)
+        Xout, Zout = self.X, self.Z
         if plot:
-            geom.polyparrot({'r': Rin, 'z': Zin}, {'r': Rout, 'z': Zout},
+            geom.polyparrot({'x': Xin, 'z': Zin}, {'x': Xout, 'z': Zout},
                             color=color, alpha=1)  # fill
-        return Rout, Zout
+        return Xout, Zout
 
     def part_fill(self, trim=None, dt=0, ref_o=4 / 8 * np.pi, dref=np.pi / 4,
                   edge=True, ends=True,
-                  color='k', label=None, alpha=0.8, referance='theta', loop=False,
-                  s=0, plot=False):
-        Rin, Zin = self.R, self.Z
+                  color='k', label=None, alpha=0.8, referance='theta',
+                  loop=False, s=0, plot=False):
+        Xin, Zin = self.X, self.Z
         if loop:
             Napp = 5  # Nappend
-            R = np.append(self.R, self.R[:Napp])
-            R = np.append(self.R[-Napp:], R)
+            X = np.append(self.X, self.X[:Napp])
+            X = np.append(self.X[-Napp:], X)
             Z = np.append(self.Z, self.Z[:Napp])
             Z = np.append(self.Z[-Napp:], Z)
-            R, Z = geom.rzSLine(R, Z, npoints=len(R), s=s)
+            X, Z = geom.rzSLine(X, Z, npoints=len(X), s=s)
             if isinstance(dt, (np.ndarray, list)):
                 dt = np.append(dt, dt[:Napp])
                 dt = np.append(dt[-Napp:], dt)
-            Rout, Zout = geom.offset(R, Z, dt)
+            Xout, Zout = geom.offset(X, Z, dt)
             print('part fill')
-            Rout, Zout = Rout[Napp:-Napp], Zout[Napp:-Napp]
-            Rout[-1], Zout[-1] = Rout[0], Zout[0]
+            Xout, Zout = Xout[Napp:-Napp], Zout[Napp:-Napp]
+            Xout[-1], Zout[-1] = Xout[0], Zout[0]
         else:
-            R, Z = geom.rzSLine(self.R, self.Z, npoints=len(self.R), s=s)
-            Rout, Zout = geom.offset(R, Z, dt)
-        self.R, self.Z = Rout, Zout  # update
+            X, Z = geom.rzSLine(self.X, self.Z, npoints=len(self.X), s=s)
+            Xout, Zout = geom.offset(X, Z, dt)
+        self.X, self.Z = Xout, Zout  # update
         if trim is None:
-            Lindex = [0, len(Rin)]
+            Lindex = [0, len(Xin)]
         else:
             Lindex = self.trim(trim)
         if plot:
             flag = 0
             for i in np.arange(Lindex[0], Lindex[1] - 1):
-                Rfill = np.array([Rin[i], Rout[i], Rout[i + 1], Rin[i + 1]])
+                Xfill = np.array([Xin[i], Xout[i], Xout[i + 1], Xin[i + 1]])
                 Zfill = np.array([Zin[i], Zout[i], Zout[i + 1], Zin[i + 1]])
                 if flag is 0 and label is not None:
                     flag = 1
-                    pl.fill(Rfill, Zfill, facecolor=color, alpha=alpha,
+                    pl.fill(Xfill, Zfill, facecolor=color, alpha=alpha,
                             edgecolor='none', label=label)
                 else:
-                    pl.fill(Rfill, Zfill, facecolor=color, alpha=alpha,
+                    pl.fill(Xfill, Zfill, facecolor=color, alpha=alpha,
                             edgecolor='none')
 
-    def blend(self, dt, ref_o=4 / 8 * np.pi, dref=np.pi / 4, gap=0, referance='theta'):
+    def blend(self, dt, ref_o=4 / 8 * np.pi, dref=np.pi / 4, gap=0,
+              referance='theta'):
         if referance is 'theta':
-            theta = np.arctan2(self.Z - self.xo[1], self.R - self.xo[0]) - gap
+            theta = np.arctan2(self.Z - self.xo[1], self.X - self.xo[0]) - gap
             theta[theta > np.pi] = theta[theta > np.pi] - 2 * np.pi
             tblend = dt[0] * np.ones(len(theta))  # inner
             tblend[(theta > -ref_o) & (theta < ref_o)] = dt[1]  # outer
@@ -515,17 +514,17 @@ class Loop(object):
                     tblend[blend_index] = dt[1] + (dt[0] - dt[1]) / dref *\
                         (updown * theta[blend_index] - ref_o)
         else:
-            L = geom.length(self.R, self.Z)
+            L = geom.length(self.X, self.Z)
             tblend = dt[0] * np.ones(len(L))  # start
             tblend[L > ref_o] = dt[1]  # end
             if dref > 0:
                 blend_index = (L >= ref_o) & (L < ref_o + dref)
-                tblend[blend_index] = dt[0] + (dt[1] - dt[0]) / dref * (L[blend_index] -
-                                                                        ref_o)
+                tblend[blend_index] = dt[0] + (dt[1] - dt[0]) /\
+                    dref * (L[blend_index] - ref_o)
         return tblend
 
-    def trim(self, trim, R, Z):
-        L = geom.length(R, Z, norm=True)
+    def trim(self, trim, X, Z):
+        L = geom.length(X, Z, norm=True)
         index = []
         for t in trim:
             index.append(np.argmin(np.abs(L - t)))

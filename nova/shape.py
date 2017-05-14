@@ -22,7 +22,7 @@ class Shape(object):
         self.bound = {}  # initalise bounds
         self.bindex = {'internal': [0], 'interior': [0], 'external': [0]}
         for side in ['internal', 'interior', 'external']:
-            self.bound[side] = {'r': [], 'z': []}
+            self.bound[side] = {'x': [], 'z': []}
             if side in kwargs:
                 self.add_bound(kwargs[side], side)
         # define optimisation functions
@@ -30,20 +30,20 @@ class Shape(object):
         self.constraints = self.geometric_constraints
         self.args = ()
 
-    def add_bound(self, x, side):
-        for var in ['r', 'z']:
-            self.bound[side][var] = np.append(self.bound[side][var], x[var])
-        self.bindex[side].append(len(self.bound[side]['r']))
+    def add_bound(self, p, side):
+        for var in ['x', 'z']:
+            self.bound[side][var] = np.append(self.bound[side][var], p[var])
+        self.bindex[side].append(len(self.bound[side]['x']))
 
     def add_interior(self, r_gap=0.001):  # offset minimum internal radius
-        argmin = np.argmin(self.bound['internal']['r'])
-        self.add_bound({'r': self.bound['internal']['r'][argmin] - r_gap,
+        argmin = np.argmin(self.bound['internal']['x'])
+        self.add_bound({'x': self.bound['internal']['x'][argmin] - r_gap,
                         'z': self.bound['internal']['z'][argmin]},
                        'interior')
 
     def clear_bound(self):
         for side in self.bound:
-            for var in ['r', 'z']:
+            for var in ['x', 'z']:
                 self.bound[side][var] = np.array([])
 
     def plot_bounds(self):
@@ -51,7 +51,7 @@ class Shape(object):
                                 ['.-', 'd', 's']):
             index = self.bindex[side]
             for i in range(len(index) - 1):
-                pl.plot(self.bound[side]['r'][index[i]:index[i + 1]],
+                pl.plot(self.bound[side]['x'][index[i]:index[i + 1]],
                         self.bound[side]['z'][index[i]:index[i + 1]],
                         marker, markersize=6, color=next(self.color))
 
@@ -63,24 +63,24 @@ class Shape(object):
             self.xo = xo
         x = self.loop.draw(x=xo)
         if self.obj == 'L':  # loop length
-            objF = geom.length(x['r'], x['z'], norm=False)[-1]
+            objF = geom.length(x['x'], x['z'], norm=False)[-1]
         elif self.obj == 'V':  # loop volume (torus)
-            objF = geom.loop_vol(x['r'], x['z'])
+            objF = geom.loop_vol(x['x'], x['z'])
         else:
             errtxt = 'objective {} '.format(self.profile.obj)
             errtxt += 'not defined within gemetric_objective function'
             raise ValueError(errtxt)
         return objF
 
-    def dot_diffrence(self, x, side):
-        Rloop, Zloop = x['r'], x['z']  # inside coil loop
+    def dot_diffrence(self, p, side):
+        Xloop, Zloop = p['x'], p['z']  # inside coil loop
         switch = 1 if side is 'internal' else -1
-        nRloop, nZloop, Rloop, Zloop = geom.normal(Rloop, Zloop)
-        R, Z = self.bound[side]['r'], self.bound[side]['z']
-        dot = np.zeros(len(R))
-        for j, (r, z) in enumerate(zip(R, Z)):
-            i = np.argmin((r - Rloop)**2 + (z - Zloop)**2)
-            dr = [Rloop[i] - r, Zloop[i] - z]
+        nRloop, nZloop, Xloop, Zloop = geom.normal(Xloop, Zloop)
+        X, Z = self.bound[side]['x'], self.bound[side]['z']
+        dot = np.zeros(len(X))
+        for j, (r, z) in enumerate(zip(X, Z)):
+            i = np.argmin((r - Xloop)**2 + (z - Zloop)**2)
+            dr = [Xloop[i] - r, Zloop[i] - z]
             dn = [nRloop[i], nZloop[i]]
             dot[j] = switch * np.dot(dr, dn)
         return dot
@@ -168,30 +168,6 @@ class Shape(object):
         self.cage.output()
     '''
 
-
-
-
-
-    '''
-    def fit(self, xnorm, *args):
-        xo = get_oppvar(self.loop.xo, self.loop.oppvar, xnorm)  # de-normalize
-        if hasattr(self, 'xo'):
-            self.xo = np.vstack([self.xo, xo])
-        else:
-            self.xo = xo
-        x = self.loop.draw(x=xo)
-        if self.profile.obj is 'L':  # loop length
-            objF = geom.length(x['r'], x['z'], norm=False)[-1]
-        elif self.obj is 'E':  # stored energy
-            x = self.tf.get_loops(x=x)
-            self.cage.set_TFcoil(x['cl'])
-            objF = 1e-9 * self.cage.energy()
-        else:  # loop volume (torus)
-            objF = geom.loop_vol(x['r'], x['z'])
-        return objF
-    '''
-
-
 if __name__ is '__main__':
 
     nTF = 16
@@ -205,7 +181,7 @@ if __name__ is '__main__':
     profile = Profile(config['TF'], family=family, part='TF', nTF=nTF)
     shp = Shape(profile, obj='L')
 
-    shp.add_vessel(demo.parts['Vessel']['out'])
+    shp.add_bound(demo.parts['Vessel']['out'], 'internal')
     shp.minimise(verbose=True)
     shp.plot_bounds()
 

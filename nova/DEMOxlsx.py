@@ -2,7 +2,6 @@ from openpyxl import load_workbook
 import numpy as np
 import pylab as pl
 from amigo import geom
-from amigo.IO import trim_dir
 import scipy as sp
 from collections import OrderedDict
 from itertools import cycle, count
@@ -10,6 +9,8 @@ from scipy.linalg import norm
 from scipy.optimize import minimize
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 from scipy.signal import savgol_filter
+import nova
+from amigo.IO import class_dir
 import seaborn as sns
 rc = {'figure.figsize': [7, 7 * 12 / 9], 'savefig.dpi': 100,
       'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
@@ -18,13 +19,12 @@ sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
         font_scale=7 / 8, rc=rc)
 color = sns.color_palette('Paired', 12)
 ic = count(0)
-import nova
-from amigo.IO import class_dir
+
 nova_root = class_dir(nova)
 
 
 def get_label(label, label_array, force=False, part=None):
-    if label != None:
+    if label is not None:
         label_array.append(label.replace(' ', '_'))
         flag = True
     else:
@@ -44,42 +44,42 @@ def get_label(label, label_array, force=False, part=None):
 
 def add_segment(lines, k):
     segment = '{:1.0f}'.format(next(k))
-    lines[segment] = {'r': np.array([]), 'z': np.array([])}
+    lines[segment] = {'x': np.array([]), 'z': np.array([])}
     return segment
 
 
-def append_value(lines, segment, r, z):
-    lines[segment]['r'] = np.append(lines[segment]['r'], r)
+def append_value(lines, segment, x, z):
+    lines[segment]['x'] = np.append(lines[segment]['x'], x)
     lines[segment]['z'] = np.append(lines[segment]['z'], z)
 
 
-def cutcorners(r, z):
-    r, z = geom.pointloop(r, z, ref='min')  # form loop from closest neighbour
-    n = len(r) - 1
-    dR = np.array([r[1:] - r[:-1], z[1:] - z[:-1]])
-    dR = np.array([np.gradient(r), np.gradient(z)])
-    dL = norm(dR, axis=0)
+def cutcorners(x, z):
+    x, z = geom.pointloop(x, z, ref='min')  # form loop from closest neighbour
+    n = len(x) - 1
+    dX = np.array([x[1:] - x[:-1], z[1:] - z[:-1]])
+    dX = np.array([np.gradient(x), np.gradient(z)])
+    dL = norm(dX, axis=0)
     k, kflag = count(0), False
     lines = OrderedDict()
     segment = add_segment(lines, k)
     for i in range(n):
-        kink = np.arccos(np.dot(dR[:, i] / dL[i],
-                                dR[:, i + 1] / dL[i + 1])) * 180 / np.pi
-        append_value(lines, segment, r[i + 1], z[i + 1])
-        if abs(kink) > 40 and kflag == False:  # angle, deg
+        kink = np.arccos(np.dot(dX[:, i] / dL[i],
+                                dX[:, i + 1] / dL[i + 1])) * 180 / np.pi
+        append_value(lines, segment, x[i + 1], z[i + 1])
+        if abs(kink) > 40 and kflag is False:  # angle, deg
             segment = add_segment(lines, k)
-            append_value(lines, segment, r[i + 1], z[i + 1])
+            append_value(lines, segment, x[i + 1], z[i + 1])
             kflag = True
         else:
             kflag = False
     segments = list(lines.keys())
     l = np.zeros(len(segments))
     for i, seg in enumerate(segments):
-        l[i] = len(lines[seg]['r'])
+        l[i] = len(lines[seg]['x'])
     seg = np.argsort(l)[-2:]  # select loops (in/out)
     rmax = np.zeros(len(seg))
     for i, s in enumerate(seg):
-        rmax[i] = np.max(lines[segments[s]]['r'])
+        rmax[i] = np.max(lines[segments[s]]['x'])
     seg = seg[np.argsort(rmax)]
     lines_sort = OrderedDict()
     for s in seg[:2]:
@@ -87,32 +87,32 @@ def cutcorners(r, z):
     return lines_sort
 
 
-def cluster_points(r, z):
-    R, Z = geom.pointloop(r, z)
-    dX = norm([r[1:] - r[:-1], z[1:] - z[:-1]], axis=0)
+def cluster_points(x, z):
+    R, Z = geom.pointloop(x, z)
+    dX = norm([x[1:] - x[:-1], z[1:] - z[:-1]], axis=0)
     dx_median = sp.median(dX)
     cluster, i = OrderedDict(), count(0)
-    for r, z in zip(R, Z):
+    for x, z in zip(R, Z):
         dx = []
         for cl in cluster:
-            rc, zc = cluster[cl]['r'], cluster[cl]['z']
-            dx.append(np.min(norm([r - rc, z - zc], axis=0)))
+            rc, zc = cluster[cl]['x'], cluster[cl]['z']
+            dx.append(np.min(norm([x - rc, z - zc], axis=0)))
         if len(dx) == 0 or np.min(dx) > 2 * dx_median:  # new
             cl = 'group{:1.0f}'.format(next(i))
             cluster[cl] = {}
-            cluster[cl] = {'r': [r], 'z': [z]}
+            cluster[cl] = {'x': [x], 'z': [z]}
         else:
             icl = np.argmin(dx)
             cl = list(cluster.keys())[icl]
-            cluster[cl]['r'] = np.append(cluster[cl]['r'], r)
+            cluster[cl]['x'] = np.append(cluster[cl]['x'], x)
             cluster[cl]['z'] = np.append(cluster[cl]['z'], z)
     for cl in cluster:
-        r, z = cluster[cl]['r'], cluster[cl]['z']
-        dx = norm([r[:1] - r[:-1], z[:1] - z[:-1]], axis=0)
+        x, z = cluster[cl]['x'], cluster[cl]['z']
+        dx = norm([x[:1] - x[:-1], z[:1] - z[:-1]], axis=0)
         imax = np.argmax(dx) + 1
-        r = np.append(r[imax:], r[:imax])
+        x = np.append(x[imax:], x[:imax])
         z = np.append(z[imax:], z[:imax])
-        cluster[cl]['r'], cluster[cl]['z'] = r, z
+        cluster[cl]['x'], cluster[cl]['z'] = x, z
     return cluster
 
 
@@ -152,87 +152,87 @@ class DEMO(object):
                 self.parts[p][l] = OrderedDict()
 
             comp, start = row[2].value, 2
-            while comp == None:
+            while comp is None:
                 start += 1
                 comp = row[start].value
             if comp == 'Rad':  # replace confusing 'Rad' label
-                comp = 'r'
+                comp = 'x'
 
             self.parts[p][l][comp] = np.zeros(len(row) - 1)
-            for i, r in enumerate(row[start + 1:]):
+            for i, x in enumerate(row[start + 1:]):
                 try:
-                    self.parts[p][l][comp][i] = 1e-3 * float(r.value)  # m
+                    self.parts[p][l][comp][i] = 1e-3 * float(x.value)  # m
                 except:
                     break
             self.parts[p][l][comp] = self.parts[p][l][comp][:i]
 
     def process(self):
         for part in self.parts:
-            x = {'in': {'r': np.array([]), 'z': np.array([])},
-                 'out': {'r': np.array([]), 'z': np.array([])},
-                 'ports': {'r': np.array([]), 'z': np.array([])},
-                 'r': np.array([]), 'z': np.array([])}
+            p = {'in': {'x': np.array([]), 'z': np.array([])},
+                 'out': {'x': np.array([]), 'z': np.array([])},
+                 'ports': {'x': np.array([]), 'z': np.array([])},
+                 'x': np.array([]), 'z': np.array([])}
 
             for loop, side in zip(self.parts[part], ['out', 'in', 'ports']):
-                r, z = geom.read_loop(self.parts[part], loop)
-                x[side]['r'], x[side]['z'] = r, z
+                x, z = geom.read_loop(self.parts[part], loop)
+                p[side]['x'], p[side]['z'] = x, z
 
             if part in ['TF_Coil', 'Vessel', 'Blanket']:
                 if side != 'out':
-                    x['r'], x['z'] = geom.polyloop(x['in'], x['out'])
+                    p['x'], p['z'] = geom.polyloop(p['in'], p['out'])
                 else:
-                    x['r'], x['z'] = geom.pointloop(
-                        x['out']['r'], x['out']['z'])
-                    lines = cutcorners(x['r'], x['z'])  # select halfs
+                    p['x'], p['z'] = geom.pointloop(
+                        p['out']['x'], p['out']['z'])
+                    lines = cutcorners(p['x'], p['z'])  # select halfs
                     for seg, side in zip(lines, ['in', 'out']):
-                        x[side] = {'r': lines[seg]['r'], 'z': lines[seg]['z']}
-            for key in x:
-                self.parts[part][key] = x[key]
+                        p[side] = {'x': lines[seg]['x'], 'z': lines[seg]['z']}
+            for key in p:
+                self.parts[part][key] = p[key]
 
     def get_ports(self, plot=False):
-        x = self.parts['Vessel']['ports']
-        clusters = cluster_points(x['r'], x['z'])
+        points = self.parts['Vessel']['ports']
+        clusters = cluster_points(points['x'], points['z'])
         port = OrderedDict()
         for i, cl in enumerate(clusters):
-            r, z = clusters[cl]['r'], clusters[cl]['z']
-            switch = r.max() - r.min() < 0.5 * (z.max() - z.min())
+            x, z = clusters[cl]['x'], clusters[cl]['z']
+            switch = x.max() - x.min() < 0.5 * (z.max() - z.min())
             if switch:  # rotate coordinates
-                x, y = np.copy(z), np.copy(r)
+                r, y = np.copy(z), np.copy(x)
             else:
-                x, y = np.copy(r), np.copy(z)
-            index = np.argsort(x)
-            x, y, r, z = x[index], y[index], r[index], z[index]
-            M = np.array([np.ones(len(x)), x]).T  # linear least-squares fit
+                r, y = np.copy(x), np.copy(z)
+            index = np.argsort(r)
+            r, y, x, z = r[index], y[index], x[index], z[index]
+            M = np.array([np.ones(len(r)), r]).T  # linear least-squares fit
             a = sp.linalg.lstsq(M, y)[0]
-            fit = a[0] + a[1] * x
+            fit = a[0] + a[1] * r
             if switch:
-                r_fit, z_fit = fit, z
+                x_fit, z_fit = fit, z
             else:
-                r_fit, z_fit = r, fit
+                x_fit, z_fit = x, fit
             n_hat = np.array([-(z_fit[-1] - z_fit[0]),
-                              r_fit[-1] - r_fit[0]])
+                              x_fit[-1] - x_fit[0]])
             n_hat /= norm(n_hat)
-            n = len(r)
+            n = len(x)
             count = {'left': 0, 'right': 0}
             p = 'P{:1.0f}'.format(i)
-            port[p] = {'left': {'r': np.zeros(n), 'z': np.zeros(n)},
-                       'right': {'r': np.zeros(n), 'z': np.zeros(n)}}
-            for r_, z_ in zip(r, z):
+            port[p] = {'left': {'x': np.zeros(n), 'z': np.zeros(n)},
+                       'right': {'x': np.zeros(n), 'z': np.zeros(n)}}
+            for x_, z_ in zip(x, z):
                 for dot, side in zip([1, -1], ['left', 'right']):
-                    if dot * np.dot([r_ - r_fit[0], z_ - z_fit[0]], n_hat) > 0:
-                        port[p][side]['r'][count[side]] = r_
+                    if dot * np.dot([x_ - x_fit[0], z_ - z_fit[0]], n_hat) > 0:
+                        port[p][side]['x'][count[side]] = x_
                         port[p][side]['z'][count[side]] = z_
                         count[side] += 1
             for side in ['left', 'right']:
-                for var in ['r', 'z']:  # trim
+                for var in ['x', 'z']:  # trim
                     n = count[side]
                     port[p][side][var] = port[p][side][var][:n]
-        ro = np.mean(self.parts['Blanket']['r'])
+        ro = np.mean(self.parts['Blanket']['x'])
         zo = np.mean(self.parts['Blanket']['z'])
         theta = np.zeros(len(port))
         for i, p in enumerate(port):
             theta[i] = np.arctan2(port[p]['left']['z'][0] - zo,
-                                  port[p]['left']['r'][0] - ro)
+                                  port[p]['left']['x'][0] - ro)
         index = list(np.argsort(theta))
         pkey = list(port.keys())
         self.port = OrderedDict()
@@ -250,51 +250,51 @@ class DEMO(object):
                     c = color[8]
                 else:
                     c = color[8]
-                pl.plot(self.port[p][s]['r'], self.port[p][s]['z'],
+                pl.plot(self.port[p][s]['x'], self.port[p][s]['z'],
                         zorder=3, color=c, lw=1)
 
     def get_limiters(self, plot=False):
         x = self.parts['Plasma']['out']
         self.limiter = OrderedDict()
-        clusters = cluster_points(x['r'], x['z'])
+        clusters = cluster_points(x['x'], x['z'])
         for i, cl in enumerate(clusters):
-            r, z = clusters[cl]['r'], clusters[cl]['z']
-            self.limiter['L{:1.0f}'.format(i)] = {'r': r, 'z': z}
+            x, z = clusters[cl]['x'], clusters[cl]['z']
+            self.limiter['L{:1.0f}'.format(i)] = {'x': x, 'z': z}
             if plot:
-                pl.plot(r, z, color=0.5 * np.ones(3))
+                pl.plot(x, z, color=0.5 * np.ones(3))
 
     def plot_limiter(self):
-        pl.plot(self.limiter['L3']['r'],
+        pl.plot(self.limiter['L3']['x'],
                 self.limiter['L3']['z'], color=0.6 * np.ones(3))
 
     def blanket_thickness(self, Nt=100, plot=False):
         bl, loop = {}, {}  # read blanket
         for side in ['in', 'out']:
             bl[side], c = {}, {}
-            for x in ['r', 'z']:
+            for x in ['x', 'z']:
                 c[x] = self.parts['Blanket'][side][x]
-            r, z = geom.order(c['r'], c['z'], anti=True)
-            r, z, l = geom.unique(r, z)  # remove repeats
-            bl[side]['r'], bl[side]['z'] = r, z
-            loop[side] = {'r': IUS(l, r), 'z': IUS(l, z)}  # interpolator
+            x, z = geom.order(c['x'], c['z'], anti=True)
+            x, z, l = geom.unique(x, z)  # remove repeats
+            bl[side]['x'], bl[side]['z'] = x, z
+            loop[side] = {'x': IUS(l, x), 'z': IUS(l, z)}  # interpolator
 
         def thickness(L, Lo, loop, norm):
-            r = loop['in']['r'](Lo) + L[0] * norm['nr'](Lo)
+            x = loop['in']['x'](Lo) + L[0] * norm['nr'](Lo)
             z = loop['in']['z'](Lo) + L[0] * norm['nz'](Lo)
-            err = (r - loop['out']['r'](L[1]))**2 +\
+            err = (x - loop['out']['x'](L[1]))**2 +\
                   (z - loop['out']['z'](L[1]))**2
             return err
 
-        r, z = geom.unique(bl['in']['r'], bl['in']['z'])[:2]  # remove repeats
-        nr, nz, r, z = geom.normal(r, z)
-        l = geom.length(r, z)
+        x, z = geom.unique(bl['in']['x'], bl['in']['z'])[:2]  # remove repeats
+        nr, nz, x, z = geom.normal(x, z)
+        l = geom.length(x, z)
         norm = {'nr': IUS(l, nr), 'nz': IUS(l, nz)}  # interpolator
 
         dt, Lo = np.zeros(Nt), np.linspace(0, 1, Nt)
         for i, lo in enumerate(Lo):
             L = minimize(thickness, [0, lo], method='L-BFGS-B',
                          bounds=([0, 5], [0, 1]), args=(lo, loop, norm)).x
-            dt[i] = np.sqrt((loop['in']['r'](lo) - loop['out']['r'](L[1]))**2 +
+            dt[i] = np.sqrt((loop['in']['x'](lo) - loop['out']['x'](L[1]))**2 +
                             (loop['in']['z'](lo) - loop['out']['z'](L[1]))**2)
             dt[i] = L[0]
         dt = savgol_filter(dt, 7, 2)  # filter
@@ -303,32 +303,32 @@ class DEMO(object):
         return [np.min(dt), np.max(dt)]
 
     def get_fw(self, plot=False):
-        rbl = self.parts['Blanket']['in']['r']  # read blanket
+        rbl = self.parts['Blanket']['in']['x']  # read blanket
         zbl = self.parts['Blanket']['in']['z']
         zmin = np.zeros(len(self.limiter))  # select divertor limiter
         for i, limiter in enumerate(self.limiter):
             zmin[i] = np.min(self.limiter[limiter]['z'])
         imin = np.argmin(zmin)
         div = list(self.limiter.keys())[imin]
-        rdiv = self.limiter[div]['r']  # set divertor profile
+        rdiv = self.limiter[div]['x']  # set divertor profile
         zdiv = self.limiter[div]['z']
         cut = np.zeros(2, dtype=int)  # cut and join divertor
         for i, j in enumerate([0, -1]):
             cut[i] = np.argmin(norm([rbl[j] - rdiv, zbl[j] - zdiv], axis=0))
         cut = np.sort(cut)
-        r = np.append(rbl, rdiv[cut[0]:cut[1]])
+        x = np.append(rbl, rdiv[cut[0]:cut[1]])
         z = np.append(zbl, zdiv[cut[0]:cut[1]])
-        r, z = np.append(r, r[0]), np.append(z, z[0])
-        r, z = geom.rzSLine(r, z)
-        r, z = r[::-1], z[::-1]  # flip
-        self.fw = {'r': r, 'z': z}
+        x, z = np.append(x, x[0]), np.append(z, z[0])
+        x, z = geom.rzSLine(x, z)
+        x, z = x[::-1], z[::-1]  # flip
+        self.fw = {'x': x, 'z': z}
         if plot:
-            pl.plot(r, z, color=0.5 * np.ones(3))
+            pl.plot(x, z, color=0.5 * np.ones(3))
 
     def fill_loops(self):
         for part in self.parts:
             try:
-                geom.polyfill(self.parts[part]['r'],
+                geom.polyfill(self.parts[part]['x'],
                               self.parts[part]['z'], color=color(next(ic)))
             except:
                 pass
@@ -340,14 +340,14 @@ class DEMO(object):
         else:
             cindex = list(self.parts.keys()).index(part) - 1
         c = kwargs.get('color', color[cindex])
-        geom.polyfill(self.parts[part]['r'], self.parts[part]['z'],
+        geom.polyfill(self.parts[part]['x'], self.parts[part]['z'],
                       color=c, alpha=alpha)
 
     def plot(self):
         for part in self.parts:
             for loop in self.parts[part]:
                 try:
-                    pl.plot(self.parts[part][loop]['r'],
+                    pl.plot(self.parts[part][loop]['x'],
                             self.parts[part][loop]['z'], '.', markersize=5.0)
                 except:
                     pass
@@ -359,7 +359,7 @@ class DEMO(object):
         ws = wb[wb.get_sheet_names()[0]]
 
         part = iter(self.parts)
-        component = cycle(['r', 'z'])
+        component = cycle(['x', 'z'])
         for row in ws.columns:
             if row[0].value is not None:
                 pt = next(part)
@@ -371,30 +371,31 @@ class DEMO(object):
             if row[2].value is not None:
                 cp = next(component)
                 row[2].value = cp
-            '''    
-            for i,r in enumerate(row[3:]):
-                if r.value is not None:
+            '''
+            for i,x in enumerate(row[3:]):
+                if x.value is not None:
                     print(pt,lp,cp,i)
-                    r.value = self.parts[pt][lp][cp][i]
+                    x.value = self.parts[pt][lp][cp][i]
             '''
 
             '''
-            new_loop = get_label(row[1].value,loop,force=new_part,part=part[-1])
+            new_loop = get_label(row[1].value,loop,
+                                 force=new_part,part=part[-1])
             p,l = part[-1],loop[-1]
             if new_loop:
                 self.parts[p][l] = OrderedDict()
-            
+
             comp,start = row[2].value,2
             while comp == None:
                 start += 1
                 comp = row[start].value
             if comp == 'Rad':  # replace confusing 'Rad' label
-                comp = 'r'
-                
+                comp = 'x'
+
             self.parts[p][l][comp] = np.zeros(len(row)-1)
-            for i,r in enumerate(row[start+1:]):
+            for i,x in enumerate(row[start+1:]):
                 try:
-                    self.parts[p][l][comp][i] = 1e-3*float(r.value)  # m
+                    self.parts[p][l][comp][i] = 1e-3*float(x.value)  # m
                 except:
                     break
             self.parts[p][l][comp] = self.parts[p][l][comp][:i]

@@ -68,8 +68,8 @@ def plot_variables(Xo, eps=1e-2, fmt='1.2f', scale=1, postfix=''):
             color = 0.75 * np.ones(3)
         ax.text(x, y, text, ha=ha, va='center',
                 size=size, color=color)
-    pl.plot(0.5 * np.ones(2), np.sort(ax.get_ylim()), '--', color=0.5 * np.ones(3),
-            zorder=0, lw=1)
+    pl.plot(0.5 * np.ones(2), np.sort(ax.get_ylim()), '--',
+            color=0.5 * np.ones(3), zorder=0, lw=1)
     pl.plot(np.ones(2), np.sort(ax.get_ylim()), '-', color=0.25 * np.ones(3),
             zorder=0, lw=1.5)
     xlim = ax.get_xlim()
@@ -153,8 +153,8 @@ def plot_oppvar(xo, oppvar, eps=1e-2, fmt='1.2f', scale=1, postfix=''):
             color = 0.75 * np.ones(3)
         ax.text(x, y, text, ha=ha, va='center',
                 size=size, color=color)
-    pl.plot(0.5 * np.ones(2), np.sort(ax.get_ylim()), '--', color=0.5 * np.ones(3),
-            zorder=0, lw=1)
+    pl.plot(0.5 * np.ones(2), np.sort(ax.get_ylim()), '--',
+            color=0.5 * np.ones(3), zorder=0, lw=1)
     pl.plot(np.ones(2), np.sort(ax.get_ylim()), '-', color=0.25 * np.ones(3),
             zorder=0, lw=1.5)
     xlim = ax.get_xlim()
@@ -180,20 +180,20 @@ def get_input(oppvar=[], **kwargs):
     return inputs
 
 
-def close_loop(x, npoints):
-    for var in ['r', 'z']:
-        x[var] = np.append(x[var], x[var][0])
-    x['r'], x['z'] = geom.rzSLine(x['r'], x['z'], npoints=npoints)
-    return x
+def close_loop(p, npoints):
+    for var in ['x', 'z']:
+        p[var] = np.append(p[var], p[var][0])
+    p['x'], p['z'] = geom.rzSLine(p['x'], p['z'], npoints=npoints)
+    return p
 
 
-def set_limit(xo, limits=True):
+def set_limit(po, limits=True):
     if limits:
-        if xo['value'] < xo['lb']:
-            xo['value'] = xo['lb']
-        if xo['value'] > xo['ub']:
-            xo['value'] = xo['ub']
-    return xo
+        if po['value'] < po['lb']:
+            po['value'] = po['lb']
+        if po['value'] > po['ub']:
+            po['value'] = po['ub']
+    return po
 
 
 class Aloop(object):  # tripple arc loop
@@ -205,7 +205,7 @@ class Aloop(object):  # tripple arc loop
 
     def initalise_parameters(self):
         self.xo = collections.OrderedDict()
-        self.xo['ro'] = {'value': 4.486, 'lb': 3, 'ub': 5}  # r origin
+        self.xo['xo'] = {'value': 4.486, 'lb': 3, 'ub': 5}  # x origin
         self.xo['zo'] = {'value': 0, 'lb': -1, 'ub': 1}  # z origin
         self.xo['sl'] = {'value': 6.428,
                          'lb': 0.5, 'ub': 10}  # straight length
@@ -233,62 +233,62 @@ class Aloop(object):  # tripple arc loop
 
     def get_xo(self):
         values = []
-        for n in ['ro', 'zo', 'sl', 'f1', 'f2', 'a1', 'a2']:
+        for n in ['xo', 'zo', 'sl', 'f1', 'f2', 'a1', 'a2']:
             values.append(self.xo[n]['value'])
         return values
 
     def draw(self, **kwargs):
         self.npoints = kwargs.get('npoints', self.npoints)
         self.set_input(**kwargs)
-        self.segments = {'r': [], 'z': []}
-        ro, zo, sl, f1, f2, a1, a2 = self.get_xo()
+        self.segments = {'x': [], 'z': []}
+        xo, zo, sl, f1, f2, a1, a2 = self.get_xo()
         a1 *= np.pi / 180  # convert to radians
         a2 *= np.pi / 180
         asum = a1 + a2
         # straight section
-        r = ro * np.ones(2)
+        x = xo * np.ones(2)
         z = np.array([zo, zo + sl])
-        self.segments['r'].append(r)
+        self.segments['x'].append(x)
         self.segments['z'].append(z)
         # small arc
         theta = np.linspace(0, a1, round(0.5 * self.npoints * a1 / np.pi))
-        rx, zx = r[-1], z[-1]
-        r = np.append(r, r[-1] + f1 * (1 - np.cos(theta)))
+        rx, zx = x[-1], z[-1]
+        x = np.append(x, x[-1] + f1 * (1 - np.cos(theta)))
         z = np.append(z, z[-1] + f1 * np.sin(theta))
-        self.segments['r'].append(rx + f1 * (1 - np.cos(theta)))
+        self.segments['x'].append(rx + f1 * (1 - np.cos(theta)))
         self.segments['z'].append(zx + f1 * np.sin(theta))
         # mid arc
         theta = np.linspace(
             theta[-1], asum, round(0.5 * self.npoints * a2 / np.pi))
-        rx, zx = r[-1], z[-1]
-        r = np.append(r, r[-1] + f2 * (np.cos(a1) - np.cos(theta)))
+        rx, zx = x[-1], z[-1]
+        x = np.append(x, x[-1] + f2 * (np.cos(a1) - np.cos(theta)))
         z = np.append(z, z[-1] + f2 * (np.sin(theta) - np.sin(a1)))
-        self.segments['r'].append(rx + f2 * (np.cos(a1) - np.cos(theta)))
+        self.segments['x'].append(rx + f2 * (np.cos(a1) - np.cos(theta)))
         self.segments['z'].append(zx + f2 * (np.sin(theta) - np.sin(a1)))
         # large arc
         rl = (z[-1] - zo) / np.sin(np.pi - asum)
         theta = np.linspace(theta[-1], np.pi, 60)
-        rx, zx = r[-1], z[-1]
-        r = np.append(r, r[-1] + rl *
+        rx, zx = x[-1], z[-1]
+        x = np.append(x, x[-1] + rl *
                       (np.cos(np.pi - theta) - np.cos(np.pi - asum)))
         z = np.append(z, z[-1] - rl * (np.sin(asum) - np.sin(np.pi - theta)))
-        self.segments['r'].append(
+        self.segments['x'].append(
             rx + rl * (np.cos(np.pi - theta) - np.cos(np.pi - asum)))
         self.segments['z'].append(
             zx - rl * (np.sin(asum) - np.sin(np.pi - theta)))
-        r = np.append(r, r[::-1])[::-1]
+        x = np.append(x, x[::-1])[::-1]
         z = np.append(z, -z[::-1] + 2 * zo)[::-1]
-        r, z = geom.rzSLine(r, z, self.npoints)  # distribute points
-        x = {'r': r, 'z': z}
+        x, z = geom.rzSLine(x, z, self.npoints)  # distribute points
+        x = {'x': x, 'z': z}
         x = close_loop(x, self.npoints)
-        x['r'], x['z'] = geom.clock(x['r'], x['z'])
+        x['x'], x['z'] = geom.clock(x['x'], x['z'])
         return x
 
     def plot(self, inputs={}):
         x = self.draw(inputs=inputs)
-        pl.plot(x['r'], x['z'], color=0.4 * np.ones(3))
-        for r, z in zip(self.segments['r'], self.segments['z']):
-            pl.plot(r, z, lw=3)
+        pl.plot(x['x'], x['z'], color=0.4 * np.ones(3))
+        for x, z in zip(self.segments['x'], self.segments['z']):
+            pl.plot(x, z, lw=3)
         pl.axis('equal')
         pl.axis('off')
 
@@ -302,8 +302,8 @@ class Dloop(object):  # Princton D
 
     def initalise_radii(self):
         self.xo = collections.OrderedDict()
-        self.xo['r1'] = {'value': 4.486, 'lb': 3, 'ub': 5}  # inner radius
-        self.xo['r2'] = {'value': 15.708, 'lb': 10, 'ub': 20}  # outer radius
+        self.xo['x1'] = {'value': 4.486, 'lb': 3, 'ub': 5}  # inner radius
+        self.xo['x2'] = {'value': 15.708, 'lb': 10, 'ub': 20}  # outer radius
         self.xo['dz'] = {'value': 0, 'lb': -10, 'ub': 10}  # vertical offset
         self.oppvar = list(self.xo.keys())
 
@@ -320,52 +320,54 @@ class Dloop(object):  # Princton D
 
     def get_xo(self):
         values = []
-        for n in ['r1', 'r2', 'dz']:
+        for n in ['x1', 'x2', 'dz']:
             values.append(self.xo[n]['value'])
         return values
 
     def draw(self, **kwargs):
         self.npoints = kwargs.get('npoints', self.npoints)
         self.set_input(**kwargs)
-        self.segments = {'r': [], 'z': []}
-        r1, r2, dz = self.get_xo()
-        ro = np.sqrt(r1 * r2)
-        k = 0.5 * np.log(r2 / r1)
+        self.segments = {'x': [], 'z': []}
+        x1, x2, dz = self.get_xo()
+        xo = np.sqrt(x1 * x2)
+        k = 0.5 * np.log(x2 / x1)
         theta = np.linspace(-0.5 * np.pi, 1.5 * np.pi, 2 * self.npoints)
-        r, z = np.zeros(2 * self.npoints), np.zeros(2 * self.npoints)
+        x, z = np.zeros(2 * self.npoints), np.zeros(2 * self.npoints)
         s = np.zeros(2 * self.npoints, dtype='complex128')
         for n in np.arange(1, 20):  # sum convergent series
-            ds = 1j / n * (np.exp(-1j * n * theta) - 1) * (1 + np.exp(1j * n * (theta + np.pi))) *\
+            ds = 1j / n * (np.exp(-1j * n * theta) - 1) *\
+                (1 + np.exp(1j * n * (theta + np.pi))) *\
                 np.exp(1j * n * np.pi / 2) * \
                 (besl(n - 1, k) + besl(n + 1, k)) / 2
             s += ds
             if np.max(abs(ds)) < 1e-14:
                 break
-        z = abs(ro * k * (besl(1, k) * theta + s))
-        r = ro * np.exp(k * np.sin(theta))
+        z = abs(xo * k * (besl(1, k) * theta + s))
+        x = xo * np.exp(k * np.sin(theta))
         z -= np.mean(z)
-        r, z = geom.space(r, z, self.npoints)
+        x, z = geom.space(x, z, self.npoints)
         z += dz  # vertical shift
-        self.segments['r'].append([r[-1], r[0]])
+        self.segments['x'].append([x[-1], x[0]])
         self.segments['z'].append([z[-1], z[0]])
-        self.segments['r'].append(r)
+        self.segments['x'].append(x)
         self.segments['z'].append(z)
-        x = {'r': r, 'z': z}
+        x = {'x': x, 'z': z}
         x = close_loop(x, self.npoints)
-        x['r'], x['z'] = geom.clock(x['r'], x['z'])
+        x['x'], x['z'] = geom.clock(x['x'], x['z'])
         return x
 
     def plot(self, inputs={}):
         x = self.draw(inputs=inputs)
-        pl.plot(x['r'], x['z'], color=0.4 * np.ones(3))
-        for r, z in zip(self.segments['r'], self.segments['z']):
-            pl.plot(r, z, lw=3)
+        pl.plot(x['x'], x['z'], color=0.4 * np.ones(3))
+        for x, z in zip(self.segments['x'], self.segments['z']):
+            pl.plot(x, z, lw=3)
             pl.axis('equal')
             pl.axis('off')
 
 
 class Sloop(object):  # polybezier
-    def __init__(self, npoints=200, symetric=False, tension='full', limits=True):
+    def __init__(self, npoints=200, symetric=False, tension='full',
+                 limits=True):
         self.name = 'Sloop'
         self.symetric = symetric
         self.tension = tension
@@ -377,8 +379,8 @@ class Sloop(object):  # polybezier
 
     def initalise_nodes(self):
         self.xo = collections.OrderedDict()
-        self.xo['r1'] = {'value': 4.486, 'lb': 3, 'ub': 8}  # inner radius
-        self.xo['r2'] = {'value': 15.708, 'lb': 5, 'ub': 25}  # outer radius
+        self.xo['x1'] = {'value': 4.486, 'lb': 3, 'ub': 8}  # inner radius
+        self.xo['x2'] = {'value': 15.708, 'lb': 5, 'ub': 25}  # outer radius
         self.xo['z2'] = {'value': 0, 'lb': -0.9,
                          'ub': 0.9}  # outer node vertical shift
         self.xo['height'] = {'value': 17.367,
@@ -501,7 +503,7 @@ class Sloop(object):  # polybezier
 
     def get_xo(self):
         values = []
-        for var in ['r1', 'r2', 'z2', 'height', 'top',
+        for var in ['x1', 'x2', 'z2', 'height', 'top',
                     'bottom', 'upper', 'lower', 'dz', 'flat', 'tilt']:
             if var not in self.xo:
                 if var == 'bottom':
@@ -527,14 +529,14 @@ class Sloop(object):  # polybezier
         return bn(n, v) * t**v * (1 - t)**(n - v)
 
     def midpoints(p):  # convert polar to cartesian
-        r = p['r'] + p['l'] * np.cos(p['t'])
+        x = p['x'] + p['l'] * np.cos(p['t'])
         z = p['z'] + p['l'] * np.sin(p['t'])
-        return r, z
+        return x, z
 
     def control(p0, p3):  # add control points (length and theta or midpoint)
         p1, p2 = {}, {}
-        xm, ym = np.mean([p0['r'], p3['r']]), np.mean([p0['z'], p3['z']])
-        dl = sp.linalg.norm([p3['r'] - p0['r'], p3['z'] - p0['z']])
+        xm, ym = np.mean([p0['x'], p3['x']]), np.mean([p0['z'], p3['z']])
+        dl = sp.linalg.norm([p3['x'] - p0['x'], p3['z'] - p0['z']])
         for p, pm in zip([p0, p3], [p1, p2]):
             if 'l' not in p:  # add midpoint length
                 p['l'] = dl / 2
@@ -542,7 +544,7 @@ class Sloop(object):  # polybezier
                 p['l'] *= dl / 2
             if 't' not in p:  # add midpoint angle
                 p['t'] = np.arctan2(ym - p['y'], xm - p['x'])
-            pm['r'], pm['z'] = Sloop.midpoints(p)
+            pm['x'], pm['z'] = Sloop.midpoints(p)
         return p1, p2, dl
 
     def append_keys(self, key):
@@ -575,86 +577,88 @@ class Sloop(object):  # polybezier
         self.set_tension()
 
     def verticies(self):
-        r1, r2, z2, height, top, bottom,\
+        x1, x2, z2, height, top, bottom,\
             upper, lower, dz, ds, alpha_s = self.get_xo()
-        r, z, theta = np.zeros(6), np.zeros(6), np.zeros(6)
+        x, z, theta = np.zeros(6), np.zeros(6), np.zeros(6)
         alpha_s *= np.pi / 180
         ds_z = ds * height / 2 * np.cos(alpha_s)
         ds_r = ds * height / 2 * np.sin(alpha_s)
-        r[0], z[0], theta[0] = r1, upper * \
+        x[0], z[0], theta[0] = x1, upper * \
             height / 2, np.pi / 2  # upper sholder
-        r[1], z[1], theta[1] = r1 + top * (r2 - r1), height / 2, 0  # top
-        r[2], z[2], theta[2] = r2 + ds_r, z2 * height / \
+        x[1], z[1], theta[1] = x1 + top * (x2 - x1), height / 2, 0  # top
+        x[2], z[2], theta[2] = x2 + ds_r, z2 * height / \
             2 + ds_z, -np.pi / 2 - alpha_s  # outer, upper
-        r[3], z[3], theta[3] = r2 - ds_r, z2 * height / \
+        x[3], z[3], theta[3] = x2 - ds_r, z2 * height / \
             2 - ds_z, -np.pi / 2 - alpha_s  # outer, lower
-        r[4], z[4], theta[4] = r1 + bottom * \
-            (r2 - r1), -height / 2, -np.pi  # bottom
-        r[5], z[5], theta[5] = r1, -lower * \
+        x[4], z[4], theta[4] = x1 + bottom * \
+            (x2 - x1), -height / 2, -np.pi  # bottom
+        x[5], z[5], theta[5] = x1, -lower * \
             height / 2, np.pi / 2  # lower sholder
         z += dz  # vertical loop offset
-        return r, z, theta
+        return x, z, theta
 
-    def linear_loop_length(self, r, z):
+    def linear_loop_length(self, x, z):
         self.L = 0
-        for i in range(len(r) - 1):
-            self.L += sp.linalg.norm([r[i + 1] - r[i], z[i + 1] - z[i]])
+        for i in range(len(x) - 1):
+            self.L += sp.linalg.norm([x[i + 1] - x[i], z[i + 1] - z[i]])
 
     def segment(self, p, dl):
         n = int(np.ceil(self.npoints * dl / self.L))  # segment point number
         t = np.linspace(0, 1, n)
-        curve = {'r': np.zeros(n), 'z': np.zeros(n)}
+        curve = {'x': np.zeros(n), 'z': np.zeros(n)}
         for i, pi in enumerate(p):
-            for var in ['r', 'z']:
+            for var in ['x', 'z']:
                 curve[var] += self.basis(t, i) * pi[var]
         return curve
 
-    def polybezier(self, r, z, theta):
-        x = {'r': np.array([]), 'z': np.array([])}
-        self.p = []
-        self.linear_loop_length(r, z)
+    def polybezier(self, x, z, theta):
+        p = {'x': np.array([]), 'z': np.array([])}
+        self.po = []
+        self.linear_loop_length(x, z)
         ls, le = self.get_l()
-        for i, j, k in zip(range(len(r) - 1), [0, 1, 3, 4], [1, 2, 4, 5]):
-            p0 = {'r': r[j], 'z': z[j], 't': theta[j], 'l': ls[i]}
-            p3 = {'r': r[k], 'z': z[k], 't': theta[k] - np.pi, 'l': le[i]}
+        for i, j, k in zip(range(len(x) - 1), [0, 1, 3, 4], [1, 2, 4, 5]):
+            p0 = {'x': x[j], 'z': z[j], 't': theta[j], 'l': ls[i]}
+            p3 = {'x': x[k], 'z': z[k], 't': theta[k] - np.pi, 'l': le[i]}
             p1, p2, dl = Sloop.control(p0, p3)
             curve = self.segment([p0, p1, p2, p3], dl)
-            self.p.append({'p0': p0, 'p1': p1, 'p2': p2, 'p3': p3})
-            for var in ['r', 'z']:
-                x[var] = np.append(x[var], curve[var][:-1])
-        for var in ['r', 'z']:
-            x[var] = np.append(x[var], curve[var][-1])
-            x[var] = x[var][::-1]
-        return x
+            self.po.append({'p0': p0, 'p1': p1, 'p2': p2, 'p3': p3})
+            for var in ['x', 'z']:
+                p[var] = np.append(p[var], curve[var][:-1])
+        for var in ['x', 'z']:
+            p[var] = np.append(p[var], curve[var][-1])
+            p[var] = p[var][::-1]
+        return p
 
     def draw(self, **kwargs):
         self.npoints = kwargs.get('npoints', self.npoints)
         self.set_input(**kwargs)
-        r, z, theta = self.verticies()
-        x = self.polybezier(r, z, theta)
-        x = close_loop(x, self.npoints)
-        x['r'], x['z'] = geom.clock(x['r'], x['z'])
-        return x
+        x, z, theta = self.verticies()
+        p = self.polybezier(x, z, theta)
+        p = close_loop(p, self.npoints)
+        p['x'], p['z'] = geom.clock(p['x'], p['z'])
+        return p
 
     def plot(self, inputs={}, ms=3):
         # color = cycle(sns.color_palette('Set2',5))
-        x = self.draw(inputs=inputs)
-        r, z, theta = self.verticies()
+        p = self.draw(inputs=inputs)
+        x, z, theta = self.verticies()
         c1, c2 = 0.75 * np.ones(3), 0.4 * np.ones(3)
-        pl.plot(r, z, 's', color=c1, ms=2 * ms, zorder=10)
-        pl.plot(r, z, 's', color=c2, ms=ms, zorder=10)
-        pl.plot(x['r'], x['z'], color=c2, ms=ms)
-        for p in self.p:
-            pl.plot([p['p0']['r'], p['p1']['r']],
-                    [p['p0']['z'], p['p1']['z']], color=c1, ms=ms, zorder=5)
-            pl.plot(p['p1']['r'], p['p1']['z'], 'o',
+        pl.plot(x, z, 's', color=c1, ms=2 * ms, zorder=10)
+        pl.plot(x, z, 's', color=c2, ms=ms, zorder=10)
+        pl.plot(p['x'], p['z'], color=c2, ms=ms)
+        for po in self.po:
+            pl.plot([po['p0']['x'], po['p1']['x']],
+                    [po['p0']['z'], po['p1']['z']], color=c1, ms=ms, zorder=5)
+            pl.plot(po['p1']['x'], po['p1']['z'], 'o',
                     color=c1, ms=2 * ms, zorder=6)
-            pl.plot(p['p1']['r'], p['p1']['z'], 'o', color=c2, ms=ms, zorder=7)
-            pl.plot([p['p3']['r'], p['p2']['r']],
-                    [p['p3']['z'], p['p2']['z']], color=c1, ms=ms, zorder=5)
-            pl.plot(p['p2']['r'], p['p2']['z'], 'o',
+            pl.plot(po['p1']['x'], po['p1']['z'], 'o',
+                    color=c2, ms=ms, zorder=7)
+            pl.plot([po['p3']['x'], po['p2']['x']],
+                    [po['p3']['z'], po['p2']['z']], color=c1, ms=ms, zorder=5)
+            pl.plot(po['p2']['x'], po['p2']['z'], 'o',
                     color=c1, ms=2 * ms, zorder=6)
-            pl.plot(p['p2']['r'], p['p2']['z'], 'o', color=c2, ms=ms, zorder=7)
+            pl.plot(po['p2']['x'], po['p2']['z'], 'o',
+                    color=c2, ms=ms, zorder=7)
         pl.axis('equal')
         pl.axis('off')
 
@@ -774,10 +778,10 @@ class Profile(object):
 
 
 if __name__ is '__main__':  # plot loop classes
-    #loop = Aloop()
-    #x = loop.plot()
+    # loop = Aloop()
+    # x = loop.plot()
     loop = Sloop(limits=False, symetric=False, tension='single')
     # loop.set_tension('full')
-    #x = loop.plot({'l2':1.5})
+    # x = loop.plot({'l2':1.5})
     # loop.draw()
     profile = Profile('DEMO_SN', family='S', part='TF', nTF=18, obj='L')

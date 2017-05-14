@@ -112,8 +112,8 @@ class Shape(object):
             self.toc(tic)
 
     def toc(self, tic):
-        print('optimisation time {:1.1f}s'.format(time.time() - tic))
         print('noppvar {:1.0f}'.format(len(self.loop.oppvar)))
+        print('optimisation time {:1.1f}s'.format(time.time() - tic))
 
     def movie(self, filename):
         fig, ax = pl.subplots(1, 2, figsize=(12, 8))

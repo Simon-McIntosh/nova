@@ -77,9 +77,9 @@ class force_feild(object):
     def get_force(self):
         self.check()
         F, dF = self.set_force(self.I)
-        Fcoil = {'PF': {'r': 0, 'z': 0}, 'CS': {
+        Fcoil = {'PF': {'x': 0, 'z': 0}, 'CS': {
             'sep': 0, 'zsum': 0}, 'F': F, 'dF': dF}
-        Fcoil['PF']['r'] = np.max(abs(F[self.index['PF']['index'], 0]))
+        Fcoil['PF']['x'] = np.max(abs(F[self.index['PF']['index'], 0]))
         Fcoil['PF']['z'] = np.max(abs(F[self.index['PF']['index'], 1]))
         FzCS = F[self.index['CS']['index'], 1]
         if self.index['CS']['n'] > 1:
@@ -105,13 +105,13 @@ class force_feild(object):
         index = np.append(self.index['PF']['index'], self.index['CS']['index'])
         names = np.append(self.index['PF']['name'], self.index['CS']['name'])
         for i, name in zip(index, names):
-            r, z = self.pf_coil[name]['r'], self.pf_coil[name]['z']
+            x, z = self.pf_coil[name]['x'], self.pf_coil[name]['z']
             F = self.F[i]
             zarrow = scale * F[1] / Fmax
-            # pl.arrow(r,z,scale*F[0]/Fmax,0,  # Fr
+            # pl.arrow(x,z,scale*F[0]/Fmax,0,  # Fr
             #         linewidth=2,head_width=0.3,head_length=0.4,
             #         ec=0.4*np.ones(3),fc=0.7*np.ones(3))
-            pl.arrow(r, z, 0, zarrow,  # Fz
+            pl.arrow(x, z, 0, zarrow,  # Fz
                      linewidth=2, head_width=0.12, head_length=0.1,
                      ec=0.2 * np.ones(3), fc=0.2 * np.ones(3))
             if name in self.index['PF']['name']:
@@ -122,33 +122,33 @@ class force_feild(object):
                     va = 'bottom'
                 else:
                     va = 'top'
-                pl.text(r, z + zarrow, '{:1.0f}MN'.format(F[1]),
+                pl.text(x, z + zarrow, '{:1.0f}MN'.format(F[1]),
                         ha='center', va=va, fontsize=1.1 * fs, color=0.1 * np.ones(3),
                         backgroundcolor=0.9 * np.ones(3))
 
     def set_bm(self, cage):
-        x = {'cl': {'r': cage.coil_loop[:, 0], 'z': cage.coil_loop[:, 2]}}
+        x = {'cl': {'x': cage.coil_loop[:, 0], 'z': cage.coil_loop[:, 2]}}
         i = np.argmax(x['cl']['z'])
-        ro, zo = x['cl']['r'][i], x['cl']['z'][i]
+        ro, zo = x['cl']['x'][i], x['cl']['z'][i]
         self.bm = ro * cage.point((ro, 0, zo),
                                   variable='feild')[1]  # TF moment
 
     def topple(self, point, J, cage, Bpoint, method='function', **kwargs):
         # eq.Bpoint == point calculated method (slow)
         # sf.Bpoint == spline interpolated method (fast)
-        x = {'cl': {'r': cage.coil_loop[:, 0], 'z': cage.coil_loop[:, 2]}}
+        x = {'cl': {'x': cage.coil_loop[:, 0], 'z': cage.coil_loop[:, 2]}}
         if 'streamfunction' in Bpoint.__str__():
-            topright = Bpoint((np.max(x['cl']['r']),
+            topright = Bpoint((np.max(x['cl']['x']),
                                np.max(x['cl']['z'])),
                               check_bounds=True)
-            bottomleft = Bpoint((np.max(x['cl']['r']),
+            bottomleft = Bpoint((np.max(x['cl']['x']),
                                  np.max(x['cl']['z'])),
                                 check_bounds=True)
             if not(topright and bottomleft):
                 errtxt = 'TF coil extends outside Bpoint interpolation grid\n'
                 errtxt = 'extend sf grid\n'
                 raise ValueError(errtxt)
-        if method == 'function':  # calculate tf feild as fitted 1/r function
+        if method == 'function':  # calculate tf feild as fitted 1/x function
             if not hasattr(self, 'bm'):
                 self.set_bm(cage)
         elif method != 'BS':  # raise error if method not 'function' or 'BS'
@@ -182,27 +182,18 @@ if __name__ is '__main__':  # test functions
 
     sf = SF(setup.filename)
     pf = PF(sf.eqdsk)
-    rb = RB(setup, sf)
-    eq = EQ(sf, pf, dCoil=0.25, sigma=0,
-            boundary=rb.get_fw(expand=0.25), n=1e3)
+    rb = RB(sf, setup)
+    eq = EQ(sf, pf, dCoil=0.75, sigma=0,
+            boundary=sf.get_sep(expand=0.25), n=1e3)
     eq.get_plasma_coil()
     # eq.gen_opp()
 
-    ff = force_feild(pf.index, pf.coil, eq.coil, eq.plasma_coil)
+    ff = force_feild(pf.index, pf.coil, pf.sub_coil, pf.plasma_coil,
+                     multi_filament=True)
     Fcoil = ff.get_force()
 
     ff.plot()
-    pf.plot(coils=pf.coil, label=True, plasma=False, current=True)
-    pf.plot(coils=eq.coil, label=False, plasma=True, current=False)
+    pf.plot(label=True, plasma=False, current=True)
+    pf.plot(subcoil=True, label=False, plasma=True, current=False)
     pl.axis('equal')
     pl.axis('off')
-    print(Fcoil['F'][:, 1])
-    '''
-    print('writing',self.filename,self.nTF)
-
-    data = {'p':self.profile.loop.p,'section':self.tf.section,
-            'pf':self.pf.coil,'nTF':self.nTF,'color':color,
-            'PFsupport':self.PFsupport,'CSsupport':self.CSsupport}
-    with open(self.filename,'w') as f:
-        json.dump(data,f,indent=4)
-    '''

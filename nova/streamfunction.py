@@ -23,13 +23,13 @@ class SF(object):
         self.eqdsk = nova.geqdsk.read(self.filename)
         self.normalise()  # unit normalisation
         self.set_plasma(self.eqdsk)
-        self.set_boundary(self.eqdsk['rbdry'], self.eqdsk['zbdry'])
+        self.set_boundary(self.eqdsk['xbdry'], self.eqdsk['zbdry'])
         self.set_flux(self.eqdsk)  # calculate flux profiles
         self.set_TF(self.eqdsk)
         self.set_current(self.eqdsk)
         xo_arg = np.argmin(self.zbdry)
-        self.xo = [self.rbdry[xo_arg], self.zbdry[xo_arg]]
-        self.mo = [self.eqdsk['rmagx'], self.eqdsk['zmagx']]
+        self.po = [self.xbdry[xo_arg], self.zbdry[xo_arg]]
+        self.mo = [self.eqdsk['xmagx'], self.eqdsk['zmagx']]
         self.upsample(upsample)
         self.get_Xpsi()
         self.get_Mpsi()
@@ -48,8 +48,9 @@ class SF(object):
             setattr(self, key, kwargs[key])
 
     def normalise(self):
-        if ('Fiesta' in self.eqdsk['name'] or 'Nova' in self.eqdsk['name']
-                or 'disr' in self.eqdsk['name']) and 'CREATE' not in self.eqdsk['name']:
+        if ('Fiesta' in self.eqdsk['name'] or 'Nova' in self.eqdsk['name'] or
+            'disr' in self.eqdsk['name']) and\
+                'CREATE' not in self.eqdsk['name']:
             self.norm = 1
         else:  # CREATE
             self.eqdsk['cpasma'] *= -1
@@ -61,10 +62,10 @@ class SF(object):
                 self.eqdsk[key] *= self.norm
         self.b_scale = 1  # flux function scaling
 
-    def trim_r(self, rmin=1.5):
-        if self.r[0] == 0:  # trim zero radius entries
-            i = np.argmin(abs(self.r - rmin))
-            self.r = self.r[i:]
+    def trim_x(self, rmin=1.5):
+        if self.x[0] == 0:  # trim zero x-coordinate entries
+            i = np.argmin(abs(self.x - rmin))
+            self.x = self.x[i:]
             self.psi = self.psi[i:, :]
 
     def eqwrite(self, pf, CREATE=False, prefix='Nova', config=''):
@@ -79,20 +80,20 @@ class SF(object):
             psi_offset = self.get_Xpsi()[0]  # reformat: boundary psi=0
         else:
             norm, Ip_dir, psi_offset = 1, 1, 0  # no change
-        nc, rc, zc, drc, dzc, Ic = pf.unpack_coils()[:-1]
+        nc, xc, zc, dxc, dzc, Ic = pf.unpack_coils()[:-1]
         psi_ff = np.linspace(0, 1, self.nr)
         pad = np.zeros(self.nr)
         eq = {'name': name,
               # Number of horizontal and vertical points
               'nx': self.nr, 'ny': self.nz,
-              'r': self.r, 'z': self.z,  # Location of the grid-points
-              'rdim': self.r[-1] - self.r[0],  # Size of the domain in meters
+              'x': self.x, 'z': self.z,  # Location of the grid-points
+              'rdim': self.x[-1] - self.x[0],  # Size of the domain in meters
               'zdim': self.z[-1] - self.z[0],  # Size of the domain in meters
               # Reference vacuum toroidal field (m, T)
-              'rcentr': self.eqdsk['rcentr'],
+              'xcentr': self.eqdsk['xcentr'],
               # Reference vacuum toroidal field (m, T)
               'bcentr': self.eqdsk['bcentr'],
-              'rgrid1': self.r[0],  # R of left side of domain
+              'rgrid1': self.x[0],  # X of left side of domain
               # Z at the middle of the domain
               'zmid': self.z[0] + (self.z[-1] - self.z[0]) / 2,
               'rmagx': self.Mpoint[0],  # Location of magnetic axis
@@ -103,7 +104,8 @@ class SF(object):
               'sibdry': self.Xpsi * norm,
               'cpasma': self.eqdsk['cpasma'] * Ip_dir,
               # Poloidal flux in Weber/rad on grid points
-              'psi': (np.transpose(self.psi).reshape((-1,)) - psi_offset) * norm,
+              'psi': (np.transpose(self.psi).reshape((-1,)) -
+                      psi_offset) * norm,
               # Poloidal current function on uniform flux grid
               'fpol': self.Fpsi(psi_ff),
               # "FF'(psi) in (mT)^2/(Weber/rad) on uniform flux grid"
@@ -112,9 +114,12 @@ class SF(object):
               'pprime': self.b_scale * self.Pprime(psi_ff) / norm,
               'pressure': pad,  # Plasma pressure in N/m^2 on uniform flux grid
               'qpsi': pad,  # q values on uniform flux grid
-              'nbdry': self.nbdry, 'rbdry': self.rbdry, 'zbdry': self.zbdry,  # Plasma boundary
-              'nlim': self.nlim, 'xlim': self.xlim, 'ylim': self.ylim,  # first wall
-              'ncoil': nc, 'rc': rc, 'zc': zc, 'drc': drc, 'dzc': dzc, 'Ic': Ic}  # coils
+              # Plasma boundary
+              'nbdry': self.nbdry, 'rbdry': self.xbdry, 'zbdry': self.zbdry,
+              # first wall
+              'nlim': self.nlim, 'xlim': self.xlim, 'ylim': self.ylim,
+              'ncoil': nc, 'xc': xc, 'zc': zc, 'dxc': dxc,
+              'dzc': dzc, 'Ic': Ic}  # coils
 
         eqdir = trim_dir('../../eqdsk')
         filename = eqdir + '/' + config + '.eqdsk'
@@ -149,19 +154,19 @@ class SF(object):
         self.Pprime = interp1d(psi_ff, Pp, fill_value=0, bounds_error=False)
 
     def set_TF(self, eqdsk):
-        for key in ['rcentr', 'bcentr']:
+        for key in ['xcentr', 'bcentr']:
             setattr(self, key, eqdsk[key])
 
-    def set_boundary(self, r, z, n=5e2):
+    def set_boundary(self, x, z, n=5e2):
         self.nbdry = int(n)
-        self.rbdry, self.zbdry = geom.rzSLine(r, z, npoints=n)
+        self.xbdry, self.zbdry = geom.rzSLine(x, z, npoints=n)
 
     def set_current(self, eqdsk):
         for key in ['cpasma']:
             setattr(self, key, eqdsk[key])
 
     def update_plasma(self, eq):  # update requres full separatrix
-        for attr in ['Bspline', 'Pspline', 'Xpsi', 'Mpsi', 'Br', 'Bz', 'LFPr']:
+        for attr in ['Bspline', 'Pspline', 'Xpsi', 'Mpsi', 'Bx', 'Bz', 'LFPx']:
             if hasattr(self, attr):
                 delattr(self, attr)
         self.set_plasma(eq)
@@ -169,24 +174,22 @@ class SF(object):
         self.get_Mpsi()
         self.set_contour()  # calculate cfeild
         self.get_LFP()
-        r, z = self.get_boundary()
-        self.set_boundary(r, z)
+        x, z = self.get_boundary()
+        self.set_boundary(x, z)
         # self.get_Plimit()  # limit plasma extent
         # self.get_sol_psi()  # re-calculate sol_psi
 
     def get_Plimit(self):
         psi = np.zeros(self.nlim)
-        for i, (r, z) in enumerate(zip(self.xlim, self.ylim)):
-            psi[i] = self.Ppoint((r, z))
+        for i, (x, z) in enumerate(zip(self.xlim, self.ylim)):
+            psi[i] = self.Ppoint((x, z))
         self.Xpsi = np.max(psi)
-        #i = np.argmax(psi)
-        #self.Xpoint = np.array([self.xlim[i],self.ylim[i]])
 
     def set_plasma(self, eq):
-        for key in ['r', 'z', 'psi']:
+        for key in ['x', 'z', 'psi']:
             if key in eq.keys():
                 setattr(self, key, eq[key])
-        self.trim_r()
+        self.trim_x()
         self.space()
         self.Bfeild()
 
@@ -198,36 +201,37 @@ class SF(object):
             '''
             from scipy.interpolate import RectBivariateSpline as rbs
             sample = np.int(np.float(sample))
-            interp_psi = rbs(self.r, self.z, self.psi)
+            interp_psi = rbs(self.x, self.z, self.psi)
             self.nr, self.nz = sample * self.nr, sample * self.nz
-            self.r = np.linspace(self.r[0], self.r[-1], self.nr)
+            self.x = np.linspace(self.x[0], self.x[-1], self.nr)
             self.z = np.linspace(self.z[0], self.z[-1], self.nz)
-            self.psi = interp_psi(self.r, self.z, dx=0, dy=0)
+            self.psi = interp_psi(self.x, self.z, dx=0, dy=0)
             self.space()
 
     def space(self):
-        self.nr = len(self.r)
+        self.nr = len(self.x)
         self.nz = len(self.z)
         self.n = self.nr * self.nz
-        self.dr = (self.r[-1] - self.r[0]) / (self.nr - 1)
+        self.dx = (self.x[-1] - self.x[0]) / (self.nr - 1)
         self.dz = (self.z[-1] - self.z[0]) / (self.nz - 1)
-        self.r2d, self.z2d = np.meshgrid(self.r, self.z, indexing='ij')
+        self.x2d, self.z2d = np.meshgrid(self.x, self.z, indexing='ij')
 
     def Bfeild(self):
-        psi_r, psi_z = np.gradient(self.psi, self.dr, self.dz)
-        rm = np.array(np.matrix(self.r).T * np.ones([1, self.nz]))
+        psi_x, psi_z = np.gradient(self.psi, self.dx, self.dz)
+        rm = np.array(np.matrix(self.x).T * np.ones([1, self.nz]))
         rm[rm == 0] = 1e-34
-        self.Br = -psi_z / rm
-        self.Bz = psi_r / rm
+        self.Bx = -psi_z / rm
+        self.Bz = psi_x / rm
 
     def Bpoint(self, point, check_bounds=False):  # magnetic feild at point
         feild = np.zeros(2)  # function re-name (was Bcoil)
         if not hasattr(self, 'Bspline'):
             self.Bspline = [[], []]
-            self.Bspline[0] = RectBivariateSpline(self.r, self.z, self.Br)
-            self.Bspline[1] = RectBivariateSpline(self.r, self.z, self.Bz)
+            self.Bspline[0] = RectBivariateSpline(self.x, self.z, self.Bx)
+            self.Bspline[1] = RectBivariateSpline(self.x, self.z, self.Bz)
         if check_bounds:
-            inbound = point[0] >= np.min(self.r) and point[0] <= np.max(self.r) \
+            inbound = point[0] >= np.min(self.x) and\
+                point[0] <= np.max(self.x) \
                 and point[1] >= np.min(self.z) and point[1] <= np.max(self.z)
             return inbound
         else:
@@ -236,17 +240,17 @@ class SF(object):
             return feild
 
     def minimum_feild(self, radius, theta):
-        R = radius * np.sin(theta) + self.Xpoint[0]
+        X = radius * np.sin(theta) + self.Xpoint[0]
         Z = radius * np.cos(theta) + self.Xpoint[1]
-        B = np.zeros(len(R))
-        for i, (r, z) in enumerate(zip(R, Z)):
-            feild = self.Bpoint((r, z))
+        B = np.zeros(len(X))
+        for i, (x, z) in enumerate(zip(X, Z)):
+            feild = self.Bpoint((x, z))
             B[i] = np.sqrt(feild[0]**2 + feild[1]**2)
         return np.argmin(B)
 
     def Ppoint(self, point):  # was Pcoil
         if not hasattr(self, 'Pspline'):
-            self.Pspline = RectBivariateSpline(self.r, self.z, self.psi)
+            self.Pspline = RectBivariateSpline(self.x, self.z, self.psi)
         psi = self.Pspline.ev(point[0], point[1])
         return psi
 
@@ -254,9 +258,9 @@ class SF(object):
                 boundary=True, **kwargs):
         alpha, lw = np.array([1, 0.5]), lw * np.array([2.25, 1.75])
         if boundary:
-            r, z = self.get_boundary(1 - 1e-3)
-            pl.plot(r, z, linewidth=lw[0], color=0.75 * np.ones(3))
-            self.set_boundary(r, z)
+            x, z = self.get_boundary(1 - 1e-3)
+            pl.plot(x, z, linewidth=lw[0], color=0.75 * np.ones(3))
+            self.set_boundary(x, z)
         if not hasattr(self, 'Xpsi'):
             self.get_Xpsi()
         if not hasattr(self, 'Mpsi'):
@@ -293,24 +297,24 @@ class SF(object):
             if Xnorm:
                 level = level - self.Xpsi
             for line in psi_line:
-                r, z = line[:, 0], line[:, 1]
-                if self.inPlasma(r, z) and boundary:
+                x, z = line[:, 0], line[:, 1]
+                if self.inPlasma(x, z) and boundary:
                     pindex = 0
                 else:
                     pindex = 1
                 if (not plot_vac and pindex == 0) or plot_vac:
-                    pl.plot(r, z, linetype, linewidth=lw[pindex],
+                    pl.plot(x, z, linetype, linewidth=lw[pindex],
                             color=color, alpha=alpha[pindex])
         # if boundary:
-        #    pl.plot(self.rbdry,self.zbdry,linetype,linewidth=lw[pindex],
+        #    pl.plot(self.xbdry,self.zbdry,linetype,linewidth=lw[pindex],
         #            color=color,alpha=alpha[pindex])
         pl.axis('equal')
         pl.axis('off')
         return levels
 
-    def inPlasma(self, R, Z, delta=0):
-        return R.min() >= self.rbdry.min() - delta and \
-            R.max() <= self.rbdry.max() + delta and \
+    def inPlasma(self, X, Z, delta=0):
+        return X.min() >= self.xbdry.min() - delta and \
+            X.max() <= self.xbdry.max() + delta and \
             Z.min() >= self.zbdry.min() - delta and \
             Z.max() <= self.zbdry.max() + delta
 
@@ -325,64 +329,65 @@ class SF(object):
 
         for p in cs.get_paths():
             v = p.vertices
-            R, Z, delta = v[:, 0][:], v[:, 1][:], 0.5
-            inPlasma = R.min() >= self.rbdry.min() - delta and \
-                R.max() <= self.rbdry.max() + delta and \
+            X, Z, delta = v[:, 0][:], v[:, 1][:], 0.5
+            inPlasma = X.min() >= self.xbdry.min() - delta and \
+                X.max() <= self.xbdry.max() + delta and \
                 Z.min() >= self.zbdry.min() - delta and \
                 Z.max() <= self.zbdry.max() + delta
             if inPlasma:
-                pl.plot(R, Z, linetype, linewidth=1.25 * lw,
+                pl.plot(X, Z, linetype, linewidth=1.25 * lw,
                         color=norm * np.array([1, 1, 1]), alpha=alpha[0])
             else:
-                pl.plot(R, Z, linetype, linewidth=lw,
+                pl.plot(X, Z, linetype, linewidth=lw,
                         color=color, alpha=alpha[1])
 
-    def Bcontour(self, axis, Nstd=1.5, color='r'):
+    def Bcontour(self, axis, Nstd=1.5, color='x'):
         var = 'B' + axis
         if not hasattr(self, var):
             self.Bfeild()
         B = getattr(self, var)
         level = [np.mean(B) - Nstd * np.std(B),
                  np.mean(B) + Nstd * np.std(B)]
-        CS = pl.contour(self.r, self.z, B,
-                        levels=np.linspace(level[0], level[1], 30), colors=color)
+        CS = pl.contour(self.x, self.z, B,
+                        levels=np.linspace(level[0], level[1], 30),
+                        colors=color)
         for cs in CS.collections:
             cs.set_linestyle('solid')
 
     def Bquiver(self):
-        if not hasattr(self, 'Br'):
+        if not hasattr(self, 'Bx'):
             self.Bfeild()
-        pl.quiver(self.r, self.z, self.Br.T, self.Bz.T)
+        pl.quiver(self.x, self.z, self.Bx.T, self.Bz.T)
 
     def Bsf(self):
-        if not hasattr(self, 'Br'):
+        if not hasattr(self, 'Bx'):
             self.Bfeild()
-        pl.streamplot(self.r, self.z, self.Br.T, self.Bz.T,
-                      color=self.Br.T, cmap=pl.cm.RdBu)
+        pl.streamplot(self.x, self.z, self.Bx.T, self.Bz.T,
+                      color=self.Bx.T, cmap=pl.cm.RdBu)
         pl.clim([-1.5, 1.5])
         # pl.colorbar(strm.lines)
 
-    def getX(self, xo=None):
-        def feild(x):
-            B = self.Bpoint(x)
+    def getX(self, po=None):
+        def feild(p):
+            B = self.Bpoint(p)
             return sum(B * B)**0.5
-        res = minimize(feild, np.array(xo), method='nelder-mead',
+        res = minimize(feild, np.array(po), method='nelder-mead',
                        options={'xtol': 1e-7, 'disp': False})
         return res.x
 
-    def get_Xpsi(self, xo=None, select='primary'):
-        if xo is None:
-            if hasattr(self, 'xo'):
-                xo = self.xo
+    def get_Xpsi(self, po=None, select='primary'):
+        if po is None:
+            if hasattr(self, 'po'):
+                po = self.po
             else:
                 xo_arg = np.argmin(self.eqdsk['zbdry'])
-                xo = [self.eqdsk['rbdry'][xo_arg],
+                po = [self.eqdsk['rbdry'][xo_arg],
                       self.eqdsk['zbdry'][xo_arg]]
         Xpoint = np.zeros((2, 2))
         Xpsi = np.zeros(2)
         for i, flip in enumerate([1, -1]):
-            xo[1] *= flip
-            Xpoint[:, i] = self.getX(xo=xo)
+            po[1] *= flip
+            Xpoint[:, i] = self.getX(po=po)
             Xpsi[i] = self.Ppoint(Xpoint[:, i])
         index = np.argsort(Xpoint[1, :])
         Xpoint = Xpoint[:, index]
@@ -398,7 +403,7 @@ class SF(object):
         self.Xpoint = Xpoint[:, i]
         self.Xpoint_array = Xpoint
         if i == 0:
-            xo[1] *= -1  # re-flip
+            po[1] *= -1  # re-flip
         if self.Xpoint[1] < self.mo[1]:
             self.Xloc = 'lower'
         else:
@@ -429,8 +434,8 @@ class SF(object):
         psi_boundary = 1.1 * (self.Xpsi - self.Mpsi) + self.Mpsi
         psi_bndry = np.pad(self.psi[1:-1, 1:-1], (1,),
                            mode='constant', constant_values=psi_boundary)
-        self.cfeild = cntr(self.r2d, self.z2d, self.psi)
-        self.cfeild_bndry = cntr(self.r2d, self.z2d, psi_bndry)
+        self.cfeild = cntr(self.x2d, self.z2d, self.psi)
+        self.cfeild_bndry = cntr(self.x2d, self.z2d, psi_bndry)
 
     def get_contour(self, levels, boundary=False):
         if boundary:
@@ -447,163 +452,164 @@ class SF(object):
     def get_boundary(self, alpha=1 - 1e-3, delta_loop=0.1, plot=False):
         self.Spsi = alpha * (self.Xpsi - self.Mpsi) + self.Mpsi
         psi_line = self.get_contour([self.Spsi], boundary=True)[0]
-        R, Z = np.array([]), np.array([])
+        X, Z = np.array([]), np.array([])
         for line in psi_line:
-            r, z = line[:, 0], line[:, 1]
+            x, z = line[:, 0], line[:, 1]
             if self.Xloc == 'lower':  # lower Xpoint
                 index = z >= self.Xpoint[1]
             elif self.Xloc == 'upper':  # upper Xpoint
                 index = z <= self.Xpoint[1]
             if sum(index) > 0:
-                r, z = r[index], z[index]
-                loop = np.sqrt((r[0] - r[-1])**2 +
+                x, z = x[index], z[index]
+                loop = np.sqrt((x[0] - x[-1])**2 +
                                (z[0] - z[-1])**2) < delta_loop
-                if (z > self.Mpoint[1]).any() and (z < self.Mpoint[1]).any() and loop:
-                    R, Z = np.append(R, r), np.append(Z, z)
-        R, Z = geom.clock(R, Z)
+                if (z > self.Mpoint[1]).any() and\
+                        (z < self.Mpoint[1]).any() and loop:
+                    X, Z = np.append(X, x), np.append(Z, z)
+        X, Z = geom.clock(X, Z)
         if plot:
-            pl.plot(R, Z)
-        return R, Z
+            pl.plot(X, Z)
+        return X, Z
 
     def get_sep(self, expand=0):  # generate boundary dict for elliptic
-        R, Z = self.get_boundary()
-        boundary = {'R': R, 'Z': Z, 'expand': expand}
+        X, Z = self.get_boundary()
+        boundary = {'X': X, 'Z': Z, 'expand': expand}
         return boundary
 
-    def get_midplane(self, r, z):
-        def psi_err(r, *args):
+    def get_midplane(self, x, z):
+        def psi_err(x, *args):
             z = args[0]
-            psi = self.Ppoint((r, z))
+            psi = self.Ppoint((x, z))
             return abs(psi - self.Xpsi)
-        res = minimize(psi_err, np.array(r), method='nelder-mead',
+        res = minimize(psi_err, np.array(x), method='nelder-mead',
                        args=(z), options={'xtol': 1e-7, 'disp': False})
         return res.x[0]
 
-    def get_LFP(self, xo=None, alpha=1 - 1e-3):
-        r, z = self.get_boundary(alpha=alpha)
+    def get_LFP(self, alpha=1 - 1e-3):
+        x, z = self.get_boundary(alpha=alpha)
         if self.Xpoint[1] < self.Mpoint[1]:
             index = z > self.Xpoint[1]
         else:  # alowance for upper Xpoint
             index = z < self.Xpoint[1]
-        r_loop, z_loop = r[index], z[index]
-        rc, zc = self.Mpoint
-        radius = ((r_loop - rc)**2 + (z_loop - zc)**2)**0.5
-        theta = np.arctan2(z_loop - zc, r_loop - rc)
+        r_loop, z_loop = x[index], z[index]
+        xc, zc = self.Mpoint
+        radius = ((r_loop - xc)**2 + (z_loop - zc)**2)**0.5
+        theta = np.arctan2(z_loop - zc, r_loop - xc)
         index = theta.argsort()
         radius, theta = radius[index], theta[index]
         theta = np.append(theta[-1] - 2 * np.pi, theta)
         radius = np.append(radius[-1], radius)
-        r = rc + radius * np.cos(theta)
+        x = xc + radius * np.cos(theta)
         z = zc + radius * np.sin(theta)
-        fLFSr = interp1d(theta, r)
+        fLFSx = interp1d(theta, x)
         fLFSz = interp1d(theta, z)
-        self.LFPr, self.LFPz = fLFSr(0), fLFSz(0)
-        self.LFPr = self.get_midplane(self.LFPr, self.LFPz)
-        self.HFPr, self.HFPz = fLFSr(-np.pi), fLFSz(-np.pi)
-        self.HFPr = self.get_midplane(self.HFPr, self.HFPz)
-        self.shape['R'] = np.mean([self.HFPr, self.LFPr])
-        self.shape['a'] = (self.LFPr - self.HFPr) / 2
+        self.LFPx, self.LFPz = fLFSx(0), fLFSz(0)
+        self.LFPx = self.get_midplane(self.LFPx, self.LFPz)
+        self.HFPx, self.HFPz = fLFSx(-np.pi), fLFSz(-np.pi)
+        self.HFPx = self.get_midplane(self.HFPx, self.HFPz)
+        self.shape['R'] = np.mean([self.HFPx, self.LFPx])
+        self.shape['a'] = (self.LFPx - self.HFPx) / 2
         self.shape['AR'] = self.shape['R'] / self.shape['a']
-        return (self.LFPr, self.LFPz, self.HFPr, self.HFPz)
+        return (self.LFPx, self.LFPz, self.HFPx, self.HFPz)
 
     def first_wall_psi(self, trim=True, single_contour=False, **kwargs):
         if 'point' in kwargs:
             req, zeq = kwargs.get('point')
             psi = self.Ppoint([req, zeq])
         else:
-            req, zeq = self.LFPr, self.LFPz
+            req, zeq = self.LFPx, self.LFPz
             if 'psi_n' in kwargs:  # normalized psi
                 psi_n = kwargs.get('psi_n')
                 psi = psi_n * (self.Xpsi - self.Mpsi) + self.Mpsi
             elif 'psi' in kwargs:
                 psi = kwargs.get('psi')
             else:
-                raise ValueError('set point=(r,z) or psi in kwargs')
+                raise ValueError('set point=(x,z) or psi in kwargs')
         contours = self.get_contour([psi])
-        R, Z = self.pick_contour(contours, Xpoint=False)
+        X, Z = self.pick_contour(contours, Xpoint=False)
         if single_contour:
-            min_contour = np.empty(len(R))
-            for i in range(len(R)):
-                min_contour[i] = np.min((R[i] - req)**2 + (Z[i] - zeq)**2)
+            min_contour = np.empty(len(X))
+            for i in range(len(X)):
+                min_contour[i] = np.min((X[i] - req)**2 + (Z[i] - zeq)**2)
             imin = np.argmin(min_contour)
-            r, z = R[imin], Z[imin]
+            x, z = X[imin], Z[imin]
         else:
-            r, z = np.array([]), np.array([])
-            for i in range(len(R)):
-                r = np.append(r, R[i])
+            x, z = np.array([]), np.array([])
+            for i in range(len(X)):
+                x = np.append(x, X[i])
                 z = np.append(z, Z[i])
         if trim:
             if self.Xloc == 'lower':
-                r, z = r[z <= zeq], z[z <= zeq]
+                x, z = x[z <= zeq], z[z <= zeq]
             elif self.Xloc == 'upper':
-                r, z = r[z >= zeq], z[z >= zeq]
+                x, z = x[z >= zeq], z[z >= zeq]
             else:
                 raise ValueError('Xloc not set (get_Xpsi)')
             if req > self.Xpoint[0]:
-                r, z = r[r > self.Xpoint[0]], z[r > self.Xpoint[0]]
+                x, z = x[x > self.Xpoint[0]], z[x > self.Xpoint[0]]
             else:
-                r, z = r[r < self.Xpoint[0]], z[r < self.Xpoint[0]]
-            istart = np.argmin((r - req)**2 + (z - zeq)**2)
-            r = np.append(r[istart + 1:], r[:istart])
+                x, z = x[x < self.Xpoint[0]], z[x < self.Xpoint[0]]
+            istart = np.argmin((x - req)**2 + (z - zeq)**2)
+            x = np.append(x[istart + 1:], x[:istart])
             z = np.append(z[istart + 1:], z[:istart])
-        istart = np.argmin((r - req)**2 + (z - zeq)**2)
+        istart = np.argmin((x - req)**2 + (z - zeq)**2)
         if istart > 0:
-            r, z = r[::-1], z[::-1]
-        return r, z, psi
+            x, z = x[::-1], z[::-1]
+        return x, z, psi
 
     def firstwall_loop(self, plot=False, **kwargs):
-        if not hasattr(self, 'LFPr'):
+        if not hasattr(self, 'LFPx'):
             self.get_LFP()
         if 'psi_n' in kwargs:
-            r, z, psi = self.first_wall_psi(psi_n=kwargs['psi_n'], trim=False)
+            x, z, psi = self.first_wall_psi(psi_n=kwargs['psi_n'], trim=False)
             psi_lfs = psi_hfs = psi
-        elif 'dr' in kwargs:  # geometric offset
-            dr = kwargs.get('dr')
-            LFfwr, LFfwz = self.LFPr + dr, self.LFPz
-            HFfwr, HFfwz = self.HFPr - dr, self.HFPz
-            r_lfs, z_lfs, psi_lfs = self.first_wall_psi(point=(LFfwr, LFfwz))
-            r_hfs, z_hfs, psi_hfs = self.first_wall_psi(point=(HFfwr, HFfwz))
-            r_top, z_top = self.get_offset(dr)
+        elif 'dx' in kwargs:  # geometric offset
+            dx = kwargs.get('dx')
+            LFfwr, LFfwz = self.LFPx + dx, self.LFPz
+            HFfwr, HFfwz = self.HFPx - dx, self.HFPz
+            x_lfs, z_lfs, psi_lfs = self.first_wall_psi(point=(LFfwr, LFfwz))
+            x_hfs, z_hfs, psi_hfs = self.first_wall_psi(point=(HFfwr, HFfwz))
+            x_top, z_top = self.get_offset(dx)
             if self.Xloc == 'lower':
-                r_top, z_top = geom.theta_sort(r_top, z_top, xo=self.xo,
+                x_top, z_top = geom.theta_sort(x_top, z_top, po=self.po,
                                                origin='top')
                 index = z_top >= self.LFPz
             else:
-                r_top, z_top = geom.theta_sort(r_top, z_top, xo=self.xo,
+                x_top, z_top = geom.theta_sort(x_top, z_top, po=self.po,
                                                origin='bottom')
                 index = z_top <= self.LFPz
-            r_top, z_top = r_top[index], z_top[index]
-            istart = np.argmin((r_top - HFfwr)**2 + (z_top - HFfwz)**2)
+            x_top, z_top = x_top[index], z_top[index]
+            istart = np.argmin((x_top - HFfwr)**2 + (z_top - HFfwz)**2)
             if istart > 0:
-                r_top, z_top = r_top[::-1], z_top[::-1]
-            r = np.append(r_hfs[::-1], r_top)
-            r = np.append(r, r_lfs)
+                x_top, z_top = x_top[::-1], z_top[::-1]
+            x = np.append(x_hfs[::-1], x_top)
+            x = np.append(x, x_lfs)
             z = np.append(z_hfs[::-1], z_top)
             z = np.append(z, z_lfs)
         else:
-            errtxt = 'requre \'psi_n\' or \'dr\' in kwargs'
+            errtxt = 'requre \'psi_n\' or \'dx\' in kwargs'
             raise ValueError(errtxt)
         if plot:
-            pl.plot(r, z)
-        return r[::-1], z[::-1], (psi_lfs, psi_hfs)
+            pl.plot(x, z)
+        return x[::-1], z[::-1], (psi_lfs, psi_hfs)
 
-    def get_offset(self, dr, Nsub=0):
+    def get_offset(self, dx, Nsub=0):
         rpl, zpl = self.get_boundary()  # boundary points
-        rpl, zpl = geom.offset(rpl, zpl, dr)  # offset from sep
+        rpl, zpl = geom.offset(rpl, zpl, dx)  # offset from sep
         if Nsub > 0:  # sub-sample
             rpl, zpl = geom.rzSLine(rpl, zpl, Nsub)
         return rpl, zpl
 
-    def midplane_loop(self, r, z):
-        index = np.argmin((r - self.LFPr)**2 + (z - self.LFPz)**2)
+    def midplane_loop(self, x, z):
+        index = np.argmin((x - self.LFPx)**2 + (z - self.LFPz)**2)
         if z[index] <= self.LFPz:
             index -= 1
-        r = np.append(r[:index + 1][::-1], r[index:][::-1])
+        x = np.append(x[:index + 1][::-1], x[index:][::-1])
         z = np.append(z[:index + 1][::-1], z[index:][::-1])
-        L = geom.length(r, z)
+        L = geom.length(x, z)
         index = np.append(np.diff(L) != 0, True)
-        r, z = r[index], z[index]  # remove duplicates
-        return r, z
+        x, z = x[index], z[index]  # remove duplicates
+        return x, z
 
     def get_sol_psi(self, verbose=False, **kwargs):
         for var in ['dSOL', 'Nsol']:
@@ -613,36 +619,36 @@ class SF(object):
             print('calculating sol psi', self.Nsol, self.dSOL)
         self.get_LFP()
         self.Dsol = np.linspace(0, self.dSOL, self.Nsol)
-        r = self.LFPr + self.Dsol
-        z = self.LFPz * np.ones(len(r))
-        self.sol_psi = np.zeros(len(r))
-        for i, (rp, zp) in enumerate(zip(r, z)):
+        x = self.LFPx + self.Dsol
+        z = self.LFPz * np.ones(len(x))
+        self.sol_psi = np.zeros(len(x))
+        for i, (rp, zp) in enumerate(zip(x, z)):
             self.sol_psi[i] = self.Ppoint([rp, zp])
 
     def upsample_sol(self, nmult=10):
         k = 1  # smoothing factor
-        for i, (r, z) in enumerate(zip(self.Rsol, self.Zsol)):
-            l = geom.length(r, z)
+        for i, (x, z) in enumerate(zip(self.Xsol, self.Zsol)):
+            l = geom.length(x, z)
             L = np.linspace(0, 1, nmult * len(l))
-            self.Rsol[i] = sinterp(l, r, k=k)(L)
+            self.Xsol[i] = sinterp(l, x, k=k)(L)
             self.Zsol[i] = sinterp(l, z, k=k)(L)
 
-    # dr [m]
-    def sol(self, dr=3e-3, Nsol=5, plot=False, update=False, debug=False):
-        if update or not hasattr(self, 'sol_psi') or dr > self.dSOL\
+    # dx [m]
+    def sol(self, dx=3e-3, Nsol=5, plot=False, update=False, debug=False):
+        if update or not hasattr(self, 'sol_psi') or dx > self.dSOL\
                 or Nsol > self.Nsol:
-            self.get_sol_psi(dSOL=dr, Nsol=Nsol)  # re-calculcate LFP
+            self.get_sol_psi(dSOL=dx, Nsol=Nsol)  # re-calculcate LFP
         elif (Nsol > 0 and Nsol != self.Nsol) or \
-                (dr > 0 and dr != self.dSOL):  # update
-            if dr > 0:
-                self.dSOL = dr
+                (dx > 0 and dx != self.dSOL):  # update
+            if dx > 0:
+                self.dSOL = dx
             if Nsol > 0:
                 self.Nsol = Nsol
             Dsol = np.linspace(0, self.dSOL, self.Nsol)
             self.sol_psi = interp1d(self.Dsol, self.sol_psi)(Dsol)
             self.Dsol = Dsol
         contours = self.get_contour(self.sol_psi)
-        self.Rsol, self.Zsol = self.pick_contour(contours, Xpoint=True,
+        self.Xsol, self.Zsol = self.pick_contour(contours, Xpoint=True,
                                                  Midplane=False, Plasma=False)
         self.upsample_sol(nmult=4)  # upsamle
         self.get_legs(debug=debug)
@@ -651,41 +657,43 @@ class SF(object):
             # enumerate(self.legs):
             for c, leg in enumerate(['inner', 'outer']):
                 for i in np.arange(self.legs[leg]['i'])[::-1]:
-                    r, z = self.snip(leg, i)
-                    r, z = self.legs[leg]['R'][i], self.legs[leg]['Z'][i]
-                    pl.plot(r, z, color=color[c], linewidth=0.5)
+                    x, z = self.snip(leg, i)
+                    x, z = self.legs[leg]['X'][i], self.legs[leg]['Z'][i]
+                    pl.plot(x, z, color=color[c], linewidth=0.5)
 
     def add_core(self):  # refarance from low-feild midplane
         for i in range(self.Nsol):
-            for leg in ['inner', 'inner1', 'inner2', 'outer', 'outer1', 'outer2']:
+            for leg in ['inner', 'inner1', 'inner2', 'outer',
+                        'outer1', 'outer2']:
                 if leg in self.legs:
                     if 'inner' in leg:
                         core = 'core1'
                     else:
                         core = 'core2'
-                    Rc = self.legs[core]['R'][i][:-1]
+                    Xc = self.legs[core]['X'][i][:-1]
                     Zc = self.legs[core]['Z'][i][:-1]
-                    self.legs[leg]['R'][i] = np.append(
-                        Rc, self.legs[leg]['R'][i])
+                    self.legs[leg]['X'][i] = np.append(
+                        Xc, self.legs[leg]['X'][i])
                     self.legs[leg]['Z'][i] = np.append(
                         Zc, self.legs[leg]['Z'][i])
 
-    def orientate(self, R, Z):
-        if R[-1] > R[0]:  # counter clockwise
-            R = R[::-1]
+    def orientate(self, X, Z):
+        if X[-1] > X[0]:  # counter clockwise
+            X = X[::-1]
             Z = Z[::-1]
-        return R, Z
+        return X, Z
 
-    def pick_contour(self, contours, Xpoint=False, Midplane=True, Plasma=False):
-        Rs = []
+    def pick_contour(self, contours, Xpoint=False,
+                     Midplane=True, Plasma=False):
+        Xs = []
         Zs = []
         Xp, Mid, Pl = True, True, True
         for psi_line in contours:
             for line in psi_line:
-                R, Z = line[:, 0], line[:, 1]
+                X, Z = line[:, 0], line[:, 1]
                 if Xpoint:  # check Xpoint proximity
                     rX = np.sqrt(
-                        (R - self.Xpoint[0])**2 + (Z - self.Xpoint[1])**2)
+                        (X - self.Xpoint[0])**2 + (Z - self.Xpoint[1])**2)
                     if (min(rX) < self.rcirc):
                         Xp = True
                     else:
@@ -696,21 +704,21 @@ class SF(object):
                     else:
                         Mid = False
                 if Plasma:
-                    if (np.max(R) < np.max(self.rbdry)) and\
-                        (np.min(R) > np.min(self.rbdry)) and\
+                    if (np.max(X) < np.max(self.xbdry)) and\
+                        (np.min(X) > np.min(self.xbdry)) and\
                         (np.max(Z) < np.max(self.zbdry)) and\
                             (np.min(Z) > np.min(self.zbdry)):
                         Pl = True
                     else:
                         Pl = False
                 if Xp and Mid and Pl:
-                    R, Z = self.orientate(R, Z)
-                    Rs.append(R)
+                    X, Z = self.orientate(X, Z)
+                    Xs.append(X)
                     Zs.append(Z)
-        return Rs, Zs
+        return Xs, Zs
 
-    def topolar(self, R, Z):
-        x, y = R, Z
+    def topolar(self, X, Z):
+        x, y = X, Z
         r = np.sqrt((x - self.Xpoint[0])**2 + (y - self.Xpoint[1])**2)
         if self.Xloc == 'lower':
             t = np.arctan2(x - self.Xpoint[0], y - self.Xpoint[1])
@@ -750,7 +758,7 @@ class SF(object):
                 label = ''
         if label:
             i = self.legs[label]['i']
-            R = rloop * np.sin(tloop) + self.Xpoint[0]
+            X = rloop * np.sin(tloop) + self.Xpoint[0]
             if self.Xloc == 'lower':
                 Z = rloop * np.cos(tloop) + self.Xpoint[1]
             elif self.Xloc == 'upper':
@@ -758,12 +766,12 @@ class SF(object):
             else:
                 raise ValueError('Xloc not set (get_Xpsi)')
             if i > 0:
-                if R[0]**2 + Z[0]**2 == (self.legs[label]['R'][i - 1][0]**2 +
+                if X[0]**2 + Z[0]**2 == (self.legs[label]['X'][i - 1][0]**2 +
                                          self.legs[label]['Z'][i - 1][0]**2):
                     i -= 1
             if 'core' in label:
-                R, Z = R[::-1], Z[::-1]
-            self.legs[label]['R'][i] = R
+                X, Z = X[::-1], Z[::-1]
+            self.legs[label]['X'][i] = X
             self.legs[label]['Z'][i] = Z
             self.legs[label]['i'] = i + 1
 
@@ -780,17 +788,17 @@ class SF(object):
     def get_legs(self, debug=False):
         if debug:
             theta = np.linspace(-np.pi, np.pi, 100)
-            r = (self.rcirc - self.drcirc / 2) * np.cos(theta)
+            x = (self.rcirc - self.drcirc / 2) * np.cos(theta)
             z = (self.rcirc - self.drcirc / 2) * np.sin(theta)
-            pl.plot(r + self.Xpoint[0], z + self.Xpoint[1], 'k--', alpha=0.5)
-            r = (self.rcirc + self.drcirc / 2) * np.cos(theta)
+            pl.plot(x + self.Xpoint[0], z + self.Xpoint[1], 'k--', alpha=0.5)
+            x = (self.rcirc + self.drcirc / 2) * np.cos(theta)
             z = (self.rcirc + self.drcirc / 2) * np.sin(theta)
-            pl.plot(r + self.Xpoint[0], z + self.Xpoint[1], 'k--', alpha=0.5)
+            pl.plot(x + self.Xpoint[0], z + self.Xpoint[1], 'k--', alpha=0.5)
         self.tleg = np.array([])
-        for N in range(len(self.Rsol)):
-            r, t = self.topolar(self.Rsol[N], self.Zsol[N])
-            index = (r > self.rcirc - self.drcirc /
-                     2) & (r < self.rcirc + self.drcirc / 2)
+        for N in range(len(self.Xsol)):
+            x, t = self.topolar(self.Xsol[N], self.Zsol[N])
+            index = (x > self.rcirc - self.drcirc /
+                     2) & (x < self.rcirc + self.drcirc / 2)
             self.tleg = np.append(self.tleg, t[index])
         nbin = 50
         nhist, bins = np.histogram(self.tleg, bins=nbin)
@@ -815,27 +823,27 @@ class SF(object):
             self.nleg += 1
         if self.nleg == 6:  # snow flake
             self.legs = {
-                'inner1': {'R': [[] for i in range(self.Nsol)],
+                'inner1': {'X': [[] for i in range(self.Nsol)],
                            'Z': [[] for i in range(self.Nsol)], 'i': 0},
-                'inner2': {'R': [[] for i in range(self.Nsol)],
+                'inner2': {'X': [[] for i in range(self.Nsol)],
                            'Z': [[] for i in range(self.Nsol)], 'i': 0},
-                'outer1': {'R': [[] for i in range(self.Nsol)],
+                'outer1': {'X': [[] for i in range(self.Nsol)],
                            'Z': [[] for i in range(self.Nsol)], 'i': 0},
-                'outer2': {'R': [[] for i in range(self.Nsol)],
+                'outer2': {'X': [[] for i in range(self.Nsol)],
                            'Z': [[] for i in range(self.Nsol)], 'i': 0},
-                'core1': {'R': [[] for i in range(self.Nsol)],
+                'core1': {'X': [[] for i in range(self.Nsol)],
                           'Z': [[] for i in range(self.Nsol)], 'i': 0},
-                'core2': {'R': [[] for i in range(self.Nsol)],
+                'core2': {'X': [[] for i in range(self.Nsol)],
                           'Z': [[] for i in range(self.Nsol)], 'i': 0}}
         else:
             self.legs = {
-                'inner': {'R': [[] for i in range(self.Nsol)],
+                'inner': {'X': [[] for i in range(self.Nsol)],
                           'Z': [[] for i in range(self.Nsol)], 'i': 0},
-                'outer': {'R': [[] for i in range(self.Nsol)],
+                'outer': {'X': [[] for i in range(self.Nsol)],
                           'Z': [[] for i in range(self.Nsol)], 'i': 0},
-                'core1': {'R': [[] for i in range(self.Nsol)],
+                'core1': {'X': [[] for i in range(self.Nsol)],
                           'Z': [[] for i in range(self.Nsol)], 'i': 0},
-                'core2': {'R': [[] for i in range(self.Nsol)],
+                'core2': {'X': [[] for i in range(self.Nsol)],
                           'Z': [[] for i in range(self.Nsol)], 'i': 0}}
         self.legs = OrderedDict(sorted(self.legs.items(), key=lambda t: t[0]))
         if self.nleg == 0:
@@ -847,36 +855,36 @@ class SF(object):
         self.tleg = np.append(-np.pi - (np.pi - self.tleg[-1]), self.tleg)
         self.tleg = np.append(self.tleg, np.pi + (np.pi + self.tleg[1]))
 
-        for N in range(len(self.Rsol)):
+        for N in range(len(self.Xsol)):
             ends, ro = [0, -1], np.zeros(2)
             for i in ends:
-                ro[i] = np.sqrt(self.Rsol[N][i]**2 + self.Zsol[N][i]**2)
-            r, t = self.topolar(self.Rsol[N], self.Zsol[N])
+                ro[i] = np.sqrt(self.Xsol[N][i]**2 + self.Zsol[N][i]**2)
+            x, t = self.topolar(self.Xsol[N], self.Zsol[N])
             post = False
             rpost, tpost = 0, 0
             if ro[0] == ro[-1]:  # cut loops
-                if np.min(r * np.cos(t)) > self.drcirc - self.rcirc:
-                    nmax = np.argmax(r * np.sin(t))  # LF
+                if np.min(x * np.cos(t)) > self.drcirc - self.rcirc:
+                    nmax = np.argmax(x * np.sin(t))  # LF
                 else:
-                    nmax = np.argmin(r * np.cos(t))  # minimum z
-                r = np.append(r[nmax:], r[:nmax])
+                    nmax = np.argmin(x * np.cos(t))  # minimum z
+                x = np.append(x[nmax:], x[:nmax])
                 t = np.append(t[nmax:], t[:nmax])
-            while len(r) > 0:
-                if r[0] > self.rcirc:
-                    if np.min(r) < self.rcirc:
-                        ncut = np.arange(len(r))[r < self.rcirc][0]
-                        rloop, tloop = r[:ncut], t[:ncut]
+            while len(x) > 0:
+                if x[0] > self.rcirc:
+                    if np.min(x) < self.rcirc:
+                        ncut = np.arange(len(x))[x < self.rcirc][0]
+                        rloop, tloop = x[:ncut], t[:ncut]
                         loop = False
                     else:
                         ncut = -1
-                        rloop, tloop = r, t
+                        rloop, tloop = x, t
                         loop = True
                     if post:
                         rloop, tloop = np.append(
                             rpost, rloop), np.append(tpost, tloop)
                 else:
-                    ncut = np.arange(len(r))[r > self.rcirc][0]
-                    rin, tin = r[:ncut], t[:ncut]
+                    ncut = np.arange(len(x))[x > self.rcirc][0]
+                    rin, tin = x[:ncut], t[:ncut]
                     nx = self.minimum_feild(rin, tin)  # minimum feild
                     rpre, tpre = rin[:nx + 1], tin[:nx + 1]
                     rpost, tpost = rin[nx:], tin[nx:]
@@ -886,7 +894,8 @@ class SF(object):
                         rloop, rpre), np.append(tloop, tpre)
                 if loop:
                     if rloop[0] < self.rcirc and rloop[-1] < self.rcirc:
-                        if np.min(rloop * np.cos(tloop)) > self.drcirc - self.rcirc:
+                        if np.min(rloop * np.cos(tloop)) >\
+                                self.drcirc - self.rcirc:
                             nmax = np.argmax(rloop * np.sin(tloop))  # LF
                         else:
                             nmax = np.argmax(rloop)
@@ -895,9 +904,9 @@ class SF(object):
                     else:
                         self.store_leg(rloop, tloop)
                 if ncut == -1:
-                    r, t = [], []
+                    x, t = [], []
                 else:
-                    r, t = r[ncut:], t[ncut:]
+                    x, t = x[ncut:], t[ncut:]
 
     def strike_point(self, Xi, graze):
         ratio = np.sin(graze) * np.sqrt(Xi[-1]**2 + 1)
@@ -908,19 +917,19 @@ class SF(object):
         return theta
 
     def snip(self, leg, layer_index=0, L2D=0):
-        if not hasattr(self, 'Rsol'):
+        if not hasattr(self, 'Xsol'):
             self.sol()
-        Rsol = self.legs[leg]['R'][layer_index]
+        Xsol = self.legs[leg]['X'][layer_index]
         Zsol = self.legs[leg]['Z'][layer_index]
-        Lsol = geom.length(Rsol, Zsol, norm=False)
+        Lsol = geom.length(Xsol, Zsol, norm=False)
         if L2D == 0:
             L2D = Lsol[-1]
         if layer_index != 0:
-            Rsolo = self.legs[leg]['R'][0]
+            Rsolo = self.legs[leg]['X'][0]
             Zsolo = self.legs[leg]['Z'][0]
             Lsolo = geom.length(Rsolo, Zsolo, norm=False)
             indexo = np.argmin(np.abs(Lsolo - L2D))
-            index = np.argmin((Rsol - Rsolo[indexo])**2 +
+            index = np.argmin((Xsol - Rsolo[indexo])**2 +
                               (Zsol - Zsolo[indexo])**2)
             L2D = Lsol[index]
         else:
@@ -930,29 +939,29 @@ class SF(object):
         if L2D > Lsol[-1]:
             L2D = Lsol[-1]
             print('warning: targent requested outside grid')
-        Rend, Zend = interp1d(Lsol, Rsol)(L2D), interp1d(Lsol, Zsol)(L2D)
-        Rsol, Zsol = Rsol[:index], Zsol[:index]  # trim to strike point
-        Rsol, Zsol = np.append(Rsol, Rend), np.append(Zsol, Zend)
-        return (Rsol, Zsol)
+        Rend, Zend = interp1d(Lsol, Xsol)(L2D), interp1d(Lsol, Zsol)(L2D)
+        Xsol, Zsol = Xsol[:index], Zsol[:index]  # trim to strike point
+        Xsol, Zsol = np.append(Xsol, Rend), np.append(Zsol, Zend)
+        return (Xsol, Zsol)
 
     def pick_leg(self, leg, layer_index):
-        R = self.legs[leg]['R'][layer_index]
+        X = self.legs[leg]['X'][layer_index]
         Z = self.legs[leg]['Z'][layer_index]
-        return R, Z
+        return X, Z
 
-    def Xtrim(self, Rsol, Zsol):
-        Xindex = np.argmin((self.Xpoint[0] - Rsol)**2 +
+    def Xtrim(self, Xsol, Zsol):
+        Xindex = np.argmin((self.Xpoint[0] - Xsol)**2 +
                            (self.Xpoint[1] - Zsol)**2)
-        if (Rsol[-1] - Rsol[Xindex])**2 + (Zsol[-1] - Zsol[Xindex])**2 <\
-                (Rsol[0] - Rsol[Xindex])**2 + (Zsol[0] - Zsol[Xindex])**2:
-            Rsol = Rsol[:Xindex]  # trim to Xpoints
+        if (Xsol[-1] - Xsol[Xindex])**2 + (Zsol[-1] - Zsol[Xindex])**2 <\
+                (Xsol[0] - Xsol[Xindex])**2 + (Zsol[0] - Zsol[Xindex])**2:
+            Xsol = Xsol[:Xindex]  # trim to Xpoints
             Zsol = Zsol[:Xindex]
-            Rsol = Rsol[::-1]
+            Xsol = Xsol[::-1]
             Zsol = Zsol[::-1]
         else:
-            Rsol = Rsol[Xindex:]  # trim to Xpoints
+            Xsol = Xsol[Xindex:]  # trim to Xpoints
             Zsol = Zsol[Xindex:]
-        return (Rsol, Zsol)
+        return (Xsol, Zsol)
 
     def get_graze(self, point, target):
         T = target / np.sqrt(target[0]**2 + target[1]**2)  # target vector
@@ -965,57 +974,58 @@ class SF(object):
         graze = np.arcsin(np.sin(theta) * (Xi[-1]**2 + 1)**-0.5)
         return graze
 
-    def get_max_graze(self, r, z):
+    def get_max_graze(self, x, z):
         theta = np.pi / 2  # normal target, maximum grazing angle
-        Xi = self.expansion([r], [z])
+        Xi = self.expansion([x], [z])
         graze = np.arcsin(np.sin(theta) * (Xi[-1]**2 + 1)**-0.5)
         return graze
 
-    def expansion(self, Rsol, Zsol):
+    def expansion(self, Xsol, Zsol):
         Xi = np.array([])
-        Bm = np.abs(self.bcentr * self.rcentr)
-        for r, z in zip(Rsol, Zsol):
-            B = self.Bpoint([r, z])
+        Bm = np.abs(self.bcentr * self.xcentr)
+        for x, z in zip(Xsol, Zsol):
+            B = self.Bpoint([x, z])
             Bp = np.sqrt(B[0]**2 + B[1]**2)  # polodial feild
-            Bphi = Bm / r  # torodal field
+            Bphi = Bm / x  # torodal field
             Xi = np.append(Xi, Bphi / Bp)  # feild expansion
         return Xi
 
     def connection(self, leg, layer_index, L2D=0):
         if L2D > 0:  # trim targets to L2D
-            Rsol, Zsol = self.snip(leg, layer_index, L2D)
+            Xsol, Zsol = self.snip(leg, layer_index, L2D)
         else:  # rb.trim_sol to trim to targets
-            Rsol = self.legs[leg]['R'][layer_index]
+            Xsol = self.legs[leg]['X'][layer_index]
             Zsol = self.legs[leg]['Z'][layer_index]
-        Lsol = geom.length(Rsol, Zsol)
+        Lsol = geom.length(Xsol, Zsol)
         index = np.append(np.diff(Lsol) != 0, True)
-        Rsol, Zsol = Rsol[index], Zsol[index]  # remove duplicates
-        if len(Rsol) < 2:
+        Xsol, Zsol = Xsol[index], Zsol[index]  # remove duplicates
+        if len(Xsol) < 2:
             L2D, L3D = [0], [0]
         else:
-            dRsol = np.diff(Rsol)
+            dXsol = np.diff(Xsol)
             dZsol = np.diff(Zsol)
-            L2D = np.append(0, np.cumsum(np.sqrt(dRsol**2 + dZsol**2)))
+            L2D = np.append(0, np.cumsum(np.sqrt(dXsol**2 + dZsol**2)))
             dTsol = np.array([])
-            Xi = self.expansion(Rsol, Zsol)
-            for r, dr, dz, xi in zip(Rsol[1:], dRsol, dZsol, Xi):
-                dLp = np.sqrt(dr**2 + dz**2)
+            Xi = self.expansion(Xsol, Zsol)
+            for x, dx, dz, xi in zip(Xsol[1:], dXsol, dZsol, Xi):
+                dLp = np.sqrt(dx**2 + dz**2)
                 dLphi = xi * dLp
-                dTsol = np.append(dTsol, dLphi / (r + dr / 2))
-            L3D = np.append(0, np.cumsum(dTsol * np.sqrt((dRsol / dTsol)**2 +
-                                                         (dZsol / dTsol)**2 + (Rsol[:-1])**2)))
-        return L2D, L3D, Rsol, Zsol
+                dTsol = np.append(dTsol, dLphi / (x + dx / 2))
+            L3D = np.append(0, np.cumsum(dTsol * np.sqrt((dXsol / dTsol)**2 +
+                                                         (dZsol / dTsol)**2 +
+                                                         (Xsol[:-1])**2)))
+        return L2D, L3D, Xsol, Zsol
 
     def shape_parameters(self, plot=False):
         self.get_LFP()
-        r95, z95 = self.get_boundary(alpha=0.95)
-        ru = r95[np.argmax(z95)]  # triangularity
-        rl = r95[np.argmin(z95)]
+        x95, z95 = self.get_boundary(alpha=0.95)
+        ru = x95[np.argmax(z95)]  # triangularity
+        rl = x95[np.argmin(z95)]
         self.shape['del_u'] = (self.shape['R'] - ru) / self.shape['a']
         self.shape['del_l'] = (self.shape['R'] - rl) / self.shape['a']
         self.shape['kappa'] = (np.max(z95) - np.min(z95)
                                ) / (2 * self.shape['a'])
-        r, z = self.get_boundary(alpha=1 - 1e-4)
-        r, z = geom.clock(r, z, reverse=True)
-        self.shape['V'] = loop_vol(r, z, plot=plot)
+        x, z = self.get_boundary(alpha=1 - 1e-4)
+        x, z = geom.clock(x, z, reverse=True)
+        self.shape['V'] = loop_vol(x, z, plot=plot)
         return self.shape

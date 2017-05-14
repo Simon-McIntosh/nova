@@ -561,7 +561,7 @@ class Sloop(object):  # polybezier
         return key
 
     def set_input(self, **kwargs):
-        inputs = get_input(self.oppvar, **kwargs)
+        inputs = get_input(self.xo.keys(), **kwargs)  # (self.oppvar, **kwargs)
         for key in inputs:
             keyo = self.append_keys(key)
             for keyo_ in keyo:

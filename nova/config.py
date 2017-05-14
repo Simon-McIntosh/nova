@@ -53,7 +53,7 @@ class Setup(object):
         self.targets['default']['dPlate'] = 0.5
         self.targets['default']['dR'] = 0
         self.firstwall = {}  # initalise firstwall data structure
-        self.firstwall['dRfw'] = 0.225
+        self.firstwall['dXfw'] = 0.225
         self.firstwall['psi_n'] = 1.07
         self.firstwall['div_ex'] = 0.25
         self.firstwall['trim'] = [0.75, 0.7]

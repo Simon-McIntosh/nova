@@ -14,7 +14,7 @@ from warnings import warn
 
 
 class coil_cage(object):
-    def __init__(self, nTF=18, rc=0.5, ny=3, nr=1, alpha=1 - 1e-4, **kwargs):
+    def __init__(self, nTF=18, rc=0.5, ny=3, nr=1, alpha=1-1e-4, **kwargs):
         self.nTF = nTF  # TF coil number
         self.ny = ny  # winding pack depth discretization
         self.nr = nr  # winding pack radial discretization
@@ -27,7 +27,7 @@ class coil_cage(object):
             # toroidal winding-pack half depth
             self.dy = kwargs['wp']['depth'] / 2
             # radial winding-pack half width
-            self.dr = kwargs['wp']['width'] / 2
+            self.dx = kwargs['wp']['width'] / 2
         else:
             if self.nr > 1:
                 warn_txt = 'winding pack dimensions not set '
@@ -46,42 +46,42 @@ class coil_cage(object):
             elif 'config' in kwargs:
                 setup = Setup(kwargs.get('config'))
                 sf = SF(setup.filename)
-            r, z = sf.get_boundary(alpha=alpha)
+            x, z = sf.get_boundary(alpha=alpha)
             self.eqdsk = sf.eqdsk
-            self.LFP = np.array([sf.LFPr, sf.LFPz])
+            self.LFP = np.array([sf.LFPx, sf.LFPz])
         else:
             if 'eqdsk' in kwargs:  # seperatrix from eqdsk
                 self.eqdsk = geqdsk.read(kwargs.get('eqdsk'))
-                r, z = self.eqdsk['rbdry'], self.eqdsk['zbdry']
-            elif 'r' in kwargs and 'z' in kwargs:  # separatrix from input
-                r, z = kwargs.get('r'), kwargs.get('z')
-                self.eqdsk = {'rcentr': 9.0735,
+                x, z = self.eqdsk['xbdry'], self.eqdsk['zbdry']
+            elif 'x' in kwargs and 'z' in kwargs:  # separatrix from input
+                x, z = kwargs.get('x'), kwargs.get('z')
+                self.eqdsk = {'xcentr': 9.0735,
                               'zmagx': 0.15295, 'bcentr': -5.6211}
-            LFindex = np.argmax(r)
-            self.LFP = np.array([r[LFindex], z[LFindex]])
+            LFindex = np.argmax(x)
+            self.LFP = np.array([x[LFindex], z[LFindex]])
         if not hasattr(self, 'eqdsk'):
             errtxt = '\n'
             errtxt += 'Require plasma={} input of following types:\n'
             errtxt += '1) configuration flag, {\'config\':\'SN\'} \n'
             errtxt += '2) eqdsk file, {\'eqdsk\':\'\'} \n'
-            errtxt += '3) seperatrix profile, {\'r\':[],\'z\':[]}'
+            errtxt += '3) seperatrix profile, {\'x\':[],\'z\':[]}'
             raise ValueError(errtxt)
-        r, z = geom.clock(r, z)
+        x, z = geom.clock(x, z)
         (self.plasma_loop[:, 0], self.plasma_loop[:, 2]) = \
-            geom.rzSLine(r, z, npoints=self.nplasma)
+            geom.rzSLine(x, z, npoints=self.nplasma)
         self.plasma_length = geom.length(self.plasma_loop[:, 0],
                                          self.plasma_loop[:, 2])
-        rfun, zfun = geom.rzfun(r, z)
-        self.plasma_interp = {'r': rfun, 'z': zfun}
+        rfun, zfun = geom.rzfun(x, z)
+        self.plasma_interp = {'x': rfun, 'z': zfun}
         if plot:
             pl.plot(self.plasma_loop[:, 0], self.plasma_loop[:, 2])
 
     def set_TFcoil(self, cl, smooth=False):
-        r, z = geom.clock(cl['r'], cl['z'])
-        self.npoints = len(r)
+        x, z = geom.clock(cl['x'], cl['z'])
+        self.npoints = len(x)
         self.coil_loop = np.zeros((self.npoints, 3))
         self.coil_loop[:, 0], self.coil_loop[:, 2] = \
-            geom.rzSLine(r, z, npoints=self.npoints)  # coil centerline
+            geom.rzSLine(x, z, npoints=self.npoints)  # coil centerline
         self.gfl = cc.GreenFeildLoop(self.coil_loop, rc=self.rc, smooth=smooth)
         self.pattern()
         self.amp_turns()  # set coil cage amp-turns
@@ -91,15 +91,15 @@ class coil_cage(object):
             ro = self.coil_loop[0, 0]  # inboard centreline
             # toroidal winding-pack depth
             self.dy = ro * np.tan(np.pi / self.nTF)
-            self.dr = 0
+            self.dx = 0
         if self.ny > 1:
             self.dYwp = np.linspace(self.dy * (1 / self.ny - 1),
                                     self.dy * (1 - 1 / self.ny), self.ny)
         else:
             self.dYwp = [0]  # coil centreline
         if self.nr > 1:
-            self.dRwp = np.linspace(self.dr * (1 / self.nr - 1),
-                                    self.dr * (1 - 1 / self.nr), self.nr)
+            self.dRwp = np.linspace(self.dx * (1 / self.nr - 1),
+                                    self.dx * (1 - 1 / self.nr), self.nr)
         else:
             self.dRwp = [0]
         self.Tcoil = np.linspace(0, 2 * np.pi, self.nTF, endpoint=False)
@@ -133,7 +133,7 @@ class coil_cage(object):
             pl.tight_layout()
 
     def amp_turns(self):
-        rc, zc = self.eqdsk['rcentr'], self.eqdsk['zmagx']
+        rc, zc = self.eqdsk['xcentr'], self.eqdsk['zmagx']
         self.Iturn = 1
         Bo = self.point((rc, 0, zc), variable='feild')
         self.Iturn = self.eqdsk['bcentr'] / Bo[1]  # single coil amp-turns
@@ -157,8 +157,8 @@ class coil_cage(object):
                 for dy in self.dYwp:  # wp pattern
                     for dr in self.dRwp:  # wp radial pattern
                         Bo += self.Iturn * cc.mu_o *\
-                            self.gfl.B(sr, theta=tcoil, dy=dy,
-                                       dr=dr) / (self.ny * self.nr)
+                            self.gfl.B(sr, theta=tcoil, dy=dy, dr=dr) /\
+                            (self.ny * self.nr)
             B[j] = np.dot(nr, Bo)
         if variable == 'ripple':
             ripple = 1e2 * (B[0] - B[1]) / np.sum(B)
@@ -170,8 +170,8 @@ class coil_cage(object):
         ripple = np.zeros(npoints)
         L = np.linspace(0.2, 0.8, npoints)
         for i, l in enumerate(L):
-            r, z = self.plasma_interp['r'](l), self.plasma_interp['z'](l)
-            ripple[i] = self.point((r, 0, z), variable='ripple')
+            x, z = self.plasma_interp['x'](l), self.plasma_interp['z'](l)
+            ripple[i] = self.point((x, 0, z), variable='ripple')
         return ripple
 
     def loop_ripple(self):
@@ -181,7 +181,7 @@ class coil_cage(object):
 
     def ripple_opp(self, x):
         s = np.zeros(3)
-        s[0], s[2] = self.plasma_interp['r'](x), self.plasma_interp['z'](x)
+        s[0], s[2] = self.plasma_interp['x'](x), self.plasma_interp['z'](x)
         ripple = self.point(s, variable='ripple')
         return -ripple
 
@@ -199,7 +199,7 @@ class coil_cage(object):
 
     def output(self):  # output cage parameters to screen
         Vol = self.get_volume()
-        print('ripple {:1.3f}'.format(self.get_ripple()))
+        print('\nripple {:1.3f}'.format(self.get_ripple()))
         print('TF energy {:1.2f} GJ'.format(1e-9 * self.energy()))
         print(r'TF centre-line enclosed volume {:1.0f} m3'.format(Vol['TF']))
         print(r'plasma enclosed volume {:1.0f} m3'.format(Vol['plasma']))
@@ -218,7 +218,7 @@ class coil_cage(object):
                         color=color[0], lw=3)
         pl.plot(self.plasma_loop[:, 0], self.plasma_loop[:, 2], '-')
         # pl.plot(self.coil_loop[:,0],self.coil_loop[:,2])
-        x_max = np.array([self.plasma_interp['r'](self.res['x']),
+        x_max = np.array([self.plasma_interp['x'](self.res['x']),
                           self.plasma_interp['z'](self.res['x'])])
         dx = 1.5
         for x in [x_max, self.LFP]:
@@ -235,8 +235,8 @@ class coil_cage(object):
                       **kwargs):
         if 'loop' in kwargs:
             loop_dict = kwargs['loop']
-            loop = np.zeros((len(loop_dict['r']), 3))
-            loop[:, 0] = loop_dict['r']
+            loop = np.zeros((len(loop_dict['x']), 3))
+            loop[:, 0] = loop_dict['x']
             loop[:, 2] = loop_dict['z']
         else:
             loop = self.coil_loop
@@ -250,12 +250,12 @@ class coil_cage(object):
                                       0]  # plasma top
         ar = dx[0] / dx[2]
         nz = int(np.sqrt(n / ar))
-        nr = int(n / nz)
-        r = np.linspace(xlim[0][0], xlim[0][1], nr)
+        nx = int(n / nz)
+        x = np.linspace(xlim[0][0], xlim[0][1], nx)
         z = np.linspace(xlim[2][0], xlim[2][1], nz)
-        R, Z = np.meshgrid(r, z, indexing='ij')
-        rpl = np.zeros((nr, nz))
-        for i, r_ in enumerate(r):
+        R, Z = np.meshgrid(x, z, indexing='ij')
+        rpl = np.zeros((nx, nz))
+        for i, r_ in enumerate(x):
             for j, z_ in enumerate(z):
                 if geom.inloop(xl[:, 0], xl[:, 2], r_, z_):
                     if variable == 'ripple':
@@ -323,61 +323,4 @@ class coil_cage(object):
 
 
 if __name__ is '__main__':
-
-    rc = {'figure.figsize': [8, 8], 'savefig.dpi': 100,  # *12/16
-          'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
-          'lines.linewidth': 1.5}
-    sns.set(context='poster', style='white', font='sans-serif', palette='Set2',
-            font_scale=7 / 8, rc=rc)
-    color = sns.color_palette('Set2')
-
-    '''  # can not import tf object for example - place elsewhere
-    demo = DEMO()
-    demo.fill_loops()
-
-    config = 'DEMO_SN'
-
-    tf = TF(config, coil_type='S', npoints=80)
-
-    # tf.coil.set_input(inputs={'upper':0.8,'top':0.5})
-
-    x = tf.coil.draw()
-    tf.get_loops(x)
-    tf.fill()
-
-    cage = coil_cage(nTF=18, rc=tf.rc, plasma={'config': config},
-                     coil={'cl': tf.x['cl']})
-
-    tic = time.time()
-    print('ripple {:1.3f}%'.format(cage.get_ripple()))
-    print('time {:1.3f}s'.format(time.time() - tic))
-
-    print(cage.edge_ripple())
-
-    # tf.coil.set_input()
-    tic = time.time()
-    print('energy {:1.3f}GJ'.format(1e-9 * cage.energy()))
-    print('time A {:1.3f}s'.format(time.time() - tic))
-    '''
-
-    '''
-    B = np.zeros((tf.npoints,3))
-    for i,(r,z) in enumerate(zip(tf.x['cl']['r'],tf.x['cl']['z'])):
-        B[i,:] = cage.Iturn*cage.point((r,0,z),variable='feild')
-
-    npoints = 200
-    rcl = np.linspace(np.min(tf.x['cl']['r']),np.max(tf.x['cl']['r']),npoints)
-    zcl = cage.eqdsk['zmagx']*np.ones(npoints)
-    Bcl = np.zeros((npoints,3))
-
-    for i,(r,z) in enumerate(zip(rcl,zcl)):
-        Bcl[i,:] = cage.Iturn*cage.point((r,0,z),variable='feild')
-
-    pl.figure(figsize=(8,6))
-    pl.plot(tf.x['cl']['r'],abs(B[:,1]))
-    pl.plot(rcl,abs(Bcl[:,1]))
-    pl.plot(cage.eqdsk['rcentr'],abs(cage.eqdsk['bcentr']),'o')
-    sns.despine()
-    '''
-
-    # rp.plot_loops()
+    print('coil cage example listed in coils.py')

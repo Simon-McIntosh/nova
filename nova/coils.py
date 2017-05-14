@@ -28,35 +28,35 @@ class PF(object):
         self.plasma_coil = collections.OrderedDict()
 
     def set_coils(self, eqdsk):
-        self.xo = [eqdsk['rcentr'], eqdsk['zmid']]
+        self.xo = [eqdsk['xcentr'], eqdsk['zmid']]
         self.coil = collections.OrderedDict()
         if eqdsk['ncoil'] > 0:
-            CSindex = np.argmin(eqdsk['rc'])  # CS radius and width
-            self.rCS, self.drCS = eqdsk['rc'][CSindex], eqdsk['drc'][CSindex]
-            for i, (r, z, dr, dz, I) in enumerate(
-                   zip(eqdsk['rc'], eqdsk['zc'], eqdsk['drc'],
+            CSindex = np.argmin(eqdsk['xc'])  # CS radius and width
+            self.rCS, self.drCS = eqdsk['xc'][CSindex], eqdsk['dxc'][CSindex]
+            for i, (x, z, dx, dz, I) in enumerate(
+                   zip(eqdsk['xc'], eqdsk['zc'], eqdsk['dxc'],
                        eqdsk['dzc'], eqdsk['Ic'])):
-                self.add_coil(r, z, dr, dz, I, categorize=False)
+                self.add_coil(x, z, dx, dz, I, categorize=False)
                 if eqdsk['ncoil'] > 100 and i >= eqdsk['ncoil'] - 101:
                     print('exit set_coil loop - coils')
                     break
         self.categorize_coils()
 
     def categorize_coils(self):
-        catogory = np.zeros(len(self.coil), dtype=[('r', 'float'),
+        catogory = np.zeros(len(self.coil), dtype=[('x', 'float'),
                             ('z', 'float'), ('theta', 'float'),
                             ('index', 'int'), ('name', 'object')])
         for i, name in enumerate(self.coil):
-            catogory[i]['r'] = self.coil[name]['r']
+            catogory[i]['x'] = self.coil[name]['x']
             catogory[i]['z'] = self.coil[name]['z']
             catogory[i]['theta'] = np.arctan2(self.coil[name]['z']-self.xo[1],
-                                              self.coil[name]['r']-self.xo[0])
+                                              self.coil[name]['x']-self.xo[0])
             catogory[i]['index'] = i
             catogory[i]['name'] = name
-        CSsort = np.sort(catogory, order=['r', 'z'])  # sort CS, r then z
-        CSsort = CSsort[CSsort['r'] < self.rCS + self.drCS]
+        CSsort = np.sort(catogory, order=['x', 'z'])  # sort CS, x then z
+        CSsort = CSsort[CSsort['x'] < self.rCS + self.drCS]
         PFsort = np.sort(catogory, order='theta')  # sort PF,  z
-        PFsort = PFsort[PFsort['r'] > self.rCS + self.drCS]
+        PFsort = PFsort[PFsort['x'] > self.rCS + self.drCS]
         self.index = {'PF': {'n': len(PFsort['index']),
                              'index': PFsort['index'], 'name': PFsort['name']},
                       'CS': {'n': len(CSsort['index']),
@@ -73,10 +73,10 @@ class PF(object):
         self.index['PF']['index'] = np.arange(0, nPF)
         self.index['CS']['index'] = np.arange(nPF, nPF+nCS)
 
-    def add_coil(self, r, z, dr, dz, I, categorize=True):
+    def add_coil(self, x, z, dx, dz, I, categorize=True):
         name = 'Coil{:1.0f}'.format(next(self.nC))
-        self.coil[name] = {'r': r, 'z': z, 'dr': dr, 'dz': dz, 'I': I,
-                           'rc': np.sqrt(dr**2 + dz**2) / 2}
+        self.coil[name] = {'x': x, 'z': z, 'dx': dx, 'dz': dz, 'I': I,
+                           'rc': np.sqrt(dx**2 + dz**2) / 2}
         if categorize:
             self.categorize_coils()
 
@@ -89,17 +89,17 @@ class PF(object):
     def unpack_coils(self):
         nc = len(self.coil.keys())
         Ic = np.zeros(nc)
-        rc, zc, drc, dzc = np.zeros(nc), np.zeros(
+        xc, zc, dxc, dzc = np.zeros(nc), np.zeros(
             nc), np.zeros(nc), np.zeros(nc)
         names = []
         for i, name in enumerate(self.coil.keys()):
-            rc[i] = self.coil[name]['r']
+            xc[i] = self.coil[name]['x']
             zc[i] = self.coil[name]['z']
-            drc[i] = self.coil[name]['dr']
+            dxc[i] = self.coil[name]['dx']
             dzc[i] = self.coil[name]['dz']
             Ic[i] = self.coil[name]['I']
             names.append(name)
-        return nc, rc, zc, drc, dzc, Ic, names
+        return nc, xc, zc, dxc, dzc, Ic, names
 
     def mesh_coils(self, dCoil=-1):
         if dCoil < 0:  # dCoil not set, use stored value
@@ -110,45 +110,45 @@ class PF(object):
         if self.dCoil == 0:
             self.sub_coil = self.coil
             for name in self.coil.keys():
-                self.sub_coil[name]['rc'] = np.sqrt(self.coil[name]['dr']**2 +
-                                                    self.coil[name]['dr']**2)
+                self.sub_coil[name]['rc'] = np.sqrt(self.coil[name]['dx']**2 +
+                                                    self.coil[name]['dx']**2)
         else:
             self.sub_coil = {}
             for name in self.coil.keys():
                 self.size_coil(name, self.dCoil)
 
     def size_coil(self, name, dCoil):
-        rc, zc = self.coil[name]['r'], self.coil[name]['z']
-        Dr, Dz = self.coil[name]['dr'], self.coil[name]['dz']
-        Dr = abs(Dr)
+        xc, zc = self.coil[name]['x'], self.coil[name]['z']
+        Dx, Dz = self.coil[name]['dx'], self.coil[name]['dz']
+        Dx = abs(Dx)
         Dz = abs(Dz)
         if self.coil[name]['I'] != 0:
-            if Dr > 0 and Dz > 0 and 'plasma' not in name:
-                nr, nz = np.ceil(Dr / dCoil), np.ceil(Dz / dCoil)
-                dr, dz = Dr / nr, Dz / nz
-                r = rc + np.linspace(dr / 2, Dr - dr / 2, nr) - Dr / 2
+            if Dx > 0 and Dz > 0 and 'plasma' not in name:
+                nx, nz = np.ceil(Dx / dCoil), np.ceil(Dz / dCoil)
+                dx, dz = Dx / nx, Dz / nz
+                x = xc + np.linspace(dx / 2, Dx - dx / 2, nx) - Dx / 2
                 z = zc + np.linspace(dz / 2, Dz - dz / 2, nz) - Dz / 2
-                R, Z = np.meshgrid(r, z, indexing='ij')
-                R, Z = np.reshape(R, (-1, 1)), np.reshape(Z, (-1, 1))
-                Nf = len(R)  # filament number
+                X, Z = np.meshgrid(x, z, indexing='ij')
+                X, Z = np.reshape(X, (-1, 1)), np.reshape(Z, (-1, 1))
+                Nf = len(X)  # filament number
                 # self.coil_o[name]['Nf'] = Nf
                 # self.coil_o[name]['Io'] = self.pf.pf_coil[name]['I']
                 I = self.coil[name]['I'] / Nf
-                bundle = {'r': np.zeros(Nf), 'z': np.zeros(Nf),
-                          'dr': dr * np.ones(Nf), 'dz': dz * np.ones(Nf),
+                bundle = {'x': np.zeros(Nf), 'z': np.zeros(Nf),
+                          'dx': dx * np.ones(Nf), 'dz': dz * np.ones(Nf),
                           'I': I * np.ones(Nf), 'sub_name': np.array([]),
                           'Nf': 0}
-                for i, (r, z) in enumerate(zip(R, Z)):
+                for i, (x, z) in enumerate(zip(X, Z)):
                     sub_name = name + '_{:1.0f}'.format(i)
-                    self.sub_coil[sub_name] = {'r': r, 'z': z,
-                                               'dr': dr, 'dz': dz,
+                    self.sub_coil[sub_name] = {'x': x, 'z': z,
+                                               'dx': dx, 'dz': dz,
                                                'I': I, 'Nf': Nf,
-                                               'rc': np.sqrt(dr**2 + dz**2)/2}
-                    bundle['r'][i], bundle['z'][i] = r, z
+                                               'rc': np.sqrt(dx**2 + dz**2)/2}
+                    bundle['x'][i], bundle['z'][i] = x, z
                     bundle['sub_name'] = np.append(
                         bundle['sub_name'], sub_name)
                 bundle['Nf'] = i + 1
-                bundle['Ro'] = np.mean(bundle['r'])
+                bundle['Xo'] = np.mean(bundle['x'])
                 bundle['Zo'] = np.mean(bundle['z'])
             else:
                 print('coil bundle not found', name)
@@ -167,33 +167,33 @@ class PF(object):
 
         for i, name in enumerate(coils.keys()):
             coil = coils[name]
-            r, z, dr, dz = coil['r'], coil['z'], coil['dr'], coil['dz']
-            Rfill = [r + dr / 2, r + dr / 2, r - dr / 2, r - dr / 2]
+            x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
+            Xfill = [x + dx / 2, x + dx / 2, x - dx / 2, x - dx / 2]
             Zfill = [z - dz / 2, z + dz / 2, z + dz / 2, z - dz / 2]
             if coil['I'] != 0:
                 edgecolor = 'k'
             else:
-                edgecolor = 'r'
+                edgecolor = 'x'
             coil_color = color[4]
             if name.split('_')[0] in self.index['CS']['name']:
-                drs = -2.5 / 3 * dr
+                drs = -2.5 / 3 * dx
                 ha = 'right'
                 coil_color = color[5]
             elif name.split('_')[0] in self.index['PF']['name']:
-                drs = 2.5 / 3 * dr
+                drs = 2.5 / 3 * dx
                 ha = 'left'
                 coil_color = color[4]
-            pl.fill(Rfill, Zfill, facecolor=coil_color, alpha=alpha,
+            pl.fill(Xfill, Zfill, facecolor=coil_color, alpha=alpha,
                     edgecolor=edgecolor)
             if label and current:
                 zshift = max([coil['dz'] / 4, 0.4])
             else:
                 zshift = 0
             if label:
-                pl.text(r + drs, z + zshift, name, fontsize=fs * 1.1,
+                pl.text(x + drs, z + zshift, name, fontsize=fs * 1.1,
                         ha=ha, va='center', color=0.2 * np.ones(3))
             if current:
-                pl.text(r + drs, z - zshift,
+                pl.text(x + drs, z - zshift,
                         '{:1.1f}MA'.format(coil['I'] * 1e-6),
                         fontsize=fs * 1.1, ha=ha, va='center',
                         color=0.2 * np.ones(3))
@@ -217,34 +217,34 @@ class PF(object):
         Nf = np.array([1 / inv.coil['active'][coil]['Nf']
                        for coil in inv.coil['active']])
         for i, coil in enumerate(inv.adjust_coils):
-            r, z = inv.pf.coil[coil]['r'], inv.pf.coil[coil]['z']
-            inv.add_psi(1, point=(r, z))
+            x, z = inv.pf.coil[coil]['x'], inv.pf.coil[coil]['z']
+            inv.add_psi(1, point=(x, z))
         inv.set_foreground()
         fillaments = np.dot(np.ones((len(Nf), 1)), Nf.reshape(1, -1))
         self.M = 2 * np.pi * inv.G * fillaments  # PF/CS inductance matrix
 
     def coil_corners(self, coils):
-        R, Z = np.array([]), np.array([])
+        X, Z = np.array([]), np.array([])
         Nc = len(coils['id'])
-        dR, dZ = np.zeros(Nc), np.zeros(Nc)
-        if len(coils['dR']) > 0:
-            dR[Nc - len(coils['dR']):] = coils['dR']
+        dX, dZ = np.zeros(Nc), np.zeros(Nc)
+        if len(coils['dX']) > 0:
+            dX[Nc - len(coils['dX']):] = coils['dX']
         if len(coils['dZ']) > 0:
             dZ[Nc - len(coils['dZ']):] = coils['dZ']
-        for Cid, Cdr, Cdz in zip(coils['id'], dR, dZ):
-            r = self.coil['Coil' + str(Cid)]['r']
+        for Cid, Cdr, Cdz in zip(coils['id'], dX, dZ):
+            x = self.coil['Coil' + str(Cid)]['x']
             z = self.coil['Coil' + str(Cid)]['z']
-            dr = self.coil['Coil' + str(Cid)]['dr']
+            dx = self.coil['Coil' + str(Cid)]['dx']
             dz = self.coil['Coil' + str(Cid)]['dz']
             if Cdr == 0 and Cdz == 0:
-                R = np.append(
-                    R, [r + dr / 2, r + dr / 2, r - dr / 2, r - dr / 2])
+                X = np.append(
+                    X, [x + dx / 2, x + dx / 2, x - dx / 2, x - dx / 2])
                 Z = np.append(
                     Z, [z + dz / 2, z - dz / 2, z + dz / 2, z - dz / 2])
             else:
-                R = np.append(R, r + Cdr)
+                X = np.append(X, x + Cdr)
                 Z = np.append(Z, z + Cdz)
-        return R, Z
+        return X, Z
 
     def fit_coils(self, Cmove, dLo=0.1):
         coils = collections.OrderedDict()
@@ -258,21 +258,21 @@ class PF(object):
                 dL = dLo
             for index in Cmove[side]:
                 coil = 'Coil' + str(index)
-                dr, dz = self.Cshift(self.sf.coil[coil], side, dL)
+                dx, dz = self.Cshift(self.sf.coil[coil], side, dL)
                 coils[coil] = self.sf.coil[coil]
-                coils[coil]['r'] = coils[coil]['r'] + dr
+                coils[coil]['x'] = coils[coil]['x'] + dx
                 coils[coil]['z'] += dz
-                coils[coil]['shiftr'] = dr
+                coils[coil]['shiftr'] = dx
                 coils[coil]['shiftz'] = dz
 
         with open('../Data/' + self.conf.config + '_coil_shift.txt', 'w') as f:
             f.write('Ncoils = {:1.0f}\n\n'.format(len(coils.keys())))
-            f.write('Name\tR[m]\t\tZ[m]\t\tshiftR[m]\tshiftZ[m]\n')
+            f.write('Name\tX[m]\t\tZ[m]\t\tshiftX[m]\tshiftZ[m]\n')
             index = sorted(map((lambda s: int(s.strip('Coil'))), coils.keys()))
             for i in index:
                 coil = 'Coil' + str(i)
                 f.write(coil + '\t{:1.6f}\t{:1.6f}\t{:1.6f}\t{:1.6f}\n'.format(
-                    coils[coil]['r'], coils[coil]['z'],
+                    coils[coil]['x'], coils[coil]['z'],
                     coils[coil]['shiftr'], coils[coil]['shiftz']))
         return coils
 
@@ -288,22 +288,23 @@ class TF(object):
             self.profile = kwargs['profile']
             self.update_profile()
             self.nTF = self.profile.nTF
-        elif 'x_in' in kwargs and 'nTF' in kwargs:
-            self.x_in = kwargs['x_in']
+        elif 'p_in' in kwargs and 'nTF' in kwargs:
+            self.p_in = kwargs['p_in']
             self.nTF = kwargs['nTF']
         else:
             err_txt = 'insurficent key word inputs\n'
-            err_txt += 'set \'profile\' or \'x_in\' and \'nTF\''
+            err_txt += 'set \'profile\' or \'p_in\' and \'nTF\''
             raise ValueError(err_txt)
         self.set_inner_loop()
+        self.set_cage()  # initalise cage
 
     def set_inner_loop(self):
-        self.ro = np.min(self.x_in['r'])
+        self.ro = np.min(self.p_in['x'])
         self.cross_section()  # coil cross-sections
-        self.get_loops(self.x_in)
+        self.get_loops(self.p_in)
 
     def update_profile(self):
-        self.x_in = self.profile.loop.draw()  # inner loop profile
+        self.p_in = self.profile.loop.draw()  # inner loop profile
         self.loop = self.profile.loop
         if hasattr(self.profile, 'nTF'):
             self.nTF = self.profile.nTF
@@ -324,20 +325,22 @@ class TF(object):
         if hasattr(self, 'sf'):  # streamfunction set
             plasma = {'sf': self.sf}
         elif self.sep is not 'unset':  # seperatrix set
-            plasma = {'r': self.sep['r'], 'z': self.sep['z']}
+            plasma = {'x': self.sep['x'], 'z': self.sep['z']}
         else:
             errtxt = 'TF cage requires ether:\n'
             errtxt += 'streamfunction opject \'sf\' or\n'
-            errtxt += 'seperatrix boundary dict \'sep['r'] and sep[\'z\]\''
+            errtxt += 'seperatrix boundary dict \'sep[\'x\'] and sep[\'z\']\''
             raise ValueError(errtxt)
         self.cage = coil_cage(nTF=self.nTF, rc=self.rc, plasma=plasma,
-                              ny=self.ny, nr=self.nr, alpha=self.alpha)
+                              ny=self.ny, nr=self.nr, alpha=self.alpha,
+                              wp=self.section['winding_pack'])
         self.update_cage = True
         self.initalise_loop()
 
     def initalise_loop(self):
         x = get_value(self.loop.xo)
-        xloop = self.get_loops(self.loop.draw(x=x))  # update tf
+        p_in = self.loop.draw(x=x)
+        xloop = self.get_loops(p_in)  # update tf
         if self.update_cage:
             self.cage.set_TFcoil(xloop['cl'], smooth=False)  # update coil cage
         return xloop
@@ -356,8 +359,8 @@ class TF(object):
         self.section['case'] = {'side': 0.1, 'nose': 0.51, 'inboard': 0.04,
                                 'outboard': 0.19, 'external': 0.225}
         if hasattr(self, 'sf'):  # TF object initalised with sf
-            BR = self.sf.eqdsk['bcentr'] * self.sf.eqdsk['rcentr']
-            Iturn = 1e-6 * abs(2 * np.pi * BR / (self.nTF * cc.mu_o))
+            BX = self.sf.eqdsk['bcentr'] * self.sf.eqdsk['xcentr']
+            Iturn = 1e-6 * abs(2 * np.pi * BX / (self.nTF * cc.mu_o))
             Acs = Iturn / J
             rwp1 = self.ro - self.section['case']['inboard']
             theta = np.pi / self.nTF
@@ -375,10 +378,10 @@ class TF(object):
         self.rc = self.section['winding_pack']['width'] / 2
 
     def initalise_loops(self):
-        self.x = {}
+        self.p = {}
         for loop in ['in', 'wp_in', 'cl', 'wp_out', 'out', 'nose', 'loop',
                      'trans_lower', 'trans_upper']:
-            self.x[loop] = {'r': [], 'z': []}
+            self.p[loop] = {'x': [], 'z': []}
 
     def transition_index(self, r_in, z_in, eps=1e-4):
         npoints = len(r_in)
@@ -390,16 +393,16 @@ class TF(object):
         index = {'upper': upper, 'lower': lower, 'top': top, 'bottom': bottom}
         return index
 
-    def loop_dt(self, r, z, dt_in, dt_out, index):
-        l = geom.length(r, z)
+    def loop_dt(self, x, z, dt_in, dt_out, index):
+        l = geom.length(x, z)
         L = np.array([0, l[index['lower']], l[index['bottom']],
                       l[index['top']], l[index['upper']], 1])
-        dR = np.array([dt_in, dt_in, dt_out, dt_out, dt_in, dt_in])
-        dt = interp1d(L, dR)(l)
+        dX = np.array([dt_in, dt_in, dt_out, dt_out, dt_in, dt_in])
+        dt = interp1d(L, dX)(l)
         return dt
 
-    def get_loops(self, x):
-        r, z = x['r'], x['z']
+    def get_loops(self, p_in):
+        x, z = p_in['x'], p_in['z']
         wp = self.section['winding_pack']
         case = self.section['case']
         inboard_dt = [case['inboard'], wp['width'] /
@@ -407,84 +410,84 @@ class TF(object):
         outboard_dt = [case['outboard'], wp['width'] / 2, wp['width'] / 2,
                        case['external']]
         loops = ['wp_in', 'cl', 'wp_out', 'out']
-        self.x['in']['r'], self.x['in']['z'] = r, z
-        index = self.transition_index(self.x['in']['r'], self.x['in']['z'])
+        self.p['in']['x'], self.p['in']['z'] = x, z
+        index = self.transition_index(self.p['in']['x'], self.p['in']['z'])
         for loop, dt_in, dt_out in zip(loops, inboard_dt, outboard_dt):
-            dt = self.loop_dt(r, z, dt_in, dt_out, index)
-            r, z = geom.offset(r, z, dt, close_loop=True)
-            self.x[loop]['r'], self.x[loop]['z'] = r, z
-        return self.x
+            dt = self.loop_dt(x, z, dt_in, dt_out, index)
+            x, z = geom.offset(x, z, dt, close_loop=True)
+            self.p[loop]['x'], self.p[loop]['z'] = x, z
+        return self.p
 
     def split_loop(self, plot=True):  # split inboard/outboard for fe model
-        r, z = self.x['cl']['r'], self.x['cl']['z']
-        index = self.transition_index(r, z)
+        x, z = self.p['cl']['x'], self.p['cl']['z']
+        index = self.transition_index(x, z)
         upper, lower = index['upper'], index['lower']
         top, bottom = index['top'], index['bottom']
-        self.x['nose']['r'] = np.append(r[upper-1:], r[1:lower + 1])
-        self.x['nose']['z'] = np.append(z[upper-1:], z[1:lower + 1])
-        self.x['trans_lower']['r'] = r[lower:bottom]
-        self.x['trans_lower']['z'] = z[lower:bottom]
-        self.x['trans_upper']['r'] = r[top:upper]
-        self.x['trans_upper']['z'] = z[top:upper]
-        self.x['loop']['r'] = r[bottom-1:top+1]
-        self.x['loop']['z'] = z[bottom-1:top+1]
+        self.p['nose']['x'] = np.append(x[upper-1:], x[1:lower + 1])
+        self.p['nose']['z'] = np.append(z[upper-1:], z[1:lower + 1])
+        self.p['trans_lower']['x'] = x[lower:bottom]
+        self.p['trans_lower']['z'] = z[lower:bottom]
+        self.p['trans_upper']['x'] = x[top:upper]
+        self.p['trans_upper']['z'] = z[top:upper]
+        self.p['loop']['x'] = x[bottom-1:top+1]
+        self.p['loop']['z'] = z[bottom-1:top+1]
 
         if plot:
-            pl.plot(self.x['cl']['r'], self.x['cl']['z'], 'o')
+            pl.plot(self.p['cl']['x'], self.p['cl']['z'], 'o')
             for name in ['nose', 'loop', 'trans_lower', 'trans_upper']:
-                r, z = self.x[name]['r'], self.x[name]['z']
-                pl.plot(r, z)
+                x, z = self.p[name]['x'], self.p[name]['z']
+                pl.plot(x, z)
 
-    # outer loop coordinate interpolators
+    # outer loop coordinate intexpolators
     def loop_interpolators(self, trim=[0, 1], offset=0.75, full=False):
-        r, z = self.x['cl']['r'], self.x['cl']['z']
+        x, z = self.p['cl']['x'], self.p['cl']['z']
         self.fun = {'in': {}, 'out': {}}
         # inner/outer loop offset
         for side, sign in zip(['in', 'out', 'cl'], [-1, 1, 0]):
-            r, z = self.x[side]['r'], self.x[side]['z']
-            index = self.transition_index(r, z)
-            r = r[index['lower'] + 1:index['upper']]
+            x, z = self.p[side]['x'], self.p[side]['z']
+            index = self.transition_index(x, z)
+            x = x[index['lower'] + 1:index['upper']]
             z = z[index['lower'] + 1:index['upper']]
-            r, z = geom.offset(r, z, sign * offset)
+            x, z = geom.offset(x, z, sign * offset)
             if full:  # full loop (including nose)
-                rmid, zmid = np.mean([r[0], r[-1]]), np.mean([z[0], z[-1]])
-                r = np.append(rmid, r)
-                r = np.append(r, rmid)
+                rmid, zmid = np.mean([x[0], x[-1]]), np.mean([z[0], z[-1]])
+                x = np.append(rmid, x)
+                x = np.append(x, rmid)
                 z = np.append(zmid, z)
                 z = np.append(z, zmid)
-            l = geom.length(r, z)
+            l = geom.length(x, z)
             lt = np.linspace(trim[0], trim[1], int(np.diff(trim) * len(l)))
-            r, z = interp1d(l, r)(lt), interp1d(l, z)(lt)
-            l = np.linspace(0, 1, len(r))
-            self.fun[side] = {'r': IUS(l, r), 'z': IUS(l, z)}
-            self.fun[side]['L'] = geom.length(r, z, norm=False)[-1]
-            self.fun[side]['dr'] = self.fun[side]['r'].derivative()
+            x, z = interp1d(l, x)(lt), interp1d(l, z)(lt)
+            l = np.linspace(0, 1, len(x))
+            self.fun[side] = {'x': IUS(l, x), 'z': IUS(l, z)}
+            self.fun[side]['L'] = geom.length(x, z, norm=False)[-1]
+            self.fun[side]['dx'] = self.fun[side]['x'].derivative()
             self.fun[side]['dz'] = self.fun[side]['z'].derivative()
 
     def norm(self, L, loop, point):
-        return (loop['r'](L) - point[0])**2 + (loop['z'](L) - point[1])**2
+        return (loop['x'](L) - point[0])**2 + (loop['z'](L) - point[1])**2
 
     def Cshift(self, coil, side, dL):  # shift pf coils to tf track
         if 'in' in side:
-            R, Z = self.x['in']['r'], self.x['in']['z']
+            X, Z = self.p['in']['x'], self.p['in']['z']
         else:
-            R, Z = self.x['out']['r'], self.x['out']['z']
-        rc, zc = coil['r'], coil['z']
-        drc, dzc = coil['dr'], coil['dz']
-        rp = rc + np.array([-drc, drc, drc, -drc]) / 2
+            X, Z = self.p['out']['x'], self.p['out']['z']
+        xc, zc = coil['x'], coil['z']
+        dxc, dzc = coil['dx'], coil['dz']
+        xp = xc + np.array([-dxc, dxc, dxc, -dxc]) / 2
         zp = zc + np.array([-dzc, -dzc, dzc, dzc]) / 2
-        nR, nZ = geom.normal(R, Z)[:2]
-        mag = np.sqrt(nR**2 + nZ**2)
-        nR /= mag
+        nX, nZ = geom.normal(X, Z)[:2]
+        mag = np.sqrt(nX**2 + nZ**2)
+        nX /= mag
         nZ /= mag
         i = []
-        L = np.empty(len(rp))
-        dn = np.empty((2, len(rp)))
-        for j, (r, z) in enumerate(zip(rp, zp)):
-            i.append(np.argmin((R - r)**2 + (Z - z)**2))
-            dr = [r - R[i[-1]], z - Z[i[-1]]]
-            dn[:, j] = [nR[i[-1]], nZ[i[-1]]]
-            L[j] = np.dot(dr, dn[:, j])
+        L = np.empty(len(xp))
+        dn = np.empty((2, len(xp)))
+        for j, (x, z) in enumerate(zip(xp, zp)):
+            i.append(np.argmin((X - x)**2 + (Z - z)**2))
+            dx = [x - X[i[-1]], z - Z[i[-1]]]
+            dn[:, j] = [nX[i[-1]], nZ[i[-1]]]
+            L[j] = np.dot(dx, dn[:, j])
             if 'in' in side:
                 L[j] *= -1
         jc = np.argmin(L)
@@ -495,19 +498,19 @@ class TF(object):
         return delta[0], delta[1]
 
     def get_loop(self, expand=0):  # generate boundary dict for elliptic
-        R, Z = self.x['cl']['r'], self.x['cl']['z']
-        boundary = {'R': R, 'Z': Z, 'expand': expand}
+        X, Z = self.p['cl']['x'], self.p['cl']['z']
+        boundary = {'X': X, 'Z': Z, 'expand': expand}
         return boundary
 
     def fill(self, write=False, plot=True, alpha=1, plot_cl=False):
-        geom.polyparrot(self.x['in'], self.x['wp_in'],
+        geom.polyparrot(self.p['in'], self.p['wp_in'],
                         color=0.4 * np.ones(3), alpha=alpha)
-        geom.polyparrot(self.x['wp_in'], self.x['wp_out'],
+        geom.polyparrot(self.p['wp_in'], self.p['wp_out'],
                         color=0.6 * np.ones(3), alpha=alpha)
-        geom.polyparrot(self.x['wp_out'], self.x['out'],
+        geom.polyparrot(self.p['wp_out'], self.p['out'],
                         color=0.4 * np.ones(3), alpha=alpha)
         if plot_cl:  # plot winding pack centre line
-            pl.plot(self.x['cl']['r'], self.x['cl']['z'],
+            pl.plot(self.p['cl']['x'], self.p['cl']['z'],
                     '-.', color=0.5 * np.ones(3))
         pl.axis('equal')
         pl.axis('off')
@@ -517,20 +520,17 @@ class TF(object):
         self.fill(**kwargs)
 
     def add_vessel(self, vessel, npoint=80, offset=[0.12, 0.2]):
-        rvv, zvv = geom.rzSLine(vessel['r'], vessel['z'], npoint)
+        rvv, zvv = geom.rzSLine(vessel['x'], vessel['z'], npoint)
         rvv, zvv = geom.offset(rvv, zvv, offset[1])
         rmin = np.min(rvv)
         rvv[rvv <= rmin + offset[0]] = rmin + offset[0]
-        self.shp.add_bound({'r': rvv, 'z': zvv}, 'internal')  # vessel
-        self.shp.add_bound({'r': np.min(rvv) - 5e-3, 'z': 0}, 'interior')
+        self.shp.add_bound({'x': rvv, 'z': zvv}, 'internal')  # vessel
+        self.shp.add_bound({'x': np.min(rvv) - 5e-3, 'z': 0}, 'interior')
 
     def update_loop(self, xnorm, *args):
         x = get_oppvar(self.loop.xo, self.loop.oppvar, xnorm)
         xloop = self.get_loops(self.loop.draw(x=x))  # update tf
-
         self.loop.set_input(x=x)  # inner loop
-        self.profile.write()  # store loop
-
         if self.update_cage:
             self.cage.set_TFcoil(xloop['cl'], smooth=False)  # update coil cage
         return xloop
@@ -546,8 +546,6 @@ class TF(object):
                 constraint = np.append(constraint,
                                        self.shp.dot_diffrence(xloop[key],
                                                               side))
-            self.cage.set_TFcoil({'r': xloop['cl']['r'],
-                                  'z': xloop['cl']['z']})
             max_ripple = self.cage.get_ripple()
             edge_ripple = self.cage.edge_ripple(npoints=10)
             constraint = np.append(constraint, ripple_limit - edge_ripple)
@@ -566,23 +564,20 @@ class TF(object):
 
     def energy(self, xnorm, *args):
         xloop = self.update_loop(xnorm, *args)
-        self.cage.set_TFcoil({'r': xloop['cl']['r'], 'z': xloop['cl']['z']})
+        self.cage.set_TFcoil({'x': xloop['cl']['x'], 'z': xloop['cl']['z']})
         E = self.cage.energy()
         return 1e-9*E
 
     def minimise(self, vessel, verbose=False, **kwargs):
         if not hasattr(self, 'profile'):
             raise ValueError('minimisation requires profile object')
-
-        self.set_cage()  # initalise cage if ripple=True
         self.update_attr(**kwargs)
         # call shape called from within tf (dog wags tail)
-        self.profile.initalise_loop(self.profile.family)  # forget previous
         self.shp = Shape(self.profile, objective='L')
         # tailor limits on loop parameters (l controls loop tension)
-        self.shp.loop.adjust_xo('upper', lb=0.6)
-        self.shp.loop.adjust_xo('lower', lb=0.6)
-        self.shp.loop.adjust_xo('l', lb=0.5)  # don't go too high (<1.2)
+        self.adjust_xo('upper', lb=0.6)
+        self.adjust_xo('lower', lb=0.6)
+        self.adjust_xo('l', lb=0.5)  # don't go too high (<1.2)
         self.add_vessel(vessel)  # add vessel constraints
 
         # pass constraint array and objective to loop optimiser
@@ -600,30 +595,52 @@ if __name__ is '__main__':  # test functions
     setup = Setup(config['eq'])
     sf = SF(setup.filename)
     profile = Profile(config['TF'], family='S', part='TF', nTF=nTF,
-                      obj='E', load=True, npoints=40)
+                      obj='L', load=True, npoints=60)
+
     # profile.loop.plot()
-    tf = TF(profile=profile, sf=sf)
+    tf = TF(profile=profile, sf=sf, nr=1, ny=1)
 
     demo = DEMO()
     demo.fill_part('Vessel')
     demo.fill_part('Blanket')
     demo.plot_ports()
 
-    tf.minimise(demo.parts['Vessel']['out'], verbose=True, ripple=True)
+    tf.minimise(demo.parts['Vessel']['out'], verbose=True, ripple=False)
     tf.fill()
 
-    rp, zp = demo.port['P0']['right']['r'], demo.port['P0']['right']['z']
-    pl.plot(rp, zp, 'k', lw=3)
-    '''
-    xc = [rp[0],zp[0]]
-    nhat = np.array([rp[1]-rp[0],zp[1]-zp[0]])
-    sal.tf.loop_interpolators(offset=0)  # construct TF interpolators
-    loop = sal.tf.fun['out']
+    pf = PF(sf.eqdsk)
+    pf.plot()
+    sf.contour()
 
-    Lo = minimize_scalar(SALOME.OIS_placment,method='bounded',
-                         args=(loop,(rp[0],zp[0])),bounds=[0,1]).x
-    xo = [Lo,0]
-    L = minimize(SALOME.intersect,xo,method='L-BFGS-B',
-                 bounds=([0.1,0.9],[0,15]),args=(xc,nhat,loop)).x
-    pl.plot(loop['r'](L[0]),loop['z'](L[0]),'o')
+    tf.cage.output()
+
     '''
+    # tf.coil.set_input()
+    tic = time.time()
+    print('energy {:1.3f}GJ'.format(1e-9 * cage.energy()))
+    print('time A {:1.3f}s'.format(time.time() - tic))
+    '''
+
+    '''
+    B = np.zeros((tf.npoints,3))
+    for i,(x,z) in enumerate(zip(tf.x['cl']['x'],tf.x['cl']['z'])):
+        B[i,:] = cage.Iturn*cage.point((x,0,z),variable='feild')
+
+    npoints = 200
+    xcl = np.linspace(np.min(tf.x['cl']['x']),np.max(tf.x['cl']['x']),npoints)
+    zcl = cage.eqdsk['zmagx']*np.ones(npoints)
+    Bcl = np.zeros((npoints,3))
+
+    for i,(x,z) in enumerate(zip(xcl,zcl)):
+        Bcl[i,:] = cage.Iturn*cage.point((x,0,z),variable='feild')
+
+    pl.figure(figsize=(8,6))
+    pl.plot(tf.x['cl']['x'],abs(B[:,1]))
+    pl.plot(xcl,abs(Bcl[:,1]))
+    pl.plot(cage.eqdsk['xcentr'],abs(cage.eqdsk['bcentr']),'o')
+    sns.despine()
+    '''
+
+    # rp.plot_loops()
+
+

@@ -38,21 +38,21 @@ class INV(object):
         self.initalise_limits()
         self.offset = offset  # offset coils from outer TF loop
         if tf is not None:
-            self.norm = np.sqrt(2)*np.mean([self.pf.coil[name]['dr'] for
+            self.norm = np.sqrt(2)*np.mean([self.pf.coil[name]['dx'] for
                                             name in self.pf.coil])/2
             self.tf.loop_interpolators(offset=self.offset)
             self.unwrap()  # store relitive coil posions around TF
         self.Jmax = Jmax  # MAm-2
-        self.fix = {'r': np.array([]), 'z': np.array([]), 'BC': np.array([]),
+        self.fix = {'x': np.array([]), 'z': np.array([]), 'BC': np.array([]),
                     'value': np.array([]), 'Bdir': np.array([[], []]).T,
                     'factor': np.array([]), 'n': 0}
-        self.cnstr = {'r': np.array([]), 'z': np.array([]), 'BC': np.array([]),
+        self.cnstr = {'x': np.array([]), 'z': np.array([]), 'BC': np.array([]),
                       'value': np.array([]), 'condition': np.array([])}
 
         self.set_swing()
         self.log_scalar = ['rms', 'rmsID']
-        # 'Fr_max','Fz_max','F_max','FzCS','Fsep','rms_bndry','Isum',
-        # 'Imax','z_offset','FrPF','FzPF','dTpol'
+        # 'Fx_max','Fz_max','F_max','FzCS','Fsep','rms_bndry','Isum',
+        # 'Imax','z_offset','FxPF','FzPF','dTpol'
         self.log_array = ['Lo']  # ,'Iswing'
         self.log_iter = ['current_iter', 'plasma_iter', 'position_iter']
         self.log_plasma = ['plasma_coil']
@@ -84,7 +84,7 @@ class INV(object):
         self.nS = len(flux)
         self.swing = {'flux': flux, 'I': np.zeros((self.nS, self.nC)),
                       'rms': np.zeros(self.nS),
-                      'FrPF': np.zeros(self.nS), 'FzPF': np.zeros(self.nS),
+                      'FxPF': np.zeros(self.nS), 'FzPF': np.zeros(self.nS),
                       'FsepCS': np.zeros(self.nS), 'FzCS': np.zeros(self.nS),
                       'Isum': np.zeros(self.nS),
                       'IsumCS': np.zeros(self.nS), 'IsumPF': np.zeros(self.nS),
@@ -142,13 +142,13 @@ class INV(object):
                 state = 'active'
             else:
                 state = 'passive'
-            self.coil[state][name] = {'r': np.array([]), 'z': np.array([]),
-                                      'dr': np.array([]), 'dz': np.array([]),
+            self.coil[state][name] = {'x': np.array([]), 'z': np.array([]),
+                                      'dx': np.array([]), 'dz': np.array([]),
                                       'sub_name': np.array([]),
-                                      'I': np.array([]), 'Fr': np.array([]),
+                                      'I': np.array([]), 'Fx': np.array([]),
                                       'Fz': np.array([]),
-                                      'Fr_sum': 0, 'Fz_sum': 0, 'I_sum': 0,
-                                      'Ro': 0, 'Zo': 0, 'Nf': 0}
+                                      'Fx_sum': 0, 'Fz_sum': 0, 'I_sum': 0,
+                                      'Xo': 0, 'Zo': 0, 'Nf': 0}
 
     def initalise_current(self):
         adjust_coils = self.coil['active'].keys()
@@ -178,14 +178,14 @@ class INV(object):
             else:
                 state = 'passive'
             coil = coils[sub_name]
-            for key, var in zip(['r', 'z', 'I', 'dr', 'dz', 'sub_name'],
-                                [coil['r'], coil['z'], coil['I'],
-                                 coil['dr'], coil['dz'], sub_name]):
+            for key, var in zip(['x', 'z', 'I', 'dx', 'dz', 'sub_name'],
+                                [coil['x'], coil['z'], coil['I'],
+                                 coil['dx'], coil['dz'], sub_name]):
                 self.coil[state][name][key] = \
                     np.append(self.coil[state][name][key], var)
             self.coil[state][name]['Isum'] = \
                 np.sum(self.coil[state][name]['I'])
-            self.coil[state][name]['Ro'] = np.mean(self.coil[state][name]['r'])
+            self.coil[state][name]['Xo'] = np.mean(self.coil[state][name]['x'])
             self.coil[state][name]['Zo'] = np.mean(self.coil[state][name]['z'])
             self.coil[state][name]['Nf'] = len(self.coil[state][name]['z'])
 
@@ -244,25 +244,25 @@ class INV(object):
     def get_point(self, **kwargs):
         keys = kwargs.keys()
         if 'point' in keys:
-            r, z = kwargs['point']
+            x, z = kwargs['point']
         elif 'polar' in keys:
             mag, arg = kwargs['polar']
-            r = self.eq.sf.Xpoint[0] + mag * np.sin(arg * np.pi / 180)
+            x = self.eq.sf.Xpoint[0] + mag * np.sin(arg * np.pi / 180)
             z = self.eq.sf.Xpoint[1] - mag * np.cos(arg * np.pi / 180)
         elif 'Lout' in keys:
             L = kwargs['Lout']
-            r, z = self.tf.fun['out']['r'](L), self.tf.fun['out']['z'](L)
-            dr, dz = self.tf.fun['out']['dr'](L), self.tf.fun['out']['dz'](L)
+            x, z = self.tf.fun['out']['x'](L), self.tf.fun['out']['z'](L)
+            dx, dz = self.tf.fun['out']['dx'](L), self.tf.fun['out']['dz'](L)
         elif 'Lin' in keys:
             L = kwargs['Lin']
-            r, z = self.tf.fun['in']['r'](L), self.tf.fun['in']['z'](L)
-            dr, dz = self.tf.fun['in']['dr'](L), self.tf.fun['in']['dz'](L)
+            x, z = self.tf.fun['in']['x'](L), self.tf.fun['in']['z'](L)
+            dx, dz = self.tf.fun['in']['dx'](L), self.tf.fun['in']['dz'](L)
         if 'norm' in keys and 'point' not in keys:
             delta = kwargs['norm'] * \
-                np.array([dr, dz]) / np.sqrt(dr**2 + dz**2)
-            r += delta[1]
+                np.array([dx, dz]) / np.sqrt(dx**2 + dz**2)
+            x += delta[1]
             z -= delta[0]
-        return r, z
+        return x, z
 
     def plot_coils(self):
         Color = cycle(sns.color_palette('Set2', 12))
@@ -270,16 +270,16 @@ class INV(object):
             for name in self.coil[state].keys():
                 if name != 'Plasma':
                     color = next(Color)
-                    for r, z in zip(self.coil[state][name]['r'],
+                    for x, z in zip(self.coil[state][name]['x'],
                                     self.coil[state][name]['z']):
-                        pl.plot(r, z, marker, color=color, markersize=4)
+                        pl.plot(x, z, marker, color=color, markersize=4)
                         if state == 'passive':  # empty marker
-                            pl.plot(r, z, marker, color='w', markersize=2)
+                            pl.plot(x, z, marker, color='w', markersize=2)
 
-    def add_fix(self, r, z, value, Bdir, BC, factor):
-        var = {'r': r, 'z': z, 'value': value,
+    def add_fix(self, x, z, value, Bdir, BC, factor):
+        var = {'x': x, 'z': z, 'value': value,
                'Bdir': Bdir, 'BC': BC, 'factor': factor}
-        nvar = len(r)
+        nvar = len(x)
         self.fix['n'] += nvar
         for name in ['value', 'Bdir', 'BC', 'factor']:
             if np.shape(var[name])[0] != nvar:
@@ -304,14 +304,14 @@ class INV(object):
         self.set_target()  # adjust target flux
 
     def get_boundary(self, N=21, alpha=0.995):
-        r, z = self.eq.sf.get_boundary(alpha=alpha)
+        x, z = self.eq.sf.get_boundary(alpha=alpha)
         self.eq_spline()
-        nr = -self.psi.ev(r, z, dx=1, dy=0)
-        nz = -self.psi.ev(r, z, dx=0, dy=1)
-        L = geom.length(r, z)
+        nx = -self.psi.ev(x, z, dx=1, dy=0)
+        nz = -self.psi.ev(x, z, dx=0, dy=1)
+        L = geom.length(x, z)
         Lc = np.linspace(0, 1, N + 1)[:-1]
-        rb, zb = interp1d(L, r)(Lc), interp1d(L, z)(Lc)
-        Bdir = np.array([interp1d(L, nr)(Lc), interp1d(L, nz)(Lc)]).T
+        rb, zb = interp1d(L, x)(Lc), interp1d(L, z)(Lc)
+        Bdir = np.array([interp1d(L, nx)(Lc), interp1d(L, nz)(Lc)]).T
         return rb, zb, Bdir
 
     def get_psi(self, alpha):
@@ -321,56 +321,56 @@ class INV(object):
         return psi
 
     def fix_boundary_psi(self, N=21, alpha=0.995, factor=1):
-        r, z, Bdir = self.get_boundary(N=N, alpha=alpha)
+        x, z, Bdir = self.get_boundary(N=N, alpha=alpha)
         psi = self.get_psi(alpha) * np.ones(N)
         psi -= self.eq.sf.Xpsi  # normalise
-        self.add_fix(r, z, psi, Bdir, ['psi_bndry'], [factor])
+        self.add_fix(x, z, psi, Bdir, ['psi_bndry'], [factor])
 
     def fix_boundary_feild(self, N=21, alpha=0.995, factor=1):
-        r, z, Bdir = self.get_boundary(N=N, alpha=alpha)
-        self.add_fix(r, z, [0.0], Bdir, ['Bdir'], [factor])
+        x, z, Bdir = self.get_boundary(N=N, alpha=alpha)
+        self.add_fix(x, z, [0.0], Bdir, ['Bdir'], [factor])
 
     def add_null(self, factor=1, **kwargs):
-        r, z = self.get_point(**kwargs)
-        self.add_fix([r], [z], [0.0], np.array(
-            [[1.0], [0.0]]).T, ['Br'], [factor])
-        self.add_fix([r], [z], [0.0], np.array(
+        x, z = self.get_point(**kwargs)
+        self.add_fix([x], [z], [0.0], np.array(
+            [[1.0], [0.0]]).T, ['Bx'], [factor])
+        self.add_fix([x], [z], [0.0], np.array(
             [[0.0], [1.0]]).T, ['Bz'], [factor])
 
-    def add_Bro(self, factor=1, **kwargs):
-        r, z = self.get_point(**kwargs)
-        self.add_fix([r], [z], [0.0], np.array(
-            [[1.0], [0.0]]).T, ['Br'], [factor])
+    def add_Bxo(self, factor=1, **kwargs):
+        x, z = self.get_point(**kwargs)
+        self.add_fix([x], [z], [0.0], np.array(
+            [[1.0], [0.0]]).T, ['Bx'], [factor])
 
     def add_Bzo(self, factor=1, **kwargs):
-        r, z = self.get_point(**kwargs)
-        self.add_fix([r], [z], [0.0], np.array(
+        x, z = self.get_point(**kwargs)
+        self.add_fix([x], [z], [0.0], np.array(
             [[0.0], [1.0]]).T, ['Bz'], [factor])
 
     def add_B(self, B, Bdir, factor=1, zero_norm=False, **kwargs):
-        r, z = self.get_point(**kwargs)
+        x, z = self.get_point(**kwargs)
         if len(Bdir) == 1:  # normal angle from horizontal in degrees
             arg = Bdir[0]
             Bdir = [-np.sin(arg * np.pi / 180), np.cos(arg * np.pi / 180)]
         Bdir /= np.sqrt(Bdir[0]**2 + Bdir[1]**2)
-        self.add_fix([r], [z], [B], np.array([[Bdir[0]], [Bdir[1]]]).T,
+        self.add_fix([x], [z], [B], np.array([[Bdir[0]], [Bdir[1]]]).T,
                      ['Bdir'], [factor])
         if zero_norm:
-            self.add_fix([r], [z], [0], np.array([[-Bdir[1]], [Bdir[0]]]).T,
+            self.add_fix([x], [z], [0], np.array([[-Bdir[1]], [Bdir[0]]]).T,
                          ['Bdir'], [factor])
 
     def add_theta(self, theta, factor=1, graze=1.5, **kwargs):
-        r, z = self.get_point(**kwargs)
+        x, z = self.get_point(**kwargs)
         Bm = np.abs(self.eq.sf.bcentr * self.eq.sf.rcentr)  # toroidal moment
-        Bphi = Bm / r  # torodal field
+        Bphi = Bm / x  # torodal field
         Bp = Bphi / np.sqrt((np.sin(theta * np.pi / 180) /
                              np.sin(graze * np.pi / 180))**2)
-        self.add_fix([r], [z], [Bp], np.array([[0], [0]]).T, ['Bp'], [factor])
+        self.add_fix([x], [z], [Bp], np.array([[0], [0]]).T, ['Bp'], [factor])
 
     def add_psi(self, psi, factor=1, **kwargs):
-        r, z = self.get_point(**kwargs)
+        x, z = self.get_point(**kwargs)
         label = kwargs.get('label', 'psi')
-        self.add_fix([r], [z], [psi], np.array(
+        self.add_fix([x], [z], [psi], np.array(
             [[0], [0]]).T, [label], [factor])
 
     def add_alpha(self, alpha, factor=1, **kwargs):
@@ -379,8 +379,8 @@ class INV(object):
         self.add_psi(psi, factor=factor, **kwargs)
 
     def add_Bcon(self, B, **kwargs):
-        r, z = self.get_point(**kwargs)
-        self.add_cnstr([r], [z], ['B'], ['gt'], [B])
+        x, z = self.get_point(**kwargs)
+        self.add_cnstr([x], [z], ['B'], ['gt'], [B])
 
     def plot_fix(self, tails=True):
         self.get_weight()
@@ -390,22 +390,22 @@ class INV(object):
             else:
                 weight = np.ones(len(self.fix['BC']))
             Color = sns.color_palette('Set2', 8)
-            psi, Bdir, Brz = [], [], []
+            psi, Bdir, Bxz = [], [], []
             tail_length = 0.75
             for bc, w in zip(self.fix['BC'], weight):
                 if 'psi' in bc:
                     psi.append(w)
                 elif bc == 'Bdir':
                     Bdir.append(w)
-                elif bc == 'Br' or bc == 'Bz':
-                    Brz.append(w)
+                elif bc == 'Bx' or bc == 'Bz':
+                    Bxz.append(w)
             if len(psi) > 0:
                 psi_norm = tail_length / np.mean(psi)
             if len(Bdir) > 0:
                 Bdir_norm = tail_length / np.mean(Bdir)
-            if len(Brz) > 0:
-                Brz_norm = tail_length / np.mean(Brz)
-            for r, z, bc, bdir, w in zip(self.fix['r'], self.fix['z'],
+            if len(Bxz) > 0:
+                Bxz_norm = tail_length / np.mean(Bxz)
+            for x, z, bc, bdir, w in zip(self.fix['x'], self.fix['z'],
                                          self.fix['BC'], self.fix['Bdir'],
                                          weight):
                 if bdir[0]**2 + bdir[1]**2 == 0:  # tails
@@ -413,31 +413,31 @@ class INV(object):
                 else:
                     direction = bdir
                 # else:
-                #    d_dr,d_dz = self.get_gradients(bc,r,z)
-                #    direction = np.array([d_dr,d_dz])/np.sqrt(d_dr**2+d_dz**2)
+                #    d_dx,d_dz = self.get_gradients(bc,x,z)
+                #    direction = np.array([d_dx,d_dz])/np.sqrt(d_dx**2+d_dz**2)
                 if 'psi' in bc:
                     norm = psi_norm
                     marker, size, color = 'o', 7.5, Color[0]
-                    pl.plot(r, z, marker, color=color, markersize=size)
-                    pl.plot(r, z, marker, color=[1, 1, 1],
+                    pl.plot(x, z, marker, color=color, markersize=size)
+                    pl.plot(x, z, marker, color=[1, 1, 1],
                             markersize=0.3 * size)
                 else:
                     if bc == 'Bdir':
                         norm = Bdir_norm
                         marker, size, color, mew = 'o', 4, Color[1], 0.0
                     elif bc == 'null':
-                        norm = Brz_norm
+                        norm = Bxz_norm
                         marker, size, color, mew = 'o', 2, Color[2], 0.0
-                    elif bc == 'Br':
-                        norm = Brz_norm
+                    elif bc == 'Bx':
+                        norm = Bxz_norm
                         marker, size, color, mew = '_', 10, Color[2], 1.75
                     elif bc == 'Bz':
-                        norm = Brz_norm
+                        norm = Bxz_norm
                         marker, size, color, mew = '|', 10, Color[2], 1.75
-                    pl.plot(r, z, marker, color=color, markersize=size,
+                    pl.plot(x, z, marker, color=color, markersize=size,
                             markeredgewidth=mew)
                 if tails:
-                    pl.plot([r, r + direction[0] * norm * w],
+                    pl.plot([x, x + direction[0] * norm * w],
                             [z, z + direction[1] * norm * w],
                             color=color, linewidth=2)
 
@@ -461,17 +461,17 @@ class INV(object):
             self.wG = np.dot(self.wG, self.V)  # solve in terms of alpha
 
     def add_value(self, state):
-        Rf, Zf, BC, Bdir = self.unpack_fix()
-        for i, (rf, zf, bc, bdir) in enumerate(zip(Rf, Zf, BC, Bdir)):
+        Xf, Zf, BC, Bdir = self.unpack_fix()
+        for i, (xf, zf, bc, bdir) in enumerate(zip(Xf, Zf, BC, Bdir)):
             for j, name in enumerate(self.coil[state].keys()):
                 # if name == 'Plasma' and False:
-                #    self.BG[i] += self.add_value_plasma(bc,rf,zf,bdir)
+                #    self.BG[i] += self.add_value_plasma(bc,xf,zf,bdir)
                 # else:
                 coil = self.coil[state][name]
-                R, Z, Ic = coil['r'], coil['z'], coil['I']
-                dR, dZ = coil['dr'], coil['dz']
-                for r, z, ic, dr, dz in zip(R, Z, Ic, dR, dZ):
-                    value = self.add_value_coil(bc, rf, zf, r, z, bdir, dr, dz)
+                R, Z, Ic = coil['x'], coil['z'], coil['I']
+                dX, dZ = coil['dx'], coil['dz']
+                for x, z, ic, dx, dz in zip(R, Z, Ic, dX, dZ):
+                    value = self.add_value_coil(bc, xf, zf, x, z, bdir, dx, dz)
                     if state == 'active':
                         self.G[i, j] += value
                     elif state == 'passive':
@@ -481,92 +481,92 @@ class INV(object):
                         errtxt += '\'active\', \'passive\'\n'
                         raise ValueError(errtxt)
 
-    def add_value_coil(self, bc, rf, zf, r, z, bdir, dr, dz):
+    def add_value_coil(self, bc, xf, zf, x, z, bdir, dx, dz):
         if 'psi' in bc:
             value = self.Iscale * cc.mu_o * \
-                cc.green(rf, zf, r, z, dRc=dr, dZc=dz)
+                cc.green(xf, zf, x, z, dXc=dx, dZc=dz)
         else:
-            B = self.Iscale * cc.mu_o * cc.green_feild(rf, zf, r, z)
+            B = self.Iscale * cc.mu_o * cc.green_feild(xf, zf, x, z)
             value = self.Bfeild(bc, B[0], B[1], bdir)
         return value
 
-    def add_value_plasma(self, bc, rf, zf, bdir):
+    def add_value_plasma(self, bc, xf, zf, bdir):
         if 'psi' in bc:
-            value = self.psi_plasma.ev(rf, zf)  # interpolate from GS
+            value = self.psi_plasma.ev(xf, zf)  # interpolate from GS
         else:
-            Br, Bz = self.B_plasma[0].ev(rf, zf), self.B_plasma[1].ev(rf, zf)
-            value = self.Bfeild(bc, Br, Bz, bdir)
+            Bx, Bz = self.B_plasma[0].ev(xf, zf), self.B_plasma[1].ev(xf, zf)
+            value = self.Bfeild(bc, Bx, Bz, bdir)
         return value
 
-    def Bfeild(self, bc, Br, Bz, Bdir):
-        if bc == 'Br':
-            value = Br
+    def Bfeild(self, bc, Bx, Bz, Bdir):
+        if bc == 'Bx':
+            value = Bx
         elif bc == 'Bz':
             value = Bz
         elif bc == 'null':
             value = np.sqrt(Bz**2 + Bz**2)
         elif bc == 'Bdir':
             nhat = Bdir / np.sqrt(Bdir[0]**2 + Bdir[1]**2)
-            value = np.dot([Br, Bz], nhat)
+            value = np.dot([Bx, Bz], nhat)
         elif bc == 'Bp':
-            value = Br - Bz / 2
+            value = Bx - Bz / 2
         return value
 
     def get_mesh(self):
-        self.rm = np.array(np.matrix(self.eq.r).T * np.ones([1, self.eq.nz]))
-        self.rm[self.rm == 0] = 1e-34
-        self.zm = np.array(np.ones([self.eq.nr, 1]) * np.matrix(self.eq.z))
+        self.xm = np.array(np.matrix(self.eq.x).T * np.ones([1, self.eq.nz]))
+        self.xm[self.xm == 0] = 1e-34
+        self.zm = np.array(np.ones([self.eq.nx, 1]) * np.matrix(self.eq.z))
 
     def eq_spline(self):
-        self.psi = RBS(self.eq.r, self.eq.z, self.eq.psi)
+        self.psi = RBS(self.eq.x, self.eq.z, self.eq.psi)
         self.get_mesh()
-        psi_r = self.psi.ev(self.rm, self.zm, dx=1, dy=0)
-        psi_z = self.psi.ev(self.rm, self.zm, dx=0, dy=1)
-        Br, Bz = -psi_z / self.rm, psi_r / self.rm
-        B = np.sqrt(Br**2 + Bz**2)
-        self.B = RBS(self.eq.r, self.eq.z, B)
+        psi_x = self.psi.ev(self.xm, self.zm, dx=1, dy=0)
+        psi_z = self.psi.ev(self.xm, self.zm, dx=0, dy=1)
+        Bx, Bz = -psi_z / self.xm, psi_x / self.xm
+        B = np.sqrt(Bx**2 + Bz**2)
+        self.B = RBS(self.eq.x, self.eq.z, B)
 
     def plasma_spline(self):
         self.B_plasma = [[], []]
         self.eq.plasma()  # evaluate scalar potential with plasma only
-        self.psi_plasma = RBS(self.eq.r, self.eq.z, self.eq.psi_plasma)
+        self.psi_plasma = RBS(self.eq.x, self.eq.z, self.eq.psi_plasma)
         self.get_mesh()
-        psi_plasma_r = self.psi_plasma.ev(self.rm, self.zm, dx=1, dy=0)
-        psi_plasma_z = self.psi_plasma.ev(self.rm, self.zm, dx=0, dy=1)
-        Bplasma_r, Bplasma_z = -psi_plasma_z / self.rm, psi_plasma_r / self.rm
-        self.B_plasma[0] = RBS(self.eq.r, self.eq.z, Bplasma_r)
-        self.B_plasma[1] = RBS(self.eq.r, self.eq.z, Bplasma_z)
+        psi_plasma_r = self.psi_plasma.ev(self.xm, self.zm, dx=1, dy=0)
+        psi_plasma_z = self.psi_plasma.ev(self.xm, self.zm, dx=0, dy=1)
+        Bplasma_r, Bplasma_z = -psi_plasma_z / self.xm, psi_plasma_r / self.xm
+        self.B_plasma[0] = RBS(self.eq.x, self.eq.z, Bplasma_r)
+        self.B_plasma[1] = RBS(self.eq.x, self.eq.z, Bplasma_z)
 
     def unpack_fix(self):
-        Rf, Zf = self.fix['r'], self.fix['z']
+        Xf, Zf = self.fix['x'], self.fix['z']
         BC, Bdir = self.fix['BC'], self.fix['Bdir']
-        return Rf, Zf, BC, Bdir
+        return Xf, Zf, BC, Bdir
 
-    def get_gradients(self, bc, rf, zf):
+    def get_gradients(self, bc, xf, zf):
         try:
             if 'psi' in bc:
-                d_dr = self.psi.ev(rf, zf, dx=1, dy=0)
-                d_dz = self.psi.ev(rf, zf, dx=0, dy=1)
+                d_dx = self.psi.ev(xf, zf, dx=1, dy=0)
+                d_dz = self.psi.ev(xf, zf, dx=0, dy=1)
             else:
-                d_dr = self.B.ev(rf, zf, dx=1, dy=0)
-                d_dz = self.B.ev(rf, zf, dx=0, dy=1)
+                d_dx = self.B.ev(xf, zf, dx=1, dy=0)
+                d_dz = self.B.ev(xf, zf, dx=0, dy=1)
         except:
             warn('gradient evaluation failed')
-            d_dr, d_dz = np.ones(len(bc)), np.ones(len(bc))
-        return d_dr, d_dz
+            d_dx, d_dz = np.ones(len(bc)), np.ones(len(bc))
+        return d_dx, d_dz
 
     def get_weight(self):
-        Rf, Zf, BC, Bdir = self.unpack_fix()
+        Xf, Zf, BC, Bdir = self.unpack_fix()
         n = self.fix['n']
         weight = np.zeros(n)
         if n > 0:
-            for i, (rf, zf, bc, bdir, factor) in \
-                    enumerate(zip(Rf, Zf, BC, Bdir, self.fix['factor'])):
-                d_dr, d_dz = self.get_gradients(bc, rf, zf)
-                if 'psi' not in bc:  # (Br,Bz)
-                    weight[i] = 1 / abs(np.sqrt(d_dr**2 + d_dz**2))
+            for i, (xf, zf, bc, bdir, factor) in \
+                    enumerate(zip(Xf, Zf, BC, Bdir, self.fix['factor'])):
+                d_dx, d_dz = self.get_gradients(bc, xf, zf)
+                if 'psi' not in bc:  # (Bx,Bz)
+                    weight[i] = 1 / abs(np.sqrt(d_dx**2 + d_dz**2))
                 elif bc == 'psi_bndry':
-                    weight[i] = 1 / abs(np.dot([d_dr, d_dz], bdir))
+                    weight[i] = 1 / abs(np.dot([d_dx, d_dz], bdir))
             if 'psi_bndry' in self.fix['BC']:
                 wbar = np.mean([weight[i]
                                 for i, bc in enumerate(self.fix['BC'])
@@ -592,7 +592,7 @@ class INV(object):
         return Zc, dZ
 
     def add_coil(self, Ctype=None, **kwargs):
-        r, z = self.get_point(**kwargs)
+        x, z = self.get_point(**kwargs)
         index, i = np.zeros(len(self.pf.coil.keys())), -1
         for i, name in enumerate(self.pf.coil.keys()):
             index[i] = name.split('Coil')[-1]
@@ -603,25 +603,25 @@ class INV(object):
         name = 'Coil{:1.0f}'.format(Cid)
         self.add_active([Cid], Ctype=Ctype)
         delta = np.ones(2)
-        for i, dx in enumerate(['dr', 'dz']):
+        for i, dx in enumerate(['dx', 'dz']):
             if dx in kwargs.keys():
                 delta[i] = kwargs.get(dx)
         I = kwargs.get('I', 1e6)
-        self.pf.coil[name] = {'r': r, 'z': z,
-                              'dr': delta[0], 'dz': delta[1], 'I': I,
+        self.pf.coil[name] = {'x': x, 'z': z,
+                              'dx': delta[0], 'dz': delta[1], 'I': I,
                               'rc': np.sqrt(delta[0]**2 + delta[1]**2) / 2}
 
-    def grid_CS(self, nCS=3, Ro=2.9, Zbound=[-10, 9],
-                dr=0.818, gap=0.1, fdr=1):
-        # dr=1.0, dr=1.25,Ro=3.2,dr=0.818
+    def grid_CS(self, nCS=3, Xo=2.9, Zbound=[-10, 9],
+                dx=0.818, gap=0.1, fdr=1):
+        # dx=1.0, dx=1.25, Xo=3.2, dx=0.818
         self.gap = gap
-        dr *= fdr  # thicken CS
-        Ro -= dr * (fdr - 1) / 2  # shift centre inwards
+        dx *= fdr  # thicken CS
+        Xo -= dx * (fdr - 1) / 2  # shift centre inwards
         dz = (np.diff(Zbound) - gap * (nCS - 1)) / nCS  # coil height
         Zc = np.linspace(Zbound[0] + dz / 2,
                          Zbound[-1] - dz / 2, nCS)  # coil centres
         for zc in Zc:
-            self.add_coil(point=(Ro, zc), dr=dr, dz=dz, Ctype='CS')
+            self.add_coil(point=(Xo, zc), dx=dx, dz=dz, Ctype='CS')
         Ze = np.linspace(Zbound[0] - gap / 2,
                          Zbound[-1] + gap / 2, nCS + 1)  # coil edges
         return Ze
@@ -651,7 +651,7 @@ class INV(object):
             c = self.pf.coil[name]
             Lpf[i] = minimize_scalar(self.tf.norm, method='bounded',
                                      args=(self.tf.fun['out'],
-                                           (c['r'], c['z'])), bounds=[0, 1]).x
+                                           (c['x'], c['z'])), bounds=[0, 1]).x
         Lcs = np.zeros(self.pf.index['CS']['n'] + 1)
         z = np.zeros(self.pf.index['CS']['n'])
         dz = np.zeros(self.pf.index['CS']['n'])
@@ -681,15 +681,15 @@ class INV(object):
         psi_line = self.eq.sf.get_contour([psi_o])[0]
         dx_bndry, dx_min = np.array([]), 0
         dz_bndry, dz_min = np.array([]), 0
-        Rf, Zf, BC = self.unpack_fix()[:3]
-        for rf, zf, bc, psi in zip(Rf, Zf, BC, self.fix['value']):
+        Xf, Zf, BC = self.unpack_fix()[:3]
+        for xf, zf, bc, psi in zip(Xf, Zf, BC, self.fix['value']):
             if bc == 'psi_bndry':
                 if psi != psi_o:  # update contour
                     psi_o = psi
                     psi_line = self.eq.sf.get_contour([psi_o])[0]
                 for j, line in enumerate(psi_line):
-                    r, z = line[:, 0], line[:, 1]
-                    dx = np.sqrt((rf - r)**2 + (zf - z)**2)
+                    x, z = line[:, 0], line[:, 1]
+                    dx = np.sqrt((xf - x)**2 + (zf - z)**2)
                     xmin_index = np.argmin(dx)
                     # update boundary error
                     if j == 0 or dx[xmin_index] < dx_min:
@@ -710,16 +710,16 @@ class INV(object):
         name = self.Cname(name)  # convert to name
         if 'point' in kwargs.keys() or 'Lout' in kwargs.keys()\
                 or 'Lin' in kwargs.keys():
-            r, z = self.get_point(**kwargs)
+            x, z = self.get_point(**kwargs)
         elif 'delta' in kwargs.keys():
-            ref, dr, dz = kwargs['delta']
+            ref, dx, dz = kwargs['delta']
             coil = self.pf.coil[self.Cname(ref)]
-            rc, zc = coil['r'], coil['z']
-            r, z = rc + dr, zc + dz
+            xc, zc = coil['x'], coil['z']
+            x, z = xc + dx, zc + dz
         elif 'L' in kwargs.keys():
             ref, dL = kwargs['dL']
             coil = self.pf.coil[self.Cname(ref)]
-            rc, zc = coil['r'], coil['z']
+            xc, zc = coil['x'], coil['z']
         ARmax = 3
         if abs(AR) > ARmax:
             AR = ARmax * np.sign(AR)
@@ -727,12 +727,12 @@ class INV(object):
             AR = 1 + AR
         else:
             AR = 1 / (1 - AR)
-        dA = self.pf.coil[name]['dr'] * self.pf.coil[name]['dz']
-        self.pf.coil[name]['dr'] = np.sqrt(AR * dA)
-        self.pf.coil[name]['dz'] = self.pf.coil[name]['dr'] / AR
-        dr = r - self.pf.coil[name]['r']
+        dA = self.pf.coil[name]['dx'] * self.pf.coil[name]['dz']
+        self.pf.coil[name]['dx'] = np.sqrt(AR * dA)
+        self.pf.coil[name]['dz'] = self.pf.coil[name]['dx'] / AR
+        dx = x - self.pf.coil[name]['x']
         dz = z - self.pf.coil[name]['z']
-        self.shift_coil(name, dr, dz)
+        self.shift_coil(name, dx, dz)
 
     def fit_PF(self, **kwargs):
         '''
@@ -744,19 +744,19 @@ class INV(object):
         offset = kwargs.get('offset', self.offset)
         dl = 0
         for name in self.PF_coils:
-            dr, dz = self.tf.Cshift(self.pf.coil[name], 'out', offset)
-            dl += dr**2 + dz**2
-            self.shift_coil(name, dr, dz)
+            dx, dz = self.tf.Cshift(self.pf.coil[name], 'out', offset)
+            dl += dx**2 + dz**2
+            self.shift_coil(name, dx, dz)
         return np.sqrt(dl / self.nPF)
 
-    def shift_coil(self, name, dr, dz):
-        self.pf.coil[name]['r'] += dr
+    def shift_coil(self, name, dx, dz):
+        self.pf.coil[name]['x'] += dx
         self.pf.coil[name]['z'] += dz
-        self.coil['active'][name]['r'] += dr
+        self.coil['active'][name]['x'] += dx
         self.coil['active'][name]['z'] += dz
         for i in range(self.pf.sub_coil[name + '_0']['Nf']):
             sub_name = name + '_{:1.0f}'.format(i)
-            self.pf.sub_coil[sub_name]['r'] += dr
+            self.pf.sub_coil[sub_name]['x'] += dx
             self.pf.sub_coil[sub_name]['z'] += dz
         self.update_bundle(name)
 
@@ -807,7 +807,7 @@ class INV(object):
         if 'Bdir' in self.fix['BC']:
             index = self.fix['BC'] == 'Bdir'  # angle for last Bdir co-location
             B = self.eq.Bpoint(
-                [self.fix['r'][index][-1], self.fix['z'][index][-1]])
+                [self.fix['x'][index][-1], self.fix['z'][index][-1]])
             Tpol = 180 * np.arctan2(B[1], B[0]) / np.pi  # angle in degrees
         else:
             Tpol = 0
@@ -870,7 +870,7 @@ class INV(object):
                 self.Io['lb'][i] = -self.limit['I']['PF'] / Nf
                 self.Io['ub'][i] = self.limit['I']['PF'] / Nf
             if name in self.CS_coils:
-                Ilim = coil['dr'] * coil['dz'] * self.Jmax
+                Ilim = coil['dx'] * coil['dz'] * self.Jmax
                 self.Io['lb'][i] = -Ilim / Nf
                 self.Io['ub'][i] = Ilim / Nf
         lindex = self.Io['value'] < self.Io['lb']
@@ -949,10 +949,10 @@ class INV(object):
                 if Ic > self.limit['I']['PF']:
                     Ic = self.limit['I']['PF']  # coil area upper bound
                 dA_target = Ic / self.Jmax  # apply current density limit
-                dA = self.pf.coil[name]['dr'] * self.pf.coil[name]['dz']
+                dA = self.pf.coil[name]['dx'] * self.pf.coil[name]['dz']
                 ratio = dA_target / dA
                 scale = (ratio * (1 + margin))**0.5
-                self.pf.coil[name]['dr'] *= relax * (scale - 1) + 1
+                self.pf.coil[name]['dx'] *= relax * (scale - 1) + 1
                 self.pf.coil[name]['dz'] *= relax * (scale - 1) + 1
         dl = self.fit_PF()  # fit re-sized coils to TF
         return dl
@@ -986,9 +986,9 @@ class INV(object):
         L = loops.denormalize_variables(Lnorm, self.Lo)
         Lpf = L[:self.nPF]
         for name, lpf in zip(self.PF_coils, Lpf):
-            # r, z = self.tf.fun['out']['r'](lpf), self.tf.fun['out']['z'](lpf)
+            # x, z = self.tf.fun['out']['x'](lpf), self.tf.fun['out']['z'](lpf)
             # ref = int(name.split('Coil')[-1])
-            # self.move_PF(ref, point=(r, z))
+            # self.move_PF(ref, point=(x, z))
             self.move_PF(name, Lout=lpf, norm=self.norm)
         if len(L) > self.nPF:
             Lcs = L[self.nPF:]
@@ -1028,7 +1028,7 @@ class INV(object):
         for i, flux in enumerate(self.swing['flux']):
             self.swing['rms'][i] = self.solve_slsqp(flux)
             Fcoil = self.ff.get_force()
-            self.swing['FrPF'][i] = Fcoil['PF']['r']
+            self.swing['FxPF'][i] = Fcoil['PF']['x']
             self.swing['FzPF'][i] = Fcoil['PF']['z']
             self.swing['FsepCS'][i] = Fcoil['CS']['sep']
             self.swing['FzCS'][i] = Fcoil['CS']['zsum']
@@ -1189,12 +1189,12 @@ class INV(object):
             f.write('Coil\tr [m]\tz [m]\tdr [m]\tdz [m]')
             f.write('\tI SOF [A]\tI EOF [A]\n')
             for j, name in enumerate(self.coil['active'].keys()):
-                r = float(self.pf.coil[name]['r'])
+                x = float(self.pf.coil[name]['x'])
                 z = float(self.pf.coil[name]['z'])
-                dr = self.pf.coil[name]['dr']
+                dx = self.pf.coil[name]['dx']
                 dz = self.pf.coil[name]['dz']
-                position = '\t{:1.3f}\t{:1.3f}'.format(r, z)
-                size = '\t{:1.3f}\t{:1.3f}'.format(dr, dz)
+                position = '\t{:1.3f}\t{:1.3f}'.format(x, z)
+                size = '\t{:1.3f}\t{:1.3f}'.format(dx, dz)
                 current = '\t{:1.3f}\t{:1.3f}\n'.format(
                     Icoil[0, j], Icoil[1, j])
                 f.write(name + position + size + current)
@@ -1266,8 +1266,8 @@ class SWING(object):
         PFvol = 0
         for name in self.inv.pf.coil:
             coil = self.inv.pf.coil[name]
-            r, dr, dz = coil['r'], coil['dr'], coil['dz']
-            PFvol += 2 * np.pi * r * dr * dz
+            x, dx, dz = coil['x'], coil['dx'], coil['dz']
+            PFvol += 2 * np.pi * x * dx * dz
         Isum = np.max(self.inv.swing['Isum'])
         Ipf = np.max(self.inv.swing['IsumPF'])
         Ics = np.max(self.inv.swing['IsumCS'])

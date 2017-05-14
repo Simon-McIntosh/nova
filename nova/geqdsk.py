@@ -180,14 +180,15 @@ def read(f):
 
     # Create dictionary of values to return
     result = {'name': name,
-              'nx': nxefit, 'ny': nyefit,        # Number of horizontal and vertical points
-              'r': r, 'z': z,                     # Location of the grid-points
-              'rdim': xdim, 'zdim': zdim,         # Size of the domain in meters
+              # Number of horizontal and vertical points
+              'nx': nxefit, 'ny': nyefit,
+              'x': r, 'z': z,               # Location of the grid-points
+              'xdim': xdim, 'zdim': zdim,   # Size of the domain in meters
               # Reference vacuum toroidal field (m, T)
-              'rcentr': rcentr, 'bcentr': bcentr,
+              'xcentr': rcentr, 'bcentr': bcentr,
               'rgrid1': rgrid1,                  # R of left side of domain
-              'zmid': zmid,                      # Z at the middle of the domain
-              'rmagx': rmagx, 'zmagx': zmagx,     # Location of magnetic axis
+              'zmid': zmid,                    # Z at the middle of the domain
+              'xmagx': rmagx, 'zmagx': zmagx,     # Location of magnetic axis
               'simagx': simagx,  # Poloidal flux at the axis (Weber / rad)
               # Poloidal flux at plasma boundary (Weber / rad)
               'sibdry': sibdry,
@@ -198,12 +199,15 @@ def read(f):
               'ffprim': ffprim,
               # "P'(psi) in (nt/m2)/(Weber/rad) on uniform flux grid"
               'pprime': pprime,
-              'pressure': pres,  # Plasma pressure in nt/m^2 on uniform flux grid
+              # Plasma pressure in nt/m^2 on uniform flux grid
+              'pressure': pres,
               'qpsi': qpsi,  # q values on uniform flux grid
               'pnorm': np.linspace(0, 1, len(fpol)),  # uniform flux grid
-              'nbdry': nbdry, 'rbdry': rbdry, 'zbdry': zbdry,  # Plasma boundary
+              # Plasma boundary
+              'nbdry': nbdry, 'xbdry': rbdry, 'zbdry': zbdry,
               'nlim': nlim, 'xlim': xlim, 'ylim': ylim,
-              'ncoil': ncoil, 'rc': rc, 'zc': zc, 'drc': drc, 'dzc': dzc, 'Ic': Ic}  # coils
+              'ncoil': ncoil, 'xc': rc, 'zc': zc, 'dxc': drc,
+              'dzc': dzc, 'Ic': Ic}  # coils
     return result
 
 

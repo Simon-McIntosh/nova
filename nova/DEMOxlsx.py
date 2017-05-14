@@ -327,11 +327,8 @@ class DEMO(object):
 
     def fill_loops(self):
         for part in self.parts:
-            try:
-                geom.polyfill(self.parts[part]['x'],
-                              self.parts[part]['z'], color=color(next(ic)))
-            except:
-                pass
+            geom.polyfill(self.parts[part]['x'],
+                          self.parts[part]['z'], color=color[next(ic)])
         set_figure()
 
     def fill_part(self, part, alpha=1, **kwargs):

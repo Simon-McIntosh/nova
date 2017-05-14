@@ -254,7 +254,7 @@ class divertor(object):
         Xi = self.sf.expansion([X[-1]], [Z[-1]])
         theta = self.sf.strike_point(Xi, graze)
         B = direction * self.sf.Bpoint((X[-1], Z[-1]))
-        Bhat = geom.rotate_vectox2D(B, theta_sign * theta)
+        Bhat = geom.rotate_vector2D(B, theta_sign * theta)
         trans_angle = np.arctan2(Bhat[1], Bhat[0])
         if abs(target_angle - trans_angle) > 0.01 * np.pi:
             accute = True
@@ -282,7 +282,7 @@ class divertor(object):
                 theta = np.pi - theta
             theta = Lhat * theta_end + (1 - Lhat) * theta
             B = direction * self.sf.Bpoint((X[-1], Z[-1]))
-            Bhat = geom.rotate_vectox2D(B, theta_sign * theta)
+            Bhat = geom.rotate_vector2D(B, theta_sign * theta)
             X = np.append(X, X[-1] + dL * Bhat[0])
             Z = np.append(Z, Z[-1] + dL * Bhat[1])
         return X, Z

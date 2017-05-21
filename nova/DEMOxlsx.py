@@ -63,8 +63,9 @@ def cutcorners(x, z):
     lines = OrderedDict()
     segment = add_segment(lines, k)
     for i in range(n):
-        kink = np.arccos(np.dot(dX[:, i] / dL[i],
-                                dX[:, i + 1] / dL[i + 1])) * 180 / np.pi
+        dot = np.dot(dX[:, i] / dL[i], dX[:, i + 1] / dL[i + 1])
+        dot = dot if dot < 1.0 else 1.0
+        kink = np.arccos(dot) * 180 / np.pi
         append_value(lines, segment, x[i + 1], z[i + 1])
         if abs(kink) > 40 and kflag is False:  # angle, deg
             segment = add_segment(lines, k)
@@ -125,6 +126,7 @@ class DEMO(object):
 
     def __init__(self):
         self.filename = 'DEMO1_Reference_Design_-_2015_April_(_EU_2MG46D_v1_0'
+        # self.filename = 'SN-A31-k165'
         self.read(self.filename)
         self.process()
         self.get_limiters()
@@ -177,7 +179,7 @@ class DEMO(object):
                 x, z = geom.read_loop(self.parts[part], loop)
                 p[side]['x'], p[side]['z'] = x, z
 
-            if part in ['TF_Coil', 'Vessel', 'Blanket']:
+            if part in ['TF_Coil', 'Vessel', 'Blanket'] and len(x) > 0:
                 if side != 'out':
                     p['x'], p['z'] = geom.polyloop(p['in'], p['out'])
                 else:

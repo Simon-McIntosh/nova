@@ -9,6 +9,7 @@ import seaborn as sns
 import pandas as pd
 from amigo.IO import trim_dir
 import pickle
+from nova.config import nova_path
 
 
 def add_value(Xo, i, name, value, lb, ub, clip=True):
@@ -673,7 +674,7 @@ class Profile(object):
         self.read_write = read_write
         # initalize loop object
         self.initalise_loop(family, npoints, symetric=symetric)
-        data_dir = trim_dir('../../Data/')
+        data_dir = nova_path('Data')
         self.dataname = data_dir + self.name + '_{}.pkl'.format(part)
         self.nTF = kwargs.get('nTF', 'unset')
         self.obj = kwargs.get('obj', 'L')

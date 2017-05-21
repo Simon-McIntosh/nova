@@ -15,10 +15,10 @@ class PKL(object):
 
     def add(self, data):
         for key in data:
-            if key in self.data.keys():
-                if key == 'sf':
-                    data[key].remove_contour()
-                self.data[key] = data[key]
+            #if key in self.data.keys():
+            if key == 'sf':
+                data[key].remove_contour()
+            self.data[key] = data[key]
 
     def write(self, **kwargs):
         if 'data' in kwargs.keys():
@@ -51,7 +51,6 @@ class PKL(object):
         if not self.inmemory:
             self.read()
         data = []
-        print(keys)
         for key in keys:
             if key in self.data.keys():
                 if key == 'sf':

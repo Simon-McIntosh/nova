@@ -26,14 +26,20 @@ def select(base={'TF': 'dtt', 'eq': 'SN'}, nTF=18, update=True, **kwargs):
     return config, setup
 
 
+def nova_path(directory, file=''):
+    sep = os.path.sep
+    root = sep.join(nova.__file__.split(sep)[:-2])
+    path = os.path.join(root, directory)+sep
+    path = os.path.join(path, file)
+    return path
+
+
 class Setup(object):
 
     # preferance for all eqdsks should be stored in Nova/eqdsk/ or subdirs
     # overide with eqdsk keyword
     def __init__(self, configuration='', **kwargs):
-        sep = os.path.sep
-        eqdir = os.path.join(sep.join(nova.__file__.split(sep)[:-2]),
-                             'eqdsk') + sep
+        eqdir = nova_path('eqdsk')
         self.eqdir = kwargs.get('eqdir', eqdir)
         if 'subdir' in kwargs:
             self.eqdir += kwargs['subdir']+'/'

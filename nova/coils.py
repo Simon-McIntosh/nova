@@ -6,7 +6,7 @@ import seaborn as sns
 import matplotlib
 import collections
 import amigo.geom as geom
-from nova.loops import Profile, set_oppvar, get_oppvar, get_value
+from nova.loops import Profile, get_oppvar, get_value
 from nova.config import Setup
 from nova.streamfunction import SF
 import nova.cross_coil as cc

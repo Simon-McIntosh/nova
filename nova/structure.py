@@ -186,7 +186,7 @@ class architect(object):
     def GS_placement(L, Xo, TFloop):
         return abs(Xo - TFloop['x'](L))
 
-    def Gravity_support(self, Xo=13, width=0.75):
+    def Gravity_support(self, Xo=13, dZo=-3, width=0.75):
         self.tf.loop_interpolators(offset=-0.15)  # construct TF interpolators
         TFloop = self.tf.fun['out']
         self.tf.loop_interpolators(offset=0)
@@ -201,7 +201,7 @@ class architect(object):
         self.Gsupport = {'base': nodes}
         z = [[self.pf.coil[name]['z'] - self.pf.coil[name]['dz'] / 2]
              for name in self.pf.coil]
-        floor = np.min(z) - 1
+        floor = np.min(z) + dZo
         self.Gsupport['zbase'] = float(Sloop['z'](L))
         self.Gsupport['zfloor'] = floor
         self.Gsupport['Xo'] = Xo

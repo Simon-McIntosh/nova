@@ -186,7 +186,7 @@ class architect(object):
     def GS_placement(L, Xo, TFloop):
         return abs(Xo - TFloop['x'](L))
 
-    def Gravity_support(self, Xo=13, dZo=-3, width=0.75):
+    def Gravity_support(self, Xo=13, dZo=-1, width=0.75):
         self.tf.loop_interpolators(offset=-0.15)  # construct TF interpolators
         TFloop = self.tf.fun['out']
         self.tf.loop_interpolators(offset=0)
@@ -216,9 +216,14 @@ class architect(object):
         pin2pin = np.sqrt((Xo * np.tan(theta) - width)**2 +
                           (self.Gsupport['zbase'] - self.Gsupport['zfloor'] -
                            width / 2)**2)
+
         self.Gsupport['alpha'] = alpha
         self.Gsupport['pin2pin'] = pin2pin
+        self.Gsupport['spread'] = pin2pin * np.sin(alpha) + 2 * width
+        self.Gsupport['zground'] = pin2pin * (1-np.cos(alpha)) +\
+            nodes[1][1]-1.5*width-pin2pin
         self.Gsupport['yfloor'] = pin2pin * np.sin(alpha)
+
 
     def adjust_TFnode(self, x, z):
         i = np.argmin((self.tf.p['cl']['x']-x)**2 +

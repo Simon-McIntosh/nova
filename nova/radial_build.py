@@ -9,7 +9,8 @@ from scipy.optimize import minimize
 import collections
 from amigo.IO import trim_dir
 import json
-from nova.firstwall import divertor
+from nova.firstwall import divertor, main_chamber
+from nova.config import select
 colors = sns.color_palette('Paired', 12)
 
 
@@ -81,6 +82,8 @@ class RB(object):
                     lw=1.75, color=0.5 * np.ones(3))
             self.blanket.fill(plot=True, color=colors[0])
             self.vessel.fill(plot=True, color=colors[1])
+            geom.polyfill(self.segment['divertor']['x'],
+                          self.segment['divertor']['z'], color=0.75*np.ones(3))
             pl.axis('equal')
             pl.axis('off')
 
@@ -100,7 +103,8 @@ class RB(object):
         return X, Z
 
     def place_blanket(self, select='upper', store=True, plot=False):
-        blanket = wrap(self.segment['first_wall'], self.segment['inner_loop'])
+        blanket = wrap(self.segment['vessel_gap'],
+                       self.segment['inner_loop'])
         blanket.sort_z('inner', select=select)
         blanket.offset('outer', self.setup.build['BB'],
                        ref_o=3 / 10 * np.pi, dref=np.pi / 3)
@@ -129,8 +133,8 @@ class RB(object):
         xd, zd = x[z < self.sf.Xpoint[1]], z[z < self.sf.Xpoint[1]]
         xo, zo = geom.offset(xd, zd, 0.1)  # divertor offset
         shp.add_bound({'x': xd, 'z': zd}, 'internal')  # vessel inner bounds
-        shp.add_bound({'x': xd, 'z': zd - 0.25},
-                      'internal')  # gap below divertor
+        shp.add_bound({'x': xd, 'z': zd - self.setup.firstwall['vv_gap']},
+                      'internal')  # for gap below divertor
         # shp.plot_bounds()
         shp.minimise()
         # shp.loop.plot()
@@ -529,3 +533,30 @@ class Loop(object):
         for t in trim:
             index.append(np.argmin(np.abs(L - t)))
         return index
+if __name__ == '__main__':
+
+    machine = 'demo'
+    nTF = 18
+
+    eq_names = ['DEMO_SN_SOF', 'DN', 'DEMO_SN_EOF']
+    date = '2017_03_10'
+
+    mc = main_chamber(machine, date=date)
+    #mc.generate(eq_names, psi_n=1.07, flux_fit=True,
+    #            plot=True, symetric=False)
+    mc.load_data(plot=False)  # or load from file
+    # mc.shp.plot_bounds()
+
+    config = {'TF': machine, 'eq': eq_names[0]}
+    config, setup = select(config, nTF=nTF, update=False)
+    sf = SF(setup.filename)
+    sf.contour()
+
+    rb = RB(sf, setup)
+    rb.generate(mc, plot=True, DN=False, debug=False)
+    rb.get_sol(plot=True)
+
+    pl.plot(rb.segment['vessel_inner']['x'],
+            rb.segment['vessel_inner']['z'])
+    pl.plot(rb.segment['vessel_outer']['x'],
+            rb.segment['vessel_outer']['z'])

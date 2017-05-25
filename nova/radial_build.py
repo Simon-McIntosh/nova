@@ -109,6 +109,20 @@ class RB(object):
         blanket.offset('outer', self.setup.build['BB'],
                        ref_o=3 / 10 * np.pi, dref=np.pi / 3)
         bfill = blanket.fill(plot=plot, color=colors[0])
+
+        inner = blanket.loops['inner']['points']
+        outer = blanket.loops['outer']['points']
+        pl.plot(inner['x'], inner['z'])
+        pl.plot(outer['x'], outer['z'])
+        '''
+        import amigo.mattitools as mj
+
+        point = [rb.segment['blanket_inner']['x'][0],
+                rb.segment['blanket_inner']['z'][0]]
+        pl.plot(point[0], point[1],'o')
+        x,z = mj.point_loop_cast(point, rb.segment['blanket_outer'], -25)
+        pl.plot(x,z, 'o')
+        '''
         if store:
             self.segment['blanket_fw'] = bfill[0]
             self.segment['blanket'] = bfill[1]
@@ -556,7 +570,4 @@ if __name__ == '__main__':
     rb.generate(mc, plot=True, DN=False, debug=False)
     rb.get_sol(plot=True)
 
-    pl.plot(rb.segment['vessel_inner']['x'],
-            rb.segment['vessel_inner']['z'])
-    pl.plot(rb.segment['vessel_outer']['x'],
-            rb.segment['vessel_outer']['z'])
+

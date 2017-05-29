@@ -112,8 +112,8 @@ class RB(object):
 
         inner = blanket.loops['inner']['points']
         outer = blanket.loops['outer']['points']
-        pl.plot(inner['x'], inner['z'])
-        pl.plot(outer['x'], outer['z'])
+        #pl.plot(inner['x'], inner['z'])
+        #pl.plot(outer['x'], outer['z'])
         '''
         import amigo.mattitools as mj
 
@@ -201,7 +201,7 @@ class RB(object):
             self.setup.targets[leg]['Xsol'] = Xsol
             self.setup.targets[leg]['Zsol'] = Zsol
 
-    def trim_sol(self, color='k', plot=True):
+    def trim_sol(self, color='k', plot=False):
         self.sf.sol()
         color = sns.color_palette('Set2', self.sf.nleg + 5)
         # color = 'k'

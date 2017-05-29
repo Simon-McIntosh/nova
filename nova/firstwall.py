@@ -389,7 +389,7 @@ class main_chamber(object):
         for sf in sf_list:  # convert input to list
             self.add_bound(sf)
         self.shp.add_interior(r_gap=0.001)  # add interior bound
-        self.shp.plot_bounds()
+        # self.shp.plot_bounds()
         self.shp.minimise()
         self.write()  # append config data to loop pickle
         if plot:

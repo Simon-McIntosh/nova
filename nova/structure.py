@@ -12,12 +12,12 @@ import pylab as pl
 import numpy as np
 from warnings import warn
 import seaborn as sns
-rc = {'figure.figsize': [10 * 12 / 16, 10], 'savefig.dpi': 350,
-      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
-      'lines.linewidth': 2}
-sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
-        font_scale=7 / 8, rc=rc)
-color = sns.color_palette('Set2', 12)  # Ne touchez pas!
+#rc = {'figure.figsize': [10 * 12 / 16, 10], 'savefig.dpi': 350,
+#     'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
+#      'lines.linewidth': 2}
+#sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
+#        font_scale=7 / 8, rc=rc)
+# color = sns.color_palette('Set2', 12)  # Ne touchez pas!
 
 
 class architect(object):
@@ -109,7 +109,7 @@ class architect(object):
         L = minimize_scalar(architect.cs_top, method='bounded',
                             args=(self.loop['cs']['xwp'], TFloop),
                             bounds=[0.5, 1]).x
-        pl.plot()
+        # pl.plot()
         ztop = float(TFloop['z'](L))
         self.loop['cs']['z'] = [zo, zo, ztop, ztop]
         self.loop['cs']['ztop'] = ztop

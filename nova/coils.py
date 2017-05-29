@@ -418,7 +418,7 @@ class TF(object):
             self.p[loop]['x'], self.p[loop]['z'] = x, z
         return self.p
 
-    def split_loop(self, plot=True):  # split inboard/outboard for fe model
+    def split_loop(self, plot=False):  # split inboard/outboard for fe model
         x, z = self.p['cl']['x'], self.p['cl']['z']
         index = self.transition_index(x, z)
         upper, lower = index['upper'], index['lower']
@@ -512,8 +512,8 @@ class TF(object):
         if plot_cl:  # plot winding pack centre line
             pl.plot(self.p['cl']['x'], self.p['cl']['z'],
                     '-.', color=0.5 * np.ones(3))
-        pl.axis('equal')
-        pl.axis('off')
+        #pl.axis('equal')
+        #pl.axis('off')
 
     def support(self, **kwargs):
         self.rzGet()

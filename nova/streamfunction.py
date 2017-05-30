@@ -81,11 +81,11 @@ class SF(object):
         else:
             norm, Ip_dir, psi_offset = 1, 1, 0  # no change
         nc, xc, zc, dxc, dzc, Ic = pf.unpack_coils()[:-1]
-        psi_ff = np.linspace(0, 1, self.nr)
-        pad = np.zeros(self.nr)
+        psi_ff = np.linspace(0, 1, self.nx)
+        pad = np.zeros(self.nx)
         eq = {'name': name,
               # Number of horizontal and vertical points
-              'nx': self.nr, 'ny': self.nz,
+              'nx': self.nx, 'ny': self.nz,
               'x': self.x, 'z': self.z,  # Location of the grid-points
               'rdim': self.x[-1] - self.x[0],  # Size of the domain in meters
               'zdim': self.z[-1] - self.z[0],  # Size of the domain in meters
@@ -127,7 +127,7 @@ class SF(object):
         nova.geqdsk.write(filename, eq)
 
     def write_flux(self):
-        psi_norm = np.linspace(0, 1, self.nr)
+        psi_norm = np.linspace(0, 1, self.nx)
         pprime = self.b_scale * self.Pprime(psi_norm)
         FFprime = self.b_scale * self.FFprime(psi_norm)
         with open('../Data/' + self.dataname + '_flux.txt', 'w') as f:
@@ -202,17 +202,17 @@ class SF(object):
             from scipy.interpolate import RectBivariateSpline as rbs
             sample = np.int(np.float(sample))
             interp_psi = rbs(self.x, self.z, self.psi)
-            self.nr, self.nz = sample * self.nr, sample * self.nz
-            self.x = np.linspace(self.x[0], self.x[-1], self.nr)
+            self.nx, self.nz = sample * self.nx, sample * self.nz
+            self.x = np.linspace(self.x[0], self.x[-1], self.nx)
             self.z = np.linspace(self.z[0], self.z[-1], self.nz)
             self.psi = interp_psi(self.x, self.z, dx=0, dy=0)
             self.space()
 
     def space(self):
-        self.nr = len(self.x)
+        self.nx = len(self.x)
         self.nz = len(self.z)
-        self.n = self.nr * self.nz
-        self.dx = (self.x[-1] - self.x[0]) / (self.nr - 1)
+        self.n = self.nx * self.nz
+        self.dx = (self.x[-1] - self.x[0]) / (self.nx - 1)
         self.dz = (self.z[-1] - self.z[0]) / (self.nz - 1)
         self.x2d, self.z2d = np.meshgrid(self.x, self.z, indexing='ij')
 
@@ -884,10 +884,10 @@ class SF(object):
                             rpost, rloop), np.append(tpost, tloop)
                 else:
                     ncut = np.arange(len(x))[x > self.rcirc][0]
-                    rin, tin = x[:ncut], t[:ncut]
-                    nx = self.minimum_feild(rin, tin)  # minimum feild
-                    rpre, tpre = rin[:nx + 1], tin[:nx + 1]
-                    rpost, tpost = rin[nx:], tin[nx:]
+                    xin, tin = x[:ncut], t[:ncut]
+                    nx = self.minimum_feild(xin, tin)  # minimum feild
+                    rpre, tpre = xin[:nx + 1], tin[:nx + 1]
+                    rpost, tpost = xin[nx:], tin[nx:]
                     loop = True
                     post = True
                     rloop, tloop = np.append(

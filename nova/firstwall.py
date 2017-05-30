@@ -66,7 +66,7 @@ class divertor(object):
             dpsi = self.psi_fw[1] - self.sf.Xpsi
             dpsi = self.psi_fw[1] - self.sf.Xpsi
             Phi_target = [psi_plasma, self.sf.Xpsi - self.div_ex * dpsi]
-            if leg is 'inner1' or leg is 'outex2':
+            if leg is 'inner1' or leg is 'outer2':
                 Phi_target[0] = self.sf.Xpsi + self.div_ex * dpsi
             if self.targets[leg]['open']:
                 theta_sign *= -1
@@ -75,7 +75,7 @@ class divertor(object):
             if 'outer' in leg:
                 Direction = Direction[::-1]
                 theta_sign *= -1
-            if leg is 'inner1' or leg is 'outex2':
+            if leg is 'inner1' or leg is 'outer2':
                 Theta_end = Theta_end[::-1]
 
             self.targets[leg]['X'] = np.array([])
@@ -96,23 +96,23 @@ class divertor(object):
 
         Xb, Zb = np.array([]), np.array([])
         if self.sf.nleg == 6:  # SF
-            Xb = np.append(Xb, self.targets['innex2']['X'][1:])
-            Zb = np.append(Zb, self.targets['innex2']['Z'][1:])
+            Xb = np.append(Xb, self.targets['inner2']['X'][1:])
+            Zb = np.append(Zb, self.targets['inner2']['Z'][1:])
             x, z = self.connect(self.sf.Xpsi -
                                 self.div_ex * dpsi,
-                                ['innex2', 'inner1'], [-1, -1])
+                                ['inner2', 'inner1'], [-1, -1])
             Xb, Zb = self.append(Xb, Zb, x, z)
             Xb = np.append(Xb, self.targets['inner1']['X'][::-1])
             Zb = np.append(Zb, self.targets['inner1']['Z'][::-1])
             x, z = self.connect(self.sf.Xpsi +
                                 self.div_ex * dpsi,
-                                ['inner1', 'outex2'], [0, 0])
+                                ['inner1', 'outer2'], [0, 0])
             Xb, Zb = self.append(Xb, Zb, x, z)
-            Xb = np.append(Xb, self.targets['outex2']['X'][1:])
-            Zb = np.append(Zb, self.targets['outex2']['Z'][1:])
+            Xb = np.append(Xb, self.targets['outer2']['X'][1:])
+            Zb = np.append(Zb, self.targets['outer2']['Z'][1:])
             x, z = self.connect(self.sf.Xpsi -
                                 self.div_ex * dpsi,
-                                ['outex2', 'outer1'], [-1, -1])
+                                ['outer2', 'outer1'], [-1, -1])
             Xb, Zb = self.append(Xb, Zb, x, z)
             Xb = np.append(Xb, self.targets['outer1']['X'][::-1])
             Zb = np.append(Zb, self.targets['outer1']['Z'][::-1])
@@ -171,7 +171,7 @@ class divertor(object):
         self.segment['first_wall'] = self.join_loops(x, z, xd, zd, i_in)[1]
 
         # divertor outer wall
-        xd, zd, i_out = self.intersect(x, z, xd, zd, s=0.05,
+        xd, zd, i_out = self.intersect(x, z, xd, zd, s=0.075,
                                        offset=self.setup.firstwall['dx_div'])
         self.segment['divertor_outer'] = {'x': xd, 'z': zd}
 
@@ -258,13 +258,13 @@ class divertor(object):
             if np.abs(phi_target - phi) < 1e-4:
                 if debug:
                     pl.plot(X, Z, 'x', color=color[1], lw=3)
-                    print('xz', Xo, Zo, 'N', i)
                 break
             if L < 0:
                 L = 1
                 gain *= -1
             if i == Nmax - 1 or L > 15:
                 print(leg, 'dir', direction, 'phi target convergence error')
+                print('traget', phi_target, 'phi', phi)
                 print('Nmax', i + 1, 'L', L, 'Lo', Lsead)
                 if flag == 0:
                     break
@@ -378,7 +378,8 @@ class main_chamber(object):
         self.filename = '{}_{}'.format(date_str, self.name)  # chamber name
 
     def generate(self, eq_names, dx=0.225, psi_n=1.07,
-                 flux_fit=False, symetric=False, plot=False):
+                 flux_fit=False, symetric=False, plot=False,
+                 plot_bounds=False, verbose=False):
         self.set_filename(update=True)  # update date in filename
         self.profile.loop.reset_oppvar(symetric)  # reset loop oppvar
         self.set_bounds()
@@ -388,12 +389,13 @@ class main_chamber(object):
         sf_list = self.load_sf(eq_names)
         for sf in sf_list:  # convert input to list
             self.add_bound(sf)
-        self.shp.add_interior(r_gap=0.001)  # add interior bound
-        self.shp.plot_bounds()
-        self.shp.minimise()
+        # self.shp.add_interior(r_gap=0.001)  # add interior bound
+        self.shp.minimise(verbose=verbose)
         self.write()  # append config data to loop pickle
         if plot:
             self.plot_chamber()
+        if plot_bounds:
+            self.shp.plot_bounds()
 
     def load_sf(self, eq_names):
         sf_dict, sf_list = OrderedDict(), []

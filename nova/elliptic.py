@@ -48,12 +48,12 @@ class EQ(object):
         self.GSoper()  # apply GS opperator to psi
         # construct spline interpolator
         GSspline = RBS(self.x, self.z, self.GS)
-        self.grid(**kwargs)  # update solution grid
+        update_edge = self.grid(**kwargs)  # update solution grid
         self.GS = GSspline.ev(self.x2d, self.z2d)  # interpolate b
         # post interpolation filter
         self.GS = self.convolve(self.GS, sigma=sigma)
         self.b = np.copy(np.reshape(self.GS, self.nx * self.nz))  # set core
-        self.edgeBC(update_edge=False)  # set edge
+        self.edgeBC(update_edge=update_edge)  # set edge
         self.psi = self.solve()  # re-solve
         self.set_eq_psi()  # pass grid and psi back to sf
 
@@ -80,6 +80,7 @@ class EQ(object):
         return lim
 
     def grid(self, **kwargs):
+        update_edge = True
         if 'boundary' in kwargs:
             limit = self.limits(kwargs.get('boundary'))
             for i, lim in enumerate(['rmin', 'rmax', 'zmin', 'zmax']):
@@ -94,10 +95,13 @@ class EQ(object):
         else:
             limit = np.array([self.sf.x[0], self.sf.x[-1],
                               self.sf.z[0], self.sf.z[-1]])
+            update_edge = False
         if 'n' in kwargs.keys():
             n = kwargs.get('n')
         else:
             n = self.sf.nx * self.sf.nz
+        self.limit_o = np.array([self.x[0], self.x[-1],
+                                 self.z[0], self.z[-1]])
         self.limit, self.n = limit, n
         xo, zo = limit[:2], limit[2:]
         dro, dzo = (xo[-1] - xo[0]), (zo[-1] - zo[0])
@@ -123,6 +127,7 @@ class EQ(object):
         self.boundary()
         self.edge()
         self.core_index()
+        return update_edge
 
     def core_index(self):
         self.core_indx = np.ones(self.N, dtype=bool)
@@ -247,10 +252,20 @@ class EQ(object):
                 self.b[self.indx(i, j)] += -self.mu_o * \
                     I * self.x[i] / (self.dA)
 
+    def set_vacuum(self, GS):
+        X, Z = geom.inloop(self.sf.xbdry, self.sf.zbdry,
+                           self.x2d.flatten(), self.z2d.flatten())
+        GSo = np.copy(GS)
+        GS *= 0  # clear all
+        for x, z in zip(X, Z):  # backfill plasma
+            i = np.argmin(np.abs(x - self.x))
+            j = np.argmin(np.abs(z - self.z))  # plasma vertical offset
+            GS = GSo[i, j]
+
     def plasma_core(self, update=True):
         if update:  # calculate plasma contribution
-            rbdry, zbdry = self.sf.get_boundary()
-            X, Z = geom.inloop(rbdry, zbdry,
+            xbdry, zbdry = self.sf.get_boundary()
+            X, Z = geom.inloop(xbdry, zbdry,
                                self.x2d.flatten(), self.z2d.flatten())
             self.Ip, self.Nplasma = 0, 0
             self.plasma_index = np.zeros(self.N, dtype=int)
@@ -632,13 +647,13 @@ class EQ(object):
         else:
             rlim, zlim = [self.x[0], self.x[-1]], [self.z[0], self.z[-1]]
         cmap = pl.get_cmap('Purples_r')
-        cmap = pl.get_cmap('RdBu')
-        # cmap._init() # create the _lut array, with rgba values
-        # cmap._lut[-4,-1] = 1.0  # set zero value clear
-        # cmap._lut[0,:-1] = 1  # set zero value clear
+        # cmap = pl.get_cmap('RdBu')
+        cmap._init() # create the _lut array, with rgba values
+        cmap._lut[-4,-1] = 1.0  # set zero value clear
+        cmap._lut[0,:-1] = 1  # set zero value clear
 
         norm = MidpointNormalize(midpoint=0)
-        pl.imshow(b, cmap=cmap, norm=norm,  # vmin=b.min(),vmax=b.max(),
+        pl.imshow(b, cmap=cmap, norm=norm, vmin=b.min(),vmax=1.1*b.max(),
                   extent=[rlim[0], rlim[-1], zlim[0], zlim[-1]],
                   interpolation='nearest', origin='lower', alpha=alpha)
         #c = pl.colorbar(orientation='horizontal')
@@ -669,9 +684,9 @@ class EQ(object):
         c.set_ticks([caxis[0],0,caxis[1]])
         '''
         cmap = pl.get_cmap('Purples_r')
-        cmap = pl.get_cmap('RdBu')
-        # cmap.set_under(color='w',alpha=0)
-        pl.imshow(scale * m.T, cmap=cmap,  # vmin=0.1,
+        # cmap = pl.get_cmap('RdBu')
+        cmap.set_under(color='w',alpha=0)
+        pl.imshow(scale * m.T, cmap=cmap, vmin=0.1,
                   extent=[rlim[0], rlim[-1], zlim[0], zlim[-1]],
                   interpolation='nearest', origin='lower', alpha=1)
 

@@ -60,14 +60,49 @@ class INV(object):
         self.force_feild_active = False
         self.rhs = False  # colocation status
 
-    def colocate(self, sf, n=1e3, expand=0.1, centre=0, width=363/(2*np.pi)):
+    def colocate(self, sf, n=1e3, expand=0.1, centre=0, width=363/(2*np.pi),
+                 SX=False, **kwargs):
+        if not hasattr(sf, 'legs'):
+            sf.sol()
         self.load_equlibrium(sf, n=n, expand=expand)
         self.fix_boundary()
+        legs = list(sf.legs)[2:]
+        if SX:
+            legs.pop(-1)  # replace outer
+            self.fix_SX(Rex=kwargs.get('Rex', 1.5),
+                        arg=kwargs.get('arg', 40))
+        if 'setup' in kwargs:
+            self.fix_target(sf, legs, kwargs['setup'].targets)
         self.add_plasma()
         self.set_swing(centre=centre, width=width,
                        array=np.linspace(-0.5, 0.5, 3))
         self.set_force_feild()
         self.rhs = True
+
+    def fix_boundary(self):
+        # add boundary points
+        self.fix_boundary_psi(N=25, alpha=1-1e-4, factor=1)
+        # add boundary feild
+        self.fix_boundary_feild(N=25, alpha=1-1e-4, factor=1)
+        self.add_null(factor=1, point=self.eq.sf.Xpoint)
+        self.initialize_log()
+
+    def fix_target(self, sf, legs, targets, factor=2):
+        for leg in legs:
+            Xsol, Zsol = sf.snip(leg, 0, targets[leg]['L2D'])
+            point = (Xsol[-1], Zsol[-1])
+            field_angle = np.arctan2(Zsol[-1]-Zsol[-2], Xsol[-1]-Xsol[-2])
+            Bdir = np.array([-np.sin(field_angle), np.cos(field_angle)])
+            Bdir /= np.linalg.norm(Bdir)
+            self.add_alpha(1, factor=factor, point=point, Bdir=Bdir)
+            self.add_B(0, [field_angle*180/np.pi], factor=factor, point=point)
+            pl.plot(Xsol, Zsol)
+
+    def fix_SX(self, Rex=1.5, arg=40):  # fix outer leg
+        R = self.eq.sf.Xpoint[0] * (Rex-1) / np.sin(arg*np.pi/180)
+        target = (R, arg)
+        self.add_alpha(1, factor=1, polar=target)  # target psi
+        self.add_B(0, [-20], factor=3, polar=target)  # target alignment feild)
 
     def load_equlibrium(self, sf, expand=0.25, n=2.5e3):
         self.eq = EQ(sf, self.pf, dCoil=self.dCoil,
@@ -370,8 +405,8 @@ class INV(object):
     def add_psi(self, psi, factor=1, **kwargs):
         x, z = self.get_point(**kwargs)
         label = kwargs.get('label', 'psi')
-        self.add_fix([x], [z], [psi], np.array(
-            [[0], [0]]).T, [label], [factor])
+        Bdir = kwargs.get('Bdir', np.array([0, 0]))
+        self.add_fix([x], [z], [psi], Bdir, [label], [factor])
 
     def add_alpha(self, alpha, factor=1, **kwargs):
         psi = self.get_psi(alpha)
@@ -611,30 +646,35 @@ class INV(object):
                               'dx': delta[0], 'dz': delta[1], 'I': I,
                               'rc': np.sqrt(delta[0]**2 + delta[1]**2) / 2}
 
-    def grid_CS(self, nCS=3, Xo=2.9, Zbound=[-10, 9],
+    def grid_CS(self, n, Xo=2.9, Zbound=[-10, 9],
                 dx=0.818, gap=0.1, fdr=1):
         # dx=1.0, dx=1.25, Xo=3.2, dx=0.818
+        nCS = n
         self.gap = gap
         dx *= fdr  # thicken CS
         Xo -= dx * (fdr - 1) / 2  # shift centre inwards
         dz = (np.diff(Zbound) - gap * (nCS - 1)) / nCS  # coil height
         Zc = np.linspace(Zbound[0] + dz / 2,
                          Zbound[-1] - dz / 2, nCS)  # coil centres
+        self.remove_coil(self.CS_coils)
         for zc in Zc:
             self.add_coil(point=(Xo, zc), dx=dx, dz=dz, Ctype='CS')
-        Ze = np.linspace(Zbound[0] - gap / 2,
+        Le = np.linspace(Zbound[0] - gap / 2,
                          Zbound[-1] + gap / 2, nCS + 1)  # coil edges
-        return Ze
+        self.update_coils()
+        L = np.append(self.Lo['value'][:self.nPF], Le)
+        self.set_Lo(L)
+        self.set_force_feild()
 
-    def grid_PF(self, nPF=5):
+    def grid_PF(self, n):
+        nPF = n
         dL = 1 / nPF
         Lpf = np.linspace(dL / 2, 1 - dL / 2, nPF)
-        L = np.append(Lpf, self.Lo['value'][self.nPF:])
         self.remove_coil(self.PF_coils)
         for lpf in Lpf:
             self.add_coil(Lout=lpf, Ctype='PF', norm=self.norm)
-        self.pf.categorize_coils()
         self.update_coils()
+        L = np.append(Lpf, self.Lo['value'][-(self.nCS+1):])
         self.set_Lo(L)
         self.set_force_feild()
 
@@ -861,8 +901,8 @@ class INV(object):
     def set_Io(self):  # set lower/upper bounds on coil currents (Jmax)
         self.Io = {'name': self.adjust_coils, 'value': np.zeros(self.nC),
                    'lb': np.zeros(self.nC), 'ub': np.zeros(self.nC)}
-        for name in self.adjust_coils:  # limits in MA
-            i = int(name.replace('Coil', ''))
+        for i, name in enumerate(self.adjust_coils):  # limits in MA
+            # i = int(name.replace('Coil', ''))
             coil = self.pf.coil[name]
             Nf = self.pf.sub_coil[name + '_0']['Nf']  # fillament number
             self.Io['value'][i] = coil['I'] / (Nf * self.Iscale)
@@ -1052,7 +1092,7 @@ class INV(object):
             Lo_name = 'Lpf{:1.0f}'.format(i)
             lb, ub = self.limit['L'][name]
             loops.add_value(self.Lo, i, Lo_name, l, lb, ub)
-        for i, l in enumerate(L[self.nPF:]):
+        for i, l in enumerate(L[self.nPF:]):  # CS
             Lo_name = 'Zcs{:1.0f}'.format(i)
             loops.add_value(self.Lo, i+self.nPF, Lo_name, l,
                             self.limit['L']['CS'][0], self.limit['L']['CS'][1])
@@ -1073,7 +1113,7 @@ class INV(object):
         constraint[self.nPF - 1:] = L[self.nPF:-1] - \
             L[self.nPF + 1:] + CSdL  # CS
 
-    def minimize(self, method='ls'):
+    def minimize(self, method='ls', verbose=False):
         self.iter['position'] == 0
         Lnorm = loops.normalize_variables(self.Lo)
 
@@ -1139,7 +1179,7 @@ class INV(object):
             self.log[var] = []
         self.iter = {'plasma': 0, 'position': 0, 'current': 0}
 
-    def optimize(self):
+    def optimize(self, verbose=False):
         self.initialize_log()
         self.ztarget = self.eq.sf.Mpoint[1]
         self.ttotal, self.ttotal_cpu = 0, 0
@@ -1147,7 +1187,7 @@ class INV(object):
         self.iter['plasma'] += 1
         self.tick()
         self.add_plasma()
-        self.minimize()
+        self.minimize(verbose=verbose)
         self.store_update(extent='position')
         self.tock()
         return self.Lo
@@ -1198,21 +1238,6 @@ class INV(object):
                 current = '\t{:1.3f}\t{:1.3f}\n'.format(
                     Icoil[0, j], Icoil[1, j])
                 f.write(name + position + size + current)
-
-    def fix_boundary(self):
-        # add boundary points
-        self.fix_boundary_psi(N=25, alpha=1-1e-4, factor=1)
-        # add boundary feild
-        self.fix_boundary_feild(N=25, alpha=1-1e-4, factor=1)
-        self.add_null(factor=1, point=self.eq.sf.Xpoint)
-        self.initialize_log()
-
-    def fix_target(self):
-        Rex, arg = 1.5, 40
-        R = self.eq.sf.Xpoint[0] * (Rex-1) / np.sin(arg*np.pi/180)
-        target = (R, arg)
-        self.add_alpha(1, factor=1, polar=target)  # target psi
-        self.add_B(0, [-15], factor=1, polar=target)  # target alignment feild)
 
 
 class SWING(object):

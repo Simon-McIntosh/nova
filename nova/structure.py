@@ -651,6 +651,7 @@ if __name__ is '__main__':
     inv.set_limit(FPFz=80)
     inv.wrap_PF(solve=False)
     inv.eq.run(update=False)
+    sf.contour()
 
     tf.fill()
     pf.plot(subcoil=False, plasma=True, current=True, label=True)

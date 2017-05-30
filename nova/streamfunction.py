@@ -38,7 +38,7 @@ class SF(object):
         # self.get_sol_psi(dSOL=3e-3,Nsol=15,verbose=False)
         # leg search radius
         self.rcirc = 0.3 * abs(self.Mpoint[1] - self.Xpoint[1])
-        self.drcirc = 0.1 * self.rcirc  # leg search width
+        self.drcirc = 0.15 * self.rcirc  # leg search width
         self.xlim = self.eqdsk['xlim']
         self.ylim = self.eqdsk['ylim']
         self.nlim = self.eqdsk['nlim']
@@ -81,22 +81,22 @@ class SF(object):
         else:
             norm, Ip_dir, psi_offset = 1, 1, 0  # no change
         nc, xc, zc, dxc, dzc, Ic = pf.unpack_coils()[:-1]
-        psi_ff = np.linspace(0, 1, self.nr)
-        pad = np.zeros(self.nr)
+        psi_ff = np.linspace(0, 1, self.nx)
+        pad = np.zeros(self.nx)
         eq = {'name': name,
               # Number of horizontal and vertical points
-              'nx': self.nr, 'ny': self.nz,
+              'nx': self.nx, 'ny': self.nz,
               'x': self.x, 'z': self.z,  # Location of the grid-points
-              'rdim': self.x[-1] - self.x[0],  # Size of the domain in meters
+              'xdim': self.x[-1] - self.x[0],  # Size of the domain in meters
               'zdim': self.z[-1] - self.z[0],  # Size of the domain in meters
               # Reference vacuum toroidal field (m, T)
               'xcentr': self.eqdsk['xcentr'],
               # Reference vacuum toroidal field (m, T)
               'bcentr': self.eqdsk['bcentr'],
-              'rgrid1': self.x[0],  # X of left side of domain
+              'xgrid1': self.x[0],  # X of left side of domain
               # Z at the middle of the domain
               'zmid': self.z[0] + (self.z[-1] - self.z[0]) / 2,
-              'rmagx': self.Mpoint[0],  # Location of magnetic axis
+              'xmagx': self.Mpoint[0],  # Location of magnetic axis
               'zmagx': self.Mpoint[1],  # Location of magnetic axis
               # Poloidal flux at the axis (Weber / rad)
               'simagx': float(self.Mpsi) * norm,
@@ -115,7 +115,7 @@ class SF(object):
               'pressure': pad,  # Plasma pressure in N/m^2 on uniform flux grid
               'qpsi': pad,  # q values on uniform flux grid
               # Plasma boundary
-              'nbdry': self.nbdry, 'rbdry': self.xbdry, 'zbdry': self.zbdry,
+              'nbdry': self.nbdry, 'xbdry': self.xbdry, 'zbdry': self.zbdry,
               # first wall
               'nlim': self.nlim, 'xlim': self.xlim, 'ylim': self.ylim,
               'ncoil': nc, 'xc': xc, 'zc': zc, 'dxc': dxc,
@@ -127,7 +127,7 @@ class SF(object):
         nova.geqdsk.write(filename, eq)
 
     def write_flux(self):
-        psi_norm = np.linspace(0, 1, self.nr)
+        psi_norm = np.linspace(0, 1, self.nx)
         pprime = self.b_scale * self.Pprime(psi_norm)
         FFprime = self.b_scale * self.FFprime(psi_norm)
         with open('../Data/' + self.dataname + '_flux.txt', 'w') as f:
@@ -202,26 +202,27 @@ class SF(object):
             from scipy.interpolate import RectBivariateSpline as rbs
             sample = np.int(np.float(sample))
             interp_psi = rbs(self.x, self.z, self.psi)
-            self.nr, self.nz = sample * self.nr, sample * self.nz
-            self.x = np.linspace(self.x[0], self.x[-1], self.nr)
+            self.nx, self.nz = sample * self.nx, sample * self.nz
+            self.x = np.linspace(self.x[0], self.x[-1], self.nx)
             self.z = np.linspace(self.z[0], self.z[-1], self.nz)
             self.psi = interp_psi(self.x, self.z, dx=0, dy=0)
             self.space()
 
     def space(self):
-        self.nr = len(self.x)
+        self.nx = len(self.x)
         self.nz = len(self.z)
-        self.n = self.nr * self.nz
-        self.dx = (self.x[-1] - self.x[0]) / (self.nr - 1)
+        self.n = self.nx * self.nz
+        self.dx = (self.x[-1] - self.x[0]) / (self.nx - 1)
         self.dz = (self.z[-1] - self.z[0]) / (self.nz - 1)
+        self.delta = np.sqrt(self.dx**2 + self.dz**2)
         self.x2d, self.z2d = np.meshgrid(self.x, self.z, indexing='ij')
 
     def Bfeild(self):
         psi_x, psi_z = np.gradient(self.psi, self.dx, self.dz)
-        rm = np.array(np.matrix(self.x).T * np.ones([1, self.nz]))
-        rm[rm == 0] = 1e-34
-        self.Bx = -psi_z / rm
-        self.Bz = psi_x / rm
+        xm = np.array(np.matrix(self.x).T * np.ones([1, self.nz]))
+        xm[xm == 0] = 1e-34
+        self.Bx = -psi_z / xm
+        self.Bz = psi_x / xm
 
     def Bpoint(self, point, check_bounds=False):  # magnetic feild at point
         feild = np.zeros(2)  # function re-name (was Bcoil)
@@ -365,7 +366,6 @@ class SF(object):
         pl.streamplot(self.x, self.z, self.Bx.T, self.Bz.T,
                       color=self.Bx.T, cmap=pl.cm.RdBu)
         pl.clim([-1.5, 1.5])
-        # pl.colorbar(strm.lines)
 
     def getX(self, po=None):
         def feild(p):
@@ -449,8 +449,9 @@ class SF(object):
             lines.append(psi_line)
         return lines
 
-    def get_boundary(self, alpha=1 - 1e-3, delta_loop=0.1, plot=False):
+    def get_boundary(self, alpha=1 - 1e-3, plot=False):
         self.Spsi = alpha * (self.Xpsi - self.Mpsi) + self.Mpsi
+
         psi_line = self.get_contour([self.Spsi], boundary=True)[0]
         X, Z = np.array([]), np.array([])
         for line in psi_line:
@@ -462,7 +463,7 @@ class SF(object):
             if sum(index) > 0:
                 x, z = x[index], z[index]
                 loop = np.sqrt((x[0] - x[-1])**2 +
-                               (z[0] - z[-1])**2) < delta_loop
+                               (z[0] - z[-1])**2) < 3*self.delta
                 if (z > self.Mpoint[1]).any() and\
                         (z < self.Mpoint[1]).any() and loop:
                     X, Z = np.append(X, x), np.append(Z, z)
@@ -485,16 +486,16 @@ class SF(object):
                        args=(z), options={'xtol': 1e-7, 'disp': False})
         return res.x[0]
 
-    def get_LFP(self, alpha=1 - 1e-3):
+    def get_LFP(self, alpha=1-1e-4):
         x, z = self.get_boundary(alpha=alpha)
         if self.Xpoint[1] < self.Mpoint[1]:
             index = z > self.Xpoint[1]
         else:  # alowance for upper Xpoint
             index = z < self.Xpoint[1]
-        r_loop, z_loop = x[index], z[index]
+        x_loop, z_loop = x[index], z[index]
         xc, zc = self.Mpoint
-        radius = ((r_loop - xc)**2 + (z_loop - zc)**2)**0.5
-        theta = np.arctan2(z_loop - zc, r_loop - xc)
+        radius = ((x_loop - xc)**2 + (z_loop - zc)**2)**0.5
+        theta = np.arctan2(z_loop - zc, x_loop - xc)
         index = theta.argsort()
         radius, theta = radius[index], theta[index]
         theta = np.append(theta[-1] - 2 * np.pi, theta)
@@ -514,10 +515,10 @@ class SF(object):
 
     def first_wall_psi(self, trim=True, single_contour=False, **kwargs):
         if 'point' in kwargs:
-            req, zeq = kwargs.get('point')
-            psi = self.Ppoint([req, zeq])
+            xeq, zeq = kwargs.get('point')
+            psi = self.Ppoint([xeq, zeq])
         else:
-            req, zeq = self.LFPx, self.LFPz
+            xeq, zeq = self.LFPx, self.LFPz
             if 'psi_n' in kwargs:  # normalized psi
                 psi_n = kwargs.get('psi_n')
                 psi = psi_n * (self.Xpsi - self.Mpsi) + self.Mpsi
@@ -530,7 +531,7 @@ class SF(object):
         if single_contour:
             min_contour = np.empty(len(X))
             for i in range(len(X)):
-                min_contour[i] = np.min((X[i] - req)**2 + (Z[i] - zeq)**2)
+                min_contour[i] = np.min((X[i] - xeq)**2 + (Z[i] - zeq)**2)
             imin = np.argmin(min_contour)
             x, z = X[imin], Z[imin]
         else:
@@ -545,14 +546,14 @@ class SF(object):
                 x, z = x[z >= zeq], z[z >= zeq]
             else:
                 raise ValueError('Xloc not set (get_Xpsi)')
-            if req > self.Xpoint[0]:
+            if xeq > self.Xpoint[0]:
                 x, z = x[x > self.Xpoint[0]], z[x > self.Xpoint[0]]
             else:
                 x, z = x[x < self.Xpoint[0]], z[x < self.Xpoint[0]]
-            istart = np.argmin((x - req)**2 + (z - zeq)**2)
+            istart = np.argmin((x - xeq)**2 + (z - zeq)**2)
             x = np.append(x[istart + 1:], x[:istart])
             z = np.append(z[istart + 1:], z[:istart])
-        istart = np.argmin((x - req)**2 + (z - zeq)**2)
+        istart = np.argmin((x - xeq)**2 + (z - zeq)**2)
         if istart > 0:
             x, z = x[::-1], z[::-1]
         return x, z, psi
@@ -650,12 +651,11 @@ class SF(object):
         contours = self.get_contour(self.sol_psi)
         self.Xsol, self.Zsol = self.pick_contour(contours, Xpoint=True,
                                                  Midplane=False, Plasma=False)
-        self.upsample_sol(nmult=4)  # upsamle
+        self.upsample_sol(nmult=4)  # upsample
         self.get_legs(debug=debug)
         if plot:
             color = sns.color_palette('Set2', 6)
-            # enumerate(self.legs):
-            for c, leg in enumerate(['inner', 'outer']):
+            for c, leg in enumerate(self.legs): # enumerate(['inner', 'outer']):
                 for i in np.arange(self.legs[leg]['i'])[::-1]:
                     x, z = self.snip(leg, i)
                     x, z = self.legs[leg]['X'][i], self.legs[leg]['Z'][i]
@@ -925,11 +925,11 @@ class SF(object):
         if L2D == 0:
             L2D = Lsol[-1]
         if layer_index != 0:
-            Rsolo = self.legs[leg]['X'][0]
+            Xsolo = self.legs[leg]['X'][0]
             Zsolo = self.legs[leg]['Z'][0]
-            Lsolo = geom.length(Rsolo, Zsolo, norm=False)
+            Lsolo = geom.length(Xsolo, Zsolo, norm=False)
             indexo = np.argmin(np.abs(Lsolo - L2D))
-            index = np.argmin((Xsol - Rsolo[indexo])**2 +
+            index = np.argmin((Xsol - Xsolo[indexo])**2 +
                               (Zsol - Zsolo[indexo])**2)
             L2D = Lsol[index]
         else:
@@ -939,9 +939,9 @@ class SF(object):
         if L2D > Lsol[-1]:
             L2D = Lsol[-1]
             print('warning: targent requested outside grid')
-        Rend, Zend = interp1d(Lsol, Xsol)(L2D), interp1d(Lsol, Zsol)(L2D)
+        Xend, Zend = interp1d(Lsol, Xsol)(L2D), interp1d(Lsol, Zsol)(L2D)
         Xsol, Zsol = Xsol[:index], Zsol[:index]  # trim to strike point
-        Xsol, Zsol = np.append(Xsol, Rend), np.append(Zsol, Zend)
+        Xsol, Zsol = np.append(Xsol, Xend), np.append(Zsol, Zend)
         return (Xsol, Zsol)
 
     def pick_leg(self, leg, layer_index):

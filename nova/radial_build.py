@@ -29,17 +29,17 @@ class RB(object):
         if mode == 'eqdsk':  # read first wall from eqdsk
             self.Xb, self.Zb = self.sf.xlim, self.sf.ylim
         elif mode == 'calc':
-            div = divertor(self.sf, self.setup, debug=debug)
+            self.div = divertor(self.sf, self.setup, debug=debug)
             if DN:  # double null
                 self.sf.get_Xpsi(select='upper')  # upper X-point
-                div.place(debug=debug)
-                self.segment = div.join(mc)
+                self.div.place(debug=debug)
+                self.segment = self.div.join(mc)
                 xu = self.segment['first_wall']['x']
                 zu = self.segment['first_wall']['z']
                 blanket_u = self.place_blanket(select='upper', store=False)[0]
                 self.sf.get_Xpsi(select='lower')  # lower X-point
-                div.place(debug=debug)
-                self.segment = div.join(mc)
+                self.div.place(debug=debug)
+                self.segment = self.div.join(mc)
                 xl = self.segment['first_wall']['x']
                 zl = self.segment['first_wall']['z']
                 blanket_l = self.place_blanket(select='lower', store=False)[0]
@@ -59,8 +59,8 @@ class RB(object):
                 self.segment['blanket'] = bfill[1]
             else:
                 self.sf.get_Xpsi(select='lower')  # lower X-point
-                div.place(debug=debug)
-                self.segment = div.join(mc)
+                self.div.place(debug=debug)
+                self.segment = self.div.join(mc)
                 self.blanket = self.place_blanket(select='lower')[-1]
             self.vessel = self.vessel_fill()
             self.Xb = self.segment['first_wall']['x']
@@ -77,15 +77,18 @@ class RB(object):
             self.sf.nlim = len(self.sf.xlim)
 
         if plot:
-            pl.plot(self.segment['first_wall']['x'],
-                    self.segment['first_wall']['z'],
-                    lw=1.75, color=0.5 * np.ones(3))
-            self.blanket.fill(plot=True, color=colors[0])
-            self.vessel.fill(plot=True, color=colors[1])
-            geom.polyfill(self.segment['divertor']['x'],
-                          self.segment['divertor']['z'], color=0.75*np.ones(3))
-            pl.axis('equal')
-            pl.axis('off')
+            self.plot()
+
+    def plot(self):
+        pl.plot(self.segment['first_wall']['x'],
+                self.segment['first_wall']['z'],
+                lw=1.75, color=0.5 * np.ones(3))
+        self.blanket.fill(plot=True, color=colors[0])
+        self.vessel.fill(plot=True, color=colors[1])
+        geom.polyfill(self.segment['divertor']['x'],
+                      self.segment['divertor']['z'], color=0.75*np.ones(3))
+        pl.axis('equal')
+        pl.axis('off')
 
     def upper_lower(self, Xu, Zu, Xl, Zl, Zjoin=0):
         u_index = np.arange(len(Xu), dtype='int')
@@ -112,8 +115,11 @@ class RB(object):
 
         inner = blanket.loops['inner']['points']
         outer = blanket.loops['outer']['points']
-        pl.plot(inner['x'], inner['z'])
-        pl.plot(outer['x'], outer['z'])
+
+
+        # TODO: finish stepped first wall work
+        #pl.plot(inner['x'], inner['z'])
+        #pl.plot(outer['x'], outer['z'])
         '''
         import amigo.mattitools as mj
 
@@ -494,7 +500,6 @@ class Loop(object):
                 dt = np.append(dt, dt[:Napp])
                 dt = np.append(dt[-Napp:], dt)
             Xout, Zout = geom.offset(X, Z, dt)
-            print('part fill')
             Xout, Zout = Xout[Napp:-Napp], Zout[Napp:-Napp]
             Xout[-1], Zout[-1] = Xout[0], Zout[0]
         else:

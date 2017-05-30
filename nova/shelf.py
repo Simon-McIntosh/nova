@@ -8,14 +8,13 @@ class PKL(object):
     def __init__(self, file, directory='../../Data/'):
         directory = trim_dir(directory)
         self.file = directory + file + '.pkl'
-        self.data = {'rb': None, 'sf': None, 'eq': None, 'cc': None, 'inv': None,
-                     'ax': None, 'pf': None}
+        self.data = {'sf': None, 'eq': None, 'cc': None, 'tf': None,
+                     'inv': None, 'ax': None, 'pf': None, 'rb': None}
         self.data = od(sorted(self.data.items(), key=lambda x: x[0]))
         self.inmemory = False
 
     def add(self, data):
         for key in data:
-            #if key in self.data.keys():
             if key == 'sf':
                 data[key].remove_contour()
             self.data[key] = data[key]
@@ -46,6 +45,9 @@ class PKL(object):
                 self.data['inv'].sf = self.data['sf']
             if self.notNone('eq'):
                 self.data['inv'].eq = self.data['eq']
+        if self.notNone('rb'):
+            if self.notNone('sf'):
+                self.data['rb'].sf = self.data['sf']
 
     def fetch(self, keys):
         if not self.inmemory:

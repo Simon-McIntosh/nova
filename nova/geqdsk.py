@@ -80,11 +80,11 @@ def read(f):
 
     xdim = float(next(token))
     zdim = float(next(token))
-    rcentr = float(next(token))
-    rgrid1 = float(next(token))
+    xcentr = float(next(token))
+    xgrid1 = float(next(token))
     zmid = float(next(token))
 
-    rmagx = float(next(token))
+    xmagx = float(next(token))
     zmagx = float(next(token))
     simagx = float(next(token))
     sibdry = float(next(token))
@@ -93,7 +93,7 @@ def read(f):
     cpasma = float(next(token))
     simagx = float(next(token))
     xdum = float(next(token))
-    rmagx = float(next(token))
+    xmagx = float(next(token))
     xdum = float(next(token))
 
     zmagx = float(next(token))
@@ -130,13 +130,13 @@ def read(f):
     nbdry = int(next(token))
     nlim = int(next(token))
     if nbdry > 0:
-        rbdry = np.zeros([nbdry])
+        xbdry = np.zeros([nbdry])
         zbdry = np.zeros([nbdry])
         for i in range(nbdry):
-            rbdry[i] = float(next(token))
+            xbdry[i] = float(next(token))
             zbdry[i] = float(next(token))
     else:
-        rbdry = [0]
+        xbdry = [0]
         zbdry = [0]
 
     if nlim > 0:
@@ -153,28 +153,28 @@ def read(f):
     try:
         ncoil = int(next(token))
     except:
-        ncoil, rc, zc, drc, dzc, Ic = 0, 0, 0, 0, 0, 0
+        ncoil, xc, zc, dxc, dzc, Ic = 0, 0, 0, 0, 0, 0
 
     if ncoil > 0:
-        rc = np.zeros(ncoil)
+        xc = np.zeros(ncoil)
         zc = np.zeros(ncoil)
-        drc = np.zeros(ncoil)
+        dxc = np.zeros(ncoil)
         dzc = np.zeros(ncoil)
         Ic = np.zeros(ncoil)
         for i in range(ncoil):
-            rc[i] = float(next(token))
+            xc[i] = float(next(token))
             zc[i] = float(next(token))
-            drc[i] = float(next(token))
+            dxc[i] = float(next(token))
             dzc[i] = float(next(token))
             Ic[i] = float(next(token))
     else:
         print('no coils')
-        rc, zc, drc, dzc, Ic = 0, 0, 0, 0, 0
-    # Construct R-Z mesh
-    r = np.zeros(nxefit)
+        xc, zc, dxc, dzc, Ic = 0, 0, 0, 0, 0
+    # Construct X-Z mesh
+    x = np.zeros(nxefit)
     z = np.zeros(nyefit)
     for i in range(nxefit):
-        r[i] = rgrid1 + xdim * i / float(nxefit - 1)
+        x[i] = xgrid1 + xdim * i / float(nxefit - 1)
     for j in range(nyefit):
         z[j] = (zmid - 0.5 * zdim) + zdim * j / float(nyefit - 1)
 
@@ -182,13 +182,13 @@ def read(f):
     result = {'name': name,
               # Number of horizontal and vertical points
               'nx': nxefit, 'ny': nyefit,
-              'x': r, 'z': z,               # Location of the grid-points
+              'x': x, 'z': z,               # Location of the grid-points
               'xdim': xdim, 'zdim': zdim,   # Size of the domain in meters
               # Reference vacuum toroidal field (m, T)
-              'xcentr': rcentr, 'bcentr': bcentr,
-              'rgrid1': rgrid1,                  # R of left side of domain
+              'xcentr': xcentr, 'bcentr': bcentr,
+              'xgrid1': xgrid1,                  # R of left side of domain
               'zmid': zmid,                    # Z at the middle of the domain
-              'xmagx': rmagx, 'zmagx': zmagx,     # Location of magnetic axis
+              'xmagx': xmagx, 'zmagx': zmagx,     # Location of magnetic axis
               'simagx': simagx,  # Poloidal flux at the axis (Weber / rad)
               # Poloidal flux at plasma boundary (Weber / rad)
               'sibdry': sibdry,
@@ -204,9 +204,9 @@ def read(f):
               'qpsi': qpsi,  # q values on uniform flux grid
               'pnorm': np.linspace(0, 1, len(fpol)),  # uniform flux grid
               # Plasma boundary
-              'nbdry': nbdry, 'xbdry': rbdry, 'zbdry': zbdry,
+              'nbdry': nbdry, 'xbdry': xbdry, 'zbdry': zbdry,
               'nlim': nlim, 'xlim': xlim, 'ylim': ylim,
-              'ncoil': ncoil, 'xc': rc, 'zc': zc, 'dxc': drc,
+              'ncoil': ncoil, 'xc': xc, 'zc': zc, 'dxc': dxc,
               'dzc': dzc, 'Ic': Ic}  # coils
     return result
 
@@ -245,9 +245,9 @@ def write(f, data):  # write a G-EQDSK file
             return write(fh, data)  # Call again with file object
     f.write('{:48s} '.format(data['name'] + '_' + time.strftime("%d%m%Y")))
     f.write('{:4d} {:4d} {:4d}\n'.format(0, data['nx'], data['ny']))
-    write_line(f, data, ['rdim', 'zdim', 'rcentr', 'rgrid1', 'zmid'])
-    write_line(f, data, ['rmagx', 'zmagx', 'simagx', 'sibdry', 'bcentr'])
-    write_line(f, data, ['cpasma', 'simagx', '', 'rmagx', ''])
+    write_line(f, data, ['xdim', 'zdim', 'xcentr', 'xgrid1', 'zmid'])
+    write_line(f, data, ['xmagx', 'zmagx', 'simagx', 'sibdry', 'bcentr'])
+    write_line(f, data, ['cpasma', 'simagx', '', 'xmagx', ''])
     write_line(f, data, ['zmagx', '', 'sibdry', '', ''])
 
     write_array(f, data['fpol'], c)
@@ -259,7 +259,7 @@ def write(f, data):  # write a G-EQDSK file
 
     f.write('{:5d} {:5d}\n'.format(data['nbdry'], data['nlim']))
     bdry = np.zeros(2 * data['nbdry'])
-    bdry[::2], bdry[1::2] = data['rbdry'], data['zbdry']
+    bdry[::2], bdry[1::2] = data['xbdry'], data['zbdry']
     write_array(f, bdry, c)
     lim = np.zeros(2 * data['nlim'])
     lim[::2], lim[1::2] = data['xlim'], data['ylim']
@@ -267,6 +267,6 @@ def write(f, data):  # write a G-EQDSK file
 
     f.write('{:5d}\n'.format(data['ncoil']))
     coil = np.zeros(5 * data['ncoil'])
-    for i, v in enumerate(['rc', 'zc', 'drc', 'dzc', 'Ic']):
+    for i, v in enumerate(['xc', 'zc', 'dxc', 'dzc', 'Ic']):
         coil[i::5] = data[v]
     write_array(f, coil, c)

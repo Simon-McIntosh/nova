@@ -99,6 +99,25 @@ class Setup(object):
 
     def update(self, configuration):  # update
         self.configuration = configuration
+        if configuration == 'DEMO_SF':
+            self.dataname = 'SFm'
+            # self.filename = '/Equil_AR3d1_16coils_SFminus_v4_2015' +\
+            #    '_09_bt_1d03li_0d8_Ipl_20d25_SOF.eqdsk'
+            # self.filename = '/2015_SFminus_eqdsk_2MCQRZ_v1_0_IDM.eqdsk'
+            self.targets['default']['dPlate'] = 0.35  # target plate length
+            self.targets['inner1'] = {
+                'L2D': [1.1 + 0.52], 'open': True, 'dR': 0}
+            self.targets['inner2'] = {
+                'L2D': [1.2 - 0.08], 'open': False, 'dR': -1}
+            self.targets['outer1'] = {
+                'L2D': [1.65 - 0.2], 'open': False, 'dR': -1}
+            self.targets['outer2'] = {
+                'L2D': [1.1 + 0.3], 'open': True, 'dR': 0}
+            self.firstwall['div_ex'] = 0.2
+            self.firstwall['trim'] = [0.75, 0.7]  # trim fraction (in/out)
+            self.coils['external']['id'] = list(range(0, 16))  # all external
+            self.TF['opp'] = 'L'
+
         if configuration == 'SFm':
             self.dataname = 'SFm'
             self.filename = '/Equil_AR3d1_16coils_SFminus_v4_2015' +\
@@ -153,6 +172,18 @@ class Setup(object):
             self.dataname = 'SXex'
             #self.filename = '/SXex.eqdsk'
             self.filename = 'SXMOF.eqdsk'
+            self.targets['inner'] = {'L2D': [1.1]}
+            self.targets['outer'] = {'L2D': [3.55]}
+            self.firstwall['div_ex'] = 1.75
+            self.firstwall['trim'] = [0.63, 0.68]  # trim fraction (in/out)
+            self.build['sheild_connect'] = [0.2, 0.9]
+            self.build['sheild_base'] = 0
+            self.targets['inner'] = {'L2D': [1.0], 'dR': 0.15, 'dPlate': 0.25}
+            self.targets['outer'] = {'L2D': [5.615], 'dPlate': 1.0}
+
+        elif configuration == 'DEMO_SX':
+            self.dataname = 'DEMO_SXe'
+            self.filename = 'DEMO_SX.eqdsk'
             self.targets['inner'] = {'L2D': [1.1]}
             self.targets['outer'] = {'L2D': [3.55]}
             self.firstwall['div_ex'] = 1.75

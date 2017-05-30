@@ -781,7 +781,7 @@ class Profile(object):
 if __name__ is '__main__':  # plot loop classes
     # loop = Aloop()
     # x = loop.plot()
-    loop = Sloop(limits=False, symetric=False, tension='single')
+    #loop = Sloop(limits=False, symetric=False, tension='single')
     # loop.set_tension('full')
     # x = loop.plot({'l2':1.5})
     # loop.draw()

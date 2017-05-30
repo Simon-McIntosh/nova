@@ -123,7 +123,7 @@ class force_feild(object):
                 else:
                     va = 'top'
                 pl.text(x, z + zarrow, '{:1.0f}MN'.format(F[1]),
-                        ha='center', va=va, fontsize=1.1 * fs, color=0.1 * np.ones(3),
+                        ha='center', va=va, fontsize=fs, color=0.1 * np.ones(3),
                         backgroundcolor=0.9 * np.ones(3))
 
     def set_bm(self, cage):

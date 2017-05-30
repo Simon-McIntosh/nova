@@ -6,6 +6,7 @@ import seaborn as sns
 import matplotlib
 import collections
 import amigo.geom as geom
+from amigo.mattitools import color_kwargs
 from nova.loops import Profile, get_oppvar, get_value
 from nova.config import Setup
 from nova.streamfunction import SF
@@ -164,7 +165,8 @@ class PF(object):
             color = coil_color  # color itterator
         if len(np.shape(color)) == 1:
             color = color * np.ones((6, 1))
-
+            # TODO: Made a change from color[4:6] to color[0:2], not sure how
+            # you are using this... sorry if it breaks
         for i, name in enumerate(coils.keys()):
             coil = coils[name]
             x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
@@ -174,15 +176,17 @@ class PF(object):
                 edgecolor = 'k'
             else:
                 edgecolor = 'x'
-            coil_color = color[4]
-            if name.split('_')[0] in self.index['CS']['name']:
+            #coil_color = color[0]
+            #if name.split('_')[0] in self.index['CS']['name']:
+            if name in self.index['CS']['name']:
                 drs = -2.5 / 3 * dx
                 ha = 'right'
-                coil_color = color[5]
-            elif name.split('_')[0] in self.index['PF']['name']:
+                coil_color = color[1]
+            #elif name.split('_')[0] in self.index['PF']['name']:
+            elif name in self.index['PF']['name']:
                 drs = 2.5 / 3 * dx
                 ha = 'left'
-                coil_color = color[4]
+                coil_color = color[0]
             pl.fill(Xfill, Zfill, facecolor=coil_color, alpha=alpha,
                     edgecolor=edgecolor)
             if label and current:
@@ -209,7 +213,7 @@ class PF(object):
                        coil_color=color, alpha=alpha)
         if plasma:
             coils = self.plasma_coil
-            self.plot_coil(coils, coil_color=color, alpha=alpha)
+            self.plot_coil(coils, coil_color=color[0], alpha=alpha)
 
     def inductance(self, dCoil=0.5, Iscale=1):
         pf = deepcopy(self)
@@ -418,7 +422,7 @@ class TF(object):
             self.p[loop]['x'], self.p[loop]['z'] = x, z
         return self.p
 
-    def split_loop(self, plot=True):  # split inboard/outboard for fe model
+    def split_loop(self, plot=False):  # split inboard/outboard for fe model
         x, z = self.p['cl']['x'], self.p['cl']['z']
         index = self.transition_index(x, z)
         upper, lower = index['upper'], index['lower']
@@ -502,18 +506,37 @@ class TF(object):
         boundary = {'X': X, 'Z': Z, 'expand': expand}
         return boundary
 
-    def fill(self, write=False, plot=True, alpha=1, plot_cl=False):
+    def fill(self, write=False, alpha=1, plot=True, plot_cl=False,
+             color=[0.4*np.ones(3), 0.6*np.ones(3)]):
+        # TODO: write and plot?
         geom.polyparrot(self.p['in'], self.p['wp_in'],
-                        color=0.4 * np.ones(3), alpha=alpha)
+                        color=color[0], alpha=alpha)
         geom.polyparrot(self.p['wp_in'], self.p['wp_out'],
-                        color=0.6 * np.ones(3), alpha=alpha)
+                        color=color[1], alpha=alpha)
         geom.polyparrot(self.p['wp_out'], self.p['out'],
-                        color=0.4 * np.ones(3), alpha=alpha)
+                        color=color[0], alpha=alpha)
         if plot_cl:  # plot winding pack centre line
             pl.plot(self.p['cl']['x'], self.p['cl']['z'],
                     '-.', color=0.5 * np.ones(3))
-        pl.axis('equal')
-        pl.axis('off')
+        #pl.axis('equal')
+        #pl.axis('off')
+        
+    def plot_XZ(self, alpha=1, **kwargs):
+        '''
+        Désolé
+        '''
+        colors = color_kwargs(**kwargs)
+        ax = pl.gca()
+        for p in [self.p['in'], self.p['wp_in'], self.p['wp_out'], self.p['out']]:
+            ax.plot(p['x'], p['z'], color='k')
+        c1, c2 = next(colors), next(colors)
+        geom.polyparrot(self.p['in'], self.p['wp_in'],
+                        color=c1, alpha=alpha)
+        geom.polyparrot(self.p['wp_in'], self.p['wp_out'],
+                        color=c2, alpha=alpha)
+        geom.polyparrot(self.p['wp_out'], self.p['out'],
+                        color=c1, alpha=alpha)
+        
 
     def support(self, **kwargs):
         self.rzGet()

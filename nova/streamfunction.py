@@ -309,8 +309,8 @@ class SF(object):
         # if boundary:
         #    pl.plot(self.xbdry,self.zbdry,linetype,linewidth=lw[pindex],
         #            color=color,alpha=alpha[pindex])
-        pl.axis('equal')
-        pl.axis('off')
+        #pl.axis('equal')
+        #pl.axis('off')
         return levels
 
     def inPlasma(self, X, Z, delta=0):
@@ -884,10 +884,10 @@ class SF(object):
                             rpost, rloop), np.append(tpost, tloop)
                 else:
                     ncut = np.arange(len(x))[x > self.rcirc][0]
-                    rin, tin = x[:ncut], t[:ncut]
-                    nx = self.minimum_feild(rin, tin)  # minimum feild
-                    rpre, tpre = rin[:nx + 1], tin[:nx + 1]
-                    rpost, tpost = rin[nx:], tin[nx:]
+                    xin, tin = x[:ncut], t[:ncut]
+                    nx = self.minimum_feild(xin, tin)  # minimum feild
+                    rpre, tpre = xin[:nx + 1], tin[:nx + 1]
+                    rpost, tpost = xin[nx:], tin[nx:]
                     loop = True
                     post = True
                     rloop, tloop = np.append(

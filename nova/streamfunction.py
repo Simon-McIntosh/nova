@@ -308,8 +308,8 @@ class SF(object):
         # if boundary:
         #    pl.plot(self.xbdry,self.zbdry,linetype,linewidth=lw[pindex],
         #            color=color,alpha=alpha[pindex])
-        pl.axis('equal')
-        pl.axis('off')
+        #pl.axis('equal')
+        #pl.axis('off')
         return levels
 
     def inPlasma(self, X, Z, delta=0):

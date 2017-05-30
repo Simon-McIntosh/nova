@@ -61,7 +61,10 @@ class Setup(object):
         self.firstwall = {}  # initalise firstwall data structure
         self.firstwall['dXfw'] = 0.225
         self.firstwall['psi_n'] = 1.07
-        self.firstwall['div_ex'] = 0.25
+        self.firstwall['div_ex'] = 0.25  # lower divertor flux offset
+        self.firstwall['dx_div'] = 0.5  # divertor thickness
+        self.firstwall['bb_gap'] = 0.05  # divertor-blanket gap
+        self.firstwall['vv_gap'] = 0.0  # extra divertor-vessel gap
         self.firstwall['trim'] = [0.75, 0.7]
         self.firstwall['flux_fit'] = True
         self.firstwall['conformal'] = False

@@ -10,7 +10,6 @@ from nova.streamfunction import SF
 from nova.config import Setup
 from collections import OrderedDict
 import seaborn as sns
-from nova.config import select
 
 
 class divertor(object):
@@ -19,6 +18,7 @@ class divertor(object):
         self.debug = debug
         self.sf = sf
         self.targets = setup.targets  # target definition (graze, L2D, etc)
+        self.setup = setup
         self.div_ex = setup.firstwall['div_ex']
         self.segment = {}
         if flux_conformal:
@@ -129,8 +129,25 @@ class divertor(object):
             Zb = np.append(Zb, self.targets['outer']['Z'][1:])
             self.segment['divertor'] = {'x': Xb, 'z': Zb}  # store diveror
 
+    def intersect(self, x, z, xd, zd, offset=0, s=0):
+        xd, zd = np.copy(xd), np.copy(zd)
+        xd, zd = geom.inloop(x, z, xd, zd, side='out')  # external to fw
+        xd, zd = geom.cut(xd, zd)
+        if offset != 0:
+            xd, zd = geom.rzInterp(xd, zd, npoints=100)
+            xd, zd = geom.offset(xd, zd, offset, min_steps=10, s=s)
+
+        istart = np.argmin((x - xd[-1])**2 + (z - zd[-1])**2)  # connect to fw
+        iend = np.argmin((x - xd[0])**2 + (z - zd[0])**2)
+        index = {'istart': istart, 'iend': iend}
+        xd = np.append(np.append(x[iend], xd), x[istart])
+        zd = np.append(np.append(z[iend], zd), z[istart])
+        if offset != 0:
+            xd, zd = geom.rzInterp(xd, zd, npoints=100)
+        return xd, zd, index
+
     def join(self, main_chamber):
-        x, z = main_chamber.draw(npoints=500)
+        x, z = main_chamber.draw(npoints=1000)
         istart = np.argmin(
             (x - self.sf.Xpoint[0])**2 + (z - self.sf.Xpoint[1])**2)
         x = np.append(x[istart:], x[:istart + 1])
@@ -147,22 +164,49 @@ class divertor(object):
                                                       self.sf.Xpoint[1])
         xd, zd = xd[zindex], zd[zindex]  # remove upper points
         xd, zd = geom.rzInterp(xd, zd)  # resample
-        # divertor external to fw
-        xd, zd = geom.inloop(x, z, xd, zd, side='out')
-        xd, zd = geom.cut(xd, zd)
-        istart = np.argmin((x - xd[-1])**2 + (z - zd[-1])**2)  # connect to fw
-        iend = np.argmin((x - xd[0])**2 + (z - zd[0])**2)
 
-        if self.sf.Xloc == 'lower':
-            xc, zc = x[istart:iend], z[istart:iend]
-        else:
-            xc, zc = x[iend:istart][::-1], z[iend:istart][::-1]
-        self.segment['blanket_inner'] = {'x': xc, 'z': zc}
-        self.segment['divertor'] = {'x': xd, 'z': zd}
-        x = np.append(np.append(xd, xc), xd[0])
-        z = np.append(np.append(zd, zc), zd[0])
-        self.segment['first_wall'] = {'x': x, 'z': z}
+        # divertor inner wall
+        xd, zd, i_in = self.intersect(x, z, xd, zd, offset=0)
+        self.segment['divertor_inner'] = {'x': xd, 'z': zd}
+        self.segment['first_wall'] = self.join_loops(x, z, xd, zd, i_in)[1]
+
+        # divertor outer wall
+        xd, zd, i_out = self.intersect(x, z, xd, zd, s=0.05,
+                                       offset=self.setup.firstwall['dx_div'])
+        self.segment['divertor_outer'] = {'x': xd, 'z': zd}
+
+        xloop = np.append(self.segment['divertor_inner']['x'],
+                          x[i_in['istart']:i_out['istart']])
+        zloop = np.append(self.segment['divertor_inner']['z'],
+                          z[i_in['istart']:i_out['istart']])
+        xloop = np.append(xloop, self.segment['divertor_outer']['x'][::-1])
+        zloop = np.append(zloop, self.segment['divertor_outer']['z'][::-1])
+        xloop = np.append(xloop, x[i_out['iend']:i_in['iend']])
+        zloop = np.append(zloop, z[i_out['iend']:i_in['iend']])
+        xloop = np.append(xloop, xloop[0])
+        zloop = np.append(zloop, zloop[0])
+        self.segment['divertor'] = {'x': xloop, 'z': zloop}
+
+        # gap to blanket
+        xd, zd, i_gap = self.intersect(x, z, xd, zd,
+                                       offset=self.setup.firstwall['bb_gap'])
+        chamber, loop = self.join_loops(x, z, xd, zd, i_gap)
+        self.segment['blanket_inner'] = chamber
+        self.segment['vessel_gap'] = loop
         return self.segment
+
+    def join_loops(self, x, z, xd, zd, index):
+        if self.sf.Xloc == 'lower':
+            xc = x[index['istart']:index['iend']]
+            zc = z[index['istart']:index['iend']]
+        else:
+            xc = x[index['iend']:index['istart']][::-1]
+            zc = z[index['iend']:index['istart']][::-1]
+        xloop = np.append(np.append(xd, xc), xd[0])
+        zloop = np.append(np.append(zd, zc), zd[0])
+        chamber = {'x': xc, 'z': zc}
+        loop = {'x': xloop, 'z': zloop}
+        return chamber, loop
 
     def connect(self, psi, target_pair, ends, loop=[]):
         gap = []
@@ -345,7 +389,7 @@ class main_chamber(object):
         for sf in sf_list:  # convert input to list
             self.add_bound(sf)
         self.shp.add_interior(r_gap=0.001)  # add interior bound
-        self.shp.plot_bounds()
+        # self.shp.plot_bounds()
         self.shp.minimise()
         self.write()  # append config data to loop pickle
         if plot:
@@ -429,23 +473,4 @@ class main_chamber(object):
 
 if __name__ == '__main__':
 
-    machine = 'demo'
-    nTF = 18
-
-    eq_names = ['DEMO_SN_SOF', 'DN', 'DEMO_SN_EOF']
-    date = '2017_03_10'
-
-    mc = main_chamber(machine, date=date)
-    mc.generate(eq_names, psi_n=1.07, flux_fit=True,
-                plot=True, symetric=False)
-    # mc.load_data(plot=False)  # or load from file
-    mc.shp.plot_bounds()
-
-    config = {'TF': machine, 'eq': eq_names[0]}
-    config, setup = select(config, nTF=nTF, update=False)
-    sf = SF(setup.filename)
-    sf.contour()
-
-    rb = RB(sf, setup)
-    rb.generate(mc, plot=True, DN=False, debug=False)
-    rb.get_sol(plot=True)
+    print('usage example in nova.radial_build')

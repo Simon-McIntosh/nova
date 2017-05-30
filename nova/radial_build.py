@@ -9,7 +9,8 @@ from scipy.optimize import minimize
 import collections
 from amigo.IO import trim_dir
 import json
-from nova.firstwall import divertor
+from nova.firstwall import divertor, main_chamber
+from nova.config import select
 colors = sns.color_palette('Paired', 12)
 
 
@@ -81,6 +82,8 @@ class RB(object):
                     lw=1.75, color=0.5 * np.ones(3))
             self.blanket.fill(plot=True, color=colors[0])
             self.vessel.fill(plot=True, color=colors[1])
+            geom.polyfill(self.segment['divertor']['x'],
+                          self.segment['divertor']['z'], color=0.75*np.ones(3))
             pl.axis('equal')
             pl.axis('off')
 
@@ -100,11 +103,26 @@ class RB(object):
         return X, Z
 
     def place_blanket(self, select='upper', store=True, plot=False):
-        blanket = wrap(self.segment['first_wall'], self.segment['inner_loop'])
+        blanket = wrap(self.segment['vessel_gap'],
+                       self.segment['inner_loop'])
         blanket.sort_z('inner', select=select)
         blanket.offset('outer', self.setup.build['BB'],
                        ref_o=3 / 10 * np.pi, dref=np.pi / 3)
         bfill = blanket.fill(plot=plot, color=colors[0])
+
+        inner = blanket.loops['inner']['points']
+        outer = blanket.loops['outer']['points']
+        #pl.plot(inner['x'], inner['z'])
+        #pl.plot(outer['x'], outer['z'])
+        '''
+        import amigo.mattitools as mj
+
+        point = [rb.segment['blanket_inner']['x'][0],
+                rb.segment['blanket_inner']['z'][0]]
+        pl.plot(point[0], point[1],'o')
+        x,z = mj.point_loop_cast(point, rb.segment['blanket_outer'], -25)
+        pl.plot(x,z, 'o')
+        '''
         if store:
             self.segment['blanket_fw'] = bfill[0]
             self.segment['blanket'] = bfill[1]
@@ -129,8 +147,8 @@ class RB(object):
         xd, zd = x[z < self.sf.Xpoint[1]], z[z < self.sf.Xpoint[1]]
         xo, zo = geom.offset(xd, zd, 0.1)  # divertor offset
         shp.add_bound({'x': xd, 'z': zd}, 'internal')  # vessel inner bounds
-        shp.add_bound({'x': xd, 'z': zd - 0.25},
-                      'internal')  # gap below divertor
+        shp.add_bound({'x': xd, 'z': zd - self.setup.firstwall['vv_gap']},
+                      'internal')  # for gap below divertor
         # shp.plot_bounds()
         shp.minimise()
         # shp.loop.plot()
@@ -183,7 +201,7 @@ class RB(object):
             self.setup.targets[leg]['Xsol'] = Xsol
             self.setup.targets[leg]['Zsol'] = Zsol
 
-    def trim_sol(self, color='k', plot=True):
+    def trim_sol(self, color='k', plot=False):
         self.sf.sol()
         color = sns.color_palette('Set2', self.sf.nleg + 5)
         # color = 'k'
@@ -529,3 +547,27 @@ class Loop(object):
         for t in trim:
             index.append(np.argmin(np.abs(L - t)))
         return index
+if __name__ == '__main__':
+
+    machine = 'demo'
+    nTF = 18
+
+    eq_names = ['DEMO_SN_SOF', 'DN', 'DEMO_SN_EOF']
+    date = '2017_03_10'
+
+    mc = main_chamber(machine, date=date)
+    #mc.generate(eq_names, psi_n=1.07, flux_fit=True,
+    #            plot=True, symetric=False)
+    mc.load_data(plot=False)  # or load from file
+    # mc.shp.plot_bounds()
+
+    config = {'TF': machine, 'eq': eq_names[0]}
+    config, setup = select(config, nTF=nTF, update=False)
+    sf = SF(setup.filename)
+    sf.contour()
+
+    rb = RB(sf, setup)
+    rb.generate(mc, plot=True, DN=False, debug=False)
+    rb.get_sol(plot=True)
+
+

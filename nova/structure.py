@@ -12,12 +12,12 @@ import pylab as pl
 import numpy as np
 from warnings import warn
 import seaborn as sns
-rc = {'figure.figsize': [10 * 12 / 16, 10], 'savefig.dpi': 350,
-      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
-      'lines.linewidth': 2}
-sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
-        font_scale=7 / 8, rc=rc)
-color = sns.color_palette('Set2', 12)  # Ne touchez pas!
+#rc = {'figure.figsize': [10 * 12 / 16, 10], 'savefig.dpi': 350,
+#     'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
+#      'lines.linewidth': 2}
+#sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
+#        font_scale=7 / 8, rc=rc)
+# color = sns.color_palette('Set2', 12)  # Ne touchez pas!
 
 
 class architect(object):
@@ -109,7 +109,7 @@ class architect(object):
         L = minimize_scalar(architect.cs_top, method='bounded',
                             args=(self.loop['cs']['xwp'], TFloop),
                             bounds=[0.5, 1]).x
-        pl.plot()
+        # pl.plot()
         ztop = float(TFloop['z'](L))
         self.loop['cs']['z'] = [zo, zo, ztop, ztop]
         self.loop['cs']['ztop'] = ztop
@@ -186,7 +186,7 @@ class architect(object):
     def GS_placement(L, Xo, TFloop):
         return abs(Xo - TFloop['x'](L))
 
-    def Gravity_support(self, Xo=13, dZo=-3, width=0.75):
+    def Gravity_support(self, Xo=13, dZo=-1, width=0.75):
         self.tf.loop_interpolators(offset=-0.15)  # construct TF interpolators
         TFloop = self.tf.fun['out']
         self.tf.loop_interpolators(offset=0)
@@ -216,9 +216,14 @@ class architect(object):
         pin2pin = np.sqrt((Xo * np.tan(theta) - width)**2 +
                           (self.Gsupport['zbase'] - self.Gsupport['zfloor'] -
                            width / 2)**2)
+
         self.Gsupport['alpha'] = alpha
         self.Gsupport['pin2pin'] = pin2pin
+        self.Gsupport['spread'] = pin2pin * np.sin(alpha) + 2 * width
+        self.Gsupport['zground'] = pin2pin * (1-np.cos(alpha)) +\
+            nodes[1][1]-1.5*width-pin2pin
         self.Gsupport['yfloor'] = pin2pin * np.sin(alpha)
+
 
     def adjust_TFnode(self, x, z):
         i = np.argmin((self.tf.p['cl']['x']-x)**2 +

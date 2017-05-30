@@ -11,6 +11,7 @@ from amigo.IO import trim_dir
 import json
 from nova.firstwall import divertor, main_chamber
 from nova.config import select
+import amigo.mattitools as mj
 colors = sns.color_palette('Paired', 12)
 
 
@@ -115,20 +116,24 @@ class RB(object):
 
         inner = blanket.loops['inner']['points']
         outer = blanket.loops['outer']['points']
+        divertor = self.segment['divertor_gap']
 
         # TODO: finish stepped first wall work
-
-        #pl.plot(inner['x'], inner['z'])
-        #pl.plot(outer['x'], outer['z'])
         '''
-        import amigo.mattitools as mj
+        x_in = rb.segment['blanket_inner']['x'][0]
+        z_in = rb.segment['blanket_inner']['z'][0]
 
-        point = [rb.segment['blanket_inner']['x'][0],
-                rb.segment['blanket_inner']['z'][0]]
-        pl.plot(point[0], point[1],'o')
-        x,z = mj.point_loop_cast(point, rb.segment['blanket_outer'], -25)
-        pl.plot(x,z, 'o')
+        x_out, z_out = mj.point_loop_cast((x_in, z_in), outer, -25)
+
+
+        pl.plot(inner['x'][:80], inner['z'][:80], 'r', lw=8)
+
+        pl.plot(outer['x'], outer['z'], 'b', lw=3)
+        pl.plot(divertor['x'], divertor['z'], 'g--', lw=3)
+        #if plot:
+        #    geom.polyfill(bfill[1]['x'], bfill[1]['z'], color=color[0])
         '''
+
         if store:
             self.segment['blanket_fw'] = bfill[0]
             self.segment['blanket'] = bfill[1]

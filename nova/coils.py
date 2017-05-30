@@ -213,7 +213,7 @@ class PF(object):
                        coil_color=color, alpha=alpha)
         if plasma:
             coils = self.plasma_coil
-            self.plot_coil(coils, coil_color=color[0], alpha=alpha)
+            self.plot_coil(coils, coil_color=color, alpha=alpha)
 
     def inductance(self, dCoil=0.5, Iscale=1):
         pf = deepcopy(self)
@@ -520,7 +520,7 @@ class TF(object):
                     '-.', color=0.5 * np.ones(3))
         #pl.axis('equal')
         #pl.axis('off')
-        
+
     def plot_XZ(self, alpha=1, **kwargs):
         '''
         Désolé
@@ -536,7 +536,7 @@ class TF(object):
                         color=c2, alpha=alpha)
         geom.polyparrot(self.p['wp_out'], self.p['out'],
                         color=c1, alpha=alpha)
-        
+
 
     def support(self, **kwargs):
         self.rzGet()

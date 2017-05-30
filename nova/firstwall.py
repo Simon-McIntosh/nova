@@ -190,6 +190,7 @@ class divertor(object):
         # gap to blanket
         xd, zd, i_gap = self.intersect(x, z, xd, zd,
                                        offset=self.setup.firstwall['bb_gap'])
+        self.segment['divertor_gap'] = {'x': xd, 'z': zd}
         chamber, loop = self.join_loops(x, z, xd, zd, i_gap)
         self.segment['blanket_inner'] = chamber
         self.segment['vessel_gap'] = loop

@@ -112,8 +112,8 @@ class force_feild(object):
             #         linewidth=2,head_width=0.3,head_length=0.4,
             #         ec=0.4*np.ones(3),fc=0.7*np.ones(3))
             pl.arrow(x, z, 0, zarrow,  # Fz
-                     linewidth=2, head_width=0.12, head_length=0.1,
-                     ec=0.2 * np.ones(3), fc=0.2 * np.ones(3))
+                     linewidth=2*2, head_width=2*0.12, head_length=2*0.1,
+                     ec=0.6 * np.ones(3), fc=0.6 * np.ones(3))
             if name in self.index['PF']['name']:
                 zarrow += np.sign(zarrow) * 0.5
                 if abs(zarrow) < self.pf_coil[name]['dz']:

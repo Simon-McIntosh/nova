@@ -87,7 +87,7 @@ class INV(object):
         self.add_null(factor=1, point=self.eq.sf.Xpoint)
         self.initialize_log()
 
-    def fix_target(self, sf, legs, targets, factor=2):
+    def fix_target(self, sf, legs, targets, factor=1):
         for leg in legs:
             Xsol, Zsol = sf.snip(leg, 0, targets[leg]['L2D'])
             point = (Xsol[-1], Zsol[-1])
@@ -96,7 +96,7 @@ class INV(object):
             Bdir /= np.linalg.norm(Bdir)
             self.add_alpha(1, factor=factor, point=point, Bdir=Bdir)
             self.add_B(0, [field_angle*180/np.pi], factor=factor, point=point)
-            pl.plot(Xsol, Zsol)
+            # pl.plot(Xsol, Zsol)
 
     def fix_SX(self, Rex=1.5, arg=40):  # fix outer leg
         R = self.eq.sf.Xpoint[0] * (Rex-1) / np.sin(arg*np.pi/180)
@@ -714,6 +714,7 @@ class INV(object):
             self.ff.set_force_feild()
             Lnorm = loops.normalize_variables(self.Lo)
             self.update_position(Lnorm, update_area=True)
+            self.eq.run(update=True)  # update psi map
 
     def get_rms_bndry(self):
         self.eq.run(update=False)
@@ -1083,6 +1084,41 @@ class INV(object):
         self.rms = self.swing['rms'][self.rmsID]
         return self.rms
 
+    def set_sail(self):  # move pf coil out of port
+        if not hasattr(self, 'Lex'):
+            errtxt = 'can\'t leave if you don\'t know were you are\n'
+            errtxt += 'set port locations in inv.Lex by running:\n'
+            errtxt += 'excl = R.define_port_exclusions\n'
+            errtxt += 'inv.Lex = R.TF.xzL(excl)'
+            raise ValueError(errtxt)
+
+        for i, (name, L) in enumerate(zip(self.PF_coils, self.Lo['value'])):
+            ip = np.argmin(abs(L-self.Lex))
+            dl = self.pf.coil[name]['rc']/self.tf.fun['out']['L']
+            if (ip % 2 == 0 and L + dl > self.Lex[ip]) or \
+                    (ip % 2 == 1 and L - dl < self.Lex[ip]):
+                # coil in port move down if even, up if odd
+                value = self.Lex[ip] - dl*(-1) ** (ip % 2)
+            else:
+                value = L
+            if ip % 2 == 0:  # even
+                ub = self.Lex[ip] - dl  # upper bound
+                if ip > 0:
+                    lb = self.Lex[ip-1] + dl  # lower bound
+                else:
+                    lb = 0.15
+            else:  # odd
+                if ip < self.nPF-1:
+                    ub = self.Lex[ip+1] - dl  # upper bound
+                else:
+                    ub = 0.95
+                lb = self.Lex[ip] + dl  # lower bound
+            # update bounds
+            self.Lo['value'][i] = value
+            self.Lo['lb'][i] = lb
+            self.Lo['ub'][i] = ub
+            self.limit['L'][name] = [lb, ub]
+
     def set_Lo(self, L):  # set lower/upper bounds on coil positions
         self.nL = len(L)  # length of coil position vector
         self.Lo = {'name': [[] for _ in range(self.nL)],
@@ -1115,6 +1151,7 @@ class INV(object):
 
     def minimize(self, method='ls', verbose=False):
         self.iter['position'] == 0
+        self.set_Lo(self.Lo['value'])  # update limits
         Lnorm = loops.normalize_variables(self.Lo)
 
         if method == 'bh':  # basinhopping
@@ -1140,7 +1177,7 @@ class INV(object):
             Lnorm, self.rms = res.x, res.fun
         elif method == 'ls':  # sequential least squares
             print('\nOptimising configuration:')
-            # opt = nlopt.opt(nlopt.LD_SLSQP,self.nL)
+            # opt = nlopt.opt(nlopt.LD_SLSQP, self.nL)
             opt = nlopt.opt(nlopt.LD_MMA, self.nL)
             opt.set_ftol_abs(5e-2)
             opt.set_ftol_rel(1e-2)
@@ -1154,6 +1191,10 @@ class INV(object):
             Lnorm = opt.optimize(Lnorm)
         loops.denormalize_variables(Lnorm, self.Lo)
         print('\nrms {:1.2f}mm'.format(1e3 * self.rms))
+        result = opt.last_optimize_result()
+        if result < 0:
+            warntxt = 'optimiser exited with error code {}'.format(result)
+            warn(warntxt)
 
     def tick(self):
         self.tloop = time.time()
@@ -1190,6 +1231,7 @@ class INV(object):
         self.minimize(verbose=verbose)
         self.store_update(extent='position')
         self.tock()
+        self.eq.run(update=True)  # update psi map
         return self.Lo
 
     def add_plasma(self):
@@ -1242,25 +1284,17 @@ class INV(object):
 
 class SWING(object):
 
-    def __init__(self, inv, sf, rms_limit=0.1, wref=25, nswing=2, plot=False):
+    def __init__(self, inv, sf, rms_limit=0.15, wref=25, nswing=2, plot=False,
+                 output=True):
         self.nswing = nswing
         self.inv = inv
         self.rms_limit = rms_limit
         self.wref = wref
 
-        # self.inv.load_equlibrium(sf)
-        # self.inv.set_boundary()
-        # self.inv.add_plasma()
-        #self.Lnorm = inv.snap_coils()
-        self.inv.set_swing(centre=0, width=self.wref,
-                           array=np.linspace(-0.5, 0.5, self.nswing))
-        # self.inv.set_force_feild()
-        # self.inv.update_position(self.Lnorm,update_area=True)
-
     def get_rms(self, centre):
         self.inv.set_swing(centre=centre, width=self.wref,
                            array=np.linspace(-0.5, 0.5, 2))
-        rms = self.inv.update_position(self.inv.Lnorm, update_area=True)
+        rms = self.inv.update_position(self.Lnorm, update_area=True)
         return float(self.rms_limit - rms)
 
     def find_root(self, slim):
@@ -1269,6 +1303,8 @@ class SWING(object):
         return swing
 
     def flat_top(self):
+        print('\nCalculating swing:')
+        self.Lnorm = loops.normalize_variables(self.inv.Lo)
         SOF = self.find_root([-60, 0]) - self.wref / 2
         EOF = self.find_root([0, 60]) + self.wref / 2
 
@@ -1287,6 +1323,7 @@ class SWING(object):
         return np.max(E)
 
     def output(self):
+        self.flat_top()
         E = self.energy()
         PFvol = 0
         for name in self.inv.pf.coil:
@@ -1300,7 +1337,6 @@ class SWING(object):
         FsepCS = np.max(self.inv.swing['FsepCS'])
         FzCS = np.max(self.inv.swing['FzCS'])
 
-        print('')
         print('swing divisions: {:1.0f}'.format(self.nswing))
         print('swing width {:1.0f}Vs'.format(2 * np.pi * self.width))
         print(r'max absolute PF/CS current sum {:1.1f}MA'.format(Isum))

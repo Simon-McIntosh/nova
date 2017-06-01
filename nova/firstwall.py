@@ -241,9 +241,9 @@ class divertor(object):
     def match_psi(self, Xo, Zo, direction, theta_end, theta_sign, phi_target,
                   graze, dPlate, leg, debug=False):
         color = sns.color_palette('Set2', 2)
-        gain = 0.15  # 0.25
+        gain = 0.25  # 0.25
         Nmax = 500
-        Lo = [1.0, 0.0015]  # [blend,turn]  5,0.015
+        Lo = [5.0, 0.0015]  # [blend,turn]  5,0.015
         x2m = [-1, -1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
         Nplate = 1  # number of target plate divisions (1==flat)
         L = Lo[0] if theta_end == 0 else Lo[1]

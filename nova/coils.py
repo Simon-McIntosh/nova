@@ -18,6 +18,7 @@ from nova.DEMOxlsx import DEMO
 from warnings import warn
 from nova.inverse import INV
 from copy import deepcopy
+from scipy.optimize import minimize_scalar
 
 colors = sns.color_palette('Paired', 12)
 
@@ -218,6 +219,8 @@ class PF(object):
     def inductance(self, dCoil=0.5, Iscale=1):
         pf = deepcopy(self)
         inv = INV(pf, Iscale=Iscale, dCoil=dCoil)
+        pf.mesh_coils(dCoil=dCoil)  # multi-filiment coils
+        inv.update_coils()
         Nf = np.array([1 / inv.coil['active'][coil]['Nf']
                        for coil in inv.coil['active']])
         for i, coil in enumerate(inv.adjust_coils):
@@ -468,8 +471,19 @@ class TF(object):
             self.fun[side]['dx'] = self.fun[side]['x'].derivative()
             self.fun[side]['dz'] = self.fun[side]['z'].derivative()
 
+    def xzL(self, points):
+        ''' translate list of x,z points into normalised TF loop lengths '''
+        self.loop_interpolators(offset=0)  # construct TF interpolators
+        TFloop = self.fun['out']  # outer loop
+        L = np.zeros(len(points))
+        for i, p in enumerate(points):
+            L[i] = minimize_scalar(self.norm, method='bounded',
+                                   args=(TFloop, p), bounds=[0, 1]).x
+        return L
+
     def norm(self, L, loop, point):
         return (loop['x'](L) - point[0])**2 + (loop['z'](L) - point[1])**2
+
 
     def Cshift(self, coil, side, dL):  # shift pf coils to tf track
         if 'in' in side:

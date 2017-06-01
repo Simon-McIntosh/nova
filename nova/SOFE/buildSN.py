@@ -59,10 +59,10 @@ inv.Lex = R.TF.xzL(excl)  # translate to normalized coil length
 inv.set_sail()
 
 inv.wrap_PF(solve=True)
-inv.optimize()
+#inv.optimize()
 
 swing = SWING(inv, sf, output=True)
-
+swing.output()
 
 
 # plot

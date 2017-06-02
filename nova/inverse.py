@@ -1284,7 +1284,7 @@ class INV(object):
 
 class SWING(object):
 
-    def __init__(self, inv, sf, rms_limit=0.15, wref=25, nswing=2, plot=False,
+    def __init__(self, inv, sf, rms_limit=0.10, wref=25, nswing=2, plot=False,
                  output=True):
         self.nswing = nswing
         self.inv = inv

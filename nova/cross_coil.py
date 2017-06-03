@@ -14,7 +14,7 @@ def green(X, Z, Xc, Zc, dXc=0, dZc=0):
     g = np.array((Xc * X)**0.5 *
                  ((2 * m**-0.5 - m**0.5) *
                   ellipk(m) - 2 * m**-0.5 * ellipe(m)) / (2 * np.pi))
-    if np.min(np.sqrt(x)) < 1e-6:  # self inductance
+    if np.min(np.sqrt(x)) < dXc / 2:  # self inductance
         rho = np.mean([dXc + dZc]) / 2
         Xc = Xc * np.ones(np.shape(X))
         index = np.sqrt(x) < dXc / 2  # self inductance index

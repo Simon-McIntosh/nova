@@ -1177,11 +1177,11 @@ class INV(object):
             Lnorm, self.rms = res.x, res.fun
         elif method == 'ls':  # sequential least squares
             print('\nOptimising configuration:')
-            # opt = nlopt.opt(nlopt.LD_SLSQP, self.nL)
-            opt = nlopt.opt(nlopt.LD_MMA, self.nL)
-            opt.set_ftol_abs(5e-2)
-            opt.set_ftol_rel(1e-2)
-            opt.set_stopval(30e-3)  # <x [m]
+            opt = nlopt.opt(nlopt.LD_SLSQP, self.nL)
+            # opt = nlopt.opt(nlopt.LD_MMA, self.nL)
+            opt.set_ftol_abs(5e-3)
+            opt.set_ftol_rel(5e-3)
+            opt.set_stopval(50e-3)  # <x [m]
             opt.set_min_objective(self.update_position_vector)
             opt.set_lower_bounds([0 for _ in range(self.nL)])
             opt.set_upper_bounds([1 for _ in range(self.nL)])
@@ -1284,7 +1284,7 @@ class INV(object):
 
 class SWING(object):
 
-    def __init__(self, inv, sf, rms_limit=0.10, wref=25, nswing=2, plot=False,
+    def __init__(self, inv, sf, rms_limit=0.10, wref=0, nswing=2, plot=False,
                  output=True):
         self.nswing = nswing
         self.inv = inv

@@ -14,7 +14,7 @@ from nova.firstwall import main_chamber
 from nova.shape import Shape
 
 import seaborn as sns
-sns.set(context='talk', style='white', font='sans-serif', font_scale=7 / 8)
+sns.set(context='talk', style='white')
 Color = cycle(sns.color_palette('Set2'))
 
 pkl = PKL('DEMO_SF', directory='../../Movies/')
@@ -36,16 +36,8 @@ tf = TF(profile=profile, sf=sf)
 #inv.wrap_PF(solve=True)
 #inv.optimize()
 
-'''
-#inv.set_limit(FPFz=50)
-inv.wrap_PF(solve=True)
-inv.grid_PF(nPF=5)
-# inv.limit['L']['Coil8'] = [0.98,0.99]
 
-'''
-
-
-mc = main_chamber('demo_SFm')
+mc = main_chamber('demo_SFm', date='2017_06_03')
 mc.generate(['SFm', 'SFp'], dx=0.225, psi_n=1.07,
             flux_fit=True, plot=False, symetric=False, plot_bounds=False,
             verbose=False)
@@ -60,17 +52,24 @@ tf.fill()
 
 
 inv = INV(pf, tf, dCoil=0.5)
-inv.colocate(sf, n=5e3, expand=2.75, centre=0, width=100/(2*np.pi),
+inv.colocate(sf, n=5e3, expand=2.5, centre=0, width=100/(2*np.pi),
              setup=setup)
+swing = SWING(inv, sf)
+
 inv.grid_CS(5)
-inv.grid_PF(5)
-inv.wrap_PF(solve=False)
+#inv.grid_PF(5)
+#inv.wrap_PF(solve=False)
 inv.optimize()
+
+
 inv.plot_fix()
 
 inv.eq.run(update=False)
 sf.contour()
 pf.plot(subcoil=True, plasma=True)
 
-sf.eqwrite(pf, config=setup.configuration)
-pkl.write(data={'sf': sf, 'inv': inv, 'rb': rb, 'tf': tf})  # pickle data
+swing.output()
+
+
+#sf.eqwrite(pf, config=setup.configuration)
+#pkl.write(data={'sf': sf, 'inv': inv, 'rb': rb, 'tf': tf})  # pickle data

@@ -463,7 +463,7 @@ class SF(object):
             if sum(index) > 0:
                 x, z = x[index], z[index]
                 loop = np.sqrt((x[0] - x[-1])**2 +
-                               (z[0] - z[-1])**2) < 3*self.delta
+                               (z[0] - z[-1])**2) < 5*self.delta
                 if (z > self.Mpoint[1]).any() and\
                         (z < self.Mpoint[1]).any() and loop:
                     X, Z = np.append(X, x), np.append(Z, z)

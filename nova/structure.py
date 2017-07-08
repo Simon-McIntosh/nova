@@ -49,11 +49,13 @@ class architect(object):
             self.plot_connections()
 
     def plot_connections(self):
+        for section in ['nose', 'trans_lower', 'loop', 'trans_upper']:
+            pl.plot(self.tf.p[section]['x'], self.tf.p[section]['z'], 'o-')
         for name in self.PFsupport:
             nodes = np.array(self.PFsupport[name]['nodes'])
             nd = self.PFsupport[name]['nd']
             geom.polyfill(nodes[:, 0], nodes[:, 1], color=0.4 * np.ones(3))
-            pl.plot(nd['x'], nd['z'], '-o')
+            # pl.plot(nd['x'], nd['z'], '-o')
         nodes = np.array(self.Gsupport['base'])
         geom.polyfill(nodes[:, 0], nodes[:, 1], color=0.4 * np.ones(3))
         pl.plot(self.Gsupport['Xo'] * np.ones(2),
@@ -65,6 +67,7 @@ class architect(object):
         for name in self.loop['OIS']:
             nodes = np.array(self.loop['OIS'][name]['nodes'])
             geom.polyfill(nodes[:, 0], nodes[:, 1], color=0.4 * np.ones(3))
+
 
     def OIS_placment(L, TFloop, point):
         err = (point[0] - TFloop['x'](L))**2 + (point[1] - TFloop['z'](L))**2
@@ -109,7 +112,6 @@ class architect(object):
         L = minimize_scalar(architect.cs_top, method='bounded',
                             args=(self.loop['cs']['xwp'], TFloop),
                             bounds=[0.5, 1]).x
-        # pl.plot()
         ztop = float(TFloop['z'](L))
         self.loop['cs']['z'] = [zo, zo, ztop, ztop]
         self.loop['cs']['ztop'] = ztop
@@ -224,7 +226,6 @@ class architect(object):
             nodes[1][1]-1.5*width-pin2pin
         self.Gsupport['yfloor'] = pin2pin * np.sin(alpha)
 
-
     def adjust_TFnode(self, x, z):
         i = np.argmin((self.tf.p['cl']['x']-x)**2 +
                       (self.tf.p['cl']['z']-z)**2)
@@ -235,8 +236,18 @@ class architect(object):
         dx = np.sqrt((self.tf.p['cl']['x'][i] - x)**2 +
                      (self.tf.p['cl']['z'][i] - z)**2)
         if dx > 0.2*dl:  # add node
-            self.tf.p['cl']['x'] = np.insert(self.tf.p['cl']['x'], i, x)
-            self.tf.p['cl']['z'] = np.insert(self.tf.p['cl']['z'], i, z)
+            Ln = minimize_scalar(architect.OIS_placment, method='bounded',
+                                 args=(self.tf.fun['out'], (x, z)),
+                                 bounds=[0, 1]).x
+            Li = minimize_scalar(architect.OIS_placment, method='bounded',
+                                 args=(self.tf.fun['out'],
+                                       (self.tf.p['cl']['x'][i],
+                                        self.tf.p['cl']['z'][i])),
+                                 bounds=[0, 1]).x
+
+            j = 0 if Ln < Li else 1
+            self.tf.p['cl']['x'] = np.insert(self.tf.p['cl']['x'], i+j, x)
+            self.tf.p['cl']['z'] = np.insert(self.tf.p['cl']['z'], i+j, z)
         else:  # insert node
             self.tf.p['cl']['x'][i], self.tf.p['cl']['z'][i] = x, z
 
@@ -455,7 +466,7 @@ class architect(object):
         if t2 > rm:  # half thickness mean radius
             errtxt = 'gravity support thickness greater than mean radius'
             raise ValueError(errtxt)
-        self.loop['gs'] = {'xo': rm-t2, 'x': rm+t2}
+        self.loop['gs'] = {'ro': rm-t2, 'r': rm+t2}
 
     def gravity_support(self, plot=False, **kwargs):  # set t, or x
         update = False
@@ -466,8 +477,8 @@ class architect(object):
         if update:
             self.gs_cs()
         sm = second_moment()
-        xo, x = self.loop['gs']['xo'], self.loop['gs']['x']
-        sm.add_shape('circ', x=x, xo=xo)
+        ro, r = self.loop['gs']['ro'], self.loop['gs']['r']
+        sm.add_shape('circ', r=r, ro=ro)
         pnt = sm.get_pnt()
         C, I, A = sm.report()
         J = I['xx']
@@ -636,6 +647,13 @@ class torsion(object):
 
 if __name__ is '__main__':
 
+
+
+    pl.style.use('default')
+    pl.axis('equal')
+    pl.axis('off')
+
+
     nTF = 16
     base = {'TF': 'demo', 'eq': 'DEMO_SN_SOF'}
     config, setup = select(base, nTF=nTF, update=False)
@@ -659,6 +677,7 @@ if __name__ is '__main__':
     inv.plot_fix(tails=True)
 
     atec = architect(tf, pf)
+    atec.plot_connections()
 
     '''
 

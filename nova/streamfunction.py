@@ -16,45 +16,32 @@ from amigo.geom import loop_vol
 
 class SF(object):
 
-    def __init__(self, **kwargs):
+    def __init__(self, filename, upsample=1, **kwargs):
         self.shape = {}
+        self.filename = filename
         self.set_kwargs(kwargs)
-        self.sample = kwargs.get('sample', 1)
-
-        if 'filename' in kwargs:  # load eqdsk file
-            self.eqdsk = nova.geqdsk.read(self.filename)
-            self.normalise()  # unit normalisation
-            self.set_flux(self.eqdsk)  # calculate flux profiles
-            self.set_TF(self.eqdsk)
-            self.set_current(self.eqdsk)
-            self.set_boundary(self.eqdsk['xbdry'], self.eqdsk['zbdry'])
-            xo_arg = np.argmin(self.zbdry)
-            self.po = [self.xbdry[xo_arg], self.zbdry[xo_arg]]
-            self.mo = [self.eqdsk['xmagx'], self.eqdsk['zmagx']]
-            self.xlim = self.eqdsk['xlim']
-            self.ylim = self.eqdsk['ylim']
-            self.nlim = self.eqdsk['nlim']
-
+        self.eqdsk = nova.geqdsk.read(self.filename)
+        self.normalise()  # unit normalisation
         self.set_plasma(self.eqdsk)
-        if 'xbdry' not in self.eqdsk:
-            self.po, self.mo = [5, -4.5], [6.5, 1]
-            self.get_Xpsi()
-            self.get_Mpsi()
-            self.set_contour()  # set cfeild
-            self.eqdsk['xbdry'], self.eqdsk['zbdry'] = self.get_boundary()
-
-
-        self.upsample(self.sample)
+        self.set_boundary(self.eqdsk['xbdry'], self.eqdsk['zbdry'])
+        self.set_flux(self.eqdsk)  # calculate flux profiles
+        self.set_TF(self.eqdsk)
+        self.set_current(self.eqdsk)
+        xo_arg = np.argmin(self.zbdry)
+        self.po = [self.xbdry[xo_arg], self.zbdry[xo_arg]]
+        self.mo = [self.eqdsk['xmagx'], self.eqdsk['zmagx']]
+        self.upsample(upsample)
         self.get_Xpsi()
         self.get_Mpsi()
         self.set_contour()  # set cfeild
         self.get_LFP()
         # self.get_sol_psi(dSOL=3e-3,Nsol=15,verbose=False)
-
         # leg search radius
         self.rcirc = 0.3 * abs(self.Mpoint[1] - self.Xpoint[1])
         self.drcirc = 0.15 * self.rcirc  # leg search width
-
+        self.xlim = self.eqdsk['xlim']
+        self.ylim = self.eqdsk['ylim']
+        self.nlim = self.eqdsk['nlim']
 
     def set_kwargs(self, kwargs):
         for key in kwargs:
@@ -302,6 +289,8 @@ class SF(object):
             color = 'k'
         if 'linetype' in kwargs.keys():
             linetype = kwargs['linetype']
+        if color == 'k':
+            alpha *= 0.25
         if Xnorm:
             levels = levels + self.Xpsi
         contours = self.get_contour(levels)
@@ -320,8 +309,8 @@ class SF(object):
         # if boundary:
         #    pl.plot(self.xbdry,self.zbdry,linetype,linewidth=lw[pindex],
         #            color=color,alpha=alpha[pindex])
-        # pl.axis('equal')
-        # pl.axis('off')
+        #pl.axis('equal')
+        #pl.axis('off')
         return levels
 
     def inPlasma(self, X, Z, delta=0):

@@ -195,12 +195,12 @@ class PF(object):
             else:
                 zshift = 0
             if label:
-                pl.text(x + drs, z + zshift, name, fontsize=fs * 1.1,
+                pl.text(x + drs, z + zshift, name, fontsize=fs,
                         ha=ha, va='center', color=0.2 * np.ones(3))
             if current:
                 pl.text(x + drs, z - zshift,
                         '{:1.1f}MA'.format(coil['I'] * 1e-6),
-                        fontsize=fs * 1.1, ha=ha, va='center',
+                        fontsize=fs, ha=ha, va='center',
                         color=0.2 * np.ones(3))
 
     def plot(self, color=None, subcoil=False, label=False, plasma=False,
@@ -438,6 +438,7 @@ class TF(object):
         self.p['trans_upper']['z'] = z[top:upper]
         self.p['loop']['x'] = x[bottom-1:top+1]
         self.p['loop']['z'] = z[bottom-1:top+1]
+        self.p['index'] = np.array([lower, bottom, top, upper])
 
         if plot:
             pl.plot(self.p['cl']['x'], self.p['cl']['z'], 'o')

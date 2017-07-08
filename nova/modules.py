@@ -110,7 +110,7 @@ class wrapper(object):  # first wall wrapper
 if __name__ == '__main__':
 
     cutri, cutzi = 10.2472993945, 4.29229220147
-    fw =R.BB.rb.segment['blanket_inner'].copy()
+    fw = R.BB.rb.segment['blanket_inner'].copy()
 
     ci = np.argmin((fw['x']-cutri)**2+(fw['z']-cutzi)**2)
 

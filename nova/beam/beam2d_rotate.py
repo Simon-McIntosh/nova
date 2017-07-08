@@ -64,7 +64,7 @@ fe.add_mat(2, E=1e3, I=8e3, A=0.5, G=50, J=50, rho=5e-2)
 
 nodes = {}
 for part in ['loop', 'nose']:  # ,'nose'
-    x, y = tf.x[part]['r'], tf.x[part]['z']
+    x, y = tf.p[part]['x'], tf.p[part]['z']
     if part == 'nose':
         x = np.min(x) * np.ones(len(x))
     X = np.zeros((len(x), 3))
@@ -102,10 +102,14 @@ fe.add_elements(n=[fe.nndo - 1, nd_OISo, fe.nndo], part_name='OISo', nmat=2)
 fe.add_cp([fe.nndo, fe.nndo - 1], dof='fix', rotate=False)
 # fe.add_cp([nd_OISo,nd_OISo-1],dof='rx')
 
-fe.add_weight()  # add weight to all elements
+#fe.add_weight()  # add weight to all elements
 fe.add_tf_load(config['eq_base'], ff, tf, sf.Bpoint,
                method='function')  # burst and topple
 
+fe.plot_nodes()
+
+
+'''
 fe.solve()
 
 
@@ -124,3 +128,4 @@ fe.deform(scale=1.2)
 fe.plot_3D(pattern=config['nTF'])
 # fe.plot_twin()
 # fe.plot_curvature()
+'''

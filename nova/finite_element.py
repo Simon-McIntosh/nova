@@ -523,6 +523,7 @@ class FE(object):
         if len(csys) == 0:
             raise ValueError('load vector unset')
         elif csys == 'global':
+            print(self.T3[:, :, el])
             f = np.linalg.solve(self.T3[:, :, el].T, f)  # rotate to local csys
         fn = np.zeros((6, 2))  # 6 dof local nodal load vector
         for i, label in enumerate(['fx', 'fy', 'fz']):  # split point load to F,M
@@ -574,7 +575,7 @@ class FE(object):
     def add_tf_load(self, sf, ff, tf, Bpoint, parts=['loop', 'nose'],
                     method='function'):
         cage = coil_cage(nTF=tf.profile.nTF, rc=tf.rc,
-                         plasma={'sf': sf}, coil=tf.x['cl'])
+                         plasma={'sf': sf}, coil=tf.p['cl'])
         self.update_rotation()  # check / update rotation matrix
         ff.set_bm(cage)  # set tf magnetic moment (method==function)
         for part in parts:

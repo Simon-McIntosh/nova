@@ -226,7 +226,7 @@ class EQ(object):
         return psi
 
     def psi_pl(self):
-        self.b[self.core_indx is False] = 0  # zero edge BC
+        self.b[self.core_indx == False] = 0  # zero edge BC
         psi_core = self.solve()  # solve with zero edgeBC
         dgdn = self.boundary_normal(psi_core)
         psi = np.zeros(self.Ne)

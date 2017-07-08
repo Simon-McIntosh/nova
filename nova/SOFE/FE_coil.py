@@ -2,7 +2,7 @@ import numpy as np
 import pylab as pl
 from nova.finite_element import FE
 from nova.config import select
-
+from collections import OrderedDict
 from nova.radial_build import RB
 from nova.elliptic import EQ
 from nova.coils import PF
@@ -25,10 +25,23 @@ Un structural solver incroyable
 Le passé est l'avenir!
 '''
 
-nTF, ripple, ny, nr = 18, True, 6, 6
-base = {'TF': 'demo_nTF', 'eq': 'DEMO_SN_EOF'}
+pl.axis('equal')
+
+nTF = 16
+base = {'TF': 'demo', 'eq': 'DEMO_SN_SOF'}
 config, setup = select(base, nTF=nTF, update=False)
-atec = architect(config, setup, nTF=nTF)
+
+profile = Profile(config['TF_base'], family='S', load=True,
+                  part='TF', nTF=nTF, obj='L', npoints=50)
+sf = SF(setup.filename)
+pf = PF(sf.eqdsk)
+tf = TF(profile=profile, sf=sf)
+
+inv = INV(pf, tf, dCoil=2.5, offset=0.3)
+inv.colocate(sf, n=1e3, expand=0.5, centre=0, width=363/(2*np.pi))
+inv.wrap_PF(solve=False)
+
+atec = architect(tf, pf, plot=False)
 
 fe = FE(frame='3D')  # initalise FE solver
 
@@ -46,10 +59,34 @@ atec.add_mat('TFout', ['wp', 'steel_cast'],
 atec.add_mat('gs', ['steel_cast'], [atec.gravity_support()])
 atec.add_mat('OIS', ['wp'], [atec.intercoil_support()])
 
+P = np.zeros((len(tf.p['cl']['x']), 3))
+P[:, 0], P[:, 2] = tf.p['cl']['x'], tf.p['cl']['z']
+fe.add_nodes(P)
+
+fe.plot_nodes()
+
+# use tf.p['index']
+
+'''
+nd = OrderedDict()
+for i, part in enumerate(['nose', 'trans_lower', 'loop', 'trans_upper']):
+    p = tf.p[part]
+    if i % 2 == 1:
+        for u in ['x', 'z']:
+            p[u] = p[u][1:-1]  # trim alternates
+    P = np.zeros((len(p['x']), 3))
+    P[:, 0], P[:, 2] = p['x'], p['z']
+    fe.add_nodes(P)
+    nd[part] = np.arange(fe.nndo, fe.nnd)
+'''
+
+'''
+fe.add_elements(n=nd['nose'], part_name='loop'
+
+fe.add_elements(n=n, part_name='loop', nmat=matID['TFout'])
 
 
-
-
+'''
 
 #rb = RB(setup,sf)
 #pf = PF(sf.eqdsk)

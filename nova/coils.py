@@ -430,15 +430,19 @@ class TF(object):
         index = self.transition_index(x, z)
         upper, lower = index['upper'], index['lower']
         top, bottom = index['top'], index['bottom']
-        self.p['nose']['x'] = np.append(x[upper-1:], x[1:lower + 1])
-        self.p['nose']['z'] = np.append(z[upper-1:], z[1:lower + 1])
+        self.p['nose']['x'] = np.append(x[upper-1:-1], x[:lower + 1])
+        self.p['nose']['z'] = np.append(z[upper-1:-1], z[:lower + 1])
+        self.p['nose']['nd'] = np.append(np.arange(upper-1, len(x)-1),
+                                         np.arange(0, lower+1))
         self.p['trans_lower']['x'] = x[lower:bottom]
         self.p['trans_lower']['z'] = z[lower:bottom]
+        self.p['trans_lower']['nd'] = np.arange(lower, bottom)
         self.p['trans_upper']['x'] = x[top:upper]
         self.p['trans_upper']['z'] = z[top:upper]
+        self.p['trans_upper']['nd'] = np.arange(top, upper)
         self.p['loop']['x'] = x[bottom-1:top+1]
         self.p['loop']['z'] = z[bottom-1:top+1]
-        self.p['index'] = np.array([lower, bottom, top, upper])
+        self.p['loop']['nd'] = np.arange(bottom-1, top+1)
 
         if plot:
             pl.plot(self.p['cl']['x'], self.p['cl']['z'], 'o')
@@ -484,7 +488,6 @@ class TF(object):
 
     def norm(self, L, loop, point):
         return (loop['x'](L) - point[0])**2 + (loop['z'](L) - point[1])**2
-
 
     def Cshift(self, coil, side, dL):  # shift pf coils to tf track
         if 'in' in side:
@@ -542,7 +545,8 @@ class TF(object):
         '''
         colors = color_kwargs(**kwargs)
         ax = pl.gca()
-        for p in [self.p['in'], self.p['wp_in'], self.p['wp_out'], self.p['out']]:
+        for p in [self.p['in'], self.p['wp_in'],
+                  self.p['wp_out'], self.p['out']]:
             ax.plot(p['x'], p['z'], color='k')
         c1, c2 = next(colors), next(colors)
         geom.polyparrot(self.p['in'], self.p['wp_in'],
@@ -551,7 +555,6 @@ class TF(object):
                         color=c2, alpha=alpha)
         geom.polyparrot(self.p['wp_out'], self.p['out'],
                         color=c1, alpha=alpha)
-
 
     def support(self, **kwargs):
         self.rzGet()
@@ -623,7 +626,6 @@ class TF(object):
         self.shp.constraints = self.constraints
         self.shp.objective = self.objective  # objective function
         self.shp.update = self.update_loop  # called on exit from minimizer
-
         self.shp.minimise(verbose=verbose)
 
 if __name__ is '__main__':  # test functions
@@ -643,14 +645,14 @@ if __name__ is '__main__':  # test functions
     demo.fill_part('Blanket')
     demo.plot_ports()
 
-    tf.minimise(demo.parts['Vessel']['out'], verbose=True, ripple=False)
+    tf.minimise(demo.parts['Vessel']['out'], verbose=True, ripple=True)
     tf.fill()
 
     pf = PF(sf.eqdsk)
     pf.plot()
     sf.contour()
 
-    tf.cage.output()
+    #tf.cage.output()
 
     '''
     # tf.coil.set_input()

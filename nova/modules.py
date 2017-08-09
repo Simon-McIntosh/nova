@@ -107,6 +107,7 @@ class wrapper(object):  # first wall wrapper
         pl.plot(Pc[:, 0], Pc[:, 1], '-o', ms=8)
         pl.axis('equal')
 
+
 if __name__ == '__main__':
 
     cutri, cutzi = 10.2472993945, 4.29229220147

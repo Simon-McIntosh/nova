@@ -13,6 +13,7 @@ from amigo import geom
 from nova.loops import Profile
 from nova.force import force_feild
 from nova.structure import architect
+from nova.streamfunction import SF
 import seaborn as sns
 rc = {'figure.figsize': [8 * 12 / 16, 8], 'savefig.dpi': 120,
       'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
@@ -20,159 +21,155 @@ rc = {'figure.figsize': [8 * 12 / 16, 8], 'savefig.dpi': 120,
 sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
         font_scale=7 / 8, rc=rc)
 
+
+class SS:  # structural solver
+    '''
+    Un structural solver incroyable
+    Le passé est l'avenir!
+    '''
+    def __init__(self, sf, pf, tf):
+        self.sf = sf
+        self.pf = pf
+        self.tf = tf
+
+        self.inv = INV(pf, tf, dCoil=2.5, offset=0.3)
+        self.inv.colocate(sf, n=1e3, expand=0.5, centre=0, width=363/(2*np.pi))
+        self.inv.wrap_PF(solve=False)
+
+        self.atec = architect(tf, pf, plot=False)  # load sectional properties
+        self.fe = FE(frame='3D')  # initalise FE solver
+
+        self.add_mat()
+
+        self.TF_loop()
+        self.PF_connect()
+
+
+
+    # def update_tf(self):
+
+    def add_mat(self):
+        self.fe.add_mat('nose', ['wp', 'steel_forged'],
+                        [self.atec.winding_pack(), self.atec.case(0)])
+        self.fe.add_mat('loop', ['wp', 'steel_cast'],
+                        [self.atec.winding_pack(), self.atec.case(1)])
+        trans = []  # nose-loop transitions
+        for i, l_frac in enumerate(np.linspace(0, 1, 5)):
+            trans.append(
+                    self.fe.add_mat('trans_{}'.format(i), ['wp', 'steel_cast'],
+                                    [self.atec.winding_pack(),
+                                     self.atec.case(l_frac)]))
+        self.fe.mat_index['trans_lower'] = trans
+        self.fe.mat_index['trans_upper'] = trans[::-1]
+        self.fe.add_mat('GS', ['steel_cast'], [self.atec.gravity_support()])
+        self.fe.add_mat('OICS', ['wp'], [self.atec.intercoil_support()])
+        for name in self.atec.PFsupport:  # PF coil connection sections
+            mat_name = 'PFS_{}'.format(name)
+            self.fe.add_mat(
+                    mat_name, ['wp'],
+                    [self.atec.coil_support(
+                            width=self.atec.PFsupport[name]['width'])])
+
+    def TF_loop(self):
+        P = np.zeros((len(tf.p['cl']['x']), 3))
+        P[:, 0], P[:, 2] = tf.p['cl']['x'], tf.p['cl']['z']
+        self.fe.add_nodes(P)  # all TF nodes
+        TFparts = ['nose', 'trans_lower', 'loop', 'trans_upper']
+        for part in TFparts:  # hookup elements
+            self.fe.add_elements(n=tf.p[part]['nd'], part_name=part, nmat=part)
+
+        # constrain TF nose - free translation in z
+        self.fe.add_bc('nw', 'all', part='nose')
+
+    def PF_connect(self):
+        for name in self.atec.PFsupport:  # PF coil connections
+            nd_tf = self.atec.PFsupport[name]['nd_tf']
+            p = self.atec.PFsupport[name]['p']  # connect PF to TF
+            # self.fe.add_nodes([p['x'][1], 0, p['z'][1]])
+            self.fe.add_nodes([p['x'][0], 0, p['z'][0]])
+            self.atec.PFsupport[name]['nd'] = self.fe.nnd-1  # store node index
+            mat_name = 'PFS_{}'.format(name)
+            self.fe.add_elements(
+                    n=[nd_tf, self.fe.nnd-1], part_name=name, nmat=mat_name)
+
+            # fe.add_elements(
+            #         n=[fe.nnd-2, fe.nnd-1], part_name=name, nmat=mat_name)
+            # fe.add_cp([nd_tf, fe.nnd-2], dof='fix', rotate=False)
+
+
+    def PF_load(self):
+        self.inv.ff.get_force()
+        for name in self.atec.PFsupport:  # PF coil connections
+            Fcoil = self.inv.ff.Fcoil[name]
+            self.fe.add_nodal_load(
+                    self.atec.PFsupport[name]['nd'], 'fz', 1e6*Fcoil['fz'])
+
+
+
+    def gravity_support(self):
+        nGS = 15
+        yGS = np.linspace(atec.Gsupport['yfloor'], 0, nGS)
+        zGS = np.linspace(atec.Gsupport['zfloor'], atec.Gsupport['zbase'], nGS)
+        for ygs, zgs in zip(yGS, zGS):
+            fe.add_nodes([atec.Gsupport['Xo'], ygs, zgs])
+        yGS = np.linspace(0, -atec.Gsupport['yfloor'], nGS)
+        zGS = np.linspace(atec.Gsupport['zbase'], atec.Gsupport['zfloor'], nGS)
+        for ygs, zgs in zip(yGS[1:], zGS[1:]):
+            fe.add_nodes([atec.Gsupport['Xo'], ygs, zgs])
+        fe.add_elements(
+                n=range(fe.nnd-2*nGS+1, fe.nnd), part_name='GS', nmat='GS')
+
+
+        # couple GS to TF loop
+        fe.add_cp([atec.Gsupport['nd_tf'], fe.nnd-nGS],
+                  dof='nrx', rotate=False)
+        fe.add_bc(['nry'], [0], part='GS', ends=0)  # nry - free rotation in y
+        fe.add_bc(['nry'], [-1], part='GS', ends=1)
+
+    def plot(self):
+        self.fe.plot_nodes()
+
+        pl.axis('off')
+
+
+if __name__ == '__main__':
+
+
+    nTF = 16
+    base = {'TF': 'demo', 'eq': 'DEMO_SN_SOF'}
+    config, setup = select(base, nTF=nTF, update=False)
+    profile = Profile(config['TF_base'], family='S', load=True,
+                      part='TF', nTF=nTF, obj='L', npoints=50)
+
+    sf = SF(setup.filename)
+    pf = PF(sf.eqdsk)
+    tf = TF(profile=profile, sf=sf)
+
+    ss = structural_solver(sf, pf, tf)
+
+    ss.plot()
+
+    tf.fill()
+
+
 '''
-Un structural solver incroyable
-Le passé est l'avenir!
-'''
-
-pl.axis('equal')
-
-nTF = 16
-base = {'TF': 'demo', 'eq': 'DEMO_SN_SOF'}
-config, setup = select(base, nTF=nTF, update=False)
-
-profile = Profile(config['TF_base'], family='S', load=True,
-                  part='TF', nTF=nTF, obj='L', npoints=50)
-sf = SF(setup.filename)
-pf = PF(sf.eqdsk)
-tf = TF(profile=profile, sf=sf)
-
-inv = INV(pf, tf, dCoil=2.5, offset=0.3)
-inv.colocate(sf, n=1e3, expand=0.5, centre=0, width=363/(2*np.pi))
-inv.wrap_PF(solve=False)
-
-atec = architect(tf, pf, plot=False)
-
-fe = FE(frame='3D')  # initalise FE solver
-
-'''
-#matID['TFin'] =
-matID['TFout'] =
-matID['gs'] =
-matID['OIS'] =
-'''
-
-atec.add_mat('TFin', ['wp', 'steel_forged'],
-             [atec.winding_pack(), atec.case(0)])
-atec.add_mat('TFout', ['wp', 'steel_cast'],
-             [atec.winding_pack(), atec.case(1)])
-atec.add_mat('gs', ['steel_cast'], [atec.gravity_support()])
-atec.add_mat('OIS', ['wp'], [atec.intercoil_support()])
-
-P = np.zeros((len(tf.p['cl']['x']), 3))
-P[:, 0], P[:, 2] = tf.p['cl']['x'], tf.p['cl']['z']
-fe.add_nodes(P)
-
-fe.plot_nodes()
-
-# use tf.p['index']
-
-'''
-nd = OrderedDict()
-for i, part in enumerate(['nose', 'trans_lower', 'loop', 'trans_upper']):
-    p = tf.p[part]
-    if i % 2 == 1:
-        for u in ['x', 'z']:
-            p[u] = p[u][1:-1]  # trim alternates
-    P = np.zeros((len(p['x']), 3))
-    P[:, 0], P[:, 2] = p['x'], p['z']
-    fe.add_nodes(P)
-    nd[part] = np.arange(fe.nndo, fe.nnd)
-'''
-
-'''
-fe.add_elements(n=nd['nose'], part_name='loop'
-
-fe.add_elements(n=n, part_name='loop', nmat=matID['TFout'])
-
-
-'''
-
-#rb = RB(setup,sf)
-#pf = PF(sf.eqdsk)
-'''
-eq = EQ(sf, pf, dCoil=2, boundary=tf.get_loop(expand=0.5), n=1e3, sigma=0)
-eq.get_plasma_coil()
-ff = force_feild(pf.index, pf.coil, pf.sub_coil, pf.plasma_coil)
-
-pf.plot(subcoil=True, label=False, plasma=True, current=False, alpha=0.5)
-sf.contour()
-
-to = time()
-tf.split_loop()
-
-
-nodes = {}
-for part in ['loop', 'nose']:  # ,'nose'
-    x, z = tf.x[part]['r'], tf.x[part]['z']
-    if part == 'nose':
-        x = np.min(x) * np.ones(len(x))
-    X = np.zeros((len(x), 3))
-    X[:, 0], X[:, 2] = x, z
-    fe.add_nodes(X)
-    nodes[part] = np.arange(fe.nndo, fe.nnd)
-n = np.append(np.append(nodes['nose'][-1], nodes['loop']), nodes['nose'][0])
-fe.add_elements(n=n, part_name='loop', nmat=matID['TFout'])
-fe.add_elements(n=nodes['nose'], part_name='nose', nmat=matID['TFin'])
-fe.add_bc('nw', 'all', part='nose')
-
-
-nd_GS = fe.el['n'][fe.part['loop']['el'][10]][0]  # gravity support connect
-fe.add_nodes([13, -2, -12])
-fe.add_nodes([13, 2, -12])
-fe.add_nodes(fe.X[nd_GS])
-fe.add_elements(n=[fe.nndo - 2, fe.nndo, fe.nndo - 1],
-                part_name='support', nmat=matID['gs'])
-fe.add_bc('nry', [0], part='support', ends=0)
-fe.add_bc('nry', [-1], part='support', ends=1)
-fe.add_cp([fe.nndo, nd_GS], dof='nrx')  # 'nrx'
-
-
-nd_OISo = fe.el['n'][fe.part['loop']['el'][15]][0]  # OIS
-nd_OIS1 = fe.el['n'][fe.part['loop']['el'][27]][0]
-
-fe.add_nodes(
-    np.dot(fe.X[nd_OISo], geom.rotate(-np.pi / config['nTF'], axis='z')))
-fe.add_nodes(np.dot(fe.X[nd_OISo], geom.rotate(
-    np.pi / config['nTF'], axis='z')))
-fe.add_elements(n=[fe.nndo - 1, nd_OISo, fe.nndo], part_name='OISo',
-                el_dy=np.cross(fe.el['dx'][nd_OISo], [0, 1, 0]),
-                nmat=matID['OIS'])
-fe.add_cp([fe.nndo - 1, fe.nndo], dof='fix', rotate=True, axis='z')
-
-fe.add_nodes(np.dot(fe.X[nd_OIS1],
-                    geom.rotate(-np.pi/config['nTF'], axis='z')))
-fe.add_nodes(np.dot(fe.X[nd_OIS1],
-                    geom.rotate(np.pi/config['nTF'], axis='z')))
-fe.add_elements(n=[fe.nndo-1, nd_OIS1, fe.nndo], part_name='OISo',
-                el_dy=np.cross(fe.el['dx'][nd_OIS1], [0, 1, 0]),
-                nmat=matID['OIS'])
-fe.add_cp([fe.nndo - 1, fe.nndo], dof='fix', rotate=True, axis='z')
-
-print(np.cross(fe.el['dx'][nd_OIS1], [0, 1, 0]))
 
 fe.add_weight()  # add weight to all elements
-# burst and topple
-fe.add_tf_load(sf, ff, tf, sf.Bpoint, method='function')
+fe.add_tf_load(sf, inv.ff, tf, inv.eq.Bpoint, parts=TFparts)
+
 
 
 fe.solve()
-fe.deform(scale=50)
-
-print('time {:1.3f}'.format(time() - to))
+fe.deform(scale=15)
 
 fe.plot_nodes()
-fe.plot_F(scale=1)
+fe.plot_F(scale=1e-8)
 
 fe.plot_displacment()
 pl.axis('off')
-pl.tight_layout(rect=[-0.3, 0.1, 0.9, 0.9])
 
+pf.plot(label=True)
 
-fe.plot_3D(pattern=config['nTF'])
-# fe.plot_curvature()
-
-fe.plot_twin()
-
-fe.plot_curvature()
+fe.plot_3D(pattern=tf.nTF)
 '''
+

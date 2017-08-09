@@ -177,7 +177,5 @@ if __name__ == '__main__':
     sm.plot()
 
     sm = second_moment()
-    sm.add_shape('circ', r=1, ro=0)
+    sm.add_shape('circ', r=1, ro=0.5)
     sm.plot()
-
-

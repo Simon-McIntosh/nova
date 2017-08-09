@@ -1,14 +1,12 @@
 import numpy as np
 import pylab as pl
-from scipy.sparse import lil_matrix, csr_matrix
-from scipy.sparse.linalg import spsolve
+from scipy.sparse import csr_matrix
 from collections import OrderedDict
 import seaborn as sns
 from mpl_toolkits.mplot3d import Axes3D
 import itertools
 from scipy.interpolate import interp1d
 from amigo.addtext import linelabel
-from mpl_toolkits.mplot3d import Axes3D
 from nova.coil_cage import coil_cage
 from amigo import geom
 from warnings import warn
@@ -40,46 +38,127 @@ class FE(object):
         self.nShape = nShape  # element shape function resolution
         self.scale = 1  # displacment scale factor (plotting)
         self.coordinate = ['x', 'y', 'z', 'tx', 'ty', 'tz']
-        self.initalise_mat()
+        self.initalize_mat()
+        self.define_materials()
         self.frame = frame
         self.set_stiffness()  # set stiffness matrix + problem dofs
         self.initalize_BC()  # boundary conditions
         self.initalise_grid()  # grid
         self.initalise_couple()  # node coupling
-        self.matID = {}
 
     def initalise_couple(self):
         self.ncp = 0  # number of constraints
         self.mpc = OrderedDict()  # multi-point constraint
 
-    def initalise_mat(self, nmat_max=20):
+    def initalize_mat(self, nmat_max=20, nsec_max=2):
         self.nmat_max = nmat_max
+        self.nsec_max = nsec_max
         self.nmat = 0
-        self.mat = np.zeros((nmat_max), dtype=[('E', 'float'), ('G', 'float'),
-                                               ('J', 'float'), ('Iy', 'float'),
-                                               ('Iz', 'float'), ('A', 'float'),
-                                               ('rho', 'float')])
+        self.matID = -1
+        self.mat_index = {}  # dict of lists (matIDs)
+        self.pntID = -1
+        self.Iindex = {'y': 1, 'z': 2}
+        self.pnt = []  # list of list - outer points of each section for stress
+        Itype = np.dtype({'names': ['xx', 'yy', 'zz'],
+                          'formats': ['float', 'float', 'float']})
+        Ctype = np.dtype({'names': ['y', 'z'], 'formats': ['float', 'float']})
+        self.mtype = np.dtype({'names': ['name', 'E', 'G', 'rho',
+                                         'J', 'A', 'I', 'v', 'C', 'pntID'],
+                               'formats': ['|U16', 'float', 'float', 'float',
+                                           'float', 'float', Itype, 'float',
+                                           Ctype, 'int']})
+        self.mtype_arrray = np.dtype(
+                {'names': ['ID', 'name', 'nsection', 'mat_o', 'mat_array'],
+                 'formats': ['int', '|U16', 'int',
+                             self.mtype, (self.mtype, self.nsec_max)]})
+        self.mat = np.zeros((nmat_max), dtype=self.mtype_arrray)
 
-    def add_mat(self, nmat, **kwargs):
-        self.nmat = nmat  # set material number
-        if self.nmat >= self.nmat_max:
-            err_txt = 'nmat=={:d}>=nmat_max=={:1d}'.format(self.nmat,
-                                                           self.nmat_max)
-            err_txt += ' increase size of material array (initalise_mat)'
-            raise ValueError(err_txt)
-        if 'mat' in kwargs:  # mat as dict
-            mat = kwargs.get('mat')
-            for p in mat:
-                self.mat[self.nmat][p] = mat[p]
-        else:  # materials as keyword pairs
-            for p in self.mat.dtype.names:
-                if p in kwargs:
-                    self.mat[self.nmat][p] = kwargs.get(p)
-            if 'I' in kwargs:  # isotropic second moment
-                for I in ['Iy', 'Iz']:
-                    self.mat[self.nmat][I] = kwargs.get('I')
+    def extend_mat(self, nblock=20):  # extend mat structured array
+        self.matID += 1  # increment material number
+        self.nmat += 1  # increment material ID
+        if self.nmat > self.nmat_max:
+            self.nmat_max += nblock
+            self.mat = np.append(
+                    self.mat, np.zeros((nblock), dtype=self.mtype_arrray))
 
-    def get_mat(self, nmat):
+    def add_mat(self, name, materials, sections):
+        '''
+        add material + sectional properties
+        name == user defined label
+        materials == [list of material names]
+        sections == [list of sections]
+        add mat combines material + section lists as addition (sliding)
+        EI = EI_1 + EI_2 + ...
+        '''
+        self.extend_mat()  # extend structured array in blocks
+        area_weight = ['E', 'v', 'rho', 'J']  # list of area weighted terms
+        self.mat[self.matID]['ID'] = self.matID
+        self.mat[self.matID]['name'] = name
+        for i, (material, section) in enumerate(zip(materials, sections)):
+            mat, pnt = self.get_mat(material, section)
+            self.mat[self.matID]['mat_array'][i] = self.add_pnt(mat, pnt)
+            self.mat[self.matID]['nsection'] += 1
+
+        mat_o = np.zeros(1, dtype=self.mtype)[0]  # default mat data structure
+        for i in range(self.mat[self.matID]['nsection']):
+            mat_instance = self.mat[self.matID]['mat_array'][i]
+            mat_o['A'] += mat_instance['A']  # sum areas
+            for var in area_weight:  # sum area weighted terms
+                mat_o[var] += mat_instance['A']*mat_instance[var]
+            for var in mat_instance['I'].dtype.names:  # sum second moments
+                mat_o['I'][var] += mat_instance['E']*mat_instance['I'][var]
+        for var in area_weight:  # normalise area weighted terms
+            mat_o[var] /= mat_o['A']
+        mat_o['G'] = self.update_G(mat_o['E'], mat_o['v'])
+        for var in mat_instance['I'].dtype.names:  # normalise second moments
+            mat_o['I'][var] /= mat_o['E']
+        mat_o['name'] = 'mean'
+        self.mat[self.matID]['mat_o'] = mat_o
+        self.mat_index[name] = [self.matID]
+        return self.matID
+
+    def define_materials(self):
+        # forged == inner leg, cast == outer + supports
+        self.mat_data = {}
+        self.mat_data['wp'] = {'E': 95e9, 'rho': 8940, 'v': 0.33}
+        self.mat_data['steel_forged'] = {'E': 205e9, 'rho': 7850, 'v': 0.29}
+        self.mat_data['steel_cast'] = {'E': 190e9, 'rho': 7850, 'v': 0.29}
+        self.update_shear_modulus()
+
+    def update_shear_modulus(self):
+        for name in self.mat_data:
+            E, v = self.mat_data[name]['E'], self.mat_data[name]['v']
+            self.mat_data[name]['G'] = self.update_G(E, v)
+
+    def update_G(self, E, v):
+        return E/(2*(1+v))
+
+    def get_mat(self, material_name, section):
+        mat = np.zeros(1, dtype=self.mtype)[0]  # default mat data structure
+        mat['name'] = material_name
+        material = self.mat_data[material_name]
+        for var in material:
+            try:  # treat as scalar
+                mat[var] = material[var]
+            except:  # extract dict
+                for subvar in mat[var]:
+                    mat[var][subvar] = material[var][subvar]
+        pnt = section.pop('pnt')
+        for var in section:
+            try:  # treat as scalar
+                mat[var] = section[var]
+            except:  # extract dict
+                for subvar in section[var]:
+                    mat[var][subvar] = section[var][subvar]
+        return mat, pnt
+
+    def add_pnt(self, mat, pnt):
+        self.pntID += 1  # advance pntID index
+        self.pnt.append(pnt)
+        mat['pntID'] = self.pntID
+        return mat
+
+    def get_mat_o(self, nmat):  # get averaged sectional properties
         if self.frame == '1D':
             mat = ['E', 'Iz']
         elif self.frame == '2D':
@@ -88,7 +167,11 @@ class FE(object):
             mat = ['E', 'A', 'G', 'J', 'Iy', 'Iz']
         values = []
         for m in mat:
-            values.append(self.mat[nmat][m])
+            if m[0] == 'I':  # 'Iy, Iz'
+                val = self.mat['mat_o'][nmat]['I'][self.Iindex.get(m[1])]
+            else:
+                val = self.mat['mat_o'][nmat][m]
+            values.append(val)
         return values
 
     def initalise_grid(self, npart_max=10):
@@ -129,7 +212,7 @@ class FE(object):
         n[:, 0] = n[:, 1] - 1
         return n
 
-    def add_elements(self, n=[], nmat=0, part_name='', close_loop=False,
+    def add_elements(self, n=[], nmat='', part_name='', close_loop=False,
                      el_dy=[0, 1, 0]):
         # list of node pairs shape==[n,2]
         if len(part_name) == 0:
@@ -153,6 +236,8 @@ class FE(object):
         self.nel += len(n)  # element number
         # element aligned coordinate
         dx = self.X[n[:, 1], :] - self.X[n[:, 0], :]
+        X = self.X[n[:, 0], :] + dx/2  # element midpoint
+
         self.check_frame(dx)
         dl = np.linalg.norm(dx, axis=1)  # element length
         norm = np.dot(np.matrix(dl).T, np.ones((1, 3)))
@@ -171,13 +256,49 @@ class FE(object):
         dy = np.zeros(np.shape(dx))
         for i, (dx_, dy_) in enumerate(zip(dx, el_dy)):
             dy[i, :] = dy_ - np.dot(dy_, dx_.T) * dx_
+        norm = np.dot(np.matrix(np.linalg.norm(dy, axis=1)).T, np.ones((1, 3)))
+        dy /= norm
+        dy = np.matrix(dy)
         dz = np.cross(dx, dy)  # right hand coordinates
+
+        # set material properties
+        if isinstance(nmat, int):  # constant sectional properties
+            mat_array = nmat * np.ones(len(n), dtype=int)
+        elif isinstance(nmat, str):
+            try:
+                nmat = self.mat_index[nmat]  # extract mat_index
+            except:
+                if len(nmat) == 0:
+                    errtxt = 'nmat variable not set in add_elements\n'
+                    errtxt += 'specify ether nmat index (int) or '
+                    errtxt += 'sectional data name (str)'
+                else:
+                    errtxt = 'sectional properties for '
+                    errtxt += '\'{}\' not present'.format(nmat)
+                raise ValueError(errtxt)
+            nm = len(nmat)
+            if nm == 1:
+                mat_array = nmat * np.ones(len(n), dtype=int)
+            else:  # variation with normalized length
+                l_sum = np.cumsum(dl)
+                l_norm = l_sum/l_sum[-1]
+                l_norm -= dl/(2*l_sum[-1])
+                mat_interp = interp1d(np.linspace(0, 1, nm),
+                                      nmat, kind='nearest')
+                mat_array = np.array(mat_interp(l_norm), dtype=int)
+        elif len(nmat) == len(n):  # nmat 2D list - linear variation
+            mat_array = nmat
+        else:
+            errtxt = 'incorrect input of nmat variable'
+            errtxt += 'int or str'
+            raise ValueError(errtxt)
 
         self.el_append('dx', dx)  # store elements
         self.el_append('dy', dy)
         self.el_append('dz', dz)
         self.el_append('dl', dl)
-        self.el_append('mat', nmat * np.ones(len(n), dtype=int))
+        self.el_append('X', X)
+        self.el_append('mat', mat_array)
         self.el_append('n', n)
         self.nd_connect(n)
         self.add_part(part_name)
@@ -234,7 +355,7 @@ class FE(object):
         self.nShape = nShape
         nsh = self.nel
         self.shape = {}
-        self.shape['x'] = np.zeros(nsh)
+        # self.shape['x'] = np.zeros(nsh)
         for label in ['u', 'd2u', 'U', 'D']:
             self.shape[label] = np.zeros((nsh, 3, self.nShape))
         self.S = {}
@@ -354,7 +475,7 @@ class FE(object):
 
     def stiffness_1D(self, el):  # dof [v,rz]
         a = self.el['dl'][el] / 2
-        E, Iz = self.get_mat(self.el['mat'][el])
+        E, Iz = self.get_mat_o(self.el['mat'][el])
         k = E * Iz / (2 * a**3) * np.matrix([[3,   3*a,   -3,  3*a],
                                              [3*a, 4*a**2, -3*a, 2*a**2],
                                              [-3, -3*a,    3, -3*a],
@@ -363,7 +484,7 @@ class FE(object):
 
     def stiffness_2D(self, el):  # dof [u,v,rz]
         a = self.el['dl'][el] / 2
-        E, A, Iz = self.get_mat(self.el['mat'][el])
+        E, A, Iz = self.get_mat_o(self.el['mat'][el])
         k = np.matrix([[A*E/(2*a), 0,               0,
                        -A*E/(2*a), 0,               0],
                        [0,         3*E*Iz/(2*a**3), 3*E*Iz/(2*a**2),
@@ -381,7 +502,7 @@ class FE(object):
 
     def stiffness_3D(self, el):  # dof [u,v,w,rx,ry,rz]
         a = self.el['dl'][el] / 2
-        E, A, G, J, Iy, Iz = self.get_mat(self.el['mat'][el])
+        E, A, G, J, Iy, Iz = self.get_mat_o(self.el['mat'][el])
         k = np.matrix([[A*E/(2*a), 0,               0,
                         0,         0,               0,
                        -A*E/(2*a), 0,               0,
@@ -470,7 +591,8 @@ class FE(object):
         k = T.T * M * T
         return k
 
-    def check_input(self, vector, label, terminate=True):  # 'dof','disp','load'
+    # 'dof','disp','load'
+    def check_input(self, vector, label, terminate=True):
         attributes = getattr(self, vector)
         error_code = 0
         if label not in attributes and not \
@@ -523,10 +645,10 @@ class FE(object):
         if len(csys) == 0:
             raise ValueError('load vector unset')
         elif csys == 'global':
-            print(self.T3[:, :, el])
             f = np.linalg.solve(self.T3[:, :, el].T, f)  # rotate to local csys
         fn = np.zeros((6, 2))  # 6 dof local nodal load vector
-        for i, label in enumerate(['fx', 'fy', 'fz']):  # split point load to F,M
+        # split point load to F,M
+        for i, label in enumerate(['fx', 'fy', 'fz']):
             if label in self.load:
                 if label == 'fx':
                     fn[i, 0] = (1 - s) * f[i]
@@ -551,11 +673,12 @@ class FE(object):
             if csys == 'global':
                 F = np.zeros((6))
                 for j in range(2):  # force,moment
-                    F[j * 3:j * 3 +
-                        3] = np.dot(self.T3[:, :, el].T, fn[j * 3:j * 3 + 3, i])
+                    F[j*3:j*3+3] = \
+                        np.dot(self.T3[:, :, el].T, fn[j * 3:j * 3 + 3, i])
             else:
                 F = fn[:, i]
-            for index, label in enumerate(['fx', 'fy', 'fz', 'mx', 'my', 'mz']):
+            for index, label in enumerate(['fx', 'fy', 'fz',
+                                           'mx', 'my', 'mz']):
                 if label in self.load:
                     self.add_nodal_load(node, label, F[index])
 
@@ -569,7 +692,8 @@ class FE(object):
         for part in self.part:
             for el in self.part[part]['el']:
                 nm = self.el['mat'][el]  # material index
-                w = -9.81 * self.mat['rho'][nm] * self.mat['A'][nm]
+                w = -9.81 * self.mat['mat_o']['rho'][nm] *\
+                    self.mat['mat_o']['A'][nm]
                 self.add_load(el=el, W=[0, 0, w])  # self weight
 
     def add_tf_load(self, sf, ff, tf, Bpoint, parts=['loop', 'nose'],
@@ -686,7 +810,7 @@ class FE(object):
                     ke[j[0]:j[0] + self.ndof, j[1]:j[1] + self.ndof]
         self.K = np.copy(self.Ko)
 
-    def add_cp(self, nodes, dof='fix', nset='next', axis='z', rotate=False):
+    def add_cp(self, nodes, dof='fix', nset='next', axis='y', rotate=False):
         nodes = np.copy(nodes)  # make local copy
         if nset == 'next':  # (default)
             self.ncp += 1
@@ -714,7 +838,7 @@ class FE(object):
             self.rotate_cp(name, dof, theta, axis)
         else:
             self.mpc[name]['Cr'] = np.identity(self.mpc[name]['neq'])
-        self.check_cp_nodes()
+        # self.check_cp_nodes()
         self.extract_cp_nodes(self.mpc[name])
 
     def check_axis(self, axis):
@@ -855,29 +979,31 @@ class FE(object):
         self.initalize_shape_coefficents(nShape=self.nShape)
         self.update_rotation()  # evaluate/update rotation matricies
         self.assemble()  # assemble stiffness matrix
-
         self.constrain()  # apply and colapse constraints
         self.Dn = np.zeros(self.nK)  # initalise displacment matrix
         self.Dn[self.nd['dr']] = np.linalg.solve(self.K, self.F)  # global
         self.Dn[self.nd['dc']] = np.dot(
-            self.Tc, self.Dn[self.nd['dr']])  # patch
+            self.Tc, self.Dn[self.nd['dr']])  # patch constrained DOFs
 
         for i, disp in enumerate(self.disp):
             self.D[disp] = self.Dn[i::self.ndof]
         self.interpolate()
 
-    def plot_3D(self, ms=5, bb=12, pattern=0):
-        fig = pl.figure(figsize=(8, 8))
-        ax = fig.gca(projection='3d')
-        Theta = np.linspace(0, 2 * np.pi, pattern, endpoint=False)
+    def plot_3D(self, ax=None, nTF=0, bb=12, ms=5):
+        if ax is None:
+            ax = Axes3D(pl.figure(figsize=(8, 8)))
+        Theta = np.linspace(0, 2*np.pi, nTF, endpoint=False)
         for t in Theta:
+            self.plot_sections(ax=ax, theta=t)
+            # X = np.dot(self.X, R)
+            # ax.plot(X[:, 0], X[:, 1], X[:, 2], 'o',
+            #         markersize=ms, color=0.75 * np.ones(3))
+            '''
             R = geom.rotate(t, axis='z')
-            X = np.dot(self.X, R)
-            ax.plot(X[:, 0], X[:, 1], X[:, 2], 'o',
-                    markersize=ms, color=0.75 * np.ones(3))
             for i, (part, c) in enumerate(zip(self.part, color)):
                 D = np.dot(self.part[part]['D'], R)
                 ax.plot(D[:, 0], D[:, 1], D[:, 2], color=c)
+            '''
         ax.set_xlim(-bb, bb)
         ax.set_ylim(-bb, bb)
         ax.set_zlim(-bb, bb)
@@ -919,8 +1045,8 @@ class FE(object):
             for el in self.part[part]['el']:
                 nd = self.el['n'][el]
                 pl.plot([self.X[nd[0], 0], self.X[nd[1], 0]],
-                        [self.X[nd[0], 2], self.X[nd[1], 2]], color=c, alpha=0.5)
-        sns.despine()
+                        [self.X[nd[0], 2], self.X[nd[1], 2]],
+                        color=c, alpha=0.5)
 
     def plot_F(self, scale=1):
         for i, (X, dx, dz) in enumerate(zip(self.X, self.D['x'], self.D['z'])):
@@ -933,7 +1059,8 @@ class FE(object):
             if nF != 0:
                 pl.arrow(X[0] + self.scale * dx, X[2] + self.scale * dz,
                          scale * F[0], scale * F[1],
-                         head_width=scale * 0.2 * nF, head_length=scale * 0.3 * nF,
+                         head_width=scale * 0.2 * nF,
+                         head_length=scale * 0.3 * nF,
                          color=color[1])
 
     def plot_displacment(self):
@@ -956,3 +1083,68 @@ class FE(object):
         sns.despine()
         pl.xlabel('part length')
         pl.ylabel('part curvature')
+
+    def plot_sections(self, ax=None, theta=0):
+        if ax is None:
+            ax = Axes3D(pl.figure(figsize=(8, 12)))
+        R = geom.rotate(theta, axis='z')  # rotation matrix
+        pl.axis('equal')
+        pl.axis('off')
+        dx_ref = np.array([1, 0, 0], ndmin=2)
+        dy_ref = np.array([0, 1, 0], ndmin=2)
+
+        for n in range(self.nel):  # for all elements
+            X = np.copy(self.el['X'][n])  # element midpoint
+            dx = self.el['dx'][n]  # element tangent
+            dy = self.el['dy'][n]  # element normal
+            pivot = np.cross(dx_ref, dx)
+            pivot /= np.linalg.norm(pivot)
+            theta_a = np.arccos(np.dot(dx_ref, np.array(dx.T))[0][0])
+            nodes = self.el['n'][n]
+            D = np.zeros(3)
+            for i, var in enumerate(['x', 'y', 'z']):
+                D[i] = self.D[var][nodes].mean()
+            X += self.scale*D  # add dissplacment
+            matID = self.el['mat'][n]
+            nsection = self.mat[matID]['nsection']
+            mat_array = self.mat[matID]['mat_array']
+            for nsec in range(nsection):
+                pntID = mat_array['pntID'][nsec]
+                pnt = self.pnt[pntID]  # section outline
+                shape = np.shape(pnt)
+                if len(shape) == 3:  # multi part
+                    nshape = shape[1]
+                else:
+                    nshape = 1
+                    pnt = np.expand_dims(pnt, 1)
+                for ns in range(nshape):
+                    y = pnt[0][ns]
+                    z = pnt[1][ns]
+                    x = np.zeros(np.shape(y))
+                    points = geom.qrotate(
+                            np.array([x, y, z]).T, theta_a, xo=[0, 0, 0],
+                            dx=pivot)
+                    dy_ref_o = geom.qrotate(dy_ref, theta_a, xo=[0, 0, 0],
+                                            dx=pivot)
+
+                    dy_dot = np.dot(dy_ref_o, dy.T).tolist()[0][0]
+                    dy_pivot = np.cross(dy_ref_o, dy)
+                    if dy_dot > 1:
+                        dy_dot = 1
+                    if np.linalg.norm(dy_pivot) == 0:
+                        dy_pivot = dx
+                    theta_b = np.arccos(dy_dot)
+                    points = geom.qrotate(points, theta_b, xo=[0, 0, 0],
+                                          dx=dy_pivot)
+                    x, y, z = points[:, 0], points[:, 1], points[:, 2]
+                    x += X[0]  # translate
+                    y += X[1]
+                    z += X[2]
+                    Xr = np.dot(np.array([x, y, z]).T, R).T  # rotate patch
+                    geom.polyfill3D(Xr[0], Xr[1], Xr[2], ax=ax, alpha=0.5)
+        for i, (part, c) in enumerate(zip(self.part, color)):
+            D = self.part[part]['D']
+            D = np.dot(D, R)
+            # plot element centre lines
+            ax.plot(D[:, 0], D[:, 1], D[:, 2], color=0.5*np.ones(3))
+        pl.axis('equal')

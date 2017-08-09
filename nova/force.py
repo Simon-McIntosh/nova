@@ -20,8 +20,15 @@ class force_feild(object):
         self.passive_coils = kwargs.get('passive_coils', ['Plasma'])
         self.set_force_feild(state='both', multi_filament=multi_filament)
         self.set_current()
+        self.initalize_F()
         if plot:
             self.plot()
+
+    def initalize_F(self):
+        self.Fcoil = {}
+        for name in self.active_coils:
+            self.Fcoil[name] = {'Fx': 0, 'Fz': 0}
+        self.Fcoil['CS'] = {'Fz': 0}
 
     def check(self):
         if not self.force_feild_active:
@@ -88,6 +95,9 @@ class force_feild(object):
                 Fsep[j] = np.sum(FzCS[j + 1:]) - np.sum(FzCS[:j + 1])
             Fcoil['CS']['sep'] = np.max(Fsep)
         Fcoil['CS']['zsum'] = np.sum(FzCS)
+        for name, F in zip(self.active_coils, F):
+            self.Fcoil[name] = {'fx': F[0], 'fz': F[1]}
+        self.Fcoil['CS'] = {'fz': Fcoil['CS']['zsum']}
         return Fcoil
 
     def set_current(self):  # set eq current vector from pf
@@ -123,7 +133,8 @@ class force_feild(object):
                 else:
                     va = 'top'
                 pl.text(x, z + zarrow, '{:1.0f}MN'.format(F[1]),
-                        ha='center', va=va, fontsize=fs, color=0.1 * np.ones(3),
+                        ha='center', va=va, fontsize=fs,
+                        color=0.1 * np.ones(3),
                         backgroundcolor=0.9 * np.ones(3))
 
     def set_bm(self, cage):
@@ -146,7 +157,7 @@ class force_feild(object):
                                 check_bounds=True)
             if not(topright and bottomleft):
                 errtxt = 'TF coil extends outside Bpoint interpolation grid\n'
-                errtxt = 'extend sf grid\n'
+                errtxt += 'Extend sf grid\n'
                 raise ValueError(errtxt)
         if method == 'function':  # calculate tf feild as fitted 1/x function
             if not hasattr(self, 'bm'):

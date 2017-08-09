@@ -11,7 +11,6 @@ from amigo.IO import trim_dir
 import json
 from nova.firstwall import divertor, main_chamber
 from nova.config import select
-import amigo.mattitools as mj
 colors = sns.color_palette('Paired', 12)
 
 

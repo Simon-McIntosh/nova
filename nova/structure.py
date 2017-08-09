@@ -12,12 +12,7 @@ import pylab as pl
 import numpy as np
 from warnings import warn
 import seaborn as sns
-#rc = {'figure.figsize': [10 * 12 / 16, 10], 'savefig.dpi': 350,
-#     'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
-#      'lines.linewidth': 2}
-#sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
-#        font_scale=7 / 8, rc=rc)
-# color = sns.color_palette('Set2', 12)  # Ne touchez pas!
+from amigo.geom import polyline
 
 
 class architect(object):
@@ -26,25 +21,21 @@ class architect(object):
     coil cage structural solver, TF / intercoil supports / gravity supports
     places structural elements around TF coil
     '''
-
     def __init__(self, tf, pf, plot=False):
         self.tf, self.pf = tf, pf
         self.loop, self.nTF = self.tf.profile.loop, self.tf.nTF
         self.initalise_cs()
         self.tf_cs()
         self.gs_cs()
-        self.initalize_mat()
-        self.define_materials()
         self.build(solve=True, plot=plot)
 
     def build(self, solve=False, plot=False):
         self.CS_support()  # calculate CS support seats
         self.PF_support()  # calculate PF support seats
-        self.Gravity_support(Xo=13, width=0.75)  # gravity support
-        self.OIS(thickness=0.15)  # outer intercoil support
+        self.G_support(Xo=13, width=0.75)  # gravity support
+        self.OIC_support(thickness=0.15)  # outer intercoil support
+        self.get_TF_nodes()  # TF node index for connecting parts
         self.tf.split_loop()
-        # self.inv.set_force_feild()
-        # self.inv.ff.plot()
         if plot:
             self.plot_connections()
 
@@ -53,9 +44,9 @@ class architect(object):
             pl.plot(self.tf.p[section]['x'], self.tf.p[section]['z'], 'o-')
         for name in self.PFsupport:
             nodes = np.array(self.PFsupport[name]['nodes'])
-            nd = self.PFsupport[name]['nd']
+            p = self.PFsupport[name]['p']
             geom.polyfill(nodes[:, 0], nodes[:, 1], color=0.4 * np.ones(3))
-            # pl.plot(nd['x'], nd['z'], '-o')
+            pl.plot(p['x'], p['z'], '-o')
         nodes = np.array(self.Gsupport['base'])
         geom.polyfill(nodes[:, 0], nodes[:, 1], color=0.4 * np.ones(3))
         pl.plot(self.Gsupport['Xo'] * np.ones(2),
@@ -67,7 +58,6 @@ class architect(object):
         for name in self.loop['OIS']:
             nodes = np.array(self.loop['OIS'][name]['nodes'])
             geom.polyfill(nodes[:, 0], nodes[:, 1], color=0.4 * np.ones(3))
-
 
     def OIS_placment(L, TFloop, point):
         err = (point[0] - TFloop['x'](L))**2 + (point[1] - TFloop['z'](L))**2
@@ -94,16 +84,31 @@ class architect(object):
         nodes = [[xcl[i], zcl[i]] for i in range(4)]
         return nodes
 
-    def OIS(self, thickness=0.15):
+    def OIC_support(self, thickness=0.15):  # outer intercoil support
         self.tf.loop_interpolators(offset=0)  # construct TF interpolators
         TFloop = self.tf.fun['cl']
         self.loop['OIS'] = {}
+        self.OICsupport = {}
         for i, (L, width) in enumerate(zip([0.4, 0.66], [4.5, 3.75])):
             name = 'ois{:d}'.format(i)
             self.loop['OIS'][name] = {'L': L, 'width': width,
                                       'thickness': thickness}
             nodes = self.draw_OIS(L, width, thickness, TFloop)
             self.loop['OIS'][name]['nodes'] = nodes
+            x = np.array([nodes[0][0], nodes[1][0]])
+            z = np.array([nodes[0][1], nodes[1][1]])
+            xo, zo = x.mean(), z.mean()
+            Lmid = minimize_scalar(architect.OIS_placment, method='bounded',
+                                   args=(TFloop, (xo, zo)), bounds=[0, 1]).x
+
+            p = {'x': np.array([x[0], TFloop['x'](Lmid), x[-1]]),
+                 'z': np.array([z[0], TFloop['z'](Lmid), z[-1]])}
+            el_dy = np.array([x[-1], 0, z[-1]]) - np.array([x[0], 0, z[0]])
+            el_dy /= np.linalg.norm(el_dy)
+            self.OICsupport[name] = {'p': p, 'thickness': thickness,
+                                     'width': width, 'el_dy': el_dy}
+            self.adjust_TFnode(p['x'][0], p['z'][0])
+            self.adjust_TFnode(p['x'][1], p['z'][1])
 
     def CS_support(self):
         zo = self.tf.profile.loop.po[0]['p0']['z']
@@ -146,6 +151,7 @@ class architect(object):
         if ndir < argmin:  # limit absolute support angle
             nhat = np.array([np.sign(nhat[0]),
                              np.tan(argmin * np.pi / 180) * np.sign(nhat[1])])
+            ndir = 180 / np.pi * np.arctan(abs(nhat[1] / nhat[0]))  # update
         nhat /= np.linalg.norm(nhat)
         above = np.sign(np.dot(nhat, [0, 1]))
         zc = coil['z'] + above * (coil['dz'] / 2 + hover)
@@ -160,10 +166,13 @@ class architect(object):
             rs, zs = res.x[1] * nhat + xc
             nodes[3 - i] = [rs, zs]
 
-        nd = {'x': np.zeros(2), 'z': np.zeros(2)}
-        for i in range(2):
-            nd['x'][i] = np.mean([nodes[2*i][0], nodes[2*i+1][0]])
-            nd['z'][i] = np.mean([nodes[2*i][1], nodes[2*i+1][1]])
+        nd = {'x': np.zeros(3), 'z': np.zeros(3)}  # cl, outboard, pf
+        for i in range(2):  # cl, pf [0,2]
+            nd['x'][2*i] = np.mean([nodes[2*i][0], nodes[2*i+1][0]])
+            nd['z'][2*i] = np.mean([nodes[2*i][1], nodes[2*i+1][1]])
+        rout, zout = polyline(self.tf.p['out'], nd)  # TFout intersect
+        nd['x'][1] = rout  # outboard TF node [1]
+        nd['z'][1] = zout
 
         self.tf.loop_interpolators(offset=0)
         cl_loop = self.tf.fun['cl']
@@ -172,23 +181,42 @@ class architect(object):
                        bounds=([0, 1], [0, 15]),
                        args=(xc, nhat, cl_loop))
         nd['x'][-1], nd['z'][-1] = res.x[1] * nhat + xc
-        return nodes, nd
+        return nodes, nd, ndir, L
 
-    def PF_support(self):
+    def PF_support(self, n=5):
         self.tf.loop_interpolators(offset=-0.15)  # construct TF interpolators
         TFloop = self.tf.fun['out']
+        dt = self.loop['cs']['dt']
+        space = self.cs['wp']['d']+2*self.cs['case']['side']-dt
+        self.cs['pfs'] = {'dt': dt, 'n': n, 'space': space}
         self.PFsupport = {}
         for name in self.pf.index['PF']['name']:
             coil = self.pf.coil[name]
-            nodes, nd = self.connect(coil, TFloop, edge=0.15, hover=0.1,
-                                     argmin=45)
-            self.PFsupport[name] = {'nodes': nodes, 'nd': nd}
-            self.adjust_TFnode(nd['x'][-1], nd['z'][-1])
+            nodes, p, ndir, L = self.connect(
+                    coil, TFloop, edge=0.15, hover=0.1, argmin=35)
+            width = coil['dx']*np.sin(ndir*np.pi/180)  # support width
+            self.PFsupport[name] = {'nodes': nodes, 'p': p, 'width': width}
+            self.adjust_TFnode(p['x'][-1], p['z'][-1])
+
+    def get_TF_nodes(self):
+        tf_x, tf_z = self.tf.p['cl']['x'], self.tf.p['cl']['z']
+        for name in self.PFsupport:
+            self.PFsupport[name]['nd_tf'] = \
+                np.argmin((tf_x-self.PFsupport[name]['p']['x'][-1])**2 +
+                          (tf_z-self.PFsupport[name]['p']['z'][-1])**2)
+        self.Gsupport['nd_tf'] = np.argmin((tf_x-self.Gsupport['Xo'])**2 +
+                                           (tf_z-self.Gsupport['zbase'])**2)
+        for name in self.OICsupport:
+            p = self.OICsupport[name]['p']
+            self.OICsupport[name]['nd_tf'] = np.zeros(len(p['x']), dtype=int)
+            for i, (x, z) in enumerate(zip(p['x'], p['z'])):
+                self.OICsupport[name]['nd_tf'][i] = np.argmin((tf_x-x)**2 +
+                                                              (tf_z-z)**2)
 
     def GS_placement(L, Xo, TFloop):
         return abs(Xo - TFloop['x'](L))
 
-    def Gravity_support(self, Xo=13, dZo=-1, width=0.75):
+    def G_support(self, Xo=13, dZo=-1, width=0.75):  # gravity support
         self.tf.loop_interpolators(offset=-0.15)  # construct TF interpolators
         TFloop = self.tf.fun['out']
         self.tf.loop_interpolators(offset=0)
@@ -199,8 +227,11 @@ class architect(object):
         coil = {'x': Sloop['x'](L) + width / 2,
                 'z': Sloop['z'](L) - width / 2,
                 'dx': width, 'dz': width}
-        nodes = self.connect(coil, TFloop, edge=0, hover=0, argmin=90)[0]
-        self.Gsupport = {'base': nodes}
+        nodes, p = self.connect(coil, TFloop, edge=0, hover=0, argmin=90)[:2]
+        self.adjust_TFnode(p['x'][-1], p['z'][-1])  # add / adjust
+
+        self.Gsupport = {}
+        self.Gsupport['base'] = nodes
         z = [[self.pf.coil[name]['z'] - self.pf.coil[name]['dz'] / 2]
              for name in self.pf.coil]
         floor = np.min(z) + dZo
@@ -248,44 +279,8 @@ class architect(object):
             j = 0 if Ln < Li else 1
             self.tf.p['cl']['x'] = np.insert(self.tf.p['cl']['x'], i+j, x)
             self.tf.p['cl']['z'] = np.insert(self.tf.p['cl']['z'], i+j, z)
-        else:  # insert node
+        else:  # adjust node
             self.tf.p['cl']['x'][i], self.tf.p['cl']['z'][i] = x, z
-
-    def initalize_mat(self, nmat_max=20, nsec_max=2):
-        self.nmat_max = nmat_max
-        self.nsec_max = nsec_max
-        self.nmat = -1
-        self.pntID = -1
-        self.pnt = []  # list of list - outer points of each section for stress
-        Itype = np.dtype({'names': ['xx', 'yy', 'zz'],
-                          'formats': ['float', 'float', 'float']})
-        Ctype = np.dtype({'names': ['y', 'z'], 'formats': ['float', 'float']})
-        self.mtype = np.dtype({'names': ['name', 'E', 'G', 'rho',
-                                         'J', 'A', 'I', 'v', 'C', 'pntID'],
-                               'formats': ['S24', 'float', 'float', 'float',
-                                           'float', 'float', Itype, 'float',
-                                           Ctype, 'int']})
-        self.mat = np.zeros((nmat_max), dtype=[('ID', 'int'), ('name', 'S24'),
-                                               ('nsection', 'int'),
-                                               ('mat_o', self.mtype),
-                                               ('mat_array',
-                                               (self.mtype, self.nsec_max))])
-
-    def define_materials(self):
-        # forged == inner leg, cast == outer + supports
-        self.mat_data = {}
-        self.mat_data['wp'] = {'E': 95e9, 'rho': 8940, 'v': 0.33}
-        self.mat_data['steel_forged'] = {'E': 205e9, 'rho': 7850, 'v': 0.29}
-        self.mat_data['steel_cast'] = {'E': 190e9, 'rho': 7850, 'v': 0.29}
-        self.update_shear_modulus()
-
-    def update_shear_modulus(self):
-        for name in self.mat_data:
-            E, v = self.mat_data[name]['E'], self.mat_data[name]['v']
-            self.mat_data[name]['G'] = self.update_G(E, v)
-
-    def update_G(self, E, v):
-        return E/(2*(1+v))
 
     def initalise_cs(self):
         '''
@@ -364,6 +359,7 @@ class architect(object):
             self.plot_tf_section()
 
     def plot_tf_section(self):
+        color = sns.get_pallete('Set2')
         fig, ax = pl.subplots(1, 2, sharex=True, figsize=(6, 4))
         pl.sca(ax[0])
         pl.axis('equal')
@@ -487,21 +483,31 @@ class architect(object):
         section = {'C': C, 'I': I, 'A': A, 'J': J, 'pnt': pnt}
         return section
 
-    def intercoil_support(self, plot=False):  # outer intercoil support
+    def intercoil_support(self, thickness, width, plot=False):
+        # outer intercoil support
         sm = second_moment()
-        thickness = 0.4
-        width = 2
-        sm.add_shape('rect', b=thickness, h=width)
+        sm.add_shape('rect', b=width, h=thickness)
         C, I, A = sm.report()
-        pnt = {'y': [thickness/2, thickness/2, -thickness/2, -thickness/2],
-               'z': [-width/2, width/2, width/2, -width/2]}
+        pnt = sm.get_pnt()
         J = 1/3*width*thickness**3
         if plot:
             sm.plot()
         section = {'C': C, 'I': I, 'A': A, 'J': J, 'pnt': pnt}
         return section
 
-    def get_section(self, C, I, A, J, pnt):
+    def coil_support(self, width=0.5, plot=False):  # PF coil support
+        sm = second_moment()
+        dt = self.cs['pfs']['dt']
+        n = self.cs['pfs']['n']
+        space = self.cs['pfs']['space']
+        for dy in np.linspace(-space/2, space/2, n):
+            sm.add_shape('rect', b=dt, h=width, dy=dy)
+        C, I, A = sm.report()
+        pnt = sm.get_pnt()
+        J = n*1/3*width*dt**3
+        if plot:
+            sm.plot()
+
         section = {'C': C, 'I': I, 'A': A, 'J': J, 'pnt': pnt}
         return section
 
@@ -540,76 +546,6 @@ class architect(object):
         pl.ylabel(r'sectional properties, m$^2$')
         pl.xlabel('cross-section position')
 
-    def get_mat(self, material_name, section):
-        mat = np.zeros(1, dtype=self.mtype)[0]  # default mat data structure
-        mat['name'] = material_name
-        material = self.mat_data[material_name]
-        for var in material:
-            try:  # treat as scalar
-                mat[var] = material[var]
-            except:  # extract dict
-                for subvar in mat[var]:
-                    mat[var][subvar] = material[var][subvar]
-        pnt = section.pop('pnt')
-        for var in section:
-            try:  # treat as scalar
-                mat[var] = section[var]
-            except:  # extract dict
-                for subvar in section[var]:
-                    mat[var][subvar] = section[var][subvar]
-        return mat, pnt
-
-    def add_pnt(self, mat, pnt):
-        self.pntID += 1  # advance pntID index
-        self.pnt.append(pnt)
-        mat['pntID'] = self.pntID
-        return mat
-
-    def add_mat(self, name, materials, sections):
-        '''
-        add material + sectional properties to FE object
-        fe == FE object
-        name == user defined label
-        materials == [list of material names]
-        sections == [list of sections]
-        add mat combines material + section lists as addition (sliding)
-        EI = EI_1 + EI_2 + ...
-        '''
-        self.nmat += 1
-        area_weight = ['E', 'v', 'rho', 'J']  # list of area weighted terms
-        self.mat[self.nmat]['ID'] = self.nmat
-        self.mat[self.nmat]['name'] = name
-        for i, (material, section) in enumerate(zip(materials, sections)):
-            mat, pnt = self.get_mat(material, section)
-            self.mat[self.nmat]['mat_array'][i] = self.add_pnt(mat, pnt)
-        self.mat[self.nmat]['nsection'] = i+1
-
-        mat_o = np.zeros(1, dtype=self.mtype)[0]  # default mat data structure
-        for i in range(self.mat[self.nmat]['nsection']):
-            mat_instance = self.mat[self.nmat]['mat_array'][i]
-            mat_o['A'] += mat_instance['A']  # sum areas
-            for var in area_weight:  # sum area weighted terms
-                mat_o[var] += mat_instance['A']*mat_instance[var]
-            for var in mat_instance['I'].dtype.names:  # sum second moments
-                mat_o['I'][var] += mat_instance['E']*mat_instance['I'][var]
-        for var in area_weight:  # normalise area weighted terms
-            mat_o[var] /= mat_o['A']
-        mat_o['G'] = self.update_G(mat_o['E'], mat_o['v'])
-        for var in mat_instance['I'].dtype.names:  # normalise second moments
-            mat_o['I'][var] /= mat_o['E']
-        mat_o['name'] = 'fe'
-        self.mat[self.nmat]['mat_o'] = mat_o
-        # fe.add_mat(self.nmat, mat=self.toFE(mat_o))
-        # return self.nmat
-
-    def toFE(self, mat):  # convert mat to dict for FE input
-        mat_dict = {}
-        for var in ['E', 'G', 'rho', 'J', 'A']:
-            mat_dict[var] = mat[var]
-        for var in ['yy', 'zz']:
-            mat_dict['I'+var[0]] = mat['I'][var]
-        return mat_dict
-
 
 class torsion(object):
 
@@ -645,14 +581,13 @@ class torsion(object):
             pl.plot(yout, zout)
         return J
 
+
 if __name__ is '__main__':
 
-
-
+    pl.figure(figsize=(8, 12))
     pl.style.use('default')
     pl.axis('equal')
     pl.axis('off')
-
 
     nTF = 16
     base = {'TF': 'demo', 'eq': 'DEMO_SN_SOF'}
@@ -679,24 +614,7 @@ if __name__ is '__main__':
     atec = architect(tf, pf)
     atec.plot_connections()
 
-    '''
-
-    '''
-
+    atec.plot_transition()
     # atec.build()
     # atec.winding_pack()
-    '''
-    atec.update_cs()  # side=0.1
-    atec.case(1, plot=True)
-    atec.gravity_support(plot=True)
 
-    ntrans = 20
-    trans = {'frac': np.linspace(0,1,ntrans), 'index': np.zeros(ntrans)}
-    for i,frac in enumerate(trans['frac']):
-        trans['index'][i] = atec.add_mat('TF_trans_{}'.format(i),
-                                         ['wp', 'wp'], [atec.winding_pack(),
-                                                        atec.case(frac)])
-
-    print(atec.mat[0]['name'], atec.mat[0]['mat_o'])
-    # atec.plot_transition()
-    '''

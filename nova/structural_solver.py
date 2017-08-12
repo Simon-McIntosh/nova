@@ -38,9 +38,8 @@ class SS:  # structural solver
         self.fe = FE(frame='3D')  # initalise FE solver
 
         self.add_mat()
-
         self.TF_loop()
-        # self.PF_connect()
+        self.PF_connect()
 
     def add_mat(self):
         self.fe.add_mat('nose', ['wp', 'steel_forged'],
@@ -78,7 +77,7 @@ class SS:  # structural solver
         # constrain TF nose - free translation in z
         self.fe.add_bc('nw', 'all', part='nose')
         self.gravity_support()  # add gravity support to TF loop
-        #self.outer_intercoil_supports()
+        self.outer_intercoil_supports()
 
     def PF_connect(self):
         for name in self.atec.PFsupport:  # PF coil connections
@@ -148,25 +147,11 @@ class SS:  # structural solver
             self.fe.add_cp([self.fe.nndo, self.fe.nnd-1],
                            dof='fix', rotate=True, axis='z')
 
-            '''
-            self.fe.add_nodes(
-                    np.dot(self.fe.X[nd_tf[1]],
-                           geom.rotate(-np.pi/self.tf.nTF, axis='z')))
-            self.fe.add_nodes(
-                    np.dot(self.fe.X[nd_tf[1]],
-                           geom.rotate(np.pi/self.tf.nTF, axis='z')))
-            self.fe.add_elements(
-                n=[self.fe.nnd-2, nd_tf[1], self.fe.nnd-1],
-                part_name=name, nmat=name, el_dy=el_dy)
-            self.fe.add_cp([self.fe.nnd-2, self.fe.nnd-1],
-                           dof='fix', rotate=True, axis='z')
-            '''
-
     def solve(self):
-        # self.PF_load()
+        self.PF_load()
         self.fe.add_weight()  # add weight to all elements
-        #self.fe.add_tf_load(self.sf, self.inv.ff, self.tf,
-        #                    self.inv.eq.Bpoint, parts=self.TFparts)
+        self.fe.add_tf_load(self.sf, self.inv.ff, self.tf,
+                            self.inv.eq.Bpoint, parts=self.TFparts)
         self.fe.solve()
 
     def plot(self, scale=15):
@@ -227,7 +212,7 @@ if __name__ == '__main__':
     print(time()-tic)
     # TODO implement multi solve logic
 
-    ss.plot(300)
-    # ss.plot3D()
-    # ss.fe.plot_sections()
+    ss.plot(25)
+    #ss.plot3D()
+    ss.fe.plot_sections()
     # ss.movie('structural_solver')

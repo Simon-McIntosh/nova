@@ -197,7 +197,7 @@ class FE(object):
             self.nd_topo = np.zeros(nX)
             self.Fo = np.zeros(nX * self.ndof)
             self.D = {}
-            for disp in ['x', 'y', 'z', 'tx', 'ty', 'tz']:
+            for disp in self.coordinate:
                 self.D[disp] = np.zeros(nX)
         else:
             self.X = np.append(self.X, X, axis=0)
@@ -388,7 +388,7 @@ class FE(object):
                     self.el['dl'][el]
             v = np.zeros((self.nShape, 2))
             d2v = np.zeros((self.nShape, 2))
-            for i, label in enumerate([['y', 'ty'], ['z', 'tz']]):
+            for i, label in enumerate([['y', 'tz'], ['z', 'ty']]):
                 if label[0] in self.disp:
                     d1D = self.displace_1D(d, label)
                     v[:, i] = np.dot(self.S['Nv'], d1D)

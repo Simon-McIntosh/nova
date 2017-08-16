@@ -34,23 +34,33 @@ def delete_row_csr(mat, i):
 
 class FE(object):
 
-    def __init__(self, frame='1D', nShape=21, scale=1):
-        self.nShape = nShape  # element shape function resolution
-        self.scale = 1  # displacment scale factor (plotting)
+    def __init__(self, frame='1D', nShape=11, scale=10):
         self.coordinate = ['x', 'y', 'z', 'tx', 'ty', 'tz']
-        self.initalize_mat()
-        self.define_materials()
+        self.scale = scale  # displacment scale factor (plotting)
+        self.nShape = nShape  # element shape function resolution
+        self.set_shape_coefficents()  # element shape coefficients
         self.frame = frame
         self.set_stiffness()  # set stiffness matrix + problem dofs
+        self.define_materials()
+        self.initalize_mat()  # materials array
         self.initalize_BC()  # boundary conditions
-        self.initalise_grid()  # grid
+        self.initalise_mesh()  # FE mesh
         self.initalise_couple()  # node coupling
+
+    def clfe(self):  # clear all (mesh, BCs, constraints and loads)
+        self.initalize_BC()  # clear boundary conditions
+        self.initalise_mesh()  # clear FE mesh - also deletes loads
+        self.initalise_couple()  # remove node coupling
+        del self.T3  # clear local - global roation matrix to force update
+
+    def clf(self):  # clear loads retaining mesh, BCs and constraints
+        self.Fo = np.zeros(self.nnd * self.ndof)
 
     def initalise_couple(self):
         self.ncp = 0  # number of constraints
         self.mpc = OrderedDict()  # multi-point constraint
 
-    def initalize_mat(self, nmat_max=20, nsec_max=2):
+    def initalize_mat(self, nmat_max=50, nsec_max=2):
         self.nmat_max = nmat_max
         self.nsec_max = nsec_max
         self.nmat = 0
@@ -73,7 +83,7 @@ class FE(object):
                              self.mtype, (self.mtype, self.nsec_max)]})
         self.mat = np.zeros((nmat_max), dtype=self.mtype_arrray)
 
-    def extend_mat(self, nblock=20):  # extend mat structured array
+    def extend_mat(self, nblock=50):  # extend mat structured array
         self.matID += 1  # increment material number
         self.nmat += 1  # increment material ID
         if self.nmat > self.nmat_max:
@@ -174,7 +184,7 @@ class FE(object):
             values.append(val)
         return values
 
-    def initalise_grid(self, npart_max=10):
+    def initalise_mesh(self, npart_max=10):
         self.X = []
         self.npart = 0  # part number
         self.part = OrderedDict()  # part ordered dict
@@ -192,14 +202,14 @@ class FE(object):
         nX = len(X)
         self.nndo = self.nnd  # start index
         self.nnd += nX  # increment node index
-        if len(self.X) == 0:  # initalise
+        if len(self.X) == 0:  # initalise node arrays
             self.X = X
             self.nd_topo = np.zeros(nX)
             self.Fo = np.zeros(nX * self.ndof)
             self.D = {}
             for disp in self.coordinate:
                 self.D[disp] = np.zeros(nX)
-        else:
+        else:  # append
             self.X = np.append(self.X, X, axis=0)
             self.nd_topo = np.append(self.nd_topo, np.zeros(nX))
             self.Fo = np.append(self.Fo, np.zeros(nX * self.ndof))
@@ -267,7 +277,7 @@ class FE(object):
         elif isinstance(nmat, str):
             try:
                 nmat = self.mat_index[nmat]  # extract mat_index
-            except:
+            except KeyError:
                 if len(nmat) == 0:
                     errtxt = 'nmat variable not set in add_elements\n'
                     errtxt += 'specify ether nmat index (int) or '
@@ -351,28 +361,25 @@ class FE(object):
         for key in self.dof:
             self.BC[key] = np.array([])  # type:[node,...]
 
-    def initalize_shape_coefficents(self, nShape=21):
-        self.nShape = nShape
-        nsh = self.nel
-        self.shape = {}
-        for label in ['u', 'd2u', 'U', 'D']:
-            self.shape[label] = np.zeros((nsh, 3, self.nShape))
+    def set_shape_coefficents(self):
         self.S = {}
-        self.S['s'] = np.linspace(0, 1, nShape)  # inter-element spacing
-        self.S['Nv'] = np.zeros((nShape, 4))  # Hermite shape functions (disp)
+        self.S['s'] = np.linspace(0, 1, self.nShape)  # inter-element spacing
+        # Hermite shape functions (disp)
+        self.S['Nv'] = np.zeros((self.nShape, 4))
         self.S['Nv'][:, 0] = 1 - 3 * self.S['s']**2 + 2 * self.S['s']**3
         self.S['Nv'][:, 1] = self.S['s'] - 2 * self.S['s']**2 + self.S['s']**3
         self.S['Nv'][:, 2] = 3 * self.S['s']**2 - 2 * self.S['s']**3
         self.S['Nv'][:, 3] = -self.S['s']**2 + self.S['s']**3
-        self.S['Nv_dL'] = np.zeros((nShape, 2))
+        self.S['Nv_dL'] = np.zeros((self.nShape, 2))
         self.S['Nv_dL'][:, 0] = np.copy(self.S['Nv'][:, 1])
         self.S['Nv_dL'][:, 1] = np.copy(self.S['Nv'][:, 3])
-        self.S['Nd2v'] = np.zeros((nShape, 4))  # Hermite functions (curve)
+        # Hermite functions (curve)
+        self.S['Nd2v'] = np.zeros((self.nShape, 4))
         self.S['Nd2v'][:, 0] = -6 + 12 * self.S['s']
         self.S['Nd2v'][:, 1] = -4 + 6 * self.S['s']
         self.S['Nd2v'][:, 2] = 6 - 12 * self.S['s']
         self.S['Nd2v'][:, 3] = -2 + 6 * self.S['s']
-        self.S['Nd2v_dL'] = np.zeros((nShape, 2))
+        self.S['Nd2v_dL'] = np.zeros((self.nShape, 2))
         self.S['Nd2v_dL'][:, 0] = np.copy(self.S['Nd2v'][:, 1])
         self.S['Nd2v_dL'][:, 1] = np.copy(self.S['Nd2v'][:, 3])
 
@@ -383,7 +390,8 @@ class FE(object):
             for i in range(2):  # axial displacment
                 u[i] = d[6 * i]
             for i, j in enumerate([1, 3]):  # adjust for element length
-                self.S['Nv'][:, j] = self.S['Nv_dL'][:, i] * self.el['dl'][el]
+                self.S['Nv'][:, j] = self.S['Nv_dL'][:, i] * \
+                    self.el['dl'][el]
                 self.S['Nd2v'][:, j] = self.S['Nd2v_dL'][:, i] * \
                     self.el['dl'][el]
             v = np.zeros((self.nShape, 2))
@@ -397,6 +405,11 @@ class FE(object):
             self.store_shape(el, u, v, d2v)
         self.shape_part(labels=['u', 'U', 'd2u'])  # set deformed part shape
         self.deform(scale=self.scale)
+
+    def set_shape(self):
+        self.shape = {}
+        for label in ['u', 'd2u', 'U', 'D']:
+            self.shape[label] = np.zeros((self.nel, 3, self.nShape))
 
     def store_shape(self, el, u, v, d2v):
         self.shape['u'][el, 0] = np.linspace(u[0], u[1], self.nShape)
@@ -421,7 +434,7 @@ class FE(object):
     def shape_part(self, labels=['u', 'U', 'D', 'd2u']):
         for part in self.part:
             nS = self.part[part]['nel'] * (self.nShape - 1) + 1
-            self.part[part]['l'] = np.linspace(0, 1, nS)
+            self.part[part]['l'] = np.linspace(0, self.part[part]['L'][-1], nS)
             for label in labels:
                 self.part[part][label] = np.zeros((nS, 3))
             for nel, el in enumerate(self.part[part]['el']):
@@ -567,8 +580,9 @@ class FE(object):
                 raise ValueError(err_txt)
 
     def update_rotation(self):
-        if not hasattr(self, 'T3'):
+        if not hasattr(self, 'T3'):  # delete T3 matrix in self.clfe()
             self.get_rotation()
+        # elements added after first solve
         elif np.shape(self.T3)[2] != self.nel:
             self.get_rotation()
 
@@ -657,6 +671,8 @@ class FE(object):
                     fn[i, 0] = (1 - s)**2 * (1 + 2 * s) * f[i]
                     fn[i, 1] = s**2 * (3 - 2 * s) * f[i]
                     mi = 5 if label == 'fy' else 4  # moment index
+                    # mi = 4 if label == 'fy' else 5  # moment index
+
                     fn[mi, 0] = f[i] * (1 - s)**2 * s * self.el['dl'][el]
                     fn[mi, 1] = -f[i] * s**2 * (1 - s) * self.el['dl'][el]
                     if load_type == 'dist':
@@ -697,11 +713,12 @@ class FE(object):
                 self.add_load(el=el, W=[0, 0, w])  # self weight
 
     def add_tf_load(self, sf, ff, tf, Bpoint, parts=['loop', 'nose'],
-                    method='function'):
-        cage = coil_cage(nTF=tf.profile.nTF, rc=tf.rc,
-                         plasma={'sf': sf}, coil=tf.p['cl'])
+                    method='function'):  # method='function'
+        cage = coil_cage(nTF=tf.profile.nTF, rc=2*tf.rc,
+                         plasma={'sf': sf}, coil=tf.p['cl'], ny=1, nr=1)
         self.update_rotation()  # check / update rotation matrix
-        ff.set_bm(cage)  # set tf magnetic moment (method==function)
+        ff.set_bm(cage)  # set tf magnetic moment (for method==function)
+        wm = np.array([])
         for part in parts:
             for el in self.part[part]['el']:
                 n = self.el['n'][el]  # node index pair
@@ -709,6 +726,8 @@ class FE(object):
                 w = ff.topple(point, cage.Iturn*self.el['dx'][el],
                               cage, Bpoint, method=method)[0]  # body force
                 self.add_load(el=el, W=w)  # bursting/toppling load
+                wm = np.append(wm, w[2])
+        return wm
 
     def check_part(self, part):
         if part not in self.part:
@@ -751,7 +770,7 @@ class FE(object):
         if dof[0] == 'fix':  # fix all dofs
             dof = self.dof
         elif dof[0] == 'pin':  # fix translational dofs
-            dof = [dof for dof in self.model_dof if 'r' not in dof]
+            dof = [dof for dof in self.dof if 'r' not in dof]
         elif 'n' in dof[0]:  # free constraint 'nu','nrx',...
             for d in dof:
                 if 'n' not in d:
@@ -976,7 +995,7 @@ class FE(object):
 
     def solve(self):
         self.nK = int(self.nnd * self.ndof)  # stiffness matrix
-        self.initalize_shape_coefficents(nShape=self.nShape)
+        self.set_shape()  # dict of displacments
         self.update_rotation()  # evaluate/update rotation matricies
         self.assemble()  # assemble stiffness matrix
         self.constrain()  # apply and colapse constraints
@@ -984,7 +1003,6 @@ class FE(object):
         self.Dn[self.nd['dr']] = np.linalg.solve(self.K, self.F)  # global
         self.Dn[self.nd['dc']] = np.dot(
             self.Tc, self.Dn[self.nd['dr']])  # patch constrained DOFs
-
         for i, disp in enumerate(self.disp):
             self.D[disp] = self.Dn[i::self.ndof]
         self.interpolate()
@@ -994,14 +1012,16 @@ class FE(object):
             ax = Axes3D(pl.figure(figsize=(8, 8)))
         Theta = np.linspace(0, 2*np.pi, nTF, endpoint=False)
         for t in Theta:
-            # self.plot_sections(ax=ax, theta=t)
+            self.plot_sections(ax=ax, theta=t)
             # X = np.dot(self.X, R)
             # ax.plot(X[:, 0], X[:, 1], X[:, 2], 'o',
             #         markersize=ms, color=0.75 * np.ones(3))
+            '''
             R = geom.rotate(t, axis='z')
             for i, (part, c) in enumerate(zip(self.part, color)):
                 D = np.dot(self.part[part]['D'], R)
                 ax.plot(D[:, 0], D[:, 1], D[:, 2], color=c)
+            '''
 
         ax.set_xlim(-bb, bb)
         ax.set_ylim(-bb, bb)
@@ -1069,14 +1089,14 @@ class FE(object):
         pl.axis('equal')
 
     def plot_curvature(self):
-        pl.figure(figsize=([4, 3 * 12 / 16]))
+        pl.figure(figsize=([8, 8 * 12 / 16]))
         text = linelabel(value='', postfix='', Ndiv=5)
-        part = self.part  # ['loop','nose']  #
+        part = self.part  # ['loop', 'trans_lower', 'trans_upper']  # self.part
         for i, (part, c) in enumerate(zip(part, color)):
             pl.plot(self.part[part]['l'],
-                    self.part[part]['d2u'][:, 2], '--', color=c)
+                    self.part[part]['d2u'][:, 1], '--', color=c)
             pl.plot(self.part[part]['l'],
-                    self.part[part]['d2u'][:, 1], color=c)
+                    self.part[part]['d2u'][:, 2], '-', color=c)
             text.add(part)
         text.plot()
         sns.despine()

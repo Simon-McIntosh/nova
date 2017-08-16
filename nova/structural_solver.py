@@ -36,26 +36,32 @@ class SS:  # structural solver
 
         self.atec = architect(tf, pf, plot=False)  # load sectional properties
         self.fe = FE(frame='3D')  # initalise FE solver
+        self.add_mat()  # pass sectional properties to fe solver
 
-        self.add_mat()
-        self.TF_loop()
-        self.PF_connect()
+        self.build_tf()  # build TF coil
+        self.fe.add_bc(['pin'], [0], part='trans_lower', ends=0)
+        self.fe.add_bc(['pin'], [-1], part='trans_upper', ends=1)
 
-    def add_mat(self):
-        self.fe.add_mat('nose', ['wp', 'steel_forged'],
+        # self.fe.add_bc(['w'], [-1], part='nose', ends=0)
+        #self.gravity_support()  # add gravity support to TF loop
+        #self.outer_intercoil_supports()  # add outer intercoil supports
+        #self.connect_pf()  # connect PF coils
+
+    def add_mat(self, ntrans=30):
+        self.fe.add_mat('nose', ['wp', 'steel_forged'],  # high field TF
                         [self.atec.winding_pack(), self.atec.case(0)])
-        self.fe.add_mat('loop', ['wp', 'steel_cast'],
+        self.fe.add_mat('loop', ['wp', 'steel_cast'],  # low field TF
                         [self.atec.winding_pack(), self.atec.case(1)])
         trans = []  # nose-loop transitions
-        for i, l_frac in enumerate(np.linspace(0, 1, 5)):
-            trans.append(
-                    self.fe.add_mat('trans_{}'.format(i), ['wp', 'steel_cast'],
-                                    [self.atec.winding_pack(),
-                                     self.atec.case(l_frac)]))
-        self.fe.mat_index['trans_lower'] = trans
-        self.fe.mat_index['trans_upper'] = trans[::-1]
+        for i, l_frac in enumerate(np.linspace(0, 1, ntrans)):
+            trans.append(self.fe.add_mat('trans_{}'.format(i),
+                                         ['wp', 'steel_cast'],
+                                         [self.atec.winding_pack(),
+                                          self.atec.case(l_frac)]))
+        self.fe.mat_index['trans_lower'] = [trans[-1]]  # trans
+        self.fe.mat_index['trans_upper'] = [trans[-1]]  # trans[::-1]
         self.fe.add_mat('GS', ['steel_cast'], [self.atec.gravity_support()])
-        for name in self.atec.OICsupport:
+        for name in self.atec.OICsupport:  # outer intercoil supports
             mat_name = name
             thickness = self.atec.OICsupport[name]['thickness']
             width = self.atec.OICsupport[name]['width']
@@ -67,19 +73,22 @@ class SS:  # structural solver
                             [self.atec.coil_support(
                                     width=self.atec.PFsupport[name]['width'])])
 
-    def TF_loop(self):
-        P = np.zeros((len(tf.p['cl']['x']), 3))
-        P[:, 0], P[:, 2] = tf.p['cl']['x'], tf.p['cl']['z']
+    def build_tf(self):
+        if self.fe.nnd != 0:
+            errtxt = 'pre-exsisting nodes found in fe object\n'
+            errtxt = 'TF connections (OIC + GS) assume clean entry\n'
+            errtxt = 'clear mesh with fe.clfe()'
+            raise ValueError(errtxt)
+        P = np.zeros((len(self.tf.p['cl']['x']), 3))
+        P[:, 0], P[:, 2] = self.tf.p['cl']['x'], self.tf.p['cl']['z']
         self.fe.add_nodes(P)  # all TF nodes
-        self.TFparts = ['nose', 'trans_lower', 'loop', 'trans_upper']
+        self.TFparts = ['trans_lower', 'loop', 'trans_upper']  # 'nose',
         for part in self.TFparts:  # hookup elements
             self.fe.add_elements(n=tf.p[part]['nd'], part_name=part, nmat=part)
         # constrain TF nose - free translation in z
-        self.fe.add_bc('nw', 'all', part='nose')
-        self.gravity_support()  # add gravity support to TF loop
-        self.outer_intercoil_supports()
+        # self.fe.add_bc('nw', 'all', part='nose')
 
-    def PF_connect(self):
+    def connect_pf(self):
         for name in self.atec.PFsupport:  # PF coil connections
             nd_tf = self.atec.PFsupport[name]['nd_tf']
             p = self.atec.PFsupport[name]['p']  # connect PF to TF
@@ -94,7 +103,7 @@ class SS:  # structural solver
                     nmat=mat_name)
             self.fe.add_cp([nd_tf,  self.fe.nnd-2], dof='fix', rotate=False)
 
-    def PF_load(self):
+    def add_pf_load(self):
         self.inv.ff.get_force()
         for name in self.atec.PFsupport:  # PF coil connections
             Fcoil = self.inv.ff.Fcoil[name]
@@ -144,27 +153,28 @@ class SS:  # structural solver
             self.fe.add_elements(
                 n=nodes,
                 part_name=name, nmat=name, el_dy=el_dy)
-            self.fe.add_cp([self.fe.nndo, self.fe.nnd-1],
+            self.fe.add_cp([nodes[0], nodes[-1]],
                            dof='fix', rotate=True, axis='z')
 
     def solve(self):
-        self.PF_load()
-        self.fe.add_weight()  # add weight to all elements
-        self.fe.add_tf_load(self.sf, self.inv.ff, self.tf,
-                            self.inv.eq.Bpoint, parts=self.TFparts)
+        self.fe.clf()  # clear forces
+        #self.add_pf_load()
+        #self.fe.add_weight()  # add weight to all elements
+        wm = self.fe.add_tf_load(self.sf, self.inv.ff, self.tf,
+                            self.inv.eq.Bpoint, parts=self.TFparts,
+                            method='function')
         self.fe.solve()
+        return wm
 
-    def plot(self, scale=15):
+    def plot(self):
         self.fe.plot_nodes()
         self.tf.fill()
-        self.fe.deform(scale=scale)
         self.fe.plot_F(scale=1e-8)
         self.fe.plot_displacment()
         self.pf.plot(label=False)
         pl.axis('off')
 
-    def plot3D(self, ax=None, scale=5):
-        self.fe.deform(scale=scale)
+    def plot3D(self, ax=None):
         self.fe.plot_3D(ax=ax, nTF=self.tf.nTF)
 
     def movie(self, filename, scale=15, nscale=20, nloop=3):
@@ -186,8 +196,8 @@ class SS:  # structural solver
         with writer.saving(fig, moviename, 100):
             for scale in loop:
                 ax.clear()
-                # self.plot(scale=scale)
-                self.plot3D(ax=ax, scale=scale)
+                self.fe.deform(scale)
+                self.plot3D(ax=ax)
                 writer.grab_frame()
                 timer.ticktoc()
 
@@ -197,22 +207,41 @@ if __name__ == '__main__':
     nTF = 16
     base = {'TF': 'demo', 'eq': 'DEMO_SN_SOF'}
     config, setup = select(base, nTF=nTF, update=False)
-    profile = Profile(config['TF_base'], family='S', load=True,
-                      part='TF', nTF=nTF, obj='L', npoints=50)
+    profile = Profile(config['TF_base'], family='D', load=True,
+                      part='TF', nTF=nTF, obj='L', npoints=1000)
 
     sf = SF(setup.filename)
     pf = PF(sf.eqdsk)
     tf = TF(profile=profile, sf=sf)
 
     ss = SS(sf, pf, tf)  # structural solver
+    wbsz = ss.solve()
+    '''
+    pl.plot(wfx)
+    pl.plot(wbsx)
 
-    from time import time
-    tic = time()
+    pl.figure()
+    pl.plot(wfz)
+    pl.plot(wbsz)
+    '''
+    ss.fe.deform(50)
+
+    ss.plot()
+    # ss.fe.plot_curvature()
+
+    '''
+    profile.update(family='D')
+    tf = TF(profile=profile, sf=sf)
+    ss = SS(sf, pf, tf)  # structural solver
+
     ss.solve()
-    print(time()-tic)
-    # TODO implement multi solve logic
+    '''
+    ss.fe.plot_curvature()
+    # ss.fe.deform(15)
 
-    ss.plot(25)
-    #ss.plot3D()
-    ss.fe.plot_sections()
+    # ss.plot()
+    # ss.plot3D()
+    # ss.fe.plot_sections()
     # ss.movie('structural_solver')
+    # ss.fe.plot_curvature()
+    # ss.fe.plot_twin()

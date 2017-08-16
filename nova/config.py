@@ -76,7 +76,8 @@ class Setup(object):
         self.build['BS'] -= (self.build['tfw'] + self.build['tBBsupport'])
         BBfrac = np.array([1, 1])
         demo = DEMO()  # load from xls baseline file
-        self.build['BB'] = demo.blanket_thickness()  # min/max
+        # demo.blanket_thickness()  # min/max
+        self.build['BB'] = [0.77531267590168096, 1.300269571583071]
         # self.build['BB'] = list(BBfrac*self.build['BS'])  # blanket (in/out)
         self.build['sheild'] = list(
             (1 - BBfrac) * self.build['BS'])  # sheilding

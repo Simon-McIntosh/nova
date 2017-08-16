@@ -472,7 +472,7 @@ class SF(object):
             pl.plot(X, Z)
         return X, Z
 
-    def get_sep(self, expand=0):  # generate boundary dict for elliptic
+    def eq_boundary(self, expand=0):  # generate boundary dict for elliptic
         X, Z = self.get_boundary()
         boundary = {'X': X, 'Z': Z, 'expand': expand}
         return boundary

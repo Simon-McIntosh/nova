@@ -25,11 +25,12 @@ from nova.elliptic import EQ
 class INV(object):
 
     def __init__(self, pf, tf=None, Jmax=12.5, offset=0.3, svd=False,
-                 Iscale=1e6, dCoil=0.5):
+                 Iscale=1e6, dCoil=0.5, boundary='tf'):
         self.wsqrt = 1
         self.svd = svd  # coil current singular value decomposition flag
         self.Iscale = Iscale  # set current units to MA
         self.dCoil = dCoil  # coil mesh length
+        self.boundary = boundary  # set boundary generator 'sf' or 'tf'
         self.ncpu = multiprocessing.cpu_count()
         self.pf = pf
         self.tf = tf
@@ -105,8 +106,20 @@ class INV(object):
         self.add_B(0, [-20], factor=3, polar=target)  # target alignment feild)
 
     def load_equlibrium(self, sf, expand=0.25, n=2.5e3):
+        if self.boundary == 'tf':  # grid boundary extractd from tf centreline
+            try:
+                eq_boundary = self.tf.eq_boundary
+            except AttributeError:
+                raise ValueError('tf object not set')
+        elif self.boundary == 'sf':  # grid boundary extracted from seperatrix
+            eq_boundary = self.sf.eq_boundary
+        else:
+            errtxt = 'invalid bondary variable - require \'sf\' or \'tf\'\n'
+            errtxt += 'boundary identifies generator object'
+            raise ValueError(errtxt)
+
         self.eq = EQ(sf, self.pf, dCoil=self.dCoil,
-                     boundary=sf.get_sep(expand=expand), n=n)
+                     boundary=eq_boundary(expand=expand), n=n)
         self.update_coils()
 
     def set_force_feild(self):

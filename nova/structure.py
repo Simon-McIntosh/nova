@@ -24,12 +24,16 @@ class architect(object):
     def __init__(self, tf, pf, plot=False):
         self.tf, self.pf = tf, pf
         self.loop, self.nTF = self.tf.profile.loop, self.tf.nTF
+        self.cross_sections()
+        self.connect(plot=plot)
+
+    def cross_sections(self):
         self.initalise_cs()
         self.tf_cs()
         self.gs_cs()
-        self.build(solve=True, plot=plot)
 
-    def build(self, solve=False, plot=False):
+    def connect(self, plot=False):
+        self.set_loop_interpolators()  # tf loop interpolators
         self.CS_support()  # calculate CS support seats
         self.PF_support()  # calculate PF support seats
         self.G_support(Xo=13, width=0.75)  # gravity support
@@ -38,6 +42,12 @@ class architect(object):
         self.tf.split_loop()
         if plot:
             self.plot_connections()
+
+    def set_loop_interpolators(self):
+        self.tf.loop_interpolators(offset=0)
+        self.tf_fun = self.tf.fun.copy()  # copy dict of functions
+        self.tf.loop_interpolators(offset=-0.15)
+        self.tf_fun_offset = self.tf.fun.copy()  # copy dict of functions
 
     def plot_connections(self):
         for section in ['nose', 'trans_lower', 'loop', 'trans_upper']:
@@ -85,24 +95,23 @@ class architect(object):
         return nodes
 
     def OIC_support(self, thickness=0.15):  # outer intercoil support
-        self.tf.loop_interpolators(offset=0)  # construct TF interpolators
-        TFloop = self.tf.fun['cl']
         self.loop['OIS'] = {}
         self.OICsupport = {}
         for i, (L, width) in enumerate(zip([0.4, 0.66], [4.5, 3.75])):
             name = 'ois{:d}'.format(i)
             self.loop['OIS'][name] = {'L': L, 'width': width,
                                       'thickness': thickness}
-            nodes = self.draw_OIS(L, width, thickness, TFloop)
+            nodes = self.draw_OIS(L, width, thickness, self.tf_fun['cl'])
             self.loop['OIS'][name]['nodes'] = nodes
             x = np.array([nodes[0][0], nodes[1][0]])
             z = np.array([nodes[0][1], nodes[1][1]])
             xo, zo = x.mean(), z.mean()
             Lmid = minimize_scalar(architect.OIS_placment, method='bounded',
-                                   args=(TFloop, (xo, zo)), bounds=[0, 1]).x
+                                   args=(self.tf_fun['cl'], (xo, zo)),
+                                   bounds=[0, 1]).x
 
-            p = {'x': np.array([x[0], TFloop['x'](Lmid), x[-1]]),
-                 'z': np.array([z[0], TFloop['z'](Lmid), z[-1]])}
+            p = {'x': np.array([x[0], self.tf_fun['cl']['x'](Lmid), x[-1]]),
+                 'z': np.array([z[0], self.tf_fun['cl']['z'](Lmid), z[-1]])}
             el_dy = np.array([x[-1], 0, z[-1]]) - np.array([x[0], 0, z[0]])
             el_dy /= np.linalg.norm(el_dy)
             self.OICsupport[name] = {'p': p, 'thickness': thickness,
@@ -111,13 +120,11 @@ class architect(object):
             self.adjust_TFnode(p['x'][1], p['z'][1])
 
     def CS_support(self):
-        zo = self.tf.profile.loop.po[0]['p0']['z']
-        self.tf.loop_interpolators(offset=0)  # construct TF interpolators
-        TFloop = self.tf.fun['out']
+        zo = self.tf.profile.loop.cs['z']
         L = minimize_scalar(architect.cs_top, method='bounded',
-                            args=(self.loop['cs']['xwp'], TFloop),
+                            args=(self.loop['cs']['xwp'], self.tf_fun['out']),
                             bounds=[0.5, 1]).x
-        ztop = float(TFloop['z'](L))
+        ztop = float(self.tf_fun['out']['z'](L))
         self.loop['cs']['z'] = [zo, zo, ztop, ztop]
         self.loop['cs']['ztop'] = ztop
         self.loop['cs']['zo'] = zo
@@ -142,7 +149,7 @@ class architect(object):
         err = np.sqrt((rTF - rs)**2 + (zTF - zs)**2)
         return err
 
-    def connect(self, coil, loop, edge=0.15, hover=0.1, argmin=60):
+    def connect_loop(self, coil, loop, edge=0.15, hover=0.1, argmin=60):
         L = minimize_scalar(architect.support_arm, method='bounded',
                             args=(coil, loop), bounds=[0, 1]).x
         rTF, zTF = loop['x'](L), loop['z'](L)
@@ -174,26 +181,31 @@ class architect(object):
         nd['x'][1] = rout  # outboard TF node [1]
         nd['z'][1] = zout
 
-        self.tf.loop_interpolators(offset=0)
-        cl_loop = self.tf.fun['cl']
         xc = [nd['x'][-1], nd['z'][-1]]
         res = minimize(architect.intersect, xo, method='L-BFGS-B',
                        bounds=([0, 1], [0, 15]),
-                       args=(xc, nhat, cl_loop))
-        nd['x'][-1], nd['z'][-1] = res.x[1] * nhat + xc
+                       args=(xc, nhat, self.tf_fun['cl']))
+        # nd['x'][-1], nd['z'][-1] = res.x[1] * nhat + xc
+        x, z = res.x[1] * nhat + xc
+        nd['x'][-1], nd['z'][-1] = self.cl_snap(x, z)
         return nodes, nd, ndir, L
 
+    def cl_snap(self, x, z):
+        L = minimize_scalar(architect.support_arm, method='bounded',
+                            args=({'x': x, 'z': z}, self.tf_fun['cl']),
+                            bounds=[0, 1]).x
+        return self.tf_fun['cl']['x'](L), self.tf_fun['cl']['z'](L)
+
     def PF_support(self, n=5):
-        self.tf.loop_interpolators(offset=-0.15)  # construct TF interpolators
-        TFloop = self.tf.fun['out']
         dt = self.loop['cs']['dt']
         space = self.cs['wp']['d']+2*self.cs['case']['side']-dt
         self.cs['pfs'] = {'dt': dt, 'n': n, 'space': space}
         self.PFsupport = {}
         for name in self.pf.index['PF']['name']:
             coil = self.pf.coil[name]
-            nodes, p, ndir, L = self.connect(
-                    coil, TFloop, edge=0.15, hover=0.1, argmin=35)
+            nodes, p, ndir, L = self.connect_loop(
+                    coil, self.tf_fun_offset['out'],
+                    edge=0.15, hover=0.1, argmin=35)
             width = coil['dx']*np.sin(ndir*np.pi/180)  # support width
             self.PFsupport[name] = {'nodes': nodes, 'p': p, 'width': width}
             self.adjust_TFnode(p['x'][-1], p['z'][-1])
@@ -217,17 +229,14 @@ class architect(object):
         return abs(Xo - TFloop['x'](L))
 
     def G_support(self, Xo=13, dZo=-1, width=0.75):  # gravity support
-        self.tf.loop_interpolators(offset=-0.15)  # construct TF interpolators
-        TFloop = self.tf.fun['out']
-        self.tf.loop_interpolators(offset=0)
-        Sloop = self.tf.fun['out']
         L = minimize_scalar(architect.GS_placement, method='bounded',
-                            args=(Xo - width / 2, Sloop),
+                            args=(Xo - width / 2, self.tf_fun['out']),
                             bounds=[0, 0.5]).x
-        coil = {'x': Sloop['x'](L) + width / 2,
-                'z': Sloop['z'](L) - width / 2,
+        coil = {'x': self.tf_fun['out']['x'](L) + width / 2,
+                'z': self.tf_fun['out']['z'](L) - width / 2,
                 'dx': width, 'dz': width}
-        nodes, p = self.connect(coil, TFloop, edge=0, hover=0, argmin=90)[:2]
+        nodes, p = self.connect_loop(coil, self.tf_fun_offset['out'],
+                                     edge=0, hover=0, argmin=90)[:2]
         self.adjust_TFnode(p['x'][-1], p['z'][-1])  # add / adjust
 
         self.Gsupport = {}
@@ -235,7 +244,7 @@ class architect(object):
         z = [[self.pf.coil[name]['z'] - self.pf.coil[name]['dz'] / 2]
              for name in self.pf.coil]
         floor = np.min(z) + dZo
-        self.Gsupport['zbase'] = float(Sloop['z'](L))
+        self.Gsupport['zbase'] = float(self.tf_fun['out']['z'](L))
         self.Gsupport['zfloor'] = floor
         self.Gsupport['Xo'] = Xo
         self.Gsupport['rtube'] = width / 3  # tube radius
@@ -258,6 +267,7 @@ class architect(object):
         self.Gsupport['yfloor'] = pin2pin * np.sin(alpha)
 
     def adjust_TFnode(self, x, z):
+        x, z = self.cl_snap(x, z)  # snap node to centreline
         i = np.argmin((self.tf.p['cl']['x']-x)**2 +
                       (self.tf.p['cl']['z']-z)**2)
         dl = np.sqrt((self.tf.p['cl']['x'][i+1] -
@@ -266,21 +276,22 @@ class architect(object):
                       self.tf.p['cl']['z'][i-1])**2)/2
         dx = np.sqrt((self.tf.p['cl']['x'][i] - x)**2 +
                      (self.tf.p['cl']['z'][i] - z)**2)
-        if dx > 0.2*dl:  # add node
+        if dx > 0.5*dl:  # add node (0.2*)
             Ln = minimize_scalar(architect.OIS_placment, method='bounded',
-                                 args=(self.tf.fun['out'], (x, z)),
+                                 args=(self.tf_fun['out'], (x, z)),
                                  bounds=[0, 1]).x
             Li = minimize_scalar(architect.OIS_placment, method='bounded',
-                                 args=(self.tf.fun['out'],
+                                 args=(self.tf_fun['out'],
                                        (self.tf.p['cl']['x'][i],
                                         self.tf.p['cl']['z'][i])),
                                  bounds=[0, 1]).x
 
             j = 0 if Ln < Li else 1
-            self.tf.p['cl']['x'] = np.insert(self.tf.p['cl']['x'], i+j, x)
-            self.tf.p['cl']['z'] = np.insert(self.tf.p['cl']['z'], i+j, z)
+            #self.tf.p['cl']['x'] = np.insert(self.tf.p['cl']['x'], i+j, x)
+            #self.tf.p['cl']['z'] = np.insert(self.tf.p['cl']['z'], i+j, z)
         else:  # adjust node
-            self.tf.p['cl']['x'][i], self.tf.p['cl']['z'][i] = x, z
+            a=1
+            #self.tf.p['cl']['x'][i], self.tf.p['cl']['z'][i] = x, z
 
     def initalise_cs(self):
         '''
@@ -303,7 +314,7 @@ class architect(object):
                            'hf_out': self.tf.section['case']['nose']}
         self.cs['wp'] = {'d': self.tf.section['winding_pack']['depth'],
                          'w': self.tf.section['winding_pack']['width'],
-                         'xo': self.tf.profile.loop.po[0]['p0']['x']}
+                         'xo': self.tf.profile.loop.cs['x']}
         self.cs['gs'] = {'x': 0.1, 't': 0.05}
 
     def update_cs(self, **kwargs):
@@ -594,7 +605,7 @@ if __name__ is '__main__':
     config, setup = select(base, nTF=nTF, update=False)
 
     profile = Profile(config['TF_base'], family='S', load=True,
-                      part='TF', nTF=nTF, obj='L', npoints=50)
+                      part='TF', nTF=nTF, obj='L', npoints=500)
     sf = SF(setup.filename)
     pf = PF(sf.eqdsk)
     tf = TF(profile=profile, sf=sf)

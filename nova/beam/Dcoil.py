@@ -12,7 +12,7 @@ sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
         font_scale=7 / 8, rc=rc)
 
 
-def pD(r1, r2, npoints=200):
+def pD(r1, r2, npoints=2000):
     ro = np.sqrt(r1 * r2)
     k = 0.5 * np.log(r2 / r1)
     theta = np.linspace(-0.5 * np.pi, 1.5 * np.pi, 2 * npoints)
@@ -50,7 +50,7 @@ if __name__ is '__main__':  # test shape function
     ro = np.sqrt(r1 * r2)
     k = 0.5 * np.log(r2 / r1)
 
-    l = np.linspace(1e-2, 0.5 - 1e-2, 100)
+    l = np.linspace(1e-2, 0.5 - 1e-2, 2000)
     L = np.append(0, np.cumsum(np.sqrt(np.diff(r)**2 + np.diff(r)**2)))
     L /= L[-1]
     ro = np.sqrt(r1 * r2)

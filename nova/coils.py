@@ -19,6 +19,7 @@ from warnings import warn
 from nova.inverse import INV
 from copy import deepcopy
 from scipy.optimize import minimize_scalar
+from nova.loops import unwind
 
 colors = sns.color_palette('Paired', 12)
 
@@ -342,9 +343,9 @@ class TF(object):
                               ny=self.ny, nr=self.nr, alpha=self.alpha,
                               wp=self.section['winding_pack'])
         self.update_cage = True
-        self.initalise_loop()
+        self.initalise_cloop()
 
-    def initalise_loop(self):
+    def initalise_cloop(self):  # previously initalise_loop
         x = get_value(self.loop.xo)
         p_in = self.loop.draw(x=x)
         xloop = self.get_loops(p_in)  # update tf
@@ -401,11 +402,11 @@ class TF(object):
         return index
 
     def loop_dt(self, x, z, dt_in, dt_out, index):
-        l = geom.length(x, z)
-        L = np.array([0, l[index['lower']], l[index['bottom']],
-                      l[index['top']], l[index['upper']], 1])
+        le = geom.length(x, z)
+        L = np.array([0, le[index['lower']], le[index['bottom']],
+                      le[index['top']], le[index['upper']], 1])
         dX = np.array([dt_in, dt_in, dt_out, dt_out, dt_in, dt_in])
-        dt = interp1d(L, dX)(l)
+        dt = interp1d(L, dX)(le)
         return dt
 
     def get_loops(self, p_in):
@@ -422,6 +423,8 @@ class TF(object):
         for loop, dt_in, dt_out in zip(loops, inboard_dt, outboard_dt):
             dt = self.loop_dt(x, z, dt_in, dt_out, index)
             x, z = geom.offset(x, z, dt, close_loop=True)
+            # TODO check that unwind does not effect stored energy calculation
+            # self.p[loop] = unwind({'x': x, 'z': z})
             self.p[loop]['x'], self.p[loop]['z'] = x, z
         return self.p
 
@@ -467,11 +470,11 @@ class TF(object):
                 x = np.append(x, rmid)
                 z = np.append(zmid, z)
                 z = np.append(z, zmid)
-            l = geom.length(x, z)
-            lt = np.linspace(trim[0], trim[1], int(np.diff(trim) * len(l)))
-            x, z = interp1d(l, x)(lt), interp1d(l, z)(lt)
-            l = np.linspace(0, 1, len(x))
-            self.fun[side] = {'x': IUS(l, x), 'z': IUS(l, z)}
+            le = geom.length(x, z)
+            lt = np.linspace(trim[0], trim[1], int(np.diff(trim) * len(le)))
+            x, z = interp1d(le, x)(lt), interp1d(le, z)(lt)
+            le = np.linspace(0, 1, len(x))
+            self.fun[side] = {'x': IUS(le, x), 'z': IUS(le, z)}
             self.fun[side]['L'] = geom.length(x, z, norm=False)[-1]
             self.fun[side]['dx'] = self.fun[side]['x'].derivative()
             self.fun[side]['dz'] = self.fun[side]['z'].derivative()
@@ -519,7 +522,7 @@ class TF(object):
         delta = fact * dn[:, jc]
         return delta[0], delta[1]
 
-    def get_loop(self, expand=0):  # generate boundary dict for elliptic
+    def eq_boundary(self, expand=0):  # generate boundary dict for elliptic
         X, Z = self.p['cl']['x'], self.p['cl']['z']
         boundary = {'X': X, 'Z': Z, 'expand': expand}
         return boundary
@@ -615,7 +618,7 @@ class TF(object):
         self.update_attr(**kwargs)
         # call shape called from within tf (dog wags tail)
         self.shp = Shape(self.profile, objective='L')
-        # tailor limits on loop parameters (l controls loop tension)
+        # tailor limits on loop parameters (l -> loop tension)
         self.adjust_xo('upper', lb=0.6)
         self.adjust_xo('lower', lb=0.6)
         self.adjust_xo('l', lb=0.5)  # don't go too high (<1.2)

@@ -34,7 +34,7 @@ class coil_cage(object):
                 warn_txt += '\'wp=tf.section[\'winding_pack\']'
                 warn(warn_txt)
 
-    def get_seperatrix(self, nplasma=80, alpha=1 - 1e-4, plot=False, **kwargs):
+    def get_seperatrix(self, nplasma=80, alpha=1-1e-4, plot=False, **kwargs):
         self.nplasma = nplasma
         self.plasma_loop = np.zeros((self.nplasma, 3))  # initalise loop array
         if 'sf' in kwargs or 'setup' in kwargs or 'config' in kwargs:
@@ -102,7 +102,7 @@ class coil_cage(object):
                                     self.dx * (1 - 1 / self.nr), self.nr)
         else:
             self.dRwp = [0]
-        self.Tcoil = np.linspace(0, 2 * np.pi, self.nTF, endpoint=False)
+        self.Tcoil = np.linspace(0, 2*np.pi, self.nTF, endpoint=False)
         if plot:
             rlim = 0.6 * np.max(self.coil_loop[:, 0])
             fig = plt.figure(figsize=(8, 6))

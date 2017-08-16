@@ -7,9 +7,18 @@ import pylab as pl
 import collections
 import seaborn as sns
 import pandas as pd
-from amigo.IO import trim_dir
 import pickle
 from nova.config import nova_path
+from amigo.geom import String
+
+
+def unwind(p, angle=2.5, plot=False):
+    # re-samlpe based on minimum turning angle and min/max segment lengths
+    string = String(np.array([p['x'], p['z']]).T,
+                    angle=angle, verbose=False)
+    if plot:
+        string.plot()
+    return {'x': string.points[:, 0], 'z': string.points[:, 1]}
 
 
 def add_value(Xo, i, name, value, lb, ub, clip=True):
@@ -249,6 +258,7 @@ class Aloop(object):  # tripple arc loop
         # straight section
         x = xo * np.ones(2)
         z = np.array([zo, zo + sl])
+        self.cs = {'x': x[-1], 'z': z[-1]}  # top of nose (cs seat)
         self.segments['x'].append(x)
         self.segments['z'].append(z)
         # small arc
@@ -283,13 +293,12 @@ class Aloop(object):  # tripple arc loop
         x = {'x': x, 'z': z}
         x = close_loop(x, self.npoints)
         x['x'], x['z'] = geom.clock(x['x'], x['z'])
+        self.xmin = x['x'].min()
         return x
 
     def plot(self, inputs={}):
         x = self.draw(inputs=inputs)
-        pl.plot(x['x'], x['z'], color=0.4 * np.ones(3))
-        for x, z in zip(self.segments['x'], self.segments['z']):
-            pl.plot(x, z, lw=3)
+        pl.plot(x['x'], x['z'], '-', ms=8, color=0.4 * np.ones(3))
         pl.axis('equal')
         pl.axis('off')
 
@@ -315,7 +324,7 @@ class Dloop(object):  # Princton D
                 try:  # dict
                     for k in inputs[key]:
                         self.xo[key][k] = inputs[key][k]
-                except:  # single value
+                except TypeError:  # single value - object is not iterable
                     self.xo[key]['value'] = inputs[key]
                 self.xo[key] = set_limit(self.xo[key], limits=self.limits)
 
@@ -352,6 +361,7 @@ class Dloop(object):  # Princton D
         self.segments['z'].append([z[-1], z[0]])
         self.segments['x'].append(x)
         self.segments['z'].append(z)
+        self.cs = {'x': x[-1], 'z': z[-1]}  # top of nose (cs seat)
         x = {'x': x, 'z': z}
         x = close_loop(x, self.npoints)
         x['x'], x['z'] = geom.clock(x['x'], x['z'])
@@ -359,11 +369,11 @@ class Dloop(object):  # Princton D
 
     def plot(self, inputs={}):
         x = self.draw(inputs=inputs)
-        pl.plot(x['x'], x['z'], color=0.4 * np.ones(3))
-        for x, z in zip(self.segments['x'], self.segments['z']):
-            pl.plot(x, z, lw=3)
-            pl.axis('equal')
-            pl.axis('off')
+        pl.plot(x['x'], x['z'], '-', ms=8, color=0.4 * np.ones(3))
+        # for x, z in zip(self.segments['x'], self.segments['z']):
+        #    pl.plot(x, z, lw=3)
+        pl.axis('equal')
+        pl.axis('off')
 
 
 class Sloop(object):  # polybezier
@@ -402,7 +412,7 @@ class Sloop(object):  # polybezier
     def remove_oppvar(self, name):
         try:
             self.oppvar.remove(name)
-        except:
+        except ValueError:
             pass
 
     def reset_oppvar(self, symetric):
@@ -570,7 +580,7 @@ class Sloop(object):  # polybezier
                     try:  # dict
                         for k in inputs[key]:
                             self.xo[keyo_][k] = inputs[key][k]
-                    except:  # single value
+                    except TypeError:  # single value - object is not iterable
                         self.xo[keyo_]['value'] = inputs[key]
                     self.xo[keyo_] = set_limit(self.xo[keyo_],
                                                limits=self.limits)
@@ -634,19 +644,21 @@ class Sloop(object):  # polybezier
         self.npoints = kwargs.get('npoints', self.npoints)
         self.set_input(**kwargs)
         x, z, theta = self.verticies()
+        self.cs = {'x': x[0], 'z': z[0]}  # top of nose (cs seat)
         p = self.polybezier(x, z, theta)
         p = close_loop(p, self.npoints)
         p['x'], p['z'] = geom.clock(p['x'], p['z'])
+        self.xmin = p['x'].min()
         return p
 
-    def plot(self, inputs={}, ms=3):
+    def plot(self, inputs={}, ms=8):
         # color = cycle(sns.color_palette('Set2',5))
         p = self.draw(inputs=inputs)
         x, z, theta = self.verticies()
         c1, c2 = 0.75 * np.ones(3), 0.4 * np.ones(3)
         pl.plot(x, z, 's', color=c1, ms=2 * ms, zorder=10)
         pl.plot(x, z, 's', color=c2, ms=ms, zorder=10)
-        pl.plot(p['x'], p['z'], color=c2, ms=ms)
+        pl.plot(p['x'], p['z'], '-', color=c2, ms=ms)
         for po in self.po:
             pl.plot([po['p0']['x'], po['p1']['x']],
                     [po['p0']['z'], po['p1']['z']], color=c1, ms=ms, zorder=5)
@@ -668,26 +680,30 @@ class Profile(object):
 
     def __init__(self, name, family='S', part='TF', npoints=200,
                  symetric=False, read_write=True, **kwargs):
-        self.npoints = npoints
         self.name = name
         self.part = part
         self.read_write = read_write
-        # initalize loop object
-        self.initalise_loop(family, npoints, symetric=symetric)
         data_dir = nova_path('Data')
         self.dataname = data_dir + self.name + '_{}.pkl'.format(part)
         self.nTF = kwargs.get('nTF', 'unset')
         self.obj = kwargs.get('obj', 'L')
+        self.update(npoints=npoints, symetric=symetric, family=family)
+
+    def update(self, **kwargs):
+        # family: A==arc, D==Princton-D, S==spline
+        for key in ['npoints', 'symetric', 'family', 'nTF', 'L']:
+            if key in kwargs:
+                setattr(self, key, kwargs[key])
+        self.initalise_loop()  # initalize loop object
         self.read_loop_dict()
 
-    def initalise_loop(self, family, npoints=200, symetric=False):
-        self.family = family  # A==arc, D==Princton-D, S==spline
+    def initalise_loop(self):
         if self.family == 'A':  # tripple arc (5-7 parameter)
-            self.loop = Aloop(npoints=npoints)
+            self.loop = Aloop(npoints=self.npoints)
         elif self.family == 'D':  # princton D (3 parameter)
-            self.loop = Dloop(npoints=npoints)
+            self.loop = Dloop(npoints=self.npoints)
         elif self.family == 'S':  # polybezier (8-16 parameter)
-            self.loop = Sloop(npoints=npoints, symetric=symetric)
+            self.loop = Sloop(npoints=self.npoints, symetric=self.symetric)
         else:
             errtxt = '\n'
             errtxt += 'loop type \'' + self.family + '\'\n'
@@ -699,14 +715,14 @@ class Profile(object):
             try:
                 with open(self.dataname, 'rb') as input:
                     self.loop_dict = pickle.load(input)
-            except:
+            except FileNotFoundError:
                 print('file ' + self.dataname + ' not found')
                 print('initializing new loop_dict')
                 self.loop_dict = {}
             self.frame_data()
             try:
                 self.load(nTF=self.nTF, obj=self.obj)
-            except:
+            except KeyError:
                 wstr = 'loop parameters '
                 wstr += 'nTF:\'{}\', obj:\'{}\''.format(self.nTF, self.obj)
                 wstr += ' not avalible\n'
@@ -785,4 +801,9 @@ if __name__ is '__main__':  # plot loop classes
     # loop.set_tension('full')
     # x = loop.plot({'l2':1.5})
     # loop.draw()
-    profile = Profile('DEMO_SN', family='S', part='TF', nTF=18, obj='L')
+    profile = Profile('demo', family='A', load=True,
+                      part='TF', nTF=16, obj='L', npoints=500)
+
+    profile.update(family='S')
+
+    profile.loop.plot()

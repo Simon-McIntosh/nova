@@ -12,6 +12,9 @@ from amigo.time import clock
 from amigo import geom
 import matplotlib.animation as manimation
 from mpl_toolkits.mplot3d import Axes3D
+from blueprint.CAD.buildCAD import buildCAD
+from blueprint.CAD import coilCAD
+
 import seaborn as sns
 rc = {'figure.figsize': [8 * 12 / 16, 8], 'savefig.dpi': 120,
       'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
@@ -239,9 +242,14 @@ if __name__ == '__main__':
     ss.fe.plot_curvature()
     # ss.fe.deform(15)
 
-    # ss.plot()
-    # ss.plot3D()
-    # ss.fe.plot_sections()
+    TFcoil = coilCAD.TFcoilCAD(ss.atec)
+    model = buildCAD(ss.tf.nTF)
+    model.add_part(TFcoil)
+    model.display(1, output='web')
+
+    ss.plot(25)
+    #ss.plot3D()
+    ss.fe.plot_sections()
     # ss.movie('structural_solver')
     # ss.fe.plot_curvature()
     # ss.fe.plot_twin()

@@ -34,7 +34,7 @@ def delete_row_csr(mat, i):
 
 class FE(object):
 
-    def __init__(self, frame='1D', nShape=11, scale=1):
+    def __init__(self, frame='1D', nShape=21, scale=1):
         self.nShape = nShape  # element shape function resolution
         self.scale = 1  # displacment scale factor (plotting)
         self.coordinate = ['x', 'y', 'z', 'tx', 'ty', 'tz']
@@ -195,14 +195,14 @@ class FE(object):
         if len(self.X) == 0:  # initalise
             self.X = X
             self.nd_topo = np.zeros(nX)
-            self.F = np.zeros(nX * self.ndof)
+            self.Fo = np.zeros(nX * self.ndof)
             self.D = {}
-            for disp in ['x', 'y', 'z', 'tx', 'ty', 'tz']:
+            for disp in self.coordinate:
                 self.D[disp] = np.zeros(nX)
         else:
             self.X = np.append(self.X, X, axis=0)
             self.nd_topo = np.append(self.nd_topo, np.zeros(nX))
-            self.F = np.append(self.F, np.zeros(nX * self.ndof))
+            self.Fo = np.append(self.Fo, np.zeros(nX * self.ndof))
             for disp in self.D:
                 self.D[disp] = np.append(self.D[disp], np.zeros(nX))
 
@@ -355,7 +355,6 @@ class FE(object):
         self.nShape = nShape
         nsh = self.nel
         self.shape = {}
-        # self.shape['x'] = np.zeros(nsh)
         for label in ['u', 'd2u', 'U', 'D']:
             self.shape[label] = np.zeros((nsh, 3, self.nShape))
         self.S = {}
@@ -405,6 +404,7 @@ class FE(object):
         self.shape['u'][el, 2] = v[:, 1]
         self.shape['U'][el] = np.dot(self.T3[:, :, el].T,  # to global
                                      self.shape['u'][el, :, :])
+        self.shape['u'][el, 0] = np.linspace(u[0], u[1], self.nShape)
         self.shape['d2u'][el, 1] = d2v[:, 0]  # curvature
         self.shape['d2u'][el, 2] = d2v[:, 1]
 
@@ -437,8 +437,8 @@ class FE(object):
                 index = self.coordinate.index(label)
                 d[i * 6 + index] = self.D[label][n]
         for i in range(4):  # transform to local coordinates
-            d[i * 3:i * 3 +
-                3] = np.linalg.solve(self.T3[:, :, el].T, d[i * 3:i * 3 + 3])
+            d[i * 3:i * 3 + 3] = np.linalg.solve(
+                    self.T3[:, :, el].T, d[i * 3:i * 3 + 3])
         return d
 
     def displace_1D(self, d, label):
@@ -685,7 +685,7 @@ class FE(object):
     def add_nodal_load(self, node, label, load):
         self.check_input('load', label)
         index = self.load.index(label)
-        self.F[node * self.ndof + index] += load
+        self.Fo[node * self.ndof + index] += load
 
     def add_weight(self):
         self.update_rotation()  # check / update rotation matrix
@@ -810,7 +810,7 @@ class FE(object):
                     ke[j[0]:j[0] + self.ndof, j[1]:j[1] + self.ndof]
         self.K = np.copy(self.Ko)
 
-    def add_cp(self, nodes, dof='fix', nset='next', axis='y', rotate=False):
+    def add_cp(self, nodes, dof='fix', nset='next', axis='z', rotate=False):
         nodes = np.copy(nodes)  # make local copy
         if nset == 'next':  # (default)
             self.ncp += 1
@@ -939,7 +939,7 @@ class FE(object):
         self.extractBC()  # remove BC dofs
         self.extractND()  # remove unconnected nodes
         self.assemble_cp_nodes()
-        self.Fo = np.copy(self.F)
+        self.F = np.copy(self.Fo)
         self.nd = {}  # node index
         self.nd['do'] = np.arange(0, self.nK, dtype=int)  # all nodes
         self.nd['mask'] = np.zeros(self.nK, dtype=bool)  # all nodes
@@ -994,16 +994,15 @@ class FE(object):
             ax = Axes3D(pl.figure(figsize=(8, 8)))
         Theta = np.linspace(0, 2*np.pi, nTF, endpoint=False)
         for t in Theta:
-            self.plot_sections(ax=ax, theta=t)
+            # self.plot_sections(ax=ax, theta=t)
             # X = np.dot(self.X, R)
             # ax.plot(X[:, 0], X[:, 1], X[:, 2], 'o',
             #         markersize=ms, color=0.75 * np.ones(3))
-            '''
             R = geom.rotate(t, axis='z')
             for i, (part, c) in enumerate(zip(self.part, color)):
                 D = np.dot(self.part[part]['D'], R)
                 ax.plot(D[:, 0], D[:, 1], D[:, 2], color=c)
-            '''
+
         ax.set_xlim(-bb, bb)
         ax.set_ylim(-bb, bb)
         ax.set_zlim(-bb, bb)

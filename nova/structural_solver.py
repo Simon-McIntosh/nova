@@ -41,7 +41,6 @@ class SS:  # structural solver
         self.fe = FE(frame='3D')  # initalise FE solver
 
         self.add_mat()
-
         self.TF_loop()
         self.PF_connect()
 
@@ -126,20 +125,29 @@ class SS:  # structural solver
         self.fe.add_bc(['nry'], [0], part='GS', ends=0)  # free rotation in y
         self.fe.add_bc(['nry'], [-1], part='GS', ends=1)
 
-    def outer_intercoil_supports(self):
+    def outer_intercoil_supports(self, nIC=3):
         for name in self.atec.OICsupport:
             nd_tf = self.atec.OICsupport[name]['nd_tf']
             el_dy = self.atec.OICsupport[name]['el_dy']
-            self.fe.add_nodes(
-                    np.dot(self.fe.X[nd_tf[1]],
-                           geom.rotate(-np.pi/self.tf.nTF, axis='z')))
-            self.fe.add_nodes(
-                    np.dot(self.fe.X[nd_tf[1]],
-                           geom.rotate(np.pi/self.tf.nTF, axis='z')))
+            Xm = geom.qrotate(self.fe.X[nd_tf[1]], -np.pi/self.tf.nTF,  # minus
+                              xo=[0, 0, 0], dx=[0, 0, 1])
+            Xp = geom.qrotate(self.fe.X[nd_tf[1]], np.pi/self.tf.nTF,  # plus
+                              xo=[0, 0, 0], dx=[0, 0, 1])
+            Xrotate = np.zeros((2*nIC, 3))
+            for i in range(3):
+                Xrotate[:nIC, i] = np.linspace(
+                        Xm[0, i], self.fe.X[nd_tf[1]][i],
+                        nIC+1)[:-1]
+                Xrotate[nIC:, i] = np.linspace(
+                        self.fe.X[nd_tf[1]][i], Xp[0, i],
+                        nIC+1)[1:]
+            self.fe.add_nodes(Xrotate)
+            nodes = list(range(self.fe.nndo, self.fe.nndo+nIC)) + [nd_tf[1]]
+            nodes += list(range(self.fe.nnd-nIC, self.fe.nnd))
             self.fe.add_elements(
-                n=[self.fe.nnd-2, nd_tf[1], self.fe.nnd-1],
+                n=nodes,
                 part_name=name, nmat=name, el_dy=el_dy)
-            self.fe.add_cp([self.fe.nnd-2, self.fe.nnd-1],
+            self.fe.add_cp([self.fe.nndo, self.fe.nnd-1],
                            dof='fix', rotate=True, axis='z')
 
     def solve(self):
@@ -149,13 +157,13 @@ class SS:  # structural solver
                             self.inv.eq.Bpoint, parts=self.TFparts)
         self.fe.solve()
 
-    def plot(self, scale=5):
+    def plot(self, scale=15):
         self.fe.plot_nodes()
-        # self.tf.fill()
+        self.tf.fill()
         self.fe.deform(scale=scale)
         self.fe.plot_F(scale=1e-8)
         self.fe.plot_displacment()
-        # self.pf.plot(label=False)
+        self.pf.plot(label=False)
         pl.axis('off')
 
     def plot3D(self, ax=None, scale=5):
@@ -200,21 +208,19 @@ if __name__ == '__main__':
     tf = TF(profile=profile, sf=sf)
 
     ss = SS(sf, pf, tf)  # structural solver
+
     from time import time
     tic = time()
     ss.solve()
     print(time()-tic)
-    # ss.plot()
-
-    ss.plot3D()
-    
+    # TODO implement multi solve logic
 
     TFcoil = coilCAD.TFcoilCAD(ss.atec)
     model = buildCAD(ss.tf.nTF)
     model.add_part(TFcoil)
     model.display(1, output='web')
 
-
-
-    # ss.fe.plot_sections()
+    ss.plot(25)
+    #ss.plot3D()
+    ss.fe.plot_sections()
     # ss.movie('structural_solver')

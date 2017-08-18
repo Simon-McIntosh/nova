@@ -209,12 +209,17 @@ class FE(object):
             self.D = {}
             for disp in self.coordinate:
                 self.D[disp] = np.zeros(nX)
+            self.Fr = {}  # reaction forces
+            for load in self.load:
+                self.Fr[load] = np.zeros(nX)
         else:  # append
             self.X = np.append(self.X, X, axis=0)
             self.nd_topo = np.append(self.nd_topo, np.zeros(nX))
             self.Fo = np.append(self.Fo, np.zeros(nX * self.ndof))
             for disp in self.D:
                 self.D[disp] = np.append(self.D[disp], np.zeros(nX))
+            for load in self.Fr:
+                self.Fr[load] = np.append(self.Fr[load], np.zeros(nX))
 
     def get_nodes(self):
         n = np.zeros((self.nnd - self.nndo - 1, 2), dtype='int')
@@ -270,6 +275,7 @@ class FE(object):
         dy /= norm
         dy = np.matrix(dy)
         dz = np.cross(dx, dy)  # right hand coordinates
+        dz = np.matrix(dz)
 
         # set material properties
         if isinstance(nmat, int):  # constant sectional properties
@@ -589,14 +595,15 @@ class FE(object):
     def get_rotation(self):
         dx_, dy_, dz_ = self.el['dx'], self.el['dy'], self.el['dz']
         self.T3 = np.zeros((3, 3, self.nel))
-        X = np.array([1, 0, 0]).T
-        Y = np.array([0, 1, 0]).T
-        Z = np.array([0, 0, 1]).T
         for i, (dx, dy, dz) in enumerate(zip(dx_, dy_, dz_)):
-            self.T3[:, :, i] = \
-                np.matrix([[np.dot(dx, X), np.dot(dx, Y), np.dot(dx, Z)],
-                           [np.dot(dy, X), np.dot(dy, Y), np.dot(dy, Z)],
-                           [np.dot(dz, X), np.dot(dz, Y), np.dot(dz, Z)]])
+            ''' direction cosines
+            [[np.dot(dx, xhat), np.dot(dx, yhat), np.dot(dx, zhat)],
+             [np.dot(dy, xhat), np.dot(dy, yhat), np.dot(dy, zhat)],
+             [np.dot(dz, xhat), np.dot(dz, yhat), np.dot(dz, zhat)]]
+            '''
+            self.T3[:, :, i] = np.matrix([[dx[0, 0], dx[0, 1], dx[0, 2]],
+                                          [dy[0, 0], dy[0, 1], dy[0, 2]],
+                                          [dz[0, 0], dz[0, 1], dz[0, 2]]])
 
     def rotate_matrix(self, M, el):
         T = np.zeros((2 * self.ndof, 2 * self.ndof))
@@ -673,8 +680,8 @@ class FE(object):
                     mi = 5 if label == 'fy' else 4  # moment index
                     # mi = 4 if label == 'fy' else 5  # moment index
 
-                    fn[mi, 0] = f[i] * (1 - s)**2 * s * self.el['dl'][el]
-                    fn[mi, 1] = -f[i] * s**2 * (1 - s) * self.el['dl'][el]
+                    #fn[mi, 0] = f[i] * (1 - s)**2 * s * self.el['dl'][el]
+                    #fn[mi, 1] = -f[i] * s**2 * (1 - s) * self.el['dl'][el]
                     if load_type == 'dist':
                         # reduce moment for distributed load
                         fn[mi, :] *= 8 / 12
@@ -825,8 +832,8 @@ class FE(object):
             ko_index = itertools.product(
                 self.ndof * self.el['n'][el], repeat=2)
             for i, j in zip(ko_index, ke_index):
-                self.Ko[i[0]:i[0] + self.ndof, i[1]:i[1] + self.ndof] += \
-                    ke[j[0]:j[0] + self.ndof, j[1]:j[1] + self.ndof]
+                self.Ko[i[0]:i[0]+self.ndof, i[1]:i[1]+self.ndof] += \
+                    ke[j[0]:j[0]+self.ndof, j[1]:j[1]+self.ndof]
         self.K = np.copy(self.Ko)
 
     def add_cp(self, nodes, dof='fix', nset='next', axis='z', rotate=False):
@@ -999,12 +1006,16 @@ class FE(object):
         self.update_rotation()  # evaluate/update rotation matricies
         self.assemble()  # assemble stiffness matrix
         self.constrain()  # apply and colapse constraints
+
         self.Dn = np.zeros(self.nK)  # initalise displacment matrix
         self.Dn[self.nd['dr']] = np.linalg.solve(self.K, self.F)  # global
         self.Dn[self.nd['dc']] = np.dot(
             self.Tc, self.Dn[self.nd['dr']])  # patch constrained DOFs
+        self.Fn = np.dot(self.Ko, self.Dn)  # reaction forces
         for i, disp in enumerate(self.disp):
             self.D[disp] = self.Dn[i::self.ndof]
+        for i, load in enumerate(self.load):
+            self.Fr[load] = self.Fn[i::self.ndof]
         self.interpolate()
 
     def plot_3D(self, ax=None, nTF=0, bb=12, ms=5):
@@ -1066,6 +1077,7 @@ class FE(object):
                 pl.plot([self.X[nd[0], 0], self.X[nd[1], 0]],
                         [self.X[nd[0], 2], self.X[nd[1], 2]],
                         color=c, alpha=0.5)
+        pl.axis('equal')
 
     def plot_F(self, scale=1):
         for i, (X, dx, dz) in enumerate(zip(self.X, self.D['x'], self.D['z'])):

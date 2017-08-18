@@ -17,15 +17,16 @@ E = fe.mat[0]['mat_o']['E']
 Iy = fe.mat[0]['mat_o']['I'][1]
 
 L = 3
-x = np.linspace(0, L, 20)
-X = np.zeros((20, 3))
+N = 21
+x = np.linspace(0, L, N)
+X = np.zeros((N, 3))
 X[:, 0] = x
 fe.add_nodes(X)
 fe.add_elements(part_name='beam', nmat='bar')
 
 
 def plot(fe, x, v, m, title):
-    fig, ax = pl.subplots(2, 1, sharex=True, squeeze=True)
+    fig, ax = pl.subplots(2, 1, sharex=True, squeeze=True, figsize=(12, 8))
     ax[0].set_title(title)
     ax[0].plot(x, fe.D['z'])
     ax[0].plot(x, v, '--')
@@ -38,8 +39,8 @@ def plot(fe, x, v, m, title):
 # simple beam
 v = w * x / (24 * E * Iy) * (L**3 - 2 * L * x**2 + x**3)  # deflection
 m = -w * x / 2 * (L - x)  # check sign
-fe.add_bc('pin', 0, part='beam', ends=0)
-fe.add_bc('pin', -1, part='beam', ends=1)
+fe.add_bc('ny', 0, part='beam', ends=0)
+fe.add_bc('ny', -1, part='beam', ends=1)
 fe.add_weight()  # add weight to all elements
 fe.solve()
 plot(fe, x, v, m, 'simple beam')

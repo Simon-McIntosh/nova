@@ -680,8 +680,8 @@ class FE(object):
                     mi = 5 if label == 'fy' else 4  # moment index
                     # mi = 4 if label == 'fy' else 5  # moment index
 
-                    #fn[mi, 0] = f[i] * (1 - s)**2 * s * self.el['dl'][el]
-                    #fn[mi, 1] = -f[i] * s**2 * (1 - s) * self.el['dl'][el]
+                    fn[mi, 0] = f[i] * (1 - s)**2 * s * self.el['dl'][el]
+                    fn[mi, 1] = -f[i] * s**2 * (1 - s) * self.el['dl'][el]
                     if load_type == 'dist':
                         # reduce moment for distributed load
                         fn[mi, :] *= 8 / 12

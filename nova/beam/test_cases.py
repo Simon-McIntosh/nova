@@ -4,63 +4,82 @@ from nova.finite_element import FE
 from nova.properties import second_moment
 from amigo import geom
 
-fe = FE(frame='3D')
-sm = second_moment()
-sm.add_shape('circ', r=0.2, ro=0.1)
-C, I, A = sm.report()
-section = {'C': C, 'I': I, 'A': A, 'J': I['xx'], 'pnt': sm.get_pnt()}
-fe.add_mat('bar', ['steel_cast'], [section])
 
-# extract sectional properties
-w = -9.81 * fe.mat[0]['mat_o']['rho'] * fe.mat[0]['mat_o']['A']  # weight / l
-E = fe.mat[0]['mat_o']['E']
-Iy = fe.mat[0]['mat_o']['I'][1]
+class TB:  # test beam
 
-L = 3
-N = 21
-x = np.linspace(0, L, N)
-X = np.zeros((N, 3))
-X[:, 0] = x
-fe.add_nodes(X)
-fe.add_elements(part_name='beam', nmat='bar')
+    def __init__(self, N, L=3):
+        self.fe = FE(frame='3D')
+        self.section()
+        self.bar(N)
 
+    def section(self):
+        sm = second_moment()
+        sm.add_shape('circ', r=0.2, ro=0.1)
+        C, I, A = sm.report()
+        section = {'C': C, 'I': I, 'A': A, 'J': I['xx'], 'pnt': sm.get_pnt()}
+        self.fe.add_mat('tube', ['steel_cast'], [section])
 
-def plot(fe, x, v, m, title):
-    fig, ax = pl.subplots(2, 1, sharex=True, squeeze=True, figsize=(12, 8))
-    ax[0].set_title(title)
-    ax[0].plot(x, fe.D['z'])
-    ax[0].plot(x, v, '--')
-    ax[0].set_ylabel(r'$\delta$')
-    ax[1].plot(fe.part['beam']['l'], E*Iy*fe.part['beam']['d2u'][:, 2])
-    ax[1].plot(x, m, '--')
-    ax[1].set_ylabel(r'$M$')
+        # extract sectional properties
+        self.w = -9.81 * self.fe.mat[0]['mat_o']['rho'] *\
+            self.fe.mat[0]['mat_o']['A']  # weight / l
+        E = self.fe.mat[0]['mat_o']['E']
+        Iy = self.fe.mat[0]['mat_o']['I'][1]
+        self.EI = E * Iy
 
+    def bar(self, N, L=3):
+        self.L = L
+        self.x = np.linspace(0, self.L, 50)
+        X = np.zeros((N, 3))
+        X[:, 0] = np.linspace(0, self.L, N)
+        self.fe.add_nodes(X)
+        self.fe.add_elements(part_name='beam', nmat='tube')
 
-# simple beam
-v = w * x / (24 * E * Iy) * (L**3 - 2 * L * x**2 + x**3)  # deflection
-m = -w * x / 2 * (L - x)  # check sign
-fe.add_bc('ny', 0, part='beam', ends=0)
-fe.add_bc('ny', -1, part='beam', ends=1)
-fe.add_weight()  # add weight to all elements
-fe.solve()
-plot(fe, x, v, m, 'simple beam')
+    def plot(self, v, m, title):
+        fig, ax = pl.subplots(2, 1, sharex=True, squeeze=True, figsize=(8, 6))
+        ax[0].set_title(title)
+        ax[0].plot(self.fe.part['beam']['Lnd'], self.fe.D['z'])
+        ax[0].plot(self.x, v, '--')
+        ax[0].set_ylabel(r'$\delta$')
+        ax[1].plot(self.fe.part['beam']['Lshp'],
+                   self.EI*self.fe.part['beam']['d2u'][:, 2])
+        ax[1].plot(self.x, m, '--')
+        ax[1].set_ylabel(r'$M$')
 
-# cantilever beam
-v = w / (24 * E * Iy) * (x**4 - 4*L**3*x + 3*L**4)  # deflection
-m = w * x**2 / 2
-fe.initalize_BC()  # clear boundary conditions
-fe.add_bc('fix', -1, part='beam', ends=1)
-fe.solve()
-plot(fe, x, v, m, 'cantilever beam')
+    def test(self, case):
+        self.fe.initalize_BC()  # clear boundary conditions
 
-# pin, fix
-v = w * x / (48 * E * Iy) * (L**3 - 3*L*x**2 + 2*x**3)  # deflection
-m = -3*w*L*x/8 + w*x**2/2  # check sign
-fe.initalize_BC()  # clear boundary conditions
-fe.add_bc('pin', 0, part='beam', ends=0)
-fe.add_bc('fix', -1, part='beam', ends=1)
-fe.solve()
-plot(fe, x, v, m, 'pin fix')
+        if case == 0:  # simple beam
+            name = 'simple beam'
+            v = self.w * self.x / (24 * self.EI) *\
+                (self.L**3 - 2 * self.L * self.x**2 + self.x**3)
+            m = -self.w * self.x / 2 * (self.L - self.x)  # check sign
+            self.fe.add_bc('ny', 0, part='beam', ends=0)
+            self.fe.add_bc('ny', -1, part='beam', ends=1)
+
+        elif case == 1:  # cantilever beam
+            name = 'cantilever beam'
+            v = self.w * self.x**2 / (24 * self.EI) * (6*self.L**2 -
+                                           4*self.L*self.x + self.x**2)
+            m = self.w * self.x**2 / 2
+            self.fe.add_bc('fix', 0, part='beam', ends=0)
+            self.fe.add_weight()  # add weight to all elements
+
+        elif case == 2:  # pin, fix
+            v = self.w * self.x / (48 * self.EI) * \
+                (self.L**3 - 3*self.L*self.x**2 + 2*self.x**3)
+            m = -3*self.w*self.L*self.x/8 + self.w*self.x**2/2  # check sign
+            self.fe.initalize_BC()  # clear boundary conditions
+            self.fe.add_bc('pin', 0, part='beam', ends=0)
+            self.fe.add_bc('fix', -1, part='beam', ends=1)
+
+        self.fe.add_weight()
+        self.fe.solve()  # solve
+        self.plot(v, m, name)
+
+if __name__ == '__main__':
+
+    tb = TB(30)
+    tb.test(1)
 
 
 '''

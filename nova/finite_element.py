@@ -350,15 +350,15 @@ class FE(object):
             iel = np.arange(self.nelo, self.nel)
         self.part[name]['el'] = iel  # construct from input element list
         self.part[name]['nel'] = len(iel)
-        self.part[name]['L'] = np.append(0, np.cumsum(self.el['dl'][iel]))
+        self.part[name]['Lnd'] = np.append(0, np.cumsum(self.el['dl'][iel]))
         n = 2 * (len(iel))
         L, nd = np.zeros(n), np.zeros(n)
-        L[::2] = self.part[name]['L'][:-1]
-        L[1::2] = self.part[name]['L'][1:]
-        L /= self.part[name]['L'][-1]  # normalise
+        L[::2] = self.part[name]['Lnd'][:-1]
+        L[1::2] = self.part[name]['Lnd'][1:]
+        L /= self.part[name]['Lnd'][-1]  # normalise
         nd[::2] = self.el['n'][iel, 0]
         nd[1::2] = self.el['n'][iel, 1]
-        self.part[name]['Ln'] = interp1d(L, nd)  # node interpolator
+        self.part[name]['nd_fun'] = interp1d(L, nd)  # node interpolator
 
     def initalize_BC(self):
         self.BC = OrderedDict()
@@ -440,7 +440,8 @@ class FE(object):
     def shape_part(self, labels=['u', 'U', 'D', 'd2u']):
         for part in self.part:
             nS = self.part[part]['nel'] * (self.nShape - 1) + 1
-            self.part[part]['l'] = np.linspace(0, self.part[part]['L'][-1], nS)
+            self.part[part]['Lshp'] = \
+                np.linspace(0, self.part[part]['Lnd'][-1], nS)  # sub-divided
             for label in labels:
                 self.part[part][label] = np.zeros((nS, 3))
             for nel, el in enumerate(self.part[part]['el']):
@@ -456,8 +457,9 @@ class FE(object):
                 index = self.coordinate.index(label)
                 d[i * 6 + index] = self.D[label][n]
         for i in range(4):  # transform to local coordinates
-            d[i * 3:i * 3 + 3] = np.linalg.solve(
-                    self.T3[:, :, el].T, d[i * 3:i * 3 + 3])
+            d[i * 3:i * 3 + 3] = np.dot(self.T3[:, :, el], d[i * 3:i * 3 + 3])
+            print(d)
+        print('')
         return d
 
     def displace_1D(self, d, label):
@@ -632,7 +634,8 @@ class FE(object):
             load_type = 'point'
             if 'L' in kwargs and 'part' in kwargs:  # identify element
                 L, part = kwargs.get('L'), kwargs.get('part')
-                Ln = self.part[part]['Ln'](L)  # length along part
+                Ln = self.part[part]['nd_fun'](L)  # length along part
+                # TODO fix fractional element loading - nd_fun / el_fun
                 el = int(np.floor(Ln))  # element index
                 s = Ln - el  # fraction along element
                 if L == 1:
@@ -666,7 +669,7 @@ class FE(object):
         if len(csys) == 0:
             raise ValueError('load vector unset')
         elif csys == 'global':
-            f = np.linalg.solve(self.T3[:, :, el].T, f)  # rotate to local csys
+            f = np.dot(self.T3[:, :, el], f)  # rotate to local csys
         fn = np.zeros((6, 2))  # 6 dof local nodal load vector
         # split point load to F,M
         for i, label in enumerate(['fx', 'fy', 'fz']):
@@ -678,8 +681,6 @@ class FE(object):
                     fn[i, 0] = (1 - s)**2 * (1 + 2 * s) * f[i]
                     fn[i, 1] = s**2 * (3 - 2 * s) * f[i]
                     mi = 5 if label == 'fy' else 4  # moment index
-                    # mi = 4 if label == 'fy' else 5  # moment index
-
                     fn[mi, 0] = f[i] * (1 - s)**2 * s * self.el['dl'][el]
                     fn[mi, 1] = -f[i] * s**2 * (1 - s) * self.el['dl'][el]
                     if load_type == 'dist':

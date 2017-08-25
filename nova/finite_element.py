@@ -458,8 +458,6 @@ class FE(object):
                 d[i * 6 + index] = self.D[label][n]
         for i in range(4):  # transform to local coordinates
             d[i * 3:i * 3 + 3] = np.dot(self.T3[:, :, el], d[i * 3:i * 3 + 3])
-            print(d)
-        print('')
         return d
 
     def displace_1D(self, d, label):
@@ -669,7 +667,7 @@ class FE(object):
         if len(csys) == 0:
             raise ValueError('load vector unset')
         elif csys == 'global':
-            f = np.dot(self.T3[:, :, el], f)  # rotate to local csys
+            f = np.dot(self.T3[:, :, el], f)  # rotate to force to local csys
         fn = np.zeros((6, 2))  # 6 dof local nodal load vector
         # split point load to F,M
         for i, label in enumerate(['fx', 'fy', 'fz']):
@@ -694,6 +692,9 @@ class FE(object):
                     err_txt += 'increase frame element dimension\n'
                     raise ValueError(err_txt)
         for i, node in enumerate(self.el['n'][el]):  # each node
+            F = np.zeros((6))
+            F[:3] = np.dot(self.T3[:, :, el].T, fn[:3, i])
+            '''
             if csys == 'global':
                 F = np.zeros((6))
                 for j in range(2):  # force,moment
@@ -701,6 +702,7 @@ class FE(object):
                         np.dot(self.T3[:, :, el].T, fn[j * 3:j * 3 + 3, i])
             else:
                 F = fn[:, i]
+            '''
             for index, label in enumerate(['fx', 'fy', 'fz',
                                            'mx', 'my', 'mz']):
                 if label in self.load:

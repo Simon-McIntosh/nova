@@ -7,11 +7,9 @@ xtick.labelsize : 16
 ytick.labelsize : 16
 
 figure.frameon : False
-figure.figsize : [10, 12]
+figure.figsize : 2, 3
 
 axes.spines.left   : False
 axes.spines.bottom : False
 axes.spines.top    : False
 axes.spines.right  : False
-
-axes.off : True

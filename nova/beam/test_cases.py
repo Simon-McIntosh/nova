@@ -1,8 +1,24 @@
 import numpy as np
-import pylab as pl
 from nova.finite_element import FE
 from nova.properties import second_moment
 from amigo import geom
+from amigo.pyplot import plt, plstyle
+
+#from matplotlib import pyplot as plt
+
+pls = plstyle('talk')
+
+pls.avalible()
+
+#pls.reset()
+#plt.style.use('default')
+
+
+
+#
+
+# import matplotlib as mpl
+# mpl.rcParams['figure.figsize'] = [12, 4.8]
 
 
 class TB:  # test beam
@@ -35,7 +51,7 @@ class TB:  # test beam
         self.fe.add_elements(part_name='beam', nmat='tube')
 
     def plot(self, v, m, title):
-        fig, ax = pl.subplots(2, 1, sharex=True, squeeze=True, figsize=(8, 6))
+        fig, ax = plt.subplots(2, 1, sharex=True, squeeze=True)
         ax[0].set_title(title)
         ax[0].plot(self.fe.part['beam']['Lnd'], self.fe.D['z'])
         ax[0].plot(self.x, v, '--')
@@ -44,6 +60,7 @@ class TB:  # test beam
                    self.EI*self.fe.part['beam']['d2u'][:, 2])
         ax[1].plot(self.x, m, '--')
         ax[1].set_ylabel(r'$M$')
+        plt.despine()
 
     def test(self, case):
         self.fe.initalize_BC()  # clear boundary conditions
@@ -59,7 +76,7 @@ class TB:  # test beam
         elif case == 1:  # cantilever beam
             name = 'cantilever beam'
             v = self.w * self.x**2 / (24 * self.EI) * (6*self.L**2 -
-                                           4*self.L*self.x + self.x**2)
+                                      4*self.L*self.x + self.x**2)
             m = self.w * self.x**2 / 2
             self.fe.add_bc('fix', 0, part='beam', ends=0)
             self.fe.add_weight()  # add weight to all elements
@@ -75,6 +92,7 @@ class TB:  # test beam
         self.fe.add_weight()
         self.fe.solve()  # solve
         self.plot(v, m, name)
+
 
 if __name__ == '__main__':
 

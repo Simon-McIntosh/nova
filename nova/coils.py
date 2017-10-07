@@ -1,12 +1,10 @@
 import numpy as np
-import pylab as pl
+from amigo.pyplot import plt
 from scipy.interpolate import interp1d
 from itertools import count
-import seaborn as sns
 import matplotlib
 import collections
-import amigo.geom as geom
-from amigo.mattitools import color_kwargs
+from amigo import geom
 from nova.loops import Profile, get_oppvar, get_value
 from nova.config import Setup
 from nova.streamfunction import SF
@@ -19,9 +17,6 @@ from warnings import warn
 from nova.inverse import INV
 from copy import deepcopy
 from scipy.optimize import minimize_scalar
-from nova.loops import unwind
-
-colors = sns.color_palette('Paired', 12)
 
 
 class PF(object):
@@ -159,16 +154,8 @@ class PF(object):
                 bundle = self.coil[name]
         return bundle
 
-    def plot_coil(self, coils, label=False, current=False, coil_color=None,
+    def plot_coil(self, coils, label=False, current=False,
                   fs=12, alpha=1):
-        if coil_color is None:
-            color = colors
-        else:
-            color = coil_color  # color itterator
-        if len(np.shape(color)) == 1:
-            color = color * np.ones((6, 1))
-            # TODO: Made a change from color[4:6] to color[0:2], not sure how
-            # you are using this... sorry if it breaks
         for i, name in enumerate(coils.keys()):
             coil = coils[name]
             x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
@@ -178,44 +165,42 @@ class PF(object):
                 edgecolor = 'k'
             else:
                 edgecolor = 'x'
-            #coil_color = color[0]
-            #if name.split('_')[0] in self.index['CS']['name']:
             if name in self.index['CS']['name']:
                 drs = -2.5 / 3 * dx
                 ha = 'right'
-                coil_color = color[1]
-            #elif name.split('_')[0] in self.index['PF']['name']:
+                coil_color = 'C1'
             elif name in self.index['PF']['name']:
                 drs = 2.5 / 3 * dx
                 ha = 'left'
-                coil_color = color[0]
-            pl.fill(Xfill, Zfill, facecolor=coil_color, alpha=alpha,
-                    edgecolor=edgecolor)
+                coil_color = 'C0'
+            else:
+                coil_color = 'C2'
+            plt.fill(Xfill, Zfill, facecolor=coil_color, alpha=alpha,
+                     edgecolor=edgecolor)
             if label and current:
                 zshift = max([coil['dz'] / 4, 0.4])
             else:
                 zshift = 0
             if label:
-                pl.text(x + drs, z + zshift, name, fontsize=fs,
-                        ha=ha, va='center', color=0.2 * np.ones(3))
+                plt.text(x + drs, z + zshift, name, fontsize=fs,
+                         ha=ha, va='center', color=0.2 * np.ones(3))
             if current:
-                pl.text(x + drs, z - zshift,
-                        '{:1.1f}MA'.format(coil['I'] * 1e-6),
-                        fontsize=fs, ha=ha, va='center',
-                        color=0.2 * np.ones(3))
+                plt.text(x + drs, z - zshift,
+                         '{:1.1f}MA'.format(coil['I'] * 1e-6),
+                         fontsize=fs, ha=ha, va='center',
+                         color=0.2 * np.ones(3))
 
-    def plot(self, color=None, subcoil=False, label=False, plasma=False,
+    def plot(self, subcoil=False, label=False, plasma=False,
              current=False, alpha=1):
         fs = matplotlib.rcParams['legend.fontsize']
         if subcoil:
             coils = self.sub_coil
         else:
             coils = self.coil
-        self.plot_coil(coils, label=label, current=current, fs=fs,
-                       coil_color=color, alpha=alpha)
+        self.plot_coil(coils, label=label, current=current, fs=fs, alpha=alpha)
         if plasma:
             coils = self.plasma_coil
-            self.plot_coil(coils, coil_color=color, alpha=alpha)
+            self.plot_coil(coils, alpha=alpha)
 
     def inductance(self, dCoil=0.5, Iscale=1):
         pf = deepcopy(self)
@@ -388,15 +373,15 @@ class TF(object):
     def initalise_loops(self):
         self.p = {}
         for loop in ['in', 'wp_in', 'cl', 'wp_out', 'out', 'nose', 'loop',
-                     'trans_lower', 'trans_upper']:
+                     'trans_lower', 'trans_upper', 'cl_fe']:
             self.p[loop] = {'x': [], 'z': []}
 
-    def transition_index(self, r_in, z_in, eps=1e-4):
-        npoints = len(r_in)
-        r_cl = r_in[0] + eps
+    def transition_index(self, x_in, z_in, eps=1e-12):
+        npoints = len(x_in)
+        x_cl = x_in[0] + eps
         upper = npoints - \
-            next((i for i, r_in_ in enumerate(r_in) if r_in_ > r_cl))  # +1
-        lower = next((i for i, r_in_ in enumerate(r_in) if r_in_ > r_cl))
+            next((i for i, x_in_ in enumerate(x_in) if x_in_ > x_cl))  # +1
+        lower = next((i for i, x_in_ in enumerate(x_in) if x_in_ > x_cl))
         top, bottom = np.argmax(z_in), np.argmin(z_in)
         index = {'upper': upper, 'lower': lower, 'top': top, 'bottom': bottom}
         return index
@@ -428,13 +413,48 @@ class TF(object):
             self.p[loop]['x'], self.p[loop]['z'] = x, z
         return self.p
 
-    def split_loop(self, plot=False):  # split inboard/outboard for fe model
+    def split_loop(self, N=50, plot=False):  # split loop for fe model
         x, z = self.p['cl']['x'], self.p['cl']['z']
         index = self.transition_index(x, z)
         upper, lower = index['upper'], index['lower']
         top, bottom = index['top'], index['bottom']
-        self.p['nose']['x'] = np.append(x[upper-1:-1], x[:lower + 1])
-        self.p['nose']['z'] = np.append(z[upper-1:-1], z[:lower + 1])
+
+        p = {}
+        for part in ['trans_lower', 'loop', 'trans_upper', 'nose']:
+            p[part] = {}
+        p['nose']['x'] = np.append(x[upper-1:-1], x[:lower + 1])
+        p['nose']['z'] = np.append(z[upper-1:-1], z[:lower + 1])
+        p['trans_lower']['x'] = x[lower:bottom]
+        p['trans_lower']['z'] = z[lower:bottom]
+        p['trans_upper']['x'] = x[top:upper]
+        p['trans_upper']['z'] = z[top:upper]
+        p['loop']['x'] = x[bottom-1:top+1]
+        p['loop']['z'] = z[bottom-1:top+1]
+
+        print(p['nose']['x'][-1], p['trans_lower']['x'][0])
+
+        Lcl = geom.length(x, z, norm=False)[-1]
+        nL = N/Lcl  # nodes per length
+        self.p['cl_fe']['x'] = np.array([p['nose']['x'][-1]])
+        self.p['cl_fe']['z'] = np.array([p['nose']['z'][-1]])
+        Nstart = 0
+        for part in ['trans_lower', 'loop', 'trans_upper', 'nose']:
+            Lpart = geom.length(p[part]['x'], p[part]['z'], norm=False)[-1]
+            Npart = int(nL * Lpart)+1
+            self.p[part]['x'], self.p[part]['z'] = \
+                geom.space(p[part]['x'], p[part]['z'], Npart)
+            self.p[part]['nd'] = np.arange(Nstart, Nstart+Npart)
+            for var in ['x', 'z']:  # append centerline
+                self.p['cl_fe'][var] = np.append(self.p['cl_fe'][var],
+                                                 self.p[part][var][1:])
+            Nstart += Npart - 1
+        self.p['nose']['nd'][-1] = 0
+        self.p['cl_fe']['x'] = self.p['cl_fe']['x'][:-1]
+        self.p['cl_fe']['z'] = self.p['cl_fe']['z'][:-1]
+
+        '''
+                p['nose']['x'] = np.append(x[upper-1:-1], x[:lower + 1])
+        p['nose']['z'] = np.append(z[upper-1:-1], z[:lower + 1])
         self.p['nose']['nd'] = np.append(np.arange(upper-1, len(x)-1),
                                          np.arange(0, lower+1))
         self.p['trans_lower']['x'] = x[lower:bottom]
@@ -446,12 +466,13 @@ class TF(object):
         self.p['loop']['x'] = x[bottom-1:top+1]
         self.p['loop']['z'] = z[bottom-1:top+1]
         self.p['loop']['nd'] = np.arange(bottom-1, top+1)
+        '''
 
         if plot:
-            pl.plot(self.p['cl']['x'], self.p['cl']['z'], 'o')
+            plt.plot(self.p['cl_fe']['x'], self.p['cl_fe']['z'], 'o')
             for name in ['nose', 'loop', 'trans_lower', 'trans_upper']:
                 x, z = self.p[name]['x'], self.p[name]['z']
-                pl.plot(x, z)
+                plt.plot(x, z)
 
     # outer loop coordinate intexpolators
     def loop_interpolators(self, trim=[0, 1], offset=0.75, full=False):
@@ -537,17 +558,17 @@ class TF(object):
         geom.polyparrot(self.p['wp_out'], self.p['out'],
                         color=color[0], alpha=alpha)
         if plot_cl:  # plot winding pack centre line
-            pl.plot(self.p['cl']['x'], self.p['cl']['z'],
-                    '-.', color=0.5 * np.ones(3))
-        #pl.axis('equal')
-        #pl.axis('off')
+            plt.plot(self.p['cl']['x'], self.p['cl']['z'],
+                     '-.', color=0.5 * np.ones(3))
+        plt.axis('equal')
+        plt.axis('off')
 
     def plot_XZ(self, alpha=1, **kwargs):
         '''
         Désolé
         '''
         colors = color_kwargs(**kwargs)
-        ax = pl.gca()
+        ax = plt.gca()
         for p in [self.p['in'], self.p['wp_in'],
                   self.p['wp_out'], self.p['out']]:
             ax.plot(p['x'], p['z'], color='k')
@@ -631,31 +652,38 @@ class TF(object):
         self.shp.update = self.update_loop  # called on exit from minimizer
         self.shp.minimise(verbose=verbose)
 
+
 if __name__ is '__main__':  # test functions
 
     nPF, nTF = 6, 16
     config = {'TF': 'SN', 'eq': 'SN_{:d}PF_{:d}TF'.format(nPF, nTF)}
     setup = Setup(config['eq'])
     sf = SF(setup.filename)
-    profile = Profile(config['TF'], family='S', part='TF', nTF=nTF,
-                      obj='L', load=True, npoints=60)
+    profile = Profile(config['TF'], family='D', part='TF', nTF=nTF,
+                      obj='L', load=True, npoints=1000)
 
     # profile.loop.plot()
     tf = TF(profile=profile, sf=sf, nr=1, ny=1)
 
+    tf.split_loop(plot=True)
+
+    '''
     demo = DEMO()
     demo.fill_part('Vessel')
     demo.fill_part('Blanket')
     demo.plot_ports()
 
-    tf.minimise(demo.parts['Vessel']['out'], verbose=True, ripple=True)
+    # tf.minimise(demo.parts['Vessel']['out'], verbose=True, ripple=True)
     tf.fill()
 
     pf = PF(sf.eqdsk)
     pf.plot()
     sf.contour()
 
-    #tf.cage.output()
+    # tf.plot_XZ()
+
+    # tf.cage.output()
+    '''
 
     '''
     # tf.coil.set_input()
@@ -677,10 +705,9 @@ if __name__ is '__main__':  # test functions
     for i,(x,z) in enumerate(zip(xcl,zcl)):
         Bcl[i,:] = cage.Iturn*cage.point((x,0,z),variable='feild')
 
-    pl.figure(figsize=(8,6))
-    pl.plot(tf.x['cl']['x'],abs(B[:,1]))
-    pl.plot(xcl,abs(Bcl[:,1]))
-    pl.plot(cage.eqdsk['xcentr'],abs(cage.eqdsk['bcentr']),'o')
+    plt.plot(tf.x['cl']['x'],abs(B[:,1]))
+    plt.plot(xcl,abs(Bcl[:,1]))
+    plt.plot(cage.eqdsk['xcentr'],abs(cage.eqdsk['bcentr']),'o')
     sns.despine()
     '''
 

@@ -1,9 +1,9 @@
+from amigo.pyplot import plt
 import scipy as sp
 import numpy as np
 from scipy.special import binom as bn
 from scipy.special import iv as besl
 from amigo import geom
-import pylab as pl
 import collections
 import seaborn as sns
 import pandas as pd
@@ -48,12 +48,12 @@ def plot_variables(Xo, eps=1e-2, fmt='1.2f', scale=1, postfix=''):
     Xo['norm'] = xo
     data = pd.DataFrame(Xo)
     data.reset_index(level=0, inplace=True)
-    pl.figure(figsize=(6, 3))
+    plt.figure(figsize=plt.figaspect(0.5))
     sns.set_color_codes("muted")
     sns.barplot(x='norm', y='name', data=data, color="b")
     sns.despine(bottom=True)
-    pl.ylabel('')
-    ax = pl.gca()
+    plt.ylabel('')
+    ax = plt.gca()
     ax.get_xaxis().set_visible(False)
     patch = ax.patches
     # values = [xo[var]['value'] for var in xo]
@@ -78,13 +78,13 @@ def plot_variables(Xo, eps=1e-2, fmt='1.2f', scale=1, postfix=''):
             color = 0.75 * np.ones(3)
         ax.text(x, y, text, ha=ha, va='center',
                 size=size, color=color)
-    pl.plot(0.5 * np.ones(2), np.sort(ax.get_ylim()), '--',
-            color=0.5 * np.ones(3), zorder=0, lw=1)
-    pl.plot(np.ones(2), np.sort(ax.get_ylim()), '-', color=0.25 * np.ones(3),
-            zorder=0, lw=1.5)
+    plt.plot(0.5 * np.ones(2), np.sort(ax.get_ylim()), '--',
+             color=0.5 * np.ones(3), zorder=0, lw=1)
+    plt.plot(np.ones(2), np.sort(ax.get_ylim()), '-', color=0.25 * np.ones(3),
+             zorder=0, lw=1.5)
     xlim = ax.get_xlim()
     xmin, xmax = np.min([0, xlim[0]]), np.max([1, xlim[1]])
-    pl.xlim([xmin, xmax])
+    plt.xlim([xmin, xmax])
 
 
 def check_var(var, xo):
@@ -133,12 +133,12 @@ def plot_oppvar(xo, oppvar, eps=1e-2, fmt='1.2f', scale=1, postfix=''):
                            (xo[var]['ub'] - xo[var]['lb'])
     data = pd.DataFrame(xo).T
     data.reset_index(level=0, inplace=True)
-    # pl.figure(figsize=(8,8))
+    plt.figure(figsize=plt.figaspect(1))
     sns.set_color_codes("muted")
     sns.barplot(x='xnorm', y='index', data=data, color="b")
     sns.despine(bottom=True)
-    pl.ylabel('')
-    ax = pl.gca()
+    plt.ylabel('')
+    ax = plt.gca()
     ax.get_xaxis().set_visible(False)
     patch = ax.patches
     values = [xo[var]['value'] for var in xo]
@@ -163,13 +163,13 @@ def plot_oppvar(xo, oppvar, eps=1e-2, fmt='1.2f', scale=1, postfix=''):
             color = 0.75 * np.ones(3)
         ax.text(x, y, text, ha=ha, va='center',
                 size=size, color=color)
-    pl.plot(0.5 * np.ones(2), np.sort(ax.get_ylim()), '--',
-            color=0.5 * np.ones(3), zorder=0, lw=1)
-    pl.plot(np.ones(2), np.sort(ax.get_ylim()), '-', color=0.25 * np.ones(3),
-            zorder=0, lw=1.5)
+    plt.plot(0.5 * np.ones(2), np.sort(ax.get_ylim()), '--',
+             color=0.5 * np.ones(3), zorder=0, lw=1)
+    plt.plot(np.ones(2), np.sort(ax.get_ylim()), '-', color=0.25 * np.ones(3),
+             zorder=0, lw=1.5)
     xlim = ax.get_xlim()
     xmin, xmax = np.min([0, xlim[0]]), np.max([1, xlim[1]])
-    pl.xlim([xmin, xmax])
+    plt.xlim([xmin, xmax])
 
 
 def get_input(oppvar=[], **kwargs):
@@ -179,7 +179,7 @@ def get_input(oppvar=[], **kwargs):
         try:
             for var, x in zip(oppvar, X):
                 inputs[var] = x
-        except:
+        except ValueError:
             errtxt = '\n'
             errtxt += 'Require self.variables'
             raise ValueError(errtxt)
@@ -237,7 +237,7 @@ class Aloop(object):  # tripple arc loop
                 try:  # dict
                     for k in inputs[key]:
                         self.xo[key][k] = inputs[key][k]
-                except:  # single value
+                except TypeError:  # single value
                     self.xo[key]['value'] = inputs[key]
                 self.xo[key] = set_limit(self.xo[key], limits=self.limits)
 
@@ -298,9 +298,9 @@ class Aloop(object):  # tripple arc loop
 
     def plot(self, inputs={}):
         x = self.draw(inputs=inputs)
-        pl.plot(x['x'], x['z'], '-', ms=8, color=0.4 * np.ones(3))
-        pl.axis('equal')
-        pl.axis('off')
+        plt.plot(x['x'], x['z'], '-', ms=8, color=0.4 * np.ones(3))
+        plt.axis('equal')
+        plt.axis('off')
 
 
 class Dloop(object):  # Princton D
@@ -344,7 +344,9 @@ class Dloop(object):  # Princton D
         theta = np.linspace(-0.5 * np.pi, 1.5 * np.pi, 2 * self.npoints)
         x, z = np.zeros(2 * self.npoints), np.zeros(2 * self.npoints)
         s = np.zeros(2 * self.npoints, dtype='complex128')
-        for n in np.arange(1, 20):  # sum convergent series
+        n = 0
+        while True:  # sum convergent series
+            n += 1
             ds = 1j / n * (np.exp(-1j * n * theta) - 1) *\
                 (1 + np.exp(1j * n * (theta + np.pi))) *\
                 np.exp(1j * n * np.pi / 2) * \
@@ -369,11 +371,11 @@ class Dloop(object):  # Princton D
 
     def plot(self, inputs={}):
         x = self.draw(inputs=inputs)
-        pl.plot(x['x'], x['z'], '-', ms=8, color=0.4 * np.ones(3))
+        plt.plot(x['x'], x['z'], '-', ms=8, color=0.4 * np.ones(3))
         # for x, z in zip(self.segments['x'], self.segments['z']):
-        #    pl.plot(x, z, lw=3)
-        pl.axis('equal')
-        pl.axis('off')
+        #    plt.plot(x, z, lw=3)
+        plt.axis('equal')
+        plt.axis('off')
 
 
 class Sloop(object):  # polybezier
@@ -652,28 +654,27 @@ class Sloop(object):  # polybezier
         return p
 
     def plot(self, inputs={}, ms=8):
-        # color = cycle(sns.color_palette('Set2',5))
         p = self.draw(inputs=inputs)
         x, z, theta = self.verticies()
         c1, c2 = 0.75 * np.ones(3), 0.4 * np.ones(3)
-        pl.plot(x, z, 's', color=c1, ms=2 * ms, zorder=10)
-        pl.plot(x, z, 's', color=c2, ms=ms, zorder=10)
-        pl.plot(p['x'], p['z'], '-', color=c2, ms=ms)
+        plt.plot(x, z, 's', color=c1, ms=2 * ms, zorder=10)
+        plt.plot(x, z, 's', color=c2, ms=ms, zorder=10)
+        plt.plot(p['x'], p['z'], '-', color=c2, ms=ms)
         for po in self.po:
-            pl.plot([po['p0']['x'], po['p1']['x']],
-                    [po['p0']['z'], po['p1']['z']], color=c1, ms=ms, zorder=5)
-            pl.plot(po['p1']['x'], po['p1']['z'], 'o',
-                    color=c1, ms=2 * ms, zorder=6)
-            pl.plot(po['p1']['x'], po['p1']['z'], 'o',
-                    color=c2, ms=ms, zorder=7)
-            pl.plot([po['p3']['x'], po['p2']['x']],
-                    [po['p3']['z'], po['p2']['z']], color=c1, ms=ms, zorder=5)
-            pl.plot(po['p2']['x'], po['p2']['z'], 'o',
-                    color=c1, ms=2 * ms, zorder=6)
-            pl.plot(po['p2']['x'], po['p2']['z'], 'o',
-                    color=c2, ms=ms, zorder=7)
-        pl.axis('equal')
-        pl.axis('off')
+            plt.plot([po['p0']['x'], po['p1']['x']],
+                     [po['p0']['z'], po['p1']['z']], color=c1, ms=ms, zorder=5)
+            plt.plot(po['p1']['x'], po['p1']['z'], 'o',
+                     color=c1, ms=2 * ms, zorder=6)
+            plt.plot(po['p1']['x'], po['p1']['z'], 'o',
+                     color=c2, ms=ms, zorder=7)
+            plt.plot([po['p3']['x'], po['p2']['x']],
+                     [po['p3']['z'], po['p2']['z']], color=c1, ms=ms, zorder=5)
+            plt.plot(po['p2']['x'], po['p2']['z'], 'o',
+                     color=c1, ms=2 * ms, zorder=6)
+            plt.plot(po['p2']['x'], po['p2']['z'], 'o',
+                     color=c2, ms=ms, zorder=7)
+        plt.axis('equal')
+        plt.axis('off')
 
 
 class Profile(object):
@@ -797,13 +798,13 @@ class Profile(object):
 if __name__ is '__main__':  # plot loop classes
     # loop = Aloop()
     # x = loop.plot()
-    #loop = Sloop(limits=False, symetric=False, tension='single')
+    # loop = Sloop(limits=False, symetric=False, tension='single')
     # loop.set_tension('full')
     # x = loop.plot({'l2':1.5})
     # loop.draw()
-    profile = Profile('demo', family='A', load=True,
+    profile = Profile('demo', family='D', load=True,
                       part='TF', nTF=16, obj='L', npoints=500)
 
-    profile.update(family='S')
+    # profile.update(family='D')
 
     profile.loop.plot()

@@ -11,15 +11,8 @@ from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 from scipy.signal import savgol_filter
 import nova
 from amigo.IO import class_dir
-import seaborn as sns
-rc = {'figure.figsize': [7, 7 * 12 / 9], 'savefig.dpi': 100,
-      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
-      'lines.linewidth': 1.5}
-sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
-        font_scale=7 / 8, rc=rc)
-color = sns.color_palette('Paired', 12)
-ic = count(0)
 
+ic = count(0)
 nova_root = class_dir(nova)
 
 
@@ -115,11 +108,6 @@ def cluster_points(x, z):
         z = np.append(z[imax:], z[:imax])
         cluster[cl]['x'], cluster[cl]['z'] = x, z
     return cluster
-
-
-def set_figure():
-    pl.axis('off')
-    pl.axis('equal')
 
 
 class DEMO(object):
@@ -248,12 +236,8 @@ class DEMO(object):
     def plot_ports(self):
         for p in self.port:
             for s in self.port[p]:
-                if s == 'left':
-                    c = color[8]
-                else:
-                    c = color[8]
                 pl.plot(self.port[p][s]['x'], self.port[p][s]['z'],
-                        zorder=3, color=c, lw=1)
+                        zorder=3, color='C8', lw=1)
 
     def get_limiters(self, plot=False):
         x = self.parts['Plasma']['out']
@@ -330,15 +314,14 @@ class DEMO(object):
     def fill_loops(self):
         for part in self.parts:
             geom.polyfill(self.parts[part]['x'],
-                          self.parts[part]['z'], color=color[next(ic)])
-        set_figure()
+                          self.parts[part]['z'], color='C{}'.format(next(ic)))
 
     def fill_part(self, part, alpha=1, **kwargs):
         if part == 'TF_Coil':
             cindex = len(self.parts.keys()) - 1
         else:
             cindex = list(self.parts.keys()).index(part) - 1
-        c = kwargs.get('color', color[cindex])
+        c = kwargs.get('color', 'C{}'.format(next(ic)))
         geom.polyfill(self.parts[part]['x'], self.parts[part]['z'],
                       color=c, alpha=alpha)
 

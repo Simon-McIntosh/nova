@@ -1,18 +1,6 @@
 import numpy as np
+from amigo.pyplot import plt
 from amigo import geom
-import pylab as pl
-import seaborn as sns
-from itertools import cycle
-color = cycle(sns.color_palette('Set2', 12))
-sns.set_context('talk')
-sns.set_style(style='white')
-
-rc = {'figure.figsize': [5, 5 * 10 / 16], 'savefig.dpi': 150,  # *12/16
-      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
-      'lines.linewidth': 0.75}
-sns.set(context='paper', style='white', font='sans-serif', palette='Set2',
-        font_scale=7 / 8, rc=rc)
-Color = cycle(sns.color_palette('Set2'))
 
 
 class second_moment(object):
@@ -113,8 +101,8 @@ class second_moment(object):
     def get_shape(self, shape):
         try:
             gen = getattr(self, shape)
-        except:
-            raise ValueError('shape {} not found'.format(shape))
+        except AttributeError:
+            raise AttributeError('shape {} not found'.format(shape))
         return gen
 
     def remove_shape(self, shape, dy=0, dz=0, **kwargs):
@@ -151,13 +139,13 @@ class second_moment(object):
 
     def plot(self, centroid=True):
         for p in self.patch:
-            geom.polyfill(p['y'], p['z'], color=next(color), alpha=1)
+            geom.polyfill(p['y'], p['z'], alpha=1)
         for h in self.hole:
             geom.polyfill(h['y'], h['z'], color=np.ones(3))
-        pl.axis('equal')
+        plt.axis('equal')
         if centroid:
-            pl.plot(0, 0, 's')
-            pl.plot(self.C['y'], self.C['z'], 'o')
+            plt.plot(0, 0, 's')
+            plt.plot(self.C['y'], self.C['z'], 'o')
 
     def get_pnt(self):
         y, z = [], []

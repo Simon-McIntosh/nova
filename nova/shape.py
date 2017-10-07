@@ -1,5 +1,5 @@
-import pylab as pl
 import numpy as np
+from amigo.pyplot import plt
 from amigo import geom
 import seaborn as sns
 from scipy.optimize import fmin_slsqp
@@ -8,14 +8,12 @@ from nova.DEMOxlsx import DEMO
 from nova.loops import set_oppvar, get_oppvar, plot_oppvar, Profile
 from nova.config import select
 import matplotlib.animation as manimation
-from itertools import cycle
 from amigo.time import clock
 
 
 class Shape(object):
 
     def __init__(self, profile, **kwargs):
-        self.color = cycle(sns.color_palette('Set2', 10))
         self.profile = profile
         self.obj = kwargs.get('objective', profile.obj)
         self.loop = self.profile.loop
@@ -51,9 +49,9 @@ class Shape(object):
                                 ['.-', 'd', 's']):
             index = self.bindex[side]
             for i in range(len(index) - 1):
-                pl.plot(self.bound[side]['x'][index[i]:index[i + 1]],
-                        self.bound[side]['z'][index[i]:index[i + 1]],
-                        marker, markersize=6, color=next(self.color))
+                plt.plot(self.bound[side]['x'][index[i]:index[i + 1]],
+                         self.bound[side]['z'][index[i]:index[i + 1]],
+                         marker, markersize=6)
 
     def geometric_objective(self, xnorm, *args):
         xo = get_oppvar(self.loop.xo, self.loop.oppvar, xnorm)  # de-normalize
@@ -116,7 +114,7 @@ class Shape(object):
         print('optimisation time {:1.1f}s'.format(time.time() - tic))
 
     def movie(self, filename):
-        fig, ax = pl.subplots(1, 2, figsize=(12, 8))
+        fig, ax = plt.subplots(1, 2, figsize=plt.figaspect(0.66))
         demo = DEMO()
         moviename = '../Movies/{}'.format(filename)
         moviename += '.mp4'
@@ -131,19 +129,19 @@ class Shape(object):
                 timer.ticktoc()
 
     def frames(self, filename):
-        fig, ax = pl.subplots(1, 2, figsize=(12, 8))
+        fig, ax = plt.subplots(1, 2, figsize=plt.figaspect(0.66))
         demo = DEMO()
         figname = '../Figs/{}'.format(filename)
         self.frame(ax, demo, xo=self.xo[0])
-        pl.savefig(figname + '_s.png')
+        plt.savefig(figname + '_s.png')
         self.frame(ax, demo, xo=self.xo[-1])
-        pl.savefig(figname + '_e.png')
+        plt.savefig(figname + '_e.png')
 
     def frame(self, ax, demo, **kwargs):
         xo = kwargs.get('xo', self.xo[-1])
-        pl.sca(ax[0])
-        # pl.cla()
-        pl.plot([3, 18], [-10, 10], 'ko', alpha=0)
+        plt.sca(ax[0])
+        # plt.cla()
+        plt.plot([3, 18], [-10, 10], 'ko', alpha=0)
         demo.fill_part('Blanket')
         demo.fill_part('Vessel')
 
@@ -156,8 +154,8 @@ class Shape(object):
                       alpha=0.3, color=sns.color_palette('Set2', 5)[3])
         # self.cage.plot_loops(sticks=False)
         if len(ax) > 1:
-            pl.sca(ax[1])
-            pl.cla()
+            plt.sca(ax[1])
+            plt.cla()
             plot_oppvar(shp.loop.xo, shp.loop.oppvar)
 
     '''
@@ -168,22 +166,28 @@ class Shape(object):
         self.cage.output()
     '''
 
+
 if __name__ is '__main__':
 
     nTF = 16
-    family = 'S'
+    family = 'D'
     ripple = False
 
     config = {'TF': 'demo', 'eq': 'SN'}
     config, setup = select(config, nTF=nTF)
 
     demo = DEMO()
-    profile = Profile(config['TF'], family=family, part='TF', nTF=nTF)
+    profile = Profile(config['TF_base'], family=family, part='TF', nTF=nTF)
     shp = Shape(profile, obj='L')
 
     shp.add_bound(demo.parts['Vessel']['out'], 'internal')
     shp.minimise(verbose=True)
     shp.plot_bounds()
+    profile.loop.plot()
+
+    plt.axis('off')
+    plt.axis('equal')
+
 
     '''
 
@@ -220,8 +224,8 @@ if __name__ is '__main__':
     print(r'plasma volume {:1.0f} m3'.format(Vol['plasma']))
     print('ratio {:1.2f}'.format(Vol['ratio']))
 
-    fig, ax = pl.subplots(1, 1, figsize=(8, 10))
-    pl.plot([3, 18], [-10, 10], 'ko', alpha=0)
+    fig, ax = plt.subplots(1, 1, figsize=plt.figaspect(0.66))
+    plt.plot([3, 18], [-10, 10], 'ko', alpha=0)
     demo.fill_part('Blanket')
     demo.fill_part('Vessel')
 
@@ -230,13 +234,13 @@ if __name__ is '__main__':
     shp.tf.fill()
 
     # cage.plot_contours(variable='ripple',n=2e3,loop=demo.fw)  # 2e5
-    pl.axis('off')
+    plt.axis('off')
 
-    pl.savefig('../Figs/ripple_referance')
+    plt.savefig('../Figs/ripple_referance')
 
 
     filename = '{}_{}_{}'.format(config['TF'],family,ripple)
     shp.movie(filename)
     #shp.frames(filename)
-    #pl.savefig('../Figs/TFloop_{}.png'.format(family))
+    #plt.savefig('../Figs/TFloop_{}.png'.format(family))
     '''

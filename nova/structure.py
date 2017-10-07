@@ -1,3 +1,5 @@
+import numpy as np
+from amigo.pyplot import plt
 from nova.config import select
 from nova.properties import second_moment
 from nova.coils import PF, TF
@@ -8,10 +10,7 @@ from amigo import geom
 from amigo.addtext import linelabel
 from matplotlib import gridspec
 from scipy.optimize import minimize_scalar, minimize
-import pylab as pl
-import numpy as np
 from warnings import warn
-import seaborn as sns
 from amigo.geom import polyline
 
 
@@ -34,12 +33,12 @@ class architect(object):
 
     def connect(self, plot=False):
         self.set_loop_interpolators()  # tf loop interpolators
+        self.tf.split_loop(plot=True)
         self.CS_support()  # calculate CS support seats
         self.PF_support()  # calculate PF support seats
         self.G_support(Xo=13, width=0.75)  # gravity support
         self.OIC_support(thickness=0.15)  # outer intercoil support
         self.get_TF_nodes()  # TF node index for connecting parts
-        self.tf.split_loop()
         if plot:
             self.plot_connections()
 
@@ -49,25 +48,31 @@ class architect(object):
         self.tf.loop_interpolators(offset=-0.15)
         self.tf_fun_offset = self.tf.fun.copy()  # copy dict of functions
 
-    def plot_connections(self):
+    def plot_connections(self, *args):
+        if len(args) == 0:
+            plt.figure(figsize=plt.figaspect(1.5))
+        self.tf.fill()
+        self.pf.plot(subcoil=False, plasma=True, current=True, label=True)
+        self.pf.plot(subcoil=True)
         for section in ['nose', 'trans_lower', 'loop', 'trans_upper']:
-            pl.plot(self.tf.p[section]['x'], self.tf.p[section]['z'], 'o-')
+            plt.plot(self.tf.p[section]['x'], self.tf.p[section]['z'], 'o-')
         for name in self.PFsupport:
             nodes = np.array(self.PFsupport[name]['nodes'])
             p = self.PFsupport[name]['p']
             geom.polyfill(nodes[:, 0], nodes[:, 1], color=0.4 * np.ones(3))
-            pl.plot(p['x'], p['z'], '-o')
+            plt.plot(p['x'], p['z'], '-o')
         nodes = np.array(self.Gsupport['base'])
         geom.polyfill(nodes[:, 0], nodes[:, 1], color=0.4 * np.ones(3))
-        pl.plot(self.Gsupport['Xo'] * np.ones(2),
-                [self.Gsupport['zbase'], self.Gsupport['zfloor']], 'o-',
-                color=0.4 * np.ones(3), lw=4)
+        plt.plot(self.Gsupport['Xo'] * np.ones(2),
+                 [self.Gsupport['zbase'], self.Gsupport['zfloor']], 'o-',
+                 color=0.4 * np.ones(3), lw=4)
         geom.polyfill(self.loop['cs']['x'], self.loop['cs']['z'],
                       color=0.4 * np.ones(3))
-
         for name in self.loop['OIS']:
             nodes = np.array(self.loop['OIS'][name]['nodes'])
             geom.polyfill(nodes[:, 0], nodes[:, 1], color=0.4 * np.ones(3))
+        plt.axis('off')
+        plt.axis('equal')
 
     def OIS_placment(L, TFloop, point):
         err = (point[0] - TFloop['x'](L))**2 + (point[1] - TFloop['z'](L))**2
@@ -211,7 +216,7 @@ class architect(object):
             self.adjust_TFnode(p['x'][-1], p['z'][-1])
 
     def get_TF_nodes(self):
-        tf_x, tf_z = self.tf.p['cl']['x'], self.tf.p['cl']['z']
+        tf_x, tf_z = self.tf.p['cl_fe']['x'], self.tf.p['cl_fe']['z']
         for name in self.PFsupport:
             self.PFsupport[name]['nd_tf'] = \
                 np.argmin((tf_x-self.PFsupport[name]['p']['x'][-1])**2 +
@@ -268,30 +273,30 @@ class architect(object):
 
     def adjust_TFnode(self, x, z):
         x, z = self.cl_snap(x, z)  # snap node to centreline
-        i = np.argmin((self.tf.p['cl']['x']-x)**2 +
-                      (self.tf.p['cl']['z']-z)**2)
-        dl = np.sqrt((self.tf.p['cl']['x'][i+1] -
-                      self.tf.p['cl']['x'][i-1])**2 +
-                     (self.tf.p['cl']['z'][i+1] -
-                      self.tf.p['cl']['z'][i-1])**2)/2
-        dx = np.sqrt((self.tf.p['cl']['x'][i] - x)**2 +
-                     (self.tf.p['cl']['z'][i] - z)**2)
+        i = np.argmin((self.tf.p['cl_fe']['x']-x)**2 +
+                      (self.tf.p['cl_fe']['z']-z)**2)
+        dl = np.sqrt((self.tf.p['cl_fe']['x'][i+1] -
+                      self.tf.p['cl_fe']['x'][i-1])**2 +
+                     (self.tf.p['cl_fe']['z'][i+1] -
+                      self.tf.p['cl_fe']['z'][i-1])**2)/2
+        dx = np.sqrt((self.tf.p['cl_fe']['x'][i] - x)**2 +
+                     (self.tf.p['cl_fe']['z'][i] - z)**2)
         if dx > 0.5*dl:  # add node (0.2*)
             Ln = minimize_scalar(architect.OIS_placment, method='bounded',
                                  args=(self.tf_fun['out'], (x, z)),
                                  bounds=[0, 1]).x
             Li = minimize_scalar(architect.OIS_placment, method='bounded',
                                  args=(self.tf_fun['out'],
-                                       (self.tf.p['cl']['x'][i],
-                                        self.tf.p['cl']['z'][i])),
+                                       (self.tf.p['cl_fe']['x'][i],
+                                        self.tf.p['cl_fe']['z'][i])),
                                  bounds=[0, 1]).x
 
             j = 0 if Ln < Li else 1
-            #self.tf.p['cl']['x'] = np.insert(self.tf.p['cl']['x'], i+j, x)
-            #self.tf.p['cl']['z'] = np.insert(self.tf.p['cl']['z'], i+j, z)
+            # self.tf.p['cl_fe']['x'] = np.insert(self.tf.p['cl_fe']['x'], i+j, x)
+            # self.tf.p['cl_fe']['z'] = np.insert(self.tf.p['cl_fe']['z'], i+j, z)
         else:  # adjust node
-            a=1
-            #self.tf.p['cl']['x'][i], self.tf.p['cl']['z'][i] = x, z
+            a = 1
+            # self.tf.p['cl_fe']['x'][i], self.tf.p['cl_fe']['z'][i] = x, z
 
     def initalise_cs(self):
         '''
@@ -370,27 +375,27 @@ class architect(object):
             self.plot_tf_section()
 
     def plot_tf_section(self):
-        color = sns.get_pallete('Set2')
-        fig, ax = pl.subplots(1, 2, sharex=True, figsize=(6, 4))
-        pl.sca(ax[0])
-        pl.axis('equal')
-        pl.axis('off')
-        pl.xlim([-1, 0.5])
-        pl.plot(self.loop['case_in']['pnt'][0],
-                self.loop['case_in']['pnt'][1])
+
+        fig, ax = plt.subplots(1, 2, sharex=True)
+        plt.sca(ax[0])
+        plt.axis('equal')
+        plt.axis('off')
+        plt.xlim([-1, 0.5])
+        plt.plot(self.loop['case_in']['pnt'][0],
+                 self.loop['case_in']['pnt'][1])
         geom.polyfill(self.loop['case_in']['pnt'][0],
                       self.loop['case_in']['pnt'][1],
-                      color=color[0])
+                      color='C0')
         geom.polyfill(self.loop['wp']['pnt'][0], self.loop['wp']['pnt'][1],
-                      color=color[1])
-        pl.sca(ax[1])
-        pl.axis('equal')
-        pl.axis('off')
+                      color='C1')
+        plt.sca(ax[1])
+        plt.axis('equal')
+        plt.axis('off')
         geom.polyfill(self.loop['case_out']['pnt'][0],
                       self.loop['case_out']['pnt'][1],
-                      color=color[0])
+                      color='C0')
         geom.polyfill(self.loop['wp']['pnt'][0], self.loop['wp']['pnt'][1],
-                      color=color[1])
+                      color='C1')
 
     def get_pnt(self, name):
         y, z = self.loop[name]['y'], self.loop[name]['z']
@@ -523,39 +528,39 @@ class architect(object):
         return section
 
     def plot_transition(self):
-        fig, ax = pl.subplots(1, 1)
+        fig, ax = plt.subplots(1, 1)
         gs = gridspec.GridSpec(3, 3, wspace=0.0, hspace=0.0)
         for i, (fact, txt) in enumerate(zip([0, 0.5, 1],
                                             ['inboard', 'transition',
                                              'outboard'])):
-            ax = pl.subplot(gs[i])
+            ax = plt.subplot(gs[i])
             ax.axis('equal')
             ax.axis('off')
-            pl.text(0, 0, txt, ha='center', va='center')
+            plt.text(0, 0, txt, ha='center', va='center')
             self.case(fact, plot=True, centroid=False)
-        ax = pl.subplot(gs[3:6])
-        pl.sca(ax)
+        ax = plt.subplot(gs[3:6])
+        plt.sca(ax)
         N = 100
         Im = np.zeros((3, N))
         J = np.zeros(N)
         fact = np.linspace(0, 1, N)
         for i, f in enumerate(fact):
             section = atec.case(f)
-            J[i], I = section['J'], section['I']
-            Im[:, i] = I['xx'], I['yy'], I['zz']
+            J[i], Isec = section['J'], section['I']
+            Im[:, i] = Isec['xx'], Isec['yy'], Isec['zz']
         text = linelabel(value='1.2f')
-        pl.plot(fact, Im[1, :])
+        plt.plot(fact, Im[1, :])
         text.add('Iyy')
-        pl.plot(fact, Im[2, :])
+        plt.plot(fact, Im[2, :])
         text.add('Izz')
-        pl.plot(fact, J)
+        plt.plot(fact, J)
         text.add('J')
         text.plot()
-        sns.despine()
+        plt.despine()
         ax.set_xticks([0, 0.5, 1])
         ax.set_xticklabels(['inboard', 'transition', 'outboard'])
-        pl.ylabel(r'sectional properties, m$^2$')
-        pl.xlabel('cross-section position')
+        plt.ylabel(r'sectional properties, m$^2$')
+        plt.xlabel('cross-section position')
 
 
 class torsion(object):
@@ -587,18 +592,13 @@ class torsion(object):
         dL = np.diff(geom.length(ycl, zcl, norm=False))
         J = 4 * A**2 / np.sum(dL / t[:-1])
         if plot:
-            pl.plot(ycl, zcl)
-            pl.plot(yin, zin)
-            pl.plot(yout, zout)
+            plt.plot(ycl, zcl)
+            plt.plot(yin, zin)
+            plt.plot(yout, zout)
         return J
 
 
 if __name__ is '__main__':
-
-    pl.figure(figsize=(8, 12))
-    pl.style.use('default')
-    pl.axis('equal')
-    pl.axis('off')
 
     nTF = 16
     base = {'TF': 'demo', 'eq': 'DEMO_SN_SOF'}
@@ -615,17 +615,12 @@ if __name__ is '__main__':
     inv.set_limit(FPFz=80)
     inv.wrap_PF(solve=False)
     inv.eq.run(update=False)
+
+    fig = plt.figure(figsize=plt.figaspect(1.2))
     sf.contour()
-
-    tf.fill()
-    pf.plot(subcoil=False, plasma=True, current=True, label=True)
-    pf.plot(subcoil=True)
     inv.plot_fix(tails=True)
-
     atec = architect(tf, pf)
-    atec.plot_connections()
-
+    atec.plot_connections(fig)
     atec.plot_transition()
-    # atec.build()
-    # atec.winding_pack()
 
+    atec.plot_tf_section()

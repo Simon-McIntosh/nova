@@ -1,10 +1,9 @@
 import numpy as np
-import pylab as pl
+from amigo.pyplot import plt
 import nova.cross_coil as cc
 from collections import OrderedDict
 from scipy.interpolate import RectBivariateSpline as RBS
 from scipy.interpolate import interp1d
-import seaborn as sns
 import scipy.optimize as op
 from itertools import cycle
 import copy
@@ -14,7 +13,6 @@ from nova import loops
 import nlopt
 from nova.force import force_feild
 from scipy.optimize import minimize_scalar
-from copy import deepcopy
 from warnings import warn
 import sys
 from scipy.optimize import brentq
@@ -97,7 +95,7 @@ class INV(object):
             Bdir /= np.linalg.norm(Bdir)
             self.add_alpha(1, factor=factor, point=point, Bdir=Bdir)
             self.add_B(0, [field_angle*180/np.pi], factor=factor, point=point)
-            # pl.plot(Xsol, Zsol)
+            # plt.plot(Xsol, Zsol)
 
     def fix_SX(self, Rex=1.5, arg=40):  # fix outer leg
         R = self.eq.sf.Xpoint[0] * (Rex-1) / np.sin(arg*np.pi/180)
@@ -180,11 +178,11 @@ class INV(object):
         self.all_coils = names.copy()
         self.adjust_coils = names.copy()
         names = np.append(names, 'Plasma')
-        #index = []
-        #for name in names:
-        #    index.append(int(name.split('Coil')[-1]))
-        #self.all_coils = ['Coil{:1.0f}'.format(i) for i in index]
-        #names = np.append(self.all_coils, 'Plasma')
+        # index = []
+        # for name in names:
+        #     index.append(int(name.split('Coil')[-1]))
+        # self.all_coils = ['Coil{:1.0f}'.format(i) for i in index]
+        # names = np.append(self.all_coils, 'Plasma')
         for name in names:
             if name in self.adjust_coils:
                 state = 'active'
@@ -313,16 +311,16 @@ class INV(object):
         return x, z
 
     def plot_coils(self):
-        Color = cycle(sns.color_palette('Set2', 12))
+        ic = cycle(range(10))
         for state, marker in zip(['passive', 'active'], ['o', 'd']):
             for name in self.coil[state].keys():
                 if name != 'Plasma':
-                    color = next(Color)
+                    color = 'C{}'.format(next(ic))
                     for x, z in zip(self.coil[state][name]['x'],
                                     self.coil[state][name]['z']):
-                        pl.plot(x, z, marker, color=color, markersize=4)
+                        plt.plot(x, z, marker, color=color, markersize=4)
                         if state == 'passive':  # empty marker
-                            pl.plot(x, z, marker, color='w', markersize=2)
+                            plt.plot(x, z, marker, color='w', markersize=2)
 
     def add_fix(self, x, z, value, Bdir, BC, factor):
         var = {'x': x, 'z': z, 'value': value,
@@ -437,7 +435,6 @@ class INV(object):
                 weight = self.wsqrt / np.mean(self.wsqrt)
             else:
                 weight = np.ones(len(self.fix['BC']))
-            Color = sns.color_palette('Set2', 8)
             psi, Bdir, Bxz = [], [], []
             tail_length = 0.75
             for bc, w in zip(self.fix['BC'], weight):
@@ -465,29 +462,29 @@ class INV(object):
                 #    direction = np.array([d_dx,d_dz])/np.sqrt(d_dx**2+d_dz**2)
                 if 'psi' in bc:
                     norm = psi_norm
-                    marker, size, color = 'o', 7.5, Color[0]
-                    pl.plot(x, z, marker, color=color, markersize=size)
-                    pl.plot(x, z, marker, color=[1, 1, 1],
-                            markersize=0.3 * size)
+                    marker, size, color = 'o', 7.5, 'C0'
+                    plt.plot(x, z, marker, color=color, markersize=size)
+                    plt.plot(x, z, marker, color=[1, 1, 1],
+                             markersize=0.3 * size)
                 else:
                     if bc == 'Bdir':
                         norm = Bdir_norm
-                        marker, size, color, mew = 'o', 4, Color[1], 0.0
+                        marker, size, color, mew = 'o', 4, 'C1', 0.0
                     elif bc == 'null':
                         norm = Bxz_norm
-                        marker, size, color, mew = 'o', 2, Color[2], 0.0
+                        marker, size, color, mew = 'o', 2, 'C2', 0.0
                     elif bc == 'Bx':
                         norm = Bxz_norm
-                        marker, size, color, mew = '_', 10, Color[2], 1.75
+                        marker, size, color, mew = '_', 10, 'C2', 1.75
                     elif bc == 'Bz':
                         norm = Bxz_norm
-                        marker, size, color, mew = '|', 10, Color[2], 1.75
-                    pl.plot(x, z, marker, color=color, markersize=size,
-                            markeredgewidth=mew)
+                        marker, size, color, mew = '|', 10, 'C2', 1.75
+                    plt.plot(x, z, marker, color=color, markersize=size,
+                             markeredgewidth=mew)
                 if tails:
-                    pl.plot([x, x + direction[0] * norm * w],
-                            [z, z + direction[1] * norm * w],
-                            color=color, linewidth=2)
+                    plt.plot([x, x + direction[0] * norm * w],
+                             [z, z + direction[1] * norm * w],
+                             color=color, linewidth=2)
 
     def set_target(self):
         self.T = (self.fix['value'] - self.BG).reshape((len(self.BG), 1))
@@ -1330,9 +1327,9 @@ class SWING(object):
     def energy(self):
         self.inv.pf.inductance(dCoil=self.inv.dCoil, Iscale=1)
         E = np.zeros(len(self.inv.swing['flux']))
-        for i, I in enumerate(self.inv.swing['I']):
-            I *= self.inv.Iscale
-            E[i] = 0.5 * np.dot(np.dot(I, self.inv.pf.M), I)
+        for i, Isw in enumerate(self.inv.swing['I']):
+            Isw *= self.inv.Iscale
+            E[i] = 0.5 * np.dot(np.dot(Isw, self.inv.pf.M), Isw)
         return np.max(E)
 
     def output(self):

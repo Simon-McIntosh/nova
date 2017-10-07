@@ -1,15 +1,12 @@
 import nova.cross_coil as cc
-import pylab as pl
+from amigo.pyplot import plt
 import numpy as np
-import seaborn as sns
 from nova.config import Setup
 from nova.streamfunction import SF
 from amigo import geom
 from scipy.optimize import minimize_scalar
 from nova import geqdsk
 from nova.inductance import neumann
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from warnings import warn
 
 

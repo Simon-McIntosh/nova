@@ -257,7 +257,8 @@ class SF(object):
 
     def contour(self, Nstd=1.5, Nlevel=31, Xnorm=True, lw=1, plot_vac=True,
                 boundary=True, **kwargs):
-        alpha, lw = np.array([1, 0.5]), lw * np.array([2.25, 1.75])
+        alpha = np.array([1, 1], dtype=float)
+        lw = lw * np.array([2.25, 1.75])
         if boundary:
             x, z = self.get_boundary(1 - 1e-3)
             pl.plot(x, z, linewidth=lw[0], color=0.75 * np.ones(3))

@@ -1,3 +1,4 @@
+from amigo.pyplot import plt
 from nova.coils import PF, TF
 from nova.loops import Profile
 from nova.streamfunction import SF
@@ -6,19 +7,9 @@ from scipy.optimize import minimize_scalar, minimize
 import numpy as np
 import json
 from amigo.IO import trim_dir
-import seaborn as sns
-import pylab as pl
 from amigo import geom
 from amigo.ANSYS import table
 import sys
-
-color = sns.color_palette('Set2', 12)
-
-rc = {'figure.figsize': [6 * 12 / 16, 6], 'savefig.dpi': 160,
-      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
-      'lines.linewidth': 2}
-sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
-        font_scale=7 / 8, rc=rc)
 
 
 class OCC(object):
@@ -184,7 +175,7 @@ class OCC(object):
             self.OISsupport[name]['nodes'] = nodes
 
     def plot(self):
-        pl.figure()
+        plt.figure()
         self.tf.fill()
         self.pf.plot(label=True, current=True)
         if hasattr(self, 'eq'):
@@ -194,7 +185,7 @@ class OCC(object):
             geom.polyfill(nodes[:, 0], nodes[:, 1], color=0.4 * np.ones(3))
         nodes = np.array(self.Gsupport['base'])
         geom.polyfill(nodes[:, 0], nodes[:, 1], color=0.4 * np.ones(3))
-        pl.plot(self.Gsupport['radius'] * np.ones(2),
+        plt.plot(self.Gsupport['radius'] * np.ones(2),
                 [self.Gsupport['zbase'], self.Gsupport['zfloor']], 'o-',
                 color=0.4 * np.ones(3), lw=4)
         for name in self.OISsupport:
@@ -315,9 +306,9 @@ class OCC(object):
                     if plot:
                         Fvec = 1e-8 * Fb  # /np.linalg.norm(Fb)
                         # Fvec = that
-                        pl.arrow(point[0], point[2], Fvec[0], Fvec[2],
+                        plt.arrow(point[0], point[2], Fvec[0], Fvec[2],
                                  head_width=0.3, head_length=0.6)
-                        pl.plot(point[0], point[2], 'o',
+                        plt.plot(point[0], point[2], 'o',
                                 color=0.15 * np.ones(3), ms=3)
         print('\n', np.sum(Fbody['x'][:-1, :, :]) * 1e-9,
               np.sum(Fbody['y'][:-1, :, :]) * 1e-9,
@@ -350,7 +341,7 @@ class OCC(object):
         *vget,el_offset,elem,,cent,z  ! element axial offset
         *voper,el_theta,el_theta,mult,pi/180  ! convert to radians
         csys,0  ! return coordinate system
-        
+
         ! compress selections
         *dim,el_v,array,nel
         *dim,el_r,array,nel
@@ -358,7 +349,7 @@ class OCC(object):
         *dim,el_o,array,nel
         *dim,el_l,array,nel
         *dim,el_dr,array,nel
-        
+
         *vmask,el_sel
         *vfun,el_v,comp,el_vol  ! volume
         *vmask,el_sel
@@ -369,7 +360,7 @@ class OCC(object):
         *vfun,el_o,comp,el_offset  ! offset
         *vitrp,el_l,l_map,el_r,el_t  ! interpolate l_map table
         *vitrp,el_dr,dr_map,el_r,el_t !  interpolate dr_map table
-        
+
         xyz = 'x','y','z'  ! axes
         fcum,add  ! accumulate nodal forces
         *do,i,1,nel  ! apply forces to loads
@@ -381,7 +372,7 @@ class OCC(object):
               F,all,F%xyz(j)%,Fbody_%xyz(j)%(el_l(i),el_dr(i),el_o(i))*el_v(i)/nnd
           *enddo
         *enddo
-        allsel  
+        allsel
         '''
         ans.f.write(apdlstr)
         ans.close()
@@ -400,8 +391,8 @@ if __name__ is '__main__':
     occ.plot()
     # occ.ansys(plot=True,nl=50,nr=3,ny=1)
 
-    pl.plot(0, -12, 'o', alpha=0)
-    pl.plot(17, 10, 'o', alpha=0)
-    pl.tight_layout()
+    plt.plot(0, -12, 'o', alpha=0)
+    plt.plot(17, 10, 'o', alpha=0)
+    plt.tight_layout()
 
-    # pl.savefig('../Figs/CoilForces.png')
+    # plt.savefig('../Figs/CoilForces.png')

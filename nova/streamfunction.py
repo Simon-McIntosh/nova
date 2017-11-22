@@ -1,12 +1,11 @@
 import numpy as np
-import pylab as pl
+from amigo.pyplot import plt
 from scipy.interpolate import RectBivariateSpline
 from scipy.interpolate import UnivariateSpline as spline
 from scipy.interpolate import InterpolatedUnivariateSpline as sinterp
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize
 import nova.geqdsk
-import seaborn as sns
 from matplotlib._cntr import Cntr as cntr
 from collections import OrderedDict
 from amigo import geom
@@ -261,7 +260,7 @@ class SF(object):
         lw = lw * np.array([2.25, 1.75])
         if boundary:
             x, z = self.get_boundary(1 - 1e-3)
-            pl.plot(x, z, linewidth=lw[0], color=0.75 * np.ones(3))
+            plt.plot(x, z, linewidth=lw[0], color=0.75 * np.ones(3))
             self.set_boundary(x, z)
         if not hasattr(self, 'Xpsi'):
             self.get_Xpsi()
@@ -284,10 +283,7 @@ class SF(object):
         else:
             levels = kwargs['levels']
             linetype = '-'
-        if 'color' in kwargs.keys():
-            color = kwargs['color']
-        else:
-            color = 'k'
+        color = 'k'
         if 'linetype' in kwargs.keys():
             linetype = kwargs['linetype']
         if color == 'k':
@@ -305,13 +301,13 @@ class SF(object):
                 else:
                     pindex = 1
                 if (not plot_vac and pindex == 0) or plot_vac:
-                    pl.plot(x, z, linetype, linewidth=lw[pindex],
-                            color=color, alpha=alpha[pindex])
-        # if boundary:
-        #    pl.plot(self.xbdry,self.zbdry,linetype,linewidth=lw[pindex],
-        #            color=color,alpha=alpha[pindex])
-        #pl.axis('equal')
-        #pl.axis('off')
+                    plt.plot(x, z, linetype, linewidth=lw[pindex],
+                             color=color, alpha=alpha[pindex])
+        if boundary:
+            plt.plot(self.xbdry, self.zbdry, linetype, linewidth=lw[pindex],
+                     color=color, alpha=alpha[pindex])
+        plt.axis('equal')
+        plt.axis('off')
         return levels
 
     def inPlasma(self, X, Z, delta=0):
@@ -337,10 +333,10 @@ class SF(object):
                 Z.min() >= self.zbdry.min() - delta and \
                 Z.max() <= self.zbdry.max() + delta
             if inPlasma:
-                pl.plot(X, Z, linetype, linewidth=1.25 * lw,
+                plt.plot(X, Z, linetype, linewidth=1.25 * lw,
                         color=norm * np.array([1, 1, 1]), alpha=alpha[0])
             else:
-                pl.plot(X, Z, linetype, linewidth=lw,
+                plt.plot(X, Z, linetype, linewidth=lw,
                         color=color, alpha=alpha[1])
 
     def Bcontour(self, axis, Nstd=1.5, color='x'):
@@ -350,7 +346,7 @@ class SF(object):
         B = getattr(self, var)
         level = [np.mean(B) - Nstd * np.std(B),
                  np.mean(B) + Nstd * np.std(B)]
-        CS = pl.contour(self.x, self.z, B,
+        CS = plt.contour(self.x, self.z, B,
                         levels=np.linspace(level[0], level[1], 30),
                         colors=color)
         for cs in CS.collections:
@@ -359,14 +355,14 @@ class SF(object):
     def Bquiver(self):
         if not hasattr(self, 'Bx'):
             self.Bfeild()
-        pl.quiver(self.x, self.z, self.Bx.T, self.Bz.T)
+        plt.quiver(self.x, self.z, self.Bx.T, self.Bz.T)
 
     def Bsf(self):
         if not hasattr(self, 'Bx'):
             self.Bfeild()
-        pl.streamplot(self.x, self.z, self.Bx.T, self.Bz.T,
-                      color=self.Bx.T, cmap=pl.cm.RdBu)
-        pl.clim([-1.5, 1.5])
+        plt.streamplot(self.x, self.z, self.Bx.T, self.Bz.T,
+                      color=self.Bx.T, cmap=plt.cm.RdBu)
+        plt.clim([-1.5, 1.5])
 
     def getX(self, po=None):
         def feild(p):
@@ -470,7 +466,7 @@ class SF(object):
                     X, Z = np.append(X, x), np.append(Z, z)
         X, Z = geom.clock(X, Z)
         if plot:
-            pl.plot(X, Z)
+            plt.plot(X, Z)
         return X, Z
 
     def eq_boundary(self, expand=0):  # generate boundary dict for elliptic
@@ -592,7 +588,7 @@ class SF(object):
             errtxt = 'requre \'psi_n\' or \'dx\' in kwargs'
             raise ValueError(errtxt)
         if plot:
-            pl.plot(x, z)
+            plt.plot(x, z)
         return x[::-1], z[::-1], (psi_lfs, psi_hfs)
 
     def get_offset(self, dx, Nsub=0):
@@ -660,7 +656,7 @@ class SF(object):
                 for i in np.arange(self.legs[leg]['i'])[::-1]:
                     x, z = self.snip(leg, i)
                     x, z = self.legs[leg]['X'][i], self.legs[leg]['Z'][i]
-                    pl.plot(x, z, color=color[c], linewidth=0.5)
+                    plt.plot(x, z, color=color[c], linewidth=0.5)
 
     def add_core(self):  # refarance from low-feild midplane
         for i in range(self.Nsol):
@@ -791,10 +787,12 @@ class SF(object):
             theta = np.linspace(-np.pi, np.pi, 100)
             x = (self.rcirc - self.drcirc / 2) * np.cos(theta)
             z = (self.rcirc - self.drcirc / 2) * np.sin(theta)
-            pl.plot(x + self.Xpoint[0], z + self.Xpoint[1], 'k--', alpha=0.5)
+            plt.plot(x + self.Xpoint[0], z + self.Xpoint[1],
+                     'k--', alpha=0.5)
             x = (self.rcirc + self.drcirc / 2) * np.cos(theta)
             z = (self.rcirc + self.drcirc / 2) * np.sin(theta)
-            pl.plot(x + self.Xpoint[0], z + self.Xpoint[1], 'k--', alpha=0.5)
+            plt.plot(x + self.Xpoint[0], z + self.Xpoint[1],
+                     'k--', alpha=0.5)
         self.tleg = np.array([])
         for N in range(len(self.Xsol)):
             x, t = self.topolar(self.Xsol[N], self.Zsol[N])

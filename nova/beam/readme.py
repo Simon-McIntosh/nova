@@ -8,17 +8,17 @@ Created on Thu Aug 10 07:31:37 2017
 
 '''
 notes for stress evaluation
-beam elemeny has three major components
+beam element has three major components
 
 [k][u] = [F]
 
 # stiffness components
-u -- AE/l
-v -- 3EIzz/2a**3
-w -- 3EIyy/2a**3
+u -- AE/L
+v -- 12EIzz/L**3
+w -- 12EIyy/L**3
 tx -- GJ/l
-ty -- EIyy/a
-tz -- EIzz/a
+ty -- 2EIyy/L
+tz -- 2EIzz/L
 
 # axial
 k = AE/l
@@ -30,12 +30,11 @@ k = GJ/l
 dtheata/dr = twist = tx/l
 syz = Gr dtheta/dz = Gr tx/l
 
-
 # bending  # interpolate from hermite polynomials
 d2v -- v, ty
 d2w -- w, tz
 sigma = d2u E y
-sx = d2v E z + d2w E y
+sx = d2w E z + d2v E y
 
 svm = sqrt()
 

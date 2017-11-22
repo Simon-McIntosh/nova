@@ -1,5 +1,5 @@
 import numpy as np
-import pylab as pl
+from amigo.pyplot import plt
 from nova.finite_element import FE
 from nova.config import select
 from nova.coils import PF
@@ -14,13 +14,6 @@ import matplotlib.animation as manimation
 from mpl_toolkits.mplot3d import Axes3D
 from blueprint.CAD.buildCAD import buildCAD
 from blueprint.CAD import coilCAD
-
-import seaborn as sns
-rc = {'figure.figsize': [8 * 12 / 16, 8], 'savefig.dpi': 120,
-      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
-      'lines.linewidth': 3}
-sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
-        font_scale=7 / 8, rc=rc)
 
 
 class SS:  # structural solver
@@ -42,13 +35,15 @@ class SS:  # structural solver
         self.add_mat()  # pass sectional properties to fe solver
 
         self.build_tf()  # build TF coil
+        if True:
         # self.fe.add_bc(['ny'], [0], part='trans_lower', ends=0)
         # self.fe.add_bc(['ny'], [-1], part='trans_upper', ends=1)
-
-        self.fe.add_bc(['w'], [-1], part='nose', ends=0)
-        self.gravity_support()  # add gravity support to TF loop
-        self.outer_intercoil_supports()  # add outer intercoil supports
-        self.connect_pf()  # connect PF coils
+            self.fe.add_bc(['fix'], [-1], part='nose', ends=2)
+            self.fe.add_bc(['fix'], [0], part='nose', ends=0)
+        else:
+            self.gravity_support()  # add gravity support to TF loop
+            self.outer_intercoil_supports()  # add outer intercoil supports
+            self.connect_pf()  # connect PF coils
 
     def add_mat(self, ntrans=30):
         self.fe.add_mat('nose', ['wp', 'steel_forged'],  # high field TF
@@ -82,12 +77,12 @@ class SS:  # structural solver
             errtxt = 'TF connections (OIC + GS) assume clean entry\n'
             errtxt = 'clear mesh with fe.clfe()'
             raise ValueError(errtxt)
-        P = np.zeros((len(self.tf.p['cl']['x']), 3))
-        P[:, 0], P[:, 2] = self.tf.p['cl']['x'], self.tf.p['cl']['z']
+        P = np.zeros((len(self.tf.p['cl_fe']['x']), 3))
+        P[:, 0], P[:, 2] = self.tf.p['cl_fe']['x'], self.tf.p['cl_fe']['z']
         self.fe.add_nodes(P)  # all TF nodes
         self.TFparts = ['nose', 'trans_lower', 'loop', 'trans_upper']  #
         for part in self.TFparts:  # hookup elements
-            self.fe.add_elements(n=tf.p[part]['nd'], part_name=part, nmat=part)
+            self.fe.add_elements(n=tf.p[part]['nd'], part_name=part, nmat='loop')  # , nmat=part)
         # constrain TF nose - free translation in z
         self.fe.add_bc('nw', 'all', part='nose')
 
@@ -163,19 +158,10 @@ class SS:  # structural solver
         self.fe.clf()  # clear forces
         #self.add_pf_load()
         #self.fe.add_weight()  # add weight to all elements
-        wm = self.fe.add_tf_load(self.sf, self.inv.ff, self.tf,
+        self.fe.add_tf_load(self.sf, self.inv.ff, self.tf,
                             self.inv.eq.Bpoint, parts=self.TFparts,
                             method='function')
         self.fe.solve()
-        return wm
-
-    def plot(self):
-        self.fe.plot_nodes()
-        self.tf.fill()
-        self.fe.plot_F(scale=1e-8)
-        self.fe.plot_displacment()
-        self.pf.plot(label=False)
-        pl.axis('off')
 
     def plot3D(self, ax=None):
         self.fe.plot_3D(ax=ax, nTF=self.tf.nTF)
@@ -193,8 +179,8 @@ class SS:  # structural solver
                               extra_args=['-pix_fmt', 'yuv420p'])
         timer = clock(len(loop))
 
-        # fig = pl.figure()
-        fig = pl.figure(figsize=(8, 8))
+        # fig = plt.figure()
+        fig = plt.figure(figsize=(8, 8))
         ax = Axes3D(fig)
         with writer.saving(fig, moviename, 100):
             for scale in loop:
@@ -208,10 +194,10 @@ class SS:  # structural solver
 if __name__ == '__main__':
 
     nTF = 16
-    base = {'TF': 'demo', 'eq': 'DEMO_SN_SOF'}
+    base = {'TF': 'demo', 'eq': 'SN'}
     config, setup = select(base, nTF=nTF, update=False)
     profile = Profile(config['TF_base'], family='D', load=True,
-                      part='TF', nTF=nTF, obj='L', npoints=100)
+                      part='TF', nTF=nTF, obj='L', npoints=501)
 
     sf = SF(setup.filename)
     pf = PF(sf.eqdsk)
@@ -219,9 +205,11 @@ if __name__ == '__main__':
 
     ss = SS(sf, pf, tf)  # structural solver
     ss.solve()
+    ss.fe.plot()
 
-    ss.fe.deform(50)
-    ss.plot()
+    ss.fe.plot_moment()
+
+    ss.fe.plot_stress()
 
     '''
     TFcoil = coilCAD.TFcoilCAD(ss.atec)
@@ -236,7 +224,9 @@ if __name__ == '__main__':
     # ss.fe.plot_curvature()
     # ss.fe.plot_twin()
 
-    pl.figure(figsize=(16, 16))
-    pl.pcolor(abs(ss.fe.K), cmap=pl.cm.gray, vmax=1)
-    pl.axis('equal')
-    pl.axis('off')
+    '''
+    plt.figure(figsize=(16, 16))
+    plt.pcolor(abs(ss.fe.K), cmap=plt.cm.gray, vmax=1)
+    plt.axis('equal')
+    plt.axis('off')
+    '''

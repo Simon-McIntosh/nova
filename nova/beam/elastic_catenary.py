@@ -1,0 +1,129 @@
+import numpy as np
+from amigo.pyplot import plt
+from scipy.optimize import brentq, minimize
+from nova.finite_element import FE
+from nova.properties import second_moment
+from amigo import geom
+
+
+class catenary:
+    g = 9.81
+
+    def __init__(self, N=50):
+        self.N = N
+        self.initalise_fe()
+
+    def initalise_fe(self):
+        sm = second_moment()
+        sm.add_shape('circ', r=0.02, ro=0.01)
+        C, I, A = sm.report()
+        section = {'C': C, 'I': I, 'A': A, 'J': I['xx'], 'pnt': sm.get_pnt()}
+        self.fe = FE(frame='3D')
+        self.fe.add_mat('bar', ['steel_cast'], [section])
+
+    def extract_section(self):
+        A = self.fe.mat[0]['mat_o']['A']
+        rho = self.fe.mat[0]['mat_o']['rho']
+        E = self.fe.mat[0]['mat_o']['E']
+        return A, E, rho
+
+    def balance(self, H, V, A, E, L, Lo, rho):
+        lhs = V / (H + np.sqrt(V**2 + H**2))
+        rhs = (A - H / E) / np.sqrt(A**2 - (H / E)**2) *\
+            np.tanh(rho * self.g * L / (2 * H) * np.sqrt(A**2 - (H / E)**2))
+        return lhs - rhs
+
+    def react(self, L, Lo, eps=1e-9):  # vertical+horizontal reactions
+        A, E, rho = self.extract_section()
+        V = rho * self.g * A * Lo  # vertical reaction
+        H = brentq(lambda H: self.balance(H, V, A, E, L, Lo, rho),
+                   eps, (1 - eps) * A * E, xtol=eps)  # horizontal reaction
+        alpha = (A - H / E) / np.sqrt(A**2 - (H / E)**2)
+        beta = rho * self.g / (2 * H) * np.sqrt(A**2 - (H / E)**2)
+        return alpha, beta, V, H
+
+    def curve(self, a, x):
+        y = a * np.cosh(x / a)
+        y -= a
+        return y
+
+    def diffrence(self, a, x, y):
+        yo = self.curve(a, x)
+        err = np.sum((y - yo)**2)
+        return err
+
+    def match_inelastic(self, x, y, plot=False):
+        res = minimize(lambda a: self.diffrence(a, x, y), x0=0.5)
+        a = res.x
+        yo = self.curve(a, x)
+        if plot:
+            plt.plot(x, y, '-')
+            plt.plot(x, yo, '--')
+            plt.axis('equal')
+        return yo, a
+
+    def theory(self, L, Lo):
+        x, yo, a = self.inelastic(L, Lo)
+        A, E, rho = self.extract_section()
+        w = A * rho  # weight per length
+        To = w * self.g * a  # horizontal tension
+        dydx = np.sinh(x / a)  # gradient of curve
+        psi = np.arctan2(dydx, 1)
+        T = To / np.cos(psi)  # curve tension
+
+        s = T / A
+        L = geom.length(x, yo, norm=False)
+
+        # plt.figure()
+        plt.plot(L, s, 'C3--')
+
+    def elastic(self, L, Lo, plot=True):
+        alpha, beta = self.react(L, Lo)[:2]
+        print(alpha)
+        x = np.linspace(0, L, int(self.N/2))
+        y = alpha / (beta * (1 - alpha**2)) * \
+            (np.log(1 - alpha**2 * np.tanh(beta * x)**2) -
+             2 * np.log(1 / np.cosh(beta * x)))
+        x = np.append(-x[::-1][:-1], x)
+        y = np.append(y[::-1][:-1], y)
+        if plot:
+            plt.figure()
+            plt.plot(x, y)
+            plt.axis('equal')
+        return x, y
+
+    def inelastic(self, L, Lo, plot=False):
+        x, y = self.elastic(L, Lo, plot=plot)
+        yo, a = self.match_inelastic(x, y)
+        return x, yo, a
+
+    def solve(self, elastic, L, Lo):
+        if elastic:
+            x, y = self.elastic(L, Lo)
+        else:
+            x, y = self.inelastic(L, Lo)[:2]
+
+        self.fe.clfe()  # clear all
+        X = np.zeros((len(x), 3))
+        X[:, 0], X[:, 2] = x, y
+        self.fe.add_nodes(X)
+        self.fe.add_elements(part_name='chain', nmat='bar')
+        self.fe.add_bc('nry', [0], part='chain', ends=0)
+        self.fe.add_bc('nry', [-1], part='chain', ends=1)
+        self.fe.add_weight()  # add weight to all elements
+        self.fe.solve()
+
+        self.fe.plot_stress()
+        self.theory(L, Lo)
+
+        # self.fe.plot_moment()
+
+
+L, Lo = 1, 1.5
+cat = catenary(N=11)
+
+cat.solve(True, L, Lo)
+#cat.solve(True, L, Lo)
+#plt.despine()
+
+

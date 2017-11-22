@@ -1,9 +1,9 @@
 import numpy as np
+from amigo.pyplot import plt
 from scipy.special import ellipk, ellipe
 from amigo import geom
 from scipy.interpolate import interp1d
 from scipy.linalg import norm
-import pylab as pl
 
 mu_o = 4 * np.pi * 1e-7  # magnetic constant [Vs/Am]
 
@@ -91,11 +91,11 @@ class GreenFeildLoop(object):
         return Bfeild
 
     def plot(self):
-        pl.figure()
-        pl.plot(self.loop_cl[:, 0], self.loop_cl[:, 1])
-        pl.plot(self.loop_ss[:, 0], self.loop_ss[:, 1])
-        pl.axis('equal')
-        pl.axis('off')
+        plt.figure()
+        plt.plot(self.loop_cl[:, 0], self.loop_cl[:, 1])
+        plt.plot(self.loop_ss[:, 0], self.loop_ss[:, 1])
+        plt.axis('equal')
+        plt.axis('off')
 
 
 def green_feild_circle(coil, point, N=20):  # 3D feild from arbitrary loop

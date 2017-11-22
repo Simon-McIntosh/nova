@@ -33,17 +33,18 @@ for m in range(len(theta)):
     print(round(m / len(theta), 2))
 
 f, ax = mp.subplots()
-mp.plot(r / 1000, z / 1000)
-mp.xlabel('$r$ [m]')
-mp.ylabel('$z$ [m]')
+# mp.plot(r / 1000, z / 1000)
+# mp.xlabel('$r$ [m]')
+# mp.ylabel('$z$ [m]')
+mp.axis('off')
 mp.ylim([10, 35])
 mp.xlim([0, 17])
 mp.gca().set_aspect('equal', adjustable='box')
 mp.locator_params(nbins=4)
 mp.text(
-    18, 20, r'$z=r_{0}k\left(I_{1}(k)\theta+ \sum_{n=1}^\infty\frac{i}{n}[e^{-in\theta}-1][1+e^{in(\theta+\pi)}]e^{in\frac{\pi}{2}}\frac{I_{n-1}(k)+I_{n+1}(k)}{2} \right) $', fontsize=14)
-mp.text(18, 15, r'$r=r_{0}e^{k\sin{\theta}}$', fontsize=14)
-mp.text(18, 30, r'$k=\frac{1}{2}\ln{\frac{r_2}{r_1}}=%s$' %
+    0, 20, r'$z=r_{0}k\left(I_{1}(k)\theta+ \sum_{n=1}^\infty\frac{i}{n}[e^{-in\theta}-1][1+e^{in(\theta+\pi)}]e^{in\frac{\pi}{2}}\frac{I_{n-1}(k)+I_{n+1}(k)}{2} \right) $', fontsize=14)
+mp.text(0, 15, r'$r=r_{0}e^{k\sin{\theta}}$', fontsize=14)
+mp.text(0, 30, r'$k=\frac{1}{2}\ln{\frac{r_2}{r_1}}=%s$' %
         round(k, 3), fontsize=14)
-mp.text(18, 25, r'$r_{0}=\sqrt{r_1r_2}$')
+mp.text(0, 25, r'$r_{0}=\sqrt{r_1r_2}$')
 # return [z,r,SUM,dSUM]

@@ -1,15 +1,14 @@
 import numpy as np
+from amigo.pyplot import plt
 import amigo.geom as geom
 from nova.loops import Profile
 from nova.shape import Shape
-import pylab as pl
 from warnings import warn
 import datetime
 import pickle
 from nova.streamfunction import SF
 from nova.config import Setup
 from collections import OrderedDict
-import seaborn as sns
 
 
 class divertor(object):
@@ -240,8 +239,7 @@ class divertor(object):
 
     def match_psi(self, Xo, Zo, direction, theta_end, theta_sign, phi_target,
                   graze, dPlate, leg, debug=False):
-        color = sns.color_palette('Set2', 2)
-        gain = 0.25  # 0.25
+        gain = 0.25
         Nmax = 500
         Lo = [5.0, 0.0015]  # [blend,turn]  5,0.015
         x2m = [-1, -1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
@@ -255,10 +253,10 @@ class divertor(object):
                                           Nplate)
             L -= gain * (phi_target - phi)
             if debug:
-                pl.plot(X, Z, color=color[0], lw=1)
+                plt.plot(X, Z, color='C0', lw=1)
             if np.abs(phi_target - phi) < 1e-4:
                 if debug:
-                    pl.plot(X, Z, 'x', color=color[1], lw=3)
+                    plt.plot(X, Z, 'x', color='C1', lw=3)
                 break
             if L < 0:
                 L = 1
@@ -422,9 +420,9 @@ class main_chamber(object):
                 self.config = pickle.load(input)
                 self.shp.bound = pickle.load(input)
                 self.shp.bindex = pickle.load(input)
-        except:
-            print(self.profile.dataname)
-            errtxt = 'boundary information not found'
+        except ValueError:
+            errtxt = 'boundary information not found\n'
+            errtxt += '{}'.format(self.profile.dataname)
             raise ValueError(errtxt)
         if plot:
             self.plot_chamber()
@@ -433,7 +431,7 @@ class main_chamber(object):
         self.shp.loop.plot()
         self.shp.plot_bounds()
         x, z = self.draw()
-        pl.plot(x, z)
+        plt.plot(x, z)
 
     def add_bound(self, sf):
         xpl, zpl = sf.get_offset(self.config['dx'], Nsub=self.config['Nsub'])

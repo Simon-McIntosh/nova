@@ -13,12 +13,12 @@ beam element has three major components
 [k][u] = [F]
 
 # stiffness components
-u -- AE/l
-v -- 3EIzz/2a**3
-w -- 3EIyy/2a**3
+u -- AE/L
+v -- 12EIzz/L**3
+w -- 12EIyy/L**3
 tx -- GJ/l
-ty -- EIyy/a
-tz -- EIzz/a
+ty -- 2EIyy/L
+tz -- 2EIzz/L
 
 # axial
 k = AE/l

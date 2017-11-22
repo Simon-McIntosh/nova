@@ -39,21 +39,38 @@ class TB:  # test beam
         self.fe.add_elements(part_name='beam', nmat='tube')
         self.fe.update_rotation()  # check / update rotation matrix
 
-    def plot(self, v, m, s, title, theta=0):
-        fig, ax = plt.subplots(3, 1, sharex=True, squeeze=True)
-        ax[0].set_title(title)
+    def plot(self, case, v, m, s, title, theta=0):
+        if case == 7 or case == 8:
+            plt.figure()
+            plt.title(title)
+            plt.xlabel('beam length')
+            plt.ylabel('extension')
 
-        D = geom.qrotate(self.fe.part['beam']['D'], -theta, dx='y')
-        ax[0].plot(D[:, 0], D[:, 2])
-        ax[0].plot(self.x, v, '--')
-        ax[0].set_ylabel(r'$\delta$')
-        ax[1].plot(self.fe.part['beam']['Lshp'],
-                   self.EI*self.fe.part['beam']['d2u'][:, 2])
-        ax[1].plot(self.x, m, '--')
-        ax[1].set_ylabel(r'$M$')
-        ax[2].plot(self.fe.part['beam']['Lshp'],
-                   self.EI*self.fe.part['beam']['d3u'][:, 2])
-        ax[2].plot(self.x, s, '--')
+            if case == 7:
+                plt.plot(self.fe.part['beam']['Lshp'],
+                         self.fe.part['beam']['u'][:, 0], 'C0')
+                plt.plot(self.x, 1e6 * self.x / self.EA, '--C1')
+            elif case == 8:
+                u = self.w / self.EA * (self.L * self.x - self.x**2 / 2)
+                plt.plot(self.fe.part['beam']['Lshp'],
+                         self.fe.part['beam']['U'][:, 2])
+                plt.plot(self.x, u, '--')
+        else:
+            fig, ax = plt.subplots(3, 1, sharex=True, squeeze=True)
+            ax[0].set_title(title)
+            D = geom.qrotate(self.fe.part['beam']['D'], -theta, dx='y')
+            ax[0].plot(self.fe.part['beam']['Lshp'], D[:, 2])
+            ax[0].plot(self.x, v, '--')
+            ax[0].set_ylabel(r'deflection')
+            ax[1].plot(self.fe.part['beam']['Lshp'],
+                       self.EI*self.fe.part['beam']['d2u'][:, 2])
+            ax[1].plot(self.x, m, '--')
+            ax[1].set_ylabel(r'moment')
+            ax[2].plot(self.fe.part['beam']['Lshp'],
+                       self.EI*self.fe.part['beam']['d3u'][:, 2])
+            ax[2].plot(self.x, s, '--')
+            ax[2].set_ylabel(r'shear')
+            ax[2].set_xlabel('beam length')
         plt.despine()
 
     def test(self, case, theta=0):
@@ -70,8 +87,8 @@ class TB:  # test beam
             v = self.w * self.x / (24 * self.EI) *\
                 (self.L**3 - 2 * self.L * self.x**2 + self.x**3)
             m = -self.w * self.x / 2 * (self.L - self.x)
-            self.fe.add_bc('pin', 0, part='beam', ends=0)
-            self.fe.add_bc('pin', -1, part='beam', ends=1)
+            self.fe.add_bc('ny', 0, part='beam', ends=0)
+            self.fe.add_bc('ny', -1, part='beam', ends=1)
             self.fe.add_weight(g=g)
 
         elif case == 1:  # cantilever beam
@@ -103,12 +120,12 @@ class TB:  # test beam
             self.fe.add_bc('fix', 0, part='beam', ends=0)
             self.fe.add_nodal_load(tb.fe.nnd-1, 'my', Mo)
             v = -Mo*self.x**2/(2*self.EI)
+            m = -Mo * np.ones(len(self.x))
 
         elif case == 5:
             name = 'cantilever tapered distributed load'
             wo = -10  # N/m
             self.fe.add_bc('fix', 0, part='beam', ends=0)
-
             L = np.append(0, np.cumsum(tb.fe.el['dl']))
             for i, el in enumerate(self.fe.part['beam']['el']):
                 Lel = (L[i] + L[i+1]) / (2 * L[-1])
@@ -123,7 +140,6 @@ class TB:  # test beam
             name = 'pinned tapered distributed load'
             wo = -10  # N/m
             self.fe.add_bc('fix', 0, part='beam', ends=0)
-
             L = np.append(0, np.cumsum(tb.fe.el['dl']))
             for i, el in enumerate(self.fe.part['beam']['el']):
                 Lel = (L[i] + L[i+1]) / (2 * L[-1])
@@ -133,34 +149,32 @@ class TB:  # test beam
                                                   10 * L[-1]**2 * self.x +
                                                   5 * L[-1] * self.x**2 -
                                                   self.x**3)
-
         elif case == 7:
             name = 'axial tip point load'
             self.fe.add_bc('fix', 0, part='beam', ends=0)
             self.fe.add_nodal_load(self.fe.nnd-1, 'fx', 1e6)
 
-
-
+        elif case == 8:
+            name = 'hanging beam'
+            self.fe.clfe()  # clear all (mesh, BCs, constraints and loads)
+            theta = 0
+            g = geom.qrotate([0, 0, -1], theta, dx='y')[0]
+            self.bar(theta=np.pi/2)  # rotate beam
+            self.fe.add_bc('fix', 0, part='beam', ends=0)
+            self.fe.add_weight(g=g)
 
         self.fe.solve()  # solve
-
-        plt.figure()
-        plt.plot(self.fe.part['beam']['Lshp'],
-                 self.fe.part['beam']['u'][:, 0], 'C1')
-
-        plt.plot(self.x,1e6 * self.x / self.EA, '--C2')
-
-
-        # self.plot(v, m, s, name, theta=theta)
-        print(v)
+        self.plot(case, v, m, s, name, theta=theta)
 
 
 if __name__ == '__main__':
 
-    tb = TB(2)
-    tb.test(7, theta=0*np.pi/180)
+    tb = TB(12)
+    tb.test(5, theta=0*np.pi/180)
     tb.fe.plot()
 
-    tb.fe.plot_matrix(tb.fe.stiffness(0))
-    tb.fe.plot_matrix(tb.fe.Ko)
-    tb.fe.plot_matrix(tb.fe.K)
+
+    #tb.fe.plot_matrix(tb.fe.stiffness(0))
+    #tb.fe.plot_matrix(tb.fe.Ko)
+    #tb.fe.plot_matrix(tb.fe.K)
+

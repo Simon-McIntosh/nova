@@ -103,7 +103,7 @@ class FE(object):
         self.mat[self.matID]['ID'] = self.matID
         self.mat[self.matID]['name'] = name
         for i, (material, section) in enumerate(zip(materials, sections)):
-            mat, pnt = self.get_mat(material, section)
+            mat, pnt = self.set_mat(material, section)
             self.mat[self.matID]['mat_array'][i] = self.add_pnt(mat, pnt)
             self.mat[self.matID]['nsection'] += 1
 
@@ -141,7 +141,7 @@ class FE(object):
     def update_G(self, E, v):
         return E/(2*(1+v))
 
-    def get_mat(self, material_name, section):
+    def set_mat(self, material_name, section):
         mat = np.zeros(1, dtype=self.mtype)[0]  # default mat data structure
         mat['name'] = material_name
         material = self.mat_data[material_name]
@@ -373,7 +373,7 @@ class FE(object):
         self.S['Nv_dL'] = np.zeros((self.nShape, 2))
         self.S['Nv_dL'][:, 0] = np.copy(self.S['Nv'][:, 1])
         self.S['Nv_dL'][:, 1] = np.copy(self.S['Nv'][:, 3])
-        # Hermite functions (curve)
+        # Hermite functions (curvature)
         self.S['Nd2v'] = np.zeros((self.nShape, 4))
         self.S['Nd2v'][:, 0] = -6 + 12 * self.S['s']
         self.S['Nd2v'][:, 1] = -4 + 6 * self.S['s']
@@ -417,39 +417,10 @@ class FE(object):
                     d3v[:, i] = np.dot(self.S['Nd3v'], d1D) / \
                         self.el['dl'][el]**3
             self.store_shape(el, u, v, d2v, d3v)
+            self.store_stress(el, u, d2v)  # store stress components along el
         self.shape_part(labels=['u', 'U', 'd2u', 'd3u'])  # set part shape
+        self.stress_part()  # set part stress
         self.deform()
-
-    def set_shape(self):
-        self.shape = {}
-        for label in ['u', 'd2u', 'd3u', 'U', 'D']:
-            self.shape[label] = np.zeros((self.nel, 3, self.nShape))
-
-    def store_shape(self, el, u, v, d2v, d3v):
-        self.shape['u'][el, 0] = np.linspace(u[0], u[1], self.nShape)
-        self.shape['u'][el, 1] = v[:, 0]  # displacment
-        self.shape['u'][el, 2] = v[:, 1]
-        self.shape['U'][el] = np.dot(self.T3[:, :, el].T,  # to global
-                                     self.shape['u'][el, :, :])
-        # self.shape['u'][el, 0] = np.linspace(u[0], u[1], self.nShape)
-        self.shape['d2u'][el, 1] = d2v[:, 0]  # curvature
-        self.shape['d2u'][el, 2] = d2v[:, 1]
-
-        self.shape['d3u'][el, 1] = d3v[:, 0]  # shear
-        self.shape['d3u'][el, 2] = d3v[:, 1]
-
-    def shape_part(self, labels=['u', 'U', 'D', 'd2u', 'd3u']):
-        for part in self.part:
-            nS = self.part[part]['nel'] * (self.nShape - 1) + 1
-            self.part[part]['Lshp'] = \
-                np.linspace(0, self.part[part]['Lnd'][-1], nS)  # sub-divided
-            for label in labels:
-                self.part[part][label] = np.zeros((nS, 3))
-            for iel, el in enumerate(self.part[part]['el']):
-                i = iel * (self.nShape - 1)
-                for label in labels:
-                    self.part[part][label][i:i + self.nShape, :] = \
-                        self.shape[label][el, :, :].T
 
     def displace(self, el):
         d = np.zeros(12)
@@ -469,7 +440,106 @@ class FE(object):
                 d1D[2 * i + j] = d[6 * i + index]
                 if label[j] == 'ty':  # displacment in z
                     d1D[2 * i + j] *= -1
+        #if 'z' in label:
+        #   d1D[1] *= -1
+        #   d1D[3] *= -1
         return d1D
+
+    def set_shape(self):
+        self.shape = {}
+        for label in ['u', 'd2u', 'd3u', 'U', 'D']:
+            self.shape[label] = np.zeros((self.nel, 3, self.nShape))
+
+    def store_shape(self, el, u, v, d2v, d3v):
+        self.shape['u'][el, 0] = np.linspace(u[0], u[1], self.nShape)
+        self.shape['u'][el, 1] = v[:, 0]  # displacment
+        self.shape['u'][el, 2] = v[:, 1]
+        self.shape['U'][el] = np.dot(self.T3[:, :, el].T,  # to global
+                                     self.shape['u'][el, :, :])
+        self.shape['d2u'][el, 1] = d2v[:, 0]  # curvature
+        self.shape['d2u'][el, 2] = d2v[:, 1]
+        self.shape['d3u'][el, 1] = d3v[:, 0]  # shear, dM/dx
+        self.shape['d3u'][el, 2] = d3v[:, 1]
+
+    def set_stress(self):
+        self.stress = {}  # axial, curve_y, curve_z
+        for label in ['axial',
+                      'cy_max', 'cy_min', 'cy',
+                      'cz_max', 'cz_min', 'cz',
+                      's_max', 's_min', 's']:
+            self.stress[label] = np.zeros((self.nel, 2))
+
+    def store_stress(self, el, u, d2v):
+        # store maximum stress components for each element
+        L = self.el['dl'][el]  # element length
+        du = u[1] - u[0]  # piecewise constant
+        nmat = self.el['mat'][el]
+        mat_array = self.mat['mat_array'][nmat]
+        for nsec in range(self.mat[nmat]['nsection']):
+            mat = mat_array[nsec]
+            E = mat['E']
+            axial = E * du / L  # axial stress
+            C = mat['C']  # centroid
+            pntID = mat['pntID']
+            pnt = self.pnt[pntID]  # section outline
+            shape = np.shape(pnt)
+            if len(shape) == 3:  # multi part
+                npart = shape[1]
+            else:
+                npart = 1
+                pnt = np.expand_dims(pnt, 1)
+            y, z = np.array([]), np.array([])
+            for i in range(npart):
+                y = np.append(y, pnt[0][i])
+                z = np.append(z, pnt[1][i])
+            y -= C[0]  # distance from centroid
+            z -= C[1]
+            nyz = len(y)
+            y = np.dot(np.ones((self.nShape, 1)), y.reshape(1, -1))
+            z = np.dot(np.ones((self.nShape, 1)), z.reshape(1, -1))
+            cy = E * z * np.dot(d2v[:, 1].reshape(-1, 1), np.ones((1, nyz)))
+            cz = E * y * np.dot(d2v[:, 0].reshape(-1, 1), np.ones((1, nyz)))
+            s = cy + cz + axial
+            self.stress['axial'][el, nsec] = axial
+            self.stress['cy_max'][el, nsec] = np.max(cy)
+            self.stress['cy_min'][el, nsec] = np.min(cy)
+            cy_index = np.argmax(abs(cy))
+            self.stress['cy'][el, nsec] = cy.flatten()[cy_index]
+            self.stress['cz_max'][el, nsec] = np.max(cz)
+            self.stress['cz_min'][el, nsec] = np.min(cz)
+            cz_index = np.argmax(abs(cz))
+            self.stress['cz'][el, nsec] = cz.flatten()[cz_index]
+            self.stress['s_max'][el, nsec] = np.max(s)
+            self.stress['s_min'][el, nsec] = np.min(s)
+            s_index = np.argmax(abs(s))
+            self.stress['s'][el, nsec] = s.flatten()[s_index]
+
+    def stress_part(self):
+        for part in self.part:
+            nel = self.part[part]['nel']
+            nmat = self.el['mat'][self.part[part]['el'][0]]
+            self.part[part]['nsection'] = self.mat[nmat]['nsection']
+            self.part[part]['name'] = self.mat[0]['mat_array']['name']
+            for label in self.stress:  # initalize
+                self.part[part][label] = np.zeros((nel, 2))
+            for iel, el in enumerate(self.part[part]['el']):
+                for label in self.stress:  # set
+                    self.part[part][label][iel, :] = self.stress[label][el, :]
+            self.part[part]['Lel'] = (self.part[part]['Lnd'][1:] +
+                                      self.part[part]['Lnd'][:-1]) / 2
+
+    def shape_part(self, labels=['u', 'U', 'D', 'd2u', 'd3u']):
+        for part in self.part:
+            nS = self.part[part]['nel'] * (self.nShape - 1) + 1
+            self.part[part]['Lshp'] = \
+                np.linspace(0, self.part[part]['Lnd'][-1], nS)  # sub-divided
+            for label in labels:
+                self.part[part][label] = np.zeros((nS, 3))
+            for iel, el in enumerate(self.part[part]['el']):
+                i = iel * (self.nShape - 1)
+                for label in labels:
+                    self.part[part][label][i:i + self.nShape, :] = \
+                        self.shape[label][el, :, :].T
 
     def set_stiffness(self):  # set element stiffness matrix
         if self.frame == '1D':
@@ -503,27 +573,26 @@ class FE(object):
         return k
 
     def stiffness_2D(self, el):  # dof [u,v,rz]
-        a = self.el['dl'][el] / 2
+        L = self.el['dl'][el]
         E, A, Iz = self.get_mat_o(self.el['mat'][el])
-        k = np.matrix([[A*E/(2*a), 0,               0,
-                       -A*E/(2*a), 0,               0],
-                       [0,         3*E*Iz/(2*a**3), 3*E*Iz/(2*a**2),
-                        0,        -3*E*Iz/(2*a**3), 3*E*Iz/(2*a**2)],
-                       [0,         3*E*Iz/(2*a**2), 2*E*Iz/a,
-                        0,        -3*E*Iz/(2*a**2), E*Iz/a],
-                       [-A*E/(2*a), 0,               0,
-                        A*E/(2*a), 0,               0],
-                       [0,        -3*E*Iz/(2*a**3), -3*E*Iz/(2*a**2),
-                        0,         3*E*Iz/(2*a**3), -3*E*Iz/(2*a**2)],
-                       [0,         3*E*Iz/(2*a**2), E*Iz/a,
-                        0,        -3*E*Iz/(2*a**2), 2*E*Iz/a]])
+        k = np.matrix([[A*E/L, 0, 0,
+                       -A*E/L, 0, 0],
+                       [0,  12*E*Iz/L**3, 6*E*Iz/L**2,
+                        0, -12*E*Iz/L**3, 6*E*Iz/L**2],
+                       [0,  6*E*Iz/L**2, 4*E*Iz/L,
+                        0, -6*E*Iz/L**2, 2*E*Iz/L],
+                       [-A*E/L, 0, 0,
+                        A*E/L, 0, 0],
+                       [0, -12*E*Iz/L**3, -6*E*Iz/L**2,
+                        0,  12*E*Iz/L**3, -6*E*Iz/L**2],
+                       [0,  6*E*Iz/L**2, 2*E*Iz/L,
+                        0, -6*E*Iz/L**2, 4*E*Iz/L]])
         k = self.rotate_matrix(k, el)  # transfer to global coordinates
         return k
 
     def stiffness_3D(self, el):  # dof [u,v,w,rx,ry,rz]
         L = self.el['dl'][el]
         E, A, G, J, Iy, Iz = self.get_mat_o(self.el['mat'][el])
-        A *= 1e6
         k = np.matrix(
             [[A*E/L, 0, 0, 0, 0, 0,
              -A*E/L, 0, 0, 0, 0, 0],
@@ -549,60 +618,6 @@ class FE(object):
               0, 0,  6*E*Iy/L**2, 0, 4*E*Iy/L, 0],
              [0,  6*E*Iz/L**2, 0, 0, 0, 2*E*Iz/L,
               0, -6*E*Iz/L**2, 0, 0, 0, 4*E*Iz/L]])
-        k = self.rotate_matrix(k, el)  # transfer to global coordinates
-        return k
-
-    def stiffness_3D_old(self, el):  # dof [u,v,w,rx,ry,rz]
-        a = self.el['dl'][el] / 2
-        E, A, G, J, Iy, Iz = self.get_mat_o(self.el['mat'][el])
-        k = np.matrix([[A*E/(2*a), 0,               0,
-                        0,         0,               0,
-                       -A*E/(2*a), 0,               0,
-                        0,         0,               0],
-                       [0,         3*E*Iz/(2*a**3), 0,
-                        0,         0,               3*E*Iz/(2*a**2),
-                        0,        -3*E*Iz/(2*a**3), 0,
-                        0,         0,               3*E*Iz/(2*a**2)],
-                       [0,         0,               3*E*Iy/(2*a**3),
-                        0,        -3*E*Iy/(2*a**2), 0,
-                        0,         0,              -3*E*Iy/(2*a**3),
-                        0,        -3*E*Iy/(2*a**2), 0],
-                       [0,         0,               0,
-                        G*J/(2*a), 0,               0,
-                        0,         0,               0,
-                       -G*J/(2*a), 0,               0],
-                       [0,         0,              -3*E*Iy/(2*a**2),
-                        0,         2*E*Iy/a,        0,
-                        0,         0,               3*E*Iy/(2*a**2),
-                        0,         E*Iy/a,          0],
-                       [0,         3*E*Iz/(2*a**2), 0,
-                        0,         0,               2*E*Iz/a,
-                        0,        -3*E*Iz/(2*a**2), 0,
-                        0,         0,               E*Iz/a],
-                       [-A*E/(2*a), 0,               0,
-                        0,         0,               0,
-                        A*E/(2*a), 0,               0,
-                        0,         0,               0],
-                       [0,        -3*E*Iz/(2*a**3), 0,
-                        0,         0,              -3*E*Iz/(2*a**2),
-                        0,         3*E*Iz/(2*a**3), 0,
-                        0,         0,              -3*E*Iz/(2*a**2)],
-                       [0,         0,              -3*E*Iy/(2*a**3),
-                        0,         3*E*Iy/(2*a**2), 0,
-                        0,         0,               3*E*Iy/(2*a**3),
-                        0,         3*E*Iy/(2*a**2), 0],
-                       [0,         0,               0,
-                       -G*J/(2*a), 0,               0,
-                        0,         0,               0,
-                        G*J/(2*a), 0,               0],
-                       [0,         0,              -3*E*Iy/(2*a**2),
-                        0,         E*Iy/a,          0,
-                        0,         0,               3*E*Iy/(2*a**2),
-                        0,         2*E*Iy/a,        0],
-                       [0,         3*E*Iz/(2*a**2), 0,
-                        0,         0,               E*Iz/a,
-                        0,        -3*E*Iz/(2*a**2), 0,
-                        0,         0,               2*E*Iz/a]])
         k = self.rotate_matrix(k, el)  # transfer to global coordinates
         return k
 
@@ -856,7 +871,6 @@ class FE(object):
             for i, j in zip(ko_index, ke_index):
                 self.Ko[i[0]:i[0]+self.ndof, i[1]:i[1]+self.ndof] += \
                     ke[j[0]:j[0]+self.ndof, j[1]:j[1]+self.ndof]
-        self.K = np.copy(self.Ko)
 
     def add_cp(self, nodes, dof='fix', nset='next', axis='z', rotate=False):
         nodes = np.copy(nodes)  # make local copy
@@ -987,18 +1001,17 @@ class FE(object):
         self.extractBC()  # remove BC dofs
         self.extractND()  # remove unconnected nodes
         self.assemble_cp_nodes()
+        self.K = np.copy(self.Ko)
         self.F = np.copy(self.Fo)
         self.nd = {}  # node index
         self.nd['do'] = np.arange(0, self.nK, dtype=int)  # all nodes
         self.nd['mask'] = np.zeros(self.nK, dtype=bool)  # all nodes
         self.nd['mask'][self.BCindex] = True  # remove
         self.nd['mask'][self.cp_nd['dc']] = True  # condense
-
         self.nd['dc'] = self.nd['do'][self.nd['mask']]  # condensed
         self.nd['dr'] = self.nd['do'][~self.nd['mask']]  # retained
         self.nd['nc'] = np.sum(self.nd['mask'])
         self.nd['nr'] = np.sum(~self.nd['mask'])
-
         self.Cc = np.zeros((self.cp_nd['n'], self.cp_nd['n']))
         self.Cr = np.zeros((self.cp_nd['n'], self.nd['nr']))
         for i, name in enumerate(self.couple):
@@ -1022,9 +1035,23 @@ class FE(object):
                            self.F[self.nd['dc']], axis=0)
         self.F = np.dot(self.T.T, self.F)
 
+    def switch_units(self):
+        # local units kg	mm	ms	kN	GPa	kN-mm
+        for i in range(3):
+            self.Ko[:, i::self.ndof] *= 1e-6  # N/m - KN/mm
+            self.Ko[:, i+3::self.ndof] *= 1e-3  # N/rad - KN/rad
+            self.Fo[i::self.ndof] *= 1e-3  # N - KN
+            self.Fo[i+3::self.ndof] *= 1  # Nm - KNmm
+        for i in range(3):
+            self.Dn[i::self.ndof] *= 1e-3  # mm - m
+            self.Dn[i+3::self.ndof] *= 1  # rad - rad
+            self.Fn[i::self.ndof] *= 1e3  # KN - N
+            self.Fo[i+3::self.ndof] *= 1  # KNm - Nm
+
     def solve(self):
         self.nK = int(self.nnd * self.ndof)  # stiffness matrix
         self.set_shape()  # dict of displacments
+        self.set_stress()
         self.update_rotation()  # evaluate/update rotation matricies
         self.assemble()  # assemble stiffness matrix
         self.constrain()  # apply and colapse constraints
@@ -1096,7 +1123,7 @@ class FE(object):
                         [self.X[nd[0], index[1]], self.X[nd[1], index[1]]],
                         color='C0', alpha=0.5)
 
-    def plot_dX(self, projection='xz', **kwargs):
+    def plot_vectors(self, projection='xz', **kwargs):
         ax = kwargs.get('ax', plt.gca())
         index = self.get_index(projection)
         factor = 0.1 * self.bb
@@ -1117,7 +1144,10 @@ class FE(object):
         for i in range(3):
             F[:, i] = self.Fo[i::self.ndof]
         Fmag = np.max(np.linalg.norm(F, axis=1))
-        factor *= self.bb / Fmag
+        if Fmag == 0:
+            factor = 1
+        else:
+            factor *= self.bb / Fmag
         for i, (X, dX) in enumerate(
                 zip(self.X, zip(self.D['x'], self.D['y'], self.D['z']))):
             j = i * self.ndof
@@ -1163,6 +1193,42 @@ class FE(object):
         plt.xlabel('part length')
         plt.ylabel('part curvature')
 
+    def plot_stress(self):
+        plt.figure(figsize=plt.figaspect(0.75))
+        text = linelabel(value='', postfix='', Ndiv=5)
+        part = self.part  # ['loop', 'trans_lower', 'trans_upper']
+        for i, part in enumerate(part):
+            for label in ['cy', 'cz', 'axial', 's']:
+                name = self.part[part]['name'][0]
+                plt.plot(self.part[part]['Lel'],
+                         self.part[part][label][:, 0],
+                         '-', color='C{}'.format(i))
+                text.add(part+'_{}_{}'.format(name, label))
+            if self.part[part]['nsection'] == 2:
+                plt.plot(self.part[part]['Lel'],
+                         self.part[part][label][:, 1],
+                         '--', color='C{}'.format(i))
+        text.plot()
+        plt.despine()
+        plt.xlabel('part length')
+        plt.ylabel('part stress')
+
+    def plot_nodal(self):
+
+        fig, ax = plt.subplots(2, 1, sharex=True, squeeze=True)
+        text = linelabel(ax=ax[0], value='', postfix='', Ndiv=5)
+        for i, var in enumerate(['x', 'y', 'z']):
+            ax[0].plot(self.D[var], 'C{}'.format(i))
+            text.add(var)
+        text.plot()
+
+        text = linelabel(ax=ax[1], value='', postfix='', Ndiv=5)
+        for i, var in enumerate(['tx', 'ty', 'tz']):
+            ax[1].plot(self.D[var], 'C{}'.format(i))
+            text.add(var)
+        text.plot()
+
+
     def plot_sections(self, ax=None, theta=0):
         if ax is None:
             ax = Axes3D(plt.figure(figsize=plt.figaspect(1.5)))
@@ -1172,7 +1238,6 @@ class FE(object):
         dx_ref = np.array([1, 0, 0], ndmin=2, dtype=float)
         dy_ref = np.array([0, 1, 0], ndmin=2, dtype=float)
         dz_ref = np.array([0, 0, 1], ndmin=2, dtype=float)
-
         for n in range(self.nel):  # for all elements
             X = np.copy(self.el['X'][n])  # element midpoint
             dx = self.el['dx'][n]  # element tangent

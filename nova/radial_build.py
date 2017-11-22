@@ -1,6 +1,5 @@
 import numpy as np
-import pylab as pl
-import seaborn as sns
+from amigo.pyplot import plt
 import amigo.geom as geom
 from nova.loops import Profile
 from nova.shape import Shape
@@ -11,7 +10,6 @@ from amigo.IO import trim_dir
 import json
 from nova.firstwall import divertor, main_chamber
 from nova.config import select
-colors = sns.color_palette('Paired', 12)
 
 
 class RB(object):
@@ -80,15 +78,15 @@ class RB(object):
             self.plot()
 
     def plot(self):
-        pl.plot(self.segment['first_wall']['x'],
-                self.segment['first_wall']['z'],
-                lw=1.75, color=0.5 * np.ones(3))
-        self.blanket.fill(plot=True, color=colors[0])
-        self.vessel.fill(plot=True, color=colors[1])
+        plt.plot(self.segment['first_wall']['x'],
+                 self.segment['first_wall']['z'],
+                 lw=1.75, color=0.5 * np.ones(3))
+        self.blanket.fill(plot=True, color='C0')
+        self.vessel.fill(plot=True, color='C1')
         geom.polyfill(self.segment['divertor']['x'],
                       self.segment['divertor']['z'], color=0.75*np.ones(3))
-        pl.axis('equal')
-        pl.axis('off')
+        plt.axis('equal')
+        plt.axis('off')
 
     def upper_lower(self, Xu, Zu, Xl, Zl, Zjoin=0):
         u_index = np.arange(len(Xu), dtype='int')
@@ -111,7 +109,7 @@ class RB(object):
         blanket.sort_z('inner', select=select)
         blanket.offset('outer', self.setup.build['BB'],
                        ref_o=3 / 10 * np.pi, dref=np.pi / 3)
-        bfill = blanket.fill(plot=plot, color=colors[0])
+        bfill = blanket.fill(plot=plot, color='C0')
 
         inner = blanket.loops['inner']['points']
         outer = blanket.loops['outer']['points']
@@ -125,10 +123,10 @@ class RB(object):
         x_out, z_out = mj.point_loop_cast((x_in, z_in), outer, -25)
 
 
-        pl.plot(inner['x'][:80], inner['z'][:80], 'r', lw=8)
+        plt.plot(inner['x'][:80], inner['z'][:80], 'r', lw=8)
 
-        pl.plot(outer['x'], outer['z'], 'b', lw=3)
-        pl.plot(divertor['x'], divertor['z'], 'g--', lw=3)
+        plt.plot(outer['x'], outer['z'], 'b', lw=3)
+        plt.plot(divertor['x'], divertor['z'], 'g--', lw=3)
         #if plot:
         #    geom.polyfill(bfill[1]['x'], bfill[1]['z'], color=color[0])
         '''
@@ -213,8 +211,6 @@ class RB(object):
 
     def trim_sol(self, color='k', plot=False):
         self.sf.sol()
-        color = sns.color_palette('Set2', self.sf.nleg + 5)
-        # color = 'k'
         for c, leg in enumerate(self.sf.legs.keys()):
             if 'core' not in leg:
                 Xsol = self.sf.legs[leg]['X']
@@ -230,14 +226,12 @@ class RB(object):
                         self.sf.legs[leg]['pannel'][i] = pannel
                         if plot:
                             if color != 'k' and i > 0:
-                                pl.plot(X, Z, '-', color=0.7 *
-                                        np.ones(3))  # color[c+3]
-                                # pl.plot(X,Z,'-',color=color[c+3])
+                                plt.plot(X, Z, '-', color=0.7 * np.ones(3))
                             elif color == 'k':
-                                pl.plot(X, Z, '-', color='k', alpha=0.15)
+                                plt.plot(X, Z, '-', color='k', alpha=0.15)
                             else:
-                                # pl.plot(X,Z,color=color[c])
-                                pl.plot(X, Z, '--', color=[0.5, 0.5, 0.5])
+                                # plt.plot(X,Z,color=color[c])
+                                plt.plot(X, Z, '--', color=[0.5, 0.5, 0.5])
 
     def crossed_lines(self, Xo, Zo, X1, Z1):
         index = np.zeros(2)
@@ -353,8 +347,8 @@ class wrap(object):
     def interpolate(self):
         for loop in self.loops:
             x, z = self.get_segment(loop)
-            x, z, l = geom.unique(x, z)
-            interpolant = {'x': IUS(l, x), 'z': IUS(l, z)}
+            x, z, le = geom.unique(x, z)
+            interpolant = {'x': IUS(le, x), 'z': IUS(le, z)}
             self.loops[loop]['fun'] = interpolant
 
     def interp(self, loop, l):
@@ -362,10 +356,10 @@ class wrap(object):
         return interpolant['x'](l), interpolant['z'](l)
 
     def sead(self, dl, N=500):  # course search
-        l = np.linspace(dl[0], dl[1], N)
+        le = np.linspace(dl[0], dl[1], N)
         x, z = np.zeros((N, 2)), np.zeros((N, 2))
         for i, loop in enumerate(self.loops):
-            x[:, i], z[:, i] = self.interp(loop, l)
+            x[:, i], z[:, i] = self.interp(loop, le)
         dx_min, i_in, i_out = np.max(x[:, 1]), 0, 0
         for i, (xin, zin) in enumerate(zip(x[:, 0], z[:, 0])):
             dX = np.sqrt((x[:, 1] - xin)**2 + (z[:, 1] - zin)**2)
@@ -374,7 +368,7 @@ class wrap(object):
                 dx_min = dx
                 i_in = i
                 i_out = np.argmin(dX)
-        return l[i_in], l[i_out]
+        return le[i_in], le[i_out]
 
     def cross(self, L):
         x, z = np.zeros(2), np.zeros(2)
@@ -404,7 +398,7 @@ class wrap(object):
         else:
             return False
 
-    def fill(self, plot=False, color=colors[0]):  # minimization focused search
+    def fill(self, plot=False, color='C0'):  # minimization focused search
         xin, zin = self.get_segment('inner')
         xout, zout = self.get_segment('outer')
         concentric = self.concentric(xin, zin, xout, zout)
@@ -442,14 +436,14 @@ class wrap(object):
             self.plot(color=color)
         return self.segment, self.patch
 
-    def plot(self, plot_loops=False, color=colors[0]):
-        geom.polyfill(self.patch['x'], self.patch['z'], color=color)
+    def plot(self, plot_loops=False):
+        geom.polyfill(self.patch['x'], self.patch['z'], color='C0')
         if plot_loops:
-            pl.plot(self.segment['x'], self.segment['z'],
-                    color=0.75 * np.ones(3))
+            plt.plot(self.segment['x'], self.segment['z'],
+                     color=0.75 * np.ones(3))
             for loop in self.loops:
                 x, z = self.get_segment(loop)
-                pl.plot(x, z, '-')
+                plt.plot(x, z, '-')
 
 
 class Loop(object):
@@ -521,11 +515,11 @@ class Loop(object):
                 Zfill = np.array([Zin[i], Zout[i], Zout[i + 1], Zin[i + 1]])
                 if flag is 0 and label is not None:
                     flag = 1
-                    pl.fill(Xfill, Zfill, facecolor=color, alpha=alpha,
-                            edgecolor='none', label=label)
+                    plt.fill(Xfill, Zfill, facecolor=color, alpha=alpha,
+                             edgecolor='none', label=label)
                 else:
-                    pl.fill(Xfill, Zfill, facecolor=color, alpha=alpha,
-                            edgecolor='none')
+                    plt.fill(Xfill, Zfill, facecolor=color, alpha=alpha,
+                             edgecolor='none')
 
     def blend(self, dt, ref_o=4 / 8 * np.pi, dref=np.pi / 4, gap=0,
               referance='theta'):
@@ -556,6 +550,8 @@ class Loop(object):
         for t in trim:
             index.append(np.argmin(np.abs(L - t)))
         return index
+
+
 if __name__ == '__main__':
 
     machine = 'demo'
@@ -565,8 +561,8 @@ if __name__ == '__main__':
     date = '2017_03_10'
 
     mc = main_chamber(machine, date=date)
-    #mc.generate(eq_names, psi_n=1.07, flux_fit=True,
-    #            plot=True, symetric=False)
+    # mc.generate(eq_names, psi_n=1.07, flux_fit=True,
+    #             plot=True, symetric=False)
     mc.load_data(plot=False)  # or load from file
     # mc.shp.plot_bounds()
 

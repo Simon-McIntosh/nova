@@ -39,7 +39,7 @@ class second_moment(object):
         patch = {'y': y, 'z': z}
         return C, {'yy': Iyy, 'zz': Izz, 'xx': Ixx}, A, patch
 
-    def rect(self, b=1, h=1):  # width,height
+    def rect(self, b=1, h=1):  # width, height
         b, h = abs(b), abs(h)
         C = {'y': 0, 'z': 0}  # centroid
         A = b * h  # area

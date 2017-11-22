@@ -209,6 +209,8 @@ if __name__ == '__main__':
 
     ss.fe.plot_moment()
 
+    ss.fe.plot_stress()
+
     '''
     TFcoil = coilCAD.TFcoilCAD(ss.atec)
     model = buildCAD(ss.tf.nTF)

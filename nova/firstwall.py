@@ -242,7 +242,7 @@ class divertor(object):
         gain = 0.25
         Nmax = 500
         Lo = [5.0, 0.0015]  # [blend,turn]  5,0.015
-        x2m = [-1, -1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
+        x2m = [-2, -1]  # ramp to step (+ive-lead, -ive-lag ramp==1, step==inf)
         Nplate = 1  # number of target plate divisions (1==flat)
         L = Lo[0] if theta_end == 0 else Lo[1]
         Lsead = L

@@ -436,8 +436,8 @@ class wrap(object):
             self.plot(color=color)
         return self.segment, self.patch
 
-    def plot(self, plot_loops=False):
-        geom.polyfill(self.patch['x'], self.patch['z'], color='C0')
+    def plot(self, color='C1', plot_loops=False):
+        geom.polyfill(self.patch['x'], self.patch['z'], color=color)
         if plot_loops:
             plt.plot(self.segment['x'], self.segment['z'],
                      color=0.75 * np.ones(3))

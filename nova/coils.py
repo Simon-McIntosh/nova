@@ -164,7 +164,7 @@ class PF(object):
             if coil['I'] != 0:
                 edgecolor = 'k'
             else:
-                edgecolor = 'x'
+                edgecolor = 'k'
             if name in self.index['CS']['name']:
                 drs = -2.5 / 3 * dx
                 ha = 'right'

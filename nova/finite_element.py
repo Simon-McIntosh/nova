@@ -723,8 +723,8 @@ class FE(object):
                     fn[i, 0] = (1 - s)**2 * (1 + 2 * s) * f[i]
                     fn[i, 1] = s**2 * (3 - 2 * s) * f[i]
                     mi = 5 if label == 'fy' else 4  # moment index
-                    fn[mi, 0] = -f[i] * (1 - s)**2 * s * self.el['dl'][el]
-                    fn[mi, 1] = f[i] * s**2 * (1 - s) * self.el['dl'][el]
+                    fn[mi, 0] = f[i] * (1 - s)**2 * s * self.el['dl'][el]
+                    fn[mi, 1] = -f[i] * s**2 * (1 - s) * self.el['dl'][el]
                     if load_type == 'dist':
                         # reduce moment for distributed load
                         fn[mi, :] *= 8 / 12
@@ -739,7 +739,7 @@ class FE(object):
         for i, node in enumerate(self.el['n'][el]):  # each node
             F = np.zeros((6))
             F[:3] = np.dot(self.T3[:, :, el].T, fn[:3, i])  # force
-            # F[3:] = np.dot(self.T3[:, :, el].T, fn[3:, i])  # moment
+            F[3:] = np.dot(self.T3[:, :, el].T, fn[3:, i])  # moment
             for index, label in enumerate(['fx', 'fy', 'fz',
                                            'mx', 'my', 'mz']):
                 if label in self.load:
@@ -1137,7 +1137,7 @@ class FE(object):
                          head_length=0.2 * factor,
                          color='C{}'.format(i+3))
 
-    def plot_F(self, projection='xz', factor=0.1, **kwargs):
+    def plot_F(self, projection='xz', factor=0.25, **kwargs):
         ax = kwargs.get('ax', plt.gca())
         index = self.get_index(projection)
         F = np.zeros((self.nnd, 3))
@@ -1178,43 +1178,52 @@ class FE(object):
 
     def plot_moment(self):
         plt.figure(figsize=plt.figaspect(0.75))
-        text = linelabel(value='', postfix='', Ndiv=5)
-        part = self.part  # ['loop', 'trans_lower', 'trans_upper']
+        text = linelabel(value='', postfix='', Ndiv=25)
+        # part = self.part
+        part = ['loop', 'trans_lower', 'trans_upper']
+        color = cycle(range(10))
         for i, part in enumerate(part):
-            plt.plot(self.part[part]['Lshp'],
+            ci = next(color)
+            Lnorm = self.part[part]['Lshp'][-1]
+            plt.plot(self.part[part]['Lshp']/Lnorm,
                      self.part[part]['d2u'][:, 1],
-                     '--', color='C{}'.format(i))
-            plt.plot(self.part[part]['Lshp'],
+                     '--', color='C{}'.format(ci))
+            plt.plot(self.part[part]['Lshp']/Lnorm,
                      self.part[part]['d2u'][:, 2],
-                     '-', color='C{}'.format(i))
+                     '-', color='C{}'.format(ci))
             text.add(part)
         text.plot()
         plt.despine()
         plt.xlabel('part length')
         plt.ylabel('part curvature')
 
-    def plot_stress(self):
-        plt.figure(figsize=plt.figaspect(0.75))
-        text = linelabel(value='', postfix='', Ndiv=5)
-        part = self.part  # ['loop', 'trans_lower', 'trans_upper']
+    def plot_stress(self):        
+        # part = self.part
+        part = ['loop', 'trans_lower', 'trans_upper']
+        color = cycle(range(10))
+        axes = plt.subplots(3, 1, sharex=True, sharey=True,
+                            figsize=plt.figaspect(0.75))[1]
+        stress = ['cy', 'cz', 'axial']
         for i, part in enumerate(part):
-            for label in ['cy', 'cz', 'axial', 's']:
-                name = self.part[part]['name'][0]
-                plt.plot(self.part[part]['Lel'],
-                         self.part[part][label][:, 0],
-                         '-', color='C{}'.format(i))
-                text.add(part+'_{}_{}'.format(name, label))
-            if self.part[part]['nsection'] == 2:
-                plt.plot(self.part[part]['Lel'],
-                         self.part[part][label][:, 1],
-                         '--', color='C{}'.format(i))
-        text.plot()
-        plt.despine()
+            ci = next(color)
+            Lnorm = self.part[part]['Lshp'][-1]
+            for label, ax in zip(stress, axes):  # , 's'
+                for j, ls in zip(range(self.part[part]['nsection']),
+                                       ['-', '--']):
+                    section = self.part[part]['name'][j]
+                    ax.plot(self.part[part]['Lel']/Lnorm,
+                            1e-6*self.part[part][label][:, j],
+                             ls, color='C{}'.format(ci),
+                             label=part+'_'+section)
+        for ax, label in zip(axes, stress): 
+            ax.set_ylabel(f'{label} MPa')
+            plt.despine()
         plt.xlabel('part length')
-        plt.ylabel('part stress')
+        plt.sca(axes[1])
+        plt.legend()
+       
 
     def plot_nodal(self):
-
         fig, ax = plt.subplots(2, 1, sharex=True, squeeze=True)
         text = linelabel(ax=ax[0], value='', postfix='', Ndiv=5)
         for i, var in enumerate(['x', 'y', 'z']):
@@ -1242,7 +1251,7 @@ class FE(object):
             X = np.copy(self.el['X'][n])  # element midpoint
             dx = self.el['dx'][n]  # element tangent
             dy = self.el['dy'][n]  # element normal
-            pivot = np.cross(dx_ref, dx)
+            pivot = np.cross(dx_ref, dx)[0]
             pnorm = np.linalg.norm(pivot)
             theta_a = np.arccos(np.dot(dx_ref, np.array(dx.T))[0][0])
             if pnorm == 0:
@@ -1277,11 +1286,11 @@ class FE(object):
                                             dx=pivot)
 
                     dy_dot = np.dot(dy_ref_o, dy.T).tolist()[0][0]
-                    dy_pivot = np.cross(dy_ref_o, dy)
+                    dy_pivot = np.cross(dy_ref_o, dy)[0]
                     if dy_dot > 1:
                         dy_dot = 1
                     if np.linalg.norm(dy_pivot) == 0:
-                        dy_pivot = dx
+                        dy_pivot = np.array(dx)[0]
                     theta_b = np.arccos(dy_dot)
                     points = geom.qrotate(points, theta_b, xo=[0, 0, 0],
                                           dx=dy_pivot)
@@ -1317,10 +1326,10 @@ class FE(object):
             plt.axis('off')
             plt.axis('equal')
 
-    def plot_twin(self):
+    def plot_twin(self, scale_factor=10):
         ax = plt.subplots(1, 2, sharex=True, sharey=True,
                           figsize=plt.figaspect(0.75))[1]
-        with scale(self.deform, -0.2):
+        with scale(self.deform, scale_factor):
             for i, projection in enumerate(['xz', 'yz']):
                 self.plot_nodes(projection=projection, ax=ax[i])
                 self.plot_displacment(projection=projection, ax=ax[i])

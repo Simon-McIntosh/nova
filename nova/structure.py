@@ -558,7 +558,7 @@ class architect(object):
         plt.despine()
         ax.set_xticks([0, 0.5, 1])
         ax.set_xticklabels(['inboard', 'transition', 'outboard'])
-        plt.ylabel(r'sectional properties, m$^2$')
+        plt.ylabel(r'sectional properties, m$^4$')
         plt.xlabel('cross-section position')
 
 
@@ -612,7 +612,7 @@ if __name__ is '__main__':
     inv = INV(pf, tf, dCoil=2.5, offset=0.3)
     inv.colocate(sf, n=1e3, expand=0.5, centre=0, width=363/(2*np.pi))
     inv.set_limit(FPFz=80)
-    inv.wrap_PF(solve=False)
+    inv.wrap_PF(solve=True)
     inv.eq.run(update=False)
 
     fig = plt.figure(figsize=plt.figaspect(1.2))
@@ -621,7 +621,6 @@ if __name__ is '__main__':
     atec = architect(tf, pf)
     atec.plot_connections(fig)
     atec.plot_transition()
-
     atec.plot_tf_section()
 
 

@@ -34,6 +34,8 @@ class SF(object):
         self.get_Mpsi()
         self.set_contour()  # set cfeild
         self.get_LFP() 
+        x, z = self.get_boundary()
+        self.set_boundary(x, z)
         # self.get_sol_psi(dSOL=3e-3,Nsol=15,verbose=False)
         # leg search radius
         self.rcirc = 0.3 * abs(self.Mpoint[1] - self.Xpoint[1])

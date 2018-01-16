@@ -178,7 +178,7 @@ class FE(object):
             values.append(val)
         return values
 
-    def initalise_mesh(self, npart_max=10):
+    def initalise_mesh(self):
         self.X = []
         self.npart = 0  # part number
         self.part = OrderedDict()  # part ordered dict
@@ -187,6 +187,10 @@ class FE(object):
         self.el = {}
 
     def add_nodes(self, X):
+        if len(np.shape(X)) == 1:  # 1D node input - expand
+            x = np.copy(X)
+            X = np.zeros((len(X), 3))
+            X[:, 0] = x
         if np.size(X) == 3:
             X = np.reshape(X, (1, 3))  # single node
         else:
@@ -1140,10 +1144,14 @@ class FE(object):
     def plot_F(self, projection='xz', factor=0.25, **kwargs):
         ax = kwargs.get('ax', plt.gca())
         index = self.get_index(projection)
-        F = np.zeros((self.nnd, 3))
-        for i in range(3):
+        nF = sum([1 for var in self.load if 'f' in var])
+        F = np.zeros((self.nnd, nF))
+        for i in range(nF):
             F[:, i] = self.Fo[i::self.ndof]
-        Fmag = np.max(np.linalg.norm(F, axis=1))
+        if nF > 1:
+            Fmag = np.max(np.linalg.norm(F, axis=1))
+        else:
+            Fmag = np.max(F)
         if Fmag == 0:
             factor = 1
         else:

@@ -710,7 +710,8 @@ class EQ(object):
 
     def add_Pcoil(self, x, z, coil):
         rc, zc, I = coil['x'], coil['z'], coil['I']
-        return self.mu_o * I * cc.green(x, z, rc, zc)
+        dx, dz = coil['dx'], coil['dz']
+        return self.mu_o * I * cc.green(x, z, rc, zc, dXc=dx, dZc=dz)
 
     def add_Bcoil(self, x, z, coil):
         rc, zc, I = coil['x'], coil['z'], coil['I']

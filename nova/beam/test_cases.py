@@ -16,7 +16,6 @@ class TB:  # test beam
         sm = second_moment()
         sm.add_shape('circ', r=0.02, ro=0.01)
         C, I, A = sm.report()
-        A *= 1e3
         section = {'C': C, 'I': I, 'A': A, 'J': I['xx'], 'pnt': sm.get_pnt()}
         self.fe.add_mat('tube', ['steel_cast'], [section])
 
@@ -87,6 +86,7 @@ class TB:  # test beam
             v = self.w * self.x / (24 * self.EI) *\
                 (self.L**3 - 2 * self.L * self.x**2 + self.x**3)
             m = -self.w * self.x / 2 * (self.L - self.x)
+            s = -self.w * (self.L/2 - self.x)
             self.fe.add_bc('ny', 0, part='beam', ends=0)
             self.fe.add_bc('ny', -1, part='beam', ends=1)
             self.fe.add_weight(g=g)
@@ -105,14 +105,19 @@ class TB:  # test beam
             v = self.w * self.x / (48 * self.EI) * \
                 (self.L**3 - 3*self.L*self.x**2 + 2*self.x**3)
             m = -3*self.w*self.L*self.x/8 + self.w*self.x**2/2
+            s = -self.w*(3*self.L/8 - self.x)
             self.fe.add_bc('pin', 0, part='beam', ends=0)
             self.fe.add_bc('fix', -1, part='beam', ends=1)
             self.fe.add_weight(g=g)
 
-        elif case == 3:  # rotated cantilever
-            name = 'cantilever'
-            self.fe.add_bc('fix', 0, part='beam', ends=0)
-            self.fe.add_nodal_load(self.fe.nnd-1, 'fz', -1e3)
+        elif case == 3:  # cantilever point load
+            name = 'cantilever - point load'
+            P = -1e3
+            v = P/(6*self.EI) * (2*self.L**3 - 3*self.L**2*self.x + self.x**3)
+            m = P*self.x
+            s = P*np.ones(len(self.x))
+            self.fe.add_bc('fix', -1, part='beam', ends=1)
+            self.fe.add_nodal_load(0, 'fz', P)
 
         elif case == 4:
             name = 'end moment'
@@ -169,11 +174,13 @@ class TB:  # test beam
 
 if __name__ == '__main__':
 
-    tb = TB(12)
-    tb.test(5, theta=0*np.pi/180)
+    tb = TB(13)
+    tb.test(0, theta=1*np.pi/180)
     tb.fe.plot()
 
-
+    tb.fe.plot_stress()
+    
+    tb.fe.plot_moment()
     #tb.fe.plot_matrix(tb.fe.stiffness(0))
     #tb.fe.plot_matrix(tb.fe.Ko)
     #tb.fe.plot_matrix(tb.fe.K)

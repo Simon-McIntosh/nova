@@ -104,13 +104,13 @@ class INV(object):
         self.add_B(0, [-20], factor=3, polar=target)  # target alignment feild)
 
     def load_equlibrium(self, sf, expand=0.25, n=2.5e3):
-        if self.boundary == 'tf':  # grid boundary extractd from tf centreline
+        if self.boundary == 'tf':  # grid boundary extracted from tf centreline
             try:
                 eq_boundary = self.tf.eq_boundary
             except AttributeError:
                 raise ValueError('tf object not set')
         elif self.boundary == 'sf':  # grid boundary extracted from seperatrix
-            eq_boundary = self.sf.eq_boundary
+            eq_boundary = sf.eq_boundary
         else:
             errtxt = 'invalid bondary variable - require \'sf\' or \'tf\'\n'
             errtxt += 'boundary identifies generator object'
@@ -212,7 +212,7 @@ class INV(object):
             self.update_bundle(coil)  # re-grid elliptic coils
         self.update_swing()
         self.initalise_current()
-        self.initalise_limits()
+        # self.initalise_limits()
         if plot:
             self.plot_coils()
 
@@ -1037,9 +1037,6 @@ class INV(object):
         L = loops.denormalize_variables(Lnorm, self.Lo)
         Lpf = L[:self.nPF]
         for name, lpf in zip(self.PF_coils, Lpf):
-            # x, z = self.tf.fun['out']['x'](lpf), self.tf.fun['out']['z'](lpf)
-            # ref = int(name.split('Coil')[-1])
-            # self.move_PF(ref, point=(x, z))
             self.move_PF(name, Lout=lpf, norm=self.norm)
         if len(L) > self.nPF:
             Lcs = L[self.nPF:]
@@ -1242,6 +1239,7 @@ class INV(object):
         self.store_update(extent='position')
         self.tock()
         self.eq.run(update=True)  # update psi map
+        self.update_coils()
         return self.Lo
 
     def add_plasma(self):

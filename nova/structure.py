@@ -33,7 +33,7 @@ class architect(object):
 
     def connect(self, plot=False):
         self.set_loop_interpolators()  # tf loop interpolators
-        self.tf.split_loop(plot=True)
+        self.tf.split_loop(plot=plot)
         self.CS_support()  # calculate CS support seats
         self.PF_support()  # calculate PF support seats
         self.G_support(Xo=13, width=0.75)  # gravity support
@@ -292,11 +292,10 @@ class architect(object):
                                  bounds=[0, 1]).x
 
             j = 0 if Ln < Li else 1
-            # self.tf.p['cl_fe']['x'] = np.insert(self.tf.p['cl_fe']['x'], i+j, x)
-            # self.tf.p['cl_fe']['z'] = np.insert(self.tf.p['cl_fe']['z'], i+j, z)
+            self.tf.p['cl_fe']['x'] = np.insert(self.tf.p['cl_fe']['x'], i+j, x)
+            self.tf.p['cl_fe']['z'] = np.insert(self.tf.p['cl_fe']['z'], i+j, z)
         else:  # adjust node
-            a = 1
-            # self.tf.p['cl_fe']['x'][i], self.tf.p['cl_fe']['z'][i] = x, z
+            self.tf.p['cl_fe']['x'][i], self.tf.p['cl_fe']['z'][i] = x, z
 
     def initalise_cs(self):
         '''

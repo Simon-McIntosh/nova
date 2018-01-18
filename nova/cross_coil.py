@@ -18,11 +18,12 @@ def green(X, Z, Xc, Zc, dXc=0, dZc=0):
         rho = np.mean([dXc + dZc]) / 2
         Xc = Xc * np.ones(np.shape(X))
         index = np.sqrt(x) < dXc / 2  # self inductance index
-        g_s = 4 * np.pi * \
-            Xc[index] * (np.log(8 * Xc[index] / rho) -
-                         1.75) / (2 * np.pi)
-        # g[index] = g_s
-        g[index] = 0
+        # g_s = 4 * np.pi * \
+        #    Xc[index] * (np.log(8 * Xc[index] / rho) -
+        #                 1.75) / (2 * np.pi)
+        g_s = Xc[index] * (np.log(8 * Xc[index] / rho) - 2) / (2 * np.pi)
+        g[index] = g_s
+        # g[index] = 0
     return g
 
 

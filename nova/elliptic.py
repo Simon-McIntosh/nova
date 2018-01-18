@@ -282,6 +282,7 @@ class EQ(object):
                         - self.sf.FFprime(psi)
                     self.Ip -= self.dA * self.bpl[index] / (self.mu_o * x)
             scale_plasma = self.sf.cpasma / self.Ip
+            print(self.Ip)
             self.sf.b_scale = scale_plasma
         for i, index in zip(range(self.Nplasma), self.plasma_index):
             self.b[index] = self.bpl[index] * self.sf.b_scale

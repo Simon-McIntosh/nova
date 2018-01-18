@@ -20,25 +20,31 @@ from scipy.optimize import minimize_scalar
 
 
 class PF(object):
-    def __init__(self, eqdsk):
+    def __init__(self, eqdsk=None):
         self.nC = count(0)
         self.set_coils(eqdsk)
         self.plasma_coil = collections.OrderedDict()
 
     def set_coils(self, eqdsk):
-        self.xo = [eqdsk['xcentr'], eqdsk['zmid']]
         self.coil = collections.OrderedDict()
-        if eqdsk['ncoil'] > 0:
-            CSindex = np.argmin(eqdsk['xc'])  # CS radius and width
-            self.rCS, self.drCS = eqdsk['xc'][CSindex], eqdsk['dxc'][CSindex]
-            for i, (x, z, dx, dz, I) in enumerate(
-                   zip(eqdsk['xc'], eqdsk['zc'], eqdsk['dxc'],
-                       eqdsk['dzc'], eqdsk['Ic'])):
-                self.add_coil(x, z, dx, dz, I, categorize=False)
-                if eqdsk['ncoil'] > 100 and i >= eqdsk['ncoil'] - 101:
-                    print('exit set_coil loop - coils')
-                    break
-        self.categorize_coils()
+        if eqdsk is None:
+            self.xo = [0, 0]
+            self.rCS = 0
+            self.drCS = 0
+        else:
+            self.xo = [eqdsk['xcentr'], eqdsk['zmid']]
+            if eqdsk['ncoil'] > 0:
+                CSindex = np.argmin(eqdsk['xc'])  # CS radius and width
+                self.rCS = eqdsk['xc'][CSindex]
+                self.drCS = eqdsk['dxc'][CSindex]
+                for i, (x, z, dx, dz, I) in enumerate(
+                       zip(eqdsk['xc'], eqdsk['zc'], eqdsk['dxc'],
+                           eqdsk['dzc'], eqdsk['Ic'])):
+                    self.add_coil(x, z, dx, dz, I, categorize=False)
+                    if eqdsk['ncoil'] > 100 and i >= eqdsk['ncoil'] - 101:
+                        print('exit set_coil loop - coils')
+                        break
+            self.categorize_coils()
 
     def categorize_coils(self):
         catogory = np.zeros(len(self.coil), dtype=[('x', 'float'),
@@ -201,6 +207,7 @@ class PF(object):
         if plasma:
             coils = self.plasma_coil
             self.plot_coil(coils, alpha=alpha)
+        plt.axis('equal')
 
     def inductance(self, dCoil=0.5, Iscale=1):
         pf = deepcopy(self)

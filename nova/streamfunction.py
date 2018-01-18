@@ -33,7 +33,7 @@ class SF(object):
         self.get_Xpsi()
         self.get_Mpsi()
         self.set_contour()  # set cfeild
-        self.get_LFP() 
+        self.get_LFP()
         # self.get_sol_psi(dSOL=3e-3,Nsol=15,verbose=False)
         # leg search radius
         self.rcirc = 0.3 * abs(self.Mpoint[1] - self.Xpoint[1])
@@ -464,7 +464,12 @@ class SF(object):
                 if (z > self.Mpoint[1]).any() and\
                         (z < self.Mpoint[1]).any() and loop:
                     X, Z = np.append(X, x), np.append(Z, z)
-        X, Z = geom.clock(X, Z)
+        try:
+            X, Z = geom.clock(X, Z)
+        except IndexError:
+            plt.figure()
+            self.contour(boundary=False)
+            raise IndexError('seperatrix open')
         if plot:
             plt.plot(X, Z)
         return X, Z
@@ -483,7 +488,7 @@ class SF(object):
                        args=(z), options={'xtol': 1e-7, 'disp': False})
         return res.x[0]
 
-    def get_LFP(self, alpha=1-1e-4):
+    def get_LFP(self, alpha=1-1e-3):
         x, z = self.get_boundary(alpha=alpha)
         if self.Xpoint[1] < self.Mpoint[1]:
             index = z > self.Xpoint[1]

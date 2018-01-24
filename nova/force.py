@@ -173,12 +173,10 @@ class force_feild(object):
         elif method == 'BS':  # calculate tf feild with full Biot-Savart
             b = cage.point(point, variable='feild')  # (slow / correct)
         theta = np.arctan2(point[1], point[0])
-
-        pf_point = np.dot(geom.rotate(-theta, 'z'),
-                          point)  # rotate to PF plane
+        pf_point = np.dot(geom.rotate(-theta, 'z'), point)  # rotate to PF plane
         # PF feild (sf-fast, eq-slow)
         pf_b = Bpoint([pf_point[0], pf_point[2]])
-        #b += np.dot(geom.rotate(theta, 'z'), [pf_b[0], 0, pf_b[1]])  # add PF
+        b += np.dot(geom.rotate(theta, 'z'), [pf_b[0], 0, pf_b[1]])  # add PF
         Fbody = np.cross(J, b)  # body force
         return Fbody
 

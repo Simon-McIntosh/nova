@@ -420,7 +420,7 @@ class TF(object):
             self.p[loop]['x'], self.p[loop]['z'] = x, z
         return self.p
 
-    def split_loop(self, N=50, plot=False):  # split loop for fe model
+    def split_loop(self, N=100, plot=False):  # split loop for fe model
         x, z = self.p['cl']['x'], self.p['cl']['z']
         index = self.transition_index(x, z)
         upper, lower = index['upper'], index['lower']
@@ -437,9 +437,6 @@ class TF(object):
         p['trans_upper']['z'] = z[top:upper]
         p['loop']['x'] = x[bottom-1:top+1]
         p['loop']['z'] = z[bottom-1:top+1]
-
-        print(p['nose']['x'][-1], p['trans_lower']['x'][0])
-
         Lcl = geom.length(x, z, norm=False)[-1]
         nL = N/Lcl  # nodes per length
         self.p['cl_fe']['x'] = np.array([p['nose']['x'][-1]])
@@ -460,7 +457,7 @@ class TF(object):
         self.p['cl_fe']['z'] = self.p['cl_fe']['z'][:-1]
 
         '''
-                p['nose']['x'] = np.append(x[upper-1:-1], x[:lower + 1])
+        p['nose']['x'] = np.append(x[upper-1:-1], x[:lower + 1])
         p['nose']['z'] = np.append(z[upper-1:-1], z[:lower + 1])
         self.p['nose']['nd'] = np.append(np.arange(upper-1, len(x)-1),
                                          np.arange(0, lower+1))

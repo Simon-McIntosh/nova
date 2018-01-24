@@ -1,6 +1,6 @@
 import numpy as np
 from amigo.pyplot import plt
-from nova.finite_element import FE
+from nova.finite_element import FE, scale
 from nova.config import select
 from nova.coils import PF
 from nova.inverse import INV
@@ -27,23 +27,17 @@ class SS:  # structural solver
         self.tf = tf
 
         self.inv = INV(pf, tf, dCoil=2.5, offset=0.3)
-        self.inv.colocate(sf, n=1e3, expand=0.5, centre=0, width=363/(2*np.pi))
-        self.inv.wrap_PF(solve=False)
+        self.inv.colocate(sf, n=1e3, expand=0.5, boundary='tf',
+                          centre=0, width=363/(2*np.pi))
+        self.inv.wrap_PF(solve=True)
 
-        self.atec = architect(tf, pf, plot=False)  # load sectional properties
+        self.atec = architect(tf, pf, plot=True)  # load sectional properties
         self.fe = FE(frame='3D')  # initalise FE solver
         self.add_mat()  # pass sectional properties to fe solver
-
         self.build_tf()  # build TF coil
-        if True:
-        # self.fe.add_bc(['ny'], [0], part='trans_lower', ends=0)
-        # self.fe.add_bc(['ny'], [-1], part='trans_upper', ends=1)
-            self.fe.add_bc(['fix'], [-1], part='nose', ends=2)
-            self.fe.add_bc(['fix'], [0], part='nose', ends=0)
-        else:
-            self.gravity_support()  # add gravity support to TF loop
-            self.outer_intercoil_supports()  # add outer intercoil supports
-            self.connect_pf()  # connect PF coils
+        #self.gravity_support()  # add gravity support to TF loop
+        #self.outer_intercoil_supports()  # add outer intercoil supports
+        #self.connect_pf()  # connect PF coils
 
     def add_mat(self, ntrans=30):
         self.fe.add_mat('nose', ['wp', 'steel_forged'],  # high field TF
@@ -56,8 +50,8 @@ class SS:  # structural solver
                                          ['wp', 'steel_cast'],
                                          [self.atec.winding_pack(),
                                           self.atec.case(l_frac)]))
-        self.fe.mat_index['trans_lower'] = [trans[-1]]  # trans
-        self.fe.mat_index['trans_upper'] = [trans[-1]]  # trans[::-1]
+        self.fe.mat_index['trans_lower'] = trans
+        self.fe.mat_index['trans_upper'] = trans[::-1] 
         self.fe.add_mat('GS', ['steel_cast'], [self.atec.gravity_support()])
         for name in self.atec.OICsupport:  # outer intercoil supports
             mat_name = name
@@ -82,9 +76,10 @@ class SS:  # structural solver
         self.fe.add_nodes(P)  # all TF nodes
         self.TFparts = ['nose', 'trans_lower', 'loop', 'trans_upper']  #
         for part in self.TFparts:  # hookup elements
-            self.fe.add_elements(n=tf.p[part]['nd'], part_name=part, nmat='loop')  # , nmat=part)
+            print(part, tf.p[part]['nd'])
+            self.fe.add_elements(n=tf.p[part]['nd'], part_name=part, nmat=part)
         # constrain TF nose - free translation in z
-        self.fe.add_bc('nw', 'all', part='nose')
+        self.fe.add_bc('fix', 'all', part='nose')  # nw
 
     def connect_pf(self):
         for name in self.atec.PFsupport:  # PF coil connections
@@ -106,7 +101,8 @@ class SS:  # structural solver
         for name in self.atec.PFsupport:  # PF coil connections
             Fcoil = self.inv.ff.Fcoil[name]
             self.fe.add_nodal_load(
-                    self.atec.PFsupport[name]['nd'], 'fz', 1e6*Fcoil['fz'])
+                    self.atec.PFsupport[name]['nd'], 'fz',
+                    1e6*Fcoil['fz']/self.tf.nTF)
 
     def gravity_support(self, nGS=7):
         yGS = np.linspace(self.atec.Gsupport['yfloor'], 0, nGS)
@@ -194,7 +190,7 @@ class SS:  # structural solver
 if __name__ == '__main__':
 
     nTF = 16
-    base = {'TF': 'demo', 'eq': 'SN'}
+    base = {'TF': 'demo', 'eq': 'SN2015_EOF'}  #'SN'
     config, setup = select(base, nTF=nTF, update=False)
     profile = Profile(config['TF_base'], family='D', load=True,
                       part='TF', nTF=nTF, obj='L', npoints=501)
@@ -205,10 +201,12 @@ if __name__ == '__main__':
 
     ss = SS(sf, pf, tf)  # structural solver
     ss.solve()
+    
+    ss.fe.plot_twin(-2)
+    
     ss.fe.plot()
 
     ss.fe.plot_moment()
-
     ss.fe.plot_stress()
 
     '''
@@ -218,11 +216,15 @@ if __name__ == '__main__':
     model.display(1, output='web')
     '''
 
-    # ss.plot3D()
-    # ss.fe.plot_sections()
+    
+    
+    
+    #ss.fe.plot3D()
+    #with scale(ss.fe.deform, 1):
+        # ss.fe.plot_sections()
     # ss.movie('structural_solver')
     # ss.fe.plot_curvature()
-    # ss.fe.plot_twin()
+        
 
     '''
     plt.figure(figsize=(16, 16))

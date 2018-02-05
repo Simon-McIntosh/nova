@@ -141,13 +141,13 @@ def read(f):
 
     if nlim > 0:
         xlim = np.zeros([nlim])
-        ylim = np.zeros([nlim])
+        zlim = np.zeros([nlim])
         for i in range(nlim):
             xlim[i] = float(next(token))
-            ylim[i] = float(next(token))
+            zlim[i] = float(next(token))
     else:
         xlim = [0]
-        ylim = [0]
+        zlim = [0]
 
     # Read coil data
     try:
@@ -205,7 +205,7 @@ def read(f):
               'pnorm': np.linspace(0, 1, len(fpol)),  # uniform flux grid
               # Plasma boundary
               'nbdry': nbdry, 'xbdry': xbdry, 'zbdry': zbdry,
-              'nlim': nlim, 'xlim': xlim, 'ylim': ylim,
+              'nlim': nlim, 'xlim': xlim, 'zlim': zlim,
               'ncoil': ncoil, 'xc': xc, 'zc': zc, 'dxc': dxc,
               'dzc': dzc, 'Ic': Ic}  # coils
     return result

@@ -11,6 +11,9 @@ from collections import OrderedDict
 from amigo import geom
 from amigo.IO import trim_dir
 from amigo.geom import loop_vol
+import nova
+from amigo.IO import class_dir
+from os.path import join
 
 
 class SF(object):
@@ -19,7 +22,8 @@ class SF(object):
         self.shape = {}
         self.filename = filename
         self.set_kwargs(kwargs)
-        self.eqdsk = nova.geqdsk.read(self.filename)
+        if not hasattr(self, 'eqdsk'):
+            self.eqdsk = nova.geqdsk.read(self.filename)
         self.normalise()  # unit normalisation
         self.set_plasma(self.eqdsk)
         self.set_boundary(self.eqdsk['xbdry'], self.eqdsk['zbdry'])
@@ -33,15 +37,17 @@ class SF(object):
         self.get_Xpsi()
         self.get_Mpsi()
         self.set_contour()  # set cfeild
+
         self.get_LFP()
         x, z = self.get_boundary()
         self.set_boundary(x, z)
+
         # self.get_sol_psi(dSOL=3e-3,Nsol=15,verbose=False)
         # leg search radius
         self.rcirc = 0.3 * abs(self.Mpoint[1] - self.Xpoint[1])
         self.drcirc = 0.15 * self.rcirc  # leg search width
         self.xlim = self.eqdsk['xlim']
-        self.ylim = self.eqdsk['ylim']
+        self.zlim = self.eqdsk['zlim']
         self.nlim = self.eqdsk['nlim']
 
     def set_kwargs(self, kwargs):
@@ -50,7 +56,7 @@ class SF(object):
 
     def normalise(self):
         if ('Fiesta' in self.eqdsk['name'] or 'Nova' in self.eqdsk['name'] or
-            'disr' in self.eqdsk['name']) and\
+            'disr' in self.eqdsk['name'] or 'DINA' in self.eqdsk['name']) and\
                 'CREATE' not in self.eqdsk['name']:
             self.norm = 1
         else:  # CREATE
@@ -170,13 +176,16 @@ class SF(object):
         for attr in ['Bspline', 'Pspline', 'Xpsi', 'Mpsi', 'Bx', 'Bz', 'LFPx']:
             if hasattr(self, attr):
                 delattr(self, attr)
+        self.normalise()  # unit normalisation
         self.set_plasma(eq)
         self.get_Xpsi()
         self.get_Mpsi()
         self.set_contour()  # calculate cfeild
+
         self.get_LFP()
         x, z = self.get_boundary()
         self.set_boundary(x, z)
+
         # self.get_Plimit()  # limit plasma extent
         # self.get_sol_psi()  # re-calculate sol_psi
 
@@ -336,21 +345,21 @@ class SF(object):
                 Z.max() <= self.zbdry.max() + delta
             if inPlasma:
                 plt.plot(X, Z, linetype, linewidth=1.25 * lw,
-                        color=norm * np.array([1, 1, 1]), alpha=alpha[0])
+                         color=norm * np.array([1, 1, 1]), alpha=alpha[0])
             else:
                 plt.plot(X, Z, linetype, linewidth=lw,
-                        color=color, alpha=alpha[1])
+                         color=color, alpha=alpha[1])
 
-    def Bcontour(self, axis, Nstd=1.5, color='x'):
+    def Bcontour(self, axis, Nstd=1.5, color='k'):
         var = 'B' + axis
         if not hasattr(self, var):
             self.Bfeild()
         B = getattr(self, var)
         level = [np.mean(B) - Nstd * np.std(B),
                  np.mean(B) + Nstd * np.std(B)]
-        CS = plt.contour(self.x, self.z, B,
-                        levels=np.linspace(level[0], level[1], 30),
-                        colors=color)
+        CS = plt.contour(self.x2d, self.z2d, B,
+                         levels=np.linspace(level[0], level[1], 30),
+                         colors=color)
         for cs in CS.collections:
             cs.set_linestyle('solid')
 
@@ -363,7 +372,7 @@ class SF(object):
         if not hasattr(self, 'Bx'):
             self.Bfeild()
         plt.streamplot(self.x, self.z, self.Bx.T, self.Bz.T,
-                      color=self.Bx.T, cmap=plt.cm.RdBu)
+                       color=self.Bx.T, cmap=plt.cm.RdBu)
         plt.clim([-1.5, 1.5])
 
     def getX(self, po=None):
@@ -1035,3 +1044,9 @@ class SF(object):
         x, z = geom.clock(x, z, reverse=True)
         self.shape['V'] = loop_vol(x, z, plot=plot)
         return self.shape
+
+if __name__ == '__main__':
+
+    directory = join(class_dir(nova), '../eqdsk')
+    sf = SF(join(directory, 'DEMO_SN.eqdsk'))
+    sf.contour()

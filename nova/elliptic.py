@@ -173,7 +173,7 @@ class EQ(object):
         for index in range(3):
             self.ccoil['active'].append(
                 self.ccoil['horizontal']['name'][index].decode())
-        self.ccoil['rtarget'] = self.sf.shape['R']
+        # self.ccoil['rtarget'] = self.sf.shape['R']
         '''
         inv = INV(self.sf,self)
         inv.fix_boundary_feild(N=21,alpha=0.995,factor=1,Bdir=[1,0])

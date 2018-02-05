@@ -20,17 +20,17 @@ from scipy.optimize import minimize_scalar
 
 
 class PF(object):
-    def __init__(self, eqdsk=None):
+    def __init__(self, eqdsk=None, **kwargs):
         self.nC = count(0)
-        self.set_coils(eqdsk)
+        self.set_coils(eqdsk, **kwargs)
         self.plasma_coil = collections.OrderedDict()
 
-    def set_coils(self, eqdsk):
+    def set_coils(self, eqdsk, **kwargs):
         self.coil = collections.OrderedDict()
         if eqdsk is None:
-            self.xo = [0, 0]
-            self.rCS = 0
-            self.drCS = 0
+            self.xo = kwargs.get('xo', [0, 0])
+            self.rCS = kwargs.get('rCS', 0)
+            self.drCS = kwargs.get('drCS', 0)
         else:
             self.xo = [eqdsk['xcentr'], eqdsk['zmid']]
             if eqdsk['ncoil'] > 0:
@@ -77,8 +77,8 @@ class PF(object):
         self.index['PF']['index'] = np.arange(0, nPF)
         self.index['CS']['index'] = np.arange(nPF, nPF+nCS)
 
-    def add_coil(self, x, z, dx, dz, I, categorize=True):
-        name = 'Coil{:1.0f}'.format(next(self.nC))
+    def add_coil(self, x, z, dx, dz, I, categorize=True, **kwargs):
+        name = kwargs.get('name', 'Coil{:1.0f}'.format(next(self.nC)))
         self.coil[name] = {'x': x, 'z': z, 'dx': dx, 'dz': dz, 'I': I,
                            'rc': np.sqrt(dx**2 + dz**2) / 2}
         if categorize:
@@ -161,7 +161,8 @@ class PF(object):
         return bundle
 
     def plot_coil(self, coils, label=False, current=False,
-                  fs=12, alpha=1):
+                  fs=12, alpha=1, **kwargs):
+        patch = []
         for i, name in enumerate(coils.keys()):
             coil = coils[name]
             x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
@@ -181,8 +182,9 @@ class PF(object):
                 coil_color = 'C0'
             else:
                 coil_color = 'C2'
-            plt.fill(Xfill, Zfill, facecolor=coil_color, alpha=alpha,
-                     edgecolor=edgecolor)
+            coil_color = kwargs.get('coil_color', coil_color)
+            patch.extend(plt.fill(Xfill, Zfill, facecolor=coil_color,
+                                  alpha=alpha, edgecolor=edgecolor))
             if label and current:
                 zshift = max([coil['dz'] / 4, 0.4])
             else:
@@ -195,6 +197,7 @@ class PF(object):
                          '{:1.1f}MA'.format(coil['I'] * 1e-6),
                          fontsize=fs, ha=ha, va='center',
                          color=0.2 * np.ones(3))
+        return patch
 
     def plot(self, subcoil=False, label=False, plasma=False,
              current=False, alpha=1):
@@ -208,6 +211,7 @@ class PF(object):
             coils = self.plasma_coil
             self.plot_coil(coils, alpha=alpha)
         plt.axis('equal')
+        plt.axis('off')
 
     def inductance(self, dCoil=0.5, Iscale=1):
         pf = deepcopy(self)
@@ -670,6 +674,9 @@ if __name__ is '__main__':  # test functions
     tf = TF(profile=profile, sf=sf, nr=1, ny=1)
 
     tf.split_loop(plot=True)
+
+    pf = PF(sf.eqdsk)
+    pf.plot()
 
     '''
     demo = DEMO()

@@ -17,6 +17,8 @@ from warnings import warn
 from nova.inverse import INV
 from copy import deepcopy
 from scipy.optimize import minimize_scalar
+from matplotlib.collections import PatchCollection
+from matplotlib import patches
 
 
 class PF(object):
@@ -162,7 +164,7 @@ class PF(object):
 
     def plot_coil(self, coils, label=False, current=False,
                   fs=12, alpha=1, **kwargs):
-        patch = []
+        patch= []
         for i, name in enumerate(coils.keys()):
             coil = coils[name]
             x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
@@ -183,8 +185,14 @@ class PF(object):
             else:
                 coil_color = 'C2'
             coil_color = kwargs.get('coil_color', coil_color)
-            patch.extend(plt.fill(Xfill, Zfill, facecolor=coil_color,
-                                  alpha=alpha, edgecolor=edgecolor))
+            
+            patch.append(patches.Rectangle((x, z), dx, dz, 
+                         facecolor=coil_color, alpha=alpha,
+                         edgecolor=edgecolor))
+            
+            #patch.append(plt.fill(Xfill, Zfill, facecolor=coil_color,
+            #                      alpha=alpha, edgecolor=edgecolor)[0])
+            
             if label and current:
                 zshift = max([coil['dz'] / 4, 0.4])
             else:
@@ -197,6 +205,20 @@ class PF(object):
                          '{:1.1f}MA'.format(coil['I'] * 1e-6),
                          fontsize=fs, ha=ha, va='center',
                          color=0.2 * np.ones(3))
+                
+        ax = plt.gca()
+        p = PatchCollection(patch, cmap=plt.cm.RdBu)
+        colors = 100*np.random.rand(len(patch))
+        # p.set_array(colors)
+        ax.add_collection(p)
+
+        '''                 
+        pc = PatchCollection(patch)
+        colors = 100*np.random.rand(len(patch))
+        pc.set_array(colors)
+        
+        ax.add_collection(pc)
+        '''
         return patch
 
     def plot(self, subcoil=False, label=False, plasma=False,

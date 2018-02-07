@@ -11,9 +11,6 @@ class read_plasma:
     def __init__(self, database_folder='disruptions'):
         self.dina = dina(database_folder)
 
-        # self.read_file(filename)
-        # self.get_vs3()
-
     def read_file(self, folder, dropnan=False):
         filename = self.dina.locate_file('plasma', folder=folder)
         self.name = filename.split('\\')[-2]

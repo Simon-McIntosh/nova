@@ -6,17 +6,21 @@ from collections import OrderedDict
 from itertools import count
 from nova.coils import PF
 from amigo.IO import readtxt
+from read_dina import dina
+from amigo.pyplot import plt
+from matplotlib.collections import PatchCollection
 
 
 class read_tor:
     # read tor_cur_data*.dat file from DINA simulation
     # listing of toroidal currents
+    
+    def __init__(self, database_folder='disruptions'):
+        self.dina = dina(database_folder)
 
-    def __init__(self, directory, subfolder=None):
-        filename = locate(directory, 'tor_cur_data', subfolder=subfolder)
-        self.read_file(filename)
-
-    def read_file(self, filename):
+    def read_file(self, folder):
+        filename = self.dina.locate_file('tor_cur', folder=folder)
+        self.name = filename.split('\\')[-2]
         with readtxt(filename) as self.rt:
             self.read_coils()
             self.read_frames()
@@ -34,7 +38,6 @@ class read_tor:
                 frames.append(self.get_current())
             except ValueError:
                 break
-
         self.nt = len(frames)
         self.t = np.zeros(self.nt)
         self.current = \
@@ -56,17 +59,17 @@ class read_tor:
         zp = 1e-2*np.array(frame[2][1::3])
         Ip = 1e3*np.array(frame[2][2::3])
         for x, z, I in zip(xp, zp, Ip):
-                name = 'pl_{}'.format(next(npl))
-                plasma_coil[name] = {'I': I, 'dx': dx, 'dz': dz, 'rc': rc,
-                                     'x': x, 'z': z}
+            name = 'pl_{}'.format(next(npl))
+            plasma_coil[name] = {'I': I, 'dx': dx, 'dz': dz, 'rc': rc,
+                                 'x': x, 'z': z}
         return plasma_coil
 
     def get_coils(self):
         self.coil, coilnames = OrderedDict(), []
         self.rt.checkline('1.')
         self.rt.skiplines(1)
-        coilnames = self.rt.readline(True)
-        coilnames.extend(self.rt.readline(True))
+        coilnames = self.rt.readline(True, string=True)
+        coilnames.extend(self.rt.readline(True, string=True))
         for name in coilnames:
             self.coil[name] = {}  # initalise as empty dict
         for var in ['x', 'z', 'dx', 'dz']:
@@ -76,7 +79,11 @@ class read_tor:
         self.set_coil()
         self.pf = PF()
         self.pf.coil = self.coil
-        self.pf.categorize_coils()
+        self.pf.index = {}
+        self.pf.index['CS'] = {'name': [name for name in coilnames
+                                        if 'CS' in name]}
+        self.pf.index['PF'] = {'name': [name for name in coilnames
+                                        if 'PF' in name]}
 
     def fill_coil(self, key, values):  # set key/value pairs in coil dict
         for name, value in zip(self.coil, values):
@@ -96,17 +103,17 @@ class read_tor:
         self.nf = self.rt.readnumber()
         self.rt.skiplines(3)
         self.filaments = \
-            np.zeros(self.nf, dtype=[('r1', '2float'), ('z1', '2float'),
-                                     ('r2', '2float'), ('z2', '2float'),
+            np.zeros(self.nf, dtype=[('x1', '2float'), ('z1', '2float'),
+                                     ('x2', '2float'), ('z2', '2float'),
                                      ('turn', '2float'), ('n_turn', 'int')])
         for i in range(self.nf):
             n_turn = self.rt.readnumber()
             self.filaments[i]['n_turn'] = n_turn
             for j in range(n_turn):
-                r1, z1, r2, z2, turn = [float(d) for d in
+                x1, z1, x2, z2, turn = [float(d) for d in
                                         self.rt.readline(True)]
-                for var, value in zip(['r1', 'z1', 'r2', 'z2', 'turn'],
-                                      [r1, z1, r2, z2, turn]):
+                for var, value in zip(['x1', 'z1', 'x2', 'z2', 'turn'],
+                                      [x1, z1, x2, z2, turn]):
                     self.filaments[i][var][j] = value
         self.store_filaments()
         if plot:
@@ -115,21 +122,21 @@ class read_tor:
     def plot_filaments(self):
         for f in self.filaments:
             for j in range(f['n_turn']):
-                pl.plot([f['r1'][j], f['r2'][j]],
+                pl.plot([f['x1'][j], f['x2'][j]],
                         [f['z1'][j], f['z2'][j]], 'o-')
         pl.axis('equal')
 
-    def store_filaments(self, dx=0.25, dz=0.25):
+    def store_filaments(self, dx=0.2, dz=0.2):
         rc = np.sqrt(dx**2 + dz**2) / 4
         nvv, nbl = count(0), count(0)
         self.blanket_coil = OrderedDict()
         self.vessel_coil = OrderedDict()
         for i, filament in enumerate(self.filaments):
             for j in range(filament['n_turn']):
-                r1, r2 = filament['r1'][j], filament['r2'][j]
+                x1, x2 = filament['x1'][j], filament['x2'][j]
                 z1, z2 = filament['z1'][j], filament['z2'][j]
                 sign = filament['turn'][j]
-                x = 1e-2*np.mean([r1, r2])
+                x = 1e-2*np.mean([x1, x2])
                 z = 1e-2*np.mean([z1, z2])
                 coil = {'I': 0, 'dx': dx, 'dz': dz, 'rc': rc,
                         'x': x, 'z': z, 'index': i, 'sign': sign}
@@ -162,6 +169,22 @@ class read_tor:
         plasma = self.get_plasma_current()
         coil = self.get_coil_current()
         return (t, filament, plasma, coil)
+    
+    def set_coil_current(self, frame_index):
+        for name, I in zip(self.coil, self.current['coil'][frame_index]):
+            self.coil[name]['I'] = I
+            
+    def set_filament_current(self, filament, frame_index):
+        current = self.current['filament'][frame_index]
+        for name in filament:
+            turn_index = filament[name]['index']
+            sign = filament[name]['sign']
+            filament[name]['I'] = sign * current[turn_index]
+            
+    def set_current(self, frame_index):
+        self.set_coil_current(frame_index)
+        self.set_filament_current(self.vessel_coil, frame_index)
+        self.set_filament_current(self.blanket_coil, frame_index)
 
     def plot(self, index, ax=None):
         if ax is None:
@@ -171,9 +194,17 @@ class read_tor:
         plt.axis('off')
 
     def plot_coils(self):
-        self.pf.plot()
+        
+        
+        self.pf.plot(label=True)
         self.pf.plot_coil(self.blanket_coil, coil_color='C2')
         self.pf.plot_coil(self.vessel_coil, coil_color='C3')
+        
+        # colors = 100*np.random.rand(len(patches))
+        # p = PatchCollection(patches, alpha=0.4)
+        # p.set_array(np.array(colors))
+        # ax.add_collection(p)
+        # fig.colorbar(p, ax=ax)
 
     def plot_plasma(self, index):
         patch = self.pf.plot_coil(self.plasma_coil[index], coil_color='C4')
@@ -203,12 +234,16 @@ class read_tor:
 
 if __name__ == '__main__':
 
-    directory = join(class_dir(nep), '../Scenario_database/disruptions')
-    folder = 'MD_UP_lin50'
 
-    tor = read_tor(directory, folder)
+    tor = read_tor('disruptions')
+    tor.read_file(3)
+    
+    
+    tor.set_current(500)
 
-    tor.plot(500)
+    tor.plot(50)
+    
+    
 
     #tor.movie('tmp')
 

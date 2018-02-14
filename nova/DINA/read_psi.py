@@ -1,4 +1,4 @@
-from read_dina import locate
+from read_dina import dina
 from amigo.IO import readtxt
 import numpy as np
 import nep
@@ -14,14 +14,19 @@ from nep.DINA.read_plasma import read_plasma
 
 class read_psi:
 
-    def __init__(self, directory, folder=None):
-        self.name = directory.split('\\')[-1] if folder is None else folder
-        self.filename = locate(directory, 'psi_data', folder=folder)
+    def __init__(self, database_folder='disruptions'):
+        self.dina = dina(database_folder)
+
+    def read_file(self, folder):
+        self.folder = folder
+        self.filename = self.dina.locate_file('psi_data', folder=folder)
+        self.name = self.filename.split('\\')[-2]
         self.read_header()
         self.initalise_arrays()
         self.read_scalars()
         self.vs = VS()  # load VS coil object
-        self.pl = read_plasma(directory, folder=folder)  # load time trace
+        self.pl = read_plasma(self.dina.database_folder)
+        self.pl.read_file(self.folder)  # load time trace
 
     def read_header(self):
         # read grid - calculate file size
@@ -186,7 +191,7 @@ class read_psi:
     def get_force(self, plot=False, Bo=None, scale=1e-2):
         B = self.get_field(self.vs.points)
         Ivs = np.zeros((3, self.vs.nP))
-        Ivs[1, :] = 4*self.pl.Ivs[self.time_index]  # Amp-turns
+        Ivs[1, :] = 4*self.pl.Ivs_o[self.time_index]  # Amp-turns
         F = np.zeros((3, self.vs.nP))
         Fo = np.zeros((3, self.vs.nP))
         for i, coil in enumerate(self.vs.geom):
@@ -247,13 +252,11 @@ class read_psi:
 
 if __name__ == '__main__':
 
-    directory = join(class_dir(nep), '../Scenario_database/disruptions')
-    folder = 'MD_UP_lin50'
-
-    psi = read_psi(directory, folder)
+    psi = read_psi('disruptions')
+    psi.read_file(3)
 
     # psi.movie()
     # plt.figure(figsize=(7, 10))
-    psi.plot(0)
+    psi.plot(30)
 
 

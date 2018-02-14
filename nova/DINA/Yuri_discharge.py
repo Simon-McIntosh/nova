@@ -8,12 +8,13 @@ from amigo.png_tools import data_mine, data_load
 from amigo.IO import class_dir
 from amigo.pyplot import plt
 from amigo.addtext import linelabel
+from read_dina import timeconstant
 
 path = os.path.join(class_dir(nep), '../Data/Energopul/')
 
 # data_mine(path, 'upperVS_discharge', [0, 1], [-5e3, 65e3])
 
-points = data_load(path, 'upperVS_discharge', date='2018_02_06')[0][0] 
+points = data_load(path, 'upperVS_discharge', date='2018_02_06')[0][0]
 
 tp = points['x']
 Ip = points['y']
@@ -36,6 +37,9 @@ I_exp = I_lp[io:]
 n_exp = len(t_exp)
 
 
+tc = timeconstant(t_exp, I_exp)
+to, Io, tau = tc.get_tau()
+'''
 def fit(x, *args):
     to, Io, tau = x
     t_exp, I_exp = args
@@ -45,6 +49,8 @@ def fit(x, *args):
 
 
 to, Io, tau = minimize(fit, [0.1, 1e4, 100e-3], args=(t_exp, I_exp)).x
+'''
+
 I_fit = Io*np.exp(-(t-to)/tau)
 
 text = linelabel(postfix='', value='', loc='max')

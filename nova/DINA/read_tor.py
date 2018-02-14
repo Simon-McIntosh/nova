@@ -1,5 +1,4 @@
 import numpy as np
-import pylab as pl
 import matplotlib.animation as manimation
 from amigo.time import clock
 from collections import OrderedDict
@@ -8,15 +7,16 @@ from nova.coils import PF
 from amigo.IO import readtxt
 from read_dina import dina
 from amigo.pyplot import plt
-from matplotlib.collections import PatchCollection
+from nep.coil_geom import VSgeom
 
 
 class read_tor:
     # read tor_cur_data*.dat file from DINA simulation
     # listing of toroidal currents
-    
+
     def __init__(self, database_folder='disruptions'):
         self.dina = dina(database_folder)
+        self.frame_index = 0
 
     def read_file(self, folder):
         filename = self.dina.locate_file('tor_cur', folder=folder)
@@ -40,16 +40,26 @@ class read_tor:
                 break
         self.nt = len(frames)
         self.t = np.zeros(self.nt)
+        self.Ibar = np.zeros(self.nt, dtype=[('vv', float), ('pl', float)])
         self.current = \
             np.zeros(self.nt, dtype=[('filament', '{}float'.format(self.nf)),
                                      ('coil', '{}float'.format(self.nC))])
         self.plasma_coil = []
         self.plasma_patch = []
+        self.nVV = len(self.vessel_coil)
         for i, frame in enumerate(frames):
-            self.t[i] = frame[0]
-            self.current['filament'][i] = frame[1]
-            self.current['coil'][i] = frame[3]
-            self.plasma_coil.append(self.plasma_filaments(frame))
+            self.t[i] = 1e-3*frame[0]  # ms-s
+            self.current['filament'][i] = -1e3*np.array(frame[1])  # -kA to A
+            self.current['coil'][i] = -1e3*np.array(frame[3])  # -kA to A
+            plasma_coil, Ipl = self.plasma_filaments(frame)
+            self.plasma_coil.append(plasma_coil)
+            self.Ibar['vv'][i] = np.mean(-1e3*np.array(frame[1])[:self.nVV])
+            # self.Ibar['vv'][i] = np.sum(-1e3*np.array(frame[1])[:self.nVV])
+            #self.Ibar['vv'][i] = np.sum(np.array(frame[1])[:self.nVV] /
+            #                            self.rVV)
+            #self.Ibar['vv'][i] = -1e-3*(frame[1][self.vv_vs_index[0]] -
+            #                            frame[1][self.vv_vs_index[1]])
+            self.Ibar['pl'][i] = Ipl
 
     def plasma_filaments(self, frame, dx=0.1, dz=0.1):
         rc = np.sqrt(dx**2 + dz**2) / 4
@@ -57,12 +67,12 @@ class read_tor:
         plasma_coil = OrderedDict()
         xp = 1e-2*np.array(frame[2][0::3])
         zp = 1e-2*np.array(frame[2][1::3])
-        Ip = 1e3*np.array(frame[2][2::3])
+        Ip = -1e3*np.array(frame[2][2::3])  # -kA to A
         for x, z, I in zip(xp, zp, Ip):
             name = 'pl_{}'.format(next(npl))
             plasma_coil[name] = {'I': I, 'dx': dx, 'dz': dz, 'rc': rc,
                                  'x': x, 'z': z}
-        return plasma_coil
+        return plasma_coil, np.sum(Ip)
 
     def get_coils(self):
         self.coil, coilnames = OrderedDict(), []
@@ -119,18 +129,12 @@ class read_tor:
         if plot:
             self.plot_filaments()
 
-    def plot_filaments(self):
-        for f in self.filaments:
-            for j in range(f['n_turn']):
-                pl.plot([f['x1'][j], f['x2'][j]],
-                        [f['z1'][j], f['z2'][j]], 'o-')
-        pl.axis('equal')
-
-    def store_filaments(self, dx=0.2, dz=0.2):
+    def store_filaments(self, dx=0.15, dz=0.15):
         rc = np.sqrt(dx**2 + dz**2) / 4
         nvv, nbl = count(0), count(0)
         self.blanket_coil = OrderedDict()
         self.vessel_coil = OrderedDict()
+        vv = {'x': [], 'z': []}  # vv coils index
         for i, filament in enumerate(self.filaments):
             for j in range(filament['n_turn']):
                 x1, x2 = filament['x1'][j], filament['x2'][j]
@@ -143,9 +147,21 @@ class read_tor:
                 if filament['n_turn'] == 1:  # vessel
                     name = 'vv_{}'.format(next(nvv))
                     self.vessel_coil[name] = coil
+                    vv['x'].append(x)
+                    vv['z'].append(z)
                 else:
                     name = 'bb_{}'.format(next(nbl))
                     self.blanket_coil[name] = coil
+        self.get_vv_vs_index(vv)
+
+    def get_vv_vs_index(self, vv):
+        vs_geom = VSgeom()
+        self.vv_vs_index = np.zeros(2, dtype=int)
+        for i, coil in enumerate(vs_geom.geom):
+            vs_coil = vs_geom.geom[coil]
+            self.vv_vs_index[i] = np.argmin(
+                    (vs_coil['x']-np.array(vv['x']))**2 +
+                    (vs_coil['z']-np.array(vv['z']))**2)
 
     def get_filament_current(self):
         self.rt.skiplines(1)
@@ -169,42 +185,47 @@ class read_tor:
         plasma = self.get_plasma_current()
         coil = self.get_coil_current()
         return (t, filament, plasma, coil)
-    
+
     def set_coil_current(self, frame_index):
         for name, I in zip(self.coil, self.current['coil'][frame_index]):
             self.coil[name]['I'] = I
-            
+
     def set_filament_current(self, filament, frame_index):
         current = self.current['filament'][frame_index]
         for name in filament:
             turn_index = filament[name]['index']
             sign = filament[name]['sign']
             filament[name]['I'] = sign * current[turn_index]
-            
+
     def set_current(self, frame_index):
+        self.frame_index = frame_index
         self.set_coil_current(frame_index)
         self.set_filament_current(self.vessel_coil, frame_index)
         self.set_filament_current(self.blanket_coil, frame_index)
 
+    def plot_filaments(self):
+        for f in self.filaments:
+            for j in range(f['n_turn']):
+                pl.plot([f['x1'][j], f['x2'][j]],
+                        [f['z1'][j], f['z2'][j]], 'o-')
+        pl.axis('equal')
+
     def plot(self, index, ax=None):
         if ax is None:
             ax = plt.subplots(figsize=(7, 10))[1]
+        self.set_current(index)
         self.plot_coils()
-        self.plot_plasma(index)
+        # self.plot_plasma(index)
         plt.axis('off')
 
     def plot_coils(self):
-        
-        
-        self.pf.plot(label=True)
-        self.pf.plot_coil(self.blanket_coil, coil_color='C2')
-        self.pf.plot_coil(self.vessel_coil, coil_color='C3')
-        
-        # colors = 100*np.random.rand(len(patches))
-        # p = PatchCollection(patches, alpha=0.4)
-        # p.set_array(np.array(colors))
-        # ax.add_collection(p)
-        # fig.colorbar(p, ax=ax)
+        self.pf.patch_coil(self.coil)
+        self.pf.patch_coil(self.blanket_coil)
+        self.pf.patch_coil(self.vessel_coil)
+        self.pf.patch_coil(self.plasma_coil[self.frame_index])
+        self.pf.plot_patch(c='Jc')
+        plt.axis('equal')
+        plt.axis('off')
 
     def plot_plasma(self, index):
         patch = self.pf.plot_coil(self.plasma_coil[index], coil_color='C4')
@@ -237,13 +258,13 @@ if __name__ == '__main__':
 
     tor = read_tor('disruptions')
     tor.read_file(3)
-    
-    
-    tor.set_current(500)
 
-    tor.plot(50)
-    
-    
+
+    # tor.set_current(200)
+
+    tor.plot(0)
+
+
 
     #tor.movie('tmp')
 

@@ -2,6 +2,98 @@ import nep
 from amigo.IO import class_dir
 from os.path import join, isfile, isdir
 from os import listdir
+from scipy.signal import savgol_filter
+import numpy as np
+from scipy.optimize import minimize
+from amigo.pyplot import plt
+
+
+def lowpass(x, dt, dt_window=1):
+    nwindow = int(dt_window/dt)
+    if nwindow % 2 == 0:
+        nwindow += 1
+    x_lp = savgol_filter(x, nwindow, 3, mode='mirror')  # lowpass
+    return x_lp
+
+
+class timeconstant:
+
+    def __init__(self, t, Ic, trim_fraction=0.2):
+        self.load(t, Ic)
+        self.trim_fraction = trim_fraction
+
+    def load(self, t, Ic):  # load profile
+        self.t = t
+        self.Ic = Ic
+
+    def trim(self, **kwargs):
+        self.trim_fraction = kwargs.get('trim_fraction', self.trim_fraction)
+        if self.trim_fraction > 0 and self.trim_fraction < 1\
+                and self.Ic[0] != 0:
+            i1 = next((i for i, Ic in enumerate(self.Ic)
+                       if abs(Ic) < self.trim_fraction*abs(self.Ic[0])))
+            td, Id = self.t[:i1], self.Ic[:i1]
+        else:
+            td, Id = self.t, self.Ic
+        return td, Id
+
+    def fit_tau(self, x, *args):
+        to, Io, tau = x
+        t_exp, I_exp = args
+        I_fit = Io*np.exp(-(t_exp-to)/tau)
+        err = np.sum((I_exp-I_fit)**2)  # sum of squares
+        return err
+
+    def get_tau(self, plot=False, **kwargs):
+        td, Id = self.trim(**kwargs)
+        x = minimize(self.fit_tau, [0, 10e3, 100e-3], args=(td, Id)).x
+        err = self.fit_tau(x, td, Id)
+        to, Io, tau = x
+        Iexp = Io*np.exp(-(td-to)/tau)
+        if plot:
+            plt.plot(1e3*td, 1e-3*Iexp, '-', label='exp')
+        return to, Io, tau, err, Iexp
+
+    def get_td(self, plot=False, **kwargs):  # linear discharge time
+        td, Id = self.trim(**kwargs)
+        A = np.ones((len(td), 2))
+        A[:, 1] = td
+        a, b = np.linalg.lstsq(A, Id)[0]
+        tlin = abs(self.Ic[0]/b)  # discharge time
+        Ilin = a + b*td  # linear fit
+        err = np.sum((Id-Ilin)**2)
+        if plot:
+            plt.plot(1e3*td, 1e-3*Ilin, '-', label='lin')
+        return a, b, tlin, err, Ilin
+
+    def fit(self, plot=False, **kwargs):
+        tfit, Idata = self.trim(**kwargs)
+        tau, tau_err, Iexp = self.get_tau(plot=False, **kwargs)[-3:]
+        tlin, tlin_err, Ilin = self.get_td(plot=False, **kwargs)[-3:]
+        if tau_err < tlin_err:
+            self.discharge_type = 'exponential'
+            self.discharge_time = tau
+            Ifit = Iexp
+        else:
+            self.discharge_type = 'linear'
+            self.discharge_time = tlin
+            Ifit = Ilin
+        if plot:
+            if 'ax' in kwargs:
+                ax = kwargs['ax']
+            else:
+                ax = plt.subplots(1, 1)[1]
+
+            ax.plot(1e3*tfit, 1e-3*Idata, '-', label='data')
+            ax.plot(1e3*tfit, 1e-3*Ifit, '--', label='fit')
+            ax.set_xlabel('$t$ ms')
+            ax.set_ylabel('$I$ kA')
+            # plt.despine()
+            # plt.legend()
+            txt = '{} discharge'.format(self.discharge_type)
+            txt += ', t={:1.1f}ms'.format(self.discharge_time)
+            # plt.title(txt)
+        return self.discharge_time, self.discharge_type, tfit, Ifit
 
 
 class dina:
@@ -11,9 +103,10 @@ class dina:
         self.get_folders()
 
     def get_directory(self, database_folder):
+        self.database_folder = database_folder
         self.directory = join(class_dir(nep), '../Scenario_database')
-        if database_folder is not None:
-            self.directory = join(self.directory, database_folder)
+        if self.database_folder is not None:
+            self.directory = join(self.directory, self.database_folder)
 
     def get_folders(self):
         folders = [f for f in listdir(self.directory)]

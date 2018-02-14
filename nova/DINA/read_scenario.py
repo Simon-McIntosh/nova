@@ -1,9 +1,8 @@
-from read_dina import dina
+from read_dina import dina, lowpass
 from amigo.qdafile import QDAfile
 from amigo.pyplot import plt
 import numpy as np
 from nep.coil_geom import PFgeom
-from scipy.signal import savgol_filter
 from scipy.interpolate import interp1d
 from amigo.stat import histopeaks
 
@@ -28,7 +27,7 @@ class read_scenario:
         if 'time' in self.data:  # rename time field
             self.data['t'] = self.data['time']
             self.data.pop('time')
-        self.space_data()
+        # self.space_data()
         self.load_data()
         self.load_coils()
 
@@ -46,7 +45,8 @@ class read_scenario:
             elif 'I' in var and 'PSI' not in var:
                 # kAturn to Aturn
                 self.Icoil[var[1:].upper()] = 1e3*self.data[var]
-        # self.t = self.data['t']
+        self.t = self.data['t']
+        self.dt = np.mean(np.diff(self.t))
         self.Icoil['VS'] = 4*self.Icoil['VS3']
 
     def space_data(self):  # generate interpolators and space timeseries
@@ -61,15 +61,8 @@ class read_scenario:
             self.fun[var] = interp1d(to, self.data[var])
             self.data[var] = self.fun[var](self.t)
 
-    def lowpass(self, x, dt_window=1):
-        nwindow = int(dt_window/self.dt)
-        if nwindow % 2 == 0:
-            nwindow += 1
-        x_lp = savgol_filter(x, nwindow, 3, mode='mirror')  # lowpass
-        return x_lp
-
     def opperate(self):  # identify operating modes
-        Ip_lp = self.lowpass(self.Ip, dt_window=1.0)  # filter plasma current
+        Ip_lp = lowpass(self.Ip, self.dt, dt_window=1.0)  # plasma current
         dIpdt = np.gradient(Ip_lp, self.t)  # calculate gradient
         hip = histopeaks(dIpdt, nstd=3, nlim=6)  # identify operating modes
 
@@ -125,5 +118,5 @@ if __name__ is '__main__':
 
     scn.plot_plasma()
 
-    #plt.figure()
+
     #scn.load_coils(plot=True)

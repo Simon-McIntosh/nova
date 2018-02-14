@@ -26,6 +26,7 @@ Iind = interp1d(pl.t, pl.Ivs_o)(t)  # A
 Iind_lp = savgol_filter(Iind, 11, 3, mode='mirror')  # lowpass filter
 
 dIdt = np.gradient(Iind_lp, t)
+
 vs = Iind_lp*R + L*dIdt  # voltage source
 vs_fun = interp1d(t, vs, fill_value='extrapolate')
 

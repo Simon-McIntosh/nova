@@ -262,7 +262,7 @@ if __name__ == '__main__':
 
     # tor.set_current(200)
 
-    tor.plot(0)
+    tor.plot(200)
 
 
 

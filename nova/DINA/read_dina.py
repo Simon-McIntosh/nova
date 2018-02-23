@@ -6,6 +6,7 @@ from scipy.signal import savgol_filter
 import numpy as np
 from scipy.optimize import minimize
 from amigo.pyplot import plt
+import pandas as pd
 
 
 def lowpass(x, dt, dt_window=1):
@@ -111,13 +112,16 @@ class dina:
     def get_folders(self):
         folders = [f for f in listdir(self.directory)]
         self.folders = sorted(folders)
-        self.nf = len(self.folders)
+        self.nfolder = len(self.folders)
+        files = [f for f in listdir(self.directory) if isfile(f)]
+        self.files = sorted(files)
+        self.nfile = len(self.files)
 
     def select_folder(self, folder):  # folder entered as string, index or None
         if isinstance(folder, int):  # index (int)
-            if folder > self.nf-1:
+            if folder > self.nfolder-1:
                 txt = '\nfolder index {:d} greater than '.format(self.folder)
-                txt += 'folder number {:d}'.format(self.nf)
+                txt += 'folder number {:d}'.format(self.nfolder)
                 raise IndexError(txt)
             folder = self.folders[folder]
         elif isinstance(folder, str):
@@ -131,10 +135,12 @@ class dina:
             raise ValueError('folder required as int, str or None')
         return join(self.directory, folder)
 
-    def locate_file(self, file_type, folder):
+    def locate_file(self, file_type, folder=None):
+        if self.nfolder == 0:
+            folder = None
         folder = self.select_folder(folder)
         ext = file_type.split('.')[-1].lower()
-        if ext in ['xls', 'qda', 'txt']:  # data*.*
+        if ext in ['xls', 'qda', 'txt']:  # *.*
             file_type = file_type.split('.')[0].lower()
             for subfolder in listdir(folder):
                 subfolder = join(folder, subfolder)
@@ -151,7 +157,7 @@ class dina:
                 raise IndexError('file {} not found'.format(file_type))
         else:
             files = [f for f in listdir(folder) if isfile(join(folder, f))]
-        file = [f for f in files if file_type in f.lower()]
+        file = [f for f in files if file_type.lower() in f.lower()]
         if len(file) == 0:
             txt = '\nfile key {} not found '.format(file_type)
             txt += 'in: \n{}'.format(files)
@@ -160,11 +166,27 @@ class dina:
             file = file[0]
         return join(folder, file)
 
+    def read_csv(self, filename, dropnan=True, split=''):
+        data = pd.read_csv(filename, delim_whitespace=True, skiprows=0,
+                           na_values='NAN')
+        if dropnan:
+            data = data.dropna()  # remove NaN values
+        columns = {}
+        for c in list(data):
+            if split:
+                columns[c] = c.split(split)[0]
+            else:
+                columns[c] = c
+        data = data.rename(index=str, columns=columns)
+        data_keys = list(data.keys())
+        for var in data_keys:
+            if len(data[var]) == 0 or np.isnan(data[var]).all():
+                data.pop(var)
+        data = data.to_dict(orient='list')
+        return data, columns
+
 
 if __name__ == '__main__':
 
     dina = dina('operations')
     filename = dina.locate_file('data3.qda', folder=0)
-
-
-

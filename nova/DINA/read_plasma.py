@@ -326,7 +326,7 @@ if __name__ == '__main__':
     # pl.read_file(4)
     # pl.get_quench(plot=True)
 
-    # pl.plot_plasma()
+    pl.plot_plasma()
 
     '''
     ax = plt.subplots(2, 1, sharex=True)[1]

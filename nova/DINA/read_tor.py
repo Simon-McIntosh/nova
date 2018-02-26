@@ -68,9 +68,9 @@ class read_tor:
         xp = 1e-2*np.array(frame[2][0::3])
         zp = 1e-2*np.array(frame[2][1::3])
         Ip = -1e3*np.array(frame[2][2::3])  # -kA to A
-        for x, z, I in zip(xp, zp, Ip):
+        for x, z, Ic in zip(xp, zp, Ip):
             name = 'pl_{}'.format(next(npl))
-            plasma_coil[name] = {'I': I, 'dx': dx, 'dz': dz, 'rc': rc,
+            plasma_coil[name] = {'Ic': Ic, 'dx': dx, 'dz': dz, 'rc': rc,
                                  'x': x, 'z': z}
         return plasma_coil, np.sum(Ip)
 
@@ -105,7 +105,7 @@ class read_tor:
                 self.coil[name][var] *= 1e-2  # cm to meters
             self.coil[name]['rc'] = np.sqrt(self.coil[name]['dx']**2 +
                                             self.coil[name]['dz']**2) / 4
-            self.coil[name]['I'] = 0
+            self.coil[name]['Ic'] = 0
 
     def get_filaments(self, plot=False):
         self.rt.checkline('2.')
@@ -142,7 +142,7 @@ class read_tor:
                 sign = filament['turn'][j]
                 x = 1e-2*np.mean([x1, x2])
                 z = 1e-2*np.mean([z1, z2])
-                coil = {'I': 0, 'dx': dx, 'dz': dz, 'rc': rc,
+                coil = {'Ic': 0, 'dx': dx, 'dz': dz, 'rc': rc,
                         'x': x, 'z': z, 'index': i, 'sign': sign}
                 if filament['n_turn'] == 1:  # vessel
                     name = 'vv_{}'.format(next(nvv))
@@ -187,15 +187,15 @@ class read_tor:
         return (t, filament, plasma, coil)
 
     def set_coil_current(self, frame_index):
-        for name, I in zip(self.coil, self.current['coil'][frame_index]):
-            self.coil[name]['I'] = I
+        for name, Ic in zip(self.coil, self.current['coil'][frame_index]):
+            self.coil[name]['Ic'] = Ic
 
     def set_filament_current(self, filament, frame_index):
         current = self.current['filament'][frame_index]
         for name in filament:
             turn_index = filament[name]['index']
             sign = filament[name]['sign']
-            filament[name]['I'] = sign * current[turn_index]
+            filament[name]['Ic'] = sign * current[turn_index]
 
     def set_current(self, frame_index):
         self.frame_index = frame_index

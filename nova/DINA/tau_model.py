@@ -98,7 +98,6 @@ def fit_waveform(x, *args):
 
     err = np.linalg.norm(Iode[:, 1] - Ivs_ref) / np.linalg.norm(Ivs_ref)
     err += np.linalg.norm(Iode[:, 0] - Ivv_ref) / np.linalg.norm(Ivv_ref)
-    print(err, x)
     return err
 
 
@@ -126,6 +125,7 @@ xo = 1e-3*np.array([881.89, 73.97, 9.58, 0.19, 1.37, -0.45])
 # 10) [268.86, 21.26, 2.66, 0.45, -0.14, -0.67]
 # 11) [863.27, 101.49, 7.89, 0.05, 1.53, -0.77]
 
+'''
 x = minimize(fit_waveform, xo, method='Nelder-Mead',
              options={'xatol': 1e-2},
              args=(tau_vs3, Iwf[i]['t'], pl_fun,
@@ -145,3 +145,4 @@ print([float('{:1.2f}'.format(1e3*n)) for n in x])
 # ax[1].plot(1e-3*Iwf[i]['t'], 1e-3*Iode[:, 0], 'C0--')
 # ax[1].plot(1e-3*Iwf[i]['t'], 1e-3*Iode[:, 1], 'C1--')
 
+'''

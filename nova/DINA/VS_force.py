@@ -1,7 +1,4 @@
 from nep.DINA.read_dina import dina
-import nep
-from amigo.IO import class_dir
-from os.path import join
 from nep.DINA.read_plasma import read_plasma
 from nep.DINA.read_psi import read_psi
 from amigo.pyplot import plt
@@ -13,7 +10,8 @@ from amigo.addtext import linelabel
 
 class Force:
 
-    def __init__(self, database_folder='operations'):
+    def __init__(self, database_folder='disruptions'):
+        self.dina = dina(database_folder)
         self.pl = read_plasma(database_folder)  # load time trace
         self.psi = read_psi(database_folder)  # load psi
         self.vs = VS()  # load VS object
@@ -74,6 +72,7 @@ class Force:
         return F_max, Fo_max
 
     def calculate_max(self):
+        folders = self.dina.folders
         F_max = np.zeros((len(folders), self.vs.nP))
         Fo_max = np.zeros((len(folders), self.vs.nP))
 
@@ -102,7 +101,7 @@ class Force:
 
 if __name__ == '__main__':
 
-    f = Force('operations')
+    f = Force('disruptions')
     f.load_scenario(3)  # MD_UP_exp16
     f.calculate(plot=True)
 

@@ -91,6 +91,8 @@ class read_psi:
                         value *= 1e-2  # cm to meters
                     if key in ['pmag', 'pbound', 'ps']:
                         value *= 1e-5  # kGcm2 to Tm2
+                    if key == 't':
+                        value *= 1e-3  # ms to s
                     self.scalars[time_index][key] = value
                 self.rt.skiplines(self.nline_index -
                                   self.nline_to_scalars - 2)
@@ -163,18 +165,15 @@ class read_psi:
 
     def get_force_array(self):
         # magnetic field vector at points fn(t)
-        self.read_single_array(0)  # re-load inital sf
-        self.update_sf()
-        Bo = self.get_field(self.vs.points)  # inital feild
         B = np.zeros((self.nt, 3, self.vs.nP))
         F = np.zeros((self.nt, 3, self.vs.nP))
         Fo = np.zeros((self.nt, 3, self.vs.nP))
         tick = clock(self.nt)
         with readtxt(self.filename) as self.rt:
             for i in range(self.nt):
-                self.read_array()
-                self.update_sf()
-                B[i], F[i], Fo[i] = self.get_force(Bo=Bo)
+                self.read_array()  # read psi matp
+                self.update_sf()  # update eqdsk
+                B[i], F[i], Fo[i] = self.get_force()
                 tick.tock()
         return B, F, Fo
 
@@ -185,17 +184,14 @@ class read_psi:
             B[::2, iP] = self.sf.Bpoint(point)
         return B
 
-    def get_force(self, plot=False, Bo=None, scale=1e-2):
+    def get_force(self, plot=False, scale=1e-2):
         B = self.get_field(self.vs.points)
         Ivs = np.zeros((3, self.vs.nP))
         Ivs[1, :] = 4*self.pl.Ivs_o[self.time_index]  # Amp-turns
         F = np.zeros((3, self.vs.nP))
-        Fo = np.zeros((3, self.vs.nP))
         for i, coil in enumerate(self.vs.geom):
             vs_sign = self.vs.geom[coil]['sign']
             F[:, i] = np.cross(vs_sign * Ivs[:, i], B[:, i], axis=0)
-            if Bo is not None:
-                Fo[:, i] = np.cross(vs_sign * Ivs[:, i], Bo[:, i], axis=0)
         if plot:
             for i, point in enumerate(self.vs.points):
                 plt.arrow(point[0], point[1],

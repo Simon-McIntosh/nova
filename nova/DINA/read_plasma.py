@@ -209,7 +209,6 @@ class read_plasma:
         for i, x in enumerate(X):
             t = self.Ivs[i]['t']
             Idina = self.Ivs[i]['Icq']
-            print(i, Idina[0])
             It = Idina - 60e3*np.exp(-(t-t[0])/tau)
             Imax[i] = It[np.argmax(abs(It))]
             color, iax = self.get_color(i)

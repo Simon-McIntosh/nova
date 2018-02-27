@@ -128,7 +128,7 @@ class INV(object):
     def set_swing(self, centre=0, width=363/(2*np.pi), array=[-0.5, 0, 0.5]):
         flux = centre - np.array(array) * width  # Webber/rad
         self.nS = len(flux)
-        self.swing = {'flux': flux, 'I': np.zeros((self.nS, self.nC)),
+        self.swing = {'flux': flux, 'Ic': np.zeros((self.nS, self.nC)),
                       'rms': np.zeros(self.nS),
                       'FxPF': np.zeros(self.nS), 'FzPF': np.zeros(self.nS),
                       'FsepCS': np.zeros(self.nS), 'FzCS': np.zeros(self.nS),
@@ -141,11 +141,11 @@ class INV(object):
                       'Fcoil': [[] for _ in range(self.nS)]}
 
     def update_swing(self):
-        self.swing['I'] = np.zeros((self.nS, self.nC))  # resize current vector
+        self.swing['Ic'] = np.zeros((self.nS, self.nC))  # resize current vector
 
     def initalise_limits(self):
-        self.limit = {'I': {}, 'L': [], 'F': []}
-        self.limit['I'] = {'PF': 50, 'CS_sum': 500}  # MA
+        self.limit = {'Ic': {}, 'L': [], 'F': []}
+        self.limit['Ic'] = {'PF': 50, 'CS_sum': 500}  # MA
         self.limit['L'] = {'CS': [-13, 10], 'PF': [0.05, 0.95]}  # m / fraction
         self.limit['F'] = {'PFz': 450, 'CSz_sum': 350, 'CSz_sep': 300}  # MN
         self.set_PF_limit()
@@ -154,7 +154,7 @@ class INV(object):
         for coil in self.PF_coils:
             self.limit['L'][coil] = self.limit['L']['PF']
 
-    def set_limit(self, **kwargs):  # set as ICS_sum for [I][CS_sum] etc...
+    def set_limit(self, **kwargs):  # set as ICS_sum for [Ic][CS_sum] etc...
         for key in kwargs:
             variable = key[0]
             if key[1:] in self.limit[variable]:
@@ -191,20 +191,21 @@ class INV(object):
             self.coil[state][name] = {'x': np.array([]), 'z': np.array([]),
                                       'dx': np.array([]), 'dz': np.array([]),
                                       'sub_name': np.array([]),
-                                      'I': np.array([]), 'Fx': np.array([]),
+                                      'Ic': np.array([]), 'Fx': np.array([]),
                                       'Fz': np.array([]),
                                       'Fx_sum': 0, 'Fz_sum': 0, 'I_sum': 0,
                                       'Xo': 0, 'Zo': 0, 'Nf': 0}
 
     def initalise_current(self):
         adjust_coils = self.coil['active'].keys()
-        self.I = np.zeros((len(adjust_coils)))
+        self.Ic = np.zeros((len(adjust_coils)))
         for i, name in enumerate(adjust_coils):
-            self.I[i] = self.pf.sub_coil[name + '_0']['I'] / self.Iscale
+            self.Ic[i] = self.pf.sub_coil[name + '_0']['Ic'] / self.Iscale
         self.alpha = np.zeros(self.nC)  # initalise alpha
 
-    def update_coils(self, plot=False):  # full coil update
-        self.pf.categorize_coils()  # index pf coils
+    def update_coils(self, plot=False, categorize=True):  # full coil update
+        if categorize:
+            self.pf.categorize_coils()  # index pf coils
         self.initalise_coil()
         self.append_coil(self.pf.sub_coil)
         self.append_coil(self.pf.plasma_coil)
@@ -213,6 +214,7 @@ class INV(object):
         self.update_swing()
         self.initalise_current()
         # self.initalise_limits()
+
         if plot:
             self.plot_coils()
 
@@ -224,13 +226,13 @@ class INV(object):
             else:
                 state = 'passive'
             coil = coils[sub_name]
-            for key, var in zip(['x', 'z', 'I', 'dx', 'dz', 'sub_name'],
-                                [coil['x'], coil['z'], coil['I'],
+            for key, var in zip(['x', 'z', 'Ic', 'dx', 'dz', 'sub_name'],
+                                [coil['x'], coil['z'], coil['Ic'],
                                  coil['dx'], coil['dz'], sub_name]):
                 self.coil[state][name][key] = \
                     np.append(self.coil[state][name][key], var)
             self.coil[state][name]['Isum'] = \
-                np.sum(self.coil[state][name]['I'])
+                np.sum(self.coil[state][name]['Ic'])
             self.coil[state][name]['Xo'] = np.mean(self.coil[state][name]['x'])
             self.coil[state][name]['Zo'] = np.mean(self.coil[state][name]['z'])
             self.coil[state][name]['Nf'] = len(self.coil[state][name]['z'])
@@ -251,8 +253,12 @@ class INV(object):
                     self.CS_coils.append(name)
         else:
             self.adjust_coils = list(self.pf.coil.keys())  # add all
-            self.PF_coils = list(self.pf.index['PF']['name'])
-            self.CS_coils = list(self.pf.index['CS']['name'])
+            if hasattr(self.pf, 'index'):
+                self.PF_coils = list(self.pf.index['PF']['name'])
+                self.CS_coils = list(self.pf.index['CS']['name'])
+            else:
+                self.PF_coils = []
+                self.CS_coils = []
 
     def remove_active(self, Clist=[], Ctype='all', full=False):
         # Clist == list of coil names
@@ -498,7 +504,7 @@ class INV(object):
 
     def set_foreground(self):
         self.G = np.zeros((len(self.fix['BC']),
-                           len(self.coil['active'].keys())))  # [G][I] = [T]
+                           len(self.coil['active'].keys())))  # [G][Ic] = [T]
         self.add_value('active')
         self.wG = self.wsqrt * self.G
         if self.svd:  # singular value dec.
@@ -513,7 +519,7 @@ class INV(object):
                 #    self.BG[i] += self.add_value_plasma(bc,xf,zf,bdir)
                 # else:
                 coil = self.coil[state][name]
-                R, Z, Ic = coil['x'], coil['z'], coil['I']
+                R, Z, Ic = coil['x'], coil['z'], coil['Ic']
                 dX, dZ = coil['dx'], coil['dz']
                 for x, z, ic, dx, dz in zip(R, Z, Ic, dX, dZ):
                     value = self.add_value_coil(bc, xf, zf, x, z, bdir, dx, dz)
@@ -651,9 +657,9 @@ class INV(object):
         for i, dx in enumerate(['dx', 'dz']):
             if dx in kwargs.keys():
                 delta[i] = kwargs.get(dx)
-        I = kwargs.get('I', 1e6)
+        Ic = kwargs.get('Ic', 1e6)
         self.pf.coil[name] = {'x': x, 'z': z,
-                              'dx': delta[0], 'dz': delta[1], 'I': I,
+                              'dx': delta[0], 'dz': delta[1], 'Ic': Ic,
                               'rc': np.sqrt(delta[0]**2 + delta[1]**2) / 2}
 
     def grid_CS(self, n, Xo=2.9, Zbound=[-10, 9],
@@ -818,12 +824,12 @@ class INV(object):
 
     def reset_current(self):
         for j, name in enumerate(self.coil['active'].keys()):
-            self.pf.coil[name]['I'] = 0
+            self.pf.coil[name]['Ic'] = 0
 
     def update_bundle(self, name):
         try:
             Nold = self.pf.sub_coil[name + '_0']['Nf']
-        except:
+        except KeyError:
             Nold = 0
         bundle = self.pf.size_coil(name, self.dCoil)
         N = self.pf.sub_coil[name + '_0']['Nf']
@@ -886,9 +892,9 @@ class INV(object):
         vector = np.linalg.lstsq(self.wG, self.wT)[0].reshape(-1)
         self.rms = self.get_rms(vector)
         if self.svd:
-            self.I = np.dot(self.V, self.alpha)
+            self.Ic = np.dot(self.V, self.alpha)
         else:
-            self.I = vector
+            self.Ic = vector
         self.update_current()
 
     def frms(self, vector, grad):
@@ -905,9 +911,9 @@ class INV(object):
         if grad.size > 0:
             grad[:self.nC] = -self.V  # lower bound
             grad[self.nC:] = self.V  # upper bound
-        I = np.dot(self.V, alpha)
-        constraint[:self.nC] = self.Io['lb'] - I  # lower bound
-        constraint[self.nC:] = I - self.Io['ub']  # upper bound
+        Ic = np.dot(self.V, alpha)
+        constraint[:self.nC] = self.Io['lb'] - Ic  # lower bound
+        constraint[self.nC:] = Ic - self.Io['ub']  # upper bound
 
     def set_Io(self):  # set lower/upper bounds on coil currents (Jmax)
         self.Io = {'name': self.adjust_coils, 'value': np.zeros(self.nC),
@@ -916,10 +922,10 @@ class INV(object):
             # i = int(name.replace('Coil', ''))
             coil = self.pf.coil[name]
             Nf = self.pf.sub_coil[name + '_0']['Nf']  # fillament number
-            self.Io['value'][i] = coil['I'] / (Nf * self.Iscale)
+            self.Io['value'][i] = coil['Ic'] / (Nf * self.Iscale)
             if name in self.PF_coils:
-                self.Io['lb'][i] = -self.limit['I']['PF'] / Nf
-                self.Io['ub'][i] = self.limit['I']['PF'] / Nf
+                self.Io['lb'][i] = -self.limit['Ic']['PF'] / Nf
+                self.Io['ub'][i] = self.limit['Ic']['PF'] / Nf
             if name in self.CS_coils:
                 Ilim = coil['dx'] * coil['dz'] * self.Jmax
                 self.Io['lb'][i] = -Ilim / Nf
@@ -931,10 +937,10 @@ class INV(object):
 
     def Flimit(self, constraint, vector, grad):
         if self.svd:  # convert eigenvalues to current vector
-            I = np.dot(self.V, vector)
+            Ic = np.dot(self.V, vector)
         else:
-            I = vector
-        F, dF = self.ff.set_force(I)  # set coil force and jacobian
+            Ic = vector
+        F, dF = self.ff.set_force(Ic)  # set coil force and jacobian
         if grad.size > 0:  # calculate constraint jacobian
             # PFz lower bound
             grad[:self.nPF] = -dF[:self.nPF, :, 1]
@@ -977,28 +983,28 @@ class INV(object):
             opt.add_inequality_mconstraint(
                 self.Ilimit, 1e-3 * np.ones(2 * self.nC))
             self.alpha = opt.optimize(self.alpha)
-            self.I = np.dot(self.V, self.alpha)
+            self.Ic = np.dot(self.V, self.alpha)
         else:
             opt.set_lower_bounds(self.Io['lb'])
             opt.set_upper_bounds(self.Io['ub'])
-            self.I = opt.optimize(self.Io['value'])
-        self.Io['value'] = self.I.reshape(-1)
+            self.Ic = opt.optimize(self.Io['value'])
+        self.Io['value'] = self.Ic.reshape(-1)
         self.rms = opt.last_optimum_value()
         self.update_current()
         return self.rms
 
     def update_area(self, relax=1, margin=0):
-        I = self.swing['I'][np.argmax(abs(self.swing['I']), axis=0),
+        Ic = self.swing['Ic'][np.argmax(abs(self.swing['Ic']), axis=0),
                             range(self.nC)]
         for name in self.PF_coils:
             if name in self.adjust_coils:
-                Ic = I[list(self.adjust_coils).index(name)]
+                Ic = Ic[list(self.adjust_coils).index(name)]
             else:
-                Ic = self.pf.coil[name]['I']
+                Ic = self.pf.coil[name]['Ic']
             if Ic != 0:
                 Ic = abs(Ic)
-                if Ic > self.limit['I']['PF']:
-                    Ic = self.limit['I']['PF']  # coil area upper bound
+                if Ic > self.limit['Ic']['PF']:
+                    Ic = self.limit['Ic']['PF']  # coil area upper bound
                 dA_target = Ic / self.Jmax  # apply current density limit
                 dA = self.pf.coil[name]['dx'] * self.pf.coil[name]['dz']
                 ratio = dA_target / dA
@@ -1082,7 +1088,7 @@ class INV(object):
             self.swing['FzCS'][i] = Fcoil['CS']['zsum']
             self.swing['Fcoil'][i] = {'F': Fcoil['F'], 'dF': Fcoil['dF']}
             self.swing['Tpol'][i] = self.poloidal_angle()
-            self.swing['I'][i] = self.Icoil
+            self.swing['Ic'][i] = self.Icoil
             self.swing['Isum'][i] = self.Isum
             self.swing['IsumCS'][i] = self.IsumCS
             self.swing['IsumPF'][i] = self.IsumPF
@@ -1248,18 +1254,17 @@ class INV(object):
 
     def update_current(self):
         self.Isum, self.IsumCS, self.IsumPF = 0, 0, 0
-        self.ff.I = self.I  # pass current to force feild
+        self.ff.Ic = self.Ic  # pass current to force feild
         self.Icoil = np.zeros(len(self.coil['active'].keys()))
         for j, name in enumerate(self.coil['active']):
             Nfilament = self.coil['active'][name]['Nf']
-            self.Icoil[j] = self.I[j] * Nfilament  # store current
-            self.pf.coil[name]['I'] = self.Icoil[j] * self.Iscale
+            self.Icoil[j] = self.Ic[j] * Nfilament  # store current
+            self.pf.coil[name]['Ic'] = self.Icoil[j] * self.Iscale
             self.coil['active'][name]['I_sum'] = self.Icoil[j] * self.Iscale
-
             for i in range(Nfilament):
                 sub_name = name + '_{:1.0f}'.format(i)
-                self.pf.sub_coil[sub_name]['I'] = self.I[j] * self.Iscale
-                self.coil['active'][name]['I'][i] = self.I[j] * self.Iscale
+                self.pf.sub_coil[sub_name]['Ic'] = self.Ic[j] * self.Iscale
+                self.coil['active'][name]['Ic'][i] = self.Ic[j] * self.Iscale
             self.Isum += abs(self.Icoil[j])  # sum absolute current
             if name in self.CS_coils:
                 self.IsumCS += abs(self.Icoil[j])
@@ -1325,7 +1330,7 @@ class SWING(object):
     def energy(self):
         self.inv.pf.inductance(dCoil=self.inv.dCoil, Iscale=1)
         E = np.zeros(len(self.inv.swing['flux']))
-        for i, Isw in enumerate(self.inv.swing['I']):
+        for i, Isw in enumerate(self.inv.swing['Ic']):
             Isw *= self.inv.Iscale
             E[i] = 0.5 * np.dot(np.dot(Isw, self.inv.pf.M), Isw)
         return np.max(E)

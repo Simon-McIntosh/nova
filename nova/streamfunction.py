@@ -34,9 +34,9 @@ class SF(object):
         self.po = [self.xbdry[xo_arg], self.zbdry[xo_arg]]
         self.mo = [self.eqdsk['xmagx'], self.eqdsk['zmagx']]
         self.upsample(upsample)
-        self.get_Xpsi()
         self.get_Mpsi()
-        self.set_contour()  # set cfeild
+        self.get_Xpsi()
+        self.set_contour()  # set cfield
 
         self.get_LFP()
         x, z = self.get_boundary()
@@ -56,12 +56,18 @@ class SF(object):
 
     def normalise(self):
         if ('Fiesta' in self.eqdsk['name'] or 'Nova' in self.eqdsk['name'] or
-            'disr' in self.eqdsk['name'] or 'DINA' in self.eqdsk['name']) and\
-                'CREATE' not in self.eqdsk['name']:
+                'disr' in self.eqdsk['name'] or 'DINA' in self.eqdsk['name']):
+            self.norm = 1
+        elif 'tosca' in self.eqdsk['header'].lower() or\
+                'TEQ' in self.eqdsk['name']:
+            self.eqdsk['cpasma'] *= -1
+            self.eqdsk['Ic'] *= -1
             self.norm = 1
         else:  # CREATE
             self.eqdsk['cpasma'] *= -1
-            self.norm = 2 * np.pi
+            self.norm = 2*np.pi
+
+        if self.norm != 1:
             for key in ['psi', 'simagx', 'sibdry']:
                 self.eqdsk[key] /= self.norm  # Webber/loop to Webber/radian
             for key in ['ffprim', 'pprime']:
@@ -180,7 +186,7 @@ class SF(object):
         self.set_plasma(eq)
         self.get_Xpsi()
         self.get_Mpsi()
-        self.set_contour()  # calculate cfeild
+        self.set_contour()  # calculate cfield
 
         self.get_LFP()
         x, z = self.get_boundary()
@@ -201,7 +207,7 @@ class SF(object):
                 setattr(self, key, eq[key])
         self.trim_x()
         self.space()
-        self.Bfeild()
+        self.Bfield()
 
     def upsample(self, sample):
         if sample > 1:
@@ -226,16 +232,26 @@ class SF(object):
         self.dz = (self.z[-1] - self.z[0]) / (self.nz - 1)
         self.delta = np.sqrt(self.dx**2 + self.dz**2)
         self.x2d, self.z2d = np.meshgrid(self.x, self.z, indexing='ij')
+        self.xbound = np.array([[self.x[0], self.x[-1]],
+                                [self.z[0], self.z[-1]]])
 
-    def Bfeild(self):
+    def Bfield(self):
         psi_x, psi_z = np.gradient(self.psi, self.dx, self.dz)
         xm = np.array(np.matrix(self.x).T * np.ones([1, self.nz]))
         xm[xm == 0] = 1e-34
         self.Bx = -psi_z / xm
         self.Bz = psi_x / xm
 
-    def Bpoint(self, point, check_bounds=False):  # magnetic feild at point
-        feild = np.zeros(2)  # function re-name (was Bcoil)
+    def bound_point(self, point):
+        for j, bound in enumerate(self.xbound):
+            if point[j] < bound[0]:
+                point[j] = bound[0]
+            elif point[j] > bound[1]:
+                point[j] = bound[1]
+            return point
+
+    def Bpoint(self, point, check_bounds=False):  # magnetic field at point
+        field = np.zeros(2)  # function re-name (was Bcoil)
         if not hasattr(self, 'Bspline'):
             self.Bspline = [[], []]
             self.Bspline[0] = RectBivariateSpline(self.x, self.z, self.Bx)
@@ -246,17 +262,18 @@ class SF(object):
                 and point[1] >= np.min(self.z) and point[1] <= np.max(self.z)
             return inbound
         else:
+            point = self.bound_point(point)
             for i in range(2):
-                feild[i] = self.Bspline[i].ev(point[0], point[1])
-            return feild
+                field[i] = self.Bspline[i].ev(point[0], point[1])
+            return field
 
-    def minimum_feild(self, radius, theta):
+    def minimum_field(self, radius, theta):
         X = radius * np.sin(theta) + self.Xpoint[0]
         Z = radius * np.cos(theta) + self.Xpoint[1]
         B = np.zeros(len(X))
         for i, (x, z) in enumerate(zip(X, Z)):
-            feild = self.Bpoint((x, z))
-            B[i] = np.sqrt(feild[0]**2 + feild[1]**2)
+            field = self.Bpoint((x, z))
+            B[i] = np.sqrt(field[0]**2 + field[1]**2)
         return np.argmin(B)
 
     def Ppoint(self, point):  # was Pcoil
@@ -265,18 +282,19 @@ class SF(object):
         psi = self.Pspline.ev(point[0], point[1])
         return psi
 
-    def contour(self, Nstd=1.5, Nlevel=31, Xnorm=True, lw=1, plot_vac=True,
+    def contour(self, Nstd=3.0, Nlevel=31, Xnorm=True, lw=1, plot_vac=True,
                 boundary=True, **kwargs):
         alpha = np.array([1, 1], dtype=float)
         lw = lw * np.array([2.25, 1.75])
+        if not hasattr(self, 'Mpsi'):
+            self.get_Mpsi()
+        if not hasattr(self, 'Xpsi'):
+            self.get_Xpsi()
         if boundary:
             x, z = self.get_boundary(1 - 1e-3)
             plt.plot(x, z, linewidth=lw[0], color=0.75 * np.ones(3))
             self.set_boundary(x, z)
-        if not hasattr(self, 'Xpsi'):
-            self.get_Xpsi()
-        if not hasattr(self, 'Mpsi'):
-            self.get_Mpsi()
+
         if 'levels' not in kwargs.keys():
             dpsi = 0.01 * (self.Xpsi - self.Mpsi)
             level, n = [self.Mpsi + dpsi, self.Xpsi - dpsi], 17
@@ -289,7 +307,7 @@ class SF(object):
                 Nstd = (self.Mpsi - self.Xpsi) / np.std(self.psi)
                 level, n = [-Nstd * np.std(self.psi),
                             Nstd * np.std(self.psi)], Nlevel
-            levels = np.linspace(level[0], level[1], n)
+            levels = np.mean(self.psi) + np.linspace(level[0], level[1], n)
             linetype = '-'
         else:
             levels = kwargs['levels']
@@ -335,7 +353,6 @@ class SF(object):
             norm = 0
         if color == 'k':
             alpha *= 0.25
-
         for p in cs.get_paths():
             v = p.vertices
             X, Z, delta = v[:, 0][:], v[:, 1][:], 0.5
@@ -353,7 +370,7 @@ class SF(object):
     def Bcontour(self, axis, Nstd=1.5, color='k'):
         var = 'B' + axis
         if not hasattr(self, var):
-            self.Bfeild()
+            self.Bfield()
         B = getattr(self, var)
         level = [np.mean(B) - Nstd * np.std(B),
                  np.mean(B) + Nstd * np.std(B)]
@@ -365,25 +382,25 @@ class SF(object):
 
     def Bquiver(self):
         if not hasattr(self, 'Bx'):
-            self.Bfeild()
+            self.Bfield()
         plt.quiver(self.x, self.z, self.Bx.T, self.Bz.T)
 
     def Bsf(self):
         if not hasattr(self, 'Bx'):
-            self.Bfeild()
+            self.Bfield()
         plt.streamplot(self.x, self.z, self.Bx.T, self.Bz.T,
                        color=self.Bx.T, cmap=plt.cm.RdBu)
         plt.clim([-1.5, 1.5])
 
     def getX(self, po=None):
-        def feild(p):
+        def field(p):
             B = self.Bpoint(p)
-            return sum(B * B)**0.5
-        res = minimize(feild, np.array(po), method='nelder-mead',
+            return np.linalg.norm(B)
+        res = minimize(field, np.array(po), method='nelder-mead',
                        options={'xtol': 1e-7, 'disp': False})
         return res.x
 
-    def get_Xpsi(self, po=None, select='primary'):
+    def get_Xpsi(self, po=None, select='primary', plot=False):
         if po is None:
             if hasattr(self, 'po'):
                 po = self.po
@@ -395,20 +412,20 @@ class SF(object):
         Xpsi = np.zeros(2)
         for i, flip in enumerate([1, -1]):
             po[1] *= flip
-            Xpoint[:, i] = self.getX(po=po)
-            Xpsi[i] = self.Ppoint(Xpoint[:, i])
-        index = np.argsort(Xpoint[1, :])
-        Xpoint = Xpoint[:, index]
+            Xpoint[i, :] = self.getX(po=po)
+            Xpsi[i] = self.Ppoint(Xpoint[i, :])
+        index = np.argsort(Xpoint[:, 1])
+        Xpoint = Xpoint[index, :]
         Xpsi = Xpsi[index]
         if select == 'lower':
             i = 0  # lower Xpoint
         elif select == 'upper':
             i = 1  # upper Xpoint
         elif select == 'primary':
-            i = np.argmax(Xpsi)  # primary Xpoint
-        self.Xerr = Xpsi[1] - Xpsi[0]
+            i = np.argmax(self.Ip_dir * Xpsi)  # primary Xpoint
+        self.Xerr = Xpsi[1] - Xpsi[0]  # for double-null
         self.Xpsi = Xpsi[i]
-        self.Xpoint = Xpoint[:, i]
+        self.Xpoint = Xpoint[i]
         self.Xpoint_array = Xpoint
         if i == 0:
             po[1] *= -1  # re-flip
@@ -416,14 +433,20 @@ class SF(object):
             self.Xloc = 'lower'
         else:
             self.Xloc = 'upper'
+        if plot:
+            for j in range(2):
+                plt.plot(self.Xpoint_array[j, 0],
+                         self.Xpoint_array[j, 1], 'C0o')
+            plt.plot(self.Xpoint[0], self.Xpoint[1], 'C1d')
         return (self.Xpsi, self.Xpoint)
 
     def getM(self, mo=None):
         if mo is None:
             mo = self.mo
+        self.Ip_dir = np.sign(self.Ppoint(mo))  # current sign
 
         def psi(m):
-            return -self.Ppoint(m)
+            return -self.Ip_dir*self.Ppoint(m)
         res = minimize(psi, np.array(mo), method='nelder-mead',
                        options={'xtol': 1e-7, 'disp': False})
         return res.x
@@ -434,7 +457,7 @@ class SF(object):
         return (self.Mpsi, self.Mpoint)
 
     def remove_contour(self):
-        for key in ['cfeild', 'cfeild_bndry']:
+        for key in ['cfield', 'cfield_bndry']:
             if hasattr(self, key):
                 delattr(self, key)
 
@@ -442,24 +465,23 @@ class SF(object):
         psi_boundary = 1.1 * (self.Xpsi - self.Mpsi) + self.Mpsi
         psi_bndry = np.pad(self.psi[1:-1, 1:-1], (1,),
                            mode='constant', constant_values=psi_boundary)
-        self.cfeild = cntr(self.x2d, self.z2d, self.psi)
-        self.cfeild_bndry = cntr(self.x2d, self.z2d, psi_bndry)
+        self.cfield = cntr(self.x2d, self.z2d, self.psi)
+        self.cfield_bndry = cntr(self.x2d, self.z2d, psi_bndry)
 
     def get_contour(self, levels, boundary=False):
         if boundary:
-            def cfeild(level): return self.cfeild_bndry.trace(level, level, 0)
+            def cfield(level): return self.cfield_bndry.trace(level, level, 0)
         else:
-            def cfeild(level): return self.cfeild.trace(level, level, 0)
+            def cfield(level): return self.cfield.trace(level, level, 0)
         lines = []
         for level in levels:
-            psi_line = cfeild(level)
+            psi_line = cfield(level)
             psi_line = psi_line[:len(psi_line) // 2]
             lines.append(psi_line)
         return lines
 
     def get_boundary(self, alpha=1-1e-3, plot=False):
         self.Spsi = alpha * (self.Xpsi - self.Mpsi) + self.Mpsi
-
         psi_line = self.get_contour([self.Spsi], boundary=True)[0]
         X, Z = np.array([]), np.array([])
         for line in psi_line:
@@ -642,10 +664,10 @@ class SF(object):
     def upsample_sol(self, nmult=10):
         k = 1  # smoothing factor
         for i, (x, z) in enumerate(zip(self.Xsol, self.Zsol)):
-            l = geom.length(x, z)
-            L = np.linspace(0, 1, nmult * len(l))
-            self.Xsol[i] = sinterp(l, x, k=k)(L)
-            self.Zsol[i] = sinterp(l, z, k=k)(L)
+            le = geom.length(x, z)
+            L = np.linspace(0, 1, nmult * len(le))
+            self.Xsol[i] = sinterp(le, x, k=k)(L)
+            self.Zsol[i] = sinterp(le, z, k=k)(L)
 
     # dx [m]
     def sol(self, dx=3e-3, Nsol=5, plot=False, update=False, debug=False):
@@ -667,14 +689,14 @@ class SF(object):
         self.upsample_sol(nmult=4)  # upsample
         self.get_legs(debug=debug)
         if plot:
-            color = sns.color_palette('Set2', 6)
-            for c, leg in enumerate(self.legs): # enumerate(['inner', 'outer']):
+            # enumerate(['inner', 'outer']):
+            for c, leg in enumerate(self.legs):
                 for i in np.arange(self.legs[leg]['i'])[::-1]:
                     x, z = self.snip(leg, i)
                     x, z = self.legs[leg]['X'][i], self.legs[leg]['Z'][i]
-                    plt.plot(x, z, color=color[c], linewidth=0.5)
+                    plt.plot(x, z, color='C0', linewidth=0.5)
 
-    def add_core(self):  # refarance from low-feild midplane
+    def add_core(self):  # refarance from low-field midplane
         for i in range(self.Nsol):
             for leg in ['inner', 'inner1', 'inner2', 'outer',
                         'outer1', 'outer2']:
@@ -900,7 +922,7 @@ class SF(object):
                 else:
                     ncut = np.arange(len(x))[x > self.rcirc][0]
                     xin, tin = x[:ncut], t[:ncut]
-                    nx = self.minimum_feild(xin, tin)  # minimum feild
+                    nx = self.minimum_field(xin, tin)  # minimum field
                     rpre, tpre = xin[:nx + 1], tin[:nx + 1]
                     rpost, tpost = xin[nx:], tin[nx:]
                     loop = True
@@ -981,7 +1003,7 @@ class SF(object):
     def get_graze(self, point, target):
         T = target / np.sqrt(target[0]**2 + target[1]**2)  # target vector
         B = self.Bpoint([point[0], point[1]])
-        B /= np.sqrt(B[0]**2 + B[1]**2)  # poloidal feild line vector
+        B /= np.sqrt(B[0]**2 + B[1]**2)  # poloidal field line vector
         theta = np.arccos(np.dot(B, T))
         if theta > np.pi / 2:
             theta = np.pi - theta
@@ -1000,9 +1022,9 @@ class SF(object):
         Bm = np.abs(self.bcentr * self.xcentr)
         for x, z in zip(Xsol, Zsol):
             B = self.Bpoint([x, z])
-            Bp = np.sqrt(B[0]**2 + B[1]**2)  # polodial feild
+            Bp = np.sqrt(B[0]**2 + B[1]**2)  # polodial field
             Bphi = Bm / x  # torodal field
-            Xi = np.append(Xi, Bphi / Bp)  # feild expansion
+            Xi = np.append(Xi, Bphi / Bp)  # field expansion
         return Xi
 
     def connection(self, leg, layer_index, L2D=0):
@@ -1044,6 +1066,7 @@ class SF(object):
         x, z = geom.clock(x, z, reverse=True)
         self.shape['V'] = loop_vol(x, z, plot=plot)
         return self.shape
+
 
 if __name__ == '__main__':
 

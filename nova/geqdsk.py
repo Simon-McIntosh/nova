@@ -65,6 +65,7 @@ def read(f):
     if len(s) < 3:
         raise IOError("First line must contain at least 3 numbers")
     name = s[0]
+    header = desc  # file header
     sint = []  # extract intergers from first line
     for s_ in s:
         try:
@@ -180,6 +181,7 @@ def read(f):
 
     # Create dictionary of values to return
     result = {'name': name,
+              'header': header,  # first line of eqdsk file
               # Number of horizontal and vertical points
               'nx': nxefit, 'ny': nyefit,
               'x': x, 'z': z,               # Location of the grid-points

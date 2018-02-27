@@ -75,7 +75,7 @@ class Setup(object):
             [0.78 - 0.2, 1.304 - 0.2])  # blanket+sheild #PMI
         self.build['BS'] -= (self.build['tfw'] + self.build['tBBsupport'])
         BBfrac = np.array([1, 1])
-        demo = DEMO()  # load from xls baseline file
+        # demo = DEMO()  # load from xls baseline file
         # demo.blanket_thickness()  # min/max
         self.build['BB'] = [0.77531267590168096, 1.300269571583071]
         # self.build['BB'] = list(BBfrac*self.build['BS'])  # blanket (in/out)
@@ -89,14 +89,16 @@ class Setup(object):
         self.build['VV'] = [0.5, 1.2]  # vacumn vessel thickness (in/out)
         self.TF = {}
         self.TF['opp'] = 'L'  # L==length, V==volume
-        self.coils = {'internal': {'id': [], 'dR': [], 'dZ': []},  # coils structure
+        # coils structure
+        self.coils = {'internal': {'id': [], 'dR': [], 'dZ': []},
                       'external': {'id': [], 'dR': [], 'dZ': []}}
 
     def backfill(self):
         for key in list(self.targets)[1:]:  # backfill defaults
             for default in list(self.targets['default']):
                 if default not in self.targets[key]:
-                    self.targets[key][default] = self.targets['default'][default]
+                    self.targets[key][default] = \
+                        self.targets['default'][default]
 
     def update(self, configuration):  # update
         self.configuration = configuration
@@ -123,7 +125,7 @@ class Setup(object):
             self.dataname = 'SFm'
             self.filename = '/Equil_AR3d1_16coils_SFminus_v4_2015' +\
                 '_09_bt_1d03li_0d8_Ipl_20d25_SOF.eqdsk'
-            #self.filename = '/2015_SFminus_eqdsk_2MCQRZ_v1_0_IDM.eqdsk'
+            # self.filename = '/2015_SFminus_eqdsk_2MCQRZ_v1_0_IDM.eqdsk'
             self.targets['default']['dPlate'] = 0.35  # target plate length
             self.targets['inner1'] = {
                 'L2D': [1.1 + 0.52], 'open': True, 'dR': 0}

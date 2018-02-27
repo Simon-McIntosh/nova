@@ -59,7 +59,7 @@ class EQ(object):
 
     def limits(self, boundary):
         X, Z = boundary.get('X'), boundary.get('Z')
-        for key in ['rmin', 'rmax', 'zmin', 'zmax']:
+        for key in ['xmin', 'xmax', 'zmin', 'zmax']:
             if key in boundary.keys():
                 if 'x' in key:
                     var = X
@@ -219,9 +219,9 @@ class EQ(object):
         psi = np.zeros(self.Ne)
         for name in self.pf.sub_coil.keys():
             x, z = self.pf.sub_coil[name]['x'], self.pf.sub_coil[name]['z']
-            I = self.pf.sub_coil[name]['I']
+            Ic = self.pf.sub_coil[name]['Ic']
             if not self.ingrid(x, z):
-                psi += cc.mu_o * I * cc.green(self.Re, self.Ze, x, z)
+                psi += cc.mu_o * Ic * cc.green(self.Re, self.Ze, x, z)
         self.psi_external = psi
         return psi
 
@@ -245,12 +245,12 @@ class EQ(object):
     def coil_core(self):
         for name in self.pf.sub_coil.keys():
             x, z = self.pf.sub_coil[name]['x'], self.pf.sub_coil[name]['z']
-            I = self.pf.sub_coil[name]['I']
+            Ic = self.pf.sub_coil[name]['Ic']
             if self.ingrid(x, z):
                 i = np.argmin(np.abs(x - self.x))
                 j = np.argmin(np.abs(z - self.z))
                 self.b[self.indx(i, j)] += -self.mu_o * \
-                    I * self.x[i] / (self.dA)
+                    Ic * self.x[i] / (self.dA)
 
     def set_vacuum(self, GS):
         X, Z = geom.inloop(self.sf.xbdry, self.sf.zbdry,
@@ -282,7 +282,6 @@ class EQ(object):
                         - self.sf.FFprime(psi)
                     self.Ip -= self.dA * self.bpl[index] / (self.mu_o * x)
             scale_plasma = self.sf.cpasma / self.Ip
-            print(self.Ip)
             self.sf.b_scale = scale_plasma
         for i, index in zip(range(self.Nplasma), self.plasma_index):
             self.b[index] = self.bpl[index] * self.sf.b_scale
@@ -294,19 +293,19 @@ class EQ(object):
         for index in range(self.Nplasma):
             i, j = self.ij(self.plasma_index[index])
             x, z = self.x[i], self.z[j]
-            I = -self.dA * self.b[self.plasma_index[index]] / (self.mu_o * x)
+            Ic = -self.dA * self.b[self.plasma_index[index]] / (self.mu_o * x)
             Rp[index], Zp[index] = x, z
-            Ip[index] = I
+            Ip[index] = Ic
             Np[index] = 1
         index = -1
-        for x, z, I, n in zip(Rp, Zp, Ip, Np):
+        for x, z, Ic, n in zip(Rp, Zp, Ip, Np):
             if n > 0:
                 index += 1
                 self.plasma_coil['Plasma_{:1.0f}'.format(index)] = \
                     {'x': x, 'z': z, 'dx': self.dx * np.sqrt(n),
                      'dz': self.dz * np.sqrt(n),
                      'rc': np.sqrt(n * self.dx**2 + n * self.dz**2) / 2,
-                     'I': I, 'index': index}
+                     'Ic': Ic, 'index': index}
         self.pf.plasma_coil = self.plasma_coil
 
     def get_plasma_coil(self):
@@ -354,17 +353,17 @@ class EQ(object):
         self.psi_plasma = self.solve()
 
     def set_control_current(self, name, **kwargs):  # set filliment currents
-        if 'I' in kwargs:
-            I = kwargs['I']
+        if 'Ic' in kwargs:
+            Ic = kwargs['Ic']
         elif 'factor' in kwargs:
-            I = (1 + kwargs['factor']) * self.coil_o[name]['Io']
+            Ic = (1 + kwargs['factor']) * self.coil_o[name]['Io']
         else:
             errtxt = '\n'
-            errtxt += 'kw input \'I\' or \'factor\'\n'
+            errtxt += 'kw input \'Ic\' or \'factor\'\n'
             raise ValueError(errtxt)
         for subcoil in range(self.coil_o[name]['Nf']):
             subname = '{}_{:1.0f}'.format(name, subcoil)
-            self.pf.sub_coil[subname]['I'] = I / self.coil_o[name]['Nf']
+            self.pf.sub_coil[subname]['Ic'] = Ic / self.coil_o[name]['Nf']
 
     def reset_control_current(self):
         self.cc = 0
@@ -419,12 +418,12 @@ class EQ(object):
             self.Ic = {'v': 0, 'h': 0}  # control current
             # stability coil pair [0,-1],[1,-1]
             for index, sign in zip([0, -1], [1, -1]):
-                dI = self.PID(self.Zerr[i], 'vertical', index, kp=kp, ki=ki)
-                self.Ic['v'] += sign * (dI)
+                dIc = self.PID(self.Zerr[i], 'vertical', index, kp=kp, ki=ki)
+                self.Ic['v'] += sign * (dIc)
             for index in range(1):
-                dI = self.PID(self.Rerr[i], 'horizontal',
+                dIc = self.PID(self.Rerr[i], 'horizontal',
                               index, kp=0.5 * kp, ki=2 * ki)
-                self.Ic['h'] += dI
+                self.Ic['h'] += dIc
         # self.set_plasma_coil()  # for independance + Vcoil at start
         return self.Ic['v']
 
@@ -433,10 +432,10 @@ class EQ(object):
         gain = 1e5 / self.ccoil[feild]['value'][i]
         self.ccoil[feild]['Ip'][i] = gain * kp * error  # proportional
         self.ccoil[feild]['Ii'][i] += gain * ki * error  # intergral
-        dI = self.ccoil[feild]['Ip'][i] + self.ccoil[feild]['Ii'][i]
-        I = self.coil_o[name]['Io'] + dI
-        self.set_control_current(name, I=I)
-        return dI
+        dIc = self.ccoil[feild]['Ip'][i] + self.ccoil[feild]['Ii'][i]
+        Ic = self.coil_o[name]['Io'] + dIc
+        self.set_control_current(name, Ic=Ic)
+        return dIc
 
     def gen_opp(self, z=None, Zerr=5e-4, Nmax=100, **kwargs):
         self.to = time()  # time at start of gen opp loop
@@ -649,16 +648,16 @@ class EQ(object):
             rlim, zlim = [self.x[0], self.x[-1]], [self.z[0], self.z[-1]]
         cmap = pl.get_cmap('Purples_r')
         # cmap = pl.get_cmap('RdBu')
-        cmap._init() # create the _lut array, with rgba values
-        cmap._lut[-4,-1] = 1.0  # set zero value clear
-        cmap._lut[0,:-1] = 1  # set zero value clear
+        cmap._init()  # create the _lut array, with rgba values
+        cmap._lut[-4, -1] = 1.0  # set zero value clear
+        cmap._lut[0, :-1] = 1  # set zero value clear
 
         norm = MidpointNormalize(midpoint=0)
         pl.imshow(b, cmap=cmap, norm=norm, vmin=b.min(),vmax=1.1*b.max(),
                   extent=[rlim[0], rlim[-1], zlim[0], zlim[-1]],
                   interpolation='nearest', origin='lower', alpha=alpha)
-        #c = pl.colorbar(orientation='horizontal')
-        #c.set_xlabel(x'$j$ MAm$^{-1}$')
+        # c = pl.colorbar(orientation='horizontal')
+        # c.set_xlabel(x'$j$ MAm$^{-1}$')
 
     def plotj(self, sigma=0, trim=False):
         self.GSoper()
@@ -686,7 +685,7 @@ class EQ(object):
         '''
         cmap = pl.get_cmap('Purples_r')
         # cmap = pl.get_cmap('RdBu')
-        cmap.set_under(color='w',alpha=0)
+        cmap.set_under(color='w', alpha=0)
         pl.imshow(scale * m.T, cmap=cmap, vmin=0.1,
                   extent=[rlim[0], rlim[-1], zlim[0], zlim[-1]],
                   interpolation='nearest', origin='lower', alpha=1)
@@ -710,13 +709,13 @@ class EQ(object):
                 self.psi[i, j] = self.sf.Ppoint((self.x[i], self.z[j]))
 
     def add_Pcoil(self, x, z, coil):
-        rc, zc, I = coil['x'], coil['z'], coil['I']
+        xc, zc, Ic = coil['x'], coil['z'], coil['Ic']
         dx, dz = coil['dx'], coil['dz']
-        return self.mu_o * I * cc.green(x, z, rc, zc, dXc=dx, dZc=dz)
+        return self.mu_o * Ic * cc.green(x, z, xc, zc, dXc=dx, dZc=dz)
 
     def add_Bcoil(self, x, z, coil):
-        rc, zc, I = coil['x'], coil['z'], coil['I']
-        return self.mu_o * I * cc.green_feild(x, z, rc, zc)
+        xc, zc, Ic = coil['x'], coil['z'], coil['Ic']
+        return self.mu_o * Ic * cc.green_feild(x, z, xc, zc)
 
     def get_coil_psi(self):
         self.psi = np.zeros(np.shape(self.x2d))
@@ -761,17 +760,17 @@ class EQ(object):
 
     def Ppoint(self, point):
         psi = 0
-        for name in self.pf.sub_coil.keys():
+        for name in self.pf.sub_coil:
             psi += self.add_Pcoil(point[0], point[1], self.pf.sub_coil[name])
-        for name in self.plasma_coil.keys():
+        for name in self.plasma_coil:
             psi += self.add_Pcoil(point[0], point[1], self.plasma_coil[name])
         return psi
 
-    def Bpoint(self, point):  # re-named, was Bfeild
+    def Bpoint(self, point):
         feild = np.zeros(2)
-        for name in self.pf.sub_coil.keys():
+        for name in self.pf.sub_coil:
             feild += self.add_Bcoil(point[0], point[1], self.pf.sub_coil[name])
-        for name in self.plasma_coil.keys():
+        for name in self.plasma_coil:
             feild += self.add_Bcoil(point[0], point[1], self.plasma_coil[name])
         return feild
 

@@ -95,7 +95,7 @@ class read_plasma:
         self.Rvs3 = Rvs3
         self.Lvs3 = Lvs3
         self.tau_vs3 = self.Lvs3/self.Rvs3  # vs3 timeconstant
-        self.quench = np.zeros(self.dina.nf,  # construct data strucutre
+        self.quench = np.zeros(self.dina.nfolder,  # construct data strucutre
                                dtype=[('name', '60U'),
                                       ('t_cq', float),  # current quench
                                       ('i_cq', int),  # quench index
@@ -104,18 +104,21 @@ class read_plasma:
                                       ('discharge_type', '60U'),
                                       ('Icontrol', float),  # control
                                       ('Ivs3_ref', float),  # zero, no spike
-                                      ('Ifault', float)])  # fault
+                                      ('Ifault', float), # fault
+                                      ('Ivs3_o', float)])
 
         Ivs_dict = {'t': [], 'Icontol': [], 'Icp': [], 'Ifault': [],
                     'to': [], 'Io': []}
-        self.Ivs = [Ivs_dict.copy() for _ in range(self.dina.nf)]  # Ivs data
-        for i in range(self.dina.nf):
+        self.Ivs = [Ivs_dict.copy()
+                    for _ in range(self.dina.nfolder)]  # Ivs data
+        for i in range(self.dina.nfolder):
             self.read_file(i)  # load plasma file
             i_cq, t_cq, tdis, ttype = self.get_quench()
             self.quench[i]['name'] = self.name
             self.quench[i]['t_cq'] = t_cq
             self.quench[i]['i_cq'] = i_cq
             self.quench[i]['I_cq'] = self.Ip[i_cq]
+            self.quench[i]['Ivs3_o'] = self.Ivs_o[i_cq]
             self.quench[i]['discharge_time'] = tdis
             self.quench[i]['discharge_type'] = ttype
             max_index = np.argmax(abs(self.Ivs_o[i_cq:]))
@@ -148,7 +151,7 @@ class read_plasma:
         for i in range(2):
             text.append(linelabel(postfix='kA', value='1.1f',
                                   loc=loc, ax=ax[i]))
-        for i in range(self.dina.nf):
+        for i in range(self.dina.nfolder):
             color, iax = self.get_color(i)
             ax[iax].plot(1e3*self.Ivs[i]['t'], 1e-3*self.Ivs[i]['Icq'],
                          color=color)
@@ -177,14 +180,14 @@ class read_plasma:
         text = []
         for i in range(2):
             text.append(linelabel(postfix='', value='', ax=ax[i], Ndiv=20))
-        for i in range(self.dina.nf):
+        for i in range(self.dina.nfolder):
             self.read_file(i)  # load file
             i_cq = self.quench[i]['i_cq']
             I_cq = self.quench[i]['I_cq']
             color, iax = self.get_color(i)
-            ax[iax].plot(pl.x, pl.z, '-', color=color)
-            ax[iax].plot(pl.x[0], pl.z[0], '*', color=color)
-            ax[iax].plot(pl.x[i_cq], pl.z[i_cq], 's', color=color)
+            ax[iax].plot(self.x, self.z, '-', color=color)
+            ax[iax].plot(self.x[0], self.z[0], '*', color=color)
+            ax[iax].plot(self.x[i_cq], self.z[i_cq], 's', color=color)
             text[iax].add('$I_{cq}$ '+'{:1.1f}MA'.format(1e-6*I_cq))
         plt.axis('equal')
         plt.despine()
@@ -195,25 +198,30 @@ class read_plasma:
                                  label='{} up'.format(vde))
             ax[i].legend(handles=[h_down, h_up])
             text[i].plot()
-            # ax[i].set_xlabel('$t$ ms')
-            # ax[i].set_ylabel('$I_{vs3}$ kA')
+            ax[i].set_xlabel('$x$ m')
+        ax[0].set_ylabel('$y$ m')
+        plt.setp(ax[1].get_yticklabels(), visible=False)
 
-    def plot_Ivs_max(self):
+    def plot_Ivs_max(self, tau=32.5e-3):
         plt.figure()
-        X = range(self.dina.nf)
+        X = range(self.dina.nfolder)
+        Imax = np.zeros(self.dina.nfolder)
         for i, x in enumerate(X):
+            t = self.Ivs[i]['t']
+            Idina = self.Ivs[i]['Icq']
+            print(i, Idina[0])
+            It = Idina - 60e3*np.exp(-(t-t[0])/tau)
+            Imax[i] = It[np.argmax(abs(It))]
             color, iax = self.get_color(i)
-            plt.bar(x, 1e-3*self.quench['Iinput'][i], color=color,
-                    width=0.8, label='input')
+            plt.bar(x, 1e-3*Imax[i], color=color, width=0.8)
         # plt.bar(x, Itau, width=0.6,
         #         label=r'$\tau=${:1.0f}ms'.format(plasma.tau))
-        '''
-        max_index = np.argmax(abs(Itau))
-        va = 'top' if vs_sign > 0 else 'bottom'
-        plt.text(max_index, Itau[max_index],
-                 '{:1.0f}kA'.format(Itau[max_index]), va=va, ha='center',
+        max_index = np.argmax(abs(Imax))
+        va = 'bottom'
+        plt.text(max_index, 1e-3*Imax[max_index],
+                 ' {:1.0f}kA'.format(1e-3*Imax[max_index]),
+                 va=va, ha='center',
                  color='k', weight='bold', rotation=90)
-        '''
         plt.xticks(X, self.dina.folders, rotation=70)
         plt.ylabel('$I_{vs3}$ kA')
         # plt.legend()
@@ -323,14 +331,16 @@ if __name__ == '__main__':
 
     # pl.plot_power()
 
-    # pl.read_file(4)
-    # pl.get_quench(plot=True)
+    pl.read_file(11)
+    pl.get_quench(plot=True)
 
     pl.plot_plasma()
 
+    pl.plot_Ivs_max()
+
     '''
     ax = plt.subplots(2, 1, sharex=True)[1]
-    for i in range(pl.dina.nf):
+    for i in range(pl.dina.nfolder):
         pl.read_file(i)
         pl.plot_currents(ax=ax)
     '''

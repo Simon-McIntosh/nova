@@ -1,9 +1,6 @@
 from read_dina import dina
 from amigo.IO import readtxt
 import numpy as np
-import nep
-from amigo.IO import class_dir
-from os.path import join
 from amigo.pyplot import plt
 from nova.streamfunction import SF
 import matplotlib.animation as manimation

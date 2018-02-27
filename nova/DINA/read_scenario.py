@@ -76,7 +76,7 @@ class read_scenario:
             self.data[var] = np.array(self.data[var])[~nan_index]
 
     def load_coils(self, plot=False):
-        pf_geom = PFgeom()
+        pf_geom = PFgeom(VS=True)
         self.pf = pf_geom.pf
         if plot:
             self.pf.plot(label=True)
@@ -249,11 +249,15 @@ if __name__ is '__main__':
     scn = read_scenario()
     scn.read_file(folder='15MA DT-DINA2015-05')
 
-    scn.load_VS3(n=100, plot=True)
+    # scn.load_plasma()
+    # scn.load_VS3(n=100, plot=True)
 
     # Ic = scn.get_current(ind, VS3=False)  # get coil currents (no VS3)
     #scn.plot_currents()
 
+    scn.load_plasma()
+    scn.pf.coil['upperVS']['Ic'] = -60e3
+    scn.pf.coil['lowerVS']['Ic'] = 60e3
     scn.plot_plasma(scn.flattop_index[-1])
 
     # scn.get_noise()

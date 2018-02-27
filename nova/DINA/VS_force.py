@@ -1,4 +1,4 @@
-from read_dina import get_folders
+from nep.DINA.read_dina import dina
 import nep
 from amigo.IO import class_dir
 from os.path import join
@@ -13,13 +13,14 @@ from amigo.addtext import linelabel
 
 class Force:
 
-    def __init__(self, directory):
-        self.directory = directory
+    def __init__(self, database_folder='operations'):
+        self.pl = read_plasma(database_folder)  # load time trace
+        self.psi = read_psi(database_folder)  # load psi
         self.vs = VS()  # load VS object
 
     def load_scenario(self, folder):
-        self.pl = read_plasma(directory, folder=folder)  # load time trace
-        self.psi = read_psi(directory, folder)  # load psi
+        self.pl.read_file(folder)
+        self.psi.read_file(folder)
         self.initalize_arrays()
 
     def initalize_arrays(self):
@@ -100,12 +101,9 @@ class Force:
 
 
 if __name__ == '__main__':
-    directory = join(class_dir(nep), '../Scenario_database/disruptions')
-    folders = get_folders(directory)
-    folders = sorted(folders)
 
-    f = Force(directory)
-    f.load_scenario(folders[3])  # MD_UP_exp16
+    f = Force('operations')
+    f.load_scenario(3)  # MD_UP_exp16
     f.calculate(plot=True)
 
     # f.calculate_max()

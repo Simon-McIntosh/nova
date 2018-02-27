@@ -9,6 +9,8 @@ from nep.coil_geom import VSgeom, PFgeom
 from nep.DINA.read_tor import read_tor
 from scipy.interpolate import interp1d
 from read_dina import timeconstant
+from nep.DINA.read_plasma import read_plasma
+from amigo.addtext import linelabel
 
 
 class inductance:
@@ -30,16 +32,18 @@ class inductance:
     def get_coil(self, coil):
         x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
         Ic = coil['Ic']
-        return x, z, dx, dz, Ic
+        if 'R' in coil:
+            R = coil['R']
+        else:
+            R = 0
+        return x, z, dx, dz, Ic, R
 
-    def add_pf_coil(self, coil, R=[0], turns=None):
+    def add_pf_coil(self, coil, turns=None):
         if turns is None:
             turns = np.ones(len(coil))
-        Rc, Ic = np.zeros(len(coil)), np.zeros(len(coil))
-        Rc[:len(R)] = R  # resistance array
-        for name, rc, nt in zip(coil, Rc, turns):
-            x, z, dx, dz, Ic = self.get_coil(coil[name])
-            self.add_coil(x, z, dx, dz, Ic, R=rc, nt=nt)
+        for name, nt in zip(coil, turns):
+            x, z, dx, dz, Ic, R = self.get_coil(coil[name])
+            self.add_coil(x, z, dx, dz, Ic, R=R, nt=nt)
 
     def initalise_cp_set(self):
         name = 'cp{:d}'.format(self.ncp)  # cp set name
@@ -151,13 +155,16 @@ class inductance:
         self.Rc = np.append(self.Rc[self.nd['dr']],
                             self.Rc[self.nd['dc']], axis=0)
         self.Rc = np.dot(self.T.T, self.Rc)  # sum
-        self.Ic = np.dot(self.T.T, self.Io)
+
+        self.Ic = np.append(self.Io[self.nd['dr']],
+                            self.Io[self.nd['dc']], axis=0)
+        self.Ic = np.dot(self.T.T, self.Ic)  # sum
         # self.Ic = self.Io[self.nd['dr']]  # retained inital currents
 
 
 if __name__ is '__main__':
 
-    Io = 60e3
+    Io = -60e3
     Ip = -15e6
 
     Lbb = 0.2e-3  # busbar inductance
@@ -166,24 +173,41 @@ if __name__ is '__main__':
     vs_geom = VSgeom()
     pf_geom = PFgeom()
 
-    tor_index = 0
+    # 0: 'MD_DW_exp22'
+    # 1: 'MD_DW_lin36'
+    # 2: 'MD_DW_lin50'
+    # 3: 'MD_UP_exp16'
+    # 4: 'MD_UP_exp22'
+    # 5: 'MD_UP_lin50'
+    # 6: 'VDE_DW_fast'
+    # 7: 'VDE_DW_slow',
+    # 8: 'VDE_DW_slow_fast'
+    # 9: 'VDE_UP_fast'
+    # 10: 'VDE_UP_slow'
+    # 11: 'VDE_UP_slow_fast'
+
+    file_index = 3
+    pl = read_plasma('disruptions')
+    pl.load_Ivs3()  # load Ivs3 system
+    t_cq = pl.quench[file_index]['t_cq']  # current quench
+    Ivs3_o = pl.quench[file_index]['Ivs3_o']  # inital vs3 current
+
     tor = read_tor('disruptions')
-    tor.read_file(3)
+    tor.read_file(file_index)
+    tor_index = np.argmin(abs(tor.t-t_cq))
     tor.set_current(tor_index)
 
-    # ind.add_coil(5.3, 0, 0.1, 0.1, Ip, 0)  # plasma  3.2
     nvs_o = ind.nC
-    Ip = 0
+    npl = len(tor.plasma_coil[tor_index])
     for i, coil in enumerate(tor.plasma_coil[tor_index]):  # plasma
-        x, z, dx, dz, Ic = ind.get_coil(tor.plasma_coil[tor_index][coil])
-        Ip += Ic
-        ind.add_coil(x, z, dx, dz, Ic, nt=1, R=0)
+        x, z, dx, dz, Ic, R = ind.get_coil(tor.plasma_coil[tor_index][coil])
+        ind.add_coil(x, z, dx, dz, Ic, R=R, nt=1/npl)
         if i > 0:
-            ind.add_cp([nvs_o, nvs_o+i], antiphase=False)  # link coils
-    print(Ip)
+            ind.add_cp([nvs_o, nvs_o+i])  # link coils
+
     nvs_o = ind.nC
     turns = np.append(np.ones(4), -np.ones(4))
-    ind.add_pf_coil(vs_geom.pf.coil, R=[17.66e-3], turns=turns)
+    ind.add_pf_coil(vs_geom.pf.coil, turns=turns)
     vs3 = 'single'
 
     if vs3 == 'single':
@@ -195,32 +219,31 @@ if __name__ is '__main__':
         for i, index in enumerate(nvs_o+np.arange(5, 8)):  # upper loops
             ind.add_cp([nvs_o+4, index])
 
-
     for coil in tor.coil:  # add pf coils
-        x, z, dx, dz, Ic = ind.get_coil(tor.coil[coil])
+        x, z, dx, dz, Ic, R = ind.get_coil(tor.coil[coil])
         nt = pf_geom.coil[coil]['N']
-        ind.add_coil(x, z, dx, dz, Ic, nt=nt, R=0)
-    '''
-    for i, coil in enumerate(tor.blanket_coil):
-        x, z, dx, dz, Ic = ind.get_coil(tor.blanket_coil[coil])
+        ind.add_coil(x, z, dx, dz, Ic, R=R, nt=nt)
 
-        ind.add_coil(x, z, dx, dz, Ic, nt=nt, R=1e-3)
+    for i, coil in enumerate(tor.blanket_coil):  # blanket
+        x, z, dx, dz, Ic, R = ind.get_coil(tor.blanket_coil[coil])
+        nt = 1 if np.mod(i, 2) == 0 else -1
+        ind.add_coil(x, z, dx, dz, Ic, R=R, nt=nt)
         if np.mod(i, 2) == 1:
-            ind.add_cp([ind.nC-2, ind.nC-1], antiphase=True)  # couple
+            ind.add_cp([ind.nC-2, ind.nC-1])  # couple
 
-    Rvessel = 3e-3*np.ones(len(tor.vessel_coil))
-    ind.add_pf_coil(tor.vessel_coil, R=Rvessel)
-    ind.add_cp([ind.nC-3, ind.nC-2], antiphase=False)  # blanket support
-    '''
+    Rvessel = 1e-3*np.ones(len(tor.vessel_coil))  # vessel
+    ind.add_pf_coil(tor.vessel_coil)
+    ind.add_cp([ind.nC-3, ind.nC-2])  # blanket support
+
     ind.assemble()
     ind.assemble_cp_nodes()
     ind.constrain()
 
     ind.Rc[0] = ind.M[0, 0]/16e-3  # update plasma resistance
-    ind.Ic[1] = Io  # vs3 inital current
+    ind.Ic[1] = Ivs3_o + Io  # add vs3 current
+    ind.Rc[1] = 17.66e-3  # total vs3 resistance
     ind.M[1, 1] += Lbb  # add busbar resistance
-
-    tau = ind.M[1, 1] / 17.66e-3
+    tau = ind.M[1, 1] / ind.Rc[1]
 
     t = np.linspace(0, 0.3, 1000)
 
@@ -230,41 +253,48 @@ if __name__ is '__main__':
         return Idot
 
     Ic_o = np.copy(ind.Ic)
-    Ic_o[1] = 0  # zero inital current referance
+    Ic_o[1] -= Io  # subtract inital current delta
     Ivs_o = odeint(dIdt, Ic_o, t).T[1]
-
     Iode = odeint(dIdt, ind.Ic, t)
-
-    ax = plt.subplots(2, 1, sharex=True)[1]
-    for i, Ic in enumerate(Iode.T[:2]):
-        if i == 0:
-            ax[0].plot(1e3*t, 1e-6*Ic)
-        else:
-            ax[1].plot(1e3*t, 1e-3*Ic)
+    Ic = Iode.T[1, :]
 
     dIdt = np.gradient(Ivs_o, t)
     vs_o = Ivs_o*ind.Rc[1] + ind.M[1, 1]*dIdt  # voltage source
     vs_fun = interp1d(t, vs_o, fill_value='extrapolate')
+    tc = timeconstant(t, Ic-Ivs_o, trim_fraction=0.5)
+    tdis, ttype, tfit, Ifit = tc.fit(plot=False)
 
-    def dIdt_fun(Ic, t):
-        g = (vs_fun(t) - Ic*ind.Rc[1])/ind.M[1, 1]
-        return g
+    ax = plt.subplots(1, 1, sharex=True)[1]
+    text = linelabel(value='', postfix='ms')
+    ax.plot(1e3*t, 1e-3*Ivs_o, '-', color='gray', label='$I_{DINA}$')
+    ax.plot(1e3*t, 1e-3*Ic, 'C3',
+            label='$I_o+$'+'{:1.0f}kA'.format(1e-3*Io))
 
-    # Iode = Ivs_o[0]+odeint(dIdt_fun, Io, t)
-    # ax[1].plot(1e3*t, 1e-3*(Ivs_o + Io*np.exp(-t/tau)), '--')
-    # ax[1].plot(1e3*t, 1e-3*Iode, '-.')
-    ax[1].plot(1e3*t, 1e-3*Ivs_o, '-', color='gray')
-    ax[1].plot(1e3*t, 1e-3*(Ic-Ivs_o), '-.', color='gray')
+    ax.plot(1e3*t, 1e-3*(Ic-Ivs_o), '-.', color='C0', label=r'$\Delta I$')
+    ax.plot(1e3*tfit, 1e-3*Ifit, 'C0-')
+    text.add(r'$\tau_{fit}=$'+'{:1.1f}ms'.format(1e3*tdis))
+    text.plot()
+    ax.plot(1e3*t, 1e-3*(Ivs_o + Io*np.exp(-t/tdis)), 'C3--', label='fit')
 
-    tc = timeconstant(t, Ic-Ivs_o, trim_fraction=0.25)
-    tdis, ttype, tfit, Ifit = tc.fit(plot=True, ax=ax[1])
+    plt.legend()
+    plt.despine()
+    plt.xlabel('$t$ ms')
+    plt.ylabel('$I$ kA')
+
+
     print('tau_o', 1e3*tau, 'ms')
     print('tau', 1e3*tdis, 'ms')
 
-    ax[1].plot(1e3*t, 1e-3*(Ivs_o + Io*np.exp(-t/tdis)), '--')
+    max_index = np.argmax(abs(Ic))
+    print('Ivs3 max {:1.1f}kA'.format(1e-3*Ic[max_index]))
 
     plt.figure()
-    dIdt_ = np.gradient(Ic, t)
+    ind.pf.plot()
+    ax = plt.gca()
+    txt = tor.name
+    txt += '\nplasma-upper: {:1.1f}'.format(1e6*ind.M[0, 2]) + r'$\mu$H'
+    txt += '\nplasma-lower: {:1.1f}'.format(1e6*ind.M[0, 1]) + r'$\mu$H'
+    ax.text(0.5, 1.0, txt, transform=ax.transAxes,
+            ha='center', va='bottom',
+            bbox=dict(facecolor='lightgray'))
 
-    plt.plot(1e3*t, 1e-6*Ivs_o**2*ind.M[1, 1], color='gray')
-    plt.plot(1e3*t, 1e-6*(Ic-Ic[0])**2*ind.M[1, 1])

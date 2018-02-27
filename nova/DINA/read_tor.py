@@ -54,11 +54,6 @@ class read_tor:
             plasma_coil, Ipl = self.plasma_filaments(frame)
             self.plasma_coil.append(plasma_coil)
             self.Ibar['vv'][i] = np.mean(-1e3*np.array(frame[1])[:self.nVV])
-            # self.Ibar['vv'][i] = np.sum(-1e3*np.array(frame[1])[:self.nVV])
-            #self.Ibar['vv'][i] = np.sum(np.array(frame[1])[:self.nVV] /
-            #                            self.rVV)
-            #self.Ibar['vv'][i] = -1e-3*(frame[1][self.vv_vs_index[0]] -
-            #                            frame[1][self.vv_vs_index[1]])
             self.Ibar['pl'][i] = Ipl
 
     def plasma_filaments(self, frame, dx=0.1, dz=0.1):
@@ -129,7 +124,7 @@ class read_tor:
         if plot:
             self.plot_filaments()
 
-    def store_filaments(self, dx=0.15, dz=0.15):
+    def store_filaments(self, dx=0.15, dz=0.15, rho=0.8e-6, t=60e-3):
         rc = np.sqrt(dx**2 + dz**2) / 4
         nvv, nbl = count(0), count(0)
         self.blanket_coil = OrderedDict()
@@ -137,13 +132,15 @@ class read_tor:
         vv = {'x': [], 'z': []}  # vv coils index
         for i, filament in enumerate(self.filaments):
             for j in range(filament['n_turn']):
-                x1, x2 = filament['x1'][j], filament['x2'][j]
-                z1, z2 = filament['z1'][j], filament['z2'][j]
+                x1, x2 = 1e-2*filament['x1'][j], 1e-2*filament['x2'][j]
+                z1, z2 = 1e-2*filament['z1'][j], 1e-2*filament['z2'][j]
                 sign = filament['turn'][j]
-                x = 1e-2*np.mean([x1, x2])
-                z = 1e-2*np.mean([z1, z2])
+                x = np.mean([x1, x2])
+                z = np.mean([z1, z2])
+                R = rho*2*np.pi*x / (t*np.sqrt((x2-x1)**2 + (z2-z1)**2))
                 coil = {'Ic': 0, 'dx': dx, 'dz': dz, 'rc': rc,
-                        'x': x, 'z': z, 'index': i, 'sign': sign}
+                        'x': x, 'z': z, 'index': i, 'sign': sign,
+                        'R': R}  # filament resistance
                 if filament['n_turn'] == 1:  # vessel
                     name = 'vv_{}'.format(next(nvv))
                     self.vessel_coil[name] = coil
@@ -262,7 +259,7 @@ if __name__ == '__main__':
 
     # tor.set_current(200)
 
-    tor.plot(200)
+    tor.plot(130)
 
 
 

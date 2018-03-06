@@ -14,12 +14,9 @@ class read_eqdsk:
 
     def plot(self):
         self.sf.contour()
-        print(self.sf.cpasma)
+
 
 if __name__ == '__main__':
 
     eqdsk = read_eqdsk()
     eqdsk.plot()
-
-
-

@@ -13,6 +13,7 @@ class read_psi:
 
     def __init__(self, database_folder='disruptions'):
         self.dina = dina(database_folder)
+        self.pl = read_plasma(database_folder)
 
     def read_file(self, folder):
         self.folder = folder
@@ -22,14 +23,13 @@ class read_psi:
         self.initalise_arrays()
         self.read_scalars()
         self.vs = VS()  # load VS coil object
-        self.pl = read_plasma(self.dina.database_folder)
         self.pl.read_file(self.folder)  # load time trace
 
     def read_header(self):
         # read grid - calculate file size
         with readtxt(self.filename) as self.rt:
-            index = self.rt.readline(True)
-            self.nfw, self.nzero, _, self.nsep, self.nflux = index
+            index = self.rt.readline(split=True)
+            self.nfw, self.nzero, __, self.nsep, self.nflux = index
             self.fw = np.zeros((self.nfw, 2))
 
             self.rt.skipnumber(2*self.nzero)  # skip zeros
@@ -158,7 +158,7 @@ class read_psi:
             'ncoil': 0, 'xc': np.array([]), 'zc': np.array([]),  # coils
             'dxc': np.array([]), 'dzc': np.array([]), 'Ic': np.array([])}
         if not hasattr(self, 'sf'):  # create
-            self.sf = SF('DINA_'+self.name, eqdsk=eqdsk)
+            self.sf = SF(eqdsk=eqdsk)
         else:
             self.sf.update_plasma(eqdsk)  # update
         return
@@ -167,15 +167,14 @@ class read_psi:
         # magnetic field vector at points fn(t)
         B = np.zeros((self.nt, 3, self.vs.nP))
         F = np.zeros((self.nt, 3, self.vs.nP))
-        Fo = np.zeros((self.nt, 3, self.vs.nP))
         tick = clock(self.nt)
         with readtxt(self.filename) as self.rt:
             for i in range(self.nt):
                 self.read_array()  # read psi matp
                 self.update_sf()  # update eqdsk
-                B[i], F[i], Fo[i] = self.get_force()
+                B[i], F[i] = self.get_force()
                 tick.tock()
-        return B, F, Fo
+        return B, F
 
     def get_field(self, points):
         nP = len(points)
@@ -197,20 +196,23 @@ class read_psi:
                 plt.arrow(point[0], point[1],
                           scale * F[0, i], scale * F[2, i],
                           width=0.05, head_length=0.15, color='C3')
-        return B, F, Fo
+        return B, F
 
-    def plot(self, time_index=0, levels=None):
+    def plot(self, time_index=0, **kwargs):
         if time_index != 0:
             self.read_single_array(time_index)
             self.update_sf()
 
-        self.sf.contour(boundary=False)
+        self.sf.contour(boundary=False, **kwargs)
         self.vs.plot()
-        self.get_force(True)
-        plt.plot(self.fw[:, 0], self.fw[:, 1])
+        # self.get_force(plot=True)
+        self.plot_fw()
         plt.plot(self.sep[:, 0], self.sep[:, 1], linewidth=2.5, color='gray')
         plt.axis('off')
         plt.axis('equal')
+
+    def plot_fw(self):
+        plt.plot(self.fw[:, 0], self.fw[:, 1], 'C0')
 
     def movie(self):
         fig, ax = plt.subplots(1, 1, figsize=(6, 10))
@@ -250,6 +252,6 @@ if __name__ == '__main__':
 
     # psi.movie()
     # plt.figure(figsize=(7, 10))
-    psi.plot(30)
+    psi.plot(200)
 
 

@@ -144,22 +144,25 @@ class inductance:
         self.Tc[index, :] = np.dot(-np.linalg.inv(self.Cc), self.Cr)
         self.T = np.append(np.identity(self.nd['nr']), self.Tc, axis=0)
 
-        # sort and couple M and Ic
+        # sort and couple M, Rc and Ic
         self.M = np.append(self.M[self.nd['dr'], :],
                            self.M[self.nd['dc'], :], axis=0)
         self.M = np.append(self.M[:, self.nd['dr']],
                            self.M[:, self.nd['dc']], axis=1)
         self.M = np.dot(np.dot(self.T.T, self.M), self.T)
-        self.Minv = np.linalg.inv(self.M)
-
+        # turn resistance
         self.Rc = np.append(self.Rc[self.nd['dr']],
                             self.Rc[self.nd['dc']], axis=0)
         self.Rc = np.dot(self.T.T, self.Rc)  # sum
-
+        # turn current
         self.Ic = np.append(self.Io[self.nd['dr']],
                             self.Io[self.nd['dc']], axis=0)
         self.Ic = np.dot(self.T.T, self.Ic)  # sum
-        # self.Ic = self.Io[self.nd['dr']]  # retained inital currents
+
+    def dIdt(self, Ic, t):  # current rate (function of odeint)
+        Idot = np.dot(-self.Minv, Ic*self.Rc)
+        return Idot
+
 
 
 if __name__ is '__main__':
@@ -190,7 +193,7 @@ if __name__ is '__main__':
     pl = read_plasma('disruptions')
     pl.load_Ivs3()  # load Ivs3 system
     t_cq = pl.quench[file_index]['t_cq']  # current quench
-    Ivs3_o = pl.quench[file_index]['Ivs3_o']  # inital vs3 current
+    Ivs_o = pl.Ivs_data[file_index]['Ireferance'][0]  # inital vs3 current
 
     tor = read_tor('disruptions')
     tor.read_file(file_index)
@@ -240,50 +243,49 @@ if __name__ is '__main__':
     ind.constrain()
 
     ind.Rc[0] = ind.M[0, 0]/16e-3  # update plasma resistance
-    ind.Ic[1] = Ivs3_o + Io  # add vs3 current
+    ind.Ic[1] = Ivs_o + Io  # add vs3 current
     ind.Rc[1] = 17.66e-3  # total vs3 resistance
-    ind.M[1, 1] += Lbb  # add busbar resistance
+    ind.M[1, 1] += Lbb  # add busbar inductance
     tau = ind.M[1, 1] / ind.Rc[1]
 
-    t = np.linspace(0, 0.3, 1000)
-
-    def dIdt(Ic, t):
-        # Idot = np.linalg.solve(-ind.M, Ic*ind.Rc)
-        Idot = np.dot(-ind.Minv, Ic*ind.Rc)
-        return Idot
+    t = np.linspace(0, 0.3, 300)
 
     Ic_o = np.copy(ind.Ic)
     Ic_o[1] -= Io  # subtract inital current delta
-    Ivs_o = odeint(dIdt, Ic_o, t).T[1]
-    Iode = odeint(dIdt, ind.Ic, t)
+
+    ind.Minv = np.linalg.inv(ind.M)  # inverse for odeint
+
+    Ivs_o = odeint(ind.dIdt, Ic_o, t).T[1]
+    Iode = odeint(ind.dIdt, ind.Ic, t)
     Ic = Iode.T[1, :]
 
     dIdt = np.gradient(Ivs_o, t)
     vs_o = Ivs_o*ind.Rc[1] + ind.M[1, 1]*dIdt  # voltage source
     vs_fun = interp1d(t, vs_o, fill_value='extrapolate')
-    tc = timeconstant(t, Ic-Ivs_o, trim_fraction=0.5)
-    tdis, ttype, tfit, Ifit = tc.fit(plot=False)
 
+    tc = timeconstant(t, Ic-Ivs_o, trim_fraction=0)  # diffrence tau
+    Io_d, tau_d, tfit, Ifit = tc.nfit(3)
+    txt_d = timeconstant.ntxt(Io_d/tc.Id[0], tau_d)
     ax = plt.subplots(1, 1, sharex=True)[1]
     text = linelabel(value='', postfix='ms')
+
     ax.plot(1e3*t, 1e-3*Ivs_o, '-', color='gray', label='$I_{DINA}$')
     ax.plot(1e3*t, 1e-3*Ic, 'C3',
             label='$I_o+$'+'{:1.0f}kA'.format(1e-3*Io))
 
-    ax.plot(1e3*t, 1e-3*(Ic-Ivs_o), '-.', color='C0', label=r'$\Delta I$')
-    ax.plot(1e3*tfit, 1e-3*Ifit, 'C0-')
-    text.add(r'$\tau_{fit}=$'+'{:1.1f}ms'.format(1e3*tdis))
-    text.plot()
-    ax.plot(1e3*t, 1e-3*(Ivs_o + Io*np.exp(-t/tdis)), 'C3--', label='fit')
-
+    ax.plot(1e3*t, 1e-3*(Ic-Ivs_o), '-', color='C0',
+            label=r'$\Delta I$')
+    ax.plot(1e3*tfit, 1e-3*Ifit, 'C1-.', label='exp fit '+txt_d)
+    ax.plot(1e3*t, 1e-3*(Ivs_o + Ifit), 'C4-.',
+            label='overall fit')
     plt.legend()
     plt.despine()
     plt.xlabel('$t$ ms')
     plt.ylabel('$I$ kA')
+    plt.ylim([-90, 0])
 
-
-    print('tau_o', 1e3*tau, 'ms')
-    print('tau', 1e3*tdis, 'ms')
+    # print('tau_o', 1e3*tau, 'ms')
+    # print('tau', 1e3*tdis, 'ms')
 
     max_index = np.argmax(abs(Ic))
     print('Ivs3 max {:1.1f}kA'.format(1e-3*Ic[max_index]))
@@ -297,4 +299,3 @@ if __name__ is '__main__':
     ax.text(0.5, 1.0, txt, transform=ax.transAxes,
             ha='center', va='bottom',
             bbox=dict(facecolor='lightgray'))
-

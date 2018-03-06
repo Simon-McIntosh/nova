@@ -6,13 +6,14 @@ from read_dina import dina, lowpass
 from scipy.interpolate import interp1d
 from read_dina import timeconstant
 import matplotlib.lines as mlines
-from scipy.integrate import odeint
+import matplotlib.patches as mpatches
 
 
 class read_plasma:
 
     def __init__(self, database_folder='disruptions'):
         self.dina = dina(database_folder)
+        self.Ivs3_properties()
 
     def read_file(self, folder, dropnan=True):
         filename = self.dina.locate_file('plasma', folder=folder)
@@ -31,8 +32,7 @@ class read_plasma:
         data = {}  # convert units
         data['t'] = 1e-3*self.data['t']  # ms - s
         data['Ip'] = -1e3*self.data['Ip']  # -kA to A
-        data['Ivs_o'] = -1e3*self.data.loc[:, 'I_dw'] / 4  # -kAturn to A
-
+        data['Ivs3_o'] = -1e3*self.data.loc[:, 'I_dw'] / 4  # -kAturn to A
         data['x'] = 1e-2*self.data['Rcur']  # cm - m
         data['z'] = 1e-2*self.data['Zcur']  # cm - m
         dt_min = np.nanmin(np.diff(data['t']))
@@ -47,15 +47,12 @@ class read_plasma:
     def get_quench(self, plot=False):  # locate current quench
         Ip_lp = lowpass(self.Ip, self.dt, dt_window=0.001)  # plasma current
         dIpdt = np.gradient(Ip_lp, self.t)
-        try:
-            i_cq = next((i for i, (dIdt, Ip) in enumerate(zip(dIpdt, Ip_lp))
-                         if dIdt > 1e8 and Ip > 0.95*Ip_lp[0]))
-        except StopIteration:
-            i_cq = next((i for i, dIdt in enumerate(dIpdt) if dIdt < -1e8))
+        i_cq = next((i for i, (dIdt, Ip) in enumerate(zip(dIpdt, Ip_lp))
+                     if dIdt > 5e7))
 
         t_cq = self.t[i_cq]  # current quench time
-        tc = timeconstant(self.t[i_cq:], Ip_lp[i_cq:], trim_fraction=0.2)
-        tdis, ttype, tfit, Ifit = tc.fit(plot=False)  # plasma discharge
+        tc = timeconstant(self.t[i_cq:], Ip_lp[i_cq:], trim_fraction=0.5)
+        tdis, ttype, tfit, Ifit = tc.fit(plot=False, Io=-15e6)  # cq
 
         if plot:
             txt = '{} discharge, t={:1.0f}ms'.format(ttype, 1e3*tdis)
@@ -85,51 +82,94 @@ class read_plasma:
             ax = plt.subplots(2, 1, sharex=True)[1]
         ax[0].plot(1e3*self.t, 1e-6*self.Ip, 'C0')
         ax[0].set_ylabel('$I_p$ MA')
-        ax[1].plot(1e3*self.t, 1e-3*self.Ivs_o, 'C1')
-        ax[1].set_ylabel('$Ivs_o$ kA')
+        ax[1].plot(1e3*self.t, 1e-3*self.Ivs3_o, 'C1')
+        ax[1].set_ylabel('$Ivs3_o$ kA')
         ax[1].set_xlabel('$t$ ms')
         plt.despine()
         plt.setp(ax[0].get_xticklabels(), visible=False)
 
-    def load_Ivs3(self, Rvs3=17.66e-3, Lvs3=1.52e-3, plot=False):
+    def Ivs3_properties(self, Rvs3=17.66e-3, Lvs3=1.52e-3, Io=60e3):
         self.Rvs3 = Rvs3
         self.Lvs3 = Lvs3
         self.tau_vs3 = self.Lvs3/self.Rvs3  # vs3 timeconstant
-        self.quench = np.zeros(self.dina.nfolder,  # construct data strucutre
-                               dtype=[('name', '60U'),
-                                      ('t_cq', float),  # current quench
-                                      ('i_cq', int),  # quench index
-                                      ('I_cq', float),  # plasma current
-                                      ('discharge_time', float),
-                                      ('discharge_type', '60U'),
-                                      ('Icontrol', float),  # control
-                                      ('Ivs3_ref', float),  # zero, no spike
-                                      ('Ifault', float), # fault
-                                      ('Ivs3_o', float)])
+        self.tau_d = {}
+        self.tau_d['DINA'] = {'alpha': [0.64754104,  0.13775032,  0.21254934],
+                              'tau': [0.04390661,  0.01073328,  0.19240964]}
+        self.tau_d['LTC'] = {'alpha': [0.0629583,  0.3059171,  0.63042031],
+                             'tau': [0.00068959,  0.01501697,  0.09481686]}
+        self.tau_d['ENP'] = {'alpha': [0.4003159,  0.36687173,  0.23344466],
+                             'tau': [0.0283991,  0.12646493,  0.04291896]}
+        self.Io = Io  # control spike current magnitude
+        self.quench_dtype = [('name', '60U'),  # construct data strucutre
+                             ('t_cq', float),  # current quench
+                             ('i_cq', int),  # quench index
+                             ('I_cq', float),  # plasma current
+                             ('discharge_time', float),
+                             ('discharge_type', '60U'),
+                             ('zdir', int)]  # VDE direction
+        self.Ivs3_dtype = [('control', '2float'),
+                           ('error', '2float'), ('referance', '2float')]
 
-        Ivs_dict = {'t': [], 'Icontol': [], 'Icp': [], 'Ifault': [],
-                    'to': [], 'Io': []}
-        self.Ivs = [Ivs_dict.copy()
-                    for _ in range(self.dina.nfolder)]  # Ivs data
-        for i in range(self.dina.nfolder):
-            self.read_file(i)  # load plasma file
-            i_cq, t_cq, tdis, ttype = self.get_quench()
-            self.quench[i]['name'] = self.name
-            self.quench[i]['t_cq'] = t_cq
-            self.quench[i]['i_cq'] = i_cq
-            self.quench[i]['I_cq'] = self.Ip[i_cq]
-            self.quench[i]['Ivs3_o'] = self.Ivs_o[i_cq]
-            self.quench[i]['discharge_time'] = tdis
-            self.quench[i]['discharge_type'] = ttype
-            max_index = np.argmax(abs(self.Ivs_o[i_cq:]))
-            self.quench[i]['Ivs3_ref'] = self.Ivs_o[i_cq:][max_index]
-
-            self.Ivs[i]['t'] = self.t[i_cq:]
-            self.Ivs[i]['Icq'] = self.Ivs_o[i_cq:]
-            self.Ivs[i]['to'] = self.t[:i_cq]
-            self.Ivs[i]['Io'] = self.Ivs_o[:i_cq]
+    def Ivs3_single(self, folder, plot=False):
+        self.read_file(folder)  # load plasma file
+        # plasma current quench
+        i_cq, t_cq, tdis, ttype = self.get_quench()
+        quench = np.zeros(1, dtype=self.quench_dtype)
+        quench['name'] = self.name
+        quench['t_cq'] = t_cq
+        quench['i_cq'] = i_cq
+        quench['I_cq'] = self.Ip[i_cq]
+        quench['discharge_time'] = tdis
+        quench['discharge_type'] = ttype
+        quench['zdir'] = np.sign(self.z[np.argmax(abs(self.z))])
+        # VS3 system
+        Ivs3_data = {}
+        Ivs3_data['t'] = self.t
+        Ivs3_data['Ireferance'] = self.Ivs3_o
+        Ivs3_data['tpre'] = self.t[:i_cq]
+        Ivs3_data['Ipre'] = self.Ivs3_o[:i_cq]
+        Ivs3_data['Icontrol'] = self.Ioffset(t_cq, quench[0]['zdir'])
+        Ivs3_data['Ierror'] = self.Ioffset(t_cq, -quench[0]['zdir'])
+        Ivs3 = np.zeros(1, dtype=self.Ivs3_dtype)
+        Ivs3_fun = {}  # Ivs3 interpolator
+        for mode in Ivs3.dtype.names:  # max values
+            Imode = 'I{}'.format(mode)
+            index = np.argmax(abs(Ivs3_data[Imode]))
+            Ivs3[mode] = np.array([Ivs3_data['t'][index],
+                                  Ivs3_data[Imode][index]])
+            Ivs3_fun[mode] = interp1d(Ivs3_data['t'], Ivs3_data[Imode],
+                                      fill_value=(Ivs3_data[Imode][0],
+                                                  Ivs3_data[Imode][-1]),
+                                      bounds_error=False)
         if plot:
-            self.plot_Ivs3()
+            for mode in Ivs3_fun:
+                plt.plot(1e3*self.t, 1e-3*Ivs3_fun[mode](self.t), label=mode)
+            plt.despine()
+            plt.legend()
+            plt.xlabel('$t$ ms')
+            plt.ylabel('$I_{vs3}$ kA')
+            plt.title(self.name)
+        return quench[0], Ivs3_data, Ivs3[0], Ivs3_fun
+
+    def Ivs3_ensemble(self, plot=False):
+        self.quench = np.zeros(self.dina.nfolder, dtype=self.quench_dtype)
+        self.Ivs3_data = [{} for _ in range(self.dina.nfolder)]  # Ivs data
+        self.Ivs3 = np.zeros(self.dina.nfolder, dtype=self.Ivs3_dtype)
+
+        for i in range(self.dina.nfolder):
+            self.quench[i], self.Ivs3_data[i], self.Ivs3[i] \
+                = self.Ivs3_single(i)[:3]
+        if plot:
+            self.plot_Ivs3_ensemble()
+
+    def Ioffset(self, t_cq, zdir, discharge='DINA'):
+        coef = self.tau_d[discharge]
+        Id = np.zeros(self.nt)
+        index = self.t > t_cq
+        for alpha, tau in zip(coef['alpha'], coef['tau']):
+            Id[index] += alpha*np.exp(-(self.t[index]-t_cq)/tau)
+        Ic = self.Ivs3_o - zdir*self.Io*Id
+        return Ic
 
     def get_color(self, index):
         t_cq = self.quench[index]['t_cq']
@@ -145,7 +185,7 @@ class read_plasma:
             color = 'C{}'.format(ic+1)
         return color, iax
 
-    def plot_Ivs3(self):
+    def plot_Ivs3_ensemble(self):
         ax = plt.subplots(2, 1)[1]
         text, loc = [], 'min'
         for i in range(2):
@@ -153,15 +193,18 @@ class read_plasma:
                                   loc=loc, ax=ax[i]))
         for i in range(self.dina.nfolder):
             color, iax = self.get_color(i)
-            ax[iax].plot(1e3*self.Ivs[i]['t'], 1e-3*self.Ivs[i]['Icq'],
-                         color=color)
+            ax[iax].plot(
+              1e3*self.Ivs3_data[i]['t'][self.quench[i]['i_cq']:],
+              1e-3*self.Ivs3_data[i]['Ireferance'][self.quench[i]['i_cq']:],
+              color=color)
             text[iax].add('')
-            ax[iax].plot(1e3*self.Ivs[i]['to'],
-                         1e-3*self.Ivs[i]['Io'], '-',
+            ax[iax].plot(1e3*self.Ivs3_data[i]['tpre'],
+                         1e-3*self.Ivs3_data[i]['Ipre'], '-',
                          color='gray', lw=0.5)
-            ax[iax].plot(1e3*self.Ivs[i]['t'][0],
-                         1e-3*self.Ivs[i]['Icq'][0], '*',
-                         ms=8, color=color)
+            ax[iax].plot(
+                1e3*self.Ivs3_data[i]['t'][self.quench[i]['i_cq']],
+                1e-3*self.Ivs3_data[i]['Ireferance'][self.quench[i]['i_cq']],
+                '*', ms=8, color=color)
         plt.despine()
         for i, vde in enumerate(['MD', 'VDE']):
             h_down = mlines.Line2D([], [], color='C{}'.format(2*i),
@@ -174,7 +217,7 @@ class read_plasma:
             text[i].plot()
         plt.tight_layout()
 
-    def plot_plasma(self):
+    def plot_displacment(self):
         ax = plt.subplots(1, 2, figsize=(8, 6), sharex=True, sharey=True)[1]
 
         text = []
@@ -202,115 +245,30 @@ class read_plasma:
         ax[0].set_ylabel('$y$ m')
         plt.setp(ax[1].get_yticklabels(), visible=False)
 
-    def plot_Ivs_max(self, tau=32.5e-3):
+    def plot_Ivs3_max(self, mode):
         plt.figure()
         X = range(self.dina.nfolder)
-        Imax = np.zeros(self.dina.nfolder)
         for i, x in enumerate(X):
-            t = self.Ivs[i]['t']
-            Idina = self.Ivs[i]['Icq']
-            It = Idina - 60e3*np.exp(-(t-t[0])/tau)
-            Imax[i] = It[np.argmax(abs(It))]
             color, iax = self.get_color(i)
-            plt.bar(x, 1e-3*Imax[i], color=color, width=0.8)
-        # plt.bar(x, Itau, width=0.6,
-        #         label=r'$\tau=${:1.0f}ms'.format(plasma.tau))
-        max_index = np.argmax(abs(Imax))
-        va = 'bottom'
-        plt.text(max_index, 1e-3*Imax[max_index],
-                 ' {:1.0f}kA'.format(1e-3*Imax[max_index]),
-                 va=va, ha='center',
-                 color='k', weight='bold', rotation=90)
+            plt.bar(x, 1e-3*self.Ivs3[mode][i][1], color=color, width=0.8)
+        for Idir in [-1, 1]:
+            max_index = np.argmax(Idir*self.Ivs3[mode][:, 1])
+            Imax = self.Ivs3[mode][max_index, 1]
+            va = 'bottom' if Imax < 0 else 'top'
+            plt.text(max_index, 1e-3*Imax, ' {:1.0f}kA'.format(1e-3*Imax),
+                     va=va, ha='center', color='k',
+                     weight='bold', rotation=90)
+
+        h = []
+        for i, label in enumerate(['MD down', 'MD up', 'VDE down', 'VDE up']):
+            h.append(mpatches.Patch(color='C{}'.format(i), label=label))
+
+        plt.legend(handles=h)
         plt.xticks(X, self.dina.folders, rotation=70)
         plt.ylabel('$I_{vs3}$ kA')
-        # plt.legend()
+        plt.ylim([-110, 110])
         plt.despine()
-
-    def trip_vs3(self, eps=0.01):
-        trip_current = 0.01*np.max(abs(self.Ivs_o))
-        trip_index = next(i for i, Iind in enumerate(self.Ivs_o)
-                          if abs(Iind) > trip_current)
-        trip_t = self.t[trip_index]  # vs3 circuit open
-        return trip_index, trip_t
-
-    def get_vs3(self, Io=60, tau=None, plot=False):
-        if tau is None:
-            tau = 1.53/(17.66)*1e3  # vs3 discharge time constant
-        self.tau = tau
-        self.t = np.copy(self.data.loc[:, 't'])
-        self.Iind = self.data.loc[:, 'I_dw'] / 4  # per turn
-        self.vs_sign = np.sign(self.Iind[np.argmax(abs(self.Iind))])
-        Io *= self.vs_sign  # induced current in same direction as pulse
-        self.Io = Io*np.ones(len(self.t))  # inital current
-
-        trip_index, trip_t = self.trip_vs3()
-        self.Io[trip_index:] = Io*np.exp(-(self.t[trip_index:]-trip_t)/tau)
-        self.Ivs = self.Iind+self.Io
-
-        Itau = self.Ivs
-        Iinf = self.Iind+Io
-        self.Imax = {'tau': Itau[np.argmax(abs(Itau))],
-                     'inf': Iinf[np.argmax(abs(Iinf))]}
-        if plot:
-            loc = 'max' if self.vs_sign > 0 else 'min'
-            text = linelabel(loc=loc, postfix='kA')
-            plt.plot(self.t, self.Iind+Io, '-', label=r'$\tau=\infty$ms')
-            text.add('')
-            plt.plot(self.t, self.Ivs, '-',
-                     label=r'$\tau=${:1.0f}ms'.format(self.tau))
-            text.add('')
-            plt.plot(self.t, self.Io, '--', label='$I_{decay}$')
-            plt.plot(self.t, self.Iind, '--', label='$I_{VDE}$')
-            ax = plt.gca()
-            ylim = ax.get_ylim()
-            plt.plot(trip_t*np.ones(2), ylim, ':', color='gray')
-            plt.ylabel(r'$I_{VS3}$ kA')
-            plt.xlabel(r'$t$ ms')
-            plt.text(0.5, 1, self.name, transform=plt.gca().transAxes,
-                     weight='bold', ha='center')
-            text.plot(Ralign=False)
-            plt.legend(loc='best')
-            plt.despine()
-
-    def plot_power(self):
-        index = 3
-        Io = 60e3
-
-        t = self.Ivs[index]['t']
-        Iin = self.Ivs[index]['Iinput']
-        ax = plt.subplots(3, 1, sharex=True)[1]
-        for i, s in enumerate([-1, 0, 1]):
-
-            Ivs = lowpass(Iin, self.dt, dt_window=0.005)
-            dIvsdt = np.gradient(Ivs, t)
-            # vs = self.Rvs3*Ivs  # voltage source
-            vs = self.Rvs3*Ivs + self.Lvs3*dIvsdt  # voltage source
-            self.vs_fun = interp1d(t, vs, fill_value='extrapolate')
-
-            Iode = odeint(self.dIdt_fun, Ivs[0]+s*Io, t)
-            Iode = np.array(Iode).T[0]
-            dIodedt = np.gradient(Iode, t)
-
-            # Ivs = Iin + s*Io*np.exp(-(t-self.quench[index]['t_cq'])/self.tau)
-            Pvs = self.get_power(Ivs.T, t)
-            Pode = self.get_power(Iode.T, t)
-
-            ax[0].plot(t, 1e-3*Ivs, 'C{}-'.format(i))
-            ax[0].plot(t, 1e-3*Iode, 'C{}--'.format(i))
-
-            ax[1].plot(t, 1e-3*dIvsdt, 'C{}-'.format(i))
-            ax[1].plot(t, 1e-3*dIodedt, 'C{}--'.format(i))
-
-            ax[2].plot(t, 1e-6*Pvs, 'C{}-'.format(i))
-            ax[2].plot(t, 1e-6*Pode, 'C{}--'.format(i))
-        plt.despine()
-
-    def get_power(self, Ivs, t):
-        Ivs = lowpass(Ivs, self.dt, dt_window=0.01)
-        dIvsdt = np.gradient(Ivs, t)
-        P = Ivs*(self.Lvs3*dIvsdt - Ivs*self.Rvs3)
-        # P = Ivs*self.Lvs3*dIvsdt
-        return P
+        plt.title(mode)
 
     def dIdt_fun(self, I, t):
         # vs_fun = args[0]
@@ -324,23 +282,14 @@ if __name__ == '__main__':
 
     pl = read_plasma('disruptions')
 
-    pl.load_Ivs3()  # load Ivs3 current waveforms
+    Ivs3_fun = pl.Ivs3_single(3, plot=True)[-1]
+    pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms
 
-    pl.plot_Ivs3()
-
-    # pl.plot_power()
-
-    pl.read_file(11)
+    pl.read_file(8)
     pl.get_quench(plot=True)
 
-    pl.plot_plasma()
+    pl.plot_displacment()
 
-    pl.plot_Ivs_max()
-
-    '''
-    ax = plt.subplots(2, 1, sharex=True)[1]
-    for i in range(pl.dina.nfolder):
-        pl.read_file(i)
-        pl.plot_currents(ax=ax)
-    '''
+    for mode in pl.Ivs3.dtype.names:
+        pl.plot_Ivs3_max(mode)
 

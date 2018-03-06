@@ -56,7 +56,7 @@ class read_tor:
             self.Ibar['vv'][i] = np.mean(-1e3*np.array(frame[1])[:self.nVV])
             self.Ibar['pl'][i] = Ipl
 
-    def plasma_filaments(self, frame, dx=0.1, dz=0.1):
+    def plasma_filaments(self, frame, dx=0.15, dz=0.15):
         rc = np.sqrt(dx**2 + dz**2) / 4
         npl = count(0)
         plasma_coil = OrderedDict()
@@ -203,9 +203,9 @@ class read_tor:
     def plot_filaments(self):
         for f in self.filaments:
             for j in range(f['n_turn']):
-                pl.plot([f['x1'][j], f['x2'][j]],
-                        [f['z1'][j], f['z2'][j]], 'o-')
-        pl.axis('equal')
+                plt.plot([f['x1'][j], f['x2'][j]],
+                         [f['z1'][j], f['z2'][j]], 'o-')
+        plt.axis('equal')
 
     def plot(self, index, ax=None):
         if ax is None:
@@ -257,7 +257,7 @@ if __name__ == '__main__':
     tor.read_file(3)
 
 
-    # tor.set_current(200)
+    tor.set_current(200)
 
     tor.plot(130)
 

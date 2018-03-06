@@ -19,23 +19,23 @@ def lowpass(x, dt, dt_window=1):
 
 class timeconstant:
 
-    def __init__(self, t, Ic, trim_fraction=0.2):
-        self.load(t, Ic)
+    def __init__(self, td, Id, trim_fraction=0.2):
+        self.load(td, Id)
         self.trim_fraction = trim_fraction
 
-    def load(self, t, Ic):  # load profile
-        self.t = t
-        self.Ic = Ic
+    def load(self, td, Id):  # load profile
+        self.td = np.copy(td)
+        self.Id = np.copy(Id)
 
     def trim(self, **kwargs):
         self.trim_fraction = kwargs.get('trim_fraction', self.trim_fraction)
         if self.trim_fraction > 0 and self.trim_fraction < 1\
-                and self.Ic[0] != 0:
-            i1 = next((i for i, Ic in enumerate(self.Ic)
-                       if abs(Ic) < self.trim_fraction*abs(self.Ic[0])))
-            td, Id = self.t[:i1], self.Ic[:i1]
+                and self.Id[0] != 0:
+            i1 = next((i for i, Id in enumerate(self.Id)
+                       if abs(Id) < self.trim_fraction*abs(self.Id[0])))
+            td, Id = self.td[:i1], self.Id[:i1]
         else:
-            td, Id = self.t, self.Ic
+            td, Id = self.td, self.Id
         return td, Id
 
     def fit_tau(self, x, *args):
@@ -47,7 +47,8 @@ class timeconstant:
 
     def get_tau(self, plot=False, **kwargs):
         td, Id = self.trim(**kwargs)
-        x = minimize(self.fit_tau, [0, 0, 100e-3], args=(td, Id)).x
+        Io = kwargs.get('Io', -60e3)
+        x = minimize(self.fit_tau, [10e-3, Io, 30e-3], args=(td, Id)).x
         err = self.fit_tau(x, td, Id)
         to, Io, tau = x
         Iexp = Io*np.exp(-(td-to)/tau)
@@ -60,12 +61,63 @@ class timeconstant:
         A = np.ones((len(td), 2))
         A[:, 1] = td
         a, b = np.linalg.lstsq(A, Id)[0]
-        tlin = abs(self.Ic[0]/b)  # discharge time
+        tlin = abs(self.Id[0]/b)  # discharge time
         Ilin = a + b*td  # linear fit
         err = np.sum((Id-Ilin)**2)
         if plot:
             plt.plot(1e3*td, 1e-3*Ilin, '-', label='lin')
         return a, b, tlin, err, Ilin
+
+    def fit_ntau(self, x, *args):
+        texp, Iexp = args
+        Ifit = self.I_nfit(texp, x)
+        err = np.sum((Iexp-Ifit)**2)  # sum of squares
+        return err
+
+    def I_nfit(self, t, x):
+        n = int(len(x)/2)
+        Io, tau = x[:n], x[n:]
+        Ifit = np.zeros(len(t))
+        for Io, tau in zip(x[:n], x[n:]):
+            Ifit += Io*np.exp(-t/tau)
+        return Ifit
+
+    def nfit(self, n, plot=False, **kwargs):
+        tau_o = kwargs.get('tau_o', 50e-3)  # inital timeconstant
+        td, Id = self.trim(**kwargs)
+        to = td[0]
+        td -= to  # time shift
+        xo = np.append(Id[0]/n*np.ones(n), tau_o*np.arange(1, n+1))
+        x = minimize(self.fit_ntau, xo, args=(td, Id)).x
+        err = self.fit_ntau(x, td, Id)
+        Ifit = self.I_nfit(td, x)
+        Io, tau = x[:n], x[n:]
+        if plot:
+            if 'ax' in kwargs:
+                ax = kwargs['ax']
+            else:
+                ax = plt.subplots(1, 1)[1]
+            ax.plot(1e3*td+to, 1e-3*Id, '-', label='data')
+            ax.plot(1e3*td+to, 1e-3*Ifit, '--')
+            ax.set_xlabel('$t$ ms')
+            ax.set_ylabel('$I$ kA')
+            plt.despine()
+        return Io, tau, td+to, Ifit
+
+    def ntxt(If, tau):
+        txt = r'$\alpha$=['
+        for i, I in enumerate(If):
+            if i > 0:
+                txt += ','
+            txt += '{:1.2f}'.format(I)
+        txt += ']'
+        txt += r' $\tau$=['
+        for i, t in enumerate(tau):
+            if i > 0:
+                txt += ','
+            txt += '{:1.1f}'.format(1e3*t)
+        txt += ']ms'
+        return txt
 
     def fit(self, plot=False, **kwargs):
         tfit, Idata = self.trim(**kwargs)
@@ -86,10 +138,11 @@ class timeconstant:
                 ax = plt.subplots(1, 1)[1]
 
             ax.plot(1e3*tfit, 1e-3*Idata, '-', label='data')
-            ax.plot(1e3*tfit, 1e-3*Ifit, '--', label='fit')
+            ax.plot(1e3*tfit, 1e-3*Ifit, '--',
+                    label='{} fit'.format(self.discharge_type))
             ax.set_xlabel('$t$ ms')
             ax.set_ylabel('$I$ kA')
-            # plt.despine()
+            plt.despine()
             # plt.legend()
             txt = '{} discharge'.format(self.discharge_type)
             txt += ', t={:1.1f}ms'.format(self.discharge_time)
@@ -120,7 +173,7 @@ class dina:
     def select_folder(self, folder):  # folder entered as string, index or None
         if isinstance(folder, int):  # index (int)
             if folder > self.nfolder-1:
-                txt = '\nfolder index {:d} greater than '.format(self.folder)
+                txt = '\nfolder index {:d} greater than '.format(folder)
                 txt += 'folder number {:d}'.format(self.nfolder)
                 raise IndexError(txt)
             folder = self.folders[folder]

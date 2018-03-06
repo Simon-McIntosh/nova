@@ -10,49 +10,69 @@ from matplotlib._cntr import Cntr as cntr
 from collections import OrderedDict
 from amigo import geom
 from amigo.IO import trim_dir
-from amigo.geom import loop_vol
+from amigo.geom import loop_vol, grid
 import nova
 from amigo.IO import class_dir
 from os.path import join
+from warnings import warn
+from itertools import count
 
 
 class SF(object):
 
-    def __init__(self, filename, upsample=1, **kwargs):
+    def __init__(self, **kwargs):
         self.shape = {}
-        self.filename = filename
         self.set_kwargs(kwargs)
-        if not hasattr(self, 'eqdsk'):
-            self.eqdsk = nova.geqdsk.read(self.filename)
-        self.normalise()  # unit normalisation
-        self.set_plasma(self.eqdsk)
-        self.set_boundary(self.eqdsk['xbdry'], self.eqdsk['zbdry'])
-        self.set_flux(self.eqdsk)  # calculate flux profiles
-        self.set_TF(self.eqdsk)
-        self.set_current(self.eqdsk)
-        xo_arg = np.argmin(self.zbdry)
-        self.po = [self.xbdry[xo_arg], self.zbdry[xo_arg]]
-        self.mo = [self.eqdsk['xmagx'], self.eqdsk['zmagx']]
-        self.upsample(upsample)
-        self.get_Mpsi()
-        self.get_Xpsi()
-        self.set_contour()  # set cfield
-
-        self.get_LFP()
-        x, z = self.get_boundary()
-        self.set_boundary(x, z)
-
-        # self.get_sol_psi(dSOL=3e-3,Nsol=15,verbose=False)
-        # leg search radius
-        self.rcirc = 0.3 * abs(self.Mpoint[1] - self.Xpoint[1])
-        self.drcirc = 0.15 * self.rcirc  # leg search width
-        self.xlim = self.eqdsk['xlim']
-        self.zlim = self.eqdsk['zlim']
-        self.nlim = self.eqdsk['nlim']
+        self.load_eqdsk()
+        self.initalize_field()
 
     def set_kwargs(self, kwargs):
         for key in kwargs:
             setattr(self, key, kwargs[key])
+
+    def load_eqdsk(self):
+        if not hasattr(self, 'eqdsk'):  # initalise from file
+            self.eqdsk = nova.geqdsk.read(self.filename)
+            self.normalise()  # unit normalisation
+            # self.upsample(kwargs.get('upsample', 1))
+            self.eqdsk_file = True
+        else:
+            self.eqdsk_file = False
+        self.set_plasma(self.eqdsk)
+        self.set_points()
+        self.set_flux(self.eqdsk)  # calculate flux profiles
+        self.set_TF(self.eqdsk)
+        self.set_current(self.eqdsk)
+        self.set_limit(self.eqdsk)
+
+    def set_points(self):
+        if np.array([hasattr(self, key) for key in ['xbdry', 'zbdry']]).all()\
+                and np.array([key in self.eqdsk
+                              for key in ['xmagx', 'zmagx']]).all():
+            xo_arg = np.argmin(self.zbdry)
+            self.po = [self.xbdry[xo_arg], self.zbdry[xo_arg]]
+            self.mo = [self.eqdsk['xmagx'], self.eqdsk['zmagx']]
+        else:
+            Xpoint = self.getXgrid(n=100, plot=False)  # find field nulls
+            # Mpoint = Xpoint[Xpoint['z'] > Xpoint[0]['z']]
+            # self.mo = np.array([Mpoint[0]['x'], Mpoint[0]['z']])
+            self.mo = np.array([np.mean(self.x), np.mean(self.z)])
+            self.po = np.array([Xpoint[0]['x'], Xpoint[0]['z']])
+
+    def initalize_field(self, plot=False):
+        self.get_Mpsi(plot=plot)
+        self.get_Xpsi(plot=plot)
+        self.set_contour()  # set cfield
+        if self.eqdsk_file:  # read from eqdsk file
+            self.get_LFP()
+            x, z = self.get_boundary()
+            self.set_boundary(x, z)
+            self.initalize_sol(rcirc=0.3, drcirc=0.15)
+
+    def initalize_sol(self, rcirc=0.3, drcirc=0.15):
+        self.get_sol_psi(dSOL=3e-3, Nsol=15, verbose=False)
+        self.rcirc = 0.3 * abs(self.Mpoint[1] - self.Xpoint[1])  # radius
+        self.drcirc = 0.15 * self.rcirc  # leg search width
 
     def normalise(self):
         if ('Fiesta' in self.eqdsk['name'] or 'Nova' in self.eqdsk['name'] or
@@ -75,9 +95,9 @@ class SF(object):
                 self.eqdsk[key] *= self.norm
         self.b_scale = 1  # flux function scaling
 
-    def trim_x(self, rmin=1.5):
-        if self.x[0] == 0:  # trim zero x-coordinate entries
-            i = np.argmin(abs(self.x - rmin))
+    def trim_x(self, xmin=1.5):
+        if self.x[0] < xmin:  # trim zero x-coordinate entries
+            i = np.argmin(abs(self.x - xmin))
             self.x = self.x[i:]
             self.psi = self.psi[i:, :]
 
@@ -150,33 +170,44 @@ class SF(object):
                 f.write('{:1.4f}\t\t{:1.4f}\t\t{:1.4f}\n'.format(psi, p_, FF_))
 
     def set_flux(self, eqdsk):
-        F_ff = eqdsk['fpol']
-        P_ff = eqdsk['pressure']
-        n = len(F_ff)
-        psi_ff = np.linspace(0, 1, n)
-        F_ff = interp1d(psi_ff, F_ff)(psi_ff)
-        P_ff = interp1d(psi_ff, P_ff)(psi_ff)
-        dF_ff = np.gradient(F_ff, 1 / (n - 1))
-        dP_ff = np.gradient(P_ff, 1 / (n - 1))
-        self.Fpsi = interp1d(psi_ff, F_ff)
-        self.dFpsi = interp1d(psi_ff, dF_ff)
-        self.dPpsi = interp1d(psi_ff, dP_ff)
-        FFp = spline(psi_ff, eqdsk['ffprim'], s=1e-5)(psi_ff)
-        Pp = spline(psi_ff, eqdsk['pprime'], s=1e2)(psi_ff)  # s=1e5
-        self.FFprime = interp1d(psi_ff, FFp, fill_value=0, bounds_error=False)
-        self.Pprime = interp1d(psi_ff, Pp, fill_value=0, bounds_error=False)
+        required_keys = ['fpol', 'pressure', 'ffprim', 'pprime']
+        if np.array([key in required_keys for key in eqdsk]).all():
+            F_ff = eqdsk['fpol']
+            P_ff = eqdsk['pressure']
+            n = len(F_ff)
+            psi_ff = np.linspace(0, 1, n)
+            F_ff = interp1d(psi_ff, F_ff)(psi_ff)
+            P_ff = interp1d(psi_ff, P_ff)(psi_ff)
+            dF_ff = np.gradient(F_ff, 1 / (n - 1))
+            dP_ff = np.gradient(P_ff, 1 / (n - 1))
+            self.Fpsi = interp1d(psi_ff, F_ff)
+            self.dFpsi = interp1d(psi_ff, dF_ff)
+            self.dPpsi = interp1d(psi_ff, dP_ff)
+            FFp = spline(psi_ff, eqdsk['ffprim'], s=1e-5)(psi_ff)
+            Pp = spline(psi_ff, eqdsk['pprime'], s=1e2)(psi_ff)  # s=1e5
+            self.FFprime = interp1d(psi_ff, FFp, fill_value=0,
+                                    bounds_error=False)
+            self.Pprime = interp1d(psi_ff, Pp, fill_value=0,
+                                   bounds_error=False)
 
     def set_TF(self, eqdsk):
-        for key in ['xcentr', 'bcentr']:
-            setattr(self, key, eqdsk[key])
+        if np.array([key in eqdsk for key in ['xcentr', 'bcentr']]).all():
+            for key in ['xcentr', 'bcentr']:
+                setattr(self, key, eqdsk[key])
 
     def set_boundary(self, x, z, n=5e2):
         self.nbdry = int(n)
         self.xbdry, self.zbdry = geom.rzSLine(x, z, npoints=n)
 
     def set_current(self, eqdsk):
-        for key in ['cpasma']:
-            setattr(self, key, eqdsk[key])
+        if 'cpasma' in eqdsk:
+            self.Ipl = eqdsk['cpasma']  # name change from cpasma
+
+    def set_limit(self, eqdsk):
+        if np.array([key in eqdsk for key in ['xlim', 'zlim', 'nlim']]).all():
+            self.xlim = self.eqdsk['xlim']
+            self.zlim = self.eqdsk['zlim']
+            self.nlim = self.eqdsk['nlim']
 
     def update_plasma(self, eq):  # update requres full separatrix
         for attr in ['Bspline', 'Pspline', 'Xpsi', 'Mpsi', 'Bx', 'Bz', 'LFPx']:
@@ -187,10 +218,10 @@ class SF(object):
         self.get_Xpsi()
         self.get_Mpsi()
         self.set_contour()  # calculate cfield
-
-        self.get_LFP()
-        x, z = self.get_boundary()
-        self.set_boundary(x, z)
+        if self.eqdsk_file:  # read from eqdsk file
+            self.get_LFP()
+            x, z = self.get_boundary()
+            self.set_boundary(x, z)
 
         # self.get_Plimit()  # limit plasma extent
         # self.get_sol_psi()  # re-calculate sol_psi
@@ -208,6 +239,7 @@ class SF(object):
         self.trim_x()
         self.space()
         self.Bfield()
+        self.Bmap()
 
     def upsample(self, sample):
         if sample > 1:
@@ -241,6 +273,7 @@ class SF(object):
         xm[xm == 0] = 1e-34
         self.Bx = -psi_z / xm
         self.Bz = psi_x / xm
+        self.Babs = np.sqrt(self.Bx**2 + self.Bz**2)
 
     def bound_point(self, point):
         for j, bound in enumerate(self.xbound):
@@ -248,14 +281,16 @@ class SF(object):
                 point[j] = bound[0]
             elif point[j] > bound[1]:
                 point[j] = bound[1]
-            return point
+        return point
+
+    def Bmap(self):
+        self.Bspline = [[], [], []]
+        self.Bspline[0] = RectBivariateSpline(self.x, self.z, self.Bx)
+        self.Bspline[1] = RectBivariateSpline(self.x, self.z, self.Bz)
+        self.Bspline[2] = RectBivariateSpline(self.x, self.z, self.Babs)
 
     def Bpoint(self, point, check_bounds=False):  # magnetic field at point
         field = np.zeros(2)  # function re-name (was Bcoil)
-        if not hasattr(self, 'Bspline'):
-            self.Bspline = [[], []]
-            self.Bspline[0] = RectBivariateSpline(self.x, self.z, self.Bx)
-            self.Bspline[1] = RectBivariateSpline(self.x, self.z, self.Bz)
         if check_bounds:
             inbound = point[0] >= np.min(self.x) and\
                 point[0] <= np.max(self.x) \
@@ -266,6 +301,46 @@ class SF(object):
             for i in range(2):
                 field[i] = self.Bspline[i].ev(point[0], point[1])
             return field
+
+    def Bpoint_abs(self, point):  # absolute polidal field
+        point = self.bound_point(point)
+        Babs = self.Bspline[2].ev(point[0], point[1])
+        return abs(Babs)
+
+    def Bpoint_jac(self, point):  # absolute polidal field
+        dB = np.zeros(2)
+        point = self.bound_point(point)
+        dB[0] = self.Bspline[2].ev(point[0], point[1], dx=1, dy=0)
+        dB[1] = self.Bspline[2].ev(point[0], point[1], dx=0, dy=1)
+        return dB
+
+    def getXgrid(self, n=100, plot=False):
+        X, Z, n = grid(n, self.xbound.flatten())[-3:]
+        Xpoint = np.zeros(n, dtype=[('x', float), ('z', float),
+                                    ('B', float), ('psi', float)])
+        index = count(0)
+        for x in X:
+            for z in Z:
+                i = next(index)
+                if plot:
+                    plt.plot(x, z, 'C1d', ms=2)
+                res = minimize(self.Bpoint_abs, [x, z], jac=self.Bpoint_jac,
+                               method='SLSQP', bounds=self.xbound)
+                Xpoint[i]['x'] = res.x[0]
+                Xpoint[i]['z'] = res.x[1]
+                Xpoint[i]['B'] = res.fun
+                Xpoint[i]['psi'] = self.Ppoint([x, z])
+
+        index = geom.unique2D(np.array([Xpoint['x'], Xpoint['z']]).T,
+                              eps=0.1, bound=self.xbound.flatten())[0]
+        Xpoint = Xpoint[index]  # trim duplicates / edge points
+        Xpoint = np.sort(Xpoint, order='psi')  # sort
+        if plot:
+            for i in range(np.min([len(Xpoint), n])):
+                plt.plot(Xpoint[i]['x'], Xpoint[i]['z'], 'C3*')
+                plt.text(Xpoint[i]['x'], Xpoint[i]['z'],
+                         '{:1.3e}'.format(Xpoint[i]['psi']))
+        return Xpoint
 
     def minimum_field(self, radius, theta):
         X = radius * np.sin(theta) + self.Xpoint[0]
@@ -282,7 +357,7 @@ class SF(object):
         psi = self.Pspline.ev(point[0], point[1])
         return psi
 
-    def contour(self, Nstd=3.0, Nlevel=31, Xnorm=True, lw=1, plot_vac=True,
+    def contour(self, Nlevel=31, Nstd=3.0, Xnorm=True, lw=1, plot_vac=True,
                 boundary=True, **kwargs):
         alpha = np.array([1, 1], dtype=float)
         lw = lw * np.array([2.25, 1.75])
@@ -312,7 +387,7 @@ class SF(object):
         else:
             levels = kwargs['levels']
             linetype = '-'
-        color = 'k'
+        color = kwargs.get('color', 'k')
         if 'linetype' in kwargs.keys():
             linetype = kwargs['linetype']
         if color == 'k':
@@ -340,10 +415,14 @@ class SF(object):
         return levels
 
     def inPlasma(self, X, Z, delta=0):
-        return X.min() >= self.xbdry.min() - delta and \
-            X.max() <= self.xbdry.max() + delta and \
-            Z.min() >= self.zbdry.min() - delta and \
-            Z.max() <= self.zbdry.max() + delta
+        if np.array([hasattr(self, key) for key in ['xbdry', 'zbdry']]).all():
+            inside = X.min() >= self.xbdry.min() - delta and \
+                     X.max() <= self.xbdry.max() + delta and \
+                     Z.min() >= self.zbdry.min() - delta and \
+                     Z.max() <= self.zbdry.max() + delta
+        else:
+            inside = False
+        return inside
 
     def plot_cs(self, cs, norm, Plasma=False, color='k',
                 pcolor='w', linetype='-'):
@@ -396,8 +475,8 @@ class SF(object):
         def field(p):
             B = self.Bpoint(p)
             return np.linalg.norm(B)
-        res = minimize(field, np.array(po), method='nelder-mead',
-                       options={'xtol': 1e-7, 'disp': False})
+        res = minimize(field, np.array(po), method='CG',
+                       options={'disp': False})
         return res.x
 
     def get_Xpsi(self, po=None, select='primary', plot=False):
@@ -447,13 +526,15 @@ class SF(object):
 
         def psi(m):
             return -self.Ip_dir*self.Ppoint(m)
-        res = minimize(psi, np.array(mo), method='nelder-mead',
-                       options={'xtol': 1e-7, 'disp': False})
+        res = minimize(psi, np.array(mo), method='SLSQP',
+                       bounds=self.xbound)
         return res.x
 
-    def get_Mpsi(self, mo=None):
+    def get_Mpsi(self, mo=None, plot=False):
         self.Mpoint = self.getM(mo=mo)
         self.Mpsi = self.Ppoint(self.Mpoint)
+        if plot:
+            plt.plot(self.Mpoint[0], self.Mpoint[1], 'C1*')
         return (self.Mpsi, self.Mpoint)
 
     def remove_contour(self):
@@ -501,8 +582,15 @@ class SF(object):
             X, Z = geom.clock(X, Z)
         except IndexError:
             plt.figure()
-            self.contour(boundary=False)
-            raise IndexError('seperatrix open')
+            try:
+                self.contour(boundary=False)
+            except AttributeError:
+                warn('unable to draw contour - *bdry not set')
+                pass
+            err_txt = '\ngeom.clock failed to find contour'
+            err_txt += '\nseperatrix open'
+            err_txt += '\ncheck X-point definition'
+            raise IndexError(err_txt)
         if plot:
             plt.plot(X, Z)
         return X, Z

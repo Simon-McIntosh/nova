@@ -23,7 +23,6 @@ def green(X, Z, Xc, Zc, dXc=0, dZc=0):
         #                 1.75) / (2 * np.pi)
         g_s = Xc[index] * (np.log(8 * Xc[index] / rho) - 2) / (2 * np.pi)
         g[index] = g_s
-        # g[index] = 0
     return g
 
 
@@ -38,6 +37,63 @@ def green_feild(X, Z, Xc, Zc):
     feild[0] = Xc / (4 * np.pi) * (Z - Zc) / B * (I1 - A * I2)
     feild[1] = Xc / (4 * np.pi) * ((Xc + X * A / B) * I2 - X / B * I1)
     return feild
+
+
+def add_Pcoil(x, z, coil):
+    xc, zc, Ic = coil['x'], coil['z'], coil['Ic']
+    dx, dz = coil['dx'], coil['dz']
+    return mu_o * Ic * green(x, z, xc, zc, dXc=dx, dZc=dz)
+
+
+def add_Bcoil(x, z, coil):
+    xc, zc, Ic = coil['x'], coil['z'], coil['Ic']
+    return mu_o * Ic * green_feild(x, z, xc, zc)
+
+
+def get_plasma_coil(pf, **kwargs):
+    plasma_coil = kwargs.get('plasma_coil', pf.plasma_coil)
+    return plasma_coil
+
+
+def Ppoint(point, pf, **kwargs):
+    plasma_coil = get_plasma_coil(pf, **kwargs)
+    psi = 0
+    for coil in pf.sub_coil:
+        psi += add_Pcoil(point[0], point[1], pf.sub_coil[coil])
+    for name in plasma_coil:
+        psi += add_Pcoil(point[0], point[1], plasma_coil[name])
+    return psi
+
+
+def Bpoint(point, pf, **kwargs):
+    plasma_coil = get_plasma_coil(pf, **kwargs)
+    feild = np.zeros(2)
+    for name in pf.sub_coil:
+        feild += add_Bcoil(point[0], point[1], pf.sub_coil[name])
+    for name in plasma_coil:
+        feild += add_Bcoil(point[0], point[1], plasma_coil[name])
+    return feild
+
+
+def Bmag(point, *args):
+    pf = args[0]  # pf object
+    if len(args) == 2:
+        kwargs = {'plasma_coil', args[1]}  # specify seperate plasma_coil
+    else:
+        kwargs = {}  # use pf.plasma_coil
+    feild = Bpoint(point, pf, **kwargs)
+    B = np.sqrt(feild[0]**2 + feild[1]**2)
+    return B
+
+
+def get_coil_psi(x2d, z2d, pf, **kwargs):
+    plasma_coil = get_plasma_coil(pf, **kwargs)
+    psi = np.zeros(np.shape(x2d))
+    for name in pf.sub_coil.keys():
+        psi += add_Pcoil(x2d, z2d, pf.sub_coil[name])
+    for name in plasma_coil.keys():
+        psi += add_Pcoil(x2d, z2d, plasma_coil[name])
+    return psi
 
 
 class GreenFeildLoop(object):
@@ -120,17 +176,17 @@ def cut_corners(loop, smooth=True, Nss=100):
             Nss = len(loop)
         N = np.shape(loop)[0]
         loop_ss = np.zeros((Nss, 3))
-        l = geom.vector_length(loop)
+        le = geom.vector_length(loop)
         lss = np.linspace(0, 1, Nss)
         npad = 2  # mirror loop for cubic interpolant
         for i in range(3):
             loop_m = np.pad(loop[:-1, i], npad, 'wrap')
-            l_m = np.pad(l[:-1], npad, 'linear_ramp',
-                         end_values=[-npad * l[1], l[-2] +
-                                     npad * (l[-1] - l[-2])])
+            l_m = np.pad(le[:-1], npad, 'linear_ramp',
+                         end_values=[-npad * le[1], le[-2] +
+                                     npad * (le[-1] - le[-2])])
             loop_ss[:, i] = interp1d(l_m, loop_m, kind='cubic')(lss)
         Lss = geom.vector_length(loop_ss, norm=False)
-        L = interp1d(lss, Lss)(l)  # cumulative length
+        L = interp1d(lss, Lss)(le)  # cumulative length
         dL_seg = L[1:] - L[:-1]  # segment length
         dL_seg = np.append(dL_seg[-1], dL_seg)  # prepend
         dL_mag = (dL_seg[1:] + dL_seg[:-1]) / 2  # average segment length
@@ -139,7 +195,7 @@ def cut_corners(loop, smooth=True, Nss=100):
                        np.ones((1, 3)))  # unit tangent
         dL = np.zeros((N - 1, 3))
         for i in range(3):
-            dL[:, i] = interp1d(lss, dLss[:, i])(l[:-1]) * dL_mag
+            dL[:, i] = interp1d(lss, dLss[:, i])(le[:-1]) * dL_mag
     else:
         dL = loop[1:] - loop[:-1]
         dL = np.append(np.reshape(dL[-1, :], (1, 3)), dL, axis=0)  # prepend

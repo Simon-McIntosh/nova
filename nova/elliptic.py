@@ -4,7 +4,6 @@ from scipy.sparse import lil_matrix
 from scipy.sparse.linalg.dsolve.linsolve import spsolve
 import nova.cross_coil as cc
 from scipy.optimize import minimize
-from itertools import cycle
 from matplotlib.colors import Normalize
 from scipy.ndimage.filters import gaussian_filter
 from scipy.interpolate import interp1d
@@ -15,8 +14,6 @@ from scipy.optimize import newton
 import sys
 from warnings import warn
 from time import time
-import seaborn as sns
-Color = cycle(sns.color_palette('Set2'))
 
 
 class MidpointNormalize(Normalize):
@@ -239,7 +236,8 @@ class EQ(object):
     def psi_edge(self):
         psi = np.zeros(self.Ne)
         for i, (x, z) in enumerate(zip(self.Re, self.Ze)):
-            psi[i] = self.sf.Ppoint((x, z))
+            psi[i] = self.sf.Ppoint((x, z), self.pf,
+                                    plasma_coil=self.plasma_coil)
         return psi
 
     def coil_core(self):
@@ -503,7 +501,8 @@ class EQ(object):
         edge_order = 2
         dpsi = np.gradient(self.psi,edge_order=edge_order)
         dpsi_r,dpsi_z = dpsi[0]/self.dx,dpsi[1]/self.dz
-        GSr = self.x2d*np.gradient(dpsi_r/self.x2d,edge_order=edge_order)[0]/self.dx
+        GSr = self.x2d*np.gradient(dpsi_r/self.x2d,
+                                   edge_order=edge_order)[0]/self.dx
         GSz = np.gradient(dpsi_z,edge_order=edge_order)[1]/self.dz
         '''
 
@@ -533,7 +532,6 @@ class EQ(object):
     def set_plasma_current(self):  # plasma current from sf line intergral
         Ip = 0
         X, Z = self.sf.get_boundary()
-        # X,Z = self.sf.get_boundary(0.8)  # !!!!!!! # for vde
         tR, tZ, X, Z = cc.tangent(X, Z, norm=False)
         for x, z, tr, tz in zip(X, Z, tR, tZ):
             B = self.sf.Bcoil((x, z))
@@ -653,7 +651,7 @@ class EQ(object):
         cmap._lut[0, :-1] = 1  # set zero value clear
 
         norm = MidpointNormalize(midpoint=0)
-        pl.imshow(b, cmap=cmap, norm=norm, vmin=b.min(),vmax=1.1*b.max(),
+        pl.imshow(b, cmap=cmap, norm=norm, vmin=b.min(), vmax=1.1*b.max(),
                   extent=[rlim[0], rlim[-1], zlim[0], zlim[-1]],
                   interpolation='nearest', origin='lower', alpha=alpha)
         # c = pl.colorbar(orientation='horizontal')
@@ -679,7 +677,8 @@ class EQ(object):
         pl.imshow(scale*m.T,cmap=cmap,norm=norm,
                   extent=[rlim[0],rlim[-1],zlim[0],zlim[-1]],
                   interpolation='nearest',origin='lower',alpha=1)
-        c = pl.colorbar(orientation='horizontal',shrink=.6, pad=0.025, aspect=15)
+        c = pl.colorbar(orientation='horizontal',shrink=.6,
+                        pad=0.025, aspect=15)
         c.ax.set_xlabel(x'$J$ MAm$^{-2}$')
         c.set_ticks([caxis[0],0,caxis[1]])
         '''
@@ -706,8 +705,11 @@ class EQ(object):
         self.psi = np.zeros(np.shape(self.x2d))
         for i in range(self.nx):
             for j in range(self.nz):
-                self.psi[i, j] = self.sf.Ppoint((self.x[i], self.z[j]))
+                self.psi[i, j] = self.sf.Ppoint((self.x[i], self.z[j]),
+                                                self.pf,
+                                                plasma_coil=self.plasma_coil)
 
+    ''' we have moved to cross_coil
     def add_Pcoil(self, x, z, coil):
         xc, zc, Ic = coil['x'], coil['z'], coil['Ic']
         dx, dz = coil['dx'], coil['dz']
@@ -716,47 +718,6 @@ class EQ(object):
     def add_Bcoil(self, x, z, coil):
         xc, zc, Ic = coil['x'], coil['z'], coil['Ic']
         return self.mu_o * Ic * cc.green_feild(x, z, xc, zc)
-
-    def get_coil_psi(self):
-        self.psi = np.zeros(np.shape(self.x2d))
-        for name in self.pf.sub_coil.keys():
-            self.psi += self.add_Pcoil(self.x2d,
-                                       self.z2d, self.pf.sub_coil[name])
-        for name in self.plasma_coil.keys():
-            self.psi += self.add_Pcoil(self.x2d, self.z2d,
-                                       self.plasma_coil[name])
-        return {'x': self.x, 'z': self.z, 'psi': self.psi}
-
-    def set_coil_psi(self):
-        eq = self.get_coil_psi()
-        self.sf.set_plasma(eq)
-        self.get_Xpsi()  # high-res Xpsi
-
-    def update_coil_psi(self):
-        eq = self.get_coil_psi()
-        self.sf.update_plasma(eq)
-        self.get_Xpsi()  # high-res Xpsi
-
-    def set_plasma_psi(self, plot=False, **kwargs):
-        self.psi = np.zeros(np.shape(self.x2d))
-        for name in self.plasma_coil.keys():
-            self.psi += self.add_coil_psi(self.x2d,
-                                          self.z2d, self.plasma_coil[name])
-        self.sf.update_plasma({'x': self.x, 'z': self.z, 'psi': self.psi})
-
-    def plot_psi(self, **kwargs):
-        if 'levels' in kwargs:
-            CS = pl.contour(self.x2d, self.z2d, self.psi,
-                            levels=kwargs['levels'], colors=[[0.5, 0.5, 0.5]])
-        elif hasattr(self, 'cs'):
-            levels = self.cs.levels
-            CS = pl.contour(self.x2d, self.z2d, self.psi, levels=levels)
-        else:
-            CS = pl.contour(self.x2d, self.z2d, self.psi, 31,
-                            colors=[[0.5, 0.5, 0.5]])
-        for cs in CS.collections:
-            cs.set_linestyle('solid')
-            cs.set_alpha(0.5)
 
     def Ppoint(self, point):
         psi = 0
@@ -779,14 +740,62 @@ class EQ(object):
         B = np.sqrt(feild[0]**2 + feild[1]**2)
         return B
 
+    def get_coil_psi(self):
+        self.psi = np.zeros(np.shape(self.x2d))
+        for name in self.pf.sub_coil.keys():
+            self.psi += cc.add_Pcoil(self.x2d,
+                                     self.z2d, self.pf.sub_coil[name])
+        for name in self.plasma_coil.keys():
+            self.psi += cc.add_Pcoil(self.x2d, self.z2d,
+                                     self.plasma_coil[name])
+        return {'x': self.x, 'z': self.z, 'psi': self.psi}
+    '''
+
+    def set_coil_psi(self):
+        psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf,
+                              plasma_coil=self.plasma_coil)
+        self.sf.set_plasma({'x': self.x, 'z': self.z, 'psi': psi})
+        self.get_Xpsi()  # high-res Xpsi
+
+    def update_coil_psi(self):
+        psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf,
+                              plasma_coil=self.plasma_coil)
+        self.sf.update_plasma({'x': self.x, 'z': self.z, 'psi': psi})
+        self.get_Xpsi()  # high-res Xpsi
+
+    def set_plasma_psi(self):
+        self.psi = np.zeros(np.shape(self.x2d))
+        for name in self.plasma_coil.keys():
+            self.psi += cc.add_Pcoil(self.x2d,
+                                     self.z2d, self.plasma_coil[name])
+        self.sf.update_plasma({'x': self.x, 'z': self.z, 'psi': self.psi})
+
+    def plot_psi(self, **kwargs):
+        if 'levels' in kwargs:
+            CS = pl.contour(self.x2d, self.z2d, self.psi,
+                            levels=kwargs['levels'], colors=[[0.5, 0.5, 0.5]])
+        elif hasattr(self, 'cs'):
+            levels = self.cs.levels
+            CS = pl.contour(self.x2d, self.z2d, self.psi, levels=levels)
+        else:
+            CS = pl.contour(self.x2d, self.z2d, self.psi, 31,
+                            colors=[[0.5, 0.5, 0.5]])
+        for cs in CS.collections:
+            cs.set_linestyle('solid')
+            cs.set_alpha(0.5)
+
     def get_Xpsi(self):
-        self.sf.Xpoint = minimize(self.Bmag, np.array(self.sf.Xpoint),
+        self.sf.Xpoint = minimize(cc.Bmag, np.array(self.sf.Xpoint),
                                   method='nelder-mead',
+                                  args=(self.pf, self.plasma_coil),
                                   options={'xtol': 1e-4, 'disp': False}).x
-        self.sf.Xpsi = self.Ppoint(self.sf.Xpoint)
+        self.sf.Xpsi = self.Ppoint(self.sf.Xpoint, self.pf,
+                                   plasma_coil=self.plasma_coil)
 
     def get_Mpsi(self):
-        self.sf.Mpoint = minimize(self.Bmag, np.array(self.sf.Mpoint),
+        self.sf.Mpoint = minimize(cc.Bmag, np.array(self.sf.Mpoint),
                                   method='nelder-mead',
+                                  args=(self.pf, self.plasma_coil),
                                   options={'xtol': 1e-4, 'disp': False}).x
-        self.sf.Mpsi = self.Ppoint(self.sf.Mpoint)
+        self.sf.Mpsi = self.Ppoint(self.sf.Mpoint, self.pf,
+                                   plasma_coil=self.plasma_coil)

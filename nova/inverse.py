@@ -11,7 +11,7 @@ import time
 import multiprocessing
 from nova import loops
 import nlopt
-from nova.force import force_feild
+from nova.force import force_field
 from scipy.optimize import minimize_scalar
 from warnings import warn
 import sys
@@ -56,7 +56,6 @@ class INV(object):
         self.log_iter = ['current_iter', 'plasma_iter', 'position_iter']
         self.log_plasma = ['plasma_coil']
         self.CS_Lnorm, self.CS_Znorm = 2, 1
-        self.force_feild_active = False
         self.rhs = False  # colocation status
 
     def colocate(self, sf, n=1e3, expand=0.1, centre=0, width=363/(2*np.pi),
@@ -141,7 +140,8 @@ class INV(object):
                       'Fcoil': [[] for _ in range(self.nS)]}
 
     def update_swing(self):
-        self.swing['Ic'] = np.zeros((self.nS, self.nC))  # resize current vector
+        # resize current vector
+        self.swing['Ic'] = np.zeros((self.nS, self.nC))
 
     def initalise_limits(self):
         self.limit = {'Ic': {}, 'L': [], 'F': []}
@@ -995,7 +995,7 @@ class INV(object):
 
     def update_area(self, relax=1, margin=0):
         Ic = self.swing['Ic'][np.argmax(abs(self.swing['Ic']), axis=0),
-                            range(self.nC)]
+                              range(self.nC)]
         for name in self.PF_coils:
             if name in self.adjust_coils:
                 Ic = Ic[list(self.adjust_coils).index(name)]

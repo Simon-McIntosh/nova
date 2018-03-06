@@ -51,7 +51,10 @@ class PF(object):
     def update_current(self, Ic):  # new current passed as dict
         for i, name in enumerate(Ic):
             self.coil[name]['Ic'] = Ic[name]
-            Nfilament = self.sub_coil[name+'_0']['Nf']
+            try:
+                Nfilament = self.sub_coil[name+'_0']['Nf']
+            except KeyError:
+                Nfilament = 1
             for n in range(Nfilament):
                 sub_coil = '{}_{}'.format(name, n)
                 self.sub_coil[sub_coil]['Ic'] = Ic[name] / Nfilament
@@ -286,12 +289,7 @@ class PF(object):
         self.plot_coil(coils, label=label, current=current, fs=fs,
                        alpha=alpha)
         if plasma:
-            self.plot_coil(self.plasma_coil, alpha=alpha)
-            Ip = 0
-            for coil in self.plasma_coil:
-                Ip += self.plasma_coil[coil]['Ic']
-            print('Ip', Ip)
-
+            self.plot_coil(self.plasma_coil, alpha=alpha, coil_color='C4')
         plt.axis('equal')
         plt.axis('off')
 

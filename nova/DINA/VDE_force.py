@@ -108,7 +108,7 @@ class VDE_force:
         if nframe is None:
             nframe = self.tor.nt
         nframe = int(nframe)
-        frames = np.linspace(0, self.tor.nt-1, nframe, dtype=int)
+        frames = np.linspace(0, self.tor.nt-2, nframe, dtype=int)
         return frames, nframe
 
     def get_force(self, nframe=None, plot=False):

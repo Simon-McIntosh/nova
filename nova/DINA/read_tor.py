@@ -5,7 +5,7 @@ from collections import OrderedDict
 from itertools import count
 from nova.coils import PF
 from amigo.IO import readtxt
-from read_dina import dina
+from nep.DINA.read_dina import dina
 from amigo.pyplot import plt
 from nep.coil_geom import VSgeom
 

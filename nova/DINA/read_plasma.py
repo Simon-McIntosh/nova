@@ -2,9 +2,8 @@ import pandas as pd
 from amigo.pyplot import plt
 import numpy as np
 from amigo.addtext import linelabel
-from read_dina import dina, lowpass
+from nep.DINA.read_dina import dina, lowpass, timeconstant
 from scipy.interpolate import interp1d
-from read_dina import timeconstant
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 from collections import OrderedDict

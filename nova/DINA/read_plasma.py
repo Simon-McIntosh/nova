@@ -7,6 +7,7 @@ from scipy.interpolate import interp1d
 from read_dina import timeconstant
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
+from collections import OrderedDict
 
 
 class read_plasma:
@@ -43,39 +44,7 @@ class read_plasma:
         for var in data:
             if var != 't':  # interpolate
                 setattr(self, var, interp1d(data['t'], data[var])(self.t))
-
-    def get_quench(self, plot=False):  # locate current quench
-        Ip_lp = lowpass(self.Ip, self.dt, dt_window=0.001)  # plasma current
-        dIpdt = np.gradient(Ip_lp, self.t)
-        i_cq = next((i for i, (dIdt, Ip) in enumerate(zip(dIpdt, Ip_lp))
-                     if dIdt > 5e7))
-
-        t_cq = self.t[i_cq]  # current quench time
-        tc = timeconstant(self.t[i_cq:], Ip_lp[i_cq:], trim_fraction=0.5)
-        tdis, ttype, tfit, Ifit = tc.fit(plot=False, Io=-15e6)  # cq
-
-        if plot:
-            txt = '{} discharge, t={:1.0f}ms'.format(ttype, 1e3*tdis)
-            ax = plt.subplots(2, 1, sharex=True)[1]
-            ax[0].plot(1e3*self.t, 1e-6*Ip_lp)
-            ax[0].plot(1e3*tfit, 1e-6*Ifit, label=txt)
-            ax[0].set_ylabel('$Ip$ MA')
-            ax[0].legend()
-
-            txt = '$t_{cq}$'+'={:1.1f}ms'.format(1e3*t_cq)
-            ax[1].plot(1e3*self.t, 1e-6*dIpdt)
-            ax[1].plot(1e3*t_cq, 1e-6*dIpdt[i_cq], 'o',
-                       label=txt)
-            ax[1].set_xlabel('$t$ ms')
-            ax[1].set_ylabel('$dI_p/dt$ MAs$^{-1}$')
-            ax[1].legend()
-            plt.despine()
-            plt.setp(ax[0].get_xticklabels(), visible=False)
-            ax[0].text(0.5, 1.05, self.name,
-                       transform=ax[0].transAxes,
-                       bbox=dict(alpha=0.25), va='bottom', ha='center')
-
-        return i_cq, t_cq, tdis, ttype
+        self.zdir = np.sign(self.z[np.argmax(abs(self.z))])
 
     def plot_currents(self, ax=None):
         if ax is None:
@@ -100,39 +69,89 @@ class read_plasma:
         self.tau_d['ENP'] = {'alpha': [0.4003159,  0.36687173,  0.23344466],
                              'tau': [0.0283991,  0.12646493,  0.04291896]}
         self.Io = Io  # control spike current magnitude
-        self.quench_dtype = [('name', '60U'),  # construct data strucutre
-                             ('t_cq', float),  # current quench
-                             ('i_cq', int),  # quench index
-                             ('I_cq', float),  # plasma current
-                             ('discharge_time', float),
-                             ('discharge_type', '60U'),
-                             ('zdir', int)]  # VDE direction
-        self.Ivs3_dtype = [('control', '2float'),
-                           ('error', '2float'), ('referance', '2float')]
+        self.trip_dtype = [('name', '60U'),  # construct data strucutre
+                           ('t_cq', float),  # current quench
+                           ('i_cq', int),  # quench index
+                           ('I_cq', float),  # plasma current
+                           ('discharge_time', float),
+                           ('discharge_type', '60U'),
+                           ('zdir', int),  # VDE direction
+                           ('t_dz', float), ('i_dz', int),
+                           ('I_dz', float), ('z_dz', float),
+                           ('i_trip', int), ('t_trip', float)]
+        self.Ivs3_dtype = [('referance', '2float'),
+                           ('control', '2float'),
+                           ('error', '2float')]
+
+    def get_vs3_trip(self, dIdt_trip=5e7, dz_trip=0.16, plot=False):
+        Ip_lp = lowpass(self.Ip, self.dt, dt_window=0.001)  # plasma current
+        dIpdt = np.gradient(Ip_lp, self.t)
+        i_cq = next((i for i, dIdt in enumerate(dIpdt) if dIdt > dIdt_trip))
+        t_cq = self.t[i_cq]  # current quench time
+        tc = timeconstant(self.t[i_cq:], Ip_lp[i_cq:], trim_fraction=0.5)
+        tdis, ttype, tfit, Ifit = tc.fit(plot=False, Io=-15e6)  # cq
+        dZ = self.z - self.z[0]  # displacment trip
+        i_dz = next((i for i, dz in enumerate(dZ) if abs(dz) > dz_trip))
+        t_dz = self.t[i_dz]
+        i_trip = i_dz if i_dz < i_cq else i_cq  # select first trigger
+        t_trip = self.t[i_trip]  # trip time
+
+        trip = np.zeros(1, dtype=self.trip_dtype)
+        trip['name'] = self.name
+        trip['t_cq'] = t_cq
+        trip['i_cq'] = i_cq
+        trip['I_cq'] = self.Ip[i_cq]
+        trip['discharge_time'] = tdis
+        trip['discharge_type'] = ttype
+        trip['zdir'] = self.zdir
+        trip['i_dz'] = i_dz
+        trip['t_dz'] = t_dz
+        trip['I_dz'] = self.Ip[i_dz]
+        trip['z_dz'] = self.z[i_dz]
+        trip['i_trip'] = i_trip
+        trip['t_trip'] = t_trip
+
+        if plot:
+            txt = '{} discharge, t={:1.0f}ms'.format(ttype, 1e3*tdis)
+            ax = plt.subplots(2, 1, sharex=True)[1]
+            ax[0].plot(1e3*self.t, 1e-6*self.Ip)
+            ax[0].plot(1e3*tfit, 1e-6*Ifit, label=txt)
+            ax[0].set_ylabel('$Ip$ MA')
+            ax[0].legend()
+
+            ax[1].plot(1e3*self.t, 1e-6*dIpdt)
+            txt_cq = '$t_{cq}$'+'={:1.1f}ms'.format(1e3*t_cq)
+            ax[1].plot(1e3*t_cq, 1e-6*dIpdt[i_cq], '*', label=txt_cq,
+                       color='gray')
+            txt_dz = r'$t_{\Delta z}$'+'={:1.1f}ms'.format(1e3*t_dz)
+            ax[1].plot(1e3*t_dz, 1e-6*dIpdt[i_dz], '^', label=txt_dz,
+                       color='gray')
+
+            ax[1].set_xlabel('$t$ ms')
+            ax[1].set_ylabel('$dI_p/dt$ MAs$^{-1}$')
+            ax[1].legend()
+            plt.despine()
+            plt.setp(ax[0].get_xticklabels(), visible=False)
+            ax[0].text(0.5, 1.05, self.name,
+                       transform=ax[0].transAxes,
+                       bbox=dict(alpha=0.25), va='bottom', ha='center')
+        return trip[0]
 
     def Ivs3_single(self, folder, plot=False):
         self.read_file(folder)  # load plasma file
-        # plasma current quench
-        i_cq, t_cq, tdis, ttype = self.get_quench()
-        quench = np.zeros(1, dtype=self.quench_dtype)
-        quench['name'] = self.name
-        quench['t_cq'] = t_cq
-        quench['i_cq'] = i_cq
-        quench['I_cq'] = self.Ip[i_cq]
-        quench['discharge_time'] = tdis
-        quench['discharge_type'] = ttype
-        quench['zdir'] = np.sign(self.z[np.argmax(abs(self.z))])
-        # VS3 system
-        Ivs3_data = {}
+        trip = self.get_vs3_trip()  # vs3 trigger
+        Ivs3_data = {}  # VS3 system
         Ivs3_data['t'] = self.t
         Ivs3_data['Ireferance'] = self.Ivs3_o
-        Ivs3_data['tpre'] = self.t[:i_cq]
-        Ivs3_data['Ipre'] = self.Ivs3_o[:i_cq]
-        Ivs3_data['Icontrol'] = self.Ioffset(t_cq, quench[0]['zdir'])
-        Ivs3_data['Ierror'] = self.Ioffset(t_cq, -quench[0]['zdir'])
+
+        Ivs3_data['tpre'] = self.t[:trip['i_cq']]
+        Ivs3_data['Ipre'] = self.Ivs3_o[:trip['i_cq']]
+        Ivs3_data['Icontrol'] = self.Ioffset(trip['t_trip'], trip['zdir'])
+        Ivs3_data['Ierror'] = self.Ioffset(trip['t_trip'], -trip['zdir'])
         Ivs3 = np.zeros(1, dtype=self.Ivs3_dtype)
-        Ivs3_fun = {}  # Ivs3 interpolator
-        for mode in Ivs3.dtype.names:  # max values
+        Ivs3_fun = OrderedDict()  # Ivs3 interpolator
+        for mode in Ivs3.dtype.names:
+            # max values
             Imode = 'I{}'.format(mode)
             index = np.argmax(abs(Ivs3_data[Imode]))
             Ivs3[mode] = np.array([Ivs3_data['t'][index],
@@ -142,22 +161,23 @@ class read_plasma:
                                                   Ivs3_data[Imode][-1]),
                                       bounds_error=False)
         if plot:
-            for mode in Ivs3_fun:
-                plt.plot(1e3*self.t, 1e-3*Ivs3_fun[mode](self.t), label=mode)
+            for mode, color in zip(Ivs3_fun, ['gray', 'C0', 'C3']):
+                plt.plot(1e3*self.t, 1e-3*Ivs3_fun[mode](self.t),
+                         label=mode, color=color)
             plt.despine()
             plt.legend()
             plt.xlabel('$t$ ms')
             plt.ylabel('$I_{vs3}$ kA')
             plt.title(self.name)
-        return quench[0], Ivs3_data, Ivs3[0], Ivs3_fun
+        return trip, Ivs3_data, Ivs3[0], Ivs3_fun
 
     def Ivs3_ensemble(self, plot=False):
-        self.quench = np.zeros(self.dina.nfolder, dtype=self.quench_dtype)
+        self.trip = np.zeros(self.dina.nfolder, dtype=self.trip_dtype)
         self.Ivs3_data = [{} for _ in range(self.dina.nfolder)]  # Ivs data
         self.Ivs3 = np.zeros(self.dina.nfolder, dtype=self.Ivs3_dtype)
 
         for i in range(self.dina.nfolder):
-            self.quench[i], self.Ivs3_data[i], self.Ivs3[i] \
+            self.trip[i], self.Ivs3_data[i], self.Ivs3[i] \
                 = self.Ivs3_single(i)[:3]
         if plot:
             self.plot_Ivs3_ensemble()
@@ -172,18 +192,23 @@ class read_plasma:
         return Ic
 
     def get_color(self, index):
-        t_cq = self.quench[index]['t_cq']
+        t_cq = self.trip[index]['t_cq']
+        label = ''
         if t_cq < 400e-3:  # MD
             iax = 0
             ic = 0
+            label += 'MD '
         else:  # VDE
             iax = 1
             ic = 2
-        if 'DW' in self.quench[index]['name']:
+            label += 'VDE '
+        if 'DW' in self.trip[index]['name']:
             color = 'C{}'.format(ic)
+            label += 'down'
         else:
             color = 'C{}'.format(ic+1)
-        return color, iax
+            label += 'up'
+        return color, iax, label
 
     def plot_Ivs3_ensemble(self):
         ax = plt.subplots(2, 1)[1]
@@ -192,54 +217,64 @@ class read_plasma:
             text.append(linelabel(postfix='kA', value='1.1f',
                                   loc=loc, ax=ax[i]))
         for i in range(self.dina.nfolder):
-            color, iax = self.get_color(i)
+            color, iax = self.get_color(i)[:2]
             ax[iax].plot(
-              1e3*self.Ivs3_data[i]['t'][self.quench[i]['i_cq']:],
-              1e-3*self.Ivs3_data[i]['Ireferance'][self.quench[i]['i_cq']:],
+              1e3*self.Ivs3_data[i]['t'][self.trip[i]['i_cq']:],
+              1e-3*self.Ivs3_data[i]['Ireferance'][self.trip[i]['i_cq']:],
               color=color)
             text[iax].add('')
             ax[iax].plot(1e3*self.Ivs3_data[i]['tpre'],
                          1e-3*self.Ivs3_data[i]['Ipre'], '-',
                          color='gray', lw=0.5)
             ax[iax].plot(
-                1e3*self.Ivs3_data[i]['t'][self.quench[i]['i_cq']],
-                1e-3*self.Ivs3_data[i]['Ireferance'][self.quench[i]['i_cq']],
-                '*', ms=8, color=color)
+                1e3*self.Ivs3_data[i]['t'][self.trip[i]['i_cq']],
+                1e-3*self.Ivs3_data[i]['Ireferance'][self.trip[i]['i_cq']],
+                '*', ms=10, color=color)
+            ax[iax].plot(
+                1e3*self.Ivs3_data[i]['t'][self.trip[i]['i_dz']],
+                1e-3*self.Ivs3_data[i]['Ireferance'][self.trip[i]['i_dz']],
+                '^', ms=7, color=color)
         plt.despine()
         for i, vde in enumerate(['MD', 'VDE']):
-            h_down = mlines.Line2D([], [], color='C{}'.format(2*i),
-                                   label='{} down'.format(vde))
-            h_up = mlines.Line2D([], [], color='C{}'.format(2*i+1),
-                                 label='{} up'.format(vde))
-            ax[i].legend(handles=[h_down, h_up])
+            self.add_vde_legend(ax[i], i, vde)
             ax[i].set_xlabel('$t$ ms')
             ax[i].set_ylabel('$I_{vs3}$ kA')
             text[i].plot()
         plt.tight_layout()
 
+    def add_vde_legend(self, ax, i, vde):
+        h_down = mlines.Line2D([], [], color='C{}'.format(2*i),
+                               label='{} down'.format(vde))
+        h_up = mlines.Line2D([], [], color='C{}'.format(2*i+1),
+                             label='{} up'.format(vde))
+        line_legend = ax.legend(handles=[h_down, h_up], loc=1)
+        if i == 1:
+            h_cq = mlines.Line2D([], [], color='gray', marker='*',
+                                 linestyle='None',  label='cq-trip')
+            h_dz = mlines.Line2D([], [], color='gray', marker='^',
+                                 linestyle='None', label=r'$\Delta z$-trip')
+            ax.legend(handles=[h_cq, h_dz], loc=4)
+            ax.add_artist(line_legend)
+
     def plot_displacment(self):
         ax = plt.subplots(1, 2, figsize=(8, 6), sharex=True, sharey=True)[1]
-
         text = []
         for i in range(2):
             text.append(linelabel(postfix='', value='', ax=ax[i], Ndiv=20))
         for i in range(self.dina.nfolder):
             self.read_file(i)  # load file
-            i_cq = self.quench[i]['i_cq']
-            I_cq = self.quench[i]['I_cq']
-            color, iax = self.get_color(i)
+            i_cq = self.trip[i]['i_cq']
+            I_cq = self.trip[i]['I_cq']
+            i_dz = self.trip[i]['i_dz']
+            color, iax = self.get_color(i)[:2]
             ax[iax].plot(self.x, self.z, '-', color=color)
-            ax[iax].plot(self.x[0], self.z[0], '*', color=color)
-            ax[iax].plot(self.x[i_cq], self.z[i_cq], 's', color=color)
+            ax[iax].plot(self.x[i_dz], self.z[i_dz], '^', color=color)
+            ax[iax].plot(self.x[i_cq], self.z[i_cq], '*', color=color)
             text[iax].add('$I_{cq}$ '+'{:1.1f}MA'.format(1e-6*I_cq))
         plt.axis('equal')
         plt.despine()
         for i, vde in enumerate(['MD', 'VDE']):
-            h_down = mlines.Line2D([], [], color='C{}'.format(2*i),
-                                   label='{} down'.format(vde))
-            h_up = mlines.Line2D([], [], color='C{}'.format(2*i+1),
-                                 label='{} up'.format(vde))
-            ax[i].legend(handles=[h_down, h_up])
+            self.add_vde_legend(ax[i], i, vde)
             text[i].plot()
             ax[i].set_xlabel('$x$ m')
         ax[0].set_ylabel('$y$ m')
@@ -249,7 +284,7 @@ class read_plasma:
         plt.figure()
         X = range(self.dina.nfolder)
         for i, x in enumerate(X):
-            color, iax = self.get_color(i)
+            color, iax = self.get_color(i)[:2]
             plt.bar(x, 1e-3*self.Ivs3[mode][i][1], color=color, width=0.8)
         for Idir in [-1, 1]:
             max_index = np.argmax(Idir*self.Ivs3[mode][:, 1])
@@ -277,19 +312,16 @@ class read_plasma:
         return g
 
 
-
 if __name__ == '__main__':
 
     pl = read_plasma('disruptions')
 
-    Ivs3_fun = pl.Ivs3_single(3, plot=True)[-1]
+    pl.Ivs3_single(11, plot=True)
     pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms
-
-    pl.read_file(8)
-    pl.get_quench(plot=True)
+    pl.read_file(3)
+    pl.get_vs3_trip(plot=True)
 
     pl.plot_displacment()
 
     for mode in pl.Ivs3.dtype.names:
         pl.plot_Ivs3_max(mode)
-

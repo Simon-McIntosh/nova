@@ -6,27 +6,86 @@ from collections import OrderedDict
 import nova.cross_coil as cc
 from nova.streamfunction import SF
 from amigo.geom import grid
-from nep.DINA.read_psi import read_psi
 from nep.DINA.read_plasma import read_plasma
 from amigo.pyplot import plt
 from amigo.time import clock
 from amigo.geom import qrotate
 import matplotlib.animation as manimation
+from nep.rails import stress_allowable
+from read_dina import dina
+import matplotlib.patches as mpatches
+import pickle
+from os.path import join, isfile
+import matplotlib.lines as mlines
 
 
 class VDE_force:
 
     def __init__(self, folder=0, frame_index=0):
+        self.dina = dina('disruptions')
+        self.pl = read_plasma('disruptions')  # load plasma
+        self.tor = read_tor('disruptions')
+        self.read_file(folder, frame_index)
+        self.allowable = stress_allowable()  # load allowable interpolators
+
+    def read_file(self, folder, frame_index=0):
         self.load_vs3(folder)  # load vs3 currents
         self.load_active()  # load active coils
         self.load_passive(folder)  # load toroidal strucutres
-        self.ff = force_field(self.pf.index, self.pf.coil, self.pf.sub_coil,
-                              self.pf.plasma_coil, multi_filament=True)
         self.frame_update(frame_index)  # initalize at start of timeseries
+        self.vs3_update('referance')  # initalize vs3 current
+        self.set_force_field()
+
+    def set_force_field(self):
+        active_coils, passive_coils = self.set_coil_type()
+        self.ff = force_field(self.pf.index, self.pf.coil, self.pf.sub_coil,
+                              self.pf.plasma_coil, multi_filament=True,
+                              active_coils=active_coils,
+                              passive_coils=passive_coils)
+
+    def set_coil_type(self):
+        active_coils = self.pf.index['VS3']['name']
+        passive_coils = list(self.pf.coil.keys())
+        for coil in active_coils:
+            passive_coils.remove(coil)
+        passive_coils.append('Plasma')
+        return active_coils, passive_coils
 
     def load_vs3(self, folder):
-        self.pl = read_plasma('disruptions')  # load plasma
         self.Ivs3_fun = self.pl.Ivs3_single(folder)[-1]  # current interpolator
+
+    def load_active(self, dCoil=0.25):
+        vs_geom = VSgeom()
+        self.vs_rail = vs_geom.rail
+        pf_geom = PFgeom(VS=True)
+        self.pf = pf_geom.pf
+        self.pf.mesh_coils(dCoil=dCoil)
+        for i, coil in enumerate(vs_geom.pf.coil):
+            if i < 4:  # lower
+                subcoil = 'lowerVS_{:d}'.format(i)
+            else:
+                subcoil = 'upperVS_{:d}'.format(i-4)
+            self.pf.sub_coil[subcoil] = vs_geom.pf.coil[coil]
+            self.pf.sub_coil[subcoil]['Nf'] = 4
+        self.vs_theta = {}
+        for name in vs_geom.geom:
+            self.vs_theta[name] = vs_geom.geom[name]['theta']
+
+    def load_passive(self, folder):
+        self.tor.read_file(folder)  # read toroidal strucutres
+        self.add_filament(self.tor.vessel_coil)
+        self.add_filament(self.tor.blanket_coil)
+
+    def add_filament(self, filament):
+        for coil in filament:
+            self.pf.coil[coil] = filament[coil]
+            self.pf.sub_coil[coil+'_0'] = filament[coil]
+            self.pf.sub_coil[coil+'_0']['Nf'] = 1
+
+    def load_plasma(self, frame_index):
+        self.pf.plasma_coil.clear()  # clear
+        for name in self.tor.plasma_coil[frame_index]:
+            self.pf.plasma_coil[name] = self.tor.plasma_coil[frame_index][name]
 
     def set_coil_current(self, frame_index):  # PF / Cs
         Ic = dict(zip(self.tor.coil.keys(),
@@ -42,17 +101,20 @@ class VDE_force:
             Ic[name] = sign * current[turn_index]
         self.pf.update_current(Ic)
 
-    def frame_update(self, frame_index):  # updates both coil and sub_coil
+    def frame_update(self, frame_index):
         self.frame_index = frame_index
         self.t = self.tor.t[self.frame_index]
         self.set_coil_current(frame_index)
         self.set_filament_current(self.tor.vessel_coil, frame_index)
         self.set_filament_current(self.tor.blanket_coil, frame_index)
         self.load_plasma(frame_index)
-        self.set_vs3_current(self.Ivs3_fun['control'](self.t))  # default
 
-    def force_update(self, mode):
-        self.set_vs3_current(self.Ivs3_fun[mode](self.t))  # VS3 current
+    def vs3_update(self, mode):
+        Ivs3 = self.Ivs3_fun[mode](self.t)
+        self.set_vs3_current(Ivs3)
+
+    def force_update(self):
+        self.ff.set_passive_force_field()  # update plasma force field
         self.ff.set_current()  # update fillament currents
         self.ff.set_force(self.ff.Ic)  # update force calculation
 
@@ -61,114 +123,115 @@ class VDE_force:
         Ic = {'upperVS': -4*Ivs3, 'lowerVS': 4*Ivs3}
         self.pf.update_current(Ic)
 
-    def load_active(self, dCoil=0.25):
-        vs_geom = VSgeom()
-        pf_geom = PFgeom(VS=True)
-        self.pf = pf_geom.pf
-        self.pf.mesh_coils(dCoil=dCoil)
-        for i, coil in enumerate(vs_geom.pf.coil):
-            if i < 4:  # lower
-                subcoil = 'lowerVS_{:d}'.format(i)
-            else:
-                subcoil = 'upperVS_{:d}'.format(i-4)
-            self.pf.sub_coil[subcoil] = vs_geom.pf.coil[coil]
-            self.pf.sub_coil[subcoil]['Nf'] = 4
-        self.vs_theta = {}
-        for name in vs_geom.geom:
-            self.vs_theta[name+'VS'] = vs_geom.geom[name]['theta']
-
-    def load_passive(self, folder):
-        self.tor = read_tor('disruptions')
-        self.tor.read_file(folder)  # read toroidal strucutres
-        self.add_filament(self.tor.vessel_coil)
-        self.add_filament(self.tor.blanket_coil)
-
-    def add_filament(self, filament):
-        for coil in filament:
-            self.pf.coil[coil] = filament[coil]
-            self.pf.sub_coil[coil+'_0'] = filament[coil]
-            self.pf.sub_coil[coil+'_0']['Nf'] = 1
-
-    def load_plasma(self, index):
-        self.pf.plasma_coil = OrderedDict()  # clear
-        for coil in self.tor.plasma_coil[index]:
-            self.pf.plasma_coil[coil] = self.tor.plasma_coil[index][coil]
-        self.ff.set_passive_force_field()  # update plasma force field
-
     def contour(self, **kwargs):
         n, limit = 1e4, [1.5, 10, -8.5, 8.5]
         self.x2d, self.z2d, self.x, self.z = grid(n, limit)[:4]
         self.psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf)
         self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi,
                             'name': 'DINA_{}'.format(self.tor.name)})
-        levels = self.sf.contour(51, boundary=False, **kwargs)
+        levels = self.sf.contour(51, boundary=False, Xnorm=False, **kwargs)
         return levels
 
     def get_frames(self, nframe):
         if nframe is None:
             nframe = self.tor.nt
         nframe = int(nframe)
-        frames = np.linspace(0, self.tor.nt-2, nframe, dtype=int)
+        time = np.linspace(self.tor.t[0], self.tor.t[-2], nframe)
+        frames = np.zeros(nframe, dtype=int)
+        for i, t in enumerate(time):
+            frames[i] = np.argmin(abs(t-self.tor.t))
         return frames, nframe
 
-    def get_force(self, nframe=None, plot=False):
-        self.Fvs3_data = OrderedDict()
-        dtype = [('Fx', '2float'), ('Fz', '2float'), ('Fmag', '2float'),
-                 ('Fn', '2float'), ('Ft', '2float'),
-                 ('t', float), ('I', float)]
+    def get_stress(self, Fn, Ft, name):
+        dx, dy = self.vs_rail[name]['dx'], self.vs_rail[name]['dy']
+        dz, n = self.vs_rail[name]['dz'], self.vs_rail[name]['n']
+        coil = self.pf.coil[name]
+        Ft *= 2*np.pi*coil['x']/n  # force per rail
+        Fn *= 2*np.pi*coil['x']/n
+
+        Stress = {}
+        Force = {'x': 0, 'y': Ft, 'z': Fn}
+        Moment = {'x': Force['y']*dz, 'y': Force['x']*dz, 'z': 0}
+        area = dx*dy
+        for var in Force:
+            Stress[var] = abs(Force[var]) / area
+        Ix = dx*dy**3/12  # second moments
+        Iy = dy*dx**3/12
+        #  stress linerization
+        Pm = np.sqrt(Stress['z']**2 + 3*(Stress['x']**2 + Stress['y']**2))
+        PmPb = np.sqrt((Stress['z'] +
+                        dx*abs(Moment['y'])/(2*Iy) +
+                        dy*abs(Moment['x'])/(2*Ix))**2 +
+                       3 * ((Stress['x'])**2 + (Stress['y'])**2))
+
+        Sm = self.allowable.get_limit(weld_category=2, load_category=1,
+                                      load_type='primary', T=100)
+        fPm, fPmPb = 1e-6*Pm/Sm, 1e-6*PmPb/(1.5*Sm)
+        return max(fPm, fPmPb)
+
+    def get_force(self, nframe=None, plot=False, pvar='sigma'):
+        vs3_data = OrderedDict()
+        data_dtype = [('Fx', '2float'), ('Fz', '2float'), ('Fmag', '2float'),
+                      ('Fn', '2float'), ('Ft', '2float'), ('sigma', '2float'),
+                      ('t', float), ('I', float)]
         frames, nframe = self.get_frames(nframe)
         tick = clock(nframe)
         for mode in ['referance', 'control', 'error']:
-            self.Fvs3_data[mode] = np.zeros(nframe, dtype=dtype)
-        for fi, frame_index in enumerate(frames):
+            vs3_data[mode] = np.zeros(nframe, dtype=data_dtype)
+        for i, frame_index in enumerate(frames):
             self.frame_update(frame_index)
-            for mode in self.Fvs3_data:
-                self.force_update(mode)
-                for i, (index, name) in \
-                        enumerate(zip(self.pf.index['VS3']['index'],
-                                      self.pf.index['VS3']['name'])):
+            for mode in vs3_data:
+                self.vs3_update(mode)
+                self.force_update()
+                for j, name in enumerate(self.pf.index['VS3']['name']):
+                    F_index = self.ff.active_coils.index(name)
                     coil = self.pf.coil[name]
-                    F = self.ff.F[index] / (2*np.pi*coil['x'])  # per length
+                    F = 1e6 * self.ff.F[F_index] / (2*np.pi*coil['x'])  # N/m
                     Fxyz = np.array([F[0], 0, F[1]])
-                    Ftn = qrotate(Fxyz, theta=-self.vs_theta[name],
-                                  dx=[0, 1, 0])[0]
+                    theta = self.vs_theta[name]
+                    Ftn = qrotate(Fxyz, theta=theta, dx=[0, 1, 0])[0]
                     Fmag = np.linalg.norm(F)
-                    self.Fvs3_data[mode][fi]['t'] = self.t
-                    self.Fvs3_data[mode][fi]['I'] = self.Ivs3
-                    self.Fvs3_data[mode][fi]['Fx'][i] = F[0]
-                    self.Fvs3_data[mode][fi]['Fz'][i] = F[1]
-                    self.Fvs3_data[mode][fi]['Fn'][i] = Ftn[-1]
-                    self.Fvs3_data[mode][fi]['Ft'][i] = Ftn[0]
-                    self.Fvs3_data[mode][fi]['Fmag'][i] = Fmag
-
+                    sigma = self.get_stress(Ftn[-1], Ftn[0], name)
+                    vs3_data[mode][i]['t'] = self.t
+                    vs3_data[mode][i]['I'] = self.Ivs3
+                    vs3_data[mode][i]['Fx'][j] = F[0]
+                    vs3_data[mode][i]['Fz'][j] = F[1]
+                    vs3_data[mode][i]['Fn'][j] = Ftn[-1]
+                    vs3_data[mode][i]['Ft'][j] = Ftn[0]
+                    vs3_data[mode][i]['Fmag'][j] = Fmag
+                    vs3_data[mode][i]['sigma'][j] = sigma
             tick.tock()
-
         if plot:
+            if 'F' in pvar:
+                factor = 1e-3
+                ylabel = '$|F|$, kNm$^{-1}$'
+            elif pvar == 'sigma':
+                factor = 1
+                ylabel = '$\sigma^*$'
+
             ax = plt.subplots(3, 1, sharex=True, figsize=(8, 8))[1]
             ax[0].text(0.5, 1, self.tor.name, transform=ax[0].transAxes,
                        ha='center', va='top', weight='bold')
-            for mode, color in zip(self.Fvs3_data, ['gray', 'C0', 'C3']):
-                ax[0].plot(1e3*self.Fvs3_data[mode]['t'],
-                           1e-3*self.Fvs3_data[mode]['I'], '-',
+            for mode, color in zip(vs3_data, ['gray', 'C0', 'C3']):
+                ax[0].plot(1e3*vs3_data[mode]['t'],
+                           1e-3*vs3_data[mode]['I'], '-',
                            color=color, label=mode)
                 for i, name in enumerate(self.pf.index['VS3']['name']):
-                    ax[i+1].plot(1e3*self.Fvs3_data[mode]['t'],
-                                 1e3*self.Fvs3_data[mode]['Fmag'][:, i],
+                    ax[i+1].plot(1e3*vs3_data[mode]['t'],
+                                 factor*vs3_data[mode][pvar][:, i],
                                  color=color)
-                    max_index = np.nanargmax(
-                            self.Fvs3_data[mode]['Fmag'][:, i])
+                    max_index = np.nanargmax(vs3_data[mode][pvar][:, i])
                     txt = '{}: {:1.1f}'.format(
-                        mode, 1e3*self.Fvs3_data[mode]['Fmag'][max_index, i])
+                        mode, factor*vs3_data[mode][pvar][max_index, i])
                     ax[i+1].plot(
-                            1e3*self.Fvs3_data[mode]['t'][max_index],
-                            1e3*self.Fvs3_data[mode]['Fmag'][max_index, i],
+                            1e3*vs3_data[mode]['t'][max_index],
+                            factor*vs3_data[mode][pvar][max_index, i],
                             'o', color=color, label=txt)
-
             plt.despine()
             ax[0].set_ylabel('$I_{vs3}$, kA')
-            ax[0].legend()
+            ax[0].legend(loc=1)
             for i, name in enumerate(self.pf.index['VS3']['name']):
-                ax[i+1].set_ylabel('$|F|$, kNm$^{-1}$')
+                ax[i+1].set_ylabel(ylabel)
                 ax[i+1].text(0.5, 1, name, transform=ax[i+1].transAxes,
                              ha='center', va='top',
                              bbox=dict(facecolor='gray', alpha=0.25))
@@ -176,45 +239,199 @@ class VDE_force:
             for i in range(2):
                 plt.setp(ax[i].get_xticklabels(), visible=False)
             ax[2].set_xlabel('$t$, ms')
+        return vs3_data
 
-    def movie(self, nframe=None, mode='referance'):
+    def movie(self, folder, nframe=None, mode='referance'):
+        self.read_file(folder)
         frames, nframe = self.get_frames(nframe)
-        #self.frame_update(0)  # get referance contour
-        #levels = self.contour()
-
         FFMpegWriter = manimation.writers['ffmpeg']
-        writer = FFMpegWriter(fps=15, bitrate=-1)
+        writer = FFMpegWriter(fps=10, bitrate=-1)
         fig = plt.figure(figsize=(6, 10))
         tick = clock(nframe)
-
         filename = '../Movies/{}_{}.mp4'.format(self.tor.name, mode)
+        levels = self.plot_frame(0, mode=mode)
         with writer.saving(fig, filename, 72):
             for frame_index in frames:
                 plt.clf()
-                self.frame_update(frame_index)
-                self.force_update(mode)
-                self.pf.plot(subcoil=True, plasma=True)
-                self.ff.plot(coils=['VS3'], scale=2e2)
-                self.contour()
+                self.plot_frame(frame_index, mode=mode, levels=levels)
                 writer.grab_frame()
                 tick.tock()
 
+    def plot_frame(self, frame_index, mode='referance', **kwargs):
+        self.frame_update(frame_index)
+        self.vs3_update(mode)
+        self.force_update()
+        self.pf.plot(subcoil=True, plasma=True)
+        self.ff.plot(coils=['VS3'], scale=3, Fmax=10)
+        levels = self.contour(**kwargs)
+        return levels
+
+    def plot_coordinates(self):
+        for i, name in enumerate(self.pf.index['VS3']['name']):
+            theta = self.vs_theta[name]
+            coil = self.pf.coil[name]
+
+            xo, zo, dl = coil['x'], coil['z'], 1.5
+            dx = np.array([[xo, xo+dl], [0, 0], [zo, zo]]).T
+            dz = qrotate(dx, theta=-np.pi/2, xo=[xo, 0, zo], dx=[0, 1, 0])
+            # rotate to clamp local coordinate system
+            dx_ = qrotate(dx, theta=theta, xo=[xo, 0, zo], dx=[0, 1, 0])
+            dz_ = qrotate(dz, theta=theta, xo=[xo, 0, zo], dx=[0, 1, 0])
+
+            plt.plot(dx[:, 0], dx[:, -1], 'C0')
+            plt.plot(dz[:, 0], dz[:, -1], 'C1')
+            plt.plot(dx_[:, 0], dx_[:, -1], 'C0-.')
+            plt.plot(dz_[:, 0], dz_[:, -1], 'C1-.')
+
+    def datafile(self, nframe):
+        filename = join(self.dina.root,
+                        'DINA/Data/vs3_{:d}.plk'.format(nframe))
+        return filename
+
+    def write_data(self, nframe=100):
+        vs3_data = OrderedDict()
+        X = range(self.dina.nfolder)
+        for i in X:
+            self.read_file(i)
+            name = self.tor.name
+            vs3_data[name] = self.get_force(nframe, plot=False)
+        filename = self.datafile(nframe)
+        with open(filename, 'wb') as output:
+            pickle.dump(vs3_data, output, -1)
+        return vs3_data
+
+    def read_data(self, nframe=100, forcewrite=False):
+        filename = self.datafile(nframe)
+        if not isfile(filename) or forcewrite:
+            print('\nre-generating data, nframe:{}'.format(nframe))
+            vs3_data = self.write_data(nframe)
+        else:
+            with open(filename, 'rb') as input:
+                vs3_data = pickle.load(input)
+        return vs3_data
+
+    def plot_Fmax(self, nframe=100):
+        vs3_data = self.read_data(nframe)  # load data
+
+        ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
+        X = range(self.dina.nfolder)
+        Fmax = OrderedDict()
+        Fmax_dtype = [('Fmag', '2float'), ('t', '2float'), ('I', '2float'),
+                      ('frame_index', '2float')]
+        for mode in ['referance', 'control', 'error']:
+            Fmax[mode] = np.zeros(len(X), dtype=Fmax_dtype)
+        for i, name in enumerate(vs3_data):
+            vs3 = vs3_data[name]
+            for j, (mode, color, width) in enumerate(
+                    zip(['referance', 'control', 'error'],
+                        ['gray', 'C0', 'C3'], [0.9, 0.7, 0.5])):
+                for iax, k in enumerate([1, 0]):  # VS coils
+                    frame_index = np.nanargmax(vs3[mode]['Fmag'][:, k])
+                    Fmax[mode][i]['frame_index'][k] = frame_index
+                    Fmax[mode][i]['Fmag'][k] =\
+                        vs3[mode]['Fmag'][frame_index, k]
+                    for var in ['t', 'I']:
+                        Fmax[mode][i][var][k] = vs3[mode][var][frame_index]
+
+                    ax[iax].bar(i, 1e-3*Fmax[mode][i]['Fmag'][k], color=color,
+                                width=width, label=mode)
+        for i, k in enumerate([1, 0]):
+            Fm, im = [], []
+            for mode in Fmax:
+                Fm.extend(Fmax[mode]['Fmag'][:, k])
+                im.extend(list(range(len(vs3_data))))
+            index = np.argmax(Fm)
+            ax[i].text(im[index], 1e-3*Fm[index],
+                       '{:1.0f}'.format(1e-3*Fm[index]), weight='bold',
+                       va='bottom', ha='center')
+        h = []
+        for mode, color in zip(['referance', 'control', 'error'],
+                               ['gray', 'C0', 'C3']):
+            h.append(mpatches.Patch(color=color, label=mode))
+        ax[0].legend(handles=h, loc=2)
+        plt.xticks(X, self.dina.folders, rotation=70)
+        plt.despine()
+        plt.setp(ax[0].get_xticklabels(), visible=False)
+        for i, k in enumerate([1, 0]):
+            ax[i].set_ylabel('$|F|_{max}$ kNm$^{-1}$')
+            name = self.pf.index['VS3']['name'][k]
+            ax[i].text(0.5, 1, name, transform=ax[i].transAxes,
+                       weight='bold', bbox=dict(facecolor='gray', alpha=0.25),
+                       va='top', ha='center')
+
+        self.pl.Ivs3_ensemble()
+        ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
+        for index, file in enumerate(vs3_data):
+            vs3 = vs3_data[file]
+            color = self.pl.get_color(index)[0]
+            for i, k in enumerate([1, 0]):
+                ax[i].plot(1e3*vs3['control']['t'],
+                           1e-3*vs3['control']['Fmag'][:, k],
+                           color=color)
+
+        for i, k in enumerate([1, 0]):
+            ax[i].set_ylabel('$|F|$ kNm$^{-1}$')
+            name = self.pf.index['VS3']['name'][k]
+            ax[i].text(0.5, 1, name, transform=ax[i].transAxes,
+                       weight='bold', bbox=dict(facecolor='gray', alpha=0.25),
+                       va='top', ha='center')
+        ax[1].set_xlabel('$t$ ms')
+        plt.despine()
+        plt.setp(ax[0].get_xticklabels(), visible=False)
+        h = []
+        h.append(mlines.Line2D([], [], color='C0', label='MD down'))
+        h.append(mlines.Line2D([], [], color='C1', label='MD up'))
+        h.append(mlines.Line2D([], [], color='C2', label='VDE down'))
+        h.append(mlines.Line2D([], [], color='C3', label='VDE up'))
+        ax[0].legend(handles=h, loc=1)
+
+        ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
+        for i, k in enumerate([1, 0]):
+            name = self.pf.index['VS3']['name'][k]
+
+            for j in range(2):  # MD then VDE
+                mode_index = np.argmax(
+                        [max(Fmax[mode]['Fmag'][slice(j*6, (j+1)*6), k])
+                         for mode in Fmax])
+                mode = list(Fmax.keys())[mode_index]
+                file_index = j*6 + np.argmax(
+                        Fmax[mode]['Fmag'][slice(j*6, (j+1)*6), k])
+                file = list(vs3_data.keys())[file_index]
+                vs3 = vs3_data[file]
+                max_index = np.argmax(vs3[mode]['Fmag'][:, k])
+                F_max = vs3[mode]['Fmag'][max_index, k]
+                t_max = vs3[mode]['t'][max_index]
+                I_max = vs3[mode]['I'][max_index]
+                ax[i].plot(1e3*vs3[mode]['t'], 1e-3*vs3[mode]['Fmag'][:, k])
+                txt = file+'\n'
+                txt += '$t=$'+'{:1.1f}ms, '.format(1e3*t_max)
+                txt += '$F=$'+'{:1.0f}'.format(1e-3*F_max)
+                txt += 'kNm$^{-1}$, '
+                txt += '$I=$'+'{:1.0f}'.format(1e-3*I_max)
+                txt += 'kA'
+                ax[i].text(1e3*t_max, 1e-3*F_max, txt, va='bottom', ha='left')
+
+        for i, k in enumerate([1, 0]):
+            ax[i].set_ylabel('$|F|$ kNm$^{-1}$')
+            name = self.pf.index['VS3']['name'][k]
+            ax[i].text(0.5, 1, name, transform=ax[i].transAxes,
+                       weight='bold', bbox=dict(facecolor='gray', alpha=0.25),
+                       va='top', ha='center')
+        ax[1].set_xlabel('$t$ ms')
+        plt.despine()
+        plt.setp(ax[0].get_xticklabels(), visible=False)
+
 
 if __name__ == '__main__':
-    folder, frame_index = 11, 300
-
+    folder, frame_index = 3, 0
     vde = VDE_force(folder=folder, frame_index=frame_index)
 
-    #vde.get_force(nframe=51, plot=True)
+    vde.plot_Fmax(nframe=100)
+    # vde.plot_frame(200, mode='control')
 
-    vde.movie(nframe=50)
+    # vde.movie(3, nframe=60, mode='control')
+
+    # vde.movie(8, nframe=60, mode='control')
 
 
-
-    '''
-    psi = read_psi('disruptions')
-    psi.read_file(folder)
-    psi.plot_fw()
-    psi.plot(frame_index, levels=levels, color='C1')
-    '''
 

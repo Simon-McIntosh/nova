@@ -89,7 +89,6 @@ class timeconstant:
         td -= to  # time shift
         xo = np.append(Id[0]/n*np.ones(n), tau_o*np.arange(1, n+1))
         x = minimize(self.fit_ntau, xo, args=(td, Id)).x
-        err = self.fit_ntau(x, td, Id)
         Ifit = self.I_nfit(td, x)
         Io, tau = x[:n], x[n:]
         if plot:
@@ -158,7 +157,8 @@ class dina:
 
     def get_directory(self, database_folder):
         self.database_folder = database_folder
-        self.directory = join(class_dir(nep), '../Scenario_database')
+        self.root = class_dir(nep)
+        self.directory = join(self.root, '../Scenario_database')
         if self.database_folder is not None:
             self.directory = join(self.directory, self.database_folder)
 

@@ -59,18 +59,18 @@ class read_tor:
     def plasma_filaments(self, frame, dx=0.15, dz=0.15):
         rc = np.sqrt(dx**2 + dz**2) / 4
         npl = count(0)
-        plasma_coil = OrderedDict()
+        plasma_coil = {}  # OrderedDict()
         xp = 1e-2*np.array(frame[2][0::3])
         zp = 1e-2*np.array(frame[2][1::3])
         Ip = -1e3*np.array(frame[2][2::3])  # -kA to A
         for x, z, Ic in zip(xp, zp, Ip):
-            name = 'pl_{}'.format(next(npl))
+            name = 'Plasma_{}'.format(next(npl))
             plasma_coil[name] = {'Ic': Ic, 'dx': dx, 'dz': dz, 'rc': rc,
                                  'x': x, 'z': z}
         return plasma_coil, np.sum(Ip)
 
     def get_coils(self):
-        self.coil, coilnames = OrderedDict(), []
+        self.coil, coilnames = {}, []  # OrderedDict(), []
         self.rt.checkline('1.')
         self.rt.skiplines(1)
         coilnames = self.rt.readline(True, string=True)
@@ -127,8 +127,8 @@ class read_tor:
     def store_filaments(self, dx=0.15, dz=0.15, rho=0.8e-6, t=60e-3):
         rc = np.sqrt(dx**2 + dz**2) / 4
         nvv, nbl = count(0), count(0)
-        self.blanket_coil = OrderedDict()
-        self.vessel_coil = OrderedDict()
+        self.blanket_coil = {}  # OrderedDict()
+        self.vessel_coil = {}  # OrderedDict()
         vv = {'x': [], 'z': []}  # vv coils index
         for i, filament in enumerate(self.filaments):
             for j in range(filament['n_turn']):

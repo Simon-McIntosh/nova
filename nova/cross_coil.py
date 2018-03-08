@@ -264,7 +264,7 @@ def Btorque(eq_coil, plasma_coil, passive_coils, sink):
             source_strand = source + '_{:1.0f}'.format(i)
             ri = Csource[source_strand]['x']  # source
             zi = Csource[source_strand]['z']
-            Ii = Csource[source_strand]['I']
+            Ii = Csource[source_strand]['Ic']
             for j in range(Nsink):
                 sink_strand = sink + '_{:1.0f}'.format(j)
                 x = Csink[sink_strand]['x']  # sink

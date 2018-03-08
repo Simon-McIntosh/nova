@@ -171,7 +171,7 @@ class SF(object):
 
     def set_flux(self, eqdsk):
         required_keys = ['fpol', 'pressure', 'ffprim', 'pprime']
-        if np.array([key in required_keys for key in eqdsk]).all():
+        if np.array([key in eqdsk for key in required_keys]).all():
             F_ff = eqdsk['fpol']
             P_ff = eqdsk['pressure']
             n = len(F_ff)
@@ -351,7 +351,7 @@ class SF(object):
             B[i] = np.sqrt(field[0]**2 + field[1]**2)
         return np.argmin(B)
 
-    def Ppoint(self, point):  # was Pcoil
+    def Ppoint(self, point):
         if not hasattr(self, 'Pspline'):
             self.Pspline = RectBivariateSpline(self.x, self.z, self.psi)
         psi = self.Pspline.ev(point[0], point[1])

@@ -15,6 +15,9 @@ import sys
 from warnings import warn
 from time import time
 
+#  [add_Pcoil, add_Bcoil, Ppoint, Bpoint, Bmag, get_coil_psi]
+#  we have moved, find us in nova.cross_coil
+
 
 class MidpointNormalize(Normalize):
     def __init__(self, vmin=None, vmax=None, midpoint=None, clip=False):
@@ -223,7 +226,7 @@ class EQ(object):
         return psi
 
     def psi_pl(self):
-        self.b[self.core_indx == False] = 0  # zero edge BC
+        self.b[~self.core_indx] = 0  # zero edge BC
         psi_core = self.solve()  # solve with zero edgeBC
         dgdn = self.boundary_normal(psi_core)
         psi = np.zeros(self.Ne)
@@ -236,8 +239,7 @@ class EQ(object):
     def psi_edge(self):
         psi = np.zeros(self.Ne)
         for i, (x, z) in enumerate(zip(self.Re, self.Ze)):
-            psi[i] = self.sf.Ppoint((x, z), self.pf,
-                                    plasma_coil=self.plasma_coil)
+            psi[i] = self.sf.Ppoint((x, z))
         return psi
 
     def coil_core(self):
@@ -265,7 +267,7 @@ class EQ(object):
             xbdry, zbdry = self.sf.get_boundary()
             X, Z = geom.inloop(xbdry, zbdry,
                                self.x2d.flatten(), self.z2d.flatten())
-            self.Ip, self.Nplasma = 0, 0
+            self.Ipl, self.Nplasma = 0, 0
             self.plasma_index = np.zeros(self.N, dtype=int)
             for x, z in zip(X, Z):
                 i = np.argmin(np.abs(x - self.x))
@@ -278,8 +280,8 @@ class EQ(object):
                     self.plasma_index[self.Nplasma - 1] = index
                     self.bpl[index] = -self.mu_o * x**2 * self.sf.Pprime(psi)\
                         - self.sf.FFprime(psi)
-                    self.Ip -= self.dA * self.bpl[index] / (self.mu_o * x)
-            scale_plasma = self.sf.cpasma / self.Ip
+                    self.Ipl -= self.dA * self.bpl[index] / (self.mu_o * x)
+            scale_plasma = self.sf.Ipl / self.Ipl
             self.sf.b_scale = scale_plasma
         for i, index in zip(range(self.Nplasma), self.plasma_index):
             self.b[index] = self.bpl[index] * self.sf.b_scale
@@ -287,16 +289,16 @@ class EQ(object):
     def set_plasma_coil(self):
         self.plasma_coil = {}
         Rp, Zp = np.zeros(self.Nplasma), np.zeros(self.Nplasma)
-        Ip, Np = np.zeros(self.Nplasma), np.zeros(self.Nplasma)
+        Ipl, Np = np.zeros(self.Nplasma), np.zeros(self.Nplasma)
         for index in range(self.Nplasma):
             i, j = self.ij(self.plasma_index[index])
             x, z = self.x[i], self.z[j]
             Ic = -self.dA * self.b[self.plasma_index[index]] / (self.mu_o * x)
             Rp[index], Zp[index] = x, z
-            Ip[index] = Ic
+            Ipl[index] = Ic
             Np[index] = 1
         index = -1
-        for x, z, Ic, n in zip(Rp, Zp, Ip, Np):
+        for x, z, Ic, n in zip(Rp, Zp, Ipl, Np):
             if n > 0:
                 index += 1
                 self.plasma_coil['Plasma_{:1.0f}'.format(index)] = \
@@ -420,7 +422,7 @@ class EQ(object):
                 self.Ic['v'] += sign * (dIc)
             for index in range(1):
                 dIc = self.PID(self.Rerr[i], 'horizontal',
-                              index, kp=0.5 * kp, ki=2 * ki)
+                               index, kp=0.5 * kp, ki=2 * ki)
                 self.Ic['h'] += dIc
         # self.set_plasma_coil()  # for independance + Vcoil at start
         return self.Ic['v']
@@ -437,7 +439,7 @@ class EQ(object):
 
     def gen_opp(self, z=None, Zerr=5e-4, Nmax=100, **kwargs):
         self.to = time()  # time at start of gen opp loop
-        if z == None:  # sead plasma magnetic center vertical target
+        if z is None:  # sead plasma magnetic center vertical target
             z = self.sf.Mpoint[1]
         f, zt, dzdf = np.zeros(Nmax), np.zeros(Nmax), -0.7e-7  # -2.2e-7
         zt[0] = z
@@ -451,8 +453,9 @@ class EQ(object):
                     (zt[i] - zt[i - 1])  # Newtons method
                 dz = f[i] / fdash
                 if abs(dz) < Zerr:
-                    print(
-                        '\nvertical position converged < {:1.3f}mm'.format(1e3 * Zerr))
+                    dz_txt = '\nvertical position converged'
+                    dz_txt += '< {:1.3f}mm'.format(1e3 * Zerr)
+                    print(dz_txt)
                     self.set_plasma_coil()
                     break
                 else:
@@ -466,7 +469,7 @@ class EQ(object):
         # balance Xpoints (for double null)
         self.to = time()  # time at start of gen bal loop
         print('balancing DN Xpoints:')
-        if ztarget == None:  # sead plasma magnetic center vertical target
+        if ztarget is None:  # sead plasma magnetic center vertical target
             ztarget = self.sf.Mpoint[1]
         self.select_control_coils()  # or set_Vcoil for virtual pair
 
@@ -530,15 +533,15 @@ class EQ(object):
         self.b = np.reshape(b, self.nx * self.nz)
 
     def set_plasma_current(self):  # plasma current from sf line intergral
-        Ip = 0
+        Ipl = 0
         X, Z = self.sf.get_boundary()
         tR, tZ, X, Z = cc.tangent(X, Z, norm=False)
         for x, z, tr, tz in zip(X, Z, tR, tZ):
             B = self.sf.Bcoil((x, z))
             t = np.array([tr, tz])
-            Ip += np.dot(B, t)
-        Ip /= cc.mu_o
-        self.sf.cpasma = Ip
+            Ipl += np.dot(B, t)
+        Ipl /= cc.mu_o
+        self.sf.Ipl = Ipl
 
     def fluxfunctions(self, npsi=100, sigma=0):
         FFp, Pp = np.ones(npsi), np.ones(npsi)  # flux functions
@@ -615,7 +618,8 @@ class EQ(object):
         dL[2 * self.nx + self.nz - 3:2 * self.nx + 2 * self.nz - 4] = self.dz
         L[:self.nx - 1] = self.dx / 2 + \
             np.cumsum(self.dx * np.ones(self.nx - 1)) - self.dx
-        L[self.nx - 1:self.nx + self.nz - 2] = L[self.nx - 2] + (self.dx + self.dz) / 2 +\
+        L[self.nx - 1:self.nx + self.nz - 2] =\
+            L[self.nx - 2] + (self.dx + self.dz) / 2 +\
             np.cumsum(self.dz * np.ones(self.nz - 1)) - self.dz
         L[self.nx + self.nz - 2:2 * self.nx + self.nz - 3] = \
             L[self.nx + self.nz - 3] + (self.dz + self.dx) / 2 +\
@@ -708,48 +712,6 @@ class EQ(object):
                 self.psi[i, j] = self.sf.Ppoint((self.x[i], self.z[j]),
                                                 self.pf,
                                                 plasma_coil=self.plasma_coil)
-
-    ''' we have moved to cross_coil
-    def add_Pcoil(self, x, z, coil):
-        xc, zc, Ic = coil['x'], coil['z'], coil['Ic']
-        dx, dz = coil['dx'], coil['dz']
-        return self.mu_o * Ic * cc.green(x, z, xc, zc, dXc=dx, dZc=dz)
-
-    def add_Bcoil(self, x, z, coil):
-        xc, zc, Ic = coil['x'], coil['z'], coil['Ic']
-        return self.mu_o * Ic * cc.green_feild(x, z, xc, zc)
-
-    def Ppoint(self, point):
-        psi = 0
-        for name in self.pf.sub_coil:
-            psi += self.add_Pcoil(point[0], point[1], self.pf.sub_coil[name])
-        for name in self.plasma_coil:
-            psi += self.add_Pcoil(point[0], point[1], self.plasma_coil[name])
-        return psi
-
-    def Bpoint(self, point):
-        feild = np.zeros(2)
-        for name in self.pf.sub_coil:
-            feild += self.add_Bcoil(point[0], point[1], self.pf.sub_coil[name])
-        for name in self.plasma_coil:
-            feild += self.add_Bcoil(point[0], point[1], self.plasma_coil[name])
-        return feild
-
-    def Bmag(self, point):
-        feild = self.Bpoint(point)
-        B = np.sqrt(feild[0]**2 + feild[1]**2)
-        return B
-
-    def get_coil_psi(self):
-        self.psi = np.zeros(np.shape(self.x2d))
-        for name in self.pf.sub_coil.keys():
-            self.psi += cc.add_Pcoil(self.x2d,
-                                     self.z2d, self.pf.sub_coil[name])
-        for name in self.plasma_coil.keys():
-            self.psi += cc.add_Pcoil(self.x2d, self.z2d,
-                                     self.plasma_coil[name])
-        return {'x': self.x, 'z': self.z, 'psi': self.psi}
-    '''
 
     def set_coil_psi(self):
         psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf,

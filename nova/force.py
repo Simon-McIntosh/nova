@@ -12,12 +12,12 @@ class force_field(object):
         self.index = index
         self.pf_coil = pf_coil
         self.eq_coil = eq_coil
-        self.eq_plasma_coil = eq_plasma_coil
+        self.eq_plasma_coil = eq_plasma_coil  # requires update
         self.Iscale = Iscale  # current units (MA)
-        self.nC = len(self.pf_coil)
         self.active_coils = kwargs.get(
             'active_coils', list(self.pf_coil.keys()))
         self.passive_coils = kwargs.get('passive_coils', ['Plasma'])
+        self.nC = len(self.active_coils)  # number of active coils
         self.set_force_field(state='both', multi_filament=multi_filament)
         self.set_current()
         self.initalize_F()
@@ -107,21 +107,23 @@ class force_field(object):
             self.Ic[i] = self.pf_coil[name]['Ic'] / Nfilament  # store current
         self.Ic /= self.Iscale  # convert current unit (MA if Iscale=1e6)
 
-    def plot(self, coils=['PF', 'CS'], scale=3, Fvector='Fo'):
+    def plot(self, coils=['PF', 'CS'], scale=1, Fvector='Fo', **kwargs):
         # vector = 'Fo', 'Fx', 'Fz' or combination
         fs = matplotlib.rcParams['legend.fontsize']
         if not hasattr(self, 'F'):
             self.set_force(self.Ic)
-        Fmax = np.max(np.linalg.norm(self.F, axis=1))
-        if np.isclose(Fmax, 0):
-            raise ValueError('force vector is zero - solve before plot')
+        if 'Fmax' in kwargs:
+            Fmax = kwargs['Fmax']
+        else:
+            Fmax = np.max(np.linalg.norm(self.F, axis=1))
         index, names = [], []
         for coil in coils:
             index.extend(self.index[coil]['index'])
             names.extend(self.index[coil]['name'])
         for i, name in zip(index, names):
             x, z = self.pf_coil[name]['x'], self.pf_coil[name]['z']
-            F = self.F[i]
+            index = self.active_coils.index(name)
+            F = self.F[index]
             Fvec = scale * F / Fmax
             for Fv, mag, color in zip(['Fo', 'Fx', 'Fz'],
                                       [(1, 1), (1, 0), (0, 1)],

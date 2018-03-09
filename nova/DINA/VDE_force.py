@@ -122,7 +122,7 @@ class VDE_force:
         self.ff.set_force(self.ff.Ic)  # update force calculation
 
     def set_vs3_current(self, Ivs3):
-        self.Ivs3 = Ivs3  # store
+        self.Ivs3 = float(Ivs3)  # store
         Ic = {'upperVS': -4*Ivs3, 'lowerVS': 4*Ivs3}
         self.pf.update_current(Ic)
 
@@ -327,14 +327,21 @@ class VDE_force:
         Fmax = OrderedDict()
         Fmax_dtype = [('Fmag', '2float'), ('t', '2float'), ('I', '2float'),
                       ('frame_index', '2float')]
+        Imax = OrderedDict()
+        Imax_dtype = [('I', float), ('t', float), ('frame_index', float)]
         for mode in ['referance', 'control', 'error']:
             Fmax[mode] = np.zeros(len(X), dtype=Fmax_dtype)
+            Imax[mode] = np.zeros(len(X), dtype=Imax_dtype)
         for i, name in enumerate(vs3_data):
             vs3 = vs3_data[name]
             for j, (mode, color, width) in enumerate(
                     zip(['referance', 'control', 'error'],
                         ['gray', 'C0', 'C3'], [0.9, 0.7, 0.5])):
-                for iax, k in enumerate([1, 0]):  # VS coils
+                frame_index = np.nanargmax(abs(vs3[mode]['I']))
+                Imax[mode][i]['frame_index'] = frame_index
+                for var in ['t', 'I']:
+                    Imax[mode][i][var] = vs3[mode][var][frame_index]
+                for iax, k in enumerate([1, 0]):  # upper / lower VS coils
                     frame_index = np.nanargmax(vs3[mode]['Fmag'][:, k])
                     Fmax[mode][i]['frame_index'][k] = frame_index
                     Fmax[mode][i]['Fmag'][k] =\
@@ -395,6 +402,18 @@ class VDE_force:
         h.append(mlines.Line2D([], [], color='C3', label='VDE up'))
         ax[0].legend(handles=h, loc=1)
 
+        mode_index = np.nanargmax(
+                [max(abs(Imax[mode]['I'][:])) for mode in Imax])
+        mode = list(Imax.keys())[mode_index]
+        file_index = np.nanargmax(abs(Imax[mode]['I']))
+        file = list(vs3_data.keys())[file_index]
+        vs3 = vs3_data[file]
+        Imax_index = np.nanargmax(abs(vs3[mode]['I']))
+        t_max = vs3[mode]['t'][Imax_index]
+        I_max = vs3[mode]['I'][Imax_index]
+        frame_index_max = vs3[mode]['frame_index'][Imax_index]
+        print('Imax', file, frame_index_max, t_max, I_max)
+
         ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
         ax_I = plt.subplots(1, 1)[1]
         for i, (k, color_I) in enumerate(zip([1, 0], ['C6', 'C7'])):
@@ -409,11 +428,11 @@ class VDE_force:
                         Fmax[mode]['Fmag'][slice(j*6, (j+1)*6), k])
                 file = list(vs3_data.keys())[file_index]
                 vs3 = vs3_data[file]
-                max_index = np.nanargmax(vs3[mode]['Fmag'][:, k])
-                F_max = vs3[mode]['Fmag'][max_index, k]
-                t_max = vs3[mode]['t'][max_index]
-                I_max = vs3[mode]['I'][max_index]
-                frame_index_max = vs3[mode]['frame_index'][max_index]
+                Fmax_index = np.nanargmax(vs3[mode]['Fmag'][:, k])
+                F_max = vs3[mode]['Fmag'][Fmax_index, k]
+                t_max = vs3[mode]['t'][Fmax_index]
+                I_max = vs3[mode]['I'][Fmax_index]
+                frame_index_max = vs3[mode]['frame_index'][Fmax_index]
                 ax[i].plot(1e3*vs3[mode]['t'], 1e-3*vs3[mode]['Fmag'][:, k],
                            color=color_I)
                 txt = file+'\n'
@@ -433,7 +452,7 @@ class VDE_force:
                 va = 'bottom' if I_max > 0 else 'top'
                 ax_I.text(1e3*t_max, 1e-3*I_max,
                           txt, va=va, ha='left')
-                print(name, file, frame_index_max)
+                print(name, file, frame_index_max, t_max)
 
         for i, k in enumerate([1, 0]):
             ax[i].set_ylabel('$|F|$ kNm$^{-1}$')
@@ -458,13 +477,13 @@ class VDE_force:
 
 
 if __name__ == '__main__':
-    folder, frame_index = 3, 300
+    folder, frame_index = 2, 45
     vde = VDE_force(folder=folder, frame_index=frame_index, mode='control')
 
-    vde.plot_Fmax(nframe=500)
+    #plt.figure()
+    #vde.plot_frame()
 
-    plt.figure()
-    vde.plot_frame()
+    vde.plot_Fmax(nframe=500)
 
     # vde.movie(3, nframe=60, mode='control')
 

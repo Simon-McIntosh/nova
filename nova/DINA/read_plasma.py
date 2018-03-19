@@ -83,6 +83,8 @@ class read_plasma:
                            ('error', '2float')]
 
     def get_vs3_trip(self, dIdt_trip=5e7, dz_trip=0.16, plot=False):
+        self.dz_trip = dz_trip
+        self.dIdt_trip = dIdt_trip
         Ip_lp = lowpass(self.Ip, self.dt, dt_window=0.001)  # plasma current
         dIpdt = np.gradient(Ip_lp, self.t)
         i_cq = next((i for i, dIdt in enumerate(dIpdt) if dIdt > dIdt_trip))
@@ -90,7 +92,11 @@ class read_plasma:
         tc = timeconstant(self.t[i_cq:], Ip_lp[i_cq:], trim_fraction=0.5)
         tdis, ttype, tfit, Ifit = tc.fit(plot=False, Io=-15e6)  # cq
         dZ = self.z - self.z[0]  # displacment trip
-        i_dz = next((i for i, dz in enumerate(dZ) if abs(dz) > dz_trip))
+        try:
+            i_dz = next((i for i, dz in enumerate(dZ) if abs(dz) > dz_trip))
+        except StopIteration:
+            i_dz = self.nt-1
+            pass
         t_dz = self.t[i_dz]
         i_trip = i_dz if i_dz < i_cq else i_cq  # select first trigger
         t_trip = self.t[i_trip]  # trip time
@@ -119,12 +125,20 @@ class read_plasma:
             ax[0].legend()
 
             ax[1].plot(1e3*self.t, 1e-6*dIpdt)
+
             txt_cq = '$t_{cq}$'+'={:1.1f}ms'.format(1e3*t_cq)
-            ax[1].plot(1e3*t_cq, 1e-6*dIpdt[i_cq], '*', label=txt_cq,
-                       color='gray')
+            ax[1].plot(1e3*t_cq, 1e-6*dIpdt[i_cq], '*',
+                       color='C7')
             txt_dz = r'$t_{\Delta z}$'+'={:1.1f}ms'.format(1e3*t_dz)
-            ax[1].plot(1e3*t_dz, 1e-6*dIpdt[i_dz], '^', label=txt_dz,
-                       color='gray')
+            ax[1].plot(1e3*t_dz, 1e-6*dIpdt[i_dz], '^',
+                       color='C6')
+
+            ylim = ax[1].get_ylim()
+            ax[1].plot(1e3*trip['t_dz']*np.ones(2), ylim, '--', alpha=0.7,
+                       color='C6', zorder=-10,
+                       label=txt_dz)
+            ax[1].plot(1e3*trip['t_cq']*np.ones(2), ylim, '-.', alpha=0.7,
+                       color='C7', zorder=-10, label=txt_cq)
 
             ax[1].set_xlabel('$t$ ms')
             ax[1].set_ylabel('$dI_p/dt$ MAs$^{-1}$')
@@ -136,17 +150,21 @@ class read_plasma:
                        bbox=dict(alpha=0.25), va='bottom', ha='center')
         return trip[0]
 
-    def Ivs3_single(self, folder, plot=False):
+    def Ivs3_single(self, folder, plot=False, discharge='DINA',
+                    dIdt_trip=5e7, dz_trip=0.16):
         self.read_file(folder)  # load plasma file
-        trip = self.get_vs3_trip()  # vs3 trigger
+         # vs3 trigger
+        trip = self.get_vs3_trip(dIdt_trip=dIdt_trip, dz_trip=dz_trip)
         Ivs3_data = {}  # VS3 system
         Ivs3_data['t'] = self.t
         Ivs3_data['Ireferance'] = self.Ivs3_o
 
         Ivs3_data['tpre'] = self.t[:trip['i_cq']]
         Ivs3_data['Ipre'] = self.Ivs3_o[:trip['i_cq']]
-        Ivs3_data['Icontrol'] = self.Ioffset(trip['t_trip'], trip['zdir'])
-        Ivs3_data['Ierror'] = self.Ioffset(trip['t_trip'], -trip['zdir'])
+        Ivs3_data['Icontrol'] = self.Ioffset(trip['t_trip'], trip['zdir'],
+                                             discharge=discharge)
+        Ivs3_data['Ierror'] = self.Ioffset(trip['t_trip'], -trip['zdir'],
+                                           discharge=discharge)
         Ivs3 = np.zeros(1, dtype=self.Ivs3_dtype)
         Ivs3_fun = OrderedDict()  # Ivs3 interpolator
         for mode in Ivs3.dtype.names:
@@ -163,6 +181,13 @@ class read_plasma:
             for mode, color in zip(Ivs3_fun, ['gray', 'C0', 'C3']):
                 plt.plot(1e3*self.t, 1e-3*Ivs3_fun[mode](self.t),
                          label=mode, color=color)
+
+            ylim = plt.gca().get_ylim()
+            plt.plot(1e3*trip['t_dz']*np.ones(2), ylim, '--', alpha=0.7,
+                     color='gray', zorder=-10,
+                     label=r'$|\Delta z|>$' + '{:1.2f}m'.format(pl.dz_trip))
+            plt.plot(1e3*trip['t_cq']*np.ones(2), ylim, '-.', alpha=0.7,
+                     color='gray', zorder=-10, label='current quench')
             plt.despine()
             plt.legend()
             plt.xlabel('$t$ ms')
@@ -317,10 +342,10 @@ if __name__ == '__main__':
 
     pl.Ivs3_single(11, plot=True)
     pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms
-    pl.read_file(3)
+    pl.read_file(11)
     pl.get_vs3_trip(plot=True)
 
     pl.plot_displacment()
 
-    for mode in pl.Ivs3.dtype.names:
-        pl.plot_Ivs3_max(mode)
+    # for mode in pl.Ivs3.dtype.names:
+    #     pl.plot_Ivs3_max(mode)

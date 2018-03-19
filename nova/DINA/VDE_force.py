@@ -17,19 +17,25 @@ import matplotlib.patches as mpatches
 import pickle
 from os.path import join, isfile
 import matplotlib.lines as mlines
+import os
+import nep
+from amigo.png_tools import data_load
+from amigo.IO import class_dir
 
 
 class VDE_force:
 
-    def __init__(self, folder=0, frame_index=0, mode='control'):
+    def __init__(self, folder=0, frame_index=0, mode='control',
+                 discharge='DINA'):
         self.dina = dina('disruptions')
         self.pl = read_plasma('disruptions')  # load plasma
         self.tor = read_tor('disruptions')
-        self.read_file(folder, frame_index, mode)
+        self.read_file(folder, frame_index, mode, discharge=discharge)
         self.allowable = stress_allowable()  # load allowable interpolators
 
-    def read_file(self, folder, frame_index=0, mode='control'):
-        self.load_vs3(folder)  # load vs3 currents
+    def read_file(self, folder, frame_index=0, mode='control',
+                  discharge='DINA'):
+        self.load_vs3(folder, discharge=discharge)  # load vs3 currents
         self.load_active()  # load active coils
         self.load_passive(folder)  # load toroidal strucutres
         self.frame_update(frame_index)  # initalize at start of timeseries
@@ -53,8 +59,9 @@ class VDE_force:
         passive_coils.append('Plasma')
         return active_coils, passive_coils
 
-    def load_vs3(self, folder):
-        self.Ivs3_fun = self.pl.Ivs3_single(folder)[-1]  # current interpolator
+    def load_vs3(self, folder, discharge='DINA'):
+        self.Ivs3_fun = self.pl.Ivs3_single(
+                folder, discharge=discharge)[-1]  # current interpolator
 
     def load_active(self, dCoil=0.25):
         vs_geom = VSgeom()
@@ -177,12 +184,39 @@ class VDE_force:
         fPm, fPmPb = 1e-6*Pm/Sm, 1e-6*PmPb/(1.5*Sm)
         return max(fPm, fPmPb)
 
-    def get_force(self, nframe=None, plot=False, pvar='sigma'):
+    def get_field(self, nframe=None):
+        B_data = OrderedDict()
+        data_dtype = [('Bx', '2float'), ('Bz', '2float'), ('Bmag', '2float'),
+                      ('t', float),
+                      ('frame_index', int)]
+
+        frames, nframe = self.get_frames(nframe)
+        tick = clock(nframe)
+        for mode in ['referance', 'control', 'error']:
+            B_data[mode] = np.zeros(nframe, dtype=data_dtype)
+        for i, frame_index in enumerate(frames):
+            self.frame_update(frame_index)
+            for mode in B_data:
+                self.vs3_update(mode)
+                for j, name in enumerate(self.pf.index['VS3']['name']):
+                    coil = self.pf.coil[name]
+                    point = [coil['x'], coil['z']]
+                    B = cc.Bpoint(point, self.pf)
+                    B_data[mode][i]['Bx'][j] = B[0]
+                    B_data[mode][i]['Bz'][j] = B[1]
+                    B_data[mode][i]['Bmag'][j] = np.linalg.norm(B)
+                    B_data[mode][i]['frame_index'] = self.frame_index
+                    B_data[mode][i]['t'] = self.t
+            tick.tock()
+        return B_data
+
+    def get_data(self, nframe=None, plot=False, pvar='sigma'):
         vs3_data = OrderedDict()
         data_dtype = [('Fx', '2float'), ('Fz', '2float'), ('Fmag', '2float'),
                       ('Fn', '2float'), ('Ft', '2float'), ('sigma', '2float'),
                       ('t', float), ('I', float),
-                      ('frame_index', int)]
+                      ('frame_index', int),
+                      ('Bx', '2float'), ('Bz', '2float'), ('Bmag', '2float')]
         frames, nframe = self.get_frames(nframe)
         tick = clock(nframe)
         for mode in ['referance', 'control', 'error']:
@@ -193,6 +227,7 @@ class VDE_force:
                 self.vs3_update(mode)
                 self.force_update()
                 for j, name in enumerate(self.pf.index['VS3']['name']):
+                    # force
                     F_index = self.ff.active_coils.index(name)
                     coil = self.pf.coil[name]
                     F = 1e6 * self.ff.F[F_index] / (2*np.pi*coil['x'])  # N/m
@@ -210,6 +245,12 @@ class VDE_force:
                     vs3_data[mode][i]['Ft'][j] = Ftn[0]
                     vs3_data[mode][i]['Fmag'][j] = Fmag
                     vs3_data[mode][i]['sigma'][j] = sigma
+                    # centerpoint field
+                    centerpoint = [coil['x'], coil['z']]
+                    B = cc.Bpoint(centerpoint, self.pf)
+                    vs3_data[mode][i]['Bx'][j] = B[0]
+                    vs3_data[mode][i]['Bz'][j] = B[1]
+                    vs3_data[mode][i]['Bmag'][j] = np.linalg.norm(B)
             tick.tock()
         if plot:
             if 'F' in pvar:
@@ -251,8 +292,8 @@ class VDE_force:
             ax[2].set_xlabel('$t$, ms')
         return vs3_data
 
-    def movie(self, folder, nframe=None, mode='referance'):
-        self.read_file(folder)
+    def movie(self, folder, nframe=None, mode='referance', discharge='DINA'):
+        self.read_file(folder, discharge=discharge)
         frames, nframe = self.get_frames(nframe)
         FFMpegWriter = manimation.writers['ffmpeg']
         writer = FFMpegWriter(fps=10, bitrate=-1)
@@ -293,35 +334,38 @@ class VDE_force:
             plt.plot(dx_[:, 0], dx_[:, -1], 'C0-.')
             plt.plot(dz_[:, 0], dz_[:, -1], 'C1-.')
 
-    def datafile(self, nframe):
+    def datafile(self, discharge, nframe):
         filename = join(self.dina.root,
-                        'DINA/Data/vs3_{:d}.plk'.format(nframe))
+                        'DINA/Data/vs3_{}_{:d}.plk'.format(discharge,
+                                                           nframe))
         return filename
 
-    def write_data(self, nframe=100):
+    def write_data(self, discharge, nframe=100):
         vs3_data = OrderedDict()
         X = range(self.dina.nfolder)
         for i in X:
-            self.read_file(i)
+            self.read_file(i, discharge=discharge)
             name = self.tor.name
-            vs3_data[name] = self.get_force(nframe, plot=False)
-        filename = self.datafile(nframe)
+            vs3_data[name] = self.get_data(nframe, plot=False)
+        filename = self.datafile(discharge, nframe)
         with open(filename, 'wb') as output:
             pickle.dump(vs3_data, output, -1)
         return vs3_data
 
-    def read_data(self, nframe=100, forcewrite=False):
-        filename = self.datafile(nframe)
+    def read_data(self, discharge, nframe=100, forcewrite=False):
+        filename = self.datafile(discharge, nframe)
         if not isfile(filename) or forcewrite:
-            print('\nre-generating data, nframe:{}'.format(nframe))
-            vs3_data = self.write_data(nframe)
+            txt = '\nre-generating data, discharge:{}, '.format(discharge)
+            txt += 'nframe:{}'.format(nframe)
+            print(txt)
+            vs3_data = self.write_data(discharge, nframe)
         else:
             with open(filename, 'rb') as input:
                 vs3_data = pickle.load(input)
         return vs3_data
 
-    def plot_Fmax(self, nframe=100):
-        vs3_data = self.read_data(nframe)  # load data
+    def plot_Fmax(self, discharge, nframe=100):
+        vs3_data = self.read_data(discharge, nframe)  # load data
         ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
         X = range(self.dina.nfolder)
         Fmax = OrderedDict()
@@ -475,6 +519,80 @@ class VDE_force:
         h.append(mlines.Line2D([], [], color='C7', label='lowerVS'))
         ax_I.legend(handles=h, loc=4)
 
+    def plot_single(self, file, discharge, nframe=500):
+        vs3_data = self.read_data(discharge, nframe)  # load data
+        vs3 = vs3_data[file]
+        self.vs3_single = vs3
+
+        ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
+        for i, k in enumerate([1, 0]):
+            for mode, color in zip(['referance', 'control', 'error'],
+                                   ['gray', 'C0', 'C3']):
+                ax[i].plot(1e3*vs3[mode]['t'], 1e-3*vs3[mode]['Fmag'][:, k],
+                           color=color)
+
+        plt.despine()
+        plt.setp(ax[0].get_xticklabels(), visible=False)
+        LTC = {}  # load and plot LTC data
+        path = os.path.join(class_dir(nep), '../Data/LTC/')
+        points = data_load(path, 'VS3_force', date='2018_03_15')[0]
+        LTC['lowerVS'] = {'t': points[0]['x'], 'Fmag': points[0]['y']}
+        LTC['upperVS'] = {'t': points[1]['x'], 'Fmag': points[1]['y']}
+        for i, coil in enumerate(['upperVS', 'lowerVS']):
+            ax[i].plot(1e3*LTC[coil]['t'], 1e-3*LTC[coil]['Fmag'],
+                       ls='--', color=0.3*np.ones(3))
+        ax[0].set_ylabel('upper $|F|$ kNm$^{-1}$')
+        ax[1].set_ylabel('lower $|F|$ kNm$^{-1}$')
+        ax[1].set_xlabel('$t$ ms')
+        h = []
+        h.append(mlines.Line2D([], [], ls='--',
+                               color=0.3*np.ones(3), label='LTC'))
+        h.append(mlines.Line2D([], [], color='gray', label='referance'))
+        h.append(mlines.Line2D([], [], color='C0', label='control'))
+        h.append(mlines.Line2D([], [], color='C3', label='error'))
+        ax[0].legend(handles=h, loc=1)
+
+        ax = plt.subplots(1, 1, sharex=True, sharey=True)[1]
+        for mode, color in zip(['referance', 'control', 'error'],
+                               ['gray', 'C0', 'C3']):
+            ax.plot(1e3*vs3[mode]['t'], 1e-3*vs3[mode]['I'],
+                    color=color)
+        plt.despine()
+        ax.set_ylabel('$I$ kA')
+        ax.set_xlabel('$t$ ms')
+        path = os.path.join(class_dir(nep), '../Data/LTC/')
+        points = data_load(path, 'VS3_current', date='2018_03_15')[0]
+        t = points[0]['x']
+        Ic = points[0]['y']
+        ax.plot(1e3*t, -1e-3*Ic, ls='--', color=0.3*np.ones(3))
+        ax.legend(handles=h, loc=1)
+
+        ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
+        for i, k in enumerate([1, 0]):
+            for mode, color in zip(['referance', 'control', 'error'],
+                                   ['gray', 'C0', 'C3']):
+                Bmag = vs3[mode]['Fmag'][:, k] / (4 * abs(vs3[mode]['I']))
+                ax[i].plot(1e3*vs3[mode]['t'], Bmag, '-.', color=color)
+                ax[i].plot(1e3*vs3[mode]['t'],
+                           vs3[mode]['Bmag'][:, k], '-', color=color)
+
+
+        plt.despine()
+        plt.setp(ax[0].get_xticklabels(), visible=False)
+        LTC = {}  # load and plot LTC data
+        path = os.path.join(class_dir(nep), '../Data/LTC/')
+        points = data_load(path, 'VS3_field', date='2018_03_15')[0]
+        LTC['lowerVS'] = {'t': points[0]['x'], 'Bmag': points[0]['y']}
+        LTC['upperVS'] = {'t': points[1]['x'], 'Bmag': points[1]['y']}
+        for i, coil in enumerate(['upperVS', 'lowerVS']):
+            ax[i].plot(1e3*LTC[coil]['t'], LTC[coil]['Bmag'],
+                       ls='--', color=0.3*np.ones(3))
+        ax[0].set_ylabel('upper $|B_p|$ T')
+        ax[1].set_ylabel('lower $|B_p|$ T')
+        ax[1].set_xlabel('$t$ ms')
+        ax[0].legend(handles=h, loc=1)
+
+
 
 if __name__ == '__main__':
     folder, frame_index = 2, 45
@@ -483,7 +601,9 @@ if __name__ == '__main__':
     #plt.figure()
     #vde.plot_frame()
 
-    vde.plot_Fmax(nframe=500)
+    vde.plot_single('MD_UP_exp16', 'LTC', nframe=500)
+    # vde.plot_Fmax('ENP', nframe=500)
+
 
     # vde.movie(3, nframe=60, mode='control')
 

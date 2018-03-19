@@ -189,113 +189,116 @@ if __name__ is '__main__':
     # 10: 'VDE_UP_slow'
     # 11: 'VDE_UP_slow_fast'
 
-    file_index = 3
-    pl = read_plasma('disruptions')
-    pl.load_Ivs3()  # load Ivs3 system
-    t_cq = pl.quench[file_index]['t_cq']  # current quench
-    Ivs_o = pl.Ivs_data[file_index]['Ireferance'][0]  # inital vs3 current
+    file_index = 11
+    for file_index in range(12):
+        pl = read_plasma('disruptions')
+        trip, Ivs3_data, Ivs3, Ivs3_fun = pl.Ivs3_single(file_index)  # load Ivs3
+        t_cq = trip['t_cq']  # trip
+        Ivs_o = Ivs3_data['Icontrol'][trip['i_cq']]  # inital vs3 current
 
-    tor = read_tor('disruptions')
-    tor.read_file(file_index)
-    tor_index = np.argmin(abs(tor.t-t_cq))
-    tor.set_current(tor_index)
+        tor = read_tor('disruptions')
+        tor.read_file(file_index)
+        tor_index = np.argmin(abs(tor.t-t_cq))
+        tor.set_current(tor_index)
 
-    nvs_o = ind.nC
-    npl = len(tor.plasma_coil[tor_index])
-    for i, coil in enumerate(tor.plasma_coil[tor_index]):  # plasma
-        x, z, dx, dz, Ic, R = ind.get_coil(tor.plasma_coil[tor_index][coil])
-        ind.add_coil(x, z, dx, dz, Ic, R=R, nt=1/npl)
-        if i > 0:
-            ind.add_cp([nvs_o, nvs_o+i])  # link coils
+        nvs_o = ind.nC
+        npl = len(tor.plasma_coil[tor_index])
+        for i, coil in enumerate(tor.plasma_coil[tor_index]):  # plasma
+            x, z, dx, dz, Ic, R = ind.get_coil(tor.plasma_coil[tor_index][coil])
+            ind.add_coil(x, z, dx, dz, Ic, R=R, nt=1/npl)
+            if i > 0:
+                ind.add_cp([nvs_o, nvs_o+i])  # link coils
 
-    nvs_o = ind.nC
-    turns = np.append(np.ones(4), -np.ones(4))
-    ind.add_pf_coil(vs_geom.pf.coil, turns=turns)
-    vs3 = 'single'
+        nvs_o = ind.nC
+        turns = np.append(np.ones(4), -np.ones(4))
+        ind.add_pf_coil(vs_geom.pf.coil, turns=turns)
+        vs3 = 'dual'
 
-    if vs3 == 'single':
-        for i, index in enumerate(nvs_o+np.arange(1, 8)):  # vs3 loops
-            ind.add_cp([nvs_o, index])  # link VS coils
-    elif vs3 == 'dual':
-        for i, index in enumerate(nvs_o+np.arange(1, 4)):  # lower loops
-            ind.add_cp([nvs_o, index])
-        for i, index in enumerate(nvs_o+np.arange(5, 8)):  # upper loops
-            ind.add_cp([nvs_o+4, index])
+        if vs3 == 'single':
+            for i, index in enumerate(nvs_o+np.arange(1, 8)):  # vs3 loops
+                ind.add_cp([nvs_o, index])  # link VS coils
+        elif vs3 == 'dual':
+            for i, index in enumerate(nvs_o+np.arange(1, 4)):  # lower loops
+                ind.add_cp([nvs_o, index])
+            for i, index in enumerate(nvs_o+np.arange(5, 8)):  # upper loops
+                ind.add_cp([nvs_o+4, index])
 
-    for coil in tor.coil:  # add pf coils
-        x, z, dx, dz, Ic, R = ind.get_coil(tor.coil[coil])
-        nt = pf_geom.coil[coil]['N']
-        ind.add_coil(x, z, dx, dz, Ic, R=R, nt=nt)
+        for coil in tor.coil:  # add pf coils
+            x, z, dx, dz, Ic, R = ind.get_coil(tor.coil[coil])
+            nt = pf_geom.coil[coil]['N']
+            ind.add_coil(x, z, dx, dz, Ic, R=R, nt=nt)
 
-    for i, coil in enumerate(tor.blanket_coil):  # blanket
-        x, z, dx, dz, Ic, R = ind.get_coil(tor.blanket_coil[coil])
-        nt = 1 if np.mod(i, 2) == 0 else -1
-        ind.add_coil(x, z, dx, dz, Ic, R=R, nt=nt)
-        if np.mod(i, 2) == 1:
-            ind.add_cp([ind.nC-2, ind.nC-1])  # couple
+        for i, coil in enumerate(tor.blanket_coil):  # blanket
+            x, z, dx, dz, Ic, R = ind.get_coil(tor.blanket_coil[coil])
+            nt = 1 if np.mod(i, 2) == 0 else -1
+            ind.add_coil(x, z, dx, dz, Ic, R=R, nt=nt)
+            if np.mod(i, 2) == 1:
+                ind.add_cp([ind.nC-2, ind.nC-1])  # couple
 
-    Rvessel = 1e-3*np.ones(len(tor.vessel_coil))  # vessel
-    ind.add_pf_coil(tor.vessel_coil)
-    ind.add_cp([ind.nC-3, ind.nC-2])  # blanket support
+        Rvessel = 1e-3*np.ones(len(tor.vessel_coil))  # vessel
+        ind.add_pf_coil(tor.vessel_coil)
+        ind.add_cp([ind.nC-3, ind.nC-2])  # blanket support
 
-    ind.assemble()
-    ind.assemble_cp_nodes()
-    ind.constrain()
+        ind.assemble()
+        ind.assemble_cp_nodes()
+        ind.constrain()
 
-    ind.Rc[0] = ind.M[0, 0]/16e-3  # update plasma resistance
-    ind.Ic[1] = Ivs_o + Io  # add vs3 current
-    ind.Rc[1] = 17.66e-3  # total vs3 resistance
-    ind.M[1, 1] += Lbb  # add busbar inductance
-    tau = ind.M[1, 1] / ind.Rc[1]
+        ind.Rc[0] = ind.M[0, 0]/16e-3  # update plasma resistance
+        ind.Ic[1] = Ivs_o + Io  # add vs3 current
+        ind.Rc[1] = 17.66e-3  # total vs3 resistance
+        ind.M[1, 1] += Lbb  # add busbar inductance
+        tau = ind.M[1, 1] / ind.Rc[1]
 
-    t = np.linspace(0, 0.3, 300)
+        '''
+        t = np.linspace(0, 0.3, 300)
 
-    Ic_o = np.copy(ind.Ic)
-    Ic_o[1] -= Io  # subtract inital current delta
+        Ic_o = np.copy(ind.Ic)
+        Ic_o[1] -= Io  # subtract inital current delta
 
-    ind.Minv = np.linalg.inv(ind.M)  # inverse for odeint
+        ind.Minv = np.linalg.inv(ind.M)  # inverse for odeint
 
-    Ivs_o = odeint(ind.dIdt, Ic_o, t).T[1]
-    Iode = odeint(ind.dIdt, ind.Ic, t)
-    Ic = Iode.T[1, :]
+        Ivs_o = odeint(ind.dIdt, Ic_o, t).T[1]
+        Iode = odeint(ind.dIdt, ind.Ic, t)
+        Ic = Iode.T[1, :]
 
-    dIdt = np.gradient(Ivs_o, t)
-    vs_o = Ivs_o*ind.Rc[1] + ind.M[1, 1]*dIdt  # voltage source
-    vs_fun = interp1d(t, vs_o, fill_value='extrapolate')
+        dIdt = np.gradient(Ivs_o, t)
+        vs_o = Ivs_o*ind.Rc[1] + ind.M[1, 1]*dIdt  # voltage source
+        vs_fun = interp1d(t, vs_o, fill_value='extrapolate')
 
-    tc = timeconstant(t, Ic-Ivs_o, trim_fraction=0)  # diffrence tau
-    Io_d, tau_d, tfit, Ifit = tc.nfit(3)
-    txt_d = timeconstant.ntxt(Io_d/tc.Id[0], tau_d)
-    ax = plt.subplots(1, 1, sharex=True)[1]
-    text = linelabel(value='', postfix='ms')
+        tc = timeconstant(t, Ic-Ivs_o, trim_fraction=0)  # diffrence tau
+        Io_d, tau_d, tfit, Ifit = tc.nfit(3)
+        txt_d = timeconstant.ntxt(Io_d/tc.Id[0], tau_d)
+        ax = plt.subplots(1, 1, sharex=True)[1]
+        text = linelabel(value='', postfix='ms')
 
-    ax.plot(1e3*t, 1e-3*Ivs_o, '-', color='gray', label='$I_{DINA}$')
-    ax.plot(1e3*t, 1e-3*Ic, 'C3',
-            label='$I_o+$'+'{:1.0f}kA'.format(1e-3*Io))
+        ax.plot(1e3*t, 1e-3*Ivs_o, '-', color='gray', label='$I_{DINA}$')
+        ax.plot(1e3*t, 1e-3*Ic, 'C3',
+                label='$I_o+$'+'{:1.0f}kA'.format(1e-3*Io))
 
-    ax.plot(1e3*t, 1e-3*(Ic-Ivs_o), '-', color='C0',
-            label=r'$\Delta I$')
-    ax.plot(1e3*tfit, 1e-3*Ifit, 'C1-.', label='exp fit '+txt_d)
-    ax.plot(1e3*t, 1e-3*(Ivs_o + Ifit), 'C4-.',
-            label='overall fit')
-    plt.legend()
-    plt.despine()
-    plt.xlabel('$t$ ms')
-    plt.ylabel('$I$ kA')
-    plt.ylim([-90, 0])
+        ax.plot(1e3*t, 1e-3*(Ic-Ivs_o), '-', color='C0',
+                label=r'$\Delta I$')
+        ax.plot(1e3*tfit, 1e-3*Ifit, 'C1-.', label='exp fit '+txt_d)
+        ax.plot(1e3*t, 1e-3*(Ivs_o + Ifit), 'C4-.',
+                label='overall fit')
+        plt.legend()
+        plt.despine()
+        plt.xlabel('$t$ ms')
+        plt.ylabel('$I$ kA')
+        plt.ylim([-90, 0])
 
-    # print('tau_o', 1e3*tau, 'ms')
-    # print('tau', 1e3*tdis, 'ms')
+        # print('tau_o', 1e3*tau, 'ms')
+        # print('tau', 1e3*tdis, 'ms')
 
-    max_index = np.argmax(abs(Ic))
-    print('Ivs3 max {:1.1f}kA'.format(1e-3*Ic[max_index]))
+        max_index = np.argmax(abs(Ic))
+        print('Ivs3 max {:1.1f}kA'.format(1e-3*Ic[max_index]))
+        '''
 
-    plt.figure()
-    ind.pf.plot()
-    ax = plt.gca()
-    txt = tor.name
-    txt += '\nplasma-upper: {:1.1f}'.format(1e6*ind.M[0, 2]) + r'$\mu$H'
-    txt += '\nplasma-lower: {:1.1f}'.format(1e6*ind.M[0, 1]) + r'$\mu$H'
-    ax.text(0.5, 1.0, txt, transform=ax.transAxes,
-            ha='center', va='bottom',
-            bbox=dict(facecolor='lightgray'))
+        plt.figure(figsize=(4,6))
+        ind.pf.plot()
+        ax = plt.gca()
+        txt = tor.name
+        txt += '\nplasma-upper: {:1.1f}'.format(1e6*ind.M[0, 2]) + r'$\mu$H'
+        txt += '\nplasma-lower: {:1.1f}'.format(1e6*ind.M[0, 1]) + r'$\mu$H'
+        ax.text(0.5, 1.0, txt, transform=ax.transAxes,
+                ha='center', va='bottom',
+                bbox=dict(facecolor='lightgray'))

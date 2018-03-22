@@ -10,6 +10,7 @@ from scipy.signal import periodogram
 from nova.elliptic import EQ
 from collections import OrderedDict
 from nep.DINA.read_eqdsk import read_eqdsk
+import nova.cross_coil as cc
 
 
 class read_scenario:
@@ -104,7 +105,7 @@ class read_scenario:
             self.fun[var] = interp1d(to, self.data[var])
             self.data[var] = self.fun[var](self.t)
 
-    def opperate(self, plot=False):  # identify operating modes
+    def opperate(self, plot=True):  # identify operating modes
         Ip_lp = lowpass(self.Ip, self.dt, dt_window=1.0)  # plasma current
         dIpdt = np.gradient(Ip_lp, self.t)  # calculate gradient
         hip = histopeaks(dIpdt, nstd=3, nlim=6)  # identify operating modes
@@ -147,7 +148,7 @@ class read_scenario:
         for i, ind in enumerate(index_array):
             self.set_current(ind)
             for VScoil in point:
-                B = self.eq.Bpoint(point[VScoil])
+                B = cc.Bpoint(point[VScoil], self.pf)
                 self.VS3[VScoil]['Bx'][i] = B[0]
                 self.VS3[VScoil]['Bz'][i] = B[1]
                 self.VS3[VScoil]['Bmag'][i] = np.linalg.norm(B)
@@ -167,8 +168,8 @@ class read_scenario:
             ax[1].legend(handles=[h_x, h_z])
 
             plt.xlabel('$t$ s')
-            plt.ylabel('$|B|$ T')
             ax[0].set_ylabel('$|B|$ T')
+            ax[1].set_ylabel('$B_*$ T')
             plt.despine()
 
     def load_plasma(self, file='burn', plot=False):
@@ -249,9 +250,10 @@ if __name__ is '__main__':
     scn = read_scenario()
     scn.read_file(folder='15MA DT-DINA2015-05')
 
-    # scn.load_plasma()
-    # scn.load_VS3(n=100, plot=True)
+    scn.load_plasma()
+    scn.load_VS3(n=100, plot=True)
 
+    '''
     # Ic = scn.get_current(ind, VS3=False)  # get coil currents (no VS3)
     #scn.plot_currents()
 
@@ -262,3 +264,4 @@ if __name__ is '__main__':
 
     # scn.get_noise()
     # scn.load_coils(plot=True)
+    '''

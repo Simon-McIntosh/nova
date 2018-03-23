@@ -38,7 +38,8 @@ class read_scenario:
     def set_noise(self):
         noise_dict = {'2014-01': 3, '2015-02': 0.6,
                       '2016-01': 0.6, '2017-05': 0.6,
-                      '2015-05': 0.6}
+                      '2015-05': 0.6, '2011-06': 0.6,
+                      '2012-02': 0.6}
         key = self.name.split('DINA')[-1]
         try:
             noise = noise_dict[key]
@@ -97,20 +98,24 @@ class read_scenario:
         to = np.copy(self.data['t'])
         dt = np.mean(np.diff(to))
         self.tmax = np.nanmax(to)
+        self.tmin = np.nanmin(to)
         self.nt = int(self.tmax/dt)
         self.dt = self.tmax/(self.nt-1)
-        self.t = np.linspace(0, self.tmax, self.nt)
+        self.t = np.linspace(self.tmin, self.tmax, self.nt)
         self.fun = {}
         for var in self.data:  # interpolate
             self.fun[var] = interp1d(to, self.data[var])
             self.data[var] = self.fun[var](self.t)
 
-    def opperate(self, plot=True):  # identify operating modes
-        Ip_lp = lowpass(self.Ip, self.dt, dt_window=1.0)  # plasma current
+    def opperate(self, plot=False):  # identify operating modes
+        Ip_lp = lowpass(self.Ip, self.dt, dt_window=1)  # plasma current
         dIpdt = np.gradient(Ip_lp, self.t)  # calculate gradient
         hip = histopeaks(dIpdt, nstd=3, nlim=6)  # identify operating modes
         self.opp_index = hip.timeseries(self.t, Ip=self.Ip, plot=plot)
         self.flattop_index = self.opp_index[0]  # flattop index
+        self.vs3 = {'t': self.t[self.flattop_index[0]:self.flattop_index[1]],
+                    'I': self.Icoil['VS3'][self.flattop_index[0]:
+                                            self.flattop_index[1]]}
 
     def get_coil_current(self, ind, VS3=True):  # return dict of coil currents
         Ic = {}

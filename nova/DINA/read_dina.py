@@ -7,6 +7,7 @@ import numpy as np
 from scipy.optimize import minimize
 from amigo.pyplot import plt
 import pandas as pd
+from itertools import count
 
 
 def lowpass(x, dt, dt_window=1):
@@ -227,9 +228,10 @@ class dina:
         columns = {}
         for c in list(data):
             if split:
-                columns[c] = c.split(split)[0]
-            else:
-                columns[c] = c
+                co = c.split(split)[0]
+            if co in [key.split(split)[0] for key in columns]:
+                co += '_extra'  # seperate duplicates
+            columns[c] = co
         data = data.rename(index=str, columns=columns)
         data_keys = list(data.keys())
         for var in data_keys:

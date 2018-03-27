@@ -15,10 +15,11 @@ import nova.cross_coil as cc
 
 class read_scenario:
 
-    def __init__(self, database_folder='operations'):
+    def __init__(self, database_folder='operations', folder=None):
         self.dina = dina(database_folder)
         self.load_coils()
-        # self.load_plasma()
+        if folder is not None:
+            self.read_file(folder)
 
     def read_file(self, folder, file_type='txt'):
         if file_type == 'txt':
@@ -255,8 +256,9 @@ if __name__ is '__main__':
     scn = read_scenario()
     scn.read_file(folder='15MA DT-DINA2015-05')
 
-    scn.load_plasma()
-    scn.load_VS3(n=100, plot=True)
+    scn.opperate(plot=True)
+    # scn.load_plasma()
+    # scn.load_VS3(n=100, plot=True)
 
     '''
     # Ic = scn.get_current(ind, VS3=False)  # get coil currents (no VS3)

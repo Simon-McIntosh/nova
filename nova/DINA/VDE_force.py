@@ -602,7 +602,7 @@ if __name__ == '__main__':
     #vde.plot_frame()
 
     vde.plot_single('MD_UP_exp16', 'LTC', nframe=500)
-    # vde.plot_Fmax('ENP', nframe=500)
+    vde.plot_Fmax('DINA', nframe=500)
 
 
     # vde.movie(3, nframe=60, mode='control')

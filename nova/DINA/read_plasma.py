@@ -11,7 +11,8 @@ from collections import OrderedDict
 
 class read_plasma:
 
-    def __init__(self, database_folder='disruptions'):
+    def __init__(self, database_folder='disruptions', Iscale=1):
+        self.Iscale = Iscale
         self.dina = dina(database_folder)
         self.Ivs3_properties()
 
@@ -27,6 +28,7 @@ class read_plasma:
             self.columns[c] = c.split('[')[0]
         self.data = self.data.rename(index=str, columns=self.columns)
         self.load_data()
+        self.scale_current()
 
     def load_data(self):
         data = {}  # convert units
@@ -44,6 +46,14 @@ class read_plasma:
             if var != 't':  # interpolate
                 setattr(self, var, interp1d(data['t'], data[var])(self.t))
         self.zdir = np.sign(self.z[np.argmax(abs(self.z))])
+        self.Iref = {'Ip': np.copy(self.Ip),  # store referance currents
+                     'Ivs3_o': np.copy(self.Ivs3_o)}
+
+    def scale_current(self, **kwargs):
+        if 'Iscale' in kwargs:
+            self.Iscale = kwargs['Iscale']
+        for var in self.Iref:
+            setattr(self, var, self.Iscale*self.Iref[var])
 
     def plot_currents(self, ax=None):
         if ax is None:
@@ -84,13 +94,14 @@ class read_plasma:
 
     def get_vs3_trip(self, dIdt_trip=5e7, dz_trip=0.16, plot=False):
         self.dz_trip = dz_trip
-        self.dIdt_trip = dIdt_trip
+        self.dIdt_trip = self.Iscale * dIdt_trip
         Ip_lp = lowpass(self.Ip, self.dt, dt_window=0.001)  # plasma current
         dIpdt = np.gradient(Ip_lp, self.t)
-        i_cq = next((i for i, dIdt in enumerate(dIpdt) if dIdt > dIdt_trip))
+        i_cq = next((i for i, dIdt in enumerate(dIpdt)
+                     if dIdt > self.dIdt_trip))
         t_cq = self.t[i_cq]  # current quench time
         tc = timeconstant(self.t[i_cq:], Ip_lp[i_cq:], trim_fraction=0.5)
-        tdis, ttype, tfit, Ifit = tc.fit(plot=False, Io=-15e6)  # cq
+        tdis, ttype, tfit, Ifit = tc.fit(plot=False, Io=-15e6 * self.Iscale)
         dZ = self.z - self.z[0]  # displacment trip
         try:
             i_dz = next((i for i, dz in enumerate(dZ) if abs(dz) > dz_trip))
@@ -178,6 +189,7 @@ class read_plasma:
                                                   Ivs3_data[Imode][-1]),
                                       bounds_error=False)
         if plot:
+            plt.figure()
             for mode, color in zip(Ivs3_fun, ['gray', 'C0', 'C3']):
                 plt.plot(1e3*self.t, 1e-3*Ivs3_fun[mode](self.t),
                          label=mode, color=color)
@@ -304,7 +316,35 @@ class read_plasma:
         ax[0].set_ylabel('$y$ m')
         plt.setp(ax[1].get_yticklabels(), visible=False)
 
-    def plot_Ivs3_max(self, mode):
+    def plot_Ivs3_max(self):
+        plt.figure()
+        X = range(self.dina.nfolder)
+        for i, x in enumerate(X):
+            for mode, color, width in zip(['referance', 'control', 'error'],
+                                          ['gray', 'C0', 'C3'],
+                                          [0.9, 0.7, 0.5]):
+                plt.bar(x, 1e-3*self.Ivs3[mode][i, 1],
+                        color=color, width=width)
+
+        max_index = np.argmax(abs(self.Ivs3['control'][:, 1]))
+        Ivs3_max = self.Ivs3['control'][max_index, 1]
+        va = 'bottom' if Ivs3_max > 0 else 'top'
+        plt.text(max_index, 1e-3*Ivs3_max,
+                 '{:1.1f}'.format(1e-3*Ivs3_max), va=va, ha='center',
+                 weight='bold')
+
+        h = []
+        for mode, color in zip(['referance', 'control', 'error'],
+                               ['gray', 'C0', 'C3']):
+            h.append(mpatches.Patch(color=color, label=mode))
+
+        plt.legend(handles=h)
+        plt.xticks(X, self.dina.folders, rotation=70)
+        plt.ylabel('$I_{vs3}$ kA')
+        plt.ylim([-110, 110])
+        plt.despine()
+
+    def plot_Ivs3_max_mode(self, mode):
         plt.figure()
         X = range(self.dina.nfolder)
         for i, x in enumerate(X):
@@ -338,14 +378,25 @@ class read_plasma:
 
 if __name__ == '__main__':
 
-    pl = read_plasma('disruptions')
+    pl = read_plasma('disruptions', Iscale=0.5)
+    '''
+    pl.Ivs3_single(3, plot=True)
 
     pl.Ivs3_single(11, plot=True)
+
     pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms
+
+    pl.read_file(3)
+    pl.get_vs3_trip(plot=True)
+
     pl.read_file(11)
     pl.get_vs3_trip(plot=True)
 
     pl.plot_displacment()
+    '''
+    pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms
+    pl.get_vs3_trip(plot=True)
+    pl.plot_Ivs3_max()
 
-    # for mode in pl.Ivs3.dtype.names:
-    #     pl.plot_Ivs3_max(mode)
+    #for mode in pl.Ivs3.dtype.names:
+    #     pl.plot_Ivs3_max_mode(mode)

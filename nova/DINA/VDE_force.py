@@ -26,10 +26,11 @@ from amigo.IO import class_dir
 class VDE_force:
 
     def __init__(self, folder=0, frame_index=0, mode='control',
-                 discharge='DINA'):
+                 discharge='DINA', Iscale=1):
+        self.Iscale = Iscale
         self.dina = dina('disruptions')
-        self.pl = read_plasma('disruptions')  # load plasma
-        self.tor = read_tor('disruptions')
+        self.pl = read_plasma('disruptions', Iscale=self.Iscale)  # load plasma
+        self.tor = read_tor('disruptions', Iscale=self.Iscale)
         self.read_file(folder, frame_index, mode, discharge=discharge)
         self.allowable = stress_allowable()  # load allowable interpolators
 
@@ -338,6 +339,9 @@ class VDE_force:
         filename = join(self.dina.root,
                         'DINA/Data/vs3_{}_{:d}.plk'.format(discharge,
                                                            nframe))
+        if self.Iscale != 1:
+            filename = filename.replace(
+                    '.plk', '_Iscale_{:1.1f}.plk'.format(self.Iscale))
         return filename
 
     def write_data(self, discharge, nframe=100):
@@ -457,12 +461,16 @@ class VDE_force:
         I_max = vs3[mode]['I'][Imax_index]
         frame_index_max = vs3[mode]['frame_index'][Imax_index]
         print('Imax', file, frame_index_max, t_max, I_max)
+        print('Fmax', 1e-3*vs3[mode]['Fx'][Imax_index],
+              1e-3*vs3[mode]['Fz'][Imax_index],
+              1e-3*vs3[mode]['Fmag'][Imax_index])
 
         ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
         ax_I = plt.subplots(1, 1)[1]
         for i, (k, color_I) in enumerate(zip([1, 0], ['C6', 'C7'])):
             name = self.pf.index['VS3']['name'][k]
-            for j, color in enumerate(['C0', 'C3']):
+            for j, (color, va) in enumerate(zip(['C0', 'C3'],
+                                                ['bottom', 'top'])):
                 # MD then VDE
                 mode_index = np.nanargmax(
                         [max(Fmax[mode]['Fmag'][slice(j*6, (j+1)*6), k])
@@ -484,7 +492,8 @@ class VDE_force:
                 txt += '$F=$'+'{:1.0f}'.format(1e-3*F_max)
                 txt += 'kNm$^{-1}$'
                 ax[i].plot(1e3*t_max, 1e-3*F_max, '*', color=0.3*np.ones(3))
-                ax[i].text(1e3*t_max, 1e-3*F_max, txt, va='bottom', ha='left')
+                ax[i].text(1e3*t_max+25,
+                           1e-3*F_max, txt, va=va, ha='left')
 
                 ax_I.plot(1e3*vs3[mode]['t'], 1e-3*vs3[mode]['I'][:],
                           color=color_I)
@@ -493,10 +502,13 @@ class VDE_force:
                 txt += '$I=$'+'{:1.0f}'.format(1e-3*I_max)
                 txt += 'kA'
                 ax_I.plot(1e3*t_max, 1e-3*I_max, '*', color=0.3*np.ones(3))
-                va = 'bottom' if I_max > 0 else 'top'
-                ax_I.text(1e3*t_max, 1e-3*I_max,
-                          txt, va=va, ha='left')
-                print(name, file, frame_index_max, t_max)
+                vaI = va if I_max > 0 else 'top'
+                ax_I.text(1e3*t_max+25, 1e-3*I_max,
+                          txt, va=vaI, ha='left')
+                print(name, file, frame_index_max, t_max, 1e-3*I_max)
+                print('Fmax', 1e-3*vs3[mode]['Fx'][Fmax_index],
+                      1e-3*vs3[mode]['Fz'][Fmax_index],
+                      1e-3*vs3[mode]['Fmag'][Fmax_index])
 
         for i, k in enumerate([1, 0]):
             ax[i].set_ylabel('$|F|$ kNm$^{-1}$')
@@ -595,14 +607,17 @@ class VDE_force:
 
 
 if __name__ == '__main__':
-    folder, frame_index = 2, 45
-    vde = VDE_force(folder=folder, frame_index=frame_index, mode='control')
+    folder, frame_index = 8, 113
+    vde = VDE_force(folder=folder, frame_index=frame_index, mode='control',
+                    Iscale=1)
 
-    #plt.figure()
+    #plt.figure(figsize=(8, 8))
     #vde.plot_frame()
 
-    vde.plot_single('MD_UP_exp16', 'LTC', nframe=500)
+    # vde.plot_single('MD_UP_exp16', 'DINA', nframe=500)
     vde.plot_Fmax('DINA', nframe=500)
+    # vde.plot_Fmax('LTC', nframe=500)
+    # vde.plot_Fmax('ENP', nframe=500)
 
 
     # vde.movie(3, nframe=60, mode='control')

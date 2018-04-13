@@ -315,7 +315,8 @@ class SF(object):
         return dB
 
     def getXgrid(self, n=100, plot=False):
-        X, Z, n = grid(n, self.xbound.flatten())[-3:]
+        X, Z, nx, nz = grid(n, self.xbound.flatten())[-4:]
+        n = nx * nz
         Xpoint = np.zeros(n, dtype=[('x', float), ('z', float),
                                     ('B', float), ('psi', float)])
         index = count(0)

@@ -1101,7 +1101,7 @@ class FE(object):
                 self.scale = -self.scale_factor * self.bb / Umax
             else:
                 self.scale = 1
-        else:
+        else:  # absolute displacment
             self.scale = self.scale_factor
         for el in range(self.nel):
             for i in range(3):
@@ -1187,8 +1187,8 @@ class FE(object):
     def plot_moment(self):
         plt.figure(figsize=plt.figaspect(0.75))
         text = linelabel(value='', postfix='', Ndiv=25)
-        # part = self.part
-        part = ['loop', 'trans_lower', 'trans_upper']
+        part = self.part
+        # part = ['loop', 'trans_lower', 'trans_upper']
         color = cycle(range(10))
         for i, part in enumerate(part):
             ci = next(color)
@@ -1205,9 +1205,9 @@ class FE(object):
         plt.xlabel('part length')
         plt.ylabel('part curvature')
 
-    def plot_stress(self):        
-        # part = self.part
-        part = ['loop', 'trans_lower', 'trans_upper']
+    def plot_stress(self):
+        part = self.part
+        # part = ['loop', 'trans_lower', 'trans_upper']
         color = cycle(range(10))
         axes = plt.subplots(3, 1, sharex=True, sharey=True,
                             figsize=plt.figaspect(0.75))[1]
@@ -1223,13 +1223,13 @@ class FE(object):
                             1e-6*self.part[part][label][:, j],
                              ls, color='C{}'.format(ci),
                              label=part+'_'+section)
-        for ax, label in zip(axes, stress): 
+        for ax, label in zip(axes, stress):
             ax.set_ylabel(f'{label} MPa')
             plt.despine()
         plt.xlabel('part length')
         plt.sca(axes[1])
         plt.legend()
-       
+
 
     def plot_nodal(self):
         fig, ax = plt.subplots(2, 1, sharex=True, squeeze=True)

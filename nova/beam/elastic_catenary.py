@@ -75,7 +75,7 @@ class catenary:
 
         plt.plot(L, s, 'C3--')
 
-    def elastic(self, L, Lo, plot=True):
+    def elastic(self, L, Lo, plot=False):
         alpha, beta = self.react(L, Lo)[:2]
         x = np.linspace(0, L, int(self.N/2))
         y = alpha / (beta * (1 - alpha**2)) * \
@@ -99,8 +99,6 @@ class catenary:
             x, y = self.elastic(L, Lo)
         else:
             x, y = self.inelastic(L, Lo)[:2]
-
-        print(x)
         self.fe.clfe()  # clear all
         X = np.zeros((len(x), 3))
         X[:, 0], X[:, 2] = x, y
@@ -110,16 +108,18 @@ class catenary:
         self.fe.add_bc('nry', [-1], part='chain', ends=1)
         self.fe.add_weight()  # add weight to all elements
         self.fe.solve()
-        self.fe.plot_stress()
-        self.theory(L, Lo)
+        # self.fe.plot_stress()
+        # self.theory(L, Lo)
 
-        # self.fe.plot_moment()
+        self.fe.plot_moment()
 
 
-L, Lo = 1, 1.01
-cat = catenary(N=7)
+L, Lo = 1, 1.1
+cat = catenary(N=51)
 
 # cat.solve(True, L, Lo)
 cat.solve(True, L, Lo)
+
+cat.fe.plot()
 
 

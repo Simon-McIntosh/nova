@@ -379,9 +379,9 @@ class read_plasma:
 if __name__ == '__main__':
 
     pl = read_plasma('disruptions', Iscale=0.5)
-    '''
-    pl.Ivs3_single(3, plot=True)
 
+    pl.Ivs3_single(3, plot=True)
+    '''
     pl.Ivs3_single(11, plot=True)
 
     pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms

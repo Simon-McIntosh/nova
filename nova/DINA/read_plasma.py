@@ -391,12 +391,14 @@ if __name__ == '__main__':
 
     pl.read_file(11)
     pl.get_vs3_trip(plot=True)
-
-    pl.plot_displacment()
     '''
+
     pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms
     pl.get_vs3_trip(plot=True)
     pl.plot_Ivs3_max()
+
+    pl.plot_displacment()
+
 
     #for mode in pl.Ivs3.dtype.names:
     #     pl.plot_Ivs3_max_mode(mode)

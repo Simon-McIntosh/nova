@@ -48,8 +48,10 @@ class timeconstant:
 
     def get_tau(self, plot=False, **kwargs):
         td, Id = self.trim(**kwargs)
+        to = kwargs.get('to', 10e-3)
         Io = kwargs.get('Io', -60e3)
-        x = minimize(self.fit_tau, [10e-3, Io, 30e-3], args=(td, Id)).x
+        tau = kwargs.get('Io', 30e-3)
+        x = minimize(self.fit_tau, [to, Io, tau], args=(td, Id)).x
         err = self.fit_tau(x, td, Id)
         to, Io, tau = x
         Iexp = Io*np.exp(-(td-to)/tau)

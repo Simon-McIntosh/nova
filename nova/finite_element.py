@@ -727,8 +727,8 @@ class FE(object):
                     fn[i, 0] = (1 - s)**2 * (1 + 2 * s) * f[i]
                     fn[i, 1] = s**2 * (3 - 2 * s) * f[i]
                     mi = 5 if label == 'fy' else 4  # moment index
-                    fn[mi, 0] = f[i] * (1 - s)**2 * s * self.el['dl'][el]
-                    fn[mi, 1] = -f[i] * s**2 * (1 - s) * self.el['dl'][el]
+                    #fn[mi, 0] = f[i] * (1 - s)**2 * s * self.el['dl'][el]
+                    #fn[mi, 1] = -f[i] * s**2 * (1 - s) * self.el['dl'][el]
                     if load_type == 'dist':
                         # reduce moment for distributed load
                         fn[mi, :] *= 8 / 12
@@ -752,7 +752,7 @@ class FE(object):
     def add_nodal_load(self, node, label, load):
         self.check_input('load', label)
         index = self.load.index(label)
-        self.Fo[node * self.ndof + index] += load
+        self.Fo[node * self.ndof + index] += load  # accumulate
 
     def add_weight(self, g=[0, 0, -1]):
         self.update_rotation()  # check / update rotation matrix
@@ -1219,16 +1219,18 @@ class FE(object):
                 for j, ls in zip(range(self.part[part]['nsection']),
                                        ['-', '--']):
                     section = self.part[part]['name'][j]
-                    ax.plot(self.part[part]['Lel']/Lnorm,
+                    ax.plot(self.part[part]['Lel'],  # /Lnorm
                             1e-6*self.part[part][label][:, j],
-                             ls, color='C{}'.format(ci),
-                             label=part+'_'+section)
+                            ls, color='C{}'.format(ci),
+                            label=part+'_'+section)
         for ax, label in zip(axes, stress):
             ax.set_ylabel(f'{label} MPa')
             plt.despine()
+        for i in range(len(axes) - 1):
+            plt.setp(axes[i].get_xticklabels(), visible=False)
         plt.xlabel('part length')
-        plt.sca(axes[1])
-        plt.legend()
+        #plt.sca(axes[1])
+        #plt.legend()
 
 
     def plot_nodal(self):

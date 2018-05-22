@@ -62,7 +62,7 @@ class catenary:
             plt.axis('equal')
         return yo, a
 
-    def theory(self, L, Lo):
+    def theory(self, L, Lo, plot=False):
         x, yo, a = self.inelastic(L, Lo)
         A, E, rho = self.extract_section()
         w = A * rho  # weight per length
@@ -72,8 +72,9 @@ class catenary:
         T = To / np.cos(psi)  # curve tension
         s = T / A  # axial stress
         L = geom.length(x, yo, norm=False)
-
-        plt.plot(L, s, 'C3--')
+        if plot:
+            plt.plot(L, 1e-6*s, 'C3--')  # MPa
+        return T
 
     def elastic(self, L, Lo, plot=False):
         alpha, beta = self.react(L, Lo)[:2]
@@ -107,19 +108,32 @@ class catenary:
         self.fe.add_bc('nry', [0], part='chain', ends=0)
         self.fe.add_bc('nry', [-1], part='chain', ends=1)
         self.fe.add_weight()  # add weight to all elements
+
+
+        T = self.theory(L, Lo)
+        self.fe.update_rotation()  # check / update rotation matrix
+        for i, el in enumerate(self.fe.part['chain']['el']):
+            tension = (T[i] + T[i+1]) / 2
+            for nd, sign in zip(self.fe.el['n'][el], [1, -1]):
+                f = np.array([sign * tension, 0, 0])
+                f = np.dot(self.fe.T3[:, :, el].T, f)  # to local
+                self.fe.add_nodal_load(nd, 'fx', f[0])
+                self.fe.add_nodal_load(nd, 'fz', f[2])
+
+
         self.fe.solve()
-        # self.fe.plot_stress()
-        # self.theory(L, Lo)
 
-        self.fe.plot_moment()
+        self.fe.plot_stress()
+        #self.theory(L, Lo)
+        #self.fe.plot_moment()
 
 
-L, Lo = 1, 1.1
+L, Lo = 1, 1.05
 cat = catenary(N=51)
 
 # cat.solve(True, L, Lo)
 cat.solve(True, L, Lo)
 
-cat.fe.plot()
+cat.fe.plot(scale_factor=2e5)
 
 

@@ -573,7 +573,11 @@ class VDE_force:
         ax.set_ylabel('$I$ kA')
         ax.set_xlabel('$t$ ms')
         path = os.path.join(class_dir(nep), '../Data/LTC/')
-        points = data_load(path, 'VS3_current', date='2018_03_15')[0]
+        if file == 'VDE_UP_slow_fast':
+            points = data_load(path, 'VS3_current_VDE',
+                               date='2018_05_24')[0]
+        elif file == 'MD_UP_exp16':
+            points = data_load(path, 'VS3_current', date='2018_03_15')[0]
         t = points[0]['x']
         Ic = points[0]['y']
         ax.plot(1e3*t, -1e-3*Ic, ls='--', color=0.3*np.ones(3))
@@ -615,7 +619,8 @@ if __name__ == '__main__':
     #vde.plot_frame()
 
     # vde.plot_single('MD_UP_exp16', 'DINA', nframe=500)
-    vde.plot_Fmax('DINA', nframe=500)
+    vde.plot_single('VDE_UP_slow_fast', 'DINA', nframe=500)
+    # vde.plot_Fmax('DINA', nframe=500)
     # vde.plot_Fmax('LTC', nframe=500)
     # vde.plot_Fmax('ENP', nframe=500)
 

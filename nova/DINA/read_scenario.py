@@ -11,6 +11,8 @@ from nova.elliptic import EQ
 from collections import OrderedDict
 from nep.DINA.read_eqdsk import read_eqdsk
 import nova.cross_coil as cc
+from os import path, mkdir
+import pickle
 
 
 class read_scenario:
@@ -50,10 +52,22 @@ class read_scenario:
             raise KeyError(errtxt)
         self.noise = noise
 
-    def read_txt(self, folder, dropnan=True):
+    def read_txt(self, folder, dropnan=True, force=False):
         filename = self.dina.locate_file('data2.txt', folder=folder)
-        self.data, self.columns = \
-            self.dina.read_csv(filename, dropnan=False, split=',')
+        binary_data = path.join(self.dina.directory, folder, 'pickle')
+        pk_filename = path.join(binary_data, 'data2.pk')
+        if path.isfile(pk_filename) and not force:
+            with open(pk_filename, 'rb') as f:
+                self.data = pickle.load(f)
+                self.columns = pickle.load(f)
+        else:  # read text data
+            self.data, self.columns = \
+                self.dina.read_csv(filename, dropnan=False, split=',')
+            if not path.isdir(binary_data):
+                mkdir(binary_data)
+            with open(pk_filename, 'wb') as f:
+                pickle.dump(self.data, f)
+                pickle.dump(self.columns, f)
         return filename
 
     def read_qda(self, folder):
@@ -116,7 +130,7 @@ class read_scenario:
         self.flattop_index = self.opp_index[0]  # flattop index
         self.vs3 = {'t': self.t[self.flattop_index[0]:self.flattop_index[1]],
                     'I': self.Icoil['VS3'][self.flattop_index[0]:
-                                            self.flattop_index[1]]}
+                                           self.flattop_index[1]]}
 
     def get_coil_current(self, ind, VS3=True):  # return dict of coil currents
         Ic = {}

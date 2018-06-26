@@ -9,7 +9,11 @@ from read_dina import timeconstant
 path = os.path.join(class_dir(nep), '../Data/LTC/')
 
 # data_mine(path, 'VS3_discharge', [10, 10.1], [0, 80e3])
+# data_mine(path, 'VS3_discharge_main_report', [10, 10.125], [0, 70e3])
+
+
 points = data_load(path, 'VS3_discharge', date='2018_02_28')[0]
+# points = data_load(path, 'VS3_discharge_main_report', date='2018_06_25')[0]
 
 to, Io = points[0]['x'], points[0]['y']  # bare conductor
 td, Id = points[1]['x'], points[1]['y']  # jacket + vessel
@@ -23,11 +27,11 @@ Io_d, tau_d, tfit_d, Ifit_d = tc.nfit(3)
 plt.plot(1e3*(to-to[0]), 1e-3*Io, 'C0-', label='bare conductor')
 txt_o = timeconstant.ntxt(Io_o/Io[0], tau_o)
 plt.plot(1e3*(tfit_o-to[0]), 1e-3*Ifit_o, 'C1--', label='exp fit '+txt_o)
-plt.plot(1e3*(td-td[0]), 1e-3*Id, 'C2-', label='conductor + passive structures')
+plt.plot(1e3*(td-td[0]), 1e-3*Id, 'C2-',
+         label='conductor + passive structures')
 txt_d = timeconstant.ntxt(Io_d/Id[0], tau_d)
 plt.plot(1e3*(tfit_d-td[0]), 1e-3*Ifit_d, 'C3--', label='exp fit '+txt_d)
 plt.despine()
 plt.xlabel('$t$ ms')
 plt.ylabel('$I$ kA')
 plt.legend()
-

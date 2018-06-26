@@ -531,18 +531,16 @@ class VDE_force:
         h.append(mlines.Line2D([], [], color='C7', label='lowerVS'))
         ax_I.legend(handles=h, loc=4)
 
-    def plot_single(self, file, discharge, nframe=500):
-        vs3_data = self.read_data(discharge, nframe)  # load data
-        vs3 = vs3_data[file]
-        self.vs3_single = vs3
-
+    def plot_line_force(self, vs3, plot_full):
+        control_label = self.get_control_label(plot_full)
         ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
         for i, k in enumerate([1, 0]):
             for mode, color in zip(['referance', 'control', 'error'],
                                    ['gray', 'C0', 'C3']):
-                ax[i].plot(1e3*vs3[mode]['t'], 1e-3*vs3[mode]['Fmag'][:, k],
-                           color=color)
-
+                if mode == 'control' or plot_full:
+                    ax[i].plot(1e3*vs3[mode]['t'],
+                               1e-3*vs3[mode]['Fmag'][:, k],
+                               color=color)
         plt.despine()
         plt.setp(ax[0].get_xticklabels(), visible=False)
         LTC = {}  # load and plot LTC data
@@ -552,23 +550,28 @@ class VDE_force:
         LTC['upperVS'] = {'t': points[1]['x'], 'Fmag': points[1]['y']}
         for i, coil in enumerate(['upperVS', 'lowerVS']):
             ax[i].plot(1e3*LTC[coil]['t'], 1e-3*LTC[coil]['Fmag'],
-                       ls='--', color=0.3*np.ones(3))
+                       ls='-', color=0.3*np.ones(3))
         ax[0].set_ylabel('upper $|F|$ kNm$^{-1}$')
         ax[1].set_ylabel('lower $|F|$ kNm$^{-1}$')
         ax[1].set_xlabel('$t$ ms')
         h = []
-        h.append(mlines.Line2D([], [], ls='--',
+        h.append(mlines.Line2D([], [], ls='-',
                                color=0.3*np.ones(3), label='LTC'))
-        h.append(mlines.Line2D([], [], color='gray', label='referance'))
-        h.append(mlines.Line2D([], [], color='C0', label='control'))
-        h.append(mlines.Line2D([], [], color='C3', label='error'))
+        if plot_full:
+            h.append(mlines.Line2D([], [], color='gray', label='referance'))
+        h.append(mlines.Line2D([], [], color='C0', label=control_label))
+        if plot_full:
+            h.append(mlines.Line2D([], [], color='C3', label='error'))
         ax[0].legend(handles=h, loc=1)
 
+    def plot_current(self, vs3, plot_full, file):
+        control_label = self.get_control_label(plot_full)
         ax = plt.subplots(1, 1, sharex=True, sharey=True)[1]
         for mode, color in zip(['referance', 'control', 'error'],
                                ['gray', 'C0', 'C3']):
-            ax.plot(1e3*vs3[mode]['t'], 1e-3*vs3[mode]['I'],
-                    color=color)
+            if mode == 'control' or plot_full:
+                ax.plot(1e3*vs3[mode]['t'], 1e-3*vs3[mode]['I'],
+                        color=color)
         plt.despine()
         ax.set_ylabel('$I$ kA')
         ax.set_xlabel('$t$ ms')
@@ -580,34 +583,131 @@ class VDE_force:
             points = data_load(path, 'VS3_current', date='2018_03_15')[0]
         t = points[0]['x']
         Ic = points[0]['y']
-        ax.plot(1e3*t, -1e-3*Ic, ls='--', color=0.3*np.ones(3))
+        ax.plot(1e3*t, -1e-3*Ic, ls='-', color=0.3*np.ones(3))
+        h = []
+        h.append(mlines.Line2D([], [], ls='-',
+                               color=0.3*np.ones(3), label='LTC'))
+        if plot_full:
+            h.append(mlines.Line2D([], [], color='gray', label='referance'))
+        h.append(mlines.Line2D([], [], color='C0', label=control_label))
+        if plot_full:
+            h.append(mlines.Line2D([], [], color='C3', label='error'))
         ax.legend(handles=h, loc=1)
 
+    def plot_Bmag(self, vs3, plot_full):
+        control_label = self.get_control_label(plot_full)
         ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
         for i, k in enumerate([1, 0]):
             for mode, color in zip(['referance', 'control', 'error'],
                                    ['gray', 'C0', 'C3']):
-                Bmag = vs3[mode]['Fmag'][:, k] / (4 * abs(vs3[mode]['I']))
-                ax[i].plot(1e3*vs3[mode]['t'], Bmag, '-.', color=color)
-                ax[i].plot(1e3*vs3[mode]['t'],
-                           vs3[mode]['Bmag'][:, k], '-', color=color)
-
-
+                if mode == 'control' or plot_full:
+                    index = abs(vs3[mode]['I']) > 0
+                    Bmag = vs3[mode]['Fmag'][index, k]\
+                        / (4 * abs(vs3[mode]['I'][index]))
+                    ax[i].plot(1e3*vs3[mode]['t'][index], Bmag,
+                               '-.', color=color)
+                    ax[i].plot(1e3*vs3[mode]['t'][index],
+                               vs3[mode]['Bmag'][index, k], '-', color=color)
         plt.despine()
         plt.setp(ax[0].get_xticklabels(), visible=False)
-        LTC = {}  # load and plot LTC data
         path = os.path.join(class_dir(nep), '../Data/LTC/')
-        points = data_load(path, 'VS3_field', date='2018_03_15')[0]
-        LTC['lowerVS'] = {'t': points[0]['x'], 'Bmag': points[0]['y']}
-        LTC['upperVS'] = {'t': points[1]['x'], 'Bmag': points[1]['y']}
+        with open(join(path, 'LTC_components'), 'rb') as intput:
+            LTC = pickle.load(intput)
         for i, coil in enumerate(['upperVS', 'lowerVS']):
-            ax[i].plot(1e3*LTC[coil]['t'], LTC[coil]['Bmag'],
-                       ls='--', color=0.3*np.ones(3))
+            Bmag = np.sqrt(LTC[coil]['Bx']**2 + LTC[coil]['Bz']**2)
+            ax[i].plot(1e3*LTC[coil]['t'], Bmag,  # LTC[coil]['Bmag']
+                       ls='-', color=0.3*np.ones(3))
         ax[0].set_ylabel('upper $|B_p|$ T')
         ax[1].set_ylabel('lower $|B_p|$ T')
         ax[1].set_xlabel('$t$ ms')
+        h = []
+        h.append(mlines.Line2D([], [], ls='-',
+                               color=0.3*np.ones(3), label='LTC'))
+        if plot_full:
+            h.append(mlines.Line2D([], [], color='gray', label='referance'))
+        h.append(mlines.Line2D([], [], color='C0', label=control_label))
+        if plot_full:
+            h.append(mlines.Line2D([], [], color='C3', label='error'))
+        # ax.legend(handles=h, loc=1)
+
+    def plot_field_components(self, var, vs3, plot_full):
+        control_label = self.get_control_label(plot_full)
+        ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
+        for i, k in enumerate([1, 0]):
+            for mode, color in zip(['referance', 'control', 'error'],
+                                   ['gray', 'C0', 'C3']):
+                if mode == 'control' or plot_full:
+                    ax[i].plot(1e3*vs3[mode]['t'],
+                               vs3[mode]['B{}'.format(var)][:, k],
+                               color=color)
+        plt.despine()
+        plt.setp(ax[0].get_xticklabels(), visible=False)
+        path = os.path.join(class_dir(nep), '../Data/LTC/')
+        with open(join(path, 'LTC_components'), 'rb') as intput:
+            LTC = pickle.load(intput)
+        for i, coil in enumerate(['upperVS', 'lowerVS']):
+            ax[i].plot(1e3*LTC[coil]['t'], LTC[coil]['B{}'.format(var)],
+                       ls='-', color=0.3*np.ones(3))
+        ax[0].set_ylabel(r'upper $B_{}$'.format(var) + ' T')
+        ax[1].set_ylabel(r'lower $B_{}$'.format(var) + ' T')
+        ax[1].set_xlabel('$t$ ms')
+        h = []
+        h.append(mlines.Line2D([], [], ls='-',
+                               color=0.3*np.ones(3), label='LTC'))
+        if plot_full:
+            h.append(mlines.Line2D([], [], color='gray', label='referance'))
+        h.append(mlines.Line2D([], [], color='C0', label=control_label))
+        if plot_full:
+            h.append(mlines.Line2D([], [], color='C3', label='error'))
         ax[0].legend(handles=h, loc=1)
 
+    def plot_line_force_components(self, var, vs3, plot_full):
+        control_label = self.get_control_label(plot_full)
+        ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
+        for i, k in enumerate([1, 0]):
+            for mode, color in zip(['referance', 'control', 'error'],
+                                   ['gray', 'C0', 'C3']):
+                if mode == 'control' or plot_full:
+                    ax[i].plot(1e3*vs3[mode]['t'],
+                               1e-3*vs3[mode]['F{}'.format(var)][:, k],
+                               color=color)
+        plt.despine()
+        plt.setp(ax[0].get_xticklabels(), visible=False)
+        path = os.path.join(class_dir(nep), '../Data/LTC/')
+        with open(join(path, 'LTC_components'), 'rb') as intput:
+            LTC = pickle.load(intput)
+        for i, coil in enumerate(['upperVS', 'lowerVS']):
+            ax[i].plot(1e3*LTC[coil]['t'], 1e-3*LTC[coil]['F{}'.format(var)],
+                       ls='-', color=0.3*np.ones(3))
+        ax[0].set_ylabel(r'upper $F_{}$'.format(var) + ' kNm$^{-1}$')
+        ax[1].set_ylabel(r'lower $F_{}$'.format(var) + ' kNm$^{-1}$')
+        ax[1].set_xlabel('$t$ ms')
+        h = []
+        h.append(mlines.Line2D([], [], ls='-',
+                               color=0.3*np.ones(3), label='LTC'))
+        if plot_full:
+            h.append(mlines.Line2D([], [], color='gray', label='referance'))
+        h.append(mlines.Line2D([], [], color='C0', label=control_label))
+        if plot_full:
+            h.append(mlines.Line2D([], [], color='C3', label='error'))
+        ax[0].legend(handles=h, loc=1)
+
+    def get_control_label(self, plot_full):
+        control_label = 'control' if plot_full else 'DINA'
+        return control_label
+
+    def plot_single(self, file, discharge, nframe=500, plot_full=False):
+        vs3_data = self.read_data(discharge, nframe)  # load data
+        vs3 = vs3_data[file]
+        self.vs3_single = vs3
+
+        self.plot_line_force(vs3, plot_full)
+        self.plot_current(vs3, plot_full, file)
+        self.plot_Bmag(vs3, plot_full)
+        self.plot_field_components('x', vs3, plot_full)
+        self.plot_field_components('z', vs3, plot_full)
+        self.plot_line_force_components('x', vs3, plot_full)
+        self.plot_line_force_components('z', vs3, plot_full)
 
 
 if __name__ == '__main__':
@@ -618,8 +718,8 @@ if __name__ == '__main__':
     #plt.figure(figsize=(8, 8))
     #vde.plot_frame()
 
-    # vde.plot_single('MD_UP_exp16', 'DINA', nframe=500)
-    vde.plot_single('VDE_UP_slow_fast', 'DINA', nframe=500)
+    vde.plot_single('MD_UP_exp16', 'DINA', nframe=500)
+    # vde.plot_single('VDE_UP_slow_fast', 'DINA', nframe=500)
     # vde.plot_Fmax('DINA', nframe=500)
     # vde.plot_Fmax('LTC', nframe=500)
     # vde.plot_Fmax('ENP', nframe=500)

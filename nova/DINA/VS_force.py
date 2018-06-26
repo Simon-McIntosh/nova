@@ -44,7 +44,7 @@ class Force:
             text = [[] for _ in range(len(ax))]
             for i, a in enumerate(ax):
                 text[i] = linelabel(loc='max', postfix='', ax=a)
-            ax[0].plot(self.t, )
+            # ax[0].plot(self.t, )
             for i, coil in enumerate(self.vs.geom):
                 ax[i+1].plot(self.t, np.linalg.norm(1e-3*Ftn[:, :, i], axis=1),
                              'C7', label=r'$|\bfF\rm|$')
@@ -56,8 +56,8 @@ class Force:
                 ax[i+1].text(0.9, 1.05, coil+'-vs',
                              transform=ax[i+1].transAxes, ha='center',
                              bbox=dict(facecolor='grey', alpha=0.25))
-            for t in text:
-                t.plot()
+            #for t in text:
+            #    t.plot()
             ax[1].text(0.15, 1.05, self.psi.name, transform=ax[0].transAxes,
                        weight='bold', ha='center')
             ax[2].set_xlabel('$t$ ms')

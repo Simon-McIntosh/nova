@@ -185,12 +185,12 @@ class read_psi:
 
     def get_force(self, plot=False, scale=1e-2):
         B = self.get_field(self.vs.points)
-        Ivs = np.zeros((3, self.vs.nP))
-        Ivs[1, :] = 4*self.pl.Ivs_o[self.time_index]  # Amp-turns
+        Ivs3 = np.zeros((3, self.vs.nP))
+        Ivs3[1, :] = 4*self.pl.Ivs3_o[self.time_index]  # Amp-turns
         F = np.zeros((3, self.vs.nP))
         for i, coil in enumerate(self.vs.geom):
             vs_sign = self.vs.geom[coil]['sign']
-            F[:, i] = np.cross(vs_sign * Ivs[:, i], B[:, i], axis=0)
+            F[:, i] = np.cross(vs_sign * Ivs3[:, i], B[:, i], axis=0)
         if plot:
             for i, point in enumerate(self.vs.points):
                 plt.arrow(point[0], point[1],

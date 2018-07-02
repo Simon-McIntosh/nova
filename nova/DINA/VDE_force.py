@@ -718,7 +718,7 @@ if __name__ == '__main__':
     #plt.figure(figsize=(8, 8))
     #vde.plot_frame()
 
-    vde.plot_single('MD_UP_exp16', 'DINA', nframe=500)
+    # vde.plot_single('MD_UP_exp16', 'DINA', nframe=500)
     # vde.plot_single('VDE_UP_slow_fast', 'DINA', nframe=500)
     # vde.plot_Fmax('DINA', nframe=500)
     # vde.plot_Fmax('LTC', nframe=500)
@@ -728,6 +728,24 @@ if __name__ == '__main__':
     # vde.movie(3, nframe=60, mode='control')
 
     # vde.movie(8, nframe=60, mode='control')
+
+    mode='control'
+    vde.read_file(3, discharge='DINA')
+    fig = plt.figure(figsize=(6, 10))
+
+    vde.frame_update(30)
+    vde.vs3_update(mode)
+    vde.force_update()
+    vde.ff.plot(coils=['LVS'], scale=3, Fmax=10)
+
+    vs = VSgeom()
+    xo = vs.points[0]
+    dx, dz = 0.2, 0.2
+    n, limit = 1e3, [xo[0]-dx/2, xo[0]+dx/2, xo[1]-dz/2, xo[1]+dz/2]
+    vde.x2d, vde.z2d, vde.x, vde.z = grid(n, limit)[:4]
+
+    levels = vde.contour()
+
 
 
 

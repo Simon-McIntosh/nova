@@ -35,3 +35,44 @@ plt.despine()
 plt.xlabel('$t$ ms')
 plt.ylabel('$I$ kA')
 plt.legend()
+
+plt.figure()
+points = data_load(path, 'VS3_discharge', date='2018_02_28')[0]
+to, Io = points[0]['x'], points[0]['y']  # bare conductor
+tc = timeconstant(to, Io, trim_fraction=0)
+Io_o, tau_o, tfit_o, Ifit_o = tc.nfit(1)  # bare single fit
+txt_o = timeconstant.ntxt(Io_o/Io[0], tau_o)
+plt.plot(1e3*(to-to[0]), 1e-3*Io, 'C0-', label='28_02 ' + txt_o)
+
+points = data_load(path, 'VS3_discharge_main_report', date='2018_06_25')[0]
+to, Io = points[0]['x'], points[0]['y']  # bare conductor
+tc = timeconstant(to, Io, trim_fraction=0)
+Io_o, tau_o, tfit_o, Ifit_o = tc.nfit(1)  # bare single fit
+txt_o = timeconstant.ntxt(Io_o/Io[0], tau_o)
+plt.plot(1e3*(to-to[0]), 1e-3*Io, 'C1-', label='25_06 ' + txt_o)
+plt.legend()
+plt.despine()
+plt.xlabel('$t$ ms')
+plt.ylabel('$I$ kA')
+plt.legend()
+
+
+plt.figure()
+points = data_load(path, 'VS3_discharge', date='2018_02_28')[0]
+to, Io = points[1]['x'], points[1]['y']
+tc = timeconstant(to, Io, trim_fraction=0)
+Io_o, tau_o, tfit_o, Ifit_o = tc.nfit(3)  # bare single fit
+txt_o = timeconstant.ntxt(Io_o/Io[0], tau_o)
+plt.plot(1e3*(to-to[0]), 1e-3*Io, 'C0-', label='28_02 ' + txt_o)
+
+points = data_load(path, 'VS3_discharge_main_report', date='2018_06_25')[0]
+to, Io = points[1]['x'], points[1]['y']
+tc = timeconstant(to, Io, trim_fraction=0)
+Io_o, tau_o, tfit_o, Ifit_o = tc.nfit(3)  # bare single fit
+txt_o = timeconstant.ntxt(Io_o/Io[0], tau_o)
+plt.plot(1e3*(to-to[0]), 1e-3*Io, 'C1-', label='25_06 ' + txt_o)
+plt.legend()
+plt.despine()
+plt.xlabel('$t$ ms')
+plt.ylabel('$I$ kA')
+plt.legend()

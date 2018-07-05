@@ -67,16 +67,8 @@ class VDE_force:
     def load_active(self, dCoil=0.25):
         vs_geom = VSgeom()
         self.vs_rail = vs_geom.rail
-        pf_geom = PFgeom(VS=True)
+        pf_geom = PFgeom(VS=True, dCoil=dCoil)
         self.pf = pf_geom.pf
-        self.pf.mesh_coils(dCoil=dCoil)
-        for i, coil in enumerate(vs_geom.pf.coil):
-            if i < 4:  # lower
-                subcoil = 'lowerVS_{:d}'.format(i)
-            else:
-                subcoil = 'upperVS_{:d}'.format(i-4)
-            self.pf.sub_coil[subcoil] = vs_geom.pf.coil[coil]
-            self.pf.sub_coil[subcoil]['Nf'] = 4
         self.vs_theta = {}
         for name in vs_geom.geom:
             self.vs_theta[name] = vs_geom.geom[name]['theta']
@@ -714,6 +706,7 @@ if __name__ == '__main__':
     folder, frame_index = 8, 113
     vde = VDE_force(folder=folder, frame_index=frame_index, mode='control',
                     Iscale=1)
+    vde.pf.plot(subcoil=True)
 
     #plt.figure(figsize=(8, 8))
     #vde.plot_frame()
@@ -729,6 +722,7 @@ if __name__ == '__main__':
 
     # vde.movie(8, nframe=60, mode='control')
 
+    '''
     mode='control'
     vde.read_file(3, discharge='DINA')
     fig = plt.figure(figsize=(6, 10))
@@ -745,6 +739,7 @@ if __name__ == '__main__':
     vde.x2d, vde.z2d, vde.x, vde.z = grid(n, limit)[:4]
 
     levels = vde.contour()
+    '''
 
 
 

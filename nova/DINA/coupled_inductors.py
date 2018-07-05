@@ -160,9 +160,16 @@ class inductance:
         self.Ic = np.dot(self.T.T, self.Ic)  # sum
 
     def dIdt(self, Ic, t):  # current rate (function of odeint)
-        Idot = np.dot(-self.Minv, Ic*self.Rc)
+        Idot = np.dot(-self.Minv, Ic*self.Rc)  # -IR + vbg
         return Idot
 
+    def solve(self, t):
+        self.assemble()
+        self.assemble_cp_nodes()
+        self.constrain()
+        self.Minv = np.linalg.inv(self.M)  # inverse for odeint
+        Iode = odeint(self.dIdt, self.Ic, t).T
+        return Iode
 
 
 if __name__ is '__main__':
@@ -190,7 +197,7 @@ if __name__ is '__main__':
     # 11: 'VDE_UP_slow_fast'
 
     file_index = 11
-    for file_index in range(12):
+    for file_index in [3]:#range(12):
         pl = read_plasma('disruptions')
         trip, Ivs3_data, Ivs3, Ivs3_fun = pl.Ivs3_single(file_index)  # load Ivs3
         t_cq = trip['t_cq']  # trip
@@ -204,7 +211,8 @@ if __name__ is '__main__':
         nvs_o = ind.nC
         npl = len(tor.plasma_coil[tor_index])
         for i, coil in enumerate(tor.plasma_coil[tor_index]):  # plasma
-            x, z, dx, dz, Ic, R = ind.get_coil(tor.plasma_coil[tor_index][coil])
+            x, z, dx, dz, Ic, R = \
+                ind.get_coil(tor.plasma_coil[tor_index][coil])
             ind.add_coil(x, z, dx, dz, Ic, R=R, nt=1/npl)
             if i > 0:
                 ind.add_cp([nvs_o, nvs_o+i])  # link coils
@@ -212,7 +220,7 @@ if __name__ is '__main__':
         nvs_o = ind.nC
         turns = np.append(np.ones(4), -np.ones(4))
         ind.add_pf_coil(vs_geom.pf.coil, turns=turns)
-        vs3 = 'dual'
+        vs3 = 'single'
 
         if vs3 == 'single':
             for i, index in enumerate(nvs_o+np.arange(1, 8)):  # vs3 loops
@@ -222,7 +230,7 @@ if __name__ is '__main__':
                 ind.add_cp([nvs_o, index])
             for i, index in enumerate(nvs_o+np.arange(5, 8)):  # upper loops
                 ind.add_cp([nvs_o+4, index])
-
+        '''
         for coil in tor.coil:  # add pf coils
             x, z, dx, dz, Ic, R = ind.get_coil(tor.coil[coil])
             nt = pf_geom.coil[coil]['N']
@@ -238,7 +246,7 @@ if __name__ is '__main__':
         Rvessel = 1e-3*np.ones(len(tor.vessel_coil))  # vessel
         ind.add_pf_coil(tor.vessel_coil)
         ind.add_cp([ind.nC-3, ind.nC-2])  # blanket support
-
+        '''
         ind.assemble()
         ind.assemble_cp_nodes()
         ind.constrain()

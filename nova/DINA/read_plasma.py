@@ -7,6 +7,11 @@ from scipy.interpolate import interp1d
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 from collections import OrderedDict
+from scipy.integrate import odeint
+from amigo.png_tools import data_load
+import nep
+from amigo.IO import class_dir
+import os
 
 
 class read_plasma:
@@ -16,7 +21,7 @@ class read_plasma:
         self.dina = dina(database_folder)
         self.Ivs3_properties()
 
-    def read_file(self, folder, dropnan=True):
+    def read_file(self, folder, dropnan=True, Rupdate=True):
         filename = self.dina.locate_file('plasma', folder=folder)
         self.name = filename.split('\\')[-2]
         self.data = pd.read_csv(filename, delim_whitespace=True, skiprows=40,
@@ -28,7 +33,7 @@ class read_plasma:
             self.columns[c] = c.split('[')[0]
         self.data = self.data.rename(index=str, columns=self.columns)
         self.load_data()
-        self.scale_current()
+        self.scale_current(Rupdate=Rupdate)
 
     def load_data(self):
         data = {}  # convert units
@@ -54,6 +59,14 @@ class read_plasma:
             self.Iscale = kwargs['Iscale']
         for var in self.Iref:
             setattr(self, var, self.Iscale*self.Iref[var])
+        didt = np.gradient(self.Ivs3_o, self.t)
+        vs3 = self.Ivs3_o*self.Rvs3['DINA'] + self.Lvs3['DINA'] * didt
+        self.vs3_fun = interp1d(self.t, vs3, fill_value='extrapolate')
+        self.Ivs3_o = odeint(self.dIdt_fun, 0, self.t).flatten()
+
+    def dIdt_fun(self, I, t):
+        g = (self.vs3_fun(t) - I*self.Rvs3['LTC'])/self.Lvs3['LTC']
+        return g
 
     def plot_currents(self, ax=None):
         if ax is None:
@@ -66,15 +79,19 @@ class read_plasma:
         plt.despine()
         plt.setp(ax[0].get_xticklabels(), visible=False)
 
-    def Ivs3_properties(self, Rvs3=17.66e-3, Lvs3=1.52e-3, Io=60e3):
-        self.Rvs3 = Rvs3
-        self.Lvs3 = Lvs3
-        self.tau_vs3 = self.Lvs3/self.Rvs3  # vs3 timeconstant
+    def Ivs3_properties(self, Io=60e3):
+        self.Rvs3 = {'DINA': 12.0e-3, 'LTC': 19.24e-3}  # 17.66e-3
+        self.Lvs3 = {'DINA': 1.52e-3, 'LTC': 1.52e-3}  #
+        self.tau_vs3 = {}  # vs3 timeconstant
+        for discharge in ['DINA', 'LTC']:
+            self.tau_vs3[discharge] = self.Lvs3[discharge]/self.Rvs3[discharge]
         self.tau_d = {}
         self.tau_d['DINA'] = {'alpha': [0.64754104,  0.13775032,  0.21254934],
                               'tau': [0.04390661,  0.01073328,  0.19240964]}
         self.tau_d['LTC'] = {'alpha': [0.0629583,  0.3059171,  0.63042031],
                              'tau': [0.00068959,  0.01501697,  0.09481686]}
+        self.tau_d['LTC'] = {'alpha': [0.07656251,  0.46998035,  0.45541367],
+                             'tau': [0.00482049,  0.12326816,  0.03081627]}
         self.tau_d['ENP'] = {'alpha': [0.4003159,  0.36687173,  0.23344466],
                              'tau': [0.0283991,  0.12646493,  0.04291896]}
         self.Io = Io  # control spike current magnitude
@@ -164,7 +181,7 @@ class read_plasma:
     def Ivs3_single(self, folder, plot=False, discharge='DINA',
                     dIdt_trip=5e7, dz_trip=0.16):
         self.read_file(folder)  # load plasma file
-         # vs3 trigger
+        # vs3 trigger
         trip = self.get_vs3_trip(dIdt_trip=dIdt_trip, dz_trip=dz_trip)
         Ivs3_data = {}  # VS3 system
         Ivs3_data['t'] = self.t
@@ -369,18 +386,31 @@ class read_plasma:
         plt.despine()
         plt.title(mode)
 
-    def dIdt_fun(self, I, t):
-        # vs_fun = args[0]
-        # g = -I*R/L
-        g = (self.vs_fun(t) - I*self.Rvs3)/self.Lvs3
-        return g
-
 
 if __name__ == '__main__':
 
-    pl = read_plasma('disruptions', Iscale=0.5)
+    pl = read_plasma('disruptions', Iscale=1)
 
-    pl.Ivs3_single(3, plot=True)
+    Ivs3_data = pl.Ivs3_single(3, plot=False, discharge='LTC')[1]
+
+    plt.figure()
+    # plt.plot(pl.t, pl.Ivs3_o)
+    # plt.plot(pl.t, pl.Ivs3_ode)
+    path = os.path.join(class_dir(nep), '../Data/LTC/')
+    points = data_load(path, 'VS3_current', date='2018_03_15')[0]
+    # points = data_load(path, 'VS3_current_VDE', date='2018_05_24')[0]
+
+    t = points[0]['x']
+    Ic = points[0]['y']
+    plt.plot(t, -Ic)
+
+    plt.plot(Ivs3_data['t'], Ivs3_data['Icontrol'])
+
+
+
+
+
+
     '''
     pl.Ivs3_single(11, plot=True)
 
@@ -391,13 +421,13 @@ if __name__ == '__main__':
 
     pl.read_file(11)
     pl.get_vs3_trip(plot=True)
-    '''
 
     pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms
     pl.get_vs3_trip(plot=True)
     pl.plot_Ivs3_max()
 
     pl.plot_displacment()
+    '''
 
 
     #for mode in pl.Ivs3.dtype.names:

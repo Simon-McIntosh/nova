@@ -259,18 +259,8 @@ if __name__ == '__main__':
     tor = read_tor('disruptions', Iscale=-0.5)
     tor.read_file(3)
 
-
     tor.set_current(200)
-
     tor.plot(130)
 
-
-
-    #tor.movie('tmp')
-
-    '''
-    i = 500
-    plt.plot(1e-2*np.array(tor.timeframes[i][2][0::3]),
-             1e-2*np.array(tor.timeframes[i][2][1::3]), '.')
-    '''
+    # tor.movie('tmp')
 

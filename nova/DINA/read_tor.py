@@ -3,25 +3,41 @@ import matplotlib.animation as manimation
 from amigo.time import clock
 from itertools import count
 from nova.coils import PF
-from amigo.IO import readtxt
+from amigo.IO import readtxt, pythonIO
 from nep.DINA.read_dina import dina
 from amigo.pyplot import plt
 from nep.coil_geom import VSgeom
+from os.path import isfile
 
 
-class read_tor:
+class read_tor(pythonIO):
     # read tor_cur_data*.dat file from DINA simulation
     # listing of toroidal currents
 
-    def __init__(self, database_folder='disruptions', Iscale=1):
+    def __init__(self, database_folder='disruptions', Iscale=1,
+                 read_txt=False):
         self.Iscale = Iscale
+        self.read_txt = read_txt
         self.dina = dina(database_folder)
         self.frame_index = 0
+        pythonIO.__init__(self)  # python read/write
 
-    def read_file(self, folder):
-        filename = self.dina.locate_file('tor_cur', folder=folder)
-        self.name = filename.split('\\')[-2]
-        with readtxt(filename) as self.rt:
+    def load_file(self, folder, **kwargs):
+        read_txt = kwargs.get('read_txt', self.read_txt)
+        filepath = self.dina.locate_file('tor_cur', folder=folder)
+        filepath = '.'.join(filepath.split('.')[:-1])
+        self.name = filepath.split('\\')[-2]
+        if read_txt or not isfile(filepath + '.pk'):
+            self.read_file(filepath)  # read txt file
+            self.save_pickle(filepath,
+                             ['nC', 'coil', 'pf', 'nt', 't', 'Ibar', 'current',
+                              'plasma_coil', 'plasma_patch', 'vessel_coil',
+                              'blanket_coil', 'vv_vs_index'])
+        else:
+            self.load_pickle(filepath)
+
+    def read_file(self, filepath):  # called by load_file
+        with readtxt(filepath + '.dat') as self.rt:
             self.read_coils()
             self.read_frames()
 
@@ -253,14 +269,10 @@ class read_tor:
                 writer.grab_frame()
                 tick.tock()
 
+
 if __name__ == '__main__':
 
-
-    tor = read_tor('disruptions', Iscale=-0.5)
-    tor.read_file(3)
-
-    tor.set_current(200)
+    tor = read_tor('disruptions', Iscale=1)
+    tor.load_file(3)
     tor.plot(130)
-
     # tor.movie('tmp')
-

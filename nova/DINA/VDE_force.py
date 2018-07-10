@@ -15,35 +15,53 @@ from nep.rails import stress_allowable
 from nep.DINA.read_dina import dina
 import matplotlib.patches as mpatches
 import pickle
-from os.path import join, isfile
+from os.path import split, join, isfile
 import matplotlib.lines as mlines
 import os
 import nep
 from amigo.png_tools import data_load
-from amigo.IO import class_dir
+from amigo.IO import class_dir, pythonIO
 
 
-class VDE_force:
+class VDE_force(pythonIO):
 
-    def __init__(self, folder=0, frame_index=0, mode='control',
-                 discharge='DINA', Iscale=1):
+    def __init__(self, mode='control', discharge='DINA', Iscale=1,
+                 read_txt=False):
         self.Iscale = Iscale
+        self.read_txt = read_txt
+        self.mode = mode
+        self.discharge = discharge
         self.dina = dina('disruptions')
-        self.pl = read_plasma('disruptions', Iscale=self.Iscale)  # load plasma
-        self.tor = read_tor('disruptions', Iscale=self.Iscale)
-        self.read_file(folder, frame_index, mode, discharge=discharge)
+        self.pl = read_plasma('disruptions', Iscale=self.Iscale,
+                              read_txt=read_txt)  # load plasma
+        self.tor = read_tor('disruptions', Iscale=self.Iscale,
+                            read_txt=read_txt)  # load currents
         self.allowable = stress_allowable()  # load allowable interpolators
+        pythonIO.__init__(self)  # python read/write
 
-    def read_file(self, folder, frame_index=0, mode='control',
-                  discharge='DINA'):
+    def load_file(self, folder, frame_index=0, **kwargs):
+        read_txt = kwargs.get('read_txt', self.read_txt)
+        mode = kwargs.get('mode', self.mode)
+        discharge = kwargs.get('discharge', self.discharge)
+        filepath = self.dina.locate_file('plasma', folder=folder)
+        self.name = split(filepath)[-2]
+        filepath = join(*split(filepath)[:-1], self.name, 'VDE_force')
+        if read_txt or not isfile(filepath + '.pk'):
+            self.read_file(folder)  # read txt file
+            self.save_pickle(filepath, ['pf', 'ff', 'vs_rail', 'vs_theta'])
+        else:
+            self.load_pickle(filepath)
+        self.tor.load_file(folder)  # read toroidal strucutres
         self.load_vs3(folder, discharge=discharge)  # load vs3 currents
+        self.frame_update(frame_index)  # initalize at start of timeseries
+        self.vs3_update(mode=mode)  # initalize vs3 current
+        # self.force_update()  # update vs3 coil forces
+        self.initalize_sf()
+
+    def read_file(self, folder):
         self.load_active()  # load active coils
         self.load_passive(folder)  # load toroidal strucutres
-        self.frame_update(frame_index)  # initalize at start of timeseries
-        self.vs3_update(mode)  # initalize vs3 current
         self.set_force_field()  # initalise force_field object
-        self.force_update()  # update vs3 coil forces
-        self.initalize_sf()
 
     def set_force_field(self):
         active_coils, passive_coils = self.set_coil_type()
@@ -74,7 +92,7 @@ class VDE_force:
             self.vs_theta[name] = vs_geom.geom[name]['theta']
 
     def load_passive(self, folder):
-        self.tor.read_file(folder)  # read toroidal strucutres
+        self.tor.load_file(folder)  # read toroidal strucutres
         self.add_filament(self.tor.vessel_coil)
         self.add_filament(self.tor.blanket_coil)
 
@@ -106,14 +124,15 @@ class VDE_force:
     def frame_update(self, frame_index):
         self.frame_index = frame_index
         self.t = self.tor.t[self.frame_index]
+        # self.vs3_update()
         self.set_coil_current(frame_index)
         self.set_filament_current(self.tor.vessel_coil, frame_index)
         self.set_filament_current(self.tor.blanket_coil, frame_index)
         self.load_plasma(frame_index)
 
-    def vs3_update(self, mode):
-        self.mode = mode
-        Ivs3 = self.Ivs3_fun[mode](self.t)
+    def vs3_update(self, **kwargs):
+        self.mode = kwargs.get('mode', self.mode)
+        Ivs3 = self.Ivs3_fun[self.mode](self.t)
         self.set_vs3_current(Ivs3)
 
     def force_update(self):
@@ -130,6 +149,7 @@ class VDE_force:
         n, limit = 1e4, [1.5, 10, -8.5, 8.5]
         self.x2d, self.z2d, self.x, self.z = grid(n, limit)[:4]
         self.psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf)
+
         self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi,
                             'name': 'DINA_{}'.format(self.tor.name)})
 
@@ -190,7 +210,7 @@ class VDE_force:
         for i, frame_index in enumerate(frames):
             self.frame_update(frame_index)
             for mode in B_data:
-                self.vs3_update(mode)
+                self.vs3_update(mode=mode)
                 for j, name in enumerate(self.pf.index['VS3']['name']):
                     coil = self.pf.coil[name]
                     point = [coil['x'], coil['z']]
@@ -217,7 +237,7 @@ class VDE_force:
         for i, frame_index in enumerate(frames):
             self.frame_update(frame_index)
             for mode in vs3_data:
-                self.vs3_update(mode)
+                self.vs3_update(mode=mode)
                 self.force_update()
                 for j, name in enumerate(self.pf.index['VS3']['name']):
                     # force
@@ -305,7 +325,7 @@ class VDE_force:
         if 'frame_index' in kwargs:
             self.frame_update(kwargs['frame_index'])
         if 'frame_index' in kwargs or 'mode' in kwargs:
-            self.vs3_update(kwargs.get('mode', self.mode))
+            self.vs3_update(**kwargs)
             self.force_update()
         self.pf.plot(subcoil=True, plasma=True)
         self.ff.plot(coils=['VS3'], scale=3, Fmax=10)
@@ -701,12 +721,17 @@ class VDE_force:
         self.plot_line_force_components('x', vs3, plot_full)
         self.plot_line_force_components('z', vs3, plot_full)
 
+    def plot(self, **kwargs):
+        plt.figure(figsize=(7, 10))
+        self.pf.plot(**kwargs)
+
 
 if __name__ == '__main__':
     folder, frame_index = 8, 113
-    vde = VDE_force(folder=folder, frame_index=frame_index, mode='control',
-                    Iscale=1)
-    vde.pf.plot(subcoil=True)
+    vde = VDE_force(mode='control', discharge='DINA', Iscale=1)
+
+    vde.load_file(folder, frame_index=0)
+    vde.plot(subcoil=True)
 
     #plt.figure(figsize=(8, 8))
     #vde.plot_frame()
@@ -728,7 +753,7 @@ if __name__ == '__main__':
     fig = plt.figure(figsize=(6, 10))
 
     vde.frame_update(30)
-    vde.vs3_update(mode)
+    vde.vs3_update(mode=mode)
     vde.force_update()
     vde.ff.plot(coils=['LVS'], scale=3, Fmax=10)
 

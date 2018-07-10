@@ -83,6 +83,7 @@ class inductance:
             mpc['dc'] = np.append(mpc['dc'], row[1 + j])
 
     def assemble(self, plot=False):
+        # print(self.pf.sub_coil.keys())
         self.pf.mesh_coils()
         if plot:
             self.pf.plot()
@@ -95,7 +96,6 @@ class inductance:
             x, z = self.pf.coil[coil]['x'], self.pf.coil[coil]['z']
             self.inv.add_psi(1, point=(x, z))
             self.Io[i] = self.pf.coil[coil]['Ic']
-
         self.inv.set_foreground()
         t2 = np.dot(turns.reshape((-1, 1)), turns.reshape((1, -1)))
         fillaments = np.dot(np.ones((len(turns), 1)), Nf.reshape(1, -1))
@@ -159,16 +159,25 @@ class inductance:
                             self.Io[self.nd['dc']], axis=0)
         self.Ic = np.dot(self.T.T, self.Ic)  # sum
 
-    def dIdt(self, Ic, t):  # current rate (function of odeint)
-        Idot = np.dot(-self.Minv, Ic*self.Rc)  # -IR + vbg
+    def dIdt(self, Ic, t, *args):  # current rate (function for odeint)
+        vfun = args[0]
+        if vfun is None:
+            vbg = np.zeros(len(Ic))  # background field
+        else:
+            vbg = np.array([vf(t) for vf in vfun])
+
+        Idot = np.dot(self.Minv, vbg - Ic*self.Rc)
         return Idot
 
-    def solve(self, t):
+    def reduce(self):
         self.assemble()
         self.assemble_cp_nodes()
         self.constrain()
+
+    def solve(self, t, **kwargs):
         self.Minv = np.linalg.inv(self.M)  # inverse for odeint
-        Iode = odeint(self.dIdt, self.Ic, t).T
+        vfun = kwargs.get('vfun', None)
+        Iode = odeint(self.dIdt, self.Ic, t, (vfun,)).T
         return Iode
 
 
@@ -196,18 +205,19 @@ if __name__ is '__main__':
     # 10: 'VDE_UP_slow'
     # 11: 'VDE_UP_slow_fast'
 
-    file_index = 11
+    #file_index = 11
     for file_index in [3]:#range(12):
         pl = read_plasma('disruptions')
-        trip, Ivs3_data, Ivs3, Ivs3_fun = pl.Ivs3_single(file_index)  # load Ivs3
+        # load Ivs3
+        trip, Ivs3_data, Ivs3, Ivs3_fun = pl.Ivs3_single(file_index)
         t_cq = trip['t_cq']  # trip
         Ivs_o = Ivs3_data['Icontrol'][trip['i_cq']]  # inital vs3 current
 
         tor = read_tor('disruptions')
-        tor.read_file(file_index)
+        tor.load_file(file_index)
         tor_index = np.argmin(abs(tor.t-t_cq))
         tor.set_current(tor_index)
-
+        '''
         nvs_o = ind.nC
         npl = len(tor.plasma_coil[tor_index])
         for i, coil in enumerate(tor.plasma_coil[tor_index]):  # plasma
@@ -216,10 +226,11 @@ if __name__ is '__main__':
             ind.add_coil(x, z, dx, dz, Ic, R=R, nt=1/npl)
             if i > 0:
                 ind.add_cp([nvs_o, nvs_o+i])  # link coils
+        '''
 
         nvs_o = ind.nC
         turns = np.append(np.ones(4), -np.ones(4))
-        ind.add_pf_coil(vs_geom.pf.coil, turns=turns)
+        ind.add_pf_coil(vs_geom.pf.sub_coil, turns=turns)
         vs3 = 'single'
 
         if vs3 == 'single':
@@ -251,11 +262,13 @@ if __name__ is '__main__':
         ind.assemble_cp_nodes()
         ind.constrain()
 
+        '''
         ind.Rc[0] = ind.M[0, 0]/16e-3  # update plasma resistance
         ind.Ic[1] = Ivs_o + Io  # add vs3 current
         ind.Rc[1] = 17.66e-3  # total vs3 resistance
         ind.M[1, 1] += Lbb  # add busbar inductance
         tau = ind.M[1, 1] / ind.Rc[1]
+        '''
 
         '''
         t = np.linspace(0, 0.3, 300)
@@ -301,12 +314,22 @@ if __name__ is '__main__':
         print('Ivs3 max {:1.1f}kA'.format(1e-3*Ic[max_index]))
         '''
 
-        plt.figure(figsize=(4,6))
+        plt.figure(figsize=(8, 10))
         ind.pf.plot()
         ax = plt.gca()
         txt = tor.name
-        txt += '\nplasma-upper: {:1.1f}'.format(1e6*ind.M[0, 2]) + r'$\mu$H'
-        txt += '\nplasma-lower: {:1.1f}'.format(1e6*ind.M[0, 1]) + r'$\mu$H'
-        ax.text(0.5, 1.0, txt, transform=ax.transAxes,
-                ha='center', va='bottom',
-                bbox=dict(facecolor='lightgray'))
+        if ind.nd['nr'] > 1:
+            if vs3 == 'single':
+                txt += '\nplasma-vs3: {:1.1f}'.format(1e6*ind.M[0, 1])
+                txt += r'$\mu$H'
+            elif vs3 == 'dual':
+                txt += '\nplasma-upper: {:1.1f}'.format(1e6*ind.M[0, 2])
+                txt += r'$\mu$H'
+                txt += '\nplasma-lower: {:1.1f}'.format(1e6*ind.M[0, 1])
+                txt += r'$\mu$H'
+            else:
+                txt += '\nplasma-vs3: {:1.1f}'.format(1e6*ind.M[0, 1])
+                txt += r'$\mu$H'
+            ax.text(0.5, 1.0, txt, transform=ax.transAxes,
+                    ha='center', va='bottom',
+                    bbox=dict(facecolor='lightgray'))

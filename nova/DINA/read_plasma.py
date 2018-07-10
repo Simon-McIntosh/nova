@@ -10,20 +10,36 @@ from collections import OrderedDict
 from scipy.integrate import odeint
 from amigo.png_tools import data_load
 import nep
-from amigo.IO import class_dir
+from amigo.IO import class_dir, pythonIO
 import os
+from os.path import isfile
 
 
-class read_plasma:
+class read_plasma(pythonIO):
 
-    def __init__(self, database_folder='disruptions', Iscale=1):
+    def __init__(self, database_folder='disruptions', Iscale=1,
+                 read_txt=False):
         self.Iscale = Iscale
+        self.read_txt = read_txt
         self.dina = dina(database_folder)
         self.Ivs3_properties()
+        pythonIO.__init__(self)  # python read/write
 
-    def read_file(self, folder, dropnan=True, Rupdate=True):
-        filename = self.dina.locate_file('plasma', folder=folder)
-        self.name = filename.split('\\')[-2]
+    def load_file(self, folder, **kwargs):
+        read_txt = kwargs.get('read_txt', self.read_txt)
+        filepath = self.dina.locate_file('plasma', folder=folder)
+        filepath = '.'.join(filepath.split('.')[:-1])
+        self.name = filepath.split('\\')[-2]
+        if read_txt or not isfile(filepath + '.pk'):
+            self.read_file(filepath)  # read txt file
+            self.save_pickle(filepath,
+                             ['data', 'columns', 't', 'Ip', 'Ivs3_o', 'x', 'z',
+                              'nt', 'dt', 'zdir', 'Iref', 'Iscale'])
+        else:
+            self.load_pickle(filepath)
+
+    def read_file(self, filepath, dropnan=True, Rupdate=True):
+        filename = filepath + '.dat'
         self.data = pd.read_csv(filename, delim_whitespace=True, skiprows=40,
                                 na_values='NAN')
         if dropnan:
@@ -59,10 +75,12 @@ class read_plasma:
             self.Iscale = kwargs['Iscale']
         for var in self.Iref:
             setattr(self, var, self.Iscale*self.Iref[var])
+        '''
         didt = np.gradient(self.Ivs3_o, self.t)
         vs3 = self.Ivs3_o*self.Rvs3['DINA'] + self.Lvs3['DINA'] * didt
         self.vs3_fun = interp1d(self.t, vs3, fill_value='extrapolate')
         self.Ivs3_o = odeint(self.dIdt_fun, 0, self.t).flatten()
+        '''
 
     def dIdt_fun(self, I, t):
         g = (self.vs3_fun(t) - I*self.Rvs3['LTC'])/self.Lvs3['LTC']
@@ -180,7 +198,7 @@ class read_plasma:
 
     def Ivs3_single(self, folder, plot=False, discharge='DINA',
                     dIdt_trip=5e7, dz_trip=0.16):
-        self.read_file(folder)  # load plasma file
+        self.load_file(folder)  # load plasma file
         # vs3 trigger
         trip = self.get_vs3_trip(dIdt_trip=dIdt_trip, dz_trip=dz_trip)
         Ivs3_data = {}  # VS3 system
@@ -315,7 +333,7 @@ class read_plasma:
         for i in range(2):
             text.append(linelabel(postfix='', value='', ax=ax[i], Ndiv=20))
         for i in range(self.dina.nfolder):
-            self.read_file(i)  # load file
+            self.load_file(i)  # load file
             i_cq = self.trip[i]['i_cq']
             I_cq = self.trip[i]['I_cq']
             i_dz = self.trip[i]['i_dz']
@@ -403,28 +421,19 @@ if __name__ == '__main__':
     t = points[0]['x']
     Ic = points[0]['y']
     plt.plot(t, -Ic)
-
     plt.plot(Ivs3_data['t'], Ivs3_data['Icontrol'])
-
-
-
-
 
 
     '''
     pl.Ivs3_single(11, plot=True)
-
     pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms
-
     pl.read_file(3)
     pl.get_vs3_trip(plot=True)
-
     pl.read_file(11)
     pl.get_vs3_trip(plot=True)
-
     pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms
     pl.get_vs3_trip(plot=True)
-    pl.plot_Ivs3_max()
+    pl.plot_Ivs3max()
 
     pl.plot_displacment()
     '''

@@ -180,6 +180,9 @@ class inductance:
         Iode = odeint(self.dIdt, self.Ic, t, (vfun,)).T
         return Iode
 
+    def plot(self, **kwargs):
+        self.pf.plot(**kwargs)
+
 
 if __name__ is '__main__':
 

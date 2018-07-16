@@ -27,13 +27,12 @@ class vs3_flux(VDE_force):
         filepath = join(*split(filepath)[:-1], self.name, 'vs3_flux')
         if read_txt or not isfile(filepath + '.pk'):
             self.read_psi(folder, **kwargs)  # read txt file
-            self.save_pickle(filepath, ['flux', 'time'])
+            self.save_pickle(filepath, ['t', 'flux', 'Vbg', 'dVbg'])
         else:
             self.load_pickle(filepath)
         if plot:
-            self.plot_flux()
-        self.t = self.time
-        vs3_trip = vs3.pl.Ivs3_single(folder)[0]
+            self.plot_profile()
+        vs3_trip = self.pl.Ivs3_single(folder)[0]
         self.t_trip = vs3_trip['t_trip']
         self.load_LTC()
 
@@ -76,21 +75,16 @@ class vs3_flux(VDE_force):
         self.load_vs3(folder, discharge=discharge)  # load vs3 currents
         self.frame_update(0)  # initalize timeseries
         self.vs3_update(mode=mode)  # initalize vs3 current
-        vs_geom = VSgeom().geom
+        vs_geom = VSgeom()
         self.flux = OrderedDict()
         nt = self.tor.nt
         self.time = self.tor.t
-        for coil in vs_geom:
-            x, z = vs_geom[coil]['x'], vs_geom[coil]['z']
+        for coil in vs_geom.pf.sub_coil:
+            x = vs_geom.pf.sub_coil[coil]['x']
+            z = vs_geom.pf.sub_coil[coil]['z']
             self.flux[coil] = {'x': x, 'z': z, 'psi_bg': np.zeros(nt)}
-        x, y, z = 6.5525, 3.7831, -2.6136  # lower VS
-        x = np.linalg.norm([x, y])
-        self.flux['lowerVV'] = {'x': x, 'z': z, 'psi_bg': np.zeros(nt)}
-        x, y, z = 5.7514, 1.0141, 5.0388  # upper VS
-        x = np.linalg.norm([x, y])
-        self.flux['upperVV'] = {'x': x, 'z': z, 'psi_bg': np.zeros(nt)}
 
-    def read_psi(self, folder, **kwargs):
+    def read_psi(self, folder, plot=False, **kwargs):
         self.load_file(folder)
         self.initalize(folder, **kwargs)
         x, z = np.zeros(len(self.flux)), np.zeros(len(self.flux))
@@ -101,20 +95,58 @@ class vs3_flux(VDE_force):
         tick = clock(self.tor.nt, header='calculating coil flux history')
         for frame_index in range(self.tor.nt):
             # update coil currents and plasma position
-            self.frame_update(frame_index)
+            self.frame_update(frame_index)  # utilises self.t for time instance
             psi_bg[frame_index] = cc.get_coil_psi(x, z, self.pf)
             tick.tock()
+        self.t = self.time  # revert to time vector
+        vs3_bg = np.zeros(self.tor.nt)
         for i, coil in enumerate(self.flux):  # unpack
             self.flux[coil]['psi_bg'] = psi_bg[:, i]
+            if 'lowerVS' in coil:
+                vs3_bg += psi_bg[:, i]
+            elif 'upperVS' in coil:
+                vs3_bg -= psi_bg[:, i]
+        self.flux['vs3'] = {'psi_bg': vs3_bg}
+        V = -2*np.pi*np.gradient(self.flux['vs3']['psi_bg'], self.t)
+        dVdt = np.gradient(V, self.t)
+        self.Vbg = interp1d(self.t, V, fill_value=0, bounds_error=False)
+        self.dVbg = interp1d(self.t, dVdt, fill_value=0, bounds_error=False)
 
-    def plot_flux(self):
-        for coil in self.flux:
-            plt.plot(1e3*self.t, self.flux[coil]['psi_bg'], label=coil)
+    def plot_profile(self):
+        ax = plt.subplots(3, 1, sharex=True)[1]
+        self.plot_flux(ax=ax[0])
+        self.plot_background(ax=ax[1:])
+        plt.detick(ax)
+
+    def plot_flux(self, ax=None):
+        if ax is None:
+            ax = plt.subplots(1, 1)[1]
+        for i, coil in enumerate(['lowerVS', 'upperVS']):
+            for isc in range(4):
+                subcoil = '{}_{}'.format(coil, isc)
+                label = coil if isc == 0 else ''
+                ax.plot(1e3*self.t, self.flux[subcoil]['psi_bg'], '-', lw=1,
+                        label=label, color='C{}'.format(i+1))
+        ax.plot(1e3*self.t, self.flux['vs3']['psi_bg'], '-',
+                label='vs3 loop', color='C0')
+        plt.despine()
+        ax.legend()
+        ax.set_xlabel('$t$ ms')
+        ax.set_ylabel('$\psi$ Weber rad$^{-1}$')
+
+    def plot_background(self, ax=None):
+        if ax is None:
+            ax = plt.subplots(2, 1)[1]
+        ax[0].plot(1e3*self.t, np.zeros(len(self.t)), '-.', color='lightgray')
+        ax[0].plot(1e3*self.t, 1e-3*self.Vbg(self.t), 'C3-')
+        ax[1].plot(1e3*self.t, 1e-6*self.dVbg(self.t), 'C4-')
         plt.despine()
         plt.legend()
-        plt.xlabel('$t$ ms')
-        plt.ylabel('$\psi$ Weber rad$^{-1}$')
+        ax[0].set_ylabel('$V_{bg}$ kV')
+        ax[1].set_ylabel('$\dot{V}_{bg}$ MVt$^{-1}$')
+        ax[1].set_xlabel('$t$ ms')
 
+        '''
     def build_coilset(self, include_vessel=True):
         vs_geom = VSgeom()
         self.ind = inductance()
@@ -131,15 +163,6 @@ class vs3_flux(VDE_force):
         self.ind.reduce()
 
     def calculate_background(self):
-        self.flux['vs3'] = {'psi_bg': 4 * self.flux['lowerVS']['psi_bg'] -
-                            4 * self.flux['upperVS']['psi_bg']}
-        V, vfun = [], []
-        V.append(-2*np.pi*np.gradient(self.flux['vs3']['psi_bg'], self.t))
-        V.append(-2*np.pi*np.gradient(self.flux['lowerVV']['psi_bg'], self.t))
-        V.append(-2*np.pi*np.gradient(self.flux['upperVV']['psi_bg'], self.t))
-        for v in V:
-            vfun.append(interp1d(self.t, v, fill_value=0, bounds_error=False))
-
         print(len(vfun))
 
         self.build_coilset(include_vessel=True)
@@ -165,7 +188,7 @@ class vs3_flux(VDE_force):
         plt.legend()
 
         print(1e-3*np.min((Iode[0])))
-
+        '''
         '''
         self.build_coilset(include_vessel=False)
         self.ind.Ic[0] = -60e3  # inital current
@@ -182,9 +205,6 @@ class vs3_flux(VDE_force):
         '''
 
         '''
-
-
-
         t = np.linspace(0, self.t[-1], 200)
 
         Iode = self.ind.solve(t)
@@ -195,7 +215,7 @@ class vs3_flux(VDE_force):
         plt.plot(1e3*t, 1e-3*self.ind.Ic[0]*np.exp(-t/tau), 'C0--')
         plt.plot(1e3*t, 1e-3*Iode[0], 'C1--')
         '''
-
+        '''
     def fit_waveform(self, Rvv):
         Iref = self.LTC['LTC+vessel']['Ic']
         self.update_Rvv(Rvv)
@@ -215,15 +235,17 @@ class vs3_flux(VDE_force):
         Iode = self.ind.solve(t)
 
         self.plot_LTC()
-        plt.plot(1e3*t, 1e-3*self.ind.Ic[0]*np.exp(-t/tau), 'C0--')
+        #plt.plot(1e3*t, 1e-3*self.ind.Ic[0]*np.exp(-t/tau), 'C0--')
         plt.plot(1e3*t, 1e-3*Iode[0], 'C1--')
+        '''
 
 
 
 if __name__ == '__main__':
     vs3 = vs3_flux()
-    vs3.load_psi(3, plot=False, read_txt=False)
-    vs3.calculate_background()
+    vs3.load_psi(3, plot=True, read_txt=False)
+    #vs3.plot_background()
+    # vs3.calculate_background()
 
 
 

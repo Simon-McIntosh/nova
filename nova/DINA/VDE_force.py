@@ -1,6 +1,6 @@
 import numpy as np
 from nova.force import force_field
-from nep.coil_geom import PFgeom, VSgeom
+from nep.coil_geom import PFgeom, VSgeom, VVcoils
 from nep.DINA.read_tor import read_tor
 from collections import OrderedDict
 import nova.cross_coil as cc
@@ -732,6 +732,12 @@ if __name__ == '__main__':
 
     vde.load_file(folder, frame_index=0)
     vde.plot(subcoil=True)
+
+    ax = plt.gca()
+    pf_geom = PFgeom(VS=True)
+    pf_geom.plot(label=False, subcoil=True, ax=ax)
+    vvc = VVcoils()
+    vvc.plot(ax=ax)
 
     #plt.figure(figsize=(8, 8))
     #vde.plot_frame()

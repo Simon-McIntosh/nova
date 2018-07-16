@@ -423,6 +423,8 @@ if __name__ == '__main__':
     plt.plot(t, -Ic)
     plt.plot(Ivs3_data['t'], Ivs3_data['Icontrol'])
 
+    pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms
+
 
     '''
     pl.Ivs3_single(11, plot=True)
@@ -436,6 +438,7 @@ if __name__ == '__main__':
     pl.plot_Ivs3max()
 
     pl.plot_displacment()
+    pl.plot_currents()
     '''
 
 

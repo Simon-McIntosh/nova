@@ -23,8 +23,8 @@ class inductance:
         self.nt = []  # coil turns
         self.nC = 0
 
-    def add_coil(self, x, z, dx, dz, Ic, R=0, nt=1):
-        self.pf.add_coil(x, z, dx, dz, Ic, categorize=False)  # retain order
+    def add_coil(self, x, z, dx, dz, Ic, R=0, nt=1, **kwargs):
+        self.pf.add_coil(x, z, dx, dz, Ic, categorize=False, **kwargs)
         self.Ro.append(R)
         self.nt.append(nt)
         self.nC += 1  # increment coil counter
@@ -43,7 +43,7 @@ class inductance:
             turns = np.ones(len(coil))
         for name, nt in zip(coil, turns):
             x, z, dx, dz, Ic, R = self.get_coil(coil[name])
-            self.add_coil(x, z, dx, dz, Ic, R=R, nt=nt)
+            self.add_coil(x, z, dx, dz, Ic, R=R, nt=nt, name=name)
 
     def initalise_cp_set(self):
         name = 'cp{:d}'.format(self.ncp)  # cp set name

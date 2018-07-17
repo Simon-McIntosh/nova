@@ -12,22 +12,44 @@ from collections import OrderedDict
 
 class power_supply:
 
-    def __init__(self, tau_d=0.1, **kwargs):
-        self.tau_d = tau_d  # capacitor discharge timeconstant
-        self.pulse = kwargs.get('pulse', True)
-        self.impulse = kwargs.get('impulse', True)
-        self.scenario = kwargs.get('scenario', -1)
+    def __init__(self, **kwargs):
+        self.set_defaults(**kwargs)
         self.flux = vs3_flux()  # load vs3 flux profiles
         self.pl = read_plasma('disruptions')
         self.build_coils()
-        self.initalize()
-        self.build_matrices('DINA')
-        self.set_constants()
-        self.set_time()
         self.ode = ode(self.dIdt).set_integrator('dopri5')
-        self.load_background_flux()
+        self.initalize(**kwargs)
 
-    def initalize(self):
+    def set_defaults(self, **kwargs):
+        self.tau_d = kwargs.get('tau_d', 0.05)  # discharge timeconstant
+        self.pulse = kwargs.get('pulse', True)
+        self.impulse = kwargs.get('impulse', True)
+        self.scenario = kwargs.get('scenario', -1)
+        self.vessel = kwargs.get('vessel', True)
+
+    def build_coils(self, plot=False):
+        self.vvc = VVcoils()
+        self.ind = inductance()
+        nvs_o = self.ind.nC
+        turns = np.append(np.ones(4), -np.ones(4))
+        self.ind.add_pf_coil(
+                OrderedDict(list(self.vvc.pf.sub_coil.items())[:8]),
+                turns=turns)
+        for i, index in enumerate(nvs_o+np.arange(1, 8)):  # vs3 loops
+            self.ind.add_cp([nvs_o, index])  # link VS coils
+        if self.vessel:
+            self.ind.add_pf_coil(
+                OrderedDict(list(self.vvc.pf.sub_coil.items())[8:]))
+        self.ind.reduce()
+        self.ncoil = self.ind.nd['nr']  # number of retained coils
+        for i in range(self.ncoil):
+            index = self.ind.M[i] > self.ind.M[i, i]
+            if sum(index) > 0:  # ensure dominant leading diagonal
+                self.ind.M[i, index] = 0.9*self.ind.M[i, i]
+        if plot:
+            self.ind.plot()
+
+    def initalize(self, **kwargs):
         self.initalize_switches()
         self.tpo = 0  # pulse start time
         self.tco = 0  # capacitor discarge start time
@@ -35,6 +57,10 @@ class power_supply:
         self.data = {'t': [], 'Ivec': [], 'Jvec': [], 'Vcap': [], 'Vps': [],
                      'npulse': 0, 'dt_discharge': [], 'dt_rise': [],
                      'Icap': []}
+        self.build_matrices('DINA', **kwargs)
+        self.set_constants()
+        self.set_time(**kwargs)
+        self.load_background_flux(**kwargs)
 
     def set_constants(self):
         self.sign = 1
@@ -47,7 +73,7 @@ class power_supply:
         self.pulse = kwargs.get('pulse', self.pulse)
         self.impulse = kwargs.get('impulse', self.impulse)
         self.pulse_phase = -0.1  # pulse phase (-ive == lag)
-        self.t_pulse = 0.0
+        self.t_pulse = 0.1
         self.pulse_period = 10  # duration between pulses
 
     def build_matrices(self, code, **kwargs):
@@ -59,14 +85,13 @@ class power_supply:
             Lvs3 = 1.38e-3  # total inductance of vs3 loop
             Rvs3 = 17.66e-3  # total vs3 loop resistance
         elif code == 'IO':
-            Lvs3 = self.ind.M[0] + 0.2  # add busbar inductance
+            Lvs3 = self.ind.M[0, 0] + 0.2e-3  # add busbar inductance
             Rvs3 = 17.66e-3  # total vs3 loop resistance
         self.R = self.ind.Rc  # coil resistance vector
         self.R[0] = Rvs3   # set vs3 loop resistance
         self.M = self.ind.M  # inductance matrix
-        self.M[0] = Lvs3   # set total inductance of vs3 loop
+        self.M[0, 0] = Lvs3   # set total inductance of vs3 loop
         self.Minv = np.linalg.inv(self.M)  # inverse
-        self.ncoil = self.ind.nd['nr']  # number of retained coils
         self.C = np.inf * np.ones(self.ncoil)
         self.C[0] = self.tau_d/self.R[0]  # impulse capacitor
 
@@ -88,26 +113,8 @@ class power_supply:
             self.dVbg = self.zero
         else:
             self.flux.load_psi(scenario, plot=False, read_txt=False)
-            self.Vbg_fun = self.flux.Vbg
-            self.dVbg_fun = self.flux.dVbg
-
-    def build_coils(self, vessel=True, plot=False):
-        self.vessel = vessel  # include vacuum vessel coils
-        self.vvc = VVcoils()
-        self.ind = inductance()
-        nvs_o = self.ind.nC
-        turns = np.append(np.ones(4), -np.ones(4))
-        self.ind.add_pf_coil(
-                OrderedDict(list(self.vvc.pf.sub_coil.items())[:8]),
-                turns=turns)
-        for i, index in enumerate(nvs_o+np.arange(1, 8)):  # vs3 loops
-            self.ind.add_cp([nvs_o, index])  # link VS coils
-        if self.vessel:
-            self.ind.add_pf_coil(
-                OrderedDict(list(self.vvc.pf.sub_coil.items())[8:]))
-        self.ind.reduce()
-        if plot:
-            self.ind.plot()
+            self.Vbg = self.flux.Vbg
+            self.dVbg = self.flux.dVbg
 
     def initalize_switches(self):
         self.capacitor_discharge = False
@@ -117,9 +124,9 @@ class power_supply:
         if self.capacitor_discharge:
             dt = 1e-4
         elif self.pulse_hold:
-            dt = 1e-3
+            dt = 5e-4
         else:
-            dt = 5e-3
+            dt = 1e-3
         return dt
 
     def dIdt(self, t, I):
@@ -137,8 +144,8 @@ class power_supply:
         if self.capacitor_discharge:  # capacitor discharging
             dHcap = -Ivec[0]  # discharge capacitor
             dIcap = 0  # zero charge current
-            dIvec = Jvec
-            dJvec = np.dot(self.Minv, - self.R*Jvec - 1/self.C*Ivec - dVbg)
+            dIvec = np.copy(Jvec)
+            dJvec = np.dot(self.Minv, - self.R*Jvec - Ivec/self.C + dVbg)
         else:  # capacitor charging
             dHcap = self.Vo / self.Rcap - Hcap / (self.Rcap * self.C[0])
             dIcap = -Icap / (self.Rcap * self.C[0])
@@ -168,7 +175,7 @@ class power_supply:
                 self.tc10 = t  # 10% capacitor current rise
             if self.op('ge', Iode[2], self.Itrip) \
                     or isclose(Iode[2], self.Itrip)\
-                    or self.op('lt', Iode[3], 0):  # capacitor vide
+                    or self.op('lt', Iode[-self.ncoil], 0):  # capacitor vide
                 self.capacitor_discharge = False  # charge capacitor
                 Icap = (self.Vo - Iode[0] / self.C[0]) / self.Rcap
                 Iode_o = np.copy(Iode)
@@ -221,14 +228,12 @@ class power_supply:
         self.set_switches(0, Iode_o)
         while self.ode.successful() and self.ode.t < tend:
             dt = self.get_step()
-            Iode = self.ode.integrate(self.ode.t+dt)
+            Iode = self.ode.integrate(self.ode.t+dt, step=True)
             self.set_switches(self.ode.t, Iode)
             self.store_data(self.ode.t, Iode)
 
     def solve(self, tend, Io=0, plot=False, **kwargs):
-        self.initalize()
-        self.set_constants()
-        self.set_time(**kwargs)
+        self.initalize(**kwargs)
         self.intergrate(tend, Io=Io)
         self.packdata()
         if plot:
@@ -255,23 +260,35 @@ class power_supply:
     def plot_current(self, ax=None):
         if ax is None:
             ax = plt.subplots(1, 1, sharex=True)[1]
-        ax.plot(self.data['t'], 1e-3*self.data['Ivec'][:, 1:], '-C0')
 
-        index = self.data['Ivec'][-1, :] < 0
-        ax.plot(self.data['t'], 1e-3*self.data['Ivec'][:, index], '-C1')
-        ax.plot(self.data['t'], 1e-3*self.data['Ivec'][:, 0], '-C3')
+        if self.vessel:
+            index = self.data['Ivec'][-1, :] < 0
+            index[0] = True
+            if sum(~index) > 0:
+                ax.plot(self.data['t'], 1e-3*self.data['Ivec'][:, ~index],
+                        '-C0')
+            index[0] = False
+            if sum(index) > 0:
+                ax.plot(self.data['t'], 1e-3*self.data['Ivec'][:, index],
+                        '-C1')
+
+        ax.plot(self.data['t'], 1e-3*self.data['Ivec'][:, 0], '-C0')
+
         ax.set_ylabel('$I_{vs3}$ kA')
         if self.scenario > 0:
             DINA = self.pl.Ivs3_single(self.scenario)[1]
             ax.plot(DINA['t'], 1e-3*DINA['Ireferance'], 'C3--')
+
+    #def plot_patch(self, index):
+    #    for
 
 
 
 
 if __name__ == '__main__':
 
-    ps = power_supply(tau_d=5, scenario=-1)
+    ps = power_supply(scenario=3, vessel=False)
 
-    tau_d = 1.75 * ps.R  # discharge time constant
-    ps.solve(0.2, tau_d=tau_d, Io=0, impulse=True, pulse=True, plot=True)
+    tau_d = 0.5  # discharge time constant
+    ps.solve(0.8, tau_d=tau_d, Io=0, impulse=False, pulse=True, plot=True)
 

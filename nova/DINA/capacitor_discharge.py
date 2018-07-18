@@ -8,14 +8,16 @@ from nep.DINA.vs3_flux import vs3_flux
 from nep.DINA.read_plasma import read_plasma
 import operator
 from collections import OrderedDict
+from matplotlib.lines import Line2D
+from numba import jit
 
 
 class power_supply:
 
     def __init__(self, **kwargs):
         self.set_defaults(**kwargs)
-        self.flux = vs3_flux()  # load vs3 flux profiles
         self.pl = read_plasma('disruptions')
+        self.vs3 = vs3_flux()  # vs3 flux profiles
         self.build_coils()
         self.ode = ode(self.dIdt).set_integrator('dopri5')
         self.initalize(**kwargs)
@@ -44,6 +46,7 @@ class power_supply:
         self.ncoil = self.ind.nd['nr']  # number of retained coils
         for i in range(self.ncoil):
             index = self.ind.M[i] > self.ind.M[i, i]
+            index[0] = False  # maintain large coupling to VS3 coil
             if sum(index) > 0:  # ensure dominant leading diagonal
                 self.ind.M[i, index] = 0.9*self.ind.M[i, i]
         if plot:
@@ -72,8 +75,8 @@ class power_supply:
     def set_time(self, **kwargs):
         self.pulse = kwargs.get('pulse', self.pulse)
         self.impulse = kwargs.get('impulse', self.impulse)
-        self.pulse_phase = -0.1  # pulse phase (-ive == lag)
-        self.t_pulse = 0.1
+        self.pulse_phase = -0.02  # pulse phase (-ive == lag)
+        self.t_pulse = 0.0
         self.pulse_period = 10  # duration between pulses
 
     def build_matrices(self, code, **kwargs):
@@ -85,11 +88,11 @@ class power_supply:
             Lvs3 = 1.38e-3  # total inductance of vs3 loop
             Rvs3 = 17.66e-3  # total vs3 loop resistance
         elif code == 'IO':
-            Lvs3 = self.ind.M[0, 0] + 0.2e-3  # add busbar inductance
+            Lvs3 = self.ind.M[0, 0] + 0.2e-3  # add busbar inductance (1.56e-3)
             Rvs3 = 17.66e-3  # total vs3 loop resistance
-        self.R = self.ind.Rc  # coil resistance vector
+        self.R = np.copy(self.ind.Rc)  # coil resistance vector
         self.R[0] = Rvs3   # set vs3 loop resistance
-        self.M = self.ind.M  # inductance matrix
+        self.M = np.copy(self.ind.M)  # inductance matrix
         self.M[0, 0] = Lvs3   # set total inductance of vs3 loop
         self.Minv = np.linalg.inv(self.M)  # inverse
         self.C = np.inf * np.ones(self.ncoil)
@@ -103,18 +106,18 @@ class power_supply:
                 key = 'g'+key[1:]
         return getattr(operator, key)(a, b)
 
-    def zero(self, t):
-        return 0
+    def zeros(self, t):
+        return np.zeros(self.ncoil)
 
     def load_background_flux(self, **kwargs):
         scenario = kwargs.get('scenario', self.scenario)
         if scenario < 0:  # set zero flux
-            self.Vbg = self.zero
-            self.dVbg = self.zero
+            self.Vbg = self.zeros
+            self.dVbg = self.zeros
         else:
-            self.flux.load_psi(scenario, plot=False, read_txt=False)
-            self.Vbg = self.flux.Vbg
-            self.dVbg = self.flux.dVbg
+            self.vs3.load_psi(scenario, plot=False, read_txt=False)
+            self.Vbg = self.vs3.Vbg
+            self.dVbg = self.vs3.dVbg
 
     def initalize_switches(self):
         self.capacitor_discharge = False
@@ -134,18 +137,23 @@ class power_supply:
         Icap = I[1]  # capacitor charge current
         Ivec = I[2:2+self.ncoil]
         Jvec = I[-self.ncoil:]
-        Vbg = np.zeros(self.ncoil)  # background voltage
-        Vbg[0] = self.Vbg(t)
-        dVbg = np.zeros(self.ncoil)  # background voltage rate
-        dVbg[0] = self.dVbg(t)
+        Vbg = self.Vbg(t)
+        dVbg = self.dVbg(t)
+        if not self.vessel:
+            Vbg = Vbg[0]
+            dVbg = dVbg[0]
         Vps = np.zeros(self.ncoil)  # power supply voltage
         dVps = np.zeros(self.ncoil)  # power supply voltage rate
         self.Vps = self.dVps = 0  # external power supply
         if self.capacitor_discharge:  # capacitor discharging
             dHcap = -Ivec[0]  # discharge capacitor
             dIcap = 0  # zero charge current
-            dIvec = np.copy(Jvec)
+            #dIvec = np.copy(Jvec)
+            Hvec = np.zeros(self.ncoil)
+            Hvec[0] = -Hcap
+            dIvec = np.dot(self.Minv, - self.R*Ivec - Hvec/self.C + Vbg)  #
             dJvec = np.dot(self.Minv, - self.R*Jvec - Ivec/self.C + dVbg)
+            #dJvec = np.zeros(self.ncoil)
         else:  # capacitor charging
             dHcap = self.Vo / self.Rcap - Hcap / (self.Rcap * self.C[0])
             dIcap = -Icap / (self.Rcap * self.C[0])
@@ -174,8 +182,11 @@ class power_supply:
                     and self.tc10 < self.tco:
                 self.tc10 = t  # 10% capacitor current rise
             if self.op('ge', Iode[2], self.Itrip) \
-                    or isclose(Iode[2], self.Itrip)\
-                    or self.op('lt', Iode[-self.ncoil], 0):  # capacitor vide
+                    or isclose(Iode[2], self.Itrip):#\
+                    #or self.op('lt', Iode[-self.ncoil], 0):  # capacitor vide
+                print(self.op('ge', Iode[2], self.Itrip),
+                      isclose(Iode[2], self.Itrip),
+                      self.op('lt', Iode[-self.ncoil], 0))
                 self.capacitor_discharge = False  # charge capacitor
                 Icap = (self.Vo - Iode[0] / self.C[0]) / self.Rcap
                 Iode_o = np.copy(Iode)
@@ -198,11 +209,15 @@ class power_supply:
                 Hcap = np.zeros(self.ncoil)
                 Hcap[0] = Iode[0]  # capacitor intergral current
                 Ivec = Iode[2:2+self.ncoil]
-                Vbg = np.zeros(self.ncoil)  # background voltage
-                Vbg[0] = self.Vbg(t)
-                Jvec = -np.dot(self.Minv, Vbg - self.R*Ivec - Hcap/self.C)
+                Vbg = self.Vbg(t)  # background voltage
+                #Jvec = -np.dot(self.Minv, Vbg - self.R*Ivec - Hcap/self.C)
+                Jvec = -np.dot(self.Minv,- self.R*Ivec - Hcap/self.C)
+                Jvec = np.zeros(self.ncoil)
+
+
+
                 Iode_o = np.copy(Iode)
-                Iode_o[2+self.ncoil:] = Jvec  # inital current rate in vs3 loop
+                Iode_o[-self.ncoil:] = Jvec  # inital current rate in vs3 loop
                 self.ode.set_initial_value(Iode_o, t=t)
                 self.tco = t  # capacitor discarge start time
         if len(self.data['dt_rise']) < self.data['npulse'] and \
@@ -262,15 +277,23 @@ class power_supply:
             ax = plt.subplots(1, 1, sharex=True)[1]
 
         if self.vessel:
-            index = self.data['Ivec'][-1, :] < 0
-            index[0] = True
-            if sum(~index) > 0:
-                ax.plot(self.data['t'], 1e-3*self.data['Ivec'][:, ~index],
-                        '-C0')
-            index[0] = False
-            if sum(index) > 0:
-                ax.plot(self.data['t'], 1e-3*self.data['Ivec'][:, index],
-                        '-C1')
+            colors = OrderedDict()
+            colors['lower_vvo'] = 'C1'
+            colors['lower_vv1'] = 'C2'
+            colors['lower_trs'] = 'C3'
+            coils = list(self.ind.pf.coil.keys())[8:]
+            for i, coil in enumerate(coils):
+                for c in colors:
+                    if c in coil:
+                        color = colors[c]
+                        break
+                ax.plot(self.data['t'], 1e-3*self.data['Ivec'][:, i+1],
+                        color=color)
+            lines, labels = [], []
+            for c in colors:
+                lines.append(Line2D([0], [0], color=colors[c]))
+                labels.append(c)
+            ax.legend(lines, labels)
 
         ax.plot(self.data['t'], 1e-3*self.data['Ivec'][:, 0], '-C0')
 
@@ -283,12 +306,10 @@ class power_supply:
     #    for
 
 
-
-
 if __name__ == '__main__':
 
-    ps = power_supply(scenario=3, vessel=False)
+    ps = power_supply(scenario=-1, vessel=True)
 
-    tau_d = 0.5  # discharge time constant
-    ps.solve(0.8, tau_d=tau_d, Io=0, impulse=False, pulse=True, plot=True)
+    tau_d = 0.05  # discharge time constant
+    ps.solve(0.08, tau_d=tau_d, Io=0, impulse=True, pulse=True, plot=True)
 

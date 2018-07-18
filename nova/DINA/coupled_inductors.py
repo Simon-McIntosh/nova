@@ -83,8 +83,8 @@ class inductance:
             mpc['dc'] = np.append(mpc['dc'], row[1 + j])
 
     def assemble(self, plot=False):
-        # print(self.pf.sub_coil.keys())
         self.pf.mesh_coils()
+        # self.pf.mesh_coils()
         if plot:
             self.pf.plot()
         self.inv = INV(self.pf, Iscale=1)

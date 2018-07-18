@@ -121,13 +121,15 @@ class VDE_force(pythonIO):
             Ic[name] = sign * current[turn_index]
         self.pf.update_current(Ic)
 
-    def frame_update(self, frame_index):
+    def frame_update(self, frame_index, vessel=True, blanket=True):
         self.frame_index = frame_index
         self.t = self.tor.t[self.frame_index]
         # self.vs3_update()
         self.set_coil_current(frame_index)
-        self.set_filament_current(self.tor.vessel_coil, frame_index)
-        self.set_filament_current(self.tor.blanket_coil, frame_index)
+        if vessel:
+            self.set_filament_current(self.tor.vessel_coil, frame_index)
+        if blanket:
+            self.set_filament_current(self.tor.blanket_coil, frame_index)
         self.load_plasma(frame_index)
 
     def vs3_update(self, **kwargs):
@@ -722,15 +724,15 @@ class VDE_force(pythonIO):
         self.plot_line_force_components('z', vs3, plot_full)
 
     def plot(self, **kwargs):
-        plt.figure(figsize=(7, 10))
         self.pf.plot(**kwargs)
 
 
 if __name__ == '__main__':
-    folder, frame_index = 8, 113
+
     vde = VDE_force(mode='control', discharge='DINA', Iscale=1)
 
-    vde.load_file(folder, frame_index=0)
+    folder, frame_index = 8, 113
+    vde.load_file(folder, frame_index=frame_index, read_txt=False)
     vde.plot(subcoil=True)
 
     ax = plt.gca()

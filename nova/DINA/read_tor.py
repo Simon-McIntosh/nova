@@ -45,6 +45,7 @@ class read_tor(pythonIO):
         self.rt.skiplines(5)  # skip header
         self.get_coils()
         self.get_filaments()
+        self.pf.mesh_coils(dCoil=0.25)
 
     def read_frames(self):
         frames = []
@@ -102,12 +103,10 @@ class read_tor(pythonIO):
         self.nC = len(coilnames)
         self.set_coil()
         self.pf = PF()
-        self.pf.coil = self.coil
-        self.pf.index = {}
-        self.pf.index['CS'] = {'name': [name for name in coilnames
-                                        if 'CS' in name]}
-        self.pf.index['PF'] = {'name': [name for name in coilnames
-                                        if 'PF' in name]}
+        CS_coil = {coil: self.coil[coil] for coil in self.coil if 'CS' in coil}
+        self.pf.add_coils(CS_coil, label='CS')
+        PF_coil = {coil: self.coil[coil] for coil in self.coil if 'PF' in coil}
+        self.pf.add_coils(PF_coil, label='PF')
 
     def fill_coil(self, key, values):  # set key/value pairs in coil dict
         for name, value in zip(self.coil, values):
@@ -168,6 +167,8 @@ class read_tor(pythonIO):
                 else:
                     name = 'bb_{}'.format(next(nbl))
                     self.blanket_coil[name] = coil
+        self.pf.add_coils(self.blanket_coil, label='bb_DINA')
+        self.pf.add_coils(self.vessel_coil, label='vv_DINA')
         self.get_vv_vs_index(vv)
 
     def get_vv_vs_index(self, vv):
@@ -202,9 +203,16 @@ class read_tor(pythonIO):
         coil = self.get_coil_current()
         return (t, filament, plasma, coil)
 
+    def package_current(self, coil):
+        Ic = {}
+        for name in coil:
+            Ic[name] = coil[name]['Ic']
+        return Ic
+
     def set_coil_current(self, frame_index):
         for name, Ic in zip(self.coil, self.current['coil'][frame_index]):
             self.coil[name]['Ic'] = Ic
+        self.pf.update_current(self.package_current(self.coil))
 
     def set_filament_current(self, filament, frame_index):
         current = self.current['filament'][frame_index]
@@ -212,12 +220,14 @@ class read_tor(pythonIO):
             turn_index = filament[name]['index']
             sign = filament[name]['sign']
             filament[name]['Ic'] = sign * current[turn_index]
+        self.pf.update_current(self.package_current(filament))
 
     def set_current(self, frame_index):
         self.frame_index = frame_index
         self.set_coil_current(frame_index)
         self.set_filament_current(self.vessel_coil, frame_index)
         self.set_filament_current(self.blanket_coil, frame_index)
+        self.pf.plasma_coil = self.plasma_coil[frame_index]
 
     def plot_filaments(self):
         for f in self.filaments:
@@ -229,28 +239,23 @@ class read_tor(pythonIO):
     def plot(self, index, ax=None):
         if ax is None:
             ax = plt.subplots(figsize=(7, 10))[1]
-        self.set_current(index)
+        self.set_current()
         self.plot_coils()
-        # self.plot_plasma(index)
+        self.plot_plasma(index)
         plt.axis('off')
 
     def plot_coils(self):
+        self.pf.initalize_collection()
         self.pf.patch_coil(self.coil)
         self.pf.patch_coil(self.blanket_coil)
         self.pf.patch_coil(self.vessel_coil)
         self.pf.patch_coil(self.plasma_coil[self.frame_index])
-        self.pf.plot_patch(c='Jc')
+        self.pf.plot_patch(c='Jc', clim=[-10, 10])
         plt.axis('equal')
         plt.axis('off')
 
     def plot_plasma(self, index):
-        patch = self.pf.plot_coil(self.plasma_coil[index], coil_color='C4')
-        self.plasma_patch.extend(patch)
-
-    def clear_plasma(self):
-        for patch in self.plasma_patch:
-            patch.remove()
-        self.plasma_patch = []  # reset patch list
+        self.pf.plot_coil(self.plasma_coil[index], coil_color='C4')
 
     def movie(self, filename):
         fig, ax = plt.subplots(1, 1, figsize=(7, 10))
@@ -264,15 +269,19 @@ class read_tor(pythonIO):
         plt.axis('off')
         with writer.saving(fig, moviename, 72):
             for i in range(int(self.nt/10)):
-                self.clear_plasma()
-                self.plot_plasma(i*10)
+                fig.clf()
+                self.plot(i*10, ax=ax)
                 writer.grab_frame()
                 tick.tock()
 
 
 if __name__ == '__main__':
 
-    tor = read_tor('disruptions', Iscale=1)
+    tor = read_tor('disruptions', read_txt=False)
     tor.load_file(3)
-    tor.plot(130)
-    # tor.movie('tmp')
+    #tor.plot(130)
+    #tor.movie('tmp')
+
+    tor.set_current(100)
+
+    tor.pf.plot(subcoil=True, plasma=True)

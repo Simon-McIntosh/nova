@@ -40,6 +40,7 @@ class coil_force(pythonIO):
     def postscript(self):
         if self.vessel:
             postscript = '_vv{:1.2f}'.format(self.t_pulse)
+            postscript = postscript.replace('.', 'dot')
         else:
             postscript = '_novv'
         return postscript
@@ -357,7 +358,7 @@ class coil_force(pythonIO):
         filename = self.datafile(nframe)
         if not isfile(filename) or forcewrite:
             txt = '\nre-generating data:'
-            txt += 'nframe:{}'.format(nframe)
+            txt += ' {} frame:{}'.format(filename.split('/')[-1], nframe)
             print(txt)
             coil_data = self.write_data(nframe)
         else:
@@ -535,11 +536,11 @@ class coil_force(pythonIO):
 
 if __name__ == '__main__':
 
-    force = coil_force(t_pulse=0, vessel=True, read_txt=True)
+    force = coil_force(t_pulse=0, vessel=True, read_txt=False)
 
     #force.load_file(3, read_txt=True)
 
-    force.read_data(nframe=2)
+    force.read_data(nframe=100)
 
     #force.plot_Fmax(nframe=100)
     # new frame_update

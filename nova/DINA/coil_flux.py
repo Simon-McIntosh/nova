@@ -21,7 +21,6 @@ class coil_flux(pythonIO):
                               read_txt=read_txt)  # load plasma
         self.tor = read_tor('disruptions', Iscale=Iscale,
                             read_txt=read_txt)  # load currents
-        self.load_geometory()
         pythonIO.__init__(self)  # python read/write
 
     def load_geometory(self, vessel=True):
@@ -53,6 +52,7 @@ class coil_flux(pythonIO):
     def read_file(self, scenario, plot=False, **kwargs):
         self.tor.load_file(scenario)  # load toroidal scenario
         self.t = self.tor.t
+        self.load_geometory()
         x, z = np.zeros(len(self.flux)), np.zeros(len(self.flux))
         for i, coil in enumerate(self.flux):  # pack
             x[i] = self.flux[coil]['x']

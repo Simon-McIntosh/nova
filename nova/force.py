@@ -130,7 +130,7 @@ class force_field(object):
                                       ['C3', 0.6*np.ones(3), 0.6*np.ones(3)]):
                 if Fv in Fvector:
                     plt.arrow(x, z, mag[0]*Fvec[0], mag[1]*Fvec[1],
-                              linewidth=2, head_width=0.2, head_length=0.2,
+                              linewidth=2,
                               ec=color, fc=color)
 
             if name in self.index['PF']['name']:

@@ -18,9 +18,6 @@ def green(X, Z, Xc, Zc, dXc=0, dZc=0):
         rho = np.mean([dXc + dZc]) / 2
         Xc = Xc * np.ones(np.shape(X))
         index = np.sqrt(x) < dXc / 2  # self inductance index
-        # g_s = 4 * np.pi * \
-        #    Xc[index] * (np.log(8 * Xc[index] / rho) -
-        #                 1.75) / (2 * np.pi)
         g_s = Xc[index] * (np.log(8 * Xc[index] / rho) - 2) / (2 * np.pi)
         g[index] = g_s
     return g
@@ -88,7 +85,10 @@ def Bmag(point, *args):
 
 def get_coil_psi(x2d, z2d, pf, **kwargs):
     plasma_coil = get_plasma_coil(pf, **kwargs)
-    psi = np.zeros(np.shape(x2d))
+    if len(np.shape(x2d)) > 0:
+        psi = np.zeros(np.shape(x2d))
+    else:
+        psi = 0
     for name in pf.sub_coil.keys():
         psi += add_Pcoil(x2d, z2d, pf.sub_coil[name])
     for name in plasma_coil.keys():

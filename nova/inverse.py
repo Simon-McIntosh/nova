@@ -178,11 +178,6 @@ class INV(object):
         self.all_coils = names.copy()
         self.adjust_coils = names.copy()
         names = np.append(names, 'Plasma')
-        # index = []
-        # for name in names:
-        #     index.append(int(name.split('Coil')[-1]))
-        # self.all_coils = ['Coil{:1.0f}'.format(i) for i in index]
-        # names = np.append(self.all_coils, 'Plasma')
         for name in names:
             if name in self.adjust_coils:
                 state = 'active'
@@ -220,7 +215,8 @@ class INV(object):
 
     def append_coil(self, coils):
         for sub_name in coils.keys():
-            name = sub_name.split('_')[0]
+            # name = sub_name.split('_')[0]
+            name = '_'.join(sub_name.split('_')[:-1])
             if name in self.adjust_coils:
                 state = 'active'
             else:

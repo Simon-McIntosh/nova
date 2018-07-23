@@ -254,7 +254,7 @@ class EQ(object):
 
     def set_vacuum(self, GS):
         X, Z = geom.inloop(self.sf.xbdry, self.sf.zbdry,
-                           self.x2d.flatten(), self.z2d.flatten())
+                           self.x2d.flatten(), self.z2d.flatten())[:2]
         GSo = np.copy(GS)
         GS *= 0  # clear all
         for x, z in zip(X, Z):  # backfill plasma
@@ -266,7 +266,7 @@ class EQ(object):
         if update:  # calculate plasma contribution
             xbdry, zbdry = self.sf.get_boundary()
             X, Z = geom.inloop(xbdry, zbdry,
-                               self.x2d.flatten(), self.z2d.flatten())
+                               self.x2d.flatten(), self.z2d.flatten())[:2]
             self.Ipl, self.Nplasma = 0, 0
             self.plasma_index = np.zeros(self.N, dtype=int)
             for x, z in zip(X, Z):

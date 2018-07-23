@@ -57,7 +57,10 @@ class SF(object):
             # Mpoint = Xpoint[Xpoint['z'] > Xpoint[0]['z']]
             # self.mo = np.array([Mpoint[0]['x'], Mpoint[0]['z']])
             self.mo = np.array([np.mean(self.x), np.mean(self.z)])
-            self.po = np.array([Xpoint[0]['x'], Xpoint[0]['z']])
+            try:
+                self.po = np.array([Xpoint[0]['x'], Xpoint[0]['z']])
+            except IndexError:
+                self.po = np.array([1, 1])
 
     def initalize_field(self, plot=False):
         self.get_Mpsi(plot=plot)

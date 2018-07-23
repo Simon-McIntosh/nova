@@ -55,22 +55,12 @@ class VDE_force(pythonIO):
         else:
             self.load_pickle(filepath)
         self.tor.load_file(folder)  # read toroidal strucutres
-        self.load_IO(folder)  # load hig-res vv model
-        #*************
-        # self.load_vs3(folder, discharge=self.discharge)  # load vs3 currents
-        #*************
-
+        self.load_vs3(folder, discharge=self.discharge)  # load vs3 currents
         self.frame_update(frame_index)  # initalize at start of timeseries
 
-        # self.vs3_update(mode=self.mode)  # initalize vs3 current
-        # self.force_update()  # update vs3 coil forces
+        self.vs3_update(mode=self.mode)  # initalize vs3 current
+        self.force_update()  # update vs3 coil forces
         self.initalize_sf()
-
-    def load_IO(self, scenario, t_pulse=0.3):
-        if self.discharge == 'IO':
-            self.ps = power_supply(scenario=scenario, vessel=True)
-            self.ps.solve(self.tor.t[-1], Io=0, sign=-1, nturn=4,
-                          t_pulse=t_pulse, impulse=True, pulse=False, plot=True)
 
     def read_file(self, folder):
         self.load_active()  # load active coils
@@ -100,7 +90,7 @@ class VDE_force(pythonIO):
     def load_active(self, dCoil=0.25):
         vs_geom = VSgeom()
         self.vs_rail = vs_geom.rail
-        pf_geom = PFgeom(VS=False, dCoil=dCoil)
+        pf_geom = PFgeom(VS=True, dCoil=dCoil)
         self.pf = pf_geom.pf
 
         self.vs_theta = {}
@@ -175,7 +165,6 @@ class VDE_force(pythonIO):
         self.load_plasma(frame_index)
 
     def vs3_update(self, **kwargs):
-        print('updating vs3')
         self.mode = kwargs.get('mode', self.mode)
         Ivs3 = self.Ivs3_fun[self.mode](self.t)
         self.set_vs3_current(Ivs3)
@@ -427,6 +416,7 @@ class VDE_force(pythonIO):
         return vs3_data
 
     def plot_Fmax(self, discharge, nframe=100):
+        self.load_file(0)
         vs3_data = self.read_data(discharge, nframe)  # load data
         ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
         X = range(self.dina.nfolder)
@@ -790,11 +780,11 @@ class VDE_force(pythonIO):
 
 if __name__ == '__main__':
 
-    vde = VDE_force(mode='control', discharge='IO', Iscale=1)
+    vde = VDE_force(mode='control', discharge='DINA', Iscale=1)
 
     #folder, frame_index = 3, 100
     #vde.load_file(folder, frame_index=frame_index, read_txt=True)
-    vde.plot_frame()
+    #vde.plot_frame()
 
     '''
     vde.plot(subcoil=True)
@@ -809,7 +799,7 @@ if __name__ == '__main__':
 
     # vde.plot_single('MD_UP_exp16', 'DINA', nframe=500)
     # vde.plot_single('VDE_UP_slow_fast', 'DINA', nframe=500)
-    # vde.plot_Fmax('DINA', nframe=500)
+    vde.plot_Fmax('DINA', nframe=500)
     # vde.plot_Fmax('LTC', nframe=500)
     # vde.plot_Fmax('ENP', nframe=500)
 

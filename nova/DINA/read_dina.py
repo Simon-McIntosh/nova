@@ -7,7 +7,6 @@ import numpy as np
 from scipy.optimize import minimize
 from amigo.pyplot import plt
 import pandas as pd
-from itertools import count
 
 
 def lowpass(x, dt, dt_window=1):
@@ -63,7 +62,7 @@ class timeconstant:
         td, Id = self.trim(**kwargs)
         A = np.ones((len(td), 2))
         A[:, 1] = td
-        a, b = np.linalg.lstsq(A, Id)[0]
+        a, b = np.linalg.lstsq(A, Id, rcond=-1)[0]
         tlin = abs(self.Id[0]/b)  # discharge time
         Ilin = a + b*td  # linear fit
         err = np.sum((Id-Ilin)**2)

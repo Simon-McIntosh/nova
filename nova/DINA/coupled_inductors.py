@@ -7,8 +7,6 @@ from collections import OrderedDict
 from itertools import count
 from nep.coil_geom import VSgeom, PFgeom
 from nep.DINA.read_tor import read_tor
-from scipy.interpolate import interp1d
-from read_dina import timeconstant
 from nep.DINA.read_plasma import read_plasma
 from amigo.addtext import linelabel
 

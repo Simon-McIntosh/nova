@@ -7,7 +7,7 @@ from amigo.IO import readtxt, pythonIO
 from nep.DINA.read_dina import dina
 from amigo.pyplot import plt
 from nep.coil_geom import VSgeom
-from os.path import isfile
+from os import path
 
 
 class read_tor(pythonIO):
@@ -26,8 +26,8 @@ class read_tor(pythonIO):
         read_txt = kwargs.get('read_txt', self.read_txt)
         filepath = self.dina.locate_file('tor_cur', folder=folder)
         filepath = '.'.join(filepath.split('.')[:-1])
-        self.name = filepath.split('\\')[-2]
-        if read_txt or not isfile(filepath + '.pk'):
+        self.name = filepath.split(path.sep)[-2]
+        if read_txt or not path.isfile(filepath + '.pk'):
             self.read_file(filepath)  # read txt file
             self.save_pickle(filepath,
                              ['nC', 'coil', 'pf', 'nt', 't', 'Ibar', 'current',
@@ -239,9 +239,9 @@ class read_tor(pythonIO):
     def plot(self, index, ax=None):
         if ax is None:
             ax = plt.subplots(figsize=(7, 10))[1]
-        self.set_current()
+        self.set_current(index)
         self.plot_coils()
-        self.plot_plasma(index)
+        # self.plot_plasma(index)
         plt.axis('off')
 
     def plot_coils(self):
@@ -279,9 +279,18 @@ if __name__ == '__main__':
 
     tor = read_tor('disruptions', read_txt=False)
     tor.load_file(3)
-    #tor.plot(130)
+    tor.plot(130)
     #tor.movie('tmp')
 
-    tor.set_current(100)
+    tor.set_current(130)
 
-    tor.pf.plot(subcoil=True, plasma=True)
+    #tor.pf.plot(subcoil=True, plasma=True)
+
+    plt.figure(figsize=(7, 10))
+    tor.pf.initalize_collection()
+    tor.pf.patch_coil(tor.pf.coil)
+    tor.pf.patch_coil(tor.plasma_coil[tor.frame_index])
+    tor.pf.plot_patch(c='Jc', clim=[-10, 10])
+    plt.axis('equal')
+    plt.axis('off')
+

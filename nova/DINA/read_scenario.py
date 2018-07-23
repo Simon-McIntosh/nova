@@ -11,7 +11,7 @@ from nova.elliptic import EQ
 from collections import OrderedDict
 from nep.DINA.read_eqdsk import read_eqdsk
 import nova.cross_coil as cc
-from os import path, mkdir
+from os import path, mkdir, sep
 import pickle
 
 
@@ -28,7 +28,7 @@ class read_scenario:
             filename = self.read_txt(folder)
         elif file_type == 'qda':
             filename = self.read_qda(folder)
-        self.name = filename.split('\\')[-3]
+        self.name = filename.split(sep)[-3]
         if 'time' in self.data:  # rename time field
             self.data['t'] = self.data['time']
             self.data.pop('time')

@@ -12,7 +12,7 @@ from amigo.png_tools import data_load
 import nep
 from amigo.IO import class_dir, pythonIO
 import os
-from os.path import isfile
+from os.path import sep, isfile
 
 
 class read_plasma(pythonIO):
@@ -29,7 +29,7 @@ class read_plasma(pythonIO):
         read_txt = kwargs.get('read_txt', self.read_txt)
         filepath = self.dina.locate_file('plasma', folder=folder)
         filepath = '.'.join(filepath.split('.')[:-1])
-        self.name = filepath.split('\\')[-2]
+        self.name = filepath.split(sep)[-2]
         if read_txt or not isfile(filepath + '.pk'):
             self.read_file(filepath)  # read txt file
             self.save_pickle(filepath,
@@ -59,7 +59,7 @@ class read_plasma(pythonIO):
         data['x'] = 1e-2*self.data['Rcur']  # cm - m
         data['z'] = 1e-2*self.data['Zcur']  # cm - m
         dt_min = np.nanmin(np.diff(data['t']))
-        t_max = np.nanmax(data['t'])
+        t_max = np.nanmax(np.array(data['t']))
         self.nt = int(t_max / dt_min)
         self.t = np.linspace(0, t_max, self.nt)  # equal spaced time stencil
         self.dt = t_max/(self.nt-1)
@@ -407,7 +407,7 @@ class read_plasma(pythonIO):
 
 if __name__ == '__main__':
 
-    pl = read_plasma('disruptions', Iscale=1)
+    pl = read_plasma('disruptions', Iscale=1, read_txt=False)
 
     Ivs3_data = pl.Ivs3_single(3, plot=False, discharge='LTC')[1]
 

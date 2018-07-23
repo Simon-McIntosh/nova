@@ -1,6 +1,6 @@
 import numpy as np
 from nova.force import force_field
-from nep.coil_geom import VSgeom, VVcoils
+from nep.coil_geom import VSgeom
 from nep.DINA.read_tor import read_tor
 from collections import OrderedDict
 import nova.cross_coil as cc
@@ -23,11 +23,13 @@ from nep.DINA.capacitor_discharge import power_supply
 
 class coil_force(pythonIO):
 
-    def __init__(self, Iscale=1, read_txt=False, vessel=True, t_pulse=0.3):
+    def __init__(self, Iscale=1, read_txt=False, vessel=True, t_pulse=0.3,
+                 mode='control'):
         self.Iscale = Iscale
         self.read_txt = read_txt
         self.vessel = vessel
         self.t_pulse = t_pulse
+        self.mode = mode
         self.dina = dina('disruptions')
         self.pl = read_plasma('disruptions', Iscale=self.Iscale,
                               read_txt=read_txt)  # load plasma
@@ -39,8 +41,8 @@ class coil_force(pythonIO):
 
     def postscript(self):
         if self.vessel:
-            postscript = '_vv{:1.2f}'.format(self.t_pulse)
-            postscript = postscript.replace('.', 'dot')
+            postscript = '_vv_tp{:1.2f}s'.format(self.t_pulse)
+            postscript = postscript.replace('.', '-')
         else:
             postscript = '_novv'
         return postscript
@@ -61,10 +63,10 @@ class coil_force(pythonIO):
             self.load_pickle(filepath)
         self.tor.load_file(scenario)  # read toroidal strucutres
         self.tor.pf = self.pf  # re-link pf object
-        self.ff.index = self.pf.index  # re-link index
-        self.ff.pf_coil = self.pf.coil  # re-link pf coil
-        self.ff.eq_coil = self.pf.sub_coil  # re-link eq coil
-        self.ff.eq_plasma_coi = self.pf.plasma_coil  # relink plasma
+        self.ff.index = self.tor.pf.index  # re-link index
+        self.ff.pf_coil = self.tor.pf.coil  # re-link pf coil
+        self.ff.eq_coil = self.tor.pf.sub_coil  # re-link eq coil
+        self.ff.eq_plasma_coil = self.tor.pf.plasma_coil  # relink plasma
         self.initalize_sf()
 
     def read_file(self, scenario):
@@ -129,10 +131,11 @@ class coil_force(pythonIO):
         passive_coils.append('Plasma')
         return active_coils, passive_coils
 
-    def vs3_update(self, mode='control'):  # update vs3 coil and structure
-        Ivs3 = self.Ivs3_fun[mode](self.t_index)  # current vector
+    def vs3_update(self, **kwargs):  # update vs3 coil and structure
+        self.mode = kwargs.get('mode', self.mode)
+        Ivs3 = self.Ivs3_fun[self.mode](self.t_index)  # current vector
         self.set_vs3_current(Ivs3[0])  # vs3 coil current
-        if self.vessel:
+        if self.vessel:  # set vv currents
             Ic = {}
             for i, coil in enumerate(list(self.vv.pf.coil.keys())[2:]):
                 Ic[coil] = Ivs3[i+1]
@@ -152,13 +155,17 @@ class coil_force(pythonIO):
         self.frame_index = frame_index
         self.t_index = self.tor.t[self.frame_index]
         self.tor.set_current(frame_index)  # update coil currents and plasma
+        self.vs3_update()  # update vs3 coil currents
+        self.ff.eq_plasma_coil = self.tor.pf.plasma_coil  # pass to ff object
 
-    def contour(self, **kwargs):
+    def contour(self, plot=True, **kwargs):
         self.psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf)
         self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi,
                             'name': 'DINA_{}'.format(self.tor.name)})
-        levels = self.sf.contour(51, boundary=False, Xnorm=False, **kwargs)
-        return levels
+        if plot:
+            levels = self.sf.contour(51, boundary=False, Xnorm=False,
+                                     **kwargs)
+            return levels
 
     def get_frames(self, nframe):
         if nframe is None:
@@ -315,7 +322,8 @@ class coil_force(pythonIO):
         with writer.saving(fig, filename, 72):
             for frame_index in frames:
                 plt.clf()
-                self.plot_frame(frame_index, mode=mode, levels=levels)
+                self.plot_frame(frame_index=frame_index, mode=mode,
+                                levels=levels)
                 writer.grab_frame()
                 tick.tock()
 
@@ -325,9 +333,9 @@ class coil_force(pythonIO):
             ax = plt.subplots(1, 1, figsize=(6, 9))[1]
         if 'frame_index' in kwargs:
             self.frame_update(kwargs['frame_index'])
-        if 'frame_index' in kwargs or 'mode' in kwargs:
+        if 'mode' in kwargs:
             self.vs3_update(**kwargs)
-            self.force_update()
+        self.force_update()
         self.pf.plot(subcoil=True, plasma=True, ax=ax)
         self.ff.plot(coils=['VS3'], scale=3, Fmax=10)
         levels = self.contour(**kwargs)
@@ -367,6 +375,7 @@ class coil_force(pythonIO):
         return coil_data
 
     def plot_Fmax(self, nframe=100):
+        self.load_file(0)
         coil_data = self.read_data(nframe)  # load data
         ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
         X = range(self.dina.nfolder)
@@ -533,38 +542,23 @@ class coil_force(pythonIO):
         self.pf.plot(**kwargs)
 
 
-
 if __name__ == '__main__':
 
-    force = coil_force(t_pulse=0, vessel=True, read_txt=False)
-
-    #force.load_file(3, read_txt=True)
-
-    force.read_data(nframe=100)
-
-    #force.plot_Fmax(nframe=100)
-    # new frame_update
-    #force.tor.set_current(300)  # update coil currents and plasma
-
-    #force.pf.plot(subcoil=True, plasma=True)
-    #force.contour()
-
-
-
-
+    force = coil_force(vessel=True, t_pulse=0.0)
 
     '''
-    self.load_IO(folder)  # load hig-res vv model
-    #*************
-    # self.load_vs3(folder, discharge=self.discharge)  # load vs3 currents
-    #*************
-
-    self.frame_update(frame_index)  # initalize at start of timeseries
-
-    # self.vs3_update(mode=self.mode)  # initalize vs3 current
-    # self.force_update()  # update vs3 coil forces
-
+    plt.figure(figsize=(7, 10))
+    force.pf.initalize_collection()
+    force.pf.patch_coil(force.pf.coil)
+    force.pf.patch_coil(force.pf.plasma_coil)
+    force.pf.plot_patch(c='Jc', clim=[-10, 10])
+    plt.axis('equal')
+    plt.axis('off')
     '''
+    # force.read_data(nframe=500)
+    force.plot_Fmax(nframe=500)
+
+
 
 
 

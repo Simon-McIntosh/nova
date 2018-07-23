@@ -79,7 +79,7 @@ class power_supply:
         self.Vps_max = self.sign * 1.35e3  # maximum power supply voltage
 
     def set_time(self):
-        if self.scenario >= 0 and self.dt_discharge != 0:  # load scenario
+        if self.scenario != -1 and self.dt_discharge != 0:  # load scenario
             trip = self.pl.Ivs3_single(self.scenario)[0]
             self.t_trip = trip[-1]
         else:
@@ -340,8 +340,7 @@ class power_supply:
 
 if __name__ == '__main__':
 
-    ps = power_supply(nturn=4, vessel=True, scenario=1)
-    # nturn=4, pulse=False
+    ps = power_supply(nturn=4, vessel=True, scenario=8)
 
     ps.solve(Io=0, sign=-1, nturn=4, t_pulse=0,
              impulse=True, plot=True)

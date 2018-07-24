@@ -76,9 +76,14 @@ class coil_force(pythonIO):
         self.vs_geom = VSgeom()  # load vs geometory
         self.vv = self.ps.vv  # link vv coil set
         VS3_coil = {coil: self.vv.pf.coil[coil] for coil in self.vv.pf.coil
-                    if 'VS' in coil}
+                    if 'VS' in coil and 'jacket' not in coil}
         self.pf.add_coils(VS3_coil, sub_coil=self.vv.pf.sub_coil, label='VS3')
         if self.vessel:  # add vv and trs coils
+            jacket_coil = {coil: self.vv.pf.coil[coil]
+                           for coil in self.vv.pf.coil
+                           if 'jacket' in coil}
+            self.pf.add_coils(jacket_coil, sub_coil=self.vv.pf.sub_coil,
+                              label='jacket')
             vv_coil = {coil: self.vv.pf.coil[coil] for coil in self.vv.pf.coil
                        if 'vv' in coil}
             self.pf.add_coils(vv_coil, sub_coil=self.vv.pf.sub_coil,
@@ -135,10 +140,14 @@ class coil_force(pythonIO):
         self.mode = kwargs.get('mode', self.mode)
         Ivs3 = self.Ivs3_fun[self.mode](self.t_index)  # current vector
         self.set_vs3_current(Ivs3[0])  # vs3 coil current
-        if self.vessel:  # set vv currents
-            Ic = {}
-            for i, coil in enumerate(list(self.vv.pf.coil.keys())[2:]):
-                Ic[coil] = Ivs3[i+1]
+        if self.vessel:  # set jacket, vv and trs currents
+            Ic = {}  # coil jacket
+            for i, coil in enumerate(list(self.vv.pf.coil.keys())[2:10]):
+                Ic[coil] = Ivs3[1]
+            self.pf.update_current(Ic)  # dissable to remove vv field
+            Ic = {}  # vv and trs
+            for i, coil in enumerate(list(self.vv.pf.coil.keys())[10:]):
+                Ic[coil] = Ivs3[i+2]
             self.pf.update_current(Ic)  # dissable to remove vv field
 
     def set_vs3_current(self, Ivs3):
@@ -544,7 +553,7 @@ class coil_force(pythonIO):
 
 if __name__ == '__main__':
 
-    force = coil_force(vessel=True, t_pulse=0.0)
+    force = coil_force(vessel=False, t_pulse=0.0)
 
     '''
     plt.figure(figsize=(7, 10))
@@ -555,7 +564,7 @@ if __name__ == '__main__':
     plt.axis('equal')
     plt.axis('off')
     '''
-    # force.read_data(nframe=500)
+    # force.read_data(nframe=500, forcewrite=True)
     force.plot_Fmax(nframe=500)
 
 

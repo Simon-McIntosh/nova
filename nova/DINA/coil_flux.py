@@ -81,17 +81,17 @@ class coil_flux(pythonIO):
                     vs3_bg -= psi_bg[:, i]
         self.flux['vs3'] = {'psi_bg': vs3_bg}
         dtype_array = '{}float'.format(self.tor.nt)
-        bg = np.zeros(len(self.flux)-15,
+        bg = np.zeros(len(self.flux)-7,
                       dtype=[('V', dtype_array), ('dVdt', dtype_array)])
         bg['V'][0] = -2*np.pi*np.gradient(self.flux['vs3']['psi_bg'], self.t)
         bg['dVdt'][0] = np.gradient(bg['V'][0], self.t)
-        bg['V'][1] = bg['V'][0]  # jacket turns
-        bg['dVdt'][1] = bg['dVdt'][0]
+        # bg['V'][1] = bg['V'][0]  # jacket turns
+        # bg['dVdt'][1] = bg['dVdt'][0]
         for i, coil in enumerate(self.flux):
-            if i >= 16 and i < len(self.flux)-1:  # skip vs3 turns
-                bg['V'][i-14] = -2*np.pi*np.gradient(self.flux[coil]['psi_bg'],
-                                                     self.t)
-                bg['dVdt'][i-14] = np.gradient(bg['V'][i-14], self.t)
+            if i >= 8 and i < len(self.flux)-1:  # skip vs3 turns
+                bg['V'][i-6] = -2*np.pi*np.gradient(self.flux[coil]['psi_bg'],
+                                                    self.t)
+                bg['dVdt'][i-6] = np.gradient(bg['V'][i-6], self.t)
         self.Vbg = interp1d(self.t, bg['V'], fill_value=0,
                             bounds_error=False)
         self.dVbg = interp1d(self.t, bg['dVdt'], fill_value=0,
@@ -135,8 +135,9 @@ class coil_flux(pythonIO):
 if __name__ == '__main__':
     cf = coil_flux()
 
-    for i in range(12):
-        cf.load_file(i, plot=True, read_txt=True)
+    cf.load_file(3, plot=True, read_txt=True)
+    #for i in range(12):
+    #    cf.load_file(i, plot=True, read_txt=True)
 
     # vs3.plot_background()
     # vs3.calculate_background()

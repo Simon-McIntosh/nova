@@ -10,6 +10,10 @@ import operator
 from collections import OrderedDict
 from matplotlib.lines import Line2D
 from scipy.interpolate import interp1d
+import os
+import nep
+from amigo.png_tools import data_load
+from amigo.IO import class_dir
 
 
 class power_supply:
@@ -21,13 +25,13 @@ class power_supply:
         self.cf = coil_flux(read_txt=read_txt)  # initalize flux profiles
         self.build_coils()
         self.ode = ode(self.dIdt).set_integrator('dop853')  # 'dopri5'
-        self.initalize(**kwargs)
 
     def set_defaults(self):
         self.setup = {'Cd': 2.42, 'pulse': True, 't_pulse': 0.0,
                       'pulse_period': 10, 'impulse': True, 'scenario': -1,
-                      'vessel': True, 'nturn': 4, 'sign': -1, 'code': 'IO',
-                      'dt_discharge': 0, 'Io': 0}
+                      'jacket': True, 'vessel': True,
+                      'nturn': 4, 'sign': -1, 'code': 'IO',
+                      'dt_discharge': 0, 'Io': 0, 'switch_capacitor': True}
         for var in self.setup:
             setattr(self, var, self.setup[var])
 
@@ -44,24 +48,33 @@ class power_supply:
         self.ind.add_pf_coil(
                 OrderedDict(list(self.vv.pf.sub_coil.items())[:8]),
                 turns=turns)
-        for i, index in enumerate(nvs_o+np.arange(1, 8)):  # vs3 loops
-            self.ind.add_cp([nvs_o, index])  # link VS coils
-        if self.vessel:
-            nvs_o = self.ind.nC
+        for index in nvs_o+np.arange(1, 8):  # link vs turns
+            self.ind.add_cp([nvs_o, index])
+        if self.jacket:  # add jacket coils
             jacket = list(self.vv.pf.sub_coil.items())[8:16]
-            turns = np.append(np.ones(4), -np.ones(4))
-            # add jacket coils
-            self.ind.add_pf_coil(OrderedDict(jacket), turns=turns)
-            for i, index in enumerate(nvs_o+np.arange(1, 8)):  # vs3 loops
-                self.ind.add_cp([nvs_o, index])  # link jacket coils
-            # add vv coils
+            self.ind.add_pf_coil(OrderedDict(jacket))
+        if self.vessel:  # add vv coils
             vv_coils = list(self.vv.pf.sub_coil.items())[16:]
             self.ind.add_pf_coil(OrderedDict(vv_coils))
-        self.ind.reduce()
+
+        self.ind.assemble()
+        '''
+        diag = np.diag(self.ind.Mo)
+        diag_m = np.max([diag[:-1], diag[1:]], axis=0)
+        diag_1 = np.diag(self.ind.Mo, k=1)
+        for i, (dm, d1) in enumerate(zip(diag_m, diag_1)):
+            if abs(d1) > 0.5*dm:
+                print(d1, dm)
+                self.ind.Mo[i, i+1] = 0.5*np.sign(d1)*dm
+                self.ind.Mo[i+1, i] = 0.5*np.sign(d1)*dm
+        '''
+        self.ind.constrain()
         self.ncoil = self.ind.nd['nr']  # number of retained coils
+
         for i in np.arange(1, self.ncoil):
             index = abs(self.ind.M[i]) > self.ind.M[i, i]
             index[0] = False  # maintain large coupling to VS3 coil
+            #index[i] = False
             if sum(index) > 0:  # ensure dominant leading diagonal
                 self.ind.M[i, index] = 0.9*self.ind.M[i, i]
         if plot:
@@ -77,7 +90,7 @@ class power_supply:
             self.build_coils()  # re-build coil-set
         self.build_matrices()
         self.set_constants()
-        self.set_time()
+        self.set_time(**kwargs)
         self.load_background_flux()
 
     def set_constants(self):
@@ -86,14 +99,17 @@ class power_supply:
         self.Vo = self.sign * 2.3e3  # capacitor voltage
         self.Vps_max = self.sign * 1.35e3  # maximum power supply voltage
 
-    def set_time(self):
+    def set_time(self, **kwargs):
         if self.scenario != -1 and self.dt_discharge != 0:  # load scenario
             trip = self.pl.Ivs3_single(self.scenario)[0]
             self.t_trip = trip[-1]
         else:
             self.t_trip = 0
         # pulse phase (-ive == lag) = peak coninsident with plasma trip
-        self.pulse_phase = self.dt_discharge + self.t_pulse - self.t_trip
+        if 'pulse_phase' in kwargs:
+            self.pulse_phase = kwargs['pulse_phase']
+        else:
+            self.pulse_phase = self.dt_discharge + self.t_pulse - self.t_trip
         self.tpo = -self.t_pulse + self.t_trip  # pulse start time
         self.tco = -self.pulse_phase + self.t_trip  # discarge start time
         self.tc10 = -self.pulse_phase + self.t_trip  # 10% current rise time
@@ -148,9 +164,9 @@ class power_supply:
 
     def get_step(self):
         if self.capacitor_discharge:
-            dt = 1e-4
+            dt = 1e-5
         elif self.pulse_hold:
-            dt = 5e-4
+            dt = 1e-4
         else:
             dt = 1e-4
         return dt
@@ -176,7 +192,7 @@ class power_supply:
             dHcap = self.Vo / self.Rcap - Hcap / (self.Rcap * self.C[0])
             dIcap = -Icap / (self.Rcap * self.C[0])
             if self.pulse_hold:
-                k = 5  # power supply gain
+                k = 0.5  # power supply gain
                 Ierr = self.Itrip - Ivec[0]
                 self.Vps = self.R[0]*Ivec[0] + k*Ierr  # power supply voltage
                 if self.op('gt', self.Vps, self.Vps_max):  # saturated
@@ -203,9 +219,9 @@ class power_supply:
                     and self.tc10 <= self.tco:
                 self.tc10 = t  # 10% capacitor current rise
             self.check_setpoint(t, Iode)
-            if self.op('ge', Iode[2], self.Itrip) \
-                    or isclose(Iode[2], self.Itrip) \
-                    or self.op('lt', dI[2], 0):  # peak current
+            if (self.op('ge', Iode[2], self.Itrip) or
+                    isclose(Iode[2], self.Itrip) or
+                    self.op('lt', dI[2], 0)) and self.switch_capacitor:
                 self.capacitor_discharge = False  # charge capacitor
                 if self.op('lt', dI[2], 0):
                     self.capacitor_empty = True
@@ -268,6 +284,9 @@ class power_supply:
             t_pulse = self.t_pulse
             self.initalize(scenario=-1, t_pulse=0)
             self.intergrate(100e-3)
+            self.packdata()
+            self.plot()
+            self.plot_current()
             dt_discharge = self.data['dt_discharge'][0]
             self.initalize(scenario=scenario, dt_discharge=dt_discharge,
                            t_pulse=t_pulse)
@@ -297,36 +316,37 @@ class power_supply:
 
     def plot(self):
         ax = plt.subplots(4, 1, sharex=True)[1]
-        ax[0].plot(self.data['t'], 1e-3*self.data['Ivec'][:, 0], '-C0')
+        ax[0].plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 0], '-C0')
         ax[0].set_ylabel('$I_{vs3}$ kA')
-        ax[1].plot(self.data['t'], 1e-3*self.data['Vps'], '-C1')
+        ax[1].plot(1e3*self.data['t'], 1e-3*self.data['Vps'], '-C1')
         ax[1].set_ylabel('$V_{ps}$ kV')
-        ax[2].plot(self.data['t'], 1e-3*self.data['Vcap'], '-C2')
+        ax[2].plot(1e3*self.data['t'], 1e-3*self.data['Vcap'], '-C2')
         ax[2].set_ylabel('$V_{capacitor}$ kV')
-        ax[3].plot(self.data['t'], 1e-3*self.data['Icap'], '-C3')
+        ax[3].plot(1e3*self.data['t'], 1e-3*self.data['Icap'], '-C3')
         ax[3].set_ylabel('$I_{charge}$ kA')
         plt.despine()
         plt.detick(ax)
+        ax[-1].set_xlabel('$t$ ms')
 
     def plot_current(self, ax=None):
         if ax is None:
             ax = plt.subplots(1, 1, sharex=True)[1]
         if self.vessel:
             colors = OrderedDict()
+            colors['conductor'] = 'C0'
+            colors['jacket'] = 'C6'
             colors['lower_vvo'] = 'C1'
             colors['lower_vv1'] = 'C2'
             colors['lower_trs'] = 'C3'
             colors['upper_vvo'] = 'C4'
             colors['upper_vv1'] = 'C5'
-            colors['jacket'] = 'C6'
             coils = list(self.ind.pf.coil.keys())[16:]
             for i, coil in enumerate(coils):
                 for c in colors:
                     if c in coil:
                         color = colors[c]
                         break
-                index = coils.index(coil)
-                ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, index+2],
+                ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, i+2],
                         color=color)
             lines, labels = [], []
             for c in colors:
@@ -334,8 +354,11 @@ class power_supply:
                 labels.append(c)
             ax.legend(lines, labels)
 
-        ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 0], '-C0')
-        ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 1], '-C6')
+        ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, :], '-C0')
+        #text.plot()
+
+        if self.jacket:
+            ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 1], '-C6')
         ax.set_ylabel('$I_{vs3}$ kA')
         ax.set_xlabel('$t$ ms')
         plt.despine()
@@ -351,22 +374,37 @@ class power_supply:
                 ha='left', va=va, color='C7')
         plt.title('t pulse {:1.2f}s'.format(self.t_pulse))
 
+    def benchmark(self):
+        if self.data['npulse'] != 1 or self.sign != -1 or self.nturn != 4\
+                or self.t_pulse != 0.3 or not self.impulse or not self.vessel:
+            if not self.vessel:
+                self.update_defaults(vessel=True)
+                self.build_coils()
+            self.solve(Io=0, sign=-1, nturn=4, t_pulse=0.3, impulse=True)
+        path = os.path.join(class_dir(nep), '../Data/LTC/')
+        points = data_load(path, 'VS3_current', date='2018_03_15')[0]
+        td, Id = points[0]['x'], points[0]['y']  # jacket + vessel
+
+        plt.figure()
+        plt.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 0], '-C0',
+                 label='NOVA')
+        plt.plot(1e3*td, -1e-3*Id, '--', label='LTC')
+        plt.xlim([0, 80])
+        plt.legend()
+        plt.despine()
+        plt.xlabel('$t$ ms')
+        plt.ylabel('$I$ kA')
+
+
 
 if __name__ == '__main__':
 
-    ps = power_supply(nturn=4, vessel=True, scenario=3, code='IO')
-    ps.solve(Io=0, sign=-1, nturn=4, t_pulse=0.3,
+    ps = power_supply(nturn=4, vessel=True, jacket=True,
+                      scenario=3, code='IO')
+
+    ps.solve(Io=0, sign=-1, nturn=4, t_pulse=0.0,
              impulse=True, plot=True)
+    #ps.benchmark()
 
-    import os
-    import nep
-    from amigo.png_tools import data_load
-    from amigo.IO import class_dir
-    path = os.path.join(class_dir(nep), '../Data/LTC/')
-    points = data_load(path, 'VS3_discharge_main_report', date='2018_06_25')[0]
 
-    points = data_load(path, 'VS3_current', date='2018_03_15')[0]
-    td, Id = points[0]['x'], points[0]['y']  # jacket + vessel
 
-    plt.plot(1e3*td, -1e-3*Id, '--')
-    plt.xlim([0, 100])

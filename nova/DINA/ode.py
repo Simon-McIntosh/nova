@@ -16,12 +16,14 @@ tau = L/R
 
 
 pl = read_plasma('disruptions')
-pl.read_file(3)
+pl.load_file(3)
 
-trip_t = pl.trip_vs3(eps=1e-3)[1]  # ms
+trip = pl.get_vs3_trip()
+
+trip_t = trip['t_trip']  # ms
 
 t = np.linspace(trip_t, pl.t[-1], int(len(pl.t)))  # equal spacing, s
-Iind = interp1d(pl.t, pl.Ivs_o)(t)  # A
+Iind = interp1d(pl.t, pl.Iref['Ivs3_o'])(t)  # A
 
 Iind_lp = savgol_filter(Iind, 11, 3, mode='mirror')  # lowpass filter
 
@@ -91,3 +93,5 @@ text_max.plot(Ralign=True)
 
 plt.despine()
 plt.setp(ax[0].get_xticklabels(), visible=False)
+
+

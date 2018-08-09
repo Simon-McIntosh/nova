@@ -82,7 +82,6 @@ class inductance:
 
     def assemble(self, plot=False):
         self.pf.mesh_coils()
-        # self.pf.mesh_coils()
         if plot:
             self.pf.plot()
         self.inv = INV(self.pf, Iscale=1)
@@ -95,6 +94,11 @@ class inductance:
             self.inv.add_psi(1, point=(x, z))
             self.Io[i] = self.pf.coil[coil]['Ic']
         self.inv.set_foreground()
+        # ensure symetric (jacket-conductor coupling)
+        tril_index = np.tril_indices(len(self.inv.G), k=-1)  # lower triangle
+        self.inv.G[tril_index] = self.inv.G.T[tril_index]  # duplicate upper tr
+        #triu_index = np.triu_indices(len(self.inv.G), k=1)  # upper triangle
+        #self.inv.G[triu_index] = self.inv.G.T[triu_index]
         t2 = np.dot(turns.reshape((-1, 1)), turns.reshape((1, -1)))
         fillaments = np.dot(np.ones((len(turns), 1)), Nf.reshape(1, -1))
         self.Mo = 2 * np.pi * self.inv.G * t2 * fillaments
@@ -169,7 +173,6 @@ class inductance:
 
     def reduce(self):
         self.assemble()
-        self.assemble_cp_nodes()
         self.constrain()
 
     def solve(self, t, **kwargs):

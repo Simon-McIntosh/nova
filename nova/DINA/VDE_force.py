@@ -1,6 +1,6 @@
 import numpy as np
 from nova.force import force_field
-from nep.coil_geom import PFgeom, VSgeom, VVcoils
+from nep.coil_geom import PFgeom, VSgeom
 from nep.DINA.read_tor import read_tor
 from collections import OrderedDict
 import nova.cross_coil as cc
@@ -21,7 +21,7 @@ import os
 import nep
 from amigo.png_tools import data_load
 from amigo.IO import class_dir, pythonIO
-from nep.DINA.capacitor_discharge import power_supply
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
 
 
 class VDE_force(pythonIO):
@@ -42,24 +42,21 @@ class VDE_force(pythonIO):
 
     def load_file(self, folder, frame_index=0, **kwargs):
         read_txt = kwargs.get('read_txt', self.read_txt)
-        self.mode = kwargs.get('mode', self.mode)
-        self.discharge = kwargs.get('discharge', self.discharge)
+        mode = kwargs.get('mode', self.mode)
+        discharge = kwargs.get('discharge', self.discharge)
         filepath = self.dina.locate_file('plasma', folder=folder)
         self.name = split(filepath)[-2]
         filepath = join(*split(filepath)[:-1], self.name, 'VDE_force')
-        if self.discharge == 'IO':
-            filepath += 'IO'
         if read_txt or not isfile(filepath + '.pk'):
             self.read_file(folder)  # read txt file
             self.save_pickle(filepath, ['pf', 'ff', 'vs_rail', 'vs_theta'])
         else:
             self.load_pickle(filepath)
         self.tor.load_file(folder)  # read toroidal strucutres
-        self.load_vs3(folder, discharge=self.discharge)  # load vs3 currents
+        self.load_vs3(folder, discharge=discharge)  # load vs3 currents
         self.frame_update(frame_index)  # initalize at start of timeseries
-
-        self.vs3_update(mode=self.mode)  # initalize vs3 current
-        self.force_update()  # update vs3 coil forces
+        self.vs3_update(mode=mode)  # initalize vs3 current
+        # self.force_update()  # update vs3 coil forces
         self.initalize_sf()
 
     def read_file(self, folder):
@@ -83,57 +80,30 @@ class VDE_force(pythonIO):
         return active_coils, passive_coils
 
     def load_vs3(self, folder, discharge='DINA'):
-        # load current interpolator
-        self.Ivs3_fun = \
-            self.pl.Ivs3_single(folder, discharge=discharge)[-1]
+        self.Ivs3_fun = self.pl.Ivs3_single(
+                folder, discharge=discharge)[-1]  # current interpolator
 
     def load_active(self, dCoil=0.25):
         vs_geom = VSgeom()
         self.vs_rail = vs_geom.rail
         pf_geom = PFgeom(VS=True, dCoil=dCoil)
         self.pf = pf_geom.pf
-
         self.vs_theta = {}
         for name in vs_geom.geom:
             self.vs_theta[name] = vs_geom.geom[name]['theta']
 
-    def add_IO(self):
-        if self.discharge == 'IO':
-            vv_cut = [0, 1] + list(np.arange(18, 23)) + \
-                list(np.arange(57, 60)) + list(np.arange(91, 96)) +\
-                list(np.arange(72, 76)) + list(np.arange(114, 116))
-            for i in vv_cut:  # remove DINA coils
-                self.tor.vessel_coil.pop('vv_{}'.format(i))
-            vv = VVcoils()
-            for part in ['VS3', 'trs', 'vv']:  # add high-res set
-                coil = OrderedDict()
-                for name in vv.pf.index[part]['name']:
-                    coil[name] = vv.pf.coil[name]
-                self.add_filament(coil, sub_coil=vv.pf.sub_coil, index=part)
-
     def load_passive(self, folder):
         self.tor.load_file(folder)  # read toroidal strucutres
-        self.add_IO()  # add high-res coils + remove DINA
-        self.add_filament(self.tor.vessel_coil, index='vv_DINA')
-        self.add_filament(self.tor.blanket_coil, index='bb_DINA')
+        self.pf.add_coils(self.tor.vessel_coil, label='vv_DINA')
+        self.pf.add_coils(self.tor.blanket_coil, label='bb_DINA')
+        # self.add_filament(self.tor.vessel_coil)
+        # self.add_filament(self.tor.blanket_coil)
 
-    def add_filament(self, filament, sub_coil=None, index=None):
-        nCo = self.pf.nC  # start index
-        name = []
+    def add_filament(self, filament):
         for coil in filament:
-            name.append(coil)
             self.pf.coil[coil] = filament[coil]
-            if sub_coil:
-                Nf = sub_coil[coil+'_0']['Nf']
-                for i in range(Nf):
-                    subname = coil+'_{}'.format(i)
-                    self.pf.sub_coil[subname] = sub_coil[subname]
-            else:
-                self.pf.sub_coil[coil+'_0'] = filament[coil]
-                self.pf.sub_coil[coil+'_0']['Nf'] = 1
-        if index:
-            self.pf.index[index] = {'name': name,
-                                    'index': np.arange(nCo, self.pf.nC)}
+            self.pf.sub_coil[coil+'_0'] = filament[coil]
+            self.pf.sub_coil[coil+'_0']['Nf'] = 1
 
     def load_plasma(self, frame_index):
         self.pf.plasma_coil.clear()  # clear
@@ -154,14 +124,13 @@ class VDE_force(pythonIO):
             Ic[name] = sign * current[turn_index]
         self.pf.update_current(Ic)
 
-    def frame_update(self, frame_index, vessel=True, blanket=True):
+    def frame_update(self, frame_index):
         self.frame_index = frame_index
         self.t = self.tor.t[self.frame_index]
+        # self.vs3_update()
         self.set_coil_current(frame_index)
-        if vessel:
-            self.set_filament_current(self.tor.vessel_coil, frame_index)
-        if blanket:
-            self.set_filament_current(self.tor.blanket_coil, frame_index)
+        self.set_filament_current(self.tor.vessel_coil, frame_index)
+        self.set_filament_current(self.tor.blanket_coil, frame_index)
         self.load_plasma(frame_index)
 
     def vs3_update(self, **kwargs):
@@ -191,7 +160,7 @@ class VDE_force(pythonIO):
         self.psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf)
         self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi,
                             'name': 'DINA_{}'.format(self.tor.name)})
-        levels = self.sf.contour(51, boundary=False, Xnorm=False, **kwargs)
+        levels = self.sf.contour(41, boundary=False, Xnorm=False, **kwargs)
         return levels
 
     def get_frames(self, nframe):
@@ -210,6 +179,7 @@ class VDE_force(pythonIO):
         coil = self.pf.coil[name]
         Ft *= 2*np.pi*coil['x']/n  # force per rail
         Fn *= 2*np.pi*coil['x']/n
+
         Stress = {}
         Force = {'x': 0, 'y': Ft, 'z': Fn}
         Moment = {'x': Force['y']*dz, 'y': Force['x']*dz, 'z': 0}
@@ -224,6 +194,7 @@ class VDE_force(pythonIO):
                         dx*abs(Moment['y'])/(2*Iy) +
                         dy*abs(Moment['x'])/(2*Ix))**2 +
                        3 * ((Stress['x'])**2 + (Stress['y'])**2))
+
         Sm = self.allowable.get_limit(weld_category=2, load_category=1,
                                       load_type='primary', T=100)
         fPm, fPmPb = 1e-6*Pm/Sm, 1e-6*PmPb/(1.5*Sm)
@@ -354,15 +325,12 @@ class VDE_force(pythonIO):
                 tick.tock()
 
     def plot_frame(self, **kwargs):
-        ax = kwargs.get('ax', None)
-        if ax is None:
-            ax = plt.subplots(1, 1, figsize=(6, 9))[1]
         if 'frame_index' in kwargs:
             self.frame_update(kwargs['frame_index'])
         if 'frame_index' in kwargs or 'mode' in kwargs:
             self.vs3_update(**kwargs)
             self.force_update()
-        self.pf.plot(subcoil=True, plasma=True, ax=ax)
+        self.pf.plot(subcoil=True, plasma=True)
         self.ff.plot(coils=['VS3'], scale=3, Fmax=10)
         levels = self.contour(**kwargs)
         return levels
@@ -416,7 +384,6 @@ class VDE_force(pythonIO):
         return vs3_data
 
     def plot_Fmax(self, discharge, nframe=100):
-        self.load_file(0)
         vs3_data = self.read_data(discharge, nframe)  # load data
         ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
         X = range(self.dina.nfolder)
@@ -757,49 +724,53 @@ class VDE_force(pythonIO):
         self.plot_line_force_components('x', vs3, plot_full)
         self.plot_line_force_components('z', vs3, plot_full)
 
-    def plot(self, **kwargs):
+    def plot(self, insert=False, contour=False, **kwargs):
+        if 'ax' not in kwargs:
+            kwargs['ax'] = plt.subplots(1, 1, figsize=(7, 10))[1]
         self.pf.plot(**kwargs)
-
-    '''
-    def load_psi(self, folder, plot=False, **kwargs):
-        read_txt = kwargs.get('read_txt', self.read_txt)
-        filepath = self.dina.locate_file('plasma', folder=folder)
-        self.name = split(filepath)[-2]
-        filepath = join(*split(filepath)[:-1], self.name, 'vs3_flux')
-        if read_txt or not isfile(filepath + '.pk'):
-            self.read_psi(folder, **kwargs)  # read txt file
-            self.save_pickle(filepath, ['t', 'flux', 'Vbg', 'dVbg'])
-        else:
-            self.load_pickle(filepath)
-        if plot:
-            self.plot_profile()
-        vs3_trip = self.pl.Ivs3_single(folder)[0]
-        self.t_trip = vs3_trip['t_trip']
-    '''
+        if contour:
+            self.contour(**kwargs)
+        if insert:
+            ax_main = kwargs['ax']  # inset image
+            vs_geom = VSgeom()
+            dx, dz, zoom = 1.75, 1.25, 3
+            for coil, loc in zip(vs_geom.geom, [(4, 3, 1), (1, 2, 4)]):
+                xo, zo = vs_geom.geom[coil]['x'], vs_geom.geom[coil]['z']
+                ax_ins = zoomed_inset_axes(ax_main, zoom, loc=loc[0])
+                mark_inset(ax_main, ax_ins, loc1=loc[1], loc2=loc[2], lw=1)
+                kwargs['ax'] = ax_ins
+                self.pf.plot(**kwargs)
+                if contour:
+                    self.contour(**kwargs)
+                ax_ins.set_xlim(xo + np.array([-dx/2, dx/2]))
+                ax_ins.set_ylim(zo + np.array([-dz/2, dz/2]))
+                ax_ins.axis('on')
+                ax_ins.set_xticks([])
+                ax_ins.set_yticks([])
 
 
 if __name__ == '__main__':
+    folder, frame_index = 4, 251
+    vde = VDE_force(mode='control', discharge='DINA', read_txt=True)
 
-    vde = VDE_force(mode='control', discharge='DINA', Iscale=1)
+    vde.load_file(folder, frame_index=frame_index)
+    vde.plot(insert=True, contour=True, subcoil=True, plasma=False)
 
-    #folder, frame_index = 3, 100
-    #vde.load_file(folder, frame_index=frame_index, read_txt=True)
-    #vde.plot_frame()
-
+    vde.plot_Fmax('DINA', nframe=500)
     '''
-    vde.plot(subcoil=True)
-
     ax = plt.gca()
+    pf_geom = PFgeom(VS=True)
+    pf_geom.plot(label=False, subcoil=True, ax=ax)
     vvc = VVcoils()
     vvc.plot(ax=ax)
+    '''
 
     #plt.figure(figsize=(8, 8))
-    vde.plot_frame()
-    '''
+    #vde.plot_frame()
 
     # vde.plot_single('MD_UP_exp16', 'DINA', nframe=500)
     # vde.plot_single('VDE_UP_slow_fast', 'DINA', nframe=500)
-    vde.plot_Fmax('DINA', nframe=500)
+    # vde.plot_Fmax('DINA', nframe=500)
     # vde.plot_Fmax('LTC', nframe=500)
     # vde.plot_Fmax('ENP', nframe=500)
 

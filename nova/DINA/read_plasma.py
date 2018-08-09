@@ -7,7 +7,6 @@ from scipy.interpolate import interp1d
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 from collections import OrderedDict
-from scipy.integrate import odeint
 from amigo.png_tools import data_load
 import nep
 from amigo.IO import class_dir, pythonIO

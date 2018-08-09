@@ -19,6 +19,7 @@ from os.path import split, join, isfile
 import matplotlib.lines as mlines
 from amigo.IO import pythonIO
 from nep.DINA.capacitor_discharge import power_supply
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
 
 
 class coil_force(pythonIO):
@@ -52,8 +53,9 @@ class coil_force(pythonIO):
         self.vessel = kwargs.get('vessel', self.vessel)
         self.t_pulse = kwargs.get('t_pulse', self.t_pulse)
         filepath = self.dina.locate_file('plasma', folder=scenario)
-        self.name = split(filepath)[-2]
-        filepath = join(*split(filepath)[:-1], self.name, 'coil_force')
+        # self.name = split(filepath)[-2]
+        self.name = split(split(filepath)[0])[-1]
+        filepath = join(split(filepath)[0], 'coil_force')
         filepath += self.postscript()
         if read_txt or not isfile(filepath + '.pk'):
             self.read_file(scenario)  # read txt file
@@ -172,7 +174,7 @@ class coil_force(pythonIO):
         self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi,
                             'name': 'DINA_{}'.format(self.tor.name)})
         if plot:
-            levels = self.sf.contour(51, boundary=False, Xnorm=False,
+            levels = self.sf.contour(41, boundary=False, Xnorm=False,
                                      **kwargs)
             return levels
 
@@ -547,13 +549,37 @@ class coil_force(pythonIO):
         h.append(mlines.Line2D([], [], color='C7', label='lowerVS'))
         ax_I.legend(handles=h, loc=4)
 
-    def plot(self, **kwargs):
+    def plot(self, insert=False, contour=False, **kwargs):
+        if 'ax' not in kwargs:
+            kwargs['ax'] = plt.subplots(1, 1, figsize=(7, 10))[1]
         self.pf.plot(**kwargs)
+        if contour:
+            self.contour(**kwargs)
+        if insert:
+            ax_main = kwargs['ax']  # Inset image
+            vs_geom = VSgeom()
+            dx, dz, zoom = 1.75, 1.25, 3
+            for coil, loc in zip(vs_geom.geom, [(4, 3, 1), (1, 2, 4)]):
+                xo, zo = vs_geom.geom[coil]['x'], vs_geom.geom[coil]['z']
+                ax_ins = zoomed_inset_axes(ax_main, zoom, loc=loc[0])
+                mark_inset(ax_main, ax_ins, loc1=loc[1], loc2=loc[2], lw=1)
+                kwargs['ax'] = ax_ins
+                self.pf.plot(**kwargs)
+                if contour:
+                    self.contour(**kwargs)
+                ax_ins.set_xlim(xo + np.array([-dx/2, dx/2]))
+                ax_ins.set_ylim(zo + np.array([-dz/2, dz/2]))
+                ax_ins.axis('on')
+                ax_ins.set_xticks([])
+                ax_ins.set_yticks([])
 
 
 if __name__ == '__main__':
 
-    force = coil_force(vessel=False, t_pulse=0.0)
+    force = coil_force(vessel=True, t_pulse=0.3)
+    force.load_file(4)
+    force.frame_update(251)
+    force.plot(subcoil=True, plasma=False, insert=True, contour=True)
 
     '''
     plt.figure(figsize=(7, 10))
@@ -564,7 +590,7 @@ if __name__ == '__main__':
     plt.axis('equal')
     plt.axis('off')
     '''
-    # force.read_data(nframe=500, forcewrite=True)
+    # force.read_data(nframe=500, forcewrite=False)
     force.plot_Fmax(nframe=500)
 
 

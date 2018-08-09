@@ -97,8 +97,6 @@ class inductance:
         # ensure symetric (jacket-conductor coupling)
         tril_index = np.tril_indices(len(self.inv.G), k=-1)  # lower triangle
         self.inv.G[tril_index] = self.inv.G.T[tril_index]  # duplicate upper tr
-        #triu_index = np.triu_indices(len(self.inv.G), k=1)  # upper triangle
-        #self.inv.G[triu_index] = self.inv.G.T[triu_index]
         t2 = np.dot(turns.reshape((-1, 1)), turns.reshape((1, -1)))
         fillaments = np.dot(np.ones((len(turns), 1)), Nf.reshape(1, -1))
         self.Mo = 2 * np.pi * self.inv.G * t2 * fillaments

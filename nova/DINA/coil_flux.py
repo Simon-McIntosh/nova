@@ -70,6 +70,8 @@ class coil_flux(pythonIO):
             psi_bg[index] = cc.get_coil_psi(x, z, self.tor.pf)
             tick.tock()
         vs3_bg = np.zeros(self.tor.nt)
+        jkt_lower_bg = np.zeros(self.tor.nt)
+        jkt_upper_bg = np.zeros(self.tor.nt)
         for i, coil in enumerate(self.flux):  # unpack
             nan_index = np.isnan(psi_bg[:, i])
             psi_bg[nan_index, i] = psi_bg[~nan_index, i][-1]
@@ -77,21 +79,29 @@ class coil_flux(pythonIO):
             if 'jacket' not in coil:
                 if 'lowerVS' in coil:
                     vs3_bg += psi_bg[:, i]
+                    jkt_lower_bg += psi_bg[:, i]
                 elif 'upperVS' in coil:
                     vs3_bg -= psi_bg[:, i]
+                    jkt_upper_bg += psi_bg[:, i]
         self.flux['vs3'] = {'psi_bg': vs3_bg}
+        self.flux['jkt_lower'] = {'psi_bg': jkt_lower_bg}
+        self.flux['jkt_upper'] = {'psi_bg': jkt_upper_bg}
         dtype_array = '{}float'.format(self.tor.nt)
-        bg = np.zeros(len(self.flux)-7,
+        bg = np.zeros(len(self.flux)-16,
                       dtype=[('V', dtype_array), ('dVdt', dtype_array)])
         bg['V'][0] = -2*np.pi*np.gradient(self.flux['vs3']['psi_bg'], self.t)
         bg['dVdt'][0] = np.gradient(bg['V'][0], self.t)
-        # bg['V'][1] = bg['V'][0]  # jacket turns
-        # bg['dVdt'][1] = bg['dVdt'][0]
+        bg['V'][1] = -2*np.pi*np.gradient(self.flux['jkt_lower']['psi_bg'],
+                                          self.t)
+        bg['dVdt'][1] = np.gradient(bg['V'][1], self.t)
+        bg['V'][2] = -2*np.pi*np.gradient(self.flux['jkt_upper']['psi_bg'],
+                                          self.t)
+        bg['dVdt'][2] = np.gradient(bg['V'][2], self.t)
         for i, coil in enumerate(self.flux):
-            if i >= 8 and i < len(self.flux)-1:  # skip vs3 turns
-                bg['V'][i-6] = -2*np.pi*np.gradient(self.flux[coil]['psi_bg'],
-                                                    self.t)
-                bg['dVdt'][i-6] = np.gradient(bg['V'][i-6], self.t)
+            if i >= 16 and i < len(self.flux) - 3:
+                bg['V'][i-13] = -2*np.pi*np.gradient(self.flux[coil]['psi_bg'],
+                                                     self.t)
+                bg['dVdt'][i-13] = np.gradient(bg['V'][i-13], self.t)
         self.Vbg = interp1d(self.t, bg['V'], fill_value=0,
                             bounds_error=False)
         self.dVbg = interp1d(self.t, bg['dVdt'], fill_value=0,
@@ -134,7 +144,6 @@ class coil_flux(pythonIO):
 
 if __name__ == '__main__':
     cf = coil_flux()
-
     cf.load_file(3, plot=True, read_txt=True)
     #for i in range(12):
     #    cf.load_file(i, plot=True, read_txt=True)

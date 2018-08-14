@@ -144,9 +144,9 @@ class coil_flux(pythonIO):
 
 if __name__ == '__main__':
     cf = coil_flux()
-    cf.load_file(3, plot=True, read_txt=True)
-    #for i in range(12):
-    #    cf.load_file(i, plot=True, read_txt=True)
+
+    for i in range(12):
+        cf.load_file(i, plot=False, read_txt=True)
 
     # vs3.plot_background()
     # vs3.calculate_background()

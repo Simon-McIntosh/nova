@@ -76,6 +76,17 @@ class coil_force(pythonIO):
         self.pf = self.tor.pf  # referance to tor pf
         self.t = self.tor.t
         self.vs_geom = VSgeom()  # load vs geometory
+        self.add_vv_coils()
+        if self.vessel:  # remove DINA coils
+            vv_remove = [0, 1] + list(np.arange(18, 23)) + \
+                list(np.arange(57, 60)) + list(np.arange(91, 96)) +\
+                list(np.arange(72, 76)) + list(np.arange(114, 116))
+            for vv_index in vv_remove:
+                self.pf.remove_coil('vv_{}'.format(vv_index))
+        self.set_force_field()  # initalise force_field object
+        self.load_ps(scenario)  # load vs currents
+
+    def add_vv_coils(self):
         self.vv = self.ps.vv  # link vv coil set
         VS3_coil = {coil: self.vv.pf.coil[coil] for coil in self.vv.pf.coil
                     if 'VS' in coil and 'jacket' not in coil}
@@ -94,34 +105,33 @@ class coil_force(pythonIO):
                         if 'trs' in coil}
             self.pf.add_coils(trs_coil, sub_coil=self.vv.pf.sub_coil,
                               label='trs')
-            vv_remove = [0, 1] + list(np.arange(18, 23)) + \
-                list(np.arange(57, 60)) + list(np.arange(91, 96)) +\
-                list(np.arange(72, 76)) + list(np.arange(114, 116))
-            for vv_index in vv_remove:
-                self.pf.remove_coil('vv_{}'.format(vv_index))
-        self.set_force_field()  # initalise force_field object
-        self.load_ps(scenario)  # load vs currents
 
-    def load_ps(self, scenario):
-        self.pl.load_file(scenario)
-        trip = self.pl.get_vs3_trip()  # get distuption direction
+    def load_ps(self, scenario, **kwargs):
+        if scenario != -1:
+            self.pl.load_file(scenario)
+            trip = self.pl.get_vs3_trip()  # get distuption direction
+            zdir = trip['zdir']
+            t_end = self.tor.t[-1]
+        else:
+            zdir = 1
+            t_end = 100e-3
         self.Ivs3_fun = OrderedDict()  # Ivs3 interpolator
         for mode, sign in zip(['referance', 'control', 'error'], [0, 1, -1]):
             impulse = False if mode == 'referance' else True
             self.Ivs3_fun[mode] = self.ps.solve(
-                    self.tor.t[-1], sign=-sign*trip['zdir'],
-                    scenario=scenario, t_pulse=self.t_pulse, impulse=impulse,
-                    vessel=self.vessel)
+                    t_end, sign=-sign*zdir, scenario=scenario,
+                    t_pulse=self.t_pulse, impulse=impulse, vessel=self.vessel,
+                    **kwargs)
 
-    # def load_vs3(self, scenario):  # load DINA current interpolator
-    #    self.Ivs3_fun = self.pl.Ivs3_single(folder, discharge='DINA')[-1]
-
-    def initalize_sf(self):
-        n, limit = 1e4, [1.5, 10, -8.5, 8.5]
+    def initalize_sf(self, n=1e4, limit=[1.5, 10, -8.5, 8.5]):
         self.x2d, self.z2d, self.x, self.z = grid(n, limit)[:4]
         self.psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf)
+        if hasattr(self.tor, 'name'):
+            self.sf_name = 'Nova_{}'.format(self.tor.name)
+        else:
+            self.sf_name = 'Nova'
         self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi,
-                            'name': 'DINA_{}'.format(self.tor.name)})
+                            'name': self.sf_name})
 
     def set_force_field(self):
         active_coils, passive_coils = self.set_coil_type()
@@ -144,12 +154,14 @@ class coil_force(pythonIO):
         self.set_vs3_current(Ivs3[0])  # vs3 coil current
         if self.vessel:  # set jacket, vv and trs currents
             Ic = {}  # coil jacket
-            for i, coil in enumerate(list(self.vv.pf.coil.keys())[2:10]):
-                Ic[coil] = Ivs3[1]
-            self.pf.update_current(Ic)  # dissable to remove vv field
+            for i, coil in enumerate(list(self.vv.pf.coil.keys())[2:6]):
+                Ic[coil] = Ivs3[1]  # lower VS jacket
+            for i, coil in enumerate(list(self.vv.pf.coil.keys())[6:10]):
+                Ic[coil] = Ivs3[2]  # upper VS jacket
+            self.pf.update_current(Ic)  # dissable to remove jacket field
             Ic = {}  # vv and trs
             for i, coil in enumerate(list(self.vv.pf.coil.keys())[10:]):
-                Ic[coil] = Ivs3[i+2]
+                Ic[coil] = Ivs3[i+3]
             self.pf.update_current(Ic)  # dissable to remove vv field
 
     def set_vs3_current(self, Ivs3):
@@ -172,7 +184,7 @@ class coil_force(pythonIO):
     def contour(self, plot=True, **kwargs):
         self.psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf)
         self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi,
-                            'name': 'DINA_{}'.format(self.tor.name)})
+                            'name': self.sf_name})
         if plot:
             levels = self.sf.contour(41, boundary=False, Xnorm=False,
                                      **kwargs)
@@ -426,7 +438,6 @@ class coil_force(pythonIO):
             ax[i].text(im[index], 1e-3*Fm[index],
                        '{:1.0f}'.format(1e-3*Fm[index]), weight='bold',
                        va='bottom', ha='center')
-
         h = []
         for mode, color in zip(['referance', 'control', 'error'],
                                ['gray', 'C0', 'C3']):
@@ -442,6 +453,34 @@ class coil_force(pythonIO):
                        weight='bold', bbox=dict(facecolor='gray', alpha=0.25),
                        va='top', ha='center')
 
+        ax_I = plt.subplots(1, 1)[1]
+        modes = ['referance', 'control', 'error']
+        colors = ['gray', 'C0', 'C3']
+        widths = [0.9, 0.7, 0.5]
+        # modes = ['control']
+        # colors = ['C0']
+        # widths = [0.7]
+        for i, name in enumerate(coil_data):
+            vs3 = coil_data[name]
+            for mode, color, width in zip(modes, colors, widths):
+                ax_I.bar(i, 1e-3*Fmax[mode][i]['I'], color=color,
+                         width=width, label=mode)
+        Im, im = [], []
+        for mode in Imax:
+            Im.extend(Imax[mode]['I'])
+            im.extend(list(range(len(coil_data))))
+        index = np.argmax(abs(np.array(Im)))
+        va = 'bottom' if Im[index] > 0 else 'top'
+        ax_I.text(im[index], 1e-3*Im[index],
+                  '{:1.0f}'.format(1e-3*Im[index]), weight='bold',
+                  va=va, ha='center')
+        plt.xticks(X, self.dina.folders, rotation=70)
+        plt.despine()
+        if len(modes) > 1:
+            ax_I.legend(handles=h, loc='lower center', bbox_to_anchor=(0.5, 1),
+                        ncol=4, bbox_transform=ax_I.transAxes)
+        ax_I.set_ylabel('$I$ kA')
+
         self.pl.Ivs3_ensemble()
         ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
         for index, file in enumerate(coil_data):
@@ -451,13 +490,12 @@ class coil_force(pythonIO):
                 ax[i].plot(1e3*vs3['control']['t'],
                            1e-3*vs3['control']['Fmag'][:, k],
                            color=color)
-
         for i, k in enumerate([1, 0]):
             ax[i].set_ylabel('$|F|$ kNm$^{-1}$')
             name = self.pf.index['VS3']['name'][k]
-            ax[i].text(1, 0.1, name, transform=ax[i].transAxes,
+            ax[i].text(1, 0.5, name, transform=ax[i].transAxes,
                        bbox=dict(facecolor='lightgray', alpha=1),
-                       va='bottom', ha='right')
+                       va='center', ha='right')
             ax[i].set_xlim([0, 1400])
         ax[1].set_xlabel('$t$ ms')
         plt.despine()
@@ -467,7 +505,28 @@ class coil_force(pythonIO):
         h.append(mlines.Line2D([], [], color='C1', label='MD up'))
         h.append(mlines.Line2D([], [], color='C2', label='VDE down'))
         h.append(mlines.Line2D([], [], color='C3', label='VDE up'))
-        ax[0].legend(handles=h, loc=1)
+        ax[0].legend(handles=h, loc=9, ncol=4)
+
+        ax = plt.subplots(3, 1, sharex=True, sharey=True)[1]
+        for index, file in enumerate(coil_data):
+            vs3 = coil_data[file]
+            color = self.pl.get_color(index)[0]
+            for i, mode in enumerate(['referance', 'control', 'error']):
+                ax[i].plot(1e3*vs3[mode]['t'],
+                           1e-3*vs3[mode]['I'], color=color)
+        for i, (mode, fc) in enumerate(zip(['referance', 'control', 'error'],
+                                           ['gray', 'C0', 'C3'])):
+            ax[i].set_ylabel('$I$ kA')
+            ax[i].set_xlim([0, 1400])
+            ax[i].text(1, 0.9, mode, transform=ax[i].transAxes,
+                       color='lightgray',
+                       bbox=dict(facecolor=fc, alpha=1),
+                       va='top', ha='right')
+        ax[-1].set_xlabel('$t$ ms')
+        ax[0].legend(handles=h, loc='lower center', bbox_to_anchor=(0.5, 1),
+                     ncol=4, bbox_transform=ax[0].transAxes)
+        plt.despine()
+        plt.detick(ax)
 
         mode_index = np.nanargmax(
                 [max(abs(Imax[mode]['I'][:])) for mode in Imax])
@@ -577,7 +636,7 @@ class coil_force(pythonIO):
 if __name__ == '__main__':
 
     force = coil_force(vessel=True, t_pulse=0.3)
-    force.load_file(4)
+    force.load_file(4, read_txt=True)
     force.frame_update(251)
     force.plot(subcoil=True, plasma=False, insert=True, contour=True)
 
@@ -591,7 +650,7 @@ if __name__ == '__main__':
     plt.axis('off')
     '''
     # force.read_data(nframe=500, forcewrite=False)
-    force.plot_Fmax(nframe=500)
+    # force.plot_Fmax(nframe=500)
 
 
 

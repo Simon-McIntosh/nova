@@ -1,6 +1,6 @@
 import os
 import nep
-from amigo.png_tools import data_mine, data_load
+from amigo.png_tools import data_load
 from amigo.IO import class_dir
 from amigo.pyplot import plt
 import numpy as np
@@ -8,6 +8,7 @@ from nep.DINA.capacitor_discharge import power_supply
 from amigo.addtext import linelabel
 from mpl_toolkits.axes_grid.inset_locator import inset_axes
 from nep.DINA.circuits import impulse_capacitor
+
 
 path = os.path.join(class_dir(nep), '../Data/EM/')
 # data_mine(path, 'VS3_risetime', [5, 6], [0, 3e5])
@@ -30,19 +31,12 @@ ax.plot(1e3*t, 1e-3*Ic, color='gray')
 text.add('PS referance')
 
 ps = power_supply(nturn=4, vessel=True, scenario=-1, code='IO')
-ps.set_dt_discharge()
-'''
-ps.solve(Io=0, sign=1, nturn=4, t_pulse=0.0, impulse=True, plot=False,
-         pulse_phase=0, tend=t[-1], switch_capacitor=False)
-ax.plot(1e3*ps.data['t'], 1e-3*ps.data['Ivec'][:, 0], '-')
-text.add('capacitor hold')
-'''
 ps.solve(Io=0, sign=1, nturn=4, t_pulse=0.3, impulse=True, plot=False,
-         pulse_phase=0, tend=t[-1], switch_capacitor=True)
+         pulse_phase=0, t_end=t[-1], origin='start')
 ax.plot(1e3*ps.data['t'], 1e-3*ps.data['Ivec'][:, 0], '-')
 text.add('flat-top')
 ps.solve(Io=0, sign=1, nturn=4, t_pulse=0.0, impulse=True, plot=False,
-         pulse_phase=0, tend=t[-1], switch_capacitor=True)
+         pulse_phase=0, t_end=t[-1], origin='start')
 ax.plot(1e3*ps.data['t'], 1e-3*ps.data['Ivec'][:, 0], '-')
 text.add('spike')
 
@@ -53,6 +47,7 @@ text.plot()
 plt.despine()
 ax.set_xlabel('$t$ ms')
 ax.set_ylabel('$I_{vs3}$ kA')
+plt.set_context('notebook')
 
 
 print('risetime {:1.1f}ms'.format(1e3*(t90 - t10)))

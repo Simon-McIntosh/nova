@@ -751,7 +751,7 @@ class VDE_force(pythonIO):
 
 if __name__ == '__main__':
     folder, frame_index = 4, 251
-    vde = VDE_force(mode='control', discharge='DINA', read_txt=True)
+    vde = VDE_force(mode='control', discharge='DINA', read_txt=False)
 
     vde.load_file(folder, frame_index=frame_index)
     vde.plot(insert=True, contour=True, subcoil=True, plasma=False)

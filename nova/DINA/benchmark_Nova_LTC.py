@@ -16,7 +16,7 @@ LTC['VDE'] = {'t': points[0]['x'], 'I': -points[0]['y']}
 
 
 Nova = {}
-ps = power_supply(nturn=4, vessel=True, code='LTC', origin='peak')
+ps = power_supply(nturn=4, vessel=True, code='IO', origin='peak')
 ps.solve(Io=0, sign=-1, nturn=4, t_pulse=0.3, scenario=3,
          impulse=True, plot=False)
 Nova['md'] = {'t': ps.data['t'], 'I': ps.data['Ivec'][:, 0]}

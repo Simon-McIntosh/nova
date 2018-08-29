@@ -25,18 +25,19 @@ from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
 class coil_force(pythonIO):
 
     def __init__(self, Iscale=1, read_txt=False, vessel=True, t_pulse=0.3,
-                 mode='control'):
+                 mode='control', nturn=4):
         self.Iscale = Iscale
         self.read_txt = read_txt
         self.vessel = vessel
         self.t_pulse = t_pulse
         self.mode = mode
+        self.nturn = nturn
         self.dina = dina('disruptions')
         self.pl = read_plasma('disruptions', Iscale=self.Iscale,
                               read_txt=read_txt)  # load plasma
         self.tor = read_tor('disruptions', Iscale=self.Iscale,
                             read_txt=read_txt)  # load currents
-        self.ps = power_supply(nturn=4, read_txt=read_txt)
+        self.ps = power_supply(nturn=nturn, read_txt=read_txt)
         self.allowable = stress_allowable()  # load allowable interpolators
         pythonIO.__init__(self)  # python read/write
 
@@ -463,7 +464,7 @@ class coil_force(pythonIO):
         for i, name in enumerate(coil_data):
             vs3 = coil_data[name]
             for mode, color, width in zip(modes, colors, widths):
-                ax_I.bar(i, 1e-3*Fmax[mode][i]['I'], color=color,
+                ax_I.bar(i, 1e-3*Imax[mode][i]['I'], color=color,
                          width=width, label=mode)
         Im, im = [], []
         for mode in Imax:
@@ -611,6 +612,11 @@ class coil_force(pythonIO):
     def plot(self, insert=False, contour=False, **kwargs):
         if 'ax' not in kwargs:
             kwargs['ax'] = plt.subplots(1, 1, figsize=(7, 10))[1]
+        if not self.vessel:
+            for coil in ['lower', 'upper']:
+                self.pf.coil.pop('{}VS'.format(coil))
+                for i in range(self.pf.sub_coil['{}VS_0'.format(coil)]['Nf']):
+                    self.pf.sub_coil.pop('{}VS_{}'.format(coil, i))
         self.pf.plot(**kwargs)
         if contour:
             self.contour(**kwargs)
@@ -636,9 +642,11 @@ class coil_force(pythonIO):
 if __name__ == '__main__':
 
     force = coil_force(vessel=True, t_pulse=0.3)
-    force.load_file(4, read_txt=True)
+    '''
+    force.load_file(4, read_txt=False)
     force.frame_update(251)
     force.plot(subcoil=True, plasma=False, insert=True, contour=True)
+    '''
 
     '''
     plt.figure(figsize=(7, 10))
@@ -650,7 +658,8 @@ if __name__ == '__main__':
     plt.axis('off')
     '''
     # force.read_data(nframe=500, forcewrite=False)
-    # force.plot_Fmax(nframe=500)
+    # plt.set_context('notebook')
+    force.plot_Fmax(nframe=500)
 
 
 

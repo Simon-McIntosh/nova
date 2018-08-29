@@ -390,12 +390,11 @@ class power_supply:
 
 
 if __name__ == '__main__':
-    ps = power_supply(nturn=4, vessel=True, scenario=3, code='IO')
+    ps = power_supply(nturn=3, vessel=True, scenario=3, code='IO')
 
-    plt.set_context('talk')
-    ps.solve(Io=0, sign=-1, nturn=4, t_pulse=0.3, origin='peak',
+    # plt.set_context('talk')
+    ps.solve(Io=0, sign=-1, nturn=3, t_pulse=0.3, origin='peak',
              impulse=True, plot=True)
-
 
     # ps.LTC()
 

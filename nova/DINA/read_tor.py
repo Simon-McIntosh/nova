@@ -282,15 +282,5 @@ if __name__ == '__main__':
     tor.plot(130)
     #tor.movie('tmp')
 
-    tor.set_current(130)
 
-    #tor.pf.plot(subcoil=True, plasma=True)
-
-    plt.figure(figsize=(7, 10))
-    tor.pf.initalize_collection()
-    tor.pf.patch_coil(tor.pf.coil)
-    tor.pf.patch_coil(tor.plasma_coil[tor.frame_index])
-    tor.pf.plot_patch(c='Jc', clim=[-10, 10])
-    plt.axis('equal')
-    plt.axis('off')
 

@@ -9,14 +9,6 @@ from amigo.pyplot import plt
 import pandas as pd
 
 
-def lowpass(x, dt, dt_window=1):
-    nwindow = int(dt_window/dt)
-    if nwindow % 2 == 0:
-        nwindow += 1
-    x_lp = savgol_filter(x, nwindow, 3, mode='mirror')  # lowpass
-    return x_lp
-
-
 class timeconstant:
 
     def __init__(self, td, Id, trim_fraction=0.2):
@@ -154,11 +146,14 @@ class timeconstant:
 class dina:
 
     def __init__(self, database_folder):
-        self.get_directory(database_folder)
+        self.set_directory(database_folder)
+
+    def set_directory(self, database_folder):
+        self.database_folder = database_folder
+        self.get_directory()
         self.get_folders()
 
-    def get_directory(self, database_folder):
-        self.database_folder = database_folder
+    def get_directory(self):
         self.root = class_dir(nep)
         self.directory = join(self.root, '../Scenario_database')
         if self.database_folder is not None:
@@ -202,23 +197,27 @@ class dina:
                 if isdir(subfolder):
                     files = [f for f in listdir(subfolder) if
                              isfile(join(subfolder, f))]
-                    folder_ext = files[0].split('.')[-1].lower()
-                    if ext == folder_ext:
+                    folder_ext = [file.split('.')[-1].lower()
+                                  for file in files]
+                    if ext in folder_ext:
                         folder = subfolder
                         break
                     else:
                         files = []
             if not files:
-                raise IndexError('file {} not found'.format(file_type))
+                raise IndexError('file {}.{} not found'.format(file_type,
+                                                               ext))
         else:
             files = [f for f in listdir(folder) if isfile(join(folder, f))]
-        file = [f for f in files if file_type.lower() in f.lower()]
-        if len(file) == 0:
+        files = [f for f in files if file_type.lower() in f.lower()]
+        if len(files) == 0:
             txt = '\nfile key {} not found '.format(file_type)
             txt += 'in: \n{}'.format(files)
             raise IndexError(txt)
-        else:
-            file = file[0]
+        try:
+            file = [f for f in files if ext in f.lower()][0]
+        except IndexError:
+            raise IndexError('ext {} not found in {}'.format(ext, files))
         return join(folder, file)
 
     def read_csv(self, filename, dropnan=True, split=''):

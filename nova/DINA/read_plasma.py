@@ -2,7 +2,7 @@ import pandas as pd
 from amigo.pyplot import plt
 import numpy as np
 from amigo.addtext import linelabel
-from nep.DINA.read_dina import dina, lowpass, timeconstant
+from nep.DINA.read_dina import dina, timeconstant
 from scipy.interpolate import interp1d
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
@@ -12,6 +12,7 @@ import nep
 from amigo.IO import class_dir, pythonIO
 import os
 from os.path import sep, isfile
+from amigo.geom import lowpass
 
 
 class read_plasma(pythonIO):

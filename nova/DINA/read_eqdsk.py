@@ -1,5 +1,6 @@
 from nep.DINA.read_dina import dina
 from nova.streamfunction import SF
+from amigo.pyplot import plt
 
 
 class read_eqdsk:
@@ -13,7 +14,8 @@ class read_eqdsk:
         self.sf = SF(filename=filename)
 
     def plot(self):
-        self.sf.contour()
+        ax = plt.subplots(1, 1, figsize=(8, 10))[1]
+        self.sf.contour(ax=ax)
 
 
 if __name__ == '__main__':

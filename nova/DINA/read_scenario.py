@@ -24,53 +24,69 @@ from itertools import count
 from nova.cross_coil import get_coil_psi
 from amigo import geom
 from nova.inverse import INV
+from nova.coils import PF
+from nova.streamfunction import SF
 
 
 class read_scenario(pythonIO):
 
     def __init__(self, database_folder='operations', folder=None,
-                 read_txt=False, VS=False, file_type='txt'):
+                 read_txt=False, VS=False, file_type='txt', dCoil=0.25):
         self.date_switch = datetime.strptime('2016-02', '%Y-%m')
         self.read_txt = read_txt
+        self.dCoil = dCoil
         self.dina = dina(database_folder)
-        self.load_coils(VS=VS)
         if folder is not None:
             self.load_file(folder, file_type=file_type)
         pythonIO.__init__(self)  # python read/write
 
     def load_file(self, folder, **kwargs):
         read_txt = kwargs.get('read_txt', self.read_txt)
+        dCoil = kwargs.get('dCoil', self.dCoil)
         file_type = kwargs.get('file_type', 'txt')
         filepath = self.dina.locate_file('data2.{}'.format(file_type),
                                          folder=folder)
         filepath = '.'.join(filepath.split('.')[:-1])
+        attributes = ['data', 'columns', 'tmax', 'tmin', 'nt', 'dt',
+                      't', 'fun', 'Icoil',
+                      'Ipl', 'Ipl_lp', 'dIpldt', 'dIpldt_lp', 'noise',
+                      'opp_index', 'flattop_index', 'vs3', 'name',
+                      'hip', 'date', 'coordinate_switch', 'dCoil',
+                      'pf_index', 'pf_coil', 'pf_subcoil',
+                      'pf_plasma_coil', 'x', 'z', 'psi', 'xlim',
+                      'zlim', 'Fa', 'Fp']  #
         if read_txt or not isfile(filepath + '.pk'):
             self.read_file(folder, file_type=file_type)  # read txt file
-            self.sf.remove_contour()  # enable pickle
-            self.save_pickle(filepath,
-                             ['data', 'columns', 'tmax', 'tmin', 'nt',
-                              'dt', 't', 'fun', 'Icoil',
-                              'Ip', 'Ip_lp', 'dIpdt', 'dIpdt_lp', 'noise',
-                              'opp_index', 'flattop_index', 'vs3', 'name',
-                              'hip', 'date', 'coordinate_switch', 'ff',
-                              'sf', 'inv'])
+            self.save_pickle(filepath, attributes)
         else:
             self.load_pickle(filepath)
-            # re-link force field dicts
-            self.ff.index = self.pf.index
-            self.ff.pf_coil = self.pf.coil
-            self.ff.eq_coil = self.pf.sub_coil
-            self.ff.eq_plasma_coil = self.pf.plasma_coil
-            # re-link inverse dicts
-            self.inv.index = self.pf.index
-            self.inv.pf_coil = self.pf.coil
-            self.inv.eq_coil = self.pf.sub_coil
-            self.inv.eq_plasma_coil = self.pf.plasma_coil
-            self.inv.update_coils(regrid=False)
-            self.inv.ff = self.ff
-        self.sf.set_contour()  # re-set contour
+            attribute_error = self.load_functions()
+            if self.dCoil != dCoil or attribute_error:  # re-read txt file
+                self.read_file(folder, file_type=file_type, dCoil=dCoil)
+                self.save_pickle(filepath, attributes)
 
-    def read_file(self, folder, file_type='txt'):
+    def load_functions(self):
+        attribute_error = False
+        try:
+            self.pf = PF()  # create bare pf coil instance
+            self.pf(self.pf_index, self.pf_coil, self.pf_subcoil,
+                    self.pf_plasma_coil)  # __call__
+            self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi,
+                                'Ipl': self.Ipl,
+                                'xlim': self.xlim, 'zlim': self.zlim})
+            self.ff = force_field(self.pf_index, self.pf_coil, self.pf_subcoil,
+                                  self.pf_plasma_coil, multi_filament=True,
+                                  Fa=self.Fa, Fp=self.Fp)
+            self.inv = INV(self.pf_index, self.pf_coil, self.pf_subcoil,
+                           self.pf_plasma_coil, boundary='sf')
+            self.inv.update_coils(regrid=False)
+            self.inv.set_ITER_limits()
+        except AttributeError:
+            attribute_error = True
+        return attribute_error
+
+    def read_file(self, folder, file_type='txt', dCoil=0.5):
+        print('reading {}'.format(folder))
         if file_type == 'txt':
             filename = self.read_txt_file(folder)
         elif file_type == 'qda':
@@ -86,60 +102,15 @@ class read_scenario(pythonIO):
         self.load_data()
         self.set_noise()  # level of dz/dt diagnostic noise
         self.opperate()  # identify operating modes
-        self.ff = force_field(
-                self.pf.index, self.pf.coil, self.pf.sub_coil,
-                self.pf.plasma_coil, multi_filament=True)
-        self.sf = read_eqdsk(file='burn').sf  # default sf object
-        self.update(self.t[0])  # update DINA interpolators
-        self.update_plasma(grid={'n': 1e4, 'limit': [1, 9, -7, 7]})
-        self.sf.sol()  # extract scrape-off-layer
+        self.load_coils(dCoil=dCoil, VS=False)  # coil geometory
+        self.load_psi()  # load flux map
+        self.load_force()  # load force field matrices
 
-        self.inv = INV(self.pf, boundary='sf')
-        self.inv.update_coils(regrid=False)
-        self.set_coil_limits()  # PF / CS operational limits
-
-        '''
-        inv = INV(scn.pf, boundary='sf')
-        inv.update_coils(regrid=False)
-
-
-        # current limits
-        inv.set_limit(ICS=45, ICS1=90,
-                      IPF1=48, IPF2=55, IPF3=55, IPF4=55, IPF5=52, IPF6=52)
-        # force limits
-        # inv.set_limit(FCSsep=240, side='upper')
-        inv.set_limit(FCS0sep=160, side='lower')
-        inv.set_limit(FCSsum=60, side='both')
-        inv.set_limit(FPF1=-150, FPF2=-75, FPF3=-90, FPF4=-40,
-                      FPF5=-10, FPF6=-190, side='lower')
-        inv.set_limit(FPF1=110, FPF2=15, FPF3=40, FPF4=90,
-                      FPF5=160, FPF6=170, side='upper')
-
-
-        # scn.sf.initalize_sol()
-        inv.colocate(scn.sf, ff=scn.ff)
-        inv.set_foreground()
-
-
-        inv.solve_slsqp(5)
-        '''
-
-    def colocate(self):  # set colocation points
+    def fix_shape(self):  # set colocation points
         self.inv.colocate(self.sf, ff=self.ff)
         self.inv.set_foreground()
-
-    def set_coil_limits(self):
-        # current limits
-        self.inv.set_limit(ICS=45, ICS1=90)
-        self.inv.set_limit(IPF1=48, IPF2=55, IPF3=55,
-                           IPF4=55, IPF5=52, IPF6=52)
-        # force limits
-        self.inv.set_limit(FCSsep=240, side='upper')
-        self.inv.set_limit(FCSsum=60, side='both')
-        self.inv.set_limit(FPF1=-150, FPF2=-75, FPF3=-90, FPF4=-40,
-                           FPF5=-10, FPF6=-190, side='lower')
-        self.inv.set_limit(FPF1=110, FPF2=15, FPF3=40, FPF4=90,
-                           FPF5=160, FPF6=170, side='upper')
+        self.inv.set_background()
+        self.inv.get_weight()
 
     def set_noise(self):
         noise_dict = {'2014-01': 3, '2015-02': 0.6,
@@ -200,13 +171,32 @@ class read_scenario(pythonIO):
         for var in self.data:
             self.data[var] = np.array(self.data[var])[~nan_index]
 
-    def load_coils(self, plot=False, VS=False, joinCS=True):
-        pf_geom = PFgeom(VS=VS, dCoil=0.15)
-        self.pf = pf_geom.pf
+    def load_coils(self, dCoil=0.15, VS=False, joinCS=True):
+        pf_geom = PFgeom(VS=VS, dCoil=dCoil)
+        pf = pf_geom.pf
         if joinCS:
-            self.pf.join_coils('CS1', ['CS1L', 'CS1U'])
-        if plot:
-            self.pf.plot(label=True)
+            pf.join_coils('CS1', ['CS1L', 'CS1U'])
+        self.pf_index = pf.index
+        self.pf_coil = pf.coil
+        self.pf_subcoil = pf.subcoil
+        self.pf_plasma_coil = pf.plasma_coil
+        self.dCoil = dCoil
+
+    def load_psi(self):
+        sf = read_eqdsk(file='burn').sf  # load referance sf instance
+        self.x, self.z, self.psi = sf.x, sf.z, sf.psi
+        self.xlim, self.zlim = sf.xlim, sf.zlim
+
+    def load_force(self):
+        ff = force_field(self.pf_index, self.pf_coil, self.pf_subcoil,
+                         self.pf_plasma_coil, multi_filament=True)
+        self.Fa, self.Fp = ff.Fa, ff.Fp  # interaction matrices
+
+    def plot_coils(self, ax=None):
+        if ax is None:
+            ax = plt.subplots(1, 1, figsize=(8, 10))[1]
+        self.pf.plot(label=True, current=True, patch=False, ax=ax)
+        self.pf.plot(subcoil=True, plasma=True, ax=ax)
 
     def space_data(self):  # generate interpolators and space timeseries
         if self.date > self.date_switch:
@@ -231,7 +221,7 @@ class read_scenario(pythonIO):
         self.Icoil = {}
         for var in self.data:
             if var == 'Ip':  # plasma
-                self.Ip = 1e6*self.data[var]  # MA to A
+                self.Ipl = 1e6*self.data[var]  # MA to A
             elif var[0] == 'I' and len(var) <= 5:
                 # kAturn to Aturn
                 self.Icoil[var[1:].upper()] = 1e3*self.data[var]
@@ -245,7 +235,7 @@ class read_scenario(pythonIO):
                                      polyorder=polyorder)
         return x_filter
 
-    def get_turning_points(self, x, dt_window=1.0, nsample=1000, ncl=6,
+    def get_turning_points(self, x, dt_window=1.0, n=1000, ncl=6,
                            plot=False, **kwargs):
         if isinstance(x, str):
             x = getattr(self, x)  # load vector
@@ -264,7 +254,7 @@ class read_scenario(pythonIO):
         if dt_window > 0:
             x = self.filter_vector(x, dt, dt_window=dt_window)
         turn_index = {}
-        to = np.linspace(t[0], t[-1], nsample)  # down-sample
+        to = np.linspace(t[0], t[-1], n)  # down-sample
         for name in names:
             xo = interp1d(t, x[name])(to)
             M = np.append(to.reshape(-1, 1), xo.reshape(-1, 1), axis=1)
@@ -309,14 +299,14 @@ class read_scenario(pythonIO):
         ax.legend()
 
     def opperate(self, plot=False):  # identify operating modes
-        trim = np.argmax(self.Ip[::-1] < 0)
-        ind = len(self.Ip)-trim
-        self.dIpdt = np.gradient(self.Ip[:ind], self.t[:ind])  # gradient
-        self.Ip_lp = lowpass(self.Ip[:ind], self.dt, dt_window=1)  # current
-        self.dIpdt_lp = np.gradient(self.Ip_lp[:ind], self.t[:ind])  # gradient
-        self.hip = histopeaks(self.t[:ind], self.dIpdt_lp, nstd=3, nlim=6,
+        trim = np.argmax(self.Ipl[::-1] < 0)
+        ind = len(self.Ipl)-trim
+        self.dIpldt = np.gradient(self.Ipl[:ind], self.t[:ind])  # gradient
+        self.Ipl_lp = lowpass(self.Ipl[:ind], self.dt, dt_window=1)  # current
+        self.dIpldt_lp = np.gradient(self.Ipl_lp[:ind], self.t[:ind])  # slope
+        self.hip = histopeaks(self.t[:ind], self.dIpldt_lp, nstd=3, nlim=10,
                               nbins=75)  # modes
-        self.opp_index = self.hip.timeseries(Ip=self.Ip[:ind], plot=plot)
+        self.opp_index = self.hip.timeseries(Ip=self.Ipl[:ind], plot=plot)
         self.flattop_index = self.opp_index[0]  # flattop index
         if 'VS3' in self.Icoil:
             self.vs3 = {
@@ -346,19 +336,23 @@ class read_scenario(pythonIO):
     def update(self, t):  # update from DINA interpolators
         self.set_plasma(t)
         self.set_coil_current(t)
+        self.inv.update_coils(regrid=False)
         self.ff.set_force_field(state='passive')
         self.ff.set_current()
-        self.ff.get_force()
+        Fcoil = self.ff.get_force()
+        return Fcoil
 
-    def update_plasma(self, grid=None, plot=False):
-        if grid:  # grid={'n': n, 'limit':[xmin, xmax, zmin, zmax]}
+    def update_psi(self, grid=None, plot=False):
+        if grid:  # grid={'n': 1e3, 'limit':[3.5, 9, -5.5, 5.5]}
             x2d, z2d, x, z = geom.grid(grid['n'], grid['limit'])[:4]
-            psi = get_coil_psi(x2d, z2d, self.pf)
-            eq = {'x': x, 'z': z, 'psi': psi, 'Ipl': self.Ipl}
+            psi = get_coil_psi(x2d, z2d, self.pf_subcoil, self.pf_plasma_coil)
+            eqdsk = {'x': x, 'z': z, 'psi': psi}
         else:
-            psi = get_coil_psi(self.sf.x2d, self.sf.z2d, self.pf)
-            eq = {'x': self.sf.x, 'z': self.sf.z, 'psi': psi, 'Ipl': self.Ipl}
-        self.sf.update_plasma(eq)
+            psi = get_coil_psi(self.sf.x2d, self.sf.z2d,
+                               self.pf.subcoil, self.pf.plasma_coil)
+            eqdsk = {'x': self.sf.x, 'z': self.sf.z, 'psi': psi}
+
+        self.sf.update_psi(eqdsk)
         try:
             self.sf.sol()
         except ValueError:
@@ -373,35 +367,35 @@ class read_scenario(pythonIO):
         levels = self.sf.contour(Xnorm=True, boundary=True,
                                  separatrix='both', ax=ax)
         self.sf.plot_firstwall(ax=ax)
-        self.pf.plot(plasma=True, label=True, current=True, patch=False, ax=ax)
-        self.pf.plot(subcoil=True, label=False, ax=ax)
-        self.ff.plot()
+        self.plot_coils(ax=ax)
         self.sf.plot_sol(ax=ax)
+        self.ff.plot()
         return levels
 
-    def set_plasma(self, index):
+    def set_plasma(self, t):
         try:
-            x = self.fun['Rcur'](index)
-            z = self.fun['Zcur'](index)
-            apl = self.fun['ap'](index)
-            kpl = self.fun['kp'](index)
+            x = self.fun['Rcur'](t)
+            z = self.fun['Zcur'](t)
+            apl = self.fun['ap'](t)
+            kpl = self.fun['kp'](t)
         except KeyError:
-            x = 1e-2*self.fun['Rp'](index)
-            z = 1e-2*self.fun['Zp'](index)
-            apl = 1e-2*self.fun['a'](index)
-            kpl = self.fun['Ksep'](index)
+            x = 1e-2*self.fun['Rp'](t)
+            z = 1e-2*self.fun['Zp'](t)
+            apl = 1e-2*self.fun['a'](t)
+            kpl = self.fun['Ksep'](t)
         dx = 2 * apl * 0.4
         dz = kpl * dx
-        self.Ipl = 1e6*self.fun['Ip'](index)
-        self.pf.plasma_coil.clear()
+        self.Ipl = 1e6*self.fun['Ip'](t)
+        self.pf_plasma_coil.clear()
         if x > 0.0:
-            self.pf.plasma_coil['Plasma_0'] = \
-                {'x': x, 'z': z, 'dx': dx, 'dz': dz,
-                 'rc': np.sqrt(dx + dz) / 2, 'Ic': self.Ipl, 'index': 0}
+            plasma_coil = {'x': x, 'z': z, 'dx': dx, 'dz': dz, 'Ic': self.Ipl}
+            plasma_subcoil = PF.mesh_coil(plasma_coil, 0.25)
+            for i, filament in enumerate(plasma_subcoil):
+                subname = 'Plasma_{}'.format(i)
+                self.pf_plasma_coil[subname] = filament
 
-    def set_coil_current(self, index):
-        # index < 0 == frame_index else time
-        Ic = self.get_coil_current(index, VS3=False)  # get coil currents
+    def set_coil_current(self, t):
+        Ic = self.get_coil_current(t, VS3=False)  # get coil currents
         self.pf.update_current(Ic)
 
     def get_force(self, n=300, plot=False, ax=None):
@@ -511,9 +505,17 @@ class read_scenario(pythonIO):
         label = coil[:3] if coil[:2] == 'VS' else coil[:2]
         return label
 
-    def plot_currents(self, mask=False, apply_filter=False,
-                      coils=['CS', 'PF'], line_color=None, ax=None,
-                      plot_turn=False):
+    def plot_flux(self, ax=None):
+        if ax is None:
+            ax = plt.subplots(1, 1)[1]
+        ax.plot(self.t, self.data['PSI(axis)'])
+        ax.set_xlabel('$t$ s')
+        ax.set_ylabel('$\Psi$ Wb')
+        plt.despine()
+
+    def plot_current(self, mask=False, apply_filter=False,
+                     coils=['CS', 'PF'], line_color=None, ax=None,
+                     plot_turn=False):
         if ax is None:
             ax = plt.subplots(1, 1)[1]
         index = self.opp_index[1]  # mode index
@@ -559,29 +561,6 @@ class read_scenario(pythonIO):
         plt.despine()
         ax.set_xlabel('$t$ s')
         ax.set_ylabel('$I$ kA')
-        '''
-        VS3_rms = self.get_VS3_rms()
-        txt = '$\sqrt{<dz/dt^2>}=$'
-        txt += '{:1.1f}'.format(self.noise)
-        txt += 'ms$^{-1}$\n'
-        txt += '$\sqrt{<I_{VS3}^2>}=$'+'{:1.2f}kA'.format(1e-3*VS3_rms)
-        ax.text(1, 1, txt, transform=plt.gca().transAxes,
-                 ha='right', va='bottom',
-                 bbox=dict(facecolor='grey', alpha=0.25),
-                 fontsize=12)
-
-        ax.text(-0.05, 1.1, self.name, transform=pax.transAxes,
-                 ha='left', va='top',
-                 bbox=dict(facecolor='grey', alpha=0.25),
-                 fontsize=12)
-
-        h = []
-        for coil in coils:
-            h.append(mlines.Line2D([], [],
-                                   color=plot_parameters[coil]['color'],
-                                   label=coil))
-        ax.legend(handles=h)
-        '''
         ax.legend(loc=8, ncol=3)
 
     def get_VS3_rms(self):

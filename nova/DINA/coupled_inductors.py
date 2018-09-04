@@ -8,7 +8,6 @@ from itertools import count
 from nep.coil_geom import VSgeom, PFgeom
 from nep.DINA.read_tor import read_tor
 from nep.DINA.read_plasma import read_plasma
-from amigo.addtext import linelabel
 
 
 class inductance:
@@ -83,9 +82,10 @@ class inductance:
     def assemble(self, plot=False):
         self.pf.mesh_coils()
         if plot:
-            self.pf.plot()
-        self.inv = INV(self.pf, Iscale=1)
-        self.inv.update_coils(categorize=False)
+            self.pf.plot(subcoil=True)
+        self.inv = INV(self.pf.index, self.pf.coil, self.pf.subcoil,
+                       self.pf.plasma_coil, Iscale=1)
+        self.inv.update_coils()
         Nf = np.ones(self.inv.nC)
         turns = np.array(self.nt)
         self.Io = np.ones(self.nC)
@@ -232,7 +232,7 @@ if __name__ is '__main__':
 
         nvs_o = ind.nC
         turns = np.append(np.ones(4), -np.ones(4))
-        ind.add_pf_coil(vs_geom.pf.sub_coil, turns=turns)
+        ind.add_pf_coil(vs_geom.pf.subcoil, turns=turns)
         vs3 = 'single'
 
         if vs3 == 'single':

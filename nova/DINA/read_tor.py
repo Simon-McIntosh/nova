@@ -14,9 +14,9 @@ class read_tor(pythonIO):
     # read tor_cur_data*.dat file from DINA simulation
     # listing of toroidal currents
 
-    def __init__(self, database_folder='disruptions', Iscale=1,
+    def __init__(self, database_folder='disruptions', Ip_scale=1,
                  read_txt=False):
-        self.Iscale = Iscale
+        self.Ip_scale = Ip_scale
         self.read_txt = read_txt
         self.dina = dina(database_folder)
         self.frame_index = 0
@@ -67,9 +67,9 @@ class read_tor(pythonIO):
         for i, frame in enumerate(frames):
             self.t[i] = 1e-3*frame[0]  # ms-s
             self.current['filament'][i] = -1e3*np.array(frame[1])  # -kA to A
-            self.current['filament'][i] *= self.Iscale  # scale
+            self.current['filament'][i] *= self.Ip_scale  # scale
             self.current['coil'][i] = -1e3*np.array(frame[3])  # -kA to A
-            self.current['coil'][i] *= self.Iscale  # scale
+            self.current['coil'][i] *= self.Ip_scale  # scale
             plasma_coil, Ipl = self.plasma_filaments(frame)
             self.plasma_coil.append(plasma_coil)
             self.Ibar['vv'][i] = np.mean(-1e3*np.array(frame[1])[:self.nVV])
@@ -82,7 +82,7 @@ class read_tor(pythonIO):
         xp = 1e-2*np.array(frame[2][0::3])
         zp = 1e-2*np.array(frame[2][1::3])
         Ip = -1e3*np.array(frame[2][2::3])  # -kA to A
-        Ip *= self.Iscale  # scale
+        Ip *= self.Ip_scale  # scale
         for x, z, Ic in zip(xp, zp, Ip):
             name = 'Plasma_{}'.format(next(npl))
             plasma_coil[name] = {'Ic': Ic, 'dx': dx, 'dz': dz, 'rc': rc,

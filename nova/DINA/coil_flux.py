@@ -14,12 +14,12 @@ from amigo.IO import pythonIO
 
 class coil_flux(pythonIO):
 
-    def __init__(self, Iscale=1, read_txt=False):
+    def __init__(self, Ip_scale=1, read_txt=False):
         self.read_txt = read_txt
         self.dina = dina('disruptions')
-        self.pl = read_plasma('disruptions', Iscale=Iscale,
+        self.pl = read_plasma('disruptions', Ip_scale=Ip_scale,
                               read_txt=read_txt)  # load plasma
-        self.tor = read_tor('disruptions', Iscale=Iscale,
+        self.tor = read_tor('disruptions', Ip_scale=Ip_scale,
                             read_txt=read_txt)  # load currents
         pythonIO.__init__(self)  # python read/write
 
@@ -35,9 +35,9 @@ class coil_flux(pythonIO):
         else:
             self.coil_geom = VSgeom()
         self.flux = OrderedDict()
-        for coil in self.coil_geom.pf.sub_coil:
-            x = self.coil_geom.pf.sub_coil[coil]['x']
-            z = self.coil_geom.pf.sub_coil[coil]['z']
+        for coil in self.coil_geom.pf.subcoil:
+            x = self.coil_geom.pf.subcoil[coil]['x']
+            z = self.coil_geom.pf.subcoil[coil]['z']
             self.flux[coil] = {'x': x, 'z': z}
 
     def load_file(self, scenario, plot=False, **kwargs):
@@ -67,7 +67,8 @@ class coil_flux(pythonIO):
         tick = clock(self.tor.nt, header='calculating coil flux history')
         for index in range(self.tor.nt):
             self.tor.set_current(index)  # update coil currents and plasma
-            psi_bg[index] = cc.get_coil_psi(x, z, self.tor.pf)
+            psi_bg[index] = cc.get_coil_psi(x, z, self.tor.pf.subcoil,
+                                            self.tor.pf.plasma_coil)
             tick.tock()
         vs3_bg = np.zeros(self.tor.nt)
         jkt_lower_bg = np.zeros(self.tor.nt)

@@ -30,9 +30,9 @@ class power_supply:
     def set_defaults(self):
         self.setup = {'Cd': 2.42, 'pulse': True, 't_pulse': 0.0,
                       'pulse_period': 10, 'impulse': True, 'scenario': -1,
-                      'vessel': True, 'nturn': 4, 'sign': -1, 'code': 'IO',
+                      'vessel': True, 'nturn': 4, 'sign': -1, 'code': 'Nova',
                       'dt_discharge': 0, 'Io': 0, 'origin': 'peak',
-                      'trip': 't_trip'}
+                      'trip': 't_trip', 'Ip_scale': 1}
         for var in self.setup:
             setattr(self, var, self.setup[var])
 
@@ -47,13 +47,13 @@ class power_supply:
         nvs_o = self.ind.nC
         turns = np.append(np.ones(4), -np.ones(4))
         self.ind.add_pf_coil(
-                OrderedDict(list(self.vv.pf.sub_coil.items())[:8]),
+                OrderedDict(list(self.vv.pf.subcoil.items())[:8]),
                 turns=turns)
         for index in nvs_o+np.arange(1, 8):  # vs3 loops
             self.ind.add_cp([nvs_o, index])  # link VS coils
         if self.vessel:
             nvs_o = self.ind.nC
-            jacket = list(self.vv.pf.sub_coil.items())[8:16]
+            jacket = list(self.vv.pf.subcoil.items())[8:16]
             R = np.array([turn[1]['R'] for turn in jacket])
             Rlower = 1 / (np.sum(1/R[:4]))
             Rupper = 1 / (np.sum(1/R[4:]))
@@ -68,7 +68,7 @@ class power_supply:
             for index in nvs_o+4+np.arange(1, 4):
                 self.ind.add_cp([nvs_o+4, index])  # upper jacket coils
             # add vv coils
-            vv_coils = list(self.vv.pf.sub_coil.items())[16:]
+            vv_coils = list(self.vv.pf.subcoil.items())[16:]
             self.ind.add_pf_coil(OrderedDict(vv_coils))
         self.ind.reduce()
         self.ncoil = self.ind.nd['nr']  # number of retained coils
@@ -128,7 +128,7 @@ class power_supply:
             # Lvs3 = 1.38e-3  # total inductance of vs3 loop
             Lvs3 = 1.395e-3  # total inductance of vs3 loop
             Rvs3 = 17.66e-3  # total vs3 loop resistance
-        elif self.code == 'IO':
+        elif self.code == 'Nova':
             Lvs3 = self.ind.M[0, 0] + 0.2e-3  # add busbar inductance (1.56e-3)
             Rvs3 = 17.66e-3  # total vs3 loop resistance
         self.R = np.copy(self.ind.Rc)  # coil resistance vector
@@ -183,6 +183,8 @@ class power_supply:
         Icap = I[1]  # capacitor charge current
         Ivec = I[2:2+self.ncoil]
         Vbg = self.Vbg(t)
+        if self.Ip_scale != 1:  # reduced plasma current opperation
+            Vbg *= self.Ip_scale
         Vbg[0] *= self.nturn/4
         Vbg[1:3] /= 4  # jacket turns
         if not self.vessel:
@@ -362,8 +364,11 @@ class power_supply:
             ax.legend(lines, labels)
 
         ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 0], '-C0')
-        ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 1], '-C6')
-        ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 2], '-C7')
+        try:
+            ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 1], '-C6')
+            ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 2], '-C7')
+        except IndexError:
+            pass
         ax.set_ylabel('$I_{vs3}$ kA')
         ax.set_xlabel('$t$ ms')
         plt.despine()
@@ -390,12 +395,11 @@ class power_supply:
 
 
 if __name__ == '__main__':
-    ps = power_supply(nturn=3, vessel=True, scenario=3, code='IO')
+    ps = power_supply(nturn=4, vessel=True, scenario=-1, code='Nova',
+                      Ip_scale=15/15, read_txt=False)
 
     # plt.set_context('talk')
-    ps.solve(Io=0, sign=-1, nturn=3, t_pulse=0.3, origin='peak',
+    ps.solve(Io=0, sign=-1, t_pulse=0.0, origin='peak',
              impulse=True, plot=True)
-
-    # ps.LTC()
 
 

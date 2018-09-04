@@ -26,16 +26,16 @@ from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
 
 class VDE_force(pythonIO):
 
-    def __init__(self, mode='control', discharge='DINA', Iscale=1,
+    def __init__(self, mode='control', discharge='DINA', Ip_scale=1,
                  read_txt=False):
-        self.Iscale = Iscale
+        self.Ip_scale = Ip_scale
         self.read_txt = read_txt
         self.mode = mode
         self.discharge = discharge
         self.dina = dina('disruptions')
-        self.pl = read_plasma('disruptions', Iscale=self.Iscale,
+        self.pl = read_plasma('disruptions', Ip_scale=self.Ip_scale,
                               read_txt=read_txt)  # load plasma
-        self.tor = read_tor('disruptions', Iscale=self.Iscale,
+        self.tor = read_tor('disruptions', Ip_scale=self.Ip_scale,
                             read_txt=read_txt)  # load currents
         self.allowable = stress_allowable()  # load allowable interpolators
         pythonIO.__init__(self)  # python read/write
@@ -354,9 +354,9 @@ class VDE_force(pythonIO):
         filename = join(self.dina.root,
                         'DINA/Data/vs3_{}_{:d}.plk'.format(discharge,
                                                            nframe))
-        if self.Iscale != 1:
+        if self.Ip_scale != 1:
             filename = filename.replace(
-                    '.plk', '_Iscale_{:1.1f}.plk'.format(self.Iscale))
+                    '.plk', '_Ip_scale_{:1.1f}.plk'.format(self.Ip_scale))
         return filename
 
     def write_data(self, discharge, nframe=100):

@@ -17,9 +17,9 @@ from amigo.geom import lowpass
 
 class read_plasma(pythonIO):
 
-    def __init__(self, database_folder='disruptions', Iscale=1,
+    def __init__(self, database_folder='disruptions', Ip_scale=1,
                  read_txt=False):
-        self.Iscale = Iscale
+        self.Ip_scale = Ip_scale
         self.read_txt = read_txt
         self.dina = dina(database_folder)
         self.Ivs3_properties()
@@ -33,8 +33,9 @@ class read_plasma(pythonIO):
         if read_txt or not isfile(filepath + '.pk'):
             self.read_file(filepath)  # read txt file
             self.save_pickle(filepath,
-                             ['data', 'columns', 't', 'Ip', 'Ivs3_o', 'x', 'z',
-                              'nt', 'dt', 'zdir', 'Iref', 'Iscale'])
+                             ['data', 'columns', 't', 'Ipl', 'Ivs3_o',
+                              'x', 'z', 'nt', 'dt', 'zdir', 'Iref',
+                              'Ip_scale'])
         else:
             self.load_pickle(filepath)
 
@@ -54,7 +55,7 @@ class read_plasma(pythonIO):
     def load_data(self):
         data = {}  # convert units
         data['t'] = 1e-3*self.data['t']  # ms - s
-        data['Ip'] = -1e3*self.data['Ip']  # -kA to A
+        data['Ipl'] = -1e3*self.data['Ip']  # -kA to A
         data['Ivs3_o'] = -1e3*self.data.loc[:, 'I_dw'] / 4  # -kAturn to A
         data['x'] = 1e-2*self.data['Rcur']  # cm - m
         data['z'] = 1e-2*self.data['Zcur']  # cm - m
@@ -67,30 +68,20 @@ class read_plasma(pythonIO):
             if var != 't':  # interpolate
                 setattr(self, var, interp1d(data['t'], data[var])(self.t))
         self.zdir = np.sign(self.z[np.argmax(abs(self.z))])
-        self.Iref = {'Ip': np.copy(self.Ip),  # store referance currents
+        self.Iref = {'Ipl': np.copy(self.Ipl),  # store referance currents
                      'Ivs3_o': np.copy(self.Ivs3_o)}
 
     def scale_current(self, **kwargs):
-        if 'Iscale' in kwargs:
-            self.Iscale = kwargs['Iscale']
+        if 'Ip_scale' in kwargs:
+            self.Ip_scale = kwargs['Ip_scale']
         for var in self.Iref:
-            setattr(self, var, self.Iscale*self.Iref[var])
-        '''
-        didt = np.gradient(self.Ivs3_o, self.t)
-        vs3 = self.Ivs3_o*self.Rvs3['DINA'] + self.Lvs3['DINA'] * didt
-        self.vs3_fun = interp1d(self.t, vs3, fill_value='extrapolate')
-        self.Ivs3_o = odeint(self.dIdt_fun, 0, self.t).flatten()
-        '''
-
-    def dIdt_fun(self, I, t):
-        g = (self.vs3_fun(t) - I*self.Rvs3['LTC'])/self.Lvs3['LTC']
-        return g
+            setattr(self, var, self.Ip_scale*self.Iref[var])
 
     def plot_currents(self, ax=None):
         if ax is None:
             ax = plt.subplots(2, 1, sharex=True)[1]
-        ax[0].plot(1e3*self.t, 1e-6*self.Ip, 'C0')
-        ax[0].set_ylabel('$I_p$ MA')
+        ax[0].plot(1e3*self.t, 1e-6*self.Ipl, 'C0')
+        ax[0].set_ylabel('$I_{pl}$ MA')
         ax[1].plot(1e3*self.t, 1e-3*self.Ivs3_o, 'C1')
         ax[1].set_ylabel('$Ivs3_o$ kA')
         ax[1].set_xlabel('$t$ ms')
@@ -129,14 +120,14 @@ class read_plasma(pythonIO):
 
     def get_vs3_trip(self, dIdt_trip=5e7, dz_trip=0.16, plot=False):
         self.dz_trip = dz_trip
-        self.dIdt_trip = self.Iscale * dIdt_trip
-        Ip_lp = lowpass(self.Ip, self.dt, dt_window=0.001)  # plasma current
-        dIpdt = np.gradient(Ip_lp, self.t)
-        i_cq = next((i for i, dIdt in enumerate(dIpdt)
+        self.dIdt_trip = self.Ip_scale * dIdt_trip
+        Ipl_lp = lowpass(self.Ipl, self.dt, dt_window=0.001)  # plasma current
+        dIpldt = np.gradient(Ipl_lp, self.t)
+        i_cq = next((i for i, dIdt in enumerate(dIpldt)
                      if dIdt > self.dIdt_trip))
         t_cq = self.t[i_cq]  # current quench time
-        tc = timeconstant(self.t[i_cq:], Ip_lp[i_cq:], trim_fraction=0.5)
-        tdis, ttype, tfit, Ifit = tc.fit(plot=False, Io=-15e6 * self.Iscale)
+        tc = timeconstant(self.t[i_cq:], Ipl_lp[i_cq:], trim_fraction=0.5)
+        tdis, ttype, tfit, Ifit = tc.fit(plot=False, Io=-15e6 * self.Ip_scale)
         dZ = self.z - self.z[0]  # displacment trip
         try:
             i_dz = next((i for i, dz in enumerate(dZ) if abs(dz) > dz_trip))
@@ -151,13 +142,13 @@ class read_plasma(pythonIO):
         trip['name'] = self.name
         trip['t_cq'] = t_cq
         trip['i_cq'] = i_cq
-        trip['I_cq'] = self.Ip[i_cq]
+        trip['I_cq'] = self.Ipl[i_cq]
         trip['discharge_time'] = tdis
         trip['discharge_type'] = ttype
         trip['zdir'] = self.zdir
         trip['i_dz'] = i_dz
         trip['t_dz'] = t_dz
-        trip['I_dz'] = self.Ip[i_dz]
+        trip['I_dz'] = self.Ipl[i_dz]
         trip['z_dz'] = self.z[i_dz]
         trip['i_trip'] = i_trip
         trip['t_trip'] = t_trip
@@ -165,9 +156,9 @@ class read_plasma(pythonIO):
         if plot:
             txt = '{} discharge, t={:1.0f}ms'.format(ttype, 1e3*tdis)
             ax = plt.subplots(2, 1, sharex=True)[1]
-            ax[0].plot(1e3*self.t, 1e-6*self.Ip)
+            ax[0].plot(1e3*self.t, 1e-6*self.Ipl)
             ax[0].plot(1e3*tfit, 1e-6*Ifit, label=txt)
-            ax[0].set_ylabel('$Ip$ MA')
+            ax[0].set_ylabel('$Ipl$ MA')
             ax[0].legend()
 
             ax[1].plot(1e3*self.t, 1e-6*dIpdt)
@@ -407,7 +398,7 @@ class read_plasma(pythonIO):
 
 if __name__ == '__main__':
 
-    pl = read_plasma('disruptions', Iscale=1, read_txt=False)
+    pl = read_plasma('disruptions', Ip_scale=1, read_txt=True)
 
     Ivs3_data = pl.Ivs3_single(3, plot=False, discharge='LTC')[1]
 

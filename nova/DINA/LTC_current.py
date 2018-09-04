@@ -21,3 +21,4 @@ plt.xlabel('$t$ ms')
 plt.ylabel('$|I|$ kA')
 plt.legend()
 
+

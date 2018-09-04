@@ -24,20 +24,21 @@ from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
 
 class coil_force(pythonIO):
 
-    def __init__(self, Iscale=1, read_txt=False, vessel=True, t_pulse=0.3,
+    def __init__(self, Ip_scale=1, read_txt=False, vessel=True, t_pulse=0.3,
                  mode='control', nturn=4):
-        self.Iscale = Iscale
+        self.Ip_scale = Ip_scale
         self.read_txt = read_txt
         self.vessel = vessel
         self.t_pulse = t_pulse
         self.mode = mode
         self.nturn = nturn
         self.dina = dina('disruptions')
-        self.pl = read_plasma('disruptions', Iscale=self.Iscale,
+        self.pl = read_plasma('disruptions', Ip_scale=self.Ip_scale,
                               read_txt=read_txt)  # load plasma
-        self.tor = read_tor('disruptions', Iscale=self.Iscale,
+        self.tor = read_tor('disruptions', Ip_scale=self.Ip_scale,
                             read_txt=read_txt)  # load currents
-        self.ps = power_supply(nturn=nturn, read_txt=read_txt)
+        self.ps = power_supply(nturn=nturn, Ip_scale=self.Ip_scale,
+                               read_txt=read_txt)
         self.allowable = stress_allowable()  # load allowable interpolators
         pythonIO.__init__(self)  # python read/write
 
@@ -47,6 +48,12 @@ class coil_force(pythonIO):
             postscript = postscript.replace('.', '-')
         else:
             postscript = '_novv'
+        if self.nturn != 4:
+            postscript += '_{}turn'.format(self.nturn)
+        if self.Ip_scale != 1:
+            Ip_txt = '_{:1.3f}Ip_scale'.format(self.Ip_scale)
+            Ip_txt = Ip_txt.replace('.', '-')
+            postscript += Ip_txt
         return postscript
 
     def load_file(self, scenario, **kwargs):
@@ -54,7 +61,6 @@ class coil_force(pythonIO):
         self.vessel = kwargs.get('vessel', self.vessel)
         self.t_pulse = kwargs.get('t_pulse', self.t_pulse)
         filepath = self.dina.locate_file('plasma', folder=scenario)
-        # self.name = split(filepath)[-2]
         self.name = split(split(filepath)[0])[-1]
         filepath = join(split(filepath)[0], 'coil_force')
         filepath += self.postscript()
@@ -66,11 +72,11 @@ class coil_force(pythonIO):
             self.load_pickle(filepath)
         self.tor.load_file(scenario)  # read toroidal strucutres
         self.tor.pf = self.pf  # re-link pf object
-        self.ff.index = self.tor.pf.index  # re-link index
+        self.ff.pf_index = self.tor.pf.index  # re-link index
         self.ff.pf_coil = self.tor.pf.coil  # re-link pf coil
-        self.ff.eq_coil = self.tor.pf.sub_coil  # re-link eq coil
-        self.ff.eq_plasma_coil = self.tor.pf.plasma_coil  # relink plasma
-        self.initalize_sf()
+        self.ff.pf_subcoil = self.tor.pf.subcoil  # re-link eq coil
+        self.ff.plasma_coil = self.tor.plasma_coil  # relink plasma
+        self.grid_sf()
 
     def read_file(self, scenario):
         self.tor.load_file(scenario)  # load toroidal scenario
@@ -91,20 +97,20 @@ class coil_force(pythonIO):
         self.vv = self.ps.vv  # link vv coil set
         VS3_coil = {coil: self.vv.pf.coil[coil] for coil in self.vv.pf.coil
                     if 'VS' in coil and 'jacket' not in coil}
-        self.pf.add_coils(VS3_coil, sub_coil=self.vv.pf.sub_coil, label='VS3')
+        self.pf.add_coils(VS3_coil, subcoil=self.vv.pf.subcoil, label='VS3')
         if self.vessel:  # add vv and trs coils
             jacket_coil = {coil: self.vv.pf.coil[coil]
                            for coil in self.vv.pf.coil
                            if 'jacket' in coil}
-            self.pf.add_coils(jacket_coil, sub_coil=self.vv.pf.sub_coil,
+            self.pf.add_coils(jacket_coil, subcoil=self.vv.pf.subcoil,
                               label='jacket')
             vv_coil = {coil: self.vv.pf.coil[coil] for coil in self.vv.pf.coil
                        if 'vv' in coil}
-            self.pf.add_coils(vv_coil, sub_coil=self.vv.pf.sub_coil,
+            self.pf.add_coils(vv_coil, subcoil=self.vv.pf.subcoil,
                               label='vv')
             trs_coil = {coil: self.vv.pf.coil[coil] for coil in self.vv.pf.coil
                         if 'trs' in coil}
-            self.pf.add_coils(trs_coil, sub_coil=self.vv.pf.sub_coil,
+            self.pf.add_coils(trs_coil, subcoil=self.vv.pf.subcoil,
                               label='trs')
 
     def load_ps(self, scenario, **kwargs):
@@ -124,19 +130,22 @@ class coil_force(pythonIO):
                     t_pulse=self.t_pulse, impulse=impulse, vessel=self.vessel,
                     **kwargs)
 
-    def initalize_sf(self, n=1e4, limit=[1.5, 10, -8.5, 8.5]):
+    def grid_sf(self, n=1e4, limit=[1.5, 10, -8.5, 8.5]):
         self.x2d, self.z2d, self.x, self.z = grid(n, limit)[:4]
-        self.psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf)
+        '''
+        self.psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf.subcoil,
+                                   self.pf.plasma_coil)
         if hasattr(self.tor, 'name'):
             self.sf_name = 'Nova_{}'.format(self.tor.name)
         else:
             self.sf_name = 'Nova'
         self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi,
                             'name': self.sf_name})
+        '''
 
     def set_force_field(self):
         active_coils, passive_coils = self.set_coil_type()
-        self.ff = force_field(self.pf.index, self.pf.coil, self.pf.sub_coil,
+        self.ff = force_field(self.pf.index, self.pf.coil, self.pf.subcoil,
                               self.pf.plasma_coil, multi_filament=True,
                               active_coils=active_coils,
                               passive_coils=passive_coils)
@@ -183,9 +192,9 @@ class coil_force(pythonIO):
         self.ff.eq_plasma_coil = self.tor.pf.plasma_coil  # pass to ff object
 
     def contour(self, plot=True, **kwargs):
-        self.psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf)
-        self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi,
-                            'name': self.sf_name})
+        self.psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf.subcoil,
+                                   self.pf.plasma_coil)
+        self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi})
         if plot:
             levels = self.sf.contour(41, boundary=False, Xnorm=False,
                                      **kwargs)
@@ -369,9 +378,6 @@ class coil_force(pythonIO):
         filename = join(self.dina.root, 'DINA/Data/coil_force')
         filename += self.postscript()
         filename += '_{:d}.plk'.format(nframe)
-        if self.Iscale != 1:
-            filename = filename.replace(
-                    '.plk', '_Iscale_{:1.1f}.plk'.format(self.Iscale))
         return filename
 
     def write_data(self, nframe=100):
@@ -615,8 +621,8 @@ class coil_force(pythonIO):
         if not self.vessel:
             for coil in ['lower', 'upper']:
                 self.pf.coil.pop('{}VS'.format(coil))
-                for i in range(self.pf.sub_coil['{}VS_0'.format(coil)]['Nf']):
-                    self.pf.sub_coil.pop('{}VS_{}'.format(coil, i))
+                for i in range(self.pf.subcoil['{}VS_0'.format(coil)]['Nf']):
+                    self.pf.subcoil.pop('{}VS_{}'.format(coil, i))
         self.pf.plot(**kwargs)
         if contour:
             self.contour(**kwargs)
@@ -641,7 +647,7 @@ class coil_force(pythonIO):
 
 if __name__ == '__main__':
 
-    force = coil_force(vessel=True, t_pulse=0.3)
+    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=12.5/15)
     '''
     force.load_file(4, read_txt=False)
     force.frame_update(251)
@@ -657,7 +663,7 @@ if __name__ == '__main__':
     plt.axis('equal')
     plt.axis('off')
     '''
-    # force.read_data(nframe=500, forcewrite=False)
+    # force.read_data(nframe=500, forcewrite=True)
     # plt.set_context('notebook')
     force.plot_Fmax(nframe=500)
 

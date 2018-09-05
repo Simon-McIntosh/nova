@@ -174,8 +174,7 @@ class read_scenario(pythonIO):
             self.data[var] = np.array(self.data[var])[~nan_index]
 
     def load_coils(self, dCoil=0.15, VS=False, joinCS=True):
-        pf_geom = PFgeom(VS=VS, dCoil=dCoil)
-        pf = pf_geom.pf
+        pf = PFgeom(VS=VS, dCoil=dCoil).pf
         if joinCS:
             pf.join_coils('CS1', ['CS1L', 'CS1U'])
         self.pf_index = pf.index
@@ -436,9 +435,13 @@ class read_scenario(pythonIO):
         Fcoil = self.ff.get_force()
         return Fcoil
 
-    def update_psi(self, grid=None, plot=False):
-        if grid:  # grid={'n': 1e3, 'limit':[3.5, 9, -5.5, 5.5]}
-            x2d, z2d, x, z = geom.grid(grid['n'], grid['limit'])[:4]
+    def update_psi(self, n=None, limit=None, plot=False):
+        if n or limit:  # grid={'n': 1e3, 'limit':[3.5, 9, -5.5, 5.5]}
+            if n is None:
+                n = self.sf.n
+            elif limit is None:
+                limit = self.sf.limit
+            x2d, z2d, x, z = geom.grid(n, limit)[:4]
             psi = get_coil_psi(x2d, z2d, self.pf_subcoil, self.pf_plasma_coil)
             eqdsk = {'x': x, 'z': z, 'psi': psi}
         else:
@@ -452,19 +455,17 @@ class read_scenario(pythonIO):
         except ValueError:
             pass
         if plot:
-            levels = self.plot_plasma()
-            return levels
+            self.plot_plasma()
 
     def plot_plasma(self, ax=None):
         if ax is None:
             ax = plt.subplots(1, 1, figsize=(8, 10))[1]
-        levels = self.sf.contour(Xnorm=True, boundary=True,
-                                 separatrix='both', ax=ax)
+        self.sf.contour(Xnorm=True, boundary=True,
+                        separatrix='both', ax=ax)
         self.sf.plot_firstwall(ax=ax)
         self.plot_coils(ax=ax)
         self.sf.plot_sol(ax=ax)
         self.ff.plot()
-        return levels
 
     def set_plasma(self, t):
         try:

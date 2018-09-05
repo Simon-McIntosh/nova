@@ -465,6 +465,9 @@ class read_scenario(pythonIO):
         self.sf.plot_firstwall(ax=ax)
         self.plot_coils(ax=ax)
         self.sf.plot_sol(ax=ax)
+
+
+
         self.ff.plot()
 
     def set_plasma(self, t):

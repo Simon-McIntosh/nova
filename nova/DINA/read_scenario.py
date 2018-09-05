@@ -17,7 +17,7 @@ from amigo.IO import pythonIO
 from os.path import isfile
 from datetime import datetime
 from amigo.geom import turning_points, lowpass
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, DBSCAN
 from rdp import rdp
 from nova.force import force_field
 from itertools import count
@@ -26,6 +26,7 @@ from amigo import geom
 from nova.inverse import INV
 from nova.coils import PF
 from nova.streamfunction import SF
+from amigo.time import clock
 
 
 class read_scenario(pythonIO):
@@ -47,6 +48,7 @@ class read_scenario(pythonIO):
         filepath = self.dina.locate_file('data2.{}'.format(file_type),
                                          folder=folder)
         filepath = '.'.join(filepath.split('.')[:-1])
+        self.filepath = '/'.join(filepath.split('\\')[:-1]) + '/'
         attributes = ['data', 'columns', 'tmax', 'tmin', 'nt', 'dt',
                       't', 'fun', 'Icoil',
                       'Ipl', 'Ipl_lp', 'dIpldt', 'dIpldt_lp', 'noise',
@@ -235,10 +237,45 @@ class read_scenario(pythonIO):
                                      polyorder=polyorder)
         return x_filter
 
-    def get_turning_points(self, x, dt_window=1.0, n=1000, ncl=6,
-                           plot=False, **kwargs):
+    def plot_plasma_current(self, flattop_mask=True, ax=None):
+        if ax is None:
+            ax = plt.subplots(1, 1)[1]
+        alpha = 0.5 if flattop_mask else 1
+        t_ft = self.t[self.flattop_index]
+        dpsi = np.diff(self.data['PSI(axis)'][self.flattop_index])[0]
+        ft_slice = slice(*self.flattop_index)
+        ax.plot(self.t, 1e-6*self.Ipl, 'C0', alpha=alpha)
+        ax.plot(self.t[ft_slice], 1e-6*self.Ipl[ft_slice], 'C0', alpha=alpha)
+        txt = 'flattop:\n'
+        txt += '$t$      {:.1f}-{:1.1f}s\n'.format(*t_ft)
+        txt += '$\Delta  t$    {:.1f}s\n'.format(np.diff(t_ft)[0])
+        txt += '$\Delta \Psi$  {:.1f}Wb'.format(dpsi)
+        ax.text(np.mean(t_ft), 1e-6*self.Ipl[self.flattop_index[0]]/2,
+                txt, ma='left', ha='center', va='top',
+                bbox=dict(facecolor='w', ec='gray', lw=1,
+                          boxstyle='round', pad=0.5))
+        ax.set_ylabel('$I_{pl}$ MA')
+
+    def plot_turning_points(self):
+        self.load_force_history(n=500)
+        ax = plt.subplots(3, 1, sharex=True, figsize=(8, 8))[1]
+        self.plot_plasma_current(ax=ax[0])
+        self.get_turning_points('Icoil', coils=['CS'],
+                                dt_window=2.0, n=500, epsilon=50,
+                                plot=True, ax=ax[1])
+        self.get_turning_points('Fsep', t=self.Fcoil['t'],
+                                dt_window=0.0, n=500, epsilon=10,
+                                plot=True, ax=ax[2])
+        ax[0].set_title(self.name)
+        plt.detick(ax)
+
+    def get_turning_points(self, x, dt_window=1.0, n=500, epsilon=50,
+                           plot=False, ax=None, **kwargs):
         if isinstance(x, str):
+            variable_name = x
             x = getattr(self, x)  # load vector
+        else:
+            variable_name = ''
         names = list(x.keys())
         if 'coils' in kwargs:
             coils = kwargs['coils']
@@ -258,46 +295,103 @@ class read_scenario(pythonIO):
         for name in names:
             xo = interp1d(t, x[name])(to)
             M = np.append(to.reshape(-1, 1), xo.reshape(-1, 1), axis=1)
-            Mrdp = rdp(M, epsilon=50)
+            Mrdp = rdp(M, epsilon=epsilon)
             to_index = np.hstack(turning_points(Mrdp[:, 1])).astype(int)
             turn_index[name] = np.zeros(len(to_index), dtype=int)
             for i, t_ in enumerate(Mrdp[to_index, 0]):
                 turn_index[name][i] = np.argmin(abs(t - t_))
-        self.cluster(t, x, turn_index, ncl, plot=plot)
+        clusters = self.cluster(t, x, turn_index)
+        if plot:
+            self.plot_clusters(clusters, variable_name=variable_name, ax=ax)
 
-    def cluster(self, t, x, turn_index, ncl, plot=False, ax=None):
-        km = KMeans(n_clusters=ncl)
+    def cluster(self, t, x, turn_index, plot=False, ax=None):
         clusters = {}
         clusters['index'] = np.array([], dtype=int)
+        clusters['time'] = np.array([], dtype=int)
         clusters['name'] = np.array([])
         clusters['t'] = t
         clusters['vector'] = {}
         for name in turn_index:
             clusters['vector'][name] = x[name]
             clusters['index'] = np.append(clusters['index'], turn_index[name])
+            clusters['time'] = \
+                np.append(clusters['time'], clusters['t'][turn_index[name]])
             clusters['name'] = np.append(
                     clusters['name'],
                     [name for __ in range(len(turn_index[name]))])
-        clusters['fit'] = km.fit(clusters['index'].reshape(-1, 1))
-        if plot:
-            self.plot_clusters(clusters, ax=ax)
+        db = DBSCAN(eps=5, min_samples=1).fit(clusters['time'].reshape(-1, 1))
+        ncl = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
+        km = KMeans(n_clusters=ncl)
+        clusters['fit'] = km.fit(clusters['time'].reshape(-1, 1))
+        return clusters
 
-    def plot_clusters(self, clusters, ax=None):
+    def plot_clusters(self, clusters, variable_name='',
+                      flattop_mask=True, ax=None):
+        scale, ylabel = self.get_variable(variable_name)
+        ft_t = self.t[self.flattop_index]
+        ft_slice = slice(np.argmin(abs(ft_t[0]-clusters['t'])),
+                         np.argmin(abs(ft_t[1]-clusters['t'])))
+        dtype = [('t', float), ('i', int), ('value', float)]
+        max_vector = np.ones(len(clusters['vector']), dtype=dtype)
+        for i, name in enumerate(clusters['vector']):
+            imax = np.argmax(clusters['vector'][name])
+            max_vector['i'][i] = i
+            max_vector['t'][i] = clusters['t'][imax]
+            max_vector['value'][i] = clusters['vector'][name][imax]
+        max_vector = np.sort(max_vector, order='value')[::-1]
         if ax is None:
             ax = plt.subplots(1, 1)[1]
-        for name in clusters['vector']:
-            ax.plot(clusters['t'], clusters['vector'][name], label=name)
+        for i, name in enumerate(clusters['vector']):
+            color = 'C{}'.format(i)
+            if flattop_mask:
+                ax.plot(clusters['t'], scale*clusters['vector'][name],
+                        alpha=0.5, color=color)
+                ax.plot(clusters['t'][ft_slice],
+                        scale*clusters['vector'][name][ft_slice],
+                        label=name, color=color)
+            else:
+                ax.plot(clusters['t'], scale*clusters['vector'][name],
+                        label=name, color=color)
         for i in range(len(clusters['index'])):
             index = clusters['index'][i]
             name = clusters['name'][i]
-            color = 'C{}'.format(clusters['fit'].labels_[i])
             ax.plot(clusters['t'][index],
-                    clusters['vector'][name][index],
-                    'X', color=color, zorder=30)
+                    scale*clusters['vector'][name][index],
+                    'X', color='gray', zorder=30)
+        for t_center in clusters['fit'].cluster_centers_:
+            index = np.argmin(abs(clusters['t']-t_center))
+            instance_vector = [clusters['vector'][name][index]
+                               for name in clusters['vector']]
+            ylim = np.array([np.min(instance_vector),
+                             np.max(instance_vector)])
+            ax.plot(t_center*np.ones(2), scale*ylim, '--', color='gray')
+        if variable_name == 'Fsep':
+            for i in range(2):
+                color = 'C{}'.format(max_vector['i'][i])
+                plt.plot(max_vector['t'][i], max_vector['value'][i],
+                         '.', color=color, ms=10, zorder=50)
+                ha = 'left' if max_vector['t'][i] < np.mean(ft_t) else 'right'
+                plt.text(max_vector['t'][i], max_vector['value'][0],
+                         '{:1.1f}MN'.format(max_vector['value'][i]),
+                         va='bottom', ha=ha, color=color)
+
         plt.despine()
         ax.set_xlabel('$t$ s')
-        ax.legend()
+        ax.set_ylabel(ylabel)
+        ax.legend(loc=4, framealpha=1)
 
+    def get_variable(self, variable_name):
+        scale, variable, unit = 1, '', ''
+        if variable_name == 'Fsep':
+            scale = 1
+            variable = '$F_{sep}$'
+            unit = 'MN'
+        elif variable_name == 'Icoil':
+            scale = 1e-3
+            variable = '$I_{coil}$'
+            unit = 'kA'
+        ylabel = '{} {}'.format(variable, unit)
+        return scale, ylabel
     def opperate(self, plot=False):  # identify operating modes
         trim = np.argmax(self.Ipl[::-1] < 0)
         ind = len(self.Ipl)-trim
@@ -385,10 +479,10 @@ class read_scenario(pythonIO):
             kpl = self.fun['Ksep'](t)
         dx = 2 * apl * 0.4
         dz = kpl * dx
-        self.Ipl = 1e6*self.fun['Ip'](t)
+        Ipl = 1e6*self.fun['Ip'](t)
         self.pf_plasma_coil.clear()
         if x > 0.0:
-            plasma_coil = {'x': x, 'z': z, 'dx': dx, 'dz': dz, 'Ic': self.Ipl}
+            plasma_coil = {'x': x, 'z': z, 'dx': dx, 'dz': dz, 'Ic': Ipl}
             plasma_subcoil = PF.mesh_coil(plasma_coil, 0.25)
             for i, filament in enumerate(plasma_subcoil):
                 subname = 'Plasma_{}'.format(i)
@@ -398,7 +492,21 @@ class read_scenario(pythonIO):
         Ic = self.get_coil_current(t, VS3=False)  # get coil currents
         self.pf.update_current(Ic)
 
-    def get_force(self, n=300, plot=False, ax=None):
+    def load_force_history(self, n=500, plot=False, ax=None, **kwargs):
+        read_txt = kwargs.get('read_txt', self.read_txt)
+        filepath = self.filepath + 'force'
+        if read_txt or not isfile(filepath + '.pk'):
+            self.get_force_history(filepath, n)  # calculate force profiles
+        else:
+            self.load_pickle(filepath)  # load force profiles
+            if len(self.Fcoil) != n:  # nstep mismatch, re-read
+                self.get_force_history(filepath, n)
+        self.Fsep = {csgap: self.Fcoil[csgap] for csgap in self.CSgap}
+        if plot:
+            self.plot_force_history(ax=ax)
+
+    def get_force_history(self, filepath, n):
+        attributes = ['CSgap', 'Fcoil']
         dtype = [('t', float), ('sep', float), ('zsum', float)]
         CSname = self.pf.index['CS']['name']
         self.CSgap = [[] for __ in range(self.pf.index['CS']['n'] - 1)]
@@ -411,6 +519,7 @@ class read_scenario(pythonIO):
             dtype.append((PFcoil[i], float))
         self.Fcoil = np.zeros(n, dtype=dtype)
         self.Fcoil['t'] = np.linspace(self.t[1], self.t[-2], n)
+        tick = clock(n, header='calculating force history')
         for i, t in enumerate(self.Fcoil['t']):
             Fcoil = self.update(t)
             self.Fcoil['sep'][i] = Fcoil['CS']['sep']
@@ -419,10 +528,10 @@ class read_scenario(pythonIO):
                 self.Fcoil[csgap][i] = Fcoil['CS']['sep_array'][j]
             for j, pfcoil in enumerate(PFcoil):
                 self.Fcoil[pfcoil][i] = Fcoil['PF']['z_array'][j]
-        if plot:
-            self.plot_force(ax=ax)
+            tick.tock()
+        self.save_pickle(filepath, attributes)
 
-    def plot_force(self, ax=None):
+    def plot_force_history(self, ax=None):
         if ax is None:
             ax = plt.subplots(1, 1)[1]
         ax.plot(self.Fcoil['t'], self.Fcoil['sep'], 'gray')

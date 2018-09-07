@@ -80,7 +80,7 @@ class coil_force(pythonIO):
 
     def read_file(self, scenario):
         self.tor.load_file(scenario)  # load toroidal scenario
-        self.pf = self.tor.pf  # referance to tor pf
+        self.pf = self.tor.pf  # reference to tor pf
         self.t = self.tor.t
         self.vs_geom = VSgeom()  # load vs geometory
         self.add_vv_coils()
@@ -123,8 +123,8 @@ class coil_force(pythonIO):
             zdir = 1
             t_end = 100e-3
         self.Ivs3_fun = OrderedDict()  # Ivs3 interpolator
-        for mode, sign in zip(['referance', 'control', 'error'], [0, 1, -1]):
-            impulse = False if mode == 'referance' else True
+        for mode, sign in zip(['reference', 'control', 'error'], [0, 1, -1]):
+            impulse = False if mode == 'reference' else True
             self.Ivs3_fun[mode] = self.ps.solve(
                     t_end, sign=-sign*zdir, scenario=scenario,
                     t_pulse=self.t_pulse, impulse=impulse, vessel=self.vessel,
@@ -132,16 +132,6 @@ class coil_force(pythonIO):
 
     def grid_sf(self, n=1e4, limit=[1.5, 10, -8.5, 8.5]):
         self.x2d, self.z2d, self.x, self.z = grid(n, limit)[:4]
-        '''
-        self.psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf.subcoil,
-                                   self.pf.plasma_coil)
-        if hasattr(self.tor, 'name'):
-            self.sf_name = 'Nova_{}'.format(self.tor.name)
-        else:
-            self.sf_name = 'Nova'
-        self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi,
-                            'name': self.sf_name})
-        '''
 
     def set_force_field(self):
         active_coils, passive_coils = self.set_coil_type()
@@ -242,7 +232,7 @@ class coil_force(pythonIO):
                       ('frame_index', int)]
         frames, nframe = self.get_frames(nframe)
         tick = clock(nframe)
-        for mode in ['referance', 'control', 'error']:
+        for mode in ['reference', 'control', 'error']:
             B_data[mode] = np.zeros(nframe, dtype=data_dtype)
         for i, frame_index in enumerate(frames):
             self.frame_update(frame_index)
@@ -270,7 +260,7 @@ class coil_force(pythonIO):
         frames, nframe = self.get_frames(nframe)
         scenario = self.dina.folders[self.ps.scenario]
         tick = clock(nframe, header='loading scenario: {}'.format(scenario))
-        for mode in ['referance', 'control', 'error']:
+        for mode in ['reference', 'control', 'error']:
             coil_data[mode] = np.zeros(nframe, dtype=data_dtype)
         for i, frame_index in enumerate(frames):
             self.frame_update(frame_index)
@@ -343,7 +333,7 @@ class coil_force(pythonIO):
             ax[2].set_xlabel('$t$, ms')
         return coil_data
 
-    def movie(self, folder, nframe=None, mode='referance', discharge='DINA'):
+    def movie(self, folder, nframe=None, mode='reference', discharge='DINA'):
         self.read_file(folder, discharge=discharge)
         frames, nframe = self.get_frames(nframe)
         FFMpegWriter = manimation.writers['ffmpeg']
@@ -402,6 +392,12 @@ class coil_force(pythonIO):
         else:
             with open(filename, 'rb') as input:
                 coil_data = pickle.load(input)
+        for folder in coil_data:  # rename reference
+            newlist = []
+            for key in coil_data[folder]:
+                newkey = key.replace('referance', 'reference')
+                newlist.append((newkey, coil_data[folder][key]))
+            coil_data[folder] = OrderedDict(newlist)
         return coil_data
 
     def plot_Fmax(self, nframe=100):
@@ -414,13 +410,13 @@ class coil_force(pythonIO):
                       ('frame_index', '2float')]
         Imax = OrderedDict()
         Imax_dtype = [('I', float), ('t', float), ('frame_index', float)]
-        for mode in ['referance', 'control', 'error']:
+        for mode in ['reference', 'control', 'error']:
             Fmax[mode] = np.zeros(len(X), dtype=Fmax_dtype)
             Imax[mode] = np.zeros(len(X), dtype=Imax_dtype)
         for i, name in enumerate(coil_data):
             vs3 = coil_data[name]
             for j, (mode, color, width) in enumerate(
-                    zip(['referance', 'control', 'error'],
+                    zip(['reference', 'control', 'error'],
                         ['gray', 'C0', 'C3'], [0.9, 0.7, 0.5])):
                 frame_index = np.nanargmax(abs(vs3[mode]['I']))
                 Imax[mode][i]['frame_index'] = frame_index
@@ -446,7 +442,7 @@ class coil_force(pythonIO):
                        '{:1.0f}'.format(1e-3*Fm[index]), weight='bold',
                        va='bottom', ha='center')
         h = []
-        for mode, color in zip(['referance', 'control', 'error'],
+        for mode, color in zip(['reference', 'control', 'error'],
                                ['gray', 'C0', 'C3']):
             h.append(mpatches.Patch(color=color, label=mode))
         ax[0].legend(handles=h, loc=2)
@@ -461,7 +457,7 @@ class coil_force(pythonIO):
                        va='top', ha='center')
 
         ax_I = plt.subplots(1, 1)[1]
-        modes = ['referance', 'control', 'error']
+        modes = ['reference', 'control', 'error']
         colors = ['gray', 'C0', 'C3']
         widths = [0.9, 0.7, 0.5]
         # modes = ['control']
@@ -481,7 +477,16 @@ class coil_force(pythonIO):
         ax_I.text(im[index], 1e-3*Im[index],
                   '{:1.0f}'.format(1e-3*Im[index]), weight='bold',
                   va=va, ha='center')
-        plt.xticks(X, self.dina.folders, rotation=70)
+        #plt.xticks(X, self.dina.folders, rotation=70)
+        plt.xticks(X, '')
+        for x, label in zip(X, self.dina.folders):
+            label = label.replace('_', ' ')
+            label = label.replace('MD', 'md')
+            label = label.replace('VDE', 'vde')
+            label = label.replace('UP', 'up')
+            label = label.replace('DW', 'down')
+            plt.text(x, 60, label + ' ', rotation=90, va='top', ha='center',
+                     color='white')
         plt.despine()
         if len(modes) > 1:
             ax_I.legend(handles=h, loc='lower center', bbox_to_anchor=(0.5, 1),
@@ -518,10 +523,10 @@ class coil_force(pythonIO):
         for index, file in enumerate(coil_data):
             vs3 = coil_data[file]
             color = self.pl.get_color(index)[0]
-            for i, mode in enumerate(['referance', 'control', 'error']):
+            for i, mode in enumerate(['reference', 'control', 'error']):
                 ax[i].plot(1e3*vs3[mode]['t'],
                            1e-3*vs3[mode]['I'], color=color)
-        for i, (mode, fc) in enumerate(zip(['referance', 'control', 'error'],
+        for i, (mode, fc) in enumerate(zip(['reference', 'control', 'error'],
                                            ['gray', 'C0', 'C3'])):
             ax[i].set_ylabel('$I$ kA')
             ax[i].set_xlim([0, 1400])
@@ -647,7 +652,7 @@ class coil_force(pythonIO):
 
 if __name__ == '__main__':
 
-    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=12.5/15)
+    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=15/15)
     '''
     force.load_file(4, read_txt=False)
     force.frame_update(251)

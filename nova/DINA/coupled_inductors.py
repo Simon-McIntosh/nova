@@ -83,8 +83,9 @@ class inductance:
         self.pf.mesh_coils()
         if plot:
             self.pf.plot(subcoil=True)
-        self.inv = INV(self.pf.index, self.pf.coil, self.pf.subcoil,
-                       self.pf.plasma_coil, Iscale=1)
+        self.inv = INV({'index': self.pf.index, 'coil': self.pf.coil,
+                        'subcoil': self.pf.subcoil,
+                        'plasma_coil': self.pf.plasma_coil}, Iscale=1)
         self.inv.update_coils()
         Nf = np.ones(self.inv.nC)
         turns = np.array(self.nt)

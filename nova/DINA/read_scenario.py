@@ -57,7 +57,12 @@ class read_scenario(pythonIO):
             self.read_file(folder, file_type=file_type, dCoil=dCoil)
             self.save_pickle(filepath, attributes)
         else:
-            self.load_pickle(filepath)
+            try:
+                self.load_pickle(filepath)
+            except pickle.UnpicklingError:
+                print('pickle error - lfs pointer found')
+                self.read_file(folder, file_type=file_type, dCoil=dCoil)
+                self.save_pickle(filepath, attributes)
             if dCoil != self.dCoil:  # reload coilset
                 print('reloading - dCoil {}'.format(dCoil))
                 self.load_coilset(dCoil=dCoil, VS=False)  # coil geometory
@@ -68,10 +73,12 @@ class read_scenario(pythonIO):
         self.setname = setname
         self.pf = PF()  # create bare pf coil instance
         self.pf(self.coilset[self.setname])
+        self.sf = SF()  # creat bare sf instance
         self.ff = force_field(self.coilset[self.setname])
         if self.coilset[self.setname]['update_passive_field']:
             self.ff.set_force_field(state='passive')
         self.inv = INV(self.coilset[self.setname], boundary='sf')
+        self.inv.sf = self.sf  # link sf instance
         self.set_limits()
 
     def read_file(self, folder, file_type='txt', dCoil=0.5):
@@ -98,19 +105,13 @@ class read_scenario(pythonIO):
         self.update_DINA(t)
         eqdsk = self.update_psi(n=n, plot=False)
         self.inv.colocate(eqdsk)
-        self.update_DINA(t)
-        #self.update_coilset()
-        #self.inv.update_coils()
 
     def set_limits(self):  # default limits for ITER coil-set
-        # reset
-        self.inv.initalise_limits()
-        # current limits
-        self.inv.set_limit(ICS=45, ICS1=90)
-        self.inv.set_limit(IPF1=48, IPF2=55, IPF3=55,
-                           IPF4=55, IPF5=52, IPF6=52)
-        # force limits
-        self.inv.set_limit(FCSsep=240, side='upper')
+        self.inv.initalise_limits()  # reset
+        self.inv.set_limit(ICS=45, ICS1=90)  # current limits
+        self.inv.set_limit(IPF1=48, IPF2=55, IPF3=55, IPF4=55, IPF5=52,
+                           IPF6=52)
+        self.inv.set_limit(FCSsep=240, side='upper')  # force limits
         self.inv.set_limit(FCSsum=60, side='both')
         self.inv.set_limit(FPF1=-150, FPF2=-75, FPF3=-90, FPF4=-40,
                            FPF5=-10, FPF6=-190, side='lower')
@@ -191,7 +192,7 @@ class read_scenario(pythonIO):
 
     def plot_coils(self, ax=None):
         if ax is None:
-            ax = plt.subplots(1, 1, figsize=(8, 10))[1]
+            ax = plt.gca()
         self.pf.plot(label=True, current=True, patch=False, ax=ax)
         self.pf.plot(subcoil=True, plasma=True, ax=ax)
 
@@ -423,7 +424,6 @@ class read_scenario(pythonIO):
 
     def update_DINA(self, t):  # update from DINA interpolators
         self.set_coil_current(t)
-        self.update_coilset()
         self.set_plasma(t)
         self.update_coilset()
         Fcoil = self.ff.get_force()
@@ -465,7 +465,7 @@ class read_scenario(pythonIO):
         eqdsk = {'x': x, 'z': z, 'psi': psi}
         eqdsk['xlim'] = self.boundary['xlim']
         eqdsk['zlim'] = self.boundary['zlim']
-        self.sf = SF(eqdsk=eqdsk)
+        self.sf.update_eqdsk(eqdsk)
         if plot:
             self.plot_plasma(ax=ax)
         return eqdsk

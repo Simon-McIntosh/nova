@@ -51,7 +51,7 @@ class read_scenario(pythonIO):
         filepath = '.'.join(filepath.split('.')[:-1])
         self.filepath = '/'.join(filepath.split('\\')[:-1]) + '/'
         attributes = ['name', 'date', 'data', 'columns',
-                      't', 'fun', 'Icoil', 'Ipl', 'flattop', 'hip',
+                      't', 'dt', 'fun', 'Icoil', 'Ipl', 'flattop', 'hip',
                       'boundary', 'coilset', 'dCoil']
         if read_txt or not isfile(filepath + '.pk'):
             self.read_file(folder, file_type=file_type, dCoil=dCoil)
@@ -93,11 +93,12 @@ class read_scenario(pythonIO):
         self.load_boundary()  # load flux map limits and fw profile
         self.load_coilset(dCoil=dCoil, VS=False)  # coil geometory
 
-    def fix_shape(self, n=1e3, **kwargs):  # set colocation points
+    def fix_shape(self, n=5e3, **kwargs):  # set colocation points
         t = kwargs.get('t', self.flattop['t'][-1])  # eof
         self.update_DINA(t)
-        eqdsk = self.update_psi(n=1e3, plot=False)
+        eqdsk = self.update_psi(n=n, plot=False)
         self.inv.colocate(eqdsk)
+        self.update_DINA(t)
         #self.update_coilset()
         #self.inv.update_coils()
 
@@ -333,6 +334,7 @@ class read_scenario(pythonIO):
             max_vector['t'][i] = clusters['t'][imax]
             max_vector['value'][i] = clusters['vector'][name][imax]
         max_vector = np.sort(max_vector, order='value')[::-1]
+        print(max_vector[0])
         if ax is None:
             ax = plt.subplots(1, 1)[1]
         for i, name in enumerate(clusters['vector']):
@@ -420,8 +422,9 @@ class read_scenario(pythonIO):
         return Ic  # return dict of coil currents
 
     def update_DINA(self, t):  # update from DINA interpolators
-        self.set_plasma(t)
         self.set_coil_current(t)
+        self.update_coilset()
+        self.set_plasma(t)
         self.update_coilset()
         Fcoil = self.ff.get_force()
         return Fcoil
@@ -453,11 +456,10 @@ class read_scenario(pythonIO):
                     coilset['subcoil'][subname]['Ic'] = current / Nf
 
     def update_psi(self, n=None, limit=None, plot=False, ax=None):
-        if n or limit:  # boundary={'n': 1e3, 'limit':[3.5, 9, -5.5, 5.5]}
-            if n is None:
-                n = self.boundary['n']
-            elif limit is None:
-                limit = self.boundary['limit']
+        if n is None:
+            n = self.boundary['n']
+        if limit is None:
+            limit = self.boundary['limit']
         x2d, z2d, x, z = geom.grid(n, limit)[:4]
         psi = get_coil_psi(x2d, z2d, self.pf.subcoil, self.pf.plasma_coil)
         eqdsk = {'x': x, 'z': z, 'psi': psi}
@@ -473,7 +475,7 @@ class read_scenario(pythonIO):
             ax = plt.subplots(1, 1, figsize=(8, 10))[1]
         self.sf.contour(Xnorm=True, boundary=True,
                         separatrix='both', ax=ax)
-        self.sf.plot_point(points=['X', 'M'])
+        self.sf.plot_nulls(labels=['X', 'M'])
         self.sf.plot_firstwall(ax=ax)
         self.plot_coils(ax=ax)
         self.sf.plot_sol(ax=ax)
@@ -497,7 +499,6 @@ class read_scenario(pythonIO):
         if x > 0.0:
             plasma_coil = {'x': x, 'z': z, 'dx': dx, 'dz': dz, 'Ic': Ipl}
             plasma_subcoil = PF.mesh_coil(plasma_coil, 0.25)
-            print(Ipl)
             for i, filament in enumerate(plasma_subcoil):
                 subname = 'Plasma_{}'.format(i)
                 self.coilset[self.setname]['plasma_coil'][subname] = filament

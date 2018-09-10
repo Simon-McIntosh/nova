@@ -12,7 +12,6 @@ from nova.coil_cage import coil_cage
 from nova.shape import Shape
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 from warnings import warn
-from nova.inverse import INV
 from copy import deepcopy
 from scipy.optimize import minimize_scalar
 from matplotlib.collections import PatchCollection
@@ -22,14 +21,27 @@ from matplotlib import patches
 class PF:
 
     def __init__(self, eqdsk=None, **kwargs):
-        self.nC = 0
         self.initalize_collection()
         self.set_coils(eqdsk, **kwargs)
         self.plasma_coil = collections.OrderedDict()
 
-    def set_coils(self, eqdsk, **kwargs):
+    def __call__(self, coilset):
+        # reset instance
+        self.index = coilset['index']
+        self.coil = coilset['coil']
+        self.subcoil = coilset['subcoil']
+        self.plasma_coil = coilset['plasma_coil']
+
+    def initalize_coils(self):
+        self.nC = 0
         self.coil = collections.OrderedDict()
-        self.sub_coil = collections.OrderedDict()
+        self.subcoil = collections.OrderedDict()
+        self.index = {}
+        for coil in ['PF', 'CS']:
+            self.index[coil] = {'n': 0, 'name': [], 'index': []}
+
+    def set_coils(self, eqdsk, **kwargs):
+        self.initalize_coils()
         if eqdsk is None:
             self.xo = kwargs.get('xo', [0, 0])
             self.rCS = kwargs.get('rCS', 0)
@@ -49,17 +61,23 @@ class PF:
                         break
             self.categorize_coils()
 
+    def get_coil_current(self):
+        Ic = {}
+        for name in self.coil:
+            Ic[name] = self.coil[name]['Ic']
+        return Ic
+
     def update_current(self, Ic):  # new current passed as dict
         for i, name in enumerate(Ic):
             if name in self.coil:  # skip removed DINA fillaments
                 self.coil[name]['Ic'] = Ic[name]
                 try:
-                    Nfilament = self.sub_coil[name+'_0']['Nf']
+                    Nfilament = self.subcoil[name+'_0']['Nf']
                 except KeyError:
                     Nfilament = 1
                 for n in range(Nfilament):
-                    sub_coil = '{}_{}'.format(name, n)
-                    self.sub_coil[sub_coil]['Ic'] = Ic[name] / Nfilament
+                    subcoil = '{}_{}'.format(name, n)
+                    self.subcoil[subcoil]['Ic'] = Ic[name] / Nfilament
 
     def categorize_coils(self):
         catogory = np.zeros(len(self.coil), dtype=[('x', 'float'),
@@ -92,22 +110,20 @@ class PF:
         self.index['PF']['index'] = np.arange(0, nPF)
         self.index['CS']['index'] = np.arange(nPF, nPF+nCS)
 
-    def add_coils(self, coil, sub_coil=None, label=None):
+    def add_coils(self, coil, subcoil=None, label=None):
         nCo = self.nC
-        xc, zc, dxc, dzc, Ic, names = self.unpack_coils(coil=coil)[1:]
+        xc, zc, dxc, dzc, Ic, names = self.unpack_coils(coil=coil)[1:-1]
         for x, z, dx, dz, I, name in zip(xc, zc, dxc, dzc, Ic, names):
             self.add_coil(x, z, dx, dz, I, name=name, categorize=False)
-            if sub_coil:
-                Nf = sub_coil[name+'_0']['Nf']
+            if subcoil:
+                Nf = subcoil[name+'_0']['Nf']
                 for i in range(Nf):
                     subname = name+'_{}'.format(i)
-                    self.sub_coil[subname] = sub_coil[subname]
+                    self.subcoil[subname] = subcoil[subname]
             else:
-                self.sub_coil[name+'_0'] = coil[name]
-                self.sub_coil[name+'_0']['Nf'] = 1
+                self.subcoil[name+'_0'] = coil[name]
+                self.subcoil[name+'_0']['Nf'] = 1
         if label:
-            if not hasattr(self, 'index'):
-                self.index = {}
             self.index[label] = {'name': names,
                                  'index': np.arange(nCo, self.nC)}
 
@@ -122,17 +138,53 @@ class PF:
         if categorize:
             self.categorize_coils()
 
-    def remove_coil_old(self, Clist):
-        for c in Clist:
-            coil = 'Coil{:1.0f}'.format(c)
-            self.coil.pop(coil)
+    def join_coils(self, name, names):
+        coil_o = deepcopy(self.coil)
+        subcoil_o = deepcopy(self.subcoil)
+        self.initalize_coils()  # clear coil dicts
+
+        coils = {name_: coil_o[name_] for name_ in names}
+        x, z, dx, dz, Ic, __, N = self.unpack_coils(coil=coils)[1:]
+        xbb = [np.min(x-dx/2), np.max(x+dx/2)]  # x bounding box
+        zbb = [np.min(z-dz/2), np.max(z+dz/2)]  # z bounding box
+        dx = xbb[1]-xbb[0]  # width
+        dz = zbb[1]-zbb[0]  # height
+        x, z = np.mean(xbb), np.mean(zbb)  # center
+        Ic = np.sum(Ic)  # Amp-turns
+        N = np.sum(N)  # turns
+        insert = {name: {'Ic': Ic, 'N': N, 'dx': dx, 'dz': dz, 'x': x, 'z': z}}
+        Nf = 0
+        for name_ in names:
+            Nf += subcoil_o[name_ + '_0']['Nf']
+        sub_index = 0
+        for name_ in coil_o:
+            if name_ in names:
+                if name not in self.coil:  # replace coil
+                    x, z, dx, dz, Ic = self.unpack_coils(coil=insert)[1:-2]
+                    self.add_coil(x[0], z[0], dx[0], dz[0], Ic[0],
+                                  name=name, categorize=False)
+                    self.coil[name]['N'] = insert[name]['N']  # turn number
+                for i in range(subcoil_o[name_+'_0']['Nf']):  # sub-coils
+                    sub_name = name+'_{}'.format(sub_index)
+                    self.subcoil[sub_name] = subcoil_o[name_+'_{}'.format(i)]
+                    self.subcoil[sub_name]['Nf'] = Nf
+                    sub_index += 1
+            else:  # re-insert
+                coil_ = {name_: coil_o[name_]}
+                x, z, dx, dz, Ic = self.unpack_coils(coil=coil_)[1:-2]
+                self.add_coil(x[0], z[0], dx[0], dz[0], Ic[0],
+                              name=name_, categorize=False)
+                self.coil[name_]['N'] = coil_o[name_]['N']  # turn number
+                for i in range(subcoil_o[name_+'_0']['Nf']):  # sub-coils
+                    sub_name = name_+'_{}'.format(i)
+                    self.subcoil[sub_name] = subcoil_o[sub_name]
         self.categorize_coils()
 
     def remove_coil(self, name):
         self.coil.pop(name)  # remove main coil
-        if name+'_0' in self.sub_coil:
-            for i in range(self.sub_coil[name+'_0']['Nf']):
-                self.sub_coil.pop('{}_{}'.format(name, i))
+        if name+'_0' in self.subcoil:
+            for i in range(self.subcoil[name+'_0']['Nf']):
+                self.subcoil.pop('{}_{}'.format(name, i))
 
     def unpack_coils(self, **kwargs):
         coil = kwargs.get('coil', self.coil)  # enable plasma_coil unpack
@@ -140,6 +192,7 @@ class PF:
         Ic = np.zeros(nc)
         xc, zc = np.zeros(nc), np.zeros(nc)
         dxc, dzc = np.zeros(nc), np.zeros(nc)
+        N = np.zeros(nc)
         names = []
         for i, name in enumerate(coil.keys()):
             xc[i] = coil[name]['x']
@@ -147,8 +200,10 @@ class PF:
             dxc[i] = coil[name]['dx']
             dzc[i] = coil[name]['dz']
             Ic[i] = coil[name]['Ic']
+            if 'N' in coil[name]:
+                N[i] = coil[name]['N']
             names.append(name)
-        return nc, xc, zc, dxc, dzc, Ic, names
+        return nc, xc, zc, dxc, dzc, Ic, names, N
 
     def mesh_coils(self, dCoil=-1):
         if dCoil < 0:  # dCoil not set, use stored value
@@ -156,56 +211,39 @@ class PF:
                 self.dCoil = 0
         else:
             self.dCoil = dCoil
-        self.sub_coil = collections.OrderedDict()
+        self.subcoil = collections.OrderedDict()
         if self.dCoil == 0:
             for name in self.coil.keys():
                 sub_name = name + '_0'
-                self.sub_coil[sub_name] = self.coil[name]
-                self.sub_coil[sub_name]['rc'] = \
+                self.subcoil[sub_name] = self.coil[name]
+                self.subcoil[sub_name]['rc'] = \
                     np.sqrt(self.coil[name]['dx']**2 +
                             self.coil[name]['dz']**2)
         else:
+            self.subcoil.clear()  # clear dict but retain referance
             for name in self.coil.keys():
-                self.size_coil(name, self.dCoil)
+                subcoil = self.mesh_coil(self.coil[name], self.dCoil)
+                for i, subcoil_ in enumerate(subcoil):
+                    subname = '{}_{}'.format(name, i)
+                    self.subcoil[subname] = subcoil_
 
-    def size_coil(self, name, dCoil):
-        xc, zc = self.coil[name]['x'], self.coil[name]['z']
-        Dx, Dz = self.coil[name]['dx'], self.coil[name]['dz']
-        Dx = abs(Dx)
-        Dz = abs(Dz)
-        # if self.coil[name]['Ic'] != 0:
-        if Dx > 0 and Dz > 0 and 'plasma' not in name:
-            nx, nz = np.ceil(Dx / dCoil), np.ceil(Dz / dCoil)
-            dx, dz = Dx / nx, Dz / nz
-            x = xc + np.linspace(dx / 2, Dx - dx / 2, nx) - Dx / 2
-            z = zc + np.linspace(dz / 2, Dz - dz / 2, nz) - Dz / 2
-            X, Z = np.meshgrid(x, z, indexing='ij')
-            X, Z = np.reshape(X, (-1, 1)), np.reshape(Z, (-1, 1))
-            Nf = len(X)  # filament number
-            # self.coil_o[name]['Nf'] = Nf
-            # self.coil_o[name]['Io'] = self.pf.pf_coil[name]['Ic']
-            Ic = self.coil[name]['Ic'] / Nf
-            bundle = {'x': np.zeros(Nf), 'z': np.zeros(Nf),
-                      'dx': dx * np.ones(Nf), 'dz': dz * np.ones(Nf),
-                      'Ic': Ic * np.ones(Nf), 'sub_name': np.array([]),
-                      'Nf': 0}
-            for i, (x, z) in enumerate(zip(X, Z)):
-                sub_name = name + '_{:1.0f}'.format(i)
-                self.sub_coil[sub_name] = {'x': x, 'z': z,
-                                           'dx': dx, 'dz': dz,
-                                           'Ic': Ic, 'Nf': Nf,
-                                           'rc': np.sqrt(dx**2 + dz**2)/2}
-                bundle['x'][i], bundle['z'][i] = x, z
-                bundle['sub_name'] = np.append(
-                    bundle['sub_name'], sub_name)
-            bundle['Nf'] = i + 1
-            bundle['Xo'] = np.mean(bundle['x'])
-            bundle['Zo'] = np.mean(bundle['z'])
-        else:
-            print('coil bundle not found', name)
-            self.sub_coil[name] = self.coil[name]
-            bundle = self.coil[name]
-        return bundle
+    @staticmethod
+    def mesh_coil(pf_coil, dCoil):  # returns subcoil list
+        xc, zc = pf_coil['x'], pf_coil['z']
+        Dx, Dz = abs(pf_coil['dx']), abs(pf_coil['dz'])
+        nx, nz = int(np.ceil(Dx / dCoil)), int(np.ceil(Dz / dCoil))
+        dx, dz = Dx / nx, Dz / nz
+        x = xc + np.linspace(dx / 2, Dx - dx / 2, nx) - Dx / 2
+        z = zc + np.linspace(dz / 2, Dz - dz / 2, nz) - Dz / 2
+        X, Z = np.meshgrid(x, z, indexing='ij')
+        X, Z = np.reshape(X, (-1, 1)), np.reshape(Z, (-1, 1))
+        Nf = len(X)  # filament number
+        Ic = pf_coil['Ic'] / Nf
+        subcoil = [[] for __ in range(Nf)]
+        for i, (x, z) in enumerate(zip(X, Z)):
+            subcoil[i] = {'x': x, 'z': z, 'dx': dx, 'dz': dz, 'Ic': Ic,
+                          'Nf': Nf, 'rc': np.sqrt(dx**2 + dz**2) / 4}
+        return subcoil
 
     def initalize_collection(self, *args):
         self.coil_patch = {'patch': [], 'Ic': [], 'Jc': []}
@@ -285,9 +323,14 @@ class PF:
                 coil_color = 'C3'
 
             coil_color = kwargs.get('coil_color', coil_color)
-            patch[i] = patches.Rectangle((x-dx/2, z-dz/2), dx, dz,
-                                         facecolor=coil_color, alpha=alpha,
-                                         edgecolor=edgecolor)
+            if 'VS' in name:
+                patch[i] = patches.Circle(
+                        (x, z), dx/2, facecolor=coil_color, alpha=alpha,
+                        edgecolor=edgecolor)
+            else:
+                patch[i] = patches.Rectangle(
+                        (x-dx/2, z-dz/2), dx, dz,
+                        facecolor=coil_color, alpha=alpha, edgecolor=edgecolor)
             self.append_patch(patch[i], Ic=1e-3*coil['Ic'], Jc=1e-6*Jc)
         return patch
 
@@ -295,9 +338,13 @@ class PF:
         for i, name in enumerate(coils.keys()):
             coil = coils[name]
             x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
-            if name in self.index['CS']['name']:
-                drs = -2.5 / 3 * dx
-                ha = 'right'
+            if hasattr(self, 'index'):
+                if name in self.index['CS']['name']:
+                    drs = -2.5 / 3 * dx
+                    ha = 'right'
+                else:
+                    drs = 2.5 / 3 * dx
+                    ha = 'left'
             else:
                 drs = 2.5 / 3 * dx
                 ha = 'left'
@@ -319,32 +366,34 @@ class PF:
                          color=0.2 * np.ones(3))
 
     def plot_coil(self, coils, label=False, current=False,
-                  fs=12, alpha=1, plot=True, ax=None, **kwargs):
+                  fs=12, alpha=1, plot=True, ax=None, patch=True, **kwargs):
         if ax is None:
             ax = plt.gca()
-        patch = self.patch_coil(coils, alpha=alpha, **kwargs)
-        pc = PatchCollection(patch, match_original=True)
-        ax.add_collection(pc)
+        if patch:
+            patch = self.patch_coil(coils, alpha=alpha, **kwargs)
+            pc = PatchCollection(patch[::-1], match_original=True)
+            ax.add_collection(pc)
         if label or current:
             self.label_coils(coils, label, current, fs=fs)
 
     def plot(self, subcoil=False, label=False, plasma=False,
-             current=False, alpha=1, ax=None):
+             current=False, alpha=1, ax=None, patch=True):
         if ax is None:
-            ax = plt.subplots(1, 1)[1]
+            ax = plt.gca()  # plt.subplots(1, 1)[1]
         fs = matplotlib.rcParams['legend.fontsize']
         if subcoil:
-            coils = self.sub_coil
+            coils = self.subcoil
         else:
             coils = self.coil
         self.plot_coil(coils, label=label, current=current, fs=fs,
-                       alpha=alpha, ax=ax)
+                       alpha=alpha, ax=ax, patch=patch)
         if plasma:
             self.plot_coil(self.plasma_coil, alpha=alpha, coil_color='C4',
                            ax=ax)
         ax.axis('equal')
         ax.axis('off')
 
+    '''
     def inductance(self, dCoil=0.5, Iscale=1):
         pf = deepcopy(self)
         inv = INV(pf, Iscale=Iscale, dCoil=dCoil)
@@ -358,6 +407,7 @@ class PF:
         inv.set_foreground()
         fillaments = np.dot(np.ones((len(Nf), 1)), Nf.reshape(1, -1))
         self.M = 2 * np.pi * inv.G * fillaments  # PF/CS inductance matrix
+    '''
 
     def coil_corners(self, coils):
         X, Z = np.array([]), np.array([])
@@ -798,7 +848,8 @@ if __name__ is '__main__':  # test functions
     nPF, nTF = 6, 16
     config = {'TF': 'SN', 'eq': 'SN_{:d}PF_{:d}TF'.format(nPF, nTF)}
     setup = Setup(config['eq'])
-    sf = SF(setup.filename)
+    sf = SF(filename=setup.filename)
+    sf.contour()
     profile = Profile(config['TF'], family='D', part='TF', nTF=nTF,
                       obj='L', load=True, npoints=1000)
 
@@ -808,7 +859,8 @@ if __name__ is '__main__':  # test functions
     tf.split_loop(plot=True)
 
     pf = PF(sf.eqdsk)
-    pf.plot()
+    pf.mesh_coils(dCoil=0.25)
+    pf.plot(subcoil=True)
 
     '''
     demo = DEMO()

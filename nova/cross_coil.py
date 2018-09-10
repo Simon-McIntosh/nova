@@ -23,17 +23,17 @@ def green(X, Z, Xc, Zc, dXc=0, dZc=0):
     return g
 
 
-def green_feild(X, Z, Xc, Zc):
-    feild = np.zeros(2)
+def green_field(X, Z, Xc, Zc):
+    field = np.zeros(2)
     a = np.sqrt((X + Xc)**2 + (Z - Zc)**2)
     m = 4 * X * Xc / a**2
     I1 = 4 / a * ellipk(m)
     I2 = 4 / a**3 * ellipe(m) / (1 - m)
     A = (Z - Zc)**2 + X**2 + Xc**2
     B = -2 * X * Xc
-    feild[0] = Xc / (4 * np.pi) * (Z - Zc) / B * (I1 - A * I2)
-    feild[1] = Xc / (4 * np.pi) * ((Xc + X * A / B) * I2 - X / B * I1)
-    return feild
+    field[0] = Xc / (4 * np.pi) * (Z - Zc) / B * (I1 - A * I2)
+    field[1] = Xc / (4 * np.pi) * ((Xc + X * A / B) * I2 - X / B * I1)
+    return field
 
 
 def add_Pcoil(x, z, coil):
@@ -44,7 +44,7 @@ def add_Pcoil(x, z, coil):
 
 def add_Bcoil(x, z, coil):
     xc, zc, Ic = coil['x'], coil['z'], coil['Ic']
-    return mu_o * Ic * green_feild(x, z, xc, zc)
+    return mu_o * Ic * green_field(x, z, xc, zc)
 
 
 def get_plasma_coil(pf, **kwargs):
@@ -55,8 +55,8 @@ def get_plasma_coil(pf, **kwargs):
 def Ppoint(point, pf, **kwargs):
     plasma_coil = get_plasma_coil(pf, **kwargs)
     psi = 0
-    for coil in pf.sub_coil:
-        psi += add_Pcoil(point[0], point[1], pf.sub_coil[coil])
+    for coil in pf.subcoil:
+        psi += add_Pcoil(point[0], point[1], pf.subcoil[coil])
     for name in plasma_coil:
         psi += add_Pcoil(point[0], point[1], plasma_coil[name])
     return psi
@@ -64,39 +64,43 @@ def Ppoint(point, pf, **kwargs):
 
 def Bpoint(point, pf, **kwargs):
     plasma_coil = get_plasma_coil(pf, **kwargs)
-    feild = np.zeros(2)
-    for name in pf.sub_coil:
-        feild += add_Bcoil(point[0], point[1], pf.sub_coil[name])
+    field = np.zeros(2)
+    for name in pf.subcoil:
+        field += add_Bcoil(point[0], point[1], pf.subcoil[name])
     for name in plasma_coil:
-        feild += add_Bcoil(point[0], point[1], plasma_coil[name])
-    return feild
+        field += add_Bcoil(point[0], point[1], plasma_coil[name])
+    return field
 
 
 def Bmag(point, *args):
     pf = args[0]  # pf object
     if len(args) == 2:
-        kwargs = {'plasma_coil', args[1]}  # specify seperate plasma_coil
+        kwargs = {'plasma_coil': args[1]}  # specify seperate plasma_coil
     else:
         kwargs = {}  # use pf.plasma_coil
-    feild = Bpoint(point, pf, **kwargs)
-    B = np.sqrt(feild[0]**2 + feild[1]**2)
+    field = Bpoint(point, pf, **kwargs)
+    B = np.sqrt(field[0]**2 + field[1]**2)
     return B
 
 
-def get_coil_psi(x2d, z2d, pf, **kwargs):
-    plasma_coil = get_plasma_coil(pf, **kwargs)
+def get_coil_psi(x2d, z2d, pf_subcoil, plasma_coil, **kwargs):
+    # plasma_coil = get_plasma_coil(pf, **kwargs)
+    set_pf = kwargs.get('set_pf', True)
+    set_plasma = kwargs.get('set_plasma', True)
     if len(np.shape(x2d)) > 0:
         psi = np.zeros(np.shape(x2d))
     else:
         psi = 0
-    for name in pf.sub_coil.keys():
-        psi += add_Pcoil(x2d, z2d, pf.sub_coil[name])
-    for name in plasma_coil.keys():
-        psi += add_Pcoil(x2d, z2d, plasma_coil[name])
+    if set_pf:
+        for name in pf_subcoil.keys():
+            psi += add_Pcoil(x2d, z2d, pf_subcoil[name])
+    if set_plasma:
+        for name in plasma_coil.keys():
+            psi += add_Pcoil(x2d, z2d, plasma_coil[name])
     return psi
 
 
-class GreenFeildLoop(object):
+class GreenFieldLoop(object):
     def __init__(self, loop, smooth=True, Nss=100, rc=0.5):
         self.rc = rc
         if np.sum((loop[0, :] - loop[-1, :])**2) != 0:  # close loop
@@ -128,7 +132,7 @@ class GreenFeildLoop(object):
         Apot = np.sum(core * dL / r_mag, axis=0) / (4 * np.pi)
         return Apot
 
-    def B(self, point, theta=0, dy=0, dr=0):  # 3D feild from arbitrary loop
+    def B(self, point, theta=0, dy=0, dr=0):  # 3D field from arbitrary loop
         loop, dL = self.transform(theta, dy, dr)
         point = np.array(point) * np.ones((self.npoints, 3))  # point array
         x = point - loop  # point-segment vectors
@@ -143,9 +147,9 @@ class GreenFeildLoop(object):
         ds_mag[ds_mag < 1e-16] = 1e-16
         core = ds_mag**2 / self.rc**2
         core[ds_mag > self.rc] = 1
-        Bfeild = sum(core * np.cross(ds, r2_hat - r1_hat) /
+        Bfield = sum(core * np.cross(ds, r2_hat - r1_hat) /
                      ds_mag**2) / (4 * np.pi)
-        return Bfeild
+        return Bfield
 
     def plot(self):
         plt.figure()
@@ -155,7 +159,7 @@ class GreenFeildLoop(object):
         plt.axis('off')
 
 
-def green_feild_circle(coil, point, N=20):  # 3D feild from arbitrary loop
+def green_field_circle(coil, point, N=20):  # 3D field from arbitrary loop
     theta, dtheta = np.linspace(
         0, 2 * np.pi, N, endpoint=False, retstep=True)  # angle
     c = np.transpose(np.array([coil['x'] * np.cos(theta),
@@ -166,8 +170,8 @@ def green_feild_circle(coil, point, N=20):  # 3D feild from arbitrary loop
         dtheta  # segment
     x = point - c  # point-segment vectors
     r_mag = np.transpose(np.sum(x * x, axis=1)**0.5 * np.ones((3, N)))
-    feild = np.sum(np.cross(dL, x) / r_mag**3, axis=0) / (4 * np.pi)  # Bfeild
-    return feild
+    field = np.sum(np.cross(dL, x) / r_mag**3, axis=0) / (4 * np.pi)  # Bfield
+    return field
 
 
 def cut_corners(loop, smooth=True, Nss=100):
@@ -204,6 +208,23 @@ def cut_corners(loop, smooth=True, Nss=100):
     return dL, loop_ss
 
 
+def get_green_field(x, xi, z, zi, rc):
+    r_mag = np.sqrt((x - xi)**2 + (z - zi)**2)
+    if r_mag > rc:  # outside coil core
+        dfield = green_field(x, z, xi, zi)
+    else:  # inside coil core
+        dfield, B = np.zeros(2), np.zeros(2)
+        dz = (rc**2 - (x - xi)**2)**0.5  # Br
+        for i, zc in enumerate([zi - dz, zi + dz]):
+            B[i] = green_field(x, z, xi, zc)[0]
+        dfield[0] = sum(B) / 2 + (z - zi) * (B[1] - B[0]) / (2 * dz)
+        dr = (rc**2 - (z - zi)**2)**0.5  # Bz
+        for i, rc in enumerate([xi - dr, xi + dr]):
+            B[i] = green_field(x, z, rc, zi)[1]
+        dfield[1] = sum(B) / 2 + (x - xi) * (B[1] - B[0]) / (2 * dr)
+    return dfield
+
+
 def Gtorque(eq_coil, pf_coil, source, sink, multi_filament):  # source-sink
     if multi_filament:
         coil = eq_coil
@@ -222,37 +243,25 @@ def Gtorque(eq_coil, pf_coil, source, sink, multi_filament):  # source-sink
         def name_source(i): return source
 
         def name_sink(j): return sink
-    feild = np.zeros(2)
+    field = np.zeros(2)
     for i in range(Nsource):
         source_strand = name_source(i)  # source
-        ri = coil[source_strand]['x']
+        xi = coil[source_strand]['x']
         zi = coil[source_strand]['z']
         for j in range(Nsink):
             sink_strand = name_sink(j)  # sink
             x = coil[sink_strand]['x']
             z = coil[sink_strand]['z']
             rc = coil[sink_strand]['rc']
-            r_mag = np.sqrt((x - ri)**2 + (z - zi)**2)
-            if r_mag > rc:  # outside coil core
-                dfeild = green_feild(x, z, ri, zi)
-            else:  # inside coil core
-                dfeild, B = np.zeros(2), np.zeros(2)
-                dz = (rc**2 - (x - ri)**2)**0.5  # Br
-                for i, zc in enumerate([zi - dz, zi + dz]):
-                    B[i] = green_feild(x, z, ri, zc)[0]
-                dfeild[0] = sum(B) / 2 + (z - zi) * (B[1] - B[0]) / (2 * dz)
-                dr = (rc**2 - (z - zi)**2)**0.5  # Bz
-                for i, rc in enumerate([ri - dr, ri + dr]):
-                    B[i] = green_feild(x, z, rc, zi)[1]
-                dfeild[1] = sum(B) / 2 + (x - ri) * (B[1] - B[0]) / (2 * dr)
-            feild += Nbundle * x * dfeild  # feild couple, rG
-    return feild
+            dfield = get_green_field(x, xi, z, zi, rc)
+            field += Nbundle * x * dfield  # field couple, rG
+    return field
 
 
 def Btorque(eq_coil, plasma_coil, passive_coils, sink):
     Csink = eq_coil
     Nsink = Csink[sink + '_0']['Nf']
-    feild = np.zeros(2)
+    field = np.zeros(2)
     for source in passive_coils:
         if source == 'Plasma':
             Csource = plasma_coil
@@ -262,22 +271,24 @@ def Btorque(eq_coil, plasma_coil, passive_coils, sink):
             Nsource = Csource[source + '_0']['Nf']
         for i in range(Nsource):
             source_strand = source + '_{:1.0f}'.format(i)
-            ri = Csource[source_strand]['x']  # source
+            xi = Csource[source_strand]['x']  # source
             zi = Csource[source_strand]['z']
             Ii = Csource[source_strand]['Ic']
             for j in range(Nsink):
                 sink_strand = sink + '_{:1.0f}'.format(j)
                 x = Csink[sink_strand]['x']  # sink
                 z = Csink[sink_strand]['z']
-                feild += Ii * x * green_feild(x, z, ri, zi)
-    return feild
+                rc = Csink[sink_strand]['rc']
+                dfield = get_green_field(x, xi, z, zi, rc)
+                field += Ii * x * dfield
+    return field
 
 
-def Gfeild(coil, plasma_coil, point):
-    feild = np.zeros(2)
+def Gfield(coil, plasma_coil, point):
+    field = np.zeros(2)
     for coil_set in [coil, plasma_coil]:
-        feild += Btorque(coil_set, point)
-    return feild
+        field += Btorque(coil_set, point)
+    return field
 
 
 def tangent(X, Z, norm=True):

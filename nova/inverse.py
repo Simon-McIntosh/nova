@@ -17,28 +17,31 @@ from warnings import warn
 import sys
 from scipy.optimize import brentq
 from amigo import geom
-from nova.elliptic import EQ
+from nova.coils import PF
+from nova.streamfunction import SF
 
 
 class INV(object):
 
-    def __init__(self, pf, tf=None, Jmax=12.5, offset=0.3, svd=False,
-                 Iscale=1e6, dCoil=0.5, boundary='tf'):
+    def __init__(self, coilset, tf=None, Jmax=12.5, offset=0.3, svd=False,
+                 Iscale=1e6, dCoil=None, boundary='tf'):
+        self.coilset = coilset  # requires update
+        self.ff = force_field(self.coilset)
         self.wsqrt = 1
         self.svd = svd  # coil current singular value decomposition flag
         self.Iscale = Iscale  # set current units to MA
         self.dCoil = dCoil  # coil mesh length
         self.boundary = boundary  # set boundary generator 'sf' or 'tf'
         self.ncpu = multiprocessing.cpu_count()
-        self.pf = pf
         self.tf = tf
         self.add_active([])  # all coils active
         self.initalise_coil()
         self.initalise_limits()
         self.offset = offset  # offset coils from outer TF loop
         if tf is not None:
-            self.norm = np.sqrt(2)*np.mean([self.pf.coil[name]['dx'] for
-                                            name in self.pf.coil])/2
+            dx = [self.coilset['coil'][name]['dx'] for
+                  name in self.coilset['coil']]
+            self.norm = np.sqrt(2)*np.mean(dx)/2
             self.tf.loop_interpolators(offset=self.offset)
             self.unwrap()  # store relitive coil posions around TF
         self.Jmax = Jmax  # MAm-2
@@ -49,6 +52,7 @@ class INV(object):
                       'value': np.array([]), 'condition': np.array([])}
 
         self.set_swing()
+        self.update_coils()
         self.log_scalar = ['rms', 'rmsID']
         # 'Fx_max','Fz_max','F_max','FzCS','Fsep','rms_bndry','Isum',
         # 'Imax','z_offset','FxPF','FzPF','dTpol'
@@ -58,74 +62,62 @@ class INV(object):
         self.CS_Lnorm, self.CS_Znorm = 2, 1
         self.rhs = False  # colocation status
 
-    def colocate(self, sf, n=1e3, expand=0.1, centre=0, width=363/(2*np.pi),
-                 SX=False, **kwargs):
-        if not hasattr(sf, 'legs'):
-            sf.sol()
-        self.load_equlibrium(sf, n=n, expand=expand)
+    def colocate(self, eqdsk, SX=False, **kwargs):
+        self.sf = SF(eqdsk=eqdsk)  # load streamfunction
         self.fix_boundary()
-        legs = list(sf.legs)[2:]
-        if SX:
-            legs.pop(-1)  # replace outer
-            self.fix_SX(Rex=kwargs.get('Rex', 1.5),
-                        arg=kwargs.get('arg', 40))
-        if 'setup' in kwargs:
-            self.fix_target(sf, legs, kwargs['setup'].targets)
-        self.add_plasma()
-        self.set_swing(centre=centre, width=width,
-                       array=np.linspace(-0.5, 0.5, 3))
-        self.set_force_feild()
+        # self.fix_SX_outer_target(SX)
+        # self.fix_divertor_targets()
+        self.set_foreground()
+        self.set_background()
+        self.get_weight()
         self.rhs = True
+
+    def fix_SX_outer_target(self, SX, **kwargs):
+        Rex = kwargs.get('Rex', 1.5)  # radius from x-point
+        arg = kwargs.get('arg', 40)  # angle from x-point
+        if SX:
+            self.sf.legs.pop(-1)  # replace outer
+            self.fix_SX(Rex=Rex, arg=arg)
 
     def fix_boundary(self):
         # add boundary points
         self.fix_boundary_psi(N=25, alpha=1-1e-4, factor=1)
-        # add boundary feild
-        self.fix_boundary_feild(N=25, alpha=1-1e-4, factor=1)
-        self.add_null(factor=1, point=self.eq.sf.Xpoint)
+        # add boundary field
+        #self.fix_boundary_field(N=25, alpha=1-1e-4, factor=1)
+        #self.fix_null(factor=1, point=self.sf.Xpoint_array[0])
+        #self.fix_null(factor=1, point=self.sf.Xpoint_array[1])
         self.initialize_log()
 
-    def fix_target(self, sf, legs, targets, factor=1):
-        for leg in legs:
-            Xsol, Zsol = sf.snip(leg, 0, targets[leg]['L2D'])
-            point = (Xsol[-1], Zsol[-1])
+    def fix_divertor_targets(self, factor=1):
+        for target in self.sf.targets:
+            L2D = self.sf.targets[target]['L2D']
+            Xsol, Zsol = self.sf.snip(target, 0, L2D)
+            if 'strike' in self.sf.targets[target]:
+                point = self.sf.targets[target]['strike']
+            else:
+                point = (Xsol[-1], Zsol[-1])
             field_angle = np.arctan2(Zsol[-1]-Zsol[-2], Xsol[-1]-Xsol[-2])
             Bdir = np.array([-np.sin(field_angle), np.cos(field_angle)])
             Bdir /= np.linalg.norm(Bdir)
             self.add_alpha(1, factor=factor, point=point, Bdir=Bdir)
             self.add_B(0, [field_angle*180/np.pi], factor=factor, point=point)
-            # plt.plot(Xsol, Zsol)
 
     def fix_SX(self, Rex=1.5, arg=40):  # fix outer leg
         R = self.eq.sf.Xpoint[0] * (Rex-1) / np.sin(arg*np.pi/180)
         target = (R, arg)
         self.add_alpha(1, factor=1, polar=target)  # target psi
-        self.add_B(0, [-20], factor=3, polar=target)  # target alignment feild)
+        self.add_B(0, [-20], factor=3, polar=target)  # target alignment field)
 
-    def load_equlibrium(self, sf, expand=0.25, n=2.5e3):
-        if self.boundary == 'tf':  # grid boundary extracted from tf centreline
-            try:
-                eq_boundary = self.tf.eq_boundary
-            except AttributeError:
-                raise ValueError('tf object not set')
-        elif self.boundary == 'sf':  # grid boundary extracted from seperatrix
-            eq_boundary = sf.eq_boundary
-        else:
-            errtxt = 'invalid bondary variable - require \'sf\' or \'tf\'\n'
-            errtxt += 'boundary identifies generator object'
-            raise ValueError(errtxt)
-
-        self.eq = EQ(sf, self.pf, dCoil=self.dCoil,
-                     boundary=eq_boundary(expand=expand), n=n)
-        self.update_coils()
-
-    def set_force_feild(self):
-        self.ff = force_feild(self.pf.index, self.pf.coil,
-                              self.pf.sub_coil, self.pf.plasma_coil,
-                              multi_filament=True)
-
-    def set_swing(self, centre=0, width=363/(2*np.pi), array=[-0.5, 0, 0.5]):
+    def get_flux(self, centre=0, width=363/(2*np.pi), array=[-0.5, 0, 0.5],
+                 **kwargs):
         flux = centre - np.array(array) * width  # Webber/rad
+        return flux
+
+    def set_swing(self, **kwargs):
+        if 'flux' in kwargs:
+            flux = kwargs['flux']
+        else:
+            flux = self.get_flux(**kwargs)
         self.nS = len(flux)
         self.swing = {'flux': flux, 'Ic': np.zeros((self.nS, self.nC)),
                       'rms': np.zeros(self.nS),
@@ -144,23 +136,46 @@ class INV(object):
         self.swing['Ic'] = np.zeros((self.nS, self.nC))
 
     def initalise_limits(self):
-        self.limit = {'Ic': {}, 'L': [], 'F': []}
-        self.limit['Ic'] = {'PF': 50, 'CS_sum': 500}  # MA
-        self.limit['L'] = {'CS': [-13, 10], 'PF': [0.05, 0.95]}  # m / fraction
-        self.limit['F'] = {'PFz': 450, 'CSz_sum': 350, 'CSz_sep': 300}  # MN
-        self.set_PF_limit()
+        self.limit = {'I': {}, 'L': {}, 'F': {}}
 
     def set_PF_limit(self):
         for coil in self.PF_coils:
             self.limit['L'][coil] = self.limit['L']['PF']
 
-    def set_limit(self, **kwargs):  # set as ICS_sum for [Ic][CS_sum] etc...
+    def set_limit(self, side='both', **kwargs):
+        # set as ICSsum for [I][CSsum] etc...
+        if side == 'both':
+            index = [0, 1]
+        elif side == 'lower':
+            index = [0]
+        elif side == 'upper':
+            index = [1]
+        else:
+            errtxt = 'invalid side parameter [both, lower, upper]'
+            errtxt += ': {}'.format(side)
+            raise IndexError(errtxt)
         for key in kwargs:
             variable = key[0]
-            if key[1:] in self.limit[variable]:
-                self.limit[variable][key[1:]] = kwargs[key]
+            if key[1:] not in self.limit[variable]:  # initalize limit
+                self.limit[variable][key[1:]] = [-1e36, 1e36]
+            if kwargs[key] is None:
+                for i in index:
+                    sign = self.sign_limit(i, side)
+                    self.limit[variable][key[1:]][i] = sign * 1e36
+            else:  # set limit(s)
+                for i in index:
+                    sign = self.sign_limit(i, side)
+                    self.limit[variable][key[1:]][i] = sign * kwargs[key]
         if 'LPF' in kwargs:
             self.set_PF_limit()
+
+    def sign_limit(self, index, side):
+        # only apply sign to symetric limits (side==both)
+        if side == 'both':
+            sign = 2*index-1
+        else:
+            sign = 1
+        return sign
 
     def Cname(self, coil):
         if isinstance(coil, str):
@@ -174,7 +189,7 @@ class INV(object):
         self.nPF = len(self.PF_coils)
         self.nCS = len(self.CS_coils)
         self.coil = {'active': OrderedDict(), 'passive': OrderedDict()}
-        names = list(self.pf.coil.keys())
+        names = list(self.coilset['coil'].keys())
         self.all_coils = names.copy()
         self.adjust_coils = names.copy()
         names = np.append(names, 'Plasma')
@@ -188,34 +203,39 @@ class INV(object):
                                       'sub_name': np.array([]),
                                       'Ic': np.array([]), 'Fx': np.array([]),
                                       'Fz': np.array([]),
-                                      'Fx_sum': 0, 'Fz_sum': 0, 'I_sum': 0,
+                                      'Fx_sum': 0, 'Fz_sum': 0, 'Isum': 0,
                                       'Xo': 0, 'Zo': 0, 'Nf': 0}
 
     def initalise_current(self):
         adjust_coils = self.coil['active'].keys()
         self.Ic = np.zeros((len(adjust_coils)))
         for i, name in enumerate(adjust_coils):
-            self.Ic[i] = self.pf.sub_coil[name + '_0']['Ic'] / self.Iscale
+            self.Ic[i] = self.coilset['subcoil'][name + '_0']['Ic']
+            self.Ic[i] /= self.Iscale
         self.alpha = np.zeros(self.nC)  # initalise alpha
 
-    def update_coils(self, plot=False, categorize=True):  # full coil update
-        if categorize:
-            self.pf.categorize_coils()  # index pf coils
+    def update_coils(self, plot=False, regrid=False):
         self.initalise_coil()
-        self.append_coil(self.pf.sub_coil)
-        self.append_coil(self.pf.plasma_coil)
-        for coil in self.all_coils:
-            self.update_bundle(coil)  # re-grid elliptic coils
+        self.append_coil(self.coilset['subcoil'])
+        self.append_coil(self.coilset['plasma_coil'])
+        if regrid:
+            for coil in self.all_coils:
+                self.update_bundle(coil)  # re-grid subcoils
         self.update_swing()
         self.initalise_current()
-        # self.initalise_limits()
-
         if plot:
-            self.plot_coils()
+            self.plot_coils(plasma=True)
+
+    def update_plasma_coil(self):
+        self.clear_plasma()
+        self.append_coil(self.coilset['plasma_coil'])
+
+    def clear_plasma(self):
+        for key in ['x', 'z', 'Ic', 'dx', 'dz', 'sub_name', 'Fx', 'Fz']:
+            self.coil['passive']['Plasma'][key] = np.array([])
 
     def append_coil(self, coils):
         for sub_name in coils.keys():
-            # name = sub_name.split('_')[0]
             name = '_'.join(sub_name.split('_')[:-1])
             if name in self.adjust_coils:
                 state = 'active'
@@ -248,22 +268,18 @@ class INV(object):
                 elif Ctype == 'CS' and name not in self.CS_coils:
                     self.CS_coils.append(name)
         else:
-            self.adjust_coils = list(self.pf.coil.keys())  # add all
-            if hasattr(self.pf, 'index'):
-                self.PF_coils = list(self.pf.index['PF']['name'])
-                self.CS_coils = list(self.pf.index['CS']['name'])
-            else:
-                self.PF_coils = []
-                self.CS_coils = []
+            self.adjust_coils = list(self.coilset['coil'].keys())  # add all
+            self.PF_coils = list(self.coilset['index']['PF']['name'])
+            self.CS_coils = list(self.coilset['index']['CS']['name'])
 
     def remove_active(self, Clist=[], Ctype='all', full=False):
         # Clist == list of coil names
         if full:
-            self.adjust_coils = list(self.pf.coil.keys())  # add all
+            self.adjust_coils = list(self.coilset['coil'].keys())  # add all
             if Ctype == 'PF':
-                self.PF_coils = list(self.pf.coil.keys())
+                self.PF_coils = list(self.coilset['coil'].keys())
             elif Ctype == 'CS':
-                self.CS_coils = list(self.pf.coil.keys())
+                self.CS_coils = list(self.coilset['coil'].keys())
         if len(Clist) > 0:
             for name in Clist.copy():
                 name = self.Cname(name)  # prepend 'Coil' if name not str
@@ -282,10 +298,10 @@ class INV(object):
     def remove_coil(self, Clist):
         for coil in Clist:
             name = self.Cname(coil)
-            if name in self.pf.coil.keys():
-                del self.pf.coil[name]
-                for i in range(self.pf.sub_coil[name + '_0']['Nf']):
-                    del self.pf.sub_coil[name + '_{:1.0f}'.format(i)]
+            if name in self.coilset['coil'].keys():
+                del self.coilset['coil'][name]
+                for i in range(self.coilset['subcoil'][name + '_0']['Nf']):
+                    del self.coilset['subcoil'][name + '_{:1.0f}'.format(i)]
         self.remove_active(Clist)
         self.update_coils()
 
@@ -312,17 +328,18 @@ class INV(object):
             z -= delta[0]
         return x, z
 
-    def plot_coils(self):
+    def plot_coils(self, plasma=True, ax=None):
+        if ax is None:
+            ax = plt.gca()
         ic = cycle(range(10))
-        for state, marker in zip(['passive', 'active'], ['o', 'd']):
+        for state, marker in zip(['passive', 'active'], ['o', '*']):
             for name in self.coil[state].keys():
-                if name != 'Plasma':
+                if name != 'Plasma' or plasma:
                     color = 'C{}'.format(next(ic))
                     for x, z in zip(self.coil[state][name]['x'],
                                     self.coil[state][name]['z']):
-                        plt.plot(x, z, marker, color=color, markersize=4)
-                        if state == 'passive':  # empty marker
-                            plt.plot(x, z, marker, color='w', markersize=2)
+                        ax.plot(x, z, marker, color='w', markersize=5)
+                        ax.plot(x, z, marker, color=color, markersize=2)
 
     def add_fix(self, x, z, value, Bdir, BC, factor):
         var = {'x': x, 'z': z, 'value': value,
@@ -343,7 +360,7 @@ class INV(object):
                 self.fix[name] = np.append(self.fix[name], var[name])
 
     def fix_flux(self, flux):
-        if not hasattr(self, 'fix_o'):
+        if not hasattr(self, 'fix_o'):  # set once
             self.fix_o = copy.deepcopy(self.fix)
         for i, (bc, value) in enumerate(zip(self.fix_o['BC'],
                                             self.fix_o['value'])):
@@ -352,8 +369,8 @@ class INV(object):
         self.set_target()  # adjust target flux
 
     def get_boundary(self, N=21, alpha=0.995):
-        x, z = self.eq.sf.get_boundary(alpha=alpha)
-        self.eq_spline()
+        x, z = self.sf.get_boundary(alpha=alpha)
+        self.psi_spline()
         nx = -self.psi.ev(x, z, dx=1, dy=0)
         nz = -self.psi.ev(x, z, dx=0, dy=1)
         L = geom.length(x, z)
@@ -363,27 +380,30 @@ class INV(object):
         return rb, zb, Bdir
 
     def get_psi(self, alpha):
-        Xpsi = self.eq.sf.Xpsi
-        Mpsi = self.eq.sf.Mpsi
+        Xpsi = self.sf.Xpsi
+        Mpsi = self.sf.Mpsi
         psi = Mpsi + alpha * (Xpsi - Mpsi)
         return psi
 
     def fix_boundary_psi(self, N=21, alpha=0.995, factor=1):
         x, z, Bdir = self.get_boundary(N=N, alpha=alpha)
         psi = self.get_psi(alpha) * np.ones(N)
-        psi -= self.eq.sf.Xpsi  # normalise
+        psi -= self.sf.Xpsi  # normalise
         self.add_fix(x, z, psi, Bdir, ['psi_bndry'], [factor])
 
-    def fix_boundary_feild(self, N=21, alpha=0.995, factor=1):
+    def fix_boundary_field(self, N=21, alpha=0.995, factor=1):
         x, z, Bdir = self.get_boundary(N=N, alpha=alpha)
         self.add_fix(x, z, [0.0], Bdir, ['Bdir'], [factor])
 
-    def add_null(self, factor=1, **kwargs):
+    def fix_null(self, factor=1, **kwargs):
         x, z = self.get_point(**kwargs)
         self.add_fix([x], [z], [0.0], np.array(
             [[1.0], [0.0]]).T, ['Bx'], [factor])
         self.add_fix([x], [z], [0.0], np.array(
             [[0.0], [1.0]]).T, ['Bz'], [factor])
+        #psi = self.sf.Ppoint((x, z))
+        #psi -= self.sf.Xpsi  # normalise
+        #self.add_psi(psi, factor=factor, label='psi_x', **kwargs)
 
     def add_Bxo(self, factor=1, **kwargs):
         x, z = self.get_point(**kwargs)
@@ -423,7 +443,7 @@ class INV(object):
 
     def add_alpha(self, alpha, factor=1, **kwargs):
         psi = self.get_psi(alpha)
-        psi -= self.eq.sf.Xpsi  # normalise
+        psi -= self.sf.Xpsi  # normalise
         self.add_psi(psi, factor=factor, **kwargs)
 
     def add_Bcon(self, B, **kwargs):
@@ -487,6 +507,7 @@ class INV(object):
                     plt.plot([x, x + direction[0] * norm * w],
                              [z, z + direction[1] * norm * w],
                              color=color, linewidth=2)
+            plt.axis('equal')
 
     def set_target(self):
         self.T = (self.fix['value'] - self.BG).reshape((len(self.BG), 1))
@@ -494,7 +515,7 @@ class INV(object):
 
     def set_background(self):
         self.BG = np.zeros(len(self.fix['BC']))  # background
-        self.eq_spline()  # generate equlibrium interpolators
+        self.psi_spline()  # generate equlibrium interpolators
         self.plasma_spline()  # generate plasma interpolators
         self.add_value('passive')
 
@@ -508,16 +529,14 @@ class INV(object):
             self.wG = np.dot(self.wG, self.V)  # solve in terms of alpha
 
     def add_value(self, state):
+        print(state)
         Xf, Zf, BC, Bdir = self.unpack_fix()
         for i, (xf, zf, bc, bdir) in enumerate(zip(Xf, Zf, BC, Bdir)):
             for j, name in enumerate(self.coil[state].keys()):
-                # if name == 'Plasma' and False:
-                #    self.BG[i] += self.add_value_plasma(bc,xf,zf,bdir)
-                # else:
                 coil = self.coil[state][name]
-                R, Z, Ic = coil['x'], coil['z'], coil['Ic']
+                X, Z, Ic = coil['x'], coil['z'], coil['Ic']
                 dX, dZ = coil['dx'], coil['dz']
-                for x, z, ic, dx, dz in zip(R, Z, Ic, dX, dZ):
+                for x, z, ic, dx, dz in zip(X, Z, Ic, dX, dZ):
                     value = self.add_value_coil(bc, xf, zf, x, z, bdir, dx, dz)
                     if state == 'active':
                         self.G[i, j] += value
@@ -533,8 +552,8 @@ class INV(object):
             value = self.Iscale * cc.mu_o * \
                 cc.green(xf, zf, x, z, dXc=dx, dZc=dz)
         else:
-            B = self.Iscale * cc.mu_o * cc.green_feild(xf, zf, x, z)
-            value = self.Bfeild(bc, B[0], B[1], bdir)
+            B = self.Iscale * cc.mu_o * cc.green_field(xf, zf, x, z)
+            value = self.Bfield(bc, B[0], B[1], bdir)
         return value
 
     def add_value_plasma(self, bc, xf, zf, bdir):
@@ -542,10 +561,10 @@ class INV(object):
             value = self.psi_plasma.ev(xf, zf)  # interpolate from GS
         else:
             Bx, Bz = self.B_plasma[0].ev(xf, zf), self.B_plasma[1].ev(xf, zf)
-            value = self.Bfeild(bc, Bx, Bz, bdir)
+            value = self.Bfield(bc, Bx, Bz, bdir)
         return value
 
-    def Bfeild(self, bc, Bx, Bz, Bdir):
+    def Bfield(self, bc, Bx, Bz, Bdir):
         if bc == 'Bx':
             value = Bx
         elif bc == 'Bz':
@@ -560,29 +579,33 @@ class INV(object):
         return value
 
     def get_mesh(self):
-        self.xm = np.array(np.matrix(self.eq.x).T * np.ones([1, self.eq.nz]))
+        self.xm = np.array(np.matrix(self.sf.x).T * np.ones([1, self.sf.nz]))
         self.xm[self.xm == 0] = 1e-34
-        self.zm = np.array(np.ones([self.eq.nx, 1]) * np.matrix(self.eq.z))
+        self.zm = np.array(np.ones([self.sf.nx, 1]) * np.matrix(self.sf.z))
 
-    def eq_spline(self):
-        self.psi = RBS(self.eq.x, self.eq.z, self.eq.psi)
+    def psi_spline(self):
+        self.psi = RBS(self.sf.x, self.sf.z, self.sf.psi)
         self.get_mesh()
         psi_x = self.psi.ev(self.xm, self.zm, dx=1, dy=0)
         psi_z = self.psi.ev(self.xm, self.zm, dx=0, dy=1)
         Bx, Bz = -psi_z / self.xm, psi_x / self.xm
         B = np.sqrt(Bx**2 + Bz**2)
-        self.B = RBS(self.eq.x, self.eq.z, B)
+        self.B = RBS(self.sf.x, self.sf.z, B)
 
     def plasma_spline(self):
         self.B_plasma = [[], []]
-        self.eq.plasma()  # evaluate scalar potential with plasma only
-        self.psi_plasma = RBS(self.eq.x, self.eq.z, self.eq.psi_plasma)
+        # self.eq.plasma()  # evaluate scalar potential with plasma only
+        psi_pl = cc.get_coil_psi(self.sf.x2d, self.sf.z2d,
+                                 self.coilset['subcoil'],
+                                 self.coilset['plasma_coil'], set_pf=False)
+        self.psi_plasma = RBS(self.sf.x, self.sf.z, psi_pl)
         self.get_mesh()
         psi_plasma_r = self.psi_plasma.ev(self.xm, self.zm, dx=1, dy=0)
         psi_plasma_z = self.psi_plasma.ev(self.xm, self.zm, dx=0, dy=1)
-        Bplasma_r, Bplasma_z = -psi_plasma_z / self.xm, psi_plasma_r / self.xm
-        self.B_plasma[0] = RBS(self.eq.x, self.eq.z, Bplasma_r)
-        self.B_plasma[1] = RBS(self.eq.x, self.eq.z, Bplasma_z)
+        Bplasma_r = -psi_plasma_z / self.xm
+        Bplasma_z = psi_plasma_r / self.xm
+        self.B_plasma[0] = RBS(self.sf.x, self.sf.z, Bplasma_r)
+        self.B_plasma[1] = RBS(self.sf.x, self.sf.z, Bplasma_z)
 
     def unpack_fix(self):
         Xf, Zf = self.fix['x'], self.fix['z']
@@ -640,8 +663,8 @@ class INV(object):
 
     def add_coil(self, Ctype=None, **kwargs):
         x, z = self.get_point(**kwargs)
-        index, i = np.zeros(len(self.pf.coil.keys())), -1
-        for i, name in enumerate(self.pf.coil.keys()):
+        index, i = np.zeros(len(self.coilset['coil'].keys())), -1
+        for i, name in enumerate(self.coilset['coil'].keys()):
             index[i] = name.split('Coil')[-1]
         try:
             Cid = index.max() + 1
@@ -654,9 +677,9 @@ class INV(object):
             if dx in kwargs.keys():
                 delta[i] = kwargs.get(dx)
         Ic = kwargs.get('Ic', 1e6)
-        self.pf.coil[name] = {'x': x, 'z': z,
-                              'dx': delta[0], 'dz': delta[1], 'Ic': Ic,
-                              'rc': np.sqrt(delta[0]**2 + delta[1]**2) / 2}
+        self.coilset['coil'][name] = \
+            {'x': x, 'z': z, 'dx': delta[0], 'dz': delta[1], 'Ic': Ic,
+             'rc': np.sqrt(delta[0]**2 + delta[1]**2) / 2}
 
     def grid_CS(self, n, Xo=2.9, Zbound=[-10, 9],
                 dx=0.818, gap=0.1, fdr=1):
@@ -676,7 +699,7 @@ class INV(object):
         self.update_coils()
         L = np.append(self.Lo['value'][:self.nPF], Le)
         self.set_Lo(L)
-        self.set_force_feild()
+        self.set_force_field()
 
     def grid_PF(self, n):
         nPF = n
@@ -688,7 +711,7 @@ class INV(object):
         self.update_coils()
         L = np.append(Lpf, self.Lo['value'][-(self.nCS+1):])
         self.set_Lo(L)
-        self.set_force_feild()
+        self.set_force_field()
 
     def unwrap(self):
         '''
@@ -698,20 +721,21 @@ class INV(object):
         funciton can accomidate large departures in TF shape
         when used with partner function self.wrap
         '''
-        Lpf = np.zeros(self.pf.index['PF']['n'])
-        for i, name in enumerate(self.pf.index['PF']['name']):
-            c = self.pf.coil[name]
+        Lpf = np.zeros(self.coilset['index']['PF']['n'])
+        for i, name in enumerate(self.coilset['index']['PF']['name']):
+            c = self.coilset['coil'][name]
             Lpf[i] = minimize_scalar(self.tf.norm, method='bounded',
                                      args=(self.tf.fun['out'],
                                            (c['x'], c['z'])), bounds=[0, 1]).x
-        Lcs = np.zeros(self.pf.index['CS']['n'] + 1)
-        z = np.zeros(self.pf.index['CS']['n'])
-        dz = np.zeros(self.pf.index['CS']['n'])
-        for i, name in enumerate(self.pf.index['CS']['name']):
-            z[i], dz[i] = self.pf.coil[name]['z'], self.pf.coil[name]['dz']
+        Lcs = np.zeros(self.coilset['index']['CS']['n'] + 1)
+        z = np.zeros(self.coilset['index']['CS']['n'])
+        dz = np.zeros(self.coilset['index']['CS']['n'])
+        for i, name in enumerate(self.coilset['index']['CS']['name']):
+            z[i] = self.coilset['coil'][name]['z']
+            dz[i] = self.coilset['coil'][name]['dz']
         self.gap = np.mean((z[1:]-dz[1:]/2)-(z[:-1]+dz[:-1]/2))
-        for i, name in enumerate(self.pf.index['CS']['name']):
-            c = self.pf.coil[name]
+        for i, name in enumerate(self.coilset['index']['CS']['name']):
+            c = self.coilset['coil'][name]
             if i == 0:
                 Lcs[0] = c['z'] - c['dz']/2 - self.gap/2
             Lcs[i + 1] = c['z'] + c['dz']/2 + self.gap/2
@@ -723,7 +747,7 @@ class INV(object):
             self.move_PF(name, Lout=L, norm=self.norm)
         self.fit_PF()  # fine-tune offset
         if solve:
-            self.ff.set_force_feild()
+            self.ff.set_force_field()
             Lnorm = loops.normalize_variables(self.Lo)
             self.update_position(Lnorm, update_area=True)
             self.eq.run(update=True)  # update psi map
@@ -766,12 +790,12 @@ class INV(object):
             x, z = self.get_point(**kwargs)
         elif 'delta' in kwargs.keys():
             ref, dx, dz = kwargs['delta']
-            coil = self.pf.coil[self.Cname(ref)]
+            coil = self.coilset['coil'][self.Cname(ref)]
             xc, zc = coil['x'], coil['z']
             x, z = xc + dx, zc + dz
         elif 'L' in kwargs.keys():
             ref, dL = kwargs['dL']
-            coil = self.pf.coil[self.Cname(ref)]
+            coil = self.coilset['coil'][self.Cname(ref)]
             xc, zc = coil['x'], coil['z']
         ARmax = 3
         if abs(AR) > ARmax:
@@ -780,11 +804,13 @@ class INV(object):
             AR = 1 + AR
         else:
             AR = 1 / (1 - AR)
-        dA = self.pf.coil[name]['dx'] * self.pf.coil[name]['dz']
-        self.pf.coil[name]['dx'] = np.sqrt(AR * dA)
-        self.pf.coil[name]['dz'] = self.pf.coil[name]['dx'] / AR
-        dx = x - self.pf.coil[name]['x']
-        dz = z - self.pf.coil[name]['z']
+        dA = self.coilset['coil'][name]['dx'] *\
+            self.coilset['coil'][name]['dz']
+        self.coilset['coil'][name]['dx'] = np.sqrt(AR * dA)
+        self.coilset['coil'][name]['dz'] = self.coilset['coil'][name]['dx']
+        self.coilset['coil'][name]['dz'] /= AR
+        dx = x - self.coilset['coil'][name]['x']
+        dz = z - self.coilset['coil'][name]['z']
         self.shift_coil(name, dx, dz)
 
     def fit_PF(self, **kwargs):
@@ -797,44 +823,46 @@ class INV(object):
         offset = kwargs.get('offset', self.offset)
         dl = 0
         for name in self.PF_coils:
-            dx, dz = self.tf.Cshift(self.pf.coil[name], 'out', offset)
+            dx, dz = self.tf.Cshift(self.coilset['coil'][name], 'out', offset)
             dl += dx**2 + dz**2
             self.shift_coil(name, dx, dz)
         return np.sqrt(dl / self.nPF)
 
     def shift_coil(self, name, dx, dz):
-        self.pf.coil[name]['x'] += dx
-        self.pf.coil[name]['z'] += dz
+        self.coilset['coil'][name]['x'] += dx
+        self.coilset['coil'][name]['z'] += dz
         self.coil['active'][name]['x'] += dx
         self.coil['active'][name]['z'] += dz
-        for i in range(self.pf.sub_coil[name + '_0']['Nf']):
+        for i in range(self.coilset['subcoil'][name + '_0']['Nf']):
             sub_name = name + '_{:1.0f}'.format(i)
-            self.pf.sub_coil[sub_name]['x'] += dx
-            self.pf.sub_coil[sub_name]['z'] += dz
+            self.coilset['subcoil'][sub_name]['x'] += dx
+            self.coilset['subcoil'][sub_name]['z'] += dz
         self.update_bundle(name)
 
     def move_CS(self, name, z, dz):
-        self.pf.coil[name]['z'] = z
-        self.pf.coil[name]['dz'] = dz
+        self.coilset['coil'][name]['z'] = z
+        self.coilset['coil'][name]['dz'] = dz
         self.update_bundle(name)
 
     def reset_current(self):
         for j, name in enumerate(self.coil['active'].keys()):
-            self.pf.coil[name]['Ic'] = 0
+            self.coilset['coil'][name]['Ic'] = 0
 
     def update_bundle(self, name):
         try:
-            Nold = self.pf.sub_coil[name + '_0']['Nf']
+            Nold = self.coilset['subcoil'][name + '_0']['Nf']
         except KeyError:
             Nold = 0
-        bundle = self.pf.size_coil(name, self.dCoil)
-        N = self.pf.sub_coil[name + '_0']['Nf']
-        self.coil['active'][name] = {}
-        for key in bundle.keys():
-            self.coil['active'][name][key] = bundle[key]
+        subcoil = PF.mesh_coil(self.coilset['coil'][name], self.dCoil)
+        N = subcoil[0]['Nf']
+        self.coil['active'][name].clear()
+        for i, filament in enumerate(subcoil):
+            subname = '{}_{}'.format(name, i)
+            self.subcoil[subname] = filament
+            self.coil['active'][name][subname] = self.subcoil[subname]
         if Nold > N:
             for i in range(N, Nold):
-                del self.pf.sub_coil[name + '_{:1.0f}'.format(i)]
+                del self.coilset['subcoil'][name + '_{:1.0f}'.format(i)]
 
     def copy_coil(self, coil_read):
         coil_copy = {}
@@ -856,10 +884,10 @@ class INV(object):
                 self.copy_coil(self.eq.plasma_coil).copy())
             self.log['position_iter'].append(self.iter['position'])
 
-    def poloidal_angle(self):  # calculate poloidal feild line angle
+    def poloidal_angle(self):  # calculate poloidal field line angle
         if 'Bdir' in self.fix['BC']:
             index = self.fix['BC'] == 'Bdir'  # angle for last Bdir co-location
-            B = self.eq.Bpoint(
+            B = self.sf.Bpoint(
                 [self.fix['x'][index][-1], self.fix['z'][index][-1]])
             Tpol = 180 * np.arctan2(B[1], B[0]) / np.pi  # angle in degrees
         else:
@@ -915,17 +943,22 @@ class INV(object):
         self.Io = {'name': self.adjust_coils, 'value': np.zeros(self.nC),
                    'lb': np.zeros(self.nC), 'ub': np.zeros(self.nC)}
         for i, name in enumerate(self.adjust_coils):  # limits in MA
-            # i = int(name.replace('Coil', ''))
-            coil = self.pf.coil[name]
-            Nf = self.pf.sub_coil[name + '_0']['Nf']  # fillament number
+            coil = self.coilset['coil'][name]
+            Nf = self.coilset['subcoil'][name + '_0']['Nf']  # fillament number
             self.Io['value'][i] = coil['Ic'] / (Nf * self.Iscale)
-            if name in self.PF_coils:
-                self.Io['lb'][i] = -self.limit['Ic']['PF'] / Nf
-                self.Io['ub'][i] = self.limit['Ic']['PF'] / Nf
-            if name in self.CS_coils:
+            if name in self.limit['I']:  # per-coil ('PF1', 'CS)
+                key = name
+            elif name[:2] in self.limit['I']:  # per-set ('PF', 'CS', ...)
+                key = name[:2]
+            else:  # coil name or coil group not found in limit['Ic'], limit J
+                key = 'Jmax'
+            if key == 'Jmax':  # apply current density limit (default)
                 Ilim = coil['dx'] * coil['dz'] * self.Jmax
                 self.Io['lb'][i] = -Ilim / Nf
                 self.Io['ub'][i] = Ilim / Nf
+            else:
+                self.Io['lb'][i] = self.limit['I'][key][0] / Nf
+                self.Io['ub'][i] = self.limit['I'][key][1] / Nf
         lindex = self.Io['value'] < self.Io['lb']
         self.Io['value'][lindex] = self.Io['lb'][lindex]
         uindex = self.Io['value'] > self.Io['ub']
@@ -944,45 +977,85 @@ class INV(object):
             grad[self.nPF:2 * self.nPF] = dF[:self.nPF, :, 1]
             # CSsum lower
             grad[2 * self.nPF] = -np.sum(dF[self.nPF:, :, 1], axis=0)
-            # CS_ upper
+            # CSsum upper
             grad[2 * self.nPF + 1] = np.sum(dF[self.nPF:, :, 1], axis=0)
             # evaluate each gap in CS stack
             for j in range(self.nCS - 1):
-                grad[2 * self.nPF + 2 + j] = \
+                index = 2 * self.nPF + 2 + j
+                # lower limit
+                grad[index] = -np.sum(dF[self.nPF+j+1:, :, 1], axis=0) +\
+                    np.sum(dF[self.nPF:self.nPF+j+1, :, 1], axis=0)
+                # upper limit
+                grad[index + self.nCS - 1] = \
                     np.sum(dF[self.nPF+j+1:, :, 1], axis=0) -\
                     np.sum(dF[self.nPF:self.nPF+j+1, :, 1], axis=0)
         PFz = F[:self.nPF, 1]  # vertical force on PF coils
-        PFz_limit = self.limit['F']['PFz']  # limit force
-        constraint[:self.nPF] = -PFz_limit - PFz  # PFz lower bound
-        constraint[self.nPF:2 * self.nPF] = PFz - PFz_limit  # PFz upper bound
-        FzCS = F[self.nPF:, 1]  # vertical force on CS coils
-        CSz_sum = np.sum(FzCS)  # vertical force on CS stack
-        CSsum_limit = self.limit['F']['CSz_sum']
-        constraint[2 * self.nPF] = -CSsum_limit - CSz_sum  # CSsum lower bound
-        constraint[2 * self.nPF + 1] = CSz_sum - \
-            CSsum_limit  # CSsum upper bound
-        CSsep_limit = self.limit['F']['CSz_sep']
-        for j in range(self.nCS - 1):  # evaluate each gap
+        PFz_limit = self.get_PFz_limit()  # PF vertical force limits
+        constraint[:self.nPF] = PFz_limit[:, 0] - PFz  # PFz lower
+        constraint[self.nPF:2 * self.nPF] = PFz - PFz_limit[:, 1]  # PFz upper
+        FzCS = F[self.nPF:, 1]  # vertical force on CS coils (vector)
+        CSsum = np.sum(FzCS)  # vertical force on CS stack (sum)
+        # lower and upper limits applied to CSz_cum
+        CSsum_limit = self.get_CSsum_limit()
+        constraint[2 * self.nPF] = CSsum_limit[0] - CSsum
+        constraint[2 * self.nPF + 1] = CSsum - CSsum_limit[1]
+        CSsep_limit = self.get_CSsep_limit()
+        for j in range(self.nCS - 1):  # evaluate CSsep for each gap
             Fsep = np.sum(FzCS[j + 1:]) - np.sum(FzCS[:j + 1])
-            # CS seperation
-            constraint[2 * self.nPF + 2 + j] = Fsep - CSsep_limit
+            index = 2 * self.nPF + 2 + j
+            # lower limit
+            constraint[index] = CSsep_limit[j, 0] - Fsep
+            # upper limit
+            constraint[index + self.nCS - 1] = Fsep - CSsep_limit[j, 1]
+
+    def get_PFz_limit(self):
+        PFz_limit = np.zeros((self.nPF, 2))
+        for i, coil in enumerate(self.PF_coils):
+            if coil in self.limit['F']:  # per-coil
+                PFz_limit[i] = self.limit['F'][coil]
+            elif coil[:2] in self.limit['F']:  # per-set
+                PFz_limit[i] = self.limit['F'][coil[:2]]
+            else:  # no limit
+                PFz_limit[i] = [-1e36, 1e36]
+        return PFz_limit
+
+    def get_CSsep_limit(self):
+        CSsep_limit = np.zeros((self.nCS - 1, 2))
+        for i in range(self.nCS - 1):  # gaps, bottom-top
+            gap = 'CS{}sep'.format(i)
+            if gap in self.limit['F']:  # per-gap
+                CSsep_limit[i] = self.limit['F'][gap]
+            elif 'CSsep' in self.limit['F']:  # per-set
+                CSsep_limit[i] = self.limit['F']['CSsep']
+            else:  # no limit
+                CSsep_limit[i] = [-1e36, 1e36]
+        return CSsep_limit
+
+    def get_CSsum_limit(self):
+        CSsum_limit = np.zeros((1, 2))
+        if 'CSsum' in self.limit['F']:  # per-set
+            CSsum_limit = self.limit['F']['CSsum']
+        else:  # no limit
+            CSsum_limit = [-1e36, 1e36]
+        return CSsum_limit
 
     def solve_slsqp(self, flux):  # solve for constrained current vector
+        self.check_state()
         self.fix_flux(flux)  # swing
         self.set_Io()  # set coil current and bounds
         opt = nlopt.opt(nlopt.LD_SLSQP, self.nC)
         opt.set_min_objective(self.frms)
         opt.set_ftol_abs(1e-12)  # 1e-12
-        tol = 1e-3 * np.ones(2 * self.nPF + self.nCS + 1)
-        opt.add_inequality_mconstraint(self.Flimit, tol)
+        tol = 1e-3 * np.ones(2 * self.nPF + 2 + 2 * (self.nCS - 1))
+        #opt.add_inequality_mconstraint(self.Flimit, tol)
         if self.svd:  # coil current eigen-decomposition
             opt.add_inequality_mconstraint(
                 self.Ilimit, 1e-3 * np.ones(2 * self.nC))
             self.alpha = opt.optimize(self.alpha)
             self.Ic = np.dot(self.V, self.alpha)
         else:
-            opt.set_lower_bounds(self.Io['lb'])
-            opt.set_upper_bounds(self.Io['ub'])
+            #opt.set_lower_bounds(self.Io['lb'])
+            #opt.set_upper_bounds(self.Io['ub'])
             self.Ic = opt.optimize(self.Io['value'])
         self.Io['value'] = self.Ic.reshape(-1)
         self.rms = opt.last_optimum_value()
@@ -996,17 +1069,18 @@ class INV(object):
             if name in self.adjust_coils:
                 Ic = Ic[list(self.adjust_coils).index(name)]
             else:
-                Ic = self.pf.coil[name]['Ic']
+                Ic = self.coilset['coil'][name]['Ic']
             if Ic != 0:
                 Ic = abs(Ic)
-                if Ic > self.limit['Ic']['PF']:
-                    Ic = self.limit['Ic']['PF']  # coil area upper bound
+                if Ic > self.limit['I']['PF']:
+                    Ic = self.limit['I']['PF']  # coil area upper bound
                 dA_target = Ic / self.Jmax  # apply current density limit
-                dA = self.pf.coil[name]['dx'] * self.pf.coil[name]['dz']
+                dA = self.coilset['coil'][name]['dx'] *\
+                    self.coilset['coil'][name]['dz']
                 ratio = dA_target / dA
                 scale = (ratio * (1 + margin))**0.5
-                self.pf.coil[name]['dx'] *= relax * (scale - 1) + 1
-                self.pf.coil[name]['dz'] *= relax * (scale - 1) + 1
+                self.coilset['coil'][name]['dx'] *= relax * (scale - 1) + 1
+                self.coilset['coil'][name]['dz'] *= relax * (scale - 1) + 1
         dl = self.fit_PF()  # fit re-sized coils to TF
         return dl
 
@@ -1052,7 +1126,7 @@ class INV(object):
             for i in range(imax):
                 dl = self.update_area(relax=relax)
                 dL.append(dl)
-                self.ff.set_force_feild(state='active')
+                self.ff.set_force_field(state='active')
                 self.set_foreground()
                 rms = self.swing_flux()
                 if abs(dl - dl_o) < err:  # coil areas converged
@@ -1066,7 +1140,7 @@ class INV(object):
                     print(dL)
         else:
             self.fit_PF()  # fit coils to TF
-            self.ff.set_force_feild(state='active')
+            self.ff.set_force_field(state='active')
             self.set_foreground()
             rms = self.swing_flux()
         if store_update:
@@ -1093,6 +1167,20 @@ class INV(object):
         self.rms = self.swing['rms'][self.rmsID]
         return self.rms
 
+    def plot_swing(self, ax=None):
+        if ax is None:
+            ax = plt.subplots(1, 1)[1]
+        for i, name in enumerate(self.coil['active']):
+            N = self.coilset['coil'][name]['N']  # turn number
+            ax.plot(2*np.pi*self.swing['flux'],
+                    1e-3*self.Iscale*self.swing['Ic'][:, i] / N,
+                    label=name)
+        ax.legend()
+        plt.despine()
+        ax.set_xlabel('$t$ s')
+        ax.set_ylabel('$I$ kA')
+
+
     def set_sail(self):  # move pf coil out of port
         if not hasattr(self, 'Lex'):
             errtxt = 'can\'t leave if you don\'t know were you are\n'
@@ -1103,7 +1191,7 @@ class INV(object):
 
         for i, (name, L) in enumerate(zip(self.PF_coils, self.Lo['value'])):
             ip = np.argmin(abs(L-self.Lex))
-            dl = self.pf.coil[name]['rc']/self.tf.fun['out']['L']
+            dl = self.coilset['coil'][name]['rc']/self.tf.fun['out']['L']
             if (ip % 2 == 0 and L + dl > self.Lex[ip]) or \
                     (ip % 2 == 1 and L - dl < self.Lex[ip]):
                 # coil in port move down if even, up if odd
@@ -1250,16 +1338,17 @@ class INV(object):
 
     def update_current(self):
         self.Isum, self.IsumCS, self.IsumPF = 0, 0, 0
-        self.ff.Ic = self.Ic  # pass current to force feild
+        self.ff.Ic = self.Ic  # pass current to force field
         self.Icoil = np.zeros(len(self.coil['active'].keys()))
         for j, name in enumerate(self.coil['active']):
             Nfilament = self.coil['active'][name]['Nf']
             self.Icoil[j] = self.Ic[j] * Nfilament  # store current
-            self.pf.coil[name]['Ic'] = self.Icoil[j] * self.Iscale
-            self.coil['active'][name]['I_sum'] = self.Icoil[j] * self.Iscale
+            self.coilset['coil'][name]['Ic'] = self.Icoil[j] * self.Iscale
+            self.coil['active'][name]['Isum'] = self.Icoil[j] * self.Iscale
             for i in range(Nfilament):
                 sub_name = name + '_{:1.0f}'.format(i)
-                self.pf.sub_coil[sub_name]['Ic'] = self.Ic[j] * self.Iscale
+                self.coilset['subcoil'][sub_name]['Ic'] = self.Ic[j] *\
+                    self.Iscale
                 self.coil['active'][name]['Ic'][i] = self.Ic[j] * self.Iscale
             self.Isum += abs(self.Icoil[j])  # sum absolute current
             if name in self.CS_coils:
@@ -1280,10 +1369,10 @@ class INV(object):
             f.write('Coil\tr [m]\tz [m]\tdr [m]\tdz [m]')
             f.write('\tI SOF [A]\tI EOF [A]\n')
             for j, name in enumerate(self.coil['active'].keys()):
-                x = float(self.pf.coil[name]['x'])
-                z = float(self.pf.coil[name]['z'])
-                dx = self.pf.coil[name]['dx']
-                dz = self.pf.coil[name]['dz']
+                x = float(self.coilset['coil'][name]['x'])
+                z = float(self.coilset['coil'][name]['z'])
+                dx = self.coilset['coil'][name]['dx']
+                dz = self.coilset['coil'][name]['dz']
                 position = '\t{:1.3f}\t{:1.3f}'.format(x, z)
                 size = '\t{:1.3f}\t{:1.3f}'.format(dx, dz)
                 current = '\t{:1.3f}\t{:1.3f}\n'.format(

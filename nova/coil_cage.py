@@ -71,7 +71,7 @@ class coil_cage(object):
         rfun, zfun = geom.rzfun(x, z)
         self.plasma_interp = {'x': rfun, 'z': zfun}
         if plot:
-            pl.plot(self.plasma_loop[:, 0], self.plasma_loop[:, 2])
+            plt.plot(self.plasma_loop[:, 0], self.plasma_loop[:, 2])
 
     def set_TFcoil(self, cl, smooth=False):
         x, z = geom.clock(cl['x'], cl['z'])
@@ -79,7 +79,7 @@ class coil_cage(object):
         self.coil_loop = np.zeros((self.npoints, 3))
         self.coil_loop[:, 0], self.coil_loop[:, 2] = \
             geom.rzSLine(x, z, npoints=self.npoints)  # coil centerline
-        self.gfl = cc.GreenFeildLoop(self.coil_loop, rc=self.rc, smooth=smooth)
+        self.gfl = cc.GreenFieldLoop(self.coil_loop, rc=self.rc, smooth=smooth)
         self.pattern()
         self.amp_turns()  # set coil cage amp-turns
 

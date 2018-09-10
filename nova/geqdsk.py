@@ -91,7 +91,7 @@ def read(f):
     sibdry = float(next(token))
     bcentr = float(next(token))
 
-    cpasma = float(next(token))
+    Ipl = float(next(token))
     simagx = float(next(token))
     xdum = float(next(token))
     xmagx = float(next(token))
@@ -169,7 +169,6 @@ def read(f):
             dzc[i] = float(next(token))
             Ic[i] = float(next(token))
     else:
-        print('no coils')
         xc, zc, dxc, dzc, Ic = 0, 0, 0, 0, 0
     # Construct X-Z mesh
     x = np.zeros(nxefit)
@@ -194,7 +193,7 @@ def read(f):
               'simagx': simagx,  # Poloidal flux at the axis (Weber / rad)
               # Poloidal flux at plasma boundary (Weber / rad)
               'sibdry': sibdry,
-              'cpasma': cpasma,
+              'Ipl': Ipl,  # plasma current
               'psi': psi,    # Poloidal flux in Weber/rad on grid points
               'fpol': fpol,  # Poloidal current function on uniform flux grid
               # "FF'(psi) in (mT)^2/(Weber/rad) on uniform flux grid"
@@ -222,7 +221,7 @@ def carrage_return(f, i):
 
 def write_line(f, data, var):
     for i, v in enumerate(var):
-        fmat = '{:16.9f}' if v != 'cpasma' else '{:16.9e}'
+        fmat = '{:16.9f}' if v != 'Ipl' else '{:16.9e}'
         num = 0 if len(v) == 0 else data[v]
         f.write(fmat.format(num))
         carrage_return(f, i)
@@ -249,7 +248,7 @@ def write(f, data):  # write a G-EQDSK file
     f.write('{:4d} {:4d} {:4d}\n'.format(0, data['nx'], data['ny']))
     write_line(f, data, ['xdim', 'zdim', 'xcentr', 'xgrid1', 'zmid'])
     write_line(f, data, ['xmagx', 'zmagx', 'simagx', 'sibdry', 'bcentr'])
-    write_line(f, data, ['cpasma', 'simagx', '', 'xmagx', ''])
+    write_line(f, data, ['Ipl', 'simagx', '', 'xmagx', ''])
     write_line(f, data, ['zmagx', '', 'sibdry', '', ''])
 
     write_array(f, data['fpol'], c)

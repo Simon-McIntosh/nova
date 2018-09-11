@@ -50,7 +50,6 @@ class INV(object):
                     'factor': np.array([]), 'n': 0}
         self.cnstr = {'x': np.array([]), 'z': np.array([]), 'BC': np.array([]),
                       'value': np.array([]), 'condition': np.array([])}
-
         self.set_swing()
         self.update_coils()
         self.log_scalar = ['rms', 'rmsID']
@@ -64,11 +63,15 @@ class INV(object):
 
     def colocate(self, eqdsk, SX=False, **kwargs):
         self.sf = SF(eqdsk=eqdsk)  # load streamfunction
+        self.psi_spline()  # evaluate plasma spline interpolators
+        self.plasma_spline()  # generate plasma interpolators
+
         self.fix_boundary()
         # self.fix_SX_outer_target(SX)
         # self.fix_divertor_targets()
-        self.set_foreground()
         self.set_background()
+        self.set_foreground()
+
         self.get_weight()
         self.rhs = True
 
@@ -83,7 +86,7 @@ class INV(object):
         # add boundary points
         self.fix_boundary_psi(N=25, alpha=1-1e-4, factor=1)
         # add boundary field
-        #self.fix_boundary_field(N=25, alpha=1-1e-4, factor=1)
+        self.fix_boundary_field(N=25, alpha=1-1e-4, factor=1)
         #self.fix_null(factor=1, point=self.sf.Xpoint_array[0])
         #self.fix_null(factor=1, point=self.sf.Xpoint_array[1])
         self.initialize_log()
@@ -370,7 +373,6 @@ class INV(object):
 
     def get_boundary(self, N=21, alpha=0.995):
         x, z = self.sf.get_boundary(alpha=alpha)
-        self.psi_spline()
         nx = -self.psi.ev(x, z, dx=1, dy=0)
         nz = -self.psi.ev(x, z, dx=0, dy=1)
         L = geom.length(x, z)
@@ -388,7 +390,8 @@ class INV(object):
     def fix_boundary_psi(self, N=21, alpha=0.995, factor=1):
         x, z, Bdir = self.get_boundary(N=N, alpha=alpha)
         psi = self.get_psi(alpha) * np.ones(N)
-        psi -= self.sf.Xpsi  # normalise
+        print(psi, self.sf.Xpsi)
+        #psi -= self.sf.Xpsi  # normalise
         self.add_fix(x, z, psi, Bdir, ['psi_bndry'], [factor])
 
     def fix_boundary_field(self, N=21, alpha=0.995, factor=1):
@@ -443,7 +446,7 @@ class INV(object):
 
     def add_alpha(self, alpha, factor=1, **kwargs):
         psi = self.get_psi(alpha)
-        psi -= self.sf.Xpsi  # normalise
+        #psi -= self.sf.Xpsi  # normalise
         self.add_psi(psi, factor=factor, **kwargs)
 
     def add_Bcon(self, B, **kwargs):
@@ -515,8 +518,7 @@ class INV(object):
 
     def set_background(self):
         self.BG = np.zeros(len(self.fix['BC']))  # background
-        self.psi_spline()  # generate equlibrium interpolators
-        self.plasma_spline()  # generate plasma interpolators
+        # self.plasma_spline()  # generate plasma interpolators
         self.add_value('passive')
 
     def set_foreground(self):
@@ -578,32 +580,25 @@ class INV(object):
             value = Bx - Bz / 2
         return value
 
-    def get_mesh(self):
-        self.xm = np.array(np.matrix(self.sf.x).T * np.ones([1, self.sf.nz]))
-        self.xm[self.xm == 0] = 1e-34
-        self.zm = np.array(np.ones([self.sf.nx, 1]) * np.matrix(self.sf.z))
-
     def psi_spline(self):
         self.psi = RBS(self.sf.x, self.sf.z, self.sf.psi)
-        self.get_mesh()
-        psi_x = self.psi.ev(self.xm, self.zm, dx=1, dy=0)
-        psi_z = self.psi.ev(self.xm, self.zm, dx=0, dy=1)
-        Bx, Bz = -psi_z / self.xm, psi_x / self.xm
+        psi_x = self.psi.ev(self.sf.x2d, self.sf.z2d, dx=1, dy=0)
+        psi_z = self.psi.ev(self.sf.x2d, self.sf.z2d, dx=0, dy=1)
+        Bx, Bz = -psi_z / self.sf.x2d, psi_x / self.sf.x2d
         B = np.sqrt(Bx**2 + Bz**2)
         self.B = RBS(self.sf.x, self.sf.z, B)
 
     def plasma_spline(self):
         self.B_plasma = [[], []]
-        # self.eq.plasma()  # evaluate scalar potential with plasma only
+        # evaluate scalar potential with plasma only
         psi_pl = cc.get_coil_psi(self.sf.x2d, self.sf.z2d,
                                  self.coilset['subcoil'],
                                  self.coilset['plasma_coil'], set_pf=False)
         self.psi_plasma = RBS(self.sf.x, self.sf.z, psi_pl)
-        self.get_mesh()
-        psi_plasma_r = self.psi_plasma.ev(self.xm, self.zm, dx=1, dy=0)
-        psi_plasma_z = self.psi_plasma.ev(self.xm, self.zm, dx=0, dy=1)
-        Bplasma_r = -psi_plasma_z / self.xm
-        Bplasma_z = psi_plasma_r / self.xm
+        psi_plasma_r = self.psi_plasma.ev(self.sf.x2d, self.sf.z2d, dx=1, dy=0)
+        psi_plasma_z = self.psi_plasma.ev(self.sf.x2d, self.sf.z2d, dx=0, dy=1)
+        Bplasma_r = -psi_plasma_z / self.sf.x2d
+        Bplasma_z = psi_plasma_r / self.sf.x2d
         self.B_plasma[0] = RBS(self.sf.x, self.sf.z, Bplasma_r)
         self.B_plasma[1] = RBS(self.sf.x, self.sf.z, Bplasma_z)
 
@@ -648,7 +643,6 @@ class INV(object):
                     weight[i] = wbar  # mean boundary weight
             if (weight == 0).any():
                 warn('fix weight entry not set')
-
         factor = np.reshape(self.fix['factor'], (-1, 1))
         weight = np.reshape(weight, (-1, 1))
         self.wsqrt = np.sqrt(factor * weight)
@@ -1179,7 +1173,6 @@ class INV(object):
         plt.despine()
         ax.set_xlabel('$t$ s')
         ax.set_ylabel('$I$ kA')
-
 
     def set_sail(self):  # move pf coil out of port
         if not hasattr(self, 'Lex'):

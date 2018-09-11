@@ -98,7 +98,7 @@ class read_scenario(pythonIO):
         self.update_DINA(t)
         eqdsk = self.update_psi(n=n, plot=False)
         self.inv.colocate(eqdsk)
-        self.update_DINA(t)
+        #self.update_DINA(t)
         #self.update_coilset()
         #self.inv.update_coils()
 
@@ -191,7 +191,7 @@ class read_scenario(pythonIO):
 
     def plot_coils(self, ax=None):
         if ax is None:
-            ax = plt.subplots(1, 1, figsize=(8, 10))[1]
+            ax = plt.gca()
         self.pf.plot(label=True, current=True, patch=False, ax=ax)
         self.pf.plot(subcoil=True, plasma=True, ax=ax)
 
@@ -423,7 +423,6 @@ class read_scenario(pythonIO):
 
     def update_DINA(self, t):  # update from DINA interpolators
         self.set_coil_current(t)
-        self.update_coilset()
         self.set_plasma(t)
         self.update_coilset()
         Fcoil = self.ff.get_force()

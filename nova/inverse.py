@@ -24,9 +24,10 @@ from nova.streamfunction import SF
 class INV(object):
 
     def __init__(self, coilset, tf=None, Jmax=12.5, offset=0.3, svd=False,
-                 Iscale=1e6, dCoil=None, boundary='tf'):
+                 Iscale=1e6, dCoil=None, eqdsk={}, boundary='tf'):
         self.coilset = coilset  # requires update
         self.ff = force_field(self.coilset)
+        self.sf = SF(eqdsk=eqdsk)
         self.wsqrt = 1
         self.svd = svd  # coil current singular value decomposition flag
         self.Iscale = Iscale  # set current units to MA
@@ -63,13 +64,15 @@ class INV(object):
         self.rhs = False  # colocation status
 
     def colocate(self, eqdsk, SX=False, **kwargs):
-        self.sf = SF(eqdsk=eqdsk)  # load streamfunction
+        self.sf.update_eqdsk(eqdsk)  # update streamfunction
+        self.psi_spline()  # generate psi interpolators
+        self.plasma_spline()  # generate plasma interpolators
         self.fix_boundary()
-        # self.fix_SX_outer_target(SX)
-        # self.fix_divertor_targets()
-        self.set_foreground()
-        self.set_background()
+        self.fix_SX_outer_target(SX)
+        self.fix_divertor_targets()
         self.get_weight()
+        self.set_background()
+        self.set_foreground()
         self.rhs = True
 
     def fix_SX_outer_target(self, SX, **kwargs):
@@ -83,9 +86,9 @@ class INV(object):
         # add boundary points
         self.fix_boundary_psi(N=25, alpha=1-1e-4, factor=1)
         # add boundary field
-        #self.fix_boundary_field(N=25, alpha=1-1e-4, factor=1)
-        #self.fix_null(factor=1, point=self.sf.Xpoint_array[0])
-        #self.fix_null(factor=1, point=self.sf.Xpoint_array[1])
+        self.fix_boundary_field(N=25, alpha=1-1e-4, factor=1)
+        self.fix_null(factor=1, point=self.sf.Xpoint_array[0])
+        self.fix_null(factor=1, point=self.sf.Xpoint_array[1])
         self.initialize_log()
 
     def fix_divertor_targets(self, factor=1):
@@ -370,14 +373,16 @@ class INV(object):
 
     def get_boundary(self, N=21, alpha=0.995):
         x, z = self.sf.get_boundary(alpha=alpha)
-        self.psi_spline()
-        nx = -self.psi.ev(x, z, dx=1, dy=0)
-        nz = -self.psi.ev(x, z, dx=0, dy=1)
+        Xindex = np.argmin((x-self.sf.Xpoint[0])**2 + (z-self.sf.Xpoint[1])**2)
+        x = np.append(x[Xindex:], x[:Xindex])
+        z = np.append(z[Xindex:], z[:Xindex])
+        psi_x = -self.psi.ev(x, z, dx=1, dy=0)
+        psi_z = -self.psi.ev(x, z, dx=0, dy=1)
         L = geom.length(x, z)
-        Lc = np.linspace(0, 1, N + 1)[:-1]
-        rb, zb = interp1d(L, x)(Lc), interp1d(L, z)(Lc)
-        Bdir = np.array([interp1d(L, nx)(Lc), interp1d(L, nz)(Lc)]).T
-        return rb, zb, Bdir
+        Lc = np.linspace(0, 1, N + 2)[1:-1]
+        xb, zb = interp1d(L, x)(Lc), interp1d(L, z)(Lc)
+        Bdir = np.array([interp1d(L, psi_x)(Lc), interp1d(L, psi_z)(Lc)]).T
+        return xb, zb, Bdir
 
     def get_psi(self, alpha):
         Xpsi = self.sf.Xpsi
@@ -401,9 +406,9 @@ class INV(object):
             [[1.0], [0.0]]).T, ['Bx'], [factor])
         self.add_fix([x], [z], [0.0], np.array(
             [[0.0], [1.0]]).T, ['Bz'], [factor])
-        #psi = self.sf.Ppoint((x, z))
-        #psi -= self.sf.Xpsi  # normalise
-        #self.add_psi(psi, factor=factor, label='psi_x', **kwargs)
+        psi = self.sf.Ppoint((x, z))
+        psi -= self.sf.Xpsi  # normalise
+        self.add_psi(psi, factor=factor, label='psi_x', **kwargs)
 
     def add_Bxo(self, factor=1, **kwargs):
         x, z = self.get_point(**kwargs)
@@ -515,8 +520,6 @@ class INV(object):
 
     def set_background(self):
         self.BG = np.zeros(len(self.fix['BC']))  # background
-        self.psi_spline()  # generate equlibrium interpolators
-        self.plasma_spline()  # generate plasma interpolators
         self.add_value('passive')
 
     def set_foreground(self):
@@ -529,7 +532,6 @@ class INV(object):
             self.wG = np.dot(self.wG, self.V)  # solve in terms of alpha
 
     def add_value(self, state):
-        print(state)
         Xf, Zf, BC, Bdir = self.unpack_fix()
         for i, (xf, zf, bc, bdir) in enumerate(zip(Xf, Zf, BC, Bdir)):
             for j, name in enumerate(self.coil[state].keys()):
@@ -578,32 +580,24 @@ class INV(object):
             value = Bx - Bz / 2
         return value
 
-    def get_mesh(self):
-        self.xm = np.array(np.matrix(self.sf.x).T * np.ones([1, self.sf.nz]))
-        self.xm[self.xm == 0] = 1e-34
-        self.zm = np.array(np.ones([self.sf.nx, 1]) * np.matrix(self.sf.z))
-
     def psi_spline(self):
         self.psi = RBS(self.sf.x, self.sf.z, self.sf.psi)
-        self.get_mesh()
-        psi_x = self.psi.ev(self.xm, self.zm, dx=1, dy=0)
-        psi_z = self.psi.ev(self.xm, self.zm, dx=0, dy=1)
-        Bx, Bz = -psi_z / self.xm, psi_x / self.xm
+        psi_x = self.psi.ev(self.sf.x2d, self.sf.z2d, dx=1, dy=0)
+        psi_z = self.psi.ev(self.sf.x2d, self.sf.z2d, dx=0, dy=1)
+        Bx, Bz = -psi_z / self.sf.x2d, psi_x / self.sf.x2d
         B = np.sqrt(Bx**2 + Bz**2)
         self.B = RBS(self.sf.x, self.sf.z, B)
 
     def plasma_spline(self):
         self.B_plasma = [[], []]
-        # self.eq.plasma()  # evaluate scalar potential with plasma only
         psi_pl = cc.get_coil_psi(self.sf.x2d, self.sf.z2d,
                                  self.coilset['subcoil'],
                                  self.coilset['plasma_coil'], set_pf=False)
         self.psi_plasma = RBS(self.sf.x, self.sf.z, psi_pl)
-        self.get_mesh()
-        psi_plasma_r = self.psi_plasma.ev(self.xm, self.zm, dx=1, dy=0)
-        psi_plasma_z = self.psi_plasma.ev(self.xm, self.zm, dx=0, dy=1)
-        Bplasma_r = -psi_plasma_z / self.xm
-        Bplasma_z = psi_plasma_r / self.xm
+        psi_plasma_r = self.psi_plasma.ev(self.sf.x2d, self.sf.z2d, dx=1, dy=0)
+        psi_plasma_z = self.psi_plasma.ev(self.sf.x2d, self.sf.z2d, dx=0, dy=1)
+        Bplasma_r = -psi_plasma_z / self.sf.x2d
+        Bplasma_z = psi_plasma_r / self.sf.x2d
         self.B_plasma[0] = RBS(self.sf.x, self.sf.z, Bplasma_r)
         self.B_plasma[1] = RBS(self.sf.x, self.sf.z, Bplasma_z)
 
@@ -753,9 +747,8 @@ class INV(object):
             self.eq.run(update=True)  # update psi map
 
     def get_rms_bndry(self):
-        self.eq.run(update=False)
-        psi_o = self.fix['value'][0]
-        psi_line = self.eq.sf.get_contour([psi_o])[0]
+        psi_o = self.fix['value'][0]  # target boundary psi
+        psi_line = self.sf.get_contour([psi_o])[0]
         dx_bndry, dx_min = np.array([]), 0
         dz_bndry, dz_min = np.array([]), 0
         Xf, Zf, BC = self.unpack_fix()[:3]
@@ -763,7 +756,7 @@ class INV(object):
             if bc == 'psi_bndry':
                 if psi != psi_o:  # update contour
                     psi_o = psi
-                    psi_line = self.eq.sf.get_contour([psi_o])[0]
+                    psi_line = self.sf.get_contour([psi_o])[0]
                 for j, line in enumerate(psi_line):
                     x, z = line[:, 0], line[:, 1]
                     dx = np.sqrt((xf - x)**2 + (zf - z)**2)
@@ -776,7 +769,6 @@ class INV(object):
                     # update boundary error
                     if j == 0 or np.abs(dz[zmin_index]) < np.abs(dz_min):
                         dz_min = dz[zmin_index]
-
                 dx_bndry = np.append(dx_bndry, dx_min)
                 dz_bndry = np.append(dz_bndry, dz_min)
         rms_bndry = np.sqrt(np.mean(dx_bndry**2))  # calculate rms
@@ -1047,15 +1039,15 @@ class INV(object):
         opt.set_min_objective(self.frms)
         opt.set_ftol_abs(1e-12)  # 1e-12
         tol = 1e-3 * np.ones(2 * self.nPF + 2 + 2 * (self.nCS - 1))
-        #opt.add_inequality_mconstraint(self.Flimit, tol)
+        opt.add_inequality_mconstraint(self.Flimit, tol)
         if self.svd:  # coil current eigen-decomposition
             opt.add_inequality_mconstraint(
                 self.Ilimit, 1e-3 * np.ones(2 * self.nC))
             self.alpha = opt.optimize(self.alpha)
             self.Ic = np.dot(self.V, self.alpha)
         else:
-            #opt.set_lower_bounds(self.Io['lb'])
-            #opt.set_upper_bounds(self.Io['ub'])
+            opt.set_lower_bounds(self.Io['lb'])
+            opt.set_upper_bounds(self.Io['ub'])
             self.Ic = opt.optimize(self.Io['value'])
         self.Io['value'] = self.Ic.reshape(-1)
         self.rms = opt.last_optimum_value()

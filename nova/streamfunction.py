@@ -27,7 +27,6 @@ class SF(object):
         self.shape = {}
         self.set_kwargs(kwargs)
         self.load_eqdsk()
-        self.initalize_field(plot=False)
 
     def set_kwargs(self, kwargs):
         for key in kwargs:
@@ -38,12 +37,14 @@ class SF(object):
             self.eqdsk = nova.geqdsk.read(self.filename)
             self.normalise()  # unit normalisation
         if not hasattr(self, 'eqdsk'):
-            raise IndexError('SF object requires filename or eqdsk kwargs')
-        self.set_psi(self.eqdsk)
-        self.set_points(n=50, plot=False)  # set (po, mo)
-        self.set_flux_functions(self.eqdsk)  # calculate flux profiles
-        self.set_TF(self.eqdsk)
-        self.set_firstwall(self.eqdsk)
+            self.eqdsk = {}  # initalise as empty
+        self.update_eqdsk(self.eqdsk)
+            
+    def update_eqdsk(self, eqdsk):
+        self.set_flux_functions(eqdsk)  # calculate flux profiles
+        self.set_TF(eqdsk)  # TF magnetic moment
+        self.set_firstwall(eqdsk)  # first wall profile
+        self.set_psi(eqdsk)  # flux map + nulls
 
     def set_psi(self, eqdsk):  # was set_plasma
         required_keys = ['x', 'z', 'psi']
@@ -56,36 +57,27 @@ class SF(object):
                     setattr(self, key, eqdsk[key])
             self.trim_x(xmin=0.5)  # trim zero x-coordinate entries
             self.meshgrid()  # store grid
+            self.Pfield()
             self.Bfield()  # compute Bfield from psi input
             self.set_contour()
+            self.set_points(n=50, plot=False)  # set (po, mo)
+            self.initalize_field(plot=False)
 
     def initalize_field(self, plot=False):
         self.get_midplane()
         self.get_boundary(alpha=1-1e-3, set_boundary=True, plot=plot)
+        self.get_sol()
 
-
-    def get_sol(self):
+    def get_sol(self, plot=False):
         # check that x-point is inside first wall
         if Polygon(self.fw).intersects(Point(self.Xpoint)):
-            print('true')
             self.initalize_sol(rcirc=0.3, drcirc=0.15)
             self.sol(plot=plot)
-
 
     def initalize_sol(self, rcirc=0.3, drcirc=0.15):
         self.get_sol_psi(dSOL=3e-3, Nsol=15, verbose=False)
         self.rcirc = 0.3 * abs(self.Mpoint[1] - self.Xpoint[1])  # radius
         self.drcirc = 0.15 * self.rcirc  # leg search width
-
-    def update_psi(self, eqdsk):  # update requres full separatrix
-        for attr in ['Bspline', 'Pspline', 'Xpsi', 'Mpsi', 'Bx', 'Bz', 'LFPx']:
-            if hasattr(self, attr):
-                delattr(self, attr)
-        self.set_psi(eqdsk)
-        self.set_points(plot=False)  # set (po, mo)
-        self.initalize_field(plot=False)
-        # self.get_Plimit()  # limit plasma extent
-        # self.get_sol_psi()  # re-calculate sol_psi
 
     def normalise(self):
         if ('Fiesta' in self.eqdsk['name'] or 'Nova' in self.eqdsk['name'] or
@@ -214,8 +206,8 @@ class SF(object):
 
     def set_firstwall(self, eqdsk):
         if np.array([key in eqdsk for key in ['xlim', 'zlim']]).all():
-            xlim = self.eqdsk['xlim']
-            zlim = self.eqdsk['zlim']
+            xlim = eqdsk['xlim']
+            zlim = eqdsk['zlim']
             L = geom.length(xlim, zlim, norm=False)
             dL = np.min(np.diff(L))  # minimum space interpolation
             self.nlim = int(L[-1]/dL)
@@ -267,6 +259,9 @@ class SF(object):
         self.x2d, self.z2d = np.meshgrid(self.x, self.z, indexing='ij')
         self.limit = np.array([[self.x[0], self.x[-1]],
                                [self.z[0], self.z[-1]]])
+            
+    def Pfield(self):
+        self.Pspline = RectBivariateSpline(self.x, self.z, self.psi)
 
     def Bfield(self):
         psi_x, psi_z = np.gradient(self.psi, self.dx, self.dz)
@@ -358,10 +353,21 @@ class SF(object):
         area_limit = 0.05*np.prod(np.diff(self.limit))
         Mindex = self.points['area'] < area_limit
         if sum(Mindex) == 0:
+            Nstd = 3
+            psi_std = np.std(self.psi)
+            levels = np.linspace(-Nstd * psi_std, Nstd * psi_std, 11)
+            contours = self.get_contour(levels)
+            for psi_line, level in zip(contours, levels):
+                for line in psi_line:
+                    x, z = line[:, 0], line[:, 1]
+                    area = Polygon(np.array([x, z]).T).area
+                    print(area)
+ 
             err_txt = 'Mpoint not found:\n'
             err_txt += 'increase grid resolution or area limit fraction\n'
             err_txt += 'limit {:1.3f}m2\n'.format(area_limit)
             err_txt += 'values {:1.3f}m2\n'.format(*self.points['area'])
+            
             raise IndexError(err_txt)
         Mpoints = self.points[Mindex]
         self.mo_array = []
@@ -428,8 +434,6 @@ class SF(object):
         return np.argmin(B)
 
     def Ppoint(self, point):
-        if not hasattr(self, 'Pspline'):
-            self.Pspline = RectBivariateSpline(self.x, self.z, self.psi)
         psi = self.Pspline.ev(point[0], point[1])
         return psi
 
@@ -588,11 +592,11 @@ class SF(object):
     def plot_nulls(self, labels=['X', 'M'], ax=None):
         if ax is None:
             ax = plt.gca()
-        for label in labels:
-            if label == 'M':
+        for l in labels:
+            if l == 'M':
                 ax.plot(self.Mpoint[0], self.Mpoint[1], 'C2*', ms=10,
                         zorder=10, label='Mpoint {:1.2f}'.format(self.Mpsi))
-            elif label == 'X':
+            elif l == 'X':
                 location_index = ['lower', 'upper',
                                   'edge', 'first_wall'].index(self.Xloc)
                 for i, (Xpoint, Xpsi) in enumerate(zip(self.Xpoint_array,
@@ -613,7 +617,7 @@ class SF(object):
 
     def get_Mpsi(self, mo=None, plot=False):
         self.Mpoint = self.getM(mo=mo)
-        self.Mpsi = self.Ppoint(self.Mpoint)
+        self.Mpsi = float(self.Ppoint(self.Mpoint))
         if plot:
             self.plot_nulls(labels=['M'])
         return (self.Mpsi, self.Mpoint)
@@ -677,7 +681,7 @@ class SF(object):
                 L[i] = geom.length(x, z, norm=False)[-1]
             index = np.argmax(L)  # select longest loop
             X, Z = X[index], Z[index]
-            # X, Z = geom.clock(X, Z)
+            # X, Z = geom.theta_sort(X, Z)
             # X, Z = X, Z
         except ValueError:
             print('Spsi', Spsi)

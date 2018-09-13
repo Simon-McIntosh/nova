@@ -26,6 +26,11 @@ class PF:
         self.coilset['plasma_coil'] = collections.OrderedDict()
         if 'coilset' in kwargs:
             self.__call__(kwargs['coilset'])
+        if 'coil' in kwargs:
+            coil = kwargs['coil']
+            subcoil = kwargs.get('subcoil', None)
+            label = kwargs.get('label', None)
+            self.add_coils(coil, subcoil=subcoil, label=label)
 
     def __call__(self, coilset):
         self.coilset = coilset  # reset instance

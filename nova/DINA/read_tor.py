@@ -29,14 +29,17 @@ class read_tor(pythonIO):
         self.name = filepath.split(path.sep)[-2]
         if read_txt or not path.isfile(filepath + '.pk'):
             self.read_file(filepath)  # read txt file
-            self.save_pickle(filepath,
-                             ['nC', 'coil', 'pf', 'nt', 't', 'Ibar', 'current',
+            self.save_pickle(filepath, [])
+            '''
+            'nC', 'coil', 'pf', 'nt', 't', 'Ibar', 'current',
                               'plasma_coil', 'plasma_patch', 'vessel_coil',
-                              'blanket_coil', 'vv_vs_index'])
+                              'blanket_coil', 'vv_vs_index'
+            '''
         else:
             self.load_pickle(filepath)
 
     def read_file(self, filepath):  # called by load_file
+        self.coilset = {}
         with readtxt(filepath + '.dat') as self.rt:
             self.read_coils()
             self.read_frames()
@@ -90,35 +93,36 @@ class read_tor(pythonIO):
         return plasma_coil, np.sum(Ip)
 
     def get_coils(self):
-        self.coil, coilnames = {}, []  # OrderedDict(), []
+        coil, coilnames = {}, []
         self.rt.checkline('1.')
         self.rt.skiplines(1)
         coilnames = self.rt.readline(True, string=True)
         coilnames.extend(self.rt.readline(True, string=True))
         for name in coilnames:
-            self.coil[name] = {}  # initalise as empty dict
+            coil[name] = {}  # initalise as empty dict
         for var in ['x', 'z', 'dx', 'dz']:
             self.rt.skiplines(1)
-            self.fill_coil(var, self.rt.readblock())
-        self.nC = len(coilnames)
-        self.set_coil()
-        self.pf = PF()
-        CS_coil = {coil: self.coil[coil] for coil in self.coil if 'CS' in coil}
-        self.pf.add_coils(CS_coil, label='CS')
-        PF_coil = {coil: self.coil[coil] for coil in self.coil if 'PF' in coil}
-        self.pf.add_coils(PF_coil, label='PF')
+            self.fill_coil(coil, var, self.rt.readblock())
+        #self.nC = len(coilnames)
+        self.set_coil(coil)
+        pf = PF()
+        CS_coil = {name: coil[name] for name in coil if 'CS' in coil}
+        pf.add_coils(CS_coil, label='CS')
+        PF_coil = {name: coil[name] for name in coil if 'PF' in coil}
+        pf.add_coils(PF_coil, label='PF')
+        self.coilset['pf'] = pf.coilset
 
-    def fill_coil(self, key, values):  # set key/value pairs in coil dict
-        for name, value in zip(self.coil, values):
-            self.coil[name][key] = value
+    def fill_coil(self, coil, key, values):  # set key/value pairs in coil dict
+        for name, value in zip(coil, values):
+            coil[name][key] = value
 
-    def set_coil(self):
-        for name in self.coil:
+    def set_coil(self, coil):
+        for name in coil:
             for var in ['dx', 'dz', 'x', 'z']:
-                self.coil[name][var] *= 1e-2  # cm to meters
-            self.coil[name]['rc'] = np.sqrt(self.coil[name]['dx']**2 +
-                                            self.coil[name]['dz']**2) / 4
-            self.coil[name]['Ic'] = 0
+                coil[name][var] *= 1e-2  # cm to meters
+            coil[name]['rc'] = np.sqrt(coil[name]['dx']**2 +
+                                       coil[name]['dz']**2) / 4
+            coil[name]['Ic'] = 0
 
     def get_filaments(self, plot=False):
         self.rt.checkline('2.')
@@ -277,9 +281,11 @@ class read_tor(pythonIO):
 
 if __name__ == '__main__':
 
-    tor = read_tor('disruptions', read_txt=False)
+    tor = read_tor('disruptions', read_txt=True, Ip_scale=1)
     tor.load_file(3)
-    tor.plot(130)
+    #tor.plot(130)
+
+    #tor.pf.plot(current=True)
     #tor.movie('tmp')
 
 

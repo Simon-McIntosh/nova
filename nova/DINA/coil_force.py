@@ -652,7 +652,7 @@ class coil_force(pythonIO):
 
 if __name__ == '__main__':
 
-    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=15/15)
+    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=12.5/15)
     '''
     force.load_file(4, read_txt=False)
     force.frame_update(251)

@@ -68,8 +68,11 @@ class read_scenario(pythonIO):
                 self.load_coilset(dCoil=dCoil, VS=False)  # coil geometory
                 self.save_pickle(filepath, attributes)
         self.load_functions(setname=setname)
+        self.set_limits()
 
     def load_functions(self, setname='link'):
+        if setname != self.setname:
+            self.update_coilset()
         self.setname = setname
         self.pf = PF()  # create bare pf coil instance
         self.pf(self.coilset[self.setname])
@@ -77,9 +80,10 @@ class read_scenario(pythonIO):
         self.ff = force_field(self.coilset[self.setname])
         if self.coilset[self.setname]['update_passive_field']:
             self.ff.set_force_field(state='passive')
+        self.ff.get_force()
         self.inv = INV(self.coilset[self.setname], boundary='sf')
         self.inv.sf = self.sf  # link sf instance
-        self.set_limits()
+        self.inv.ff = self.ff  # link ff instance
 
     def read_file(self, folder, file_type='txt', dCoil=0.5):
         print('reading {}'.format(folder))
@@ -100,15 +104,17 @@ class read_scenario(pythonIO):
         self.load_boundary()  # load flux map limits and fw profile
         self.load_coilset(dCoil=dCoil, VS=False)  # coil geometory
 
-    def fix_shape(self, n=5e3, **kwargs):  # set colocation points
+    def fix_shape(self, plot=False, **kwargs):  # set colocation points
         t = kwargs.get('t', self.flattop['t'][-1])  # eof
+        n = kwargs.get('n', self.boundary['n'])
+        limit = kwargs.get('limit', self.boundary['limit'])
         self.update_DINA(t)
-        eqdsk = self.update_psi(n=n, plot=False)
+        eqdsk = self.update_psi(n=n, limit=limit, plot=plot)
         self.inv.colocate(eqdsk)
 
     def set_limits(self):  # default limits for ITER coil-set
         self.inv.initalise_limits()  # reset
-        self.inv.set_limit(ICS=45, ICS1=90)  # current limits
+        self.inv.set_limit(ICS=45)  # kA current limits
         self.inv.set_limit(IPF1=48, IPF2=55, IPF3=55, IPF4=55, IPF5=52,
                            IPF6=52)
         self.inv.set_limit(FCSsep=240, side='upper')  # force limits
@@ -190,10 +196,10 @@ class read_scenario(pythonIO):
         coilset['Fa'] = ff.Fa  # interaction matrices
         coilset['Fp'] = ff.Fp
 
-    def plot_coils(self, ax=None):
+    def plot_coils(self, ax=None, current='AT'):
         if ax is None:
             ax = plt.gca()
-        self.pf.plot(label=True, current=True, patch=False, ax=ax)
+        self.pf.plot(label=True, current=current, patch=False, ax=ax)
         self.pf.plot(subcoil=True, plasma=True, ax=ax)
 
     def space_data(self):  # generate interpolators and space timeseries
@@ -455,31 +461,37 @@ class read_scenario(pythonIO):
                     subname = setname+'_{}'.format(i)
                     coilset['subcoil'][subname]['Ic'] = current / Nf
 
-    def update_psi(self, n=None, limit=None, plot=False, ax=None):
-        if n is None:
-            n = self.boundary['n']
-        if limit is None:
-            limit = self.boundary['limit']
-        x2d, z2d, x, z = geom.grid(n, limit)[:4]
+    def update_psi(self, n=None, limit=None, plot=False, ax=None,
+                   current='A'):
+        if n is not None:
+            self.boundary['n'] = n
+        if limit is not None:
+            self.boundary['limit'] = limit
+        x2d, z2d, x, z = geom.grid(self.boundary['n'],
+                                   self.boundary['limit'])[:4]
         psi = get_coil_psi(x2d, z2d, self.pf.subcoil, self.pf.plasma_coil)
-        eqdsk = {'x': x, 'z': z, 'psi': psi}
+        eqdsk = {'x': x, 'z': z, 'psi': psi, 'beta': self.plasma['beta'],
+                 'li': self.plasma['li'], 'Ipl': self.plasma['Ipl']}
         eqdsk['xlim'] = self.boundary['xlim']
         eqdsk['zlim'] = self.boundary['zlim']
         self.sf.update_eqdsk(eqdsk)
         if plot:
-            self.plot_plasma(ax=ax)
+            self.plot_plasma(ax=ax, current=current)
         return eqdsk
 
-    def plot_plasma(self, ax=None):
+    def plot_plasma(self, ax=None, plot_nulls=False, current='A'):
         if ax is None:
             ax = plt.subplots(1, 1, figsize=(8, 10))[1]
         self.sf.contour(Xnorm=True, boundary=True,
                         separatrix='both', ax=ax)
-        self.sf.plot_nulls(labels=['X', 'M'])
+        self.sf.plot_sol(core=True, ax=ax)
+        if plot_nulls:
+            self.sf.plot_nulls(labels=['X', 'M'])
         self.sf.plot_firstwall(ax=ax)
-        self.plot_coils(ax=ax)
-        self.sf.plot_sol(ax=ax)
+        self.plot_coils(ax=ax, current=current)
+        self.ff.get_force()
         self.ff.plot()
+        self.ff.plotCS()
 
     def set_plasma(self, t):
         try:
@@ -495,6 +507,13 @@ class read_scenario(pythonIO):
         dx = 2 * apl * 0.4
         dz = kpl * dx
         Ipl = 1e6*self.fun['Ip'](t)
+        beta = self.fun['BETAp'](t)
+        li = self.fun['li(3)'](t)
+        self.plasma = {'Ipl': Ipl, 'a': apl, 'kappa': kpl,
+                       'beta': beta, 'li': li}
+        ###
+        # eq update here
+        ###
         self.coilset[self.setname]['plasma_coil'].clear()
         if x > 0.0:
             plasma_coil = {'x': x, 'z': z, 'dx': dx, 'dz': dz, 'Ic': Ipl}

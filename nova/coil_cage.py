@@ -39,13 +39,14 @@ class coil_cage(object):
                 sf = kwargs['sf']
             elif 'setup' in kwargs:
                 setup = kwargs.get('setup')
-                sf = SF(setup.filename)
+                sf = SF(filename=setup.filename)
             elif 'config' in kwargs:
                 setup = Setup(kwargs.get('config'))
-                sf = SF(setup.filename)
+                sf = SF(filename=setup.filename)
             x, z = sf.get_boundary(alpha=alpha)
             self.eqdsk = sf.eqdsk
-            self.LFP = np.array([sf.LFPx, sf.LFPz])
+            self.LF = np.array([sf.midplane['LF']['x'],
+                                sf.midplane['LF']['z']])
         else:
             if 'eqdsk' in kwargs:  # seperatrix from eqdsk
                 self.eqdsk = geqdsk.read(kwargs.get('eqdsk'))
@@ -55,7 +56,7 @@ class coil_cage(object):
                 self.eqdsk = {'xcentr': 9.0735,
                               'zmagx': 0.15295, 'bcentr': -5.6211}
             LFindex = np.argmax(x)
-            self.LFP = np.array([x[LFindex], z[LFindex]])
+            self.LF = np.array([x[LFindex], z[LFindex]])
         if not hasattr(self, 'eqdsk'):
             errtxt = '\n'
             errtxt += 'Require plasma={} input of following types:\n'
@@ -127,7 +128,7 @@ class coil_cage(object):
             ax1.set_zlim(-rlim, rlim)
             ax2.set_xlim(-rlim, rlim)
             ax2.set_ylim(-rlim, rlim)
-            pl.tight_layout()
+            plt.tight_layout()
 
     def amp_turns(self):
         rc, zc = self.eqdsk['xcentr'], self.eqdsk['zmagx']
@@ -205,28 +206,27 @@ class coil_cage(object):
     def plot_loops(self, scale=1.5, sticks=False):
         self.loop_ripple()
         ripple = self.get_ripple()
-        # pl.plot(self.res['x'],self.res['fun'],'o',color=0.8*np.ones(3))
+        # plt.plot(self.res['x'],self.res['fun'],'o',color=0.8*np.ones(3))
         rpl, zpl = self.plasma_loop[:, 0], self.plasma_loop[:, 2]
         rr, zr = geom.offset(rpl, zpl, scale * self.ripple)
-        color = sns.color_palette('Set2', 2)
         if sticks:  # ripple sticks
             for i in range(self.nplasma):
-                pl.plot([rpl[i], rr[i]], [zpl[i], zr[i]],
-                        color=color[0], lw=3)
-        pl.plot(self.plasma_loop[:, 0], self.plasma_loop[:, 2], '-')
-        # pl.plot(self.coil_loop[:,0],self.coil_loop[:,2])
+                plt.plot([rpl[i], rr[i]], [zpl[i], zr[i]],
+                         color='C0', lw=3)
+        plt.plot(self.plasma_loop[:, 0], self.plasma_loop[:, 2], '-')
+        # plt.plot(self.coil_loop[:,0],self.coil_loop[:,2])
         x_max = np.array([self.plasma_interp['x'](self.res['x']),
                           self.plasma_interp['z'](self.res['x'])])
         dx = 1.5
-        for x in [x_max, self.LFP]:
+        for x in [x_max, self.LF]:
             ripple = self.point([x[0], 0, x[1]], variable='ripple')
-            pl.plot(x[0], x[1], 'o', ms=8, color=0.5 * np.ones(3), zorder=10)
-            pl.plot([x[0] + 0.1 * dx, x[0] + 0.9 * dx], x[1] * np.ones(2), '-',
-                    lw=1, color=0.5 * np.ones(3))
-            pl.text(x[0] + dx, x[1], ' {:1.2f}%'.format(ripple),
-                    ha='left', va='center', color=0.5 * np.ones(3))
-        pl.axis('equal')
-        pl.axis('off')
+            plt.plot(x[0], x[1], 'o', ms=8, color=0.5 * np.ones(3), zorder=10)
+            plt.plot([x[0] + 0.1 * dx, x[0] + 0.9 * dx], x[1] * np.ones(2),
+                     '-', lw=1, color=0.5 * np.ones(3))
+            plt.text(x[0] + dx, x[1], ' {:1.2f}%'.format(ripple),
+                     ha='left', va='center', color=0.5 * np.ones(3))
+        plt.axis('equal')
+        plt.axis('off')
 
     def plot_contours(self, variable='ripple', n=3e3, loop_offset=-1,
                       **kwargs):
@@ -273,13 +273,13 @@ class coil_cage(object):
             rpl_max = self.res['fun']
             iplasma = np.argmin(abs(np.log10(levels) - np.log10(rpl_max)))
             levels[iplasma] = rpl_max  # select edge contour
-            CS = pl.contour(R, Z, rpl, levels=levels,
+            CS = plt.contour(R, Z, rpl, levels=levels,
                             colors=[0.6 * np.ones(3)], lw=3)
             zc = CS.collections[iplasma]
-            pl.setp(zc, color=[0.4 * np.ones(3)])
-            pl.clabel(CS, inline=1, fontsize='medium', fmt='%1.2f')
+            plt.setp(zc, color=[0.4 * np.ones(3)])
+            plt.clabel(CS, inline=1, fontsize='medium', fmt='%1.2f')
         else:
-            pl.contour(R, Z, rpl)
+            plt.contour(R, Z, rpl)
 
     def energy(self):  # super-duper fast version
         nloop = int(np.floor(self.nTF / 2)) + 1  # symetric

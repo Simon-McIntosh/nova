@@ -66,19 +66,19 @@ class force_field(object):
         self.Fa = np.zeros((self.nC, self.nC, 2))  # active
         for i, sink in enumerate(self.active_coils):
             for j, source in enumerate(self.active_coils):
-                rG = cc.Gtorque(self.coilset['subcoil'], self.coilset['coil'],
+                xG = cc.Gtorque(self.coilset['subcoil'], self.coilset['coil'],
                                 source, sink, multi_filament) * self.Iscale**2
-                self.Fa[i, j, 0] = 2 * np.pi * cc.mu_o * rG[1]  # cross product
-                self.Fa[i, j, 1] = -2 * np.pi * cc.mu_o * rG[0]
+                self.Fa[i, j, 0] = 2 * np.pi * cc.mu_o * xG[1]  # cross product
+                self.Fa[i, j, 1] = -2 * np.pi * cc.mu_o * xG[0]
 
     def set_passive_force_field(self):
         self.Fp = np.zeros((self.nC, 2))  # passive
         for i, sink in enumerate(self.active_coils):
-            rB = cc.Btorque(self.coilset['subcoil'],
+            xB = cc.Btorque(self.coilset['subcoil'],
                             self.coilset['plasma_coil'],
                             self.passive_coils, sink) * self.Iscale
-            self.Fp[i, 0] = 2 * np.pi * cc.mu_o * rB[1]  # cross product
-            self.Fp[i, 1] = -2 * np.pi * cc.mu_o * rB[0]
+            self.Fp[i, 0] = 2 * np.pi * cc.mu_o * xB[1]  # cross product
+            self.Fp[i, 1] = -2 * np.pi * cc.mu_o * xB[0]
 
     def set_force(self, Ic):  # evaluate coil force and force jacobian
         self.F = np.zeros((self.nC, 2))
@@ -100,7 +100,8 @@ class force_field(object):
         F, dF = self.set_force(Ic)
         Fcoil = {'PF': {'x': 0, 'z': 0,
                         'x_array': np.ndarray, 'z_array': np.ndarray},
-                 'CS': {'sep_array': np.ndarray, 'sep': 0, 'zsum': 0},
+                 'CS': {'sep_array': np.ndarray, 'sep': 0, 'zsum': 0,
+                        'x_array': np.ndarray, 'z_array': np.ndarray},
                  'F': F, 'dF': dF}
         Fcoil['PF']['x_array'] = F[self.coilset['index']['PF']['index'], 0]
         Fcoil['PF']['z_array'] = F[self.coilset['index']['PF']['index'], 1]
@@ -118,10 +119,8 @@ class force_field(object):
             Fcoil['CS']['sep_array'] = Fsep
             Fcoil['CS']['sep'] = np.max(Fsep)
         Fcoil['CS']['zsum'] = np.sum(FzCS)
-        for name, F in zip(self.active_coils, F):
-            self.Fcoil[name] = {'fx': F[0], 'fz': F[1]}
-        self.Fcoil['CS'] = {'fz': Fcoil['CS']['zsum']}
-        return Fcoil
+        self.Fcoil = Fcoil
+        return self.Fcoil
 
     def set_current(self):  # set subcoil current vector from pf
         self.Ic = np.zeros(self.nC)
@@ -132,7 +131,8 @@ class force_field(object):
         self.Ic /= self.Iscale  # convert current unit (MA if Iscale=1e6)
         return self.Ic
 
-    def plot(self, coils=['PF', 'CS'], scale=2, Fvector='Fo', **kwargs):
+    def plot(self, coils=['PF', 'CS'], scale=2, Fvector=['Fo'],
+             **kwargs):
         # vector = 'Fo', 'Fx', 'Fz' or combination
         fs = matplotlib.rcParams['legend.fontsize']
         if not hasattr(self, 'F'):
@@ -157,10 +157,8 @@ class force_field(object):
                                     0.6*np.ones(3)]):
                 if Fv in Fvector:
                     plt.arrow(x, z, mag[0]*Fvec[0], mag[1]*Fvec[1],
-                              linewidth=2,
-                              ec=0.4*fc, fc=fc, head_width=0.2,
-                              lw=1.0)
-
+                              linewidth=2, ec=0.4*fc, fc=fc, head_width=0.2,
+                              lw=1.0, length_includes_head=False)
             if name in self.coilset['index']['PF']['name']:
                 Fvec[1] += np.sign(Fvec[1]) * 0.5
                 if abs(Fvec[1]) < self.coilset['coil'][name]['dz']:
@@ -170,11 +168,40 @@ class force_field(object):
                     va = 'bottom'
                 else:
                     va = 'top'
-
-                plt.text(x, z + Fvec[1], '{:1.0f}MN'.format(F[1]),
+                plt.text(x, z + 0.75 * Fvec[1], '{:1.0f}MN'.format(F[1]),
                          ha='center', va=va, fontsize=fs,
                          color=0.1 * np.ones(3),
-                         backgroundcolor=0.9 * np.ones(3))
+                         backgroundcolor=0.85 * np.ones(3))
+
+    def plotCS(self, scale=1e-3):
+        colors = [c['color'] for c in matplotlib.rcParams['axes.prop_cycle']]
+        colors = [np.array(matplotlib.colors.hex2color(c)) for c in colors]
+        Fmax = np.max(abs(self.Fcoil['CS']['sep_array']))
+        names = self.coilset['index']['CS']['name']
+        for i, Fsep in enumerate(self.Fcoil['CS']['sep_array']):
+            txt = '{:1.0f}MN'.format(Fsep)
+            color = colors[2] if Fsep < 0 else colors[3]
+            lower = self.coilset['coil'][names[i]]  # lower
+            upper = self.coilset['coil'][names[i+1]]  # upper
+            z_lower = lower['z'] + lower['dz']/2
+            z_upper = upper['z'] - upper['dz']/2
+            z_gap = np.mean([z_lower, z_upper])
+            x_gap = np.mean([lower['x'], upper['x']])
+            dx = np.max([lower['dx'], upper['dx']])
+            xvec = x_gap + np.linspace(-dx/2, dx/2, 5)
+            for xo in xvec:
+                for sign in [1, -1]:
+                    zo = z_lower if sign * Fsep > 0 else z_upper
+                    zarrow = -sign * np.sign(Fsep) * scale * Fsep / Fmax
+                    zoffset = zarrow if Fsep < 0 else 0
+                    include_head = Fsep < 0
+                    plt.arrow(xo, zo-zoffset, 0, zarrow,
+                              ec=0.4*color, fc=color,
+                              head_width=0.15, lw=1.0,
+                              length_includes_head=include_head)
+            plt.text(x_gap - dx, z_gap, txt, color=0.2*np.ones(3),
+                     va='center', ha='right',
+                     backgroundcolor=0.85 * np.ones(3))
 
     def set_bm(self, cage):
         x = {'cl': {'x': cage.coil_loop[:, 0], 'z': cage.coil_loop[:, 2]}}

@@ -144,9 +144,9 @@ class INV(object):
         for coil in self.PF_coils:
             self.limit['L'][coil] = self.limit['L']['PF']
 
-    def set_limit(self, side='both', **kwargs):
+    def set_limit(self, side='both', eps=1e-2, **kwargs):
         # set as ICSsum for [I][CSsum] etc...
-        if side == 'both':
+        if side == 'both' or side == 'equal':
             index = [0, 1]
         elif side == 'lower':
             index = [0]
@@ -167,13 +167,17 @@ class INV(object):
             else:  # set limit(s)
                 for i in index:
                     sign = self.sign_limit(i, side)
-                    self.limit[variable][key[1:]][i] = sign * kwargs[key]
+                    if side is 'equal':
+                        value = sign * eps + kwargs[key]
+                    else:
+                        value = sign * kwargs[key]
+                    self.limit[variable][key[1:]][i] = value
         if 'LPF' in kwargs:
             self.set_PF_limit()
 
     def sign_limit(self, index, side):
         # only apply sign to symetric limits (side==both)
-        if side == 'both':
+        if side in ['both', 'equal']:
             sign = 2*index-1
         else:
             sign = 1
@@ -392,8 +396,7 @@ class INV(object):
     def fix_boundary_psi(self, N=21, alpha=0.995, factor=1):
         x, z, Bdir = self.get_boundary(N=N, alpha=alpha)
         psi = self.get_psi(alpha) * np.ones(N)
-        print(psi, self.sf.Xpsi)
-        #psi -= self.sf.Xpsi  # normalise
+        # psi -= self.sf.Xpsi  # normalise
         self.add_fix(x, z, psi, Bdir, ['psi_bndry'], [factor])
 
     def fix_boundary_field(self, N=21, alpha=0.995, factor=1):
@@ -407,7 +410,7 @@ class INV(object):
         self.add_fix([x], [z], [0.0], np.array(
             [[0.0], [1.0]]).T, ['Bz'], [factor])
         psi = self.sf.Ppoint((x, z))
-        psi -= self.sf.Xpsi  # normalise
+        # psi -= self.sf.Xpsi  # normalise
         self.add_psi(psi, factor=factor, label='psi_x', **kwargs)
 
     def add_Bxo(self, factor=1, **kwargs):
@@ -448,7 +451,7 @@ class INV(object):
 
     def add_alpha(self, alpha, factor=1, **kwargs):
         psi = self.get_psi(alpha)
-        #psi -= self.sf.Xpsi  # normalise
+        # psi -= self.sf.Xpsi  # normalise
         self.add_psi(psi, factor=factor, **kwargs)
 
     def add_Bcon(self, B, **kwargs):
@@ -551,10 +554,13 @@ class INV(object):
 
     def add_value_coil(self, bc, xf, zf, x, z, bdir, dx, dz):
         if 'psi' in bc:
+            # flux Wb/rad.A
             value = self.Iscale * cc.mu_o * \
                 cc.green(xf, zf, x, z, dXc=dx, dZc=dz)
         else:
-            B = self.Iscale * cc.mu_o * cc.green_field(xf, zf, x, z)
+            # field T/A
+            B = 2 * np.pi * cc.mu_o * cc.green_field(xf, zf, x, z)
+            B *= self.Iscale
             value = self.Bfield(bc, B[0], B[1], bdir)
         return value
 
@@ -936,6 +942,7 @@ class INV(object):
         for i, name in enumerate(self.adjust_coils):  # limits in MA
             coil = self.coilset['coil'][name]
             Nf = self.coilset['subcoil'][name + '_0']['Nf']  # fillament number
+            N = coil['N']  # turn number
             self.Io['value'][i] = coil['Ic'] / (Nf * self.Iscale)
             if name in self.limit['I']:  # per-coil ('PF1', 'CS)
                 key = name
@@ -948,8 +955,12 @@ class INV(object):
                 self.Io['lb'][i] = -Ilim / Nf
                 self.Io['ub'][i] = Ilim / Nf
             else:
-                self.Io['lb'][i] = self.limit['I'][key][0] / Nf
-                self.Io['ub'][i] = self.limit['I'][key][1] / Nf
+                # limit set as kA
+                self.Io['lb'][i] = 1e-3 * self.limit['I'][key][0] * N / Nf
+                self.Io['ub'][i] = 1e-3 * self.limit['I'][key][1] * N / Nf
+                # set limit as MA.T
+                # self.Io['lb'][i] = self.limit['I'][key][0] / Nf
+                # self.Io['ub'][i] = self.limit['I'][key][1] / Nf
         lindex = self.Io['value'] < self.Io['lb']
         self.Io['value'][lindex] = self.Io['lb'][lindex]
         uindex = self.Io['value'] > self.Io['ub']

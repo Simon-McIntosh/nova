@@ -23,22 +23,20 @@ class PF:
     def __init__(self, eqdsk=None, **kwargs):
         self.initalize_collection()
         self.set_coils(eqdsk, **kwargs)
-        self.plasma_coil = collections.OrderedDict()
+        self.coilset['plasma_coil'] = collections.OrderedDict()
+        if 'coilset' in kwargs:
+            self.__call__(kwargs['coilset'])
 
     def __call__(self, coilset):
-        # reset instance
-        self.index = coilset['index']
-        self.coil = coilset['coil']
-        self.subcoil = coilset['subcoil']
-        self.plasma_coil = coilset['plasma_coil']
+        self.coilset = coilset  # reset instance
 
     def initalize_coils(self):
-        self.nC = 0
-        self.coil = collections.OrderedDict()
-        self.subcoil = collections.OrderedDict()
-        self.index = {}
+        self.coilset = {'nC': 0, 'index': {},
+                        'coil': collections.OrderedDict(),
+                        'subcoil': collections.OrderedDict(),
+                        'plasma_coil': collections.OrderedDict()}
         for coil in ['PF', 'CS']:
-            self.index[coil] = {'n': 0, 'name': [], 'index': []}
+            self.coilset['index'][coil] = {'n': 0, 'name': [], 'index': []}
 
     def set_coils(self, eqdsk, **kwargs):
         self.initalize_coils()
@@ -63,55 +61,60 @@ class PF:
 
     def get_coil_current(self):
         Ic = {}
-        for name in self.coil:
-            Ic[name] = self.coil[name]['Ic']
+        for name in self.coilset['coil']:
+            Ic[name] = self.coilset['coil'][name]['Ic']
         return Ic
 
     def update_current(self, Ic):  # new current passed as dict
         for i, name in enumerate(Ic):
-            if name in self.coil:  # skip removed DINA fillaments
-                self.coil[name]['Ic'] = Ic[name]
+            if name in self.coilset['coil']:  # skip removed DINA fillaments
+                self.coilset['coil'][name]['Ic'] = Ic[name]
                 try:
-                    Nfilament = self.subcoil[name+'_0']['Nf']
+                    Nfilament = self.coilset['subcoil'][name+'_0']['Nf']
                 except KeyError:
                     Nfilament = 1
                 for n in range(Nfilament):
                     subcoil = '{}_{}'.format(name, n)
-                    self.subcoil[subcoil]['Ic'] = Ic[name] / Nfilament
+                    self.coilset['subcoil'][subcoil]['Ic'] =\
+                        Ic[name] / Nfilament
 
     def categorize_coils(self):
-        catogory = np.zeros(len(self.coil), dtype=[('x', 'float'),
+        catogory = np.zeros(len(self.coilset['coil']), dtype=[('x', 'float'),
                             ('z', 'float'), ('theta', 'float'),
                             ('index', 'int'), ('name', 'object')])
-        for i, name in enumerate(self.coil):
-            catogory[i]['x'] = self.coil[name]['x']
-            catogory[i]['z'] = self.coil[name]['z']
-            catogory[i]['theta'] = np.arctan2(self.coil[name]['z']-self.xo[1],
-                                              self.coil[name]['x']-self.xo[0])
+        for i, name in enumerate(self.coilset['coil']):
+            catogory[i]['x'] = self.coilset['coil'][name]['x']
+            catogory[i]['z'] = self.coilset['coil'][name]['z']
+            catogory[i]['theta'] =\
+                np.arctan2(self.coilset['coil'][name]['z']-self.xo[1],
+                           self.coilset['coil'][name]['x']-self.xo[0])
             catogory[i]['index'] = i
             catogory[i]['name'] = name
         CSsort = np.sort(catogory, order=['x', 'z'])  # sort CS, x then z
         CSsort = CSsort[CSsort['x'] < self.rCS + self.drCS]
         PFsort = np.sort(catogory, order='theta')  # sort PF,  z
         PFsort = PFsort[PFsort['x'] > self.rCS + self.drCS]
-        self.index = {'PF': {'n': len(PFsort['index']),
-                             'index': PFsort['index'], 'name': PFsort['name']},
-                      'CS': {'n': len(CSsort['index']),
-                             'index': CSsort['index'], 'name': CSsort['name']}}
+        self.coilset['index'] = {'PF': {'n': len(PFsort['index']),
+                                        'index': PFsort['index'],
+                                        'name': PFsort['name']},
+                                 'CS': {'n': len(CSsort['index']),
+                                        'index': CSsort['index'],
+                                        'name': CSsort['name']}}
         self.sort()  # sort pf.coil dict [PF,CS]
 
     def sort(self):  # order coil dict for use by inverse.py
-        coil = deepcopy(self.coil)
-        self.coil = collections.OrderedDict()
-        for name in np.append(self.index['PF']['name'],
-                              self.index['CS']['name']):
-            self.coil[name] = coil[name]
-        nPF, nCS = self.index['PF']['n'], self.index['CS']['n']
-        self.index['PF']['index'] = np.arange(0, nPF)
-        self.index['CS']['index'] = np.arange(nPF, nPF+nCS)
+        coil = deepcopy(self.coilset['coil'])
+        self.coilset['coil'] = collections.OrderedDict()
+        for name in np.append(self.coilset['index']['PF']['name'],
+                              self.coilset['index']['CS']['name']):
+            self.coilset['coil'][name] = coil[name]
+        nPF = self.coilset['index']['PF']['n']
+        nCS = self.coilset['index']['CS']['n']
+        self.coilset['index']['PF']['index'] = np.arange(0, nPF)
+        self.coilset['index']['CS']['index'] = np.arange(nPF, nPF+nCS)
 
     def add_coils(self, coil, subcoil=None, label=None):
-        nCo = self.nC
+        nCo = self.coilset['nC']
         xc, zc, dxc, dzc, Ic, names = self.unpack_coils(coil=coil)[1:-1]
         for x, z, dx, dz, I, name in zip(xc, zc, dxc, dzc, Ic, names):
             self.add_coil(x, z, dx, dz, I, name=name, categorize=False)
@@ -119,28 +122,29 @@ class PF:
                 Nf = subcoil[name+'_0']['Nf']
                 for i in range(Nf):
                     subname = name+'_{}'.format(i)
-                    self.subcoil[subname] = subcoil[subname]
+                    self.coilset['subcoil'][subname] = subcoil[subname]
             else:
-                self.subcoil[name+'_0'] = coil[name]
-                self.subcoil[name+'_0']['Nf'] = 1
+                self.coilset['subcoil'][name+'_0'] = coil[name]
+                self.coilset['subcoil'][name+'_0']['Nf'] = 1
         if label:
-            self.index[label] = {'name': names,
-                                 'index': np.arange(nCo, self.nC)}
+            self.coilset['index'][label] =\
+                {'name': names, 'index': np.arange(nCo, self.coilset['nC'])}
 
     def add_coil(self, x, z, dx, dz, Ic, categorize=True, **kwargs):
-        self.nC += 1
-        name = kwargs.get('name', 'Coil{:1.0f}'.format(self.nC))
-        self.coil[name] = {'x': x, 'z': z, 'dx': dx, 'dz': dz, 'Ic': Ic}
+        self.coilset['nC'] += 1
+        name = kwargs.get('name', 'Coil{:1.0f}'.format(self.coilset['nC']))
+        self.coilset['coil'][name] = {'x': x, 'z': z, 'dx': dx, 'dz': dz,
+                                      'Ic': Ic}
         rc = kwargs.get('rc', np.sqrt(dx**2 + dz**2) / 2)
-        self.coil[name]['rc'] = rc
+        self.coilset['coil'][name]['rc'] = rc
         if 'R' in kwargs:
-            self.coil[name]['R'] = kwargs.get('R')
+            self.coilset['coil'][name]['R'] = kwargs.get('R')
         if categorize:
             self.categorize_coils()
 
     def join_coils(self, name, names):
-        coil_o = deepcopy(self.coil)
-        subcoil_o = deepcopy(self.subcoil)
+        coil_o = deepcopy(self.coilset['coil'])
+        subcoil_o = deepcopy(self.coilset['subcoil'])
         self.initalize_coils()  # clear coil dicts
 
         coils = {name_: coil_o[name_] for name_ in names}
@@ -159,35 +163,38 @@ class PF:
         sub_index = 0
         for name_ in coil_o:
             if name_ in names:
-                if name not in self.coil:  # replace coil
+                if name not in self.coilset['coil']:  # replace coil
                     x, z, dx, dz, Ic = self.unpack_coils(coil=insert)[1:-2]
                     self.add_coil(x[0], z[0], dx[0], dz[0], Ic[0],
                                   name=name, categorize=False)
-                    self.coil[name]['N'] = insert[name]['N']  # turn number
+                    # turn number
+                    self.coilset['coil'][name]['N'] = insert[name]['N']
                 for i in range(subcoil_o[name_+'_0']['Nf']):  # sub-coils
                     sub_name = name+'_{}'.format(sub_index)
-                    self.subcoil[sub_name] = subcoil_o[name_+'_{}'.format(i)]
-                    self.subcoil[sub_name]['Nf'] = Nf
+                    self.coilset['subcoil'][sub_name] =\
+                        subcoil_o[name_+'_{}'.format(i)]
+                    self.coilset['subcoil'][sub_name]['Nf'] = Nf
                     sub_index += 1
             else:  # re-insert
                 coil_ = {name_: coil_o[name_]}
                 x, z, dx, dz, Ic = self.unpack_coils(coil=coil_)[1:-2]
                 self.add_coil(x[0], z[0], dx[0], dz[0], Ic[0],
                               name=name_, categorize=False)
-                self.coil[name_]['N'] = coil_o[name_]['N']  # turn number
+                # turn number
+                self.coilset['coil'][name_]['N'] = coil_o[name_]['N']
                 for i in range(subcoil_o[name_+'_0']['Nf']):  # sub-coils
                     sub_name = name_+'_{}'.format(i)
-                    self.subcoil[sub_name] = subcoil_o[sub_name]
+                    self.coilset['subcoil'][sub_name] = subcoil_o[sub_name]
         self.categorize_coils()
 
     def remove_coil(self, name):
-        self.coil.pop(name)  # remove main coil
-        if name+'_0' in self.subcoil:
-            for i in range(self.subcoil[name+'_0']['Nf']):
-                self.subcoil.pop('{}_{}'.format(name, i))
+        self.coilset['coil'].pop(name)  # remove main coil
+        if name+'_0' in self.coilset['subcoil']:
+            for i in range(self.coilset['subcoil'][name+'_0']['Nf']):
+                self.coilset['subcoil'].pop('{}_{}'.format(name, i))
 
     def unpack_coils(self, **kwargs):
-        coil = kwargs.get('coil', self.coil)  # enable plasma_coil unpack
+        coil = kwargs.get('coil', self.coilset['coil'])
         nc = len(coil.keys())
         Ic = np.zeros(nc)
         xc, zc = np.zeros(nc), np.zeros(nc)
@@ -211,26 +218,27 @@ class PF:
                 self.dCoil = 0
         else:
             self.dCoil = dCoil
-        self.subcoil = collections.OrderedDict()
+        self.coilset['subcoil'] = collections.OrderedDict()
         if self.dCoil == 0:
-            for name in self.coil.keys():
+            for name in self.coilset['coil'].keys():
                 sub_name = name + '_0'
-                self.subcoil[sub_name] = self.coil[name]
-                self.subcoil[sub_name]['rc'] = \
-                    np.sqrt(self.coil[name]['dx']**2 +
-                            self.coil[name]['dz']**2)
+                self.coilset['subcoil'][sub_name] = self.coilset['coil'][name]
+                self.coilset['subcoil'][sub_name]['rc'] = \
+                    np.sqrt(self.coilset['coil'][name]['dx']**2 +
+                            self.coilset['coil'][name]['dz']**2)
         else:
-            self.subcoil.clear()  # clear dict but retain referance
-            for name in self.coil.keys():
-                subcoil = self.mesh_coil(self.coil[name], self.dCoil)
+            self.coilset['subcoil'].clear()  # clear dict but retain referance
+            for name in self.coilset['coil'].keys():
+                subcoil = self.mesh_coil(self.coilset['coil'][name],
+                                         self.dCoil)
                 for i, subcoil_ in enumerate(subcoil):
                     subname = '{}_{}'.format(name, i)
-                    self.subcoil[subname] = subcoil_
+                    self.coilset['subcoil'][subname] = subcoil_
 
     @staticmethod
-    def mesh_coil(pf_coil, dCoil):  # returns subcoil list
-        xc, zc = pf_coil['x'], pf_coil['z']
-        Dx, Dz = abs(pf_coil['dx']), abs(pf_coil['dz'])
+    def mesh_coil(coil, dCoil):  # returns subcoil list
+        xc, zc = coil['x'], coil['z']
+        Dx, Dz = abs(coil['dx']), abs(coil['dz'])
         nx, nz = int(np.ceil(Dx / dCoil)), int(np.ceil(Dz / dCoil))
         dx, dz = Dx / nx, Dz / nz
         x = xc + np.linspace(dx / 2, Dx - dx / 2, nx) - Dx / 2
@@ -238,7 +246,7 @@ class PF:
         X, Z = np.meshgrid(x, z, indexing='ij')
         X, Z = np.reshape(X, (-1, 1)), np.reshape(Z, (-1, 1))
         Nf = len(X)  # filament number
-        Ic = pf_coil['Ic'] / Nf
+        Ic = coil['Ic'] / Nf
         subcoil = [[] for __ in range(Nf)]
         for i, (x, z) in enumerate(zip(X, Z)):
             subcoil[i] = {'x': x, 'z': z, 'dx': dx, 'dz': dz, 'Ic': Ic,
@@ -291,8 +299,21 @@ class PF:
         if reset:  # reset patch collection
             self.initalize_collection()
 
+    def get_coil_label(self, name):
+        sname = name.split('_')
+        if len(sname) == 1:
+            label = name
+        elif len(sname) == 2:
+            label = sname[0]
+        else:
+            label = '_'.join(sname[:-1])
+        return label
+
     def patch_coil(self, coils, alpha=1, **kwargs):
         patch = [[] for _ in range(len(coils))]
+        color_key = ['CS', 'skip', 'VS3', 'vv_DINA', 'plasma',
+                     'PF', 'skip', 'bb_DINA', 'trs', 'skip',
+                     'skip', 'skip', 'skip', 'vv', 'skip']
         for i, name in enumerate(coils.keys()):
             coil = coils[name]
             x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
@@ -301,27 +322,15 @@ class PF:
                 edgecolor = 'k'
             else:
                 edgecolor = 'k'
-            # coils categorized
-            if hasattr(self, 'index'):
-                coil_color = 'C7'
-                for ic, part in \
-                        enumerate(['PF', 'CS', 'skip', 'vv_DINA', 'plasma',
-                                   'vv', 'VS3', 'bb_DINA', 'trs']):
+            label = self.get_coil_label(name)
+            coil_color = 'C3'  # default
+            for group in self.coilset['index']:
+                if label in self.coilset['index'][group]['name']\
+                        and group in color_key:
+                    ic = color_key.index(group)
                     icolor = ic % 5
-                    if part in self.index:
-                        sname = name.split('_')
-                        if len(sname) == 1:
-                            label = name
-                        elif len(sname) == 2:
-                            label = sname[0]
-                        else:
-                            label = '_'.join(sname[:-1])
-                        if label in self.index[part]['name']:
-                            coil_color = 'C{}'.format(icolor)
-                            break
-            else:
-                coil_color = 'C3'
-
+                    coil_color = 'C{}'.format(icolor)
+                    break
             coil_color = kwargs.get('coil_color', coil_color)
             if 'VS' in name:
                 patch[i] = patches.Circle(
@@ -338,8 +347,8 @@ class PF:
         for i, name in enumerate(coils.keys()):
             coil = coils[name]
             x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
-            if hasattr(self, 'index'):
-                if name in self.index['CS']['name']:
+            if hasattr(self.coilset, 'index'):
+                if name in self.coilset['index']['CS']['name']:
                     drs = -2.5 / 3 * dx
                     ha = 'right'
                 else:
@@ -350,17 +359,22 @@ class PF:
                 ha = 'left'
 
             if label and current:
-                zshift = max([dz / 4, 0.4])
+                zshift = max([dz / 10, 0.2])
             else:
                 zshift = 0
             if label:
                 plt.text(x + drs, z + zshift, name, fontsize=fs,
                          ha=ha, va='center', color=0.2 * np.ones(3))
             if current:
-                if abs(coil['Ic']) < 0.1e6:  # kA
-                    txt = '{:1.1f}kA'.format(coil['Ic'] * 1e-3)
-                else:  # MA
-                    txt = '{:1.1f}MA'.format(coil['Ic'] * 1e-6)
+                if current == 'A' and 'N' in coil:  # amps
+                    N = coil['N']
+                    linecurrent = coil['Ic'] / N
+                    txt = '{:1.1f}kA'.format(linecurrent * 1e-3)
+                else:  # amp turns
+                    if abs(coil['Ic']) < 0.1e6:  # kA.t
+                        txt = '{:1.1f}kA$\cdot$T'.format(coil['Ic'] * 1e-3)
+                    else:  # MA.t
+                        txt = '{:1.1f}MA$\cdot$T'.format(coil['Ic'] * 1e-6)
                 plt.text(x + drs, z - zshift, txt,
                          fontsize=fs, ha=ha, va='center',
                          color=0.2 * np.ones(3))
@@ -379,17 +393,17 @@ class PF:
     def plot(self, subcoil=False, label=False, plasma=False,
              current=False, alpha=1, ax=None, patch=True):
         if ax is None:
-            ax = plt.gca()  # plt.subplots(1, 1)[1]
+            ax = plt.gca()
         fs = matplotlib.rcParams['legend.fontsize']
         if subcoil:
-            coils = self.subcoil
+            coils = self.coilset['subcoil']
         else:
-            coils = self.coil
+            coils = self.coilset['coil']
         self.plot_coil(coils, label=label, current=current, fs=fs,
                        alpha=alpha, ax=ax, patch=patch)
         if plasma:
-            self.plot_coil(self.plasma_coil, alpha=alpha, coil_color='C4',
-                           ax=ax)
+            self.plot_coil(self.coilset['plasma_coil'], alpha=alpha,
+                           coil_color='C4', ax=ax)
         ax.axis('equal')
         ax.axis('off')
 
@@ -418,10 +432,10 @@ class PF:
         if len(coils['dZ']) > 0:
             dZ[Nc - len(coils['dZ']):] = coils['dZ']
         for Cid, Cdr, Cdz in zip(coils['id'], dX, dZ):
-            x = self.coil['Coil' + str(Cid)]['x']
-            z = self.coil['Coil' + str(Cid)]['z']
-            dx = self.coil['Coil' + str(Cid)]['dx']
-            dz = self.coil['Coil' + str(Cid)]['dz']
+            x = self.coilset['coil']['Coil' + str(Cid)]['x']
+            z = self.coilset['coil']['Coil' + str(Cid)]['z']
+            dx = self.coilset['coil']['Coil' + str(Cid)]['dx']
+            dz = self.coilset['coil']['Coil' + str(Cid)]['dz']
             if Cdr == 0 and Cdz == 0:
                 X = np.append(
                     X, [x + dx / 2, x + dx / 2, x - dx / 2, x - dx / 2])
@@ -753,22 +767,17 @@ class TF(object):
         plt.axis('equal')
         plt.axis('off')
 
-    def plot_XZ(self, alpha=1, **kwargs):
-        '''
-        Désolé
-        '''
-        colors = color_kwargs(**kwargs)
+    def plot_XZ(self, alpha=1):
         ax = plt.gca()
         for p in [self.p['in'], self.p['wp_in'],
                   self.p['wp_out'], self.p['out']]:
             ax.plot(p['x'], p['z'], color='k')
-        c1, c2 = next(colors), next(colors)
         geom.polyparrot(self.p['in'], self.p['wp_in'],
-                        color=c1, alpha=alpha)
+                        color='C1', alpha=alpha)
         geom.polyparrot(self.p['wp_in'], self.p['wp_out'],
-                        color=c2, alpha=alpha)
+                        color='C2', alpha=alpha)
         geom.polyparrot(self.p['wp_out'], self.p['out'],
-                        color=c1, alpha=alpha)
+                        color='C3', alpha=alpha)
 
     def support(self, **kwargs):
         self.rzGet()
@@ -850,13 +859,12 @@ if __name__ is '__main__':  # test functions
     setup = Setup(config['eq'])
     sf = SF(filename=setup.filename)
     sf.contour()
-    profile = Profile(config['TF'], family='D', part='TF', nTF=nTF,
+    profile = Profile(config['TF'], family='S', part='TF', nTF=nTF,
                       obj='L', load=True, npoints=1000)
 
-    # profile.loop.plot()
     tf = TF(profile=profile, sf=sf, nr=1, ny=1)
-
-    tf.split_loop(plot=True)
+    tf.split_loop(plot=False)
+    tf.fill()
 
     pf = PF(sf.eqdsk)
     pf.mesh_coils(dCoil=0.25)
@@ -907,5 +915,3 @@ if __name__ is '__main__':  # test functions
     '''
 
     # rp.plot_loops()
-
-

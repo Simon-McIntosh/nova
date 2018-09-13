@@ -208,7 +208,7 @@ def cut_corners(loop, smooth=True, Nss=100):
     return dL, loop_ss
 
 
-def get_green_field(x, xi, z, zi, rc):
+def get_green_field(x, z, xi, zi, rc):
     r_mag = np.sqrt((x - xi)**2 + (z - zi)**2)
     if r_mag > rc:  # outside coil core
         dfield = green_field(x, z, xi, zi)
@@ -253,13 +253,13 @@ def Gtorque(eq_coil, pf_coil, source, sink, multi_filament):  # source-sink
             x = coil[sink_strand]['x']
             z = coil[sink_strand]['z']
             rc = coil[sink_strand]['rc']
-            dfield = get_green_field(x, xi, z, zi, rc)
+            dfield = get_green_field(x, z, xi, zi, rc)
             field += Nbundle * x * dfield  # field couple, rG
     return field
 
 
-def Btorque(eq_coil, plasma_coil, passive_coils, sink):
-    Csink = eq_coil
+def Btorque(subcoil, plasma_coil, passive_coils, sink):
+    Csink = subcoil
     Nsink = Csink[sink + '_0']['Nf']
     field = np.zeros(2)
     for source in passive_coils:
@@ -267,7 +267,7 @@ def Btorque(eq_coil, plasma_coil, passive_coils, sink):
             Csource = plasma_coil
             Nsource = len(Csource)
         else:
-            Csource = eq_coil
+            Csource = subcoil
             Nsource = Csource[source + '_0']['Nf']
         for i in range(Nsource):
             source_strand = source + '_{:1.0f}'.format(i)
@@ -279,7 +279,7 @@ def Btorque(eq_coil, plasma_coil, passive_coils, sink):
                 x = Csink[sink_strand]['x']  # sink
                 z = Csink[sink_strand]['z']
                 rc = Csink[sink_strand]['rc']
-                dfield = get_green_field(x, xi, z, zi, rc)
+                dfield = get_green_field(x, z, xi, zi, rc)
                 field += Ii * x * dfield
     return field
 

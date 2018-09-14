@@ -419,13 +419,13 @@ class read_scenario(pythonIO):
                     Ic[coil] = self.Icoil[coil][-index]
                 else:  # time value
                     Ic[coil] = 1e3*self.fun['I'+coil.lower()](index)
-        if 'CS1' not in self.pf.coil:  # split central pair
+        if 'CS1' not in self.pf.coilset['coil']:  # split central pair
             for coil in ['CS1L', 'CS1U']:
                 Ic[coil] = Ic['CS1']
             Ic.pop('CS1')  # remove CS1 value
         for coil in Ic:  # A to A.turn
-            if coil in self.pf.coil:
-                Ic[coil] *= self.pf.coil[coil]['N']
+            if coil in self.pf.coilset['coil']:
+                Ic[coil] *= self.pf.coilset['coil'][coil]['N']
         return Ic  # return dict of coil currents
 
     def update_DINA(self, t):  # update from DINA interpolators
@@ -469,7 +469,7 @@ class read_scenario(pythonIO):
             self.boundary['limit'] = limit
         x2d, z2d, x, z = geom.grid(self.boundary['n'],
                                    self.boundary['limit'])[:4]
-        psi = get_coil_psi(x2d, z2d, self.pf.subcoil, self.pf.plasma_coil)
+        psi = get_coil_psi(x2d, z2d, self.pf.coilset['subcoil'], self.pf.coilset['plasma_coil'])
         eqdsk = {'x': x, 'z': z, 'psi': psi, 'beta': self.plasma['beta'],
                  'li': self.plasma['li'], 'Ipl': self.plasma['Ipl']}
         eqdsk['xlim'] = self.boundary['xlim']
@@ -547,14 +547,14 @@ class read_scenario(pythonIO):
     def get_force_history(self, filepath, n):
         attributes = ['CSgap', 'Fcoil']
         dtype = [('t', float), ('sep', float), ('zsum', float)]
-        CSname = self.pf.index['CS']['name']
-        self.CSgap = [[] for __ in range(self.pf.index['CS']['n'] - 1)]
-        PFcoil = [[] for __ in range(self.pf.index['PF']['n'])]
-        for i in range(self.pf.index['CS']['n'] - 1):
+        CSname = self.pf.coilset['index']['CS']['name']
+        self.CSgap = [[] for __ in range(self.pf.coilset['index']['CS']['n'] - 1)]
+        PFcoil = [[] for __ in range(self.pf.coilset['index']['PF']['n'])]
+        for i in range(self.pf.coilset['index']['CS']['n'] - 1):
             self.CSgap[i] = '{}-{}'.format(CSname[i], CSname[i+1])
             dtype.append((self.CSgap[i], float))
-        for i in range(self.pf.index['PF']['n']):
-            PFcoil[i] = self.pf.index['PF']['name'][i]
+        for i in range(self.pf.coilset['index']['PF']['n']):
+            PFcoil[i] = self.pf.coilset['index']['PF']['name'][i]
             dtype.append((PFcoil[i], float))
         self.Fcoil = np.zeros(n, dtype=dtype)
         self.Fcoil['t'] = np.linspace(self.t[1], self.t[-2], n)
@@ -600,8 +600,8 @@ class read_scenario(pythonIO):
                  ('t', float), ('index', int)]
         self.VS3 = {}
         for VScoil in ['upper', 'lower']:
-            point[VScoil] = np.array([self.pf.coil[VScoil+'VS']['x']+1e-3,
-                                      self.pf.coil[VScoil+'VS']['z']])
+            point[VScoil] = np.array([self.pf.coilset['coil'][VScoil+'VS']['x']+1e-3,
+                                      self.pf.coilset['coil'][VScoil+'VS']['z']])
             self.VS3[VScoil] = np.zeros(n, dtype=dtype)
         index = self.flattop['index']  # flattop index
         index_array = np.linspace(index[0], index[1], n, dtype=int)

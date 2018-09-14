@@ -48,7 +48,8 @@ class read_tor(pythonIO):
         self.rt.skiplines(5)  # skip header
         self.get_coils()
         self.get_filaments()
-        self.pf.mesh_coils(dCoil=0.25)
+
+        #self.pf.mesh_coils(dCoil=0.25)
 
     def read_frames(self):
         frames = []
@@ -149,8 +150,8 @@ class read_tor(pythonIO):
     def store_filaments(self, dx=0.15, dz=0.15, rho=0.8e-6, t=60e-3):
         rc = np.sqrt(dx**2 + dz**2) / 4
         nvv, nbl = count(0), count(0)
-        self.blanket_coil = {}  # OrderedDict()
-        self.vessel_coil = {}  # OrderedDict()
+        blanket_coil = OrderedDict()
+        vessel_coil = OrderedDict()
         vv = {'x': [], 'z': []}  # vv coils index
         for i, filament in enumerate(self.filaments):
             for j in range(filament['n_turn']):
@@ -165,14 +166,16 @@ class read_tor(pythonIO):
                         'R': R}  # filament resistance
                 if filament['n_turn'] == 1:  # vessel
                     name = 'vv_{}'.format(next(nvv))
-                    self.vessel_coil[name] = coil
+                    vessel_coil[name] = coil
                     vv['x'].append(x)
                     vv['z'].append(z)
                 else:
                     name = 'bb_{}'.format(next(nbl))
-                    self.blanket_coil[name] = coil
-        self.pf.add_coils(self.blanket_coil, label='bb_DINA')
-        self.pf.add_coils(self.vessel_coil, label='vv_DINA')
+                    blanket_coil[name] = coil
+        pf = PF(coil=blanket_coil, label='bb_DINA')
+        self.coilset['blanket'] = pf.coilset
+        pf = PF(coil=vessel_coil, label='vv_DINA')
+        self.coilset['vessel'] = pf.coilset
         self.get_vv_vs_index(vv)
 
     def get_vv_vs_index(self, vv):

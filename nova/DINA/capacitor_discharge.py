@@ -45,15 +45,16 @@ class power_supply:
         self.vv = VVcoils()
         self.ind = inductance()
         nvs_o = self.ind.nC
+        coilset = self.vv.pf.coilset
         turns = np.append(np.ones(4), -np.ones(4))
         self.ind.add_pf_coil(
-                OrderedDict(list(self.vv.pf.subcoil.items())[:8]),
+                OrderedDict(list(coilset['subcoil'].items())[:8]),
                 turns=turns)
         for index in nvs_o+np.arange(1, 8):  # vs3 loops
             self.ind.add_cp([nvs_o, index])  # link VS coils
         if self.vessel:
             nvs_o = self.ind.nC
-            jacket = list(self.vv.pf.subcoil.items())[8:16]
+            jacket = list(coilset['subcoil'].items())[8:16]
             R = np.array([turn[1]['R'] for turn in jacket])
             Rlower = 1 / (np.sum(1/R[:4]))
             Rupper = 1 / (np.sum(1/R[4:]))
@@ -68,7 +69,7 @@ class power_supply:
             for index in nvs_o+4+np.arange(1, 4):
                 self.ind.add_cp([nvs_o+4, index])  # upper jacket coils
             # add vv coils
-            vv_coils = list(self.vv.pf.subcoil.items())[16:]
+            vv_coils = list(coilset['subcoil'].items())[16:]
             self.ind.add_pf_coil(OrderedDict(vv_coils))
         self.ind.reduce()
         self.ncoil = self.ind.nd['nr']  # number of retained coils
@@ -348,7 +349,7 @@ class power_supply:
             colors['upper_vvo'] = 'C4'
             colors['upper_vv1'] = 'C5'
             colors['upper_jacket'] = 'C7'
-            coils = list(self.ind.pf.coil.keys())[16:]
+            coils = list(self.ind.pf.coilset['coil'].keys())[16:]
             for i, coil in enumerate(coils):
                 for c in colors:
                     if c in coil:
@@ -401,5 +402,3 @@ if __name__ == '__main__':
     # plt.set_context('talk')
     ps.solve(Io=0, sign=-1, t_pulse=0.0, origin='peak',
              impulse=True, plot=True)
-
-

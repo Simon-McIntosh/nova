@@ -1,8 +1,7 @@
-import nep
+import scenario_database
 from amigo.IO import class_dir
 from os.path import join, isfile, isdir
 from os import listdir
-from scipy.signal import savgol_filter
 import numpy as np
 from scipy.optimize import minimize
 from amigo.pyplot import plt
@@ -154,8 +153,8 @@ class dina:
         self.get_folders()
 
     def get_directory(self):
-        self.root = class_dir(nep)
-        self.directory = join(self.root, '../Scenario_database')
+        self.root = class_dir(scenario_database)
+        self.directory = join(self.root, '../scenario_database')
         if self.database_folder is not None:
             self.directory = join(self.directory, self.database_folder)
 

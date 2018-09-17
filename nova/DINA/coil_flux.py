@@ -35,9 +35,9 @@ class coil_flux(pythonIO):
         else:
             self.coil_geom = VSgeom()
         self.flux = OrderedDict()
-        for coil in self.coil_geom.pf.subcoil:
-            x = self.coil_geom.pf.subcoil[coil]['x']
-            z = self.coil_geom.pf.subcoil[coil]['z']
+        for coil in self.coil_geom.pf.coilset['subcoil']:
+            x = self.coil_geom.pf.coilset['subcoil'][coil]['x']
+            z = self.coil_geom.pf.coilset['subcoil'][coil]['z']
             self.flux[coil] = {'x': x, 'z': z}
 
     def load_file(self, scenario, plot=False, **kwargs):
@@ -67,8 +67,9 @@ class coil_flux(pythonIO):
         tick = clock(self.tor.nt, header='calculating coil flux history')
         for index in range(self.tor.nt):
             self.tor.set_current(index)  # update coil currents and plasma
-            psi_bg[index] = cc.get_coil_psi(x, z, self.tor.pf.subcoil,
-                                            self.tor.pf.plasma_coil)
+            psi_bg[index] = cc.get_coil_psi(x, z,
+                                            self.tor.pf.coilset['subcoil'],
+                                            self.tor.pf.coilset['plasma_coil'])
             tick.tock()
         vs3_bg = np.zeros(self.tor.nt)
         jkt_lower_bg = np.zeros(self.tor.nt)

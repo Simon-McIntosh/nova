@@ -83,17 +83,16 @@ class inductance:
         self.pf.mesh_coils(dCoil=0.25)
         if plot:
             self.pf.plot(subcoil=True)
-        self.inv = INV({'index': self.pf.index, 'coil': self.pf.coil,
-                        'subcoil': self.pf.subcoil,
-                        'plasma_coil': self.pf.plasma_coil}, Iscale=1)
+        self.inv = INV(self.pf.coilset, Iscale=1)
         self.inv.update_coils()
         Nf = np.ones(self.inv.nC)
         turns = np.array(self.nt)
         self.Io = np.ones(self.nC)
         for i, coil in enumerate(self.inv.adjust_coils):
-            x, z = self.pf.coil[coil]['x'], self.pf.coil[coil]['z']
+            x = self.pf.coilset['coil'][coil]['x']
+            z = self.pf.coilset['coil'][coil]['z']
             self.inv.add_psi(1, point=(x, z))
-            self.Io[i] = self.pf.coil[coil]['Ic']
+            self.Io[i] = self.pf.coilset['coil'][coil]['Ic']
         self.inv.set_foreground()
         # ensure symetric (jacket-conductor coupling)
         tril_index = np.tril_indices(len(self.inv.G), k=-1)  # lower triangle

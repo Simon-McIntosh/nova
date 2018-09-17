@@ -8,6 +8,8 @@ from nep.DINA.read_dina import dina
 from amigo.pyplot import plt
 from nep.coil_geom import VSgeom
 from os import path
+from collections import OrderedDict
+import copy
 
 
 class read_tor(pythonIO):
@@ -29,14 +31,12 @@ class read_tor(pythonIO):
         self.name = filepath.split(path.sep)[-2]
         if read_txt or not path.isfile(filepath + '.pk'):
             self.read_file(filepath)  # read txt file
-            self.save_pickle(filepath, [])
-            '''
-            'nC', 'coil', 'pf', 'nt', 't', 'Ibar', 'current',
-                              'plasma_coil', 'plasma_patch', 'vessel_coil',
-                              'blanket_coil', 'vv_vs_index'
-            '''
+            self.save_pickle(filepath, ['coilset', 'current', 'plasma_coil',
+                                        't', 'nt'])
         else:
             self.load_pickle(filepath)
+        self.pf = PF()
+        self.pf.add_coilsets(self.coilset)
 
     def read_file(self, filepath):  # called by load_file
         self.coilset = {}
@@ -49,10 +49,9 @@ class read_tor(pythonIO):
         self.get_coils()
         self.get_filaments()
 
-        #self.pf.mesh_coils(dCoil=0.25)
-
     def read_frames(self):
         frames = []
+        nCS, nPF = self.coilset['CS']['nC'], self.coilset['PF']['nC']
         self.rt.skiplines(6)
         while True:
             try:
@@ -62,18 +61,17 @@ class read_tor(pythonIO):
         self.nt = len(frames)
         self.t = np.zeros(self.nt)
         self.Ibar = np.zeros(self.nt, dtype=[('vv', float), ('pl', float)])
-        self.current = \
-            np.zeros(self.nt, dtype=[('filament', '{}float'.format(self.nf)),
-                                     ('coil', '{}float'.format(self.nC))])
+        dtype = [('filament', '{}float'.format(self.nf)),
+                 ('CS', '{}float'.format(nCS)), ('PF', '{}float'.format(nPF))]
+        self.current = np.zeros(self.nt, dtype=dtype)
         self.plasma_coil = []
         self.plasma_patch = []
-        self.nVV = len(self.vessel_coil)
+        self.nVV = self.coilset['vv_DINA']['nC']
         for i, frame in enumerate(frames):
             self.t[i] = 1e-3*frame[0]  # ms-s
             self.current['filament'][i] = -1e3*np.array(frame[1])  # -kA to A
-            self.current['filament'][i] *= self.Ip_scale  # scale
-            self.current['coil'][i] = -1e3*np.array(frame[3])  # -kA to A
-            self.current['coil'][i] *= self.Ip_scale  # scale
+            self.current['CS'][i] = -1e3*np.array(frame[3][:nCS])  # -kA to A
+            self.current['PF'][i] = -1e3*np.array(frame[3][nCS:])  # -kA to A
             plasma_coil, Ipl = self.plasma_filaments(frame)
             self.plasma_coil.append(plasma_coil)
             self.Ibar['vv'][i] = np.mean(-1e3*np.array(frame[1])[:self.nVV])
@@ -86,14 +84,13 @@ class read_tor(pythonIO):
         xp = 1e-2*np.array(frame[2][0::3])
         zp = 1e-2*np.array(frame[2][1::3])
         Ip = -1e3*np.array(frame[2][2::3])  # -kA to A
-        Ip *= self.Ip_scale  # scale
         for x, z, Ic in zip(xp, zp, Ip):
             name = 'Plasma_{}'.format(next(npl))
             plasma_coil[name] = {'Ic': Ic, 'dx': dx, 'dz': dz, 'rc': rc,
                                  'x': x, 'z': z}
         return plasma_coil, np.sum(Ip)
 
-    def get_coils(self):
+    def get_coils(self, dCoil=0.25):
         coil, coilnames = {}, []
         self.rt.checkline('1.')
         self.rt.skiplines(1)
@@ -104,14 +101,15 @@ class read_tor(pythonIO):
         for var in ['x', 'z', 'dx', 'dz']:
             self.rt.skiplines(1)
             self.fill_coil(coil, var, self.rt.readblock())
-        #self.nC = len(coilnames)
         self.set_coil(coil)
-        pf = PF()
-        CS_coil = {name: coil[name] for name in coil if 'CS' in coil}
-        pf.add_coils(CS_coil, label='CS')
-        PF_coil = {name: coil[name] for name in coil if 'PF' in coil}
-        pf.add_coils(PF_coil, label='PF')
-        self.coilset['pf'] = pf.coilset
+        CS_coil = {name: coil[name] for name in coil if 'CS' in name}
+        pf = PF(coil=CS_coil, label='CS')
+        pf.mesh_coils(dCoil=dCoil)
+        self.coilset['CS'] = pf.coilset
+        PF_coil = {name: coil[name] for name in coil if 'PF' in name}
+        pf = PF(coil=PF_coil, label='PF')
+        pf.mesh_coils(dCoil=dCoil)
+        self.coilset['PF'] = pf.coilset
 
     def fill_coil(self, coil, key, values):  # set key/value pairs in coil dict
         for name, value in zip(coil, values):
@@ -172,10 +170,10 @@ class read_tor(pythonIO):
                 else:
                     name = 'bb_{}'.format(next(nbl))
                     blanket_coil[name] = coil
-        pf = PF(coil=blanket_coil, label='bb_DINA')
-        self.coilset['blanket'] = pf.coilset
-        pf = PF(coil=vessel_coil, label='vv_DINA')
-        self.coilset['vessel'] = pf.coilset
+        pf = PF(coil=blanket_coil)
+        self.coilset['bb_DINA'] = pf.coilset
+        pf = PF(coil=vessel_coil)
+        self.coilset['vv_DINA'] = pf.coilset
         self.get_vv_vs_index(vv)
 
     def get_vv_vs_index(self, vv):
@@ -216,25 +214,41 @@ class read_tor(pythonIO):
             Ic[name] = coil[name]['Ic']
         return Ic
 
-    def set_coil_current(self, frame_index):
-        for name, Ic in zip(self.coil, self.current['coil'][frame_index]):
-            self.coil[name]['Ic'] = Ic
-        self.pf.update_current(self.package_current(self.coil))
+    def set_coil_current(self, frame_index, Ip_scale):
+        for label in ['CS', 'PF']:
+            Ic = {}
+            for name, I in zip(self.coilset[label]['coil'],
+                               self.current[label][frame_index]):
+                Ic[name] = Ip_scale * I
+            self.pf.update_current(Ic, self.coilset[label])  # update coilset
+            self.pf.update_current(Ic)  # update pf instance
 
-    def set_filament_current(self, filament, frame_index):
+    def set_filament_current(self, coilset, frame_index, Ip_scale):
+        Ic = {}
         current = self.current['filament'][frame_index]
-        for name in filament:
-            turn_index = filament[name]['index']
-            sign = filament[name]['sign']
-            filament[name]['Ic'] = sign * current[turn_index]
-        self.pf.update_current(self.package_current(filament))
+        for name in coilset['coil']:
+            turn_index = coilset['coil'][name]['index']
+            sign = coilset['coil'][name]['sign']
+            Ic[name] = Ip_scale * sign * current[turn_index]
+        self.pf.update_current(Ic, coilset)  # update coilset
+        self.pf.update_current(Ic)  # update pf instance
 
-    def set_current(self, frame_index):
+    def set_plasma_current(self, frame_index, Ip_scale):
+        self.pf.coilset['plasma_coil'] =\
+            copy.deepcopy(self.plasma_coil[frame_index])
+        for name in self.pf.coilset['plasma_coil']:
+            self.pf.coilset['plasma_coil'][name]['Ic'] *= Ip_scale
+        self.coilset['PF']['plasma_coil'] = self.pf.coilset['plasma_coil']
+
+    def set_current(self, frame_index, **kwargs):
+        Ip_scale = kwargs.get('Ip_scale', self.Ip_scale)
         self.frame_index = frame_index
-        self.set_coil_current(frame_index)
-        self.set_filament_current(self.vessel_coil, frame_index)
-        self.set_filament_current(self.blanket_coil, frame_index)
-        self.pf.plasma_coil = self.plasma_coil[frame_index]
+        self.set_coil_current(frame_index, Ip_scale)
+        self.set_filament_current(self.coilset['vv_DINA'],
+                                  frame_index, Ip_scale)
+        self.set_filament_current(self.coilset['bb_DINA'],
+                                  frame_index, Ip_scale)
+        self.set_plasma_current(frame_index, Ip_scale)
 
     def plot_filaments(self):
         for f in self.filaments:
@@ -248,21 +262,18 @@ class read_tor(pythonIO):
             ax = plt.subplots(figsize=(7, 10))[1]
         self.set_current(index)
         self.plot_coils()
-        # self.plot_plasma(index)
         plt.axis('off')
 
     def plot_coils(self):
         self.pf.initalize_collection()
-        self.pf.patch_coil(self.coil)
-        self.pf.patch_coil(self.blanket_coil)
-        self.pf.patch_coil(self.vessel_coil)
-        self.pf.patch_coil(self.plasma_coil[self.frame_index])
+        self.pf.patch_coil(self.coilset['CS']['subcoil'])
+        self.pf.patch_coil(self.coilset['PF']['subcoil'])
+        self.pf.patch_coil(self.coilset['bb_DINA']['coil'])
+        self.pf.patch_coil(self.coilset['vv_DINA']['coil'])
+        self.pf.patch_coil(self.coilset['PF']['plasma_coil'])
         self.pf.plot_patch(c='Jc', clim=[-10, 10])
         plt.axis('equal')
         plt.axis('off')
-
-    def plot_plasma(self, index):
-        self.pf.plot_coil(self.plasma_coil[index], coil_color='C4')
 
     def movie(self, filename):
         fig, ax = plt.subplots(1, 1, figsize=(7, 10))
@@ -284,12 +295,12 @@ class read_tor(pythonIO):
 
 if __name__ == '__main__':
 
-    tor = read_tor('disruptions', read_txt=True, Ip_scale=1)
+    tor = read_tor('disruptions', read_txt=False, Ip_scale=1)
     tor.load_file(3)
-    #tor.plot(130)
+    tor.plot(10)
 
-    #tor.pf.plot(current=True)
-    #tor.movie('tmp')
+    # tor.pf.plot(current=False, plasma=True, subcoil=True)
+    # tor.movie('tmp')
 
 
 

@@ -38,7 +38,7 @@ class coil_force(pythonIO):
         self.tor = read_tor('disruptions', Ip_scale=self.Ip_scale,
                             read_txt=read_txt)  # load currents
         self.ps = power_supply(nturn=nturn, Ip_scale=self.Ip_scale,
-                               read_txt=read_txt)
+                               read_txt=False)
         self.allowable = stress_allowable()  # load allowable interpolators
         pythonIO.__init__(self)  # python read/write
 
@@ -64,54 +64,47 @@ class coil_force(pythonIO):
         self.name = split(split(filepath)[0])[-1]
         filepath = join(split(filepath)[0], 'coil_force')
         filepath += self.postscript()
+        self.tor.load_file(scenario)  # read toroidal strucutres
+        self.t = self.tor.t
+        self.pf = self.tor.pf  # link pf instance
         if read_txt or not isfile(filepath + '.pk'):
             self.read_file(scenario)  # read txt file
-            self.save_pickle(filepath, ['pf', 'ff', 'vv',
-                                        'Ivs3_fun', 'vs_geom'])
+            self.save_pickle(filepath, ['Ivs3_fun'])
         else:
             self.load_pickle(filepath)
-        self.tor.load_file(scenario)  # read toroidal strucutres
-        self.tor.pf = self.pf  # re-link pf object
-        self.ff.pf_index = self.tor.pf.index  # re-link index
-        self.ff.pf_coil = self.tor.pf.coil  # re-link pf coil
-        self.ff.pf_subcoil = self.tor.pf.subcoil  # re-link eq coil
-        self.ff.plasma_coil = self.tor.plasma_coil  # relink plasma
+        self.vs_geom = VSgeom()  # load vs geometory
+        self.add_vv_coils()  # add local vessel, trs and VS3 coils
+        self.set_force_field()  # initalise force_field object
         self.grid_sf()
 
     def read_file(self, scenario):
-        self.tor.load_file(scenario)  # load toroidal scenario
-        self.pf = self.tor.pf  # reference to tor pf
-        self.t = self.tor.t
-        self.vs_geom = VSgeom()  # load vs geometory
-        self.add_vv_coils()
-        if self.vessel:  # remove DINA coils
+        self.load_ps(scenario)  # load vs currents
+
+    def add_vv_coils(self):
+        coilset = self.ps.vv.pf.coilset
+        VS3_coil = {name: coilset['coil'][name] for name in coilset['coil']
+                    if 'VS' in name and 'jacket' not in name}
+        self.pf.add_coils(VS3_coil, subcoil=coilset['subcoil'], label='VS3')
+        if self.vessel:  # add vv and trs coils
+            jacket_coil = {name: coilset['coil'][name]
+                           for name in coilset['coil']
+                           if 'jacket' in name}
+            self.pf.add_coils(jacket_coil, subcoil=coilset['subcoil'],
+                              label='jacket')
+            vv_coil = {name: coilset['coil'][name] for name in coilset['coil']
+                       if 'vv' in name}
+            self.pf.add_coils(vv_coil, subcoil=coilset['subcoil'],
+                              label='vv')
+            trs_coil = {name: coilset['coil'][name] for name in coilset['coil']
+                        if 'trs' in name}
+            self.pf.add_coils(trs_coil, subcoil=coilset['subcoil'],
+                              label='trs')
+            # remove DINA coils
             vv_remove = [0, 1] + list(np.arange(18, 23)) + \
                 list(np.arange(57, 60)) + list(np.arange(91, 96)) +\
                 list(np.arange(72, 76)) + list(np.arange(114, 116))
             for vv_index in vv_remove:
                 self.pf.remove_coil('vv_{}'.format(vv_index))
-        self.set_force_field()  # initalise force_field object
-        self.load_ps(scenario)  # load vs currents
-
-    def add_vv_coils(self):
-        self.vv = self.ps.vv  # link vv coil set
-        VS3_coil = {coil: self.vv.pf.coil[coil] for coil in self.vv.pf.coil
-                    if 'VS' in coil and 'jacket' not in coil}
-        self.pf.add_coils(VS3_coil, subcoil=self.vv.pf.subcoil, label='VS3')
-        if self.vessel:  # add vv and trs coils
-            jacket_coil = {coil: self.vv.pf.coil[coil]
-                           for coil in self.vv.pf.coil
-                           if 'jacket' in coil}
-            self.pf.add_coils(jacket_coil, subcoil=self.vv.pf.subcoil,
-                              label='jacket')
-            vv_coil = {coil: self.vv.pf.coil[coil] for coil in self.vv.pf.coil
-                       if 'vv' in coil}
-            self.pf.add_coils(vv_coil, subcoil=self.vv.pf.subcoil,
-                              label='vv')
-            trs_coil = {coil: self.vv.pf.coil[coil] for coil in self.vv.pf.coil
-                        if 'trs' in coil}
-            self.pf.add_coils(trs_coil, subcoil=self.vv.pf.subcoil,
-                              label='trs')
 
     def load_ps(self, scenario, **kwargs):
         if scenario != -1:
@@ -135,14 +128,13 @@ class coil_force(pythonIO):
 
     def set_force_field(self):
         active_coils, passive_coils = self.set_coil_type()
-        self.ff = force_field(self.pf.index, self.pf.coil, self.pf.subcoil,
-                              self.pf.plasma_coil, multi_filament=True,
+        self.ff = force_field(self.pf.coilset, multi_filament=True,
                               active_coils=active_coils,
                               passive_coils=passive_coils)
 
     def set_coil_type(self):  # set VS3 coils active
-        active_coils = list(self.pf.index['VS3']['name'])  # calculate force
-        passive_coils = list(self.pf.coil.keys())
+        active_coils = list(self.pf.coilset['index']['VS3']['name'])
+        passive_coils = list(self.pf.coilset['coil'].keys())
         for coil in active_coils:
             passive_coils.remove(coil)
         passive_coils.append('Plasma')
@@ -152,15 +144,16 @@ class coil_force(pythonIO):
         self.mode = kwargs.get('mode', self.mode)
         Ivs3 = self.Ivs3_fun[self.mode](self.t_index)  # current vector
         self.set_vs3_current(Ivs3[0])  # vs3 coil current
+        coil_list = list(self.ps.vv.pf.coilset['coil'].keys())
         if self.vessel:  # set jacket, vv and trs currents
             Ic = {}  # coil jacket
-            for i, coil in enumerate(list(self.vv.pf.coil.keys())[2:6]):
+            for i, coil in enumerate(coil_list[2:6]):
                 Ic[coil] = Ivs3[1]  # lower VS jacket
-            for i, coil in enumerate(list(self.vv.pf.coil.keys())[6:10]):
+            for i, coil in enumerate(coil_list[6:10]):
                 Ic[coil] = Ivs3[2]  # upper VS jacket
             self.pf.update_current(Ic)  # dissable to remove jacket field
             Ic = {}  # vv and trs
-            for i, coil in enumerate(list(self.vv.pf.coil.keys())[10:]):
+            for i, coil in enumerate(coil_list[10:]):
                 Ic[coil] = Ivs3[i+3]
             self.pf.update_current(Ic)  # dissable to remove vv field
 
@@ -179,11 +172,13 @@ class coil_force(pythonIO):
         self.t_index = self.tor.t[self.frame_index]
         self.tor.set_current(frame_index)  # update coil currents and plasma
         self.vs3_update()  # update vs3 coil currents
-        self.ff.eq_plasma_coil = self.tor.pf.plasma_coil  # pass to ff object
+        # pass to ff object
+        self.ff.coilset['plasma_coil'] = self.tor.coilset['PF']['plasma_coil']
 
     def contour(self, plot=True, **kwargs):
-        self.psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf.subcoil,
-                                   self.pf.plasma_coil)
+        self.psi = cc.get_coil_psi(self.x2d, self.z2d,
+                                   self.pf.coilset['subcoil'],
+                                   self.pf.coilset['plasma_coil'])
         self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi})
         if plot:
             levels = self.sf.contour(41, boundary=False, Xnorm=False,
@@ -203,7 +198,7 @@ class coil_force(pythonIO):
     def get_stress(self, Fn, Ft, name):
         dx, dy = self.vs_geom.rail[name]['dx'], self.vs_geom.rail[name]['dy']
         dz, n = self.vs_geom.rail[name]['dz'], self.vs_geom.rail[name]['n']
-        coil = self.pf.coil[name]
+        coil = self.pf.coilset['coil'][name]
         Ft *= 2*np.pi*coil['x']/n  # force per rail
         Fn *= 2*np.pi*coil['x']/n
         Stress = {}
@@ -238,10 +233,11 @@ class coil_force(pythonIO):
             self.frame_update(frame_index)
             for mode in B_data:
                 self.vs3_update(mode=mode)
-                for j, name in enumerate(self.pf.index['VS3']['name']):
-                    coil = self.pf.coil[name]
+                for j, name in enumerate(
+                        self.pf.coilset['index']['VS3']['name']):
+                    coil = self.pf.coilset['coil'][name]
                     point = [coil['x'], coil['z']]
-                    B = cc.Bpoint(point, self.pf)
+                    B = cc.Bpoint(point, self.pf.coilset)
                     B_data[mode][i]['Bx'][j] = B[0]
                     B_data[mode][i]['Bz'][j] = B[1]
                     B_data[mode][i]['Bmag'][j] = np.linalg.norm(B)
@@ -267,10 +263,11 @@ class coil_force(pythonIO):
             for mode in coil_data:
                 self.vs3_update(mode=mode)
                 self.force_update()
-                for j, name in enumerate(self.pf.index['VS3']['name']):
+                for j, name in enumerate(
+                        self.pf.coilset['index']['VS3']['name']):
                     # force
                     F_index = self.ff.active_coils.index(name)
-                    coil = self.pf.coil[name]
+                    coil = self.pf.coilset['coil'][name]
                     F = 1e6 * self.ff.F[F_index] / (2*np.pi*coil['x'])  # N/m
                     Fxyz = np.array([F[0], 0, F[1]])
                     theta = self.vs_geom.theta_coil[name]  # theta_coil
@@ -288,7 +285,7 @@ class coil_force(pythonIO):
                     coil_data[mode][i]['sigma'][j] = sigma
                     # centerpoint field
                     centerpoint = [coil['x'], coil['z']]
-                    B = cc.Bpoint(centerpoint, self.pf)
+                    B = cc.Bpoint(centerpoint, self.pf.coilset)
                     coil_data[mode][i]['Bx'][j] = B[0]
                     coil_data[mode][i]['Bz'][j] = B[1]
                     coil_data[mode][i]['Bmag'][j] = np.linalg.norm(B)
@@ -308,7 +305,7 @@ class coil_force(pythonIO):
                 ax[0].plot(1e3*coil_data[mode]['t'],
                            1e-3*coil_data[mode]['I'], '-',
                            color=color, label=mode)
-                for i, name in enumerate(self.pf.index['VS3']['name']):
+                for i, name in enumerate(self.pf.coilset['index']['VS3']['name']):
                     ax[i+1].plot(1e3*coil_data[mode]['t'],
                                  factor*coil_data[mode][pvar][:, i],
                                  color=color)
@@ -322,7 +319,7 @@ class coil_force(pythonIO):
             plt.despine()
             ax[0].set_ylabel('$I_{vs3}$, kA')
             ax[0].legend(loc=1)
-            for i, name in enumerate(self.pf.index['VS3']['name']):
+            for i, name in enumerate(self.pf.coilset['index']['VS3']['name']):
                 ax[i+1].set_ylabel(ylabel)
                 ax[i+1].text(0.5, 1, name, transform=ax[i+1].transAxes,
                              ha='center', va='top',
@@ -334,7 +331,7 @@ class coil_force(pythonIO):
         return coil_data
 
     def movie(self, folder, nframe=None, mode='reference', discharge='DINA'):
-        self.read_file(folder, discharge=discharge)
+        self.load_file(folder, discharge=discharge)
         frames, nframe = self.get_frames(nframe)
         FFMpegWriter = manimation.writers['ffmpeg']
         writer = FFMpegWriter(fps=10, bitrate=-1)
@@ -374,7 +371,7 @@ class coil_force(pythonIO):
         coil_data = OrderedDict()
         X = range(self.dina.nfolder)
         for i in X:
-            self.read_file(i)
+            self.load_file(i, read_txt=True)
             name = self.tor.name
             coil_data[name] = self.get_data(nframe, plot=False)
         filename = self.datafile(nframe)
@@ -451,7 +448,7 @@ class coil_force(pythonIO):
         plt.setp(ax[0].get_xticklabels(), visible=False)
         for i, k in enumerate([1, 0]):
             ax[i].set_ylabel('$|F|_{max}$ kNm$^{-1}$')
-            name = self.pf.index['VS3']['name'][k]
+            name = self.pf.coilset['index']['VS3']['name'][k]
             ax[i].text(0.5, 1, name, transform=ax[i].transAxes,
                        weight='bold', bbox=dict(facecolor='gray', alpha=0.25),
                        va='top', ha='center')
@@ -504,7 +501,7 @@ class coil_force(pythonIO):
                            color=color)
         for i, k in enumerate([1, 0]):
             ax[i].set_ylabel('$|F|$ kNm$^{-1}$')
-            name = self.pf.index['VS3']['name'][k]
+            name = self.pf.coilset['index']['VS3']['name'][k]
             ax[i].text(1, 0.5, name, transform=ax[i].transAxes,
                        bbox=dict(facecolor='lightgray', alpha=1),
                        va='center', ha='right')
@@ -558,7 +555,7 @@ class coil_force(pythonIO):
         ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
         ax_I = plt.subplots(1, 1)[1]
         for i, (k, color_I) in enumerate(zip([1, 0], ['C6', 'C7'])):
-            name = self.pf.index['VS3']['name'][k]
+            name = self.pf.coilset['index']['VS3']['name'][k]
             for j, (color, va) in enumerate(zip(['C0', 'C3'],
                                                 ['bottom', 'top'])):
                 # MD then VDE
@@ -602,7 +599,7 @@ class coil_force(pythonIO):
 
         for i, k in enumerate([1, 0]):
             ax[i].set_ylabel('$|F|$ kNm$^{-1}$')
-            name = self.pf.index['VS3']['name'][k]
+            name = self.pf.coilset['index']['VS3']['name'][k]
             ax[i].text(1, 0.1, name, transform=ax[i].transAxes,
                        bbox=dict(facecolor='lightgray', alpha=1),
                        va='bottom', ha='right')
@@ -625,9 +622,9 @@ class coil_force(pythonIO):
             kwargs['ax'] = plt.subplots(1, 1, figsize=(7, 10))[1]
         if not self.vessel:
             for coil in ['lower', 'upper']:
-                self.pf.coil.pop('{}VS'.format(coil))
-                for i in range(self.pf.subcoil['{}VS_0'.format(coil)]['Nf']):
-                    self.pf.subcoil.pop('{}VS_{}'.format(coil, i))
+                self.pf.coilset['coil'].pop('{}VS'.format(coil))
+                for i in range(self.pf.coilset['subcoil']['{}VS_0'.format(coil)]['Nf']):
+                    self.pf.coilset['subcoil'].pop('{}VS_{}'.format(coil, i))
         self.pf.plot(**kwargs)
         if contour:
             self.contour(**kwargs)
@@ -652,7 +649,8 @@ class coil_force(pythonIO):
 
 if __name__ == '__main__':
 
-    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=12.5/15)
+    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=12.5/15,
+                       read_txt=False)
     '''
     force.load_file(4, read_txt=False)
     force.frame_update(251)
@@ -668,9 +666,12 @@ if __name__ == '__main__':
     plt.axis('equal')
     plt.axis('off')
     '''
-    # force.read_data(nframe=500, forcewrite=True)
+
+    # force.load_file(4, read_txt=False)
+
+    force.read_data(nframe=500, forcewrite=True)
     # plt.set_context('notebook')
-    force.plot_Fmax(nframe=500)
+    # force.plot_Fmax(nframe=500)
 
 
 

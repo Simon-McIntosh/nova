@@ -20,6 +20,8 @@ import matplotlib.lines as mlines
 from amigo.IO import pythonIO
 from nep.DINA.capacitor_discharge import power_supply
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
+import nep
+from amigo.IO import class_dir
 
 
 class coil_force(pythonIO):
@@ -38,7 +40,7 @@ class coil_force(pythonIO):
         self.tor = read_tor('disruptions', Ip_scale=self.Ip_scale,
                             read_txt=read_txt)  # load currents
         self.ps = power_supply(nturn=nturn, Ip_scale=self.Ip_scale,
-                               read_txt=False)
+                               read_txt=read_txt)
         self.allowable = stress_allowable()  # load allowable interpolators
         pythonIO.__init__(self)  # python read/write
 
@@ -362,7 +364,7 @@ class coil_force(pythonIO):
         return levels
 
     def datafile(self, nframe):
-        filename = join(self.dina.root, 'DINA/Data/coil_force')
+        filename = join(class_dir(nep), 'DINA/Data/coil_force')
         filename += self.postscript()
         filename += '_{:d}.plk'.format(nframe)
         return filename
@@ -474,7 +476,7 @@ class coil_force(pythonIO):
         ax_I.text(im[index], 1e-3*Im[index],
                   '{:1.0f}'.format(1e-3*Im[index]), weight='bold',
                   va=va, ha='center')
-        #plt.xticks(X, self.dina.folders, rotation=70)
+        # plt.xticks(X, self.dina.folders, rotation=70)
         plt.xticks(X, '')
         for x, label in zip(X, self.dina.folders):
             label = label.replace('_', ' ')
@@ -623,7 +625,8 @@ class coil_force(pythonIO):
         if not self.vessel:
             for coil in ['lower', 'upper']:
                 self.pf.coilset['coil'].pop('{}VS'.format(coil))
-                for i in range(self.pf.coilset['subcoil']['{}VS_0'.format(coil)]['Nf']):
+                name = '{}VS_0'.format(coil)
+                for i in range(self.pf.coilset['subcoil'][name]['Nf']):
                     self.pf.coilset['subcoil'].pop('{}VS_{}'.format(coil, i))
         self.pf.plot(**kwargs)
         if contour:

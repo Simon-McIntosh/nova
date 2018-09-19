@@ -17,6 +17,8 @@ from os.path import join
 from warnings import warn
 from itertools import count
 from shapely.geometry import Polygon, Point, LineString
+from nova.exceptions import TopologyError
+from scipy.stats import mode
 
 
 class SF(object):
@@ -58,19 +60,23 @@ class SF(object):
             self.Pfield()
             self.Bfield()  # compute Bfield from psi input
             self.set_contour()
-            self.set_points(n=50, plot=False)  # set (po, mo)
-            self.initalize_field(plot=False)
+            self.set_points(n=50, plot=True)  # set (po, mo)
+            #self.initalize_field(plot=False)
 
     def initalize_field(self, plot=False):
-        self.get_midplane()
-        self.get_boundary(alpha=1-1e-3, set_boundary=True, plot=plot)
+        try:
+            self.get_midplane()
+            self.get_boundary(alpha=1-1e-3, set_boundary=True, plot=plot)
+        except TopologyError:
+            pass
         self.get_sol(debug=False)
 
     def get_sol(self, plot=False, debug=False):
-        # check that x-point is inside first wall
-        if Polygon(self.fw).intersects(Point(self.Xpoint)):
-            self.initalize_sol(rcirc=0.2, drcirc=0.15)
-            self.sol(plot=plot, debug=debug)
+        if hasattr(self, 'fw'):
+            # check that x-point is inside first wall
+            if Polygon(self.fw).intersects(Point(self.Xpoint)):
+                self.initalize_sol(rcirc=0.2, drcirc=0.15)
+                self.sol(plot=plot, debug=debug)
 
     def initalize_sol(self, rcirc=0.3, drcirc=0.15):
         self.get_sol_psi(dSOL=3e-3, Nsol=15, verbose=False)
@@ -190,12 +196,9 @@ class SF(object):
             self.dPpsi = interp1d(psi_ff, dP_ff)
             FFp = spline(psi_ff, eqdsk['ffprim'], s=1e-5)(psi_ff)
             Pp = spline(psi_ff, eqdsk['pprime'], s=1e2)(psi_ff)  # s=1e5
-
             self.FFprime = interp1d(psi_ff, FFp, fill_value=0,
                                     bounds_error=False)
-            #self.Pprime = interp1d(psi_ff, Pp, fill_value=0,
-            #                       bounds_error=False)
-            self.Pprime = interp1d(psi_ff, eqdsk['pprime'], fill_value=0,
+            self.Pprime = interp1d(psi_ff, Pp, fill_value=0,
                                    bounds_error=False)
 
     def plot_flux_functions(self):
@@ -329,7 +332,9 @@ class SF(object):
         self.point_grid = {'x': x, 'z': z}
         n = nx * nz
         dtype = [('x', float), ('z', float), ('B', float), ('psi', float),
-                 ('area', float), ('polygon', np.ndarray)]
+                 ('area', float), ('polygon', np.ndarray),
+                 ('separatrix_area', float), ('separatrix_psi', float),
+                 ('psi_norm', float)]
         self.points = np.zeros(n, dtype=dtype)
         index = count(0)
         for x in self.point_grid['x']:
@@ -340,11 +345,11 @@ class SF(object):
                 self.points[i]['x'] = res.x[0]
                 self.points[i]['z'] = res.x[1]
                 self.points[i]['B'] = res.fun
-                self.points[i]['psi'] = self.Ppoint([x, z])
+                self.points[i]['psi'] = self.Ppoint([res.x[0], res.x[1]])
         index = geom.unique2D(np.array([self.points['x'], self.points['z']]).T,
                               eps=0.1, bound=self.limit.flatten())[0]
         self.points = self.points[index]  # trim duplicates / edge points
-        # trim high field < 0.05% of maximum absolute value
+        # trim high field > 0.05% of maximum absolute value
         self.points = self.points[self.points['B'] < 0.05*np.max(self.Babs)]
         self.points = np.sort(self.points, order='B')  # sort
         self.points = np.sort(self.points, order='z')  # sort
@@ -362,27 +367,29 @@ class SF(object):
             else:
                 self.points[i]['area'] = np.max(area)
         self.points = np.sort(self.points, order=['area', 'z'])  # sort
-        # select Mpoints < 5% limit area
-        area_limit = 0.05*np.prod(np.diff(self.limit))
-        Mindex = self.points['area'] < area_limit
-        if sum(Mindex) > 0:  # check that Mpoint is within bounding box
-            bb = Polygon([(self.limit[0][i], self.limit[1][j]) for
-                          i, j in zip([0, 1, 1, 0], [0, 0, 1, 1])])
-            point = Point([self.points[Mindex][0]['x'],
-                           self.points[Mindex][0]['z']])
-            inside = bb.intersects(point)
-        if sum(Mindex) == 0 or not inside:  # ergodic field or outside bb
-            self.get_Mloop(plot=False)  # minimum area contout centroid
-        else:
-            Mpoints = self.points[Mindex]
-            self.mo_array = []
-            for Mpoint in Mpoints:
-                self.mo_array.append([Mpoint['x'], Mpoint['z']])
-            self.mo = self.mo_array[0]
-            self.get_Mpsi(plot=False)
-        Xpoints = self.points[~Mindex]
+        self.get_bounding_loops()  # get bounding loops
+        Mindex = np.zeros(len(self.points), dtype=bool)  # select Mpoints
+        for i, point in enumerate(self.points):
+            p = Point([point['x'], point['z']])
+            for loop in self.bounding_loops['exterior']:
+                if p.within(loop['poly']):
+                    Mindex[i] = True
+                    self.points['separatrix_area'][i] = loop['area']
+                    self.points['separatrix_psi'][i] = loop['psi']
+        self.Mpoints = self.points[Mindex]
+        self.Mpoints = np.sort(self.Mpoints, order='separatrix_area')[::-1]
+        self.mo_array = []
+        for Mpoint in self.Mpoints:
+            self.mo_array.append([Mpoint['x'], Mpoint['z']])
+        self.mo = self.mo_array[0]
+        self.get_Mpsi(plot=False)
+        Xpsi = self.Mpoints['separatrix_psi'][0]  # Xpsi estimate
+        self.points['psi_norm'] =\
+            (self.points['psi'] - self.Mpsi) / (Xpsi - self.Mpsi)
+        self.Xpoints = self.points[~Mindex]
+        self.Xpoints = np.sort(self.Xpoints, order='psi_norm')
         self.po_array = []
-        for Xpoint in Xpoints:
+        for Xpoint in self.Xpoints:
             self.po_array.append([Xpoint['x'], Xpoint['z']])
         if len(self.po_array) > 0:
             self.po = self.po_array[0]
@@ -401,12 +408,51 @@ class SF(object):
             self.Xpoint_array = [self.Xpoint, None]
             self.Xpsi_array = [self.Xpsi, None]
             self.Xloc = 'edge'
+        # update psi norm
+        self.points['psi_norm'] =\
+            (self.points['psi'] - self.Mpsi) / (self.Xpsi - self.Mpsi)
+        self.Mpoints['psi_norm'] =\
+            (self.Mpoints['psi'] - self.Mpsi) / (self.Xpsi - self.Mpsi)
+        self.Xpoints['psi_norm'] =\
+            (self.Xpoints['psi'] - self.Mpsi) / (self.Xpsi - self.Mpsi)
+
+        '''
+        # select Mpoints < 5% limit area
+        area_limit = 0.05*np.prod(np.diff(self.limit))
+        Mindex = self.points['area'] < area_limit
+        if sum(Mindex) > 0:  # check that Mpoint is within bounding box
+            bb = Polygon([(self.limit[0][i], self.limit[1][j]) for
+                          i, j in zip([0, 1, 1, 0], [0, 0, 1, 1])])
+            point = Point([self.points[Mindex][0]['x'],
+                           self.points[Mindex][0]['z']])
+            inside = bb.intersects(point)
+        if sum(Mindex) == 0 or not inside:  # ergodic field or outside bb
+            self.get_Mloop(plot=False)  # minimum area contour centroid
+            index = np.argmin((self.Mpoint[0]-self.points['x'])**2 +
+                              (self.Mpoint[1]-self.points['z'])**2)
+            self.Mpoints = self.points[index:index+1]
+        else:
+            self.Mpoints = self.points[Mindex]
+            self.mo_array = []
+            for Mpoint in self.Mpoints:
+                self.mo_array.append([Mpoint['x'], Mpoint['z']])
+            self.mo = self.mo_array[0]
+            self.get_Mpsi(plot=False)
+        '''
+
         if plot:
             self.plot_points()
+            self.plot_bounding_loops()
 
-    def plot_points(self, ax=None):
+    def plot_point(self, point, ax, marker):
+        ax.plot(point['x'], point['z'], marker)
+        txt = '  psi_norm: {:1.3f}\n'.format(point['psi_norm'])
+        txt += '  B: {:1.3f}'.format(point['B'])
+        ax.text(point['x'], point['z'], txt, va='center')
+
+    def plot_points(self, ax=None, plot_sead_points=True):
         if ax is None:
-            ax = plt.subplots(1, 1)[1]
+            ax = plt.subplots(1, 1, figsize=(8, 10))[1]
         for x in self.point_grid['x']:
             for z in self.point_grid['z']:
                 ax.plot(x, z, 'C1d', ms=2)
@@ -415,19 +461,20 @@ class SF(object):
             for polygon in self.points[i]['polygon']:
                 x, z = polygon.exterior.coords.xy
                 plt.plot(x, z)
-            ax.plot(self.points[i]['x'], self.points[i]['z'], 'C3*')
-            txt = '  psi: {:1.3f}\n'.format(self.points[i]['psi'])
-            txt += '  B: {:1.3f}'.format(self.points[i]['B'])
-            ax.text(self.points[i]['x'], self.points[i]['z'], txt, va='center')
-            ax.axis('equal')
+        for point in self.Mpoints:
+            self.plot_point(point, ax, 'C3*')
+        for point in self.Xpoints:
+            self.plot_point(point, ax, 'C4*')
+        ax.axis('equal')
         self.plot_nulls(labels=['X', 'M'])
-        for po in self.po_array:
-            ax.plot(po[0], po[1], 'o')
-        for mo in self.mo_array:
-            ax.plot(mo[0], mo[1], 'o')
-        plt.text(self.mo[0], self.mo[1], 'mo ', ha='right')
+        if plot_sead_points:
+            for po in self.po_array:
+                ax.plot(po[0], po[1], 'o', ms=10, color='gray', alpha=0.5)
+            for mo in self.mo_array:
+                ax.plot(mo[0], mo[1], 'o', ms=10, color='gray', alpha=0.5)
+        plt.text(self.mo[0], self.mo[1], 'mo  ', ha='right', va='center')
         if self.po:
-            ax.text(self.po[0], self.po[1], 'xo ', ha='right')
+            ax.text(self.po[0], self.po[1], 'xo  ', ha='right', va='center')
 
     def minimum_field(self, radius, theta):
         X = radius * np.sin(theta) + self.Xpoint[0]
@@ -551,23 +598,29 @@ class SF(object):
                        method='L-BFGS-B', bounds=self.limit)
         return res.x
 
-    def get_Xpsi(self, select='lower', plot=False):
+    def get_Xpsi(self, select='primary', plot=False):
         n_po = len(self.po_array)
         Xpoint = np.zeros((n_po, 2))
         Xpsi = np.zeros(n_po)
         for i, po in enumerate(self.po_array):
             Xpoint[i, :] = self.getX(po=po)
             Xpsi[i] = self.Ppoint(Xpoint[i, :])
-        index = np.argsort(Xpoint[:, 1])
-        Xpoint = Xpoint[index, :]
-        Xpsi = Xpsi[index]
-        if select == 'lower':
-            i = 0  # lower Xpoint
-        elif select == 'upper':
-            i = 1  # upper Xpoint
-        elif select == 'primary':
-            i = np.argmax(self.Ipl_dir * Xpsi)  # primary Xpoint
-        self.Xerr = Xpsi[1] - Xpsi[0]  # for double-null
+        if select == 'primary':
+            i = 0  # use prior Xpoint sort
+        else:
+            index = np.argsort(Xpoint[:, 1])
+            Xpoint = Xpoint[index, :]
+            Xpsi = Xpsi[index]
+            if select == 'lower':
+                i = 0  # lower Xpoint
+            elif select == 'upper':
+                i = 1  # upper Xpoint
+            else:
+                IndexError('select not in [''primary'', ''lower'', ''upper'']')
+        if len(Xpsi) > 1:
+            self.Xerr = Xpsi[1] - Xpsi[0]  # for double-null
+        else:
+            self.Xerr = None
         Xpsi_array = Xpsi
         Xpoint_array = Xpoint
         Xpsi = Xpsi[i]
@@ -606,7 +659,7 @@ class SF(object):
                             txt = 'primary'
                         else:
                             txt = 'secondary'
-                        color = 'C0' if txt == 'secondary' else 'C1'
+                        color = 'C1' if txt == 'secondary' else 'C0'
                         if Xpsi:
                             label_txt = 'Xpoint-{} {:1.2f}'.format(txt, Xpsi)
                             ax.plot(Xpoint[0], Xpoint[1], '*', color=color,
@@ -620,7 +673,69 @@ class SF(object):
             self.plot_nulls(labels=['M'])
         return (self.Mpsi, self.Mpoint)
 
+    def get_bounding_loops(self, n_std=2, n=51, loops_per_level=5, plot=False):
+        delta_psi = n_std * np.std(self.psi)
+        levels = np.mean(self.psi) + np.linspace(-delta_psi, delta_psi, n)
+        dtype = [('valid', bool), ('closed', bool), ('area', float),
+                 ('x', np.ndarray), ('z', np.ndarray), ('poly', np.ndarray),
+                 ('psi', float)]
+        loops = np.zeros(n * loops_per_level, dtype=dtype)  # inital sizing
+        k = 0
+        contours = self.get_contour(levels)
+        for i, psi_line in enumerate(contours):
+            for j, line in enumerate(psi_line):
+                x, z = line[:, 0], line[:, 1]
+                if len(x) > 2:  # loop condition
+                    loop_length = geom.length(x, z, norm=False)[-1]
+                    gap = np.sqrt((x[0]-x[-1])**2 + (z[0]-z[-1])**2)
+                    closed = gap < 0.01*loop_length  # loop is closed
+                    if closed:
+                        poly = Polygon(np.array([x, z]).T)
+                        loops[k]['valid'] = True
+                        loops[k]['x'] = x
+                        loops[k]['z'] = z
+                        loops[k]['area'] = poly.area
+                        loops[k]['poly'] = poly
+                        loops[k]['psi'] = levels[i]
+                        k += 1
+                        if k >= n * loops_per_level:
+                            errtxt = 'loops array undersized\n'
+                            errtxt += 'increase number of loops per level'
+                            IndexError(errtxt)
+        loops = loops[:k]
+        self.bounding_loops = {}  # return interior and exterior loops
+        for select in ['interior', 'exterior']:
+            self.bounding_loops[select] = self.select_loops(loops, select)
+        if plot:
+            self.plot_bounding_loops()
+
+    def plot_bounding_loops(self):
+        for select, ls in zip(self.bounding_loops, ['C6--', 'C6-']):
+            for loop in self.bounding_loops[select]:
+                plt.plot(loop['x'], loop['z'], ls, lw=2)
+
+    def select_loops(self, loops, select):
+        loops = np.copy(loops)
+        n = len(loops)
+        for i in range(n):  # trim interior loops
+            if loops[i]['valid']:
+                for j in range(n):
+                    if i != j and loops[j]['valid']:
+                        if loops[i]['poly'].contains(loops[j]['poly']):
+                            if select == 'exterior':
+                                loops[j]['valid'] = False
+                            elif select == 'interior':
+                                loops[i]['valid'] = False
+                            else:
+                                errtxt = 'select must equal ''exterior'''
+                                errtxt += ' or ''interior'''
+                                raise ValueError(errtxt)
+        loops = loops[loops['valid']]
+        return loops
+
     def get_Mloop(self, n_std=3, n_loop=11, plot=False):
+
+        '''
         delta_psi = n_std * np.std(self.psi)
         levels = np.linspace(-delta_psi, delta_psi, n_loop)
         mloops = np.zeros(n_loop, dtype=[('valid', bool), ('closed', bool),
@@ -648,24 +763,26 @@ class SF(object):
         valid_loops = mloops[mloops['valid']]
         closed_loops = np.sort(valid_loops[valid_loops['closed']])
         primary_loop = closed_loops[0]
-        Mpoint = Polygon(np.array([primary_loop['x'],
-                                   primary_loop['z']]).T).centroid.xy
+        '''
+        exterior_loops = self.get_loops(select='exterior')
+        interior_loops = self.get_loops(select='interior')
+        separatrix = np.sort(exterior_loops, order='area')[0]
+        Mloop = False
+        for loop in interior_loops:
+            if separatrix['poly'].contains(loop['poly']):
+                Mloop = loop
+                break
+        if not Mloop:
+            raise TopologyError('separatrix interior loop not found')
+
+        Mpoint = Polygon(np.array([Mloop['x'], Mloop['z']]).T).centroid.xy
         self.Mpoint = np.array([Mpoint[0][0], Mpoint[1][0]])
         self.mo = self.Mpoint
         self.mo_array = [self.mo]
         self.Mpsi = self.Ppoint(self.Mpoint)
         if plot:
-            for loop in valid_loops:
-                x, z = loop['x'], loop['z']
-                if loop['closed']:
-                    line = '-'
-                    color = 'C0'
-                else:
-                    line = '--'
-                    color = 'gray'
-                plt.plot(x, z, line, color=color)
-            x, z = primary_loop['x'], primary_loop['z']
-            plt.plot(x, z, 'C3-')
+            plt.plot(Mloop['x'], Mloop['z'], 'C3-')
+            plt.plot(separatrix['x'], separatrix['z'], 'C3-')
 
     def remove_contour(self):
         for key in ['cfield', 'cfield_bndry']:
@@ -794,7 +911,7 @@ class SF(object):
             plt.plot(x, z)  # separatrix
             plt.plot(self.Mpoint[0], self.Mpoint[1], 'o')
             self.contour()
-            raise IndexError('Mpoint located outside separatrix')
+            raise TopologyError('Mpoint located outside separatrix')
         return
 
     def first_wall_psi(self, trim=True, single_contour=False, **kwargs):
@@ -1360,3 +1477,4 @@ if __name__ == '__main__':
     sf.contour()
     sf.plot_sol(core=True)
     sf.plot_firstwall()
+

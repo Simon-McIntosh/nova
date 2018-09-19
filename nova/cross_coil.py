@@ -47,26 +47,26 @@ def add_Bcoil(x, z, coil):
     return mu_o * Ic * green_field(x, z, xc, zc)
 
 
-def get_plasma_coil(pf, **kwargs):
-    plasma_coil = kwargs.get('plasma_coil', pf.plasma_coil)
+def get_plasma_coil(coilset, **kwargs):
+    plasma_coil = kwargs.get('plasma_coil', coilset['plasma_coil'])
     return plasma_coil
 
 
-def Ppoint(point, pf, **kwargs):
-    plasma_coil = get_plasma_coil(pf, **kwargs)
+def Ppoint(point, coilset, **kwargs):
+    plasma_coil = get_plasma_coil(coilset, **kwargs)
     psi = 0
-    for coil in pf.subcoil:
-        psi += add_Pcoil(point[0], point[1], pf.subcoil[coil])
+    for name in coilset['subcoil']:
+        psi += add_Pcoil(point[0], point[1], coilset['subcoil'][name])
     for name in plasma_coil:
         psi += add_Pcoil(point[0], point[1], plasma_coil[name])
     return psi
 
 
-def Bpoint(point, pf, **kwargs):
-    plasma_coil = get_plasma_coil(pf, **kwargs)
+def Bpoint(point, coilset, **kwargs):
+    plasma_coil = get_plasma_coil(coilset, **kwargs)
     field = np.zeros(2)
-    for name in pf.subcoil:
-        field += add_Bcoil(point[0], point[1], pf.subcoil[name])
+    for name in coilset['subcoil']:
+        field += add_Bcoil(point[0], point[1], coilset['subcoil'][name])
     for name in plasma_coil:
         field += add_Bcoil(point[0], point[1], plasma_coil[name])
     return field

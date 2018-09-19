@@ -289,31 +289,27 @@ class EQ(object):
             for q in range(self.Nplasma):  # source
                 iq, jq = self.ij(self.plasma_index[q])
                 xi, zi = self.x[iq], self.z[jq]
-                B = 2 * np.pi * cc.mu_o * cc.get_green_field(x, z, xi, zi)
+                B = 2 * np.pi * cc.mu_o * cc.get_green_field(x, z, xi, zi,
+                                                             self.dx/2)
                 self.xB[p, q] = x * (B[0]**2 + B[1]**2)
 
-    def solve_plasma()
+    # def solve_plasma()
 
     def plasma_core(self, update=True):
         if update:  # calculate plasma contribution
             self.index_plasma_core()
 
-
-
-
-            li = np.dot(self.xB, I.reshape(-1, 1))  # internal inductance
-
-            '''
-                self.bpl[index] = -self.mu_o * x**2 * self.sf.Pprime(psi)\
-                    - self.sf.FFprime(psi)
+            for index, psi_norm in zip(self.plasma_index, self.psi_norm):
+                x = self.x[self.ij(index)[0]]
+                self.bpl[index] = -self.mu_o * x**2 * self.sf.Pprime(psi_norm)\
+                    - self.sf.FFprime(psi_norm)
                 self.Ipl -= self.dA * self.bpl[index] / (self.mu_o * x)
-            '''
+
+            # li = np.dot(self.xB, I.reshape(-1, 1))  # internal inductance
             scale_plasma = self.sf.Ipl / self.Ipl
             self.sf.b_scale = scale_plasma
         for i, index in enumerate(self.plasma_index):
             self.b[index] = self.bpl[index] * self.sf.b_scale
-
-
 
     def set_plasma_coil(self):
         self.plasma_coil = {}

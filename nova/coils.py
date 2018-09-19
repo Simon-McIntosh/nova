@@ -70,7 +70,9 @@ class PF:
             Ic[name] = self.coilset['coil'][name]['Ic']
         return Ic
 
-    def update_current(self, Ic):  # new current passed as dict
+    def update_current(self, Ic, coilset=None):  # new current passed as dict
+        if coilset is None:
+            coilset = self.coilset
         for i, name in enumerate(Ic):
             if name in self.coilset['coil']:  # skip removed DINA fillaments
                 self.coilset['coil'][name]['Ic'] = Ic[name]
@@ -118,11 +120,23 @@ class PF:
         self.coilset['index']['PF']['index'] = np.arange(0, nPF)
         self.coilset['index']['CS']['index'] = np.arange(nPF, nPF+nCS)
 
+    def add_coilsets(self, coilset):
+        for label in coilset:
+            self.add_coils(coilset[label]['coil'],
+                           subcoil=coilset[label]['subcoil'], label=label)
+
     def add_coils(self, coil, subcoil=None, label=None):
         nCo = self.coilset['nC']
-        xc, zc, dxc, dzc, Ic, names = self.unpack_coils(coil=coil)[1:-1]
-        for x, z, dx, dz, I, name in zip(xc, zc, dxc, dzc, Ic, names):
-            self.add_coil(x, z, dx, dz, I, name=name, categorize=False)
+        for name in coil:
+            x, z = coil[name]['x'], coil[name]['z']
+            dx, dz = coil[name]['dx'], coil[name]['dz']
+            Ic = coil[name]['Ic']
+            oparg = {}
+            for key in ['R', 'index', 'sign']:  # optional keys
+                if key in coil[name]:
+                    oparg[key] = coil[name][key]
+            self.add_coil(x, z, dx, dz, Ic, name=name, categorize=False,
+                          **oparg)
             if subcoil:
                 Nf = subcoil[name+'_0']['Nf']
                 for i in range(Nf):
@@ -133,7 +147,8 @@ class PF:
                 self.coilset['subcoil'][name+'_0']['Nf'] = 1
         if label:
             self.coilset['index'][label] =\
-                {'name': names, 'index': np.arange(nCo, self.coilset['nC'])}
+                {'name': list(coil.keys()),
+                 'index': np.arange(nCo, self.coilset['nC'])}
 
     def add_coil(self, x, z, dx, dz, Ic, categorize=True, **kwargs):
         self.coilset['nC'] += 1
@@ -142,8 +157,9 @@ class PF:
                                       'Ic': Ic}
         rc = kwargs.get('rc', np.sqrt(dx**2 + dz**2) / 2)
         self.coilset['coil'][name]['rc'] = rc
-        if 'R' in kwargs:
-            self.coilset['coil'][name]['R'] = kwargs.get('R')
+        for key in ['R', 'index', 'sign']:  # optional keys
+            if key in kwargs:
+                self.coilset['coil'][name][key] = kwargs.get(key)
         if categorize:
             self.categorize_coils()
 

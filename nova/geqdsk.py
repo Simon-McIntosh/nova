@@ -74,7 +74,7 @@ def read(f):
             pass
     idum = int(sint[-3])
     nxefit = int(sint[-2])
-    nyefit = int(sint[-1])
+    nzefit = int(sint[-1])
 
     # Use a generator to read numbers
     token = file_numbers(f)
@@ -124,7 +124,7 @@ def read(f):
     pres = read_array(nxefit, "pressure")
     ffprim = read_array(nxefit, "ffprim")
     pprime = read_array(nxefit, "pprime")
-    psi = read_2d(nxefit, nyefit, "psi")
+    psi = read_2d(nxefit, nzefit, "psi")
     qpsi = read_array(nxefit, "qpsi")
 
     # Read boundary and limiters, if present
@@ -172,17 +172,17 @@ def read(f):
         xc, zc, dxc, dzc, Ic = 0, 0, 0, 0, 0
     # Construct X-Z mesh
     x = np.zeros(nxefit)
-    z = np.zeros(nyefit)
+    z = np.zeros(nzefit)
     for i in range(nxefit):
         x[i] = xgrid1 + xdim * i / float(nxefit - 1)
-    for j in range(nyefit):
-        z[j] = (zmid - 0.5 * zdim) + zdim * j / float(nyefit - 1)
+    for j in range(nzefit):
+        z[j] = (zmid - 0.5 * zdim) + zdim * j / float(nzefit - 1)
 
     # Create dictionary of values to return
     result = {'name': name,
               'header': header,  # first line of eqdsk file
               # Number of horizontal and vertical points
-              'nx': nxefit, 'ny': nyefit,
+              'nx': nxefit, 'nz': nzefit,
               'x': x, 'z': z,               # Location of the grid-points
               'xdim': xdim, 'zdim': zdim,   # Size of the domain in meters
               # Reference vacuum toroidal field (m, T)

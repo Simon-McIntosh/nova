@@ -14,6 +14,7 @@ import os
 import nep
 from amigo.png_tools import data_load
 from amigo.IO import class_dir
+from scipy.optimize import minimize
 
 
 class power_supply:
@@ -91,7 +92,9 @@ class power_supply:
         self.update_defaults(**kwargs)
         if 'vessel' in kwargs:
             self.build_coils()  # re-build coil-set
-        self.build_matrices()
+        build_keys = ['code', 'nturn', 'Cd', 'vessel']
+        if np.array([key in kwargs for key in build_keys]).any():
+            self.build_matrices()
         self.set_constants()
         self.set_time()
         self.load_background_flux()
@@ -198,7 +201,12 @@ class power_supply:
             dIcap = 0  # zero charge current
             Hvec = np.zeros(self.ncoil)
             Hvec[0] = -Hcap
-            dIvec = np.dot(self.Minv, - self.R*Ivec - Hvec/self.C + Vbg)
+            try:
+                dIvec = np.dot(self.Minv, - self.R*Ivec - Hvec/self.C + Vbg)
+            except ValueError:
+                print(np.shape(self.Minv), np.shape(self.R), np.shape(Ivec),
+                      np.shape(Hvec), np.shape(self.C), np.shape(Vbg))
+
         else:  # capacitor charging
             dHcap = self.Vo / self.Rcap - Hcap / (self.Rcap * self.C[0])
             dIcap = -Icap / (self.Rcap * self.C[0])
@@ -315,10 +323,13 @@ class power_supply:
             self.plot_current()
         return self.Ivec
 
-    def packdata(self):
+    def formatdata(self):
         for var in ['t', 'Ivec', 'Vps', 'Vcap', 'Icap']:
             self.data[var] = np.array(self.data[var])
-        self.data['Ivec'][:, 1:3] /= 4  # per turn current
+
+    def packdata(self):
+        self.formatdata()
+        self.data['Ivec'][:, 1:3] /= 4  # jacket per turn current
         self.Ivec = interp1d(self.data['t'], self.data['Ivec'], axis=0,
                              fill_value=(self.data['Ivec'][0],
                                          self.data['Ivec'][-1]),
@@ -356,8 +367,11 @@ class power_supply:
                         color = colors[c]
                         break
                 index = coils.index(coil)
-                ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, index+3],
-                        color=color)
+                try:
+                    ax.plot(1e3*self.data['t'],
+                            1e-3*self.data['Ivec'][:, index+3], color=color)
+                except IndexError:
+                    pass
             lines, labels = [], []
             for c in colors:
                 lines.append(Line2D([0], [0], color=colors[c]))
@@ -394,11 +408,71 @@ class power_supply:
         plt.plot(1e3*td, -1e-3*Id, '--')
         plt.xlim([0, 80])
 
+    def reduce(self, ncoil):
+        # store referance profile
+        referance = {'t': np.copy(self.data['t']),
+                     'Ic': np.copy(self.data['Ivec'][:, 0])}
+        referance['fun'] = interp1d(referance['t'], referance['Ic'])
+        referance['to'] = np.linspace(referance['t'][0],
+                                      referance['t'][-1], 150)
+        referance['Ico'] = referance['fun'](referance['to'])
+
+        self.ncoil = ncoil
+        self.M = self.M[:self.ncoil, :self.ncoil]
+        self.R = self.R[:self.ncoil]
+        self.C = self.C[:self.ncoil]
+
+        # self-inductance, mutual, resistance
+        xo = [0.00198368, 0.00115038, 0.025]
+        res = minimize(self.fit, xo, args=(referance), method='L-BFGS-B',
+                       options={'ftol':0.005})
+        print(res)
+
+        ax = plt.subplots(1, 1)[1]
+        ax.plot(1e3*referance['t'], 1e-3*referance['Ic'], '-C0',
+                label='VS3 referance')
+        ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 0], '-C3',
+                label='VS3 reduced model')
+        ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 1:], '-C7',
+                label='dummy coil')
+        ax.set_xlabel('$t$ ms')
+        ax.set_ylabel('$I$ kA')
+        plt.despine()
+        plt.legend()
+
+    def fit(self, x, *args):
+        self.M[1, 1] = x[0]  # secondary coil self inductance
+        self.M[0, 1] = x[1]  # cross-inductance
+        self.M[1, 0] = self.M[0, 1]  # symetric
+        self.Minv = np.linalg.inv(self.M)  # inverse
+        self.R[1] = x[2]  # secondary coil resistance
+        referance = args[0]  # referance primary current timeseries
+        self.initalize()
+        self.intergrate(referance['to'][-1])
+        self.formatdata()
+        Io = interp1d(self.data['t'], self.data['Ivec'][:, 0],
+                      bounds_error=False,
+                      fill_value=(self.data['Ivec'][0, 0],
+                                  self.data['Ivec'][-1, 0]))(referance['to'])
+        err = 1e-3*np.sqrt(np.mean((Io-referance['Ico'])**2))
+        print(err, x)
+        return err
+
+
 
 if __name__ == '__main__':
     ps = power_supply(nturn=4, vessel=True, scenario=-1, code='Nova',
                       Ip_scale=15/15, read_txt=False)
 
-    # plt.set_context('talk')
+    plt.set_context('talk')
     ps.solve(Io=0, sign=-1, t_pulse=0.0, origin='peak',
              impulse=True, plot=True)
+
+
+
+    ps.reduce(2)
+
+
+
+
+

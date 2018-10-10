@@ -3,7 +3,6 @@ from nova.streamfunction import SF
 from amigo.pyplot import plt
 from amigo.IO import pythonIO
 from os.path import isfile
-from scipy.integrate import ode
 import numpy as np
 
 
@@ -14,7 +13,6 @@ class read_eqdsk(pythonIO):
         self.dina = dina(database_folder)
         pythonIO.__init__(self)  # python read/write
         self.load_file(file)
-        # self.read_file(file=file)
 
     def load_file(self, file, **kwargs):
         read_txt = kwargs.get('read_txt', self.read_txt)
@@ -77,9 +75,8 @@ class read_eqdsk(pythonIO):
 
 if __name__ == '__main__':
 
-    eqdsk = read_eqdsk(read_txt=False)
+    eqdsk = read_eqdsk(read_txt=True)
     # eqdsk.plot()
-
     eqdsk.plot_flux_functions()
 
 

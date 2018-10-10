@@ -84,9 +84,9 @@ class read_tor(pythonIO):
         xp = 1e-2*np.array(frame[2][0::3])
         zp = 1e-2*np.array(frame[2][1::3])
         Ip = -1e3*np.array(frame[2][2::3])  # -kA to A
-        for x, z, Ic in zip(xp, zp, Ip):
+        for x, z, If in zip(xp, zp, Ip):
             name = 'Plasma_{}'.format(next(npl))
-            plasma_coil[name] = {'Ic': Ic, 'dx': dx, 'dz': dz, 'rc': rc,
+            plasma_coil[name] = {'If': If, 'dx': dx, 'dz': dz, 'rc': rc,
                                  'x': x, 'z': z}
         return plasma_coil, np.sum(Ip)
 
@@ -121,7 +121,7 @@ class read_tor(pythonIO):
                 coil[name][var] *= 1e-2  # cm to meters
             coil[name]['rc'] = np.sqrt(coil[name]['dx']**2 +
                                        coil[name]['dz']**2) / 4
-            coil[name]['Ic'] = 0
+            coil[name]['It'] = 0
 
     def get_filaments(self, plot=False):
         self.rt.checkline('2.')
@@ -159,7 +159,7 @@ class read_tor(pythonIO):
                 x = np.mean([x1, x2])
                 z = np.mean([z1, z2])
                 R = rho*2*np.pi*x / (t*np.sqrt((x2-x1)**2 + (z2-z1)**2))
-                coil = {'Ic': 0, 'dx': dx, 'dz': dz, 'rc': rc,
+                coil = {'It': 0, 'dx': dx, 'dz': dz, 'rc': rc,
                         'x': x, 'z': z, 'index': i, 'sign': sign,
                         'R': R}  # filament resistance
                 if filament['n_turn'] == 1:  # vessel
@@ -209,35 +209,34 @@ class read_tor(pythonIO):
         return (t, filament, plasma, coil)
 
     def package_current(self, coil):
-        Ic = {}
+        It = {}
         for name in coil:
-            Ic[name] = coil[name]['Ic']
-        return Ic
+            It[name] = coil[name]['It']
+        return It
 
     def set_coil_current(self, frame_index, Ip_scale):
         for label in ['CS', 'PF']:
-            Ic = {}
+            It = {}
             for name, I in zip(self.coilset[label]['coil'],
                                self.current[label][frame_index]):
-                Ic[name] = Ip_scale * I
-            self.pf.update_current(Ic, self.coilset[label])  # update coilset
-            self.pf.update_current(Ic)  # update pf instance
+                It[name] = Ip_scale * I
+            self.pf.update_current(It, self.coilset[label])  # update coilset
 
     def set_filament_current(self, coilset, frame_index, Ip_scale):
-        Ic = {}
+        It = {}
         current = self.current['filament'][frame_index]
         for name in coilset['coil']:
             turn_index = coilset['coil'][name]['index']
             sign = coilset['coil'][name]['sign']
-            Ic[name] = Ip_scale * sign * current[turn_index]
-        self.pf.update_current(Ic, coilset)  # update coilset
-        self.pf.update_current(Ic)  # update pf instance
+            It[name] = Ip_scale * sign * current[turn_index]
+        self.pf.update_current(It, coilset)  # update coilset
+        self.pf.update_current(It)  # update pf instance
 
     def set_plasma_current(self, frame_index, Ip_scale):
         self.pf.coilset['plasma_coil'] =\
             copy.deepcopy(self.plasma_coil[frame_index])
         for name in self.pf.coilset['plasma_coil']:
-            self.pf.coilset['plasma_coil'][name]['Ic'] *= Ip_scale
+            self.pf.coilset['plasma_coil'][name]['If'] *= Ip_scale
         self.coilset['PF']['plasma_coil'] = self.pf.coilset['plasma_coil']
 
     def set_current(self, frame_index, **kwargs):
@@ -296,7 +295,7 @@ class read_tor(pythonIO):
 if __name__ == '__main__':
 
     tor = read_tor('disruptions', read_txt=False, Ip_scale=1)
-    tor.load_file(3)
+    tor.load_file(3, read_txt=False)
     tor.plot(10)
 
     # tor.pf.plot(current=False, plasma=True, subcoil=True)

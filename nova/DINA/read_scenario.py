@@ -9,8 +9,7 @@ import matplotlib.lines as mlines
 from collections import OrderedDict
 from nep.DINA.read_eqdsk import read_eqdsk
 import nova.cross_coil as cc
-from os import path, mkdir, sep
-import pickle
+from os import sep
 from amigo.IO import pythonIO
 from os.path import isfile
 from datetime import datetime
@@ -25,6 +24,7 @@ from nova.inverse import INV
 from nova.coils import PF
 from nova.streamfunction import SF
 from amigo.time import clock
+import copy
 
 
 class read_scenario(pythonIO):
@@ -50,19 +50,14 @@ class read_scenario(pythonIO):
                                          folder=folder)
         filepath = '.'.join(filepath.split('.')[:-1])
         self.filepath = '/'.join(filepath.split('\\')[:-1]) + '/'
-        attributes = ['name', 'date', 'data', 'columns',
-                      't', 'dt', 'fun', 'Icoil', 'Ipl', 'flattop', 'hip',
+        attributes = ['name', 'date', 'data', 't', 'dt', 'fun',
+                      'Icoil', 'Ipl', 'flattop', 'hip',
                       'boundary', 'coilset', 'dCoil']
         if read_txt or not isfile(filepath + '.pk'):
             self.read_file(folder, file_type=file_type, dCoil=dCoil)
             self.save_pickle(filepath, attributes)
         else:
-            try:
-                self.load_pickle(filepath)
-            except pickle.UnpicklingError:
-                print('pickle error - lfs pointer found')
-                self.read_file(folder, file_type=file_type, dCoil=dCoil)
-                self.save_pickle(filepath, attributes)
+            self.load_pickle(filepath)
             if dCoil != self.dCoil:  # reload coilset
                 print('reloading - dCoil {}'.format(dCoil))
                 self.load_coilset(dCoil=dCoil, VS=False)  # coil geometory
@@ -78,7 +73,7 @@ class read_scenario(pythonIO):
         self.pf(self.coilset[self.setname])
         self.sf = SF()  # creat bare sf instance
         self.ff = force_field(self.coilset[self.setname])
-        if self.coilset[self.setname]['update_passive_field']:
+        if self.coilset[self.setname]['force']['update_passive']:
             self.ff.set_force_field(state='passive')
         self.ff.get_force()
         self.inv = INV(self.coilset[self.setname], boundary='sf')
@@ -94,9 +89,9 @@ class read_scenario(pythonIO):
         self.name = filename.split(sep)[-3]
         self.date = datetime.strptime(
                 self.name.split('DINA')[-1].split('_')[0], '%Y-%m')
-        if 'time' in self.data:  # rename time field
-            self.data['t'] = self.data['time']
-            self.data.pop('time')
+        if 'time' in self.data2:  # rename time field
+            self.data2['t'] = self.data2['time']
+            self.data2.pop('time')
         self.trim_nan()
         self.space_data()
         self.load_data()
@@ -124,48 +119,41 @@ class read_scenario(pythonIO):
         self.inv.set_limit(FPF1=110, FPF2=15, FPF3=40, FPF4=90,
                            FPF5=160, FPF6=170, side='upper')
 
-    #def solve(self, fff):  # flattop flux factor
-    #    flux =
+    def solve(self, **kwargs):
+        flux_factor = kwargs.get('flux_factor', 1)
+        flux = (flux_factor - 1) * self.flattop['dpsi'] / (2*np.pi)
+        kwargs.pop('flux_factor', None)
+        for key in kwargs:
+            self.inv.set_limit(**dict([[key, kwargs[key]]]), side='equal')
+        rms = self.inv.solve_slsqp(flux)
+        self.ff.get_force()
+        return rms
 
     def read_txt_file(self, folder, dropnan=True, force=False):
         filename = self.dina.locate_file('data2.txt', folder=folder)
-        binary_data = path.join(self.dina.directory, folder, 'pickle')
-        pk_filename = path.join(binary_data, 'data2.pk')
-        if path.isfile(pk_filename) and not force:
-            with open(pk_filename, 'rb') as f:
-                self.data = pickle.load(f)
-                self.columns = pickle.load(f)
-        else:  # read text data
-            self.data, self.columns = \
-                self.dina.read_csv(filename, dropnan=False, split=',')
-            if not path.isdir(binary_data):
-                mkdir(binary_data)
-            with open(pk_filename, 'wb') as f:
-                pickle.dump(self.data, f)
-                pickle.dump(self.columns, f)
+        self.data2 = self.dina.read_csv(filename, dropnan=False, split=',')[0]
         return filename
 
     def read_qda_file(self, folder):
         filename = self.dina.locate_file('data2.qda', folder=folder)
         self.qdafile = QDAfile(filename)
-        self.data = {}
-        self.columns = {}
+        self.data2 = {}
+        columns = {}
         for i, (var, nrow) in enumerate(zip(self.qdafile.headers,
                                             self.qdafile.rows)):
             var = var.decode()
             if nrow > 0:
-                self.columns[var] = var.split(',')[0]
-                self.data[self.columns[var]] = \
-                    np.array(self.qdafile.data[i, :])
+                columns[var] = var.split(',')[0]
+                self.data2[columns[var]] = np.array(self.qdafile.data[i, :])
         return filename
 
     def trim_nan(self):
-        nan_index = np.zeros(len(self.data['t']), dtype=int)
-        for var in self.data:
-            nan_index += np.isnan(self.data[var])
+        nan_index = np.zeros(len(self.data2['t']), dtype=int)
+        for var in self.data2:
+            nan_index += np.isnan(self.data2[var])
         nan_index = nan_index > 0
-        for var in self.data:
-            self.data[var] = np.array(self.data[var])[~nan_index]
+        for var in self.data2:
+            self.data2[var] = np.array(self.data2[var])[~nan_index]
 
     def load_coilset(self, dCoil=0.25, VS=False):
         self.dCoil = dCoil
@@ -180,21 +168,24 @@ class read_scenario(pythonIO):
         pf = PFgeom(VS=VS, dCoil=dCoil).pf
         if joinCS:
             pf.join_coils('CS1', ['CS1L', 'CS1U'])
-        coilset = {'index': pf.index, 'coil': pf.coil, 'subcoil': pf.subcoil,
-                   'plasma_coil': pf.plasma_coil, 'dCoil': dCoil,
-                   'update_passive_field': True}
+        coilset = pf.coilset
+        coilset['mesh'] = {'dCoil': dCoil}
+        coilset['force'] = {'update_passive': True,
+                            'update_active': False}  # defaults
         self.load_force(coilset)  # append interaction matrices
         return coilset
 
     def load_boundary(self):
-        sf = read_eqdsk(file='burn').sf  # load referance sf instance
-        self.boundary = {'n': sf.n, 'limit': sf.limit,
-                         'xlim': sf.xlim, 'zlim': sf.zlim}
+        eqdsk = read_eqdsk(file='burn').eqdsk  # load referance sf instance
+        limit = [[eqdsk['x'][0], eqdsk['x'][-1]],
+                 [eqdsk['z'][0], eqdsk['z'][-1]]]
+        self.boundary = {'n': eqdsk['nx'] * eqdsk['nz'], 'limit': limit,
+                         'xlim': eqdsk['xlim'], 'zlim': eqdsk['zlim']}
 
     def load_force(self, coilset):
         ff = force_field(coilset, multi_filament=True)
-        coilset['Fa'] = ff.Fa  # interaction matrices
-        coilset['Fp'] = ff.Fp
+        coilset['force']['Fa'] = ff.Fa  # interaction matrices
+        coilset['force']['Fp'] = ff.Fp
 
     def plot_coils(self, ax=None, current='AT'):
         if ax is None:
@@ -207,18 +198,22 @@ class read_scenario(pythonIO):
             coordinate_switch = 1
         else:  # old file - correct coordinates
             coordinate_switch = -1
-        to = np.copy(self.data['t'])
+        to = np.copy(self.data2['t'])
         dt = np.mean(np.diff(to))
         tmax = np.nanmax(to)
         tmin = np.nanmin(to)
         nt = int(tmax/dt)
         dt = tmax/(nt-1)
         self.t = np.linspace(tmin, tmax, nt)
-        self.fun = {}
-        for var in self.data:  # interpolate
+        self.fun, self.data = {}, {}
+        extract = [var for var in self.data2 if ('I' in var and len(var) <= 5)]
+        extract += ['Rcur', 'Zcur', 'ap', 'kp', 'Rp', 'Zp', 'a',
+                    'Ksep', 'Ip', 'BETAp', 'li(3)', 't', 'PSI(axis)']
+        extract = [var for var in extract if var in self.data2]
+        for var in extract:  # interpolate
             if ('I' in var and len(var) <= 5) or ('V' in var):
-                self.data[var] *= coordinate_switch
-            self.fun[var] = interp1d(to, self.data[var])
+                self.data2[var] *= coordinate_switch
+            self.fun[var] = interp1d(to, self.data2[var])
             self.data[var] = self.fun[var](self.t)
 
     def load_data(self):
@@ -258,8 +253,8 @@ class read_scenario(pythonIO):
                           boxstyle='round', pad=0.5))
         ax.set_ylabel('$I_{pl}$ MA')
 
-    def plot_turning_points(self, read_txt=False):
-        self.load_force_history(n=500, read_txt=read_txt)
+    def plot_turning_points(self, n=500, read_txt=False):
+        self.load_force_history(n=n, read_txt=read_txt)
         ax = plt.subplots(3, 1, sharex=True, figsize=(8, 8))[1]
         self.plot_plasma_current(ax=ax[0])
         self.get_turning_points('Icoil', coils=['CS'],
@@ -341,7 +336,6 @@ class read_scenario(pythonIO):
             max_vector['t'][i] = clusters['t'][imax]
             max_vector['value'][i] = clusters['vector'][name][imax]
         max_vector = np.sort(max_vector, order='value')[::-1]
-        print(max_vector[0])
         if ax is None:
             ax = plt.subplots(1, 1)[1]
         for i, name in enumerate(clusters['vector']):
@@ -412,54 +406,66 @@ class read_scenario(pythonIO):
             np.diff(self.data['PSI(axis)'][self.flattop['index']])[0]
 
     def get_coil_current(self, index, VS3=True):
-        Ic = {}
+        It = {}
         for coil in self.Icoil:
             if VS3 or 'VS' not in coil:
                 if index < 0:  # frame_index
-                    Ic[coil] = self.Icoil[coil][-index]
+                    It[coil] = self.Icoil[coil][-index]
                 else:  # time value
-                    Ic[coil] = 1e3*self.fun['I'+coil.lower()](index)
+                    It[coil] = 1e3*self.fun['I'+coil.lower()](index)
         if 'CS1' not in self.pf.coilset['coil']:  # split central pair
             for coil in ['CS1L', 'CS1U']:
-                Ic[coil] = Ic['CS1']
-            Ic.pop('CS1')  # remove CS1 value
-        for coil in Ic:  # A to A.turn
-            if coil in self.pf.coilset['coil']:
-                Ic[coil] *= self.pf.coilset['coil'][coil]['N']
-        return Ic  # return dict of coil currents
+                It[coil] = It['CS1']
+            It.pop('CS1')  # remove CS1 value
+        for name in It:  # A to A.turn
+            if name in self.pf.coilset['coil']:
+                It[name] *= self.pf.coilset['coil'][name]['Nt']
+        return It  # return dict of coil currents
 
     def update_DINA(self, t):  # update from DINA interpolators
+        self.to = t  # referance time
         self.set_coil_current(t)
         self.set_plasma(t)
         self.update_coilset()
-        Fcoil = self.ff.get_force()
-        return Fcoil
+        self.ff.get_force()
+
+    def set_checkpoint(self):
+        checkpoint = {'name': self.name, 'setname': self.setname,
+                      'to': self.to, 'Xpsi': self.inv.sf.Xpsi,
+                      'coilset': copy.deepcopy(self.coilset[self.setname]),
+                      'fix': copy.deepcopy(self.inv.fix),
+                      'limit': copy.deepcopy(self.inv.limit),
+                      'Fcoil': copy.deepcopy(self.ff.Fcoil)}
+        return checkpoint
 
     def update_coilset(self):  # synchronize coilset currents
-        plasma_coil = self.coilset[self.setname]['plasma_coil']
-        Ic = self.pf.get_coil_current()
+        plasma = self.coilset[self.setname]['plasma']
+        It = self.pf.get_coil_current()
         for setname in self.coilset:
             if setname != self.setname:
-                self.coilset[setname]['plasma_coil'] = plasma_coil
-                self.update_coil_current(self.coilset[setname], Ic)
+                self.coilset[setname]['plasma'] = plasma
+                self.update_coil_current(self.coilset[setname], It)
 
-    def update_coil_current(self, coilset, Ic):
-        for name in Ic:
+    def update_coil_current(self, coilset, It):
+        for name in It:
             if name in coilset['coil']:
                 setname_array = [name]
-                current_array = [Ic[name]]
+                current_array = [It[name]]
             elif name == 'CS1':  # single to pair
                 setname_array = ['CS1L', 'CS1U']
-                current_array = 0.5 * Ic[name] * np.ones(2)
+                current_array = 0.5 * It[name] * np.ones(2)
             else:  # pair to single
                 setname_array = ['CS1']
-                current_array = [2 * Ic[name]]
+                current_array = [2 * It[name]]
             for setname, current in zip(setname_array, current_array):
-                coilset['coil'][setname]['Ic'] = current
-                Nf = coilset['subcoil'][setname+'_0']['Nf']
+                coilset['coil'][setname]['It'] = current
+                if 'Nt' in coilset['coil'][setname]:
+                    Nt = coilset['coil'][setname]['Nt']
+                    coilset['coil'][setname]['It'] = current / Nt
+                Nf = coilset['coil'][setname]['Nf']
                 for i in range(Nf):
                     subname = setname+'_{}'.format(i)
-                    coilset['subcoil'][subname]['Ic'] = current / Nf
+                    coilset['subcoil'][subname]['It'] = current / Nf
 
     def update_psi(self, n=None, limit=None, plot=False, ax=None,
                    current='A'):
@@ -469,9 +475,13 @@ class read_scenario(pythonIO):
             self.boundary['limit'] = limit
         x2d, z2d, x, z = geom.grid(self.boundary['n'],
                                    self.boundary['limit'])[:4]
-        psi = get_coil_psi(x2d, z2d, self.pf.coilset['subcoil'], self.pf.coilset['plasma_coil'])
-        eqdsk = {'x': x, 'z': z, 'psi': psi, 'beta': self.plasma['beta'],
-                 'li': self.plasma['li'], 'Ipl': self.plasma['Ipl']}
+        psi = get_coil_psi(x2d, z2d, self.pf.coilset['subcoil'],
+                           self.pf.coilset['plasma'])
+        plasma_parameters = self.coilset[self.setname]['plasma_parameters']
+        eqdsk = {'x': x, 'z': z, 'psi': psi,
+                 'beta': plasma_parameters['beta'],
+                 'li': plasma_parameters['li'],
+                 'Ipl': plasma_parameters['Ipl']}
         eqdsk['xlim'] = self.boundary['xlim']
         eqdsk['zlim'] = self.boundary['zlim']
         self.sf.update_eqdsk(eqdsk)
@@ -483,7 +493,7 @@ class read_scenario(pythonIO):
         if ax is None:
             ax = plt.subplots(1, 1, figsize=(8, 10))[1]
         self.sf.contour(Xnorm=True, boundary=True,
-                        separatrix='both', ax=ax)
+                        separatrix='', ax=ax)
         self.sf.plot_sol(core=True, ax=ax)
         if plot_nulls:
             self.sf.plot_nulls(labels=['X', 'M'])
@@ -504,32 +514,33 @@ class read_scenario(pythonIO):
             z = 1e-2*self.fun['Zp'](t)
             apl = 1e-2*self.fun['a'](t)
             kpl = self.fun['Ksep'](t)
-        dx = 2 * apl * 0.4
+        dx = 2 * apl * 0.025
         dz = kpl * dx
         Ipl = 1e6*self.fun['Ip'](t)
         beta = self.fun['BETAp'](t)
         li = self.fun['li(3)'](t)
-        self.plasma = {'Ipl': Ipl, 'a': apl, 'kappa': kpl,
-                       'beta': beta, 'li': li}
+        self.coilset[self.setname]['plasma_parameters'] =\
+            {'Ipl': Ipl, 'xcur': x, 'zcur': z, 'a': apl, 'kappa': kpl,
+             'beta': beta, 'li': li}
         ###
         # eq update here
         ###
-        self.coilset[self.setname]['plasma_coil'].clear()
+        self.coilset[self.setname]['plasma'].clear()
         if x > 0.0:
-            plasma_coil = {'x': x, 'z': z, 'dx': dx, 'dz': dz, 'Ic': Ipl}
-            plasma_subcoil = PF.mesh_coil(plasma_coil, 0.25)
+            plasma = {'x': x, 'z': z, 'dx': dx, 'dz': dz, 'It': Ipl}
+            plasma_subcoil = PF.mesh_coil(plasma, dCoil=0.25)
             for i, filament in enumerate(plasma_subcoil):
                 subname = 'Plasma_{}'.format(i)
-                self.coilset[self.setname]['plasma_coil'][subname] = filament
+                self.coilset[self.setname]['plasma'][subname] = filament
         self.inv.update_plasma_coil()
         self.ff.set_force_field(state='passive')
         for setname in self.coilset:  # set passive_field flag
             update = False if setname == self.setname else True
-            self.coilset[setname]['update_passive_field'] = update
+            self.coilset[setname]['force']['update_passive'] = update
 
     def set_coil_current(self, t):
-        Ic = self.get_coil_current(t, VS3=False)  # get coil currents
-        self.pf.update_current(Ic)
+        It = self.get_coil_current(t, VS3=False)  # get coil currents
+        self.pf.update_current(It)
 
     def load_force_history(self, n=500, plot=False, ax=None, **kwargs):
         read_txt = kwargs.get('read_txt', self.read_txt)
@@ -548,7 +559,8 @@ class read_scenario(pythonIO):
         attributes = ['CSgap', 'Fcoil']
         dtype = [('t', float), ('sep', float), ('zsum', float)]
         CSname = self.pf.coilset['index']['CS']['name']
-        self.CSgap = [[] for __ in range(self.pf.coilset['index']['CS']['n'] - 1)]
+        self.CSgap = [[] for __ in
+                      range(self.pf.coilset['index']['CS']['n'] - 1)]
         PFcoil = [[] for __ in range(self.pf.coilset['index']['PF']['n'])]
         for i in range(self.pf.coilset['index']['CS']['n'] - 1):
             self.CSgap[i] = '{}-{}'.format(CSname[i], CSname[i+1])
@@ -560,7 +572,8 @@ class read_scenario(pythonIO):
         self.Fcoil['t'] = np.linspace(self.t[1], self.t[-2], n)
         tick = clock(n, header='calculating force history')
         for i, t in enumerate(self.Fcoil['t']):
-            Fcoil = self.update_DINA(t)
+            self.update_DINA(t)
+            Fcoil = self.ff.Fcoil
             self.Fcoil['sep'][i] = Fcoil['CS']['sep']
             self.Fcoil['zsum'][i] = Fcoil['CS']['zsum']
             for j, csgap in enumerate(self.CSgap):
@@ -579,13 +592,6 @@ class read_scenario(pythonIO):
         ax.legend()
         ylim = ax.get_ylim()
         ax.set_ylim([0, ylim[1]])
-        '''
-        for i, center_index in\
-                enumerate(self.clusters['fit'].cluster_centers_):
-            t_center = self.t[int(center_index.round())]
-            Fs = interp1d(self.Fcoil['t'], self.Fcoil['sep'])(t_center)
-            ax.plot(t_center, Fs, 'C{}X'.format(i))
-        '''
         ax.set_xlabel('$t$ s')
         ax.set_ylabel('$F_{sep}$ MN')
         imax = np.argmax(self.Fcoil['sep'])
@@ -600,8 +606,9 @@ class read_scenario(pythonIO):
                  ('t', float), ('index', int)]
         self.VS3 = {}
         for VScoil in ['upper', 'lower']:
-            point[VScoil] = np.array([self.pf.coilset['coil'][VScoil+'VS']['x']+1e-3,
-                                      self.pf.coilset['coil'][VScoil+'VS']['z']])
+            point[VScoil] = np.array(
+                    [self.pf.coilset['coil'][VScoil+'VS']['x']+1e-3,
+                     self.pf.coilset['coil'][VScoil+'VS']['z']])
             self.VS3[VScoil] = np.zeros(n, dtype=dtype)
         index = self.flattop['index']  # flattop index
         index_array = np.linspace(index[0], index[1], n, dtype=int)
@@ -723,9 +730,14 @@ class read_scenario(pythonIO):
 if __name__ is '__main__':
 
     scn = read_scenario(read_txt=False)
-    scn.load_file(folder='15MA H-DINA2018-04')
 
-    scn.load_plasma(frame_index=100, plot=True)
+    #scn.load_file(folder='15MA H-DINA2018-04')
+
+    for folder in scn.dina.folders[1:]:
+        scn.load_file(folder=folder, read_txt=True)
+
+    #scn.load_file(folder='15MA H-DINA2018-04')
+    #scn.load_plasma(frame_index=100, plot=True)
 
     # scn.plot_currents()
 
@@ -735,12 +747,12 @@ if __name__ is '__main__':
     # scn.load_VS3(n=100, plot=True)
 
     '''
-    # Ic = scn.get_current(ind, VS3=False)  # get coil currents (no VS3)
+    # It = scn.get_current(ind, VS3=False)  # get coil currents (no VS3)
     #scn.plot_currents()
 
     scn.load_plasma()
-    scn.pf.coil['upperVS']['Ic'] = -60e3
-    scn.pf.coil['lowerVS']['Ic'] = 60e3
+    scn.pf.coil['upperVS']['It'] = -60e3
+    scn.pf.coil['lowerVS']['It'] = 60e3
     scn.plot_plasma(scn.flattop_index[-1])
     # scn.load_coils(plot=True)
     '''

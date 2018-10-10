@@ -20,27 +20,27 @@ class inductance:
         self.nt = []  # coil turns
         self.nC = 0
 
-    def add_coil(self, x, z, dx, dz, Ic, R=0, nt=1, **kwargs):
-        self.pf.add_coil(x, z, dx, dz, Ic, categorize=False, **kwargs)
+    def add_coil(self, x, z, dx, dz, It, R=0, nt=1, **kwargs):
+        self.pf.add_coil(x, z, dx, dz, It, categorize=False, **kwargs)
         self.Ro.append(R)
         self.nt.append(nt)
         self.nC += 1  # increment coil counter
 
     def get_coil(self, coil):
         x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
-        Ic = coil['Ic']
+        It = coil['It']
         if 'R' in coil:
             R = coil['R']
         else:
             R = 0
-        return x, z, dx, dz, Ic, R
+        return x, z, dx, dz, It, R
 
     def add_pf_coil(self, coil, turns=None):
         if turns is None:
             turns = np.ones(len(coil))
         for name, nt in zip(coil, turns):
-            x, z, dx, dz, Ic, R = self.get_coil(coil[name])
-            self.add_coil(x, z, dx, dz, Ic, R=R, nt=nt, name=name)
+            x, z, dx, dz, It, R = self.get_coil(coil[name])
+            self.add_coil(x, z, dx, dz, It, R=R, nt=nt, name=name)
 
     def initalise_cp_set(self):
         name = 'cp{:d}'.format(self.ncp)  # cp set name
@@ -92,7 +92,7 @@ class inductance:
             x = self.pf.coilset['coil'][coil]['x']
             z = self.pf.coilset['coil'][coil]['z']
             self.inv.add_psi(1, point=(x, z))
-            self.Io[i] = self.pf.coilset['coil'][coil]['Ic']
+            self.Io[i] = self.pf.coilset['coil'][coil]['It']
         self.inv.set_foreground()
         # ensure symetric (jacket-conductor coupling)
         tril_index = np.tril_indices(len(self.inv.G), k=-1)  # lower triangle
@@ -144,7 +144,7 @@ class inductance:
         self.Tc[index, :] = np.dot(-np.linalg.inv(self.Cc), self.Cr)
         self.T = np.append(np.identity(self.nd['nr']), self.Tc, axis=0)
 
-        # sort and couple M, Rc and Ic
+        # sort and couple M, Rc and It
         self.M = np.append(self.M[self.nd['dr'], :],
                            self.M[self.nd['dc'], :], axis=0)
         self.M = np.append(self.M[:, self.nd['dr']],
@@ -155,18 +155,18 @@ class inductance:
                             self.Rc[self.nd['dc']], axis=0)
         self.Rc = np.dot(self.T.T, self.Rc)  # sum
         # turn current
-        self.Ic = np.append(self.Io[self.nd['dr']],
+        self.It = np.append(self.Io[self.nd['dr']],
                             self.Io[self.nd['dc']], axis=0)
-        self.Ic = np.dot(self.T.T, self.Ic)  # sum
+        self.It = np.dot(self.T.T, self.It)  # sum
 
-    def dIdt(self, Ic, t, *args):  # current rate (function for odeint)
+    def dIdt(self, It, t, *args):  # current rate (function for odeint)
         vfun = args[0]
         if vfun is None:
-            vbg = np.zeros(len(Ic))  # background field
+            vbg = np.zeros(len(It))  # background field
         else:
             vbg = np.array([vf(t) for vf in vfun])
 
-        Idot = np.dot(self.Minv, vbg - Ic*self.Rc)
+        Idot = np.dot(self.Minv, vbg - It*self.Rc)
         return Idot
 
     def reduce(self):
@@ -176,7 +176,7 @@ class inductance:
     def solve(self, t, **kwargs):
         self.Minv = np.linalg.inv(self.M)  # inverse for odeint
         vfun = kwargs.get('vfun', None)
-        Iode = odeint(self.dIdt, self.Ic, t, (vfun,)).T
+        Iode = odeint(self.dIdt, self.It, t, (vfun,)).T
         return Iode
 
     def plot(self, **kwargs):
@@ -223,9 +223,9 @@ if __name__ is '__main__':
         nvs_o = ind.nC
         npl = len(tor.plasma_coil[tor_index])
         for i, coil in enumerate(tor.plasma_coil[tor_index]):  # plasma
-            x, z, dx, dz, Ic, R = \
+            x, z, dx, dz, It, R = \
                 ind.get_coil(tor.plasma_coil[tor_index][coil])
-            ind.add_coil(x, z, dx, dz, Ic, R=R, nt=1/npl)
+            ind.add_coil(x, z, dx, dz, It, R=R, nt=1/npl)
             if i > 0:
                 ind.add_cp([nvs_o, nvs_o+i])  # link coils
         '''
@@ -245,14 +245,14 @@ if __name__ is '__main__':
                 ind.add_cp([nvs_o+4, index])
         '''
         for coil in tor.coil:  # add pf coils
-            x, z, dx, dz, Ic, R = ind.get_coil(tor.coil[coil])
+            x, z, dx, dz, It, R = ind.get_coil(tor.coil[coil])
             nt = pf_geom.coil[coil]['N']
-            ind.add_coil(x, z, dx, dz, Ic, R=R, nt=nt)
+            ind.add_coil(x, z, dx, dz, It, R=R, nt=nt)
 
         for i, coil in enumerate(tor.blanket_coil):  # blanket
-            x, z, dx, dz, Ic, R = ind.get_coil(tor.blanket_coil[coil])
+            x, z, dx, dz, It, R = ind.get_coil(tor.blanket_coil[coil])
             nt = 1 if np.mod(i, 2) == 0 else -1
-            ind.add_coil(x, z, dx, dz, Ic, R=R, nt=nt)
+            ind.add_coil(x, z, dx, dz, It, R=R, nt=nt)
             if np.mod(i, 2) == 1:
                 ind.add_cp([ind.nC-2, ind.nC-1])  # couple
 
@@ -266,7 +266,7 @@ if __name__ is '__main__':
 
         '''
         ind.Rc[0] = ind.M[0, 0]/16e-3  # update plasma resistance
-        ind.Ic[1] = Ivs_o + Io  # add vs3 current
+        ind.It[1] = Ivs_o + Io  # add vs3 current
         ind.Rc[1] = 17.66e-3  # total vs3 resistance
         ind.M[1, 1] += Lbb  # add busbar inductance
         tau = ind.M[1, 1] / ind.Rc[1]
@@ -275,30 +275,30 @@ if __name__ is '__main__':
         '''
         t = np.linspace(0, 0.3, 300)
 
-        Ic_o = np.copy(ind.Ic)
+        Ic_o = np.copy(ind.It)
         Ic_o[1] -= Io  # subtract inital current delta
 
         ind.Minv = np.linalg.inv(ind.M)  # inverse for odeint
 
         Ivs_o = odeint(ind.dIdt, Ic_o, t).T[1]
-        Iode = odeint(ind.dIdt, ind.Ic, t)
-        Ic = Iode.T[1, :]
+        Iode = odeint(ind.dIdt, ind.It, t)
+        It = Iode.T[1, :]
 
         dIdt = np.gradient(Ivs_o, t)
         vs_o = Ivs_o*ind.Rc[1] + ind.M[1, 1]*dIdt  # voltage source
         vs_fun = interp1d(t, vs_o, fill_value='extrapolate')
 
-        tc = timeconstant(t, Ic-Ivs_o, trim_fraction=0)  # diffrence tau
+        tc = timeconstant(t, It-Ivs_o, trim_fraction=0)  # diffrence tau
         Io_d, tau_d, tfit, Ifit = tc.nfit(3)
         txt_d = timeconstant.ntxt(Io_d/tc.Id[0], tau_d)
         ax = plt.subplots(1, 1, sharex=True)[1]
         text = linelabel(value='', postfix='ms')
 
         ax.plot(1e3*t, 1e-3*Ivs_o, '-', color='gray', label='$I_{DINA}$')
-        ax.plot(1e3*t, 1e-3*Ic, 'C3',
+        ax.plot(1e3*t, 1e-3*It, 'C3',
                 label='$I_o+$'+'{:1.0f}kA'.format(1e-3*Io))
 
-        ax.plot(1e3*t, 1e-3*(Ic-Ivs_o), '-', color='C0',
+        ax.plot(1e3*t, 1e-3*(It-Ivs_o), '-', color='C0',
                 label=r'$\Delta I$')
         ax.plot(1e3*tfit, 1e-3*Ifit, 'C1-.', label='exp fit '+txt_d)
         ax.plot(1e3*t, 1e-3*(Ivs_o + Ifit), 'C4-.',
@@ -312,8 +312,8 @@ if __name__ is '__main__':
         # print('tau_o', 1e3*tau, 'ms')
         # print('tau', 1e3*tdis, 'ms')
 
-        max_index = np.argmax(abs(Ic))
-        print('Ivs3 max {:1.1f}kA'.format(1e-3*Ic[max_index]))
+        max_index = np.argmax(abs(It))
+        print('Ivs3 max {:1.1f}kA'.format(1e-3*It[max_index]))
         '''
 
         plt.figure(figsize=(8, 10))

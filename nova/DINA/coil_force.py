@@ -22,6 +22,7 @@ from nep.DINA.capacitor_discharge import power_supply
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
 import nep
 from amigo.IO import class_dir
+from nep.DINA.read_eqdsk import read_eqdsk
 
 
 class coil_force(pythonIO):
@@ -41,8 +42,10 @@ class coil_force(pythonIO):
                             read_txt=read_txt)  # load currents
         self.ps = power_supply(nturn=nturn, Ip_scale=self.Ip_scale,
                                read_txt=read_txt)
+        '''
         self.allowable = stress_allowable()  # load allowable interpolators
         pythonIO.__init__(self)  # python read/write
+        '''
 
     def postscript(self):
         if self.vessel:
@@ -66,21 +69,29 @@ class coil_force(pythonIO):
         self.name = split(split(filepath)[0])[-1]
         filepath = join(split(filepath)[0], 'coil_force')
         filepath += self.postscript()
-        self.tor.load_file(scenario)  # read toroidal strucutres
+        self.tor.load_file(scenario, read_txt=read_txt)
         self.t = self.tor.t
         self.pf = self.tor.pf  # link pf instance
         if read_txt or not isfile(filepath + '.pk'):
             self.read_file(scenario)  # read txt file
-            self.save_pickle(filepath, ['Ivs3_fun'])
+            self.save_pickle(filepath, ['Ivs3_fun', 'vs_geom', 'pf', 'ff',
+                                        'xlim', 'zlim'])
         else:
             self.load_pickle(filepath)
-        self.vs_geom = VSgeom()  # load vs geometory
-        self.add_vv_coils()  # add local vessel, trs and VS3 coils
-        self.set_force_field()  # initalise force_field object
-        self.grid_sf()
+            self.tor.pf = self.pf  # link pf instance
+            self.ff.coilset = self.pf.coilset
+        self.grid_sf(n=1e4, limit=[3.5, 10, -8.5, 8.5])
 
     def read_file(self, scenario):
         self.load_ps(scenario)  # load vs currents
+        self.vs_geom = VSgeom()  # load vs geometory
+        self.add_vv_coils()  # add local vessel, trs and VS3 coils
+        self.set_force_field()  # initalise force_field object
+        self.load_first_wall()
+
+    def load_first_wall(self):
+        eqdsk = read_eqdsk(file='burn').eqdsk
+        self.xlim, self.zlim = eqdsk['xlim'], eqdsk['zlim']
 
     def add_vv_coils(self):
         coilset = self.ps.vv.pf.coilset
@@ -109,6 +120,8 @@ class coil_force(pythonIO):
                 self.pf.remove_coil('vv_{}'.format(vv_index))
 
     def load_ps(self, scenario, **kwargs):
+        if isinstance(scenario, str):
+            scenario = self.dina.folders.index(scenario)
         if scenario != -1:
             self.pl.load_file(scenario)
             trip = self.pl.get_vs3_trip()  # get distuption direction
@@ -175,16 +188,21 @@ class coil_force(pythonIO):
         self.tor.set_current(frame_index)  # update coil currents and plasma
         self.vs3_update()  # update vs3 coil currents
         # pass to ff object
-        self.ff.coilset['plasma_coil'] = self.tor.coilset['PF']['plasma_coil']
+        self.ff.coilset['plasma'] = self.tor.coilset['PF']['plasma']
 
-    def contour(self, plot=True, **kwargs):
+    def contour(self, plot=True, ax=None, **kwargs):
         self.psi = cc.get_coil_psi(self.x2d, self.z2d,
                                    self.pf.coilset['subcoil'],
-                                   self.pf.coilset['plasma_coil'])
-        self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi})
+                                   self.pf.coilset['plasma'])
+        self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi,
+                            'fw_limit': True,
+                            'xlim': self.xlim, 'zlim': self.zlim})
         if plot:
-            levels = self.sf.contour(41, boundary=False, Xnorm=False,
+            if ax is None:
+                ax = plt.subplots(1, 1, figsize=(8, 10))[1]
+            levels = self.sf.contour(boundary=True, Xnorm=True, ax=ax,
                                      **kwargs)
+            self.sf.plot_firstwall()
             return levels
 
     def get_frames(self, nframe):
@@ -546,6 +564,7 @@ class coil_force(pythonIO):
         file = list(coil_data.keys())[file_index]
         vs3 = coil_data[file]
         Imax_index = np.nanargmax(abs(vs3[mode]['I']))
+        Fmax_index = np.nanargmax(abs(vs3[mode]['I']))
         t_max = vs3[mode]['t'][Imax_index]
         I_max = vs3[mode]['I'][Imax_index]
         frame_index_max = vs3[mode]['frame_index'][Imax_index]
@@ -652,7 +671,7 @@ class coil_force(pythonIO):
 
 if __name__ == '__main__':
 
-    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=12.5/15,
+    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=15/15,
                        read_txt=False)
     '''
     force.load_file(4, read_txt=False)
@@ -664,17 +683,18 @@ if __name__ == '__main__':
     plt.figure(figsize=(7, 10))
     force.pf.initalize_collection()
     force.pf.patch_coil(force.pf.coil)
-    force.pf.patch_coil(force.pf.plasma_coil)
+    force.pf.patch_coil(force.pf.plasma)
     force.pf.plot_patch(c='Jc', clim=[-10, 10])
     plt.axis('equal')
     plt.axis('off')
     '''
 
-    # force.load_file(4, read_txt=False)
+    #force.load_file(0)
 
-    force.read_data(nframe=500, forcewrite=True)
+    # force.read_data(nframe=500, forcewrite=True)
     # plt.set_context('notebook')
-    # force.plot_Fmax(nframe=500)
+    force.plot_Fmax(nframe=500)
+
 
 
 

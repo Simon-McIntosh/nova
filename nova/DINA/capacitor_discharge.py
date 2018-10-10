@@ -410,12 +410,13 @@ class power_supply:
 
     def reduce(self, ncoil):
         # store referance profile
-        referance = {'t': np.copy(self.data['t']),
-                     'Ic': np.copy(self.data['Ivec'][:, 0])}
-        referance['fun'] = interp1d(referance['t'], referance['Ic'])
-        referance['to'] = np.linspace(referance['t'][0],
-                                      referance['t'][-1], 150)
-        referance['Ico'] = referance['fun'](referance['to'])
+        self.referance = {'t': np.copy(self.data['t']),
+                          'Ic': np.copy(self.data['Ivec'][:, 0])}
+        self.referance['fun'] = interp1d(self.referance['t'],
+                                         self.referance['Ic'])
+        self.referance['to'] = np.linspace(self.referance['t'][0],
+                                           self.referance['t'][-1], 150)
+        self.referance['Ico'] = self.referance['fun'](self.referance['to'])
 
         self.ncoil = ncoil
         self.M = self.M[:self.ncoil, :self.ncoil]
@@ -423,13 +424,16 @@ class power_supply:
         self.C = self.C[:self.ncoil]
 
         # self-inductance, mutual, resistance
-        xo = [0.00198368, 0.00115038, 0.025]
-        res = minimize(self.fit, xo, args=(referance), method='L-BFGS-B',
-                       options={'ftol':0.005})
-        print(res)
+        xo = [0.002, 0.5, 5]
 
+        res = minimize(self.fit, xo, method='L-BFGS-B',
+                       options={'ftol':0.005})
+
+        print(res)
+        ps.fit(res.x, plot=True)
+        '''
         ax = plt.subplots(1, 1)[1]
-        ax.plot(1e3*referance['t'], 1e-3*referance['Ic'], '-C0',
+        ax.plot(1e3*self.referance['t'], 1e-3*self.referance['Ic'], '-C0',
                 label='VS3 referance')
         ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 0], '-C3',
                 label='VS3 reduced model')
@@ -439,22 +443,28 @@ class power_supply:
         ax.set_ylabel('$I$ kA')
         plt.despine()
         plt.legend()
+        '''
 
-    def fit(self, x, *args):
+    def fit(self, x, plot=False):
         self.M[1, 1] = x[0]  # secondary coil self inductance
-        self.M[0, 1] = x[1]  # cross-inductance
+        self.M[0, 1] = x[1]*x[0]  # cross-inductance
         self.M[1, 0] = self.M[0, 1]  # symetric
         self.Minv = np.linalg.inv(self.M)  # inverse
-        self.R[1] = x[2]  # secondary coil resistance
-        referance = args[0]  # referance primary current timeseries
+        self.R[1] = x[0]/x[2]  # secondary coil resistance
         self.initalize()
-        self.intergrate(referance['to'][-1])
+        self.intergrate(self.referance['to'][-1])
         self.formatdata()
-        Io = interp1d(self.data['t'], self.data['Ivec'][:, 0],
-                      bounds_error=False,
-                      fill_value=(self.data['Ivec'][0, 0],
-                                  self.data['Ivec'][-1, 0]))(referance['to'])
-        err = 1e-3*np.sqrt(np.mean((Io-referance['Ico'])**2))
+        Io = interp1d(
+                self.data['t'], self.data['Ivec'][:, 0],
+                bounds_error=False,
+                fill_value=(self.data['Ivec'][0, 0],
+                            self.data['Ivec'][-1, 0]))(self.referance['to'])
+        err = 1e-3*np.sqrt(np.mean((Io-self.referance['Ico'])**2))
+
+        if plot:
+            plt.plot(1e3*self.referance['to'], 1e-3*self.referance['Ico'])
+            plt.plot(1e3*self.referance['to'], 1e-3*Io, 'C3')
+            plt.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 1], 'C7')
         print(err, x)
         return err
 
@@ -464,11 +474,9 @@ if __name__ == '__main__':
     ps = power_supply(nturn=4, vessel=True, scenario=-1, code='Nova',
                       Ip_scale=15/15, read_txt=False)
 
-    plt.set_context('talk')
+    # plt.set_context('talk')
     ps.solve(Io=0, sign=-1, t_pulse=0.0, origin='peak',
              impulse=True, plot=True)
-
-
 
     ps.reduce(2)
 

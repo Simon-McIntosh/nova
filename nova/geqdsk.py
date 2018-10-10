@@ -154,22 +154,22 @@ def read(f):
     try:
         ncoil = int(next(token))
     except:
-        ncoil, xc, zc, dxc, dzc, Ic = 0, 0, 0, 0, 0, 0
+        ncoil, xc, zc, dxc, dzc, It = 0, 0, 0, 0, 0, 0
 
     if ncoil > 0:
         xc = np.zeros(ncoil)
         zc = np.zeros(ncoil)
         dxc = np.zeros(ncoil)
         dzc = np.zeros(ncoil)
-        Ic = np.zeros(ncoil)
+        It = np.zeros(ncoil)
         for i in range(ncoil):
             xc[i] = float(next(token))
             zc[i] = float(next(token))
             dxc[i] = float(next(token))
             dzc[i] = float(next(token))
-            Ic[i] = float(next(token))
+            It[i] = float(next(token))
     else:
-        xc, zc, dxc, dzc, Ic = 0, 0, 0, 0, 0
+        xc, zc, dxc, dzc, It = 0, 0, 0, 0, 0
     # Construct X-Z mesh
     x = np.zeros(nxefit)
     z = np.zeros(nzefit)
@@ -208,7 +208,7 @@ def read(f):
               'nbdry': nbdry, 'xbdry': xbdry, 'zbdry': zbdry,
               'nlim': nlim, 'xlim': xlim, 'zlim': zlim,
               'ncoil': ncoil, 'xc': xc, 'zc': zc, 'dxc': dxc,
-              'dzc': dzc, 'Ic': Ic}  # coils
+              'dzc': dzc, 'It': It}  # coils
     return result
 
 
@@ -268,6 +268,6 @@ def write(f, data):  # write a G-EQDSK file
 
     f.write('{:5d}\n'.format(data['ncoil']))
     coil = np.zeros(5 * data['ncoil'])
-    for i, v in enumerate(['xc', 'zc', 'dxc', 'dzc', 'Ic']):
+    for i, v in enumerate(['xc', 'zc', 'dxc', 'dzc', 'It']):
         coil[i::5] = data[v]
     write_array(f, coil, c)

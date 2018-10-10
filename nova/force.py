@@ -41,10 +41,12 @@ class force_field(object):
             raise ValueError(errtxt)
 
     def initalize_force_field(self, multi_filament=True, **kwargs):
-        if 'Fa' in self.coilset and 'Fp' in self.coilset:
+        if 'force' not in self.coilset:
+            self.coilset['force'] = {}
+        if 'Fa' in self.coilset['force'] and 'Fp' in self.coilset['force']:
             self.force_field_active = True
-            self.Fa = self.coilset['Fa']
-            self.Fp = self.coilset['Fp']
+            self.Fa = self.coilset['force']['Fa']
+            self.Fp = self.coilset['force']['Fp']
             nC = np.shape(self.Fa)[0]
             if nC != self.nC:
                 err_txt = 'active coil force matrix shape {}\n'.format(nC)
@@ -66,7 +68,7 @@ class force_field(object):
         self.Fa = np.zeros((self.nC, self.nC, 2))  # active
         for i, sink in enumerate(self.active_coils):
             for j, source in enumerate(self.active_coils):
-                xG = cc.Gtorque(self.coilset['subcoil'], self.coilset['coil'],
+                xG = cc.Gtorque(self.coilset['coil'], self.coilset['subcoil'],
                                 source, sink, multi_filament) * self.Iscale**2
                 self.Fa[i, j, 0] = 2 * np.pi * cc.mu_o * xG[1]  # cross product
                 self.Fa[i, j, 1] = -2 * np.pi * cc.mu_o * xG[0]
@@ -74,8 +76,8 @@ class force_field(object):
     def set_passive_force_field(self):
         self.Fp = np.zeros((self.nC, 2))  # passive
         for i, sink in enumerate(self.active_coils):
-            xB = cc.Btorque(self.coilset['subcoil'],
-                            self.coilset['plasma_coil'],
+            xB = cc.Btorque(self.coilset['coil'], self.coilset['subcoil'],
+                            self.coilset['plasma'],
                             self.passive_coils, sink) * self.Iscale
             self.Fp[i, 0] = 2 * np.pi * cc.mu_o * xB[1]  # cross product
             self.Fp[i, 1] = -2 * np.pi * cc.mu_o * xB[0]
@@ -120,23 +122,21 @@ class force_field(object):
             Fcoil['CS']['sep'] = np.max(Fsep)
         Fcoil['CS']['zsum'] = np.sum(FzCS)
         self.Fcoil = Fcoil
-        return self.Fcoil
 
     def set_current(self):  # set subcoil current vector from pf
-        self.Ic = np.zeros(self.nC)
+        self.If = np.zeros(self.nC)
         for i, name in enumerate(self.active_coils):
-            Nfilament = self.coilset['subcoil'][name + '_0']['Nf']
-            # store current
-            self.Ic[i] = self.coilset['coil'][name]['Ic'] / Nfilament
-        self.Ic /= self.Iscale  # convert current unit (MA if Iscale=1e6)
-        return self.Ic
+            Nf = self.coilset['coil'][name]['Nf']
+            self.If[i] = self.coilset['coil'][name]['It'] / Nf
+        self.If /= self.Iscale  # convert current unit (MA if Iscale=1e6)
+        return self.If
 
     def plot(self, coils=['PF', 'CS'], scale=2, Fvector=['Fo'],
              **kwargs):
         # vector = 'Fo', 'Fx', 'Fz' or combination
         fs = matplotlib.rcParams['legend.fontsize']
         if not hasattr(self, 'F'):
-            self.set_force(self.Ic)
+            self.set_force(self.If)
         if 'Fmax' in kwargs:
             Fmax = kwargs['Fmax']
         else:
@@ -253,20 +253,17 @@ if __name__ is '__main__':  # test functions
     from nova.streamfunction import SF
     from nova.elliptic import EQ
     from nova.coils import PF
-    from nova.radial_build import RB
 
     setup = Setup('SN_3PF_18TF')
 
-    sf = SF(setup.filename)
+    sf = SF(filename=setup.filename)
     pf = PF(sf.eqdsk)
-    rb = RB(sf, setup)
-    eq = EQ(sf, pf, dCoil=0.75, sigma=0,
-            boundary=sf.get_sep(expand=0.25), n=1e3)
+    eq = EQ(pf.coilset, sf.eqdsk, dCoil=0.75, sigma=0,
+            boundary=sf.eq_boundary(expand=0.25), n=5e3)
     eq.get_plasma_coil()
     # eq.gen_opp()
 
-    ff = force_field(pf.index, pf.coil, pf.subcoil, pf.plasma_coil,
-                     multi_filament=True)
+    ff = force_field(pf.coilset, multi_filament=True)
     Fcoil = ff.get_force()
 
     ff.plot()

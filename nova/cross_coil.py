@@ -37,14 +37,14 @@ def green_field(X, Z, Xc, Zc):
 
 
 def add_Pcoil(x, z, coil):
-    xc, zc, Ic = coil['x'], coil['z'], coil['Ic']
+    xc, zc, If = coil['x'], coil['z'], coil['If']
     dx, dz = coil['dx'], coil['dz']
-    return mu_o * Ic * green(x, z, xc, zc, dXc=dx, dZc=dz)
+    return mu_o * If * green(x, z, xc, zc, dXc=dx, dZc=dz)
 
 
 def add_Bcoil(x, z, coil):
-    xc, zc, Ic = coil['x'], coil['z'], coil['Ic']
-    return mu_o * Ic * green_field(x, z, xc, zc)
+    xc, zc, If = coil['x'], coil['z'], coil['If']
+    return mu_o * If * green_field(x, z, xc, zc)
 
 
 def get_plasma_coil(coilset, **kwargs):
@@ -225,24 +225,30 @@ def get_green_field(x, z, xi, zi, rc):
     return dfield
 
 
-def Gtorque(eq_coil, pf_coil, source, sink, multi_filament):  # source-sink
+def Gtorque(coil, subcoil, source, sink, multi_filament):  # source-sink
+
     if multi_filament:
-        coil = eq_coil
         Nbundle = 1
-        Nsource = coil[source + '_0']['Nf']
-        Nsink = coil[sink + '_0']['Nf']
+        Nsource = coil[source]['Nf']
+        Nsink = coil[sink]['Nf']
+        coil = subcoil
 
-        def name_source(i): return source + '_{:1.0f}'.format(i)
+        def name_source(i):
+            return source + '_{:1.0f}'.format(i)
 
-        def name_sink(j): return sink + '_{:1.0f}'.format(j)
+        def name_sink(j):
+            return sink + '_{:1.0f}'.format(j)
+
     else:  # single-filament
-        coil = pf_coil
-        Nbundle = eq_coil[source + '_0']['Nf'] * eq_coil[sink + '_0']['Nf']
+        Nbundle = coil[source]['Nf'] * coil[sink]['Nf']
         Nsource, Nsink = 1, 1
 
-        def name_source(i): return source
+        def name_source(i):
+            return source
 
-        def name_sink(j): return sink
+        def name_sink(j):
+            return sink
+
     field = np.zeros(2)
     for i in range(Nsource):
         source_strand = name_source(i)  # source
@@ -258,9 +264,9 @@ def Gtorque(eq_coil, pf_coil, source, sink, multi_filament):  # source-sink
     return field
 
 
-def Btorque(subcoil, plasma_coil, passive_coils, sink):
+def Btorque(coil, subcoil, plasma_coil, passive_coils, sink):
     Csink = subcoil
-    Nsink = Csink[sink + '_0']['Nf']
+    Nsink = coil[sink]['Nf']
     field = np.zeros(2)
     for source in passive_coils:
         if source == 'Plasma':
@@ -268,12 +274,12 @@ def Btorque(subcoil, plasma_coil, passive_coils, sink):
             Nsource = len(Csource)
         else:
             Csource = subcoil
-            Nsource = Csource[source + '_0']['Nf']
+            Nsource = coil[source]['Nf']
         for i in range(Nsource):
             source_strand = source + '_{:1.0f}'.format(i)
             xi = Csource[source_strand]['x']  # source
             zi = Csource[source_strand]['z']
-            Ii = Csource[source_strand]['Ic']
+            Ii = Csource[source_strand]['If']
             for j in range(Nsink):
                 sink_strand = sink + '_{:1.0f}'.format(j)
                 x = Csink[sink_strand]['x']  # sink

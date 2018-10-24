@@ -15,6 +15,7 @@ import nep
 from amigo.png_tools import data_load
 from amigo.IO import class_dir
 from scipy.optimize import minimize
+from nep.DINA.read_dina import timeconstant
 
 
 class power_supply:
@@ -408,14 +409,14 @@ class power_supply:
         plt.plot(1e3*td, -1e-3*Id, '--')
         plt.xlim([0, 80])
 
-    def reduce(self, ncoil):
+    def set_referance(self, ncoil=2):
         # store referance profile
         self.referance = {'t': np.copy(self.data['t']),
                           'Ic': np.copy(self.data['Ivec'][:, 0])}
         self.referance['fun'] = interp1d(self.referance['t'],
                                          self.referance['Ic'])
         self.referance['to'] = np.linspace(self.referance['t'][0],
-                                           self.referance['t'][-1], 150)
+                                           self.referance['t'][-1], 350)
         self.referance['Ico'] = self.referance['fun'](self.referance['to'])
 
         self.ncoil = ncoil
@@ -423,11 +424,17 @@ class power_supply:
         self.R = self.R[:self.ncoil]
         self.C = self.C[:self.ncoil]
 
+    def reduce(self):
         # self-inductance, mutual, resistance
-        xo = [0.002, 0.5, 5]
+        if self.ncoil == 2:
+            xo = [6.26306679e-05, 0.722, 5.97155991e-04]
+        elif self.ncoil == 3:
+            xo = [2.49423821e-04, 3.42989379e-05, 5.57050300e-01,
+                  1.00965866e-01, 5.72307931e-01, 1.13850869e-03,
+                  1.19446487e-03]
 
-        res = minimize(self.fit, xo, method='L-BFGS-B',
-                       options={'ftol':0.005})
+        res = minimize(self.fit, xo, method='Nelder-Mead',
+                       options={'fatol': 0.01})
 
         print(res)
         ps.fit(res.x, plot=True)
@@ -446,29 +453,53 @@ class power_supply:
         '''
 
     def fit(self, x, plot=False):
-        self.M[1, 1] = x[0]  # secondary coil self inductance
-        self.M[0, 1] = x[1]*x[0]  # cross-inductance
-        self.M[1, 0] = self.M[0, 1]  # symetric
+        x = abs(x)  # insure positive input
+        if len(x) == 3:
+            x[1:2][x[1:2] > 0.99] = 0.99
+            self.M[1, 1] = x[0]  # secondary coil self inductance
+            # cross-inductance
+            self.M[0, 1] = x[1]*np.sqrt(self.M[0, 0] * self.M[1, 1])
+            self.M[1, 0] = self.M[0, 1]  # symetric
+            self.R[1] = x[2]  # secondary coil resistance
+        elif len(x) == 7:
+            x[2:5][x[2:5] > 0.95] = 0.95
+            self.M[1, 1] = x[0]
+            self.M[2, 2] = x[1]
+            self.M[0, 1] = x[2]*np.sqrt(self.M[0, 0] * self.M[1, 1])
+            self.M[1, 0] = self.M[0, 1]  # symetric
+            self.M[1, 2] = x[3]*np.sqrt(self.M[1, 1] * self.M[2, 2])
+            self.M[2, 1] = self.M[1, 2]  # symetric
+            self.M[0, 2] = x[4]*np.sqrt(self.M[0, 0] * self.M[2, 2])
+            self.M[2, 0] = self.M[0, 2]  # symetric
+            self.R[1:] = x[5:]  # secondary coil resistance
         self.Minv = np.linalg.inv(self.M)  # inverse
-        self.R[1] = x[0]/x[2]  # secondary coil resistance
         self.initalize()
         self.intergrate(self.referance['to'][-1])
         self.formatdata()
-        Io = interp1d(
+        self.referance['Ifit'] = interp1d(
                 self.data['t'], self.data['Ivec'][:, 0],
                 bounds_error=False,
                 fill_value=(self.data['Ivec'][0, 0],
                             self.data['Ivec'][-1, 0]))(self.referance['to'])
-        err = 1e-3*np.sqrt(np.mean((Io-self.referance['Ico'])**2))
+        err = 1e-3*np.sqrt(np.mean((self.referance['Ifit'] -
+                                    self.referance['Ico'])**2))
 
         if plot:
-            plt.plot(1e3*self.referance['to'], 1e-3*self.referance['Ico'])
-            plt.plot(1e3*self.referance['to'], 1e-3*Io, 'C3')
-            plt.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 1], 'C7')
+            plt.figure()
+            plt.plot(1e3*self.referance['to'], 1e-3*self.referance['Ico'],
+                     label='referance')
+            plt.plot(1e3*self.referance['to'],
+                     1e-3*self.referance['Ifit'], 'C3', label='fit')
+            for i in range(self.ncoil-1):
+                plt.plot(1e3*self.data['t'],
+                         1e-3*self.data['Ivec'][:, i+1], 'C7',
+                         label=f'dummy {i+1}')
+            plt.xlabel('$t$ ms')
+            plt.ylabel('$I$ kA')
+            plt.despine()
+            plt.legend()
         print(err, x)
         return err
-
-
 
 if __name__ == '__main__':
     ps = power_supply(nturn=4, vessel=True, scenario=-1, code='Nova',
@@ -478,7 +509,29 @@ if __name__ == '__main__':
     ps.solve(Io=0, sign=-1, t_pulse=0.0, origin='peak',
              impulse=True, plot=True)
 
-    ps.reduce(2)
+    ps.set_referance(ncoil=2)
+    #ps.reduce()
+
+    if ps.ncoil == 2:
+        x = np.array([5.09661450e-05, 7.28185583e-01, 6.66816036e-04])  # impulse
+        # x = np.array([6.26306679e-05, 7.22409337e-01, 5.97155991e-04])  # discharge
+    elif ps.ncoil == 3:
+        x = np.array([ 2.49423821e-04, 3.42989379e-05, 5.57050300e-01,
+                      1.00965866e-01, 5.72307931e-01, 1.13850869e-03,
+                      1.19446487e-03])
+
+    ps.fit(x, plot=True)
+
+    tc = timeconstant(ps.referance['to'], ps.referance['Ifit'],
+                      trim_fraction=0.2)
+    tau = tc.nfit(ps.ncoil, trim_fraction=0, plot=True)[1]
+    print(tau*1e3)
+
+    R = np.dot(np.ones((ps.ncoil, 1)), ps.R.reshape((1, -1)))
+    tau = np.linalg.eigvals(ps.M/R)
+    print(tau*1e3)
+
+
 
 
 

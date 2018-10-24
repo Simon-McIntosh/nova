@@ -22,8 +22,9 @@ class timeconstant:
         self.trim_fraction = kwargs.get('trim_fraction', self.trim_fraction)
         if self.trim_fraction > 0 and self.trim_fraction < 1\
                 and self.Id[0] != 0:
+            dI = abs(self.Id[0] - self.Id[-1])
             i1 = next((i for i, Id in enumerate(self.Id)
-                       if abs(Id) < self.trim_fraction*abs(self.Id[0])))
+                       if abs(Id) < self.Id[0] - (1-self.trim_fraction)*dI))
             td, Id = self.td[:i1], self.Id[:i1]
         else:
             td, Id = self.td, self.Id

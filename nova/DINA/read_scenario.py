@@ -123,11 +123,24 @@ class read_scenario(pythonIO):
         flux_factor = kwargs.get('flux_factor', 1)
         flux = (flux_factor - 1) * self.flattop['dpsi'] / (2*np.pi)
         kwargs.pop('flux_factor', None)
+        plasma_factor = kwargs.get('plasma_factor', 1)
+        kwargs.pop('plasma_factor', None)
         for key in kwargs:
             self.inv.set_limit(**dict([[key, kwargs[key]]]), side='equal')
         rms = self.inv.solve_slsqp(flux)
+        if plasma_factor != 1:
+            self.scale_plasma_current(plasma_factor)
+        Ipl = self.coilset[self.setname]['plasma_parameters']['Ipl']
         self.ff.get_force()
-        return rms
+        return rms, Ipl
+
+    def scale_plasma_current(self, factor):
+        Ipl = self.checkpoint['coilset']['plasma_parameters']['Ipl']
+        self.coilset[self.setname]['plasma_parameters']['Ipl'] = Ipl*factor
+        for filament in self.coilset[self.setname]['plasma']:
+            self.coilset[self.setname]['plasma'][filament]['If'] = Ipl*factor
+        self.inv.update_plasma_coil()
+        self.ff.set_force_field(state='passive')
 
     def read_txt_file(self, folder, dropnan=True, force=False):
         filename = self.dina.locate_file('data2.txt', folder=folder)
@@ -422,7 +435,9 @@ class read_scenario(pythonIO):
                 It[name] *= self.pf.coilset['coil'][name]['Nt']
         return It  # return dict of coil currents
 
-    def update_DINA(self, t):  # update from DINA interpolators
+    def update_DINA(self, t=None):  # update from DINA interpolators
+        if t is None:
+            t = self.flattop['t'][-1]  # eof
         self.to = t  # referance time
         self.set_coil_current(t)
         self.set_plasma(t)
@@ -430,13 +445,13 @@ class read_scenario(pythonIO):
         self.ff.get_force()
 
     def set_checkpoint(self):
-        checkpoint = {'name': self.name, 'setname': self.setname,
-                      'to': self.to, 'Xpsi': self.inv.sf.Xpsi,
-                      'coilset': copy.deepcopy(self.coilset[self.setname]),
-                      'fix': copy.deepcopy(self.inv.fix),
-                      'limit': copy.deepcopy(self.inv.limit),
-                      'Fcoil': copy.deepcopy(self.ff.Fcoil)}
-        return checkpoint
+        self.checkpoint = {
+                'name': self.name, 'setname': self.setname,
+                'to': self.to, 'Xpsi': self.inv.sf.Xpsi,
+                'coilset': copy.deepcopy(self.coilset[self.setname]),
+                'fix': copy.deepcopy(self.inv.fix),
+                'limit': copy.deepcopy(self.inv.limit),
+                'Fcoil': copy.deepcopy(self.ff.Fcoil)}
 
     def update_coilset(self):  # synchronize coilset currents
         plasma = self.coilset[self.setname]['plasma']
@@ -519,9 +534,10 @@ class read_scenario(pythonIO):
         Ipl = 1e6*self.fun['Ip'](t)
         beta = self.fun['BETAp'](t)
         li = self.fun['li(3)'](t)
-        self.coilset[self.setname]['plasma_parameters'] =\
-            {'Ipl': Ipl, 'xcur': x, 'zcur': z, 'a': apl, 'kappa': kpl,
-             'beta': beta, 'li': li}
+        plasma_parameters = {'Ipl': Ipl, 'xcur': x, 'zcur': z, 'a': apl,
+                             'kappa': kpl, 'beta': beta, 'li': li}
+        for name in self.coilset:
+            self.coilset[name]['plasma_parameters'] = plasma_parameters
         ###
         # eq update here
         ###
@@ -731,19 +747,29 @@ if __name__ is '__main__':
 
     scn = read_scenario(read_txt=False)
 
-    #scn.load_file(folder='15MA H-DINA2018-04')
+    scn.load_file(folder='15MA DT-DINA2017-04_v1.2')
+    scn.update_DINA()
 
-    for folder in scn.dina.folders[1:]:
-        scn.load_file(folder=folder, read_txt=True)
+    scn.update_psi(n=5e3, plot=True)
 
-    #scn.load_file(folder='15MA H-DINA2018-04')
-    #scn.load_plasma(frame_index=100, plot=True)
+    for name in scn.pf.coilset['coil']:
+        print(name, scn.pf.coilset['coil'][name]['It'])
 
+    scn.load_functions('link')
+
+    # print(scn.pf.coilset['subcoil'])
+
+    for name in scn.pf.coilset['coil']:
+        print(name, scn.pf.coilset['coil'][name]['It'])
+
+    # scn.update_psi(n=5e3, plot=True)
+
+
+
+    # scn.load_plasma(frame_index=100, plot=True)
     # scn.plot_currents()
-
     #scn.hip.plot_timeseries()
     #scn.hip.plot_peaks()
-
     # scn.load_VS3(n=100, plot=True)
 
     '''

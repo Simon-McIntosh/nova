@@ -56,7 +56,7 @@ class power_supply:
             self.ind.add_cp([nvs_o, index])  # link VS coils
         if self.vessel:
             nvs_o = self.ind.nC
-            jacket = list(coilset['subcoil'].items())[8:16]
+            jacket = list(coilset['coil'].items())[2:10]
             R = np.array([turn[1]['R'] for turn in jacket])
             Rlower = 1 / (np.sum(1/R[:4]))
             Rupper = 1 / (np.sum(1/R[4:]))
@@ -71,7 +71,7 @@ class power_supply:
             for index in nvs_o+4+np.arange(1, 4):
                 self.ind.add_cp([nvs_o+4, index])  # upper jacket coils
             # add vv coils
-            vv_coils = list(coilset['subcoil'].items())[16:]
+            vv_coils = list(coilset['coil'].items())[10:]
             self.ind.add_pf_coil(OrderedDict(vv_coils))
         self.ind.reduce()
         self.ncoil = self.ind.nd['nr']  # number of retained coils
@@ -512,6 +512,8 @@ if __name__ == '__main__':
     ps.set_referance(ncoil=2)
     #ps.reduce()
 
+
+    '''
     if ps.ncoil == 2:
         x = np.array([5.09661450e-05, 7.28185583e-01, 6.66816036e-04])  # impulse
         # x = np.array([6.26306679e-05, 7.22409337e-01, 5.97155991e-04])  # discharge
@@ -523,13 +525,14 @@ if __name__ == '__main__':
     ps.fit(x, plot=True)
 
     tc = timeconstant(ps.referance['to'], ps.referance['Ifit'],
-                      trim_fraction=0.2)
+                      trim_fraction=0.8)
     tau = tc.nfit(ps.ncoil, trim_fraction=0, plot=True)[1]
     print(tau*1e3)
 
     R = np.dot(np.ones((ps.ncoil, 1)), ps.R.reshape((1, -1)))
     tau = np.linalg.eigvals(ps.M/R)
     print(tau*1e3)
+    '''
 
 
 

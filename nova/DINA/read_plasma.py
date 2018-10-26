@@ -8,7 +8,7 @@ import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 from collections import OrderedDict
 from amigo.png_tools import data_load
-import nep
+import nep_data
 from amigo.IO import class_dir, pythonIO
 import os
 from os.path import sep, isfile
@@ -405,7 +405,7 @@ if __name__ == '__main__':
     plt.figure()
     # plt.plot(pl.t, pl.Ivs3_o)
     # plt.plot(pl.t, pl.Ivs3_ode)
-    path = os.path.join(class_dir(nep), '../Data/LTC/')
+    path = os.path.join(class_dir(nep_data), 'LTC/')
     points = data_load(path, 'VS3_current', date='2018_03_15')[0]
     # points = data_load(path, 'VS3_current_VDE', date='2018_05_24')[0]
 

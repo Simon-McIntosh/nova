@@ -69,7 +69,7 @@ class coil_force(pythonIO):
         self.name = split(split(filepath)[0])[-1]
         filepath = join(split(filepath)[0], 'coil_force')
         filepath += self.postscript()
-        self.tor.load_file(scenario, read_txt=read_txt)
+        self.tor.load_file(scenario, read_txt=self.read_txt)
         self.t = self.tor.t
         self.pf = self.tor.pf  # link pf instance
         if read_txt or not isfile(filepath + '.pk'):
@@ -158,6 +158,7 @@ class coil_force(pythonIO):
     def vs3_update(self, **kwargs):  # update vs3 coil and structure
         self.mode = kwargs.get('mode', self.mode)
         Ivs3 = self.Ivs3_fun[self.mode](self.t_index)  # current vector
+        print('Ivs3', Ivs3[0])
         self.set_vs3_current(Ivs3[0])  # vs3 coil current
         coil_list = list(self.ps.vv.pf.coilset['coil'].keys())
         if self.vessel:  # set jacket, vv and trs currents
@@ -195,7 +196,7 @@ class coil_force(pythonIO):
                                    self.pf.coilset['subcoil'],
                                    self.pf.coilset['plasma'])
         self.sf = SF(eqdsk={'x': self.x, 'z': self.z, 'psi': self.psi,
-                            'fw_limit': True,
+                            'fw_limit': False,
                             'xlim': self.xlim, 'zlim': self.zlim})
         if plot:
             if ax is None:
@@ -671,10 +672,14 @@ class coil_force(pythonIO):
 
 if __name__ == '__main__':
 
-    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=15/15,
+    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=12.5/15,
                        read_txt=False)
+
+    for folder in force.dina.folders:
+        print(folder)
+        force.load_file(folder, read_txt=True)
+
     '''
-    force.load_file(4, read_txt=False)
     force.frame_update(251)
     force.plot(subcoil=True, plasma=False, insert=True, contour=True)
     '''
@@ -693,7 +698,7 @@ if __name__ == '__main__':
 
     # force.read_data(nframe=500, forcewrite=True)
     # plt.set_context('notebook')
-    force.plot_Fmax(nframe=500)
+    # force.plot_Fmax(nframe=500)
 
 
 

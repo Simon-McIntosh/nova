@@ -24,9 +24,11 @@ from nova.streamfunction import SF
 class INV(object):
 
     def __init__(self, coilset, tf=None, Jmax=12.5, offset=0.3, svd=False,
-                 Iscale=1e6, dCoil=None, eqdsk={}, boundary='tf'):
+                 Iscale=1e6, dCoil=None, eqdsk={}, boundary='tf',
+                 set_force=False):
         self.coilset = coilset  # requires update
-        self.ff = force_field(self.coilset)
+        if set_force:
+            self.ff = force_field(self.coilset)
         self.sf = SF(eqdsk=eqdsk)
         self.wsqrt = 1
         self.svd = svd  # coil current singular value decomposition flag
@@ -232,7 +234,7 @@ class INV(object):
         if plot:
             self.plot_coils(plasma=True)
 
-    def update_plasma_coil(self):
+    def update_plasma(self):
         self.clear_plasma()
         self.append_subcoil(self.coilset['plasma'])
 

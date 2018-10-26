@@ -37,7 +37,7 @@ class EQ(object):
         self.coilset = coilset
         self.sf = SF(eqdsk=eqdsk)
         self.resample(sigma=sigma, **kwargs)
-        self.get_plasma_coil()  # plasma coils
+        self.get_plasma()  # plasma coils
         self.select_control_coils()  # identify control coils
 
     def resample(self, sigma=0, **kwargs):  # resample current density
@@ -311,8 +311,8 @@ class EQ(object):
         for i, index in enumerate(self.plasma_index):
             self.b[index] = self.bpl[index] * self.sf.b_scale
 
-    def set_plasma_coil(self):
-        self.plasma_coil = {}
+    def set_plasma(self):
+        self.plasma = {}
         Rp, Zp = np.zeros(self.Nplasma), np.zeros(self.Nplasma)
         Ipl, Np = np.zeros(self.Nplasma), np.zeros(self.Nplasma)
         for index in range(self.Nplasma):
@@ -326,16 +326,16 @@ class EQ(object):
         for x, z, If, n in zip(Rp, Zp, Ipl, Np):
             if n > 0:
                 index += 1
-                self.plasma_coil['Plasma_{:1.0f}'.format(index)] = \
+                self.plasma['Plasma_{:1.0f}'.format(index)] = \
                     {'x': x, 'z': z, 'dx': self.dx * np.sqrt(n),
                      'dz': self.dz * np.sqrt(n),
                      'rc': np.sqrt(n * self.dx**2 + n * self.dz**2) / 2,
                      'If': If, 'index': index}
-        self.coilset['plasma_coil'] = self.plasma_coil
+        self.coilset['plasma'] = self.plasma
 
-    def get_plasma_coil(self):
+    def get_plasma(self):
         self.plasma_core()
-        self.set_plasma_coil()
+        self.set_plasma()
 
     def coreBC(self, update=True):
         self.plasma_core(update=update)
@@ -368,17 +368,11 @@ class EQ(object):
         self.set_eq_psi()
 
         self.coreBC(update=update)
-        self.set_plasma_coil()
+        self.set_plasma()
 
     def set_eq_psi(self):  # set psi from eq
         eqdsk = {'x': self.x, 'z': self.z, 'psi': self.psi, 'Ipl': self.sf.Ipl}
         self.sf.update_eqdsk(eqdsk)  # include boundary update
-
-    def plasma(self):
-        self.resetBC()
-        self.plasma_core()
-        self.edgeBC(external_coils=False)
-        self.psi_plasma = self.solve()
 
     def set_control_current(self, name, **kwargs):  # set filliment currents
         if 'It' in kwargs:
@@ -469,7 +463,7 @@ class EQ(object):
         plt.figure()
         plt.plot(self.dIc)
         plt.figure()
-        # self.set_plasma_coil()  # for independance + Vcoil at start
+        # self.set_plasma()  # for independance + Vcoil at start
         return self.Ic['v']
 
     def PID(self, error, field, i, kp=1.5, ki=0.05):
@@ -509,7 +503,7 @@ class EQ(object):
                     dz_txt = '\nvertical position converged'
                     dz_txt += '< {:1.3f}mm'.format(1e3 * Zerr)
                     print(dz_txt)
-                    self.set_plasma_coil()
+                    self.set_plasma()
                     break
                 else:
                     zt[i + 1] = zt[i] - dz  # Newton's method
@@ -531,19 +525,6 @@ class EQ(object):
             return self.sf.Xerr
         newton(gen_err, ztarget, tol=tol)  # find root
         print('')  # escape line
-
-    def fit(self, inv, N=5):
-        inv.set_foreground()
-        for i in range(N):
-            self.plasma()  # without coils
-
-            inv.set_background()
-            inv.set_target()
-            inv.set_Io()
-            inv.get_weight()
-            # inv.set_force_field(state='both')
-            inv.solve_slsqp()
-            self.run()  # with coils
 
     def GSoper_spline(self):  # apply GS operator
         psi_sp = RBS(self.x, self.z, self.psi)  # construct spline interpolator
@@ -764,25 +745,25 @@ class EQ(object):
             for j in range(self.nz):
                 self.psi[i, j] = self.sf.Ppoint((self.x[i], self.z[j]),
                                                 self.pf,
-                                                plasma_coil=self.plasma_coil)
+                                                plasma=self.plasma)
 
     def set_coil_psi(self):
         psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf,
-                              plasma_coil=self.plasma_coil)
+                              plasma=self.plasma)
         self.sf.set_plasma({'x': self.x, 'z': self.z, 'psi': psi})
         self.get_Xpsi()  # high-res Xpsi
 
     def update_coil_psi(self):
         psi = cc.get_coil_psi(self.x2d, self.z2d, self.pf,
-                              plasma_coil=self.plasma_coil)
+                              plasma=self.plasma)
         self.sf.update_plasma({'x': self.x, 'z': self.z, 'psi': psi})
         self.get_Xpsi()  # high-res Xpsi
 
     def set_plasma_psi(self):
         self.psi = np.zeros(np.shape(self.x2d))
-        for name in self.plasma_coil.keys():
+        for name in self.plasma.keys():
             self.psi += cc.add_Pcoil(self.x2d,
-                                     self.z2d, self.plasma_coil[name])
+                                     self.z2d, self.plasma[name])
         self.sf.update_plasma({'x': self.x, 'z': self.z, 'psi': self.psi})
 
     def plot_psi(self, **kwargs):
@@ -802,15 +783,15 @@ class EQ(object):
     def get_Xpsi(self):
         self.sf.Xpoint = minimize(cc.Bmag, np.array(self.sf.Xpoint),
                                   method='nelder-mead',
-                                  args=(self.pf, self.plasma_coil),
+                                  args=(self.pf, self.plasma),
                                   options={'xtol': 1e-4, 'disp': False}).x
         self.sf.Xpsi = cc.Ppoint(self.sf.Xpoint, self.pf,
-                                 plasma_coil=self.plasma_coil)
+                                 plasma=self.plasma)
 
     def get_Mpsi(self):
         self.sf.Mpoint = minimize(cc.Bmag, np.array(self.sf.Mpoint),
                                   method='nelder-mead',
-                                  args=(self.pf, self.plasma_coil),
+                                  args=(self.pf, self.plasma),
                                   options={'xtol': 1e-4, 'disp': False}).x
         self.sf.Mpsi = cc.Ppoint(self.sf.Mpoint, self.pf,
-                                 plasma_coil=self.plasma_coil)
+                                 plasma=self.plasma)

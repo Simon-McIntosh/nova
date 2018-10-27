@@ -47,44 +47,44 @@ def add_Bcoil(x, z, coil):
     return mu_o * If * green_field(x, z, xc, zc)
 
 
-def get_plasma_coil(coilset, **kwargs):
-    plasma_coil = kwargs.get('plasma_coil', coilset['plasma_coil'])
-    return plasma_coil
+def get_plasma(coilset, **kwargs):
+    plasma = kwargs.get('plasma', coilset['plasma'])
+    return plasma
 
 
 def Ppoint(point, coilset, **kwargs):
-    plasma_coil = get_plasma_coil(coilset, **kwargs)
+    plasma = get_plasma(coilset, **kwargs)
     psi = 0
     for name in coilset['subcoil']:
         psi += add_Pcoil(point[0], point[1], coilset['subcoil'][name])
-    for name in plasma_coil:
-        psi += add_Pcoil(point[0], point[1], plasma_coil[name])
+    for name in plasma:
+        psi += add_Pcoil(point[0], point[1], plasma[name])
     return psi
 
 
 def Bpoint(point, coilset, **kwargs):
-    plasma_coil = get_plasma_coil(coilset, **kwargs)
+    plasma = get_plasma(coilset, **kwargs)
     field = np.zeros(2)
     for name in coilset['subcoil']:
         field += add_Bcoil(point[0], point[1], coilset['subcoil'][name])
-    for name in plasma_coil:
-        field += add_Bcoil(point[0], point[1], plasma_coil[name])
+    for name in plasma:
+        field += add_Bcoil(point[0], point[1], plasma[name])
     return field
 
 
 def Bmag(point, *args):
     pf = args[0]  # pf object
     if len(args) == 2:
-        kwargs = {'plasma_coil': args[1]}  # specify seperate plasma_coil
+        kwargs = {'plasma': args[1]}  # specify seperate plasma
     else:
-        kwargs = {}  # use pf.plasma_coil
+        kwargs = {}  # use pf.plasma
     field = Bpoint(point, pf, **kwargs)
     B = np.sqrt(field[0]**2 + field[1]**2)
     return B
 
 
-def get_coil_psi(x2d, z2d, pf_subcoil, plasma_coil, **kwargs):
-    # plasma_coil = get_plasma_coil(pf, **kwargs)
+def get_coil_psi(x2d, z2d, subcoil, plasma, **kwargs):
+    # plasma = get_plasma(pf, **kwargs)
     set_pf = kwargs.get('set_pf', True)
     set_plasma = kwargs.get('set_plasma', True)
     if len(np.shape(x2d)) > 0:
@@ -92,11 +92,11 @@ def get_coil_psi(x2d, z2d, pf_subcoil, plasma_coil, **kwargs):
     else:
         psi = 0
     if set_pf:
-        for name in pf_subcoil.keys():
-            psi += add_Pcoil(x2d, z2d, pf_subcoil[name])
+        for name in subcoil.keys():
+            psi += add_Pcoil(x2d, z2d, subcoil[name])
     if set_plasma:
-        for name in plasma_coil.keys():
-            psi += add_Pcoil(x2d, z2d, plasma_coil[name])
+        for name in plasma.keys():
+            psi += add_Pcoil(x2d, z2d, plasma[name])
     return psi
 
 
@@ -264,13 +264,13 @@ def Gtorque(coil, subcoil, source, sink, multi_filament):  # source-sink
     return field
 
 
-def Btorque(coil, subcoil, plasma_coil, passive_coils, sink):
+def Btorque(coil, subcoil, plasma, passive_coils, sink):
     Csink = subcoil
     Nsink = coil[sink]['Nf']
     field = np.zeros(2)
     for source in passive_coils:
         if source == 'Plasma':
-            Csource = plasma_coil
+            Csource = plasma
             Nsource = len(Csource)
         else:
             Csource = subcoil
@@ -290,9 +290,9 @@ def Btorque(coil, subcoil, plasma_coil, passive_coils, sink):
     return field
 
 
-def Gfield(coil, plasma_coil, point):
+def Gfield(coil, plasma, point):
     field = np.zeros(2)
-    for coil_set in [coil, plasma_coil]:
+    for coil_set in [coil, plasma]:
         field += Btorque(coil_set, point)
     return field
 

@@ -88,7 +88,10 @@ class SF(object):
                                   plot=plot)
             except TopologyError:
                 pass
-            self.get_sol(debug=False)
+            try:
+                self.get_sol(debug=False)
+            except ValueError:
+                pass
 
     def get_sol(self, plot=False, debug=False):
         if hasattr(self, 'fw'):
@@ -441,7 +444,8 @@ class SF(object):
             self.mo = None
 
     def set_Xpoints(self):
-        if sum(self.Mindex) > 0:  # found Mpoints
+
+        if sum(self.Mindex) > 0 and sum(~self.Mindex) > 0:  # found points
             Xpsi = self.Mpoints['separatrix_psi'][0]  # Xpsi estimate
             self.points['psi_norm'] =\
                 (self.points['psi'] - self.Mpsi) / (Xpsi - self.Mpsi)

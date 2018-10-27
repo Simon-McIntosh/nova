@@ -260,7 +260,7 @@ if __name__ is '__main__':  # test functions
     pf = PF(sf.eqdsk)
     eq = EQ(pf.coilset, sf.eqdsk, dCoil=0.75, sigma=0,
             boundary=sf.eq_boundary(expand=0.25), n=5e3)
-    eq.get_plasma_coil()
+    eq.get_plasma()
     # eq.gen_opp()
 
     ff = force_field(pf.coilset, multi_filament=True)

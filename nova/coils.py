@@ -64,7 +64,7 @@ class PF:
             self.categorize_coils()
 
     def get_coil_current(self):
-        It = {}
+        It = collections.OrderedDict()
         for name in self.coilset['coil']:
             It[name] = self.coilset['coil'][name]['It']
         return It
@@ -133,7 +133,7 @@ class PF:
             dx, dz = coil[name]['dx'], coil[name]['dz']
             It = coil[name]['It']
             oparg = {}  # optional keys
-            for key in ['R', 'index', 'sign', 'Nt']:
+            for key in ['R', 'index', 'sign', 'Nt', 'Nf']:
                 if key in coil[name]:
                     oparg[key] = coil[name][key]
             self.add_coil(x, z, dx, dz, It, name=name, categorize=False,
@@ -158,7 +158,7 @@ class PF:
                                       'It': It, 'Nf': 1}
         rc = kwargs.get('rc', np.sqrt(dx**2 + dz**2) / 2)
         self.coilset['coil'][name]['rc'] = rc
-        for key in ['R', 'index', 'sign', 'Nt']:  # optional keys
+        for key in ['R', 'index', 'sign', 'Nt', 'Nf']:  # optional keys
             if key in kwargs:
                 self.coilset['coil'][name][key] = kwargs.get(key)
         if categorize:
@@ -229,7 +229,10 @@ class PF:
             zc[i] = coil[name]['z']
             dxc[i] = coil[name]['dx']
             dzc[i] = coil[name]['dz']
-            It[i] = coil[name]['It']
+            if 'It' in coil[name]:
+                It[i] = coil[name]['It']
+            else:
+                It[i] = coil[name]['If']  # return filliment for plasma
             if 'Nt' in coil[name]:
                 Nt[i] = coil[name]['Nt']
             if 'Nf' in coil[name]:

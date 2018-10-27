@@ -23,7 +23,6 @@ class PF:
     def __init__(self, eqdsk=None, **kwargs):
         self.initalize_collection()
         self.set_coils(eqdsk, **kwargs)
-        self.coilset['plasma'] = collections.OrderedDict()
         if 'coilset' in kwargs:
             self.__call__(kwargs['coilset'])
         if 'coil' in kwargs:
@@ -39,7 +38,7 @@ class PF:
         self.coilset = {'nC': 0, 'index': {},
                         'coil': collections.OrderedDict(),
                         'subcoil': collections.OrderedDict(),
-                        'plasma': collections.OrderedDict()}
+                        'plasma_coil': collections.OrderedDict()}
         for coil in ['PF', 'CS']:
             self.coilset['index'][coil] = {'n': 0, 'name': [], 'index': []}
 
@@ -196,7 +195,6 @@ class PF:
                     subname = name+'_{}'.format(sub_index)
                     self.coilset['subcoil'][subname] =\
                         subcoil_o[name_+'_{}'.format(i)]
-                    #self.coilset['subcoil'][subname]['Nf'] = Nf
                     sub_index += 1
             else:  # re-insert
                 coil_ = {name_: coil_o[name_]}
@@ -441,7 +439,7 @@ class PF:
         self.plot_coil(coils, label=label, current=current, fs=fs,
                        alpha=alpha, ax=ax, patch=patch)
         if plasma:
-            self.plot_coil(self.coilset['plasma'], alpha=alpha,
+            self.plot_coil(self.coilset['plasma_coil'], alpha=alpha,
                            coil_color='C4', ax=ax)
         ax.axis('equal')
         ax.axis('off')

@@ -385,8 +385,8 @@ class SF(object):
                               eps=0.1, bound=self.limit.flatten())[0]
         self.points = self.points[index]  # trim duplicates / edge points
         # trim high field > 1.5* minimum absolute value
-        self.points = self.points[self.points['B']
-                                  < 10*np.min(self.points['B'])]
+        self.points = self.points[
+                self.points['B'] < 10*np.min(self.points['B'])]
         self.get_bounding_loops()  # get bounding loops
         self.set_Mpoints()  # set Mpoints
         self.set_Xpoints()  # set Xpoints
@@ -524,7 +524,7 @@ class SF(object):
 
     def plot_separatrix(self, select='both', ax=None):
         if ax is None:
-            ax = plt.subplots(1, 1, figsize=(8, 10))[1]
+            ax = plt.gca()
         if select == 'both':
             select = ['upper', 'lower']
         else:

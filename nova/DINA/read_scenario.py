@@ -139,7 +139,7 @@ class read_scenario(pythonIO):
         self.coilset[self.setname]['plasma_parameters']['Ipl'] = Ipl*factor
         for filament in self.coilset[self.setname]['plasma']:
             self.coilset[self.setname]['plasma'][filament]['If'] = Ipl*factor
-        self.inv.update_plasma_coil()
+        self.inv.update_plasma()
         self.ff.set_force_field(state='passive')
 
     def read_txt_file(self, folder, dropnan=True, force=False):
@@ -474,13 +474,10 @@ class read_scenario(pythonIO):
                 current_array = [2 * It[name]]
             for setname, current in zip(setname_array, current_array):
                 coilset['coil'][setname]['It'] = current
-                if 'Nt' in coilset['coil'][setname]:
-                    Nt = coilset['coil'][setname]['Nt']
-                    coilset['coil'][setname]['It'] = current / Nt
                 Nf = coilset['coil'][setname]['Nf']
                 for i in range(Nf):
                     subname = setname+'_{}'.format(i)
-                    coilset['subcoil'][subname]['It'] = current / Nf
+                    coilset['subcoil'][subname]['If'] = current / Nf
 
     def update_psi(self, n=None, limit=None, plot=False, ax=None,
                    current='A'):
@@ -548,7 +545,7 @@ class read_scenario(pythonIO):
             for i, filament in enumerate(plasma_subcoil):
                 subname = 'Plasma_{}'.format(i)
                 self.coilset[self.setname]['plasma'][subname] = filament
-        self.inv.update_plasma_coil()
+        self.inv.update_plasma()
         self.ff.set_force_field(state='passive')
         for setname in self.coilset:  # set passive_field flag
             update = False if setname == self.setname else True

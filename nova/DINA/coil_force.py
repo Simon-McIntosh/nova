@@ -672,12 +672,13 @@ class coil_force(pythonIO):
 
 if __name__ == '__main__':
 
-    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=12.5/15,
+    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=15/15,
                        read_txt=False)
-
+    '''
     for folder in force.dina.folders:
         print(folder)
         force.load_file(folder, read_txt=True)
+    '''
 
     '''
     force.frame_update(251)
@@ -698,7 +699,7 @@ if __name__ == '__main__':
 
     # force.read_data(nframe=500, forcewrite=True)
     # plt.set_context('notebook')
-    # force.plot_Fmax(nframe=500)
+    force.plot_Fmax(nframe=500)
 
 
 

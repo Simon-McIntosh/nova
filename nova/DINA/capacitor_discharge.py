@@ -502,14 +502,14 @@ class power_supply:
         return err
 
 if __name__ == '__main__':
-    ps = power_supply(nturn=4, vessel=True, scenario=-1, code='Nova',
+    ps = power_supply(nturn=4, vessel=True, scenario=3, code='Nova',
                       Ip_scale=15/15, read_txt=False)
 
     # plt.set_context('talk')
-    ps.solve(Io=0, sign=-1, t_pulse=0.0, origin='peak',
+    ps.solve(Io=0, sign=-1, t_pulse=0.3, origin='peak',
              impulse=True, plot=True)
 
-    ps.set_referance(ncoil=2)
+    #ps.set_referance(ncoil=2)
     #ps.reduce()
 
 

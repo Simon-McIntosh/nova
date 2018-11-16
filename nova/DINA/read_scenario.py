@@ -31,7 +31,7 @@ class read_scenario(pythonIO):
 
     def __init__(self, database_folder='operations', folder=None,
                  read_txt=False, VS=False, file_type='txt', dCoil=0.25,
-                 setname='link'):
+                 setname='split'):
         self.date_switch = datetime.strptime('2016-02', '%Y-%m')
         self.read_txt = read_txt
         self.setname = setname
@@ -221,7 +221,7 @@ class read_scenario(pythonIO):
         self.fun, self.data = {}, {}
         extract = [var for var in self.data2 if ('I' in var and len(var) <= 5)]
         extract += ['Rcur', 'Zcur', 'ap', 'kp', 'Rp', 'Zp', 'a',
-                    'Ksep', 'Ip', 'BETAp', 'li(3)', 't', 'PSI(axis)']
+                    'Ksep', 'BETAp', 'li(3)', 't', 'PSI(axis)']
         extract = [var for var in extract if var in self.data2]
         for var in extract:  # interpolate
             if ('I' in var and len(var) <= 5) or ('V' in var):
@@ -744,16 +744,17 @@ if __name__ is '__main__':
 
     scn = read_scenario(read_txt=False)
 
-    scn.load_file(folder='15MA DT-DINA2017-04_v1.2')
+    #scn.load_file(folder='15MA DT-DINA2017-04_v1.2')
+    scn.load_file(folder='15MA DT-DINA2015-05', read_txt=False)
     scn.update_DINA()
 
-    scn.update_psi(n=5e3, plot=True)
+    scn.update_psi(n=5e3, plot=True, current='AT')
 
     for name in scn.pf.coilset['coil']:
         print(name, scn.pf.coilset['coil'][name]['It'])
 
-    scn.load_functions('link')
 
+    scn.load_functions('split')
     # print(scn.pf.coilset['subcoil'])
 
     for name in scn.pf.coilset['coil']:

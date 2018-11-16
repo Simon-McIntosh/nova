@@ -1,5 +1,5 @@
 import nova.cross_coil as cc
-from amigo.pyplot import plt
+from amigo.pyplot import plt, arrow_arc
 import numpy as np
 import matplotlib
 from amigo import geom
@@ -65,52 +65,65 @@ class force_field(object):
             self.set_passive_force_field()
 
     def set_active_force_field(self, multi_filament=False):
-        self.Fa = np.zeros((self.nC, self.nC, 2))  # active
+        self.Fa = np.zeros((self.nC, self.nC, 4))  # active
         for i, sink in enumerate(self.active_coils):
             for j, source in enumerate(self.active_coils):
                 xG = cc.Gtorque(self.coilset['coil'], self.coilset['subcoil'],
                                 source, sink, multi_filament) * self.Iscale**2
-                self.Fa[i, j, 0] = 2 * np.pi * cc.mu_o * xG[1]  # cross product
-                self.Fa[i, j, 1] = -2 * np.pi * cc.mu_o * xG[0]
+                self.Fa[i, j, 0] = xG[1]  # Fx
+                self.Fa[i, j, 1] = -xG[0]  # Fz
+                self.Fa[i, j, 2] = xG[2]  # moment
+                self.Fa[i, j, 3] = xG[3]  # z crush
 
     def set_passive_force_field(self):
-        self.Fp = np.zeros((self.nC, 2))  # passive
+        self.Fp = np.zeros((self.nC, 4))  # passive
         for i, sink in enumerate(self.active_coils):
             xB = cc.Btorque(self.coilset['coil'], self.coilset['subcoil'],
                             self.coilset['plasma'],
                             self.passive_coils, sink) * self.Iscale
-            self.Fp[i, 0] = 2 * np.pi * cc.mu_o * xB[1]  # cross product
-            self.Fp[i, 1] = -2 * np.pi * cc.mu_o * xB[0]
+            self.Fp[i, 0] = xB[1]  # Fx
+            self.Fp[i, 1] = -xB[0]  # Fz
+            self.Fp[i, 2] = xB[2]  # moment
+            self.Fp[i, 3] = xB[3]  # z crush
 
-    def set_force(self, Ic):  # evaluate coil force and force jacobian
-        self.F = np.zeros((self.nC, 2))
-        dF = np.zeros((self.nC, self.nC, 2))
-        Im = np.dot(Ic.reshape(-1, 1), np.ones((1, self.nC)))  # current matrix
-        for i in range(2):  # coil force (bundle of eq elements)
+    def set_force(self):  # evaluate coil force and force jacobian
+        If = self.If
+        self.F = np.zeros((self.nC, 4))
+        dF = np.zeros((self.nC, self.nC, 4))
+        Im = np.dot(If.reshape(-1, 1), np.ones((1, self.nC)))  # current matrix
+        for i in range(4):  # coil force (bundle of eq elements)
             self.F[:, i] = 1e-6 * \
-                (Ic * (np.dot(self.Fa[:, :, i], Ic) + self.Fp[:, i]))  # MN
+                (If * (np.dot(self.Fa[:, :, i], If) + self.Fp[:, i]))  # MN
             dF[:, :, i] = Im * self.Fa[:, :, i]
-            diag = np.dot(self.Fa[:, :, i], Ic) +\
-                Ic * np.diag(self.Fa[:, :, i]) + self.Fp[:, i]
+            diag = np.dot(self.Fa[:, :, i], If) +\
+                If * np.diag(self.Fa[:, :, i]) + self.Fp[:, i]
             np.fill_diagonal(dF[:, :, i], diag)
         dF *= 1e-6  # force jacobian MN/MA
         return self.F, dF
 
     def get_force(self):
         self.check()
-        Ic = self.set_current()
-        F, dF = self.set_force(Ic)
+        self.set_current()
+        F, dF = self.set_force()
         Fcoil = {'PF': {'x': 0, 'z': 0,
-                        'x_array': np.ndarray, 'z_array': np.ndarray},
+                        'x_array': np.ndarray, 'z_array': np.ndarray,
+                        'moment_array': np.ndarray},
                  'CS': {'sep_array': np.ndarray, 'sep': 0, 'zsum': 0,
-                        'x_array': np.ndarray, 'z_array': np.ndarray},
+                        'x_array': np.ndarray, 'z_array': np.ndarray,
+                        'moment_array': np.ndarray},
                  'F': F, 'dF': dF}
         Fcoil['PF']['x_array'] = F[self.coilset['index']['PF']['index'], 0]
         Fcoil['PF']['z_array'] = F[self.coilset['index']['PF']['index'], 1]
+        Fcoil['PF']['moment_array'] = \
+            F[self.coilset['index']['PF']['index'], 2]
         Fcoil['PF']['x'] = \
             np.max(abs(F[self.coilset['index']['PF']['index'], 0]))
         Fcoil['PF']['z'] = \
             np.max(abs(F[self.coilset['index']['PF']['index'], 1]))
+        Fcoil['CS']['x_array'] = F[self.coilset['index']['CS']['index'], 0]
+        Fcoil['CS']['z_array'] = F[self.coilset['index']['CS']['index'], 1]
+        Fcoil['CS']['moment_array'] = \
+            F[self.coilset['index']['CS']['index'], 2]
         FzCS = F[self.coilset['index']['CS']['index'], 1]
         if self.coilset['index']['CS']['n'] > 1:
             # seperation force
@@ -136,7 +149,7 @@ class force_field(object):
         # vector = 'Fo', 'Fx', 'Fz' or combination
         fs = matplotlib.rcParams['legend.fontsize']
         if not hasattr(self, 'F'):
-            self.set_force(self.If)
+            self.set_force()
         if 'Fmax' in kwargs:
             Fmax = kwargs['Fmax']
         else:
@@ -202,6 +215,18 @@ class force_field(object):
             plt.text(x_gap - dx, z_gap, txt, color=0.2*np.ones(3),
                      va='center', ha='right',
                      backgroundcolor=0.85 * np.ones(3))
+        self.plot_moment()
+
+    def plot_moment(self, scale=5e-1):
+        Mmax = np.max(abs(self.Fcoil['CS']['moment_array']))
+        for name, M in zip(self.coilset['index']['CS']['name'],
+                           self.Fcoil['CS']['moment_array']):
+            x = self.coilset['coil'][name]['x']
+            z = self.coilset['coil'][name]['z']
+            color = 'C3' if M > 0 else 'C2'
+
+            arrow_arc(x, z, scale*M/Mmax, color=color)
+            # arrow_arc(x, z, np.sign(M), color=color)
 
     def set_bm(self, cage):
         x = {'cl': {'x': cage.coil_loop[:, 0], 'z': cage.coil_loop[:, 2]}}
@@ -258,8 +283,9 @@ if __name__ is '__main__':  # test functions
 
     sf = SF(filename=setup.filename)
     pf = PF(sf.eqdsk)
-    eq = EQ(pf.coilset, sf.eqdsk, dCoil=0.75, sigma=0,
-            boundary=sf.eq_boundary(expand=0.25), n=5e3)
+    pf.mesh_coils(dCoil=0.75)
+    eq = EQ(pf.coilset, sf.eqdsk, sigma=0,
+            boundary=sf.eq_boundary(expand=0.25), n=1e3)
     eq.get_plasma()
     # eq.gen_opp()
 
@@ -267,7 +293,9 @@ if __name__ is '__main__':  # test functions
     Fcoil = ff.get_force()
 
     ff.plot()
+    ff.plotCS()
     pf.plot(label=True, plasma=False, current=True)
     pf.plot(subcoil=True, label=False, plasma=True, current=False)
     plt.axis('equal')
     plt.axis('off')
+

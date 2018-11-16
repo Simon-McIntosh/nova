@@ -282,6 +282,8 @@ class EQ(object):
                 (self.psi[i, j] - self.sf.Mpsi) / (self.sf.Xpsi - self.sf.Mpsi)
 
         # calculate self-inductance coupling matrix
+        '''
+        #  slow
         self.xB = np.zeros((self.Nplasma, self.Nplasma))  # [xB][I] = x|B|**2
         for p in range(self.Nplasma):  # sink
             ip, jp = self.ij(self.plasma_index[p])
@@ -292,13 +294,13 @@ class EQ(object):
                 B = 2 * np.pi * cc.mu_o * cc.get_green_field(x, z, xi, zi,
                                                              self.dx/2)
                 self.xB[p, q] = x * (B[0]**2 + B[1]**2)
+        '''
 
     # def solve_plasma()
 
     def plasma_core(self, update=True):
         if update:  # calculate plasma contribution
             self.index_plasma_core()
-
             for index, psi_norm in zip(self.plasma_index, self.psi_norm):
                 x = self.x[self.ij(index)[0]]
                 self.bpl[index] = -self.mu_o * x**2 * self.sf.Pprime(psi_norm)\

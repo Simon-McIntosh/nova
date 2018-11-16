@@ -133,6 +133,11 @@ class FE(object):
         self.mat_data['steel_cast'] = {'E': 190e9, 'rho': 7850, 'v': 0.29}
         self.update_shear_modulus()
 
+    def add_material(self, name, data):
+        #  data = dict{'E':, 'rho':, 'v': }
+        self.mat_data[name] = data
+        self.update_shear_modulus()
+
     def update_shear_modulus(self):
         for name in self.mat_data:
             E, v = self.mat_data[name]['E'], self.mat_data[name]['v']
@@ -147,7 +152,7 @@ class FE(object):
         material = self.mat_data[material_name]
         for var in material:
             mat[var] = material[var]
-        pnt = section.pop('pnt')
+        pnt = section.pop('pnt', None)
         for var in section:
             try:  # treat as scalar
                 mat[var] = section[var]
@@ -163,7 +168,9 @@ class FE(object):
         return mat
 
     def get_mat_o(self, nmat):  # get averaged sectional properties
-        if self.frame == '1D':
+        if self.frame == 'spring':
+            mat = ['E', 'A']
+        elif self.frame == '1D':
             mat = ['E', 'Iz']
         elif self.frame == '2D':
             mat = ['E', 'A', 'Iz']
@@ -566,6 +573,13 @@ class FE(object):
         self.load = load
         self.ndof = len(dof)  # degrees of fredom per node
         self.stiffness = stiffness
+
+    def stiffness_spring(self, el):  # dof [u]
+        L = self.el['dl'][el]
+        E, A = self.get_mat_o(self.el['mat'][el])
+        k = E * A / L * np.matrix([[1, -1],
+                                   [-1, 1]])
+        return k
 
     def stiffness_1D(self, el):  # dof [v,rz]
         a = self.el['dl'][el] / 2

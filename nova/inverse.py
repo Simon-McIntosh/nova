@@ -972,7 +972,8 @@ class INV(object):
             If = np.dot(self.V, vector)
         else:
             If = vector
-        F, dF = self.ff.set_force(If)  # set coil force and jacobian
+        self.ff.If = If
+        F, dF = self.ff.set_force()  # set coil force and jacobian
         if grad.size > 0:  # calculate constraint jacobian
             # PFz lower bound
             grad[:self.nPF] = -dF[:self.nPF, :, 1]

@@ -38,7 +38,7 @@ class PF:
         self.coilset = {'nC': 0, 'index': {},
                         'coil': collections.OrderedDict(),
                         'subcoil': collections.OrderedDict(),
-                        'plasma_coil': collections.OrderedDict()}
+                        'plasma': collections.OrderedDict()}
         for coil in ['PF', 'CS']:
             self.coilset['index'][coil] = {'n': 0, 'name': [], 'index': []}
 
@@ -387,7 +387,7 @@ class PF:
         for i, name in enumerate(coils.keys()):
             coil = coils[name]
             x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
-            if hasattr(self.coilset, 'index'):
+            if 'index' in self.coilset:
                 if name in self.coilset['index']['CS']['name']:
                     drs = -2.5 / 3 * dx
                     ha = 'right'
@@ -442,7 +442,7 @@ class PF:
         self.plot_coil(coils, label=label, current=current, fs=fs,
                        alpha=alpha, ax=ax, patch=patch)
         if plasma:
-            self.plot_coil(self.coilset['plasma_coil'], alpha=alpha,
+            self.plot_coil(self.coilset['plasma'], alpha=alpha,
                            coil_color='C4', ax=ax)
         ax.axis('equal')
         ax.axis('off')

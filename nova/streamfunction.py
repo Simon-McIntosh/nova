@@ -77,7 +77,7 @@ class SF(object):
                      [eqdsk['z'][0], eqdsk['z'][-1]]]
             xlim = [limit[0][0], limit[0][1], limit[0][1], limit[0][0]]
             zlim = [limit[1][0], limit[1][0], limit[1][1], limit[1][1]]
-            xlim, zlim = geom.rzInterp(xlim, zlim)
+            xlim, zlim = geom.xzInterp(xlim, zlim)
             self.set_firstwall({'xlim': xlim, 'zlim': zlim})
 
     def initalize_field(self, plot=False):
@@ -91,6 +91,8 @@ class SF(object):
             try:
                 self.get_sol(debug=False)
             except ValueError:
+                pass
+            except AttributeError:
                 pass
 
     def get_sol(self, plot=False, debug=False):
@@ -240,7 +242,7 @@ class SF(object):
 
     def set_boundary(self, x, z, n=5e2):
         self.nbdry = int(n)
-        self.xbdry, self.zbdry = geom.rzSLine(x, z, npoints=n)
+        self.xbdry, self.zbdry = geom.xzSLine(x, z, npoints=n)
 
     def set_firstwall(self, eqdsk):
         required_keys = ['xlim', 'zlim']
@@ -250,7 +252,7 @@ class SF(object):
             L = geom.length(xlim, zlim, norm=False)
             dL = np.min(np.diff(L))  # minimum space interpolation
             self.nlim = int(L[-1]/dL)
-            self.xlim, self.zlim = geom.rzInterp(xlim, zlim, self.nlim)
+            self.xlim, self.zlim = geom.xzInterp(xlim, zlim, self.nlim)
             fw_list = [(x, z) for x, z in zip(self.xlim, self.zlim)]
             self.fw = LineString(fw_list)  # shapley fw linestring
 
@@ -388,8 +390,8 @@ class SF(object):
                               eps=0.1, bound=self.limit.flatten())[0]
         self.points = self.points[index]  # trim duplicates / edge points
         # trim high field > 1.5* minimum absolute value
-        self.points = self.points[
-                self.points['B'] < 10*np.min(self.points['B'])]
+        # self.points = self.points[
+        #         self.points['B'] < 10*np.min(self.points['B'])]
         self.get_bounding_loops()  # get bounding loops
         self.set_Mpoints()  # set Mpoints
         self.set_Xpoints()  # set Xpoints
@@ -988,7 +990,7 @@ class SF(object):
         rpl, zpl = self.get_boundary()  # boundary points
         rpl, zpl = geom.offset(rpl, zpl, dx)  # offset from sep
         if Nsub > 0:  # sub-sample
-            rpl, zpl = geom.rzSLine(rpl, zpl, Nsub)
+            rpl, zpl = geom.xzSLine(rpl, zpl, Nsub)
         return rpl, zpl
 
     def midplane_loop(self, x, z):

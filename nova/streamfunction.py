@@ -88,6 +88,8 @@ class SF(object):
                                   plot=plot)
             except TopologyError:
                 pass
+            except NotImplementedError:
+                pass
             try:
                 self.get_sol(debug=False)
             except ValueError:
@@ -389,9 +391,6 @@ class SF(object):
         index = geom.unique2D(np.array([self.points['x'], self.points['z']]).T,
                               eps=0.1, bound=self.limit.flatten())[0]
         self.points = self.points[index]  # trim duplicates / edge points
-        # trim high field > 1.5* minimum absolute value
-        # self.points = self.points[
-        #         self.points['B'] < 10*np.min(self.points['B'])]
         self.get_bounding_loops()  # get bounding loops
         self.set_Mpoints()  # set Mpoints
         self.set_Xpoints()  # set Xpoints
@@ -446,7 +445,6 @@ class SF(object):
             self.mo = None
 
     def set_Xpoints(self):
-
         if sum(self.Mindex) > 0 and sum(~self.Mindex) > 0:  # found points
             Xpsi = self.Mpoints['separatrix_psi'][0]  # Xpsi estimate
             self.points['psi_norm'] =\
@@ -543,6 +541,12 @@ class SF(object):
             for line in psi_line:
                 x, z = line[:, 0], line[:, 1]
                 ax.plot(x, z, 'C4', alpha=0.75, zorder=-10)
+                
+    def get_levels(self, Nlevel=31, Nstd=4, **kwargs):
+        level, n = [-Nstd * np.std(self.psi),
+                    Nstd * np.std(self.psi)], Nlevel
+        levels = np.mean(self.psi) + np.linspace(level[0], level[1], n)
+        return levels
 
     def contour(self, Nlevel=31, Nstd=4, Xnorm=True, lw=1, plot_vac=True,
                 boundary=True, separatrix='', plot_points=False, **kwargs):
@@ -560,9 +564,7 @@ class SF(object):
         if separatrix:
             self.plot_separatrix(select=separatrix, ax=ax)
         if 'levels' not in kwargs.keys():
-            level, n = [-Nstd * np.std(self.psi),
-                        Nstd * np.std(self.psi)], Nlevel
-            levels = np.mean(self.psi) + np.linspace(level[0], level[1], n)
+            levels = self.get_levels(Nlevel=Nlevel, Nstd=Nstd)
             linetype = '-'
         else:
             levels = kwargs['levels']
@@ -842,10 +844,13 @@ class SF(object):
             if index is not False:
                 X, Z = X[index], Z[index]
             else:
+                '''
                 for i, (x, z) in enumerate(zip(X, Z)):
                     plt.plot(x, z, 'C6')
                 plt.plot(self.Mpoint[0], self.Mpoint[1], 'C7o')
+                '''
                 raise TopologyError('Mpoint not found within separatrix')
+            
         except ValueError:
             for x, z in zip(X, Z):
                 plt.plot(x, z, 'C3')
@@ -864,6 +869,7 @@ class SF(object):
             plt.figure()
             try:
                 self.contour(boundary=False)
+                warn('plot boundary index error')
             except AttributeError:
                 warn('unable to draw contour - *bdry not set')
                 pass

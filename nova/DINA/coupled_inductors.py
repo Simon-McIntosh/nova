@@ -1,13 +1,9 @@
 import numpy as np
 from scipy.integrate import odeint
-from amigo.pyplot import plt
 from nova.coils import PF
 from nova.inverse import INV
 from collections import OrderedDict
 from itertools import count
-from nep.coil_geom import VSgeom, PFgeom
-from nep.DINA.read_tor import read_tor
-from nep.DINA.read_plasma import read_plasma
 
 
 class inductance:

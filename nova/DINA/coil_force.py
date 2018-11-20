@@ -42,10 +42,6 @@ class coil_force(pythonIO):
                             read_txt=read_txt)  # load currents
         self.ps = power_supply(nturn=nturn, Ip_scale=self.Ip_scale,
                                read_txt=read_txt)
-        '''
-        self.allowable = stress_allowable()  # load allowable interpolators
-        pythonIO.__init__(self)  # python read/write
-        '''
 
     def postscript(self):
         if self.vessel:
@@ -158,16 +154,15 @@ class coil_force(pythonIO):
     def vs3_update(self, **kwargs):  # update vs3 coil and structure
         self.mode = kwargs.get('mode', self.mode)
         Ivs3 = self.Ivs3_fun[self.mode](self.t_index)  # current vector
-        print('Ivs3', Ivs3[0])
         self.set_vs3_current(Ivs3[0])  # vs3 coil current
         coil_list = list(self.ps.vv.pf.coilset['coil'].keys())
-        if self.vessel:  # set jacket, vv and trs currents
-            Ic = {}  # coil jacket
-            for i, coil in enumerate(coil_list[2:6]):
-                Ic[coil] = Ivs3[1]  # lower VS jacket
-            for i, coil in enumerate(coil_list[6:10]):
-                Ic[coil] = Ivs3[2]  # upper VS jacket
-            self.pf.update_current(Ic)  # dissable to remove jacket field
+        Ic = {}  # coil jacket
+        for i, coil in enumerate(coil_list[2:6]):
+            Ic[coil] = Ivs3[1]  # lower VS jacket
+        for i, coil in enumerate(coil_list[6:10]):
+            Ic[coil] = Ivs3[2]  # upper VS jacket
+        self.pf.update_current(Ic)  # dissable to remove jacket field
+        if self.vessel:  # vv and trs currents    
             Ic = {}  # vv and trs
             for i, coil in enumerate(coil_list[10:]):
                 Ic[coil] = Ivs3[i+3]

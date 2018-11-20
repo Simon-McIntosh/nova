@@ -69,7 +69,7 @@ class coil_flux(pythonIO):
             self.tor.set_current(index)  # update coil currents and plasma
             psi_bg[index] = cc.get_coil_psi(x, z,
                                             self.tor.pf.coilset['subcoil'],
-                                            self.tor.pf.coilset['plasma_coil'])
+                                            self.tor.pf.coilset['plasma'])
             tick.tock()
         vs3_bg = np.zeros(self.tor.nt)
         jkt_lower_bg = np.zeros(self.tor.nt)

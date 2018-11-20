@@ -15,7 +15,6 @@ import nep
 from amigo.png_tools import data_load
 from amigo.IO import class_dir
 from scipy.optimize import minimize
-from nep.DINA.read_dina import timeconstant
 
 
 class power_supply:
@@ -34,7 +33,8 @@ class power_supply:
                       'pulse_period': 10, 'impulse': True, 'scenario': -1,
                       'vessel': True, 'nturn': 4, 'sign': -1, 'code': 'Nova',
                       'dt_discharge': 0, 'Io': 0, 'origin': 'peak',
-                      'trip': 't_trip', 'Ip_scale': 1}
+                      'trip': 't_trip', 'Ip_scale': 1, 'vessel_model': 'local',
+                      'Vo_factor': 1, 'invessel': True, 'Ipulse': 60e3}
         for var in self.setup:
             setattr(self, var, self.setup[var])
 
@@ -44,7 +44,7 @@ class power_supply:
             setattr(self, var, self.setup[var])
 
     def build_coils(self, plot=False):
-        self.vv = VVcoils()
+        self.vv = VVcoils(model=self.vessel_model, invessel=self.invessel)
         self.ind = inductance()
         nvs_o = self.ind.nC
         coilset = self.vv.pf.coilset
@@ -54,28 +54,30 @@ class power_supply:
                 turns=turns)
         for index in nvs_o+np.arange(1, 8):  # vs3 loops
             self.ind.add_cp([nvs_o, index])  # link VS coils
-        if self.vessel:
-            nvs_o = self.ind.nC
-            jacket = list(coilset['coil'].items())[2:10]
-            R = np.array([turn[1]['R'] for turn in jacket])
-            Rlower = 1 / (np.sum(1/R[:4]))
-            Rupper = 1 / (np.sum(1/R[4:]))
-            for i in range(8):
-                Rt = Rlower/4 if i < 4 else Rupper/4
-                jacket[i][1]['R'] = Rt
-            # add jacket coils
-            turns = 0.25*np.ones(8)
-            self.ind.add_pf_coil(OrderedDict(jacket), turns=turns)
-            for index in nvs_o+np.arange(1, 4):
-                self.ind.add_cp([nvs_o, index])  # lower jacket coils
-            for index in nvs_o+4+np.arange(1, 4):
-                self.ind.add_cp([nvs_o+4, index])  # upper jacket coils
-            # add vv coils
+        nvs_o = self.ind.nC
+        jacket = list(coilset['coil'].items())[2:10]
+        R = np.array([turn[1]['R'] for turn in jacket])
+        Rlower = 1 / (np.sum(1/R[:4]))
+        Rupper = 1 / (np.sum(1/R[4:]))
+        for i in range(8):
+            Rt = Rlower/4 if i < 4 else Rupper/4
+            jacket[i][1]['R'] = Rt
+        # add jacket coils
+        turns = 0.25*np.ones(8)
+        self.ind.add_pf_coil(OrderedDict(jacket), turns=turns)
+        for index in nvs_o+np.arange(1, 4):
+            self.ind.add_cp([nvs_o, index])  # lower jacket coils
+        for index in nvs_o+4+np.arange(1, 4):
+            self.ind.add_cp([nvs_o+4, index])  # upper jacket coils
+        if self.vessel:  # add vv coils
             vv_coils = list(coilset['coil'].items())[10:]
             self.ind.add_pf_coil(OrderedDict(vv_coils))
         self.ind.reduce()
         self.ncoil = self.ind.nd['nr']  # number of retained coils
-        factor = 0.95
+        if self.vessel_model == 'local':
+            factor = 0.95
+        else:
+            factor = 0.92
         for i in np.arange(3, self.ncoil):
             index = abs(self.ind.M[i]) > factor * self.ind.M[i, i]
             index[0:3] = False  # maintain large coupling to VS3 coil
@@ -91,7 +93,7 @@ class power_supply:
                      'npulse': 0, 'dt_discharge': [], 'dt_rise': [],
                      'Icap': []}
         self.update_defaults(**kwargs)
-        if 'vessel' in kwargs:
+        if 'vessel' in kwargs or 'invessel' in kwargs:
             self.build_coils()  # re-build coil-set
         build_keys = ['code', 'nturn', 'Cd', 'vessel']
         if np.array([key in kwargs for key in build_keys]).any():
@@ -102,9 +104,10 @@ class power_supply:
 
     def set_constants(self):
         self.Rcap = 0.005  # capacitor charge resistance
-        self.Itrip = self.sign * 4/self.nturn * 60e3  # impulse set-point
-        self.Vo = self.sign * 2.3e3  # capacitor voltage
-        self.Vps_max = self.sign * 1.35e3  # maximum power supply voltage
+        self.Itrip = self.sign * 4/self.nturn * self.Ipulse  # set-point
+        self.Vo = self.sign * self.Vo_factor * 2.3e3  # capacitor voltage
+        # maximum power supply voltage
+        self.Vps_max = self.sign * self.Vo_factor * 1.35e3  
 
     def set_time(self):
         # self.trip = 't_trip', 't_cq', 't_dz', float
@@ -315,7 +318,7 @@ class power_supply:
             try:
                 t_end = self.cf.t[-1]
             except AttributeError:
-                t_end = 100e-3
+                t_end = self.tpo + self.t_pulse + 200e-3
         self.set_dt_discharge()
         self.intergrate(t_end)
         self.packdata()
@@ -349,7 +352,7 @@ class power_supply:
         plt.despine()
         plt.detick(ax)
 
-    def plot_current(self, ax=None):
+    def plot_current(self, ax=None, title=True):
         if ax is None:
             ax = plt.subplots(1, 1, sharex=True)[1]
         if self.vessel:
@@ -361,6 +364,10 @@ class power_supply:
             colors['upper_vvo'] = 'C4'
             colors['upper_vv1'] = 'C5'
             colors['upper_jacket'] = 'C7'
+            colors['vv_vvo'] = 'C4'
+            colors['vv_vv1'] = 'C5'
+            colors['trs_trs'] = 'C3'
+            
             coils = list(self.ind.pf.coilset['coil'].keys())[16:]
             for i, coil in enumerate(coils):
                 for c in colors:
@@ -398,7 +405,8 @@ class power_supply:
         ax.plot(1e3*tmax, 1e-3*Imax, '.C7')
         ax.text(1e3*tmax, 1e-3*Imax, ' {:1.1f}kA'.format(1e-3*Imax),
                 ha='left', va=va, color='C7')
-        plt.title('t pulse {:1.2f}s'.format(self.t_pulse))
+        if title:
+            plt.title('t pulse {:1.2f}s'.format(self.t_pulse))
 
     def LTC(self):
         path = os.path.join(class_dir(nep), '../Data/LTC/')
@@ -502,8 +510,8 @@ class power_supply:
         return err
 
 if __name__ == '__main__':
-    ps = power_supply(nturn=4, vessel=True, scenario=3, code='Nova',
-                      Ip_scale=15/15, read_txt=False)
+    ps = power_supply(nturn=3, vessel=True, scenario=3, code='Nova',
+                      Ip_scale=15/15, read_txt=False, vessel_model='local')
 
     # plt.set_context('talk')
     ps.solve(Io=0, sign=-1, t_pulse=0.3, origin='peak',

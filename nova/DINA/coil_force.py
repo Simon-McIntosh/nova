@@ -162,7 +162,7 @@ class coil_force(pythonIO):
         for i, coil in enumerate(coil_list[6:10]):
             Ic[coil] = Ivs3[2]  # upper VS jacket
         self.pf.update_current(Ic)  # dissable to remove jacket field
-        if self.vessel:  # vv and trs currents    
+        if self.vessel:  # vv and trs currents
             Ic = {}  # vv and trs
             for i, coil in enumerate(coil_list[10:]):
                 Ic[coil] = Ivs3[i+3]
@@ -667,7 +667,7 @@ class coil_force(pythonIO):
 
 if __name__ == '__main__':
 
-    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=15/15,
+    force = coil_force(vessel=True, t_pulse=0.3, nturn=3, Ip_scale=15/15,
                        read_txt=False)
     '''
     for folder in force.dina.folders:

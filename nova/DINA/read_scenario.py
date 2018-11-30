@@ -261,7 +261,7 @@ class read_scenario(pythonIO):
         txt += '$\Delta  t$    {:.1f}s\n'.format(np.diff(t_ft)[0])
         txt += '$\Delta \Psi$  {:.1f}Wb'.format(dpsi)
         ax.text(np.mean(t_ft), 1e-6*self.Ipl[self.flattop['index'][0]]/2,
-                txt, ma='left', ha='center', va='top',
+                txt, ma='left', ha='center', va='center',
                 bbox=dict(facecolor='w', ec='gray', lw=1,
                           boxstyle='round', pad=0.5))
         ax.set_ylabel('$I_{pl}$ MA')
@@ -461,7 +461,8 @@ class read_scenario(pythonIO):
                 self.coilset[setname]['plasma'] = plasma
                 self.update_coil_current(self.coilset[setname], It)
 
-    def update_coil_current(self, coilset, It):
+    @staticmethod
+    def update_coil_current(coilset, It):
         for name in It:
             if name in coilset['coil']:
                 setname_array = [name]
@@ -510,10 +511,11 @@ class read_scenario(pythonIO):
         if plot_nulls:
             self.sf.plot_nulls(labels=['X', 'M'])
         self.sf.plot_firstwall(ax=ax)
-        self.plot_coils(ax=ax, current=current)
-        self.ff.get_force()
-        self.ff.plot()
-        self.ff.plotCS()
+        self.inv.plot_fix()
+        #self.plot_coils(ax=ax, current=current)
+        #self.ff.get_force()
+        #self.ff.plot()
+        #self.ff.plotCS()
 
     def set_plasma(self, t):
         try:

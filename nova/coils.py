@@ -412,9 +412,9 @@ class PF:
                     txt = '{:1.1f}kA'.format(linecurrent * 1e-3)
                 else:  # amp turns
                     if abs(coil['It']) < 0.1e6:  # display as kA.t
-                        txt = '{:1.1f}kA$\cdot$T'.format(coil['It'] * 1e-3)
+                        txt = '{:1.1f}kAT'.format(coil['It'] * 1e-3)
                     else:  # MA.t
-                        txt = '{:1.1f}MA$\cdot$T'.format(coil['It'] * 1e-6)
+                        txt = '{:1.1f}MAT'.format(coil['It'] * 1e-6)
                 plt.text(x + drs, z - zshift, txt,
                          fontsize=fs, ha=ha, va='center',
                          color=0.2 * np.ones(3))

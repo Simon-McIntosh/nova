@@ -11,9 +11,11 @@ class force_field(object):
                  plot=False, **kwargs):
         self.coilset = coilset  # requires update
         self.Iscale = Iscale  # current units (MA)
-        self.active_coils = kwargs.get('active_coils',
-                                       list(self.coilset['coil'].keys()))
         self.passive_coils = kwargs.get('passive_coils', ['Plasma'])
+        active_coils = kwargs.get('active_coils',
+                                  list(self.coilset['coil'].keys()))
+        self.active_coils = [name for name in active_coils if name not in
+                             self.passive_coils]
         self.nC = len(self.active_coils)  # number of active coils
         self.nP = len(self.passive_coils)  # number of active coils
         self.initalize_force_field(multi_filament=multi_filament)
@@ -145,7 +147,7 @@ class force_field(object):
         return self.If
 
     def plot(self, coils=['PF', 'CS'], scale=2, Fvector=['Fo'],
-             **kwargs):
+             label=False, **kwargs):
         # vector = 'Fo', 'Fx', 'Fz' or combination
         fs = matplotlib.rcParams['legend.fontsize']
         if not hasattr(self, 'F'):
@@ -156,8 +158,11 @@ class force_field(object):
             Fmax = np.max(np.linalg.norm(self.F, axis=1))
         index, names = [], []
         for coil in coils:
-            index.extend(self.coilset['index'][coil]['index'])
-            names.extend(self.coilset['index'][coil]['name'])
+            mask = [name in self.active_coils for name in
+                    self.coilset['index'][coil]['name']]
+            index.extend(self.coilset['index'][coil]['index'][mask])
+            names.extend(self.coilset['index'][coil]['name'][mask])
+
         for i, name in zip(index, names):
             x = self.coilset['coil'][name]['x']
             z = self.coilset['coil'][name]['z']
@@ -181,12 +186,14 @@ class force_field(object):
                     va = 'bottom'
                 else:
                     va = 'top'
-                plt.text(x, z + 0.75 * Fvec[1], '{:1.0f}MN'.format(F[1]),
-                         ha='center', va=va, fontsize=fs,
-                         color=0.1 * np.ones(3),
-                         backgroundcolor=0.85 * np.ones(3))
+                if label:
+                    plt.text(x, z + 0.75 * Fvec[1], '{:1.0f}MN'.format(F[1]),
+                             ha='center', va=va, fontsize=fs,
+                             color=0.1 * np.ones(3),
+                             backgroundcolor=0.85 * np.ones(3))
 
     def plotCS(self, scale=1e-3):
+        fs = matplotlib.rcParams['legend.fontsize']
         colors = [c['color'] for c in matplotlib.rcParams['axes.prop_cycle']]
         colors = [np.array(matplotlib.colors.hex2color(c)) for c in colors]
         Fmax = np.max(abs(self.Fcoil['CS']['sep_array']))
@@ -213,9 +220,9 @@ class force_field(object):
                               head_width=0.15, lw=1.0,
                               length_includes_head=include_head)
             plt.text(x_gap - dx, z_gap, txt, color=0.2*np.ones(3),
-                     va='center', ha='right',
+                     va='center', ha='right', fontsize=fs,
                      backgroundcolor=0.85 * np.ones(3))
-        self.plot_moment()
+        # self.plot_moment()
 
     def plot_moment(self, scale=5e-1):
         Mmax = np.max(abs(self.Fcoil['CS']['moment_array']))

@@ -10,6 +10,7 @@ from nova.coil_cage import coil_cage
 from amigo import geom
 from warnings import warn
 from itertools import count, cycle
+from scipy.optimize import minimize
 
 
 def delete_row_csr(mat, i):
@@ -152,7 +153,7 @@ class FE(object):
         material = self.mat_data[material_name]
         for var in material:
             mat[var] = material[var]
-        pnt = section.pop('pnt', None)
+        pnt = section.pop('pnt', [[0], [0]])
         for var in section:
             try:  # treat as scalar
                 mat[var] = section[var]
@@ -195,9 +196,7 @@ class FE(object):
 
     def add_nodes(self, X):
         if len(np.shape(X)) == 1:  # 1D node input - expand
-            x = np.copy(X)
-            X = np.zeros((len(X), 3))
-            X[:, 0] = x
+            X = np.array(X).reshape(-1, 3)
         if np.size(X) == 3:
             X = np.reshape(X, (1, 3))  # single node
         else:
@@ -321,6 +320,7 @@ class FE(object):
         self.el_append('X', X)
         self.el_append('mat', mat_array)
         self.el_append('n', n)
+        self.el_append('contact', np.ones(len(n)))
         self.nd_connect(n)
         self.add_part(part_name)
 
@@ -364,13 +364,16 @@ class FE(object):
         nd[::2] = self.el['n'][iel, 0]
         nd[1::2] = self.el['n'][iel, 1]
         self.part[name]['nd_fun'] = interp1d(L, nd)  # node interpolator
+        self.part[name]['Lel'] = (self.part[name]['Lnd'][1:] +
+                                  self.part[name]['Lnd'][:-1]) / 2
 
     def initalize_BC(self):
+        self.BCdtype = [('nd', int), ('d', float)]
         self.BC = OrderedDict()
-        self.BC['fix'] = np.array([])  # type:[node,...]
-        self.BC['pin'] = np.array([])  # type:[node,...]
+        self.BC['fix'] = np.array([], dtype=self.BCdtype)  # type:[node,...]
+        self.BC['pin'] = np.array([], dtype=self.BCdtype)  # type:[node,...]
         for key in self.dof:
-            self.BC[key] = np.array([])  # type:[node,...]
+            self.BC[key] = np.array([], dtype=self.BCdtype)  # type:[node,...]
 
     def set_shape_coefficents(self):
         self.S = {}
@@ -451,9 +454,6 @@ class FE(object):
                 d1D[2 * i + j] = d[6 * i + index]
                 if label[j] == 'ty':  # displacment in z
                     d1D[2 * i + j] *= -1
-        #if 'z' in label:
-        #   d1D[1] *= -1
-        #   d1D[3] *= -1
         return d1D
 
     def set_shape(self):
@@ -473,23 +473,26 @@ class FE(object):
         self.shape['d3u'][el, 2] = d3v[:, 1]
 
     def set_stress(self):
+        nsection = self.mat['nsection'].max()  # maximum section number
         self.stress = {}  # axial, curve_y, curve_z
-        for label in ['axial',
+        for label in ['axial', 'axial_load',
                       'cy_max', 'cy_min', 'cy',
                       'cz_max', 'cz_min', 'cz',
                       's_max', 's_min', 's']:
-            self.stress[label] = np.zeros((self.nel, 2))
+            self.stress[label] = np.zeros((self.nel, nsection))
 
     def store_stress(self, el, u, d2v):
         # store maximum stress components for each element
+        contact = self.el['contact'][el]
         L = self.el['dl'][el]  # element length
         du = u[1] - u[0]  # piecewise constant
         nmat = self.el['mat'][el]
         mat_array = self.mat['mat_array'][nmat]
         for nsec in range(self.mat[nmat]['nsection']):
             mat = mat_array[nsec]
-            E = mat['E']
+            E = mat['E'] * contact  # adjust stiffness
             axial = E * du / L  # axial stress
+            axial_load = axial * mat['A']
             C = mat['C']  # centroid
             pntID = mat['pntID']
             pnt = self.pnt[pntID]  # section outline
@@ -512,6 +515,7 @@ class FE(object):
             cz = E * y * np.dot(d2v[:, 0].reshape(-1, 1), np.ones((1, nyz)))
             s = cy + cz + axial
             self.stress['axial'][el, nsec] = axial
+            self.stress['axial_load'][el, nsec] = axial_load
             self.stress['cy_max'][el, nsec] = np.max(cy)
             self.stress['cy_min'][el, nsec] = np.min(cy)
             cy_index = np.argmax(abs(cy))
@@ -529,31 +533,40 @@ class FE(object):
         for part in self.part:
             nel = self.part[part]['nel']
             nmat = self.el['mat'][self.part[part]['el'][0]]
-            self.part[part]['nsection'] = self.mat[nmat]['nsection']
-            self.part[part]['name'] = self.mat[0]['mat_array']['name']
+            nsec = self.mat[nmat]['nsection']
+            self.part[part]['nsection'] = nsec
+            self.part[part]['name'] = self.mat[nmat]['mat_array']['name']
+            self.part[part]['name'] = self.part[part]['name'][:nsec]
             for label in self.stress:  # initalize
-                self.part[part][label] = np.zeros((nel, 2))
+                self.part[part][label] = np.zeros((nel, nsec))
             for iel, el in enumerate(self.part[part]['el']):
-                for label in self.stress:  # set
-                    self.part[part][label][iel, :] = self.stress[label][el, :]
-            self.part[part]['Lel'] = (self.part[part]['Lnd'][1:] +
-                                      self.part[part]['Lnd'][:-1]) / 2
+                nsection = self.mat[self.el['mat'][el]]['nsection']
+                for label in self.stress:
+                    self.part[part][label][iel, :] = \
+                        self.stress[label][el, :nsection]
+            #self.part[part]['Lel'] = (self.part[part]['Lnd'][1:] +
+            #                          self.part[part]['Lnd'][:-1]) / 2
 
     def shape_part(self, labels=['u', 'U', 'D', 'd2u', 'd3u']):
         for part in self.part:
-            nS = self.part[part]['nel'] * (self.nShape - 1) + 1
+            nS = self.part[part]['nel'] * self.nShape
             self.part[part]['Lshp'] = \
                 np.linspace(0, self.part[part]['Lnd'][-1], nS)  # sub-divided
             for label in labels:
                 self.part[part][label] = np.zeros((nS, 3))
             for iel, el in enumerate(self.part[part]['el']):
-                i = iel * (self.nShape - 1)
+                i = iel * self.nShape
                 for label in labels:
                     self.part[part][label][i:i + self.nShape, :] = \
                         self.shape[label][el, :, :].T
 
     def set_stiffness(self):  # set element stiffness matrix
-        if self.frame == '1D':
+        if self.frame == 'spring':
+            dof = ['u', 'v', 'w']
+            disp = ['x', 'y', 'z']
+            load = ['fx', 'fy', 'fz']
+            stiffness = self.stiffness_spring
+        elif self.frame == '1D':
             dof = ['v', 'rz']
             disp = ['y', 'tz']
             load = ['fy', 'mz']
@@ -563,11 +576,13 @@ class FE(object):
             disp = ['x', 'y', 'tz']
             load = ['fx', 'fy', 'mz']
             stiffness = self.stiffness_2D
-        else:
+        elif self.frame == '3D':
             dof = ['u', 'v', 'w', 'rx', 'ry', 'rz']
             disp = ['x', 'y', 'z', 'tx', 'ty', 'tz']
             load = ['fx', 'fy', 'fz', 'mx', 'my', 'mz']
             stiffness = self.stiffness_3D
+        else:
+            raise IndexError(f'frame not found, check setting: {self.frame}')
         self.dof = dof
         self.disp = disp
         self.load = load
@@ -577,8 +592,12 @@ class FE(object):
     def stiffness_spring(self, el):  # dof [u]
         L = self.el['dl'][el]
         E, A = self.get_mat_o(self.el['mat'][el])
-        k = E * A / L * np.matrix([[1, -1],
-                                   [-1, 1]])
+        k = E * A / L * np.matrix([[0, 0,  0, 0, 0,  0],
+                                   [0, 0,  0, 0, 0,  0],
+                                   [0, 0,  1, 0, 0, -1],
+                                   [0, 0,  0, 0, 0,  0],
+                                   [0, 0,  0, 0, 0,  0],
+                                   [0, 0, -1, 0, 0,  1]])
         return k
 
     def stiffness_1D(self, el):  # dof [v,rz]
@@ -741,8 +760,8 @@ class FE(object):
                     fn[i, 0] = (1 - s)**2 * (1 + 2 * s) * f[i]
                     fn[i, 1] = s**2 * (3 - 2 * s) * f[i]
                     mi = 5 if label == 'fy' else 4  # moment index
-                    #fn[mi, 0] = f[i] * (1 - s)**2 * s * self.el['dl'][el]
-                    #fn[mi, 1] = -f[i] * s**2 * (1 - s) * self.el['dl'][el]
+                    # fn[mi, 0] = f[i] * (1 - s)**2 * s * self.el['dl'][el]
+                    # fn[mi, 1] = -f[i] * s**2 * (1 - s) * self.el['dl'][el]
                     if load_type == 'dist':
                         # reduce moment for distributed load
                         fn[mi, :] *= 8 / 12
@@ -768,6 +787,15 @@ class FE(object):
         index = self.load.index(label)
         self.Fo[node * self.ndof + index] += load  # accumulate
 
+    def update_mass(self):
+        for part in self.part:
+            mass = 0
+            for el, Lel in zip(self.part[part]['el'], self.part[part]['Lel']):
+                nm = self.el['mat'][el]  # material index
+                mass += self.mat['mat_o']['rho'][nm] *\
+                    self.mat['mat_o']['A'][nm] * Lel
+            self.part[part]['mass'] = mass
+
     def add_weight(self, g=[0, 0, -1]):
         self.update_rotation()  # check / update rotation matrix
         for part in self.part:
@@ -792,7 +820,7 @@ class FE(object):
                 self.add_load(el=el, W=w)  # bursting/toppling load
 
     def check_part(self, part):
-        if part not in self.part:
+        if part not in self.part and part != 'all':
             err_txt = part + \
                 ' not present in [' + ', '.join(self.part.keys()) + ']'
             raise ValueError(err_txt)
@@ -804,22 +832,25 @@ class FE(object):
         else:  # node index
             index_type = 'node'
         if index_type == 'element':
-            if index == 'all':
-                if len(part) > 0:  # node index relitive to part
-                    elements = list(range(self.part[part]['nel']))
+            if part == 'all':
+                nodes = range(self.nnd)
             else:
-                elements = index
-                if not isinstance(elements, list):  # convert to list
-                    elements = [elements]
-            nodes = -1 * np.ones(2 * len(elements))  # node array
-            for i, element in enumerate(elements):
-                el = self.part[part]['el'][element]
-                if ends == 0 or ends == 2:  # start or both
-                    nodes[2 * i] = self.el['n'][el, 0]
-                if ends == 1 or ends == 2:  # end or both
-                    nodes[2 * i + 1] = self.el['n'][el, 1]
-            nodes = np.unique(nodes)
-            nodes = nodes[nodes > -1]
+                if index == 'all':
+                    if len(part) > 0:  # node index relitive to part
+                        elements = list(range(self.part[part]['nel']))
+                else:
+                    elements = index
+                    if not isinstance(elements, list):  # convert to list
+                        elements = [elements]
+                nodes = -1 * np.ones(2 * len(elements))  # node array
+                for i, element in enumerate(elements):
+                    el = self.part[part]['el'][element]
+                    if ends == 0 or ends == 2:  # start or both
+                        nodes[2 * i] = self.el['n'][el, 0]
+                    if ends == 1 or ends == 2:  # end or both
+                        nodes[2 * i + 1] = self.el['n'][el, 1]
+                nodes = np.unique(nodes)
+                nodes = nodes[nodes > -1]
         elif index_type == 'node':
             nodes = index
             if not isinstance(nodes, list):  # convert to list
@@ -846,43 +877,61 @@ class FE(object):
             dof = dof
         return dof
 
-    def add_bc(self, dof, index, part=None, ends=2, terminate=True):
+    def add_bc(self, dof, index, part=None, d=0, ends=2, terminate=True):
         if part:  # part=part then index=elements
             self.check_part(part)
             nodes = self.part_nodes(index, part, ends=ends)  # select nodes
         else:  # part=None then index=nodes,
             nodes = index
+        if isinstance(nodes, str) or not hasattr(nodes, '__len__'):
+            nnd = 1
+        else:
+            nnd = len(nodes)
         dof = self.extract_dof(dof)
         for constrn in dof:  # constrain nodes
             error_code = self.check_input('dof', constrn, terminate=terminate)
-            if not error_code:
-                self.BC[constrn] = np.append(self.BC[constrn], np.array(nodes))
+            if not error_code:  # append structured array
+                BC = np.ones(nnd, dtype=self.BCdtype)
+                BC['nd'], BC['d'] = nodes, d
+                index = [np.array(
+                        [nd in self.BC[constrn]['nd'] for nd in BC['nd']]),
+                         np.array(
+                        [nd in BC['nd'] for nd in self.BC[constrn]['nd']])]
+                if sum(index[1]) > 0:
+                    self.BC[constrn]['d'][index[1]] = BC[index[0]]['d']
+                self.BC[constrn] = np.append(self.BC[constrn], BC[~index[0]])
 
     def extractBC(self):  # extract matrix indicies for constraints
-        self.BCindex = np.array([])
-        for j, key in enumerate(self.BC.keys()):
-            ui = self.ndof * self.BC[key]  # node dof
+        self.BCindex = np.array([], dtype=self.BCdtype)
+        for j, constrn in enumerate(self.BC.keys()):
+            ui = self.ndof * self.BC[constrn]['nd']  # node dof
+            BC = np.zeros(len(ui), dtype=self.BCdtype)
+            BC['d'] = self.BC[constrn]['d']
             if len(ui) > 0:
-                if key == 'fix':  # fix all dofs
+                if constrn == 'fix':  # fix all dofs
                     for i in range(self.ndof):
-                        self.BCindex = np.append(self.BCindex, ui + i)
-                elif key == 'pin':  # pin node (u,v,w)
+                        BC['nd'] = ui + i
+                        self.BCindex = np.append(self.BCindex, BC)
+                elif constrn == 'pin':  # pin node (u,v,w)
                     for i in range(int(self.ndof / 2)):
-                        self.BCindex = np.append(self.BCindex, ui + i)
+                        BC['nd'] = ui + i
+                        self.BCindex = np.append(self.BCindex, BC)
                 else:
                     # skip-fix,pin
-                    self.BCindex = np.append(self.BCindex, ui + j - 2)
-        self.BCindex = list(map(int, set(self.BCindex)))
+                    BC['nd'] = ui + j - 2
+                    self.BCindex = np.append(self.BCindex, BC)
+        # self.BCindex = list(map(int, set(self.BCindex)))
 
     def extractND(self):
+        BC = np.zeros(self.ndof, dtype=self.BCdtype)
         for nd in np.where(self.nd_topo == 0)[0]:  # remove unconnected nodes
-            self.BCindex = np.append(self.BCindex,
-                                     nd * self.ndof + np.arange(0, self.ndof))
+            BC['nd'] = nd * self.ndof + np.arange(0, self.ndof)
+            self.BCindex = np.append(self.BCindex, BC)
 
     def assemble(self):  # assemble global stiffness matrix
         self.Ko = np.zeros((self.nK, self.nK))  # matrix without constraints
         for el in range(self.nel):
-            ke = self.stiffness(el)
+            ke = self.stiffness(el) * self.el['contact'][el]
             ke_index = itertools.product([0, self.ndof], repeat=2)
             ko_index = itertools.product(self.ndof * self.el['n'][el],
                                          repeat=2)
@@ -1015,16 +1064,22 @@ class FE(object):
                 errtxt += label + ' ' + str(self.mpc[label]['nodes']) + '\n'
             raise ValueError(errtxt)
 
+    def apply_displacments(self):
+        self.d = np.zeros(self.nK)  # apply displacemnt constraints (non-hom)
+        self.d[self.BCindex['nd']] = self.BCindex['d']
+        self.Fd = np.dot(self.Ko, self.d)
+
     def constrain(self):  # apply and colapse constraints
         self.extractBC()  # remove BC dofs
         self.extractND()  # remove unconnected nodes
         self.assemble_cp_nodes()
+        self.apply_displacments()  # apply displacment constraints
         self.K = np.copy(self.Ko)
-        self.F = np.copy(self.Fo)
+        self.F = np.copy(self.Fo - self.Fd)  # subtract displacment forces
         self.nd = {}  # node index
         self.nd['do'] = np.arange(0, self.nK, dtype=int)  # all nodes
         self.nd['mask'] = np.zeros(self.nK, dtype=bool)  # all nodes
-        self.nd['mask'][self.BCindex] = True  # remove
+        self.nd['mask'][self.BCindex['nd']] = True  # remove
         self.nd['mask'][self.cp_nd['dc']] = True  # condense
         self.nd['dc'] = self.nd['do'][self.nd['mask']]  # condensed
         self.nd['dr'] = self.nd['do'][~self.nd['mask']]  # retained
@@ -1070,6 +1125,7 @@ class FE(object):
         self.nK = int(self.nnd * self.ndof)  # stiffness matrix
         self.set_shape()  # dict of displacments
         self.set_stress()
+        self.update_mass()
         self.update_rotation()  # evaluate/update rotation matricies
         self.assemble()  # assemble stiffness matrix
         self.constrain()  # apply and colapse constraints
@@ -1079,12 +1135,28 @@ class FE(object):
         self.Dn[self.nd['dr']] = np.linalg.solve(self.K, self.F)  # global
         self.Dn[self.nd['dc']] = np.dot(
             self.Tc, self.Dn[self.nd['dr']])  # patch constrained DOFs
+        self.Dn[self.BCindex['nd']] = self.BCindex['d']  # patch displacments
         self.Fn = np.dot(self.Ko, self.Dn)  # reaction forces
         for i, disp in enumerate(self.disp):
             self.D[disp] = self.Dn[i::self.ndof]
         for i, load in enumerate(self.load):
             self.Fr[load] = self.Fn[i::self.ndof]
         self.interpolate()
+
+    def preload_err(self, d, *args):
+        dof, displacement_node, reaction_node, load = args
+        self.add_bc(dof, displacement_node, d=d)  # apply nodal displacment
+        self.solve()
+        err = abs(self.Fr[self.load[self.dof.index(dof)]][reaction_node] -
+                  load)
+        return err
+
+    def preload(self, dof, displacement_node, reaction_node, load):
+        self.bounding_box()  # calulate problem length scale
+        do = 0.5e-3*self.bb  # fraction of problem's bounding box
+        minimize(self.preload_err, do,
+                 args=(dof, displacement_node, reaction_node, load),
+                 method='Nelder-Mead', options={'fatol': 1e1})
 
     def check_condition(self, digits):
         self.condition_number = np.linalg.cond(self.K)
@@ -1129,17 +1201,33 @@ class FE(object):
         index = ('xyz'.index(projection[0]), 'xyz'.index(projection[1]))
         return index
 
-    def plot_nodes(self, projection='xz', ms=5, **kwargs):
+    def select_parts(self, select=[]):
+        if isinstance(select, str):
+            select = [select]
+        if not select:
+            part = self.part
+        else:
+            part = [p for p in self.part if p in select]
+        return part
+
+    def plot_nodes(self, projection='xz', ms=5, select=[], **kwargs):
         ax = kwargs.get('ax', plt.gca())
         index = self.get_index(projection)
         ax.plot(self.X[:, index[0]], self.X[:, index[1]], 'o', markersize=ms,
                 color=0.75 * np.ones(3))
-        for part in self.part:
+        for part in self.select_parts(select):
             for el in self.part[part]['el']:
                 nd = self.el['n'][el]
                 ax.plot([self.X[nd[0], index[0]], self.X[nd[1], index[0]]],
                         [self.X[nd[0], index[1]], self.X[nd[1], index[1]]],
                         color='C0', alpha=0.5)
+        plt.axis('equal')
+        mpc = kwargs.get('mpc', False)
+        if mpc:
+            for cp in self.mpc:
+                nodes = self.mpc[cp]['nodes']
+                ax.plot(self.X[nodes, index[0]],
+                        self.X[nodes, index[1]], 'C3o-', ms=4)
 
     def plot_vectors(self, projection='xz', **kwargs):
         ax = kwargs.get('ax', plt.gca())
@@ -1184,19 +1272,27 @@ class FE(object):
                          factor * F[index[0]], factor * F[index[1]],
                          head_width=factor * 0.15 * nF,
                          head_length=factor * 0.2 * nF,
-                         color='C1')
+                         color='C1', zorder=10, lw=1)
                 ax.plot(X[index[0]] + self.scale * dX[index[0]]
                         + factor * F[index[0]],
                         X[index[1]] + self.scale * dX[index[1]]
-                        + factor * F[index[1]], '.', alpha=0)
+                        + factor * F[index[1]], '.', alpha=0.5, zorder=10,
+                        lw=6)
 
-    def plot_displacment(self, projection='xz', **kwargs):
+    def plot_displacment(self, projection='xz', select=[], **kwargs):
         ax = kwargs.get('ax', plt.gca())
         index = self.get_index(projection)
-        for part in self.part:
-            ax.plot(self.part[part]['D'][:, index[0]],
-                    self.part[part]['D'][:, index[1]],
-                    color='C0')
+        for ic, part in enumerate(self.select_parts(select)):
+            for iel in range(self.part[part]['nel']):  #
+                i = iel * self.nShape
+                ax.plot(self.part[part]['D'][i:i+self.nShape, index[0]],
+                        self.part[part]['D'][i:i+self.nShape, index[1]],
+                        color=f'C{ic}')
+        for el in range(self.nel):
+            for end in [0, -1]:
+                ax.plot(self.shape['D'][el, index[0], end],
+                        self.shape['D'][el, index[1], end],
+                        'o', color='gray', ms=5)
 
     def plot_moment(self):
         plt.figure(figsize=plt.figaspect(0.75))
@@ -1228,10 +1324,10 @@ class FE(object):
         stress = ['cy', 'cz', 'axial']
         for i, part in enumerate(part):
             ci = next(color)
-            Lnorm = self.part[part]['Lshp'][-1]
+            # Lnorm = self.part[part]['Lshp'][-1]
             for label, ax in zip(stress, axes):  # , 's'
                 for j, ls in zip(range(self.part[part]['nsection']),
-                                       ['-', '--']):
+                                 ['-', '--']):
                     section = self.part[part]['name'][j]
                     ax.plot(self.part[part]['Lel'],  # /Lnorm
                             1e-6*self.part[part][label][:, j],
@@ -1243,9 +1339,8 @@ class FE(object):
         for i in range(len(axes) - 1):
             plt.setp(axes[i].get_xticklabels(), visible=False)
         plt.xlabel('part length')
-        #plt.sca(axes[1])
-        #plt.legend()
-
+        # plt.sca(axes[1])
+        # plt.legend()
 
     def plot_nodal(self):
         fig, ax = plt.subplots(2, 1, sharex=True, squeeze=True)
@@ -1260,7 +1355,6 @@ class FE(object):
             ax[1].plot(self.D[var], 'C{}'.format(i))
             text.add(var)
         text.plot()
-
 
     def plot_sections(self, ax=None, theta=0):
         if ax is None:
@@ -1341,12 +1435,12 @@ class FE(object):
         ax.invert_yaxis()
         plt.axis('equal')
 
-    def plot(self, projection='xz', scale_factor=-0.2):
+    def plot(self, projection='xz', scale_factor=-0.2, select=[]):
         with scale(self.deform, scale_factor):
             plt.figure()
-            self.plot_nodes(projection=projection)
-            self.plot_displacment(projection=projection)
-            self.plot_F(projection=projection)
+            self.plot_nodes(projection=projection, select=select)
+            self.plot_displacment(projection=projection, select=select)
+            # self.plot_F(projection=projection)
             plt.axis('off')
             plt.axis('equal')
 

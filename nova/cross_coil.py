@@ -226,7 +226,7 @@ def get_green_field(x, z, xi, zi, rc):
 
 
 def Gtorque(coil, subcoil, source, sink, multi_filament):  # source-sink
-    xo, zo = centroid(coil, sink)  # coil centroid
+    xo, zo, dz = centroid(coil, sink)  # coil centroid
     if multi_filament:
         Nbundle = 1
         Nsource = coil[source]['Nf']
@@ -256,12 +256,13 @@ def Gtorque(coil, subcoil, source, sink, multi_filament):  # source-sink
             xG[:2] += dxG  # field couple, xG
             # moment about coil centroid
             xG[2] += moment(xo, zo, x, z, dxG)
-            xG[3] += -(z-zo)*dxG[0]  # vertical crush
+            xG[3] += -dxG[0]*(z-zo)  # vertical crush
+    xG[3] /= dz
     return 2*np.pi*mu_o*xG
 
 
 def Btorque(coil, subcoil, plasma, passive_coils, sink):
-    xo, zo = centroid(coil, sink)  # coil centroid
+    xo, zo, dz = centroid(coil, sink)  # coil centroid
     Csink = subcoil
     Nsink = coil[sink]['Nf']
     xB = np.zeros(4)  # xBx, xBz, cross(r, dF)
@@ -283,17 +284,20 @@ def Btorque(coil, subcoil, plasma, passive_coils, sink):
                 z = Csink[sink_strand]['z'][0]
                 rc = Csink[sink_strand]['rc']
                 dfield = get_green_field(x, z, xi, zi, rc)
-                xB[:2] += Ii * x * dfield
+                dxB = Ii * x * dfield  # strand delta
+                xB[:2] += dxB
                 # moment about coil centroid
-                xB[2] += moment(xo, zo, x, z, xB[:2])
-                xB[3] += -(z-zo)*xB[0]  # vertical crush
+                xB[2] += moment(xo, zo, x, z, dxB)
+                xB[3] += -dxB[0]*(z-zo)  # vertical crush
+    xB[3] /= dz
     return 2*np.pi*mu_o*xB
 
 
 def centroid(coil, sink):
     xo = coil[sink]['x']
     zo = coil[sink]['z']
-    return xo, zo
+    dz = coil[sink]['dz']
+    return xo, zo, dz
 
 
 def moment(xo, zo, x, z, xB):

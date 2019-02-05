@@ -42,13 +42,14 @@ class timeconstant:
         td, Id = self.trim(**kwargs)
         to = kwargs.get('to', 10e-3)
         Io = kwargs.get('Io', -60e3)
-        tau = kwargs.get('Io', 30e-3)
+        tau = kwargs.get('tau', 30e-3)
         x = minimize(self.fit_tau, [to, Io, tau], args=(td, Id)).x
         err = self.fit_tau(x, td, Id)
         to, Io, tau = x
         Iexp = Io*np.exp(-(td-to)/tau)
         if plot:
-            plt.plot(1e3*td, 1e-3*Iexp, '-', label='exp')
+            ax = kwargs.get('ax', plt.gca())
+            ax.plot(1e3*td, 1e-3*Iexp, '-', label='exp')
         return to, Io, tau, err, Iexp
 
     def get_td(self, plot=False, **kwargs):  # linear discharge time
@@ -220,11 +221,9 @@ class dina:
             raise IndexError('ext {} not found in {}'.format(ext, files))
         return join(folder, file)
 
-    def read_csv(self, filename, dropnan=True, split=''):
-        data = pd.read_csv(filename, delim_whitespace=True, skiprows=0,
-                           na_values='NAN')
-        if dropnan:
-            data = data.dropna()  # remove NaN values
+    def read_csv(self, filename, dropnan=True, split='', dataframe=False):
+        data = pd.read_csv(filename, delimiter='\t', na_values='NAN')
+
         columns = {}
         for c in list(data):
             if split:
@@ -237,8 +236,11 @@ class dina:
         for var in data_keys:
             if len(data[var]) == 0 or np.isnan(data[var]).all():
                 data.pop(var)
-        data = data.to_dict(orient='list')
-        return data, columns
+        if dropnan:
+            data = data.dropna(axis=0)  # remove NaN values
+        if not dataframe:
+            data = data.to_dict(orient='list')
+        return data
 
 
 if __name__ == '__main__':

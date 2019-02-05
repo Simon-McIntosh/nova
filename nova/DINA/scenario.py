@@ -25,13 +25,15 @@ from nova.coils import PF
 from nova.streamfunction import SF
 from amigo.time import clock
 import copy
+import pandas as pd
+from amigo.addtext import linelabel
 
 
-class read_scenario(pythonIO):
+class scenario(pythonIO):
 
     def __init__(self, database_folder='operations', folder=None,
                  read_txt=False, VS=False, file_type='txt', dCoil=0.25,
-                 setname='split'):
+                 setname='split_f'):
         self.date_switch = datetime.strptime('2016-02', '%Y-%m')
         self.read_txt = read_txt
         self.setname = setname
@@ -41,37 +43,81 @@ class read_scenario(pythonIO):
             self.load_file(folder, file_type=file_type)
         pythonIO.__init__(self)  # python read/write
 
+    def get_folders(self, exclude=[]):
+        folders = np.ones(self.dina.nfolder,
+                          dtype=[('name', 'U25'),
+                                 ('year', int), ('mode', 'U25'),
+                                 ('month', int), ('version', 'U25')])
+        for i in range(self.dina.nfolder):
+            folders[i]['name'] = self.dina.folders[i]
+            folders[i]['mode'] = self.dina.folders[i].split('DINA')[0][:-1]
+            timestamp = self.dina.folders[i].split('DINA')[-1]
+            folders[i]['year'] = int(timestamp.split('-')[0])
+            timestamp = ''.join(timestamp.split('-')[1:])
+            folders[i]['month'] = int(timestamp[:2])
+            folders[i]['version'] = timestamp[2:].replace('_', '')
+        folders.sort(order=['year', 'month', 'version'])
+        if exclude:
+            index = [name not in exclude for name in folders['name']]
+            folders = folders[index]
+        return folders
+
+    def locate_file_type(self, file_type, folder):
+        file_types = ['txt', 'qda']
+        file_types.remove(file_type)
+        file_types = [file_type, *file_types]
+        filepath = None
+        for file_type in file_types:
+            try:
+                filepath = self.dina.locate_file(
+                        'data2.{}'.format(file_type), folder=folder)
+                break
+            except IndexError:
+                pass
+        if filepath is None:
+            raise FileNotFoundError()
+        return filepath, file_type
+
     def load_file(self, folder, **kwargs):
         read_txt = kwargs.get('read_txt', self.read_txt)
         setname = kwargs.get('setname', self.setname)
         dCoil = kwargs.get('dCoil', self.dCoil)
         file_type = kwargs.get('file_type', 'txt')
-        filepath = self.dina.locate_file('data2.{}'.format(file_type),
-                                         folder=folder)
+        self.load_coilset(dCoil=dCoil, read_txt=False)
+        self.load_functions(setname=setname)
+        filepath, file_type = self.locate_file_type(file_type, folder)
         filepath = '.'.join(filepath.split('.')[:-1])
+        self.folder = folder
         self.filepath = '/'.join(filepath.split('\\')[:-1]) + '/'
-        attributes = ['name', 'date', 'data', 't', 'dt', 'fun',
-                      'Icoil', 'Ipl', 'flattop', 'hip',
-                      'boundary', 'coilset', 'dCoil']
+        attributes = ['name', 'date', 'data', 'post', 'tie_plate',
+                      't', 'dt', 'fun', 'Icoil', 'Ipl']
         if read_txt or not isfile(filepath + '.pk'):
             self.read_file(folder, file_type=file_type, dCoil=dCoil)
             self.save_pickle(filepath, attributes)
         else:
             self.load_pickle(filepath)
-            if dCoil != self.dCoil:  # reload coilset
-                print('reloading - dCoil {}'.format(dCoil))
-                self.load_coilset(dCoil=dCoil, VS=False)  # coil geometory
-                self.save_pickle(filepath, attributes)
-        self.load_functions(setname=setname)
         self.set_limits()
+        self.loadCScurrents()
+
+    def load_coilset(self, read_txt=False, **kwargs):
+        dCoil = kwargs.get('dCoil', self.dCoil)
+        filepath = '/'.join(self.dina.directory.split('\\')[:-1]) + '/'
+        filepath = filepath + f'coilset_{dCoil}'
+        attributes = ['coilset', 'dCoil', 'boundary']
+        if read_txt or not isfile(filepath + '.pk'):
+            self.compute_coilset(dCoil=dCoil, VS=False)  # coil geometory
+            self.load_boundary()  # load flux map limits and fw profile
+            self.save_pickle(filepath, attributes)
+        else:
+            self.load_pickle(filepath)
 
     def load_functions(self, setname='link'):
-        if setname != self.setname:
-            self.update_coilset()
         self.setname = setname
         self.pf = PF()  # create bare pf coil instance
         self.pf(self.coilset[self.setname])
-        self.sf = SF()  # creat bare sf instance
+        if setname != self.setname:
+            self.update_coilset()
+        self.sf = SF()  # create bare sf instance
         self.ff = force_field(self.coilset[self.setname])
         if self.coilset[self.setname]['force']['update_passive']:
             self.ff.set_force_field(state='passive')
@@ -80,30 +126,121 @@ class read_scenario(pythonIO):
         self.inv.sf = self.sf  # link sf instance
         self.inv.ff = self.ff  # link ff instance
 
-    def read_file(self, folder, file_type='txt', dCoil=0.5):
-        print('reading {}'.format(folder))
+    def read_file(self, folder, file_type='txt', dCoil=0.5, verbose=False):
+        if verbose:
+            print('reading {}'.format(folder))
         if file_type == 'txt':
-            filename = self.read_txt_file(folder)
+            self.read_txt_file(folder)
         elif file_type == 'qda':
-            filename = self.read_qda_file(folder)
-        self.name = filename.split(sep)[-3]
+            self.read_qda_file(folder)
         self.date = datetime.strptime(
-                self.name.split('DINA')[-1].split('_')[0], '%Y-%m')
+                self.name.split('DINA')[-1].split('_')[0][:7], '%Y-%m')
         if 'time' in self.data2:  # rename time field
             self.data2['t'] = self.data2['time']
             self.data2.pop('time')
-        self.trim_nan()
-        self.space_data()
-        self.load_data()
-        self.opperate()  # identify operating modes
-        self.load_boundary()  # load flux map limits and fw profile
-        self.load_coilset(dCoil=dCoil, VS=False)  # coil geometory
+        self.load_scenario_data()
+        self.load_force_data()
+        self.postprocess()  # calculate Faxial
+        # self.operate()  # identify operating modes
+
+    def get_current(self, t, names):
+        Ic = pd.Series(index=names)
+        for i, name in enumerate(names):
+            key = 'I'+name.lower()
+            if 'cs1' in key:
+                key = key[:-1]
+            if key == 'Iplasma':
+                key = 'Ip'
+                factor = 1e3  # MA to kA
+            else:
+                factor = 1
+            Ic.iloc[i] = factor*self.fun[key](t)
+        return Ic
+
+    def get_time(self, dt=None):
+        if dt is None:
+            dt = self.dt  # data-set resolution
+        n = int((self.t[-1] - self.t[0]) / dt)
+        time = np.linspace(self.t[0], self.t[-1], n)
+        return time, n
+
+    def stored_energy(self, M, names, dt=20, plot=False):
+        time, n = self.get_time(dt=dt)
+        E = np.zeros(n)
+        for i, t in enumerate(time):
+            Ic = self.get_current(t, names)  # kA
+            E[i] = 0.5*M.dot(Ic).dot(Ic)
+            E[i] *= 1e-3  # stored energy GJ
+        energy = pd.Series()
+        index = np.argmax(E)
+        energy['t [s]'] = time[index]
+        energy['E [GJ]'] = E[index]
+        Ic = self.get_current(time[index], names)
+        for Io, name in zip(Ic, names):
+            energy[f'Io [kA] {name}'] = Io
+        if plot:
+            ax = plt.subplots(1, 1)[1]
+            ax.plot(time, E)
+            ax.set_xlabel('$t$ s')
+            ax.set_ylabel('$E$ GJ')
+            index = np.argmax(E)
+            ax.text(time[index], E[index],
+                    f'{E[index]:1.1f}GJ, {time[index]:1.1f}s',
+                    ha='left', va='bottom')
+            plt.despine()
+        return energy
+
+    def scenario_fault(self, M, names, dt=None, plot=False):
+        time, n = self.get_time(dt=dt)
+        Ic = np.zeros((n, len(M)))
+        dI = np.zeros((n, len(M)))
+        Eo = np.zeros((n, len(M)))
+        Efault = np.zeros((n, len(M)))
+        for i, t in enumerate(time):
+            Ic[i, :], dI[i, :], Eo[i, :], Efault[i, :] = \
+                self.fault_current(t, M, names)
+        Ic = pd.DataFrame(Ic, columns=names)
+        dI = pd.DataFrame(dI, columns=names)
+        Eo = pd.DataFrame(Eo, columns=names)
+        Efault = pd.DataFrame(Efault, columns=names)
+        fault = pd.DataFrame(columns=names)
+        for name in names:
+            i = Efault.loc[:, name].idxmax()
+            fault.loc['t', name] = time[i]
+            fault.loc['Io', name] = Ic.loc[i, name]
+            fault.loc['dI', name] = dI.loc[i, name]
+            fault.loc['Ifault', name] = Ic.loc[i, name] + dI.loc[i, name]
+            fault.loc['Eo', name] = Eo.loc[i, name]
+            fault.loc['Efault', name] = Efault.loc[i, name]
+        if plot:
+            ax = plt.subplots(2, 1)[1]
+            for i, name in enumerate(names):
+                ls = f'C{i}-' if 'PF' in name else f'C{i-6}--'
+                ax[0].plot(time, Ic.loc[:, name], ls, label=name)
+                ax[1].plot(time, Efault.loc[:, name], ls, label=name)
+            ax[0].legend(bbox_to_anchor=(1.1, 1.4), ncol=6)
+            plt.despine()
+            plt.detick(ax)
+            ax[1].set_xlabel('$t$ s')
+            ax[0].set_ylabel('$I$ kA')
+            ax[1].set_ylabel('$E_{fault}$ GJ')
+        return fault
+
+    def fault_current(self, t, Mt, names):
+        Ic = self.get_current(t, names)  # kA
+        L = np.diag(Mt)
+        M = Mt.copy()
+        np.fill_diagonal(M, 0)
+        Eo = 1e-3 * 0.5 * L * Ic**2  # GJ
+        dI = pd.Series(1/L * np.dot(M, Ic), index=Ic.index)
+        Efault = 1e-3 * 0.5 * L * (Ic+dI)**2  # GJ
+        return Ic, dI, Eo, Efault
 
     def fix_shape(self, plot=False, **kwargs):  # set colocation points
         t = kwargs.get('t', self.flattop['t'][-1])  # eof
         n = kwargs.get('n', self.boundary['n'])
         limit = kwargs.get('limit', self.boundary['limit'])
-        self.update_DINA(t)
+        self.update_scenario(t)
         eqdsk = self.update_psi(n=n, limit=limit, plot=plot)
         self.inv.colocate(eqdsk)
 
@@ -114,6 +251,7 @@ class read_scenario(pythonIO):
                            IPF6=52)
         self.inv.set_limit(FCSsep=240, side='upper')  # force limits
         self.inv.set_limit(FCSsum=60, side='both')
+
         self.inv.set_limit(FPF1=-150, FPF2=-75, FPF3=-90, FPF4=-40,
                            FPF5=-10, FPF6=-190, side='lower')
         self.inv.set_limit(FPF1=110, FPF2=15, FPF3=40, FPF4=90,
@@ -142,13 +280,28 @@ class read_scenario(pythonIO):
         self.inv.update_plasma()
         self.ff.set_force_field(state='passive')
 
+    def set_tie_plate(self):
+        self.tie_plate = {}
+        self.tie_plate['preload'] = 201.33
+        self.tie_plate['limit_load'] = -26  # minimum axial load
+        self.tie_plate['alpha'] = 6.85e-3  # alpha Fx (Poisson)
+        self.tie_plate['beta'] = np.array([-0.0165, -0.0489, -0.0812,
+                                           -0.113, -0.145, -0.178])  # beta Fz
+        self.tie_plate['gamma'] = -2.95e-2  # gamma Fc (crush)
+        self.tie_plate['mg'] = 1.18  # coil weight MN
+
     def read_txt_file(self, folder, dropnan=True, force=False):
         filename = self.dina.locate_file('data2.txt', folder=folder)
-        self.data2 = self.dina.read_csv(filename, dropnan=False, split=',')[0]
-        return filename
+        self.name = filename.split(sep)[-3]
+        self.data2 = self.dina.read_csv(filename, dropnan=True, split=',',
+                                        dataframe=True)
+        filename = self.dina.locate_file('data3.txt', folder=folder)
+        self.data3 = self.dina.read_csv(filename, dropnan=True, split=',',
+                                        dataframe=True)
 
     def read_qda_file(self, folder):
         filename = self.dina.locate_file('data2.qda', folder=folder)
+        self.name = filename.split(sep)[-3]
         self.qdafile = QDAfile(filename)
         self.data2 = {}
         columns = {}
@@ -158,24 +311,26 @@ class read_scenario(pythonIO):
             if nrow > 0:
                 columns[var] = var.split(',')[0]
                 self.data2[columns[var]] = np.array(self.qdafile.data[i, :])
-        return filename
+        filename = self.dina.locate_file('data3.qda', folder=folder)
+        self.name = filename.split(sep)[-3]
+        self.qdafile = QDAfile(filename)
+        self.data3 = {}
+        columns = {}
+        for i, (var, nrow) in enumerate(zip(self.qdafile.headers,
+                                            self.qdafile.rows)):
+            var = var.decode()
+            if nrow > 0:
+                columns[var] = var.split(',')[0]
+                self.data3[columns[var]] = np.array(self.qdafile.data[i, :])
 
-    def trim_nan(self):
-        nan_index = np.zeros(len(self.data2['t']), dtype=int)
-        for var in self.data2:
-            nan_index += np.isnan(self.data2[var])
-        nan_index = nan_index > 0
-        for var in self.data2:
-            self.data2[var] = np.array(self.data2[var])[~nan_index]
-
-    def load_coilset(self, dCoil=0.25, VS=False):
+    def compute_coilset(self, dCoil=0.25, VS=False, nlevel=5):
         self.dCoil = dCoil
-        dCoil_f = self.dCoil / np.sqrt(2)  # fine mesh
+        dCoil = [self.dCoil/np.sqrt(2)**i for i in range(nlevel)]
         self.coilset = {}
-        self.coilset['split'] = self.load_coil(self.dCoil, VS, joinCS=False)
-        self.coilset['split_f'] = self.load_coil(dCoil_f, VS, joinCS=False)
-        self.coilset['link'] = self.load_coil(self.dCoil, VS, joinCS=True)
-        self.coilset['link_f'] = self.load_coil(dCoil_f, VS, joinCS=True)
+        for i, dC in enumerate(dCoil):
+            f = '' if i == 0 else '_' + i*'f'
+            self.coilset['split'+f] = self.load_coil(dC, VS, joinCS=False)
+            self.coilset['link'+f] = self.load_coil(dC, VS, joinCS=True)
 
     def load_coil(self, dCoil, VS, joinCS=True):
         pf = PFgeom(VS=VS, dCoil=dCoil).pf
@@ -190,6 +345,9 @@ class read_scenario(pythonIO):
 
     def load_boundary(self):
         eqdsk = read_eqdsk(file='burn').eqdsk  # load referance sf instance
+        self.update_boundary(eqdsk)
+
+    def update_boundary(self, eqdsk):
         limit = [[eqdsk['x'][0], eqdsk['x'][-1]],
                  [eqdsk['z'][0], eqdsk['z'][-1]]]
         self.boundary = {'n': eqdsk['nx'] * eqdsk['nz'], 'limit': limit,
@@ -198,20 +356,16 @@ class read_scenario(pythonIO):
     def load_force(self, coilset):
         ff = force_field(coilset, multi_filament=True)
         coilset['force']['Fa'] = ff.Fa  # interaction matrices
+        coilset['force']['Fa_filament'] = ff.Fa_filament
         coilset['force']['Fp'] = ff.Fp
-
-    def plot_coils(self, ax=None, current='AT'):
-        if ax is None:
-            ax = plt.gca()
-        self.pf.plot(label=True, current=current, patch=False, ax=ax)
-        self.pf.plot(subcoil=True, plasma=True, ax=ax)
+        coilset['force']['Fp_filament'] = ff.Fp_filament
 
     def space_data(self):  # generate interpolators and space timeseries
         if self.date > self.date_switch:
             coordinate_switch = 1
         else:  # old file - correct coordinates
             coordinate_switch = -1
-        to = np.copy(self.data2['t'])
+        to, unique_index = np.unique(self.data2['t'], return_index=True)
         dt = np.mean(np.diff(to))
         tmax = np.nanmax(to)
         tmin = np.nanmin(to)
@@ -226,10 +380,12 @@ class read_scenario(pythonIO):
         for var in extract:  # interpolate
             if ('I' in var and len(var) <= 5) or ('V' in var):
                 self.data2[var] *= coordinate_switch
-            self.fun[var] = interp1d(to, self.data2[var])
+            self.fun[var] = interp1d(to, self.data2[var][unique_index],
+                                     fill_value='extrapolate')
             self.data[var] = self.fun[var](self.t)
 
-    def load_data(self):
+    def load_scenario_data(self):
+        self.space_data()
         self.Icoil = {}
         for var in self.data:
             if var == 'Ip':  # plasma
@@ -239,6 +395,68 @@ class read_scenario(pythonIO):
                 self.Icoil[var[1:].upper()] = 1e3*self.data[var]
         self.t = self.data['t']
         self.dt = np.mean(np.diff(self.t))
+
+    def load_force_data(self, ticktock=False):
+        coils = list(self.pf.coilset['coil'].keys())
+        CSname = self.pf.coilset['index']['CS']['name']
+        self.post = {'DINA': {}, 'Nova': {}}
+        # DINA
+        self.post['DINA']['t'] = pd.Series(self.data3['time'])
+        nC, nt = self.pf.coilset['nC'], len(self.post['DINA']['t'])
+        Fx, Fz, B = np.zeros((nt, nC)), np.zeros((nt, nC)), np.zeros((nt, nC))
+        for i, name in enumerate(self.pf.coilset['coil']):
+            B[:, i] = self.data3[f'B_{name.lower()}']
+            Fx[:, i] = self.data3[f'Fr_{name.lower()}']
+            Fz[:, i] = self.data3[f'Fz_{name.lower()}']
+        self.post['DINA']['B'] = pd.DataFrame(B, columns=coils)
+        self.post['DINA']['Fx'] = pd.DataFrame(Fx, columns=coils)
+        self.post['DINA']['Fz'] = pd.DataFrame(Fz, columns=coils)
+        self.post['DINA']['Fsep'] = self.calculate_Fsep(
+                self.post['DINA']['Fz'].loc[:, CSname])
+        # Nova
+        Fx, Fz, Fc = np.zeros((nt, nC)), np.zeros((nt, nC)), np.zeros((nt, nC))
+        tick = clock(nt)
+        for i, t in enumerate(self.post['DINA']['t']):
+            self.update_scenario(t)  # recalculate coil forces (+ crush)
+            Fx[i, :] = self.ff.Fcoil['F'][:, 0]
+            Fz[i, :] = self.ff.Fcoil['F'][:, 1]
+            Fc[i, :] = self.ff.Fcoil['F'][:, 3]
+            if ticktock:
+                tick.tock()
+        self.post['Nova']['t'] = self.post['DINA']['t']
+        self.post['Nova']['Fx'] = pd.DataFrame(Fx, columns=coils)
+        self.post['Nova']['Fz'] = pd.DataFrame(Fz, columns=coils)
+        self.post['Nova']['Fc'] = pd.DataFrame(Fc, columns=coils)
+        self.post['Nova']['Fsep'] = self.calculate_Fsep(
+                self.post['Nova']['Fz'].loc[:, CSname])
+        # patch DINA Faxial with Nova Fc calculation
+        self.post['DINA']['Fc'] = self.post['Nova']['Fc']
+
+    def loadCScurrents(self):
+        CSname = self.pf.coilset['index']['CS']['name']
+        self.post['DINA']['Ic'] = pd.DataFrame(columns=CSname)
+        for name in CSname:
+            data_name = 'CS1' if 'CS1' in name else name
+            Ic_interp = interp1d(self.t, self.data[f'I{data_name.lower()}'],
+                                 fill_value='extrapolate')
+            self.post['DINA']['Ic'][name] = Ic_interp(self.post['DINA']['t'])
+
+    def postprocess(self):
+        # postprocess Faxial calculation
+        self.set_tie_plate()  # set tip-plate constants
+        CSname = self.pf.coilset['index']['CS']['name']
+        self.post['Nova']['Faxial'] = self.calculate_Faxial(
+            self.post['Nova']['Fx'].loc[:, CSname],
+            self.post['Nova']['Fz'].loc[:, CSname],
+            self.post['Nova']['Fc'].loc[:, CSname])
+        self.post['Nova']['Fsum'] = np.sum(
+                self.post['Nova']['Fz'].loc[:, CSname], axis=1)
+        self.post['DINA']['Faxial'] = self.calculate_Faxial(
+            self.post['DINA']['Fx'].loc[:, CSname],
+            self.post['DINA']['Fz'].loc[:, CSname],
+            self.post['DINA']['Fc'].loc[:, CSname])
+        self.post['DINA']['Fsum'] = np.sum(
+                self.post['DINA']['Fz'].loc[:, CSname], axis=1)
 
     def filter_vector(self, x, dt, dt_window=1.0, polyorder=2):
         x_filter = {}
@@ -403,13 +621,15 @@ class read_scenario(pythonIO):
         ylabel = '{} {}'.format(variable, unit)
         return scale, ylabel
 
-    def opperate(self, plot=False):  # identify operating modes
-        trim = np.argmax(self.Ipl[::-1] < 0)
+    def operate(self, plot=False, dt_window=10, nstd=3):
+        # identify operating modes
+        trim = np.argmax(self.Ipl[::-1] < -1e-3)
         ind = len(self.Ipl)-trim
-        Ipl_lp = lowpass(self.Ipl[:ind], self.dt, dt_window=1)  # current
-        dIpldt_lp = np.gradient(Ipl_lp[:ind], self.t[:ind])  # slope
-        self.hip = histopeaks(self.t[:ind], dIpldt_lp, nstd=3, nlim=10,
-                              nbins=75)  # modes
+        # low-pass filter current
+        Ipl_lp = lowpass(self.Ipl, self.dt, dt_window=dt_window)
+        dIpldt_lp = np.gradient(Ipl_lp, self.t)  # slope
+        self.hip = histopeaks(self.t[:ind], dIpldt_lp[:ind], nstd=nstd, nlim=9,
+                              nbins=300)  # modes
         opp_index = self.hip.timeseries(Ip=self.Ipl[:ind], plot=plot)
         self.flattop = {}  # plasma current flattop
         self.flattop['index'] = opp_index[0]
@@ -422,25 +642,32 @@ class read_scenario(pythonIO):
         It = {}
         for coil in self.Icoil:
             if VS3 or 'VS' not in coil:
-                if index < 0:  # frame_index
+                if index <= 0 and isinstance(index, int):  # frame_index
                     It[coil] = self.Icoil[coil][-index]
                 else:  # time value
                     It[coil] = 1e3*self.fun['I'+coil.lower()](index)
-        if 'CS1' not in self.pf.coilset['coil']:  # split central pair
+        if 'CS1' in It and 'CS1' not in self.pf.coilset['coil']:
+            # split central pair
             for coil in ['CS1L', 'CS1U']:
-                It[coil] = It['CS1']
+                It[coil] = It['CS1']  # prior to turn multiplication
             It.pop('CS1')  # remove CS1 value
+        elif 'CS1' in self.pf.coilset['coil'] and 'CS1' not in It:
+            # combine central pair
+            It['CS1'] = np.mean([It['CS1L'], It['CS1U']])
+            It.pop('CS1L')  # remove CS1L value
+            It.pop('CS1U')  # remove CS1U value
         for name in It:  # A to A.turn
             if name in self.pf.coilset['coil']:
                 It[name] *= self.pf.coilset['coil'][name]['Nt']
         return It  # return dict of coil currents
 
-    def update_DINA(self, t=None):  # update from DINA interpolators
+    def update_scenario(self, t=None):
+        # update from DINA interpolators
         if t is None:
             t = self.flattop['t'][-1]  # eof
         self.to = t  # referance time
         self.set_coil_current(t)
-        self.set_plasma(t)
+        self.set_plasma(self.extract_plasma(t))
         self.update_coilset()
         self.ff.get_force()
 
@@ -481,7 +708,7 @@ class read_scenario(pythonIO):
                     coilset['subcoil'][subname]['If'] = current / Nf
 
     def update_psi(self, n=None, limit=None, plot=False, ax=None,
-                   current='A'):
+                   current='A', plot_nulls=False):
         if n is not None:
             self.boundary['n'] = n
         if limit is not None:
@@ -490,16 +717,17 @@ class read_scenario(pythonIO):
                                    self.boundary['limit'])[:4]
         psi = get_coil_psi(x2d, z2d, self.pf.coilset['subcoil'],
                            self.pf.coilset['plasma'])
-        plasma_parameters = self.coilset[self.setname]['plasma_parameters']
         eqdsk = {'x': x, 'z': z, 'psi': psi,
-                 'beta': plasma_parameters['beta'],
-                 'li': plasma_parameters['li'],
-                 'Ipl': plasma_parameters['Ipl']}
+                 'nx': len(x), 'nz': len(z)}
         eqdsk['xlim'] = self.boundary['xlim']
         eqdsk['zlim'] = self.boundary['zlim']
+        if 'plasma_parameters' in self.coilset[self.setname]:
+            plasma_parameters = self.coilset[self.setname]['plasma_parameters']
+            for variable in ['beta', 'li', 'Ipl']:
+                eqdsk[variable] = plasma_parameters[variable]
         self.sf.update_eqdsk(eqdsk)
         if plot:
-            self.plot_plasma(ax=ax, current=current)
+            self.plot_plasma(ax=ax, current=current, plot_nulls=plot_nulls)
         return eqdsk
 
     def plot_plasma(self, ax=None, plot_nulls=False, current='A'):
@@ -507,42 +735,66 @@ class read_scenario(pythonIO):
             ax = plt.subplots(1, 1, figsize=(8, 10))[1]
         self.sf.contour(Xnorm=True, boundary=True,
                         separatrix='', ax=ax)
-        self.sf.plot_sol(core=True, ax=ax)
+        try:
+            self.sf.sol(update=True, plot=True)
+            self.sf.plot_sol(core=True, ax=ax)
+        except ValueError:  # legs not found
+            pass
+        except AttributeError:
+            pass
         if plot_nulls:
             self.sf.plot_nulls(labels=['X', 'M'])
         self.sf.plot_firstwall(ax=ax)
         self.inv.plot_fix()
-        #self.plot_coils(ax=ax, current=current)
-        #self.ff.get_force()
-        #self.ff.plot()
-        #self.ff.plotCS()
+        self.pf.plot(label=True, current=current, patch=False, ax=ax)
+        self.pf.plot(subcoil=True, plasma=True, ax=ax)
+        self.ff.get_force()
+        self.ff.plot(label=True)
+        self.ff.plotCS()
 
-    def set_plasma(self, t):
-        try:
-            x = self.fun['Rcur'](t)
-            z = self.fun['Zcur'](t)
-            apl = self.fun['ap'](t)
-            kpl = self.fun['kp'](t)
-        except KeyError:
-            x = 1e-2*self.fun['Rp'](t)
-            z = 1e-2*self.fun['Zp'](t)
-            apl = 1e-2*self.fun['a'](t)
-            kpl = self.fun['Ksep'](t)
-        dx = 2 * apl * 0.025
-        dz = kpl * dx
-        Ipl = 1e6*self.fun['Ip'](t)
-        beta = self.fun['BETAp'](t)
-        li = self.fun['li(3)'](t)
+    def extract_plasma(self, t):
+        if t <= 0 and isinstance(t, int):  # frame_index
+            x = self.plasma['x'][-t]
+            z = self.plasma['z'][-t]
+            # dx, dz = self.plasma['dx'], self.plasma['dz']
+            Ipl = self.plasma['I'][-t]
+            apl = np.nan
+            kpl = np.nan
+            beta = np.nan
+            li = np.nan
+        else:  # time interpolant
+            try:
+                x = self.fun['Rcur'](t)
+                z = self.fun['Zcur'](t)
+                apl = self.fun['ap'](t)
+                kpl = self.fun['kp'](t)
+            except KeyError:
+                x = 1e-2*self.fun['Rp'](t)
+                z = 1e-2*self.fun['Zp'](t)
+                apl = 1e-2*self.fun['a'](t)
+                kpl = self.fun['Ksep'](t)
+            # dx = 2 * apl * 0.025
+            # dz = kpl * dx
+            Ipl = 1e6*self.fun['Ip'](t)
+            beta = self.fun['BETAp'](t)
+            li = self.fun['li(3)'](t)
         plasma_parameters = {'Ipl': Ipl, 'xcur': x, 'zcur': z, 'a': apl,
                              'kappa': kpl, 'beta': beta, 'li': li}
+        return plasma_parameters
+
+    def set_plasma(self, plasma_parameters):
         for name in self.coilset:
             self.coilset[name]['plasma_parameters'] = plasma_parameters
         ###
         # eq update here
         ###
+        dx, dz = 0.15, 0.25
         self.coilset[self.setname]['plasma'].clear()
-        if x > 0.0:
-            plasma = {'x': x, 'z': z, 'dx': dx, 'dz': dz, 'It': Ipl}
+        if plasma_parameters['xcur'] > 0:
+            plasma = {'x': plasma_parameters['xcur'],
+                      'z': plasma_parameters['zcur'],
+                      'It': plasma_parameters['Ipl'],
+                      'dx': dx, 'dz': dz}
             plasma_subcoil = PF.mesh_coil(plasma, dCoil=0.25)
             for i, filament in enumerate(plasma_subcoil):
                 subname = 'Plasma_{}'.format(i)
@@ -587,7 +839,7 @@ class read_scenario(pythonIO):
         self.Fcoil['t'] = np.linspace(self.t[1], self.t[-2], n)
         tick = clock(n, header='calculating force history')
         for i, t in enumerate(self.Fcoil['t']):
-            self.update_DINA(t)
+            self.update_scenario(t)
             Fcoil = self.ff.Fcoil
             self.Fcoil['sep'][i] = Fcoil['CS']['sep']
             self.Fcoil['zsum'][i] = Fcoil['CS']['zsum']
@@ -659,7 +911,7 @@ class read_scenario(pythonIO):
             plt.despine()
 
     def get_index(self, index):
-        if index < 0:  # interger frame index
+        if index <= 0:  # interger frame index
             frame_index = -index
         else:  # time
             if index < np.min(self.t) or index > np.max(self.t):
@@ -688,7 +940,10 @@ class read_scenario(pythonIO):
                      plot_turn=False):
         if ax is None:
             ax = plt.subplots(1, 1)[1]
-        index = self.opp_index[1]  # mode index
+        if not hasattr(self, 'opp_index'):
+            mask=False
+        else:
+            index = self.opp_index[1]  # mode index
         if mask:
             alpha = 0.15
         else:
@@ -741,16 +996,232 @@ class read_scenario(pythonIO):
         VS3_rms = np.sqrt(np.trapz(Ivs3**2, t)/(t[-1]-t[0]))
         return VS3_rms
 
+    def get_gap_name(self):
+        nCS = self.pf.coilset['index']['CS']['n']
+        CSname = self.pf.coilset['index']['CS']['name']
+        gap_name = [f'{CSname[i]}_{CSname[i+1]}' for i in range(nCS - 1)]
+        gap_name = [f'LDP_{CSname[0]}'] + gap_name + [f'{CSname[-1]}_LDP']
+        return gap_name
+
+    def calculate_Fsep(self, FzCS):
+        Fsum = np.sum(FzCS, axis=1)
+        Fsep = pd.DataFrame(columns=self.get_gap_name())
+        Fsep.iloc[:, 0] = Fsum
+        Fsep.iloc[:, 1:-1] = np.array(
+                [np.sum(FzCS.iloc[:, i+1:], axis=1) -
+                 np.sum(FzCS.iloc[:, :i+1], axis=1)
+                 for i in range(np.shape(FzCS)[1]-1)]).T
+        Fsep.iloc[:, -1] = -Fsum
+        return Fsep
+
+    def calculate_Faxial(self, FxCS, FzCS, FcCS):
+        gap_name = self.get_gap_name()
+        Faxial = pd.DataFrame(columns=gap_name)
+        # adjustment to tie-plate tension
+        Faxial.iloc[:, -1] = self.tie_plate['alpha'] * FxCS.sum(axis=1)
+        Faxial.iloc[:, -1] += (self.tie_plate['beta'] * FzCS).sum(axis=1)
+        Faxial.iloc[:, -1] += self.tie_plate['gamma'] * FcCS.sum(axis=1)
+        uppergap = gap_name[-1]  # top to bottom
+        for i, gap in enumerate(gap_name[::-1][1:]):
+            Faxial[gap] = Faxial[uppergap] + FzCS.iloc[:, -(i+1)]
+            Faxial[gap] -= self.tie_plate['mg']  # module weight
+            uppergap = gap
+        # caculate Fbase
+        Flimit = 109.04 - 0.526 * Faxial[gap_name[0]]
+        Faxial['base'] = FzCS.sum(axis=1) / Flimit *\
+            (self.tie_plate['preload'] + self.tie_plate['limit_load'])
+        return Faxial
+
+    def get_max_value(self, t, df, ax=None, plot=False, unit='MN', sign=1):
+        if hasattr(df, 'stack'):
+            index = df.stack().index[np.argmax(sign*df.values)]
+            ic = list(df.columns).index(index[1])
+            time = t[int(index[0])]
+            value = df.loc[int(index[0]), index[1]]
+        else:
+            index = np.argmax(sign*df.values)
+            ic = 0
+            time = t[index]
+            value = df.loc[index]
+        if plot:
+            if ax is None:
+                ax = plt.gca()
+            color = f'C{ic%10}'
+            va = 'bottom' if sign == 1 else 'top'
+            va = 'center'
+            ax.plot(time, value, 'o', color=color)
+            ax.text(time, value, f' {value:1.1f}{unit}',
+                    va=va, ha='left', color=color)
+        return time, value
+
+    def compare_force(self, Nova=False, title=False):
+        ax = plt.subplots(2, 1)[1]
+        text = [linelabel(postfix='MN', ax=ax[i], value='') for i in range(2)]
+        for i, gap in enumerate(self.post['DINA']['Fsep']):
+            ax[0].plot(self.post['DINA']['t'], self.post['DINA']['Fsep'][gap],
+                       '-', color=f'C{i%10}', label=gap)
+            if Nova:
+                ax[0].plot(self.post['Nova']['t'],
+                           self.post['Nova']['Fsep'][gap].values,
+                           '-.', color=f'C{i%10}')
+        self.get_max_value(self.post['DINA']['t'], self.post['DINA']['Fsep'],
+                           ax=ax[0], plot=True)
+        for i, gap in enumerate(self.post['DINA']['Faxial']):
+            label = gap.replace('_', '-')
+            if label != 'base':
+                label = f'gap {6-i}'
+            ax[1].plot(self.post['DINA']['t'],
+                       self.post['DINA']['Faxial'][gap],
+                       '-', color=f'C{i%10}', label=label)
+            if Nova:
+                ax[1].plot(self.post['Nova']['t'],
+                           self.post['Nova']['Faxial'][gap].values,
+                           '-.', color=f'C{i%10}')
+        self.get_max_value(self.post['DINA']['t'], self.post['DINA']['Faxial'],
+                           ax=ax[1], plot=True)
+        ax[0].plot(self.post['DINA']['t'],
+                   240*np.ones(len(self.post['DINA']['t'])),
+                   '--', color='gray', label='limit')
+        text[0].add('', value='1.1f')
+        axial_limit = self.tie_plate['preload'] + self.tie_plate['limit_load']
+        ax[1].plot(self.post['DINA']['t'],
+                   axial_limit * np.ones(len(self.post['DINA']['t'])),
+                   '--', color='gray')
+        text[1].add('', value='1.1f')
+        plt.despine()
+        plt.detick(ax)
+        ax[0].set_ylabel('$F_{sep}$ MN')
+        ax[1].set_ylabel('$F_{axial}^*$ MN')
+        ax[-1].set_xlabel('$t$ s')
+        ax[0].set_ylim([0, 280])
+        ax[1].set_ylim([0, 200])
+        for i in range(2):
+            text[i].plot()
+        ax[1].legend(loc='upper center', bbox_to_anchor=(0.5, 2.7),
+                     ncol=4)
+        if title:
+            ax[0].set_title(self.name, y=1.5)
+
+    def compare(self):
+        ax = plt.subplots(5, 1, figsize=(9, 9), sharex=True)[1]
+        text = [linelabel(ax=ax_, Ndiv=7, value='') for ax_ in ax]
+
+        for name in self.post['DINA']['Ic'].columns[::-1]:
+            ax[0].plot(self.post['DINA']['t'], self.post['DINA']['Ic'][name])
+            text[0].add(name)
+        # text[0].plot()
+        ax[0].legend(loc='center left', bbox_to_anchor=(1.0, 0.5), ncol=1,
+                     fontsize='xx-small')
+        self.get_max_value(self.post['DINA']['t'],
+                           self.post['DINA']['Ic'].loc[:, ::-1],
+                           ax=ax[0], plot=True, unit='kA')
+        self.get_max_value(self.post['DINA']['t'],
+                           self.post['DINA']['Ic'].loc[:, ::-1],
+                           ax=ax[0], plot=True, unit='kA', sign=-1)
+        ax[0].plot(self.post['DINA']['t'],
+                   -45*np.ones(len(self.post['DINA']['t'])),
+                   '--', color='gray', zorder=-10, alpha=0.6)
+        ax[0].plot(self.post['DINA']['t'],
+                   45*np.ones(len(self.post['DINA']['t'])),
+                   '--', color='gray', zorder=-10, alpha=0.6)
+        ax[0].set_ylim([-60, 55])
+
+        Blimit = interp1d([40, 45], [13, 12.6], fill_value='extrapolate')
+        CSname = self.pf.coilset['index']['CS']['name']
+        B = self.post['DINA']['B'].loc[:, CSname]
+        Bstar = B / Blimit(abs(self.post['DINA']['Ic'].values)) * 12.6
+        for name in Bstar.columns[::-1]:
+            ax[1].plot(self.post['DINA']['t'], Bstar[name])
+            text[1].add(name)
+        ax[1].legend(loc='center left', bbox_to_anchor=(1.0, 0.5), ncol=1,
+                     fontsize='xx-small')
+        # text[1].plot()
+        self.get_max_value(self.post['DINA']['t'], Bstar.loc[::-1],
+                           ax=ax[1], plot=True, unit='T')
+        ax[1].plot(self.post['DINA']['t'],
+                   12.6*np.ones(len(self.post['DINA']['t'])), '--',
+                   color='gray', zorder=-10, alpha=0.6)
+
+        ax[2].plot(self.post['DINA']['t'], self.post['DINA']['Fsum'])
+        ax[2].plot(self.post['DINA']['t'],
+                   -60*np.ones(len(self.post['DINA']['t'])), '--',
+                   color='gray', zorder=-10, alpha=0.6)
+        ax[2].plot(self.post['DINA']['t'],
+                   60*np.ones(len(self.post['DINA']['t'])), '--',
+                   color='gray', zorder=-10, alpha=0.6)
+        self.get_max_value(self.post['DINA']['t'], self.post['DINA']['Fsum'],
+                           ax=ax[2], plot=True, unit='MN')
+        self.get_max_value(self.post['DINA']['t'], self.post['DINA']['Fsum'],
+                           ax=ax[2], plot=True, unit='MN', sign=-1)
+
+        for name in self.post['DINA']['Fsep'].columns[::-1]:
+            ax[3].plot(self.post['DINA']['t'],
+                       self.post['DINA']['Fsep'][name],
+                       label=name.replace('_', '-'))
+            text[3].add(name.replace('_', '-'))
+        self.get_max_value(self.post['DINA']['t'],
+                           self.post['DINA']['Fsep'].iloc[:, ::-1],
+                           ax=ax[3], plot=True, unit='MN')
+        ax[3].plot(self.post['DINA']['t'],
+                   240*np.ones(len(self.post['DINA']['t'])), '--',
+                   color='gray', zorder=-10, alpha=0.6)
+        ax[3].set_ylim([0, 250])
+        # text[3].plot()
+        ax[3].legend(loc='center left', bbox_to_anchor=(1.0, 0.5), ncol=1,
+                     fontsize='xx-small')
+
+        index = np.argmin(abs(self.data['t']-self.post['DINA']['t'][-1]))
+        ax[4].plot(self.data['t'][:index], self.data['Ip'][:index])
+
+        ax[0].set_ylabel('$I_c$ kA')
+        ax[1].set_ylabel('$B^*$ T')
+        ax[2].set_ylabel('$F_{sum}$ MN')
+        ax[3].set_ylabel('$F_{sep}$ MN')
+        ax[4].set_ylabel('$I_p$ MA')
+        ax[-1].set_xlabel('$t$ s')
+        plt.despine()
+        plt.detick(ax)
+
 
 if __name__ is '__main__':
 
-    scn = read_scenario(read_txt=False)
+    scn = scenario(read_txt=False)
 
-    #scn.load_file(folder='15MA DT-DINA2017-04_v1.2')
-    scn.load_file(folder='15MA DT-DINA2015-05', read_txt=False)
-    scn.update_DINA()
+    # scn.load_file(folder='15MA DT-DINA2017-04_v1.2')
+    # scn.load_file(folder='15MA H-DINA2017-05')
+    #exclude = ['15MA DT-DINA2008-01', '15MA DT-DINA2012-01',
 
-    scn.update_psi(n=5e3, plot=True, current='AT')
+    #'15MA DT-DINA2012-03',
+    #'15MA DT-DINA2012-05', '15MA DT-DINA2018-05_v1.1']
+
+
+    scn.load_file(folder='15MA DT-DINA2010-07b', read_txt=False)
+    scn.update_scenario(t=100)
+    scn.update_psi(plot=True, current='AT', n=5e3)
+
+
+    # scn.compare_force(title=False)
+    # scn.compare()
+    #scn.load_file(folder='15MA DT-DINA2014-01', read_txt=False)
+
+
+    #scn.read_data3(plot=True)
+
+
+    #scn.update_scenario()
+    #scn.update_psi(plot=True, current='AT')
+    #scn.operate(plot=True)
+
+    #scn.hip.get_peaks(plot=True)
+    '''
+    scn.update_scenario()
+    scn.update_psi(plot=True, current='AT')
+    '''
+
+    # scn.update_scenario(150)
+    # scn.update_psi(n=5e3, plot=True, current='AT')
+
+    '''
 
     for name in scn.pf.coilset['coil']:
         print(name, scn.pf.coilset['coil'][name]['It'])
@@ -762,7 +1233,8 @@ if __name__ is '__main__':
     for name in scn.pf.coilset['coil']:
         print(name, scn.pf.coilset['coil'][name]['It'])
 
-    # scn.update_psi(n=5e3, plot=True)
+    scn.update_psi(n=5e3, plot=True)
+    '''
 
 
 

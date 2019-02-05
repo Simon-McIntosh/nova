@@ -32,13 +32,19 @@ class inductance:
             R = coil['R']
         else:
             R = 0
-        return x, z, dx, dz, It, R
+        if 'Nt' in coil:
+            Nt = coil['Nt']
+        else:
+            Nt = 1
+        return x, z, dx, dz, It, R, Nt
 
     def add_pf_coil(self, coil, turns=None):
         if turns is None:
             turns = np.ones(len(coil))
         for name, nt in zip(coil, turns):
-            x, z, dx, dz, It, R = self.get_coil(coil[name])
+            x, z, dx, dz, It, R, Nt = self.get_coil(coil[name])
+            if nt == 1:
+                nt = Nt
             self.add_coil(x, z, dx, dz, It, R=R, nt=nt, name=name)
 
     def initalise_cp_set(self):
@@ -94,8 +100,9 @@ class inductance:
             self.Io[i] = self.pf.coilset['coil'][coil]['It']
         self.inv.set_foreground()
         # ensure symetric (jacket-conductor coupling)
-        tril_index = np.tril_indices(len(self.inv.G), k=-1)  # lower triangle
-        self.inv.G[tril_index] = self.inv.G.T[tril_index]  # duplicate upper tr
+        # tril_index = np.tril_indices(len(self.inv.G), k=-1)  # lower triangle
+        # self.inv.G[tril_index] = self.inv.G.T[tril_index]  # duplicate upper tr
+
         t2 = np.dot(turns.reshape((-1, 1)), turns.reshape((1, -1)))
         fillaments = np.dot(np.ones((len(turns), 1)), Nf.reshape(1, -1))
         self.Mo = 2 * np.pi * self.inv.G * t2 * fillaments

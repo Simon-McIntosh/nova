@@ -126,7 +126,7 @@ class read_plasma(pythonIO):
         i_cq = next((i for i, dIdt in enumerate(dIpldt)
                      if dIdt > self.dIdt_trip))
         t_cq = self.t[i_cq]  # current quench time
-        tc = timeconstant(self.t[i_cq:], Ipl_lp[i_cq:], trim_fraction=0.5)
+        tc = timeconstant(self.t[i_cq:], Ipl_lp[i_cq:], trim_fraction=0.2)
         tdis, ttype, tfit, Ifit = tc.fit(plot=False, Io=-15e6 * self.Ip_scale)
         dZ = self.z - self.z[0]  # displacment trip
         try:
@@ -161,13 +161,13 @@ class read_plasma(pythonIO):
             ax[0].set_ylabel('$Ipl$ MA')
             ax[0].legend()
 
-            ax[1].plot(1e3*self.t, 1e-6*dIpdt)
+            ax[1].plot(1e3*self.t, 1e-6*dIpldt)
 
             txt_cq = '$t_{cq}$'+'={:1.1f}ms'.format(1e3*t_cq)
-            ax[1].plot(1e3*t_cq, 1e-6*dIpdt[i_cq], '*',
+            ax[1].plot(1e3*t_cq, 1e-6*dIpldt[i_cq], '*',
                        color='C7')
             txt_dz = r'$t_{\Delta z}$'+'={:1.1f}ms'.format(1e3*t_dz)
-            ax[1].plot(1e3*t_dz, 1e-6*dIpdt[i_dz], '^',
+            ax[1].plot(1e3*t_dz, 1e-6*dIpldt[i_dz], '^',
                        color='C6')
 
             ylim = ax[1].get_ylim()
@@ -319,7 +319,7 @@ class read_plasma(pythonIO):
             ax.add_artist(line_legend)
 
     def plot_displacment(self):
-        ax = plt.subplots(1, 2, figsize=(8, 6), sharex=True, sharey=True)[1]
+        ax = plt.subplots(1, 2, figsize=(8, 6), sharey=True)[1]
         text = []
         for i in range(2):
             text.append(linelabel(postfix='', value='', ax=ax[i], Ndiv=20))
@@ -333,14 +333,16 @@ class read_plasma(pythonIO):
             ax[iax].plot(self.x[i_dz], self.z[i_dz], '^', color=color)
             ax[iax].plot(self.x[i_cq], self.z[i_cq], '*', color=color)
             text[iax].add('$I_{cq}$ '+'{:1.1f}MA'.format(1e-6*I_cq))
-        plt.axis('equal')
+            ax[iax].axis('equal')
         plt.despine()
+
         for i, vde in enumerate(['MD', 'VDE']):
             self.add_vde_legend(ax[i], i, vde)
             text[i].plot()
             ax[i].set_xlabel('$x$ m')
         ax[0].set_ylabel('$y$ m')
         plt.setp(ax[1].get_yticklabels(), visible=False)
+
 
     def plot_Ivs3_max(self):
         plt.figure()
@@ -400,7 +402,10 @@ if __name__ == '__main__':
 
     pl = read_plasma('disruptions', Ip_scale=1, read_txt=True)
 
-    Ivs3_data = pl.Ivs3_single(3, plot=False, discharge='LTC')[1]
+    Ivs3_data = pl.Ivs3_single(0, plot=True, discharge='LTC')[1]
+    pl.get_vs3_trip(plot=True)
+
+
 
     plt.figure()
     # plt.plot(pl.t, pl.Ivs3_o)
@@ -416,7 +421,7 @@ if __name__ == '__main__':
 
     pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms
 
-
+    pl.plot_displacment()
     '''
     pl.Ivs3_single(11, plot=True)
     pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms

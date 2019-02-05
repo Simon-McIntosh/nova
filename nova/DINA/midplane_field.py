@@ -69,16 +69,15 @@ class midplane:
             ax = plt.subplots(2, 1, sharex=True)[1]
         Bx_max = np.max(abs(data['B'][:, 0]))
         if tmax:
-            index = np.argmin(abs(data['time'] - tmax))
+            idx = np.argmin(abs(data['time'] - tmax))
         else:
-            index = len(data['B'])
-        t10 = data['time'][np.argmin(abs(abs(data['B'][:index, 0])-0.1*Bx_max))]
-        t90 = data['time'][np.argmin(abs(abs(data['B'][:index, 0])-0.9*Bx_max))]
+            idx = len(data['B'])
+        t10 = data['time'][np.argmin(abs(abs(data['B'][:idx, 0])-0.1*Bx_max))]
+        t90 = data['time'][np.argmin(abs(abs(data['B'][:idx, 0])-0.9*Bx_max))]
         risetime = t90-t10
         if label:
             label += r' $\tau$'
             label += f'={1e3*risetime:1.0f}ms'
-
         ax[0].plot(1e3*data['time'], 1e-3*data['Ivs3'][:])
         ax[1].plot(1e3*data['time'], 1e3*data['B'][:, 0], label=label)
         ax[0].set_ylabel('$I_vs3$ kA')

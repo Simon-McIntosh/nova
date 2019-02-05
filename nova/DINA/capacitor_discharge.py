@@ -2,7 +2,7 @@ import numpy as np
 from scipy.integrate import ode
 from amigo.pyplot import plt
 from math import isclose
-from nep.coil_geom import VVcoils
+from nep.coil_geom import VVcoils, ITERcoilset
 from nep.DINA.coupled_inductors import inductance
 from nep.DINA.coil_flux import coil_flux
 from nep.DINA.read_plasma import read_plasma
@@ -44,10 +44,10 @@ class power_supply:
             setattr(self, var, self.setup[var])
 
     def build_coils(self, plot=False):
-        self.vv = VVcoils(model=self.vessel_model, invessel=self.invessel)
+        vv = VVcoils(model=self.vessel_model, invessel=self.invessel)
         self.ind = inductance()
         nvs_o = self.ind.nC
-        coilset = self.vv.pf.coilset
+        coilset = vv.pf.coilset
         turns = np.append(np.ones(4), -np.ones(4))
         self.ind.add_pf_coil(
                 OrderedDict(list(coilset['subcoil'].items())[:8]),
@@ -72,7 +72,15 @@ class power_supply:
         if self.vessel:  # add vv coils
             vv_coils = list(coilset['coil'].items())[10:]
             self.ind.add_pf_coil(OrderedDict(vv_coils))
+
+        self.pfcs = True
+        if self.pfcs:
+            pf = ITERcoilset().pf
+            self.ind.add_pf_coil(pf.coilset['coil'])
+
         self.ind.reduce()
+
+
         self.ncoil = self.ind.nd['nr']  # number of retained coils
         if self.vessel_model == 'local':
             factor = 0.95
@@ -107,7 +115,7 @@ class power_supply:
         self.Itrip = self.sign * 4/self.nturn * self.Ipulse  # set-point
         self.Vo = self.sign * self.Vo_factor * 2.3e3  # capacitor voltage
         # maximum power supply voltage
-        self.Vps_max = self.sign * self.Vo_factor * 1.35e3  
+        self.Vps_max = self.sign * self.Vo_factor * 1.35e3
 
     def set_time(self):
         # self.trip = 't_trip', 't_cq', 't_dz', float
@@ -290,6 +298,9 @@ class power_supply:
     def intergrate(self, t_end):
         #  [Hcap, Icap, Ivec]
         Iode_o = np.zeros(2 + self.ncoil)
+
+        Iode_o[-8] = 10e3
+
         Iode_o[0] = self.C[0] * self.Vo  # capacitor fully charged
         Iode_o[2] = self.Io  # vs3 circuit inital current
         to = 0 if self.pulse_phase < 0 else -self.pulse_phase
@@ -367,7 +378,7 @@ class power_supply:
             colors['vv_vvo'] = 'C4'
             colors['vv_vv1'] = 'C5'
             colors['trs_trs'] = 'C3'
-            
+
             coils = list(self.ind.pf.coilset['coil'].keys())[16:]
             for i, coil in enumerate(coils):
                 for c in colors:
@@ -426,7 +437,6 @@ class power_supply:
         self.referance['to'] = np.linspace(self.referance['t'][0],
                                            self.referance['t'][-1], 350)
         self.referance['Ico'] = self.referance['fun'](self.referance['to'])
-
         self.ncoil = ncoil
         self.M = self.M[:self.ncoil, :self.ncoil]
         self.R = self.R[:self.ncoil]
@@ -440,25 +450,9 @@ class power_supply:
             xo = [2.49423821e-04, 3.42989379e-05, 5.57050300e-01,
                   1.00965866e-01, 5.72307931e-01, 1.13850869e-03,
                   1.19446487e-03]
-
         res = minimize(self.fit, xo, method='Nelder-Mead',
                        options={'fatol': 0.01})
-
-        print(res)
-        ps.fit(res.x, plot=True)
-        '''
-        ax = plt.subplots(1, 1)[1]
-        ax.plot(1e3*self.referance['t'], 1e-3*self.referance['Ic'], '-C0',
-                label='VS3 referance')
-        ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 0], '-C3',
-                label='VS3 reduced model')
-        ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 1:], '-C7',
-                label='dummy coil')
-        ax.set_xlabel('$t$ ms')
-        ax.set_ylabel('$I$ kA')
-        plt.despine()
-        plt.legend()
-        '''
+        self.fit(res.x, plot=True)
 
     def fit(self, x, plot=False):
         x = abs(x)  # insure positive input
@@ -491,7 +485,6 @@ class power_supply:
                             self.data['Ivec'][-1, 0]))(self.referance['to'])
         err = 1e-3*np.sqrt(np.mean((self.referance['Ifit'] -
                                     self.referance['Ico'])**2))
-
         if plot:
             plt.figure()
             plt.plot(1e3*self.referance['to'], 1e-3*self.referance['Ico'],
@@ -506,16 +499,16 @@ class power_supply:
             plt.ylabel('$I$ kA')
             plt.despine()
             plt.legend()
-        print(err, x)
         return err
 
 if __name__ == '__main__':
-    ps = power_supply(nturn=3, vessel=True, scenario=3, code='Nova',
-                      Ip_scale=15/15, read_txt=False, vessel_model='local')
+    ps = power_supply(nturn=4, vessel=True, scenario=-1, code='Nova',
+                      Ip_scale=15/15, read_txt=False, vessel_model='full')
 
-    # plt.set_context('talk')
+    '''
     ps.solve(Io=0, sign=-1, t_pulse=0.3, origin='peak',
-             impulse=True, plot=True)
+             impulse=False, plot=True)
+    '''
 
     #ps.set_referance(ncoil=2)
     #ps.reduce()

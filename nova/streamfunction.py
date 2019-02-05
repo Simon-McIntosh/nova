@@ -6,7 +6,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline as sinterp
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize
 import nova.geqdsk
-from matplotlib._cntr import Cntr as cntr
+from legacycontour._cntr import Cntr as cntr
 from collections import OrderedDict
 from amigo import geom
 from amigo.IO import trim_dir
@@ -16,7 +16,7 @@ from amigo.IO import class_dir
 from os.path import join
 from warnings import warn
 from itertools import count
-from shapely.geometry import Polygon, Point, LineString
+from shapely.geometry import Polygon, Point, LineString, LinearRing
 from nova.exceptions import TopologyError
 from amigo.geom import poly_inloop
 
@@ -25,6 +25,7 @@ class SF(object):
 
     def __init__(self, **kwargs):
         self.shape = {}
+        self.Xloc = None
         self.set_kwargs(kwargs)
         self.load_eqdsk()
 
@@ -58,7 +59,7 @@ class SF(object):
             for key in optional_keys:
                 if key in eqdsk:
                     setattr(self, key, eqdsk[key])
-            self.trim_x(xmin=0.5)  # trim zero x-coordinate entries
+            self.trim_x(xmin=0.05)  # trim zero x-coordinate entries
             self.meshgrid()  # store grid
             self.Pfield()
             self.Bfield()  # compute Bfield from psi input
@@ -152,7 +153,7 @@ class SF(object):
         pad = np.zeros(self.nx)
         eq = {'name': name,
               # Number of horizontal and vertical points
-              'nx': self.nx, 'ny': self.nz,
+              'nx': self.nx, 'nz': self.nz,
               'x': self.x, 'z': self.z,  # Location of the grid-points
               'xdim': self.x[-1] - self.x[0],  # Size of the domain in meters
               'zdim': self.z[-1] - self.z[0],  # Size of the domain in meters
@@ -276,13 +277,18 @@ class SF(object):
             FWpoint = None
             FWpsi = None
         if plot:
-            self.contour()
-            plt.plot(xlim, zlim, 'C3')
+            plt.plot(xlim, zlim, 'C3.')
             plt.plot(FWpoint[0], FWpoint[1], 'X')
         return FWpoint, FWpsi
 
     def set_Plimit(self, plot=False):
-        self.get_boundary(alpha=1, set_boundary=True)
+        if self.Xpsi is None:
+            self.Xpsi = self.bounding_loops['exterior']['psi'][0]
+            self.xbdry = np.append(self.limit[0], self.limit[0, ::-1])
+            self.zbdry = np.append(self.limit[1, 0] * np.ones(2),
+                                   self.limit[1, 1] * np.ones(2))
+        else:
+            self.get_boundary(alpha=1, set_boundary=True)
         poly = Polygon(np.array([self.xbdry, self.zbdry]).T)
         FWlimit = poly.intersects(self.fw)  # Point(FWpoint)
         if FWlimit:  # plasma limited by first wall
@@ -445,7 +451,8 @@ class SF(object):
             self.mo = None
 
     def set_Xpoints(self):
-        if sum(self.Mindex) > 0 and sum(~self.Mindex) > 0:  # found points
+        if sum(self.Mindex) > 0 and sum(~self.Mindex) > 0 and \
+                self.Xloc != 'edge':  # found points
             Xpsi = self.Mpoints['separatrix_psi'][0]  # Xpsi estimate
             self.points['psi_norm'] =\
                 (self.points['psi'] - self.Mpsi) / (Xpsi - self.Mpsi)
@@ -461,27 +468,56 @@ class SF(object):
             if self.po:
                 self.Xpsi, self.Xpoint, self.Xpsi_array, self.Xpoint_array,\
                     self.Xloc = self.get_Xpsi()
-            if self.fw_limit:
-                self.set_Plimit()
-                self.Xpoint_array[0] = self.Xpoint
-                self.Xpsi_array[0] = self.Xpsi
-                self.Xpoints['x'][0] = self.Xpoint[0]
-                self.Xpoints['z'][0] = self.Xpoint[1]
-                self.Xpoints['psi'][0] = self.Xpsi
-
-            # update psi norm
-            self.points['psi_norm'] =\
-                (self.points['psi'] - self.Mpsi) / (self.Xpsi - self.Mpsi)
-            self.Mpoints['psi_norm'] =\
-                (self.Mpoints['psi'] - self.Mpsi) / (self.Xpsi - self.Mpsi)
-            self.Xpoints['psi_norm'] =\
-                (self.Xpoints['psi'] - self.Mpsi) / (self.Xpsi - self.Mpsi)
+            self.update_psi_norm()
+        elif self.Xloc == 'edge':
+            # self.Xloc = 'edge'
+            self.Xpsi = self.bounding_loops['exterior']['psi'][0]
+            self.get_boundary(alpha=1, set_boundary=True, boundary_cntr=False)
+            self.Xpsi_array = np.array([self.Xpsi])
+            edge = Polygon([(self.limit[0, 0], self.limit[1, 0]),
+                            (self.limit[0, 1], self.limit[1, 0]),
+                            (self.limit[0, 1], self.limit[1, 1]),
+                            (self.limit[0, 0], self.limit[1, 1])])
+            edge_ring = LinearRing(edge.exterior.coords)
+            xloop = self.bounding_loops['exterior']['x'][0]
+            zloop = self.bounding_loops['exterior']['z'][0]
+            dx = []
+            for x, z in zip(xloop, zloop):  # find loop-edge intersect
+                point = Point(x, z)
+                d = edge_ring.project(point)
+                p = np.array(list(edge_ring.interpolate(d).coords)[0])
+                dx.append(np.sqrt((x - p[0])**2 + (z - p[1])**2))
+            index = np.argmin(dx)  # intersection
+            self.Xpoint = np.array([xloop[index], zloop[index]])
+            self.Xpoint_array = [self.Xpoint]
+            self.update_Xpoints()
         else:
             self.Xpsi = None
             self.Xpoint = None
-            self.Xpoint_array = None
-            self.po = None
-            self.Xloc = None
+            self.Xpoint_array = [self.Xpoint]
+            self.update_Xpoints()
+        if self.fw_limit:
+            self.Xloc = 'first_wall'
+            self.set_Plimit()
+            self.Xpsi_array[0] = self.Xpsi
+            self.Xpoint_array[0] = self.Xpoint
+            self.update_Xpoints()
+            self.update_psi_norm()
+
+    def update_Xpoints(self):
+        self.Xpoints = np.zeros(1, dtype=self.points.dtype)
+        if self.Xpoint is not None:
+            self.Xpoints['x'][0] = self.Xpoint[0]
+            self.Xpoints['z'][0] = self.Xpoint[1]
+        self.Xpoints['psi'][0] = self.Xpsi
+
+    def update_psi_norm(self):
+        self.points['psi_norm'] =\
+            (self.points['psi'] - self.Mpsi) / (self.Xpsi - self.Mpsi)
+        self.Mpoints['psi_norm'] =\
+            (self.Mpoints['psi'] - self.Mpsi) / (self.Xpsi - self.Mpsi)
+        self.Xpoints['psi_norm'] =\
+            (self.Xpoints['psi'] - self.Mpsi) / (self.Xpsi - self.Mpsi)
 
     def label_point(self, ax, point):
         txt = '  psi_norm: {:1.3f}\n'.format(point['psi_norm'])
@@ -541,7 +577,7 @@ class SF(object):
             for line in psi_line:
                 x, z = line[:, 0], line[:, 1]
                 ax.plot(x, z, 'C4', alpha=0.75, zorder=-10)
-                
+
     def get_levels(self, Nlevel=31, Nstd=4, **kwargs):
         level, n = [-Nstd * np.std(self.psi),
                     Nstd * np.std(self.psi)], Nlevel
@@ -556,9 +592,10 @@ class SF(object):
             separatrix = ''
         ax = kwargs.get('ax', plt.gca())
         alpha = np.array([1, 1], dtype=float)
+        zorder = kwargs.get('zorder', 0)
         lw = lw * np.array([2.25, 1.75])
         if boundary:
-            x, z = self.get_boundary(alpha=1-1e-4)
+            x, z = self.get_boundary(alpha=1-1e-4, boundary_cntr=False)
             ax.plot(x, z, linewidth=lw[0], color=0.75 * np.ones(3))
             self.set_boundary(x, z)
         if separatrix:
@@ -588,7 +625,7 @@ class SF(object):
                     pindex = 1
                 if (not plot_vac and pindex == 0) or plot_vac:
                     ax.plot(x, z, linetype, linewidth=lw[pindex],
-                            color=color, alpha=alpha[pindex])
+                            color=color, alpha=alpha[pindex], zorder=zorder)
         if boundary:
             ax.plot(self.xbdry, self.zbdry, linetype, linewidth=lw[0],
                     color=color, alpha=alpha[0])
@@ -688,8 +725,8 @@ class SF(object):
             ax = plt.gca()
         for label in labels:
             if label == 'M':
-                ax.plot(self.Mpoint[0], self.Mpoint[1], 'C3*', ms=10,
-                        zorder=10, label='Mpoint')
+                ax.plot(self.Mpoint[0], self.Mpoint[1], 'P', color='gray',
+                        ms=8, zorder=-10, label='Mpoint')
             elif label == 'X':
                 for i, (Xpoint, Xpsi) in enumerate(zip(self.Xpoint_array,
                                                        self.Xpsi_array)):
@@ -701,11 +738,11 @@ class SF(object):
                                 txt = 'P'
                         else:
                             txt = 'S{}'.format(i)
-                        alpha = 1 if i == 0 else 0.25
+                        alpha = 1 if i == 0 else 0.5
                         if Xpsi:
                             label_txt = 'Xpoint-{}'.format(txt)
-                            ax.plot(Xpoint[0], Xpoint[1], 'C0*', alpha=alpha,
-                                    ms=10, zorder=10, label=label_txt)
+                            ax.plot(Xpoint[0], Xpoint[1], 'C3X', alpha=alpha,
+                                    ms=8, zorder=10, label=label_txt)
         ax.legend(loc=1)
 
     def get_Mpsi(self, mo=None, plot=False):
@@ -782,8 +819,9 @@ class SF(object):
                 delattr(self, key)
 
     def set_contour(self):
-        flux = self.Ppoint((self.limit[0][1], np.mean(self.limit[1])))
-        if flux > 0:
+        # flux = self.Ppoint((self.limit[0][1], np.mean(self.limit[1])))
+        B = self.Bpoint((self.limit[0][1], np.mean(self.limit[1])))
+        if B[1] > 0:  # deduce sign of plasma current
             psi_boundary = np.max(self.psi)
         else:
             psi_boundary = np.min(self.psi)
@@ -804,7 +842,8 @@ class SF(object):
             lines.append(psi_line)
         return lines
 
-    def get_boundary(self, plot=False, set_boundary=False, **kwargs):
+    def get_boundary(self, plot=False, set_boundary=False, boundary_cntr=True,
+                     reverse=True, locate='min', **kwargs):
         if 'alpha' in kwargs:
             alpha = kwargs['alpha']
             Spsi = alpha * (self.Xpsi - self.Mpsi) + self.Mpsi
@@ -812,7 +851,7 @@ class SF(object):
             Spsi = kwargs['psi']
         else:
             raise ValueError('requires target alpha or psi')
-        boundary = kwargs.get('boundary', True)
+        boundary = kwargs.get('boundary', boundary_cntr)
         psi_line = self.get_contour([Spsi], boundary=boundary)[0]
         X, Z = [], []
         for line in psi_line:
@@ -827,8 +866,6 @@ class SF(object):
                 x, z = x[index], z[index]
                 loop = np.sqrt((x[0] - x[-1])**2 +
                                (z[0] - z[-1])**2) < 3*self.delta
-                # (z > self.Mpoint[1]).any() and\
-                # (z < self.Mpoint[1]).any() and
                 if loop:
                     X.append(x)
                     Z.append(z)
@@ -847,10 +884,10 @@ class SF(object):
                 '''
                 for i, (x, z) in enumerate(zip(X, Z)):
                     plt.plot(x, z, 'C6')
-                plt.plot(self.Mpoint[0], self.Mpoint[1], 'C7o')
+                plt.plot(self.Mpoint[0], self.Mpoint[1], 'C6o')
+                self.contour(boundary=False)
                 '''
                 raise TopologyError('Mpoint not found within separatrix')
-            
         except ValueError:
             for x, z in zip(X, Z):
                 plt.plot(x, z, 'C3')
@@ -877,6 +914,17 @@ class SF(object):
             err_txt += '\nseperatrix open'
             err_txt += '\ncheck X-point definition'
             raise IndexError(err_txt)
+        X, Z = geom.clock(X, Z, reverse=reverse)
+        if locate == 'X':  # referance primary Xpoint
+            iloc = np.argmin((X-self.Xpoint[0])**2+(Z-self.Xpoint[1])**2)
+        elif locate == 'zmin':
+            iloc = np.argmin(Z)
+        elif locate == 'zmax':
+            iloc = np.argmax(Z)
+        else:
+            iloc = 0
+        X = np.append(X[iloc:], X[:iloc+1])
+        Z = np.append(Z[iloc:], Z[:iloc+1])
         if set_boundary:
             self.set_boundary(X, Z)
         if plot:
@@ -1056,6 +1104,9 @@ class SF(object):
             self.trim_legs()  # trim legs to first wall
             if plot:
                 self.plot_sol(core=True)
+        else:
+            # clear sol
+            self.legs, self.nleg, self.tleg = {}, 0, np.array([])
 
     def plot_sol(self, core=False, ax=None):
         if hasattr(self, 'legs'):

@@ -16,12 +16,235 @@ from copy import deepcopy
 from scipy.optimize import minimize_scalar
 from matplotlib.collections import PatchCollection
 from matplotlib import patches
+from scipy.interpolate import griddata
+
+
+class plotPF:
+
+    def __init__(self, coilset=None):
+        self.initalize_keys()
+        self.initalize_collection()
+        self.link(coilset)
+
+    def initalize_keys(self):
+        self.color_key = \
+            ['CS', 'skip', 'VS3', 'vv_DINA', 'plasma',
+             'PF', 'skip', 'bb_DINA', 'trs', 'skip',
+             'skip', 'skip', 'skip', 'vv', 'skip']
+        # set defaults
+        self.properties = {'var': None, 'cmap': plt.cm.RdBu, 'clim': None,
+                           }
+
+    def update_properties(self, **kwargs):
+        for key in kwargs:
+            if key in self.properties:
+                self.properties[key] = kwargs.get(key)
+
+    def initalize_collection(self, *args):
+        self.patch = {'patch': []}
+
+    def link(self, coilset):
+        if coilset:
+            self.coilset = coilset
+
+    @staticmethod
+    def get_coil_label(name):
+        sname = name.split('_')
+        if len(sname) == 1:
+            label = name
+        elif len(sname) == 2:
+            label = sname[0]
+        else:
+            label = '_'.join(sname[:-1])
+        return label
+
+    def label_coils(self, coils, label, current, fs=12):
+        for i, name in enumerate(coils.keys()):
+            coil = coils[name]
+            x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
+            if 'index' in self.coilset:
+                if name in self.coilset['index']['CS']['name']:
+                    drs = -2.5 / 3 * dx
+                    ha = 'right'
+                else:
+                    drs = 2.5 / 3 * dx
+                    ha = 'left'
+            else:
+                drs = 2.5 / 3 * dx
+                ha = 'left'
+
+            if label and current:
+                zshift = max([dz / 10, 0.2])
+            else:
+                zshift = 0
+            if label:
+                plt.text(x + drs, z + zshift, name, fontsize=fs,
+                         ha=ha, va='center', color=0.2 * np.ones(3))
+            if current:
+                if current == 'A' and 'Nt' in coil:  # amps
+                    Nt = coil['Nt']
+                    linecurrent = coil['It'] / Nt
+                    txt = '{:1.1f}kA'.format(linecurrent * 1e-3)
+                else:  # amp turns
+                    if abs(coil['It']) < 0.1e6:  # display as kA.t
+                        txt = '{:1.1f}kAT'.format(coil['It'] * 1e-3)
+                    else:  # MA.t
+                        txt = '{:1.1f}MAT'.format(coil['It'] * 1e-6)
+                plt.text(x + drs, z - zshift, txt,
+                         fontsize=fs, ha=ha, va='center',
+                         color=0.2 * np.ones(3))
+
+    def get_coils(self, subcoil):
+        if subcoil:
+            coils = self.coilset['subcoil']
+        else:
+            coils = self.coilset['coil']
+        return coils
+
+    def plot(self, subcoil=False, label=False, plasma=False,
+             current=False, alpha=1, ax=None, patch=True):
+        if ax is None:
+            ax = plt.gca()
+        coils = self.get_coils(subcoil)
+        self.plot_coils(coils, label=label, current=current, alpha=alpha,
+                        ax=ax, patch=patch)
+        if plasma:
+            self.plot_coils(self.coilset['plasma'], alpha=alpha,
+                            coil_color='C4', ax=ax)
+        ax.axis('equal')
+        ax.axis('off')
+
+    def get_single(self, name):
+        coils = self.get_coils(True)
+        single_coil = collections.OrderedDict(
+                [(n, coils[n]) for n in self.coilset['index'][name]['name']])
+        return single_coil
+
+    def plot_single(self, name, subcoil=False, label=False, plasma=False,
+                    current=False, alpha=1, ax=None, plot=True, **kwargs):
+        coils = self.get_single(name)
+        self.plot_coils(coils, label=label, current=current,
+                        alpha=alpha, ax=ax, plot=plot, **kwargs)
+
+    def contour_single(self, name, variable, n=1e3, ax=None):
+        if ax is None:
+            ax = plt.gca()
+        coils = self.get_single(name)
+        x = [coils[name]['x'] for name in coils]
+        z = [coils[name]['z'] for name in coils]
+        values = [coils[name][variable] for name in coils]
+        x2d, z2d, xg, zg = geom.grid(n, [np.min(x), np.max(x),
+                                     np.min(z), np.max(z)])[:4]
+        v2d = griddata((x, z), values, (x2d, z2d), method='linear')
+        levels = np.linspace(np.min(values), np.max(values), 11)
+        CS = ax.contour(x2d, z2d, v2d, levels=levels, colors='gray',
+                        linewidths=1.75)
+        ax.clabel(CS, levels[1::2], inline=1, fmt='%1.1f', fontsize=14)
+
+    def plot_coils(self, coils, label=False, current=False,
+                   alpha=1, plot=True, ax=None, patch=True, **kwargs):
+        self.update_properties(**kwargs)
+        for i, name in enumerate(coils.keys()):
+            shape = 'circle' if 'VS' in name else 'rectangle'
+            coil_color = kwargs.get('coil_color', self.get_coil_color(name))
+            kwargs.pop('coil_color', None)
+            self.patch_coil(coils[name], alpha=alpha,
+                            coil_color=coil_color, shape=shape, **kwargs)
+        if plot:
+            self.plot_patch(ax=ax, **kwargs)
+            if label or current:
+                fs = matplotlib.rcParams['legend.fontsize']
+                self.label_coils(coils, label, current, fs=fs)
+
+    def get_coil_color(self, name, coil_color=None):
+        label = self.get_coil_label(name)
+        if coil_color is None:
+            coil_color = 'C3'  # default
+            for group in self.coilset['index']:
+                if label in self.coilset['index'][group]['name']\
+                        and group in self.color_key:
+                    ic = self.color_key.index(group)
+                    icolor = ic % 5
+                    coil_color = 'C{}'.format(icolor)
+                    break
+        return coil_color
+
+    def patch_coil(self, coil, alpha=1, shape='rectangle', **kwargs):
+        edge_color = kwargs.get('edge_color', 'k')
+        coil_color = kwargs.get('coil_color', 'C0')
+        x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
+        if 'It' in coil:
+            Ic = coil['It']
+        else:
+            Ic = coil['If']
+        coil['Jc'] = 1e-6 * Ic / (dx*dz)
+
+        if shape == 'circle':
+            patch = patches.Circle((x, z), dx/2, facecolor=coil_color,
+                                   alpha=alpha, edgecolor=edge_color)
+        elif shape == 'rectangle':
+            patch = patches.Rectangle((x-dx/2, z-dz/2), dx, dz,
+                                      facecolor=coil_color, alpha=alpha,
+                                      edgecolor=edge_color)
+        else:
+            raise TypeError('shape not in [''circle'', ''rectangle'']')
+        self.append_patch(patch, **coil)
+
+    def append_patch(self, patch, **kwargs):
+        self.patch['patch'].append(patch)
+        for var in kwargs:
+            try:
+                self.patch[var].append(kwargs[var])
+            except KeyError:
+                self.patch[var] = [kwargs[var]]
+
+    def plot_patch(self, reset=False, ax=None, **kwargs):
+        self.update_properties(**kwargs)
+        var = self.properties['var']  # plot variable
+        match_original = True if var is None else False
+        clim = self.properties['clim']  # plot variable
+        if ax is None:
+            ax = plt.gca()
+        pc = PatchCollection(self.patch['patch'],
+                             match_original=match_original,
+                             cmap=self.properties['cmap'])
+        im = ax.add_collection(pc)
+        if var is not None:
+            if var in self.patch:
+                var_array = np.array(self.patch[var])
+            else:  # var is np.array len == len(patch)
+                npatch = len(self.patch['patch'])
+                if isinstance(var, np.ndarray) and len(var) == npatch:
+                    var_array = var
+                else:
+                    raise ValueError('color array incompatable with patches')
+            if clim is not None:
+                if clim == 'symetric':
+                    var_max = np.max(abs(var_array))
+                    clim = [-var_max, var_max]
+                elif clim == 'tight':
+                    clim = [np.min(var_array), np.max(var_array)]
+                pc.set_clim(vmin=clim[0], vmax=clim[1])
+            pc.set_array(var_array)
+            plt.sca(ax)
+            cb = plt.colorbar(im, orientation='vertical', aspect=50,
+                              shrink=0.8, fraction=0.1)
+            if var == 'It':
+                cb.set_label('$I_c$ kA')
+            elif var == 'Jc':
+                cb.set_label('$J_c$ MAm$^{-2}$')
+
+        ax.axis('equal')
+        ax.axis('off')
+        if reset:  # reset patch collection
+            self.initalize_collection()
 
 
 class PF:
 
     def __init__(self, eqdsk=None, **kwargs):
-        self.initalize_collection()
+        self.ppf = plotPF()
+        self.plot = self.ppf.plot  # expose PF coil plotter
         self.set_coils(eqdsk, **kwargs)
         if 'coilset' in kwargs:
             self.__call__(kwargs['coilset'])
@@ -33,14 +256,27 @@ class PF:
 
     def __call__(self, coilset):
         self.coilset = coilset  # reset instance
+        self.index_coilset(self.coilset)  # calculate subcoil mapping
+        self.ppf.link(self.coilset)  # link to coil plotter
 
     def initalize_coils(self):
         self.coilset = {'nC': 0, 'index': {},
                         'coil': collections.OrderedDict(),
                         'subcoil': collections.OrderedDict(),
                         'plasma': collections.OrderedDict()}
+        self.ppf.link(self.coilset)  # link to coil plotter
         for coil in ['PF', 'CS']:
             self.coilset['index'][coil] = {'n': 0, 'name': [], 'index': []}
+
+    @staticmethod
+    def index_coilset(coilset):  # append coil-subcoil map in index
+        subcoilset = list(coilset['subcoil'].keys())
+        Nf = [coilset['coil'][name]['Nf'] for name in coilset['coil']]
+        for i, name in enumerate(coilset['coil']):
+            N = [np.sum(Nf[slice(None, i)], dtype=int),
+                 np.sum(Nf[slice(None, i+1)], dtype=int)]
+            coilset['index'][name] = {'index': slice(*N), 'n': Nf[i],
+                                      'name': subcoilset[slice(*N)]}
 
     def set_coils(self, eqdsk, **kwargs):
         self.initalize_coils()
@@ -153,7 +389,7 @@ class PF:
 
     def add_coil(self, x, z, dx, dz, It, categorize=True, **kwargs):
         self.coilset['nC'] += 1
-        name = kwargs.get('name', 'Coil{:1.0f}'.format(self.coilset['nC']))
+        name = kwargs.get('name', 'Coil{:1.0f}'.format(self.coilset['nC']-1))
         self.coilset['coil'][name] = {'x': x, 'z': z, 'dx': dx, 'dz': dz,
                                       'It': It, 'Nf': 1}
         rc = kwargs.get('rc', np.sqrt(dx**2 + dz**2) / 2)
@@ -240,8 +476,8 @@ class PF:
             names.append(name)
         return nc, xc, zc, dxc, dzc, It, names, Nt, Nf
 
-    def mesh_coils(self, dCoil=-1):
-        if dCoil < 0:  # dCoil not set, use stored value
+    def mesh_coils(self, dCoil=0):
+        if dCoil == 0:  # dCoil not set, use stored value
             if not hasattr(self, 'dCoil'):
                 self.dCoil = 0
         else:
@@ -258,7 +494,7 @@ class PF:
             self.coilset['subcoil'].clear()  # clear dict but retain referance
             for name in self.coilset['coil'].keys():
                 subcoil = self.mesh_coil(
-                        self.coilset['coil'][name], self.dCoil)
+                        self.coilset['coil'][name], dCoil)
                 for i, subcoil_ in enumerate(subcoil):
                     subname = '{}_{}'.format(name, i)
                     self.coilset['subcoil'][subname] = subcoil_
@@ -269,6 +505,9 @@ class PF:
         Dx, Dz = abs(coil['dx']), abs(coil['dz'])
         if dCoil is None:
             dCoil = np.max([Dx, Dz])
+        elif dCoil == -1:  # mesh per-turn (inductance calculation)
+            Nt = coil['Nt']
+            dCoil = (Dx * Dz / Nt)**0.5
         nx = int(np.ceil(Dx / dCoil))
         nz = int(np.ceil(Dz / dCoil))
         if nx < 1:
@@ -279,7 +518,7 @@ class PF:
         x = xc + np.linspace(dx / 2, Dx - dx / 2, nx) - Dx / 2
         z = zc + np.linspace(dz / 2, Dz - dz / 2, nz) - Dz / 2
         X, Z = np.meshgrid(x, z, indexing='ij')
-        X, Z = np.reshape(X, (-1, 1)), np.reshape(Z, (-1, 1))
+        X, Z = np.reshape(X, (-1, 1))[:, 0], np.reshape(Z, (-1, 1))[:, 0]
         Nf = len(X)  # filament number
         coil['Nf'] = Nf  # store filament number
         If = coil['It'] / Nf
@@ -288,180 +527,6 @@ class PF:
             subcoil[i] = {'x': x, 'z': z, 'dx': dx, 'dz': dz, 'If': If,
                           'rc': np.sqrt(dx**2 + dz**2) / 4}
         return subcoil
-
-    def initalize_collection(self, *args):
-        self.coil_patch = {'patch': [], 'Icoil': [], 'Jc': []}
-        if len(args) > 0:  # list of additional tracked varibles
-            for var in args:
-                self.coil_patch[var] = []
-
-    def append_patch(self, patch, **kwargs):
-        self.coil_patch['patch'].append(patch)
-        for var in kwargs:
-            try:
-                self.coil_patch[var].append(kwargs[var])
-            except KeyError:
-                txt = '\ninitalisze kwarg {} '.format(var)
-                txt += ' in initalize collection'
-                raise KeyError(txt)
-
-    def plot_patch(self, c=None, reset=False, **kwargs):
-        cmap = kwargs.get('cmap', plt.cm.RdBu)
-        clim = kwargs.get('clim', None)
-        pc = PatchCollection(self.coil_patch['patch'], cmap=cmap)
-        if c is not None:
-            if c in self.coil_patch:  # c == It or Jc
-                carray = np.array(self.coil_patch[c])
-            else:  # c is np.array len == len(patch)
-                npatch = len(self.coil_patch['patch'])
-                if isinstance(c, np.ndarray) and len(c) == npatch:
-                    carray = c
-                else:
-                    raise ValueError('color array incompatable with patches')
-            if not clim:
-                cmax = np.max(abs(carray))
-                clim = [-cmax, cmax]
-            pc.set_clim(vmin=clim[0], vmax=clim[1])
-            pc.set_array(carray)
-
-        ax = plt.gca()
-        im = ax.add_collection(pc)
-        cb = plt.colorbar(im, orientation='horizontal', aspect=40, shrink=0.6,
-                          fraction=0.05)
-        if c == 'It':
-            cb.set_label('$I_c$ kA')
-        elif c == 'Jc':
-            cb.set_label('$J_c$ MAm$^{-2}$')
-        if reset:  # reset patch collection
-            self.initalize_collection()
-
-    def get_coil_label(self, name):
-        sname = name.split('_')
-        if len(sname) == 1:
-            label = name
-        elif len(sname) == 2:
-            label = sname[0]
-        else:
-            label = '_'.join(sname[:-1])
-        return label
-
-    def patch_coil(self, coils, alpha=1, **kwargs):
-        patch = [[] for _ in range(len(coils))]
-        color_key = ['CS', 'skip', 'VS3', 'vv_DINA', 'plasma',
-                     'PF', 'skip', 'bb_DINA', 'trs', 'skip',
-                     'skip', 'skip', 'skip', 'vv', 'skip']
-        for i, name in enumerate(coils.keys()):
-            coil = coils[name]
-            x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
-            if 'It' in coil:
-                Icoil = coil['It']
-            else:
-                Icoil = coil['If']
-            Jc = Icoil / (dx*dz)
-            if Icoil != 0:
-                edgecolor = 'k'
-            else:
-                edgecolor = 'k'
-            label = self.get_coil_label(name)
-            coil_color = 'C3'  # default
-            for group in self.coilset['index']:
-                if label in self.coilset['index'][group]['name']\
-                        and group in color_key:
-                    ic = color_key.index(group)
-                    icolor = ic % 5
-                    coil_color = 'C{}'.format(icolor)
-                    break
-            coil_color = kwargs.get('coil_color', coil_color)
-            if 'VS' in name:
-                patch[i] = patches.Circle(
-                        (x, z), dx/2, facecolor=coil_color, alpha=alpha,
-                        edgecolor=edgecolor)
-            else:
-                patch[i] = patches.Rectangle(
-                        (x-dx/2, z-dz/2), dx, dz,
-                        facecolor=coil_color, alpha=alpha, edgecolor=edgecolor)
-            self.append_patch(patch[i], Icoil=1e-3*Icoil, Jc=1e-6*Jc)
-        return patch
-
-    def label_coils(self, coils, label, current, fs=12):
-        for i, name in enumerate(coils.keys()):
-            coil = coils[name]
-            x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
-            if 'index' in self.coilset:
-                if name in self.coilset['index']['CS']['name']:
-                    drs = -2.5 / 3 * dx
-                    ha = 'right'
-                else:
-                    drs = 2.5 / 3 * dx
-                    ha = 'left'
-            else:
-                drs = 2.5 / 3 * dx
-                ha = 'left'
-
-            if label and current:
-                zshift = max([dz / 10, 0.2])
-            else:
-                zshift = 0
-            if label:
-                plt.text(x + drs, z + zshift, name, fontsize=fs,
-                         ha=ha, va='center', color=0.2 * np.ones(3))
-            if current:
-                if current == 'A' and 'Nt' in coil:  # amps
-                    Nt = coil['Nt']
-                    linecurrent = coil['It'] / Nt
-                    txt = '{:1.1f}kA'.format(linecurrent * 1e-3)
-                else:  # amp turns
-                    if abs(coil['It']) < 0.1e6:  # display as kA.t
-                        txt = '{:1.1f}kAT'.format(coil['It'] * 1e-3)
-                    else:  # MA.t
-                        txt = '{:1.1f}MAT'.format(coil['It'] * 1e-6)
-                plt.text(x + drs, z - zshift, txt,
-                         fontsize=fs, ha=ha, va='center',
-                         color=0.2 * np.ones(3))
-
-    def plot_coil(self, coils, label=False, current=False,
-                  fs=12, alpha=1, plot=True, ax=None, patch=True, **kwargs):
-        if ax is None:
-            ax = plt.gca()
-        if patch:
-            patch = self.patch_coil(coils, alpha=alpha, **kwargs)
-            pc = PatchCollection(patch[::-1], match_original=True)
-            ax.add_collection(pc)
-        if label or current:
-            self.label_coils(coils, label, current, fs=fs)
-
-    def plot(self, subcoil=False, label=False, plasma=False,
-             current=False, alpha=1, ax=None, patch=True):
-        if ax is None:
-            ax = plt.gca()
-        fs = matplotlib.rcParams['legend.fontsize']
-        if subcoil:
-            coils = self.coilset['subcoil']
-        else:
-            coils = self.coilset['coil']
-        self.plot_coil(coils, label=label, current=current, fs=fs,
-                       alpha=alpha, ax=ax, patch=patch)
-        if plasma:
-            self.plot_coil(self.coilset['plasma'], alpha=alpha,
-                           coil_color='C4', ax=ax)
-        ax.axis('equal')
-        ax.axis('off')
-
-    '''
-    def inductance(self, dCoil=0.5, Iscale=1):
-        pf = deepcopy(self)
-        inv = INV(pf, Iscale=Iscale, dCoil=dCoil)
-        pf.mesh_coils(dCoil=dCoil)  # multi-filiment coils
-        inv.update_coils()
-        Nf = np.array([1 / inv.coil['active'][coil]['Nf']
-                       for coil in inv.coil['active']])
-        for i, coil in enumerate(inv.adjust_coils):
-            x, z = inv.pf.coil[coil]['x'], inv.pf.coil[coil]['z']
-            inv.add_psi(1, point=(x, z))
-        inv.set_foreground()
-        fillaments = np.dot(np.ones((len(Nf), 1)), Nf.reshape(1, -1))
-        self.M = 2 * np.pi * inv.G * fillaments  # PF/CS inductance matrix
-    '''
 
     def coil_corners(self, coils):
         X, Z = np.array([]), np.array([])

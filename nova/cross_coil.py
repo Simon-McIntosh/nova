@@ -14,12 +14,12 @@ def green(X, Z, Xc, Zc, dXc=0, dZc=0):
     g = np.array((Xc * X)**0.5 *
                  ((2 * m**-0.5 - m**0.5) *
                   ellipk(m) - 2 * m**-0.5 * ellipe(m)) / (2 * np.pi))
-    if np.min(np.sqrt(x)) < dXc / 2:  # self inductance
+    dr = np.sqrt(x)
+    if np.min(dr) < dXc / 2:  # self inductance + adjacent coils
         rho = np.mean([dXc + dZc]) / 2
         Xc = Xc * np.ones(np.shape(X))
-        index = np.sqrt(x) < dXc / 2  # self inductance index
-        g_s = Xc[index] * (np.log(8 * Xc[index] / rho) - 2) / (2 * np.pi)
-        g[index] = g_s
+        index = dr < dXc / 2  # self inductance index
+        g[index] = Xc[index] * (np.log(8 * Xc[index] / rho) - 2) / (2 * np.pi)
     return g
 
 
@@ -225,31 +225,31 @@ def get_green_field(x, z, xi, zi, rc):
     return dfield
 
 
-def Gtorque(coil, subcoil, source, sink, multi_filament):  # source-sink
+def Gtorque(coil, subcoil, source, sink, multi_filament, **kwargs):
     xo, zo, dz = centroid(coil, sink)  # coil centroid
     if multi_filament:
         Nbundle = 1
-        Nsource = coil[source]['Nf']
-        Nsink = coil[sink]['Nf']
+        Nsource = range(coil[source]['Nf'])
+        Nsink = kwargs.get('Nsink', range(coil[sink]['Nf']))
         coil = subcoil
     else:  # single-filament
         Nbundle = coil[source]['Nf'] * coil[sink]['Nf']
-        Nsource, Nsink = 1, 1
+        Nsource, Nsink = [1], [1]
     xG = np.zeros(4)  # xBx, xBz, cross(r, dF), sum(-zxBx)
-    for i in range(Nsource):
+    for i in Nsource:
         if multi_filament:  # source
             source_strand = f'{source}_{i}'
         else:
             source_strand = f'{source}'
         xi = coil[source_strand]['x']
         zi = coil[source_strand]['z']
-        for j in range(Nsink):
+        for j in Nsink:
             if multi_filament:  # sink
                 sink_strand = f'{sink}_{j}'
             else:
                 sink_strand = f'{sink}'
-            x = coil[sink_strand]['x'][0]
-            z = coil[sink_strand]['z'][0]
+            x = coil[sink_strand]['x']
+            z = coil[sink_strand]['z']
             rc = coil[sink_strand]['rc']
             dfield = get_green_field(x, z, xi, zi, rc)
             dxG = Nbundle * x * dfield  # strand delta
@@ -261,27 +261,27 @@ def Gtorque(coil, subcoil, source, sink, multi_filament):  # source-sink
     return 2*np.pi*mu_o*xG
 
 
-def Btorque(coil, subcoil, plasma, passive_coils, sink):
+def Btorque(coil, subcoil, plasma, passive_coils, sink, **kwargs):
     xo, zo, dz = centroid(coil, sink)  # coil centroid
     Csink = subcoil
-    Nsink = coil[sink]['Nf']
+    Nsink = kwargs.get('Nsink', range(coil[sink]['Nf']))
     xB = np.zeros(4)  # xBx, xBz, cross(r, dF)
     for source in passive_coils:
         if source == 'Plasma':
             Csource = plasma
-            Nsource = len(Csource)
+            Nsource = range(len(Csource))
         else:
             Csource = subcoil
-            Nsource = coil[source]['Nf']
-        for i in range(Nsource):
+            Nsource = range(coil[source]['Nf'])
+        for i in Nsource:
             source_strand = source + '_{:1.0f}'.format(i)
             xi = Csource[source_strand]['x']  # source
             zi = Csource[source_strand]['z']
             Ii = Csource[source_strand]['If']
-            for j in range(Nsink):
+            for j in Nsink:
                 sink_strand = sink + '_{:1.0f}'.format(j)
-                x = Csink[sink_strand]['x'][0]  # sink
-                z = Csink[sink_strand]['z'][0]
+                x = Csink[sink_strand]['x']  # sink
+                z = Csink[sink_strand]['z']
                 rc = Csink[sink_strand]['rc']
                 dfield = get_green_field(x, z, xi, zi, rc)
                 dxB = Ii * x * dfield  # strand delta

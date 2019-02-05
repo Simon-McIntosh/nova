@@ -19,6 +19,7 @@ from scipy.optimize import brentq
 from amigo import geom
 from nova.coils import PF
 from nova.streamfunction import SF
+from amigo.time import clock
 
 
 class INV(object):
@@ -48,15 +49,13 @@ class INV(object):
             self.tf.loop_interpolators(offset=self.offset)
             self.unwrap()  # store relitive coil posions around TF
         self.Jmax = Jmax  # MAm-2
-        self.fix = {'x': np.array([]), 'z': np.array([]), 'BC': np.array([]),
-                    'value': np.array([]), 'Bdir': np.array([[], []]).T,
-                    'factor': np.array([]), 'n': 0}
+        self.initalize_fix()
         self.cnstr = {'x': np.array([]), 'z': np.array([]), 'BC': np.array([]),
                       'value': np.array([]), 'condition': np.array([])}
         self.set_swing()
         self.update_coils()
-        self.log_scalar = ['rms', 'rmsID']
-        # 'Fx_max','Fz_max','F_max','FzCS','Fsep','rms_bndry','Isum',
+        self.log_scalar = ['rss', 'rssID']
+        # 'Fx_max','Fz_max','F_max','FzCS','Fsep','rss_bndry','Isum',
         # 'Imax','z_offset','FxPF','FzPF','dTpol'
         self.log_array = ['Lo']  # ,'Iswing'
         self.log_iter = ['current_iter', 'plasma_iter', 'position_iter']
@@ -64,13 +63,21 @@ class INV(object):
         self.CS_Lnorm, self.CS_Znorm = 2, 1
         self.rhs = False  # colocation status
 
-    def colocate(self, eqdsk, SX=False, **kwargs):
-        self.sf.update_eqdsk(eqdsk)  # update streamfunction
+    def initalize_fix(self):
+        self.fix = {'x': np.array([]), 'z': np.array([]), 'BC': np.array([]),
+                    'value': np.array([]), 'Bdir': np.array([[], []]).T,
+                    'factor': np.array([]), 'n': 0}
+
+    def colocate(self, eqdsk=None, psi=True, field=True, Xpoint=True,
+                 targets=True, SX=False):
+        self.initialize_log()
+        if eqdsk:
+            self.sf.update_eqdsk(eqdsk)  # update streamfunction
         self.psi_spline()  # generate psi interpolators
         self.plasma_spline()  # generate plasma interpolators
-        self.fix_boundary()
+        self.fix_boundary(psi, field, Xpoint)
         self.fix_SX_outer_target(SX)
-        self.fix_divertor_targets()
+        self.fix_divertor_targets(targets)
         self.get_weight()
         self.set_background()
         self.set_foreground()
@@ -83,28 +90,30 @@ class INV(object):
             self.sf.legs.pop(-1)  # replace outer
             self.fix_SX(Rex=Rex, arg=arg)
 
-    def fix_boundary(self):
-        # add boundary points
-        self.fix_boundary_psi(npoint=25, alpha=1-1e-4, factor=1)
-        # add boundary field
-        self.fix_boundary_field(npoint=25, alpha=1-1e-4, factor=1)
-        self.fix_null(factor=1, point=self.sf.Xpoint_array[0])
-        self.fix_null(factor=1, point=self.sf.Xpoint_array[1])
-        self.initialize_log()
+    def fix_boundary(self, psi=True, field=False, Xpoint=False):
+        if psi:  # add boundary points
+            self.fix_boundary_psi(npoint=25, alpha=1-1e-4, factor=1)
+        if field:  # add boundary field
+            self.fix_boundary_field(npoint=25, alpha=1-1e-4, factor=1)
+        if Xpoint:  # Xpoints
+            self.fix_null(factor=1, point=self.sf.Xpoint_array[0])
+            self.fix_null(factor=1, point=self.sf.Xpoint_array[1])
 
-    def fix_divertor_targets(self, factor=1):
-        for target in self.sf.targets:
-            L2D = self.sf.targets[target]['L2D']
-            Xsol, Zsol = self.sf.snip(target, 0, L2D)
-            if 'strike' in self.sf.targets[target]:
-                point = self.sf.targets[target]['strike']
-            else:
-                point = (Xsol[-1], Zsol[-1])
-            field_angle = np.arctan2(Zsol[-1]-Zsol[-2], Xsol[-1]-Xsol[-2])
-            Bdir = np.array([-np.sin(field_angle), np.cos(field_angle)])
-            Bdir /= np.linalg.norm(Bdir)
-            self.add_alpha(1, factor=factor, point=point, Bdir=Bdir)
-            self.add_B(0, [field_angle*180/np.pi], factor=factor, point=point)
+    def fix_divertor_targets(self, targets, factor=1):
+        if targets:
+            for target in self.sf.targets:
+                L2D = self.sf.targets[target]['L2D']
+                Xsol, Zsol = self.sf.snip(target, 0, L2D)
+                if 'strike' in self.sf.targets[target]:
+                    point = self.sf.targets[target]['strike']
+                else:
+                    point = (Xsol[-1], Zsol[-1])
+                field_angle = np.arctan2(Zsol[-1]-Zsol[-2], Xsol[-1]-Xsol[-2])
+                Bdir = np.array([-np.sin(field_angle), np.cos(field_angle)])
+                Bdir /= np.linalg.norm(Bdir)
+                self.add_alpha(1, factor=factor, point=point, Bdir=Bdir)
+                self.add_B(0, [field_angle*180/np.pi], factor=factor,
+                           point=point)
 
     def fix_SX(self, Rex=1.5, arg=40):  # fix outer leg
         R = self.eq.sf.Xpoint[0] * (Rex-1) / np.sin(arg*np.pi/180)
@@ -123,15 +132,16 @@ class INV(object):
         else:
             flux = self.get_flux(**kwargs)
         self.nS = len(flux)
-        self.swing = {'flux': flux, 'If': np.zeros((self.nS, self.nC)),
-                      'rms': np.zeros(self.nS),
+        self.swing = {'flux': flux, 'It': np.zeros((self.nS, self.nC)),
+                      'rss': np.zeros(self.nS),
                       'FxPF': np.zeros(self.nS), 'FzPF': np.zeros(self.nS),
                       'FsepCS': np.zeros(self.nS), 'FzCS': np.zeros(self.nS),
                       'Isum': np.zeros(self.nS),
                       'IsumCS': np.zeros(self.nS), 'IsumPF': np.zeros(self.nS),
                       'Imax': np.zeros(self.nS),
+                      'IcCSmax': np.zeros(self.nS),
                       'Tpol': np.zeros(self.nS),
-                      'rms_bndry': np.zeros(self.nS),
+                      'rss_bndry': np.zeros(self.nS),
                       'z_offset': np.zeros(self.nS), 'dTpol': 0,
                       'Fcoil': [[] for _ in range(self.nS)]}
 
@@ -233,6 +243,41 @@ class INV(object):
         self.initalise_current()
         if plot:
             self.plot_coils(plasma=True)
+
+    def inductance(self):
+        fix_o = copy.deepcopy(self.fix)  # store current BCs
+        if hasattr(self, 'G'):  # store coupling matrix
+            self.Go = self.G.copy()
+        self.initalize_fix()  # reinitalize BC vector
+        for i, name in enumerate(self.adjust_coils):
+            coil = self.coil['active'][name]
+            X, Z = coil['x'], coil['z']
+            for x, z in zip(X, Z):
+                x = self.coilset['coil'][name]['x']
+                z = self.coilset['coil'][name]['z']
+                self.add_psi(1, point=(x, z))
+        self.set_foreground()
+        Gi = np.zeros((self.nC, self.nC))  # inductance coupling matrix
+        Ncount = 0
+        for i, name in enumerate(self.adjust_coils):
+            Nf = self.coilset['coil'][name]['Nf']
+            Gi[i, :] = np.sum(self.G[Ncount:Ncount+Nf, :], axis=0)
+            Ncount += Nf
+        Gi /= self.Iscale  # ensure coil currents [A]
+        turns = np.array([self.coilset['coil'][name]['Nt']
+                          for name in self.coil['active']])
+        turns = np.dot(turns.reshape(-1, 1), turns.reshape(1, -1))
+        fillaments = np.array([self.coilset['coil'][name]['Nf']
+                               for name in self.coil['active']])
+        fillaments = np.dot(fillaments.reshape(-1, 1),
+                            fillaments.reshape(1, -1))
+        # PF/CS inductance matrix
+        self.Mc = 2 * np.pi * Gi / fillaments  # inductance [H]
+        self.Mt = self.Mc * turns  # inductance [H]
+        self.fix = fix_o  # reset BC vector
+        if hasattr(self, 'Go'):  # reset coupling matrix
+            self.G = self.Go
+            del self.Go
 
     def update_plasma(self):
         self.clear_plasma()
@@ -376,7 +421,7 @@ class INV(object):
         self.set_target()  # adjust target flux
 
     def get_boundary(self, npoint=21, alpha=0.995):
-        x, z = self.sf.get_boundary(alpha=alpha)
+        x, z = self.sf.get_boundary(alpha=alpha, boundary_cntr=False)
         Xindex = np.argmin((x-self.sf.Xpoint[0])**2 + (z-self.sf.Xpoint[1])**2)
         x = np.append(x[Xindex:], x[:Xindex])
         z = np.append(z[Xindex:], z[:Xindex])
@@ -527,8 +572,7 @@ class INV(object):
         self.add_value('passive')
 
     def set_foreground(self):
-        self.G = np.zeros((len(self.fix['BC']),
-                           len(self.coil['active'].keys())))  # [G][If] = [T]
+        self.G = np.zeros((self.fix['n'], self.nC))  # [G][If] = [T]
         self.add_value('active')
         self.wG = self.wsqrt * self.G
         if self.svd:  # singular value dec.
@@ -536,7 +580,8 @@ class INV(object):
             self.wG = np.dot(self.wG, self.V)  # solve in terms of alpha
 
     def add_value(self, state):
-        Xf, Zf, BC, Bdir = self.unpack_fix()
+        Xf, Zf, BC, Bdir, nfix = self.unpack_fix()
+        tick = clock(nfix)
         for n, (xf, zf, bc, bdir) in enumerate(zip(Xf, Zf, BC, Bdir)):
             for m, name in enumerate(self.coil[state].keys()):
                 coil = self.coil[state][name]
@@ -552,6 +597,10 @@ class INV(object):
                         errtxt = 'specify coil state'
                         errtxt += '\'active\', \'passive\'\n'
                         raise ValueError(errtxt)
+            if state == 'active' and nfix > 100:
+                if n == 0:
+                    print('computing foreground coupling')
+                tick.tock()
 
     def add_value_coil(self, bc, xf, zf, x, z, bdir, dx, dz):
         if 'psi' in bc:
@@ -611,7 +660,8 @@ class INV(object):
     def unpack_fix(self):
         Xf, Zf = self.fix['x'], self.fix['z']
         BC, Bdir = self.fix['BC'], self.fix['Bdir']
-        return Xf, Zf, BC, Bdir
+        n = self.fix['n']
+        return Xf, Zf, BC, Bdir, n
 
     def get_gradients(self, bc, xf, zf):
         try:
@@ -627,8 +677,7 @@ class INV(object):
         return d_dx, d_dz
 
     def get_weight(self):
-        Xf, Zf, BC, Bdir = self.unpack_fix()
-        n = self.fix['n']
+        Xf, Zf, BC, Bdir, n = self.unpack_fix()
         weight = np.zeros(n)
         if n > 0:
             for i, (xf, zf, bc, bdir, factor) in \
@@ -752,7 +801,7 @@ class INV(object):
             self.update_position(Lnorm, update_area=True)
             self.eq.run(update=True)  # update psi map
 
-    def get_rms_bndry(self):
+    def get_rss_bndry(self):
         psi_o = self.fix['value'][0]  # target boundary psi
         psi_line = self.sf.get_contour([psi_o])[0]
         dx_bndry, dx_min = np.array([]), 0
@@ -777,9 +826,9 @@ class INV(object):
                         dz_min = dz[zmin_index]
                 dx_bndry = np.append(dx_bndry, dx_min)
                 dz_bndry = np.append(dz_bndry, dz_min)
-        rms_bndry = np.sqrt(np.mean(dx_bndry**2))  # calculate rms
+        rss_bndry = np.sum(dx_bndry**2)  # calculate rss
         z_offset = np.mean(dz_bndry)
-        return rms_bndry, z_offset
+        return rss_bndry, z_offset
 
     def move_PF(self, name, AR=0, **kwargs):
         name = self.Cname(name)  # convert to name
@@ -902,32 +951,33 @@ class INV(object):
         fun = np.min(dL) - dLmin
         return fun
 
-    def get_rms(self, vector, error=False):
+    def get_rss(self, vector, gamma, error=False):
         err = np.dot(self.wG, vector.reshape(-1, 1)) - self.wT
-        rms = np.sqrt(np.mean(err**2))
+        rss = np.sum(err**2)  # residual sum of squares
+        rss += gamma * np.sum(vector**2)  # Tikhonov regularization
         if error:  # return error
-            return rms, err
+            return rss, err
         else:
-            return rms
+            return rss
 
     def solve(self):
-        vector = np.linalg.lstsq(self.wG, self.wT)[0].reshape(-1)
-        self.rms = self.get_rms(vector)
+        vector = np.linalg.lstsq(self.wG, self.wT, rcond=None)[0].reshape(-1)
+        self.rss = self.get_rss(vector)
         if self.svd:
             self.If = np.dot(self.V, self.alpha)
         else:
             self.If = vector
         self.update_current()
 
-    def frms(self, vector, grad):
+    def frss(self, vector, grad, gamma=0.1):
         self.iter['current'] += 1
-        rms, err = self.get_rms(vector, error=True)
+        rss, err = self.get_rss(vector, gamma, error=True)
         if grad.size > 0:
-            jac = np.ones(self.nC) / (rms * self.fix['n'])
-            for i in range(self.nC):
-                jac[i] *= np.dot(self.wG[:, i], err)
+            jac = 2 * self.wG.T @ self.wG @ vector
+            jac -= 2 * self.wG.T @ self.wT[:, 0]
+            jac += gamma * 2 * vector  # Tikhonov regularization
             grad[:] = jac
-        return rms
+        return rss
 
     def Ilimit(self, constraint, alpha, grad):  # only for svd==True
         if grad.size > 0:
@@ -999,7 +1049,7 @@ class INV(object):
         constraint[self.nPF:2 * self.nPF] = PFz - PFz_limit[:, 1]  # PFz upper
         FzCS = F[self.nPF:, 1]  # vertical force on CS coils (vector)
         CSsum = np.sum(FzCS)  # vertical force on CS stack (sum)
-        # lower and upper limits applied to CSz_cum
+        # lower and upper limits applied to CSz_sum
         CSsum_limit = self.get_CSsum_limit()
         constraint[2 * self.nPF] = CSsum_limit[0] - CSsum
         constraint[2 * self.nPF + 1] = CSsum - CSsum_limit[1]
@@ -1011,6 +1061,7 @@ class INV(object):
             constraint[index] = CSsep_limit[j, 0] - Fsep
             # upper limit
             constraint[index + self.nCS - 1] = Fsep - CSsep_limit[j, 1]
+        # CSaxial_limit
 
     def get_PFz_limit(self):
         PFz_limit = np.zeros((self.nPF, 2))
@@ -1048,7 +1099,7 @@ class INV(object):
         self.fix_flux(flux)  # swing
         self.set_Io()  # set coil current and bounds
         opt = nlopt.opt(nlopt.LD_SLSQP, self.nC)
-        opt.set_min_objective(self.frms)
+        opt.set_min_objective(self.frss)
         opt.set_ftol_abs(1e-12)  # 1e-12
         tol = 1e-3 * np.ones(2 * self.nPF + 2 + 2 * (self.nCS - 1))
         opt.add_inequality_mconstraint(self.Flimit, tol)
@@ -1062,9 +1113,9 @@ class INV(object):
             opt.set_upper_bounds(self.Io['ub'])
             self.If = opt.optimize(self.Io['value'])
         self.Io['value'] = self.If.reshape(-1)
-        self.rms = opt.last_optimum_value()
+        self.rss = opt.last_optimum_value()
         self.update_current()
-        return self.rms
+        return self.rss
 
     def update_area(self, relax=1, margin=0):
         It = self.swing['It'][np.argmax(abs(self.swing['It']), axis=0),
@@ -1089,21 +1140,21 @@ class INV(object):
         return dl
 
     def update_position_vector(self, Lnorm, grad):
-        rms = self.update_position(Lnorm, update_area=True, store_update=True)
+        rss = self.update_position(Lnorm, update_area=True, store_update=True)
         if grad.size > 0:
             grad[:] = op.approx_fprime(Lnorm, self.update_position, 1e-7)
-        rms_str = '\r{:d}) rms {:1.2f}mm '.format(
-            self.iter['position'], 1e3 * rms)
-        rms_str += 'time {:1.0f}s'.format(time.time() - self.tstart)
-        rms_str += '\t\t\t'  # white space
-        sys.stdout.write(rms_str)
+        rss_str = '\r{:d}) rss {:1.2f}mm '.format(
+            self.iter['position'], 1e3 * rss)
+        rss_str += 'time {:1.0f}s'.format(time.time() - self.tstart)
+        rss_str += '\t\t\t'  # white space
+        sys.stdout.write(rss_str)
         sys.stdout.flush()
-        return rms
+        return rss
 
     def update_position_scipy(self, Lnorm):
         jac = op.approx_fprime(Lnorm, self.update_position, 5e-4)
-        rms = self.update_position(Lnorm, store_update=True)
-        return rms, jac
+        rss = self.update_position(Lnorm, store_update=True)
+        return rss, jac
 
     def check_state(self):
         if not self.rhs:
@@ -1132,7 +1183,7 @@ class INV(object):
                 dL.append(dl)
                 self.ff.set_force_field(state='active')
                 self.set_foreground()
-                rms = self.swing_flux()
+                rss = self.swing_flux()
                 if abs(dl - dl_o) < err:  # coil areas converged
                     break
                 else:
@@ -1146,16 +1197,17 @@ class INV(object):
             self.fit_PF()  # fit coils to TF
             self.ff.set_force_field(state='active')
             self.set_foreground()
-            rms = self.swing_flux()
+            rss = self.swing_flux()
         if store_update:
             self.iter['position'] += 1
             self.store_update()
-        return rms
+        return rss
 
     def swing_flux(self, bndry=False):
         for i, flux in enumerate(self.swing['flux']):
-            self.swing['rms'][i] = self.solve_slsqp(flux)
-            Fcoil = self.ff.get_force()
+            self.swing['rss'][i] = self.solve_slsqp(flux)
+            self.ff.get_force()
+            Fcoil = self.ff.Fcoil
             self.swing['FxPF'][i] = Fcoil['PF']['x']
             self.swing['FzPF'][i] = Fcoil['PF']['z']
             self.swing['FsepCS'][i] = Fcoil['CS']['sep']
@@ -1167,9 +1219,10 @@ class INV(object):
             self.swing['IsumCS'][i] = self.IsumCS
             self.swing['IsumPF'][i] = self.IsumPF
             self.swing['Imax'][i] = self.Imax
-        self.rmsID = np.argmax(self.swing['rms'])
-        self.rms = self.swing['rms'][self.rmsID]
-        return self.rms
+            self.swing['IcCSmax'][i] = self.IcCSmax
+        self.rssID = np.argmax(self.swing['rss'])
+        self.rss = self.swing['rss'][self.rssID]
+        return self.rss
 
     def plot_swing(self, ax=None):
         if ax is None:
@@ -1265,7 +1318,7 @@ class INV(object):
                                   T=1e-3, stepsize=0.05, disp=True,
                                   minimizer_kwargs=minimizer,
                                   interval=50, niter_success=100)
-            Lnorm, self.rms = res.x, res.fun
+            Lnorm, self.rss = res.x, res.fun
         elif method == 'de':  # differential_evolution
             bounds = [[0, 1] for _ in range(self.nL)]
             res = op.differential_evolution(self.update_position, bounds,
@@ -1274,7 +1327,7 @@ class INV(object):
                                             mutation=(0.5, 1),
                                             recombination=0.7, polish=True,
                                             disp=True)
-            Lnorm, self.rms = res.x, res.fun
+            Lnorm, self.rss = res.x, res.fun
         elif method == 'ls':  # sequential least squares
             print('\nOptimising configuration:')
             opt = nlopt.opt(nlopt.LD_SLSQP, self.nL)
@@ -1287,10 +1340,10 @@ class INV(object):
             opt.set_upper_bounds([1 for _ in range(self.nL)])
             tol = 1e-3 * np.ones(self.nPF - 1 + self.nCS)
             opt.add_inequality_mconstraint(self.Llimit, tol)
-            self.rms = opt.last_optimum_value()
+            self.rss = opt.last_optimum_value()
             Lnorm = opt.optimize(Lnorm)
         loops.denormalize_variables(Lnorm, self.Lo)
-        print('\nrms {:1.2f}mm'.format(1e3 * self.rms))
+        print('\nrss {:1.2f}mm'.format(1e3 * self.rss))
         result = opt.last_optimize_result()
         if result < 0:
             warntxt = 'optimiser exited with error code {}'.format(result)
@@ -1362,6 +1415,9 @@ class INV(object):
                 self.IsumCS += abs(self.It[j])
             elif name in self.PFcoils:
                 self.IsumPF += abs(self.It[j])
+        IcCS = np.array([self.coilset['coil'][name]['Ic']
+                         for name in self.coilset['index']['CS']['name']])
+        self.IcCSmax = IcCS[np.argmax(abs(IcCS))]
         imax = np.argmax(abs(self.It))
         self.Imax = self.It[imax]
 
@@ -1388,21 +1444,21 @@ class INV(object):
 
 class SWING(object):
 
-    def __init__(self, inv, sf, rms_limit=0.10, wref=0, nswing=2, plot=False,
+    def __init__(self, inv, sf, rss_limit=0.10, wref=0, nswing=2, plot=False,
                  output=True):
         self.nswing = nswing
         self.inv = inv
-        self.rms_limit = rms_limit
+        self.rss_limit = rss_limit
         self.wref = wref
 
-    def get_rms(self, centre):
+    def get_rss(self, centre):
         self.inv.set_swing(centre=centre, width=self.wref,
                            array=np.linspace(-0.5, 0.5, 2))
-        rms = self.inv.update_position(self.Lnorm, update_area=True)
-        return float(self.rms_limit - rms)
+        rss = self.inv.update_position(self.Lnorm, update_area=True)
+        return float(self.rss_limit - rss)
 
     def find_root(self, slim):
-        swing = brentq(self.get_rms, slim[0], slim[1], xtol=0.1, maxiter=500,
+        swing = brentq(self.get_rss, slim[0], slim[1], xtol=0.1, maxiter=500,
                        disp=True)
         return swing
 
@@ -1419,11 +1475,11 @@ class SWING(object):
         self.inv.update_position(self.Lnorm, update_area=True)
 
     def energy(self):
-        self.inv.pf.inductance(dCoil=self.inv.dCoil, Iscale=1)
+        self.inductance(dCoil=self.inv.dCoil, Iscale=1)
         E = np.zeros(len(self.inv.swing['flux']))
         for i, Isw in enumerate(self.inv.swing['It']):
             Isw *= self.inv.Iscale
-            E[i] = 0.5 * np.dot(np.dot(Isw, self.inv.pf.M), Isw)
+            E[i] = 0.5 * np.dot(np.dot(Isw, self.inv.M), Isw)
         return np.max(E)
 
     def output(self):

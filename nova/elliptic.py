@@ -571,10 +571,10 @@ class EQ(object):
     def set_plasma_current(self):  # plasma current from sf line intergral
         Ipl = 0
         X, Z = self.sf.get_boundary()
-        tR, tZ, X, Z = cc.tangent(X, Z, norm=False)
-        for x, z, tr, tz in zip(X, Z, tR, tZ):
+        tX, tZ, X, Z = cc.tangent(X, Z, norm=False)
+        for x, z, tx, tz in zip(X, Z, tX, tZ):
             B = self.sf.Bcoil((x, z))
-            t = np.array([tr, tz])
+            t = np.array([tx, tz])
             Ipl += np.dot(B, t)
         Ipl /= cc.mu_o
         self.sf.Ipl = Ipl

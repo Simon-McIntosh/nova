@@ -3,6 +3,9 @@ from amigo.pyplot import plt, arrow_arc
 import numpy as np
 import matplotlib
 from amigo import geom
+import pandas as pd
+from math import isclose
+from amigo.time import clock
 
 
 class force_field(object):
@@ -17,6 +20,8 @@ class force_field(object):
         self.active_coils = [name for name in active_coils if name not in
                              self.passive_coils]
         self.nC = len(self.active_coils)  # number of active coils
+        self.nC_filament = np.sum([self.coilset['coil'][name]['Nf']
+                                   for name in self.active_coils])
         self.nP = len(self.passive_coils)  # number of active coils
         self.initalize_force_field(multi_filament=multi_filament)
         self.set_current()
@@ -45,10 +50,11 @@ class force_field(object):
     def initalize_force_field(self, multi_filament=True, **kwargs):
         if 'force' not in self.coilset:
             self.coilset['force'] = {}
-        if 'Fa' in self.coilset['force'] and 'Fp' in self.coilset['force']:
+        force = ['Fa', 'Fa_filament', 'Fp', 'Fp_filament']
+        if np.array([key in self.coilset['force'] for key in force]).all():
             self.force_field_active = True
-            self.Fa = self.coilset['force']['Fa']
-            self.Fp = self.coilset['force']['Fp']
+            for key in force:
+                setattr(self, key, self.coilset['force'][key])
             nC = np.shape(self.Fa)[0]
             if nC != self.nC:
                 err_txt = 'active coil force matrix shape {}\n'.format(nC)
@@ -58,7 +64,7 @@ class force_field(object):
         else:
             self.set_force_field(state='both', multi_filament=multi_filament)
 
-    def set_force_field(self, state='both', multi_filament=False):
+    def set_force_field(self, state='both', multi_filament=True):
         # [Ic]T([Fa][Ic]+[Fp]) = F
         self.force_field_active = True
         if state == 'both' or state == 'active':
@@ -66,53 +72,114 @@ class force_field(object):
         if state == 'both' or state == 'passive':
             self.set_passive_force_field()
 
-    def set_active_force_field(self, multi_filament=False):
-        self.Fa = np.zeros((self.nC, self.nC, 4))  # active
+    def set_active_force_field(self, multi_filament=True):
+        io = 0
+        self.Fa = np.zeros((self.nC, self.nC, 4))  # active coil
+        self.Fa_filament = np.zeros((self.nC_filament,
+                                     self.nC, 2))  # active filament
+        tick = clock(self.nC**2, header='computing active force field')
         for i, sink in enumerate(self.active_coils):
             for j, source in enumerate(self.active_coils):
-                xG = cc.Gtorque(self.coilset['coil'], self.coilset['subcoil'],
-                                source, sink, multi_filament) * self.Iscale**2
-                self.Fa[i, j, 0] = xG[1]  # Fx
-                self.Fa[i, j, 1] = -xG[0]  # Fz
-                self.Fa[i, j, 2] = xG[2]  # moment
-                self.Fa[i, j, 3] = xG[3]  # z crush
+                self.set_active_coil(i, j, source, sink, multi_filament)
+                self.set_active_filament(io, j, source, sink)
+                tick.tock()
+            io += self.coilset['coil'][sink]['Nf']
+
+    def set_active_coil(self, i, j, source, sink, multi_filament):
+        xG = cc.Gtorque(self.coilset['coil'], self.coilset['subcoil'],
+                        source, sink, multi_filament)
+        xG *= self.Iscale**2
+        self.Fa[i, j, 0] = xG[1]  # Fx
+        self.Fa[i, j, 1] = -xG[0]  # Fz
+        self.Fa[i, j, 2] = xG[2]  # moment
+        self.Fa[i, j, 3] = xG[3]  # z crush
+
+    def set_active_filament(self, io, j, source, sink):
+        for k in range(self.coilset['coil'][sink]['Nf']):
+            xG = cc.Gtorque(self.coilset['coil'], self.coilset['subcoil'],
+                            source, sink, True, Nsink=[k])
+            xG *= self.Iscale**2
+            self.Fa_filament[io+k, j, 0] = xG[1]  # Fx
+            self.Fa_filament[io+k, j, 1] = -xG[0]  # Fz
 
     def set_passive_force_field(self):
-        self.Fp = np.zeros((self.nC, 4))  # passive
+        io = 0
+        self.Fp = np.zeros((self.nC, 4))  # passive coil
+        self.Fp_filament = np.zeros((self.nC_filament, 2))  # passive filament
         for i, sink in enumerate(self.active_coils):
+            self.set_passive_coil(i, sink)
+            self.set_passive_filament(io, sink)
+            io += self.coilset['coil'][sink]['Nf']
+
+    def set_passive_coil(self, i, sink):
+        xB = cc.Btorque(self.coilset['coil'], self.coilset['subcoil'],
+                        self.coilset['plasma'], self.passive_coils, sink)
+        xB *= self.Iscale
+        self.Fp[i, 0] = xB[1]  # Fx
+        self.Fp[i, 1] = -xB[0]  # Fz
+        self.Fp[i, 2] = xB[2]  # moment
+        self.Fp[i, 3] = xB[3]  # z crush
+
+    def set_passive_filament(self, io, sink):
+        for k in range(self.coilset['coil'][sink]['Nf']):
             xB = cc.Btorque(self.coilset['coil'], self.coilset['subcoil'],
-                            self.coilset['plasma'],
-                            self.passive_coils, sink) * self.Iscale
-            self.Fp[i, 0] = xB[1]  # Fx
-            self.Fp[i, 1] = -xB[0]  # Fz
-            self.Fp[i, 2] = xB[2]  # moment
-            self.Fp[i, 3] = xB[3]  # z crush
+                            self.coilset['plasma'], self.passive_coils,
+                            sink, Nsink=[k])
+            xB *= self.Iscale
+            self.Fp_filament[io+k, 0] = xB[1]  # Fx
+            self.Fp_filament[io+k, 1] = -xB[0]  # Fz
 
     def set_force(self):  # evaluate coil force and force jacobian
-        If = self.If
         self.F = np.zeros((self.nC, 4))
         dF = np.zeros((self.nC, self.nC, 4))
-        Im = np.dot(If.reshape(-1, 1), np.ones((1, self.nC)))  # current matrix
+        # current matrix
+        Im = np.dot(self.If.reshape(-1, 1), np.ones((1, self.nC)))
         for i in range(4):  # coil force (bundle of eq elements)
-            self.F[:, i] = 1e-6 * \
-                (If * (np.dot(self.Fa[:, :, i], If) + self.Fp[:, i]))  # MN
+            self.F[:, i] = self.If * (np.dot(self.Fa[:, :, i], self.If) +
+                                      self.Fp[:, i])
             dF[:, :, i] = Im * self.Fa[:, :, i]
-            diag = np.dot(self.Fa[:, :, i], If) +\
-                If * np.diag(self.Fa[:, :, i]) + self.Fp[:, i]
+            diag = np.dot(self.Fa[:, :, i], self.If) +\
+                self.If * np.diag(self.Fa[:, :, i]) + self.Fp[:, i]
             np.fill_diagonal(dF[:, :, i], diag)
-        dF *= 1e-6  # force jacobian MN/MA
+        self.F /= self.Iscale  # force MN (iff Iscale set to 1e6)
+        dF /= self.Iscale  # force jacobian MN/MA (iff Iscale set to 1e6)
         return self.F, dF
+
+    def set_force_filament(self):  # evaluate coil force on filament level
+        self.F_filament = np.zeros((self.nC_filament, 2))
+        If_filament = np.array([])
+        for name, If in zip(self.coilset['coil'], self.If):
+            Nf = self.coilset['coil'][name]['Nf']
+            If_filament = np.append(If_filament, If*np.ones(Nf))
+        for i in range(2):
+            self.F_filament[:, i] = \
+                If_filament * (np.dot(self.Fa_filament[:, :, i], self.If) +
+                               self.Fp_filament[:, i])
+        self.F_filament /= self.Iscale  # force MN (iff Iscale set to 1e6)
+        for i, name in enumerate(self.coilset['subcoil']):  # populate subcoil
+            coil = self.coilset['coil']['_'.join(name.split('_')[:-1])]
+            Nt, Nf = coil['Nt'], coil['Nf']
+            subcoil = self.coilset['subcoil'][name]
+            length = 2*np.pi*subcoil['x']  # coil length
+            for j, var in enumerate(['x', 'z']):
+                subcoil[f'Ff{var}'] = self.F_filament[i, j]  # per filament
+                subcoil[f'Ff_length{var}'] = subcoil[f'Ff{var}'] / length
+                subcoil[f'Ft{var}'] = subcoil[f'Ff{var}'] * Nf / Nt  # per turn
+                subcoil[f'Ft_length{var}'] = subcoil[f'Ft{var}'] / length
 
     def get_force(self):
         self.check()
         self.set_current()
         F, dF = self.set_force()
+        self.set_force_filament()
         Fcoil = {'PF': {'x': 0, 'z': 0,
                         'x_array': np.ndarray, 'z_array': np.ndarray,
                         'moment_array': np.ndarray},
                  'CS': {'sep_array': np.ndarray, 'sep': 0, 'zsum': 0,
                         'x_array': np.ndarray, 'z_array': np.ndarray,
-                        'moment_array': np.ndarray},
+                        'c_array': np.ndarray,
+                        'moment_array': np.ndarray,
+                        'axial': np.ndarray},
                  'F': F, 'dF': dF}
         Fcoil['PF']['x_array'] = F[self.coilset['index']['PF']['index'], 0]
         Fcoil['PF']['z_array'] = F[self.coilset['index']['PF']['index'], 1]
@@ -124,19 +191,53 @@ class force_field(object):
             np.max(abs(F[self.coilset['index']['PF']['index'], 1]))
         Fcoil['CS']['x_array'] = F[self.coilset['index']['CS']['index'], 0]
         Fcoil['CS']['z_array'] = F[self.coilset['index']['CS']['index'], 1]
+        Fcoil['CS']['c_array'] = F[self.coilset['index']['CS']['index'], 3]
         Fcoil['CS']['moment_array'] = \
             F[self.coilset['index']['CS']['index'], 2]
         FzCS = F[self.coilset['index']['CS']['index'], 1]
+        Fcoil['CS']['zsum'] = np.sum(FzCS)
         if self.coilset['index']['CS']['n'] > 1:
             # seperation force
-            Fsep = np.zeros(self.coilset['index']['CS']['n'] - 1)
+            Fsep = np.zeros(self.coilset['index']['CS']['n'] + 1)
             for j in range(self.coilset['index']['CS']['n'] - 1):
                 # evaluate each gap
-                Fsep[j] = np.sum(FzCS[j + 1:]) - np.sum(FzCS[:j + 1])
+                Fsep[j+1] = np.sum(FzCS[j + 1:]) - np.sum(FzCS[:j + 1])
+            Fsep[0] = Fcoil['CS']['zsum']
+            Fsep[-1] = -Fcoil['CS']['zsum']
             Fcoil['CS']['sep_array'] = Fsep
             Fcoil['CS']['sep'] = np.max(Fsep)
-        Fcoil['CS']['zsum'] = np.sum(FzCS)
         self.Fcoil = Fcoil
+
+    def set_axial_stack(self):
+        mg = 1.182  # module weight MN
+        Ftp = -201.33  # tie-plate pre-load
+        alpha = 6.85e-3  # alpha Fx (Poisson)
+        beta = np.array([-1.78e-1, -1.45e-1, -1.13e-1,
+                         -8.12e-2, -4.89e-2, -1.65e-2])  # beta Fz
+        gamma = -2.95e-2  # gamma Fc (crush)
+        CScoils = self.coilset['index']['CS']['name']
+        Fx = pd.DataFrame(self.Fcoil['CS']['x_array'].reshape(1, -1),
+                          columns=CScoils)
+        Fz = pd.DataFrame(self.Fcoil['CS']['z_array'].reshape(1, -1),
+                          columns=CScoils)
+        Fc = pd.DataFrame(self.Fcoil['CS']['c_array'].reshape(1, -1),
+                          columns=CScoils)
+        CScaps = np.append(np.append('LDP', CScoils), 'LDP')
+        CSgaps = [f'{CScaps[i]}_{CScaps[i+1]}'
+                  for i in range(len(CScoils)+1)]
+        self.FCSz = pd.DataFrame(columns=CSgaps)
+        self.FCSz['CS3U_LDP'] = alpha * Fx.sum(axis=1)
+        self.FCSz['CS3U_LDP'] += (beta * Fz).sum(axis=1)
+        self.FCSz['CS3U_LDP'] += gamma * Fc.sum(axis=1)
+        self.FCSz['CS3U_LDP'] += Ftp
+        uppergap = 'CS3U_LDP'
+        for coil, gap in zip(CScoils[::-1], CSgaps[::-1][1:]):
+            self.FCSz[gap] = self.FCSz[uppergap] + Fz.loc[:, coil] - mg
+            uppergap = gap
+        Fo = 16.8242
+        dFdF = -0.5263
+        Flimit = Fo + dFdF * self.FCSz['LDP_CS3L']
+        self.FCSz['base'] = abs(self.Fcoil['CS']['zsum']) / Flimit
 
     def set_current(self):  # set subcoil current vector from pf
         self.If = np.zeros(self.nC)
@@ -146,16 +247,54 @@ class force_field(object):
         self.If /= self.Iscale  # convert current unit (MA if Iscale=1e6)
         return self.If
 
-    def plot(self, coils=['PF', 'CS'], scale=2, Fvector=['Fo'],
-             label=False, **kwargs):
-        # vector = 'Fo', 'Fx', 'Fz' or combination
+    @staticmethod
+    def plot_force_vector(x, z, Fvec, Fvector=['Fo'], ax=None):
+        #  Fvector = ['Fo', 'Fx', 'Fz']
+        if ax is None:
+            ax = plt.gca()
+        for Fv, mag, fc in zip(
+                ['Fo', 'Fx', 'Fz'], [(1, 1), (1, 0), (0, 1)],
+                [0.3*np.ones(3), 0.6*np.ones(3), 0.6*np.ones(3)]):
+            if Fv in Fvector:
+                ax.arrow(x, z, mag[0]*Fvec[0], mag[1]*Fvec[1],
+                         linewidth=1, ec=0.4*fc, fc=fc, head_width=0.05,
+                         lw=1.0, length_includes_head=False, alpha=0.5)
+                ax.plot(x+mag[0]*Fvec[0], z+mag[1]*Fvec[1], '.k', alpha=0)
+
+    @staticmethod
+    def force_label_PF(coil, F, Fvec):
+        #  coil = coilset['coil'][name], Fz = Fvec[1]
+        F_label = Fvec.copy()
+        Fz_label = F_label[1] + np.sign(F_label[1]) * 0.5
+        x, z = coil['x'], coil['z']
+        if abs(Fz_label) < coil['dz']:
+            Fz_label = np.sign(Fz_label) * coil['dz']
+        if isclose(Fz_label, 0):  # protect zero force placment
+            Fz_label = coil['dz']
+        if Fz_label > 0:
+            va = 'bottom'
+        else:
+            va = 'top'
         fs = matplotlib.rcParams['legend.fontsize']
+        plt.text(x, z + 0.75 * Fz_label, '{:1.0f}MN'.format(F[1]),
+                 ha='center', va=va, fontsize=fs, color=0.1 * np.ones(3),
+                 backgroundcolor=0.85 * np.ones(3))
+
+    def get_Fmax(self, **kwargs):
         if not hasattr(self, 'F'):
             self.set_force()
         if 'Fmax' in kwargs:
             Fmax = kwargs['Fmax']
         else:
-            Fmax = np.max(np.linalg.norm(self.F, axis=1))
+            Fmax = np.max(np.linalg.norm(self.F[:, :2], axis=1))
+        if isclose(Fmax, 0):
+            Fmax = 1
+        return Fmax
+
+    def plot(self, coils=['PF', 'CS'], scale=2, Fvector=['Fo'],
+             label=False, **kwargs):
+        # vector = 'Fo', 'Fx', 'Fz' or combination
+        Fmax = self.get_Fmax(**kwargs)
         index, names = [], []
         for coil in coils:
             mask = [name in self.active_coils for name in
@@ -163,42 +302,25 @@ class force_field(object):
             index.extend(self.coilset['index'][coil]['index'][mask])
             names.extend(self.coilset['index'][coil]['name'][mask])
 
-        for i, name in zip(index, names):
+        for name in names:
             x = self.coilset['coil'][name]['x']
             z = self.coilset['coil'][name]['z']
             index = self.active_coils.index(name)
             F = self.F[index]
             Fvec = scale * F / Fmax
-            for Fv, mag, fc in zip(['Fo', 'Fx', 'Fz'],
-                                   [(1, 1), (1, 0), (0, 1)],
-                                   [0.3*np.ones(3), 0.6*np.ones(3),
-                                    0.6*np.ones(3)]):
-                if Fv in Fvector:
-                    plt.arrow(x, z, mag[0]*Fvec[0], mag[1]*Fvec[1],
-                              linewidth=2, ec=0.4*fc, fc=fc, head_width=0.2,
-                              lw=1.0, length_includes_head=False)
-            if name in self.coilset['index']['PF']['name']:
-                Fvec[1] += np.sign(Fvec[1]) * 0.5
-                if abs(Fvec[1]) < self.coilset['coil'][name]['dz']:
-                    Fvec[1] = np.sign(Fvec[1]) * \
-                        self.coilset['coil'][name]['dz']
-                if Fvec[1] > 0:
-                    va = 'bottom'
-                else:
-                    va = 'top'
-                if label:
-                    plt.text(x, z + 0.75 * Fvec[1], '{:1.0f}MN'.format(F[1]),
-                             ha='center', va=va, fontsize=fs,
-                             color=0.1 * np.ones(3),
-                             backgroundcolor=0.85 * np.ones(3))
+            self.plot_force_vector(x, z, Fvec, Fvector=Fvector)
+            if name in self.coilset['index']['PF']['name'] and label:
+                self.force_label_PF(self.coilset['coil'][name], F, Fvec)
 
     def plotCS(self, scale=1e-3):
         fs = matplotlib.rcParams['legend.fontsize']
         colors = [c['color'] for c in matplotlib.rcParams['axes.prop_cycle']]
         colors = [np.array(matplotlib.colors.hex2color(c)) for c in colors]
         Fmax = np.max(abs(self.Fcoil['CS']['sep_array']))
+        if isclose(Fmax, 0):
+            Fmax = 1
         names = self.coilset['index']['CS']['name']
-        for i, Fsep in enumerate(self.Fcoil['CS']['sep_array']):
+        for i, Fsep in enumerate(self.Fcoil['CS']['sep_array'][1:-1]):
             txt = '{:1.0f}MN'.format(Fsep)
             color = colors[2] if Fsep < 0 else colors[3]
             lower = self.coilset['coil'][names[i]]  # lower
@@ -222,7 +344,21 @@ class force_field(object):
             plt.text(x_gap - dx, z_gap, txt, color=0.2*np.ones(3),
                      va='center', ha='right', fontsize=fs,
                      backgroundcolor=0.85 * np.ones(3))
-        # self.plot_moment()
+
+    def plot_single(self, name, scale=1, ax=None, **kwargs):
+        Nf = self.coilset['index'][name]['n']
+        Nt = self.coilset['coil'][name]['Nt']
+        coil_index = list(self.coilset['coil'].keys()).index(name)
+        Fmax = np.linalg.norm(self.F[coil_index, :2])
+        Fmax /= Nt  # per turn
+        names = self.coilset['index'][name]['name']
+        for name in names:
+            x = self.coilset['subcoil'][name]['x']
+            z = self.coilset['subcoil'][name]['z']
+            F = np.array([self.coilset['subcoil'][name]['Ffx'],
+                          self.coilset['subcoil'][name]['Ffz']])
+            Fvec = scale * F / Fmax * Nf / Nt
+            self.plot_force_vector(x, z, Fvec, Fvector=['Fo'], ax=ax)
 
     def plot_moment(self, scale=5e-1):
         Mmax = np.max(abs(self.Fcoil['CS']['moment_array']))

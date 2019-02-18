@@ -1,4 +1,4 @@
-from nep.coil_geom import VSgeom, VVcoils
+from nep.coil_geom import VVcoils
 import nova.cross_coil as cc
 from amigo.pyplot import plt
 import numpy as np
@@ -23,17 +23,21 @@ class coil_flux(pythonIO):
                             read_txt=read_txt)  # load currents
         pythonIO.__init__(self)  # python read/write
 
-    def load_geometory(self, vessel=True):
-        if vessel:
-            self.coil_geom = VVcoils()
+    def load_geometory(self, vessel_model):
+        if vessel_model == 'local':
+            self.coil_geom = VVcoils(model=vessel_model)
             # remove DINA vessel close to vs3 coils
             vv_remove = [0, 1] + list(np.arange(18, 23)) + \
                 list(np.arange(57, 60)) + list(np.arange(91, 96)) +\
                 list(np.arange(72, 76)) + list(np.arange(114, 116))
-            for vv_index in vv_remove:
-                self.tor.pf.remove_coil('vv_{}'.format(vv_index))
+        elif vessel_model == 'full':
+            vv_remove = list(np.arange(0, 117))
+            self.coil_geom = VVcoils(model=vessel_model)
         else:
-            self.coil_geom = VSgeom()
+            vv_remove = []
+            self.coil_geom = VVcoils(model=vessel_model)
+        for vv_index in vv_remove:
+            self.tor.pf.remove_coil('vv_{}'.format(vv_index))
         self.flux = OrderedDict()
         for coil in self.coil_geom.pf.coilset['subcoil']:
             x = self.coil_geom.pf.coilset['subcoil'][coil]['x']
@@ -41,24 +45,28 @@ class coil_flux(pythonIO):
             self.flux[coil] = {'x': x, 'z': z}
 
     def load_file(self, scenario, plot=False, **kwargs):
+        self.scenario = scenario
         read_txt = kwargs.get('read_txt', self.read_txt)
-        filepath = self.dina.locate_file('plasma', folder=scenario)
+        self.vessel_model = kwargs.get('vessel_model', 'local')
+        filepath = self.dina.locate_file('plasma', folder=self.scenario)
         self.name = split(filepath)[-2]
-        filepath = join(*split(filepath)[:-1], self.name, 'coil_flux')
+        filename = f'coil_flux_{self.vessel_model}'
+        filepath = join(*split(filepath)[:-1], self.name, filename)
         if read_txt or not isfile(filepath + '.pk'):
-            self.read_file(scenario, **kwargs)  # read txt file
+            self.read_file(self.scenario, **kwargs)  # read txt file
             self.save_pickle(filepath, ['t', 'flux', 'Vbg', 'dVbg'])
         else:
             self.load_pickle(filepath)
         if plot:
             self.plot_profile()
-        vs3_trip = self.pl.Ivs3_single(scenario)[0]
+        vs3_trip = self.pl.Ivs3_single(self.scenario)[0]
         self.t_trip = vs3_trip['t_trip']
 
     def read_file(self, scenario, plot=False, **kwargs):
+        self.vessel_model = kwargs.get('vessel_model', 'local')
         self.tor.load_file(scenario)  # load toroidal scenario
         self.t = self.tor.t
-        self.load_geometory()
+        self.load_geometory(self.vessel_model)
         x, z = np.zeros(len(self.flux)), np.zeros(len(self.flux))
         for i, coil in enumerate(self.flux):  # pack
             x[i] = self.flux[coil]['x']
@@ -93,16 +101,16 @@ class coil_flux(pythonIO):
                       dtype=[('V', dtype_array), ('dVdt', dtype_array)])
         bg['V'][0] = -2*np.pi*np.gradient(self.flux['vs3']['psi_bg'], self.t)
         bg['dVdt'][0] = np.gradient(bg['V'][0], self.t)
-        bg['V'][1] = -2*np.pi*np.gradient(self.flux['jkt_lower']['psi_bg'],
-                                          self.t)
+        bg['V'][1] = -2*np.pi*np.gradient(
+                self.flux['jkt_lower']['psi_bg'], self.t)
         bg['dVdt'][1] = np.gradient(bg['V'][1], self.t)
-        bg['V'][2] = -2*np.pi*np.gradient(self.flux['jkt_upper']['psi_bg'],
-                                          self.t)
+        bg['V'][2] = -2*np.pi*np.gradient(
+                self.flux['jkt_upper']['psi_bg'], self.t)
         bg['dVdt'][2] = np.gradient(bg['V'][2], self.t)
         for i, coil in enumerate(self.flux):
             if i >= 16 and i < len(self.flux) - 3:
-                bg['V'][i-13] = -2*np.pi*np.gradient(self.flux[coil]['psi_bg'],
-                                                     self.t)
+                bg['V'][i-13] = -2*np.pi*np.gradient(
+                        self.flux[coil]['psi_bg'], self.t)
                 bg['dVdt'][i-13] = np.gradient(bg['V'][i-13], self.t)
         self.Vbg = interp1d(self.t, bg['V'], fill_value=0,
                             bounds_error=False)
@@ -138,20 +146,41 @@ class coil_flux(pythonIO):
         ax[0].plot(1e3*self.t, 1e-3*self.Vbg(self.t)[0], 'C3-')
         ax[1].plot(1e3*self.t, 1e-6*self.dVbg(self.t)[0], 'C4-')
         plt.despine()
-        plt.legend()
         ax[0].set_ylabel('$V_{bg}$ kV')
         ax[1].set_ylabel('$\dot{V}_{bg}$ MVt$^{-1}$')
         ax[1].set_xlabel('$t$ ms')
+
+    def plot_coils(self, ax=None):
+        if ax is None:
+            ax = plt.subplots(1, 1)[1]
+        for name in self.flux:
+            if name not in ['vs3', 'jkt_lower', 'jkt_upper']:
+                ax.plot(self.flux[name]['x'], self.flux[name]['z'], '.',
+                        ms=5, color='gray')
+
+        self.tor.load_file(self.scenario)  # load toroidal scenario
+        self.load_geometory(self.vessel_model)
+        for name in self.tor.pf.coilset['coil']:
+            ax.plot(self.tor.pf.coilset['coil'][name]['x'],
+                    self.tor.pf.coilset['coil'][name]['z'], '.',
+                    color='C3')
+
+        plt.axis('equal')
+        plt.axis('off')
 
 
 if __name__ == '__main__':
     cf = coil_flux()
 
-    for i in range(12):
-        cf.load_file(i, plot=False, read_txt=True)
+    for model in ['no_vessel', 'local', 'full']:
+        for i in range(13):
+            print(model, i)
+            cf.load_file(i, vessel_model=model, plot=False, read_txt=True)
 
+    # cf.load_file(0, vessel_model='full', plot=False, read_txt=True)
     # vs3.plot_background()
     # vs3.calculate_background()
+    # cf.plot_coils()
 
 
 

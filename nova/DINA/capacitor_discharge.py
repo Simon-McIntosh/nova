@@ -2,7 +2,7 @@ import numpy as np
 from scipy.integrate import ode
 from amigo.pyplot import plt
 from math import isclose
-from nep.coil_geom import VVcoils, ITERcoilset
+from nep.coil_geom import VVcoils
 from nep.DINA.coupled_inductors import inductance
 from nep.DINA.coil_flux import coil_flux
 from nep.DINA.read_plasma import read_plasma
@@ -15,16 +15,22 @@ import nep
 from amigo.png_tools import data_load
 from amigo.IO import class_dir
 from scipy.optimize import minimize
+import nep_data
+from os.path import join, isfile
+from amigo.IO import pythonIO
+from nova.coils import PF
 
 
-class power_supply:
+class power_supply(pythonIO):
 
     def __init__(self, read_txt=False, **kwargs):
+        self.read_txt = read_txt
         self.set_defaults()
         self.update_defaults(**kwargs)
         self.pl = read_plasma('disruptions', read_txt=read_txt)
         self.cf = coil_flux(read_txt=read_txt)  # initalize flux profiles
-        self.build_coils()
+        self.pf = PF()
+        self.load_coils(read_txt=read_txt)
         self.ode = ode(self.dIdt).set_integrator('dop853')  # 'dopri5'
         self.initalize(**kwargs)
 
@@ -43,19 +49,40 @@ class power_supply:
             self.setup[var] = kwargs[var]
             setattr(self, var, self.setup[var])
 
+    def get_filename(self, **kwargs):
+        vessel = 'vessel' if self.setup['vessel'] else 'no_vessel'
+        in_vessel = 'in_vessel' if self.setup['invessel'] else 'ex_vessel'
+        vessel_model = self.setup['vessel_model']
+        filename = f'Nova_{vessel}_{vessel_model}_{in_vessel}'
+        return filename
+
+    def load_coils(self, **kwargs):
+        read_txt = kwargs.get('read_txt', self.read_txt)
+        data_dir = join(class_dir(nep_data), 'EM', 'inductance')
+        filename = self.get_filename()
+        filepath = join(data_dir, filename)
+        attributes = ['coilset', 'M', 'R', 'ncoil']
+        if read_txt or not isfile(filepath + '.pk'):
+            self.build_coils()
+            self.save_pickle(filepath, attributes)
+        else:
+            self.load_pickle(filepath)
+            self.pf(self.coilset)  # update local pf instance
+
     def build_coils(self, plot=False):
-        vv = VVcoils(model=self.vessel_model, invessel=self.invessel)
+        self.vv = VVcoils(model=self.vessel_model, invessel=self.invessel)
         self.ind = inductance()
         nvs_o = self.ind.nC
-        coilset = vv.pf.coilset
+        self.coilset = self.vv.pf.coilset
+        self.pf(self.coilset)
         turns = np.append(np.ones(4), -np.ones(4))
         self.ind.add_pf_coil(
-                OrderedDict(list(coilset['subcoil'].items())[:8]),
+                OrderedDict(list(self.coilset['subcoil'].items())[:8]),
                 turns=turns)
         for index in nvs_o+np.arange(1, 8):  # vs3 loops
             self.ind.add_cp([nvs_o, index])  # link VS coils
         nvs_o = self.ind.nC
-        jacket = list(coilset['coil'].items())[2:10]
+        jacket = list(self.coilset['coil'].items())[2:10]
         R = np.array([turn[1]['R'] for turn in jacket])
         Rlower = 1 / (np.sum(1/R[:4]))
         Rupper = 1 / (np.sum(1/R[4:]))
@@ -70,17 +97,9 @@ class power_supply:
         for index in nvs_o+4+np.arange(1, 4):
             self.ind.add_cp([nvs_o+4, index])  # upper jacket coils
         if self.vessel:  # add vv coils
-            vv_coils = list(coilset['coil'].items())[10:]
+            vv_coils = list(self.coilset['coil'].items())[10:]
             self.ind.add_pf_coil(OrderedDict(vv_coils))
-
-        self.pfcs = True
-        if self.pfcs:
-            pf = ITERcoilset().pf
-            self.ind.add_pf_coil(pf.coilset['coil'])
-
         self.ind.reduce()
-
-
         self.ncoil = self.ind.nd['nr']  # number of retained coils
         if self.vessel_model == 'local':
             factor = 0.95
@@ -92,8 +111,10 @@ class power_supply:
             index[i] = False
             if sum(index) > 0:  # ensure dominant leading diagonal
                 self.ind.M[i, index] = factor * self.ind.M[i, i]
+        self.M = self.ind.M
+        self.R = self.ind.Rc
         if plot:
-            self.ind.plot()
+            self.pf.plot()
 
     def initalize(self, **kwargs):
         self.initalize_switches()
@@ -102,7 +123,8 @@ class power_supply:
                      'Icap': []}
         self.update_defaults(**kwargs)
         if 'vessel' in kwargs or 'invessel' in kwargs:
-            self.build_coils()  # re-build coil-set
+            # self.build_coils()  # re-build coil-set
+            self.load_coils()
         build_keys = ['code', 'nturn', 'Cd', 'vessel']
         if np.array([key in kwargs for key in build_keys]).any():
             self.build_matrices()
@@ -145,11 +167,9 @@ class power_supply:
             Lvs3 = 1.395e-3  # total inductance of vs3 loop
             Rvs3 = 17.66e-3  # total vs3 loop resistance
         elif self.code == 'Nova':
-            Lvs3 = self.ind.M[0, 0] + 0.2e-3  # add busbar inductance (1.56e-3)
+            Lvs3 = self.M[0, 0] + 0.2e-3  # add busbar inductance (1.56e-3)
             Rvs3 = 17.66e-3  # total vs3 loop resistance
-        self.R = np.copy(self.ind.Rc)  # coil resistance vector
         self.R[0] = Rvs3   # set vs3 loop resistance
-        self.M = np.copy(self.ind.M)  # inductance matrix
         self.M[0, 0] = Lvs3   # set total inductance of vs3 loop
         if self.nturn != 4:  # operation with reduced turn number
             factor = self.nturn / 4
@@ -176,7 +196,8 @@ class power_supply:
             self.Vbg = self.zeros
             self.dVbg = self.zeros
         else:
-            self.cf.load_file(self.scenario, plot=False)
+            self.cf.load_file(self.scenario, plot=False,
+                              vessel_model=self.vessel_model)
             self.Vbg = self.cf.Vbg
             self.dVbg = self.cf.dVbg
 
@@ -298,9 +319,6 @@ class power_supply:
     def intergrate(self, t_end):
         #  [Hcap, Icap, Ivec]
         Iode_o = np.zeros(2 + self.ncoil)
-
-        Iode_o[-8] = 10e3
-
         Iode_o[0] = self.C[0] * self.Vo  # capacitor fully charged
         Iode_o[2] = self.Io  # vs3 circuit inital current
         to = 0 if self.pulse_phase < 0 else -self.pulse_phase
@@ -379,7 +397,7 @@ class power_supply:
             colors['vv_vv1'] = 'C5'
             colors['trs_trs'] = 'C3'
 
-            coils = list(self.ind.pf.coilset['coil'].keys())[16:]
+            coils = list(self.coilset['coil'].keys())[16:]
             for i, coil in enumerate(coils):
                 for c in colors:
                     if c in coil:
@@ -437,6 +455,7 @@ class power_supply:
         self.referance['to'] = np.linspace(self.referance['t'][0],
                                            self.referance['t'][-1], 350)
         self.referance['Ico'] = self.referance['fun'](self.referance['to'])
+
         self.ncoil = ncoil
         self.M = self.M[:self.ncoil, :self.ncoil]
         self.R = self.R[:self.ncoil]
@@ -450,9 +469,25 @@ class power_supply:
             xo = [2.49423821e-04, 3.42989379e-05, 5.57050300e-01,
                   1.00965866e-01, 5.72307931e-01, 1.13850869e-03,
                   1.19446487e-03]
+
         res = minimize(self.fit, xo, method='Nelder-Mead',
                        options={'fatol': 0.01})
-        self.fit(res.x, plot=True)
+
+        print(res)
+        ps.fit(res.x, plot=True)
+        '''
+        ax = plt.subplots(1, 1)[1]
+        ax.plot(1e3*self.referance['t'], 1e-3*self.referance['Ic'], '-C0',
+                label='VS3 referance')
+        ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 0], '-C3',
+                label='VS3 reduced model')
+        ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 1:], '-C7',
+                label='dummy coil')
+        ax.set_xlabel('$t$ ms')
+        ax.set_ylabel('$I$ kA')
+        plt.despine()
+        plt.legend()
+        '''
 
     def fit(self, x, plot=False):
         x = abs(x)  # insure positive input
@@ -485,6 +520,7 @@ class power_supply:
                             self.data['Ivec'][-1, 0]))(self.referance['to'])
         err = 1e-3*np.sqrt(np.mean((self.referance['Ifit'] -
                                     self.referance['Ico'])**2))
+
         if plot:
             plt.figure()
             plt.plot(1e3*self.referance['to'], 1e-3*self.referance['Ico'],
@@ -501,39 +537,43 @@ class power_supply:
             plt.legend()
         return err
 
+    '''
+    def reduced_coil_model(inwork)
+        first solve model to create fit data
+
+        ps.set_referance(ncoil=2)
+        ps.reduce()
+
+        if ps.ncoil == 2:
+            # impulse
+            x = np.array([5.09661450e-05, 7.28185583e-01, 6.66816036e-04])
+            # discharge
+            # x = np.array([6.26306679e-05, 7.22409337e-01, 5.97155991e-04])
+        elif ps.ncoil == 3:
+            x = np.array([ 2.49423821e-04, 3.42989379e-05, 5.57050300e-01,
+                          1.00965866e-01, 5.72307931e-01, 1.13850869e-03,
+                          1.19446487e-03])
+
+        ps.fit(x, plot=True)
+
+        tc = timeconstant(ps.referance['to'], ps.referance['Ifit'],
+                          trim_fraction=0.8)
+        tau = tc.nfit(ps.ncoil, trim_fraction=0, plot=True)[1]
+        print(tau*1e3)
+
+        R = np.dot(np.ones((ps.ncoil, 1)), ps.R.reshape((1, -1)))
+        tau = np.linalg.eigvals(ps.M/R)
+        print(tau*1e3)
+    '''
+
+
 if __name__ == '__main__':
-    ps = power_supply(nturn=4, vessel=True, scenario=-1, code='Nova',
+    ps = power_supply(nturn=4, vessel=True, scenario=0, code='Nova',
                       Ip_scale=15/15, read_txt=False, vessel_model='full')
-
-    '''
-    ps.solve(Io=0, sign=-1, t_pulse=0.3, origin='peak',
+    ps.solve(Io=0, sign=-1, t_pulse=0, origin='peak',
              impulse=False, plot=True)
-    '''
-
-    #ps.set_referance(ncoil=2)
-    #ps.reduce()
 
 
-    '''
-    if ps.ncoil == 2:
-        x = np.array([5.09661450e-05, 7.28185583e-01, 6.66816036e-04])  # impulse
-        # x = np.array([6.26306679e-05, 7.22409337e-01, 5.97155991e-04])  # discharge
-    elif ps.ncoil == 3:
-        x = np.array([ 2.49423821e-04, 3.42989379e-05, 5.57050300e-01,
-                      1.00965866e-01, 5.72307931e-01, 1.13850869e-03,
-                      1.19446487e-03])
-
-    ps.fit(x, plot=True)
-
-    tc = timeconstant(ps.referance['to'], ps.referance['Ifit'],
-                      trim_fraction=0.8)
-    tau = tc.nfit(ps.ncoil, trim_fraction=0, plot=True)[1]
-    print(tau*1e3)
-
-    R = np.dot(np.ones((ps.ncoil, 1)), ps.R.reshape((1, -1)))
-    tau = np.linalg.eigvals(ps.M/R)
-    print(tau*1e3)
-    '''
 
 
 

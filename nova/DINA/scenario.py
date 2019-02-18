@@ -215,9 +215,10 @@ class scenario(pythonIO):
         if plot:
             ax = plt.subplots(2, 1)[1]
             for i, name in enumerate(names):
-                ls = f'C{i}-' if 'PF' in name else f'C{i-6}--'
-                ax[0].plot(time, Ic.loc[:, name], ls, label=name)
-                ax[1].plot(time, Efault.loc[:, name], ls, label=name)
+                if name != 'Plasma':
+                    ls = f'C{i}-' if 'PF' in name else f'C{i-6}--'
+                    ax[0].plot(time, Ic.loc[:, name], ls, label=name)
+                    ax[1].plot(time, Efault.loc[:, name], ls, label=name)
             ax[0].legend(bbox_to_anchor=(1.1, 1.4), ncol=6)
             plt.despine()
             plt.detick(ax)

@@ -99,10 +99,6 @@ class inductance:
             self.inv.add_psi(1, point=(x, z))
             self.Io[i] = self.pf.coilset['coil'][coil]['It']
         self.inv.set_foreground()
-        # ensure symetric (jacket-conductor coupling)
-        # tril_index = np.tril_indices(len(self.inv.G), k=-1)  # lower triangle
-        # self.inv.G[tril_index] = self.inv.G.T[tril_index]  # duplicate upper tr
-
         t2 = np.dot(turns.reshape((-1, 1)), turns.reshape((1, -1)))
         fillaments = np.dot(np.ones((len(turns), 1)), Nf.reshape(1, -1))
         self.Mo = 2 * np.pi * self.inv.G * t2 * fillaments

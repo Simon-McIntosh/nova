@@ -248,7 +248,8 @@ class force_field(object):
         return self.If
 
     @staticmethod
-    def plot_force_vector(x, z, Fvec, Fvector=['Fo'], ax=None):
+    def plot_force_vector(x, z, Fvec, Fvector=['Fo'], alpha=1, width=0.2,
+                          ax=None):
         #  Fvector = ['Fo', 'Fx', 'Fz']
         if ax is None:
             ax = plt.gca()
@@ -257,8 +258,8 @@ class force_field(object):
                 [0.3*np.ones(3), 0.6*np.ones(3), 0.6*np.ones(3)]):
             if Fv in Fvector:
                 ax.arrow(x, z, mag[0]*Fvec[0], mag[1]*Fvec[1],
-                         linewidth=1, ec=0.4*fc, fc=fc, head_width=0.05,
-                         lw=1.0, length_includes_head=False, alpha=0.5)
+                         linewidth=1, ec=0.4*fc, fc=fc, head_width=width,
+                         lw=1.0, length_includes_head=False, alpha=alpha)
                 ax.plot(x+mag[0]*Fvec[0], z+mag[1]*Fvec[1], '.k', alpha=0)
 
     @staticmethod

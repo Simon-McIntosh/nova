@@ -1,4 +1,6 @@
 """
+Ben Dudson - https://github.com/bendudson/freegs
+
 Read and write 'G' formatted equilibria. This is an R-Z free boundary
 format.
 

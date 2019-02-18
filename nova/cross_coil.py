@@ -15,11 +15,16 @@ def green(X, Z, Xc, Zc, dXc=0, dZc=0):
                  ((2 * m**-0.5 - m**0.5) *
                   ellipk(m) - 2 * m**-0.5 * ellipe(m)) / (2 * np.pi))
     dr = np.sqrt(x)
-    if np.min(dr) < dXc / 2:  # self inductance + adjacent coils
-        rho = np.mean([dXc + dZc]) / 2
+    # print(dXc, dZc, np.min(dr))
+    if np.min(dr) < dXc:  # self inductance + adjacent coils
+        rho = np.mean([dXc + dZc])
         Xc = Xc * np.ones(np.shape(X))
-        index = dr < dXc / 2  # self inductance index
+        index = dr < dXc  # self inductance index
         g[index] = Xc[index] * (np.log(8 * Xc[index] / rho) - 2) / (2 * np.pi)
+
+        g[index] = Xc[index] * ((1 + 0.1137 * (rho/Xc[index])**2) *
+                                np.log(8*Xc[index]/rho) -
+                                0.0095*(rho/Xc[index])**2 - 1.75) / (2 * np.pi)
     return g
 
 

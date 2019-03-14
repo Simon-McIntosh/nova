@@ -27,6 +27,7 @@ from amigo.time import clock
 import copy
 import pandas as pd
 from amigo.addtext import linelabel
+from warnings import warn
 
 
 class scenario(pythonIO):
@@ -39,6 +40,8 @@ class scenario(pythonIO):
         self.setname = setname
         self.dCoil = dCoil
         self.dina = dina(database_folder)
+        self.initalize_functions()
+
         if folder is not None:
             self.load_file(folder, file_type=file_type)
         pythonIO.__init__(self)  # python read/write
@@ -111,13 +114,15 @@ class scenario(pythonIO):
         else:
             self.load_pickle(filepath)
 
+    def initalize_functions(self):
+        self.pf = PF()  # create bare pf coil instance
+        self.sf = SF()  # create bare sf instance
+
     def load_functions(self, setname='link'):
         self.setname = setname
-        self.pf = PF()  # create bare pf coil instance
         self.pf(self.coilset[self.setname])
         if setname != self.setname:
             self.update_coilset()
-        self.sf = SF()  # create bare sf instance
         self.ff = force_field(self.coilset[self.setname])
         if self.coilset[self.setname]['force']['update_passive']:
             self.ff.set_force_field(state='passive')
@@ -126,9 +131,9 @@ class scenario(pythonIO):
         self.inv.sf = self.sf  # link sf instance
         self.inv.ff = self.ff  # link ff instance
 
-    def read_file(self, folder, file_type='txt', dCoil=0.5, verbose=False):
+    def read_file(self, folder, file_type='txt', dCoil=0.5, verbose=True):
         if verbose:
-            print('reading {}'.format(folder))
+            print('reading {}.{}'.format(folder, file_type))
         if file_type == 'txt':
             self.read_txt_file(folder)
         elif file_type == 'qda':
@@ -243,7 +248,10 @@ class scenario(pythonIO):
         limit = kwargs.get('limit', self.boundary['limit'])
         self.update_scenario(t)
         eqdsk = self.update_psi(n=n, limit=limit, plot=plot)
-        self.inv.colocate(eqdsk)
+        try:
+            self.inv.colocate(eqdsk)
+        except TypeError:
+            warn('separatrix boundary not found')
 
     def set_limits(self):  # default limits for ITER coil-set
         self.inv.initalise_limits()  # reset
@@ -376,7 +384,9 @@ class scenario(pythonIO):
         self.fun, self.data = {}, {}
         extract = [var for var in self.data2 if ('I' in var and len(var) <= 5)]
         extract += ['Rcur', 'Zcur', 'ap', 'kp', 'Rp', 'Zp', 'a',
-                    'Ksep', 'BETAp', 'li(3)', 't', 'PSI(axis)']
+                    'Ksep', 'BETAp', 'li(3)', 't', 'PSI(axis)', 'Emag', 'Lp',
+                    'q(95)', 'q(axis)', 'Vloop', 'D(PSI)res', 'Cejima',
+                    '<PSIext>', '<PSIcoils>']
         extract = [var for var in extract if var in self.data2]
         for var in extract:  # interpolate
             if ('I' in var and len(var) <= 5) or ('V' in var):
@@ -722,14 +732,19 @@ class scenario(pythonIO):
                  'nx': len(x), 'nz': len(z)}
         eqdsk['xlim'] = self.boundary['xlim']
         eqdsk['zlim'] = self.boundary['zlim']
-        if 'plasma_parameters' in self.coilset[self.setname]:
-            plasma_parameters = self.coilset[self.setname]['plasma_parameters']
+        if 'plasma_parameters' in self.pf.coilset:
+            plasma_parameters = self.pf.coilset['plasma_parameters']
             for variable in ['beta', 'li', 'Ipl']:
                 eqdsk[variable] = plasma_parameters[variable]
         self.sf.update_eqdsk(eqdsk)
         if plot:
             self.plot_plasma(ax=ax, current=current, plot_nulls=plot_nulls)
         return eqdsk
+
+    def get_flux(self, x, z):
+        psi = get_coil_psi(x, z, self.pf.coilset['subcoil'],
+                           self.pf.coilset['plasma'])
+        return psi
 
     def plot_plasma(self, ax=None, plot_nulls=False, current='A'):
         if ax is None:
@@ -743,26 +758,26 @@ class scenario(pythonIO):
             pass
         except AttributeError:
             pass
+        except KeyError:
+            pass
         if plot_nulls:
             self.sf.plot_nulls(labels=['X', 'M'])
         self.sf.plot_firstwall(ax=ax)
-        self.inv.plot_fix()
+        if hasattr(self, 'inv'):
+            self.inv.plot_fix()
         self.pf.plot(label=True, current=current, patch=False, ax=ax)
         self.pf.plot(subcoil=True, plasma=True, ax=ax)
-        self.ff.get_force()
-        self.ff.plot(label=True)
-        self.ff.plotCS()
+        if hasattr(self, 'ff'):
+            self.ff.get_force()
+            self.ff.plot(label=True)
+            self.ff.plotCS()
 
     def extract_plasma(self, t):
         if t <= 0 and isinstance(t, int):  # frame_index
             x = self.plasma['x'][-t]
             z = self.plasma['z'][-t]
-            # dx, dz = self.plasma['dx'], self.plasma['dz']
             Ipl = self.plasma['I'][-t]
-            apl = np.nan
-            kpl = np.nan
-            beta = np.nan
-            li = np.nan
+            apl = kpl = beta = li = lp = None
         else:  # time interpolant
             try:
                 x = self.fun['Rcur'](t)
@@ -774,32 +789,31 @@ class scenario(pythonIO):
                 z = 1e-2*self.fun['Zp'](t)
                 apl = 1e-2*self.fun['a'](t)
                 kpl = self.fun['Ksep'](t)
-            # dx = 2 * apl * 0.025
-            # dz = kpl * dx
             Ipl = 1e6*self.fun['Ip'](t)
             beta = self.fun['BETAp'](t)
             li = self.fun['li(3)'](t)
+            lp = self.fun['Lp'](t)
         plasma_parameters = {'Ipl': Ipl, 'xcur': x, 'zcur': z, 'a': apl,
-                             'kappa': kpl, 'beta': beta, 'li': li}
+                             'kappa': kpl, 'beta': beta, 'li': li, 'lp': lp}
         return plasma_parameters
 
     def set_plasma(self, plasma_parameters):
         for name in self.coilset:
             self.coilset[name]['plasma_parameters'] = plasma_parameters
-        ###
-        # eq update here
-        ###
-        dx, dz = 0.15, 0.25
+        dx, dz = 0.05, 0.05
         self.coilset[self.setname]['plasma'].clear()
         if plasma_parameters['xcur'] > 0:
             plasma = {'x': plasma_parameters['xcur'],
                       'z': plasma_parameters['zcur'],
                       'It': plasma_parameters['Ipl'],
                       'dx': dx, 'dz': dz}
-            plasma_subcoil = PF.mesh_coil(plasma, dCoil=0.25)
+            plasma_subcoil = PF.mesh_coil(plasma, dCoil=None)
             for i, filament in enumerate(plasma_subcoil):
                 subname = 'Plasma_{}'.format(i)
                 self.coilset[self.setname]['plasma'][subname] = filament
+        self.update_plasma()
+
+    def update_plasma(self):
         self.inv.update_plasma()
         self.ff.set_force_field(state='passive')
         for setname in self.coilset:  # set passive_field flag
@@ -1050,6 +1064,7 @@ class scenario(pythonIO):
             color = f'C{ic%10}'
             va = 'bottom' if sign == 1 else 'top'
             va = 'center'
+            print(time, value)
             ax.plot(time, value, 'o', color=color)
             ax.text(time, value, f' {value:1.1f}{unit}',
                     va=va, ha='left', color=color)
@@ -1069,8 +1084,8 @@ class scenario(pythonIO):
                            ax=ax[0], plot=True)
         for i, gap in enumerate(self.post['DINA']['Faxial']):
             label = gap.replace('_', '-')
-            if label != 'base':
-                label = f'gap {6-i}'
+            #if label != 'base':
+            #    label = f'gap {6-i}'
             ax[1].plot(self.post['DINA']['t'],
                        self.post['DINA']['Faxial'][gap],
                        '-', color=f'C{i%10}', label=label)
@@ -1196,12 +1211,12 @@ if __name__ is '__main__':
     #'15MA DT-DINA2012-05', '15MA DT-DINA2018-05_v1.1']
 
 
-    scn.load_file(folder='15MA DT-DINA2010-07b', read_txt=False)
-    scn.update_scenario(t=100)
-    scn.update_psi(plot=True, current='AT', n=5e3)
+    scn.load_file(folder='10MA D-DINA2019-02', read_txt=False)
+    # scn.update_scenario(t=100)
+    # scn.update_psi(plot=True, current='AT', n=5e3)
 
 
-    # scn.compare_force(title=False)
+    scn.compare_force(title=True, Nova=True)
     # scn.compare()
     #scn.load_file(folder='15MA DT-DINA2014-01', read_txt=False)
 

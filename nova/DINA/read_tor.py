@@ -268,15 +268,7 @@ class read_tor(pythonIO):
         plt.axis('off')
 
     def plot_coils(self):
-        self.pf.initalize_collection()
-        self.pf.patch_coil(self.coilset['CS']['subcoil'])
-        self.pf.patch_coil(self.coilset['PF']['subcoil'])
-        self.pf.patch_coil(self.coilset['bb_DINA']['coil'])
-        self.pf.patch_coil(self.coilset['vv_DINA']['coil'])
-        self.pf.patch_coil(self.coilset['PF']['plasma'])
-        self.pf.plot_patch(c='Jc', clim=[-10, 10])
-        plt.axis('equal')
-        plt.axis('off')
+        self.pf.plot(subcoil=True, plasma=True)
 
     def movie(self, filename):
         fig, ax = plt.subplots(1, 1, figsize=(7, 10))
@@ -302,7 +294,7 @@ if __name__ == '__main__':
     #for folder in tor.dina.folders:
     #    tor.load_file(folder, read_txt=True)
     tor.load_file(3, read_txt=False)
-    tor.plot(10)
+    tor.plot(200)
 
     # tor.pf.plot(current=False, plasma=True, subcoil=True)
     # tor.movie('tmp')

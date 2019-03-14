@@ -16,12 +16,6 @@ class inductance:
         self.nt = []  # coil turns
         self.nC = 0
 
-    def add_coil(self, x, z, dx, dz, It, R=0, nt=1, **kwargs):
-        self.pf.add_coil(x, z, dx, dz, It, categorize=False, **kwargs)
-        self.Ro.append(R)
-        self.nt.append(nt)
-        self.nC += 1  # increment coil counter
-
     def get_coil(self, coil):
         x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
         if 'It' in coil:
@@ -38,14 +32,20 @@ class inductance:
             Nt = 1
         return x, z, dx, dz, It, R, Nt
 
-    def add_pf_coil(self, coil, turns=None):
+    def add_coil(self, coil, turns=None):
         if turns is None:
             turns = np.ones(len(coil))
         for name, nt in zip(coil, turns):
             x, z, dx, dz, It, R, Nt = self.get_coil(coil[name])
             if nt == 1:
                 nt = Nt
-            self.add_coil(x, z, dx, dz, It, R=R, nt=nt, name=name)
+            self.append_coil(x, z, dx, dz, It, R=R, nt=nt, name=name)
+
+    def append_coil(self, x, z, dx, dz, It, R=0, nt=1, **kwargs):
+        self.pf.add_coil(x, z, dx, dz, It, categorize=False, **kwargs)
+        self.Ro.append(R)
+        self.nt.append(nt)
+        self.nC += 1  # increment coil counter
 
     def initalise_cp_set(self):
         name = 'cp{:d}'.format(self.ncp)  # cp set name
@@ -85,7 +85,7 @@ class inductance:
             mpc['dc'] = np.append(mpc['dc'], row[1 + j])
 
     def assemble(self, plot=False):
-        self.pf.mesh_coils(dCoil=0.25)
+        self.pf.mesh_coils(dCoil=None)
         if plot:
             self.pf.plot(subcoil=True)
         self.inv = INV(self.pf.coilset, Iscale=1)

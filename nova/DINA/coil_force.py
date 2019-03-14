@@ -11,7 +11,7 @@ from amigo.pyplot import plt
 from amigo.time import clock
 from amigo.geom import qrotate
 import matplotlib.animation as manimation
-from nep.rails import stress_allowable
+# from nep.rails import stress_allowable
 from nep.DINA.read_dina import dina
 import matplotlib.patches as mpatches
 import pickle
@@ -23,6 +23,7 @@ from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
 import nep
 from amigo.IO import class_dir
 from nep.DINA.read_eqdsk import read_eqdsk
+import cycler
 
 
 class coil_force(pythonIO):
@@ -155,7 +156,7 @@ class coil_force(pythonIO):
         self.mode = kwargs.get('mode', self.mode)
         Ivs3 = self.Ivs3_fun[self.mode](self.t_index)  # current vector
         self.set_vs3_current(Ivs3[0])  # vs3 coil current
-        coil_list = list(self.ps.vv.pf.coilset['coil'].keys())
+        coil_list = list(self.ps.coilset['coil'].keys())
         Ic = {}  # coil jacket
         for i, coil in enumerate(coil_list[2:6]):
             Ic[coil] = Ivs3[1]  # lower VS jacket
@@ -414,10 +415,14 @@ class coil_force(pythonIO):
         return coil_data
 
     def plot_Fmax(self, nframe=100):
-        self.load_file(0)
+        self.load_file(1)
         coil_data = self.read_data(nframe)  # load data
+        folders = list(coil_data.keys())
+        nfolder = len(folders)
+        color = cycler.cycler('color', plt.cm.cubehelix(np.linspace(0, 1, 6)))
+        plt.rcParams['axes.prop_cycle'] = color
         ax = plt.subplots(2, 1, sharex=True, sharey=True)[1]
-        X = range(self.dina.nfolder)
+        X = range(nfolder)
         Fmax = OrderedDict()
         Fmax_dtype = [('Fmag', '2float'), ('t', '2float'), ('I', '2float'),
                       ('frame_index', '2float')]
@@ -430,7 +435,7 @@ class coil_force(pythonIO):
             vs3 = coil_data[name]
             for j, (mode, color, width) in enumerate(
                     zip(['reference', 'control', 'error'],
-                        ['gray', 'C0', 'C3'], [0.9, 0.7, 0.5])):
+                        ['C1', 'C2', 'C3'], [0.9, 0.7, 0.5])):
                 frame_index = np.nanargmax(abs(vs3[mode]['I']))
                 Imax[mode][i]['frame_index'] = frame_index
                 for var in ['t', 'I']:
@@ -456,10 +461,10 @@ class coil_force(pythonIO):
                        va='bottom', ha='center')
         h = []
         for mode, color in zip(['reference', 'control', 'error'],
-                               ['gray', 'C0', 'C3']):
+                               ['C1', 'C2', 'C3']):
             h.append(mpatches.Patch(color=color, label=mode))
         ax[0].legend(handles=h, loc=2)
-        plt.xticks(X, self.dina.folders, rotation=70)
+        plt.xticks(X, folders, rotation=70)
         plt.despine()
         plt.setp(ax[0].get_xticklabels(), visible=False)
         for i, k in enumerate([1, 0]):
@@ -471,7 +476,7 @@ class coil_force(pythonIO):
 
         ax_I = plt.subplots(1, 1)[1]
         modes = ['reference', 'control', 'error']
-        colors = ['gray', 'C0', 'C3']
+        colors = ['C1', 'C2', 'C3']
         widths = [0.9, 0.7, 0.5]
         # modes = ['control']
         # colors = ['C0']
@@ -490,9 +495,9 @@ class coil_force(pythonIO):
         ax_I.text(im[index], 1e-3*Im[index],
                   '{:1.0f}'.format(1e-3*Im[index]), weight='bold',
                   va=va, ha='center')
-        # plt.xticks(X, self.dina.folders, rotation=70)
+        # plt.xticks(X, folders, rotation=70)
         plt.xticks(X, '')
-        for x, label in zip(X, self.dina.folders):
+        for x, label in zip(X, folders):
             label = label.replace('_', ' ')
             label = label.replace('MD', 'md')
             label = label.replace('VDE', 'vde')
@@ -667,7 +672,7 @@ class coil_force(pythonIO):
 
 if __name__ == '__main__':
 
-    force = coil_force(vessel=True, t_pulse=0.3, nturn=3, Ip_scale=15/15,
+    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=15/15,
                        read_txt=False)
     '''
     for folder in force.dina.folders:

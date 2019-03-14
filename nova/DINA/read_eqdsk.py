@@ -34,8 +34,6 @@ class read_eqdsk(pythonIO):
         ax = plt.subplots(1, 1, figsize=(8, 10))[1]
         self.sf.contour(ax=ax)
 
-    #def
-
     def dPdPsi(self, Psi, I):
         dP = 1
         return dP

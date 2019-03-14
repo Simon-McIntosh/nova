@@ -83,8 +83,12 @@ class timeconstant:
         td, Id = self.trim(**kwargs)
         to = td[0]
         td -= to  # time shift
-        xo = np.append(Id[0]/n*np.ones(n), tau_o*np.arange(1, n+1))
-        x = minimize(self.fit_ntau, xo, args=(td, Id)).x
+        xo = np.append(Id[0]/n*np.ones(n), tau_o*np.ones(n))
+        # xo *= np.random.random(2*n)
+        bounds = [(None, None) for __ in range(n)]
+        bounds.extend([(1e-6, None) for __ in range(n)])
+        x = minimize(self.fit_ntau, xo, args=(td, Id),
+                     method='L-BFGS-B', bounds=bounds).x
         Ifit = self.I_nfit(td, x)
         Io, tau = x[:n], x[n:]
         if plot:
@@ -93,10 +97,11 @@ class timeconstant:
             else:
                 ax = plt.subplots(1, 1)[1]
             ax.plot(1e3*td+to, 1e-3*Id, '-', label='data')
-            ax.plot(1e3*td+to, 1e-3*Ifit, '--')
+            ax.plot(1e3*td+to, 1e-3*Ifit, '--', label='fit')
             ax.set_xlabel('$t$ ms')
             ax.set_ylabel('$I$ kA')
             plt.despine()
+            plt.legend()
         return Io, tau, td+to, Ifit
 
     def ntxt(If, tau):
@@ -193,7 +198,8 @@ class dina:
         ext = file_type.split('.')[-1].lower()
         if ext in ['xls', 'qda', 'txt']:  # *.*
             file_type = file_type.split('.')[0].lower()
-            for subfolder in listdir(folder):
+            subfolders = listdir(folder)
+            for subfolder in subfolders:
                 subfolder = join(folder, subfolder)
                 if isdir(subfolder):
                     files = [f for f in listdir(subfolder) if
@@ -246,4 +252,4 @@ class dina:
 if __name__ == '__main__':
 
     dina = dina('operations')
-    filename = dina.locate_file('data3.qda', folder=0)
+    filename = dina.locate_file('data2.txt', folder=0)

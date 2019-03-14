@@ -76,7 +76,7 @@ class power_supply(pythonIO):
         self.coilset = self.vv.pf.coilset
         self.pf(self.coilset)
         turns = np.append(np.ones(4), -np.ones(4))
-        self.ind.add_pf_coil(
+        self.ind.add_coil(
                 OrderedDict(list(self.coilset['subcoil'].items())[:8]),
                 turns=turns)
         for index in nvs_o+np.arange(1, 8):  # vs3 loops

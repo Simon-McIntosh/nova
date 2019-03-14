@@ -1,7 +1,6 @@
 import numpy as np
 from amigo.pyplot import plt
 from scipy.interpolate import interp1d
-import matplotlib
 import collections
 from amigo import geom
 from nova.loops import Profile, get_oppvar, get_value
@@ -14,259 +13,56 @@ from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 from warnings import warn
 from copy import deepcopy
 from scipy.optimize import minimize_scalar
-from matplotlib.collections import PatchCollection
-from matplotlib import patches
-from scipy.interpolate import griddata
-
-
-class plotPF:
-
-    def __init__(self, coilset=None):
-        self.initalize_keys()
-        self.initalize_collection()
-        self.link(coilset)
-
-    def initalize_keys(self):
-        self.color_key = \
-            ['CS', 'skip', 'VS3', 'vv_DINA', 'plasma',
-             'PF', 'skip', 'bb_DINA', 'trs', 'skip',
-             'skip', 'skip', 'skip', 'vv', 'skip']
-        # set defaults
-        self.properties = {'var': None, 'cmap': plt.cm.RdBu, 'clim': None,
-                           }
-
-    def update_properties(self, **kwargs):
-        for key in kwargs:
-            if key in self.properties:
-                self.properties[key] = kwargs.get(key)
-
-    def initalize_collection(self, *args):
-        self.patch = {'patch': []}
-
-    def link(self, coilset):
-        if coilset:
-            self.coilset = coilset
-
-    @staticmethod
-    def get_coil_label(name):
-        sname = name.split('_')
-        if len(sname) == 1:
-            label = name
-        elif len(sname) == 2:
-            label = sname[0]
-        else:
-            label = '_'.join(sname[:-1])
-        return label
-
-    def label_coils(self, coils, label, current, fs=12):
-        for i, name in enumerate(coils.keys()):
-            coil = coils[name]
-            x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
-            if 'index' in self.coilset:
-                if name in self.coilset['index']['CS']['name']:
-                    drs = -2.5 / 3 * dx
-                    ha = 'right'
-                else:
-                    drs = 2.5 / 3 * dx
-                    ha = 'left'
-            else:
-                drs = 2.5 / 3 * dx
-                ha = 'left'
-
-            if label and current:
-                zshift = max([dz / 10, 0.2])
-            else:
-                zshift = 0
-            if label:
-                plt.text(x + drs, z + zshift, name, fontsize=fs,
-                         ha=ha, va='center', color=0.2 * np.ones(3))
-            if current:
-                if current == 'A' and 'Nt' in coil:  # amps
-                    Nt = coil['Nt']
-                    linecurrent = coil['It'] / Nt
-                    txt = '{:1.1f}kA'.format(linecurrent * 1e-3)
-                else:  # amp turns
-                    if abs(coil['It']) < 0.1e6:  # display as kA.t
-                        txt = '{:1.1f}kAT'.format(coil['It'] * 1e-3)
-                    else:  # MA.t
-                        txt = '{:1.1f}MAT'.format(coil['It'] * 1e-6)
-                plt.text(x + drs, z - zshift, txt,
-                         fontsize=fs, ha=ha, va='center',
-                         color=0.2 * np.ones(3))
-
-    def get_coils(self, subcoil):
-        if subcoil:
-            coils = self.coilset['subcoil']
-        else:
-            coils = self.coilset['coil']
-        return coils
-
-    def plot(self, subcoil=False, label=False, plasma=False,
-             current=False, alpha=1, ax=None, patch=True):
-        if ax is None:
-            ax = plt.gca()
-        coils = self.get_coils(subcoil)
-        self.plot_coils(coils, label=label, current=current, alpha=alpha,
-                        ax=ax, patch=patch)
-        if plasma:
-            self.plot_coils(self.coilset['plasma'], alpha=alpha,
-                            coil_color='C4', ax=ax)
-        ax.axis('equal')
-        ax.axis('off')
-
-    def get_single(self, name):
-        coils = self.get_coils(True)
-        single_coil = collections.OrderedDict(
-                [(n, coils[n]) for n in self.coilset['index'][name]['name']])
-        return single_coil
-
-    def plot_single(self, name, subcoil=False, label=False, plasma=False,
-                    current=False, alpha=1, ax=None, plot=True, **kwargs):
-        coils = self.get_single(name)
-        self.plot_coils(coils, label=label, current=current,
-                        alpha=alpha, ax=ax, plot=plot, **kwargs)
-
-    def contour_single(self, name, variable, n=1e3, ax=None):
-        if ax is None:
-            ax = plt.gca()
-        coils = self.get_single(name)
-        x = [coils[name]['x'] for name in coils]
-        z = [coils[name]['z'] for name in coils]
-        values = [coils[name][variable] for name in coils]
-        x2d, z2d, xg, zg = geom.grid(n, [np.min(x), np.max(x),
-                                     np.min(z), np.max(z)])[:4]
-        v2d = griddata((x, z), values, (x2d, z2d), method='linear')
-        levels = np.linspace(np.min(values), np.max(values), 11)
-        CS = ax.contour(x2d, z2d, v2d, levels=levels, colors='gray',
-                        linewidths=1.75)
-        ax.clabel(CS, levels[1::2], inline=1, fmt='%1.1f', fontsize=14)
-
-    def plot_coils(self, coils, label=False, current=False,
-                   alpha=1, plot=True, ax=None, patch=True, **kwargs):
-        self.update_properties(**kwargs)
-        for i, name in enumerate(coils.keys()):
-            shape = 'circle' if 'VS' in name else 'rectangle'
-            coil_color = kwargs.get('coil_color', self.get_coil_color(name))
-            kwargs.pop('coil_color', None)
-            self.patch_coil(coils[name], alpha=alpha,
-                            coil_color=coil_color, shape=shape, **kwargs)
-        if plot:
-            self.plot_patch(ax=ax, **kwargs)
-            if label or current:
-                fs = matplotlib.rcParams['legend.fontsize']
-                self.label_coils(coils, label, current, fs=fs)
-
-    def get_coil_color(self, name, coil_color=None):
-        label = self.get_coil_label(name)
-        if coil_color is None:
-            coil_color = 'C3'  # default
-            for group in self.coilset['index']:
-                if label in self.coilset['index'][group]['name']\
-                        and group in self.color_key:
-                    ic = self.color_key.index(group)
-                    icolor = ic % 5
-                    coil_color = 'C{}'.format(icolor)
-                    break
-        return coil_color
-
-    def patch_coil(self, coil, alpha=1, shape='rectangle', **kwargs):
-        edge_color = kwargs.get('edge_color', 'k')
-        coil_color = kwargs.get('coil_color', 'C0')
-        x, z, dx, dz = coil['x'], coil['z'], coil['dx'], coil['dz']
-        if 'It' in coil:
-            Ic = coil['It']
-        else:
-            Ic = coil['If']
-        coil['Jc'] = 1e-6 * Ic / (dx*dz)
-
-        if shape == 'circle':
-            patch = patches.Circle((x, z), dx/2, facecolor=coil_color,
-                                   alpha=alpha, edgecolor=edge_color)
-        elif shape == 'rectangle':
-            patch = patches.Rectangle((x-dx/2, z-dz/2), dx, dz,
-                                      facecolor=coil_color, alpha=alpha,
-                                      edgecolor=edge_color)
-        else:
-            raise TypeError('shape not in [''circle'', ''rectangle'']')
-        self.append_patch(patch, **coil)
-
-    def append_patch(self, patch, **kwargs):
-        self.patch['patch'].append(patch)
-        for var in kwargs:
-            try:
-                self.patch[var].append(kwargs[var])
-            except KeyError:
-                self.patch[var] = [kwargs[var]]
-
-    def plot_patch(self, reset=False, ax=None, **kwargs):
-        self.update_properties(**kwargs)
-        var = self.properties['var']  # plot variable
-        match_original = True if var is None else False
-        clim = self.properties['clim']  # plot variable
-        if ax is None:
-            ax = plt.gca()
-        pc = PatchCollection(self.patch['patch'],
-                             match_original=match_original,
-                             cmap=self.properties['cmap'])
-        im = ax.add_collection(pc)
-        if var is not None:
-            if var in self.patch:
-                var_array = np.array(self.patch[var])
-            else:  # var is np.array len == len(patch)
-                npatch = len(self.patch['patch'])
-                if isinstance(var, np.ndarray) and len(var) == npatch:
-                    var_array = var
-                else:
-                    raise ValueError('color array incompatable with patches')
-            if clim is not None:
-                if clim == 'symetric':
-                    var_max = np.max(abs(var_array))
-                    clim = [-var_max, var_max]
-                elif clim == 'tight':
-                    clim = [np.min(var_array), np.max(var_array)]
-                pc.set_clim(vmin=clim[0], vmax=clim[1])
-            pc.set_array(var_array)
-            plt.sca(ax)
-            cb = plt.colorbar(im, orientation='vertical', aspect=50,
-                              shrink=0.8, fraction=0.1)
-            if var == 'It':
-                cb.set_label('$I_c$ kA')
-            elif var == 'Jc':
-                cb.set_label('$J_c$ MAm$^{-2}$')
-
-        ax.axis('equal')
-        ax.axis('off')
-        if reset:  # reset patch collection
-            self.initalize_collection()
+from nova.plot_coilset import plot_coilset
 
 
 class PF:
 
     def __init__(self, eqdsk=None, **kwargs):
-        self.ppf = plotPF()
-        self.plot = self.ppf.plot  # expose PF coil plotter
+        self.pcs = plot_coilset()
+        self.plot = self.pcs.plot  # expose PF coil plotter
+        self.set_coil_key()  # set optional coil key list
         self.set_coils(eqdsk, **kwargs)
         if 'coilset' in kwargs:
             self.__call__(kwargs['coilset'])
         if 'coil' in kwargs:
-            coil = kwargs['coil']
-            subcoil = kwargs.get('subcoil', None)
+            coilset = {'coil': kwargs['coil']}
+            coilset['subcoil'] = kwargs.get(
+                    'subcoil', collections.OrderedDict())
+            coilset['plasma'] = kwargs.get(
+                    'plasma', collections.OrderedDict())
             label = kwargs.get('label', None)
-            self.add_coils(coil, subcoil=subcoil, label=label)
+            self.add_coilset(coilset, label=label)
+
+    def set_coil_key(self):
+        self.coil_key = {}
+        self.coil_key['optional'] = ['R', 'index', 'sign', 'Nt', 'Nf', 'tf',
+                                     'cross_section', 'T', 'm', 'Ic',
+                                     'material']
 
     def __call__(self, coilset):
         self.coilset = coilset  # reset instance
         self.index_coilset(self.coilset)  # calculate subcoil mapping
         self.ppf.link(self.coilset)  # link to coil plotter
 
+    @staticmethod
+    def initalize_coilset():
+        coilset = {'nC': 0, 'index': {},
+                   'coil': collections.OrderedDict(),
+                   'subcoil': collections.OrderedDict(),
+                   'plasma': collections.OrderedDict()}
+        return coilset
+
     def initalize_coils(self):
-        self.coilset = {'nC': 0, 'index': {},
-                        'coil': collections.OrderedDict(),
-                        'subcoil': collections.OrderedDict(),
-                        'plasma': collections.OrderedDict()}
-        self.ppf.link(self.coilset)  # link to coil plotter
-        for coil in ['PF', 'CS']:
-            self.coilset['index'][coil] = {'n': 0, 'name': [], 'index': []}
+        self.coilset = self.initalize_coilset()
+        self.pcs.link(self.coilset)  # link to coil plotter
+
+    @staticmethod
+    def update_coil_key(coilset, **kwargs):
+        for name in coilset['coil']:
+            for key in kwargs:
+                coilset['coil'][name][key] = kwargs[key]
+        return coilset
 
     @staticmethod
     def index_coilset(coilset):  # append coil-subcoil map in index
@@ -277,6 +73,108 @@ class PF:
                  np.sum(Nf[slice(None, i+1)], dtype=int)]
             coilset['index'][name] = {'index': slice(*N), 'n': Nf[i],
                                       'name': subcoilset[slice(*N)]}
+
+    @staticmethod
+    def cluster_coilset(coilset, ncluster=3):
+        subset = {'nC': 0, 'index': {},
+                  'coil': collections.OrderedDict(),
+                  'subcoil': collections.OrderedDict(),
+                  'plasma': collections.OrderedDict()}
+        for label in coilset['index']:
+            subset['index'][label] = {'name': [], 'index': [], 'n': 0}
+            for i, name in enumerate(coilset['index'][label]['name']):
+                if i % ncluster == 0:  # create new coil
+                    name_ = name
+                    subset['nC'] += 1
+                    subset['coil'][name] = coilset['coil'][name].copy()
+                    subset['coil'][name]['R'] = 1 / subset['coil'][name]['R']
+                    subset['index'][label]['name'].append(name)
+                    subset['index'][label]['index'].append(subset['nC']-1)
+                    subset['index'][label]['n'] += 1
+                    for Nf_ in range(coilset['coil'][name]['Nf']):
+                        subname = f'{name}_{Nf_}'
+                        subset['subcoil'][subname] = \
+                            coilset['subcoil'][subname]
+                else:  # append additional subcoils
+                    subset['coil'][name_]['Nf'] += coilset['coil'][name]['Nf']
+                    subset['coil'][name_]['Nt'] += coilset['coil'][name]['Nt']
+                    subset['coil'][name_]['R'] += 1/coilset['coil'][name]['R']
+                    for Nf in range(coilset['coil'][name]['Nf']):
+                        Nf_ += 1
+                        subsetname = f'{name_}_{Nf_}'
+                        subname = f'{name}_{Nf}'
+                        subset['subcoil'][subsetname] = \
+                            coilset['subcoil'][subname]
+        for name in subset['coil']:
+            x, z = 0, 0
+            Nf = subset['coil'][name]['Nf']
+            subset['coil'][name]['R'] = 1 / subset['coil'][name]['R']
+            for i in range(Nf):
+                subname = f'{name}_{i}'
+                x += subset['subcoil'][subname]['x']
+                z += subset['subcoil'][subname]['z']
+            subset['coil'][name]['x'] = x / Nf
+            subset['coil'][name]['z'] = z / Nf
+        return subset
+
+    def add_coilset(self, coilset, label=None):
+        nCo = self.coilset['nC']
+        for name in coilset['coil']:
+            x, z = coilset['coil'][name]['x'], coilset['coil'][name]['z']
+            dx, dz = coilset['coil'][name]['dx'], coilset['coil'][name]['dz']
+            It = coilset['coil'][name]['It']
+            oparg = {}  # optional keys
+            for key in self.coil_key['optional']:
+                if key in coilset['coil'][name]:
+                    oparg[key] = coilset['coil'][name][key]
+            self.add_coil(x, z, dx, dz, It, name=name, categorize=False,
+                          **oparg)
+            if coilset['subcoil']:
+                Nf = coilset['coil'][name]['Nf']
+                for i in range(Nf):
+                    subname = name+'_{}'.format(i)
+                    self.coilset['subcoil'][subname] = \
+                        coilset['subcoil'][subname]
+            else:
+                self.coilset['subcoil'][name] = {'Nf': 1}
+                self.coilset['subcoil'][name+'_0'] = coilset['coil'][name]
+        if coilset['plasma']:
+            self.update_plasma(coilset)
+        self.inherit_index(coilset, offset=nCo)
+        if label:
+            self.coilset['index'][label] =\
+                {'name': list(coilset['coil'].keys()),
+                 'index': np.arange(nCo, self.coilset['nC']),
+                 'n': len(coilset['coil'])}
+
+    def append_index(self, label, name, index=None):
+        if index is None:
+            index = self.coilset['nC']-1
+        if hasattr(index, '__iter__'):
+            n = len(index)
+        else:
+            n = 1
+        if label in self.coilset['index']:
+            self.coilset['index'][label]['name'].append(name)
+            self.coilset['index'][label]['index'].append(index)
+            self.coilset['index'][label]['n'] += n
+        else:
+            if not isinstance(name, (list, tuple, np.ndarray)):
+                name = [name]
+            if not isinstance(index, (list, tuple, np.ndarray)):
+                index = [index]
+            self.coilset['index'][label] = {
+                    'name': name, 'index': index, 'n': n}
+
+    def inherit_index(self, coilset, offset=0):
+        if 'index' in coilset:
+            for label in coilset['index']:
+                if 'n' in coilset['index'][label]:
+                    if coilset['index'][label]['n'] > 0:
+                        name = coilset['index'][label]['name']
+                        index = np.array(coilset['index'][label]['index'])
+                        index += offset
+                        self.append_index(label, name, index)
 
     def set_coils(self, eqdsk, **kwargs):
         self.initalize_coils()
@@ -322,83 +220,74 @@ class PF:
                     subcoil = '{}_{}'.format(name, n)
                     coilset['subcoil'][subcoil]['If'] = It[name] / Nf
 
-    def categorize_coils(self):
-        catogory = np.zeros(len(self.coilset['coil']), dtype=[('x', 'float'),
-                            ('z', 'float'), ('theta', 'float'),
-                            ('index', 'int'), ('name', 'object')])
-        for i, name in enumerate(self.coilset['coil']):
-            catogory[i]['x'] = self.coilset['coil'][name]['x']
-            catogory[i]['z'] = self.coilset['coil'][name]['z']
-            catogory[i]['theta'] =\
-                np.arctan2(self.coilset['coil'][name]['z']-self.xo[1],
-                           self.coilset['coil'][name]['x']-self.xo[0])
+    @staticmethod
+    def categorize_coilset(coilset, xo, rCS, drCS):
+        dtype = [('x', 'float'), ('z', 'float'), ('theta', 'float'),
+                 ('index', 'int'), ('name', 'object')]
+        catogory = np.zeros(coilset['nC'], dtype=dtype)
+        for i, name in enumerate(coilset['coil'].index):
             catogory[i]['index'] = i
             catogory[i]['name'] = name
+            catogory[i]['x'] = coilset['coil'].loc[name, 'x']
+            catogory[i]['z'] = coilset['coil'].loc[name, 'z']
+            catogory[i]['theta'] = np.arctan2(
+                    coilset['coil'].loc[name, 'z'] - xo[1],
+                    coilset['coil'].loc[name, 'x'] - xo[0])
         CSsort = np.sort(catogory, order=['x', 'z'])  # sort CS, x then z
-        CSsort = CSsort[CSsort['x'] < self.rCS + self.drCS]
+        CSsort = CSsort[CSsort['x'] < rCS + drCS]
         PFsort = np.sort(catogory, order='theta')  # sort PF,  z
-        PFsort = PFsort[PFsort['x'] > self.rCS + self.drCS]
-        self.coilset['index'] = {'PF': {'n': len(PFsort['index']),
-                                        'index': PFsort['index'],
-                                        'name': PFsort['name']},
-                                 'CS': {'n': len(CSsort['index']),
-                                        'index': CSsort['index'],
-                                        'name': CSsort['name']}}
-        self.sort()  # sort pf.coil dict [PF,CS]
+        PFsort = PFsort[PFsort['x'] > rCS + drCS]
+        coilset['index'] = {
+                'PF': {'n': len(PFsort['index']), 'index': PFsort['index'],
+                       'name': PFsort['name']},
+                'CS': {'n': len(CSsort['index']), 'index': CSsort['index'],
+                       'name': CSsort['name']}}
 
-    def sort(self):  # order coil dict for use by inverse.py
-        coil = deepcopy(self.coilset['coil'])
-        self.coilset['coil'] = collections.OrderedDict()
-        for name in np.append(self.coilset['index']['PF']['name'],
-                              self.coilset['index']['CS']['name']):
-            self.coilset['coil'][name] = coil[name]
-        nPF = self.coilset['index']['PF']['n']
-        nCS = self.coilset['index']['CS']['n']
-        self.coilset['index']['PF']['index'] = np.arange(0, nPF)
-        self.coilset['index']['CS']['index'] = np.arange(nPF, nPF+nCS)
+    @staticmethod
+    def sort_coilset(coilset):  # order coil dict for use by inverse.py
+        index = np.append(coilset['index']['PF']['name'],
+                          coilset['index']['CS']['name'])
+        coilset['coil'] = coilset['coil'].reindex(index)
+        nPF = coilset['index']['PF']['n']
+        nCS = coilset['index']['CS']['n']
+        coilset['index']['PF']['index'] = np.arange(0, nPF)
+        coilset['index']['CS']['index'] = np.arange(nPF, nPF+nCS)
 
     def add_coilsets(self, coilset):
         for label in coilset:
-            self.add_coils(coilset[label]['coil'],
-                           subcoil=coilset[label]['subcoil'], label=label)
+            self.add_coilset(coilset[label], label=label)
 
-    def add_coils(self, coil, subcoil=None, label=None):
-        nCo = self.coilset['nC']
-        for name in coil:
-            x, z = coil[name]['x'], coil[name]['z']
-            dx, dz = coil[name]['dx'], coil[name]['dz']
-            It = coil[name]['It']
-            oparg = {}  # optional keys
-            for key in ['R', 'index', 'sign', 'Nt', 'Nf']:
-                if key in coil[name]:
-                    oparg[key] = coil[name][key]
-            self.add_coil(x, z, dx, dz, It, name=name, categorize=False,
-                          **oparg)
-            if subcoil:
-                Nf = coil[name]['Nf']
-                for i in range(Nf):
-                    subname = name+'_{}'.format(i)
-                    self.coilset['subcoil'][subname] = subcoil[subname]
-            else:
-                coil[name]['Nf'] = 1
-                self.coilset['subcoil'][name+'_0'] = coil[name]
-        if label:
-            self.coilset['index'][label] =\
-                {'name': list(coil.keys()),
-                 'index': np.arange(nCo, self.coilset['nC'])}
+    def update_plasma(self, coilset):
+        self.coilset['plasma'].clear()
+        for name in coilset['plasma']:
+            self.coilset['plasma'][name] = coilset['plasma'][name]
 
-    def add_coil(self, x, z, dx, dz, It, categorize=True, **kwargs):
+    def add_coil(self, x, z, dx, dz, It, categorize=False, **kwargs):
         self.coilset['nC'] += 1
         name = kwargs.get('name', 'Coil{:1.0f}'.format(self.coilset['nC']-1))
         self.coilset['coil'][name] = {'x': x, 'z': z, 'dx': dx, 'dz': dz,
                                       'It': It, 'Nf': 1}
         rc = kwargs.get('rc', np.sqrt(dx**2 + dz**2) / 2)
         self.coilset['coil'][name]['rc'] = rc
-        for key in ['R', 'index', 'sign', 'Nt', 'Nf']:  # optional keys
+        for key in self.coil_key['optional']:  # optional keys
             if key in kwargs:
                 self.coilset['coil'][name][key] = kwargs.get(key)
+        for keypair in [('R', 0), ('Nt', 1),
+                        ('cross_section', 'circle')]:  # set default values
+            if keypair[0] not in self.coilset['coil'][name]:
+                self.coilset['coil'][name][keypair[0]] = keypair[1]
         if categorize:
             self.categorize_coils()
+
+    def set_geometric_mean(self):
+        #  update coil center as geometric mean of fillament bundle
+        for name in self.coilset['coil']:
+            x = 0
+            Nf = self.coilset['coil'][name]['Nf']
+            for i in range(Nf):
+                x += np.log(self.coilset['subcoil'][f'{name}_{i}']['x'])
+            x = np.exp(x/Nf)  # geometric mean radius
+            self.coilset['coil'][name]['x'] = x  # update with GMR
 
     def join_coils(self, name, names):
         coil_o = deepcopy(self.coilset['coil'])
@@ -522,10 +411,12 @@ class PF:
         Nf = len(X)  # filament number
         coil['Nf'] = Nf  # store filament number
         If = coil['It'] / Nf
+        cross_section = coil['cross_section']
         subcoil = [[] for __ in range(Nf)]
         for i, (x, z) in enumerate(zip(X, Z)):
             subcoil[i] = {'x': x, 'z': z, 'dx': dx, 'dz': dz, 'If': If,
-                          'rc': np.sqrt(dx**2 + dz**2) / 4}
+                          'rc': np.sqrt(dx**2 + dz**2) / 4,
+                          'cross_section': cross_section}
         return subcoil
 
     def coil_corners(self, coils):

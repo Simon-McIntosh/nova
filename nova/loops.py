@@ -193,7 +193,7 @@ def get_input(oppvar=[], **kwargs):
 def close_loop(p, npoints):
     for var in ['x', 'z']:
         p[var] = np.append(p[var], p[var][0])
-    p['x'], p['z'] = geom.rzSLine(p['x'], p['z'], npoints=npoints)
+    p['x'], p['z'] = geom.xzSLine(p['x'], p['z'], npoints=npoints)
     return p
 
 

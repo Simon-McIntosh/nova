@@ -6,7 +6,7 @@ from nova.streamfunction import SF
 from amigo import geom
 from scipy.optimize import minimize_scalar
 from nova import geqdsk
-from nova.inductance import neumann
+# from nova.inductance import neumann
 from warnings import warn
 
 
@@ -66,11 +66,11 @@ class coil_cage(object):
             raise ValueError(errtxt)
         x, z = geom.clock(x, z)
         (self.plasma_loop[:, 0], self.plasma_loop[:, 2]) = \
-            geom.rzSLine(x, z, npoints=self.nplasma)
+            geom.xzSLine(x, z, npoints=self.nplasma)
         self.plasma_length = geom.length(self.plasma_loop[:, 0],
                                          self.plasma_loop[:, 2])
-        rfun, zfun = geom.rzfun(x, z)
-        self.plasma_interp = {'x': rfun, 'z': zfun}
+        xfun, zfun = geom.xzfun(x, z)
+        self.plasma_interp = {'x': xfun, 'z': zfun}
         if plot:
             plt.plot(self.plasma_loop[:, 0], self.plasma_loop[:, 2])
 
@@ -79,7 +79,7 @@ class coil_cage(object):
         self.npoints = len(x)
         self.coil_loop = np.zeros((self.npoints, 3))
         self.coil_loop[:, 0], self.coil_loop[:, 2] = \
-            geom.rzSLine(x, z, npoints=self.npoints)  # coil centerline
+            geom.xzSLine(x, z, npoints=self.npoints)  # coil centerline
         self.gfl = cc.GreenFieldLoop(self.coil_loop, rc=self.rc, smooth=smooth)
         self.pattern()
         self.amp_turns()  # set coil cage amp-turns

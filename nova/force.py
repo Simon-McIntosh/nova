@@ -322,7 +322,7 @@ class force_field(object):
             Fmax = 1
         names = self.coilset['index']['CS']['name']
         for i, Fsep in enumerate(self.Fcoil['CS']['sep_array'][1:-1]):
-            txt = '{:1.0f}MN'.format(Fsep)
+            txt = '{:1.1f}MN'.format(Fsep)
             color = colors[2] if Fsep < 0 else colors[3]
             lower = self.coilset['coil'][names[i]]  # lower
             upper = self.coilset['coil'][names[i+1]]  # upper

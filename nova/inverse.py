@@ -39,7 +39,6 @@ class INV(object):
         self.ncpu = multiprocessing.cpu_count()
         self.tf = tf
         self.add_active([])  # all coils active
-        self.initalise_coil()
         self.initalise_limits()
         self.offset = offset  # offset coils from outer TF loop
         if tf is not None:
@@ -204,8 +203,8 @@ class INV(object):
 
     def initalise_coil(self):
         self.nC = len(self.adjust_coils)  # number of active coils
-        self.nPF = len(self.PFcoils)
-        self.nCS = len(self.CScoils)
+        # self.nPF = len(self.PFcoils)
+        # self.nCS = len(self.CScoils)
         self.coil = {'active': OrderedDict(), 'passive': OrderedDict()}
         names = list(self.coilset['coil'].keys())
         self.all_coils = names.copy()
@@ -216,13 +215,13 @@ class INV(object):
                 state = 'active'
             else:
                 state = 'passive'
-            self.coil[state][name] = {'x': np.array([]), 'z': np.array([]),
-                                      'dx': np.array([]), 'dz': np.array([]),
-                                      'subname': np.array([]),
-                                      'If': np.array([]), 'Fx': np.array([]),
-                                      'Fz': np.array([]),
-                                      'Fx_sum': 0, 'Fz_sum': 0, 'Isum': 0,
-                                      'Xo': 0, 'Zo': 0}
+            self.coil[state][name] = {
+                    'x': np.array([]), 'z': np.array([]),
+                    'dx': np.array([]), 'dz': np.array([]),
+                    'subname': np.array([]), 'If': np.array([]),
+                    'Fx': np.array([]), 'Fz': np.array([]),
+                    'Fx_sum': 0, 'Fz_sum': 0, 'Isum': 0, 'Xo': 0, 'Zo': 0,
+                    'cross_section': 'square'}
 
     def initalise_current(self):
         adjust_coils = self.coil['active'].keys()
@@ -232,10 +231,21 @@ class INV(object):
             self.If[i] /= self.Iscale
         self.alpha = np.zeros(self.nC)  # initalise alpha
 
+    def propogate_cross_section(self):
+        for state in self.coil:
+            for name in self.coil[state]:
+                if name in self.coilset['coil']:
+                    if 'cross_section' in self.coilset['coil'][name]:
+                        CS = self.coilset['coil'][name]['cross_section']
+                    else:
+                        CS = 'circle'
+                    self.coil[state][name]['cross_section'] = CS
+
     def update_coils(self, plot=False, regrid=False):
         self.initalise_coil()
         self.append_subcoil(self.coilset['subcoil'])
         self.append_subcoil(self.coilset['plasma'])
+        self.propogate_cross_section()
         if regrid:
             for coil in self.all_coils:
                 self.update_bundle(coil)  # re-grid subcoils
@@ -247,14 +257,11 @@ class INV(object):
     def inductance(self):
         fix_o = copy.deepcopy(self.fix)  # store current BCs
         if hasattr(self, 'G'):  # store coupling matrix
-            self.Go = self.G.copy()
+            self.G_ = self.G.copy()
         self.initalize_fix()  # reinitalize BC vector
         for i, name in enumerate(self.adjust_coils):
             coil = self.coil['active'][name]
-            X, Z = coil['x'], coil['z']
-            for x, z in zip(X, Z):
-                x = self.coilset['coil'][name]['x']
-                z = self.coilset['coil'][name]['z']
+            for x, z in zip(coil['x'], coil['z']):
                 self.add_psi(1, point=(x, z))
         self.set_foreground()
         Gi = np.zeros((self.nC, self.nC))  # inductance coupling matrix
@@ -272,12 +279,12 @@ class INV(object):
         fillaments = np.dot(fillaments.reshape(-1, 1),
                             fillaments.reshape(1, -1))
         # PF/CS inductance matrix
-        self.Mc = 2 * np.pi * Gi / fillaments  # inductance [H]
+        self.Mc = Gi / fillaments  # inductance [H]
         self.Mt = self.Mc * turns  # inductance [H]
         self.fix = fix_o  # reset BC vector
         if hasattr(self, 'Go'):  # reset coupling matrix
-            self.G = self.Go
-            del self.Go
+            self.G = self.G_
+            del self.G_
 
     def update_plasma(self):
         self.clear_plasma()
@@ -308,21 +315,24 @@ class INV(object):
     def add_active(self, Clist, Ctype=None, empty=False):  # list of coil names
         if empty:
             self.adjust_coils = []
-            self.PFcoils = []
-            self.CScoils = []
+            # self.PFcoils = []
+            # self.CScoils = []
         if Clist:
             for coil in Clist:
                 name = self.Cname(coil)
                 if name not in self.adjust_coils:
                     self.adjust_coils.append(name)
+                '''
                 if Ctype == 'PF' and name not in self.PFcoils:
                     self.PFcoils.append(name)
                 elif Ctype == 'CS' and name not in self.CScoils:
                     self.CScoils.append(name)
+                '''
         else:
             self.adjust_coils = list(self.coilset['coil'].keys())  # add all
-            self.PFcoils = list(self.coilset['index']['PF']['name'])
-            self.CScoils = list(self.coilset['index']['CS']['name'])
+            # self.PFcoils = list(self.coilset['index']['PF']['name'])
+            # self.CScoils = list(self.coilset['index']['CS']['name'])
+        self.nC = len(self.adjust_coils)  # number of active coils
 
     def remove_active(self, Clist=[], Ctype='all', full=False):
         # Clist == list of coil names
@@ -580,37 +590,38 @@ class INV(object):
             self.wG = np.dot(self.wG, self.V)  # solve in terms of alpha
 
     def add_value(self, state):
-        Xf, Zf, BC, Bdir, nfix = self.unpack_fix()
-        tick = clock(nfix)
-        for n, (xf, zf, bc, bdir) in enumerate(zip(Xf, Zf, BC, Bdir)):
-            for m, name in enumerate(self.coil[state].keys()):
-                coil = self.coil[state][name]
-                X, Z, If = coil['x'], coil['z'], coil['If']
-                dX, dZ = coil['dx'], coil['dz']
-                for x, z, i, dx, dz in zip(X, Z, If, dX, dZ):
-                    value = self.add_value_coil(bc, xf, zf, x, z, bdir, dx, dz)
-                    if state == 'active':
-                        self.G[n, m] += value
-                    elif state == 'passive':
-                        self.BG[n] += i * value / self.Iscale
-                    else:
-                        errtxt = 'specify coil state'
-                        errtxt += '\'active\', \'passive\'\n'
-                        raise ValueError(errtxt)
+        Xfix, Zfix, BC, Bdir, nfix = self.unpack_fix()
+        if not all(bc == 'psi' for bc in BC):
+            raise NotImplementedError('field support dissabled')
+        ncoil = len(self.coil[state])
+        tick = clock(ncoil)
+        for i, name in enumerate(self.coil[state]):
+            coil = self.coil[state][name]
+            Xc, Zc, dXc, dZc = coil['x'], coil['z'], coil['dx'], coil['dz']
+            cross_section = coil['cross_section']
+            # field support dissabled - need to vectorise cc.green_field
+            value = self.Iscale * cc.green(Xfix, Zfix, Xc, Zc, dX=dXc, dZ=dZc,
+                                           cross_section=cross_section)
+            if state == 'active':
+                self.G[:, i] += np.sum(value, axis=1)
+            elif state == 'passive':
+                self.BG[:] += np.sum(coil['If'] * value, axis=1) / self.Iscale
+            else:
+                errtxt = 'specify coil state'
+                errtxt += '\'active\', \'passive\'\n'
+                raise ValueError(errtxt)
             if state == 'active' and nfix > 100:
-                if n == 0:
-                    print('computing foreground coupling')
+                if i == 0:
+                    print('nova.inverse: computing foreground coupling')
                 tick.tock()
 
     def add_value_coil(self, bc, xf, zf, x, z, bdir, dx, dz):
         if 'psi' in bc:
-            # flux Wb/rad.A
-            value = self.Iscale * cc.mu_o * \
-                cc.green(xf, zf, x, z, dXc=dx, dZc=dz)
+            # flux Wb
+            value = self.Iscale * cc.green(xf, zf, x, z, dX=dx, dZ=dz)
         else:
             # field T/A
-            B = 2 * np.pi * cc.mu_o * cc.green_field(xf, zf, x, z)
-            B *= self.Iscale
+            B = self.Iscale * cc.green_field(xf, zf, x, z)
             value = self.Bfield(bc, B[0], B[1], bdir)
         return value
 

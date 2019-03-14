@@ -19,9 +19,11 @@ from itertools import count
 from shapely.geometry import Polygon, Point, LineString, LinearRing
 from nova.exceptions import TopologyError
 from amigo.geom import poly_inloop
+from matplotlib.collections import LineCollection
+from matplotlib.lines import Line2D
 
 
-class SF(object):
+class SF:
 
     def __init__(self, **kwargs):
         self.shape = {}
@@ -97,6 +99,8 @@ class SF(object):
                 pass
             except AttributeError:
                 pass
+            except KeyError:
+                pass
 
     def get_sol(self, plot=False, debug=False):
         if hasattr(self, 'fw'):
@@ -112,10 +116,12 @@ class SF(object):
 
     def normalise(self):
         if ('Fiesta' in self.eqdsk['name'] or 'Nova' in self.eqdsk['name'] or
-                'disr' in self.eqdsk['name'] or 'DINA' in self.eqdsk['name']):
+                'disr' in self.eqdsk['name']):
+            # or 'DINA' in self.eqdsk['name']
             self.norm = 1
         elif 'tosca' in self.eqdsk['header'].lower() or\
-                'TEQ' in self.eqdsk['name']:
+                'TEQ' in self.eqdsk['name'] or\
+                'DINA' in self.eqdsk['name']:
             self.eqdsk['Ipl'] *= -1
             self.eqdsk['It'] *= -1
             self.norm = 1
@@ -581,58 +587,71 @@ class SF(object):
     def get_levels(self, Nlevel=31, Nstd=4, **kwargs):
         level, n = [-Nstd * np.std(self.psi),
                     Nstd * np.std(self.psi)], Nlevel
-        levels = np.mean(self.psi) + np.linspace(level[0], level[1], n)
+        levels = np.linspace(level[0], level[1], n)
+        if self.Xpsi:
+            levels += np.mean(self.Xpsi)
+        else:
+            levels += np.mean(self.psi)
         return levels
 
-    def contour(self, Nlevel=31, Nstd=4, Xnorm=True, lw=1, plot_vac=True,
-                boundary=True, separatrix='', plot_points=False, **kwargs):
+    def contour(self, Nlevel=31, Nstd=4, lw=1, plot_vac=True,
+                boundary=True, separatrix=None, plot_points=False,
+                label=None, **kwargs):
         if self.Xpsi is None:
             boundary = False
-            Xnorm = False
-            separatrix = ''
+            separatrix = None
         ax = kwargs.get('ax', plt.gca())
         alpha = np.array([1, 1], dtype=float)
         zorder = kwargs.get('zorder', 0)
         lw = lw * np.array([2.25, 1.75])
         if boundary:
-            x, z = self.get_boundary(alpha=1-1e-4, boundary_cntr=False)
-            ax.plot(x, z, linewidth=lw[0], color=0.75 * np.ones(3))
-            self.set_boundary(x, z)
+            try:
+                x, z = self.get_boundary(alpha=1, boundary_cntr=False)
+                self.set_boundary(x, z)
+            except TopologyError:
+                boundary = False
+                pass
         if separatrix:
             self.plot_separatrix(select=separatrix, ax=ax)
         if 'levels' not in kwargs.keys():
             levels = self.get_levels(Nlevel=Nlevel, Nstd=Nstd)
-            linetype = '-'
         else:
             levels = kwargs['levels']
-            linetype = '-'
         color = kwargs.get('color', 'k')
-        if 'linetype' in kwargs.keys():
-            linetype = kwargs['linetype']
+        linestyle = kwargs.get('linestyle', '-')
         if color == 'k':
             alpha *= 0.25
-        if Xnorm:
-            levels = levels + self.Xpsi
         contours = self.get_contour(levels)
+        plasma_lines = []
+        vacuum_lines = []
         for psi_line, level in zip(contours, levels):
-            if Xnorm:
-                level = level - self.Xpsi
             for line in psi_line:
                 x, z = line[:, 0], line[:, 1]
-                if self.inPlasma(x, z) and boundary:
-                    pindex = 0
+                if self.inPlasma(x, z):
+                    plasma_lines.append(np.column_stack((x, z)))
                 else:
-                    pindex = 1
-                if (not plot_vac and pindex == 0) or plot_vac:
-                    ax.plot(x, z, linetype, linewidth=lw[pindex],
-                            color=color, alpha=alpha[pindex], zorder=zorder)
+                    vacuum_lines.append(np.column_stack((x, z)))
+        for i, lines in enumerate([plasma_lines, vacuum_lines]):
+            lc = LineCollection(lines, alpha=alpha[i], linewidth=lw[i],
+                                linestyle=linestyle, zorder=zorder,
+                                color=color)
+            ax.add_collection(lc)
+
+        if label is not None:
+            h = Line2D([], [], label=label, alpha=alpha[0], linewidth=lw[0],
+                       linestyle=linestyle, color=color)
+            ho = ax.get_legend()
+            if ho:
+                h = [*ho.legendHandles, h]
+            else:
+                h = [h]
+            ax.legend(handles=h, loc='upper center',
+                      bbox_to_anchor=(0.5, 1.05))
         if boundary:
-            ax.plot(self.xbdry, self.zbdry, linetype, linewidth=lw[0],
-                    color=color, alpha=alpha[0])
+            ax.plot(self.xbdry, self.zbdry, linewidth=lw[0],
+                    linestyle=linestyle, color=color, alpha=alpha[0])
         ax.axis('equal')
         ax.axis('off')
-        if Xnorm:
-            levels = levels - self.Xpsi
         if plot_points:
             self.plot_set_points(ax=ax)
         return levels

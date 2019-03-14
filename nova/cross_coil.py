@@ -4,28 +4,131 @@ from scipy.special import ellipk, ellipe
 from amigo import geom
 from scipy.interpolate import interp1d
 from scipy.linalg import norm
+from nova.inductance.geometric_mean_radius import geometric_mean_radius
+from amigo.geom import shape
+from collections import OrderedDict
+
 
 mu_o = 4 * np.pi * 1e-7  # magnetic constant [Vs/Am]
 
 
-def green(X, Z, Xc, Zc, dXc=0, dZc=0):
-    x = np.array((X - Xc)**2 + (Z - Zc)**2)
-    m = 4 * X * Xc / ((X + Xc)**2 + (Z - Zc)**2)
-    g = np.array((Xc * X)**0.5 *
-                 ((2 * m**-0.5 - m**0.5) *
-                  ellipk(m) - 2 * m**-0.5 * ellipe(m)) / (2 * np.pi))
-    dr = np.sqrt(x)
-    # print(dXc, dZc, np.min(dr))
-    if np.min(dr) < dXc:  # self inductance + adjacent coils
-        rho = np.mean([dXc + dZc])
-        Xc = Xc * np.ones(np.shape(X))
-        index = dr < dXc  # self inductance index
-        g[index] = Xc[index] * (np.log(8 * Xc[index] / rho) - 2) / (2 * np.pi)
+def reshape(X0, Z0, X1, Z1, dX, dZ):
+    X0 = X0.reshape(-1, 1)
+    Z0 = Z0.reshape(-1, 1)
+    X1 = X1.reshape(1, -1)
+    Z1 = Z1.reshape(1, -1)
+    dX = dX.reshape(1, -1)
+    dZ = dZ.reshape(1, -1)
+    n0, n1 = np.shape(X0)[0], np.shape(X1)[1]
+    X0 = np.dot(X0, np.ones((1, n1)))
+    Z0 = np.dot(Z0, np.ones((1, n1)))
+    X1 = np.dot(np.ones((n0, 1)), X1)
+    Z1 = np.dot(np.ones((n0, 1)), Z1)
+    dX = np.dot(np.ones((n0, 1)), dX)
+    dZ = np.dot(np.ones((n0, 1)), dZ)
+    return X0, Z0, X1, Z1, dX, dZ
 
-        g[index] = Xc[index] * ((1 + 0.1137 * (rho/Xc[index])**2) *
-                                np.log(8*Xc[index]/rho) -
-                                0.0095*(rho/Xc[index])**2 - 1.75) / (2 * np.pi)
-    return g
+
+class biot_savart:
+
+    def __init__(self, points=None, coilset=None):
+        self.initalize()
+        self.add_coilset(coilset)
+
+        '''
+        self.extract_points(points)
+        self.extract_coils(coils)
+        self.shape()
+        self.gmr = geometric_mean_radius()  # lookup table of mutual gmr
+        '''
+
+    def initalize(self):
+        self.nC = 0  # coil count
+        self.coil_keys = ['x', 'z', 'dx', 'dz', 'cross_section', 'If']
+        self.coils = {}
+        for key in self.coil_keys:
+            self.coils[key] = []
+        self.coils['index'] = {}  # name-index lookup
+
+    def extract_coildata(self, coilset):
+        nC = len(coilset)
+        coilnames = [name for name in coilset]
+        coildata = {}
+        for var in self.coil_keys:
+            coildata[var] = [coilset[name][var] for name in coilset]
+        return nC, coilnames, coildata
+
+    def add_coilset(self, coilset):
+        # appends coilset data to self.coils
+        if coilset:
+            nC, coilnames, coildata = self.extract_coildata(coilset)
+            for var in self.coil_keys:
+                self.coils[var].append(coildata[var])
+            for index, name in enumerate(coilnames):
+                self.coils['index'] = self.nC + index
+            self.nC += nC
+
+    def update_coilset(self, coilset):
+        # search self.coils['index'], insert or append
+        self.coilset = coilset
+        #self.extract_coils(self.coilset['subcoil'])
+
+    def extract_points(self, points):
+        self.shp = shape(points[0])  # shape of requested points
+        self.points = {'x': self.shp.shape(points[0], (-1, 1)),
+                       'z': self.shp.shape(points[1], (-1, 1))}
+        self.nP = len(self.points['x'])
+
+    def shape(self):
+        for var in self.points:
+            self.points[var] = np.dot(self.points[var], np.ones((1, self.nC)))
+        for var in self.coils:
+            self.coils[var] = np.dot(np.ones((self.nP, 1)), self.coils[var])
+
+    def offset(self):
+        self.dL = np.array([self.coils['x'] - self.points['x'],
+                            self.coils['z'] - self.points['z']])
+        self.dR = np.linalg.norm(self.dL, axis=0)
+        factor = self.gmr.evaluate()
+
+        Xp, Zp = self.points['x'], self.points['z']
+
+    def calculate(self):
+        m = 4 * X0 * X1 / ((X0 + X1)**2 + (Z0 - Z1)**2)
+        flux = np.array((X0 * X1)**0.5 *
+                        ((2 * m**-0.5 - m**0.5) *
+                         ellipk(m) - 2 * m**-0.5 * ellipe(m)))
+
+
+def green(X0, Z0, X1, Z1, dX=0, dZ=0, cross_section='skin'):
+    X0, Z0, X1, Z1, dX, dZ = reshape(X0, Z0, X1, Z1, dX, dZ)
+    dL = np.array([X1 - X0, Z1 - Z0])
+    dR = np.linalg.norm(dL, axis=0)
+    gmr = geometric_mean_radius().evaluate(abs(dL[0]/dX), abs(dL[1]/dZ))
+    alpha = (gmr - 1) / 2
+    X0 -= alpha * dL[0]
+    X1 += alpha * dL[0]
+    Z0 -= alpha * dL[1]
+    Z1 += alpha * dL[1]
+    m = 4 * X0 * X1 / ((X0 + X1)**2 + (Z0 - Z1)**2)
+    flux = np.array((X0 * X1)**0.5 *
+                    ((2 * m**-0.5 - m**0.5) *
+                     ellipk(m) - 2 * m**-0.5 * ellipe(m)))
+    if np.array(dR < 0.1*dX).any():  # self inductance
+        rho = (dX + dZ) / 4  # turn radius
+        index = dR < 0.1*dX  # self inductance index
+        if cross_section == 'circle':
+            self_gmr = rho[index]*np.exp(-0.25)  # self-circle gmr
+        elif cross_section == 'square':
+            self_gmr = 2*rho[index]*0.447049  # self-square gmr
+        elif cross_section == 'skin':
+            self_gmr = rho[index]
+        # Maxwell self inductance
+        r = X0[index]
+        flux[index] = r * ((1 + 3*self_gmr**2 / (16*r**2)) *
+                           np.log(8*r / self_gmr) -
+                           (2 + self_gmr**2 / (16*r**2)))
+    return mu_o * flux
 
 
 def green_field(X, Z, Xc, Zc):
@@ -36,15 +139,20 @@ def green_field(X, Z, Xc, Zc):
     I2 = 4 / a**3 * ellipe(m) / (1 - m)
     A = (Z - Zc)**2 + X**2 + Xc**2
     B = -2 * X * Xc
-    field[0] = Xc / (4 * np.pi) * (Z - Zc) / B * (I1 - A * I2)
-    field[1] = Xc / (4 * np.pi) * ((Xc + X * A / B) * I2 - X / B * I1)
-    return field
+    field[0] = Xc / (2 * np.pi) * (Z - Zc) / B * (I1 - A * I2)
+    field[1] = Xc / (2 * np.pi) * ((Xc + X * A / B) * I2 - X / B * I1)
+    return mu_o * field
 
 
 def add_Pcoil(x, z, coil):
+    shp = shape(x)
+    x = shp.shape(x, (-1, 1))
+    z = shp.shape(z, (-1, 1))
     xc, zc, If = coil['x'], coil['z'], coil['If']
-    dx, dz = coil['dx'], coil['dz']
-    return mu_o * If * green(x, z, xc, zc, dXc=dx, dZc=dz)
+    dx, dz = np.float64(coil['dx']), np.float64(coil['dz'])
+    psi = If * green(x, z, xc, zc, dX=dx, dZ=dz)
+    psi = shp.reshape(psi)
+    return psi
 
 
 def add_Bcoil(x, z, coil):

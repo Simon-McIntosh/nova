@@ -139,36 +139,33 @@ class EQ(object):
 
     def select_control_coils(self):
         self.ccoil = {'vertical': {}, 'horizontal': {}}
-        self.ccoil['vertical'] = np.zeros((self.coilset['index']['PF']['n']),
-                                          dtype=[('name', '|S10'),
-                                                 ('value', 'float'),
-                                                 ('Io', 'float'),
-                                                 ('Ip', 'float'),
-                                                 ('Ii', 'float'),
-                                                 ('z', 'float')])
-        self.ccoil['horizontal'] = np.zeros((self.coilset['index']['CS']['n']),
-                                            dtype=[('name', '|S10'),
-                                                   ('value', 'float'),
-                                                   ('Io', 'float'),
-                                                   ('Ip', 'float'),
-                                                   ('Ii', 'float'),
-                                                   ('z', 'float')])
+        PF = self.coilset.coil.loc[self.coilset.coil['part'] == 'PF', :]
+        CS = self.coilset.coil.loc[self.coilset.coil['part'] == 'CS', :]
+        self.ccoil['vertical'] = np.zeros(
+                PF.nC, dtype=[('name', '|S10'), ('value', 'float'),
+                              ('Io', 'float'), ('Ip', 'float'),
+                              ('Ii', 'float'), ('z', 'float')])
+        self.ccoil['horizontal'] = np.zeros(
+                CS.nC, dtype=[('name', '|S10'), ('value', 'float'),
+                              ('Io', 'float'), ('Ip', 'float'),
+                              ('Ii', 'float'), ('z', 'float')])
         nV, nH = -1, -1
-        for name in self.coilset['coil']:
-            x = self.coilset['coil'][name]['x']
-            z = self.coilset['coil'][name]['z']
+        index = list(PF.index) + list(CS.index)
+        for name in index:
+            x = self.coilset.coil.at[name, 'x']
+            z = self.coilset.coil.at[name, 'z']
             field = cc.green_field(self.sf.Mpoint[0], self.sf.Mpoint[1], x, z)
-            if name in self.coilset['index']['PF']['name']:
+            if name in PF.index:
                 nV += 1
                 direction, index, iB = 'vertical', nV, 0
-            elif name in self.coilset['index']['CS']['name']:
+            elif name in CS.index:
                 nH += 1
                 direction, index, iB = 'horizontal', nH, 1
             self.ccoil[direction]['name'][index] = name
-            self.ccoil[direction]['z'][index] = self.coilset['coil'][name]['z']
+            self.ccoil[direction]['z'][index] = z
             self.ccoil[direction]['value'][index] = field[iB]
-            self.ccoil[direction]['Io'][index] =\
-                self.coilset['coil'][name]['It']
+            self.ccoil[direction]['Io'][index] = \
+                self.coilset.coil.at[name, 'It']
         for direction in ['vertical', 'horizontal']:
             self.ccoil[direction] = np.sort(self.ccoil[direction],
                                             order='value')  # order='z'
@@ -179,7 +176,6 @@ class EQ(object):
         for index in range(2):
             self.ccoil['active'].append(
                 self.ccoil['horizontal']['name'][index].decode())
-        # self.ccoil['rtarget'] = self.sf.shape['R']
 
     def indx(self, i, j):
         return i * self.nz + j
@@ -218,12 +214,10 @@ class EQ(object):
 
     def psi_ex(self):
         psi = np.zeros(self.Ne)
-        for name in self.coilset['subcoil'].keys():
-            x = self.coilset['subcoil'][name]['x']
-            z = self.coilset['subcoil'][name]['z']
-            If = self.coilset['subcoil'][name]['If']
-            if not self.ingrid(x, z):
-                psi += cc.mu_o * If * cc.green(self.Re, self.Ze, x, z)
+        x, z, If = self.coilset.subcoil.loc[:, ['x', 'z', 'If']].values.T
+        for i, name in enumerate(self.coilset.subcoil.index):
+            if not self.ingrid(x[i], z[i]):
+                psi += cc.mu_o * If[i] * cc.green(self.Xe, self.Ze, x[i], z[i])
         self.psi_external = psi
         return psi
 
@@ -232,23 +226,23 @@ class EQ(object):
         psi_core = self.solve()  # solve with zero edgeBC
         dgdn = self.boundary_normal(psi_core)
         psi = np.zeros(self.Ne)
-        for i, (x, z) in enumerate(zip(self.Re, self.Ze)):
-            circ = -cc.green(x, z, self.Rb, self.Zb) * dgdn / self.Rb
+        for i, (x, z) in enumerate(zip(self.Xe, self.Ze)):
+            circ = -cc.green(x, z, self.Xb, self.Zb) * dgdn / self.Xb
             psi[i] = np.trapz(circ, self.Lb)
         self.psi_e_plasma = psi
         return psi
 
     def psi_edge(self):
         psi = np.zeros(self.Ne)
-        for i, (x, z) in enumerate(zip(self.Re, self.Ze)):
+        for i, (x, z) in enumerate(zip(self.Xe, self.Ze)):
             psi[i] = self.sf.Ppoint((x, z))
         return psi
 
     def coil_core(self):
-        for name in self.coilset['subcoil'].keys():
-            x = self.coilset['subcoil'][name]['x']
-            z = self.coilset['subcoil'][name]['z']
-            If = self.coilset['subcoil'][name]['If']
+        for name in self.coilset.subcoil.index:
+            x = self.coilset.subcoil.at[name, 'x']
+            z = self.coilset.subcoil.at[name, 'z']
+            If = self.coilset.subcoil.at[name, 'If']
             if self.ingrid(x, z):
                 i = np.argmin(np.abs(x - self.x))
                 j = np.argmin(np.abs(z - self.z))
@@ -315,25 +309,17 @@ class EQ(object):
 
     def set_plasma(self):
         self.plasma = {}
-        Rp, Zp = np.zeros(self.Nplasma), np.zeros(self.Nplasma)
-        Ipl, Np = np.zeros(self.Nplasma), np.zeros(self.Nplasma)
+        Xp, Zp = np.zeros(self.Nplasma), np.zeros(self.Nplasma)
+        Ipl = np.zeros(self.Nplasma)
         for index in range(self.Nplasma):
             i, j = self.ij(self.plasma_index[index])
             x, z = self.x[i], self.z[j]
             Ic = -self.dA * self.b[self.plasma_index[index]] / (self.mu_o * x)
-            Rp[index], Zp[index] = x, z
+            Xp[index], Zp[index] = x, z
             Ipl[index] = Ic
-            Np[index] = 1
         index = -1
-        for x, z, If, n in zip(Rp, Zp, Ipl, Np):
-            if n > 0:
-                index += 1
-                self.plasma['Plasma_{:1.0f}'.format(index)] = \
-                    {'x': x, 'z': z, 'dx': self.dx * np.sqrt(n),
-                     'dz': self.dz * np.sqrt(n),
-                     'rc': np.sqrt(n * self.dx**2 + n * self.dz**2) / 2,
-                     'If': If, 'index': index}
-        self.coilset['plasma'] = self.plasma
+        self.coilset.plasma.add_coil(Xp, Zp, self.dx, self.dz, If=Ipl,
+                                     name='Pl', part='plasma')
 
     def get_plasma(self):
         self.plasma_core()
@@ -380,16 +366,16 @@ class EQ(object):
         if 'It' in kwargs:
             It = kwargs['It']
         elif 'factor' in kwargs:
-            It = (1 + kwargs['factor']) * self.coilset['coil'][name]['Io']
+            It = (1 + kwargs['factor']) * self.coilset.coil.at[name, 'Io']
         else:
             errtxt = '\n'
             errtxt += 'kw input \'It\' or \'factor\'\n'
             raise ValueError(errtxt)
-        self.coilset['coil'][name]['It'] = It
-        Nf = self.coilset['coil'][name]['Nf']
+        self.coilset.coil.at[name, 'It'] = It
+        Nf = self.coilset.coil.at[name, 'Nf']
         for subcoil in range(Nf):
             subname = '{}_{:1.0f}'.format(name, subcoil)
-            self.coilset['subcoil'][subname]['If'] = It / Nf
+            self.coilset.subcoil.at[subname, 'If'] = It / Nf
 
     def reset_control_current(self):
         self.cc = 0
@@ -412,7 +398,7 @@ class EQ(object):
         '''
         plt.plot(self.sf.xbdry, self.sf.zbdry)
         Mflag = False
-        self.Zerr, self.Rerr = np.zeros(Nmax), np.zeros(Nmax)
+        self.Zerr, self.Xerr = np.zeros(Nmax), np.zeros(Nmax)
         self.dIc = np.zeros((Nmax, 2))
         self.reset_control_current()
         to = time()
@@ -422,9 +408,8 @@ class EQ(object):
             self.run()
             # self.get_Mpsi()  # high res
             self.Zerr[i] = self.sf.Mpoint[1] - self.ztarget
-            # self.Rerr[i] = -(self.sf.shape['X'] - self.rtarget)
-            # print(i, self.sf.Mpoint, self.Rerr[i], self.Zerr[i])
-            # print(self.coilset['coil']['PF2']['It'])
+            # self.Xerr[i] = -(self.sf.shape['X'] - self.rtarget)
+            # print(i, self.sf.Mpoint, self.Xerr[i], self.Zerr[i])
             if i > 1:
                 if abs(self.Zerr[i - 1]) <= Zerr and abs(self.Zerr[i]) <= Zerr:
                     if Mflag:
@@ -432,7 +417,7 @@ class EQ(object):
                         progress += 'z {:1.3f}m'.format(self.ztarget)
                         progress += '{:+1.3f}mm '.format(1e3 * self.Zerr[i])
                         # progress += 'X {:1.3f}m'.format(self.sf.shape['X'])
-                        # progress += '{:+1.3f}mm '.format(1e3 * self.Rerr[i])
+                        # progress += '{:+1.3f}mm '.format(1e3 * self.Xerr[i])
                         progress += 'Ipf {:1.3f}KA '.format(
                             1e-3 * self.Ic['v'])
                         progress += 'Ics {:1.3f}MA '.format(
@@ -456,7 +441,7 @@ class EQ(object):
                 self.dIc[i, index] = dIc
             '''
             for index in range(1):
-                dIc = self.PID(self.Rerr[i], 'horizontal',
+                dIc = self.PID(self.Xerr[i], 'horizontal',
                                index, kp=0.5 * kp, ki=2 * ki)
                 self.Ic['h'] += dIc
             '''
@@ -483,7 +468,7 @@ class EQ(object):
         for field in ['horizontal', 'vertical']:
             for i in range(len(self.ccoil[field]['name'])):
                 name = self.ccoil[field]['name'][i].decode()
-                self.ccoil[field]['Io'][i] = self.coilset['coil'][name]['It']
+                self.ccoil[field]['Io'][i] = self.coilset.coil.at[name, 'It']
     '''
 
     def gen_opp(self, z=None, Zerr=5e-4, Nmax=100, **kwargs):
@@ -631,7 +616,7 @@ class EQ(object):
         Z[self.nx:self.nx + self.nz] = self.z
         Z[self.nx + self.nz:2 * self.nx + self.nz] = self.z[-1]
         Z[2 * self.nx + self.nz:2 * self.nx + 2 * self.nz] = self.z[::-1]
-        self.Re, self.Ze, self.Ne = X, Z, len(X)
+        self.Xe, self.Ze, self.Ne = X, Z, len(X)
 
     def boundary(self):
         X = np.zeros(2 * (self.nx - 1) + 2 * (self.nz - 1))
@@ -664,7 +649,7 @@ class EQ(object):
             L[2 * self.nx + self.nz - 4] + (self.dx + self.dz) / 2 +\
             np.cumsum(self.dz * np.ones(self.nz - 1)) - self.dz
         L[-1] += self.dz / 2
-        self.Rb, self.Zb, self.dL, self.Lb = X, Z, dL, L
+        self.Xb, self.Zb, self.dL, self.Lb = X, Z, dL, L
 
     def boundary_normal(self, psi):
         dgdn = np.zeros(2 * (self.nx - 1) + 2 * (self.nz - 1))

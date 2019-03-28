@@ -6,7 +6,7 @@ from nep.DINA.scenario import scenario
 from amigo import geom
 import nova.cross_coil as cc
 from nova.streamfunction import SF
-from nova.coilclass import coilclass
+from nova.coil_class import CoilClass
 
 
 class transient(inductance):

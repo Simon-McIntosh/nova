@@ -42,8 +42,7 @@ class INV(object):
         self.initalise_limits()
         self.offset = offset  # offset coils from outer TF loop
         if tf is not None:
-            dx = [self.coilset['coil'][name]['dx'] for
-                  name in self.coilset['coil']]
+            dx = self.coilset.coil.loc[:, 'dx']
             self.norm = np.sqrt(2)*np.mean(dx)/2
             self.tf.loop_interpolators(offset=self.offset)
             self.unwrap()  # store relitive coil posions around TF
@@ -206,7 +205,7 @@ class INV(object):
         # self.nPF = len(self.PFcoils)
         # self.nCS = len(self.CScoils)
         self.coil = {'active': OrderedDict(), 'passive': OrderedDict()}
-        names = list(self.coilset['coil'].keys())
+        names = self.coilset.coil.index
         self.all_coils = names.copy()
         self.adjust_coils = names.copy()
         names = np.append(names, 'Plasma')
@@ -225,20 +224,22 @@ class INV(object):
 
     def initalise_current(self):
         adjust_coils = self.coil['active'].keys()
+        It = self.coilset.coil.loc[adjust_coils, 'It']  # AT
+        self.If = It / self.coilset.coil.loc[adjust_coils, 'Nf']
+        self.If /= self.Iscale
+        '''
         self.If = np.zeros((len(adjust_coils)))
         for i, name in enumerate(adjust_coils):
             self.If[i] = self.coilset['subcoil'][name + '_0']['If']
             self.If[i] /= self.Iscale
+        '''
         self.alpha = np.zeros(self.nC)  # initalise alpha
 
     def propogate_cross_section(self):
         for state in self.coil:
             for name in self.coil[state]:
                 if name in self.coilset['coil']:
-                    if 'cross_section' in self.coilset['coil'][name]:
-                        CS = self.coilset['coil'][name]['cross_section']
-                    else:
-                        CS = 'circle'
+                    CS = self.coilset.coil.at[name, 'cross_section']
                     self.coil[state][name]['cross_section'] = CS
 
     def update_coils(self, plot=False, regrid=False):
@@ -270,7 +271,7 @@ class INV(object):
             Nf = self.coilset['coil'][name]['Nf']
             Gi[i, :] = np.sum(self.G[Ncount:Ncount+Nf, :], axis=0)
             Ncount += Nf
-        Gi /= self.Iscale  # ensure coil currents [A]
+        Gi /= self.Iscale  # coil currents [A]
         turns = np.array([self.coilset['coil'][name]['Nt']
                           for name in self.coil['active']])
         turns = np.dot(turns.reshape(-1, 1), turns.reshape(1, -1))

@@ -6,6 +6,7 @@ from amigo import geom
 import pandas as pd
 from math import isclose
 from amigo.time import clock
+from nova.coil_class import CoilClass
 
 
 class force_field(object):
@@ -15,13 +16,11 @@ class force_field(object):
         self.coilset = coilset  # requires update
         self.Iscale = Iscale  # current units (MA)
         self.passive_coils = kwargs.get('passive_coils', ['Plasma'])
-        active_coils = kwargs.get('active_coils',
-                                  list(self.coilset['coil'].keys()))
+        active_coils = kwargs.get('active_coils', self.coilset.coil.index)
         self.active_coils = [name for name in active_coils if name not in
                              self.passive_coils]
         self.nC = len(self.active_coils)  # number of active coils
-        self.nC_filament = np.sum([self.coilset['coil'][name]['Nf']
-                                   for name in self.active_coils])
+        self.nC_filament = self.coilset.coil.loc[self.active_coils, 'Nf'].sum()
         self.nP = len(self.passive_coils)  # number of active coils
         self.initalize_force_field(multi_filament=multi_filament)
         self.set_current()
@@ -40,15 +39,18 @@ class force_field(object):
             errtxt = 'no force field\n'
             errtxt += 'set_force_field\n'
             raise ValueError(errtxt)
-        if self.coilset['index']['PF']['n'] == 0:
+        if np.sum(cc.coilset.coil['part'] == 'PF') == 0:
             errtxt = 'PF_coils empty\n'
             raise ValueError(errtxt)
-        if self.coilset['index']['CS']['n'] == 0:
+        if np.sum(cc.coilset.coil['part'] == 'CS') == 0:
             errtxt = 'CS_coils empty\n'
             raise ValueError(errtxt)
 
     def initalize_force_field(self, multi_filament=True, **kwargs):
-        if 'force' not in self.coilset:
+        if self.coilset.force is None:
+            self.set_force_field(state='both', multi_filament=multi_filament)
+
+        else:
             self.coilset['force'] = {}
         force = ['Fa', 'Fa_filament', 'Fp', 'Fp_filament']
         if np.array([key in self.coilset['force'] for key in force]).all():
@@ -61,11 +63,11 @@ class force_field(object):
                 err_txt += 'incompatible with number of'
                 err_txt += 'active {} coils'.format(self.nC)
                 raise IndexError(err_txt)
-        else:
-            self.set_force_field(state='both', multi_filament=multi_filament)
 
     def set_force_field(self, state='both', multi_filament=True):
-        # [Ic]T([Fa][Ic]+[Fp]) = F
+        '''
+        F = [Ic]T([Factive][Ic]+[Fpassive])
+        '''
         self.force_field_active = True
         if state == 'both' or state == 'active':
             self.set_active_force_field(multi_filament=multi_filament)
@@ -426,14 +428,16 @@ if __name__ is '__main__':  # test functions
     setup = Setup('SN_3PF_18TF')
 
     sf = SF(filename=setup.filename)
-    pf = PF(sf.eqdsk)
-    pf.mesh_coils(dCoil=0.75)
-    eq = EQ(pf.coilset, sf.eqdsk, sigma=0,
-            boundary=sf.eq_boundary(expand=0.25), n=1e3)
-    eq.get_plasma()
-    # eq.gen_opp()
 
-    ff = force_field(pf.coilset, multi_filament=True)
+    cc = CoilClass(eqdsk=sf.eqdsk, dCoil=0.25)
+
+    cc.plot()
+
+    eq = EQ(cc.coilset, sf.eqdsk, sigma=0,
+            boundary=sf.eq_boundary(expand=0.25), n=1e3)
+
+    ff = force_field(cc.coilset, multi_filament=True)
+    '''
     Fcoil = ff.get_force()
 
     ff.plot()
@@ -442,4 +446,5 @@ if __name__ is '__main__':  # test functions
     pf.plot(subcoil=True, label=False, plasma=True, current=False)
     plt.axis('equal')
     plt.axis('off')
+    '''
 

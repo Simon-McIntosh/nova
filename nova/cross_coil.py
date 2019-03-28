@@ -6,10 +6,120 @@ from scipy.interpolate import interp1d
 from scipy.linalg import norm
 from nova.inductance.geometric_mean_radius import geometric_mean_radius
 from amigo.geom import shape
-from collections import OrderedDict
 
 
 mu_o = 4 * np.pi * 1e-7  # magnetic constant [Vs/Am]
+
+
+class CrossCoil:
+
+    def __init__(self, coilset):
+        self.coilset = coilset
+
+    def green_field(X, Z, Xc, Zc):
+        field = np.zeros(2)
+        a = np.sqrt((X + Xc)**2 + (Z - Zc)**2)
+        m = 4 * X * Xc / a**2
+        I1 = 4 / a * ellipk(m)
+        I2 = 4 / a**3 * ellipe(m) / (1 - m)
+        A = (Z - Zc)**2 + X**2 + Xc**2
+        B = -2 * X * Xc
+        field[0] = Xc / (2 * np.pi) * (Z - Zc) / B * (I1 - A * I2)
+        field[1] = Xc / (2 * np.pi) * ((Xc + X * A / B) * I2 - X / B * I1)
+        return mu_o * field
+
+    @staticmethod
+    def get_green_field(x, z, xi, zi, rc):
+        r_mag = np.sqrt((x - xi)**2 + (z - zi)**2)
+        if r_mag > rc:  # outside coil core
+            dfield = green_field(x, z, xi, zi)
+        else:  # inside coil core
+            dfield, B = np.zeros(2), np.zeros(2)
+            dz = (rc**2 - (x - xi)**2)**0.5  # Br
+            for i, zc in enumerate([zi - dz, zi + dz]):
+                B[i] = green_field(x, z, xi, zc)[0]
+            dfield[0] = sum(B) / 2 + (z - zi) * (B[1] - B[0]) / (2 * dz)
+            dr = (rc**2 - (z - zi)**2)**0.5  # Bz
+            for i, rc in enumerate([xi - dr, xi + dr]):
+                B[i] = green_field(x, z, rc, zi)[1]
+            dfield[1] = sum(B) / 2 + (x - xi) * (B[1] - B[0]) / (2 * dr)
+        return dfield
+
+
+    def Gtorque(self, source, sink, multi_filament, **kwargs):
+        xo, zo, dz = centroid(coil, sink)  # coil centroid
+        if multi_filament:
+            Nbundle = 1
+            Nsource = range(coil[source]['Nf'])
+            Nsink = kwargs.get('Nsink', range(coil[sink]['Nf']))
+            coil = subcoil
+        else:  # single-filament
+            Nbundle = coil[source]['Nf'] * coil[sink]['Nf']
+            Nsource, Nsink = [1], [1]
+        xG = np.zeros(4)  # xBx, xBz, cross(r, dF), sum(-zxBx)
+        for i in Nsource:
+            if multi_filament:  # source
+                source_strand = f'{source}_{i}'
+            else:
+                source_strand = f'{source}'
+            xi = coil[source_strand]['x']
+            zi = coil[source_strand]['z']
+            for j in Nsink:
+                if multi_filament:  # sink
+                    sink_strand = f'{sink}_{j}'
+                else:
+                    sink_strand = f'{sink}'
+                x = coil[sink_strand]['x']
+                z = coil[sink_strand]['z']
+                rc = coil[sink_strand]['rc']
+                dfield = get_green_field(x, z, xi, zi, rc)
+                dxG = Nbundle * x * dfield  # strand delta
+                xG[:2] += dxG  # field couple, xG
+                # moment about coil centroid
+                xG[2] += moment(xo, zo, x, z, dxG)
+                xG[3] += -dxG[0]*(z-zo)  # vertical crush
+        xG[3] /= dz
+        return 2*np.pi*mu_o*xG
+
+    def Btorque(coil, subcoil, plasma, passive_coils, sink, **kwargs):
+        xo, zo, dz = centroid(coil, sink)  # coil centroid
+        Csink = subcoil
+        Nsink = kwargs.get('Nsink', range(coil[sink]['Nf']))
+        xB = np.zeros(4)  # xBx, xBz, cross(r, dF)
+        for source in passive_coils:
+            if source == 'Plasma':
+                Csource = plasma
+                Nsource = range(len(Csource))
+            else:
+                Csource = subcoil
+                Nsource = range(coil[source]['Nf'])
+            for i in Nsource:
+                source_strand = source + '_{:1.0f}'.format(i)
+                xi = Csource[source_strand]['x']  # source
+                zi = Csource[source_strand]['z']
+                Ii = Csource[source_strand]['If']
+                for j in Nsink:
+                    sink_strand = sink + '_{:1.0f}'.format(j)
+                    x = Csink[sink_strand]['x']  # sink
+                    z = Csink[sink_strand]['z']
+                    rc = Csink[sink_strand]['rc']
+                    dfield = get_green_field(x, z, xi, zi, rc)
+                    dxB = Ii * x * dfield  # strand delta
+                    xB[:2] += dxB
+                    # moment about coil centroid
+                    xB[2] += moment(xo, zo, x, z, dxB)
+                    xB[3] += -dxB[0]*(z-zo)  # vertical crush
+        xB[3] /= dz
+        return 2*np.pi*mu_o*xB
+
+    @staticmethod
+    def centroid(coil, sink):
+        xo = coil[sink]['x']
+        zo = coil[sink]['z']
+        dz = coil[sink]['dz']
+        return xo, zo, dz
+
+
 
 
 def reshape(X0, Z0, X1, Z1, dX, dZ):
@@ -29,78 +139,27 @@ def reshape(X0, Z0, X1, Z1, dX, dZ):
     return X0, Z0, X1, Z1, dX, dZ
 
 
-class biot_savart:
+def green(X, Z, Xc, Zc, dXc=0, dZc=0):
+    x = np.array((X - Xc)**2 + (Z - Zc)**2)
+    m = 4 * X * Xc / ((X + Xc)**2 + (Z - Zc)**2)
+    g = np.array((Xc * X)**0.5 *
+                 ((2 * m**-0.5 - m**0.5) *
+                  ellipk(m) - 2 * m**-0.5 * ellipe(m)) / (2 * np.pi))
+    dr = np.sqrt(x)
+    # print(dXc, dZc, np.min(dr))
+    if np.min(dr) < dXc:  # self inductance + adjacent coils
+        rho = np.mean([dXc + dZc])
+        Xc = Xc * np.ones(np.shape(X))
+        index = dr < dXc  # self inductance index
+        g[index] = Xc[index] * (np.log(8 * Xc[index] / rho) - 2) / (2 * np.pi)
 
-    def __init__(self, points=None, coilset=None):
-        self.initalize()
-        self.add_coilset(coilset)
-
-        '''
-        self.extract_points(points)
-        self.extract_coils(coils)
-        self.shape()
-        self.gmr = geometric_mean_radius()  # lookup table of mutual gmr
-        '''
-
-    def initalize(self):
-        self.nC = 0  # coil count
-        self.coil_keys = ['x', 'z', 'dx', 'dz', 'cross_section', 'If']
-        self.coils = {}
-        for key in self.coil_keys:
-            self.coils[key] = []
-        self.coils['index'] = {}  # name-index lookup
-
-    def extract_coildata(self, coilset):
-        nC = len(coilset)
-        coilnames = [name for name in coilset]
-        coildata = {}
-        for var in self.coil_keys:
-            coildata[var] = [coilset[name][var] for name in coilset]
-        return nC, coilnames, coildata
-
-    def add_coilset(self, coilset):
-        # appends coilset data to self.coils
-        if coilset:
-            nC, coilnames, coildata = self.extract_coildata(coilset)
-            for var in self.coil_keys:
-                self.coils[var].append(coildata[var])
-            for index, name in enumerate(coilnames):
-                self.coils['index'] = self.nC + index
-            self.nC += nC
-
-    def update_coilset(self, coilset):
-        # search self.coils['index'], insert or append
-        self.coilset = coilset
-        #self.extract_coils(self.coilset['subcoil'])
-
-    def extract_points(self, points):
-        self.shp = shape(points[0])  # shape of requested points
-        self.points = {'x': self.shp.shape(points[0], (-1, 1)),
-                       'z': self.shp.shape(points[1], (-1, 1))}
-        self.nP = len(self.points['x'])
-
-    def shape(self):
-        for var in self.points:
-            self.points[var] = np.dot(self.points[var], np.ones((1, self.nC)))
-        for var in self.coils:
-            self.coils[var] = np.dot(np.ones((self.nP, 1)), self.coils[var])
-
-    def offset(self):
-        self.dL = np.array([self.coils['x'] - self.points['x'],
-                            self.coils['z'] - self.points['z']])
-        self.dR = np.linalg.norm(self.dL, axis=0)
-        factor = self.gmr.evaluate()
-
-        Xp, Zp = self.points['x'], self.points['z']
-
-    def calculate(self):
-        m = 4 * X0 * X1 / ((X0 + X1)**2 + (Z0 - Z1)**2)
-        flux = np.array((X0 * X1)**0.5 *
-                        ((2 * m**-0.5 - m**0.5) *
-                         ellipk(m) - 2 * m**-0.5 * ellipe(m)))
+        g[index] = Xc[index] * ((1 + 0.1137 * (rho/Xc[index])**2) *
+                                np.log(8*Xc[index]/rho) -
+                                0.0095*(rho/Xc[index])**2 - 1.75) / (2 * np.pi)
+    return g
 
 
-def green(X0, Z0, X1, Z1, dX=0, dZ=0, cross_section='skin'):
+def green_mod(X0, Z0, X1, Z1, dX=0, dZ=0, cross_section='skin'):
     X0, Z0, X1, Z1, dX, dZ = reshape(X0, Z0, X1, Z1, dX, dZ)
     dL = np.array([X1 - X0, Z1 - Z0])
     dR = np.linalg.norm(dL, axis=0)

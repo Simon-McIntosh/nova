@@ -337,19 +337,17 @@ class scenario(pythonIO):
         dCoil = [self.dCoil/np.sqrt(2)**i for i in range(nlevel)]
         self.coilset = {}
         for i, dC in enumerate(dCoil):
-            f = '' if i == 0 else '_' + i*'f'
-            self.coilset['split'+f] = self.load_coil(dC, VS, joinCS=False)
-            self.coilset['link'+f] = self.load_coil(dC, VS, joinCS=True)
+            self.coilset[f'L{i}'] = self.load_coil(dC, VS)
 
-    def load_coil(self, dCoil, VS, joinCS=True):
-        pf = PFgeom(VS=VS, dCoil=dCoil).pf
-        if joinCS:
-            pf.join_coils('CS1', ['CS1L', 'CS1U'])
-        coilset = pf.coilset
+    def load_coil(self, dCoil, VS):
+        cc = PFgeom(VS=VS, dCoil=dCoil).cc
+        coilset = cc.coilset
+        '''
         coilset['mesh'] = {'dCoil': dCoil}
         coilset['force'] = {'update_passive': True,
                             'update_active': False}  # defaults
         self.load_force(coilset)  # append interaction matrices
+        '''
         return coilset
 
     def load_boundary(self):
@@ -1203,70 +1201,8 @@ if __name__ is '__main__':
 
     scn = scenario(read_txt=False)
 
-    # scn.load_file(folder='15MA DT-DINA2017-04_v1.2')
-    # scn.load_file(folder='15MA H-DINA2017-05')
-    #exclude = ['15MA DT-DINA2008-01', '15MA DT-DINA2012-01',
+    coilset = scn.load_coil(0.5, True, joinCS=True)
 
-    #'15MA DT-DINA2012-03',
-    #'15MA DT-DINA2012-05', '15MA DT-DINA2018-05_v1.1']
+    # scn.load_file(folder='10MA D-DINA2019-02', read_txt=False)
 
 
-    scn.load_file(folder='10MA D-DINA2019-02', read_txt=False)
-    # scn.update_scenario(t=100)
-    # scn.update_psi(plot=True, current='AT', n=5e3)
-
-
-    scn.compare_force(title=True, Nova=True)
-    # scn.compare()
-    #scn.load_file(folder='15MA DT-DINA2014-01', read_txt=False)
-
-
-    #scn.read_data3(plot=True)
-
-
-    #scn.update_scenario()
-    #scn.update_psi(plot=True, current='AT')
-    #scn.operate(plot=True)
-
-    #scn.hip.get_peaks(plot=True)
-    '''
-    scn.update_scenario()
-    scn.update_psi(plot=True, current='AT')
-    '''
-
-    # scn.update_scenario(150)
-    # scn.update_psi(n=5e3, plot=True, current='AT')
-
-    '''
-
-    for name in scn.pf.coilset['coil']:
-        print(name, scn.pf.coilset['coil'][name]['It'])
-
-
-    scn.load_functions('split')
-    # print(scn.pf.coilset['subcoil'])
-
-    for name in scn.pf.coilset['coil']:
-        print(name, scn.pf.coilset['coil'][name]['It'])
-
-    scn.update_psi(n=5e3, plot=True)
-    '''
-
-
-
-    # scn.load_plasma(frame_index=100, plot=True)
-    # scn.plot_currents()
-    #scn.hip.plot_timeseries()
-    #scn.hip.plot_peaks()
-    # scn.load_VS3(n=100, plot=True)
-
-    '''
-    # It = scn.get_current(ind, VS3=False)  # get coil currents (no VS3)
-    #scn.plot_currents()
-
-    scn.load_plasma()
-    scn.pf.coil['upperVS']['It'] = -60e3
-    scn.pf.coil['lowerVS']['It'] = 60e3
-    scn.plot_plasma(scn.flattop_index[-1])
-    # scn.load_coils(plot=True)
-    '''

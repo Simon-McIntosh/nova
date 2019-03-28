@@ -402,7 +402,8 @@ if __name__ == '__main__':
 
     pl = read_plasma('disruptions', Ip_scale=1, read_txt=True)
 
-    Ivs3_data = pl.Ivs3_single(0, plot=True, discharge='LTC')[1]
+
+    Ivs3_data = pl.Ivs3_single(10, plot=False, discharge='LTC')[1]
     pl.get_vs3_trip(plot=True)
 
 

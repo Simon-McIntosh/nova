@@ -99,8 +99,8 @@ class scenario(pythonIO):
             self.save_pickle(filepath, attributes)
         else:
             self.load_pickle(filepath)
-        self.set_limits()
-        self.loadCScurrents()
+        #self.set_limits()
+        #self.loadCScurrents()
 
     def load_coilset(self, read_txt=False, **kwargs):
         dCoil = kwargs.get('dCoil', self.dCoil)
@@ -115,11 +115,12 @@ class scenario(pythonIO):
             self.load_pickle(filepath)
 
     def initalize_functions(self):
-        self.pf = PF()  # create bare pf coil instance
+        # self.pf = PF()  # create bare pf coil instance
         self.sf = SF()  # create bare sf instance
 
     def load_functions(self, setname='link'):
         self.setname = setname
+        '''
         self.pf(self.coilset[self.setname])
         if setname != self.setname:
             self.update_coilset()
@@ -130,6 +131,7 @@ class scenario(pythonIO):
         self.inv = INV(self.coilset[self.setname], boundary='sf')
         self.inv.sf = self.sf  # link sf instance
         self.inv.ff = self.ff  # link ff instance
+        '''
 
     def read_file(self, folder, file_type='txt', dCoil=0.5, verbose=True):
         if verbose:
@@ -339,7 +341,7 @@ class scenario(pythonIO):
         for i, dC in enumerate(dCoil):
             self.coilset[f'L{i}'] = self.load_coil(dC, VS)
 
-    def load_coil(self, dCoil, VS):
+    def load_coil(self, dCoil, VS=True):
         cc = PFgeom(VS=VS, dCoil=dCoil).cc
         coilset = cc.coilset
         '''
@@ -655,6 +657,7 @@ class scenario(pythonIO):
                     It[coil] = self.Icoil[coil][-index]
                 else:  # time value
                     It[coil] = 1e3*self.fun['I'+coil.lower()](index)
+        print(self.cc.coilset)
         if 'CS1' in It and 'CS1' not in self.pf.coilset['coil']:
             # split central pair
             for coil in ['CS1L', 'CS1U']:
@@ -954,7 +957,7 @@ class scenario(pythonIO):
         if ax is None:
             ax = plt.subplots(1, 1)[1]
         if not hasattr(self, 'opp_index'):
-            mask=False
+            mask = False
         else:
             index = self.opp_index[1]  # mode index
         if mask:
@@ -1200,8 +1203,12 @@ class scenario(pythonIO):
 if __name__ is '__main__':
 
     scn = scenario(read_txt=False)
+    scn.load_coilset(read_txt=False)
 
-    coilset = scn.load_coil(0.5, True, joinCS=True)
+    print(scn.coilset['L1'].coil)
+
+
+    #coilset = scn.load_coil(0.5, VS=True)
 
     # scn.load_file(folder='10MA D-DINA2019-02', read_txt=False)
 

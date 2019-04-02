@@ -20,9 +20,8 @@ class CoilFrame(pd.DataFrame):
     CoilFrame instance inheritance from Pandas DataFrame
     Inspiration taken from GeoPandas https://github.com/geopandas
     '''
-    _metadata = ['_current_column', '_required_columns',
-                 '_additional_columns', '_default_attributes',
-                 '_integer_columns']
+    _metadata = ['_required_columns', '_additional_columns',
+                 '_default_attributes', '_integer_columns']
 
     def __init__(self, *args, **kwargs):
         self._initalize_instance_metadata()
@@ -30,13 +29,11 @@ class CoilFrame(pd.DataFrame):
         super().__init__(*args, **kwargs)
 
     def _initalize_instance_metadata(self):
-        # current column label used in current calculation
-        self._current_column = ''
         # required input *args
         self._required_columns = ['x', 'z', 'dx', 'dz']
         # additional input via **kwargs
         self._additional_columns = ['cross_section', 'patch', 'part']
-        self._default_attributes = {'Ic': 0, 'It': 0, 'If': 0,
+        self._default_attributes = {'Ic': 0, 'It': 0,
                                     'm': None, 'R': 0,
                                     'Nt': 1, 'Nf': 1, 'material': None,
                                     'cross_section': 'square',
@@ -73,16 +70,22 @@ class CoilFrame(pd.DataFrame):
         return CoilSeries
 
     @property
-    def current(self):
-        if self._current_column not in self:
-            raise AttributeError(f'\ncurrent_column: {self._current_column}\n'
-                                 'not present in CoilFrame.columns:\n'
-                                 f'{self.columns}')
-        return self[self._current_column]
+    def turn_current(self):
+        return self['It']
 
-    @current.setter
-    def current(self, column):
-        self._current_column = column
+    @turn_current.setter
+    def turn_current(self, It):
+        self['It'] = It  # turn-current [A.turn]
+        self['Ic'] = self['It'] / self['Nt']  # conductor current [A]
+
+    @property
+    def conductor_current(self):
+        return self['Ic']
+
+    @conductor_current.setter
+    def conductor_current(self, Ic):
+        self['Ic'] = Ic
+        self['It'] = self['Ic'] * self['Nt']
 
     def _get_coil_number(self):
         return len(self.index)
@@ -215,21 +218,24 @@ class CoilSet:
         subcoil: a Pandas DataFrame containig all subcoil data
         plasma: a Pandas DataFrame containing plasma filaments
 
-        inductance = {coil: M_coil, coil_o: Mo_coil, subcoil: M_subcoil}
-
         matrix: a dictionary of force interaction matrices stored as dataframes
-        matrix = {inductance: {coil: M, coil_o: M, subcoil: M}
-
-                 {force: {coil: {Fx, Fz, xFx, xFz, zFx, zFz, My},
-                          subcoil: {Fx, Fz, xFx, xFz, zFx, zFz, My}}
-                 passive: {coil: {Fx, Fz},
-                           subcoil: {Fx, Fz}}}
+        matrix['inductance'] = {Mc: line-current inductance matrix
+                                Mt: amp-turn inductance matrix}
+        matrix['coil'] = {Fx: radial force
+                          Fz: vertical force
+                          xFx: first radial moment of radial force
+                          xFz: first radial moment of vertical force
+                          zFx: first vertical moment of radial force
+                          zFz: first vertical moment of vertical force
+                          My: torque}
+        matrix['subcoil'] = {Fx, Fz, xFx, xFz, zFx, zFz, My}
+        matrix['plasma'] = {'Fx', 'Fz'}
     '''
-    def __init__(self, coil, subcoil, plasma, inductance=None):
+    def __init__(self, coil, subcoil, plasma, matrix):
         self.coil = coil
         self.subcoil = subcoil
         self.plasma = plasma
-        self.inductance = inductance
+        self.matrix = matrix
 
 
 if __name__ is '__main__':

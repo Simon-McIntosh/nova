@@ -1,4 +1,4 @@
-import nova.cross_coil as cc
+# import nova.cross_coil as cc
 from amigo.pyplot import plt, arrow_arc
 import numpy as np
 import matplotlib
@@ -11,18 +11,10 @@ from nova.coil_class import CoilClass
 
 class force_field(object):
 
-    def __init__(self, coilset, Iscale=1e6, multi_filament=True,
-                 plot=False, **kwargs):
+    def __init__(self, coilset, Iscale=1e6, plot=False, **kwargs):
         self.coilset = coilset  # requires update
-        self.Iscale = Iscale  # current units (MA)
-        self.passive_coils = kwargs.get('passive_coils', ['Plasma'])
-        active_coils = kwargs.get('active_coils', self.coilset.coil.index)
-        self.active_coils = [name for name in active_coils if name not in
-                             self.passive_coils]
-        self.nC = len(self.active_coils)  # number of active coils
-        self.nC_filament = self.coilset.coil.loc[self.active_coils, 'Nf'].sum()
-        self.nP = len(self.passive_coils)  # number of active coils
-        self.initalize_force_field(multi_filament=multi_filament)
+        self.Iscale = Iscale  # current units (1e6==MA)
+        self.initalize_force_field()
         self.set_current()
         self.initalize_F()
         if plot:
@@ -46,12 +38,9 @@ class force_field(object):
             errtxt = 'CS_coils empty\n'
             raise ValueError(errtxt)
 
-    def initalize_force_field(self, multi_filament=True, **kwargs):
-        if self.coilset.force is None:
-            self.set_force_field(state='both', multi_filament=multi_filament)
+    def initalize_force_field(self, **kwargs):
+        self.set_force_field(state='both')
 
-        else:
-            self.coilset['force'] = {}
         force = ['Fa', 'Fa_filament', 'Fp', 'Fp_filament']
         if np.array([key in self.coilset['force'] for key in force]).all():
             self.force_field_active = True
@@ -64,32 +53,32 @@ class force_field(object):
                 err_txt += 'active {} coils'.format(self.nC)
                 raise IndexError(err_txt)
 
-    def set_force_field(self, state='both', multi_filament=True):
+    def set_force_field(self, state='both'):
         '''
-        F = [Ic]T([Factive][Ic]+[Fpassive])
+        F = [Ic]T([Fcoil][Ic]+[Fplasma])
         '''
         self.force_field_active = True
         if state == 'both' or state == 'active':
-            self.set_active_force_field(multi_filament=multi_filament)
+            self.set_active_force_field()
         if state == 'both' or state == 'passive':
             self.set_passive_force_field()
 
-    def set_active_force_field(self, multi_filament=True):
+    def set_active_force_field(self):
         io = 0
-        self.Fa = np.zeros((self.nC, self.nC, 4))  # active coil
+        self.Fa = np.zeros((self.coilset.coil.nC, self.nC, 4))  # active coil
         self.Fa_filament = np.zeros((self.nC_filament,
                                      self.nC, 2))  # active filament
         tick = clock(self.nC**2, header='computing active force field')
         for i, sink in enumerate(self.active_coils):
             for j, source in enumerate(self.active_coils):
-                self.set_active_coil(i, j, source, sink, multi_filament)
+                self.set_active_coil(i, j, source, sink)
                 self.set_active_filament(io, j, source, sink)
                 tick.tock()
             io += self.coilset['coil'][sink]['Nf']
 
-    def set_active_coil(self, i, j, source, sink, multi_filament):
+    def set_active_coil(self, i, j, source, sink):
         xG = cc.Gtorque(self.coilset['coil'], self.coilset['subcoil'],
-                        source, sink, multi_filament)
+                        source, sink)
         xG *= self.Iscale**2
         self.Fa[i, j, 0] = xG[1]  # Fx
         self.Fa[i, j, 1] = -xG[0]  # Fz
@@ -423,7 +412,6 @@ if __name__ is '__main__':  # test functions
     from nova.config import Setup
     from nova.streamfunction import SF
     from nova.elliptic import EQ
-    from nova.coils import PF
 
     setup = Setup('SN_3PF_18TF')
 
@@ -436,7 +424,7 @@ if __name__ is '__main__':  # test functions
     eq = EQ(cc.coilset, sf.eqdsk, sigma=0,
             boundary=sf.eq_boundary(expand=0.25), n=1e3)
 
-    ff = force_field(cc.coilset, multi_filament=True)
+    ff = force_field(cc.coilset)
     '''
     Fcoil = ff.get_force()
 

@@ -3,6 +3,7 @@ from matplotlib.collections import PatchCollection
 from amigo.pyplot import plt
 import numpy as np
 import pandas as pd
+import matplotlib
 
 
 class CoilClass:
@@ -15,17 +16,36 @@ class CoilClass:
     def __init__(self, *args, eqdsk=None, dCoil=0):
         self.dCoil = dCoil
         self.coil = CoilFrame(
-                current_column='It',
                 additional_columns=['Ic', 'It', 'Nt', 'Nf', 'dCoil',
                                     'subcoil_index', 'mpc'],
                 default_attributes={'dCoil': dCoil})
         self.subcoil = CoilFrame(
-                current_column='If', additional_columns=['If', 'Nt', 'coil'])
-        self.plasma = CoilFrame(
-                current_column='If', additional_columns=['If'])
+                additional_columns=['Ic', 'It',  'Nt', 'coil'])
+        self.plasma = CoilFrame(additional_columns=['Ic', 'It',  'Nt'])
         self.add_coilset(*args)  # add list of coilset instances
         self.add_eqdsk(eqdsk)
-        self.matrix = None  # force interaction matrices
+        self.initalize_matrix()  # coil flux and force interaction matrices
+
+    def initalize_matrix(self):
+        '''
+        matrix: a dictionary of force interaction matrices stored as dataframes
+        '''
+        self.matrix = {}
+        self.matrix['inductance'] = {
+                'Mc': None,  # line-current inductance matrix
+                'Mt': None}  # amp-turn inductance matrix
+        self.matrix['coil'] = {
+                'Fx': None,  # radial force
+                'Fz': None,  # vertical force
+                'xFx': None,  # first radial moment of radial force
+                'xFz': None,  # first radial moment of vertical force
+                'zFx': None,  # first vertical moment of radial force
+                'zFz': None,  # first vertical moment of vertical force
+                'My': None}  # torque
+        self.matrix['subcoil'] = {
+                'Fx': None, 'Fz': None, 'xFx': None, 'xFz': None,
+                'zFx': None, 'zFz': None, 'My': None}
+        self.matrix['plasma'] = {'Fx': None, 'Fz': None}
 
     @property
     def coilset(self):
@@ -38,11 +58,18 @@ class CoilClass:
         self.plasma = coilset.plasma
         self.matrix = coilset.matrix
 
+    def add_coilset(self, *args):
+        for coilset in args:
+            for attribute in ['coil', 'subcoil', 'plasma']:
+                coil = getattr(coilset, attribute)
+                if not coil.empty:
+                    getattr(self, attribute).add_coil(coil)
+
     @staticmethod
     def check_current_label(label):
-        if label not in ['It', 'Ic', 'If']:  # turn, conductor, filament
+        if label not in ['It', 'Ic']:  # turn-current, conductor current
             raise AttributeError(f'\ncurrent label: {label}\n'
-                                 'not present in [It, Ic, If]\n')
+                                 'not present in [It, Ic]\n')
 
     @property
     def current(self, label, index=None):
@@ -50,7 +77,7 @@ class CoilClass:
         if index is None:  # return full set
             index = self.coil.index
         value = self.coil.loc[index, 'It']  # turn current
-        if label == 'If':  # filament current
+        if label == 'It':  # filament current
             value /= self.coil.loc[index, 'Nf']
         elif label == 'Ic':  # conductor current
             value /= self.coil.loc[index, 'Nf']
@@ -100,23 +127,6 @@ class CoilClass:
         frame = pd.concat([PF, CS])
         return frame
 
-    @staticmethod
-    def sort_coilset(coilset):  # order coil dict for use by inverse.py
-        index = np.append(coilset['index']['PF']['name'],
-                          coilset['index']['CS']['name'])
-        coilset['coil'] = coilset['coil'].reindex(index)
-        nPF = coilset['index']['PF']['n']
-        nCS = coilset['index']['CS']['n']
-        coilset['index']['PF']['index'] = np.arange(0, nPF)
-        coilset['index']['CS']['index'] = np.arange(nPF, nPF+nCS)
-
-    def add_coilset(self, *args):
-        for coilset in args:
-            for attribute in ['coil', 'subcoil', 'plasma']:
-                coil = getattr(coilset, attribute)
-                if not coil.empty:
-                    getattr(self, attribute).add_coil(coil)
-
     def update_metadata(self, coil, **kwargs):
         # update coilset metadata, coil in ['coil', 'subcoil', 'plasma']
         getattr(self, coil)._update_metadata(**kwargs)
@@ -141,7 +151,7 @@ class CoilClass:
     def mesh_coil(self, name, dCoil=None, part=None):
         if dCoil is None:
             dCoil = self.coil.at[name, 'dCoil']
-        It = self.coil.at[name, 'It']
+        It = self.coil.at[name, 'It']  # coil turn-current
         cross_section = self.coil.at[name, 'cross_section']
         x, z, dx, dz = self.coil.loc[name, ['x', 'z', 'dx', 'dz']]
         if dCoil is None or dCoil == 0:
@@ -162,9 +172,9 @@ class CoilClass:
         xm_ = np.reshape(xm_, (-1, 1))[:, 0]
         zm_ = np.reshape(zm_, (-1, 1))[:, 0]
         Nf = len(xm_)  # filament number
-        If = It / Nf  # filament current
         self.coil.at[name, 'Nf'] = Nf
-        frame = self.subcoil.get_frame(xm_, zm_, dx_, dz_, If=If, name=name,
+        frame = self.subcoil.get_frame(xm_, zm_, dx_, dz_,
+                                       It=It/Nf, name=name,
                                        cross_section=cross_section, coil=name,
                                        part=part)
         self.coil.at[name, 'subcoil_index'] = list(frame.index)
@@ -187,44 +197,7 @@ class CoilClass:
             raise IndexError(f'len(factor={factor}) must == 1 '
                              f'or == len(name={name})')
         for n, f in zip(name, factor):
-           self.coil.at[n, 'mpc'] = (name[0], f)
-
-
-    def inductance(self):
-        cc.green(Xfix, Zfix, Xc, Zc, dX=dXc, dZ=dZc,
-                                           cross_section=cross_section)
-        '''
-        fix_o = copy.deepcopy(self.fix)  # store current BCs
-        if hasattr(self, 'G'):  # store coupling matrix
-            self.G_ = self.G.copy()
-        self.initalize_fix()  # reinitalize BC vector
-        for i, name in enumerate(self.adjust_coils):
-            coil = self.coil['active'][name]
-            for x, z in zip(coil['x'], coil['z']):
-                self.add_psi(1, point=(x, z))
-        self.set_foreground()
-        Gi = np.zeros((self.nC, self.nC))  # inductance coupling matrix
-        Ncount = 0
-        for i, name in enumerate(self.adjust_coils):
-            Nf = self.coilset['coil'][name]['Nf']
-            Gi[i, :] = np.sum(self.G[Ncount:Ncount+Nf, :], axis=0)
-            Ncount += Nf
-        Gi /= self.Iscale  # coil currents [A]
-        turns = np.array([self.coilset['coil'][name]['Nt']
-                          for name in self.coil['active']])
-        turns = np.dot(turns.reshape(-1, 1), turns.reshape(1, -1))
-        fillaments = np.array([self.coilset['coil'][name]['Nf']
-                               for name in self.coil['active']])
-        fillaments = np.dot(fillaments.reshape(-1, 1),
-                            fillaments.reshape(1, -1))
-        # PF/CS inductance matrix
-        self.Mc = Gi / fillaments  # inductance [H]
-        self.Mt = self.Mc * turns  # inductance [H]
-        self.fix = fix_o  # reset BC vector
-        if hasattr(self, 'Go'):  # reset coupling matrix
-            self.G = self.G_
-            del self.G_
-        '''
+            self.coil.at[n, 'mpc'] = (name[0], f)
 
     def plot_coil(self, ax, coil):
         if not coil.empty:
@@ -234,7 +207,8 @@ class CoilClass:
                                  match_original=True)
             ax.add_collection(pc)
 
-    def plot(self, subcoil=True, plasma=True, ax=None):
+    def plot(self, subcoil=True, plasma=True, label=False, current=False,
+             ax=None):
         if ax is None:
             ax = plt.gca()
         if subcoil:
@@ -243,10 +217,54 @@ class CoilClass:
             self.plot_coil(ax, self.coil)
         if plasma:
             self.plot_coil(ax, self.plasma)
-
+        if label or current:
+            self.label_coil(ax, label, current)
         ax.axis('equal')
         ax.axis('off')
 
+    def label_coil(self, ax, label, current, unit='A', coil=None, fs=None):
+        if fs is None:
+            fs = matplotlib.rcParams['legend.fontsize']
+        if coil is None:
+            coil = self.coil
+        parts = np.unique(coil.part)
+        if label is True:
+            label = parts
+        elif label is False:
+            label = []
+        if current is True:
+            current = parts
+        elif current is False:
+            current = []
+        for name, part in zip(coil.index, coil.part):
+            x, z = coil.at[name, 'x'], coil.at[name, 'z']
+            dx, dz = coil.at[name, 'dx'], coil.at[name, 'dz']
+            if coil.part[name] == 'CS':
+                drs = -2.5 / 3 * dx
+                ha = 'right'
+            else:
+                drs = 2.5 / 3 * dx
+                ha = 'left'
+            if part in label and part in current:
+                zshift = max([dz / 10, 0.5])
+            else:
+                zshift = 0
+            if part in label:
+                ax.text(x + drs, z + zshift, name, fontsize=fs,
+                        ha=ha, va='center', color=0.2 * np.ones(3))
+            if part in current:
+                if unit == 'A':  # amps
+                    Ic = coil.at[name, 'Ic']
+                    txt = '{:1.1f}kA'.format(Ic * 1e-3)
+                else:  # amp turns
+                    It = coil.at[name, 'It']
+                    if abs(It) < 0.1e6:  # display as kA.t
+                        txt = '{:1.1f}kAT'.format(It * 1e-3)
+                    else:  # MA.t
+                        txt = '{:1.1f}MAT'.format(It * 1e-6)
+                ax.text(x + drs, z - zshift, txt,
+                        fontsize=fs, ha=ha, va='center',
+                        color=0.2 * np.ones(3))
 
 if __name__ is '__main__':
 

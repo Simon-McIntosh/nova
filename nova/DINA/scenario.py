@@ -11,7 +11,7 @@ from nep.DINA.read_eqdsk import read_eqdsk
 import nova.cross_coil as cc
 from os import sep
 from amigo.IO import pythonIO
-from os.path import isfile
+from os.path import isfile, split
 from datetime import datetime
 from amigo.geom import turning_points, lowpass
 from sklearn.cluster import KMeans, DBSCAN
@@ -28,20 +28,20 @@ import copy
 import pandas as pd
 from amigo.addtext import linelabel
 from warnings import warn
+from nova.coil_class import CoilClass
 
 
 class scenario(pythonIO):
 
     def __init__(self, database_folder='operations', folder=None,
                  read_txt=False, VS=False, file_type='txt', dCoil=0.25,
-                 setname='split_f'):
+                 quiver_index=0):
         self.date_switch = datetime.strptime('2016-02', '%Y-%m')
         self.read_txt = read_txt
-        self.setname = setname
+        self.quiver_index = quiver_index
         self.dCoil = dCoil
         self.dina = dina(database_folder)
         self.initalize_functions()
-
         if folder is not None:
             self.load_file(folder, file_type=file_type)
         pythonIO.__init__(self)  # python read/write
@@ -83,11 +83,11 @@ class scenario(pythonIO):
 
     def load_file(self, folder, **kwargs):
         read_txt = kwargs.get('read_txt', self.read_txt)
-        setname = kwargs.get('setname', self.setname)
+        quiver_index = kwargs.get('quiver_index', self.quiver_index)
         dCoil = kwargs.get('dCoil', self.dCoil)
         file_type = kwargs.get('file_type', 'txt')
-        self.load_coilset(dCoil=dCoil, read_txt=False)
-        self.load_functions(setname=setname)
+        self.load_quiver(dCoil=dCoil, read_txt=False)
+        self.load_functions(quiver_index=quiver_index)
         filepath, file_type = self.locate_file_type(file_type, folder)
         filepath = '.'.join(filepath.split('.')[:-1])
         self.folder = folder
@@ -102,40 +102,43 @@ class scenario(pythonIO):
         #self.set_limits()
         #self.loadCScurrents()
 
-    def load_coilset(self, read_txt=False, **kwargs):
+    def load_quiver(self, read_txt=False, **kwargs):
         dCoil = kwargs.get('dCoil', self.dCoil)
         filepath = '/'.join(self.dina.directory.split('\\')[:-1]) + '/'
         filepath = filepath + f'coilset_{dCoil}'
-        attributes = ['coilset', 'dCoil', 'boundary']
+        attributes = ['quiver', 'dCoil', 'boundary']
         if read_txt or not isfile(filepath + '.pk'):
-            self.compute_coilset(dCoil=dCoil, VS=False)  # coil geometory
+            self.compute_quiver(dCoil=dCoil, nlevel=5)
             self.load_boundary()  # load flux map limits and fw profile
             self.save_pickle(filepath, attributes)
         else:
             self.load_pickle(filepath)
 
     def initalize_functions(self):
-        # self.pf = PF()  # create bare pf coil instance
+        self.cc = CoilClass()  # create bare cc instance
         self.sf = SF()  # create bare sf instance
 
-    def load_functions(self, setname='link'):
-        self.setname = setname
-        '''
-        self.pf(self.coilset[self.setname])
-        if setname != self.setname:
-            self.update_coilset()
-        self.ff = force_field(self.coilset[self.setname])
-        if self.coilset[self.setname]['force']['update_passive']:
+    def load_functions(self, quiver_index=0):
+        self.quiver_index = quiver_index
+        self.coilset = self.quiver[quiver_index]
+        self.cc.coilset = self.coilset
+        if quiver_index != self.quiver_index:
+            self.update_quiver()
+        self.ff = force_field(self.coilset)
+        if self.coilset['force']['update_passive']:
             self.ff.set_force_field(state='passive')
         self.ff.get_force()
-        self.inv = INV(self.coilset[self.setname], boundary='sf')
+
+        '''
+        self.inv = INV(self.coilset, boundary='sf')
         self.inv.sf = self.sf  # link sf instance
         self.inv.ff = self.ff  # link ff instance
         '''
 
     def read_file(self, folder, file_type='txt', dCoil=0.5, verbose=True):
         if verbose:
-            print('reading {}.{}'.format(folder, file_type))
+            folder_txt = split(self.dina.select_folder(folder))[-1]
+            print(f'reading {folder_txt}.{file_type}')
         if file_type == 'txt':
             self.read_txt_file(folder)
         elif file_type == 'qda':
@@ -279,15 +282,16 @@ class scenario(pythonIO):
         rms = self.inv.solve_slsqp(flux)
         if plasma_factor != 1:
             self.scale_plasma_current(plasma_factor)
-        Ipl = self.coilset[self.setname]['plasma_parameters']['Ipl']
+        Ipl = self.coilset['plasma_parameters']['Ipl']
         self.ff.get_force()
         return rms, Ipl
 
     def scale_plasma_current(self, factor):
+        print('scale')
         Ipl = self.checkpoint['coilset']['plasma_parameters']['Ipl']
-        self.coilset[self.setname]['plasma_parameters']['Ipl'] = Ipl*factor
-        for filament in self.coilset[self.setname]['plasma']:
-            self.coilset[self.setname]['plasma'][filament]['If'] = Ipl*factor
+        self.coilset['plasma_parameters']['Ipl'] = Ipl*factor
+        for filament in self.coilset['plasma']:
+            self.coilset['plasma'][filament]['If'] = Ipl*factor
         self.inv.update_plasma()
         self.ff.set_force_field(state='passive')
 
@@ -334,14 +338,14 @@ class scenario(pythonIO):
                 columns[var] = var.split(',')[0]
                 self.data3[columns[var]] = np.array(self.qdafile.data[i, :])
 
-    def compute_coilset(self, dCoil=0.25, VS=False, nlevel=5):
-        self.dCoil = dCoil
+    def compute_quiver(self, dCoil=0.25, nlevel=5):
+        self.dCoil = dCoil  # referance grid dimension
         dCoil = [self.dCoil/np.sqrt(2)**i for i in range(nlevel)]
-        self.coilset = {}
+        self.quiver = [[] for __ in range(nlevel)]
         for i, dC in enumerate(dCoil):
-            self.coilset[f'L{i}'] = self.load_coil(dC, VS)
+            self.quiver[i] = self.compute_coilset(dC)
 
-    def load_coil(self, dCoil, VS=True):
+    def compute_coilset(self, dCoil, VS=False):
         cc = PFgeom(VS=VS, dCoil=dCoil).cc
         coilset = cc.coilset
         '''
@@ -408,14 +412,14 @@ class scenario(pythonIO):
         self.dt = np.mean(np.diff(self.t))
 
     def load_force_data(self, ticktock=False):
-        coils = list(self.pf.coilset['coil'].keys())
-        CSname = self.pf.coilset['index']['CS']['name']
+        coils = self.coilset.coil.index
+        CSname = self.coilset.coil.index[self.coilset.coil.part == 'CS']
         self.post = {'DINA': {}, 'Nova': {}}
         # DINA
         self.post['DINA']['t'] = pd.Series(self.data3['time'])
-        nC, nt = self.pf.coilset['nC'], len(self.post['DINA']['t'])
+        nC, nt = self.coilset.coil.nC, len(self.post['DINA']['t'])
         Fx, Fz, B = np.zeros((nt, nC)), np.zeros((nt, nC)), np.zeros((nt, nC))
-        for i, name in enumerate(self.pf.coilset['coil']):
+        for i, name in enumerate(self.coilset.coil.index):
             B[:, i] = self.data3[f'B_{name.lower()}']
             Fx[:, i] = self.data3[f'Fr_{name.lower()}']
             Fz[:, i] = self.data3[f'Fz_{name.lower()}']
@@ -425,6 +429,7 @@ class scenario(pythonIO):
         self.post['DINA']['Fsep'] = self.calculate_Fsep(
                 self.post['DINA']['Fz'].loc[:, CSname])
         # Nova
+        print('skip Nova')
         Fx, Fz, Fc = np.zeros((nt, nC)), np.zeros((nt, nC)), np.zeros((nt, nC))
         tick = clock(nt)
         for i, t in enumerate(self.post['DINA']['t']):
@@ -455,7 +460,7 @@ class scenario(pythonIO):
     def postprocess(self):
         # postprocess Faxial calculation
         self.set_tie_plate()  # set tip-plate constants
-        CSname = self.pf.coilset['index']['CS']['name']
+        CSname = self.coilset.coil.index[self.coilset.coil.part == 'CS']
         self.post['Nova']['Faxial'] = self.calculate_Faxial(
             self.post['Nova']['Fx'].loc[:, CSname],
             self.post['Nova']['Fz'].loc[:, CSname],
@@ -649,8 +654,26 @@ class scenario(pythonIO):
         self.flattop['dpsi'] = \
             np.diff(self.data['PSI(axis)'][self.flattop['index']])[0]
 
+    def update_scenario(self, t=None):
+        # update from DINA interpolators
+        if t is None:
+            if not hasattr(self, 'flattop'):
+                self.operate()
+            t = self.flattop['t'][-1]  # eof
+        self.to = t  # referance time
+        self.set_coil_current(t)
+        self.set_plasma(self.extract_plasma(t))
+        self.update_quiver()
+        self.ff.get_force()
+
+    def set_coil_current(self, t):
+        It = self.get_coil_current(t, VS3=False)  # get coil currents
+        # self.pf.update_current(It)
+
     def get_coil_current(self, index, VS3=True):
-        It = {}
+        It = pd.Series()
+        print(self.Icoil.keys())
+        '''
         for coil in self.Icoil:
             if VS3 or 'VS' not in coil:
                 if index <= 0 and isinstance(index, int):  # frame_index
@@ -672,36 +695,28 @@ class scenario(pythonIO):
             if name in self.pf.coilset['coil']:
                 It[name] *= self.pf.coilset['coil'][name]['Nt']
         return It  # return dict of coil currents
-
-    def update_scenario(self, t=None):
-        # update from DINA interpolators
-        if t is None:
-            t = self.flattop['t'][-1]  # eof
-        self.to = t  # referance time
-        self.set_coil_current(t)
-        self.set_plasma(self.extract_plasma(t))
-        self.update_coilset()
-        self.ff.get_force()
+        '''
 
     def set_checkpoint(self):
         self.checkpoint = {
                 'name': self.name, 'setname': self.setname,
                 'to': self.to, 'Xpsi': self.inv.sf.Xpsi,
-                'coilset': copy.deepcopy(self.coilset[self.setname]),
+                'coilset': copy.deepcopy(self.coilset),
                 'fix': copy.deepcopy(self.inv.fix),
                 'limit': copy.deepcopy(self.inv.limit),
                 'Fcoil': copy.deepcopy(self.ff.Fcoil)}
 
-    def update_coilset(self):  # synchronize coilset currents
-        plasma = self.coilset[self.setname]['plasma']
-        It = self.pf.get_coil_current()
-        for setname in self.coilset:
-            if setname != self.setname:
-                self.coilset[setname]['plasma'] = plasma
-                self.update_coil_current(self.coilset[setname], It)
+    def update_quiver(self):  # synchronize quiver coilset currents
+        plasma = self.coilset.plasma
+        #It = self.pf.get_coil_current()
+        for quiver_index in range(len(self.quiver)):
+            if quiver_index != self.quiver_index:
+                self.quiver[quiver_index].plasma = plasma
+                #self.update_coil_current(self.coilset[setname], It)
 
     @staticmethod
     def update_coil_current(coilset, It):
+        print('update')
         for name in It:
             if name in coilset['coil']:
                 setname_array = [name]
@@ -802,7 +817,7 @@ class scenario(pythonIO):
         for name in self.coilset:
             self.coilset[name]['plasma_parameters'] = plasma_parameters
         dx, dz = 0.05, 0.05
-        self.coilset[self.setname]['plasma'].clear()
+        self.coilset['plasma'].clear()
         if plasma_parameters['xcur'] > 0:
             plasma = {'x': plasma_parameters['xcur'],
                       'z': plasma_parameters['zcur'],
@@ -811,7 +826,7 @@ class scenario(pythonIO):
             plasma_subcoil = PF.mesh_coil(plasma, dCoil=None)
             for i, filament in enumerate(plasma_subcoil):
                 subname = 'Plasma_{}'.format(i)
-                self.coilset[self.setname]['plasma'][subname] = filament
+                self.coilset['plasma'][subname] = filament
         self.update_plasma()
 
     def update_plasma(self):
@@ -820,10 +835,6 @@ class scenario(pythonIO):
         for setname in self.coilset:  # set passive_field flag
             update = False if setname == self.setname else True
             self.coilset[setname]['force']['update_passive'] = update
-
-    def set_coil_current(self, t):
-        It = self.get_coil_current(t, VS3=False)  # get coil currents
-        self.pf.update_current(It)
 
     def load_force_history(self, n=500, plot=False, ax=None, **kwargs):
         read_txt = kwargs.get('read_txt', self.read_txt)
@@ -1013,8 +1024,8 @@ class scenario(pythonIO):
         return VS3_rms
 
     def get_gap_name(self):
-        nCS = self.pf.coilset['index']['CS']['n']
-        CSname = self.pf.coilset['index']['CS']['name']
+        CSname = self.coilset.coil.index[self.coilset.coil.part == 'CS']
+        nCS = len(CSname)
         gap_name = [f'{CSname[i]}_{CSname[i+1]}' for i in range(nCS - 1)]
         gap_name = [f'LDP_{CSname[0]}'] + gap_name + [f'{CSname[-1]}_LDP']
         return gap_name
@@ -1203,9 +1214,17 @@ class scenario(pythonIO):
 if __name__ is '__main__':
 
     scn = scenario(read_txt=False)
-    scn.load_coilset(read_txt=False)
+    scn.load_quiver(read_txt=True)
 
-    print(scn.coilset['L1'].coil)
+    scn.load_file(0, read_txt=True)
+
+    #scn.load_functions(quiver_index=0)
+
+    scn.update_quiver()
+
+    scn.update_scenario()
+
+    print(scn.coilset.coil)
 
 
     #coilset = scn.load_coil(0.5, VS=True)

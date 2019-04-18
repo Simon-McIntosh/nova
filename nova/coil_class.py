@@ -4,6 +4,7 @@ from amigo.pyplot import plt
 import numpy as np
 import pandas as pd
 import matplotlib
+from nova.biot_savart import biot_savart
 
 
 class CoilClass:
@@ -17,7 +18,7 @@ class CoilClass:
         self.dCoil = dCoil
         self.coil = CoilFrame(
                 additional_columns=['Ic', 'It', 'Nt', 'Nf', 'dCoil',
-                                    'subcoil_index', 'mpc'],
+                                    'subindex', 'mpc'],
                 default_attributes={'dCoil': dCoil})
         self.subcoil = CoilFrame(
                 additional_columns=['Ic', 'It',  'Nt', 'coil'])
@@ -25,6 +26,10 @@ class CoilClass:
         self.add_coilset(*args)  # add list of coilset instances
         self.add_eqdsk(eqdsk)
         self.initalize_matrix()  # coil flux and force interaction matrices
+        self.initalize_functions()  # initalise functions
+
+    def initalize_functions(self):
+        self.bs = biot_savart()
 
     def initalize_matrix(self):
         '''
@@ -65,29 +70,51 @@ class CoilClass:
                 if not coil.empty:
                     getattr(self, attribute).add_coil(coil)
 
-    @staticmethod
-    def check_current_label(label):
-        if label not in ['It', 'Ic']:  # turn-current, conductor current
-            raise AttributeError(f'\ncurrent label: {label}\n'
-                                 'not present in [It, Ic]\n')
+    @property
+    def Ic(self):
+        '''
+        Returns:
+            self.coil.Ic (pd.Series): coil instance line current [A]
+        '''
+        return self.coil.Ic
+
+    @Ic.setter
+    def Ic(self, value):
+        self.set_current(value, 'Ic')
 
     @property
-    def current(self, label, index=None):
-        self.check_current_label(label)
-        if index is None:  # return full set
-            index = self.coil.index
-        value = self.coil.loc[index, 'It']  # turn current
-        if label == 'It':  # filament current
-            value /= self.coil.loc[index, 'Nf']
-        elif label == 'Ic':  # conductor current
-            value /= self.coil.loc[index, 'Nf']
-        return value
+    def It(self):
+        '''
+        Returns:
+            self.coil.It (pd.Series): coil instance turn current [A.turns]
+        '''
+        return self.coil.It
 
-    @current.setter
-    def current(self, value, label, index=None):
-        self.check_current_label(label)
-        if index is None:  # return full set
-            index = self.coil.index
+    @It.setter
+    def It(self, value):
+        self.set_current(value, 'It')
+
+    def set_current(self, value, current_column):
+        '''
+        update current in coil and subcoil instances (Ic and It)
+        index built as union of value.index and coil.index
+        mpc constraints applied
+        Args:
+            value (pd.Series): current update
+            current_column (str):
+                'Ic' == line current [A]
+                'It' == turn current [A.turns]
+        '''
+        if current_column not in ['Ic', 'It']:
+            raise IndexError(f'current column: {current_column} '
+                             'not in [Ic, It]')
+        index = [n for n in value.index if n in self.coil.index]  # union index
+        setattr(self.coil, current_column, value.loc[index])  # coil
+        coil_current = getattr(self.coil, current_column)
+        subcoil_current = pd.Series(index=self.subcoil.index)
+        for name, subindex in zip(self.coil.index, self.coil.subindex):
+            subcoil_current.loc[subindex] = coil_current[name]
+        setattr(self.subcoil, current_column, subcoil_current)  # subcoil
 
     def add_eqdsk(self, eqdsk):
         if eqdsk:
@@ -154,13 +181,16 @@ class CoilClass:
         It = self.coil.at[name, 'It']  # coil turn-current
         cross_section = self.coil.at[name, 'cross_section']
         x, z, dx, dz = self.coil.loc[name, ['x', 'z', 'dx', 'dz']]
+        turn_fraction = 1
         if dCoil is None or dCoil == 0:
             dCoil = np.max([dx, dz])
         elif dCoil == -1:  # mesh per-turn (inductance calculation)
+            cross_section = 'circle'
+            turn_fraction = 0.7  # pass as variable
             Nt = self.coil.at[name, 'Nt']
             dCoil = (dx * dz / Nt)**0.5
-        nx = int(np.ceil(dx / dCoil))
-        nz = int(np.ceil(dz / dCoil))
+        nx = int(np.round(dx / dCoil))
+        nz = int(np.round(dz / dCoil))
         if nx < 1:
             nx = 1
         if nz < 1:
@@ -173,17 +203,19 @@ class CoilClass:
         zm_ = np.reshape(zm_, (-1, 1))[:, 0]
         Nf = len(xm_)  # filament number
         self.coil.at[name, 'Nf'] = Nf
-        frame = self.subcoil.get_frame(xm_, zm_, dx_, dz_,
+        frame = self.subcoil.get_frame(xm_, zm_,
+                                       turn_fraction*dx_,
+                                       turn_fraction*dz_,
                                        It=It/Nf, name=name,
                                        cross_section=cross_section, coil=name,
                                        part=part)
-        self.coil.at[name, 'subcoil_index'] = list(frame.index)
+        self.coil.at[name, 'subindex'] = list(frame.index)
         frame.loc[:, 'Nt'] = self.coil.at[name, 'Nt'] / Nf
         return frame
 
     def add_mpc(self, name, factor=1):
         '''
-        define multi-point constraint linking a set of coils (Ic)
+        define multi-point constraint linking a set of coils
         name: list of coil names (present in self.coil.index)
         factor: inter-coil coupling factor
         '''
@@ -192,11 +224,11 @@ class CoilClass:
         elif len(name) == 1:
             raise IndexError(f'len({name}) must be > 1')
         if not pd.api.types.is_list_like(factor):
-            factor = np.ones(len(name))
-        elif len(factor) != len(name):
+            factor = factor * np.ones(len(name)-1)
+        elif len(factor) != len(name)-1:
             raise IndexError(f'len(factor={factor}) must == 1 '
-                             f'or == len(name={name})')
-        for n, f in zip(name, factor):
+                             f'or == len(name={name})-1')
+        for n, f in zip(name[1:], factor):
             self.coil.at[n, 'mpc'] = (name[0], f)
 
     def plot_coil(self, ax, coil):
@@ -208,7 +240,7 @@ class CoilClass:
             ax.add_collection(pc)
 
     def plot(self, subcoil=True, plasma=True, label=False, current=False,
-             ax=None):
+             ax=None, unit='A'):
         if ax is None:
             ax = plt.gca()
         if subcoil:
@@ -218,11 +250,11 @@ class CoilClass:
         if plasma:
             self.plot_coil(ax, self.plasma)
         if label or current:
-            self.label_coil(ax, label, current)
+            self.label_coil(ax, label, current, unit)
         ax.axis('equal')
         ax.axis('off')
 
-    def label_coil(self, ax, label, current, unit='A', coil=None, fs=None):
+    def label_coil(self, ax, label, current, unit, coil=None, fs=None):
         if fs is None:
             fs = matplotlib.rcParams['legend.fontsize']
         if coil is None:
@@ -256,7 +288,7 @@ class CoilClass:
                 if unit == 'A':  # amps
                     Ic = coil.at[name, 'Ic']
                     txt = '{:1.1f}kA'.format(Ic * 1e-3)
-                else:  # amp turns
+                elif unit == 'AT':  # amp turns
                     It = coil.at[name, 'It']
                     if abs(It) < 0.1e6:  # display as kA.t
                         txt = '{:1.1f}kAT'.format(It * 1e-3)
@@ -274,7 +306,6 @@ if __name__ is '__main__':
     cc.add_coil([1, 3], 1, 0.3, 0.3, name='PF', part='PF', delim='')
     cc.add_coil(1, 2, 0.1, 0.1, name='PF4', part='VS3')
     cc.add_coil(1.6, 1.5, 0.2, 0.2, name='PF7', part='vvin', dCoil=0.01)
-
     cc.plot()
 
 

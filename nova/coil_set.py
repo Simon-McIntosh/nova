@@ -17,8 +17,8 @@ class CoilSeries(pd.Series):
 
 class CoilFrame(pd.DataFrame):
     '''
-    CoilFrame instance inheritance from Pandas DataFrame
     Inspiration taken from GeoPandas https://github.com/geopandas
+    CoilFrame instance inherits from Pandas DataFrame
     '''
     _metadata = ['_required_columns', '_additional_columns',
                  '_default_attributes', '_integer_columns']
@@ -38,7 +38,7 @@ class CoilFrame(pd.DataFrame):
                                     'Nt': 1, 'Nf': 1, 'material': None,
                                     'cross_section': 'square',
                                     'patch': None, 'coil': '', 'part': '',
-                                    'subcoil_index': None,
+                                    'subindex': None,
                                     'dCoil': 0, 'mpc': None}
         self._integer_columns = ['Nf']
 
@@ -70,22 +70,39 @@ class CoilFrame(pd.DataFrame):
         return CoilSeries
 
     @property
-    def turn_current(self):
+    def It(self):
+        '''
+        Returns:
+            self['It'] (pd.Series): turn current [A.turns]
+        '''
         return self['It']
 
-    @turn_current.setter
-    def turn_current(self, It):
+    @It.setter
+    def It(self, It):
         self['It'] = It  # turn-current [A.turn]
-        self['Ic'] = self['It'] / self['Nt']  # conductor current [A]
+        self.copy_mpc('It')  # copy multi-point constraints
+        self['Ic'] = self['It'] / self['Nt']  # line-current [A]
 
     @property
-    def conductor_current(self):
+    def Ic(self):
+        '''
+        Returns:
+            self['Ic'] (pd.Series): line current [A]
+        '''
         return self['Ic']
 
-    @conductor_current.setter
-    def conductor_current(self, Ic):
-        self['Ic'] = Ic
-        self['It'] = self['Ic'] * self['Nt']
+    @Ic.setter
+    def Ic(self, Ic):
+        self['Ic'] = Ic  # line-current [A]
+        self.copy_mpc('Ic')  # copy multi-point constraints
+        self['It'] = self['Ic'] * self['Nt']  # turn-current [A.turn]
+
+    def copy_mpc(self, var):
+        if 'mpc' in self.columns:
+            for name in self.mpc.dropna().index:
+                mpc = self.mpc[name]
+                if name != mpc[0]:
+                    self.at[name, var] = self.at[mpc[0], var] * mpc[1]
 
     def _get_coil_number(self):
         return len(self.index)

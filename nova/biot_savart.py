@@ -3,7 +3,6 @@ from nova.inductance.geometric_mean_radius import geometric_mean_radius
 from amigo.geom import shape, grid
 import numpy as np
 import pandas as pd
-from nova.coil_class import CoilClass
 
 
 class biot_savart:
@@ -101,6 +100,26 @@ class biot_savart:
         M *= Nt * Nc  # turn-turn interaction, line-current
         return self.mu_o * M  # Wb
 
+    def inductance(self):
+        self.colocate()  # set targets
+        Msub = self.flux()  # calculate subcoil inductance matrix
+        Msub = pd.DataFrame(Msub, index=self.coilset.subcoil.index,
+                            columns=self.coilset.subcoil.index)
+        Mrow = pd.DataFrame(index=self.coilset.coil.index,
+                            columns=self.coilset.subcoil.index)
+        Mc = pd.DataFrame(index=self.coilset.coil.index,
+                          columns=self.coilset.coil.index)
+        for name in self.coilset.coil.index:  # row reduction
+            index = self.coilset.coil.subindex[name]
+            Mrow.loc[name, :] = Msub.loc[index, :].sum(axis=0)
+        for name in self.coilset.coil.index:  # column reduction
+            index = self.coilset.coil.subindex[name]
+            Mc.loc[:, name] = Mrow.loc[:, index].sum(axis=1)
+        Nt = self.coilset.coil.Nt.values
+        Nt = Nt.reshape(-1, 1) * Nt.reshape(1, -1)
+        self.coilset.matrix['inductance']['Mc'] = Mc  # line-current
+        self.coilset.matrix['inductance']['Mt'] = Mc / Nt  # amp-turn
+
     def field(self):
         field = np.zeros((2, self.nT, self.nC))
         xt, zt, __, xc, zc, Nc = self.locate()
@@ -115,35 +134,19 @@ class biot_savart:
         field *= Nc  # line-current
         return self.mu_o * field  # T
 
-    def inductance(self):
-        self.colocate()  # set targets
-        Msub = self.flux()  # calculate subcoil inductance matrix
-        Msub = pd.DataFrame(Msub, index=self.coilset.subcoil.index,
-                            columns=self.coilset.subcoil.index)
-        Mrow = pd.DataFrame(index=self.coilset.coil.index,
-                            columns=self.coilset.subcoil.index)
-        Mc = pd.DataFrame(index=self.coilset.coil.index,
-                          columns=self.coilset.coil.index)
-        for name in self.coilset.coil.index:  # row reduction
-            index = self.coilset.coil.subcoil_index[name]
-            Mrow.loc[name, :] = Msub.loc[index, :].sum(axis=0)
-        for name in self.coilset.coil.index:  # column reduction
-            index = self.coilset.coil.subcoil_index[name]
-            Mc.loc[:, name] = Mrow.loc[:, index].sum(axis=1)
-        Nt = self.coilset.coil.Nt.values
-        Nt = Nt.reshape(-1, 1) * Nt.reshape(1, -1)
-        Mt = Mc / Nt
-        self.coilset.matrix['inductance']['Mc'] = Mc  # line-current
-        self.coilset.matrix['inductance']['Mt'] = Mt  # amp-turn
-
 
 if __name__ is '__main__':
 
-    cc = CoilClass(dCoil=0.05)
-    cc.update_metadata('coil', additional_columns=['R'])
-    cc.add_coil(1, 0, 0.1, 0.1, name='PF6', part='CS')
-    cc.add_coil([1, 3], 1, 0.3, 0.3, name='PF', part='PF', delim='')
-    cc.add_coil(1, 2, 0.1, 0.1, name='PF4', part='VS3')
-    cc.add_coil(1.6, 1.5, 0.2, 0.2, name='PF7', part='vvin', dCoil=0.01)
+    from nova.coil_class import CoilClass  # avoid cyclic import
 
+    cc = CoilClass(dCoil=-1)
+    #cc.add_coil(3.943, 7.564, 0.959, 0.984, Nt=248.64, name='PF1', part='PF')
+    cc.add_coil(1.722, 5.313, 0.719, 2.2, Nt=554, name='CS3U', part='CS',
+                cross_section='square')
+
+    #cc.add_coil(1.722, 3.188, 0.719, 2.075, Nt=554, name='CS2U', part='CS')
     cc.plot()
+
+    biot_savart(cc.coilset, mutual=False).inductance()
+
+    plt.title(cc.coilset.matrix['inductance']['Mc'].CS3U)

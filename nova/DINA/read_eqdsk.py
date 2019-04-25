@@ -1,4 +1,4 @@
-from nep.DINA.read_dina import dina
+from nep.DINA.read_dina import read_dina
 from nova.streamfunction import SF
 from amigo.pyplot import plt
 from amigo.IO import pythonIO
@@ -10,7 +10,7 @@ class read_eqdsk(pythonIO):
 
     def __init__(self, database_folder='eqdsk', file='burn', read_txt=False):
         self.read_txt = read_txt
-        self.dina = dina(database_folder)
+        self.dina = read_dina(database_folder)
         pythonIO.__init__(self)  # python read/write
         self.load_file(file)
 

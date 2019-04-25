@@ -8,7 +8,7 @@ from os.path import split, join, isfile
 from scipy.interpolate import interp1d
 from nep.DINA.read_tor import read_tor
 from nep.DINA.read_plasma import read_plasma
-from nep.DINA.read_dina import dina
+from nep.DINA.read_dina import read_dina
 from amigo.IO import pythonIO
 
 
@@ -16,7 +16,7 @@ class coil_flux(pythonIO):
 
     def __init__(self, Ip_scale=1, read_txt=False):
         self.read_txt = read_txt
-        self.dina = dina('disruptions')
+        self.dina = read_dina('disruptions')
         self.pl = read_plasma('disruptions', Ip_scale=Ip_scale,
                               read_txt=read_txt)  # load plasma
         self.tor = read_tor('disruptions', Ip_scale=Ip_scale,

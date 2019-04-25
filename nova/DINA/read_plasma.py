@@ -2,7 +2,8 @@ import pandas as pd
 from amigo.pyplot import plt
 import numpy as np
 from amigo.addtext import linelabel
-from nep.DINA.read_dina import dina, timeconstant
+from nep.DINA.read_dina import read_dina
+from amigo.time import time_constant
 from scipy.interpolate import interp1d
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
@@ -21,7 +22,7 @@ class read_plasma(pythonIO):
                  read_txt=False):
         self.Ip_scale = Ip_scale
         self.read_txt = read_txt
-        self.dina = dina(database_folder)
+        self.dina = read_dina(database_folder)
         self.Ivs3_properties()
         pythonIO.__init__(self)  # python read/write
 
@@ -126,7 +127,7 @@ class read_plasma(pythonIO):
         i_cq = next((i for i, dIdt in enumerate(dIpldt)
                      if dIdt > self.dIdt_trip))
         t_cq = self.t[i_cq]  # current quench time
-        tc = timeconstant(self.t[i_cq:], Ipl_lp[i_cq:], trim_fraction=0.2)
+        tc = time_constant(self.t[i_cq:], Ipl_lp[i_cq:], trim_fraction=0.2)
         tdis, ttype, tfit, Ifit = tc.fit(plot=False, Io=-15e6 * self.Ip_scale)
         dZ = self.z - self.z[0]  # displacment trip
         try:

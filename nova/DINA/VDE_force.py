@@ -12,7 +12,7 @@ from amigo.time import clock
 from amigo.geom import qrotate
 import matplotlib.animation as manimation
 from nep.rails import stress_allowable
-from nep.DINA.read_dina import dina
+from nep.DINA.read_dina import read_dina
 import matplotlib.patches as mpatches
 import pickle
 from os.path import split, join, isfile
@@ -32,7 +32,7 @@ class VDE_force(pythonIO):
         self.read_txt = read_txt
         self.mode = mode
         self.discharge = discharge
-        self.dina = dina('disruptions')
+        self.dina = read_dina('disruptions')
         self.pl = read_plasma('disruptions', Ip_scale=self.Ip_scale,
                               read_txt=read_txt)  # load plasma
         self.tor = read_tor('disruptions', Ip_scale=self.Ip_scale,

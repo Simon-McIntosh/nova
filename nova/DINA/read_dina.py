@@ -3,157 +3,29 @@ from amigo.IO import class_dir
 from os.path import join, isfile, isdir
 from os import listdir
 import numpy as np
-from scipy.optimize import minimize
-from amigo.pyplot import plt
 import pandas as pd
+from os import sep
+from amigo.IO import pythonIO
+from datetime import datetime
+from amigo.time import clock
 
 
-class timeconstant:
-
-    def __init__(self, td, Id, trim_fraction=0.2):
-        self.load(td, Id)
-        self.trim_fraction = trim_fraction
-
-    def load(self, td, Id):  # load profile
-        self.td = np.copy(td)
-        self.Id = np.copy(Id)
-
-    def trim(self, **kwargs):
-        self.trim_fraction = kwargs.get('trim_fraction', self.trim_fraction)
-        if self.trim_fraction > 0 and self.trim_fraction < 1\
-                and self.Id[0] != 0:
-            dI = self.Id[-1] - self.Id[0]
-            i1 = next((i for i, Id in enumerate(self.Id)
-                       if abs(Id) < abs(self.Id[0] +
-                                        (1-self.trim_fraction)*dI)))
-            td, Id = self.td[:i1], self.Id[:i1]
-        else:
-            td, Id = self.td, self.Id
-        return td, Id
-
-    def fit_tau(self, x, *args):
-        to, Io, tau = x
-        t_exp, I_exp = args
-        I_fit = Io*np.exp(-(t_exp-to)/tau)
-        err = np.sum((I_exp-I_fit)**2)  # sum of squares
-        return err
-
-    def get_tau(self, plot=False, **kwargs):
-        td, Id = self.trim(**kwargs)
-        to = kwargs.get('to', 10e-3)
-        Io = kwargs.get('Io', -60e3)
-        tau = kwargs.get('tau', 30e-3)
-        x = minimize(self.fit_tau, [to, Io, tau], args=(td, Id)).x
-        err = self.fit_tau(x, td, Id)
-        to, Io, tau = x
-        Iexp = Io*np.exp(-(td-to)/tau)
-        if plot:
-            ax = kwargs.get('ax', plt.gca())
-            ax.plot(1e3*td, 1e-3*Iexp, '-', label='exp')
-        return to, Io, tau, err, Iexp
-
-    def get_td(self, plot=False, **kwargs):  # linear discharge time
-        td, Id = self.trim(**kwargs)
-        A = np.ones((len(td), 2))
-        A[:, 1] = td
-        a, b = np.linalg.lstsq(A, Id, rcond=None)[0]
-        tlin = abs(self.Id[0]/b)  # discharge time
-        Ilin = a + b*td  # linear fit
-        err = np.sum((Id-Ilin)**2)
-        if plot:
-            plt.plot(1e3*td, 1e-3*Ilin, '-', label='lin')
-        return a, b, tlin, err, Ilin
-
-    def fit_ntau(self, x, *args):
-        texp, Iexp = args
-        Ifit = self.I_nfit(texp, x)
-        err = np.sum((Iexp-Ifit)**2)  # sum of squares
-        return err
-
-    def I_nfit(self, t, x):
-        n = int(len(x)/2)
-        Io, tau = x[:n], x[n:]
-        Ifit = np.zeros(len(t))
-        for Io, tau in zip(x[:n], x[n:]):
-            Ifit += Io*np.exp(-t/tau)
-        return Ifit
-
-    def nfit(self, n, plot=False, **kwargs):
-        tau_o = kwargs.get('tau_o', 50e-3)  # inital timeconstant
-        td, Id = self.trim(**kwargs)
-        to = td[0]
-        td -= to  # time shift
-        xo = np.append(Id[0]/n*np.ones(n), tau_o*np.ones(n))
-        # xo *= np.random.random(2*n)
-        bounds = [(None, None) for __ in range(n)]
-        bounds.extend([(1e-6, None) for __ in range(n)])
-        x = minimize(self.fit_ntau, xo, args=(td, Id),
-                     method='L-BFGS-B', bounds=bounds).x
-        Ifit = self.I_nfit(td, x)
-        Io, tau = x[:n], x[n:]
-        if plot:
-            if 'ax' in kwargs:
-                ax = kwargs['ax']
-            else:
-                ax = plt.subplots(1, 1)[1]
-            ax.plot(1e3*td+to, 1e-3*Id, '-', label='data')
-            ax.plot(1e3*td+to, 1e-3*Ifit, '--', label='fit')
-            ax.set_xlabel('$t$ ms')
-            ax.set_ylabel('$I$ kA')
-            plt.despine()
-            plt.legend()
-        return Io, tau, td+to, Ifit
-
-    def ntxt(If, tau):
-        txt = r'$\alpha$=['
-        for i, I in enumerate(If):
-            if i > 0:
-                txt += ','
-            txt += '{:1.2f}'.format(I)
-        txt += ']'
-        txt += r' $\tau$=['
-        for i, t in enumerate(tau):
-            if i > 0:
-                txt += ','
-            txt += '{:1.1f}'.format(1e3*t)
-        txt += ']ms'
-        return txt
-
-    def fit(self, plot=False, **kwargs):
-        tfit, Idata = self.trim(**kwargs)
-        tau, tau_err, Iexp = self.get_tau(plot=False, **kwargs)[-3:]
-        tlin, tlin_err, Ilin = self.get_td(plot=False, **kwargs)[-3:]
-        if tau_err < tlin_err:
-            self.discharge_type = 'exponential'
-            self.discharge_time = tau
-            Ifit = Iexp
-        else:
-            self.discharge_type = 'linear'
-            self.discharge_time = tlin
-            Ifit = Ilin
-        if plot:
-            if 'ax' in kwargs:
-                ax = kwargs['ax']
-            else:
-                ax = plt.subplots(1, 1)[1]
-
-            ax.plot(1e3*tfit, 1e-3*Idata, '-', label='data')
-            ax.plot(1e3*tfit, 1e-3*Ifit, '--',
-                    label='{} fit'.format(self.discharge_type))
-            ax.set_xlabel('$t$ ms')
-            ax.set_ylabel('$I$ kA')
-            plt.despine()
-            # plt.legend()
-            txt = '{} discharge'.format(self.discharge_type)
-            txt += ', t={:1.1f}ms'.format(self.discharge_time)
-            # plt.title(txt)
-        return self.discharge_time, self.discharge_type, tfit, Ifit
+# read_dina.timeconstant moved to time.time_constant
 
 
-class dina:
+class read_dina(pythonIO):
 
-    def __init__(self, database_folder):
+    date_switch = datetime.strptime('2016-02', '%Y-%m')
+
+    def __init__(self, database_folder=None, read_txt=True, **kwargs):
+        '''
+        Kwargs:
+            database_folder (str): name of database folder
+            read_txt (bool): read / reread source text files
+        '''
+        super().__init__()  # python read/write
         self.set_directory(database_folder)
+        self.read_txt = read_txt
 
     def set_directory(self, database_folder):
         self.database_folder = database_folder
@@ -173,6 +45,24 @@ class dina:
         self.files = sorted(files)
         self.nfile = len(self.files)
 
+    def sort_folders(self, exclude=[]):
+        dtype = [('name', 'U25'), ('year', int), ('mode', 'U25'),
+                 ('month', int), ('version', 'U25')]
+        folders = np.ones(self.nfolder, dtype=dtype)
+        for i in range(self.nfolder):
+            folders[i]['name'] = self.folders[i]
+            folders[i]['mode'] = self.folders[i].split('DINA')[0][:-1]
+            timestamp = self.folders[i].split('DINA')[-1]
+            folders[i]['year'] = int(timestamp.split('-')[0])
+            timestamp = ''.join(timestamp.split('-')[1:])
+            folders[i]['month'] = int(timestamp[:2])
+            folders[i]['version'] = timestamp[2:].replace('_', '')
+        folders.sort(order=['year', 'month', 'version'])
+        if exclude:
+            index = [name not in exclude for name in folders['name']]
+            folders = folders[index]
+        self.folders = folders
+
     def select_folder(self, folder):  # folder entered as string, index or None
         if isinstance(folder, int):  # index (int)
             if folder > self.nfolder-1:
@@ -190,6 +80,31 @@ class dina:
         else:
             raise ValueError('folder required as int, str or None')
         return join(self.directory, folder)
+
+    def locate_file_type(self, file, file_type, folder):
+        file_types = ['txt', 'qda']
+        file_types.remove(file_type)
+        file_types = [file_type, *file_types]
+        filepath = None
+        for file_type in file_types:
+            try:
+                filepath = self.locate_file(f'{file}.{file_type}',
+                                            folder=folder)
+                break
+            except IndexError:
+                pass
+        if filepath is None:
+            raise FileNotFoundError()
+        return filepath, file_type
+
+    def locate_folder(self, file, folder, file_type='txt'):
+        filepath, file_type = self.locate_file_type(file, file_type, folder)
+        self.filename = filepath.split(sep)[-3].replace(' ', '_')
+        self.date = datetime.strptime(
+                self.filename.split('DINA')[-1].split('_')[0][:7], '%Y-%m')
+        self.folder = folder
+        self.filepath = sep.join(filepath.split(sep)[:-1]) + sep
+        return join(self.filepath, self.filename), file_type
 
     def locate_file(self, file_type, folder=None):
         if self.nfolder == 0:
@@ -212,8 +127,8 @@ class dina:
                     else:
                         files = []
             if not files:
-                raise IndexError('file {}.{} not found'.format(file_type,
-                                                               ext))
+                raise IndexError(f'file {file_type}.{ext} not found\n'
+                                 f'dir: {join(folder, subfolder)}')
         else:
             files = [f for f in listdir(folder) if isfile(join(folder, f))]
         files = [f for f in files if file_type.lower() in f.lower()]
@@ -248,8 +163,19 @@ class dina:
             data = data.to_dict(orient='list')
         return data
 
+    def load_folder(self):
+        '''
+        load / reload all files from specified database folder
+        '''
+        nfolder = self.nfolder
+        tick = clock(nfolder, header=f'loading {nfolder} scenarios from '
+                                     f'folder: {self.database_folder}')
+        for folder in range(nfolder):
+            self.load_file(folder, read_txt=True, verbose=False)
+            tick.tock()
+
 
 if __name__ == '__main__':
 
-    dina = dina('operations')
+    dina = read_dina('operations')
     filename = dina.locate_file('data2.txt', folder=0)

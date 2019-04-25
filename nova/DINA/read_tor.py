@@ -4,7 +4,7 @@ from amigo.time import clock
 from itertools import count
 from nova.coils import PF
 from amigo.IO import readtxt, pythonIO
-from nep.DINA.read_dina import dina
+from nep.DINA.read_dina import read_dina
 from amigo.pyplot import plt
 from nep.coil_geom import VSgeom
 from os import path
@@ -20,7 +20,7 @@ class read_tor(pythonIO):
                  read_txt=False):
         self.Ip_scale = Ip_scale
         self.read_txt = read_txt
-        self.dina = dina(database_folder)
+        self.dina = read_dina(database_folder)
         self.frame_index = 0
         pythonIO.__init__(self)  # python read/write
 

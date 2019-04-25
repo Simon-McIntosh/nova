@@ -31,6 +31,107 @@ from warnings import warn
 from nova.coil_class import CoilClass
 
 
+class scenario_data:
+    '''
+    Attributes:
+        t (float): current time
+        to (np.array): original time vector
+        teq (np.array): time vector with equidistant spacing
+        interpolator (): q 1d interpolator (vectorised) for data2 input
+        data (pd.Series): interpoated data at time t
+    '''
+
+    date_switch = datetime.strptime('2016-02', '%Y-%m')
+
+    def __init__(self, name, data2):
+        '''
+        Attributes:
+            name (str): DINA file name
+            data2 (pd.DataFrame): raw DINA data
+        '''
+        self.label_dataset(name)
+        self.interpolate(data2)
+
+    def label_dataset(self, name):
+        self.name = name
+        self.date = datetime.strptime(
+                self.name.split('DINA')[-1].split('_')[0][:7], '%Y-%m')
+
+    def correct_time(self):
+        if 'time' in self.data2:  # rename time field
+            self.data2['t'] = self.data2['time']
+            self.data2.pop('time')
+
+    def correct_coordinates(self):
+        '''
+        correct coodrinate system for DINA data created before self.date_switch
+        '''
+        if self.date > self.date_switch:
+            coordinate_switch = 1
+        else:  # old file - correct coordinates
+            coordinate_switch = -1
+        for var in self.data2:
+            if ('I' in var and len(var) <= 5) or ('V' in var):
+                self.data2[var] *= coordinate_switch
+
+    def correct_units(self):
+        for var in self.data2:
+            if var == 'Ip':  # plasma
+                self.data2.loc[:, var] *= 1e6  # MA to A
+            elif var[0] == 'I' and len(var) <= 5:
+                self.data2.loc[:, var] *= 1e3  # kAturn to Aturn
+
+    def space(self):
+        self.to, unique_index = np.unique(self.data2['t'], return_index=True)
+        dt = np.mean(np.diff(self.to))
+        tmax = np.nanmax(self.to)
+        tmin = np.nanmin(self.to)
+        nt = int(tmax/dt)
+        dt = tmax/(nt-1)
+        self.teq = np.linspace(tmin, tmax, nt)
+        return unique_index
+
+    def set_index(self, *args):
+        # current columns
+        index = [var for var in self.data2 if ('I' in var and len(var) <= 5)]
+        # additional baseline data
+        index += ['Rcur', 'Zcur', 'ap', 'kp', 'Rp', 'Zp', 'a',
+                  'Ksep', 'BETAp', 'li(3)', 't', 'PSI(axis)', 'Emag', 'Lp',
+                  'q(95)', 'q(axis)', 'Vloop', 'D(PSI)res', 'Cejima',
+                  '<PSIext>', '<PSIcoils>']
+        for arg in args:  # append aditional columns
+            if arg not in index:
+                index.append(arg)
+        # remove columns absent from data2
+        self.index = [var for var in index if var in self.data2]
+        self.data = pd.Series(index=self.index)  # initalise data vector
+
+    def interpolate(self, data2, *args):
+        '''
+        build 1d vectorized interpolator, initalize self.data
+        '''
+        self.data2 = data2.copy()  # create local copy
+        self.correct_time()
+        self.correct_coordinates()
+        self.correct_units()
+        self.set_index(*args)
+        unique_index = self.space()  # generate equidistant time vector
+        data_block = np.zeros((len(self.to), len(self.index)))
+        for i, index in enumerate(self.index):  # build input data
+            data_block[:, i] = self.data2[index][unique_index]
+        self.interpolator = interp1d(self.to, data_block, axis=0,
+                                     fill_value='extrapolate')
+        self.data2 = None
+
+    def update(self, t, force=False):
+        if (t < self.to[0] or t > self.to[-1]) and not force:
+            raise IndexError(f'requested time: {t}s outside data range '
+                             f'{self.to[0]} to {self.to[-1]}')
+        self.t = t
+        self.data.loc[:] = self.interpolator(self.t)
+        print(self.data)
+
+
 class scenario(pythonIO):
 
     def __init__(self, database_folder='operations', folder=None,
@@ -93,7 +194,7 @@ class scenario(pythonIO):
         self.folder = folder
         self.filepath = '/'.join(filepath.split('\\')[:-1]) + '/'
         attributes = ['name', 'date', 'data', 'post', 'tie_plate',
-                      't', 'dt', 'fun', 'Icoil', 'Ipl']
+                      't', 'dt', 'fun', 'Ic', 'Ipl']
         if read_txt or not isfile(filepath + '.pk'):
             self.read_file(folder, file_type=file_type, dCoil=dCoil)
             self.save_pickle(filepath, attributes)
@@ -124,10 +225,12 @@ class scenario(pythonIO):
         self.cc.coilset = self.coilset
         if quiver_index != self.quiver_index:
             self.update_quiver()
+        '''
         self.ff = force_field(self.coilset)
         if self.coilset['force']['update_passive']:
             self.ff.set_force_field(state='passive')
         self.ff.get_force()
+        '''
 
         '''
         self.inv = INV(self.coilset, boundary='sf')
@@ -143,14 +246,15 @@ class scenario(pythonIO):
             self.read_txt_file(folder)
         elif file_type == 'qda':
             self.read_qda_file(folder)
-        self.date = datetime.strptime(
-                self.name.split('DINA')[-1].split('_')[0][:7], '%Y-%m')
-        if 'time' in self.data2:  # rename time field
-            self.data2['t'] = self.data2['time']
-            self.data2.pop('time')
-        self.load_scenario_data()
-        self.load_force_data()
-        self.postprocess()  # calculate Faxial
+
+        self.scenario = scenario_data(self.name, self.data2)
+        self.scenario.update(200)
+        self.scenario.update(-1)
+        print(self.scenario.data)
+        assert 0
+        # self.load_scenario_data()
+        # self.load_force_data()
+        # self.postprocess()  # calculate Faxial
         # self.operate()  # identify operating modes
 
     def get_current(self, t, names):
@@ -373,43 +477,7 @@ class scenario(pythonIO):
         coilset['force']['Fp'] = ff.Fp
         coilset['force']['Fp_filament'] = ff.Fp_filament
 
-    def space_data(self):  # generate interpolators and space timeseries
-        if self.date > self.date_switch:
-            coordinate_switch = 1
-        else:  # old file - correct coordinates
-            coordinate_switch = -1
-        to, unique_index = np.unique(self.data2['t'], return_index=True)
-        dt = np.mean(np.diff(to))
-        tmax = np.nanmax(to)
-        tmin = np.nanmin(to)
-        nt = int(tmax/dt)
-        dt = tmax/(nt-1)
-        self.t = np.linspace(tmin, tmax, nt)
-        self.fun, self.data = {}, {}
-        extract = [var for var in self.data2 if ('I' in var and len(var) <= 5)]
-        extract += ['Rcur', 'Zcur', 'ap', 'kp', 'Rp', 'Zp', 'a',
-                    'Ksep', 'BETAp', 'li(3)', 't', 'PSI(axis)', 'Emag', 'Lp',
-                    'q(95)', 'q(axis)', 'Vloop', 'D(PSI)res', 'Cejima',
-                    '<PSIext>', '<PSIcoils>']
-        extract = [var for var in extract if var in self.data2]
-        for var in extract:  # interpolate
-            if ('I' in var and len(var) <= 5) or ('V' in var):
-                self.data2[var] *= coordinate_switch
-            self.fun[var] = interp1d(to, self.data2[var][unique_index],
-                                     fill_value='extrapolate')
-            self.data[var] = self.fun[var](self.t)
 
-    def load_scenario_data(self):
-        self.space_data()
-        self.Icoil = {}
-        for var in self.data:
-            if var == 'Ip':  # plasma
-                self.Ipl = 1e6*self.data[var]  # MA to A
-            elif var[0] == 'I' and len(var) <= 5:
-                # kAturn to Aturn
-                self.Icoil[var[1:].upper()] = 1e3*self.data[var]
-        self.t = self.data['t']
-        self.dt = np.mean(np.diff(self.t))
 
     def load_force_data(self, ticktock=False):
         coils = self.coilset.coil.index
@@ -671,8 +739,10 @@ class scenario(pythonIO):
         # self.pf.update_current(It)
 
     def get_coil_current(self, index, VS3=True):
-        It = pd.Series()
+        It = pd.Series(index=self.Icoil.keys())
+        print(It)
         print(self.Icoil.keys())
+        assert 0
         '''
         for coil in self.Icoil:
             if VS3 or 'VS' not in coil:

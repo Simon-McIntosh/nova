@@ -53,7 +53,7 @@ class SF:
 
     def set_psi(self, eqdsk):  # was set_plasma
         required_keys = ['x', 'z', 'psi']
-        optional_keys = ['Ipl', 'beta_p', 'Li']
+        optional_keys = ['Ip', 'beta_p', 'Li']
         self.fw_limit = eqdsk.get('fw_limit', self.fw_limit)
         if np.array([key in eqdsk for key in required_keys]).all():
             for key in required_keys:
@@ -122,11 +122,11 @@ class SF:
         elif 'tosca' in self.eqdsk['header'].lower() or\
                 'TEQ' in self.eqdsk['name'] or\
                 'DINA' in self.eqdsk['name']:
-            self.eqdsk['Ipl'] *= -1
+            self.eqdsk['Ip'] *= -1
             self.eqdsk['It'] *= -1
             self.norm = 1
         else:  # CREATE
-            self.eqdsk['Ipl'] *= -1
+            self.eqdsk['Ip'] *= -1
             self.norm = 2*np.pi
         if self.norm != 1:
             for key in ['psi', 'simagx', 'sibdry']:
@@ -176,7 +176,7 @@ class SF:
               'simagx': float(self.Mpsi) * norm,
               # Poloidal flux at plasma boundary (Weber / rad)
               'sibdry': self.Xpsi * norm,
-              'Ipl': self.eqdsk['Ipl'] * Ip_dir,
+              'Ip': self.eqdsk['Ip'] * Ip_dir,
               # Poloidal flux in Weber/rad on grid points
               'psi': (np.transpose(self.psi).reshape((-1,)) -
                       psi_offset) * norm,

@@ -4,7 +4,9 @@ from amigo.pyplot import plt
 import numpy as np
 import pandas as pd
 import matplotlib
-from nova.biot_savart import biot_savart
+from nova.biot_savart import biot_savart, self_inductance
+from nep.DINA.read_scenario import scenario_data
+from astropy import units
 
 
 class CoilClass:
@@ -13,62 +15,58 @@ class CoilClass:
         - implements methods to manage input and
             output of data to/from the CoilSet class
         - provides interface to eqdsk files containing coil data
+        - provides interface to DINA scenaria data
     '''
-    def __init__(self, *args, eqdsk=None, dCoil=0):
+    def __init__(self, *args, eqdsk=None, dCoil=0, turn_fraction=1,
+                 scenario_filename=None):
         self.dCoil = dCoil
         self.coil = CoilFrame(
                 additional_columns=['Ic', 'It', 'Nt', 'Nf', 'dCoil',
-                                    'subindex', 'mpc'],
-                default_attributes={'dCoil': dCoil})
+                                    'subindex', 'mpc', 'turn_fraction'],
+                default_attributes={'dCoil': dCoil,
+                                    'turn_fraction': turn_fraction})
         self.subcoil = CoilFrame(
                 additional_columns=['Ic', 'It',  'Nt', 'coil'])
-        self.plasma = CoilFrame(additional_columns=['Ic', 'It',  'Nt'])
+        self.matrix = CoilSet.empty_matrix()
         self.add_coilset(*args)  # add list of coilset instances
         self.add_eqdsk(eqdsk)
-        self.initalize_matrix()  # coil flux and force interaction matrices
         self.initalize_functions()  # initalise functions
+        self._scenario_filename = None
+        self.scenario_filename = scenario_filename
 
     def initalize_functions(self):
         self.bs = biot_savart()
-
-    def initalize_matrix(self):
-        '''
-        matrix: a dictionary of force interaction matrices stored as dataframes
-        '''
-        self.matrix = {}
-        self.matrix['inductance'] = {
-                'Mc': None,  # line-current inductance matrix
-                'Mt': None}  # amp-turn inductance matrix
-        self.matrix['coil'] = {
-                'Fx': None,  # radial force
-                'Fz': None,  # vertical force
-                'xFx': None,  # first radial moment of radial force
-                'xFz': None,  # first radial moment of vertical force
-                'zFx': None,  # first vertical moment of radial force
-                'zFz': None,  # first vertical moment of vertical force
-                'My': None}  # torque
-        self.matrix['subcoil'] = {
-                'Fx': None, 'Fz': None, 'xFx': None, 'xFz': None,
-                'zFx': None, 'zFz': None, 'My': None}
-        self.matrix['plasma'] = {'Fx': None, 'Fz': None}
+        self.d2 = scenario_data()
 
     @property
     def coilset(self):
-        return CoilSet(self.coil, self.subcoil, self.plasma, self.matrix)
+        return CoilSet(self.coil, self.subcoil, self.matrix)
 
     @coilset.setter
     def coilset(self, coilset):
         self.coil = coilset.coil
         self.subcoil = coilset.subcoil
-        self.plasma = coilset.plasma
         self.matrix = coilset.matrix
 
+    def subset(self, coil_index, invert=False):
+        if not pd.api.types.is_list_like(coil_index):
+            coil_index = [coil_index]
+        if invert:
+            coil_index = self.coil.loc[~self.coil.index.isin(coil_index)].index
+        subindex = []
+        for index in coil_index:
+            subindex.extend(self.coil.loc[index, 'subindex'])
+        return CoilSet(self.coil.loc[coil_index], self.subcoil.loc[subindex])
+
     def add_coilset(self, *args):
-        for coilset in args:
-            for attribute in ['coil', 'subcoil', 'plasma']:
-                coil = getattr(coilset, attribute)
-                if not coil.empty:
-                    getattr(self, attribute).add_coil(coil)
+        if len(args) == 1:  # single coilset
+            self.coilset = args[0]
+        else:  # build from multiple coilsets
+            for coilset in args:
+                for attribute in ['coil', 'subcoil']:
+                    coil = getattr(coilset, attribute)
+                    if not coil.empty:
+                        getattr(self, attribute).add_coil(coil)
 
     @property
     def Ic(self):
@@ -93,6 +91,49 @@ class CoilClass:
     @It.setter
     def It(self, value):
         self.set_current(value, 'It')
+
+    @property
+    def Ip(self):
+        # return total plasma current
+        return self.coil.loc['Plasma', 'Ic']
+
+    @Ip.setter
+    def Ip(self, Ip):
+        self.coil.Ic = pd.Series({'Plasma': Ip})
+
+    @property
+    def scenario_filename(self):
+        return self._scenario_filename
+
+    @scenario_filename.setter
+    def scenario_filename(self, filename):
+        '''
+        Attributes:
+            filename (str) DINA filename
+            filename (int) DINA fileindex
+        '''
+        if filename != self._scenario_filename:
+            self.d2.load_file(filename)
+            self._scenario_filename = self.d2.filename
+
+    @property
+    def scenario(self):
+        '''
+        return scenario metadata
+        '''
+        return pd.Series({'filename': self.scenario_filename,
+                          'to': self.d2.to, 'ko': self.d2.ko})
+
+    @scenario.setter
+    def scenario(self, to):
+        '''
+        Attributes:
+            to (float): input time
+            to (str): feature_keypoint
+        '''
+        self.d2.to = to  # update scenario data (time or keypoint)
+        self.Ic = self.d2.Ic  # update coil currents
+        self.update_plasma()  # update plasma based on d2 data
 
     def set_current(self, value, current_column):
         '''
@@ -179,16 +220,17 @@ class CoilClass:
         if dCoil is None:
             dCoil = self.coil.at[name, 'dCoil']
         It = self.coil.at[name, 'It']  # coil turn-current
-        cross_section = self.coil.at[name, 'cross_section']
         x, z, dx, dz = self.coil.loc[name, ['x', 'z', 'dx', 'dz']]
-        turn_fraction = 1
+        cross_section = self.coil.at[name, 'cross_section']
+        turn_fraction = self.coil.at[name, 'turn_fraction']
         if dCoil is None or dCoil == 0:
-            dCoil = np.max([dx, dz])
-        elif dCoil == -1:  # mesh per-turn (inductance calculation)
+            dCoil = np.mean([dx, dz])
+        if dCoil == -1:  # mesh per-turn (inductance calculation)
             cross_section = 'circle'
-            turn_fraction = 0.7  # pass as variable
             Nt = self.coil.at[name, 'Nt']
             dCoil = (dx * dz / Nt)**0.5
+        else:
+            turn_fraction = 1
         nx = int(np.round(dx / dCoil))
         nz = int(np.round(dz / dCoil))
         if nx < 1:
@@ -213,6 +255,98 @@ class CoilClass:
         frame.loc[:, 'Nt'] = self.coil.at[name, 'Nt'] / Nf
         return frame
 
+    def drop_coil(self, index=None):
+        if index is None:
+            index = self.coil.index
+        if not pd.api.types.is_list_like(index):
+            index = [index]
+        for name in index:
+            if name in self.coil.index:
+                self.subcoil.drop_coil(self.coil.loc[name, 'subindex'])
+                self.coil.drop_coil(index)
+
+    def add_plasma(self, *args, **kwargs):
+        label = kwargs.pop('label', 'Pl')  # filament prefix
+        name = kwargs.pop('name', 'Pl_0')
+        part = kwargs.pop('part', 'plasma')
+        coil = kwargs.pop('coil', 'Plasma')
+        cross_section = kwargs.pop('cross_section', 'square')
+        self.drop_coil('Plasma')
+        # add plasma filaments to subcoil
+        subindex = self.subcoil.add_coil(
+                *args, label=label, part=part, coil=coil, name=name,
+                cross_section=cross_section, **kwargs)
+        Ip = self.subcoil.It[subindex]  # filament currents
+        Ip_net = Ip.sum()  # net plasma current
+        if not np.isclose(Ip.sum(), 0):
+            Nt = Ip / Ip_net  # filament turn number
+        else:
+            Nt = np.ones(Ip.size)
+        self.subcoil.loc[subindex, 'Nt'] = Nt
+        xpl = self.subcoil.x[subindex]  # filament x-location
+        zpl = self.subcoil.z[subindex]  # filament z-location
+        dx = dz = np.sqrt(np.sum(self.subcoil.dx[subindex] *
+                                 self.subcoil.dz[subindex]))
+        # add plasma to coil (x_gmd, z_amd)
+        Nf = Ip.size
+        self.coil.add_coil(biot_savart.gmd(xpl, Nt), biot_savart.amd(zpl, Nt),
+                           dz, dx, Nf=Nf, dCoil=None, cross_section='circle',
+                           name='Plasma', part='plasma', turn_fraction=1)
+        self.coil.at['Plasma', 'subindex'] = list(subindex)
+        #if Nf > 1:
+        #    self.inductance('Plasma', update=True)  # re-size plasma coil
+        self.Ic = pd.Series({'Plasma': Ip_net})  # update plasma net current
+
+    def inductance(self, name, update=False):
+        '''
+        calculate self-inductance and geometric mean of single coil
+
+        Attributes:
+            name (str): coil name (present in self.coil.index)
+            update (bool): apply update to self.coil.loc[name]
+        '''
+        coilset = self.subset(name)  # create single coil coilset
+        biot_savart(coilset).inductance()  # calculate self-inductance
+        L = coilset.matrix['inductance']['Mt'].loc[name, name]
+        dr = self_inductance(coilset.coil.x[name]).minor_radius(L)
+        # calculate geometric and arithmetic means
+        Nt = coilset.subcoil.Nt
+        x_gmd = biot_savart.gmd(coilset.subcoil.x, Nt)
+        z_amd = biot_savart.amd(coilset.subcoil.z, Nt)
+        if update:  # apply update
+            coilset.coil.loc[name, ['x', 'z']] = x_gmd, z_amd
+            coilset.coil.loc[name, ['dx', 'dz']] = 2*dr, 2*dr
+            CoilFrame.patch_coil(coilset.coil)  # re-generate coil patch
+            self.coil.loc[name] = coilset.coil.loc[name]
+        coilset = None  # remove coilset
+        return L
+
+    def update_plasma(self):
+        coordinates = ['Rcur', 'Zcur']
+        if not np.array([c in self.d2.unit for c in coordinates]).all():
+            coordinates = ['Rp', 'Zp']
+        v2 = self.d2.vector.loc[['Lp'] + coordinates].droplevel(1)
+        if 'Lp' not in self.d2.unit:
+            v2['Lp'] = 1.1e-5  # default plasma self-inductance H
+        scale = units.Unit(self.d2.unit[coordinates[0]]).to('m')
+        if not np.isclose(scale, 1):
+            for c in coordinates:
+                v2.loc[c] *= scale  # convert coordinates
+        Xp, Zp, Lp = v2.loc[coordinates + ['Lp']]
+        dr = self_inductance(Xp).minor_radius(Lp)
+
+        if 'Plasma' not in self.coil.index:  # create plasma coilset
+            self.add_plasma(Xp, Zp, 2*dr, 2*dr, cross_section='circle')
+        else:  # update plasma coilset
+            subindex = self.coil.at['Plasma', 'subindex']
+            # TODO update multi-filament plasma model
+        self.Ip = self.d2.Ip  # update plasma current
+
+    def calculate_inductance(self, mutual=False):
+        self.bs.mutual = mutual
+        self.bs.load_coilset(self.coilset)
+        self.bs.inductance()  # values written in self.coilset.matrix
+
     def add_mpc(self, name, factor=1):
         '''
         define multi-point constraint linking a set of coils
@@ -231,12 +365,15 @@ class CoilClass:
         for n, f in zip(name[1:], factor):
             self.coil.at[n, 'mpc'] = (name[0], f)
 
-    def plot_coil(self, ax, coil):
+    def plot_coil(self, ax, coil, alpha=1):
         if not coil.empty:
             patch = coil.loc[:, 'patch']  # sort patch based on zorder
+            no_patch = pd.isnull(coil.loc[:, 'patch'])
+            if no_patch.any():
+                coil.patch_coil(coil)
             patch = patch.iloc[np.argsort([p.zorder for p in patch])]
             pc = PatchCollection(patch, edgecolor='k',
-                                 match_original=True)
+                                 match_original=True, alpha=alpha)
             ax.add_collection(pc)
 
     def plot(self, subcoil=True, plasma=True, label=False, current=False,
@@ -246,13 +383,21 @@ class CoilClass:
         if subcoil:
             self.plot_coil(ax, self.subcoil)
         else:
-            self.plot_coil(ax, self.coil)
-        if plasma:
-            self.plot_coil(ax, self.plasma)
+            self.plot_coil(ax, self.coil, alpha=0.5)
+        if 'Plasma' in self.coil.index and plasma:
+            self.label_plasma(ax)
         if label or current:
             self.label_coil(ax, label, current, unit)
         ax.axis('equal')
         ax.axis('off')
+
+    def label_plasma(self, ax, fs=None):
+        if fs is None:
+            fs = matplotlib.rcParams['legend.fontsize']
+        x = self.coil.x['Plasma']
+        z = self.coil.z['Plasma']
+        ax.text(x, z, f'{1e-6*self.Ip:1.1f}MA', fontsize=fs,
+                ha='center', va='center', color=0.9 * np.ones(3))
 
     def label_coil(self, ax, label, current, unit, coil=None, fs=None):
         if fs is None:
@@ -260,6 +405,7 @@ class CoilClass:
         if coil is None:
             coil = self.coil
         parts = np.unique(coil.part)
+        parts = [p for p in parts if p != 'plasma']
         if label is True:
             label = parts
         elif label is False:
@@ -268,17 +414,18 @@ class CoilClass:
             current = parts
         elif current is False:
             current = []
+        ylim = np.diff(ax.get_ylim())[0]
         for name, part in zip(coil.index, coil.part):
             x, z = coil.at[name, 'x'], coil.at[name, 'z']
             dx, dz = coil.at[name, 'dx'], coil.at[name, 'dz']
             if coil.part[name] == 'CS':
-                drs = -2.5 / 3 * dx
+                drs = -2.0 / 3 * dx
                 ha = 'right'
             else:
-                drs = 2.5 / 3 * dx
+                drs = 2.0 / 3 * dx
                 ha = 'left'
             if part in label and part in current:
-                zshift = max([dz / 10, 0.5])
+                zshift = max([dz / 10, ylim / 5])
             else:
                 zshift = 0
             if part in label:
@@ -298,19 +445,27 @@ class CoilClass:
                         fontsize=fs, ha=ha, va='center',
                         color=0.2 * np.ones(3))
 
+
 if __name__ is '__main__':
 
     cc = CoilClass(dCoil=0.05)
     cc.update_metadata('coil', additional_columns=['R'])
-    cc.add_coil(1, 0, 0.1, 0.1, name='PF6', part='CS')
-    cc.add_coil([1, 3], 1, 0.3, 0.3, name='PF', part='PF', delim='')
-    cc.add_coil(1, 2, 0.1, 0.1, name='PF4', part='VS3')
-    cc.add_coil(1.6, 1.5, 0.2, 0.2, name='PF7', part='vvin', dCoil=0.01)
-    cc.plot()
+    cc.add_coil(1, 0, 0.1, 0.1, name='PF6', part='CS', cross_section='circle')
+    cc.add_coil([2, 2, 3, 3.5], [1, 0, -1, -3], 0.3, 0.3,
+                name='PF', part='PF', delim='', Nt=12)
+    cc.add_coil(3, 2, 0.1, 0.1, name='PF4', part='VS3', turn_fraction=0.75,
+                Nt=15, dCoil=-1)
+    cc.add_coil(5.6, 3.5, 0.2, 0.2, name='PF7', part='vvin', dCoil=0.01)
+
+    #cc.add_plasma(1, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
+    #cc.add_plasma(6, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
+
+    cc.scenario_filename = 48
+    cc.scenario = 'EOF'
+
+    cc.plot(label=True, current=True)
+    cc.plot(subcoil=False)
 
 
 
-
-
-
-
+    #cc.calculate_inductance()

@@ -16,9 +16,7 @@ from warnings import warn
 from time import time
 from amigo.geom import poly_inloop
 from nova.streamfunction import SF
-
-#  [add_Pcoil, add_Bcoil, Ppoint, Bpoint, Bmag, get_coil_psi]
-#  we have moved, find us in nova.cross_coil
+from nova.coil_class import CoilClass
 
 
 class MidpointNormalize(Normalize):
@@ -32,9 +30,10 @@ class MidpointNormalize(Normalize):
 
 
 class EQ(object):
+
     def __init__(self, coilset, eqdsk, sigma=0, **kwargs):
         self.mu_o = 4 * np.pi * 1e-7  # magnetic constant [Vs/Am]
-        self.coilset = coilset
+        self.cc = CoilClass(coilset)
         self.sf = SF(eqdsk=eqdsk)
         self.resample(sigma=sigma, **kwargs)
         self.get_plasma()  # plasma coils
@@ -56,7 +55,7 @@ class EQ(object):
         self.b = np.copy(np.reshape(self.GS, self.nx * self.nz))  # set core
         self.edgeBC(update_edge=update_edge)  # set edge
         self.psi = self.solve()  # re-solve
-        #self.set_eq_psi()  # pass grid and psi back to sf
+        # self.set_eq_psi()  # pass grid and psi back to sf
 
     def limits(self, boundary):
         X, Z = boundary.get('X'), boundary.get('Z')
@@ -114,7 +113,7 @@ class EQ(object):
         self.x2d, self.z2d = np.meshgrid(self.x, self.z, indexing='ij')
         self.N = self.nx * self.nz
         self.b = np.zeros(self.N)
-        self.bpl = np.zeros(self.N)
+        self.bp = np.zeros(self.N)
         self.psi_plasma = np.zeros((self.nx, self.nz))
         self.dx = (self.x[-1] - self.x[0]) / (self.nx - 1)
         self.dz = (self.z[-1] - self.z[0]) / (self.nz - 1)
@@ -139,8 +138,8 @@ class EQ(object):
 
     def select_control_coils(self):
         self.ccoil = {'vertical': {}, 'horizontal': {}}
-        PF = self.coilset.coil.loc[self.coilset.coil['part'] == 'PF', :]
-        CS = self.coilset.coil.loc[self.coilset.coil['part'] == 'CS', :]
+        PF = self.cc.coil.loc[self.cc.coil['part'] == 'PF', :]
+        CS = self.cc.coil.loc[self.cc.coil['part'] == 'CS', :]
         self.ccoil['vertical'] = np.zeros(
                 PF.nC, dtype=[('name', '|S10'), ('value', 'float'),
                               ('Io', 'float'), ('Ip', 'float'),
@@ -152,8 +151,8 @@ class EQ(object):
         nV, nH = -1, -1
         index = list(PF.index) + list(CS.index)
         for name in index:
-            x = self.coilset.coil.at[name, 'x']
-            z = self.coilset.coil.at[name, 'z']
+            x = self.cc.coil.at[name, 'x']
+            z = self.cc.coil.at[name, 'z']
             field = cc.green_field(self.sf.Mpoint[0], self.sf.Mpoint[1], x, z)
             if name in PF.index:
                 nV += 1
@@ -165,7 +164,7 @@ class EQ(object):
             self.ccoil[direction]['z'][index] = z
             self.ccoil[direction]['value'][index] = field[iB]
             self.ccoil[direction]['Io'][index] = \
-                self.coilset.coil.at[name, 'It']
+                self.cc.coil.at[name, 'It']
         for direction in ['vertical', 'horizontal']:
             self.ccoil[direction] = np.sort(self.ccoil[direction],
                                             order='value')  # order='z'
@@ -214,10 +213,11 @@ class EQ(object):
 
     def psi_ex(self):
         psi = np.zeros(self.Ne)
-        x, z, If = self.coilset.subcoil.loc[:, ['x', 'z', 'If']].values.T
-        for i, name in enumerate(self.coilset.subcoil.index):
+        subcoil = self.cc.subset('Plasma', invert=True).subcoil
+        x, z, It = subcoil.loc[:, ['x', 'z', 'It']].values.T
+        for i in range(subcoil.nC):
             if not self.ingrid(x[i], z[i]):
-                psi += cc.mu_o * If[i] * cc.green(self.Xe, self.Ze, x[i], z[i])
+                psi += cc.mu_o * It[i] * cc.green(self.Xe, self.Ze, x[i], z[i])
         self.psi_external = psi
         return psi
 
@@ -239,15 +239,14 @@ class EQ(object):
         return psi
 
     def coil_core(self):
-        for name in self.coilset.subcoil.index:
-            x = self.coilset.subcoil.at[name, 'x']
-            z = self.coilset.subcoil.at[name, 'z']
-            If = self.coilset.subcoil.at[name, 'If']
-            if self.ingrid(x, z):
-                i = np.argmin(np.abs(x - self.x))
-                j = np.argmin(np.abs(z - self.z))
+        subcoil = self.cc.subset('Plasma', invert=True).subcoil
+        x, z, It = subcoil.loc[:, ['x', 'z', 'It']].values.T
+        for index in range(subcoil.nC):
+            if self.ingrid(x[index], z[index]):
+                i = np.argmin(np.abs(x[index] - self.x))
+                j = np.argmin(np.abs(z[index] - self.z))
                 self.b[self.indx(i, j)] += -self.mu_o * \
-                    If * self.x[i] / (self.dA)
+                    It[index] * self.x[i] / (self.dA)
 
     def set_vacuum(self, GS):
         X, Z = geom.inloop(self.sf.xbdry, self.sf.zbdry,
@@ -265,7 +264,6 @@ class EQ(object):
         points = {'x': self.x2d.flatten(), 'z': self.z2d.flatten()}
         X, Z = poly_inloop(loop, points, plot=False)
         self.Nplasma = len(X)
-        self.Ipl = 0
         self.plasma_index = np.zeros(self.Nplasma, dtype=int)
         self.psi_norm = np.zeros(self.Nplasma, dtype=float)
         for k, (x, z) in enumerate(zip(X, Z)):
@@ -290,36 +288,32 @@ class EQ(object):
                 self.xB[p, q] = x * (B[0]**2 + B[1]**2)
         '''
 
-    # def solve_plasma()
-
     def plasma_core(self, update=True):
         if update:  # calculate plasma contribution
             self.index_plasma_core()
+            self.Ip = 0
             for index, psi_norm in zip(self.plasma_index, self.psi_norm):
                 x = self.x[self.ij(index)[0]]
-                self.bpl[index] = -self.mu_o * x**2 * self.sf.Pprime(psi_norm)\
+                self.bp[index] = -self.mu_o * x**2 * self.sf.Pprime(psi_norm)\
                     - self.sf.FFprime(psi_norm)
-                self.Ipl -= self.dA * self.bpl[index] / (self.mu_o * x)
-
+                self.Ip -= self.dA * self.bp[index] / (self.mu_o * x)
             # li = np.dot(self.xB, I.reshape(-1, 1))  # internal inductance
-            scale_plasma = self.sf.Ipl / self.Ipl
+            scale_plasma = self.sf.Ip / self.Ip
             self.sf.b_scale = scale_plasma
         for i, index in enumerate(self.plasma_index):
-            self.b[index] = self.bpl[index] * self.sf.b_scale
+            self.b[index] = self.bp[index] * self.sf.b_scale
 
     def set_plasma(self):
-        self.plasma = {}
         Xp, Zp = np.zeros(self.Nplasma), np.zeros(self.Nplasma)
-        Ipl = np.zeros(self.Nplasma)
+        Ip = np.zeros(self.Nplasma)
         for index in range(self.Nplasma):
             i, j = self.ij(self.plasma_index[index])
             x, z = self.x[i], self.z[j]
-            Ic = -self.dA * self.b[self.plasma_index[index]] / (self.mu_o * x)
+            It = -self.dA * self.b[self.plasma_index[index]] / (self.mu_o * x)
             Xp[index], Zp[index] = x, z
-            Ipl[index] = Ic
+            Ip[index] = It
         index = -1
-        self.coilset.plasma.add_coil(Xp, Zp, self.dx, self.dz, If=Ipl,
-                                     name='Pl', part='plasma')
+        self.cc.add_plasma(Xp, Zp, self.dx, self.dz, It=Ip)
 
     def get_plasma(self):
         self.plasma_core()
@@ -359,23 +353,23 @@ class EQ(object):
         self.set_plasma()
 
     def set_eq_psi(self):  # set psi from eq
-        eqdsk = {'x': self.x, 'z': self.z, 'psi': self.psi, 'Ipl': self.sf.Ipl}
+        eqdsk = {'x': self.x, 'z': self.z, 'psi': self.psi, 'Ip': self.sf.Ip}
         self.sf.update_eqdsk(eqdsk)  # include boundary update
 
     def set_control_current(self, name, **kwargs):  # set filliment currents
         if 'It' in kwargs:
             It = kwargs['It']
         elif 'factor' in kwargs:
-            It = (1 + kwargs['factor']) * self.coilset.coil.at[name, 'Io']
+            It = (1 + kwargs['factor']) * self.cc.coil.at[name, 'Io']
         else:
             errtxt = '\n'
             errtxt += 'kw input \'It\' or \'factor\'\n'
             raise ValueError(errtxt)
-        self.coilset.coil.at[name, 'It'] = It
-        Nf = self.coilset.coil.at[name, 'Nf']
+        self.cc.coil.at[name, 'It'] = It
+        Nf = self.cc.coil.at[name, 'Nf']
         for subcoil in range(Nf):
             subname = '{}_{:1.0f}'.format(name, subcoil)
-            self.coilset.subcoil.at[subname, 'If'] = It / Nf
+            self.cc.subcoil.at[subname, 'It'] = It / Nf
 
     def reset_control_current(self):
         self.cc = 0
@@ -468,7 +462,7 @@ class EQ(object):
         for field in ['horizontal', 'vertical']:
             for i in range(len(self.ccoil[field]['name'])):
                 name = self.ccoil[field]['name'][i].decode()
-                self.ccoil[field]['Io'][i] = self.coilset.coil.at[name, 'It']
+                self.ccoil[field]['Io'][i] = self.coil.at[name, 'It']
     '''
 
     def gen_opp(self, z=None, Zerr=5e-4, Nmax=100, **kwargs):
@@ -554,15 +548,15 @@ class EQ(object):
         self.b = np.reshape(b, self.nx * self.nz)
 
     def set_plasma_current(self):  # plasma current from sf line intergral
-        Ipl = 0
+        Ip = 0
         X, Z = self.sf.get_boundary()
         tX, tZ, X, Z = cc.tangent(X, Z, norm=False)
         for x, z, tx, tz in zip(X, Z, tX, tZ):
             B = self.sf.Bcoil((x, z))
             t = np.array([tx, tz])
-            Ipl += np.dot(B, t)
-        Ipl /= cc.mu_o
-        self.sf.Ipl = Ipl
+            Ip += np.dot(B, t)
+        Ip /= cc.mu_o
+        self.sf.Ip = Ip
 
     def fluxfunctions(self, npsi=100, sigma=0):
         FFp, Pp = np.ones(npsi), np.ones(npsi)  # flux functions

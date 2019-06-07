@@ -79,9 +79,11 @@ class CoilFrame(pd.DataFrame):
 
     @It.setter
     def It(self, It):
-        self['It'] = It  # turn-current [A.turn]
+        idx = It.index
+        self.loc[idx, 'It'] = It  # turn-current [A.turn]
         self.copy_mpc('It')  # copy multi-point constraints
-        self['Ic'] = self['It'] / self['Nt']  # line-current [A]
+        # line-current [A]
+        self.loc[idx, 'Ic'] = self.loc[idx, 'It'] / self.loc[idx, 'Nt']
 
     @property
     def Ic(self):
@@ -93,9 +95,11 @@ class CoilFrame(pd.DataFrame):
 
     @Ic.setter
     def Ic(self, Ic):
-        self['Ic'] = Ic  # line-current [A]
+        idx = Ic.index
+        self.loc[idx, 'Ic'] = Ic  # line-current [A]
         self.copy_mpc('Ic')  # copy multi-point constraints
-        self['It'] = self['Ic'] * self['Nt']  # turn-current [A.turn]
+        # turn-current [A.turn]
+        self.loc[idx, 'It'] = self.loc[idx, 'Ic'] * self.loc[idx, 'Nt']
 
     def copy_mpc(self, var):
         if 'mpc' in self.columns:
@@ -117,17 +121,18 @@ class CoilFrame(pd.DataFrame):
 
     def get_frame(self, *args, **kwargs):
         args, kwargs = self._check_arguments(*args, **kwargs)
-        name = kwargs.pop('name', f'Coil_{self.nC:d}')
         delim = kwargs.pop('delim', '_')
+        label = kwargs.pop('label', kwargs.get('name', 'Coil'))
+        name = kwargs.pop('name', f'{label}{delim}{self.nC:d}')
         data = self._extract_data(*args, **kwargs)
-        index = self._extract_index(data, name, delim)
+        index = self._extract_index(data, delim, label, name)
         frame = CoilFrame(data, index=index, columns=data.keys(),
                           **self.metadata)
-        self.patch_coil(frame)
+        # self.patch_coil(frame)
         return frame
 
     @staticmethod
-    def patch_coil(frame, **kwargs):
+    def patch_coil(frame, **kwargs):  # call on-demand
         color = kwargs.get('color', {'VS3': 'C0', 'VS3j': 'gray',
                                      'CS': 'C0', 'PF': 'C0',
                                      'trs': 'C2', 'vvin': 'C3', 'vvout': 'C4',
@@ -153,6 +158,11 @@ class CoilFrame(pd.DataFrame):
         frame = self.get_frame(*args, **kwargs)  # additional coils
         self.concatenate(frame)
         return frame.index
+
+    def drop_coil(self, index=None):
+        if index is None:
+            index = self.index
+        self.drop(index, inplace=True)
 
     def concatenate(self, *frame):
         coil = pd.concat([self, *frame], sort=False)  # concatenate
@@ -194,7 +204,7 @@ class CoilFrame(pd.DataFrame):
                  f'{self._default_attributes}\n')
         return data
 
-    def _extract_index(self, data, name, delim):
+    def _extract_index(self, data, delim, label, name):
         try:
             nCol = np.max([len(data[key]) for key in data
                            if pd.api.types.is_list_like(data[key])])
@@ -209,7 +219,7 @@ class CoilFrame(pd.DataFrame):
             if nCol == 1:
                 index = [name]
             else:
-                index = [f'{name}{delim}{i}' for i in range(nCol)]
+                index = [f'{label}{delim}{i}' for i in range(nCol)]
         self._check_index(index)
         return index
 
@@ -233,26 +243,47 @@ class CoilSet:
 
         coil: a Pandas DataFrame containing all coil data
         subcoil: a Pandas DataFrame containig all subcoil data
-        plasma: a Pandas DataFrame containing plasma filaments
-
         matrix: a dictionary of force interaction matrices stored as dataframes
         matrix['inductance'] = {Mc: line-current inductance matrix
                                 Mt: amp-turn inductance matrix}
-        matrix['coil'] = {Fx: radial force
-                          Fz: vertical force
+        matrix['coil'] = {Fx:  net radial force
+                          Fz:  net vertical force
                           xFx: first radial moment of radial force
                           xFz: first radial moment of vertical force
                           zFx: first vertical moment of radial force
                           zFz: first vertical moment of vertical force
-                          My: torque}
+                          My:  net torque}
         matrix['subcoil'] = {Fx, Fz, xFx, xFz, zFx, zFz, My}
-        matrix['plasma'] = {'Fx', 'Fz'}
     '''
-    def __init__(self, coil, subcoil, plasma, matrix):
+    def __init__(self, coil, subcoil, matrix=None):
         self.coil = coil
         self.subcoil = subcoil
-        self.plasma = plasma
-        self.matrix = matrix
+        if matrix is None:
+            self.matrix = self.empty_matrix()
+        else:
+            self.matrix = matrix
+
+    @staticmethod
+    def empty_matrix():
+        '''
+        matrix: a dictionary of force interaction matrices stored as dataframes
+        '''
+        matrix = {}
+        matrix['inductance'] = {
+                'Mc': None,  # line-current inductance matrix
+                'Mt': None}  # amp-turn inductance matrix
+        matrix['coil'] = {
+                'Fx': None,  # radial force
+                'Fz': None,  # vertical force
+                'xFx': None,  # first radial moment of radial force
+                'xFz': None,  # first radial moment of vertical force
+                'zFx': None,  # first vertical moment of radial force
+                'zFz': None,  # first vertical moment of vertical force
+                'My': None}  # torque
+        matrix['subcoil'] = {
+                'Fx': None, 'Fz': None, 'xFx': None, 'xFz': None,
+                'zFx': None, 'zFz': None, 'My': None}
+        return matrix
 
 
 if __name__ is '__main__':

@@ -67,7 +67,7 @@ class power_supply(pythonIO):
             self.save_pickle(filepath, attributes)
         else:
             self.load_pickle(filepath)
-            self.pf(self.coilset)  # update local pf instance
+            # self.pf(self.coilset)  # update local pf instance
 
     def build_coils(self, plot=False):
         self.vv = VVcoils(model=self.vessel_model, invessel=self.invessel)

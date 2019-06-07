@@ -8,6 +8,7 @@ from os import sep
 from amigo.IO import pythonIO
 from datetime import datetime
 from amigo.time import clock
+from amigo.qdafile import QDAfile
 
 
 # read_dina.timeconstant moved to time.time_constant
@@ -23,7 +24,7 @@ class read_dina(pythonIO):
             database_folder (str): name of database folder
             read_txt (bool): read / reread source text files
         '''
-        super().__init__()  # python read/write
+        pythonIO.__init__(self)  # python read/write
         self.set_directory(database_folder)
         self.read_txt = read_txt
 
@@ -39,32 +40,41 @@ class read_dina(pythonIO):
 
     def get_folders(self):
         folders = [f for f in listdir(self.directory)]
-        self.folders = sorted(folders)
+        if self.database_folder == 'operations':
+            self.folders = sorted(
+                    folders, key=lambda x: f'{x.split("-")[1]}_'
+                                           f'{x.split("-")[2]}_'
+                                           f'{x.split("-")[0]}')
+        else:
+            self.folders = folders
         self.nfolder = len(self.folders)
         files = [f for f in listdir(self.directory) if isfile(f)]
         self.files = sorted(files)
         self.nfile = len(self.files)
 
-    def sort_folders(self, exclude=[]):
+    def get_folder_array(self, exclude=[]):
         dtype = [('name', 'U25'), ('year', int), ('mode', 'U25'),
                  ('month', int), ('version', 'U25')]
-        folders = np.ones(self.nfolder, dtype=dtype)
+        folder_array = np.ones(self.nfolder, dtype=dtype)
         for i in range(self.nfolder):
-            folders[i]['name'] = self.folders[i]
-            folders[i]['mode'] = self.folders[i].split('DINA')[0][:-1]
+            folder_array[i]['name'] = self.folders[i]
+            folder_array[i]['mode'] = self.folders[i].split('DINA')[0][:-1]
             timestamp = self.folders[i].split('DINA')[-1]
-            folders[i]['year'] = int(timestamp.split('-')[0])
+            folder_array[i]['year'] = int(timestamp.split('-')[0])
             timestamp = ''.join(timestamp.split('-')[1:])
-            folders[i]['month'] = int(timestamp[:2])
-            folders[i]['version'] = timestamp[2:].replace('_', '')
-        folders.sort(order=['year', 'month', 'version'])
+            folder_array[i]['month'] = int(timestamp[:2])
+            folder_array[i]['version'] = timestamp[2:].replace('_', '')
+        folder_array.sort(order=['year', 'month', 'version'])
         if exclude:
-            index = [name not in exclude for name in folders['name']]
-            folders = folders[index]
-        self.folders = folders
+            index = [name not in exclude for name in folder_array['name']]
+            folder_array = folder_array[index]
+        self.folder_array = folder_array
+        self.folders = self.folder_array['name']
 
     def select_folder(self, folder):  # folder entered as string, index or None
         if isinstance(folder, int):  # index (int)
+            if folder < 0:
+                folder += self.nfolder
             if folder > self.nfolder-1:
                 txt = '\nfolder index {:d} greater than '.format(folder)
                 txt += 'folder number {:d}'.format(self.nfolder)
@@ -142,17 +152,54 @@ class read_dina(pythonIO):
             raise IndexError('ext {} not found in {}'.format(ext, files))
         return join(folder, file)
 
-    def read_csv(self, filename, dropnan=True, split='', dataframe=False):
+    def read_csv(self, filename, split='', dropnan=True, dataframe=True):
         data = pd.read_csv(filename, delimiter='\t', na_values='NAN')
-
         columns = {}
+        units = []
         for c in list(data):
+            uo = ''
             if split:
-                co = c.split(split)[0]
+                c_split = c.split(split)
+                co = c_split[0]
+                co = co.replace(' or ', '_or_')
+                co = co.replace(' ', '')
+                if len(c_split) == 2:
+                    uo = c_split[1].replace(' ', '')
             if co in [key.split(split)[0] for key in columns]:
                 co += '_extra'  # seperate duplicates
             columns[c] = co
-        data = data.rename(index=str, columns=columns)
+            units.append(uo)
+        data = self.multiindex(data, columns, units,
+                               dropnan=dropnan, dataframe=dataframe)
+        return data
+
+    def read_qda(self, filename, split='', dropnan=True, dataframe=True):
+        qdafile = QDAfile(filename)
+        data = pd.DataFrame()
+        columns = {}
+        units = []
+        for i, (var, nrow) in enumerate(zip(qdafile.headers, qdafile.rows)):
+            uo = ''
+            var = var.decode()
+            if nrow > 0:
+                var_split = var.split(',')
+                co = var_split[0]
+                co = co.replace(' or ', '_or_')
+                co = co.replace(' ', '')
+                columns[var] = co
+                if len(var_split) == 2:
+                    uo = var_split[1].replace(' ', '')
+                data[columns[var]] = np.array(qdafile.data[i, :])
+                units.append(uo)
+        data = self.multiindex(data, columns, units,
+                               dropnan=dropnan, dataframe=dataframe)
+        return data
+
+    def multiindex(self, data, columns, units,
+                   dropnan=False, dataframe=True):
+        data.columns = pd.MultiIndex.from_tuples(
+                [(columns[c], u) for c, u in zip(columns, units)],
+                names=['name', 'unit'])
         data_keys = list(data.keys())
         for var in data_keys:
             if len(data[var]) == 0 or np.isnan(data[var]).all():
@@ -178,4 +225,4 @@ class read_dina(pythonIO):
 if __name__ == '__main__':
 
     dina = read_dina('operations')
-    filename = dina.locate_file('data2.txt', folder=0)
+    filename = dina.locate_file('data2.txt', folder=1)

@@ -27,8 +27,8 @@ class read_eqdsk(pythonIO):
 
     def read_file(self, file):
         filename = self.dina.locate_file(file)
-        sf = SF(filename=filename)
-        self.eqdsk = sf.eqdsk
+        self.sf = SF(filename=filename)
+        self.eqdsk = self.sf.eqdsk
 
     def plot(self):
         ax = plt.subplots(1, 1, figsize=(8, 10))[1]
@@ -37,11 +37,6 @@ class read_eqdsk(pythonIO):
     def dPdPsi(self, Psi, I):
         dP = 1
         return dP
-
-
-    def intergrate(self):
-        eqdsk = self.sf.eqdsk
-        #self.ode = ode(dIdPsi).set_integrator('dop853')  # 'dopri5'
 
     def plot_flux_functions(self):
         Xpsi, Mpsi = self.eqdsk['sibdry'], self.eqdsk['simagx']
@@ -68,15 +63,8 @@ class read_eqdsk(pythonIO):
         plt.detick(ax)
 
 
-
-
-
 if __name__ == '__main__':
 
     eqdsk = read_eqdsk(read_txt=True)
-    # eqdsk.plot()
+    eqdsk.plot()
     eqdsk.plot_flux_functions()
-
-
-
-

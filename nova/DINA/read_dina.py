@@ -11,7 +11,7 @@ from amigo.time import clock
 from amigo.qdafile import QDAfile
 
 
-# read_dina.timeconstant moved to time.time_constant
+# read_dina.timeconstant moved to amigo.time.time_constant
 
 
 class read_dina(pythonIO):

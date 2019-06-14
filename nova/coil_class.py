@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import matplotlib
 from nova.biot_savart import biot_savart, self_inductance
+from nova.mesh_grid import MeshGrid
 from nep.DINA.read_scenario import scenario_data
 from astropy import units
 
@@ -19,6 +20,15 @@ class CoilClass:
     '''
     def __init__(self, *args, eqdsk=None, dCoil=0, turn_fraction=1,
                  scenario_filename=None):
+        self.initialize_coils(dCoil, turn_fraction)
+        self.add_coilset(*args)  # add list of coilset instances
+        self.add_eqdsk(eqdsk)
+        self.initalise_data()
+        self.initalize_functions()  # initalise functions
+        self._scenario_filename = None
+        self.scenario_filename = scenario_filename
+
+    def initialize_coils(self, dCoil, turn_fraction):
         self.dCoil = dCoil
         self.coil = CoilFrame(
                 additional_columns=['Ic', 'It', 'Nt', 'Nf', 'dCoil',
@@ -27,26 +37,27 @@ class CoilClass:
                                     'turn_fraction': turn_fraction})
         self.subcoil = CoilFrame(
                 additional_columns=['Ic', 'It',  'Nt', 'coil'])
-        self.matrix = CoilSet.empty_matrix()
-        self.add_coilset(*args)  # add list of coilset instances
-        self.add_eqdsk(eqdsk)
-        self.initalize_functions()  # initalise functions
-        self._scenario_filename = None
-        self.scenario_filename = scenario_filename
+
+    def initalise_data(self):
+        self.inductance = CoilSet.initalize_inductance()
+        self.force = CoilSet.initialize_force()
+        self.subforce = CoilSet.initialize_force()
+        self.grid = CoilSet.initialize_grid()
 
     def initalize_functions(self):
-        self.bs = biot_savart()
         self.d2 = scenario_data()
 
     @property
     def coilset(self):
-        return CoilSet(self.coil, self.subcoil, self.matrix)
+        return CoilSet(self.coil, self.subcoil, inductance=self.inductance,
+                       force=self.force, subforce=self.subforce,
+                       grid=self.grid)
 
     @coilset.setter
     def coilset(self, coilset):
-        self.coil = coilset.coil
-        self.subcoil = coilset.subcoil
-        self.matrix = coilset.matrix
+        for attr in ['coil', 'subcoil', 'inductance',
+                     'force', 'subforce', 'flux']:
+            setattr(self, attr, getattr(coilset, attr))
 
     def subset(self, coil_index, invert=False):
         if not pd.api.types.is_list_like(coil_index):
@@ -141,11 +152,13 @@ class CoilClass:
         index built as union of value.index and coil.index
         mpc constraints applied
         Args:
-            value (pd.Series): current update
+            value (pd.Series or dict): current update
             current_column (str):
                 'Ic' == line current [A]
                 'It' == turn current [A.turns]
         '''
+        if not isinstance(value, pd.Series):
+            value = pd.Series(value)
         if current_column not in ['Ic', 'It']:
             raise IndexError(f'current column: {current_column} '
                              'not in [Ic, It]')
@@ -342,11 +355,6 @@ class CoilClass:
             # TODO update multi-filament plasma model
         self.Ip = self.d2.Ip  # update plasma current
 
-    def calculate_inductance(self, mutual=False):
-        self.bs.mutual = mutual
-        self.bs.load_coilset(self.coilset)
-        self.bs.inductance()  # values written in self.coilset.matrix
-
     def add_mpc(self, name, factor=1):
         '''
         define multi-point constraint linking a set of coils
@@ -445,17 +453,70 @@ class CoilClass:
                         fontsize=fs, ha=ha, va='center',
                         color=0.2 * np.ones(3))
 
+    def calculate_inductance(self, mutual=False):
+        bs = biot_savart(self.coilset, mutual=mutual)
+        Mc = bs.calculate_inductance()
+        Nt = self.coil['Nt']
+        Nt = Nt.reshape(-1, 1) * Nt.reshape(1, -1)
+        self.inductance['Mc'] = Mc  # line-current
+        self.inductance['Mt'] = Mc / Nt  # amp-turn
+
+    def update_grid(self, n=1e4, limit=None):
+        self.grid = CoilSet.initialize_grid()
+        if limit is None:
+            x = self.subcoil.loc[:, 'x']
+            z = self.subcoil.loc[:, 'z']
+            limit = np.array([x.min(), x.max(), z.min(), z.max()])
+            dx, dz = np.diff(limit[:2])[0], np.diff(limit[2:])[0]
+            delta = np.mean([dx, dz])
+            limit += 0.05 * delta * np.array([-1, 1, -1, 1])
+        mg = MeshGrid(n, limit)  # set mesh
+        self.grid['n'] = [mg.nx, mg.nz]
+        self.grid['dx'] = np.diff(limit[:2])[0] / (mg.nx - 1)
+        self.grid['dz'] = np.diff(limit[2:])[0] / (mg.nz - 1)
+        self.grid['limit'] = limit
+        self.grid['x2d'] = mg.x2d
+        self.grid['z2d'] = mg.z2d
+        bs = biot_savart(self.coilset, mutual=False)
+        Psi, Bx, Bz = bs.calculate_interaction(grid=self.grid)
+        self.grid['Psi'] = Psi
+        self.grid['Bx'] = Bx
+        self.grid['Bz'] = Bz
+
+    def solve_grid(self, n=1e4, limit=None, nlevels=31, plot=False):
+        if self.grid['Psi'] is None:
+            self.update_grid(n=n, limit=limit)
+        for var in ['Psi', 'Bx', 'Bz']:
+            value = np.dot(self.grid[var], self.Ic).reshape(self.grid['n'])
+            self.grid[var.lower()] = value
+
+        psi_x, psi_z = np.gradient(self.grid['psi'],
+                                   self.grid['dx'], self.grid['dz'])
+        bx = -psi_z / self.grid['x2d']
+        bz = psi_x / self.grid['x2d']
+
+        if plot:
+            plt.contour(self.grid['x2d'], self.grid['z2d'], self.grid['psi'],
+                        nlevels, colors='gray', linestyles='-', linewidths=1.0)
+            plt.quiver(self.grid['x2d'], self.grid['z2d'],
+                       self.grid['bx'], self.grid['bz'], scale=100)
+            plt.quiver(self.grid['x2d'], self.grid['z2d'],
+                       bx, bz, scale=100, color='C3')
+
 
 if __name__ is '__main__':
 
-    cc = CoilClass(dCoil=0.05)
+    cc = CoilClass(dCoil=0.25)
     cc.update_metadata('coil', additional_columns=['R'])
-    cc.add_coil(1, 0, 0.1, 0.1, name='PF6', part='CS', cross_section='circle')
+    cc.add_coil(6, -3, 1.5, 1.5, name='PF6', part='CS', Nt=600)
+
+    '''
     cc.add_coil([2, 2, 3, 3.5], [1, 0, -1, -3], 0.3, 0.3,
-                name='PF', part='PF', delim='', Nt=12)
-    cc.add_coil(3, 2, 0.1, 0.1, name='PF4', part='VS3', turn_fraction=0.75,
+                name='PF', part='PF', delim='', Nt=300)
+    cc.add_coil(3, 2, 0.5, 0.8, name='PF4', part='VS3', turn_fraction=0.75,
                 Nt=15, dCoil=-1)
     cc.add_coil(5.6, 3.5, 0.2, 0.2, name='PF7', part='vvin', dCoil=0.01)
+    '''
 
     #cc.add_plasma(1, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
     #cc.add_plasma(6, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
@@ -463,9 +524,11 @@ if __name__ is '__main__':
     cc.scenario_filename = 48
     cc.scenario = 'EOF'
 
-    cc.plot(label=True, current=True)
+    cc.plot(label=True, current=True, unit='AT')
     cc.plot(subcoil=False)
 
+    # cc.calculate_inductance()
 
+    cc.calculate_flux_interaction(limit=[0.5, 9, -4, 3])
 
-    #cc.calculate_inductance()
+    cc.update_flux(plot=True)

@@ -13,8 +13,7 @@ class biot_savart:
     def __init__(self, coilset=None, **kwargs):
         self.gmr = geometric_mean_radius()  # mutual gmr factors
         self.mutual = kwargs.pop('mutual', False)  # mutual inductance offset
-        if coilset is not None:
-            self.load_coilset(coilset)
+        self.load_coilset(coilset)
 
     @staticmethod
     def gmd(x, Nt):
@@ -31,44 +30,32 @@ class biot_savart:
         return np.sum(Nt * x) / np.sum(Nt)
 
     def load_coilset(self, coilset):
-        self.initalize_coil()
-        self.coilset = coilset
-        self.append_coil(self.coilset.subcoil)
+        self.coil_index = coilset.coil.index
+        self.subcoil_index = coilset.subcoil.index
+        self.subindex = coilset.coil['subindex']
+        self.nC = coilset.subcoil.nC
+        self.coil = coilset.subcoil.loc[:, ['x', 'z', 'dx', 'dz', 'Nt']]
+        self.coil['ro'] = self.gmr.calculate_self(coilset.subcoil)
+        self.coil = self.coil.to_dict('list')
         self.reshape_coil()
-
-    def initalize_coil(self):
-        self.nC = 0
-        self.coil = {}
-        self.index = []
-        self.subindex = {}
-        for key in ['x', 'z', 'dx', 'dz', 'Nt', 'ro']:
-            self.coil[key] = np.array([])
-
-    def append_coil(self, coil):
-        self.nC += coil.nC
-        for key in self.coil:
-            if key == 'ro':
-                attribute = self.gmr.calculate_self(coil).values
-            else:
-                attribute = coil[key].values
-            self.coil[key] = np.append(self.coil[key], attribute)
 
     def reshape_coil(self):
         for key in self.coil:
-            self.coil[key] = self.coil[key].reshape(1, -1)
+            self.coil[key] = np.array(self.coil[key]).reshape(1, -1)
 
-    def load_target(self, x, z, Nt=None):
-        self.tshp = shape(x)  # store input shape of requested targets
+    def load_target(self, x, z, Nt=None, index=None):
+        tshp = shape(x)  # store input shape of requested targets
         if Nt is None:
-            Nt = np.ones((self.tshp.input_shape))
+            Nt = np.ones((tshp.input_shape))
+        self.target_index = index
         self.target = {}
         for key, value in zip(['x', 'z', 'Nt'], [x, z, Nt]):
-            self.target[key] = self.tshp.shape(value, (-1, 1))
+            self.target[key] = tshp.shape(value, (-1, 1))
         self.nT = len(self.target['x'])
 
     def assemble(self):
         if not hasattr(self, 'target'):
-            raise IndexError('points undefined: load_points')
+            raise IndexError('points undefined: load_target')
         self.target_m = {}
         for key in self.target:
             self.target_m[key] = np.dot(self.target[key],
@@ -89,7 +76,8 @@ class biot_savart:
         self.assemble()
 
     def colocate(self):
-        self.load_target(self.coil['x'], self.coil['z'], self.coil['Nt'])
+        self.load_target(self.coil['x'], self.coil['z'], self.coil['Nt'],
+                         index=self.subcoil_index)
         self.assemble()
 
     def offset(self):
@@ -98,24 +86,42 @@ class biot_savart:
         '''
         self.dL = np.array([self.target_m['x'] - self.coil_m['x'],
                             self.target_m['z'] - self.coil_m['z']])
-        self.Xo = np.array([self.coil_m['x'], self.coil_m['z']]) + self.dL / 2
-        self.dR = np.linalg.norm(self.dL, axis=0)
+        self.Ro = np.exp((np.log(self.coil_m['x']) +
+                          np.log(self.target_m['x'])) / 2)
+        self.dL_mag = np.linalg.norm(self.dL, axis=0)
+        iszero = np.isclose(self.dL_mag, 0)  # self index
+        self.dL_norm = np.zeros((2, self.nT, self.nC))
+        self.dL_norm[:, ~iszero] = self.dL[:, ~iszero] / self.dL_mag[~iszero]
+        self.dL_norm[1, iszero] = 1
         # self inductance index
-        idx = self.dR < self.coil['ro']  # seperation < self-self gmr
+        dr = (self.coil_m['dx'] + self.coil_m['dz']) / 4  # mean turn radius
+        idx = self.dL_mag < dr  # seperation < mean radius
         # mutual inductance
         if self.mutual:  # mutual inductance offset
-            nx = abs(self.dR / self.coil_m['dx'])
-            nz = abs(self.dR / self.coil_m['dz'])
+            nx = abs(self.dL_mag / self.coil_m['dx'])
+            nz = abs(self.dL_mag / self.coil_m['dz'])
             mutual_factor = self.gmr.evaluate(nx, nz)
             mutual_adjust = (mutual_factor - 1) / 2
             for i, key in enumerate(['x', 'z']):
-                self.target_m[key][~idx] -= \
-                    mutual_adjust[~idx] * self.dL[i][~idx]
-                self.coil_m[key][~idx] += \
-                    mutual_adjust[~idx] * self.dL[i][~idx]
+                offset = mutual_adjust[~idx] * self.dL[i][~idx]
+                self._apply_offset(key, offset, ~idx)
         # self-inductance offset
-        self.target_m['z'][idx] = self.Xo[1][idx] - self.coil_m['ro'][idx] / 2
-        self.coil_m['z'][idx] = self.Xo[1][idx] + self.coil_m['ro'][idx] / 2
+        factor = (1 - self.dL_mag[idx] / dr[idx]) / 2
+        for i, key in enumerate(['x', 'z']):
+            offset = factor * self.coil_m['ro'][idx] * self.dL_norm[i][idx]
+            self._apply_offset(key, offset, idx)
+
+    def _apply_offset(self, key, offset, index):
+        if key == 'x':
+            Ro_offset = np.exp(
+                    (np.log(self.coil_m[key][index] - offset) +
+                     np.log(self.target_m[key][index] + offset)) / 2)
+            shift = self.Ro[index] - Ro_offset  # gmr shift
+        else:
+            shift = np.zeros(np.shape(offset))
+        self.coil_m[key][index] -= offset - shift
+        self.target_m[key][index] += offset + shift
+        return shift
 
     def locate(self):
         xt, zt = self.target_m['x'], self.target_m['z']
@@ -125,6 +131,9 @@ class biot_savart:
         return xt, zt, Nt, xc, zc, Nc
 
     def flux_matrix(self):
+        '''
+        calculate subcoil flux (inductance) matrix
+        '''
         xt, zt, Nt, xc, zc, Nc = self.locate()
         m = 4 * xt * xc / ((xt + xc)**2 + (zt - zc)**2)
         M = np.array((xt * xc)**0.5 * ((2 * m**-0.5 - m**0.5) *
@@ -132,29 +141,12 @@ class biot_savart:
         M *= Nt * Nc  # turn-turn interaction, line-current
         return self.mu_o * M  # Wb
 
-    def inductance(self):
-        self.colocate()  # set targets
-        Msub = self.flux_matrix()  # calculate subcoil inductance matrix
-        Msub = pd.DataFrame(Msub, index=self.coilset.subcoil.index,
-                            columns=self.coilset.subcoil.index)
-        Mrow = pd.DataFrame(index=self.coilset.coil.index,
-                            columns=self.coilset.subcoil.index)
-        Mc = pd.DataFrame(index=self.coilset.coil.index,
-                          columns=self.coilset.coil.index)
-        for name in self.coilset.coil.index:  # row reduction
-            index = self.coilset.coil.subindex[name]
-            Mrow.loc[name, :] = Msub.loc[index, :].sum(axis=0)
-        for name in self.coilset.coil.index:  # column reduction
-            index = self.coilset.coil.subindex[name]
-            Mc.loc[:, name] = Mrow.loc[:, index].sum(axis=1)
-        Nt = self.coilset.coil.Nt.values
-        Nt = Nt.reshape(-1, 1) * Nt.reshape(1, -1)
-        self.coilset.matrix['inductance']['Mc'] = Mc  # line-current
-        self.coilset.matrix['inductance']['Mt'] = Mc / Nt  # amp-turn
-
-    def field(self):
+    def field_matrix(self):
+        '''
+        calculate subcoil field matrix
+        '''
         field = np.zeros((2, self.nT, self.nC))
-        xt, zt, __, xc, zc, Nc = self.locate()
+        xt, zt, Nt, xc, zc, Nc = self.locate()
         a = np.sqrt((xt + xc)**2 + (zt - zc)**2)
         m = 4 * xt * xc / a**2
         I1 = 4 / a * ellipk(m)
@@ -163,8 +155,51 @@ class biot_savart:
         B = -2 * xt * xc
         field[0] = xc / (2 * np.pi) * (zt - zc) / B * (I1 - A * I2)
         field[1] = xc / (2 * np.pi) * ((xc + xt * A / B) * I2 - xt / B * I1)
-        field *= Nc  # line-current
+        field *= Nt * Nc  # line-current
         return self.mu_o * field  # T
+
+    def solve(self, field=False):
+        Mo = self.flux_matrix()
+        M = self.reduce(Mo)
+        if field:
+            Bo = self.field_matrix()
+            Bx = self.reduce(Bo[0])
+            Bz = self.reduce(Bo[1])
+            return M, Bx, Bz
+        else:
+            return M
+
+    def reduce(self, Mo):
+        Mo = pd.DataFrame(Mo, index=self.target_index,
+                          columns=self.subcoil_index, dtype=float)
+        Mcol = pd.DataFrame(index=self.target_index,
+                            columns=self.coil_index, dtype=float)
+        M = pd.DataFrame(columns=self.coil_index, dtype=float)
+        for name in self.coil_index:  # column reduction
+            index = self.subindex[name]
+            Mcol.loc[:, name] = Mo.loc[:, index].sum(axis=1)
+        if self.target_index is not None:
+            for name in self.coil_index:  # row reduction
+                index = self.subindex[name]
+                M.loc[name, :] = Mcol.loc[index, :].sum(axis=0)
+        else:
+            M = Mcol
+        return M
+
+    def calculate_inductance(self):
+        self.colocate()  # set targets
+        Mc = self.solve(field=False)  # line-current
+        return Mc
+
+    def calculate_interaction(self, coilset=None, grid=None):
+        if coilset is not None:  # update coilset
+            self.load_coilset(coilset)
+        if grid is not None:  # update targets
+            self.load_target(grid['x2d'], grid['z2d'])
+        if coilset is not None or grid is not None:
+            self.assemble()
+        M, Bx, Bz = self.solve(field=True)  # line-current interaction
+        return M, Bx, Bz
 
 
 class self_inductance:
@@ -206,9 +241,11 @@ class self_inductance:
     def flux(self, gmr):
         '''
         calculate self-induced flux though a single-turn coil
+
         Attributes:
             a (float): coil major radius
             gmr (float): coil cross-section geometric mean radius
+
         Retuns:
             L (float): self inductance of coil
         '''
@@ -227,11 +264,10 @@ if __name__ is '__main__':
     cc.add_coil(1.6870, 5.4640, 0.7400, 2.093, Nt=554, name='CS3U', part='CS',
                 cross_section='circle')
     cc.add_coil(1.6870, 3.2780, 0.7400, 2.093, Nt=554, name='CS2U', part='CS')
-    cc.add_plasma(5, 2.5, 1.5, 1.5, It=5, cross_section='circle')
+    cc.add_plasma(5, 2.5, 1.5, 1.5, It=5e6, cross_section='circle')
     cc.plot(label=True)
 
-
-
-    # biot_savart(cc.coilset, mutual=False).inductance()
+    bs = biot_savart(cc.coilset, mutual=False)
+    Mc = bs.calculate_inductance()
 
     # plt.title(cc.coilset.matrix['inductance']['Mc'].CS3U)

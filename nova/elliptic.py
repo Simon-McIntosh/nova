@@ -70,14 +70,14 @@ class EQ(object):
                 else:
                     index = var < boundary.get(key)
                 X, Z = X[index], Z[index]
-        lim = np.array([X.min(), X.max(), Z.min(), Z.max()])
+        limit = np.array([X.min(), X.max(), Z.min(), Z.max()])
         if 'expand' in boundary.keys():  # expansion from boundary in meters
             expand = boundary.get('expand')
         else:
             expand = 0.5
         for i, direction in enumerate([-1, 1, -1, 1]):
-            lim[i] += direction * expand
-        return lim
+            limit[i] += direction * expand
+        return limit
 
     def grid(self, **kwargs):
         update_edge = True

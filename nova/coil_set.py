@@ -241,49 +241,83 @@ class CoilSet:
 
     Attributes:
 
-        coil: a Pandas DataFrame containing all coil data
-        subcoil: a Pandas DataFrame containig all subcoil data
-        matrix: a dictionary of force interaction matrices stored as dataframes
-        matrix['inductance'] = {Mc: line-current inductance matrix
-                                Mt: amp-turn inductance matrix}
-        matrix['coil'] = {Fx:  net radial force
-                          Fz:  net vertical force
-                          xFx: first radial moment of radial force
-                          xFz: first radial moment of vertical force
-                          zFx: first vertical moment of radial force
-                          zFz: first vertical moment of vertical force
-                          My:  net torque}
-        matrix['subcoil'] = {Fx, Fz, xFx, xFz, zFx, zFz, My}
+        coil (pd.DataFrame): coil data
+        subcoil (pd.DataFrame): subcoil data
+
+        mutual (dict): dictionary of inductance interaction matirces
+            mutual['Mc'] (pd.DataFrame): line-current inductance matrix
+            mutual['Mt'] (pd.DataFrame): amp-turn inductance matrix
+
+        force (dict): coil force interaction matrices (pd.DataFrame)
+            force['Fx']:  net radial force
+            force['Fz']:  net vertical force
+            force['xFx']: first radial moment of radial force
+            force['xFz']: first radial moment of vertical force
+            force['zFx']: first vertical moment of radial force
+            force['zFz']: first vertical moment of vertical force
+            force['My']:  net torque}
+        subforce (dict): filament force interaction matrices (pd.DataFrame)
+            subforce = {Fx, Fz, xFx, xFz, zFx, zFz, My}
+
+        grid (dict): poloidal grid coordinates and interaction matrices
+            grid['n'] ([2int]): grid dimensions
+            grid['limit'] ([4float]): grid limits
+            grid['x2d'] (np.array): x-coordinates (radial)
+            grid['z2d'] (np.array): z-coordinates
+            grid['Psi'] (pd.DataFrame): poloidal flux interaction matrix
+            grid['psi'] (pd.DataFrame): poloidal flux
+            grid['Bx'] (pd.DataFrame): radial field interaction matrix
+            grid['Bz'] (pd.DataFrame): vertical field interaction matrix
+            grid['bx'] (pd.DataFrame): radial field
+            grid['bz'] (pd.DataFrame): vertical field
     '''
-    def __init__(self, coil, subcoil, matrix=None):
+
+    def __init__(self, coil, subcoil, inductance=None, force=None,
+                 subforce=None, grid=None):
         self.coil = coil
         self.subcoil = subcoil
-        if matrix is None:
-            self.matrix = self.empty_matrix()
-        else:
-            self.matrix = matrix
+        self.inductance = self.initalize_inductance(inductance)
+        self.force = self.initialize_force(force)
+        self.subforce = self.initialize_force(subforce)
+        self.grid = self.initialize_grid(grid)
 
     @staticmethod
-    def empty_matrix():
+    def initalize_inductance(inductance=None):
+        if inductance is None:
+            inductance = {'Mc': None,  # line-current inductance matrix
+                          'Mt': None}  # amp-turn inductance matrix
+        return inductance
+
+    @staticmethod
+    def initialize_force(force=None):
         '''
-        matrix: a dictionary of force interaction matrices stored as dataframes
+        force: a dictionary of force interaction matrices stored as dataframes
         '''
-        matrix = {}
-        matrix['inductance'] = {
-                'Mc': None,  # line-current inductance matrix
-                'Mt': None}  # amp-turn inductance matrix
-        matrix['coil'] = {
-                'Fx': None,  # radial force
-                'Fz': None,  # vertical force
-                'xFx': None,  # first radial moment of radial force
-                'xFz': None,  # first radial moment of vertical force
-                'zFx': None,  # first vertical moment of radial force
-                'zFz': None,  # first vertical moment of vertical force
-                'My': None}  # torque
-        matrix['subcoil'] = {
-                'Fx': None, 'Fz': None, 'xFx': None, 'xFz': None,
-                'zFx': None, 'zFz': None, 'My': None}
-        return matrix
+        if force is None:
+            force = {
+                    'Fx': None,  # radial force
+                    'Fz': None,  # vertical force
+                    'xFx': None,  # first radial moment of radial force
+                    'xFz': None,  # first radial moment of vertical force
+                    'zFx': None,  # first vertical moment of radial force
+                    'zFz': None,  # first vertical moment of vertical force
+                    'My': None}  # in-plane torque
+        return force
+
+    @staticmethod
+    def initialize_grid(grid=None):
+        if grid is None:
+            grid = {'n': None,  # grid dimensions
+                    'limit': None,  # grid limits
+                    'x2d': None,  # x-coordinate
+                    'z2d': None,  # z-coordinate
+                    'Psi': None,  # flux interaction matrix
+                    'psi': None,  # poloidal flux
+                    'Bx': None,  # radial field interaction matrix
+                    'Bz': None,  # radial field interaction matrix
+                    'bx': None,  # radial field
+                    'bz': None}  # vertical field
+        return grid
 
 
 if __name__ is '__main__':

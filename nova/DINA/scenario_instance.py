@@ -23,10 +23,13 @@ eq = EQ(cc.coilset, eqdsk, n=3e3)  # set plasma coils
 # 236ms with patch on-demand
 # eq.run(update=False)
 
+
 cc.scenario = 'XPF'
 ax = plt.subplots(1, 1, figsize=(7, 9))[1]
 cc.plot()
-cc.solve_grid(plot=True, nlevels=71, limit=[1, 9, -3, 4], n=1e4)
+cc.solve_grid(plot=True, nlevels=31, limit=[3.5, 8.5, -2, 3], n=1e3)
+ax.axis('equal')
+ax.axis('off')
 
 '''
 

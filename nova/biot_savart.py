@@ -153,8 +153,9 @@ class biot_savart:
         I2 = 4 / a**3 * ellipe(m) / (1 - m)
         A = (zt - zc)**2 + xt**2 + xc**2
         B = -2 * xt * xc
-        field[0] = xc / (2 * np.pi) * (zt - zc) / B * (I1 - A * I2)
-        field[1] = xc / (2 * np.pi) * ((xc + xt * A / B) * I2 - xt / B * I1)
+        # xc / (2 * np.pi)
+        field[0] = xc / 2 * (zt - zc) / B * (I1 - A * I2)
+        field[1] = xc / 2 * ((xc + xt * A / B) * I2 - xt / B * I1)
         field *= Nt * Nc  # line-current
         return self.mu_o * field  # T
 

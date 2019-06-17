@@ -14,7 +14,8 @@ def test_inductance(plot=False):
     cc.add_coil(1.722, 5.313, 0.719, 2.075, Nt=554, name='CS3U', part='CS')
     cc.add_coil(1.722, 3.188, 0.719, 2.075, Nt=554, name='CS2U', part='CS')
     # calculated
-    Mc_bs = biot_savart(coilset=cc.coilset, mutual=True).inductance().values
+    Mc_bs = biot_savart(coilset=cc.coilset, 
+                        mutual=True).calculate_inductance().values
     # referance
     Mc_ddd = [[7.076E-01, 1.348E-01, 6.021E-02],
               [1.348E-01, 7.954E-01, 2.471E-01],

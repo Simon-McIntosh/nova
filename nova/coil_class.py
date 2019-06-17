@@ -126,6 +126,7 @@ class CoilClass:
         if filename != self._scenario_filename:
             self.d2.load_file(filename)
             self._scenario_filename = self.d2.filename
+        
 
     @property
     def scenario(self):
@@ -492,16 +493,19 @@ class CoilClass:
 
         psi_x, psi_z = np.gradient(self.grid['psi'],
                                    self.grid['dx'], self.grid['dz'])
-        bx = -psi_z / self.grid['x2d']
-        bz = psi_x / self.grid['x2d']
+        bx = -psi_z / self.grid['x2d'] 
+        bz = psi_x / self.grid['x2d'] 
 
         if plot:
+            scale = 20
             plt.contour(self.grid['x2d'], self.grid['z2d'], self.grid['psi'],
-                        nlevels, colors='gray', linestyles='-', linewidths=1.0)
+                        nlevels, colors='C1', linestyles='-', 
+                        linewidths=1.0)
             plt.quiver(self.grid['x2d'], self.grid['z2d'],
-                       self.grid['bx'], self.grid['bz'], scale=100)
+                       self.grid['bx'], self.grid['bz'], scale=scale,
+                       color='C0')
             plt.quiver(self.grid['x2d'], self.grid['z2d'],
-                       bx, bz, scale=100, color='C3')
+                       bx, bz, scale=scale, color='C3')
 
 
 if __name__ is '__main__':

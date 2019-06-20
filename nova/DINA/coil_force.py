@@ -24,6 +24,7 @@ import nep
 from amigo.IO import class_dir
 from nep.DINA.read_eqdsk import read_eqdsk
 import cycler
+from nova.coil_class import CoilClass
 
 
 class coil_force(pythonIO):
@@ -91,7 +92,7 @@ class coil_force(pythonIO):
         self.xlim, self.zlim = eqdsk['xlim'], eqdsk['zlim']
 
     def add_vv_coils(self):
-        coilset = self.ps.vv.pf.coilset
+        coilset = self.ps.coilset
         VS3_coil = {name: coilset['coil'][name] for name in coilset['coil']
                     if 'VS' in name and 'jacket' not in name}
         self.pf.add_coils(VS3_coil, subcoil=coilset['subcoil'], label='VS3')
@@ -674,6 +675,11 @@ if __name__ == '__main__':
 
     force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=15/15,
                        read_txt=False)
+    force.load_file(0)
+    # force.read_data(nframe=500, forcewrite=False)
+
+    cc = CoilClass()
+
     '''
     for folder in force.dina.folders:
         print(folder)
@@ -695,11 +701,11 @@ if __name__ == '__main__':
     plt.axis('off')
     '''
 
-    #force.load_file(0)
+    #
 
     # force.read_data(nframe=500, forcewrite=True)
     # plt.set_context('notebook')
-    force.plot_Fmax(nframe=500)
+    # force.plot_Fmax(nframe=500)
 
 
 

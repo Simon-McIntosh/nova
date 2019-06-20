@@ -67,7 +67,6 @@ class power_supply(pythonIO):
             self.save_pickle(filepath, attributes)
         else:
             self.load_pickle(filepath)
-            # self.pf(self.coilset)  # update local pf instance
 
     def build_coils(self, plot=False):
         self.vv = VVcoils(model=self.vessel_model, invessel=self.invessel)
@@ -123,7 +122,6 @@ class power_supply(pythonIO):
                      'Icap': []}
         self.update_defaults(**kwargs)
         if 'vessel' in kwargs or 'invessel' in kwargs:
-            # self.build_coils()  # re-build coil-set
             self.load_coils()
         build_keys = ['code', 'nturn', 'Cd', 'vessel']
         if np.array([key in kwargs for key in build_keys]).any():
@@ -413,7 +411,7 @@ class power_supply(pythonIO):
             for c in colors:
                 lines.append(Line2D([0], [0], color=colors[c]))
                 labels.append(c)
-            ax.legend(lines, labels)
+            ax.legend(lines, labels, loc='lower center')
 
         ax.plot(1e3*self.data['t'], 1e-3*self.data['Ivec'][:, 0], '-C0')
         try:
@@ -486,7 +484,7 @@ class power_supply(pythonIO):
         ax.set_xlabel('$t$ ms')
         ax.set_ylabel('$I$ kA')
         plt.despine()
-        plt.legend()
+        plt.legend(loc='lower center')
         '''
 
     def fit(self, x, plot=False):
@@ -534,7 +532,7 @@ class power_supply(pythonIO):
             plt.xlabel('$t$ ms')
             plt.ylabel('$I$ kA')
             plt.despine()
-            plt.legend()
+            plt.legend(loc='lower center')
         return err
 
     '''

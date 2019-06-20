@@ -10,6 +10,7 @@ from nep.DINA.read_scenario import scenario_data
 from astropy import units
 from amigo.IO import human_format
 from sklearn.cluster import DBSCAN
+from nova.biot_savart import biot_savart
 
 
 class CoilClass:
@@ -353,8 +354,10 @@ class CoilClass:
         if 'Plasma' not in self.coil.index:  # create plasma coilset
             self.add_plasma(Xp, Zp, 2*dr, 2*dr, cross_section='circle')
         else:  # update plasma coilset
-            subindex = self.coil.at['Plasma', 'subindex']
             # TODO update multi-filament plasma model
+            # subindex = self.coil.at['Plasma', 'subindex']
+            self.drop_coil('Plasma')
+            self.add_plasma(Xp, Zp, 2*dr, 2*dr, cross_section='circle')
         self.Ip = self.d2.Ip  # update plasma current
 
     def add_mpc(self, name, factor=1):
@@ -528,7 +531,21 @@ class CoilClass:
             self.subcoil.loc[subindex, 'cluster_index'] = cluster_index
         nc = self.coil.loc[:, 'cluster_index'].max()  # cluster number
 
-
+    def merge(self, coil_index):
+        subframe = self.subset(coil_index)
+        self.drop_coil(coil_index)
+        
+        x = biot_savart.gmd(subframe.x, subframe.Nt)
+        z = biot_savart.amd(subframe.z, subframe.Nt)
+        dr = np.sqrt(subframe.dx * subframe.dz) / 2
+        
+        self.add_coil(x, z, 2*dr, 2*dr, subcoil=False)
+        self.subcoil.add_coil(subframe.subcoil)
+        
+        #self.coil.at[name, 'subindex'] = list(frame.index)
+        
+        
+        
 if __name__ is '__main__':
 
     cc = CoilClass(dCoil=0.25)

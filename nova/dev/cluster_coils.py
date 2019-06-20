@@ -5,16 +5,20 @@ from nep.coil_geom import VVcoils, ITERcoilset
 from nova.coil_class import CoilClass
 
 pf = ITERcoilset().cc
-vv = VVcoils(model='local', read_txt=False).cc
+vv = VVcoils(model='full', read_txt=False).cc
 
-cc = CoilClass(pf, vv)
+cc = CoilClass(pf)
 
-cc.scenario_filename = -1
-cc.scenario = 'EOF'
+#cc.scenario_filename = -1
+#cc.scenario = 'EOF'
 
 cc.cluster()
 
+cc.merge(['PF6', 'PF5'])
+
 cc.plot(subcoil=True, color_label='cluster_index')
+
+# cc.solve_grid(plot=True)
 
 
 '''

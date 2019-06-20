@@ -6,7 +6,8 @@ from scipy.interpolate import InterpolatedUnivariateSpline as sinterp
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize
 import nova.geqdsk
-# from legacycontour._cntr import Cntr as cntr
+from legacycontour._cntr import Cntr as cntr
+#from skimage import measure
 from collections import OrderedDict
 from amigo import geom
 from amigo.IO import trim_dir

@@ -81,9 +81,9 @@ class CoilFrame(pd.DataFrame):
     def It(self, It):
         idx = It.index
         self.loc[idx, 'It'] = It  # turn-current [A.turn]
-        self.copy_mpc('It')  # copy multi-point constraints
         # line-current [A]
         self.loc[idx, 'Ic'] = self.loc[idx, 'It'] / self.loc[idx, 'Nt']
+        self.copy_mpc()  # copy multi-point constraints
 
     @property
     def Ic(self):
@@ -97,16 +97,18 @@ class CoilFrame(pd.DataFrame):
     def Ic(self, Ic):
         idx = Ic.index
         self.loc[idx, 'Ic'] = Ic  # line-current [A]
-        self.copy_mpc('Ic')  # copy multi-point constraints
         # turn-current [A.turn]
         self.loc[idx, 'It'] = self.loc[idx, 'Ic'] * self.loc[idx, 'Nt']
+        self.copy_mpc()  # copy multi-point constraints
 
-    def copy_mpc(self, var):
+    def copy_mpc(self):
         if 'mpc' in self.columns:
             for name in self.mpc.dropna().index:
                 mpc = self.mpc[name]
                 if name != mpc[0]:
-                    self.at[name, var] = self.at[mpc[0], var] * mpc[1]
+                    self.at[name, 'Ic'] = self.at[mpc[0], 'Ic'] * mpc[1]
+                    self.at[name, 'It'] = self.at[name, 'Ic'] *\
+                        self.at[name, 'Nt']
 
     def _get_coil_number(self):
         return len(self.index)
@@ -128,21 +130,26 @@ class CoilFrame(pd.DataFrame):
         index = self._extract_index(data, delim, label, name)
         frame = CoilFrame(data, index=index, columns=data.keys(),
                           **self.metadata)
-        # self.patch_coil(frame)
         return frame
 
     @staticmethod
-    def patch_coil(frame, **kwargs):  # call on-demand
-        color = kwargs.get('color', {'VS3': 'C0', 'VS3j': 'gray',
-                                     'CS': 'C0', 'PF': 'C0',
-                                     'trs': 'C2', 'vvin': 'C3', 'vvout': 'C4',
-                                     'plasma': 'C4'})
+    def patch_coil(frame, color_label='part', **kwargs):  # call on-demand
+        part_color = {'VS3': 'C0', 'VS3j': 'gray', 'CS': 'C0', 'PF': 'C0',
+                      'trs': 'C2', 'vvin': 'C3', 'vvout': 'C4', 'plasma': 'C4'}
+        cluster_color = dict([(i, f'C{i%10}') for i in range(frame.nC)])
+        if color_label == 'part':
+            color = kwargs.get('part_color', part_color)
+        elif color_label == 'cluster_index':
+            color = kwargs.get('cluster_color', cluster_color)
+        else:
+            raise IndexError(f'color_label: {color_label} '
+                             'not in [part, cluster_index]')
         zorder = kwargs.get('zorder', {'VS3': 1, 'VS3j': 0})
         patch = [[] for __ in range(frame.nC)]
         for i, geom in enumerate(
                 frame.loc[:, ['x', 'z', 'dx', 'dz', 'cross_section',
-                              'part']].values):
-            x, z, dx, dz, cross_section, part = geom
+                              color_label]].values):
+            x, z, dx, dz, cross_section, color_key = geom
             if cross_section in ['square', 'rectangle']:
                 patch[i] = patches.Rectangle((x - dx/2, z - dz / 2), dx, dz)
             else:
@@ -150,8 +157,8 @@ class CoilFrame(pd.DataFrame):
             patch[i].set_edgecolor('darkgrey')
             patch[i].set_linewidth(0.25)
             patch[i].set_antialiased(True)
-            patch[i].set_facecolor(color.get(part, 'C9'))
-            patch[i].zorder = zorder.get(part, 0)
+            patch[i].set_facecolor(color.get(color_key, 'C9'))
+            patch[i].zorder = zorder.get(color_key, 0)
         frame.loc[:, 'patch'] = patch
 
     def add_coil(self, *args, **kwargs):
@@ -244,9 +251,9 @@ class CoilSet:
         coil (pd.DataFrame): coil data
         subcoil (pd.DataFrame): subcoil data
 
-        mutual (dict): dictionary of inductance interaction matirces
-            mutual['Mc'] (pd.DataFrame): line-current inductance matrix
-            mutual['Mt'] (pd.DataFrame): amp-turn inductance matrix
+        inductance (dict): dictionary of inductance interaction matirces
+            inductance['Mc'] (pd.DataFrame): line-current inductance matrix
+            inductance['Mt'] (pd.DataFrame): amp-turn inductance matrix
 
         force (dict): coil force interaction matrices (pd.DataFrame)
             force['Fx']:  net radial force
@@ -283,9 +290,12 @@ class CoilSet:
 
     @staticmethod
     def initalize_inductance(inductance=None):
+        '''
+        inductance interaction matrix, H
+        '''
         if inductance is None:
-            inductance = {'Mc': None,  # line-current inductance matrix
-                          'Mt': None}  # amp-turn inductance matrix
+            inductance = {'Mc': pd.DataFrame(),  # line-current
+                          'Mt': pd.DataFrame()}  # amp-turn
         return inductance
 
     @staticmethod

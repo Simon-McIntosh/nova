@@ -8,6 +8,8 @@ from nova.biot_savart import biot_savart, self_inductance
 from nova.mesh_grid import MeshGrid
 from nep.DINA.read_scenario import scenario_data
 from astropy import units
+from amigo.IO import human_format
+from sklearn.cluster import DBSCAN
 
 
 class CoilClass:
@@ -56,7 +58,7 @@ class CoilClass:
     @coilset.setter
     def coilset(self, coilset):
         for attr in ['coil', 'subcoil', 'inductance',
-                     'force', 'subforce', 'flux']:
+                     'force', 'subforce', 'grid']:
             setattr(self, attr, getattr(coilset, attr))
 
     def subset(self, coil_index, invert=False):
@@ -126,7 +128,6 @@ class CoilClass:
         if filename != self._scenario_filename:
             self.d2.load_file(filename)
             self._scenario_filename = self.d2.filename
-        
 
     @property
     def scenario(self):
@@ -159,7 +160,7 @@ class CoilClass:
                 'It' == turn current [A.turns]
         '''
         if not isinstance(value, pd.Series):
-            value = pd.Series(value)
+            value = pd.Series(value)  # convert dict to pd.Series
         if current_column not in ['Ic', 'It']:
             raise IndexError(f'current column: {current_column} '
                              'not in [Ic, It]')
@@ -226,11 +227,11 @@ class CoilClass:
             self.subcoil.drop(self.subcoil.index, inplace=True)
         frame = [[] for __ in range(len(index))]
         for i, name in enumerate(index):
-            frame[i] = self.mesh_coil(name, dCoil=self.coil.at[name, 'dCoil'],
-                                      part=self.coil.at[name, 'part'])
+            frame[i] = self._mesh_coil(name, dCoil=self.coil.at[name, 'dCoil'],
+                                       part=self.coil.at[name, 'part'])
         self.subcoil.concatenate(*frame)
 
-    def mesh_coil(self, name, dCoil=None, part=None):
+    def _mesh_coil(self, name, dCoil=None, part=None):
         if dCoil is None:
             dCoil = self.coil.at[name, 'dCoil']
         It = self.coil.at[name, 'It']  # coil turn-current
@@ -307,8 +308,8 @@ class CoilClass:
                            dz, dx, Nf=Nf, dCoil=None, cross_section='circle',
                            name='Plasma', part='plasma', turn_fraction=1)
         self.coil.at['Plasma', 'subindex'] = list(subindex)
-        #if Nf > 1:
-        #    self.inductance('Plasma', update=True)  # re-size plasma coil
+        # if Nf > 1:
+        #     self.inductance('Plasma', update=True)  # re-size plasma coil
         self.Ic = pd.Series({'Plasma': Ip_net})  # update plasma net current
 
     def inductance(self, name, update=False):
@@ -374,29 +375,28 @@ class CoilClass:
         for n, f in zip(name[1:], factor):
             self.coil.at[n, 'mpc'] = (name[0], f)
 
-    def plot_coil(self, ax, coil, alpha=1):
+    def plot_coil(self, ax, coil, alpha=1, **kwargs):
         if not coil.empty:
-            patch = coil.loc[:, 'patch']  # sort patch based on zorder
-            no_patch = pd.isnull(coil.loc[:, 'patch'])
-            if no_patch.any():
-                coil.patch_coil(coil)
+            if pd.isnull(coil.loc[:, 'patch']).any() or len(kwargs) > 0:
+                coil.patch_coil(coil, **kwargs)  # patch on-demand
+            patch = coil.loc[:, 'patch']
             patch = patch.iloc[np.argsort([p.zorder for p in patch])]
-            pc = PatchCollection(patch, edgecolor='k',
+            pc = PatchCollection(patch, facecolors='k',
                                  match_original=True, alpha=alpha)
             ax.add_collection(pc)
 
-    def plot(self, subcoil=True, plasma=True, label=False, current=False,
-             ax=None, unit='A'):
+    def plot(self, subcoil=True, plasma=True, label=False, current=None,
+             ax=None, **kwargs):
         if ax is None:
             ax = plt.gca()
         if subcoil:
-            self.plot_coil(ax, self.subcoil)
+            self.plot_coil(ax, self.subcoil, **kwargs)
         else:
-            self.plot_coil(ax, self.coil, alpha=0.5)
+            self.plot_coil(ax, self.coil, **kwargs)
         if 'Plasma' in self.coil.index and plasma:
             self.label_plasma(ax)
         if label or current:
-            self.label_coil(ax, label, current, unit)
+            self.label_coil(ax, label, current)
         ax.axis('equal')
         ax.axis('off')
 
@@ -408,21 +408,14 @@ class CoilClass:
         ax.text(x, z, f'{1e-6*self.Ip:1.1f}MA', fontsize=fs,
                 ha='center', va='center', color=0.9 * np.ones(3))
 
-    def label_coil(self, ax, label, current, unit, coil=None, fs=None):
+    def label_coil(self, ax, label, current, coil=None, fs=None):
         if fs is None:
             fs = matplotlib.rcParams['legend.fontsize']
         if coil is None:
             coil = self.coil
         parts = np.unique(coil.part)
-        parts = [p for p in parts if p != 'plasma']
-        if label is True:
-            label = parts
-        elif label is False:
-            label = []
-        if current is True:
-            current = parts
-        elif current is False:
-            current = []
+        parts = [p for p in parts if p not in ['plasma', 'vvin',
+                                               'vvout', 'trs']]
         ylim = np.diff(ax.get_ylim())[0]
         for name, part in zip(coil.index, coil.part):
             x, z = coil.at[name, 'x'], coil.at[name, 'z']
@@ -433,31 +426,42 @@ class CoilClass:
             else:
                 drs = 2.0 / 3 * dx
                 ha = 'left'
-            if part in label and part in current:
+            if part in parts and (label and current):
                 zshift = max([dz / 10, ylim / 5])
             else:
                 zshift = 0
-            if part in label:
+            if part in parts and label:
                 ax.text(x + drs, z + zshift, name, fontsize=fs,
                         ha=ha, va='center', color=0.2 * np.ones(3))
-            if part in current:
-                if unit == 'A':  # amps
-                    Ic = coil.at[name, 'Ic']
-                    txt = '{:1.1f}kA'.format(Ic * 1e-3)
-                elif unit == 'AT':  # amp turns
-                    It = coil.at[name, 'It']
-                    if abs(It) < 0.1e6:  # display as kA.t
-                        txt = '{:1.1f}kAT'.format(It * 1e-3)
-                    else:  # MA.t
-                        txt = '{:1.1f}MAT'.format(It * 1e-6)
+            if part in parts and current:
+                if current == 'Ic':  # line current, amps
+                    unit = 'A'
+                    Ilabel = coil.at[name, 'Ic']
+                elif current == 'It':  # turn current, amp turns
+                    unit = 'At'
+                    Ilabel = coil.at[name, 'It']
+                txt = f'{human_format(Ilabel, precision=1)}{unit}'
                 ax.text(x + drs, z - zshift, txt,
                         fontsize=fs, ha=ha, va='center',
                         color=0.2 * np.ones(3))
 
-    def calculate_inductance(self, mutual=False):
-        bs = biot_savart(self.coilset, mutual=mutual)
+    def calculate_inductance(self, mutual=True, coil_index=None,
+                             invert=False):
+        '''
+        calculate / update inductance matrix
+
+            Attributes:
+                mutual (bool): include gmr correction for adjacent turns
+                coil_index (list): update inductance for coil subest
+                invert (bool): invert coil_index selection
+        '''
+        if coil_index is not None and not self.inductance['Mc'].empty:
+            coilset = self.subset(coil_index, invert=invert)
+        else:
+            coilset = self.coilset
+        bs = biot_savart(coilset, mutual=mutual)
         Mc = bs.calculate_inductance()
-        Nt = self.coil['Nt']
+        Nt = coilset.coil['Nt'].values
         Nt = Nt.reshape(-1, 1) * Nt.reshape(1, -1)
         self.inductance['Mc'] = Mc  # line-current
         self.inductance['Mt'] = Mc / Nt  # amp-turn
@@ -484,8 +488,9 @@ class CoilClass:
         self.grid['Bx'] = Bx
         self.grid['Bz'] = Bz
 
-    def solve_grid(self, n=1e4, limit=None, nlevels=31, plot=False):
-        if self.grid['Psi'] is None:
+    def solve_grid(self, n=1e4, limit=None, nlevels=31, plot=False,
+                   update=False):
+        if self.grid['Psi'] is None or update:
             self.update_grid(n=n, limit=limit)
         for var in ['Psi', 'Bx', 'Bz']:
             value = np.dot(self.grid[var], self.Ic).reshape(self.grid['n'])
@@ -493,19 +498,35 @@ class CoilClass:
 
         psi_x, psi_z = np.gradient(self.grid['psi'],
                                    self.grid['dx'], self.grid['dz'])
-        bx = -psi_z / self.grid['x2d'] 
-        bz = psi_x / self.grid['x2d'] 
+        bx = -psi_z / self.grid['x2d']
+        bz = psi_x / self.grid['x2d']
 
         if plot:
-            scale = 20
             plt.contour(self.grid['x2d'], self.grid['z2d'], self.grid['psi'],
-                        nlevels, colors='C1', linestyles='-', 
-                        linewidths=1.0)
+                        nlevels, colors='k', linestyles='-',
+                        linewidths=1.0, alpha=0.5,
+                        zorder=-50)
+            '''
+            scale = 20
             plt.quiver(self.grid['x2d'], self.grid['z2d'],
                        self.grid['bx'], self.grid['bz'], scale=scale,
                        color='C0')
             plt.quiver(self.grid['x2d'], self.grid['z2d'],
                        bx, bz, scale=scale, color='C3')
+            '''
+
+    def cluster(self, eps=0.15):
+        '''
+        cluster coils using DBSCAN algorithm
+        '''
+        dbscan = DBSCAN(eps=eps, min_samples=1)
+        cluster_index = dbscan.fit_predict(self.coil.loc[:, ['x', 'z']])
+        self.coil.loc[:, 'cluster_index'] = cluster_index
+        for name in self.coil.index:
+            subindex = self.coil.at[name, 'subindex']
+            cluster_index = self.coil.at[name, 'cluster_index']
+            self.subcoil.loc[subindex, 'cluster_index'] = cluster_index
+        nc = self.coil.loc[:, 'cluster_index'].max()  # cluster number
 
 
 if __name__ is '__main__':

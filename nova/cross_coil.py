@@ -209,7 +209,7 @@ def add_Pcoil(x, z, coil):
     z = shp.shape(z, (-1, 1))
     xc, zc, If = coil['x'], coil['z'], coil['If']
     dx, dz = np.float64(coil['dx']), np.float64(coil['dz'])
-    psi = If * green(x, z, xc, zc, dX=dx, dZ=dz)
+    psi = If * green(x, z, xc, zc, dXc=dx, dZc=dz)
     psi = shp.reshape(psi)
     return psi
 

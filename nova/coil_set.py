@@ -21,7 +21,7 @@ class CoilFrame(pd.DataFrame):
     CoilFrame instance inherits from Pandas DataFrame
     '''
     _metadata = ['_required_columns', '_additional_columns',
-                 '_default_attributes', '_integer_columns']
+                 '_default_attributes']  #, '_integer_columns'
 
     def __init__(self, *args, **kwargs):
         self._initalize_instance_metadata()
@@ -40,7 +40,7 @@ class CoilFrame(pd.DataFrame):
                                     'patch': None, 'coil': '', 'part': '',
                                     'subindex': None,
                                     'dCoil': 0, 'mpc': None}
-        self._integer_columns = ['Nf']
+        # self._integer_columns = ['Nf']
 
     def _update_metadata(self, **kwargs):
         for key in self._metadata:  # extract and update metadata from kwargs
@@ -133,7 +133,8 @@ class CoilFrame(pd.DataFrame):
         return frame
 
     @staticmethod
-    def patch_coil(frame, color_label='part', **kwargs):  # call on-demand
+    def patch_coil(frame, color_label='part', overwrite=False, **kwargs):
+        # call on-demand
         part_color = {'VS3': 'C0', 'VS3j': 'gray', 'CS': 'C0', 'PF': 'C0',
                       'trs': 'C2', 'vvin': 'C3', 'vvout': 'C4', 'plasma': 'C4'}
         cluster_color = dict([(i, f'C{i%10}') for i in range(frame.nC)])
@@ -147,18 +148,23 @@ class CoilFrame(pd.DataFrame):
         zorder = kwargs.get('zorder', {'VS3': 1, 'VS3j': 0})
         patch = [[] for __ in range(frame.nC)]
         for i, geom in enumerate(
-                frame.loc[:, ['x', 'z', 'dx', 'dz', 'cross_section',
+                frame.loc[:, ['x', 'z', 'dx', 'dz', 'cross_section', 'patch',
                               color_label]].values):
-            x, z, dx, dz, cross_section, color_key = geom
-            if cross_section in ['square', 'rectangle']:
-                patch[i] = patches.Rectangle((x - dx/2, z - dz / 2), dx, dz)
+            x, z, dx, dz, cross_section, current_patch, color_key = geom
+            if overwrite or np.array(pd.isnull(current_patch)).any():
+                if cross_section in ['square', 'rectangle']:
+                    patch[i] = [patches.Rectangle((x - dx/2, z - dz / 2),
+                                                  dx, dz)]
+                else:
+                    patch[i] = [patches.Circle((x, z), (dx + dz) / 4)]
             else:
-                patch[i] = patches.Circle((x, z), (dx + dz) / 4)
-            patch[i].set_edgecolor('darkgrey')
-            patch[i].set_linewidth(0.25)
-            patch[i].set_antialiased(True)
-            patch[i].set_facecolor(color.get(color_key, 'C9'))
-            patch[i].zorder = zorder.get(color_key, 0)
+                patch[i] = current_patch
+            for j in range(len(patch[i])):
+                patch[i][j].set_edgecolor('darkgrey')
+                patch[i][j].set_linewidth(0.25)
+                patch[i][j].set_antialiased(True)
+                patch[i][j].set_facecolor(color.get(color_key, 'C9'))
+                patch[i][j].zorder = zorder.get(color_key, 0)
         frame.loc[:, 'patch'] = patch
 
     def add_coil(self, *args, **kwargs):

@@ -20,14 +20,14 @@ class biot_savart:
         '''
         geometric mean distance
         '''
-        return np.exp(np.sum(Nt * np.log(x)) / np.sum(Nt))
+        return np.exp(np.sum(abs(Nt) * np.log(x)) / np.sum(abs(Nt)))
 
     @staticmethod
     def amd(x, Nt):
         '''
         arithmetic mean distance
         '''
-        return np.sum(Nt * x) / np.sum(Nt)
+        return np.sum(abs(Nt) * x) / np.sum(abs(Nt))
 
     def load_coilset(self, coilset):
         self.coil_index = coilset.coil.index

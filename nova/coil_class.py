@@ -10,7 +10,8 @@ from nep.DINA.read_scenario import scenario_data
 from astropy import units
 from amigo.IO import human_format
 from sklearn.cluster import DBSCAN
-from nova.biot_savart import biot_savart
+import functools
+import operator
 
 
 class CoilClass:
@@ -279,7 +280,7 @@ class CoilClass:
         for name in index:
             if name in self.coil.index:
                 self.subcoil.drop_coil(self.coil.loc[name, 'subindex'])
-                self.coil.drop_coil(index)
+                self.coil.drop_coil(name)
 
     def add_plasma(self, *args, **kwargs):
         label = kwargs.pop('label', 'Pl')  # filament prefix
@@ -307,7 +308,8 @@ class CoilClass:
         Nf = Ip.size
         self.coil.add_coil(biot_savart.gmd(xpl, Nt), biot_savart.amd(zpl, Nt),
                            dz, dx, Nf=Nf, dCoil=None, cross_section='circle',
-                           name='Plasma', part='plasma', turn_fraction=1)
+                           name='Plasma', part='plasma', turn_fraction=1,
+                           material='plasma')
         self.coil.at['Plasma', 'subindex'] = list(subindex)
         # if Nf > 1:
         #     self.inductance('Plasma', update=True)  # re-size plasma coil
@@ -350,7 +352,6 @@ class CoilClass:
                 v2.loc[c] *= scale  # convert coordinates
         Xp, Zp, Lp = v2.loc[coordinates + ['Lp']]
         dr = self_inductance(Xp).minor_radius(Lp)
-
         if 'Plasma' not in self.coil.index:  # create plasma coilset
             self.add_plasma(Xp, Zp, 2*dr, 2*dr, cross_section='circle')
         else:  # update plasma coilset
@@ -381,21 +382,25 @@ class CoilClass:
     def plot_coil(self, ax, coil, alpha=1, **kwargs):
         if not coil.empty:
             if pd.isnull(coil.loc[:, 'patch']).any() or len(kwargs) > 0:
-                coil.patch_coil(coil, **kwargs)  # patch on-demand
+                CoilFrame.patch_coil(coil, **kwargs)  # patch on-demand
             patch = coil.loc[:, 'patch']
-            patch = patch.iloc[np.argsort([p.zorder for p in patch])]
-            pc = PatchCollection(patch, facecolors='k',
-                                 match_original=True, alpha=alpha)
+            # form list of lists
+            patch = [p if pd.api.types.is_list_like(p) else [p] for p in patch]
+            # flatten
+            patch = functools.reduce(operator.concat, patch)
+            # sort
+            patch = np.array(patch)[np.argsort([p.zorder for p in patch])]
+            pc = PatchCollection(patch, match_original=True, alpha=alpha)
             ax.add_collection(pc)
 
     def plot(self, subcoil=True, plasma=True, label=False, current=None,
-             ax=None, **kwargs):
+             ax=None):
         if ax is None:
             ax = plt.gca()
         if subcoil:
-            self.plot_coil(ax, self.subcoil, **kwargs)
+            self.plot_coil(ax, self.subcoil)
         else:
-            self.plot_coil(ax, self.coil, **kwargs)
+            self.plot_coil(ax, self.coil)
         if 'Plasma' in self.coil.index and plasma:
             self.label_plasma(ax)
         if label or current:
@@ -518,34 +523,57 @@ class CoilClass:
                        bx, bz, scale=scale, color='C3')
             '''
 
-    def cluster(self, eps=0.15):
+    def cluster(self, n, eps=0.2):
         '''
         cluster coils using DBSCAN algorithm
         '''
         dbscan = DBSCAN(eps=eps, min_samples=1)
         cluster_index = dbscan.fit_predict(self.coil.loc[:, ['x', 'z']])
         self.coil.loc[:, 'cluster_index'] = cluster_index
-        for name in self.coil.index:
-            subindex = self.coil.at[name, 'subindex']
-            cluster_index = self.coil.at[name, 'cluster_index']
-            self.subcoil.loc[subindex, 'cluster_index'] = cluster_index
-        nc = self.coil.loc[:, 'cluster_index'].max()  # cluster number
+        merge_index = []
+        for part in self.coil.part.unique():
+            coil = self.subset(self.coil.index[self.coil.part == part]).coil
+            for cluster in coil.cluster_index.unique():
+                index = coil.index[coil.cluster_index == cluster]
+                if index.size > 1:
+                    for i in range(index.size // n + 1):
+                        if i*n != len(index):
+                            merge_index.append(index[i*n:(i+1)*n])
+        self.coil.drop(columns='cluster_index', inplace=True)
+        for index in merge_index:
+            self.merge(index)
 
     def merge(self, coil_index):
         subframe = self.subset(coil_index)
+        x = biot_savart.gmd(subframe.coil.x, subframe.coil.Nt)
+        z = biot_savart.amd(subframe.coil.z, subframe.coil.Nt)
+        dr = np.sqrt(np.sum(subframe.coil.dx * subframe.coil.dz)) / 2
+        Ic = subframe.coil.It.sum() / np.sum(abs(subframe.coil.Nt))
+        name = f'{coil_index[0]}-{coil_index[-1]}'
+        referance_coil = subframe.coil.loc[coil_index[0], :]
+        kwargs = {'name': name}
+        for key in subframe.coil.columns:
+            if key in ['cross_section', 'part', 'material', 'turn_fraction']:
+                # take referance
+                kwargs[key] = referance_coil[key]
+            elif key in ['Nf', 'Nt', 'm', 'R']:
+                kwargs[key] = subframe.coil.loc[:, key].sum()
+        # remove seperate coils
         self.drop_coil(coil_index)
-        
-        x = biot_savart.gmd(subframe.x, subframe.Nt)
-        z = biot_savart.amd(subframe.z, subframe.Nt)
-        dr = np.sqrt(subframe.dx * subframe.dz) / 2
-        
-        self.add_coil(x, z, 2*dr, 2*dr, subcoil=False)
-        self.subcoil.add_coil(subframe.subcoil)
-        
-        #self.coil.at[name, 'subindex'] = list(frame.index)
-        
-        
-        
+        # add merged coil
+        self.add_coil(x, z, 2*dr, 2*dr, subcoil=False, **kwargs)
+        # on-demand patch of top level (coil)
+        if pd.isnull(subframe.coil.loc[:, 'patch']).any():
+            subframe.coil.patch_coil(subframe.coil)  # patch on-demand
+        self.coil.at[name, 'patch'] = list(subframe.coil.patch)
+        # add subcoils
+        subindex = self.subcoil.add_coil(subframe.subcoil)
+        self.coil.at[name, 'subindex'] = list(subindex)
+        # update current
+        self.Ic = {name: Ic}
+
+
+
 if __name__ is '__main__':
 
     cc = CoilClass(dCoil=0.25)

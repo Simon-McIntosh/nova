@@ -1,24 +1,26 @@
 from amigo.pyplot import plt
 
 import numpy as np
-from nep.coil_geom import VVcoils, ITERcoilset
+from nep.coil_geom import VVcoils, ITERcoilset, VSgeom
 from nova.coil_class import CoilClass
 
 pf = ITERcoilset().cc
-vv = VVcoils(model='full', read_txt=False).cc
+#vv = VVcoils(model='full').cc
+vs = VSgeom(jacket=True).cc
 
-cc = CoilClass(pf)
+cc = CoilClass(pf, vs)
 
-#cc.scenario_filename = -1
-#cc.scenario = 'EOF'
+cc.scenario_filename = -2
+cc.scenario = 'EOF'
 
-cc.cluster()
+cc.cluster(5)
 
-cc.merge(['PF6', 'PF5'])
+cc.merge(['LVS', 'UVS'])
+cc.merge(['CS1L', 'CS1U'])
 
-cc.plot(subcoil=True, color_label='cluster_index')
+cc.plot(subcoil=False, label=True)
 
-# cc.solve_grid(plot=True)
+#cc.solve_grid(plot=True)
 
 
 '''

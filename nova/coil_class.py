@@ -119,9 +119,10 @@ class CoilClass(CoilSet):
 
     def update_plasma(self):
         coordinates = ['Rcur', 'Zcur']
+        #coordinates = ['Rp', 'Zp']
         if not np.array([c in self.d2.unit for c in coordinates]).all():
             coordinates = ['Rp', 'Zp']
-        v2 = self.d2.vector.loc[['Lp'] + coordinates].droplevel(1)
+        v2 = self.d2.vector.loc[['Lp', 'kp', 'ap'] + coordinates].droplevel(1)
         if 'Lp' not in self.d2.unit:
             v2['Lp'] = 1.1e-5  # default plasma self-inductance H
         scale = units.Unit(self.d2.unit[coordinates[0]]).to('m')
@@ -130,12 +131,15 @@ class CoilClass(CoilSet):
                 v2.loc[c] *= scale  # convert coordinates
         Xp, Zp, Lp = v2.loc[coordinates + ['Lp']]
         dr = self_inductance(Xp).minor_radius(Lp)
+        #dx, dz = 2*dr, 2*dr
+        dx = 1.518*v2.ap
+        dz = v2.kp * dx
         if 'Plasma' not in self.coil.index:  # create plasma coilset
-            self.add_plasma(Xp, Zp, 2*dr, 2*dr, cross_section='circle')
+            self.add_plasma(Xp, Zp, dx, dz, dCoil=0.25)
         else:  # update plasma coilset
             # TODO update multi-filament plasma model
             # subindex = self.coil.at['Plasma', 'subindex']
-            self.add_plasma(Xp, Zp, 2*dr, 2*dr, cross_section='circle')
+            self.add_plasma(Xp, Zp, 2*dr, 2*dr)
         self.calculate_inductance(source_index=['Plasma'])
         self.Ip = self.d2.Ip  # update plasma current
 
@@ -246,13 +250,17 @@ class CoilClass(CoilSet):
 
 if __name__ is '__main__':
 
-    cc = CoilClass(dCoil=0.25)
+    cc = CoilClass(dCoil=0.15)
     # cc.update_metadata('coil', additional_columns=['R'])
 
-    x, dx = 5.5, 4.2
+    x, z, dx = 5.5, -5, 4.2
+    dz = 2*dx
+    cc.add_coil(x, z, dx, dz, name='PF6', part='PF', Ic=50e3,
+                cross_section='ellipse',
+                turn_section='square', turn_fraction=1)
 
-    cc.add_coil(x, -5, dx, dx, name='PF6', part='PF', Nt=1,
-                Ic=50e3)
+    #plt.plot(*cc.coil.at['PF6', 'polygon'].exterior.xy, 'C3')
+
     '''
     cc.add_coil([2, 2, 3, 3.5], [1, 0, -1, -3], 0.3, 0.3,
                 name='PF', part='PF', delim='', Nt=30)
@@ -268,24 +276,24 @@ if __name__ is '__main__':
 
     # cc.scenario_filename = -2
     # cc.scenario = 'EOF'
+    # cc.calculate_inductance(source_index=['Plasma'])
 
-    #cc.calculate_inductance(source_index=['Plasma'])
-
-    cc.solve_grid(n=2e3, plot=True, update=True, expand=0.25,
-                  nlevels=31, color='k')
+    #cc.solve_grid(n=2e3, plot=True, update=True, expand=0.25,
+    #              nlevels=31, color='k')
+    cc.plot(subcoil=False)
     cc.plot(label=True)
 
 
+
+    '''
     cc.drop_coil('PF6')
 
 
-    #xo = 2*x-np.exp(1/dx * ((x+dx/2)*np.log(x+dx/2) - dx - (x-dx/2)*np.log(x-dx/2)))
-
-    cc.add_coil(x, -5, dx, dx, name='PF7', part='CS', Nt=1,
-                Ic=50e3, dCoil=1.5)
+    cc.add_coil(x, -5, dx, dx, name='PF7', part='CS', Ic=50e3, dCoil=1.5)
     cc.plot(label=True)
-
-    cc.solve_grid(n=2e3, plot=True, update=True, expand=0.75,
+    '''
+    cc.solve_grid(n=1e3, plot=True, update=True, expand=0.15,
                   nlevels=61, color='C3')
+
 
 

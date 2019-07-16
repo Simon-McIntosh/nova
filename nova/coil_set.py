@@ -10,6 +10,7 @@ from sklearn.cluster import DBSCAN
 from matplotlib.collections import PatchCollection
 from amigo.pyplot import plt
 from nova.inductance.geometric_mean_radius import coil_gmr
+import shapely.geometry
 
 
 class CoilSet(CoilObject):
@@ -169,16 +170,15 @@ class CoilSet(CoilObject):
             self.coil.at[name, 'dCoil'] = dCoil  # back-propagate dCoil setting
         x, z, dx, dz = self.coil.loc[name, ['x', 'z', 'dx', 'dz']]
         kwargs = {}
-        if 'cross_section' in self.coil.columns:
-            kwargs['cross_section'] = self.coil.at[name, 'cross_section']
-        if 'turn_fraction' in self.coil.columns:
+        if 'turn_section' in self.coil.columns:
+            kwargs['cross_section'] = self.coil.at[name, 'turn_section']
+        if 'turn_fraction' in self.coil.columns and dCoil == -1:
             turn_fraction = self.coil.at[name, 'turn_fraction']
         else:
             turn_fraction = 1
-
         if dCoil is None or dCoil == 0:
             dCoil = np.mean([dx, dz])
-        if dCoil == -1:  # mesh per-turn (inductance calculation)
+        if dCoil == -1:  # mesh per-turn (for detailed inductance calculations)
             kwargs['cross_section'] = 'circle'
             Nt = self.coil.at[name, 'Nt']
             dCoil = (dx * dz / Nt)**0.5
@@ -195,6 +195,15 @@ class CoilSet(CoilObject):
         xm_, zm_ = np.meshgrid(x_, z_, indexing='ij')
         xm_ = np.reshape(xm_, (-1, 1))[:, 0]
         zm_ = np.reshape(zm_, (-1, 1))[:, 0]
+
+        # place mesh fillaments within polygon exterior
+        points = shapely.geometry.MultiPoint(points=list(zip(xm_, zm_)))
+        polygon = self.coil.at[name, 'polygon']
+        multi_point = np.asarray(polygon.intersection(points))
+        if len(multi_point) == 2:
+            multi_point = [multi_point]
+        xm_ = [point[0] for point in multi_point]
+        zm_ = [point[1] for point in multi_point]
 
         Nf = len(xm_)  # filament number
         self.coil.at[name, 'Nf'] = Nf  # back-propagate fillament number
@@ -242,35 +251,41 @@ class CoilSet(CoilObject):
         name = kwargs.pop('name', 'Pl_0')
         part = kwargs.pop('part', 'plasma')
         coil = kwargs.pop('coil', 'Plasma')
-        cross_section = kwargs.pop('cross_section', 'square')
+        cross_section = kwargs.pop('cross_section', 'ellipse')
+        mesh = kwargs.pop('mesh', True)
         iloc = [None, None]
         if 'Plasma' in self.coil.index:
             iloc = self.drop_coil('Plasma')
-        # add plasma filaments to subcoil
-        subindex = self.subcoil.add_coil(
-                *args, label=label, part=part, coil=coil, name=name,
-                cross_section=cross_section, iloc=iloc[1], **kwargs)
-        Ip = self.subcoil.It[subindex]  # filament currents
-        Ip_net = Ip.sum()  # net plasma current
-        if not np.isclose(Ip.sum(), 0):
-            Nt = Ip / Ip_net  # filament turn number
-        else:
-            Nt = np.ones(Ip.size)
-        self.subcoil.loc[subindex, 'Nt'] = Nt
-        xpl = self.subcoil.x[subindex]  # filament x-location
-        zpl = self.subcoil.z[subindex]  # filament z-location
-        dx = dz = np.sqrt(np.sum(self.subcoil.dx[subindex] *
-                                 self.subcoil.dz[subindex]))
-        # add plasma to coil (x_gmd, z_amd)
-        Nf = Ip.size
-        self.coil.add_coil(gmd(xpl, Nt), amd(zpl, Nt),
-                           dz, dx, Nf=Nf, dCoil=None, cross_section='circle',
-                           name='Plasma', part='plasma', turn_fraction=1,
-                           material='plasma', iloc=iloc[0])
-        self.coil.at['Plasma', 'subindex'] = list(subindex)
-        # if Nf > 1:
-        #     self.inductance('Plasma', update=True)  # re-size plasma coil
-        self.Ic = pd.Series({'Plasma': Ip_net})  # update plasma net current
+        if mesh:  # add single plasma coil - mesh filaments
+            self.add_coil(*args, part=part, coil=coil, name='Plasma',
+                          cross_section=cross_section, iloc=iloc[1], **kwargs)
+        else:  # add single / multiple filaments, fit coil
+            # add plasma filaments to subcoil
+            subindex = self.subcoil.add_coil(
+                    *args, label=label, part=part, coil=coil, name=name,
+                    cross_section=cross_section, iloc=iloc[1], **kwargs)
+            Ip = self.subcoil.It[subindex]  # filament currents
+            Ip_net = Ip.sum()  # net plasma current
+            if not np.isclose(Ip.sum(), 0):
+                Nt = Ip / Ip_net  # filament turn number
+            else:
+                Nt = np.ones(Ip.size)
+            self.subcoil.loc[subindex, 'Nt'] = Nt
+            xpl = self.subcoil.x[subindex]  # filament x-location
+            zpl = self.subcoil.z[subindex]  # filament z-location
+            dx = dz = np.sqrt(np.sum(self.subcoil.dx[subindex] *
+                                     self.subcoil.dz[subindex]))
+            # add plasma to coil (x_gmd, z_amd)
+            Nf = Ip.size
+            self.coil.add_coil(gmd(xpl, Nt), amd(zpl, Nt),
+                               dz, dx, Nf=Nf, dCoil=None,
+                               cross_section=cross_section,
+                               name='Plasma', part=part, turn_fraction=1,
+                               material='plasma', iloc=iloc[0])
+            self.coil.at['Plasma', 'subindex'] = list(subindex)
+            # if Nf > 1:
+            #     self.inductance('Plasma', update=True)  # re-size plasma coil
+            self.Ic = pd.Series({'Plasma': Ip_net})  # update net current
 
     def add_mpc(self, name, factor=1):
         '''
@@ -325,12 +340,17 @@ class CoilSet(CoilObject):
                 kwargs[key] = referance_coil[key]
             elif key in ['Nf', 'Nt', 'm', 'R']:
                 kwargs[key] = subframe.coil.loc[:, key].sum()
+            elif key == 'polygon':
+                polys = [p for p in subframe.coil.loc[:, 'polygon'].values]
+                if not pd.isnull(polys).any():
+                    polygon = shapely.geometry.MultiPolygon(polys)
         # extract current coil / subcoil locations
         coil_iloc = self.coil.index.get_loc(coil_index[0])
         subcoil_iloc = self.subcoil.index.get_loc(
                 self.coil.subindex[coil_index[0]][0])
         # remove seperate coils
         self.drop_coil(coil_index)
+
         # add merged coil
         self.add_coil(x, z, 2*dr, 2*dr, subcoil=False,
                       iloc=coil_iloc, **kwargs)
@@ -338,13 +358,17 @@ class CoilSet(CoilObject):
         if pd.isnull(subframe.coil.loc[:, 'patch']).any():
             subframe.coil.patch_coil(subframe.coil)  # patch on-demand
         self.coil.at[name, 'patch'] = list(subframe.coil.patch)
+        # insert multi-polygon
+        self.coil.at[name, 'polygon'] = polygon
         # add subcoils
         subindex = self.subcoil.add_coil(subframe.subcoil, iloc=subcoil_iloc)
         self.coil.at[name, 'subindex'] = list(subindex)
         # update current
         self.Ic = {name: Ic}
 
-    def plot_coil(self, ax, coil, alpha=1, **kwargs):
+    def plot_coil(self, coil, alpha=1, ax=None, **kwargs):
+        if ax is None:
+            ax = plt.gca()
         if not coil.empty:
             if pd.isnull(coil.loc[:, 'patch']).any() or len(kwargs) > 0:
                 CoilFrame.patch_coil(coil, **kwargs)  # patch on-demand
@@ -363,9 +387,9 @@ class CoilSet(CoilObject):
         if ax is None:
             ax = plt.gca()
         if subcoil:
-            self.plot_coil(ax, self.subcoil)
+            self.plot_coil(self.subcoil, ax=ax)
         else:
-            self.plot_coil(ax, self.coil)
+            self.plot_coil(self.coil, ax=ax)
         if 'Plasma' in self.coil.index and plasma and 'Ic' in self.coil:
             self.label_plasma(ax)
         if label or current:

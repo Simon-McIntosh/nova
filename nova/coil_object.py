@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
-from matplotlib import patches
 from warnings import warn
+import shapely.geometry
+import shapely.affinity
+from descartes import PolygonPatch
 
 
 class CoilSeries(pd.Series):
@@ -51,9 +53,10 @@ class CoilFrame(pd.DataFrame):
         '''
         self._default_attributes = \
             {'Ic': 0, 'It': 0, 'm': None, 'R': 0, 'Nt': 1, 'Nf': 1,
-             'material': None, 'cross_section': 'square', 'patch': None,
+             'material': None, 'turn_fraction': 1, 'patch': None,
+             'cross_section': 'square', 'turn_section': 'square',
              'coil': '', 'part': '', 'subindex': None, 'dCoil': 0,
-             'mpc': None}
+             'mpc': None, 'polygon': None}
 
     def _update_metadata(self, **kwargs):
         mode = kwargs.pop('mode', 'append')  # [empty, reset, append]
@@ -149,6 +152,7 @@ class CoilFrame(pd.DataFrame):
         index = self._extract_index(data, delim, label, name)
         frame = CoilFrame(data, index=index, columns=data.keys(),
                           **self.metadata)
+        frame = self._insert_polygon(frame)
         return frame
 
     def add_coil(self, *args, iloc=None, **kwargs):
@@ -234,6 +238,48 @@ class CoilFrame(pd.DataFrame):
                 raise IndexError(f'\ncoil: {name} already defined in index\n'
                                  f'index: {self.index}')
 
+    def _insert_polygon(self, frame):
+        if 'polygon' in frame.columns:
+            for name in frame.index:
+                if pd.isna(frame.at[name, 'polygon']):
+                    x, z, dx, dz, cross_section = \
+                        frame.loc[name, ['x', 'z', 'dx', 'dz',
+                                         'cross_section']]
+                    polygon = self._get_polygon(cross_section)(x, z, dx, dz)
+                    frame.at[name, 'polygon'] = polygon
+        return frame
+
+    def _get_polygon(self, cross_section):
+        if cross_section == 'circle':
+            return self._poly_circle
+        elif cross_section == 'ellipse':
+            return self._poly_ellipse
+        elif cross_section == 'square' or cross_section == 'rectangle':
+            return self._poly_rectangle
+        elif cross_section == 'skin':
+            return self._poly_skin
+        else:
+            raise IndexError(f'cross_section: {cross_section} not implemented'
+                             '\n specify as [circle, ellipse, square, '
+                             'rectangle, skin]')
+
+    def _poly_circle(self, x, z, dx, dz):
+        radius = np.min([dx, dz]) / 2
+        circle = shapely.geometry.Point(x, z).buffer(radius)
+        return shapely.geometry.Polygon(circle.exterior)
+
+    def _poly_ellipse(self, x, z, dx, dz):
+        circle = self._poly_circle(x, z, dx, dx)
+        return shapely.affinity.scale(circle, 1, dz/dx)
+
+    def _poly_rectangle(self, x, z, dx, dz):
+        return shapely.geometry.box(x-dx/2, z-dz/2, x+dx/2, z+dz/2)
+
+    def _poly_skin(self, x, z, dx, dz):
+        circle_outer = self._poly_circle(x, z, dx, dz)
+        circle_inner = shapely.affinity.scale(circle_outer, 0.8, 0.8)
+        return circle_outer.difference(circle_inner)
+
     @staticmethod
     def patch_coil(frame, color_label='part', overwrite=False, **kwargs):
         # call on-demand
@@ -250,16 +296,12 @@ class CoilFrame(pd.DataFrame):
         zorder = kwargs.get('zorder', {'VS3': 1, 'VS3j': 0, 'CS': 3, 'PF': 2})
         alpha = {'plasma': 0.5}
         patch = [[] for __ in range(frame.nC)]
-        for i, geom in enumerate(
+        for i, (x, z, dx, dz, cross_section,
+                current_patch, polygon, color_key) in enumerate(
                 frame.loc[:, ['x', 'z', 'dx', 'dz', 'cross_section', 'patch',
-                              color_label]].values):
-            x, z, dx, dz, cross_section, current_patch, color_key = geom
+                              'polygon', color_label]].values):
             if overwrite or np.array(pd.isnull(current_patch)).any():
-                if cross_section in ['square', 'rectangle']:
-                    patch[i] = [patches.Rectangle((x - dx/2, z - dz / 2),
-                                                  dx, dz)]
-                else:
-                    patch[i] = [patches.Circle((x, z), (dx + dz) / 4)]
+                patch[i] = [PolygonPatch(polygon)]
             else:
                 patch[i] = current_patch
             for j in range(len(patch[i])):
@@ -326,8 +368,9 @@ class CoilObject:
         if coil is None:
             self.coil = CoilFrame(
                     additional_columns=['Ic', 'It', 'Nt', 'Nf', 'dCoil',
-                                        'subindex', 'mpc', 'turn_fraction',
-                                        'cross_section', 'patch', 'part'],
+                                        'subindex', 'mpc', 'cross_section',
+                                        'turn_section', 'turn_fraction',
+                                        'patch', 'polygon', 'part'],
                     default_attributes={'dCoil': self.dCoil,
                                         'turn_fraction': self.turn_fraction})
         else:
@@ -335,7 +378,8 @@ class CoilObject:
         if subcoil is None:
             self.subcoil = CoilFrame(
                     additional_columns=['Ic', 'It', 'Nt', 'coil',
-                                        'cross_section', 'patch', 'part'],
+                                        'cross_section',
+                                        'patch', 'polygon', 'part'],
                     default_attributes={})
         else:
             self.subcoil = subcoil

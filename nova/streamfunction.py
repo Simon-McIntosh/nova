@@ -6,8 +6,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline as sinterp
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize
 import nova.geqdsk
-from legacycontour._cntr import Cntr as cntr
-#from skimage import measure
+from amigo.pyplot import cntr
 from collections import OrderedDict
 from amigo import geom
 from amigo.IO import trim_dir
@@ -852,13 +851,12 @@ class SF:
 
     def get_contour(self, levels, boundary=False):
         if boundary:
-            def cfield(level): return self.cfield_bndry.trace(level, level, 0)
+            def cfield(level): return self.cfield_bndry.trace(level)
         else:
-            def cfield(level): return self.cfield.trace(level, level, 0)
+            def cfield(level): return self.cfield.trace(level)
         lines = []
         for level in levels:
             psi_line = cfield(level)
-            psi_line = psi_line[:len(psi_line) // 2]
             lines.append(psi_line)
         return lines
 

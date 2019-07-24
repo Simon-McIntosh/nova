@@ -1,11 +1,10 @@
-from nova.coil_object import CoilObject
-from nova.coil_set import CoilSet, CoilFrame
+from nova.coil_set import CoilSet
+from nep.DINA.read_scenario import scenario_data
+from nova.biot_savart import biot_savart, self_inductance
+from nova.mesh_grid import MeshGrid
 from amigo.pyplot import plt
 import numpy as np
 import pandas as pd
-from nova.biot_savart import biot_savart, self_inductance
-from nova.mesh_grid import MeshGrid
-from nep.DINA.read_scenario import scenario_data
 from astropy import units
 
 
@@ -22,23 +21,7 @@ class CoilClass(CoilSet):
         self.add_eqdsk(eqdsk)
         self.initalise_data()
         self.initalize_functions()  # initalise functions
-        self._scenario_filename = None
-        self.scenario_filename = scenario_filename
-
-        self._levels = None
-        self._limit = None
-
-    @property
-    def coilset(self):
-        return CoilObject(self.coil, self.subcoil, inductance=self.inductance,
-                          force=self.force, subforce=self.subforce,
-                          grid=self.grid)
-
-    @coilset.setter
-    def coilset(self, coilset):
-        for attr in ['coil', 'subcoil', 'inductance',
-                     'force', 'subforce', 'grid']:
-            setattr(self, attr, getattr(coilset, attr))
+        self._scenario_filename = scenario_filename
 
     def initalise_data(self):
         self.inductance = self.initalize_inductance()
@@ -112,14 +95,13 @@ class CoilClass(CoilSet):
         if update:  # apply update
             coilset.coil.loc[name, ['x', 'z']] = x_gmd, z_amd
             coilset.coil.loc[name, ['dx', 'dz']] = 2*dr, 2*dr
-            CoilFrame.patch_coil(coilset.coil)  # re-generate coil patch
+            CoilSet.patch_coil(coilset.coil)  # re-generate coil patch
             self.coil.loc[name] = coilset.coil.loc[name]
         coilset = None  # remove coilset
         return L
 
     def update_plasma(self):
         coordinates = ['Rcur', 'Zcur']
-        #coordinates = ['Rp', 'Zp']
         if not np.array([c in self.d2.unit for c in coordinates]).all():
             coordinates = ['Rp', 'Zp']
         v2 = self.d2.vector.loc[['Lp', 'kp', 'ap'] + coordinates].droplevel(1)
@@ -131,17 +113,21 @@ class CoilClass(CoilSet):
                 v2.loc[c] *= scale  # convert coordinates
         Xp, Zp, Lp = v2.loc[coordinates + ['Lp']]
         dr = self_inductance(Xp).minor_radius(Lp)
-        #dx, dz = 2*dr, 2*dr
-        dx = 1.518*v2.ap
-        dz = v2.kp * dx
-        if 'Plasma' not in self.coil.index:  # create plasma coilset
-            self.add_plasma(Xp, Zp, dx, dz, dCoil=0.25)
-        else:  # update plasma coilset
-            # TODO update multi-filament plasma model
-            # subindex = self.coil.at['Plasma', 'subindex']
-            self.add_plasma(Xp, Zp, 2*dr, 2*dr)
-        self.calculate_inductance(source_index=['Plasma'])
-        self.Ip = self.d2.Ip  # update plasma current
+        dx, dz = 2*dr, 2*dr
+        # dx = 1.518*v2.ap
+        # dz = v2.kp * dx
+        if (np.array([Xp, dx, dz]) != 0).all():
+            if 'Plasma' not in self.coil.index:  # create plasma coilset
+                self.add_plasma(Xp, Zp, dx, dz)
+            else:  # update plasma coilset
+                # TODO update multi-filament plasma model
+                # subindex = self.coil.at['Plasma', 'subindex']
+                self.add_plasma(Xp, Zp, 2*dr, 2*dr)
+            self.calculate_inductance(source_index=['Plasma'])
+            self.calculate_interaction(coil_index=['Plasma'])
+            self.Ip = self.d2.Ip  # update plasma current
+        elif 'Plasma' in self.coil.index:
+            self.drop_coil('Plasma')
 
     def calculate_inductance(self, mutual=True,
                              source_index=None, invert_source=False,
@@ -184,116 +170,140 @@ class CoilClass(CoilSet):
         Nt = Nt.reshape(-1, 1) * Nt.reshape(1, -1)
         self.inductance['Mt'] = self.inductance['Mc'] / Nt  # amp-turn
 
-    def update_grid(self, n=1e4, limit=None, expand=0.05):
-        self.grid = CoilSet.initialize_grid()
-        if limit is None:
-            if self._limit is None:
-                x, z = self.subcoil.loc[:, ['x', 'z']].to_numpy().T
-                dx, dz = self.subcoil.loc[:, ['dx', 'dz']].to_numpy().T
-                limit = np.array([(x - dx/2).min(), (x + dx/2).max(),
-                                  (z - dz/2).min(), (z + dz/2).max()])
-                dx, dz = np.diff(limit[:2])[0], np.diff(limit[2:])[0]
-                delta = np.mean([dx, dz])
-                limit += expand * delta * np.array([-1, 1, -1, 1])
-                self._limit = limit
-            else:
-                limit = self._limit
-        mg = MeshGrid(n, limit)  # set mesh
-        self.grid['n'] = [mg.nx, mg.nz]
-        self.grid['dx'] = np.diff(limit[:2])[0] / (mg.nx - 1)
-        self.grid['dz'] = np.diff(limit[2:])[0] / (mg.nz - 1)
-        self.grid['limit'] = limit
+    def generate_grid(self, **kwargs):
+        self.grid = self.initialize_grid(**kwargs)  # reset / update defaults
+        if self.grid['limit'] is None:
+            self.grid['limit'] = self._get_grid_limit(self.grid['expand'])
+        mg = MeshGrid(self.grid['n'], self.grid['limit'])  # set mesh
+        self.grid['n2d'] = [mg.nx, mg.nz]
+        self.grid['dx'] = np.diff(self.grid['limit'][:2])[0] / (mg.nx - 1)
+        self.grid['dz'] = np.diff(self.grid['limit'][2:])[0] / (mg.nz - 1)
         self.grid['x2d'] = mg.x2d
         self.grid['z2d'] = mg.z2d
-        bs = biot_savart(source=self.coilset, mutual=False)
-        Psi = bs.calculate_interaction(grid=self.grid)
-        self.grid['Psi'] = Psi
-        # self.grid['Bx'] = Bx
-        # self.grid['Bz'] = Bz
 
-    def solve_grid(self, n=1e4, limit=None, nlevels=31,
-                   plot=False, update=False, expand=0.05, color='k'):
-        if self.grid['Psi'] is None or update:
-            self.update_grid(n=n, limit=limit, expand=expand)
+    def _get_grid_limit(self, expand):
+        if expand is None:
+            expand = self.grid['expand']  # use coil_object default
+        x, z = self.subcoil.loc[:, ['x', 'z']].to_numpy().T
+        dx, dz = self.subcoil.loc[:, ['dx', 'dz']].to_numpy().T
+        limit = np.array([(x - dx/2).min(), (x + dx/2).max(),
+                          (z - dz/2).min(), (z + dz/2).max()])
+        dx, dz = np.diff(limit[:2])[0], np.diff(limit[2:])[0]
+        delta = np.mean([dx, dz])
+        limit += expand * delta * np.array([-1, 1, -1, 1])
+        return limit
+
+    def _regenerate_grid(self, **kwargs):
+        '''
+        compare kwargs to current grid settings, update as required
+        '''
+        regen = False
+        grid = {}  # grid parameters
+        for key in ['n', 'limit', 'expand', 'levels', 'nlevels']:
+            grid[key] = kwargs.pop(key, self.grid[key])
+        if grid['limit'] is None:  # update grid limit
+            grid['limit'] = self._get_grid_limit(grid['expand'])
+        regen = not np.array_equal(grid['limit'], self.grid['limit']) or \
+            grid['n'] != self.grid['n']
+        if regen:  # update grid to match kwargs
+            self.generate_grid(**grid)
+        return regen
+
+    def calculate_interaction(self, coil_index=None, **kwargs):
+        '''
+        kwargs:
+            n (int): grid node number
+            limit (np.array): [xmin, xmax, zmin, zmax] grid limits
+            expand (float): expansion beyond coil limits (when limit not set)
+            nlevels (int)
+            levels ()
+        '''
+        kwargs = self._set_levels(**kwargs)  # update contour levels
+        regen = self._regenerate_grid(**kwargs)  # regenerate grid on demand
+        if regen or self.grid['Psi'].empty or coil_index is not None:
+            if coil_index is None:
+                coilset = self.coilset
+            else:
+                coilset = self.subset(coil_index)
+            bs = biot_savart(source=coilset, mutual=False)
+            Psi = bs.calculate_interaction(grid=self.grid)
+            if self.grid['Psi'].empty:
+                self.grid['Psi'] = Psi
+            else:  # append
+                for name in coilset.coil.index:
+                    self.grid['Psi'].loc[:, name] = Psi.loc[:, name]
+        return regen
+
+    def _set_levels(self, **kwargs):
+        '''
+        kwargs:
+            nlevels (int): number of contour levels
+            levels: contour levels
+        '''
+        self.grid['nlevels'] = kwargs.pop('nlevels', self.grid['nlevels'])
+        self.grid['levels'] = kwargs.pop('levels', self.grid['levels'])
+        return kwargs
+
+    def solve_grid(self, plot=False, color='gray', **kwargs):
+        self.calculate_interaction(**kwargs)
         for var in ['Psi']:  # 'Bx', 'Bz'
-            value = np.dot(self.grid[var], self.Ic).reshape(self.grid['n'])
+            value = np.dot(self.grid[var], self.Ic).reshape(self.grid['n2d'])
             self.grid[var.lower()] = value
-
         '''
         psi_x, psi_z = np.gradient(self.grid['psi'],
                                    self.grid['dx'], self.grid['dz'])
         bx = -psi_z / self.grid['x2d']
         bz = psi_x / self.grid['x2d']
         '''
-
         if plot:
-            if self._levels is None:
-                levels = nlevels
+            if self.grid['levels'] is None:
+                levels = self.grid['nlevels']
             else:
-                levels = self._levels
+                levels = self.grid['levels']
             QuadContourSet = plt.contour(
                     self.grid['x2d'], self.grid['z2d'], self.grid['psi'],
                     levels, colors=color, linestyles='-', linewidths=1.0,
-                    alpha=0.5, zorder=50)
-            if self._levels is None:
-                self._levels = QuadContourSet.levels
+                    alpha=0.5, zorder=5)
+            self.grid['levels'] = QuadContourSet.levels
             plt.axis('equal')
-            '''
-            scale = 20
-            plt.quiver(self.grid['x2d'], self.grid['z2d'],
-                       self.grid['bx'], self.grid['bz'], scale=scale,
-                       color='C0')
-            plt.quiver(self.grid['x2d'], self.grid['z2d'],
-                       bx, bz, scale=scale, color='C3')
-            '''
 
 
-if __name__ is '__main__':
+if __name__ == '__main__':
 
     cc = CoilClass(dCoil=0.15)
-    # cc.update_metadata('coil', additional_columns=['R'])
+    cc.update_metadata('coil', additional_columns=['R'])
+    cc.scenario_filename = '15MA DT-DINA2016-01_v1.1'
 
     x, z, dx = 5.5, -5, 4.2
     dz = 2*dx
-    cc.add_coil(x, z, dx, dz, name='PF6', part='PF', Ic=50e3,
-                cross_section='ellipse',
-                turn_section='square', turn_fraction=1)
+    cc.add_coil(x, z, dx, dz, name='Plasma', part='plasma', Ic=-15e6,
+                cross_section='circle',
+                turn_section='square', turn_fraction=1, Nt=1)
 
-    #plt.plot(*cc.coil.at['PF6', 'polygon'].exterior.xy, 'C3')
-
-    '''
-    cc.add_coil([2, 2, 3, 3.5], [1, 0, -1, -3], 0.3, 0.3,
-                name='PF', part='PF', delim='', Nt=30)
-    cc.add_coil(3, 2, 0.5, 0.8, name='PF4', part='VS3', turn_fraction=0.75,
-                Nt=15, dCoil=-1)
-    cc.add_coil(5.6, 3.5, 0.5, 0.8, name='PF7', part='vvin', dCoil=0.01)
-    '''
+    # plt.plot(*cc.coil.at['Plasma', 'polygon'].exterior.xy, 'C3')
     # cc.add_plasma(1, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
     # cc.add_plasma(6, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
 
+    cc.solve_grid(n=2e3, plot=True, expand=0.25,
+                  nlevels=51)
+    cc.plot()
+
+    '''
     #cc.plot(label=True)
     #cc.calculate_inductance()
 
-    # cc.scenario_filename = -2
-    # cc.scenario = 'EOF'
+    cc.scenario_filename = -2
+    cc.scenario = 'EOF'
     # cc.calculate_inductance(source_index=['Plasma'])
 
     #cc.solve_grid(n=2e3, plot=True, update=True, expand=0.25,
     #              nlevels=31, color='k')
     cc.plot(subcoil=False)
     cc.plot(label=True)
-
-
-
     '''
-    cc.drop_coil('PF6')
 
 
-    cc.add_coil(x, -5, dx, dx, name='PF7', part='CS', Ic=50e3, dCoil=1.5)
-    cc.plot(label=True)
-    '''
-    cc.solve_grid(n=1e3, plot=True, update=True, expand=0.15,
-                  nlevels=61, color='C3')
+
 
 
 

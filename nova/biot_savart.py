@@ -41,14 +41,14 @@ class biot_savart:
         self.target = CoilSet(metadata=metadata)
 
     def load_source(self, coilset):
-        self.source.add_coilset(coilset, overwrite=False)
+        self.source.add_coilset(coilset)
         self.source.subcoil['ro'] = \
             self.gmr.calculate_self(self.source.subcoil)
         self.nC = self.source.subcoil.nC
 
     def load_target(self, *args, **kwargs):
         if len(args) == 1:  # load coilset
-            self.target.add_coilset(args[0], overwrite=False)
+            self.target.add_coilset(args[0])
             self.target.subcoil['ro'] = \
                 self.gmr.calculate_self(self.target.subcoil)
         else:  # load coordinates (args=(x, z))

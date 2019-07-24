@@ -1,4 +1,4 @@
-from nova.coil_object import CoilObject, CoilFrame
+from nova.coil_object import CoilObject
 import pandas as pd
 import numpy as np
 from amigo.geom import gmd, amd
@@ -11,6 +11,7 @@ from matplotlib.collections import PatchCollection
 from amigo.pyplot import plt
 from nova.inductance.geometric_mean_radius import coil_gmr
 import shapely.geometry
+from descartes import PolygonPatch
 
 
 class CoilSet(CoilObject):
@@ -19,29 +20,34 @@ class CoilSet(CoilObject):
         - implements methods to manage input and
             output of data to/from the CoilObject class
     '''
-
     def __init__(self, *args, **kwargs):
         CoilObject.__init__(self, **kwargs)  # inherent from coil object
-        self.add_coilset(*args)  # add list of coilset instances
+        if len(args) == 1:
+            self.add_coilset(args[0])  # overwrite coilset
+        else:
+            self.append_coilset(*args)  # append list of coilset instances
 
     @property
     def coilset(self):
-        return CoilObject(self.coil, self.subcoil)
+        return CoilObject(self.coil, self.subcoil, inductance=self.inductance,
+                          force=self.force, subforce=self.subforce,
+                          grid=self.grid)
 
     @coilset.setter
     def coilset(self, coilset):
-        for attr in ['coil', 'subcoil']:
-            setattr(self, attr, getattr(coilset, attr))
+        for attribute in self._attributes:
+            setattr(self, attribute, getattr(coilset, attribute))
 
-    def add_coilset(self, *args, overwrite=True):
-        if len(args) == 1 and overwrite:  # single coilset
-            self.coilset = args[0]
-        else:  # build from multiple coilsets
-            for coilset in args:
-                for attribute in ['coil', 'subcoil']:
-                    coil = getattr(coilset, attribute)
-                    if not coil.empty:
-                        getattr(self, attribute).add_coil(coil)
+    def add_coilset(self, coilset=None):
+        if coilset is not None:
+            self.coilset = coilset  # overwrite coilset object
+
+    def append_coilset(self, *args):
+        for coilset in args:
+            for attribute in ['coil', 'subcoil']:
+                coil = getattr(coilset, attribute)
+                if not coil.empty:
+                    getattr(self, attribute).add_coil(coil)
 
     def subset(self, coil_index, invert=False):
         if not pd.api.types.is_list_like(coil_index):
@@ -207,8 +213,8 @@ class CoilSet(CoilObject):
 
         Nf = len(xm_)  # filament number
         self.coil.at[name, 'Nf'] = Nf  # back-propagate fillament number
-        if 'It' in self.coil.columns:
-            kwargs['It'] = self.coil.at[name, 'It'] / Nf  # coil turn-current
+        if 'It' in self.coil.columns:  # update subcoil turn-current
+            kwargs['It'] = self.coil.at[name, 'It'] / Nf
         if 'part' in self.coil.columns:
             kwargs['part'] = self.coil.at[name, 'part']
         mesh = {'x': xm_, 'z': zm_,
@@ -244,6 +250,11 @@ class CoilSet(CoilObject):
             if name in self.coil.index:
                 self.subcoil.drop_coil(self.coil.loc[name, 'subindex'])
                 self.coil.drop_coil(name)
+                for M in self.inductance:
+                    self.inductance[M].drop(index=name, columns=name,
+                                            inplace=True, errors='ignore')
+                self.grid['Psi'].drop(columns=name, inplace=True,
+                                      errors='ignore')
         return iloc
 
     def add_plasma(self, *args, **kwargs):
@@ -252,18 +263,21 @@ class CoilSet(CoilObject):
         part = kwargs.pop('part', 'plasma')
         coil = kwargs.pop('coil', 'Plasma')
         cross_section = kwargs.pop('cross_section', 'ellipse')
-        mesh = kwargs.pop('mesh', True)
+        turn_section = kwargs.pop('turn_section', 'square')
         iloc = [None, None]
         if 'Plasma' in self.coil.index:
             iloc = self.drop_coil('Plasma')
-        if mesh:  # add single plasma coil - mesh filaments
+        nlist = sum([1 for arg in args if pd.api.types.is_list_like(arg)])
+        if nlist == 0:   # add single plasma coil - mesh filaments
+            dCoil = kwargs.pop('dCoil', self.dPlasma)
             self.add_coil(*args, part=part, coil=coil, name='Plasma',
-                          cross_section=cross_section, iloc=iloc[1], **kwargs)
+                          dCoil=dCoil, cross_section=cross_section,
+                          turn_section=turn_section, iloc=iloc[1], **kwargs)
         else:  # add single / multiple filaments, fit coil
             # add plasma filaments to subcoil
             subindex = self.subcoil.add_coil(
                     *args, label=label, part=part, coil=coil, name=name,
-                    cross_section=cross_section, iloc=iloc[1], **kwargs)
+                    turn_section=turn_section, iloc=iloc[1], **kwargs)
             Ip = self.subcoil.It[subindex]  # filament currents
             Ip_net = Ip.sum()  # net plasma current
             if not np.isclose(Ip.sum(), 0):
@@ -325,13 +339,14 @@ class CoilSet(CoilObject):
         for index in merge_index:
             self.merge(index)
 
-    def merge(self, coil_index):
+    def merge(self, coil_index, name=None):
         subframe = self.subset(coil_index)
         x = gmd(subframe.coil.x, subframe.coil.Nt)
         z = amd(subframe.coil.z, subframe.coil.Nt)
         dr = np.sqrt(np.sum(subframe.coil.dx * subframe.coil.dz)) / 2
         Ic = subframe.coil.It.sum() / np.sum(abs(subframe.coil.Nt))
-        name = f'{coil_index[0]}-{coil_index[-1]}'
+        if name is None:
+            name = f'{coil_index[0]}-{coil_index[-1]}'
         referance_coil = subframe.coil.loc[coil_index[0], :]
         kwargs = {'name': name}
         for key in subframe.coil.columns:
@@ -356,7 +371,7 @@ class CoilSet(CoilObject):
                       iloc=coil_iloc, **kwargs)
         # on-demand patch of top level (coil)
         if pd.isnull(subframe.coil.loc[:, 'patch']).any():
-            subframe.coil.patch_coil(subframe.coil)  # patch on-demand
+            CoilSet.patch_coil(subframe.coil)  # patch on-demand
         self.coil.at[name, 'patch'] = list(subframe.coil.patch)
         # insert multi-polygon
         self.coil.at[name, 'polygon'] = polygon
@@ -366,12 +381,38 @@ class CoilSet(CoilObject):
         # update current
         self.Ic = {name: Ic}
 
+    @staticmethod
+    def patch_coil(frame, overwrite=False, **kwargs):
+        # call on-demand
+        part_color = {'VS3': 'C0', 'VS3j': 'gray', 'CS': 'C0', 'PF': 'C0',
+                      'trs': 'C2', 'vvin': 'C3', 'vvout': 'C4', 'plasma': 'C4'}
+        color = kwargs.get('part_color', part_color)
+        zorder = kwargs.get('zorder', {'VS3': 1, 'VS3j': 0, 'CS': 3, 'PF': 2})
+        alpha = {'plasma': 0.75}
+        patch = [[] for __ in range(frame.nC)]
+        for i, (x, z, dx, dz, cross_section,
+                current_patch, polygon, color_key) in enumerate(
+                frame.loc[:, ['x', 'z', 'dx', 'dz', 'cross_section', 'patch',
+                              'polygon', 'part']].values):
+            if overwrite or np.array(pd.isnull(current_patch)).any():
+                patch[i] = [PolygonPatch(polygon)]
+            else:
+                patch[i] = [current_patch]
+            for j in range(len(patch[i])):
+                patch[i][j].set_edgecolor('darkgrey')
+                patch[i][j].set_linewidth(0.25)
+                patch[i][j].set_antialiased(True)
+                patch[i][j].set_facecolor(color.get(color_key, 'C9'))
+                patch[i][j].zorder = zorder.get(color_key, 0)
+                patch[i][j].set_alpha(alpha.get(color_key, 1))
+        frame.loc[:, 'patch'] = patch
+
     def plot_coil(self, coil, alpha=1, ax=None, **kwargs):
         if ax is None:
             ax = plt.gca()
         if not coil.empty:
             if pd.isnull(coil.loc[:, 'patch']).any() or len(kwargs) > 0:
-                CoilFrame.patch_coil(coil, **kwargs)  # patch on-demand
+                CoilSet.patch_coil(coil, **kwargs)  # patch on-demand
             patch = coil.loc[:, 'patch']
             # form list of lists
             patch = [p if pd.api.types.is_list_like(p) else [p] for p in patch]
@@ -379,7 +420,7 @@ class CoilSet(CoilObject):
             patch = functools.reduce(operator.concat, patch)
             # sort
             patch = np.array(patch)[np.argsort([p.zorder for p in patch])]
-            pc = PatchCollection(patch, match_original=True, alpha=alpha)
+            pc = PatchCollection(patch, match_original=True)
             ax.add_collection(pc)
 
     def plot(self, subcoil=True, plasma=True, label=False, current=None,
@@ -403,7 +444,8 @@ class CoilSet(CoilObject):
         x = self.coil.x['Plasma']
         z = self.coil.z['Plasma']
         ax.text(x, z, f'{1e-6*self.Ip:1.1f}MA', fontsize=fs,
-                ha='center', va='center', color=0.9 * np.ones(3))
+                ha='center', va='center', color=0.9 * np.ones(3),
+                zorder=10)
 
     def label_coil(self, ax, label, current, coil=None, fs=None):
         if fs is None:
@@ -443,12 +485,10 @@ class CoilSet(CoilObject):
                         color=0.2 * np.ones(3))
 
 
-if __name__ is '__main__':
+if __name__ == '__main__':
 
     cs = CoilSet(dCoil=0.25)
-    #cs.update_metadata('coil', additional_columns=['R'])
-
-    '''
+    cs.update_metadata('coil', additional_columns=['R'])
 
     cs.add_coil(6, -3, 1.5, 1.5, name='PF6', part='PF', Nt=600)
     cs.add_coil(7, -0.5, 2.5, 2.5, name='PF8', part='PF', Nt=600,
@@ -461,7 +501,9 @@ if __name__ is '__main__':
     cs.add_coil(5.6, 3.5, 0.2, 0.2, name='PF7', part='vvin', dCoil=0.01)
 
     cs.add_plasma(6, [1.5, 2, 2.5], 1.75, 0.4, It=-15e6/3)
-    cs.add_plasma(7, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
+    # cs.add_plasma(7, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
 
     cs.plot(label=True)
-    '''
+
+
+

@@ -206,15 +206,14 @@ class CoilSet(CoilObject):
         points = shapely.geometry.MultiPoint(points=list(zip(xm_, zm_)))
         polygon = self.coil.at[name, 'polygon']
         multi_point = np.asarray(polygon.intersection(points))
-        if len(multi_point) == 2:
+        if np.size(multi_point) == 2:
             multi_point = [multi_point]
         xm_ = [point[0] for point in multi_point]
         zm_ = [point[1] for point in multi_point]
-
         Nf = len(xm_)  # filament number
         self.coil.at[name, 'Nf'] = Nf  # back-propagate fillament number
-        if 'It' in self.coil.columns:  # update subcoil turn-current
-            kwargs['It'] = self.coil.at[name, 'It'] / Nf
+        #if 'It' in self.coil.columns:  # update subcoil turn-current
+        #    kwargs['It'] = self.coil.at[name, 'It'] / Nf
         if 'part' in self.coil.columns:
             kwargs['part'] = self.coil.at[name, 'part']
         mesh = {'x': xm_, 'z': zm_,
@@ -225,6 +224,7 @@ class CoilSet(CoilObject):
                 args.append(mesh[var])
             elif var in self.subcoil._additional_columns:
                 kwargs[var] = mesh[var]
+        #print('sub args', *args, 'xm_', xm_)
         frame = self.subcoil.get_frame(*args, name=name, coil=name, **kwargs)
         self.coil.at[name, 'subindex'] = list(frame.index)
         frame.loc[:, 'Nt'] = self.coil.at[name, 'Nt'] / Nf
@@ -490,18 +490,18 @@ if __name__ == '__main__':
     cs = CoilSet(dCoil=0.25)
     cs.update_metadata('coil', additional_columns=['R'])
 
-    cs.add_coil(6, -3, 1.5, 1.5, name='PF6', part='PF', Nt=600)
-    cs.add_coil(7, -0.5, 2.5, 2.5, name='PF8', part='PF', Nt=600,
+    cs.add_coil(6, -3, 1.5, 1.5, name='PF6', part='PF', Nt=600, It=5e5)
+    cs.add_coil(7, -0.5, 2.5, 2.5, name='PF8', part='PF', Nt=600, Ic=2e3,
                 cross_section='circle')
 
     cs.add_coil([2, 2, 3, 3.5], [1, 0, -1, -3], 0.3, 0.3,
                 name='PF', part='PF', delim='', Nt=300)
     cs.add_coil(3, 2, 0.5, 0.8, name='PF4', part='VS3', turn_fraction=0.75,
                 Nt=15, dCoil=-1)
-    cs.add_coil(5.6, 3.5, 0.2, 0.2, name='PF7', part='vvin', dCoil=0.01)
+    cs.add_coil(5.6, 3.5, 0.2, 0.2, name='PF7', part='vvin', dCoil=0.01, Ic=1e6)
 
-    cs.add_plasma(6, [1.5, 2, 2.5], 1.75, 0.4, It=-15e6/3)
-    # cs.add_plasma(7, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
+    # cs.add_plasma(6, [1.5, 2, 2.5], 1.75, 0.4, It=-15e6/3)
+    cs.add_plasma(7, 3, 1.5, 0.5, It=-15e6/3)
 
     cs.plot(label=True)
 

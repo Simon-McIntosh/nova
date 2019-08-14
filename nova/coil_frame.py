@@ -195,6 +195,7 @@ class CoilFrame(pd.DataFrame):
         data = {}  # python 3.6+ assumes dict is insertion ordered
         for key, arg in zip(self._required_columns, args):
             data[key] = arg  # add required arguments
+        current_label = self._extract_current_label(**kwargs)
         for key in self._additional_columns:
             if key in kwargs:
                 data[key] = kwargs.pop(key)
@@ -204,12 +205,28 @@ class CoilFrame(pd.DataFrame):
             if key in kwargs:
                 data[key] = kwargs.pop(key)
                 self._update_metadata(additional_columns=[key])
+        data = self._propogate_current(current_label, data)
         if len(kwargs.keys()) > 0:
             warn(f'\n\nunset kwargs: {list(kwargs.keys())}'
                  '\nto use include within additional_columns:\n'
                  f'{self._additional_columns}'
                  '\nor within default_attributes:\n'
                  f'{self._default_attributes}\n')
+        return data
+
+    def _extract_current_label(self, **kwargs):
+        current_label = None
+        if 'Ic' in self._required_columns or 'Ic' in kwargs:
+            current_label = 'Ic'
+        elif 'It' in self._required_columns or 'It' in kwargs:
+            current_label = 'It'
+        return current_label
+
+    def _propogate_current(self, current_label, data):
+        if current_label == 'Ic':
+            data['It'] = data['Ic'] * data['Nt']
+        elif current_label == 'It':
+            data['Ic'] = data['It'] / data['Nt']
         return data
 
     def _extract_index(self, data, delim, label, name):

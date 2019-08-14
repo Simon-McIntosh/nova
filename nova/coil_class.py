@@ -6,6 +6,7 @@ from amigo.pyplot import plt
 import numpy as np
 import pandas as pd
 from astropy import units
+import amigo.geom
 
 
 class CoilClass(CoilSet):
@@ -63,7 +64,8 @@ class CoilClass(CoilSet):
             to (str): feature_keypoint
         '''
         self.d2.to = to  # update scenario data (time or keypoint)
-        self.update_plasma()  # update plasma based on d2 data
+        self.update_plasma_coil()  # update plasma location based on d2 data
+        self.update_plasma_current()  # update plasma current
         self.Ic = self.d2.Ic  # update coil currents
 
     def add_eqdsk(self, eqdsk):
@@ -85,13 +87,13 @@ class CoilClass(CoilSet):
             update (bool): apply update to self.coil.loc[name]
         '''
         coilset = self.subset(name)  # create single coil coilset
-        biot_savart(coilset).inductance()  # calculate self-inductance
-        L = coilset.matrix['inductance']['Mt'].loc[name, name]
+        Mc = biot_savart(coilset).calculate_inductance()  # self-inductance
+        L = Mc.at[name, name]
         dr = self_inductance(coilset.coil.x[name]).minor_radius(L)
         # calculate geometric and arithmetic means
         Nt = coilset.subcoil.Nt
-        x_gmd = biot_savart.gmd(coilset.subcoil.x, Nt)
-        z_amd = biot_savart.amd(coilset.subcoil.z, Nt)
+        x_gmd = amigo.geom.gmd(coilset.subcoil.x, Nt)
+        z_amd = amigo.geom.amd(coilset.subcoil.z, Nt)
         if update:  # apply update
             coilset.coil.loc[name, ['x', 'z']] = x_gmd, z_amd
             coilset.coil.loc[name, ['dx', 'dz']] = 2*dr, 2*dr
@@ -100,7 +102,7 @@ class CoilClass(CoilSet):
         coilset = None  # remove coilset
         return L
 
-    def update_plasma(self):
+    def update_plasma_coil(self):
         coordinates = ['Rcur', 'Zcur']
         if not np.array([c in self.d2.unit for c in coordinates]).all():
             coordinates = ['Rp', 'Zp']
@@ -125,9 +127,12 @@ class CoilClass(CoilSet):
                 self.add_plasma(Xp, Zp, 2*dr, 2*dr)
             self.calculate_inductance(source_index=['Plasma'])
             self.calculate_interaction(coil_index=['Plasma'])
-            self.Ip = self.d2.Ip  # update plasma current
         elif 'Plasma' in self.coil.index:
             self.drop_coil('Plasma')
+
+    def update_plasma_current(self):
+        if 'Plasma' in self.coil.index:
+            self.Ip = self.d2.Ip  # update plasma current
 
     def calculate_inductance(self, mutual=True,
                              source_index=None, invert_source=False,

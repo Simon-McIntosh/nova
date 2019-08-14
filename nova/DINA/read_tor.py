@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.animation as manimation
 from amigo.time import clock
 from itertools import count
-from nova.coils import PF
+from nova.old.coils import PF
 from amigo.IO import readtxt, pythonIO
 from nep.DINA.read_dina import read_dina
 from amigo.pyplot import plt
@@ -12,21 +12,21 @@ from collections import OrderedDict
 import copy
 
 
-class read_tor(pythonIO):
+class read_tor(read_dina, pythonIO):
     # read tor_cur_data*.dat file from DINA simulation
     # listing of toroidal currents
 
     def __init__(self, database_folder='disruptions', Ip_scale=1,
                  read_txt=False):
-        self.Ip_scale = Ip_scale
-        self.read_txt = read_txt
-        self.dina = read_dina(database_folder)
-        self.frame_index = 0
+        read_dina.__init__(self, database_folder=database_folder,
+                           read_txt=read_txt)
         pythonIO.__init__(self)  # python read/write
+        self.Ip_scale = Ip_scale
+        self.frame_index = 0
 
     def load_file(self, folder, **kwargs):
         read_txt = kwargs.get('read_txt', self.read_txt)
-        filepath = self.dina.locate_file('tor_cur', folder=folder)
+        filepath = self.locate_file('tor_cur', folder=folder)
         filepath = '.'.join(filepath.split('.')[:-1])
         self.name = filepath.split(path.sep)[-2]
         if read_txt or not path.isfile(filepath + '.pk'):
@@ -294,7 +294,8 @@ if __name__ == '__main__':
     #for folder in tor.dina.folders:
     #    tor.load_file(folder, read_txt=True)
     tor.load_file(3, read_txt=False)
-    tor.plot(200)
+
+    #tor.plot(200)
 
     # tor.pf.plot(current=False, plasma=True, subcoil=True)
     # tor.movie('tmp')

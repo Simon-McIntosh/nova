@@ -1,5 +1,5 @@
 import numpy as np
-from nova.force import force_field
+from nova.old.force import force_field
 from nep.coil_geom import VSgeom
 from nep.DINA.read_tor import read_tor
 from collections import OrderedDict
@@ -24,7 +24,6 @@ import nep
 from amigo.IO import class_dir
 from nep.DINA.read_eqdsk import read_eqdsk
 import cycler
-from nova.coil_class import CoilClass
 
 
 class coil_force(pythonIO):
@@ -673,12 +672,13 @@ class coil_force(pythonIO):
 
 if __name__ == '__main__':
 
-    force = coil_force(vessel=True, t_pulse=0.3, nturn=4, Ip_scale=15/15,
+    force = coil_force(vessel=True, t_pulse=0.3, nturn=3, Ip_scale=15/15,
                        read_txt=False)
-    force.load_file(0)
+    # force.load_file(0)
     # force.read_data(nframe=500, forcewrite=False)
+    force.plot_Fmax(nframe=500)
+    # cc = CoilClass()
 
-    cc = CoilClass()
 
     '''
     for folder in force.dina.folders:

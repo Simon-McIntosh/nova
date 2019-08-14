@@ -411,11 +411,13 @@ class scenario_data(read_dina, interpolate, operate):
                  if ('I' in v[0] and len(v[0]) <= 5 and v[0] != 'Ip')]).T
 
         cs1_loc = coil_names.tolist().index('Ics1')
-        coil_names = np.insert(coil_names, cs1_loc, 'Ics1')
-        self.coil_iloc = np.insert(self.coil_iloc, cs1_loc,
-                                   self.coil_iloc[cs1_loc])
+        coil_names = np.insert(coil_names, cs1_loc, ['Ics1', 'Ics1'])
+        self.coil_iloc = np.insert(
+                self.coil_iloc, cs1_loc,
+                [self.coil_iloc[cs1_loc], self.coil_iloc[cs1_loc]])
         Ic_index = [name[1:].upper() for name in coil_names]
-        Ic_index[cs1_loc:cs1_loc+2] = ['CS1U', 'CS1L']  # CS central pair
+        # CS central pair
+        Ic_index[cs1_loc:cs1_loc+3] = ['CS1U', 'CS1', 'CS1L']
         Ic_index = [(name, 'A') for name in Ic_index]
         self._Ic = pd.Series(index=pd.MultiIndex.from_tuples(
                 Ic_index, names=['name', 'unit']))
@@ -576,15 +578,11 @@ class read_scenario(read_dina):
                                    dataframe=True)
 
 
-if __name__ is '__main__':
-
-    # scn = read_scenario(read_txt=True)
-    # scn.load_file(46)  # read / load single file
-    # scn.load_folder()
+if __name__ == '__main__':
 
     d2 = scenario_data(read_txt=False)
     # d2.load_folder()
-    d2.load_file(24)
+    d2.load_file('15MA DT-DINA2016-01_v1.1')  # read / load single file
 
     # d2.to = 100
     # print(d2.Ic)

@@ -1,3 +1,4 @@
+from nova.coil_data import CoilData
 import pandas as pd
 import numpy as np
 from warnings import warn
@@ -17,54 +18,54 @@ class CoilSeries(pd.Series):
 
 
 class CoilFrame(pd.DataFrame):
+
     '''
-    Inspiration taken from GeoPandas https://github.com/geopandas
     CoilFrame instance inherits from Pandas DataFrame
+    Inspiration taken from GeoPandas https://github.com/geopandas
     '''
+
     _metadata = ['_required_columns', '_additional_columns',
                  '_default_attributes']
 
     def __init__(self, *args, **kwargs):
-        self._initalize_instance_metadata()
+        self._initialize_instance_metadata()
         kwargs = self._update_metadata(**kwargs)
         pd.DataFrame.__init__(self, *args, **kwargs)
 
-    def _initalize_instance_metadata(self):
-        self._initalize_required_columns()
-        self._initalize_additional_columns()
-        self._initalize_default_attributes()
+    def _initialize_instance_metadata(self):
+        self._initialize_required_columns()
+        self._initialize_additional_columns()
+        self._initialize_default_attributes()
 
-    def _initalize_required_columns(self):
+    def _initialize_required_columns(self):
         '''
         required input: self.add_coil(*args)
         '''
         self._required_columns = ['x', 'z', 'dx', 'dz']
 
-    def _initalize_additional_columns(self):
+    def _initialize_additional_columns(self):
         '''
         additional input: self.add_coil(**kwargs)
         '''
         self._additional_columns = []
 
-    def _initalize_default_attributes(self):
+    def _initialize_default_attributes(self):
         '''
         default attributes when not set via self.add_coil(**kwargs)
         '''
         self._default_attributes = \
-            {'Ic': 0, 'It': 0, 'm': None, 'R': 0, 'Nt': 1, 'Nf': 1,
-             'material': None, 'turn_fraction': 1, 'patch': None,
+            {'Ic': 0, 'It': 0, 'm': '', 'R': 0, 'Nt': 1, 'Nf': 1,
+             'material': '', 'turn_fraction': 1, 'patch': None,
              'cross_section': 'square', 'turn_section': 'square',
              'coil': '', 'part': '', 'subindex': None, 'dCoil': 0,
-             'mpc': None, 'polygon': None}
+             'mpc': '', 'polygon': None, 'control': True}
 
     def _update_metadata(self, **kwargs):
-        mode = kwargs.pop('mode', 'append')  # [empty, reset, append]
+        mode = kwargs.pop('mode', 'append')  # [overwrite, append]
         for key in self._metadata:  # extract and update metadata from kwargs
-            if mode == 'empty':
-                empty = {} if key == '_default_attributes' else []
-                setattr(self, key, empty)
-            elif mode == 'reset':
-                getattr(self, f'_initalise{mode}')()
+            if mode == 'overwrite':
+                null = {} if key == '_default_attributes' else []
+                setattr(self, key, null)
             value = kwargs.pop(key[1:], None)
             if value:
                 if key == '_additional_columns':
@@ -96,15 +97,13 @@ class CoilFrame(pd.DataFrame):
         Returns:
             self['It'] (pd.Series): turn current [A.turns]
         '''
+        self.update_frame()
         return self['It']
 
     @It.setter
     def It(self, It):
-        idx = It.index
-        self.loc[idx, 'It'] = It  # turn-current [A.turn]
-        # line-current [A]
-        self.loc[idx, 'Ic'] = self.loc[idx, 'It'] / self.loc[idx, 'Nt']
-        self.copy_mpc()  # copy multi-point constraints
+        self.data.It = It
+        self.update_frame()
 
     @property
     def Ic(self):
@@ -112,46 +111,48 @@ class CoilFrame(pd.DataFrame):
         Returns:
             self['Ic'] (pd.Series): line current [A]
         '''
+        self.update_frame()
         return self['Ic']
 
     @Ic.setter
     def Ic(self, Ic):
-        idx = Ic.index
-        self.loc[idx, 'Ic'] = Ic  # line-current [A]
-        # turn-current [A.turn]
-        self.loc[idx, 'It'] = self.loc[idx, 'Ic'] * self.loc[idx, 'Nt']
-        self.copy_mpc()  # copy multi-point constraints
+        self.data.Ic = Ic
+        self.update_frame()
 
-    def copy_mpc(self):
-        if 'mpc' in self.columns:
-            for name in self.mpc.dropna().index:
-                mpc = self.mpc[name]
-                if name != mpc[0]:
-                    self.at[name, 'Ic'] = self.at[mpc[0], 'Ic'] * mpc[1]
-                    self.at[name, 'It'] = self.at[name, 'Ic'] *\
-                        self.at[name, 'Nt']
+    def update_frame(self):
+        self.data.update_frame()
+        self['Ic'] = self.data.frame['Ic']  # line-current [A]
+        self['It'] = self.data.frame['It']  # turn-current [A.turn]
 
-    def _get_coil_number(self):
+    @property
+    def nC(self):
+        '''
+        Returns:
+            number of coils in dataframe
+        '''
         return len(self.index)
 
-    nC = property(fget=_get_coil_number, doc='number of coils in dataframe')
-
-    def _get_column_number(self):
+    @property
+    def nCol(self):
+        '''
+        Returns:
+            number of columns
+        '''
         return len(self.columns)
-
-    nCol = property(fget=_get_column_number, doc='number of columns '
-                    'in dataframe')
 
     def get_frame(self, *args, **kwargs):
         args, kwargs = self._check_arguments(*args, **kwargs)
         delim = kwargs.pop('delim', '_')
         label = kwargs.pop('label', kwargs.get('name', 'Coil'))
         name = kwargs.pop('name', f'{label}{delim}{self.nC:d}')
+        mpc = kwargs.pop('mpc', False)
         data = self._extract_data(*args, **kwargs)
         index = self._extract_index(data, delim, label, name)
         frame = CoilFrame(data, index=index, columns=data.keys(),
                           **self.metadata)
         frame = self._insert_polygon(frame)
+        if mpc:
+            frame.add_mpc(frame.index.to_list())
         return frame
 
     def add_coil(self, *args, iloc=None, **kwargs):
@@ -162,15 +163,37 @@ class CoilFrame(pd.DataFrame):
     def drop_coil(self, index=None):
         if index is None:
             index = self.index
-        self.drop(index, inplace=True)
+        self = self.drop(index, inplace=False)
+        self.data = CoilData(self)
 
-    def concatenate(self, *frame, iloc=None):
+    def concatenate(self, *frame, iloc=None, sort=False):
         if iloc is None:  # append
-            frame = [self, *frame]
+            frames = [self, *frame]
         else:  # insert
-            frame = [self.iloc[:iloc, :], *frame, self.iloc[iloc:, :]]
-        coil = pd.concat(frame, sort=False)  # concatenate
-        CoilFrame.__init__(self, coil, **self.metadata)  # relink new instance
+            frames = [self.iloc[:iloc, :], *frame, self.iloc[iloc:, :]]
+        frame = pd.concat(frames, sort=sort)  # concatenate
+        if sort:
+            frame.sort_index(inplace=True)
+        CoilFrame.__init__(self, frame, **self.metadata)  # relink new instance
+        self.data = CoilData(self)
+
+    def add_mpc(self, name, factor=1):
+        '''
+        define multi-point constraint linking a set of coils
+        name: list of coil names (present in self.frame.index)
+        factor: inter-coil coupling factor
+        '''
+        if not pd.api.types.is_list_like(name):
+            raise IndexError(f'name: {name} must be list like')
+        elif len(name) == 1:
+            raise IndexError(f'len({name}) must be > 1')
+        if not pd.api.types.is_list_like(factor):
+            factor = factor * np.ones(len(name)-1)
+        elif len(factor) != len(name)-1:
+            raise IndexError(f'len(factor={factor}) must == 1 '
+                             f'or == len(name={name})-1')
+        for n, f in zip(name[1:], factor):
+            self.at[n, 'mpc'] = (name[0], f)
 
     def _check_arguments(self, *args, **kwargs):
         if len(args) == 1:  # data passed as pandas dataframe
@@ -258,9 +281,11 @@ class CoilFrame(pd.DataFrame):
         if 'polygon' in frame.columns:
             for name in frame.index:
                 if pd.isna(frame.at[name, 'polygon']):
-                    x, z, dx, dz, cross_section = \
-                        frame.loc[name, ['x', 'z', 'dx', 'dz',
-                                         'cross_section']]
+                    x = frame.at[name, 'x']
+                    z = frame.at[name, 'z']
+                    dx = frame.at[name, 'dx']
+                    dz = frame.at[name, 'dz']
+                    cross_section = frame.at[name, 'cross_section']
                     if (np.array([x, dx, dz]) != 0).all():
                         polygen = self._get_polygen(cross_section)
                         polygon = polygen(x, z, dx, dz)

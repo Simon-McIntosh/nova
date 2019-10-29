@@ -81,10 +81,14 @@ class read_dina(pythonIO):
                 raise IndexError(txt)
             folder = self.folders[folder]
         elif isinstance(folder, str):
+            folder.split
             if folder not in self.folders:
-                txt = '\nfolder {} '.format(folder)
-                txt += 'not found in {}'.format(self.directroy)
-                raise IndexError(txt)
+                folder = folder.split('_')  # remove leading underscore
+                folder = '_'.join([' '.join(folder[:2]), '_'.join(folder[2:])])
+                if folder not in self.folders:
+                    txt = '\nfolder {} '.format(folder)
+                    txt += 'not found in {}'.format(self.directroy)
+                    raise IndexError(txt)
         elif folder is None:
             folder = self.directory
         else:

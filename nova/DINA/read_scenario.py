@@ -6,6 +6,7 @@ import pandas as pd
 from amigo.pyplot import plt
 from amigo.geom import rdp_extract
 from astropy import units
+from amigo.time import clock, timeit
 
 
 class operate:
@@ -43,7 +44,7 @@ class operate:
         '''
         self.feature_name = feature_name
         feature = {'eps': eps, 'dt': dt, 'dt_window': dt_window}
-        y = self.frame.loc[:, self.feature_name].values[:, 0]
+        y = self.frame.loc[:, self.feature_name].values
         xrdp = rdp_extract(self.t, y, dx=dt, eps=eps,
                            dx_window=dt_window)[0]
         # interpolate data frame to rdp nodes
@@ -92,12 +93,12 @@ class operate:
         value = abs(feature['node'].loc[:, self.feature_name])
         max_value = np.max(value.values)
         for index in feature['node'].index:
-            if value.loc[index].values[0] > threshold*max_value:
+            if value.loc[index] > threshold*max_value:
                 if not self.feature_switch:
                     tag = self.feature_tag
                     feature['node'].rename(index={index: tag},
                                            inplace=True)
-            elif value.loc[index].values[0] < threshold*max_value:
+            elif value.loc[index] < threshold*max_value:
                 if self.feature_switch:
                     tag = self.feature_tag
                     feature['node'].rename(index={index-1: tag},
@@ -105,18 +106,18 @@ class operate:
                     break
         if self.feature_name == 'Ip':
             feature['node'].rename(index={0: 'SOD'}, inplace=True)
-            if value.loc[value.index[1]].values[0] > 0.01*max_value:
+            if value.loc[value.index[1]] > 0.01 * max_value:
                 feature['node'].rename(index={'SOD': 'SOP'}, inplace=True)
             else:
                 for index in value.index[1:]:
-                    if value.loc[index].values[0] < 0.01*max_value:
+                    if value.loc[index] < 0.01 * max_value:
                         feature['node'].rename(index={index: 'SOP'},
                                                inplace=True)
                         break
             if 'EOF' in feature['node'].index:
-                EOF_index = int(feature['node'].loc['EOF', 'index'].values[0])
+                EOF_index = int(feature['node'].loc['EOF', 'index'])
                 for index in value.index[EOF_index+1:]:
-                    if value.loc[index].values[0] < 0.01*max_value:
+                    if value.loc[index] < 0.01 * max_value:
                         feature['node'].rename(index={index: 'EOP'},
                                                inplace=True)
                         break
@@ -131,12 +132,11 @@ class operate:
             for index in self.feature['node'].index:
                 if isinstance(index, str):
                     vector = pd.Series(self.feature['node'].loc[index, :])
-                    vector.drop('index', level=0, inplace=True)
                     vector.loc['frame_index'] = \
-                        np.argmin(abs(self.t - vector.t.values[0]))
+                        np.argmin(abs(self.t - vector.t))
                     self.feature_keypoints = self.feature_keypoints.append(
                             vector)
-        self.feature_keypoints.sort_values(('t', 's'), inplace=True)
+        self.feature_keypoints.sort_values('t', inplace=True)
 
     def extract_feature_segments(self):
         self.feature_segments = pd.DataFrame(
@@ -152,13 +152,13 @@ class operate:
                          for key in keypoints]).all():
                 t_index = [[] for __ in range(len(keypoints))]
                 for i, key in enumerate(keypoints):
-                    t_index[i] = self.feature['node'].loc[key, 't'][0]
+                    t_index[i] = self.feature['node'].loc[key, 't']
                 index = [np.argmin(abs(self.t-t)) for t in t_index]
                 vector = pd.Series(name=label)
                 vector['frame_index'] = index
                 vector['t'] = t_index
                 vector['dt'] = np.diff(t_index)[0]
-                psi = self.frame.loc[index, 'PSI(axis)'].values[:, 0]
+                psi = self.frame.loc[index, 'PSI(axis)'].values
                 vector['dpsi'] = np.diff(psi)[0]
                 self.feature_segments = self.feature_segments.append(vector)
 
@@ -169,12 +169,15 @@ class operate:
         self.extract_feature_segments()
         self.extract_feature_keypoints()
 
-    def feature_plot(self, feature_name=None):
+    def plot_features(self, feature_name=None, ax=None, ls=None):
         if feature_name is None:
             feature_name = ['Ip', 'Pfus', 'Ti', 'Zx']
-        ax = plt.subplots(len(feature_name), 1, sharex=True)[1]
-        if len(feature_name) == 1:
-            ax = [ax]
+        if ax is None:
+            ax = plt.subplots(len(feature_name), 1, sharex=True)[1]
+            if len(feature_name) == 1:
+                ax = [ax]
+        if ls is None:
+            ls = '.-'
         for i, name in enumerate(feature_name):
             ax[i].plot(self.t, self.frame.loc[:, name],
                        alpha=0.75, color='gray')
@@ -197,31 +200,57 @@ class operate:
                     ax[i].text(self.feature['node'].t.loc[index],
                                self.feature['node'].loc[index, name],
                                index, ha=ha, va=va, color='gray')
-            ax[i].set_ylabel(f'${name}$, {self.vector[name].index[0]}')
+            ax[i].set_ylabel(f'${name}$, {self.units["read"][name]}')
             ax[i].plot(self.feature['node'].t,
-                       self.feature['node'].loc[:, name], '.-', color=f'C{i}')
+                       self.feature['node'].loc[:, name], ls, color=f'C{i}')
         plt.despine()
         plt.detick(ax)
-        ax[-1].set_xlabel(f'$t$, {self.vector["t"].index[0]}')
+        ax[-1].set_xlabel(f'$t$, {self.units["read"]["t"]}')
 
 
 class interpolate:
 
-    def __init__(self, extrapolate):
+    def __init__(self, extrapolate, sort=False):
         self._to = None  # time instance (float)
         self._ko = None  # keypoint instance (SOF, EOF, etc.)
         self._extrapolate = extrapolate
+        self.sort = sort  # sort index
 
     def set_index(self, index=None):
         if index is None:
-            self.index = self.data.columns
+            index = self.data.columns
         else:
-            # remove columns absent from data
-            self.index = [var for var in index if var in self.data]
-        self.unit = dict(self.index)
-        # initalise data slice
-        index = pd.MultiIndex.from_tuples(self.index, names=['name', 'unit'])
-        self._vector = pd.Series(index=index)
+            index = [var for var in index if var in self.data]
+        name = [var[0] for var in index]
+        unit = np.array([var[1] for var in index])
+        # initalise data structures ( + sort index)
+        self.index = pd.Index(name)
+        if self.sort:
+            self.index, indexer = self.index.sort_values(return_indexer=True)
+        else:
+            indexer = np.arange(self.index.size)
+        self._vector = pd.Series(index=self.index)
+        self.units = pd.DataFrame(index=self.index,
+                                  columns=['read', 'write', 'factor'])
+        self.units['read'] = unit[indexer]
+        self.units['write'] = unit[indexer]  # initalize as 1-1
+        self.units['factor'] = 1
+
+    def update_units(self, read, write):
+        '''
+        set / update conversion factors for selected units / index
+        Attributes:
+            read (str or [str]): read unit
+            write (str): write unit
+        '''
+        read_units = self.units['read'].unique()
+        if not pd.api.types.is_list_like(read):  # ensure iterable
+            read = [read]
+        for _read in read:
+            if _read in read_units:
+                index = self.units['read'] == _read
+                self.units.loc[index, 'write'] = write
+                self.units.loc[index, 'factor'] = units.Unit(_read).to(write)
 
     @property
     def to(self):
@@ -239,18 +268,23 @@ class interpolate:
             to (float): input time
             to (str): feature_keypoint
         '''
+        self.check_folder_set()
         if isinstance(to, str):  # feature keypoint
             self._ko = to
             if to in self.feature_keypoints.index:
-                to = self.feature_keypoints.loc[to, 't'].values[0]
+                to = self.feature_keypoints.loc[to, 't']
             else:
-                self.feature_plot()
+                self.plot_feature()
                 raise IndexError(f'{to} not in {self.feature_keypoints.index}')
         else:
             self._ko = None  # unset keypoint
         self._to = to
         self.check_extrapolate()
-        self._vector.loc[:] = self.interpolator(self._to)  # update vector
+        vector = self.interpolator(self._to)  # interpolate
+        if hasattr(self, 'units'):
+            self._vector.iloc[:] = vector * self.units['factor'].values
+        else:
+            self._vector.iloc[:] = vector
 
     @property
     def ko(self):
@@ -324,39 +358,53 @@ class scenario_data(read_dina, interpolate, operate):
     '''
 
     def __init__(self, folder=None, database_folder='operations',
-                 read_txt=False, extrapolate=False):
+                 read_txt=False, extrapolate=False, sort=False,
+                 additional_columns=[]):
         '''
         Attributes:
             database_folder (str): database folder
             folder (str): scenario folder
             read_txt (bool): read / reread source text files
+            extrapolate (bool): extrapolate beyond DINA data set
+            additional_columns (list): additional column names
+                None: load full dataset
+                []: use default columns defined in subset
         '''
         read_dina.__init__(self, database_folder=database_folder,
                            read_txt=read_txt)
-        interpolate.__init__(self, extrapolate)
+        interpolate.__init__(self, extrapolate, sort)
         operate.__init__(self)  # initalise operation instance
+        self.additional_columns = additional_columns
         self.load_file(folder)
 
     def load_file(self, folder, verbose=True, **kwargs):
         self.folder = folder
+        additional_columns = kwargs.get('additional_columns',
+                                        self.additional_columns)
         if self.folder is not None:
             read_txt = kwargs.get('read_txt', self.read_txt)
             filename = self.locate_folder('data2', folder)[0]
             filename += '_scenario_data'
+            if additional_columns is None:
+                filename += '_fullset'
+            attributes = ['t', 'dt', '_to', 'interpolator', 'frame', '_vector',
+                          '_Ic', 'index', 'units', 'Ic_iloc',
+                          'additional_columns',
+                          '_feature', 'feature_keypoints', 'feature_segments']
             if read_txt or not isfile(filename + '.pk'):
-                self.read_file(folder)
-                self.save_pickle(
-                        filename, ['t', 'dt', '_to', 'interpolator',
-                                   'frame', '_vector',
-                                   '_Ic', 'index', 'unit', 'coil_iloc',
-                                   '_feature', 'feature_keypoints',
-                                   'feature_segments'])
+                self.read_file(folder, additional_columns)
+                self.save_pickle(filename, attributes)
             else:
                 self.load_pickle(filename)
+                if sorted(additional_columns) != self.additional_columns:
+                    self.read_file(filename, additional_columns)
+                    self.save_pickle(filename, attributes)
+            self.update_units(['kA', 'MA'], 'A')  # scale current units
+            self.update_units(['mm', 'cm'], 'm')
 
-    def read_file(self, folder):
+    def read_file(self, folder, additional_columns=[]):
         scn = read_scenario(folder, self.database_folder, read_txt=False)
-        self.interpolate(scn.data2)
+        self.interpolate(scn.data2, additional_columns)
         operate.__init__(self)  # re-initalise operation instance
         self.extract_features()  # extract operational keypoints / keysegments
 
@@ -381,158 +429,197 @@ class scenario_data(read_dina, interpolate, operate):
             if ('I' in var[0] and len(var[0]) <= 5) or ('V' in var[0]):
                 self.data[var] *= coordinate_switch
 
-    def subindex(self, *args):
+    def subindex(self, additional_columns):
         '''
         return reduced subindex
-        aditional paramters specified in *args
-        pass dummy *args = [-1] to use default subindex
+        aditional paramters specified in additional_columns
+        set additional_columns=[] to use default subindex
         '''
-        # current columns
-        columns = self.data.columns
-        index = [var for var in columns if ('I' in var and len(var) <= 5)]
+        # current columns (I)
+        index = [var for var in self.data.columns.droplevel(1)
+                 if ('I' in var and len(var) <= 5)]
         # additional baseline data
         index += ['Rcur', 'Zcur', 'ap', 'kp', 'Rp', 'Zp', 'a',
                   'Ksep', 'BETAp', 'li(3)', 't', 'PSI(axis)', 'Emag', 'Lp',
                   'q(95)', 'q(axis)', 'Vloop', 'D(PSI)res', 'Cejima',
-                  '<PSIext>', '<PSIcoils>']
-        for arg in args:  # append aditional columns
-            if arg not in index:
-                index.append(arg)
+                  '<PSIext>', '<PSIcoils>', 'Pfus', 'Ti', 'Zx']
+        for column in additional_columns:  # append aditional columns
+            if column not in index:
+                index.append(column)
+        index = self.data.columns.to_frame().loc[index]  # extract subset
+        index = pd.MultiIndex.from_frame(index)  # generate multi-index
         return index
 
-    def build_index(self, *args):
-        if len(args) == 0:
+    def build_index(self, additional_columns):
+        self.additional_columns = sorted(additional_columns)
+        if additional_columns is None:  # load full dataset
             index = self.data.columns
         else:
-            index = self.subindex(*args)
+            index = self.subindex(additional_columns)
         self.set_index(index)  # interpolate
-        coil_names, self.coil_iloc = np.array(
-                [[v[0], i] for i, v in enumerate(self.index)
-                 if ('I' in v[0] and len(v[0]) <= 5 and v[0] != 'Ip')]).T
-
+        # extract coil names
+        coil_names, self.Ic_iloc = np.array(
+                [[v, i] for i, v in enumerate(self.index)
+                 if ('I' in v and len(v) <= 5)]).T  # and v != 'Ip'
+        self.Ic_iloc = self.Ic_iloc.astype(int)
         cs1_loc = coil_names.tolist().index('Ics1')
         coil_names = np.insert(coil_names, cs1_loc, ['Ics1', 'Ics1'])
-        self.coil_iloc = np.insert(
-                self.coil_iloc, cs1_loc,
-                [self.coil_iloc[cs1_loc], self.coil_iloc[cs1_loc]])
+        self.Ic_iloc = np.insert(
+                self.Ic_iloc, cs1_loc,
+                [self.Ic_iloc[cs1_loc], self.Ic_iloc[cs1_loc]])
+        plasma_loc = coil_names.tolist().index('Ip')
         Ic_index = [name[1:].upper() for name in coil_names]
+        Ic_index[plasma_loc] = 'Plasma'
         # CS central pair
         Ic_index[cs1_loc:cs1_loc+3] = ['CS1U', 'CS1', 'CS1L']
-        Ic_index = [(name, 'A') for name in Ic_index]
-        self._Ic = pd.Series(index=pd.MultiIndex.from_tuples(
-                Ic_index, names=['name', 'unit']))
+        self._Ic = pd.Series(index=Ic_index)
+        if self.sort:
+            self._Ic.sort_index(inplace=True)
 
-    def interpolate(self, data, *args):
+    def interpolate(self, data, additional_columns=[]):
         '''
         build 1d vectorized interpolator, initalize self.data
         '''
         self.data = data.copy()  # create local copy
         self.rename_columns()
         self.correct_coordinates()
-        self.build_index(*args)
+        self.build_index(additional_columns)  # build and sort
         unique_index = self.space()  # generate equidistant time vector
         data_block = np.zeros((len(unique_index), len(self.index)))
+        self.data = self.data.droplevel(1, axis=1)  # drop units from column
         for i, index in enumerate(self.index):  # build input data
             data_block[:, i] = self.data[index][unique_index]
         t = self.data['t'].values[unique_index].flatten()
         self.interpolator = interp1d(t, data_block, axis=0,
                                      fill_value='extrapolate')
         self.data = None  # unlink raw data (reload from source)
-        # generate dataframe
-        self.frame = pd.DataFrame(self.interpolator(self.t))
-        self.frame.columns = pd.MultiIndex.from_tuples(
-                self.index, names=['name', 'unit'])
+        self.frame = pd.DataFrame(self.interpolator(self.t),
+                                  columns=self.index)
 
     @property
     def Ip(self):
         '''
-        return plasma current [A] at time to
+        return plasma current at time to
         '''
-        self.check_folder_set()
-        read_unit = self.vector['Ip'].index[0]
-        conversion_factor = units.Unit(read_unit).to('A')
-        return conversion_factor*self.vector['Ip'][0]
+        return self._Ip
 
     @property
     def Ic(self):
         '''
-        return pd.Series of coil currents [A] at time to
+        return pd.Series of coil currents at time to
         '''
-        self.check_folder_set()
-        Ic_vector = self.vector.iloc[self.coil_iloc]
-        read_unit = Ic_vector.index.get_level_values('unit')[0]
-        write_unit = self._Ic.index.get_level_values('unit')[0]
-        if read_unit != write_unit:
-            conversion_factor = units.Unit(read_unit).to(write_unit)
-        else:
-            conversion_factor = 1
-        self._Ic.loc[:] = conversion_factor * Ic_vector.values
-        return self._Ic.droplevel(1)  # single index pandas Series [A]
+        return self._Ic
+
+    @property
+    def to(self):
+        return interpolate.to.fget(self)
+
+    @to.setter
+    def to(self, to):
+        interpolate.to.fset(self, to)  # update interpolation instance
+        self._Ic.iloc[:] = self.vector.iloc[self.Ic_iloc].values  # coils
+        self._Ip = self.vector['Ip']  # plasma
 
 
-class force_data(read_dina):
+class field_data(read_dina, interpolate, operate):
 
     '''
     Attributes:
         data (pd.DataFrame): DINA raw data (load using read_scenario)
         t (np.array): time vector with equidistant spacing
+        dt (float): time delta
         interpolator (): q 1d interpolator (vectorised) for data2 input
-        to (float): instance time
-        instance (pd.Series): interpolated data at time instance to
+        to (float): instance time (default, start of file)
+        vector (pd.Series): interpolated data at time instance to
         frame (pd.DataFrame): interpolated data across time vector t
         index (list): column names extracted from data
         coil_index (list): coil names
-        Ic (pd.Series): coil current vector
+        B (pd.DataFrame): coil field vector
+        F (pd.DataFrame): coil force vector
     '''
 
-    def __init__(self, database_folder='operations', folder=None,
-                 read_txt=False):
+    def __init__(self, folder=None, database_folder='operations',
+                 read_txt=False, extrapolate=False):
         '''
         Attributes:
             database_folder (str): database folder
             folder (str): scenario folder
             read_txt (bool): read / reread source text files
+            extrapolate (bool): extrapolate beyond DINA data set
+            additional_columns (list): additional column names
+                None: load full dataset
+                []: use default columns defined in subset
         '''
-        super().__init__(database_folder, read_txt)  # dina read utilities
-        if folder is not None:
-            self.load_file(folder)
+        read_dina.__init__(self, database_folder=database_folder,
+                           read_txt=read_txt)
+        interpolate.__init__(self, extrapolate)
+        self.load_file(folder)
 
     def load_file(self, folder, verbose=True, **kwargs):
-        read_txt = kwargs.get('read_txt', self.read_txt)
-        filename = self.locate_folder('data2', folder) + '_scenario_data'
-        if read_txt or not isfile(filename + '.pk'):
-            self.read_file(folder)
-            self.save_pickle(filename, ['t', 'interpolator', 'frame', 'vector',
-                                        'Ic', 'index', 'coil_index'])
-        else:
-            self.load_pickle(filename)
+        self.folder = folder
+        if self.folder is not None:
+            read_txt = kwargs.get('read_txt', self.read_txt)
+            filename = self.locate_folder('data3', folder)[0]
+            filename += '_field_data'
+            attributes = ['t', 'dt', '_to', 'interpolator', 'frame', '_vector',
+                          'index']
+            if read_txt or not isfile(filename + '.pk'):
+                self.read_file(folder)
+                self.save_pickle(filename, attributes)
+            else:
+                self.load_pickle(filename)
 
-    def read_file(self, folder, file_type='txt'):
-        scn = read_scenario(self.database_folder, read_txt=self.read_txt)
-        scn.load_file(folder)
-        self.interpolate(scn.data2)
+    def read_file(self, folder):
+        scn = read_scenario(folder, self.database_folder, read_txt=False)
+        self.interpolate(scn.data3)
 
-    def build_index(self):
-        a=1
+    def rename_columns(self):
+        self.data.rename(columns={'time': 't'}, level=0, inplace=True)
+        columns = {}
+        for var in self.data.columns:
+            if var[0][:3] == 'Fr_':
+                columns[var[0]] = var[0].replace('Fr_', 'Fx_')
+        self.data.rename(columns=columns, level=0, inplace=True)
 
+    def correct_coordinates(self):
         '''
-        coils = self.coilset.coil.index
-        CSname = self.coilset.coil.index[self.coilset.coil.part == 'CS']
-        self.post = {'DINA': {}, 'Nova': {}}
-        # DINA
-        self.post['DINA']['t'] = pd.Series(self.data3['time'])
-        nC, nt = self.coilset.coil.nC, len(self.post['DINA']['t'])
-        Fx, Fz, B = np.zeros((nt, nC)), np.zeros((nt, nC)), np.zeros((nt, nC))
-        for i, name in enumerate(self.coilset.coil.index):
-            B[:, i] = self.data3[f'B_{name.lower()}']
-            Fx[:, i] = self.data3[f'Fr_{name.lower()}']
-            Fz[:, i] = self.data3[f'Fz_{name.lower()}']
-        self.post['DINA']['B'] = pd.DataFrame(B, columns=coils)
-        self.post['DINA']['Fx'] = pd.DataFrame(Fx, columns=coils)
-        self.post['DINA']['Fz'] = pd.DataFrame(Fz, columns=coils)
-        self.post['DINA']['Fsep'] = self.calculate_Fsep(
-                self.post['DINA']['Fz'].loc[:, CSname])
+        correct coodrinate system for DINA data created before self.date_switch
         '''
+        if self.date > self.date_switch:
+            coordinate_switch = 1
+        else:  # old file - correct coordinates
+            coordinate_switch = -1
+        for var in self.data.columns:
+            if var[0][:2] == 'Ip':  # field given as L2norm
+                self.data[var] *= coordinate_switch
+
+    def interpolate(self, data):
+        '''
+        build 1d vectorized interpolator, initalize self.data
+        '''
+        self.data = data.copy()  # create local copy
+        self.rename_columns()
+        self.correct_coordinates()
+        self.set_index(self.data.columns)  # interpolate
+        unique_index = self.space()  # generate equidistant time vector
+        data_block = np.zeros((len(unique_index), len(self.index)))
+        self.data = self.data.droplevel(1, axis=1)  # drop units from column
+        for i, index in enumerate(self.index):  # build input data
+            data_block[:, i] = self.data[index][unique_index]
+        t = self.data['t'].values[unique_index].flatten()
+        self.interpolator = interp1d(t, data_block, axis=0,
+                                     fill_value='extrapolate')
+        self.data = None  # unlink raw data (reload from source)
+        self.frame = pd.DataFrame(self.interpolator(self.t),
+                                  columns=self.index)
+
+    @property
+    def to(self):
+        return interpolate.to.fget(self)
+
+    @to.setter
+    def to(self, to):
+        interpolate.to.fset(self, to)  # update interpolation instance
 
 
 class read_scenario(read_dina):
@@ -580,13 +667,24 @@ class read_scenario(read_dina):
 
 if __name__ == '__main__':
 
+    d3 = field_data(read_txt=False)
+    #d3.load_folder()
+    d3.load_file('15MA DT-DINA2016-01_v1.1')
+
+    '''
     d2 = scenario_data(read_txt=False)
-    # d2.load_folder()
+    #d2.load_folder()
     d2.load_file('15MA DT-DINA2016-01_v1.1')  # read / load single file
 
-    # d2.to = 100
-    # print(d2.Ic)
+    scn = read_scenario('15MA DT-DINA2016-01_v1.1', 'operations')
+
+
+    d2.ko = 100
+    print(d2.Ic)
     # print(d2.Ip)
+    '''
+
+
 
 
 

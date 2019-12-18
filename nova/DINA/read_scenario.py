@@ -667,18 +667,18 @@ class read_scenario(read_dina):
 
 if __name__ == '__main__':
 
-    d3 = field_data(read_txt=False)
-    #d3.load_folder()
-    d3.load_file('15MA DT-DINA2016-01_v1.1')
+    # d3 = field_data(read_txt=False)
+    # d3.load_folder()
+    # d3.load_file('15MA DT-DINA2016-01_v1.1')
 
-    '''
+
     d2 = scenario_data(read_txt=False)
     #d2.load_folder()
     d2.load_file('15MA DT-DINA2016-01_v1.1')  # read / load single file
 
     scn = read_scenario('15MA DT-DINA2016-01_v1.1', 'operations')
 
-
+    '''
     d2.ko = 100
     print(d2.Ic)
     # print(d2.Ip)

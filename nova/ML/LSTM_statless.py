@@ -210,3 +210,24 @@ plt.subplot(3, 1, 3)
 plt.plot((y_test - predicted_stateless).flatten())
 plt.title('Stateless: Expected - Predicted')
 plt.show()
+
+sl = model_stateless.predict(x_test[tsteps-1:tsteps+2, :])
+
+plt.figure()
+nplot = 5
+t = -np.arange(nplot)
+plt.plot(t, y_test.flatten()[tsteps - 1:][:nplot], 'k-', label='gt')
+#plt.plot(t, predicted_stateful.flatten()[tsteps - 1:][:nplot], 'ro-', label='stateful')
+plt.plot(t, predicted_stateless.flatten()[tsteps - 1:][:nplot], 'k--', label='stateless')
+
+
+for i in range(nplot):
+    plt.plot(np.arange(10)-10-i, x_test[i, :], f'C{i}')
+    plt.plot(np.arange(2)-1-i, 
+             [x_test[i, -1], 
+              predicted_stateless.flatten()[tsteps-1:][i]], 
+              #y_test.flatten()[tsteps - 1:][i]],
+              f'C{i}o-',
+              label=f'n{i}')
+plt.legend()
+    

@@ -67,13 +67,13 @@ Y_valid = Y[ntrain:]
 
 
 model = Sequential()
-model.add(InputLayer(input_shape=[None, 1]))
+model.add(InputLayer(input_shape=[ntime, 1], batch_size=10))
 for rate in (1, 2, 4, 8, 16) * 1:
     model.add(Conv1D(filters=100, kernel_size=2, padding='causal',
                      dilation_rate=rate))
-    # model.add(Dropout(0.05))
-model.add(Conv1D(filters=nfilter, kernel_size=1))
-# model.add(Dense(nfilter))
+    #model.add(Dropout(0.05))
+#model.add(Conv1D(filters=nfilter, kernel_size=1))
+model.add(Dense(nfilter))
 model.compile(loss='mse', optimizer='adam', metrics=[last_time_step_mse])  # , metrics=[last_time_step_mse]
 
 history = model.fit(X_train, Y_train, epochs=50,
@@ -81,10 +81,10 @@ history = model.fit(X_train, Y_train, epochs=50,
 
 pred = model.predict(X_valid)
 
-nfuture = nfilter
-for i in range(5):
+nfuture = 99#nfilter
+for i in range(1):
     plt.figure()
     plt.plot(np.arange(ntime), X_valid[i, :, 0], '-o', ms=12)
     plt.plot(np.arange(ntime)+1, pred[i, :, 0], 'C3--', ms=12)
-    plt.plot(np.arange(nfuture) + ntime, Y_valid[i, -nfuture:, nfuture-1], '-s')
-    plt.plot(np.arange(nfuture) + ntime, pred[i, -nfuture:, nfuture-1], 'C2--')
+    plt.plot(np.arange(ntime) + nfuture + 1, Y_valid[i, :, nfuture], '-s')
+    plt.plot(np.arange(ntime) + nfuture + 1, pred[i, :, nfuture], 'C2--')

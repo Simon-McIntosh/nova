@@ -17,47 +17,47 @@ class CoilData:
 
     _attributes = {'Ic': 0, 'It': 0, 'Nt': 1, 'mpc': '', 'control': True}
 
-    def __init__(self, frame, control=True):
-        self.initalize_frame(frame)
+    def __init__(self, coil, control=True):
+        self.initalize_coil(coil)
         self.control = control
 
-    def initalize_frame(self, frame):
-        self.frame = {}  # extract attributes from frame
-        self.frame['update'] = True  # full frame update flag
-        self.frame['index'] = np.array(frame.index)  # frame index
-        self.frame['nC'] = frame.nC  # frame coil number
+    def initalize_coil(self, coil):
+        self.coil = {}  # extract attributes from coil
+        self.coil['update'] = True  # full coil update flag
+        self.coil['index'] = np.array(coil.index)  # coil index
+        self.coil['nC'] = coil.nC  # coil coil number
         for attribute in self._attributes:
-            if attribute in frame.columns:  # extract value from frame
-                self.frame[attribute] = frame[attribute].to_numpy()
+            if attribute in coil.columns:  # extract value from coil
+                self.coil[attribute] = coil[attribute].to_numpy()
             else:  # set default from self._attributes
-                self.frame[attribute] = \
+                self.coil[attribute] = \
                     np.array([self._attributes[attribute]
-                              for __ in range(self.frame['nC'])])
+                              for __ in range(self.coil['nC'])])
         # extract mpc interger index
         self.mpc_index = [i for i, mpc in
-                          enumerate(self.frame['mpc']) if not mpc]
-        self.index = self.frame['index'][self.mpc_index]
-        self.frame['mpc_referance'] = np.zeros(frame.nC, dtype=int)
-        self.frame['mpc_factor'] = np.ones(frame.nC, dtype=int)
+                          enumerate(self.coil['mpc']) if not mpc]
+        self.index = self.coil['index'][self.mpc_index]
+        self.coil['mpc_referance'] = np.zeros(coil.nC, dtype=int)
+        self.coil['mpc_factor'] = np.ones(coil.nC, dtype=int)
         for i, (index, mpc) in \
-                enumerate(zip(self.frame['index'], self.frame['mpc'])):
+                enumerate(zip(self.coil['index'], self.coil['mpc'])):
             if not mpc:
-                self.frame['mpc_referance'][i] = list(self.index).index(index)
+                self.coil['mpc_referance'][i] = list(self.index).index(index)
             else:
-                self.frame['mpc_referance'][i] = list(self.index).index(mpc[0])
-                self.frame['mpc_factor'][i] = mpc[1]
-        # subframe - link referance id to primary coil
-        if 'coil' in frame.columns:
+                self.coil['mpc_referance'][i] = list(self.index).index(mpc[0])
+                self.coil['mpc_factor'][i] = mpc[1]
+        # subcoil - link referance id to primary coil
+        if 'coil' in coil.columns:
             for i, index in enumerate(self.index):
-                self.index[i] = frame.loc[index, 'coil']
+                self.index[i] = coil.loc[index, 'coil']
         self.nC = len(self.index)
         self._update_index = np.full(self.nC, True)
-        self._control = self.frame['control'][self.mpc_index]
+        self._control = self.coil['control'][self.mpc_index]
         # initalize current vectors
-        self._Ic = self.frame['Ic'][self.mpc_index]
-        self._It = self.frame['It'][self.mpc_index]
+        self._Ic = self.coil['Ic'][self.mpc_index]
+        self._It = self.coil['It'][self.mpc_index]
         # initalize coil turn number
-        self.Nt = self.frame['Nt'][self.mpc_index]
+        self.Nt = self.coil['Nt'][self.mpc_index]
 
     @property
     def control(self):
@@ -90,7 +90,7 @@ class CoilData:
                 'Ic' == line current [A]
                 'It' == turn current [A.turns]
         '''
-        self.frame['update'] = True
+        self.coil['update'] = True
         nC = sum(self._update_index)  # length of update vector
         if isinstance(value, dict):  # dict
             current = np.zeros(nC, dtype=float)
@@ -154,9 +154,9 @@ class CoilData:
     def Ip(self, Ip):
         self.Ip = Ip
 
-    def update_frame(self):
-        if self.frame['update']:
-            self.frame['Ic'] = self.Ic[self.frame['mpc_referance']] *\
-                self.frame['mpc_factor']
-            self.frame['It'] = self.frame['Ic'] * self.frame['Nt']
-            self.frame['update'] = False
+    def update_coil(self):
+        if self.coil['update']:
+            self.coil['Ic'] = self.Ic[self.coil['mpc_referance']] *\
+                self.coil['mpc_factor']
+            self.coil['It'] = self.coil['Ic'] * self.coil['Nt']
+            self.coil['update'] = False

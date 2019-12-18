@@ -77,10 +77,10 @@ class CoilClass(CoilSet):
         '''
         self.d2.to = to  # update scenario data (time or keypoint)
         self.t = self.d2.to  # time instance
-        #self.update_plasma()
+        self.update_plasma()
         #Ic = self.d2.Ic.reindex(self.Ic.index)
-        self.frame.data.Ic = self.d2.Ic.to_dict()
-        #self.frame.Ic = self.d2.Ic.to_dict()
+        self.coil.data.Ic = self.d2.Ic.to_dict()
+        #self.coil.Ic = self.d2.Ic.to_dict()
 
     @property
     def plasma(self):
@@ -134,6 +134,7 @@ class CoilClass(CoilSet):
         '''
         extract plasma metadata from self.d2 instance
         '''
+        '''
         d2 = {'t': 1.2, 'Ip': 1.2, 'Rp': 1.2, 'Lp': 1.2, 'Rcur': 1.2, 'Zcur': 1.2}
         plasma_metadata = {}
         for key in ['t', 'Ip', 'Rp', 'Lp', 'Rcur', 'Zcur']:
@@ -153,8 +154,6 @@ class CoilClass(CoilSet):
             v2['Lp'] = self._plasma_metadata['Lp']
         elif 'Lp' not in self.d2.index:
             v2['Lp'] = Lp  # default plasma self-inductance H
-        '''
-        '''
         xp, zp, Lp = v2.loc[coordinates + ['Lp']]  # current center, inductance
         # xp, zp, Lp = v2.iloc[:3]
         dr = self_inductance(xp).minor_radius(Lp)
@@ -163,16 +162,13 @@ class CoilClass(CoilSet):
         plasma_metadata = pd.Series(
                 {'Ip': Ip, 'Lp': Lp, 'x': xp, 'z': zp, 'dx': dx, 'dz': dz,
                  'cross_section': cross_section, 'turn_section': turn_section})
-        '''
-        #return plasma_metadata
+        return plasma_metadata
 
     def update_plasma(self):
         self.plasma_metadata = self.extract_plasma_metadata()  # extract
-        '''
         self.plasma_metadata.update(self._plasma_metadata)  # overwrite
         self.update_plasma_coil()  # update coil position
         self.update_plasma_current()
-        '''
 
     def update_plasma_coil(self):
         pl = self.plasma_metadata.loc[['x', 'z', 'dx', 'dz']]
@@ -183,8 +179,8 @@ class CoilClass(CoilSet):
                 update = True
             if update:  # update plasma coils, inductance and interaction
                 self.add_plasma(*pl)  # create / update plasma
-                self.update_inductance(source_index=['Plasma'])
-                self.update_interaction(coil_index=['Plasma'])
+                #self.update_inductance(source_index=['Plasma'])
+                #self.update_interaction(coil_index=['Plasma'])
         elif 'Plasma' in self.coil.index:  # remove plasma
             self.drop_coil('Plasma')
 
@@ -194,13 +190,13 @@ class CoilClass(CoilSet):
 
     def add_eqdsk(self, eqdsk):
         if eqdsk:
-            frame = self.coil.get_frame(eqdsk['xc'], eqdsk['zc'],
+            coil = self.coil.get_coil(eqdsk['xc'], eqdsk['zc'],
                                         eqdsk['dxc'], eqdsk['dzc'],
                                         It=eqdsk['It'], name='eqdsk',
                                         delim='')
-            frame = self.categorize_coilset(frame)
-            self.coil.concatenate(frame)
-            self.add_subcoil(index=frame.index)
+            coil = self.categorize_coilset(coil)
+            self.coil.concatenate(coil)
+            self.add_subcoil(index=coil.index)
 
     def self_inductance(self, name, update=False):
         '''
@@ -427,9 +423,9 @@ class CoilClass(CoilSet):
                 index = self.interaction[matrix].index
                 value = np.dot(self.interaction[matrix].loc[:, self.Ic.index],
                                self.Ic)
-                frame = pd.DataFrame(value, index=index)
-                for part in frame.index.unique(level=1):
-                    part_data = frame.xs(part, level=1)
+                coil = pd.DataFrame(value, index=index)
+                for part in coil.index.unique(level=1):
+                    part_data = coil.xs(part, level=1)
                     part_dict = getattr(self, part)
                     if 'n2d' in part_dict:  # reshape data to n2d
                         part_data = part_data.to_numpy()
@@ -463,7 +459,7 @@ class CoilClass(CoilSet):
 if __name__ == '__main__':
 
     cc = CoilClass(dCoil=0.15, n=1e3, expand=0.25, nlevels=51)
-    cc.update_metadata('frame', additional_columns=['R'])
+    cc.update_metadata('coil', additional_columns=['R'])
     cc.scenario_filename = '15MA DT-DINA2016-01_v1.1'
 
     x, z, dx = 5.5, -5, 4.2
@@ -472,12 +468,15 @@ if __name__ == '__main__':
                 cross_section='circle',
                 turn_section='square', turn_fraction=1, Nt=1)
 
-    plt.plot(*cc.frame.at['PF1', 'polygon'].exterior.xy, 'C3')
+    plt.plot(*cc.coil.at['PF1', 'polygon'].exterior.xy, 'C3')
     cc.add_plasma(1, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
     cc.plot()
     # cc.add_plasma(6, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
 
     cc.scenario = 100
+
+    # from nep.coil_geom import PFgeom
+    # cc = CoilClass(PFgeom(dCoil=0.15).cs)
 
     '''
 

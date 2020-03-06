@@ -1,4 +1,5 @@
 from nova.coil_frame import CoilFrame
+from nova.coil_matrix import CoilMatrix
 import pandas as pd
 import numpy as np
 from amigo.geom import gmd, amd
@@ -9,12 +10,11 @@ from amigo.IO import human_format
 from sklearn.cluster import DBSCAN
 from matplotlib.collections import PatchCollection
 from amigo.pyplot import plt
-from nova.inductance.geometric_mean_radius import coil_gmr
 import shapely.geometry
 from descartes import PolygonPatch
 
 
-class CoilSet:
+class CoilSet(CoilMatrix):
 
     '''
     CoilSet:
@@ -23,28 +23,28 @@ class CoilSet:
     Attributes:
         coil (nova.CoilFrame): coil config
         subcoil (nova.CoilFrame): subcoil config
-        data (nova.CoilData): coil data
-        subdata (nova.CoilData): subcoil data
-
     '''
 
     # main class attribures
     _attributes = ['coil', 'subcoil']
 
     # default class parameters
-    _parameters = {'dCoil': 0, 'dPlasma': 0.25, 'turn_fraction': 1}
+    _parameters = {'dCoil': 0, 'dPlasma': 0.25, 'turn_fraction': 1,
+                   'turn_section': 'circle'}
 
     # coil additional _columns
     _coil = ['dCoil', 'Nf', 'Nt', 'It', 'Ic', 'subindex',
               'cross_section', 'turn_section', 'turn_fraction',
-              'patch', 'polygon', 'part', 'control']
-    _subcoil = ['mpc', 'coil', 'Nt', 'It', 'Ic', 'cross_section',
-                 'patch', 'polygon', 'part']
+              'patch', 'polygon', 'part']
+    _subcoil = ['rx', 'rz', 'mpc', 'coil', 'Nt', 'It', 'Ic',
+                'cross_section', 'patch', 'polygon', 'part']
 
     def __init__(self, *args, **kwargs):
+        CoilMatrix.__init__(self)  # coil and subcoil interaction datafields
         kwargs = self.set_parameters(**kwargs)  # set instance parameters
         self.set_attributes(**kwargs)  # set attributes from kwargs
         self.initialize_coil()  # initalize coil and subcoil
+        kwargs = self.set_metadata(**kwargs)
         self.append_coilset(*args)  # append list of coilset instances
 
     def set_parameters(self, **kwargs):
@@ -56,20 +56,26 @@ class CoilSet:
     def set_attributes(self, **kwargs):
         for attribute in self._attributes:
             setattr(self, attribute, kwargs.pop(attribute, None))
+            
+    def set_metadata(self, **kwargs):
+        metadata = kwargs.pop('metadata', None)
+        if metadata is not None:
+            for coil in metadata:
+                self.update_metadata(coil, **metadata[coil])
+        return kwargs
 
     def initialize_coil(self):
         self.coil = CoilFrame(
-                self.coil, additional_columns=self._coil,
-                default_attributes={'dCoil': self.dCoil,
-                                    'turn_fraction': self.turn_fraction})
+                self.coil, _additional_columns=self._coil,
+                _default_attributes={'dCoil': self.dCoil,
+                                    'turn_fraction': self.turn_fraction,
+                                    'turn_section': self.turn_section})
         self.subcoil = CoilFrame(
-                self.subcoil, additional_columns=self._subcoil,
-                default_attributes={})
+                self.subcoil, _additional_columns=self._subcoil,
+                _default_attributes={})
 
     def update_metadata(self, coil, **metadata):
-        '''
-        update coilset metadata ['coil', 'subcoil']
-        '''
+        'update coilset metadata ["coil", "subcoil"]'
         getattr(self, coil)._update_metadata(**metadata)
 
     @property
@@ -82,7 +88,7 @@ class CoilSet:
     @coilset.setter
     def coilset(self, coilset):
         for attribute in self._attributes:
-            setattr(self, attribute, getattr(coilset, attribute))
+            setattr(self, attribute, getattr(coilset, attribute).copy())
 
     def append_coilset(self, *args):
         for coilset in args:
@@ -137,20 +143,24 @@ class CoilSet:
         if subcoil:
             self.add_subcoil(index=index)
 
-    def add_subcoil(self, index=None, remesh=False):
+    def add_subcoil(self, index=None, remesh=False, **kwargs):
         if index is None:  # re-mesh all coils
             remesh = True
             index = self.coil.index
         if remesh:
             self.subcoil.drop(self.subcoil.index, inplace=True)
-        coil = [[] for __ in range(len(index))]
+        subcoil = [[] for __ in range(len(index))]
         for i, name in enumerate(index):
-            coil[i] = self._mesh_coil(
-                    name, dCoil=self.coil.at[name, 'dCoil'])
+            _dCoil = kwargs.get('dCoil', self.coil.at[name, 'dCoil'])
+            subcoil[i] = self._mesh_coil(name, dCoil=_dCoil)
+            xo, zo = self.coil.loc[name, ['x', 'z']]
             if 'part' in self.coil.columns:  # propagate part label
-                coil[i].loc[:, 'part'] = self.coil.at[name, 'part']
-            # coil[i].add_mpc(coil[i].index.to_list())  # link turns (Ic)
-        self.subcoil.concatenate(*coil)
+                subcoil[i].loc[:, 'part'] = self.coil.at[name, 'part']
+            if 'rx' in subcoil[i].columns and 'rz' in subcoil[i].columns:
+                subcoil[i].loc[:, 'rx'] = subcoil[i].x - xo
+                subcoil[i].loc[:, 'rz'] = subcoil[i].z - zo
+            # subcoil[i].add_mpc(subcoil[i].index.to_list())  # link turns (Ic)
+        self.subcoil.concatenate(*subcoil)
 
     def _mesh_coil(self, name, dCoil=None, part=None):
         '''
@@ -169,20 +179,23 @@ class CoilSet:
         else:
             turn_fraction = 1
         if dCoil is None or dCoil == 0:
-            dCoil = np.mean([dx, dz])
+            dCoil = np.max([dx, dz])
         if dCoil == -1:  # mesh per-turn (for detailed inductance calculations)
-            kwargs['cross_section'] = 'circle'
+            if 'cross_section' not in kwargs:
+                kwargs['cross_section'] = 'circle'
             Nt = self.coil.at[name, 'Nt']
-            dCoil = (dx * dz / Nt)**0.5
+            if self.coil.at[name, 'cross_section'] == 'circle':
+                dCoil = (np.pi * (dx / 2)**2 / Nt)**0.5
+            else:
+                dCoil = (dx * dz / Nt)**0.5
         nx = int(np.round(dx / dCoil))
         nz = int(np.round(dz / dCoil))
         if nx < 1:
             nx = 1
         if nz < 1:
             nz = 1
-        dx_, dz_ = dx / nx, dz / nz  # subcoil dimensions
+        dx_, dz_ = dx / nx, dz / nz  # subcoil dimensions  
         x_ = x + np.linspace(dx_ / 2, dx - dx_ / 2, nx) - dx / 2
-        x_ = coil_gmr(x_, dx_)  # displace coil centroid to match section gmr
         z_ = z + np.linspace(dz_ / 2, dz - dz_ / 2, nz) - dz / 2
         xm_, zm_ = np.meshgrid(x_, z_, indexing='ij')
         xm_ = np.reshape(xm_, (-1, 1))[:, 0]
@@ -196,9 +209,10 @@ class CoilSet:
         xm_ = [point[0] for point in multi_point]
         zm_ = [point[1] for point in multi_point]
         Nf = len(xm_)  # filament number
-        self.coil.at[name, 'Nf'] = Nf  # back-propagate fillament number
+        self.coil.at[name, 'Nf'] = Nf  # back-propagate fillament number 
         if 'part' in self.coil.columns:
             kwargs['part'] = self.coil.at[name, 'part']
+            
         mesh = {'x': xm_, 'z': zm_,
                 'dx': turn_fraction*dx_, 'dz': turn_fraction*dz_}
         args = []
@@ -207,10 +221,10 @@ class CoilSet:
                 args.append(mesh[var])
             elif var in self.subcoil._additional_columns:
                 kwargs[var] = mesh[var]
-        coil = self.subcoil.get_coil(*args, name=name, coil=name, **kwargs)
-        self.coil.at[name, 'subindex'] = list(coil.index)
-        coil.loc[:, 'Nt'] = self.coil.at[name, 'Nt'] / Nf
-        return coil
+        subcoil = self.subcoil.get_coil(*args, name=name, coil=name, **kwargs)
+        self.coil.at[name, 'subindex'] = list(subcoil.index)
+        subcoil.loc[:, 'Nt'] = self.coil.at[name, 'Nt'] / Nf
+        return subcoil
 
     def get_iloc(self, index):
         iloc = [None, None]
@@ -460,29 +474,30 @@ if __name__ == '__main__':
 
     cs = CoilSet(dCoil=1.25)
 
-
-    cs.update_metadata('coil', additional_columns=['R'])
-
+    # cs.update_metadata('coil', additional_columns=['R'])
     cs.add_coil(6, -3, 1.5, 1.5, name='PF6', part='PF', Nt=600, It=5e5,
-                turn_section='skin', dCoil=0.75)
-    '''
+                turn_section='circle', turn_fraction=0.7, dCoil=0.75)
+
     cs.add_coil(7, -0.5, 2.5, 2.5, name='PF8', part='PF', Nt=600, Ic=2e3,
                 cross_section='circle')
-
+    
+    cs.subcoil.force['Fx'].loc[:, 'PF8'] = 23
 
     #cs.add_coil([2, 2, 3, 3.5], [1, 0, -1, -3], 0.5, 0.3,
     #            name='PF', part='PF', delim='', Nt=300)
     cs.add_coil(4, 0.75, 1.75, 1.8, name='PF4', part='VS3', turn_fraction=0.75,
                 Nt=35, dCoil=-1)
+    
     cs.add_coil(5.6, 3.5, 0.52, 0.52, name='PF7', part='vvin', dCoil=0.05,
                 Ic=1e6)
-
     cs.add_plasma(6, [1.5, 2, 2.5], 1.75, 0.4, It=-15e6/3)
     #cs.add_plasma(7, 3, 1.5, 0.5, It=-15e6/3)
-
-
     cs.plot(label=True)
-    '''
+
+    #print(cs.subcoil.force['Fx'])
+
+
+
 
 
 

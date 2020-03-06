@@ -13,53 +13,61 @@ class biot_savart:
     def __init__(self, source=None, target=None, **kwargs):
         self.gmr = geometric_mean_radius()  # mutual gmr factors
         self.mutual = kwargs.pop('mutual', False)  # mutual inductance offset
-        self.initalize_frames()
+        self.load_metadata()
+        self.initialize_frames()
         if source is not None:  # load source coilset
             self.load_source(source)
         if target is not None:  # load target coilset
             self.load_target(target)
-
-    def initalize_frames(self):
-        '''
-        intalise coil and target dataframes
-        '''
+            
+    def load_metadata(self):
         required_columns = ['x', 'z']
-        additional_columns = ['dx', 'dz', 'ro', 'Nt', 'patch', 'cross_section',
+        additional_columns = ['dx', 'dz', 'ro', 'Nt', 'patch', 
+                              'cross_section',
                               'subindex', 'dCoil', 'part']
         default_attributes = {'dx': 0, 'dz': 0, 'ro': 0, 'Nt': 1,
                               'patch': None, 'dCoil': 0, 'subindex': None,
                               'cross_section': 'square', 'part': ''}
-        metadata = {'coil': {'required_columns': required_columns,
-                             'additional_columns': additional_columns,
-                             'default_attributes': default_attributes,
-                             'mode': 'empty'},
-                    'subcoil': {'required_columns': required_columns,
-                                'additional_columns': additional_columns[:-2],
-                                'default_attributes': default_attributes,
-                                'mode': 'empty'}}
-        self.source = CoilSet(metadata=metadata)
-        self.target = CoilSet(metadata=metadata)
+        self.metadata = {
+                'coil': {'required_columns': required_columns,
+                         'additional_columns': additional_columns,
+                         'default_attributes': default_attributes,
+                         'mode': 'empty'},
+                'subcoil': {'required_columns': required_columns,
+                            'additional_columns': additional_columns[:-2],
+                            'default_attributes': default_attributes,
+                            'mode': 'empty'}}
+
+    def initialize_frames(self):
+        '''
+        intalise coil and target dataframes
+        '''
+        self.source = CoilSet(metadata=self.metadata)
+        self.target = CoilSet(metadata=self.metadata)
 
     def load_source(self, coilset):
-        self.source.add_coilset(coilset)
+        #self.source.append_coilset(coilset)
+        self.source.coilset = coilset
         self.source.subcoil['ro'] = \
             self.gmr.calculate_self(self.source.subcoil)
         self.nC = self.source.subcoil.nC
 
-    def load_target(self, *args, **kwargs):
+    def load_target(self, *args, subcoil=True, **kwargs):
+        self.target = CoilSet(metadata=self.metadata)  # re-initalize
         if len(args) == 1:  # load coilset
-            self.target.add_coilset(args[0])
-            self.target.subcoil['ro'] = \
-                self.gmr.calculate_self(self.target.subcoil)
+            self.target.coilset = args[0]
         else:  # load coordinates (args=(x, z))
             self.target.add_coil(*args, subcoil=False, **kwargs)
             self.target.subcoil = self.target.coil  # link
             self.target.coil.drop(columns='subindex', inplace=True)
+        if not subcoil:  # re-mesh to coil centroids
+             self.target.add_subcoil(dCoil=0)   
+        self.target.subcoil['ro'] = \
+            self.gmr.calculate_self(self.target.subcoil)
         self.nT = self.target.subcoil.nC
 
-    def colocate(self):
-        if self.target.coil.empty:
-            self.load_target(self.source.coilset)
+    def colocate(self, subcoil=True):
+        self.load_target(self.source.coilset, subcoil=subcoil)
         self.assemble(offset=True)
 
     def assemble(self, offset=True):
@@ -147,7 +155,8 @@ class biot_savart:
         M = np.array((xt * xc)**0.5 * ((2 * m**-0.5 - m**0.5) *
                      ellipk(m) - 2 * m**-0.5 * ellipe(m)))
         M *= Nt * Nc  # turn-turn interaction, line-current
-        return self.mu_o * M  # Wb
+        M *= self.mu_o  # Wb / Amp
+        return self.column_reduce(M)
 
     def field_matrix(self):
         '''
@@ -165,44 +174,45 @@ class biot_savart:
         field[0] = xc / 2 * (zt - zc) / B * (I1 - A * I2)
         field[1] = xc / 2 * ((xc + xt * A / B) * I2 - xt / B * I1)
         field *= Nt * Nc  # line-current
-        return self.mu_o * field  # T
-
-    def solve(self, field=False):
-        Psi = self.flux_matrix()
-        M = {'Psi': self.reduce(Psi)}
-        if field:
-            B = self.field_matrix()
-            M['Bx'] = self.reduce(B[0])
-            M['Bz'] = self.reduce(B[1])
-        return M
-
-    def reduce(self, Mo):
+        field *= self.mu_o  # T/ Amp
+        B = {'x': [], 'z': []}
+        for i, var in enumerate(B):
+            B[var] = self.column_reduce(field[i])
+        return B
+    
+    def column_reduce(self, Mo):
         Mo = pd.DataFrame(Mo, index=self.target.subcoil.index,
                           columns=self.source.subcoil.index, dtype=float)
         Mcol = pd.DataFrame(index=self.target.subcoil.index,
                             columns=self.source.coil.index, dtype=float)
-        M = pd.DataFrame(columns=self.source.coil.index, dtype=float)
         for name in self.source.coil.index:  # column reduction
             index = self.source.coil.subindex[name]
             Mcol.loc[:, name] = Mo.loc[:, index].sum(axis=1)
+        return Mcol
+
+    def row_reduce(self, Mcol):
+        Mrow = pd.DataFrame(columns=self.source.coil.index, dtype=float)
         if 'subindex' in self.target.coil.columns:
+            #part = self.target.coil['part']
             for name in self.target.coil.index:  # row reduction
                 index = self.target.coil.subindex[name]
-                M.loc[name, :] = Mcol.loc[index, :].sum(axis=0)
+                Mrow.loc[name, :] = Mcol.loc[index, :].sum(axis=0)
         else:
-            M = Mcol
-        M['part'] = self.target.coil['part']
-        M.set_index('part', append=True, inplace=True)
-        return M
+            #part = self.target.subcoil['part']
+            Mrow = Mcol
+        #M['part'] = part
+        #M.set_index('part', append=True, inplace=True)
+        return Mrow
 
     def calculate_inductance(self):
         self.colocate()  # set targets
-        Mc = self.solve(field=False)['Psi'].droplevel('part')  # line-current
+        Mc = self.row_reduce(self.flux_matrix())  # line-current
         return Mc
 
     def calculate_interaction(self):
         self.assemble(offset=True)  # build interaction matrices
-        M = self.solve(field=False)  # line-current interaction
+        M = {}
+        M['Psi'] = self.flux_matrix()  # line-current interaction
         return M
 
 
@@ -270,10 +280,18 @@ if __name__ == '__main__':
     cs.add_coil(1.6870, 3.2780, 0.7400, 2.093, Nt=554, name='CS2U', part='CS')
     cs.add_plasma(5, 2.5, 1.5, 1.5, It=5e6, cross_section='circle')
 
-    bs = biot_savart(cs.coilset, mutual=False)
+    bs = biot_savart(cs.coilset, mutual=True)
+
+    #bs.colocate(subcoil=True)
+    #_B = bs.field_matrix()
+    #_Bx = bs.reduce(_B[0])
+    
+    bs.colocate(subcoil=False)
+    
+    B = bs.field_matrix()
+    print(B['x'])
 
     Mc = bs.calculate_inductance()
-
-    bs.target.plot()
+    #bs.target.plot(label=True)
 
     # plt.title(cc.coilset.matrix['inductance']['Mc'].CS3U)

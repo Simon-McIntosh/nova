@@ -9,7 +9,7 @@ class MeshGrid:
     construct 2d poloidal grid
     '''
 
-    def __init__(self, n, limit):
+    def __init__(self, n, limit, xscale='linear', zscale='linear'):
         '''
         Attributes:
             n (int or [int, int]): mesh dimension n or [nx, nz]
@@ -17,15 +17,32 @@ class MeshGrid:
         '''
         self._n = n
         self._limit = limit
+        self.xscale = xscale
+        self.zscale = zscale
         self.update()
-
+        
     def update(self):
         '''
         update grid
         '''
         self.x2d, self.z2d, self.x, self.z, self._nx, self._nz = \
             grid(self._n, self._limit, eqdsk=False)
-
+        for var in ['x', 'z']:
+            self.scale(var)
+        
+    def scale(self, xz):
+        if getattr(self, f'{xz}scale') == 'log':
+            x = getattr(self, xz)
+            nx = getattr(self, f'n{xz}')
+            nz = int(self.n / nx)
+            setattr(self, xz, 10**np.linspace(
+                    np.log10(x[0]), np.log10(x[-1]), nx))
+            if xz == 'x':
+                x2d = np.dot(x.reshape(-1, 1), np.ones((1, nz)))
+            else:
+                x2d = np.dot(np.ones((nz, 1)), x.reshape(1, -1))
+            setattr(self, f'{xz}2d', x2d)
+            
     @property
     def n(self):
         return self._n
@@ -33,7 +50,6 @@ class MeshGrid:
     @n.setter
     def n(self, n):
         if n != self._n:
-            print('update n', n)
             self._n = n
             self.update()
 
@@ -73,6 +89,10 @@ class MeshGrid:
         self.limit = limit
         if plot:
             self.plot()
+            
+    @property
+    def xz(self):
+        return self.x, self.z
 
     def eqdsk(self):
         '''
@@ -96,13 +116,17 @@ class MeshGrid:
             segments = LineCollection(lines, linewidth=linewidth,
                                       zorder=zorder)
             ax.add_collection(segments)
-        ax.axis('equal')
+        if self.xscale == 'linear' and self.zscale == 'linear':
+            ax.axis('equal')
+        else:
+            ax.set_xscale(self.xscale)
+            ax.set_yscale(self.zscale)
         if ax.get_xlim() == (0, 1) and ax.get_ylim() == (0, 1):
             ax.set_xlim(self.limit[:2])
             ax.set_ylim(self.limit[2:])
 
-
+        
 if __name__ == '__main__':
 
-    mg = MeshGrid(1e3, [5, 7.5, -12, -8])
+    mg = MeshGrid(1e3, [5, 7.5, 8, 12], xscale='linear')
     mg.plot()

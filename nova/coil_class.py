@@ -1,14 +1,15 @@
 from nova.coil_set import CoilSet
+from nova.simulation_data import SimulationData
 from nep.DINA.read_scenario import scenario_data
 from nova.biot_savart import biot_savart, self_inductance
-from nova.mesh_grid import MeshGrid
 from amigo.pyplot import plt
 import numpy as np
 import pandas as pd
 import amigo.geom
+#from nova.force import force_field
 
 
-class CoilClass(CoilSet):
+class CoilClass(CoilSet, SimulationData):
     '''
     CoilClass:
         - implements methods to manage input and
@@ -17,8 +18,10 @@ class CoilClass(CoilSet):
         - provides interface to eqdsk files containing coil data
         - provides interface to DINA scenaria data
     '''
+
     def __init__(self, *args, eqdsk=None, filename=None, **kwargs):
         CoilSet.__init__(self, *args, **kwargs)  # inherent from CoilSet
+        SimulationData.__init__(self, *args, **kwargs)  # add simulation data
         self.add_eqdsk(eqdsk)
         self.initalize_functions()
         self.initalize_metadata()
@@ -77,7 +80,7 @@ class CoilClass(CoilSet):
         '''
         self.d2.to = to  # update scenario data (time or keypoint)
         self.t = self.d2.to  # time instance
-        self.update_plasma()
+        #self.update_plasma()
         #Ic = self.d2.Ic.reindex(self.Ic.index)
         self.coil.data.Ic = self.d2.Ic.to_dict()
         #self.coil.Ic = self.d2.Ic.to_dict()
@@ -131,9 +134,7 @@ class CoilClass(CoilSet):
 
     def extract_plasma_metadata(self, cross_section='ellipse',
                                 turn_section='square', Lp=1.1e-5):
-        '''
-        extract plasma metadata from self.d2 instance
-        '''
+        'extract plasma metadata from self.d2 instance'
         '''
         d2 = {'t': 1.2, 'Ip': 1.2, 'Rp': 1.2, 'Lp': 1.2, 'Rcur': 1.2, 'Zcur': 1.2}
         plasma_metadata = {}
@@ -190,10 +191,9 @@ class CoilClass(CoilSet):
 
     def add_eqdsk(self, eqdsk):
         if eqdsk:
-            coil = self.coil.get_coil(eqdsk['xc'], eqdsk['zc'],
-                                        eqdsk['dxc'], eqdsk['dzc'],
-                                        It=eqdsk['It'], name='eqdsk',
-                                        delim='')
+            coil = self.coil.get_coil(
+                    eqdsk['xc'], eqdsk['zc'], eqdsk['dxc'], eqdsk['dzc'],
+                    It=eqdsk['It'], name='eqdsk', delim='')
             coil = self.categorize_coilset(coil)
             self.coil.concatenate(coil)
             self.add_subcoil(index=coil.index)
@@ -221,6 +221,44 @@ class CoilClass(CoilSet):
             self.coil.loc[name] = coilset.coil.loc[name]
         coilset = None  # remove coilset
         return L
+    
+    def solve_colocation(self):
+        bs = biot_savart(self.coilset, mutual=True)
+        bs.colocate(subcoil=False)  # values at coil centroid 
+        
+        self.flux = bs.flux_matrix()
+        
+        
+        #B = bs.field_matrix()
+        
+        #Psi = bs.reduce(Psi)
+        #print(Psi)
+        '''
+        bs.colocate()
+        Psi = bs.flux_matrix()
+        B = bs.field_matrix()
+        # flux
+        self.flux, self.subflux = bs.reduce(Psi, retcol=True)
+        # field
+        for i, var in enumerate(['x', 'z']):
+            self.field[var], self.subfield[var] = bs.reduce(B[i], retcol=True)        
+        # force
+        x = self.subcoil.x
+        print(np.shape(B), np.shape(x))
+        #self.subforce['Fx'].loc[:] = 2 * np.pi * bs.mu_o * x * B[1]
+        #self.subforce['Fz'].loc[:] = -2 * np.pi * bs.mu_o * x * B[0]
+        '''
+
+        '''
+            force['Fx']:  net radial force
+            force['Fz']:  net vertical force
+            force['xFx']: first radial moment of radial force
+            force['xFz']: first radial moment of vertical force
+            force['zFx']: first vertical moment of radial force
+            force['zFz']: first vertical moment of vertical force
+            force['My']:  in-plane torque}
+        '''
+  
 
     def update_inductance(self, mutual=True,
                           source_index=None, invert_source=False,
@@ -230,7 +268,7 @@ class CoilClass(CoilSet):
 
             Attributes:
                 mutual (bool): include gmr correction for adjacent turns
-                coil_index (list): update inductance for coil subest
+                coil_index (list): update inductance for coil subset
                 invert_coil (bool): invert coil_index selection
         '''
         if self.inductance['Mc'].empty:
@@ -246,9 +284,9 @@ class CoilClass(CoilSet):
             target = self.coilset
         bs = biot_savart(source=source, target=target, mutual=mutual)
         Mc = bs.calculate_inductance()
-        if source_index is None and target_index is None:
+        if source_index is None and target_index is None:  # full update
             self.inductance['Mc'] = Mc  # line-current
-        else:
+        else:  # partial update
             index = np.append(source.coil.index, target.coil.index)
             expand = [name for name in np.unique(index)
                       if name not in self.inductance['Mc'].index]
@@ -263,111 +301,47 @@ class CoilClass(CoilSet):
         Nt = Nt.reshape(-1, 1) * Nt.reshape(1, -1)
         self.inductance['Mt'] = self.inductance['Mc'] / Nt  # amp-turn
 
-    def generate_grid(self, **kwargs):
-        '''
-        compare kwargs to current grid settings, update grid on-demand
-
-        kwargs:
-            n (int): grid node number
-            limit (np.array): [xmin, xmax, zmin, zmax] grid limits
-            expand (float): expansion beyond coil limits (when limit not set)
-            nlevels (int)
-            levels ()
-        '''
-        update = kwargs.get('update', False)
-        grid = {}  # grid parameters
-        for key in ['n', 'limit', 'expand', 'levels', 'nlevels']:
-            grid[key] = kwargs.pop(key, self.grid[key])
-        if grid['limit'] is None:  # update grid limit
-            grid['limit'] = self._get_grid_limit(grid['expand'])
-        update = not np.array_equal(grid['limit'], self.grid['limit']) or \
-            grid['n'] != self.grid['n'] or update
-        if update:
-            self._generate_grid(**grid)
-        return update
-
-    def _get_grid_limit(self, expand):
-        if expand is None:
-            expand = self.grid['expand']  # use coil_object default
-        x, z = self.subcoil.loc[:, ['x', 'z']].to_numpy().T
-        dx, dz = self.subcoil.loc[:, ['dx', 'dz']].to_numpy().T
-        limit = np.array([(x - dx/2).min(), (x + dx/2).max(),
-                          (z - dz/2).min(), (z + dz/2).max()])
-        dx, dz = np.diff(limit[:2])[0], np.diff(limit[2:])[0]
-        delta = np.mean([dx, dz])
-        limit += expand * delta * np.array([-1, 1, -1, 1])
-        return limit
-
-    def _generate_grid(self, **kwargs):
-        self.grid = self.initialize_grid(**kwargs)
-        if self.grid['n'] > 0:
-            if self.grid['limit'] is None:
-                self.grid['limit'] = self._get_grid_limit(self.grid['expand'])
-            mg = MeshGrid(self.grid['n'], self.grid['limit'])  # set mesh
-            self.grid['n2d'] = [mg.nx, mg.nz]
-            self.grid['dx'] = np.diff(self.grid['limit'][:2])[0] / (mg.nx - 1)
-            self.grid['dz'] = np.diff(self.grid['limit'][2:])[0] / (mg.nz - 1)
-            self.grid['x2d'] = mg.x2d
-            self.grid['z2d'] = mg.z2d
-            self.grid['update'] = True
-
-    def add_targets(self, targets=None, **kwargs):
-        '''
-        Kwargs:
-            targets (): target coordinates
-                (dict, pd.DataFrame() or list like):
-                    x (np.array): x-coordinates
-                    z (np.array): z-coordinates
-                    update (np.array): update flag
-            append (bool): create new list | append
-            update (bool): update interaction matricies
-            drop_duplicates (bool): drop duplicates
-        '''
-        update = kwargs.get('update', False)  # update all
-        if targets is not None:
-            append = kwargs.get('append', True)
-            drop_duplicates = kwargs.get('drop_duplicates', True)
-            if not isinstance(targets, pd.DataFrame):
-                if pd.api.types.is_dict_like(targets):
-                    targets = pd.DataFrame(targets)
-                elif pd.api.types.is_list_like(targets):
-                    x, z = targets
-                    if not pd.api.types.is_list_like(x):
-                        x = [x]
-                    if not pd.api.types.is_list_like(z):
-                        z = [z]
-                    targets = pd.DataFrame({'x': x, 'z': z})
-                if append:
-                    io = self.target['points'].shape[0]
-                else:
-                    io = 0
-                targets['index'] = [f'P{i+io}'
-                                    for i in range(targets.shape[0])]
-                targets.set_index('index', inplace=True)
-                targets = targets.astype('float')
-            if not targets.empty:
-                if self.target['points'].equals(targets):  # duplicate set
-                    self.target['points']['update'] = False
-                else:
-                    targets['update'] = True
-                    if append:
-                        self.target['points'] = pd.concat(
-                                (self.target['points'], targets))
-                        if drop_duplicates:
-                            self.target['points'].drop_duplicates(
-                                    subset=['x', 'z'], inplace=True)
-                    else:  # overwrite
-                        self.target['points'] = targets
-            if update:  # update all
-                self.target['points']['update'] = True
+    def solve_interaction(self, plot=False, color='gray', *args, **kwargs):
+        'generate grid / target interaction matrices'
+        self.add_targets(**kwargs)  # add | append data targets
+        self.generate_grid(**kwargs)  # re-generate grid on demand
+        self.update_interaction()  # update on demand
+        for matrix in self.interaction:  # Psi, Bx, Bz
+            if not self.interaction[matrix].empty:
+                # variable = matrix.lower()
+                index = self.interaction[matrix].index
+                value = np.dot(
+                        self.interaction[matrix].loc[:, self.coil.data.index],
+                        self.coil.data.Ic)
+                coil = pd.DataFrame(value, index=index)  # grid, target
+                for part in coil.index.unique(level=1):
+                    part_data = coil.xs(part, level=1)
+                    part_dict = getattr(self, part)
+                    if 'n2d' in part_dict:  # reshape data to n2d
+                        part_data = part_data.to_numpy()
+                        part_data = part_data.reshape(part_dict['n2d'])
+                        part_dict[matrix] = part_data
+                    else:
+                        part_data = pd.concat(
+                                (pd.Series({'t': self.t}), part_data),
+                                sort=False)
+                        part_dict[matrix] = pd.concat(
+                                (part_dict[matrix], part_data.T),
+                                ignore_index=True, sort=False)
+        if plot and self.grid['n'] > 0:
+            if self.grid['levels'] is None:
+                levels = self.grid['nlevels']
             else:
-                update = self.target['points']['update'].any()
-        else:
-            if update:  # update all
-                self.target['points']['update'] = True
-        self.target['update'] = update
-        return update
-
+                levels = self.grid['levels']
+            QuadContourSet = plt.contour(
+                    self.grid['x2d'], self.grid['z2d'], self.grid['Psi'],
+                    levels, colors=color, linestyles='-', linewidths=1.0,
+                    alpha=0.5, zorder=5)
+            self.grid['levels'] = QuadContourSet.levels
+            plt.axis('equal')
+            plt.quiver(self.grid['x2d'], self.grid['z2d'], 
+                       self.grid['Bx'], self.grid['Bz'])
+            
     def update_interaction(self, coil_index=None):
         if coil_index is not None:  # full update
             self.grid['update'] = True and self.grid['n'] > 0
@@ -391,6 +365,7 @@ class CoilClass(CoilSet):
                 bs.load_target(points['x'], points['z'], name=points.index,
                                part='target')
                 self.target['points'].loc[update, 'update'] = False
+                self.target['update'] = False
             M = bs.calculate_interaction()
             for matrix in M:
                 if self.interaction[matrix].empty:
@@ -413,48 +388,6 @@ class CoilClass(CoilSet):
                         self.interaction[matrix].loc[:, name] = \
                             M[matrix].loc[:, name]
 
-    def solve_interaction(self, plot=False, color='gray', *args, **kwargs):
-        self.add_targets(**kwargs)  # add | append data targets
-        self.generate_grid(**kwargs)  # re-generate grid on demand
-        self.update_interaction()  # update on demand
-        for matrix in self.interaction:
-            if not self.interaction[matrix].empty:
-                variable = matrix.lower()
-                index = self.interaction[matrix].index
-                value = np.dot(self.interaction[matrix].loc[:, self.Ic.index],
-                               self.Ic)
-                coil = pd.DataFrame(value, index=index)
-                for part in coil.index.unique(level=1):
-                    part_data = coil.xs(part, level=1)
-                    part_dict = getattr(self, part)
-                    if 'n2d' in part_dict:  # reshape data to n2d
-                        part_data = part_data.to_numpy()
-                        part_data = part_data.reshape(part_dict['n2d'])
-                        part_dict[variable] = part_data
-                    else:
-                        part_data = pd.concat(
-                                (pd.Series({'t': self.t}), part_data))
-                        part_dict[variable] = pd.concat(
-                                (part_dict[variable], part_data.T),
-                                ignore_index=True)
-        '''
-        psi_x, psi_z = np.gradient(self.grid['psi'],
-                                   self.grid['dx'], self.grid['dz'])
-        bx = -psi_z / self.grid['x2d']
-        bz = psi_x / self.grid['x2d']
-        '''
-        if plot and self.grid['n'] > 0:
-            if self.grid['levels'] is None:
-                levels = self.grid['nlevels']
-            else:
-                levels = self.grid['levels']
-            QuadContourSet = plt.contour(
-                    self.grid['x2d'], self.grid['z2d'], self.grid['psi'],
-                    levels, colors=color, linestyles='-', linewidths=1.0,
-                    alpha=0.5, zorder=5)
-            self.grid['levels'] = QuadContourSet.levels
-            plt.axis('equal')
-
 
 if __name__ == '__main__':
 
@@ -462,38 +395,72 @@ if __name__ == '__main__':
     cc.update_metadata('coil', additional_columns=['R'])
     cc.scenario_filename = '15MA DT-DINA2016-01_v1.1'
 
-    x, z, dx = 5.5, -5, 4.2
+    
+    x, z, dx = 5.5, -5, 2
     dz = 2*dx
     cc.add_coil(x, z, dx, dz, name='PF1', part='PF', Ic=-15e6,
-                cross_section='circle',
-                turn_section='square', turn_fraction=1, Nt=1)
+                cross_section='square', turn_section='circle', 
+                turn_fraction=0.75, Nt=50, dCoil=-1)
 
     plt.plot(*cc.coil.at['PF1', 'polygon'].exterior.xy, 'C3')
-    cc.add_plasma(1, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
+    #cc.add_plasma(1, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
     cc.plot()
     # cc.add_plasma(6, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
 
     cc.scenario = 100
+    
+
+    cc.solve_colocation()
+    
+    cc.solve_interaction(plot=True)
+    
+    #plt.plot(cc.coil.x, cc.coil.z, 'C1o')
+
+    
+    '''
 
     # from nep.coil_geom import PFgeom
     # cc = CoilClass(PFgeom(dCoil=0.15).cs)
 
+    cc.plot(label=True)
+    cc.add_targets(([1.0, 2], [4, 5]))
+    
+    cc.generate_grid(n=0)
+    for t in np.arange(1, 100, 1):
+        cc.scenario = t
+        cc.solve_interaction()
+        
+    cc.add_targets(([1.0, 2], [4, 5.5]))
+    cc.update_interaction()
+
+    for t in np.arange(120, 130, 1):
+        cc.scenario = t
+        cc.solve_interaction()
+
+    print(cc.target['psi'])
+
+    #cc.solve_interaction(plot=True)
     '''
 
-    # cc.generate_grid(n=0)
+    '''
+    cc.generate_grid(n=0)
     cc.add_targets(([1.0, 2], [4, 5]))
+    print(cc.target['points'].index)
     cc.update_interaction()
 
     cc.add_targets(([1, 2, 3], [4, 5, 3]), append=True)
+    print(cc.target['points'].index)
+
     cc.update_interaction()
 
     cc.add_targets((1, 4), append=True, update=True)
+    print(cc.target['points'].index)
+
     cc.add_targets(([1, 2, 3], [4, 5, 3.1]), append=True)
-
-
-    cc.plot(label=True)
-    #cc.solve_interaction(plot=True)
+    print(cc.target['points'].index)
     '''
+
+
 
     '''
     #cc.plot(label=True)

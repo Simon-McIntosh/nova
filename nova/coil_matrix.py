@@ -1,66 +1,106 @@
+from pandas import DataFrame, concat
+import numpy as np
+
 
 class CoilMatrix:
     '''
     container for coil_matrix and subcoil_matrix (filament) data
+    
+    Formulae:
+        Psi = [flux][Ic] (Wb)
+        B[*] = [field[*]][Ic] (T)
+        F[*] = [Ic]'[force[*]][Ic] (N, Nm)
+        Mc = inductance['Mc'][Ic] (H) line-current
+        Mt = inductance['Mt'][It] (H) turn-current
 
     Attributes:
-
-        force (dict): coil force interaction matrices (np.2darray)
+        flux (DataFrame): coil colocation flux matrix 
+        
+        field (dict): coil colocation field matrices (DataFrame) 
+            field['x']: radial field
+            field['z']: vertical field
+                    
+        force (dict): coil force interaction matrices (DataFrame) 
             force['Fx']:  net radial force
             force['Fz']:  net vertical force
             force['xFx']: first radial moment of radial force
             force['xFz']: first radial moment of vertical force
             force['zFx']: first vertical moment of radial force
             force['zFz']: first vertical moment of vertical force
-            force['My']:  net torque}
-
-        inductance (dict): dictionary of inductance matirces (np.2darray)
-            inductance['Mc']: line-current inductance matrix
-            inductance['Mt']: amp-turn inductance matrix
-
-        interaction (dict): dictionary of interaction matrices (np.2darray)
-            interaction['Psi']: poloidal flux interaction matrix
-            interaction['Bx']: radial field interaction matrix
-            interaction['Bz']: vertical field interaction matrix
+            force['My']:  in-plane torque}
     '''
+    
+    # main class attribures
+    _matrix_attributes = ['flux', 'field', 'force']
 
-    def __init__(self):
-        self.index = list(index)
-        self.inductance = self.initialize_inductance(inductance)
-        self.interaction = self.initialize_interaction(interaction)
-        self.force = self.initialize_force(force)
+    def __init__(self, **kwargs):
+        self.set_matrix_attributes(**kwargs)  # set attributes from kwargs
+     
+    def set_matrix_attributes(self, **kwargs):
+        for attribute in self._matrix_attributes:
+            _name = f'_initialize_{attribute}'
+            _initialize_function = getattr(self, _name)
+            value = kwargs.get(attribute, None)
+            if value is None:
+                value = _initialize_function()
+            setattr(self, attribute, value)
+            
+    @property
+    def matrix(self):
+        kwargs = {attribute: getattr(self, attribute)
+                  for attribute in self._matrix_attributes}
+        return CoilMatrix(**kwargs)
 
-    @staticmethod
-    def initialize_inductance(inductance=None):
-        '''
-        inductance interaction matrix, H
-        '''
-        if inductance is None:
-            inductance = {'Mc': pd.DataFrame(),  # line-current
-                          'Mt': pd.DataFrame()}  # amp-turn
-        return inductance
-
-    @staticmethod
-    def initialize_interaction(interaction=None):
-        if interaction is None:  # initalize
-            interaction = {
-                    'Psi': pd.DataFrame(),  # flux interaction matrix
-                    'Bx': pd.DataFrame(),  # radial field interaction matrix
-                    'Bz': pd.DataFrame()}  # radial field interaction matrix
-        return interaction
-
-    @staticmethod
-    def initialize_force(force=None):
-        '''
-        force: a dictionary of force interaction matrices stored as dataframes
-        '''
-        if force is None:
-            force = {
-                    'Fx': None,  # radial force
-                    'Fz': None,  # vertical force
-                    'xFx': None,  # first radial moment of radial force
-                    'xFz': None,  # first radial moment of vertical force
-                    'zFx': None,  # first vertical moment of radial force
-                    'zFz': None,  # first vertical moment of vertical force
-                    'My': None}  # in-plane torque
-        return force
+    @matrix.setter
+    def matrix(self, matrix):
+        for attribute in self._matrix_attributes:
+            setattr(self, attribute, getattr(matrix, attribute))
+    
+    @staticmethod        
+    def _initialize_flux():
+        return DataFrame()
+    
+    @staticmethod        
+    def _initialize_field():
+        return {'x': DataFrame(), 'z': DataFrame()}
+    
+    @staticmethod        
+    def _initialize_force():
+        return {'Fx': DataFrame(), 'Fz': DataFrame(),
+                'xFx': DataFrame(), 'xFz': DataFrame(),
+                'zFx': DataFrame(), 'zFz': DataFrame(),
+                'My': DataFrame()}
+    
+    def extend_frame(self, frame, index, columns):
+        index = [idx for idx in index if idx not in frame.index]
+        columns = [c for c in columns if c not in frame.columns]
+        frame = concat((frame, DataFrame(index=index, columns=columns)),
+                       sort=False)
+        return frame
+    
+    def concatenate_matrix(self):
+        index = self.index
+        if 'coil' in self.columns:  # subcoil
+            columns = np.unique(self.coil)
+        else:
+            columns = index
+        for attribute in self._matrix_attributes:
+            frame = getattr(self, attribute)
+            if isinstance(frame, dict):
+                for key in frame:
+                    frame[key] = self.extend_frame(frame[key], index, columns)
+            else:
+                frame = self.extend_frame(frame, index, columns)
+            setattr(self, attribute, frame)    
+                
+    
+if __name__ == '__main__':
+    cm = CoilMatrix()
+    
+    cm.add_matrix(['PF1', 'PF2'], 
+                  subindex=['PF1_0', 'PF1_1', 'PF2'])
+    cm.add_matrix(['PF3', 'PF2'])
+    print(cm.subfield['x'])
+    
+    
+    

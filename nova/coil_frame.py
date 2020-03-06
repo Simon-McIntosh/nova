@@ -1,12 +1,13 @@
-from nova.coil_data import CoilData
-import pandas as pd
+from nova.coil_matrix import CoilMatrix
+from pandas import DataFrame, Series, isna, concat
+from pandas.api.types import is_list_like
 import numpy as np
 from warnings import warn
 import shapely.geometry
 import shapely.affinity
 
 
-class CoilSeries(pd.Series):
+class CoilSeries(Series):
 
     @property
     def _constructor(self):
@@ -17,21 +18,30 @@ class CoilSeries(pd.Series):
         return CoilFrame
 
 
-class CoilFrame(pd.DataFrame):
+class CoilFrame(DataFrame, CoilMatrix):
 
     '''
     CoilFrame instance inherits from Pandas DataFrame
     Inspiration taken from GeoPandas https://github.com/geopandas
+    
+    Fast access attributes:
+        Ic (np.array, float): coil line current [A]
+        It (np.array, float): coil turn curent [A.turns]
+        Nt (np.array, float): coil turn number
+        control (np.array, bool): coil power supply status
     '''
 
-    _metadata = ['_required_columns', '_additional_columns',
-                 '_default_attributes']
+    _metadata = ['_required_columns', 
+                 '_additional_columns',
+                 '_default_attributes',
+                 'flux', 'field', 'force']
 
     def __init__(self, *args, **kwargs):
         self._initialize_instance_metadata()
         kwargs = self._update_metadata(**kwargs)
-        pd.DataFrame.__init__(self, *args, **kwargs)
-
+        DataFrame.__init__(self, *args, **kwargs)
+        CoilMatrix.__init__(self, **self.metadata)  # flux, field, and force
+        
     def _initialize_instance_metadata(self):
         self._initialize_required_columns()
         self._initialize_additional_columns()
@@ -58,7 +68,7 @@ class CoilFrame(pd.DataFrame):
              'material': '', 'turn_fraction': 1, 'patch': None,
              'cross_section': 'square', 'turn_section': 'square',
              'coil': '', 'part': '', 'subindex': None, 'dCoil': 0,
-             'mpc': '', 'polygon': None, 'control': True}
+             'rx': 0, 'rz': 0, 'mpc': '', 'polygon': None, 'control': True}
 
     def _update_metadata(self, **kwargs):
         mode = kwargs.pop('mode', 'append')  # [overwrite, append]
@@ -66,8 +76,8 @@ class CoilFrame(pd.DataFrame):
             if mode == 'overwrite':
                 null = {} if key == '_default_attributes' else []
                 setattr(self, key, null)
-            value = kwargs.pop(key[1:], None)
-            if value:
+            value = kwargs.pop(key, None)
+            if value is not None:
                 if key == '_additional_columns':
                     for v in value:  # insert additional columns
                         if v not in self._additional_columns:
@@ -77,11 +87,13 @@ class CoilFrame(pd.DataFrame):
                         self._default_attributes[k] = value[k]
                 else:  # overwrite required columns
                     setattr(self, key, value)
+            elif key in ['flux', 'field', 'force']:  # initialize as None
+                setattr(self, key, kwargs.pop(key, None))
         return kwargs
 
     @property
     def metadata(self):
-        return dict((key[1:], getattr(self, key)) for key in self._metadata)
+        return dict((key, getattr(self, key)) for key in self._metadata)  # key[1:],
 
     @property
     def _constructor(self):
@@ -90,12 +102,14 @@ class CoilFrame(pd.DataFrame):
     @property
     def _constructor_sliced(self):
         return CoilSeries
+    
+    ###
 
     @property
     def It(self):
         '''
         Returns:
-            self['It'] (pd.Series): turn current [A.turns]
+            self['It'] (Series): turn current [A.turns]
         '''
         self.update_coil()
         return self['It']
@@ -109,7 +123,7 @@ class CoilFrame(pd.DataFrame):
     def Ic(self):
         '''
         Returns:
-            self['Ic'] (pd.Series): line current [A]
+            self['Ic'] (Series): line current [A]
         '''
         self.update_coil()
         return self['Ic']
@@ -123,6 +137,10 @@ class CoilFrame(pd.DataFrame):
         self.data.update_coil()
         self['Ic'] = self.data.coil['Ic']  # line-current [A]
         self['It'] = self.data.coil['It']  # turn-current [A.turn]
+        
+        
+        
+    ###
 
     @property
     def nC(self):
@@ -149,45 +167,45 @@ class CoilFrame(pd.DataFrame):
         data = self._extract_data(*args, **kwargs)
         index = self._extract_index(data, delim, label, name)
         coil = CoilFrame(data, index=index, columns=data.keys(),
-                          **self.metadata)
+                         **self.metadata)
         coil = self._insert_polygon(coil)
         if mpc:
             coil.add_mpc(coil.index.to_list())
         return coil
 
     def add_coil(self, *args, iloc=None, **kwargs):
+        metadata = self.metadata
         coil = self.get_coil(*args, **kwargs)  # additional coils
-        self.concatenate(coil, iloc=iloc)
+        self.concatenate(coil, metadata=metadata, iloc=iloc)
         return coil.index
 
     def drop_coil(self, index=None):
         if index is None:
             index = self.index
         self.drop(index, inplace=True)
-        self.data = CoilData(self)
 
-    def concatenate(self, *coil, iloc=None, sort=False):
+    def concatenate(self, *coil, metadata=None, iloc=None, sort=False):
+        if metadata is None:
+            metadata = self.metadata
         if iloc is None:  # append
             coils = [self, *coil]
         else:  # insert
             coils = [self.iloc[:iloc, :], *coil, self.iloc[iloc:, :]]
-        coil = pd.concat(coils, sort=sort)  # concatenate
-        if sort:
-            coil.sort_index(inplace=True)
-        CoilFrame.__init__(self, coil, **self.metadata)  # relink new instance
-        self.data = CoilData(self)
-
+        coil = concat(coils, sort=sort)  # concatenate
+        CoilFrame.__init__(self, coil, **metadata)  # relink new instance
+        self.concatenate_matrix()
+        
     def add_mpc(self, name, factor=1):
         '''
         define multi-point constraint linking a set of coils
         name: list of coil names (present in self.coil.index)
         factor: inter-coil coupling factor
         '''
-        if not pd.api.types.is_list_like(name):
+        if not is_list_like(name):
             raise IndexError(f'name: {name} must be list like')
         elif len(name) == 1:
             raise IndexError(f'len({name}) must be > 1')
-        if not pd.api.types.is_list_like(factor):
+        if not is_list_like(factor):
             factor = factor * np.ones(len(name)-1)
         elif len(factor) != len(name)-1:
             raise IndexError(f'len(factor={factor}) must == 1 '
@@ -255,10 +273,10 @@ class CoilFrame(pd.DataFrame):
     def _extract_index(self, data, delim, label, name):
         try:
             nCol = np.max([len(data[key]) for key in data
-                           if pd.api.types.is_list_like(data[key])])
+                           if is_list_like(data[key])])
         except ValueError:
             nCol = 1  # scalar input
-        if pd.api.types.is_list_like(name):
+        if is_list_like(name):
             if len(name) != nCol:
                 raise IndexError(f'missmatch between name {name} and '
                                  f'column number: {nCol}')
@@ -280,7 +298,7 @@ class CoilFrame(pd.DataFrame):
     def _insert_polygon(self, coil):
         if 'polygon' in coil.columns:
             for name in coil.index:
-                if pd.isna(coil.at[name, 'polygon']):
+                if isna(coil.at[name, 'polygon']):
                     x = coil.at[name, 'x']
                     z = coil.at[name, 'z']
                     dx = coil.at[name, 'dx']

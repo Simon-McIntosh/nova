@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-class CoilData:
+class CoilData():
     '''
     provides fast access to dynamic coil and subcoil data
 
@@ -13,16 +13,19 @@ class CoilData:
         It (np.array, float): coil turn curent [A.turns]
         Nt (np.array, float): coil turn number
         control (np.array, bool): coil power supply status
+        
     '''
 
     _attributes = {'Ic': 0, 'It': 0, 'Nt': 1, 'mpc': '', 'control': True}
 
-    def __init__(self, coil, control=True):
-        self.initalize_coil(coil)
+    def __init__(self, frame):
+        self.initalize_coil(frame)
         self.control = control
 
-    def initalize_coil(self, coil):
-        self.coil = {}  # extract attributes from coil
+    def initalize_coil(self, frame):
+        self.frame = frame
+ 
+        {}  # extract attributes from coil
         self.coil['update'] = True  # full coil update flag
         self.coil['index'] = np.array(coil.index)  # coil index
         self.coil['nC'] = coil.nC  # coil coil number
@@ -58,6 +61,7 @@ class CoilData:
         self._It = self.coil['It'][self.mpc_index]
         # initalize coil turn number
         self.Nt = self.coil['Nt'][self.mpc_index]
+
 
     @property
     def control(self):
@@ -160,3 +164,43 @@ class CoilData:
                 self.coil['mpc_factor']
             self.coil['It'] = self.coil['Ic'] * self.coil['Nt']
             self.coil['update'] = False
+            
+    def initialize_inductance(self, inductance=None):
+        '''
+        inductance interaction matrix, H
+        '''
+        if inductance is None:
+            inductance = {'Mc': np.zeros((self.nC, self.nC)),  # line-current
+                          'Mt': np.zeros((self.nC, self.nC))}  # amp-turn
+        return inductance
+
+    def initialize_interaction(self, interaction=None):
+        if interaction is None:  # initalize
+            interaction = {
+                    'Psi': np.zeros((self.nC, self.nC)),  # flux 
+                    'Bx': np.zeros((self.nC, self.nC)),  # radial field 
+                    'Bz': np.zeros((self.nC, self.nC))}  # vertical field 
+        return interaction
+
+    def initialize_force(self, force=None):
+        '''
+        force: a dictionary of force interaction matrices stored as dataframes
+        '''
+        if force is None:
+            force = {
+                    # radial force
+                    'Fx': np.zeros((self.nC, self.nC)),  
+                    # vertical force
+                    'Fz': np.zeros((self.nC, self.nC)),
+                    # first radial moment of radial force
+                    'xFx': np.zeros((self.nC, self.nC)),  
+                    # first radial moment of vertical force
+                    'xFz': np.zeros((self.nC, self.nC)),  
+                    # first vertical moment of radial force
+                    'zFx': np.zeros((self.nC, self.nC)),
+                    # first vertical moment of vertical force
+                    'zFz': np.zeros((self.nC, self.nC)), 
+                    # in-plane torque
+                    'My': np.zeros((self.nC, self.nC))}  
+        return force
+

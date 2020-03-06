@@ -6,7 +6,6 @@ import pandas as pd
 from amigo.pyplot import plt
 from amigo.geom import rdp_extract
 from astropy import units
-from amigo.time import clock, timeit
 
 
 class operate:
@@ -676,7 +675,7 @@ if __name__ == '__main__':
     #d2.load_folder()
     d2.load_file('15MA DT-DINA2016-01_v1.1')  # read / load single file
 
-    scn = read_scenario('15MA DT-DINA2016-01_v1.1', 'operations')
+    #scn = read_scenario('15MA DT-DINA2016-01_v1.1', 'operations')
 
     '''
     d2.ko = 100

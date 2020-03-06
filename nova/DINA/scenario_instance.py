@@ -5,19 +5,19 @@ from amigo.pyplot import plt
 from nova.biot_savart import biot_savart
 from nova.coil_class import CoilClass
 
-cc = PFgeom(dCoil=0.25).cc
+cs = PFgeom(dCoil=0.25).cs
 
 # cc = CoilClass(dCoil=0.25)
 # cc.add_coil(5.5, 1, 2.5, 2.5, dCoil=0.1, name='PF1')
 # cc.add_mpc(['PF1', 'new'], 1)  # link new to 'CS1L'
 
-cc.plot()
+cs.plot()
 
 # cc.calculate_inductance(coil_index='Plasma')
 
 
-cc.scenario_filename = -1
-cc.scenario = 'SOF'
+cs.scenario_filename = -1
+cs.scenario = 'SOF'
 
 
 '''

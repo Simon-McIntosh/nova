@@ -100,30 +100,37 @@ class MeshGrid:
         '''
         return {'x2d': self.x2d, 'z2d': self.z2d,
                 'x': self.x, 'z': self.z, 'nx': self.nx, 'nz': self.nz}
-
+        
     def plot(self, ax=None, **kwargs):
+        self._plot(self.x2d, self.z2d, self.limit,
+                   xscale=self.xscale, zscale=self.zscale, ax=ax, **kwargs)
+
+    @staticmethod
+    def _plot(x2d, z2d, limit,
+              xscale='linear', zscale='linear', ax=None, **kwargs):
         if ax is None:
             ax = plt.subplots(1, 1)[1]
         linewidth = kwargs.pop('linewidth', 0.4)
         zorder = kwargs.pop('zorder', -100)
-        for coordinate, step in zip(['x', 'z'], [1, -1]):
-            n_ = getattr(self, f'n{coordinate}')
+        color = kwargs.pop('color', 'gray')
+        alpha = kwargs.pop('alpha', 0.5)
+        for n_, step in zip(x2d.shape, [1, -1]):
             lines = np.zeros((n_, 2, 2))
             for i in range(2):
                 index = tuple([slice(None), -i][::step])
-                lines[:, i, 0] = self.x2d[index]
-                lines[:, i, 1] = self.z2d[index]
+                lines[:, i, 0] = x2d[index]
+                lines[:, i, 1] = z2d[index]
             segments = LineCollection(lines, linewidth=linewidth,
-                                      zorder=zorder)
+                                      zorder=zorder, color=color, alpha=alpha)
             ax.add_collection(segments)
-        if self.xscale == 'linear' and self.zscale == 'linear':
+        if xscale == 'linear' and zscale == 'linear':
             ax.axis('equal')
         else:
-            ax.set_xscale(self.xscale)
-            ax.set_yscale(self.zscale)
+            ax.set_xscale(xscale)
+            ax.set_yscale(zscale)
         if ax.get_xlim() == (0, 1) and ax.get_ylim() == (0, 1):
-            ax.set_xlim(self.limit[:2])
-            ax.set_ylim(self.limit[2:])
+            ax.set_xlim(limit[:2])
+            ax.set_ylim(limit[2:])
 
         
 if __name__ == '__main__':

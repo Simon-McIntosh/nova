@@ -1,5 +1,5 @@
 from nova.coil_frame import CoilFrame
-from nova.coil_matrix import CoilMatrix
+from nova.biot_savart import BiotSavart
 import pandas as pd
 import numpy as np
 from amigo.geom import gmd, amd
@@ -14,7 +14,7 @@ import shapely.geometry
 from descartes import PolygonPatch
 
 
-class CoilSet(CoilMatrix):
+class CoilSet(BiotSavart):
 
     '''
     CoilSet:
@@ -24,80 +24,111 @@ class CoilSet(CoilMatrix):
         coil (nova.CoilFrame): coil config
         subcoil (nova.CoilFrame): subcoil config
     '''
+    
+    # exchange coilset attributes
+    _coilset_attributes = ['default_attributes', 
+                           'coilset_frames', 
+                           'coilset_metadata']
 
     # main class attribures
-    _attributes = ['coil', 'subcoil']
+    _coilset_frames = ['coil', 'subcoil']
 
-    # default class parameters
-    _parameters = {'dCoil': 0, 'dPlasma': 0.25, 'turn_fraction': 1,
-                   'turn_section': 'circle'}
+    # additional_columns
+    _coil_columns = ['dCoil', 'Nf', 'Nt', 'It', 'Ic', 'mpc', 'power', 'plasma', 
+             'subindex', 'cross_section', 'turn_section', 'turn_fraction',
+             'patch', 'polygon', 'part']
+    
+    _subcoil_columns = ['dl_x', 'dl_z', 'mpc', 'power', 'plasma', 
+                'coil', 'Nt', 'It', 'Ic', 'cross_section', 'patch',
+                'polygon', 'part']
 
-    # coil additional _columns
-    _coil = ['dCoil', 'Nf', 'Nt', 'It', 'Ic', 'subindex',
-              'cross_section', 'turn_section', 'turn_fraction',
-              'patch', 'polygon', 'part']
-    _subcoil = ['rx', 'rz', 'mpc', 'coil', 'Nt', 'It', 'Ic',
-                'cross_section', 'patch', 'polygon', 'part']
-
-    def __init__(self, *args, **kwargs):
-        CoilMatrix.__init__(self)  # coil and subcoil interaction datafields
-        kwargs = self.set_parameters(**kwargs)  # set instance parameters
-        self.set_attributes(**kwargs)  # set attributes from kwargs
+    def __init__(self, *args, current_update='full', **kwargs):
+        BiotSavart.__init__(self)  # inherit biot savart methods
+        self.initialize_default_attributes(**kwargs)
         self.initialize_coil()  # initalize coil and subcoil
-        kwargs = self.set_metadata(**kwargs)
+        self.current_update = current_update
+        self.coilset_metadata = kwargs.get('coilset_metadata', {})  
         self.append_coilset(*args)  # append list of coilset instances
+        
+        
+    def initialize_default_attributes(self, **default_attributes):
+        self._default_attributes = {'dCoil': -1, 
+                                    'dPlasma': 0.25, 
+                                    'turn_fraction': 1, 
+                                    'turn_section': 'circle'}
+        self._additional_columns = np.unique(
+                self._coil_columns + self._subcoil_columns + 
+                list(self._default_attributes.keys()))
+        self.default_attributes = default_attributes
+        
+    @property
+    def default_attributes(self):
+        return self._default_attributes
+        
+    @default_attributes.setter
+    def default_attributes(self, default_attributes):
+        for attribute in default_attributes:
+            if attribute in self._additional_columns:
+                self._default_attributes[attribute] = \
+                    default_attributes[attribute]
+        for attribute in self._default_attributes:
+            setattr(self, attribute, self._default_attributes[attribute])
 
-    def set_parameters(self, **kwargs):
-        for parameter in self._parameters:
-            value = kwargs.pop(parameter, self._parameters[parameter])
-            setattr(self, parameter, value)
-        return kwargs
-
-    def set_attributes(self, **kwargs):
-        for attribute in self._attributes:
-            setattr(self, attribute, kwargs.pop(attribute, None))
+    @property
+    def coilset_frames(self):
+        coilset_frames = {}
+        for frame in self._coilset_frames:
+            coilset_frames[frame] = getattr(self, frame)
+        return coilset_frames
+    
+    @coilset_frames.setter
+    def coilset_frames(self, coilset_frames):
+        for frame in self._coilset_frames:
+            coilframe = coilset_frames.get(frame, pd.DataFrame())
+            if not coilframe.empty:
+                getattr(self, frame).add_coil(coilframe)  # append coilframe
             
-    def set_metadata(self, **kwargs):
-        metadata = kwargs.pop('metadata', None)
-        if metadata is not None:
-            for coil in metadata:
-                self.update_metadata(coil, **metadata[coil])
-        return kwargs
-
+    @property
+    def coilset_metadata(self):
+        'extract coilset metadata from coilset frames (coil, subcoil)'
+        coilset_metadata = {}
+        for frame in self._coilset_frames:
+            coilset_metadata[frame] = getattr(self, frame).coilframe_metadata
+        return coilset_metadata
+        
+    @coilset_metadata.setter
+    def coilset_metadata(self, coilset_metadata):
+        'update coilframe metadata'
+        for frame in self._coilset_frames:
+            getattr(self, frame).coilframe_metadata = \
+                coilset_metadata.get(frame, coilset_metadata)
+                    
     def initialize_coil(self):
-        self.coil = CoilFrame(
-                self.coil, _additional_columns=self._coil,
-                _default_attributes={'dCoil': self.dCoil,
-                                    'turn_fraction': self.turn_fraction,
-                                    'turn_section': self.turn_section})
-        self.subcoil = CoilFrame(
-                self.subcoil, _additional_columns=self._subcoil,
-                _default_attributes={})
+        coil_metadata = {'_additional_columns': self._coil_columns,
+                         '_default_attributes': self._default_attributes}
+        subcoil_metadata = {'_additional_columns': self._subcoil_columns}
+        self.coil = CoilFrame(coilframe_metadata=coil_metadata)
+        self.subcoil = CoilFrame(coilframe_metadata=subcoil_metadata)
+        self.coil.update_coildata()
+        self.subcoil.update_coildata()
 
-    def update_metadata(self, coil, **metadata):
-        'update coilset metadata ["coil", "subcoil"]'
-        getattr(self, coil)._update_metadata(**metadata)
+    def update_coilframe_metadata(self, coilframe, **coilframe_metadata):
+        'update coilset metadata coilframe in [coil, subcoil]'
+        getattr(self, coilframe).coilframe_metadata = coilframe_metadata
 
     @property
     def coilset(self):
-        _attributes = list(self._parameters.keys()) + self._attributes
-        kwargs = {attribute: getattr(self, attribute)
-                  for attribute in _attributes}
-        return CoilSet(**kwargs)
+        return {attribute: getattr(self, attribute)
+                for attribute in self._coilset_attributes}
 
     @coilset.setter
     def coilset(self, coilset):
-        for attribute in self._attributes:
-            setattr(self, attribute, getattr(coilset, attribute).copy())
+        for attribute in self._coilset_attributes:
+            setattr(self, attribute, coilset.get(attribute, {}))
 
     def append_coilset(self, *args):
         for coilset in args:
-            if self.coil.empty:  # overwrite
-                self.coilset = coilset
-            else:  # append
-                for attribute in self._attributes:
-                    coil = getattr(coilset, attribute)
-                    getattr(self, attribute).add_coil(coil)
+            self.coilset = coilset
 
     def subset(self, index, invert=False):
         if not pd.api.types.is_list_like(index):
@@ -108,8 +139,8 @@ class CoilSet(CoilMatrix):
         for _index in index:
             subindex.extend(self.coil.loc[_index, 'subindex'])
         return CoilSet(coil=self.coil.loc[index],
-                       subcoil=self.subcoil.loc[subindex])
-
+                         subcoil=self.subcoil.loc[subindex])
+        
     @staticmethod
     def categorize_coilset(coil, xo=None, rename=True):
         '''
@@ -137,13 +168,68 @@ class CoilSet(CoilMatrix):
             PF.index = [f'PF{i}' for i in range(PF.nC)]
         coil = pd.concat([PF, CS])
         return coil
+        
+    @property
+    def current_update(self):
+        'display current_update status'
+        return self.coil.current_update
+
+    @current_update.setter
+    def current_update(self, flag):
+        self._current_update = flag
+        for frame in self._coilset_frames:
+            coilframe = getattr(self, frame)
+            if hasattr(coilframe, 'current_update'):
+                coilframe.current_update = flag
+            
+    def _set_current(self, value, current_column='Ic'):
+        self.relink_mpc()  # relink subcoil mpc as required
+        setattr(self.coil, current_column, value)
+        setattr(self.subcoil, current_column,
+                getattr(self.coil, 
+                        current_column)[self.subcoil._update_index])
+        
+    @property
+    def Ic(self):
+        '''
+        Returns:
+            self.Ic (np.array): coil instance line subindex current [A]
+        '''
+        return self.coil.Ic
+
+    @Ic.setter
+    def Ic(self, value):
+        self._set_current(value, 'Ic')
+        
+    @property
+    def It(self):
+        '''
+        Returns:
+            self.coil.It (np.array): coil instance turn current [A.turns]
+        '''
+        return self.coil.It
+
+    @It.setter
+    def It(self, value):
+        self._set_current(value, 'It')
+        
+
+    @property
+    def Ip(self):
+        # return total plasma current
+        return self.coil.Ip_sum
+
+    @Ip.setter
+    def Ip(self, Ip):
+        self.coil.Ip = Ip   
+        self.subcoil.Ip = Ip  
 
     def add_coil(self, *args, iloc=None, subcoil=True, **kwargs):
         index = self.coil.add_coil(*args, iloc=iloc, **kwargs)
         if subcoil:
             self.add_subcoil(index=index)
 
-    def add_subcoil(self, index=None, remesh=False, **kwargs):
+    def add_subcoil(self, index=None, remesh=False, mpc=True, **kwargs):
         if index is None:  # re-mesh all coils
             remesh = True
             index = self.coil.index
@@ -152,17 +238,28 @@ class CoilSet(CoilMatrix):
         subcoil = [[] for __ in range(len(index))]
         for i, name in enumerate(index):
             _dCoil = kwargs.get('dCoil', self.coil.at[name, 'dCoil'])
-            subcoil[i] = self._mesh_coil(name, dCoil=_dCoil)
+            subcoil[i] = self._mesh_coil(name, dCoil=_dCoil, mpc=mpc)
             xo, zo = self.coil.loc[name, ['x', 'z']]
-            if 'part' in self.coil.columns:  # propagate part label
-                subcoil[i].loc[:, 'part'] = self.coil.at[name, 'part']
+            for label in ['part', 'power', 'plasma']: 
+                if label in self.coil:  # propagate label
+                    subcoil[i].loc[:, label] = self.coil.at[name, label]
             if 'rx' in subcoil[i].columns and 'rz' in subcoil[i].columns:
                 subcoil[i].loc[:, 'rx'] = subcoil[i].x - xo
                 subcoil[i].loc[:, 'rz'] = subcoil[i].z - zo
-            # subcoil[i].add_mpc(subcoil[i].index.to_list())  # link turns (Ic)
+            subcoil[i].loc[:, 'Ic'] = self.coil.at[name, 'Ic']
         self.subcoil.concatenate(*subcoil)
+        
+    def add_mpc(self, index, factor=1):
+        self.coil.add_mpc(index, factor)
+        self.relink_mpc()
+        
+    def relink_mpc(self):
+        if self.coil._relink_mpc:
+            self.subcoil._power = self.coil._power[self.coil._mpc_referance]
+            self.subcoil.current_update = self.coil._current_update
+            self.coil._relink_mpc = False
 
-    def _mesh_coil(self, name, dCoil=None, part=None):
+    def _mesh_coil(self, name, dCoil=None, part=None, mpc=True):
         '''
         mesh coil instance
         '''
@@ -171,7 +268,7 @@ class CoilSet(CoilMatrix):
         else:
             self.coil.at[name, 'dCoil'] = dCoil  # update
         x, z, dx, dz = self.coil.loc[name, ['x', 'z', 'dx', 'dz']]
-        kwargs = {}
+        kwargs = {'mpc': mpc}
         if 'turn_section' in self.coil.columns:
             kwargs['cross_section'] = self.coil.at[name, 'turn_section']
         if 'turn_fraction' in self.coil.columns and dCoil == -1:
@@ -212,7 +309,6 @@ class CoilSet(CoilMatrix):
         self.coil.at[name, 'Nf'] = Nf  # back-propagate fillament number 
         if 'part' in self.coil.columns:
             kwargs['part'] = self.coil.at[name, 'part']
-            
         mesh = {'x': xm_, 'z': zm_,
                 'dx': turn_fraction*dx_, 'dz': turn_fraction*dz_}
         args = []
@@ -224,6 +320,7 @@ class CoilSet(CoilMatrix):
         subcoil = self.subcoil.get_coil(*args, name=name, coil=name, **kwargs)
         self.coil.at[name, 'subindex'] = list(subcoil.index)
         subcoil.loc[:, 'Nt'] = self.coil.at[name, 'Nt'] / Nf
+        subcoil.update_coildata()
         return subcoil
 
     def get_iloc(self, index):
@@ -269,31 +366,32 @@ class CoilSet(CoilMatrix):
             dCoil = kwargs.pop('dCoil', self.dPlasma)
             self.add_coil(*args, part=part, name='Plasma',
                           dCoil=dCoil, cross_section=cross_section,
-                          turn_section=turn_section, iloc=iloc[1], **kwargs)
+                          turn_section=turn_section, iloc=iloc[1], 
+                          plasma=True, **kwargs)
         else:  # add single / multiple filaments, fit coil
             # add plasma filaments to subcoil
             subindex = self.subcoil.add_coil(
                     *args, label=label, part=part, coil=coil, name=name,
                     cross_section=turn_section, iloc=iloc[1],
-                    mpc=True, **kwargs)
-            Ip = self.subcoil.It[subindex]  # filament currents
-            Ip_net = Ip.sum()  # net plasma current
-            if not np.isclose(Ip.sum(), 0):
-                Nt = Ip / Ip_net  # filament turn number
+                    mpc=True, plasma=True, **kwargs)
+            plasma_index = self.subcoil._plasma_index
+            if not np.isclose(self.subcoil.Ip_sum, 0):  # net plasma current
+                Nt = self.subcoil.Ip / self.subcoil.Ip_sum  # filament turn number
             else:
-                Nt = 1/Ip.size * np.ones(Ip.size)
-            self.subcoil.loc[subindex, 'Nt'] = Nt
-            xpl = self.subcoil.x[subindex]  # filament x-location
-            zpl = self.subcoil.z[subindex]  # filament z-location
-            dx = dz = np.sqrt(np.sum(self.subcoil.dx[subindex] *
-                                     self.subcoil.dz[subindex]))
+                Nt = 1 / self.subcoil.nPlasma * np.ones(self.subcoil.nPlasma)
+            self.subcoil.Np = Nt  # set plasma filament turn number
+            xpl = self.subcoil.x[plasma_index]  # filament x-location
+            zpl = self.subcoil.z[plasma_index]  # filament z-location
+            dx = dz = np.sqrt(np.sum(self.subcoil.dx[plasma_index] *
+                                     self.subcoil.dz[plasma_index]))
             # add plasma to coil (x_gmd, z_amd)
-            Nf = Ip.size
+            Nf = self.subcoil.nP  # number of plasma filaments
             self.coil.add_coil(gmd(xpl, Nt), amd(zpl, Nt),
                                 dz, dx, Nf=Nf, dCoil=None,
                                 cross_section=cross_section,
                                 name='Plasma', part=part, turn_fraction=1,
-                                material='plasma', iloc=iloc[0])
+                                material='plasma', iloc=iloc[0],
+                                plasma=True, Ic=self.subcoil.Ip.sum())
             self.coil.at['Plasma', 'subindex'] = list(subindex)
             # if Nf > 1:
             #     self.inductance('Plasma', update=True)  # re-size plasma coil
@@ -320,28 +418,31 @@ class CoilSet(CoilMatrix):
             self.merge(index)
 
     def merge(self, coil_index, name=None):
-        subcoil = self.subset(coil_index)
-        x = gmd(subcoil.coil.x, subcoil.coil.Nt)
-        z = amd(subcoil.coil.z, subcoil.coil.Nt)
-        dx = np.max(subcoil.coil.x + subcoil.coil.dx/2) -\
-            np.min(subcoil.coil.x - subcoil.coil.dx/2)
-        dz = np.max(subcoil.coil.z + subcoil.coil.dz/2) -\
-            np.min(subcoil.coil.z - subcoil.coil.dz/2)
-        Ic = subcoil.coil.It.sum() / np.sum(abs(subcoil.coil.Nt))
+        subset = self.subset(coil_index)
+        x = gmd(subset.coil.x, subset.coil.Nt)
+        z = amd(subset.coil.z, subset.coil.Nt)
+        dx = np.max(subset.coil.x + subset.coil.dx/2) -\
+            np.min(subset.coil.x - subset.coil.dx/2)
+        dz = np.max(subset.coil.z + subset.coil.dz/2) -\
+            np.min(subset.coil.z - subset.coil.dz/2)
+        Ic = subset.coil.It.sum() / np.sum(abs(subset.coil.Nt))
         if name is None:
             name = f'{coil_index[0]}-{coil_index[-1]}'
-        referance_coil = subcoil.coil.loc[coil_index[0], :]
+        referance_coil = subset.coil.loc[coil_index[0], :]
         kwargs = {'name': name}
-        for key in subcoil.coil.columns:
-            if key in ['cross_section', 'part', 'material', 'turn_fraction']:
-                # take referance
-                kwargs[key] = referance_coil[key]
-            elif key in ['Nf', 'Nt', 'm', 'R']:
-                kwargs[key] = subcoil.coil.loc[:, key].sum()
+        for key in subset.coil.columns:
+            #if key in ['cross_section', 'part', 'material', 'turn_fraction']:
+            #    # take referance
+            #    kwargs[key] = referance_coil[key]
+            if key in ['Nf', 'Nt', 'm', 'R']:
+                kwargs[key] = subset.coil.loc[:, key].sum()
             elif key == 'polygon':
-                polys = [p for p in subcoil.coil.loc[:, 'polygon'].values]
+                polys = [p for p in subset.coil.loc[:, 'polygon'].values]
                 if not pd.isnull(polys).any():
                     polygon = shapely.geometry.MultiPolygon(polys)
+            elif key not in self.coil._required_columns:  
+                # take referance
+                kwargs[key] = referance_coil[key]
         # extract current coil / subcoil locations
         coil_iloc = self.coil.index.get_loc(coil_index[0])
         subcoil_iloc = self.subcoil.index.get_loc(
@@ -349,20 +450,27 @@ class CoilSet(CoilMatrix):
         # remove seperate coils
         self.drop_coil(coil_index)
         # add merged coil
-        self.add_coil(x, z, dx, dz, subcoil=False,
-                      iloc=coil_iloc, **kwargs)
+        self.add_coil(x, z, dx, dz, subcoil=False, iloc=coil_iloc, **kwargs)
         # on-demand patch of top level (coil)
-        if pd.isnull(subcoil.coil.loc[:, 'patch']).any():
-            CoilSet.patch_coil(subcoil.coil)  # patch on-demand
-        self.coil.at[name, 'patch'] = list(subcoil.coil.patch)
+        if pd.isnull(subset.coil.loc[:, 'patch']).any():
+            CoilSet.patch_coil(subset.coil)  # patch on-demand
+        self.coil.at[name, 'patch'] = list(subset.coil.patch)
         # insert multi-polygon
         self.coil.at[name, 'polygon'] = polygon
         # add subcoils
-        subindex = self.subcoil.add_coil(subcoil.subcoil, iloc=subcoil_iloc)
+        subindex = self.subcoil.add_coil(subset.subcoil, iloc=subcoil_iloc,
+                                         mpc=True)
         self.coil.at[name, 'subindex'] = list(subindex)
         self.subcoil.loc[subindex, 'coil'] = name
         # update current
         self.Ic = {name: Ic}
+        
+    def rename(self, index):
+        self.coil.rename(index=index, inplace=True)  # rename coil
+        for name in index:  # link subcoil
+            self.subcoil.loc[self.coil.at[index[name], 'subindex'], 'coil'] = \
+                index[name]
+        self.subcoil.update_coildata()  # rebuild coildata
 
     @staticmethod
     def patch_coil(coil, overwrite=False, **kwargs):
@@ -383,7 +491,7 @@ class CoilSet(CoilMatrix):
                 patch[i] = [current_patch]
             for j in range(len(patch[i])):
                 patch[i][j].set_edgecolor('darkgrey')
-                patch[i][j].set_linewidth(0.25)
+                patch[i][j].set_linewidth(0.75)
                 patch[i][j].set_antialiased(True)
                 patch[i][j].set_facecolor(color.get(color_key, 'C9'))
                 patch[i][j].zorder = zorder.get(color_key, 0)
@@ -424,13 +532,12 @@ class CoilSet(CoilMatrix):
     def label_plasma(self, ax, fs=None):
         if fs is None:
             fs = matplotlib.rcParams['legend.fontsize']
-        x = self.coil.x['Plasma']
-        z = self.coil.z['Plasma']
-        '''
+        plasma_index = self.coil._plasma_index
+        x = self.coil.x[plasma_index]
+        z = self.coil.z[plasma_index]
         ax.text(x, z, f'{1e-6*self.Ip:1.1f}MA', fontsize=fs,
                 ha='center', va='center', color=0.9 * np.ones(3),
                 zorder=10)
-        '''
 
     def label_coil(self, ax, label, current, coil=None, fs=None):
         if fs is None:
@@ -440,6 +547,8 @@ class CoilSet(CoilMatrix):
         parts = np.unique(coil.part)
         parts = [p for p in parts if p not in ['plasma', 'vvin',
                                                'vvout', 'trs']]
+        if label == True:
+            label = parts
         ylim = np.diff(ax.get_ylim())[0]
         for name, part in zip(coil.index, coil.part):
             x, z = coil.at[name, 'x'], coil.at[name, 'z']
@@ -454,7 +563,7 @@ class CoilSet(CoilMatrix):
                 zshift = max([dz / 5, ylim / 3])
             else:
                 zshift = 0
-            if part in parts and label:
+            if part in parts and part in label:
                 ax.text(x + drs, z + zshift, name, fontsize=fs,
                         ha=ha, va='center', color=0.2 * np.ones(3))
             if part in parts and current:
@@ -464,6 +573,8 @@ class CoilSet(CoilMatrix):
                 elif current == 'It':  # turn current, amp turns
                     unit = 'At'
                     Ilabel = coil.at[name, 'It']
+                else:
+                    raise IndexError(f'current {current} not in [Ic, It]')
                 txt = f'{human_format(Ilabel, precision=1)}{unit}'
                 ax.text(x + drs, z - zshift, txt,
                         fontsize=fs, ha=ha, va='center',
@@ -472,29 +583,47 @@ class CoilSet(CoilMatrix):
 
 if __name__ == '__main__':
 
-    cs = CoilSet(dCoil=1.25)
+    cs = CoilSet(dCoil=3, current_update='passive', turn_fraction=0.5,
+                 cross_section='circle')
 
-    # cs.update_metadata('coil', additional_columns=['R'])
+    cs.coilset_metadata = {'_default_attributes': {'dCoil': -1}}
+    cs.coil.coilframe_metadata = {'_default_attributes': {'dPlasma': 0.333}}
+    cs.update_coilframe_metadata('coil', additional_columns=['R'])
+    
     cs.add_coil(6, -3, 1.5, 1.5, name='PF6', part='PF', Nt=600, It=5e5,
                 turn_section='circle', turn_fraction=0.7, dCoil=0.75)
 
-    cs.add_coil(7, -0.5, 2.5, 2.5, name='PF8', part='PF', Nt=600, Ic=2e3,
-                cross_section='circle')
+    cs.add_coil(7, -0.5, 2.5, 2.5, name='PF8', part='PF', Nt=16, Ic=2e3,
+                cross_section='square', turn_section='square', dCoil=-1)
     
-    cs.subcoil.force['Fx'].loc[:, 'PF8'] = 23
-
-    #cs.add_coil([2, 2, 3, 3.5], [1, 0, -1, -3], 0.5, 0.3,
-    #            name='PF', part='PF', delim='', Nt=300)
+    cs.add_coil([2, 2, 3, 3.5], [1, 0, -1, -3], 0.5, 0.3,
+                name='PF', part='PF', delim='', Nt=30)
     cs.add_coil(4, 0.75, 1.75, 1.8, name='PF4', part='VS3', turn_fraction=0.75,
-                Nt=35, dCoil=-1)
+                Nt=350, dCoil=-1, power=False)
     
     cs.add_coil(5.6, 3.5, 0.52, 0.52, name='PF7', part='vvin', dCoil=0.05,
-                Ic=1e6)
-    cs.add_plasma(6, [1.5, 2, 2.5], 1.75, 0.4, It=-15e6/3)
-    #cs.add_plasma(7, 3, 1.5, 0.5, It=-15e6/3)
+                Ic=1e6, Nt=7)
+    cs.add_plasma(6, [1.5, 2, 2.5], 1.75, 0.4, It=-15e6)
+    cs.add_plasma(7, 3, 1.5, 0.5, It=-15e6/3)
+    
     cs.plot(label=True)
+    
+    cs.current_update = 'coil'
+    cs.Ic = 12
+    cs.Ip = 15
+    
+    _cs = CoilSet(cs.coilset)
+    
+    cs.Ic = 34
+    cs.coil.Nt = 1
+    
+    print(cs.It)
+    print(_cs.It)
 
-    #print(cs.subcoil.force['Fx'])
+    
+    
+    
+    
 
 
 

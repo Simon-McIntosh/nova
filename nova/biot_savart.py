@@ -1,25 +1,31 @@
+from nova.coil_matrix import CoilMatrix
 from scipy.special import ellipk, ellipe
 from nova.inductance.geometric_mean_radius import geometric_mean_radius
 import numpy as np
 import pandas as pd
 from scipy.optimize import minimize_scalar
-from nova.coil_set import CoilSet
 
 
-class biot_savart:
+class BiotSavart(CoilMatrix):
 
     mu_o = 4 * np.pi * 1e-7  # magnetic constant [Vs/Am]
 
     def __init__(self, source=None, target=None, **kwargs):
+        CoilMatrix.__init__(self)
+        
         self.gmr = geometric_mean_radius()  # mutual gmr factors
         self.mutual = kwargs.pop('mutual', False)  # mutual inductance offset
+        
+        print('initalizing biot savart')
+        '''
         self.load_metadata()
         self.initialize_frames()
         if source is not None:  # load source coilset
             self.load_source(source)
         if target is not None:  # load target coilset
             self.load_target(target)
-            
+        '''
+
     def load_metadata(self):
         required_columns = ['x', 'z']
         additional_columns = ['dx', 'dz', 'ro', 'Nt', 'patch', 
@@ -29,31 +35,31 @@ class biot_savart:
                               'patch': None, 'dCoil': 0, 'subindex': None,
                               'cross_section': 'square', 'part': ''}
         self.metadata = {
-                'coil': {'required_columns': required_columns,
-                         'additional_columns': additional_columns,
-                         'default_attributes': default_attributes,
-                         'mode': 'empty'},
-                'subcoil': {'required_columns': required_columns,
-                            'additional_columns': additional_columns[:-2],
-                            'default_attributes': default_attributes,
-                            'mode': 'empty'}}
+                'coil': {'_required_columns': required_columns,
+                         '_additional_columns': additional_columns,
+                         '_default_attributes': default_attributes,
+                         'mode': 'overwrite'},
+                'subcoil': {'_required_columns': required_columns,
+                            '_additional_columns': additional_columns[:-2],
+                            '_default_attributes': default_attributes,
+                            'mode': 'overwrite'}}
 
     def initialize_frames(self):
         '''
         intalise coil and target dataframes
         '''
-        self.source = CoilSet(metadata=self.metadata)
-        self.target = CoilSet(metadata=self.metadata)
+        a = 1
+        #self.source = CoilSet(metadata=self.metadata)
+        #self.target = CoilSet(metadata=self.metadata)
 
     def load_source(self, coilset):
-        #self.source.append_coilset(coilset)
         self.source.coilset = coilset
         self.source.subcoil['ro'] = \
             self.gmr.calculate_self(self.source.subcoil)
         self.nC = self.source.subcoil.nC
 
     def load_target(self, *args, subcoil=True, **kwargs):
-        self.target = CoilSet(metadata=self.metadata)  # re-initalize
+        #self.target = CoilSet(metadata=self.metadata)  # re-initalize
         if len(args) == 1:  # load coilset
             self.target.coilset = args[0]
         else:  # load coordinates (args=(x, z))
@@ -156,7 +162,9 @@ class biot_savart:
                      ellipk(m) - 2 * m**-0.5 * ellipe(m)))
         M *= Nt * Nc  # turn-turn interaction, line-current
         M *= self.mu_o  # Wb / Amp
-        return self.column_reduce(M)
+        M = self.column_reduce(M)
+        M = self.index_part(M)
+        return M
 
     def field_matrix(self):
         '''
@@ -174,11 +182,16 @@ class biot_savart:
         field[0] = xc / 2 * (zt - zc) / B * (I1 - A * I2)
         field[1] = xc / 2 * ((xc + xt * A / B) * I2 - xt / B * I1)
         field *= Nt * Nc  # line-current
-        field *= self.mu_o  # T/ Amp
+        field *= self.mu_o  # T / Amp
         B = {'x': [], 'z': []}
         for i, var in enumerate(B):
             B[var] = self.column_reduce(field[i])
         return B
+    
+    def index_part(self, M):
+        M.loc[:, 'part'] = self.target.coil['part']
+        M.set_index('part', append=True, inplace=True)
+        return M
     
     def column_reduce(self, Mo):
         Mo = pd.DataFrame(Mo, index=self.target.subcoil.index,
@@ -200,8 +213,8 @@ class biot_savart:
         else:
             #part = self.target.subcoil['part']
             Mrow = Mcol
-        #M['part'] = part
-        #M.set_index('part', append=True, inplace=True)
+        #Mrow['part'] = part
+        #Mrow.set_index('part', append=True, inplace=True)
         return Mrow
 
     def calculate_inductance(self):
@@ -272,7 +285,8 @@ class self_inductance:
 
 
 if __name__ == '__main__':
-
+    
+    from nova.coil_set import CoilSet
     cs = CoilSet(dCoil=-1, turn_fraction=0.7)
     cs.add_coil(3.943, 7.564, 0.959, 0.984, Nt=248.64, name='PF1', part='PF')
     cs.add_coil(1.6870, 5.4640, 0.7400, 2.093, Nt=554, name='CS3U', part='CS',
@@ -280,18 +294,22 @@ if __name__ == '__main__':
     cs.add_coil(1.6870, 3.2780, 0.7400, 2.093, Nt=554, name='CS2U', part='CS')
     cs.add_plasma(5, 2.5, 1.5, 1.5, It=5e6, cross_section='circle')
 
-    bs = biot_savart(cs.coilset, mutual=True)
+    #bs = BiotSavart()
+    #bs = biot_savart(cs.coilset, mutual=True)
 
     #bs.colocate(subcoil=True)
     #_B = bs.field_matrix()
     #_Bx = bs.reduce(_B[0])
     
+    '''
     bs.colocate(subcoil=False)
     
     B = bs.field_matrix()
     print(B['x'])
 
     Mc = bs.calculate_inductance()
+    '''
+    
     #bs.target.plot(label=True)
 
     # plt.title(cc.coilset.matrix['inductance']['Mc'].CS3U)

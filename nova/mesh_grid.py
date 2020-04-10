@@ -102,11 +102,11 @@ class MeshGrid:
                 'x': self.x, 'z': self.z, 'nx': self.nx, 'nz': self.nz}
         
     def plot(self, ax=None, **kwargs):
-        self._plot(self.x2d, self.z2d, self.limit,
+        self._plot(self.x2d, self.z2d, self.limit[:2], self.limit[2:],
                    xscale=self.xscale, zscale=self.zscale, ax=ax, **kwargs)
 
     @staticmethod
-    def _plot(x2d, z2d, limit,
+    def _plot(x2d, z2d, xlim, zlim,
               xscale='linear', zscale='linear', ax=None, **kwargs):
         if ax is None:
             ax = plt.subplots(1, 1)[1]
@@ -129,8 +129,8 @@ class MeshGrid:
             ax.set_xscale(xscale)
             ax.set_yscale(zscale)
         if ax.get_xlim() == (0, 1) and ax.get_ylim() == (0, 1):
-            ax.set_xlim(limit[:2])
-            ax.set_ylim(limit[2:])
+            ax.set_xlim(xlim)
+            ax.set_ylim(zlim)
 
         
 if __name__ == '__main__':

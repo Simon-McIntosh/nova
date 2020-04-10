@@ -25,6 +25,9 @@ class CoilFrame(DataFrame, CoilData, CoilMatrix):
     CoilFrame instance inherits from Pandas DataFrame
     Inspiration taken from GeoPandas https://github.com/geopandas
     '''
+    _internal_names = DataFrame._internal_names
+    _internal_names += CoilData._coildata_flags
+    _internal_names_set = set(_internal_names)
 
     _metadata = ['_required_columns', 
                  '_additional_columns', 
@@ -200,6 +203,7 @@ class CoilFrame(DataFrame, CoilData, CoilMatrix):
     def _check_arguments(self, *args, **kwargs):
         if len(args) == 1:  # data passed as pandas dataframe
             data = args[0]
+            print('required', self._required_columns)
             args = [data.loc[:, col] for col in self._required_columns]
             kwargs['name'] = data.index
             for col in data.columns:

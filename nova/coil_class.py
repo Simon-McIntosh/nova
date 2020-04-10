@@ -7,7 +7,7 @@ import pandas as pd
 import amigo.geom
 
 
-class CoilClass(CoilSet, SimulationData):
+class CoilClass(CoilSet):
     '''
     CoilClass:
         - implements methods to manage input and
@@ -19,7 +19,7 @@ class CoilClass(CoilSet, SimulationData):
 
     def __init__(self, *args, eqdsk=None, filename=None, **kwargs):
         CoilSet.__init__(self, *args, **kwargs)  # inherent from CoilSet
-        SimulationData.__init__(self, **kwargs)  # add simulation data
+        #SimulationData.__init__(self, **kwargs)  # add simulation data
         self.add_eqdsk(eqdsk)
         self.initalize_functions()
         self.initalize_metadata()
@@ -369,22 +369,24 @@ if __name__ == '__main__':
     pd.Index.set_names
 
     from nep.coil_geom import PFgeom
-    pf = PFgeom(dCoil=0.15).cs
+    pf = PFgeom(dCoil=0.35).cs
     cc = CoilClass(pf.coilset)
     
     
-    cc.add_coil(4, 3, 2, 2, name='PF12', dCoil=-1)
+    #cc.add_coil(4, 3, 2, 2, name='PF12', dCoil=-1)
 
     cc.plot(label=['CS', 'PF'])
     #cc.plot_grid()
-    
-    cc.add_targets(([1.0, 2], [4, 5]))
-
-
-    cc.generate_grid(n=1000)
-        
+       
     cc.scenario_filename = -2
     cc.scenario = 'SOB'
+    
+    cc.grid.generate_grid()
+    #cc.grid.solve_interaction()
+    cc.grid.plot_flux()
+    
+    cc.scenario = 'EOB'
+    cc.grid.plot_flux()
     #cc.solve_interaction(plot=False)
     
     #cc.scenario = 'EOB'

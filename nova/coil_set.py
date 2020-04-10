@@ -1,6 +1,7 @@
 from nova.coil_frame import CoilFrame
-from nova.biot_savart import BiotSavart
-import pandas as pd
+from nova.simulation_data import Grid
+from pandas import Series, DataFrame, concat, isnull
+from pandas.api.types import is_list_like
 import numpy as np
 from amigo.geom import gmd, amd
 import functools
@@ -14,7 +15,7 @@ import shapely.geometry
 from descartes import PolygonPatch
 
 
-class CoilSet(BiotSavart):
+class CoilSet():
 
     '''
     CoilSet:
@@ -29,26 +30,33 @@ class CoilSet(BiotSavart):
     _coilset_attributes = ['default_attributes', 
                            'coilset_frames', 
                            'coilset_metadata']
+    
+    # exchange coilset instance
+    _coilset_instances = {'grid': ['grid_attributes']}
 
     # main class attribures
     _coilset_frames = ['coil', 'subcoil']
 
     # additional_columns
     _coil_columns = ['dCoil', 'Nf', 'Nt', 'It', 'Ic', 'mpc', 'power', 'plasma', 
-             'subindex', 'cross_section', 'turn_section', 'turn_fraction',
-             'patch', 'polygon', 'part']
+                     'subindex', 'cross_section', 'turn_section', 
+                     'turn_fraction', 'patch', 'polygon', 'part']
     
     _subcoil_columns = ['dl_x', 'dl_z', 'mpc', 'power', 'plasma', 
-                'coil', 'Nt', 'It', 'Ic', 'cross_section', 'patch',
-                'polygon', 'part']
+                        'coil', 'Nt', 'It', 'Ic', 'cross_section', 'patch',
+                        'polygon', 'part']
 
     def __init__(self, *args, current_update='full', **kwargs):
-        BiotSavart.__init__(self)  # inherit biot savart methods
         self.initialize_default_attributes(**kwargs)
         self.initialize_coil()  # initalize coil and subcoil
-        self.current_update = current_update
-        self.coilset_metadata = kwargs.get('coilset_metadata', {})  
+        self.coilset_frames = kwargs.get('coilset_frames', {})
+        self.coilset_metadata = kwargs.get('coilset_metadata', {}) 
+        self.grid = Grid(self.coilset_frames, 
+                         **kwargs.get('grid.grid_attributes', {}))        
         self.append_coilset(*args)  # append list of coilset instances
+        self.current_update = current_update
+
+
         
         
     def initialize_default_attributes(self, **default_attributes):
@@ -84,8 +92,9 @@ class CoilSet(BiotSavart):
     @coilset_frames.setter
     def coilset_frames(self, coilset_frames):
         for frame in self._coilset_frames:
-            coilframe = coilset_frames.get(frame, pd.DataFrame())
+            coilframe = coilset_frames.get(frame, DataFrame())
             if not coilframe.empty:
+                print('adding', frame)
                 getattr(self, frame).add_coil(coilframe)  # append coilframe
             
     @property
@@ -118,28 +127,42 @@ class CoilSet(BiotSavart):
 
     @property
     def coilset(self):
-        return {attribute: getattr(self, attribute)
-                for attribute in self._coilset_attributes}
+        coilset_attributes = {attribute: getattr(self, attribute)
+                              for attribute in self._coilset_attributes}
+        instance_attributes = {}
+        for instance in self._coilset_instances:
+            for attribute in self._coilset_instances[instance]:
+                instance_attribute = '.'.join([instance, attribute])
+                instance_attributes[instance_attribute] = \
+                    getattr(getattr(self, instance), attribute)
+        return {**coilset_attributes, **instance_attributes}
 
     @coilset.setter
     def coilset(self, coilset):
         for attribute in self._coilset_attributes:
+            print(attribute)
             setattr(self, attribute, coilset.get(attribute, {}))
+        for instance in self._coilset_instances:
+            for attribute in self._coilset_instances[instance]:
+                instance_attribute = '.'.join([instance, attribute])
+                setattr(getattr(self, instance), attribute,
+                        coilset.get(instance_attribute, {}))
 
     def append_coilset(self, *args):
         for coilset in args:
             self.coilset = coilset
 
     def subset(self, index, invert=False):
-        if not pd.api.types.is_list_like(index):
+        if not is_list_like(index):
             index = [index]
         if invert:
             index = self.coil.loc[~self.coil.index.isin(index)].index
         subindex = []
         for _index in index:
             subindex.extend(self.coil.loc[_index, 'subindex'])
-        return CoilSet(coil=self.coil.loc[index],
-                         subcoil=self.subcoil.loc[subindex])
+        coilset_frames = {'coil': self.coil.loc[index], 
+                          'subcoil': self.subcoil.loc[subindex]}
+        return CoilSet(coilset_frames=coilset_frames)
         
     @staticmethod
     def categorize_coilset(coil, xo=None, rename=True):
@@ -166,7 +189,7 @@ class CoilSet(BiotSavart):
         if rename:
             CS.index = [f'CS{i}' for i in range(CS.nC)]
             PF.index = [f'PF{i}' for i in range(PF.nC)]
-        coil = pd.concat([PF, CS])
+        coil = concat([PF, CS])
         return coil
         
     @property
@@ -336,7 +359,7 @@ class CoilSet(BiotSavart):
     def drop_coil(self, index=None):
         if index is None:  # drop all coils
             index = self.coil.index
-        if not pd.api.types.is_list_like(index):
+        if not is_list_like(index):
             index = [index]
         iloc = self.get_iloc(index)
         for name in index:
@@ -361,7 +384,7 @@ class CoilSet(BiotSavart):
         iloc = [None, None]
         if 'Plasma' in self.coil.index:
             iloc = self.drop_coil('Plasma')
-        nlist = sum([1 for arg in args if pd.api.types.is_list_like(arg)])
+        nlist = sum([1 for arg in args if is_list_like(arg)])
         if nlist == 0:   # add single plasma coil - mesh filaments
             dCoil = kwargs.pop('dCoil', self.dPlasma)
             self.add_coil(*args, part=part, name='Plasma',
@@ -395,7 +418,7 @@ class CoilSet(BiotSavart):
             self.coil.at['Plasma', 'subindex'] = list(subindex)
             # if Nf > 1:
             #     self.inductance('Plasma', update=True)  # re-size plasma coil
-            #self.Ic = pd.Series({'Plasma': Ip_net})  # update net current
+            #self.Ic = Series({'Plasma': Ip_net})  # update net current
 
     def cluster(self, n, eps=0.2):
         '''
@@ -403,17 +426,17 @@ class CoilSet(BiotSavart):
         '''
         dbscan = DBSCAN(eps=eps, min_samples=1)
         cluster_index = dbscan.fit_predict(self.coil.loc[:, ['x', 'z']])
-        self.coil.loc[:, 'cluster_index'] = cluster_index
+        cluster_index = Series(cluster_index, index=self.coil.index)
         merge_index = []
         for part in self.coil.part.unique():
             coil = self.subset(self.coil.index[self.coil.part == part]).coil
-            for cluster in coil.cluster_index.unique():
-                index = coil.index[coil.cluster_index == cluster]
+            cluster_subset = cluster_index.loc[self.coil.part == part]
+            for cluster in cluster_subset.unique():
+                index = coil.index[cluster_subset == cluster]
                 if index.size > 1:
                     for i in range(index.size // n + 1):
                         if i*n != len(index):
                             merge_index.append(index[i*n:(i+1)*n])
-        self.coil.drop(columns='cluster_index', inplace=True)
         for index in merge_index:
             self.merge(index)
 
@@ -438,7 +461,7 @@ class CoilSet(BiotSavart):
                 kwargs[key] = subset.coil.loc[:, key].sum()
             elif key == 'polygon':
                 polys = [p for p in subset.coil.loc[:, 'polygon'].values]
-                if not pd.isnull(polys).any():
+                if not isnull(polys).any():
                     polygon = shapely.geometry.MultiPolygon(polys)
             elif key not in self.coil._required_columns:  
                 # take referance
@@ -452,7 +475,7 @@ class CoilSet(BiotSavart):
         # add merged coil
         self.add_coil(x, z, dx, dz, subcoil=False, iloc=coil_iloc, **kwargs)
         # on-demand patch of top level (coil)
-        if pd.isnull(subset.coil.loc[:, 'patch']).any():
+        if isnull(subset.coil.loc[:, 'patch']).any():
             CoilSet.patch_coil(subset.coil)  # patch on-demand
         self.coil.at[name, 'patch'] = list(subset.coil.patch)
         # insert multi-polygon
@@ -485,7 +508,7 @@ class CoilSet(BiotSavart):
                 current_patch, polygon, color_key) in enumerate(
                 coil.loc[:, ['x', 'z', 'dx', 'dz', 'cross_section', 'patch',
                               'polygon', 'part']].values):
-            if overwrite or np.array(pd.isnull(current_patch)).any():
+            if overwrite or np.array(isnull(current_patch)).any():
                 patch[i] = [PolygonPatch(polygon)]
             else:
                 patch[i] = [current_patch]
@@ -494,7 +517,7 @@ class CoilSet(BiotSavart):
                 patch[i][j].set_linewidth(0.75)
                 patch[i][j].set_antialiased(True)
                 patch[i][j].set_facecolor(color.get(color_key, 'C9'))
-                patch[i][j].zorder = zorder.get(color_key, 0)
+                patch[i][j].set_zorder = zorder.get(color_key, 0)
                 patch[i][j].set_alpha(alpha.get(color_key, 1))
         coil.loc[:, 'patch'] = patch
 
@@ -502,11 +525,11 @@ class CoilSet(BiotSavart):
         if ax is None:
             ax = plt.gca()
         if not coil.empty:
-            if pd.isnull(coil.loc[:, 'patch']).any() or len(kwargs) > 0:
+            if isnull(coil.loc[:, 'patch']).any() or len(kwargs) > 0:
                 CoilSet.patch_coil(coil, **kwargs)  # patch on-demand
             patch = coil.loc[:, 'patch']
             # form list of lists
-            patch = [p if pd.api.types.is_list_like(p) else [p] for p in patch]
+            patch = [p if is_list_like(p) else [p] for p in patch]
             # flatten
             patch = functools.reduce(operator.concat, patch)
             # sort
@@ -583,19 +606,25 @@ class CoilSet(BiotSavart):
 
 if __name__ == '__main__':
 
-    cs = CoilSet(dCoil=3, current_update='passive', turn_fraction=0.5,
-                 cross_section='circle')
+    cs = CoilSet(dCoil=3, current_update='full', turn_fraction=0.5,
+                 cross_section='circle', mutual=True)
+    
+    cs.coil._flux = [2, 4, 5]
 
     cs.coilset_metadata = {'_default_attributes': {'dCoil': -1}}
     cs.coil.coilframe_metadata = {'_default_attributes': {'dPlasma': 0.333}}
     cs.update_coilframe_metadata('coil', additional_columns=['R'])
     
     cs.add_coil(6, -3, 1.5, 1.5, name='PF6', part='PF', Nt=600, It=5e5,
-                turn_section='circle', turn_fraction=0.7, dCoil=0.75)
-
-    cs.add_coil(7, -0.5, 2.5, 2.5, name='PF8', part='PF', Nt=16, Ic=2e3,
-                cross_section='square', turn_section='square', dCoil=-1)
+                turn_section='circle', turn_fraction=0.7, dCoil=0.75)   
     
+    cs.add_coil(7, -0.5, 2.5, 2.5, name='PF8', part='PF', Nt=500, Ic=2e3,
+                cross_section='square', turn_section='square', dCoil=0.5)
+    
+    cs.add_mpc(['PF6', 'PF8'])
+    
+    
+    '''
     cs.add_coil([2, 2, 3, 3.5], [1, 0, -1, -3], 0.5, 0.3,
                 name='PF', part='PF', delim='', Nt=30)
     cs.add_coil(4, 0.75, 1.75, 1.8, name='PF4', part='VS3', turn_fraction=0.75,
@@ -612,15 +641,44 @@ if __name__ == '__main__':
     cs.Ic = 12
     cs.Ip = 15
     
-    _cs = CoilSet(cs.coilset)
+    #_cs = CoilSet(cs.coilset)
     
     cs.Ic = 34
     cs.coil.Nt = 1
     
     print(cs.It)
-    print(_cs.It)
+    #print(_cs.It)
 
+    #print(_cs.mutual)
     
+    #print(_cs.coil._flux)
+    
+    cs.Ic = 222
+    
+    cs.grid.generate_grid()
+    
+    
+    cs.add_coil(9.6, 3.5, 0.52, 0.52, name='PF19', dCoil=0.05,
+                Ic=1e6, Nt=7)
+    
+    cs.Ic = 333
+    '''
+    
+    '''
+    cs.plot(label=True)
+    cs.grid.generate_grid()
+    #cs.grid.plot_grid()
+    cs.grid.solve_interaction()
+    cs.grid.plot_flux()
+    
+    _cs = CoilSet()
+    _cs.append_coilset(cs.coilset)
+    
+    import pickle
+    cs_p = pickle.dumps(cs.coilset)
+    __cs = pickle.loads(cs_p)
+    _cs.append_coilset(__cs)
+    '''
     
     
     

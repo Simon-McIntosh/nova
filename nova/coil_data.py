@@ -36,16 +36,13 @@ class CoilData():
 
     # CoilFrame attributes - fast access np.array linked to CoilFrame
     _coilframe_attributes = ['x', 'z', 'dx', 'dz', 'Ic', 'It', 'Nt',
-                             'power', 'plasma',
-                             'Psi',
-                             'Bx', 'Bz',
-                             'Fx', 'Fz',
-                             'xFx', 'xFz', 'zFx', 'zFz', 'My']
+                             'power', 'plasma', 'Psi', 'Bx', 'Bz',
+                             'Fx', 'Fz', 'xFx', 'xFz', 'zFx', 'zFz', 'My']
     
     _coildata_attributes = {'_current_update': 'full'}
         
     # CoilData indices
-    _coildata_indices = ['plasma_index', 'update_index']
+    _coildata_indices = ['coil_index', 'plasma_index', 'update_index']
     
     # compact mpc attributes - subset of coilframe and coildata attributes
     _mpc_attributes = ['Ic', 'power', 'plasma', 'update_index']
@@ -56,9 +53,9 @@ class CoilData():
     _coildata_properties = []
     
     # update flags
-    _flags = {'update_coilframe': False,
-              'update_data': True,
-              'relink_mpc': True}
+    _coildata_flags = {'update_coilframe': False,
+                       'update_data': True,
+                       'relink_mpc': True}
         
     def __init__(self):
         self._extract_coildata_properties()
@@ -87,17 +84,19 @@ class CoilData():
     
     @update_coilframe.setter
     def update_coilframe(self, value):
-        self._update_coilframe = {attr: value 
-                                  for attr in self._coilframe_attributes}
+        self._update_coilframe = {attribute: value 
+                                  for attribute in self._coilframe_attributes}
     
     def _extract_coildata_properties(self):
         self._coildata_properties = [p for p, __ in inspect.getmembers(
             CoilData, lambda o: isinstance(o, property))]
         
     def _unlink_coildata_attributes(self):
-        for flag in self._flags:
-            setattr(self, f'_{flag}', None)  # unlink from DataFrame
-            setattr(self, f'_{flag}', self._flags[flag])  # update read/write
+        for flag in self._coildata_flags:  # update read/write
+            #setattr(self, f'_{flag}', None)  # unlink from DataFrame
+            #setattr(self, f'_{flag}', self._coildata_flags[flag]) 
+            setattr(self, f'_{flag}', [1])
+        print('setting flags')
         self.update_coilframe = False
         for attribute in self._coilframe_attributes + \
                          self._coildata_indices + \
@@ -109,7 +108,7 @@ class CoilData():
         self.coildata = self._coildata_attributes
                              
     def _update_flags(self, **kwargs):
-        for flag in self._flags:
+        for flag in self._coildata_flags:
             if flag in kwargs:
                 setattr(self, f'_{flag}', kwargs[flag])
             
@@ -117,6 +116,7 @@ class CoilData():
         if self.nC > 0:
             self._extract_mpc()  # extract multi-point constraints
             self._extract_data_attributes()  # extract from DataFrame columns
+            self._extract_coil_index()
             self.current_update = self._current_update  # set flag
             self.update_dataframe()
                
@@ -157,7 +157,20 @@ class CoilData():
             for i, index in enumerate(self._mpc_index):
                 mpc_index[i] = self.at[index, 'coil']
             self._mpc_index = Index(mpc_index) 
-        self._relink_mpc = True               
+        self._relink_mpc = True      
+
+    def _extract_coil_index(self):  # extract incices of 
+        if 'coil' in self:  # subcoil
+            coil = self.coil.to_numpy()
+            _name = coil[0]
+            _coil_index = [0]
+            for i, name in enumerate(coil):
+                if name != _name:
+                    _coil_index.append(i)
+                    _name = name
+            self._coil_index = np.array(_coil_index)
+        else:
+            self._coil_index = np.arange(self.nC)
                 
     @property
     def current_update(self):

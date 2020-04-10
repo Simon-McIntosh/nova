@@ -52,13 +52,10 @@ class CoilData():
     
     _coildata_properties = []
     
-    # update coildata flags
-    _coildata_flags = {'_update_coilframe': False,
-                       '_update_data': True,
-                       '_relink_mpc': True}
-    
-    _coildata_internal_names = list(_coildata_attributes.keys()) + \
-                               list(_coildata_flags.keys())
+    # update flags
+    _coildata_flags = {'update_coilframe': False,
+                       'update_data': True,
+                       'relink_mpc': True}
         
     def __init__(self):
         self._extract_coildata_properties()
@@ -66,16 +63,15 @@ class CoilData():
         self._update_data = True
         
     @property
-    def coildata_attributes(self):
+    def coildata(self):
         'extract coildata attributes'
         self._coildata_attributes = {
                 attribute: getattr(self, attribute)
                 for attribute in self._coildata_attributes}
         return self._coildata_attributes
-
         
-    @coildata_attributes.setter
-    def coildata_attributes(self, coildata_attributes):
+    @coildata.setter
+    def coildata(self, coildata_attributes):
         'set coildata attributes'
         for attribute in self._coildata_attributes:
             value = coildata_attributes.get(attribute, None)
@@ -97,7 +93,10 @@ class CoilData():
         
     def _unlink_coildata_attributes(self):
         for flag in self._coildata_flags:  # update read/write
-            setattr(self, flag, self._coildata_flags[flag]) 
+            #setattr(self, f'_{flag}', None)  # unlink from DataFrame
+            #setattr(self, f'_{flag}', self._coildata_flags[flag]) 
+            setattr(self, f'_{flag}', [1])
+        print('setting flags')
         self.update_coilframe = False
         for attribute in self._coilframe_attributes + \
                          self._coildata_indices + \
@@ -106,14 +105,12 @@ class CoilData():
             setattr(self, f'_{attribute}', None)
         for attribute in self._coildata_attributes:
             setattr(self, attribute, None)
-        self.coildata_attributes = self._coildata_attributes
+        self.coildata = self._coildata_attributes
                              
-    '''
     def _update_flags(self, **kwargs):
         for flag in self._coildata_flags:
             if flag in kwargs:
                 setattr(self, f'_{flag}', kwargs[flag])
-    '''
             
     def update_coildata(self):
         if self.nC > 0:

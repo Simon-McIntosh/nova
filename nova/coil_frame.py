@@ -19,14 +19,14 @@ class CoilSeries(Series):
         return CoilFrame
 
 
-class CoilFrame(DataFrame, CoilData, CoilMatrix):
+class CoilFrame(DataFrame, CoilData):
 
     '''
     CoilFrame instance inherits from Pandas DataFrame
     Inspiration taken from GeoPandas https://github.com/geopandas
     '''
     _internal_names = DataFrame._internal_names
-    _internal_names += CoilData._coildata_flags
+    _internal_names += []
     _internal_names_set = set(_internal_names)
 
     _metadata = ['_required_columns', 
@@ -34,19 +34,27 @@ class CoilFrame(DataFrame, CoilData, CoilMatrix):
                  '_default_attributes',
                  '_coildata_attributes',
                  '_coilmatrix_attributes']
+    
+    @property
+    def _constructor(self):
+        return CoilFrame
+
+    @property
+    def _constructor_sliced(self):
+        return CoilSeries   
 
     def __init__(self, *args, coilframe_metadata={}, **kwargs):
         self._initialize_coilframe_metadata()
         DataFrame.__init__(self, *args, **kwargs)  # inherit pandas DataFrame
         CoilData.__init__(self)  # coil data
-        CoilMatrix.__init__(self)  # coil matrix
+        #CoilMatrix.__init__(self)  # coil matrix
         self.coilframe_metadata = coilframe_metadata  # update metadata
         
     def _initialize_coilframe_metadata(self):
         self._initialize_required_columns()
         self._initialize_additional_columns()
         self._initialize_default_attributes()
-        self._initialize_data_attributes()
+        #self._initialize_data_attributes()
         
     def _initialize_required_columns(self):
         'required input: self.add_coil(*args)'
@@ -98,24 +106,17 @@ class CoilFrame(DataFrame, CoilData, CoilMatrix):
     @property
     def coilframe_metadata(self):
         'extract coilframe_metadata attributes'
-        self._coildata_attributes = self.coildata
-        self._coilmatrix_attributes = self.coilmatrix
+        self._coildata_attributes = self.coildata_attributes
+        #self._coilmatrix_attributes = self.coilmatrix
         return dict((key, getattr(self, key)) for key in self._metadata)
     
     @coilframe_metadata.setter
     def coilframe_metadata(self, coilframe_metadata):
         'update coilframe_metadata attributes'
         self._update_coilframe_metadata(**coilframe_metadata)
-        self.coildata = self._coildata_attributes  # return to coildata
-        self.coilmatrix = self._coilmatrix_attributes  # return to coilmatrix
-        
-    @property
-    def _constructor(self):
-        return CoilFrame
-
-    @property
-    def _constructor_sliced(self):
-        return CoilSeries
+        # return to coildata
+        self.coildata_attributes = self._coildata_attributes  
+        #self.coilmatrix = self._coilmatrix_attributes  # return to coilmatrix
     
     @property
     def nC(self):
@@ -159,7 +160,6 @@ class CoilFrame(DataFrame, CoilData, CoilMatrix):
         CoilFrame.__init__(self, coil, 
                            coilframe_metadata=self.coilframe_metadata)  
         self.update_coildata()
-        #self.concatenate_matrix()
         
     def add_coil(self, *args, iloc=None, **kwargs):
         coil = self.get_coil(*args, **kwargs)  # additional coils
@@ -203,7 +203,6 @@ class CoilFrame(DataFrame, CoilData, CoilMatrix):
     def _check_arguments(self, *args, **kwargs):
         if len(args) == 1:  # data passed as pandas dataframe
             data = args[0]
-            print('required', self._required_columns)
             args = [data.loc[:, col] for col in self._required_columns]
             kwargs['name'] = data.index
             for col in data.columns:

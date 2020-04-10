@@ -37,11 +37,12 @@ class CoilSet():
     # main class attribures
     _coilset_frames = ['coil', 'subcoil']
 
-    # additional_columns
+    # additional coil columns
     _coil_columns = ['dCoil', 'Nf', 'Nt', 'It', 'Ic', 'mpc', 'power', 'plasma', 
                      'subindex', 'cross_section', 'turn_section', 
                      'turn_fraction', 'patch', 'polygon', 'part']
     
+    # additional subcoil columns
     _subcoil_columns = ['dl_x', 'dl_z', 'mpc', 'power', 'plasma', 
                         'coil', 'Nt', 'It', 'Ic', 'cross_section', 'patch',
                         'polygon', 'part']
@@ -51,14 +52,11 @@ class CoilSet():
         self.initialize_coil()  # initalize coil and subcoil
         self.coilset_frames = kwargs.get('coilset_frames', {})
         self.coilset_metadata = kwargs.get('coilset_metadata', {}) 
-        self.grid = Grid(self.coilset_frames, 
-                         **kwargs.get('grid.grid_attributes', {}))        
-        self.append_coilset(*args)  # append list of coilset instances
-        self.current_update = current_update
+        #self.grid = Grid(self.coilset_frames, 
+        #                 **kwargs.get('grid.grid_attributes', {}))        
+        #self.append_coilset(*args)  # append list of coilset instances
+        #self.current_update = current_update
 
-
-        
-        
     def initialize_default_attributes(self, **default_attributes):
         self._default_attributes = {'dCoil': -1, 
                                     'dPlasma': 0.25, 
@@ -454,9 +452,6 @@ class CoilSet():
         referance_coil = subset.coil.loc[coil_index[0], :]
         kwargs = {'name': name}
         for key in subset.coil.columns:
-            #if key in ['cross_section', 'part', 'material', 'turn_fraction']:
-            #    # take referance
-            #    kwargs[key] = referance_coil[key]
             if key in ['Nf', 'Nt', 'm', 'R']:
                 kwargs[key] = subset.coil.loc[:, key].sum()
             elif key == 'polygon':
@@ -464,8 +459,7 @@ class CoilSet():
                 if not isnull(polys).any():
                     polygon = shapely.geometry.MultiPolygon(polys)
             elif key not in self.coil._required_columns:  
-                # take referance
-                kwargs[key] = referance_coil[key]
+                kwargs[key] = referance_coil[key]  # take referance
         # extract current coil / subcoil locations
         coil_iloc = self.coil.index.get_loc(coil_index[0])
         subcoil_iloc = self.subcoil.index.get_loc(
@@ -609,6 +603,7 @@ if __name__ == '__main__':
     cs = CoilSet(dCoil=3, current_update='full', turn_fraction=0.5,
                  cross_section='circle', mutual=True)
     
+    '''
     cs.coil._flux = [2, 4, 5]
 
     cs.coilset_metadata = {'_default_attributes': {'dCoil': -1}}
@@ -622,6 +617,7 @@ if __name__ == '__main__':
                 cross_section='square', turn_section='square', dCoil=0.5)
     
     cs.add_mpc(['PF6', 'PF8'])
+    '''
     
     
     '''

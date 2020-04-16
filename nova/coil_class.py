@@ -1,7 +1,5 @@
 from nova.coil_set import CoilSet
-from nova.simulation_data import SimulationData
 from nep.DINA.read_scenario import scenario_data
-#from nova.biot_savart import biot_savart, self_inductance
 import numpy as np
 import pandas as pd
 import amigo.geom
@@ -19,7 +17,6 @@ class CoilClass(CoilSet):
 
     def __init__(self, *args, eqdsk=None, filename=None, **kwargs):
         CoilSet.__init__(self, *args, **kwargs)  # inherent from CoilSet
-        #SimulationData.__init__(self, **kwargs)  # add simulation data
         self.add_eqdsk(eqdsk)
         self.initalize_functions()
         self.initalize_metadata()

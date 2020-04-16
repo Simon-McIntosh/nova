@@ -42,7 +42,11 @@ class CoilData():
     _coildata_attributes = {'_current_update': 'full'}
         
     # CoilData indices
-    _coildata_indices = ['coil_index', 'plasma_index', 'update_index']
+    _coildata_indices = ['reduction_index',
+                         'plasma_reduction_index',
+                         'plasma_iloc',
+                         'plasma_index', 
+                         'update_index']
     
     # compact mpc attributes - subset of coilframe and coildata attributes
     _mpc_attributes = ['Ic', 'power', 'plasma', 'update_index']
@@ -53,51 +57,24 @@ class CoilData():
     _coildata_properties = []
     
     # update flags
-    _coildata_flags = {'update_coilframe': False,
-                       'update_data': True,
+    _coildata_flags = {'update_dataframe': False,
+                       'update_coilframe': True,
+                       'update_biotsavart': True,
                        'relink_mpc': True}
         
     def __init__(self):
         self._extract_coildata_properties()
         self._unlink_coildata_attributes()
-        self._update_data = True
         
-    @property
-    def coildata(self):
-        'extract coildata attributes'
-        self._coildata_attributes = {
-                attribute: getattr(self, attribute)
-                for attribute in self._coildata_attributes}
-        return self._coildata_attributes
-        
-    @coildata.setter
-    def coildata(self, coildata_attributes):
-        'set coildata attributes'
-        for attribute in self._coildata_attributes:
-            value = coildata_attributes.get(attribute, None)
-            if value is not None:
-                setattr(self, attribute, value)
-
-    @property
-    def update_coilframe(self):
-        return np.fromiter(self._update_coilframe.values(), dtype=bool).any()
-    
-    @update_coilframe.setter
-    def update_coilframe(self, value):
-        self._update_coilframe = {attribute: value 
-                                  for attribute in self._coilframe_attributes}
-    
     def _extract_coildata_properties(self):
         self._coildata_properties = [p for p, __ in inspect.getmembers(
             CoilData, lambda o: isinstance(o, property))]
         
     def _unlink_coildata_attributes(self):
         for flag in self._coildata_flags:  # update read/write
-            #setattr(self, f'_{flag}', None)  # unlink from DataFrame
-            #setattr(self, f'_{flag}', self._coildata_flags[flag]) 
-            setattr(self, f'_{flag}', [1])
-        print('setting flags')
-        self.update_coilframe = False
+            setattr(self, f'_{flag}', None)  # unlink from DataFrame
+            setattr(self, f'_{flag}', self._coildata_flags[flag]) 
+        self.update_dataframe = False
         for attribute in self._coilframe_attributes + \
                          self._coildata_indices + \
                          self._mpc_attributes + \
@@ -105,23 +82,48 @@ class CoilData():
             setattr(self, f'_{attribute}', None)
         for attribute in self._coildata_attributes:
             setattr(self, attribute, None)
-        self.coildata = self._coildata_attributes
+        self.coildata_attributes = self._coildata_attributes
+        
+    @property
+    def coildata_attributes(self):
+        'extract coildata attributes'
+        self._coildata_attributes = {
+                attribute: getattr(self, attribute)
+                for attribute in self._coildata_attributes}
+        return self._coildata_attributes
+        
+    @coildata_attributes.setter
+    def coildata_attributes(self, coildata_attributes):
+        'set coildata attributes'
+        for attribute in self._coildata_attributes:
+            value = coildata_attributes.get(attribute, None)
+            if value is not None:
+                setattr(self, attribute, value)
+
+    @property
+    def update_dataframe(self):
+        return np.fromiter(self._update_dataframe.values(), dtype=bool).any()
+    
+    @update_dataframe.setter
+    def update_dataframe(self, value):
+        self._update_dataframe = {attribute: value 
+                                  for attribute in self._coilframe_attributes}
                              
     def _update_flags(self, **kwargs):
         for flag in self._coildata_flags:
             if flag in kwargs:
                 setattr(self, f'_{flag}', kwargs[flag])
             
-    def update_coildata(self):
+    def rebuild_coildata(self):
         if self.nC > 0:
             self._extract_mpc()  # extract multi-point constraints
             self._extract_data_attributes()  # extract from DataFrame columns
-            self._extract_coil_index()
+            self._extract_reduction_index()
             self.current_update = self._current_update  # set flag
-            self.update_dataframe()
+            self.refresh_dataframe()
                
     def _extract_data_attributes(self):
-        self.update_coilframe = False
+        self.update_dataframe = False
         for attribute in self._coilframe_attributes + \
                          self._coildata_indices:
                 if attribute in self:  # read from DataFrame column
@@ -159,19 +161,28 @@ class CoilData():
             self._mpc_index = Index(mpc_index) 
         self._relink_mpc = True      
 
-    def _extract_coil_index(self):  # extract incices of 
+    def _extract_reduction_index(self):  # extract reduction incices (reduceat)
         if 'coil' in self:  # subcoil
             coil = self.coil.to_numpy()
             _name = coil[0]
-            _coil_index = [0]
+            _reduction_index = [0]
             for i, name in enumerate(coil):
                 if name != _name:
-                    _coil_index.append(i)
+                    _reduction_index.append(i)
                     _name = name
-            self._coil_index = np.array(_coil_index)
-        else:
-            self._coil_index = np.arange(self.nC)
-                
+            self._reduction_index = np.array(_reduction_index)
+            self._plasma_iloc = np.arange(self._nC)[
+            self._plasma_index[self._reduction_index]]
+            filament_indices = np.append(self._reduction_index, self.nC)
+            plasma_filaments = filament_indices[self._plasma_iloc+ 1] - \
+                    filament_indices[self._plasma_iloc]
+            self._plasma_reduction_index = \
+                    np.append(0, np.cumsum(plasma_filaments)[:-1])
+        else:  # coil, reduction only applied to subfilaments
+            self._reduction_index = None
+            self._plasma_iloc = None
+            self._plasma_reduction_index = None
+   
     @property
     def current_update(self):
         'display current_update status'
@@ -209,7 +220,7 @@ class CoilData():
                 raise IndexError(f'flag {flag} not in '
                                  '[full, actitve, passive, plasma, coil]')
                 
-    def _set_current(self, value, current_column='Ic', update_coilframe=True):
+    def _set_current(self, value, current_column='Ic', update_dataframe=True):
         '''
         update line-current in variable _Ic
         index built as union of value.index and coil.index
@@ -219,8 +230,8 @@ class CoilData():
                 'Ic' == line current [A]
                 'It' == turn current [A.turns]
         '''
-        self._update_coilframe['Ic'] = update_coilframe  # update dataframe
-        self._update_coilframe['It'] = update_coilframe
+        self._update_dataframe['Ic'] = update_dataframe  # update dataframe
+        self._update_dataframe['It'] = update_dataframe
         nU = sum(self._update_index)  # length of update vector
         current = getattr(self, '_Ic')
         if current_column == 'It':  # convert to turn current
@@ -279,10 +290,6 @@ class CoilData():
     def It(self, value):
         self._set_current(value, 'It')
     
-    #@property
-    #def Nt(self):  # filament turn number
-    #    return self._Nt
-    
     @property
     def Np(self):  # plasma filament turn number
         return self._Nt[self._plasma_index]
@@ -290,7 +297,8 @@ class CoilData():
     @Np.setter
     def Np(self, value):  # set plasma fillament number
         self._Nt[self._plasma_index] = value
-        self._update_coilframe['Nt'] = True
+        #self._Nt[self._plasma_index] /= np.sum(self._Nt[self._plasma_index])
+        self._update_dataframe['Nt'] = True
         
     @property
     def nP(self):  # number of plasma filaments
@@ -311,7 +319,7 @@ class CoilData():
     @Ip.setter
     def Ip(self, value):
         self._Ic[self._plasma] = value
-        self._update_coilframe['Ic'] = True
+        self._update_dataframe['Ic'] = True
         
     @property
     def Ip_sum(self):  # net plasma current
@@ -321,33 +329,33 @@ class CoilData():
     @contextmanager
     def _write_to_dataframe(self):
         'prevent local attribute write via __setitem__ during dataframe update'
-        self._update_data = False
+        self._update_coilframe = False
         yield # with self._write_to_dataframe(self):
-        self._update_data = True
+        self._update_coilframe = True
                 
-    def update_dataframe(self):
-        'transfer data from _coilframe_attribute to dataframe'
-        if self.update_coilframe:
-            _update_coilframe = self._update_coilframe.copy()
-            self.update_coilframe = False
+    def refresh_dataframe(self):
+        'transfer data from coilframe attributes to dataframe'
+        if self.update_dataframe:
+            _update_dataframe = self._update_dataframe.copy()
+            self.update_dataframe = False
             with self._write_to_dataframe(self):
-                for attribute in _update_coilframe:
-                    if _update_coilframe[attribute]:
+                for attribute in _update_dataframe:
+                    if _update_dataframe[attribute]:
                         self.loc[:, attribute] = getattr(self, attribute)
             
-    def update_data(self, key):
-        'copy data from dataframe to attribute'
-        if self._update_data:  
+    def refresh_coilframe(self, key):
+        'transfer data from dataframe to coilframe attributes'
+        if self._update_coilframe:  # protect against regressive update
             if key in ['Ic', 'It']:
                 _current_update = self._current_update
                 self.current_update = 'full'
                 self._set_current(self.loc[self.index[self._mpc_iloc], key],
-                                  current_column=key, update_coilframe=False)
+                                  current_column=key, update_dataframe=False)
                 self.current_update = _current_update
             else:
                 value = self.loc[:, key].to_numpy()
                 if key in self._mpc_attributes:
                     value = value[self._mpc_iloc]
                 setattr(self, f'_{key}', value)
-            if key in self._update_coilframe:
-                self._update_coilframe[key] = False
+            if key in self._update_dataframe:
+                self._update_dataframe[key] = False

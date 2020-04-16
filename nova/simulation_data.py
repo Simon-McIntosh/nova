@@ -1,12 +1,30 @@
 import numpy as np
-from pandas import Series, DataFrame, concat
+from pandas import DataFrame, concat
 from pandas.api.types import is_list_like, is_dict_like
 from amigo.pyplot import plt
 from nova.mesh_grid import MeshGrid
-from nova.biot_savart import BiotSavart
+from nova.biot_savart import BiotSavart, BiotAttributes
+                
 
+class Mutual(BiotSavart, BiotAttributes):
+    
+    _attributes = []
+    
+    def __init__(self, subcoil, **mutual_attributes):
+        BiotAttributes.__init__(self, **mutual_attributes)
+        
+        print('mutual', self._attributes)
+        
+        #self.attributes = mutual_attributes
+        '''
+        BiotSavart.__init__(self)
+        self.subcoil = subcoil
+        self.load_source(self.subcoil)  # link source to coilframe
+        self.load_target(self.subcoil)  # link target to coilframe
+        '''
+        
 
-class Grid(BiotSavart):
+class Grid(BiotSavart, BiotAttributes):
     ''' 
     grid interaction methods and data
     
@@ -26,15 +44,26 @@ class Grid(BiotSavart):
         Bz (np.array): vertical field
     '''
     
-    _grid_attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'expand',
-                        'nlevels', 'levels', 'x2d', 'z2d']
+    _attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'expand',
+                   'nlevels', 'levels', 'x2d', 'z2d']
+    
+    _default_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31}
+    
     
     def __init__(self, coilframe=None, **grid_attributes):
-        self._initialize_grid()
+        BiotSavart.__init__(self)
+        BiotAttributes.__init__(self, **grid_attributes)
+
+        print('grid', self.mutual_offset)
+
+        '''
+        BiotSavart.__init__(self, **grid_attributes)  # inherit biot-savart
         self.grid_attributes = grid_attributes
         self.coilframe = coilframe  # link to coilset
         self.load_source(self.coilframe['subcoil'])  # link to coilframe
+        '''
                 
+    '''
     def _initialize_grid(self):
         self._grid_attributes += self._biot_attributes
         self._grid_attributes += self._coilmatrix_attributes
@@ -53,7 +82,20 @@ class Grid(BiotSavart):
             value = grid_attributes.get(attribute, None)
             if value is not None:
                 setattr(self, attribute, value)
-        BiotSavart.__init__(self, **grid_attributes)  # inherit biot-savart
+    '''
+        
+    def _generate_grid(self, **grid_attributes):
+        self.grid_attributes = grid_attributes
+        if self.n > 0:
+            mg = MeshGrid(self.n, self._limit)  # set mesh
+            self.n2d = [mg.nx, mg.nz]
+            self.x, self.z = mg.x, mg.z
+            self.dx = np.diff(self._limit[:2])[0] / (mg.nx - 1)
+            self.dz = np.diff(self._limit[2:])[0] / (mg.nz - 1)
+            self.x2d = mg.x2d
+            self.z2d = mg.z2d
+            self.load_target(x=self.x2d, z=self.z2d)
+            self.solve_interaction()
 
     def generate_grid(self, **kwargs):
         '''
@@ -104,18 +146,6 @@ class Grid(BiotSavart):
             return self.limit
         else:
             return self.coilset_limit
-
-    def _generate_grid(self, **grid_attributes):
-        self.grid_attributes = grid_attributes
-        if self.n > 0:
-            mg = MeshGrid(self.n, self._limit)  # set mesh
-            self.n2d = [mg.nx, mg.nz]
-            self.dx = np.diff(self._limit[:2])[0] / (mg.nx - 1)
-            self.dz = np.diff(self._limit[2:])[0] / (mg.nz - 1)
-            self.x2d = mg.x2d
-            self.z2d = mg.z2d
-            self.load_target(x=self.x2d, z=self.z2d)
-            self.solve_interaction()
             
     def plot_grid(self, ax=None, **kwargs):
         self.generate_grid(**kwargs)
@@ -131,14 +161,12 @@ class Grid(BiotSavart):
             else:
                 levels = self.levels
             QuadContourSet = plt.contour(
-                    self.x2d, self.z2d, self.Psi.reshape(*self.n2d),
+                    self.x2d, self.z2d, self.Psi,
                     levels, colors='lightgrey', linestyles='-', 
                     linewidths=1.0,
                     alpha=0.9, zorder=4)  # default zorder = 2
             self.levels = QuadContourSet.levels
             plt.axis('equal')
-            #plt.quiver(self.grid['x2d'], self.grid['z2d'], 
-            #           self.grid['Bx'], self.grid['Bz'])
     
 class Interaction:
     

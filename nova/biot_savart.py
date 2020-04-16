@@ -18,19 +18,31 @@ class BiotFrame:
         
     def load_data(self, **kwargs):
         self._emulate_nC(**kwargs)
+        self._emulate_plasma()
         self._setattr(**kwargs)
         self._emulate_coil_index()
         self._check_attribute_length()
         
     def _emulate_nC(self, **kwargs):
         'emulate CoilFrame.nC: calculate maximum element number in kwars' 
-        self.nC = np.max([np.size(kwargs[key]) 
-                         for key in kwargs if is_list_like(kwargs[key])])
+        n2d = [np.shape(kwargs[key]) 
+               for key in kwargs if is_list_like(kwargs[key])]
+        nC = [np.prod(n) for n in n2d]
+        arg_nC = np.argmax(nC)
+        self.nC = nC[arg_nC]  # filament number
+        self._nC = self.nC  # collapsed filament number
+        self.n2d = n2d[arg_nC]  # 2d shape  
+        
+    def _emulate_plasma(self):
+        self._plasma_index = np.zeros(self.nC, dtype=bool)
+        self.Np = np.array([]) # plasma filament turn number
+        self.nP = 0  # number of plasma filaments
+        
     
     def _emulate_coil_index(self):
-        'emulate CoilFrame._coil_index'
-        if not hasattr(self, '_coil_index'):
-            self._coil_index = np.arange(self.nC)
+        'emulate CoilFrame._reduction_index'
+        if not hasattr(self, '_reduction_index'):
+            self._reduction_index = np.arange(self._nC)
     
     def _setattr(self, **kwargs):
         'set data attributes'
@@ -42,7 +54,7 @@ class BiotFrame:
             else:
                 raise KeyError(f'required attribute {key} not found')
             if not is_list_like(value):
-                value = np.array([value for __ in range(self.nC)])
+                value = [value]
             value = np.array(value).flatten()  # ensure 1D input
             if len(value) == 1:
                 value = np.array([value[0] for __ in range(self.nC)])
@@ -56,18 +68,51 @@ class BiotFrame:
             err = Series(nC, index=self._frame_attributes, name='nC')
             raise IndexError(f'miss-matched data input: \n{err}')
 
+
+class BiotAttributes:
+    
+    'manage attributes to and from Biot derived classes'
+    _attributes = []
+    _default_attributes = {}
+    
+    def __init__(self, **attributes):
+        self._attributes += self._biot_attributes
+        self._attributes += self._coilmatrix_attributes
+        self._default_attributes = {**self._default_attributes, 
+                                    **self._biot_attributes}
+        self.attributes = attributes
+    
+    @property
+    def attributes(self):
+        return {attribute: getattr(self, attribute) for attribute in 
+                self._attributes}
+        
+    @attributes.setter
+    def attributes(self, _attributes):
+        for attribute in self._attributes:
+            default = self._default_attributes.get(attribute, None)
+            value = _attributes.get(attribute, None)
+            if value is not None:
+                setattr(self, attribute, value)  # set value 
+            elif not hasattr(self, attribute):
+                setattr(self, attribute, default)  # set default
+                
         
 class BiotSavart(CoilMatrix):
 
     mu_o = 4 * np.pi * 1e-7  # magnetic constant [Vs/Am]
     
-    _biot_attributes = {'mutual': True}  # include mutual inductance offset
+    _biot_attributes = {'mutual_offset': True}  # include mutual inductance offset
 
-    def __init__(self, **biot_attributes):
-        self._initialize_biot_attributes()  # initialize unset biot attributes
-        self.biot_attributes = biot_attributes
+    def __init__(self):
+        CoilMatrix.__init__(self)
+
+        #self._initialize_biot_attributes()  # initialize unset biot attributes
+        #self.biot_attributes = biot_attributes
+
         self.gmr = geometric_mean_radius()  # mutual gmr factors
         
+    '''
     def _initialize_biot_attributes(self):
         for attribute in self._biot_attributes:
             if not hasattr(self, attribute):
@@ -89,8 +134,8 @@ class BiotSavart(CoilMatrix):
             if value is not None:
                 setattr(self, attribute, value)
         CoilMatrix.__init__(self, **biot_attributes)  # initalize biot-savart 
-
-        
+    '''
+    
     def _load_frame(self, *args, **kwargs):
         nargs = len(args)
         if nargs == 0:  # key-word input
@@ -109,6 +154,10 @@ class BiotSavart(CoilMatrix):
         
     def load_target(self, *args, **kwargs):
         self.target = self._load_frame(*args, **kwargs)
+        if isinstance(self.target, BiotFrame):
+            self.n2d = self.target.n2d  # target shape
+        else:
+            self.n2d = self.target.nC
 
     def _extract_data(self, frame):
         data = {}
@@ -137,8 +186,31 @@ class BiotSavart(CoilMatrix):
     def assemble(self):
         self.assemble_source()
         self.assemble_target()
+        self.assemble_plasma()
         self.offset()  # transform turn-trun offset to geometric mean
-            
+        
+    '''
+    @staticmethod
+    def _extract_plasma(frame):
+        turn_index = np.append(frame._reduction_index, frame.nC)
+        coil_index = np.arange(frame._nC)[
+                        frame._plasma_index[frame._reduction_index]]
+        turn_number = turn_index[coil_index + 1] - turn_index[coil_index]
+        plasma_index = np.append(0, np.cumsum(turn_number)[:-1])
+        return coil_index, plasma_index
+    '''
+    
+    def assemble_plasma(self):
+        '''
+        self._reduction_index = {}
+        self._plasma_index = {}
+        for frame in ['source', 'target']:
+            self._reduction_index[frame], self._plasma_index[frame] = \
+                self._extract_plasma(getattr(self, frame))
+        '''
+        self.Np = np.dot(np.ones((self.target._nC, 1)), 
+                         self.source.Np.reshape(1, -1))
+        
     def offset(self):
         'transform turn-trun offset to geometric mean'
         self.dL = np.array([self.target_m['x'] - self.source_m['x'],
@@ -154,7 +226,7 @@ class BiotSavart(CoilMatrix):
         dr = (self.source_m['dx'] + self.source_m['dz']) / 4  # mean radius
         idx = self.dL_mag < dr  # seperation < mean radius
         # mutual inductance offset
-        if self.mutual:  # mutual inductance offset
+        if self.mutual_offset:  # mutual inductance offset
             nx = abs(self.dL_mag / self.source_m['dx'])
             nz = abs(self.dL_mag / self.source_m['dz'])
             mutual_factor = self.gmr.evaluate(nx, nz)
@@ -195,15 +267,13 @@ class BiotSavart(CoilMatrix):
         m = 4 * xt * xs / ((xt + xs)**2 + (zt - zs)**2)
         flux = np.array((xt * xs)**0.5 * ((2 * m**-0.5 - m**0.5) *
                         ellipk(m) - 2 * m**-0.5 * ellipe(m)))
-        flux *= self.mu_o  # Wb / Amp-turn-turn
-        # flux *= Nt * Nc  # turn-turn interaction, line-current
-        return flux
-
+        flux *= self.mu_o  # unit filaments, Wb/Amp-turn-turn
+        self._flux, self._flux_, self.flux = self.save_matrix(flux)
+        
     def field_matrix(self):
         '''
         calculate subcoil field matrix
         '''
-        field = np.zeros((2, self.nT, self.nS))
         xt, zt, xs, zs, = self.locate()
         a = np.sqrt((xt + xs)**2 + (zt - zs)**2)
         m = 4 * xt * xs / a**2
@@ -211,34 +281,66 @@ class BiotSavart(CoilMatrix):
         I2 = 4 / a**3 * ellipe(m) / (1 - m)
         A = (zt - zs)**2 + xt**2 + xs**2
         B = -2 * xt * xs
-        # xs / (2 * np.pi)
-        field[0] = xs / 2 * (zt - zs) / B * (I1 - A * I2)
-        field[1] = xs / 2 * ((xs + xt * A / B) * I2 - xt / B * I1)
-        field *= self.mu_o  # T / Amp-turn-turn
-        return field
+        field = {}
+        field['x'] = xs / 2 * (zt - zs) / B * (I1 - A * I2)
+        field['z'] = xs / 2 * ((xs + xt * A / B) * I2 - xt / B * I1)
+        for xz in field:
+            self._field[xz], self._field_[xz], self.field[xz] = \
+                self.save_matrix(self.mu_o * field[xz])  # T / Amp-turn-turn
     
-    def _reduce(self, matrix):
-        matrix *= self.source_m['Nt'] * self.target_m['Nt']  # line-current
-        #if len(self.target._coil_index) < self.nT:
-        #    matrix = np.add.reduceat(matrix, self.target._coil_index, axis=0)
-        if len(self.source._coil_index) < self.nS:
-            matrix = np.add.reduceat(matrix, self.source._coil_index, axis=1)
-        return matrix
-    
-    def reduce(self):
-        self.flux = self._reduce(self._flux)
-        for i in range(2):
-            self.field[i] = self._reduce(self._field[i])
+    def save_matrix(self, M):
+        # extract plasma unit filaments
+        _M = M[:, self.source._plasma_index]  # plasma source unit filaments
+        _M_ = _M[self.target._plasma_index]  # plasma mutual unit filaments
+        # reduce
+        M *= self.source_m['Nt'] * self.target_m['Nt']  # line-current
+        if len(self.target._reduction_index) < self.nT:  # sum sub-target
+            M = np.add.reduceat(M, self.target._reduction_index, axis=0)
+        if len(self.source._reduction_index) < self.nS:  # sum sub-source
+            M = np.add.reduceat(M, self.source._reduction_index, axis=1)
+        return _M, _M_, M  # source unit, mutual unit, turn-turn interaction
 
     def solve_interaction(self):
-        self.assemble()
-        self._flux = self.flux_matrix()
-        self._field = self.field_matrix()
-        self.reduce()
+        self.assemble()  # assemble geometory matrices
+        self.flux_matrix()  # assemble flux interaction matrix
+
+        #self._update_plasma('flux')
+        
+        #_field = self.field_matrix()
+        #self.field[xz] = self.reduce(_field[xz])
+        
+    def _update_plasma(self, attribute):
+        'update plasma turns'
+        matrix = getattr(self, attribute)
+        _matrix = getattr(self, f'_{attribute}')  # filaments
+        if self.source.nP > 0:
+            plasma = np.add.reduceat(
+                    _matrix * self.source.Np,
+                    self.source._plasma_reduction_index, axis=1)
+            matrix[:, self.source._plasma_iloc] = plasma[self.target.nP:, :]
+            if self.target.nP > 0:  # mutual
+                if self.target.nP != self.source.nP:
+                    raise IndexError('plasma source-target miss-match')
+                matrix[self.target._plasma_iloc, :] = \
+                    plasma[self.target.nP:, :].T
+                    
+                '''
+                _mutual = _matrix[:self.target.nP, :]
+                mutual = np.add.reduceat(_mutual * self.source.Np,
+                                         self._plasma_index['source'], axis=1)
+                mutual = np.add.reduceat(mutual.T * self.target.Np,
+                                         self._plasma_index['target'], axis=1)
+                matrix[self._reduction_index['target']][:, 
+                       self._reduction_index['source']] = mutual.T
+                '''
+       
         
     @property
     def Psi(self):
-        return np.dot(self.flux, self.source._Ic)
+        if self.source._update_biotsavart:
+            self._Psi = np.dot(self.flux, self.source._Ic).reshape(self.n2d)
+            self.source._update_biotsavart = False
+        return self._Psi
         
     #def update_interaction(self):
   

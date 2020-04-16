@@ -12,30 +12,31 @@ class CoilMatrix:
         field[*] = reduce([Nt][Nc]*[_field])
         
     Attributes:
-        _flux (np.array): unit filaments
+        _flux (np.array): plasma source unit filaments [:, nP]
+        _flux_ (np.array): plasma mutual unit filaments [nP, nP]
         flux (np.array): coil colocation flux matrix 
-        field (2D np.array): coil colocation field matrices
-            _field[*] (np.array): unit filaments
+        field (dict): coil colocation field matrices
+            _field[*] (np.array): plasma unit filaments
             field['x'] (np.array): radial field
             field['z'] (np.array): vertical field 
     '''
     
     # main class attribures
-    _coilmatrix_attributes = ['_flux', 'flux', '_field', 'field']
+    _coilmatrix_attributes = ['_flux', '_flux_', 'flux', 
+                              '_field', '_field_', 'field']
 
-    def __init__(self, **coilmatrix_attributes):
+    def __init__(self):
         self._initialilze_coilmatrix_attributes()
-        self.coilmatrix = coilmatrix_attributes  # exchange attributes
+        #self.coilmatrix = coilmatrix_attributes  # exchange attributes
              
     def _initialilze_coilmatrix_attributes(self):
         for attribute in self._coilmatrix_attributes:  
-            setattr(self, f'{attribute}', None)  # unlink from DataFrame
             if 'flux' in attribute:
                 setattr(self, f'{attribute}', np.array([]))
             else:
                 setattr(self, f'{attribute}', 
                         {var: np.array([]) for var in ['x', 'z']})
-            
+    '''
     @property
     def coilmatrix(self):
         'extract coilmatrix attributes'
@@ -49,6 +50,7 @@ class CoilMatrix:
             value = coilmatrix_attributes.get(attribute, None)
             if value is not None:
                 setattr(self, attribute, value)
+    '''
     
     
 if __name__ == '__main__':

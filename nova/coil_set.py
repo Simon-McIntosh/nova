@@ -1,5 +1,5 @@
 from nova.coil_frame import CoilFrame
-from nova.simulation_data import Grid
+from nova.simulation_data import Mutual, Grid
 from pandas import Series, DataFrame, concat, isnull
 from pandas.api.types import is_list_like
 import numpy as np
@@ -31,18 +31,19 @@ class CoilSet():
                            'coilset_frames', 
                            'coilset_metadata']
     
-    # exchange coilset instance
-    _coilset_instances = {'grid': ['grid_attributes']}
+    # exchange instance attributes
+    _coilset_instance_attributes = {'grid': ['attributes']}
 
     # main class attribures
     _coilset_frames = ['coil', 'subcoil']
 
     # additional_columns
-    _coil_columns = ['dCoil', 'Nf', 'Nt', 'It', 'Ic', 'mpc', 'power', 'plasma', 
+    _coil_columns = ['alpha', 'dCoil', 'Nf', 'Nt', 'It', 'Ic', 'mpc',
+                     'power', 'plasma', 
                      'subindex', 'cross_section', 'turn_section', 
                      'turn_fraction', 'patch', 'polygon', 'part']
     
-    _subcoil_columns = ['dl_x', 'dl_z', 'mpc', 'power', 'plasma', 
+    _subcoil_columns = ['alpha', 'dl_x', 'dl_z', 'mpc', 'power', 'plasma', 
                         'coil', 'Nt', 'It', 'Ic', 'cross_section', 'patch',
                         'polygon', 'part']
 
@@ -52,12 +53,13 @@ class CoilSet():
         self.coilset_frames = kwargs.get('coilset_frames', {})
         self.coilset_metadata = kwargs.get('coilset_metadata', {}) 
         self.grid = Grid(self.coilset_frames, 
-                         **kwargs.get('grid.grid_attributes', {}))        
+                         **{**kwargs.get('grid_attributes', {}),
+                         'mutual_offset': True})   
+        
+        self.mutual = Mutual(self.subcoil)
+        
         self.append_coilset(*args)  # append list of coilset instances
         self.current_update = current_update
-
-
-        
         
     def initialize_default_attributes(self, **default_attributes):
         self._default_attributes = {'dCoil': -1, 
@@ -94,7 +96,6 @@ class CoilSet():
         for frame in self._coilset_frames:
             coilframe = coilset_frames.get(frame, DataFrame())
             if not coilframe.empty:
-                print('adding', frame)
                 getattr(self, frame).add_coil(coilframe)  # append coilframe
             
     @property
@@ -118,8 +119,8 @@ class CoilSet():
         subcoil_metadata = {'_additional_columns': self._subcoil_columns}
         self.coil = CoilFrame(coilframe_metadata=coil_metadata)
         self.subcoil = CoilFrame(coilframe_metadata=subcoil_metadata)
-        self.coil.update_coildata()
-        self.subcoil.update_coildata()
+        self.coil.rebuild_coildata()
+        self.subcoil.rebuild_coildata()
 
     def update_coilframe_metadata(self, coilframe, **coilframe_metadata):
         'update coilset metadata coilframe in [coil, subcoil]'
@@ -130,9 +131,9 @@ class CoilSet():
         coilset_attributes = {attribute: getattr(self, attribute)
                               for attribute in self._coilset_attributes}
         instance_attributes = {}
-        for instance in self._coilset_instances:
-            for attribute in self._coilset_instances[instance]:
-                instance_attribute = '.'.join([instance, attribute])
+        for instance in self._coilset_instance_attributes:
+            for attribute in self._coilset_instance_attributes[instance]:
+                instance_attribute = '_'.join([instance, attribute])
                 instance_attributes[instance_attribute] = \
                     getattr(getattr(self, instance), attribute)
         return {**coilset_attributes, **instance_attributes}
@@ -140,11 +141,10 @@ class CoilSet():
     @coilset.setter
     def coilset(self, coilset):
         for attribute in self._coilset_attributes:
-            print(attribute)
             setattr(self, attribute, coilset.get(attribute, {}))
-        for instance in self._coilset_instances:
-            for attribute in self._coilset_instances[instance]:
-                instance_attribute = '.'.join([instance, attribute])
+        for instance in self._coilset_instance_attributes:
+            for attribute in self._coilset_instance_attributes[instance]:
+                instance_attribute = '_'.join([instance, attribute])
                 setattr(getattr(self, instance), attribute,
                         coilset.get(instance_attribute, {}))
 
@@ -246,13 +246,23 @@ class CoilSet():
     def Ip(self, Ip):
         self.coil.Ip = Ip   
         self.subcoil.Ip = Ip  
+        
+    @property
+    def Np(self):
+        return self.subcoil.Np
+    
+    @Np.setter
+    def Np(self, Np):  # set plasma fillament number
+        self.subcoil.Np = Np
+        self.coil.Np = 1
 
     def add_coil(self, *args, iloc=None, subcoil=True, **kwargs):
         index = self.coil.add_coil(*args, iloc=iloc, **kwargs)
         if subcoil:
             self.add_subcoil(index=index)
 
-    def add_subcoil(self, index=None, remesh=False, mpc=True, **kwargs):
+    def add_subcoil(self, index=None, remesh=False, mpc=True,
+                    **kwargs):
         if index is None:  # re-mesh all coils
             remesh = True
             index = self.coil.index
@@ -334,6 +344,7 @@ class CoilSet():
             kwargs['part'] = self.coil.at[name, 'part']
         mesh = {'x': xm_, 'z': zm_,
                 'dx': turn_fraction*dx_, 'dz': turn_fraction*dz_}
+        mesh['alpha'] = self.coil.loc[name].get('alpha', 0)
         args = []
         for var in mesh:
             if var in self.subcoil._required_columns:
@@ -343,7 +354,7 @@ class CoilSet():
         subcoil = self.subcoil.get_coil(*args, name=name, coil=name, **kwargs)
         self.coil.at[name, 'subindex'] = list(subcoil.index)
         subcoil.loc[:, 'Nt'] = self.coil.at[name, 'Nt'] / Nf
-        subcoil.update_coildata()
+        subcoil.rebuild_coildata()
         return subcoil
 
     def get_iloc(self, index):
@@ -420,7 +431,7 @@ class CoilSet():
             #     self.inductance('Plasma', update=True)  # re-size plasma coil
             #self.Ic = Series({'Plasma': Ip_net})  # update net current
 
-    def cluster(self, n, eps=0.2):
+    def cluster(self, n, eps=0.2, merge_pairs=True):
         '''
         cluster coils using DBSCAN algorithm
         '''
@@ -438,9 +449,9 @@ class CoilSet():
                         if i*n != len(index):
                             merge_index.append(index[i*n:(i+1)*n])
         for index in merge_index:
-            self.merge(index)
+            self.merge(index, merge_pairs=merge_pairs)
 
-    def merge(self, coil_index, name=None):
+    def merge(self, coil_index, name=None, merge_pairs=True):
         subset = self.subset(coil_index)
         x = gmd(subset.coil.x, subset.coil.Nt)
         z = amd(subset.coil.z, subset.coil.Nt)
@@ -454,14 +465,20 @@ class CoilSet():
         referance_coil = subset.coil.loc[coil_index[0], :]
         kwargs = {'name': name}
         for key in subset.coil.columns:
-            #if key in ['cross_section', 'part', 'material', 'turn_fraction']:
-            #    # take referance
-            #    kwargs[key] = referance_coil[key]
             if key in ['Nf', 'Nt', 'm', 'R']:
                 kwargs[key] = subset.coil.loc[:, key].sum()
             elif key == 'polygon':
                 polys = [p for p in subset.coil.loc[:, 'polygon'].values]
                 if not isnull(polys).any():
+                    if merge_pairs:
+                        poly_pairs = []
+                        for p0, p1 in zip(polys[::2], polys[1::2]):
+                            poly_pairs.append(
+                                    shapely.geometry.MultiPolygon(
+                                    [p0, p1]).minimum_rotated_rectangle)
+                        if len(polys) % 2 == 1:  # append last
+                            poly_pairs.append(polys[-1])
+                        polys = poly_pairs
                     polygon = shapely.geometry.MultiPolygon(polys)
             elif key not in self.coil._required_columns:  
                 # take referance
@@ -474,12 +491,12 @@ class CoilSet():
         self.drop_coil(coil_index)
         # add merged coil
         self.add_coil(x, z, dx, dz, subcoil=False, iloc=coil_iloc, **kwargs)
+        # insert multi-polygon
+        self.coil.at[name, 'polygon'] = polygon
         # on-demand patch of top level (coil)
         if isnull(subset.coil.loc[:, 'patch']).any():
             CoilSet.patch_coil(subset.coil)  # patch on-demand
-        self.coil.at[name, 'patch'] = list(subset.coil.patch)
-        # insert multi-polygon
-        self.coil.at[name, 'polygon'] = polygon
+        #self.coil.at[name, 'patch'] = list(subset.coil.patch)
         # add subcoils
         subindex = self.subcoil.add_coil(subset.subcoil, iloc=subcoil_iloc,
                                          mpc=True)
@@ -493,7 +510,7 @@ class CoilSet():
         for name in index:  # link subcoil
             self.subcoil.loc[self.coil.at[index[name], 'subindex'], 'coil'] = \
                 index[name]
-        self.subcoil.update_coildata()  # rebuild coildata
+        self.subcoil.rebuild_coildata()  # rebuild coildata
 
     @staticmethod
     def patch_coil(coil, overwrite=False, **kwargs):
@@ -514,7 +531,7 @@ class CoilSet():
                 patch[i] = [current_patch]
             for j in range(len(patch[i])):
                 patch[i][j].set_edgecolor('darkgrey')
-                patch[i][j].set_linewidth(0.75)
+                patch[i][j].set_linewidth(0.15)
                 patch[i][j].set_antialiased(True)
                 patch[i][j].set_facecolor(color.get(color_key, 'C9'))
                 patch[i][j].set_zorder = zorder.get(color_key, 0)
@@ -609,19 +626,29 @@ if __name__ == '__main__':
     cs = CoilSet(dCoil=3, current_update='full', turn_fraction=0.5,
                  cross_section='circle', mutual=True)
     
-    cs.coil._flux = [2, 4, 5]
+    #cs.coil._flux = [2, 4, 5]
 
     cs.coilset_metadata = {'_default_attributes': {'dCoil': -1}}
     cs.coil.coilframe_metadata = {'_default_attributes': {'dPlasma': 0.333}}
     cs.update_coilframe_metadata('coil', additional_columns=['R'])
     
-    cs.add_coil(6, -3, 1.5, 1.5, name='PF6', part='PF', Nt=600, It=5e5,
-                turn_section='circle', turn_fraction=0.7, dCoil=0.75)   
+
+    cs.add_coil(6, -3, 1.5, 1.5, name='PF6', part='PF', Nt=6000, It=5e5,
+                turn_section='circle', turn_fraction=0.7, dCoil=0.25)   
     
     cs.add_coil(7, -0.5, 2.5, 2.5, name='PF8', part='PF', Nt=500, Ic=2e3,
                 cross_section='square', turn_section='square', dCoil=0.5)
     
     cs.add_mpc(['PF6', 'PF8'])
+
+    
+    cs.add_coil(6, -3, 1.5, 1.5, name='PF12', part='PF', Nt=600, It=5e5,
+                turn_section='circle', turn_fraction=0.7, dCoil=0.75,
+                plasma=True) 
+    
+    cs.add_coil(6, -3, 1.5, 1.5, name='PF13', part='PF', Nt=60, It=5e5,
+                turn_section='circle', turn_fraction=0.7, dCoil=0.75,
+                plasma=True) 
     
     
     '''
@@ -667,23 +694,28 @@ if __name__ == '__main__':
     '''
     cs.plot(label=True)
     cs.grid.generate_grid()
-    #cs.grid.plot_grid()
-    cs.grid.solve_interaction()
+    cs.grid.plot_grid()
     cs.grid.plot_flux()
     
     _cs = CoilSet()
-    _cs.append_coilset(cs.coilset)
+    #_cs.append_coilset(cs.coilset)
     
+
     import pickle
     cs_p = pickle.dumps(cs.coilset)
     __cs = pickle.loads(cs_p)
     _cs.append_coilset(__cs)
+    
+    
+    plt.figure()
+    _cs.plot(label=True)
+    _cs.grid.generate_grid(n=500)
+    _cs.grid.plot_grid()
+    #cs.grid.solve_interaction()
+    _cs.grid.plot_flux()
     '''
-    
-    
-    
 
-
+    
 
 
 

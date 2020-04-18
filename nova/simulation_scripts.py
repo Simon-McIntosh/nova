@@ -11,17 +11,10 @@ class Mutual(BiotSavart, BiotAttributes):
     _attributes = []
     
     def __init__(self, subcoil, **mutual_attributes):
-        BiotAttributes.__init__(self, **mutual_attributes)
-        
-        print('mutual', self._attributes)
-        
-        #self.attributes = mutual_attributes
-        '''
         BiotSavart.__init__(self)
-        self.subcoil = subcoil
-        self.load_source(self.subcoil)  # link source to coilframe
-        self.load_target(self.subcoil)  # link target to coilframe
-        '''
+        BiotAttributes.__init__(self, **mutual_attributes)
+        self.load_source(subcoil)  # link source
+        self.load_target(subcoil)  # link target
         
 
 class Grid(BiotSavart, BiotAttributes):
@@ -50,42 +43,17 @@ class Grid(BiotSavart, BiotAttributes):
     _default_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31}
     
     
-    def __init__(self, coilframe=None, **grid_attributes):
+    def __init__(self, subcoil, **grid_attributes):
         BiotSavart.__init__(self)
         BiotAttributes.__init__(self, **grid_attributes)
-
-        print('grid', self.mutual_offset)
-
-        '''
-        BiotSavart.__init__(self, **grid_attributes)  # inherit biot-savart
-        self.grid_attributes = grid_attributes
-        self.coilframe = coilframe  # link to coilset
-        self.load_source(self.coilframe['subcoil'])  # link to coilframe
-        '''
-                
-    '''
-    def _initialize_grid(self):
-        self._grid_attributes += self._biot_attributes
-        self._grid_attributes += self._coilmatrix_attributes
-        for attribute in self._grid_attributes:
-            setattr(self, attribute, None)
-        self.grid_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31}
-
-    @property
-    def grid_attributes(self):
-        return {attribute: getattr(self, attribute) for attribute in 
-                self._grid_attributes}
+        self.load_source(subcoil)  # link source
         
-    @grid_attributes.setter
-    def grid_attributes(self, grid_attributes):
-        for attribute in self._grid_attributes:
-            value = grid_attributes.get(attribute, None)
-            if value is not None:
-                setattr(self, attribute, value)
-    '''
+    def solve_interaction(self):
+        self.load_target(x=self.x2d, z=self.z2d)
+        BiotSavart.solve_interaction(self)        
         
     def _generate_grid(self, **grid_attributes):
-        self.grid_attributes = grid_attributes
+        self.attributes = grid_attributes  # update attributes
         if self.n > 0:
             mg = MeshGrid(self.n, self._limit)  # set mesh
             self.n2d = [mg.nx, mg.nz]
@@ -94,9 +62,8 @@ class Grid(BiotSavart, BiotAttributes):
             self.dz = np.diff(self._limit[2:])[0] / (mg.nz - 1)
             self.x2d = mg.x2d
             self.z2d = mg.z2d
-            self.load_target(x=self.x2d, z=self.z2d)
             self.solve_interaction()
-
+    
     def generate_grid(self, **kwargs):
         '''
         compare kwargs to current grid settings, update grid on-demand
@@ -124,20 +91,20 @@ class Grid(BiotSavart, BiotAttributes):
             self._generate_grid(**grid_attributes)
         return regenerate_grid
 
-    def _get_coil_limit(self, expand):
+    def _get_coil_limit(self, expand, xmin=1e-3):
         if expand is None:
             expand = self.expand  # use default
-        if self.coilframe is None:
-            raise IndexError('coilframe not found')
-        coil = self.coilframe['coil']
-        if coil.empty:
-            raise IndexError('coilset empty')
-        x, z, dx, dz = coil.x, coil.z, coil.dx, coil.dz
+        if self.source.empty:
+            raise IndexError('source coilframe empty')
+        x, z, = self.source.x, self.source.z
+        dx, dz = self.source.dx, self.source.dz
         limit = np.array([(x - dx/2).min(), (x + dx/2).max(),
                           (z - dz/2).min(), (z + dz/2).max()])
         dx, dz = np.diff(limit[:2])[0], np.diff(limit[2:])[0]
         delta = np.mean([dx, dz])
         limit += expand * delta * np.array([-1, 1, -1, 1])
+        if limit[0] < xmin:
+            limit[0] = xmin
         return limit
     
     @property
@@ -165,7 +132,8 @@ class Grid(BiotSavart, BiotAttributes):
                     levels, colors='lightgrey', linestyles='-', 
                     linewidths=1.0,
                     alpha=0.9, zorder=4)  # default zorder = 2
-            self.levels = QuadContourSet.levels
+            if self.levels is None:
+                self.levels = QuadContourSet.levels
             plt.axis('equal')
     
 class Interaction:

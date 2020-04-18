@@ -57,12 +57,12 @@ class CoilFrame(DataFrame, CoilData):
              'material': '', 'turn_fraction': 1, 'patch': None,
              'cross_section': 'square', 'turn_section': 'square',
              'coil': '', 'part': '', 'subindex': None, 'dCoil': 0,
-             'dl_x': 0, 'dl_z': 0, 'mpc': '', 'polygon': None,
-             'power': True, 'plasma': False, 'alpha': 0}
+             'dl_x': 0, 'dl_z': 0, 'dA': 0, 'mpc': '', 'polygon': None,
+             'power': True, 'plasma': False, 'rho': 0}
             
     def _initialize_data_attributes(self):
         'convert list attributes to dict'
-        for attributes in ['_coildata_attributes']: #, '_coilmatrix_attributes']:
+        for attributes in ['_coildata_attributes']:
             if not is_dict_like(getattr(self, attributes)):
                 setattr(self, attributes, {
                         attribute: None 
@@ -82,8 +82,7 @@ class CoilFrame(DataFrame, CoilData):
                         if v not in getattr(self, key):
                             getattr(self, key).append(v)
                 elif key in ['_default_attributes', 
-                             '_coildata_attributes',
-                             '_coilmatrix_attributes']:
+                             '_coildata_attributes']:
                     for k in value:  # set/overwrite dict
                         getattr(self, key)[k] = value[k]
                 else:  # overwrite
@@ -135,7 +134,7 @@ class CoilFrame(DataFrame, CoilData):
         index = self._extract_index(data, delim, label, name)
         coil = CoilFrame(data, index=index, columns=data.keys(),
                          coilframe_metadata=self.coilframe_metadata)
-        coil = self._insert_polygon(coil)
+        self._insert_polygon(coil)
         if mpc and coil.nC > 1:
             coil.add_mpc(coil.index.to_list())
         coil.rebuild_coildata()  # rebuild fast index
@@ -229,7 +228,7 @@ class CoilFrame(DataFrame, CoilData):
                 additional_columns.append(key)
                 data[key] = kwargs.pop(key)
         self._update_coilframe_metadata(additional_columns=additional_columns)
-        data = self._propogate_current(current_label, data)
+        self._propogate_current(current_label, data)
         if len(kwargs.keys()) > 0:
             warn(f'\n\nunset kwargs: {list(kwargs.keys())}'
                  '\nto use include within additional_columns:\n'
@@ -251,7 +250,6 @@ class CoilFrame(DataFrame, CoilData):
             data['It'] = data['Ic'] * data['Nt']
         elif current_label == 'It':
             data['Ic'] = data['It'] / data['Nt']
-        return data
 
     def _extract_index(self, data, delim, label, name):
         try:
@@ -268,7 +266,7 @@ class CoilFrame(DataFrame, CoilData):
             if nCol == 1:
                 index = [name]
             else:
-                index = [f'{label}{delim}{i}' for i in range(nCol)]
+                index = [f'{label}{delim}{i:d}' for i in range(nCol)]
         self._check_index(index)
         return index
 
@@ -286,18 +284,15 @@ class CoilFrame(DataFrame, CoilData):
                     z = coil.at[name, 'z']
                     dx = coil.at[name, 'dx']
                     dz = coil.at[name, 'dz']
-                    alpha = coil.loc[name].get('alpha', 0)
                     cross_section = coil.at[name, 'cross_section']
                     if (np.array([x, dx, dz]) != 0).all():
                         polygen = self._get_polygen(cross_section)
                         polygon = polygen(x, z, dx, dz)
-                        if alpha != 0:
-                            polygon = shapely.affinity.rotate(
-                                    polygon, alpha, use_radians=True)
                     else:
                         polygon = None
                     coil.at[name, 'polygon'] = polygon
-        return coil
+                coil.at[name, 'dA'] = coil.at[name, 'polygon'].area  # update
+        #return coil
 
     def _get_polygen(self, cross_section):
         if cross_section == 'circle':

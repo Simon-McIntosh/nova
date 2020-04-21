@@ -10,7 +10,7 @@ from pandas import Series
 class BiotFrame:
     
     _frame_attributes = ['x', 'z', 'dx', 'dz', 'Nt', 'cross_section']
-    _default_attributes = {'dx': 0, 'dz': 0, 'Nt': 1, 
+    _default_frame_attributes = {'dx': 0, 'dz': 0, 'Nt': 1, 
                            'cross_section': 'circle'}
     
     def __init__(self, dx=0, dz=0, cross_section='circle', **kwargs):
@@ -49,8 +49,8 @@ class BiotFrame:
         for key in self._frame_attributes:
             if key in kwargs:
                 value = kwargs[key]
-            elif key in self._default_attributes:
-                value = self._default_attributes[key]
+            elif key in self._default_frame_attributes:
+                value = self._default_frame_attributes[key]
             else:
                 raise KeyError(f'required attribute {key} not found')
             if not is_list_like(value):
@@ -72,26 +72,26 @@ class BiotFrame:
 class BiotAttributes:
     
     'manage attributes to and from Biot derived classes'
-    _attributes = []
-    _default_attributes = {}
+    _biot_attributes = []
+    _default_biot_attributes = {}
     
-    def __init__(self, **attributes):
-        self._attributes += self._biot_attributes
-        self._attributes += self._coilmatrix_attributes
-        self._default_attributes = {**self._default_attributes, 
-                                    **self._biot_attributes}
-        self.attributes = attributes
+    def __init__(self, **biot_attributes):
+        self._biot_attributes += self._biotsavart_attributes
+        self._biot_attributes += self._coilmatrix_attributes
+        self._default_biot_attributes = {**self._default_biot_attributes, 
+                                         **self._biotsavart_attributes}
+        self.biot_attributes = biot_attributes
     
     @property
-    def attributes(self):
+    def biot_attributes(self):
         return {attribute: getattr(self, attribute) for attribute in 
-                self._attributes}
+                self._biot_attributes}
         
-    @attributes.setter
-    def attributes(self, _attributes):
-        for attribute in self._attributes:
-            default = self._default_attributes.get(attribute, None)
-            value = _attributes.get(attribute, None)
+    @biot_attributes.setter
+    def biot_attributes(self, _biot_attributes):
+        for attribute in self._biot_attributes:
+            default = self._default_biot_attributes.get(attribute, None)
+            value = _biot_attributes.get(attribute, None)
             if value is not None:
                 setattr(self, attribute, value)  # set value 
             elif not hasattr(self, attribute):
@@ -102,8 +102,9 @@ class BiotSavart(CoilMatrix):
 
     mu_o = 4 * np.pi * 1e-7  # magnetic constant [Vs/Am]
     
-    _biot_attributes = {'mutual_offset': True}  # include mutual inductance offset
-
+    # include mutual inductance offset
+    _biotsavart_attributes = {'mutual_offset': True}  
+    
     def __init__(self):
         self.gmr = geometric_mean_radius()  # load mutual gmr factors
         CoilMatrix.__init__(self)

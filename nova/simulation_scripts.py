@@ -8,13 +8,13 @@ from nova.biot_savart import BiotSavart, BiotAttributes
 
 class Mutual(BiotSavart, BiotAttributes):
     
-    _attributes = []
+    _biot_attributes = []
     
-    def __init__(self, subcoil, **mutual_attributes):
+    def __init__(self, **mutual_attributes):
         BiotSavart.__init__(self)
         BiotAttributes.__init__(self, **mutual_attributes)
-        self.load_source(subcoil)  # link source
-        self.load_target(subcoil)  # link target
+        self.load_source(self.subcoil)  # link source
+        self.load_target(self.subcoil)  # link target
         
 
 class Grid(BiotSavart, BiotAttributes):
@@ -37,10 +37,10 @@ class Grid(BiotSavart, BiotAttributes):
         Bz (np.array): vertical field
     '''
     
-    _attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'expand',
+    _biot_attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'expand',
                    'nlevels', 'levels', 'x2d', 'z2d']
     
-    _default_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31}
+    _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31}
     
     
     def __init__(self, subcoil, **grid_attributes):
@@ -53,7 +53,7 @@ class Grid(BiotSavart, BiotAttributes):
         BiotSavart.solve_interaction(self)        
         
     def _generate_grid(self, **grid_attributes):
-        self.attributes = grid_attributes  # update attributes
+        self.biot_attributes = grid_attributes  # update attributes
         if self.n > 0:
             mg = MeshGrid(self.n, self._limit)  # set mesh
             self.n2d = [mg.nx, mg.nz]

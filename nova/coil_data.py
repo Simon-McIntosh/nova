@@ -39,7 +39,8 @@ class CoilData():
                              'power', 'plasma', 'Psi', 'Bx', 'Bz',
                              'Fx', 'Fz', 'xFx', 'xFz', 'zFx', 'zFz', 'My']
     
-    _coildata_attributes = {'_current_update': 'full'}
+    _coildata_attributes = {'current_update': 'full',
+                            'biot_update' : ['coilset', 'grid']}
         
     # CoilData indices
     _coildata_indices = ['reduction_index',
@@ -81,7 +82,7 @@ class CoilData():
                          self._mpc_constraints:
             setattr(self, f'_{attribute}', None)
         for attribute in self._coildata_attributes:
-            setattr(self, attribute, None)
+            setattr(self, f'_{attribute}', None)
         self.coildata_attributes = self._coildata_attributes
         
     @property
@@ -97,6 +98,7 @@ class CoilData():
         'set coildata attributes'
         for attribute in self._coildata_attributes:
             value = coildata_attributes.get(attribute, None)
+            print(attribute, value)
             if value is not None:
                 setattr(self, attribute, value)
 
@@ -185,6 +187,10 @@ class CoilData():
    
     @property
     def current_update(self):
+        return self._current_update
+        
+    @property
+    def current(self):
         'display current_update status'
         if self.nC > 0:
             return DataFrame(
@@ -205,7 +211,7 @@ class CoilData():
             flag == 'coil': update all coils
         '''
         self._current_update = flag
-        if self.nC > 0:
+        if self.nC > 0 and self._mpc_iloc is not None:
             if flag == 'full':
                 self._update_index = np.full(self._nC, True)  # full
             elif flag == 'active':
@@ -263,7 +269,7 @@ class CoilData():
                                  'not in [Ic, It]')
          
     @property
-    def _nC(self):  # mpc coil number
+    def _nC(self):  # mpc coil number 
         return len(self._mpc_iloc)
     
     @property

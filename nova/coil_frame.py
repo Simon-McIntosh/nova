@@ -71,11 +71,11 @@ class CoilFrame(DataFrame, CoilData):
     def _update_coilframe_metadata(self, **coilframe_metadata):
         'extract and update coilframe_metadata'
         mode = coilframe_metadata.pop('mode', 'append')  # [overwrite, append]
-        for key in self._metadata:
+        for key in coilframe_metadata:
             if mode == 'overwrite':
                 null = {} if key.split('_')[-1] == 'attributes' else []
                 setattr(self, key, null)
-            value = coilframe_metadata.pop(key, None)
+            value = coilframe_metadata.get(key, None)
             if value is not None:
                 if key == '_additional_columns':
                     for v in value:  # insert additional columns
@@ -85,8 +85,10 @@ class CoilFrame(DataFrame, CoilData):
                              '_coildata_attributes']:
                     for k in value:  # set/overwrite dict
                         getattr(self, key)[k] = value[k]
-                else:  # overwrite
-                    setattr(self, key, value)
+                elif key in self._default_attributes:
+                    self._default_attributes[key] = value
+                elif key in self._coildata_attributes:
+                    self._coildata_attributes[key] = value
 
     @property
     def coilframe_metadata(self):

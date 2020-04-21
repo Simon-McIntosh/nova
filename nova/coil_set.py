@@ -21,9 +21,10 @@ from amigo.geom import length, xzfun
 from scipy.interpolate import interp1d
 import matplotlib.colors as mc
 import colorsys
+from nova.biot_savart import BiotSavart, BiotAttributes
 
 
-class CoilSet(pythonIO):
+class CoilSet(pythonIO, BiotSavart, BiotAttributes):
 
     '''
     CoilSet:
@@ -37,13 +38,14 @@ class CoilSet(pythonIO):
     # exchange coilset attributes
     _coilset_attributes = ['default_attributes', 
                            'coilset_frames', 
-                           'coilset_metadata']
+                           'coilset_metadata',
+                           'biot_attributes']
 
     # main class attribures
     _coilset_frames = ['coil', 'subcoil']
     
-    # exchange simulation instances
-    _simulation_scripts = ['grid', 'mutual']  
+    # exchange biot instances
+    _biot_insatnces = ['grid']#, 'mutual']  
 
     # additional_columns
     _coil_columns = ['dCoil', 'Nf', 'Nt', 'It', 'Ic', 'mpc',
@@ -61,7 +63,8 @@ class CoilSet(pythonIO):
 
     def __init__(self, **coilset):
         self.initialize_coil()  # initalize coil and subcoil
-        self.initialize_simulation_scripts()
+        self.initialize_biot_insatnces()
+        self.initalize_biot()
         self.coilset = coilset  # exchange coilset and instance attributes
 
     def initialize_coil(self):
@@ -72,30 +75,34 @@ class CoilSet(pythonIO):
         self.coil.rebuild_coildata()
         self.subcoil.rebuild_coildata()
         
-    def initialize_simulation_scripts(self):
-        if 'grid' in self._simulation_scripts:
-            self.grid = Grid(self.subcoil)
-        if 'mutual' in self._simulation_scripts:
-            self.mutual = Mutual(self.subcoil)
+    def initalize_biot(self):
+        BiotSavart.__init__(self)
+        BiotAttributes.__init__(self)
+        self.load_source(self.subcoil)  # link source
+        self.load_target(self.subcoil)  # link target
         
+    def initialize_biot_insatnces(self):
+        if 'grid' in self._biot_insatnces:
+            self.grid = Grid(self.subcoil)   
+            
     @property
     def coilset(self):
         coilset_attributes = {attribute: getattr(self, attribute)
                               for attribute in self._coilset_attributes}
         instance_attributes = {}
-        for instance in self._simulation_scripts:
-            instance_attribute = '_'.join([instance, 'attributes'])
+        for instance in self._biot_insatnces:
+            instance_attribute = '_'.join([instance, 'biot_attributes'])
             instance_attributes[instance_attribute] = \
-                getattr(getattr(self, instance), 'attributes')
+                getattr(getattr(self, instance), 'biot_attributes')
         return {**coilset_attributes, **instance_attributes}
 
     @coilset.setter
     def coilset(self, coilset):
         for attribute in self._coilset_attributes:
             setattr(self, attribute, coilset.get(attribute, coilset))
-        for instance in self._simulation_scripts:
-            instance_attribute = '_'.join([instance, 'attributes'])
-            setattr(getattr(self, instance), 'attributes',
+        for instance in self._biot_insatnces:
+            instance_attribute = '_'.join([instance, 'biot_attributes'])
+            setattr(getattr(self, instance), 'biot_attributes',
                     coilset.get(instance_attribute, coilset))
 
     def append_coilset(self, *args):
@@ -109,12 +116,9 @@ class CoilSet(pythonIO):
     @default_attributes.setter
     def default_attributes(self, default_attributes):
         for attribute in default_attributes:
-            if attribute in self._default_attributes or \
-                    attribute in self._coil_columns + self._subcoil_columns:
+            if attribute in self._coil_columns + self._subcoil_columns:
                 self._default_attributes[attribute] = \
                     default_attributes[attribute]
-        self.coil.coilframe_metadata = {
-                '_default_attributes': self._default_attributes}
 
     @property
     def coilset_frames(self):
@@ -737,12 +741,12 @@ class CoilSet(pythonIO):
                 ax.text(x + drs, z - zshift, txt,
                         fontsize=fs, ha=ha, va='center',
                         color=0.2 * np.ones(3))
-
+        
 
 if __name__ == '__main__':
 
-    cs = CoilSet(dCoil=3, current_update='full', turn_fraction=0.5,
-                 cross_section='circle', mutual=True)
+    cs = CoilSet(dCoil=3, current_update='coil', turn_fraction=0.5,
+                 cross_section='circle')
     
     '''
     cs.coilset_metadata = {'_default_attributes': {'dCoil': -1}}
@@ -761,7 +765,7 @@ if __name__ == '__main__':
                 turn_section='circle', turn_fraction=0.7, dCoil=0.75,
                 plasma=True) 
     '''
-    cs.add_coil(9, -3, 1.5, 1.5, name='PF13', part='PF', Nt=400, It=5e5,
+    cs.add_coil(9, -3, 1.5, 1.5, name='PF13', part='PF', Nt=1.5, It=5e5,
                 turn_section='circle', turn_fraction=0.7, dCoil=0.75,
                 plasma=True) 
     
@@ -781,8 +785,8 @@ if __name__ == '__main__':
     cs.plot(label=True)
     '''
     
-    cs.add_shell([4, 6, 7, 9], [1, 1, 2, 1.5], 0.1, 
-                 dShell=1, dCoil=-1, name='VVin')
+    cs.add_shell([4, 6, 7, 9, 9.5, 6], [1, 1, 2, 1.5, -1, -1.5], 0.1, 
+                 dShell=1, dCoil=-1, name='vvin')
     
     
     
@@ -815,9 +819,11 @@ if __name__ == '__main__':
     cs.grid.generate_grid(n=4e3)
     #cs.grid.plot_grid()
     cs.grid.plot_flux()
-
     
+    cs.solve_interaction()
     '''
+    
+    
     _cs = CoilSet()
     
 
@@ -835,12 +841,8 @@ if __name__ == '__main__':
     #_cs.grid.plot_grid()
     #cs.grid.solve_interaction()
     _cs.grid.plot_flux()
+    
     '''
-    
-
-    
-
-
 
 
 

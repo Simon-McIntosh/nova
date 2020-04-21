@@ -1,23 +1,21 @@
 from nep.DINA.read_dina import read_dina
 from nova.streamfunction import SF
 from amigo.pyplot import plt
-from amigo.IO import pythonIO
 from os.path import isfile
 import numpy as np
 
 
-class read_eqdsk(pythonIO):
+class read_eqdsk(read_dina):
 
     def __init__(self, database_folder='eqdsk', file='burn', read_txt=False):
-        self.read_txt = read_txt
-        self.dina = read_dina(database_folder)
-        pythonIO.__init__(self)  # python read/write
+        read_dina.__init__(self, database_folder, read_txt)  # read utilities
         self.load_file(file)
 
     def load_file(self, file, **kwargs):
         read_txt = kwargs.get('read_txt', self.read_txt)
-        filename = self.dina.locate_file(file)
+        filename = self.locate_file(file)
         filename = '.'.join(filename.split('.')[:-1])
+        print(filename)
         attributes = ['eqdsk']
         if read_txt or not isfile(filename + '.pk'):
             self.read_file(file)
@@ -26,13 +24,14 @@ class read_eqdsk(pythonIO):
             self.load_pickle(filename)
 
     def read_file(self, file):
-        filename = self.dina.locate_file(file)
+        filename = self.locate_file(file)
         self.sf = SF(filename=filename)
         self.eqdsk = self.sf.eqdsk
 
     def plot(self):
         ax = plt.subplots(1, 1, figsize=(8, 10))[1]
         self.sf.contour(ax=ax)
+        plt.plot(self.eqdsk['xlim'], self.eqdsk['zlim'])
 
     def dPdPsi(self, Psi, I):
         dP = 1

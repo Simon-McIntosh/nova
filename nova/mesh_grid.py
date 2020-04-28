@@ -72,6 +72,10 @@ class MeshGrid:
         if nz != self._nz:
             self._nz = nz
             self.update()
+            
+    @property
+    def n2d(self):
+        return (self.nx, self.nz)
 
     @property
     def limit(self):

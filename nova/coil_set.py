@@ -22,6 +22,7 @@ from scipy.interpolate import interp1d
 import matplotlib.colors as mc
 import colorsys
 from nova.biot_savart import BiotSavart, BiotAttributes
+from warnings import warn
 
 
 class CoilSet(pythonIO, BiotSavart, BiotAttributes):
@@ -48,14 +49,14 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
     _biot_insatnces = ['grid']#, 'mutual']  
 
     # additional_columns
-    _coil_columns = ['dCoil', 'Nf', 'Nt', 'It', 'Ic', 'mpc',
-                     'power', 'plasma', 
-                     'subindex', 'cross_section', 'turn_section', 
-                     'turn_fraction', 'patch', 'polygon', 'part']
+    _coil_columns = ['dA', 'dCoil', 'subindex', 'part',
+                     'cross_section', 'turn_section', 'turn_fraction', 
+                     'patch', 'polygon',
+                     'power', 'plasma', 'mpc', 'Nf', 'Nt', 'It', 'Ic']
     
-    _subcoil_columns = ['dl_x', 'dl_z', 'mpc', 'power', 'plasma', 
-                        'coil', 'Nt', 'It', 'Ic', 'cross_section', 'patch',
-                        'polygon', 'part']
+    _subcoil_columns = ['dA', 'dl_x', 'dl_z', 'coil', 'part',
+                        'cross_section', 'patch', 'polygon', 
+                        'power', 'plasma', 'mpc', 'Nt', 'It', 'Ic']
     
     _default_attributes = {'dCoil': -1, 'dPlasma': 0.25, 'dShell': 0.5, 
                            'turn_fraction': 1, 'turn_section': 'circle', 
@@ -292,28 +293,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
     def add_coil(self, *args, iloc=None, subcoil=True, **kwargs):
         index = self.coil.add_coil(*args, iloc=iloc, **kwargs)
         if subcoil:
-            self.add_subcoil(index=index)
-
-    def add_subcoil(self, index=None, remesh=False, mpc=True,
-                    **kwargs):
-        if index is None:  # re-mesh all coils
-            remesh = True
-            index = self.coil.index
-        if remesh:
-            self.subcoil.drop(self.subcoil.index, inplace=True)
-        subcoil = [[] for __ in range(len(index))]
-        for i, name in enumerate(index):
-            _dCoil = kwargs.get('dCoil', self.coil.at[name, 'dCoil'])
-            subcoil[i] = self._mesh_coil(name, dCoil=_dCoil, mpc=mpc)
-            xo, zo = self.coil.loc[name, ['x', 'z']]
-            for label in ['part', 'power', 'plasma']: 
-                if label in self.coil:  # propagate label
-                    subcoil[i].loc[:, label] = self.coil.at[name, label]
-            if 'rx' in subcoil[i].columns and 'rz' in subcoil[i].columns:
-                subcoil[i].loc[:, 'rx'] = subcoil[i].x - xo
-                subcoil[i].loc[:, 'rz'] = subcoil[i].z - zo
-            subcoil[i].loc[:, 'Ic'] = self.coil.at[name, 'Ic']
-        self.subcoil.concatenate(*subcoil)
+            self.meshcoil(index=index)
         
     def add_mpc(self, index, factor=1):
         self.coil.add_mpc(index, factor)
@@ -325,32 +305,70 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
             self.subcoil.current_update = self.coil._current_update
             self.coil._relink_mpc = False
 
-    def _mesh_coil(self, name, dCoil=None, part=None, mpc=True):
-        '''
-        mesh coil instance
-        '''
-        if dCoil is None:
-            dCoil = self.coil.at[name, 'dCoil']
+    def meshcoil(self, index=None, mpc=True, **kwargs):
+        coil = kwargs.pop('coil', self.coil)
+        subcoil = kwargs.pop('subcoil', self.subcoil)
+        if index is None:  # re-mesh all coils
+            index = coil.index
+        _subcoil = [[] for __ in range(len(index))]
+        for i, name in enumerate(index):
+            if 'dCoil' in kwargs:
+                coil.loc[name, 'dCoil'] = kwargs['dCoil']
+            for key in kwargs:
+                if key in coil:
+                    coil.loc[name, key] = kwargs[key]
+            if 'subindex' in coil:  # drop existing subcoils
+                if isinstance(coil.loc[name, 'subindex'], list):  
+                    subcoil.drop(coil.loc[name, 'subindex'], inplace=True)
+            mesh = self._mesh_coil(coil.loc[name, :], mpc=mpc, 
+                                   **kwargs)  # single coil
+            subcoil_args, subcoil_kwargs = [], {}
+            for var in mesh:
+                if var in subcoil._required_columns:
+                    subcoil_args.append(mesh[var])
+                elif var in subcoil._additional_columns:
+                    subcoil_kwargs[var] = mesh[var]
+            _subcoil[i] = subcoil.get_coil(
+                    *subcoil_args, name=name, coil=name, **subcoil_kwargs)
+            # back-propagate fillament attributes to coil
+            coil.at[name, 'Nf'] = mesh['Nf']  
+            if 'subindex' in coil:
+                coil.at[name, 'subindex'] = list(_subcoil[i].index)
+        subcoil.concatenate(*_subcoil)
+        
+    @staticmethod
+    def _mesh_coil(coil, mpc=True, **kwargs):
+        'mesh single coil'
+        x, z, dx, dz, dCoil = coil[['x', 'z', 'dx', 'dz', 'dCoil']]
+        mesh = {'mpc': mpc}  # multi-point constraint (link current)
+        if 'part' in coil:
+            mesh['part'] = coil['part']
+        if 'turn_section' in coil:
+            mesh['cross_section'] = kwargs.get('turn_section', 
+                                               coil['turn_section'])
+        if 'turn_fraction' in coil and dCoil == -1:
+            turn_fraction = kwargs.get('turn_fraction', coil['turn_fraction'])
+            if turn_fraction < 1 and dCoil != -1:
+                warn('\nunder-resolved coil mesh\n' +\
+                     f'turn_fraction {turn_fraction} < 1 ' +\
+                     f'and dCoil {dCoil} != -1')
         else:
-            self.coil.at[name, 'dCoil'] = dCoil  # update
-        x, z, dx, dz = self.coil.loc[name, ['x', 'z', 'dx', 'dz']]
-        kwargs = {'mpc': mpc}
-        if 'turn_section' in self.coil.columns:
-            kwargs['cross_section'] = self.coil.at[name, 'turn_section']
-        if 'turn_fraction' in self.coil.columns and dCoil == -1:
-            turn_fraction = self.coil.at[name, 'turn_fraction']
-        else:
-            turn_fraction = 1
+            turn_fraction = kwargs.get('turn_fraction', 1)
         if dCoil is None or dCoil == 0:
             dCoil = np.max([dx, dz])
-        if dCoil == -1:  # mesh per-turn (for detailed inductance calculations)
-            if 'cross_section' not in kwargs:
-                kwargs['cross_section'] = 'circle'
-            Nt = self.coil.at[name, 'Nt']
-            if self.coil.at[name, 'cross_section'] == 'circle':
-                dCoil = (np.pi * (dx / 2)**2 / Nt)**0.5
+        elif dCoil == -1:  # mesh per-turn (detailed inductance calculations)
+            if 'cross_section' not in mesh:
+                mesh['cross_section'] = 'circle'
+            Nt = coil['Nt']
+            if coil['cross_section'] == 'circle':
+                dCoil = (np.pi * ((dx + dz) / 4)**2 / Nt)**0.5
             else:
                 dCoil = (dx * dz / Nt)**0.5
+        elif dCoil < -1:  # Nf = -dCoil
+            if coil['cross_section'] == 'circle':
+                dCoil = (np.pi * (dx / 2)**2 / -dCoil)**0.5
+            else:
+                dCoil = (dx * dz / -dCoil)**0.5
         nx = int(np.round(dx / dCoil))
         nz = int(np.round(dz / dCoil))
         if nx < 1:
@@ -365,30 +383,27 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         zm_ = np.reshape(zm_, (-1, 1))[:, 0]
         # place mesh fillaments within polygon exterior
         points = shapely.geometry.MultiPoint(points=list(zip(xm_, zm_)))
-        polygon = self.coil.at[name, 'polygon']
+        polygon = coil['polygon']
         multi_point = np.asarray(polygon.intersection(points))
         if np.size(multi_point) == 2:
             multi_point = [multi_point]
         xm_ = [point[0] for point in multi_point]
         zm_ = [point[1] for point in multi_point]
         Nf = len(xm_)  # filament number
-        self.coil.at[name, 'Nf'] = Nf  # back-propagate fillament number 
-        if 'part' in self.coil.columns:
-            kwargs['part'] = self.coil.at[name, 'part']
-        mesh = {'x': xm_, 'z': zm_,
-                'dx': turn_fraction*dx_, 'dz': turn_fraction*dz_}
-        mesh['alpha'] = self.coil.loc[name].get('alpha', 0)
-        args = []
-        for var in mesh:
-            if var in self.subcoil._required_columns:
-                args.append(mesh[var])
-            elif var in self.subcoil._additional_columns:
-                kwargs[var] = mesh[var]
-        subcoil = self.subcoil.get_coil(*args, name=name, coil=name, **kwargs)
-        self.coil.at[name, 'subindex'] = list(subcoil.index)
-        subcoil.loc[:, 'Nt'] = self.coil.at[name, 'Nt'] / Nf
-        subcoil.rebuild_coildata()
-        return subcoil
+        mesh.update({'x': xm_, 'z': zm_,
+                     'dx': turn_fraction*dx_, 'dz': turn_fraction*dz_,
+                     'Nt': coil['Nt'] / Nf, 'Nf': Nf})  # subcoil bundle
+        # subcoil moment arms
+        xo, zo = coil.loc[['x', 'z']]
+        mesh['rx'] = xm_ - xo
+        mesh['rz'] = zm_ - zo
+        # propagate current update flags to subcoil
+        for label in ['part', 'power', 'plasma']: 
+            if label in coil:  
+                mesh[label] = coil[label]
+        mesh['Ic'] = coil['Ic']
+        mesh['turn_fraction'] = turn_fraction
+        return mesh
 
     def get_iloc(self, index):
         iloc = [None, None]

@@ -33,6 +33,7 @@ class CoilFrame(DataFrame, CoilData):
     def __init__(self, *args, coilframe_metadata={}, **kwargs):
         self._initialize_coilframe_metadata()
         DataFrame.__init__(self, *args, **kwargs)  # inherit pandas DataFrame
+        self.set_dtypes()
         CoilData.__init__(self)  # coil data
         self.coilframe_metadata = coilframe_metadata  # update metadata
         
@@ -53,12 +54,22 @@ class CoilFrame(DataFrame, CoilData):
     def _initialize_default_attributes(self):
         'default attributes when not set via self.add_coil(**kwargs)'
         self._default_attributes = \
-            {'Ic': 0, 'It': 0, 'm': '', 'R': 0, 'Nt': 1, 'Nf': 1,
-             'material': '', 'turn_fraction': 1, 'patch': None,
-             'cross_section': 'square', 'turn_section': 'square',
-             'coil': '', 'part': '', 'subindex': None, 'dCoil': 0,
-             'dl_x': 0, 'dl_z': 0, 'dA': 0, 'mpc': '', 'polygon': None,
-             'power': True, 'plasma': False, 'rho': 0}
+            {'dA': 0., 'Ic': 0., 'It': 0., 'm': '', 'R': 0., 'Nt': 1.,
+             'Nf': 1, 'material': '', 'turn_fraction': 1, 'patch': None,
+             'cross_section': 'square', 'turn_section': 'circle',
+             'coil': '', 'part': '', 'subindex': None, 'dCoil': 0.,
+             'dl_x': 0., 'dl_z': 0., 'mpc': '', 'polygon': None,
+             'power': True, 'plasma': False, 'rho': 0.}
+            
+    def set_dtypes(self):
+        if self.nC > 0:
+            dtypes = {}
+            for column in self:
+                if column in self._default_attributes:
+                    dtype = type(self._default_attributes[column])
+                    if dtype in [int, float]:
+                        dtypes[column] = dtype
+            self = self.astype(dtypes)
             
     def _initialize_data_attributes(self):
         'convert list attributes to dict'
@@ -125,6 +136,15 @@ class CoilFrame(DataFrame, CoilData):
             number of columns
         '''
         return len(self.columns)
+    
+    def limit(self, index):
+        'returns coil limits [xmin, xmax, zmin, zmax]'
+        geom = self.loc[index, ['x', 'z', 'dx', 'dz']]
+        limit = [min(geom['x'] - geom['dx'] / 2),
+                 max(geom['x'] + geom['dx'] / 2),
+                 min(geom['z'] - geom['dz'] / 2),
+                 max(geom['z'] + geom['dz'] / 2)]
+        return limit
 
     def get_coil(self, *args, **kwargs):
         mpc = kwargs.pop('mpc', False)
@@ -139,7 +159,7 @@ class CoilFrame(DataFrame, CoilData):
         self._insert_polygon(coil)
         if mpc and coil.nC > 1:
             coil.add_mpc(coil.index.to_list())
-        coil.rebuild_coildata()  # rebuild fast index
+        #coil.rebuild_coildata()  # rebuild fast index
         return coil
 
     def concatenate(self, *coil, iloc=None, sort=False):
@@ -151,7 +171,7 @@ class CoilFrame(DataFrame, CoilData):
         # new instance
         CoilFrame.__init__(self, coil, 
                            coilframe_metadata=self.coilframe_metadata)  
-        self.rebuild_coildata()
+        self.rebuild_coildata()  # rebuild fast index
         
     def add_coil(self, *args, iloc=None, **kwargs):
         coil = self.get_coil(*args, **kwargs)  # additional coils

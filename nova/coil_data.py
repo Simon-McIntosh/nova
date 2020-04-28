@@ -39,8 +39,8 @@ class CoilData():
                              'power', 'plasma', 'Psi', 'Bx', 'Bz',
                              'Fx', 'Fz', 'xFx', 'xFz', 'zFx', 'zFz', 'My']
     
-    _coildata_attributes = {'current_update': 'full',
-                            'biot_update' : ['coilset', 'grid']}
+    _coildata_attributes = {'current_update': 'full'}
+                            #'biot_update' : ['coilset', 'grid']}
         
     # CoilData indices
     _coildata_indices = ['reduction_index',
@@ -98,7 +98,6 @@ class CoilData():
         'set coildata attributes'
         for attribute in self._coildata_attributes:
             value = coildata_attributes.get(attribute, None)
-            print(attribute, value)
             if value is not None:
                 setattr(self, attribute, value)
 

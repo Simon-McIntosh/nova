@@ -171,7 +171,7 @@ class BiotSavart(CoilMatrix):
         iszero = np.isclose(self.dL_mag, 0)  # self index
         self.dL_norm = np.zeros((2, self.nT, self.nS))
         self.dL_norm[:, ~iszero] = self.dL[:, ~iszero] / self.dL_mag[~iszero]
-        self.dL_norm[1, iszero] = 1
+        self.dL_norm[0, iszero] = 1
         # self inductance index
         dr = (self.source_m['dx'] + self.source_m['dz']) / 4  # mean radius
         idx = self.dL_mag < dr  # seperation < mean radius
@@ -232,7 +232,7 @@ class BiotSavart(CoilMatrix):
         field['z'] = xs / 2 * ((xs + xt * A / B) * I2 - xt / B * I1)
         for xz in field:  # save field matricies
             self.field[xz], self._field[xz], self._field_[xz] = \
-                self.save_matrix(self.mu_o * field[xz])  # T / Amp-turn-turn
+                self.save_matrix(self.mu_o / (2 * np.pi) * field[xz])  # T / Amp-turn-turn
     
     def solve_interaction(self):
         self.assemble()  # assemble geometory matrices
@@ -243,12 +243,12 @@ class BiotSavart(CoilMatrix):
         # extract plasma unit filaments
         _M_ = M[self.target._plasma_index][:, self.source._plasma_index]  
         # reduce
-        M *= self.target_m['Nt']  # target turns
+        # M *= self.target_m['Nt']  # target turns
         _M = M[:, self.source._plasma_index]  # unit source filament
         M *= self.source_m['Nt']  # source turns
-        if len(self.target._reduction_index) < self.nT:  # sum sub-target
-            M = np.add.reduceat(M, self.target._reduction_index, axis=0)
-            _M = np.add.reduceat(_M, self.target._reduction_index, axis=0)
+        #if len(self.target._reduction_index) < self.nT:  # sum sub-target
+        #    M = np.add.reduceat(M, self.target._reduction_index, axis=0)
+        #    _M = np.add.reduceat(_M, self.target._reduction_index, axis=0)
         if len(self.source._reduction_index) < self.nS:  # sum sub-source
             M = np.add.reduceat(M, self.source._reduction_index, axis=1)
         return M, _M, _M_  # turn-turn interaction, source unit, mutual unit
@@ -277,10 +277,25 @@ class BiotSavart(CoilMatrix):
         
     @property
     def Psi(self):
-        #if self.source._update_biotsavart:
-        self._Psi = np.dot(self.flux, self.source._Ic).reshape(self.n2d)
-        #    self.source._update_biotsavart = False
+        self._Psi = np.dot(self.flux, self.source._Ic)
+        if self.n2d != 0:
+            self._Psi = self._Psi.reshape(self.n2d)
         return self._Psi
+    
+    @property
+    def Bx(self):
+        self._Bx = np.dot(self.field['x'], self.source._Ic)
+        if self.n2d != 0:
+            self._Bx = self._Bx.reshape(self.n2d)
+        return self._Bx
+    
+    @property
+    def Bz(self):
+        self._Bz = np.dot(self.field['z'], self.source._Ic)
+        if self.n2d != 0:
+            self._Bz = self._Bz.reshape(self.n2d)
+        return self._Bz
+
 
     """
     from simulation data
@@ -486,7 +501,6 @@ if __name__ == '__main__':
     cs.add_coil(1.6870, 3.2780, 0.7400, 2.093, Nt=554, name='CS2U', part='CS')
     cs.add_plasma(5, 2.5, 1.5, 1.5, It=5e6, cross_section='circle')
 
-    print(cs.biot_attributes)
     #bs = BiotSavart()
     #bs = biot_savart(cs.coilset, mutual=True)
 

@@ -38,7 +38,7 @@ class Grid(BiotSavart, BiotAttributes):
     '''
     
     _biot_attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'expand',
-                   'nlevels', 'levels', 'x2d', 'z2d']
+                        'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d']
     
     _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31}
     
@@ -121,20 +121,26 @@ class Grid(BiotSavart, BiotAttributes):
         MeshGrid._plot(self.x2d, self.z2d, self._limit[:2], self._limit[2:],
                        ax=ax, zorder=-500, **kwargs)  # plot grid 
         
-    def plot_flux(self):
+    def plot_flux(self, ax=None, lw=1, color='lightgrey'):
         if self.n > 0:
+            if ax is None:
+                ax = plt.gca() 
             if self.levels is None:
                 levels = self.nlevels
             else:
                 levels = self.levels
             QuadContourSet = plt.contour(
                     self.x2d, self.z2d, self.Psi,
-                    levels, colors='lightgrey', linestyles='-', 
-                    linewidths=1.0,
+                    levels, colors=color, linestyles='-', 
+                    linewidths=lw,
                     alpha=0.9, zorder=4)  # default zorder = 2
             if self.levels is None:
                 self.levels = QuadContourSet.levels
             plt.axis('equal')
+            
+    def plot_field(self):
+        if self.n > 0:
+            plt.quiver(self.x2d, self.z2d, self.Bx, self.Bz)
     
 class Interaction:
     

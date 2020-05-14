@@ -37,7 +37,6 @@ class BiotFrame:
         self._plasma_index = np.zeros(self.nC, dtype=bool)
         self.Np = np.array([]) # plasma filament turn number
         self.nP = 0  # number of plasma filaments
-        
     
     def _emulate_coil_index(self):
         'emulate CoilFrame._reduction_index'
@@ -243,7 +242,7 @@ class BiotSavart(CoilMatrix):
         # extract plasma unit filaments
         _M_ = M[self.target._plasma_index][:, self.source._plasma_index]  
         # reduce
-        # M *= self.target_m['Nt']  # target turns
+        M *= self.target_m['Nt']  # target turns
         _M = M[:, self.source._plasma_index]  # unit source filament
         M *= self.source_m['Nt']  # source turns
         #if len(self.target._reduction_index) < self.nT:  # sum sub-target

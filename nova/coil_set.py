@@ -339,7 +339,16 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
     @staticmethod
     def _mesh_coil(coil, mpc=True, **kwargs):
         'mesh single coil'
-        x, z, dx, dz, dCoil = coil[['x', 'z', 'dx', 'dz', 'dCoil']]
+        x, z, dl, dt, dCoil = coil[['x', 'z', 'dl', 'dt', 'dCoil']]
+        if 'polygon' in coil:
+            coil_polygon = coil.polygon
+            bounds = coil_polygon.bounds
+            dx = bounds[2] - bounds[0]
+            dz = bounds[3] - bounds[1]
+        else:  # assume rectangular coil cross-section
+            dx, dz = coil[['dl', 'dt']]  # length, thickness == dx, dz
+            bounds = (x-dx/2, z-dz/2, x+dx/2, z+dz/2)
+            coil_polygon = shapely.geometry.box(bounds)
         mesh = {'mpc': mpc}  # multi-point constraint (link current)
         if 'part' in coil:
             mesh['part'] = coil['part']
@@ -348,10 +357,6 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
                                                coil['turn_section'])
         if 'turn_fraction' in coil and dCoil == -1:
             turn_fraction = kwargs.get('turn_fraction', coil['turn_fraction'])
-            if turn_fraction < 1 and dCoil != -1:
-                warn('\nunder-resolved coil mesh\n' +\
-                     f'turn_fraction {turn_fraction} < 1 ' +\
-                     f'and dCoil {dCoil} != -1')
         else:
             turn_fraction = kwargs.get('turn_fraction', 1)
         if dCoil is None or dCoil == 0:
@@ -364,39 +369,60 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
                 dCoil = (np.pi * ((dx + dz) / 4)**2 / Nt)**0.5
             else:
                 dCoil = (dx * dz / Nt)**0.5
-        elif dCoil < -1:  # Nf = -dCoil
+        elif dCoil < -1:  
+            Nf = -dCoil  # set filament number
             if coil['cross_section'] == 'circle':
-                dCoil = (np.pi * (dx / 2)**2 / -dCoil)**0.5
+                dCoil = (np.pi * (dx / 2)**2 / Nf)**0.5
             else:
-                dCoil = (dx * dz / -dCoil)**0.5
+                dCoil = (dx * dz / Nf)**0.5
+        cross_section = mesh['cross_section']       
         nx = int(np.round(dx / dCoil))
         nz = int(np.round(dz / dCoil))
         if nx < 1:
             nx = 1
         if nz < 1:
             nz = 1
-        dx_, dz_ = dx / nx, dz / nz  # subcoil dimensions  
-        x_ = x + np.linspace(dx_ / 2, dx - dx_ / 2, nx) - dx / 2
-        z_ = z + np.linspace(dz_ / 2, dz - dz_ / 2, nz) - dz / 2
-        xm_, zm_ = np.meshgrid(x_, z_, indexing='ij')
-        xm_ = np.reshape(xm_, (-1, 1))[:, 0]
-        zm_ = np.reshape(zm_, (-1, 1))[:, 0]
-        # place mesh fillaments within polygon exterior
-        points = shapely.geometry.MultiPoint(points=list(zip(xm_, zm_)))
-        polygon = coil['polygon']
-        multi_point = np.asarray(polygon.intersection(points))
-        if np.size(multi_point) == 2:
-            multi_point = [multi_point]
-        xm_ = [point[0] for point in multi_point]
-        zm_ = [point[1] for point in multi_point]
+        dx_, dz_ = dx / nx, dz / nz  # subcoil divisions
+        dl_ = turn_fraction * dx_
+        if cross_section == 'skin':  # maintain fractional thickness
+            dt_ = dt
+        else:
+            dt_ = turn_fraction * dz_
+        x_ = np.linspace(*bounds[::2], nx+1)
+        z_ = np.linspace(*bounds[1::2], nz+1)
+        polygen = CoilFrame._get_polygen(cross_section)  # polygon generator
+        polygon, xm_, zm_, cs_ = [], [], [], []
+        for i in range(nx):  # radial divisions
+            for j in range(nz):  # vertical divisions
+                sub_polygon = polygen(x_[i]+dx_/2, z_[j]+dz_/2, dl_, dt_)
+                p = coil_polygon.intersection(sub_polygon)
+                if isinstance(p, shapely.geometry.polygon.Polygon):
+                    p = [p]  # single polygon
+                for p_ in p:
+                    if isinstance(p_, shapely.geometry.polygon.Polygon):
+                        polygon.append(p_)
+                        xm_.append(p_.centroid.x)
+                        zm_.append(p_.centroid.y)
+                        if sub_polygon.within(coil_polygon):
+                            cs_.append(cross_section)  # maintain cs referance
+                        else:
+                            cs_.append('polygon')
+
         Nf = len(xm_)  # filament number
-        mesh.update({'x': xm_, 'z': zm_,
-                     'dx': turn_fraction*dx_, 'dz': turn_fraction*dz_,
-                     'Nt': coil['Nt'] / Nf, 'Nf': Nf})  # subcoil bundle
+        if Nf == 0:  # no points found within polygon (skin)
+            xm_, zm_, dl_, dt_ = x, z, dl, dt
+            Nf = 1
+            
+        # subcoil bundle
+        mesh.update({'x': xm_, 'z': zm_, 'dl': dl_, 'dt': dt_,
+                     'Nt': coil['Nt'] / Nf, 'Nf': Nf, 
+                     'polygon': polygon, 'cross_section': cs_})  
+            
         # subcoil moment arms
-        xo, zo = coil.loc[['x', 'z']]
-        mesh['rx'] = xm_ - xo
-        mesh['rz'] = zm_ - zo
+        #xo, zo = coil.loc[['x', 'z']]
+        #mesh['rx'] = xm_ - xo
+        #mesh['rz'] = zm_ - zo
+        
         # propagate current update flags to subcoil
         for label in ['part', 'power', 'plasma']: 
             if label in coil:  
@@ -452,7 +478,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         polygon = [[] for __ in range(nS)]
         x, z = np.zeros(nS), np.zeros(nS)
         rho_bar, dt_bar = np.zeros(nS), np.zeros(nS)
-        dx, dz, dA = np.zeros(nS), np.zeros(nS), np.zeros(nS)
+        dl, dt, dA = np.zeros(nS), np.zeros(nS), np.zeros(nS)
         sub_segment = np.zeros((nS, 2, nSS))
         sub_rho, sub_dt = np.zeros((nS, nSS)), np.zeros((nS, nSS))
         for i in range(nS):
@@ -473,10 +499,10 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
                     dt_bar[i]/2, cap_style=2, join_style=2)
             x[i] = polygon[i].centroid.x
             z[i] = polygon[i].centroid.y
-            dx[i] = dS  # sub-segment length
-            dz[i] = dt_bar[i]  # sub-segment thickness
+            dl[i] = dS  # sub-segment length
+            dt[i] = dt_bar[i]  # sub-segment thickness
             dA[i] = polygon[i].area
-        return x, z, dx, dz, dA, rho_bar, polygon, sub_segment, sub_rho, sub_dt
+        return x, z, dl, dt, dA, rho_bar, polygon, sub_segment, sub_rho, sub_dt
     
     def add_shell(self, x, z, dt, **kwargs):
         name = kwargs.pop('name', kwargs.get('part', 'Shl'))
@@ -486,23 +512,23 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         power = kwargs.pop('power', False)
         delim = kwargs.pop('delim', '')
         rho = kwargs.pop('rho', 0)
-        x, z, dx, dz, dA, rho_bar, polygon, sub_segment, sub_rho, sub_dt = \
+        x, z, dl, dt, dA, rho_bar, polygon, sub_segment, sub_rho, sub_dt = \
             self._shlspace((x, z), dt, rho, dShell)
         
         #R[i] = resistivity_ss * 2 * np.pi * x[i] / (dx * dz)
         #m[i] = density_ss * 2 * np.pi * x[i] * dx * dz
                     
-        index = self.coil.add_coil(x, z, dx, dz, dA=dA, polygon=polygon, 
+        index = self.coil.add_coil(x, z, dl, dt, dA=dA, polygon=polygon, 
                                    cross_section='shell', turn_fraction=1, 
-                                   turn_section='square', dCoil=dShell,
+                                   turn_section='shell', dCoil=dShell,
                                    power=power, name=name, part=part,
                                    delim=delim, Nt=dA, rho=rho_bar)
         subindex = [[] for __ in range(len(index))]
         for i, coil in enumerate(index):
-            _x, _z, _dx, _dz, _dA, _rho_bar, _polygon = \
+            _x, _z, _dl, _dt, _dA, _rho_bar, _polygon = \
                 self._shlspace(sub_segment[i], sub_dt[i], sub_rho[i], 
                                dCoil)[:-3]
-            subindex[i] = self.subcoil.add_coil(_x, _z, _dx, _dz, 
+            subindex[i] = self.subcoil.add_coil(_x, _z, _dl, _dt, 
                     polygon=_polygon, coil=coil, cross_section='square', 
                     mpc=True, power=power, name=index[i], part=part, Nt=_dA,
                     rho=_rho_bar)
@@ -636,7 +662,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         self.subcoil.rebuild_coildata()  # rebuild coildata
 
     @staticmethod
-    def patch_coil(coil, overwrite=False, patchwork_factor=0.01, **kwargs):
+    def patch_coil(coil, overwrite=False, patchwork_factor=0.15, **kwargs):
         # call on-demand
         part_color = {'VS3': 'C0', 'VS3j': 'gray', 'CS': 'C0', 'PF': 'C0',
                       'trs': 'C2', 'vvin': 'C3', 'vvout': 'C4', 'plasma': 'C4',
@@ -644,6 +670,8 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         color = kwargs.get('part_color', part_color)
         zorder = kwargs.get('zorder', {'VS3': 1, 'VS3j': 0, 'CS': 3, 'PF': 2})
         alpha = {'plasma': 0.75}
+        if 'coil' not in coil:
+            patchwork_factor = 0
         patch = [[] for __ in range(coil.nC)]
         for i, (x, z, dx, dz, cross_section,
                 current_patch, polygon, part) in enumerate(
@@ -661,13 +689,13 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
                 patch[i][j].set_zorder = zorder.get(part, 0)
                 patch[i][j].set_alpha(alpha.get(part, 1))
                 if patchwork_factor != 0:
-                    CoilSet.patchwork(i, patch[i][j], patchwork_factor)
+                    CoilSet.patchwork(patch[i][j], patchwork_factor)
         coil.loc[:, 'patch'] = patch
         
     @staticmethod
-    def patchwork(i, patch, factor):
+    def patchwork(patch, factor):
         'alternate facecolor lightness by +- factor'
-        factor *= 1 - 2 * (i % 2)
+        factor *= 1 - 2 * np.random.rand(1)[0]
         c = patch.get_facecolor()
         c = colorsys.rgb_to_hls(*mc.to_rgb(c))
         c = colorsys.hls_to_rgb(
@@ -812,11 +840,7 @@ if __name__ == '__main__':
     cs.Ic = 34
     #cs.coil.Nt = 1
     
-    #print(_cs.It)
 
-    #print(_cs.mutual)
-    
-    #print(_cs.coil._flux)
     '''
     cs.Ic = 222
     

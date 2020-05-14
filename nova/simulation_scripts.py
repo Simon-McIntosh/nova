@@ -38,7 +38,8 @@ class Grid(BiotSavart, BiotAttributes):
     '''
     
     _biot_attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'expand',
-                        'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d']
+                        'nlevels', 'levels', 'x', 'z', 'dx', 'dz',
+                        'x2d', 'z2d']
     
     _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31}
     
@@ -101,7 +102,7 @@ class Grid(BiotSavart, BiotAttributes):
         limit = np.array([(x - dx/2).min(), (x + dx/2).max(),
                           (z - dz/2).min(), (z + dz/2).max()])
         dx, dz = np.diff(limit[:2])[0], np.diff(limit[2:])[0]
-        delta = np.mean([dx, dz])
+        delta = np.max([dx, dz])
         limit += expand * delta * np.array([-1, 1, -1, 1])
         if limit[0] < xmin:
             limit[0] = xmin
@@ -121,19 +122,19 @@ class Grid(BiotSavart, BiotAttributes):
         MeshGrid._plot(self.x2d, self.z2d, self._limit[:2], self._limit[2:],
                        ax=ax, zorder=-500, **kwargs)  # plot grid 
         
-    def plot_flux(self, ax=None, lw=1, color='lightgrey'):
+    def plot_flux(self, ax=None, lw=1, color='lightgrey',
+                  **kwargs):
         if self.n > 0:
             if ax is None:
                 ax = plt.gca() 
-            if self.levels is None:
+            levels = kwargs.get('levels', self.levels)
+            if levels is None:
                 levels = self.nlevels
-            else:
-                levels = self.levels
-            QuadContourSet = plt.contour(
+            QuadContourSet = ax.contour(
                     self.x2d, self.z2d, self.Psi,
                     levels, colors=color, linestyles='-', 
                     linewidths=lw,
-                    alpha=0.9, zorder=4)  # default zorder = 2
+                    alpha=0.9, zorder=4)
             if self.levels is None:
                 self.levels = QuadContourSet.levels
             plt.axis('equal')

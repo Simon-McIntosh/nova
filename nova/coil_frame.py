@@ -5,6 +5,7 @@ import numpy as np
 from warnings import warn
 import shapely.geometry
 import shapely.affinity
+from shapely.ops import transform
 
 
 class CoilSeries(Series):
@@ -45,21 +46,22 @@ class CoilFrame(DataFrame, CoilData):
         
     def _initialize_required_columns(self):
         'required input: self.add_coil(*args)'
-        self._required_columns = ['x', 'z', 'dx', 'dz']
+        self._required_columns = ['x', 'z', 'dl', 'dt']
 
     def _initialize_additional_columns(self):
         'additional input: self.add_coil(**kwargs)'
-        self._additional_columns = []
+        self._additional_columns = ['rms']
 
     def _initialize_default_attributes(self):
         'default attributes when not set via self.add_coil(**kwargs)'
         self._default_attributes = \
-            {'dA': 0., 'Ic': 0., 'It': 0., 'm': '', 'R': 0., 'Nt': 1.,
+            {'rms': 0, 'dA': 0, 'Ic': 0, 'It': 0, 'm': '', 
+             'R': 0, 'Nt': 1,
              'Nf': 1, 'material': '', 'turn_fraction': 1, 'patch': None,
-             'cross_section': 'square', 'turn_section': 'circle',
-             'coil': '', 'part': '', 'subindex': None, 'dCoil': 0.,
-             'dl_x': 0., 'dl_z': 0., 'mpc': '', 'polygon': None,
-             'power': True, 'plasma': False, 'rho': 0.}
+             'cross_section': 'rectangle', 'turn_section': 'square',
+             'coil': '', 'part': '', 'subindex': None, 'dCoil': 0,
+             'dl_x': 0, 'dl_z': 0, 'mpc': '', 'polygon': None,
+             'power': True, 'plasma': False, 'rho': 0}
             
     def set_dtypes(self):
         if self.nC > 0:
@@ -159,7 +161,6 @@ class CoilFrame(DataFrame, CoilData):
         self._insert_polygon(coil)
         if mpc and coil.nC > 1:
             coil.add_mpc(coil.index.to_list())
-        #coil.rebuild_coildata()  # rebuild fast index
         return coil
 
     def concatenate(self, *coil, iloc=None, sort=False):
@@ -301,51 +302,96 @@ class CoilFrame(DataFrame, CoilData):
     def _insert_polygon(self, coil):
         if 'polygon' in coil.columns:
             for name in coil.index:
+                cross_section = coil.at[name, 'cross_section']
+                x, z, dl, dt = coil.loc[name, ['x', 'z', 'dl', 'dt']]
                 if isna(coil.at[name, 'polygon']):
-                    x = coil.at[name, 'x']
-                    z = coil.at[name, 'z']
-                    dx = coil.at[name, 'dx']
-                    dz = coil.at[name, 'dz']
-                    cross_section = coil.at[name, 'cross_section']
-                    if (np.array([x, dx, dz]) != 0).all():
-                        polygen = self._get_polygen(cross_section)
-                        polygon = polygen(x, z, dx, dz)
-                    else:
-                        polygon = None
+                    polygen = self._get_polygen(cross_section)
+                    polygon = polygen(x, z, dl, dt)
                     coil.at[name, 'polygon'] = polygon
-                coil.at[name, 'dA'] = coil.at[name, 'polygon'].area  # update
-        #return coil
+                polygon = coil.at[name, 'polygon']
+                dA = polygon.area  # update polygon area
+                if dA == 0:
+                    err_txt = f'zero area polygon entered for coil {name}\n'
+                    err_txt += f'cross section: {cross_section}\n'
+                    err_txt += f'dl {dl}\ndt {dt}'
+                    raise ValueError(err_txt)
+                else:
+                    coil.at[name, 'dA'] = dA
+                bounds = polygon.bounds
+                coil.at[name, 'dx'] = bounds[2] - bounds[0]
+                coil.at[name, 'dz'] = bounds[3] - bounds[1]
+                if cross_section == 'circle':
+                    rms = np.sqrt(x**2 + dl**2 / 16)  # circle
+                elif cross_section in ['square', 'rectangle']:
+                    rms = np.sqrt(x**2 + dl**2 / 12)  # square
+                elif cross_section == 'skin':
+                    rms = 1
+                else:  # calculate directly from polygon
+                    p = coil.at[name, 'polygon']
+                    rms = (transform(lambda x, z: 
+                                      (x**2, z), p).centroid.x)**0.5
 
-    def _get_polygen(self, cross_section):
+    def _calculate_current_center(self, coil):
+        for cross_section in ['square', 'rectangle', 'circle', 
+                              'skin']:
+            index = coil.cross_section == cross_section
+             
+        
+        #coil.loc[:, 'xm'] = 
+        
+    @staticmethod
+    def _get_polygen(cross_section):
         if cross_section == 'circle':
-            return self._poly_circle
+            return CoilFrame._poly_circle
         elif cross_section == 'ellipse':
-            return self._poly_ellipse
-        elif cross_section == 'square' or cross_section == 'rectangle':
-            return self._poly_rectangle
+            return CoilFrame._poly_ellipse
+        elif cross_section == 'square':
+            return CoilFrame._poly_square
+        elif cross_section == 'rectangle':
+            return CoilFrame._poly_rectangle
         elif cross_section == 'skin':
-            return self._poly_skin
+            return CoilFrame._poly_skin
         else:
             raise IndexError(f'cross_section: {cross_section} not implemented'
                              '\n specify as [circle, ellipse, square, '
                              'rectangle, skin]')
 
-    def _poly_circle(self, x, z, dx, dz):
-        radius = np.min([dx, dz]) / 2
+    @staticmethod
+    def _poly_circle(x, z, dx, dz):
+        radius = dx / 2
         circle = shapely.geometry.Point(x, z).buffer(radius)
         return shapely.geometry.Polygon(circle.exterior)
 
-    def _poly_ellipse(self, x, z, dx, dz):
-        circle = self._poly_circle(x, z, dx, dx)
+    @staticmethod
+    def _poly_ellipse(x, z, dx, dz):
+        circle = CoilFrame._poly_circle(x, z, dx, dx)
         return shapely.affinity.scale(circle, 1, dz/dx)
+    
+    @staticmethod
+    def _poly_square(x, z, dx, dz):
+        return shapely.geometry.box(x-dx/2, z-dx/2, x+dx/2, z+dx/2)    
 
-    def _poly_rectangle(self, x, z, dx, dz):
+    @staticmethod
+    def _poly_rectangle(x, z, dx, dz):
         return shapely.geometry.box(x-dx/2, z-dz/2, x+dx/2, z+dz/2)
 
-    def _poly_skin(self, x, z, dx, dz):
-        circle_outer = self._poly_circle(x, z, dx, dz)
-        circle_inner = shapely.affinity.scale(circle_outer, 0.8, 0.8)
-        return circle_outer.difference(circle_inner)
+    @staticmethod
+    def _poly_skin(x, z, dt, d):
+        '''
+        dx: fractional thickness
+        dz: circle diameter
+        '''
+        if dt < 0 or dt > 1:
+            raise ValueError(f'skin fractional thickness not 0 <= {dt} <= 1')
+        circle_outer = CoilFrame._poly_circle(x, z, d, d)
+        if dt == 1:
+            shape = circle_outer
+        else:
+            if dt == 0:
+                dt = 1e-3
+            circle_inner = shapely.affinity.scale(circle_outer, (1-dt), (1-dt))
+            shape = circle_outer.difference(circle_inner)
+        return shape
     
     def __setattr__(self, key, value):
         if key in self._coilframe_attributes:
@@ -359,7 +405,7 @@ class CoilFrame(DataFrame, CoilData):
                 if not is_list_like(value):
                     value *= np.ones(nC)
                 if len(value) != nC:
-                    raise IndexError('Length of private values does not match '
+                    raise IndexError('Length of mpc vector does not match '
                                      'length of index')
                 key = f'_{key}'
         return DataFrame.__setattr__(self, key, value)

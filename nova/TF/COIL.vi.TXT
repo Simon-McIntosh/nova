@@ -1,2345 +1,2345 @@
-!
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-*DIM, KPC ,  ARRAY ,  100     , 3 ,       !  coordinates of the keypoints
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-!
-!                                     M A C R O   C O I L
-!
-!                           G E O M E T R I C A L     P A R A M E T E R S
-!
-!
-!                          the shape of the centerline of the "empty space" 
-!
-!   the angles
-!
-ARC_1   =    92.758
-ARC_2   =    69.659
-ARC_3   =    17.583
-ARC_4   =    24.913
-ARC_5   =    61.711
-ARC_6   =    93.376
-!
-!
-!   the radii of curvature
-!
-!
-R_1     =    4518.973
-R_2     =    7562.5
-R_3     =    5678.832
-R_4     =   12172.425
-R_5     =    6992.5
-R_6     =    4518.206
-!
-!   other dimensions
-!
-R_G     =    4173.5
-H_G     =    3461.0 
-H_D     =    3662.0
-!
-!
-!    The dimensions of the cavity (the “empty space” of the casing), and of its radius corner 
-!
-!
-ESRA     =    625.0   !  radial size
-ESPO     =   1243.0   !  poloidal size 
-ESCR     =     38.0   !  chamfer radius
-!
-WPCF     =     10.0   !  thickness of the case filler
-WPGI     =      8.0   !  thickness of the ground insulation
-!
-!
-!     The casing thicknesses in the radial direction for both the inner and outer legs
-!     The outer shape of the casing, and of the “D” shape
-!
-!
-!
-OWSL    =     510.0        !  Outer width straight leg (radial direction)
-IWSL    =      40.0        !  Inner width straight leg (radial direction)
-IWOL    =     190.0        !  Inner width outer leg (radial direction)
-OWOL    =     225.0        !  Outer width outer leg (radial direction)
-CSPO    =    1443.0        !  Casing maximal poloidal size
-!
-CS0PO   =    1181.6
-ARC_0   =      10.0
-!
-! CHRA/ CHPO               !  Chamfer on inner casing (radial and poloidal size)
-!
-CHRA    =      17.36
-CHPO    =     100.0
-!
-!
-!
-!             Dimensions of the outer intercoil structures 
-!   
-!
-!   the upper part
-!
-DE_U  = 250                   !   the distance from the edge
-TH_U  = 200                   !   thickness
-!
-!   the lower part
-!
-DE_L  = 250                   !   the distance from the edge
-TH_L  = 200                   !   thickness
-!
-!
-!                        M E S H      P A R A M E T E R S
-!
-!
-ESI_A  =  50.0     ! SIZE ELEMENTS  OF AREAS 
-!
-ESI_V  =  200.0    ! SIZE ELEMENTS OF VOLUMES 
-!
-!
-!
-!                 T F C   A N D    W P    M A T E R I A L S : 
-!
-!                      PROPERTIES AND STATIC ALLOWABLES 
-!
-!
-!     Thermo-mechanical properties of EK1/JJ1 strengthened austenitic as forged sections 
-!                                 (TFC inner leg)
-!
-!     MAT 1
-!      
-E1_4.2    =  2.05e5
-E1_293    =  1.96e5
-NI1       =  0.29
-AL1       =  1.04E-5
-S102      =  1000.0
-!
-!
-!      Thermo-mechanical properties of EC1 strengthened austenitic as cast sections 
-!                    (TFC outer leg and outer intercoil structure)
-!
-!     MAT 2
-!
-E2        =  1.90e5
-NI2       =  0.29
-AL2       =  1.04E-5
-S202     =  750.0
-!
-!
-!
-!       Thermo-mechanical properties of the WP ground insulation (VPI epoxy glass)
-!
-!                       ! ANSYS  -> CSKP,11,1,1,8,7,1,1,
-!
-!                           I  (X)                             I--------
-!                           I                -----  (Z)        I 
-!                           I                                  I
-!                                                              I
-!    MAT 3 AND 4           MAT 3             MAT 4             I--------
-!
-E3IP     =  2.0E4       !  EX,EY             EZ,EY 
-E3NO     =  1.2E4       !  EZ                EX
-G3IP     =  0.6E4       !  GXY               GZY
-G3OP     =  0.6E4       !  GXZ,GYZ           GXZ,GYX 
-NI3IP    =  0.17        !  NIXY              NIZY 
-NI3OP    =  0.33        !  NIXZ,NIYZ         NIXZ,NIYX
-AL3IP    =  6.90E-6     !  ALX,ALY           ALZ,ALY
-AL3OP    =  2.47E-5     !  ALZ               ALX
-!
-!
-!
-!      Thermo-mechanical properties of the TFC case/ WP filler
-!
-!
-!    MAT 5
-!
-E4_4.2   =  2.35E4
-E4_293   =  1.03E4
-NI4      =  0.32
-AL4      =  1.21E-5
-!
-!
-!
-!
-!       Calculated effective thermo-mechanical characteristics for the WP#3
-!       x – the coil radial direction (8 turns),
-!       y – the coil toroidal direction (8 double pancakes), 
-!       z – along the coil perimeter
-!
-!                           ! ANSYS   ->  CSKP,11,1,1,8,7,1,1,
-!
-!       MAT 6
-!
-E5X_4.2     =   3.459E4     !  EX
-E5X_293     =   3.366E4  
-E5Y_4.2     =   3.105E4     !  EZ 
-E5Y_293     =   3.029E4
-E5Z_4.2     =   9.531E4     !  EY
-E5Z_293     =   9.120E4
-G5XY_4.2    =   0.341E4     !  GXZ
-G5XY_293    =   0.329E4
-G5YZ_4.2    =   1.918E4     !  GZY
-G5YZ_293    =   1.853E4
-G5XZ_4.2    =   2.032E4     !  GXY
-G5XZ_293    =   1.957E4
-NI5XY_4.2   =   0.333       !  NIXZ
-NI5XY_293   =   0.329
-NI5YZ_4.2   =   0.094       !  NIZY
-NI5YZ_293   =   0.096
-NI5XZ_4.2   =   0.104       !  NIXY 
-NI5XZ_293   =   0.106
-AL5X        =   1.08E-5     !  ALX
-AL5Y        =   1.13E-5     !  ALZ
-AL5Z        =   1.04E-5     !  ALY
-!
-!
-!
-!            Friction coeffcients
-!
-!
-!   MAT 7
-! 
-MU_WI  =  0.5     !   between  winding  and  insulation
-!
-!
-!   MAT 8
-! 
-MU_IF  =  0.4     !   between  insulation  and  filler
-!
-!
-!   MAT 9
-! 
-MU_FC  =  0.3     !   between  filler  and  casing
-!
-!
-!
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!*DIM, KPC ,  ARRAY ,  100     , 3 ,       !  coordinates of the keypoints
-pi =  3.1415926535898
-P180=180
-rd = 57.2957795130823
-tol=1
-N16=16
-DCOP=10000
-!
-!    The half-section of the inner leg is defined by its contour  defined counter clockwise. 
-!    the half-section is defined by 3 points. 
-!
-!   1  point
-!
-KPC(15,1)   =    R_G-ESRA/2-OWSL
-KPC(15,2)   =    0.0
-KPC(15,3)   =    0.0
-!
-!   2  point
-!
-KPC(16,1)   =      R_G-ESRA/2-OWSL
-KPC(16,2)   =     -CS0PO/2
-KPC(16,3)   =       0.0
-!
-!   3  point
-!
-
-Y=(CSPO-CS0PO)/2
-X=Y/TAN(ARC_0/RD)
-KPC(17,1)   =     R_G-ESRA/2-OWSL+X
-KPC(17,2)   =    -CSPO/2
-KPC(17,3)   =     0.0
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-!
-!
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!       cceli,  
-!       cceli, 
-*create,cceli,mac   
-! 
-!
-KPC(7,1)  =  R_G 
-KPC(7,2)  =  0.0
-KPC(7,3)  =  H_G
-!
-KPC(13,1)  =  R_G 
-KPC(13,2)  =  0.0
-KPC(13,3)  = -H_D
-!
-KPC(1,1)  =  R_G + R_1
-KPC(1,2)  =  0.0
-KPC(1,3)  =  H_G
-!
-KPC(8,1)  =  R_G + R_1 + R_1*sin((arc_1-90)/rd) 
-KPC(8,2)  =  0.0
-KPC(8,3)  =  H_G + R_1 - (R_1- R_1*cos((arc_1-90)/rd))
-!
-*do,lp,1,8
-x=kpc(lp,1)
-y=kpc(lp,2)
-z=kpc(lp,3)
-K,lp,x,y,z,  
-*enddo
-CSKP,11,0,1,8,7,1,1,
-CSYS,11,
-k,2,R_1-R_2,0,0 
-CSKP,11,0,2,8,7,1,1,
-CSYS,11,
-x= R_2*cos(arc_2/rd)
-y=-R_2*sin(arc_2/rd)
-k,9,x,y,0 
-CSYS,0,
-!
-KPC(2,1)  =  KX(2)
-KPC(2,2)  =  KY(2)
-KPC(2,3)  =  KZ(2)
-!
-KPC(9,1)  =  KX(9)
-KPC(9,2)  =  KY(9)
-KPC(9,3)  =  KZ(9)
-!
-CSKP,11,0,2,9,7,1,1,
-CSYS,11,
-K,3,R_2-R_3,0,0,
-CSYS,0,
-!
-KPC(3,1)  =  KX(3)
-KPC(3,2)  =  KY(3)
-KPC(3,3)  =  KZ(3)
-!
-CSKP,11,0,3,9,1,1,1,
-CSYS,11,
-x= R_3*cos(arc_3/rd)
-y=-R_3*sin(arc_3/rd)
-k,10,x,y,0 
-CSYS,0,
-!
-KPC(10,1)  =  KX(10)
-KPC(10,2)  =  KY(10)
-KPC(10,3)  =  KZ(10)
-!
-CSKP,11,0,3,10,1,1,1,   
-CSYS,11,
-K,4,R_3-R_4,0,0,  
-CSYS,0,
-!
-KPC(4,1)  =  KX(4)
-KPC(4,2)  =  KY(4)
-KPC(4,3)  =  KZ(4)
-!
-CSKP,11,0,4,10,1,1,1,
-CSYS,11,
-x= R_4*cos(arc_4/rd)
-y=-R_4*sin(arc_4/rd)
-k,11,x,y,0 
-CSYS,0,
-!
-KPC(11,1)  =  KX(11)
-KPC(11,2)  =  KY(11)
-KPC(11,3)  =  KZ(11)
-!
-CSKP,11,0,4,11,7,1,1,   
-CSYS,11,
-K,5,R_4-R_5,0,0,  
-!*  
-CSKP,11,0,5,11,3,1,1,    
-CSYS,11,
-x= R_5*cos(arc_5/rd)
-y=-R_5*sin(arc_5/rd)
-k,12,x,y,0 
-CSYS,0,
-!
-KPC(5,1)  =  KX(5)
-KPC(5,2)  =  KY(5)
-KPC(5,3)  =  KZ(5)
-!
-KPC(12,1)  =  KX(12)
-KPC(12,2)  =  KY(12)
-KPC(12,3)  =  KZ(12)
-!
-CSKP,11,0,5,12,4,1,1,   
-CSYS,11,
-K,6,R_5-R_6,0,0,
-CSYS,0,
-!
-KPC(6,1)  =  KX(6)
-KPC(6,2)  =  KY(6)
-KPC(6,3)  =  KZ(6)
-!
-KPC(14,1)  =  R_G
-KPC(14,2)  =  0
-KPC(14,3)  =  0
-!
-KDELE,ALL 
-CSYS,0, 
-!
-*do,lp,1,14
-x=kpc(lp,1)
-y=kpc(lp,2)
-z=kpc(lp,3)
-K,lp,x,y,z,  
-*enddo
-!
-LARC,7,8,1,R_1, 
-LARC,8,9,2,R_2,  
-LARC,9,10,3,R_3,  
-LARC,10,11,4,R_4,  
-LARC,11,12,5,R_5,  
-LARC,12,13,6,R_6, 
-!
-LDIV,ALL,0.5, ,2,0 
-LDELE,ALL  
-NUMCMP,ALL  
-!
-LSTR,      13,       14  
-LSTR,      14,       7  
-!
-LARC,7,15,1,R_1, 
-LARC,15,8,1,R_1, 
-!
-LARC,8,16,2,R_2,  
-LARC,16,9,2,R_2,  
-!
-LARC,9,17,3,R_3,  
-LARC,17,10,3,R_3,  
-!
-LARC,10,18,4,R_4,  
-LARC,18,11,4,R_4,  
-!
-LARC,11,19,5,R_5, 
-LARC,19,12,5,R_5,   
-!
-LARC,12,20,6,R_6, 
-LARC,20,13,6,R_6, 
-!
-CM,L_centerline,LINE
-!                         
-*end            
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!
-!
-!
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!       empty,  
-!       empty, 
-*create,empty,mac   
-!
-CSYS,0, 
-!
-K,21,R_G-ESRA/2,0,0,  
-K,22,R_G+ESRA/2,0,0,    
-K,23,R_G+ESRA/2,-ESPO/2,0,  
-K,24,R_G-ESRA/2,-ESPO/2,0,  
-!
-!                   
-LSTR,      22,       23
-LSTR,      23,       24
-LSTR,      24,       21
-!
-LFILLT,16,17,ESCR, ,
-!
-NUMMRG,KP, tol, , ,LOW 
-NUMCMP,ALL   
-!
-K,27,R_G-ESRA/2+WPCF,0,0,  
-K,28,R_G-ESRA/2+WPCF+WPGI,0,0,  
-!
-K,29,R_G+ESRA/2-WPCF,0,0,  
-K,30,R_G+ESRA/2-WPCF-WPGI,0,0, 
-!
-K,31,R_G+ESRA/2-WPCF,-ESPO/2+wpcf,0,  
-K,32,R_G+ESRA/2-WPCF-WPGI,-ESPO/2+WPCF+WPGI,0, 
-!
-LSTR,      21,       27
-LSTR,      27,       28
-!
-ADRAG,      19, , , , , ,17,18, 
-NUMMRG,KP, tol, , ,LOW 
-NUMCMP,ALL  
-A,25,23,31,34 
-A,23,22,29,31 
-NUMMRG,KP,tol , , ,LOW 
-NUMCMP,ALL  
-CM,A_filler,AREA
-! 
-ADRAG,      20, , , , , ,17,18,
-NUMMRG,KP, tol, , ,LOW 
-NUMCMP,ALL 
-A,34,31,32,36  
-A,32,31,29,30  
-NUMMRG,KP,tol , , ,LOW 
-NUMCMP,ALL 
-CMSEL,U,A_FILLER
-CM,A_insulation,AREA
-!
-ALLSEL,ALL  
-NUMMRG,KP, tol, , ,LOW 
-NUMCMP,ALL  
-!
-A,28,35,36,32,30,
-CMSEL,U,A_FILLER
-CMSEL,U,A_insulation
-CM,A_Winding,AREA
-ALLSEL,ALL  
-CM,A_Empty,AREA
-!
-FLST,8,14,4 
-FITEM,8,2   
-FITEM,8,3   
-FITEM,8,4   
-FITEM,8,5   
-FITEM,8,6   
-FITEM,8,7   
-FITEM,8,8   
-FITEM,8,9   
-FITEM,8,10  
-FITEM,8,11  
-FITEM,8,12  
-FITEM,8,13  
-FITEM,8,14  
-FITEM,8,1   
-VDRAG,       1,2 ,3 ,4 , , ,P51X   
-NUMMRG,KP, tol, , ,LOW
-NUMCMP,ALL  
-! 
-CM,V_filler,VOLU  
-CMSEL,U,V_filler  
-!
-FLST,8,14,4 
-FITEM,8,2   
-FITEM,8,3   
-FITEM,8,4   
-FITEM,8,5   
-FITEM,8,6   
-FITEM,8,7   
-FITEM,8,8   
-FITEM,8,9   
-FITEM,8,10  
-FITEM,8,11  
-FITEM,8,12  
-FITEM,8,13  
-FITEM,8,14  
-FITEM,8,1   
-VDRAG,       5,6 ,7 ,8 , , ,P51X  
-CM,V_insulation,VOLU  
-CMSEL,U,V_insulation  
-!
-FLST,8,14,4 
-FITEM,8,2   
-FITEM,8,3   
-FITEM,8,4   
-FITEM,8,5   
-FITEM,8,6   
-FITEM,8,7   
-FITEM,8,8   
-FITEM,8,9   
-FITEM,8,10  
-FITEM,8,11  
-FITEM,8,12  
-FITEM,8,13  
-FITEM,8,14  
-FITEM,8,1   
-VDRAG,       9, , , , , ,P51X  
-CM,V_winding,VOLU  
-!
-ALLSEL,ALL  
-NUMMRG,KP, tol, , ,LOW 
-NUMCMP,ALL  
-CM,V_Empty,VOLU  
-!                         
-*end            
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!
-!
-!
-!
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!       casi1,  
-!       casi1, 
-*create,casi1,mac   
-!
-CSYS,0, 
-!
-K,1001,R_G-ESRA/2-OWOL,0,0,  
-K,1002,R_G+ESRA/2+IWOL,0,0, 
-K,1003,R_G+ESRA/2+IWOL,-CSPO/2+CHPO,0,  
-K,1004,R_G+ESRA/2+IWOL-CHRA,-CSPO/2,0,  
-K,1005,R_G+ESRA/2,-CSPO/2,0,  
-K,1006,R_G-ESRA/2-OWOL,-CSPO/2,0,  
-K,1007,R_G-ESRA/2-OWOL,-ESPO/2+ESCR,0, 
-!
-ASEL,U, , ,all
-A,21,1001,1007,26 
-A,1006,1005,23,25,26,1007  
-A,23,1005,1004,1003,1002,22
-!
-CM,A_casing1,AREA
-!
-FLST,8,14,4 
-FITEM,8,2   
-FITEM,8,3   
-FITEM,8,4   
-FITEM,8,5   
-FITEM,8,6   
-FITEM,8,7   
-FITEM,8,8   
-FITEM,8,9   
-FITEM,8,10  
-FITEM,8,11  
-FITEM,8,12  
-FITEM,8,13  
-FITEM,8,14  
-FITEM,8,1   
-VDRAG,       449, , , , , ,P51X   
-NUMMRG,KP,tol , , ,LOW
-NUMCMP,ALL  
-! 
-CMSEL,U,V_Empty  
-CM,V_CASING1,VOLU 
-! 
-FLST,8,14,4 
-FITEM,8,2   
-FITEM,8,3   
-FITEM,8,4   
-FITEM,8,5   
-FITEM,8,6   
-FITEM,8,7   
-FITEM,8,8   
-FITEM,8,9   
-FITEM,8,10  
-FITEM,8,11  
-FITEM,8,12  
-FITEM,8,13  
-FITEM,8,14  
-FITEM,8,1   
-VDRAG,       450, , , , , ,P51X   
-NUMMRG,KP,tol , , ,LOW
-NUMCMP,ALL  
-! 
-CM,V_CASING1,VOLU 
-!  
-FLST,8,14,4 
-FITEM,8,2   
-FITEM,8,3   
-FITEM,8,4   
-FITEM,8,5   
-FITEM,8,6   
-FITEM,8,7   
-FITEM,8,8   
-FITEM,8,9   
-FITEM,8,10  
-FITEM,8,11  
-FITEM,8,12  
-FITEM,8,13  
-FITEM,8,14  
-FITEM,8,1   
-VDRAG,       451, , , , , ,P51X   
-NUMMRG,KP,tol , , ,LOW
-NUMCMP,ALL  
-! 
-CM,V_CASING1,VOLU 
-! 
-ALLSEL,ALL  
-NUMMRG,KP,tol , , ,LOW 
-NUMCMP,ALL  
-!                         
-*end            
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!
-!
-!
-!
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!       casi2,  
-!       casi2, 
-*create,casi2,mac   
-!
-CSYS,0,
-VSEL,R, , ,155,157 
-VSEL,A, , ,166,168
-ALLSEL,BELOW,VOLU   
-!
-VDELE,ALL, , ,1
-!
-K,1002,R_G+ESRA/2+IWSL,0,0, 
-K,1003,R_G+ESRA/2+IWSL,-CSPO/2+CHPO,0,  
-K,1004,R_G+ESRA/2+IWSL-CHRA,-CSPO/2,0,  
-!
-A,263,23,22,1002,1003,1004
-!
-VDRAG,     451, , , , , ,      57   
-VDRAG,     451, , , , , ,     345 
-!  
-NUMMRG,KP, tol, , ,LOW 
-NUMCMP,ALL  
-!
-KSEL,A,,,1
-!
-LARC,293,288,1,R_1-ESRA/2-(IWOL+IWSL)/2, 
-LDIV,765,0.525, ,2,0 
-LDELE,765,766
-!
-LARC,293,324,1,R_1-ESRA/2-(IWOL+IWSL)/2, 
-LARC,324,288,1,R_1-ESRA/2-(IWOL+IWSL)/2, 
-!
-A,293,324,288,45,55,65,  
-!
-ADRAG,765,766 , , , , ,     700  
-!
-ADRAG,     699, , , , , ,767,770  
-!
-NUMMRG,KP,tol, , ,LOW 
-!
-A,267,291,328,290,260,265
-!
-!
-!
-!
-!
-KSEL,A,,,6
-LARC,318,317,6,R_6-ESRA/2-(IWOL+IWSL)/2, 
-LDIV,768,0.5415, ,2,0 
-LDELE,768,
-LDELE,771,
-!
-LARC,318,325,6,R_6-ESRA/2-(IWOL+IWSL)/2, 
-LARC,325,317,6,R_6-ESRA/2-(IWOL+IWSL)/2, 
-!
-A,318,165,155,145,317,325  
-!
-ADRAG,768,771 , , , , ,     760 
-!
-ADRAG,     762, , , , , ,774,778  
-!
-NUMMRG,KP,tol, , ,LOW 
-!
-A,287,320,332,315,283,285,
-!  
-CM,AA,AREA  
-!
-FLST,2,12,5,ORDE,8  
-FITEM,2,40  
-FITEM,2,57  
-FITEM,2,512 
-FITEM,2,516 
-FITEM,2,566 
-FITEM,2,572 
-FITEM,2,613 
-FITEM,2,-618
-VA,P51X 
-!
-CMSEL,S,AA  
-ALLSEL,BELOW,AREA 
-!
-FLST,2,12,5,ORDE,8  
-FITEM,2,210 
-FITEM,2,227 
-FITEM,2,552 
-FITEM,2,556 
-FITEM,2,571 
-FITEM,2,612 
-FITEM,2,619 
-FITEM,2,-624
-VA,P51X
-!
-CMSEL,A,V_CASING1     
-ALLSEL,BELOW,VOLU   
-CM,V_CASING2,VOLU 
-!
-CMSEL,R,A_CASING1   
-ASEL,A, , ,451
-CM,A_CASING2,AREA 
-!
-ALLSEL,ALL  
-NUMMRG,KP, tol, , ,LOW 
-NUMCMP,ALL 
-!
-CMDELE,AA   
-!
-!                         
-*end            
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!
-!
-!
-!
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!       casi3,  
-!       casi3, 
-*create,casi3,mac   
-!
-CSYS,0,
-!
-VSEL,R, , ,129
-VSEL,A, , ,143
-ALLSEL,BELOW,VOLU   
-!
-K,1001,R_G+R_1,20,H_G+R_1+ESRA/2+OWOL-50  
-K,1002,R_G+R_1,-CSPO/2-20,H_G+R_1+ESRA/2+OWOL-50 
-K,1003,R_G+R_1,20,H_G+R_1+ESRA/2+OWOL+50  
-K,1004,R_G+R_1,-CSPO/2-20,H_G+R_1+ESRA/2+OWOL+50 
-!
-A,1001,1002,1004,1003,
-!
-FLST,2,2,5,ORDE,2   
-FITEM,2,461 
-FITEM,2,517 
-ASBA,P51X,     625   
-!
-LDIV,785,0.45, ,2,0
-!
-LSTR,    330,     333  
-!
-ADRAG,     570, , , , , ,787,791   
-!
-VSBA,     129,     461     
-VSBA,     143,     517 
-! 
-VDELE,     167, , ,1
-VDELE,     129, , ,1
-!
-CMSEL,A,V_CASING2   
-ALLSEL,BELOW,VOLU    
-CM,V_Casing3,VOLU   
-!
-!
-ALLSEL,ALL  
-NUMMRG,KP,tol , , ,LOW 
-NUMCMP,ALL 
-!
-!
-VSEL,R, , ,137
-VSEL,A, , ,150
-ALLSEL,BELOW,VOLU   
-!
-K,1001,R_G+R_6,20      ,-H_D-R_6-ESRA/2-OWOL  
-K,1002,R_G+R_6,-CSPO/2-20,-H_D-R_6-ESRA/2-OWOL  
-LSTR,      1001,       1002
-!
-LDIV,612,0.6, ,2,0 
-LDIV,678,0.6, ,2,0 
-!
-A,1001,1002,337,336,
-!
-FLST,2,2,6,ORDE,2   
-FITEM,2,137 
-FITEM,2,150 
-VSBA,P51X,     629  
-!
-VDELE,     167, , ,1
-VDELE,     168, , ,1
-!
-CMSEL,A,V_CASING3   
-ALLSEL,BELOW,VOLU    
-CM,V_casing3,VOLU   
-!
-ALLSEL,ALL  
-NUMMRG,KP,tol , , ,LOW 
-NUMCMP,ALL 
-!
-VSEL,S,,,165,166
-ALLSEL,BELOW,VOLU   
-!
-VDELE,165,166  
-!  
-FLST,2,4,5,ORDE,4   
-FITEM,2,626 
-FITEM,2,628 
-FITEM,2,631 
-FITEM,2,633 
-ADELE,P51X, , ,1
-!  
-FLST,2,2,4,ORDE,2   
-FITEM,2,797 
-FITEM,2,801 
-LCOMB,P51X, ,0  
-FLST,2,2,4,ORDE,2   
-FITEM,2,798 
-FITEM,2,802 
-LCOMB,P51X, ,0  
-FLST,2,2,4,ORDE,2   
-FITEM,2,803 
-FITEM,2,805 
-LCOMB,P51X, ,0  
-!
-ADRAG,     797, , , , , ,     608   
-ADRAG,     803, , , , , ,     674   
-NUMMRG,KP,tol, , ,LOW   
-!
-ALLSEL,BELOW,AREA   
-CM,aa,AREA  
-FLST,5,10,5,ORDE,9  
-FITEM,5,204 
-FITEM,5,206 
-FITEM,5,543 
-FITEM,5,-545
-FITEM,5,625 
-FITEM,5,628 
-FITEM,5,630 
-FITEM,5,632 
-FITEM,5,634 
-ASEL,R, , ,P51X 
-! 
-FLST,2,10,5,ORDE,9  
-FITEM,2,204 
-FITEM,2,206 
-FITEM,2,543 
-FITEM,2,-545
-FITEM,2,625 
-FITEM,2,628 
-FITEM,2,630 
-FITEM,2,632 
-FITEM,2,634 
-VA,P51X 
-!
-CMSEL,S,AA  
-!
-FLST,5,8,5,ORDE,8   
-FITEM,5,200 
-FITEM,5,493 
-FITEM,5,-494
-FITEM,5,624 
-FITEM,5,626 
-FITEM,5,-627
-FITEM,5,629 
-FITEM,5,-630
-ASEL,R, , ,P51X 
-!  
-FLST,2,8,5,ORDE,8   
-FITEM,2,200 
-FITEM,2,493 
-FITEM,2,-494
-FITEM,2,624 
-FITEM,2,626 
-FITEM,2,-627
-FITEM,2,629 
-FITEM,2,-630
-VA,P51X 
-ALLSEL,BELOW,VOLU   
-CMSEL,A,V_CASING3     
-ALLSEL,BELOW,VOLU   
-!  
-CM,V_Casing3,VOLU   
-!
-ALLSEL,ALL  
-NUMMRG,KP,tol , , ,LOW 
-NUMCMP,ALL 
-!
-CMDELE,aa
-!                         
-*end            
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-
-
-!
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!       casi4,  
-!       casi4, 
-*create,casi4,mac   
-!
-CSYS,0,
-
-*do,lp,15,17
-x=kpc(lp,1)
-y=kpc(lp,2)
-z=kpc(lp,3)
-K,lp+1000,x,y,z,  
-*enddo
-!
-LSTR,      1015,       1016
-LSTR,      1016,       1017
-x=kpc(15,1)
-!
-K,2001,x,0,H_G+R_1+ESRA/2+OWOL 
-K,2002,x,0,-H_D-R_6-ESRA/2-OWOL 
-!
-LSTR,      2002,       1015
-LSTR,      1015,       2001
-!
-LSTR,      330,       2001
-LSTR,      258,       1015
-LSTR,      338,       2002
-!
-A,330,2001,1015,258,232,234,333,
-A,258,1015,2002,338,336,254,256,
-!
-VDRAG,     634, , , , , ,548,552, 
-VDRAG,     633, , , , , ,548,552, 
-!
-ALLSEL,ALL  
-NUMMRG,KP,tol , , ,LOW 
-NUMCMP,ALL 
-!
-CMSEL,U,V_CASING3   
-CMSEL,U,V_EMPTY 
-!
-CMSEL,A,V_CASING3   
-ALLSEL,BELOW,VOLU   
-CM,V_Casing4,VOLU  
-!
-x=kpc(16,1)
-y=kpc(16,2)
-z=-H_D-R_6-ESRA/2-OWOL
-K,1001,x,y,z, 
-x=kpc(17,1)
-y=kpc(17,2)
-z=-H_D-R_6-ESRA/2-OWOL
-K,1002,x,y,z, 
-LSTR,      1001,     1002
-!
-ADRAG,     824, , , , , ,815,823
-CMSEL,S,V_CASING4   
-FLST,2,44,6,ORDE,2  
-FITEM,2,127 
-FITEM,2,-170
-FLST,3,2,5,ORDE,2   
-FITEM,3,649 
-FITEM,3,-650
-VSBA,P51X,P51X  
-!
-FLST,2,6,6,ORDE,2   
-FITEM,2,171 
-FITEM,2,-176
-VDELE,P51X, , ,1
-VPLOT   
-CM,V_CaSING4,VOLU   
-!
-ALLSEL,ALL  
-NUMMRG,KP,tol , , ,LOW 
-NUMCMP,ALL 
-!
-LDELE,     791, , ,1
-LDELE,     792, , ,1
-NUMCMP,ALL 
-!
-!                         
-*end            
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!
-!
-!
-!
-!
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!       inter,  
-!       inter, 
-*create,inter,mac   
-! 
-CSYS,0,
-!
-CMSEL,S,V_CASING4   
-ALLSEL,BELOW,VOLU   
-ASEL,R, , ,     510 
-ALLSEL,BELOW,AREA   
-!
-CSKP,11,0,266,267,269,1,1,  
-CSYS,11,
-K,1001,DE_U,0,0 
-K,1002,DE_U+TH_U,0,0 
-!
-CSKP,11,0,268,269,267,1,1,  
-CSYS,11,
-K,2001,DE_U,0,0 
-K,2002,DE_U+TH_U,0,0 
-!
-LARC,1001,2001,267,R_2+ESRA/2+OWOL-DE_U,   
-LARC,1002,2002,267,R_2+ESRA/2+OWOL-DE_U-TH_U, 
-!
-ASBL,     510,     835  
-ASBL,     656,     836  
-ALLSEL,BELOW,VOLU   
-!
-NUMCMP,ALL 
-!
-!
-!
-ASEL,R, , ,     530 
-ASEL,A, , ,     526 
-ALLSEL,BELOW,AREA  
-!
-CSKP,11,0,274,275,277,1,1,  
-CSYS,11,
-K,1001,DE_L,0,0 
-K,1002,DE_L+TH_L,0,0 
-!
-CSKP,11,0,276,277,279,1,1,  
-CSYS,11,
-K,2001,DE_L,0,0 
-K,2002,DE_L+TH_L,0,0 
-!
-CSKP,11,0,278,279,277,1,1,  
-CSYS,11,
-K,3001,DE_L,0,0 
-K,3002,DE_L+TH_L,0,0 
-!
-LARC,1001,2001,277,R_4+ESRA/2+OWOL-DE_L,   
-LARC,1002,2002,277,R_4+ESRA/2+OWOL-DE_L-TH_L, 
-!
-LARC,2001,3001,277,R_5+ESRA/2+OWOL-DE_L,   
-LARC,2002,3002,277,R_5+ESRA/2+OWOL-DE_L-TH_L,
-!
-ASBL,     526,     841  
-ASBL,     658,     842  
-ASBL,     530,     843  
-ASBL,     660,     844  
-!
-ALLSEL,BELOW,VOLU   
-CM,V_CASING,VOLU 
-!
-CSYS,0,
-ALLSEL,ALL  
-NUMMRG,KP,tol , , ,LOW 
-NUMCMP,ALL 
-!
-CMSEL,S,V_CASING
-ALLSEL,BELOW,VOLU   
-CSYS,1  
-AGEN,2,656, , , ,-P180/N16, , ,0 
-SAVE
-V,     361,     360,     358,     359,     370,     371,     368,     369   
-!
-FLST,3,2,5,ORDE,2   
-FITEM,3,659 
-FITEM,3,-660
-AGEN,2,P51X, , , ,-P180/N16, , ,0 
-!
-V,     365,     364,     362,     363,     374,     375,     372,     373    
-V,     367,     366,     364,     365,     376,     377,     375,     374     
-!
-CM,V_CAS_INT,VOLU 
-!
-CSYS,0,
-ALLSEL,ALL  
-NUMMRG,KP,tol , , ,LOW 
-NUMCMP,ALL 
-!
-VSEL,S, , ,171,173 
-ALLSEL,BELOW,VOLU   
-CM,V_INTER,VOLU 
-ALLSEL,ALL  
-!
-!
-VSEL,S, , ,163,164 
-VSEL,A, , ,169,170 
-ALLSEL,BELOW,VOLU   
-CM,V_CAS_COR,VOLU 
-ALLSEL,ALL  
-!
-CMSEL,U,V_INTER
-CMSEL,U,V_CAS_COR
-!
-CM,V_RING,VOLU 
-ALLSEL,ALL 
-! LSTR,      20002,       23
-!                         
-*end            
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!
-!
-!
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!       eemat,  
-!       eemat, 
-*create,eemat,mac   
-! 
-!
-!   ELEMENTS
-!
-ET,1,SOLID185   
-!*  
-ET,2,SHELL181   
-!* 
-!
-!   MATERIALS
-!
-!  MAT 1
-!
-MPTEMP,,,,,,,,  
-MPTEMP,1,4.2
-MPTEMP,2,293
-MPDATA,EX,1,,E1_4.2 
-MPDATA,EX,1,,E1_293 
-MPDATA,PRXY,1,,NI1  
-MPDATA,PRXY,1,,NI1  
-MPTEMP,,,,,,,,  
-MPTEMP,1,0  
-UIMP,1,REFT,,,  
-MPDATA,ALPX,1,,AL1  
-TB,BKIN,1,1,2,1 
-TBTEMP,0
-TBDATA,,S102,0,,,,  
-!
-!
-!  MAT 2
-!
-MPTEMP,,,,,,,,  
-MPTEMP,1,0  
-MPDATA,EX,2,,E2 
-MPDATA,PRXY,2,,NI2  
-MPTEMP,,,,,,,,  
-MPTEMP,1,0  
-UIMP,2,REFT,,,  
-MPDATA,ALPX,2,,AL2  
-TB,BKIN,2,1,2,1 
-TBTEMP,0
-TBDATA,,S202,0,,,, 
-!
-!
-!    MAT 3 
-!
-MPTEMP,,,,,,,,  
-MPTEMP,1,0  
-MPDATA,EX,3,,E3IP   
-MPDATA,EY,3,,E3IP   
-MPDATA,EZ,3,,E3NO   
-MPDATA,PRXY,3,,NI3IP
-MPDATA,PRYZ,3,,NI3OP
-MPDATA,PRXZ,3,,NI3OP
-MPDATA,GXY,3,,G3IP  
-MPDATA,GYZ,3,,G3OP  
-MPDATA,GXZ,3,,G3OP  
-MPTEMP,,,,,,,,  
-MPTEMP,1,0  
-UIMP,3,REFT,,,  
-MPDATA,ALPX,3,,AL3IP
-MPDATA,ALPY,3,,AL3IP
-MPDATA,ALPZ,3,,AL3OP
-!
-!
-!   MAT 4
-!
-MPTEMP,,,,,,,,  
-MPTEMP,1,0  
-MPDATA,EX,4,,E3NO   
-MPDATA,EY,4,,E3IP   
-MPDATA,EZ,4,,E3IP   
-MPDATA,PRXY,4,,NI3OP
-MPDATA,PRYZ,4,,NI3IP
-MPDATA,PRXZ,4,,NI3OP
-MPDATA,GXY,4,,G3OP  
-MPDATA,GYZ,4,,G3IP  
-MPDATA,GXZ,4,,G3OP  
-MPTEMP,,,,,,,,  
-MPTEMP,1,0  
-UIMP,4,REFT,,,  
-MPDATA,ALPX,4,,AL3OP
-MPDATA,ALPY,4,,AL3IP
-MPDATA,ALPZ,4,,AL3IP
-!
-!
-!    MAT 5
-!
-MPTEMP,,,,,,,,  
-MPTEMP,1,4.2
-MPTEMP,2,293
-MPDATA,EX,5,,E4_4.2 
-MPDATA,EX,5,,E4_293 
-MPDATA,PRXY,5,,NI4  
-MPDATA,PRXY,5,,NI4  
-MPTEMP,,,,,,,,  
-MPTEMP,1,0  
-UIMP,5,REFT,,,  
-MPDATA,ALPX,5,,AL4  
-!
-!
-!    MAT 6
-!
-MPTEMP,,,,,,,,  
-MPTEMP,1,4.2
-MPTEMP,2,293
-MPDE,EX,5   
-MPDE,PRXY,5 
-MPDATA,EX,5,,23500  
-MPDATA,EX,5,,10300  
-MPDATA,PRXY,5,,0.32 
-MPDATA,PRXY,5,,0.32 
-MPTEMP,,,,,,,,  
-MPTEMP,1,4.2
-MPTEMP,2,293
-MPDATA,EX,6,,E5X_4.2
-MPDATA,EX,6,,E5X_293
-MPDATA,EY,6,,E5Z_4.2
-MPDATA,EY,6,,E5Z_293
-MPDATA,EZ,6,,E5Y_4.2
-MPDATA,EZ,6,,E5Y_293
-MPDATA,PRXY,6,,NI5XZ_4.2
-MPDATA,PRXY,6,,NI5XZ_293
-MPDATA,PRYZ,6,,NI5YZ_4.2
-MPDATA,PRYZ,6,,NI5YZ_293
-MPDATA,PRXZ,6,,NI5XY_4.2
-MPDATA,PRXZ,6,,NI5XY_293
-MPDATA,GXY,6,,G5XZ_4.2  
-MPDATA,GXY,6,,G5XZ_293  
-MPDATA,GYZ,6,,G5YZ_4.2  
-MPDATA,GYZ,6,,G5YZ_293  
-MPDATA,GXZ,6,,G5XY_4.2  
-MPDATA,GXZ,6,,G5XY_293  
-MPTEMP,,,,,,,,  
-MPTEMP,1,0  
-UIMP,6,REFT,,,  
-MPDATA,ALPX,6,,AL5X 
-MPDATA,ALPY,6,,AL5Z 
-MPDATA,ALPZ,6,,AL5Y 
-!
-!    MAT 7, MAT 8, MAT 9
-!
-!
-MPTEMP,,,,,,,,  
-MPTEMP,1,0  
-MPDATA,MU,7,,MU_WI  
-MPTEMP,,,,,,,,  
-MPTEMP,1,0  
-MPDATA,MU,8,,MU_IF 
-MPTEMP,,,,,,,,  
-MPTEMP,1,0  
-MPDATA,MU,9,,MU_FC  
-!
-!
-!
-!     L O C A L     C O O R D I N A T E     S Y S T E M S 
-!
-!
-!
-CSKP,11,1,1,8,7,1,1,
-!
-CSKP,12,1,2,8,7,1,1,
-!
-CSKP,13,1,3,9,1,1,1,
-!
-CSKP,14,1,4,10,1,1,1,
-!
-CSKP,15,1,5,11,3,1,1, 
-!
-CSKP,16,1,6,12,3,1,1, 
-!
-CSKP,17,0,1,7,2,1,1, 
-!
-!
-CSYS,0,
-!                         
-*end            
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!
-!
-!
-!
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!       mmes1,  
-!       mmes1, 
-*create,mmes1,mac   
-! 
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-!
-!    C O R R E C T I O N         of     T H E   G E O M E T R Y
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-CMSEL,S,V_CAS_COR   
-ALLSEL,BELOW,VOLU
-!
-x=kpc(15,1)
-!
-K,1001,x,0,H_G, 
-K,1002,x,0,-H_D 
-K,1003,x,-CSPO/2,H_G, 
-K,1004,x,-CSPO/2,-H_D 
-LSTR, 1001,  1003
-LSTR, 1002,  1004
-A,232,1001,1003,350,
-A,256,1002,1004,354,
-!
-FLST,2,2,6,ORDE,2   
-FITEM,2,163 
-FITEM,2,170 
-VSBA,P51X,     676  
-FLST,2,2,6,ORDE,2   
-FITEM,2,164 
-FITEM,2,169 
-VSBA,P51X,     675  
-!
-CM,V_CAS_COR,VOLU 
-!
-CMSEL,A,V_CASING4  
-CM,V_CASING4,VOLU 
-CM,V_CASING,VOLU 
-! 
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-!
-!
-!
-!   A R E A S
-!
-CMSEL,S,V_RING
-ALLSEL,BELOW,VOLU   
-!
-FLST,5,96,6,ORDE,12 
-FITEM,5,13  
-FITEM,5,-44 
-FITEM,5,69  
-FITEM,5,-100
-FITEM,5,116 
-FITEM,5,-123
-FITEM,5,129 
-FITEM,5,-136
-FITEM,5,139 
-FITEM,5,-146
-FITEM,5,149 
-FITEM,5,-156
-VSEL,R, , ,P51X 
-ALLSEL,BELOW,VOLU   
-/REPLOT 
-FLST,5,12,5,ORDE,12 
-FITEM,5,48  
-FITEM,5,52  
-FITEM,5,56  
-FITEM,5,60  
-FITEM,5,273 
-FITEM,5,276 
-FITEM,5,279 
-FITEM,5,282 
-FITEM,5,427 
-FITEM,5,460 
-FITEM,5,505 
-FITEM,5,552 
-ASEL,R, , ,P51X 
-ALLSEL,BELOW,AREA  
-!
-AATT,       1, ,   2,       0,  
-ESIZE,ESI_A,0,  
-!
-!
-!
-!
-FLST,2,2,4,ORDE,2   
-FITEM,2,684 
-FITEM,2,-685
-LCCAT,P51X  
-FLST,2,2,4,ORDE,2   
-FITEM,2,102 
-FITEM,2,627 
-LCCAT,P51X  
-CM,_Y,AREA  
-ASEL, , , ,     552 
-CM,_Y1,AREA 
-CHKMSH,'AREA'   
-CMSEL,S,_Y  
-!*  
-MSHKEY,1
-AMESH,_Y1   
-MSHKEY,0
-!*  
-CMDELE,_Y   
-CMDELE,_Y1  
-CMDELE,_Y2  
-!*  
-!
-!
-!
-FLST,5,9,5,ORDE,9   
-FITEM,5,48  
-FITEM,5,52  
-FITEM,5,56  
-FITEM,5,60  
-FITEM,5,273 
-FITEM,5,276 
-FITEM,5,279 
-FITEM,5,282 
-FITEM,5,460 
-CM,_Y,AREA  
-ASEL, , , ,P51X 
-CM,_Y1,AREA 
-CHKMSH,'AREA'   
-CMSEL,S,_Y  
-!*  
-MSHKEY,1
-AMESH,_Y1   
-MSHKEY,0
-!*  
-CMDELE,_Y   
-CMDELE,_Y1  
-CMDELE,_Y2  
-!*  
-!
-!
-!
-!
-MSHKEY,0
-CM,_Y,AREA  
-ASEL, , , ,     427 
-CM,_Y1,AREA 
-CHKMSH,'AREA'   
-CMSEL,S,_Y  
-!*  
-AMESH,_Y1   
-!*  
-CMDELE,_Y   
-CMDELE,_Y1  
-CMDELE,_Y2  
-!*  
-!
-!
-!
-MSHKEY,0
-CM,_Y,AREA  
-ASEL, , , ,     505 
-CM,_Y1,AREA 
-CHKMSH,'AREA'   
-CMSEL,S,_Y  
-!*  
-AMESH,_Y1   
-!*  
-CMDELE,_Y   
-CMDELE,_Y1  
-CMDELE,_Y2  
-!* 
-!
-!
-!  V O L U M E S
-!
-!
-!
-!
-ALLSEL,BELOW,VOLU      
-ESIZE,ESI_V,0,  
-!
-vsweep,all  
-CMSEL,S,V_EMPTY 
-ALLSEL,BELOW,VOLU        
-vsweep,all
-CMSEL,S,V_inter 
-ALLSEL,BELOW,VOLU        
-vsweep,all
-CMSEL,S,V_ring
-ALLSEL,BELOW,VOLU   
-!
-!
-! area
-!
-!
-FLST,5,12,5,ORDE,5  
-FITEM,5,1   
-FITEM,5,-9  
-FITEM,5,449 
-FITEM,5,-450
-FITEM,5,639 
-ASEL,R, , ,P51X 
-ALLSEL,BELOW,AREA    
-AATT,       1, ,   2,       0,  
-ESIZE,ESI_A,0,  
-MSHKEY,0
-CM,_Y,AREA  
-ASEL, , , ,     639 
-CM,_Y1,AREA 
-CHKMSH,'AREA'   
-CMSEL,S,_Y  
-!*  
-AMESH,_Y1   
-!*  
-CMDELE,_Y   
-CMDELE,_Y1  
-CMDELE,_Y2  
-!*  
-!
-!  volumes
-!
-ALLSEL,BELOW,VOLU      
-ESIZE,ESI_V,0,  
-vsweep,all
-!
-ALLSEL,ALL  
-!
-!
-!  areas
-!
-!
-FLST,5,14,5,ORDE,7  
-FITEM,5,1   
-FITEM,5,-9  
-FITEM,5,449 
-FITEM,5,-450
-FITEM,5,624 
-FITEM,5,639 
-FITEM,5,648 
-ASEL,R, , ,P51X 
-ALLSEL,BELOW,AREA     
-AATT,       1, ,   2,       0,  
-ESIZE,ESI_A,0,  
-CM,_Y,AREA  
-ASEL, , , ,     624 
-CM,_Y1,AREA 
-CHKMSH,'AREA'   
-CMSEL,S,_Y  
-!*  
-MSHKEY,1
-AMESH,_Y1   
-MSHKEY,0
-!*  
-CMDELE,_Y   
-CMDELE,_Y1  
-CMDELE,_Y2  
-!*  
-MSHKEY,0
-CM,_Y,AREA  
-ASEL, , , ,     648 
-CM,_Y1,AREA 
-CHKMSH,'AREA'   
-CMSEL,S,_Y  
-!*  
-AMESH,_Y1   
-!*  
-CMDELE,_Y   
-CMDELE,_Y1  
-CMDELE,_Y2  
-!*  
-!
-!   volumes
-!
-ALLSEL,BELOW,VOLU      
-ESIZE,ESI_V,0,  
-vsweep,all  
-!
-MSHKEY,0
-MSHAPE,1,3d 
-!
-!                         ESIZE,ESI_V/2,0,  
-!
-VMESH,ALL
-!
-ALLSEL,ALL   
-ACLEAR,ALL
-ETDEL,2  
-NUMMRG,KP, , , ,LOW 
-NUMMRG,NODE, , , ,LOW   
-NUMCMP,ALL  
-!
-!                         
-*end            
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!
-!
-!
-!
-!
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!       mmes2,  
-!       mmes2, 
-*create,mmes2,mac   
-! 
-!
-CSYS,0,
-!                         
-CMSEL,S,V_WINDING   
-ALLSEL,BELOW,VOLU   
-VSYMM,Y,ALL, , , ,0,0  
-CM,V_WINDING,VOLU   
-!
-CMSEL,S,V_INSULATION   
-ALLSEL,BELOW,VOLU   
-VSYMM,Y,ALL, , , ,0,0  
-CM,V_INSULATION,VOLU   
-!
-!
-CMSEL,S,V_FILLER  
-ALLSEL,BELOW,VOLU   
-VSYMM,Y,ALL, , , ,0,0  
-CM,V_FILLER,VOLU   
-!
-!
-CMSEL,S,V_CASING  
-ALLSEL,BELOW,VOLU   
-VSYMM,Y,ALL, , , ,0,0  
-CM,V_CASING,VOLU   
-!
-!
-CMSEL,S,V_INTER  
-ALLSEL,BELOW,VOLU   
-VSYMM,Y,ALL, , , ,0,0  
-CM,V_INTER,VOLU   
-!
-ALLSEL,ALL   
-!
-NUMMRG,KP, , , ,LOW 
-NUMMRG,NODE, , , ,LOW   
-NUMCMP,ALL  
-!
-NUMMRG,KP, , , ,LOW 
-NUMMRG,NODE, , , ,LOW   
-NUMCMP,ALL 
-!
-!
-CMSEL,S,V_INSULATION
-ALLSEL,BELOW,VOLU   
-VGEN,2,ALL, , , ,DCOP, , ,0   
-CM,X_INSULATION,VOLU
-CMSEL,S,V_INSULATION
-ALLSEL,BELOW,VOLU   
-VCLEAR,ALL 
-VDELE,ALL, , ,1
-CMSEL,S,X_INSULATION
-ALLSEL,BELOW,VOLU 
-VGEN, ,ALL, , , ,-DCOP, , , ,1
-CM,V_INSULATION,VOLU
-!
-!
-CMSEL,S,V_FILLER
-ALLSEL,BELOW,VOLU   
-VGEN,2,ALL, , , ,DCOP, , ,0   
-CM,X_FILLER,VOLU
-CMSEL,S,V_FILLER
-ALLSEL,BELOW,VOLU   
-VCLEAR,ALL 
-VDELE,ALL, , ,1
-CMSEL,S,X_FILLER
-ALLSEL,BELOW,VOLU 
-VGEN, ,ALL, , , ,-DCOP, , , ,1
-CM,V_FILLER,VOLU
-!
-ALLSEL,ALL   
-!
-NUMCMP,ALL 
-!
-!
-!
-!
-CMSEL,S,V_WINDING   
-ALLSEL,BELOW,VOLU   
-NSEL,R,EXT    
-CM,EXWIN,NODE   
-!
-CMSEL,S,V_INSULATION   
-ALLSEL,BELOW,VOLU   
-NSEL,R,EXT    
-CM,EXINS,NODE   
-!
-CMSEL,S,V_FILLER   
-ALLSEL,BELOW,VOLU   
-NSEL,R,EXT    
-CM,EXFIL,NODE   
-!
-CMSEL,S,V_CASING   
-ALLSEL,BELOW,VOLU   
-NSEL,R,EXT    
-CM,EXCAS,NODE   
-!
-!
-!
-!
-!
-CMSEL,S,V_WINDING   
-CMSEL,A,V_INSULATION
-ALLSEL,BELOW,VOLU     
-CPINTF,ALL,TOL,   
-NSEL,S,CP,,1,1000000  
-CM,XXX,NODE 
-CMSEL,R,EXWIN      
-CM,W_I_C,NODE   
-CMSEL,S,XXX   
-CMSEL,R,EXINS   
-CM,I_W_C,NODE   
-ALLSEL,ALL  
-CPDELE,1,1000000,,ANY   
-!
-CMSEL,S,V_FILLER   
-CMSEL,A,V_INSULATION
-ALLSEL,BELOW,VOLU     
-CPINTF,ALL,TOL,   
-NSEL,S,CP,,1,1000000  
-CM,XXX,NODE 
-CMSEL,R,EXINS      
-CM,I_F_C,NODE   
-CMSEL,S,XXX   
-CMSEL,R,EXFIL   
-CM,F_I_C,NODE   
-ALLSEL,ALL  
-CPDELE,1,1000000,,ANY   
-!
-CMSEL,S,V_FILLER   
-CMSEL,A,V_CASING
-ALLSEL,BELOW,VOLU     
-CPINTF,ALL,TOL,   
-NSEL,S,CP,,1,1000000  
-CM,XXX,NODE 
-CMSEL,R,EXFIL      
-CM,F_C_C,NODE   
-CMSEL,S,XXX   
-CMSEL,R,EXCAS   
-CM,C_F_C,NODE   
-ALLSEL,ALL  
-CPDELE,1,1000000,,ANY   
-!
-!
-!
-!
-!
-!
-/COM, CONTACT PAIR CREATION - START 
-CM,_NODECM,NODE 
-CM,_ELEMCM,ELEM 
-CM,_KPCM,KP 
-CM,_LINECM,LINE 
-CM,_AREACM,AREA 
-CM,_VOLUCM,VOLU 
-/GSAV,cwz,gsav,,temp
-MP,MU,7,0.5 
-MAT,7   
-R,3 
-REAL,3  
-ET,2,170
-ET,3,174
-KEYOPT,3,9,0
-KEYOPT,3,10,2   
-R,3,
-RMORE,  
-RMORE,,0
-RMORE,0 
-! Generate the target surface   
-NSEL,S,,,W_I_C  
-CM,_TARGET,NODE 
-TYPE,2  
-ESLN,S,0
-ESURF   
-CMSEL,S,_ELEMCM 
-! Generate the contact surface  
-NSEL,S,,,I_W_C  
-CM,_CONTACT,NODE
-TYPE,3  
-ESLN,S,0
-ESURF   
-ALLSEL  
-ESEL,ALL
-ESEL,S,TYPE,,2  
-ESEL,A,TYPE,,3  
-ESEL,R,REAL,,3  
-/PSYMB,ESYS,1   
-/PNUM,TYPE,1
-/NUM,1  
-EPLOT   
-ESEL,ALL
-ESEL,S,TYPE,,2  
-ESEL,A,TYPE,,3  
-ESEL,R,REAL,,3  
-CMSEL,A,_NODECM 
-CMDEL,_NODECM   
-CMSEL,A,_ELEMCM 
-CMDEL,_ELEMCM   
-CMSEL,S,_KPCM   
-CMDEL,_KPCM 
-CMSEL,S,_LINECM 
-CMDEL,_LINECM   
-CMSEL,S,_AREACM 
-CMDEL,_AREACM   
-CMSEL,S,_VOLUCM 
-CMDEL,_VOLUCM   
-/GRES,cwz,gsav  
-CMDEL,_TARGET   
-CMDEL,_CONTACT  
-/COM, CONTACT PAIR CREATION - END   
-/MREP,EPLOT 
-! 
-!  
-/COM, CONTACT PAIR CREATION - START 
-CM,_NODECM,NODE 
-CM,_ELEMCM,ELEM 
-CM,_KPCM,KP 
-CM,_LINECM,LINE 
-CM,_AREACM,AREA 
-CM,_VOLUCM,VOLU 
-/GSAV,cwz,gsav,,temp
-MP,MU,8,0.4 
-MAT,8   
-R,4 
-REAL,4  
-ET,4,170
-ET,5,174
-KEYOPT,5,9,0
-KEYOPT,5,10,2   
-R,4,
-RMORE,  
-RMORE,,0
-RMORE,0 
-! Generate the target surface   
-NSEL,S,,,I_F_C  
-CM,_TARGET,NODE 
-TYPE,4  
-ESLN,S,0
-ESURF   
-CMSEL,S,_ELEMCM 
-! Generate the contact surface  
-NSEL,S,,,F_I_C  
-CM,_CONTACT,NODE
-TYPE,5  
-ESLN,S,0
-ESURF   
-ALLSEL  
-ESEL,ALL
-ESEL,S,TYPE,,4  
-ESEL,A,TYPE,,5  
-ESEL,R,REAL,,4  
-/PSYMB,ESYS,1   
-/PNUM,TYPE,1
-/NUM,1  
-EPLOT   
-ESEL,ALL
-ESEL,S,TYPE,,4  
-ESEL,A,TYPE,,5  
-ESEL,R,REAL,,4  
-CMSEL,A,_NODECM 
-CMDEL,_NODECM   
-CMSEL,A,_ELEMCM 
-CMDEL,_ELEMCM   
-CMSEL,S,_KPCM   
-CMDEL,_KPCM 
-CMSEL,S,_LINECM 
-CMDEL,_LINECM   
-CMSEL,S,_AREACM 
-CMDEL,_AREACM   
-CMSEL,S,_VOLUCM 
-CMDEL,_VOLUCM   
-/GRES,cwz,gsav  
-CMDEL,_TARGET   
-CMDEL,_CONTACT  
-/COM, CONTACT PAIR CREATION - END   
-/MREP,EPLOT 
-!
-!
-/COM, CONTACT PAIR CREATION - START 
-CM,_NODECM,NODE 
-CM,_ELEMCM,ELEM 
-CM,_KPCM,KP 
-CM,_LINECM,LINE 
-CM,_AREACM,AREA 
-CM,_VOLUCM,VOLU 
-/GSAV,cwz,gsav,,temp
-MP,MU,9,0.3 
-MAT,9   
-R,5 
-REAL,5  
-ET,6,170
-ET,7,174
-KEYOPT,7,9,0
-KEYOPT,7,10,2   
-R,5,
-RMORE,  
-RMORE,,0
-RMORE,0 
-! Generate the target surface   
-NSEL,S,,,F_C_C  
-CM,_TARGET,NODE 
-TYPE,6  
-ESLN,S,0
-ESURF   
-CMSEL,S,_ELEMCM 
-! Generate the contact surface  
-NSEL,S,,,C_F_C  
-CM,_CONTACT,NODE
-TYPE,7  
-ESLN,S,0
-ESURF   
-ALLSEL  
-ESEL,ALL
-ESEL,S,TYPE,,6  
-ESEL,A,TYPE,,7  
-ESEL,R,REAL,,5  
-/PSYMB,ESYS,1   
-/PNUM,TYPE,1
-/NUM,1  
-EPLOT   
-ESEL,ALL
-ESEL,S,TYPE,,6  
-ESEL,A,TYPE,,7  
-ESEL,R,REAL,,5  
-CMSEL,A,_NODECM 
-CMDEL,_NODECM   
-CMSEL,A,_ELEMCM 
-CMDEL,_ELEMCM   
-CMSEL,S,_KPCM   
-CMDEL,_KPCM 
-CMSEL,S,_LINECM 
-CMDEL,_LINECM   
-CMSEL,S,_AREACM 
-CMDEL,_AREACM   
-CMSEL,S,_VOLUCM 
-CMDEL,_VOLUCM   
-/GRES,cwz,gsav  
-CMDEL,_TARGET   
-CMDEL,_CONTACT  
-/COM, CONTACT PAIR CREATION - END   
-/MREP,EPLOT 
-!
-!
-!                         
-*end            
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!
-!
-!
-!
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!       aatr  
-!       aatr, 
-*create,aatr,mac   
-!
-CMSEL,S,V_CASING
-ALLSEL,BELOW,VOLU   
-!
-!  MATERIALS
-!
-FLST,5,20,6,ORDE,18 
-FITEM,5,71  
-FITEM,5,82  
-FITEM,5,91  
-FITEM,5,-92 
-FITEM,5,107 
-FITEM,5,-108
-FITEM,5,111 
-FITEM,5,-112
-FITEM,5,116 
-FITEM,5,-117
-FITEM,5,192 
-FITEM,5,203 
-FITEM,5,212 
-FITEM,5,-213
-FITEM,5,228 
-FITEM,5,-229
-FITEM,5,232 
-FITEM,5,-235
-VSEL,R, , ,P51X 
-!
-ALLSEL,BELOW,VOLU   
-CM,V_INNER_LEG,VOLU 
-!
-CMSEL,S,V_CASING
-!
-CMSEL,U,V_INNER_LEG
-CM,V_OUTER_LEG,VOLU 
-!
-!
-!
-CMSEL,S,V_INSULATION
-ALLSEL,BELOW,VOLU     
-FLST,5,56,6,ORDE,56 
-FITEM,5,243 
-FITEM,5,246 
-FITEM,5,-247
-FITEM,5,250 
-FITEM,5,-251
-FITEM,5,254 
-FITEM,5,-255
-FITEM,5,258 
-FITEM,5,-259
-FITEM,5,262 
-FITEM,5,-263
-FITEM,5,266 
-FITEM,5,-267
-FITEM,5,270 
-FITEM,5,-271
-FITEM,5,274 
-FITEM,5,-275
-FITEM,5,278 
-FITEM,5,-279
-FITEM,5,282 
-FITEM,5,-283
-FITEM,5,286 
-FITEM,5,-287
-FITEM,5,290 
-FITEM,5,-291
-FITEM,5,294 
-FITEM,5,-295
-FITEM,5,298 
-FITEM,5,-299
-FITEM,5,302 
-FITEM,5,-303
-FITEM,5,306 
-FITEM,5,-307
-FITEM,5,310 
-FITEM,5,-311
-FITEM,5,314 
-FITEM,5,-315
-FITEM,5,318 
-FITEM,5,-319
-FITEM,5,322 
-FITEM,5,-323
-FITEM,5,326 
-FITEM,5,-327
-FITEM,5,330 
-FITEM,5,-331
-FITEM,5,334 
-FITEM,5,-335
-FITEM,5,338 
-FITEM,5,-339
-FITEM,5,342 
-FITEM,5,-343
-FITEM,5,346 
-FITEM,5,-347
-FITEM,5,350 
-FITEM,5,-351
-FITEM,5,354 
-VSEL,U, , ,P51X   
-CM,V_INSU_MAT3,VOLU 
-!
-CMSEL,S,V_INSULATION
-ALLSEL,BELOW,VOLU  
-CMSEL,U,V_INSU_MAT3
-CM,V_INSU_MAT4,VOLU 
-!
-!
-!
-!
-CMSEL,S,V_INNER_LEG 
-ALLSEL,BELOW,VOLU   
-EMODIF,ALL,MAT,1,  
-!
-CMSEL,S,V_OUTER_LEG 
-CMSEL,A,V_INTER 
-ALLSEL,BELOW,VOLU   
-EMODIF,ALL,MAT,2,  
-!
-CMSEL,S,V_INSU_MAT3 
-ALLSEL,BELOW,VOLU   
-EMODIF,ALL,MAT,3,  
-!
-CMSEL,S,V_INSU_MAT4 
-ALLSEL,BELOW,VOLU   
-EMODIF,ALL,MAT,4,  
-!
-CMSEL,S,V_FILLER 
-ALLSEL,BELOW,VOLU   
-EMODIF,ALL,MAT,5,  
-!
-CMSEL,S,V_WINDING 
-ALLSEL,BELOW,VOLU   
-EMODIF,ALL,MAT,6,  
-!
-CMSEL,S,V_WINDING 
-CMSEL,A,V_INSULATION
-CMSEL,A,V_FILLER 
-CM,V_EMPTY,VOLU 
-!
-CMSEL,S,V_EMPTY 
-ALLSEL,BELOW,VOLU   
-!
-!
-!
-!   SYSTEMS
-!
-!
-CMSEL,S,V_EMPTY 
-ALLSEL,BELOW,VOLU 
-FLST,5,36,6,ORDE,12 
-FITEM,5,5   
-FITEM,5,-12 
-FITEM,5,58  
-FITEM,5,-59 
-FITEM,5,123 
-FITEM,5,-124
-FITEM,5,140 
-FITEM,5,-147
-FITEM,5,247 
-FITEM,5,-254
-FITEM,5,303 
-FITEM,5,-310
-VSEL,R, , ,P51X 
-ALLSEL,BELOW,VOLU      
-CM,CSYS_11,VOLU 
-EMODIF,ALL,ESYS,11,
-!
-CMSEL,S,V_EMPTY 
-ALLSEL,BELOW,VOLU 
-FLST,5,36,6,ORDE,12 
-FITEM,5,13  
-FITEM,5,-20 
-FITEM,5,60  
-FITEM,5,-61 
-FITEM,5,125 
-FITEM,5,-126
-FITEM,5,148 
-FITEM,5,-155
-FITEM,5,255 
-FITEM,5,-262
-FITEM,5,311 
-FITEM,5,-318
-VSEL,R, , ,P51X 
-ALLSEL,BELOW,VOLU      
-CM,CSYS_12,VOLU 
-EMODIF,ALL,ESYS,12,
-!
-CMSEL,S,V_EMPTY 
-ALLSEL,BELOW,VOLU 
-FLST,5,36,6,ORDE,12 
-FITEM,5,21  
-FITEM,5,-28 
-FITEM,5,62  
-FITEM,5,-63 
-FITEM,5,127 
-FITEM,5,-128
-FITEM,5,156 
-FITEM,5,-163
-FITEM,5,263 
-FITEM,5,-270
-FITEM,5,319 
-FITEM,5,-326
-VSEL,R, , ,P51X 
-ALLSEL,BELOW,VOLU      
-CM,CSYS_13,VOLU 
-EMODIF,ALL,ESYS,13,
-!
-CMSEL,S,V_EMPTY 
-ALLSEL,BELOW,VOLU 
-FLST,5,36,6,ORDE,12 
-FITEM,5,29  
-FITEM,5,-36 
-FITEM,5,64  
-FITEM,5,-65 
-FITEM,5,129 
-FITEM,5,-130
-FITEM,5,164 
-FITEM,5,-171
-FITEM,5,271 
-FITEM,5,-278
-FITEM,5,327 
-FITEM,5,-334
-VSEL,R, , ,P51X 
-ALLSEL,BELOW,VOLU      
-CM,CSYS_14,VOLU 
-EMODIF,ALL,ESYS,14,
-!
-CMSEL,S,V_EMPTY 
-ALLSEL,BELOW,VOLU 
-FLST,5,36,6,ORDE,12 
-FITEM,5,37  
-FITEM,5,-44 
-FITEM,5,66  
-FITEM,5,-67 
-FITEM,5,131 
-FITEM,5,-132
-FITEM,5,172 
-FITEM,5,-179
-FITEM,5,279 
-FITEM,5,-286
-FITEM,5,335 
-FITEM,5,-342
-VSEL,R, , ,P51X 
-ALLSEL,BELOW,VOLU      
-CM,CSYS_15,VOLU 
-EMODIF,ALL,ESYS,15,
-!
-CMSEL,S,V_EMPTY 
-ALLSEL,BELOW,VOLU 
-FLST,5,36,6,ORDE,12 
-FITEM,5,45  
-FITEM,5,-52 
-FITEM,5,68  
-FITEM,5,-69 
-FITEM,5,133 
-FITEM,5,-134
-FITEM,5,180 
-FITEM,5,-187
-FITEM,5,287 
-FITEM,5,-294
-FITEM,5,343 
-FITEM,5,-350
-VSEL,R, , ,P51X 
-ALLSEL,BELOW,VOLU      
-CM,CSYS_16,VOLU 
-EMODIF,ALL,ESYS,16,
-!
-CMSEL,S,V_EMPTY 
-ALLSEL,BELOW,VOLU 
-FLST,5,36,6,ORDE,16 
-FITEM,5,1   
-FITEM,5,-4  
-FITEM,5,53  
-FITEM,5,-57 
-FITEM,5,70  
-FITEM,5,122 
-FITEM,5,135 
-FITEM,5,-139
-FITEM,5,188 
-FITEM,5,-191
-FITEM,5,243 
-FITEM,5,-246
-FITEM,5,295 
-FITEM,5,-302
-FITEM,5,351 
-FITEM,5,-354
-VSEL,R, , ,P51X 
-ALLSEL,BELOW,VOLU      
-CM,CSYS_17,VOLU 
-EMODIF,ALL,ESYS,17,
-!
-ALLSEL,ALL   
-!
-!                         
-*end            
-!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-!
-!
-!
-!
-!
-!
-!          B E G I N N I N G      O F     T H E      P R O G R A M 
-!
-!
-!  
-/VIEW,1,1,1,1   
-/VUP,1,Z
-/PLOPTS,INFO,1  
-/PLOPTS,LEG1,1  
-/PLOPTS,LEG2,0  
-/PLOPTS,LEG3,1  
-/PLOPTS,FRAME,0 
-/PLOPTS,TITLE,1 
-/PLOPTS,MINM,1  
-/PLOPTS,FILE,0  
-/PLOPTS,LOGO,0  
-/PLOPTS,WINS,1  
-/PLOPTS,WP,0
-/PLOPTS,DATE,2  
-/TRIAD,LTOP 
-!
-!
-/VIEW,1,,-1 
-/ANG,1  
-/REP,FAST   
-!
-!
-!/PNUM,KP,1 
-/NUMBER,1    
-/PNUM,MAT,1
-! /UIS,MSGPOP,3 
-/NERR,5,10000000,   
-!*  
-!
-!
-!
-!
-/PREP7  
-cceli
-empty
-casi1
-casi2
-casi3
-casi4
-inter
-eemat
-mmes1
-mmes2
-aatr
-!
-!
-!
-/sys,del cceli.mac 
-/sys,del empty.mac 
-/sys,del casi1.mac 
-/sys,del casi2.mac 
-/sys,del casi3.mac 
-/sys,del casi4.mac 
-/sys,del inter.mac 
-/sys,del eemat.mac 
-/sys,del mmes1.mac 
-/sys,del mmes2.mac 
-/sys,del aatr.mac 
-!
-!
+!
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+*DIM, KPC ,  ARRAY ,  100     , 3 ,       !  coordinates of the keypoints
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!
+!                                     M A C R O   C O I L
+!
+!                           G E O M E T R I C A L     P A R A M E T E R S
+!
+!
+!                          the shape of the centerline of the "empty space" 
+!
+!   the angles
+!
+ARC_1   =    92.758
+ARC_2   =    69.659
+ARC_3   =    17.583
+ARC_4   =    24.913
+ARC_5   =    61.711
+ARC_6   =    93.376
+!
+!
+!   the radii of curvature
+!
+!
+R_1     =    4518.973
+R_2     =    7562.5
+R_3     =    5678.832
+R_4     =   12172.425
+R_5     =    6992.5
+R_6     =    4518.206
+!
+!   other dimensions
+!
+R_G     =    4173.5
+H_G     =    3461.0 
+H_D     =    3662.0
+!
+!
+!    The dimensions of the cavity (the “empty space” of the casing), and of its radius corner 
+!
+!
+ESRA     =    625.0   !  radial size
+ESPO     =   1243.0   !  poloidal size 
+ESCR     =     38.0   !  chamfer radius
+!
+WPCF     =     10.0   !  thickness of the case filler
+WPGI     =      8.0   !  thickness of the ground insulation
+!
+!
+!     The casing thicknesses in the radial direction for both the inner and outer legs
+!     The outer shape of the casing, and of the “D” shape
+!
+!
+!
+OWSL    =     510.0        !  Outer width straight leg (radial direction)
+IWSL    =      40.0        !  Inner width straight leg (radial direction)
+IWOL    =     190.0        !  Inner width outer leg (radial direction)
+OWOL    =     225.0        !  Outer width outer leg (radial direction)
+CSPO    =    1443.0        !  Casing maximal poloidal size
+!
+CS0PO   =    1181.6
+ARC_0   =      10.0
+!
+! CHRA/ CHPO               !  Chamfer on inner casing (radial and poloidal size)
+!
+CHRA    =      17.36
+CHPO    =     100.0
+!
+!
+!
+!             Dimensions of the outer intercoil structures 
+!   
+!
+!   the upper part
+!
+DE_U  = 250                   !   the distance from the edge
+TH_U  = 200                   !   thickness
+!
+!   the lower part
+!
+DE_L  = 250                   !   the distance from the edge
+TH_L  = 200                   !   thickness
+!
+!
+!                        M E S H      P A R A M E T E R S
+!
+!
+ESI_A  =  50.0     ! SIZE ELEMENTS  OF AREAS 
+!
+ESI_V  =  200.0    ! SIZE ELEMENTS OF VOLUMES 
+!
+!
+!
+!                 T F C   A N D    W P    M A T E R I A L S : 
+!
+!                      PROPERTIES AND STATIC ALLOWABLES 
+!
+!
+!     Thermo-mechanical properties of EK1/JJ1 strengthened austenitic as forged sections 
+!                                 (TFC inner leg)
+!
+!     MAT 1
+!      
+E1_4.2    =  2.05e5
+E1_293    =  1.96e5
+NI1       =  0.29
+AL1       =  1.04E-5
+S102      =  1000.0
+!
+!
+!      Thermo-mechanical properties of EC1 strengthened austenitic as cast sections 
+!                    (TFC outer leg and outer intercoil structure)
+!
+!     MAT 2
+!
+E2        =  1.90e5
+NI2       =  0.29
+AL2       =  1.04E-5
+S202     =  750.0
+!
+!
+!
+!       Thermo-mechanical properties of the WP ground insulation (VPI epoxy glass)
+!
+!                       ! ANSYS  -> CSKP,11,1,1,8,7,1,1,
+!
+!                           I  (X)                             I--------
+!                           I                -----  (Z)        I 
+!                           I                                  I
+!                                                              I
+!    MAT 3 AND 4           MAT 3             MAT 4             I--------
+!
+E3IP     =  2.0E4       !  EX,EY             EZ,EY 
+E3NO     =  1.2E4       !  EZ                EX
+G3IP     =  0.6E4       !  GXY               GZY
+G3OP     =  0.6E4       !  GXZ,GYZ           GXZ,GYX 
+NI3IP    =  0.17        !  NIXY              NIZY 
+NI3OP    =  0.33        !  NIXZ,NIYZ         NIXZ,NIYX
+AL3IP    =  6.90E-6     !  ALX,ALY           ALZ,ALY
+AL3OP    =  2.47E-5     !  ALZ               ALX
+!
+!
+!
+!      Thermo-mechanical properties of the TFC case/ WP filler
+!
+!
+!    MAT 5
+!
+E4_4.2   =  2.35E4
+E4_293   =  1.03E4
+NI4      =  0.32
+AL4      =  1.21E-5
+!
+!
+!
+!
+!       Calculated effective thermo-mechanical characteristics for the WP#3
+!       x – the coil radial direction (8 turns),
+!       y – the coil toroidal direction (8 double pancakes), 
+!       z – along the coil perimeter
+!
+!                           ! ANSYS   ->  CSKP,11,1,1,8,7,1,1,
+!
+!       MAT 6
+!
+E5X_4.2     =   3.459E4     !  EX
+E5X_293     =   3.366E4  
+E5Y_4.2     =   3.105E4     !  EZ 
+E5Y_293     =   3.029E4
+E5Z_4.2     =   9.531E4     !  EY
+E5Z_293     =   9.120E4
+G5XY_4.2    =   0.341E4     !  GXZ
+G5XY_293    =   0.329E4
+G5YZ_4.2    =   1.918E4     !  GZY
+G5YZ_293    =   1.853E4
+G5XZ_4.2    =   2.032E4     !  GXY
+G5XZ_293    =   1.957E4
+NI5XY_4.2   =   0.333       !  NIXZ
+NI5XY_293   =   0.329
+NI5YZ_4.2   =   0.094       !  NIZY
+NI5YZ_293   =   0.096
+NI5XZ_4.2   =   0.104       !  NIXY 
+NI5XZ_293   =   0.106
+AL5X        =   1.08E-5     !  ALX
+AL5Y        =   1.13E-5     !  ALZ
+AL5Z        =   1.04E-5     !  ALY
+!
+!
+!
+!            Friction coeffcients
+!
+!
+!   MAT 7
+! 
+MU_WI  =  0.5     !   between  winding  and  insulation
+!
+!
+!   MAT 8
+! 
+MU_IF  =  0.4     !   between  insulation  and  filler
+!
+!
+!   MAT 9
+! 
+MU_FC  =  0.3     !   between  filler  and  casing
+!
+!
+!
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!*DIM, KPC ,  ARRAY ,  100     , 3 ,       !  coordinates of the keypoints
+pi =  3.1415926535898
+P180=180
+rd = 57.2957795130823
+tol=1
+N16=16
+DCOP=10000
+!
+!    The half-section of the inner leg is defined by its contour  defined counter clockwise. 
+!    the half-section is defined by 3 points. 
+!
+!   1  point
+!
+KPC(15,1)   =    R_G-ESRA/2-OWSL
+KPC(15,2)   =    0.0
+KPC(15,3)   =    0.0
+!
+!   2  point
+!
+KPC(16,1)   =      R_G-ESRA/2-OWSL
+KPC(16,2)   =     -CS0PO/2
+KPC(16,3)   =       0.0
+!
+!   3  point
+!
+
+Y=(CSPO-CS0PO)/2
+X=Y/TAN(ARC_0/RD)
+KPC(17,1)   =     R_G-ESRA/2-OWSL+X
+KPC(17,2)   =    -CSPO/2
+KPC(17,3)   =     0.0
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!
+!
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!       cceli,  
+!       cceli, 
+*create,cceli,mac   
+! 
+!
+KPC(7,1)  =  R_G 
+KPC(7,2)  =  0.0
+KPC(7,3)  =  H_G
+!
+KPC(13,1)  =  R_G 
+KPC(13,2)  =  0.0
+KPC(13,3)  = -H_D
+!
+KPC(1,1)  =  R_G + R_1
+KPC(1,2)  =  0.0
+KPC(1,3)  =  H_G
+!
+KPC(8,1)  =  R_G + R_1 + R_1*sin((arc_1-90)/rd) 
+KPC(8,2)  =  0.0
+KPC(8,3)  =  H_G + R_1 - (R_1- R_1*cos((arc_1-90)/rd))
+!
+*do,lp,1,8
+x=kpc(lp,1)
+y=kpc(lp,2)
+z=kpc(lp,3)
+K,lp,x,y,z,  
+*enddo
+CSKP,11,0,1,8,7,1,1,
+CSYS,11,
+k,2,R_1-R_2,0,0 
+CSKP,11,0,2,8,7,1,1,
+CSYS,11,
+x= R_2*cos(arc_2/rd)
+y=-R_2*sin(arc_2/rd)
+k,9,x,y,0 
+CSYS,0,
+!
+KPC(2,1)  =  KX(2)
+KPC(2,2)  =  KY(2)
+KPC(2,3)  =  KZ(2)
+!
+KPC(9,1)  =  KX(9)
+KPC(9,2)  =  KY(9)
+KPC(9,3)  =  KZ(9)
+!
+CSKP,11,0,2,9,7,1,1,
+CSYS,11,
+K,3,R_2-R_3,0,0,
+CSYS,0,
+!
+KPC(3,1)  =  KX(3)
+KPC(3,2)  =  KY(3)
+KPC(3,3)  =  KZ(3)
+!
+CSKP,11,0,3,9,1,1,1,
+CSYS,11,
+x= R_3*cos(arc_3/rd)
+y=-R_3*sin(arc_3/rd)
+k,10,x,y,0 
+CSYS,0,
+!
+KPC(10,1)  =  KX(10)
+KPC(10,2)  =  KY(10)
+KPC(10,3)  =  KZ(10)
+!
+CSKP,11,0,3,10,1,1,1,   
+CSYS,11,
+K,4,R_3-R_4,0,0,  
+CSYS,0,
+!
+KPC(4,1)  =  KX(4)
+KPC(4,2)  =  KY(4)
+KPC(4,3)  =  KZ(4)
+!
+CSKP,11,0,4,10,1,1,1,
+CSYS,11,
+x= R_4*cos(arc_4/rd)
+y=-R_4*sin(arc_4/rd)
+k,11,x,y,0 
+CSYS,0,
+!
+KPC(11,1)  =  KX(11)
+KPC(11,2)  =  KY(11)
+KPC(11,3)  =  KZ(11)
+!
+CSKP,11,0,4,11,7,1,1,   
+CSYS,11,
+K,5,R_4-R_5,0,0,  
+!*  
+CSKP,11,0,5,11,3,1,1,    
+CSYS,11,
+x= R_5*cos(arc_5/rd)
+y=-R_5*sin(arc_5/rd)
+k,12,x,y,0 
+CSYS,0,
+!
+KPC(5,1)  =  KX(5)
+KPC(5,2)  =  KY(5)
+KPC(5,3)  =  KZ(5)
+!
+KPC(12,1)  =  KX(12)
+KPC(12,2)  =  KY(12)
+KPC(12,3)  =  KZ(12)
+!
+CSKP,11,0,5,12,4,1,1,   
+CSYS,11,
+K,6,R_5-R_6,0,0,
+CSYS,0,
+!
+KPC(6,1)  =  KX(6)
+KPC(6,2)  =  KY(6)
+KPC(6,3)  =  KZ(6)
+!
+KPC(14,1)  =  R_G
+KPC(14,2)  =  0
+KPC(14,3)  =  0
+!
+KDELE,ALL 
+CSYS,0, 
+!
+*do,lp,1,14
+x=kpc(lp,1)
+y=kpc(lp,2)
+z=kpc(lp,3)
+K,lp,x,y,z,  
+*enddo
+!
+LARC,7,8,1,R_1, 
+LARC,8,9,2,R_2,  
+LARC,9,10,3,R_3,  
+LARC,10,11,4,R_4,  
+LARC,11,12,5,R_5,  
+LARC,12,13,6,R_6, 
+!
+LDIV,ALL,0.5, ,2,0 
+LDELE,ALL  
+NUMCMP,ALL  
+!
+LSTR,      13,       14  
+LSTR,      14,       7  
+!
+LARC,7,15,1,R_1, 
+LARC,15,8,1,R_1, 
+!
+LARC,8,16,2,R_2,  
+LARC,16,9,2,R_2,  
+!
+LARC,9,17,3,R_3,  
+LARC,17,10,3,R_3,  
+!
+LARC,10,18,4,R_4,  
+LARC,18,11,4,R_4,  
+!
+LARC,11,19,5,R_5, 
+LARC,19,12,5,R_5,   
+!
+LARC,12,20,6,R_6, 
+LARC,20,13,6,R_6, 
+!
+CM,L_centerline,LINE
+!                         
+*end            
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!
+!
+!
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!       empty,  
+!       empty, 
+*create,empty,mac   
+!
+CSYS,0, 
+!
+K,21,R_G-ESRA/2,0,0,  
+K,22,R_G+ESRA/2,0,0,    
+K,23,R_G+ESRA/2,-ESPO/2,0,  
+K,24,R_G-ESRA/2,-ESPO/2,0,  
+!
+!                   
+LSTR,      22,       23
+LSTR,      23,       24
+LSTR,      24,       21
+!
+LFILLT,16,17,ESCR, ,
+!
+NUMMRG,KP, tol, , ,LOW 
+NUMCMP,ALL   
+!
+K,27,R_G-ESRA/2+WPCF,0,0,  
+K,28,R_G-ESRA/2+WPCF+WPGI,0,0,  
+!
+K,29,R_G+ESRA/2-WPCF,0,0,  
+K,30,R_G+ESRA/2-WPCF-WPGI,0,0, 
+!
+K,31,R_G+ESRA/2-WPCF,-ESPO/2+wpcf,0,  
+K,32,R_G+ESRA/2-WPCF-WPGI,-ESPO/2+WPCF+WPGI,0, 
+!
+LSTR,      21,       27
+LSTR,      27,       28
+!
+ADRAG,      19, , , , , ,17,18, 
+NUMMRG,KP, tol, , ,LOW 
+NUMCMP,ALL  
+A,25,23,31,34 
+A,23,22,29,31 
+NUMMRG,KP,tol , , ,LOW 
+NUMCMP,ALL  
+CM,A_filler,AREA
+! 
+ADRAG,      20, , , , , ,17,18,
+NUMMRG,KP, tol, , ,LOW 
+NUMCMP,ALL 
+A,34,31,32,36  
+A,32,31,29,30  
+NUMMRG,KP,tol , , ,LOW 
+NUMCMP,ALL 
+CMSEL,U,A_FILLER
+CM,A_insulation,AREA
+!
+ALLSEL,ALL  
+NUMMRG,KP, tol, , ,LOW 
+NUMCMP,ALL  
+!
+A,28,35,36,32,30,
+CMSEL,U,A_FILLER
+CMSEL,U,A_insulation
+CM,A_Winding,AREA
+ALLSEL,ALL  
+CM,A_Empty,AREA
+!
+FLST,8,14,4 
+FITEM,8,2   
+FITEM,8,3   
+FITEM,8,4   
+FITEM,8,5   
+FITEM,8,6   
+FITEM,8,7   
+FITEM,8,8   
+FITEM,8,9   
+FITEM,8,10  
+FITEM,8,11  
+FITEM,8,12  
+FITEM,8,13  
+FITEM,8,14  
+FITEM,8,1   
+VDRAG,       1,2 ,3 ,4 , , ,P51X   
+NUMMRG,KP, tol, , ,LOW
+NUMCMP,ALL  
+! 
+CM,V_filler,VOLU  
+CMSEL,U,V_filler  
+!
+FLST,8,14,4 
+FITEM,8,2   
+FITEM,8,3   
+FITEM,8,4   
+FITEM,8,5   
+FITEM,8,6   
+FITEM,8,7   
+FITEM,8,8   
+FITEM,8,9   
+FITEM,8,10  
+FITEM,8,11  
+FITEM,8,12  
+FITEM,8,13  
+FITEM,8,14  
+FITEM,8,1   
+VDRAG,       5,6 ,7 ,8 , , ,P51X  
+CM,V_insulation,VOLU  
+CMSEL,U,V_insulation  
+!
+FLST,8,14,4 
+FITEM,8,2   
+FITEM,8,3   
+FITEM,8,4   
+FITEM,8,5   
+FITEM,8,6   
+FITEM,8,7   
+FITEM,8,8   
+FITEM,8,9   
+FITEM,8,10  
+FITEM,8,11  
+FITEM,8,12  
+FITEM,8,13  
+FITEM,8,14  
+FITEM,8,1   
+VDRAG,       9, , , , , ,P51X  
+CM,V_winding,VOLU  
+!
+ALLSEL,ALL  
+NUMMRG,KP, tol, , ,LOW 
+NUMCMP,ALL  
+CM,V_Empty,VOLU  
+!                         
+*end            
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!
+!
+!
+!
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!       casi1,  
+!       casi1, 
+*create,casi1,mac   
+!
+CSYS,0, 
+!
+K,1001,R_G-ESRA/2-OWOL,0,0,  
+K,1002,R_G+ESRA/2+IWOL,0,0, 
+K,1003,R_G+ESRA/2+IWOL,-CSPO/2+CHPO,0,  
+K,1004,R_G+ESRA/2+IWOL-CHRA,-CSPO/2,0,  
+K,1005,R_G+ESRA/2,-CSPO/2,0,  
+K,1006,R_G-ESRA/2-OWOL,-CSPO/2,0,  
+K,1007,R_G-ESRA/2-OWOL,-ESPO/2+ESCR,0, 
+!
+ASEL,U, , ,all
+A,21,1001,1007,26 
+A,1006,1005,23,25,26,1007  
+A,23,1005,1004,1003,1002,22
+!
+CM,A_casing1,AREA
+!
+FLST,8,14,4 
+FITEM,8,2   
+FITEM,8,3   
+FITEM,8,4   
+FITEM,8,5   
+FITEM,8,6   
+FITEM,8,7   
+FITEM,8,8   
+FITEM,8,9   
+FITEM,8,10  
+FITEM,8,11  
+FITEM,8,12  
+FITEM,8,13  
+FITEM,8,14  
+FITEM,8,1   
+VDRAG,       449, , , , , ,P51X   
+NUMMRG,KP,tol , , ,LOW
+NUMCMP,ALL  
+! 
+CMSEL,U,V_Empty  
+CM,V_CASING1,VOLU 
+! 
+FLST,8,14,4 
+FITEM,8,2   
+FITEM,8,3   
+FITEM,8,4   
+FITEM,8,5   
+FITEM,8,6   
+FITEM,8,7   
+FITEM,8,8   
+FITEM,8,9   
+FITEM,8,10  
+FITEM,8,11  
+FITEM,8,12  
+FITEM,8,13  
+FITEM,8,14  
+FITEM,8,1   
+VDRAG,       450, , , , , ,P51X   
+NUMMRG,KP,tol , , ,LOW
+NUMCMP,ALL  
+! 
+CM,V_CASING1,VOLU 
+!  
+FLST,8,14,4 
+FITEM,8,2   
+FITEM,8,3   
+FITEM,8,4   
+FITEM,8,5   
+FITEM,8,6   
+FITEM,8,7   
+FITEM,8,8   
+FITEM,8,9   
+FITEM,8,10  
+FITEM,8,11  
+FITEM,8,12  
+FITEM,8,13  
+FITEM,8,14  
+FITEM,8,1   
+VDRAG,       451, , , , , ,P51X   
+NUMMRG,KP,tol , , ,LOW
+NUMCMP,ALL  
+! 
+CM,V_CASING1,VOLU 
+! 
+ALLSEL,ALL  
+NUMMRG,KP,tol , , ,LOW 
+NUMCMP,ALL  
+!                         
+*end            
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!
+!
+!
+!
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!       casi2,  
+!       casi2, 
+*create,casi2,mac   
+!
+CSYS,0,
+VSEL,R, , ,155,157 
+VSEL,A, , ,166,168
+ALLSEL,BELOW,VOLU   
+!
+VDELE,ALL, , ,1
+!
+K,1002,R_G+ESRA/2+IWSL,0,0, 
+K,1003,R_G+ESRA/2+IWSL,-CSPO/2+CHPO,0,  
+K,1004,R_G+ESRA/2+IWSL-CHRA,-CSPO/2,0,  
+!
+A,263,23,22,1002,1003,1004
+!
+VDRAG,     451, , , , , ,      57   
+VDRAG,     451, , , , , ,     345 
+!  
+NUMMRG,KP, tol, , ,LOW 
+NUMCMP,ALL  
+!
+KSEL,A,,,1
+!
+LARC,293,288,1,R_1-ESRA/2-(IWOL+IWSL)/2, 
+LDIV,765,0.525, ,2,0 
+LDELE,765,766
+!
+LARC,293,324,1,R_1-ESRA/2-(IWOL+IWSL)/2, 
+LARC,324,288,1,R_1-ESRA/2-(IWOL+IWSL)/2, 
+!
+A,293,324,288,45,55,65,  
+!
+ADRAG,765,766 , , , , ,     700  
+!
+ADRAG,     699, , , , , ,767,770  
+!
+NUMMRG,KP,tol, , ,LOW 
+!
+A,267,291,328,290,260,265
+!
+!
+!
+!
+!
+KSEL,A,,,6
+LARC,318,317,6,R_6-ESRA/2-(IWOL+IWSL)/2, 
+LDIV,768,0.5415, ,2,0 
+LDELE,768,
+LDELE,771,
+!
+LARC,318,325,6,R_6-ESRA/2-(IWOL+IWSL)/2, 
+LARC,325,317,6,R_6-ESRA/2-(IWOL+IWSL)/2, 
+!
+A,318,165,155,145,317,325  
+!
+ADRAG,768,771 , , , , ,     760 
+!
+ADRAG,     762, , , , , ,774,778  
+!
+NUMMRG,KP,tol, , ,LOW 
+!
+A,287,320,332,315,283,285,
+!  
+CM,AA,AREA  
+!
+FLST,2,12,5,ORDE,8  
+FITEM,2,40  
+FITEM,2,57  
+FITEM,2,512 
+FITEM,2,516 
+FITEM,2,566 
+FITEM,2,572 
+FITEM,2,613 
+FITEM,2,-618
+VA,P51X 
+!
+CMSEL,S,AA  
+ALLSEL,BELOW,AREA 
+!
+FLST,2,12,5,ORDE,8  
+FITEM,2,210 
+FITEM,2,227 
+FITEM,2,552 
+FITEM,2,556 
+FITEM,2,571 
+FITEM,2,612 
+FITEM,2,619 
+FITEM,2,-624
+VA,P51X
+!
+CMSEL,A,V_CASING1     
+ALLSEL,BELOW,VOLU   
+CM,V_CASING2,VOLU 
+!
+CMSEL,R,A_CASING1   
+ASEL,A, , ,451
+CM,A_CASING2,AREA 
+!
+ALLSEL,ALL  
+NUMMRG,KP, tol, , ,LOW 
+NUMCMP,ALL 
+!
+CMDELE,AA   
+!
+!                         
+*end            
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!
+!
+!
+!
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!       casi3,  
+!       casi3, 
+*create,casi3,mac   
+!
+CSYS,0,
+!
+VSEL,R, , ,129
+VSEL,A, , ,143
+ALLSEL,BELOW,VOLU   
+!
+K,1001,R_G+R_1,20,H_G+R_1+ESRA/2+OWOL-50  
+K,1002,R_G+R_1,-CSPO/2-20,H_G+R_1+ESRA/2+OWOL-50 
+K,1003,R_G+R_1,20,H_G+R_1+ESRA/2+OWOL+50  
+K,1004,R_G+R_1,-CSPO/2-20,H_G+R_1+ESRA/2+OWOL+50 
+!
+A,1001,1002,1004,1003,
+!
+FLST,2,2,5,ORDE,2   
+FITEM,2,461 
+FITEM,2,517 
+ASBA,P51X,     625   
+!
+LDIV,785,0.45, ,2,0
+!
+LSTR,    330,     333  
+!
+ADRAG,     570, , , , , ,787,791   
+!
+VSBA,     129,     461     
+VSBA,     143,     517 
+! 
+VDELE,     167, , ,1
+VDELE,     129, , ,1
+!
+CMSEL,A,V_CASING2   
+ALLSEL,BELOW,VOLU    
+CM,V_Casing3,VOLU   
+!
+!
+ALLSEL,ALL  
+NUMMRG,KP,tol , , ,LOW 
+NUMCMP,ALL 
+!
+!
+VSEL,R, , ,137
+VSEL,A, , ,150
+ALLSEL,BELOW,VOLU   
+!
+K,1001,R_G+R_6,20      ,-H_D-R_6-ESRA/2-OWOL  
+K,1002,R_G+R_6,-CSPO/2-20,-H_D-R_6-ESRA/2-OWOL  
+LSTR,      1001,       1002
+!
+LDIV,612,0.6, ,2,0 
+LDIV,678,0.6, ,2,0 
+!
+A,1001,1002,337,336,
+!
+FLST,2,2,6,ORDE,2   
+FITEM,2,137 
+FITEM,2,150 
+VSBA,P51X,     629  
+!
+VDELE,     167, , ,1
+VDELE,     168, , ,1
+!
+CMSEL,A,V_CASING3   
+ALLSEL,BELOW,VOLU    
+CM,V_casing3,VOLU   
+!
+ALLSEL,ALL  
+NUMMRG,KP,tol , , ,LOW 
+NUMCMP,ALL 
+!
+VSEL,S,,,165,166
+ALLSEL,BELOW,VOLU   
+!
+VDELE,165,166  
+!  
+FLST,2,4,5,ORDE,4   
+FITEM,2,626 
+FITEM,2,628 
+FITEM,2,631 
+FITEM,2,633 
+ADELE,P51X, , ,1
+!  
+FLST,2,2,4,ORDE,2   
+FITEM,2,797 
+FITEM,2,801 
+LCOMB,P51X, ,0  
+FLST,2,2,4,ORDE,2   
+FITEM,2,798 
+FITEM,2,802 
+LCOMB,P51X, ,0  
+FLST,2,2,4,ORDE,2   
+FITEM,2,803 
+FITEM,2,805 
+LCOMB,P51X, ,0  
+!
+ADRAG,     797, , , , , ,     608   
+ADRAG,     803, , , , , ,     674   
+NUMMRG,KP,tol, , ,LOW   
+!
+ALLSEL,BELOW,AREA   
+CM,aa,AREA  
+FLST,5,10,5,ORDE,9  
+FITEM,5,204 
+FITEM,5,206 
+FITEM,5,543 
+FITEM,5,-545
+FITEM,5,625 
+FITEM,5,628 
+FITEM,5,630 
+FITEM,5,632 
+FITEM,5,634 
+ASEL,R, , ,P51X 
+! 
+FLST,2,10,5,ORDE,9  
+FITEM,2,204 
+FITEM,2,206 
+FITEM,2,543 
+FITEM,2,-545
+FITEM,2,625 
+FITEM,2,628 
+FITEM,2,630 
+FITEM,2,632 
+FITEM,2,634 
+VA,P51X 
+!
+CMSEL,S,AA  
+!
+FLST,5,8,5,ORDE,8   
+FITEM,5,200 
+FITEM,5,493 
+FITEM,5,-494
+FITEM,5,624 
+FITEM,5,626 
+FITEM,5,-627
+FITEM,5,629 
+FITEM,5,-630
+ASEL,R, , ,P51X 
+!  
+FLST,2,8,5,ORDE,8   
+FITEM,2,200 
+FITEM,2,493 
+FITEM,2,-494
+FITEM,2,624 
+FITEM,2,626 
+FITEM,2,-627
+FITEM,2,629 
+FITEM,2,-630
+VA,P51X 
+ALLSEL,BELOW,VOLU   
+CMSEL,A,V_CASING3     
+ALLSEL,BELOW,VOLU   
+!  
+CM,V_Casing3,VOLU   
+!
+ALLSEL,ALL  
+NUMMRG,KP,tol , , ,LOW 
+NUMCMP,ALL 
+!
+CMDELE,aa
+!                         
+*end            
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+
+
+!
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!       casi4,  
+!       casi4, 
+*create,casi4,mac   
+!
+CSYS,0,
+
+*do,lp,15,17
+x=kpc(lp,1)
+y=kpc(lp,2)
+z=kpc(lp,3)
+K,lp+1000,x,y,z,  
+*enddo
+!
+LSTR,      1015,       1016
+LSTR,      1016,       1017
+x=kpc(15,1)
+!
+K,2001,x,0,H_G+R_1+ESRA/2+OWOL 
+K,2002,x,0,-H_D-R_6-ESRA/2-OWOL 
+!
+LSTR,      2002,       1015
+LSTR,      1015,       2001
+!
+LSTR,      330,       2001
+LSTR,      258,       1015
+LSTR,      338,       2002
+!
+A,330,2001,1015,258,232,234,333,
+A,258,1015,2002,338,336,254,256,
+!
+VDRAG,     634, , , , , ,548,552, 
+VDRAG,     633, , , , , ,548,552, 
+!
+ALLSEL,ALL  
+NUMMRG,KP,tol , , ,LOW 
+NUMCMP,ALL 
+!
+CMSEL,U,V_CASING3   
+CMSEL,U,V_EMPTY 
+!
+CMSEL,A,V_CASING3   
+ALLSEL,BELOW,VOLU   
+CM,V_Casing4,VOLU  
+!
+x=kpc(16,1)
+y=kpc(16,2)
+z=-H_D-R_6-ESRA/2-OWOL
+K,1001,x,y,z, 
+x=kpc(17,1)
+y=kpc(17,2)
+z=-H_D-R_6-ESRA/2-OWOL
+K,1002,x,y,z, 
+LSTR,      1001,     1002
+!
+ADRAG,     824, , , , , ,815,823
+CMSEL,S,V_CASING4   
+FLST,2,44,6,ORDE,2  
+FITEM,2,127 
+FITEM,2,-170
+FLST,3,2,5,ORDE,2   
+FITEM,3,649 
+FITEM,3,-650
+VSBA,P51X,P51X  
+!
+FLST,2,6,6,ORDE,2   
+FITEM,2,171 
+FITEM,2,-176
+VDELE,P51X, , ,1
+VPLOT   
+CM,V_CaSING4,VOLU   
+!
+ALLSEL,ALL  
+NUMMRG,KP,tol , , ,LOW 
+NUMCMP,ALL 
+!
+LDELE,     791, , ,1
+LDELE,     792, , ,1
+NUMCMP,ALL 
+!
+!                         
+*end            
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!
+!
+!
+!
+!
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!       inter,  
+!       inter, 
+*create,inter,mac   
+! 
+CSYS,0,
+!
+CMSEL,S,V_CASING4   
+ALLSEL,BELOW,VOLU   
+ASEL,R, , ,     510 
+ALLSEL,BELOW,AREA   
+!
+CSKP,11,0,266,267,269,1,1,  
+CSYS,11,
+K,1001,DE_U,0,0 
+K,1002,DE_U+TH_U,0,0 
+!
+CSKP,11,0,268,269,267,1,1,  
+CSYS,11,
+K,2001,DE_U,0,0 
+K,2002,DE_U+TH_U,0,0 
+!
+LARC,1001,2001,267,R_2+ESRA/2+OWOL-DE_U,   
+LARC,1002,2002,267,R_2+ESRA/2+OWOL-DE_U-TH_U, 
+!
+ASBL,     510,     835  
+ASBL,     656,     836  
+ALLSEL,BELOW,VOLU   
+!
+NUMCMP,ALL 
+!
+!
+!
+ASEL,R, , ,     530 
+ASEL,A, , ,     526 
+ALLSEL,BELOW,AREA  
+!
+CSKP,11,0,274,275,277,1,1,  
+CSYS,11,
+K,1001,DE_L,0,0 
+K,1002,DE_L+TH_L,0,0 
+!
+CSKP,11,0,276,277,279,1,1,  
+CSYS,11,
+K,2001,DE_L,0,0 
+K,2002,DE_L+TH_L,0,0 
+!
+CSKP,11,0,278,279,277,1,1,  
+CSYS,11,
+K,3001,DE_L,0,0 
+K,3002,DE_L+TH_L,0,0 
+!
+LARC,1001,2001,277,R_4+ESRA/2+OWOL-DE_L,   
+LARC,1002,2002,277,R_4+ESRA/2+OWOL-DE_L-TH_L, 
+!
+LARC,2001,3001,277,R_5+ESRA/2+OWOL-DE_L,   
+LARC,2002,3002,277,R_5+ESRA/2+OWOL-DE_L-TH_L,
+!
+ASBL,     526,     841  
+ASBL,     658,     842  
+ASBL,     530,     843  
+ASBL,     660,     844  
+!
+ALLSEL,BELOW,VOLU   
+CM,V_CASING,VOLU 
+!
+CSYS,0,
+ALLSEL,ALL  
+NUMMRG,KP,tol , , ,LOW 
+NUMCMP,ALL 
+!
+CMSEL,S,V_CASING
+ALLSEL,BELOW,VOLU   
+CSYS,1  
+AGEN,2,656, , , ,-P180/N16, , ,0 
+SAVE
+V,     361,     360,     358,     359,     370,     371,     368,     369   
+!
+FLST,3,2,5,ORDE,2   
+FITEM,3,659 
+FITEM,3,-660
+AGEN,2,P51X, , , ,-P180/N16, , ,0 
+!
+V,     365,     364,     362,     363,     374,     375,     372,     373    
+V,     367,     366,     364,     365,     376,     377,     375,     374     
+!
+CM,V_CAS_INT,VOLU 
+!
+CSYS,0,
+ALLSEL,ALL  
+NUMMRG,KP,tol , , ,LOW 
+NUMCMP,ALL 
+!
+VSEL,S, , ,171,173 
+ALLSEL,BELOW,VOLU   
+CM,V_INTER,VOLU 
+ALLSEL,ALL  
+!
+!
+VSEL,S, , ,163,164 
+VSEL,A, , ,169,170 
+ALLSEL,BELOW,VOLU   
+CM,V_CAS_COR,VOLU 
+ALLSEL,ALL  
+!
+CMSEL,U,V_INTER
+CMSEL,U,V_CAS_COR
+!
+CM,V_RING,VOLU 
+ALLSEL,ALL 
+! LSTR,      20002,       23
+!                         
+*end            
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!
+!
+!
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!       eemat,  
+!       eemat, 
+*create,eemat,mac   
+! 
+!
+!   ELEMENTS
+!
+ET,1,SOLID185   
+!*  
+ET,2,SHELL181   
+!* 
+!
+!   MATERIALS
+!
+!  MAT 1
+!
+MPTEMP,,,,,,,,  
+MPTEMP,1,4.2
+MPTEMP,2,293
+MPDATA,EX,1,,E1_4.2 
+MPDATA,EX,1,,E1_293 
+MPDATA,PRXY,1,,NI1  
+MPDATA,PRXY,1,,NI1  
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+UIMP,1,REFT,,,  
+MPDATA,ALPX,1,,AL1  
+TB,BKIN,1,1,2,1 
+TBTEMP,0
+TBDATA,,S102,0,,,,  
+!
+!
+!  MAT 2
+!
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,EX,2,,E2 
+MPDATA,PRXY,2,,NI2  
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+UIMP,2,REFT,,,  
+MPDATA,ALPX,2,,AL2  
+TB,BKIN,2,1,2,1 
+TBTEMP,0
+TBDATA,,S202,0,,,, 
+!
+!
+!    MAT 3 
+!
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,EX,3,,E3IP   
+MPDATA,EY,3,,E3IP   
+MPDATA,EZ,3,,E3NO   
+MPDATA,PRXY,3,,NI3IP
+MPDATA,PRYZ,3,,NI3OP
+MPDATA,PRXZ,3,,NI3OP
+MPDATA,GXY,3,,G3IP  
+MPDATA,GYZ,3,,G3OP  
+MPDATA,GXZ,3,,G3OP  
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+UIMP,3,REFT,,,  
+MPDATA,ALPX,3,,AL3IP
+MPDATA,ALPY,3,,AL3IP
+MPDATA,ALPZ,3,,AL3OP
+!
+!
+!   MAT 4
+!
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,EX,4,,E3NO   
+MPDATA,EY,4,,E3IP   
+MPDATA,EZ,4,,E3IP   
+MPDATA,PRXY,4,,NI3OP
+MPDATA,PRYZ,4,,NI3IP
+MPDATA,PRXZ,4,,NI3OP
+MPDATA,GXY,4,,G3OP  
+MPDATA,GYZ,4,,G3IP  
+MPDATA,GXZ,4,,G3OP  
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+UIMP,4,REFT,,,  
+MPDATA,ALPX,4,,AL3OP
+MPDATA,ALPY,4,,AL3IP
+MPDATA,ALPZ,4,,AL3IP
+!
+!
+!    MAT 5
+!
+MPTEMP,,,,,,,,  
+MPTEMP,1,4.2
+MPTEMP,2,293
+MPDATA,EX,5,,E4_4.2 
+MPDATA,EX,5,,E4_293 
+MPDATA,PRXY,5,,NI4  
+MPDATA,PRXY,5,,NI4  
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+UIMP,5,REFT,,,  
+MPDATA,ALPX,5,,AL4  
+!
+!
+!    MAT 6
+!
+MPTEMP,,,,,,,,  
+MPTEMP,1,4.2
+MPTEMP,2,293
+MPDE,EX,5   
+MPDE,PRXY,5 
+MPDATA,EX,5,,23500  
+MPDATA,EX,5,,10300  
+MPDATA,PRXY,5,,0.32 
+MPDATA,PRXY,5,,0.32 
+MPTEMP,,,,,,,,  
+MPTEMP,1,4.2
+MPTEMP,2,293
+MPDATA,EX,6,,E5X_4.2
+MPDATA,EX,6,,E5X_293
+MPDATA,EY,6,,E5Z_4.2
+MPDATA,EY,6,,E5Z_293
+MPDATA,EZ,6,,E5Y_4.2
+MPDATA,EZ,6,,E5Y_293
+MPDATA,PRXY,6,,NI5XZ_4.2
+MPDATA,PRXY,6,,NI5XZ_293
+MPDATA,PRYZ,6,,NI5YZ_4.2
+MPDATA,PRYZ,6,,NI5YZ_293
+MPDATA,PRXZ,6,,NI5XY_4.2
+MPDATA,PRXZ,6,,NI5XY_293
+MPDATA,GXY,6,,G5XZ_4.2  
+MPDATA,GXY,6,,G5XZ_293  
+MPDATA,GYZ,6,,G5YZ_4.2  
+MPDATA,GYZ,6,,G5YZ_293  
+MPDATA,GXZ,6,,G5XY_4.2  
+MPDATA,GXZ,6,,G5XY_293  
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+UIMP,6,REFT,,,  
+MPDATA,ALPX,6,,AL5X 
+MPDATA,ALPY,6,,AL5Z 
+MPDATA,ALPZ,6,,AL5Y 
+!
+!    MAT 7, MAT 8, MAT 9
+!
+!
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,MU,7,,MU_WI  
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,MU,8,,MU_IF 
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,MU,9,,MU_FC  
+!
+!
+!
+!     L O C A L     C O O R D I N A T E     S Y S T E M S 
+!
+!
+!
+CSKP,11,1,1,8,7,1,1,
+!
+CSKP,12,1,2,8,7,1,1,
+!
+CSKP,13,1,3,9,1,1,1,
+!
+CSKP,14,1,4,10,1,1,1,
+!
+CSKP,15,1,5,11,3,1,1, 
+!
+CSKP,16,1,6,12,3,1,1, 
+!
+CSKP,17,0,1,7,2,1,1, 
+!
+!
+CSYS,0,
+!                         
+*end            
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!
+!
+!
+!
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!       mmes1,  
+!       mmes1, 
+*create,mmes1,mac   
+! 
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!
+!    C O R R E C T I O N         of     T H E   G E O M E T R Y
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+CMSEL,S,V_CAS_COR   
+ALLSEL,BELOW,VOLU
+!
+x=kpc(15,1)
+!
+K,1001,x,0,H_G, 
+K,1002,x,0,-H_D 
+K,1003,x,-CSPO/2,H_G, 
+K,1004,x,-CSPO/2,-H_D 
+LSTR, 1001,  1003
+LSTR, 1002,  1004
+A,232,1001,1003,350,
+A,256,1002,1004,354,
+!
+FLST,2,2,6,ORDE,2   
+FITEM,2,163 
+FITEM,2,170 
+VSBA,P51X,     676  
+FLST,2,2,6,ORDE,2   
+FITEM,2,164 
+FITEM,2,169 
+VSBA,P51X,     675  
+!
+CM,V_CAS_COR,VOLU 
+!
+CMSEL,A,V_CASING4  
+CM,V_CASING4,VOLU 
+CM,V_CASING,VOLU 
+! 
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!
+!
+!
+!   A R E A S
+!
+CMSEL,S,V_RING
+ALLSEL,BELOW,VOLU   
+!
+FLST,5,96,6,ORDE,12 
+FITEM,5,13  
+FITEM,5,-44 
+FITEM,5,69  
+FITEM,5,-100
+FITEM,5,116 
+FITEM,5,-123
+FITEM,5,129 
+FITEM,5,-136
+FITEM,5,139 
+FITEM,5,-146
+FITEM,5,149 
+FITEM,5,-156
+VSEL,R, , ,P51X 
+ALLSEL,BELOW,VOLU   
+/REPLOT 
+FLST,5,12,5,ORDE,12 
+FITEM,5,48  
+FITEM,5,52  
+FITEM,5,56  
+FITEM,5,60  
+FITEM,5,273 
+FITEM,5,276 
+FITEM,5,279 
+FITEM,5,282 
+FITEM,5,427 
+FITEM,5,460 
+FITEM,5,505 
+FITEM,5,552 
+ASEL,R, , ,P51X 
+ALLSEL,BELOW,AREA  
+!
+AATT,       1, ,   2,       0,  
+ESIZE,ESI_A,0,  
+!
+!
+!
+!
+FLST,2,2,4,ORDE,2   
+FITEM,2,684 
+FITEM,2,-685
+LCCAT,P51X  
+FLST,2,2,4,ORDE,2   
+FITEM,2,102 
+FITEM,2,627 
+LCCAT,P51X  
+CM,_Y,AREA  
+ASEL, , , ,     552 
+CM,_Y1,AREA 
+CHKMSH,'AREA'   
+CMSEL,S,_Y  
+!*  
+MSHKEY,1
+AMESH,_Y1   
+MSHKEY,0
+!*  
+CMDELE,_Y   
+CMDELE,_Y1  
+CMDELE,_Y2  
+!*  
+!
+!
+!
+FLST,5,9,5,ORDE,9   
+FITEM,5,48  
+FITEM,5,52  
+FITEM,5,56  
+FITEM,5,60  
+FITEM,5,273 
+FITEM,5,276 
+FITEM,5,279 
+FITEM,5,282 
+FITEM,5,460 
+CM,_Y,AREA  
+ASEL, , , ,P51X 
+CM,_Y1,AREA 
+CHKMSH,'AREA'   
+CMSEL,S,_Y  
+!*  
+MSHKEY,1
+AMESH,_Y1   
+MSHKEY,0
+!*  
+CMDELE,_Y   
+CMDELE,_Y1  
+CMDELE,_Y2  
+!*  
+!
+!
+!
+!
+MSHKEY,0
+CM,_Y,AREA  
+ASEL, , , ,     427 
+CM,_Y1,AREA 
+CHKMSH,'AREA'   
+CMSEL,S,_Y  
+!*  
+AMESH,_Y1   
+!*  
+CMDELE,_Y   
+CMDELE,_Y1  
+CMDELE,_Y2  
+!*  
+!
+!
+!
+MSHKEY,0
+CM,_Y,AREA  
+ASEL, , , ,     505 
+CM,_Y1,AREA 
+CHKMSH,'AREA'   
+CMSEL,S,_Y  
+!*  
+AMESH,_Y1   
+!*  
+CMDELE,_Y   
+CMDELE,_Y1  
+CMDELE,_Y2  
+!* 
+!
+!
+!  V O L U M E S
+!
+!
+!
+!
+ALLSEL,BELOW,VOLU      
+ESIZE,ESI_V,0,  
+!
+vsweep,all  
+CMSEL,S,V_EMPTY 
+ALLSEL,BELOW,VOLU        
+vsweep,all
+CMSEL,S,V_inter 
+ALLSEL,BELOW,VOLU        
+vsweep,all
+CMSEL,S,V_ring
+ALLSEL,BELOW,VOLU   
+!
+!
+! area
+!
+!
+FLST,5,12,5,ORDE,5  
+FITEM,5,1   
+FITEM,5,-9  
+FITEM,5,449 
+FITEM,5,-450
+FITEM,5,639 
+ASEL,R, , ,P51X 
+ALLSEL,BELOW,AREA    
+AATT,       1, ,   2,       0,  
+ESIZE,ESI_A,0,  
+MSHKEY,0
+CM,_Y,AREA  
+ASEL, , , ,     639 
+CM,_Y1,AREA 
+CHKMSH,'AREA'   
+CMSEL,S,_Y  
+!*  
+AMESH,_Y1   
+!*  
+CMDELE,_Y   
+CMDELE,_Y1  
+CMDELE,_Y2  
+!*  
+!
+!  volumes
+!
+ALLSEL,BELOW,VOLU      
+ESIZE,ESI_V,0,  
+vsweep,all
+!
+ALLSEL,ALL  
+!
+!
+!  areas
+!
+!
+FLST,5,14,5,ORDE,7  
+FITEM,5,1   
+FITEM,5,-9  
+FITEM,5,449 
+FITEM,5,-450
+FITEM,5,624 
+FITEM,5,639 
+FITEM,5,648 
+ASEL,R, , ,P51X 
+ALLSEL,BELOW,AREA     
+AATT,       1, ,   2,       0,  
+ESIZE,ESI_A,0,  
+CM,_Y,AREA  
+ASEL, , , ,     624 
+CM,_Y1,AREA 
+CHKMSH,'AREA'   
+CMSEL,S,_Y  
+!*  
+MSHKEY,1
+AMESH,_Y1   
+MSHKEY,0
+!*  
+CMDELE,_Y   
+CMDELE,_Y1  
+CMDELE,_Y2  
+!*  
+MSHKEY,0
+CM,_Y,AREA  
+ASEL, , , ,     648 
+CM,_Y1,AREA 
+CHKMSH,'AREA'   
+CMSEL,S,_Y  
+!*  
+AMESH,_Y1   
+!*  
+CMDELE,_Y   
+CMDELE,_Y1  
+CMDELE,_Y2  
+!*  
+!
+!   volumes
+!
+ALLSEL,BELOW,VOLU      
+ESIZE,ESI_V,0,  
+vsweep,all  
+!
+MSHKEY,0
+MSHAPE,1,3d 
+!
+!                         ESIZE,ESI_V/2,0,  
+!
+VMESH,ALL
+!
+ALLSEL,ALL   
+ACLEAR,ALL
+ETDEL,2  
+NUMMRG,KP, , , ,LOW 
+NUMMRG,NODE, , , ,LOW   
+NUMCMP,ALL  
+!
+!                         
+*end            
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!
+!
+!
+!
+!
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!       mmes2,  
+!       mmes2, 
+*create,mmes2,mac   
+! 
+!
+CSYS,0,
+!                         
+CMSEL,S,V_WINDING   
+ALLSEL,BELOW,VOLU   
+VSYMM,Y,ALL, , , ,0,0  
+CM,V_WINDING,VOLU   
+!
+CMSEL,S,V_INSULATION   
+ALLSEL,BELOW,VOLU   
+VSYMM,Y,ALL, , , ,0,0  
+CM,V_INSULATION,VOLU   
+!
+!
+CMSEL,S,V_FILLER  
+ALLSEL,BELOW,VOLU   
+VSYMM,Y,ALL, , , ,0,0  
+CM,V_FILLER,VOLU   
+!
+!
+CMSEL,S,V_CASING  
+ALLSEL,BELOW,VOLU   
+VSYMM,Y,ALL, , , ,0,0  
+CM,V_CASING,VOLU   
+!
+!
+CMSEL,S,V_INTER  
+ALLSEL,BELOW,VOLU   
+VSYMM,Y,ALL, , , ,0,0  
+CM,V_INTER,VOLU   
+!
+ALLSEL,ALL   
+!
+NUMMRG,KP, , , ,LOW 
+NUMMRG,NODE, , , ,LOW   
+NUMCMP,ALL  
+!
+NUMMRG,KP, , , ,LOW 
+NUMMRG,NODE, , , ,LOW   
+NUMCMP,ALL 
+!
+!
+CMSEL,S,V_INSULATION
+ALLSEL,BELOW,VOLU   
+VGEN,2,ALL, , , ,DCOP, , ,0   
+CM,X_INSULATION,VOLU
+CMSEL,S,V_INSULATION
+ALLSEL,BELOW,VOLU   
+VCLEAR,ALL 
+VDELE,ALL, , ,1
+CMSEL,S,X_INSULATION
+ALLSEL,BELOW,VOLU 
+VGEN, ,ALL, , , ,-DCOP, , , ,1
+CM,V_INSULATION,VOLU
+!
+!
+CMSEL,S,V_FILLER
+ALLSEL,BELOW,VOLU   
+VGEN,2,ALL, , , ,DCOP, , ,0   
+CM,X_FILLER,VOLU
+CMSEL,S,V_FILLER
+ALLSEL,BELOW,VOLU   
+VCLEAR,ALL 
+VDELE,ALL, , ,1
+CMSEL,S,X_FILLER
+ALLSEL,BELOW,VOLU 
+VGEN, ,ALL, , , ,-DCOP, , , ,1
+CM,V_FILLER,VOLU
+!
+ALLSEL,ALL   
+!
+NUMCMP,ALL 
+!
+!
+!
+!
+CMSEL,S,V_WINDING   
+ALLSEL,BELOW,VOLU   
+NSEL,R,EXT    
+CM,EXWIN,NODE   
+!
+CMSEL,S,V_INSULATION   
+ALLSEL,BELOW,VOLU   
+NSEL,R,EXT    
+CM,EXINS,NODE   
+!
+CMSEL,S,V_FILLER   
+ALLSEL,BELOW,VOLU   
+NSEL,R,EXT    
+CM,EXFIL,NODE   
+!
+CMSEL,S,V_CASING   
+ALLSEL,BELOW,VOLU   
+NSEL,R,EXT    
+CM,EXCAS,NODE   
+!
+!
+!
+!
+!
+CMSEL,S,V_WINDING   
+CMSEL,A,V_INSULATION
+ALLSEL,BELOW,VOLU     
+CPINTF,ALL,TOL,   
+NSEL,S,CP,,1,1000000  
+CM,XXX,NODE 
+CMSEL,R,EXWIN      
+CM,W_I_C,NODE   
+CMSEL,S,XXX   
+CMSEL,R,EXINS   
+CM,I_W_C,NODE   
+ALLSEL,ALL  
+CPDELE,1,1000000,,ANY   
+!
+CMSEL,S,V_FILLER   
+CMSEL,A,V_INSULATION
+ALLSEL,BELOW,VOLU     
+CPINTF,ALL,TOL,   
+NSEL,S,CP,,1,1000000  
+CM,XXX,NODE 
+CMSEL,R,EXINS      
+CM,I_F_C,NODE   
+CMSEL,S,XXX   
+CMSEL,R,EXFIL   
+CM,F_I_C,NODE   
+ALLSEL,ALL  
+CPDELE,1,1000000,,ANY   
+!
+CMSEL,S,V_FILLER   
+CMSEL,A,V_CASING
+ALLSEL,BELOW,VOLU     
+CPINTF,ALL,TOL,   
+NSEL,S,CP,,1,1000000  
+CM,XXX,NODE 
+CMSEL,R,EXFIL      
+CM,F_C_C,NODE   
+CMSEL,S,XXX   
+CMSEL,R,EXCAS   
+CM,C_F_C,NODE   
+ALLSEL,ALL  
+CPDELE,1,1000000,,ANY   
+!
+!
+!
+!
+!
+!
+/COM, CONTACT PAIR CREATION - START 
+CM,_NODECM,NODE 
+CM,_ELEMCM,ELEM 
+CM,_KPCM,KP 
+CM,_LINECM,LINE 
+CM,_AREACM,AREA 
+CM,_VOLUCM,VOLU 
+/GSAV,cwz,gsav,,temp
+MP,MU,7,0.5 
+MAT,7   
+R,3 
+REAL,3  
+ET,2,170
+ET,3,174
+KEYOPT,3,9,0
+KEYOPT,3,10,2   
+R,3,
+RMORE,  
+RMORE,,0
+RMORE,0 
+! Generate the target surface   
+NSEL,S,,,W_I_C  
+CM,_TARGET,NODE 
+TYPE,2  
+ESLN,S,0
+ESURF   
+CMSEL,S,_ELEMCM 
+! Generate the contact surface  
+NSEL,S,,,I_W_C  
+CM,_CONTACT,NODE
+TYPE,3  
+ESLN,S,0
+ESURF   
+ALLSEL  
+ESEL,ALL
+ESEL,S,TYPE,,2  
+ESEL,A,TYPE,,3  
+ESEL,R,REAL,,3  
+/PSYMB,ESYS,1   
+/PNUM,TYPE,1
+/NUM,1  
+EPLOT   
+ESEL,ALL
+ESEL,S,TYPE,,2  
+ESEL,A,TYPE,,3  
+ESEL,R,REAL,,3  
+CMSEL,A,_NODECM 
+CMDEL,_NODECM   
+CMSEL,A,_ELEMCM 
+CMDEL,_ELEMCM   
+CMSEL,S,_KPCM   
+CMDEL,_KPCM 
+CMSEL,S,_LINECM 
+CMDEL,_LINECM   
+CMSEL,S,_AREACM 
+CMDEL,_AREACM   
+CMSEL,S,_VOLUCM 
+CMDEL,_VOLUCM   
+/GRES,cwz,gsav  
+CMDEL,_TARGET   
+CMDEL,_CONTACT  
+/COM, CONTACT PAIR CREATION - END   
+/MREP,EPLOT 
+! 
+!  
+/COM, CONTACT PAIR CREATION - START 
+CM,_NODECM,NODE 
+CM,_ELEMCM,ELEM 
+CM,_KPCM,KP 
+CM,_LINECM,LINE 
+CM,_AREACM,AREA 
+CM,_VOLUCM,VOLU 
+/GSAV,cwz,gsav,,temp
+MP,MU,8,0.4 
+MAT,8   
+R,4 
+REAL,4  
+ET,4,170
+ET,5,174
+KEYOPT,5,9,0
+KEYOPT,5,10,2   
+R,4,
+RMORE,  
+RMORE,,0
+RMORE,0 
+! Generate the target surface   
+NSEL,S,,,I_F_C  
+CM,_TARGET,NODE 
+TYPE,4  
+ESLN,S,0
+ESURF   
+CMSEL,S,_ELEMCM 
+! Generate the contact surface  
+NSEL,S,,,F_I_C  
+CM,_CONTACT,NODE
+TYPE,5  
+ESLN,S,0
+ESURF   
+ALLSEL  
+ESEL,ALL
+ESEL,S,TYPE,,4  
+ESEL,A,TYPE,,5  
+ESEL,R,REAL,,4  
+/PSYMB,ESYS,1   
+/PNUM,TYPE,1
+/NUM,1  
+EPLOT   
+ESEL,ALL
+ESEL,S,TYPE,,4  
+ESEL,A,TYPE,,5  
+ESEL,R,REAL,,4  
+CMSEL,A,_NODECM 
+CMDEL,_NODECM   
+CMSEL,A,_ELEMCM 
+CMDEL,_ELEMCM   
+CMSEL,S,_KPCM   
+CMDEL,_KPCM 
+CMSEL,S,_LINECM 
+CMDEL,_LINECM   
+CMSEL,S,_AREACM 
+CMDEL,_AREACM   
+CMSEL,S,_VOLUCM 
+CMDEL,_VOLUCM   
+/GRES,cwz,gsav  
+CMDEL,_TARGET   
+CMDEL,_CONTACT  
+/COM, CONTACT PAIR CREATION - END   
+/MREP,EPLOT 
+!
+!
+/COM, CONTACT PAIR CREATION - START 
+CM,_NODECM,NODE 
+CM,_ELEMCM,ELEM 
+CM,_KPCM,KP 
+CM,_LINECM,LINE 
+CM,_AREACM,AREA 
+CM,_VOLUCM,VOLU 
+/GSAV,cwz,gsav,,temp
+MP,MU,9,0.3 
+MAT,9   
+R,5 
+REAL,5  
+ET,6,170
+ET,7,174
+KEYOPT,7,9,0
+KEYOPT,7,10,2   
+R,5,
+RMORE,  
+RMORE,,0
+RMORE,0 
+! Generate the target surface   
+NSEL,S,,,F_C_C  
+CM,_TARGET,NODE 
+TYPE,6  
+ESLN,S,0
+ESURF   
+CMSEL,S,_ELEMCM 
+! Generate the contact surface  
+NSEL,S,,,C_F_C  
+CM,_CONTACT,NODE
+TYPE,7  
+ESLN,S,0
+ESURF   
+ALLSEL  
+ESEL,ALL
+ESEL,S,TYPE,,6  
+ESEL,A,TYPE,,7  
+ESEL,R,REAL,,5  
+/PSYMB,ESYS,1   
+/PNUM,TYPE,1
+/NUM,1  
+EPLOT   
+ESEL,ALL
+ESEL,S,TYPE,,6  
+ESEL,A,TYPE,,7  
+ESEL,R,REAL,,5  
+CMSEL,A,_NODECM 
+CMDEL,_NODECM   
+CMSEL,A,_ELEMCM 
+CMDEL,_ELEMCM   
+CMSEL,S,_KPCM   
+CMDEL,_KPCM 
+CMSEL,S,_LINECM 
+CMDEL,_LINECM   
+CMSEL,S,_AREACM 
+CMDEL,_AREACM   
+CMSEL,S,_VOLUCM 
+CMDEL,_VOLUCM   
+/GRES,cwz,gsav  
+CMDEL,_TARGET   
+CMDEL,_CONTACT  
+/COM, CONTACT PAIR CREATION - END   
+/MREP,EPLOT 
+!
+!
+!                         
+*end            
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!
+!
+!
+!
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!       aatr  
+!       aatr, 
+*create,aatr,mac   
+!
+CMSEL,S,V_CASING
+ALLSEL,BELOW,VOLU   
+!
+!  MATERIALS
+!
+FLST,5,20,6,ORDE,18 
+FITEM,5,71  
+FITEM,5,82  
+FITEM,5,91  
+FITEM,5,-92 
+FITEM,5,107 
+FITEM,5,-108
+FITEM,5,111 
+FITEM,5,-112
+FITEM,5,116 
+FITEM,5,-117
+FITEM,5,192 
+FITEM,5,203 
+FITEM,5,212 
+FITEM,5,-213
+FITEM,5,228 
+FITEM,5,-229
+FITEM,5,232 
+FITEM,5,-235
+VSEL,R, , ,P51X 
+!
+ALLSEL,BELOW,VOLU   
+CM,V_INNER_LEG,VOLU 
+!
+CMSEL,S,V_CASING
+!
+CMSEL,U,V_INNER_LEG
+CM,V_OUTER_LEG,VOLU 
+!
+!
+!
+CMSEL,S,V_INSULATION
+ALLSEL,BELOW,VOLU     
+FLST,5,56,6,ORDE,56 
+FITEM,5,243 
+FITEM,5,246 
+FITEM,5,-247
+FITEM,5,250 
+FITEM,5,-251
+FITEM,5,254 
+FITEM,5,-255
+FITEM,5,258 
+FITEM,5,-259
+FITEM,5,262 
+FITEM,5,-263
+FITEM,5,266 
+FITEM,5,-267
+FITEM,5,270 
+FITEM,5,-271
+FITEM,5,274 
+FITEM,5,-275
+FITEM,5,278 
+FITEM,5,-279
+FITEM,5,282 
+FITEM,5,-283
+FITEM,5,286 
+FITEM,5,-287
+FITEM,5,290 
+FITEM,5,-291
+FITEM,5,294 
+FITEM,5,-295
+FITEM,5,298 
+FITEM,5,-299
+FITEM,5,302 
+FITEM,5,-303
+FITEM,5,306 
+FITEM,5,-307
+FITEM,5,310 
+FITEM,5,-311
+FITEM,5,314 
+FITEM,5,-315
+FITEM,5,318 
+FITEM,5,-319
+FITEM,5,322 
+FITEM,5,-323
+FITEM,5,326 
+FITEM,5,-327
+FITEM,5,330 
+FITEM,5,-331
+FITEM,5,334 
+FITEM,5,-335
+FITEM,5,338 
+FITEM,5,-339
+FITEM,5,342 
+FITEM,5,-343
+FITEM,5,346 
+FITEM,5,-347
+FITEM,5,350 
+FITEM,5,-351
+FITEM,5,354 
+VSEL,U, , ,P51X   
+CM,V_INSU_MAT3,VOLU 
+!
+CMSEL,S,V_INSULATION
+ALLSEL,BELOW,VOLU  
+CMSEL,U,V_INSU_MAT3
+CM,V_INSU_MAT4,VOLU 
+!
+!
+!
+!
+CMSEL,S,V_INNER_LEG 
+ALLSEL,BELOW,VOLU   
+EMODIF,ALL,MAT,1,  
+!
+CMSEL,S,V_OUTER_LEG 
+CMSEL,A,V_INTER 
+ALLSEL,BELOW,VOLU   
+EMODIF,ALL,MAT,2,  
+!
+CMSEL,S,V_INSU_MAT3 
+ALLSEL,BELOW,VOLU   
+EMODIF,ALL,MAT,3,  
+!
+CMSEL,S,V_INSU_MAT4 
+ALLSEL,BELOW,VOLU   
+EMODIF,ALL,MAT,4,  
+!
+CMSEL,S,V_FILLER 
+ALLSEL,BELOW,VOLU   
+EMODIF,ALL,MAT,5,  
+!
+CMSEL,S,V_WINDING 
+ALLSEL,BELOW,VOLU   
+EMODIF,ALL,MAT,6,  
+!
+CMSEL,S,V_WINDING 
+CMSEL,A,V_INSULATION
+CMSEL,A,V_FILLER 
+CM,V_EMPTY,VOLU 
+!
+CMSEL,S,V_EMPTY 
+ALLSEL,BELOW,VOLU   
+!
+!
+!
+!   SYSTEMS
+!
+!
+CMSEL,S,V_EMPTY 
+ALLSEL,BELOW,VOLU 
+FLST,5,36,6,ORDE,12 
+FITEM,5,5   
+FITEM,5,-12 
+FITEM,5,58  
+FITEM,5,-59 
+FITEM,5,123 
+FITEM,5,-124
+FITEM,5,140 
+FITEM,5,-147
+FITEM,5,247 
+FITEM,5,-254
+FITEM,5,303 
+FITEM,5,-310
+VSEL,R, , ,P51X 
+ALLSEL,BELOW,VOLU      
+CM,CSYS_11,VOLU 
+EMODIF,ALL,ESYS,11,
+!
+CMSEL,S,V_EMPTY 
+ALLSEL,BELOW,VOLU 
+FLST,5,36,6,ORDE,12 
+FITEM,5,13  
+FITEM,5,-20 
+FITEM,5,60  
+FITEM,5,-61 
+FITEM,5,125 
+FITEM,5,-126
+FITEM,5,148 
+FITEM,5,-155
+FITEM,5,255 
+FITEM,5,-262
+FITEM,5,311 
+FITEM,5,-318
+VSEL,R, , ,P51X 
+ALLSEL,BELOW,VOLU      
+CM,CSYS_12,VOLU 
+EMODIF,ALL,ESYS,12,
+!
+CMSEL,S,V_EMPTY 
+ALLSEL,BELOW,VOLU 
+FLST,5,36,6,ORDE,12 
+FITEM,5,21  
+FITEM,5,-28 
+FITEM,5,62  
+FITEM,5,-63 
+FITEM,5,127 
+FITEM,5,-128
+FITEM,5,156 
+FITEM,5,-163
+FITEM,5,263 
+FITEM,5,-270
+FITEM,5,319 
+FITEM,5,-326
+VSEL,R, , ,P51X 
+ALLSEL,BELOW,VOLU      
+CM,CSYS_13,VOLU 
+EMODIF,ALL,ESYS,13,
+!
+CMSEL,S,V_EMPTY 
+ALLSEL,BELOW,VOLU 
+FLST,5,36,6,ORDE,12 
+FITEM,5,29  
+FITEM,5,-36 
+FITEM,5,64  
+FITEM,5,-65 
+FITEM,5,129 
+FITEM,5,-130
+FITEM,5,164 
+FITEM,5,-171
+FITEM,5,271 
+FITEM,5,-278
+FITEM,5,327 
+FITEM,5,-334
+VSEL,R, , ,P51X 
+ALLSEL,BELOW,VOLU      
+CM,CSYS_14,VOLU 
+EMODIF,ALL,ESYS,14,
+!
+CMSEL,S,V_EMPTY 
+ALLSEL,BELOW,VOLU 
+FLST,5,36,6,ORDE,12 
+FITEM,5,37  
+FITEM,5,-44 
+FITEM,5,66  
+FITEM,5,-67 
+FITEM,5,131 
+FITEM,5,-132
+FITEM,5,172 
+FITEM,5,-179
+FITEM,5,279 
+FITEM,5,-286
+FITEM,5,335 
+FITEM,5,-342
+VSEL,R, , ,P51X 
+ALLSEL,BELOW,VOLU      
+CM,CSYS_15,VOLU 
+EMODIF,ALL,ESYS,15,
+!
+CMSEL,S,V_EMPTY 
+ALLSEL,BELOW,VOLU 
+FLST,5,36,6,ORDE,12 
+FITEM,5,45  
+FITEM,5,-52 
+FITEM,5,68  
+FITEM,5,-69 
+FITEM,5,133 
+FITEM,5,-134
+FITEM,5,180 
+FITEM,5,-187
+FITEM,5,287 
+FITEM,5,-294
+FITEM,5,343 
+FITEM,5,-350
+VSEL,R, , ,P51X 
+ALLSEL,BELOW,VOLU      
+CM,CSYS_16,VOLU 
+EMODIF,ALL,ESYS,16,
+!
+CMSEL,S,V_EMPTY 
+ALLSEL,BELOW,VOLU 
+FLST,5,36,6,ORDE,16 
+FITEM,5,1   
+FITEM,5,-4  
+FITEM,5,53  
+FITEM,5,-57 
+FITEM,5,70  
+FITEM,5,122 
+FITEM,5,135 
+FITEM,5,-139
+FITEM,5,188 
+FITEM,5,-191
+FITEM,5,243 
+FITEM,5,-246
+FITEM,5,295 
+FITEM,5,-302
+FITEM,5,351 
+FITEM,5,-354
+VSEL,R, , ,P51X 
+ALLSEL,BELOW,VOLU      
+CM,CSYS_17,VOLU 
+EMODIF,ALL,ESYS,17,
+!
+ALLSEL,ALL   
+!
+!                         
+*end            
+!MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+!
+!
+!
+!
+!
+!
+!          B E G I N N I N G      O F     T H E      P R O G R A M 
+!
+!
+!  
+/VIEW,1,1,1,1   
+/VUP,1,Z
+/PLOPTS,INFO,1  
+/PLOPTS,LEG1,1  
+/PLOPTS,LEG2,0  
+/PLOPTS,LEG3,1  
+/PLOPTS,FRAME,0 
+/PLOPTS,TITLE,1 
+/PLOPTS,MINM,1  
+/PLOPTS,FILE,0  
+/PLOPTS,LOGO,0  
+/PLOPTS,WINS,1  
+/PLOPTS,WP,0
+/PLOPTS,DATE,2  
+/TRIAD,LTOP 
+!
+!
+/VIEW,1,,-1 
+/ANG,1  
+/REP,FAST   
+!
+!
+!/PNUM,KP,1 
+/NUMBER,1    
+/PNUM,MAT,1
+! /UIS,MSGPOP,3 
+/NERR,5,10000000,   
+!*  
+!
+!
+!
+!
+/PREP7  
+cceli
+empty
+casi1
+casi2
+casi3
+casi4
+inter
+eemat
+mmes1
+mmes2
+aatr
+!
+!
+!
+/sys,del cceli.mac 
+/sys,del empty.mac 
+/sys,del casi1.mac 
+/sys,del casi2.mac 
+/sys,del casi3.mac 
+/sys,del casi4.mac 
+/sys,del inter.mac 
+/sys,del eemat.mac 
+/sys,del mmes1.mac 
+/sys,del mmes2.mac 
+/sys,del aatr.mac 
+!
+!

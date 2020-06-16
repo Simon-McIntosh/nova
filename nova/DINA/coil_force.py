@@ -1,5 +1,5 @@
 import numpy as np
-from nova.old.force import force_field
+from nova.force import force_field
 from nep.coil_geom import VSgeom
 from nep.DINA.read_tor import read_tor
 from collections import OrderedDict

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.animation as manimation
 from amigo.time import clock
 from itertools import count
-from nova.old.coils import PF
+from nova.coils import PF
 from amigo.IO import readtxt, pythonIO
 from nep.DINA.read_dina import read_dina
 from amigo.pyplot import plt

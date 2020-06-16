@@ -130,7 +130,8 @@ class operate:
             self.feature_name = feature_name
             for index in self.feature['node'].index:
                 if isinstance(index, str):
-                    vector = pd.Series(self.feature['node'].loc[index, :])
+                    vector = pd.Series(self.feature['node'].loc[index, :],
+                                       dtype=float)
                     vector.loc['frame_index'] = \
                         np.argmin(abs(self.t - vector.t))
                     self.feature_keypoints = self.feature_keypoints.append(
@@ -153,7 +154,7 @@ class operate:
                 for i, key in enumerate(keypoints):
                     t_index[i] = self.feature['node'].loc[key, 't']
                 index = [np.argmin(abs(self.t-t)) for t in t_index]
-                vector = pd.Series(name=label)
+                vector = pd.Series(name=label, dtype=float)
                 vector['frame_index'] = index
                 vector['t'] = t_index
                 vector['dt'] = np.diff(t_index)[0]
@@ -162,8 +163,9 @@ class operate:
                 self.feature_segments = self.feature_segments.append(vector)
 
     def extract_features(self):
-        for variable, threshold in zip(['Ip', 'Pfus', 'Ti', 'Zx'],
-                                       [0.95, 0.85, 0.25, 0.95]):
+        for variable, threshold in zip(['Ip', 'Pfus', 'Ti', 'Zx', 
+                                        '<PSIext>', '<PSIcoils>', 'PSI(axis)'],
+                                       [0.95, 0.85, 0.25, 0.95, 1, 1, 1]):
             self.feature_extract(variable, threshold=threshold)
         self.extract_feature_segments()
         self.extract_feature_keypoints()
@@ -199,6 +201,8 @@ class operate:
                     ax[i].text(self.feature['node'].t.loc[index],
                                self.feature['node'].loc[index, name],
                                index, ha=ha, va=va, color='gray')
+            label = name.replace('(', '').replace(')', '')
+            label = label.replace('PSI', '\psi')
             ax[i].set_ylabel(f'${name}$, {self.units["read"][name]}')
             ax[i].plot(self.feature['node'].t,
                        self.feature['node'].loc[:, name], ls, color=f'C{i}')
@@ -228,7 +232,7 @@ class interpolate:
             self.index, indexer = self.index.sort_values(return_indexer=True)
         else:
             indexer = np.arange(self.index.size)
-        self._vector = pd.Series(index=self.index)
+        self._vector = pd.Series(index=self.index, dtype=float)
         self.units = pd.DataFrame(index=self.index,
                                   columns=['read', 'write', 'factor'])
         self.units['read'] = unit[indexer]
@@ -471,7 +475,7 @@ class scenario_data(read_dina, interpolate, operate):
         Ic_index[plasma_loc] = 'Plasma'
         # CS central pair
         Ic_index[cs1_loc:cs1_loc+3] = ['CS1U', 'CS1', 'CS1L']
-        self._Ic = pd.Series(index=Ic_index)
+        self._Ic = pd.Series(index=Ic_index, dtype=float)
         if self.sort:
             self._Ic.sort_index(inplace=True)
 
@@ -670,16 +674,22 @@ if __name__ == '__main__':
     # d3.load_folder()
     # d3.load_file('15MA DT-DINA2016-01_v1.1')
 
-    scn = read_scenario(database_folder='operations', read_txt=False)
-    scn.load_folder()
+    #scn = read_scenario(database_folder='operations', read_txt=False)
+    #scn.load_folder()
+    #scn.load_file(-1)
+    
+    
     
     d2 = scenario_data(read_txt=False)
-    d2.load_folder()
-    #d2.load_file('15MA DT-DINA2016-01_v1.1')  # read / load single file
-    #d2.load_file(-2)  # read / load single file
+    #d2.load_folder()
+    d2.load_file('15MA DT-DINA2016-01_v1.1')  # read / load single file
+    #d2.load_file(-1, read_txt=True)  # read / load single file
+    
+    plt.set_context('talk')
+    d2.plot_features(feature_name=['Ip', '<PSIcoils>'])
 
-    d3 = field_data(read_txt=False)
-    d3.load_folder()
+    #d3 = field_data(read_txt=False)
+    #d3.load_folder()
     # d3.load_file('15MA DT-DINA2016-01_v1.1')
 
     '''

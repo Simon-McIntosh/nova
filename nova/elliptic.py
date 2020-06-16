@@ -33,7 +33,7 @@ class EQ(object):
 
     def __init__(self, coilset, eqdsk, sigma=0, **kwargs):
         self.mu_o = 4 * np.pi * 1e-7  # magnetic constant [Vs/Am]
-        self.cc = CoilClass(coilset)
+        self.cc = CoilClass(**coilset)
         self.sf = SF(eqdsk=eqdsk)
         self.resample(sigma=sigma, **kwargs)
         self.get_plasma()  # plasma coils

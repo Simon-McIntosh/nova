@@ -6,6 +6,7 @@ import pandas as pd
 from amigo.pyplot import plt
 from amigo.geom import rdp_extract
 from astropy import units
+from amigo.geom import vector_lowpass
 
 
 class operate:
@@ -166,7 +167,10 @@ class operate:
         for variable, threshold in zip(['Ip', 'Pfus', 'Ti', 'Zx', 
                                         '<PSIext>', '<PSIcoils>', 'PSI(axis)'],
                                        [0.95, 0.85, 0.25, 0.95, 1, 1, 1]):
-            self.feature_extract(variable, threshold=threshold)
+            try:
+                self.feature_extract(variable, threshold=threshold)
+            except KeyError:
+                pass
         self.extract_feature_segments()
         self.extract_feature_keypoints()
 
@@ -342,7 +346,223 @@ class interpolate:
         self.t = np.linspace(tmin, tmax, nt)
         self.dt = (tmax - tmin) / (nt - 1)
         return unique_index
-
+    
+    
+class scenario_limits:
+    
+    
+    def __init__(self, folder=None, t='d3'):
+        self.initialize_limits()
+        self.load_data(folder, t=t)
+        
+    def reset_limits(self):
+        self.limit = {'I': {}, 'F': {}, 'B': {}}
+        
+    def initialize_limits(self):
+        'default limits for ITER coil-set'
+        self.reset_limits()  # reset
+        # current limits kA
+        self.set_limit(ICS=45)
+        self.set_limit(IPF1=48, IPF2=55, IPF3=55, 
+                       IPF4=55, IPF5=52, IPF6=52)
+        # force limits
+        self.set_limit(FCSsep=120, side='upper')  
+        self.set_limit(FCSsum=60, side='both')
+        self.set_limit(FPF1=-150, FPF2=-75, FPF3=-90, FPF4=-40,
+                           FPF5=-10, FPF6=-190, side='lower')
+        self.set_limit(FPF1=110, FPF2=15, FPF3=40, FPF4=90,
+                           FPF5=160, FPF6=170, side='upper')
+        # field limits
+        self.set_limit(BCS=[[45, 40], [12.6, 13]], side='abs') 
+        self.set_limit(BPF1=[[48, 41], [6.4, 6.5]], side='abs') 
+        self.set_limit(BPF2=[[55, 50], [4.8, 5]], side='abs') 
+        self.set_limit(BPF3=[[55, 50], [4.8, 5]], side='abs') 
+        self.set_limit(BPF4=[[55, 50], [4.8, 5]], side='abs') 
+        self.set_limit(BPF5=[[52, 33], [5.7, 6]], side='abs') 
+        self.set_limit(BPF6=[[48, 41], [6.4, 6.5]], side='abs') 
+        
+    def set_limit(self, side='both', eps=1e-2, **kwargs):
+        # set as ICSsum for [I][CSsum] etc...
+        if side == 'both' or side == 'equal':
+            index = [0, 1]
+        elif side == 'lower':
+            index = [0]
+        elif side == 'upper':
+            index = [1]
+        elif side == 'abs':
+            index = [0]
+        else:
+            errtxt = 'invalid side parameter [both, lower, upper]'
+            errtxt += ': {}'.format(side)
+            raise IndexError(errtxt)
+        for key in kwargs:
+            variable = key[0]
+            if key[1:] not in self.limit[variable]:  # initalize limit
+                if side == 'abs':
+                    self.limit[variable][key[1:]] = [1e36]
+                else:
+                    self.limit[variable][key[1:]] = [-1e36, 1e36]
+            if kwargs[key] is None:
+                for i in index:
+                    sign = self.sign_limit(i, side)
+                    self.limit[variable][key[1:]][i] = sign * 1e36
+            else:  # set limit(s)
+                if side == 'abs':
+                    self.limit[variable][key[1:]] = kwargs[key]
+                else:
+                    for i in index:
+                        sign = self.sign_limit(i, side)
+                        if side == 'equal':
+                            value = sign * eps + kwargs[key]
+                        else:
+                            value = sign * kwargs[key]
+                        self.limit[variable][key[1:]][i] = value
+                    
+    def sign_limit(self, index, side):
+        # only apply sign to symetric limits (side==both)
+        if side in ['both', 'equal']:
+            sign = 2*index-1
+        else:
+            sign = 1
+        return sign
+        
+    def load_data(self, folder, t='d3'):
+        self.d2 = scenario_data(folder)
+        self.d3 = field_data(folder)
+        self.t = t
+        self.normalize()
+        
+    @property
+    def t(self):
+        return self._t
+        
+    @t.setter
+    def t(self, t):
+        if isinstance(t, str):
+            self._t = getattr(self, t).t
+        else:
+            self._t = t
+            t = ''
+        frame = []
+        for dataset in ['d2', 'd3']:
+            if t == dataset:
+                frame.append(getattr(self, dataset).frame)
+            else:
+                frame.append(pd.DataFrame(
+                        getattr(self, dataset).interpolator(self.t),
+                        columns=getattr(self, dataset).index))
+        self.frame = pd.concat(frame, axis=1)
+        self.frame.rename(columns={'Fz_1': 'Fz_cssep', 'Fz_2': 'Fz_cssum'},
+                          inplace=True)
+        
+    def extract_index(self):
+        self.index = {}
+        for var in self.limit:
+            index = []
+            for name in self.limit[var]:
+                if var == 'F':
+                    prefix = 'Fz'
+                else:
+                    prefix = var
+                if var in ['F', 'B']:
+                    prefix += '_'
+                name = f'{prefix}{name.lower()}'
+                if name in self.frame:
+                    index.append(name)
+                else:
+                    index.extend([col for col in self.frame if name in col])
+            self.index[var] = index
+        
+    def normalize(self):
+        self.norm = pd.DataFrame()
+        self.extract_index()
+        for var in self.index:
+            for name in self.index[var]:
+                if var == 'I':
+                    label = name[1:]
+                else:
+                    label = name.split('_')[-1]
+                label = f'{label[:2].upper()}{label[2:]}'
+                if label[-1] in ['l', 'u']:
+                    label = label.upper()
+                if label not in self.limit[var]:
+                    label = label[:2]
+                limit = self.limit[var][label]
+                self.norm.loc[:, name] = self.frame.loc[:, name]
+                if len(np.shape(limit)) == 1:  # static limit
+                    value = self.norm.loc[:, name].copy()
+                    for i, sign in enumerate([-1, 1]):
+                        index = sign * value > 0
+                        self.norm.loc[index, name] /= limit[i]
+                else:  # current dependance
+                    coil = name.split('_')[-1]
+                    if 'cs1' in coil:
+                        coil = 'cs1'
+                    I = abs(self.frame.loc[:, f'I{coil}'])
+                    limit = interp1d(*limit, fill_value='extrapolate')(I)
+                    self.norm.loc[:, name] /= limit
+        
+    def plot(self, multi=True, strID='', ax=None):
+        if ax is None:
+            ax = plt.subplots(len(self.index), 1, sharex=True, sharey=True)[1]
+        ylabel = {'I': '$I^*$', 'F': '$F^*$', 'B': '$B^*$'}
+        for i, index in enumerate(self.index):
+            norm = self.norm.loc[:, self.index[index]]
+            max_norm = norm.max(axis=1)
+            iC = 0
+            waveform = np.zeros(len(self.t))
+            for limit in self.index[index]:
+                _waveform = norm.loc[:, limit].copy()
+                max_index = np.isclose(_waveform, max_norm)
+                if np.sum(max_index) > 0:
+                    waveform[max_index] = _waveform[max_index]
+                    _waveform[~max_index] = np.nan
+                    _label = limit
+                    if index == 'I':
+                        _label = _label[1:]
+                    else:
+                        _label = _label.split('_')[-1]
+                    _label = _label.upper()
+                    _label = _label.replace('SEP', 'sep').replace('SUM', 'sum')
+                    if np.nanmax(_waveform) > 0.75:
+                        _color = f'C{iC}'
+                        iC += 1
+                    else:
+                        _color = 'darkgray'
+                        _label = None
+                    if multi:
+                        ax[i].plot(self.t, _waveform, label=_label, 
+                                   color=_color)
+            if multi:
+                # plot keypoints
+                for keypoint, marker in zip(['SOF', 'SOB', 'EOB'],
+                                        ['*', 'P', 'X']):
+                    try:
+                        t = self.d2.feature_keypoints.loc[keypoint, 't']
+                        value = interp1d(self.t, waveform)(t)
+                        ax[i].plot(t, value, marker=marker, color='k', ms=8)
+                    except:
+                        pass
+                # multi axes legend
+                ax[i].legend(ncol=1, loc='center right', 
+                         bbox_to_anchor=(1.15, 0.5), frameon=False)
+            else:
+                strID = strID.replace(' ', '_')
+                label = self.d2.filename.replace(strID, '')
+                ax[i].plot(self.t, waveform, label=label)
+            ax[i].plot([self.t[0], self.t[-1]], np.ones(2), '--',
+                       color='gray')
+            ax[i].set_ylabel(ylabel[index])
+            ax[i].set_ylim(0.5)
+        if multi:
+            plt.suptitle(self.d2.filename)
+        else:
+            ax[1].legend(ncol=1, loc='center right', 
+                         bbox_to_anchor=(1.3, 0.5), frameon=False)
+            
+        ax[-1].set_xlabel('$t$ s')
+        plt.despine()
+        
 
 class scenario_data(read_dina, interpolate, operate):
 
@@ -429,7 +649,8 @@ class scenario_data(read_dina, interpolate, operate):
         else:  # old file - correct coordinates
             coordinate_switch = -1
         for var in self.data.columns:
-            if ('I' in var[0] and len(var[0]) <= 5) or ('V' in var[0]):
+            if ('I' in var[0] and len(var[0]) <= 5) or ('V' in var[0]) \
+                or ('PSI' in var[0]):
                 self.data[var] *= coordinate_switch
 
     def subindex(self, additional_columns):
@@ -522,6 +743,46 @@ class scenario_data(read_dina, interpolate, operate):
         interpolate.to.fset(self, to)  # update interpolation instance
         self._Ic.iloc[:] = self.vector.iloc[self.Ic_iloc].values  # coils
         self._Ip = self.vector['Ip']  # plasma
+        
+    def plot(self, x='t', y='Ip', xslice=None, dt_filt=0, dt_min=0,
+             strID='', ax=None, **kwargs):
+        # slice
+        if xslice is None:
+            xslice = [self.frame.index[0], self.frame.index[-1]]
+        else:
+            if not pd.api.types.is_list_like(xslice):
+                xslice = [xslice]
+            for i in range(len(xslice)):
+                if isinstance(xslice[i], str):
+                    xslice[i] = self.feature_keypoints.loc[xslice[i], 
+                                                         'frame_index']
+        if len(xslice) == 1:
+            dt = 0
+            xslice = xslice[0] 
+        else:
+            dt = self.frame.loc[xslice[1], 't'] - \
+                self.frame.loc[xslice[0], 't'] 
+            xslice = slice(*xslice)
+        x = self.frame.loc[xslice, x]
+        y = self.frame.loc[xslice, y]
+        # filter
+        if dt_filt != 0:
+            n_filt = int(dt_filt/self.dt) 
+            if n_filt%2 == 0:
+                n_filt += 1
+            x = vector_lowpass(x.values, n_filt)
+            y = vector_lowpass(y.values, n_filt)
+        if ax is None:
+            ax = plt.gca()
+        
+        if isinstance(x, float):
+            ax.plot(x, y, **kwargs)
+        else:
+            if dt > dt_min:
+                strID = strID.replace(' ', '_')
+                label = self.filename.replace(strID, '')
+                ax.plot(x, y, label=label)              
+        return dt
 
 
 class field_data(read_dina, interpolate, operate):
@@ -680,17 +941,18 @@ if __name__ == '__main__':
     
     
     
-    d2 = scenario_data(read_txt=False)
-    #d2.load_folder()
-    d2.load_file('15MA DT-DINA2016-01_v1.1')  # read / load single file
+    d2 = scenario_data(read_txt=True)
+    d2.load_folder()
+    #d2.load_file(-7)  # read / load single file
     #d2.load_file(-1, read_txt=True)  # read / load single file
     
-    plt.set_context('talk')
-    d2.plot_features(feature_name=['Ip', '<PSIcoils>'])
+    #plt.set_context('talk')
+    #d2.plot_features(feature_name=['Ip', '<PSIcoils>'])
 
     #d3 = field_data(read_txt=False)
     #d3.load_folder()
     # d3.load_file('15MA DT-DINA2016-01_v1.1')
+    
 
     '''
     d2.ko = 100

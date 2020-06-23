@@ -1,0 +1,232 @@
+import nep_data.scenario_database
+from amigo.IO import class_dir
+from os.path import join, isfile, isdir
+from os import listdir
+import numpy as np
+import pandas as pd
+from os import sep
+from amigo.IO import pythonIO
+from datetime import datetime
+from amigo.time import clock
+from amigo.qdafile import QDAfile
+
+
+# read_dina.timeconstant moved to amigo.time.time_constant
+
+
+class read_dina(pythonIO):
+
+    date_switch = datetime.strptime('2016-02', '%Y-%m')
+
+    def __init__(self, database_folder=None, read_txt=True, **kwargs):
+        '''
+        Kwargs:
+            database_folder (str): name of database folder
+            read_txt (bool): read / reread source text files
+        '''
+        pythonIO.__init__(self)  # python read/write
+        self.set_directory(database_folder)
+        self.read_txt = read_txt
+
+    def set_directory(self, database_folder):
+        self.database_folder = database_folder
+        self.get_directory()
+        self.get_folders()
+
+    def get_directory(self):
+        self.directory = class_dir(nep_data.scenario_database)
+        if self.database_folder is not None:
+            self.directory = join(self.directory, self.database_folder)
+
+    def get_folders(self):
+        folders = [f for f in listdir(self.directory)]
+        if self.database_folder == 'operations':
+            self.folders = sorted(
+                    folders, key=lambda x: f'{x.split("-")[1]}_'
+                                           f'{x.split("-")[2]}_'
+                                           f'{x.split("-")[0]}')
+        else:
+            self.folders = folders
+        self.nfolder = len(self.folders)
+        files = [f for f in listdir(self.directory) if isfile(f)]
+        self.files = sorted(files)
+        self.nfile = len(self.files)
+
+    def get_folder_array(self, exclude=[]):
+        dtype = [('name', 'U25'), ('year', int), ('mode', 'U25'),
+                 ('month', int), ('version', 'U25')]
+        folder_array = np.ones(self.nfolder, dtype=dtype)
+        for i in range(self.nfolder):
+            folder_array[i]['name'] = self.folders[i]
+            folder_array[i]['mode'] = self.folders[i].split('DINA')[0][:-1]
+            timestamp = self.folders[i].split('DINA')[-1]
+            folder_array[i]['year'] = int(timestamp.split('-')[0])
+            timestamp = ''.join(timestamp.split('-')[1:])
+            folder_array[i]['month'] = int(timestamp[:2])
+            folder_array[i]['version'] = timestamp[2:].replace('_', '')
+        folder_array.sort(order=['year', 'month', 'version'])
+        if exclude:
+            index = [name not in exclude for name in folder_array['name']]
+            folder_array = folder_array[index]
+        self.folder_array = folder_array
+        self.folders = self.folder_array['name']
+
+    def select_folder(self, folder):  # folder entered as string, index or None
+        if isinstance(folder, int):  # index (int)
+            if folder < 0:
+                folder += self.nfolder
+            if folder > self.nfolder-1:
+                txt = '\nfolder index {:d} greater than '.format(folder)
+                txt += 'folder number {:d}'.format(self.nfolder)
+                raise IndexError(txt)
+            folder = self.folders[folder]
+        elif isinstance(folder, str):
+            folder.split
+            if folder not in self.folders:
+                folder = folder.split('_')  # remove leading underscore
+                folder = '_'.join([' '.join(folder[:2]), '_'.join(folder[2:])])
+                if folder not in self.folders:
+                    txt = '\nfolder {} '.format(folder)
+                    txt += 'not found in {}'.format(self.directroy)
+                    raise IndexError(txt)
+        elif folder is None:
+            folder = self.directory
+        else:
+            raise ValueError('folder required as int, str or None')
+        return join(self.directory, folder)
+
+    def locate_file_type(self, file, file_type, folder):
+        file_types = ['txt', 'qda']
+        file_types.remove(file_type)
+        file_types = [file_type, *file_types]
+        filepath = None
+        for file_type in file_types:
+            try:
+                filepath = self.locate_file(f'{file}.{file_type}',
+                                            folder=folder)
+                break
+            except IndexError:
+                pass
+        if filepath is None:
+            raise FileNotFoundError()
+        return filepath, file_type
+
+    def locate_folder(self, file, folder, file_type='txt'):
+        filepath, file_type = self.locate_file_type(file, file_type, folder)
+        self.filename = filepath.split(sep)[-3].replace(' ', '_')
+        self.date = datetime.strptime(
+                self.filename.split('DINA')[-1].split('_')[0][:7], '%Y-%m')
+        self.folder = folder
+        self.filepath = sep.join(filepath.split(sep)[:-1]) + sep
+        return join(self.filepath, self.filename), file_type
+
+    def locate_file(self, file_type, folder=None):
+        if self.nfolder == 0:
+            folder = None
+        folder = self.select_folder(folder)
+        ext = file_type.split('.')[-1].lower()
+        if ext in ['xls', 'qda', 'txt']:  # *.*
+            file_type = file_type.split('.')[0].lower()
+            subfolders = listdir(folder)
+            for subfolder in subfolders:
+                subfolder = join(folder, subfolder)
+                if isdir(subfolder):
+                    files = [f for f in listdir(subfolder) if
+                             isfile(join(subfolder, f))]
+                    folder_ext = [file.split('.')[-1].lower()
+                                  for file in files]
+                    if ext in folder_ext:
+                        folder = subfolder
+                        break
+                    else:
+                        files = []
+            if not files:
+                raise IndexError(f'file {file_type}.{ext} not found\n'
+                                 f'dir: {join(folder, subfolder)}')
+        else:
+            files = [f for f in listdir(folder) if isfile(join(folder, f))]
+        files = [f for f in files if file_type.lower() in f.lower()]
+        if len(files) == 0:
+            txt = '\nfile key {} not found '.format(file_type)
+            txt += 'in: \n{}'.format(files)
+            raise IndexError(txt)
+        try:
+            file = [f for f in files if ext in f.lower()][0]
+        except IndexError:
+            raise IndexError('ext {} not found in {}'.format(ext, files))
+        return join(folder, file)
+
+    def read_csv(self, filename, split='', dropnan=True, dataframe=True):
+        data = pd.read_csv(filename, delimiter='\t', na_values='NAN')
+        columns = {}
+        units = []
+        for c in list(data):
+            uo = ''
+            if split:
+                c_split = c.split(split)
+                co = c_split[0]
+                co = co.replace(' or ', '_or_')
+                co = co.replace(' ', '')
+                if len(c_split) == 2:
+                    uo = c_split[1].replace(' ', '')
+            if co in [key.split(split)[0] for key in columns]:
+                co += '_extra'  # seperate duplicates
+            columns[c] = co
+            units.append(uo)
+        data = self.multiindex(data, columns, units,
+                               dropnan=dropnan, dataframe=dataframe)
+        return data
+
+    def read_qda(self, filename, split='', dropnan=True, dataframe=True):
+        qdafile = QDAfile(filename)
+        data = pd.DataFrame()
+        columns = {}
+        units = []
+        for i, (var, nrow) in enumerate(zip(qdafile.headers, qdafile.rows)):
+            uo = ''
+            var = var.decode()
+            if nrow > 0:
+                var_split = var.split(',')
+                co = var_split[0]
+                co = co.replace(' or ', '_or_')
+                co = co.replace(' ', '')
+                columns[var] = co
+                if len(var_split) == 2:
+                    uo = var_split[1].replace(' ', '')
+                data[columns[var]] = np.array(qdafile.data[i, :])
+                units.append(uo)
+        data = self.multiindex(data, columns, units,
+                               dropnan=dropnan, dataframe=dataframe)
+        return data
+
+    def multiindex(self, data, columns, units,
+                   dropnan=False, dataframe=True):
+        data.columns = pd.MultiIndex.from_tuples(
+                [(columns[c], u) for c, u in zip(columns, units)],
+                names=['name', 'unit'])
+        data_keys = list(data.keys())
+        for var in data_keys:
+            if len(data[var]) == 0 or np.isnan(data[var]).all():
+                data.pop(var)
+        if dropnan:
+            data = data.dropna(axis=0)  # remove NaN values
+        if not dataframe:
+            data = data.to_dict(orient='list')
+        return data
+
+    def load_folder(self):
+        '''
+        load / reload all files from specified database folder
+        '''
+        nfolder = self.nfolder
+        tick = clock(nfolder, header=f'loading {nfolder} scenarios from '
+                                     f'folder: {self.database_folder}')
+        for folder in range(nfolder):
+            self.load_file(folder, read_txt=True, verbose=False)
+            tick.tock()
+
+
+if __name__ == '__main__':
+
+    dina = read_dina('operations')
+    filename = dina.locate_file('data2.txt', folder=1)

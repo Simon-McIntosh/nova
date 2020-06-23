@@ -545,7 +545,8 @@ class scenario_limits:
                         pass
                 # multi axes legend
                 ax[i].legend(ncol=1, loc='center right', 
-                         bbox_to_anchor=(1.15, 0.5), frameon=False)
+                         bbox_to_anchor=(1.15, 0.5), frameon=False,
+                         fontsize='xx-small')
             else:
                 strID = strID.replace(' ', '_')
                 label = self.d2.filename.replace(strID, '')
@@ -558,7 +559,8 @@ class scenario_limits:
             plt.suptitle(self.d2.filename)
         else:
             ax[1].legend(ncol=1, loc='center right', 
-                         bbox_to_anchor=(1.3, 0.5), frameon=False)
+                         bbox_to_anchor=(1.3, 0.5), frameon=False,
+                         fontsize='xx-small')
             
         ax[-1].set_xlabel('$t$ s')
         plt.despine()

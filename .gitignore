@@ -1,6 +1,13 @@
 # Compiled python modules.
 *.pyc
 
+# Python binary files
+*.pk
+*.pkl
+
+# eqdsk files
+*.eqdsk
+
 # Mac DSstore
 .DS_Store
 

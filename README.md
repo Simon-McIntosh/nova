@@ -1,1 +1,1 @@
-Equilibrium tools for scenario design and machine opperation
+Equilibrium tools for Tokamak scenario design and machine operation

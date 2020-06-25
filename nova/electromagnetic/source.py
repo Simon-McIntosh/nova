@@ -1,4 +1,4 @@
-from nova.coil_set import CoilSet
+from nova.electromagnetic.coilset import CoilSet
 from scipy.special import ellipk, ellipe
 import numpy as np
 
@@ -70,9 +70,9 @@ if __name__ == '__main__':
     dl, dt = 0.5, 0.1
     
     cs = CoilSet()
-    cs.add_coil(x, z, dl, dt, dCoil=-1, Nt=50, cross_section='rectangle',
-                turn_section='square', turn_fraction=1, subcoil=False)
-    cs.plot(subcoil=False)
+    cs.add_coil(x, z, dl, dt, dCoil=-1, Nt=12, cross_section='rectangle',
+                turn_section='rectangle', turn_fraction=1, subcoil=True)
+    cs.plot(subcoil=True)
     #cs.plot()
     
 

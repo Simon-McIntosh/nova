@@ -1,9 +1,10 @@
 import numpy as np
 from pandas import DataFrame, concat
 from pandas.api.types import is_list_like, is_dict_like
+
 from amigo.pyplot import plt
-from nova.mesh_grid import MeshGrid
-from nova.biot_savart import BiotSavart, BiotAttributes
+from nova.electromagnetic.meshgrid import MeshGrid
+from nova.electromagnetic.biotsavart import BiotSavart, BiotAttributes
                 
 
 class Mutual(BiotSavart, BiotAttributes):
@@ -142,6 +143,7 @@ class Grid(BiotSavart, BiotAttributes):
     def plot_field(self):
         if self.n > 0:
             plt.quiver(self.x2d, self.z2d, self.Bx, self.Bz)
+    
     
 class Interaction:
     

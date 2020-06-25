@@ -1,11 +1,12 @@
-from nova.coil_data import CoilData
+import numpy as np
 from pandas import DataFrame, Series, isna, concat
 from pandas.api.types import is_list_like, is_dict_like
-import numpy as np
-from warnings import warn
 import shapely.geometry
 import shapely.affinity
 from shapely.ops import transform
+from warnings import warn
+
+from nova.electromagnetic.coildata import CoilData
 
 
 class CoilSeries(Series):
@@ -376,7 +377,7 @@ class CoilFrame(DataFrame, CoilData):
         return shapely.geometry.box(x-dx/2, z-dz/2, x+dx/2, z+dz/2)
 
     @staticmethod
-    def _poly_skin(x, z, dt, d):
+    def _poly_skin(x, z, d, dt):
         '''
         dx: fractional thickness
         dz: circle diameter

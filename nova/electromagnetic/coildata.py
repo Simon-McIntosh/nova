@@ -183,22 +183,11 @@ class CoilData():
             self._reduction_index = None
             self._plasma_iloc = None
             self._plasma_reduction_index = None
-   
+        
     @property
     def current_update(self):
         return self._current_update
-        
-    @property
-    def current(self):
-        'display current_update status'
-        if self.nC > 0:
-            return DataFrame(
-                    {'power': self._power, 'plasma': self._plasma,
-                     self._current_update: self._update_index},
-                    index=self._mpc_index)
-        else:
-            return DataFrame(columns=['power', 'plasma', self._current_update])
-
+    
     @current_update.setter
     def current_update(self, flag):
         '''
@@ -224,6 +213,17 @@ class CoilData():
             else:
                 raise IndexError(f'flag {flag} not in '
                                  '[full, actitve, passive, plasma, coil]')
+
+    @property
+    def status(self):
+        'display power, plasma and current_update status'
+        if self.nC > 0:
+            return DataFrame(
+                    {'power': self._power, 'plasma': self._plasma,
+                     self._current_update: self._update_index},
+                    index=self._mpc_index)
+        else:
+            return DataFrame(columns=['power', 'plasma', self._current_update])
                 
     def _set_current(self, value, current_column='Ic', update_dataframe=True):
         '''

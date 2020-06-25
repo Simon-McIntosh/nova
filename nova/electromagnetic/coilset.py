@@ -1,28 +1,29 @@
-from nova.coil_frame import CoilFrame
-from nova.simulation_scripts import Mutual, Grid
+from os import path
+
+import numpy as np
 from pandas import Series, DataFrame, concat, isnull
 from pandas.api.types import is_list_like
-import numpy as np
-from amigo.geom import gmd, amd
 import functools
 import matplotlib
-import operator
-from amigo.IO import human_format
-from sklearn.cluster import DBSCAN
 from matplotlib.collections import PatchCollection
-from amigo.pyplot import plt
+import matplotlib.colors as mc
+import operator
+from sklearn.cluster import DBSCAN
 import shapely.geometry
 from descartes import PolygonPatch
-from os import path
+from scipy.interpolate import interp1d
+import colorsys
+
+from amigo.geom import gmd, amd
+from amigo.IO import human_format
+from amigo.pyplot import plt
 from amigo.IO import class_dir
-import nova
 from amigo.IO import pythonIO
 from amigo.geom import length, xzfun
-from scipy.interpolate import interp1d
-import matplotlib.colors as mc
-import colorsys
-from nova.biot_savart import BiotSavart, BiotAttributes
-from warnings import warn
+import nova
+from nova.electromagnetic.coilframe import CoilFrame
+from nova.electromagnetic.interact import Mutual, Grid
+from nova.electromagnetic.biotsavart import BiotSavart, BiotAttributes
 
 
 class CoilSet(pythonIO, BiotSavart, BiotAttributes):
@@ -815,15 +816,14 @@ if __name__ == '__main__':
                 turn_section='circle', turn_fraction=0.7, dCoil=0.75,
                 plasma=True) 
     '''
-    cs.add_coil(9, -3, 1.5, 1.5, name='PF13', part='PF', Nt=1.5, It=5e5,
-                turn_section='circle', turn_fraction=0.7, dCoil=0.75,
+    cs.add_coil(1.75, 0.5, 2.5, 0.25, name='PF13', part='PF', Nt=1, It=5e5,
+                cross_section='skin',
+                turn_section='square', turn_fraction=0.7, dCoil=0.15,
                 plasma=True) 
     
-    
-    
+    cs.add_coil([2, 2], [1, 0], 0.5, 0.3,
+                name='PF', part='PF', delim='', Nt=30, dCoil=0.1)
     '''
-    cs.add_coil([2, 2, 3, 3.5], [1, 0, -1, -3], 0.5, 0.3,
-                name='PF', part='PF', delim='', Nt=30)
     cs.add_coil(4, 0.75, 1.75, 1.8, name='PF4', part='VS3', turn_fraction=0.75,
                 Nt=350, dCoil=-1, power=False)
     
@@ -841,10 +841,10 @@ if __name__ == '__main__':
     
     
     cs.current_update = 'coil'
-    cs.Ic = 12
-    cs.Ip = -20
+    cs.It = 12
+    cs.Ip = -2000
         
-    cs.Ic = 34
+    #cs.Ic = 34
     #cs.coil.Nt = 1
     
 

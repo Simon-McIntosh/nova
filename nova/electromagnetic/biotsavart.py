@@ -1,11 +1,13 @@
-from nova.coil_frame import CoilFrame
-from nova.coil_matrix import CoilMatrix
-from scipy.special import ellipk, ellipe
-from nova.inductance.geometric_mean_radius import geometric_mean_radius
 import numpy as np
 from scipy.optimize import minimize_scalar
 from pandas.api.types import is_list_like
 from pandas import Series
+from scipy.special import ellipk, ellipe
+
+from nova.electromagnetic.coilframe import CoilFrame
+from nova.electromagnetic.coilmatrix import CoilMatrix
+from nova.electromagnetic.geometric_mean_radius import geometric_mean_radius
+
 
 class BiotFrame:
     

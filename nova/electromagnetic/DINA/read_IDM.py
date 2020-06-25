@@ -2,7 +2,7 @@ import numpy as np
 from collections import OrderedDict
 import urllib.request
 import requests
-auth = ('mcintos', 'sm085888?')
+auth = (username, password)
 
 # https://user.iter.org/?uid=3C6V7B&action=get_document
 

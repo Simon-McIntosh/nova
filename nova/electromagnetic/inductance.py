@@ -3,7 +3,7 @@ from itertools import combinations_with_replacement as cr
 from itertools import combinations as cm
 import sys
 import datetime
-import nova.cross_coil as cc
+#import nova.cross_coil as cc
 from amigo import geom
 
 

@@ -50,8 +50,9 @@ class Filament(Vectors):
         super().__init__(*args)
 
     def flux(self):
-        'vector potential in phi'
-        Aphi = 1 / (2 * np.pi) * self.a / self.r * ((1 - self.k2 / 2) * self.K - self.E)
+        'vector and scalar potential'
+        Aphi = 1 / (2*np.pi) * self.a/self.r * ((1 - self.k2/2) * 
+                                                self.K - self.E)
         Apsi = 2 * np.pi * self.mu_o * self.r * Aphi  # scalar potential
         return Apsi
     
@@ -70,8 +71,8 @@ if __name__ == '__main__':
     dl, dt = 0.5, 0.1
     
     cs = CoilSet()
-    cs.add_coil(x, z, dl, dt, dCoil=-1, Nt=12, cross_section='rectangle',
-                turn_section='rectangle', turn_fraction=1, subcoil=True)
+    cs.add_coil(x, z, dl, dt, dCoil=-1, Nt=12, cross_section='square',
+                turn_section='square', turn_fraction=1, subcoil=True)
     cs.plot(subcoil=True)
     #cs.plot()
     

@@ -59,7 +59,7 @@ class CoilFrame(DataFrame, CoilData):
             {'rms': 0, 'dA': 0, 'Ic': 0, 'It': 0, 'm': '', 
              'R': 0, 'Nt': 1,
              'Nf': 1, 'material': '', 'turn_fraction': 1, 'patch': None,
-             'cross_section': 'rectangle', 'turn_section': 'square',
+             'cross_section': 'rectangle', 'turn_section': 'rectangle',
              'coil': '', 'part': '', 'subindex': None, 'dCoil': 0,
              'dl_x': 0, 'dl_z': 0, 'mpc': '', 'polygon': None,
              'power': True, 'plasma': False, 'rho': 0}
@@ -251,8 +251,10 @@ class CoilFrame(DataFrame, CoilData):
             if key in kwargs:
                 additional_columns.append(key)
                 data[key] = kwargs.pop(key)
+        print(data)
         self._update_coilframe_metadata(additional_columns=additional_columns)
         self._propogate_current(current_label, data)
+        self._set_section(data)
         if len(kwargs.keys()) > 0:
             warn(f'\n\nunset kwargs: {list(kwargs.keys())}'
                  '\nto use include within additional_columns:\n'
@@ -260,6 +262,10 @@ class CoilFrame(DataFrame, CoilData):
                  '\nor within default_attributes:\n'
                  f'{self._default_attributes}\n')
         return data
+    
+    def _set_section(self, data):
+        if data['cross_section'] in ['circle', 'square']:
+            data['dl'] = data['dt'] = np.min([data['dl'], data['dt']])
 
     def _extract_current_label(self, **kwargs):
         current_label = None

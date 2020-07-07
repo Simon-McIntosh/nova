@@ -15,12 +15,18 @@ circle = 4 / (pi * dx**2) * integrate(
 print(pretty(simplify(circle)))
 '''
 
-skin = 1 / (pi * dx) * integrate(dx/2 * (xc + dx/2 * cos(theta))**2, 
+skin = 1 / (2*pi) * integrate((xc + dx/2 * cos(theta))**2, 
                                  (theta, 0, 2*pi))
 print(pretty(simplify(skin)))
 
+thick_skin = 1 / (pi*dx*f) * integrate(
+                    integrate((xc + r * cos(theta))**2, 
+                              (r, (1 - f)*dx/2, dx/2)), 
+                              (theta, 0, 2*pi))
+'''
 thick_skin = (4 / (pi * dx**2) - 4 / (pi * ((1 - f) * dx)**2)) * integrate(
                     integrate(r * (xc + r * cos(theta))**2, 
                               (r, (1 - f)*dx/2, dx/2)), 
                               (theta, 0, 2*pi))
-print(pretty(simplify(thick_skin)))
+'''
+simplify(thick_skin)

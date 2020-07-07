@@ -46,6 +46,7 @@ class geometric_mean_radius:
         factor = np.zeros(len(cross_section))
         factor[cross_section == 'circle'] = self.gmr_factor['circle']
         factor[cross_section == 'square'] = self.gmr_factor['square']
+        factor[cross_section == 'rectangle'] = self.gmr_factor['square']
         factor[cross_section == 'skin'] = self.gmr_factor['skin']
         factor[cross_section == 'polygon'] = self.gmr_factor['square']
         if np.array(factor == 0).any():

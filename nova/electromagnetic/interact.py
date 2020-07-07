@@ -48,7 +48,7 @@ class Grid(BiotSavart, BiotAttributes):
     def __init__(self, subcoil, **grid_attributes):
         BiotSavart.__init__(self)
         BiotAttributes.__init__(self, **grid_attributes)
-        self.load_source(subcoil)  # link source
+        self.load_source(subcoil)  # link source coilset
         
     def solve_interaction(self):
         self.load_target(x=self.x2d, z=self.z2d)
@@ -88,7 +88,7 @@ class Grid(BiotSavart, BiotAttributes):
             not np.array_equal(grid_attributes['limit'], self.limit) or \
             not np.array_equal(grid_attributes['coilset_limit'], 
                                self.coilset_limit) or \
-            grid_attributes['n'] != self.n
+            grid_attributes['n'] != self.n or kwargs.get('regen', False)
         if regenerate_grid:
             self._generate_grid(**grid_attributes)
         return regenerate_grid

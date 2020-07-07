@@ -56,13 +56,14 @@ class CoilFrame(DataFrame, CoilData):
     def _initialize_default_attributes(self):
         'default attributes when not set via self.add_coil(**kwargs)'
         self._default_attributes = \
-            {'rms': 0, 'dA': 0, 'Ic': 0, 'It': 0, 'm': '', 
-             'R': 0, 'Nt': 1,
-             'Nf': 1, 'material': '', 'turn_fraction': 1, 'patch': None,
+            {'rms': 0., 'dA': 0., 'Ic': 0., 'It': 0., 'm': '', 
+             'R': 0., 'Nt': 1,
+             'Nf': 1, 'material': '', 
+             'turn_fraction': 1., 'skin_fraction': 1., 'patch': None,
              'cross_section': 'rectangle', 'turn_section': 'rectangle',
-             'coil': '', 'part': '', 'subindex': None, 'dCoil': 0,
-             'dl_x': 0, 'dl_z': 0, 'mpc': '', 'polygon': None,
-             'power': True, 'plasma': False, 'rho': 0}
+             'coil': '', 'part': '', 'subindex': None, 
+             'dCoil': 0., 'dl_x': 0., 'dl_z': 0., 'mpc': '', 'polygon': None,
+             'power': True, 'plasma': False, 'rho': 0.}
             
     def set_dtypes(self):
         if self.nC > 0:
@@ -187,6 +188,21 @@ class CoilFrame(DataFrame, CoilData):
         self.drop(index, inplace=True)
         self.rebuild_coildata()
         
+    def translate(self, index=None, dx=0, dz=0):
+        if index is None:
+            index = self.index
+        elif not is_list_like(index):
+            index = [index]
+        if dx != 0:
+            self.loc[index, 'x'] += dx
+        if dz != 0:
+            self.loc[index, 'z'] += dz
+        for name in index:
+            self.loc[name, 'polygon'] = \
+                shapely.affinity.translate(self.loc[name, 'polygon'], 
+                                           xoff=dx, yoff=dz)
+            self.loc[name, 'patch'] = None  # re-generate coil patch
+        
     def add_mpc(self, name, factor=1):
         '''
         define multi-point constraint linking a set of coils
@@ -251,10 +267,8 @@ class CoilFrame(DataFrame, CoilData):
             if key in kwargs:
                 additional_columns.append(key)
                 data[key] = kwargs.pop(key)
-        print(data)
         self._update_coilframe_metadata(additional_columns=additional_columns)
         self._propogate_current(current_label, data)
-        self._set_section(data)
         if len(kwargs.keys()) > 0:
             warn(f'\n\nunset kwargs: {list(kwargs.keys())}'
                  '\nto use include within additional_columns:\n'
@@ -262,10 +276,6 @@ class CoilFrame(DataFrame, CoilData):
                  '\nor within default_attributes:\n'
                  f'{self._default_attributes}\n')
         return data
-    
-    def _set_section(self, data):
-        if data['cross_section'] in ['circle', 'square']:
-            data['dl'] = data['dt'] = np.min([data['dl'], data['dt']])
 
     def _extract_current_label(self, **kwargs):
         current_label = None
@@ -296,7 +306,11 @@ class CoilFrame(DataFrame, CoilData):
             if nCol == 1:
                 index = [name]
             else:
-                index = [f'{label}{delim}{i:d}' for i in range(nCol)]
+                if delim in name:
+                    offset = int(name.split(delim)[-1])
+                else:
+                    offset = 0
+                index = [f'{label}{delim}{i+offset:d}' for i in range(nCol)]
         self._check_index(index)
         return index
 
@@ -311,6 +325,8 @@ class CoilFrame(DataFrame, CoilData):
             for name in coil.index:
                 cross_section = coil.at[name, 'cross_section']
                 x, z, dl, dt = coil.loc[name, ['x', 'z', 'dl', 'dt']]
+                if cross_section in ['circle', 'square']:
+                    dl = dt = np.min([dl, dt])  # set aspect equal
                 if isna(coil.at[name, 'polygon']):
                     polygen = self._get_polygen(cross_section)
                     polygon = polygen(x, z, dl, dt)
@@ -332,19 +348,14 @@ class CoilFrame(DataFrame, CoilData):
                 elif cross_section in ['square', 'rectangle']:
                     rms = np.sqrt(x**2 + dl**2 / 12)  # square
                 elif cross_section == 'skin':
-                    rms = 1
+                    rms = np.sqrt((dl**2 * dt**2 / 24 - dl**2 * dt / 8 
+                                   + dl**2 / 8 + x**2))
                 else:  # calculate directly from polygon
                     p = coil.at[name, 'polygon']
                     rms = (transform(lambda x, z: 
                                       (x**2, z), p).centroid.x)**0.5
+                coil.at[name, 'rms'] = rms
 
-    def _calculate_current_center(self, coil):
-        for cross_section in ['square', 'rectangle', 'circle', 
-                              'skin']:
-            index = coil.cross_section == cross_section
-             
-        
-        #coil.loc[:, 'xm'] = 
         
     @staticmethod
     def _get_polygen(cross_section):
@@ -448,3 +459,14 @@ class CoilFrame(DataFrame, CoilData):
         if key in self._coilframe_attributes:
             self.refresh_dataframe()
         return DataFrame.__getitem__(self, key)
+    
+    def _get_value(self, index, col, takeable=False):
+        'subclass dataframe get_value'
+        if col in self._coilframe_attributes:
+            self.refresh_dataframe()
+        return DataFrame._get_value(self, index, col, takeable)
+    
+    def __repr__(self):
+        self.refresh_dataframe()
+        return DataFrame.__repr__(self)
+        

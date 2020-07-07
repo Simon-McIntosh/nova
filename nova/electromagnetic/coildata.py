@@ -35,7 +35,8 @@ class CoilData():
     '''
 
     # CoilFrame attributes - fast access np.array linked to CoilFrame
-    _coilframe_attributes = ['x', 'z', 'dx', 'dz', 'Ic', 'It', 'Nt',
+    _coilframe_attributes = ['x', 'z', 'dl', 'dt', 'rms', 'dx', 'dz',
+                             'Ic', 'It', 'Nt',
                              'power', 'plasma', 'Psi', 'Bx', 'Bz',
                              'Fx', 'Fz', 'xFx', 'xFz', 'zFx', 'zFz', 'My']
     
@@ -347,6 +348,10 @@ class CoilData():
                 for attribute in _update_dataframe:
                     if _update_dataframe[attribute]:
                         self.loc[:, attribute] = getattr(self, attribute)
+                        if attribute in ['Ic', 'It']:
+                            _attr = next(attr for attr in ['Ic', 'It'] 
+                                         if attr != attribute)
+                            self._update_dataframe[_attr] = False
             
     def refresh_coilframe(self, key):
         'transfer data from dataframe to coilframe attributes'

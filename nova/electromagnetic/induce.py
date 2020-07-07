@@ -51,67 +51,62 @@ class Filament(Vectors):
 
     def flux(self):
         'vector and scalar potential'
-        Aphi = 1 / (2*np.pi) * self.a/self.r * ((1 - self.k2/2) * 
-                                                self.K - self.E)
-        Apsi = 2 * np.pi * self.mu_o * self.r * Aphi  # scalar potential
-        return Apsi
+        Aphi = 1 / (2*np.pi) * self.a/self.r * \
+            ((1 - self.k2/2) * self.K - self.E)  # 
+        psi = 2 * np.pi * self.mu_o * self.r * Aphi  # scalar potential
+        return psi
     
 
-
-class Rectangular(Vectors):
+class Rectangle(Vectors):
     
     def __init__(self, *args):
         super().__init__(*args)
         
+    def flux(self):
+        'calculate flux for rectangular coil section'
+        return np.zeros(len(self.r))
+        
+        
+class BiotSavart:
+    
+    def __init__(self, *args):
+        # assemble source and target
+    
+        # calculate seperation between source and target 
+        # (low order / high order)
+        
+        # split source high order source coils dependant on type
+        # (rectangle, polygon, shell)
+        a=1
+    #def flux
+    
+    
         
 
 if __name__ == '__main__':
     
-    x, z = 0.5, 0
-    dl, dt = 0.5, 0.1
+    x, z = 0.3, 0
+    dl, dt = 0.5, 0.7
     
     cs = CoilSet()
-    cs.add_coil(x, z, dl, dt, dCoil=-1, Nt=12, cross_section='square',
-                turn_section='square', turn_fraction=1, subcoil=True)
-    cs.plot(subcoil=True)
-    #cs.plot()
+    cs.add_coil(x, z, dl, dt, dCoil=-1, Nt=150, cross_section='skin',
+                turn_section='rectangle', turn_fraction=1, Ic=40e3)
     
+    #cs.add_coil(x, z, dl, dt, dCoil=-1, Nt=5, 
+    #            cross_section='square', turn_section='skin',
+    #            skin_fraction=0.7)
+    #cs.plot(subcoil=True)
+    cs.plot()
+    
+    cs.grid.generate_grid(expand=0, n=4e3)
+    #cs.grid.plot_grid()
+    cs.grid.plot_flux()
+    
+    f = Filament(cs.grid.source_m['x'], cs.grid.source_m['z'],
+                 cs.grid.target_m['x'], cs.grid.target_m['z'])
+    #cs.grid.flux = cs.grid.save_matrix(f.flux())[0]
+    
+    #cs.grid.flux = f.flux()
+    cs.grid.plot_flux(color='C0', levels=cs.grid.levels)
 
-
-    
-    '''
-    cs.Ic = 1
-    cs.grid.generate_grid(expand=1, n=1e3)
-    #cs.grid.plot_flux(lw=3)
-    
- 
-    xo = np.exp(1/dx * ((x + dx/2) * np.log(x + dx/2) - 
-                        (x - dx/2) * np.log(x - dx/2) - dx))
-    xo = np.sqrt(np.mean(cs.subcoil.x**2))
-    
-    #xo = np.sqrt(cs.coil.x**2 + cs.coil.dx**2 / 12)  # square
-    xo = np.sqrt(cs.coil.x**2 + cs.coil.dx**2 / 16)  # circle
-    xo = np.sqrt(cs.coil.x**2 + cs.coil.dx**2 / 8)  # circle  # skin
-    
-    print(xo, gmd(cs.subcoil.x, cs.subcoil.Nt), np.sqrt(np.mean(cs.subcoil.x**2)))
-    
-    cs_ = CoilSet(**cs.coilset)
-    cs_.coil.x = xo
-    #cs_.coil.xm = xo
-    cs_.meshcoil(dCoil=0)
-    #cs_.plot()
-    
-    
-    #cs_.Ic = cs.Ic
-    
-    cs_.grid.solve_interaction()
-    
-    
-    f = Filament(cs_.grid.source_m['x'], cs_.grid.source_m['z'],
-                 cs_.grid.target_m['x'], cs_.grid.target_m['z'])
-    
-    cs_.grid.flux = f.flux()
-    
-    #cs_.grid.plot_flux(color='C0', levels=cs.grid.levels)
-    '''
     

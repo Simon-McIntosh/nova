@@ -10,6 +10,7 @@ import matplotlib.colors as mc
 import operator
 from sklearn.cluster import DBSCAN
 import shapely.geometry
+import shapely.affinity
 from descartes import PolygonPatch
 from scipy.interpolate import interp1d
 import colorsys
@@ -51,7 +52,8 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
 
     # additional_columns
     _coil_columns = ['dA', 'dCoil', 'subindex', 'part',
-                     'cross_section', 'turn_section', 'turn_fraction', 
+                     'cross_section', 
+                     'turn_section', 'turn_fraction', 'skin_fraction',
                      'patch', 'polygon',
                      'power', 'plasma', 'mpc', 'Nf', 'Nt', 'It', 'Ic']
     
@@ -118,7 +120,8 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
     @default_attributes.setter
     def default_attributes(self, default_attributes):
         for attribute in default_attributes:
-            if attribute in self._coil_columns + self._subcoil_columns:
+            if attribute in list(self._default_attributes.keys()) + \
+                    self._coil_columns + self._subcoil_columns:
                 self._default_attributes[attribute] = \
                     default_attributes[attribute]
 
@@ -219,6 +222,11 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
             PF.index = [f'PF{i}' for i in range(PF.nC)]
         coil = concat([PF, CS])
         return coil
+    
+    @property
+    def status(self):
+        'display power, plasma and current_update status'
+        return self.coil.status
         
     @property
     def current_update(self):
@@ -247,6 +255,22 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
     @dCoil.setter
     def dCoil(self, dCoil):
         self.coil._default_attributes['dCoil'] = dCoil
+        
+    @property
+    def dPlasma(self):
+        return self._default_attributes['dPlasma']
+    
+    @dPlasma.setter
+    def dPlasma(self, dPlasma):
+        self._default_attributes['dPlasma'] = dPlasma
+        
+    @property
+    def dShell(self):
+        return self.coil._default_attributes['dShell']
+    
+    @dShell.setter
+    def dShell(self, dShell):
+        self.coil._default_attributes['dShell'] = dShell
         
     @property
     def Ic(self):
@@ -305,7 +329,16 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
             self.subcoil._power = self.coil._power[self.coil._mpc_referance]
             self.subcoil.current_update = self.coil._current_update
             self.coil._relink_mpc = False
-
+            
+    def translate(self, index=None, dx=0, dz=0):
+        if index is None:
+            index = self.coil.index
+        elif not is_list_like(index):
+            index = [index]
+        self.coil.translate(index, dx, dz)
+        for name in index:
+            self.subcoil.translate(self.coil.loc[name, 'subindex'], dx, dz)
+            
     def meshcoil(self, index=None, mpc=True, **kwargs):
         coil = kwargs.pop('coil', self.coil)
         subcoil = kwargs.pop('subcoil', self.subcoil)
@@ -350,6 +383,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
             dx, dz = coil[['dl', 'dt']]  # length, thickness == dx, dz
             bounds = (x-dx/2, z-dz/2, x+dx/2, z+dz/2)
             coil_polygon = shapely.geometry.box(bounds)
+        coil_area = coil_polygon.area
         mesh = {'mpc': mpc}  # multi-point constraint (link current)
         if 'part' in coil:
             mesh['part'] = coil['part']
@@ -384,15 +418,18 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         if nz < 1:
             nz = 1
         dx_, dz_ = dx / nx, dz / nz  # subcoil divisions
+        if cross_section in ['circle', 'square', 'skin']:
+            dx_ = dz_ = np.min([dx_, dz_])  # equal aspect      
         dl_ = turn_fraction * dx_
-        if cross_section == 'skin':  # maintain fractional thickness
-            dt_ = dt
+        if cross_section == 'skin':  # update fractional thickness
+            dt_ = coil['skin_fraction']
         else:
             dt_ = turn_fraction * dz_
+
         x_ = np.linspace(*bounds[::2], nx+1)
         z_ = np.linspace(*bounds[1::2], nz+1)
         polygen = CoilFrame._get_polygen(cross_section)  # polygon generator
-        polygon, xm_, zm_, cs_ = [], [], [], []
+        polygon, xm_, zm_, cs_, dA_ = [], [], [], [], []
         for i in range(nx):  # radial divisions
             for j in range(nz):  # vertical divisions
                 sub_polygon = polygen(x_[i]+dx_/2, z_[j]+dz_/2, dl_, dt_)
@@ -404,6 +441,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
                         polygon.append(p_)
                         xm_.append(p_.centroid.x)
                         zm_.append(p_.centroid.y)
+                        dA_.append(p_.area)
                         if sub_polygon.within(coil_polygon):
                             cs_.append(cross_section)  # maintain cs referance
                         else:
@@ -413,10 +451,11 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         if Nf == 0:  # no points found within polygon (skin)
             xm_, zm_, dl_, dt_ = x, z, dl, dt
             Nf = 1
+        Nt_ = coil['Nt']*np.array(dA_) / coil_area  # constant current density
             
         # subcoil bundle
         mesh.update({'x': xm_, 'z': zm_, 'dl': dl_, 'dt': dt_,
-                     'Nt': coil['Nt'] / Nf, 'Nf': Nf, 
+                     'Nt': Nt_, 'Nf': Nf, 
                      'polygon': polygon, 'cross_section': cs_})  
             
         # subcoil moment arms
@@ -541,7 +580,8 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         part = kwargs.pop('part', 'Plasma')
         coil = kwargs.pop('coil', 'Plasma')
         cross_section = kwargs.pop('cross_section', 'ellipse')
-        turn_section = kwargs.pop('turn_section', 'square')
+        turn_section = kwargs.pop('turn_section', 'rectangle')
+        self.dPlasma = kwargs.pop('dPlasma', self.dPlasma)  # update dPlasma
         iloc = [None, None]
         if 'Plasma' in self.coil.index:
             iloc = self.drop_coil('Plasma')
@@ -673,7 +713,8 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
     def patch_coil(coil, overwrite=False, patchwork_factor=0.15, **kwargs):
         # call on-demand
         part_color = {'VS3': 'C0', 'VS3j': 'gray', 'CS': 'C0', 'PF': 'C0',
-                      'trs': 'C2', 'vvin': 'C3', 'vvout': 'C4', 'plasma': 'C4',
+                      'trs': 'C2', 'vvin': 'C3', 'vvout': 'C4', 
+                      'plasma': 'C4', 'Plasma': 'C4',
                       'cryo': 'C5'}
         color = kwargs.get('part_color', part_color)
         zorder = kwargs.get('zorder', {'VS3': 1, 'VS3j': 0, 'CS': 3, 'PF': 2})
@@ -727,7 +768,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
             pc = PatchCollection(patch, match_original=True)
             ax.add_collection(pc)
 
-    def plot(self, subcoil=True, plasma=True, label=False, current=None,
+    def plot(self, subcoil=True, plasma=True, label=True, current=None,
              ax=None):
         if ax is None:
             ax = plt.gca()
@@ -748,7 +789,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         plasma_index = self.coil._plasma_index
         x = self.coil.x[plasma_index]
         z = self.coil.z[plasma_index]
-        ax.text(x, z, f'{1e-6*self.Ip:1.1f}MA', fontsize=fs,
+        ax.text(x, z, f'{1e-6*self.Ip:1.1f}MA', fontsize='x-large',
                 ha='center', va='center', color=0.9 * np.ones(3),
                 zorder=10)
 
@@ -758,7 +799,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         if coil is None:
             coil = self.coil
         parts = np.unique(coil.part)
-        parts = [p for p in parts if p not in ['plasma', 'vvin',
+        parts = [p for p in parts if p not in ['plasma', 'Plasma', 'vvin',
                                                'vvout', 'trs']]
         if label == True:
             label = parts
@@ -780,14 +821,15 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
                 ax.text(x + drs, z + zshift, name, fontsize=fs,
                         ha=ha, va='center', color=0.2 * np.ones(3))
             if part in parts and current:
-                if current == 'Ic':  # line current, amps
+                if current == 'Ic' or current == 'A':  # line current
                     unit = 'A'
-                    Ilabel = coil.at[name, 'Ic']
-                elif current == 'It':  # turn current, amp turns
+                    Ilabel = coil.loc[name, 'Ic']
+                elif current == 'It' or current == 'AT':  # turn current
                     unit = 'At'
-                    Ilabel = coil.at[name, 'It']
+                    Ilabel = coil.loc[name, 'It']
                 else:
-                    raise IndexError(f'current {current} not in [Ic, It]')
+                    raise IndexError(f'current {current} not in ' +\
+                                     '[Ic, A, It, AT]')
                 txt = f'{human_format(Ilabel, precision=1)}{unit}'
                 ax.text(x + drs, z - zshift, txt,
                         fontsize=fs, ha=ha, va='center',
@@ -816,14 +858,15 @@ if __name__ == '__main__':
                 turn_section='circle', turn_fraction=0.7, dCoil=0.75,
                 plasma=True) 
     '''
-    cs.add_coil(1.75, 0.5, 2.5, 0.25, name='PF13', part='PF', Nt=1, It=5e5,
-                cross_section='skin',
-                turn_section='square', turn_fraction=0.7, dCoil=0.15,
+    cs.add_coil(1.75, 0.5, 2.5, 0.75, name='PF13', part='PF', Nt=1, It=5e5,
+                cross_section='skin', turn_fraction=0.7, dCoil=0.15,
                 plasma=True) 
-    
+    cs.add_coil(cs.coil.rms[0], 0.5, 0.1, 0.1, name='PF19', dCoil=-1,
+                Ic=0, Nt=1)
+        
+    '''
     cs.add_coil([2, 2], [1, 0], 0.5, 0.3,
                 name='PF', part='PF', delim='', Nt=30, dCoil=0.1)
-    '''
     cs.add_coil(4, 0.75, 1.75, 1.8, name='PF4', part='VS3', turn_fraction=0.75,
                 Nt=350, dCoil=-1, power=False)
     
@@ -841,32 +884,23 @@ if __name__ == '__main__':
     
     
     cs.current_update = 'coil'
-    cs.It = 12
+    cs.It = 0
     cs.Ip = -2000
         
     #cs.Ic = 34
     #cs.coil.Nt = 1
-    
 
-    '''
-    cs.Ic = 222
-    
-    cs.grid.generate_grid()
-    
-    
-    cs.add_coil(9.6, 3.5, 0.52, 0.52, name='PF19', dCoil=0.05,
-                Ic=1e6, Nt=7)
-    
-    cs.Ic = 333
-    '''
-    
 
     cs.plot(label=True)
-    cs.grid.generate_grid(n=4e3)
+    cs.grid.generate_grid(expand=0, n=4e3)
     #cs.grid.plot_grid()
     cs.grid.plot_flux()
     
-    cs.solve_interaction()
+    cs.It = -2000
+    cs.Ip = 0
+    
+    cs.grid.plot_flux(color='C3')
+    #cs.solve_interaction()
     '''
     
     

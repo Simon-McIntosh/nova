@@ -7,23 +7,41 @@ from scipy.special import ellipk, ellipe
 from nova.electromagnetic.coilframe import CoilFrame
 from nova.electromagnetic.coilmatrix import CoilMatrix
 from nova.electromagnetic.geometric_mean_radius import geometric_mean_radius
+from amigo.pyplot import plt
+import quadpy
+from numba import jit
 
 
 class BiotFrame:
     
     _frame_attributes = ['x', 'z', 'dx', 'dz', 'Nt', 'cross_section']
-    _default_frame_attributes = {'dx': 0, 'dz': 0, 'Nt': 1, 
-                           'cross_section': 'circle'}
+    _default_frame_attributes = {
+            'dx': 0, 'dz': 0, 'Nt': 1, 'cross_section': 'circle'}
     
-    def __init__(self, dx=0, dz=0, cross_section='circle', **kwargs):
-        self.load_data(**kwargs)
+    def __init__(self, **kwargs):
+        self._load_data(**kwargs)
         
-    def load_data(self, **kwargs):
+    def _load_data(self, **kwargs):
         self._emulate_nC(**kwargs)
         self._emulate_plasma()
         self._setattr(**kwargs)
         self._emulate_coil_index()
         self._check_attribute_length()
+        
+    @staticmethod
+    def load(*args, **kwargs):
+        'static load'
+        nargs = len(args)
+        if nargs == 0:  # key-word input
+            frame = kwargs
+        elif len(args) == 1:  # CoilFrame or dict
+            frame = args[0]
+        else:  # arguments ordered as BiotFrame._frame_attributes
+            frame = {key: args[i] 
+                     for i, key in enumerate(BiotFrame._frame_attributes)}
+        if not isinstance(frame, CoilFrame):
+            frame = BiotFrame(**frame)   # emulate dict as CoilFrame
+        return frame
         
     def _emulate_nC(self, **kwargs):
         'emulate CoilFrame.nC: calculate maximum element number in kwars' 
@@ -98,41 +116,256 @@ class BiotAttributes:
             elif not hasattr(self, attribute):
                 setattr(self, attribute, default)  # set default
                 
+
+class BiotArray:
+    
+    _cross_section_ID = {'square': 0, 'rectangle': 1, 
+                         'circle': 2, 'ellipse': 3, 'skin': 4,
+                         'shell': 5, 'polygon': 6}
+    
+    def __init__(self, source=None):
+        if source is not None:
+            self.load_source(source)
         
-class BiotSavart(CoilMatrix):
+    def load_source(self, *args, **kwargs):
+        self.source = BiotFrame.load(*args, **kwargs)
+        
+    def load_target(self, *args, **kwargs):
+        self.target = BiotFrame.load(*args, **kwargs)
+        if hasattr(self.target, 'n2d'):
+            self.n2d = self.target.n2d  # target grid shape
+        else:
+            self.n2d = self.target.nC
+            
+    def assemble_source(self):
+        for label, column in zip(
+                ['rs', 'rs_rms', 'zs', 'Ns', 'dl', 'dt', 'dx', 'dz'],
+                ['x', 'rms', 'z', 'Nt', 'dl', 'dt', 'dx', 'dz']):
+            self.points[label] = np.dot(
+                    np.ones((self.nT, 1)), 
+                    getattr(self.source, column).reshape(1, -1)).flatten()
+        # cross-section ID
+        csID = np.array([self._cross_section_ID[cs] 
+                        for cs in self.source.cross_section])
+        self.points['csID'] = np.dot(np.ones((self.nT, 1)), 
+                                     csID.reshape(1, -1)).flatten()
+        self.points['dr'] = np.linalg.norm([self.points['dx'], 
+                                            self.points['dz']], axis=0) / 2
+
+    def assemble_target(self):
+        for label, column in zip(['r', 'z', 'N'], ['x', 'z', 'Nt']):
+            self.points[label] = np.dot(
+                    getattr(self.target, column).reshape(-1, 1), 
+                    np.ones((1, self.nS))).flatten()
+
+    def assemble(self):
+        'assemble interaction strucutred array'
+        self.nS = self.source.nC  # source filament number
+        self.nT = self.target.nC  # target point number
+        self.nI = self.nS*self.nT  # total number of interactions
+        self.points = np.zeros(
+                self.nI, dtype=[('rs', float),  # source radius (centroid)
+                                ('rs_rms', float),  # source radius (rms)
+                                ('r', float),  # target radius
+                                ('zs', float),  # source height
+                                ('z', float),  # target height
+                                ('Ns', float),  # source turn number
+                                ('N', float),  # target turn number
+                                ('dL', float),  # source-target seperation
+                                ('dl', float),  # primary shape delta 
+                                ('dt', float),  # secondary shape delta 
+                                ('dx', float),  # radial bounding box delta 
+                                ('dz', float),  # vertical bounding box delta
+                                ('dr', float),  # maximum filament dimension
+                                ('csID', int)])  # cross section ID
+        self.assemble_source()
+        self.assemble_target()
+        self.points['dL'] = np.linalg.norm(
+                np.array([self.points['rs'] - self.points['r'],
+                          self.points['zs'] - self.points['z']]), axis=0)
+            
+    def plot(self, ax=None):
+        if ax is None:
+            ax = plt.gca()
+        ax.plot(self.points['rs'], self.points['zs'], 'C1o', label='source')
+        ax.plot(self.points['r'], self.points['z'], 'C2.', label='target')
+        plt.legend()
+        
+
+class Vectors(object):
+    
+    mu_o = 4e-7*np.pi  # magnetic constant [Vs/Am]
+    
+    def __init__(self, points, rms=False, **kwargs):
+        self.initialize_delta()
+        self.points = points
+        self.rms = rms
+        self.position(**kwargs)  # initialize source and target points
+        
+    def initialize_delta(self):
+        self.delta = {f'd{var}': 0 for var in ['r', 'rs', 'z', 'zs']}
+          
+    @property
+    def points(self):
+        return self._points
+    
+    @points.setter
+    def points(self, points):
+        self.nP = len(points)  # interaction number
+        self._points = points  # store point subset 
+        
+    def position(self, **kwargs):
+        '(re)position source filaments and target points [dr, drs, dz, dzs]'
+        self.rms = kwargs.pop('rms', self.rms)  # update rms flag
+        for dvar in self.delta:
+            delta = kwargs.pop(dvar, self.delta[dvar])
+            var = pvar = dvar[1:]
+            if not hasattr(self, var) or not \
+                    np.isclose(delta, self.delta[dvar]).all():
+                self.delta[dvar] = delta
+                if var == 'rs' and self.rms:
+                    pvar += '_rms'
+                setattr(self, var, self.points[pvar] + self.delta[dvar])
+                self.update_flag = True
+        
+    def update(self):
+        if self.update_flag:
+            self.gamma = self.zs - self.z
+            self.a2 = self.gamma**2 + (self.r + self.rs)**2
+            self.a = np.sqrt(self.a2)
+            self.k2 = 4 * self.r * self.rs / self.a2  # modulus
+            self.ck2 = 1 - self.k2  # complementary modulus
+            self.K = ellipk(self.k2)  # first complete elliptic integral
+            self.E = ellipe(self.k2)  # second complete elliptic integral 
+            self.update_flag = False
+        
+
+    
+    ''' 
+    @property
+    def U(self):
+        if self._U is None:
+            self._U = self.k2 * (4*self.gamma**2 + 3*self.rs**2 - 
+                                 5*self.r**2) / (4*self.r)
+    '''
+    
+
+class Filament(Vectors):
+    'complete circular filaments'
+    def __init__(self, points, rms=True):
+        Vectors.__init__(self, points, rms=rms)
+        self.factor = {'circle': np.exp(-0.25),  # circle-circle
+                       'square': 2*0.447049,  # square-square
+                       'skin': 1}  # skin-skin
+        self.csID_lookup = {0: 'square', 1: 'square',
+                            2: 'circle', 3: 'circle', 
+                            4: 'skin', 
+                            5: 'square', 6: 'square'}
+        self.offset()
+        
+    def offset(self):
+        'offset source and target points '
+        self.dL = np.array([self.r-self.rs, self.z-self.zs])
+        self.dL_mag = np.linalg.norm(self.dL, axis=0)
+        self.dL_norm = np.zeros((2, self.nP))
+        self.index = np.isclose(self.dL_mag, 0)  # self index
+        self.dL_norm[0, self.index] = 1  # radial offset
+        self.dL_norm[:, ~self.index] = \
+            self.dL[:, ~self.index] / self.dL_mag[~self.index]
+        idx = self.dL_mag < self.points['dr'] # seperation < L2 norm radius
+        ro = self.points['dr'] * np.array([self.factor[self.csID_lookup[csID]] 
+                                           for csID in self.points['csID']])
+        factor = (1 - self.dL_mag[idx] / self.points['dr'][idx]) / 2
+        deltas = {}
+        for i, var in enumerate(['r', 'z']):
+            offset = np.zeros(self.nP)
+            offset[idx] = factor * ro[idx] * self.dL_norm[i][idx]
+            deltas.update({f'd{var}': offset, f'd{var}s': -offset})
+        self.position(**deltas)
+        
+    def flux(self):
+        'vector and scalar potential'
+        self.update()  # update coefficents
+        Aphi = 1 / (2*np.pi) * self.a/self.r * \
+            ((1 - self.k2/2) * self.K - self.E)  # 
+        psi = 2 * np.pi * self.mu_o * self.r * Aphi  # scalar potential
+        return psi
+    
+
+class Rectangle(Vectors):
+    
+    def __init__(self, points):
+        Vectors.__init__(self, points)
+        
+    def B(self, phi):
+        return np.sqrt(self.rs**2 + self.r**2 - 2*self.r*self.rs*np.cos(phi))
+    
+    def D(self, phi):
+        return np.sqrt(self.gamma**2 + self.B(phi)**2)
+    
+    def G(self, phi):
+        return np.sqrt(self.gamma**2 + self.r**2 * np.sin(phi)**2)
+    
+    def b1(self, phi):
+        'beta 1'
+        return (self.rs - self.r*np.cos(phi)) / self.G(phi)
+    
+    def b2(self, phi):
+        'beta 2'
+        return self.gamma / self.B(phi)
+    
+    def b3(self, phi):
+        'beta 3'
+        return self.gamma * (self.rs - self.r*np.cos(phi)) \
+                / (self.r*np.sin(phi)*self.D(phi))
+          
+    def Jf(self, phi):
+        'compute J intergrand'
+        f = np.zeros(np.shape(phi))
+        for i in range(f.shape[1]):
+            f[:, i] = np.arcsinh(self.b1(phi[:, i]))
+        return f
+        
+    def J(self, alpha, index=2):
+        scheme = quadpy.line_segment.gauss_patterson(index)
+        bounds = np.dot(np.array([[self.phi(0)], [self.phi(alpha)]]), 
+                        np.ones((1, self.nI)))
+        return scheme.integrate(self.Jf, bounds)
+    
+    def Cphi(self, alpha):
+        return 0.5*self.gamma*self.a * (1 - self.k2*np.sin(alpha)**2)**0.5 *\
+                    -np.sin(2*alpha) \
+                -1/6 * np.arcsinh(self.b2(alpha)) *\
+                    np.sin(2*alpha) * (2*self.r**2*np.sin(2*alpha)**2 + 
+                                       3 * (self.rs**2 - self.r**2)) \
+                -1/4 * self.gamma*self.r*np.arcsinh(self.b1(alpha)) *\
+                    -np.sin(4*alpha) \
+                -1/3 * self.r**2*np.arctan(self.b3(alpha)) - np.cos(2*alpha)**3
+        
+        
+    def flux(self):
+        'calculate flux for rectangular coil section'
+        Aphi = self.Cphi(np.pi/2) + self.gamma*self.r*self.J(np.pi/2) \
+                + self.gamma*self.a / (6*self.r) * (self.U*self.K - 
+                                                    2*self.rs*self.E)
+        for p in range(3):
+            Aphi += self.gamma / (6 * self.a * self.r)
+        return np.zeros(len(self.r))
+        
+        
+class BiotSavart(CoilMatrix, BiotArray):
 
     mu_o = 4 * np.pi * 1e-7  # magnetic constant [Vs/Am]
     
-    # include mutual inductance offset
     _biotsavart_attributes = {'mutual_offset': True}  
     
-    def __init__(self):
-        self.gmr = geometric_mean_radius()  # load mutual gmr factors
+    def __init__(self, source=None):
+        #self.gmr = geometric_mean_radius()  # load mutual gmr factors
         CoilMatrix.__init__(self)
+        BiotArray.__init__(self, source)
         
-    def _load_frame(self, *args, **kwargs):
-        nargs = len(args)
-        if nargs == 0:  # key-word input
-            frame = kwargs
-        elif len(args) == 1:  # CoilFrame or dict
-            frame = args[0]
-        else:  # arguments ordered as BiotFrame._frame_attributes
-            frame = {key: args[i] 
-                     for i, key in enumerate(BiotFrame._frame_attributes)}
-        if not isinstance(frame, CoilFrame):
-            frame = BiotFrame(**frame)   # emulate dict as CoilFrame
-        return frame
-        
-    def load_source(self, *args, **kwargs):
-        self.source = self._load_frame(*args, **kwargs)
-        
-    def load_target(self, *args, **kwargs):
-        self.target = self._load_frame(*args, **kwargs)
-        if hasattr(self.target, 'n2d'):
-            self.n2d = self.target.n2d  # target shape
-        else:
-            self.n2d = self.target.nC
 
+    '''
     def _extract_data(self, frame):
         data = {}
         for key in ['x', 'z', 'dx', 'dz', 'Nt']:
@@ -140,7 +373,12 @@ class BiotSavart(CoilMatrix):
         data['ro'] = self.gmr.calculate_self(
                 data['dx'], data['dz'], frame.cross_section)
         return data
+    '''
+    
+    # structured array
+    #fields; x, z, rms, turn_section,  
             
+    '''
     def assemble_source(self):
         self.nT = self.target.nC  # target number
         data = self._extract_data(self.source)
@@ -160,7 +398,7 @@ class BiotSavart(CoilMatrix):
     def assemble(self):
         self.assemble_source()
         self.assemble_target()
-        self.offset()  # transform turn-trun offset to geometric mean
+        #self.offset()  # transform turn-trun offset to geometric mean
         
     def offset(self):
         'transform turn-trun offset to geometric mean'
@@ -209,14 +447,28 @@ class BiotSavart(CoilMatrix):
         xt, zt = self.target_m['x'], self.target_m['z']
         xs, zs = self.source_m['x'], self.source_m['z']
         return xt, zt, xs, zs
+    '''
 
-    def flux_matrix(self):
+    def flux_matrix(self, ndr=0):
         'calculate filament flux (inductance) matrix'
+        '''
         xt, zt, xs, zs = self.locate()
         m = 4 * xt * xs / ((xt + xs)**2 + (zt - zs)**2)
         flux = np.array((xt * xs)**0.5 * ((2 * m**-0.5 - m**0.5) *
                         ellipk(m) - 2 * m**-0.5 * ellipe(m)))
         flux *= self.mu_o  # unit filaments, Wb/Amp-turn-turn
+        '''
+        flux = np.zeros(self.nI)  # initalize vector
+        
+        index = self.points['dL'] > ndr/2 * self.points['dr']
+        self.filament = Filament(self.points[index], rms=True)
+        
+        #self.filament.position(dr=1.5, dz=-0.5)
+        #self.filament.update()
+        
+        flux[index] = self.filament.flux()
+        
+        flux = flux.reshape(self.nT, self.nS)  # source-target reshape (matrix)
         self.flux , self._flux, self._flux_ = self.save_matrix(flux)
         
     def field_matrix(self):
@@ -238,15 +490,15 @@ class BiotSavart(CoilMatrix):
     def solve_interaction(self):
         self.assemble()  # assemble geometory matrices
         self.flux_matrix()  # assemble flux interaction matrix
-        self.field_matrix()  # assemble field interaction matricies 
+        #self.field_matrix()  # assemble field interaction matricies 
         
     def save_matrix(self, M):
         # extract plasma unit filaments
         _M_ = M[self.target._plasma_index][:, self.source._plasma_index]  
         # reduce
-        M *= self.target_m['Nt']  # target turns
+        M *= self.points['N'].reshape(self.nT, self.nS)  # target turns
         _M = M[:, self.source._plasma_index]  # unit source filament
-        M *= self.source_m['Nt']  # source turns
+        M *= self.points['Ns'].reshape(self.nT, self.nS)  # source turns
         #if len(self.target._reduction_index) < self.nT:  # sum sub-target
         #    M = np.add.reduceat(M, self.target._reduction_index, axis=0)
         #    _M = np.add.reduceat(_M, self.target._reduction_index, axis=0)
@@ -298,211 +550,53 @@ class BiotSavart(CoilMatrix):
         return self._Bz
 
 
-    """
-    from simulation data
-    def update_interaction(self, coil_index=None, **kwargs):
-        self.generate_grid(**kwargs)  # add | append data targets
-        self.add_targets(**kwargs)  # re-generate grid on demand
-        if coil_index is not None:  # full update
-            self.grid['update'] = True and self.grid['n'] > 0
-            self.target['update'] = True
-            self.target['targets']['update'] = True
-        update_targets = self.grid['update'] or self.target['update']
-        if update_targets or coil_index is not None:
-            if coil_index is None:
-                coilset = self.coilset  # full coilset
-            else:
-                coilset = self.subset(coil_index)  # extract subset
-            bs = biot_savart(source=coilset, mutual=False)  # load coilset
-            if self.grid['update'] and self.grid['n'] > 0:
-                bs.load_target(self.grid['x2d'].flatten(),
-                               self.grid['z2d'].flatten(),
-                               label='G', delim='', part='grid')
-                self.grid['update'] = False  # reset update status
-            if self.target['update']:
-                update = self.target['targets']['update']  # new points only
-                targets = self.target['targets'].loc[update, :]  # subset
-                bs.load_target(targets['x'], targets['z'], name=targets.index,
-                               part='target')
-                self.target['targets'].loc[update, 'update'] = False
-                self.target['update'] = False
-            M = bs.calculate_interaction()
-            for matrix in M:
-                if self.interaction[matrix].empty:
-                    self.interaction[matrix] = M[matrix]
-                elif coil_index is None:
-                    drop = self.interaction[matrix].index.unique(level=1)
-                    for part in M[matrix].index.unique(level=1):
-                        if part in drop:  # clear prior to concat
-                            if part == 'target':
-                                self.interaction[matrix].drop(
-                                        points.index, level=0,
-                                        inplace=True, errors='ignore')
-                            else:
-                                self.interaction[matrix].drop(
-                                        part, level=1, inplace=True)
-                    self.interaction[matrix] = concat(
-                            [self.interaction[matrix], M[matrix]])
-                else:  # selective coil_index overwrite
-                    for name in coilset.coil.index:
-                        self.interaction[matrix].loc[:, name] = \
-                            M[matrix].loc[:, name]
-                            
-    def solve_interaction(self, plot=False, color='gray', *args, **kwargs):
-        'generate grid / target interaction matrices'
-        self.update_interaction(**kwargs)  # update on demand
-        for matrix in self.interaction:  # Psi, Bx, Bz
-            if not self.interaction[matrix].empty:
-                # variable = matrix.lower()
-                #index = self.interaction[matrix].index
-                #value = np.dot(
-                #        self.interaction[matrix].loc[:, self.coil.data.index],
-                #        self.coil.data.Ic)
-                #value = self.interaction[matrix].dot(self.Ic)
-                value = np.dot(self.interaction[matrix].to_numpy(), self.Ic)
-                #coil = DataFrame(value, index=index)  # grid, target
-                '''
-                for part in coil.index.unique(level=1):
-                    part_data = coil.xs(part, level=1)
-                    part_dict = getattr(self, part)
-                    if 'n2d' in part_dict:  # reshape data to n2d
-                        part_data = part_data.to_numpy()
-                        part_data = part_data.reshape(part_dict['n2d'])
-                        part_dict[matrix] = part_data
-                    else:
-                        part_data = concat(
-                                (Series({'t': self.t}), part_data),
-                                sort=False)
-                        part_dict[matrix] = concat(
-                                (part_dict[matrix], part_data.T),
-                                ignore_index=True, sort=False)
-                '''
-        if plot and self.grid['n'] > 0:
-            if self.grid['levels'] is None:
-                levels = self.grid['nlevels']
-            else:
-                levels = self.grid['levels']
-            QuadContourSet = plt.contour(
-                    self.grid['x2d'], self.grid['z2d'], self.grid['Psi'],
-                    levels, colors=color, linestyles='-', linewidths=1.0,
-                    alpha=0.5, zorder=5)
-            self.grid['levels'] = QuadContourSet.levels
-            plt.axis('equal')
-            #plt.quiver(self.grid['x2d'], self.grid['z2d'], 
-            #           self.grid['Bx'], self.grid['Bz'])
-    """
-    
-    
-    
-    '''
-    def index_part(self, M):
-        M.loc[:, 'part'] = self.target.coil['part']
-        M.set_index('part', append=True, inplace=True)
-        return M
-    
-    def column_reduce(self, Mo):
-        Mo = pd.DataFrame(Mo, index=self.target.subcoil.index,
-                          columns=self.source.subcoil.index, dtype=float)
-        Mcol = pd.DataFrame(index=self.target.subcoil.index,
-                            columns=self.source.coil.index, dtype=float)
-        for name in self.source.coil.index:  # column reduction
-            index = self.source.coil.subindex[name]
-            Mcol.loc[:, name] = Mo.loc[:, index].sum(axis=1)
-        return Mcol
-
-    def row_reduce(self, Mcol):
-        Mrow = pd.DataFrame(columns=self.source.coil.index, dtype=float)
-        if 'subindex' in self.target.coil.columns:
-            #part = self.target.coil['part']
-            for name in self.target.coil.index:  # row reduction
-                index = self.target.coil.subindex[name]
-                Mrow.loc[name, :] = Mcol.loc[index, :].sum(axis=0)
-        else:
-            #part = self.target.subcoil['part']
-            Mrow = Mcol
-        #Mrow['part'] = part
-        #Mrow.set_index('part', append=True, inplace=True)
-        return Mrow
-
-    def calculate_inductance(self):
-        self.colocate()  # set targets
-        Mc = self.row_reduce(self.flux_matrix())  # line-current
-        return Mc
-
-    def calculate_interaction(self):
-        self.assemble(offset=True)  # build interaction matrices
-        M = {}
-        M['Psi'] = self.flux_matrix()  # line-current interaction
-        return M
-    '''
-
-
-class self_inductance:
-    '''
-    self-inductance methods for a single turn circular coil
-    '''
-    def __init__(self, x, cross_section='circle'):
-        self.x = x  # coil major radius
-        self.cross_section = cross_section  # coil cross_section
-        self.cross_section_factor = \
-            geometric_mean_radius.gmr_factor[self.cross_section]
-
-    def minor_radius(self, L, bounds=(0, 1)):
-        '''
-        inverse method, solve coil minor radius for given inductance
-
-        Attributes:
-            L (float): target inductance Wb
-            bounds (tuple of floats): bounds fraction of major radius
-
-        Returns:
-            dr (float): coil minor radius
-        '''
-        self.Lo = L
-        r = minimize_scalar(self.flux_err, method='bounded',
-                            bounds=bounds, args=(self.Lo),
-                            options={'xatol': 1e-12}).x
-        gmr = self.x * r
-        dr = gmr / self.cross_section_factor
-        return dr
-
-    def flux_err(self, r, *args):
-        gmr = r * self.x
-        L_target = args[0]
-        L = self.flux(gmr)
-        return (L-L_target)**2
-
-    def flux(self, gmr):
-        '''
-        calculate self-induced flux though a single-turn coil
-
-        Attributes:
-            a (float): coil major radius
-            gmr (float): coil cross-section geometric mean radius
-
-        Retuns:
-            L (float): self inductance of coil
-        '''
-        if self.x > 0:
-            L = self.x * ((1 + 3 * gmr**2 / (16 * self.x**2)) *
-                          np.log(8 * self.x / gmr) -
-                          (2 + gmr**2 / (16 * self.x**2)))
-        else:
-            L = 0
-        return biot_savart.mu_o * L  # Wb
-
-
 if __name__ == '__main__':
     
-    from nova.coil_set import CoilSet
-    cs = CoilSet(dCoil=-1, turn_fraction=0.7, mutual=False)
-    cs.add_coil(3.943, 7.564, 0.959, 0.984, Nt=248.64, name='PF1', part='PF')
-    cs.add_coil(1.6870, 5.4640, 0.7400, 2.093, Nt=554, name='CS3U', part='CS',
-                cross_section='circle')
-    cs.add_coil(1.6870, 3.2780, 0.7400, 2.093, Nt=554, name='CS2U', part='CS')
-    cs.add_plasma(5, 2.5, 1.5, 1.5, It=5e6, cross_section='circle')
+    from nova.electromagnetic.coilset import CoilSet
+    cs = CoilSet(dCoil=0.2, dPlasma=0.05, turn_fraction=0.5)
+    #cs.add_coil(3.943, 7.564, 0.959, 0.984, Nt=248.64, name='PF1', part='PF')
+    #cs.add_coil(1.6870, 5.4640, 0.7400, 2.093, Nt=554, name='CS3U', part='CS')
+    #cs.add_coil(1.6870, 3.2780, 0.7400, 2.093, Nt=554, name='CS2U', part='CS')
+    #cs.add_plasma(3.5, 4.5, 1.5, 2.5, It=-15e6, cross_section='ellipse')
+    
+    cs.add_plasma(3.5, 4.5, 1.5, 2.5, dPlasma=0.5, 
+                  It=-15e6, cross_section='circle')
 
-    #bs = BiotSavart()
+    cs.current_update = 'coil'
+    
+    
+    plt.set_aspect(1.2)
+    
+    cs.grid.generate_grid(expand=0.2, n=1e3)
+    #cs.grid.plot_grid()
+    
+    cs.Ic = -40e3
+            
+    cs.plot(current='A')
+    cs.grid.plot_flux()
+    
+    cs.add_plasma(3.5, 4.5, 1.5, 2.5, dPlasma=0.05, 
+                  It=-15e6, cross_section='circle')
+    #cs.plot()
+    cs.grid.generate_grid(regen=True)
+    cs.grid.plot_flux(color='C0')
+    
+    '''
+    
+    
+    bs = BiotSavart(cs.subcoil)
+
+    bs.load_target(cs.subcoil)
+    bs.assemble()
+    bs.flux_matrix() 
+    bs.plot()
+    '''
+    
+    
+
+    #scheme = quadpy.disk.lether(2)
+    #scheme.show()
+    #val = scheme.integrate(lambda x: np.exp(x[0]), [0.0, 0.0], 1.0)
     #bs = biot_savart(cs.coilset, mutual=True)
 
     #bs.colocate(subcoil=True)

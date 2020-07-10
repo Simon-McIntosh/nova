@@ -1,15 +1,12 @@
 import numpy as np
-from scipy.optimize import minimize_scalar
 from pandas.api.types import is_list_like
 from pandas import Series
 from scipy.special import ellipk, ellipe
 
 from nova.electromagnetic.coilframe import CoilFrame
 from nova.electromagnetic.coilmatrix import CoilMatrix
-from nova.electromagnetic.geometric_mean_radius import geometric_mean_radius
 from amigo.pyplot import plt
 import quadpy
-from numba import jit
 
 
 class BiotFrame:
@@ -567,7 +564,7 @@ if __name__ == '__main__':
     
     plt.set_aspect(1.2)
     
-    cs.grid.generate_grid(expand=0.2, n=1e3)
+    cs.grid.generate_grid(expand=1, n=5e3)
     #cs.grid.plot_grid()
     
     cs.Ic = -40e3
@@ -577,7 +574,7 @@ if __name__ == '__main__':
     
     cs.add_plasma(3.5, 4.5, 1.5, 2.5, dPlasma=0.05, 
                   It=-15e6, cross_section='circle')
-    #cs.plot()
+    cs.plot()
     cs.grid.generate_grid(regen=True)
     cs.grid.plot_flux(color='C0')
     

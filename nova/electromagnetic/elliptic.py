@@ -1,22 +1,24 @@
-from amigo.pyplot import plt
+import sys
+from warnings import warn
+from time import time
+
+from matplotlib.colors import Normalize
 import numpy as np
 from scipy.sparse import lil_matrix
 from scipy.sparse.linalg.dsolve.linsolve import spsolve
-import nova.cross_coil as cc
 from scipy.optimize import minimize
-from matplotlib.colors import Normalize
 from scipy.ndimage.filters import gaussian_filter
 from scipy.interpolate import interp1d
 from scipy.interpolate import RectBivariateSpline as RBS
 from scipy.linalg import lstsq
-from amigo import geom
 from scipy.optimize import newton
-import sys
-from warnings import warn
-from time import time
+
+from amigo import geom
 from amigo.geom import poly_inloop
-from nova.streamfunction import SF
-from nova.coil_class import CoilClass
+from amigo.pyplot import plt
+from nova.electromagnetic.streamfunction import SF
+from nova.electromagnetic.coilclass import CoilClass
+#import nova.cross_coil as cc
 
 
 class MidpointNormalize(Normalize):

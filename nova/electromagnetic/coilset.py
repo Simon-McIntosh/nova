@@ -727,7 +727,10 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
                 coil.loc[:, ['x', 'z', 'dx', 'dz', 'cross_section', 'patch',
                               'polygon', 'part']].values):
             if overwrite or np.array(isnull(current_patch)).any():
-                patch[i] = [PolygonPatch(polygon)]
+                if isinstance(polygon, shapely.geometry.Polygon):
+                    patch[i] = [PolygonPatch(polygon)]
+                else:
+                    patch[i] = []
             else:
                 patch[i] = [current_patch]
             for j in range(len(patch[i])):
@@ -760,7 +763,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
                 CoilSet.patch_coil(coil, **kwargs)  # patch on-demand
             patch = coil.loc[:, 'patch']
             # form list of lists
-            patch = [p if is_list_like(p) else [p] for p in patch]
+            patch = [p if is_list_like(p) else [p] for p in patch if p != -1]
             # flatten
             patch = functools.reduce(operator.concat, patch)
             # sort

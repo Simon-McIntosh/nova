@@ -1,26 +1,28 @@
+from os.path import join
+from warnings import warn
+from itertools import count
+
 import numpy as np
-from amigo.pyplot import plt
 from scipy.interpolate import RectBivariateSpline
 from scipy.interpolate import UnivariateSpline as spline
 from scipy.interpolate import InterpolatedUnivariateSpline as sinterp
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize
-import nova.geqdsk
-from amigo.pyplot import cntr
-from collections import OrderedDict
+from matplotlib.collections import LineCollection
+from matplotlib.lines import Line2D
+from shapely.geometry import Polygon, Point, LineString, LinearRing
+
+from amigo.IO import class_dir
 from amigo import geom
 from amigo.IO import trim_dir
 from amigo.geom import loop_vol, grid
-import nova
-from amigo.IO import class_dir
-from os.path import join
-from warnings import warn
-from itertools import count
-from shapely.geometry import Polygon, Point, LineString, LinearRing
-from nova.exceptions import TopologyError
 from amigo.geom import poly_inloop
-from matplotlib.collections import LineCollection
-from matplotlib.lines import Line2D
+from amigo.pyplot import plt
+from amigo.pyplot import cntr
+import nep_data
+from nova.electromagnetic import geqdsk
+#from nova.electromagnetic.elliptic import EQ
+from nova.electromagnetic.coilset import CoilSet
 
 
 class SF:
@@ -39,7 +41,7 @@ class SF:
 
     def load_eqdsk(self):
         if hasattr(self, 'filename'):  # initalise from file
-            self.eqdsk = nova.geqdsk.read(self.filename)
+            self.eqdsk = geqdsk.read(self.filename)
             self.normalise()  # unit normalisation
         if not hasattr(self, 'eqdsk'):
             self.eqdsk = {}  # initalise as empty
@@ -89,8 +91,6 @@ class SF:
                 self.get_midplane()
                 self.get_boundary(alpha=1-1e-4, set_boundary=True,
                                   plot=plot)
-            except TopologyError:
-                pass
             except NotImplementedError:
                 pass
             try:
@@ -198,7 +198,7 @@ class SF:
         eqdir = trim_dir('../../eqdsk')
         filename = eqdir + '/' + config + '.eqdsk'
         print('writing eqdsk', filename)
-        nova.geqdsk.write(filename, eq)
+        geqdsk.write(filename, eq)
 
     def write_flux(self):
         psi_norm = np.linspace(0, 1, self.nx)
@@ -253,15 +253,18 @@ class SF:
         self.nbdry = int(n)
         self.xbdry, self.zbdry = geom.xzSLine(x, z, npoints=n)
 
-    def set_firstwall(self, eqdsk):
+    def set_firstwall(self, eqdsk, interpolate=False):
         required_keys = ['xlim', 'zlim']
         if np.array([key in eqdsk for key in required_keys]).all():
             xlim = eqdsk['xlim']
             zlim = eqdsk['zlim']
-            L = geom.length(xlim, zlim, norm=False)
-            dL = np.min(np.diff(L))  # minimum space interpolation
-            self.nlim = int(L[-1]/dL)
-            self.xlim, self.zlim = geom.xzInterp(xlim, zlim, self.nlim)
+            if interpolate:
+                L = geom.length(xlim, zlim, norm=False)
+                dL = np.min(np.diff(L))  # minimum space interpolation
+                self.nlim = int(L[-1]/dL)
+                self.xlim, self.zlim = geom.xzInterp(xlim, zlim, self.nlim)
+            else:
+                self.xlim, self.zlim = xlim, zlim
             fw_list = [(x, z) for x, z in zip(self.xlim, self.zlim)]
             self.fw = LineString(fw_list)  # shapley fw linestring
 
@@ -394,8 +397,7 @@ class SF:
         for x in self.point_grid['x']:
             for z in self.point_grid['z']:
                 i = next(index)
-                res = minimize(self.Bpoint_abs, [x, z], jac=self.Bpoint_jac,
-                               method='L-BFGS-B', bounds=self.limit)
+                res = minimize(self.Bpoint_abs, [x, z], method='Nelder-Mead')
                 self.points[i]['x'] = res.x[0]
                 self.points[i]['z'] = res.x[1]
                 self.points[i]['B'] = res.fun
@@ -602,13 +604,13 @@ class SF:
             separatrix = None
         ax = kwargs.get('ax', plt.gca())
         alpha = np.array([1, 1], dtype=float)
-        zorder = kwargs.get('zorder', 0)
+        zorder = kwargs.get('zorder', 4)
         lw = lw * np.array([2.25, 1.75])
         if boundary:
             try:
                 x, z = self.get_boundary(alpha=1, boundary_cntr=False)
                 self.set_boundary(x, z)
-            except TopologyError:
+            except:
                 boundary = False
                 pass
         if separatrix:
@@ -649,7 +651,8 @@ class SF:
                       bbox_to_anchor=(0.5, 1.05))
         if boundary:
             ax.plot(self.xbdry, self.zbdry, linewidth=lw[0],
-                    linestyle=linestyle, color=color, alpha=alpha[0])
+                    linestyle=linestyle, color=color, alpha=alpha[0],
+                    zorder=4)
         ax.axis('equal')
         ax.axis('off')
         if plot_points:
@@ -1540,11 +1543,50 @@ class SF:
 
 if __name__ == '__main__':
 
-    directory = join(class_dir(nova), '../eqdsk')
-    sf = SF(filename=join(directory, 'DEMO_SN.eqdsk'), fw_limit=True)
+    plt.set_aspect(1.2)
+    
+    directory = join(class_dir(nep_data), 'scenario_database/eqdsk')
+    sf = SF(filename=join(directory, 'CORSICA_15MA_burn_2V2XYR.eqdsk'), 
+            fw_limit=False)
 
     sf.contour()
-
     sf.plot_sol(core=True)
     sf.plot_firstwall()
+    
+    cs = CoilSet()
+    
+    limit = sf.fw.bounds
+    cs.add_plasma(np.mean(sf.fw.bounds[::2]), np.mean(sf.fw.bounds[1::2]),
+                  np.diff(sf.fw.bounds[::2])[0], 
+                  np.diff(sf.fw.bounds[1::2])[0], 
+                  polygon=Polygon(sf.fw))
+    #cs.plot()
+    
+    points = [(x, z) for x, z in zip(sf.xbdry, sf.zbdry)]
+    sep = Polygon(points)
+    
+    cs.patch_coil(cs.subcoil) 
+    for index in cs.subcoil.index:
+        if not sep.intersects(cs.subcoil.loc[index, 'polygon']):
+            cs.subcoil.loc[index, 'patch'].set_alpha(0)
+            
+            x, z = cs.subcoil.loc[index, ['x', 'z']]
+            cs.subcoil.loc[index, 'polygon'] = None
+        elif not cs.subcoil.loc[index, 'polygon'].within(sep):
+            cs.subcoil.loc[index, 'polygon'] = \
+                cs.subcoil.loc[index, 'polygon'].intersection(sep)
+    cs.patch_coil(cs.subcoil, overwrite=True) 
+
+
+    #psi_norm = (self.Pspline.e - self.sf.Mpsi) / (self.sf.Xpsi - self.sf.Mpsi)
+    #I = dA *(x*sf.Pprime(psi_norm) + sf.FFprime(psi_norm))
+                
+    cs.Ip = 15e6
+                
+    cs.plot()
+        
+    
+    
+    #self.eq = EQ(self.pf.coilset, eqdsk, n=1e3)  # set plasma coils
+    
 

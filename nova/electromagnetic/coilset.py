@@ -48,7 +48,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
     _coilset_frames = ['coil', 'subcoil']
     
     # exchange biot instances
-    _biot_insatnces = ['grid']#, 'mutual']  
+    _biot_instances = ['mutual', 'plasma', 'grid']  
 
     # additional_columns
     _coil_columns = ['dA', 'dCoil', 'subindex', 'part',
@@ -67,8 +67,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
 
     def __init__(self, **coilset):
         self.initialize_coil()  # initalize coil and subcoil
-        self.initialize_biot_insatnces()
-        self.initalize_biot()
+        self.initalize_biot()  # initalize biot instances
         self.coilset = coilset  # exchange coilset and instance attributes
 
     def initialize_coil(self):
@@ -82,19 +81,22 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
     def initalize_biot(self):
         BiotSavart.__init__(self)
         BiotAttributes.__init__(self)
-        self.load_source(self.subcoil)  # link source
-        self.load_target(self.subcoil)  # link target
+        self.initialize_biot_instances()
+        # mutual interaction
+        #self.load_source(self.subcoil)  # link source
+        #self.load_target(self.subcoil)  # link target
         
-    def initialize_biot_insatnces(self):
-        if 'grid' in self._biot_insatnces:
-            self.grid = Grid(self.subcoil)   
+    def initialize_biot_instances(self):
+        for instance in self._biot_instances:
+            biot_class = Mutual if instance == 'mutual' else Grid
+            setattr(self, instance, biot_class(self.subcoil))   
             
     @property
     def coilset(self):
         coilset_attributes = {attribute: getattr(self, attribute)
                               for attribute in self._coilset_attributes}
         instance_attributes = {}
-        for instance in self._biot_insatnces:
+        for instance in self._biot_instances:
             instance_attribute = '_'.join([instance, 'biot_attributes'])
             instance_attributes[instance_attribute] = \
                 getattr(getattr(self, instance), 'biot_attributes')
@@ -104,7 +106,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
     def coilset(self, coilset):
         for attribute in self._coilset_attributes:
             setattr(self, attribute, coilset.get(attribute, coilset))
-        for instance in self._biot_insatnces:
+        for instance in self._biot_instances:
             instance_attribute = '_'.join([instance, 'biot_attributes'])
             setattr(getattr(self, instance), 'biot_attributes',
                     coilset.get(instance_attribute, coilset))
@@ -579,7 +581,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         name = kwargs.pop('name', 'Pl_0')
         part = kwargs.pop('part', 'Plasma')
         coil = kwargs.pop('coil', 'Plasma')
-        cross_section = kwargs.pop('cross_section', 'ellipse')
+        cross_section = kwargs.pop('cross_section', 'rectangle')
         turn_section = kwargs.pop('turn_section', 'rectangle')
         self.dPlasma = kwargs.pop('dPlasma', self.dPlasma)  # update dPlasma
         iloc = [None, None]
@@ -761,9 +763,9 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         if not coil.empty:
             if isnull(coil.loc[:, 'patch']).any() or len(kwargs) > 0:
                 CoilSet.patch_coil(coil, **kwargs)  # patch on-demand
-            patch = coil.loc[:, 'patch']
+            patch = coil.loc[coil.Nt > 0, 'patch']  # plot iff Nt > 0
             # form list of lists
-            patch = [p if is_list_like(p) else [p] for p in patch if p != -1]
+            patch = [p if is_list_like(p) else [p] for p in patch]
             # flatten
             patch = functools.reduce(operator.concat, patch)
             # sort

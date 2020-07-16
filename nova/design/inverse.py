@@ -1,25 +1,26 @@
-import numpy as np
-from amigo.pyplot import plt
-import nova.cross_coil as cc
-from collections import OrderedDict
-from scipy.interpolate import RectBivariateSpline as RBS
-from scipy.interpolate import interp1d
-import scipy.optimize as op
-from itertools import cycle
 import copy
 import time
 import multiprocessing
-from nova import loops
-import nlopt
-from nova.force import force_field
-from scipy.optimize import minimize_scalar
+from itertools import cycle
 from warnings import warn
 import sys
+
+import numpy as np
+from scipy.interpolate import RectBivariateSpline as RBS
+from scipy.interpolate import interp1d
+import scipy.optimize as op
+from scipy.optimize import minimize_scalar
 from scipy.optimize import brentq
+import nlopt
+
 from amigo import geom
-from nova.coils import PF
-from nova.streamfunction import SF
 from amigo.time import clock
+from amigo.pyplot import plt
+#from nova import loops
+#import nova.cross_coil as cc
+#from nova.coils import PF
+from nova.electromagnetic.streamfunction import SF
+#from nova.force import force_field
 from nep.DINA.tie_plate import get_tie_plate
 
 

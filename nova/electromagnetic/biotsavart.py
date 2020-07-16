@@ -354,10 +354,9 @@ class BiotSavart(CoilMatrix, BiotArray):
 
     mu_o = 4 * np.pi * 1e-7  # magnetic constant [Vs/Am]
     
-    _biotsavart_attributes = {'mutual_offset': True}  
+    _biotsavart_attributes = {}  
     
     def __init__(self, source=None):
-        #self.gmr = geometric_mean_radius()  # load mutual gmr factors
         CoilMatrix.__init__(self)
         BiotArray.__init__(self, source)
         

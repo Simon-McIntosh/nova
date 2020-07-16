@@ -160,7 +160,7 @@ class CoilFrame(DataFrame, CoilData):
         index = self._extract_index(data, delim, label, name)
         coil = CoilFrame(data, index=index, columns=data.keys(),
                          coilframe_metadata=self.coilframe_metadata)
-        self._insert_polygon(coil)
+        self.generate_polygon(coil)
         if mpc and coil.nC > 1:
             coil.add_mpc(coil.index.to_list())
         return coil
@@ -320,29 +320,41 @@ class CoilFrame(DataFrame, CoilData):
                 raise IndexError(f'\ncoil: {name} already defined in index\n'
                                  f'index: {self.index}')
 
-    def _insert_polygon(self, coil):
+    def generate_polygon(self, coil):
         if 'polygon' in coil.columns:
-            for name in coil.index:
-                cross_section = coil.at[name, 'cross_section']
-                x, z, dl, dt = coil.loc[name, ['x', 'z', 'dl', 'dt']]
+            for index in coil.index:
+                cross_section = coil.at[index, 'cross_section']
+                x, z, dl, dt = coil.loc[index, ['x', 'z', 'dl', 'dt']]
                 if cross_section in ['circle', 'square']:
                     dl = dt = np.min([dl, dt])  # set aspect equal
-                if isna(coil.at[name, 'polygon']):
+                if isna(coil.at[index, 'polygon']):
                     polygen = self._get_polygen(cross_section)
                     polygon = polygen(x, z, dl, dt)
-                    coil.at[name, 'polygon'] = polygon
-                polygon = coil.at[name, 'polygon']
+                    coil.at[index, 'polygon'] = polygon
+            self.update_polygon(coil)
+            
+    def update_polygon(self, coil):
+        for index in coil.index:
+            polygon = coil.at[index, 'polygon']
+            if polygon is not None:
+                cross_section = coil.at[index, 'cross_section']
+                dl, dt = coil.loc[index, ['dl', 'dt']]
                 dA = polygon.area  # update polygon area
+                x = polygon.centroid.x  # update x centroid
+                z = polygon.centroid.y  # update z centroid
+                coil.at[index, 'x'] = x
+                coil.at[index, 'z'] = z
                 if dA == 0:
-                    err_txt = f'zero area polygon entered for coil {name}\n'
+                    err_txt = f'zero area polygon entered for coil {index}\n'
                     err_txt += f'cross section: {cross_section}\n'
                     err_txt += f'dl {dl}\ndt {dt}'
                     raise ValueError(err_txt)
                 else:
-                    coil.at[name, 'dA'] = dA
+                    coil.at[index, 'dA'] = dA
                 bounds = polygon.bounds
-                coil.at[name, 'dx'] = bounds[2] - bounds[0]
-                coil.at[name, 'dz'] = bounds[3] - bounds[1]
+                coil.at[index, 'dx'] = bounds[2] - bounds[0]
+                coil.at[index, 'dz'] = bounds[3] - bounds[1]
+                
                 if cross_section == 'circle':
                     rms = np.sqrt(x**2 + dl**2 / 16)  # circle
                 elif cross_section in ['square', 'rectangle']:
@@ -351,10 +363,10 @@ class CoilFrame(DataFrame, CoilData):
                     rms = np.sqrt((dl**2 * dt**2 / 24 - dl**2 * dt / 8 
                                    + dl**2 / 8 + x**2))
                 else:  # calculate directly from polygon
-                    p = coil.at[name, 'polygon']
+                    p = coil.at[index, 'polygon']
                     rms = (transform(lambda x, z: 
-                                      (x**2, z), p).centroid.x)**0.5
-                coil.at[name, 'rms'] = rms
+                                     (x**2, z), p).centroid.x)**0.5
+                coil.at[index, 'rms'] = rms
 
         
     @staticmethod

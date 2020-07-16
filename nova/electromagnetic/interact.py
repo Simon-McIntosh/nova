@@ -11,11 +11,11 @@ class Mutual(BiotSavart, BiotAttributes):
     
     _biot_attributes = []
     
-    def __init__(self, **mutual_attributes):
+    def __init__(self, subcoil, **mutual_attributes):
         BiotSavart.__init__(self)
         BiotAttributes.__init__(self, **mutual_attributes)
-        self.load_source(self.subcoil)  # link source
-        self.load_target(self.subcoil)  # link target
+        self.load_source(subcoil)  # link source
+        self.load_target(subcoil)  # link target
         
 
 class Grid(BiotSavart, BiotAttributes):
@@ -72,10 +72,11 @@ class Grid(BiotSavart, BiotAttributes):
 
         kwargs:
             n (int): grid node number
-            grid_limit (np.array): [xmin, xmax, zmin, zmax] fixed grid limits
+            limit (np.array): [xmin, xmax, zmin, zmax] fixed grid limits
             expand (float): expansion beyond coil limits (when limit not set)
             nlevels (int)
             levels ()
+            regen (bool): force grid regeneration
         '''
         grid_attributes = {}  # grid attributes
         for key in ['n', 'limit', 'coilset_limit',

@@ -1,17 +1,18 @@
-from nep.DINA.read_dina import read_dina
-import numpy as np
-from scipy.interpolate import interp1d
 from os.path import isfile
+
+import numpy as np
 import pandas as pd
+from scipy.interpolate import interp1d
+from astropy import units
+
 from amigo.pyplot import plt
 from amigo.geom import rdp_extract
-from astropy import units
 from amigo.geom import vector_lowpass
-
+from nova.electromagnetic.DINA.read_dina import read_dina
 
 class operate:
     '''
-    extract features from DINA waveform using rdp algorithum
+    extract features from waveforms using rdp algorithum
     '''
     def __init__(self, feature_name='Ip'):
         self._feature = {}
@@ -350,7 +351,6 @@ class interpolate:
     
 class scenario_limits:
     
-    
     def __init__(self, folder=None, t='d3'):
         self.initialize_limits()
         self.load_data(folder, t=t)
@@ -565,10 +565,18 @@ class scenario_limits:
         ax[-1].set_xlabel('$t$ s')
         plt.despine()
         
+class cosica_data(read_dina):
+    
+    def __init__(self):
+        read_dina.__init__(self, database_folder=database_folder,
+                           read_txt=read_txt)
+        
 
 class scenario_data(read_dina, interpolate, operate):
 
     '''
+    read DINA scenario data
+    
     Attributes:
         data (pd.DataFrame): DINA raw data (load using read_scenario)
         t (np.array): time vector with equidistant spacing

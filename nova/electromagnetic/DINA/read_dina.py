@@ -1,24 +1,20 @@
-import nep_data.scenario_database
-from amigo.IO import class_dir
+from os import listdir, sep
 from os.path import join, isfile, isdir
-from os import listdir
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
-from os import sep
-from amigo.IO import pythonIO
-from datetime import datetime
+
+from amigo.IO import class_dir
+from amigo.IO import pythonIO, readtxt
 from amigo.time import clock
 from amigo.qdafile import QDAfile
+import nep_data.scenario_database
 
 
-# read_dina.timeconstant moved to amigo.time.time_constant
-
-
-class read_dina(pythonIO):
-
-    date_switch = datetime.strptime('2016-02', '%Y-%m')
-
-    def __init__(self, database_folder=None, read_txt=True, **kwargs):
+class read_waveform(pythonIO):
+    
+    def __init__(self, database_folder=None, read_txt=True):
         '''
         Kwargs:
             database_folder (str): name of database folder
@@ -39,37 +35,11 @@ class read_dina(pythonIO):
             self.directory = join(self.directory, self.database_folder)
 
     def get_folders(self):
-        folders = [f for f in listdir(self.directory)]
-        if self.database_folder == 'operations':
-            self.folders = sorted(
-                    folders, key=lambda x: f'{x.split("-")[1]}_'
-                                           f'{x.split("-")[2]}_'
-                                           f'{x.split("-")[0]}')
-        else:
-            self.folders = folders
+        self.folders = [f for f in listdir(self.directory)]
         self.nfolder = len(self.folders)
         files = [f for f in listdir(self.directory) if isfile(f)]
         self.files = sorted(files)
         self.nfile = len(self.files)
-
-    def get_folder_array(self, exclude=[]):
-        dtype = [('name', 'U25'), ('year', int), ('mode', 'U25'),
-                 ('month', int), ('version', 'U25')]
-        folder_array = np.ones(self.nfolder, dtype=dtype)
-        for i in range(self.nfolder):
-            folder_array[i]['name'] = self.folders[i]
-            folder_array[i]['mode'] = self.folders[i].split('DINA')[0][:-1]
-            timestamp = self.folders[i].split('DINA')[-1]
-            folder_array[i]['year'] = int(timestamp.split('-')[0])
-            timestamp = ''.join(timestamp.split('-')[1:])
-            folder_array[i]['month'] = int(timestamp[:2])
-            folder_array[i]['version'] = timestamp[2:].replace('_', '')
-        folder_array.sort(order=['year', 'month', 'version'])
-        if exclude:
-            index = [name not in exclude for name in folder_array['name']]
-            folder_array = folder_array[index]
-        self.folder_array = folder_array
-        self.folders = self.folder_array['name']
 
     def select_folder(self, folder):  # folder entered as string, index or None
         if isinstance(folder, int):  # index (int)
@@ -114,8 +84,6 @@ class read_dina(pythonIO):
     def locate_folder(self, file, folder, file_type='txt'):
         filepath, file_type = self.locate_file_type(file, file_type, folder)
         self.filename = filepath.split(sep)[-3].replace(' ', '_')
-        self.date = datetime.strptime(
-                self.filename.split('DINA')[-1].split('_')[0][:7], '%Y-%m')
         self.folder = folder
         self.filepath = sep.join(filepath.split(sep)[:-1]) + sep
         return join(self.filepath, self.filename), file_type
@@ -155,7 +123,109 @@ class read_dina(pythonIO):
         except IndexError:
             raise IndexError('ext {} not found in {}'.format(ext, files))
         return join(folder, file)
+    
+    def load_folder(self):
+        '''
+        load / reload all files from specified database folder
+        '''
+        nfolder = self.nfolder
+        tick = clock(nfolder, header=f'loading {nfolder} scenarios from '
+                                     f'folder: {self.database_folder}')
+        for folder in range(nfolder):
+            self.load_file(folder, read_txt=True, verbose=False)
+            tick.tock()
+            
+    def multiindex(self, data, columns, units,
+                   dropnan=False, dataframe=True):
+        data.columns = pd.MultiIndex.from_tuples(
+                [(columns[c], u) for c, u in zip(columns, units)],
+                names=['name', 'unit'])
+        data_keys = list(data.keys())
+        for var in data_keys:
+            if len(data[var]) == 0 or np.isnan(data[var]).all():
+                data.pop(var)
+        if dropnan:
+            data = data.dropna(axis=0)  # remove NaN values
+        if not dataframe:
+            data = data.to_dict(orient='list')
+        return data
+    
 
+class read_corsica(read_waveform):
+    'read corsica wavefrom data'
+    
+    def __init__(self, *args, **kwargs):
+        read_waveform.__init__(self, *args, **kwargs)
+        
+    def read_file(self):
+        filename = self.locate_file('T_.txt', folder=-1)
+        data = pd.DataFrame()
+        comments, units = {}, []
+        #nz_index = 
+        with readtxt(filename) as f:
+            f.trim('ncol', index=0)
+            ncol = f.readnumber()
+            f.skiplines(1)
+            nt = f.readnumber()
+            for __ in range(7):
+                label = f.readline(split=True, string=True, sep=':')
+                variable = label[0].strip()
+                note = label[1].split()
+                comment = ' '.join(note[:-1])
+                comments[variable] = comment
+                unit = note[-1].replace('[', '').replace(']', '')
+                units.append(unit)
+                if variable == '<nz>(t)':
+                    variable += 'a'
+                print(variable, comment, unit)
+
+                data[variable] = f.readblock()
+            f.skiplines(5, verbose=True)
+        
+            print(ncol, nt, data['t'])
+    
+    
+class read_dina(read_waveform):
+
+    date_switch = datetime.strptime('2016-02', '%Y-%m')
+
+    def __init__(self, *args, **kwargs):
+        read_waveform.__init__(self, *args, **kwargs)
+        
+    def get_folders(self):
+        read_waveform.get_folders(self)
+        if self.database_folder == 'operations':
+            self.folders = sorted(
+                    self.folders, key=lambda x: f'{x.split("-")[1]}_'
+                                                f'{x.split("-")[2]}_'
+                                                f'{x.split("-")[0]}')
+            
+    def get_folder_array(self, exclude=[]):
+        dtype = [('name', 'U25'), ('year', int), ('mode', 'U25'),
+                 ('month', int), ('version', 'U25')]
+        folder_array = np.ones(self.nfolder, dtype=dtype)
+        for i in range(self.nfolder):
+            folder_array[i]['name'] = self.folders[i]
+            folder_array[i]['mode'] = self.folders[i].split('DINA')[0][:-1]
+            timestamp = self.folders[i].split('DINA')[-1]
+            folder_array[i]['year'] = int(timestamp.split('-')[0])
+            timestamp = ''.join(timestamp.split('-')[1:])
+            folder_array[i]['month'] = int(timestamp[:2])
+            folder_array[i]['version'] = timestamp[2:].replace('_', '')
+        folder_array.sort(order=['year', 'month', 'version'])
+        if exclude:
+            index = [name not in exclude for name in folder_array['name']]
+            folder_array = folder_array[index]
+        self.folder_array = folder_array
+        self.folders = self.folder_array['name']
+        
+    def locate_folder(self, file, folder, file_type='txt'):
+        filepath, file_type = \
+            read_waveform.locate_folder(self, file, folder, file_type)
+        self.date = datetime.strptime(
+                self.filename.split('DINA')[-1].split('_')[0][:7], '%Y-%m')
+        return filepath, file_type
+            
     def read_csv(self, filename, split='', dropnan=True, dataframe=True):
         data = pd.read_csv(filename, delimiter='\t', na_values='NAN')
         columns = {}
@@ -199,34 +269,11 @@ class read_dina(pythonIO):
                                dropnan=dropnan, dataframe=dataframe)
         return data
 
-    def multiindex(self, data, columns, units,
-                   dropnan=False, dataframe=True):
-        data.columns = pd.MultiIndex.from_tuples(
-                [(columns[c], u) for c, u in zip(columns, units)],
-                names=['name', 'unit'])
-        data_keys = list(data.keys())
-        for var in data_keys:
-            if len(data[var]) == 0 or np.isnan(data[var]).all():
-                data.pop(var)
-        if dropnan:
-            data = data.dropna(axis=0)  # remove NaN values
-        if not dataframe:
-            data = data.to_dict(orient='list')
-        return data
-
-    def load_folder(self):
-        '''
-        load / reload all files from specified database folder
-        '''
-        nfolder = self.nfolder
-        tick = clock(nfolder, header=f'loading {nfolder} scenarios from '
-                                     f'folder: {self.database_folder}')
-        for folder in range(nfolder):
-            self.load_file(folder, read_txt=True, verbose=False)
-            tick.tock()
-
 
 if __name__ == '__main__':
 
-    dina = read_dina('operations')
-    filename = dina.locate_file('data2.txt', folder=1)
+    corsica = read_corsica('corsica')
+    corsica.read_file()
+    
+    #dina = read_dina('operations')
+    #filename = dina.locate_file('data2.txt', folder=1)

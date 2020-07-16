@@ -1,8 +1,9 @@
-from nova.coil_set import CoilSet
-from nep.DINA.read_scenario import scenario_data
 import numpy as np
 import pandas as pd
+
 import amigo.geom
+from nova.electromagnetic.coilset import CoilSet
+from nova.electromagnetic.DINA.read_scenario import scenario_data
 
 
 class CoilClass(CoilSet):
@@ -10,7 +11,6 @@ class CoilClass(CoilSet):
     CoilClass:
         - implements methods to manage input and
             output of data to/from the CoilSet class
-        - provides inductance caluculation methods (biot_savart)
         - provides interface to eqdsk files containing coil data
         - provides interface to DINA scenaria data
     '''
@@ -21,6 +21,15 @@ class CoilClass(CoilSet):
         self.initalize_functions()
         self.initalize_metadata()
         self.filename = filename
+        
+    def add_eqdsk(self, eqdsk):
+        if eqdsk:
+            coil = self.coil.get_coil(
+                    eqdsk['xc'], eqdsk['zc'], eqdsk['dxc'], eqdsk['dzc'],
+                    It=eqdsk['It'], name='eqdsk', delim='')
+            coil = self.categorize_coilset(coil)
+            self.coil.concatenate(coil)
+            self.add_subcoil(index=coil.index)
 
     def initalize_functions(self):
         self.t = None  # scenario time instance (d2.to)
@@ -80,6 +89,8 @@ class CoilClass(CoilSet):
         self.Ic = self.d2.Ic.to_dict()
         #self.coil.Ic = self.d2.Ic.to_dict()
 
+
+    """
     @property
     def plasma(self):
         return self.plasma_metadata
@@ -183,16 +194,9 @@ class CoilClass(CoilSet):
     def update_plasma_current(self):
         if 'Plasma' in self.coil.index:
             self.Ip = self.plasma_metadata['Ip']  # update plasma current
+    """
 
-    def add_eqdsk(self, eqdsk):
-        if eqdsk:
-            coil = self.coil.get_coil(
-                    eqdsk['xc'], eqdsk['zc'], eqdsk['dxc'], eqdsk['dzc'],
-                    It=eqdsk['It'], name='eqdsk', delim='')
-            coil = self.categorize_coilset(coil)
-            self.coil.concatenate(coil)
-            self.add_subcoil(index=coil.index)
-
+    """
     def self_inductance(self, name, update=False):
         '''
         calculate self-inductance and geometric mean of single coil
@@ -296,6 +300,7 @@ class CoilClass(CoilSet):
         Nt = self.coilset.coil['Nt'].values
         Nt = Nt.reshape(-1, 1) * Nt.reshape(1, -1)
         self.inductance['Mt'] = self.inductance['Mc'] / Nt  # amp-turn
+    """
 
 
             

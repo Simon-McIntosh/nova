@@ -1,18 +1,18 @@
-# from nova.coils import PF
-from amigo.geom import rotate2D
-import numpy as np
-from collections import OrderedDict
-import pandas as pd
 import io
-from amigo.pyplot import plt
 import os
-import nep_data.geom
-from amigo.png_tools import data_load
-from amigo.IO import class_dir
+
+import numpy as np
+import pandas as pd
+
 import amigo
 from amigo.IO import pythonIO
-from nova.coil_set import CoilSet
-from nova.coil_class import CoilClass
+from amigo.geom import rotate2D
+from amigo.pyplot import plt
+from amigo.png_tools import data_load
+from amigo.IO import class_dir
+import nep_data.geom
+from nova.electromagnetic.coilset import CoilSet
+from nova.electromagnetic.coilclass import CoilClass
 
 
 resistivity_ss = 0.815e-6  # steel electrical resistivity at 100C
@@ -69,14 +69,14 @@ class ITERcoilset(pythonIO):
             coilset = VVcoils(model='full', read_txt=True).cs.coilset
             self.cc.append_coilset(coilset)
         if 'pf' in coils:  # pf coilset
-            coilset = PFgeom(VS=False, dCoil=dCoil).cs.coilset  # PF coils 
+            coilset = PFgeom(VS=False, dCoil=dCoil).cc.coilset  # PF coils 
             self.cc.append_coilset(coilset)
         if 'vsj' in coils or 'vs' in coils:  # vs coils with/without ss jacket
             jacket = True if 'vsj' in coils else False
             coilset = VSgeom(jacket=jacket).cs.coilset  # vs coils + jackets
             self.cc.append_coilset(coilset)
                     
-        self.cc.mutual.solve_interaction()  # compute inductance matrix
+        #self.cc.mutual.solve_interaction()  # compute inductance matrix
         self.cc.grid.generate_grid(n=self.n)
         #self.cc.add_targets(targets=targets)
         #self.cc.update_interaction()
@@ -270,8 +270,9 @@ class ITERdata(pythonIO):
 class PFgeom:  # PF/CS coil class
 
     def __init__(self, VS=False, dCoil=0.25, source='PCR'):
-        self.cs = CoilSet(dCoil=dCoil, turn_fraction=0.665, turn_section='circle')
-        self.cs.update_coilframe_metadata(
+        self.cc = CoilClass(dCoil=dCoil, turn_fraction=0.665,
+                            turn_section='rectangle')
+        self.cc.update_coilframe_metadata(
                 'coil', additional_columns=['m', 'material', 'R'])
         self.load(VS=VS, source=source)
 
@@ -320,29 +321,29 @@ class PFgeom:  # PF/CS coil class
         part = ['CS' if 'CS' in name else 'PF' for name in self.data.index]
         self.data.rename(columns={'dx': 'dl', 'dz': 'dt'}, inplace=True)        
 
-        coil = self.cs.coil.get_coil(self.data, material='steel',
+        coil = self.cc.coil.get_coil(self.data, material='steel',
                                      cross_section='rectangle', part=part)
-        coil = self.cs.categorize_coilset(coil, rename=False)
-        self.cs.coil.concatenate(coil)
-        self.cs.meshcoil(index=coil.index)
-        self.cs.add_mpc(['CS1L', 'CS1U'], 1)  # link CS1 modules
+        coil = self.cc.categorize_coilset(coil, rename=False)
+        self.cc.coil.concatenate(coil)
+        self.cc.meshcoil(index=coil.index)
+        self.cc.add_mpc(['CS1L', 'CS1U'], 1)  # link CS1 modules
         if VS:  # add vs3 system after primary coils
-            self.cs.append_coilset(VSgeom(jacket=True).cs)
+            self.cc.append_coilset(VSgeom(jacket=True).cs)
 
 
 class VSgeom:  # VS coil class
 
     def __init__(self, invessel=True, jacket=True):
-        self.cs = CoilSet()
+        self.cc = CoilClass()
         self.add_conductor(invessel=invessel)
         reindex = {'LVS0-LVS3': 'LVS', 'UVS0-UVS3': 'UVS'}
         if jacket:
             self.add_jacket()  # add steel jacket
             reindex = {**reindex, 'LVSj0-LVSj3': 'LVSj', 'UVSj0-UVSj3': 'UVSj'}
         # cluster upper and lower coils and jackets
-        self.cs.cluster(4, merge_pairs=False)  
-        self.cs.rename(index=reindex)
-        self.cs.coil.add_mpc(['LVS', 'UVS'], 1)  # link vs turns
+        self.cc.cluster(4, merge_pairs=False)  
+        self.cc.rename(index=reindex)
+        self.cc.coil.add_mpc(['LVS', 'UVS'], 1)  # link vs turns
         self.extract()
 
     def add_conductor(self, invessel=True):  # VS coil geometory
@@ -378,19 +379,19 @@ class VSgeom:  # VS coil class
             self.xc[name] = xc
             for i, x in enumerate(xc):
                 subname = f'{name}{i}'
-                self.cs.add_coil(x[0], x[1], d, d, name=subname,
+                self.cc.add_coil(x[0], x[1], d, d, name=subname,
                                  cross_section='skin', material='copper',
                                  subcoil=False, part='VS3',
                                  Nt=self.geom[name]['sign'])
-                self.cs.coil.at[subname, 'subindex'] = [subname]
-                self.cs.subcoil.add_coil(
+                self.cc.coil.at[subname, 'subindex'] = [subname]
+                self.cc.subcoil.add_coil(
                         x[0], x[1], d, d, cross_section='skin',
                         name=subname, coil=name, part='VS3',
                         Nt=self.geom[name]['sign'])
                 R = resistivity_cu * 2 * np.pi * x[0] / acs_turn
                 m = density_cu * 2 * np.pi * x[0] * acs_turn
-                self.cs.coil.at[subname, 'R'] = R
-                self.cs.coil.at[subname, 'm'] = m
+                self.cc.coil.at[subname, 'R'] = R
+                self.cc.coil.at[subname, 'm'] = m
 
     def add_jacket(self, rcs=[0.0265, 0.0295]):
         acs_turn = np.pi * (rcs[1]**2 - rcs[0]**2)  # single turn cross-section
@@ -399,17 +400,17 @@ class VSgeom:  # VS coil class
         for name in self.geom:
             for isub in range(Nf):
                 subname = name+'{}'.format(isub)
-                x_sub = self.cs.subcoil.at[subname, 'x']
-                z_sub = self.cs.subcoil.at[subname, 'z']
+                x_sub = self.cc.subcoil.at[subname, 'x']
+                z_sub = self.cc.subcoil.at[subname, 'z']
                 R = resistivity_ss * 2 * np.pi * x_sub / acs_turn
                 m = density_ss * 2 * np.pi * x_sub * acs_turn
                 jacket_name = f'{name}j{isub}'
-                self.cs.add_coil(x_sub, z_sub, dx, dz, R=R, name=jacket_name,
+                self.cc.add_coil(x_sub, z_sub, dx, dz, R=R, name=jacket_name,
                                  cross_section='skin', turn_section='skin',
                                  m=m, material='steel', dCoil=0, part='VS3j',
                                  subcoil=False, power=False)
-                self.cs.coil.at[jacket_name, 'subindex'] = [jacket_name]
-                self.cs.subcoil.add_coil(x_sub, z_sub, dx, dz, R=R,
+                self.cc.coil.at[jacket_name, 'subindex'] = [jacket_name]
+                self.cc.subcoil.add_coil(x_sub, z_sub, dx, dz, R=R,
                                          name=jacket_name, coil=jacket_name,
                                          cross_section='skin', part='VS3j',
                                          power=False)
@@ -431,7 +432,7 @@ class VSgeom:  # VS coil class
             self.theta_coil[coil] = self.geom[coil]['theta']
 
     def plot(self, **kwargs):
-        self.cs.plot(**kwargs)
+        self.cc.plot(**kwargs)
 
 
 class VVcoils(pythonIO):
@@ -446,7 +447,7 @@ class VVcoils(pythonIO):
         self.model = model
         self.invessel = invessel
         self.read_txt = read_txt
-        self.cs = CoilSet(dCoil=0)
+        self.cc = CoilClass(dCoil=0)
         self.path = os.path.join(class_dir(nep_data.geom) + '/')
         self.load_coils()
 
@@ -461,7 +462,7 @@ class VVcoils(pythonIO):
             self.save_pickle(filename, ['centerlines', '_coilset'])
         else:
             self.load_pickle(filename)
-            self.cs.append_coilset(self._coilset)
+            self.cc.append_coilset(self._coilset)
 
     def read_coils(self):
         self.dt = 60e-3  # vv thickness
@@ -518,7 +519,7 @@ class VVcoils(pythonIO):
             if plot_centerlines:
                 self.plot_centerlines(location, ax=ax, zorder=10, color='C0')
         if plot_coils:
-            self.cs.plot(subcoil=True, ax=ax)
+            self.cc.plot(subcoil=True, ax=ax)
 
     def subplot(self, plot_centerlines=False):
         ax = plt.subplots(1, 2, figsize=(9, 4))[1]
@@ -547,8 +548,8 @@ class VVcoils(pythonIO):
                 x, z = np.zeros(nc), np.zeros(nc)
                 R, m = np.zeros(nc), np.zeros(nc)
                 name = [{} for __ in range(nc)]
-                if not self.cs.coil.empty:
-                    io = self.cs.coil.index[self.cs.coil.part == part].size
+                if not self.cc.coil.empty:
+                    io = self.cc.coil.index[self.cc.coil.part == part].size
                 else:
                     io = 0
                 for i in range(nc):
@@ -558,12 +559,12 @@ class VVcoils(pythonIO):
                     R[i] = resistivity_ss * 2 * np.pi * x[i] / (dx * dz)
                     m[i] = density_ss * 2 * np.pi * x[i] * dx * dz
                     name[i] = f'{part}{i+io}'
-                self.cs.add_coil(x, z, dx, dz, R=R, name=name, part=part,
+                self.cc.add_coil(x, z, dx, dz, R=R, name=name, part=part,
                                  cross_section='square', 
                                  turn_section='square',
                                  m=m, material='steel', power=False)
-        #self.cs.cluster(20) 
-        self._coilset = self.cs.coilset  # back-link for pythonIO save
+        #self.cc.cluster(20) 
+        self._coilset = self.cc.coilset  # back-link for pythonIO save
 
 
 class elm_coils:
@@ -662,19 +663,21 @@ if __name__ == '__main__':
     #IOdata.compare()
     #IOdata.cc.plot(label=True, ax=plt.subplots(1, 1)[1])
     
-    ITER = ITERcoilset(coils='pf_vv', dCoil=0.5, n=1e3, read_txt=True)
+    ITER = ITERcoilset(coils='pf', dCoil=-1, n=5e3, read_txt=False)
     
     cc = ITER.cc
-    cc.scenario_filename = -2
+    cc.scenario_filename = -1
    
-    #cc.add_coil(6, -3, 1.5, 1.5, name='PF16', part='PF', Nt=600, It=5e5,
+    #cs.add_coil(6, -3, 1.5, 1.5, name='PF16', part='PF', Nt=600, It=5e5,
     #            turn_section='circle', turn_fraction=0.7, dCoil=0.75)
     cc.scenario = 'SOB'
     
-    #cc.current_update = 'passive'
-    cc.plot(subcoil=False)
+    #cs.current_update = 'passive'
+    
+    
+    plt.set_aspect(1)
     cc.plot(label=['PF', 'CS'])
-    #cc.Ic = 2.5e4
+    #cs.Ic = 2.5e4
     
     cc.grid.plot_flux()
     '''

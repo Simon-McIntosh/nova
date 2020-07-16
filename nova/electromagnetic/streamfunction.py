@@ -10,6 +10,8 @@ from scipy.interpolate import interp1d
 from scipy.optimize import minimize
 from matplotlib.collections import LineCollection
 from matplotlib.lines import Line2D
+from matplotlib.path import Path
+from matplotlib.patches import PathPatch
 from shapely.geometry import Polygon, Point, LineString, LinearRing
 
 from amigo.IO import class_dir
@@ -23,6 +25,7 @@ import nep_data
 from nova.electromagnetic import geqdsk
 #from nova.electromagnetic.elliptic import EQ
 from nova.electromagnetic.coilset import CoilSet
+from nova.electromagnetic.coilgeom import ITERcoilset
 
 
 class SF:
@@ -1355,7 +1358,7 @@ class SF:
                           'Z': [[] for i in range(self.Nsol)], 'i': 0},
                 'core2': {'X': [[] for i in range(self.Nsol)],
                           'Z': [[] for i in range(self.Nsol)], 'i': 0}}
-        self.legs = OrderedDict(sorted(self.legs.items(), key=lambda t: t[0]))
+        self.legs = dict(sorted(self.legs.items(), key=lambda t: t[0]))
         if self.nleg == 0:
             err_txt = 'legs not found\n'
             self.contour()
@@ -1546,47 +1549,92 @@ if __name__ == '__main__':
     plt.set_aspect(1.2)
     
     directory = join(class_dir(nep_data), 'scenario_database/eqdsk')
-    sf = SF(filename=join(directory, 'CORSICA_15MA_burn_2V2XYR.eqdsk'), 
+    
+    directory = join(class_dir(nep_data), 
+                     'scenario_database/corsica/DThmode24/data')
+    
+    sf = SF(filename=join(directory, 'G_DTHMODE24_ITER_MR_00500.TXT'), 
             fw_limit=False)
 
     sf.contour()
     sf.plot_sol(core=True)
     sf.plot_firstwall()
     
-    cs = CoilSet()
-    
+    # load coilset
+    ITER = ITERcoilset(coils='pf', dCoil=0.25, n=1e3, read_txt=False)
+    cc = ITER.cc
+        
     limit = sf.fw.bounds
-    cs.add_plasma(np.mean(sf.fw.bounds[::2]), np.mean(sf.fw.bounds[1::2]),
+    cc.add_plasma(np.mean(sf.fw.bounds[::2]), np.mean(sf.fw.bounds[1::2]),
                   np.diff(sf.fw.bounds[::2])[0], 
                   np.diff(sf.fw.bounds[1::2])[0], 
-                  polygon=Polygon(sf.fw))
-    #cs.plot()
+                  dPlasma=0.5)
+    cc.patch_coil(cc.subcoil)
+    #cc.plot()
     
-    points = [(x, z) for x, z in zip(sf.xbdry, sf.zbdry)]
-    sep = Polygon(points)
     
-    cs.patch_coil(cs.subcoil) 
-    for index in cs.subcoil.index:
-        if not sep.intersects(cs.subcoil.loc[index, 'polygon']):
-            cs.subcoil.loc[index, 'patch'].set_alpha(0)
-            
-            x, z = cs.subcoil.loc[index, ['x', 'z']]
-            cs.subcoil.loc[index, 'polygon'] = None
-        elif not cs.subcoil.loc[index, 'polygon'].within(sep):
-            cs.subcoil.loc[index, 'polygon'] = \
-                cs.subcoil.loc[index, 'polygon'].intersection(sep)
-    cs.patch_coil(cs.subcoil, overwrite=True) 
 
+    #points = [(x, z) for x, z in zip(sf.xbdry, sf.zbdry)]
+    #sep = Polygon(points)
+    
+    def inside():
+        separatrix = Path([(x, z) for x, z in zip(sf.xbdry, sf.zbdry)])
+        
+        xp, zp = cc.subcoil.loc[cc.subcoil.plasma, ['x', 'z']].values.T
+        flag = separatrix.contains_points(np.array([cc.subcoil.x, 
+                                                    cc.subcoil.z]).T)
+        
+        cc.subcoil.loc[cc.subcoil.plasma & ~flag, 'Nt'] = 0
+        
+        
+        patch = PathPatch(separatrix, facecolor='green',
+                          edgecolor='yellow', alpha=0.5)
+        ax = plt.gca()
+        #ax.add_patch(patch)
+
+    
+    inside()
+    cc.plot()
+    
+    
+    '''
+    
+    cc.patch_coil(cc.subcoil) 
+
+    for index in cc.subcoil.index[cc.subcoil.plasma]:
+        if not sep.intersects(cc.subcoil.loc[index, 'polygon']):
+            cc.subcoil.loc[index, 'patch'].set_alpha(0)
+            cc.subcoil.loc[index, 'polygon'] = None
+            cc.subcoil.loc[index, 'Nt'] = 0
+        elif not cc.subcoil.loc[index, 'polygon'].within(sep):
+            cc.subcoil.loc[index, 'polygon'] = \
+                cc.subcoil.loc[index, 'polygon'].intersection(sep)
+            #cc.subcoil.loc[index, 'x'] = p_.centroid.x)
+            #zm_.append(p_.centroid.y)
+            
+    #cc.patch_coil(cc.subcoil, overwrite=True) 
+    
+    cc.subcoil.update_polygon(cc.subcoil.loc[cc.subcoil.plasma])
+    for index in cc.subcoil.index[cc.subcoil.plasma]:
+        if cc.subcoil.loc[index, 'polygon'] is not None:
+            x, z = cc.subcoil.loc[index, ['x', 'z']]
+            plt.plot(x, z, '.')
+            psi = sf.Pspline(x, z)
+            psi_norm = (psi - sf.Mpsi) / (sf.Xpsi - sf.Mpsi)
+            print(psi_norm)
 
     #psi_norm = (self.Pspline.e - self.sf.Mpsi) / (self.sf.Xpsi - self.sf.Mpsi)
     #I = dA *(x*sf.Pprime(psi_norm) + sf.FFprime(psi_norm))
                 
-    cs.Ip = 15e6
-                
-    cs.plot()
-        
+    cc.scenario_filename = -1
+    cc.scenario = 'SOB'
     
+                
+    cc.plot()
+        
+    cc.grid.generate_grid(limit=sf.limit.flatten(), regen=True)
+    cc.grid.plot_flux(color='C3')
     
     #self.eq = EQ(self.pf.coilset, eqdsk, n=1e3)  # set plasma coils
-    
+    '''
 

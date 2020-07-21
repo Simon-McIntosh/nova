@@ -21,7 +21,7 @@ from amigo.pyplot import plt
 #from nova.coils import PF
 from nova.electromagnetic.streamfunction import SF
 #from nova.force import force_field
-from nep.DINA.tie_plate import get_tie_plate
+from nova.limits.tieplate import get_tie_plate
 
 
 class INV(object):

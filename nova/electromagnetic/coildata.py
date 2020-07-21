@@ -216,7 +216,7 @@ class CoilData():
                                  '[full, actitve, passive, plasma, coil]')
 
     @property
-    def status(self):
+    def update_status(self):
         'display power, plasma and current_update status'
         if self.nC > 0:
             return DataFrame(
@@ -303,7 +303,7 @@ class CoilData():
     @Np.setter
     def Np(self, value):  # set plasma fillament number
         self._Nt[self._plasma_index] = value
-        #self._Nt[self._plasma_index] /= np.sum(self._Nt[self._plasma_index])
+        self._Nt[self._plasma_index] /= np.sum(self._Nt[self._plasma_index])
         self._update_dataframe['Nt'] = True
         
     @property

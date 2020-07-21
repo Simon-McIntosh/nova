@@ -122,6 +122,8 @@ class read_waveform(pythonIO):
             file = [f for f in files if ext in f.lower()][0]
         except IndexError:
             raise IndexError('ext {} not found in {}'.format(ext, files))
+        self.folder = folder
+        self.file = file
         return join(folder, file)
     
     def load_folder(self):

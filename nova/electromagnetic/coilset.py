@@ -1,7 +1,7 @@
 from os import path
 
 import numpy as np
-from pandas import Series, DataFrame, concat, isnull
+from pandas import Series, DataFrame, concat, isnull, Index
 from pandas.api.types import is_list_like
 import functools
 import matplotlib
@@ -51,7 +51,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
     _biot_instances = ['mutual', 'plasma', 'grid']  
 
     # additional_columns
-    _coil_columns = ['dA', 'dCoil', 'subindex', 'part',
+    _coil_columns = ['dA', 'dCoil', 'nx', 'nz', 'subindex', 'part',
                      'cross_section', 
                      'turn_section', 'turn_fraction', 'skin_fraction',
                      'patch', 'polygon',
@@ -186,6 +186,9 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
             raise LookupError(f'file {filepath} not found')
 
     def subset(self, index, invert=False):
+        if not isinstance(index, Index):
+            index = self.coil.index[index]
+            print(index)
         if not is_list_like(index):
             index = [index]
         if invert:
@@ -226,14 +229,14 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         return coil
     
     @property
-    def status(self):
+    def update_status(self):
         'display power, plasma and current_update status'
-        return self.coil.status
+        return self.coil.update_status
         
     @property
     def current_update(self):
         'display current_update status'
-        return self.coil.current_update
+        return self.coil.current_update  # current_update
 
     @current_update.setter
     def current_update(self, flag):
@@ -315,7 +318,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
     @Np.setter
     def Np(self, Np):  # set plasma fillament number
         self.subcoil.Np = Np
-        self.coil.Np = 1
+        self.coil.Np = self.subcoil.Np.sum()
 
     def add_coil(self, *args, iloc=None, subcoil=True, **kwargs):
         index = self.coil.add_coil(*args, iloc=iloc, **kwargs)
@@ -368,6 +371,8 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
                     *subcoil_args, name=name, coil=name, **subcoil_kwargs)
             # back-propagate fillament attributes to coil
             coil.at[name, 'Nf'] = mesh['Nf']  
+            coil.at[name, 'nx'] = mesh['nx']  
+            coil.at[name, 'nz'] = mesh['nz']  
             if 'subindex' in coil:
                 coil.at[name, 'subindex'] = list(_subcoil[i].index)
         subcoil.concatenate(*_subcoil)
@@ -427,7 +432,6 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
             dt_ = coil['skin_fraction']
         else:
             dt_ = turn_fraction * dz_
-
         x_ = np.linspace(*bounds[::2], nx+1)
         z_ = np.linspace(*bounds[1::2], nz+1)
         polygen = CoilFrame._get_polygen(cross_section)  # polygon generator
@@ -448,7 +452,6 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
                             cs_.append(cross_section)  # maintain cs referance
                         else:
                             cs_.append('polygon')
-
         Nf = len(xm_)  # filament number
         if Nf == 0:  # no points found within polygon (skin)
             xm_, zm_, dl_, dt_ = x, z, dl, dt
@@ -456,8 +459,8 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         Nt_ = coil['Nt']*np.array(dA_) / coil_area  # constant current density
             
         # subcoil bundle
-        mesh.update({'x': xm_, 'z': zm_, 'dl': dl_, 'dt': dt_,
-                     'Nt': Nt_, 'Nf': Nf, 
+        mesh.update({'x': xm_, 'z': zm_, 'nx': nx, 'nz': nz,
+                     'dl': dl_, 'dt': dt_, 'Nt': Nt_, 'Nf': Nf, 
                      'polygon': polygon, 'cross_section': cs_})  
             
         # subcoil moment arms
@@ -500,12 +503,14 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         if not is_list_like(dt):  # permit variable thickness segments
             dt *= np.ones(np.shape(segment)[1])    
         if not is_list_like(rho):  # permit variable resistivity segments
-            rho *= np.ones(np.shape(segment)[1])   
+            rho *= np.ones(np.shape(segment)[1]) 
+        dL = length(*segment, norm=False)  # cumulative segment length
+        L = dL[-1]  # total segment length    
+        if dS == 0:
+            dS = L
         dt_min = dt.min()
         if dS < dt_min:
             dS = dt_min
-        dL = length(*segment, norm=False)  # cumulative segment length
-        L = dL[-1]  # total segment length
         nS = int(L / dS)  # segment number
         if nS < 1:  # ensure > 0
             nS = 1
@@ -547,8 +552,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         return x, z, dl, dt, dA, rho_bar, polygon, sub_segment, sub_rho, sub_dt
     
     def add_shell(self, x, z, dt, **kwargs):
-        name = kwargs.pop('name', kwargs.get('part', 'Shl'))
-        part = kwargs.pop('part', name)
+        label = kwargs.pop('label', kwargs.get('part', 'Shl'))
         dShell = kwargs.pop('dShell', self._default_attributes['dShell'])
         dCoil = kwargs.pop('dCoil', self._default_attributes['dCoil'])
         power = kwargs.pop('power', False)
@@ -563,17 +567,19 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         index = self.coil.add_coil(x, z, dl, dt, dA=dA, polygon=polygon, 
                                    cross_section='shell', turn_fraction=1, 
                                    turn_section='shell', dCoil=dShell,
-                                   power=power, name=name, part=part,
-                                   delim=delim, Nt=dA, rho=rho_bar)
+                                   power=power, label=label,
+                                   delim=delim, Nt=dA, rho=rho_bar,
+                                   **kwargs)
         subindex = [[] for __ in range(len(index))]
+        kwargs.pop('name', None)
         for i, coil in enumerate(index):
             _x, _z, _dl, _dt, _dA, _rho_bar, _polygon = \
                 self._shlspace(sub_segment[i], sub_dt[i], sub_rho[i], 
                                dCoil)[:-3]
             subindex[i] = self.subcoil.add_coil(_x, _z, _dl, _dt, 
                     polygon=_polygon, coil=coil, cross_section='square', 
-                    mpc=True, power=power, name=index[i], part=part, Nt=_dA,
-                    rho=_rho_bar)
+                    mpc=True, power=power, name=index[i], Nt=_dA, 
+                    rho=_rho_bar, **kwargs)
             self.coil.at[index[i], 'subindex'] = subindex[i]
             
     def add_plasma(self, *args, **kwargs):
@@ -584,16 +590,18 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         cross_section = kwargs.pop('cross_section', 'rectangle')
         turn_section = kwargs.pop('turn_section', 'rectangle')
         self.dPlasma = kwargs.pop('dPlasma', self.dPlasma)  # update dPlasma
-        iloc = [None, None]
-        if 'Plasma' in self.coil.index:
-            iloc = self.drop_coil('Plasma')
+        iloc = [None, None]  # coil, subcoil
+        print(self.coil.part, 'Plasma' in self.coil.part)
+        if 'Plasma' in self.coil.part.values:
+            print('plasma', self.coil.part)
+            iloc = self.drop_coil(self.coil.index[self.coil.part == 'Plasma'])
         nlist = sum([1 for arg in args if is_list_like(arg)])
         if nlist == 0:   # add single plasma coil - mesh filaments
             dCoil = kwargs.pop('dCoil', self.dPlasma)
             self.add_coil(*args, 
                           part=part, name='Plasma',
                           dCoil=dCoil, cross_section=cross_section,
-                          turn_section=turn_section, iloc=iloc[1], 
+                          turn_section=turn_section, iloc=iloc[0], 
                           plasma=True, **kwargs)
         else:  # add single / multiple filaments, fit coil
             # add plasma filaments to subcoil
@@ -715,7 +723,8 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
     def patch_coil(coil, overwrite=False, patchwork_factor=0.15, **kwargs):
         # call on-demand
         part_color = {'VS3': 'C0', 'VS3j': 'gray', 'CS': 'C0', 'PF': 'C0',
-                      'trs': 'C2', 'vvin': 'C3', 'vvout': 'C4', 
+                      'trs': 'C2', 'vv': 'C3', 'vvin': 'C3', 'vvout': 'C3', 
+                      'bb': 'C7',
                       'plasma': 'C4', 'Plasma': 'C4',
                       'cryo': 'C5'}
         color = kwargs.get('part_color', part_color)
@@ -757,30 +766,34 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         patch.set_facecolor(c)
         
 
-    def plot_coil(self, coil, alpha=1, ax=None, **kwargs):
+    def plot_coil(self, coil, alpha=1, ax=None, passive=False, **kwargs):
         if ax is None:
             ax = plt.gca()
         if not coil.empty:
             if isnull(coil.loc[:, 'patch']).any() or len(kwargs) > 0:
                 CoilSet.patch_coil(coil, **kwargs)  # patch on-demand
-            patch = coil.loc[coil.Nt > 0, 'patch']  # plot iff Nt > 0
+            if passive:
+                patch = coil.loc[:, 'patch']
+            else:  # exclude passive filaments (Nt == 0)
+                patch = coil.loc[coil.Nt > 0, 'patch']  # plot iff Nt > 0
             # form list of lists
             patch = [p if is_list_like(p) else [p] for p in patch]
-            # flatten
-            patch = functools.reduce(operator.concat, patch)
-            # sort
-            patch = np.array(patch)[np.argsort([p.zorder for p in patch])]
-            pc = PatchCollection(patch, match_original=True)
-            ax.add_collection(pc)
+            if len(patch) > 0:
+                # flatten
+                patch = functools.reduce(operator.concat, patch)
+                # sort
+                patch = np.array(patch)[np.argsort([p.zorder for p in patch])]
+                pc = PatchCollection(patch, match_original=True)
+                ax.add_collection(pc)
 
     def plot(self, subcoil=True, plasma=True, label=True, current=None,
-             ax=None):
+             passive=False, ax=None):
         if ax is None:
             ax = plt.gca()
         if subcoil:
-            self.plot_coil(self.subcoil, ax=ax)
+            self.plot_coil(self.subcoil, passive=passive, ax=ax)
         else:
-            self.plot_coil(self.coil, ax=ax)
+            self.plot_coil(self.coil, passive=passive, ax=ax)
         if 'Plasma' in self.coil.index and plasma and 'Ic' in self.coil:
             self.label_plasma(ax)
         if label or current:
@@ -798,14 +811,15 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
                 ha='center', va='center', color=0.9 * np.ones(3),
                 zorder=10)
 
-    def label_coil(self, ax, label, current, coil=None, fs=None):
+    def label_coil(self, ax, label, current, coil=None, fs=None, Nmax=20):
         if fs is None:
             fs = matplotlib.rcParams['legend.fontsize']
         if coil is None:
             coil = self.coil
         parts = np.unique(coil.part)
         parts = [p for p in parts if p not in ['plasma', 'Plasma', 'vvin',
-                                               'vvout', 'trs']]
+                                               'vvout', 'trs', 'vv', 'bb']]
+        N = {p: sum(coil.part == p) for p in parts}
         if label == True:
             label = parts
         ylim = np.diff(ax.get_ylim())[0]
@@ -822,7 +836,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
                 zshift = max([dz / 5, ylim / 3])
             else:
                 zshift = 0
-            if part in parts and part in label:
+            if part in parts and part in label and N[part] < Nmax:
                 ax.text(x + drs, z + zshift, name, fontsize=fs,
                         ha=ha, va='center', color=0.2 * np.ones(3))
             if part in parts and current:

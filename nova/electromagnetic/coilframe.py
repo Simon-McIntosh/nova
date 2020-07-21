@@ -1,10 +1,13 @@
+import re
+from warnings import warn
+import string
+
 import numpy as np
 from pandas import DataFrame, Series, isna, concat
 from pandas.api.types import is_list_like, is_dict_like
 import shapely.geometry
 import shapely.affinity
 from shapely.ops import transform
-from warnings import warn
 
 from nova.electromagnetic.coildata import CoilData
 
@@ -56,8 +59,8 @@ class CoilFrame(DataFrame, CoilData):
     def _initialize_default_attributes(self):
         'default attributes when not set via self.add_coil(**kwargs)'
         self._default_attributes = \
-            {'rms': 0., 'dA': 0., 'Ic': 0., 'It': 0., 'm': '', 
-             'R': 0., 'Nt': 1,
+            {'rms': 0., 'dA': 0., 'nx': 1, 'nz': 1, 
+             'Ic': 0., 'It': 0., 'm': '', 'R': 0., 'Nt': 1,
              'Nf': 1, 'material': '', 
              'turn_fraction': 1., 'skin_fraction': 1., 'patch': None,
              'cross_section': 'rectangle', 'turn_section': 'rectangle',
@@ -154,8 +157,8 @@ class CoilFrame(DataFrame, CoilData):
         mpc = kwargs.pop('mpc', False)
         args, kwargs = self._check_arguments(*args, **kwargs)
         delim = kwargs.pop('delim', '_')
-        label = kwargs.pop('label', kwargs.get('name', 'Coil'))
-        name = kwargs.pop('name', f'{label}{delim}{self.nC:d}')
+        label = kwargs.pop('label', 'Coil')
+        name = kwargs.pop('name', None)
         data = self._extract_data(*args, **kwargs)
         index = self._extract_index(data, delim, label, name)
         coil = CoilFrame(data, index=index, columns=data.keys(),
@@ -303,14 +306,23 @@ class CoilFrame(DataFrame, CoilData):
                                  f'column number: {nCol}')
             index = name
         else:
-            if nCol == 1:
-                index = [name]
-            else:
-                if delim in name:
-                    offset = int(name.split(delim)[-1])
-                else:
+            if name is None:
+                try:  # reverse search through coilframe index
+                    offset = next(int(re.sub(r'[a-zA-Z]', '', index))
+                                  for index in self.index[::-1] 
+                                  if label in index) + 1
+                except StopIteration:  # label not present in index
                     offset = 0
-                index = [f'{label}{delim}{i+offset:d}' for i in range(nCol)]
+            else:
+                if delim:
+                    label = name.split(delim)[0]
+                else:
+                    label = name.rstrip(string.digits)  # trailing  number
+                try:  # build list taking starting index from name
+                    offset = int(re.sub(r'[a-zA-Z]', '', name))
+                except ValueError:
+                    offset = 0
+            index = [f'{label}{delim}{i+offset:d}' for i in range(nCol)]
         self._check_index(index)
         return index
 

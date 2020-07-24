@@ -1,6 +1,7 @@
 from os import listdir, sep
 from os.path import join, isfile, isdir
 from datetime import datetime
+import string
 
 import numpy as np
 import pandas as pd
@@ -163,28 +164,38 @@ class read_corsica(read_waveform):
         filename = self.locate_file('T_.txt', folder=-1)
         data = pd.DataFrame()
         comments, units = {}, []
-        #nz_index = 
+        nz_index = 0
         with readtxt(filename) as f:
             f.trim('ncol', index=0)
             ncol = f.readnumber()
             f.skiplines(1)
             nt = f.readnumber()
-            for __ in range(7):
-                label = f.readline(split=True, string=True, sep=':')
-                variable = label[0].strip()
-                note = label[1].split()
-                comment = ' '.join(note[:-1])
-                comments[variable] = comment
-                unit = note[-1].replace('[', '').replace(']', '')
-                units.append(unit)
-                if variable == '<nz>(t)':
-                    variable += 'a'
-                print(variable, comment, unit)
-
-                data[variable] = f.readblock()
+            while True:
+                try:
+                    label = f.readline(split=True, string=True, sep=':')
+                    variable = label[0].strip()
+                    note = label[1].split()
+                    comment = ' '.join(note[:-1])
+                    comments[variable] = comment
+                    unit = note[-1].replace('[', '').replace(']', '')
+                    units.append(unit)
+                    if variable == '<nz>(t)':
+                        variable = variable.replace(
+                            '(', f'{string.ascii_letters[nz_index]}(')
+                        nz_index += 1
+                        num = f.readline(split=True, string=True)[2::3]
+                        num = [float(n.replace('D', 'E').replace(',', '')) 
+                               for n in num]
+                        comment += f' ({num[0]}, {num[1]})'
+    
+                    data[variable] = f.readblock()
+                except ValueError:  # end of file
+                    eof = True
+                    break
+                
             f.skiplines(5, verbose=True)
         
-            print(ncol, nt, data['t'])
+
     
     
 class read_dina(read_waveform):

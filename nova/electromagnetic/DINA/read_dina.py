@@ -187,14 +187,21 @@ class read_corsica(read_waveform):
                         num = [float(n.replace('D', 'E').replace(',', '')) 
                                for n in num]
                         comment += f' ({num[0]}, {num[1]})'
-    
-                    data[variable] = f.readblock()
-                except ValueError:  # end of file
-                    eof = True
-                    break
+                    if variable == 'Ncoils':  # read PF / CS coil currents
+                        nC = f.readnumber()
+                    else:
+                        data[variable] = f.readblock()
+                except ValueError:
+                    try:
+                        label = f.readline(split=False, string=True)
+                        if 'nottt available' in label:  # valiable not avalible
+                            continue
+                        else:  # not implemented
+                            raise NotImplementedError(
+                                f'read error for line: {label}')
+                    except:
+                        break
                 
-            f.skiplines(5, verbose=True)
-        
 
     
     

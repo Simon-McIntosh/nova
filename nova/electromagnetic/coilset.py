@@ -83,9 +83,6 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         BiotSavart.__init__(self)
         BiotAttributes.__init__(self)
         self.initialize_biot_instances()
-        # mutual interaction
-        #self.load_source(self.subcoil)  # link source
-        #self.load_target(self.subcoil)  # link target
         
     def initialize_biot_instances(self):
         for instance in self._biot_instances:
@@ -439,7 +436,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         sub_polygons = [[] for __ in range(nx*nz)]
         for i in range(nx):  # radial divisions
             for j in range(nz):  # vertical divisions
-                sub_polygons[i*nx + j] = \
+                sub_polygons[i*nz + j] = \
                         polygen(x_[i]+dx_/2, z_[j]+dz_/2, dl_, dt_)
         tree = STRtree(sub_polygons)
         sub_polygons = [p for p in tree.query(coil_polygon) 

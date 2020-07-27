@@ -201,10 +201,26 @@ class read_corsica(read_waveform):
                                 f'read error for line: {label}')
                     except:
                         break
+            data.rename(columns={c: c.replace('(t)', '') 
+                         for c in data.columns}, inplace=True)
+            data.rename(columns={c: c.replace(',t)', ')') 
+                         for c in data.columns}, inplace=True)
+            
+            current = {c: f'I{c.replace("current", "").strip()}' 
+                       for c in data.columns if 'current' in c}
+            data.rename(columns=current, inplace=True)
+            kappa = {c: c.replace("Triangularity", "kappa").strip().replace(
+                '_Lower', 'L').replace('_Upper', 'U') 
+                       for c in data.columns if 'Triangularity' in c}
+            data.rename(columns=kappa, inplace=True)
+            elongation = {c: c.replace('Elongation', 'dell').strip() 
+                          for c in data.columns if 'Elongation' in c}
+            data.rename(columns=elongation, inplace=True)           
+            data.rename(columns={'Timebase': 't'}, inplace=True)
+
+            print(data.columns)
                 
 
-    
-    
 class read_dina(read_waveform):
 
     date_switch = datetime.strptime('2016-02', '%Y-%m')
@@ -295,5 +311,6 @@ if __name__ == '__main__':
     corsica = read_corsica('corsica')
     corsica.read_file()
     
-    #dina = read_dina('operations')
+    dina = read_dina('operations')
+    dina.load
     #filename = dina.locate_file('data2.txt', folder=1)

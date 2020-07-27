@@ -3,7 +3,7 @@ import pandas as pd
 
 import amigo.geom
 from nova.electromagnetic.coilset import CoilSet
-from nova.electromagnetic.DINA.read_scenario import scenario_data
+from nova.electromagnetic.IO.read_scenario import scenario_data
 
 
 class CoilClass(CoilSet):

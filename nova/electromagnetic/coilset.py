@@ -1,19 +1,19 @@
 from os import path
+import functools
+import operator
+import colorsys
 
 import numpy as np
 from pandas import Series, DataFrame, concat, isnull, Index
 from pandas.api.types import is_list_like
-import functools
 import matplotlib
 from matplotlib.collections import PatchCollection
 import matplotlib.colors as mc
-import operator
 from sklearn.cluster import DBSCAN
 import shapely.geometry
 import shapely.affinity
 from descartes import PolygonPatch
 from scipy.interpolate import interp1d
-import colorsys
 
 from amigo.geom import gmd, amd
 from amigo.IO import human_format
@@ -445,6 +445,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
                 for p_ in p:
                     if isinstance(p_, shapely.geometry.polygon.Polygon):
                         polygon.append(p_)
+                        print(p_)
                         xm_.append(p_.centroid.x)
                         zm_.append(p_.centroid.y)
                         dA_.append(p_.area)

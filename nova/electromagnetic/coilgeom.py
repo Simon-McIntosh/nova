@@ -11,9 +11,7 @@ from amigo.pyplot import plt
 from amigo.png_tools import data_load
 from amigo.IO import class_dir
 import nep_data.geom
-from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.coilclass import CoilClass
-
 
 resistivity_ss = 0.815e-6  # steel electrical resistivity at 100C
 resistivity_cu = 0.029e-6  # copper electrical resistivity at 100C
@@ -317,13 +315,13 @@ class PFgeom:  # PF/CS coil class
             self.columns[c] = c.split(',')[0].lower()
         self.columns['R, ohm'] = 'R'
         self.columns['N,'] = 'Nt'
-        self.data = self.data.rename(index=str, columns=self.columns)
+        self.data = self.data.rename(columns=self.columns)
         part = ['CS' if 'CS' in name else 'PF' for name in self.data.index]
         self.data.rename(columns={'dx': 'dl', 'dz': 'dt'}, inplace=True)        
 
         coil = self.cc.coil.get_coil(self.data, material='steel',
                                      cross_section='rectangle', part=part)
-        coil = self.cc.categorize_coilset(coil, rename=False)
+        #coil = self.cc.categorize_coilset(coil, rename=True)
         self.cc.coil.concatenate(coil)
         self.cc.meshcoil(index=coil.index)
         self.cc.add_mpc(['CS1L', 'CS1U'], 1)  # link CS1 modules
@@ -471,7 +469,7 @@ class VVcoils(pythonIO):
 
     def load_centerlines(self, model='local', plot=False, ax=None):
         # model = 'local', 'full'
-        self.centerlines = OrderedDict()
+        self.centerlines = {}
         if model == 'local':
             for location, filename, date in \
                     zip(['lower', 'upper'],
@@ -574,8 +572,8 @@ class elm_coils:
         self.initalize_geometry()
         self.load()
 
-    def initalize_coil(self):
-        self.pf = PF()  # primary coil object
+    #def initalize_coil(self):
+    #    self.pf = PF()  # primary coil object
 
     def initalize_geometry(self):
         co = 0.1065  # inner
@@ -589,7 +587,7 @@ class elm_coils:
                                          [-1, 0, 1, 1, 0, -1])):
             self.pattern[i, 0] = ix*dx/2
             self.pattern[i, 1] = iz*dz/2
-        self.geom = OrderedDict()
+        self.geom = {}
         self.xc = {}
 
     def add_coil(self, name, x, z, theta, tf):
@@ -606,8 +604,8 @@ class elm_coils:
             self.pf.coilset['coil'][name]['Nf'] += 1
             subcoil = {'x': x[0], 'z': x[1],
                        'dx': self.d, 'dz': self.d, 'It': 0}
-            self.pf.coilset['subcoil'][f'{name}_{i}'] = \
-                PF.mesh_coil(subcoil, dCoil=None)[0]
+            #self.pf.coilset['subcoil'][f'{name}_{i}'] = \
+            #    PF.mesh_coil(subcoil, dCoil=None)[0]
             self.pf.coilset['subcoil'][f'{name}_{i}']['tf'] = tf
 
     def add_geom(self, name, x, z, theta):
@@ -663,19 +661,22 @@ if __name__ == '__main__':
     #IOdata.compare()
     #IOdata.cc.plot(label=True, ax=plt.subplots(1, 1)[1])
     
-    ITER = ITERcoilset(coils='pf', dCoil=-1, n=5e3, read_txt=False)
+    ITER = ITERcoilset(coils='pf', dCoil=0.15, n=7.5e3, read_txt=False)
     
     cc = ITER.cc
-    cc.scenario_filename = -1
+    cc.scenario_filename = -2
    
     #cs.add_coil(6, -3, 1.5, 1.5, name='PF16', part='PF', Nt=600, It=5e5,
     #            turn_section='circle', turn_fraction=0.7, dCoil=0.75)
-    cc.scenario = 'SOB'
+    cc.scenario = 'IM'
+    cc.scenario = 'SOP'
+    
+    
     
     #cs.current_update = 'passive'
+    #cc.Ic = {f'PF{i}': 0 for i in [2, 3, 4]}
     
-    
-    plt.set_aspect(1)
+    plt.set_aspect(1.2)
     cc.plot(label=['PF', 'CS'])
     #cs.Ic = 2.5e4
     

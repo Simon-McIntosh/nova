@@ -8,7 +8,8 @@ from astropy import units
 from amigo.pyplot import plt
 from amigo.geom import rdp_extract
 from amigo.geom import vector_lowpass
-from nova.electromagnetic.DINA.read_dina import read_dina
+from nova.electromagnetic.IO.read_waveform import read_dina
+
 
 class operate:
     '''
@@ -106,9 +107,9 @@ class operate:
                                            inplace=True)
                     break
         if self.feature_name == 'Ip':
-            feature['node'].rename(index={0: 'SOD'}, inplace=True)
+            feature['node'].rename(index={0: 'IM'}, inplace=True)
             if value.loc[value.index[1]] > 0.01 * max_value:
-                feature['node'].rename(index={'SOD': 'SOP'}, inplace=True)
+                feature['node'].rename(index={'IM': 'SOP'}, inplace=True)
             else:
                 for index in value.index[1:]:
                     if value.loc[index] < 0.01 * max_value:
@@ -564,13 +565,14 @@ class scenario_limits:
             
         ax[-1].set_xlabel('$t$ s')
         plt.despine()
-        
+      
+'''
 class cosica_data(read_dina):
     
     def __init__(self):
         read_dina.__init__(self, database_folder=database_folder,
                            read_txt=read_txt)
-        
+'''     
 
 class scenario_data(read_dina, interpolate, operate):
 
@@ -636,7 +638,10 @@ class scenario_data(read_dina, interpolate, operate):
             self.update_units(['mm', 'cm'], 'm')
 
     def read_file(self, folder, additional_columns=[]):
-        scn = read_scenario(folder, self.database_folder, read_txt=False)
+        try:
+            scn = read_scenario(folder, self.database_folder, read_txt=False)
+        except AttributeError:
+            scn = read_scenario(folder, self.database_folder, read_txt=True)
         self.interpolate(scn.data2, additional_columns)
         operate.__init__(self)  # re-initalise operation instance
         self.extract_features()  # extract operational keypoints / keysegments
@@ -952,8 +957,8 @@ if __name__ == '__main__':
     
     
     d2 = scenario_data(read_txt=True)
-    d2.load_folder()
-    #d2.load_file(-7)  # read / load single file
+    #d2.load_folder()
+    d2.load_file(-2)  # read / load single file
     #d2.load_file(-1, read_txt=True)  # read / load single file
     
     #plt.set_context('talk')

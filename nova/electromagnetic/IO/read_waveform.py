@@ -1,6 +1,7 @@
 from os import listdir, sep
 from os.path import join, isfile, isdir
 from datetime import datetime
+import string
 
 import numpy as np
 import pandas as pd
@@ -163,30 +164,63 @@ class read_corsica(read_waveform):
         filename = self.locate_file('T_.txt', folder=-1)
         data = pd.DataFrame()
         comments, units = {}, []
-        #nz_index = 
+        nz_index = 0
         with readtxt(filename) as f:
             f.trim('ncol', index=0)
             ncol = f.readnumber()
             f.skiplines(1)
             nt = f.readnumber()
-            for __ in range(7):
-                label = f.readline(split=True, string=True, sep=':')
-                variable = label[0].strip()
-                note = label[1].split()
-                comment = ' '.join(note[:-1])
-                comments[variable] = comment
-                unit = note[-1].replace('[', '').replace(']', '')
-                units.append(unit)
-                if variable == '<nz>(t)':
-                    variable += 'a'
-                print(variable, comment, unit)
+            while True:
+                try:
+                    label = f.readline(split=True, string=True, sep=':')
+                    variable = label[0].strip()
+                    note = label[1].split()
+                    comment = ' '.join(note[:-1])
+                    comments[variable] = comment
+                    unit = note[-1].replace('[', '').replace(']', '')
+                    units.append(unit)
+                    if variable == '<nz>(t)':
+                        variable = variable.replace(
+                            '(', f'{string.ascii_letters[nz_index]}(')
+                        nz_index += 1
+                        num = f.readline(split=True, string=True)[2::3]
+                        num = [float(n.replace('D', 'E').replace(',', '')) 
+                               for n in num]
+                        comment += f' ({num[0]}, {num[1]})'
+                    if variable == 'Ncoils':  # read PF / CS coil currents
+                        nC = f.readnumber()
+                    else:
+                        data[variable] = f.readblock()
+                except ValueError:
+                    try:
+                        label = f.readline(split=False, string=True)
+                        if 'nottt available' in label:  # valiable not avalible
+                            continue
+                        else:  # not implemented
+                            raise NotImplementedError(
+                                f'read error for line: {label}')
+                    except:
+                        break
+            data.rename(columns={c: c.replace('(t)', '') 
+                         for c in data.columns}, inplace=True)
+            data.rename(columns={c: c.replace(',t)', ')') 
+                         for c in data.columns}, inplace=True)
+            
+            current = {c: f'I{c.replace("current", "").strip()}' 
+                       for c in data.columns if 'current' in c}
+            data.rename(columns=current, inplace=True)
+            kappa = {c: c.replace("Triangularity", "kappa").strip().replace(
+                '_Lower', 'L').replace('_Upper', 'U') 
+                       for c in data.columns if 'Triangularity' in c}
+            data.rename(columns=kappa, inplace=True)
+            elongation = {c: c.replace('Elongation', 'dell').strip() 
+                          for c in data.columns if 'Elongation' in c}
+            data.rename(columns=elongation, inplace=True)           
+            data.rename(columns={'Timebase': 't'}, inplace=True)
 
-                data[variable] = f.readblock()
-            f.skiplines(5, verbose=True)
-        
-            print(ncol, nt, data['t'])
-    
-    
+            print(data.columns)
+                
+
 class read_dina(read_waveform):
 
     date_switch = datetime.strptime('2016-02', '%Y-%m')
@@ -277,5 +311,6 @@ if __name__ == '__main__':
     corsica = read_corsica('corsica')
     corsica.read_file()
     
-    #dina = read_dina('operations')
+    dina = read_dina('operations')
+    dina.load
     #filename = dina.locate_file('data2.txt', folder=1)

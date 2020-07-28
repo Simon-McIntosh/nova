@@ -12,6 +12,7 @@ import matplotlib.colors as mc
 from sklearn.cluster import DBSCAN
 import shapely.geometry
 import shapely.affinity
+from shapely.strtree import STRtree
 from descartes import PolygonPatch
 from scipy.interpolate import interp1d
 
@@ -82,9 +83,6 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         BiotSavart.__init__(self)
         BiotAttributes.__init__(self)
         self.initialize_biot_instances()
-        # mutual interaction
-        #self.load_source(self.subcoil)  # link source
-        #self.load_target(self.subcoil)  # link target
         
     def initialize_biot_instances(self):
         for instance in self._biot_instances:
@@ -394,9 +392,8 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         mesh = {'mpc': mpc}  # multi-point constraint (link current)
         if 'part' in coil:
             mesh['part'] = coil['part']
-        if 'turn_section' in coil:
-            mesh['cross_section'] = kwargs.get('turn_section', 
-                                               coil['turn_section'])
+        mesh['cross_section'] = kwargs.get('cross_section',
+                                           coil['turn_section'])
         if 'turn_fraction' in coil and dCoil == -1:
             turn_fraction = kwargs.get('turn_fraction', coil['turn_fraction'])
         else:
@@ -436,23 +433,28 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         z_ = np.linspace(*bounds[1::2], nz+1)
         polygen = CoilFrame._get_polygen(cross_section)  # polygon generator
         polygon, xm_, zm_, cs_, dA_ = [], [], [], [], []
+        sub_polygons = [[] for __ in range(nx*nz)]
         for i in range(nx):  # radial divisions
             for j in range(nz):  # vertical divisions
-                sub_polygon = polygen(x_[i]+dx_/2, z_[j]+dz_/2, dl_, dt_)
-                p = coil_polygon.intersection(sub_polygon)
-                if isinstance(p, shapely.geometry.polygon.Polygon):
-                    p = [p]  # single polygon
-                for p_ in p:
-                    if isinstance(p_, shapely.geometry.polygon.Polygon):
-                        polygon.append(p_)
-                        print(p_)
-                        xm_.append(p_.centroid.x)
-                        zm_.append(p_.centroid.y)
-                        dA_.append(p_.area)
-                        if sub_polygon.within(coil_polygon):
-                            cs_.append(cross_section)  # maintain cs referance
-                        else:
-                            cs_.append('polygon')
+                sub_polygons[i*nz + j] = \
+                        polygen(x_[i]+dx_/2, z_[j]+dz_/2, dl_, dt_)
+        tree = STRtree(sub_polygons)
+        sub_polygons = [p for p in tree.query(coil_polygon) 
+                        if p.intersects(coil_polygon)]
+        for sub_polygon in sub_polygons:
+            p = coil_polygon.intersection(sub_polygon)
+            if isinstance(p, shapely.geometry.polygon.Polygon):
+                p = [p]  # single polygon
+            for p_ in p:
+                if isinstance(p_, shapely.geometry.polygon.Polygon):
+                    polygon.append(p_)
+                    xm_.append(p_.centroid.x)
+                    zm_.append(p_.centroid.y)
+                    dA_.append(p_.area)
+                    if sub_polygon.within(coil_polygon):
+                        cs_.append(cross_section)  # maintain cs referance
+                    else:
+                        cs_.append('polygon')
         Nf = len(xm_)  # filament number
         if Nf == 0:  # no points found within polygon (skin)
             xm_, zm_, dl_, dt_ = x, z, dl, dt
@@ -878,9 +880,10 @@ if __name__ == '__main__':
                 turn_section='circle', turn_fraction=0.7, dCoil=0.75,
                 plasma=True) 
     '''
-    cs.add_coil(1.75, 0.5, 2.5, 0.75, name='PF13', part='PF', Nt=1, It=5e5,
-                cross_section='skin', turn_fraction=0.7, dCoil=0.15,
+    cs.add_coil(1.75, 0.5, 2.5, 2.5, name='PF13', part='PF', Nt=1, It=5e5,
+                cross_section='circle', dCoil=0.15,
                 plasma=True) 
+    
     cs.add_coil(cs.coil.rms[0], 0.5, 0.1, 0.1, name='PF19', dCoil=-1,
                 Ic=0, Nt=1)
         
@@ -912,7 +915,7 @@ if __name__ == '__main__':
 
 
     cs.plot(label=True)
-    cs.grid.generate_grid(expand=0, n=4e3)
+    cs.grid.generate_grid(expand=0.1, n=4e3)
     #cs.grid.plot_grid()
     cs.grid.plot_flux()
     

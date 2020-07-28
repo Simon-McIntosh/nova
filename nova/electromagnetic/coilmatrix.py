@@ -56,10 +56,6 @@ class CoilMatrix:
 if __name__ == '__main__':
     cm = CoilMatrix()
     
-    '''
-
-    print(cm.subfield['x'])
-    '''
     
     
     

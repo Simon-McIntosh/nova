@@ -316,13 +316,21 @@ class CoilFrame(DataFrame, CoilData):
             else:
                 if delim:
                     label = name.split(delim)[0]
+                    try:
+                        index = name.split(delim)[1]
+                    except IndexError:
+                        index = ''
                 else:
                     label = name.rstrip(string.digits)  # trailing  number
+                    index = name.rstrip(string.ascii_letters)
                 try:  # build list taking starting index from name
-                    offset = int(re.sub(r'[a-zA-Z]', '', name))
+                    offset = int(re.sub(r'[a-zA-Z]', '', index))
                 except ValueError:
                     offset = 0
-            index = [f'{label}{delim}{i+offset:d}' for i in range(nCol)]
+            if nCol > 1:
+                index = [f'{label}{delim}{i+offset:d}' for i in range(nCol)]
+            else:
+                index = [name]
         self._check_index(index)
         return index
 

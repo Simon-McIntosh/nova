@@ -661,7 +661,7 @@ if __name__ == '__main__':
     #IOdata.compare()
     #IOdata.cc.plot(label=True, ax=plt.subplots(1, 1)[1])
     
-    ITER = ITERcoilset(coils='pf', dCoil=0.15, n=7.5e3, read_txt=False)
+    ITER = ITERcoilset(coils='pf', dCoil=0.15, n=5e3, read_txt=True)
     
     cc = ITER.cc
     cc.scenario_filename = -2

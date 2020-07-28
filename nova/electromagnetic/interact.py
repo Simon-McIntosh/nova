@@ -39,13 +39,15 @@ class Grid(BiotSavart, BiotAttributes):
     '''
     
     _biot_attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'expand',
-                        'nlevels', 'levels', 'x', 'z', 'dx', 'dz',
+                        'nlevels', 'levels', #'x', 'z', 'dx', 'dz',
                         'x2d', 'z2d']
     
     _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31}
     
     
     def __init__(self, subcoil, **grid_attributes):
+        
+        
         BiotSavart.__init__(self)
         BiotAttributes.__init__(self, **grid_attributes)
         self.load_source(subcoil)  # link source coilset
@@ -59,7 +61,7 @@ class Grid(BiotSavart, BiotAttributes):
         if self.n > 0:
             mg = MeshGrid(self.n, self._limit)  # set mesh
             self.n2d = [mg.nx, mg.nz]
-            self.x, self.z = mg.x, mg.z
+            #self.x, self.z = mg.x, mg.z
             self.dx = np.diff(self._limit[:2])[0] / (mg.nx - 1)
             self.dz = np.diff(self._limit[2:])[0] / (mg.nz - 1)
             self.x2d = mg.x2d
@@ -163,12 +165,14 @@ class Interaction:
         force['zFz'] (np.array): first vertical moment of vertical force
         force['My'] (np.array):  in-plane torque}
     '''
+    
     @staticmethod        
     def _initialize_force():
         return {'Fx': np.array([]), 'Fz': np.array([]),
                 'xFx': np.array([]), 'xFz': np.array([]),
                 'zFx': np.array([]), 'zFz': np.array([]),
                 'My': np.array([])}
+    
     '''
     def extend_frame(self, frame, index, columns):
         index = [idx for idx in index if idx not in frame.index]
@@ -227,8 +231,6 @@ class SimulationData:
                            'Bx': DataFrame(), 
                            'Bz': DataFrame()}
         return interaction
-        
-
 
     @staticmethod
     def _initialize_target(target=None):
@@ -304,7 +306,7 @@ class SimulationData:
         return update
 
 
-if __name__ is '__main__':
+if __name__ == '__main__':
     
     #data = SimulationData()
     #data.generate_grid()

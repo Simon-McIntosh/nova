@@ -1,10 +1,10 @@
 import numpy as np
 from pandas.api.types import is_list_like
 from pandas import Series
-from scipy.special import ellipk, ellipe
 
 from nova.electromagnetic.coilframe import CoilFrame
 from nova.electromagnetic.coilmatrix import CoilMatrix
+from nova.electromagnetic.biotelements import Points, BiotPoints
 from amigo.pyplot import plt
 
 
@@ -112,132 +112,13 @@ class BiotAttributes:
             elif not hasattr(self, attribute):
                 setattr(self, attribute, default)  # set default
                 
-
-class Vectors:
-    
-    mu_o = 4e-7*np.pi  # magnetic constant [Vs/Am]
-    
-    def __init__(self, rms=False, **kwargs):
-        self.initialize_delta()
-        self.rms = rms
-        
-    def initialize_delta(self):
-        self.delta = {f'd{var}': 0 for var in ['r', 'rs', 'z', 'zs']}
-          
-    @property
-    def points(self):
-        return self._points
-    
-    @points.setter
-    def points(self, points):
-        self.nP = len(points)  # interaction number
-        self._points = points  # store point subset 
-        self.position()  # initialize source and target points
-        
-    def position(self, **kwargs):
-        '(re)position source filaments and target points [dr, drs, dz, dzs]'
-        self.rms = kwargs.pop('rms', self.rms)  # update rms flag
-        for dvar in self.delta:
-            delta = kwargs.pop(dvar, self.delta[dvar])
-            var = pvar = dvar[1:]
-            if not hasattr(self, var) or not \
-                    np.isclose(delta, self.delta[dvar]).all():
-                self.delta[dvar] = delta
-                if var == 'rs' and self.rms:
-                    pvar += '_rms'
-                setattr(self, var, self.points[pvar] + self.delta[dvar])
-                self.update_flag = True
-        
-    def update(self):
-        if self.update_flag:
-            self.gamma = self.zs - self.z
-            self.a2 = self.gamma**2 + (self.r + self.rs)**2
-            self.a = np.sqrt(self.a2)
-            self.k2 = 4 * self.r * self.rs / self.a2  # modulus
-            self.ck2 = 1 - self.k2  # complementary modulus
-            self.K = ellipk(self.k2)  # first complete elliptic integral
-            self.E = ellipe(self.k2)  # second complete elliptic integral 
-            self.update_flag = False
-        
-
-class Filament(Vectors):
-    
-    'complete circular filaments'
-    
-    _cross_section_factor = {'circle': np.exp(-0.25),  # circle-circle
-                             'square': 2*0.447049,  # square-square
-                             'skin': 1}  # skin-skin
-    
-    _cross_section_lookup = {
-        0: 'square', 1: 'square', 5: 'square', 6: 'square',
-        2: 'circle', 3: 'circle', 4: 'skin'}
-    
-    def __init__(self, rms=True):
-        Vectors.__init__(self, rms=rms)
-
-    def offset(self):
-        'offset source and target points '
-        self.dL = np.array([self.r-self.rs, self.z-self.zs])
-        self.dL_mag = np.linalg.norm(self.dL, axis=0)
-        self.dL_norm = np.zeros((2, self.nP))
-        self.index = np.isclose(self.dL_mag, 0)  # self index
-        self.dL_norm[0, self.index] = 1  # radial offset
-        self.dL_norm[:, ~self.index] = \
-            self.dL[:, ~self.index] / self.dL_mag[~self.index]
-        idx = self.dL_mag < self.points['dr'] # seperation < L2 norm radius
-        ro = self.points['dr'] * np.array(
-            [self._cross_section_factor[self._cross_section_lookup[csID]] 
-             for csID in self.points['csID']])
-        factor = (1 - self.dL_mag[idx] / self.points['dr'][idx]) / 2
-        deltas = {}
-        for i, var in enumerate(['r', 'z']):
-            offset = np.zeros(self.nP)
-            offset[idx] = factor * ro[idx] * self.dL_norm[i][idx]
-            deltas.update({f'd{var}': offset, f'd{var}s': -offset})
-        self.position(**deltas)
-        
-    def flux(self):
-        'vector and scalar potential'
-        self.update()  # update coefficents
-        Aphi = 1 / (2*np.pi) * self.a/self.r * \
-            ((1 - self.k2/2) * self.K - self.E)  # 
-        psi = 2 * np.pi * self.mu_o * self.r * Aphi  # scalar potential
-        return psi  # unit filaments, Wb/Amp-turn-turn
-    
-    
-class BiotArray():
-    
-    _cross_section_ID = {'square': 0, 'rectangle': 1, 
-                         'circle': 2, 'ellipse': 3, 'skin': 4,
-                         'shell': 5, 'polygon': 6}
-    
-    _points_dtype = [('rs', float),  # source radius (centroid)
-                     ('rs_rms', float),  # source radius (rms)
-                     ('r', float),  # target radius
-                     ('zs', float),  # source height
-                     ('z', float),  # target height
-                     ('Ns', float),  # source turn number
-                     ('N', float),  # target turn number
-                     ('dL', float),  # source-target seperation
-                     ('dl', float),  # primary shape delta 
-                     ('dt', float),  # secondary shape delta 
-                     ('dx', float),  # radial bounding box delta 
-                     ('dz', float),  # vertical bounding box delta
-                     ('dr', float),  # maximum filament dimension
-                     ('csID', int)]  # cross section ID
+                
+class BiotArray(Points):
     
     def __init__(self, source=None):
-        self.initialize_methods()
         if source is not None:
             self.load_source(source)
             
-    def initialize_methods(self):
-        
-        # far-field
-        self.methods = {'filament': Filament(rms=True)}  # complete circular arc
-        
-
-        
     def load_source(self, *args, **kwargs):
         self.source = BiotFrame.load(*args, **kwargs)
         
@@ -247,45 +128,39 @@ class BiotArray():
             self.n2d = self.target.n2d  # target grid shape
         else:
             self.n2d = self.target.nC
-            
+                        
     def assemble_source(self):
+        'load source filaments into points structured array'
         for label, column in zip(
                 ['rs', 'rs_rms', 'zs', 'Ns', 'dl', 'dt', 'dx', 'dz'],
                 ['x', 'rms', 'z', 'Nt', 'dl', 'dt', 'dx', 'dz']):
             self.points[label] = np.dot(
                     np.ones((self.nT, 1)), 
                     getattr(self.source, column).reshape(1, -1)).flatten()
-        # cross-section ID
-        csID = np.array([self._cross_section_ID[cs] 
-                        for cs in self.source.cross_section])
-        self.points['csID'] = np.dot(np.ones((self.nT, 1)), 
-                                     csID.reshape(1, -1)).flatten()
+        csID = np.array([self._source_cross_section.index(cs)  # cross-section 
+                         for cs in self.source.cross_section])
+        csID = np.dot(np.ones((self.nT, 1)), csID.reshape(1, -1)).flatten()
+        for i, cs in enumerate(self._source_cross_section):
+            self.points['cs'][csID == i] = cs
         self.points['dr'] = np.linalg.norm(
             [self.points['dx'], self.points['dz']], axis=0) / 2
 
     def assemble_target(self):
+        'load target points into points structured array'
         for label, column in zip(['r', 'z', 'N'], ['x', 'z', 'Nt']):
             self.points[label] = np.dot(
                     getattr(self.target, column).reshape(-1, 1), 
                     np.ones((1, self.nS))).flatten()
 
     def assemble(self):
-        'assemble interaction strucutred array'
+        'assemble interaction'
         self.nS = self.source.nC  # source filament number
         self.nT = self.target.nC  # target point number
         self.nI = self.nS*self.nT  # total number of interactions
-        self.points = np.zeros(self.nI, dtype=self._points_dtype)
+        self.initialize_point_array(self.nI)
         self.assemble_source()
         self.assemble_target()
-        self.points['dL'] = np.linalg.norm(
-                np.array([self.points['rs'] - self.points['r'],
-                          self.points['zs'] - self.points['z']]), 
-                         axis=0)
-        
-        print(np.unique(self.points['csID']))
-        # calculate filament interaction
-        self.filament.points = self.points
-        self.filament.offset()
+        self.set_biot_instance()
         
     def plot(self, ax=None):
         if ax is None:
@@ -297,52 +172,29 @@ class BiotArray():
         plt.legend()
     
         
-class BiotSavart(CoilMatrix, BiotArray):
+class BiotSavart(CoilMatrix, BiotArray, BiotPoints):
     
     _biotsavart_attributes = {}  
     
-    def __init__(self, source=None):
+    def __init__(self, source=None, ndr=3):
         CoilMatrix.__init__(self)
         BiotArray.__init__(self, source)
-
+        BiotPoints.__init__(self, ndr=ndr)
+        
     def flux_matrix(self, ndr=0):
         'calculate filament flux (inductance) matrix'
-        '''
-        xt, zt, xs, zs = self.locate()
-        m = 4 * xt * xs / ((xt + xs)**2 + (zt - zs)**2)
-        flux = np.array((xt * xs)**0.5 * ((2 * m**-0.5 - m**0.5) *
-                        ellipk(m) - 2 * m**-0.5 * ellipe(m)))
-        flux *= self.mu_o  # unit filaments, Wb/Amp-turn-turn
-        '''
-        #flux = np.zeros(self.nI)  # initalize vector
-        
-        #index = self.points['dL'] > ndr/2 * self.points['dr']
-        #self.filament = Filament(self.points[index], rms=True)
-        
-        #self.filament.position(dr=1.5, dz=-0.5)
-        #self.filament.update()
-        
-        flux = self.filament.flux()
-        
-        flux = flux.reshape(self.nT, self.nS)  # source-target reshape (matrix)
+        flux = self.calculate('flux')
         self.flux , self._flux, self._flux_ = self.save_matrix(flux)
         
     def field_matrix(self):
         'calculate subcoil field matrix'
-        xt, zt, xs, zs, = self.locate()
-        a = np.sqrt((xt + xs)**2 + (zt - zs)**2)
-        m = 4 * xt * xs / a**2
-        I1 = 4 / a * ellipk(m)
-        I2 = 4 / a**3 * ellipe(m) / (1 - m)
-        A = (zt - zs)**2 + xt**2 + xs**2
-        B = -2 * xt * xs
         field = {}
-        field['x'] = xs / 2 * (zt - zs) / B * (I1 - A * I2)
-        field['z'] = xs / 2 * ((xs + xt * A / B) * I2 - xt / B * I1)
+        field['x'] = self.calculate('radial_field')
+        field['z'] = self.calculate('vertical_field')
         for xz in field:  # save field matricies
             self.field[xz], self._field[xz], self._field_[xz] = \
-                self.save_matrix(self.mu_o / (2 * np.pi) * field[xz])  # T / Amp-turn-turn
-    
+                self.save_matrix(field[xz])  # T / Amp-turn-turn
+
     def solve_interaction(self):
         self.assemble()  # assemble geometory matrices
         self.flux_matrix()  # assemble flux interaction matrix

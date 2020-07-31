@@ -24,7 +24,7 @@ from amigo.IO import pythonIO
 from amigo.geom import length, xzfun
 import nova
 from nova.electromagnetic.coilframe import CoilFrame
-from nova.electromagnetic.interact import Mutual, Grid
+from nova.electromagnetic.biotmethods import Mutual, Grid, Target
 from nova.electromagnetic.biotsavart import BiotSavart, BiotAttributes
 
 
@@ -49,7 +49,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
     _coilset_frames = ['coil', 'subcoil']
     
     # exchange biot instances
-    _biot_instances = ['mutual', 'plasma', 'grid']  
+    _biot_instances = ['mutual', 'plasma', 'grid', 'target']  
 
     # additional_columns
     _coil_columns = ['dA', 'dCoil', 'nx', 'nz', 'subindex', 'part',
@@ -86,7 +86,12 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         
     def initialize_biot_instances(self):
         for instance in self._biot_instances:
-            biot_class = Mutual if instance == 'mutual' else Grid
+            if instance == 'mutual':
+                biot_class = Mutual
+            elif instance == 'target':
+                biot_class = Target
+            else:
+                biot_class = Grid
             setattr(self, instance, biot_class(self.subcoil))   
             
     @property
@@ -186,7 +191,6 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
     def subset(self, index, invert=False):
         if not isinstance(index, Index):
             index = self.coil.index[index]
-            print(index)
         if not is_list_like(index):
             index = [index]
         if invert:
@@ -881,11 +885,11 @@ if __name__ == '__main__':
                 plasma=True) 
     '''
     cs.add_coil(1.75, 0.5, 2.5, 2.5, name='PF13', part='PF', Nt=1, It=5e5,
-                cross_section='circle', dCoil=0.15,
+                cross_section='circle', dCoil=0.55,
                 plasma=True) 
     
-    cs.add_coil(cs.coil.rms[0], 0.5, 0.1, 0.1, name='PF19', dCoil=-1,
-                Ic=0, Nt=1)
+    #cs.add_coil(cs.coil.rms[0], 0.5, 0.1, 0.1, name='PF19', dCoil=-1,
+    #            Ic=0, Nt=1)
         
     '''
     cs.add_coil([2, 2], [1, 0], 0.5, 0.3,
@@ -904,8 +908,6 @@ if __name__ == '__main__':
     #cs.add_shell([4, 6, 7, 9, 9.5, 6], [1, 1, 2, 1.5, -1, -1.5], 0.1, 
     #             dShell=1, dCoil=-1, name='vvin')
     
-    
-    
     cs.current_update = 'coil'
     cs.It = 0
     cs.Ip = -2000
@@ -913,23 +915,25 @@ if __name__ == '__main__':
     #cs.Ic = 34
     #cs.coil.Nt = 1
 
-
     cs.plot(label=True)
-    cs.grid.generate_grid(expand=0.1, n=4e3)
-    #cs.grid.plot_grid()
+    cs.grid.generate_grid(expand=0.1, n=1e3)
     cs.grid.plot_flux()
     
+    cs.target.add_targets([[1,2,3],[1,2,3]])
+    cs.target.plot()
+    cs.target.solve_interaction()
+    
+    '''
     cs.It = -2000
     cs.Ip = 0
     
     cs.grid.plot_flux(color='C3')
     #cs.solve_interaction()
-    '''
+    
     
     
     _cs = CoilSet()
     
-
     import pickle
     cs_p = pickle.dumps(cs.coilset)
     __cs = pickle.loads(cs_p)

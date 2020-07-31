@@ -22,7 +22,7 @@ from amigo.geom import poly_inloop
 from amigo.pyplot import plt
 from amigo.pyplot import cntr
 import nep_data
-from nova.electromagnetic import geqdsk
+from nova.electromagnetic.IO import geqdsk
 #from nova.electromagnetic.elliptic import EQ
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.coilgeom import ITERcoilset

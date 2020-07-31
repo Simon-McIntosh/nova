@@ -3,6 +3,43 @@
 Created on Mon Jun 29 10:27:36 2020
 """
 
+    
+class SimulationData:
+    '''
+    container for simulation data
+    
+        target (dict): poloidal target coordinates and data
+            target['targets'] (DataFrame):  target xz-coordinates
+            target['Psi'] (DataFrame): poloidal flux
+            target['Bx'] (DataFrame): radial field
+            target['Bz'] (DataFrame): vertical field
+            target['update'] (bool): update flag
+
+        interaction (dict): coil grid / target interaction matrices (DataFrame)
+            interaction['Psi']: poloidal flux interaction matrix
+            interaction['Bx']: radial field interaction matrix
+            interaction['Bz']: vertical field interaction matrix
+    '''
+    
+    # main class attributes
+    _simulation_attributes = ['target', 'grid', 'interaction']
+
+    def __init__(self, target=None, grid=None, interaction=None, **kwargs):
+        self._attributes += self._simulation_attributes
+        self.target = self._initialize_target(target)
+        self.grid = self._initialize_grid(grid, **kwargs)
+        self.interaction = self._initialize_interaction(interaction)
+        
+    @staticmethod        
+    def _initialize_interaction(interaction=None):
+        if interaction is None:
+            interaction = {'Psi': DataFrame(),
+                           'Bx': DataFrame(), 
+                           'Bz': DataFrame()}
+        return interaction
+
+
+
 class Rectangle(Vectors):
     
     def __init__(self, points):

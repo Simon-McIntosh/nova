@@ -640,7 +640,7 @@ class scenario_data(read_dina, interpolate, operate):
     def read_file(self, folder, additional_columns=[]):
         try:
             scn = read_scenario(folder, self.database_folder, read_txt=False)
-        except AttributeError:
+        except (AttributeError, ValueError):
             scn = read_scenario(folder, self.database_folder, read_txt=True)
         self.interpolate(scn.data2, additional_columns)
         operate.__init__(self)  # re-initalise operation instance

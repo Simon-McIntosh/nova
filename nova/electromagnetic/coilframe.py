@@ -327,7 +327,7 @@ class CoilFrame(DataFrame, CoilData):
                     offset = int(re.sub(r'[a-zA-Z]', '', index))
                 except ValueError:
                     offset = 0
-            if nCol > 1:
+            if nCol > 1 or name is None:
                 index = [f'{label}{delim}{i+offset:d}' for i in range(nCol)]
             else:
                 index = [name]

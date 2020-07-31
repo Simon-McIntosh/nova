@@ -164,16 +164,23 @@ class MachineData(CoilSet):
             self.data['upperCTS'] = self.read_sheet(
                     'Cryostat & CST', 8, np.arange(12, 17))
   
-    def plot_data(self):
-        ax = plt.subplots(1, 1)[1]
-        for key in self.data:
+    def plot_data(self, keys=None, ax=None, legend=False):
+        if ax is None:
+            ax = plt.gca()
+        if keys is not None:
+            if not pd.api.types.is_list_like(keys):
+                keys = [keys]
+        else:
+            keys = self.data.keys()
+        for key in keys:
             try:
                 ax.plot(self.data[key]['x'], self.data[key]['z'], label=key)
             except KeyError:
                 raise KeyError(key, self.data[key].columns)
-            plt.axis('equal')
-            plt.axis('off')
-            plt.legend()
+        ax.axis('equal')
+        ax.axis('off')
+        if legend:
+            ax.legend()
             
     def load_coilset(self, **kwargs):
         read_txt = kwargs.get('read_txt', self.read_txt)

@@ -26,10 +26,10 @@ class CoilMatrix:
                               '_field', '_field_', 'field']
 
     def __init__(self):
-        self._initialilze_coilmatrix_attributes()
+        self._initialize_coilmatrix_attributes()
         #self.coilmatrix = coilmatrix_attributes  # exchange attributes
              
-    def _initialilze_coilmatrix_attributes(self):
+    def _initialize_coilmatrix_attributes(self):
         for attribute in self._coilmatrix_attributes:  
             if 'flux' in attribute:
                 setattr(self, f'{attribute}', np.array([]))

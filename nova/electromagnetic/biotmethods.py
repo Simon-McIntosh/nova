@@ -39,15 +39,12 @@ class Grid(BiotSavart, BiotAttributes):
     '''
     
     _biot_attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'expand',
-                        'nlevels', 'levels', #'x', 'z', 'dx', 'dz',
-                        'x2d', 'z2d']
+                        'nlevels', 'levels', 'x2d', 'z2d']
     
     _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31}
     
     
     def __init__(self, subcoil, **grid_attributes):
-        
-        
         BiotSavart.__init__(self)
         BiotAttributes.__init__(self, **grid_attributes)
         self.load_source(subcoil)  # link source coilset
@@ -147,7 +144,113 @@ class Grid(BiotSavart, BiotAttributes):
         if self.n > 0:
             plt.quiver(self.x2d, self.z2d, self.Bx, self.Bz)
     
+
+class Target(BiotSavart, BiotAttributes):
     
+    ''' 
+    traget interaction methods and data
+    
+    Key Attributes:
+        targets (DataFrame): grid dimension
+        update (bool): update interaction matricies
+        
+    Derived Attributes:
+        Psi (np.array):  poloidal flux
+        Bx (np.array): radial field
+        Bz (np.array): vertical field
+    '''
+    
+    _biot_attributes = ['targets', 'update']
+    
+    _default_biot_attributes = {}
+    
+    def __init__(self, subcoil, **target_attributes):
+        BiotSavart.__init__(self)
+        BiotAttributes.__init__(self, **target_attributes)
+        self._initialize_target()
+        self.load_source(subcoil)  # link source coilset
+        
+    def _initialize_target(self, target=None):
+        if target is None:  # initalize
+            self.targets = DataFrame(columns=['x', 'z', 'update'])
+            self.update = False
+        return target
+
+    def clear_target_data(self):
+        for variable in ['Psi', 'Bx', 'Bz']:
+            self.target[variable] = DataFrame()
+        
+    def add_targets(self, targets=None, **kwargs):
+        '''
+        Kwargs:
+            targets (): target coordinates
+                (dict, DataFrame() or list like):
+                    x (np.array): x-coordinates
+                    z (np.array): z-coordinates
+                    update (np.array): update flag
+            append (bool): create new list | append
+            update (bool): update interaction matricies
+            drop_duplicates (bool): drop duplicates
+        '''
+        update = kwargs.get('update', False)  # update all
+        if targets is not None:
+            append = kwargs.get('append', True)
+            drop_duplicates = kwargs.get('drop_duplicates', True)
+            if not isinstance(targets, DataFrame):
+                if is_dict_like(targets):
+                    targets = DataFrame(targets)
+                elif is_list_like(targets):
+                    x, z = targets
+                    if not is_list_like(x):
+                        x = [x]
+                    if not is_list_like(z):
+                        z = [z]
+                    targets = DataFrame({'x': x, 'z': z})
+                if append:
+                    io = self.targets.shape[0]
+                else:
+                    io = 0
+                targets['index'] = [f'P{i+io}'
+                                    for i in range(targets.shape[0])]
+                targets.set_index('index', inplace=True)
+                targets = targets.astype('float')
+            if not targets.empty:
+                if self.targets.equals(targets):  # duplicate set
+                    self.targets['update'] = False
+                else:
+                    targets['update'] = True
+                    if append:
+                        self.targets = concat((self.targets, targets))
+                        if drop_duplicates:
+                            self.targets.drop_duplicates(
+                                    subset=['x', 'z'], inplace=True)
+                    else:  # overwrite
+                        self.targets = targets
+            if update:  # update all
+                self.targets['update'] = True
+            else:
+                update = self.targets['update'].any()
+        else:
+            if update:  # update all
+                self.targets['update'] = True
+            else:
+                update = self.update 
+        self.update = update
+        return update
+    
+    def plot(self, ax=None, **kwargs):
+        if ax is None:
+            ax = plt.gca() 
+        ls = kwargs.pop('ls', 'o')
+        color = kwargs.pop('color', 'C3')
+        ax.plot(self.targets['x'], self.targets['z'],
+                ls, color=color, **kwargs)
+        
+    def solve_interaction(self):
+        self.load_target(x=self.targets['x'], z=self.targets['z'])
+        BiotSavart.solve_interaction(self)   
+
+        
 class Interaction:
     
     '''
@@ -196,114 +299,6 @@ class Interaction:
                 frame = self.extend_frame(frame, index, columns)
             setattr(self, attribute, frame)
     '''
-                
-    
-class SimulationData:
-    '''
-    container for simulation data
-    
-        target (dict): poloidal target coordinates and data
-            target['targets'] (DataFrame):  target xz-coordinates
-            target['Psi'] (DataFrame): poloidal flux
-            target['Bx'] (DataFrame): radial field
-            target['Bz'] (DataFrame): vertical field
-            target['update'] (bool): update flag
-
-        interaction (dict): coil grid / target interaction matrices (DataFrame)
-            interaction['Psi']: poloidal flux interaction matrix
-            interaction['Bx']: radial field interaction matrix
-            interaction['Bz']: vertical field interaction matrix
-    '''
-    
-    # main class attributes
-    _simulation_attributes = ['target', 'grid', 'interaction']
-
-    def __init__(self, target=None, grid=None, interaction=None, **kwargs):
-        self._attributes += self._simulation_attributes
-        self.target = self._initialize_target(target)
-        self.grid = self._initialize_grid(grid, **kwargs)
-        self.interaction = self._initialize_interaction(interaction)
-        
-    @staticmethod        
-    def _initialize_interaction(interaction=None):
-        if interaction is None:
-            interaction = {'Psi': DataFrame(),
-                           'Bx': DataFrame(), 
-                           'Bz': DataFrame()}
-        return interaction
-
-    @staticmethod
-    def _initialize_target(target=None):
-        if target is None:  # initalize
-            target = {'targets': DataFrame(columns=['x', 'z', 'update']),
-                      'Psi': DataFrame(),  # poloidal flux
-                      'Bx': DataFrame(),  # radial field
-                      'Bz': DataFrame(),  # vertical field
-                      'update': False}
-        return target
-
-    def clear_target_data(self):
-        for variable in ['Psi', 'Bx', 'Bz']:
-            self.target[variable] = DataFrame()
-        
-    def add_targets(self, targets=None, **kwargs):
-        '''
-        Kwargs:
-            targets (): target coordinates
-                (dict, DataFrame() or list like):
-                    x (np.array): x-coordinates
-                    z (np.array): z-coordinates
-                    update (np.array): update flag
-            append (bool): create new list | append
-            update (bool): update interaction matricies
-            drop_duplicates (bool): drop duplicates
-        '''
-        update = kwargs.get('update', False)  # update all
-        if targets is not None:
-            append = kwargs.get('append', True)
-            drop_duplicates = kwargs.get('drop_duplicates', True)
-            if not isinstance(targets, DataFrame):
-                if is_dict_like(targets):
-                    targets = DataFrame(targets)
-                elif is_list_like(targets):
-                    x, z = targets
-                    if not is_list_like(x):
-                        x = [x]
-                    if not is_list_like(z):
-                        z = [z]
-                    targets = DataFrame({'x': x, 'z': z})
-                if append:
-                    io = self.target['targets'].shape[0]
-                else:
-                    io = 0
-                targets['index'] = [f'P{i+io}'
-                                    for i in range(targets.shape[0])]
-                targets.set_index('index', inplace=True)
-                targets = targets.astype('float')
-            if not targets.empty:
-                if self.target['targets'].equals(targets):  # duplicate set
-                    self.target['targets']['update'] = False
-                else:
-                    targets['update'] = True
-                    if append:
-                        self.target['targets'] = concat(
-                                (self.target['targets'], targets))
-                        if drop_duplicates:
-                            self.target['targets'].drop_duplicates(
-                                    subset=['x', 'z'], inplace=True)
-                    else:  # overwrite
-                        self.target['targets'] = targets
-            if update:  # update all
-                self.target['targets']['update'] = True
-            else:
-                update = self.target['targets']['update'].any()
-        else:
-            if update:  # update all
-                self.target['targets']['update'] = True
-            else:
-                update = self.target['update'] 
-        self.target['update'] = update
-        return update
 
 
 if __name__ == '__main__':

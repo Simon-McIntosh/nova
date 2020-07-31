@@ -32,6 +32,7 @@ class ITERcoilset(pythonIO):
     def load_coilset(self, **kwargs):
         read_txt = kwargs.pop('read_txt', self.read_txt)
         self.n = kwargs.pop('n', 1e4)  # grid dimension for psi plot
+        self.limit = kwargs.pop('limit', None)
         self.filename, coils, kwargs = self.select_coils(**kwargs)
         self.path = os.path.join(class_dir(nep_data.geom) + '/')
         self.filepath = os.path.join(self.path, self.filename)
@@ -41,12 +42,13 @@ class ITERcoilset(pythonIO):
         else:
             self.load_pickle(self.filepath)
             self.cc.append_coilset(self._coilset)
-        '''
-        regenerate_grid = self.cc.grid.generate_grid(n=self.n)
+  
+        regenerate_grid = self.cc.grid.generate_grid(
+            n=self.n, limit=self.limit)
         if regenerate_grid:  # save on-demand update
             print('re-generating grid')
             self.save_coilset()
-        '''
+
 
     def select_coils(self, **kwargs):
         coils = kwargs.pop('coils', ['pf', 'vsj', 'vv'])  # default set
@@ -661,7 +663,8 @@ if __name__ == '__main__':
     #IOdata.compare()
     #IOdata.cc.plot(label=True, ax=plt.subplots(1, 1)[1])
     
-    ITER = ITERcoilset(coils='pf', dCoil=0.15, n=5e3, read_txt=True)
+    ITER = ITERcoilset(coils='pf', dCoil=0.2, n=2e3, limit=[4, 8.5, -3, 3],#limit=[2.3, 8.5, -4, 4],
+                       read_txt=False)
     
     cc = ITER.cc
     cc.scenario_filename = -2
@@ -669,7 +672,7 @@ if __name__ == '__main__':
     #cs.add_coil(6, -3, 1.5, 1.5, name='PF16', part='PF', Nt=600, It=5e5,
     #            turn_section='circle', turn_fraction=0.7, dCoil=0.75)
     cc.scenario = 'IM'
-    cc.scenario = 'SOP'
+    #cc.scenario = 'SOP'
     
     
     
@@ -678,9 +681,11 @@ if __name__ == '__main__':
     
     plt.set_aspect(1.2)
     cc.plot(label=['PF', 'CS'])
-    #cs.Ic = 2.5e4
     
-    cc.grid.plot_flux()
+    #cc.grid.plot_flux()
+    
+    #cc.grid.plot_field()
+    
     '''
     from nova.streamfunction import SF
     

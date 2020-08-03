@@ -1,39 +1,69 @@
-from amigo.pyplot import plt
+import numpy as np
 
+from amigo.pyplot import plt
 from nova.design.inverse import Inverse
 from nova.electromagnetic.coilgeom import ITERcoilset
 from nova.electromagnetic.machinedata import MachineData
 
 
-premag = Inverse()
-premag.load_coilset('ITER')
+pmag = Inverse()
 
-'''
-ITER = ITERcoilset(coils='pf', dCoil=0.2, n=2e3, limit=[4, 8.5, -3, 3],
-                   read_txt=False)
+"""
+#pmag.load_coilset('ITER')
+
+
+ITER = ITERcoilset(coils='pf', dCoil=0.2, n=2e3, limit=[3.5, 9, -5, 5],
+                   read_txt=True)
 cc = ITER.cc
 cc.scenario_filename = -2
 cc.scenario = 'IM'
 cc.save_coilset('ITER')
-'''
 
-#premag.Ic = {'PF6': 0}
+
+
+r, xo, zo = 1.2, 5.4, 0
+x, z = np.array([[r*np.cos(t), r*np.sin(t)]
+                  for t in np.linspace(0, 2*np.pi, 20, endpoint=False)]).T
+
+pmag.add_fix(xo+x, zo+z, 0, 'psi', 1, 2)
+pmag.add_fix(xo, zo, 0, 'psi', 1, 2)
+
+#pmag.Ic = {'PF6': 0}
+
+pmag.colocate.solve_interaction()
+pmag.save_coilset('ITER')
+"""
+
+
+
+"""
+pmag.fix.value = pmag.colocate.Psi
+
+pmag.fix_flux(4)
 
 plt.set_aspect(1.1)
-premag.plot(subcoil=False)
+pmag.colocate.plot()
 
-#premag.grid.generate_grid(limit=[3.5, 9, -5, 5])
-#premag.save_coilset('ITER')
-#premag.grid.plot_flux()
+pmag.plot(subcoil=False)
+
+pmag.grid.plot_flux()
+
+'''
+pmag.grid.generate_grid(limit=[3.5, 9, -5, 5])
+pmag.save_coilset('ITER')
+pmag.grid.plot_flux()
+'''
+
 
 machine = MachineData()
 machine.load_data()
 machine.plot_data(['firstwall', 'divertor'], color='k')
     
-premag.label_gaps()
+pmag.label_gaps()
 
 #machine.load_models()
 #machine.plot_models()
     
 #machine.load_coilset()
 #machine.plot()
+"""

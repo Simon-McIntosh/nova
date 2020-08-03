@@ -24,11 +24,11 @@ from amigo.IO import pythonIO
 from amigo.geom import length, xzfun
 import nova
 from nova.electromagnetic.coilframe import CoilFrame
-from nova.electromagnetic.biotmethods import Mutual, Grid, Target
+from nova.electromagnetic.biotmethods import Mutual, Grid, Target, BiotMethods
 from nova.electromagnetic.biotsavart import BiotSavart, BiotAttributes
 
 
-class CoilSet(pythonIO, BiotSavart, BiotAttributes):
+class CoilSet(pythonIO, BiotSavart, BiotAttributes, BiotMethods):
 
     '''
     CoilSet:
@@ -49,7 +49,11 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
     _coilset_frames = ['coil', 'subcoil']
     
     # exchange biot instances
-    _biot_instances = ['mutual', 'plasma', 'grid', 'target']  
+    _biot_instances = {'mutual': 'mutual',
+                       'plasma': 'grid',
+                       #'grid': 'grid'}
+                       'target': 'target'}
+                       #'colocate': 'target'} 
 
     # additional_columns
     _coil_columns = ['dA', 'dCoil', 'nx', 'nz', 'subindex', 'part',
@@ -86,14 +90,8 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         
     def initialize_biot_instances(self):
         for instance in self._biot_instances:
-            if instance == 'mutual':
-                biot_class = Mutual
-            elif instance == 'target':
-                biot_class = Target
-            else:
-                biot_class = Grid
-            setattr(self, instance, biot_class(self.subcoil))   
-            
+            self.initialize_biot_method(instance)
+
     @property
     def coilset(self):
         coilset_attributes = {attribute: getattr(self, attribute)
@@ -111,6 +109,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
             setattr(self, attribute, coilset.get(attribute, coilset))
         for instance in self._biot_instances:
             instance_attribute = '_'.join([instance, 'biot_attributes'])
+            print('setting', instance)
             setattr(getattr(self, instance), 'biot_attributes',
                     coilset.get(instance_attribute, coilset))
 

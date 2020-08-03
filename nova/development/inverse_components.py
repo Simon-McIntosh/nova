@@ -1,5 +1,70 @@
 
 
+    def fix_boundary_psi(self, npoint=21, alpha=0.995, factor=1):
+        x, z, Bdir = self.get_boundary(npoint=npoint, alpha=alpha)
+        psi = self.get_psi(alpha) * np.ones(npoint)
+        # psi -= self.sf.Xpsi  # normalise
+        self.add_fix(x, z, psi, Bdir, ['psi_bndry'], [factor])
+
+    def fix_boundary_field(self, npoint=21, alpha=0.995, factor=1):
+        x, z, Bdir = self.get_boundary(npoint=npoint, alpha=alpha)
+        self.add_fix(x, z, [0.0], Bdir, ['Bdir'], [factor])
+
+    def fix_null(self, factor=1, **kwargs):
+        x, z = self.get_point(**kwargs)
+        self.add_fix([x], [z], [0.0], np.array(
+            [[1.0], [0.0]]).T, ['Bx'], [factor])
+        self.add_fix([x], [z], [0.0], np.array(
+            [[0.0], [1.0]]).T, ['Bz'], [factor])
+        psi = self.sf.Ppoint((x, z))
+        # psi -= self.sf.Xpsi  # normalise
+        self.add_psi(psi, factor=factor, label='psi_x', **kwargs)
+
+    def add_Bxo(self, factor=1, **kwargs):
+        x, z = self.get_point(**kwargs)
+        self.add_fix([x], [z], [0.0], np.array(
+            [[1.0], [0.0]]).T, ['Bx'], [factor])
+
+    def add_Bzo(self, factor=1, **kwargs):
+        x, z = self.get_point(**kwargs)
+        self.add_fix([x], [z], [0.0], np.array(
+            [[0.0], [1.0]]).T, ['Bz'], [factor])
+
+    def add_B(self, B, Bdir, factor=1, zero_norm=False, **kwargs):
+        x, z = self.get_point(**kwargs)
+        if len(Bdir) == 1:  # normal angle from horizontal in degrees
+            arg = Bdir[0]
+            Bdir = [-np.sin(arg * np.pi / 180), np.cos(arg * np.pi / 180)]
+        Bdir /= np.sqrt(Bdir[0]**2 + Bdir[1]**2)
+        self.add_fix([x], [z], [B], np.array([[Bdir[0]], [Bdir[1]]]).T,
+                     ['Bdir'], [factor])
+        if zero_norm:
+            self.add_fix([x], [z], [0], np.array([[-Bdir[1]], [Bdir[0]]]).T,
+                         ['Bdir'], [factor])
+
+    def add_theta(self, theta, factor=1, graze=1.5, **kwargs):
+        x, z = self.get_point(**kwargs)
+        Bm = np.abs(self.eq.sf.bcentr * self.eq.sf.rcentr)  # toroidal moment
+        Bphi = Bm / x  # torodal field
+        Bp = Bphi / np.sqrt((np.sin(theta * np.pi / 180) /
+                             np.sin(graze * np.pi / 180))**2)
+        self.add_fix([x], [z], [Bp], np.array([[0], [0]]).T, ['Bp'], [factor])
+
+    def add_psi(self, psi, factor=1, **kwargs):
+        x, z = self.get_point(**kwargs)
+        label = kwargs.get('label', 'psi')
+        Bdir = kwargs.get('Bdir', np.array([0, 0]))
+        self.add_fix([x], [z], [psi], Bdir, [label], [factor])
+
+    def add_alpha(self, alpha, factor=1, **kwargs):
+        psi = self.get_psi(alpha)
+        # psi -= self.sf.Xpsi  # normalise
+        self.add_psi(psi, factor=factor, **kwargs)
+
+    def add_Bcon(self, B, **kwargs):
+        x, z = self.get_point(**kwargs)
+        self.add_cnstr([x], [z], ['B'], ['gt'], [B])
+
         #if set_force:
         #    self.ff = force_field(self.coilset)
         #self.sf = SF(eqdsk=eqdsk)

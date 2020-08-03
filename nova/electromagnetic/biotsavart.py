@@ -91,6 +91,7 @@ class BiotAttributes:
     _default_biot_attributes = {}
     
     def __init__(self, **biot_attributes):
+        print(self._biot_attributes)
         self._biot_attributes += self._biotsavart_attributes
         self._biot_attributes += self._coilmatrix_attributes
         self._default_biot_attributes = {**self._default_biot_attributes, 
@@ -124,11 +125,7 @@ class BiotArray(Points):
         
     def load_target(self, *args, **kwargs):
         self.target = BiotFrame.load(*args, **kwargs)
-        if hasattr(self.target, 'n2d'):
-            self.n2d = self.target.n2d  # target grid shape
-        else:
-            self.n2d = self.target.nC
-                        
+  
     def assemble_source(self):
         'load source filaments into points structured array'
         for label, column in zip(
@@ -174,7 +171,7 @@ class BiotArray(Points):
         
 class BiotSavart(CoilMatrix, BiotArray, BiotPoints):
     
-    _biotsavart_attributes = {}  
+    _biotsavart_attributes = {}
     
     def __init__(self, source=None, ndr=3):
         CoilMatrix.__init__(self)
@@ -235,27 +232,21 @@ class BiotSavart(CoilMatrix, BiotArray, BiotPoints):
         for xz in self.field:
             self._update_plasma(self.field[xz], self._field[xz], 
                                 self._field_[xz])
-        
+             
     @property
     def Psi(self):
         self._Psi = np.dot(self.flux, self.source._Ic)
-        if self.n2d != 0:
-            self._Psi = self._Psi.reshape(self.n2d)
-        return self._Psi
+        return self._Psi.reshape(self.n2d)
     
     @property
     def Bx(self):
         self._Bx = np.dot(self.field['x'], self.source._Ic)
-        if self.n2d != 0:
-            self._Bx = self._Bx.reshape(self.n2d)
-        return self._Bx
+        return self._Bx.reshape(self.n2d)
     
     @property
     def Bz(self):
         self._Bz = np.dot(self.field['z'], self.source._Ic)
-        if self.n2d != 0:
-            self._Bz = self._Bz.reshape(self.n2d)
-        return self._Bz
+        return self._Bz.reshape(self.n2d)
 
 
 if __name__ == '__main__':

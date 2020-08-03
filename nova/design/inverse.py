@@ -12,6 +12,8 @@ import scipy.optimize as op
 from scipy.optimize import minimize_scalar
 from scipy.optimize import brentq
 import nlopt
+from pandas import DataFrame, Series, concat
+from pandas.api.types import is_list_like
 
 from amigo import geom
 from amigo.time import clock
@@ -20,176 +22,75 @@ from amigo.pyplot import plt
 #import nova.cross_coil as cc
 #from nova.coils import PF
 from nova.electromagnetic.coilset import CoilSet
+from nova.electromagnetic.biotmethods import Target
 #from nova.electromagnetic.streamfunction import SF
 #from nova.force import force_field
 from nova.limits.tieplate import get_tie_plate
 
 
 class Inverse(CoilSet):
+    
+    _fix_attributes = ['x', 'z', 'value', 'label', 'nx', 'nz', 'factor', 
+                       'Psi', 'Bx', 'Bz']
 
     def __init__(self):
         CoilSet.__init__(self)
+        self.initalize_targets()
         
-    def initalize_fix(self):
-        self.fix = {'x': np.array([]), 'z': np.array([]), 
-                    'BC': np.array([]),
-                    'value': np.array([]), 'Bdir': np.array([[], []]).T,
-                    'factor': np.array([]), 'n': 0}
-        
-    def colocate(self, eqdsk=None, psi=True, field=True, Xpoint=True,
-                 targets=True, SX=False, npoint=25):
-        self.initialize_log()
-        if eqdsk:
-            self.sf.update_eqdsk(eqdsk)  # update streamfunction
-        self.psi_spline()  # generate psi interpolators
-        self.plasma_spline()  # generate plasma interpolators
-        self.fix_boundary(psi, field, Xpoint, npoint=npoint)
-        self.fix_SX_outer_target(SX)
-        self.fix_divertor_targets(targets)
-        self.get_weight()
-        self.set_background()
-        self.set_foreground()
-        self.rhs = True
-        
-    def initalise_limits(self):
-        self.limit = {'I': {}, 'L': {}, 'F': {}}
-
-    def set_PF_limit(self):
-        for coil in self.PFcoils:
-            self.limit['L'][coil] = self.limit['L']['PF']
-
-    def set_limit(self, side='both', eps=1e-2, **kwargs):
-        # set as ICSsum for [I][CSsum] etc...
-        if side == 'both' or side == 'equal':
-            index = [0, 1]
-        elif side == 'lower':
-            index = [0]
-        elif side == 'upper':
-            index = [1]
-        else:
-            errtxt = 'invalid side parameter [both, lower, upper]'
-            errtxt += ': {}'.format(side)
-            raise IndexError(errtxt)
-        for key in kwargs:
-            variable = key[0]
-            if key[1:] not in self.limit[variable]:  # initalize limit
-                self.limit[variable][key[1:]] = [-1e16, 1e16]
-            if kwargs[key] is None:
-                for i in index:
-                    sign = self.sign_limit(i, side)
-                    self.limit[variable][key[1:]][i] = sign * 1e16
-            else:  # set limit(s)
-                for i in index:
-                    sign = self.sign_limit(i, side)
-                    if side == 'equal':
-                        value = sign * eps + kwargs[key]
-                    else:
-                        value = sign * kwargs[key]
-                    self.limit[variable][key[1:]][i] = value
-        if 'LPF' in kwargs:
-            self.set_PF_limit()
-
-    def sign_limit(self, index, side):
-        # only apply sign to symetric limits (side==both)
-        if side in ['both', 'equal']:
-            sign = 2*index-1
-        else:
-            sign = 1
-        return sign
+    def initalize_targets(self):
+        self.fix = DataFrame(columns=self._fix_attributes)
+        #self.fix = self.colocate.targets
+        #for name in self._fix_attributes:
+        #    if name not in self.colocate.targets:
+        #        self.colocate.targets[name] = None
     
-    def add_fix(self, x, z, value, Bdir, BC, factor):
-        var = {'x': x, 'z': z, 'value': value,
-               'Bdir': Bdir, 'BC': BC, 'factor': factor}
-        nvar = len(x)
-        self.fix['n'] += nvar
-        for name in ['value', 'Bdir', 'BC', 'factor']:
-            if np.shape(var[name])[0] != nvar:
-                var[name] = np.array([var[name]] * nvar)
-        for name in var.keys():
-            if name == 'Bdir':
-                for i in range(nvar):
-                    norm = np.sqrt(var[name][i][0]**2 + var[name][i][1]**2)
-                    if norm != 0:
-                        var[name][i] /= norm  # normalise tangent vectors
-                self.fix[name] = np.append(self.fix[name], var[name], axis=0)
-            else:
-                self.fix[name] = np.append(self.fix[name], var[name])
-
+    @property
+    def nfix(self):
+        return self.fix.shape[0]
+        
+    def add_fix(self, *args, **kwargs):
+        '''
+        add colocation points 
+        
+        len(args) == 1 (DataFrame or dict): colocation points as frame
+        len(args) == fix.ncol (float or array): colocation points as args
+        len(args) == 0
+        
+            (DataFrame or fix.columns): fix data points
+        kwargs:
+            (float): alternate input method
+        '''
+        default = {'x': 0, 'z': 0, 'value': 0, 
+                   'label': 'psi', 'nx': 0, 'nz': 0, 'factor': 1,
+                   'Psi': 0, 'Bx': 0, 'Bz': 0}
+        if len(args) == 1:  # as frame
+            fix = args[0]
+        elif len(args) == 0:  # as kwargs
+            fix = kwargs    
+        else:  # as args
+            fix = {key: value 
+                   for key, value in zip(self._fix_attributes, args)}
+        # populate missing entries with defaults
+        if len(fix) != self.fix.shape[1]:  # fill defaults
+            for key in default:
+                if key not in fix:
+                    fix[key] = default[key]
+        nrow = np.max([len(arg) if is_list_like(arg) else 1 for arg in args])
+        fix = DataFrame(fix, index=range(nrow))
+        print(fix)
+        norm = np.linalg.norm([fix['nx'], fix['nz']], axis=0)
+        for nhat in ['nx', 'nz']:
+            fix.loc[fix.index[norm != 0], nhat] /= norm[norm != 0]
+        self.fix = concat([self.fix, fix], ignore_index=True)  # append fix
+        self.colocate.add_targets(fix)  # append Biot colocation targets
+            
     def fix_flux(self, flux):
         if not hasattr(self, 'fix_o'):  # set once
-            self.fix_o = copy.deepcopy(self.fix)
-        for i, (bc, value) in enumerate(zip(self.fix_o['BC'],
-                                            self.fix_o['value'])):
-            if 'psi' in bc:
-                self.fix['value'][i] = value + flux
-        self.set_target()  # adjust target flux
+            self.fix_o = self.fix.copy()
+        index = ['psi' in name for name in self.fix.name]
+        self.fix.loc[index, 'value'] = self.fix_o.loc[index, 'value'] + flux
+        #self.set_target()  # adjust target flux
         
-
-    def fix_boundary_psi(self, npoint=21, alpha=0.995, factor=1):
-        x, z, Bdir = self.get_boundary(npoint=npoint, alpha=alpha)
-        psi = self.get_psi(alpha) * np.ones(npoint)
-        # psi -= self.sf.Xpsi  # normalise
-        self.add_fix(x, z, psi, Bdir, ['psi_bndry'], [factor])
-
-    def fix_boundary_field(self, npoint=21, alpha=0.995, factor=1):
-        x, z, Bdir = self.get_boundary(npoint=npoint, alpha=alpha)
-        self.add_fix(x, z, [0.0], Bdir, ['Bdir'], [factor])
-
-    def fix_null(self, factor=1, **kwargs):
-        x, z = self.get_point(**kwargs)
-        self.add_fix([x], [z], [0.0], np.array(
-            [[1.0], [0.0]]).T, ['Bx'], [factor])
-        self.add_fix([x], [z], [0.0], np.array(
-            [[0.0], [1.0]]).T, ['Bz'], [factor])
-        psi = self.sf.Ppoint((x, z))
-        # psi -= self.sf.Xpsi  # normalise
-        self.add_psi(psi, factor=factor, label='psi_x', **kwargs)
-
-    def add_Bxo(self, factor=1, **kwargs):
-        x, z = self.get_point(**kwargs)
-        self.add_fix([x], [z], [0.0], np.array(
-            [[1.0], [0.0]]).T, ['Bx'], [factor])
-
-    def add_Bzo(self, factor=1, **kwargs):
-        x, z = self.get_point(**kwargs)
-        self.add_fix([x], [z], [0.0], np.array(
-            [[0.0], [1.0]]).T, ['Bz'], [factor])
-
-    def add_B(self, B, Bdir, factor=1, zero_norm=False, **kwargs):
-        x, z = self.get_point(**kwargs)
-        if len(Bdir) == 1:  # normal angle from horizontal in degrees
-            arg = Bdir[0]
-            Bdir = [-np.sin(arg * np.pi / 180), np.cos(arg * np.pi / 180)]
-        Bdir /= np.sqrt(Bdir[0]**2 + Bdir[1]**2)
-        self.add_fix([x], [z], [B], np.array([[Bdir[0]], [Bdir[1]]]).T,
-                     ['Bdir'], [factor])
-        if zero_norm:
-            self.add_fix([x], [z], [0], np.array([[-Bdir[1]], [Bdir[0]]]).T,
-                         ['Bdir'], [factor])
-
-    def add_theta(self, theta, factor=1, graze=1.5, **kwargs):
-        x, z = self.get_point(**kwargs)
-        Bm = np.abs(self.eq.sf.bcentr * self.eq.sf.rcentr)  # toroidal moment
-        Bphi = Bm / x  # torodal field
-        Bp = Bphi / np.sqrt((np.sin(theta * np.pi / 180) /
-                             np.sin(graze * np.pi / 180))**2)
-        self.add_fix([x], [z], [Bp], np.array([[0], [0]]).T, ['Bp'], [factor])
-
-    def add_psi(self, psi, factor=1, **kwargs):
-        x, z = self.get_point(**kwargs)
-        label = kwargs.get('label', 'psi')
-        Bdir = kwargs.get('Bdir', np.array([0, 0]))
-        self.add_fix([x], [z], [psi], Bdir, [label], [factor])
-
-    def add_alpha(self, alpha, factor=1, **kwargs):
-        psi = self.get_psi(alpha)
-        # psi -= self.sf.Xpsi  # normalise
-        self.add_psi(psi, factor=factor, **kwargs)
-
-    def add_Bcon(self, B, **kwargs):
-        x, z = self.get_point(**kwargs)
-        self.add_cnstr([x], [z], ['B'], ['gt'], [B])
-
     def plot_fix(self, tails=True):
         self.get_weight()
         if self.fix['n'] > 0:
@@ -248,9 +149,72 @@ class Inverse(CoilSet):
                              [z, z + direction[1] * norm * w],
                              color=color, linewidth=2)
             plt.axis('equal')
-            
-            
+        
+    '''
+    def colocate(self, eqdsk=None, psi=True, field=True, Xpoint=True,
+                 targets=True, SX=False, npoint=25):
+        self.initialize_log()
+        if eqdsk:
+            self.sf.update_eqdsk(eqdsk)  # update streamfunction
+        self.psi_spline()  # generate psi interpolators
+        self.plasma_spline()  # generate plasma interpolators
+        self.fix_boundary(psi, field, Xpoint, npoint=npoint)
+        self.fix_SX_outer_target(SX)
+        self.fix_divertor_targets(targets)
+        self.get_weight()
+        self.set_background()
+        self.set_foreground()
+        self.rhs = True
+    '''
+        
+    def initalise_limits(self):
+        self.limit = {'I': {}, 'L': {}, 'F': {}}
 
+    def set_PF_limit(self):
+        for coil in self.PFcoils:
+            self.limit['L'][coil] = self.limit['L']['PF']
+
+    def set_limit(self, side='both', eps=1e-2, **kwargs):
+        # set as ICSsum for [I][CSsum] etc...
+        if side == 'both' or side == 'equal':
+            index = [0, 1]
+        elif side == 'lower':
+            index = [0]
+        elif side == 'upper':
+            index = [1]
+        else:
+            errtxt = 'invalid side parameter [both, lower, upper]'
+            errtxt += ': {}'.format(side)
+            raise IndexError(errtxt)
+        for key in kwargs:
+            variable = key[0]
+            if key[1:] not in self.limit[variable]:  # initalize limit
+                self.limit[variable][key[1:]] = [-1e16, 1e16]
+            if kwargs[key] is None:
+                for i in index:
+                    sign = self.sign_limit(i, side)
+                    self.limit[variable][key[1:]][i] = sign * 1e16
+            else:  # set limit(s)
+                for i in index:
+                    sign = self.sign_limit(i, side)
+                    if side == 'equal':
+                        value = sign * eps + kwargs[key]
+                    else:
+                        value = sign * kwargs[key]
+                    self.limit[variable][key[1:]][i] = value
+        if 'LPF' in kwargs:
+            self.set_PF_limit()
+
+    def sign_limit(self, index, side):
+        # only apply sign to symetric limits (side==both)
+        if side in ['both', 'equal']:
+            sign = 2*index-1
+        else:
+            sign = 1
+        return sign
+
+
+        
     def set_target(self):
         self.T = (self.fix['value'] - self.BG).reshape((len(self.BG), 1))
         self.wT = self.wsqrt * self.T

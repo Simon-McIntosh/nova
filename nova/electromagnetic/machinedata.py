@@ -164,7 +164,7 @@ class MachineData(CoilSet):
             self.data['upperCTS'] = self.read_sheet(
                     'Cryostat & CST', 8, np.arange(12, 17))
   
-    def plot_data(self, keys=None, ax=None, legend=False):
+    def plot_data(self, keys=None, ax=None, legend=False, **kwargs):
         if ax is None:
             ax = plt.gca()
         if keys is not None:
@@ -174,7 +174,8 @@ class MachineData(CoilSet):
             keys = self.data.keys()
         for key in keys:
             try:
-                ax.plot(self.data[key]['x'], self.data[key]['z'], label=key)
+                ax.plot(self.data[key]['x'], self.data[key]['z'], label=key,
+                        **kwargs)
             except KeyError:
                 raise KeyError(key, self.data[key].columns)
         ax.axis('equal')

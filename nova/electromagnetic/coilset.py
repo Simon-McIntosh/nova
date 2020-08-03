@@ -817,6 +817,31 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         ax.text(x, z, f'{1e-6*self.Ip:1.1f}MA', fontsize='x-large',
                 ha='center', va='center', color=0.9 * np.ones(3),
                 zorder=10)
+        
+    def label_gaps(self, ax=None):
+        coil_index = []
+        for end in ['L', 'U']:
+            position = range(1, 4) if end == 'U' else range(3, 0, -1)
+            for i in position:
+                coil_index.append(f'CS{i}{end}')
+        gap_index = ['LDP'] + coil_index + ['LDP']
+        if ax is None:
+            ax = plt.gca()
+        for i, name in enumerate(coil_index):
+            x, z, dx, dz = self.coil.loc[name, ['x', 'z', 'dx', 'dz']]
+            drs = 2/3*dx
+            ax.text(x + drs, z, f'Coil {i}',
+                    ha='left', va='center', color=0.2 * np.ones(3))
+        xo, zo = self.coil.loc[coil_index[0], ['x', 'z']]  
+        z1 = self.coil.loc[coil_index[-1], 'z']  
+        dzo = (z1-zo) / (len(coil_index) - 1)
+        z = zo - dzo/2
+        for i in range(7):
+            ax.text(x - drs, z, f'{gap_index[i]}-{gap_index[i+1]}',
+                    ha='right', va='center', color='C3')
+            ax.text(x + drs, z, f'Gap {i}',
+                    ha='left', va='center', color='C3')      
+            z += dzo
 
     def label_coil(self, ax, label, current, coil=None, fs=None, Nmax=20):
         if fs is None:
@@ -833,18 +858,19 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
         for name, part in zip(coil.index, coil.part):
             x, z = coil.at[name, 'x'], coil.at[name, 'z']
             dx, dz = coil.at[name, 'dx'], coil.at[name, 'dz']
+            drs = 2/3*dx * np.array([-1, 1])
             if coil.part[name] == 'CS':
-                drs = -2.0 / 3 * dx
+                drs_index = 0
                 ha = 'right'
             else:
-                drs = 2.0 / 3 * dx
+                drs_index = 1
                 ha = 'left'
             if part in parts and (label and current):
                 zshift = max([dz / 5, ylim / 3])
             else:
                 zshift = 0
             if part in parts and part in label and N[part] < Nmax:
-                ax.text(x + drs, z + zshift, name, fontsize=fs,
+                ax.text(x + drs[drs_index], z + zshift, name, fontsize=fs,
                         ha=ha, va='center', color=0.2 * np.ones(3))
             if part in parts and current:
                 if current == 'Ic' or current == 'A':  # line current
@@ -857,7 +883,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes):
                     raise IndexError(f'current {current} not in ' +\
                                      '[Ic, A, It, AT]')
                 txt = f'{human_format(Ilabel, precision=1)}{unit}'
-                ax.text(x + drs, z - zshift, txt,
+                ax.text(x + drs[drs_index], z - zshift, txt,
                         fontsize=fs, ha=ha, va='center',
                         color=0.2 * np.ones(3))
         

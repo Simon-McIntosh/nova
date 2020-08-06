@@ -11,19 +11,14 @@ pmag = Inverse()
 pmag.load_coilset('ITER')
 
 '''
-ITER = ITERcoilset(coils='pf', dCoil=0.2, n=2e3, limit=[3.5, 9, -5, 5],
+ITER = ITERcoilset(coils='pf', dCoil=0.2, n=2e3, limit=[3.5, 7.5, -3, 3],
                    read_txt=True)
 cc = ITER.cc
 cc.scenario_filename = -2
 cc.scenario = 'IM'
-cc.save_coilset('ITER')
-'''
 
-'''
-pmag.coil.add_mpc(['PF2', 'PF3'])
-
-pmag.coil.remove_mpc('CS1U')
-pmag.coil.add_mpc(['CS1U', 'CS1L'], 0.99)
+pmag = Inverse()
+pmag.coilset = cc.coilset
 
 # add colocation circle
 r, xo, zo = 1.2, 5.4, 0
@@ -34,8 +29,6 @@ nx, nz = x, z  # normalze
 pmag.colocate.initialize_targets()
 pmag.colocate.add_targets('Psi_bndry', xo+x, zo+z)
 pmag.colocate.add_targets('Psi_bndry', xo, zo, 0, 1, d_dx=3, d_dz=2)  
-
-#pmag.Ic = {'PF6': 0}
 
 pmag.colocate.solve_interaction()
 pmag.save_coilset('ITER')
@@ -50,13 +43,30 @@ pmag.save_coilset('ITER')
 
 #pmag.fix_flux(4)
 
+
+
+pmag.scenario_filename = -2
+pmag.scenario = 'IM'
+
+#pmag.coil.add_mpc(['PF2', 'PF3'], 0)
+
 plt.set_aspect(1.1)
 pmag.colocate.plot()
 pmag.grid.plot_flux()
 
+pmag.colocate.update()
+
+pmag.coil.remove_mpc('CS1U')
+pmag.coil.add_mpc(['PF3', 'PF4'], -2)
+
 
 pmag.set_foreground()
-pmag.solve_slsqp()
+pmag.set_background()
+pmag.set_target()
+
+pmag.solve()
+print(np.linalg.norm(pmag.err))
+
 pmag.plot(subcoil=False, current='A')
 pmag.grid.plot_flux(color='C3')
 

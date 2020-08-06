@@ -205,7 +205,7 @@ class Target(BiotSavart, BiotAttributes):
         if not targets.empty:
             if append:
                 self.targets = concat((self.targets, targets),
-                                      ignore_index=True)
+                                      ignore_index=True, sort=False)
                 if drop_duplicates:
                     self.targets.drop_duplicates(
                             subset=['x', 'z'], inplace=True)
@@ -237,7 +237,7 @@ class Colocate(Target):
     
     _target_attributes = ['label', 'x', 'z', 'value',
                           'nx', 'nz', 'd_dx', 'd_dz',  
-                          'factor', 'weight', 'Psi', 'Bx', 'Bz']
+                          'factor', 'weight']
         
     def __init__(self, subcoil, **colocate_attributes):
         Target.__init__(self, subcoil, **colocate_attributes)
@@ -257,8 +257,7 @@ class Colocate(Target):
         '''
         default = {'label': 'Psi', 'x': 0., 'z': 0., 
                    'value': 0., 'd_dx': 0., 'd_dz': 0., 
-                   'nx': 0., 'nz': 0., 'factor': 1., 'weight': 1.,
-                   'Psi': 0., 'Bx': 0., 'Bz': 0.}
+                   'nx': 0., 'nz': 0., 'factor': 1., 'weight': 1.}
         if len(args) == 1:  # as frame
             target = args[0]   
         else:  # as args and kwargs
@@ -277,6 +276,106 @@ class Colocate(Target):
         for nhat in ['nx', 'nz']:
             target.loc[target.index[norm != 0], nhat] /= norm[norm != 0]
         Target.add_targets(self, target)  # append Biot colocation targets
+        
+    def update(self):
+        'update targets.value from Psi and/or field'
+        psi_index = ['Psi' in l for l in self.targets.label]
+        self.targets.loc[psi_index, 'value'] = self.Psi[psi_index]
+        
+    def set_weight(self, index, gradient):
+        index &= (gradient > 0)  # ensure gradient > 0
+        self.targets.loc[index, 'weight'] = 1 / gradient[index]
+            
+    def update_weight(self):        
+        'update colocation weight based on inverse of absolute gradient'
+        gradient = self.targets.loc[:, ['d_dx', 'd_dz']].to_numpy()
+        normal = self.targets.loc[:, ['nx', 'nz']].to_numpy()
+        d_dx, d_dz = gradient.T
+        # compute gradient magnitudes
+        gradient_L2 = np.linalg.norm(gradient, axis=1)  # L2norm
+        field_index = np.array(['B' in l for l in self.targets.label])
+        self.set_weight(field_index, gradient_L2)
+        gradient_dot = abs(np.array([g @ n for g, n in zip(gradient, normal)]))
+        bndry_index = ['bndry' in l for l in self.targets.label]
+        self.set_weight(bndry_index, gradient_dot)
+        # calculate mean weight
+        if sum(bndry_index) > 0:
+            mean_index = bndry_index
+        elif sum(field_index) > 0:
+            mean_index = field_index
+        else:
+            mean_index = slice(None)
+        mean_weight = self.targets.weight[mean_index].mean()
+        # not field or Psi_bndry (separatrix)
+        mean_index = [not field and not bndry for field, bndry in zip(
+                    field_index, bndry_index)]
+        
+        self.targets.loc[mean_index, 'weight'] = mean_weight
+        self.wsqrt = np.sqrt(self.targets.factor * 
+                             self.targets.weight)
+        self.wsqrt /= np.mean(self.wsqrt)  # normalize weight
+        
+        
+    def plot_colocate(self, tails=True):
+        self.update_weight()
+        
+        style = DataFrame(index=['color', 'marker', 'markersize',
+                                 'markeredgewidth'])
+        
+        plt.plot(self.colocate)
+        '''
+            psi, Bdir, Bxz = [], [], []
+            tail_length = 0.75
+            for bc, w in zip(self.fix['BC'], weight):
+                if 'psi' in bc:
+                    psi.append(w)
+                elif bc == 'Bdir':
+                    Bdir.append(w)
+                elif bc == 'Bx' or bc == 'Bz':
+                    Bxz.append(w)
+            if len(psi) > 0:
+                psi_norm = tail_length / np.mean(psi)
+            if len(Bdir) > 0:
+                Bdir_norm = tail_length / np.mean(Bdir)
+            if len(Bxz) > 0:
+                Bxz_norm = tail_length / np.mean(Bxz)
+            for x, z, bc, bdir, w in zip(self.fix['x'], self.fix['z'],
+                                         self.fix['BC'], self.fix['Bdir'],
+                                         weight):
+                if bdir[0]**2 + bdir[1]**2 == 0:  # tails
+                    direction = [0, -1]
+                else:
+                    direction = bdir
+                # else:
+                #    d_dx,d_dz = self.get_gradients(bc,x,z)
+                #    direction = np.array([d_dx,d_dz])/np.sqrt(d_dx**2+d_dz**2)
+                if 'psi' in bc:
+                    norm = psi_norm
+                    marker, size, color = 'o', 7.5, 'C0'
+                    plt.plot(x, z, marker, color=color, markersize=size)
+                    plt.plot(x, z, marker, color=[1, 1, 1],
+                             markersize=0.3 * size)
+                else:
+                    if bc == 'Bdir':
+                        norm = Bdir_norm
+                        marker, size, color, mew = 'o', 4, 'C1', 0.0
+                    elif bc == 'null':
+                        norm = Bxz_norm
+                        marker, size, color, mew = 'o', 2, 'C2', 0.0
+                    elif bc == 'Bx':
+                        norm = Bxz_norm
+                        marker, size, color, mew = '_', 10, 'C2', 1.75
+                    elif bc == 'Bz':
+                        norm = Bxz_norm
+                        marker, size, color, mew = '|', 10, 'C2', 1.75
+                    plt.plot(x, z, marker, color=color, markersize=size,
+                             markeredgewidth=mew)
+                if tails:
+                    plt.plot([x, x + direction[0] * norm * w],
+                             [z, z + direction[1] * norm * w],
+                             color=color, linewidth=2)
+            plt.axis('equal')
+        '''
         
     def plot(self):
         plt.plot(self.targets.x, self.targets.z, 'o')

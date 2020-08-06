@@ -55,7 +55,7 @@ class CoilData():
     
     # multi-point constraints (shared line-current)
     _mpc_constraints = ['mpc_index', 'mpc_iloc', 'mpc_referance', 
-                        'mpc_factor', 'mpl']
+                        'mpc_factor', 'mpl_index', 'mpl_factor']
     
     _coildata_properties = []
     
@@ -163,10 +163,16 @@ class CoilData():
                 mpc_index[i] = self.at[index, 'coil']
             self._mpc_index = Index(mpc_index) 
         # construct multi-point link ()
-        self._mpl = np.array([
-            [i, referance, factor] for i, (_mpc, referance, factor) 
-            in enumerate(zip(mpc, self._mpc_referance, self._mpc_factor))
-            if _mpc], dtype=int)
+        mpl = np.array([
+            [referance, couple, factor] for couple, (referance, _mpc, factor) 
+            in enumerate(zip(self._mpc_referance, mpc, self._mpc_factor))
+            if _mpc])
+        if len(mpl) > 0:
+            self._mpl_index = mpl[:, :2].astype(int)  # (refernace, couple)
+            self._mpl_factor = mpl[:, 2]  # coupling factor
+        else:
+            self._mpl_index = []
+            self._mpl_factor = []
         self._relink_mpc = True      
 
     def _extract_reduction_index(self):  # extract reduction incices (reduceat)

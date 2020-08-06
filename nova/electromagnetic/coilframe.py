@@ -242,10 +242,10 @@ class CoilFrame(DataFrame, CoilData):
     def reduce_mpc(self, matrix):
         'apply mpc constraints to coupling matrix'
         _matrix = matrix[:, self._mpc_iloc]  # extract primary coils
-        if len(self._mpl) > 0:  # add multi-point links
-            _matrix[:, self._mpl[:, 1]] += matrix[:, self._mpl[:, 0]] * \
-                np.dot(np.ones((len(matrix), 1)), 
-                       self._mpl[:, 2].reshape(1, -1))
+        if len(self._mpl_index) > 0:  # add multi-point links 
+            _matrix[:, self._mpl_index[:, 0]] += \
+                matrix[:, self._mpl_index[:, 1]] * \
+                np.ones((len(matrix), 1)) @ self._mpl_factor.reshape(-1, 1)
         return _matrix
 
     def _check_arguments(self, *args, **kwargs):

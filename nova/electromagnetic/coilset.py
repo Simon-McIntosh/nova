@@ -24,7 +24,7 @@ from amigo.IO import pythonIO
 from amigo.geom import length, xzfun
 import nova
 from nova.electromagnetic.coilframe import CoilFrame
-from nova.electromagnetic.biotmethods import Mutual, Grid, Target, BiotMethods
+from nova.electromagnetic.biotmethods import BiotMethods
 from nova.electromagnetic.biotsavart import BiotSavart, BiotAttributes
 
 
@@ -278,12 +278,17 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes, BiotMethods):
         self.coil._default_attributes['dShell'] = dShell
         
     @property
+    def nC(self):
+        'number of active coils'
+        return self.coil._nC
+        
+    @property
     def Ic(self):
         '''
         Returns:
             self.Ic (np.array): coil instance line subindex current [A]
         '''
-        return self.coil.Ic
+        return self.coil._Ic
 
     @Ic.setter
     def Ic(self, value):

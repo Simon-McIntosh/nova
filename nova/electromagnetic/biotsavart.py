@@ -91,12 +91,15 @@ class BiotAttributes:
     _default_biot_attributes = {}
     
     def __init__(self, **biot_attributes):
-        print(self._biot_attributes)
-        self._biot_attributes += self._biotsavart_attributes
-        self._biot_attributes += self._coilmatrix_attributes
+        self._append_biot_attributes(self._biotsavart_attributes)
+        self._append_biot_attributes(self._coilmatrix_attributes)
         self._default_biot_attributes = {**self._default_biot_attributes, 
                                          **self._biotsavart_attributes}
         self.biot_attributes = biot_attributes
+        
+    def _append_biot_attributes(self, attributes):
+        self._biot_attributes += [attr for attr in attributes 
+                                  if attr not in self._biot_attributes]
     
     @property
     def biot_attributes(self):

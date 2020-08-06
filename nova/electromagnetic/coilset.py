@@ -51,9 +51,9 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes, BiotMethods):
     # exchange biot instances
     _biot_instances = {'mutual': 'mutual',
                        'plasma': 'grid',
-                       #'grid': 'grid'}
-                       'target': 'target'}
-                       #'colocate': 'target'} 
+                       'grid': 'grid',
+                       'target': 'target',
+                       'colocate': 'colocate'} 
 
     # additional_columns
     _coil_columns = ['dA', 'dCoil', 'nx', 'nz', 'subindex', 'part',
@@ -109,7 +109,6 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes, BiotMethods):
             setattr(self, attribute, coilset.get(attribute, coilset))
         for instance in self._biot_instances:
             instance_attribute = '_'.join([instance, 'biot_attributes'])
-            print('setting', instance)
             setattr(getattr(self, instance), 'biot_attributes',
                     coilset.get(instance_attribute, coilset))
 
@@ -853,10 +852,13 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes, BiotMethods):
         N = {p: sum(coil.part == p) for p in parts}
         if label == True:
             label = parts
-        ylim = np.diff(ax.get_ylim())[0]
+        # referance coil height
+        dz_ref = np.min(
+            [coil.at[name, 'dz'] for name, part in zip(coil.index, coil.part)
+             if part in parts])
         for name, part in zip(coil.index, coil.part):
             x, z = coil.at[name, 'x'], coil.at[name, 'z']
-            dx, dz = coil.at[name, 'dx'], coil.at[name, 'dz']
+            dx = coil.at[name, 'dx'] 
             drs = 2/3*dx * np.array([-1, 1])
             if coil.part[name] == 'CS':
                 drs_index = 0
@@ -865,7 +867,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes, BiotMethods):
                 drs_index = 1
                 ha = 'left'
             if part in parts and (label and current):
-                zshift = max([dz / 5, ylim / 3])
+                zshift = dz_ref/3  #max([dz / 5, ylim / 3])
             else:
                 zshift = 0
             if part in parts and part in label and N[part] < Nmax:

@@ -209,7 +209,7 @@ class CoilFrame(DataFrame, CoilData):
     def add_mpc(self, name, factor=1):
         '''
         define multi-point constraint linking a set of coils
-        name: list of coil names (present in self.coil.index)
+        name: list of coil names (present in self.index)
         factor: inter-coil coupling factor
         '''
         if not is_list_like(name):
@@ -231,7 +231,22 @@ class CoilFrame(DataFrame, CoilData):
             index = [index]
         name = [mpc[0] if mpc else '' for mpc in self.mpc]
         drop = [n in index for n in name]
-        self.loc[drop, 'mpc'] = ''
+        self.remove_mpc(drop)
+        
+    def remove_mpc(self, index):
+        'remove multi-point constraint on indexed coils'
+        if not is_list_like(index):
+            index = [index]
+        self.loc[index, 'mpc'] = ''
+         
+    def reduce_mpc(self, matrix):
+        'apply mpc constraints to coupling matrix'
+        _matrix = matrix[:, self._mpc_iloc]  # extract primary coils
+        if len(self._mpl) > 0:  # add multi-point links
+            _matrix[:, self._mpl[:, 1]] += matrix[:, self._mpl[:, 0]] * \
+                np.dot(np.ones((len(matrix), 1)), 
+                       self._mpl[:, 2].reshape(1, -1))
+        return _matrix
 
     def _check_arguments(self, *args, **kwargs):
         if len(args) == 1:  # data passed as CoilFrame

@@ -160,21 +160,20 @@ class Target(BiotSavart, BiotAttributes):
     '''
     _biot_attributes = ['targets']
     _default_biot_attributes = {}
+    _target_attributes = ['x', 'z']
     
     def __init__(self, subcoil, **target_attributes):
         BiotSavart.__init__(self)
         BiotAttributes.__init__(self, **target_attributes)
-        self._initialize_target()
+        self.initialize_targets()
         self.load_source(subcoil)  # link source coilset
         
-    def _initialize_target(self, target=None):
-        if target is None:  # initalize
-            self.targets = DataFrame(columns=['x', 'z'])
-
-    def clear_target_data(self):
-        for variable in ['Psi', 'Bx', 'Bz']:
-            self.target[variable] = DataFrame()
+    def __repr__(self):
+        return self.targets.to_string(max_cols=8, max_colwidth=10)
         
+    def initialize_targets(self):
+        self.targets = DataFrame(columns=self._target_attributes)
+
     def add_targets(self, targets, append=True, drop_duplicates=True):
         '''
         Attributes:
@@ -182,7 +181,6 @@ class Target(BiotSavart, BiotAttributes):
                 (dict, DataFrame() or list like):
                     x (np.array): x-coordinates
                     z (np.array): z-coordinates
-                    update (np.array): update flag
             append (bool): create new list | append
             drop_duplicates (bool): drop duplicates
         '''
@@ -203,16 +201,21 @@ class Target(BiotSavart, BiotAttributes):
             targets['index'] = [f'P{i+io}'
                                 for i in range(targets.shape[0])]
             targets.set_index('index', inplace=True)
-            targets = targets.astype('float')
+            targets = targets.astype('float')        
         if not targets.empty:
             if append:
-                self.targets = concat((self.targets, targets), join='inner')
+                self.targets = concat((self.targets, targets),
+                                      ignore_index=True)
                 if drop_duplicates:
                     self.targets.drop_duplicates(
                             subset=['x', 'z'], inplace=True)
             else:  # overwrite
                 self.targets = targets
-
+                
+    @property
+    def n(self):
+        return self.targets.shape[0]
+                
     @property
     def n2d(self):
         return self.targets.shape[0]
@@ -228,11 +231,61 @@ class Target(BiotSavart, BiotAttributes):
     def solve_interaction(self):
         self.load_target(x=self.targets['x'], z=self.targets['z'])
         BiotSavart.solve_interaction(self)   
+      
         
+class Colocate(Target):
+    
+    _target_attributes = ['label', 'x', 'z', 'value',
+                          'nx', 'nz', 'd_dx', 'd_dz',  
+                          'factor', 'weight', 'Psi', 'Bx', 'Bz']
+        
+    def __init__(self, subcoil, **colocate_attributes):
+        Target.__init__(self, subcoil, **colocate_attributes)
+        #self._append_biot_attributes(['fix'])  # append fix dataframe
+        
+    def add_targets(self, *args, **kwargs):
+        '''
+        add colocation points 
+        
+        len(args) == 1 (DataFrame or dict): colocation points as frame
+        len(args) == fix.ncol (float or array): colocation points as args
+        len(args) == 0
+        
+            (DataFrame or fix.columns): fix data points
+        kwargs:
+            (float): alternate input method
+        '''
+        default = {'label': 'Psi', 'x': 0., 'z': 0., 
+                   'value': 0., 'd_dx': 0., 'd_dz': 0., 
+                   'nx': 0., 'nz': 0., 'factor': 1., 'weight': 1.,
+                   'Psi': 0., 'Bx': 0., 'Bz': 0.}
+        if len(args) == 1:  # as frame
+            target = args[0]   
+        else:  # as args and kwargs
+            target = {key: value 
+                      for key, value in zip(self._target_attributes, args)}
+            for key in kwargs:
+                target[key] = kwargs[key]
+        # populate missing entries with defaults
+        if len(target) != self.targets.shape[1]:  # fill defaults
+            for key in default:
+                if key not in target:
+                    target[key] = default[key]
+        nrow = np.max([len(arg) if is_list_like(arg) else 1 for arg in args])
+        target = DataFrame(target, index=range(nrow))
+        norm = np.linalg.norm([target['nx'], target['nz']], axis=0)
+        for nhat in ['nx', 'nz']:
+            target.loc[target.index[norm != 0], nhat] /= norm[norm != 0]
+        Target.add_targets(self, target)  # append Biot colocation targets
+        
+    def plot(self):
+        plt.plot(self.targets.x, self.targets.z, 'o')
+
         
 class BiotMethods:
     
-    _biot_methods = {'grid': Grid, 'mutual': Mutual, 'target': Target}
+    _biot_methods = {'grid': Grid, 'mutual': Mutual, 'target': Target,
+                     'colocate': Colocate}
 
     def initialize_biot_method(self, instance):
         'link biot instance to method'

@@ -12,7 +12,7 @@ import scipy.optimize as op
 from scipy.optimize import minimize_scalar
 from scipy.optimize import brentq
 import nlopt
-from pandas import DataFrame, Series, concat
+from pandas import DataFrame, Series, concat, isnull
 from pandas.api.types import is_list_like
 
 from amigo import geom
@@ -30,74 +30,133 @@ from nova.limits.tieplate import get_tie_plate
 
 class Inverse(CoilSet):
     
-    _fix_attributes = ['x', 'z', 'value', 'label', 'nx', 'nz', 'factor', 
-                       'Psi', 'Bx', 'Bz']
-
     def __init__(self):
+        self._biot_instances.update({'colocate': 'colocate'})
         CoilSet.__init__(self)
-        self.initalize_targets()
         
-    def initalize_targets(self):
-        self.fix = DataFrame(columns=self._fix_attributes)
-        #self.fix = self.colocate.targets
-        #for name in self._fix_attributes:
-        #    if name not in self.colocate.targets:
-        #        self.colocate.targets[name] = None
+        
+    def set_foreground(self):
+        self.flux = self.coil.reduce_mpc(self.colocate.flux)
+        self.wG = self.flux  # full flux constraint
+        
+        '''
+        self.G = np.zeros((self.fix['n'], self.coil._nC))  # [G][If] = [T]
+        self.add_value('active')
+        self.wG = self.wsqrt * self.G
+        if self.svd:  # singular value dec.
+            self.U, self.S, self.V = np.linalg.svd(self.wG)
+            self.wG = np.dot(self.wG, self.V)  # solve in terms of alpha
+        '''
+        
+    def set_background(self):
+        self.BG = np.zeros(self.colocate.n)  # background
+        #self.add_value('passive')
+        
+    def set_target(self):
+        self.T = (self.fix['value'] - self.BG).reshape(-1, 1)
+        self.wT = self.wsqrt * self.T
+
+    #def set_target(self)
     
-    @property
-    def nfix(self):
-        return self.fix.shape[0]
+    def get_rss(self, vector, gamma, error=False):
+        err = np.dot(self.wG, vector.reshape(-1, 1)) - self.wT
+        rss = np.sum(err**2)  # residual sum of squares
+        rss += gamma * np.sum(vector**2)  # Tikhonov regularization
+        if error:  # return error
+            return rss, err
+        else:
+            return rss
+
+    def solve(self):
+        Ic = np.linalg.lstsq(self.wG, 
+                             self.colocate.Psi, rcond=None)[0]
+        self.Ic = Ic
         
-    def add_fix(self, *args, **kwargs):
         '''
-        add colocation points 
-        
-        len(args) == 1 (DataFrame or dict): colocation points as frame
-        len(args) == fix.ncol (float or array): colocation points as args
-        len(args) == 0
-        
-            (DataFrame or fix.columns): fix data points
-        kwargs:
-            (float): alternate input method
+        self.rss = self.get_rss(vector)
+        if self.svd:
+            self.If = np.dot(self.V, self.alpha)
+        else:
+            self.If = vector
+        self.update_current()
         '''
-        default = {'x': 0, 'z': 0, 'value': 0, 
-                   'label': 'psi', 'nx': 0, 'nz': 0, 'factor': 1,
-                   'Psi': 0, 'Bx': 0, 'Bz': 0}
-        if len(args) == 1:  # as frame
-            fix = args[0]
-        elif len(args) == 0:  # as kwargs
-            fix = kwargs    
-        else:  # as args
-            fix = {key: value 
-                   for key, value in zip(self._fix_attributes, args)}
-        # populate missing entries with defaults
-        if len(fix) != self.fix.shape[1]:  # fill defaults
-            for key in default:
-                if key not in fix:
-                    fix[key] = default[key]
-        nrow = np.max([len(arg) if is_list_like(arg) else 1 for arg in args])
-        fix = DataFrame(fix, index=range(nrow))
-        print(fix)
-        norm = np.linalg.norm([fix['nx'], fix['nz']], axis=0)
-        for nhat in ['nx', 'nz']:
-            fix.loc[fix.index[norm != 0], nhat] /= norm[norm != 0]
-        self.fix = concat([self.fix, fix], ignore_index=True)  # append fix
-        self.colocate.add_targets(fix)  # append Biot colocation targets
+        
+    def check_state(self):
+        if self.colocate.n == 0:
+            errtxt = 'colocations unset, self.colocate.add_targets'
+            raise ValueError(errtxt)
+        
+    def solve_slsqp(self):  # solve for constrained current vector
+        #self.check_state()
+        #self.set_Io()  # set coil current and bounds
+        #opt = nlopt.opt(nlopt.LD_SLSQP, self.nC)
+        opt = nlopt.opt(nlopt.LD_MMA, self.coil._nC)
+        opt.set_min_objective(self.frss)
+        opt.set_ftol_rel(1e-3)
+        opt.set_xtol_abs(1e-3)
+        #tol = 1e-2 * np.ones(2 * self.nPF + 2 + 2 * (self.nCS - 1) + 
+        #                     2 * (self.nCS + 1))  # 1e-3
+        #opt.add_inequality_mconstraint(self.Flimit, tol)
+        
+        #opt.set_lower_bounds(self.Io['lb'])
+        #opt.set_upper_bounds(self.Io['ub'])
+        Ic = opt.optimize(self.coil._Ic)
+        '''
+        print('')
+        c = np.zeros(len(tol))
+        self.Flimit(c, self.If, np.array([]))
+        print('c', c[-(self.nCS+1):])
+        print(self.get_Faxial(self.If) - self.tie_plate['limit_load'])
+        print(self.get_Faxial(self.If))
+        '''
+        self.Io['value'] = self.If.reshape(-1)
+        self.opt_result = opt.last_optimize_result()
+        self.rss = opt.last_optimum_value()
+        self.update_current()
+        return self.rss
+        
+    def set_weight(self, index, gradient):
+        index &= (gradient > 0)  # ensure gradient > 0
+        self.colocate.targets.loc[index, 'weight'] = 1 / gradient[index]
             
-    def fix_flux(self, flux):
-        if not hasattr(self, 'fix_o'):  # set once
-            self.fix_o = self.fix.copy()
-        index = ['psi' in name for name in self.fix.name]
-        self.fix.loc[index, 'value'] = self.fix_o.loc[index, 'value'] + flux
-        #self.set_target()  # adjust target flux
+    def update_weight(self):        
+        'update colocation weight based on inverse of absolute gradient'
+        gradient = self.colocate.targets.loc[:, ['d_dx', 'd_dz']].to_numpy()
+        normal = self.colocate.targets.loc[:, ['nx', 'nz']].to_numpy()
+        d_dx, d_dz = gradient.T
+        # compute gradient magnitudes
+        gradient_L2 = np.linalg.norm(gradient, axis=1)  # L2norm
+        field_index = np.array(['B' in l for l in self.colocate.targets.label])
+        self.set_weight(field_index, gradient_L2)
+        gradient_dot = abs(np.array([g @ n for g, n in zip(gradient, normal)]))
+        bndry_index = ['bndry' in l for l in self.colocate.targets.label]
+        self.set_weight(bndry_index, gradient_dot)
+        # calculate mean weight
+        if sum(bndry_index) > 0:
+            mean_index = bndry_index
+        elif sum(field_index) > 0:
+            mean_index = field_index
+        else:
+            mean_index = slice(None)
+        mean_weight = self.colocate.targets.weight[mean_index].mean()
+        # not field or Psi_bndry (separatrix)
+        mean_index = [not field and not bndry for field, bndry in zip(
+                    field_index, bndry_index)]
         
-    def plot_fix(self, tails=True):
-        self.get_weight()
-        if self.fix['n'] > 0:
-            if hasattr(self, 'wsqrt'):
-                weight = self.wsqrt / np.mean(self.wsqrt)
-            else:
-                weight = np.ones(len(self.fix['BC']))
+        self.colocate.targets.loc[mean_index, 'weight'] = mean_weight
+        self.wsqrt = np.sqrt(self.colocate.targets.factor * 
+                             self.colocate.targets.weight)
+        self.wsqrt /= np.mean(self.wsqrt)  # normalize weight
+        
+        
+    def plot_colocate(self, tails=True):
+        self.update_weight()
+        
+        style = DataFrame(index=['color', 'marker', 'markersize',
+                                 'markeredgewidth'])
+        
+        plt.plot(self.colocate)
+        '''
             psi, Bdir, Bxz = [], [], []
             tail_length = 0.75
             for bc, w in zip(self.fix['BC'], weight):
@@ -149,6 +208,15 @@ class Inverse(CoilSet):
                              [z, z + direction[1] * norm * w],
                              color=color, linewidth=2)
             plt.axis('equal')
+        '''
+               
+
+    def fix_flux(self, flux):
+        if not hasattr(self, 'fix_o'):  # set once
+            self.fix_o = self.fix.copy()
+        index = ['psi' in name for name in self.fix.name]
+        self.fix.loc[index, 'value'] = self.fix_o.loc[index, 'value'] + flux
+        #self.set_target()  # adjust target flux
         
     '''
     def colocate(self, eqdsk=None, psi=True, field=True, Xpoint=True,
@@ -214,15 +282,9 @@ class Inverse(CoilSet):
         return sign
 
 
-        
-    def set_target(self):
-        self.T = (self.fix['value'] - self.BG).reshape((len(self.BG), 1))
-        self.wT = self.wsqrt * self.T
 
-    def set_background(self):
-        self.BG = np.zeros(len(self.fix['BC']))  # background
-        self.add_value('passive')
 
+    '''
     def set_foreground(self):
         self.G = np.zeros((self.fix['n'], self.nC))  # [G][If] = [T]
         self.add_value('active')
@@ -230,6 +292,7 @@ class Inverse(CoilSet):
         if self.svd:  # singular value dec.
             self.U, self.S, self.V = np.linalg.svd(self.wG)
             self.wG = np.dot(self.wG, self.V)  # solve in terms of alpha
+    '''
 
     def add_value(self, state):
         Xf, Zf, BC, Bdir, nfix = self.unpack_fix()
@@ -309,12 +372,6 @@ class Inverse(CoilSet):
         self.B_plasma[0] = RBS(self.sf.x, self.sf.z, Bplasma_r)
         self.B_plasma[1] = RBS(self.sf.x, self.sf.z, Bplasma_z)
 
-    def unpack_fix(self):
-        Xf, Zf = self.fix['x'], self.fix['z']
-        BC, Bdir = self.fix['BC'], self.fix['Bdir']
-        n = self.fix['n']
-        return Xf, Zf, BC, Bdir, n
-
     def get_gradients(self, bc, xf, zf):
         try:
             if 'psi' in bc:
@@ -328,52 +385,7 @@ class Inverse(CoilSet):
             d_dx, d_dz = np.ones(len(bc)), np.ones(len(bc))
         return d_dx, d_dz
 
-    def get_weight(self):
-        Xf, Zf, BC, Bdir, n = self.unpack_fix()
-        weight = np.zeros(n)
-        if n > 0:
-            for i, (xf, zf, bc, bdir, factor) in \
-                    enumerate(zip(Xf, Zf, BC, Bdir, self.fix['factor'])):
-                d_dx, d_dz = self.get_gradients(bc, xf, zf)
-                if 'psi' not in bc:  # (Bx,Bz)
-                    weight[i] = 1 / abs(np.sqrt(d_dx**2 + d_dz**2))
-                elif bc == 'psi_bndry':
-                    weight[i] = 1 / abs(np.dot([d_dx, d_dz], bdir))
-            if 'psi_bndry' in self.fix['BC']:
-                wbar = np.mean([weight[i]
-                                for i, bc in enumerate(self.fix['BC'])
-                                if bc == 'psi_bndry'])
-            else:
-                wbar = np.mean(weight)
-            for i, bc in enumerate(BC):
-                if bc == 'psi_x' or bc == 'psi':  # psi point weights
-                    weight[i] = wbar  # mean boundary weight
-            if (weight == 0).any():
-                warn('fix weight entry not set')
-        factor = np.reshape(self.fix['factor'], (-1, 1))
-        weight = np.reshape(weight, (-1, 1))
-        self.wsqrt = np.sqrt(factor * weight)
-        
-    def get_rss(self, vector, gamma, error=False):
-        err = np.dot(self.wG, vector.reshape(-1, 1)) - self.wT
-        rss = np.sum(err**2)  # residual sum of squares
-        rss += gamma * np.sum(vector**2)  # Tikhonov regularization
-        if error:  # return error
-            return rss, err
-        else:
-            return rss
-
-    def solve(self):
-        vector = np.linalg.lstsq(self.wG, self.wT, rcond=None)[0].reshape(-1)
-        self.rss = self.get_rss(vector)
-        if self.svd:
-            self.If = np.dot(self.V, self.alpha)
-        else:
-            self.If = vector
-        self.update_current()
-
     def frss(self, vector, grad, gamma=1):
-        self.iter['current'] += 1
         rss, err = self.get_rss(vector, gamma, error=True)
         if grad.size > 0:
             jac = 2 * self.wG.T @ self.wG @ vector
@@ -603,42 +615,7 @@ class Inverse(CoilSet):
                 CSaxial_limit[i] = [-1e16, 1e16]
         return CSaxial_limit
 
-    def solve_slsqp(self, flux):  # solve for constrained current vector
-        self.check_state()
-        self.fix_flux(flux)  # swing
-        self.set_Io()  # set coil current and bounds
-        #opt = nlopt.opt(nlopt.LD_SLSQP, self.nC)
-        opt = nlopt.opt(nlopt.LD_MMA, self.nC)
-        opt.set_min_objective(self.frss)
-        opt.set_ftol_rel(1e-3)
-        opt.set_xtol_abs(1e-3)
-        tol = 1e-2 * np.ones(2 * self.nPF + 2 + 2 * (self.nCS - 1) + 
-                             2 * (self.nCS + 1))  # 1e-3
-        opt.add_inequality_mconstraint(self.Flimit, tol)
-        #tol = 1e-1 * np.ones(self.nCS + 1)
-        #opt.add_inequality_mconstraint(self.CSlimit, tol)
-        if self.svd:  # coil current eigen-decomposition
-            opt.add_inequality_mconstraint(
-                self.Ilimit, 1e-3 * np.ones(2 * self.nC))
-            self.alpha = opt.optimize(self.alpha)
-            self.If = np.dot(self.V, self.alpha)
-        else:
-            opt.set_lower_bounds(self.Io['lb'])
-            opt.set_upper_bounds(self.Io['ub'])
-            self.If = opt.optimize(self.If)  # self.Io['value']
-        '''
-        print('')
-        c = np.zeros(len(tol))
-        self.Flimit(c, self.If, np.array([]))
-        print('c', c[-(self.nCS+1):])
-        print(self.get_Faxial(self.If) - self.tie_plate['limit_load'])
-        print(self.get_Faxial(self.If))
-        '''
-        self.Io['value'] = self.If.reshape(-1)
-        self.opt_result = opt.last_optimize_result()
-        self.rss = opt.last_optimum_value()
-        self.update_current()
-        return self.rss
+
 
     def update_current(self):
         self.Isum, self.IsumCS, self.IsumPF = 0, 0, 0

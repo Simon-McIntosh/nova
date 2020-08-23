@@ -87,7 +87,6 @@ class Inverse(CoilClass, PoloidalLimit):
         lb = self.get_limit(self.coil._mpc_index, 'current', 'lower')
         ub = self.get_limit(self.coil._mpc_index, 'current', 'upper')
         
-        print(lb, ub)
         opt.set_lower_bounds(1e3*lb)
         opt.set_upper_bounds(1e3*ub)
         #opt.set_lower_bounds(self.Io['lb'])

@@ -6,9 +6,10 @@ from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.coilgeom import ITERcoilset
 from nova.electromagnetic.machinedata import MachineData
 
-
 pmag = Inverse()
 pmag.load_coilset('ITER')
+
+pmag.build_limits()
 
 '''
 ITER = ITERcoilset(coils='pf', dCoil=0.2, n=2e3, limit=[3.5, 7.5, -3, 3],
@@ -43,7 +44,7 @@ pmag.save_coilset('ITER')
 
 #pmag.fix_flux(4)
 
-
+'''
 
 pmag.scenario_filename = -2
 pmag.scenario = 'IM'
@@ -64,11 +65,15 @@ pmag.set_foreground()
 pmag.set_background()
 pmag.set_target()
 
+pmag.add_limit(ICS=20)
+
 pmag.solve()
 print(np.linalg.norm(pmag.err))
 
 pmag.plot(subcoil=False, current='A')
 pmag.grid.plot_flux(color='C3')
+'''
+
 
 """
 '''

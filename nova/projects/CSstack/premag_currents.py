@@ -8,7 +8,6 @@ from nova.electromagnetic.machinedata import MachineData
 
 pmag = Inverse()
 pmag.load_coilset('ITER')
-
 pmag.build_limits()
 
 '''

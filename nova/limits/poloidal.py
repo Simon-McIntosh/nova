@@ -5,7 +5,7 @@ from pandas import DataFrame
 class PoloidalLimit:
     'operating limits for poloidal field coils (PF and CS)'
     
-    _limit_key = {'I': 'current', 'F': 'force'}
+    _limit_key = {'I': 'current', 'F': 'force', 'B': 'field'}
     _limit_unit = {'current': 'kA', 'force': 'MN', 'field': 'T'}
     _limit_bound = 1e16
     
@@ -79,14 +79,16 @@ class PoloidalLimit:
                 self._initalise_limit(name, coil, unit)
         return limit_xs.loc[_index, bound]
 
-    def build_limits(self, index=None):
-        if index is None:
+    def build_limits(self, coil_index=None, stack_index=None):
+        if coil_index is None:
             if not hasattr(self, 'coil'):
-                raise IndexError('index must be specified '
+                raise IndexError('coil_index must be specified '
                                  'when coilset not present')
             else:
-                index = self.coil.index
-        self.limits['coil'] = DataFrame(index=index)
+                coil_index = self.coil.index
+        #if stack_index is None:  # build stack index from CS coilset
+        
+        self.limits['coil'] = DataFrame(index=coil_index)
         
         print(self.limits['coil'])
         # coil_limit

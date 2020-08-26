@@ -41,14 +41,9 @@ class ITERcoilset(pythonIO):
             self.save_coilset()
         else:
             self.load_pickle(self.filepath)
-            self.cc.append_coilset(self._coilset)
-  
-        regenerate_grid = self.cc.grid.generate_grid(
-            n=self.n, limit=self.limit)
-        if regenerate_grid:  # save on-demand update
-            print('re-generating grid')
-            self.save_coilset()
-
+            self.cc.coilset = self._coilset
+        if self.cc.grid.generate_grid(n=self.n, limit=self.limit):  
+            self.save_coilset()  # save on-demand update
 
     def select_coils(self, **kwargs):
         coils = kwargs.pop('coils', ['pf', 'vsj', 'vv'])  # default set
@@ -64,7 +59,7 @@ class ITERcoilset(pythonIO):
 
     def build_coilset(self, coils, **kwargs):
         dCoil = self.cc.dCoil  # PF subcoil dimension
-        targets = kwargs.get('targets', {})  # data extraction targets
+        # targets = kwargs.get('targets', {})  # data extraction targets
         if 'vv' in coils:  # vv coilset (inner, outer, and trs)
             coilset = VVcoils(model='full', read_txt=True).cs.coilset
             self.cc.append_coilset(coilset)
@@ -75,8 +70,7 @@ class ITERcoilset(pythonIO):
             jacket = True if 'vsj' in coils else False
             coilset = VSgeom(jacket=jacket).cs.coilset  # vs coils + jackets
             self.cc.append_coilset(coilset)
-                    
-        #self.cc.mutual.solve_interaction()  # compute inductance matrix
+        self.cc.mutual.solve_interaction()  # compute mutual interaction
         self.cc.grid.generate_grid(n=self.n)
         #self.cc.add_targets(targets=targets)
         #self.cc.update_interaction()

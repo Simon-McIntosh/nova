@@ -5,6 +5,7 @@ from pandas.api.types import is_list_like, is_dict_like
 from amigo.pyplot import plt
 from nova.electromagnetic.meshgrid import MeshGrid
 from nova.electromagnetic.biotsavart import BiotSavart, BiotAttributes
+from nova.electromagnetic.biotsavart import BiotArray
                 
 
 class Mutual(BiotSavart, BiotAttributes):
@@ -50,9 +51,10 @@ class Grid(BiotSavart, BiotAttributes):
         self.load_source(subcoil)  # link source coilset
         
     def solve_interaction(self):
-        self.load_target(x=self.x2d, z=self.z2d)
-        BiotSavart.solve_interaction(self)        
-        
+        if not hasattr(self, 'target'):
+            self.load_target(x=self.x2d, z=self.z2d)
+        BiotSavart.solve_interaction(self)
+
     def _generate_grid(self, **grid_attributes):
         self.biot_attributes = grid_attributes  # update attributes
         if self.n > 0:
@@ -63,6 +65,7 @@ class Grid(BiotSavart, BiotAttributes):
             self.dz = np.diff(self._limit[2:])[0] / (mg.nz - 1)
             self.x2d = mg.x2d
             self.z2d = mg.z2d
+            self.load_target(x=self.x2d, z=self.z2d)
             self.solve_interaction()
     
     def generate_grid(self, **kwargs):
@@ -216,9 +219,9 @@ class Target(BiotSavart, BiotAttributes):
     def n(self):
         return self.targets.shape[0]
                 
-    @property
-    def n2d(self):
-        return self.targets.shape[0]
+    #@property
+    #def n2d(self):
+    #    return self.targets.shape[0]
     
     def plot(self, ax=None, **kwargs):
         if ax is None:
@@ -241,7 +244,6 @@ class Colocate(Target):
         
     def __init__(self, subcoil, **colocate_attributes):
         Target.__init__(self, subcoil, **colocate_attributes)
-        #self._append_biot_attributes(['fix'])  # append fix dataframe
         
     def add_targets(self, *args, **kwargs):
         '''
@@ -277,7 +279,7 @@ class Colocate(Target):
             target.loc[target.index[norm != 0], nhat] /= norm[norm != 0]
         Target.add_targets(self, target)  # append Biot colocation targets
         
-    def update(self):
+    def update_targets(self):
         'update targets.value from Psi and/or field'
         psi_index = ['Psi' in l for l in self.targets.label]
         self.targets.loc[psi_index, 'value'] = self.Psi[psi_index]

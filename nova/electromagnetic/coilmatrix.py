@@ -16,7 +16,8 @@ class CoilMatrix:
         _flux_ (np.array): plasma mutual unit filaments [nP, nP]
         flux (np.array): coil colocation flux matrix 
         field (dict): coil colocation field matrices
-            _field[*] (np.array): plasma unit filaments
+            _field[*] (np.array): plasma source unit filaments
+            _field_[*] (np.array): plasma mutual unit filaments
             field['x'] (np.array): radial field
             field['z'] (np.array): vertical field 
     '''
@@ -30,6 +31,7 @@ class CoilMatrix:
         #self.coilmatrix = coilmatrix_attributes  # exchange attributes
              
     def _initialize_coilmatrix_attributes(self):
+        self.nS, self.nT = 0, 0  # source and target length
         for attribute in self._coilmatrix_attributes:  
             if 'flux' in attribute:
                 setattr(self, f'{attribute}', np.array([]))

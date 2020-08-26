@@ -1,35 +1,43 @@
+import string
+
 import numpy as np
 from pandas import DataFrame
+from pandas.api.types import is_list_like
+from astropy import units
 
 
 class PoloidalLimit:
     'operating limits for poloidal field coils (PF and CS)'
-    
+  
     _limit_key = {'I': 'current', 'F': 'force', 'B': 'field'}
     _limit_unit = {'current': 'kA', 'force': 'MN', 'field': 'T'}
     _limit_bound = 1e16
-    
+    _limit_columns = ['limit', 'label', 'lower', 'upper', 'unit']
+       
     def __init__(self):
-        self.initalise_limits()
+        self.initialise_limitframe()
         
-    def initalise_limits(self):
-        if not hasattr(self, 'limits'):
-            self.limits = {}
-        self._limit = DataFrame(columns=['name', 'coil', 'lower', 'upper',
-                                        'unit'])
-        self._limit.set_index(['name', 'coil'], inplace=True)
+    def initialise_limitframe(self):
+        'initialize limit dataframe - store limit inputs'
+        self._limit = DataFrame(columns=self._limit_columns)
+        self._limit.set_index(['limit', 'label'], inplace=True)
         
-    def _initalise_limit(self, name, coil, unit):
+    def _set_limit(self, variable, label, unit):
         'add limit to dataframe with bounding values'
-        if (name, coil) not in self._limit.index:
-            self._limit.loc[(name, coil), ['lower', 'upper']] = \
+        if (variable, label) not in self._limit.index:
+            self._limit.loc[(variable, label), ['lower', 'upper']] = \
                 [-self._limit_bound, self._limit_bound]
-        self.set_unit(name, coil, unit)
+        self._set_unit(variable, label, unit)
 
-    def set_unit(self, name, coil, unit):
+    def _set_unit(self, variable, label, unit):
         if unit is None:
-            unit = self._limit_unit[name]
-        self._limit.loc[(name, coil), 'unit'] = unit
+            unit = self._limit_unit[variable]
+        self._limit.loc[(variable, label), 'unit'] = unit
+        
+    def _get_index(self, limit):
+        variable = self._limit_key[limit[0]]
+        label = limit[1:]
+        return variable, label
         
     def add_limit(self, bound='both', eps=1e-2, unit=None, **limits):
         '''
@@ -43,16 +51,63 @@ class PoloidalLimit:
         else:
             bounds = bound
         for limit in limits:
-            name = self._limit_key[limit[0]]
-            coil = limit[1:]
+            variable, label = self._get_index(limit)
             value = limits[limit]                
-            self._initalise_limit(name, coil, unit)
+            self._set_limit(variable, label, unit)
             if bound == 'equal':
                 value = value + eps*np.array([-1, 1])
             elif bound == 'both':
-                value = value * np.array([-1, 1])
-            self._limit.loc[(name, coil), bounds] = value
+                value = abs(value) * np.array([-1, 1])
+            self._limit.loc[(variable, label), bounds] = value
+            
+    def drop_limit(self, limits=None):
+        if limits is None:  # clear all limit
+            self.initialise_limitframe()
+        else:  # drop specified limits
+            if not is_list_like(limits):
+                limits = [limits]
+            for limit in limits:
+                variable, label = self._get_index(limit)
+                self._limit.drop(index=(variable, label), inplace=True)
+        
+    def initialize_limit(self, variable, index):
+        # initalize limit with default bounds
+        limit = DataFrame(index=index, columns=self._limit_columns[2:])
+        for bound, sign in zip(['lower', 'upper'], [-1, 1]):
+            limit.loc[:, bound] = sign*self._limit_bound
+        limit.loc[:, 'unit'] = self._limit_unit[variable]
+        return limit
+    
+    def update_unit(self, limit, output_unit=None):
+        if output_unit is not None:
+            for input_unit in limit.unit.unique():
+                if input_unit != output_unit:
+                    index = limit.unit == input_unit
+                    limit.loc[index, ['lower', 'upper']] *= \
+                        units.Unit(input_unit).to(output_unit)
+                    limit.loc[index, 'unit'] = output_unit
 
+    def get_limit(self, variable, index=None, unit=None):
+        if index is None:
+            if not hasattr(self, 'coil'):
+                raise IndexError('coil_index must be specified '
+                                 'when coilset not present')
+            else:
+                index = self.coil.index        
+        limit = self.initialize_limit(variable, index)
+        if not self._limit.empty:
+            _limit = self._limit.xs(variable)
+            for label in limit.index: 
+                if label in _limit.index:  # single label
+                    limit.loc[label, :] = _limit.loc[label, :]
+                else:
+                    part_label = label.rstrip(string.ascii_letters)
+                    part_label = part_label.rstrip(string.digits)
+                    if part_label in _limit.index:  # group
+                        limit.loc[label, :] = _limit.loc[part_label, :]
+        self.update_unit(limit, output_unit=unit)
+        return limit
+    
     def load_ITER_limits(self):
         'add default limits for ITER coil-set'
         self.add_limit(ICS=45)  # kA current limits
@@ -65,35 +120,7 @@ class PoloidalLimit:
         self.add_limit(FPF1=110, FPF2=15, FPF3=40, FPF4=90,
                        FPF5=160, FPF6=170, bound='upper')
         
-    def get_limit(self, index, name, bound, unit=None):
-        _index = np.copy(index)
-        limit_xs = self._limit.xs(name)
-        limit_index = limit_xs.index.to_list()
-        for i, coil in enumerate(index):
-            if coil in limit_index:  # full label
-                _index[i] = coil
-            elif coil[:2] in limit_xs.index:  # prefix
-                _index[i] = coil[:2]
-            else:  # default
-                _index[i] = coil
-                self._initalise_limit(name, coil, unit)
-        return limit_xs.loc[_index, bound]
-
-    def build_limits(self, coil_index=None, stack_index=None):
-        if coil_index is None:
-            if not hasattr(self, 'coil'):
-                raise IndexError('coil_index must be specified '
-                                 'when coilset not present')
-            else:
-                coil_index = self.coil.index
-        #if stack_index is None:  # build stack index from CS coilset
-        
-        self.limits['coil'] = DataFrame(index=coil_index)
-        
-        print(self.limits['coil'])
-        # coil_limit
-        # stack_limit
-        
+    '''
     def get_PFz_limit(self):
         PFz_limit = np.zeros((self.nPF, 2))
         for i, coil in enumerate(self.PFcoils):
@@ -136,6 +163,7 @@ class PoloidalLimit:
             else:  # no limit
                 CSaxial_limit[i] = [-self._bound, self._bound]
         return CSaxial_limit
+    '''
     
 if __name__ == '__main__':
     
@@ -143,4 +171,7 @@ if __name__ == '__main__':
     pl.add_limit(ICS=40, bound='lower')
     
     pl.load_ITER_limits()
+    
+    print(pl.get_limit('current', ['CS1U', 'CS2U'], 'A'))
+    print(pl._limit)
     

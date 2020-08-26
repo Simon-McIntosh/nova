@@ -4,6 +4,7 @@ import multiprocessing
 from itertools import cycle
 from warnings import warn
 import sys
+import operator
 
 import numpy as np
 from scipy.interpolate import RectBivariateSpline as RBS
@@ -14,6 +15,7 @@ from scipy.optimize import brentq
 import nlopt
 from pandas import DataFrame, Series, concat, isnull
 from pandas.api.types import is_list_like
+from astropy import units
 
 from amigo import geom
 from amigo.time import clock
@@ -27,14 +29,22 @@ from nova.limits.poloidal import PoloidalLimit
 class Inverse(CoilClass, PoloidalLimit):
     
     def __init__(self, gamma=1e-9):
-        self._biot_instances.update({'colocate': 'colocate'})
         CoilClass.__init__(self)
         PoloidalLimit.__init__(self)
         self.load_ITER_limits()
         
         self.gamma = gamma  # Tikhonov regularization
         
-    
+    def add_colocation_circle(self, xo, zo, r, N=20):
+        # build colocation circle
+        x, z = np.array([[r*np.cos(t), r*np.sin(t)]
+                         for t in np.linspace(0, 2*np.pi, N, 
+                                              endpoint=False)]).T
+        self.colocate.initialize_targets()
+        self.colocate.add_targets('Psi_bndry', xo+x, zo+z)
+        self.colocate.add_targets('Psi_bndry', xo, zo, 0, 1, d_dx=3, d_dz=2)  
+        self.colocate.solve_interaction()
+        
     def set_foreground(self):
         '[G][Ic] = [T]'
         self.flux = self.coil.reduce_mpc(self.colocate.flux)
@@ -73,25 +83,27 @@ class Inverse(CoilClass, PoloidalLimit):
         self.Ic = np.linalg.lstsq(self.wG, self.wT, rcond=None)[0]
         
     def solve(self):  # solve for constrained current vector
-        #self.solve_lstsq()  # sead with least-squares solution
+        self.solve_lstsq()  # sead with least-squares solution
         
-        #self.set_Io()  # set coil current and bounds
         opt = nlopt.opt(nlopt.LD_MMA, self.coil._nC)
         opt.set_min_objective(self.frss)
         opt.set_ftol_rel(1e-3)
-        opt.set_xtol_abs(1e-3)
+        #opt.set_xtol_abs(1e1)
         #tol = 1e-2 * np.ones(2 * self.nPF + 2 + 2 * (self.nCS - 1) + 
         #                     2 * (self.nCS + 1))  # 1e-3
         #opt.add_inequality_mconstraint(self.Flimit, tol)
-        
-        lb = self.get_limit(self.coil._mpc_index, 'current', 'lower')
-        ub = self.get_limit(self.coil._mpc_index, 'current', 'upper')
-        
-        opt.set_lower_bounds(1e3*lb)
-        opt.set_upper_bounds(1e3*ub)
-        #opt.set_lower_bounds(self.Io['lb'])
-        #opt.set_upper_bounds(self.Io['ub'])
-        self.Ic = opt.optimize(self.Ic)
+
+        # limit current
+        current_limit = self.get_limit('current', self.coil._mpc_index, 'A')
+        opt.set_lower_bounds(current_limit['lower'])
+        opt.set_upper_bounds(current_limit['upper'])
+        Ic = self.Ic.copy()
+        for bound, logic in zip(['lower', 'upper'], 
+                                [operator.lt, operator.gt]):
+            index = logic(Ic, current_limit[bound])
+            Ic[index] = current_limit[bound][index]
+
+        self.Ic = opt.optimize(Ic)
         '''
         print('')
         c = np.zeros(len(tol))
@@ -101,6 +113,7 @@ class Inverse(CoilClass, PoloidalLimit):
         print(self.get_Faxial(self.If))
         '''
         self.opt_result = opt.last_optimize_result()
+        print(self.opt_result)
         
     def Flimit(self, constraint, vector, grad):
         if self.svd:  # convert eigenvalues to current vector

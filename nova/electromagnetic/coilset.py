@@ -28,7 +28,7 @@ from nova.electromagnetic.biotmethods import BiotMethods
 from nova.electromagnetic.biotsavart import BiotSavart, BiotAttributes
 
 
-class CoilSet(pythonIO, BiotSavart, BiotAttributes, BiotMethods):
+class CoilSet(pythonIO, BiotMethods):
 
     '''
     CoilSet:
@@ -43,7 +43,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes, BiotMethods):
     _coilset_attributes = ['default_attributes', 
                            'coilset_frames', 
                            'coilset_metadata',
-                           'biot_attributes']
+                           ]  # 'biot_attributes'
 
     # main class attribures
     _coilset_frames = ['coil', 'subcoil']
@@ -56,15 +56,17 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes, BiotMethods):
                        'colocate': 'colocate'} 
 
     # additional_columns
-    _coil_columns = ['dA', 'dCoil', 'nx', 'nz', 'subindex', 'part',
+    _coil_columns = ['dx', 'dz', 'dA', 'dCoil', 'nx', 'nz', 'subindex', 'part',
                      'cross_section', 
                      'turn_section', 'turn_fraction', 'skin_fraction',
                      'patch', 'polygon',
-                     'power', 'plasma', 'mpc', 'Nf', 'Nt', 'It', 'Ic']
+                     'power', 'plasma', 'mpc', 'Nf', 'Nt', 'It', 'Ic',
+                     'Psi', 'Bx', 'Bz', 'B']
     
-    _subcoil_columns = ['dA', 'dl_x', 'dl_z', 'coil', 'part',
+    _subcoil_columns = ['dx', 'dz', 'dA', 'dl_x', 'dl_z', 'coil', 'part',
                         'cross_section', 'patch', 'polygon', 
-                        'power', 'plasma', 'mpc', 'Nt', 'It', 'Ic']
+                        'power', 'plasma', 'mpc', 'Nt', 'It', 'Ic',
+                        'Psi', 'Bx', 'Bz', 'B']
     
     _default_attributes = {'dCoil': -1, 'dPlasma': 0.25, 'dShell': 0.5, 
                            'turn_fraction': 1, 'turn_section': 'circle', 
@@ -72,7 +74,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes, BiotMethods):
 
     def __init__(self, **coilset):
         self.initialize_coil()  # initalize coil and subcoil
-        self.initalize_biot()  # initalize biot instances
+        self.initialize_biot_instances()  # initalize biot instances
         self.coilset = coilset  # exchange coilset and instance attributes
 
     def initialize_coil(self):
@@ -82,11 +84,6 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes, BiotMethods):
         self.subcoil = CoilFrame(coilframe_metadata=subcoil_metadata)
         self.coil.rebuild_coildata()
         self.subcoil.rebuild_coildata()
-        
-    def initalize_biot(self):
-        BiotSavart.__init__(self)
-        BiotAttributes.__init__(self)
-        self.initialize_biot_instances()
         
     def initialize_biot_instances(self):
         for instance in self._biot_instances:
@@ -200,24 +197,39 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes, BiotMethods):
                           'subcoil': self.subcoil.loc[subindex]}
         return CoilSet(coilset_frames=coilset_frames)
         
-    @staticmethod
-    def categorize_coilset(coil, xo=None, rename=True):
+    def categorize_coilset(self, rename=False):
         '''
         categorize coils in coil as CS or PF
         categorization split based on coils minimum radius
         CS coils ordered by x then z
         PF coils ordered by theta taken about coilset centroid
         '''
-        if xo is None:
-            xo = (coil['x'].mean(), coil['z'].mean())
-        # sort CS coils ['x', 'z']
-        CSo = coil['x'].idxmin()
-        xCS = coil.loc[CSo, 'x'] + coil.loc[CSo, 'dx']
-        CS = coil.loc[coil['x'] <= xCS, :]
-        CS = CS.sort_values(['x', 'z'])
+        # set part labels
+        label = {part: 'part' in self.coil.part.values for part in ['CS','PF']}
+        # select CS coils
+        if label['CS']:
+            CS = self.coil.loc[self.coil.part == 'CS', :]
+        else:
+            CSo = self.coil['x'].idxmin()
+            xCS = self.coil.loc[CSo, 'x'] + self.coil.loc[CSo, 'dx']
+            CS = self.coil.loc[self.coil['x'] <= xCS, :]
+        # select PF coils
+        if label['PF']:
+            PF = self.coil.loc[self.coil.part == 'PF', :]
+        elif not label['CS']: 
+            PF = self.coil.loc[self.coil['x'] > xCS, :]
+        else:
+            PF = self.coil.loc[self.coil.part != 'CS', :]
+        # select other coils
+        if label['CS'] and label['PF']:
+            index = self.coil.part != 'CS' and self.coil.part != 'PF'
+            other = self.coil.loc[index, :]
+        else:
+            other = DataFrame()
+        # sort CS coils ['z']
+        CS = CS.sort_values(['z'])
         CS = CS.assign(part='CS')
         # sort PF coils ['theta']
-        PF = coil.loc[coil['x'] > xCS, :]
         PF = PF.assign(theta=np.arctan2(PF['z'], PF['x']))
         PF = PF.sort_values('theta')
         PF.drop(columns='theta', inplace=True)
@@ -225,8 +237,7 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes, BiotMethods):
         if rename:
             CS.index = [f'CS{i}' for i in range(CS.nC)]
             PF.index = [f'PF{i}' for i in range(PF.nC)]
-        coil = concat([PF, CS])
-        return coil
+        self.coil = concat([PF, CS, other])
     
     @property
     def update_status(self):
@@ -248,10 +259,22 @@ class CoilSet(pythonIO, BiotSavart, BiotAttributes, BiotMethods):
             
     def _set_current(self, value, current_column='Ic'):
         self.relink_mpc()  # relink subcoil mpc as required
-        setattr(self.coil, current_column, value)
-        setattr(self.subcoil, current_column,
-                getattr(self.coil, 
-                        current_column)[self.subcoil._update_index])
+        self.coil._set_current(value, current_column)
+        self.subcoil._set_current(
+            self.coil.Ic[self.subcoil._update_index], 'Ic')
+        self.update_mutual()
+        
+    def update_mutual(self):
+        'update mutual interactions'
+        for variable in ['Psi', 'Bx', 'Bz']:
+            setattr(self.subcoil, variable, getattr(self.mutual, variable))
+        self.subcoil.B = \
+            np.linalg.norm([self.subcoil.Bx, self.subcoil.Bz], axis=0)
+        # set coil variables to maximum of subcoil bundles
+        for variable in ['Psi', 'Bx', 'Bz', 'B']:
+            setattr(self.coil, variable, 
+                    np.maximum.reduceat(getattr(self.subcoil, variable), 
+                                        self.subcoil._reduction_index))
         
     @property
     def dCoil(self):

@@ -184,7 +184,6 @@ class BiotPoints(Points):
             cross_section (str or [str]): applicable cross sections
             far_field (bool): promote instance to far field
         '''
-        
         if cross_section is None:
             cross_section = biot_instance._cross_section
         if isinstance(cross_section, str):

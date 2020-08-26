@@ -59,14 +59,15 @@ class CoilFrame(DataFrame, CoilData):
     def _initialize_default_attributes(self):
         'default attributes when not set via self.add_coil(**kwargs)'
         self._default_attributes = \
-            {'rms': 0., 'dA': 0., 'nx': 1, 'nz': 1, 
+            {'rms': 0., 'dx': 0., 'dz': 0., 'dA': 0., 'nx': 1, 'nz': 1, 
              'Ic': 0., 'It': 0., 'm': '', 'R': 0., 'Nt': 1,
              'Nf': 1, 'material': '', 
              'turn_fraction': 1., 'skin_fraction': 1., 'patch': None,
              'cross_section': 'rectangle', 'turn_section': 'rectangle',
              'coil': '', 'part': '', 'subindex': None, 
              'dCoil': 0., 'dl_x': 0., 'dl_z': 0., 'mpc': '', 'polygon': None,
-             'power': True, 'plasma': False, 'rho': 0.}
+             'power': True, 'plasma': False, 'rho': 0.,
+             'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.}
             
     def set_dtypes(self):
         if self.nC > 0:

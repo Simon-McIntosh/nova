@@ -47,8 +47,8 @@ class BiotFrame:
         arg_nC = np.argmax(nC)
         self.nC = nC[arg_nC]  # filament number
         self._nC = self.nC  # collapsed filament number
-        self.n2d = n2d[arg_nC]  # 2d shape  
-        
+        self.n2d = n2d[arg_nC]  # 2d shape
+
     def _emulate_plasma(self):
         self._plasma_index = np.zeros(self.nC, dtype=bool)
         self.Np = np.array([]) # plasma filament turn number
@@ -174,14 +174,15 @@ class BiotArray(Points):
         
 class BiotSavart(CoilMatrix, BiotArray, BiotPoints):
     
-    _biotsavart_attributes = {}
+    _biotsavart_attributes = {'_solve_interaction': True}
     
-    def __init__(self, source=None, ndr=3):
+    def __init__(self, source=None, ndr=3, mutual=False):
         CoilMatrix.__init__(self)
         BiotArray.__init__(self, source)
         BiotPoints.__init__(self, ndr=ndr)
+        self.mutual = mutual
         
-    def flux_matrix(self, ndr=0):
+    def flux_matrix(self):
         'calculate filament flux (inductance) matrix'
         flux = self.calculate('flux')
         self.flux , self._flux, self._flux_ = self.save_matrix(flux)
@@ -199,12 +200,14 @@ class BiotSavart(CoilMatrix, BiotArray, BiotPoints):
         self.assemble()  # assemble geometory matrices
         self.flux_matrix()  # assemble flux interaction matrix
         self.field_matrix()  # assemble field interaction matricies 
+        self._solve_interaction = False
         
     def save_matrix(self, M):
         # extract plasma unit filaments
         _M_ = M[self.target._plasma_index][:, self.source._plasma_index]  
         # reduce
-        M *= self.points['N'].reshape(self.nT, self.nS)  # target turns
+        if self.mutual:
+            M *= self.points['N'].reshape(self.nT, self.nS)  # target turns
         _M = M[:, self.source._plasma_index]  # unit source filament
         M *= self.points['Ns'].reshape(self.nT, self.nS)  # source turns
         #if len(self.target._reduction_index) < self.nT:  # sum sub-target
@@ -235,22 +238,34 @@ class BiotSavart(CoilMatrix, BiotArray, BiotPoints):
         for xz in self.field:
             self._update_plasma(self.field[xz], self._field[xz], 
                                 self._field_[xz])
-             
+            
+    def _reshape(self, M):
+        if hasattr(self, 'n2d'):
+            M = M.reshape(self.n2d)
+        return M
+    
+    def _dot(self, variable):
+        if self._solve_interaction:
+            self.solve_interaction()
+        if variable == 'Psi':
+            matrix = self.flux 
+        elif variable in ['Bx', 'Bz']:
+            matrix = self.field[variable[-1]]
+        else:
+            raise IndexError(f'variable {variable} not in [Psi, Bx, Bz]')
+        return self._reshape(np.dot(matrix, self.source._Ic))
+
     @property
     def Psi(self):
-        self._Psi = np.dot(self.flux, self.source._Ic)
-        return self._Psi.reshape(self.n2d)
+        return self._dot('Psi')
     
     @property
     def Bx(self):
-        self._Bx = np.dot(self.field['x'], self.source._Ic)
-        return self._Bx.reshape(self.n2d)
+        return self._dot('Bx')
     
     @property
     def Bz(self):
-        self._Bz = np.dot(self.field['z'], self.source._Ic)
-        return self._Bz.reshape(self.n2d)
-
+        return self._dot('Bz')
 
 if __name__ == '__main__':
     

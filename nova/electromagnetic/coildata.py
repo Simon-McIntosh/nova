@@ -20,6 +20,7 @@ class CoilData():
         Psi: magnetic flux [Wb]
         Bx: radial field [T]
         Bz: vertical field [T]
+        B: field magnitude [T]
         Fx:  net radial force [N]
         Fz:  net vertical force [N]
         xFx: first radial moment of radial force [Nm]
@@ -37,7 +38,7 @@ class CoilData():
     # CoilFrame attributes - fast access np.array linked to CoilFrame
     _coilframe_attributes = ['x', 'z', 'dl', 'dt', 'rms', 'dx', 'dz',
                              'Ic', 'It', 'Nt',
-                             'power', 'plasma', 'Psi', 'Bx', 'Bz',
+                             'power', 'plasma', 'Psi', 'Bx', 'Bz', 'B',
                              'Fx', 'Fz', 'xFx', 'xFz', 'zFx', 'zFz', 'My']
     
     _coildata_attributes = {'current_update': 'full'}

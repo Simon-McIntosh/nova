@@ -31,7 +31,6 @@ def test_solenoid_target():
     cs.add_coil(1.5, 0, 0.01, L, Nt=N, turn_section='rectangle', dCoil=0.5)
     cs.Ic = Ic
 
-
     cs.target.add_targets([1e-9, 0])
     cs.target.solve_interaction()
     
@@ -42,7 +41,7 @@ def test_solenoid_target():
     return cs, Bz, Bz_theory
 
 if __name__ == '__main__':
-    # cs, Bz, Bz_theory = test_solenoid_grid(plot=True)
-    cs, Bz, Bz_theory = test_solenoid_target()
+    cs, Bz, Bz_theory = test_solenoid_grid(plot=True)
+    #cs, Bz, Bz_theory = test_solenoid_target()
     print(Bz, Bz_theory)
 

@@ -16,7 +16,7 @@ from shapely.strtree import STRtree
 from descartes import PolygonPatch
 from scipy.interpolate import interp1d
 
-from amigo.geom import gmd, amd
+from amigo.geom import gmd, amd, rms
 from amigo.IO import human_format
 from amigo.pyplot import plt
 from amigo.IO import class_dir
@@ -25,7 +25,6 @@ from amigo.geom import length, xzfun
 import nova
 from nova.electromagnetic.coilframe import CoilFrame
 from nova.electromagnetic.biotmethods import BiotMethods
-from nova.electromagnetic.biotsavart import BiotSavart, BiotAttributes
 
 
 class CoilSet(pythonIO, BiotMethods):
@@ -182,6 +181,7 @@ class CoilSet(pythonIO, BiotMethods):
             del self._coilset  # delete temp variable
         else:
             raise LookupError(f'file {filepath} not found')
+        return self.coilset
 
     def subset(self, index, invert=False):
         if not isinstance(index, Index):
@@ -693,7 +693,7 @@ class CoilSet(pythonIO, BiotMethods):
 
     def merge(self, coil_index, name=None, merge_pairs=True):
         subset = self.subset(coil_index)
-        x = gmd(subset.coil.x, subset.coil.Nt)
+        x = amd(subset.coil.x, subset.coil.Nt)
         z = amd(subset.coil.z, subset.coil.Nt)
         dx = np.max(subset.coil.x + subset.coil.dx/2) -\
             np.min(subset.coil.x - subset.coil.dx/2)
@@ -736,13 +736,13 @@ class CoilSet(pythonIO, BiotMethods):
         # on-demand patch of top level (coil)
         if isnull(subset.coil.loc[:, 'patch']).any():
             CoilSet.patch_coil(subset.coil)  # patch on-demand
-        #self.coil.at[name, 'patch'] = list(subset.coil.patch)
         # add subcoils
-        subindex = self.subcoil.add_coil(subset.subcoil, iloc=subcoil_iloc,
-                                         mpc=True)
+        subindex = self.subcoil.add_coil(subset.subcoil, iloc=subcoil_iloc)
         self.coil.at[name, 'subindex'] = list(subindex)
         self.subcoil.loc[subindex, 'coil'] = name
+        self.subcoil.add_mpc(subindex.to_list())
         # update current
+        self.mutual.solve_interaction()
         self.Ic = {name: Ic}
         
     def rename(self, index):
@@ -808,7 +808,7 @@ class CoilSet(pythonIO, BiotMethods):
             if passive:
                 patch = coil.loc[:, 'patch']
             else:  # exclude passive filaments (Nt == 0)
-                patch = coil.loc[coil.Nt > 0, 'patch']  # plot iff Nt > 0
+                patch = coil.loc[coil.Nt != 0, 'patch']  # plot iff Nt != 0
             # form list of lists
             patch = [p if is_list_like(p) else [p] for p in patch]
             if len(patch) > 0:
@@ -833,6 +833,7 @@ class CoilSet(pythonIO, BiotMethods):
             self.label_coil(ax, label, current)
         ax.axis('equal')
         ax.axis('off')
+        plt.tight_layout()
 
     def label_plasma(self, ax, fs=None):
         if fs is None:
@@ -881,9 +882,10 @@ class CoilSet(pythonIO, BiotMethods):
         if label == True:
             label = parts
         # referance coil height
-        dz_ref = np.min(
-            [coil.at[name, 'dz'] for name, part in zip(coil.index, coil.part)
-             if part in parts])
+        dz_list = [coil.at[name, 'dz'] for name, part in 
+                   zip(coil.index, coil.part) if part in parts]
+        if len(dz_list) > 0:
+            dz_ref = np.min(dz_list)
         for name, part in zip(coil.index, coil.part):
             x, z = coil.at[name, 'x'], coil.at[name, 'z']
             dx = coil.at[name, 'dx'] 

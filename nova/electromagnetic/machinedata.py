@@ -183,24 +183,37 @@ class MachineData(CoilSet):
         if legend:
             ax.legend()
             
+    def select_coilset(self, part_list=None):
+        if not hasattr(self, 'models'):
+            self.load_models()
+        if part_list is None:
+            part_list = self.models.keys()
+        if not pd.api.types.is_list_like(part_list):
+            part_list = part_list.replace('_', ' ')
+            part_list = part_list.split()
+        part_list = [pl for pl in part_list if pl in self.models]
+        part_list = list(np.unique(np.sort(part_list)))
+        return part_list
+            
     def load_coilset(self, **kwargs):
         read_txt = kwargs.get('read_txt', self.read_txt)
-        filename = 'ITER_machine_coilset'
+        filename = 'ITER_coilset_'
+        part_list = self.select_coilset(kwargs.get('part_list', None))
+        filename += '_'.join(part_list)
         filepath = path.join(self.directory, filename)
         if read_txt or not path.isfile(filepath + '.pk'):
-            self.build_coilset()
+            self.build_coilset(part_list)
             self.save_coilset(filename, directory=self.directory)
         else:
             CoilSet.load_coilset(self, filename, directory=self.directory)
+        return self.coilset
             
-    def build_coilset(self):
-        if not hasattr(self, 'models'):
-            self.load_models()
-        for part in self.models:
+    def build_coilset(self, part_list):
+        for part in part_list:
             for segment in self.models[part]:
                 frame = self.models[part][segment]
                 self.add_shell(frame.x, frame.z, frame.dt, rho=frame.rho, 
-                               dShell=1, dCoil=-1, part=part, name=segment)
+                               dShell=1, dCoil=0.25, part=part, name=segment)
           
             
 if __name__ == '__main__':
@@ -213,7 +226,7 @@ if __name__ == '__main__':
     #machine.load_data()
     #machine.plot_data()
     
-    machine.load_coilset()
+    machine.load_coilset(part_list='vvin vvout', read_txt=True)
 
 
     #machine.Ic = 20

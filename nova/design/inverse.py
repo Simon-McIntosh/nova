@@ -28,7 +28,7 @@ from nova.limits.poloidal import PoloidalLimit
 
 class Inverse(CoilClass, PoloidalLimit):
     
-    def __init__(self, gamma=1e-9):
+    def __init__(self, gamma=1e-14):
         CoilClass.__init__(self)
         PoloidalLimit.__init__(self)
         self.load_ITER_limits()
@@ -87,7 +87,7 @@ class Inverse(CoilClass, PoloidalLimit):
         
         opt = nlopt.opt(nlopt.LD_MMA, self.coil._nC)
         opt.set_min_objective(self.frss)
-        opt.set_ftol_rel(1e-3)
+        opt.set_ftol_rel(1e-6)
         #opt.set_xtol_abs(1e1)
         #tol = 1e-2 * np.ones(2 * self.nPF + 2 + 2 * (self.nCS - 1) + 
         #                     2 * (self.nCS + 1))  # 1e-3

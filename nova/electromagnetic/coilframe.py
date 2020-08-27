@@ -225,7 +225,7 @@ class CoilFrame(DataFrame, CoilData):
         for n, f in zip(name[1:], factor):
             self.at[n, 'mpc'] = (name[0], f)
         self.rebuild_coildata()
-        
+
     def drop_mpc(self, index):
         'remove multi-point constraints referancing dropped coils'
         if not is_list_like(index):
@@ -404,7 +404,6 @@ class CoilFrame(DataFrame, CoilData):
                                      (x**2, z), p).centroid.x)**0.5
                 coil.at[index, 'rms'] = rms
 
-        
     @staticmethod
     def _get_polygen(cross_section):
         if cross_section == 'circle':
@@ -444,8 +443,8 @@ class CoilFrame(DataFrame, CoilData):
     @staticmethod
     def _poly_skin(x, z, d, dt):
         '''
-        dx: fractional thickness
-        dz: circle diameter
+        d: circle diameter
+        dt: fractional thickness
         '''
         if dt < 0 or dt > 1:
             raise ValueError(f'skin fractional thickness not 0 <= {dt} <= 1')

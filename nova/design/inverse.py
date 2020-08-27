@@ -28,7 +28,7 @@ from nova.limits.poloidal import PoloidalLimit
 
 class Inverse(CoilClass, PoloidalLimit):
     
-    def __init__(self, gamma=1e-14):
+    def __init__(self, gamma=0):
         CoilClass.__init__(self)
         PoloidalLimit.__init__(self)
         self.load_ITER_limits()

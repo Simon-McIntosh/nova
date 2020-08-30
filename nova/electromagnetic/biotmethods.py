@@ -5,7 +5,6 @@ from pandas.api.types import is_list_like, is_dict_like
 from amigo.pyplot import plt
 from nova.electromagnetic.meshgrid import MeshGrid
 from nova.electromagnetic.biotsavart import BiotSavart, BiotAttributes
-from nova.electromagnetic.biotsavart import BiotArray
                 
 
 class Mutual(BiotSavart, BiotAttributes):

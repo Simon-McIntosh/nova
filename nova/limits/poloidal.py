@@ -110,9 +110,11 @@ class PoloidalLimit:
     
     def load_ITER_limits(self):
         'add default limits for ITER coil-set'
-        self.add_limit(ICS=45)  # kA current limits
+        # kA current limits
+        self.add_limit(ICS=45)  
         self.add_limit(IPF1=48, IPF2=55, IPF3=55, IPF4=55, IPF5=52,
                        IPF6=52)
+        self.add_limit(Iimb=22.5)  # imbalance current
         self.add_limit(FCSsep=240, bound='upper')  # force limits
         self.add_limit(FCSsum=60, bound='both')
         self.add_limit(FPF1=-150, FPF2=-75, FPF3=-90, FPF4=-40,

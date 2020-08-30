@@ -16,7 +16,7 @@ from shapely.strtree import STRtree
 from descartes import PolygonPatch
 from scipy.interpolate import interp1d
 
-from amigo.geom import gmd, amd, rms
+from amigo.geom import gmd, amd
 from amigo.IO import human_format
 from amigo.pyplot import plt
 from amigo.IO import class_dir
@@ -820,7 +820,7 @@ class CoilSet(pythonIO, BiotMethods):
                 ax.add_collection(pc)
 
     def plot(self, subcoil=True, plasma=True, label=True, current=None,
-             passive=False, ax=None):
+             field=True, passive=False, ax=None):
         if ax is None:
             ax = plt.gca()
         if subcoil:
@@ -829,8 +829,8 @@ class CoilSet(pythonIO, BiotMethods):
             self.plot_coil(self.coil, passive=passive, ax=ax)
         if 'Plasma' in self.coil.index and plasma and 'Ic' in self.coil:
             self.label_plasma(ax)
-        if label or current:
-            self.label_coil(ax, label, current)
+        if label or current or field:
+            self.label_coil(ax, label, current, field)
         ax.axis('equal')
         ax.axis('off')
         plt.tight_layout()
@@ -870,9 +870,8 @@ class CoilSet(pythonIO, BiotMethods):
                     ha='left', va='center', color='C3')      
             z += dzo
 
-    def label_coil(self, ax, label, current, coil=None, fs=None, Nmax=20):
-        if fs is None:
-            fs = matplotlib.rcParams['legend.fontsize']
+    def label_coil(self, ax, label, current, field, 
+                   coil=None, fs='large', Nmax=20):
         if coil is None:
             coil = self.coil
         parts = np.unique(coil.part)
@@ -886,6 +885,17 @@ class CoilSet(pythonIO, BiotMethods):
                    zip(coil.index, coil.part) if part in parts]
         if len(dz_list) > 0:
             dz_ref = np.min(dz_list)
+        print([label, current != None, field])
+        nz = np.sum(np.array([label != False, current != None, 
+                              field != False]))
+        if nz == 1:
+            dz_ref = 0
+        ztext = {name: 0 for name, value 
+                 in zip(['label', 'current', 'field'],
+                        [label, current, field]) if value}
+        for name, dz in zip(ztext, nz*dz_ref / 5 * np.linspace(1, -1, nz)):
+            ztext[name] = dz
+        print(ztext, nz)
         for name, part in zip(coil.index, coil.part):
             x, z = coil.at[name, 'x'], coil.at[name, 'z']
             dx = coil.at[name, 'dx'] 
@@ -896,13 +906,16 @@ class CoilSet(pythonIO, BiotMethods):
             else:
                 drs_index = 1
                 ha = 'left'
-            if part in parts and (label and current):
-                zshift = dz_ref/3  #max([dz / 5, ylim / 3])
+            '''
+            if part in parts and nz > 1:
+                zshift = dz_ref/(nz+1)  #max([dz / 5, ylim / 3])
             else:
                 zshift = 0
+            '''
             if part in parts and part in label and N[part] < Nmax:
-                ax.text(x + drs[drs_index], z + zshift, name, fontsize=fs,
-                        ha=ha, va='center', color=0.2 * np.ones(3))
+                ax.text(x + drs[drs_index], z + ztext['label'], 
+                        name, fontsize=fs, ha=ha, va='center', 
+                        color=0.2 * np.ones(3))
             if part in parts and current:
                 if current == 'Ic' or current == 'A':  # line current
                     unit = 'A'
@@ -914,7 +927,7 @@ class CoilSet(pythonIO, BiotMethods):
                     raise IndexError(f'current {current} not in ' +\
                                      '[Ic, A, It, AT]')
                 txt = f'{human_format(Ilabel, precision=1)}{unit}'
-                ax.text(x + drs[drs_index], z - zshift, txt,
+                ax.text(x + drs[drs_index], z + ztext['current'], txt,
                         fontsize=fs, ha=ha, va='center',
                         color=0.2 * np.ones(3))
         

@@ -68,7 +68,7 @@ class ITERcoilset(CoilClass):
             self.append_coilset(
                 MachineData().load_coilset(part_list='vvin vvout'))
             #self.append_coilset(VVcoils(model='full', read_txt=True).coilset)
-        self.mutual.solve_interaction()  # compute mutual interaction
+        #self.mutual.solve_interaction()  # compute mutual interaction
         self.grid.generate_grid(**kwargs)
         #self.add_targets(targets=targets)
         #self.update_interaction()

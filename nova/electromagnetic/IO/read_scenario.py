@@ -958,15 +958,15 @@ if __name__ == '__main__':
     
     d2 = scenario_data(read_txt=True)
     #d2.load_folder()
-    d2.load_file(-2)  # read / load single file
+    d2.load_file(-1)  # read / load single file
     #d2.load_file(-1, read_txt=True)  # read / load single file
     
     #plt.set_context('talk')
     #d2.plot_features(feature_name=['Ip', '<PSIcoils>'])
 
-    #d3 = field_data(read_txt=False)
+    d3 = field_data(read_txt=False)
     #d3.load_folder()
-    # d3.load_file('15MA DT-DINA2016-01_v1.1')
+    d3.load_file(-1)
     
 
     '''

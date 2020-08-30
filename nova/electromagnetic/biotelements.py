@@ -46,6 +46,7 @@ class Points:
         return self._points
     
     @points.setter
+    @profile
     def points(self, points):
         self.Npoints = len(points)  # interaction number
         self._points = points  # store point subset
@@ -110,6 +111,7 @@ class Filament(Vectors):
     def __init__(self, rms=True):
         Vectors.__init__(self, rms=rms)
 
+    @profile
     def offset(self):
         'offset source and target points '
         self.dL = np.array([self.vector['r']-self.vector['rs'],
@@ -121,16 +123,16 @@ class Filament(Vectors):
         self.dL_norm[:, ~self.index] = \
             self.dL[:, ~self.index] / self.dL_mag[~self.index]
         idx = self.dL_mag < self.points['dr'] # seperation < L2 norm radius
-        ro = self.points['dr'] * np.array(
+        ro = self.points['dr'][idx] * np.array(
             [self._cross_section_factor['square'] 
              if cs not in self._cross_section_factor 
              else self._cross_section_factor[cs] 
-             for cs in self.points['cs']])
+             for cs in self.points['cs'][idx]])
         factor = (1 - self.dL_mag[idx] / self.points['dr'][idx]) / 2
         deltas = {}
         for i, var in enumerate(['r', 'z']):
             offset = np.zeros(self.Npoints)
-            offset[idx] = factor * ro[idx] * self.dL_norm[i][idx]
+            offset[idx] = factor * ro * self.dL_norm[i][idx]
             deltas.update({f'd{var}': offset, f'd{var}s': -offset})
         self.set_point_position(**deltas)
         
@@ -148,7 +150,6 @@ class Filament(Vectors):
             self.K - (2-self.k2) / (2*self.ck2) * self.E) / (self.a*self.vector['r'])
         return Br  # T / Amp-turn-turn
 
-    
     def vertical_field(self):  # T / Amp-turn-turn
         self.update()  # on-demand coefficent update
         Bz = self.mu_o / (2*np.pi) * (self.vector['r']*self.K - \
@@ -214,6 +215,7 @@ class BiotPoints(Points):
         self.points['far_field'] = False
         self.points['far_field'][index] = True
         
+    @profile
     def set_biot_instance(self):
         'set instance attribute in points structured array'
         self.points['instance'] = ''
@@ -231,15 +233,23 @@ class BiotPoints(Points):
                 self.points['instance'][cs_index] = self.far_field
         self.set_biot_index()
                 
+    @profile
     def set_biot_index(self):
         self.index = {}
         for name in self.biot_instance:
+            if name in self.points['instance']:
+                self.index[name] = self.points['instance'] == name
+                # upload points to instance
+                self.biot_instance[name].points = \
+                    self.points[self.index[name]] 
+            '''
             index = self.points['instance'] == name
             if sum(index) == 0:
                 index = None
             self.index[name] = index
             if index is not None:  # upload points to instance
                 self.biot_instance[name].points = self.points[index]
+            '''
       
     def calculate(self, attribute):
         'calculate biot attributes (flux, radial_field, vertical_field)'

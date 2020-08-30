@@ -95,7 +95,7 @@ class MachineData(CoilSet):
     def read_models(self):
         self.models = {}
         self.filename = \
-            'Models_for_calculation_of_axisymmetric_c_XBQF5H_v2_1.xlsx'
+            'Models_for_calculation_of_axisymmetric_c_XBQF5H_v2_2.xlsx'
         with pd.ExcelFile(path.join(self.directory, self.filename)) as self.f:
             self.read_model('vvin', 'Conducting structures', 10, 
                             np.arange(1, 6), nrows=100)

@@ -11,7 +11,7 @@ build_coilset = True
 pmag = Inverse()
 
 if build_coilset:
-    pmag.coilset = ITERcoilset(coils='pf', dCoil=0.2, n=5e3, 
+    pmag.coilset = ITERcoilset(coils='pf', dCoil=0.2, n=20, 
                                limit=[3.5, 8, -2.5, 2.5], 
                                read_txt=True).coilset
     pmag.scenario_filename = -2
@@ -21,9 +21,9 @@ if build_coilset:
 else:
     pmag.load_coilset('ITER')
     
+"""
 pmag.scenario_filename = -2
 pmag.scenario = 'IM'
-pmag.colocate.update_targets()
 
 #pmag.coil.add_mpc(['PF2', 'PF3'], 0)
 
@@ -35,6 +35,7 @@ pmag.grid.plot_flux()
 #pmag.coil.add_mpc(['PF3', 'PF4'], -2)
 #pmag.colocate.targets.value += 10
 
+pmag.colocate.update_targets()
 pmag.set_foreground()
 pmag.set_background()
 pmag.set_target()
@@ -45,18 +46,19 @@ pmag.add_limit(ICS3L=15)
 
 pmag.scenario = 'IM'
 
-pmag.solve()
+#pmag.solve()
 #pmag.solve_lstsq()
 
 print(np.linalg.norm(pmag.err))
 
-pmag.plot(subcoil=False, current='A')
+pmag.plot(subcoil=True, current='A')
 pmag.grid.plot_flux(color='C3')
 #pmag.grid.plot_field()
 
 #pmag.target.add_targets([1.409500, 4.522150])
 #print(pmag.target.Bz, -pmag.target.mu_o*40e3*554/2.093)
 
+"""
 
 """
 '''

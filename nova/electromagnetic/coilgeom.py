@@ -48,7 +48,8 @@ class ITERcoilset(CoilClass):
         if not pd.api.types.is_list_like(coils):
             coils = coils.replace('_', ' ')
             coils = coils.split()
-        coils = [c for c in coils if c in ['pf', 'vs', 'vsj', 'vv']]
+        coils = [c for c in coils 
+                 if c in ['pf', 'vs', 'vsj', 'vv', 'trs', 'dir']]
         coils = list(np.unique(np.sort(coils)))
         if 'vs' in coils and 'vsj' in coils:
             coils.remove('vs')  # remove vs if selection is over-defined
@@ -68,8 +69,14 @@ class ITERcoilset(CoilClass):
             self.append_coilset(
                 MachineData().load_coilset(part_list='vvin vvout'))
             #self.append_coilset(VVcoils(model='full', read_txt=True).coilset)
-        #self.mutual.solve_interaction()  # compute mutual interaction
-        self.grid.generate_grid(**kwargs)
+        if 'trs' in coils:
+            self.append_coilset(
+                MachineData().load_coilset(part_list='trs'))
+        if 'dir' in coils:
+            self.append_coilset(
+                MachineData().load_coilset(part_list='dir'))
+        self.mutual.solve_interaction()  # compute mutual interaction
+        self.grid.generate_grid(**kwargs, regen=True)
         #self.add_targets(targets=targets)
         #self.update_interaction()
         
@@ -259,7 +266,7 @@ class PFgeom(CoilSet):  # PF/CS coilset
 
     def __init__(self, VS=False, dCoil=0.25, source='PCR'):
         CoilSet.__init__(self, dCoil=dCoil, turn_fraction=0.665,
-                           turn_section='rectangle')
+                         turn_section='skin', skin_fraction=0.75)
         self.update_coilframe_metadata(
                 'coil', additional_columns=['m', 'material', 'R'])
         self.load(VS=VS, source=source)

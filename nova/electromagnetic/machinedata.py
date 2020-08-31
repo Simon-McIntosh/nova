@@ -15,7 +15,7 @@ class MachineData(CoilSet):
     load ITER data and geometry  
     
     Data_for_study_of_ITER_plasma_magnetic_c_33NHXN_v3_15.xlsx
-    Models_for_calculation_of_axisymmetric_c_XBQF5H_v2_1.xlsx
+    Models_for_calculation_of_axisymmetric_c_XBQF5H_v2_2.xlsx
     '''
     
     def __init__(self, read_txt=False):
@@ -45,11 +45,17 @@ class MachineData(CoilSet):
             return sheet
         
     def read_model(self, name, sheetname, skiprows, usecols, nrows=None,
-                   dt=0.06):
+                   dt=0.06, ring=False, rho=None):
         columns = {'R1(m)': 'x1', 'R2(m)': 'x2', 'Z1(m)': 'z1', 
                     'Z2(m)': 'z2', 'Ω(Ohm)': 'R'}
         model = self.read_sheet(sheetname, skiprows, usecols, nrows=nrows,
                                 columns=columns)
+        if ring:  # triangular support and divertor rail
+            ring = model.copy()
+            model = pd.DataFrame(index=range(1), columns=columns.values())
+            model.loc[:, 'x1':'x2'] = ring.x.values
+            model.loc[:, 'z1':'z2'] = ring.z.values
+            model.R = rho
         data = {}
         _data = {var: [] for var in ['x', 'z', 'rho', 'dt']}
         _xz, index = np.array([0, 0]), 0
@@ -103,6 +109,10 @@ class MachineData(CoilSet):
                             np.arange(1, 6), nrows=100)
             self.read_model('cryo', 'Conducting structures', 215, 
                             np.arange(1, 6), nrows=249)
+            self.read_model('trs', 'Conducting structures', 55, 
+                            np.arange(10, 12), nrows=2, ring=True, rho=0.8)
+            self.read_model('dir', 'Conducting structures', 67, 
+                            np.arange(10, 12), nrows=2, ring=True, rho=0.9)
             
     def plot_models(self):
         plt.set_aspect(1.1)
@@ -118,11 +128,9 @@ class MachineData(CoilSet):
         filepath = path.join(self.directory, 'ITER_machine_data')
         if read_txt or not path.isfile(filepath + '.pk'):
             self.read_data()
-            #self.save_coilset('coilset', directory=self.folder)
             self.save_pickle(filepath, ['data'])
         else:
             self.load_pickle(filepath)
-            #self.load_coilset('coilset', directory=self.folder)
         
     def read_data(self):
         self.data = {}
@@ -213,25 +221,26 @@ class MachineData(CoilSet):
             for segment in self.models[part]:
                 frame = self.models[part][segment]
                 self.add_shell(frame.x, frame.z, frame.dt, rho=frame.rho, 
-                               dShell=1, dCoil=0.25, part=part, name=segment)
+                               dShell=1, dCoil=0.1, part=part, name=segment)
           
             
 if __name__ == '__main__':
 
     machine = MachineData()
     
-    #machine.load_models()
+    #machine.load_models(read_txt=True)
     #machine.plot_models()
     
     #machine.load_data()
     #machine.plot_data()
     
-    machine.load_coilset(part_list='vvin vvout', read_txt=True)
+    machine.load_coilset(part_list='trs', read_txt=True)
 
-
-    #machine.Ic = 20
-    machine.plot()
-    #machine.grid.plot_flux()
+    machine.Ic = 20
+    machine.plot(subcoil=True)
+    
+    machine.grid.generate_grid()
+    machine.grid.plot_flux()
     
     
     '''

@@ -52,7 +52,7 @@ class CoilSet(pythonIO, BiotMethods):
                        'plasma': 'grid',
                        'grid': 'grid',
                        'target': 'target',
-                       'colocate': 'colocate'} 
+                       'colocate': 'colocate'}
 
     # additional_columns
     _coil_columns = ['dx', 'dz', 'dA', 'dCoil', 'nx', 'nz', 'subindex', 'part',
@@ -374,6 +374,8 @@ class CoilSet(pythonIO, BiotMethods):
             
     def meshcoil(self, index=None, mpc=True, **kwargs):
         coil = kwargs.pop('coil', self.coil)
+        coil.generate_polygon()
+        coil.update_polygon()
         subcoil = kwargs.pop('subcoil', self.subcoil)
         if index is None:  # re-mesh all coils
             index = coil.index
@@ -397,6 +399,7 @@ class CoilSet(pythonIO, BiotMethods):
                     subcoil_kwargs[var] = mesh[var]
             _subcoil[i] = subcoil.get_coil(
                     *subcoil_args, name=name, coil=name, **subcoil_kwargs)
+            _subcoil[i].update_polygon()
             # back-propagate fillament attributes to coil
             coil.at[name, 'Nf'] = mesh['Nf']  
             coil.at[name, 'nx'] = mesh['nx']  
@@ -418,7 +421,7 @@ class CoilSet(pythonIO, BiotMethods):
             dx, dz = coil[['dl', 'dt']]  # length, thickness == dx, dz
             bounds = (x-dx/2, z-dz/2, x+dx/2, z+dz/2)
             coil_polygon = shapely.geometry.box(bounds)
-        coil_area = coil_polygon.area
+        # coil_area = coil_polygon.area
         mesh = {'mpc': mpc}  # multi-point constraint (link current)
         if 'part' in coil:
             mesh['part'] = coil['part']
@@ -489,7 +492,8 @@ class CoilSet(pythonIO, BiotMethods):
         if Nf == 0:  # no points found within polygon (skin)
             xm_, zm_, dl_, dt_ = x, z, dl, dt
             Nf = 1
-        Nt_ = coil['Nt']*np.array(dA_) / coil_area  # constant current density
+        # constant current density
+        Nt_ = coil['Nt']*np.array(dA_) / np.sum(dA_)  
             
         # subcoil bundle
         mesh.update({'x': xm_, 'z': zm_, 'nx': nx, 'nz': nz,
@@ -603,17 +607,23 @@ class CoilSet(pythonIO, BiotMethods):
                                    power=power, label=label,
                                    delim=delim, Nt=dA, rho=rho_bar,
                                    **kwargs)
+        #self.coil.update_polygon(index)
         subindex = [[] for __ in range(len(index))]
         kwargs.pop('name', None)
         for i, coil in enumerate(index):
             _x, _z, _dl, _dt, _dA, _rho_bar, _polygon = \
                 self._shlspace(sub_segment[i], sub_dt[i], sub_rho[i], 
                                dCoil)[:-3]
-            subindex[i] = self.subcoil.add_coil(_x, _z, _dl, _dt, 
-                    polygon=_polygon, coil=coil, cross_section='square', 
+            subindex[i] = self.subcoil.add_coil(_x, _z, _dl, _dt,
+                    polygon=_polygon, coil=coil, cross_section='shell', 
                     mpc=True, power=power, name=index[i], Nt=_dA, 
                     rho=_rho_bar, **kwargs)
+            #self.subcoil.update_polygon(subindex[i])
             self.coil.at[index[i], 'subindex'] = subindex[i]
+        #self.coil.generate_polygon()
+        #self.coil.update_polygon()
+        #self.subcoil.generate_polygon()
+        #self.subcoil.update_polygon()
             
     def add_plasma(self, *args, **kwargs):
         label = kwargs.pop('label', 'Pl')  # filament prefix
@@ -819,7 +829,7 @@ class CoilSet(pythonIO, BiotMethods):
                 pc = PatchCollection(patch, match_original=True)
                 ax.add_collection(pc)
 
-    def plot(self, subcoil=True, plasma=True, label=True, current=None,
+    def plot(self, subcoil=False, plasma=True, label=True, current='A',
              field=True, passive=False, ax=None):
         if ax is None:
             ax = plt.gca()
@@ -870,66 +880,73 @@ class CoilSet(pythonIO, BiotMethods):
                     ha='left', va='center', color='C3')      
             z += dzo
 
-    def label_coil(self, ax, label, current, field, 
-                   coil=None, fs='large', Nmax=20):
+    def label_coil(self, ax, label='status', current='A', field=True, 
+                   coil=None, fs='medium', Nmax=20):
         if coil is None:
             coil = self.coil
-        parts = np.unique(coil.part)
-        parts = [p for p in parts if p not in ['plasma', 'Plasma', 'vvin',
-                                               'vvout', 'trs', 'vv', 'bb']]
+        if label == 'all':  # all coils
+            parts = coil.part.unique()
+        elif label == 'status':  # based on coil.update_status
+            parts = coil.part[coil._update_index[coil._mpc_referance]].unique()
+        elif label == 'active':  # power == True
+            parts = coil.part[coil.power].unique()
+        elif label == 'passive':  # power == False
+            parts = coil.part[~coil.power].unique()
+        #elif label == 'adjust':            
+        else:
+            if not is_list_like(label):
+                label = [label]
+            parts = self.coil.part.unique()
+            parts = [_part for _part in label if _part in parts]
+        parts = list(parts)    
         N = {p: sum(coil.part == p) for p in parts}
-        if label == True:
-            label = parts
-        # referance coil height
-        dz_list = [coil.at[name, 'dz'] for name, part in 
-                   zip(coil.index, coil.part) if part in parts]
-        if len(dz_list) > 0:
-            dz_ref = np.min(dz_list)
-        print([label, current != None, field])
-        nz = np.sum(np.array([label != False, current != None, 
+        # referance vertical length scale
+        dz_ref = np.diff(ax.get_ylim())[0] / 8
+        nz = np.sum(np.array([parts != False, current != None, 
                               field != False]))
         if nz == 1:
             dz_ref = 0
         ztext = {name: 0 for name, value 
                  in zip(['label', 'current', 'field'],
                         [label, current, field]) if value}
-        for name, dz in zip(ztext, nz*dz_ref / 5 * np.linspace(1, -1, nz)):
+        for name, dz in zip(ztext, nz*dz_ref * np.linspace(1, -1, nz)):
             ztext[name] = dz
-        print(ztext, nz)
         for name, part in zip(coil.index, coil.part):
-            x, z = coil.at[name, 'x'], coil.at[name, 'z']
-            dx = coil.at[name, 'dx'] 
-            drs = 2/3*dx * np.array([-1, 1])
-            if coil.part[name] == 'CS':
-                drs_index = 0
-                ha = 'right'
-            else:
-                drs_index = 1
-                ha = 'left'
-            '''
-            if part in parts and nz > 1:
-                zshift = dz_ref/(nz+1)  #max([dz / 5, ylim / 3])
-            else:
-                zshift = 0
-            '''
-            if part in parts and part in label and N[part] < Nmax:
+            if part in parts and N[part] < Nmax:
+                x, z = coil.at[name, 'x'], coil.at[name, 'z']
+                dx = coil.at[name, 'dx'] 
+                drs = 2/3*dx * np.array([-1, 1])
+                if coil.part[name] == 'CS':
+                    drs_index = 0
+                    ha = 'right'
+                else:
+                    drs_index = 1
+                    ha = 'left'
+                # label coil
                 ax.text(x + drs[drs_index], z + ztext['label'], 
                         name, fontsize=fs, ha=ha, va='center', 
                         color=0.2 * np.ones(3))
-            if part in parts and current:
-                if current == 'Ic' or current == 'A':  # line current
-                    unit = 'A'
-                    Ilabel = coil.loc[name, 'Ic']
-                elif current == 'It' or current == 'AT':  # turn current
-                    unit = 'At'
-                    Ilabel = coil.loc[name, 'It']
-                else:
-                    raise IndexError(f'current {current} not in ' +\
-                                     '[Ic, A, It, AT]')
-                txt = f'{human_format(Ilabel, precision=1)}{unit}'
-                ax.text(x + drs[drs_index], z + ztext['current'], txt,
-                        fontsize=fs, ha=ha, va='center',
-                        color=0.2 * np.ones(3))
+                if current:
+                    if current == 'Ic' or current == 'A':  # line current
+                        unit = 'A'
+                        Ilabel = coil.loc[name, 'Ic']
+                    elif current == 'It' or current == 'AT':  # turn current
+                        unit = 'At'
+                        Ilabel = coil.loc[name, 'It']
+                    else:
+                        raise IndexError(f'current {current} not in ' +\
+                                         '[Ic, A, It, AT]')
+                    txt = f'{human_format(Ilabel, precision=1)}{unit}'
+                    ax.text(x + drs[drs_index], z + ztext['current'], txt,
+                            fontsize=fs, ha=ha, va='center',
+                            color=0.2 * np.ones(3))
+                if field:
+                    Blabel = coil.loc[name, 'B']
+                    txt = f'{human_format(Blabel, precision=2)}T'
+                    ax.text(x + drs[drs_index], z + ztext['field'], txt,
+                            fontsize=fs, ha=ha, va='center',
+                            color=0.2 * np.ones(3))
+                    
         
 
 if __name__ == '__main__':

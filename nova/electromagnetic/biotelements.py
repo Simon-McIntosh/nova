@@ -46,7 +46,6 @@ class Points:
         return self._points
     
     @points.setter
-    @profile
     def points(self, points):
         self.Npoints = len(points)  # interaction number
         self._points = points  # store point subset
@@ -111,7 +110,6 @@ class Filament(Vectors):
     def __init__(self, rms=True):
         Vectors.__init__(self, rms=rms)
 
-    @profile
     def offset(self):
         'offset source and target points '
         self.dL = np.array([self.vector['r']-self.vector['rs'],
@@ -215,7 +213,6 @@ class BiotPoints(Points):
         self.points['far_field'] = False
         self.points['far_field'][index] = True
         
-    @profile
     def set_biot_instance(self):
         'set instance attribute in points structured array'
         self.points['instance'] = ''
@@ -233,7 +230,6 @@ class BiotPoints(Points):
                 self.points['instance'][cs_index] = self.far_field
         self.set_biot_index()
                 
-    @profile
     def set_biot_index(self):
         self.index = {}
         for name in self.biot_instance:
@@ -242,14 +238,6 @@ class BiotPoints(Points):
                 # upload points to instance
                 self.biot_instance[name].points = \
                     self.points[self.index[name]] 
-            '''
-            index = self.points['instance'] == name
-            if sum(index) == 0:
-                index = None
-            self.index[name] = index
-            if index is not None:  # upload points to instance
-                self.biot_instance[name].points = self.points[index]
-            '''
       
     def calculate(self, attribute):
         'calculate biot attributes (flux, radial_field, vertical_field)'

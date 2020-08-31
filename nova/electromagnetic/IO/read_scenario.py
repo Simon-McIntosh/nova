@@ -956,7 +956,7 @@ if __name__ == '__main__':
     
     
     
-    d2 = scenario_data(read_txt=True)
+    d2 = scenario_data(read_txt=False)
     #d2.load_folder()
     d2.load_file(-1)  # read / load single file
     #d2.load_file(-1, read_txt=True)  # read / load single file

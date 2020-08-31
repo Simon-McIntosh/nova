@@ -43,7 +43,6 @@ class Grid(BiotSavart, BiotAttributes):
     
     _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31}
     
-    
     def __init__(self, subcoil, **grid_attributes):
         BiotSavart.__init__(self)
         BiotAttributes.__init__(self, **grid_attributes)

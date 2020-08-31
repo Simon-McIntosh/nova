@@ -11,8 +11,8 @@ build_coilset = True
 pmag = Inverse()
 
 if build_coilset:
-    pmag.coilset = ITERcoilset(coils='pf', dCoil=0.2, n=20, 
-                               limit=[3.5, 8, -2.5, 2.5], 
+    pmag.coilset = ITERcoilset(coils='pf vv trs dir', dCoil=-1, n=1e5, 
+                               limit=[3, 10, -5.75, 5.75], levels=61,
                                read_txt=True).coilset
     pmag.scenario_filename = -2
     pmag.scenario = 'IM'
@@ -20,7 +20,18 @@ if build_coilset:
     pmag.save_coilset('ITER')
 else:
     pmag.load_coilset('ITER')
+ 
     
+plt.set_aspect(1)
+pmag.plot(subcoil=False, label='all')
+pmag.grid.plot_flux()
+
+#pmag.target.add_targets(
+#    [pmag.coil.loc['CS1U', 'x'] - pmag.coil.loc['CS1U', 'dx']/2,
+#     pmag.coil.loc['CS1U', 'z']])
+#pmag.target.plot()
+#print(np.linalg.norm([pmag.target.Bx, pmag.target.Bz]))
+
 """
 pmag.scenario_filename = -2
 pmag.scenario = 'IM'

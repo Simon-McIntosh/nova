@@ -221,12 +221,12 @@ class MachineData(CoilSet):
             for segment in self.models[part]:
                 frame = self.models[part][segment]
                 self.add_shell(frame.x, frame.z, frame.dt, rho=frame.rho, 
-                               dShell=1, dCoil=0.1, part=part, name=segment)
+                               dShell=1, dCoil=0.25, part=part, name=segment)
           
             
 if __name__ == '__main__':
 
-    machine = MachineData()
+    machine = MachineData(read_txt=False)
     
     #machine.load_models(read_txt=True)
     #machine.plot_models()
@@ -234,9 +234,9 @@ if __name__ == '__main__':
     #machine.load_data()
     #machine.plot_data()
     
-    machine.load_coilset(part_list='trs', read_txt=True)
+    machine.load_coilset(part_list='vvin vvout trs dir', read_txt=False)
 
-    machine.Ic = 20
+    machine.Ic = 20e3
     machine.plot(subcoil=True)
     
     machine.grid.generate_grid()

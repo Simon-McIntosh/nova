@@ -48,11 +48,14 @@ class CoilSet(pythonIO, BiotMethods):
     _coilset_frames = ['coil', 'subcoil']
     
     # exchange biot instances
-    _biot_instances = {'mutual': 'mutual',
+    _biot_instances = {'mutual': 'mutual'}
+    '''
+    'mutual': 'mutual',
                        'plasma': 'grid',
                        'grid': 'grid',
                        'target': 'target',
                        'colocate': 'colocate'}
+    '''
 
     # additional_columns
     _coil_columns = ['dx', 'dz', 'dA', 'dCoil', 'nx', 'nz', 'subindex', 'part',

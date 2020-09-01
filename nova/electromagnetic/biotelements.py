@@ -173,7 +173,7 @@ class BiotPoints(Points):
         #   self.add_biot_instance(... )
            
     def add_biot_instance(self, name, biot_instance, cross_section=None, 
-                     far_field=False):
+                          far_field=False):
         '''
         Attributes:
             name (str): instance label
@@ -246,7 +246,8 @@ class BiotPoints(Points):
             if self.index[name] is not None:
                 variable[self.index[name]] = \
                         getattr(self.biot_instance[name], attribute)()
-        return variable.reshape(self.nT, self.nS)  # source-target reshape (matrix)
+        # source-target reshape (matrix)
+        return variable.reshape(self.nT, self.nS)  
 
 
 if __name__ == '__main__':

@@ -6,12 +6,12 @@ from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.coilgeom import ITERcoilset
 from nova.electromagnetic.machinedata import MachineData
 
-build_coilset = True
+build_coilset = False
 
 pmag = Inverse()
 
 if build_coilset:
-    pmag.coilset = ITERcoilset(coils='pf vv trs dir', dCoil=-1, n=1e5, 
+    pmag.coilset = ITERcoilset(coils='pf vv trs dir', dCoil=0.2, n=5e4, 
                                limit=[3, 10, -5.75, 5.75], levels=61,
                                read_txt=True).coilset
     pmag.scenario_filename = -2
@@ -22,6 +22,9 @@ else:
     pmag.load_coilset('ITER')
  
     
+pmag.scenario_filename = -1
+pmag.scenario = 'IM'
+
 plt.set_aspect(1)
 pmag.plot(subcoil=False, label='all')
 pmag.grid.plot_flux()

@@ -76,7 +76,7 @@ class ITERcoilset(CoilClass):
             self.append_coilset(
                 MachineData().load_coilset(part_list='dir'))
         self.mutual.solve_interaction()  # compute mutual interaction
-        self.grid.generate_grid(**kwargs, regen=True)
+        #self.grid.generate_grid(**kwargs, regen=True)
         #self.add_targets(targets=targets)
         #self.update_interaction()
         

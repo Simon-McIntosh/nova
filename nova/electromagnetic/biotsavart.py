@@ -157,6 +157,8 @@ class BiotArray(Points):
         self.nS = self.source.nC  # source filament number
         self.nT = self.target.nC  # target point number
         self.nI = self.nS*self.nT  # total number of interactions
+        
+        
         self.initialize_point_array(self.nI)
         self.assemble_source()
         self.assemble_target()

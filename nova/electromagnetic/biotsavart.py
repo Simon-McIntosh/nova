@@ -8,16 +8,82 @@ from nova.electromagnetic.biotelements import Points, BiotPoints
 from amigo.pyplot import plt
 
 
-class BiotFrame:
+class BiotFrame(CoilFrame):
     
-    _frame_attributes = ['x', 'z', 'dx', 'dz', 'Nt', 'cross_section']
-    _default_frame_attributes = {
-            'dx': 0, 'dz': 0, 'Nt': 1, 'cross_section': 'circle'}
-    
-    def __init__(self, **kwargs):
-        self._load_data(**kwargs)
+    def __init__(self, *args, **kwargs):
+        CoilFrame.__init__(self, coilframe_metadata={
+            '_required_columns': ['x', 'z'],
+            '_additional_columns': ['dx', 'dz', 'Nt', 'cross_section'],
+            '_default_attributes': {'dx': 0, 'dz': 0, 'Nt': 1, 
+                                    'cross_section': 'circle'},
+            '_coilframe_attributes': ['x', 'z', 'dx', 'dz', 'Nt']})
+        self.add_coil(*args, **kwargs)
         
-    def _load_data(self, **kwargs):
+    def add_coil(self, *args, **kwargs):
+        self.frame = None
+        if len(args) == 1:
+            if isinstance(args[0], CoilFrame):
+                self.frame = args[0]  # store referance to CoilFrame
+        CoilFrame.add_coil(self, *args, **kwargs)
+        
+    def update_coilframe(self):
+        if self.frame is not None:
+            if self.frame.nC != self.nC:
+                self.drop_coil() 
+                CoilFrame.add_coil(self, self.frame)
+        
+    #def assemble(self):
+        
+        
+    '''
+    def assemble_source(self):
+        'load source filaments into points structured array'
+        for label, column in zip(
+                ['rs', 'rs_rms', 'zs', 'Ns', 'dl', 'dt', 'dx', 'dz'],
+                ['x', 'rms', 'z', 'Nt', 'dl', 'dt', 'dx', 'dz']):
+            self.points[label] = np.dot(
+                    np.ones((self.nT, 1)), 
+                    getattr(self.source, column).reshape(1, -1)).flatten()
+        csID = np.array([self._source_cross_section.index(cs)  # cross-section 
+                         for cs in self.source.cross_section])
+        csID = np.dot(np.ones((self.nT, 1)), csID.reshape(1, -1)).flatten()
+        for i, cs in enumerate(self._source_cross_section):
+            self.points['cs'][csID == i] = cs
+        self.points['dr'] = np.linalg.norm(
+            [self.points['dx'], self.points['dz']], axis=0) / 2
+
+    def assemble_target(self):
+        'load target points into points structured array'
+        for label, column in zip(['r', 'z', 'N'], ['x', 'z', 'Nt']):
+            self.points[label] = np.dot(
+                    getattr(self.target, column).reshape(-1, 1), 
+                    np.ones((1, self.nS))).flatten()
+    '''
+        
+    def __getattr__(self, key):
+        'subclass coilframe getattr'
+        if key in self._coilframe_attributes:
+            # get coilframe vector
+            value = getattr(self, f'_{key}')
+            if key in self._mpc_attributes:  # inflate
+                value = value[self._mpc_referance]
+            # assemble source
+            self.nT = 20
+            #value = np.dot(np.ones((self.nT, 1)), value.reshape(1, -1)).flatten()
+            return value
+        else:
+            return CoilFrame.__getattr__(self, key)
+        
+        '''
+        frame = self._initialize_frame(*args, **kwargs)
+        self.coilset = frame.coilset
+        #self.frame = frame
+        CoilFrame.__init__(self, frame)
+        #self._emulate(**kwargs)
+        '''
+        
+    '''
+    def _emulate(self, **kwargs):
         self._emulate_nC(**kwargs)
         self._emulate_plasma()
         self._setattr(**kwargs)
@@ -25,8 +91,7 @@ class BiotFrame:
         self._check_attribute_length()
         
     @staticmethod
-    def load(*args, **kwargs):
-        'static load'
+    def _initialize_frame(*args, **kwargs):
         nargs = len(args)
         if nargs == 0:  # key-word input
             frame = kwargs
@@ -35,8 +100,6 @@ class BiotFrame:
         else:  # arguments ordered as BiotFrame._frame_attributes
             frame = {key: args[i] 
                      for i, key in enumerate(BiotFrame._frame_attributes)}
-        if not isinstance(frame, CoilFrame):
-            frame = BiotFrame(**frame)   # emulate dict as CoilFrame
         return frame
         
     def _emulate_nC(self, **kwargs):
@@ -82,6 +145,7 @@ class BiotFrame:
         if not np.all(nC == self.nC):
             err = Series(nC, index=self._frame_attributes, name='nC')
             raise IndexError(f'miss-matched data input: \n{err}')
+    '''
 
 
 class BiotAttributes:
@@ -124,11 +188,12 @@ class BiotArray(Points):
             self.load_source(source)
             
     def load_source(self, *args, **kwargs):
-        self.source = BiotFrame.load(*args, **kwargs)
+        self.source = BiotFrame(*args, **kwargs)
         
     def load_target(self, *args, **kwargs):
-        self.target = BiotFrame.load(*args, **kwargs)
+        self.target = BiotFrame(*args, **kwargs)
   
+    '''
     def assemble_source(self):
         'load source filaments into points structured array'
         for label, column in zip(
@@ -151,6 +216,7 @@ class BiotArray(Points):
             self.points[label] = np.dot(
                     getattr(self.target, column).reshape(-1, 1), 
                     np.ones((1, self.nS))).flatten()
+    '''
 
     def assemble(self):
         'assemble interaction'
@@ -159,9 +225,9 @@ class BiotArray(Points):
         self.nI = self.nS*self.nT  # total number of interactions
         
         
-        self.initialize_point_array(self.nI)
-        self.assemble_source()
-        self.assemble_target()
+        #self.initialize_point_array(self.nI)
+        #self.assemble_source()
+        #self.assemble_target()
         self.set_biot_instance()
         
     def plot(self, ax=None):
@@ -181,8 +247,8 @@ class BiotSavart(CoilMatrix, BiotArray, BiotPoints):
     def __init__(self, source=None, ndr=3, mutual=False):
         CoilMatrix.__init__(self)
         BiotArray.__init__(self, source)
-        BiotPoints.__init__(self, ndr=ndr)
-        self.mutual = mutual
+        #BiotPoints.__init__(self, ndr=ndr)
+        #self.mutual = mutual
         
     def flux_matrix(self):
         'calculate filament flux (inductance) matrix'
@@ -273,7 +339,7 @@ if __name__ == '__main__':
     
     from nova.electromagnetic.coilset import CoilSet
     cs = CoilSet(dCoil=0.2, dPlasma=0.05, turn_fraction=0.5)
-    #cs.add_coil(3.943, 7.564, 0.959, 0.984, Nt=248.64, name='PF1', part='PF')
+    cs.add_coil(3.943, 7.564, 0.959, 0.984, Nt=248.64, name='PF1', part='PF')
     #cs.add_coil(1.6870, 5.4640, 0.7400, 2.093, Nt=554, name='CS3U', part='CS')
     #cs.add_coil(1.6870, 3.2780, 0.7400, 2.093, Nt=554, name='CS2U', part='CS')
     #cs.add_plasma(3.5, 4.5, 1.5, 2.5, It=-15e6, cross_section='ellipse')
@@ -281,6 +347,8 @@ if __name__ == '__main__':
     cs.add_plasma(3.5, 4.5, 1.5, 2.5, dPlasma=0.5, 
                   It=-15e6, cross_section='circle')
 
+    cs.plot()
+    """
     cs.current_update = 'coil'
     
     
@@ -334,3 +402,4 @@ if __name__ == '__main__':
     #bs.target.plot(label=True)
 
     # plt.title(cc.coilset.matrix['inductance']['Mc'].CS3U)
+    """

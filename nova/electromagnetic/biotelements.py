@@ -10,6 +10,7 @@ class Points:
     _source_cross_section = ['square', 'rectangle', 'circle', 'ellipse', 
                              'skin', 'shell', 'polygon']
     
+    '''
     _points_dtype = [('rs', float),  # source radius (centroid)
                      ('rs_rms', float),  # source radius (rms)
                      ('r', float),  # target radius
@@ -26,6 +27,7 @@ class Points:
                      ('cs', 'U10'),  # source cross section 
                      ('instance', 'U10'),  # interaction method
                      ('far_field', bool)]  # far field flag
+    '''
     
     def __init__(self, rms=False, **kwargs):
         self.initialize_points()

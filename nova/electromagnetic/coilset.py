@@ -48,7 +48,7 @@ class CoilSet(pythonIO, BiotMethods):
     _coilset_frames = ['coil', 'subcoil']
     
     # exchange biot instances
-    _biot_instances = {'mutual': 'mutual'}
+    _biot_instances = {}#{'mutual': 'mutual'}
     '''
     'mutual': 'mutual',
                        'plasma': 'grid',
@@ -62,17 +62,22 @@ class CoilSet(pythonIO, BiotMethods):
                      'cross_section', 
                      'turn_section', 'turn_fraction', 'skin_fraction',
                      'patch', 'polygon',
-                     'power', 'plasma', 'mpc', 'Nf', 'Nt', 'It', 'Ic',
-                     'Psi', 'Bx', 'Bz', 'B']
+                     'power', 'optimize', 'plasma', 'mpc', 'Nf', 'Nt',
+                     'It', 'Ic', 'Psi', 'Bx', 'Bz', 'B']
     
     _subcoil_columns = ['dx', 'dz', 'dA', 'dl_x', 'dl_z', 'coil', 'part',
                         'cross_section', 'patch', 'polygon', 
-                        'power', 'plasma', 'mpc', 'Nt', 'It', 'Ic',
+                        'power', 'optimize', 'plasma', 'mpc', 'Nt', 'It', 'Ic',
                         'Psi', 'Bx', 'Bz', 'B']
     
     _default_attributes = {'dCoil': -1, 'dPlasma': 0.25, 'dShell': 0.5, 
                            'turn_fraction': 1, 'turn_section': 'circle', 
                            'current_update': 'full'}
+    
+    # fast access np.array linked to CoilFrame via DataFrame
+    _coilframe_attributes =  ['x', 'z', 'dl', 'dt', 'rms', 'dx', 'dz',
+                              'Ic', 'It', 'Nt', 'Psi', 'Bx', 'Bz', 'B',
+                              'Fx', 'Fz', 'xFx', 'xFz', 'zFx', 'zFz', 'My']
 
     def __init__(self, **coilset):
         self.initialize_coil()  # initalize coil and subcoil
@@ -80,8 +85,11 @@ class CoilSet(pythonIO, BiotMethods):
         self.coilset = coilset  # exchange coilset and instance attributes
 
     def initialize_coil(self):
-        coil_metadata = {'_additional_columns': self._coil_columns}
-        subcoil_metadata = {'_additional_columns': self._subcoil_columns}
+        coil_metadata = {'_additional_columns': self._coil_columns,
+                         '_coilframe_attributes': self._coilframe_attributes}
+        subcoil_metadata = {'_additional_columns': self._subcoil_columns,
+                            '_coilframe_attributes': 
+                                self._coilframe_attributes}
         self.coil = CoilFrame(coilframe_metadata=coil_metadata)
         self.subcoil = CoilFrame(coilframe_metadata=subcoil_metadata)
         self.coil.rebuild_coildata()
@@ -243,9 +251,9 @@ class CoilSet(pythonIO, BiotMethods):
         self.coil = concat([PF, CS, other])
     
     @property
-    def update_status(self):
+    def current_index(self):
         'display power, plasma and current_update status'
-        return self.coil.update_status
+        return self.coil.current_index
         
     @property
     def current_update(self):
@@ -334,7 +342,10 @@ class CoilSet(pythonIO, BiotMethods):
         
     @property
     def Ip(self):
-        # return total plasma current
+        '''
+        Returns:
+           self.coil.Ip_sum (float): total plasma current
+        '''
         return self.coil.Ip_sum
 
     @Ip.setter
@@ -347,7 +358,8 @@ class CoilSet(pythonIO, BiotMethods):
         return self.subcoil.Np
     
     @Np.setter
-    def Np(self, Np):  # set plasma fillament number
+    def Np(self, Np):  
+        'set plasma fillament number'
         self.subcoil.Np = Np
         self.coil.Np = self.subcoil.Np.sum()
 
@@ -362,8 +374,9 @@ class CoilSet(pythonIO, BiotMethods):
         
     def relink_mpc(self):
         if self.coil._relink_mpc:
-            self.subcoil._power = self.coil._power[self.coil._mpc_referance]
-            self.subcoil.current_update = self.coil._current_update
+            #for attribute in self.coil._coilcurrent_attributes:
+            #    setattr(self.subcoil, attribute, getattr(self.coil, attribute))
+            self.subcoil.current_update = self.coil.current_update
             self.coil._relink_mpc = False
             
     def translate(self, index=None, dx=0, dz=0):
@@ -509,7 +522,7 @@ class CoilSet(pythonIO, BiotMethods):
         #mesh['rz'] = zm_ - zo
         
         # propagate current update flags to subcoil
-        for label in ['part', 'power', 'plasma']: 
+        for label in ['part', 'power', 'optimize', 'plasma']: 
             if label in coil:  
                 mesh[label] = coil[label]
         mesh['Ic'] = coil['Ic']
@@ -832,7 +845,7 @@ class CoilSet(pythonIO, BiotMethods):
                 pc = PatchCollection(patch, match_original=True)
                 ax.add_collection(pc)
 
-    def plot(self, subcoil=False, plasma=True, label=True, current='A',
+    def plot(self, subcoil=False, plasma=True, label='all', current='A',
              field=True, passive=False, ax=None):
         if ax is None:
             ax = plt.gca()
@@ -892,10 +905,13 @@ class CoilSet(pythonIO, BiotMethods):
         elif label == 'status':  # based on coil.update_status
             parts = coil.part[coil._update_index[coil._mpc_referance]].unique()
         elif label == 'active':  # power == True
-            parts = coil.part[coil.power].unique()
+            parts = coil.part[coil.power & ~coil.plasma].unique()
         elif label == 'passive':  # power == False
-            parts = coil.part[~coil.power].unique()
-        #elif label == 'adjust':            
+            parts = coil.part[~coil.power & ~coil.plasma].unique()
+        elif label == 'free':  # optimize == True
+            parts = coil.part[coil.optimize & ~coil.plasma].unique()
+        elif label == 'fix':  # optimize == False
+            parts = coil.part[~coil.optimize & ~coil.plasma].unique()
         else:
             if not is_list_like(label):
                 label = [label]
@@ -904,7 +920,7 @@ class CoilSet(pythonIO, BiotMethods):
         parts = list(parts)    
         N = {p: sum(coil.part == p) for p in parts}
         # referance vertical length scale
-        dz_ref = np.diff(ax.get_ylim())[0] / 8
+        dz_ref = np.diff(ax.get_ylim())[0] / 6
         nz = np.sum(np.array([parts != False, current != None, 
                               field != False]))
         if nz == 1:

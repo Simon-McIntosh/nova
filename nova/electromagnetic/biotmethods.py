@@ -7,7 +7,7 @@ from nova.electromagnetic.meshgrid import MeshGrid
 from nova.electromagnetic.biotsavart import BiotSavart, BiotAttributes
                 
 
-class Mutual(BiotSavart, BiotAttributes):
+class ForceField(BiotSavart, BiotAttributes):
     
     _biot_attributes = []
     
@@ -383,7 +383,7 @@ class Colocate(Target):
         
 class BiotMethods:
     
-    _biot_methods = {'grid': Grid, 'mutual': Mutual, 'target': Target,
+    _biot_methods = {'grid': Grid, 'forcefield': ForceField, 'target': Target,
                      'colocate': Colocate}
 
     def initialize_biot_method(self, instance):

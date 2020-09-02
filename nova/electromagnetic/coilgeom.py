@@ -27,8 +27,8 @@ class ITERcoilset(CoilClass):
     def __init__(self, read_txt=False, **kwargs):
         self.read_txt = read_txt
         CoilClass.__init__(self, **kwargs)
-        self.update_coilframe_metadata(
-            'coil', additional_columns=['m', 'material', 'R'])
+        #self.update_coilframe_metadata(
+        #    'coil', _additional_columns=['m', 'material', 'R'])
         self.load_coilset(**kwargs)
 
     def load_coilset(self, **kwargs):
@@ -75,7 +75,7 @@ class ITERcoilset(CoilClass):
         if 'dir' in coils:
             self.append_coilset(
                 MachineData().load_coilset(part_list='dir'))
-        self.mutual.solve_interaction()  # compute mutual interaction
+        #self.mutual.solve_interaction()  # compute mutual interaction
         #self.grid.generate_grid(**kwargs, regen=True)
         #self.add_targets(targets=targets)
         #self.update_interaction()

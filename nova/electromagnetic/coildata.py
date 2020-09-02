@@ -13,7 +13,8 @@ class CoilData():
         Ic (np.array, float): coil line current [A]
         It (np.array, float): coil turn curent [A.turns]
         Nt (np.array, float): coil turn number
-        power (np.array, bool): coil power supply status  
+        power (np.array, bool): coil power supply status 
+        optimize (np.array, bool): optimization flag  
         plasma (np.array, bool): plasma flag
         
     Derived Attributes:
@@ -35,29 +36,29 @@ class CoilData():
         F[*] = [Ic]'[force[*]][Ic] (N, Nm)
     '''
 
-    # CoilFrame attributes - fast access np.array linked to CoilFrame
-    _coilframe_attributes = ['x', 'z', 'dl', 'dt', 'rms', 'dx', 'dz',
-                             'Ic', 'It', 'Nt',
-                             'power', 'plasma', 'Psi', 'Bx', 'Bz', 'B',
-                             'Fx', 'Fz', 'xFx', 'xFz', 'zFx', 'zFz', 'My']
+    # list of fast access np.array variables linked to CataFrame
+    _coilframe_attributes = []
     
+    # metadata attributes
     _coildata_attributes = {'current_update': 'full'}
-                            #'biot_update' : ['coilset', 'grid']}
+    
+    _coilcurrent_attributes = []
         
     # CoilData indices
     _coildata_indices = ['reduction_index',
                          'plasma_reduction_index',
                          'plasma_iloc',
                          'plasma_index', 
-                         'update_index']
+                         'current_index']
     
     # compact mpc attributes - subset of coilframe and coildata attributes
-    _mpc_attributes = ['Ic', 'power', 'plasma', 'update_index']
+    _mpc_attributes = ['Ic', 'power', 'plasma', 'optimize', 'current_index']
     
     # multi-point constraints (shared line-current)
     _mpc_constraints = ['mpc_index', 'mpc_iloc', 'mpc_referance', 
                         'mpc_factor', 'mpl_index', 'mpl_factor']
     
+    # class properties (inspect.getmembers) exclude from setattr
     _coildata_properties = []
     
     # update flags
@@ -68,26 +69,61 @@ class CoilData():
         
     def __init__(self):
         self._extract_coildata_properties()
+        self._initialize_coilframe_attributes()
+        self._initialize_coildata_attributes()
+        self._initialize_coilcurrent_attributes()
         self._unlink_coildata_attributes()
         
     def _extract_coildata_properties(self):
         self._coildata_properties = [p for p, __ in inspect.getmembers(
             CoilData, lambda o: isinstance(o, property))]
         
+    def _initialize_coilframe_attributes(self, **kwargs):
+        self.coilframe_attributes = self._mpc_attributes
+    
+    def _initialize_coildata_attributes(self):
+        'convert list attributes to dict'
+        for attributes in ['_coildata_attributes']:
+            if not is_dict_like(getattr(self, attributes)):
+                setattr(self, attributes, {
+                        attribute: None 
+                        for attribute in getattr(self, attributes)})
+                
+    def _initialize_coilcurrent_attributes(self):
+        self._coilcurrent_attributes = [attribute for attribute in 
+                                        self._mpc_attributes if attribute 
+                                        not in ['Ic', 'current_index']]
+        
     def _unlink_coildata_attributes(self):
         for flag in self._coildata_flags:  # update read/write
             setattr(self, f'_{flag}', None)  # unlink from DataFrame
             setattr(self, f'_{flag}', self._coildata_flags[flag]) 
         self.update_dataframe = False
-        for attribute in self._coilframe_attributes + \
+        # list attributes
+        for attribute in self._coilframe_attributes +\
                          self._coildata_indices + \
                          self._mpc_attributes + \
                          self._mpc_constraints:
             setattr(self, f'_{attribute}', None)
+        # dict attributes
         for attribute in self._coildata_attributes:
             setattr(self, f'_{attribute}', None)
         self.coildata_attributes = self._coildata_attributes
         
+    @property 
+    def coilframe_attributes(self):
+        return self._coilframe_attributes
+    
+    @coilframe_attributes.setter 
+    def coilframe_attributes(self, coilframe_attributes):
+        'append coilframe attributes (fast access)'
+        for attribute in coilframe_attributes:
+            if attribute not in self._coilframe_attributes:
+                setattr(self, f'_{attribute}', None)
+                self._coilframe_attributes.append(attribute)
+                if attribute in self.columns:
+                    self.refresh_coilframe(attribute)
+                    
     @property
     def coildata_attributes(self):
         'extract coildata attributes'
@@ -130,17 +166,17 @@ class CoilData():
         self.update_dataframe = False
         for attribute in self._coilframe_attributes + \
                          self._coildata_indices:
+                if attribute in ['power', 'plasma', 'optimize']:
+                    dtype = bool
+                else:
+                    dtype = float             
                 if attribute in self:  # read from DataFrame column
-                    if attribute in ['power', 'plasma']:
-                        dtype = bool
-                    else:
-                        dtype = float
                     value = self[attribute].to_numpy(dtype=dtype)
                 elif attribute in self._default_attributes:  # default
                     value = np.array([self._default_attributes[attribute] 
-                                      for __ in range(self.nC)])
+                                      for __ in range(self.nC)], dtype=dtype)
                 else:
-                    value = np.zeros(self.nC, dtype=float)
+                    value = np.zeros(self.nC, dtype=dtype)
                 if attribute in self._mpc_attributes:  # mpc compaction
                     value = value[self._mpc_iloc]
                 setattr(self, f'_{attribute}', value)
@@ -197,7 +233,7 @@ class CoilData():
             self._reduction_index = None
             self._plasma_iloc = None
             self._plasma_reduction_index = None
-        
+    
     @property
     def current_update(self):
         return self._current_update
@@ -205,39 +241,48 @@ class CoilData():
     @current_update.setter
     def current_update(self, flag):
         '''
-        set update_index via current_update flag for coil current update
+        set update current_index via current_flag for coil current update
             flag == 'full': update full current vector
-            flag == 'active': update active coils 
-            flag == 'passive': update passive coils
-            flag == 'plasma': update plasma 
-            flag == 'coil': update all coils
+            flag == 'active': update active coils (power & ~plasma)
+            flag == 'passive': update passive coils (~power & ~plasma)
+            flag == 'free': update free coils (optimize & ~plasma)
+            flag == 'fix': update fix coils (~optimize & ~plasma)
+            flag == 'plasma': update plasma (plasma)
+            flag == 'coil': update all coils (~plasma)
         '''
         self._current_update = flag
         if self.nC > 0 and self._mpc_iloc is not None:
             if flag == 'full':
-                self._update_index = np.full(self._nC, True)  # full
+                self._current_index = np.full(self._nC, True)  # full
             elif flag == 'active':
-                self._update_index = self._power & ~self._plasma  # active 
+                self._current_index = self._power & ~self._plasma  # active 
             elif flag == 'passive':
-                self._update_index = ~self._power & ~self._plasma  # passive
+                self._current_index = ~self._power & ~self._plasma  # passive
+            elif flag == 'free':
+                self._current_index = self._optimize & ~self._plasma  # free
+            elif flag == 'fix':
+                self._current_index = ~self._optimize & ~self._plasma  # fix                
             elif flag == 'plasma':
-                self._update_index = self._plasma  # plasma
+                self._current_index = self._plasma  # plasma
             elif flag == 'coil':
-                self._update_index = ~self._plasma  # all coils        
+                self._current_index = ~self._plasma  # all coils        
             else:
                 raise IndexError(f'flag {flag} not in '
                                  '[full, actitve, passive, plasma, coil]')
-
+    
     @property
-    def update_status(self):
-        'display power, plasma and current_update status'
+    def current_index(self):
+        'display power, optimize, plasma and current update status'
         if self.nC > 0:
             return DataFrame(
-                    {'power': self._power, 'plasma': self._plasma,
-                     self._current_update: self._update_index},
+                    {'power': self._power, 
+                     'optimize': self._optimize, 
+                     'plasma': self._plasma,
+                     self.current_update: self._current_index},
                     index=self._mpc_index)
         else:
-            return DataFrame(columns=['power', 'plasma', self._current_update])
+            return DataFrame(columns=['power', 'optimize', 'plasma', 
+                                      self._current_flag])
                 
     def _set_current(self, value, current_column='Ic', update_dataframe=True):
         '''
@@ -251,26 +296,26 @@ class CoilData():
         '''
         self._update_dataframe['Ic'] = update_dataframe  # update dataframe
         self._update_dataframe['It'] = update_dataframe
-        nU = sum(self._update_index)  # length of update vector
+        nU = sum(self._current_index)  # length of update vector
         current = getattr(self, '_Ic')
         if current_column == 'It':  # convert to turn current
             current * self._Nt[self._mpc_iloc]
         if is_dict_like(value):
             for i, (index, update) in enumerate(zip(self.index[self._mpc_iloc],
-                                                    self._update_index)):
+                                                    self._current_index)):
                 if index in value and update:
                     current[i] = value[index]  # overwrite
         else:  # itterable
             if not is_list_like(value):
                 value = value * np.ones(nU)
             if len(value) == nU:  # cross-check input length
-                current[self._update_index] = value
+                current[self._current_index] = value
             else:
                 raise IndexError(
                         'length of input does not match '
-                        f'"{self._current_update}" coilset\n'
+                        f'"{self._current_flag}" coilset\n'
                         'coilset.index: '
-                        f'{self._mpc_index[self._update_index]}\n'
+                        f'{self._mpc_index[self._current_index]}\n'
                         f'value: {value}\n\n'
                         f'{self.current_update}\n')
         if current_column == 'Ic':
@@ -344,6 +389,42 @@ class CoilData():
     def Ip_sum(self):  # net plasma current
         return self.Ip.sum()
     
+    '''
+    def _set_coilcurrent_flag(self, value, attribute):
+        if attribute in self._coilcurrent_attributes:
+            if not is_list_like(value):
+                value = value * np.ones(self._nC, dtype='bool')
+            setattr(self, f'_{attribute}', value)
+            self._update_dataframe[attribute] = True
+            
+    def _get_coilcurrent_flag(self, attribute):
+        return getattr(self, f'_{attribute}')[self._mpc_referance]
+    
+    @property
+    def power(self):
+        return self._get_coilcurrent_flag('power')
+    
+    @power.setter 
+    def power(self, value):
+        self._set_coilcurrent_flag(value, 'power')
+        
+    @property
+    def optimize(self):
+        return self._get_coilcurrent_flag('optimize')
+    
+    @optimize.setter 
+    def optimize(self, value):
+        self._set_coilcurrent_flag(value, 'optimize')
+        
+    @property
+    def plasma(self):
+        return self._get_coilcurrent_flag('plasma')
+    
+    @plasma.setter 
+    def plasma(self, value):
+        self._set_coilcurrent_flag(value, 'plasma')
+    '''
+        
     @staticmethod 
     @contextmanager
     def _write_to_dataframe(self):
@@ -370,11 +451,11 @@ class CoilData():
         'transfer data from dataframe to coilframe attributes'
         if self._update_coilframe:  # protect against regressive update
             if key in ['Ic', 'It']:
-                _current_update = self._current_update
+                _current_flag = self._current_flag
                 self.current_update = 'full'
                 self._set_current(self.loc[self.index[self._mpc_iloc], key],
                                   current_column=key, update_dataframe=False)
-                self.current_update = _current_update
+                self.current_update = _current_flag
             else:
                 value = self.loc[:, key].to_numpy()
                 if key in self._mpc_attributes:

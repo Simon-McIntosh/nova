@@ -33,20 +33,19 @@ class CoilFrame(DataFrame, CoilData):
     _metadata = ['_required_columns', 
                  '_additional_columns', 
                  '_default_attributes',
-                 '_coildata_attributes']
+                 '_coildata_attributes',
+                 '_coilframe_attributes']
 
     def __init__(self, *args, coilframe_metadata={}, **kwargs):
         self._initialize_coilframe_metadata()
         DataFrame.__init__(self, *args, **kwargs)  # inherit pandas DataFrame
-        self.set_dtypes()
-        CoilData.__init__(self)  # coil data
+        CoilData.__init__(self)  # fast access attributes and DataFrame IO
         self.coilframe_metadata = coilframe_metadata  # update metadata
-        
+
     def _initialize_coilframe_metadata(self):
         self._initialize_required_columns()
         self._initialize_additional_columns()
         self._initialize_default_attributes()
-        self._initialize_data_attributes()
         
     def _initialize_required_columns(self):
         'required input: self.add_coil(*args)'
@@ -66,26 +65,8 @@ class CoilFrame(DataFrame, CoilData):
              'cross_section': 'rectangle', 'turn_section': 'rectangle',
              'coil': '', 'part': '', 'subindex': None, 
              'dCoil': 0., 'dl_x': 0., 'dl_z': 0., 'mpc': '', 'polygon': None,
-             'power': True, 'plasma': False, 'rho': 0.,
+             'power': True, 'optimize': False, 'plasma': False, 'rho': 0.,
              'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.}
-            
-    def set_dtypes(self):
-        if self.nC > 0:
-            dtypes = {}
-            for column in self:
-                if column in self._default_attributes:
-                    dtype = type(self._default_attributes[column])
-                    if dtype in [int, float]:
-                        dtypes[column] = dtype
-            self = self.astype(dtypes)
-            
-    def _initialize_data_attributes(self):
-        'convert list attributes to dict'
-        for attributes in ['_coildata_attributes']:
-            if not is_dict_like(getattr(self, attributes)):
-                setattr(self, attributes, {
-                        attribute: None 
-                        for attribute in getattr(self, attributes)})
             
     def _update_coilframe_metadata(self, **coilframe_metadata):
         'extract and update coilframe_metadata'
@@ -97,7 +78,7 @@ class CoilFrame(DataFrame, CoilData):
             value = coilframe_metadata.get(key, None)
             if value is not None:
                 if key == '_additional_columns':
-                    for v in value:  # insert additional columns
+                    for v in value:
                         if v not in getattr(self, key):
                             getattr(self, key).append(v)
                 elif key in ['_default_attributes', 
@@ -106,6 +87,8 @@ class CoilFrame(DataFrame, CoilData):
                         getattr(self, key)[k] = value[k]
                 elif key in self._default_attributes:
                     self._default_attributes[key] = value
+                elif key == '_coilframe_attributes':
+                    self.coilframe_attributes = value 
                 elif key in self._coildata_attributes:
                     self._coildata_attributes[key] = value
 
@@ -113,7 +96,7 @@ class CoilFrame(DataFrame, CoilData):
     def coilframe_metadata(self):
         'extract coilframe_metadata attributes'
         self._coildata_attributes = self.coildata_attributes
-        return dict((key, getattr(self, key)) for key in self._metadata)
+        return {key: getattr(self, key) for key in self._metadata}
     
     @coilframe_metadata.setter
     def coilframe_metadata(self, coilframe_metadata):
@@ -164,9 +147,7 @@ class CoilFrame(DataFrame, CoilData):
         index = self._extract_index(data, delim, label, name)
         coil = CoilFrame(data, index=index, columns=data.keys(),
                          coilframe_metadata=self.coilframe_metadata)
-        coil.update_polygon()
         coil.generate_polygon()
-        
         if mpc and coil.nC > 1:
             coil.add_mpc(coil.index.to_list())
         return coil
@@ -230,11 +211,12 @@ class CoilFrame(DataFrame, CoilData):
 
     def drop_mpc(self, index):
         'remove multi-point constraints referancing dropped coils'
-        if not is_list_like(index):
-            index = [index]
-        name = [mpc[0] if mpc else '' for mpc in self.mpc]
-        drop = [n in index for n in name]
-        self.remove_mpc(drop)
+        if 'mpc' in self.columns:
+            if not is_list_like(index):
+                index = [index]
+            name = [mpc[0] if mpc else '' for mpc in self.mpc]
+            drop = [n in index for n in name]
+            self.remove_mpc(drop)
         
     def remove_mpc(self, index):
         'remove multi-point constraint on indexed coils'
@@ -254,9 +236,12 @@ class CoilFrame(DataFrame, CoilData):
     def _check_arguments(self, *args, **kwargs):
         if len(args) == 1:  # data passed as CoilFrame
             coilframe = args[0]
+            '''
             if isinstance(coilframe, CoilFrame):
                 if not hasattr(coilframe, 'coildata_attributes'):
-                    CoilData.__init__(coilframe)  # re-initialize from pickle
+                    # re-initialize from pickle
+                    CoilData.__init__(coilframe) 
+            '''
             args = [coilframe.loc[:, col] for col in self._required_columns]
             kwargs['name'] = coilframe.index
             for col in coilframe.columns:
@@ -368,9 +353,10 @@ class CoilFrame(DataFrame, CoilData):
                 polygen = self._get_polygen(cross_section)
                 polygon = polygen(x, z, dl, dt)
                 self.at[index, 'polygon'] = polygon
+            self.update_polygon()
             
-    def update_polygon(self, ):
-        for index in self.index[self.rms == 0]:
+    def update_polygon(self):
+        for index in self.index[(self.rms == 0) & (~self.polygon.isna())]:
             polygon = self.at[index, 'polygon']
             cross_section = self.at[index, 'cross_section']
             dl, dt = self.loc[index, ['dl', 'dt']]

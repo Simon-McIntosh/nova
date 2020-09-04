@@ -389,42 +389,6 @@ class CoilData():
     def Ip_sum(self):  # net plasma current
         return self.Ip.sum()
     
-    '''
-    def _set_coilcurrent_flag(self, value, attribute):
-        if attribute in self._coilcurrent_attributes:
-            if not is_list_like(value):
-                value = value * np.ones(self._nC, dtype='bool')
-            setattr(self, f'_{attribute}', value)
-            self._update_dataframe[attribute] = True
-            
-    def _get_coilcurrent_flag(self, attribute):
-        return getattr(self, f'_{attribute}')[self._mpc_referance]
-    
-    @property
-    def power(self):
-        return self._get_coilcurrent_flag('power')
-    
-    @power.setter 
-    def power(self, value):
-        self._set_coilcurrent_flag(value, 'power')
-        
-    @property
-    def optimize(self):
-        return self._get_coilcurrent_flag('optimize')
-    
-    @optimize.setter 
-    def optimize(self, value):
-        self._set_coilcurrent_flag(value, 'optimize')
-        
-    @property
-    def plasma(self):
-        return self._get_coilcurrent_flag('plasma')
-    
-    @plasma.setter 
-    def plasma(self, value):
-        self._set_coilcurrent_flag(value, 'plasma')
-    '''
-        
     @staticmethod 
     @contextmanager
     def _write_to_dataframe(self):

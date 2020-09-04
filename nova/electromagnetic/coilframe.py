@@ -452,7 +452,7 @@ class CoilFrame(DataFrame, CoilData):
                 else:
                     nC = self.nC  # coil number
                 if not is_list_like(value):
-                    value *= np.ones(nC)
+                    value *= np.ones(nC, dtype=type(value))
                 if len(value) != nC:
                     raise IndexError('Length of mpc vector does not match '
                                      'length of index')

@@ -363,6 +363,24 @@ class CoilSet(pythonIO, BiotMethods):
         self.subcoil.Np = Np
         self.coil.Np = self.subcoil.Np.sum()
 
+    @property 
+    def power(self):
+        return self.coil.power
+
+    @power.setter 
+    def power(self, value):
+        self.coil.power = value 
+        self.subcoil.power = value
+    
+    @property 
+    def optimize(self):
+        return self.coil.optimize
+    
+    @optimize.setter 
+    def optimize(self, value):
+        self.coil.optimize = value 
+        self.subcoil.optimize = value
+     
     def add_coil(self, *args, iloc=None, subcoil=True, **kwargs):
         index = self.coil.add_coil(*args, iloc=iloc, **kwargs)
         if subcoil:
@@ -374,8 +392,8 @@ class CoilSet(pythonIO, BiotMethods):
         
     def relink_mpc(self):
         if self.coil._relink_mpc:
-            #for attribute in self.coil._coilcurrent_attributes:
-            #    setattr(self.subcoil, attribute, getattr(self.coil, attribute))
+            for attribute in self.coil._coilcurrent_attributes:
+                setattr(self.subcoil, attribute, getattr(self.coil, attribute))
             self.subcoil.current_update = self.coil.current_update
             self.coil._relink_mpc = False
             
@@ -443,6 +461,8 @@ class CoilSet(pythonIO, BiotMethods):
             mesh['part'] = coil['part']
         mesh['cross_section'] = kwargs.get('cross_section',
                                            coil['turn_section'])
+        if dCoil != -1:
+            mesh['cross_section'] = 'rectangle'
         if 'turn_fraction' in coil and dCoil == -1:
             turn_fraction = kwargs.get('turn_fraction', coil['turn_fraction'])
         else:

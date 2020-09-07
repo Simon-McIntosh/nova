@@ -42,7 +42,8 @@ class CoilSet(pythonIO, BiotMethods):
     _coilset_attributes = ['default_attributes', 
                            'coilset_frames', 
                            'coilset_metadata',
-                           ]  # 'biot_attributes'
+                           'coilframe_attributes',
+                           'coildata_attributes']  
 
     # main class attribures
     _coilset_frames = ['coil', 'subcoil']
@@ -103,6 +104,7 @@ class CoilSet(pythonIO, BiotMethods):
     def coilset(self):
         coilset_attributes = {attribute: getattr(self, attribute)
                               for attribute in self._coilset_attributes}
+        print(coilset_attributes.keys())
         instance_attributes = {}
         for instance in self._biot_instances:
             instance_attribute = '_'.join([instance, 'biot_attributes'])
@@ -112,12 +114,13 @@ class CoilSet(pythonIO, BiotMethods):
 
     @coilset.setter
     def coilset(self, coilset):
-        for attribute in self._coilset_attributes:
-            setattr(self, attribute, coilset.get(attribute, coilset))
         for instance in self._biot_instances:
             instance_attribute = '_'.join([instance, 'biot_attributes'])
             setattr(getattr(self, instance), 'biot_attributes',
                     coilset.get(instance_attribute, coilset))
+        for attribute in self._coilset_attributes:
+            setattr(self, attribute, coilset.get(attribute, coilset))
+
 
     def append_coilset(self, *args):
         for coilset in args:

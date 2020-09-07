@@ -81,16 +81,17 @@ class CoilFrame(DataFrame, CoilData):
                     for v in value:
                         if v not in getattr(self, key):
                             getattr(self, key).append(v)
-                elif key in ['_default_attributes', 
-                             '_coildata_attributes']:
+                elif key == '_default_attributes':
                     for k in value:  # set/overwrite dict
-                        getattr(self, key)[k] = value[k]
+                        self._default_attributes[k] = value[k]
                 elif key in self._default_attributes:
                     self._default_attributes[key] = value
                 elif key == '_coilframe_attributes':
-                    self.coilframe_attributes = value 
+                    self.coilframe_attributes = value
+                elif key == '_coildata_attributes':
+                    self.coildata_attributes = value    
                 elif key in self._coildata_attributes:
-                    self._coildata_attributes[key] = value
+                    self.coildata_attributes = {key: value}
 
     @property
     def coilframe_metadata(self):
@@ -232,22 +233,32 @@ class CoilFrame(DataFrame, CoilData):
                 matrix[:, self._mpl_index[:, 1]] * \
                 np.ones((len(matrix), 1)) @ self._mpl_factor.reshape(-1, 1)
         return _matrix
+    
+    def _is_coilframe(self, *args, accept_dataframe=True):
+        'check if data passed as CoilFrame or DataFrame'
+        if len(args) == 1:
+            if isinstance(args[0], CoilFrame):
+                return True
+            elif isinstance(args[0], DataFrame) and accept_dataframe:
+                return True
+            else:
+                return False 
+        else:
+            return False
+        
+    def _extract_coilframe(self, coilframe, **kwargs):
+        'extract data from coilframe and set as args / kwargs'
+        args = [coilframe.loc[:, col] for col in self._required_columns]
+        kwargs['name'] = coilframe.index
+        for col in coilframe.columns:
+            if col not in self._required_columns:
+                if col in self._additional_columns:
+                    kwargs[col] = coilframe.loc[:, col]
+        return args, kwargs
 
     def _check_arguments(self, *args, **kwargs):
-        if len(args) == 1:  # data passed as CoilFrame
-            coilframe = args[0]
-            '''
-            if isinstance(coilframe, CoilFrame):
-                if not hasattr(coilframe, 'coildata_attributes'):
-                    # re-initialize from pickle
-                    CoilData.__init__(coilframe) 
-            '''
-            args = [coilframe.loc[:, col] for col in self._required_columns]
-            kwargs['name'] = coilframe.index
-            for col in coilframe.columns:
-                if col not in self._required_columns:
-                    if col in self._additional_columns:
-                        kwargs[col] = coilframe.loc[:, col]
+        if self._is_coilframe(*args):  # data passed as CoilFrame
+            args, kwargs = self._extract_coilframe(args[0], **kwargs)
         elif len(self._required_columns) != len(args):  # set from kwargs
             raise IndexError(f'\nincorrect argument number: {len(args)}\n'
                              f'input *args as {self._required_columns} '

@@ -315,7 +315,6 @@ class PFgeom(CoilSet):  # PF/CS coilset
         data = data.rename(columns=columns)
         part = ['CS' if 'CS' in name else 'PF' for name in data.index]
         data.rename(columns={'dx': 'dl', 'dz': 'dt'}, inplace=True)        
-
         coil = self.coil.get_coil(data, material='steel',
                                   cross_section='rectangle', part=part)
         #coil = self.cc.categorize_coilset(coil, rename=True)

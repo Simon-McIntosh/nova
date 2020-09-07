@@ -17,11 +17,9 @@ ff = ForceField(ITER.subcoil)
 ITER.add_coil(5, [-2, 4], 1.2, [0.3, 2.4], name='C', delim='',
               optimize=True)
 
-print(ff.source)
+#ff.source.nT = 5
 
 ff.source.update_coilframe()
-
-print(ff.source)
 
 #ff.assemble()
 

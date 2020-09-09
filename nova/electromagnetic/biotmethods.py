@@ -4,21 +4,19 @@ from pandas.api.types import is_list_like, is_dict_like
 
 from amigo.pyplot import plt
 from nova.electromagnetic.meshgrid import MeshGrid
-from nova.electromagnetic.biotsavart import BiotSavart, BiotAttributes
+from nova.electromagnetic.biotsavart import BiotSet, BiotAttributes
                 
 
-class ForceField(BiotSavart, BiotAttributes):
+class ForceField(BiotSet, BiotAttributes):
     
     _biot_attributes = []
     
     def __init__(self, subcoil, **mutual_attributes):
-        BiotSavart.__init__(self)
-        BiotAttributes.__init__(self, **mutual_attributes)
-        self.load_source(subcoil)  # link source
-        self.load_target(subcoil)  # link target
+        BiotSet.__init__(self, source=subcoil, target=subcoil, 
+                            **mutual_attributes)
         
 
-class Grid(BiotSavart, BiotAttributes):
+class Grid(BiotSet):
     ''' 
     grid interaction methods and data
     
@@ -44,14 +42,12 @@ class Grid(BiotSavart, BiotAttributes):
     _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31}
     
     def __init__(self, subcoil, **grid_attributes):
-        BiotSavart.__init__(self)
-        BiotAttributes.__init__(self, **grid_attributes)
-        self.load_source(subcoil)  # link source coilset
+        BiotSet.__init__(self, source=subcoil, **grid_attributes)
         
     def solve_interaction(self):
         if not hasattr(self, 'target'):
-            self.load_target(x=self.x2d, z=self.z2d)
-        BiotSavart.solve_interaction(self)
+            self.target.add_coil(x=self.x2d, z=self.z2d)
+        BiotSet.solve_interaction(self)
 
     def _generate_grid(self, **grid_attributes):
         self.biot_attributes = grid_attributes  # update attributes
@@ -146,7 +142,7 @@ class Grid(BiotSavart, BiotAttributes):
             plt.quiver(self.x2d, self.z2d, self.Bx, self.Bz)
     
 
-class Target(BiotSavart, BiotAttributes):
+class Target(BiotSet, BiotAttributes):
     
     ''' 
     traget interaction methods and data
@@ -164,10 +160,9 @@ class Target(BiotSavart, BiotAttributes):
     _target_attributes = ['x', 'z']
     
     def __init__(self, subcoil, **target_attributes):
-        BiotSavart.__init__(self)
-        BiotAttributes.__init__(self, **target_attributes)
+        BiotSet.__init__(self, source=subcoil, **target_attributes)
+        BiotAttributes.__init__(self)
         self.initialize_targets()
-        self.load_source(subcoil)  # link source coilset
         
     def __repr__(self):
         return self.targets.to_string(max_cols=8, max_colwidth=10)
@@ -231,7 +226,7 @@ class Target(BiotSavart, BiotAttributes):
         
     def solve_interaction(self):
         self.load_target(x=self.targets['x'], z=self.targets['z'])
-        BiotSavart.solve_interaction(self)   
+        BiotSet.solve_interaction(self)   
       
         
 class Colocate(Target):
@@ -383,13 +378,48 @@ class Colocate(Target):
         
 class BiotMethods:
     
-    _biot_methods = {'grid': Grid, 'forcefield': ForceField, 'target': Target,
+    _biot_methods = {'grid': Grid, 
+                     'forcefield': ForceField, 
+                     'target': Target,
                      'colocate': Colocate}
-
-    def initialize_biot_method(self, instance):
-        'link biot instance to method'
-        method = self._biot_instances[instance]
-        setattr(self, instance, self._biot_methods[method](self.subcoil))   
+    
+    def __init__(self):
+        self._biot_instances = {}
+    
+    def _initialize_biot_method(self, name, method):
+        'create biot instance and link to method'
+        setattr(self, name, self._biot_methods[method](self.subcoil)) 
+        
+    @property
+    def biot_instances(self):
+        return self._biot_instances
+    
+    @biot_instances.setter
+    def biot_instances(self, biot_instances):
+        for biot_name in biot_instances:
+            biot_method = biot_instances[biot_name]
+            if biot_method in self._biot_methods:
+                if biot_name not in self._biot_instances:
+                    self._biot_instances.update({biot_name: biot_method})
+                if not hasattr(self, biot_name):
+                    self._initialize_biot_method(biot_name, biot_method)
+        
+    @property
+    def biot_attributes(self):
+        _biot_attributes = {}
+        for instance in self._biot_instances:
+            biot_attribute = '_'.join([instance, 'biot_attributes'])
+            _biot_attributes[biot_attribute] = \
+                getattr(getattr(self, instance), 'biot_attributes')
+        return _biot_attributes
+    
+    @biot_attributes.setter
+    def biot_attributes(self, biot_attributes):
+        for instance in self._biot_instances:
+            biot_attribute = '_'.join([instance, 'biot_attributes'])
+            setattr(getattr(self, instance), 'biot_attributes',
+                    biot_attributes.get(biot_attribute, biot_attributes))
+        
         
 class Interaction:
     

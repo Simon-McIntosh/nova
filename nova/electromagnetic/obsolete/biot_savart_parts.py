@@ -4,6 +4,34 @@ Created on Mon Sep  7 13:22:00 2020
 
 @author: mcintos
 """
+
+  
+    '''
+    def assemble_source(self):
+        'load source filaments into points structured array'
+        for label, column in zip(
+                ['rs', 'rs_rms', 'zs', 'Ns', 'dl', 'dt', 'dx', 'dz'],
+                ['x', 'rms', 'z', 'Nt', 'dl', 'dt', 'dx', 'dz']):
+            self.points[label] = np.dot(
+                    np.ones((self.nT, 1)), 
+                    getattr(self.source, column).reshape(1, -1)).flatten()
+        csID = np.array([self._source_cross_section.index(cs)  # cross-section 
+                         for cs in self.source.cross_section])
+        csID = np.dot(np.ones((self.nT, 1)), csID.reshape(1, -1)).flatten()
+        for i, cs in enumerate(self._source_cross_section):
+            self.points['cs'][csID == i] = cs
+        self.points['dr'] = np.linalg.norm(
+            [self.points['dx'], self.points['dz']], axis=0) / 2
+
+    def assemble_target(self):
+        'load target points into points structured array'
+        for label, column in zip(['r', 'z', 'N'], ['x', 'z', 'Nt']):
+            self.points[label] = np.dot(
+                    getattr(self.target, column).reshape(-1, 1), 
+                    np.ones((1, self.nS))).flatten()
+    '''
+
+
     #def assemble(self):
         
         

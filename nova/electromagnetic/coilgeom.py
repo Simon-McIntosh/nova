@@ -40,8 +40,8 @@ class ITERcoilset(CoilClass):
             self.save_coilset(filename)
         else:
             CoilClass.load_coilset(self, filename)
-            if self.grid.generate_grid(**kwargs):  
-                self.save_coilset(filename)  # save on-demand update
+            #if self.grid.generate_grid(**kwargs):  
+            #    self.save_coilset(filename)  # save on-demand update
 
     def select_coils(self, **kwargs):
         coils = kwargs.pop('coils', ['pf', 'vsj', 'vv'])  # default set
@@ -648,8 +648,8 @@ if __name__ == '__main__':
     #IOdata.compare()
     #IOdata.cc.plot(label=True, ax=plt.subplots(1, 1)[1])
     
-    ITER = ITERcoilset(coils='vv', dCoil=0.2, n=2e3, 
-                       limit=[4, 8.5, -3, 3], read_txt=True)
+    ITER = ITERcoilset(coils='pf', dCoil=0.2, n=2e3, 
+                       limit=[4, 8.5, -3, 3], read_txt=False)
     """
     cc = ITER.cc
     cc.scenario_filename = -2

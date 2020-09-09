@@ -1,32 +1,80 @@
 import numpy as np
-from pandas.api.types import is_list_like
-from pandas import Series
 
 from nova.electromagnetic.coilframe import CoilFrame
 from nova.electromagnetic.coilmatrix import CoilMatrix
-from nova.electromagnetic.biotelements import Points, BiotPoints
+from nova.electromagnetic.biotelements import Filament
 from amigo.pyplot import plt
+
+
+class BiotAttributes:
+    
+    'manage attributes to and from Biot derived classes'
+    _biot_attributes = []
+    _default_biot_attributes = {}
+    
+    def __init__(self, **biot_attributes):
+        self._append_biot_attributes(self._biotset_attributes)
+        self._append_biot_attributes(self._coilmatrix_attributes)
+        self._default_biot_attributes = {**self._default_biot_attributes, 
+                                         **self._biotset_attributes}
+        self.biot_attributes = biot_attributes
+        
+    def _append_biot_attributes(self, attributes):
+        self._biot_attributes += [attr for attr in attributes 
+                                  if attr not in self._biot_attributes]
+    
+    @property
+    def biot_attributes(self):
+        return {attribute: getattr(self, attribute) for attribute in 
+                self._biot_attributes}
+        
+    @biot_attributes.setter
+    def biot_attributes(self, _biot_attributes):
+        for attribute in self._biot_attributes:
+            default = self._default_biot_attributes.get(attribute, None)
+            value = _biot_attributes.get(attribute, None)
+            if value is not None:
+                setattr(self, attribute, value)  # set value 
+            elif not hasattr(self, attribute):
+                setattr(self, attribute, default)  # set default
 
 
 class BiotFrame(CoilFrame):
     
-    def __init__(self, *args, **kwargs):
+        
+    _cross_section_factor = {'circle': np.exp(-0.25),  # circle-circle
+                             'square': 2*0.447049,  # square-square
+                             'skin': 1}  # skin-skin
+    
+    _cross_section_key = {'rectangle': 'square',
+                          'eliplse': 'circle',
+                          'polygon': 'square',
+                          'shell': 'square'}
+    
+    def __init__(self):
         CoilFrame.__init__(self, coilframe_metadata={
             '_required_columns': ['x', 'z'],
-            '_additional_columns': ['rms', 'dx', 'dz', 'Nt', 'cross_section'],
+            '_additional_columns': ['rms', 'dx', 'dz', 'Nt', 'cross_section',
+                                    'cs_factor'],
             '_default_attributes': {'dx': 0, 'dz': 0, 'Nt': 1, 
-                                    'cross_section': 'circle'},
-            '_coilframe_attributes': ['x', 'z', 'dx', 'dz', 'Nt'],
+                                    'cross_section': 'square',
+                                    'cs_factor': 
+                                        self._cross_section_factor['square']},
+            '_dataframe_attributes': ['x', 'z', 'dx', 'dz', 'Nt',
+                                      'cs_factor'],
             '_coildata_attributes': {'region': None, 'nS': None, 'nT': None}})
-        self.add_coil(*args, **kwargs)
+        self.coilframe = None
         
     def add_coil(self, *args, **kwargs):
         self.link_coilframe(*args)  # store referance to CoilFrame
+        if self.coilframe is not None:
+            if self.coilframe.empty:
+                return
         CoilFrame.add_coil(self, *args, **kwargs)
+        self.update_cross_section_factor()
         
     def link_coilframe(self, *args):
         'set link to coilframe instance to permit future coilframe updates'
-        self.coilframe = None
         if self._is_coilframe(*args, accept_dataframe=False):
             self.coilframe = args[0]
 
@@ -35,6 +83,14 @@ class BiotFrame(CoilFrame):
             if self.coilframe.nC != self.nC or force_update:
                 self.drop_coil() 
                 CoilFrame.add_coil(self, self.coilframe)
+                self.update_cross_section_factor()
+                
+    def update_cross_section_factor(self):
+        cross_section = [cs if cs in self._cross_section_factor 
+                         else self._cross_section_key.get(cs, 'square')
+                         for cs in self.cross_section]
+        self.cs_factor = np.array([self._cross_section_factor[cs] 
+                                   for cs in cross_section])
         
     @property
     def region(self):
@@ -66,10 +122,11 @@ class BiotFrame(CoilFrame):
         self._nT = value        
         
     def __getattr__(self, key):
-        'subclass coilframe getattr'
-        if key in self._coilframe_attributes:
-            # get coilframe vector
-            value = getattr(self, f'_{key}')
+        'assemble float16 (nT,nS) matrix if _attribute_'
+        if key[0] == '_' and key[-1] == '_' \
+                and key[1:-1] in self._dataframe_attributes:
+            key = key[1:-1]
+            value = CoilFrame.__getattr__(self, f'_{key}').astype(np.half)
             if key in self._mpc_attributes:  # inflate
                 value = value[self._mpc_referance]
             if self.nS is None or self.nT is None or self.region is None:
@@ -77,117 +134,54 @@ class BiotFrame(CoilFrame):
                 err_txt += 'number not set'
                 raise IndexError(err_txt)
             if self.region == 'source':  # assemble source
-                value = np.dot(np.ones((self.nT, 1)), 
+                value = np.dot(np.ones((self.nT, 1), dtype=np.half), 
                                value.reshape(1, -1)).flatten()
             elif self.region == 'target':  # assemble target
                 value = np.dot(value.reshape(-1, 1), 
-                               np.ones((1, self.nS))).flatten()
+                               np.ones((1, self.nS), dtype=np.half)).flatten()
             return value
         else:
             return CoilFrame.__getattr__(self, key)
-        
-
-class BiotAttributes:
-    
-    'manage attributes to and from Biot derived classes'
-    _biot_attributes = []
-    _default_biot_attributes = {}
-    
-    def __init__(self, **biot_attributes):
-        self._append_biot_attributes(self._biotsavart_attributes)
-        self._append_biot_attributes(self._coilmatrix_attributes)
-        self._default_biot_attributes = {**self._default_biot_attributes, 
-                                         **self._biotsavart_attributes}
-        self.biot_attributes = biot_attributes
-        
-    def _append_biot_attributes(self, attributes):
-        self._biot_attributes += [attr for attr in attributes 
-                                  if attr not in self._biot_attributes]
-    
-    @property
-    def biot_attributes(self):
-        return {attribute: getattr(self, attribute) for attribute in 
-                self._biot_attributes}
-        
-    @biot_attributes.setter
-    def biot_attributes(self, _biot_attributes):
-        for attribute in self._biot_attributes:
-            default = self._default_biot_attributes.get(attribute, None)
-            value = _biot_attributes.get(attribute, None)
-            if value is not None:
-                setattr(self, attribute, value)  # set value 
-            elif not hasattr(self, attribute):
-                setattr(self, attribute, default)  # set default
                 
-                
-class BiotArray(Points):
+        
+class BiotSet(CoilMatrix, BiotAttributes, Filament):
     
-    def __init__(self, source=None):
+    _biotset_attributes = {'_solve_interaction': True}
+    
+    def __init__(self, source=None, target=None, **biot_attributes):
+        CoilMatrix.__init__(self)
+        BiotAttributes.__init__(self, **biot_attributes)
+        self.source = BiotFrame()
+        self.target = BiotFrame()
+        self.load_biotset(source, target)
+        
+    def load_biotset(self, source=None, target=None):
         if source is not None:
-            self.load_source(source)
-            
-    def load_source(self, *args, **kwargs):
-        self.source = BiotFrame(*args, **kwargs)
+            self.source.add_coil(source)
+        if target is not None:
+            self.target.add_coil(target)
         
-    def load_target(self, *args, **kwargs):
-        self.target = BiotFrame(*args, **kwargs)
-  
-    '''
-    def assemble_source(self):
-        'load source filaments into points structured array'
-        for label, column in zip(
-                ['rs', 'rs_rms', 'zs', 'Ns', 'dl', 'dt', 'dx', 'dz'],
-                ['x', 'rms', 'z', 'Nt', 'dl', 'dt', 'dx', 'dz']):
-            self.points[label] = np.dot(
-                    np.ones((self.nT, 1)), 
-                    getattr(self.source, column).reshape(1, -1)).flatten()
-        csID = np.array([self._source_cross_section.index(cs)  # cross-section 
-                         for cs in self.source.cross_section])
-        csID = np.dot(np.ones((self.nT, 1)), csID.reshape(1, -1)).flatten()
-        for i, cs in enumerate(self._source_cross_section):
-            self.points['cs'][csID == i] = cs
-        self.points['dr'] = np.linalg.norm(
-            [self.points['dx'], self.points['dz']], axis=0) / 2
-
-    def assemble_target(self):
-        'load target points into points structured array'
-        for label, column in zip(['r', 'z', 'N'], ['x', 'z', 'Nt']):
-            self.points[label] = np.dot(
-                    getattr(self.target, column).reshape(-1, 1), 
-                    np.ones((1, self.nS))).flatten()
-    '''
-
+    def update_biotset(self):
+        self.source.update_coilframe()
+        self.target.update_coilframe()
+        
     def assemble(self):
-        'assemble interaction'
-        self.nS = self.source.nC  # source filament number
-        self.nT = self.target.nC  # target point number
-        self.nI = self.nS*self.nT  # total number of interactions
+        self.update_biotset()
+        self.target.nS = self.source.nC  # source filament number
+        self.source.nT = self.target.nC  # target point number
+        self.nI = self.source.nC*self.target.nC  # total number of interactions
         
-        
-        #self.initialize_point_array(self.nI)
-        #self.assemble_source()
-        #self.assemble_target()
-        self.set_biot_instance()
+    def calculate(self):
+        rs, zs = self.source._x_, self.source._z_
+        r, z = self.target._x_, self.target._z_
+        self.offset(rs, zs, r, z)         
         
     def plot(self, ax=None):
         if ax is None:
             ax = plt.gca()
-        ax.plot(self.points['rs'], self.points['zs'], 
-                'C1o', label='source')
-        ax.plot(self.points['r'], self.points['z'], 
-                'C2.', label='target')
+        ax.plot(self.source.x, self.source.z, 'C1o', label='source')
+        ax.plot(self.target.x, self.target.z, 'C2.', label='target')
         plt.legend()
-    
-        
-class BiotSavart(CoilMatrix, BiotArray, BiotPoints):
-    
-    _biotsavart_attributes = {'_solve_interaction': True}
-    
-    def __init__(self, source=None, ndr=3, mutual=False):
-        CoilMatrix.__init__(self)
-        BiotArray.__init__(self, source)
-        #BiotPoints.__init__(self, ndr=ndr)
-        #self.mutual = mutual
         
     def flux_matrix(self):
         'calculate filament flux (inductance) matrix'
@@ -310,7 +304,7 @@ if __name__ == '__main__':
     '''
     
     
-    bs = BiotSavart(cs.subcoil)
+    bs = BiotSet(cs.subcoil)
 
     bs.load_target(cs.subcoil)
     bs.assemble()

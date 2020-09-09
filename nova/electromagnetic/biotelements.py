@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.special import ellipk, ellipe
 
+from amigo.pyplot import plt
+
 class Points:
     
     'store source and target points in structured array'
@@ -99,42 +101,44 @@ class Vectors(Points):
             self.update_flag = False
             
             
-class Filament(Vectors):
+class Filament():
     
     'compute interaction using complete circular filaments'
     
-    _cross_section_factor = {'circle': np.exp(-0.25),  # circle-circle
-                             'square': 2*0.447049,  # square-square
-                             'skin': 1}  # skin-skin
-    
     _cross_section = 'filament'  # applicable cross section type
-    
-    def __init__(self, rms=True):
-        Vectors.__init__(self, rms=rms)
 
-    def offset(self):
-        'offset source and target points '
-        self.dL = np.array([self.vector['r']-self.vector['rs'],
-                            self.vector['z']-self.vector['zs']])
-        self.dL_mag = np.linalg.norm(self.dL, axis=0)
-        self.dL_norm = np.zeros((2, self.Npoints))
-        self.index = np.isclose(self.dL_mag, 0)  # self index
-        self.dL_norm[0, self.index] = 1  # radial offset
-        self.dL_norm[:, ~self.index] = \
-            self.dL[:, ~self.index] / self.dL_mag[~self.index]
-        idx = self.dL_mag < self.points['dr'] # seperation < L2 norm radius
-        ro = self.points['dr'][idx] * np.array(
-            [self._cross_section_factor['square'] 
-             if cs not in self._cross_section_factor 
-             else self._cross_section_factor[cs] 
-             for cs in self.points['cs'][idx]])
-        factor = (1 - self.dL_mag[idx] / self.points['dr'][idx]) / 2
-        deltas = {}
-        for i, var in enumerate(['r', 'z']):
-            offset = np.zeros(self.Npoints)
-            offset[idx] = factor * ro * self.dL_norm[i][idx]
-            deltas.update({f'd{var}': offset, f'd{var}s': -offset})
-        self.set_point_position(**deltas)
+    def offset(self, rs, zs, r, z):
+        'offset source and target points inplace'
+        dL = np.array([(rs-r), (zs-z)])
+        dL_mag = np.linalg.norm(dL, axis=0)
+        dl = self.source._dl_  # filament characteristic length
+        idx = np.where(dL_mag < dl/2)[0]  # seperation < dl
+        print(len(idx))
+        # reduce
+        dL = dL[:, idx]
+        dL_mag = dL_mag[idx]
+        #dL_norm = np.zeros((2, len(idx)))
+        dl = dl[idx]
+        #index = np.isclose(dL_mag, 0)
+        #dL_norm[0, index] = 1  # radial offset        
+        #dL_norm[:, ~index] = dL[:, ~index] / dL_mag[~index]
+        
+        dL_norm = dL / dL_mag
+        cs_factor = self.source._cs_factor_[idx]
+        ro = dl * cs_factor  # self seperation
+        factor = (1 - dL_mag / dl) / 2
+        factor *= 20
+        dr = factor*ro*dL_norm[0]  # radial offset
+        dz = factor*ro*dL_norm[1]  # vertical offset
+        # source
+        rs[idx] -= dr
+        #zs[idx] -= dz
+        # target
+        r[idx] += dr
+        #z[idx] += dz
+        
+        plt.plot(rs[idx], zs[idx], 'C3o')
+        plt.plot(r[idx], z[idx], 'C0.') 
         
     def flux(self): 
         'vector and scalar potential'

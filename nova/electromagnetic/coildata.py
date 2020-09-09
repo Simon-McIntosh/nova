@@ -37,7 +37,7 @@ class CoilData():
     '''
 
     # list of fast access np.array variables linked to CataFrame
-    _coilframe_attributes = []
+    _dataframe_attributes = []
     
     # metadata attributes
     _coildata_attributes = {}
@@ -70,7 +70,7 @@ class CoilData():
     def __init__(self):
         self._extract_coildata_properties()
         self._initialize_coildata_flags()
-        self._initialize_coilframe_attributes()
+        self._initialize_dataframe_attributes()
         self._initialize_coildata_attributes()
         self._initialize_coilcurrent_attributes()
         self._unlink_coildata_attributes()
@@ -85,8 +85,8 @@ class CoilData():
             setattr(self, f'_{flag}', self._coildata_flags[flag]) 
         self.update_dataframe = False
         
-    def _initialize_coilframe_attributes(self, **kwargs):
-        self.coilframe_attributes = self._mpc_attributes
+    def _initialize_dataframe_attributes(self, **kwargs):
+        self.dataframe_attributes = self._mpc_attributes
     
     def _initialize_coildata_attributes(self):
         self._coildata_attributes = {'current_update': 'full'}
@@ -98,7 +98,7 @@ class CoilData():
         
     def _unlink_coildata_attributes(self):
         # list attributes
-        for attribute in self._coilframe_attributes +\
+        for attribute in self._dataframe_attributes +\
                          self._coildata_indices + \
                          self._mpc_attributes + \
                          self._mpc_constraints:
@@ -109,16 +109,16 @@ class CoilData():
         self.coildata_attributes = self._coildata_attributes
         
     @property 
-    def coilframe_attributes(self):
-        return self._coilframe_attributes
+    def dataframe_attributes(self):
+        return self._dataframe_attributes
     
-    @coilframe_attributes.setter 
-    def coilframe_attributes(self, coilframe_attributes):
+    @dataframe_attributes.setter 
+    def dataframe_attributes(self, dataframe_attributes):
         'append coilframe attributes (fast access)'
-        for attribute in coilframe_attributes:
-            if attribute not in self._coilframe_attributes:
+        for attribute in dataframe_attributes:
+            if attribute not in self._dataframe_attributes:
                 setattr(self, f'_{attribute}', None)
-                self._coilframe_attributes.append(attribute)
+                self._dataframe_attributes.append(attribute)
                 if attribute in self.columns:
                     self.refresh_coilframe(attribute)
                     
@@ -150,7 +150,7 @@ class CoilData():
     @update_dataframe.setter
     def update_dataframe(self, value):
         self._update_dataframe = {attribute: value 
-                                  for attribute in self._coilframe_attributes}
+                                  for attribute in self._dataframe_attributes}
                              
     def _update_flags(self, **kwargs):
         for flag in self._coildata_flags:
@@ -167,7 +167,7 @@ class CoilData():
                
     def _extract_data_attributes(self):
         self.update_dataframe = False
-        for attribute in self._coilframe_attributes + \
+        for attribute in self._dataframe_attributes + \
                          self._coildata_indices:
                 if attribute in ['power', 'plasma', 'optimize']:
                     dtype = bool

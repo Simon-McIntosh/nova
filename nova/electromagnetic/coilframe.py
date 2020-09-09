@@ -34,7 +34,7 @@ class CoilFrame(DataFrame, CoilData):
                  '_additional_columns', 
                  '_default_attributes',
                  '_coildata_attributes',
-                 '_coilframe_attributes']
+                 '_dataframe_attributes']
 
     def __init__(self, *args, coilframe_metadata={}, **kwargs):
         self._initialize_coilframe_metadata()
@@ -86,8 +86,8 @@ class CoilFrame(DataFrame, CoilData):
                         self._default_attributes[k] = value[k]
                 elif key in self._default_attributes:
                     self._default_attributes[key] = value
-                elif key == '_coilframe_attributes':
-                    self.coilframe_attributes = value
+                elif key == '_dataframe_attributes':
+                    self.dataframe_attributes = value
                 elif key == '_coildata_attributes':
                     self.coildata_attributes = value    
                 elif key in self._coildata_attributes:
@@ -454,7 +454,7 @@ class CoilFrame(DataFrame, CoilData):
         return shape
     
     def __setattr__(self, key, value):
-        if key in self._coilframe_attributes:
+        if key in self._dataframe_attributes:
             self._update_dataframe[key] = True
             if key not in self._coildata_properties:
                 # set as private variable
@@ -471,7 +471,7 @@ class CoilFrame(DataFrame, CoilData):
         return DataFrame.__setattr__(self, key, value)
     
     def __getattr__(self, key):
-        if key in self._coilframe_attributes:
+        if key in self._dataframe_attributes:
             value = getattr(self, f'_{key}')
             if key in self._mpc_attributes:  # inflate
                 value = value[self._mpc_referance]
@@ -482,7 +482,7 @@ class CoilFrame(DataFrame, CoilData):
     def __setitem__(self, key, value):
         'subclass dataframe setitem'
         self.refresh_dataframe()  # flush dataframe updates
-        if key in self._coilframe_attributes:
+        if key in self._dataframe_attributes:
             DataFrame.__setitem__(self, key, value)
             self.refresh_coilframe(key)
             if key in ['Nt', 'It', 'Ic']:
@@ -498,13 +498,13 @@ class CoilFrame(DataFrame, CoilData):
     
     def __getitem__(self, key):  
         'subclass dataframe getitem'
-        if key in self._coilframe_attributes:
+        if key in self._dataframe_attributes:
             self.refresh_dataframe()
         return DataFrame.__getitem__(self, key)
     
     def _get_value(self, index, col, takeable=False):
         'subclass dataframe get_value'
-        if col in self._coilframe_attributes:
+        if col in self._dataframe_attributes:
             self.refresh_dataframe()
         return DataFrame._get_value(self, index, col, takeable)
     

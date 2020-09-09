@@ -24,6 +24,7 @@ from amigo.IO import pythonIO
 from amigo.geom import length, xzfun
 import nova
 from nova.electromagnetic.coilframe import CoilFrame
+from nova.electromagnetic.coildata import CoilData
 from nova.electromagnetic.biotmethods import BiotMethods
 
 
@@ -42,21 +43,13 @@ class CoilSet(pythonIO, BiotMethods):
     _coilset_attributes = ['default_attributes', 
                            'coilset_frames', 
                            'coilset_metadata',
-                           'coilframe_attributes',
-                           'coildata_attributes']  
+                           'dataframe_attributes',
+                           'coildata_attributes',
+                           'biot_instances',
+                           'biot_attributes']  
 
     # main class attribures
     _coilset_frames = ['coil', 'subcoil']
-    
-    # exchange biot instances
-    _biot_instances = {}#{'mutual': 'mutual'}
-    '''
-    'mutual': 'mutual',
-                       'plasma': 'grid',
-                       'grid': 'grid',
-                       'target': 'target',
-                       'colocate': 'colocate'}
-    '''
 
     # additional_columns
     _coil_columns = ['dx', 'dz', 'dA', 'dCoil', 'nx', 'nz', 'subindex', 'part',
@@ -76,51 +69,47 @@ class CoilSet(pythonIO, BiotMethods):
                            'current_update': 'full'}
     
     # fast access np.array linked to CoilFrame via DataFrame
-    _coilframe_attributes =  ['x', 'z', 'dl', 'dt', 'rms', 'dx', 'dz',
+    _dataframe_attributes =  ['x', 'z', 'dl', 'dt', 'rms', 'dx', 'dz',
                               'Ic', 'It', 'Nt', 'Psi', 'Bx', 'Bz', 'B',
                               'Fx', 'Fz', 'xFx', 'xFz', 'zFx', 'zFz', 'My']
 
     def __init__(self, **coilset):
-        self.initialize_coil()  # initalize coil and subcoil
-        self.initialize_biot_instances()  # initalize biot instances
+        self.initialize_coilset()  # initialize coil and subcoil
+        self.initialize_biot()  # setup biot instances
         self.coilset = coilset  # exchange coilset and instance attributes
 
-    def initialize_coil(self):
+    def initialize_coilset(self):
         coil_metadata = {'_additional_columns': self._coil_columns,
-                         '_coilframe_attributes': self._coilframe_attributes}
+                         '_dataframe_attributes': self._dataframe_attributes}
         subcoil_metadata = {'_additional_columns': self._subcoil_columns,
-                            '_coilframe_attributes': 
-                                self._coilframe_attributes}
+                            '_dataframe_attributes': 
+                                self._dataframe_attributes}
         self.coil = CoilFrame(coilframe_metadata=coil_metadata)
         self.subcoil = CoilFrame(coilframe_metadata=subcoil_metadata)
-        self.coil.rebuild_coildata()
-        self.subcoil.rebuild_coildata()
+        BiotMethods.__init__(self)  # initialize biotmethods
         
-    def initialize_biot_instances(self):
-        for instance in self._biot_instances:
-            self.initialize_biot_method(instance)
+    def initialize_biot(self):
+        self.biot_instances = {'forcefield': 'forcefield',
+                               'plasma': 'grid',
+                               'grid': 'grid',
+                               'target': 'target',
+                               'colocate': 'colocate'}
 
     @property
     def coilset(self):
         coilset_attributes = {attribute: getattr(self, attribute)
                               for attribute in self._coilset_attributes}
-        print(coilset_attributes.keys())
-        instance_attributes = {}
-        for instance in self._biot_instances:
-            instance_attribute = '_'.join([instance, 'biot_attributes'])
-            instance_attributes[instance_attribute] = \
-                getattr(getattr(self, instance), 'biot_attributes')
-        return {**coilset_attributes, **instance_attributes}
+        return coilset_attributes
 
     @coilset.setter
-    def coilset(self, coilset):
-        for instance in self._biot_instances:
-            instance_attribute = '_'.join([instance, 'biot_attributes'])
-            setattr(getattr(self, instance), 'biot_attributes',
-                    coilset.get(instance_attribute, coilset))
-        for attribute in self._coilset_attributes:
-            setattr(self, attribute, coilset.get(attribute, coilset))
-
+    def coilset(self, coilset_attributes):
+        for attribute_name in self._coilset_attributes:
+            if attribute_name in ['default_attributes', 'coilset_metadata']:
+                default_attributes = coilset_attributes
+            else:  # require attributes to be passed within attribute dict
+                default_attributes = {}    
+            setattr(self, attribute_name, 
+                    coilset_attributes.get(attribute_name, default_attributes))
 
     def append_coilset(self, *args):
         for coilset in args:
@@ -151,6 +140,7 @@ class CoilSet(pythonIO, BiotMethods):
         for frame in self._coilset_frames:
             coilframe = coilset_frames.get(frame, DataFrame())
             if not coilframe.empty:
+                CoilData.__init__(coilframe)  # re-initalize coildata
                 getattr(self, frame).add_coil(coilframe)  # append coilframe
             
     @property
@@ -184,14 +174,11 @@ class CoilSet(pythonIO, BiotMethods):
         self.save_pickle(filepath, ['_coilset'])
         del self._coilset  # delete temp variable
         
-    def load_coilset(self, filename, directory=None, append=False):
+    def load_coilset(self, filename, directory=None):
         filepath = self.filepath(filename, directory)
         if path.isfile(filepath + '.pk'):
             self.load_pickle(filepath)
-            if append:  # append coilset
-                self.coilset = self._coilset
-            else:  # create new instance
-                CoilSet.__init__(self, **self._coilset)
+            self.coilset = self._coilset
             del self._coilset  # delete temp variable
         else:
             raise LookupError(f'file {filepath} not found')
@@ -876,13 +863,13 @@ class CoilSet(pythonIO, BiotMethods):
             self.plot_coil(self.subcoil, passive=passive, ax=ax)
         else:
             self.plot_coil(self.coil, passive=passive, ax=ax)
+        ax.axis('equal')
+        ax.axis('off')
+        plt.tight_layout()   
         if 'Plasma' in self.coil.index and plasma and 'Ic' in self.coil:
             self.label_plasma(ax)
         if label or current or field:
             self.label_coil(ax, label, current, field)
-        ax.axis('equal')
-        ax.axis('off')
-        plt.tight_layout()
 
     def label_plasma(self, ax, fs=None):
         if fs is None:
@@ -943,7 +930,7 @@ class CoilSet(pythonIO, BiotMethods):
         parts = list(parts)    
         N = {p: sum(coil.part == p) for p in parts}
         # referance vertical length scale
-        dz_ref = np.diff(ax.get_ylim())[0] / 6
+        dz_ref = np.diff(ax.get_ylim())[0] / 100
         nz = np.sum(np.array([parts != False, current != None, 
                               field != False]))
         if nz == 1:

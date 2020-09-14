@@ -11,7 +11,7 @@ from descartes import PolygonPatch
 from amigo.pyplot import plt
 from amigo.time import clock
 from amigo.IO import readtxt, pythonIO
-from nova.electromagnetic.DINA.read_dina import read_dina
+from nova.electromagnetic.IO.read_waveform import read_dina
 from nova.electromagnetic.coilgeom import VSgeom
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.machinedata import MachineData

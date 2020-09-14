@@ -31,7 +31,6 @@ class CoilMatrix:
         #self.coilmatrix = coilmatrix_attributes  # exchange attributes
              
     def _initialize_coilmatrix_attributes(self):
-        self.nS, self.nT = 0, 0  # source and target length
         for attribute in self._coilmatrix_attributes:  
             if 'flux' in attribute:
                 setattr(self, f'{attribute}', np.array([]))

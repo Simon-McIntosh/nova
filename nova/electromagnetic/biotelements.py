@@ -101,64 +101,76 @@ class Vectors(Points):
             self.update_flag = False
             
             
-class Filament():
+class Filament:
     
     'compute interaction using complete circular filaments'
     
     _cross_section = 'filament'  # applicable cross section type
+    
+    mu_o = 4e-7*np.pi  # magnetic constant [Vs/Am]
 
-    def offset(self, rs, zs, r, z):
-        'offset source and target points inplace'
-        dL = np.array([(rs-r), (zs-z)])
+    def __init__(self, source, target):
+        self.initialize_filaments(source, target)
+        self.offset_filaments() 
+        self.calculate_coefficients()
+        
+    def initialize_filaments(self, source, target):
+        self.rs, self.zs = source._x_, source._z_  # source
+        self.r, self.z = target._x_, target._z_  # target
+        self.dl = source._dl_  # filament characteristic length
+        self.factor = source._factor_  # cross-section factor
+
+    def offset_filaments(self):
+        'offset source and target points'
+        dL = np.array([(self.rs-self.r), (self.zs-self.z)])
         dL_mag = np.linalg.norm(dL, axis=0)
-        dl = self.source._dl_  # filament characteristic length
-        idx = np.where(dL_mag < dl/2)[0]  # seperation < dl
-        print(len(idx))
+        idx = np.where(dL_mag < self.dl/2)[0]  # seperation < dl/2
         # reduce
         dL = dL[:, idx]
         dL_mag = dL_mag[idx]
-        #dL_norm = np.zeros((2, len(idx)))
-        dl = dl[idx]
-        #index = np.isclose(dL_mag, 0)
-        #dL_norm[0, index] = 1  # radial offset        
-        #dL_norm[:, ~index] = dL[:, ~index] / dL_mag[~index]
-        
-        dL_norm = dL / dL_mag
-        cs_factor = self.source._cs_factor_[idx]
-        ro = dl * cs_factor  # self seperation
-        factor = (1 - dL_mag / dl) / 2
-        factor *= 20
+        dr = self.dl[idx]/2  # filament characteristic radius
+        dL_norm = np.zeros((2, len(idx)))
+        index = np.isclose(dL_mag, 0)
+        dL_norm[0, index] = 1  # radial offset 
+        dL_norm[:, ~index] = dL[:, ~index] / dL_mag[~index]
+        cross_section_factor = self.factor[idx]  # cross-section factor
+        ro = dr*cross_section_factor  # self seperation
+        factor = 1 - dL_mag/dr
         dr = factor*ro*dL_norm[0]  # radial offset
         dz = factor*ro*dL_norm[1]  # vertical offset
-        # source
-        rs[idx] -= dr
-        #zs[idx] -= dz
-        # target
-        r[idx] += dr
-        #z[idx] += dz
+        # offset source filaments
+        self.rs[idx] -= dr
+        self.zs[idx] -= dz
+        # offset target filaments
+        self.r[idx] += dr
+        self.z[idx] += dz
         
-        plt.plot(rs[idx], zs[idx], 'C3o')
-        plt.plot(r[idx], z[idx], 'C0.') 
-        
+    def calculate_coefficients(self):
+        self.b = self.rs + self.r
+        self.gamma = self.zs - self.z
+        self.a2 = self.gamma**2 + (self.r + self.rs)**2
+        self.a = np.sqrt(self.a2)
+        self.k2 = 4 * self.r * self.rs / self.a2  
+        self.ck2 = 1 - self.k2  # complementary modulus
+        self.K = ellipk(self.k2)  # first complete elliptic integral
+        self.E = ellipe(self.k2)  # second complete elliptic integral
+
     def flux(self): 
         'vector and scalar potential'
-        self.update()  # on-demand coefficent update
-        Aphi = 1 / (2*np.pi) * self.a/self.vector['r'] * \
+        Aphi = 1 / (2*np.pi) * self.a/self.r * \
             ((1 - self.k2/2) * self.K - self.E)  # Wb/Amp-turn-turn
-        psi = 2 * np.pi * self.mu_o * self.vector['r'] * Aphi  # scalar potential
+        psi = 2 * np.pi * self.mu_o * self.r * Aphi  # scalar potential
         return psi
     
     def radial_field(self):  
-        self.update()  # on-demand coefficent update
         Br = self.mu_o / (2*np.pi) * self.gamma * (
-            self.K - (2-self.k2) / (2*self.ck2) * self.E) / (self.a*self.vector['r'])
+            self.K - (2-self.k2) / (2*self.ck2) * self.E) / (self.a*self.r)
         return Br  # T / Amp-turn-turn
 
     def vertical_field(self):  # T / Amp-turn-turn
-        self.update()  # on-demand coefficent update
-        Bz = self.mu_o / (2*np.pi) * (self.vector['r']*self.K - \
-            (2*self.vector['r'] - self.b*self.k2) / 
-            (2*self.ck2) * self.E) / (self.a*self.vector['r'])
+        Bz = self.mu_o / (2*np.pi) * (self.r*self.K - \
+            (2*self.r - self.b*self.k2) / 
+            (2*self.ck2) * self.E) / (self.a*self.r)
         return Bz  # T / Amp-turn-turn
 
 

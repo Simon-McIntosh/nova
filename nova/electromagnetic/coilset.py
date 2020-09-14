@@ -2,6 +2,7 @@ from os import path
 import functools
 import operator
 import colorsys
+import inspect
 
 import numpy as np
 from pandas import Series, DataFrame, concat, isnull, Index
@@ -43,7 +44,6 @@ class CoilSet(pythonIO, BiotMethods):
     _coilset_attributes = ['default_attributes', 
                            'coilset_frames', 
                            'coilset_metadata',
-                           'dataframe_attributes',
                            'coildata_attributes',
                            'biot_instances',
                            'biot_attributes']  
@@ -65,8 +65,9 @@ class CoilSet(pythonIO, BiotMethods):
                         'Psi', 'Bx', 'Bz', 'B']
     
     _default_attributes = {'dCoil': -1, 'dPlasma': 0.25, 'dShell': 0.5, 
-                           'turn_fraction': 1, 'turn_section': 'circle', 
-                           'current_update': 'full'}
+                           'turn_fraction': 1, 'turn_section': 'circle'}
+    
+    _coildata_attributes = {'current_update': 'full'}
     
     # fast access np.array linked to CoilFrame via DataFrame
     _dataframe_attributes =  ['x', 'z', 'dl', 'dt', 'rms', 'dx', 'dz',
@@ -79,14 +80,24 @@ class CoilSet(pythonIO, BiotMethods):
         self.coilset = coilset  # exchange coilset and instance attributes
 
     def initialize_coilset(self):
+        self._extract_coilset_properties()
         coil_metadata = {'_additional_columns': self._coil_columns,
-                         '_dataframe_attributes': self._dataframe_attributes}
+                         '_dataframe_attributes': self._dataframe_attributes,
+                         '_coildata_attributes': {**self._coildata_attributes,
+                                                  **{'subcoil': False}}}
         subcoil_metadata = {'_additional_columns': self._subcoil_columns,
                             '_dataframe_attributes': 
-                                self._dataframe_attributes}
+                                self._dataframe_attributes,
+                            '_coildata_attributes': 
+                                {**self._coildata_attributes, 
+                                 **{'subcoil': True}}}
         self.coil = CoilFrame(coilframe_metadata=coil_metadata)
         self.subcoil = CoilFrame(coilframe_metadata=subcoil_metadata)
         BiotMethods.__init__(self)  # initialize biotmethods
+        
+    def _extract_coilset_properties(self):
+        self._coilset_properties = [p for p, __ in inspect.getmembers(
+            CoilSet, lambda o: isinstance(o, property))]
         
     def initialize_biot(self):
         self.biot_instances = {'forcefield': 'forcefield',
@@ -104,12 +115,26 @@ class CoilSet(pythonIO, BiotMethods):
     @coilset.setter
     def coilset(self, coilset_attributes):
         for attribute_name in self._coilset_attributes:
-            if attribute_name in ['default_attributes', 'coilset_metadata']:
+            if attribute_name in ['default_attributes', 'coilset_metadata', 
+                                  'coildata_attributes']:
                 default_attributes = coilset_attributes
             else:  # require attributes to be passed within attribute dict
-                default_attributes = {}    
+                default_attributes = {}  
             setattr(self, attribute_name, 
                     coilset_attributes.get(attribute_name, default_attributes))
+            
+    @property 
+    def coildata_attributes(self):
+        return self.coil.coildata_attributes
+    
+    @coildata_attributes.setter 
+    def coildata_attributes(self, coildata_attributes):
+        'update only - create new via coilset_metadata[_coildata_attributes]'
+        for attribute in self.coildata_attributes:
+            if attribute in self._coilset_properties and \
+                    attribute in coildata_attributes and \
+                        not hasattr(self, f'_{attribute}'):
+                setattr(self, attribute, coildata_attributes[attribute])
 
     def append_coilset(self, *args):
         for coilset in args:
@@ -124,8 +149,11 @@ class CoilSet(pythonIO, BiotMethods):
         for attribute in default_attributes:
             if attribute in list(self._default_attributes.keys()) + \
                     self._coil_columns + self._subcoil_columns:
+                #if attribute in self._coilset_properties and \
+                #        not hasattr(self, f'_{attribute}'):
+                #    setattr(self, attribute, default_attributes[attribute])
                 self._default_attributes[attribute] = \
-                    default_attributes[attribute]
+                        default_attributes[attribute]
 
     @property
     def coilset_frames(self):
@@ -445,6 +473,7 @@ class CoilSet(pythonIO, BiotMethods):
             dx, dz = coil[['dl', 'dt']]  # length, thickness == dx, dz
             bounds = (x-dx/2, z-dz/2, x+dx/2, z+dz/2)
             coil_polygon = shapely.geometry.box(bounds)
+        coil_polygon = coil_polygon.buffer(1e-12*dCoil)  # offset coil polygon
         # coil_area = coil_polygon.area
         mesh = {'mpc': mpc}  # multi-point constraint (link current)
         if 'part' in coil:
@@ -778,7 +807,7 @@ class CoilSet(pythonIO, BiotMethods):
         self.subcoil.loc[subindex, 'coil'] = name
         self.subcoil.add_mpc(subindex.to_list())
         # update current
-        self.mutual.solve_interaction()
+        self.forcefield.solve_interaction()
         self.Ic = {name: Ic}
         
     def rename(self, index):

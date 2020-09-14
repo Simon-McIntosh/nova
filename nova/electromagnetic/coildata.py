@@ -1,8 +1,9 @@
 from contextlib import contextmanager
+import inspect
+
 import numpy as np
 from pandas import DataFrame, Index
 from pandas.api.types import is_list_like, is_dict_like
-import inspect
 
 
 class CoilData():
@@ -42,6 +43,7 @@ class CoilData():
     # metadata attributes
     _coildata_attributes = {}
     
+    # current update attributes
     _coilcurrent_attributes = []
         
     # CoilData indices
@@ -85,11 +87,11 @@ class CoilData():
             setattr(self, f'_{flag}', self._coildata_flags[flag]) 
         self.update_dataframe = False
         
-    def _initialize_dataframe_attributes(self, **kwargs):
+    def _initialize_dataframe_attributes(self):
         self.dataframe_attributes = self._mpc_attributes
     
     def _initialize_coildata_attributes(self):
-        self._coildata_attributes = {'current_update': 'full'}
+        self._coildata_attributes = {}
                 
     def _initialize_coilcurrent_attributes(self):
         self._coilcurrent_attributes = [attribute for attribute in 
@@ -271,7 +273,8 @@ class CoilData():
                 self._current_index = ~self._plasma  # all coils        
             else:
                 raise IndexError(f'flag {update_flag} not in '
-                                 '[full, actitve, passive, plasma, coil]')
+                                 '[full, actitve, passive, free, fix, '
+                                 'plasma, coil]')
     
     @property
     def current_index(self):

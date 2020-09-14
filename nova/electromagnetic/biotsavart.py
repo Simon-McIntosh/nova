@@ -55,14 +55,15 @@ class BiotFrame(CoilFrame):
         CoilFrame.__init__(self, coilframe_metadata={
             '_required_columns': ['x', 'z'],
             '_additional_columns': ['rms', 'dx', 'dz', 'Nt', 'cross_section',
-                                    'cs_factor'],
+                                    'factor', 'coil', 'mpc'],
             '_default_attributes': {'dx': 0, 'dz': 0, 'Nt': 1, 
                                     'cross_section': 'square',
-                                    'cs_factor': 
+                                    'factor': 
                                         self._cross_section_factor['square']},
-            '_dataframe_attributes': ['x', 'z', 'dx', 'dz', 'Nt',
-                                      'cs_factor'],
-            '_coildata_attributes': {'region': None, 'nS': None, 'nT': None}})
+            '_dataframe_attributes': ['x', 'z', 'dx', 'dz', 'Nt', 'factor'],
+            '_coildata_attributes': {'region': None, 'nS': None, 'nT': None,
+                                     'rms_offset': True,
+                                     'current_update': 'full'}})
         self.coilframe = None
         
     def add_coil(self, *args, **kwargs):
@@ -89,7 +90,7 @@ class BiotFrame(CoilFrame):
         cross_section = [cs if cs in self._cross_section_factor 
                          else self._cross_section_key.get(cs, 'square')
                          for cs in self.cross_section]
-        self.cs_factor = np.array([self._cross_section_factor[cs] 
+        self.factor = np.array([self._cross_section_factor[cs] 
                                    for cs in cross_section])
         
     @property
@@ -121,12 +122,19 @@ class BiotFrame(CoilFrame):
         self._nS = self.nC
         self._nT = value        
         
+    @property 
+    def rms_offset(self):
+        'set to use rms current centre for source coils'
+        return self._rms_offset
+        
     def __getattr__(self, key):
         'assemble float16 (nT,nS) matrix if _attribute_'
         if key[0] == '_' and key[-1] == '_' \
                 and key[1:-1] in self._dataframe_attributes:
             key = key[1:-1]
-            value = CoilFrame.__getattr__(self, f'_{key}').astype(np.half)
+            if key == 'x' and self.region == 'source' and self.rms_offset:
+                key = 'rms'
+            value = CoilFrame.__getattr__(self, f'_{key}') #.astype(np.half)
             if key in self._mpc_attributes:  # inflate
                 value = value[self._mpc_referance]
             if self.nS is None or self.nT is None or self.region is None:
@@ -134,17 +142,17 @@ class BiotFrame(CoilFrame):
                 err_txt += 'number not set'
                 raise IndexError(err_txt)
             if self.region == 'source':  # assemble source
-                value = np.dot(np.ones((self.nT, 1), dtype=np.half), 
+                value = np.dot(np.ones((self.nT, 1)), #, dtype=np.half
                                value.reshape(1, -1)).flatten()
             elif self.region == 'target':  # assemble target
                 value = np.dot(value.reshape(-1, 1), 
-                               np.ones((1, self.nS), dtype=np.half)).flatten()
+                               np.ones((1, self.nS))).flatten()  # , dtype=np.half
             return value
         else:
             return CoilFrame.__getattr__(self, key)
                 
         
-class BiotSet(CoilMatrix, BiotAttributes, Filament):
+class BiotSet(CoilMatrix, BiotAttributes):
     
     _biotset_attributes = {'_solve_interaction': True}
     
@@ -165,16 +173,55 @@ class BiotSet(CoilMatrix, BiotAttributes, Filament):
         self.source.update_coilframe()
         self.target.update_coilframe()
         
+    @property 
+    def nS(self):
+        return self._nS 
+    
+    @nS.setter 
+    def nS(self, nS):
+        self._nS = nS
+        self.target.nS = nS  # update target source filament number
+        
+    @property 
+    def nT(self):
+        return self._nT 
+    
+    @nT.setter 
+    def nT(self, nT):
+        self._nT = nT
+        self.source.nT = nT  # update source target filament number
+        
     def assemble(self):
-        self.update_biotset()
-        self.target.nS = self.source.nC  # source filament number
-        self.source.nT = self.target.nC  # target point number
+        self.update_biotset()  # update biotframes
+        self.nS = self.source.nC  # source filament number
+        self.nT = self.target.nC  # target point number
         self.nI = self.source.nC*self.target.nC  # total number of interactions
+        # initialize interaction matricies (column compressed)
+        '''
+        self.flux = np.zeros((self.target.nC, self.source._nC))
+        self.field['x'] = np.zeros((self.target.nC, self.source._nC))
+        self.field['z'] = np.zeros((self.target.nC, self.source._nC))
+        '''
+        
+    @property 
+    def farfield(self):
+        'returns farfield boolean index'
+        index = []
+        return index
         
     def calculate(self):
-        rs, zs = self.source._x_, self.source._z_
-        r, z = self.target._x_, self.target._z_
-        self.offset(rs, zs, r, z)         
+        self.assemble()
+        filament = Filament(self.source, self.target)
+        
+        self.flux = self.save_matrix(filament.flux())[0]
+        self.field['x'] = self.save_matrix(filament.radial_field())[0]
+        self.field['z'] = self.save_matrix(filament.vertical_field())[0]
+        '''
+        self.r = r
+        self.z = z
+        self.rs = rs
+        self.zs = zs
+        '''
         
     def plot(self, ax=None):
         if ax is None:
@@ -204,16 +251,20 @@ class BiotSet(CoilMatrix, BiotAttributes, Filament):
         self._solve_interaction = False
         
     def save_matrix(self, M):
+        # reshape
+        M = M.reshape(self.nT, self.nS)
         # extract plasma unit filaments
         _M_ = M[self.target._plasma_index][:, self.source._plasma_index]  
         # reduce
-        if self.mutual:
-            M *= self.points['N'].reshape(self.nT, self.nS)  # target turns
+        #if self.mutual:
+        #    M *= self.points['N'].reshape(self.nT, self.nS)  # target turns
         _M = M[:, self.source._plasma_index]  # unit source filament
-        M *= self.points['Ns'].reshape(self.nT, self.nS)  # source turns
+        M *= self.source._Nt_.reshape(self.nT, self.nS)  # source turns
+        
         #if len(self.target._reduction_index) < self.nT:  # sum sub-target
         #    M = np.add.reduceat(M, self.target._reduction_index, axis=0)
         #    _M = np.add.reduceat(_M, self.target._reduction_index, axis=0)
+        
         if len(self.source._reduction_index) < self.nS:  # sum sub-source
             M = np.add.reduceat(M, self.source._reduction_index, axis=1)
         return M, _M, _M_  # turn-turn interaction, source unit, mutual unit

@@ -59,7 +59,7 @@ class Grid(BiotSet):
             self.dz = np.diff(self._limit[2:])[0] / (mg.nz - 1)
             self.x2d = mg.x2d
             self.z2d = mg.z2d
-            self.load_target(x=self.x2d, z=self.z2d)
+            self.target.add_coil(self.x2d.flatten(), self.z2d.flatten())
             self.solve_interaction()
     
     def generate_grid(self, **kwargs):
@@ -75,6 +75,7 @@ class Grid(BiotSet):
             regen (bool): force grid regeneration
         '''
         grid_attributes = {}  # grid attributes
+        self.source.update_coilframe()
         for key in ['n', 'limit', 'coilset_limit',
                     'expand', 'levels', 'nlevels']:
             grid_attributes[key] = kwargs.pop(key, getattr(self, key))

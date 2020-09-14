@@ -75,7 +75,8 @@ class ITERcoilset(CoilClass):
         if 'dir' in coils:
             self.append_coilset(
                 MachineData().load_coilset(part_list='dir'))
-        #self.mutual.solve_interaction()  # compute mutual interaction
+            
+        self.forcefield.calculate()  # compute mutual interaction
         #self.grid.generate_grid(**kwargs, regen=True)
         #self.add_targets(targets=targets)
         #self.update_interaction()

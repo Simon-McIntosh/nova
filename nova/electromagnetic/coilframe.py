@@ -77,7 +77,9 @@ class CoilFrame(DataFrame, CoilData):
                 setattr(self, key, null)
             value = coilframe_metadata.get(key, None)
             if value is not None:
-                if key == '_additional_columns':
+                if key == '_required_columns':
+                    self._required_columns = value  # overwrite
+                elif key == '_additional_columns':
                     for v in value:
                         if v not in getattr(self, key):
                             getattr(self, key).append(v)

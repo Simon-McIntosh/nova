@@ -61,8 +61,7 @@ class BiotFrame(CoilFrame):
                                     'factor': 
                                         self._cross_section_factor['square']},
             '_dataframe_attributes': ['x', 'z', 'dx', 'dz', 'Nt', 'factor'],
-            '_coildata_attributes': {'region': None, 'nS': None, 'nT': None,
-                                     'rms_offset': True,
+            '_coildata_attributes': {'region': '', 'nS': 0, 'nT': 0,
                                      'current_update': 'full'}})
         self.coilframe = None
         
@@ -122,18 +121,11 @@ class BiotFrame(CoilFrame):
         self._nS = self.nC
         self._nT = value        
         
-    @property 
-    def rms_offset(self):
-        'set to use rms current centre for source coils'
-        return self._rms_offset
-        
     def __getattr__(self, key):
         'assemble float16 (nT,nS) matrix if _attribute_'
         if key[0] == '_' and key[-1] == '_' \
                 and key[1:-1] in self._dataframe_attributes:
             key = key[1:-1]
-            if key == 'x' and self.region == 'source' and self.rms_offset:
-                key = 'rms'
             value = CoilFrame.__getattr__(self, f'_{key}') #.astype(np.half)
             if key in self._mpc_attributes:  # inflate
                 value = value[self._mpc_referance]
@@ -203,25 +195,11 @@ class BiotSet(CoilMatrix, BiotAttributes):
         self.field['z'] = np.zeros((self.target.nC, self.source._nC))
         '''
         
-    @property 
-    def farfield(self):
-        'returns farfield boolean index'
-        index = []
-        return index
-        
-    def calculate(self):
-        self.assemble()
-        filament = Filament(self.source, self.target)
-        
-        self.flux = self.save_matrix(filament.flux())[0]
-        self.field['x'] = self.save_matrix(filament.radial_field())[0]
-        self.field['z'] = self.save_matrix(filament.vertical_field())[0]
-        '''
-        self.r = r
-        self.z = z
-        self.rs = rs
-        self.zs = zs
-        '''
+    #@property 
+    #def farfield(self):
+    #    'returns farfield boolean index'
+    #    index = []
+    #    return index
         
     def plot(self, ax=None):
         if ax is None:
@@ -230,28 +208,36 @@ class BiotSet(CoilMatrix, BiotAttributes):
         ax.plot(self.target.x, self.target.z, 'C2.', label='target')
         plt.legend()
         
-    def flux_matrix(self):
+    def flux_matrix(self, method):
         'calculate filament flux (inductance) matrix'
-        flux = self.calculate('flux')
+        flux = self.calculate(method, 'scalar_potential')
         self.flux , self._flux, self._flux_ = self.save_matrix(flux)
         
-    def field_matrix(self):
+    def field_matrix(self, method):
         'calculate subcoil field matrix'
-        field = {}
-        field['x'] = self.calculate('radial_field')
-        field['z'] = self.calculate('vertical_field')
+        field = {'x': 'radial_field', 'z': 'vertical_field'}
         for xz in field:  # save field matricies
             self.field[xz], self._field[xz], self._field_[xz] = \
-                self.save_matrix(field[xz])  # T / Amp-turn-turn
+                self.save_matrix(self.calculate(method, field[xz])) 
+                
+    def calculate(self, method, attribute):
+        'calculate biot attributes (flux, radial_field, vertical_field)'
+        return getattr(method, attribute)()  
 
     def solve_interaction(self):
         self.assemble()  # assemble geometory matrices
-        self.flux_matrix()  # assemble flux interaction matrix
-        self.field_matrix()  # assemble field interaction matricies 
+        filament = Filament(self.source, self.target)
+        
+        #self.flux = self.save_matrix(filament.flux())[0]
+        #self.field['x'] = self.save_matrix(filament.radial_field())[0]
+        #self.field['z'] = self.save_matrix(filament.vertical_field())[0]
+        
+        self.flux_matrix(filament)  # assemble flux interaction matrix
+        self.field_matrix(filament)  # assemble field interaction matricies 
         self._solve_interaction = False
         
     def save_matrix(self, M):
-        # reshape
+        # source-target reshape (matrix)
         M = M.reshape(self.nT, self.nS)
         # extract plasma unit filaments
         _M_ = M[self.target._plasma_index][:, self.source._plasma_index]  

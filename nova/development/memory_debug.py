@@ -1,21 +1,17 @@
 from guppy import hpy
 
 from nova.electromagnetic.coilgeom import ITERcoilset
-from nova.electromagnetic.coilset import CoilSet
 
-hp = hpy()  # initialize memory manager
+#hp = hpy()  # initialize memory manager
 
 
-#cs = CoilSet(dCoil=3, current_update='coil', turn_fraction=0.5,
-#             cross_section='circle', biot_instances={'fd': 'forcefield'},
-#             coildata_attributes={'rms_offset': False})
 
 # load ITER coilset
 ITER = ITERcoilset(coils='pf', dCoil=0.25, n=1e3, 
                    limit=[3, 10, -5.75, 5.75], levels=61, 
-                   read_txt=True, current_update='passive')
+                   read_txt=False, current_update='passive')
 
-ITER.plot()
+
 
 
 
@@ -24,13 +20,20 @@ ITER.plot()
 
 #ff.source.nT = 5
 
-hp.setrelheap()  # set relative heap
+#hp.setrelheap()  # set relative heap
 
-ITER.forcefield.calculate()
+#ITER.forcefield.calculate()
+
 
 ITER.grid.generate_grid()
+
+ITER.Ic = 10
+ITER.grid.plot_flux()
+
+ITER.plot()
 #ITER.forcefield.plot()
 
+'''
 #ff.assemble()
 
 #ITER.plot(False)
@@ -42,4 +45,5 @@ byrcs= h.byrcs
 
 print(byrcs)
 print(byrcs[0].byvia)
+'''
 

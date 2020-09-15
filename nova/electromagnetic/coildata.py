@@ -188,7 +188,8 @@ class CoilData():
         self._plasma_index = self._plasma[self._mpc_referance]
                     
     def _extract_mpc(self):  # extract mpc interger index and factor
-        mpc = self.get('mpc', [None for __ in range(self.nC)])
+        # mpc = self.get('mpc', [None for __ in range(self.nC)])
+        mpc = self.get('mpc', ['' for __ in range(self.nC)])
         self._mpc_iloc = [i for i, _mpc in enumerate(mpc) if not _mpc]
         self._mpc_index = self.index[self._mpc_iloc]
         self._mpc_referance = np.zeros(self.nC, dtype=int)
@@ -220,12 +221,15 @@ class CoilData():
     def _extract_reduction_index(self):  # extract reduction incices (reduceat)
         if 'coil' in self:  # subcoil
             coil = self.coil.to_numpy()
-            _name = coil[0]
-            _reduction_index = [0]
-            for i, name in enumerate(coil):
-                if name != _name:
-                    _reduction_index.append(i)
-                    _name = name
+            if (coil == self._default_attributes['coil']).all():
+                _reduction_index = np.arange(self._nC)
+            else:
+                _name = coil[0]
+                _reduction_index = [0]
+                for i, name in enumerate(coil):
+                    if name != _name:
+                        _reduction_index.append(i)
+                        _name = name
             self._reduction_index = np.array(_reduction_index)
             self._plasma_iloc = np.arange(self._nC)[
             self._plasma_index[self._reduction_index]]

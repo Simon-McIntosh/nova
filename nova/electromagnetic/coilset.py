@@ -290,10 +290,10 @@ class CoilSet(pythonIO, BiotMethods):
         self.relink_mpc()  # relink subcoil mpc as required
         self.coil._set_current(value, current_column)
         self.subcoil._set_current(
-            self.coil.Ic[self.subcoil._update_index], 'Ic')
-        self.update_mutual()
+            self.coil.Ic[self.subcoil._current_index], 'Ic')
+        #self.update_forcefield()
         
-    def update_mutual(self):
+    def update_forcefield(self):
         'update mutual interactions'
         for variable in ['Psi', 'Bx', 'Bz']:
             setattr(self.subcoil, variable, getattr(self.mutual, variable))
@@ -942,7 +942,7 @@ class CoilSet(pythonIO, BiotMethods):
         if label == 'all':  # all coils
             parts = coil.part.unique()
         elif label == 'status':  # based on coil.update_status
-            parts = coil.part[coil._update_index[coil._mpc_referance]].unique()
+            parts = coil.part[coil._current_index[coil._mpc_referance]].unique()
         elif label == 'active':  # power == True
             parts = coil.part[coil.power & ~coil.plasma].unique()
         elif label == 'passive':  # power == False

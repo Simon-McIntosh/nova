@@ -161,6 +161,7 @@ class CoilData():
             
     def rebuild_coildata(self):
         if self.nC > 0:
+            print('rebuild coil data')
             self._extract_mpc()  # extract multi-point constraints
             self._extract_data_attributes()  # extract from DataFrame columns
             self._extract_reduction_index()
@@ -186,7 +187,8 @@ class CoilData():
                     value = value[self._mpc_iloc]
                 setattr(self, f'_{attribute}', value)
         self._plasma_index = self._plasma[self._mpc_referance]
-                    
+                
+    #@profile
     def _extract_mpc(self):  # extract mpc interger index and factor
         # mpc = self.get('mpc', [None for __ in range(self.nC)])
         mpc = self.get('mpc', ['' for __ in range(self.nC)])
@@ -194,6 +196,8 @@ class CoilData():
         self._mpc_index = self.index[self._mpc_iloc]
         self._mpc_referance = np.zeros(self.nC, dtype=int)
         self._mpc_factor = np.ones(self.nC, dtype=float)
+        
+        #print(len(mpc), len(self.index), mpc)
         for i, (index, _mpc) in enumerate(zip(self.index, mpc)):
             if not _mpc:
                 self._mpc_referance[i] = list(self._mpc_index).index(index)

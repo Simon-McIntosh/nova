@@ -100,11 +100,13 @@ class CoilSet(pythonIO, BiotMethods):
             CoilSet, lambda o: isinstance(o, property))]
         
     def initialize_biot(self):
-        self.biot_instances = {'forcefield': 'forcefield',
+        self.biot_instances = {}
+        '''{'forcefield': 'forcefield',
                                'plasma': 'grid',
                                'grid': 'grid',
                                'target': 'target',
                                'colocate': 'colocate'}
+        '''
 
     @property
     def coilset(self):
@@ -115,6 +117,7 @@ class CoilSet(pythonIO, BiotMethods):
     @coilset.setter
     def coilset(self, coilset_attributes):
         for attribute_name in self._coilset_attributes:
+            print(attribute_name)
             if attribute_name in ['default_attributes', 'coilset_metadata', 
                                   'coildata_attributes']:
                 default_attributes = coilset_attributes
@@ -206,7 +209,9 @@ class CoilSet(pythonIO, BiotMethods):
         filepath = self.filepath(filename, directory)
         if path.isfile(filepath + '.pk'):
             self.load_pickle(filepath)
+            print('pre coilset')
             self.coilset = self._coilset
+            print('post coilset')
             del self._coilset  # delete temp variable
         else:
             raise LookupError(f'file {filepath} not found')

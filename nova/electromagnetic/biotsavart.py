@@ -291,7 +291,7 @@ class BiotSet(CoilMatrix, BiotAttributes):
             matrix = self.field[variable[-1]]
         else:
             raise IndexError(f'variable {variable} not in [Psi, Bx, Bz]')
-        return self._reshape(np.dot(matrix, self.source._Ic))
+        return self._reshape(np.dot(matrix, self.source.coilframe._Ic))
 
     @property
     def Psi(self):
@@ -305,71 +305,20 @@ class BiotSet(CoilMatrix, BiotAttributes):
     def Bz(self):
         return self._dot('Bz')
 
+
 if __name__ == '__main__':
     
     from nova.electromagnetic.coilset import CoilSet
     cs = CoilSet(dCoil=0.2, dPlasma=0.05, turn_fraction=0.5)
     cs.add_coil(3.943, 7.564, 0.959, 0.984, Nt=248.64, name='PF1', part='PF')
-    #cs.add_coil(1.6870, 5.4640, 0.7400, 2.093, Nt=554, name='CS3U', part='CS')
+    cs.add_coil(1.6870, 5.4640, 0.7400, 2.093, Nt=554, name='CS3U', part='CS')
     #cs.add_coil(1.6870, 3.2780, 0.7400, 2.093, Nt=554, name='CS2U', part='CS')
     #cs.add_plasma(3.5, 4.5, 1.5, 2.5, It=-15e6, cross_section='ellipse')
     
-    cs.add_plasma(3.5, 4.5, 1.5, 2.5, dPlasma=0.5, 
-                  It=-15e6, cross_section='circle')
+    #cs.add_plasma(3.5, 4.5, 1.5, 2.5, dPlasma=0.5, 
+    #              It=-15e6, cross_section='circle')
 
-    cs.plot()
-    """
-    cs.current_update = 'coil'
+    cs.plot(True)
     
     
-    plt.set_aspect(1.2)
-    
-    cs.grid.generate_grid(expand=1, n=5e3)
-    #cs.grid.plot_grid()
-    
-    cs.Ic = -40e3
-            
-    cs.plot(current='A')
-    cs.grid.plot_flux()
-    
-    cs.add_plasma(3.5, 4.5, 1.5, 2.5, dPlasma=0.05, 
-                  It=-15e6, cross_section='circle')
-    cs.plot()
-    cs.grid.generate_grid(regen=True)
-    cs.grid.plot_flux(color='C0')
-    
-    '''
-    
-    
-    bs = BiotSet(cs.subcoil)
-
-    bs.load_target(cs.subcoil)
-    bs.assemble()
-    bs.flux_matrix() 
-    bs.plot()
-    '''
-    
-    
-
-    #scheme = quadpy.disk.lether(2)
-    #scheme.show()
-    #val = scheme.integrate(lambda x: np.exp(x[0]), [0.0, 0.0], 1.0)
-    #bs = biot_savart(cs.coilset, mutual=True)
-
-    #bs.colocate(subcoil=True)
-    #_B = bs.field_matrix()
-    #_Bx = bs.reduce(_B[0])
-    
-    '''
-    bs.colocate(subcoil=False)
-    
-    B = bs.field_matrix()
-    print(B['x'])
-
-    Mc = bs.calculate_inductance()
-    '''
-    
-    #bs.target.plot(label=True)
-
-    # plt.title(cc.coilset.matrix['inductance']['Mc'].CS3U)
-    """
+    source = BiotFrame(cs.subcoil)

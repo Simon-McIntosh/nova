@@ -39,7 +39,9 @@ class ITERcoilset(CoilClass):
             self.build_coilset(coils, **kwargs)
             self.save_coilset(filename)
         else:
+            print('pre load')
             CoilClass.load_coilset(self, filename)
+            print('post load')
             #if self.grid.generate_grid(**kwargs):  
             #    self.save_coilset(filename)  # save on-demand update
 

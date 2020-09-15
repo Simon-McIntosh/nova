@@ -9,7 +9,7 @@ from nova.electromagnetic.coilgeom import ITERcoilset
 # load ITER coilset
 ITER = ITERcoilset(coils='pf', dCoil=0.25, n=1e3, 
                    limit=[3, 10, -5.75, 5.75], levels=61, 
-                   read_txt=False, current_update='passive')
+                   read_txt=False, current_update='full')
 
 
 
@@ -25,12 +25,12 @@ ITER = ITERcoilset(coils='pf', dCoil=0.25, n=1e3,
 #ITER.forcefield.calculate()
 
 
-ITER.grid.generate_grid()
+#ITER.grid.generate_grid()
 
-ITER.Ic = 10
-ITER.grid.plot_flux()
+#ITER.Ic = 10
+#ITER.grid.plot_flux()
 
-ITER.plot()
+#ITER.plot()
 #ITER.forcefield.plot()
 
 '''

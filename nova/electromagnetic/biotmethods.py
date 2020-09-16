@@ -25,6 +25,7 @@ class Grid(BiotSet):
         limit ([4float]): grid limits
         expand (float): grid expansion beyond coils
         nlevels (int): number of contour levels
+        boundary (str): limit boundary ['limit', 'coilset_limit']
         
     Derived Attributes:
         n2d: None,  # ([int, int]) as meshed dimensions
@@ -36,31 +37,36 @@ class Grid(BiotSet):
         Bz (np.array): vertical field
     '''
     
-    _biot_attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'expand',
-                        'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d']
+    _biot_attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'boundary',
+                        'expand', 'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d']
     
-    _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31}
+    _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31,
+                                'boundary': 'limit'}
     
     def __init__(self, subcoil, **grid_attributes):
         BiotSet.__init__(self, source=subcoil, **grid_attributes)
         
-    def solve_interaction(self):
-        if not hasattr(self, 'target'):
-            self.target.add_coil(x=self.x2d, z=self.z2d)
-        BiotSet.solve_interaction(self)
+    def relink_biotset(self):
+        BiotSet.relink_biotset(self)
+        self.update_target()
+        
+    def update_target(self):
+        if self.x2d is not None and self.z2d is not None:
+            self.target.add_coil(self.x2d.flatten(), self.z2d.flatten(),
+                                 name='Grid', delim='')
 
     def _generate_grid(self, **grid_attributes):
         self.biot_attributes = grid_attributes  # update attributes
         if self.n > 0:
-            mg = MeshGrid(self.n, self._limit)  # set mesh
+            mg = MeshGrid(self.n, self.grid_boundary)  # set mesh
             self.n2d = [mg.nx, mg.nz]
             self.x, self.z = mg.x, mg.z
-            self.dx = np.diff(self._limit[:2])[0] / (mg.nx - 1)
-            self.dz = np.diff(self._limit[2:])[0] / (mg.nz - 1)
+            self.dx = np.diff(self.grid_boundary[:2])[0] / (mg.nx - 1)
+            self.dz = np.diff(self.grid_boundary[2:])[0] / (mg.nz - 1)
             self.x2d = mg.x2d
             self.z2d = mg.z2d
-            self.target.add_coil(self.x2d.flatten(), self.z2d.flatten())
-            self.solve_interaction()
+            self.update_target()
+            self.solve()
     
     def generate_grid(self, **kwargs):
         '''
@@ -74,19 +80,21 @@ class Grid(BiotSet):
             levels ()
             regen (bool): force grid regeneration
         '''
+        self.regen = kwargs.get('regen', False)
         grid_attributes = {}  # grid attributes
-        self.source.update_coilframe()
         for key in ['n', 'limit', 'coilset_limit',
                     'expand', 'levels', 'nlevels']:
-            grid_attributes[key] = kwargs.pop(key, getattr(self, key))
-        if grid_attributes['limit'] is None: # calculate coilset limit
-            grid_attributes['coilset_limit'] = \
+            grid_attributes[key] = kwargs.get(key, getattr(self, key))
+        # calculate coilset limit
+        grid_attributes['coilset_limit'] = \
                 self._get_coil_limit(grid_attributes['expand'])
+        self.grid_boundary = 'limit' if 'limit' in kwargs else 'coilset_limit'
         regenerate_grid = \
             not np.array_equal(grid_attributes['limit'], self.limit) or \
             not np.array_equal(grid_attributes['coilset_limit'], 
                                self.coilset_limit) or \
-            grid_attributes['n'] != self.n or kwargs.get('regen', False)
+            grid_attributes['expand'] != self.expand or \
+            grid_attributes['n'] != self.n or self.regen
         if regenerate_grid:
             self._generate_grid(**grid_attributes)
         return regenerate_grid
@@ -108,11 +116,21 @@ class Grid(BiotSet):
         return limit
     
     @property
-    def _limit(self):
-        if self.limit is not None:
+    def grid_boundary(self):
+        if self.boundary == 'limit':
             return self.limit
-        else:
+        elif self.boundary == 'coilset_limit':
             return self.coilset_limit
+    
+    @grid_boundary.setter 
+    def grid_boundary(self, boundary):
+        if boundary != self.boundary:
+            self.regen = True  # force update after boundary switch
+        if boundary in ['limit', 'coilset_limit']:
+            self.boundary = boundary
+        else:
+            raise IndexError(f'boundary label {boundary} not in '
+                             '[limit, coilset_limit]')
             
     def plot_grid(self, ax=None, **kwargs):
         self.generate_grid(**kwargs)
@@ -225,9 +243,9 @@ class Target(BiotSet, BiotAttributes):
         ax.plot(self.targets['x'], self.targets['z'],
                 ls, color=color, **kwargs)
         
-    def solve_interaction(self):
+    def solve(self):
         self.load_target(x=self.targets['x'], z=self.targets['z'])
-        BiotSet.solve_interaction(self)   
+        BiotSet.solve(self)   
       
         
 class Colocate(Target):
@@ -403,8 +421,9 @@ class BiotMethods:
                 if biot_name not in self._biot_instances:
                     self._biot_instances.update({biot_name: biot_method})
                 if not hasattr(self, biot_name):
+                    'initialize method'
                     self._initialize_biot_method(biot_name, biot_method)
-        
+
     @property
     def biot_attributes(self):
         _biot_attributes = {}
@@ -420,6 +439,7 @@ class BiotMethods:
             biot_attribute = '_'.join([instance, 'biot_attributes'])
             setattr(getattr(self, instance), 'biot_attributes',
                     biot_attributes.get(biot_attribute, biot_attributes))
+            getattr(self, instance).relink_biotset()
         
         
 class Interaction:

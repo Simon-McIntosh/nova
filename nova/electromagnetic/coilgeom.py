@@ -39,11 +39,9 @@ class ITERcoilset(CoilClass):
             self.build_coilset(coils, **kwargs)
             self.save_coilset(filename)
         else:
-            print('pre load')
             CoilClass.load_coilset(self, filename)
-            print('post load')
-            #if self.grid.generate_grid(**kwargs):  
-            #    self.save_coilset(filename)  # save on-demand update
+            if self.grid.generate_grid(**kwargs):  
+                self.save_coilset(filename)  # save on-demand update
 
     def select_coils(self, **kwargs):
         coils = kwargs.pop('coils', ['pf', 'vsj', 'vv'])  # default set
@@ -78,8 +76,8 @@ class ITERcoilset(CoilClass):
             self.append_coilset(
                 MachineData().load_coilset(part_list='dir'))
             
-        self.forcefield.calculate()  # compute mutual interaction
-        #self.grid.generate_grid(**kwargs, regen=True)
+        self.forcefield.solve()  # compute mutual interaction
+        self.grid.generate_grid(**kwargs, regen=True)
         #self.add_targets(targets=targets)
         #self.update_interaction()
         

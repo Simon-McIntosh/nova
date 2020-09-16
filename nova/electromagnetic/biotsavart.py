@@ -70,6 +70,7 @@ class BiotFrame(CoilFrame):
         if self.coilframe is not None:
             if self.coilframe.empty:
                 return
+        CoilFrame.drop_coil(self)
         CoilFrame.add_coil(self, *args, **kwargs)
         self.update_cross_section_factor()
         
@@ -154,7 +155,7 @@ class BiotSet(CoilMatrix, BiotAttributes):
         self.source = BiotFrame()
         self.target = BiotFrame()
         self.load_biotset(source, target)
-        
+                
     def load_biotset(self, source=None, target=None):
         if source is not None:
             self.source.add_coil(source)
@@ -164,6 +165,9 @@ class BiotSet(CoilMatrix, BiotAttributes):
     def update_biotset(self):
         self.source.update_coilframe()
         self.target.update_coilframe()
+        
+    def relink_biotset(self):
+        self.source.update_coilframe()
         
     @property 
     def nS(self):
@@ -224,7 +228,7 @@ class BiotSet(CoilMatrix, BiotAttributes):
         'calculate biot attributes (flux, radial_field, vertical_field)'
         return getattr(method, attribute)()  
 
-    def solve_interaction(self):
+    def solve(self):
         self.assemble()  # assemble geometory matrices
         filament = Filament(self.source, self.target)
         

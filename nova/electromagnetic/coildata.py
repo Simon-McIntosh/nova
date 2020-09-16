@@ -2,7 +2,7 @@ from contextlib import contextmanager
 import inspect
 
 import numpy as np
-from pandas import DataFrame, Index
+from pandas import DataFrame, Series, Index
 from pandas.api.types import is_list_like, is_dict_like
 
 
@@ -112,6 +112,7 @@ class CoilData():
         
     @property 
     def dataframe_attributes(self):
+        'return list of fast access dataframe attributes'
         return self._dataframe_attributes
     
     @dataframe_attributes.setter 
@@ -161,13 +162,50 @@ class CoilData():
             
     def rebuild_coildata(self):
         if self.nC > 0:
-            print('rebuild coil data')
             self._extract_mpc()  # extract multi-point constraints
             self._extract_data_attributes()  # extract from DataFrame columns
             self._extract_reduction_index()
             self.current_update = self._current_update  # set flag
-            self.refresh_dataframe()
+            self.refresh_dataframe()  # transfer from coilframe to dataframe
                
+    def _extract_mpc(self):  # extract mpc interger index and factor
+        mpc = self.get('mpc', np.array([self._default_attributes['mpc']
+                               for __ in range(self.nC)]))
+        self._mpc_iloc = [i for i, _mpc in enumerate(mpc) if not _mpc]
+        self._mpc_index = self.index[self._mpc_iloc]
+        self._mpc_referance = np.zeros(self.nC, dtype=int)
+        self._mpc_factor = np.ones(self.nC, dtype=float)
+        _mpc_list = list(self._mpc_index)
+        _mpc_array = np.arange(len(_mpc_list))
+        mpc_index = mpc != self._default_attributes['mpc']
+        self._mpc_referance[~mpc_index] = _mpc_array
+        if sum(mpc_index) > 0:            
+            _mpc = np.array([[name, factor] 
+                             for name, factor in mpc[mpc_index].values])
+            _mpc_name = [_mpc[i, 0] for i in 
+                         sorted(np.unique(_mpc[:, 0], return_index=True)[1])]
+            _mpc_dict = {name: index for name, index in 
+                         zip(_mpc_name, 
+                             _mpc_array[np.isin(_mpc_list, _mpc_name)])}
+            self._mpc_referance[mpc_index] = [_mpc_dict[name] 
+                                              for name in _mpc[:, 0]]
+            self._mpc_factor[mpc_index] = _mpc[:, 1]
+        # link subcoil to coil referance
+        if 'coil' in self:
+            self._mpc_index = Index(self.loc[self._mpc_index, 'coil'])
+        # construct multi-point link ()
+        mpl = np.array([
+            [referance, couple, factor] for couple, (referance, _mpc, factor) 
+            in enumerate(zip(self._mpc_referance, mpc, self._mpc_factor))
+            if _mpc])
+        if len(mpl) > 0:
+            self._mpl_index = mpl[:, :2].astype(int)  # (refernace, couple)
+            self._mpl_factor = mpl[:, 2]  # coupling factor
+        else:
+            self._mpl_index = []
+            self._mpl_factor = []
+        self._relink_mpc = True
+        
     def _extract_data_attributes(self):
         self.update_dataframe = False
         for attribute in self._dataframe_attributes + \
@@ -187,40 +225,6 @@ class CoilData():
                     value = value[self._mpc_iloc]
                 setattr(self, f'_{attribute}', value)
         self._plasma_index = self._plasma[self._mpc_referance]
-                
-    #@profile
-    def _extract_mpc(self):  # extract mpc interger index and factor
-        # mpc = self.get('mpc', [None for __ in range(self.nC)])
-        mpc = self.get('mpc', ['' for __ in range(self.nC)])
-        self._mpc_iloc = [i for i, _mpc in enumerate(mpc) if not _mpc]
-        self._mpc_index = self.index[self._mpc_iloc]
-        self._mpc_referance = np.zeros(self.nC, dtype=int)
-        self._mpc_factor = np.ones(self.nC, dtype=float)
-        
-        #print(len(mpc), len(self.index), mpc)
-        for i, (index, _mpc) in enumerate(zip(self.index, mpc)):
-            if not _mpc:
-                self._mpc_referance[i] = list(self._mpc_index).index(index)
-            else:
-                self._mpc_referance[i] = list(self._mpc_index).index(_mpc[0])
-                self._mpc_factor[i] = _mpc[1]
-        if 'coil' in self:  # link subcoil to coil referance
-            mpc_index = self._mpc_index.to_numpy().copy()
-            for i, index in enumerate(self._mpc_index):
-                mpc_index[i] = self.at[index, 'coil']
-            self._mpc_index = Index(mpc_index) 
-        # construct multi-point link ()
-        mpl = np.array([
-            [referance, couple, factor] for couple, (referance, _mpc, factor) 
-            in enumerate(zip(self._mpc_referance, mpc, self._mpc_factor))
-            if _mpc])
-        if len(mpl) > 0:
-            self._mpl_index = mpl[:, :2].astype(int)  # (refernace, couple)
-            self._mpl_factor = mpl[:, 2]  # coupling factor
-        else:
-            self._mpl_index = []
-            self._mpl_factor = []
-        self._relink_mpc = True      
 
     def _extract_reduction_index(self):  # extract reduction incices (reduceat)
         if 'coil' in self:  # subcoil

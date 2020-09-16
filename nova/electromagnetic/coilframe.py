@@ -164,7 +164,7 @@ class CoilFrame(DataFrame, CoilData):
         # new instance
         CoilFrame.__init__(self, coil, 
                            coilframe_metadata=self.coilframe_metadata)  
-        #self.rebuild_coildata()  # rebuild fast index
+        self.rebuild_coildata()  # rebuild fast index
         
     def add_coil(self, *args, iloc=None, **kwargs):
         coil = self.get_coil(*args, **kwargs)  # additional coils

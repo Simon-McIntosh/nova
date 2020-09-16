@@ -809,7 +809,7 @@ class CoilSet(pythonIO, BiotMethods):
         self.subcoil.loc[subindex, 'coil'] = name
         self.subcoil.add_mpc(subindex.to_list())
         # update current
-        self.forcefield.solve_interaction()
+        self.forcefield.solve()
         self.Ic = {name: Ic}
         
     def rename(self, index):

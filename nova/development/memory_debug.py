@@ -7,8 +7,8 @@ from nova.electromagnetic.coilgeom import ITERcoilset
 
 
 # load ITER coilset
-ITER = ITERcoilset(coils='pf', dCoil=-1, n=1e3, 
-                   expand=-0.1, levels=31,
+ITER = ITERcoilset(coils='pf vv vs', dCoil=0.25, n=5e4, 
+                   expand=0.0, levels=31,
                    read_txt=False, current_update='full')
 
 #ITER.add_coil(5, [-2, 4], 1.2, [0.3, 2.4], name='C', delim='',
@@ -25,6 +25,9 @@ ITER = ITERcoilset(coils='pf', dCoil=-1, n=1e3,
 
 ITER.filename = -1
 ITER.scenario = 'IM'
+
+ITER.current_update = 'passive'
+ITER.It = 20e4
 
 ITER.grid.plot_flux()
 

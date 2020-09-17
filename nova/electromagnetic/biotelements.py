@@ -19,12 +19,13 @@ class Filament:
     def initialize_filaments(self, source, target):
         self.rs, self.zs = source._rms_, source._z_  # source
         self.r, self.z = target._x_, target._z_  # target
-        self.dl = source._dl_  # filament characteristic length
-        self.factor = source._factor_  # cross-section factor
+        self.dl = np.linalg.norm([source._dx_, source._dz_],
+                                 axis=0) # filament characteristic length
+        self.cross_section_factor = source._factor_  # cross-section factor
 
     def offset_filaments(self):
         'offset source and target points'
-        dL = np.array([(self.rs-self.r), (self.zs-self.z)])
+        dL = np.array([(self.r-self.rs), (self.z-self.zs)])
         dL_mag = np.linalg.norm(dL, axis=0)
         idx = np.where(dL_mag < self.dl/2)[0]  # seperation < dl/2
         # reduce
@@ -35,18 +36,23 @@ class Filament:
         index = np.isclose(dL_mag, 0)
         dL_norm[0, index] = 1  # radial offset 
         dL_norm[:, ~index] = dL[:, ~index] / dL_mag[~index]
-        cross_section_factor = self.factor[idx]  # cross-section factor
-        ro = dr*cross_section_factor  # self seperation
+        ro = dr*self.cross_section_factor[idx]  # self seperation
         factor = 1 - dL_mag/dr
         dr = factor*ro*dL_norm[0]  # radial offset
         dz = factor*ro*dL_norm[1]  # vertical offset
+        # rms offset
+        drms = -(self.r[idx]+self.rs[idx])/4 + np.sqrt(
+            (self.r[idx]+self.rs[idx])**2 - 
+             8*dr*(self.r[idx] - self.rs[idx] + 2*dr))/4
+        self.rs[idx] += drms
+        self.r[idx] += drms
         # offset source filaments
         self.rs[idx] -= dr
         self.zs[idx] -= dz
         # offset target filaments
         self.r[idx] += dr
         self.z[idx] += dz
-        
+                
     def calculate_coefficients(self):
         self.b = self.rs + self.r
         self.gamma = self.zs - self.z

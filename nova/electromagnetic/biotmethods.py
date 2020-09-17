@@ -1,10 +1,10 @@
 import numpy as np
-from pandas import DataFrame, concat
-from pandas.api.types import is_list_like, is_dict_like
+from pandas import DataFrame
+from pandas.api.types import is_list_like
 
 from amigo.pyplot import plt
 from nova.electromagnetic.meshgrid import MeshGrid
-from nova.electromagnetic.biotsavart import BiotSet, BiotAttributes
+from nova.electromagnetic.biotsavart import BiotSet, BiotAttributes, BiotFrame
                 
 
 class ForceField(BiotSet, BiotAttributes):
@@ -46,8 +46,8 @@ class Grid(BiotSet):
     def __init__(self, subcoil, **grid_attributes):
         BiotSet.__init__(self, source=subcoil, **grid_attributes)
         
-    def relink_biotset(self):
-        BiotSet.relink_biotset(self)
+    def update_biotset(self):
+        BiotSet.update_biotset(self)
         self.update_target()
         
     def update_target(self):
@@ -81,6 +81,7 @@ class Grid(BiotSet):
             regen (bool): force grid regeneration
         '''
         self.regen = kwargs.get('regen', False)
+        self.update_biotset()
         grid_attributes = {}  # grid attributes
         for key in ['n', 'limit', 'coilset_limit',
                     'expand', 'levels', 'nlevels']:
@@ -162,91 +163,36 @@ class Grid(BiotSet):
     
 
 class Target(BiotSet, BiotAttributes):
+
+    'traget interaction methods and data'
     
-    ''' 
-    traget interaction methods and data
-    
-    Key Attributes:
-        targets (DataFrame): grid dimension
-        
-    Derived Attributes:
-        Psi (np.array):  poloidal flux
-        Bx (np.array): radial field
-        Bz (np.array): vertical field
-    '''
-    _biot_attributes = ['targets']
+    _biot_attributes = []
     _default_biot_attributes = {}
-    _target_attributes = ['x', 'z']
     
     def __init__(self, subcoil, **target_attributes):
         BiotSet.__init__(self, source=subcoil, **target_attributes)
-        BiotAttributes.__init__(self)
-        self.initialize_targets()
+        self.target = BiotFrame()
         
-    def __repr__(self):
-        return self.targets.to_string(max_cols=8, max_colwidth=10)
-        
-    def initialize_targets(self):
-        self.targets = DataFrame(columns=self._target_attributes)
-
-    def add_targets(self, targets, append=True, drop_duplicates=True):
-        '''
-        Attributes:
-            targets (): target coordinates
-                (dict, DataFrame() or list like):
-                    x (np.array): x-coordinates
-                    z (np.array): z-coordinates
-            append (bool): create new list | append
-            drop_duplicates (bool): drop duplicates
-        '''
-        if not isinstance(targets, DataFrame):
-            if is_dict_like(targets):
-                targets = DataFrame(targets)
-            elif is_list_like(targets):
-                x, z = targets
-                if not is_list_like(x):
-                    x = [x]
-                if not is_list_like(z):
-                    z = [z]
-                targets = DataFrame({'x': x, 'z': z})
-            if append:
-                io = self.targets.shape[0]
-            else:
-                io = 0
-            targets['index'] = [f'P{i+io}'
-                                for i in range(targets.shape[0])]
-            targets.set_index('index', inplace=True)
-            targets = targets.astype('float')        
-        if not targets.empty:
-            if append:
-                self.targets = concat((self.targets, targets),
-                                      ignore_index=True, sort=False)
-                if drop_duplicates:
-                    self.targets.drop_duplicates(
-                            subset=['x', 'z'], inplace=True)
-            else:  # overwrite
-                self.targets = targets
-                
-    @property
-    def n(self):
-        return self.targets.shape[0]
-                
-    #@property
-    #def n2d(self):
-    #    return self.targets.shape[0]
+    def add_target(self, *args, **kwargs):
+        self.target.add_coil(*args, name='Target', delim='', **kwargs)
     
     def plot(self, ax=None, **kwargs):
         if ax is None:
             ax = plt.gca() 
         ls = kwargs.pop('ls', '.')
         color = kwargs.pop('color', 'C3')
-        ax.plot(self.targets['x'], self.targets['z'],
-                ls, color=color, **kwargs)
+        ax.plot(self.target.x, self.target.z, ls, color=color, **kwargs)
         
-    def solve(self):
-        self.load_target(x=self.targets['x'], z=self.targets['z'])
-        BiotSet.solve(self)   
-      
+        
+class Field(Target):
+    
+    _target_attributes = []
+    
+    def __init__(self, subcoil, **field_attributes):
+        Target.__init__(self, subcoil, **field_attributes)
+        
+    def add_target(self, coil, part):
+        for index in coil.index[coil.part == part]
         
 class Colocate(Target):
     
@@ -439,7 +385,7 @@ class BiotMethods:
             biot_attribute = '_'.join([instance, 'biot_attributes'])
             setattr(getattr(self, instance), 'biot_attributes',
                     biot_attributes.get(biot_attribute, biot_attributes))
-            getattr(self, instance).relink_biotset()
+            getattr(self, instance).update_biotset()
         
         
 class Interaction:

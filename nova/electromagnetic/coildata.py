@@ -181,7 +181,8 @@ class CoilData():
         self._mpc_referance[~mpc_index] = _mpc_array
         if sum(mpc_index) > 0:            
             _mpc = np.array([[name, factor] 
-                             for name, factor in mpc[mpc_index].values])
+                             for name, factor in mpc[mpc_index].values],
+                            dtype=object)
             _mpc_name = [_mpc[i, 0] for i in 
                          sorted(np.unique(_mpc[:, 0], return_index=True)[1])]
             _mpc_dict = {name: index for name, index in 
@@ -205,6 +206,7 @@ class CoilData():
             self._mpl_index = []
             self._mpl_factor = []
         self._relink_mpc = True
+        
         
     def _extract_data_attributes(self):
         self.update_dataframe = False

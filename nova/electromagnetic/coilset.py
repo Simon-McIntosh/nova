@@ -42,7 +42,7 @@ class CoilSet(pythonIO, BiotMethods):
     
     # exchange coilset attributes
     _coilset_attributes = ['default_attributes', 
-                           'coilset_frames', 
+                           'coilset_frames',
                            'coilset_metadata',
                            'coildata_attributes',
                            'biot_instances',
@@ -100,14 +100,12 @@ class CoilSet(pythonIO, BiotMethods):
             CoilSet, lambda o: isinstance(o, property))]
         
     def initialize_biot(self):
-        'specify biot instances'
-        self.biot_instances = {'forcefield': 'forcefield',
+        'specify default biot instances'
+        self.biot_instances = {'field': 'field',
+                               'forcefield': 'forcefield',
                                'plasma': 'grid',
-                               'grid': 'grid',
-                               'target': 'target',
-                               'colocate': 'colocate'}
+                               'grid': 'grid'}
         
-
     @property
     def coilset(self):
         coilset_attributes = {attribute: getattr(self, attribute)
@@ -119,11 +117,11 @@ class CoilSet(pythonIO, BiotMethods):
         for attribute_name in self._coilset_attributes:
             if attribute_name in ['default_attributes', 'coilset_metadata', 
                                   'coildata_attributes', 'biot_attributes']:
-                default_attributes = coilset_attributes
+                default = coilset_attributes
             else:  # require attributes to be passed within attribute dict
-                default_attributes = {}  
+                default = {}  
             setattr(self, attribute_name, 
-                    coilset_attributes.get(attribute_name, default_attributes))
+                    coilset_attributes.get(attribute_name, default))
             
     @property 
     def coildata_attributes(self):
@@ -151,9 +149,9 @@ class CoilSet(pythonIO, BiotMethods):
         for attribute in default_attributes:
             if attribute in list(self._default_attributes.keys()) + \
                     self._coil_columns + self._subcoil_columns:
-                #if attribute in self._coilset_properties and \
-                #        not hasattr(self, f'_{attribute}'):
-                #    setattr(self, attribute, default_attributes[attribute])
+                if attribute in self._coilset_properties and not \
+                        hasattr(self, f'_{attribute}'):
+                    setattr(self, attribute, default_attributes[attribute])
                 self._default_attributes[attribute] = \
                         default_attributes[attribute]
 
@@ -293,12 +291,13 @@ class CoilSet(pythonIO, BiotMethods):
         self.coil._set_current(value, current_column)
         self.subcoil._set_current(
             self.coil.Ic[self.subcoil._current_index], 'Ic')
-        #self.update_forcefield()
+        self.update_forcefield()
         
     def update_forcefield(self):
         'update mutual interactions'
         for variable in ['Psi', 'Bx', 'Bz']:
-            setattr(self.subcoil, variable, getattr(self.mutual, variable))
+            setattr(self.subcoil, variable, 
+                    getattr(self.forcefield, variable))
         self.subcoil.B = \
             np.linalg.norm([self.subcoil.Bx, self.subcoil.Bz], axis=0)
         # set coil variables to maximum of subcoil bundles
@@ -309,26 +308,31 @@ class CoilSet(pythonIO, BiotMethods):
         
     @property
     def dCoil(self):
-        return self.coil._default_attributes['dCoil']
+        return self._dCoil
     
     @dCoil.setter
     def dCoil(self, dCoil):
+        self._dCoil = dCoil
+        self._default_attributes['dCoil'] = dCoil
         self.coil._default_attributes['dCoil'] = dCoil
         
     @property
     def dPlasma(self):
-        return self._default_attributes['dPlasma']
+        return self._dPlasma
     
     @dPlasma.setter
     def dPlasma(self, dPlasma):
+        self._dPlasma = dPlasma
         self._default_attributes['dPlasma'] = dPlasma
         
     @property
     def dShell(self):
-        return self.coil._default_attributes['dShell']
+        return self._dShell
     
     @dShell.setter
     def dShell(self, dShell):
+        self._dShell = dShell
+        self._default_attributes['dShell'] = dShell
         self.coil._default_attributes['dShell'] = dShell
         
     @property
@@ -455,9 +459,9 @@ class CoilSet(pythonIO, BiotMethods):
                     *subcoil_args, name=name, coil=name, **subcoil_kwargs)
             _subcoil[i].update_polygon()
             # back-propagate fillament attributes to coil
-            coil.at[name, 'Nf'] = mesh['Nf']  
-            coil.at[name, 'nx'] = mesh['nx']  
-            coil.at[name, 'nz'] = mesh['nz']  
+            coil.loc[name, 'Nf'] = mesh['Nf']  
+            coil.loc[name, 'nx'] = mesh['nx']  
+            coil.loc[name, 'nz'] = mesh['nz']  
             if 'subindex' in coil:
                 coil.at[name, 'subindex'] = list(_subcoil[i].index)
         subcoil.concatenate(*_subcoil)
@@ -664,7 +668,7 @@ class CoilSet(pythonIO, BiotMethods):
                                    power=power, label=label,
                                    delim=delim, Nt=dA, rho=rho_bar,
                                    **kwargs)
-        #self.coil.update_polygon(index)
+        self.coil.update_polygon()
         subindex = [[] for __ in range(len(index))]
         kwargs.pop('name', None)
         for i, coil in enumerate(index):
@@ -675,12 +679,8 @@ class CoilSet(pythonIO, BiotMethods):
                     polygon=_polygon, coil=coil, cross_section='shell', 
                     mpc=True, power=power, name=index[i], Nt=_dA, 
                     rho=_rho_bar, **kwargs)
-            #self.subcoil.update_polygon(subindex[i])
             self.coil.at[index[i], 'subindex'] = subindex[i]
-        #self.coil.generate_polygon()
-        #self.coil.update_polygon()
-        #self.subcoil.generate_polygon()
-        #self.subcoil.update_polygon()
+        self.subcoil.update_polygon()
             
     def add_plasma(self, *args, **kwargs):
         label = kwargs.pop('label', 'Pl')  # filament prefix
@@ -733,7 +733,7 @@ class CoilSet(pythonIO, BiotMethods):
                                 name='Plasma', part=part, turn_fraction=1,
                                 material='plasma', iloc=iloc[0],
                                 plasma=True, Ic=self.subcoil.Ip_sum)
-            self.coil.at['Plasma', 'subindex'] = list(subindex)
+            self.coil.loc['Plasma', 'subindex'] = list(subindex)
             # if Nf > 1:
             #     self.inductance('Plasma', update=True)  # re-size plasma coil
             #self.Ic = Series({'Plasma': Ip_net})  # update net current
@@ -799,13 +799,13 @@ class CoilSet(pythonIO, BiotMethods):
         # add merged coil
         self.add_coil(x, z, dx, dz, subcoil=False, iloc=coil_iloc, **kwargs)
         # insert multi-polygon
-        self.coil.at[name, 'polygon'] = polygon
+        self.coil.loc[name, 'polygon'] = polygon
         # on-demand patch of top level (coil)
         if isnull(subset.coil.loc[:, 'patch']).any():
             CoilSet.patch_coil(subset.coil)  # patch on-demand
         # add subcoils
         subindex = self.subcoil.add_coil(subset.subcoil, iloc=subcoil_iloc)
-        self.coil.at[name, 'subindex'] = list(subindex)
+        self.coil.loc[name, 'subindex'] = list(subindex)
         self.subcoil.loc[subindex, 'coil'] = name
         self.subcoil.add_mpc(subindex.to_list())
         # update current
@@ -815,7 +815,7 @@ class CoilSet(pythonIO, BiotMethods):
     def rename(self, index):
         self.coil.rename(index=index, inplace=True)  # rename coil
         for name in index:  # link subcoil
-            self.subcoil.loc[self.coil.at[index[name], 'subindex'], 'coil'] = \
+            self.subcoil.loc[self.coil.loc[index[name], 'subindex'], 'coil'] = \
                 index[name]
         self.subcoil.rebuild_coildata()  # rebuild coildata
 
@@ -853,7 +853,7 @@ class CoilSet(pythonIO, BiotMethods):
                 patch[i][j].set_alpha(alpha.get(part, 1))
                 if patchwork_factor != 0:
                     CoilSet.patchwork(patch[i][j], patchwork_factor)
-        coil.loc[:, 'patch'] = patch
+        coil.loc[:, 'patch'] = np.asarray(patch, object)
         
     @staticmethod
     def patchwork(patch, factor):
@@ -973,8 +973,8 @@ class CoilSet(pythonIO, BiotMethods):
             ztext[name] = dz
         for name, part in zip(coil.index, coil.part):
             if part in parts and N[part] < Nmax:
-                x, z = coil.at[name, 'x'], coil.at[name, 'z']
-                dx = coil.at[name, 'dx'] 
+                x, z = coil.loc[name, 'x'], coil.loc[name, 'z']
+                dx = coil.loc[name, 'dx'] 
                 drs = 2/3*dx * np.array([-1, 1])
                 if coil.part[name] == 'CS':
                     drs_index = 0
@@ -1031,9 +1031,9 @@ if __name__ == '__main__':
                 turn_section='circle', turn_fraction=0.7, dCoil=0.75,
                 plasma=True) 
     '''
-    cs.add_coil(1.75, 0.5, 2.5, 2.5, name='PF13', part='PF', Nt=1, It=5e5,
-                cross_section='circle', dCoil=0.55,
-                plasma=True) 
+    cs.add_coil(1.75, 0.5, 2.5, 2.5, name='PF13', part='PF', Nt=1, It=0,
+                cross_section='circle', dCoil=0.5,
+                plasma=False) 
     
     #cs.add_coil(cs.coil.rms[0], 0.5, 0.1, 0.1, name='PF19', dCoil=-1,
     #            Ic=0, Nt=1)
@@ -1052,23 +1052,25 @@ if __name__ == '__main__':
     cs.plot(label=True)
     '''
     
-    #cs.add_shell([4, 6, 7, 9, 9.5, 6], [1, 1, 2, 1.5, -1, -1.5], 0.1, 
-    #             dShell=1, dCoil=-1, name='vvin')
+    cs.add_shell([4, 6, 7, 9, 9.5, 6], [1, 1, 2, 1.5, -1, -1.5], 0.1, 
+                 dShell=1, dCoil=-1, name='vvin')
     
-    cs.current_update = 'coil'
-    cs.It = 0
+    cs.current_update = 'passive'
+    cs.It = 100
     cs.Ip = -2000
         
     #cs.Ic = 34
     #cs.coil.Nt = 1
 
-    cs.plot(label=True)
-    cs.grid.generate_grid(expand=0.1, n=1e3)
+    cs.plot(subcoil=True)
+    cs.grid.generate_grid(expand=0.2, n=5e4)
     cs.grid.plot_flux()
     
-    cs.target.add_targets([[1,2,3],[1,2,3]])
+    '''
+    cs.target.add_targets([[1,2],[1,1]])
     cs.target.plot()
-    cs.target.solve_interaction()
+    cs.target.solve()
+    '''
     
     '''
     cs.It = -2000

@@ -54,9 +54,10 @@ class BiotFrame(CoilFrame):
     def __init__(self):
         CoilFrame.__init__(self, coilframe_metadata={
             '_required_columns': ['x', 'z'],
-            '_additional_columns': ['rms', 'dx', 'dz', 'Nt', 'cross_section',
+            '_additional_columns': ['rms', 'dx', 'dz', 'dl',
+                                    'Nt', 'cross_section',
                                     'factor', 'coil', 'mpc'],
-            '_default_attributes': {'dx': 0, 'dz': 0, 'Nt': 1, 
+            '_default_attributes': {'dx': 0, 'dz': 0, 'dl': 0, 'Nt': 1, 
                                     'cross_section': 'square',
                                     'factor': 
                                         self._cross_section_factor['square']},
@@ -147,7 +148,7 @@ class BiotFrame(CoilFrame):
         
 class BiotSet(CoilMatrix, BiotAttributes):
     
-    _biotset_attributes = {'_solve_interaction': True}
+    _biotset_attributes = {'_solve': True}
     
     def __init__(self, source=None, target=None, **biot_attributes):
         CoilMatrix.__init__(self)
@@ -166,8 +167,8 @@ class BiotSet(CoilMatrix, BiotAttributes):
         self.source.update_coilframe()
         self.target.update_coilframe()
         
-    def relink_biotset(self):
-        self.source.update_coilframe()
+    #def relink_biotset(self):
+    #    self.source.update_coilframe()
         
     @property 
     def nS(self):
@@ -238,7 +239,7 @@ class BiotSet(CoilMatrix, BiotAttributes):
         
         self.flux_matrix(filament)  # assemble flux interaction matrix
         self.field_matrix(filament)  # assemble field interaction matricies 
-        self._solve_interaction = False
+        self._solve = False
         
     def save_matrix(self, M):
         # source-target reshape (matrix)
@@ -287,8 +288,8 @@ class BiotSet(CoilMatrix, BiotAttributes):
         return M
     
     def _dot(self, variable):
-        if self._solve_interaction:
-            self.solve_interaction()
+        if self._solve:
+            self.solve()
         if variable == 'Psi':
             matrix = self.flux 
         elif variable in ['Bx', 'Bz']:
@@ -308,6 +309,10 @@ class BiotSet(CoilMatrix, BiotAttributes):
     @property
     def Bz(self):
         return self._dot('Bz')
+    
+    @property 
+    def B(self):
+        return np.linalg.norm([self._dot('Bx'), self._dot('Bz')], axis=0)
 
 
 if __name__ == '__main__':

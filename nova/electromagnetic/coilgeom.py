@@ -40,6 +40,10 @@ class ITERcoilset(CoilClass):
             self.save_coilset(filename)
         else:
             CoilClass.load_coilset(self, filename)
+            if self.dCoil != self.coil.dCoil[self.coil.part == 'CS'][0]:
+                self.drop_coil()  # clear
+                self.build_coilset(coils, **kwargs)  # rebuild
+                self.save_coilset(filename)
             if self.grid.generate_grid(**kwargs):  
                 self.save_coilset(filename)  # save on-demand update
 
@@ -54,14 +58,13 @@ class ITERcoilset(CoilClass):
         if 'vs' in coils and 'vsj' in coils:
             coils.remove('vs')  # remove vs if selection is over-defined
         filename = '_'.join(coils)
-        filename = filename.replace('pf', f'pf{self.dCoil*1e3:.0f}')
         return filename, coils, kwargs
 
     def build_coilset(self, coils, **kwargs):
-        dCoil = self.dCoil  # PF subcoil dimension
         # targets = kwargs.get('targets', {})  # data extraction targets
         if 'pf' in coils:  # pf coilset
-            self.append_coilset(PFgeom(VS=False, dCoil=dCoil).coilset)
+            self.append_coilset(PFgeom(VS=False, dCoil=self.dCoil,
+                                       source='PCR').coilset)
         if 'vsj' in coils or 'vs' in coils:  # vs coils with/without ss jacket
             jacket = True if 'vsj' in coils else False
             self.append_coilset(VSgeom(jacket=jacket).coilset)  
@@ -75,7 +78,6 @@ class ITERcoilset(CoilClass):
         if 'dir' in coils:
             self.append_coilset(
                 MachineData().load_coilset(part_list='dir'))
-            
         self.forcefield.solve()  # compute mutual interaction
         self.grid.generate_grid(**kwargs, regen=True)
         #self.add_targets(targets=targets)

@@ -359,35 +359,35 @@ class CoilFrame(DataFrame, CoilData):
     def generate_polygon(self):
         if 'polygon' in self.columns:
             for index in self.index[self.polygon.isna()]:
-                cross_section = self.at[index, 'cross_section']
+                cross_section = self.loc[index, 'cross_section']
                 x, z, dl, dt = self.loc[index, ['x', 'z', 'dl', 'dt']]
                 if cross_section in ['circle', 'square']:
                     dl = dt = np.min([dl, dt])  # set aspect equal
                 polygen = self._get_polygen(cross_section)
                 polygon = polygen(x, z, dl, dt)
-                self.at[index, 'polygon'] = polygon
+                self.loc[index, 'polygon'] = polygon
             self.update_polygon()
             
     def update_polygon(self):
         for index in self.index[(self.rms == 0) & (~self.polygon.isna())]:
-            polygon = self.at[index, 'polygon']
-            cross_section = self.at[index, 'cross_section']
+            polygon = self.loc[index, 'polygon']
+            cross_section = self.loc[index, 'cross_section']
             dl, dt = self.loc[index, ['dl', 'dt']]
             dA = polygon.area  # update polygon area
             x = polygon.centroid.x  # update x centroid
             z = polygon.centroid.y  # update z centroid
-            self.at[index, 'x'] = x
-            self.at[index, 'z'] = z
+            self.loc[index, 'x'] = x
+            self.loc[index, 'z'] = z
             if dA == 0:
                 err_txt = f'zero area polygon entered for coil {index}\n'
                 err_txt += f'cross section: {cross_section}\n'
                 err_txt += f'dl {dl}\ndt {dt}'
                 raise ValueError(err_txt)
             else:
-                self.at[index, 'dA'] = dA
+                self.loc[index, 'dA'] = dA
             bounds = polygon.bounds
-            self.at[index, 'dx'] = bounds[2] - bounds[0]
-            self.at[index, 'dz'] = bounds[3] - bounds[1]
+            self.loc[index, 'dx'] = bounds[2] - bounds[0]
+            self.loc[index, 'dz'] = bounds[3] - bounds[1]
             if cross_section == 'circle':
                 rms = np.sqrt(x**2 + dl**2 / 16)  # circle
             elif cross_section in ['square', 'rectangle']:
@@ -396,10 +396,10 @@ class CoilFrame(DataFrame, CoilData):
                 rms = np.sqrt((dl**2 * dt**2 / 24 - dl**2 * dt / 8 
                                + dl**2 / 8 + x**2))
             else:  # calculate directly from polygon
-                p = self.at[index, 'polygon']
+                p = self.loc[index, 'polygon']
                 rms = (transform(lambda x, z: 
                                  (x**2, z), p).centroid.x)**0.5
-            self.at[index, 'rms'] = rms
+            self.loc[index, 'rms'] = rms
 
     @staticmethod
     def _get_polygen(cross_section):

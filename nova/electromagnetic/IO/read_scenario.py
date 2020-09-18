@@ -283,7 +283,7 @@ class interpolate:
             if to in self.feature_keypoints.index:
                 to = self.feature_keypoints.loc[to, 't']
             else:
-                self.plot_feature()
+                self.plot_features()
                 raise IndexError(f'{to} not in {self.feature_keypoints.index}')
         else:
             self._ko = None  # unset keypoint

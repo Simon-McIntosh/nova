@@ -3,6 +3,7 @@ import numpy as np
 from nova.electromagnetic.coilframe import CoilFrame
 from nova.electromagnetic.coilmatrix import CoilMatrix
 from nova.electromagnetic.biotelements import Filament
+from nova.electromagnetic.coildata import CoilData
 from amigo.pyplot import plt
 
 
@@ -34,6 +35,10 @@ class BiotAttributes:
             default = self._default_biot_attributes.get(attribute, None)
             value = _biot_attributes.get(attribute, None)
             if value is not None:
+                if attribute == 'target':
+                    CoilData.__init__(value)
+                    value.rebuild_coildata()
+                    value.coilframe = None
                 setattr(self, attribute, value)  # set value 
             elif not hasattr(self, attribute):
                 setattr(self, attribute, default)  # set default
@@ -41,7 +46,6 @@ class BiotAttributes:
 
 class BiotFrame(CoilFrame):
     
-        
     _cross_section_factor = {'circle': np.exp(-0.25),  # circle-circle
                              'square': 2*0.447049,  # square-square
                              'skin': 1}  # skin-skin
@@ -57,13 +61,16 @@ class BiotFrame(CoilFrame):
             '_additional_columns': ['rms', 'dx', 'dz', 'dl',
                                     'Nt', 'cross_section',
                                     'factor', 'coil', 'mpc'],
-            '_default_attributes': {'dx': 0, 'dz': 0, 'dl': 0, 'Nt': 1, 
+            '_default_attributes': {'dx': 0., 'dz': 0., 'rms': 0., 
+                                    'dl': 0., 'Nt': 1, 'mpc': '', 'coil': '',
                                     'cross_section': 'square',
                                     'factor': 
                                         self._cross_section_factor['square']},
-            '_dataframe_attributes': ['x', 'z', 'dx', 'dz', 'Nt', 'factor'],
+            '_dataframe_attributes': ['x', 'z', 'rms', 'dx', 'dz', 'Nt', 
+                                      'factor'],
             '_coildata_attributes': {'region': '', 'nS': 0, 'nT': 0,
-                                     'current_update': 'full'}})
+                                     'current_update': 'full'},
+            'mode': 'overwrite'})
         self.coilframe = None
         
     def add_coil(self, *args, **kwargs):
@@ -71,7 +78,6 @@ class BiotFrame(CoilFrame):
         if self.coilframe is not None:
             if self.coilframe.empty:
                 return
-        CoilFrame.drop_coil(self)
         CoilFrame.add_coil(self, *args, **kwargs)
         self.update_cross_section_factor()
         
@@ -81,11 +87,12 @@ class BiotFrame(CoilFrame):
             self.coilframe = args[0]
 
     def update_coilframe(self, force_update=False):
-        if self.coilframe is not None:
-            if self.coilframe.nC != self.nC or force_update:
-                self.drop_coil() 
-                CoilFrame.add_coil(self, self.coilframe)
-                self.update_cross_section_factor()
+        if hasattr(self, 'coilframe'):
+            if self.coilframe is not None:
+                if self.coilframe.nC != self.nC or force_update:
+                    self.drop_coil() 
+                    CoilFrame.add_coil(self, self.coilframe)
+                    self.update_cross_section_factor()
                 
     def update_cross_section_factor(self):
         cross_section = [cs if cs in self._cross_section_factor 
@@ -155,6 +162,7 @@ class BiotSet(CoilMatrix, BiotAttributes):
         BiotAttributes.__init__(self, **biot_attributes)
         self.source = BiotFrame()
         self.target = BiotFrame()
+        self._nS, self._nT = 0, 0
         self.load_biotset(source, target)
                 
     def load_biotset(self, source=None, target=None):
@@ -166,9 +174,7 @@ class BiotSet(CoilMatrix, BiotAttributes):
     def update_biotset(self):
         self.source.update_coilframe()
         self.target.update_coilframe()
-        
-    #def relink_biotset(self):
-    #    self.source.update_coilframe()
+        self.assemble()
         
     @property 
     def nS(self):
@@ -189,22 +195,9 @@ class BiotSet(CoilMatrix, BiotAttributes):
         self.source.nT = nT  # update source target filament number
         
     def assemble(self):
-        self.update_biotset()  # update biotframes
         self.nS = self.source.nC  # source filament number
         self.nT = self.target.nC  # target point number
         self.nI = self.source.nC*self.target.nC  # total number of interactions
-        # initialize interaction matricies (column compressed)
-        '''
-        self.flux = np.zeros((self.target.nC, self.source._nC))
-        self.field['x'] = np.zeros((self.target.nC, self.source._nC))
-        self.field['z'] = np.zeros((self.target.nC, self.source._nC))
-        '''
-        
-    #@property 
-    #def farfield(self):
-    #    'returns farfield boolean index'
-    #    index = []
-    #    return index
         
     def plot(self, ax=None):
         if ax is None:
@@ -230,13 +223,8 @@ class BiotSet(CoilMatrix, BiotAttributes):
         return getattr(method, attribute)()  
 
     def solve(self):
-        self.assemble()  # assemble geometory matrices
+        self.update_biotset()  # assemble geometory matrices
         filament = Filament(self.source, self.target)
-        
-        #self.flux = self.save_matrix(filament.flux())[0]
-        #self.field['x'] = self.save_matrix(filament.radial_field())[0]
-        #self.field['z'] = self.save_matrix(filament.vertical_field())[0]
-        
         self.flux_matrix(filament)  # assemble flux interaction matrix
         self.field_matrix(filament)  # assemble field interaction matricies 
         self._solve = False

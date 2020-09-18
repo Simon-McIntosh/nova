@@ -19,8 +19,9 @@ class Filament:
     def initialize_filaments(self, source, target):
         self.rs, self.zs = source._rms_, source._z_  # source
         self.r, self.z = target._x_, target._z_  # target
-        self.dl = np.linalg.norm([source._dx_, source._dz_],
-                                 axis=0) # filament characteristic length
+        #self.dl = np.linalg.norm([source._dx_, source._dz_],
+        #                         axis=0) # filament characteristic length
+        self.dl = np.max([source._dx_, source._dz_], axis=0) 
         self.cross_section_factor = source._factor_  # cross-section factor
 
     def offset_filaments(self):

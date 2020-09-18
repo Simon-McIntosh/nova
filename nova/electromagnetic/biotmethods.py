@@ -1,10 +1,12 @@
 import numpy as np
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from pandas.api.types import is_list_like
+from scipy.interpolate import interp1d
 
 from amigo.pyplot import plt
+from amigo.geom import length
 from nova.electromagnetic.meshgrid import MeshGrid
-from nova.electromagnetic.biotsavart import BiotSet, BiotAttributes, BiotFrame
+from nova.electromagnetic.biotsavart import BiotSet, BiotAttributes
                 
 
 class ForceField(BiotSet, BiotAttributes):
@@ -13,8 +15,12 @@ class ForceField(BiotSet, BiotAttributes):
     
     def __init__(self, subcoil, **mutual_attributes):
         BiotSet.__init__(self, source=subcoil, target=subcoil, 
-                            **mutual_attributes)
-        
+                         **mutual_attributes)
+    @property
+    def Fx(self):
+        return np.add.reduceat(2*np.pi*self.source.coilframe.x*self.source.coilframe.It*self.Bz, 
+                      self.source._reduction_index)
+
 
 class Grid(BiotSet):
     ''' 
@@ -38,7 +44,8 @@ class Grid(BiotSet):
     '''
     
     _biot_attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'boundary',
-                        'expand', 'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d']
+                        'expand', 'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d',
+                        'target']
     
     _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31,
                                 'boundary': 'limit'}
@@ -46,15 +53,6 @@ class Grid(BiotSet):
     def __init__(self, subcoil, **grid_attributes):
         BiotSet.__init__(self, source=subcoil, **grid_attributes)
         
-    def update_biotset(self):
-        BiotSet.update_biotset(self)
-        self.update_target()
-        
-    def update_target(self):
-        if self.x2d is not None and self.z2d is not None:
-            self.target.add_coil(self.x2d.flatten(), self.z2d.flatten(),
-                                 name='Grid', delim='')
-
     def _generate_grid(self, **grid_attributes):
         self.biot_attributes = grid_attributes  # update attributes
         if self.n > 0:
@@ -65,7 +63,9 @@ class Grid(BiotSet):
             self.dz = np.diff(self.grid_boundary[2:])[0] / (mg.nz - 1)
             self.x2d = mg.x2d
             self.z2d = mg.z2d
-            self.update_target()
+            self.target.drop_coil()
+            self.target.add_coil(self.x2d.flatten(), self.z2d.flatten(),
+                                 name='Grid', delim='')
             self.solve()
     
     def generate_grid(self, **kwargs):
@@ -171,7 +171,6 @@ class Target(BiotSet, BiotAttributes):
     
     def __init__(self, subcoil, **target_attributes):
         BiotSet.__init__(self, source=subcoil, **target_attributes)
-        self.target = BiotFrame()
         
     def add_target(self, *args, **kwargs):
         self.target.add_coil(*args, name='Target', delim='', **kwargs)
@@ -186,14 +185,50 @@ class Target(BiotSet, BiotAttributes):
         
 class Field(Target):
     
-    _target_attributes = []
+    _biot_attributes = ['target', 'coil_index']
     
     def __init__(self, subcoil, **field_attributes):
         Target.__init__(self, subcoil, **field_attributes)
+        self.coil_index = []
         
-    def add_target(self, coil, part):
-        for index in coil.index[coil.part == part]
+    def add_target(self, coil, parts, dField=0.5):
+        'add field probes spaced around each coil perimiter'
+        if not is_list_like(parts):
+            parts = [parts]
+        for part in parts:
+            for index in coil.index[coil.part == part]:
+                self.coil_index.append(index)
+                x, z = coil.polygon[index].boundary.coords.xy
+                if dField == 0:  # no interpolation
+                    polygon = {'x': x, 'z': z}
+                else:
+                    if dField == -1:  # extract dField from coil
+                        _dL = coil.loc[index, 'dCoil']
+                    else:
+                        _dL = dField
+                    nPoly = len(x)
+                    polygon = {'_x': x, '_z': z,
+                               '_L': length(x, z, norm=False)}
+                    for attr in ['x', 'z']:
+                        polygon[f'interp{attr}'] = \
+                            interp1d(polygon['_L'], polygon[f'_{attr}'])
+                        dL = [polygon[f'interp{attr}'](
+                            np.linspace(polygon['_L'][i], polygon['_L'][i+1], 
+                                1+int(np.diff(polygon['_L'][i:i+2])[0]/_dL),
+                                endpoint=False)) 
+                             for i in range(nPoly-1)]
+                        polygon[attr] = np.concatenate(dL).ravel()
+                self.target.add_coil(polygon['x'], polygon['z'], 
+                                     label='Field', delim='', 
+                                     coil=index, mpc=True) 
+   
+    @property
+    def frame(self):
+        return DataFrame(
+            np.maximum.reduceat(self.B, self.target._reduction_index), 
+            index=self.coil_index, columns=['B'])
         
+    
 class Colocate(Target):
     
     _target_attributes = ['label', 'x', 'z', 'value',
@@ -344,6 +379,7 @@ class Colocate(Target):
 class BiotMethods:
     
     _biot_methods = {'grid': Grid, 
+                     'field': Field,
                      'forcefield': ForceField, 
                      'target': Target,
                      'colocate': Colocate}

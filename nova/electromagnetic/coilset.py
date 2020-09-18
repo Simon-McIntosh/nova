@@ -65,6 +65,7 @@ class CoilSet(pythonIO, BiotMethods):
                         'Psi', 'Bx', 'Bz', 'B']
     
     _default_attributes = {'dCoil': -1, 'dPlasma': 0.25, 'dShell': 0.5, 
+                           'dField': 0.2,
                            'turn_fraction': 1, 'turn_section': 'circle'}
     
     _coildata_attributes = {'current_update': 'full'}
@@ -75,6 +76,7 @@ class CoilSet(pythonIO, BiotMethods):
                               'Fx', 'Fz', 'xFx', 'xFz', 'zFx', 'zFz', 'My']
 
     def __init__(self, **coilset):
+        BiotMethods.__init__(self)  # initialize biotmethods
         self.initialize_coilset()  # initialize coil and subcoil
         self.initialize_biot()  # setup biot instances
         self.coilset = coilset  # exchange coilset and instance attributes
@@ -93,7 +95,6 @@ class CoilSet(pythonIO, BiotMethods):
                                  **{'subcoil': True}}}
         self.coil = CoilFrame(coilframe_metadata=coil_metadata)
         self.subcoil = CoilFrame(coilframe_metadata=subcoil_metadata)
-        BiotMethods.__init__(self)  # initialize biotmethods
         
     def _extract_coilset_properties(self):
         self._coilset_properties = [p for p, __ in inspect.getmembers(
@@ -142,6 +143,10 @@ class CoilSet(pythonIO, BiotMethods):
         
     @property
     def default_attributes(self):
+        for attribute in self._default_attributes:
+            if attribute in self._coilset_properties \
+                    and hasattr(self, f'_{attribute}'):  # update
+                self._default_attributes[attribute] = getattr(self, attribute)
         return self._default_attributes
         
     @default_attributes.setter
@@ -207,7 +212,7 @@ class CoilSet(pythonIO, BiotMethods):
         if path.isfile(filepath + '.pk'):
             self.load_pickle(filepath)
             self.coilset = self._coilset
-            del self._coilset  # delete temp variable
+            #del self._coilset  # delete temp variable
         else:
             raise LookupError(f'file {filepath} not found')
         return self.coilset
@@ -301,10 +306,17 @@ class CoilSet(pythonIO, BiotMethods):
         self.subcoil.B = \
             np.linalg.norm([self.subcoil.Bx, self.subcoil.Bz], axis=0)
         # set coil variables to maximum of subcoil bundles
+        
         for variable in ['Psi', 'Bx', 'Bz', 'B']:
             setattr(self.coil, variable, 
                     np.maximum.reduceat(getattr(self.subcoil, variable), 
                                         self.subcoil._reduction_index))
+        self.coil.refresh_dataframe()  # flush updates
+        if self.field.nT > 0:  # maximum of coil boundary values
+            frame = self.field.frame
+            self.coil.loc[frame.index, frame.columns] = np.max(
+                [frame.values, 
+                 self.coil.loc[frame.index, frame.columns].values], axis=0)
         
     @property
     def dCoil(self):
@@ -315,6 +327,14 @@ class CoilSet(pythonIO, BiotMethods):
         self._dCoil = dCoil
         self._default_attributes['dCoil'] = dCoil
         self.coil._default_attributes['dCoil'] = dCoil
+        
+    @property 
+    def dField(self):
+        return self._dField
+        
+    @dField.setter
+    def dField(self, dField):
+        self._dField = dField
         
     @property
     def dPlasma(self):
@@ -459,9 +479,8 @@ class CoilSet(pythonIO, BiotMethods):
                     *subcoil_args, name=name, coil=name, **subcoil_kwargs)
             _subcoil[i].update_polygon()
             # back-propagate fillament attributes to coil
-            coil.loc[name, 'Nf'] = mesh['Nf']  
-            coil.loc[name, 'nx'] = mesh['nx']  
-            coil.loc[name, 'nz'] = mesh['nz']  
+            coil.loc[name, ['Nf', 'nx', 'nz', 'dCoil']] = \
+                mesh['Nf'], mesh['nx'], mesh['nz'], mesh['dCoil'] 
             if 'subindex' in coil:
                 coil.at[name, 'subindex'] = list(_subcoil[i].index)
         subcoil.concatenate(*_subcoil)
@@ -559,7 +578,8 @@ class CoilSet(pythonIO, BiotMethods):
         # subcoil bundle
         mesh.update({'x': xm_, 'z': zm_, 'nx': nx, 'nz': nz,
                      'dl': dl_, 'dt': dt_, 'Nt': Nt_, 'Nf': Nf, 
-                     'polygon': polygon, 'cross_section': cs_})  
+                     'polygon': polygon, 'cross_section': cs_,
+                     'dCoil': dCoil})  
             
         # subcoil moment arms
         #xo, zo = coil.loc[['x', 'z']]

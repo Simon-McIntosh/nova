@@ -40,12 +40,31 @@ class ITERcoilset(CoilClass):
             self.save_coilset(filename)
         else:
             CoilClass.load_coilset(self, filename)
-            if self.dCoil != self.coil.dCoil[self.coil.part == 'CS'][0]:
-                self.drop_coil()  # clear
-                self.build_coilset(coils, **kwargs)  # rebuild
-                self.save_coilset(filename)
-            if self.grid.generate_grid(**kwargs):  
-                self.save_coilset(filename)  # save on-demand update
+            self.rebuild(coils, filename, **kwargs)
+
+    def update(self, attribute):
+        return getattr(self, attribute) != \
+            self._coilset['default_attributes'][attribute]
+         
+    def rebuild(self, coils, filename, **kwargs):
+        _rebuild = {'coilset': False, 'field': False, 'grid': False}
+        #filename, coils, kwargs = self.select_coils(**kwargs)
+        if self.update('dCoil'):
+            print('rebuild coilset')
+            self.drop_coil()  # clear
+            self.build_coilset(coils, **kwargs)  # rebuild
+            _rebuild['coilset'] = True
+        if self.update('dField'):
+            print('rebuild field targets')
+            self.field.target.drop_coil()  # clear
+            self.field.add_target(self.coil, ['CS', 'PF'], 
+                                  dField=self.dField)
+            _rebuild['field']
+        if self.grid.generate_grid(**kwargs):  
+            print('rebuild grid')
+            _rebuild['grid'] = True
+        if np.array(_rebuild.values()).any():
+            self.save_coilset(filename)
 
     def select_coils(self, **kwargs):
         coils = kwargs.pop('coils', ['pf', 'vsj', 'vv'])  # default set
@@ -78,6 +97,9 @@ class ITERcoilset(CoilClass):
         if 'dir' in coils:
             self.append_coilset(
                 MachineData().load_coilset(part_list='dir'))
+        self.field.add_target(self.coil, ['CS', 'PF'], 
+                              dField=self.dField)
+        self.field.solve()
         self.forcefield.solve()  # compute mutual interaction
         self.grid.generate_grid(**kwargs, regen=True)
         #self.add_targets(targets=targets)

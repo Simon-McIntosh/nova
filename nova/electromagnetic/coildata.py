@@ -67,6 +67,7 @@ class CoilData():
     _coildata_flags = {'update_dataframe': False,
                        'update_coilframe': True,
                        'update_biotsavart': True,
+                       'current_update': 'full',
                        'relink_mpc': True}
         
     def __init__(self):
@@ -190,6 +191,7 @@ class CoilData():
                              _mpc_array[np.isin(_mpc_list, _mpc_name)])}
             self._mpc_referance[mpc_index] = [_mpc_dict[name] 
                                               for name in _mpc[:, 0]]
+          
             self._mpc_factor[mpc_index] = _mpc[:, 1]
         # link subcoil to coil referance
         if 'coil' in self:
@@ -319,7 +321,7 @@ class CoilData():
         nU = sum(self._current_index)  # length of update vector
         current = getattr(self, '_Ic')
         if current_column == 'It':  # convert to turn current
-            current * self._Nt[self._mpc_iloc]
+            current *= self._Nt[self._mpc_iloc]
         if is_dict_like(value):
             for i, (index, update) in enumerate(zip(self.index[self._mpc_iloc],
                                                     self._current_index)):

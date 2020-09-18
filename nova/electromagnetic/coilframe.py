@@ -73,7 +73,9 @@ class CoilFrame(DataFrame, CoilData):
         mode = coilframe_metadata.pop('mode', 'append')  # [overwrite, append]
         for key in coilframe_metadata:
             if mode == 'overwrite':
-                null = {} if key.split('_')[-1] == 'attributes' else []
+                null = [] if key[1:] in ['required_columns', 
+                                         'additional_columns',
+                                         'dataframe_attributes'] else {}
                 setattr(self, key, null)
             value = coilframe_metadata.get(key, None)
             if value is not None:

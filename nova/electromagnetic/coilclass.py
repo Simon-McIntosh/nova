@@ -82,12 +82,11 @@ class CoilClass(CoilSet):
             to (float): input time
             to (str): feature_keypoint
         '''
+        self.to = to  # time or keypoint
         self.d2.to = to  # update scenario data (time or keypoint)
         self.t = self.d2.to  # time instance
         #self.update_plasma()
-        #Ic = self.d2.Ic.reindex(self.Ic.index)
         self.Ic = self.d2.Ic.to_dict()
-        #self.coil.Ic = self.d2.Ic.to_dict()
 
 
     """

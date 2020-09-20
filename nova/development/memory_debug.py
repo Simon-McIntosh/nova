@@ -10,15 +10,15 @@ from amigo.pyplot import plt
 
 
 # load ITER coilset
-ITER = ITERcoilset(coils='pf vv dir trs', dCoil=-1, dField=0.1,
+ITER = ITERcoilset(coils='pf vv dir trs', dCoil=0.25, dField=0.1,
                    n=1e3, expand=0.0, levels=31,
                    read_txt=False, current_update='full')
 
 ITER.add_coil(6, 0, 0.2, 0.2, name='plasma', delim='',
               Ic=1000, cross_section='circle')
 
-ITER.field.solve()
-ITER.forcefield.solve()
+#ITER.field.solve()
+#ITER.forcefield.solve()
 
 #ff.source.nT = 5
 

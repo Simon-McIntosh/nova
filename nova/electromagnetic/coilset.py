@@ -296,10 +296,19 @@ class CoilSet(pythonIO, BiotMethods):
         self.coil._set_current(value, current_column)
         self.subcoil._set_current(
             self.coil.Ic[self.subcoil._current_index], 'Ic')
-        self.update_forcefield()
+        self.update_field()
         
-    def update_forcefield(self):
-        'update mutual interactions'
+    def update_field(self):
+        self.coil.refresh_dataframe()  # flush updates
+        if self.field.nT > 0:  # maximum of coil boundary values
+            frame = self.field.frame
+            self.coil.loc[frame.index, frame.columns] = frame
+        
+    def update_forcefield(self, subcoil=False):
+        
+        if subcoil and self.forcefield.reduce_target: 
+            self.forcefield.solve(reduce_target=False)
+            
         for variable in ['Psi', 'Bx', 'Bz']:
             setattr(self.subcoil, variable, 
                     getattr(self.forcefield, variable))
@@ -311,12 +320,6 @@ class CoilSet(pythonIO, BiotMethods):
             setattr(self.coil, variable, 
                     np.maximum.reduceat(getattr(self.subcoil, variable), 
                                         self.subcoil._reduction_index))
-        self.coil.refresh_dataframe()  # flush updates
-        if self.field.nT > 0:  # maximum of coil boundary values
-            frame = self.field.frame
-            self.coil.loc[frame.index, frame.columns] = np.max(
-                [frame.values, 
-                 self.coil.loc[frame.index, frame.columns].values], axis=0)
         
     @property
     def dCoil(self):
@@ -1072,19 +1075,21 @@ if __name__ == '__main__':
     cs.plot(label=True)
     '''
     
+    '''
     cs.add_shell([4, 6, 7, 9, 9.5, 6], [1, 1, 2, 1.5, -1, -1.5], 0.1, 
                  dShell=1, dCoil=-1, name='vvin')
     
     cs.current_update = 'passive'
     cs.It = 100
     cs.Ip = -2000
+    '''
         
     #cs.Ic = 34
     #cs.coil.Nt = 1
 
-    cs.plot(subcoil=True)
-    cs.grid.generate_grid(expand=0.2, n=5e4)
-    cs.grid.plot_flux()
+    #cs.plot(subcoil=True)
+    #cs.grid.generate_grid(expand=0.2, n=5e4)
+    #cs.grid.plot_flux()
     
     '''
     cs.target.add_targets([[1,2],[1,1]])

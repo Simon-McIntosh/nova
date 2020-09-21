@@ -16,8 +16,8 @@ class BiotAttributes:
     def __init__(self, **biot_attributes):
         self._append_biot_attributes(self._biotset_attributes)
         self._append_biot_attributes(self._coilmatrix_attributes)
-        self._default_biot_attributes = {**self._default_biot_attributes, 
-                                         **self._biotset_attributes}
+        self._default_biot_attributes = {**self._biotset_attributes,
+                                         **self._default_biot_attributes}
         self.biot_attributes = biot_attributes
         
     def _append_biot_attributes(self, attributes):
@@ -36,10 +36,11 @@ class BiotAttributes:
             value = _biot_attributes.get(attribute, None)
             if value is not None:
                 if attribute == 'target':
-                    CoilData.__init__(value)
-                    value.rebuild_coildata()
-                    value.coilframe = None
-                setattr(self, attribute, value)  # set value 
+                    BiotFrame.__init__(self.target, value)
+                    print(self.target._dataframe_attributes)
+                    self.target.rebuild_coildata()
+                else:
+                    setattr(self, attribute, value)  # set value 
             elif not hasattr(self, attribute):
                 setattr(self, attribute, default)  # set default
 
@@ -55,20 +56,21 @@ class BiotFrame(CoilFrame):
                           'polygon': 'square',
                           'shell': 'square'}
     
-    def __init__(self):
-        CoilFrame.__init__(self, coilframe_metadata={
+    def __init__(self, *args):
+        CoilFrame.__init__(self, *args, coilframe_metadata={
             '_required_columns': ['x', 'z'],
             '_additional_columns': ['rms', 'dx', 'dz', 'dl',
                                     'Nt', 'cross_section',
-                                    'factor', 'coil', 'mpc'],
+                                    'cs_factor', 'coil', 'plasma', 'mpc'],
             '_default_attributes': {'dx': 0., 'dz': 0., 'rms': 0., 
                                     'dl': 0., 'Nt': 1, 'mpc': '', 'coil': '',
+                                    'plasma': False,
                                     'cross_section': 'square',
-                                    'factor': 
+                                    'cs_factor': 
                                         self._cross_section_factor['square']},
-            '_dataframe_attributes': ['x', 'z', 'rms', 'dx', 'dz', 'Nt', 
-                                      'factor'],
-            '_coildata_attributes': {'region': '', 'nS': 0, 'nT': 0,
+            '_dataframe_attributes': ['x', 'z', 'rms', 'dx', 'dz', 'Nt',
+                                      'cs_factor'] + self._mpc_attributes,
+            '_coildata_attributes': {'region': '', 'nS': 0., 'nT': 0.,
                                      'current_update': 'full'},
             'mode': 'overwrite'})
         self.coilframe = None
@@ -98,7 +100,7 @@ class BiotFrame(CoilFrame):
         cross_section = [cs if cs in self._cross_section_factor 
                          else self._cross_section_key.get(cs, 'square')
                          for cs in self.cross_section]
-        self.factor = np.array([self._cross_section_factor[cs] 
+        self.cs_factor = np.array([self._cross_section_factor[cs] 
                                    for cs in cross_section])
         
     @property
@@ -155,7 +157,9 @@ class BiotFrame(CoilFrame):
         
 class BiotSet(CoilMatrix, BiotAttributes):
     
-    _biotset_attributes = {'_solve': True}
+    _biotset_attributes = {'_solve': True, 
+                           'source_turns': True, 'target_turns': True,
+                           'reduce_source': True, 'reduce_target': True}
     
     def __init__(self, source=None, target=None, **biot_attributes):
         CoilMatrix.__init__(self)
@@ -163,7 +167,7 @@ class BiotSet(CoilMatrix, BiotAttributes):
         self.source = BiotFrame()
         self.target = BiotFrame()
         self._nS, self._nT = 0, 0
-        self.load_biotset(source, target)
+        self.load_biotset(source, target)        
                 
     def load_biotset(self, source=None, target=None):
         if source is not None:
@@ -208,21 +212,23 @@ class BiotSet(CoilMatrix, BiotAttributes):
         
     def flux_matrix(self, method):
         'calculate filament flux (inductance) matrix'
-        flux = self.calculate(method, 'scalar_potential')
-        self.flux , self._flux, self._flux_ = self.save_matrix(flux)
+        psi = self.calculate(method, 'scalar_potential')
+        self.psi , self._psi = self.save_matrix(psi)
         
     def field_matrix(self, method):
         'calculate subcoil field matrix'
         field = {'x': 'radial_field', 'z': 'vertical_field'}
         for xz in field:  # save field matricies
-            self.field[xz], self._field[xz], self._field_[xz] = \
-                self.save_matrix(self.calculate(method, field[xz])) 
+            b, _b = self.save_matrix(self.calculate(method, field[xz])) 
+            setattr(self, f'b{xz}', b)
+            setattr(self, f'_b{xz}', _b)
                 
     def calculate(self, method, attribute):
         'calculate biot attributes (flux, radial_field, vertical_field)'
         return getattr(method, attribute)()  
 
-    def solve(self):
+    def solve(self, **biot_attributes):
+        self.biot_attributes = biot_attributes  # update attributes
         self.update_biotset()  # assemble geometory matrices
         filament = Filament(self.source, self.target)
         self.flux_matrix(filament)  # assemble flux interaction matrix
@@ -230,25 +236,21 @@ class BiotSet(CoilMatrix, BiotAttributes):
         self._solve = False
         
     def save_matrix(self, M):
-        # source-target reshape (matrix)
-        M = M.reshape(self.nT, self.nS)
-        # extract plasma unit filaments
-        _M_ = M[self.target._plasma_index][:, self.source._plasma_index]  
+        M = M.reshape(self.nT, self.nS)  # source-target reshape (matrix)
+        _M = M[:, self.source._plasma_index]  # extract plasma unit filaments  
+        if self.source_turns:
+            M *= self.source._Nt_.reshape(self.nT, self.nS) 
+        if self.target_turns:  
+            M *= self.target._Nt_.reshape(self.nT, self.nS)
         # reduce
-        #if self.mutual:
-        #    M *= self.points['N'].reshape(self.nT, self.nS)  # target turns
-        _M = M[:, self.source._plasma_index]  # unit source filament
-        M *= self.source._Nt_.reshape(self.nT, self.nS)  # source turns
-        
-        #if len(self.target._reduction_index) < self.nT:  # sum sub-target
-        #    M = np.add.reduceat(M, self.target._reduction_index, axis=0)
-        #    _M = np.add.reduceat(_M, self.target._reduction_index, axis=0)
-        
-        if len(self.source._reduction_index) < self.nS:  # sum sub-source
+        if self.reduce_source and len(self.source._reduction_index) < self.nS:
             M = np.add.reduceat(M, self.source._reduction_index, axis=1)
-        return M, _M, _M_  # turn-turn interaction, source unit, mutual unit
+        if self.reduce_target and len(self.target._reduction_index) < self.nT:
+            M = np.add.reduceat(M, self.target._reduction_index, axis=0)
+        return M, _M  # turn-turn interaction, unit plasma interaction
 
-    def _update_plasma(self, M, _M, _M_):
+    '''
+    def _update_plasma(self, M, _M_):
         'update plasma turns'
         if self.source.nP > 0:  # source plasma filaments 
             _m = _M * self.source.Np
@@ -263,12 +265,12 @@ class BiotSet(CoilMatrix, BiotAttributes):
             M[self.target._plasma_iloc][:, self.source._plasma_iloc] = _m_.T
              
     def update_flux(self):
-        self._update_plasma(self.flux, self._flux, self._flux_)
+        self._update_plasma(self.flux, self._flux)
         
     def update_field(self):
         for xz in self.field:
-            self._update_plasma(self.field[xz], self._field[xz], 
-                                self._field_[xz])
+            self._update_plasma(self.field[xz], self._field[xz])
+    '''
             
     def _reshape(self, M):
         if hasattr(self, 'n2d'):
@@ -278,12 +280,7 @@ class BiotSet(CoilMatrix, BiotAttributes):
     def _dot(self, variable):
         if self._solve:
             self.solve()
-        if variable == 'Psi':
-            matrix = self.flux 
-        elif variable in ['Bx', 'Bz']:
-            matrix = self.field[variable[-1]]
-        else:
-            raise IndexError(f'variable {variable} not in [Psi, Bx, Bz]')
+        matrix = getattr(self, variable.lower())
         return self._reshape(np.dot(matrix, self.source.coilframe._Ic))
 
     @property

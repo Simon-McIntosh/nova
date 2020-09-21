@@ -73,8 +73,8 @@ class CoilData():
     def __init__(self):
         self._extract_coildata_properties()
         self._initialize_coildata_flags()
-        self._initialize_dataframe_attributes()
         self._initialize_coildata_attributes()
+        self._initialize_dataframe_attributes()
         self._initialize_coilcurrent_attributes()
         self._unlink_coildata_attributes()
         
@@ -89,8 +89,10 @@ class CoilData():
         self.update_dataframe = False
         
     def _initialize_dataframe_attributes(self):
-        self.dataframe_attributes = self._mpc_attributes
-    
+        self._dataframe_attributes = self._mpc_attributes.copy()
+        print('mpc', self._mpc_attributes)
+        print('init', self._dataframe_attributes)
+
     def _initialize_coildata_attributes(self):
         self._coildata_attributes = {}
                 
@@ -208,7 +210,6 @@ class CoilData():
             self._mpl_index = []
             self._mpl_factor = []
         self._relink_mpc = True
-        
         
     def _extract_data_attributes(self):
         self.update_dataframe = False
@@ -436,7 +437,7 @@ class CoilData():
     def refresh_coilframe(self, key):
         'transfer data from dataframe to coilframe attributes'
         if self._update_coilframe:  # protect against regressive update
-            if key in ['Ic', 'It']:
+            if key in ['Ic', 'It'] and self._mpc_iloc is not None:
                 _current_update = self.current_update
                 self.current_update = 'full'
                 self._set_current(self.loc[self.index[self._mpc_iloc], key],

@@ -162,15 +162,15 @@ class Grid(BiotSet):
             plt.quiver(self.x2d, self.z2d, self.Bx, self.Bz)
     
 
-class Target(BiotSet, BiotAttributes):
+class Probe(BiotSet, BiotAttributes):
 
-    'traget interaction methods and data'
+    'probe interaction methods and data'
     
     _biot_attributes = []
     _default_biot_attributes = {}
     
-    def __init__(self, subcoil, **target_attributes):
-        BiotSet.__init__(self, source=subcoil, **target_attributes)
+    def __init__(self, subcoil, **probe_attributes):
+        BiotSet.__init__(self, source=subcoil, **probe_attributes)
         
     def add_target(self, *args, **kwargs):
         self.target.add_coil(*args, name='Target', delim='', **kwargs)
@@ -183,21 +183,23 @@ class Target(BiotSet, BiotAttributes):
         ax.plot(self.target.x, self.target.z, ls, color=color, **kwargs)
         
         
-class Field(Target):
+class Field(Probe):
     
-    _biot_attributes = ['target', 'coil_index']
+    _biot_attributes = ['target', '_coil_index']
+    _default_biot_attributes = {'target_turns': False,  # include target turns 
+                                'reduce_target': False}  # sum-reduce target
     
     def __init__(self, subcoil, **field_attributes):
-        Target.__init__(self, subcoil, **field_attributes)
-        self.coil_index = []
+        Probe.__init__(self, subcoil, **field_attributes)
         
     def add_target(self, coil, parts, dField=0.5):
         'add field probes spaced around each coil perimiter'
         if not is_list_like(parts):
             parts = [parts]
+        self._coil_index = []
         for part in parts:
             for index in coil.index[coil.part == part]:
-                self.coil_index.append(index)
+                self._coil_index.append(index)
                 x, z = coil.polygon[index].boundary.coords.xy
                 if dField == 0:  # no interpolation
                     polygon = {'x': x, 'z': z}
@@ -226,17 +228,17 @@ class Field(Target):
     def frame(self):
         return DataFrame(
             np.maximum.reduceat(self.B, self.target._reduction_index), 
-            index=self.coil_index, columns=['B'])
+            index=self._coil_index, columns=['B'])
         
     
-class Colocate(Target):
+class Colocate(Probe):
     
-    _target_attributes = ['label', 'x', 'z', 'value',
-                          'nx', 'nz', 'd_dx', 'd_dz',  
-                          'factor', 'weight']
+    _biot_attributes = ['label', 'x', 'z', 'value',
+                        'nx', 'nz', 'd_dx', 'd_dz',  
+                        'factor', 'weight']
         
     def __init__(self, subcoil, **colocate_attributes):
-        Target.__init__(self, subcoil, **colocate_attributes)
+        Probe.__init__(self, subcoil, **colocate_attributes)
         
     def add_targets(self, *args, **kwargs):
         '''
@@ -270,7 +272,7 @@ class Colocate(Target):
         norm = np.linalg.norm([target['nx'], target['nz']], axis=0)
         for nhat in ['nx', 'nz']:
             target.loc[target.index[norm != 0], nhat] /= norm[norm != 0]
-        Target.add_targets(self, target)  # append Biot colocation targets
+        Probe.add_targets(self, target)  # append Biot colocation targets
         
     def update_targets(self):
         'update targets.value from Psi and/or field'
@@ -381,7 +383,7 @@ class BiotMethods:
     _biot_methods = {'grid': Grid, 
                      'field': Field,
                      'forcefield': ForceField, 
-                     'target': Target,
+                     'target': Probe,
                      'colocate': Colocate}
     
     def __init__(self):
@@ -402,8 +404,7 @@ class BiotMethods:
             if biot_method in self._biot_methods:
                 if biot_name not in self._biot_instances:
                     self._biot_instances.update({biot_name: biot_method})
-                if not hasattr(self, biot_name):
-                    'initialize method'
+                if not hasattr(self, biot_name):  # initialize method
                     self._initialize_biot_method(biot_name, biot_method)
 
     @property
@@ -420,7 +421,7 @@ class BiotMethods:
         for instance in self._biot_instances:
             biot_attribute = '_'.join([instance, 'biot_attributes'])
             setattr(getattr(self, instance), 'biot_attributes',
-                    biot_attributes.get(biot_attribute, biot_attributes))
+                    biot_attributes.get(biot_attribute, {}))
             getattr(self, instance).update_biotset()
         
         

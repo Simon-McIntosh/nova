@@ -39,8 +39,11 @@ class CoilFrame(DataFrame, CoilData):
     def __init__(self, *args, coilframe_metadata={}, **kwargs):
         self._initialize_coilframe_metadata()
         DataFrame.__init__(self, *args, **kwargs)  # inherit pandas DataFrame
-        CoilData.__init__(self)  # fast access attributes and DataFrame IO
+        CoilData.__init__(self)  # fast access attributes
+        print('cs', self._dataframe_attributes)
+        print('dfa', coilframe_metadata.get('_dataframe_attributes', {}))
         self.coilframe_metadata = coilframe_metadata  # update metadata
+        print('md', self._dataframe_attributes)
 
     def _initialize_coilframe_metadata(self):
         self._initialize_required_columns()

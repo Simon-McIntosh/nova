@@ -10,15 +10,20 @@ from amigo.pyplot import plt
 
 
 # load ITER coilset
-ITER = ITERcoilset(coils='pf vv dir trs', dCoil=0.25, dField=0.1,
+ITER = ITERcoilset(coils='pf vv', dCoil=0.15, dField=0.25,
                    n=1e3, expand=0.0, levels=31,
                    read_txt=False, current_update='full')
 
-ITER.add_coil(6, 0, 0.2, 0.2, name='plasma', delim='',
+'''
+ITER.add_coil(6, 0, 0.2, 0.2, label='plasma', delim='',
               Ic=1000, cross_section='circle')
 
+ITER.add_coil(8, 0, 0.2, 0.2, label='plasma', delim='',
+              Ic=1000, cross_section='circle')
+'''
 #ITER.field.solve()
 #ITER.forcefield.solve()
+
 
 #ff.source.nT = 5
 
@@ -31,19 +36,20 @@ ITER.add_coil(6, 0, 0.2, 0.2, name='plasma', delim='',
 
 
 ITER.filename = -1
-ITER.scenario = 'IM'
+ITER.scenario = 'SOF'
 
-print(1e-6*ITER.forcefield.Fx)
+#print(1e-6*ITER.forcefield.Fx)
 
 #ITER.current_update = 'passive'
 #ITER.Ic = 0
 
 plt.set_aspect(1.0)
-#ITER.grid.plot_flux()
+ITER.grid.plot_flux()
 
 ITER.plot()
 #ITER.field.plot()
 #ITER.forcefield.plot()
+
 
 '''
 d3 = field_data(read_txt=False)

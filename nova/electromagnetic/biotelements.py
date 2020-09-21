@@ -22,7 +22,7 @@ class Filament:
         #self.dl = np.linalg.norm([source._dx_, source._dz_],
         #                         axis=0) # filament characteristic length
         self.dl = np.max([source._dx_, source._dz_], axis=0) 
-        self.cross_section_factor = source._factor_  # cross-section factor
+        self.cross_section_factor = source._cs_factor_  # cross-section factor
 
     def offset_filaments(self):
         'offset source and target points'

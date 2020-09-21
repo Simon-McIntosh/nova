@@ -28,7 +28,7 @@ class ITERcoilset(CoilClass):
         self.read_txt = read_txt
         CoilClass.__init__(self, **kwargs)
         #self.update_coilframe_metadata(
-        #    'coil', _additional_columns=['m', 'material', 'R'])
+        #    'coil', _additional_columns=['m', 'material', 'R'])    
         self.load_coilset(**kwargs)
 
     def load_coilset(self, **kwargs):

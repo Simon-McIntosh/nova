@@ -2,13 +2,13 @@ from contextlib import contextmanager
 import inspect
 
 import numpy as np
-from pandas import DataFrame, Series, Index
+from pandas import DataFrame, Index
 from pandas.api.types import is_list_like, is_dict_like
 
 
 class CoilData():
     '''
-    provides fast access to dynamic coil and subcoil data
+    methods enabling fast access to dynamic coil and subcoil data
 
     Key Attributes:
         Ic (np.array, float): coil line current [A]
@@ -17,24 +17,6 @@ class CoilData():
         power (np.array, bool): coil power supply status 
         optimize (np.array, bool): optimization flag  
         plasma (np.array, bool): plasma flag
-        
-    Derived Attributes:
-        Psi: magnetic flux [Wb]
-        Bx: radial field [T]
-        Bz: vertical field [T]
-        B: field magnitude [T]
-        Fx:  net radial force [N]
-        Fz:  net vertical force [N]
-        xFx: first radial moment of radial force [Nm]
-        xFz: first radial moment of vertical force [Nm]
-        zFx: first vertical moment of radial force [Nm]
-        zFz: first vertical moment of vertical force [Nm]
-        My:  in-plane torque [Nm]
-    
-    Formulae (CoilMatrix): 
-        Psi = [flux][Ic] (Wb)
-        B[*] = [field[*]][Ic] (T)
-        F[*] = [Ic]'[force[*]][Ic] (N, Nm)
     '''
 
     # list of fast access np.array variables linked to CataFrame
@@ -90,8 +72,6 @@ class CoilData():
         
     def _initialize_dataframe_attributes(self):
         self._dataframe_attributes = self._mpc_attributes.copy()
-        print('mpc', self._mpc_attributes)
-        print('init', self._dataframe_attributes)
 
     def _initialize_coildata_attributes(self):
         self._coildata_attributes = {}

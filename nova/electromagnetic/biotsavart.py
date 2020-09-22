@@ -2,8 +2,6 @@ import numpy as np
 
 from nova.electromagnetic.coilframe import CoilFrame
 from nova.electromagnetic.coilmatrix import CoilMatrix
-from nova.electromagnetic.biotelements import Filament
-from nova.electromagnetic.coildata import CoilData
 from amigo.pyplot import plt
 
 
@@ -35,9 +33,8 @@ class BiotAttributes:
             default = self._default_biot_attributes.get(attribute, None)
             value = _biot_attributes.get(attribute, None)
             if value is not None:
-                if attribute == 'target':
-                    BiotFrame.__init__(self.target, value)
-                    print(self.target._dataframe_attributes)
+                if type(value) == BiotFrame:
+                    BiotFrame.__init__(self.target, value)  # set biot frame
                     self.target.rebuild_coildata()
                 else:
                     setattr(self, attribute, value)  # set value 
@@ -210,95 +207,6 @@ class BiotSet(CoilMatrix, BiotAttributes):
         ax.plot(self.target.x, self.target.z, 'C2.', label='target')
         plt.legend()
         
-    def flux_matrix(self, method):
-        'calculate filament flux (inductance) matrix'
-        psi = self.calculate(method, 'scalar_potential')
-        self.psi , self._psi = self.save_matrix(psi)
-        
-    def field_matrix(self, method):
-        'calculate subcoil field matrix'
-        field = {'x': 'radial_field', 'z': 'vertical_field'}
-        for xz in field:  # save field matricies
-            b, _b = self.save_matrix(self.calculate(method, field[xz])) 
-            setattr(self, f'b{xz}', b)
-            setattr(self, f'_b{xz}', _b)
-                
-    def calculate(self, method, attribute):
-        'calculate biot attributes (flux, radial_field, vertical_field)'
-        return getattr(method, attribute)()  
-
-    def solve(self, **biot_attributes):
-        self.biot_attributes = biot_attributes  # update attributes
-        self.update_biotset()  # assemble geometory matrices
-        filament = Filament(self.source, self.target)
-        self.flux_matrix(filament)  # assemble flux interaction matrix
-        self.field_matrix(filament)  # assemble field interaction matricies 
-        self._solve = False
-        
-    def save_matrix(self, M):
-        M = M.reshape(self.nT, self.nS)  # source-target reshape (matrix)
-        _M = M[:, self.source._plasma_index]  # extract plasma unit filaments  
-        if self.source_turns:
-            M *= self.source._Nt_.reshape(self.nT, self.nS) 
-        if self.target_turns:  
-            M *= self.target._Nt_.reshape(self.nT, self.nS)
-        # reduce
-        if self.reduce_source and len(self.source._reduction_index) < self.nS:
-            M = np.add.reduceat(M, self.source._reduction_index, axis=1)
-        if self.reduce_target and len(self.target._reduction_index) < self.nT:
-            M = np.add.reduceat(M, self.target._reduction_index, axis=0)
-        return M, _M  # turn-turn interaction, unit plasma interaction
-
-    '''
-    def _update_plasma(self, M, _M_):
-        'update plasma turns'
-        if self.source.nP > 0:  # source plasma filaments 
-            _m = _M * self.source.Np
-            M[:, self.source._plasma_iloc] = np.add.reduceat(
-                _m, self.source._plasma_reduction_index, axis=1)
-        if _M_.size > 0:  # update target plasma filaments
-            M[self.source._plasma_iloc, :] = M[:, self.source._plasma_iloc].T
-            _m_ = np.add.reduceat(_M_ * self.source.Np,
-                                  self.source._plasma_reduction_index, axis=1)
-            _m_ = np.add.reduceat(_m_.T * self.target.Np,
-                                  self.target._plasma_reduction_index, axis=1)
-            M[self.target._plasma_iloc][:, self.source._plasma_iloc] = _m_.T
-             
-    def update_flux(self):
-        self._update_plasma(self.flux, self._flux)
-        
-    def update_field(self):
-        for xz in self.field:
-            self._update_plasma(self.field[xz], self._field[xz])
-    '''
-            
-    def _reshape(self, M):
-        if hasattr(self, 'n2d'):
-            M = M.reshape(self.n2d)
-        return M
-    
-    def _dot(self, variable):
-        if self._solve:
-            self.solve()
-        matrix = getattr(self, variable.lower())
-        return self._reshape(np.dot(matrix, self.source.coilframe._Ic))
-
-    @property
-    def Psi(self):
-        return self._dot('Psi')
-    
-    @property
-    def Bx(self):
-        return self._dot('Bx')
-    
-    @property
-    def Bz(self):
-        return self._dot('Bz')
-    
-    @property 
-    def B(self):
-        return np.linalg.norm([self._dot('Bx'), self._dot('Bz')], axis=0)
-
 
 if __name__ == '__main__':
     

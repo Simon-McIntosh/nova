@@ -10,8 +10,8 @@ from amigo.pyplot import plt
 
 
 # load ITER coilset
-ITER = ITERcoilset(coils='pf vv', dCoil=0.15, dField=0.25,
-                   n=1e3, expand=0.0, levels=31,
+ITER = ITERcoilset(coils='pf vv dir trs', dCoil=0.1, dField=0.2,
+                   n=5e3, expand=0.0, levels=31,
                    read_txt=False, current_update='full')
 
 '''
@@ -36,7 +36,7 @@ ITER.add_coil(8, 0, 0.2, 0.2, label='plasma', delim='',
 
 
 ITER.filename = -1
-ITER.scenario = 'SOF'
+ITER.scenario = 'IM'
 
 #print(1e-6*ITER.forcefield.Fx)
 

@@ -103,7 +103,8 @@ class CoilSet(pythonIO, BiotMethods):
     def initialize_biot(self):
         'specify default biot instances'
         self.biot_instances = {'field': 'field',
-                               'forcefield': 'forcefield',
+                               'forcefield': 'mutual',
+                               'mutual': 'mutual',
                                'plasma': 'grid',
                                'grid': 'grid'}
         
@@ -687,7 +688,7 @@ class CoilSet(pythonIO, BiotMethods):
                     
         index = self.coil.add_coil(x, z, dl, dt, dA=dA, polygon=polygon, 
                                    cross_section='shell', turn_fraction=1, 
-                                   turn_section='shell', dCoil=dShell,
+                                   turn_section='shell', dCoil=dCoil,
                                    power=power, label=label,
                                    delim=delim, Nt=dA, rho=rho_bar,
                                    **kwargs)
@@ -1057,6 +1058,8 @@ if __name__ == '__main__':
     cs.add_coil(1.75, 0.5, 2.5, 2.5, name='PF13', part='PF', Nt=1, It=0,
                 cross_section='circle', dCoil=0.5,
                 plasma=False) 
+    
+    cs.plot(True)
     
     #cs.add_coil(cs.coil.rms[0], 0.5, 0.1, 0.1, name='PF19', dCoil=-1,
     #            Ic=0, Nt=1)

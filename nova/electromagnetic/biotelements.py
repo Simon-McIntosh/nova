@@ -48,11 +48,11 @@ class Filament:
         self.rs[idx] += drms
         self.r[idx] += drms
         # offset source filaments
-        self.rs[idx] -= dr
-        self.zs[idx] -= dz
+        self.rs[idx] -= dr/2
+        self.zs[idx] -= dz/2
         # offset target filaments
-        self.r[idx] += dr
-        self.z[idx] += dz
+        self.r[idx] += dr/2
+        self.z[idx] += dz/2
                 
     def calculate_coefficients(self):
         self.b = self.rs + self.r

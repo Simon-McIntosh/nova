@@ -59,7 +59,8 @@ class ITERcoilset(CoilClass):
             self.field.target.drop_coil()  # clear
             self.field.add_target(self.coil, ['CS', 'PF'], 
                                   dField=self.dField)
-            _rebuild['field']
+            self.field.solve()
+            _rebuild['field'] = True
         if self.grid.generate_grid(**kwargs):  
             print('rebuild grid')
             _rebuild['grid'] = True
@@ -87,18 +88,17 @@ class ITERcoilset(CoilClass):
         if 'vsj' in coils or 'vs' in coils:  # vs coils with/without ss jacket
             jacket = True if 'vsj' in coils else False
             self.append_coilset(VSgeom(jacket=jacket).coilset)  
-        if 'vv' in coils:  # vv coilset (inner, outer, and trs)
-            self.append_coilset(
-                MachineData().load_coilset(part_list='vvin vvout'))
-            #self.append_coilset(VVcoils(model='full', read_txt=True).coilset)
-        if 'trs' in coils:
-            self.append_coilset(
-                MachineData().load_coilset(part_list='trs'))
-        if 'dir' in coils:
-            self.append_coilset(
-                MachineData().load_coilset(part_list='dir'))
-        self.field.add_target(self.coil, ['CS', 'PF'], 
-                              dField=self.dField)
+            
+        if any(coil in ['vv', 'trs', 'dir'] for coil in coils):
+            machine = MachineData(dCoil=self.dCoil, read_txt=True)
+            if 'vv' in coils:  # vv coilset (inner, outer, and trs)
+                machine.load_coilset(part_list='vvin vvout')
+            if 'trs' in coils:
+                machine.load_coilset(part_list='trs')
+            if 'dir' in coils:
+                machine.load_coilset(part_list='dir')
+            self.append_coilset(machine.coilset)
+        self.field.add_target(self.coil, ['CS', 'PF'], dField=self.dField)
         self.field.solve()
         self.forcefield.solve()  # compute mutual interaction
         self.grid.generate_grid(**kwargs, regen=True)

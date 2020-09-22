@@ -9,158 +9,15 @@ from nova.electromagnetic.meshgrid import MeshGrid
 from nova.electromagnetic.biotsavart import BiotSet, BiotAttributes
                 
 
-class ForceField(BiotSet, BiotAttributes):
+class Mutual(BiotSet, BiotAttributes):
     
     _biot_attributes = []
+    _default_biot_attributes = {}
     
     def __init__(self, subcoil, **mutual_attributes):
         BiotSet.__init__(self, source=subcoil, target=subcoil, 
                          **mutual_attributes)
-    @property
-    def Fx(self):
-        return np.add.reduceat(2*np.pi*self.source.coilframe.x*self.source.coilframe.It*self.Bz, 
-                      self.source._reduction_index)
 
-
-class Grid(BiotSet):
-    ''' 
-    grid interaction methods and data
-    
-    Key Attributes:
-        n (int): grid dimension
-        limit ([4float]): grid limits
-        expand (float): grid expansion beyond coils
-        nlevels (int): number of contour levels
-        boundary (str): limit boundary ['limit', 'coilset_limit']
-        
-    Derived Attributes:
-        n2d: None,  # ([int, int]) as meshed dimensions
-        x2d (np.array): 2D x-coordinates (radial)
-        z2d (np.array): 2D z-coordinates
-        levels (np.array): contour levels
-        Psi (np.array):  poloidal flux
-        Bx (np.array): radial field
-        Bz (np.array): vertical field
-    '''
-    
-    _biot_attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'boundary',
-                        'expand', 'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d',
-                        'target']
-    
-    _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31,
-                                'boundary': 'limit'}
-    
-    def __init__(self, subcoil, **grid_attributes):
-        BiotSet.__init__(self, source=subcoil, **grid_attributes)
-        
-    def _generate_grid(self, **grid_attributes):
-        self.biot_attributes = grid_attributes  # update attributes
-        if self.n > 0:
-            mg = MeshGrid(self.n, self.grid_boundary)  # set mesh
-            self.n2d = [mg.nx, mg.nz]
-            self.x, self.z = mg.x, mg.z
-            self.dx = np.diff(self.grid_boundary[:2])[0] / (mg.nx - 1)
-            self.dz = np.diff(self.grid_boundary[2:])[0] / (mg.nz - 1)
-            self.x2d = mg.x2d
-            self.z2d = mg.z2d
-            self.target.drop_coil()
-            self.target.add_coil(self.x2d.flatten(), self.z2d.flatten(),
-                                 name='Grid', delim='')
-            self.solve()
-    
-    def generate_grid(self, **kwargs):
-        '''
-        compare kwargs to current grid settings, update grid on-demand
-
-        kwargs:
-            n (int): grid node number
-            limit (np.array): [xmin, xmax, zmin, zmax] fixed grid limits
-            expand (float): expansion beyond coil limits (when limit not set)
-            nlevels (int)
-            levels ()
-            regen (bool): force grid regeneration
-        '''
-        self.regen = kwargs.get('regen', False)
-        self.update_biotset()
-        grid_attributes = {}  # grid attributes
-        for key in ['n', 'limit', 'coilset_limit',
-                    'expand', 'levels', 'nlevels']:
-            grid_attributes[key] = kwargs.get(key, getattr(self, key))
-        # calculate coilset limit
-        grid_attributes['coilset_limit'] = \
-                self._get_coil_limit(grid_attributes['expand'])
-        self.grid_boundary = 'limit' if 'limit' in kwargs else 'coilset_limit'
-        regenerate_grid = \
-            not np.array_equal(grid_attributes['limit'], self.limit) or \
-            not np.array_equal(grid_attributes['coilset_limit'], 
-                               self.coilset_limit) or \
-            grid_attributes['expand'] != self.expand or \
-            grid_attributes['n'] != self.n or self.regen
-        if regenerate_grid:
-            self._generate_grid(**grid_attributes)
-        return regenerate_grid
-    
-    def _get_coil_limit(self, expand, xmin=1e-3):
-        if expand is None:
-            expand = self.expand  # use default
-        if self.source.empty:
-            raise IndexError('source coilframe empty')
-        x, z, = self.source.x, self.source.z
-        dx, dz = self.source.dx, self.source.dz
-        limit = np.array([(x - dx/2).min(), (x + dx/2).max(),
-                          (z - dz/2).min(), (z + dz/2).max()])
-        dx, dz = np.diff(limit[:2])[0], np.diff(limit[2:])[0]
-        delta = np.max([dx, dz])
-        limit += expand * delta * np.array([-1, 1, -1, 1])
-        if limit[0] < xmin:
-            limit[0] = xmin
-        return limit
-    
-    @property
-    def grid_boundary(self):
-        if self.boundary == 'limit':
-            return self.limit
-        elif self.boundary == 'coilset_limit':
-            return self.coilset_limit
-    
-    @grid_boundary.setter 
-    def grid_boundary(self, boundary):
-        if boundary != self.boundary:
-            self.regen = True  # force update after boundary switch
-        if boundary in ['limit', 'coilset_limit']:
-            self.boundary = boundary
-        else:
-            raise IndexError(f'boundary label {boundary} not in '
-                             '[limit, coilset_limit]')
-            
-    def plot_grid(self, ax=None, **kwargs):
-        self.generate_grid(**kwargs)
-        if ax is None:
-            ax = plt.gca()  
-        MeshGrid._plot(self.x2d, self.z2d, self._limit[:2], self._limit[2:],
-                       ax=ax, zorder=-500, **kwargs)  # plot grid 
-        
-    def plot_flux(self, ax=None, lw=1, color='lightgrey',
-                  **kwargs):
-        if self.n > 0:
-            if ax is None:
-                ax = plt.gca() 
-            levels = kwargs.get('levels', self.levels)
-            if levels is None:
-                levels = self.nlevels
-            QuadContourSet = ax.contour(
-                    self.x2d, self.z2d, self.Psi,
-                    levels, colors=color, linestyles='-', 
-                    linewidths=lw,
-                    alpha=0.9, zorder=4)
-            if self.levels is None:
-                self.levels = QuadContourSet.levels
-            plt.axis('equal')
-            
-    def plot_field(self):
-        if self.n > 0:
-            plt.quiver(self.x2d, self.z2d, self.Bx, self.Bz)
-    
 
 class Probe(BiotSet, BiotAttributes):
 
@@ -184,6 +41,8 @@ class Probe(BiotSet, BiotAttributes):
         
         
 class Field(Probe):
+    
+    'field values imposed on coil boundaries - derived from probe class'
     
     _biot_attributes = ['target', '_coil_index']
     _default_biot_attributes = {'target_turns': False,  # include target turns 
@@ -232,6 +91,8 @@ class Field(Probe):
         
     
 class Colocate(Probe):
+    
+    'colocation probes - used by inverse (nova.design)'
     
     _biot_attributes = ['label', 'x', 'z', 'value',
                         'nx', 'nz', 'd_dx', 'd_dz',  
@@ -376,15 +237,155 @@ class Colocate(Probe):
         
     def plot(self):
         plt.plot(self.targets.x, self.targets.z, 'o')
+        
+
+class Grid(BiotSet):
+    ''' 
+    grid interaction methods and data
+    
+    Key Attributes:
+        n (int): grid dimension
+        limit ([4float]): grid limits
+        expand (float): grid expansion beyond coils
+        nlevels (int): number of contour levels
+        boundary (str): limit boundary ['limit', 'coilset_limit']
+        
+    Derived Attributes:
+        n2d: None,  # ([int, int]) as meshed dimensions
+        x2d (np.array): 2D x-coordinates (radial)
+        z2d (np.array): 2D z-coordinates
+        levels (np.array): contour levels
+        Psi (np.array):  poloidal flux
+        Bx (np.array): radial field
+        Bz (np.array): vertical field
+    '''
+    
+    _biot_attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'boundary',
+                        'expand', 'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d',
+                        'target']
+    
+    _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31,
+                                'boundary': 'limit'}
+    
+    def __init__(self, subcoil, **grid_attributes):
+        BiotSet.__init__(self, source=subcoil, **grid_attributes)
+        
+    def _generate_grid(self, **grid_attributes):
+        self.biot_attributes = grid_attributes  # update attributes
+        if self.n > 0:
+            mg = MeshGrid(self.n, self.grid_boundary)  # set mesh
+            self.n2d = [mg.nx, mg.nz]
+            self.x, self.z = mg.x, mg.z
+            self.dx = np.diff(self.grid_boundary[:2])[0] / (mg.nx - 1)
+            self.dz = np.diff(self.grid_boundary[2:])[0] / (mg.nz - 1)
+            self.x2d = mg.x2d
+            self.z2d = mg.z2d
+            self.target.drop_coil()
+            self.target.add_coil(self.x2d.flatten(), self.z2d.flatten(),
+                                 name='Grid', delim='')
+            self.solve()
+    
+    def generate_grid(self, **kwargs):
+        '''
+        compare kwargs to current grid settings, update grid on-demand
+
+        kwargs:
+            n (int): grid node number
+            limit (np.array): [xmin, xmax, zmin, zmax] fixed grid limits
+            expand (float): expansion beyond coil limits (when limit not set)
+            nlevels (int)
+            levels ()
+            regen (bool): force grid regeneration
+        '''
+        self.regen = kwargs.get('regen', False)
+        self.update_biotset()
+        grid_attributes = {}  # grid attributes
+        for key in ['n', 'limit', 'coilset_limit',
+                    'expand', 'levels', 'nlevels']:
+            grid_attributes[key] = kwargs.get(key, getattr(self, key))
+        # calculate coilset limit
+        grid_attributes['coilset_limit'] = \
+                self._get_coil_limit(grid_attributes['expand'])
+        self.grid_boundary = 'limit' if 'limit' in kwargs else 'coilset_limit'
+        regenerate_grid = \
+            not np.array_equal(grid_attributes['limit'], self.limit) or \
+            not np.array_equal(grid_attributes['coilset_limit'], 
+                               self.coilset_limit) or \
+            grid_attributes['expand'] != self.expand or \
+            grid_attributes['n'] != self.n or self.regen
+        if regenerate_grid:
+            self._generate_grid(**grid_attributes)
+        return regenerate_grid
+    
+    def _get_coil_limit(self, expand, xmin=1e-3):
+        if expand is None:
+            expand = self.expand  # use default
+        if self.source.empty:
+            raise IndexError('source coilframe empty')
+        x, z, = self.source.x, self.source.z
+        dx, dz = self.source.dx, self.source.dz
+        limit = np.array([(x - dx/2).min(), (x + dx/2).max(),
+                          (z - dz/2).min(), (z + dz/2).max()])
+        dx, dz = np.diff(limit[:2])[0], np.diff(limit[2:])[0]
+        delta = np.max([dx, dz])
+        limit += expand * delta * np.array([-1, 1, -1, 1])
+        if limit[0] < xmin:
+            limit[0] = xmin
+        return limit
+    
+    @property
+    def grid_boundary(self):
+        if self.boundary == 'limit':
+            return self.limit
+        elif self.boundary == 'coilset_limit':
+            return self.coilset_limit
+    
+    @grid_boundary.setter 
+    def grid_boundary(self, boundary):
+        if boundary != self.boundary:
+            self.regen = True  # force update after boundary switch
+        if boundary in ['limit', 'coilset_limit']:
+            self.boundary = boundary
+        else:
+            raise IndexError(f'boundary label {boundary} not in '
+                             '[limit, coilset_limit]')
+            
+    def plot_grid(self, ax=None, **kwargs):
+        self.generate_grid(**kwargs)
+        if ax is None:
+            ax = plt.gca()  
+        MeshGrid._plot(self.x2d, self.z2d, self._limit[:2], self._limit[2:],
+                       ax=ax, zorder=-500, **kwargs)  # plot grid 
+        
+    def plot_flux(self, ax=None, lw=1, color='lightgrey',
+                  **kwargs):
+        if self.n > 0:
+            if ax is None:
+                ax = plt.gca() 
+            levels = kwargs.get('levels', self.levels)
+            if levels is None:
+                levels = self.nlevels
+            QuadContourSet = ax.contour(
+                    self.x2d, self.z2d, self.Psi,
+                    levels, colors=color, linestyles='-', 
+                    linewidths=lw,
+                    alpha=0.9, zorder=4)
+            if self.levels is None:
+                self.levels = QuadContourSet.levels
+            plt.axis('equal')
+            
+    def plot_field(self):
+        if self.n > 0:
+            plt.quiver(self.x2d, self.z2d, self.Bx, self.Bz)
 
         
 class BiotMethods:
     
-    _biot_methods = {'grid': Grid, 
+    _biot_methods = {'mutual': Mutual,
+                     'probe': Probe,
                      'field': Field,
-                     'forcefield': ForceField, 
-                     'target': Probe,
-                     'colocate': Colocate}
+                     'colocate': Colocate,
+                     'grid': Grid}
     
     def __init__(self):
         self._biot_instances = {}
@@ -424,56 +425,6 @@ class BiotMethods:
                     biot_attributes.get(biot_attribute, {}))
             getattr(self, instance).update_biotset()
         
-        
-class Interaction:
-    
-    '''
-    Formulae:
-
-        F[*] = [Ic]'[force[*]][Ic] (N, Nm)
-
-        force (dict): coil force interaction matrices (DataFrame) 
-        _force[*] (np.array): force[*] = reduce([Nt][Nc]*[_force])
-        force['Fx'] (np.array):  net radial force
-        force['Fz'] (np.array):  net vertical force
-        force['xFx'] (np.array): first radial moment of radial force
-        force['xFz'] (np.array): first radial moment of vertical force
-        force['zFx'] (np.array): first vertical moment of radial force
-        force['zFz'] (np.array): first vertical moment of vertical force
-        force['My'] (np.array):  in-plane torque}
-    '''
-    
-    @staticmethod        
-    def _initialize_force():
-        return {'Fx': np.array([]), 'Fz': np.array([]),
-                'xFx': np.array([]), 'xFz': np.array([]),
-                'zFx': np.array([]), 'zFz': np.array([]),
-                'My': np.array([])}
-    
-    '''
-    def extend_frame(self, frame, index, columns):
-        index = [idx for idx in index if idx not in frame.index]
-        columns = [c for c in columns if c not in frame.columns]
-        frame = concat((frame, DataFrame(index=index, columns=columns)),
-                       sort=False)
-        return frame
-    
-    def concatenate_matrix(self):
-        index = self.index
-        if 'coil' in self.columns:  # subcoil
-            columns = np.unique(self.coil)
-        else:
-            columns = index
-        for attribute in self._matrix_attributes:
-            frame = getattr(self, attribute)
-            if isinstance(frame, dict):
-                for key in frame:
-                    frame[key] = self.extend_frame(frame[key], index, columns)
-            else:
-                frame = self.extend_frame(frame, index, columns)
-            setattr(self, attribute, frame)
-    '''
-
 
 if __name__ == '__main__':
     

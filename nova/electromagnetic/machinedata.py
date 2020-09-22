@@ -18,10 +18,10 @@ class MachineData(CoilSet):
     Models_for_calculation_of_axisymmetric_c_XBQF5H_v2_2.xlsx
     '''
     
-    def __init__(self, read_txt=False):
+    def __init__(self, read_txt=False, **kwargs):
         self.read_txt = read_txt
         self.directory = class_dir(nep_data.geom)
-        CoilSet.__init__(self)
+        CoilSet.__init__(self, **kwargs)
         
     @staticmethod
     def append(data, x, z, rho, dt):
@@ -221,20 +221,20 @@ class MachineData(CoilSet):
             for segment in self.models[part]:
                 frame = self.models[part][segment]
                 self.add_shell(frame.x, frame.z, frame.dt, rho=frame.rho, 
-                               dShell=1, dCoil=0.25, part=part, name=segment)
+                               dShell=1, part=part, name=segment)
           
             
 if __name__ == '__main__':
 
-    machine = MachineData(read_txt=False)
+    machine = MachineData(dCoil=0.2, read_txt=False)
     
-    #machine.load_models(read_txt=True)
-    #machine.plot_models()
+    machine.load_models(read_txt=True)
+    machine.plot_models()
     
     #machine.load_data()
     #machine.plot_data()
     
-    machine.load_coilset(part_list='vvin vvout trs dir', read_txt=False)
+    machine.load_coilset(part_list='trs dir', read_txt=True)
 
     machine.Ic = 20e3
     machine.plot(subcoil=True)
@@ -243,10 +243,10 @@ if __name__ == '__main__':
     machine.grid.plot_flux()
     
     
-    '''
+    
     machine.read_data()
     machine.plot_data()
-    '''
+    
     
     
     '''

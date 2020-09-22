@@ -685,6 +685,8 @@ class scenario_data(read_dina, interpolate, operate):
         for column in additional_columns:  # append aditional columns
             if column not in index:
                 index.append(column)
+        # remove absent
+        index = [idx for idx in index if idx in self.data.columns.droplevel(1)]
         index = self.data.columns.to_frame().loc[index]  # extract subset
         index = pd.MultiIndex.from_frame(index)  # generate multi-index
         return index

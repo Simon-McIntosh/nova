@@ -1,7 +1,6 @@
-from nova.coil_set import CoilSet
-#from nova.biot_savart import biot_savart
-#from nova.coil_class import CoilClass
 from numpy import allclose
+
+from nova.electromagnetic.coilset import CoilSet
 
 
 def test_inductance(plot=False):
@@ -15,7 +14,7 @@ def test_inductance(plot=False):
                 name='PF1', part='PF')
     cs.add_coil(1.722, 5.313, 0.719, 2.075, Nt=554, name='CS3U', part='CS')
     cs.add_coil(1.722, 3.188, 0.719, 2.075, Nt=554, name='CS2U', part='CS')
-    # calculated
+    # calculate
     cs.mutual.solve_interaction()        
     # referance
     Mc_ddd = [[7.076E-01, 1.348E-01, 6.021E-02],
@@ -27,7 +26,7 @@ def test_inductance(plot=False):
         cs.grid.generate_grid()
         cs.grid.plot_flux()
         
-    assert allclose(Mc_ddd, cs.mutual.flux , atol=5e-3)
+    assert allclose(Mc_ddd, cs.mutual.psi , atol=5e-3)
     return cs
 
 

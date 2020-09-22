@@ -802,7 +802,7 @@ class scenario_data(read_dina, interpolate, operate):
         return dt
 
 
-class field_data(read_dina, interpolate, operate):
+class forcefield_data(read_dina, interpolate):
 
     '''
     Attributes:
@@ -966,10 +966,11 @@ if __name__ == '__main__':
     #plt.set_context('talk')
     #d2.plot_features(feature_name=['Ip', '<PSIcoils>'])
 
-    d3 = field_data(read_txt=False)
+    d3 = forcefield_data(read_txt=False)
     #d3.load_folder()
     d3.load_file(-1)
     
+    d3.to = 'IM'
 
     '''
     d2.ko = 100

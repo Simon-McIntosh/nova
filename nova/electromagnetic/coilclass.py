@@ -4,6 +4,7 @@ import pandas as pd
 import amigo.geom
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.IO.read_scenario import scenario_data
+from nova.electromagnetic.IO.read_scenario import forcefield_data
 
 
 class CoilClass(CoilSet):
@@ -34,6 +35,7 @@ class CoilClass(CoilSet):
     def initalize_functions(self):
         self.t = None  # scenario time instance (d2.to)
         self.d2 = scenario_data()
+        self.d3 = forcefield_data()
 
     def initalize_metadata(self):
         self._scenario_filename = ''
@@ -59,6 +61,7 @@ class CoilClass(CoilSet):
         '''
         if filename != self._scenario_filename and filename is not None:
             self.d2.load_file(filename)
+            self.d3.load_file(filename)
             self._scenario_filename = self.d2.filename
 
     @property
@@ -78,6 +81,7 @@ class CoilClass(CoilSet):
         '''
         self.to = to  # time or keypoint
         self.d2.to = to  # update scenario data (time or keypoint)
+        self.d3.to = self.d2.to # update forcefield data
         self.t = self.d2.to  # time instance
         #self.update_plasma()
         self.Ic = self.d2.Ic.to_dict()

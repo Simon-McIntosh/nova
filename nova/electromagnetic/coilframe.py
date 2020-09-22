@@ -93,7 +93,7 @@ class CoilFrame(DataFrame, CoilData):
                 elif key == '_dataframe_attributes':
                     self.dataframe_attributes = value
                 elif key == '_coildata_attributes':
-                    self.coildata_attributes = value    
+                    self.coildata_attributes = value  
                 elif key in self._coildata_attributes:
                     self.coildata_attributes = {key: value}
 
@@ -326,9 +326,9 @@ class CoilFrame(DataFrame, CoilData):
         else:
             if name is None:
                 try:  # reverse search through coilframe index
-                    offset = next(int(re.sub(r'[a-zA-Z]', '', index))
-                                  for index in self.index[::-1] 
-                                  if label in index) + 1
+                    offset = next(
+                        int(re.sub(r'[a-zA-Z]', '', index).replace(delim, ''))
+                        for index in self.index[::-1] if label in index) + 1
                 except StopIteration:  # label not present in index
                     offset = 0
             else:

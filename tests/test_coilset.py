@@ -1,0 +1,66 @@
+import pytest
+from numpy import allclose
+import pickle
+
+from nova.electromagnetic.coilset import CoilSet
+
+
+def test_dCoil():
+    'test setting of kwarg dCoil'
+    cs = CoilSet(dCoil=0.15)
+    assert cs.dCoil == 0.15
+    
+def test_dCoil_default():
+    'test instance default attribute setting'
+    cs = CoilSet()
+    cs.coilset = {'default_attributes': {'dCoil': 3}}
+    assert cs.dCoil == 3
+    
+def test_dCoil_memory():
+    'test persistance of default attributes (set once)'
+    cs = CoilSet(dCoil=0.15)
+    cs.coilset = {'default_attributes': {'dCoil': 3}}
+    assert cs.dCoil == 0.15
+    
+def test_dPlasma():
+    'test dPlasma and coilset shorthand'
+    cs = CoilSet()
+    cs.coilset = {'dPlasma': 0.333}
+    assert cs.dPlasma == 0.333    
+    
+def test_current_update():
+    'test current update for active coils (power=True)'
+    cs = CoilSet(current_update='active', dCoil=0)
+    cs.add_coil(1, 2, 0.4, 0.5, Ic=5, power=True)
+    cs.add_coil(1, 3, 0.4, 0.5, Ic=6.7, power=False)
+    cs.add_coil(1, 4, 0.4, 0.5, Ic=4, power=True)
+    cs.Ic = [3.2, 5.8]
+    assert allclose(cs.Ic, [3.2, 6.7, 5.8])
+    
+def test_mpc():
+    'query Ic from dataframe for pair of coils with mpc constraint'
+    cs = CoilSet(current_update='active', dCoil=0)
+    cs.add_coil(7, -3, 1.5, 1.5, name='PF6', part='PF', Nt=4, It=1e6,
+            turn_section='circle', turn_fraction=0.7, dCoil=0.12)   
+    cs.add_coil(7, -0.5, 1.5, 1.5, name='PF8', part='PF', Nt=5, Ic=2e3,
+                cross_section='circle', turn_section='square', dCoil=0.12)
+    cs.add_mpc(['PF6', 'PF8'], -0.5)  # Ic[PF8] = -0.5*Ic[PF6]
+    assert allclose(cs.coil['It'].values, [1e6, -0.5*1e6/4*5])
+    
+def test_pickle():
+    'test coilset sterilization'
+    cs = CoilSet()
+    cs.add_coil(1, [2, 3, 4], 0.4, 0.5, label='Coil', delim='_')
+    _cs = CoilSet()
+    cs_p = pickle.dumps(cs.coilset)
+    __cs = pickle.loads(cs_p)
+    _cs.coilset = __cs
+    assert cs.coil.equals(_cs.coil)
+    
+    
+if __name__ == '__main__':
+    pytest.main([__file__])
+    
+    
+    
+

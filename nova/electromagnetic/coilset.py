@@ -64,9 +64,7 @@ class CoilSet(pythonIO, BiotMethods):
                         'power', 'optimize', 'plasma', 'mpc', 'Nt', 'It', 'Ic',
                         'Psi', 'Bx', 'Bz', 'B']
     
-    _default_attributes = {'dCoil': -1, 'dPlasma': 0.25, 'dShell': 0.5, 
-                           'dField': 0.2,
-                           'turn_fraction': 1, 'turn_section': 'circle'}
+    #_default_attributes = {}
     
     _coildata_attributes = {'current_update': 'full'}
     
@@ -83,6 +81,7 @@ class CoilSet(pythonIO, BiotMethods):
 
     def initialize_coilset(self):
         self._extract_coilset_properties()
+        self._initialize_default_attributes()
         coil_metadata = {'_additional_columns': self._coil_columns,
                          '_dataframe_attributes': self._dataframe_attributes,
                          '_coildata_attributes': {**self._coildata_attributes,
@@ -100,11 +99,15 @@ class CoilSet(pythonIO, BiotMethods):
         self._coilset_properties = [p for p, __ in inspect.getmembers(
             CoilSet, lambda o: isinstance(o, property))]
         
+    def _initialize_default_attributes(self):
+        self._default_attributes = {
+            'dCoil': -1, 'dPlasma': 0.25, 'dShell': 0.5, 'dField': 0.2,
+            'turn_fraction': 1, 'turn_section': 'circle'}
+        
     def initialize_biot(self):
         'specify default biot instances'
         self.biot_instances = {'field': 'field',
                                'forcefield': 'mutual',
-                               'mutual': 'mutual',
                                'plasma': 'grid',
                                'grid': 'grid'}
         
@@ -153,8 +156,8 @@ class CoilSet(pythonIO, BiotMethods):
     @default_attributes.setter
     def default_attributes(self, default_attributes):
         for attribute in default_attributes:
-            if attribute in list(self._default_attributes.keys()) + \
-                    self._coil_columns + self._subcoil_columns:
+            if attribute in self._coil_columns + self._subcoil_columns +\
+                    self._coilset_properties:
                 if attribute in self._coilset_properties and not \
                         hasattr(self, f'_{attribute}'):
                     setattr(self, attribute, default_attributes[attribute])
@@ -321,9 +324,14 @@ class CoilSet(pythonIO, BiotMethods):
             setattr(self.coil, variable, 
                     np.maximum.reduceat(getattr(self.subcoil, variable), 
                                         self.subcoil._reduction_index))
+            
+    def _check_default(self, attribute):
+        if not hasattr(self, f'_{attribute}'):
+            setattr(self, f'_{attribute}', self._default_attributes[attribute])
         
     @property
     def dCoil(self):
+        self._check_default('dCoil')
         return self._dCoil
     
     @dCoil.setter
@@ -334,6 +342,7 @@ class CoilSet(pythonIO, BiotMethods):
         
     @property 
     def dField(self):
+        self._check_default('dField')
         return self._dField
         
     @dField.setter
@@ -342,6 +351,7 @@ class CoilSet(pythonIO, BiotMethods):
         
     @property
     def dPlasma(self):
+        self._check_default('dPlasma')
         return self._dPlasma
     
     @dPlasma.setter
@@ -351,6 +361,7 @@ class CoilSet(pythonIO, BiotMethods):
         
     @property
     def dShell(self):
+        self._check_default('dShell')
         return self._dShell
     
     @dShell.setter
@@ -440,6 +451,9 @@ class CoilSet(pythonIO, BiotMethods):
         
     def relink_mpc(self):
         if self.coil._relink_mpc:
+            # force dataframe update
+            self.coil._update_dataframe['Ic'] = True
+            self.coil._update_dataframe['It'] = True
             for attribute in self.coil._coilcurrent_attributes:
                 setattr(self.subcoil, attribute, getattr(self.coil, attribute))
             self.subcoil.current_update = self.coil.current_update
@@ -1039,21 +1053,8 @@ if __name__ == '__main__':
                  cross_section='circle')
     
     '''
-    cs.coilset_metadata = {'_default_attributes': {'dCoil': -1}}
-    cs.coil.coilframe_metadata = {'_default_attributes': {'dPlasma': 0.333}}
     cs.update_coilframe_metadata('coil', additional_columns=['R'])
     
-    cs.add_coil(7, -3, 1.5, 1.5, name='PF6', part='PF', Nt=500, It=1e6,
-                turn_section='circle', turn_fraction=0.7, dCoil=0.12)   
-    
-    cs.add_coil(7, -0.5, 1.5, 1.5, name='PF8', part='PF', Nt=500, Ic=2e3,
-                cross_section='circle', turn_section='square', dCoil=0.12)
-    
-    #cs.add_mpc(['PF6', 'PF8'])
-
-    cs.add_coil(6, -5, 1.5, 1.5, name='PF12', part='PF', Nt=600, It=5e5,
-                turn_section='circle', turn_fraction=0.7, dCoil=0.75,
-                plasma=True) 
     '''
     cs.add_coil(1.75, 0.5, 2.5, 2.5, name='PF13', part='PF', Nt=1, It=0,
                 cross_section='circle', dCoil=0.5,
@@ -1109,14 +1110,7 @@ if __name__ == '__main__':
     
     
     
-    _cs = CoilSet()
-    
-    import pickle
-    cs_p = pickle.dumps(cs.coilset)
-    __cs = pickle.loads(cs_p)
-    #_cs.append_coilset(__cs)
-    
-    _cs.coilset = __cs
+
     
     
     plt.figure()

@@ -1,5 +1,5 @@
 import numpy as np
-from pandas import DataFrame, Series
+from pandas import DataFrame
 from pandas.api.types import is_list_like
 from scipy.interpolate import interp1d
 
@@ -390,9 +390,9 @@ class BiotMethods:
     def __init__(self):
         self._biot_instances = {}
     
-    def _initialize_biot_method(self, name, method):
+    def _initialize_biot_method(self, name, method, **kwargs):
         'create biot instance and link to method'
-        setattr(self, name, self._biot_methods[method](self.subcoil)) 
+        setattr(self, name, self._biot_methods[method](self.subcoil, **kwargs)) 
         
     @property
     def biot_instances(self):
@@ -401,12 +401,16 @@ class BiotMethods:
     @biot_instances.setter
     def biot_instances(self, biot_instances):
         for biot_name in biot_instances:
-            biot_method = biot_instances[biot_name]
+            if is_list_like(biot_instances[biot_name]):
+                biot_method, biot_attributes = biot_instances[biot_name]
+            else:
+                biot_method, biot_attributes = biot_instances[biot_name], {}
             if biot_method in self._biot_methods:
                 if biot_name not in self._biot_instances:
                     self._biot_instances.update({biot_name: biot_method})
                 if not hasattr(self, biot_name):  # initialize method
-                    self._initialize_biot_method(biot_name, biot_method)
+                    self._initialize_biot_method(biot_name, biot_method, 
+                                                 **biot_attributes)
 
     @property
     def biot_attributes(self):

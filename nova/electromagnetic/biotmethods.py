@@ -3,8 +3,8 @@ from pandas import DataFrame
 from pandas.api.types import is_list_like
 from scipy.interpolate import interp1d
 
-from amigo.pyplot import plt
-from amigo.geom import length
+from nova.utilities.pyplot import plt
+from nova.utilities.geom import length
 from nova.electromagnetic.meshgrid import MeshGrid
 from nova.electromagnetic.biotsavart import BiotSet, BiotAttributes
                 

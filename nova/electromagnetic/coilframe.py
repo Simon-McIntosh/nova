@@ -3,8 +3,8 @@ from warnings import warn
 import string
 
 import numpy as np
-from pandas import DataFrame, Series, isna, concat
-from pandas.api.types import is_list_like, is_dict_like
+from pandas import DataFrame, Series, concat
+from pandas.api.types import is_list_like
 import shapely.geometry
 import shapely.affinity
 from shapely.ops import transform

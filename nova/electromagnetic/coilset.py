@@ -17,13 +17,14 @@ from shapely.strtree import STRtree
 from descartes import PolygonPatch
 from scipy.interpolate import interp1d
 
-from amigo.geom import gmd, amd
-from amigo.IO import human_format
-from amigo.pyplot import plt
-from amigo.IO import class_dir
-from amigo.IO import pythonIO
-from amigo.geom import length, xzfun
 import nova
+from nova.utilities.geom import gmd, amd
+from nova.utilities.IO import human_format
+from nova.utilities.pyplot import plt
+from nova.utilities.IO import class_dir
+from nova.utilities.IO import pythonIO
+from nova.utilities.geom import length, xzfun
+
 from nova.electromagnetic.coilframe import CoilFrame
 from nova.electromagnetic.coildata import CoilData
 from nova.electromagnetic.biotmethods import BiotMethods

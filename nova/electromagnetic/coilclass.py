@@ -1,10 +1,9 @@
-import numpy as np
 import pandas as pd
 
-import amigo.geom
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.IO.read_scenario import scenario_data
 from nova.electromagnetic.IO.read_scenario import forcefield_data
+import nova.utilities.geom
 
 
 class CoilClass(CoilSet):

@@ -4,12 +4,11 @@ import os
 import numpy as np
 import pandas as pd
 
-import amigo
-from amigo.IO import pythonIO
-from amigo.geom import rotate2D
-from amigo.pyplot import plt
-from amigo.png_tools import data_load
-from amigo.IO import class_dir
+from nova.utilities.IO import pythonIO
+from nova.utilities.geom import rotate2D
+from nova.utilities.pyplot import plt
+from nova.utilities.png_tools import data_load
+from nova.utilities.IO import class_dir
 import nep_data.geom
 from nova.electromagnetic.coilclass import CoilClass
 from nova.electromagnetic.coilset import CoilSet
@@ -552,8 +551,8 @@ class VVcoils(CoilSet):
         for location in self.centerlines:
             for part in self.centerlines[location]:
                 cl = self.centerlines[location][part]
-                L = amigo.geom.length(cl['x'], cl['y'], norm=False)[-1]
-                xfun, zfun = amigo.geom.xzfun(cl['x'], cl['y'])
+                L = nova.utilities.geom.length(cl['x'], cl['y'], norm=False)[-1]
+                xfun, zfun = nova.utilities.geom.xzfun(cl['x'], cl['y'])
                 nc = int(np.ceil(L / self.dt))
                 dx = L / nc  # coil width
                 dz = self.dt  # coil height

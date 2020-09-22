@@ -1,7 +1,8 @@
-from amigo.geom import grid
-from amigo.pyplot import plt
 from matplotlib.collections import LineCollection
 import numpy as np
+
+from nova.utilities.geom import grid
+from nova.utilities.pyplot import plt
 
 
 class MeshGrid:

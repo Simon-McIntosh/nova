@@ -4,8 +4,8 @@ from copy import deepcopy
 import pandas as pd
 import numpy as np
 
-from amigo.pyplot import plt
-from amigo.IO import class_dir
+from nova.utilities.pyplot import plt
+from nova.utilities.IO import class_dir
 from nova.electromagnetic.coilset import CoilSet
 import nep_data.geom
 

@@ -6,10 +6,10 @@ import string
 import numpy as np
 import pandas as pd
 
-from amigo.IO import class_dir
-from amigo.IO import pythonIO, readtxt
-from amigo.time import clock
-from amigo.qdafile import QDAfile
+from nova.utilities.IO import class_dir
+from nova.utilities.IO import pythonIO, readtxt
+from nova.utilities.time import clock
+from nova.utilities.qdafile import QDAfile
 import nep_data.scenario_database
 
 

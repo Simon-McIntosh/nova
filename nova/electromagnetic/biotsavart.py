@@ -2,7 +2,7 @@ import numpy as np
 
 from nova.electromagnetic.coilframe import CoilFrame
 from nova.electromagnetic.coilmatrix import CoilMatrix
-from amigo.pyplot import plt
+from nova.utilities.pyplot import plt
 
 
 class BiotAttributes:

@@ -5,9 +5,9 @@ import pandas as pd
 from scipy.interpolate import interp1d
 from astropy import units
 
-from amigo.pyplot import plt
-from amigo.geom import rdp_extract
-from amigo.geom import vector_lowpass
+from nova.utilities.pyplot import plt
+from nova.utilities.geom import rdp_extract
+from nova.utilities.geom import vector_lowpass
 from nova.electromagnetic.IO.read_waveform import read_dina
 
 

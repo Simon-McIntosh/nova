@@ -3,7 +3,7 @@ import numpy as np
 
 from nova.electromagnetic.coilgeom import ITERcoilset
 from nova.electromagnetic.IO.read_scenario import field_data
-from amigo.pyplot import plt
+from nova.utilities.pyplot import plt
 
 #hp = hpy()  # initialize memory manager
 

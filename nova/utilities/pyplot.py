@@ -3,7 +3,6 @@ from os import path
 from matplotlib import pyplot as plt
 import seaborn as sns
 import matplotlib as mpl
-import nova
 from nova.utilities.IO import class_dir
 
 from matplotlib.patches import FancyArrowPatch
@@ -160,7 +159,7 @@ class plstyle:
 
     def __init__(self, context='notebook'):
         self.reset()  # reset style
-        self.style_dir = path.join(class_dir(nova), 'style_sheets')
+        #self.style_dir = path.join(class_dir(nova), 'style_sheets')
         self.context = context
         self.sns_contex(context)
         # mpl.rcParams['figure.dpi'] = 120

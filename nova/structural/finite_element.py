@@ -1,16 +1,18 @@
-import numpy as np
-from amigo.pyplot import plt
-from scipy.sparse import csr_matrix
 from collections import OrderedDict
-from mpl_toolkits.mplot3d import Axes3D
 import itertools
-from scipy.interpolate import interp1d
-from amigo.addtext import linelabel
-from nova.coil_cage import coil_cage
-from amigo import geom
-from warnings import warn
 from itertools import count, cycle
+from warnings import warn
+
+import numpy as np
 from scipy.optimize import minimize
+from scipy.sparse import csr_matrix
+from scipy.interpolate import interp1d
+from mpl_toolkits.mplot3d import Axes3D
+
+from nova.utilities.pyplot import plt
+from nova.utilities.addtext import linelabel
+from nova.utilities import geom
+#from nova.coil_cage import coil_cage
 
 
 def delete_row_csr(mat, i):

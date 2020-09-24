@@ -1,9 +1,13 @@
-from os.path import isfile
+from os.path import isfile, join
+from pathlib import Path
+import re
+import subprocess
 
 import numpy as np
 import pandas as pd
 from scipy.interpolate import interp1d
 from astropy import units
+import docx
 
 from nova.utilities.pyplot import plt
 from nova.utilities.geom import rdp_extract
@@ -429,7 +433,7 @@ class scenario_limits:
         
     def load_data(self, folder, t='d3'):
         self.d2 = scenario_data(folder)
-        self.d3 = field_data(folder)
+        self.d3 = forcefield_data(folder)
         self.t = t
         self.normalize()
         
@@ -592,7 +596,7 @@ class scenario_data(read_dina, interpolate, operate):
         Ic (pd.Series): coil current vector
     '''
 
-    def __init__(self, folder=None, database_folder='operations',
+    def __init__(self, folder=None, database_folder='scenarios',
                  read_txt=False, extrapolate=False, sort=False,
                  additional_columns=[]):
         '''
@@ -618,7 +622,7 @@ class scenario_data(read_dina, interpolate, operate):
                                         self.additional_columns)
         if self.folder is not None:
             read_txt = kwargs.get('read_txt', self.read_txt)
-            filename = self.locate_folder('data2', folder)[0]
+            filename = self.locate_folder('*data2', folder)[0]
             filename += '_scenario_data'
             if additional_columns is None:
                 filename += '_fullset'
@@ -819,7 +823,7 @@ class forcefield_data(read_dina, interpolate):
         F (pd.DataFrame): coil force vector
     '''
 
-    def __init__(self, folder=None, database_folder='operations',
+    def __init__(self, folder=None, database_folder='scenarios',
                  read_txt=False, extrapolate=False):
         '''
         Attributes:
@@ -905,7 +909,7 @@ class forcefield_data(read_dina, interpolate):
 
 class read_scenario(read_dina):
 
-    def __init__(self, folder=None, database_folder='operations',
+    def __init__(self, folder=None, database_folder='scenarios',
                  read_txt=False, file_type='txt'):
         read_dina.__init__(self, database_folder, read_txt)  # read utilities
         if folder is not None:
@@ -914,7 +918,7 @@ class read_scenario(read_dina):
     def load_file(self, folder, verbose=True, **kwargs):
         read_txt = kwargs.get('read_txt', self.read_txt)
         file_type = kwargs.get('file_type', 'txt')
-        filename, file_type = self.locate_folder('data2', folder, file_type)
+        filename, file_type = self.locate_folder('*data2', folder, file_type)
         if read_txt or not isfile(filename + '.pk'):
             self.read_file(folder, file_type=file_type, verbose=verbose)
             self.save_pickle(filename, ['data2', 'data3'])
@@ -930,7 +934,7 @@ class read_scenario(read_dina):
             self.read_qda_file(folder)
 
     def read_txt_file(self, folder, dropnan=True):
-        filename = self.locate_file('data2.txt', folder=folder)
+        filename = self.locate_file('*data2.txt', folder=folder)
         self.data2 = self.read_csv(filename, dropnan=dropnan, split=',',
                                    dataframe=True)
         filename = self.locate_file('data3.txt', folder=folder)
@@ -938,26 +942,59 @@ class read_scenario(read_dina):
                                    dataframe=True)
 
     def read_qda_file(self, folder, dropnan=True):
-        filename = self.locate_file('data2.qda', folder=folder)
+        filename = self.locate_file('*data2.qda', folder=folder)
         self.data2 = self.read_qda(filename, dropnan=dropnan, split=',',
                                    dataframe=True)
         filename = self.locate_file('data3.qda', folder=folder)
         self.data3 = self.read_qda(filename, dropnan=dropnan, split=',',
                                    dataframe=True)
 
-
+    def upload(self, folder, **kwargs):
+        'upload DINA data to ITER cluster'
+        self.load_file(folder, **kwargs)  # load local file
+        metadata = {
+            'title': 'DINA scenario data',
+            'IDM referance': self.read_IDM(folder),
+            'folder': self.filename,
+            'date': self.date.strftime('%m/%Y')}
+        netCDFfile = join(self.filepath, 'scenario_data')
+        #self.save_netCDF(netCDFfile, ['data2', 'data3'], **metadata)
+        with open(netCDFfile+'.nc', 'w') as f:
+            f.write(f'{np.random.random(9)}')
+        print(netCDFfile+'.nc')
+        secure_hash = self.hash_file(netCDFfile+'.nc', algorithm='md5')
+        print(secure_hash)
+        # upload file to ITER cluster'
+        subprocess.run(['scp', netCDFfile+'.nc',
+                        'hpc-login.iter.org:/work/imas/shared/external/'
+                        f'assets/nova/MD5/{secure_hash}'])
+        #self.load_netCDF(netCDFfile+'.nc')
+        
+ 
+    def read_IDM(self, folder):
+        'read IDM referance from word file'
+        file = self.locate_file_type('Parameters*Data2*', 'docx', folder)[0]
+        doc = docx.Document(file)
+        for paragraph in doc.paragraphs:
+            IDM = re.search('\[(.*)\]', paragraph.text)
+            if IDM:
+                IDM = IDM.groups(1)[0]
+                break
+        return IDM
+        
 if __name__ == '__main__':
 
     # d3 = field_data(read_txt=False)
     # d3.load_folder()
     # d3.load_file('15MA DT-DINA2016-01_v1.1')
 
-    #scn = read_scenario(database_folder='operations', read_txt=False)
+    scn = read_scenario(database_folder='scenarios', read_txt=False)
     #scn.load_folder()
-    #scn.load_file(-1)
+    scn.load_file(-1)
     
+    scn.read_IDM(-1)
     
-    
+    '''
     d2 = scenario_data(read_txt=False)
     #d2.load_folder()
     d2.load_file(-1)  # read / load single file
@@ -971,6 +1008,7 @@ if __name__ == '__main__':
     d3.load_file(-1)
     
     d3.to = 'IM'
+    '''
 
     '''
     d2.ko = 100

@@ -3,8 +3,12 @@ from subprocess import Popen, PIPE
 from shlex import split
 import pickle
 import datetime
+import hashlib
 
 import numpy as np
+from pandas import DataFrame, MultiIndex
+import xarray as xr
+import netCDF4 as nc4
 
 
 def human_format(number, precision=2):
@@ -22,12 +26,18 @@ def human_format(number, precision=2):
 
 
 class pythonIO:
-
-    def save_pickle(self, filepath, attributes):
-        protocol = pickle.HIGHEST_PROTOCOL
+    
+    _illegal = [('/', '_DIV_'), ('<','_LR_'), ('>','_RR_'), 
+                ('(','_OB_'), (')','_CB_')]  # illegal netCDF symbols
+    
+    def mkdir(self, filepath):
         filedir = os.path.dirname(filepath)
         if not os.path.isdir(filedir):  # make dir
             os.mkdir(filedir)
+
+    def save_pickle(self, filepath, attributes):
+        self.mkdir(filepath)
+        protocol = pickle.HIGHEST_PROTOCOL
         with open(filepath + '.pk', mode='wb') as f:
             pickle.dump(attributes, f, protocol=protocol)
             for attribute in attributes:
@@ -39,6 +49,58 @@ class pythonIO:
             attributes = pickle.load(f)
             for attribute in attributes:
                 setattr(self, attribute, pickle.load(f))
+                
+    def netCDF_columns(self, columns, decode=False):
+        for illegal in self._illegal:
+            if decode:
+                illegal = illegal[::-1]
+            columns = [c.replace(*illegal) for c in columns]
+        return columns
+                
+    def save_netCDF(self, filepath, attributes, **metadata):
+        'convert list of dataframes (attributes) to xarrays and save as NetCDF'
+        self.mkdir(filepath)        
+        with nc4.Dataset(filepath+'.nc', 'w', format='NETCDF4') as dataset:
+            for md in metadata:
+                print(md)
+                setattr(dataset, md, metadata[md])
+            for i, attribute in enumerate(attributes):
+                dataframe = getattr(self, attribute).copy()
+                if not isinstance(dataframe, DataFrame):
+                    raise TypeError(f'attribute {type(attribute)} not DataFrame')
+                # compress multi-index    
+                if isinstance(dataframe.columns, MultiIndex):  
+                    dataframe.columns = \
+                        ['|'.join(c) for c in dataframe.columns.values]
+                    attribute += '.mi'    
+                # encode columns
+                dataframe.columns = self.netCDF_columns(dataframe.columns)
+                dataframe.to_xarray().to_netcdf(
+                    filepath+'.nc', mode='a', format='NETCDF4', group=attribute)
+            
+    def load_netCDF(self, filepath):
+        with nc4.Dataset(filepath+'.nc', 'r') as dataset:
+            print(dataset)
+            attributes = dataset.groups.keys()  # read dataset groups
+        for attribute in attributes:
+            with xr.open_dataset(filepath+'.nc', group=attribute) as xarray:
+                dataframe = xarray.to_dataframe()
+            # decode columns
+            dataframe.columns = self.netCDF_columns(dataframe.columns,
+                                                    decode=True)
+            if attribute[-3:] == '.mi':  # re-create multi-index
+                dataframe.columns = MultiIndex.from_tuples(
+                    [(c.split('|')) for c in dataframe.columns],
+                    names=('name', 'unit'))
+                attribute = attribute[:-3]
+            setattr(self, attribute, dataframe)
+            
+    def hash_file(self, file, algorithm='sha256'):
+        secure_hash = getattr(hashlib, algorithm)()
+        with open(file, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                secure_hash.update(chunk)
+        return secure_hash.hexdigest()
 
 
 def read_block(txt, string=False):

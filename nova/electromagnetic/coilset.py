@@ -203,7 +203,7 @@ class CoilSet(pythonIO, BiotMethods):
     @staticmethod
     def filepath(filename, directory=None):
         if directory is None:
-            directory = path.join(class_dir(nova), '../geom/coilsets')
+            directory = path.join(class_dir(nova), '../data/Nova/coilsets')
         return path.join(directory, filename)    
     
     def save_coilset(self, filename, directory=None):

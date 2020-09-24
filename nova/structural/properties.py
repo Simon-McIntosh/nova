@@ -1,6 +1,7 @@
 import numpy as np
-from amigo.pyplot import plt
-from amigo import geom
+
+from nova.utilities.pyplot import plt
+from nova.utilities import geom
 
 
 class second_moment(object):

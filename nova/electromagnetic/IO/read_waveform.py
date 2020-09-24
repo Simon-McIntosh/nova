@@ -2,6 +2,7 @@ from os import listdir, sep
 from os.path import join, isfile, isdir
 from datetime import datetime
 import string
+import fnmatch
 
 import numpy as np
 import pandas as pd
@@ -10,7 +11,7 @@ from nova.utilities.IO import class_dir
 from nova.utilities.IO import pythonIO, readtxt
 from nova.utilities.time import clock
 from nova.utilities.qdafile import QDAfile
-import nep_data.scenario_database
+import nova
 
 
 class read_waveform(pythonIO):
@@ -31,7 +32,7 @@ class read_waveform(pythonIO):
         self.get_folders()
 
     def get_directory(self):
-        self.directory = class_dir(nep_data.scenario_database)
+        self.directory = join(class_dir(nova), '../data/DINA')
         if self.database_folder is not None:
             self.directory = join(self.directory, self.database_folder)
 
@@ -68,8 +69,11 @@ class read_waveform(pythonIO):
 
     def locate_file_type(self, file, file_type, folder):
         file_types = ['txt', 'qda']
-        file_types.remove(file_type)
-        file_types = [file_type, *file_types]
+        if file_type in file_types:
+            file_types.remove(file_type)
+            file_types = [file_type, *file_types]
+        else:
+            file_types = [file_type]
         filepath = None
         for file_type in file_types:
             try:
@@ -113,8 +117,11 @@ class read_waveform(pythonIO):
                 raise IndexError(f'file {file_type}.{ext} not found\n'
                                  f'dir: {join(folder, subfolder)}')
         else:
+            file_type = file_type.split('.')[0]
             files = [f for f in listdir(folder) if isfile(join(folder, f))]
-        files = [f for f in files if file_type.lower() in f.lower()]
+        #files = [f for f in files if file_type.lower() in f.lower()]
+        files = [f for f in files if 
+                 fnmatch.fnmatch(f.lower().split('.')[0], file_type.lower())]
         if len(files) == 0:
             txt = '\nfile key {} not found '.format(file_type)
             txt += 'in: \n{}'.format(files)

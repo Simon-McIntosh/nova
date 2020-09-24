@@ -9,7 +9,7 @@ from nova.utilities.geom import rotate2D
 from nova.utilities.pyplot import plt
 from nova.utilities.png_tools import data_load
 from nova.utilities.IO import class_dir
-import nep_data.geom
+#import nep_data.geom
 from nova.electromagnetic.coilclass import CoilClass
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.machinedata import MachineData
@@ -673,7 +673,7 @@ if __name__ == '__main__':
     #IOdata.cc.plot(label=True, ax=plt.subplots(1, 1)[1])
     
     ITER = ITERcoilset(coils='pf', dCoil=0.2, n=2e3, 
-                       limit=[4, 8.5, -3, 3], read_txt=False)
+                       limit=[4, 8.5, -3, 3], read_txt=True)
     """
     cc = ITER.cc
     cc.scenario_filename = -2

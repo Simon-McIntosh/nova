@@ -1,8 +1,7 @@
-from guppy import hpy
 import numpy as np
 
 from nova.electromagnetic.coilgeom import ITERcoilset
-from nova.electromagnetic.IO.read_scenario import field_data
+from nova.electromagnetic.IO.read_scenario import forcefield_data
 from nova.utilities.pyplot import plt
 
 #hp = hpy()  # initialize memory manager
@@ -52,7 +51,7 @@ ITER.plot()
 
 
 '''
-d3 = field_data(read_txt=False)
+d3 = forcefield_data(read_txt=False)
 d3.load_file(-1)
 d3.to = ITER.t
 print(d3.vector)

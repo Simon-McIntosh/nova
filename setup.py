@@ -1,11 +1,10 @@
 from setuptools import setup
 
 setup(name='novastella',
-      version='0.0.1',
+      version='1.0.0',
       description='equlibrium tools',
-      url='https://github.com/twistersi/Nova',
+      url='https://git.iter.org/projects/SCEN/repos/nova/',
       author='Simon McIntosh',
-      author_email='simon.mcintosh@ukaea.uk',
+      author_email='simon.mcintosh@iter.org',
       license='MIT',
-      packages=['nova'],
-			zip_safe=False)
+      packages=['nova'], zip_safe=False)

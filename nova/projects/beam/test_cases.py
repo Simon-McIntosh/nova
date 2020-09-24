@@ -1,11 +1,12 @@
 import numpy as np
-from amigo.pyplot import plt
-from nova.finite_element import FE
-from nova.properties import second_moment
-from amigo import geom
+
+from nova.structural.finite_element import FE
+from nova.structural.properties import second_moment
+from nova.utilities import geom
+from nova.utilities.pyplot import plt
 
 
-class TB:  # test beam
+class TestBeam:  # test beam
 
     def __init__(self, N):
         self.N = N  # node number
@@ -33,7 +34,7 @@ class TB:  # test beam
         self.x = np.linspace(0, self.L, 50)
         X = np.zeros((self.N, 3))
         X[:, 0] = np.linspace(0, self.L, self.N)
-        X = geom.qrotate(X, theta, dx='y')
+        X = geom.qrotate(X, theta=theta, dx='y')
         self.fe.add_nodes(X)
         self.fe.add_elements(part_name='beam', nmat='tube')
         self.fe.update_rotation()  # check / update rotation matrix
@@ -57,7 +58,7 @@ class TB:  # test beam
         else:
             fig, ax = plt.subplots(3, 1, sharex=True, squeeze=True)
             ax[0].set_title(title)
-            D = geom.qrotate(self.fe.part['beam']['D'], -theta, dx='y')
+            D = geom.qrotate(self.fe.part['beam']['D'], theta=-theta, dx='y')
             ax[0].plot(self.fe.part['beam']['Lshp'], D[:, 2])
             ax[0].plot(self.x, v, '--')
             ax[0].set_ylabel(r'deflection')
@@ -74,7 +75,7 @@ class TB:  # test beam
 
     def test(self, case, theta=0):
         self.fe.clfe()  # clear all (mesh, BCs, constraints and loads)
-        g = geom.qrotate([0, 0, -1], theta, dx='y')[0]
+        g = geom.qrotate([0, 0, -1], theta=theta, dx='y')[0]
 
         self.bar(theta=theta)  # add nodes / elements
         v = np.zeros(np.shape(self.x))
@@ -163,7 +164,7 @@ class TB:  # test beam
             name = 'hanging beam'
             self.fe.clfe()  # clear all (mesh, BCs, constraints and loads)
             theta = 0
-            g = geom.qrotate([0, 0, -1], theta, dx='y')[0]
+            g = geom.qrotate([0, 0, -1], theta=theta, dx='y')[0]
             self.bar(theta=np.pi/2)  # rotate beam
             self.fe.add_bc('fix', 0, part='beam', ends=0)
             self.fe.add_weight(g=g)
@@ -180,7 +181,7 @@ if __name__ == '__main__':
 
     tb.fe.plot_stress()
     
-    tb.fe.plot_moment()
+    #tb.fe.plot_moment()
     #tb.fe.plot_matrix(tb.fe.stiffness(0))
     #tb.fe.plot_matrix(tb.fe.Ko)
     #tb.fe.plot_matrix(tb.fe.K)

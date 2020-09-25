@@ -1,7 +1,8 @@
 import numpy as np
-import pylab as pl
-from nova.finite_element import FE
-from nova.properties import second_moment
+
+from nova.structural.finite_element import FE
+from nova.structural.properties import second_moment
+from nova.utilities.pyplot import plt
 
 fe = FE(frame='3D')
 sm = second_moment()
@@ -44,15 +45,15 @@ fe.add_weight()  # add weight to all elements
 # fe.add_cp([1,3],dof='fix',rotate=True)
 
 fe.solve()
-fe.deform(scale=1e4)
+fe.deform(5e4)
 
 
 
 fe.plot_nodes()
-fe.plot_F(scale=5e-5)
+fe.plot_F(factor=5e-4)
 
 fe.plot_displacment()
-pl.axis('off')
+plt.axis('off')
 
 
 # fe.plot_twin()

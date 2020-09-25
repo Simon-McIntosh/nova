@@ -1,4 +1,3 @@
-from collections import OrderedDict
 import itertools
 from itertools import count, cycle
 from warnings import warn
@@ -12,7 +11,6 @@ from mpl_toolkits.mplot3d import Axes3D
 from nova.utilities.pyplot import plt
 from nova.utilities.addtext import linelabel
 from nova.utilities import geom
-#from nova.coil_cage import coil_cage
 
 
 def delete_row_csr(mat, i):
@@ -30,7 +28,7 @@ def delete_row_csr(mat, i):
     mat._shape = (mat._shape[0] - 1, mat._shape[1])
 
 
-class FE(object):
+class finiteframe(object):
 
     def __init__(self, frame='1D', nShape=11, scale_factor=1):
         self.coordinate = ['x', 'y', 'z', 'tx', 'ty', 'tz']
@@ -59,7 +57,7 @@ class FE(object):
 
     def initalise_couple(self):
         self.ncp = 0  # number of constraints
-        self.mpc = OrderedDict()  # multi-point constraint
+        self.mpc = {}  # multi-point constraint
 
     def initalize_mat(self, nmat_max=50, nsec_max=2):
         self.nmat_max = nmat_max
@@ -191,7 +189,7 @@ class FE(object):
     def initalise_mesh(self):
         self.X = []
         self.npart = 0  # part number
-        self.part = OrderedDict()  # part ordered dict
+        self.part = {}  # part ordered dict
         self.nnd = 0  # node number
         self.nel = 0  # element number
         self.el = {}
@@ -261,10 +259,9 @@ class FE(object):
 
         self.check_frame(dx)
         dl = np.linalg.norm(dx, axis=1)  # element length
-        norm = np.dot(np.matrix(dl).T, np.ones((1, 3)))
+        norm = np.dot(np.array(dl, ndmin=2).T, np.ones((1, 3)))
         dx = dx / norm  # unit length
-
-        el_dy = np.matrix(el_dy)  # element orentation
+        el_dy = np.array(el_dy, ndmin=2)  # element orentation
         if np.shape(el_dy) != np.shape(dx):
             if np.shape(el_dy)[0] == 1:  # duplicate el_dy
                 el_dy = np.dot(el_dy.T, np.ones((1, len(n)))).T
@@ -277,11 +274,10 @@ class FE(object):
         dy = np.zeros(np.shape(dx))
         for i, (dx_, dy_) in enumerate(zip(dx, el_dy)):
             dy[i, :] = dy_ - np.dot(dy_, dx_.T) * dx_
-        norm = np.dot(np.matrix(np.linalg.norm(dy, axis=1)).T, np.ones((1, 3)))
+        norm = np.dot(np.linalg.norm(dy, axis=1).reshape(-1, 1), 
+                      np.ones((1, 3)))
         dy /= norm
-        dy = np.matrix(dy)
         dz = np.cross(dx, dy)  # right hand coordinates
-        dz = np.matrix(dz)
 
         # set material properties
         if isinstance(nmat, int):  # constant sectional properties
@@ -314,7 +310,6 @@ class FE(object):
             errtxt = 'incorrect input of nmat variable'
             errtxt += 'int or str'
             raise ValueError(errtxt)
-
         self.el_append('dx', dx)  # store elements
         self.el_append('dy', dy)
         self.el_append('dz', dz)
@@ -371,7 +366,7 @@ class FE(object):
 
     def initalize_BC(self):
         self.BCdtype = [('nd', int), ('d', float)]
-        self.BC = OrderedDict()
+        self.BC = {}
         self.BC['fix'] = np.array([], dtype=self.BCdtype)  # type:[node,...]
         self.BC['pin'] = np.array([], dtype=self.BCdtype)  # type:[node,...]
         for key in self.dof:
@@ -594,7 +589,7 @@ class FE(object):
     def stiffness_spring(self, el):  # dof [u]
         L = self.el['dl'][el]
         E, A = self.get_mat_o(self.el['mat'][el])
-        k = E * A / L * np.matrix([[0, 0,  0, 0, 0,  0],
+        k = E * A / L * np.array([[0, 0,  0, 0, 0,  0],
                                    [0, 0,  0, 0, 0,  0],
                                    [0, 0,  1, 0, 0, -1],
                                    [0, 0,  0, 0, 0,  0],
@@ -605,7 +600,7 @@ class FE(object):
     def stiffness_1D(self, el):  # dof [v,rz]
         a = self.el['dl'][el] / 2
         E, Iz = self.get_mat_o(self.el['mat'][el])
-        k = E * Iz / (2 * a**3) * np.matrix([[3,   3*a,   -3,  3*a],
+        k = E * Iz / (2 * a**3) * np.array([[3,   3*a,   -3,  3*a],
                                              [3*a, 4*a**2, -3*a, 2*a**2],
                                              [-3, -3*a,    3, -3*a],
                                              [3*a, 2*a**2, -3*a, 4*a**2]])
@@ -614,7 +609,7 @@ class FE(object):
     def stiffness_2D(self, el):  # dof [u,v,rz]
         L = self.el['dl'][el]
         E, A, Iz = self.get_mat_o(self.el['mat'][el])
-        k = np.matrix([[A*E/L, 0, 0,
+        k = np.array([[A*E/L, 0, 0,
                        -A*E/L, 0, 0],
                        [0,  12*E*Iz/L**3, 6*E*Iz/L**2,
                         0, -12*E*Iz/L**3, 6*E*Iz/L**2],
@@ -632,7 +627,7 @@ class FE(object):
     def stiffness_3D(self, el):  # dof [u,v,w,rx,ry,rz]
         L = self.el['dl'][el]
         E, A, G, J, Iy, Iz = self.get_mat_o(self.el['mat'][el])
-        k = np.matrix(
+        k = np.array(
             [[A*E/L, 0, 0, 0, 0, 0,
              -A*E/L, 0, 0, 0, 0, 0],
              [0,  12*E*Iz/L**3, 0, 0, 0, 6*E*Iz/L**2,
@@ -684,15 +679,13 @@ class FE(object):
         self.T3 = np.zeros((3, 3, self.nel))
         for i, (dx, dy, dz) in enumerate(zip(dx_, dy_, dz_)):
             # direction cosines
-            self.T3[:, :, i] = np.matrix([[dx[0, 0], dx[0, 1], dx[0, 2]],
-                                          [dy[0, 0], dy[0, 1], dy[0, 2]],
-                                          [dz[0, 0], dz[0, 1], dz[0, 2]]])
+            self.T3[:, :, i] = np.array([dx, dy, dz])
 
     def rotate_matrix(self, k, el):
         T = np.zeros((2 * self.ndof, 2 * self.ndof))
         for i in range(int(2 / 3 * self.ndof)):
             T[3 * i:3 * i + 3, 3 * i:3 * i + 3] = self.T3[:, :, el]
-        k = T.T * k * T
+        k = T.T @ k @ T
         return k
 
     # 'dof','disp','load'
@@ -1041,7 +1034,7 @@ class FE(object):
     def assemble_cp_nodes(self):
         self.cp_nd = {'dr': np.array([], dtype=int),
                       'dc': np.array([], dtype=int), 'n': 0}
-        self.couple = OrderedDict()
+        self.couple = {}
         ieq = count(0)
         for name in self.mpc:
             for node in ['dr', 'dc']:

@@ -95,7 +95,8 @@ class pythonIO:
                 attribute = attribute[:-3]
             setattr(self, attribute, dataframe)
             
-    def hash_file(self, file, algorithm='sha256'):
+    @staticmethod
+    def hash_file(file, algorithm='sha256'):
         secure_hash = getattr(hashlib, algorithm)()
         with open(file, "rb") as f:
             for chunk in iter(lambda: f.read(4096), b""):

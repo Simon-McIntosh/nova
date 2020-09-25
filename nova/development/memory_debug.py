@@ -9,8 +9,8 @@ from nova.utilities.pyplot import plt
 
 
 # load ITER coilset
-ITER = ITERcoilset(coils='pf vv dir trs', dCoil=-1, dField=0.1,
-                   n=2e4, expand=0.0, levels=31,
+ITER = ITERcoilset(coils='pf vv dir trs', dCoil=0.15, dField=0.2,
+                   n=5e3, expand=0.0, levels=31,
                    read_txt=False, current_update='full')
 
 '''

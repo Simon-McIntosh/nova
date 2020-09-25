@@ -844,7 +844,7 @@ class forcefield_data(read_dina, interpolate):
         self.folder = folder
         if self.folder is not None:
             read_txt = kwargs.get('read_txt', self.read_txt)
-            filename = self.locate_folder('data3', folder)[0]
+            filename = self.locate_folder('*data3', folder)[0]
             filename += '_field_data'
             attributes = ['t', 'dt', '_to', 'interpolator', 'frame', '_vector',
                           'index']
@@ -937,7 +937,7 @@ class read_scenario(read_dina):
         filename = self.locate_file('*data2.txt', folder=folder)
         self.data2 = self.read_csv(filename, dropnan=dropnan, split=',',
                                    dataframe=True)
-        filename = self.locate_file('data3.txt', folder=folder)
+        filename = self.locate_file('*data3.txt', folder=folder)
         self.data3 = self.read_csv(filename, dropnan=dropnan, split=',',
                                    dataframe=True)
 
@@ -945,7 +945,7 @@ class read_scenario(read_dina):
         filename = self.locate_file('*data2.qda', folder=folder)
         self.data2 = self.read_qda(filename, dropnan=dropnan, split=',',
                                    dataframe=True)
-        filename = self.locate_file('data3.qda', folder=folder)
+        filename = self.locate_file('*data3.qda', folder=folder)
         self.data3 = self.read_qda(filename, dropnan=dropnan, split=',',
                                    dataframe=True)
 

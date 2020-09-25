@@ -37,7 +37,7 @@ class read_waveform(pythonIO):
             self.directory = join(self.directory, self.database_folder)
 
     def get_folders(self):
-        self.folders = [f for f in listdir(self.directory)]
+        self.folders = [f for f in listdir(self.directory) if f[0] != '.']
         self.nfolder = len(self.folders)
         files = [f for f in listdir(self.directory) if isfile(f)]
         self.files = sorted(files)
@@ -237,7 +237,7 @@ class read_dina(read_waveform):
         
     def get_folders(self):
         read_waveform.get_folders(self)
-        if self.database_folder == 'operations':
+        if self.database_folder == 'scenarios':
             self.folders = sorted(
                     self.folders, key=lambda x: f'{x.split("-")[1]}_'
                                                 f'{x.split("-")[2]}_'

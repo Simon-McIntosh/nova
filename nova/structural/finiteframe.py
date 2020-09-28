@@ -8,6 +8,7 @@ from scipy.sparse import csr_matrix
 from scipy.interpolate import interp1d
 from mpl_toolkits.mplot3d import Axes3D
 
+from nova.structural.properties import secondmoment
 from nova.utilities.pyplot import plt
 from nova.utilities.addtext import linelabel
 from nova.utilities import geom
@@ -28,9 +29,10 @@ def delete_row_csr(mat, i):
     mat._shape = (mat._shape[0] - 1, mat._shape[1])
 
 
-class finiteframe(object):
+class finiteframe(secondmoment):
 
     def __init__(self, frame='1D', nShape=11, scale_factor=1):
+        super().__init__()
         self.coordinate = ['x', 'y', 'z', 'tx', 'ty', 'tz']
         self.scale_factor = scale_factor  # displacment scale factor (plotting)
         self.nShape = nShape  # element shape function resolution

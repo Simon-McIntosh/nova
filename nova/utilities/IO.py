@@ -46,10 +46,13 @@ class pythonIO:
 
     def load_pickle(self, filepath):
         with open(filepath + '.pk', mode='rb') as f:
-            attributes = pickle.load(f)
-            for attribute in attributes:
-                setattr(self, attribute, pickle.load(f))
-                
+            try:
+                attributes = pickle.load(f)
+                for attribute in attributes:
+                    setattr(self, attribute, pickle.load(f))
+            except ValueError:
+                return True
+
     def netCDF_columns(self, columns, decode=False):
         for illegal in self._illegal:
             if decode:

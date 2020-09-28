@@ -212,7 +212,7 @@ class operate:
                                self.feature['node'].loc[index, name],
                                index, ha=ha, va=va, color='gray')
             label = name.replace('(', '').replace(')', '')
-            label = label.replace('PSI', '\psi')
+            label = label.replace('PSI', r'$\psi$')
             ax[i].set_ylabel(f'${name}$, {self.units["read"][name]}')
             ax[i].plot(self.feature['node'].t,
                        self.feature['node'].loc[:, name], ls, color=f'C{i}')
@@ -634,9 +634,10 @@ class scenario_data(read_dina, interpolate, operate):
                 self.read_file(folder, additional_columns)
                 self.save_pickle(filename, attributes)
             else:
-                self.load_pickle(filename)
-                if sorted(additional_columns) != self.additional_columns:
-                    self.read_file(filename, additional_columns)
+                if self.load_pickle(filename) or \
+                        (sorted(additional_columns) != 
+                         self.additional_columns):
+                    self.read_file(folder, additional_columns)
                     self.save_pickle(filename, attributes)
             self.update_units(['kA', 'MA'], 'A')  # scale current units
             self.update_units(['mm', 'cm'], 'm')
@@ -852,7 +853,9 @@ class forcefield_data(read_dina, interpolate):
                 self.read_file(folder)
                 self.save_pickle(filename, attributes)
             else:
-                self.load_pickle(filename)
+                if self.load_pickle(filename):
+                    self.read_file(folder)
+                    self.save_pickle(filename, attributes)
 
     def read_file(self, folder):
         scn = read_scenario(folder, self.database_folder, read_txt=False)
@@ -923,8 +926,10 @@ class read_scenario(read_dina):
             self.read_file(folder, file_type=file_type, verbose=verbose)
             self.save_pickle(filename, ['data2', 'data3'])
         else:
-            self.load_pickle(filename)
-
+            if self.load_pickle(filename):
+                self.read_file(folder, file_type=file_type, verbose=verbose)
+                self.save_pickle(filename, ['data2', 'data3'])
+                
     def read_file(self, folder, file_type='txt', verbose=True):
         if verbose:
             print(f'reading {self.filename}.{file_type}')
@@ -976,7 +981,7 @@ class read_scenario(read_dina):
         file = self.locate_file_type('Parameters*Data2*', 'docx', folder)[0]
         doc = docx.Document(file)
         for paragraph in doc.paragraphs:
-            IDM = re.search('\[(.*)\]', paragraph.text)
+            IDM = re.search(r'\[(.*)\]', paragraph.text)
             if IDM:
                 IDM = IDM.groups(1)[0]
                 break
@@ -991,6 +996,7 @@ if __name__ == '__main__':
     scn = read_scenario(database_folder='scenarios', read_txt=False)
     #scn.load_folder()
     scn.load_file(-1)
+    scn.load_file('15MA DT-DINA2020-04', read_txt=True)
     
     scn.read_IDM(-1)
     

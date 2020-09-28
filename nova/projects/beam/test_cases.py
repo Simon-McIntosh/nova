@@ -88,6 +88,8 @@ class testbeam(finiteframe):
 
 def test_simple_beam():  # simple beam
     name = 'simple beam'
+    
+    # analytic solution
     v = self.w * self.x / (24 * self.EI) *\
         (self.L**3 - 2 * self.L * self.x**2 + self.x**3)
     m = -self.w * self.x / 2 * (self.L - self.x)

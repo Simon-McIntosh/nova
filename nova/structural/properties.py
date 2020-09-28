@@ -4,7 +4,7 @@ from nova.utilities.pyplot import plt
 from nova.utilities import geom
 
 
-class second_moment(object):
+class secondmoment(object):
 
     def __init__(self):
         self.patch = []
@@ -154,17 +154,22 @@ class second_moment(object):
             y.append(p['y'])
             z.append(p['z'])
         return [y, z]
+    
+    @property
+    def section(self):
+        return {'C': self.C, 'I': self.I, 'A': self.A, 
+                'J': self.I['xx'], 'pnt': self.get_pnt()}
 
 
 if __name__ == '__main__':
 
     w, d = 0.625, 1.243
     i, o, s = 0.04, 0.19, 0.1
-    sm = second_moment()
+    sm = secondmoment()
     sm.add_shape('rect', b=d + 2 * s, h=w + i + o, dz=(i - o) / 2)
     sm.remove_shape('rect', b=d, h=w)
     sm.plot()
 
-    sm = second_moment()
+    sm = secondmoment()
     sm.add_shape('circ', r=1, ro=0.5)
     sm.plot()

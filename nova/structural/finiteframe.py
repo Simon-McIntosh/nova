@@ -369,10 +369,10 @@ class finiteframe(secondmoment):
     def initalize_BC(self):
         self.BCdtype = [('nd', int), ('d', float)]
         self.BC = {}
-        self.BC['fix'] = np.array([], dtype=self.BCdtype)  # type:[node,...]
-        self.BC['pin'] = np.array([], dtype=self.BCdtype)  # type:[node,...]
+        self.BC['fix'] = np.array([], dtype=self.BCdtype)  # type [node,...]
+        self.BC['pin'] = np.array([], dtype=self.BCdtype)  # type [node,...]
         for key in self.dof:
-            self.BC[key] = np.array([], dtype=self.BCdtype)  # type:[node,...]
+            self.BC[key] = np.array([], dtype=self.BCdtype)  # type [node,...]
 
     def set_shape_coefficents(self):
         self.S = {}
@@ -624,6 +624,7 @@ class finiteframe(secondmoment):
                        [0,  6*E*Iz/L**2, 2*E*Iz/L,
                         0, -6*E*Iz/L**2, 4*E*Iz/L]])
         k = self.rotate_matrix(k, el)  # transfer to global coordinates
+        self.k = k.copy()
         return k
 
     def stiffness_3D(self, el):  # dof [u,v,w,rx,ry,rz]
@@ -644,7 +645,7 @@ class finiteframe(secondmoment):
               0, -6*E*Iz/L**2, 0, 0, 0, 2*E*Iz/L],
              [-A*E/L, 0, 0, 0, 0, 0,
               A*E/L, 0, 0, 0, 0, 0],
-             [0, -12*E*Iz/L**3, 0, 0, 0, -6*E*Iz/L*2,
+             [0, -12*E*Iz/L**3, 0, 0, 0, -6*E*Iz/L**2,
               0,  12*E*Iz/L**3, 0, 0, 0, -6*E*Iz/L**2],
              [0, 0, -12*E*Iy/L**3, 0, 6*E*Iy/L**2, 0,
               0, 0,  12*E*Iy/L**3, 0, 6*E*Iy/L**2, 0],
@@ -654,6 +655,7 @@ class finiteframe(secondmoment):
               0, 0,  6*E*Iy/L**2, 0, 4*E*Iy/L, 0],
              [0,  6*E*Iz/L**2, 0, 0, 0, 2*E*Iz/L,
               0, -6*E*Iz/L**2, 0, 0, 0, 4*E*Iz/L]])
+        self.k = k.copy()
         k = self.rotate_matrix(k, el)  # transfer to global coordinates
         return k
 
@@ -1291,26 +1293,27 @@ class finiteframe(secondmoment):
                         self.shape['D'][el, index[1], end],
                         'o', color='gray', ms=5)
 
-    def plot_moment(self):
-        plt.figure(figsize=plt.figaspect(0.75))
-        text = linelabel(value='', postfix='', Ndiv=25)
+    def plot_moment(self, ax=None):
+        if ax is None:
+            ax = plt.subplots(1, 1)[1]
+        #text = linelabel(value='', postfix='', Ndiv=25)
         part = self.part
         # part = ['loop', 'trans_lower', 'trans_upper']
         color = cycle(range(10))
         for i, part in enumerate(part):
             ci = next(color)
             Lnorm = self.part[part]['Lshp'][-1]
-            plt.plot(self.part[part]['Lshp']/Lnorm,
+            ax.plot(self.part[part]['Lshp']/Lnorm,
                      self.part[part]['d2u'][:, 1],
                      '--', color='C{}'.format(ci))
-            plt.plot(self.part[part]['Lshp']/Lnorm,
+            ax.plot(self.part[part]['Lshp']/Lnorm,
                      self.part[part]['d2u'][:, 2],
                      '-', color='C{}'.format(ci))
-            text.add(part)
-        text.plot()
+            #text.add(part)
+        #text.plot()
         plt.despine()
-        plt.xlabel('part length')
-        plt.ylabel('part curvature')
+        ax.set_xlabel('part length')
+        ax.set_ylabel('part curvature')
 
     def plot_stress(self):
         part = self.part
@@ -1434,10 +1437,10 @@ class finiteframe(secondmoment):
 
     def plot(self, projection='xz', scale_factor=-0.2, select=[]):
         with scale(self.deform, scale_factor):
-            plt.figure()
+            #plt.figure()
             self.plot_nodes(projection=projection, select=select)
             self.plot_displacment(projection=projection, select=select)
-            # self.plot_F(projection=projection)
+            self.plot_F(projection=projection)
             plt.axis('off')
             plt.axis('equal')
 

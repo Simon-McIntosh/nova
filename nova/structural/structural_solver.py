@@ -1,6 +1,11 @@
 import numpy as np
+import matplotlib.animation as manimation
+from mpl_toolkits.mplot3d import Axes3D
+
+
+
 from amigo.pyplot import plt
-from nova.finite_element import FE, scale
+from nova.finiteframe import finiteframe, scale
 from nova.config import select
 from nova.coils import PF
 from nova.inverse import INV
@@ -10,10 +15,10 @@ from nova.structure import architect
 from nova.streamfunction import SF
 from amigo.time import clock
 from amigo import geom
-import matplotlib.animation as manimation
-from mpl_toolkits.mplot3d import Axes3D
-from blueprint.CAD.buildCAD import buildCAD
-from blueprint.CAD import coilCAD
+
+#from blueprint.CAD.buildCAD import buildCAD
+#from blueprint.CAD import coilCAD
+
 
 
 class SS:  # structural solver

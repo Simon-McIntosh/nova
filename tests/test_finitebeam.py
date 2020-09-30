@@ -48,16 +48,16 @@ class testbeam(finiteframe):
     def add_weight(self):
         finiteframe.add_weight(self, g=self.g)
         
-    def extract_model(self):
+    def extract_model(self, i=2):
         if self.name == 'axial tip point load':
             self.model = {'u': self.part['beam']['u'][:, 0]}
         elif self.name == 'vertical hanging beam':
             self.model = {'U': self.part['beam']['U'][:, 2]}
         else:
             v = geom.qrotate(self.part['beam']['D'], 
-                             theta=-self.theta, dx='y')[:, 2]  # deflection
-            m = self.EI*self.part['beam']['d2u'][:, 2]  # moment
-            s = self.EI*self.part['beam']['d3u'][:, 2]  # shear
+                             theta=-self.theta, dx='y')[:, i]  # deflection
+            m = self.EI*self.part['beam']['d2u'][:, i]  # moment
+            s = self.EI*self.part['beam']['d3u'][:, i]  # shear
             self.model = {'v': v, 'm': m, 's': s}
             
     def solve(self):
@@ -114,6 +114,25 @@ def test_simple(plot=False):
     tb.analytic['s'] = -tb.w * (tb.L/2 - tb.x)
     # assert
     tb.check()
+    if plot:
+        tb.plot()
+        
+def test_simple_xy(plot=False):  
+    tb = testbeam('simple beam')
+    # define model
+    tb.add_bc('ny', 0, part='beam', ends=0)
+    tb.add_bc('ny', -1, part='beam', ends=1)
+    finiteframe.add_weight(tb, g=[0, -1, 0])
+    tb.solve()  
+    tb.extract_model(i=0)
+    finiteframe.plot(tb, projection='xy')
+    # analytic solution
+    tb.analytic['v'] = tb.w*tb.x / (24*tb.EI) * (tb.L**3 - 2*tb.L*tb.x**2 + 
+                                                   tb.x**3)
+    tb.analytic['m'] = -tb.w*tb.x / 2 * (tb.L-tb.x)
+    tb.analytic['s'] = -tb.w * (tb.L/2 - tb.x)
+    # assert
+    #tb.check()
     if plot:
         tb.plot()
         
@@ -252,7 +271,9 @@ def test_vertical_hanging_beam(plot=False):
     return tb
     
 if __name__ == '__main__':
-    pytest.main([__file__])
+    #pytest.main([__file__])
+    
+    test_simple_xy(plot=True)
 
     #tb.plot()
     #tb.plot_stress()

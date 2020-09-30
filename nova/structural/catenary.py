@@ -122,7 +122,6 @@ class catenary(finiteframe):
                     self.add_nodal_load(nd, 'fy', f[1])
             
         finiteframe.solve(self)
-        self.plot(scale_factor=-0.2, projection='xy')
 
 
 if __name__ == '__main__':
@@ -130,12 +129,6 @@ if __name__ == '__main__':
     L, Lo = 1, 1.5
     cat = catenary(N=51)
     
-    #ax = plt.subplots(1, 1)[1]
     cat.solve('beam', L, Lo)
-    
-    #x, y = cat.X[0]-cat.D['x'], cat.X[0]-cat.D['x']
-    #
-    
-    #cat.plot(scale_factor=1, projection='xy')
-    
+    cat.plot(scale_factor=-0.2, projection='xy')
     cat.plot_moment()

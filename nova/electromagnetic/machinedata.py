@@ -4,9 +4,8 @@ from copy import deepcopy
 import pandas as pd
 import numpy as np
 
-import nova
+from nova.definitions import root_dir
 from nova.utilities.pyplot import plt
-from nova.utilities.IO import class_dir
 from nova.electromagnetic.coilset import CoilSet
 
 
@@ -20,7 +19,7 @@ class MachineData(CoilSet):
     
     def __init__(self, read_txt=False, **kwargs):
         self.read_txt = read_txt
-        self.directory = path.join(class_dir(nova), '../inputs/geometry/ITER')
+        self.directory = path.join(root_dir, 'inputs/geometry/ITER')
         CoilSet.__init__(self, **kwargs)
         
     @staticmethod

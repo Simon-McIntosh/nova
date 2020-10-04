@@ -318,11 +318,11 @@ class readtxt:
     def __exit__(self, type, value, traceback):
         self.f.close()
 
-
+'''
 def class_dir(name):
     root = list(name.__path__)[0]
     return root
-
+'''
 
 def trim_dir(check_dir):
     nlevel, dir_found = 5, False

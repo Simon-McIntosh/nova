@@ -423,7 +423,7 @@ class CoilFrame(DataFrame, CoilData):
     @staticmethod
     def _poly_circle(x, z, dx, dz):
         radius = dx / 2
-        circle = shapely.geometry.Point(x, z).buffer(radius)
+        circle = shapely.geometry.Point(x, z).buffer(radius, resolution=32)
         return shapely.geometry.Polygon(circle.exterior)
 
     @staticmethod

@@ -7,7 +7,7 @@ import fnmatch
 import numpy as np
 import pandas as pd
 
-from nova.utilities.IO import class_dir
+from nova.definitions import root_dir
 from nova.utilities.IO import pythonIO, readtxt
 from nova.utilities.time import clock
 from nova.utilities.qdafile import QDAfile
@@ -32,7 +32,7 @@ class read_waveform(pythonIO):
         self.get_folders()
 
     def get_directory(self):
-        self.directory = join(class_dir(nova), '../data/DINA')
+        self.directory = join(root_dir, 'data/DINA')
         if self.database_folder is not None:
             self.directory = join(self.directory, self.database_folder)
 

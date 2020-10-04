@@ -1,0 +1,23 @@
+name: nova
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - astropy
+  - descartes
+  - matplotlib
+  - netcdf4
+  - numpy
+  - pandas
+  - pytest
+  - python=3.8
+  - python-docx
+  - scikit-image
+  - scikit-learn
+  - scipy
+  - seaborn
+  - shapely
+  - xarray
+  - pip:
+    - pyquaternion
+    - rdp

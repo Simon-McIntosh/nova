@@ -18,18 +18,13 @@
 /dist/
 /build/
 
+# tmp folder
+/tmp/
+
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
 
 MANIFEST.in
-
-
-# Editors
-.vscode/
-.idea/
-
-# Vagrant
-.vagrant/
 
 # Mac/OSX
 .DS_Store
@@ -119,12 +114,6 @@ ipython_config.py
 
 # pyenv
 .python-version
-
-# celery beat schedule file
-celerybeat-schedule
-
-# SageMath parsed files
-*.sage.py
 
 # Environments
 .env

@@ -3,7 +3,6 @@ import pandas as pd
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.IO.read_scenario import scenario_data
 from nova.electromagnetic.IO.read_scenario import forcefield_data
-import nova.utilities.geom
 
 
 class CoilClass(CoilSet):
@@ -84,106 +83,5 @@ class CoilClass(CoilSet):
         self.t = self.d2.to  # time instance
         #self.update_plasma()
         self.Ic = self.d2.Ic.to_dict()
-
-
-if __name__ == '__main__':
-
-    
-    """
-    #cc.add_coil(4, 3, 2, 2, name='PF2', dCoil=1)
-    #cc.add_coil(6, -1, 2, 2, name='PF3', dCoil=1)
-
-    plt.plot(*cc.coil.at['PF1', 'polygon'].exterior.xy, 'C3')
-    #cc.add_plasma(1, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
-    cc.plot()
-    # cc.add_plasma(6, [1.5, 2, 2.5], 0.5, 0.2, It=-15e6/3)
-
-    cc.coil.Ic = 5
-    #cc.scenario = 100
-    #cc.solve_colocation()
-    #cc.solve_interaction(plot=True)
-    
-    #plt.plot(cc.coil.x, cc.coil.z, 'C1o')
-    """
-
-    """
-    from nova.electromagnetic.coilgeom import PFgeom
-    pf = PFgeom(dCoil=0.35)
-    cc = CoilClass(**pf.coilset)
-    
-    
-    #cc.add_coil(4, 3, 2, 2, name='PF12', dCoil=-1)
-
-    cc.plot(label=['CS', 'PF'])
-    #cc.plot_grid()
-       
-    cc.scenario_filename = -2
-    cc.scenario = 'SOB'
-    
-    cc.grid.generate_grid()
-    #cc.grid.solve_interaction()
-    cc.grid.plot_flux()
-    
-    cc.scenario = 'EOB'
-    cc.grid.plot_flux()
-    #cc.solve_interaction(plot=False)
-    
-    #cc.scenario = 'EOB'
-    #cc.solve_interaction(plot=True)
-    
-    #for t in np.arange(1, 100, 1):
-    #    cc.scenario = t
-    #    #    #cc.solve_interaction()
-    '''  
-    cc.add_targets(([1.0, 2], [4, 5.5]))
-    cc.update_interaction()
-
-    for t in np.arange(120, 130, 1):
-        cc.scenario = t
-        cc.solve_interaction()
-
-    print(cc.target['psi'])
-
-    #cc.solve_interaction(plot=True)
-    '''
-
-    '''
-    cc.generate_grid(n=0)
-    cc.add_targets(([1.0, 2], [4, 5]))
-    print(cc.target['targets'].index)
-    cc.update_interaction()
-
-    cc.add_targets(([1, 2, 3], [4, 5, 3]), append=True)
-    print(cc.target['targets'].index)
-
-    cc.update_interaction()
-
-    cc.add_targets((1, 4), append=True, update=True)
-    print(cc.target['targets'].index)
-
-    cc.add_targets(([1, 2, 3], [4, 5, 3.1]), append=True)
-    print(cc.target['targets'].index)
-    '''
-
-
-
-    '''
-    #cc.plot(label=True)
-    #cc.update_inductance()
-
-    cc.scenario_filename = -2
-    cc.scenario = 'EOF'
-    # cc.update_inductance(source_index=['Plasma'])
-
-    #cc.solve_grid(n=2e3, plot=True, update=True, expand=0.25,
-    #              nlevels=31, color='k')
-    cc.plot(subcoil=False)
-    cc.plot(label=True)
-    '''
-    """
-
-
-
-
 
 

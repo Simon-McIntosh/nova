@@ -4,12 +4,11 @@ import os
 import numpy as np
 import pandas as pd
 
+from nova.definitions import root_dir
 from nova.utilities.IO import pythonIO
 from nova.utilities.geom import rotate2D
 from nova.utilities.pyplot import plt
 from nova.utilities.png_tools import data_load
-from nova.utilities.IO import class_dir
-#import nep_data.geom
 from nova.electromagnetic.coilclass import CoilClass
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.machinedata import MachineData
@@ -113,7 +112,7 @@ class ITERdata(pythonIO):
         self.source = source
         self.dCoil = dCoil
         self.read_txt = read_txt
-        self.path = os.path.join(class_dir(nep_data.geom) + '/')
+        #self.path = os.path.join(class_dir(nep_data.geom) + '/')
         self.cc = CoilClass(dCoil=dCoil)
         self.load_coils()
 
@@ -457,7 +456,7 @@ class VVcoils(CoilSet):
         self.model = model
         self.invessel = invessel
         self.read_txt = read_txt
-        self.data_path = os.path.join(class_dir(nep_data.geom) + '/')
+        self.data_path = os.path.join(root_dir, 'data/Nova/coilsets')
         self.load_coils()
 
     def load_coils(self, **kwargs):

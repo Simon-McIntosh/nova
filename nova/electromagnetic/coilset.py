@@ -17,11 +17,10 @@ from shapely.strtree import STRtree
 from descartes import PolygonPatch
 from scipy.interpolate import interp1d
 
-import nova
+from nova.definitions import root_dir
 from nova.utilities.geom import gmd, amd
 from nova.utilities.IO import human_format
 from nova.utilities.pyplot import plt
-from nova.utilities.IO import class_dir
 from nova.utilities.IO import pythonIO
 from nova.utilities.geom import length, xzfun
 
@@ -203,7 +202,7 @@ class CoilSet(pythonIO, BiotMethods):
     @staticmethod
     def filepath(filename, directory=None):
         if directory is None:
-            directory = path.join(class_dir(nova), '../data/Nova/coilsets')
+            directory = path.join(root_dir, 'data/Nova/coilsets')
         return path.join(directory, filename)    
     
     def save_coilset(self, filename, directory=None):
@@ -1050,78 +1049,14 @@ class CoilSet(pythonIO, BiotMethods):
 
 if __name__ == '__main__':
 
-    cs = CoilSet(dCoil=3, current_update='coil', turn_fraction=0.5,
+    cs = CoilSet(dCoil=-1, current_update='coil', turn_fraction=0.5,
                  cross_section='circle')
     
-    '''
-    cs.update_coilframe_metadata('coil', additional_columns=['R'])
-    
-    '''
-    cs.add_coil(1.75, 0.5, 2.5, 2.5, name='PF13', part='PF', Nt=1, It=0,
-                cross_section='circle', dCoil=0.5,
-                plasma=False) 
-    
+    cs.add_coil(1.75, 0.5, 2.5, 2.5, name='PF13', part='PF', Nt=10, It=0,
+                cross_section='circle', turn_fraction=1,
+                dCoil=-15) 
     cs.plot(True)
     
-    #cs.add_coil(cs.coil.rms[0], 0.5, 0.1, 0.1, name='PF19', dCoil=-1,
-    #            Ic=0, Nt=1)
-        
-    '''
-    cs.add_coil([2, 2], [1, 0], 0.5, 0.3,
-                name='PF', part='PF', delim='', Nt=30, dCoil=0.1)
-    cs.add_coil(4, 0.75, 1.75, 1.8, name='PF4', part='VS3', turn_fraction=0.75,
-                Nt=350, dCoil=-1, power=False)
-    
-    cs.add_coil(5.6, 3.5, 0.52, 0.52, name='PF7', part='vvin', dCoil=0.05,
-                Ic=1e6, Nt=7)
-    cs.add_plasma(6, [1.5, 2, 2.5], 1.75, 0.4, It=-15e6)
-    cs.add_plasma(7, 3, 1.5, 0.5, It=-15e6/3)
-    
-    cs.plot(label=True)
-    '''
-    
-    '''
-    cs.add_shell([4, 6, 7, 9, 9.5, 6], [1, 1, 2, 1.5, -1, -1.5], 0.1, 
-                 dShell=1, dCoil=-1, name='vvin')
-    
-    cs.current_update = 'passive'
-    cs.It = 100
-    cs.Ip = -2000
-    '''
-        
-    #cs.Ic = 34
-    #cs.coil.Nt = 1
-
-    #cs.plot(subcoil=True)
-    #cs.grid.generate_grid(expand=0.2, n=5e4)
-    #cs.grid.plot_flux()
-    
-    '''
-    cs.target.add_targets([[1,2],[1,1]])
-    cs.target.plot()
-    cs.target.solve()
-    '''
-    
-    '''
-    cs.It = -2000
-    cs.Ip = 0
-    
-    cs.grid.plot_flux(color='C3')
-    #cs.solve_interaction()
-    
-    
-    
-
-    
-    
-    plt.figure()
-    _cs.plot(label=True)
-    #_cs.grid.generate_grid(n=500)
-    #_cs.grid.plot_grid()
-    #cs.grid.solve_interaction()
-    _cs.grid.plot_flux()
-    
-    '''
 
 
 

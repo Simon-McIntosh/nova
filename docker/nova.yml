@@ -9,6 +9,7 @@ dependencies:
   - netcdf4
   - numpy
   - pandas
+  - pip
   - pytest
   - python=3.8
   - python-docx

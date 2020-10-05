@@ -2,6 +2,7 @@ FROM continuumio/miniconda3
 
 COPY nova.yml /tmp/nova.yml 
 RUN conda env create -f /tmp/nova.yml
-RUN echo "source activate nova" > ~/.bashrc
-ENV PATH /opt/conda/envs/env/bin:$PATH
+SHELL ["conda", "run", "-n", "nova", "/bin/bash", "-c"]
+ENTRYPOINT ["conda", "run", "-n", "nova", "python"]
+CMD ["--version"]
 

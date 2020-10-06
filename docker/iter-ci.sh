@@ -1,7 +1,7 @@
 #!/bin/sh
 # initialize modules
 . /usr/share/Modules/init/sh
-module use /work/imas/etc/modules/all 
+#module use /work/imas/etc/modules/all 
 # load python and udocker
 module purge
 module unload Python

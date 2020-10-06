@@ -99,6 +99,7 @@ class read_waveform(pythonIO):
         folder = self.select_folder(folder)
         ext = file_type.split('.')[-1].lower()
         if ext in ['xls', 'qda', 'txt']:  # *.*
+            files = []
             file_type = file_type.split('.')[0].lower()
             subfolders = listdir(folder)
             for subfolder in subfolders:

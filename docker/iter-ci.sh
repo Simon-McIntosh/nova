@@ -8,9 +8,9 @@ module unload Python
 module load Python/2.7.18-GCCcore-9.3.0
 module load udocker/1.1.4-intel-2020a-Python-2.7.18
 # run docker container
-udocker --allow-root run --name nova -v ${bamboo.build.working.directory}:/nova twistersi/nova:base -m pytest --junitxml=${bamboo.build.working.directory}/tests/results.xml
+udocker --allow-root run --name nova -v **/:/nova twistersi/nova:base -m pytest --junitxml=**/tests/results.xml
 # clearup
-docker rm nova
+udocker rm nova
 
 # -o junit_suite_name=pytest
 cat ${bamboo.build.working.directory}/tests/results.xml

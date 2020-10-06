@@ -1,4 +1,4 @@
-!#/bin/sh
+#!/bin/sh
 echo $PATH
 # initialize modules
 . /usr/share/Modules/init/sh

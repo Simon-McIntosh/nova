@@ -76,6 +76,7 @@ if __name__ == '__main__':
     
     cc.plot(True)
     
+    
     cc.grid.generate_grid()
     cc.grid.plot_flux()
 '''

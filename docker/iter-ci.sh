@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # initialize modules
 . /usr/share/Modules/init/sh
 module use /work/imas/etc/modules/all 
@@ -8,8 +8,8 @@ module load GCC/9.3.0
 module load Python/2.7.18-GCCcore-9.3.0
 module load udocker/1.1.4-intel-2020a-Python-2.7.18
 # run docker container
-udocker --allow-root ps
-udocker --allow-root create --name nova_base twistersi/nova:base
+udocker ps
+#udocker --allow-root create --name nova_base twistersi/nova:base
 #udocker --allow-root run --name nova twistersi/nova:base 
 
 #-v **/:/nova twistersi/nova:base -m pytest --junitxml=**/tests/results.xml

@@ -1,12 +1,11 @@
 #!/bin/sh
 # initialize modules
 . /usr/share/Modules/init/sh
-#module use /work/imas/etc/modules/all 
+module use /work/imas/etc/modules/all 
 # load python and udocker
-module purge
-module unload Python
-module load GCC/9.3.0 
-module load Python/2.7.18-GCCcore-9.3.0
+#module unload Python
+#module load GCC/9.3.0 
+#module load Python/2.7.18-GCCcore-9.3.0
 module load udocker/1.1.4-intel-2020a-Python-2.7.18
 # run docker container
 udocker ps

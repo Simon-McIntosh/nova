@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # initialize modules
 . /usr/share/Modules/init/sh
 module use /work/imas/etc/modules/all 

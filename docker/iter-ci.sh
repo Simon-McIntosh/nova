@@ -13,7 +13,7 @@ udocker --allow-root run --name nova -v **/:/nova twistersi/nova:base -m pytest 
 udocker rm nova
 
 # -o junit_suite_name=pytest
-cat ${bamboo.build.working.directory}/tests/results.xml
+cat **/tests/results.xml
 
 # docker run --name twistersi/nova:base -v C:/Users/mcintos/Work/Code/nova:/nova nova -m pytest /nova/tests/
 

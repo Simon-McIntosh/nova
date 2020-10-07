@@ -132,7 +132,7 @@ def read_block(txt, string=False):
 
 def read_table(txt, plot=False, labels=None):
     # read 2d block of text
-    labels = ['\Delta \sigma', 'K'] if labels is None else labels
+    labels = [r'\Delta \sigma', 'K'] if labels is None else labels
     if len(labels) != 2:
         raise ValueError('2D list of labels required')
     txt = txt.split('\n')

@@ -64,8 +64,6 @@ class CoilSet(pythonIO, BiotMethods):
                         'power', 'optimize', 'plasma', 'mpc', 'Nt', 'It', 'Ic',
                         'Psi', 'Bx', 'Bz', 'B']
     
-    #_default_attributes = {}
-    
     _coildata_attributes = {'current_update': 'full'}
     
     # fast access np.array linked to CoilFrame via DataFrame
@@ -924,7 +922,7 @@ class CoilSet(pythonIO, BiotMethods):
                 pc = PatchCollection(patch, match_original=True)
                 ax.add_collection(pc)
 
-    def plot(self, subcoil=False, plasma=True, label='all', current='A',
+    def plot(self, subcoil=False, plasma=True, label='coil', current='A',
              field=True, passive=False, ax=None):
         if ax is None:
             ax = plt.gca()
@@ -935,7 +933,7 @@ class CoilSet(pythonIO, BiotMethods):
         ax.axis('equal')
         ax.axis('off')
         plt.tight_layout()   
-        if 'Plasma' in self.coil.index and plasma and 'Ic' in self.coil:
+        if  plasma and self.coil._plasma_index.sum() > 0:
             self.label_plasma(ax)
         if label or current or field:
             self.label_coil(ax, label, current, field)
@@ -946,7 +944,7 @@ class CoilSet(pythonIO, BiotMethods):
         plasma_index = self.coil._plasma_index
         x = self.coil.x[plasma_index]
         z = self.coil.z[plasma_index]
-        ax.text(x, z, f'{1e-6*self.Ip:1.1f}MA', fontsize='x-large',
+        ax.text(x, z, f'{1e-6*self.Ip:1.1f}MA', fontsize='medium',
                 ha='center', va='center', color=0.9 * np.ones(3),
                 zorder=10)
         
@@ -975,7 +973,7 @@ class CoilSet(pythonIO, BiotMethods):
                     ha='left', va='center', color='C3')      
             z += dzo
 
-    def label_coil(self, ax, label='status', current='A', field=True, 
+    def label_coil(self, ax, label='coil', current='A', field=True, 
                    coil=None, fs='medium', Nmax=20):
         if coil is None:
             coil = self.coil
@@ -987,6 +985,10 @@ class CoilSet(pythonIO, BiotMethods):
             parts = coil.part[coil.power & ~coil.plasma].unique()
         elif label == 'passive':  # power == False
             parts = coil.part[~coil.power & ~coil.plasma].unique()
+        elif label == 'coil':  # plasma == False
+            parts = coil.part[~coil.plasma].unique()
+        elif label == 'plasma':  # plasma == True
+            parts = coil.part[coil.plasma].unique()
         elif label == 'free':  # optimize == True
             parts = coil.part[coil.optimize & ~coil.plasma].unique()
         elif label == 'fix':  # optimize == False

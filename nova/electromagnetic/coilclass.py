@@ -83,5 +83,6 @@ class CoilClass(CoilSet):
         self.t = self.d2.to  # time instance
         #self.update_plasma()
         self.Ic = self.d2.Ic.to_dict()
+        self.Ip = self.d2.Ip
 
 

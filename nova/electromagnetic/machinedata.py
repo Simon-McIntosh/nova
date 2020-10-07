@@ -230,9 +230,10 @@ if __name__ == '__main__':
     machine.load_models(read_txt=True)
     machine.plot_models()
     
-    #machine.load_data()
-    #machine.plot_data()
+    machine.load_data()
+    machine.plot_data()
     
+    '''
     machine.load_coilset(part_list='trs dir', read_txt=True)
 
     machine.Ic = 20e3
@@ -241,11 +242,9 @@ if __name__ == '__main__':
     machine.grid.generate_grid()
     machine.grid.plot_flux()
     
-    
-    
     machine.read_data()
     machine.plot_data()
-    
+    '''
     
     
     '''

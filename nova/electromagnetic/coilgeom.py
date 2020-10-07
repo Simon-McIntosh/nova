@@ -1,5 +1,6 @@
 import io
 import os
+import copy
 
 import numpy as np
 import pandas as pd
@@ -26,8 +27,16 @@ class ITERcoilset(CoilClass):
         self.read_txt = read_txt
         CoilClass.__init__(self, **kwargs)
         #self.update_coilframe_metadata(
-        #    'coil', _additional_columns=['m', 'material', 'R'])    
+        #    'coil', _additional_columns=['m', 'material', 'R'])  
+        self.load_data(**kwargs)
         self.load_coilset(**kwargs)
+        
+    def load_data(self, **kwargs):
+        read_txt = kwargs.pop('read_txt', self.read_txt)
+        machine = MachineData(read_txt=read_txt)
+        machine.load_data()
+        self.data = machine.data
+        self.plot_data = machine.plot_data
 
     def load_coilset(self, **kwargs):
         read_txt = kwargs.pop('read_txt', self.read_txt)
@@ -45,7 +54,8 @@ class ITERcoilset(CoilClass):
             self._coilset['default_attributes'][attribute]
          
     def rebuild(self, coils, filename, **kwargs):
-        _rebuild = {'coilset': False, 'field': False, 'grid': False}
+        _rebuild = {'coilset': False, 'field': False, 'grid': False,
+                    'plasma': False}
         #filename, coils, kwargs = self.select_coils(**kwargs)
         if self.update('dCoil'):
             print('rebuild coilset')
@@ -62,6 +72,9 @@ class ITERcoilset(CoilClass):
         if self.grid.generate_grid(**kwargs):  
             print('rebuild grid')
             _rebuild['grid'] = True
+        if self.plasma.generate_grid(**self.plasma_kwargs(**kwargs)):
+            print('rebuild plasma')
+            _rebuild['plasma'] = True
         if np.array(_rebuild.values()).any():
             self.save_coilset(filename)
 
@@ -100,10 +113,29 @@ class ITERcoilset(CoilClass):
         self.field.solve()
         self.forcefield.solve()  # compute mutual interaction
         self.grid.generate_grid(**kwargs, regen=True)
-        #self.add_targets(targets=targets)
-        #self.update_interaction()
+        self.plasma.generate_grid(self.plasma_kwargs(**kwargs), regen=True)
         
+    def plasma_kwargs(self, **kwargs):
+        kwargs = copy.deepcopy(kwargs)
+        kwargs['limit'] = kwargs.get('plasma_limit', self.plasma_limit)
+        kwargs['n'] = kwargs.get('plasma_n', self.plasma_n)
+        kwargs['nlevels'] = kwargs.get('plasma_nlevels', self.plasma.nlevels)
+        return kwargs
         
+    @property
+    def plasma_limit(self):
+        boundary = pd.concat([self.data['firstwall'], self.data['divertor']])
+        limit = [boundary.x.min(), boundary.x.max(),
+                 boundary.z.min(), boundary.z.max()]
+        return limit
+    
+    @property 
+    def plasma_n(self):
+        limit = self.plasma_limit
+        area = (limit[1]-limit[0]) * (limit[3]-limit[2])
+        return int(area / self.dPlasma**2)
+    
+    
 class ITERdata(pythonIO):
 
     def __init__(self, dCoil=0.2, plasma=True, source='PCR', read_txt=False):

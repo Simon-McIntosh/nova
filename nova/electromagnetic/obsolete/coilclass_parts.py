@@ -5,6 +5,63 @@ Created on Tue Sep 22 09:56:04 2020
 @author: mcintos
 """
 
+    def add_plasma(self, *args, **kwargs):
+        label = kwargs.pop('label', 'Pl')  # filament prefix
+        name = kwargs.pop('name', 'Pl_0')
+        part = kwargs.pop('part', 'Plasma')
+        coil = kwargs.pop('coil', 'Plasma')
+        cross_section = kwargs.pop('cross_section', 'rectangle')
+        turn_section = kwargs.pop('turn_section', 'rectangle')
+        self.dPlasma = kwargs.pop('dPlasma', self.dPlasma)  # update dPlasma
+        iloc = [None, None]  # coil, subcoil
+        print(self.coil.part, 'Plasma' in self.coil.part)
+        if 'Plasma' in self.coil.part.values:
+            print('plasma', self.coil.part)
+            iloc = self.drop_coil(self.coil.index[self.coil.part == 'Plasma'])
+        nlist = sum([1 for arg in args if is_list_like(arg)])
+        if nlist == 0:   # add single plasma coil - mesh filaments
+            dCoil = kwargs.pop('dCoil', self.dPlasma)
+            self.add_coil(*args, 
+                          part=part, name='Plasma',
+                          dCoil=dCoil, cross_section=cross_section,
+                          turn_section=turn_section, iloc=iloc[0], 
+                          plasma=True, **kwargs)
+        else:  # add single / multiple filaments, fit coil
+            # add plasma filaments to subcoil
+            print(kwargs['It'].sum())
+            subindex = self.subcoil.add_coil(
+                    *args, label=label, part=part, coil=coil, name=name,
+                    cross_section=turn_section, iloc=iloc[1],
+                    mpc=True, plasma=True, **kwargs)
+            plasma_index = self.subcoil._plasma_index
+            print(self.subcoil.Ip_sum)
+            if not np.isclose(self.subcoil.Ip_sum, 0):  # net plasma current
+                Nt = self.subcoil.Ip / self.subcoil.Ip_sum  # filament turn number
+            else:
+                Nt = 1 / self.subcoil.nPlasma * np.ones(self.subcoil.nPlasma)
+            print(self.subcoil.Ip_sum)
+            self.subcoil.Np = Nt  # set plasma filament turn number
+            print(self.subcoil.Ip_sum)
+            xpl = self.subcoil.x[plasma_index]  # filament x-location
+            zpl = self.subcoil.z[plasma_index]  # filament z-location
+            dx = dz = np.sqrt(np.sum(self.subcoil.dx[plasma_index] *
+                                     self.subcoil.dz[plasma_index]))
+            # add plasma to coil (x_gmd, z_amd)
+            Nf = self.subcoil.nP  # number of plasma filaments
+            self.subcoil.plot()
+            print(self.subcoil.Ip.sum())
+            self.coil.add_coil(gmd(xpl, Nt), amd(zpl, Nt),
+                                dz, dx, Nf=Nf, dCoil=None,
+                                cross_section=cross_section,
+                                name='Plasma', part=part, turn_fraction=1,
+                                material='plasma', iloc=iloc[0],
+                                plasma=True, Ic=self.subcoil.Ip_sum)
+            self.coil.loc['Plasma', 'subindex'] = list(subindex)
+            # if Nf > 1:
+            #     self.inductance('Plasma', update=True)  # re-size plasma coil
+            #self.Ic = Series({'Plasma': Ip_net})  # update net current
+
+
     """
     @property
     def plasma(self):

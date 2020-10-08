@@ -1,3 +1,11 @@
+"""
+Construct coilsets for electromagnetic calculation.
+
+Coilsets constructed from a pair of CoilFrame objects derived from
+pands.DataFrames. Fast access to and from CoilFrame objects managed via the
+CoilData Class.
+"""
+
 from os import path
 import functools
 import operator
@@ -18,7 +26,7 @@ from descartes import PolygonPatch
 from scipy.interpolate import interp1d
 
 from nova.definitions import root_dir
-from nova.utilities.geom import gmd, amd
+from nova.utilities.geom import amd
 from nova.utilities.IO import human_format
 from nova.utilities.pyplot import plt
 from nova.utilities.IO import pythonIO
@@ -30,54 +38,52 @@ from nova.electromagnetic.biotmethods import BiotMethods
 
 
 class CoilSet(pythonIO, BiotMethods):
+    """
+    Instance wrapper for coilset data.
 
-    '''
-    CoilSet:
-        instance wrapper for coilset data
-
-    Attributes:
+    Attributes :
         coil (nova.CoilFrame): coil config
         subcoil (nova.CoilFrame): subcoil config
-    '''
-    
+    """
+
     # exchange coilset attributes
-    _coilset_attributes = ['default_attributes', 
+    _coilset_attributes = ['default_attributes',
                            'coilset_frames',
                            'coilset_metadata',
                            'coildata_attributes',
                            'biot_instances',
-                           'biot_attributes']  
+                           'biot_attributes']
 
     # main class attribures
     _coilset_frames = ['coil', 'subcoil']
 
     # additional_columns
     _coil_columns = ['dx', 'dz', 'dA', 'dCoil', 'nx', 'nz', 'subindex', 'part',
-                     'cross_section', 
+                     'cross_section',
                      'turn_section', 'turn_fraction', 'skin_fraction',
                      'patch', 'polygon',
                      'power', 'optimize', 'plasma', 'mpc', 'Nf', 'Nt',
                      'It', 'Ic', 'Psi', 'Bx', 'Bz', 'B']
-    
+
     _subcoil_columns = ['dx', 'dz', 'dA', 'dl_x', 'dl_z', 'coil', 'part',
-                        'cross_section', 'patch', 'polygon', 
+                        'cross_section', 'patch', 'polygon',
                         'power', 'optimize', 'plasma', 'mpc', 'Nt', 'It', 'Ic',
                         'Psi', 'Bx', 'Bz', 'B']
-    
+
     _coildata_attributes = {'current_update': 'full'}
-    
+
     # fast access np.array linked to CoilFrame via DataFrame
-    _dataframe_attributes =  ['x', 'z', 'dl', 'dt', 'rms', 'dx', 'dz',
-                              'Ic', 'It', 'Nt', 'Psi', 'Bx', 'Bz', 'B',
-                              'Fx', 'Fz', 'xFx', 'xFz', 'zFx', 'zFz', 'My']
+    _dataframe_attributes = ['x', 'z', 'dl', 'dt', 'rms', 'dx', 'dz',
+                             'Ic', 'It', 'Nt', 'Psi', 'Bx', 'Bz', 'B',
+                             'Fx', 'Fz', 'xFx', 'xFz', 'zFx', 'zFz', 'My']
 
     def __init__(self, **coilset):
         BiotMethods.__init__(self)  # initialize biotmethods
-        self.initialize_coilset()  # initialize coil and subcoil
-        self.initialize_biot()  # setup biot instances
+        self._initialize_coilset()  # initialize coil and subcoil
+        self._initialize_biot()  # setup biot instances
         self.coilset = coilset  # exchange coilset and instance attributes
 
-    def initialize_coilset(self):
+    def _initialize_coilset(self):
         self._extract_coilset_properties()
         self._initialize_default_attributes()
         coil_metadata = {'_additional_columns': self._coil_columns,
@@ -85,32 +91,43 @@ class CoilSet(pythonIO, BiotMethods):
                          '_coildata_attributes': {**self._coildata_attributes,
                                                   **{'subcoil': False}}}
         subcoil_metadata = {'_additional_columns': self._subcoil_columns,
-                            '_dataframe_attributes': 
+                            '_dataframe_attributes':
                                 self._dataframe_attributes,
-                            '_coildata_attributes': 
-                                {**self._coildata_attributes, 
+                            '_coildata_attributes':
+                                {**self._coildata_attributes,
                                  **{'subcoil': True}}}
         self.coil = CoilFrame(coilframe_metadata=coil_metadata)
         self.subcoil = CoilFrame(coilframe_metadata=subcoil_metadata)
-        
+
     def _extract_coilset_properties(self):
         self._coilset_properties = [p for p, __ in inspect.getmembers(
             CoilSet, lambda o: isinstance(o, property))]
-        
+
     def _initialize_default_attributes(self):
         self._default_attributes = {
             'dCoil': -1, 'dPlasma': 0.25, 'dShell': 0.5, 'dField': 0.2,
             'turn_fraction': 1, 'turn_section': 'circle'}
-        
-    def initialize_biot(self):
-        'specify default biot instances'
+
+    def _initialize_biot(self):
+        """Specify default biot instances."""
         self.biot_instances = {'field': 'field',
                                'forcefield': 'mutual',
-                               'plasma': 'grid',
+                               'plasma': 'plasma',
                                'grid': 'grid'}
-        
+
     @property
     def coilset(self):
+        """
+        Return dict of coilset attributes listed in self._coilset_attributes.
+
+        Property used to get and set coilset attributes to aid sterilization
+
+        Returns
+        -------
+        coilset_attributes : dict
+            Coilset attributes.
+
+        """
         coilset_attributes = {attribute: getattr(self, attribute)
                               for attribute in self._coilset_attributes}
         return coilset_attributes
@@ -118,31 +135,68 @@ class CoilSet(pythonIO, BiotMethods):
     @coilset.setter
     def coilset(self, coilset_attributes):
         for attribute_name in self._coilset_attributes:
-            if attribute_name in ['default_attributes', 'coilset_metadata', 
+            if attribute_name in ['default_attributes', 'coilset_metadata',
                                   'coildata_attributes', 'biot_attributes']:
                 default = coilset_attributes
             else:  # require attributes to be passed within attribute dict
-                default = {}  
-            setattr(self, attribute_name, 
+                default = {}
+            setattr(self, attribute_name,
                     coilset_attributes.get(attribute_name, default))
-            
-    @property 
+
+    @property
     def coildata_attributes(self):
+        """
+        Expose coildata_attributes from self.coil.
+
+        Returns
+        -------
+        coildata_attributes : dict
+            coildata attributes exposed from self.coil CoilFrame.
+
+        """
         return self.coil.coildata_attributes
-    
-    @coildata_attributes.setter 
+
+    @coildata_attributes.setter
     def coildata_attributes(self, coildata_attributes):
-        'update only - create new via coilset_metadata[_coildata_attributes]'
+        """
+        Set coildata_attriutes.
+
+        Update only.
+        Create new attributes via self.coilset_metadata[_coildata_attributes]
+
+        Parameters
+        ----------
+        coildata_attributes : dict
+            coildata_attributes.
+
+        Returns
+        -------
+        None.
+
+        """
         for attribute in self.coildata_attributes:
             if attribute in self._coilset_properties and \
                     attribute in coildata_attributes and \
-                        not hasattr(self, f'_{attribute}'):
+                    not hasattr(self, f'_{attribute}'):
                 setattr(self, attribute, coildata_attributes[attribute])
 
     def append_coilset(self, *args):
+        """
+        Append coilsets via coilset.setter.
+
+        Parameters
+        ----------
+        *args : dict
+            Coilset_attributes.
+
+        Returns
+        -------
+        None.
+
+        """
         for coilset in args:
             self.coilset = coilset
-        
+
     @property
     def default_attributes(self):
         for attribute in self._default_attributes:
@@ -150,7 +204,7 @@ class CoilSet(pythonIO, BiotMethods):
                     and hasattr(self, f'_{attribute}'):  # update
                 self._default_attributes[attribute] = getattr(self, attribute)
         return self._default_attributes
-        
+
     @default_attributes.setter
     def default_attributes(self, default_attributes):
         for attribute in default_attributes:
@@ -169,7 +223,7 @@ class CoilSet(pythonIO, BiotMethods):
             getattr(self, frame).refresh_dataframe()  # flush dataframe updates
             coilset_frames[frame] = getattr(self, frame)
         return coilset_frames
-    
+
     @coilset_frames.setter
     def coilset_frames(self, coilset_frames):
         for frame in self._coilset_frames:
@@ -177,7 +231,7 @@ class CoilSet(pythonIO, BiotMethods):
             if not coilframe.empty:
                 CoilData.__init__(coilframe)  # re-initalize coildata
                 getattr(self, frame).add_coil(coilframe)  # append coilframe
-            
+
     @property
     def coilset_metadata(self):
         'extract coilset metadata from coilset frames (coil, subcoil)'
@@ -185,7 +239,7 @@ class CoilSet(pythonIO, BiotMethods):
         for frame in self._coilset_frames:
             coilset_metadata[frame] = getattr(self, frame).coilframe_metadata
         return coilset_metadata
-        
+
     @coilset_metadata.setter
     def coilset_metadata(self, coilset_metadata):
         'update coilframe metadata'
@@ -196,19 +250,19 @@ class CoilSet(pythonIO, BiotMethods):
     def update_coilframe_metadata(self, coilframe, **coilframe_metadata):
         'update coilset metadata coilframe in [coil, subcoil]'
         getattr(self, coilframe).coilframe_metadata = coilframe_metadata
-            
+
     @staticmethod
     def filepath(filename, directory=None):
         if directory is None:
             directory = path.join(root_dir, 'data/Nova/coilsets')
-        return path.join(directory, filename)    
-    
+        return path.join(directory, filename)
+
     def save_coilset(self, filename, directory=None):
         filepath = self.filepath(filename, directory)
         self._coilset = self.coilset  # link coilset for pythonIO save
         self.save_pickle(filepath, ['_coilset'])
         del self._coilset  # delete temp variable
-        
+
     def load_coilset(self, filename, directory=None):
         filepath = self.filepath(filename, directory)
         if path.isfile(filepath + '.pk'):
@@ -229,10 +283,10 @@ class CoilSet(pythonIO, BiotMethods):
         subindex = []
         for _index in index:
             subindex.extend(self.coil.loc[_index, 'subindex'])
-        coilset_frames = {'coil': self.coil.loc[index], 
+        coilset_frames = {'coil': self.coil.loc[index],
                           'subcoil': self.subcoil.loc[subindex]}
         return CoilSet(coilset_frames=coilset_frames)
-        
+
     def categorize_coilset(self, rename=False):
         '''
         categorize coils in coil as CS or PF
@@ -252,7 +306,7 @@ class CoilSet(pythonIO, BiotMethods):
         # select PF coils
         if label['PF']:
             PF = self.coil.loc[self.coil.part == 'PF', :]
-        elif not label['CS']: 
+        elif not label['CS']:
             PF = self.coil.loc[self.coil['x'] > xCS, :]
         else:
             PF = self.coil.loc[self.coil.part != 'CS', :]
@@ -274,12 +328,12 @@ class CoilSet(pythonIO, BiotMethods):
             CS.index = [f'CS{i}' for i in range(CS.nC)]
             PF.index = [f'PF{i}' for i in range(PF.nC)]
         self.coil = concat([PF, CS, other])
-    
+
     @property
     def current_index(self):
         'display power, plasma and current_update status'
         return self.coil.current_index
-        
+
     @property
     def current_update(self):
         'display current_update status'
@@ -292,87 +346,87 @@ class CoilSet(pythonIO, BiotMethods):
             coilframe = getattr(self, frame)
             if hasattr(coilframe, 'current_update'):
                 coilframe.current_update = flag
-            
+
     def _set_current(self, value, current_column='Ic'):
         self.relink_mpc()  # relink subcoil mpc as required
         self.coil._set_current(value, current_column)
         self.subcoil._set_current(
             self.coil.Ic[self.subcoil._current_index], 'Ic')
         self.update_field()
-        
+
     def update_field(self):
         self.coil.refresh_dataframe()  # flush updates
         if self.field.nT > 0:  # maximum of coil boundary values
             frame = self.field.frame
             self.coil.loc[frame.index, frame.columns] = frame
-        
+
     def update_forcefield(self, subcoil=False):
-        
-        if subcoil and self.forcefield.reduce_target: 
+
+        if subcoil and self.forcefield.reduce_target:
             self.forcefield.solve(reduce_target=False)
-            
+
         for variable in ['Psi', 'Bx', 'Bz']:
-            setattr(self.subcoil, variable, 
+            setattr(self.subcoil, variable,
                     getattr(self.forcefield, variable))
         self.subcoil.B = \
             np.linalg.norm([self.subcoil.Bx, self.subcoil.Bz], axis=0)
         # set coil variables to maximum of subcoil bundles
-        
+
         for variable in ['Psi', 'Bx', 'Bz', 'B']:
-            setattr(self.coil, variable, 
-                    np.maximum.reduceat(getattr(self.subcoil, variable), 
+            setattr(self.coil, variable,
+                    np.maximum.reduceat(getattr(self.subcoil, variable),
                                         self.subcoil._reduction_index))
-            
+
     def _check_default(self, attribute):
         if not hasattr(self, f'_{attribute}'):
             setattr(self, f'_{attribute}', self._default_attributes[attribute])
-        
+
     @property
     def dCoil(self):
         self._check_default('dCoil')
         return self._dCoil
-    
+
     @dCoil.setter
     def dCoil(self, dCoil):
         self._dCoil = dCoil
         self._default_attributes['dCoil'] = dCoil
         self.coil._default_attributes['dCoil'] = dCoil
-        
-    @property 
+
+    @property
     def dField(self):
         self._check_default('dField')
         return self._dField
-        
+
     @dField.setter
     def dField(self, dField):
         self._dField = dField
-        
+
     @property
     def dPlasma(self):
         self._check_default('dPlasma')
         return self._dPlasma
-    
+
     @dPlasma.setter
     def dPlasma(self, dPlasma):
         self._dPlasma = dPlasma
         self._default_attributes['dPlasma'] = dPlasma
-        
+
     @property
     def dShell(self):
         self._check_default('dShell')
         return self._dShell
-    
+
     @dShell.setter
     def dShell(self, dShell):
         self._dShell = dShell
         self._default_attributes['dShell'] = dShell
         self.coil._default_attributes['dShell'] = dShell
-        
+
     @property
     def nC(self):
         'number of active coils'
         return self.coil._nC
-        
+
     @property
     def Ic(self):
         '''
@@ -384,7 +438,7 @@ class CoilSet(pythonIO, BiotMethods):
     @Ic.setter
     def Ic(self, value):
         self._set_current(value, 'Ic')
-        
+
     @property
     def It(self):
         '''
@@ -396,7 +450,7 @@ class CoilSet(pythonIO, BiotMethods):
     @It.setter
     def It(self, value):
         self._set_current(value, 'It')
-        
+
     @property
     def Ip(self):
         '''
@@ -407,46 +461,46 @@ class CoilSet(pythonIO, BiotMethods):
 
     @Ip.setter
     def Ip(self, Ip):
-        self.coil.Ip = Ip   
-        self.subcoil.Ip = Ip  
-        
+        self.coil.Ip = Ip
+        self.subcoil.Ip = Ip
+
     @property
     def Np(self):
         return self.subcoil.Np
-    
+
     @Np.setter
-    def Np(self, Np):  
+    def Np(self, Np):
         'set plasma fillament number'
         self.subcoil.Np = Np
         self.coil.Np = self.subcoil.Np.sum()
 
-    @property 
+    @property
     def power(self):
         return self.coil.power
 
-    @power.setter 
+    @power.setter
     def power(self, value):
-        self.coil.power = value 
+        self.coil.power = value
         self.subcoil.power = value
-    
-    @property 
+
+    @property
     def optimize(self):
         return self.coil.optimize
-    
-    @optimize.setter 
+
+    @optimize.setter
     def optimize(self, value):
-        self.coil.optimize = value 
+        self.coil.optimize = value
         self.subcoil.optimize = value
-     
+
     def add_coil(self, *args, iloc=None, subcoil=True, **kwargs):
         index = self.coil.add_coil(*args, iloc=iloc, **kwargs)
         if subcoil:
             self.meshcoil(index=index)
-        
+
     def add_mpc(self, index, factor=1):
         self.coil.add_mpc(index, factor)
         self.relink_mpc()
-        
+
     def relink_mpc(self):
         if self.coil._relink_mpc:
             # force dataframe update
@@ -456,7 +510,7 @@ class CoilSet(pythonIO, BiotMethods):
                 setattr(self.subcoil, attribute, getattr(self.coil, attribute))
             self.subcoil.current_update = self.coil.current_update
             self.coil._relink_mpc = False
-            
+
     def translate(self, index=None, dx=0, dz=0):
         if index is None:
             index = self.coil.index
@@ -465,7 +519,7 @@ class CoilSet(pythonIO, BiotMethods):
         self.coil.translate(index, dx, dz)
         for name in index:
             self.subcoil.translate(self.coil.loc[name, 'subindex'], dx, dz)
-            
+
     def meshcoil(self, index=None, mpc=True, **kwargs):
         coil = kwargs.pop('coil', self.coil)
         coil.generate_polygon()
@@ -481,9 +535,9 @@ class CoilSet(pythonIO, BiotMethods):
                 if key in coil:
                     coil.loc[name, key] = kwargs[key]
             if 'subindex' in coil:  # drop existing subcoils
-                if isinstance(coil.loc[name, 'subindex'], list):  
+                if isinstance(coil.loc[name, 'subindex'], list):
                     subcoil.drop(coil.loc[name, 'subindex'], inplace=True)
-            mesh = self._mesh_coil(coil.loc[name, :], mpc=mpc, 
+            mesh = self._mesh_coil(coil.loc[name, :], mpc=mpc,
                                    **kwargs)  # single coil
             subcoil_args, subcoil_kwargs = [], {}
             for var in mesh:
@@ -496,11 +550,11 @@ class CoilSet(pythonIO, BiotMethods):
             _subcoil[i].update_polygon()
             # back-propagate fillament attributes to coil
             coil.loc[name, ['Nf', 'nx', 'nz', 'dCoil']] = \
-                mesh['Nf'], mesh['nx'], mesh['nz'], mesh['dCoil'] 
+                mesh['Nf'], mesh['nx'], mesh['nz'], mesh['dCoil']
             if 'subindex' in coil:
                 coil.at[name, 'subindex'] = list(_subcoil[i].index)
         subcoil.concatenate(*_subcoil)
-        
+
     @staticmethod
     def _mesh_coil(coil, mpc=True, **kwargs):
         'mesh single coil'
@@ -537,13 +591,13 @@ class CoilSet(pythonIO, BiotMethods):
                 dCoil = (np.pi * ((dx + dz) / 4)**2 / Nt)**0.5
             else:
                 dCoil = (dx * dz / Nt)**0.5
-        elif dCoil < -1:  
+        elif dCoil < -1:
             Nf = -dCoil  # set filament number
             if coil['cross_section'] == 'circle':
                 dCoil = (np.pi * (dx / 2)**2 / Nf)**0.5
             else:
                 dCoil = (dx * dz / Nf)**0.5
-        cross_section = mesh['cross_section']       
+        cross_section = mesh['cross_section']
         nx = int(np.round(dx / dCoil))
         nz = int(np.round(dz / dCoil))
         if nx < 1:
@@ -552,7 +606,7 @@ class CoilSet(pythonIO, BiotMethods):
             nz = 1
         dx_, dz_ = dx / nx, dz / nz  # subcoil divisions
         if cross_section in ['circle', 'square', 'skin']:
-            dx_ = dz_ = np.min([dx_, dz_])  # equal aspect      
+            dx_ = dz_ = np.min([dx_, dz_])  # equal aspect
         dl_ = turn_fraction * dx_
         if cross_section == 'skin':  # update fractional thickness
             dt_ = coil['skin_fraction']
@@ -568,7 +622,7 @@ class CoilSet(pythonIO, BiotMethods):
                 sub_polygons[i*nz + j] = \
                         polygen(x_[i]+dx_/2, z_[j]+dz_/2, dl_, dt_)
         tree = STRtree(sub_polygons)
-        sub_polygons = [p for p in tree.query(coil_polygon) 
+        sub_polygons = [p for p in tree.query(coil_polygon)
                         if p.intersects(coil_polygon)]
         for sub_polygon in sub_polygons:
             p = coil_polygon.intersection(sub_polygon)
@@ -589,22 +643,22 @@ class CoilSet(pythonIO, BiotMethods):
             xm_, zm_, dl_, dt_ = x, z, dl, dt
             Nf = 1
         # constant current density
-        Nt_ = coil['Nt']*np.array(dA_) / np.sum(dA_)  
-            
+        Nt_ = coil['Nt']*np.array(dA_) / np.sum(dA_)
+
         # subcoil bundle
         mesh.update({'x': xm_, 'z': zm_, 'nx': nx, 'nz': nz,
-                     'dl': dl_, 'dt': dt_, 'Nt': Nt_, 'Nf': Nf, 
+                     'dl': dl_, 'dt': dt_, 'Nt': Nt_, 'Nf': Nf,
                      'polygon': polygon, 'cross_section': cs_,
-                     'dCoil': dCoil})  
-            
+                     'dCoil': dCoil})
+
         # subcoil moment arms
         #xo, zo = coil.loc[['x', 'z']]
         #mesh['rx'] = xm_ - xo
         #mesh['rz'] = zm_ - zo
-        
+
         # propagate current update flags to subcoil
-        for label in ['part', 'power', 'optimize', 'plasma']: 
-            if label in coil:  
+        for label in ['part', 'power', 'optimize', 'plasma']:
+            if label in coil:
                 mesh[label] = coil[label]
         mesh['Ic'] = coil['Ic']
         mesh['turn_fraction'] = turn_fraction
@@ -631,15 +685,15 @@ class CoilSet(pythonIO, BiotMethods):
                 self.subcoil.drop_coil(self.coil.loc[name, 'subindex'])
                 self.coil.drop_coil(name)
         return iloc
-    
+
     @staticmethod
     def _shlspace(segment, dt, rho, dS):
         if not is_list_like(dt):  # permit variable thickness segments
-            dt *= np.ones(np.shape(segment)[1])    
+            dt *= np.ones(np.shape(segment)[1])
         if not is_list_like(rho):  # permit variable resistivity segments
-            rho *= np.ones(np.shape(segment)[1]) 
+            rho *= np.ones(np.shape(segment)[1])
         dL = length(*segment, norm=False)  # cumulative segment length
-        L = dL[-1]  # total segment length    
+        L = dL[-1]  # total segment length
         if dS == 0:
             dS = L
         dt_min = dt.min()
@@ -684,7 +738,7 @@ class CoilSet(pythonIO, BiotMethods):
             dt[i] = dt_bar[i]  # sub-segment thickness
             dA[i] = polygon[i].area
         return x, z, dl, dt, dA, rho_bar, polygon, sub_segment, sub_rho, sub_dt
-    
+
     def add_shell(self, x, z, dt, **kwargs):
         label = kwargs.pop('label', kwargs.get('part', 'Shl'))
         dShell = kwargs.pop('dShell', self._default_attributes['dShell'])
@@ -694,12 +748,8 @@ class CoilSet(pythonIO, BiotMethods):
         rho = kwargs.pop('rho', 0)
         x, z, dl, dt, dA, rho_bar, polygon, sub_segment, sub_rho, sub_dt = \
             self._shlspace((x, z), dt, rho, dShell)
-        
-        #R[i] = resistivity_ss * 2 * np.pi * x[i] / (dx * dz)
-        #m[i] = density_ss * 2 * np.pi * x[i] * dx * dz
-                    
-        index = self.coil.add_coil(x, z, dl, dt, dA=dA, polygon=polygon, 
-                                   cross_section='shell', turn_fraction=1, 
+        index = self.coil.add_coil(x, z, dl, dt, dA=dA, polygon=polygon,
+                                   cross_section='shell', turn_fraction=1,
                                    turn_section='shell', dCoil=dCoil,
                                    power=power, label=label,
                                    delim=delim, Nt=dA, rho=rho_bar,
@@ -709,16 +759,71 @@ class CoilSet(pythonIO, BiotMethods):
         kwargs.pop('name', None)
         for i, coil in enumerate(index):
             _x, _z, _dl, _dt, _dA, _rho_bar, _polygon = \
-                self._shlspace(sub_segment[i], sub_dt[i], sub_rho[i], 
+                self._shlspace(sub_segment[i], sub_dt[i], sub_rho[i],
                                dCoil)[:-3]
-            subindex[i] = self.subcoil.add_coil(_x, _z, _dl, _dt,
-                    polygon=_polygon, coil=coil, cross_section='shell', 
-                    mpc=True, power=power, name=index[i], Nt=_dA, 
-                    rho=_rho_bar, **kwargs)
+            subindex[i] = self.subcoil.add_coil(
+                _x, _z, _dl, _dt,
+                polygon=_polygon, coil=coil, cross_section='shell',
+                mpc=True, power=power, name=index[i], Nt=_dA,
+                rho=_rho_bar, **kwargs)
             self.coil.at[index[i], 'subindex'] = subindex[i]
         self.subcoil.update_polygon()
-            
-    def add_plasma(self, *args, **kwargs):
+
+    def add_plasma(self, boundary, name='Plasma', dPlasma=None):
+        """
+        Add plasma coil to coilset and generate plasma grid.
+
+        Plasma coil inserted into coilframe with subcoils meshed accoriding
+        to dCoil and trimmed to the inital boundary curve.
+
+        Parameters
+        ----------
+        boundary : array_like or Polygon
+            External plasma boundary. Coerced as a positively oriented curve.
+            array_like
+                shape(4,) [xmin, xmax, zmin, zmax] limit bounding box
+                shape(n,2) bounding loop
+        name : str, optional
+            Plasma coil name.
+        dPlasma : float, optional
+            Plasma subcoil dimension. If None defaults to self.dPlasma
+
+
+        Returns
+        -------
+        None.
+
+        """
+        if dPlasma is not None:  # update plasma subcoil dimension
+            self.dPlasma = dPlasma
+        if not isinstance(boundary, shapely.geometry.Polygon):
+            boundary = np.array(boundary)  # to numpy array
+            if boundary.ndim == 1:   # limit bounding box
+                if len(boundary) == 4:
+                    polygon = shapely.geometry.box(*boundary[::2],
+                                                   *boundary[1::2])
+                else:
+                    raise IndexError('malformed bounding box\n'
+                                     f'boundary: {boundary}\n'
+                                     'require [xmin, xmax, zmin, zmax]')
+            elif boundary.ndim == 2 and boundary.shape[1] == 2:  # loop
+                polygon = shapely.geometry.Polygon(boundary)
+            else:
+                raise IndexError('malformed bounding loop\n'
+                                 f'shape(boundary): {boundary.shape}\n'
+                                 'require (n,2)')
+        else:
+            polygon = boundary
+        # orient polygon
+        polygon = shapely.geometry.polygon.orient(polygon, sign=1.0)
+        # construct plasma coil from polygon
+        self.add_coil(0, 0, 0, 0, polygon=polygon, cross_section='rectangle',
+                      dCoil=self.dPlasma, name=name, plasma=True,
+                      part='plasma')
+        # generate plasma grid
+        #self.plasma.generate_grid()
+
+        '''
         label = kwargs.pop('label', 'Pl')  # filament prefix
         name = kwargs.pop('name', 'Pl_0')
         part = kwargs.pop('part', 'Plasma')
@@ -734,10 +839,10 @@ class CoilSet(pythonIO, BiotMethods):
         nlist = sum([1 for arg in args if is_list_like(arg)])
         if nlist == 0:   # add single plasma coil - mesh filaments
             dCoil = kwargs.pop('dCoil', self.dPlasma)
-            self.add_coil(*args, 
+            self.add_coil(*args,
                           part=part, name='Plasma',
                           dCoil=dCoil, cross_section=cross_section,
-                          turn_section=turn_section, iloc=iloc[0], 
+                          turn_section=turn_section, iloc=iloc[0],
                           plasma=True, **kwargs)
         else:  # add single / multiple filaments, fit coil
             # add plasma filaments to subcoil
@@ -773,11 +878,27 @@ class CoilSet(pythonIO, BiotMethods):
             # if Nf > 1:
             #     self.inductance('Plasma', update=True)  # re-size plasma coil
             #self.Ic = Series({'Plasma': Ip_net})  # update net current
+        '''
 
     def cluster(self, n, eps=0.2, merge_pairs=True):
-        '''
-        cluster coils using DBSCAN algorithm
-        '''
+        """
+        Cluster coils using DBSCAN algorithm.
+
+        Parameters
+        ----------
+        n : int
+            Target cluster size.
+        eps : float, optional
+            The maximum distance between two samples for one to be considered
+            as in the neighborhood of the other. The default is 0.2.
+        merge_pairs : bool, optional
+            DESCRIPTION. The default is True.
+
+        Returns
+        -------
+        None.
+
+        """
         dbscan = DBSCAN(eps=eps, min_samples=1)
         cluster_index = dbscan.fit_predict(self.coil.loc[:, ['x', 'z']])
         cluster_index = Series(cluster_index, index=self.coil.index)
@@ -818,12 +939,12 @@ class CoilSet(pythonIO, BiotMethods):
                         for p0, p1 in zip(polys[::2], polys[1::2]):
                             poly_pairs.append(
                                     shapely.geometry.MultiPolygon(
-                                    [p0, p1]).minimum_rotated_rectangle)
+                                        [p0, p1]).minimum_rotated_rectangle)
                         if len(polys) % 2 == 1:  # append last
                             poly_pairs.append(polys[-1])
                         polys = poly_pairs
                     polygon = shapely.geometry.MultiPolygon(polys)
-            elif key not in self.coil._required_columns:  
+            elif key not in self.coil._required_columns:
                 # take referance
                 kwargs[key] = referance_coil[key]
         # extract current coil / subcoil locations
@@ -847,7 +968,7 @@ class CoilSet(pythonIO, BiotMethods):
         # update current
         self.forcefield.solve()
         self.Ic = {name: Ic}
-        
+
     def rename(self, index):
         self.coil.rename(index=index, inplace=True)  # rename coil
         for name in index:  # link subcoil
@@ -859,7 +980,7 @@ class CoilSet(pythonIO, BiotMethods):
     def patch_coil(coil, overwrite=False, patchwork_factor=0.15, **kwargs):
         # call on-demand
         part_color = {'VS3': 'C0', 'VS3j': 'gray', 'CS': 'C0', 'PF': 'C0',
-                      'trs': 'C2', 'vv': 'C3', 'vvin': 'C3', 'vvout': 'C3', 
+                      'trs': 'C2', 'vv': 'C3', 'vvin': 'C3', 'vvout': 'C3',
                       'bb': 'C7',
                       'plasma': 'C4', 'Plasma': 'C4',
                       'cryo': 'C5'}
@@ -890,7 +1011,7 @@ class CoilSet(pythonIO, BiotMethods):
                 if patchwork_factor != 0:
                     CoilSet.patchwork(patch[i][j], patchwork_factor)
         coil.loc[:, 'patch'] = np.asarray(patch, object)
-        
+
     @staticmethod
     def patchwork(patch, factor):
         'alternate facecolor lightness by +- factor'
@@ -900,7 +1021,7 @@ class CoilSet(pythonIO, BiotMethods):
         c = colorsys.hls_to_rgb(
                 c[0], max(0, min(1, (1 + factor) * c[1])), c[2])
         patch.set_facecolor(c)
-        
+
 
     def plot_coil(self, coil, alpha=1, ax=None, passive=False, **kwargs):
         if ax is None:
@@ -932,7 +1053,7 @@ class CoilSet(pythonIO, BiotMethods):
             self.plot_coil(self.coil, passive=passive, ax=ax)
         ax.axis('equal')
         ax.axis('off')
-        plt.tight_layout()   
+        plt.tight_layout()
         if  plasma and self.coil._plasma_index.sum() > 0:
             self.label_plasma(ax)
         if label or current or field:
@@ -947,7 +1068,7 @@ class CoilSet(pythonIO, BiotMethods):
         ax.text(x, z, f'{1e-6*self.Ip:1.1f}MA', fontsize='medium',
                 ha='center', va='center', color=0.9 * np.ones(3),
                 zorder=10)
-        
+
     def label_gaps(self, ax=None):
         coil_index = []
         for end in ['L', 'U']:
@@ -962,18 +1083,18 @@ class CoilSet(pythonIO, BiotMethods):
             drs = 2/3*dx
             ax.text(x + drs, z, f'Coil {i}',
                     ha='left', va='center', color=0.2 * np.ones(3))
-        xo, zo = self.coil.loc[coil_index[0], ['x', 'z']]  
-        z1 = self.coil.loc[coil_index[-1], 'z']  
+        xo, zo = self.coil.loc[coil_index[0], ['x', 'z']]
+        z1 = self.coil.loc[coil_index[-1], 'z']
         dzo = (z1-zo) / (len(coil_index) - 1)
         z = zo - dzo/2
         for i in range(7):
             ax.text(x - drs, z, f'{gap_index[i]}-{gap_index[i+1]}',
                     ha='right', va='center', color='C3')
             ax.text(x + drs, z, f'Gap {i}',
-                    ha='left', va='center', color='C3')      
+                    ha='left', va='center', color='C3')
             z += dzo
 
-    def label_coil(self, ax, label='coil', current='A', field=True, 
+    def label_coil(self, ax, label='coil', current='A', field=True,
                    coil=None, fs='medium', Nmax=20):
         if coil is None:
             coil = self.coil
@@ -998,15 +1119,15 @@ class CoilSet(pythonIO, BiotMethods):
                 label = [label]
             parts = self.coil.part.unique()
             parts = [_part for _part in label if _part in parts]
-        parts = list(parts)    
+        parts = list(parts)
         N = {p: sum(coil.part == p) for p in parts}
         # referance vertical length scale
         dz_ref = np.diff(ax.get_ylim())[0] / 100
-        nz = np.sum(np.array([parts != False, current != None, 
+        nz = np.sum(np.array([parts != False, current != None,
                               field != False]))
         if nz == 1:
             dz_ref = 0
-        ztext = {name: 0 for name, value 
+        ztext = {name: 0 for name, value
                  in zip(['label', 'current', 'field'],
                         [label, current, field]) if value}
         for name, dz in zip(ztext, nz*dz_ref * np.linspace(1, -1, nz)):
@@ -1014,7 +1135,7 @@ class CoilSet(pythonIO, BiotMethods):
         for name, part in zip(coil.index, coil.part):
             if part in parts and N[part] < Nmax:
                 x, z = coil.loc[name, 'x'], coil.loc[name, 'z']
-                dx = coil.loc[name, 'dx'] 
+                dx = coil.loc[name, 'dx']
                 drs = 2/3*dx * np.array([-1, 1])
                 if coil.part[name] == 'CS':
                     drs_index = 0
@@ -1023,8 +1144,8 @@ class CoilSet(pythonIO, BiotMethods):
                     drs_index = 1
                     ha = 'left'
                 # label coil
-                ax.text(x + drs[drs_index], z + ztext['label'], 
-                        name, fontsize=fs, ha=ha, va='center', 
+                ax.text(x + drs[drs_index], z + ztext['label'],
+                        name, fontsize=fs, ha=ha, va='center',
                         color=0.2 * np.ones(3))
                 if current:
                     if current == 'Ic' or current == 'A':  # line current
@@ -1034,7 +1155,7 @@ class CoilSet(pythonIO, BiotMethods):
                         unit = 'At'
                         Ilabel = coil.loc[name, 'It']
                     else:
-                        raise IndexError(f'current {current} not in ' +\
+                        raise IndexError(f'current {current} not in '
                                          '[Ic, A, It, AT]')
                     txt = f'{human_format(Ilabel, precision=1)}{unit}'
                     ax.text(x + drs[drs_index], z + ztext['current'], txt,
@@ -1046,24 +1167,16 @@ class CoilSet(pythonIO, BiotMethods):
                     ax.text(x + drs[drs_index], z + ztext['field'], txt,
                             fontsize=fs, ha=ha, va='center',
                             color=0.2 * np.ones(3))
-                    
-        
+
 
 if __name__ == '__main__':
 
     cs = CoilSet(dCoil=-1, current_update='coil', turn_fraction=0.5,
                  cross_section='circle')
-    
+
     cs.add_coil(1.75, 0.5, 2.5, 2.5, name='PF13', part='PF', Nt=10, It=0,
                 cross_section='circle', turn_fraction=1,
-                dCoil=-15) 
+                dCoil=-15)
+
+    cs.add_plasma([1, 3, 2, 3])
     cs.plot(True)
-    
-
-
-
-
-
-
-
-

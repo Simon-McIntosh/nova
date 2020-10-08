@@ -27,10 +27,10 @@ class ITERcoilset(CoilClass):
         self.read_txt = read_txt
         CoilClass.__init__(self, **kwargs)
         #self.update_coilframe_metadata(
-        #    'coil', _additional_columns=['m', 'material', 'R'])  
+        #    'coil', _additional_columns=['m', 'material', 'R'])
         self.load_data(**kwargs)
         self.load_coilset(**kwargs)
-        
+
     def load_data(self, **kwargs):
         read_txt = kwargs.pop('read_txt', self.read_txt)
         machine = MachineData(read_txt=read_txt)
@@ -52,12 +52,11 @@ class ITERcoilset(CoilClass):
     def update(self, attribute):
         return getattr(self, attribute) != \
             self._coilset['default_attributes'][attribute]
-         
+
     def rebuild(self, coils, filename, **kwargs):
         _rebuild = {'coilset': False, 'field': False, 'grid': False,
                     'plasma': False}
-        #filename, coils, kwargs = self.select_coils(**kwargs)
-        if self.update('dCoil'):
+        if self.update('dCoil') or self.update('dPlasma'):
             print('rebuild coilset')
             self.drop_coil()  # clear
             self.build_coilset(coils, **kwargs)  # rebuild
@@ -65,16 +64,16 @@ class ITERcoilset(CoilClass):
         if self.update('dField'):
             print('rebuild field targets')
             self.field.target.drop_coil()  # clear
-            self.field.add_target(self.coil, ['CS', 'PF'], 
+            self.field.add_target(self.coil, ['CS', 'PF'],
                                   dField=self.dField)
             self.field.solve()
             _rebuild['field'] = True
-        if self.grid.generate_grid(**kwargs):  
+        if self.grid.generate_grid(**kwargs):
             print('rebuild grid')
             _rebuild['grid'] = True
-        if self.plasma.generate_grid(**self.plasma_kwargs(**kwargs)):
-            print('rebuild plasma')
-            _rebuild['plasma'] = True
+        #if self.plasma.generate_grid(**self.plasma_kwargs(**kwargs)):
+        #    print('rebuild plasma')
+        #    _rebuild['plasma'] = True
         if np.array(_rebuild.values()).any():
             self.save_coilset(filename)
 
@@ -83,7 +82,7 @@ class ITERcoilset(CoilClass):
         if not pd.api.types.is_list_like(coils):
             coils = coils.replace('_', ' ')
             coils = coils.split()
-        coils = [c for c in coils 
+        coils = [c for c in coils
                  if c in ['pf', 'vs', 'vsj', 'vv', 'trs', 'dir']]
         coils = list(np.unique(np.sort(coils)))
         if 'vs' in coils and 'vsj' in coils:
@@ -92,14 +91,13 @@ class ITERcoilset(CoilClass):
         return filename, coils, kwargs
 
     def build_coilset(self, coils, **kwargs):
-        # targets = kwargs.get('targets', {})  # data extraction targets
         if 'pf' in coils:  # pf coilset
             self.append_coilset(PFgeom(VS=False, dCoil=self.dCoil,
                                        source='PCR').coilset)
         if 'vsj' in coils or 'vs' in coils:  # vs coils with/without ss jacket
             jacket = True if 'vsj' in coils else False
-            self.append_coilset(VSgeom(jacket=jacket).coilset)  
-            
+            self.append_coilset(VSgeom(jacket=jacket).coilset)
+
         if any(coil in ['vv', 'trs', 'dir'] for coil in coils):
             machine = MachineData(dCoil=self.dCoil, read_txt=True)
             if 'vv' in coils:  # vv coilset (inner, outer, and trs)
@@ -109,33 +107,21 @@ class ITERcoilset(CoilClass):
             if 'dir' in coils:
                 machine.load_coilset(part_list='dir')
             self.append_coilset(machine.coilset)
+        # build plasma
+        boundary = pd.concat([self.data['firstwall'], self.data['divertor']])
+        self.add_plasma(boundary)
+        # generate biot objects
         self.field.add_target(self.coil, ['CS', 'PF'], dField=self.dField)
         self.field.solve()
         self.forcefield.solve()  # compute mutual interaction
         self.grid.generate_grid(**kwargs, regen=True)
-        self.plasma.generate_grid(self.plasma_kwargs(**kwargs), regen=True)
-        
-    def plasma_kwargs(self, **kwargs):
-        kwargs = copy.deepcopy(kwargs)
-        kwargs['limit'] = kwargs.get('plasma_limit', self.plasma_limit)
-        kwargs['n'] = kwargs.get('plasma_n', self.plasma_n)
-        kwargs['nlevels'] = kwargs.get('plasma_nlevels', self.plasma.nlevels)
-        return kwargs
-        
-    @property
-    def plasma_limit(self):
-        boundary = pd.concat([self.data['firstwall'], self.data['divertor']])
-        limit = [boundary.x.min(), boundary.x.max(),
-                 boundary.z.min(), boundary.z.max()]
-        return limit
-    
-    @property 
-    def plasma_n(self):
-        limit = self.plasma_limit
-        area = (limit[1]-limit[0]) * (limit[3]-limit[2])
-        return int(area / self.dPlasma**2)
-    
-    
+
+
+        #self.plasma.generate_grid(**self.plasma_kwargs(**kwargs), regen=True)
+
+
+
+
 class ITERdata(pythonIO):
 
     def __init__(self, dCoil=0.2, plasma=True, source='PCR', read_txt=False):
@@ -369,7 +355,7 @@ class PFgeom(CoilSet):  # PF/CS coilset
         columns['N,'] = 'Nt'
         data = data.rename(columns=columns)
         part = ['CS' if 'CS' in name else 'PF' for name in data.index]
-        data.rename(columns={'dx': 'dl', 'dz': 'dt'}, inplace=True)        
+        data.rename(columns={'dx': 'dl', 'dz': 'dt'}, inplace=True)
         coil = self.coil.get_coil(data, material='steel',
                                   cross_section='rectangle', part=part)
         #coil = self.cc.categorize_coilset(coil, rename=True)
@@ -385,13 +371,13 @@ class VSgeom(CoilSet):  # VS coil class
     def __init__(self, invessel=True, jacket=True):
         CoilSet.__init__(self)
         self.add_conductor(invessel=invessel)
-        
+
         reindex = {'LVS0-LVS3': 'LVS', 'UVS0-UVS3': 'UVS'}
         if jacket:
             self.add_jacket()  # add steel jacket
             reindex = {**reindex, 'LVSj0-LVSj3': 'LVSj', 'UVSj0-UVSj3': 'UVSj'}
         # cluster upper and lower coils and jackets
-        self.cluster(4, merge_pairs=False)  
+        self.cluster(4, merge_pairs=False)
         self.rename(index=reindex)
         self.coil.add_mpc(['LVS', 'UVS'], -1)  # link vs turns
         self.extract()
@@ -432,7 +418,7 @@ class VSgeom(CoilSet):  # VS coil class
                 subname = f'{name}{i}'
                 self.add_coil(
                     x[0], x[1], d, dt, dCoil=0, name=subname,
-                    cross_section='skin',turn_section='skin', 
+                    cross_section='skin',turn_section='skin',
                     skin_fraction=dt, material='copper',part='VS3',
                     Nt=1)
                 R = resistivity_cu * 2 * np.pi * x[0] / acs_turn
@@ -602,10 +588,10 @@ class VVcoils(CoilSet):
                     m[i] = density_ss * 2 * np.pi * x[i] * dx * dz
                     name[i] = f'{part}{i+io}'
                 self.add_coil(x, z, dx, dz, R=R, name=name, part=part,
-                                 cross_section='square', 
+                                 cross_section='square',
                                  turn_section='square',
                                  m=m, material='steel', power=False)
-        #self.cluster(20) 
+        #self.cluster(20)
 
 class elm_coils:
 
@@ -702,41 +688,41 @@ if __name__ == '__main__':
     #IOdata = ITERdata(plasma=True, dCoil=-1, source='baseline', read_txt=False)
     #IOdata.compare()
     #IOdata.cc.plot(label=True, ax=plt.subplots(1, 1)[1])
-    
-    ITER = ITERcoilset(coils='pf', dCoil=0.2, n=2e3, 
+
+    ITER = ITERcoilset(coils='pf', dCoil=0.2, n=2e3,
                        limit=[4, 8.5, -3, 3], read_txt=True)
     """
     cc = ITER.cc
     cc.scenario_filename = -2
-   
+
     #cs.add_coil(6, -3, 1.5, 1.5, name='PF16', part='PF', Nt=600, It=5e5,
     #            turn_section='circle', turn_fraction=0.7, dCoil=0.75)
     cc.scenario = 'IM'
     #cc.scenario = 'SOP'
-    
-    
-    
+
+
+
     #cs.current_update = 'passive'
     #cc.Ic = {f'PF{i}': 0 for i in [2, 3, 4]}
-    
+
     plt.set_aspect(1.2)
     cc.plot(label=['PF', 'CS'])
-    
+
     #cc.grid.plot_flux()
-    
+
     #cc.grid.plot_field()
-    
+
     '''
     from nova.streamfunction import SF
-    
-    sf = SF(eqdsk={'x': cc.grid.x, 'z': cc.grid.z, 
+
+    sf = SF(eqdsk={'x': cc.grid.x, 'z': cc.grid.z,
                    'psi': cc.grid.Psi})
     sf.contour(ax=plt.gca(), separatrix=True, plot_points=True)
     '''
-    
+
     #vs = VSgeom(jacket=True).cs
     #vs.plot()
-    
+
     #vv = VVcoils(model='full', read_txt=True).cs
     #vv.plot()
 

@@ -7,50 +7,50 @@ from nova.utilities.pyplot import plt
 from nova.utilities.geom import length
 from nova.electromagnetic.meshgrid import MeshGrid
 from nova.electromagnetic.biotsavart import BiotSet, BiotAttributes
-                
+
 
 class Mutual(BiotSet, BiotAttributes):
-    
+
     _biot_attributes = []
     _default_biot_attributes = {}
-    
+
     def __init__(self, subcoil, **mutual_attributes):
-        BiotSet.__init__(self, source=subcoil, target=subcoil, 
+        BiotSet.__init__(self, source=subcoil, target=subcoil,
                          **mutual_attributes)
 
 
 class Probe(BiotSet, BiotAttributes):
 
     'probe interaction methods and data'
-    
+
     _biot_attributes = []
     _default_biot_attributes = {}
-    
+
     def __init__(self, subcoil, **probe_attributes):
         BiotSet.__init__(self, source=subcoil, **probe_attributes)
-        
+
     def add_target(self, *args, **kwargs):
         self.target.add_coil(*args, name='Target', delim='', **kwargs)
-    
+
     def plot(self, ax=None, **kwargs):
         if ax is None:
-            ax = plt.gca() 
+            ax = plt.gca()
         ls = kwargs.pop('ls', '.')
         color = kwargs.pop('color', 'C3')
         ax.plot(self.target.x, self.target.z, ls, color=color, **kwargs)
-        
-        
+
+
 class Field(Probe):
-    
+
     'field values imposed on coil boundaries - derived from probe class'
-    
+
     _biot_attributes = ['target', '_coil_index']
-    _default_biot_attributes = {'target_turns': False,  # include target turns 
+    _default_biot_attributes = {'target_turns': False,  # include target turns
                                 'reduce_target': False}  # sum-reduce target
-    
+
     def __init__(self, subcoil, **field_attributes):
         Probe.__init__(self, subcoil, **field_attributes)
-        
+
     def add_target(self, coil, parts, dField=0.5):
         'add field probes spaced around each coil perimiter'
         if not is_list_like(parts):
@@ -74,52 +74,52 @@ class Field(Probe):
                         polygon[f'interp{attr}'] = \
                             interp1d(polygon['_L'], polygon[f'_{attr}'])
                         dL = [polygon[f'interp{attr}'](
-                            np.linspace(polygon['_L'][i], polygon['_L'][i+1], 
+                            np.linspace(polygon['_L'][i], polygon['_L'][i+1],
                                 1+int(np.diff(polygon['_L'][i:i+2])[0]/_dL),
-                                endpoint=False)) 
+                                endpoint=False))
                              for i in range(nPoly-1)]
                         polygon[attr] = np.concatenate(dL).ravel()
-                self.target.add_coil(polygon['x'], polygon['z'], 
-                                     label='Field', delim='', 
-                                     coil=index, mpc=True) 
-   
+                self.target.add_coil(polygon['x'], polygon['z'],
+                                     label='Field', delim='',
+                                     coil=index, mpc=True)
+
     @property
     def frame(self):
         return DataFrame(
-            np.maximum.reduceat(self.B, self.target._reduction_index), 
+            np.maximum.reduceat(self.B, self.target._reduction_index),
             index=self._coil_index, columns=['B'])
-        
-    
+
+
 class Colocate(Probe):
-    
+
     'colocation probes - used by inverse (nova.design)'
-    
+
     _biot_attributes = ['label', 'x', 'z', 'value',
-                        'nx', 'nz', 'd_dx', 'd_dz',  
+                        'nx', 'nz', 'd_dx', 'd_dz',
                         'factor', 'weight']
-        
+
     def __init__(self, subcoil, **colocate_attributes):
         Probe.__init__(self, subcoil, **colocate_attributes)
-        
+
     def add_targets(self, *args, **kwargs):
         '''
-        add colocation points 
-        
+        add colocation points
+
         len(args) == 1 (DataFrame or dict): colocation points as frame
         len(args) == fix.ncol (float or array): colocation points as args
         len(args) == 0
-        
+
             (DataFrame or fix.columns): fix data points
         kwargs:
             (float): alternate input method
         '''
-        default = {'label': 'Psi', 'x': 0., 'z': 0., 
-                   'value': 0., 'd_dx': 0., 'd_dz': 0., 
+        default = {'label': 'Psi', 'x': 0., 'z': 0.,
+                   'value': 0., 'd_dx': 0., 'd_dz': 0.,
                    'nx': 0., 'nz': 0., 'factor': 1., 'weight': 1.}
         if len(args) == 1:  # as frame
-            target = args[0]   
+            target = args[0]
         else:  # as args and kwargs
-            target = {key: value 
+            target = {key: value
                       for key, value in zip(self._target_attributes, args)}
             for key in kwargs:
                 target[key] = kwargs[key]
@@ -134,17 +134,17 @@ class Colocate(Probe):
         for nhat in ['nx', 'nz']:
             target.loc[target.index[norm != 0], nhat] /= norm[norm != 0]
         Probe.add_targets(self, target)  # append Biot colocation targets
-        
+
     def update_targets(self):
         'update targets.value from Psi and/or field'
         psi_index = ['Psi' in l for l in self.targets.label]
         self.targets.loc[psi_index, 'value'] = self.Psi[psi_index]
-        
+
     def set_weight(self, index, gradient):
         index &= (gradient > 0)  # ensure gradient > 0
         self.targets.loc[index, 'weight'] = 1 / gradient[index]
-            
-    def update_weight(self):        
+
+    def update_weight(self):
         'update colocation weight based on inverse of absolute gradient'
         gradient = self.targets.loc[:, ['d_dx', 'd_dz']].to_numpy()
         normal = self.targets.loc[:, ['nx', 'nz']].to_numpy()
@@ -167,19 +167,19 @@ class Colocate(Probe):
         # not field or Psi_bndry (separatrix)
         mean_index = [not field and not bndry for field, bndry in zip(
                     field_index, bndry_index)]
-        
+
         self.targets.loc[mean_index, 'weight'] = mean_weight
-        self.wsqrt = np.sqrt(self.targets.factor * 
+        self.wsqrt = np.sqrt(self.targets.factor *
                              self.targets.weight)
         self.wsqrt /= np.mean(self.wsqrt)  # normalize weight
-        
-        
+
+
     def plot_colocate(self, tails=True):
         self.update_weight()
-        
+
         style = DataFrame(index=['color', 'marker', 'markersize',
                                  'markeredgewidth'])
-        
+
         plt.plot(self.colocate)
         '''
             psi, Bdir, Bxz = [], [], []
@@ -234,22 +234,22 @@ class Colocate(Probe):
                              color=color, linewidth=2)
             plt.axis('equal')
         '''
-        
+
     def plot(self):
         plt.plot(self.targets.x, self.targets.z, 'o')
-        
+
 
 class Grid(BiotSet):
-    ''' 
+    '''
     grid interaction methods and data
-    
+
     Key Attributes:
         n (int): grid dimension
         limit ([4float]): grid limits
         expand (float): grid expansion beyond coils
         nlevels (int): number of contour levels
         boundary (str): limit boundary ['limit', 'coilset_limit']
-        
+
     Derived Attributes:
         n2d: None,  # ([int, int]) as meshed dimensions
         x2d (np.array): 2D x-coordinates (radial)
@@ -259,17 +259,99 @@ class Grid(BiotSet):
         Bx (np.array): radial field
         Bz (np.array): vertical field
     '''
-    
+
     _biot_attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'boundary',
                         'expand', 'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d',
-                        'target']
-    
+                        'target', 'polygon']
+
     _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31,
-                                'boundary': 'limit'}
-    
+                                'boundary': 'coilset', 'polygon': None}
+
     def __init__(self, subcoil, **grid_attributes):
+        """
+        Links Grid class to subcoil and (re)initalizes grid_attributes.
+
+        Extends methods provided by BiotSet
+
+        Parameters
+        ----------
+        subcoil : CoilFrame
+            Source coilframe (subcoils).
+        **grid_attributes : dict
+            Composite biot attributes.
+
+        Returns
+        -------
+        None.
+
+        """
         BiotSet.__init__(self, source=subcoil, **grid_attributes)
-        
+
+    def generate_grid(self, regen=False, **kwargs):
+        """
+        Generate grid for use as targets in Biot Savart calculations.
+
+        Compare kwargs to current grid settings, update grid on-demand and
+        return update flag
+
+        Parameters
+        ----------
+        regen : bool
+            Force grid regeneration.
+        boundary : str
+            Grid boundary flag ['coilset_limit' or 'limit'].
+
+        Keyword Arguments
+        -----------------
+        n : int, optional
+            Grid node number.
+        limit : array_like, size(4,)
+            Grid bounding box [xmin, xmax, zmin, zmax].
+        expand : float, optional
+            Expansion beyond coil/boundary (when limit not set)
+        nlevels : int, optional
+            Number of contour levels.
+        levels : array_like, optional
+
+        Returns
+        -------
+        regenerate_grid : bool
+            Generation flag.
+
+        """
+        self.regen = regen
+        self._set_boundary(**kwargs)
+        self.update_biotset()
+        grid_attributes = {}  # grid attributes
+        for key in ['n', 'limit', 'coilset_limit',
+                    'expand', 'levels', 'nlevels']:
+            grid_attributes[key] = kwargs.get(key, getattr(self, key))
+        # calculate coilset limit
+        grid_attributes['coilset_limit'] = \
+            self._get_coilset_limit(grid_attributes['expand'])
+        # switch to coilset limit if limit is None
+        if grid_attributes['limit'] is None:
+            self.grid_boundary = 'coilset_limit'
+        regenerate_grid = \
+            not np.array_equal(grid_attributes[self.boundary],
+                               self.grid_boundary) or \
+            grid_attributes['expand'] != self.expand or \
+            grid_attributes['n'] != self.n or self.regen
+        if regenerate_grid:
+            self._generate_grid(**grid_attributes)
+        return regenerate_grid
+
+    def _set_boundary(self, **kwargs):
+        if 'boundary' in kwargs:  # primary switch
+            boundary = kwargs['boundary']
+        elif 'expand' in kwargs:  # then expand (coilset limit)
+            boundary = 'coilset_limit'
+        elif 'limit' in kwargs:  # then limit
+            boundary = 'limit'
+        else:  # defaults to coilset limit
+            boundary = 'coilset_limit'
+        self.grid_boundary = boundary
+
     def _generate_grid(self, **grid_attributes):
         self.biot_attributes = grid_attributes  # update attributes
         if self.n > 0:
@@ -284,40 +366,8 @@ class Grid(BiotSet):
             self.target.add_coil(self.x2d.flatten(), self.z2d.flatten(),
                                  name='Grid', delim='')
             self.solve()
-    
-    def generate_grid(self, **kwargs):
-        '''
-        compare kwargs to current grid settings, update grid on-demand
 
-        kwargs:
-            n (int): grid node number
-            limit (np.array): [xmin, xmax, zmin, zmax] fixed grid limits
-            expand (float): expansion beyond coil limits (when limit not set)
-            nlevels (int)
-            levels ()
-            regen (bool): force grid regeneration
-        '''
-        self.regen = kwargs.get('regen', False)
-        self.update_biotset()
-        grid_attributes = {}  # grid attributes
-        for key in ['n', 'limit', 'coilset_limit',
-                    'expand', 'levels', 'nlevels']:
-            grid_attributes[key] = kwargs.get(key, getattr(self, key))
-        # calculate coilset limit
-        grid_attributes['coilset_limit'] = \
-                self._get_coil_limit(grid_attributes['expand'])
-        self.grid_boundary = 'limit' if 'limit' in kwargs else 'coilset_limit'
-        regenerate_grid = \
-            not np.array_equal(grid_attributes['limit'], self.limit) or \
-            not np.array_equal(grid_attributes['coilset_limit'], 
-                               self.coilset_limit) or \
-            grid_attributes['expand'] != self.expand or \
-            grid_attributes['n'] != self.n or self.regen
-        if regenerate_grid:
-            self._generate_grid(**grid_attributes)
-        return regenerate_grid
-    
-    def _get_coil_limit(self, expand, xmin=1e-3):
+    def _get_coilset_limit(self, expand, xmin=1e-3):
         if expand is None:
             expand = self.expand  # use default
         if self.source.empty:
@@ -326,22 +376,55 @@ class Grid(BiotSet):
         dx, dz = self.source.dx, self.source.dz
         limit = np.array([(x - dx/2).min(), (x + dx/2).max(),
                           (z - dz/2).min(), (z + dz/2).max()])
+        return self._expand_limit(limit, expand, xmin)
+
+    @staticmethod
+    def _expand_limit(limit, expand, xmin):
         dx, dz = np.diff(limit[:2])[0], np.diff(limit[2:])[0]
-        delta = np.max([dx, dz])
-        limit += expand * delta * np.array([-1, 1, -1, 1])
+        limit += expand/2 * np.array([-dx, dx, -dz, dz])
         if limit[0] < xmin:
             limit[0] = xmin
         return limit
-    
+
     @property
     def grid_boundary(self):
+        """
+        Return grid bounding box based on self.boundary.
+
+        Returns
+        -------
+        limit : array_like, shape(4,)
+            Grid bounding box [xmin, xmax, zmin, zmax]
+
+        """
         if self.boundary == 'limit':
             return self.limit
         elif self.boundary == 'coilset_limit':
             return self.coilset_limit
-    
-    @grid_boundary.setter 
+        else:
+            raise IndexError(f'boundary {self.boundary} not in '
+                             '[limit, coilset_limit]')
+
+    @grid_boundary.setter
     def grid_boundary(self, boundary):
+        """
+        Set grid boundary flag. self.regen if boundary flag is changed.
+
+        Parameters
+        ----------
+        boundary : str
+            Boundary flag ether 'limit' or 'coilset_limit'
+
+        Raises
+        ------
+        IndexError
+            Flag not in [limit, coilset_limit].
+
+        Returns
+        -------
+        None.
+
+        """
         if boundary != self.boundary:
             self.regen = True  # force update after boundary switch
         if boundary in ['limit', 'coilset_limit']:
@@ -349,55 +432,167 @@ class Grid(BiotSet):
         else:
             raise IndexError(f'boundary label {boundary} not in '
                              '[limit, coilset_limit]')
-            
+
     def plot_grid(self, ax=None, **kwargs):
+        """
+        Extend MeshGrid.plot - plot target grid.
+
+        Parameters
+        ----------
+        ax : Axes, optional
+            Plot Axes.
+        **kwargs : dict
+            Keyword arguments passed to MeshGrid.plot.
+
+        Returns
+        -------
+        None.
+
+        """
         self.generate_grid(**kwargs)
         if ax is None:
-            ax = plt.gca()  
+            ax = plt.gca()
         MeshGrid._plot(self.x2d, self.z2d, self._limit[:2], self._limit[2:],
-                       ax=ax, zorder=-500, **kwargs)  # plot grid 
-        
-    def plot_flux(self, ax=None, lw=1, color='lightgrey',
-                  **kwargs):
+                       ax=ax, zorder=-500, **kwargs)  # plot grid
+
+    def plot_flux(self, ax=None, lw=1, color='lightgrey', **kwargs):
+        """
+        Plot constant flux contours.
+
+        Parameters
+        ----------
+        ax : Axes, optional
+            Plot axes.
+        lw : float, optional
+            line weight.
+        color : str, optional
+            line color. The default is 'lightgrey'.
+        **kwargs : dict, optional
+            Keyword arguments passed to ax.contour.
+
+        Returns
+        -------
+        None.
+
+        """
         if self.n > 0:
             if ax is None:
-                ax = plt.gca() 
+                ax = plt.gca()
             levels = kwargs.get('levels', self.levels)
             if levels is None:
                 levels = self.nlevels
             QuadContourSet = ax.contour(
                     self.x2d, self.z2d, self.Psi,
-                    levels, colors=color, linestyles='-', 
+                    levels, colors=color, linestyles='-',
                     linewidths=lw,
                     alpha=0.9, zorder=4)
             if self.levels is None:
                 self.levels = QuadContourSet.levels
             plt.axis('equal')
-            
+
     def plot_field(self):
+        """
+        Generate field quiver plot.
+
+        Returns
+        -------
+        None.
+
+        """
         if self.n > 0:
             plt.quiver(self.x2d, self.z2d, self.Bx, self.Bz)
 
-        
+
+class Plasma(Grid):
+    """Plasma grid interaction methods and data. Class extends Grid."""
+
+    '''
+    _biot_attributes = ['n', 'n2d', 'limit', 'coilset_limit', '_boundary',
+                        'expand', 'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d',
+                        'target']
+
+    _default_biot_attributes = {'n': 5e4, 'expand': 0.05, 'nlevels': 31,
+                                '_boundary': 'limit'}
+    '''
+
+    def generate_grid(self, regen=False, **kwargs):
+        """
+        Generate plasma grid.
+
+        Parameters
+        ----------
+        regen : bool
+            Force grid regeneration.
+
+        Keyword Arguments
+        -----------------
+        plasma_n : int, optional
+            Plasma grid node number.
+        boundary : array_like or Polygon, optional
+            External plasma boundary. A positively oriented curve or
+            bounding box.
+        expand : float, optional
+            Expansion beyond boundary (when limit not set)
+        nlevels : int, optional
+            Number of contour levels
+        levels : float array_like, optional
+            Explicit values for contour levels
+        regen : bool
+            Force grid regeneration
+        Returns
+        -------
+        None.
+
+        """
+        # coerce kwargs to Grid format
+        kwargs = copy.deepcopy(kwargs)
+        kwargs['limit'] = kwargs.get('plasma_limit', self.plasma_limit)
+        kwargs['n'] = kwargs.get('plasma_n', self.plasma_n)
+        kwargs['nlevels'] = kwargs.get('plasma_nlevels', self.plasma.nlevels)
+
+        Grid.getnerate_grid(self, **kwargs)
+
+
+    def plasma_kwargs(self, **kwargs):
+        kwargs = copy.deepcopy(kwargs)
+        kwargs['limit'] = kwargs.get('plasma_limit', self.plasma_limit)
+        kwargs['n'] = kwargs.get('plasma_n', self.plasma_n)
+        kwargs['nlevels'] = kwargs.get('plasma_nlevels', self.plasma.nlevels)
+        return kwargs
+
+    @property
+    def plasma_limit(self):
+        boundary = pd.concat([self.data['firstwall'], self.data['divertor']])
+        limit = [boundary.x.min(), boundary.x.max(),
+                 boundary.z.min(), boundary.z.max()]
+        return limit
+
+    @property
+    def plasma_n(self):
+        limit = self.plasma_limit
+        area = (limit[1]-limit[0]) * (limit[3]-limit[2])
+        return int(area / self.dPlasma**2)
+
 class BiotMethods:
-    
+
     _biot_methods = {'mutual': Mutual,
                      'probe': Probe,
                      'field': Field,
                      'colocate': Colocate,
-                     'grid': Grid}
-    
+                     'grid': Grid,
+                     'plasma': Plasma}
+
     def __init__(self):
         self._biot_instances = {}
-    
+
     def _initialize_biot_method(self, name, method, **kwargs):
         'create biot instance and link to method'
-        setattr(self, name, self._biot_methods[method](self.subcoil, **kwargs)) 
-        
+        setattr(self, name, self._biot_methods[method](self.subcoil, **kwargs))
+
     @property
     def biot_instances(self):
         return self._biot_instances
-    
+
     @biot_instances.setter
     def biot_instances(self, biot_instances):
         for biot_name in biot_instances:
@@ -409,7 +604,7 @@ class BiotMethods:
                 if biot_name not in self._biot_instances:
                     self._biot_instances.update({biot_name: biot_method})
                 if not hasattr(self, biot_name):  # initialize method
-                    self._initialize_biot_method(biot_name, biot_method, 
+                    self._initialize_biot_method(biot_name, biot_method,
                                                  **biot_attributes)
 
     @property
@@ -420,7 +615,7 @@ class BiotMethods:
             _biot_attributes[biot_attribute] = \
                 getattr(getattr(self, instance), 'biot_attributes')
         return _biot_attributes
-    
+
     @biot_attributes.setter
     def biot_attributes(self, biot_attributes):
         for instance in self._biot_instances:
@@ -428,13 +623,13 @@ class BiotMethods:
             setattr(getattr(self, instance), 'biot_attributes',
                     biot_attributes.get(biot_attribute, {}))
             getattr(self, instance).update_biotset()
-        
+
 
 if __name__ == '__main__':
-    
+
     #data = SimulationData()
     #data.generate_grid()
-    
+
     grid = Grid(coilset={'x': [1, 2, 3], 'z': [3, 2, 5]}, limit=[-1, 1, -2, 2])
     grid.plot_grid(color='C3')
     grid.plot_grid(limit=[-2, 2, 0,5])

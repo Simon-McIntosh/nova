@@ -47,7 +47,7 @@ class MachineData(CoilSet):
         if frame.shape[0] > 2 and 'x' in frame and 'z' in frame:
             ring = shapely.geometry.LinearRing(
                 frame.loc[:, ['x', 'z']].values)
-            if shapely.algorithms.cga.signed_area(ring) < 0:
+            if not ring.is_ccw:
                 frame = frame.iloc[::-1, :]
         return frame
 

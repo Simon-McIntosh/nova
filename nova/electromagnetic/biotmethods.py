@@ -20,8 +20,7 @@ class Mutual(BiotSet, BiotAttributes):
 
 
 class Probe(BiotSet, BiotAttributes):
-
-    'probe interaction methods and data'
+    """Probe interaction methods and data."""
 
     _biot_attributes = []
     _default_biot_attributes = {}
@@ -30,9 +29,41 @@ class Probe(BiotSet, BiotAttributes):
         BiotSet.__init__(self, source=subcoil, **probe_attributes)
 
     def add_target(self, *args, **kwargs):
+        """
+        Add target to probe.
+
+        Target addition managed by CoilFrame.add_coil()
+
+        Parameters
+        ----------
+        *args : DataFrame or a pair of 1D arrays
+            Data to be inserted into CoilFrame.
+        **kwargs : dict
+            See CoilFrame for description of keyword arguments.
+
+        Returns
+        -------
+        None.
+
+        """
         self.target.add_coil(*args, name='Target', delim='', **kwargs)
 
     def plot(self, ax=None, **kwargs):
+        """
+        Plot target and probe locations.
+
+        Parameters
+        ----------
+        ax : Axes, optional
+            target axes. The default is None.
+        **kwargs : dict
+            Keyword arguments passed to ax.plot.
+
+        Returns
+        -------
+        None.
+
+        """
         if ax is None:
             ax = plt.gca()
         ls = kwargs.pop('ls', '.')
@@ -42,7 +73,7 @@ class Probe(BiotSet, BiotAttributes):
 
 class Field(Probe):
 
-    'field values imposed on coil boundaries - derived from probe class'
+    """Field values imposed on coil boundaries - extends Probe class."""
 
     _biot_attributes = ['target', '_coil_index']
     _default_biot_attributes = {'target_turns': False,  # include target turns
@@ -88,6 +119,10 @@ class Field(Probe):
         return DataFrame(
             np.maximum.reduceat(self.B, self.target._reduction_index),
             index=self._coil_index, columns=['B'])
+
+
+class PlasmaFilament(Probe):
+    """Plasma filament interaction methods and data. Class extends Probe."""
 
 
 class Colocate(Probe):
@@ -240,25 +275,40 @@ class Colocate(Probe):
 
 
 class Grid(BiotSet):
-    '''
-    grid interaction methods and data
+    """
+    Grid interaction methods and data.
 
-    Key Attributes:
-        n (int): grid dimension
-        limit ([4float]): grid limits
-        expand (float): grid expansion beyond coils
-        nlevels (int): number of contour levels
-        boundary (str): limit boundary ['limit', 'coilset_limit']
+    Key Attributes
+    --------------
+        n : int
+            Grid dimension.
+        limit : array-like, shape(4,)
+            Grid limits.
+        expand : float
+            Grid expansion beyond coils.
+        nlevels : int
+            Number of contour levels.
+        boundary : str
+            Limit boundary ['limit', 'coilset_limit'].
 
-    Derived Attributes:
-        n2d: None,  # ([int, int]) as meshed dimensions
-        x2d (np.array): 2D x-coordinates (radial)
-        z2d (np.array): 2D z-coordinates
-        levels (np.array): contour levels
-        Psi (np.array):  poloidal flux
-        Bx (np.array): radial field
-        Bz (np.array): vertical field
-    '''
+    Derived Attributes
+    ------------------
+        n2d : array-like, shape(2,)
+            As meshed dimension.
+        x2d : array-like shape(*n2D)
+            2D x-coordinates (radial).
+        z2d : array-like shape(*n2D)
+            2D z-coordinates.
+        levels : array-like
+            Contour levels.
+        Psi : array-like
+            Poloidal flux.
+        Bx : array-like
+            Radial field.
+        Bz : array-like
+            Vertical field.
+
+    """
 
     _biot_attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'boundary',
                         'expand', 'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d',
@@ -503,7 +553,7 @@ class Grid(BiotSet):
             plt.quiver(self.x2d, self.z2d, self.Bx, self.Bz)
 
 
-class Plasma(Grid):
+class PlasmaGrid(Grid):
     """Plasma grid interaction methods and data. Class extends Grid."""
 
     '''
@@ -573,6 +623,7 @@ class Plasma(Grid):
         area = (limit[1]-limit[0]) * (limit[3]-limit[2])
         return int(area / self.dPlasma**2)
 
+
 class BiotMethods:
 
     _biot_methods = {'mutual': Mutual,
@@ -580,7 +631,8 @@ class BiotMethods:
                      'field': Field,
                      'colocate': Colocate,
                      'grid': Grid,
-                     'plasma': Plasma}
+                     'plasmagrid': PlasmaGrid,
+                     'plasmafilament': PlasmaFilament}
 
     def __init__(self):
         self._biot_instances = {}

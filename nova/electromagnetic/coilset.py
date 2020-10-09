@@ -980,7 +980,8 @@ class CoilSet(pythonIO, BiotMethods):
     def patch_coil(coil, overwrite=False, patchwork_factor=0.15, **kwargs):
         # call on-demand
         part_color = {'VS3': 'C0', 'VS3j': 'gray', 'CS': 'C0', 'PF': 'C0',
-                      'trs': 'C2', 'vv': 'C3', 'vvin': 'C3', 'vvout': 'C3',
+                      'trs': 'C3', 'dir': 'C3',
+                      'vv': 'C3', 'vvin': 'C3', 'vvout': 'C3',
                       'bb': 'C7',
                       'plasma': 'C4', 'Plasma': 'C4',
                       'cryo': 'C5'}

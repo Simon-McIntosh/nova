@@ -108,7 +108,9 @@ class ITERcoilset(CoilClass):
                 machine.load_coilset(part_list='dir')
             self.append_coilset(machine.coilset)
         # build plasma
-        boundary = pd.concat([self.data['firstwall'], self.data['divertor']])
+        boundary = pd.concat([self.data['firstwall'],
+                              self.data['divertor'].iloc[1:]])
+
         self.add_plasma(boundary)
         # generate biot objects
         self.field.add_target(self.coil, ['CS', 'PF'], dField=self.dField)

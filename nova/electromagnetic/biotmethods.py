@@ -647,11 +647,18 @@ class BiotMethods:
 
     @biot_instances.setter
     def biot_instances(self, biot_instances):
+        if not is_list_like(biot_instances):
+            biot_instances = [biot_instances]
         for biot_name in biot_instances:
-            if is_list_like(biot_instances[biot_name]):
-                biot_method, biot_attributes = biot_instances[biot_name]
+            if isinstance(biot_instances, dict):
+                if is_list_like(biot_instances[biot_name]):
+                    biot_method, biot_attributes = biot_instances[biot_name]
+                else:
+                    biot_method = biot_instances[biot_name]
+                    biot_attributes = {}
             else:
-                biot_method, biot_attributes = biot_instances[biot_name], {}
+                biot_method = biot_name
+                biot_attributes = {}
             if biot_method in self._biot_methods:
                 if biot_name not in self._biot_instances:
                     self._biot_instances.update({biot_name: biot_method})

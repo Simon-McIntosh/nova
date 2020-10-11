@@ -7,7 +7,7 @@ import pygeos
 from nova.electromagnetic.coilgeom import ITERcoilset
 from nova.utilities.pyplot import plt
 
-ITER = ITERcoilset(coils='pf vv trs dir', dCoil=0.5, dPlasma=0.15, n=2e3,
+ITER = ITERcoilset(coils='pf vv trs dir', dCoil=0.5, dPlasma=0.55, n=2e2,
                    read_txt=False, limit=[3, 10, -6, 6])
 
 ITER.filename = -1
@@ -33,13 +33,13 @@ poly = pygeos.get_geometry(poly, np.argmax(area))
 points = pygeos.points(ITER.subcoil.loc[ITER.subcoil._plasma_index,
                                         ['x', 'z']].values)
 tree = pygeos.STRtree(points)
-#ITER.subcoil.ionize = tree.query(poly, predicate='contains')
-#ITER.coil.loc['Plasma', 'polygon'] = \
-#    shapely.geometry.Polygon(pygeos.get_coordinates(poly))
+ITER.subcoil.ionize = tree.query(poly, predicate='contains')
+ITER.coil.loc['Plasma', 'polygon'] = \
+    shapely.geometry.Polygon(pygeos.get_coordinates(poly))
 
 
 plt.set_aspect(0.9)
-ITER.plot(plasma=True, label='active')
+ITER.plot(True, plasma=True, label='active')
 ITER.grid.plot_flux()
 
 #ITER.plot_data(['firstwall', 'divertor'])

@@ -35,9 +35,10 @@ from nova.utilities.geom import length, xzfun
 from nova.electromagnetic.coilframe import CoilFrame
 from nova.electromagnetic.coildata import CoilData
 from nova.electromagnetic.biotmethods import BiotMethods
+from nova.electromagnetic.plasma import PlasmaMethods
 
 
-class CoilSet(pythonIO, BiotMethods):
+class CoilSet(pythonIO, BiotMethods, PlasmaMethods):
     """
     Instance wrapper for coilset data.
 
@@ -78,7 +79,8 @@ class CoilSet(pythonIO, BiotMethods):
                              'Fx', 'Fz', 'xFx', 'xFz', 'zFx', 'zFz', 'My']
 
     def __init__(self, **coilset):
-        BiotMethods.__init__(self)  # initialize biotmethods
+        super().__init__()
+        #BiotMethods.__init__(self)  # initialize biotmethods
         self._initialize_coilset()  # initialize coil and subcoil
         self._initialize_biot()  # setup biot instances
         self.coilset = coilset  # exchange coilset and instance attributes
@@ -112,7 +114,8 @@ class CoilSet(pythonIO, BiotMethods):
         """Specify default biot instances."""
         self.biot_instances = {'field': 'field',
                                'forcefield': 'mutual',
-                               'plasma': 'plasma',
+                               #'plasmagrid': 'plasmagrid',
+                               #'plasmafilament': 'plasmafilament',
                                'grid': 'grid'}
 
     @property
@@ -120,12 +123,12 @@ class CoilSet(pythonIO, BiotMethods):
         """
         Return dict of coilset attributes listed in self._coilset_attributes.
 
-        Property used to get and set coilset attributes to aid sterilization
+        Coilset property used to get and set coilset attributes.
 
         Returns
         -------
         coilset_attributes : dict
-            Coilset attributes.
+            Coilset attributes listed in self._coilset_attributes.
 
         """
         coilset_attributes = {attribute: getattr(self, attribute)

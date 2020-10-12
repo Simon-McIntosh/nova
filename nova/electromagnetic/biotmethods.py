@@ -9,7 +9,7 @@ from nova.electromagnetic.meshgrid import MeshGrid
 from nova.electromagnetic.biotsavart import BiotSet, BiotAttributes
 
 
-class Mutual(BiotSet, BiotAttributes):
+class Mutual(BiotSet):
 
     _biot_attributes = []
     _default_biot_attributes = {}
@@ -19,7 +19,16 @@ class Mutual(BiotSet, BiotAttributes):
                          **mutual_attributes)
 
 
-class Probe(BiotSet, BiotAttributes):
+class ForceField(Mutual):
+    _biot_attributes = []
+    _default_biot_attributes = {'target_turns': False,  # include target turns
+                                'reduce_target': False}  # sum-reduce target
+
+    def __init__(self, subcoil, **forcefield_attributes):
+        Mutual.__init__(self, subcoil, **forcefield_attributes)
+
+
+class Probe(BiotSet):
     """Probe interaction methods and data."""
 
     _biot_attributes = []
@@ -625,8 +634,10 @@ class PlasmaGrid(Grid):
 
 
 class BiotMethods:
+    """Manage biot methods for CoilSet."""
 
     _biot_methods = {'mutual': Mutual,
+                     'forcefield': ForceField,
                      'probe': Probe,
                      'field': Field,
                      'colocate': Colocate,
@@ -635,14 +646,39 @@ class BiotMethods:
                      'plasmafilament': PlasmaFilament}
 
     def __init__(self):
+        """Initialize biot instances."""
         self._biot_instances = {}
-
-    def _initialize_biot_method(self, name, method, **kwargs):
-        'create biot instance and link to method'
-        setattr(self, name, self._biot_methods[method](self.subcoil, **kwargs))
+        self.biot_instances = ['field', 'forcefield', 'grid']  # base set
 
     @property
     def biot_instances(self):
+        """
+        Initialize biot methods.
+
+        Maintain dictionary of initialized biot methods
+
+        Parameters
+        ----------
+        biot_instances : str or list or dict
+            Collection of biot instances to initialize.
+
+            - str or list: biot name and method assumed equal
+            - dict : option to set diffrent values for biot name and method
+
+            Possible to pass biot_attributes as
+            {biot_name: [biot_method, biot_attributes], ...}
+
+        Raises
+        ------
+        IndexError
+            biot_method not given in self._biot_methods.
+
+        Returns
+        -------
+        biot_instances : dict
+            Dict of initialized biot methods.
+
+        """
         return self._biot_instances
 
     @biot_instances.setter
@@ -665,6 +701,15 @@ class BiotMethods:
                 if not hasattr(self, biot_name):  # initialize method
                     self._initialize_biot_method(biot_name, biot_method,
                                                  **biot_attributes)
+            else:
+                raise IndexError(f'method {biot_method} not found in '
+                                 f'{self._biot_methods}\n'
+                                 'unable to initialize method')
+
+    def _initialize_biot_method(self, name, method, **attributes):
+        """Create biot instance and link to method."""
+        setattr(self, name,
+                self._biot_methods[method](self.subcoil, **attributes))
 
     @property
     def biot_attributes(self):
@@ -682,6 +727,37 @@ class BiotMethods:
             setattr(getattr(self, instance), 'biot_attributes',
                     biot_attributes.get(biot_attribute, {}))
             getattr(self, instance).update_biotset()
+
+    @property
+    def dField(self):
+        self._check_default('dField')
+        return self._dField
+
+    @dField.setter
+    def dField(self, dField):
+        self._dField = dField
+
+    def update_field(self):
+        self.coil.refresh_dataframe()  # flush updates
+        if self.field.nT > 0:  # maximum of coil boundary values
+            frame = self.field.frame
+            self.coil.loc[frame.index, frame.columns] = frame
+
+    def update_forcefield(self, subcoil=False):
+        if subcoil and self.forcefield.reduce_target:
+            self.forcefield.solve(reduce_target=False)
+
+        for variable in ['Psi', 'Bx', 'Bz']:
+            setattr(self.subcoil, variable,
+                    getattr(self.forcefield, variable))
+        self.subcoil.B = \
+            np.linalg.norm([self.subcoil.Bx, self.subcoil.Bz], axis=0)
+        # set coil variables to maximum of subcoil bundles
+
+        for variable in ['Psi', 'Bx', 'Bz', 'B']:
+            setattr(self.coil, variable,
+                    np.maximum.reduceat(getattr(self.subcoil, variable),
+                                        self.subcoil._reduction_index))
 
 
 if __name__ == '__main__':

@@ -41,7 +41,7 @@ class ITERcoilset(CoilClass):
     def load_coilset(self, **kwargs):
         read_txt = kwargs.pop('read_txt', self.read_txt)
         filename, coils, kwargs = self.select_coils(**kwargs)
-        filepath = self.filepath(filename)
+        filepath = self._filepath(filename)
         if not os.path.isfile(filepath + '.pk') or read_txt:
             self.build_coilset(coils, **kwargs)
             self.save_coilset(filename)
@@ -107,6 +107,7 @@ class ITERcoilset(CoilClass):
             if 'dir' in coils:
                 machine.load_coilset(part_list='dir')
             self.append_coilset(machine.coilset)
+        #self.categorize_coilset()
         # build plasma
         boundary = pd.concat([self.data['firstwall'],
                               self.data['divertor'].iloc[1:]])
@@ -379,7 +380,7 @@ class VSgeom(CoilSet):  # VS coil class
             self.add_jacket()  # add steel jacket
             reindex = {**reindex, 'LVSj0-LVSj3': 'LVSj', 'UVSj0-UVSj3': 'UVSj'}
         # cluster upper and lower coils and jackets
-        self.cluster(4, merge_pairs=False)
+        self.cluster(4)
         self.rename(index=reindex)
         self.coil.add_mpc(['LVS', 'UVS'], -1)  # link vs turns
         self.extract()

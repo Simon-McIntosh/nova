@@ -7,17 +7,29 @@ from pandas.api.types import is_list_like, is_dict_like
 
 
 class CoilData():
-    '''
-    methods enabling fast access to dynamic coil and subcoil data
+    """
+    Methods enabling fast access to dynamic coil and subcoil data.
 
-    Key Attributes:
-        Ic (np.array, float): coil line current [A]
-        It (np.array, float): coil turn curent [A.turns]
-        Nt (np.array, float): coil turn number
-        power (np.array, bool): coil power supply status
-        optimize (np.array, bool): optimization flag
-        plasma (np.array, bool): plasma flag
-    '''
+    Provided as parent to CoilFrame. Inherited alongside DataFrame.
+    Fast access variables stored as np.arrays _*
+    Lazy exchange implemented with DataFrame.
+
+    Key Attributes
+    --------------
+    Ic : float, array-like
+        Coil line current [A]
+    It : float, array-like
+        Coil turn curent [A.turns]
+    Nt : float, array-like
+        Coil turn number.
+    power : bool, array-like
+        Coil power supply status.
+    optimize : bool, array-like
+        Optimization flag.
+    plasma : bool, array-like
+        Plasma flag.
+
+    """
 
     # list of fast access np.array variables linked to CataFrame
     _dataframe_attributes = []
@@ -244,16 +256,12 @@ class CoilData():
         """
         Manage current index via current update flag.
 
-        ======
-        Getter
-        ======
+        Update current_index via current flag for coil current update.
 
-        Return current update flag
-
-        Returns
-        -------
+        Parameters
+        ----------
         update_flag : str
-            Current update flag:
+            Current update flag.
 
             - 'full': update full current vector
             - 'active': update active coils (power & ~plasma)
@@ -263,17 +271,6 @@ class CoilData():
             - 'plasma': update plasma (plasma)
             - 'coil': update all coils (~plasma)
 
-        ======
-        Setter
-        ======
-
-        Update current_index via current flag for coil current update.
-
-        Parameters
-        ----------
-        update_flag : str
-            Current update flag.
-
         Raises
         ------
         IndexError
@@ -282,7 +279,8 @@ class CoilData():
 
         Returns
         -------
-        None.
+        update_flag : str
+            Current update flag:
 
         """
         return self._current_update
@@ -312,7 +310,7 @@ class CoilData():
 
     @property
     def current_index(self):
-        'display power, optimize, plasma and current update status'
+        """Display power, optimize, plasma and current update status."""
         if self.nC > 0:
             return DataFrame(
                     {'power': self._power,
@@ -335,9 +333,11 @@ class CoilData():
         value : dict or itterable
             Current update vector.
         current_column : str, optional
-            Current_column. The default is 'Ic'.
+            Specify current_column. The default is 'Ic'.
+
             - 'Ic' == line current [A]
             - 'It' == turn current [A.turns]
+
         update_dataframe : bool, optional
             Update dataframe. The default is True.
 
@@ -379,8 +379,22 @@ class CoilData():
                                  'not in [Ic, It]')
 
     @property
-    def _nC(self):  # mpc coil number
+    def _nC(self):
+        """
+        Return mpc coil number.
+
+        Returns
+        -------
+        _nC : int
+            Number of coils without mpc constraints.
+
+        """
         return len(self._mpc_iloc)
+
+    @property
+    def _nI(self):
+        """Return number of indexed coils."""
+        return sum(self._current_index)
 
     @property
     def Ic(self):
@@ -419,7 +433,14 @@ class CoilData():
     @property
     def ionize(self):
         """
-        Set ionization_index based on intra-spearatrix filament index.
+        Manage plasma ionization_index.
+
+        Set index to True for all intra-spearatrix filaments.
+
+        Parameters
+        ----------
+        index : array-like, shape(n,)
+            ionization index for plasma filament bundle, shape(nP,).
 
         Returns
         -------
@@ -431,19 +452,6 @@ class CoilData():
 
     @ionize.setter
     def ionize(self, index):
-        """
-        Set ionization_index based on intra-spearatrix filament index.
-
-        Parameters
-        ----------
-        index : array-like, shape(n,)
-            ionization index for plasma filament bundle, shape(nP,).
-
-        Returns
-        -------
-        None.
-
-        """
         active = np.zeros(self.nP, dtype=bool)
         active[index] = True
         self._ionize_index[self._plasma_index] = active
@@ -451,34 +459,20 @@ class CoilData():
 
     @property
     def Np(self):
-        """
+        r"""
         Plasma filament turn number.
 
-        ======
-        Getter
-        ======
+        Parameters
+        ----------
+        value : float or array-like
+            Set turn number of plasma filaments
 
-        Return plasma filament turn number.
+            Ensure :math:`\sum |Np| = 1`.
 
         Returns
         -------
         Np : np.array, shape(nP,)
             Plasma filament turn number.
-
-        ======
-        Setter
-        ======
-
-        Set plasma fillament number.
-
-        Parameters
-        ----------
-        value : float or array-like
-            Turn number of plasma filaments.
-
-        Returns
-        -------
-        None.
 
         """
         return self._Nt[self._plasma_index]

@@ -1,3 +1,5 @@
+"""A library of geometric helper functions derived from Amigo."""
+
 import collections
 from itertools import count
 
@@ -19,35 +21,33 @@ from nova.utilities.pyplot import plt
 
 
 def rms(x, Nt):
-    'root mean squared distance'
+    """Return turn weighted root mean squared distance."""
     return np.sqrt(np.sum((x*Nt)**2) / np.sum(abs(Nt)))
 
+
 def gmd(x, Nt):
-    '''
-    geometric mean distance
-    '''
+    """Return turn weighted geometric mean distance."""
     return np.exp(np.sum(abs(Nt) * np.log(x)) / np.sum(abs(Nt)))
 
 
 def amd(x, Nt):
-    '''
-    arithmetic mean distance
-    '''
+    """Return turn weighted arithmetic mean distance."""
     return np.sum(abs(Nt) * x) / np.sum(abs(Nt))
 
 
 def rdp_extract(x, y, eps=1e-2, dx=None, dx_window=None,
                 scale=None, plot=False):
-    '''
-    extract features from 2d curve via the rdp algorithm
+    """
+    Extract features from a 2d curve via the rdp algorithm.
 
-    Atributes:
+    Atributes
+    ---------
         x (np.array): x-coordinate data
         y (np.array): y-corrdinate data
         eps (float): acceptible deviation expressed as fraction of y extent
         dx (float): step width for x,y subsampling
         scale (float): xo = x / scale (modify aspect of input data)
-    '''
+    """
     if dx_window is not None:
         step = x[1] - x[0]
         y = lowpass(y, step, dt_window=dx_window, polyorder=2)

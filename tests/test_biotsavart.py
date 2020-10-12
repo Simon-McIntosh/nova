@@ -25,9 +25,9 @@ def test_ITER_subinductance_matrix(plot=False):
         cs.plot(label=True)
         cs.grid.generate_grid()
         cs.grid.plot_flux()
-        
-    assert allclose(Mc_ddd, cs.mutual.psi , atol=5e-3)
+    assert allclose(Mc_ddd, cs.mutual.psi, atol=5e-3)
     return cs
+
 
 def test_solenoid_grid(plot=False):
     'verify solenoid vertical field using grid biot instance'
@@ -47,8 +47,9 @@ def test_solenoid_grid(plot=False):
     assert allclose(Bz, Bz_theory, atol=5e-3)
     return cs, Bz, Bz_theory
 
+
 def test_solenoid_probe():
-    'verify solenoid vertical field using probe biot instance'
+    """Verify solenoid vertical field using probe biot instance."""
     N, L, Ic = 500, 30, 1e3
     cs = CoilSet()
     cs.add_coil(1.5, 0, 0.01, L, Nt=N, turn_section='rectangle', dCoil=0.5)
@@ -63,7 +64,7 @@ def test_solenoid_probe():
 
 if __name__ == '__main__':
     pytest.main([__file__])
-    
+
     #cs = test_ITER_subinductance_matrix(plot=True)
     #cs, Bz, Bz_theory = test_solenoid_grid(plot=True)
     #cs, Bz, Bz_theory = test_solenoid_target()

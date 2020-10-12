@@ -2,13 +2,12 @@ import numpy as np
 import shapely.geometry
 import shapely.ops
 import pygeos
-#import shapely.validation
 
 from nova.electromagnetic.coilgeom import ITERcoilset
 from nova.utilities.pyplot import plt
 
-ITER = ITERcoilset(coils='pf vv trs dir', dCoil=0.5, dPlasma=0.55, n=2e2,
-                   read_txt=False, limit=[3, 10, -6, 6])
+ITER = ITERcoilset(coils='pf vv trs dir', dCoil=0.25, dPlasma=0.25, n=2e3,
+                   read_txt=True, limit=[3, 10, -6, 6])
 
 ITER.filename = -1
 ITER.scenario = 'SOF'
@@ -30,9 +29,12 @@ area = [pygeos.area(pygeos.get_geometry(poly, i))
         for i in range(pygeos.get_num_geometries(poly))]
 poly = pygeos.get_geometry(poly, np.argmax(area))
 
-points = pygeos.points(ITER.subcoil.loc[ITER.subcoil._plasma_index,
-                                        ['x', 'z']].values)
-tree = pygeos.STRtree(points)
+
+
+tree = pygeos.STRtree(pygeos.points(
+            ITER.subcoil.loc[ITER.plasma_index, ['x', 'z']].values))
+
+
 ITER.subcoil.ionize = tree.query(poly, predicate='contains')
 ITER.coil.loc['Plasma', 'polygon'] = \
     shapely.geometry.Polygon(pygeos.get_coordinates(poly))

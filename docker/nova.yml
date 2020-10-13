@@ -10,6 +10,7 @@ dependencies:
   - numpy
   - pandas
   - pip
+  - pygeos
   - pytest
   - python=3.8
   - python-docx

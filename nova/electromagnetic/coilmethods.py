@@ -393,7 +393,7 @@ class CoilMethods:
     @staticmethod
     def _mesh_coil(coil, mpc=True, **kwargs):
         """Mesh single coil."""
-        x, z, dl, dt, dCoil = coil[['x', 'z', 'dl', 'dt', 'dCoil']]
+        dCoil = coil.dCoil
         if 'polygon' in coil:
             coil_polygon = coil.polygon
             bounds = coil_polygon.bounds
@@ -401,10 +401,9 @@ class CoilMethods:
             dz = bounds[3] - bounds[1]
         else:  # assume rectangular coil cross-section
             dx, dz = coil[['dl', 'dt']]  # length, thickness == dx, dz
-            bounds = (x-dx/2, z-dz/2, x+dx/2, z+dz/2)
+            bounds = (coil.x-coil.dx/2, coil.z-coil.dz/2,
+                      coil.x+coil.dx/2, coil.z+coil.dz/2)
             coil_polygon = shapely.geometry.box(bounds)
-        coil_polygon = coil_polygon.buffer(1e-12*dCoil)  # offset coil polygon
-        # coil_area = coil_polygon.area
         mesh = {'mpc': mpc}  # multi-point constraint (link current)
         if 'part' in coil:
             mesh['part'] = coil['part']
@@ -418,7 +417,7 @@ class CoilMethods:
             turn_fraction = kwargs.get('turn_fraction', 1)
         if dCoil is None or dCoil == 0:
             dCoil = np.max([dx, dz])
-        elif dCoil == -1:  # mesh per-turn (detailed inductance calculations)
+        elif dCoil == -1:  # mesh per-turn
             if 'cross_section' not in mesh:
                 mesh['cross_section'] = 'circle'
             Nt = coil['Nt']
@@ -447,35 +446,55 @@ class CoilMethods:
             dt_ = coil['skin_fraction']
         else:
             dt_ = turn_fraction * dz_
-        x_ = np.linspace(*bounds[::2], nx+1)
-        z_ = np.linspace(*bounds[1::2], nz+1)
+        x_ = np.linspace(*bounds[::2], nx+1)[:-1]
+        z_ = np.linspace(*bounds[1::2], nz+1)[:-1]
         polygen = CoilFrame._get_polygen(cross_section)  # polygon generator
-        polygon, xm_, zm_, cs_, dA_ = [], [], [], [], []
         sub_polygons = [[] for __ in range(nx*nz)]
+        __x = np.zeros(nx*nz)
+        __z = np.zeros(nx*nz)
         for i in range(nx):  # radial divisions
             for j in range(nz):  # vertical divisions
                 sub_polygons[i*nz + j] = \
                         polygen(x_[i]+dx_/2, z_[j]+dz_/2, dl_, dt_)
-        tree = shapely.strtree.STRtree(sub_polygons)
-        sub_polygons = [p for p in tree.query(coil_polygon)
-                        if p.intersects(coil_polygon)]
-        for sub_polygon in sub_polygons:
-            p = coil_polygon.intersection(sub_polygon)
-            if isinstance(p, shapely.geometry.polygon.Polygon):
-                p = [p]  # single polygon
-            for p_ in p:
-                if isinstance(p_, shapely.geometry.polygon.Polygon):
-                    polygon.append(p_)
-                    xm_.append(p_.centroid.x)
-                    zm_.append(p_.centroid.y)
-                    dA_.append(p_.area)
-                    if sub_polygon.within(coil_polygon):
-                        cs_.append(cross_section)  # maintain cs referance
-                    else:
-                        cs_.append('polygon')
+                __x[i*nz + j] = x_[i]+dx_/2
+                __z[i*nz + j] = z_[j]+dz_/2
+        xm, zm = np.meshgrid(x_+dx_/2, z_+dz_/2, indexing='ij')
+        xm = xm.reshape(-1, order='F')
+        zm = zm.reshape(-1, order='F')
+        dA = sub_polygons[0].area  # referance area
+        if coil.cross_section in ['square', 'rectangle']:
+            polygon = sub_polygons
+            xm_, zm_ = xm, zm
+            dA_ = dA * np.ones(nx*nz)
+            cs_ = cross_section
+        else:
+            tree = shapely.strtree.STRtree(sub_polygons)
+            sub_polygons = [p for p in tree.query(coil_polygon)
+                            if p.intersects(coil_polygon)]
+            # apply buffer to coil polygon (for within boolean)
+            coil_polygon_buffer = coil_polygon.buffer(1e-12*dCoil)
+            polygon, xm_, zm_, cs_, dA_ = [], [], [], [], []
+            for i, sub_polygon in enumerate(sub_polygons):
+                p = coil_polygon.intersection(sub_polygon)
+                if isinstance(p, shapely.geometry.polygon.Polygon):
+                    p = [p]  # single polygon
+                for p_ in p:
+                    if isinstance(p_, shapely.geometry.polygon.Polygon):
+                        polygon.append(p_)
+                        if sub_polygon.within(coil_polygon_buffer):  # link
+                            xm_.append(xm[i])
+                            zm_.append(zm[i])
+                            dA_.append(dA)
+                            cs_.append(cross_section)
+                        else:  # re-calculate
+                            xm_.append(p_.centroid.x)
+                            zm_.append(p_.centroid.y)
+                            dA_.append(p_.area)
+                            cs_.append('polygon')
+
         Nf = len(xm_)  # filament number
         if Nf == 0:  # no points found within polygon (skin)
-            xm_, zm_, dl_, dt_ = x, z, dl, dt
+            xm_, zm_, dl_, dt_ = coil.x, coil.z, coil.dl, coil.dt
             Nf = 1
         # constant current density
         Nt_ = coil['Nt']*np.array(dA_) / np.sum(dA_)

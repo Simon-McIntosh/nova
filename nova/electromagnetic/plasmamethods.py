@@ -14,8 +14,7 @@ class PlasmaMethods:
 
     def __init__(self):
         self.biot_instances = ['plasmagrid', 'plasmafilament']
-        self.default_attributes = {'plasma_boundary': None,
-                                   'plasma_tree': None}
+        self.default_attributes = {'plasma_boundary': []}
 
     @property
     def dPlasma(self):
@@ -67,7 +66,8 @@ class PlasmaMethods:
         self.plasma_boundary = boundary
         # construct plasma coil from polygon
         self.add_coil(0, 0, 0, 0, polygon=self.plasma_boundary,
-                      cross_section='rectangle',
+                      cross_section='polygon',
+                      turn_section='rectangle',
                       dCoil=self.dPlasma, name=name, plasma=True,
                       part='plasma')
         #self.plasma_tree = pygeos.STRtree(pygeos.points(
@@ -106,28 +106,29 @@ class PlasmaMethods:
 
     @plasma_boundary.setter
     def plasma_boundary(self, boundary):
-        if boundary is not None:
-            if not isinstance(boundary, shapely.geometry.Polygon):
-                boundary = np.array(boundary)  # to numpy array
-                if boundary.ndim == 1:   # limit bounding box
-                    if len(boundary) == 4:
-                        polygon = shapely.geometry.box(*boundary[::2],
-                                                       *boundary[1::2])
-                    else:
-                        raise IndexError('malformed bounding box\n'
-                                         f'boundary: {boundary}\n'
-                                         'require [xmin, xmax, zmin, zmax]')
-                elif boundary.ndim == 2 and boundary.shape[1] == 2:  # loop
-                    polygon = shapely.geometry.Polygon(boundary)
+        if not isinstance(boundary, shapely.geometry.Polygon):
+            boundary = np.array(boundary)  # to numpy array
+            if boundary.ndim == 1:   # limit bounding box
+                if len(boundary) == 0:
+                    return
+                elif len(boundary) == 4:
+                    polygon = shapely.geometry.box(*boundary[::2],
+                                                   *boundary[1::2])
                 else:
-                    raise IndexError('malformed bounding loop\n'
-                                     f'shape(boundary): {boundary.shape}\n'
-                                     'require (n,2)')
+                    raise IndexError('malformed bounding box\n'
+                                     f'boundary: {boundary}\n'
+                                     'require [xmin, xmax, zmin, zmax]')
+            elif boundary.ndim == 2 and boundary.shape[1] == 2:  # loop
+                polygon = shapely.geometry.Polygon(boundary)
             else:
-                polygon = boundary
-            # orient polygon
-            polygon = shapely.geometry.polygon.orient(polygon, sign=1.0)
-            self._plasma_boundary = polygon
+                raise IndexError('malformed bounding loop\n'
+                                 f'shape(boundary): {boundary.shape}\n'
+                                 'require (n,2)')
+        else:
+            polygon = boundary
+        # orient polygon
+        polygon = shapely.geometry.polygon.orient(polygon)
+        self._plasma_boundary = polygon
 
     '''
     @property

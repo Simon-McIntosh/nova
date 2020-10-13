@@ -7,7 +7,7 @@ from nova.electromagnetic.coilgeom import ITERcoilset
 from nova.utilities.pyplot import plt
 
 ITER = ITERcoilset(coils='pf vv trs dir', dCoil=0.25, dPlasma=0.25, n=2e3,
-                   read_txt=True, limit=[3, 10, -6, 6])
+                   read_txt=False, limit=[3, 10, -6, 6])
 
 ITER.filename = -1
 ITER.scenario = 'SOF'

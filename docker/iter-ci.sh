@@ -7,14 +7,14 @@ module use /work/imas/etc/modules/all
 hostname
 # load udocker
 module load udocker/1.1.4-intel-2020a-Python-2.7.18
-docker_pytest="udocker --allow-root run --volume=$wkdir:/nova $label -m pytest /nova/tests/ --junitxml=/nova/tests/results.xml"
+docker_pytest="udocker --allow-root run --volume=$wkdir:/nova nova_$label -m pytest /nova/tests/ --junitxml=/nova/tests/results.xml"
 { # try
 # run from cached image
 $docker_pytest
 } || { # except
 # pull and build when cached image not found
 udocker --allow-root pull twistersi/nova:$label
-udocker --allow-root create --name=$label twistersi/nova:base
+udocker --allow-root create --name=nova_$label twistersi/nova:$label
 # run docker container (run pytest on nova/tests)
 $docker_pytest
 }

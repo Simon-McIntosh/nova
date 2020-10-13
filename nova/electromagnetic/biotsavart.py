@@ -130,11 +130,11 @@ class BiotFrame(CoilFrame):
         self._nT = value
 
     def __getattr__(self, key):
-        'assemble float16 (nT,nS) matrix if _attribute_'
+        """Assemble (nT,nS) matrix if key == _*_."""
         if key[0] == '_' and key[-1] == '_' \
                 and key[1:-1] in self._dataframe_attributes:
             key = key[1:-1]
-            value = CoilFrame.__getattr__(self, f'_{key}') #.astype(np.half)
+            value = CoilFrame.__getattr__(self, f'_{key}')
             if key in self._mpc_attributes:  # inflate
                 value = value[self._mpc_referance]
             if self.nS is None or self.nT is None or self.region is None:
@@ -142,11 +142,11 @@ class BiotFrame(CoilFrame):
                 err_txt += 'number not set'
                 raise IndexError(err_txt)
             if self.region == 'source':  # assemble source
-                value = np.dot(np.ones((self.nT, 1)), #, dtype=np.half
+                value = np.dot(np.ones((self.nT, 1)),
                                value.reshape(1, -1)).flatten()
             elif self.region == 'target':  # assemble target
                 value = np.dot(value.reshape(-1, 1),
-                               np.ones((1, self.nS))).flatten()  # , dtype=np.half
+                               np.ones((1, self.nS))).flatten()
             return value
         else:
             return CoilFrame.__getattr__(self, key)
@@ -155,8 +155,8 @@ class BiotFrame(CoilFrame):
 class BiotSet(CoilMatrix, BiotAttributes):
 
     _biotset_attributes = {'_solve': True,
-                           'source_turns': True, 'target_turns': True,
-                           'reduce_source': True, 'reduce_target': True}
+                           'source_turns': True, 'target_turns': False,
+                           'reduce_source': True, 'reduce_target': False}
 
     def __init__(self, source=None, target=None, **biot_attributes):
         CoilMatrix.__init__(self)

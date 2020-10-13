@@ -5,6 +5,7 @@ Methods inserted into CoilSet class. Requies CoilMethods.
 
 """
 import numpy as np
+import pandas as pd
 import shapely
 import pygeos
 
@@ -14,7 +15,8 @@ class PlasmaMethods:
 
     def __init__(self):
         self.biot_instances = ['plasmagrid', 'plasmafilament']
-        self.default_attributes = {'plasma_boundary': []}
+        self.default_attributes = {'plasma_boundary': [],
+                                   'separatrix': []}
 
     @property
     def dPlasma(self):
@@ -70,8 +72,7 @@ class PlasmaMethods:
                       turn_section='rectangle',
                       dCoil=self.dPlasma, name=name, plasma=True,
                       part='plasma')
-        #self.plasma_tree = pygeos.STRtree(pygeos.points(
-        #    self.subcoil.loc[self.plasma_index, ['x', 'z']].values))
+
         # generate plasma grid
         # self.plasma.generate_grid()
 
@@ -130,14 +131,14 @@ class PlasmaMethods:
         polygon = shapely.geometry.polygon.orient(polygon)
         self._plasma_boundary = polygon
 
-    '''
     @property
     def plasma_tree(self):
         """
-        Manage STR plasma tree.
+        Return STR plasma tree, read only.
 
         Construct STR tree from plasma filaments to enable fast search in
-        free-boundary calculations.
+        free-boundary calculations. Create link to tree on first call.
+        pygeos creates tree on first evaluation
 
         Parameters
         ----------
@@ -155,16 +156,40 @@ class PlasmaMethods:
             pygeos STRtree.
 
         """
+        if not hasattr(self, '_plasma_tree'):  # link to pygeos STRtree
+            self._plasma_tree = pygeos.STRtree(pygeos.points(
+                self.subcoil.x[self.plasma_index],
+                self.subcoil.z[self.plasma_index]))
         return self._plasma_tree
 
-    @plasma_tree.setter
-    def plasma_tree(self, tree):
-        if tree is not None:
-            if not isinstance(tree, pygeos.STRtree):
-                raise TypeError('requires pygeos.STRtree\n'
-                                f'passed {type(tree)}')
-            self._plasma_tree = tree
-    '''
+    @property
+    def separatrix(self):
+        return self._separatrix
+
+    @separatrix.setter
+    def separatrix(self, loop):
+        if len(loop) == 0:
+            return
+        else:
+            if isinstance(loop, pd.DataFrame):
+                loop = loop.values
+            if not isinstance(loop, shapely.geometry.Polygon):
+                polygon = shapely.geometry.Polygon(loop)
+            if not polygon.is_valid:
+                polygon = pygeos.creation.polygons(loop)
+                polygon = pygeos.constructive.make_valid(polygon)
+                area = [pygeos.area(pygeos.get_geometry(polygon, i))
+                        for i in range(pygeos.get_num_geometries(polygon))]
+                polygon = pygeos.get_geometry(polygon, np.argmax(area))
+                polygon = shapely.geometry.Polygon(
+                    pygeos.get_coordinates(polygon))
+            self._separatrix = polygon
+            # update coil - polygon and polygon derived attributes
+            self.coil.loc['Plasma', 'polygon'] = polygon
+            self.coil.update_polygon(index='Plasma')
+            # ubdate subcoil
+            self.subcoil.ionize = self.plasma_tree.query(
+                pygeos.io.from_shapely(polygon), predicate='contains')
 
     @property
     def plasma_index(self):

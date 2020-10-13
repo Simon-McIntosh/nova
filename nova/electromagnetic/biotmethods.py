@@ -21,8 +21,8 @@ class Mutual(BiotSet):
 
 class ForceField(Mutual):
     _biot_attributes = []
-    _default_biot_attributes = {'target_turns': False,  # include target turns
-                                'reduce_target': False}  # sum-reduce target
+    _default_biot_attributes = {'target_turns': False,
+                                'reduce_target': False}
 
     def __init__(self, subcoil, **forcefield_attributes):
         Mutual.__init__(self, subcoil, **forcefield_attributes)
@@ -81,7 +81,6 @@ class Probe(BiotSet):
 
 
 class Field(Probe):
-
     """Field values imposed on coil boundaries - extends Probe class."""
 
     _biot_attributes = ['target', '_coil_index']
@@ -92,7 +91,7 @@ class Field(Probe):
         Probe.__init__(self, subcoil, **field_attributes)
 
     def add_target(self, coil, parts, dField=0.5):
-        'add field probes spaced around each coil perimiter'
+        """Add field probes spaced around each coil perimiter."""
         if not is_list_like(parts):
             parts = [parts]
         self._coil_index = []
@@ -135,8 +134,7 @@ class PlasmaFilament(Probe):
 
 
 class Colocate(Probe):
-
-    'colocation probes - used by inverse (nova.design)'
+    """Colocation probes - used by inverse (nova.design)."""
 
     _biot_attributes = ['label', 'x', 'z', 'value',
                         'nx', 'nz', 'd_dx', 'd_dz',
@@ -324,7 +322,9 @@ class Grid(BiotSet):
                         'target', 'polygon']
 
     _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31,
-                                'boundary': 'coilset', 'polygon': None}
+                                'boundary': 'coilset', 'polygon': None,
+                                'source_turns': True, 'target_turns': False,
+                                'reduce_source': True, 'reduce_target': False}
 
     def __init__(self, subcoil, **grid_attributes):
         """

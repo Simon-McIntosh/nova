@@ -148,8 +148,14 @@ class CoilData():
 
     @update_dataframe.setter
     def update_dataframe(self, value):
-        self._update_dataframe = {attribute: value
-                                  for attribute in self._dataframe_attributes}
+        if type(value) == bool:
+            self._update_dataframe = {
+                attribute: value for attribute in self._dataframe_attributes}
+        elif isinstance(value, dict):
+            self._update_dataframe.update(value)
+        else:
+            self._update_dataframe.update({
+                attribute: True for attribute in value})
 
     def _update_flags(self, **kwargs):
         for flag in self._coildata_flags:

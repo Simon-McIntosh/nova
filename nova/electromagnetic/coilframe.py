@@ -360,6 +360,7 @@ class CoilFrame(DataFrame, CoilData):
                                  f'index: {self.index}')
 
     def generate_polygon(self):
+        """Generate polygons based on coil geometroy and cross section."""
         if 'polygon' in self.columns:
             for index in self.index[self.polygon.isna()]:
                 cross_section = self.loc[index, 'cross_section']
@@ -371,26 +372,58 @@ class CoilFrame(DataFrame, CoilData):
                 self.loc[index, 'polygon'] = polygon
             self.update_polygon()
 
-    def update_polygon(self):
-        for index in self.index[(self.rms == 0) & (~self.polygon.isna())]:
-            polygon = self.loc[index, 'polygon']
-            cross_section = self.loc[index, 'cross_section']
-            dl, dt = self.loc[index, ['dl', 'dt']]
+    def update_polygon(self, index=None):
+        """
+        Update polygon derived attributes.
+
+        Derived attributes:
+            - x, z, dx, dz : float
+                coil centroid and bounding box
+
+        Parameters
+        ----------
+        index : str or array-like or Index, optional
+            CoilFrame subindex. The default is None (all coils).
+
+        Raises
+        ------
+        ValueError
+            Zero cross-sectional area.
+
+        Returns
+        -------
+        None.
+
+        """
+        if index is None:
+            index = self.index[(self.rms == 0) & (~self.polygon.isna())]
+        elif not is_list_like(index):
+            index = [index]
+        for key in index:
+            i = self.index.get_loc(key)
+            polygon = self.loc[key, 'polygon']
+            cross_section = self.loc[key, 'cross_section']
+            dl, dt = self.dl[i], self.dt[i]
             dA = polygon.area  # update polygon area
             x = polygon.centroid.x  # update x centroid
             z = polygon.centroid.y  # update z centroid
-            self.loc[index, 'x'] = x
-            self.loc[index, 'z'] = z
+            #self.loc[key, 'x'] = x
+            #self.loc[key, 'z'] = z
+            self.x[i] = x
+            self.z[i] = z
             if dA == 0:
                 err_txt = f'zero area polygon entered for coil {index}\n'
                 err_txt += f'cross section: {cross_section}\n'
                 err_txt += f'dl {dl}\ndt {dt}'
                 raise ValueError(err_txt)
             else:
-                self.loc[index, 'dA'] = dA
+                self.loc[key, 'dA'] = dA
             bounds = polygon.bounds
-            self.loc[index, 'dx'] = bounds[2] - bounds[0]
-            self.loc[index, 'dz'] = bounds[3] - bounds[1]
+            #self.loc[key, 'dx'] = bounds[2] - bounds[0]
+            #self.loc[key, 'dz'] = bounds[3] - bounds[1]
+            self.dx[i] = bounds[2] - bounds[0]
+            self.dz[i] = bounds[3] - bounds[1]
+
             if cross_section == 'circle':
                 rms = np.sqrt(x**2 + dl**2 / 16)  # circle
             elif cross_section in ['square', 'rectangle']:
@@ -399,10 +432,12 @@ class CoilFrame(DataFrame, CoilData):
                 rms = np.sqrt((dl**2 * dt**2 / 24 - dl**2 * dt / 8
                                + dl**2 / 8 + x**2))
             else:  # calculate directly from polygon
-                p = self.loc[index, 'polygon']
+                p = self.loc[key, 'polygon']
                 rms = (transform(lambda x, z:
                                  (x**2, z), p).centroid.x)**0.5
-            self.loc[index, 'rms'] = rms
+            #self.loc[key, 'rms'] = rms
+            self.rms[i] = rms
+        self.update_dataframe = ['x', 'z', 'dx', 'dz', 'rms']
 
     @staticmethod
     def _get_polygen(cross_section):

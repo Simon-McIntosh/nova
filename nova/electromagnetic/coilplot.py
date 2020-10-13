@@ -64,15 +64,15 @@ class CoilPlot:
         patch.set_facecolor(c)
 
 
-    def plot_coil(self, coil, alpha=1, ax=None, passive=False, **kwargs):
+    def plot_coil(self, coil, alpha=1, ax=None, zeroturn=False, **kwargs):
         if ax is None:
             ax = plt.gca()
         if not coil.empty:
             if pd.isnull(coil.loc[:, 'patch']).any() or len(kwargs) > 0:
                 CoilPlot.patch_coil(coil, **kwargs)  # patch on-demand
-            if passive:
+            if zeroturn:  # include zeroturn filaments
                 patch = coil.loc[:, 'patch']
-            else:  # exclude passive filaments (Nt == 0)
+            else:  # exclude zeroturn filaments (Nt == 0)
                 patch = coil.loc[coil.Nt != 0, 'patch']  # plot iff Nt != 0
             # form list of lists
             patch = [p if pd.api.types.is_list_like(p)
@@ -85,18 +85,18 @@ class CoilPlot:
                 pc = PatchCollection(patch, match_original=True)
                 ax.add_collection(pc)
 
-    def plot(self, subcoil=False, plasma=True, label='coil', current='A',
-             field=True, passive=False, ax=None):
+    def plot(self, subcoil=False, plasma=True, label='active', current='A',
+             field=True, zeroturn=False, ax=None):
         if ax is None:
             ax = plt.gca()
         if subcoil:
-            self.plot_coil(self.subcoil, passive=passive, ax=ax)
+            self.plot_coil(self.subcoil, zeroturn=zeroturn, ax=ax)
         else:
-            self.plot_coil(self.coil, passive=passive, ax=ax)
+            self.plot_coil(self.coil, zeroturn=zeroturn, ax=ax)
         ax.axis('equal')
         ax.axis('off')
         plt.tight_layout()
-        if  plasma and self.coil._plasma_index.sum() > 0:
+        if plasma and self.coil._plasma_index.sum() > 0:
             self.label_plasma(ax)
         if label or current or field:
             self.label_coil(ax, label, current, field)

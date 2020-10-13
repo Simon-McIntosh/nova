@@ -6,7 +6,7 @@ import pygeos
 from nova.electromagnetic.coilgeom import ITERcoilset
 from nova.utilities.pyplot import plt
 
-ITER = ITERcoilset(coils='pf vv trs dir', dCoil=0.25, dPlasma=0.25, n=2e3,
+ITER = ITERcoilset(coils='pf vv trs dir', dCoil=0.25, dPlasma=0.15, n=5e3,
                    read_txt=False, limit=[3, 10, -6, 6])
 
 ITER.filename = -1
@@ -20,39 +20,23 @@ ITER.grid.solve()
 ITER.scenario = 'SOF'
 '''
 
-#ITER.plasma.generate_grid()
-#ITER.grid.generate_grid()
+# ITER.plasma.generate_grid()
+# ITER.grid.generate_grid()
 
-poly = pygeos.creation.polygons(ITER.data['separatrix'].values)
-poly = pygeos.constructive.make_valid(poly)
-area = [pygeos.area(pygeos.get_geometry(poly, i))
-        for i in range(pygeos.get_num_geometries(poly))]
-poly = pygeos.get_geometry(poly, np.argmax(area))
+sep = ITER.data['separatrix']
+sep.loc[:, 'x'] -= 0.2
+sep.loc[:, 'z'] += -1.5
+ITER.separatrix = sep#ITER.data['separatrix']
 
-
-
-tree = pygeos.STRtree(pygeos.points(
-            ITER.subcoil.loc[ITER.plasma_index, ['x', 'z']].values))
-
-
-ITER.subcoil.ionize = tree.query(poly, predicate='contains')
-ITER.coil.loc['Plasma', 'polygon'] = \
-    shapely.geometry.Polygon(pygeos.get_coordinates(poly))
-
+ITER.grid.update_psi()
 
 plt.set_aspect(0.9)
-ITER.plot(True, plasma=True, label='active')
+#ITER.plot(False, plasma=True)
+ITER.plot(True, plasma=True)
 ITER.grid.plot_flux()
 
 #ITER.plot_data(['firstwall', 'divertor'])
 #plt.plot(*ITER.data['divertor'].iloc[1:].values.T)
-#sep = pygeos.get_coordinates(poly)
-
-plt.plot(*pygeos.get_coordinates(poly).T)
 
 
-#Xpoint = re.findall(r'\d+\.\d+', shapely.validation.explain_validity(ring))
-
-#poly = shapely.geometry.Polygon(ITER.data['separatrix'].values)
-#poly = shapely.ops.polygonize_full(ITER.data['separatrix'].values)
 #ITER.plasma.plot()

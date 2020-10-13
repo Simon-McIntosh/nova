@@ -141,8 +141,6 @@ class Colocate(Probe):
                         'nx', 'nz', 'd_dx', 'd_dz',
                         'factor', 'weight']
 
-    def __init__(self, subcoil, **colocate_attributes):
-        Probe.__init__(self, subcoil, **colocate_attributes)
 
     def add_targets(self, *args, **kwargs):
         '''
@@ -574,6 +572,7 @@ class PlasmaGrid(Grid):
     _default_biot_attributes = {'n': 5e4, 'expand': 0.05, 'nlevels': 31,
                                 '_boundary': 'limit'}
     '''
+    _default_biot_attributes = {}
 
     def generate_grid(self, regen=False, **kwargs):
         """
@@ -728,6 +727,19 @@ class BiotMethods:
             setattr(getattr(self, instance), 'biot_attributes',
                     biot_attributes.get(biot_attribute, {}))
             getattr(self, instance).update_biotset()
+
+    @property
+    def update_plasma(self):
+        return {instance: getattr(self, instance)._update_plasma
+                for instance in self._biot_instances}
+
+    @update_plasma.setter
+    def update_plasma(self, value):
+        if not isinstance(value, bool):
+            raise ValueError(f'flag type {type(value)} must be bool')
+        else:
+            for instance in self._biot_instances:
+                getattr(self, instance)._update_plasma = value
 
     @property
     def dField(self):

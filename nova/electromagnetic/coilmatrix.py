@@ -99,7 +99,7 @@ class CoilMatrix:
                       self.source._reduction_index)
 
 
-    def _update_plasma(self, M, _M):
+    def _update_plasma_turns(self, M, _M):
         """Update plasma turns."""
         if self.source.nP > 0:  # source plasma filaments
             _M = _M.copy()  # unlink
@@ -114,28 +114,12 @@ class CoilMatrix:
         if self.reduce_target and len(self.target._reduction_index) < self.nT:
             _M = np.add.reduceat(_M, self.target._reduction_index, axis=0)
         M[:, self.source._plasma_iloc] = _M
-        '''
-            _m = _M * self.source.Np
-            M[:, self.source._plasma_iloc] = np.add.reduceat(
-                _m, self.source._plasma_reduction_index, axis=1)
-        if _M_.size > 0:  # update target plasma filaments
-            M[self.source._plasma_iloc, :] = M[:, self.source._plasma_iloc].T
-            _m_ = np.add.reduceat(_M_ * self.source.Np,
-                                  self.source._plasma_reduction_index, axis=1)
-            _m_ = np.add.reduceat(_m_.T * self.target.Np,
-                                  self.target._plasma_reduction_index, axis=1)
-            M[self.target._plasma_iloc][:, self.source._plasma_iloc] = _m_.T
-        '''
 
-
-
-    def update_psi(self):
-        self._update_plasma(self.psi, self._psi)
-
-    def update_field(self):
-        for xz in self.field:
-            self._update_plasma(self.field[xz], self._field[xz])
-
+    def update_plasma(self):
+        self._update_plasma_turns(self.psi, self._psi)
+        self._update_plasma_turns(self.bx, self._bx)
+        self._update_plasma_turns(self.bz, self._bz)
+        self._update_plasma = False
 
     def _reshape(self, M):
         if hasattr(self, 'n2d'):
@@ -143,8 +127,10 @@ class CoilMatrix:
         return M
 
     def _dot(self, variable):
-        if self._solve:
+        if self._solve:  # solve interaction
             self.solve()
+        if self._update_plasma:  # update plasma turns
+            self.update_plasma()
         matrix = getattr(self, variable.lower())
         return self._reshape(np.dot(matrix, self.source.coilframe._Ic))
 

@@ -6,8 +6,9 @@ import pygeos
 from nova.electromagnetic.coilgeom import ITERcoilset
 from nova.utilities.pyplot import plt
 
-ITER = ITERcoilset(coils='pf vv trs dir', dCoil=0.25, dPlasma=0.15, n=5e3,
-                   read_txt=False, limit=[3, 10, -6, 6])
+ITER = ITERcoilset(coils='pf', dCoil=0.5, dPlasma=0.5, n=1e3,
+                   read_txt=True, limit=[3, 10, -6, 6])
+
 
 ITER.filename = -1
 ITER.scenario = 'SOF'
@@ -24,11 +25,24 @@ ITER.scenario = 'SOF'
 # ITER.grid.generate_grid()
 
 sep = ITER.data['separatrix']
-sep.loc[:, 'x'] -= 0.2
-sep.loc[:, 'z'] += -1.5
-ITER.separatrix = sep#ITER.data['separatrix']
+#sep.loc[:, 'x'] -= 0.2
+#sep.loc[:, 'z'] += -1.5
+ITER.separatrix = ITER.data['separatrix']
 
-ITER.grid.update_psi()
+ITER.update_field()
+
+#ITER.grid.update_psi()
+
+from scipy.interpolate import RectBivariateSpline as RBS
+from scipy.optimize import minimize
+interp = RBS(ITER.grid.x, ITER.grid.z, ITER.grid.B)
+
+def fun(x):
+    return interp.ev(*x)
+
+x = minimize(fun, [ITER.coil.x[-1], ITER.coil.z[-1]-5]).x
+print(x)
+plt.plot(*x, 'o')
 
 plt.set_aspect(0.9)
 #ITER.plot(False, plasma=True)
@@ -40,3 +54,4 @@ ITER.grid.plot_flux()
 
 
 #ITER.plasma.plot()
+

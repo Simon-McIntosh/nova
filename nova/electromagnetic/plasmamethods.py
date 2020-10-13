@@ -190,6 +190,7 @@ class PlasmaMethods:
             # ubdate subcoil
             self.subcoil.ionize = self.plasma_tree.query(
                 pygeos.io.from_shapely(polygon), predicate='contains')
+            self.update_plasma = True
 
     @property
     def plasma_index(self):

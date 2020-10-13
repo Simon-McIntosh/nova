@@ -776,7 +776,7 @@ class CoilMethods:
         self.subcoil.loc[subindex, 'coil'] = name
         self.subcoil.add_mpc(subindex.to_list())
         # update current
-        self.forcefield.solve()
+        #self.forcefield.solve()
         self.Ic = {name: Ic}
 
     def categorize_coilset(self, rename=False):

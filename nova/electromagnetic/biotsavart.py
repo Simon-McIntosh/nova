@@ -154,7 +154,7 @@ class BiotFrame(CoilFrame):
 
 class BiotSet(CoilMatrix, BiotAttributes):
 
-    _biotset_attributes = {'_solve': True,
+    _biotset_attributes = {'_solve': True, '_update_plasma': True,
                            'source_turns': True, 'target_turns': False,
                            'reduce_source': True, 'reduce_target': False}
 

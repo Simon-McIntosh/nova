@@ -12,7 +12,8 @@ from nova.electromagnetic.biotsavart import BiotSet, BiotAttributes
 class Mutual(BiotSet):
 
     _biot_attributes = []
-    _default_biot_attributes = {}
+    _default_biot_attributes = {'target_turns': True,
+                                'reduce_target': True}
 
     def __init__(self, subcoil, **mutual_attributes):
         BiotSet.__init__(self, source=subcoil, target=subcoil,

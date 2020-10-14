@@ -12,7 +12,7 @@ class CoilData():
 
     Provided as parent to CoilFrame. Inherited alongside DataFrame.
     Fast access variables stored as np.arrays _*
-    Lazy exchange implemented with DataFrame.
+    Lazy data exchange implemented with parent DataFrame.
 
     Key Attributes
     --------------

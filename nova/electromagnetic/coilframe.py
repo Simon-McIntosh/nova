@@ -60,7 +60,7 @@ class CoilFrame(DataFrame, CoilData):
         'default attributes when not set via self.add_coil(**kwargs)'
         self._default_attributes = \
             {'rms': 0., 'dx': 0., 'dz': 0., 'dA': 0., 'nx': 1, 'nz': 1,
-             'Ic': 0., 'It': 0., 'm': '', 'R': 0., 'Nt': 1,
+             'Ic': 0., 'It': 0., 'm': '', 'R': 0., 'Nt': 1.,
              'Nf': 1, 'material': '',
              'turn_fraction': 1., 'skin_fraction': 1., 'patch': None,
              'cross_section': 'rectangle', 'turn_section': 'rectangle',
@@ -277,7 +277,7 @@ class CoilFrame(DataFrame, CoilData):
     def _extract_data(self, *args, **kwargs):
         data = {}  # python 3.6+ assumes dict is insertion ordered
         for key, arg in zip(self._required_columns, args):
-            data[key] = arg  # add required arguments
+            data[key] = np.array(arg, dtype=float)  # add required arguments
         current_label = self._extract_current_label(**kwargs)
         for key in self._additional_columns:
             if key in kwargs:
@@ -401,14 +401,12 @@ class CoilFrame(DataFrame, CoilData):
             index = [index]
         for key in index:
             i = self.index.get_loc(key)
-            polygon = self.loc[key, 'polygon']
-            cross_section = self.loc[key, 'cross_section']
+            polygon = self.at[key, 'polygon']
+            cross_section = self.at[key, 'cross_section']
             dl, dt = self.dl[i], self.dt[i]
             dA = polygon.area  # update polygon area
             x = polygon.centroid.x  # update x centroid
             z = polygon.centroid.y  # update z centroid
-            #self.loc[key, 'x'] = x
-            #self.loc[key, 'z'] = z
             self.x[i] = x
             self.z[i] = z
             if dA == 0:
@@ -419,8 +417,6 @@ class CoilFrame(DataFrame, CoilData):
             else:
                 self.loc[key, 'dA'] = dA
             bounds = polygon.bounds
-            #self.loc[key, 'dx'] = bounds[2] - bounds[0]
-            #self.loc[key, 'dz'] = bounds[3] - bounds[1]
             self.dx[i] = bounds[2] - bounds[0]
             self.dz[i] = bounds[3] - bounds[1]
 
@@ -435,9 +431,9 @@ class CoilFrame(DataFrame, CoilData):
                 p = self.loc[key, 'polygon']
                 rms = (transform(lambda x, z:
                                  (x**2, z), p).centroid.x)**0.5
-            #self.loc[key, 'rms'] = rms
             self.rms[i] = rms
-        self.update_dataframe = ['x', 'z', 'dx', 'dz', 'rms']
+        if len(index) != 0:
+            self.update_dataframe = ['x', 'z', 'dx', 'dz', 'rms']
 
     @staticmethod
     def _get_polygen(cross_section):

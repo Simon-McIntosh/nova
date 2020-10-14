@@ -53,30 +53,6 @@ class ITERcoilset(CoilClass):
         return getattr(self, attribute) != \
             self._coilset['default_attributes'][attribute]
 
-    def rebuild(self, coils, filename, **kwargs):
-        _rebuild = {'coilset': False, 'field': False, 'grid': False,
-                    'plasma': False}
-        if self.update('dCoil') or self.update('dPlasma'):
-            print('rebuild coilset')
-            self.drop_coil()  # clear
-            self.build_coilset(coils, **kwargs)  # rebuild
-            _rebuild['coilset'] = True
-        if self.update('dField'):
-            print('rebuild field targets')
-            self.field.target.drop_coil()  # clear
-            self.field.add_target(self.coil, ['CS', 'PF'],
-                                  dField=self.dField)
-            self.field.solve()
-            _rebuild['field'] = True
-        if self.grid.generate_grid(**kwargs):
-            print('rebuild grid')
-            _rebuild['grid'] = True
-        #if self.plasma.generate_grid(**self.plasma_kwargs(**kwargs)):
-        #    print('rebuild plasma')
-        #    _rebuild['plasma'] = True
-        if np.array(_rebuild.values()).any():
-            self.save_coilset(filename)
-
     def select_coils(self, **kwargs):
         coils = kwargs.pop('coils', ['pf', 'vsj', 'vv'])  # default set
         if not pd.api.types.is_list_like(coils):
@@ -107,22 +83,40 @@ class ITERcoilset(CoilClass):
             if 'dir' in coils:
                 machine.load_coilset(part_list='dir')
             self.append_coilset(machine.coilset)
-        #self.categorize_coilset()
+        # self.categorize_coilset()
         # build plasma
         boundary = pd.concat([self.data['firstwall'],
                               self.data['divertor'].iloc[1:]])
-
         self.add_plasma(boundary)
         # generate biot objects
         self.field.add_target(self.coil, ['CS', 'PF'], dField=self.dField)
-        self.field.solve()
-        self.forcefield.solve()  # compute mutual interaction
-        self.grid.generate_grid(**kwargs, regen=True)
+        self.field.solve_interaction()
+        self.forcefield.solve_interaction()  # compute mutual interaction
+        self.grid.generate_grid(**kwargs)  # generate base grid (plots)
+        self.plasmagrid.generate_grid(**kwargs)  # generate plasma grid
 
-
-        #self.plasma.generate_grid(**self.plasma_kwargs(**kwargs), regen=True)
-
-
+    def rebuild(self, coils, filename, **kwargs):
+        _rebuild = {}
+        if self.update('dCoil') or self.update('dPlasma'):
+            print('rebuild coilset')
+            self.drop_coil()  # clear
+            self.build_coilset(coils, **kwargs)  # rebuild
+            _rebuild['coilset'] = True
+        if self.update('dField'):
+            print('rebuild field targets')
+            self.field.target.drop_coil()  # clear
+            self.field.add_target(self.coil, ['CS', 'PF'],
+                                  dField=self.dField)
+            self.field.solve()
+            _rebuild['field'] = True
+        if self.grid.generate_grid(**kwargs):
+            print('rebuild grid')
+            _rebuild['grid'] = True
+        if self.plasmagrid.generate_grid(**kwargs):
+            print('rebuild plasmagrid')
+            _rebuild['plasmagrid'] = True
+        if np.fromiter(_rebuild.values(), dtype=bool).any():
+            self.save_coilset(filename)
 
 
 class ITERdata(pythonIO):
@@ -133,7 +127,6 @@ class ITERdata(pythonIO):
         self.source = source
         self.dCoil = dCoil
         self.read_txt = read_txt
-        #self.path = os.path.join(class_dir(nep_data.geom) + '/')
         self.cc = CoilClass(dCoil=dCoil)
         self.load_coils()
 

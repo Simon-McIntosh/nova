@@ -2,11 +2,12 @@ import numpy as np
 from pandas import DataFrame
 from pandas.api.types import is_list_like
 from scipy.interpolate import interp1d
+import shapely.geometry
 
 from nova.utilities.pyplot import plt
 from nova.utilities.geom import length
 from nova.electromagnetic.meshgrid import MeshGrid
-from nova.electromagnetic.biotsavart import BiotSet, BiotAttributes
+from nova.electromagnetic.biotsavart import BiotSet
 
 
 class Mutual(BiotSet):
@@ -295,7 +296,7 @@ class Grid(BiotSet):
         nlevels : int
             Number of contour levels.
         boundary : str
-            Limit boundary ['limit', 'coilset_limit'].
+            Limit boundary ['limit', 'expand_limit'].
 
     Derived Attributes
     ------------------
@@ -316,7 +317,7 @@ class Grid(BiotSet):
 
     """
 
-    _biot_attributes = ['n', 'n2d', 'limit', 'coilset_limit', 'boundary',
+    _biot_attributes = ['n', 'n2d', 'limit', 'expand_limit', 'boundary',
                         'expand', 'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d',
                         'target', 'polygon']
 
@@ -345,6 +346,57 @@ class Grid(BiotSet):
         """
         BiotSet.__init__(self, source=subcoil, **grid_attributes)
 
+    @property
+    def grid_boundary(self):
+        """
+        Manage grid bounding box based on self.boundary.
+
+        Parameters
+        ----------
+        boundary : str
+            Boundary flag ether 'limit' or 'expand_limit'.
+            Set self.regen=True if boundary flag is changed.
+
+        Raises
+        ------
+        IndexError
+            Flag not in [limit, expand_limit].
+
+        Returns
+        -------
+        limit : array_like, shape(4,)
+            Grid bounding box [xmin, xmax, zmin, zmax]
+
+        """
+        if self.boundary == 'limit':
+            return self.limit
+        elif self.boundary == 'expand_limit':
+            return self.expand_limit
+        else:
+            raise IndexError(f'boundary {self.boundary} not in '
+                             '[limit, expand_limit]')
+
+    @grid_boundary.setter
+    def grid_boundary(self, boundary):
+        if boundary != self.boundary:
+            self.regen = True  # force update after boundary switch
+        if boundary in ['limit', 'expand_limit']:
+            self.boundary = boundary
+        else:
+            raise IndexError(f'boundary label {boundary} not in '
+                             '[limit, expand_limit]')
+
+    def _set_boundary(self, **kwargs):
+        if 'boundary' in kwargs:  # set flag directly [limit, expand_limit]
+            boundary = kwargs['boundary']
+        elif 'expand' in kwargs:  # then expand (coilset limit)
+            boundary = 'expand_limit'
+        elif 'limit' in kwargs:  # then limit
+            boundary = 'limit'
+        else:  # defaults to coilset limit
+            boundary = 'expand_limit'
+        self.grid_boundary = boundary
+
     def generate_grid(self, regen=False, **kwargs):
         """
         Generate grid for use as targets in Biot Savart calculations.
@@ -357,7 +409,7 @@ class Grid(BiotSet):
         regen : bool
             Force grid regeneration.
         boundary : str
-            Grid boundary flag ['coilset_limit' or 'limit'].
+            Grid boundary flag ['expand_limit' or 'limit'].
 
         Keyword Arguments
         -----------------
@@ -381,15 +433,14 @@ class Grid(BiotSet):
         self._set_boundary(**kwargs)
         self.update_biotset()
         grid_attributes = {}  # grid attributes
-        for key in ['n', 'limit', 'coilset_limit',
-                    'expand', 'levels', 'nlevels']:
+        for key in ['n', 'limit', 'expand', 'levels', 'nlevels']:
             grid_attributes[key] = kwargs.get(key, getattr(self, key))
         # calculate coilset limit
-        grid_attributes['coilset_limit'] = \
-            self._get_coilset_limit(grid_attributes['expand'])
+        grid_attributes['expand_limit'] = \
+            self._get_expand_limit(grid_attributes['expand'])
         # switch to coilset limit if limit is None
         if grid_attributes['limit'] is None:
-            self.grid_boundary = 'coilset_limit'
+            self.grid_boundary = 'expand_limit'
         regenerate_grid = \
             not np.array_equal(grid_attributes[self.boundary],
                                self.grid_boundary) or \
@@ -398,17 +449,6 @@ class Grid(BiotSet):
         if regenerate_grid:
             self._generate_grid(**grid_attributes)
         return regenerate_grid
-
-    def _set_boundary(self, **kwargs):
-        if 'boundary' in kwargs:  # primary switch
-            boundary = kwargs['boundary']
-        elif 'expand' in kwargs:  # then expand (coilset limit)
-            boundary = 'coilset_limit'
-        elif 'limit' in kwargs:  # then limit
-            boundary = 'limit'
-        else:  # defaults to coilset limit
-            boundary = 'coilset_limit'
-        self.grid_boundary = boundary
 
     def _generate_grid(self, **grid_attributes):
         self.biot_attributes = grid_attributes  # update attributes
@@ -423,9 +463,9 @@ class Grid(BiotSet):
             self.target.drop_coil()
             self.target.add_coil(self.x2d.flatten(), self.z2d.flatten(),
                                  name='Grid', delim='')
-            self.solve()
+            self.solve_interaction()
 
-    def _get_coilset_limit(self, expand, xmin=1e-3):
+    def _get_expand_limit(self, expand=None, xmin=1e-3):
         if expand is None:
             expand = self.expand  # use default
         if self.source.empty:
@@ -437,59 +477,14 @@ class Grid(BiotSet):
         return self._expand_limit(limit, expand, xmin)
 
     @staticmethod
-    def _expand_limit(limit, expand, xmin):
+    def _expand_limit(limit, expand, xmin, fix_aspect=False):
         dx, dz = np.diff(limit[:2])[0], np.diff(limit[2:])[0]
+        if not fix_aspect:
+            dx = dz = np.mean([dx, dz])
         limit += expand/2 * np.array([-dx, dx, -dz, dz])
         if limit[0] < xmin:
             limit[0] = xmin
         return limit
-
-    @property
-    def grid_boundary(self):
-        """
-        Return grid bounding box based on self.boundary.
-
-        Returns
-        -------
-        limit : array_like, shape(4,)
-            Grid bounding box [xmin, xmax, zmin, zmax]
-
-        """
-        if self.boundary == 'limit':
-            return self.limit
-        elif self.boundary == 'coilset_limit':
-            return self.coilset_limit
-        else:
-            raise IndexError(f'boundary {self.boundary} not in '
-                             '[limit, coilset_limit]')
-
-    @grid_boundary.setter
-    def grid_boundary(self, boundary):
-        """
-        Set grid boundary flag. self.regen if boundary flag is changed.
-
-        Parameters
-        ----------
-        boundary : str
-            Boundary flag ether 'limit' or 'coilset_limit'
-
-        Raises
-        ------
-        IndexError
-            Flag not in [limit, coilset_limit].
-
-        Returns
-        -------
-        None.
-
-        """
-        if boundary != self.boundary:
-            self.regen = True  # force update after boundary switch
-        if boundary in ['limit', 'coilset_limit']:
-            self.boundary = boundary
-        else:
-            raise IndexError(f'boundary label {boundary} not in '
-                             '[limit, coilset_limit]')
 
     def plot_grid(self, ax=None, **kwargs):
         """
@@ -564,19 +559,82 @@ class Grid(BiotSet):
 class PlasmaGrid(Grid):
     """Plasma grid interaction methods and data. Class extends Grid."""
 
-    '''
-    _biot_attributes = ['n', 'n2d', 'limit', 'coilset_limit', '_boundary',
-                        'expand', 'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d',
-                        'target']
+    _biot_attributes = Grid._biot_attributes + ['plasma_boundary']
 
-    _default_biot_attributes = {'n': 5e4, 'expand': 0.05, 'nlevels': 31,
-                                '_boundary': 'limit'}
-    '''
-    _default_biot_attributes = {}
+    Grid._default_biot_attributes.update(
+        {'expand': 0.1, 'nlevels': 51, 'boundary': 'limit',
+         'plasma_boundary': None})
+
+    def __init__(self, subcoil, **plasmagrid_attributes):
+        Grid.__init__(self, subcoil, **plasmagrid_attributes)
+
+    def _get_expand_limit(self, expand=None, xmin=1e-3):
+        """Overide Grid._get_expand_limit."""
+        if expand is None:
+            expand = self.expand  # use default
+        else:
+            self.expand = expand  # update
+        if self.plasma_boundary is None:
+            raise IndexError('Plasma boundary not set')
+        bounds = self.plasma_boundary.bounds
+        limit = [*bounds[::2], *bounds[1::2]]
+        return self._expand_limit(limit, expand, xmin)
+
+    @property
+    def plasma_boundary(self):
+        """
+        Manage plasma boundary (limit surface).
+
+        Parameters
+        ----------
+        plasma_boundary : array-like, shape(n,2) or Polygon
+            Plasma boundary.
+
+        Returns
+        -------
+        plasma_boundary : Polygon
+            Plasma boundary.
+
+        """
+        return self._plasma_boundary
+
+    @plasma_boundary.setter
+    def plasma_boundary(self, plasma_boundary):
+        if plasma_boundary is None:
+            pass
+        elif not isinstance(plasma_boundary, shapely.geometry.Polygon):
+            plasma_boundary = shapely.geometory.Polygon(plasma_boundary)
+        self._plasma_boundary = plasma_boundary
+
+    @property
+    def plasma_n(self):
+        """
+        Return default plasma grid point number.
+
+        Point number calculated to produce a grid with a nodal density
+        2.5 times the plasma filament density.
+
+        Returns
+        -------
+        n_plasma : int
+            plasmagrid node number.
+
+        """
+        grid_limit = self._get_expand_limit()
+        grid_area = (grid_limit[1]-grid_limit[0]) * \
+            (grid_limit[3]-grid_limit[2])
+        plasma_filament_density = \
+            np.sum(self.source.coilframe._plasma_index) /\
+            self.source.coilframe.dA[self.source.coilframe._plasma_index].sum()
+        return 2.5*int(plasma_filament_density*grid_area)
 
     def generate_grid(self, regen=False, **kwargs):
         """
         Generate plasma grid.
+
+        Accepts keyword aguments with plasma_* prefix. Plasma prefix
+        to enables shared attribute setting with base Grid instance
+        in CoilSet.
 
         Parameters
         ----------
@@ -585,7 +643,7 @@ class PlasmaGrid(Grid):
 
         Keyword Arguments
         -----------------
-        plasma_n : int, optional
+        n : int, optional
             Plasma grid node number.
         boundary : array_like or Polygon, optional
             External plasma boundary. A positively oriented curve or
@@ -598,39 +656,22 @@ class PlasmaGrid(Grid):
             Explicit values for contour levels
         regen : bool
             Force grid regeneration
+
         Returns
         -------
         None.
 
         """
-        # coerce kwargs to Grid format
-        kwargs = copy.deepcopy(kwargs)
-        kwargs['limit'] = kwargs.get('plasma_limit', self.plasma_limit)
-        kwargs['n'] = kwargs.get('plasma_n', self.plasma_n)
-        kwargs['nlevels'] = kwargs.get('plasma_nlevels', self.plasma.nlevels)
+        kwargs['plasma_n'] = kwargs.get('plasma_n', self.plasma_n)  # auto size
+        Grid.generate_grid(self, **self._strip_plasma(**kwargs))
 
-        Grid.getnerate_grid(self, **kwargs)
-
-
-    def plasma_kwargs(self, **kwargs):
-        kwargs = copy.deepcopy(kwargs)
-        kwargs['limit'] = kwargs.get('plasma_limit', self.plasma_limit)
-        kwargs['n'] = kwargs.get('plasma_n', self.plasma_n)
-        kwargs['nlevels'] = kwargs.get('plasma_nlevels', self.plasma.nlevels)
-        return kwargs
-
-    @property
-    def plasma_limit(self):
-        boundary = pd.concat([self.data['firstwall'], self.data['divertor']])
-        limit = [boundary.x.min(), boundary.x.max(),
-                 boundary.z.min(), boundary.z.max()]
-        return limit
-
-    @property
-    def plasma_n(self):
-        limit = self.plasma_limit
-        area = (limit[1]-limit[0]) * (limit[3]-limit[2])
-        return int(area / self.dPlasma**2)
+    def _strip_plasma(self, **kwargs):
+        """Coerce kwargs to Grid format (extract keys with plasma_* prefix)."""
+        plasma_kwargs = {}
+        for key in kwargs:
+            if key[:7] == 'plasma_':
+                plasma_kwargs[key[7:]] = kwargs[key]
+        return plasma_kwargs
 
 
 class BiotMethods:
@@ -758,7 +799,7 @@ class BiotMethods:
 
     def update_forcefield(self, subcoil=False):
         if subcoil and self.forcefield.reduce_target:
-            self.forcefield.solve(reduce_target=False)
+            self.forcefield.solve_interaction(reduce_target=False)
 
         for variable in ['Psi', 'Bx', 'Bz']:
             setattr(self.subcoil, variable,

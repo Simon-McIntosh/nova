@@ -43,6 +43,7 @@ class BiotAttributes:
 
 
 class BiotFrame(CoilFrame):
+    """Extend CoilFrame class with biot specific attributes and methods."""
 
     _cross_section_factor = {'circle': np.exp(-0.25),  # circle-circle
                              'square': 2*0.447049,  # square-square
@@ -56,11 +57,10 @@ class BiotFrame(CoilFrame):
     def __init__(self, *args):
         CoilFrame.__init__(self, *args, coilframe_metadata={
             '_required_columns': ['x', 'z'],
-            '_additional_columns': ['rms', 'dx', 'dz', 'dl',
-                                    'Nt', 'cross_section',
+            '_additional_columns': ['rms', 'dx', 'dz', 'Nt', 'cross_section',
                                     'cs_factor', 'coil', 'plasma', 'mpc'],
             '_default_attributes': {'dx': 0., 'dz': 0., 'rms': 0.,
-                                    'dl': 0., 'Nt': 1, 'mpc': '', 'coil': '',
+                                    'Nt': 1, 'mpc': '', 'coil': '',
                                     'plasma': False,
                                     'cross_section': 'square',
                                     'cs_factor':
@@ -73,27 +73,58 @@ class BiotFrame(CoilFrame):
         self.coilframe = None
 
     def add_coil(self, *args, **kwargs):
-        self.link_coilframe(*args)  # store referance to CoilFrame
+        """
+        Extend CoilFrame.add_coil.
+
+        Create link to coilframe if passed as single argument.
+
+        Parameters
+        ----------
+        *args : CoilFrame or _required_columns [x, z]
+            Frame arguments.
+        **kwargs : _additional columns
+            Ancillary data.
+
+        Returns
+        -------
+        None.
+
+        """
+        self._link_coilframe(*args)  # store referance to CoilFrame
         if self.coilframe is not None:
             if self.coilframe.empty:
                 return
         CoilFrame.add_coil(self, *args, **kwargs)
-        self.update_cross_section_factor()
+        self._update_cross_section_factor()
 
-    def link_coilframe(self, *args):
-        'set link to coilframe instance to permit future coilframe updates'
+    def _link_coilframe(self, *args):
+        """Link to coilframe instance to propagate future coilframe updates."""
         if self._is_coilframe(*args, accept_dataframe=False):
             self.coilframe = args[0]
 
     def update_coilframe(self, force_update=False):
+        """
+        Rebuild coilframe following geometric changes to coilset.
+
+        Parameters
+        ----------
+        force_update : bool, optional
+            Update is lazy - flag forces update. The default is False.
+
+        Returns
+        -------
+        None.
+
+        """
         if hasattr(self, 'coilframe'):
             if self.coilframe is not None:
                 if self.coilframe.nC != self.nC or force_update:
                     self.drop_coil()
                     CoilFrame.add_coil(self, self.coilframe)
-                    self.update_cross_section_factor()
+                    self._update_cross_section_factor()
 
-    def update_cross_section_factor(self):
+    def _update_cross_section_factor(self):
+        """Calculate factor applied to self inductance calculations."""
         cross_section = [cs if cs in self._cross_section_factor
                          else self._cross_section_key.get(cs, 'square')
                          for cs in self.cross_section]
@@ -102,29 +133,63 @@ class BiotFrame(CoilFrame):
 
     @property
     def region(self):
-        'source / target region - implicit - set via self.nT or self.nS'
+        """
+        Source / target region, read only.
+
+        Set value via self.nT or self.nS'
+
+        Returns
+        -------
+        region : str
+            region type.
+
+        """
         return self._region
 
     @property
     def nS(self):
-        'source filament number'
+        """
+        Manage source filament number for target region.
+
+        Parameters
+        ----------
+        value : int
+            Set source filament number.
+
+        Returns
+        -------
+        nS : int
+            Number of source turns.
+
+        """
         return self._nS
 
     @nS.setter
     def nS(self, value):
-        'set source filament number for target region'
         self._region = 'target'
         self._nT = self.nC
         self._nS = value
 
     @property
     def nT(self):
-        'target filament number'
+        """
+        Manage target filament number for source region.
+
+        Parameters
+        ----------
+        value : int
+            Set target filament number.
+
+        Returns
+        -------
+        nT : int
+            Number of target turns.
+
+        """
         return self._nT
 
     @nT.setter
     def nT(self, value):
-        'set target filament number for source region'
         self._region = 'source'
         self._nS = self.nC
         self._nT = value
@@ -154,7 +219,7 @@ class BiotFrame(CoilFrame):
 
 class BiotSet(CoilMatrix, BiotAttributes):
 
-    _biotset_attributes = {'_solve': True, '_update_plasma': True,
+    _biotset_attributes = {'_solve_interaction': True, '_update_plasma': True,
                            'source_turns': True, 'target_turns': False,
                            'reduce_source': True, 'reduce_target': False}
 

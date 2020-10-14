@@ -358,7 +358,7 @@ class CoilMethods:
         """
         coil = kwargs.pop('coil', self.coil)
         coil.generate_polygon()
-        coil.update_polygon()
+        #coil.update_polygon()
         subcoil = kwargs.pop('subcoil', self.subcoil)
         if index is None:  # re-mesh all coils
             index = coil.index
@@ -476,7 +476,7 @@ class CoilMethods:
             polygon, xm_, zm_, cs_, dA_ = [], [], [], [], []
             for i, sub_polygon in enumerate(sub_polygons):
                 p = coil_polygon.intersection(sub_polygon)
-                if isinstance(p, shapely.geometry.polygon.Polygon):
+                if not pd.api.types.is_list_like(p):
                     p = [p]  # single polygon
                 for p_ in p:
                     if isinstance(p_, shapely.geometry.polygon.Polygon):
@@ -720,7 +720,7 @@ class CoilMethods:
 
     def merge(self, coil_index, name=None):
         """
-        Merge coils listed in coil_index
+        Merge coils listed in coil_index.
 
         Parameters
         ----------
@@ -769,7 +769,7 @@ class CoilMethods:
         self.coil.loc[name, 'polygon'] = polygon
         # on-demand patch of top level (coil)
         if pd.isnull(subset.coil.loc[:, 'patch']).any():
-            CoilSet.patch_coil(subset.coil)  # patch on-demand
+            CoilMethods.patch_coil(subset.coil)  # patch on-demand
         # add subcoils
         subindex = self.subcoil.add_coil(subset.subcoil, iloc=subcoil_iloc)
         self.coil.loc[name, 'subindex'] = list(subindex)

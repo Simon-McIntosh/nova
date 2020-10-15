@@ -210,7 +210,8 @@ class PlasmaMethods:
         # ubdate subcoil
         self.subcoil.ionize = self.plasma_tree.query(
             pygeos.io.from_shapely(separatrix), predicate='contains')
-        self.update_plasma = True
+        self.update_plasma_turns = True
+        self.update_plasma_current = True
 
     @property
     def plasma_index(self):
@@ -223,7 +224,7 @@ class PlasmaMethods:
             subcoil plasma index
 
         """
-        return self.subcoil._plasma_index
+        return self.subcoil.plasma
 
     @property
     def ionize_index(self):
@@ -236,7 +237,7 @@ class PlasmaMethods:
             Subcoil ionization index (Nt>0).
 
         """
-        return self.subcoil.ionize
+        return self.subcoil.ionize[self.subcoil.plasma]
 
     @property
     def nP(self):
@@ -291,3 +292,4 @@ class PlasmaMethods:
     def Ip(self, Ip):
         self.coil.Ip = Ip
         self.subcoil.Ip = Ip
+        self.update_plasma_current = True

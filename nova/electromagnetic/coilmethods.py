@@ -168,7 +168,9 @@ class CoilMethods:
         self.coil._set_current(value, current_column)
         self.subcoil._set_current(
             self.coil.Ic[self.subcoil._current_index], 'Ic')
-        self.update_field()
+        self.update_coil_current = True
+        self.update_plasma_current = True
+        #self.update_field()
 
     @property
     def power(self):

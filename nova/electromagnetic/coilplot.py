@@ -96,7 +96,7 @@ class CoilPlot:
         ax.axis('equal')
         ax.axis('off')
         plt.tight_layout()
-        if plasma and self.coil._plasma_index.sum() > 0:
+        if plasma and self.coil.nP > 0:
             self.label_plasma(ax)
         if label or current or field:
             self.label_coil(ax, label, current, field)
@@ -104,9 +104,8 @@ class CoilPlot:
     def label_plasma(self, ax, fs=None):
         if fs is None:
             fs = matplotlib.rcParams['legend.fontsize']
-        plasma_index = self.coil._plasma_index
-        x = self.coil.x[plasma_index]
-        z = self.coil.z[plasma_index]
+        x = self.coil.x[self.coil.plasma]
+        z = self.coil.z[self.coil.plasma]
         ax.text(x, z, f'{1e-6*self.Ip:1.1f}MA', fontsize='medium',
                 ha='center', va='center', color=0.9 * np.ones(3),
                 zorder=10)

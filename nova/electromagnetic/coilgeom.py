@@ -49,9 +49,9 @@ class ITERcoilset(CoilClass):
             CoilClass.load_coilset(self, filename)
             self.rebuild(coils, filename, **kwargs)
 
-    def update(self, attribute):
+    def update_attribute(self, attribute):
         return getattr(self, attribute) != \
-            self._coilset['default_attributes'][attribute]
+            self._pickled_attributes[attribute]
 
     def select_coils(self, **kwargs):
         coils = kwargs.pop('coils', ['pf', 'vsj', 'vv'])  # default set
@@ -89,20 +89,21 @@ class ITERcoilset(CoilClass):
                               self.data['divertor'].iloc[1:]])
         self.add_plasma(boundary)
         # generate biot objects
-        self.field.add_target(self.coil, ['CS', 'PF'], dField=self.dField)
-        self.field.solve_interaction()
-        self.forcefield.solve_interaction()  # compute mutual interaction
+        self.field.add_coil(self.coil, ['CS', 'PF'], dField=self.dField)
+        # self.field.solve_interaction()
+        # self.forcefield.solve_interaction()  # compute mutual interaction
         self.grid.generate_grid(**kwargs)  # generate base grid (plots)
         self.plasmagrid.generate_grid(**kwargs)  # generate plasma grid
+        self.plasmafilament.add_plasma()  # add plasma filaments
 
     def rebuild(self, coils, filename, **kwargs):
         _rebuild = {}
-        if self.update('dCoil') or self.update('dPlasma'):
+        if self.update_attribute('dCoil') or self.update_attribute('dPlasma'):
             print('rebuild coilset')
             self.drop_coil()  # clear
             self.build_coilset(coils, **kwargs)  # rebuild
             _rebuild['coilset'] = True
-        if self.update('dField'):
+        if self.update_attribute('dField'):
             print('rebuild field targets')
             self.field.target.drop_coil()  # clear
             self.field.add_target(self.coil, ['CS', 'PF'],

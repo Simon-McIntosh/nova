@@ -26,7 +26,7 @@ def test_ITER_subinductance_matrix(plot=False):
         cs.plot(label=True)
         cs.grid.generate_grid()
         cs.grid.plot_flux()
-    assert allclose(Mc_ddd, cs.mutual.psi, atol=5e-3)
+    assert allclose(Mc_ddd, cs.mutual._psi, atol=5e-3)
     return cs
 
 

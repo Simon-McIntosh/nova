@@ -79,17 +79,56 @@ class CoilSet(pythonIO, BiotMethods, PlasmaMethods, CoilMethods, CoilPlot):
         return path.join(directory, filename)
 
     def save_coilset(self, filename, directory=None):
+        """
+        Pickle coilset output.
+
+        Parameters
+        ----------
+        filename : str
+            Filename.
+        directory : dir, optional
+            Directory. The default is None (nova/data/Nova/coilsets/).
+
+        Returns
+        -------
+        None.
+
+        """
         filepath = self._filepath(filename, directory)
+        self.update_biot()  # update biot interaction matrices
         self._coilset = self.coilset  # link coilset for pythonIO save
         self.save_pickle(filepath, ['_coilset'])
         del self._coilset  # delete temp variable
 
     def load_coilset(self, filename, directory=None):
+        """
+        Load coilset pickle.
+
+        Parameters
+        ----------
+        filename : str
+            Filename.
+        directory : dir, optional
+            Directory. The default is None (nova/data/Nova/coilsets/).
+
+
+        Raises
+        ------
+        LookupError
+            File not found.
+
+        Returns
+        -------
+        coilset : dict
+            Coilset data.
+
+        """
         filepath = self._filepath(filename, directory)
         if path.isfile(filepath + '.pk'):
             self.load_pickle(filepath)
+            self._pickled_attributes = self._coilset['default_attributes']
             self.coilset = self._coilset
-            #del self._coilset  # delete temp variable
+            del self._coilset  # delete temp variable
         else:
             raise LookupError(f'file {filepath} not found')
         return self.coilset

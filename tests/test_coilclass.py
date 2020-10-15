@@ -17,7 +17,7 @@ def test_IM_field(plot=False):
     # build ITER coilset
     cc = CoilClass(dCoil=0.25, dField=0.5)
     cc.coilset = PFgeom(VS=False, dCoil=cc.dCoil, source='PCR').coilset
-    cc.field.add_target(cc.coil, ['CS', 'PF'], dField=cc.dField)
+    cc.field.add_coil(cc.coil, ['CS', 'PF'], dField=cc.dField)
     # load DINA scenario
     cc.filename = '15MA DT-DINA2020-04'
     cc.scenario = 'IM'

@@ -44,7 +44,6 @@ class CoilData():
     _coildata_indices = ['reduction_index',
                          'plasma_reduction_index',
                          'plasma_iloc',
-                         'plasma_index',
                          'ionize_index',
                          'current_index']
 
@@ -228,7 +227,6 @@ class CoilData():
             if attribute in self._mpc_attributes:  # mpc compaction
                 value = value[self._mpc_iloc]
             setattr(self, f'_{attribute}', value)
-        self._plasma_index = self._plasma[self._mpc_referance]
         self._ionize_index = self._plasma[self._mpc_referance]
 
     def _extract_reduction_index(self):
@@ -246,7 +244,7 @@ class CoilData():
                         _name = name
             self._reduction_index = np.array(_reduction_index)
             self._plasma_iloc = np.arange(self._nC)[
-                self._plasma_index[self._reduction_index]]
+                self.plasma[self._reduction_index]]
             filament_indices = np.append(self._reduction_index, self.nC)
             plasma_filaments = filament_indices[self._plasma_iloc+1] - \
                 filament_indices[self._plasma_iloc]
@@ -460,7 +458,7 @@ class CoilData():
     def ionize(self, index):
         active = np.zeros(self.nP, dtype=bool)
         active[index] = True
-        self._ionize_index[self._plasma_index] = active
+        self._ionize_index[self.plasma] = active
         self.Np = 1  # initalize turn number
 
     @property
@@ -481,22 +479,22 @@ class CoilData():
             Plasma filament turn number.
 
         """
-        return self._Nt[self._plasma_index]
+        return self._Nt[self.plasma]
 
     @Np.setter
     def Np(self, value):
-        self._Nt[self._plasma_index & ~self._ionize_index] = 0
-        self._Nt[self._plasma_index & self._ionize_index] = value
+        self._Nt[self.plasma & ~self._ionize_index] = 0
+        self._Nt[self.plasma & self._ionize_index] = value
         # normalize plasma tun number
-        Nt_sum = np.sum(self._Nt[self._plasma_index])
+        Nt_sum = np.sum(self._Nt[self.plasma])
         if Nt_sum > 0:
-            self._Nt[self._plasma_index] /= Nt_sum
+            self._Nt[self.plasma] /= Nt_sum
         self._update_dataframe['Nt'] = True
 
     @property
     def nP(self):
         """Return number of plasma filaments."""
-        return np.sum(self._plasma_index)
+        return np.sum(self.plasma)
 
     @property
     def nPlasma(self):
@@ -514,7 +512,7 @@ class CoilData():
             sum(It) (float): plasma line current [A]
 
         """
-        return self.It[self._plasma_index]
+        return self.It[self.plasma]
 
     @Ip.setter
     def Ip(self, value):

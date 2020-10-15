@@ -16,9 +16,9 @@ class Mutual(BiotSet):
     _default_biot_attributes = {'target_turns': True,
                                 'reduce_target': True}
 
-    def __init__(self, subcoil, **mutual_attributes):
+    def __init__(self, subcoil, **biot_attributes):
         BiotSet.__init__(self, source=subcoil, target=subcoil,
-                         **mutual_attributes)
+                         **biot_attributes)
 
 
 class ForceField(Mutual):
@@ -26,18 +26,18 @@ class ForceField(Mutual):
     _default_biot_attributes = {'target_turns': False,
                                 'reduce_target': False}
 
-    def __init__(self, subcoil, **forcefield_attributes):
-        Mutual.__init__(self, subcoil, **forcefield_attributes)
+    def __init__(self, subcoil, **biot_attributes):
+        Mutual.__init__(self, subcoil, **biot_attributes)
 
 
 class Probe(BiotSet):
     """Probe interaction methods and data."""
 
-    _biot_attributes = []
-    _default_biot_attributes = {}
+    _biot_attributes = ['target']
+    _default_biot_attributes = {'target_turns': False, 'reduce_target': False}
 
-    def __init__(self, subcoil, **probe_attributes):
-        BiotSet.__init__(self, source=subcoil, **probe_attributes)
+    def __init__(self, subcoil, **biot_attributes):
+        BiotSet.__init__(self, source=subcoil, **biot_attributes)
 
     def add_target(self, *args, **kwargs):
         """
@@ -58,10 +58,11 @@ class Probe(BiotSet):
 
         """
         self.target.add_coil(*args, name='Target', delim='', **kwargs)
+        self.update_biotset()
 
-    def plot(self, ax=None, **kwargs):
+    def plot_targets(self, ax=None, **kwargs):
         """
-        Plot target and probe locations.
+        Plot targets.
 
         Parameters
         ----------
@@ -85,14 +86,12 @@ class Probe(BiotSet):
 class Field(Probe):
     """Field values imposed on coil boundaries - extends Probe class."""
 
-    _biot_attributes = ['target', '_coil_index']
-    _default_biot_attributes = {'target_turns': False,  # include target turns
-                                'reduce_target': False}  # sum-reduce target
+    _biot_attributes = Probe._biot_attributes + ['_coil_index']
 
-    def __init__(self, subcoil, **field_attributes):
-        Probe.__init__(self, subcoil, **field_attributes)
+    def __init__(self, subcoil, **biot_attributes):
+        Probe.__init__(self, subcoil, **biot_attributes)
 
-    def add_target(self, coil, parts, dField=0.5):
+    def add_coil(self, coil, parts, dField=0.5):
         """Add field probes spaced around each coil perimiter."""
         if not is_list_like(parts):
             parts = [parts]
@@ -115,14 +114,16 @@ class Field(Probe):
                         polygon[f'interp{attr}'] = \
                             interp1d(polygon['_L'], polygon[f'_{attr}'])
                         dL = [polygon[f'interp{attr}'](
-                            np.linspace(polygon['_L'][i], polygon['_L'][i+1],
+                            np.linspace(
+                                polygon['_L'][i], polygon['_L'][i+1],
                                 1+int(np.diff(polygon['_L'][i:i+2])[0]/_dL),
                                 endpoint=False))
-                             for i in range(nPoly-1)]
+                              for i in range(nPoly-1)]
                         polygon[attr] = np.concatenate(dL).ravel()
                 self.target.add_coil(polygon['x'], polygon['z'],
                                      label='Field', delim='',
                                      coil=index, mpc=True)
+        self.update_biotset()
 
     @property
     def frame(self):
@@ -133,6 +134,16 @@ class Field(Probe):
 
 class PlasmaFilament(Probe):
     """Plasma filament interaction methods and data. Class extends Probe."""
+
+    def __init__(self, subcoil, **biot_attributes):
+        Probe.__init__(self, subcoil, **biot_attributes)
+
+    def add_plasma(self):
+        """Add plasma filaments from source coilframe as targets."""
+        self.source.update_coilframe()
+        self.add_target(
+            self.source.coilframe.x[self.source.coilframe.plasma],
+            self.source.coilframe.z[self.source.coilframe.plasma])
 
 
 class Colocate(Probe):
@@ -326,7 +337,7 @@ class Grid(BiotSet):
                                 'source_turns': True, 'target_turns': False,
                                 'reduce_source': True, 'reduce_target': False}
 
-    def __init__(self, subcoil, **grid_attributes):
+    def __init__(self, subcoil, **biot_attributes):
         """
         Links Grid class to subcoil and (re)initalizes grid_attributes.
 
@@ -344,7 +355,7 @@ class Grid(BiotSet):
         None.
 
         """
-        BiotSet.__init__(self, source=subcoil, **grid_attributes)
+        BiotSet.__init__(self, source=subcoil, **biot_attributes)
 
     @property
     def grid_boundary(self):
@@ -463,7 +474,8 @@ class Grid(BiotSet):
             self.target.drop_coil()
             self.target.add_coil(self.x2d.flatten(), self.z2d.flatten(),
                                  name='Grid', delim='')
-            self.solve_interaction()
+            self.update_biotset()
+            self._update_interaction = True
 
     def _get_expand_limit(self, expand=None, xmin=1e-3):
         if expand is None:
@@ -560,13 +572,13 @@ class PlasmaGrid(Grid):
     """Plasma grid interaction methods and data. Class extends Grid."""
 
     _biot_attributes = Grid._biot_attributes + ['plasma_boundary']
+    _default_biot_attributes = {
+        **Grid._default_biot_attributes,
+        **{'expand': 0.1, 'nlevels': 21, 'boundary': 'limit',
+           'plasma_boundary': None}}
 
-    Grid._default_biot_attributes.update(
-        {'expand': 0.1, 'nlevels': 51, 'boundary': 'limit',
-         'plasma_boundary': None})
-
-    def __init__(self, subcoil, **plasmagrid_attributes):
-        Grid.__init__(self, subcoil, **plasmagrid_attributes)
+    def __init__(self, subcoil, **biot_attributes):
+        Grid.__init__(self, subcoil, **biot_attributes)
 
     def _get_expand_limit(self, expand=None, xmin=1e-3):
         """Overide Grid._get_expand_limit."""
@@ -624,8 +636,8 @@ class PlasmaGrid(Grid):
         grid_area = (grid_limit[1]-grid_limit[0]) * \
             (grid_limit[3]-grid_limit[2])
         plasma_filament_density = \
-            np.sum(self.source.coilframe._plasma_index) /\
-            self.source.coilframe.dA[self.source.coilframe._plasma_index].sum()
+            np.sum(self.source.coilframe.plasma) /\
+            self.source.coilframe.dA[self.source.coilframe.plasma].sum()
         return 2.5*int(plasma_filament_density*grid_area)
 
     def generate_grid(self, regen=False, **kwargs):
@@ -769,18 +781,111 @@ class BiotMethods:
                     biot_attributes.get(biot_attribute, {}))
             getattr(self, instance).update_biotset()
 
-    @property
-    def update_plasma(self):
-        return {instance: getattr(self, instance)._update_plasma
+    def _get_instance_attributes(self, attribute):
+        return {instance: getattr(getattr(self, instance), attribute)
                 for instance in self._biot_instances}
 
-    @update_plasma.setter
-    def update_plasma(self, value):
-        if not isinstance(value, bool):
-            raise ValueError(f'flag type {type(value)} must be bool')
+    def _set_instance_attributes(self, attribute, status):
+        if not isinstance(status, bool):
+            raise ValueError(f'flag type {type(status)} must be bool')
         else:
             for instance in self._biot_instances:
-                getattr(self, instance)._update_plasma = value
+                setattr(getattr(self, instance), attribute, status)
+
+    @property
+    def update_plasma_turns(self):
+        r"""
+        Manage biot instance plasma_turn flags.
+
+        Parameters
+        ----------
+        status : bool
+            Set update flag for all biot_instances.
+            Set flag to True following a change to plasma interaction
+            matrix (plasma turns).
+            Setting flag to True ensures that interaction matrix
+            :math:`\_m\_` is re-evaluated
+
+        Returns
+        -------
+        status : nested dict
+            plasma_turn flag status for all biot instances.
+
+        """
+        return self._get_instance_attributes('update_plasma_turns')
+
+    @update_plasma_turns.setter
+    def update_plasma_turns(self, status):
+        self._set_instance_attributes('update_plasma_turns', status)
+
+    @property
+    def update_coil_current(self):
+        r"""
+        Manage biot instance coil_current flags.
+
+        Parameters
+        ----------
+        status : bool
+            Set update flag for all biot_instances.
+            Set flag to True following a change to coil currents.
+            Setting flag to True ensures that interaction matrix
+            dot product is re-evaluated
+
+            .. math::
+                \_M = \_m \cdot I_c
+
+        Returns
+        -------
+        status : nested dict
+            coil_current flag status for all biot instances.
+
+        """
+        return self._get_instance_attributes('update_coil_current')
+
+    @update_coil_current.setter
+    def update_coil_current(self, status):
+        self._set_instance_attributes('update_coil_current', status)
+
+    @property
+    def update_plasma_current(self):
+        r"""
+        Manage biot instance plasma_current flags.
+
+        Parameters
+        ----------
+        status : bool
+            Set update flag for all biot_instances.
+            Set flag to True following a change to plasma current or plasma
+            interaction matrix (plasma turns).
+            Setting flag to True ensures that interaction matrix
+            dot product is re-evaluated
+
+            .. math::
+                \_M\_ = \_m\_ \cdot I_p
+
+        Returns
+        -------
+        status : nested dict
+            plasma_current flag status for all biot instances.
+
+        """
+        return self._get_instance_attributes('update_plasma_current')
+
+    @update_plasma_current.setter
+    def update_plasma_current(self, status):
+        self._set_instance_attributes('update_plasma_current', status)
+
+    def update_biot(self):
+        """
+        Evaluate all biot attributes for all biot instances.
+
+        Returns
+        -------
+        None.
+
+        """
+        for instance in self._biot_instances:
+            getattr(self, instance).update_biot()
 
     @property
     def dField(self):
@@ -795,7 +900,7 @@ class BiotMethods:
         self.coil.refresh_dataframe()  # flush updates
         if self.field.nT > 0:  # maximum of coil boundary values
             frame = self.field.frame
-            self.coil.loc[frame.index, frame.columns] = frame
+            self.coil.loc[frame.index, frame.columns] = self.field.frame
 
     def update_forcefield(self, subcoil=False):
         if subcoil and self.forcefield.reduce_target:

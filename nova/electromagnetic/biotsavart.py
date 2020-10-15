@@ -12,10 +12,12 @@ class BiotAttributes:
     _default_biot_attributes = {}
 
     def __init__(self, **biot_attributes):
-        self._append_biot_attributes(self._biotset_attributes)
+        self._append_biot_attributes(self._biot_attributes)
         self._append_biot_attributes(self._coilmatrix_attributes)
-        self._default_biot_attributes = {**self._biotset_attributes,
-                                         **self._default_biot_attributes}
+        self._append_biot_attributes(self._default_coilmatrix_attributes)
+        self._default_biot_attributes = {
+            **self._default_coilmatrix_attributes,
+            **self._default_biot_attributes}
         self.biot_attributes = biot_attributes
 
     def _append_biot_attributes(self, attributes):
@@ -219,10 +221,6 @@ class BiotFrame(CoilFrame):
 
 class BiotSet(CoilMatrix, BiotAttributes):
 
-    _biotset_attributes = {'_solve_interaction': True, '_update_plasma': True,
-                           'source_turns': True, 'target_turns': False,
-                           'reduce_source': True, 'reduce_target': False}
-
     def __init__(self, source=None, target=None, **biot_attributes):
         CoilMatrix.__init__(self)
         BiotAttributes.__init__(self, **biot_attributes)
@@ -270,7 +268,9 @@ class BiotSet(CoilMatrix, BiotAttributes):
             ax = plt.gca()
         ax.plot(self.source.x, self.source.z, 'C1o', label='source')
         ax.plot(self.target.x, self.target.z, 'C2.', label='target')
-        plt.legend()
+        ax.legend()
+        ax.set_axis_off()
+        ax.set_aspect('equal')
 
 
 if __name__ == '__main__':

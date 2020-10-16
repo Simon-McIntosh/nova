@@ -243,7 +243,7 @@ class CoilData():
                         _reduction_index.append(i)
                         _name = name
             self._reduction_index = np.array(_reduction_index)
-            self._plasma_iloc = np.arange(self._nC)[
+            self._plasma_iloc = np.arange(len(self._reduction_index))[
                 self.plasma[self._reduction_index]]
             filament_indices = np.append(self._reduction_index, self.nC)
             plasma_filaments = filament_indices[self._plasma_iloc+1] - \

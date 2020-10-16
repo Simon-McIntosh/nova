@@ -101,40 +101,6 @@ class CoilPlot:
         if label or current or field:
             self.label_coil(ax, label, current, field)
 
-    def label_plasma(self, ax, fs=None):
-        if fs is None:
-            fs = matplotlib.rcParams['legend.fontsize']
-        x = self.coil.x[self.coil.plasma]
-        z = self.coil.z[self.coil.plasma]
-        ax.text(x, z, f'{1e-6*self.Ip:1.1f}MA', fontsize='medium',
-                ha='center', va='center', color=0.9 * np.ones(3),
-                zorder=10)
-
-    def label_gaps(self, ax=None):
-        coil_index = []
-        for end in ['L', 'U']:
-            position = range(1, 4) if end == 'U' else range(3, 0, -1)
-            for i in position:
-                coil_index.append(f'CS{i}{end}')
-        gap_index = ['LDP'] + coil_index + ['LDP']
-        if ax is None:
-            ax = plt.gca()
-        for i, name in enumerate(coil_index):
-            x, z, dx, dz = self.coil.loc[name, ['x', 'z', 'dx', 'dz']]
-            drs = 2/3*dx
-            ax.text(x + drs, z, f'Coil {i}',
-                    ha='left', va='center', color=0.2 * np.ones(3))
-        xo, zo = self.coil.loc[coil_index[0], ['x', 'z']]
-        z1 = self.coil.loc[coil_index[-1], 'z']
-        dzo = (z1-zo) / (len(coil_index) - 1)
-        z = zo - dzo/2
-        for i in range(7):
-            ax.text(x - drs, z, f'{gap_index[i]}-{gap_index[i+1]}',
-                    ha='right', va='center', color='C3')
-            ax.text(x + drs, z, f'Gap {i}',
-                    ha='left', va='center', color='C3')
-            z += dzo
-
     def label_coil(self, ax, label='coil', current='A', field=True,
                    coil=None, fs='medium', Nmax=20):
         if coil is None:
@@ -203,8 +169,43 @@ class CoilPlot:
                             fontsize=fs, ha=ha, va='center',
                             color=0.2 * np.ones(3))
                 if field:
+                    self.update_field()
                     Blabel = coil.loc[name, 'B']
                     txt = f'{human_format(Blabel, precision=2)}T'
                     ax.text(x + drs[drs_index], z + ztext['field'], txt,
                             fontsize=fs, ha=ha, va='center',
                             color=0.2 * np.ones(3))
+
+    def label_plasma(self, ax, fs=None):
+        if fs is None:
+            fs = matplotlib.rcParams['legend.fontsize']
+        x = self.coil.x[self.coil.plasma]
+        z = self.coil.z[self.coil.plasma]
+        ax.text(x, z, f'{1e-6*self.Ip:1.1f}MA', fontsize='medium',
+                ha='center', va='center', color=0.9 * np.ones(3),
+                zorder=10)
+
+    def label_gaps(self, ax=None):
+        coil_index = []
+        for end in ['L', 'U']:
+            position = range(1, 4) if end == 'U' else range(3, 0, -1)
+            for i in position:
+                coil_index.append(f'CS{i}{end}')
+        gap_index = ['LDP'] + coil_index + ['LDP']
+        if ax is None:
+            ax = plt.gca()
+        for i, name in enumerate(coil_index):
+            x, z, dx, dz = self.coil.loc[name, ['x', 'z', 'dx', 'dz']]
+            drs = 2/3*dx
+            ax.text(x + drs, z, f'Coil {i}',
+                    ha='left', va='center', color=0.2 * np.ones(3))
+        xo, zo = self.coil.loc[coil_index[0], ['x', 'z']]
+        z1 = self.coil.loc[coil_index[-1], 'z']
+        dzo = (z1-zo) / (len(coil_index) - 1)
+        z = zo - dzo/2
+        for i in range(7):
+            ax.text(x - drs, z, f'{gap_index[i]}-{gap_index[i+1]}',
+                    ha='right', va='center', color='C3')
+            ax.text(x + drs, z, f'Gap {i}',
+                    ha='left', va='center', color='C3')
+            z += dzo

@@ -26,8 +26,6 @@ class ITERcoilset(CoilClass):
     def __init__(self, read_txt=False, **kwargs):
         self.read_txt = read_txt
         CoilClass.__init__(self, **kwargs)
-        #self.update_coilframe_metadata(
-        #    'coil', _additional_columns=['m', 'material', 'R'])
         self.load_data(**kwargs)
         self.load_coilset(**kwargs)
 
@@ -90,8 +88,6 @@ class ITERcoilset(CoilClass):
         self.add_plasma(boundary)
         # generate biot objects
         self.field.add_coil(self.coil, ['CS', 'PF'], dField=self.dField)
-        # self.field.solve_interaction()
-        # self.forcefield.solve_interaction()  # compute mutual interaction
         self.grid.generate_grid(**kwargs)  # generate base grid (plots)
         self.plasmagrid.generate_grid(**kwargs)  # generate plasma grid
         self.plasmafilament.add_plasma()  # add plasma filaments
@@ -106,9 +102,7 @@ class ITERcoilset(CoilClass):
         if self.update_attribute('dField'):
             print('rebuild field targets')
             self.field.target.drop_coil()  # clear
-            self.field.add_target(self.coil, ['CS', 'PF'],
-                                  dField=self.dField)
-            self.field.solve()
+            self.field.add_coil(self.coil, ['CS', 'PF'], dField=self.dField)
             _rebuild['field'] = True
         if self.grid.generate_grid(**kwargs):
             print('rebuild grid')

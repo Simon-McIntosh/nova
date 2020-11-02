@@ -95,7 +95,7 @@ class CoilSet(pythonIO, BiotMethods, PlasmaMethods, CoilMethods, CoilPlot):
 
         """
         filepath = self._filepath(filename, directory)
-        self.update_biot()  # update biot interaction matrices
+        self.generate_biot()  # update biot interaction matrices
         self._coilset = self.coilset  # link coilset for pythonIO save
         self.save_pickle(filepath, ['_coilset'])
         del self._coilset  # delete temp variable

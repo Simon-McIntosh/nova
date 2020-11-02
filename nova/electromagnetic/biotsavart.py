@@ -235,7 +235,7 @@ class BiotSet(CoilMatrix, BiotAttributes):
         if target is not None:
             self.target.add_coil(target)
 
-    def update_biotset(self):
+    def assemble_biotset(self):
         self.source.update_coilframe()
         self.target.update_coilframe()
         self.assemble()

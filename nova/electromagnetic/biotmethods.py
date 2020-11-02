@@ -1,13 +1,14 @@
 import numpy as np
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from pandas.api.types import is_list_like
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, RectBivariateSpline
 import shapely.geometry
 
 from nova.utilities.pyplot import plt
 from nova.utilities.geom import length
 from nova.electromagnetic.meshgrid import MeshGrid
 from nova.electromagnetic.biotsavart import BiotSet
+from nova.electromagnetic.coilmatrix import CoilMatrix
 
 
 class Mutual(BiotSet):
@@ -57,7 +58,7 @@ class Probe(BiotSet):
 
         """
         self.target.add_coil(*args, name='Target', delim='', **kwargs)
-        self.update_biotset()
+        self.assemble_biotset()
 
     def plot_targets(self, ax=None, **kwargs):
         """
@@ -111,6 +112,7 @@ class Field(Probe):
         if not is_list_like(parts):
             parts = [parts]
         self._coil_index = []
+        target = {'x': [], 'z': [], 'coil': [], 'nC': []}
         for part in parts:
             for index in coil.index[coil.part == part]:
                 self._coil_index.append(index)
@@ -135,13 +137,33 @@ class Field(Probe):
                                 endpoint=False))
                               for i in range(nPoly-1)]
                         polygon[attr] = np.concatenate(dL).ravel()
-                self.target.add_coil(polygon['x'], polygon['z'],
-                                     label='Field', delim='',
-                                     coil=index, mpc=True)
-        self.update_biotset()
+                target['x'].extend(x)
+                target['z'].extend(z)
+                target['coil'].extend([index for __ in range(len(x))])
+                target['nC'].append(len(x))
+        self.target.add_coil(target['x'], target['z'],
+                             label='Field', delim='',
+                             coil=target['coil'])
+        _nC = 0
+        for nC in target['nC']:
+            index = [f'Field{i}' for i in np.arange(_nC, _nC+nC)]
+            self.target.add_mpc(index)
+            _nC = nC
+        self.assemble_biotset()
 
     @property
     def frame(self):
+        """
+        Return DataFrame of coil properties (reduceat), read-only.
+
+        Returns
+        -------
+        frame : DataFrame
+            Coil properties:
+
+                - B : maximum L2norm field on perimeter of each coil.
+
+        """
         return DataFrame(
             np.maximum.reduceat(self.B, self.target._reduction_index),
             index=self._coil_index, columns=['B'])
@@ -342,27 +364,30 @@ class Grid(BiotSet):
             Vertical field.
 
     """
+    _rbs_attributes = ['Psi', 'B']
 
     _biot_attributes = ['n', 'n2d', 'limit', 'expand_limit', 'boundary',
                         'expand', 'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d',
-                        'target', 'polygon']
+                        'target']
+    _biot_attributes += [f'_{rbs}_rbs' for rbs in _rbs_attributes]  # rbs
+    _biot_attributes += [f'_update_{rbs}_rbs' for rbs in _rbs_attributes]  # flag
 
-    _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 31,
-                                'boundary': 'coilset', 'polygon': None,
-                                'source_turns': True, 'target_turns': False,
-                                'reduce_source': True, 'reduce_target': False}
+    _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 51,
+                                'boundary': 'coilset'}
+    _default_biot_attributes.update({f'_update_{rbs}_rbs': True
+                                     for rbs in _rbs_attributes})
 
     def __init__(self, subcoil, **biot_attributes):
         """
-        Links Grid class to subcoil and (re)initalizes grid_attributes.
+        Links Grid class to subcoil and (re)initalizes biot_attributes.
 
-        Extends methods provided by BiotSet
+        Extends methods provided by BiotSet and CoilMatrix
 
         Parameters
         ----------
         subcoil : CoilFrame
             Source coilframe (subcoils).
-        **grid_attributes : dict
+        **biot_attributes : dict
             Composite biot attributes.
 
         Returns
@@ -371,6 +396,43 @@ class Grid(BiotSet):
 
         """
         BiotSet.__init__(self, source=subcoil, **biot_attributes)
+
+    @property
+    def B_rbs(self):
+        return self.rbs('B')
+
+    @property
+    def Psi_rbs(self):
+        return self.rbs('Psi')
+
+    def rbs(self, attribute):
+        self._evaluate_rbs(attribute)
+        return getattr(self, f'_{attribute}_rbs')  # interpolant
+
+    def _evaluate_rbs(self, attribute):
+        update_flag = f'_update_{attribute}_rbs'
+        if getattr(self, update_flag):
+            # compute interpolant
+            setattr(self, f'_{attribute}_rbs',
+                    RectBivariateSpline(self.x, self.z,
+                                        getattr(self, attribute)))
+            setattr(self, update_flag, False)
+
+    @property
+    def update_rbs(self):
+        return Series({attribute:
+                          getattr(self, f'_update_{attribute}_rbs')
+                          for attribute in self._rbs_attributes})
+
+    def _update(self, status):
+        if status:
+            for attribute in self._rbs_attributes:
+                setattr(self, f'_update_{attribute}_rbs', True)
+
+    def generate_biot(self):
+        for attribute in self._rbs_attributes:
+            self._evaluate_rbs(attribute)
+        CoilMatrix.generate_biot(self)
 
     @property
     def grid_boundary(self):
@@ -457,7 +519,7 @@ class Grid(BiotSet):
         """
         self.regen = regen
         self._set_boundary(**kwargs)
-        self.update_biotset()
+        self.assemble_biotset()
         grid_attributes = {}  # grid attributes
         for key in ['n', 'limit', 'expand', 'levels', 'nlevels']:
             grid_attributes[key] = kwargs.get(key, getattr(self, key))
@@ -489,8 +551,8 @@ class Grid(BiotSet):
             self.target.drop_coil()
             self.target.add_coil(self.x2d.flatten(), self.z2d.flatten(),
                                  name='Grid', delim='')
-            self.update_biotset()
-            self._update_interaction = True
+            self.assemble_biotset()
+            self.update_biot = True
 
     def _get_expand_limit(self, expand=None, xmin=1e-3):
         if expand is None:
@@ -552,7 +614,8 @@ class Grid(BiotSet):
 
         Returns
         -------
-        None.
+        levels : QuadContourSet.levels
+            Contour levels.
 
         """
         if self.n > 0:
@@ -569,6 +632,7 @@ class Grid(BiotSet):
             if self.levels is None:
                 self.levels = QuadContourSet.levels
             plt.axis('equal')
+            return QuadContourSet.levels
 
     def plot_field(self):
         """
@@ -690,7 +754,7 @@ class PlasmaGrid(Grid):
 
         """
         kwargs['plasma_n'] = kwargs.get('plasma_n', self.plasma_n)  # auto size
-        Grid.generate_grid(self, **self._strip_plasma(**kwargs))
+        return Grid.generate_grid(self, **self._strip_plasma(**kwargs))
 
     def _strip_plasma(self, **kwargs):
         """Coerce kwargs to Grid format (extract keys with plasma_* prefix)."""
@@ -781,6 +845,20 @@ class BiotMethods:
 
     @property
     def biot_attributes(self):
+        """
+        Manage attributes for all biot_instances.
+
+        Parameters
+        ----------
+        biot_attributes : dict
+            Set biot_attributes, default {}.
+
+        Returns
+        -------
+        _biot_attributes : dict
+            biot_attributes for all biot_instances.
+
+        """
         _biot_attributes = {}
         for instance in self._biot_instances:
             biot_attribute = '_'.join([instance, 'biot_attributes'])
@@ -794,7 +872,7 @@ class BiotMethods:
             biot_attribute = '_'.join([instance, 'biot_attributes'])
             setattr(getattr(self, instance), 'biot_attributes',
                     biot_attributes.get(biot_attribute, {}))
-            getattr(self, instance).update_biotset()
+            getattr(self, instance).assemble_biotset()
 
     def _get_instance_attributes(self, attribute):
         return {instance: getattr(getattr(self, instance), attribute)
@@ -890,9 +968,9 @@ class BiotMethods:
     def update_plasma_current(self, status):
         self._set_instance_attributes('update_plasma_current', status)
 
-    def update_biot(self):
+    def generate_biot(self):
         """
-        Evaluate all biot attributes for all biot instances.
+        Generate for all biot instances.
 
         Returns
         -------
@@ -900,7 +978,7 @@ class BiotMethods:
 
         """
         for instance in self._biot_instances:
-            getattr(self, instance).update_biot()
+            getattr(self, instance).generate_biot()
 
     @property
     def dField(self):

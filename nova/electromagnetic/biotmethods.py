@@ -11,7 +11,6 @@ from nova.electromagnetic.biotsavart import BiotSet
 
 
 class Mutual(BiotSet):
-
     _biot_attributes = []
     _default_biot_attributes = {'target_turns': True,
                                 'reduce_target': True}
@@ -31,7 +30,7 @@ class ForceField(Mutual):
 
 
 class Probe(BiotSet):
-    """Probe interaction methods and data."""
+    """Probe interaction methods and data. Extends BiotSet class."""
 
     _biot_attributes = ['target']
     _default_biot_attributes = {'target_turns': False, 'reduce_target': False}
@@ -92,7 +91,23 @@ class Field(Probe):
         Probe.__init__(self, subcoil, **biot_attributes)
 
     def add_coil(self, coil, parts, dField=0.5):
-        """Add field probes spaced around each coil perimiter."""
+        """
+        Add field probes spaced around each coil perimiter.
+
+        Parameters
+        ----------
+        coil : CoilFrame
+            Coil coilframe.
+        parts : str or list
+            Part names to include field calculation.
+        dField : float, optional
+            Coil boundary probe resoultion. The default is 0.5.
+
+        Returns
+        -------
+        None.
+
+        """
         if not is_list_like(parts):
             parts = [parts]
         self._coil_index = []
@@ -889,6 +904,24 @@ class BiotMethods:
 
     @property
     def dField(self):
+        """
+        Field probe resolution.
+
+        Parameters
+        ----------
+        dField : float
+            Resoultion of field probes spaced around the perimiters of
+            specified coils.
+
+            - 0: No interpolation - probes plaed at polygon boundary points
+            - -1: dField set equal to each coils' dCoil parameter
+
+        Returns
+        -------
+        dField: float
+            Field probe resolution.
+
+        """
         self._check_default('dField')
         return self._dField
 
@@ -897,6 +930,17 @@ class BiotMethods:
         self._dField = dField
 
     def update_field(self):
+        """
+        Update field biot instance.
+
+        Calculate maximum L2 norm of magnetic field around the perimiters of
+        specified coils. Probe resolution specified via dField property
+
+        Returns
+        -------
+        None.
+
+        """
         self.coil.refresh_dataframe()  # flush updates
         if self.field.nT > 0:  # maximum of coil boundary values
             frame = self.field.frame

@@ -36,10 +36,10 @@ x = minimize(fun, [ITER.coil.x[-1], ITER.coil.z[-1]-5]).x
 print(x)
 """
 
-ITER.Ip = -20e6
+#ITER.Ip = -20e6
 
-plt.set_aspect(0.9)
-ITER.plot(False, plasma=True, current='AT')
+plt.set_aspect(0.7)
+ITER.plot(True, plasma=True, current='AT')
 #ITER.grid.plot_flux()
 
 ITER.plasmagrid.plot_flux()

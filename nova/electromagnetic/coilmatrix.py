@@ -199,7 +199,7 @@ class CoilMatrix():
 
     def _update(self, status):
         """
-        Update stats hook.
+        Update status hook.
 
         Called when setting status for:
 

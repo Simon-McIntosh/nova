@@ -168,7 +168,7 @@ class PlasmaMethods:
         Manage plasma separatrix.
 
         Updates coil and subcoil geometries. Ionizes subcoil plasma filaments.
-        Sets plasma update flag to True.
+        Sets plasma update turn and current flags to True.
 
         Parameters
         ----------

@@ -2,6 +2,7 @@ import numpy as np
 from pandas import DataFrame, Series
 from pandas.api.types import is_list_like
 from scipy.interpolate import interp1d, RectBivariateSpline
+from scipy.optimize import minimize
 import shapely.geometry
 
 from nova.utilities.pyplot import plt
@@ -109,6 +110,7 @@ class Field(Probe):
         None.
 
         """
+        print(dField)
         if not is_list_like(parts):
             parts = [parts]
         self._coil_index = []
@@ -137,10 +139,11 @@ class Field(Probe):
                                 endpoint=False))
                               for i in range(nPoly-1)]
                         polygon[attr] = np.concatenate(dL).ravel()
-                target['x'].extend(x)
-                target['z'].extend(z)
-                target['coil'].extend([index for __ in range(len(x))])
-                target['nC'].append(len(x))
+                nP = len(polygon['x'])
+                target['x'].extend(polygon['x'])
+                target['z'].extend(polygon['z'])
+                target['coil'].extend([index for __ in range(nP)])
+                target['nC'].append(nP)
         self.target.add_coil(target['x'], target['z'],
                              label='Field', delim='',
                              coil=target['coil'])
@@ -148,7 +151,7 @@ class Field(Probe):
         for nC in target['nC']:
             index = [f'Field{i}' for i in np.arange(_nC, _nC+nC)]
             self.target.add_mpc(index)
-            _nC = nC
+            _nC += nC
         self.assemble_biotset()
 
     @property
@@ -364,13 +367,16 @@ class Grid(BiotSet):
             Vertical field.
 
     """
+
     _rbs_attributes = ['Psi', 'B']
 
     _biot_attributes = ['n', 'n2d', 'limit', 'expand_limit', 'boundary',
                         'expand', 'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d',
                         'target']
-    _biot_attributes += [f'_{rbs}_rbs' for rbs in _rbs_attributes]  # rbs
-    _biot_attributes += [f'_update_{rbs}_rbs' for rbs in _rbs_attributes]  # flag
+    # extend rbs attributes
+    _biot_attributes += [f'_{rbs}_rbs' for rbs in _rbs_attributes]
+    # extend rbs update flags
+    _biot_attributes += [f'_update_{rbs}_rbs' for rbs in _rbs_attributes]
 
     _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 51,
                                 'boundary': 'coilset'}
@@ -397,6 +403,11 @@ class Grid(BiotSet):
         """
         BiotSet.__init__(self, source=subcoil, **biot_attributes)
 
+    def _update(self, status):
+        if status:
+            for attribute in self._rbs_attributes:
+                setattr(self, f'_update_{attribute}_rbs', True)
+
     @property
     def B_rbs(self):
         return self.rbs('B')
@@ -406,6 +417,22 @@ class Grid(BiotSet):
         return self.rbs('Psi')
 
     def rbs(self, attribute):
+        """
+        Return RectBivariateSpline for attribute.
+
+        Lazy evaluation.
+
+        Parameters
+        ----------
+        attribute : str
+            Attriburte label.
+
+        Returns
+        -------
+        _{attribute}_rbs: RectBivariateSpline
+            Grid interpolant.
+
+        """
         self._evaluate_rbs(attribute)
         return getattr(self, f'_{attribute}_rbs')  # interpolant
 
@@ -420,16 +447,28 @@ class Grid(BiotSet):
 
     @property
     def update_rbs(self):
-        return Series({attribute:
-                          getattr(self, f'_update_{attribute}_rbs')
-                          for attribute in self._rbs_attributes})
+        """
+        Return update status for rbs interpolants.
 
-    def _update(self, status):
-        if status:
-            for attribute in self._rbs_attributes:
-                setattr(self, f'_update_{attribute}_rbs', True)
+        Returns
+        -------
+        rbs_update_status: Series
+            Update status for rbs interpolants.
+
+        """
+        return Series({attribute:
+                       getattr(self, f'_update_{attribute}_rbs')
+                       for attribute in self._rbs_attributes})
 
     def generate_biot(self):
+        """
+        Evaluate all biot attributes.
+
+        Returns
+        -------
+        None.
+
+        """
         for attribute in self._rbs_attributes:
             self._evaluate_rbs(attribute)
         CoilMatrix.generate_biot(self)
@@ -650,14 +689,28 @@ class Grid(BiotSet):
 class PlasmaGrid(Grid):
     """Plasma grid interaction methods and data. Class extends Grid."""
 
+    _plasma_attributes = ['polarity', 'Opoint', 'Opsi', 'Xpoint', 'Xpsi']
+
     _biot_attributes = Grid._biot_attributes + ['plasma_boundary']
+
+    # extend biot attributes
+    _biot_attributes += [f'_{attribute}' for attribute in _plasma_attributes]
+    # extend rbs update flags
+    _biot_attributes += [f'_update_{attribute}'
+                         for attribute in _plasma_attributes]
+
     _default_biot_attributes = {
         **Grid._default_biot_attributes,
-        **{'expand': 0.1, 'nlevels': 21, 'boundary': 'limit',
-           'plasma_boundary': None}}
+        **{'expand': 0.1, 'nlevels': 21, 'boundary': 'limit'}}
 
     def __init__(self, subcoil, **biot_attributes):
         Grid.__init__(self, subcoil, **biot_attributes)
+
+    def _update(self, status):
+        if status:
+            for attribute in self._plasma_attributes:
+                setattr(self, f'_update_{attribute}', True)
+        Grid._update(self, status)
 
     def _get_expand_limit(self, expand=None, xmin=1e-3):
         """Overide Grid._get_expand_limit."""
@@ -763,6 +816,120 @@ class PlasmaGrid(Grid):
             if key[:7] == 'plasma_':
                 plasma_kwargs[key[7:]] = kwargs[key]
         return plasma_kwargs
+
+    def _update_topology(self):
+        a = 1
+        # _topology = pd.DataFrame(columns=['x', 'z', 'Psi', 'B'])
+
+    @property
+    def bounds(self):
+        """
+        Return grid bounds.
+
+        Returns
+        -------
+        bounds: array-like, shape(2, 2)
+            Grid bounds [(xmin, xmax), (zmin, zmax)].
+
+        """
+        return np.array([self.grid_boundary[:2], self.grid_boundary[2:]])
+
+    @property
+    def polarity(self):
+        if self._update_polarity:
+            self._polarity = self.source.coilframe.Ip_sign
+            self._update_polarity = False
+        return self._polarity
+
+    def _signed_flux(self, x):
+        return -1 * self.polarity * self.Psi_rbs.ev(*x)
+
+    def _signed_flux_gradient(self, x):
+        return -1 * self.polarity * np.array([self.Psi_rbs.ev(*x, dx=1),
+                                              self.Psi_rbs.ev(*x, dy=1)])
+
+    @property
+    def Opoint(self):
+        """
+        Return coordinates of center of nested flux surfaces.
+
+        Returns
+        -------
+        tuple
+            Plasma O-point coordinates (x, z).
+
+        """
+        if self._update_Opoint or self._Opoint is None:
+            self._Opoint = self.get_Opoint(xo=self._Opoint)
+            self._update_Opoint = False
+        return self._Opoint
+
+    def get_Opoint(self, xo=None):
+        if xo is None:
+            xo = self.bounds.mean(axis=1)
+        return minimize(self._signed_flux, xo,
+                        jac=self._signed_flux_gradient,
+                        bounds=self.bounds).x
+
+    @property
+    def Opsi(self):
+        if self._update_Opsi:
+            self._Opsi = float(self.Psi_rbs.ev(*self.Opoint))
+            self._update_Opsi = False
+        return self._Opsi
+
+    def _field_null(self, x):
+        return self.B_rbs.ev(*x)
+
+    def _field_gradient(self, x):
+        return np.array([self.B_rbs.ev(*x, dx=1), self.B_rbs.ev(*x, dy=1)])
+
+    def get_Xpoint(self, xo):
+        return minimize(self._field_null, xo,
+                        jac=self._field_gradient, bounds=self.bounds).x
+
+    @property
+    def Xpoint(self):
+        """
+        Manage Xpoint locations.
+
+        Parameters
+        ----------
+        xo : array-like, shape(n, 2)
+            Sead Xpoints.
+
+        Returns
+        -------
+        Xpoint: ndarray, shape(2)
+            Coordinates of primary Xpoint (x, z).
+
+        """
+        if self._update_Xpoint or self._Xpoint is None:
+            if self._Xpoint is None:  # sead with boundary midsides
+                bounds = self.bounds
+                self.Xpoint = [[np.mean(bounds[0]), bounds[1][i]]
+                               for i in range(2)]
+            nX = len(self._Xpoint)
+            _Xpoint = np.zeros((nX, 2))
+            _Xpsi = np.zeros(nX)
+            for i in range(nX):
+                _Xpoint[i] = self.get_Xpoint(self._Xpoint[i])
+                _Xpsi[i] = self._Psi_rbs.ev(*_Xpoint[i])
+            self._Xpoint = _Xpoint[np.argsort(_Xpsi)]
+            if self.source.coilframe.Ip_sign > 0:
+                self._Xpoint = self._Xpoint[::-1]
+            self._update_Xpoint = False
+        return self._Xpoint
+
+    @Xpoint.setter
+    def Xpoint(self, xo):
+        if not isinstance(xo, np.ndarray):
+            xo = np.array(xo)
+        if xo.ndim == 1:
+            xo = xo.reshape(1, -1)
+        if xo.shape[1] != 2:
+            raise IndexError(f'shape(xo) {xo.shape} not (n, 2)')
+        self._Xpoint = xo
 
 
 class BiotMethods:

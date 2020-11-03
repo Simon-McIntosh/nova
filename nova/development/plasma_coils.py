@@ -16,11 +16,18 @@ ITER.separatrix = ITER.data['separatrix']
 #def minloc():
 #    np.argmin(ITER.subcoil.z[ITER.ionize_index])
 
+'''
 def fun(x):
     return ITER.plasmagrid.B_rbs.ev(*x)
 
-x = minimize(fun, [ITER.coil.x[-1], ITER.coil.z[-1]-5]).x
+x = minimize(fun, [ITER.coil.x[-1], ITER.coil.z[-1]+5],
+             bounds=(ITER.plasmagrid.grid_boundary[:2],
+                     ITER.plasmagrid.grid_boundary[2:])).x
+
 print(x)
+'''
+
+#ITER.Ic *= -1
 
 #ITER.Ip = -15e6
 
@@ -29,7 +36,10 @@ ITER.plot()
 #levels = ITER.grid.plot_flux()
 ITER.plasmagrid.plot_flux()
 
-plt.plot(*x, 'X')
+plt.plot(*ITER.plasmagrid.Opoint, 'ko')
+
+plt.plot(*ITER.plasmagrid.Xpoint[0], 'kX')
+
 
 #ITER.plot_data(['firstwall', 'divertor'])
 #plt.plot(*ITER.data['divertor'].iloc[1:].values.T)

@@ -524,6 +524,11 @@ class CoilData():
         """Net plasma current."""
         return self.Ip.sum()
 
+    @property
+    def Ip_sign(self):
+        """Plasma polarity."""
+        return np.sign(self.Ip_sum)
+
     @staticmethod
     @contextmanager
     def _write_to_dataframe(self):

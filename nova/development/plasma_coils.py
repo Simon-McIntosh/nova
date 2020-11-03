@@ -38,7 +38,10 @@ ITER.plasmagrid.plot_flux()
 
 plt.plot(*ITER.plasmagrid.Opoint, 'ko')
 
-plt.plot(*ITER.plasmagrid.Xpoint[0], 'kX')
+opt = ITER.plasmagrid.get_Xpoint([5, 0])
+#plt.plot(*ITER.plasmagrid.Xpoint, 'kX')
+
+ITER.grid.contour(ITER.plasmagrid.Opsi + 70, plot=True)
 
 
 #ITER.plot_data(['firstwall', 'divertor'])

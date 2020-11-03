@@ -1,9 +1,12 @@
+
 import numpy as np
 from pandas import DataFrame, Series
 from pandas.api.types import is_list_like
 from scipy.interpolate import interp1d, RectBivariateSpline
 from scipy.optimize import minimize
 import shapely.geometry
+from skimage import measure
+import nlopt
 
 from nova.utilities.pyplot import plt
 from nova.utilities.geom import length
@@ -110,7 +113,6 @@ class Field(Probe):
         None.
 
         """
-        print(dField)
         if not is_list_like(parts):
             parts = [parts]
         self._coil_index = []
@@ -371,7 +373,8 @@ class Grid(BiotSet):
     _rbs_attributes = ['Psi', 'B']
 
     _biot_attributes = ['n', 'n2d', 'limit', 'expand_limit', 'boundary',
-                        'expand', 'nlevels', 'levels', 'x', 'z', 'x2d', 'z2d',
+                        'expand', 'nlevels', 'levels',
+                        'x', 'z', '_x', '_z', 'x2d', 'z2d',
                         'target']
     # extend rbs attributes
     _biot_attributes += [f'_{rbs}_rbs' for rbs in _rbs_attributes]
@@ -469,8 +472,9 @@ class Grid(BiotSet):
         None.
 
         """
-        for attribute in self._rbs_attributes:
-            self._evaluate_rbs(attribute)
+        if self.target.nT > 0:
+            for attribute in self._rbs_attributes:
+                self._evaluate_rbs(attribute)
         CoilMatrix.generate_biot(self)
 
     @property
@@ -581,17 +585,57 @@ class Grid(BiotSet):
         self.biot_attributes = grid_attributes  # update attributes
         if self.n > 0:
             mg = MeshGrid(self.n, self.grid_boundary)  # set mesh
-            self.n2d = [mg.nx, mg.nz]
-            self.x, self.z = mg.x, mg.z
+            self.n2d = [mg.nx, mg.nz]  # shape
+            self.x, self.z = mg.x, mg.z  # axes
+            # trace index interpolators
+            self._x = interp1d(range(self.n2d[0]), self.x)
+            self._z = interp1d(range(self.n2d[1]), self.z)
+            # grid deltas
             self.dx = np.diff(self.grid_boundary[:2])[0] / (mg.nx - 1)
             self.dz = np.diff(self.grid_boundary[2:])[0] / (mg.nz - 1)
+            # 2d coordinates
             self.x2d = mg.x2d
             self.z2d = mg.z2d
-            self.target.drop_coil()
+            self.target.drop_coil()  # clear target
             self.target.add_coil(self.x2d.flatten(), self.z2d.flatten(),
                                  name='Grid', delim='')
             self.assemble_biotset()
             self.update_biot = True
+
+    def contour(self, flux, plot=False, ax=None, **kwargs):
+        """
+        Return flux contours.
+
+        Parameters
+        ----------
+        flux : float or list[float]
+            Contour levels.
+        plot : bool, optional
+            Plot contours. The default is False.
+        ax : axes, optional
+            Plot axes. The default is None.
+
+            - None: plots to current axes
+
+        **kwargs : dict
+            Keyword arguments passed to plot.
+
+        Returns
+        -------
+        contours : list[array-like, shape(n, 2)]
+            Contour coordinates.
+
+        """
+        index = measure.find_contours(self.Psi, flux)
+        contours = [[] for __ in range(len(index))]
+        for i, idx in enumerate(index):
+            contours[i] = np.array([self._x(idx[:, 0]), self._z(idx[:, 1])]).T
+        if plot:
+            if ax is None:
+                ax = plt.gca()
+            for contour in contours:
+                plt.plot(contour[:, 0], contour[:, 1], **kwargs)
+        return contours
 
     def _get_expand_limit(self, expand=None, xmin=1e-3):
         if expand is None:
@@ -673,7 +717,7 @@ class Grid(BiotSet):
             plt.axis('equal')
             return QuadContourSet.levels
 
-    def plot_field(self):
+    def plot_field(self, ax=None, **kwargs):
         """
         Generate field quiver plot.
 
@@ -683,7 +727,17 @@ class Grid(BiotSet):
 
         """
         if self.n > 0:
-            plt.quiver(self.x2d, self.z2d, self.Bx, self.Bz)
+            if ax is None:
+                ax = plt.gca()
+            levels = kwargs.get('levels', self.levels)
+            if levels is None:
+                levels = self.nlevels
+            ax.contour(
+                    self.x2d, self.z2d, self.B,
+                    31, linestyles='-', alpha=0.9, zorder=4)
+
+class TopologyError(Exception):
+    """Raise topology error."""
 
 
 class PlasmaGrid(Grid):
@@ -810,12 +864,31 @@ class PlasmaGrid(Grid):
         return Grid.generate_grid(self, **self._strip_plasma(**kwargs))
 
     def _strip_plasma(self, **kwargs):
-        """Coerce kwargs to Grid format (extract keys with plasma_* prefix)."""
+        """
+        Coerce kwargs to Grid format (extract keys with plasma_* prefix).
+
+        Strip plasma_ prefix from kwargs and merge with base kwargs.
+        Priority given to plasma_* kwargs.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            Keyword arguments passed to Grid.generate_grid.
+
+        Returns
+        -------
+        kwargs: dict
+            Merged kwargs.
+
+        """
+        base_kwargs = {}
         plasma_kwargs = {}
         for key in kwargs:
             if key[:7] == 'plasma_':
                 plasma_kwargs[key[7:]] = kwargs[key]
-        return plasma_kwargs
+            else:
+                base_kwargs[key] = kwargs[key]
+        return {**plasma_kwargs, **base_kwargs}
 
     def _update_topology(self):
         a = 1
@@ -836,10 +909,83 @@ class PlasmaGrid(Grid):
 
     @property
     def polarity(self):
+        """
+        Return plasma current polarity.
+
+        Returns
+        -------
+        polarity: int
+            Plasma current polarity.
+
+        """
         if self._update_polarity:
             self._polarity = self.source.coilframe.Ip_sign
             self._update_polarity = False
         return self._polarity
+
+    def _flux_curvature(self, x):
+        """
+        Return principal curvatures in poloidal flux at x.
+
+        Parameters
+        ----------
+        x : array-like, shape(2,)
+            Polidal coordinates for curvature calculation.
+
+        Returns
+        -------
+        Pmax : float
+            Maximum principal curvature.
+        Pmin : float
+            Minimum principal curvature.
+
+        """
+        # flux derivatives
+        Px = self.Psi_rbs.ev(*x, dx=1)
+        Pz = self.Psi_rbs.ev(*x, dy=1)
+        Pxx = self.Psi_rbs.ev(*x, dx=2)
+        Pzz = self.Psi_rbs.ev(*x, dy=2)
+        Pxz = self.Psi_rbs.ev(*x, dx=1, dy=1)
+        # mean curvature
+        H = (Px**2 + 1)*Pzz - 2*Px*Pz*Pxz + (Pz**2 + 1)*Pxx
+        H = -H/(2*(Px**2 + Pz**2 + 1)**(1.5))
+        # gaussian curvature
+        K = (Pxx*Pzz - Pxz**2) / (1 + Px**2 + Pz**2)**2
+        # principal curvatures
+        Pmax = H + np.sqrt(H**2 - K)
+        Pmin = H - np.sqrt(H**2 - K)
+        return Pmax, Pmin
+
+    def null_type(self, x):
+        """
+        Return feild null type.
+
+        Parameters
+        ----------
+        x : array-like, shape(2,)
+            Coordinates of null-point (x, z).
+
+        Raises
+        ------
+        TopologyError
+            One or both princaple flux curvatures equal to zero
+            (plane or cylindrical surface).
+
+        Returns
+        -------
+        null_type : str
+
+            - X : X-point
+            - O : O-point.
+
+        """
+        Pmax, Pmin = self._flux_curvature(x)
+        if np.isclose(Pmax, 0) or np.isclose(Pmin, 0):
+            raise TopologyError('Field null froms cylinder or plane surface')
+        elif np.sign(Pmax) == np.sign(Pmin):
+            return 'O'
+        else:
+            return 'X'
 
     def _signed_flux(self, x):
         return -1 * self.polarity * self.Psi_rbs.ev(*x)
@@ -847,6 +993,39 @@ class PlasmaGrid(Grid):
     def _signed_flux_gradient(self, x):
         return -1 * self.polarity * np.array([self.Psi_rbs.ev(*x, dx=1),
                                               self.Psi_rbs.ev(*x, dy=1)])
+
+    def get_Opoint(self, xo=None):
+        """
+        Return coordinates of plasma O-point.
+
+        O-point defined as center of nested flux surfaces.
+
+        Parameters
+        ----------
+        xo : array-like(float), shape(2,), optional
+            Sead coordinates (x, z). The default is None.
+
+            - None: xo set to grid center
+
+        Raises
+        ------
+        TopologyError
+            Failed to find signed flux minimum.
+
+        Returns
+        -------
+        Opoint, array-like(float), shape(2,)
+            Coordinates of O-point.
+
+        """
+        if xo is None:
+            xo = self.bounds.mean(axis=1)
+        res = minimize(self._signed_flux, xo,
+                       jac=self._signed_flux_gradient, bounds=self.bounds)
+        if not res.success:
+            raise TopologyError('Opoint signed flux minimization failure\n\n'
+                                f'{res}.')
+        return res.x
 
     @property
     def Opoint(self):
@@ -864,29 +1043,91 @@ class PlasmaGrid(Grid):
             self._update_Opoint = False
         return self._Opoint
 
-    def get_Opoint(self, xo=None):
-        if xo is None:
-            xo = self.bounds.mean(axis=1)
-        return minimize(self._signed_flux, xo,
-                        jac=self._signed_flux_gradient,
-                        bounds=self.bounds).x
-
     @property
     def Opsi(self):
+        """
+        Return poloidal flux calculated at O-point.
+
+        Returns
+        -------
+        Opsi: float
+            O-point poloidal flux.
+
+        """
         if self._update_Opsi:
             self._Opsi = float(self.Psi_rbs.ev(*self.Opoint))
             self._update_Opsi = False
         return self._Opsi
 
-    def _field_null(self, x):
-        return self.B_rbs.ev(*x)
+    def _field_null(self, x, grad):
+        print(x)
+        if grad.size > 0:
+            grad[:] = self._field_gradient(x)
+        return self.B_rbs.ev(*x).item()
 
     def _field_gradient(self, x):
         return np.array([self.B_rbs.ev(*x, dx=1), self.B_rbs.ev(*x, dy=1)])
 
     def get_Xpoint(self, xo):
-        return minimize(self._field_null, xo,
-                        jac=self._field_gradient, bounds=self.bounds).x
+        """
+        Return X-point coordinates.
+
+        Resolve X-point location based on solution of field minimum in
+        proximity to sead location, *xo*.
+
+        Parameters
+        ----------
+        xo : array-like(float), shape(2,)
+            Sead coordinates (x, z).
+
+        Raises
+        ------
+        TopologyError
+            Field minimization failure.
+
+        Returns
+        -------
+        Xpoint: array-like(float), shape(2,)
+            X-point coordinates (x, z).
+
+        """
+
+        opt = nlopt.opt(nlopt.G_MLSL_LDS, 2)
+        local = nlopt.opt(nlopt.LD_MMA, 2)
+        '''
+        local.set_ftol_rel(1e-4)
+        local.set_min_objective(self._field_null)
+        local.set_lower_bounds([4, -4])
+        local.set_upper_bounds([8, 4])
+        '''
+
+        opt.set_local_optimizer(local)
+        opt.set_min_objective(self._field_null)
+        opt.set_ftol_rel(1e-4)
+        opt.set_maxeval(50)
+        # grid limits
+        opt.set_lower_bounds([4, -4])
+        opt.set_upper_bounds([8, 4])
+
+        opt.set_population(2)
+
+        x = opt.optimize(xo)
+
+        print(opt)
+
+        #print(self.grid_boundary[1::2])
+        #print(x)
+
+        '''
+        res = minimize(self._field_null, xo,
+                       jac=self._field_gradient,
+                       #bounds=self.bounds,
+                       )
+        if not res.success:
+            raise TopologyError('Xpoint signed |B| minimization failure\n\n'
+                                f'{res}.')
+        '''
+        return opt
 
     @property
     def Xpoint(self):
@@ -914,12 +1155,12 @@ class PlasmaGrid(Grid):
             _Xpsi = np.zeros(nX)
             for i in range(nX):
                 _Xpoint[i] = self.get_Xpoint(self._Xpoint[i])
-                _Xpsi[i] = self._Psi_rbs.ev(*_Xpoint[i])
+                _Xpsi[i] = self.Psi_rbs.ev(*_Xpoint[i])
             self._Xpoint = _Xpoint[np.argsort(_Xpsi)]
             if self.source.coilframe.Ip_sign > 0:
                 self._Xpoint = self._Xpoint[::-1]
             self._update_Xpoint = False
-        return self._Xpoint
+        return self._Xpoint[0]
 
     @Xpoint.setter
     def Xpoint(self, xo):
@@ -1145,6 +1386,7 @@ class BiotMethods:
 
         """
         for instance in self._biot_instances:
+            print(instance)
             getattr(self, instance).generate_biot()
 
     @property

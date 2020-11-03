@@ -27,48 +27,48 @@ from nova.limits.poloidal import PoloidalLimit
 
 
 class Inverse(CoilClass, PoloidalLimit):
-    
+
     def __init__(self, gamma=0):
         CoilClass.__init__(self)
         PoloidalLimit.__init__(self)
         self.load_ITER_limits()
-        
+
         self.gamma = gamma  # Tikhonov regularization
-        
+
     def add_colocation_circle(self, xo, zo, r, N=20):
         # build colocation circle
         x, z = np.array([[r*np.cos(t), r*np.sin(t)]
-                         for t in np.linspace(0, 2*np.pi, N, 
+                         for t in np.linspace(0, 2*np.pi, N,
                                               endpoint=False)]).T
         self.colocate.initialize_targets()
         self.colocate.add_targets('Psi_bndry', xo+x, zo+z)
-        self.colocate.add_targets('Psi_bndry', xo, zo, 0, 1, d_dx=3, d_dz=2)  
+        self.colocate.add_targets('Psi_bndry', xo, zo, 0, 1, d_dx=3, d_dz=2)
         self.colocate.solve_interaction()
-        
+
     def set_foreground(self):
         '[G][Ic] = [T]'
         self.flux = self.coil.reduce_mpc(self.colocate.flux)
         self.G = self.flux  # full flux constraint
         self.wG = self.G  # self.wsqrt * self.G
-        
+
     def set_background(self):
         'contribution from passive coils'
         self.BG = np.zeros(self.colocate.n)  # background
-        
+
     def set_target(self):
         self.T = (self.colocate.targets.value.values - self.BG)
         self.wT = self.T  # self.wsqrt * self.T
-    
+
     @property
     def err(self):
         'error vector'
         return self.wG @ self.Ic - self.wT
-    
+
     @property
     def rss(self):
         'residual sum of squares with Tikhonov regularization'
         return np.sum(self.err**2) + self.gamma * np.sum(self.Ic**2)
-    
+
     def frss(self, Ic, grad):
         self.Ic = Ic  # update current vector
         if grad.size > 0:
@@ -77,19 +77,19 @@ class Inverse(CoilClass, PoloidalLimit):
             jac += self.gamma * 2 * self.Ic  # Tikhonov regularization
             grad[:] = jac  # set gradient in-place
         return self.rss
-    
+
     def solve_lstsq(self):
         'linear least squares solution'
         self.Ic = np.linalg.lstsq(self.wG, self.wT, rcond=None)[0]
-        
+
     def solve(self):  # solve for constrained current vector
         self.solve_lstsq()  # sead with least-squares solution
-        
+
         opt = nlopt.opt(nlopt.LD_MMA, self.coil._nC)
         opt.set_min_objective(self.frss)
         opt.set_ftol_rel(1e-6)
         #opt.set_xtol_abs(1e1)
-        #tol = 1e-2 * np.ones(2 * self.nPF + 2 + 2 * (self.nCS - 1) + 
+        #tol = 1e-2 * np.ones(2 * self.nPF + 2 + 2 * (self.nCS - 1) +
         #                     2 * (self.nCS + 1))  # 1e-3
         #opt.add_inequality_mconstraint(self.Flimit, tol)
 
@@ -98,7 +98,7 @@ class Inverse(CoilClass, PoloidalLimit):
         opt.set_lower_bounds(current_limit['lower'])
         opt.set_upper_bounds(current_limit['upper'])
         Ic = self.Ic.copy()
-        for bound, logic in zip(['lower', 'upper'], 
+        for bound, logic in zip(['lower', 'upper'],
                                 [operator.lt, operator.gt]):
             index = logic(Ic, current_limit[bound])
             Ic[index] = current_limit[bound][index]
@@ -114,7 +114,7 @@ class Inverse(CoilClass, PoloidalLimit):
         '''
         self.opt_result = opt.last_optimize_result()
         print(self.opt_result)
-        
+
     def Flimit(self, constraint, vector, grad):
         if self.svd:  # convert eigenvalues to current vector
             If = np.dot(self.V, vector)
@@ -147,7 +147,7 @@ class Inverse(CoilClass, PoloidalLimit):
             dFtp += np.sum(self.tie_plate['beta'].reshape((-1, 1)) * \
                 np.ones((1, self.nC)) * dF[self.nPF:, :, 1], axis=0)
             dFtp += self.tie_plate['gamma'] * \
-                    np.sum(dF[self.nPF:, :, 3], axis=0) 
+                    np.sum(dF[self.nPF:, :, 3], axis=0)
             dFaxial = np.zeros((self.nCS+1, self.nC))
             dFaxial[-1] = dFtp
             for i in np.arange(1, self.nCS + 1):
@@ -182,7 +182,7 @@ class Inverse(CoilClass, PoloidalLimit):
             constraint[index + self.nCS - 1] = Fsep - CSsep_limit[j, 1]
         # CS Faxial limit
         CSaxial_limit = self.get_CSaxial_limit()
-        Ftp = -self.tie_plate['preload'] 
+        Ftp = -self.tie_plate['preload']
         Ftp += self.tie_plate['alpha'] * np.sum(FxCS)
         Ftp += np.sum(self.tie_plate['beta'] * FzCS)
         Ftp += self.tie_plate['gamma'] * np.sum(FcCS)
@@ -197,15 +197,15 @@ class Inverse(CoilClass, PoloidalLimit):
             # upper limit
             constraint[index + self.nCS + 1] = Faxial[j] - CSaxial_limit[j, 1]
         #print('c', np.array_str(constraint[-(self.nCS+1):], precision=2))
-        
+
     def get_Faxial(self, If, j=None):
         self.ff.If = If
-        F, dF = self.ff.set_force() 
+        F, dF = self.ff.set_force()
         FxCS = F[self.nPF:, 0]  # radial force on CS coils (vector)
         FzCS = F[self.nPF:, 1]  # vertical force on CS coils (vector)
         FcCS = F[self.nPF:, 3]  # vertical crusing force on CS coils (vector)
-        
-        Ftp = -self.tie_plate['preload'] 
+
+        Ftp = -self.tie_plate['preload']
         Ftp += self.tie_plate['alpha'] * np.sum(FxCS)
         Ftp += np.sum(self.tie_plate['beta'] * FzCS)
         Ftp += self.tie_plate['gamma'] * np.sum(FcCS)

@@ -3,6 +3,7 @@ import shapely.geometry
 import numpy as np
 
 from nova.electromagnetic.coilset import CoilSet
+from nova.utilities.pyplot import plt
 
 
 def test_centroid_x(plot=False):
@@ -53,6 +54,46 @@ def test_array_separatrix(plot=False):
                       0.5**2, 1e-3)
 
 
+def Opoint_curvature(sign, plot):
+    cs = CoilSet()
+    polygon = shapely.geometry.Point(5, 1).buffer(0.5)
+    cs.add_plasma(polygon, dPlasma=0.1)
+    cs.add_coil(5, -0.5, 0.75, 0.75, dCoil=0.2)
+    cs.plasmagrid.generate_grid(expand=0.2, n=2e2)  # generate plasma grid
+    cs.Ic = sign * 15e6 * np.ones(2)
+    if plot:
+        cs.plot(True)
+        cs.plasmagrid.plot_flux()
+        plt.plot(*cs.plasmagrid.Opoint, 'ko')
+    assert cs.plasmagrid.field_null(cs.plasmagrid.Opoint) == 'O'
+
+
+def test_Opoint_curvature_Ip_positive(plot=False):
+    Opoint_curvature(1, plot)
+
+
+def test_Opoint_curvature_Ip_negative(plot=False):
+    Opoint_curvature(-1, plot)
+
+
+def test_Xpoint_curvature_Ip_positive(plot=False):
+    cs = CoilSet()
+    polygon = shapely.geometry.Point(5, 1).buffer(0.5)
+    cs.add_plasma(polygon, dPlasma=0.1)
+    cs.add_coil(5, -0.5, 0.75, 0.75, dCoil=0.2)
+    cs.plasmagrid.generate_grid(expand=1, n=2e4)  # generate plasma grid
+    cs.Ic = [15e6, 15e6]
+
+    plt.figure()
+    if plot:
+        cs.plot(True)
+        cs.plasmagrid.plot_flux()
+        plt.plot(*cs.plasmagrid.Opoint, 'ko')
+        plt.plot(*cs.plasmagrid.Xpoint, 'kX')
+        plt.plot(*cs.plasmagrid._Xpoint.T, 'kX')
+    assert cs.plasmagrid.field_null(cs.plasmagrid.Xpoint) == 'X'
+
+
 if __name__ == '__main__':
-    pytest.main([__file__])
-    # test_array_separatrix(True)
+    #pytest.main([__file__])
+    test_Xpoint_curvature_Ip_positive(True)

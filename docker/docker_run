@@ -1,1 +1,0 @@
-docker run --name nova -v C:/Users/mcintos/Work/Code/nova:/nova nova -m pytest /nova/tests/

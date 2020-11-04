@@ -8,13 +8,17 @@ import numpy as np
 import pandas as pd
 import shapely
 import pygeos
+import scipy.optimize
+import nlopt
+
+from nova.electromagnetic.biotmethods import Grid
 
 
 class PlasmaMethods:
     """Plasma methods mixin."""
 
     def __init__(self):
-        self.biot_instances = ['plasmagrid', 'plasmafilament']
+        #self.biot_instances = ['plasmagrid', 'plasmafilament']
         self.default_attributes = {'plasma_boundary': [],
                                    'separatrix': []}
 
@@ -52,7 +56,7 @@ class PlasmaMethods:
         Parameters
         ----------
         boundary : array_like or Polygon
-            External plasma boundary. Coerced as a positively oriented curve.
+            External plasma boundary. Coerced into positively oriented curve.
         name : str, optional
             Plasma coil name.
         dPlasma : float, optional
@@ -65,6 +69,7 @@ class PlasmaMethods:
         """
         if dPlasma is not None:  # update plasma subcoil dimension
             self.dPlasma = dPlasma
+        self.biot_instances = ['plasmagrid', 'plasmafilament']
         self.plasma_boundary = boundary
         # construct plasma coil from polygon
         self.add_coil(0, 0, 0, 0, polygon=self.plasma_boundary,
@@ -293,3 +298,6 @@ class PlasmaMethods:
         self.coil.Ip = Ip
         self.subcoil.Ip = Ip
         self.update_plasma_current = True
+
+
+

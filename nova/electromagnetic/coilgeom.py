@@ -87,6 +87,7 @@ class ITERcoilset(CoilClass):
                               self.data['divertor'].iloc[1:]])
         self.add_plasma(boundary)
         # generate biot objects
+        self.biot_instances = ['field', 'grid']
         self.field.add_coil(self.coil, ['CS', 'PF'], dField=self.dField)
         self.grid.generate_grid(**kwargs)  # generate base grid (plots)
         self.plasmagrid.generate_grid(**kwargs)  # generate plasma grid

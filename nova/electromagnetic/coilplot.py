@@ -106,28 +106,32 @@ class CoilPlot:
         if coil is None:
             coil = self.coil
         if label == 'all':  # all coils
-            parts = coil.part.unique()
+            parts = coil.part
         elif label == 'status':  # based on coil.update_status
-            parts = coil.part[coil._current_index[coil._mpc_referance]].unique()
+            parts = coil.part[coil._current_index[coil._mpc_referance]]
+            parts = parts
         elif label == 'active':  # power == True
-            parts = coil.part[coil.power & ~coil.plasma].unique()
+            parts = coil.part[coil.power & ~coil.plasma]
         elif label == 'passive':  # power == False
-            parts = coil.part[~coil.power & ~coil.plasma].unique()
+            parts = coil.part[~coil.power & ~coil.plasma]
         elif label == 'coil':  # plasma == False
-            parts = coil.part[~coil.plasma].unique()
+            parts = coil.part[~coil.plasma]
         elif label == 'plasma':  # plasma == True
-            parts = coil.part[coil.plasma].unique()
+            parts = coil.part[coil.plasma]
         elif label == 'free':  # optimize == True
-            parts = coil.part[coil.optimize & ~coil.plasma].unique()
+            parts = coil.part[coil.optimize & ~coil.plasma]
         elif label == 'fix':  # optimize == False
-            parts = coil.part[~coil.optimize & ~coil.plasma].unique()
+            parts = coil.part[~coil.optimize & ~coil.plasma]
         else:
             if not pd.api.types.is_list_like(label):
                 label = [label]
-            parts = self.coil.part.unique()
+            parts = self.coil.part
             parts = [_part for _part in label if _part in parts]
+        parts = parts.unique()
         parts = list(parts)
         N = {p: sum(coil.part == p) for p in parts}
+        # check for presence of field instance
+        field = False if 'field' not in self.biot_instances else field
         # referance vertical length scale
         dz_ref = np.diff(ax.get_ylim())[0] / 100
         nz = np.sum(np.array([parts is not False, current is not None,

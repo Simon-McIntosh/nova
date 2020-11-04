@@ -65,7 +65,7 @@ def Opoint_curvature(sign, plot):
         cs.plot(True)
         cs.plasmagrid.plot_flux()
         plt.plot(*cs.plasmagrid.Opoint, 'ko')
-    assert cs.plasmagrid.field_null(cs.plasmagrid.Opoint) == 'O'
+    assert cs.plasmagrid.null_type(cs.plasmagrid.Opoint) == 'O'
 
 
 def test_Opoint_curvature_Ip_positive(plot=False):
@@ -91,7 +91,7 @@ def test_Xpoint_curvature_Ip_positive(plot=False):
         plt.plot(*cs.plasmagrid.Opoint, 'ko')
         plt.plot(*cs.plasmagrid.Xpoint, 'kX')
         plt.plot(*cs.plasmagrid._Xpoint.T, 'kX')
-    assert cs.plasmagrid.field_null(cs.plasmagrid.Xpoint) == 'X'
+    assert cs.plasmagrid.null_type(cs.plasmagrid.Xpoint) == 'X'
 
 
 if __name__ == '__main__':

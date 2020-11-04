@@ -197,11 +197,18 @@ class CoilMatrix():
         self.update_coil_current = status
         self.update_plasma_current = status
 
-    def _update(self, status):
+    def _flag_update(self, status):
         """
-        Update status hook.
+        Provide hook to set update flags in child class(es).
 
-        Called when setting status for:
+        Method to be extended by child class(es).
+
+        >>> def _flag_update(self, status):
+        >>>        super._flag_update(self, status)
+        >>>        # set local update flags here
+
+
+        Method called when setting status for:
 
             - interaction
             - plasma_turns
@@ -243,7 +250,7 @@ class CoilMatrix():
     @update_interaction.setter
     def update_interaction(self, status):
         self._confirm_boolean(status)
-        self._update(status)
+        self._flag_update(status)
         self._update_interaction = status
 
     @property
@@ -328,11 +335,11 @@ class CoilMatrix():
 
     def _set_update_status(self, update, status):
         self._confirm_boolean(status)
-        self._update(status)
+        self._flag_update(status)
         for attribute in update:
             update[attribute] = status
 
-    def generate_biot(self):
+    def solve(self):
         """
         Evaluate all biot attributes.
 
@@ -341,15 +348,13 @@ class CoilMatrix():
         None.
 
         """
-        if self.target.nT == 0:  # return if targets not set
+        if self.target.nT == 0:
+            'Return with warning if targets not set.'
             warn('Targets not set in:\n'
                  f'{self.__class__}')
             return
-        self.solve_interaction()
         for variable in self._coilmatrix_properties:
-            self._dot_plasma_turns(variable)
-            self._dot_coil_current(variable)
-            self._dot_plasma_current(variable)
+            self.evaluate(variable)
 
     def evaluate(self, variable):
         """

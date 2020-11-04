@@ -7,10 +7,12 @@ dependencies:
   - descartes
   - matplotlib
   - netcdf4
+  - nlopt
   - numpy
   - pandas
   - pip
   - pygeos
+  - pygmo
   - pytest
   - python=3.8
   - python-docx

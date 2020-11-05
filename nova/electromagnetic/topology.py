@@ -14,6 +14,34 @@ from nova.utilities import geom
 from nova.electromagnetic.meshgrid import MeshGrid
 
 
+class Stencil:
+
+    def __init__(self, grid_boundary):
+        self.grid_boundary = grid_boundary
+
+    def get_bounds(self):
+        return (self.grid_boundary[::2], self.grid_boundary[1::2])
+
+
+class FieldNull(Stencil):
+
+    def __init__(self, grid_boundary, interpolate):
+        Stencil.__init__(self, grid_boundary)
+        self.interpolate = interpolate
+
+    def fitness(self, x):
+        return [self.interpolate('B').ev(*x).item()]
+
+    def get_nobj(self):
+        return 1
+
+    def gradient(self, x):
+        return [self.interpolate('B').ev(*x, dx=1).item(),
+                self.interpolate('B').ev(*x, dy=1).item()]
+
+
+
+
 class TopologyError(Exception):
     """Raise topology error."""
 
@@ -531,8 +559,20 @@ class Topology:
         return self.interpolate('B').ev(*x).item()
 
     def _field_gradient(self, x):
-        return  [self.interpolate('B').ev(*x, dx=1),
-                         self.interpolate('B').ev(*x, dy=1)]
+        return  [self.interpolate('B').ev(*x, dx=1).item(),
+                 self.interpolate('B').ev(*x, dy=1).item()]
+
+    def get_Xpoint_pygmo(self, xo):
+        uda = pg.nlopt("slsqp")
+        algo = pg.algorithm(uda)
+        algo.extract(pg.nlopt).ftol_rel = 1e-8
+
+        #print(algo)
+        prob = pg.problem(FieldNull(self.grid_boundary, self.interpolate))
+        pop = pg.population(prob, size=1)
+        pop = algo.evolve(pop)
+        #print(pop)
+        return pop.champion_x, pop.champion_f
 
     def get_Xpoint(self, xo):
         """
@@ -591,6 +631,7 @@ class Topology:
         opt.set_lower_bounds(self.grid_boundary[::2])
         opt.set_upper_bounds(self.grid_boundary[1::2])
         x = opt.optimize(xo)
+        #print(self.interpolate('B').ev(*x))
 
         """
         res = scipy.optimize.minimize(
@@ -646,31 +687,6 @@ class Topology:
         if xo.shape[1] != 2:
             raise IndexError(f'shape(xo) {xo.shape} not (n, 2)')
         self._Xpoint = xo
-
-
-class Stencil:
-
-    def __init__(self, grid_boundary):
-        self.grid_boundary = grid_boundary
-
-    def get_bounds(self):
-        return (self.grid_boundary[::2], self.grid_boundary[1::2])
-
-
-class FieldNull(Stencil):
-
-    def __init__(self, grid_boundary, interpolate):
-        Stencil.__init__(self, grid_boundary)
-        self.interpolate = interpolate
-
-    def fitness(self, x):
-        return [self.interpolate('B').ev(*x)]
-
-    def get_nobj(self):
-        return 1
-
-    def gradient(self, x):
-        return [self.interpolate('B').ev(*x, dx=1), self.interpolate('B').ev(*x, dy=1)]
 
 
 if __name__ == '__main__':

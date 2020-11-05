@@ -5,7 +5,7 @@ from nova.electromagnetic.coilgeom import ITERcoilset
 from nova.utilities.pyplot import plt
 
 ITER = ITERcoilset(coils='pf', dCoil=0.2, dPlasma=0.2, dField=0.2,
-                   plasma_n=2e3, n=1e3, read_txt=True)
+                   plasma_n=2e3, n=1e3, read_txt=False)
 
 ITER.filename = -1
 ITER.scenario = 'EOF'
@@ -43,6 +43,19 @@ plt.plot(*ITER.plasmagrid.Opoint, 'ko')
 
 ITER.grid.contour(ITER.plasmagrid.Opsi + 70, plot=True)
 
+ITER.plasmagrid.plot()
+
+index = ITER.plasmagrid.B < 0.2 * np.mean(ITER.plasmagrid.B)
+plt.plot(ITER.plasmagrid.x2d[index], ITER.plasmagrid.z2d[index], 'o')
+
+from sklearn.cluster import DBSCAN
+dbscan = DBSCAN(eps=0.5, min_samples=1)
+xo, zo = ITER.plasmagrid.x2d[index], ITER.plasmagrid.z2d[index]
+cluster_index = dbscan.fit_predict(np.array([xo,zo]).T)
+
+for i in range(np.max(cluster_index)+1):
+    plt.plot(np.mean(xo[cluster_index == i]),
+             np.mean(zo[cluster_index == i]), 'D')
 
 #ITER.plot_data(['firstwall', 'divertor'])
 #plt.plot(*ITER.data['divertor'].iloc[1:].values.T)

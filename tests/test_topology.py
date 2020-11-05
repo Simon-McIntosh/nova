@@ -53,7 +53,7 @@ def test_Xpoint_curvature_Ip_positive(plot=False):
     polygon = shapely.geometry.Point(5, 1).buffer(0.5)
     cs.add_plasma(polygon, dPlasma=0.1)
     cs.add_coil(5, -0.5, 0.75, 0.75, dCoil=0.2)
-    cs.plasmagrid.generate_grid(expand=0.9, n=2e2)  # generate plasma grid
+    cs.plasmagrid.generate_grid(expand=2.9, n=2e2)  # generate plasma grid
     cs.Ic = [15e6, 15e6]
 
     plt.figure()
@@ -66,6 +66,6 @@ def test_Xpoint_curvature_Ip_positive(plot=False):
     assert cs.plasmagrid.null_type(cs.plasmagrid.Xpoint) == 'X'
 
 if __name__ == '__main__':
-    pytest.main([__file__])
+    #pytest.main([__file__])
     test_Xpoint_curvature_Ip_positive(True)
     #test_spline_update(True)

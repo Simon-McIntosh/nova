@@ -1,7 +1,7 @@
 #!/bin/sh
 wkdir=$1  # working directory
 label=$2  # docker label
-image_name="nova"$(echo "$label" | sed "s/./_/")
+image_name="nova_"$(echo "$label" | sed "s/\./_/")
 echo image name: $image_name
 . /usr/share/Modules/init/sh
 module use /work/imas/etc/modules/all

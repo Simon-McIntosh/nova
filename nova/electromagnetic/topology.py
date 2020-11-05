@@ -5,8 +5,9 @@ import shapely.geometry
 import numpy as np
 import scipy.optimize
 import scipy.interpolate
-import skimage
+import skimage.measure
 import nlopt
+import pandas as pd
 
 from nova.utilities.pyplot import plt
 from nova.utilities import geom
@@ -83,13 +84,13 @@ class Topology:
 
         Returns
         -------
-        spline_update_status: Series
+        spline_update_status: pandas.Series
             Update status for spline interpolants.
 
         """
-        return Series({attribute:
-                       getattr(self, f'_update_{attribute}_spline')
-                       for attribute in self._spline_attributes})
+        return pd.Series({attribute:
+                          getattr(self, f'_update_{attribute}_spline')
+                          for attribute in self._spline_attributes})
 
     def contour(self, flux, plot=False, ax=None, **kwargs):
         """
@@ -484,8 +485,9 @@ class Topology:
         """
         if xo is None:
             xo = self.bounds.mean(axis=1)
-        res = scipy.optimize.minimize(self._signed_flux, xo,
-                       jac=self._signed_flux_gradient, bounds=self.bounds)
+        res = scipy.optimize.minimize(
+            self._signed_flux, xo,
+            jac=self._signed_flux_gradient, bounds=self.bounds)
         if not res.success:
             raise TopologyError('Opoint signed flux minimization failure\n\n'
                                 f'{res}.')
@@ -529,7 +531,8 @@ class Topology:
         return self.interpolate('B').ev(*x).item()
 
     def _field_gradient(self, x):
-        return np.array([self.interpolate('B').ev(*x, dx=1), self.interpolate('B').ev(*x, dy=1)])
+        return  [self.interpolate('B').ev(*x, dx=1),
+                         self.interpolate('B').ev(*x, dy=1)]
 
     def get_Xpoint(self, xo):
         """
@@ -555,6 +558,7 @@ class Topology:
 
         """
 
+        """
         opt = nlopt.opt(nlopt.G_MLSL_LDS, 2)
         local = nlopt.opt(nlopt.LD_MMA, 2)
         '''
@@ -580,17 +584,25 @@ class Topology:
 
         #print(self.grid_boundary[1::2])
         #print(x)
+        """
+        opt = nlopt.opt(nlopt.LD_MMA, 2)
+        opt.set_min_objective(self._field_null)
+        opt.set_ftol_rel(1e-6)
+        opt.set_lower_bounds(self.grid_boundary[::2])
+        opt.set_upper_bounds(self.grid_boundary[1::2])
+        x = opt.optimize(xo)
 
-        '''
-        res = minimize(self._field_null, xo,
-                       jac=self._field_gradient,
-                       #bounds=self.bounds,
-                       )
+        """
+        res = scipy.optimize.minimize(
+            self._field_null, xo, jac=self._field_gradient,
+            # bounds=self.bounds,
+            )
         if not res.success:
             raise TopologyError('Xpoint signed |B| minimization failure\n\n'
                                 f'{res}.')
-        '''
-        return opt
+        return res.x
+        """
+        return x
 
     @property
     def Xpoint(self):

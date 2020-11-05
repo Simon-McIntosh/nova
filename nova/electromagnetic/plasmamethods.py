@@ -46,7 +46,7 @@ class PlasmaMethods:
         self._dPlasma = dPlasma
         self._default_attributes['dPlasma'] = dPlasma
 
-    def add_plasma(self, boundary, name='Plasma', dPlasma=None):
+    def add_plasma(self, boundary, name='Plasma', dPlasma=None, **kwargs):
         """
         Add plasma coil to coilset and generate plasma grid.
 
@@ -76,6 +76,8 @@ class PlasmaMethods:
                       cross_section='polygon', turn_section='rectangle',
                       dCoil=self.dPlasma, name=name, plasma=True, power=True,
                       part='plasma')
+        self.plasmagrid.generate_grid(**kwargs)
+        self.plasmafilament.add_plasma()
 
     @property
     def plasma_boundary(self):
@@ -134,7 +136,8 @@ class PlasmaMethods:
         # orient polygon
         polygon = shapely.geometry.polygon.orient(polygon)
         self._plasma_boundary = polygon
-        self.plasmagrid.plasma_boundary = polygon
+        if 'plasmagrid' in self.biot_instances:
+            self.plasmagrid.plasma_boundary = polygon
 
     @property
     def plasma_tree(self):

@@ -11,39 +11,6 @@ from matplotlib.transforms import Bbox
 from matplotlib.colors import to_rgb
 from matplotlib.patches import Arc, RegularPolygon
 from matplotlib.path import Path
-from scipy.interpolate import interp1d
-from skimage import measure
-
-
-class cntr:
-    '''
-    emulate _cntr behavour using skimage.mesure
-    '''
-    def __init__(self, x, z, c):
-        # store grid
-        self.x = x
-        self.z = z
-        # store contour values
-        self.c = c
-        # store grid dimensions
-        self.nx, self.nz = np.shape(x)
-        # construct index interpolators
-        self._x = interp1d(range(self.nx), x[:, 0])
-        self._z = interp1d(range(self.nz), z[0, :])
-
-    def trace(self, level):
-        c_index = measure.find_contours(self.c, level)
-        lines = [[] for __ in range(len(c_index))]
-        for i, index in enumerate(c_index):
-            lines[i] = np.array([self._x(index[:, 0]), self._z(index[:, 1])]).T
-        return lines
-
-    def plot(self, level):
-        lines = self.trace(level)
-        ax = plt.subplots(1, 1)[1]
-        ax.pcolor(self.x, self.z, self.c)
-        for line in lines:
-            ax.plot(line[:, 0], line[:, 1])
 
 
 def ring_coding(ob):
@@ -91,7 +58,7 @@ def set_xticks(n, ax=None, ntick=20, whitespace=False):
     else:
         space = 1
     ticklabels = ['{:1d}'.format(i) if i % space == 0 else ''
-                  for i in range(n)]   
+                  for i in range(n)]
     if whitespace:
         X = np.arange(n)
     else:
@@ -239,7 +206,7 @@ def detick(ax):  # remove xticks from upper subplots
     for i in range(len(ax) - 1):
         plt.setp(ax[i].get_xticklabels(), visible=False)
         ax[i].set_xlabel('')
-        
+
 def insert_yticks(ticks, ax=None, N=8):
     if ax is None:
         ax = plt.gca()

@@ -169,7 +169,7 @@ class operate:
                 self.feature_segments = self.feature_segments.append(vector)
 
     def extract_features(self):
-        for variable, threshold in zip(['Ip', 'Pfus', 'Ti', 'Zx', 
+        for variable, threshold in zip(['Ip', 'Pfus', 'Ti', 'Zx',
                                         '<PSIext>', '<PSIcoils>', 'PSI(axis)'],
                                        [0.95, 0.85, 0.25, 0.95, 1, 1, 1]):
             try:
@@ -351,40 +351,40 @@ class interpolate:
         self.t = np.linspace(tmin, tmax, nt)
         self.dt = (tmax - tmin) / (nt - 1)
         return unique_index
-    
-    
+
+
 class scenario_limits:
-    
+
     def __init__(self, folder=None, t='d3'):
         self.initialize_limits()
         self.load_data(folder, t=t)
-        
+
     def reset_limits(self):
         self.limit = {'I': {}, 'F': {}, 'B': {}}
-        
+
     def initialize_limits(self):
         'default limits for ITER coil-set'
         self.reset_limits()  # reset
         # current limits kA
         self.set_limit(ICS=45)
-        self.set_limit(IPF1=48, IPF2=55, IPF3=55, 
+        self.set_limit(IPF1=48, IPF2=55, IPF3=55,
                        IPF4=55, IPF5=52, IPF6=52)
         # force limits
-        self.set_limit(FCSsep=120, side='upper')  
+        self.set_limit(FCSsep=120, side='upper')
         self.set_limit(FCSsum=60, side='both')
         self.set_limit(FPF1=-150, FPF2=-75, FPF3=-90, FPF4=-40,
                            FPF5=-10, FPF6=-190, side='lower')
         self.set_limit(FPF1=110, FPF2=15, FPF3=40, FPF4=90,
                            FPF5=160, FPF6=170, side='upper')
         # field limits
-        self.set_limit(BCS=[[45, 40], [12.6, 13]], side='abs') 
-        self.set_limit(BPF1=[[48, 41], [6.4, 6.5]], side='abs') 
-        self.set_limit(BPF2=[[55, 50], [4.8, 5]], side='abs') 
-        self.set_limit(BPF3=[[55, 50], [4.8, 5]], side='abs') 
-        self.set_limit(BPF4=[[55, 50], [4.8, 5]], side='abs') 
-        self.set_limit(BPF5=[[52, 33], [5.7, 6]], side='abs') 
-        self.set_limit(BPF6=[[48, 41], [6.4, 6.5]], side='abs') 
-        
+        self.set_limit(BCS=[[45, 40], [12.6, 13]], side='abs')
+        self.set_limit(BPF1=[[48, 41], [6.4, 6.5]], side='abs')
+        self.set_limit(BPF2=[[55, 50], [4.8, 5]], side='abs')
+        self.set_limit(BPF3=[[55, 50], [4.8, 5]], side='abs')
+        self.set_limit(BPF4=[[55, 50], [4.8, 5]], side='abs')
+        self.set_limit(BPF5=[[52, 33], [5.7, 6]], side='abs')
+        self.set_limit(BPF6=[[48, 41], [6.4, 6.5]], side='abs')
+
     def set_limit(self, side='both', eps=1e-2, **kwargs):
         # set as ICSsum for [I][CSsum] etc...
         if side == 'both' or side == 'equal':
@@ -421,7 +421,7 @@ class scenario_limits:
                         else:
                             value = sign * kwargs[key]
                         self.limit[variable][key[1:]][i] = value
-                    
+
     def sign_limit(self, index, side):
         # only apply sign to symetric limits (side==both)
         if side in ['both', 'equal']:
@@ -429,17 +429,17 @@ class scenario_limits:
         else:
             sign = 1
         return sign
-        
+
     def load_data(self, folder, t='d3'):
         self.d2 = scenario_data(folder)
         self.d3 = forcefield_data(folder)
         self.t = t
         self.normalize()
-        
+
     @property
     def t(self):
         return self._t
-        
+
     @t.setter
     def t(self, t):
         if isinstance(t, str):
@@ -458,7 +458,7 @@ class scenario_limits:
         self.frame = pd.concat(frame, axis=1)
         self.frame.rename(columns={'Fz_1': 'Fz_cssep', 'Fz_2': 'Fz_cssum'},
                           inplace=True)
-        
+
     def extract_index(self):
         self.index = {}
         for var in self.limit:
@@ -476,7 +476,7 @@ class scenario_limits:
                 else:
                     index.extend([col for col in self.frame if name in col])
             self.index[var] = index
-        
+
     def normalize(self):
         self.norm = pd.DataFrame()
         self.extract_index()
@@ -505,7 +505,7 @@ class scenario_limits:
                     I = abs(self.frame.loc[:, f'I{coil}'])
                     limit = interp1d(*limit, fill_value='extrapolate')(I)
                     self.norm.loc[:, name] /= limit
-        
+
     def plot(self, multi=True, strID='', ax=None):
         if ax is None:
             ax = plt.subplots(len(self.index), 1, sharex=True, sharey=True)[1]
@@ -535,7 +535,7 @@ class scenario_limits:
                         _color = 'darkgray'
                         _label = None
                     if multi:
-                        ax[i].plot(self.t, _waveform, label=_label, 
+                        ax[i].plot(self.t, _waveform, label=_label,
                                    color=_color)
             if multi:
                 # plot keypoints
@@ -548,7 +548,7 @@ class scenario_limits:
                     except:
                         pass
                 # multi axes legend
-                ax[i].legend(ncol=1, loc='center right', 
+                ax[i].legend(ncol=1, loc='center right',
                          bbox_to_anchor=(1.15, 0.5), frameon=False,
                          fontsize='xx-small')
             else:
@@ -562,26 +562,26 @@ class scenario_limits:
         if multi:
             plt.suptitle(self.d2.filename)
         else:
-            ax[1].legend(ncol=1, loc='center right', 
+            ax[1].legend(ncol=1, loc='center right',
                          bbox_to_anchor=(1.3, 0.5), frameon=False,
                          fontsize='xx-small')
-            
+
         ax[-1].set_xlabel('$t$ s')
         plt.despine()
-      
+
 '''
 class cosica_data(read_dina):
-    
+
     def __init__(self):
         read_dina.__init__(self, database_folder=database_folder,
                            read_txt=read_txt)
-'''     
+'''
 
 class scenario_data(read_dina, interpolate, operate):
 
     '''
     read DINA scenario data
-    
+
     Attributes:
         data (pd.DataFrame): DINA raw data (load using read_scenario)
         t (np.array): time vector with equidistant spacing
@@ -634,7 +634,7 @@ class scenario_data(read_dina, interpolate, operate):
                 self.save_pickle(filename, attributes)
             else:
                 if self.load_pickle(filename) or \
-                        (sorted(additional_columns) != 
+                        (sorted(additional_columns) !=
                          self.additional_columns):
                     self.read_file(folder, additional_columns)
                     self.save_pickle(filename, attributes)
@@ -764,7 +764,7 @@ class scenario_data(read_dina, interpolate, operate):
         interpolate.to.fset(self, to)  # update interpolation instance
         self._Ic.iloc[:] = self.vector.iloc[self.Ic_iloc].values  # coils
         self._Ip = self.vector['Ip']  # plasma
-        
+
     def plot(self, x='t', y='Ip', xslice=None, dt_filt=0, dt_min=0,
              strID='', ax=None, **kwargs):
         # slice
@@ -775,34 +775,34 @@ class scenario_data(read_dina, interpolate, operate):
                 xslice = [xslice]
             for i in range(len(xslice)):
                 if isinstance(xslice[i], str):
-                    xslice[i] = self.feature_keypoints.loc[xslice[i], 
+                    xslice[i] = self.feature_keypoints.loc[xslice[i],
                                                          'frame_index']
         if len(xslice) == 1:
             dt = 0
-            xslice = xslice[0] 
+            xslice = xslice[0]
         else:
             dt = self.frame.loc[xslice[1], 't'] - \
-                self.frame.loc[xslice[0], 't'] 
+                self.frame.loc[xslice[0], 't']
             xslice = slice(*xslice)
         x = self.frame.loc[xslice, x]
         y = self.frame.loc[xslice, y]
         # filter
         if dt_filt != 0:
-            n_filt = int(dt_filt/self.dt) 
+            n_filt = int(dt_filt/self.dt)
             if n_filt%2 == 0:
                 n_filt += 1
             x = vector_lowpass(x.values, n_filt)
             y = vector_lowpass(y.values, n_filt)
         if ax is None:
             ax = plt.gca()
-        
+
         if isinstance(x, float):
             ax.plot(x, y, **kwargs)
         else:
             if dt > dt_min:
                 strID = strID.replace(' ', '_')
                 label = self.filename.replace(strID, '')
-                ax.plot(x, y, label=label)              
+                ax.plot(x, y, label=label)
         return dt
 
 
@@ -928,7 +928,7 @@ class read_scenario(read_dina):
             if self.load_pickle(filename):
                 self.read_file(folder, file_type=file_type, verbose=verbose)
                 self.save_pickle(filename, ['data2', 'data3'])
-                
+
     def read_file(self, folder, file_type='txt', verbose=True):
         if verbose:
             print(f'reading {self.filename}.{file_type}')
@@ -962,7 +962,7 @@ class read_scenario(read_dina):
             'folder': self.filename,
             'date': self.date.strftime('%m/%Y')}
         netCDFfile = join(self.filepath, 'scenario_data')
-        #self.save_netCDF(netCDFfile, ['data2', 'data3'], **metadata)
+        self.save_netCDF(netCDFfile, ['data2', 'data3'], **metadata)
         with open(netCDFfile+'.nc', 'w') as f:
             f.write(f'{np.random.random(9)}')
         print(netCDFfile+'.nc')
@@ -973,8 +973,8 @@ class read_scenario(read_dina):
                         'hpc-login.iter.org:/work/imas/shared/external/'
                         f'assets/nova/MD5/{secure_hash}'])
         #self.load_netCDF(netCDFfile+'.nc')
-        
- 
+
+
     def read_IDM(self, folder):
         'read IDM referance from word file'
         file = self.locate_file_type('Parameters*Data2*', 'docx', folder)[0]
@@ -985,7 +985,7 @@ class read_scenario(read_dina):
                 IDM = IDM.groups(1)[0]
                 break
         return IDM
-        
+
 if __name__ == '__main__':
 
     # d3 = field_data(read_txt=False)
@@ -995,23 +995,23 @@ if __name__ == '__main__':
     scn = read_scenario(database_folder='scenarios', read_txt=False)
     #scn.load_folder()
     scn.load_file(-1)
-    scn.load_file('15MA DT-DINA2020-04', read_txt=True)
-    
+    #scn.load_file('15MA DT-DINA2020-04', read_txt=True)
+
     scn.read_IDM(-1)
-    
+
     '''
     d2 = scenario_data(read_txt=False)
     #d2.load_folder()
     d2.load_file(-1)  # read / load single file
     #d2.load_file(-1, read_txt=True)  # read / load single file
-    
+
     #plt.set_context('talk')
     #d2.plot_features(feature_name=['Ip', '<PSIcoils>'])
 
     d3 = forcefield_data(read_txt=False)
     #d3.load_folder()
     d3.load_file(-1)
-    
+
     d3.to = 'IM'
     '''
 
@@ -1020,4 +1020,3 @@ if __name__ == '__main__':
     print(d2.Ic)
     # print(d2.Ip)
     '''
-    

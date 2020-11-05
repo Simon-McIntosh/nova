@@ -413,7 +413,7 @@ class Grid(BiotSet, Topology):
         BiotSet._flag_update(self, status)
         Topology._flag_update(self, status)
 
-    def generate_biot(self):
+    def solve(self):
         """
         Evaluate all biot attributes.
 
@@ -423,9 +423,9 @@ class Grid(BiotSet, Topology):
 
         """
         if self.target.nT > 0:
-            for attribute in self._rbs_attributes:
-                self._evaluate_rbs(attribute)
-        CoilMatrix.generate_biot(self)
+            for attribute in self._interpolate_attributes:
+                self._evaluate_spline(attribute)
+        CoilMatrix.solve(self)
 
     @property
     def grid_boundary(self):
@@ -708,7 +708,7 @@ class PlasmaGrid(Grid):
         Return default plasma grid point number.
 
         Point number calculated to produce a grid with a nodal density
-        2.5 times the plasma filament density.
+        2.5**2 times the plasma filament density.
 
         Returns
         -------
@@ -722,7 +722,7 @@ class PlasmaGrid(Grid):
         plasma_filament_density = \
             np.sum(self.source.coilframe.plasma) /\
             self.source.coilframe.dA[self.source.coilframe.plasma].sum()
-        return 2.5*int(plasma_filament_density*grid_area)
+        return int(2.5**2 * plasma_filament_density*grid_area)
 
     def generate_grid(self, regen=False, **kwargs):
         """
@@ -1029,7 +1029,6 @@ class BiotMethods:
 
         """
         for instance in self._biot_instances:
-            print(instance)
             getattr(self, instance).solve()
 
     @property

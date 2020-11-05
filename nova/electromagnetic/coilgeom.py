@@ -85,13 +85,11 @@ class ITERcoilset(CoilClass):
         # build plasma
         boundary = pd.concat([self.data['firstwall'],
                               self.data['divertor'].iloc[1:]])
-        self.add_plasma(boundary)
+        self.add_plasma(boundary, **kwargs)
         # generate biot objects
         self.biot_instances = ['field', 'grid']
         self.field.add_coil(self.coil, ['CS', 'PF'], dField=self.dField)
         self.grid.generate_grid(**kwargs)  # generate base grid (plots)
-        self.plasmagrid.generate_grid(**kwargs)  # generate plasma grid
-        self.plasmafilament.add_plasma()  # add plasma filaments
 
     def rebuild(self, coils, filename, **kwargs):
         _rebuild = {}

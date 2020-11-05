@@ -1,7 +1,8 @@
 #!/bin/sh
 wkdir=$1  # working directory
 label=$2  # docker label
-image_name="nova_pygeos"
+image_name="nova"$label
+echo image name: $image_name
 . /usr/share/Modules/init/sh
 module use /work/imas/etc/modules/all
 # print hostname (debug)

@@ -370,7 +370,8 @@ class Grid(BiotSet, Topology):
 
     _biot_attributes = ['n', 'n2d', 'limit', 'expand_limit', 'boundary',
                         'expand', 'nlevels', 'levels',
-                        'x', 'z', '_x', '_z', 'x2d', 'z2d', 'target']
+                        'x', 'z', 'x_index', 'z_index', 'x2d', 'z2d',
+                        'dx', 'dz', 'target']
 
     _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 51,
                                 'boundary': 'coilset'}
@@ -538,8 +539,8 @@ class Grid(BiotSet, Topology):
             self.n2d = [mg.nx, mg.nz]  # shape
             self.x, self.z = mg.x, mg.z  # axes
             # trace index interpolators
-            self._x = interp1d(range(self.n2d[0]), self.x)
-            self._z = interp1d(range(self.n2d[1]), self.z)
+            self.x_index = interp1d(range(self.n2d[0]), self.x)
+            self.z_index = interp1d(range(self.n2d[1]), self.z)
             # grid deltas
             self.dx = np.diff(self.grid_boundary[:2])[0] / (mg.nx - 1)
             self.dz = np.diff(self.grid_boundary[2:])[0] / (mg.nz - 1)
@@ -755,7 +756,7 @@ class PlasmaGrid(Grid):
 
         Returns
         -------
-        None.
+        regen flag : bool.
 
         """
         kwargs['plasma_n'] = kwargs.get('plasma_n', self.plasma_n)  # auto size
@@ -786,7 +787,7 @@ class PlasmaGrid(Grid):
                 plasma_kwargs[key[7:]] = kwargs[key]
             else:
                 base_kwargs[key] = kwargs[key]
-        return {**plasma_kwargs, **base_kwargs}
+        return {**base_kwargs, **plasma_kwargs}
 
     @property
     def bounds(self):

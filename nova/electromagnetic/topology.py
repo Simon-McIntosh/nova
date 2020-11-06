@@ -30,7 +30,7 @@ class Topology:
 
     _topology_attributes = ['Opoint', 'Opsi', 'Xpoint', 'Xpsi', 'ftol_rel']
 
-    def __init__(self, ftol_rel=1e-9):
+    def __init__(self):
         """Extend biot attributes."""
         self._biot_attributes += [
             attribute_pair for attribute in self._interpolate_attributes
@@ -42,9 +42,7 @@ class Topology:
             {f'_update_{attribute}_spline': True
              for attribute in self._interpolate_attributes})
         self._default_biot_attributes.update({'_update_topology': True,
-                                              '_ftol_rel': 1e-9})
-        #self.ftol_rel = ftol_rel
-        self.set_opt()
+                                              '_ftol_rel': 1e-6})
 
     @property
     def ftol_rel(self):
@@ -67,13 +65,23 @@ class Topology:
 
     @ftol_rel.setter
     def ftol_rel(self, ftol_rel):
-        if not np.isclose(self._ftol_rel, ftol_rel, atol=1e-16):
-            self.set_opt()
-            self._update_topology = True
+        update = ~np.isclose(self._ftol_rel, ftol_rel, atol=1e-16)
         self._ftol_rel = ftol_rel
+        if update:
+            self._update_ftol_rel('field', True)
+            self._update_ftol_rel('flux', True)
+            self._update_ftol_rel('flux', False)
+            self._update_topology = True
+
+    def _update_ftol_rel(self, opt_name, minimize):
+        opt_name = self._opt_name(opt_name, minimize)
+        if hasattr(self, opt_name):
+            getattr(self, opt_name).set_ftol_rel(self.ftol_rel)
 
     def _flag_update(self, status):
         if status:
+            for attribute in self._interpolate_attributes:
+                 setattr(self, f'_update_{attribute}_spline', True)
             self._update_topology = True
 
     def update_topology(self):
@@ -211,6 +219,7 @@ class Topology:
         """
         return f'_min_{opt_name}' if minimize else f'_max_{opt_name}'
 
+    '''
     def set_opt(self):
         """
         Set topology optimizers.
@@ -223,8 +232,9 @@ class Topology:
         self._set_opt('field', minimize=True)
         self._set_opt('flux', minimize=True)
         self._set_opt('flux', minimize=False)
+    '''
 
-    def _set_opt(self, opt_name, minimize=True):
+    def _get_opt(self, opt_name, minimize=True):
         """
         Set nlopt optimization instance.
 
@@ -252,9 +262,11 @@ class Topology:
             opt_instance.set_lower_bounds(self.grid_boundary[::2])
             opt_instance.set_upper_bounds(self.grid_boundary[1::2])
             setattr(self, opt_name, opt_instance)
-        else:  # update ftol_rel
-            getattr(self, opt_name).set_ftol_rel(self.ftol_rel)
+        else:
+            opt_instance = getattr(self, opt_name)
+        return opt_instance
 
+    '''
     def _get_opt(self, opt_name, minimize=True):
         """
         Return nlopt optimization instance.
@@ -274,6 +286,7 @@ class Topology:
         """
         opt_name = self._opt_name(opt_name, minimize)
         return getattr(self, opt_name)
+    '''
 
     def _field(self, x, grad):
         if grad.size > 0:
@@ -305,7 +318,7 @@ class Topology:
         return [self.interpolate(attribute).ev(*x, dx=1).item(),
                 self.interpolate(attribute).ev(*x, dy=1).item()]
 
-    def get_local_null(self, xo, ftol_rel=1e-9):
+    def get_local_null(self, xo):
         """
         Return local field null (minimum absolutle poloidal field).
 
@@ -313,8 +326,6 @@ class Topology:
         ----------
         xo : array-like, shape(2,)
             Seed coordinates (x, y).
-        ftol_rel : float, optional
-            relitive minimization tolarance on objective. The default is 1e-9.
 
         Returns
         -------
@@ -325,7 +336,7 @@ class Topology:
         opt = self._get_opt('field', minimize=True)
         return opt.optimize(xo)
 
-    def get_local_Opoint(self, xo, minimize, ftol_rel=1e-9):
+    def get_local_Opoint(self, xo, minimize):
         """
         Return local Opoint (minimum or maximum of poloidal flux).
 
@@ -338,9 +349,6 @@ class Topology:
 
             - True : minimize objective
             - False : maximuze objective
-
-        ftol_rel : float, optional
-            relitive minimization tolarance on objective. The default is 1e-9.
 
         Returns
         -------
@@ -364,10 +372,8 @@ class Topology:
 
         Parameters
         ----------
-        ftol_rel : TYPE, optional
-            DESCRIPTION. The default is 1e-9.
-        plot : TYPE, optional
-            DESCRIPTION. The default is False.
+        plot : bool, optional
+            Plot flag. The default is False.
 
         Returns
         -------
@@ -387,7 +393,7 @@ class Topology:
                 xc = np.mean(xt[cluster_index == i])
                 zc = np.mean(zt[cluster_index == i])
                 # resolve local field null
-                xn, zn = self.get_local_null((xc, zc), ftol_rel=ftol_rel)
+                xn, zn = self.get_local_null((xc, zc))
                 if self.null_type((xn, zn)) == 'X':
                     self._Xpoint.append([xn, zn])
                 else:  # Opoint - refine using local flux gradient search

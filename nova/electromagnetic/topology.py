@@ -28,7 +28,8 @@ class Topology:
 
     _interpolate_attributes = ['Psi', 'B']
 
-    _topology_attributes = ['Opoint', 'Opsi', 'Xpoint', 'Xpsi', 'ftol_rel']
+    _topology_attributes = ['Opoint', 'Opsi', 'Xpoint', 'Xpsi',
+                            'ftol_rel']
 
     def __init__(self):
         """Extend biot attributes."""
@@ -41,8 +42,9 @@ class Topology:
         self._default_biot_attributes.update(
             {f'_update_{attribute}_spline': True
              for attribute in self._interpolate_attributes})
-        self._default_biot_attributes.update({'_update_topology': True,
-                                              '_ftol_rel': 1e-6})
+        self._default_biot_attributes.update(
+            {'_update_topology': True, '_Xpoint': [], '_Opoint': [],
+             '_ftol_rel': 1e-6})
 
     @property
     def ftol_rel(self):
@@ -76,21 +78,13 @@ class Topology:
     def _update_ftol_rel(self, opt_name, minimize):
         opt_name = self._opt_name(opt_name, minimize)
         if hasattr(self, opt_name):
-            getattr(self, opt_name).set_ftol_rel(self.ftol_rel)
+            getattr(self, opt_name).set_ftol_rel(self._ftol_rel)
 
     def _flag_update(self, status):
         if status:
             for attribute in self._interpolate_attributes:
-                 setattr(self, f'_update_{attribute}_spline', True)
+                setattr(self, f'_update_{attribute}_spline', True)
             self._update_topology = True
-
-    def update_topology(self):
-        """
-        Perform global topology update.
-
-        """
-
-
 
     def interpolate(self, attribute):
         """
@@ -219,21 +213,6 @@ class Topology:
         """
         return f'_min_{opt_name}' if minimize else f'_max_{opt_name}'
 
-    '''
-    def set_opt(self):
-        """
-        Set topology optimizers.
-
-        Returns
-        -------
-        None.
-
-        """
-        self._set_opt('field', minimize=True)
-        self._set_opt('flux', minimize=True)
-        self._set_opt('flux', minimize=False)
-    '''
-
     def _get_opt(self, opt_name, minimize=True):
         """
         Set nlopt optimization instance.
@@ -254,6 +233,8 @@ class Topology:
         opt_name = self._opt_name(opt_name, minimize)
         if not hasattr(self, opt_name):
             opt_instance = nlopt.opt(nlopt.LD_MMA, 2)
+            # opt_instance = nlopt.opt(nlopt.LD_LBFGS, 2)
+            # opt_instance = nlopt.opt(nlopt.LD_SLSQP, 2)
             if minimize:
                 opt_instance.set_min_objective(objective)
             else:
@@ -265,28 +246,6 @@ class Topology:
         else:
             opt_instance = getattr(self, opt_name)
         return opt_instance
-
-    '''
-    def _get_opt(self, opt_name, minimize=True):
-        """
-        Return nlopt optimization instance.
-
-        Parameters
-        ----------
-        opt_name : str
-            Optimization name.
-        minimize : bool, optional
-            Minimize objective function. The default is True.
-
-        Returns
-        -------
-        opt_instance : nlopt.opt
-            Nlopt optimization instance.
-
-        """
-        opt_name = self._opt_name(opt_name, minimize)
-        return getattr(self, opt_name)
-    '''
 
     def _field(self, x, grad):
         if grad.size > 0:
@@ -318,7 +277,20 @@ class Topology:
         return [self.interpolate(attribute).ev(*x, dx=1).item(),
                 self.interpolate(attribute).ev(*x, dy=1).item()]
 
-    def get_local_null(self, xo):
+    def _bound_point(self, x, z):
+        # bound x
+        if x < self.grid_boundary[0]:
+            x = self.grid_boundary[0]
+        elif x > self.grid_boundary[1]:
+            x = self.grid_boundary[1]
+        # bound z
+        if z < self.grid_boundary[2]:
+            z = self.grid_boundary[2]
+        elif z > self.grid_boundary[3]:
+            z = self.grid_boundary[3]
+        return x, z
+
+    def local_null(self, xo):
         """
         Return local field null (minimum absolutle poloidal field).
 
@@ -334,9 +306,9 @@ class Topology:
 
         """
         opt = self._get_opt('field', minimize=True)
-        return opt.optimize(xo)
+        return opt.optimize(self._bound_point(*xo))
 
-    def get_local_Opoint(self, xo, minimize):
+    def local_Opoint(self, xo, minimize):
         """
         Return local Opoint (minimum or maximum of poloidal flux).
 
@@ -357,9 +329,9 @@ class Topology:
 
         """
         opt = self._get_opt('flux', minimize=minimize)
-        return opt.optimize(xo)
+        return opt.optimize(self._bound_point(*xo))
 
-    def get_global_null(self, plot=False):
+    def _global_null(self, plot=False):
         """
         Locate all field nulls. Categorize as X or O points.
 
@@ -381,32 +353,179 @@ class Topology:
 
         """
         self._Xpoint, self._Opoint = [], []  # (re)initialize null point arrays
-        Bthreshold = np.max([2*np.min(self.B), 0.05*np.median(self.B)])
-        index = self.B < Bthreshold  # threshold
+        Bthreshold = np.quantile(self.B*self.x2d, 0.05)
+        index = self.B*self.x2d < Bthreshold  # threshold
         if np.sum(index) > 0:  # protect against uniform zero field
             xt, zt = self.x2d[index], self.z2d[index]  # threshold points
-            eps = 1.5 * np.max([self.dx, self.dz])  # max neighbour seperation
+            eps = 1.25 * np.max([self.dx, self.dz])  # max neighbour seperation
             dbscan = sklearn.cluster.DBSCAN(eps=eps, min_samples=1)
             cluster_index = dbscan.fit_predict(np.array([xt, zt]).T)
+            xc, zc = [], []
             for i in range(np.max(cluster_index)+1):
+                # cluster coordinates
+                x_cluster = xt[cluster_index == i]
+                z_cluster = zt[cluster_index == i]
                 # coordinates of cluster centre
-                xc = np.mean(xt[cluster_index == i])
-                zc = np.mean(zt[cluster_index == i])
+                xc.append(np.mean(x_cluster))
+                zc.append(np.mean(z_cluster))
                 # resolve local field null
-                xn, zn = self.get_local_null((xc, zc))
+                xn, zn = self.local_null((xc[-1], zc[-1]))
                 if self.null_type((xn, zn)) == 'X':
                     self._Xpoint.append([xn, zn])
                 else:  # Opoint - refine using local flux gradient search
                     concave = self._flux_curvature((xn, zn))[0] < 0
-                    xn, zn = self.get_local_Opoint((xn, zn), concave)
-                    self._Opoint.append([xn, zn])
+                    xn_opt, zn_opt = self.local_Opoint((xn, zn), concave)
+                    dx = np.sqrt((xn_opt-xn)**2 + (zn_opt-zn)**2)
+                    if dx < np.max(
+                            [np.max(x_cluster) - np.min(x_cluster),
+                             np.max(z_cluster) - np.min(z_cluster)]):
+                        self._Opoint.append([xn_opt, zn_opt])
+                    else:
+                        self._Opoint.append([xn, zn])
             # convert to unique np.arrays
-            self._Xpoint = geom.unique2D(self._Xpoint, eps=1e-3)[1]
-            self._Opoint = geom.unique2D(self._Opoint, eps=1e-3)[1]
+            self._Xpoint = geom.unique2D(self._Xpoint, eps=1e-3,
+                                         bound=self.grid_boundary)[1]
+            self._Opoint = geom.unique2D(self._Opoint, eps=1e-3,
+                                         bound=self.grid_boundary)[1]
             if plot:
                 plt.plot(xt, zt, '.', color='darkgray')  # threshold points
+                plt.plot(xc, zc, 'k.')  # cluster centers
                 plt.plot(*self._Xpoint.T, 'C0X')  # Xponits
                 plt.plot(*self._Opoint.T, 'C1o')  # Opoints
+
+    def _sort_flux(self, null_type):
+        """
+        Sort null arrays by poloidal flux.
+
+        Parameters
+        ----------
+        null_type : str
+            null type, X or O.
+
+        Raises
+        ------
+        IndexError
+            null_type not in [X, O].
+
+        Returns
+        -------
+        None.
+
+        """
+        if null_type not in ['X', 'O']:
+            raise IndexError(f'null_type {null_type} not in [X, O]')
+        Psi = []
+        Xnull = getattr(self, f'_{null_type}point')
+        for i in range(len(Xnull)):
+            Psi.append(self.interpolate('Psi').ev(*Xnull[i]))
+        Psi = np.array(Psi)
+        sort_index = np.argsort(Psi)
+        setattr(self, f'_{null_type}psi', Psi[sort_index])
+        setattr(self, f'_{null_type}point', Xnull[sort_index])
+
+    def update_topology(self):
+        """
+        Perform global topology update.
+
+        - Extract global null points.
+        - Sort by null type (X or O).
+        - poloidal flux at each null point.
+        - Sort each null type array by poloidal flux.
+
+        Returns
+        -------
+        None.
+
+        """
+        if self._update_topology:
+            self._global_null()
+            for null_type in ['X', 'O']:
+                self._sort_flux(null_type)
+            self._update_topology = False
+
+    @property
+    def Xpoint(self):
+        """
+        Return Xpoints sorted by poloidal flux.
+
+        Returns
+        -------
+        Xpoint : ndarray, shape(nX, 2)
+            Xpoints sorted by poloidal flux.
+
+        """
+        self.update_topology()
+        return self._Xpoint
+
+    @property
+    def Opoint(self):
+        """
+        Return Opoints sorted by poloidal flux.
+
+        Returns
+        -------
+        Opoint : ndarray, shape(nO, 2)
+            Opoints sorted by poloidal flux.
+
+        """
+        self.update_topology()
+        return self._Opoint
+
+    @property
+    def Xpsi(self):
+        """
+        Return sorted poloidal flux at Xpoints.
+
+        Returns
+        -------
+        Xpsi : ndarray, shape(nX, 2)
+            Sorted poloidal flux at Xpoints.
+
+        """
+        self.update_topology()
+        return self._Xpsi
+
+    @property
+    def Opsi(self):
+        """
+        Return sorted poloidal flux at Opoints.
+
+        Returns
+        -------
+        Opsi : ndarray, shape(nO, 2)
+            Sorted poloidal flux at Opoints.
+
+        """
+        self.update_topology()
+        return self._Opsi
+
+    @property
+    def nX(self):
+        """
+        Return number of Xpoints.
+
+        Returns
+        -------
+        nX : int
+            Number of Xpoints.
+
+        """
+        self.update_topology()
+        return len(self._Xpoint)
+
+    @property
+    def nO(self):
+        """
+        Return number of Opoints.
+
+        Returns
+        -------
+        nO : int
+            Number of Opoints.
+
+        """
+        self.update_topology()
+        return len(self._Opoint)
 
     def contour(self, flux, plot=False, ax=None, **kwargs):
         """
@@ -443,130 +562,3 @@ class Topology:
             for contour in contours:
                 plt.plot(contour[:, 0], contour[:, 1], **kwargs)
         return contours
-
-    @property
-    def polarity(self):
-        """
-        Return plasma current polarity.
-
-        Returns
-        -------
-        polarity: int
-            Plasma current polarity.
-
-        """
-        if self._update_polarity:
-            self._polarity = self.source.coilframe.Ip_sign
-            self._update_polarity = False
-        return self._polarity
-
-    def _signed_flux(self, x):
-        return -1 * self.polarity * self.interpolate('Psi').ev(*x)
-
-    def _signed_flux_gradient(self, x):
-        return -1 * self.polarity * np.array(
-            [self.interpolate('Psi').ev(*x, dx=1),
-             self.interpolate('Psi').ev(*x, dy=1)])
-
-    def get_Opoint(self, xo=None):
-        """
-        Return coordinates of plasma O-point.
-
-        O-point defined as center of nested flux surfaces.
-
-        Parameters
-        ----------
-        xo : array-like(float), shape(2,), optional
-            Sead coordinates (x, z). The default is None.
-
-            - None: xo set to grid center
-
-        Raises
-        ------
-        TopologyError
-            Failed to find signed flux minimum.
-
-        Returns
-        -------
-        Opoint, array-like(float), shape(2,)
-            Coordinates of O-point.
-
-        """
-        if xo is None:
-            xo = self.bounds.mean(axis=1)
-        res = scipy.optimize.minimize(
-            self._signed_flux, xo,
-            jac=self._signed_flux_gradient, bounds=self.bounds)
-        if not res.success:
-            raise TopologyError('Opoint signed flux minimization failure\n\n'
-                                f'{res}.')
-        return res.x
-
-    @property
-    def Opoint(self):
-        """
-        Return coordinates for the center(s) of nested flux surfaces.
-
-        Returns
-        -------
-        Opoints : array-like, shape(n, 2)
-            O-point coordinates (x, z).
-
-        """
-        if self._update_Opoint or self._Opoint is None:
-            self._Opoint = self.get_Opoint(xo=self._Opoint)
-            self._update_Opoint = False
-        return self._Opoint
-
-    @property
-    def Opsi(self):
-        """
-        Return poloidal flux calculated at O-point.
-
-        Returns
-        -------
-        Opsi: float
-            O-point poloidal flux.
-
-        """
-        if self._update_Opsi:
-            self._Opsi = float(self.interpolate('Psi').ev(*self.Opoint))
-            self._update_Opsi = False
-        return self._Opsi
-
-    @property
-    def Xpoint(self):
-        """
-        Manage Xpoint locations.
-
-        Parameters
-        ----------
-        xo : array-like, shape(n, 2)
-            Sead Xpoints.
-
-        Returns
-        -------
-        Xpoint: ndarray, shape(2)
-            Coordinates of primary Xpoint (x, z).
-
-        """
-        if self._update_Xpoint or self._Xpoint is None:
-            if self._Xpoint is None:  # sead with boundary midsides
-                bounds = self.bounds
-                self.Xpoint = [[np.mean(bounds[0]), bounds[1][i]]
-                               for i in range(2)]
-            nX = len(self._Xpoint)
-            _Xpoint = np.zeros((nX, 2))
-            _Xpsi = np.zeros(nX)
-            for i in range(nX):
-                _Xpoint[i] = self.get_Xpoint(self._Xpoint[i])
-                _Xpsi[i] = self.interpolate('Psi').ev(*_Xpoint[i])
-            self._Xpoint = _Xpoint[np.argsort(_Xpsi)]
-            if self.source.coilframe.Ip_sign > 0:
-                self._Xpoint = self._Xpoint[::-1]
-            self._update_Xpoint = False
-        return self._Xpoint[0]
-
-
-
-

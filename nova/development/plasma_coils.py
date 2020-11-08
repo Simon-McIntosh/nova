@@ -5,7 +5,7 @@ from nova.electromagnetic.coilgeom import ITERcoilset
 from nova.utilities.pyplot import plt
 
 ITER = ITERcoilset(coils='pf', dCoil=0.2, dPlasma=0.2, dField=0.2,
-                   plasma_n=2e3, n=1e3, read_txt=False)
+                   plasma_n=2e3, plasma_expand=0.1, n=1e3, read_txt=False)
 
 ITER.filename = -1
 ITER.scenario = 'EOF'
@@ -45,8 +45,7 @@ ITER.plasmagrid.plot_flux()
 
 #ITER.plasmagrid.plot()
 
-ITER.plasmagrid.get_global_null(plot=True)
-print(ITER.plasmagrid._min_field)
+ITER.plasmagrid._global_null(plot=True)
 
 
 #print(*ITER.plasmagrid.Opoint)

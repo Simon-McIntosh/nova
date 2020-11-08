@@ -32,12 +32,12 @@ def Opoint_curvature(sign, plot):
     cs.add_plasma(polygon, dPlasma=0.1)
     cs.add_coil(5, -0.5, 0.75, 0.75, dCoil=0.2)
     cs.plasmagrid.generate_grid(expand=0.2, n=2e2)  # generate plasma grid
-    cs.Ic = sign * 15e6 * np.ones(2)
+    cs.Ic = sign * 15e6
     if plot:
         cs.plot(True)
         cs.plasmagrid.plot_flux()
-        plt.plot(*cs.plasmagrid.Opoint, 'ko')
-    assert cs.plasmagrid.null_type(cs.plasmagrid.Opoint) == 'O'
+        plt.plot(*cs.plasmagrid.Opoint.T, 'ko')
+    assert cs.plasmagrid.null_type(cs.plasmagrid.Opoint[0]) == 'O'
 
 
 def test_Opoint_curvature_Ip_positive(plot=False):
@@ -48,24 +48,30 @@ def test_Opoint_curvature_Ip_negative(plot=False):
     Opoint_curvature(-1, plot)
 
 
-def test_Xpoint_curvature_Ip_positive(plot=False):
+def global_null(sign, plot):
     cs = CoilSet()
-    polygon = shapely.geometry.Point(5, 1).buffer(0.5)
+    polygon = shapely.geometry.Point(5, 0).buffer(0.5)
     cs.add_plasma(polygon, dPlasma=0.1)
-    cs.add_coil(5, -0.5, 0.75, 0.75, dCoil=0.2)
-    cs.plasmagrid.generate_grid(expand=2.9, n=2e2)  # generate plasma grid
-    cs.Ic = [15e6, 15e6]
-
-    plt.figure()
+    cs.add_coil(5, [-2, 2], 0.75, 0.75, dCoil=0.2)
+    cs.add_coil(7.8, 0, 0.75, 0.75, label='Xcoil', dCoil=0.2)
+    cs.plasmagrid.generate_grid(expand=5, plasma_n=1e3)  # generate plasma grid
+    cs.Ic = sign*15e6
     if plot:
         cs.plot(True)
         cs.plasmagrid.plot_flux()
-        plt.plot(*cs.plasmagrid.Opoint, 'ko')
-        plt.plot(*cs.plasmagrid.Xpoint, 'kX')
-        plt.plot(*cs.plasmagrid._Xpoint.T, 'kX')
-    assert cs.plasmagrid.null_type(cs.plasmagrid.Xpoint) == 'X'
+        cs.plasmagrid._global_null(True)
+    assert cs.plasmagrid.nX == 3 and cs.plasmagrid.nO == 4
+
+
+def test_global_null_positive(plot=False):
+    global_null(1, plot)
+
+def test_global_null_negative(plot=False):
+    global_null(-1, plot)
 
 if __name__ == '__main__':
-    #pytest.main([__file__])
-    test_Xpoint_curvature_Ip_positive(True)
+    pytest.main([__file__])
+
+    test_global_null_positive(True)
+    #test_global_null_negative(True)
     #test_spline_update(True)

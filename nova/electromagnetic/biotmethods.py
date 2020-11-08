@@ -394,8 +394,8 @@ class Grid(BiotSet, Topology):
         None.
 
         """
-        BiotSet.__init__(self, source=subcoil, **biot_attributes)
         Topology.__init__(self)
+        BiotSet.__init__(self, source=subcoil, **biot_attributes)
 
     def _flag_update(self, status):
         """

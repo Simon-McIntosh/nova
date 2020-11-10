@@ -95,7 +95,8 @@ class ITERcoilset(CoilClass):
         _rebuild = {}
         if self.update_attribute('dCoil') or self.update_attribute('dPlasma'):
             print('rebuild coilset')
-            self.drop_coil()  # clear
+            self.drop_coil()  # clear coils
+            self.clear_biot()  # remove biot instances
             self.build_coilset(coils, **kwargs)  # rebuild
             _rebuild['coilset'] = True
         if self.update_attribute('dField'):
@@ -104,10 +105,10 @@ class ITERcoilset(CoilClass):
             self.field.add_coil(self.coil, ['CS', 'PF'], dField=self.dField)
             _rebuild['field'] = True
         if self.grid.generate_grid(**kwargs):
-            print('rebuilt grid')
+            print('rebuild grid')
             _rebuild['grid'] = True
         if self.plasmagrid.generate_grid(**kwargs):
-            print('rebuilt plasmagrid')
+            print('rebuild plasmagrid')
             _rebuild['plasmagrid'] = True
         if np.fromiter(_rebuild.values(), dtype=bool).any():
             self.save_coilset(filename)

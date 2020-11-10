@@ -339,7 +339,7 @@ class CoilMatrix():
         for attribute in update:
             update[attribute] = status
 
-    def solve(self):
+    def solve_biot(self):
         """
         Evaluate all biot attributes.
 

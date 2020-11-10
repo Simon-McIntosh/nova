@@ -26,52 +26,68 @@ def test_spline_update(plot=False):
     assert np.equal(update, [True, False, True, False, True]).all()
 
 
-def Opoint_curvature(sign, plot):
+def null_curvature(sign, plot):
     cs = CoilSet()
     polygon = shapely.geometry.Point(5, 1).buffer(0.5)
     cs.add_plasma(polygon, dPlasma=0.1)
-    cs.add_coil(5, -0.5, 0.75, 0.75, dCoil=0.2)
-    cs.plasmagrid.generate_grid(expand=0.2, n=2e2)  # generate plasma grid
+    cs.add_coil(5, -0.5, 0.75, 0.75, dCoil=0.5)
+    cs.plasmagrid.generate_grid(expand=0.25, n=1e2)  # generate plasma grid
     cs.Ic = sign * 15e6
     if plot:
         cs.plot(True)
         cs.plasmagrid.plot_flux()
-        plt.plot(*cs.plasmagrid.Opoint.T, 'ko')
-    assert cs.plasmagrid.null_type(cs.plasmagrid.Opoint[0]) == 'O'
+        cs.plasmagrid.global_null(True)
+    return cs
 
 
 def test_Opoint_curvature_Ip_positive(plot=False):
-    Opoint_curvature(1, plot)
+    cs = null_curvature(1, plot)
+    assert cs.plasmagrid.null_type(cs.plasmagrid.Opoint[0]) == 'O'
 
 
 def test_Opoint_curvature_Ip_negative(plot=False):
-    Opoint_curvature(-1, plot)
+    cs = null_curvature(-1, plot)
+    assert cs.plasmagrid.null_type(cs.plasmagrid.Opoint[0]) == 'O'
 
 
 def global_null(sign, plot):
     cs = CoilSet()
+    cs.add_coil(5, [-2, 2], 0.75, 0.75, dCoil=0.5)
+    cs.add_coil(7.8, 0, 0.75, 0.75, label='Xcoil', dCoil=0.5)
     polygon = shapely.geometry.Point(5, 0).buffer(0.5)
-    cs.add_plasma(polygon, dPlasma=0.1)
-    cs.add_coil(5, [-2, 2], 0.75, 0.75, dCoil=0.2)
-    cs.add_coil(7.8, 0, 0.75, 0.75, label='Xcoil', dCoil=0.2)
-    cs.plasmagrid.generate_grid(expand=5, plasma_n=1e3)  # generate plasma grid
+    cs.add_plasma(polygon, dPlasma=0.3, expand=5, n=5e2)
     cs.Ic = sign*15e6
     if plot:
         cs.plot(True)
         cs.plasmagrid.plot_flux()
-        cs.plasmagrid._global_null(True)
+        cs.plasmagrid.global_null(True)
     assert cs.plasmagrid.nX == 3 and cs.plasmagrid.nO == 4
 
 
-def test_global_null_positive(plot=False):
+def test_global_null_Ip_positive(plot=False):
     global_null(1, plot)
 
-def test_global_null_negative(plot=False):
+
+def test_global_null_Ip_negative(plot=False):
     global_null(-1, plot)
 
-if __name__ == '__main__':
-    pytest.main([__file__])
 
-    test_global_null_positive(True)
-    #test_global_null_negative(True)
-    #test_spline_update(True)
+def test_ftol_rel_attribute():
+    cs = CoilSet()
+    cs.add_plasma([4, 5, -1, 1], dPlasma=1)
+    cs.plasmagrid.ftol_rel = 1e-4
+    assert np.isclose(cs.plasmagrid._get_opt('field').get_ftol_rel(), 1e-4)
+
+
+def test_xtol_rel_attribute():
+    cs = CoilSet()
+    cs.add_plasma([4, 5, -1, 1], dPlasma=1)
+    cs.plasmagrid.xtol_rel = 1e-2
+    assert np.isclose(cs.plasmagrid._get_opt('field').get_xtol_rel(), 1e-2)
+
+
+if __name__ == '__main__':
+    #pytest.main([__file__])
+
+    # test_xtol_rel_attribute()
+    test_global_null_Ip_negative(True)

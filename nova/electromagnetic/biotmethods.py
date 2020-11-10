@@ -369,7 +369,7 @@ class Grid(BiotSet, Topology):
     """
 
     _biot_attributes = ['n', 'n2d', 'limit', 'expand_limit', 'boundary',
-                        'expand', 'nlevels', 'levels',
+                        'grid_polygon', 'expand', 'nlevels', 'levels',
                         'x', 'z', 'x_index', 'z_index', 'x2d', 'z2d',
                         'dx', 'dz', 'target']
 
@@ -414,7 +414,7 @@ class Grid(BiotSet, Topology):
         BiotSet._flag_update(self, status)
         Topology._flag_update(self, status)
 
-    def solve(self):
+    def solve_biot(self):
         """
         Evaluate all biot attributes.
 
@@ -426,7 +426,7 @@ class Grid(BiotSet, Topology):
         if self.target.nT > 0:
             for attribute in self._interpolate_attributes:
                 self._evaluate_spline(attribute)
-        CoilMatrix.solve(self)
+        CoilMatrix.solve_biot(self)
 
     @property
     def grid_boundary(self):
@@ -516,7 +516,10 @@ class Grid(BiotSet, Topology):
         self.assemble_biotset()
         grid_attributes = {}  # grid attributes
         for key in ['n', 'limit', 'expand', 'levels', 'nlevels']:
-            grid_attributes[key] = kwargs.get(key, getattr(self, key))
+            attribute = kwargs.get(key, getattr(self, key))
+            if key in ['n', 'nlevels']:
+                attribute = int(attribute)
+            grid_attributes[key] = attribute
         # calculate coilset limit
         grid_attributes['expand_limit'] = \
             self._get_expand_limit(grid_attributes['expand'])
@@ -530,6 +533,8 @@ class Grid(BiotSet, Topology):
             grid_attributes['n'] != self.n or self.regen
         if regenerate_grid:
             self._generate_grid(**grid_attributes)
+            self.grid_polygon = shapely.geometry.box(
+                *self.grid_boundary[::2], *self.grid_boundary[1::2])
         return regenerate_grid
 
     def _generate_grid(self, **grid_attributes):
@@ -552,6 +557,24 @@ class Grid(BiotSet, Topology):
                                  name='Grid', delim='')
             self.assemble_biotset()
             self.update_biot = True
+
+    @property
+    def grid_polygon(self):
+        """
+        Manage boundary polygon.
+
+        Returns
+        -------
+        grid_polygon : shapely.polygon or None
+            Grid bounding box.
+
+        """
+        return self._grid_polygon
+
+    @grid_polygon.setter
+    def grid_polygon(self, polygon):
+        self._grid_polygon = polygon
+        self._update_coil_center = True
 
     def _get_expand_limit(self, expand=None, xmin=1e-3):
         if expand is None:
@@ -709,7 +732,7 @@ class PlasmaGrid(Grid):
         Return default plasma grid point number.
 
         Point number calculated to produce a grid with a nodal density
-        2.5**2 times the plasma filament density.
+        equal the plasma filament density.
 
         Returns
         -------
@@ -723,7 +746,7 @@ class PlasmaGrid(Grid):
         plasma_filament_density = \
             np.sum(self.source.coilframe.plasma) /\
             self.source.coilframe.dA[self.source.coilframe.plasma].sum()
-        return int(2.5**2 * plasma_filament_density*grid_area)
+        return int(plasma_filament_density*grid_area)
 
     def generate_grid(self, regen=False, **kwargs):
         """
@@ -759,7 +782,8 @@ class PlasmaGrid(Grid):
         regen flag : bool.
 
         """
-        kwargs['plasma_n'] = kwargs.get('plasma_n', self.plasma_n)  # auto size
+        if 'n' not in kwargs and 'plasma_n' not in kwargs:  # auto size
+            kwargs['plasma_n'] = self.plasma_n
         return Grid.generate_grid(self, **self._merge_plasma_kwargs(**kwargs))
 
     def _merge_plasma_kwargs(self, **kwargs):
@@ -889,6 +913,12 @@ class BiotMethods:
                 raise IndexError(f'method {biot_method} not found in '
                                  f'{self._biot_methods}\n'
                                  'unable to initialize method')
+
+    def clear_biot(self):
+        """Remove all biot instances."""
+        for biot_name in self.biot_instances:
+            delattr(self, biot_name)
+        self._biot_instances = {}
 
     def _initialize_biot_method(self, name, method, **attributes):
         """Create biot instance and link to method."""
@@ -1030,7 +1060,7 @@ class BiotMethods:
 
         """
         for instance in self._biot_instances:
-            getattr(self, instance).solve()
+            getattr(self, instance).solve_biot()
 
     @property
     def dField(self):

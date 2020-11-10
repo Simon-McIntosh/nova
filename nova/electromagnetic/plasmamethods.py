@@ -8,19 +8,15 @@ import numpy as np
 import pandas as pd
 import shapely
 import pygeos
-import scipy.optimize
-import nlopt
 
-from nova.electromagnetic.biotmethods import Grid
+from nova.electromagnetic.topology import TopologyError
 
 
 class PlasmaMethods:
     """Plasma methods mixin."""
 
     def __init__(self):
-        #self.biot_instances = ['plasmagrid', 'plasmafilament']
-        self.default_attributes = {'plasma_boundary': [],
-                                   'separatrix': []}
+        self.default_attributes = {'plasma_boundary': [], 'separatrix': []}
 
     @property
     def dPlasma(self):
@@ -61,6 +57,8 @@ class PlasmaMethods:
             Plasma coil name.
         dPlasma : float, optional
             Plasma subcoil dimension. If None defaults to self.dPlasma
+        **kwargs : dict
+            Keyword arguments passed to PlasmaGrid.generate_grid()
 
         Returns
         -------
@@ -69,7 +67,7 @@ class PlasmaMethods:
         """
         if dPlasma is not None:  # update plasma subcoil dimension
             self.dPlasma = dPlasma
-        self.biot_instances = ['plasmagrid', 'plasmafilament']
+        self.biot_instances = ['plasmafilament', 'plasmagrid']
         self.plasma_boundary = boundary
         # construct plasma coil from polygon
         self.add_coil(0, 0, 0, 0, polygon=self.plasma_boundary,
@@ -77,6 +75,7 @@ class PlasmaMethods:
                       dCoil=self.dPlasma, name=name, plasma=True, power=True,
                       part='plasma')
         self.plasmagrid.generate_grid(**kwargs)
+        self.plasmagrid.cluster_factor = 1.5*self.dPlasma/self.plasmagrid.dx
         self.plasmafilament.add_plasma()
 
     @property
@@ -221,6 +220,52 @@ class PlasmaMethods:
         self.update_plasma_turns = True
         self.update_plasma_current = True
 
+    def update_topology_index(self):
+        if self.plasmagrid._update_topology_index:
+            Opoint = self.plasmagrid.Opoint
+            if self.plasmagrid.nO == 0:
+                raise TopologyError('no Opoints found')
+            elif self.plasmagrid.nO == 1:
+                self._Oindex = 0
+            else:
+                plasma_centroid = np.array([self.coil.x[self.coil.plasma],
+                                            self.coil.z[self.coil.plasma]]).T
+                dL = np.linalg.norm(Opoint-plasma_centroid, axis=1)
+                self._Oindex = np.argmin(dL)
+            if not self.separatrix.contains(
+                    shapely.geometry.Point(*Opoint[self._Oindex])):
+                raise TopologyError('no Opoints found within separatrix')
+            Opsi = self.plasmagrid.Opsi[self._Oindex]
+            Xpsi = self.plasmagrid.Xpsi
+            self._Xindex = np.argmin(abs(Opsi-Xpsi))
+            self.plasmagrid._update_topology_index = False
+
+    @property
+    def Oindex(self):
+        self.update_topology_index()
+        return self._Oindex
+
+    @property
+    def Opoint(self):
+        return self.plasmagrid.Opoint[self.Oindex]
+
+    @property
+    def Opsi(self):
+        return self.plasmagrid.Opsi[self.Oindex]
+
+    @property
+    def Xindex(self):
+        self.update_topology_index()
+        return self._Xindex
+
+    @property
+    def Xpoint(self):
+        return self.plasmagrid.Xpoint[self.Xindex]
+
+    @property
+    def Xpsi(self):
+        return self.plasmagrid.Xpsi[self.Xindex]
+
     @property
     def plasma_index(self):
         """
@@ -301,6 +346,3 @@ class PlasmaMethods:
         self.coil.Ip = Ip
         self.subcoil.Ip = Ip
         self.update_plasma_current = True
-
-
-

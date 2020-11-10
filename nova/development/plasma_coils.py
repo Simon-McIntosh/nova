@@ -4,8 +4,8 @@ from scipy.optimize import minimize
 from nova.electromagnetic.coilgeom import ITERcoilset
 from nova.utilities.pyplot import plt
 
-ITER = ITERcoilset(coils='pf', dCoil=0.2, dPlasma=0.2, dField=0.2,
-                   plasma_n=2e3, plasma_expand=0.1, n=1e3, read_txt=False)
+ITER = ITERcoilset(coils='pf', dCoil=0.25, dPlasma=0.25, dField=0.25,
+                   plasma_expand=1.1, plasma_n=1e3, n=1e3, read_txt=False)
 
 ITER.filename = -1
 ITER.scenario = 'EOF'
@@ -32,7 +32,7 @@ print(x)
 #ITER.Ip = -15e6
 
 plt.set_aspect(0.8)
-ITER.plot()
+
 #levels = ITER.grid.plot_flux()
 ITER.plasmagrid.plot_flux()
 
@@ -45,8 +45,32 @@ ITER.plasmagrid.plot_flux()
 
 #ITER.plasmagrid.plot()
 
-ITER.plasmagrid._global_null(plot=True)
+#ITER.plasmagrid.field_quantile = 0.05
 
+ITER.plasmagrid.ftol_rel = 1e-9
+ITER.plasmagrid.xtol_rel = 1e-9
+
+
+Psi = ITER.Xpsi + 0.5*(ITER.Opsi-ITER.Xpsi)
+
+
+contour = ITER.plasmagrid.contour(Psi, plot=True)
+closed_contour = []
+for c in contour:
+    if np.isclose(np.linalg.norm(c[0]-c[-1]), 0):
+        closed_contour.append(c)
+
+plt.plot(*ITER.Opoint, 'C3d')
+plt.plot(*ITER.Xpoint, 'C3d')
+
+
+ITER.plot()
+
+Psi = ITER.plasmagrid.Xpsi[0] + 1e-3*(ITER.plasmagrid.Opsi[0] -
+                                      ITER.plasmagrid.Xpsi[0])
+ITER.plasmagrid.plot_topology(True, color='C3')
+#plt.plot(*ITER.plasmagrid.Opoint[0], 'C1o', ms=15)
+#ITER.separatrix = c[1]
 
 #print(*ITER.plasmagrid.Opoint)
 #print(ITER.plasmagrid._Opoint)
@@ -56,5 +80,6 @@ ITER.plasmagrid._global_null(plot=True)
 
 #ITER.field.plot()
 #ITER.plasmafilament.plot()
+
 
 

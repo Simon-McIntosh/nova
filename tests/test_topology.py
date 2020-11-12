@@ -59,8 +59,7 @@ def global_null(sign, plot=False):
                   boundary='limit', limit=[3.2, 8.5, -2.5, 2.5])
     cs.plasmagrid.optimizer = 'newton'
     cs.plasmagrid.filter_sigma = 0  # disable interpolant filter
-    cs.plasmagrid.ftol_rel = 1e-9
-    cs.plasmagrid.xtol_rel = 1e-9
+    cs.plasmagrid.cluster = True
 
     cs.Ic = sign*15e6
     cs.plasmagrid.global_null(plot)

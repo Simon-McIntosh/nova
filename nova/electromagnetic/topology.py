@@ -2,6 +2,7 @@ import shapely.geometry
 import numpy as np
 import scipy.optimize
 import scipy.interpolate
+import scipy.ndimage
 import skimage.measure
 import sklearn.cluster
 import nlopt
@@ -23,6 +24,9 @@ class Topology:
 
     """
 
+    _optimizer_instances = {'newton': 'LD_TNEWTON',
+                            'mma': 'LD_MMA'}
+
     _interpolate_attributes = ['Psi', 'B']
 
     _topology_attributes = ['null_cluster',
@@ -31,6 +35,7 @@ class Topology:
                             'update_topology', 'update_topology_index',
                             'field_quantile',
                             'cluster_factor', 'unique_factor',
+                            'optimizer', 'filter_sigma',
                             'ftol_rel', 'xtol_rel']
 
     def __init__(self):
@@ -51,7 +56,8 @@ class Topology:
              '_field_quantile': 0.05,
              '_cluster_factor': 1.5, '_unique_factor': 0.5,
              '_update_topology': True, '_update_topology_index': True,
-             '_ftol_rel': 1e-9, '_xtol_rel': 1e-9})
+             '_optimizer': 'mma', '_filter_sigma': 1.5,
+             '_ftol_rel': 1e-12, '_xtol_rel': 1e-12})
 
     def _flag_update(self, status):
         """
@@ -133,7 +139,7 @@ class Topology:
         # (re)initialize null point arrays
         self._Xpoint, self._Opoint = [], []
         # field null clusters
-        self._null_cluster = []
+        self._null_cluster, _field_Opoint = [], []
         Bthreshold = np.quantile(self.B, field_quantile, interpolation='lower')
         index = self.B < Bthreshold  # threshold
         if np.sum(index) > 0:  # protect against uniform zero field
@@ -145,15 +151,18 @@ class Topology:
                 x_cluster = xt[cluster_index == i]
                 z_cluster = zt[cluster_index == i]
                 self._null_cluster.append([x_cluster, z_cluster])
-        for x_cluster, z_cluster in self._null_cluster + self.plasma_vertex:
+        for x_cl, z_cl in self._null_cluster + list(self.plasma_vertex):
             # coordinates of cluster centre
-            xc = np.mean(x_cluster)
-            zc = np.mean(z_cluster)
+            xc = np.mean(x_cl)
+            zc = np.mean(z_cl)
             # resolve local field null
             xn, zn = self.local_null((xc, zc))
-            if self.null_type((xn, zn)) == 'X':
+            null_type = self.null_type((xn, zn))
+            if null_type == 'X':
                 self._Xpoint.append([xn, zn])
-        for xc, zc in self.coil_center:
+            elif null_type == 'O':
+                _field_Opoint.append([xn, zn])
+        for xc, zc in _field_Opoint + list(self.coil_center):
             xn, zn = self._refine_Opoint(xc, zc)
             if self.null_type((xn, zn)) == 'O':
                 self._Opoint.append([xn, zn])
@@ -213,8 +222,8 @@ class Topology:
         None.
 
         """
-        self._coil_center = []
-        self._plasma_vertex = []
+        _coil_center = []
+        _plasma_vertex = []
         reduction_index = self.source._reduction_index
         turn_number = np.add.reduceat(np.ones(self.source.nC), reduction_index)
         xc = np.sqrt(np.add.reduceat(self.source.rms**2, reduction_index) /
@@ -224,12 +233,14 @@ class Topology:
         zmax = np.maximum.reduceat(self.source.z, reduction_index)
         # plasma vertex
         for iloc in self.source._plasma_iloc:
-            self._plasma_vertex.append([xc[iloc], zmin[iloc]])
-            self._plasma_vertex.append([xc[iloc], zmax[iloc]])
+            _plasma_vertex.append([xc[iloc], zmin[iloc]])
+            _plasma_vertex.append([xc[iloc], zmax[iloc]])
         grid_polygon = self.grid_polygon
         for i, (x, z), in enumerate(zip(xc, zc)):
             if grid_polygon.contains(shapely.geometry.Point(x, z)):
-                self._coil_center.append([x, z])
+                _coil_center.append([x, z])
+        self._coil_center = np.array(_coil_center)
+        self._plasma_vertex = np.array(_plasma_vertex)
 
     def plot_topology(self, plot_clusters=False, ax=None, color='C3',
                       legend=False):
@@ -257,14 +268,16 @@ class Topology:
             for cluster in self._null_cluster:
                 ax.plot(cluster[0], cluster[1], 'C7.', ms=4)
                 ax.plot(*np.mean(cluster, axis=1), 'k.', ms=4)  # centers
+            ax.plot(*self._plasma_vertex.T, 'C0.')
+            ax.plot(*self._coil_center.T, 'C3.')
         if self.nX > 0:  # X-ponits
-            ax.plot(*self.Xpoint.T, 'x', label='X-point', ms=6, mew=1,
-                    color=color)
+            ax.plot(*self.Xpoint.T, 'x', label=f'X-point {self.nX}',
+                    ms=6, mew=1, color=color)
         if self.nO > 0:  # O-ponits
-            ax.plot(*self.Opoint.T, 'o', label='O-point',
+            ax.plot(*self.Opoint.T, 'o', label=f'O-point {self.nO}',
                     markerfacecolor='none', mew=1, ms=6, color=color)
-        if (self.nX > 0 or self.nO > 0) and legend:
-            ax.legend()
+        if (self.nX > 0 or self.nO > 0) and (legend or plot_clusters):
+            ax.legend(loc='center right')
 
     @property
     def field_quantile(self):
@@ -603,14 +616,39 @@ class Topology:
         self._evaluate_spline(attribute)
         return getattr(self, f'_{attribute}_spline')  # interpolant
 
+    @property
+    def filter_sigma(self):
+        """
+        Manage kernal width for gaussian filter.
+
+        Set width to zero to dissable filtering.
+
+        Parameters
+        ----------
+        sigma : float
+            Kernal width of gaussian filter.
+
+        """
+        return self._filter_sigma
+
+    @filter_sigma.setter
+    def filter_sigma(self, sigma):
+        for attribute in self._interpolate_attributes:
+            setattr(self,  f'_update_{attribute}_spline', True)
+        self._filter_sigma = sigma
+
     def _evaluate_spline(self, attribute):
         update_flag = f'_update_{attribute}_spline'
         if getattr(self, update_flag):
             # compute interpolant
+            z = getattr(self, attribute)
+            # filter
+            sigma = self.filter_sigma
+            if sigma != 0:
+                z = scipy.ndimage.gaussian_filter(z, sigma)
             setattr(self, f'_{attribute}_spline',
                     scipy.interpolate.RectBivariateSpline(
-                        self.x, self.z, getattr(self, attribute),
-                        kx=3, ky=3, s=0, bbox=self.grid_boundary))
+                        self.x, self.z, z, bbox=self.grid_boundary))
             setattr(self, update_flag, False)
 
     @property
@@ -652,8 +690,12 @@ class Topology:
 
         """
         Pmax, Pmin = self._flux_curvature(x)
+        Pratio = np.max(abs(np.array([Pmax, Pmin])) /
+                        np.min(abs(np.array([Pmax, Pmin]))))
         if np.isclose(Pmax, 0) or np.isclose(Pmin, 0):
             raise TopologyError('Field null froms cylinder or plane surface')
+        elif Pratio > 100:
+            return '-'
         elif np.sign(Pmax) == np.sign(Pmin):
             return 'O'
         else:
@@ -713,6 +755,33 @@ class Topology:
         """
         return f'_min_{opt_name}' if minimize else f'_max_{opt_name}'
 
+    @property
+    def optimizer(self):
+        """
+        Manage nlopt optimizer.
+
+        Avalible optimizers listed in self._optimizer_instances.
+
+        Parameters
+        ----------
+        _optimizer : str
+            Set optimiser name.
+
+        Returns
+        -------
+        _optimizer : str
+            Return name of current optimizer.
+
+        """
+        return self._optimizer
+
+    @optimizer.setter
+    def optimizer(self, name):
+        if name not in self._optimizer_instances:
+            raise IndexError(f'Optimizer {name} not present in '
+                             f'{self._optimizer_instances.keys()}')
+        self._optimizer = name
+
     def _get_opt(self, name, minimize=True):
         """
         Set nlopt optimization instance.
@@ -731,7 +800,8 @@ class Topology:
         """
         opt_name = self._opt_name(name, minimize)
         if not hasattr(self, opt_name):
-            opt_instance = nlopt.opt(nlopt.LD_TNEWTON, 2)
+            opt_instance = nlopt.opt(
+                getattr(nlopt, self._optimizer_instances[self.optimizer]), 2)
             objective = getattr(self, f'_{name}')
             if minimize:
                 opt_instance.set_min_objective(objective)

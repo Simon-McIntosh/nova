@@ -42,7 +42,8 @@ class PlasmaMethods:
         self._dPlasma = dPlasma
         self._default_attributes['dPlasma'] = dPlasma
 
-    def add_plasma(self, boundary, name='Plasma', dPlasma=None, **kwargs):
+    def add_plasma(self, plasma_boundary, name='Plasma',
+                   dPlasma=None, **kwargs):
         """
         Add plasma coil to coilset and generate plasma grid.
 
@@ -51,7 +52,7 @@ class PlasmaMethods:
 
         Parameters
         ----------
-        boundary : array_like or Polygon
+        plasma_boundary : array_like or Polygon
             External plasma boundary. Coerced into positively oriented curve.
         name : str, optional
             Plasma coil name.
@@ -68,14 +69,17 @@ class PlasmaMethods:
         if dPlasma is not None:  # update plasma subcoil dimension
             self.dPlasma = dPlasma
         self.biot_instances = ['plasmafilament', 'plasmagrid']
-        self.plasma_boundary = boundary
+        self.plasma_boundary = plasma_boundary
         # construct plasma coil from polygon
         self.add_coil(0, 0, 0, 0, polygon=self.plasma_boundary,
                       cross_section='polygon', turn_section='rectangle',
                       dCoil=self.dPlasma, name=name, plasma=True, power=True,
                       part='plasma')
         self.plasmagrid.generate_grid(**kwargs)
-        self.plasmagrid.cluster_factor = 1.5*self.dPlasma/self.plasmagrid.dx
+        grid_factor = self.dPlasma/self.plasmagrid.dx
+        self.plasmagrid.cluster_factor = 1.5*grid_factor
+        #if grid_factor > self.plasmagrid.filter_sigma:
+        #    self.plasmagrid.filter_sigma = grid_factor
         self.plasmafilament.add_plasma()
 
     @property

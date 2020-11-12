@@ -54,22 +54,31 @@ def global_null(sign, plot):
     cs = CoilSet()
     cs.add_coil(5, [-2, 2], 0.75, 0.75, dCoil=0.5)
     cs.add_coil(7.8, 0, 0.75, 0.75, label='Xcoil', dCoil=0.5)
-    polygon = shapely.geometry.Point(5, 0).buffer(0.5)
-    cs.add_plasma(polygon, dPlasma=0.3, expand=5, n=5e2)
+    polygon = shapely.geometry.Point(4, 0).buffer(0.5)
+    cs.add_plasma(polygon, dPlasma=0.3, expand=5, n=3e2,
+                  boundary='limit', limit=[3.2, 8.5, -2.5, 2.5])
+    cs.plasmagrid.optimizer = 'newton'
+    cs.plasmagrid.filter_sigma = 0  # disable interpolant filter
     cs.Ic = sign*15e6
     if plot:
         cs.plot(True)
-        cs.plasmagrid.plot_flux()
+        cs.plasmagrid.plot_flux(levels=51)
+        plt.contour(cs.plasmagrid.x2d, cs.plasmagrid.z2d,
+                    cs.plasmagrid.interpolate('Psi').ev(cs.plasmagrid.x2d,
+                                                        cs.plasmagrid.z2d),
+                    levels=cs.plasmagrid.levels, colors='C3')
         cs.plasmagrid.global_null(True)
-    assert cs.plasmagrid.nX == 3 and cs.plasmagrid.nO == 4
+    return cs
 
 
 def test_global_null_Ip_positive(plot=False):
-    global_null(1, plot)
+    cs = global_null(1, plot)
+    assert cs.plasmagrid.nX == 3 and cs.plasmagrid.nO == 4
 
 
 def test_global_null_Ip_negative(plot=False):
-    global_null(-1, plot)
+    cs = global_null(-1, plot)
+    assert cs.plasmagrid.nX == 3 and cs.plasmagrid.nO == 4
 
 
 def test_ftol_rel_attribute():
@@ -90,4 +99,4 @@ if __name__ == '__main__':
     #pytest.main([__file__])
 
     # test_xtol_rel_attribute()
-    test_global_null_Ip_negative(True)
+    cs = global_null(1, True)

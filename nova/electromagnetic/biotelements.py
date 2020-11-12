@@ -37,44 +37,63 @@ class Filament:
     _cross_section = 'filament'  # applicable cross section type
 
     def __init__(self, source, target):
-        self.gmr = geometric_mean_radius()
         self.initialize_filaments(source, target)
-        self.offset_filaments()
+        self.offset_filaments(source)
         self.calculate_coefficients()
 
     def initialize_filaments(self, source, target):
         self.rs, self.zs = source._rms_, source._z_  # source
-        self.drs, self.dzs = source._dx_, source._dz_  # source filament size
         self.r, self.z = target._x_, target._z_  # target
-        self.nI = source.nS*target.nT
-        #self.dl = np.linalg.norm([self.drs, self.dzs],
-        #                         axis=0)  # filament characteristic length
-        self.dl = np.max([self.drs, self.dzs], axis=0)
-        self.cross_section_factor = source._cs_factor_  # cross-section factor
 
-    def _offset_filaments(self):
-        'offset source and target points'
+    def offset_filaments(self, source, n_fold=0, n_merge=1,
+                         rms_offset=True):
+        """
+        Offset source and target filaments.
+
+        Parameters
+        ----------
+        source : nova.BiotFrame
+            Source filament biotframe.
+        n_fold : float, optional
+            Number of e-foling lenghts within filament. The default is 1.
+        n_merge : float, optional
+            Merge radius, multiple of filament widths. The default is 1.25.
+        rms_offset : bool, optional
+            Maintain rms offset for filament pairs. The default is False.
+
+        Returns
+        -------
+        None.
+
+        """
+        # extract interaction
+        df = np.max([source._dx_, source._dz_], axis=0) / 2
         dL = np.array([(self.r-self.rs), (self.z-self.zs)])
         dL_mag = np.linalg.norm(dL, axis=0)
-        idx = np.where(dL_mag < self.dl/2)[0]  # seperation < dl/2
+        # select filaments within merge radius
+        idx = np.where(dL_mag <= df*n_merge)[0]
         # reduce
-        dL = dL[:, idx]
         dL_mag = dL_mag[idx]
-        dr = self.dl[idx]/2  # filament characteristic radius
-        dL_norm = np.zeros((2, len(idx)))
+        dL = dL[:, idx]
+        df = df[idx]
+        ro = source._dx_[idx]*source._cs_factor_[idx]/2  # self seperation
+        # interacton orientation
         index = np.isclose(dL_mag, 0)
+        dL_norm = np.zeros((2, len(index)))
         dL_norm[0, index] = 1  # radial offset
         dL_norm[:, ~index] = dL[:, ~index] / dL_mag[~index]
-        ro = dr*self.cross_section_factor[idx]  # self seperation
-        factor = 1 - dL_mag/dr
-        dr = factor*ro*dL_norm[0]  # radial offset
-        dz = factor*ro*dL_norm[1]  # vertical offset
-        # rms offset
-        drms = -(self.r[idx]+self.rs[idx])/4 + np.sqrt(
-            (self.r[idx]+self.rs[idx])**2 -
-            8*dr*(self.r[idx] - self.rs[idx] + 2*dr))/4
-        self.rs[idx] += drms
-        self.r[idx] += drms
+        if n_fold == 0:
+            factor = (1 - dL_mag / (df*n_merge))  # linear blending
+        else:
+            factor = np.exp(-n_fold*(dL_mag/df)**2)  # exponential blending
+        dr = factor*ro*dL_norm[0, :]  # radial offset
+        dz = factor*ro*dL_norm[1, :]  # vertical offset
+        if rms_offset:
+            drms = -(self.r[idx]+self.rs[idx])/4 + np.sqrt(
+                (self.r[idx]+self.rs[idx])**2 -
+                8*dr*(self.r[idx] - self.rs[idx] + 2*dr))/4
+            self.rs[idx] += drms
+            self.r[idx] += drms
         # offset source filaments
         self.rs[idx] -= dr/2
         self.zs[idx] -= dz/2
@@ -82,11 +101,13 @@ class Filament:
         self.r[idx] += dr/2
         self.z[idx] += dz/2
 
-    def offset_filaments(self):
+    def _offset_filaments(self):
         'offset source and target points'
         # point seperation
         dL = np.array([(self.r-self.rs), (self.z-self.zs)])
         dL_mag = np.linalg.norm(dL, axis=0)
+        dr = self.dl/2  # filament characteristic radius
+        ro = dr*self.cross_section_factor  # self seperation
 
         # zero-seperation
         index = np.isclose(dL_mag, 0)
@@ -105,10 +126,11 @@ class Filament:
         dz[mutual_index] = (mutual_factor-1) * dL[1, mutual_index]
 
         # self inductance index
-        self_index = np.where(dL_mag <= self.dl/2)  # seperation < dl/2
-        self_dr = self.dl[self_index]/2  # filament characteristic radius
-        self_ro = self_dr*self.cross_section_factor[self_index]  # seperation
-        self_factor = 1 - dL_mag[self_index]/self_dr
+        self_index = np.where(dL_mag <= ro)  # seperation < dl/2
+        #self_dr = self.dl[self_index]/2  # filament characteristic radius
+        #self_ro = self_dr*self.cross_section_factor[self_index]  # seperation
+        self_ro = ro[self_index]
+        self_factor = 1 - dL_mag[self_index]/self_ro
         dr[self_index] = self_factor*self_ro*dL_norm[0, self_index]  # radial
         dz[self_index] = self_factor*self_ro*dL_norm[1, self_index]  # vertical
 

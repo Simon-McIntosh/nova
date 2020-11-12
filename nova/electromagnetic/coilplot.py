@@ -183,10 +183,10 @@ class CoilPlot:
     def label_plasma(self, ax, fs=None):
         if fs is None:
             fs = matplotlib.rcParams['legend.fontsize']
-        x = self.coil.x[self.coil.plasma]
+        x = self.coil.x[self.coil.plasma] + self.coil.dx[self.coil.plasma]/2
         z = self.coil.z[self.coil.plasma]
         ax.text(x, z, f'{1e-6*self.Ip:1.1f}MA', fontsize='medium',
-                ha='center', va='center', color=0.9 * np.ones(3),
+                ha='left', va='center', color=0.9 * np.ones(3),
                 zorder=10)
 
     def label_gaps(self, ax=None):

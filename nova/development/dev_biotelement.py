@@ -4,7 +4,7 @@ from nova.electromagnetic.coilset import CoilSet
 from nova.utilities.pyplot import plt
 
 cs = CoilSet(biot_instances='grid', n=2e4)
-cs.add_coil(3, 0, 0.5, 0.5, dCoil=0.25, part='PF')
+cs.add_coil(3, 0, 0.25, 0.5, dCoil=0.05, part='PF')
 
 cs.Ic = 15e6
 cs.grid.generate_grid(expand=0.2)

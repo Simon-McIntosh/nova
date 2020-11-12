@@ -29,7 +29,7 @@ class Topology:
 
     _interpolate_attributes = ['Psi', 'B']
 
-    _topology_attributes = ['null_cluster',
+    _topology_attributes = ['cluster', 'null_cluster',
                             'coil_center', 'update_coil_center',
                             'Xpoint', 'Opoint', 'Xpsi', 'Opsi',
                             'update_topology', 'update_topology_index',
@@ -50,14 +50,14 @@ class Topology:
             {f'_update_{attribute}_spline': True
              for attribute in self._interpolate_attributes})
         self._default_biot_attributes.update(
-            {'_null_cluster': [],
+            {'_cluster': False, '_null_cluster': [],
              '_coil_center': [], 'update_coil_center': True,
              '_Xpoint': [], '_Opoint': [],
              '_field_quantile': 0.05,
              '_cluster_factor': 1.5, '_unique_factor': 0.5,
              '_update_topology': True, '_update_topology_index': True,
              '_optimizer': 'mma', '_filter_sigma': 1.5,
-             '_ftol_rel': 1e-12, '_xtol_rel': 1e-12})
+             '_ftol_rel': 1e-9, '_xtol_rel': 1e-9})
 
     def _flag_update(self, status):
         """
@@ -140,17 +140,19 @@ class Topology:
         self._Xpoint, self._Opoint = [], []
         # field null clusters
         self._null_cluster, _field_Opoint = [], []
-        Bthreshold = np.quantile(self.B, field_quantile, interpolation='lower')
-        index = self.B < Bthreshold  # threshold
-        if np.sum(index) > 0:  # protect against uniform zero field
-            xt, zt = self.x2d[index], self.z2d[index]  # threshold points
-            dbscan = sklearn.cluster.DBSCAN(eps=eps_cluster, min_samples=1)
-            cluster_index = dbscan.fit_predict(np.array([xt, zt]).T)
-            for i in range(np.max(cluster_index)+1):
-                # cluster coordinates
-                x_cluster = xt[cluster_index == i]
-                z_cluster = zt[cluster_index == i]
-                self._null_cluster.append([x_cluster, z_cluster])
+        if self.cluster:  # cluster low field nulls
+            Bthreshold = np.quantile(self.B, field_quantile,
+                                     interpolation='lower')
+            index = self.B < Bthreshold  # threshold
+            if np.sum(index) > 0:  # protect against uniform zero field
+                xt, zt = self.x2d[index], self.z2d[index]  # threshold points
+                dbscan = sklearn.cluster.DBSCAN(eps=eps_cluster, min_samples=1)
+                cluster_index = dbscan.fit_predict(np.array([xt, zt]).T)
+                for i in range(np.max(cluster_index)+1):
+                    # cluster coordinates
+                    x_cluster = xt[cluster_index == i]
+                    z_cluster = zt[cluster_index == i]
+                    self._null_cluster.append([x_cluster, z_cluster])
         for x_cl, z_cl in self._null_cluster + list(self.plasma_vertex):
             # coordinates of cluster centre
             xc = np.mean(x_cl)
@@ -280,6 +282,24 @@ class Topology:
             ax.legend(loc='center right')
 
     @property
+    def cluster(self):
+        """
+        Manage cluster flag.
+
+        Returns
+        -------
+        cluster : bool
+            Enable low field clustering in global_null.
+
+        """
+        return self._cluster
+
+    @cluster.setter
+    def cluster(self, cluster):
+        self._cluster = cluster
+        self._update_topology = True
+
+    @property
     def field_quantile(self):
         """
         Manage field_quantile.
@@ -291,11 +311,8 @@ class Topology:
         Parameters
         ----------
         field_quantile : float
-            DESCRIPTION.
-
-        Returns
-        -------
-        field_quantile : float
+            Lower quantile to search for low field clusters. Required to lie
+            between 0 and 1 inclusive.
 
         """
         return self._field_quantile

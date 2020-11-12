@@ -50,7 +50,7 @@ def test_Opoint_curvature_Ip_negative(plot=False):
     assert cs.plasmagrid.null_type(cs.plasmagrid.Opoint[0]) == 'O'
 
 
-def global_null(sign, plot):
+def global_null(sign, plot=False):
     cs = CoilSet()
     cs.add_coil(5, [-2, 2], 0.75, 0.75, dCoil=0.5)
     cs.add_coil(7.8, 0, 0.75, 0.75, label='Xcoil', dCoil=0.5)
@@ -59,7 +59,11 @@ def global_null(sign, plot):
                   boundary='limit', limit=[3.2, 8.5, -2.5, 2.5])
     cs.plasmagrid.optimizer = 'newton'
     cs.plasmagrid.filter_sigma = 0  # disable interpolant filter
+    cs.plasmagrid.ftol_rel = 1e-9
+    cs.plasmagrid.xtol_rel = 1e-9
+
     cs.Ic = sign*15e6
+    cs.plasmagrid.global_null(plot)
     if plot:
         cs.plot(True)
         cs.plasmagrid.plot_flux(levels=51)
@@ -67,7 +71,6 @@ def global_null(sign, plot):
                     cs.plasmagrid.interpolate('Psi').ev(cs.plasmagrid.x2d,
                                                         cs.plasmagrid.z2d),
                     levels=cs.plasmagrid.levels, colors='C3')
-        cs.plasmagrid.global_null(True)
     return cs
 
 
@@ -99,4 +102,6 @@ if __name__ == '__main__':
     #pytest.main([__file__])
 
     # test_xtol_rel_attribute()
-    cs = global_null(1, True)
+    cs = global_null(1, plot=True)
+
+

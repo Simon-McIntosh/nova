@@ -57,7 +57,7 @@ class Topology:
              '_cluster_factor': 1.5, '_unique_factor': 0.5,
              '_update_topology': True, '_update_topology_index': True,
              '_optimizer': 'mma', '_filter_sigma': 1.5,
-             '_ftol_rel': 1e-9, '_xtol_rel': 1e-9})
+             '_ftol_rel': 1e-5, '_xtol_rel': 1e-5})
 
     def _flag_update(self, status):
         """
@@ -136,6 +136,11 @@ class Topology:
         dx = np.max([self.dx, self.dz])  # maximum grid delta
         eps_cluster = cluster_factor*dx  # max neighbour seperation in DBSCAN
         eps_unique = unique_factor*dx  # min seperation for unique nulls
+        # sead nulls
+        self._Xseed, self._Oseed = list(self._Xpoint), list(self._Opoint)
+        if not self._Xseed:
+            self._Xseed = list(self.plasma_vertex)
+        self._Oseed.extend(list(self.coil_center))
         # (re)initialize null point arrays
         self._Xpoint, self._Opoint = [], []
         # field null clusters
@@ -153,7 +158,7 @@ class Topology:
                     x_cluster = xt[cluster_index == i]
                     z_cluster = zt[cluster_index == i]
                     self._null_cluster.append([x_cluster, z_cluster])
-        for x_cl, z_cl in self._null_cluster + list(self.plasma_vertex):
+        for x_cl, z_cl in self._null_cluster + self._Xseed:
             # coordinates of cluster centre
             xc = np.mean(x_cl)
             zc = np.mean(z_cl)
@@ -164,12 +169,14 @@ class Topology:
                 self._Xpoint.append([xn, zn])
             elif null_type == 'O':
                 _field_Opoint.append([xn, zn])
-        for xc, zc in _field_Opoint + list(self.coil_center):
+        for xc, zc in _field_Opoint + self._Oseed:
             xn, zn = self._refine_Opoint(xc, zc)
             if self.null_type((xn, zn)) == 'O':
                 self._Opoint.append([xn, zn])
-        # convert to unique np.arrays and
+        # convert to unique np.arrays
         self._sort_null(eps=eps_unique)  # sort by poloidal flux
+        self._Xseed = np.array(self._Xseed)
+        self._Oseed = np.array(self._Oseed)
         self._update_topology = False
         self._update_topology_index = True
         if plot:
@@ -231,6 +238,8 @@ class Topology:
         xc = np.sqrt(np.add.reduceat(self.source.rms**2, reduction_index) /
                      turn_number)
         zc = np.add.reduceat(self.source.z, reduction_index) / turn_number
+        # xmin = np.minimum.reduceat(self.source.x, reduction_index)
+        # xmax = np.maximum.reduceat(self.source.x, reduction_index)
         zmin = np.minimum.reduceat(self.source.z, reduction_index)
         zmax = np.maximum.reduceat(self.source.z, reduction_index)
         # plasma vertex
@@ -267,17 +276,23 @@ class Topology:
         if ax is None:
             ax = plt.gca()
         if plot_clusters:
-            for cluster in self._null_cluster:
-                ax.plot(cluster[0], cluster[1], 'C7.', ms=4)
-                ax.plot(*np.mean(cluster, axis=1), 'k.', ms=4)  # centers
-            ax.plot(*self._plasma_vertex.T, 'C0.')
-            ax.plot(*self._coil_center.T, 'C3.')
+            cluster_labels = ['cluster', 'cluster center']
+            for i, cluster in enumerate(self._null_cluster):
+                if i == 0:
+                    label = cluster_labels
+                else:
+                    label = [None, None]
+                ax.plot(cluster[0], cluster[1], 'C7.', ms=4, label=label[0])
+                ax.plot(*np.mean(cluster, axis=1), 'k.', ms=4,
+                        label=label[1])  # centers
+            ax.plot(*self._Xseed.T, 'k*', ms=8, label='X-seed')
+            ax.plot(*self._Oseed.T, 'kd', ms=5, label='O-seed')
         if self.nX > 0:  # X-ponits
             ax.plot(*self.Xpoint.T, 'x', label=f'X-point {self.nX}',
                     ms=6, mew=1, color=color)
         if self.nO > 0:  # O-ponits
             ax.plot(*self.Opoint.T, 'o', label=f'O-point {self.nO}',
-                    markerfacecolor='none', mew=1, ms=6, color=color)
+                    mfc='none', mew=1, ms=6, color=color)
         if (self.nX > 0 or self.nO > 0) and (legend or plot_clusters):
             ax.legend(loc='center right')
 

@@ -85,7 +85,8 @@ class CoilPlot:
                 pc = PatchCollection(patch, match_original=True)
                 ax.add_collection(pc)
 
-    def plot(self, subcoil=False, plasma=True, label='active', current='A',
+    def plot(self, subcoil=False, plasma=True, plasma_boundary=True,
+             label='active', current='A',
              field=True, zeroturn=False, ax=None):
         if ax is None:
             ax = plt.gca()
@@ -98,6 +99,8 @@ class CoilPlot:
         plt.tight_layout()
         if plasma and self.coil.nP > 0:
             self.label_plasma(ax)
+        if plasma_boundary and self.plasma_boundary:
+            plt.plot(*self.plasma_boundary.boundary.xy, 'C0')
         if label or current or field:
             self.label_coil(ax, label, current, field)
 
@@ -183,10 +186,10 @@ class CoilPlot:
     def label_plasma(self, ax, fs=None):
         if fs is None:
             fs = matplotlib.rcParams['legend.fontsize']
-        x = self.coil.x[self.coil.plasma] + self.coil.dx[self.coil.plasma]/2
-        z = self.coil.z[self.coil.plasma]
-        ax.text(x, z, f'{1e-6*self.Ip:1.1f}MA', fontsize='medium',
-                ha='left', va='center', color=0.9 * np.ones(3),
+        x = self.coil.x[self.coil.plasma]
+        z = self.coil.z[self.coil.plasma] + self.coil.dz[self.coil.plasma]/10
+        ax.text(x, z, f' {1e-6*self.Ip:1.1f}MA', fontsize='medium',
+                ha='center', va='center', color=0.95 * np.ones(3),
                 zorder=10)
 
     def label_gaps(self, ax=None):

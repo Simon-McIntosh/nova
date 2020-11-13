@@ -4,12 +4,16 @@ Plasma methods mixin.
 Methods inserted into CoilSet class. Requies CoilMethods.
 
 """
+import operator
+import itertools
+
 import numpy as np
 import pandas as pd
 import shapely
 import pygeos
 
 from nova.electromagnetic.topology import TopologyError
+from nova.utilities.pyplot import plt
 
 
 class PlasmaMethods:
@@ -242,7 +246,34 @@ class PlasmaMethods:
             Opsi = self.plasmagrid.Opsi[self._Oindex]
             Xpsi = self.plasmagrid.Xpsi
             self._Xindex = np.argmin(abs(Opsi-Xpsi))
+            self._locate_Xpoint()
             self.plasmagrid._update_topology_index = False
+
+    def _locate_Xpoint(self):
+        Xz = self.plasmagrid.Xpoint[self._Xindex][1]
+        Oz = self.plasmagrid.Opoint[self._Oindex][1]
+        if Xz < Oz:
+            self._Xloc = 'lower'
+        else:
+            self._Xloc = 'upper'
+
+    @property
+    def Xloc(self):
+        """
+        Return location descriptor of primary X-point relitive to O-point.
+
+        - lower : X-point below O-point.
+        - upper : X-point above O-point.
+        - limit : Separatrix limited by plasma_boundary.
+
+        Returns
+        -------
+        Xloc : str
+            Xpoint location descriptor.
+
+        """
+        self.update_topology_index()
+        return self._Xloc
 
     @property
     def Oindex(self):
@@ -269,6 +300,98 @@ class PlasmaMethods:
     @property
     def Xpsi(self):
         return self.plasmagrid.Xpsi[self.Xindex]
+
+    def _trim_contour(self, contour):
+        if self.Xloc in ['lower', 'upper']:
+            trimed_contour = []
+            compare = operator.ge if self.Xloc == 'lower' else operator.le
+            index = compare(contour[:, 1], self.Xpoint[1])
+            group = [list(i)[:2][0] for __, i in
+                     itertools.groupby(enumerate(index), key=lambda x: x[-1])]
+            ngroup = len(group)
+            ncontour = len(contour)
+            for i in range(ngroup):
+                if group[i][1]:  # compare is True
+                    start = group[i][0]
+                    stop = ncontour if i == ngroup-1 else group[i+1][0]
+                    trimed_contour.append(contour[slice(start, stop)])
+        else:
+            trimed_contour = [contour]
+        return trimed_contour
+
+    def _close_contour(self, trimed_contour, alpha, ndx=3):
+        max_gap = ndx*self.coil.dx[self.coil.plasma]
+        closed_contour = []
+        for ct in trimed_contour:
+            gap = np.linalg.norm(ct[0]-ct[-1])
+            if gap <= max_gap and len(ct) >= 3:  # contour closed
+                if gap > 0:  # close gap
+                    dX = np.linalg.norm(self.Xpoint-ct[0])
+                    if dX < max_gap and alpha == 1:
+                        Xpoint = self.Xpoint.reshape(-1, 2)
+                        ct = np.append(Xpoint, np.append(ct, Xpoint, axis=0),
+                                       axis=0)
+                    else:
+                        ct = np.append(ct, ct[:1], axis=0)
+                closed_contour.append(ct)
+        return closed_contour
+
+    def update_separatrix(self, plot=False, **kwargs):
+        if 'Psi' in kwargs:
+            Psi = kwargs['psi']
+            alpha = (Psi-self.Opsi) / (self.Xpsi-self.Opsi)
+        else:
+            alpha = kwargs.get('alpha', 1-1e-3)
+            Psi = alpha * (self.Xpsi-self.Opsi) + self.Opsi
+        Opoint = shapely.geometry.Point(self.Opoint)
+        contours = self.plasmagrid.contour(Psi)
+        closed_contours = []
+        for contour in contours:
+            trimed_contour = self._trim_contour(contour)
+            closed_contours.extend(self._close_contour(trimed_contour, alpha))
+        self._separatrix = []  # clear current separatrix
+        for cc in closed_contours:
+            polygon = shapely.geometry.Polygon(cc)
+            if polygon.contains(Opoint):
+                self.separatrix = polygon
+                self.separatrix = self.separatrix
+                break
+        if not self._separatrix:  # separatrix not found
+            self.plot()
+            self.plasmagrid.plot_topology(True)
+            self.plasmagrid.plot_flux()
+            for i, contour in enumerate(contours):
+                label = rf'all $\alpha$={alpha:1.2f}' if i == 0 else None
+                plt.plot(*contour.T, 'k-', label=label)
+            for i, closed_contour in enumerate(closed_contours):
+                label = 'closed' if i == 0 else None
+                plt.plot(*closed_contour.T, 'C3-', label=label)
+            plt.legend(loc='upper right')
+            raise TopologyError('closed separatrix containing Opoint '
+                                'not found')
+        if plot:
+            plt.plot(*self.separatrix.boundary.xy, '-', color=0.4*np.ones(3))
+
+    def plot_null(self, legend=True):
+        """
+        Plot primary nulls.
+
+        Parameters
+        ----------
+        legend : bool, optional
+            Include legend. The default is True.
+
+        Returns
+        -------
+        None.
+
+        """
+        color = 0.25*np.ones(3)
+        plt.plot(*self.Opoint, 'o', mfc='none', mec=color, mew=1.25, ms=6,
+                 label='X-point')
+        plt.plot(*self.Xpoint, 'x', mec=color, mew=1.25, ms=6, label='O-point')
+        if legend:
+            plt.legend(loc='center right')
 
     @property
     def plasma_index(self):

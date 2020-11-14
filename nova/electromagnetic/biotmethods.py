@@ -1,8 +1,8 @@
 
 import numpy as np
-from pandas import DataFrame, Series
+from pandas import DataFrame
 from pandas.api.types import is_list_like
-from scipy.interpolate import interp1d, RectBivariateSpline
+from scipy.interpolate import interp1d
 import shapely.geometry
 
 from nova.utilities.pyplot import plt

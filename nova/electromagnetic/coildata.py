@@ -28,6 +28,8 @@ class CoilData():
         Optimization flag.
     plasma : bool, array-like
         Plasma flag.
+    stabilize : bool, array-like
+        Stabilization flag
 
     """
 
@@ -48,7 +50,8 @@ class CoilData():
                          'current_index']
 
     # compact mpc attributes - subset of coilframe and coildata attributes
-    _mpc_attributes = ['Ic', 'power', 'plasma', 'optimize', 'current_index']
+    _mpc_attributes = ['Ic', 'power', 'plasma', 'optimize', 'stabilize',
+                       'current_index']
 
     # multi-point constraints (shared line-current)
     _mpc_constraints = ['mpc_index', 'mpc_iloc', 'mpc_referance',
@@ -213,7 +216,7 @@ class CoilData():
     def _extract_data_attributes(self):
         self.update_dataframe = False
         for attribute in self._dataframe_attributes + self._coildata_indices:
-            if attribute in ['power', 'plasma', 'optimize']:
+            if attribute in ['power', 'plasma', 'optimize', 'stabilize']:
                 dtype = bool
             else:
                 dtype = float
@@ -255,36 +258,96 @@ class CoilData():
             self._plasma_iloc = None
             self._plasma_reduction_index = None
 
-    @property
-    def current_update(self):
+    def mpc_index(self, mpc_flag):
         """
-        Manage current index via current update flag.
-
-        Update current_index via current flag for coil current update.
+        Return subset of _mpc_index based on mpc_flag.
 
         Parameters
         ----------
-        update_flag : str
-            Current update flag.
+        mpc_flag : str
+            Selection flag. Full description given in
+            :meth:`~coildata.CoilData.mpc_select`.
 
-            - 'full': update full current vector
-            - 'active': update active coils (power & ~plasma)
-            - 'passive': update passive coils (~power & ~plasma)
-            - 'free': update free coils (optimize & ~plasma)
-            - 'fix': update fix coils (~optimize & ~plasma)
-            - 'plasma': update plasma (plasma)
-            - 'coil': update all coils (~plasma)
+        Returns
+        -------
+        index : pandas.DataFrame.Index
+            Subset of mpc_index based on mpc_flag.
+
+        """
+        return self._mpc_index[self.mpc_select(mpc_flag)]
+
+    def mpc_select(self, mpc_flag):
+        """
+        Return selection boolean for _mpc_index based on mpc_flag.
+
+        Parameters
+        ----------
+        mpc_flag : str
+            Selection flag.
+
+            - 'full' : update full current vector (~stabilize)
+            - 'active' : update active coils (power & ~plasma & ~stabilize)
+            - 'passive' : update passive coils (~power & ~plasma & ~stabilize)
+            - 'free' : update free coils (optimize & ~plasma & ~stabilize)
+            - 'fix' : update fix coils (~optimize & ~plasma & ~stabilize)
+            - 'plasma' : update plasma (plasma & ~stabilize)
+            - 'coil' : update all coils (~plasma & ~stabilize)
+            - 'stabilize' : update stabilization coils
+
 
         Raises
         ------
         IndexError
-            update_flag not in
-            [full, active, passive, free, fix, plasma, coil].
+            mpc_flag not in
+            [full, active, passive, free, fix, plasma, coil, stabilize].
+
+        Returns
+        -------
+        mpc_select : array-like, shape(_nC,)
+            Boolean selection array.
+
+        """
+        if self.nC > 0 and self._mpc_iloc is not None:
+            if mpc_flag == 'full':
+                mpc_select = np.full(self._nC, True) & ~self._stabilize
+            elif mpc_flag == 'active':
+                mpc_select = self._power & ~self._plasma & ~self._stabilize
+            elif mpc_flag == 'passive':
+                mpc_select = ~self._power & ~self._plasma & ~self._stabilize
+            elif mpc_flag == 'free':
+                mpc_select = self._optimize & ~self._plasma & ~self._stabilize
+            elif mpc_flag == 'fix':
+                mpc_select = ~self._optimize & ~self._plasma & ~self._stabilize
+            elif mpc_flag == 'plasma':
+                mpc_select = self._plasma & ~self._stabilize
+            elif mpc_flag == 'coil':
+                mpc_select = ~self._plasma & ~self._stabilize
+            elif mpc_flag == 'stabilize':
+                mpc_select = self._stabilize
+            else:
+                raise IndexError(f'flag {mpc_flag} not in '
+                                 '[full, actitve, passive, free, fix, '
+                                 'plasma, coil, stabilize]')
+            return mpc_select
+
+    @property
+    def current_update(self):
+        """
+        Manage current_index and current_update flag.
+
+        Set current_index based on current_flag. current_index used
+        in coil current update.
+
+        Parameters
+        ----------
+        update_flag : str
+            Current update select flag. Full description given in
+            :meth:`~coildata.CoilData.mpc_select`.
 
         Returns
         -------
         update_flag : str
-            Current update flag:
+            Current update select flag:
 
         """
         return self._current_update
@@ -292,39 +355,31 @@ class CoilData():
     @current_update.setter
     def current_update(self, update_flag):
         self._current_update = update_flag
-        if self.nC > 0 and self._mpc_iloc is not None:
-            if update_flag == 'full':
-                self._current_index = np.full(self._nC, True)  # full
-            elif update_flag == 'active':
-                self._current_index = self._power & ~self._plasma  # active
-            elif update_flag == 'passive':
-                self._current_index = ~self._power & ~self._plasma  # passive
-            elif update_flag == 'free':
-                self._current_index = self._optimize & ~self._plasma  # free
-            elif update_flag == 'fix':
-                self._current_index = ~self._optimize & ~self._plasma  # fix
-            elif update_flag == 'plasma':
-                self._current_index = self._plasma  # plasma
-            elif update_flag == 'coil':
-                self._current_index = ~self._plasma  # all coils
-            else:
-                raise IndexError(f'flag {update_flag} not in '
-                                 '[full, actitve, passive, free, fix, '
-                                 'plasma, coil]')
+        self._current_index = self.mpc_select(update_flag)
 
     @property
     def current_index(self):
-        """Display power, optimize, plasma and current update status."""
+        """
+        Display current index update status.
+
+        - power
+        - optimize
+        - plasma
+        - stabilize
+        - current_update
+
+        """
         if self.nC > 0:
             return DataFrame(
                     {'power': self._power,
                      'optimize': self._optimize,
                      'plasma': self._plasma,
+                     'stabilize': self._stabilize,
                      self.current_update: self._current_index},
                     index=self._mpc_index)
         else:
             return DataFrame(columns=['power', 'optimize', 'plasma',
-                                      self.current_update])
+                                      'stabilize', self.current_update])
 
     def _set_current(self, value, current_column='Ic', update_dataframe=True):
         """

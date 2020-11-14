@@ -51,12 +51,14 @@ class CoilSet(pythonIO, BiotMethods, PlasmaMethods, CoilMethods, CoilPlot):
                      'cross_section',
                      'turn_section', 'turn_fraction', 'skin_fraction',
                      'patch', 'polygon',
-                     'power', 'optimize', 'plasma', 'mpc', 'Nf', 'Nt',
+                     'power', 'optimize', 'plasma', 'stabilize',
+                     'mpc', 'Nf', 'Nt',
                      'It', 'Ic', 'Psi', 'Bx', 'Bz', 'B']
 
     _subcoil_columns = ['dx', 'dz', 'dA', 'dl_x', 'dl_z', 'coil', 'part',
                         'cross_section', 'patch', 'polygon',
-                        'power', 'optimize', 'plasma', 'mpc', 'Nt', 'It', 'Ic',
+                        'power', 'optimize', 'stabilize',
+                        'plasma', 'mpc', 'Nt', 'It', 'Ic',
                         'Psi', 'Bx', 'Bz', 'B']
 
     _coildata_attributes = {'current_update': 'full'}

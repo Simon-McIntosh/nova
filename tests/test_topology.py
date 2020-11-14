@@ -60,7 +60,6 @@ def global_null(sign, plot=False):
     cs.plasmagrid.optimizer = 'newton'
     cs.plasmagrid.filter_sigma = 0  # disable interpolant filter
     cs.plasmagrid.cluster = True
-
     cs.Ic = sign*15e6
     cs.plasmagrid.global_null(plot)
     if plot:

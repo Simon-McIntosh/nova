@@ -386,7 +386,7 @@ class PlasmaMethods:
         None.
 
         """
-        color = 0.25*np.ones(3)
+        color = 'C3'
         plt.plot(*self.Opoint, 'o', mfc='none', mec=color, mew=1.25, ms=6,
                  label='X-point')
         plt.plot(*self.Xpoint, 'x', mec=color, mew=1.25, ms=6, label='O-point')

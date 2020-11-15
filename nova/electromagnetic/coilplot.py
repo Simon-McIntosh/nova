@@ -65,7 +65,7 @@ class CoilPlot:
 
 
     def plot_coil(self, coil, alpha=1, ax=None, zeroturn=False,
-                  stabilize=False, **kwargs):
+                  feedback=False, **kwargs):
         if ax is None:
             ax = plt.gca()
         if not coil.empty:
@@ -74,8 +74,8 @@ class CoilPlot:
             index = np.full(coil.nC, True)
             if not zeroturn:  # exclude zeroturn filaments (Nt == 0)
                 index &= (coil.Nt != 0)
-            if not stabilize:  # exclude stabilization coils
-                index &= ~coil.stabilize
+            if not feedback:  # exclude stabilization coils
+                index &= ~coil.feedback
             patch = coil.loc[index, 'patch']
             # form list of lists
             patch = [p if pd.api.types.is_list_like(p)
@@ -90,15 +90,15 @@ class CoilPlot:
 
     def plot(self, subcoil=False, plasma=True, plasma_boundary=True,
              label='active', current='A',
-             field=True, zeroturn=False, stabilize=False, ax=None):
+             field=True, zeroturn=False, feedback=False, ax=None):
         if ax is None:
             ax = plt.gca()
         if subcoil:
             self.plot_coil(self.subcoil, zeroturn=zeroturn,
-                           stabilize=stabilize, ax=ax)
+                           feedback=feedback, ax=ax)
         else:
             self.plot_coil(self.coil, zeroturn=zeroturn,
-                           stabilize=stabilize, ax=ax)
+                           feedback=feedback, ax=ax)
         ax.axis('equal')
         ax.axis('off')
         plt.tight_layout()
@@ -119,17 +119,17 @@ class CoilPlot:
             parts = coil.part[coil._current_index[coil._mpc_referance]]
             parts = parts
         elif label == 'active':  # power == True
-            parts = coil.part[coil.power & ~coil.plasma & ~coil.stabilize]
+            parts = coil.part[coil.power & ~coil.plasma & ~coil.feedback]
         elif label == 'passive':  # power == False
-            parts = coil.part[~coil.power & ~coil.plasma & ~coil.stabilize]
+            parts = coil.part[~coil.power & ~coil.plasma & ~coil.feedback]
         elif label == 'coil':  # plasma == False
-            parts = coil.part[~coil.plasma & ~coil.stabilize]
+            parts = coil.part[~coil.plasma & ~coil.feedback]
         elif label == 'plasma':  # plasma == True
-            parts = coil.part[coil.plasma & ~coil.stabilize]
+            parts = coil.part[coil.plasma & ~coil.feedback]
         elif label == 'free':  # optimize == True
-            parts = coil.part[coil.optimize & ~coil.plasma & ~coil.stabilize]
+            parts = coil.part[coil.optimize & ~coil.plasma & ~coil.feedback]
         elif label == 'fix':  # optimize == False
-            parts = coil.part[~coil.optimize & ~coil.plasma & ~coil.stabilize]
+            parts = coil.part[~coil.optimize & ~coil.plasma & ~coil.feedback]
         else:
             if not pd.api.types.is_list_like(label):
                 label = [label]

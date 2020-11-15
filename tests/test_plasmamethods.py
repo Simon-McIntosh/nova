@@ -20,7 +20,7 @@ def test_centroid_z(plot=False):
     if plot:
         cs.plot()
     plasma_polygon = cs.coil.polygon[0]
-    assert plasma_polygon.centroid.y == 1 == cs.coil.z
+    assert plasma_polygon.centroid.y == 1 == cs.coil.z[0]
 
 
 def test_circle(plot=False):
@@ -29,7 +29,8 @@ def test_circle(plot=False):
     cs.add_plasma(polygon)
     if plot:
         cs.plot(True)
-    assert np.isclose(cs.subcoil.dA.sum(), np.pi*0.5**2, 5e-3)
+    assert np.isclose(cs.subcoil.dA[cs.subcoil.plasma].sum(),
+                      np.pi*0.5**2, 5e-3)
 
 
 def test_polygon_separatrix(plot=False):
@@ -38,7 +39,7 @@ def test_polygon_separatrix(plot=False):
     cs.separatrix = shapely.geometry.Point(3, 3).buffer(2)
     if plot:
         cs.plot(True)
-    assert np.isclose(cs.subcoil.dA[cs.ionize_index].sum(),
+    assert np.isclose(cs.subcoil.dA[cs.subcoil.plasma][cs.ionize_index].sum(),
                       np.pi*2**2, 0.05)
 
 
@@ -48,11 +49,11 @@ def test_array_separatrix(plot=False):
     cs.separatrix = np.array([[1, 2, 1.5, 1], [0, 0, 2, 0]]).T
     if plot:
         cs.plot()
-        cs.plot(True)
-    assert np.isclose(cs.subcoil.dA[cs.ionize_index].sum(),
+        cs.plot(True, feedback=True)
+    assert np.isclose(cs.subcoil.dA[cs.subcoil.plasma][cs.ionize_index].sum(),
                       0.5**2, 1e-3)
 
 
 if __name__ == '__main__':
     #pytest.main([__file__])
-    test_Xpoint_curvature_Ip_positive(True)
+    test_array_separatrix(True)

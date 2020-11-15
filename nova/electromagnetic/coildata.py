@@ -28,8 +28,8 @@ class CoilData():
         Optimization flag.
     plasma : bool, array-like
         Plasma flag.
-    stabilize : bool, array-like
-        Stabilization flag
+    feedback : bool, array-like
+        Feedback stabilization flag
 
     """
 
@@ -50,7 +50,7 @@ class CoilData():
                          'current_index']
 
     # compact mpc attributes - subset of coilframe and coildata attributes
-    _mpc_attributes = ['Ic', 'power', 'plasma', 'optimize', 'stabilize',
+    _mpc_attributes = ['Ic', 'power', 'plasma', 'optimize', 'feedback',
                        'current_index']
 
     # multi-point constraints (shared line-current)
@@ -216,7 +216,7 @@ class CoilData():
     def _extract_data_attributes(self):
         self.update_dataframe = False
         for attribute in self._dataframe_attributes + self._coildata_indices:
-            if attribute in ['power', 'plasma', 'optimize', 'stabilize']:
+            if attribute in ['power', 'plasma', 'optimize', 'feedback']:
                 dtype = bool
             else:
                 dtype = float
@@ -285,21 +285,21 @@ class CoilData():
         mpc_flag : str
             Selection flag.
 
-            - 'full' : update full current vector (~stabilize)
-            - 'active' : update active coils (power & ~plasma & ~stabilize)
-            - 'passive' : update passive coils (~power & ~plasma & ~stabilize)
-            - 'free' : update free coils (optimize & ~plasma & ~stabilize)
-            - 'fix' : update fix coils (~optimize & ~plasma & ~stabilize)
-            - 'plasma' : update plasma (plasma & ~stabilize)
-            - 'coil' : update all coils (~plasma & ~stabilize)
-            - 'stabilize' : update stabilization coils
+            - 'full' : update full current vector (~feedback)
+            - 'active' : update active coils (power & ~plasma & ~feedback)
+            - 'passive' : update passive coils (~power & ~plasma & ~feedback)
+            - 'free' : update free coils (optimize & ~plasma & ~feedback)
+            - 'fix' : update fix coils (~optimize & ~plasma & ~feedback)
+            - 'plasma' : update plasma (plasma & ~feedback)
+            - 'coil' : update all coils (~plasma & ~feedback)
+            - 'feedback' : update feedback stabilization coils
 
 
         Raises
         ------
         IndexError
             mpc_flag not in
-            [full, active, passive, free, fix, plasma, coil, stabilize].
+            [full, active, passive, free, fix, plasma, coil, feedback].
 
         Returns
         -------
@@ -309,25 +309,25 @@ class CoilData():
         """
         if self.nC > 0 and self._mpc_iloc is not None:
             if mpc_flag == 'full':
-                mpc_select = np.full(self._nC, True) & ~self._stabilize
+                mpc_select = np.full(self._nC, True) & ~self._feedback
             elif mpc_flag == 'active':
-                mpc_select = self._power & ~self._plasma & ~self._stabilize
+                mpc_select = self._power & ~self._plasma & ~self._feedback
             elif mpc_flag == 'passive':
-                mpc_select = ~self._power & ~self._plasma & ~self._stabilize
+                mpc_select = ~self._power & ~self._plasma & ~self._feedback
             elif mpc_flag == 'free':
-                mpc_select = self._optimize & ~self._plasma & ~self._stabilize
+                mpc_select = self._optimize & ~self._plasma & ~self._feedback
             elif mpc_flag == 'fix':
-                mpc_select = ~self._optimize & ~self._plasma & ~self._stabilize
+                mpc_select = ~self._optimize & ~self._plasma & ~self._feedback
             elif mpc_flag == 'plasma':
-                mpc_select = self._plasma & ~self._stabilize
+                mpc_select = self._plasma & ~self._feedback
             elif mpc_flag == 'coil':
-                mpc_select = ~self._plasma & ~self._stabilize
-            elif mpc_flag == 'stabilize':
-                mpc_select = self._stabilize
+                mpc_select = ~self._plasma & ~self._feedback
+            elif mpc_flag == 'feedback':
+                mpc_select = self._feedback
             else:
                 raise IndexError(f'flag {mpc_flag} not in '
                                  '[full, actitve, passive, free, fix, '
-                                 'plasma, coil, stabilize]')
+                                 'plasma, coil, feedback]')
             return mpc_select
 
     @property
@@ -365,7 +365,7 @@ class CoilData():
         - power
         - optimize
         - plasma
-        - stabilize
+        - feedback
         - current update
 
         """
@@ -374,12 +374,12 @@ class CoilData():
                     {'power': self._power,
                      'optimize': self._optimize,
                      'plasma': self._plasma,
-                     'stabilize': self._stabilize,
+                     'feedback': self._feedback,
                      self.current_update: self._current_index},
                     index=self._mpc_index)
         else:
             return DataFrame(columns=['power', 'optimize', 'plasma',
-                                      'stabilize', self.current_update])
+                                      'feedback', self.current_update])
 
     def _set_current(self, value, current_column='Ic', update_dataframe=True):
         """

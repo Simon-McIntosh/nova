@@ -605,12 +605,14 @@ class CoilMethods:
         None.
 
         """
+        print('dCoil', kwargs['dCoil'])
         label = kwargs.pop('label', kwargs.get('part', 'Shl'))
         dShell = kwargs.pop('dShell', self._default_attributes['dShell'])
         dCoil = kwargs.pop('dCoil', self._default_attributes['dCoil'])
         power = kwargs.pop('power', False)
         delim = kwargs.pop('delim', '')
         rho = kwargs.pop('rho', 0)
+        print(dCoil)
         x, z, dl, dt, dA, rho_bar, polygon, sub_segment, sub_rho, sub_dt = \
             self._shlspace((x, z), dt, rho, dShell)
         index = self.coil.add_coil(x, z, dl, dt, dA=dA, polygon=polygon,

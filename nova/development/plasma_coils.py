@@ -4,7 +4,7 @@ from nova.electromagnetic.coilgeom import ITERcoilset
 from nova.utilities.pyplot import plt
 
 ITER = ITERcoilset(coils='pf', dCoil=0.25, dPlasma=0.15, dField=0.25,
-                   plasma_expand=0.6, plasma_n=2e3,
+                   plasma_expand=0.2, plasma_n=2e3,
                    n=1e3, read_txt=False)
 
 ITER.filename = -1
@@ -13,22 +13,29 @@ ITER.scenario = 'EOF'
 #ITER.data['separatrix'].z += 0.1
 ITER.separatrix = ITER.data['separatrix']
 
-ITER.current_update = 'stabilize'
-ITER.Ic = -1e6
+ITER.current_update = 'feedback'
+ITER.Ic = 0
 
 #ITER.current_update = 'full'
 #ITER.Ic = 0
 
-
+ITER.plasmagrid.optimize = 'newton'
 
 
 plt.set_aspect(0.8)
 
-for __ in range(8):
-    ITER.update_separatrix(alpha=1, plot=True)
+zo = -0.5
+k = 5e6
 
-ITER.plot(True, stabilize=False)
-#ITER.plot_null()
+for __ in range(50):
+    err = (ITER.Opoint[1]-zo)
+    ITER.update_separatrix(alpha=1)
+
+    print(err)
+    ITER.Ic = k*err
+
+ITER.plot(True, feedback=False)
+ITER.plot_null()
 #ITER.plasmagrid.plot_topology(True)
 ITER.plasmagrid.plot_flux(levels=101)
 

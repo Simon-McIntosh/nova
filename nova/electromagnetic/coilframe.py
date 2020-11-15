@@ -67,7 +67,7 @@ class CoilFrame(DataFrame, CoilData):
              'coil': '', 'part': '', 'subindex': None,
              'dCoil': 0., 'dl_x': 0., 'dl_z': 0., 'mpc': '', 'polygon': None,
              'power': True, 'optimize': False, 'plasma': False,
-             'stabilize': False, 'rho': 0.,
+             'feedback': False, 'rho': 0.,
              'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.}
 
     def _update_coilframe_metadata(self, **coilframe_metadata):

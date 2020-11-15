@@ -85,48 +85,27 @@ class PlasmaMethods:
         self.plasmagrid.cluster_factor = 1.5*grid_factor
         self.plasmafilament.add_plasma()
 
-    def _add_vertical_stabilization_coils(self):
+    def _add_vertical_stabilization_coils(self, apex=25, n_subcoil=25):
 
-        skew = 70
-        width = 0.25
-
+        apex *= np.pi/180
         bounds = self.plasma_boundary.bounds
         zlim = bounds[1::2]
         dz = zlim[1]-zlim[0]
         zo = np.mean(zlim)
-        xmax = 2*bounds[2]
-
-        xo = bounds[0] - (dz/2) / np.tan(skew*np.pi / 180)
-        origin = (xo, zo)
+        xmax = 1.5*bounds[2]
+        xo = bounds[0] - 1.1*(dz/2) * np.tan(apex)
         if xo < 0:
-            xo = 0
-        # disk
-        disk = shapely.geometry.box(xo, zo - width/2, xmax, zo + width/2)
-        # lower cone
-        lower_cone = shapely.affinity.skew(disk, 0, -skew, origin=origin)
-        lower_cone = shapely.affinity.translate(lower_cone, 0, -width/2)
-        # upper cone
-        upper_cone = shapely.affinity.skew(disk, 0, skew, origin=origin)
-        upper_cone = shapely.affinity.translate(upper_cone, 0, width/2)
-
-        self.add_coil(0, 0, 0, 0, polygon=lower_cone, dCoil=0.5,
-                      Nt=1, cross_section='circle', label='Zfb0',
-                      part='feedback', stabilize=True)
-        self.add_coil(0, 0, 0, 0, polygon=upper_cone, dCoil=0.5,
-                      Nt=1, cross_section='circle', label='Zfb1',
-                      part='feedback', stabilize=True)
+            raise TopologyError(f'cone apex {xo:1.1f}<0 increase apex angle')
+        dL = (xmax-xo) / np.sin(apex)
+        dCoil = dL / n_subcoil
+        # add conical coils
+        for i in range(2):
+            self.add_shell([xo, xmax],
+                           [zo, zo + (-1)**i * (xmax-xo) / np.tan(apex)],
+                           dt=self.dPlasma, dCoil=dCoil, dShell=0,
+                           label='Zfb', feedback=True)
         self.add_mpc(self.coil.index[-2:], -1)
-        '''
-        factor = np.linspace(0.5, 1, 5)
-        for f in factor:
-            self.add_coil(f*ro, [zo - f*dz, zo + f*dz], 0.5, 0.5, dCoil=0.5,
-                          Nt=1, cross_section='circle', label='stabilize',
-                          part='stabilize', stabilize=True)
-        label = [f'stabilize_{i}' for i in range(2*len(factor))]
-        sign = [(-1)**i for i in range(2*len(factor))]
-        print(len(label), sign[1:])
-        self.add_mpc(label, sign[1:])
-        '''
+
 
     @property
     def plasma_boundary(self):

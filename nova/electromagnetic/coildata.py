@@ -498,12 +498,12 @@ class CoilData():
 
         Parameters
         ----------
-        index : array-like, shape(n,)
+        index : array-like, shape(nP,)
             ionization index for plasma filament bundle, shape(nP,).
 
         Returns
         -------
-        _ionize_index : array-like, shape(nP,)
+        _ionize_index : array-like, shape(nC,)
             Ionization index.
 
         """
@@ -511,7 +511,7 @@ class CoilData():
 
     @ionize.setter
     def ionize(self, index):
-        active = np.zeros(self.nP, dtype=bool)
+        active = np.full(self.nP, False)
         active[index] = True
         self._ionize_index[self.plasma] = active
         self.Np = 1  # initalize turn number

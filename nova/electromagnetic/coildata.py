@@ -366,7 +366,7 @@ class CoilData():
         - optimize
         - plasma
         - stabilize
-        - current_update
+        - current update
 
         """
         if self.nC > 0:

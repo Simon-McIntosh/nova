@@ -10,8 +10,16 @@ ITER = ITERcoilset(coils='pf', dCoil=0.25, dPlasma=0.15, dField=0.25,
 ITER.filename = -1
 ITER.scenario = 'EOF'
 
-ITER.data['separatrix'].z += 0.1
+#ITER.data['separatrix'].z += 0.1
 ITER.separatrix = ITER.data['separatrix']
+
+ITER.current_update = 'stabilize'
+ITER.Ic = -1e6
+
+#ITER.current_update = 'full'
+#ITER.Ic = 0
+
+
 
 
 plt.set_aspect(0.8)
@@ -19,10 +27,10 @@ plt.set_aspect(0.8)
 for __ in range(8):
     ITER.update_separatrix(alpha=1, plot=True)
 
-ITER.plot(True)
-ITER.plot_null()
+ITER.plot(True, stabilize=False)
+#ITER.plot_null()
 #ITER.plasmagrid.plot_topology(True)
-ITER.plasmagrid.plot_flux()
+ITER.plasmagrid.plot_flux(levels=101)
 
 
 #ITER.plot_data(['firstwall', 'divertor'])
@@ -30,6 +38,5 @@ ITER.plasmagrid.plot_flux()
 
 #ITER.field.plot()
 #ITER.plasmafilament.plot()
-
 
 

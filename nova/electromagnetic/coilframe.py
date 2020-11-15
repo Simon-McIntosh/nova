@@ -198,11 +198,13 @@ class CoilFrame(DataFrame, CoilData):
             self.loc[name, 'patch'] = None  # re-generate coil patch
 
     def add_mpc(self, name, factor=1):
-        '''
-        define multi-point constraint linking a set of coils
+        """
+        Define multi-point constraint linking a set of coils.
+
         name: list of coil names (present in self.index)
         factor: inter-coil coupling factor
-        '''
+
+        """
         if not is_list_like(name):
             raise IndexError(f'name: {name} must be list like')
         elif len(name) == 1:

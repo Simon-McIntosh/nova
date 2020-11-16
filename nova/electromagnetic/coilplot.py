@@ -104,7 +104,7 @@ class CoilPlot:
         plt.tight_layout()
         if plasma and self.coil.nP > 0:
             self.label_plasma(ax)
-        if plasma_boundary and self.plasma_boundary:
+        if plasma_boundary and hasattr(self, 'plasma_boundary'):
             plt.plot(*self.plasma_boundary.boundary.xy, 'C0')
         if label or current or field:
             self.label_coil(ax, label, current, field)

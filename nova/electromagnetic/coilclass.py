@@ -90,7 +90,7 @@ class CoilClass(CoilSet):
     def scenario(self, to):
         self.to = to  # time or keypoint
         self.d2.to = to  # update scenario data (time or keypoint)
-        #self.d3.to = self.d2.to  # update forcefield data
+        self.d3.to = self.d2.to  # update forcefield data
         self.t = self.d2.to  # time instance
         self.update_plasma()
         self.Ic = self.d2.Ic.to_dict()

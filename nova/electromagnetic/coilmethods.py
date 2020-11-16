@@ -383,7 +383,8 @@ class CoilMethods:
                 elif var in subcoil._additional_columns:
                     subcoil_kwargs[var] = mesh[var]
             _subcoil[i] = subcoil.get_coil(
-                    *subcoil_args, name=name, coil=name, **subcoil_kwargs)
+                    *subcoil_args, label=name, coil=name, delim='_',
+                    **subcoil_kwargs)
             _subcoil[i].update_polygon()
             # back-propagate fillament attributes to coil
             coil.loc[name, ['Nf', 'nx', 'nz', 'dCoil']] = \

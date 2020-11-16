@@ -147,7 +147,7 @@ class CoilFrame(DataFrame, CoilData):
     def get_coil(self, *args, **kwargs):
         mpc = kwargs.pop('mpc', False)
         args, kwargs = self._check_arguments(*args, **kwargs)
-        delim = kwargs.pop('delim', '_')
+        delim = kwargs.pop('delim', '')
         label = kwargs.pop('label', 'Coil')
         name = kwargs.pop('name', None)
         data = self._extract_data(*args, **kwargs)

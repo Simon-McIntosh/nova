@@ -34,8 +34,9 @@ def test_IM_field(plot=False):
     assert allclose(vector.values,
                     cc.field.frame.loc[vector.index, 'B'].values,
                     atol=0.25)
+    return cc
 
 
 if __name__ == '__main__':
 
-    test_IM_field(plot=True)
+    cc = test_IM_field(plot=False)

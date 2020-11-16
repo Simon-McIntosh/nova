@@ -6,6 +6,7 @@ Methods inserted into CoilSet class. Requies CoilMethods.
 """
 import operator
 import itertools
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -85,17 +86,48 @@ class PlasmaMethods:
         self.plasmagrid.cluster_factor = 1.5*grid_factor
         self.plasmafilament.add_plasma()
 
-    def _add_vertical_stabilization_coils(self, apex=25, n_subcoil=25):
+    def _add_vertical_stabilization_coils(self, apex=25, dz_factor=1.1,
+                                          n_subcoil=25):
+        """
+        Add vertical stabilization coils.
 
+        Pair of truncated cone shaped coils inserted on high field side of
+        plasma. Coil pair linked with a multi-point constraint (mpc) with the
+        upper coil constrained in current with a vaule equal to the negated
+        lower coil current (Iupper=-Ilower). Coil geometroy chosen to generate
+        roughly uniform radial field across the entire plasma rejoin.
+
+
+        Parameters
+        ----------
+        apex : float, optional
+            Apex angle of coil cone in degrees. The default is 25.
+        dz_factor : float, optional
+            Multiplicative factor applied to the plasma boundary vertical
+            extent. The default is 1.1.
+        n_subcoil : int, optional
+            Number of subcoils to discritize each coil cone. The default is 25.
+
+        Returns
+        -------
+        None.
+
+        """
         apex *= np.pi/180
         bounds = self.plasma_boundary.bounds
         zlim = bounds[1::2]
         dz = zlim[1]-zlim[0]
         zo = np.mean(zlim)
         xmax = 1.5*bounds[2]
-        xo = bounds[0] - 1.1*(dz/2) * np.tan(apex)
+        xo = bounds[0] - dz_factor * dz/2 * np.tan(apex)
         if xo < 0:
-            raise TopologyError(f'cone apex {xo:1.1f}<0 increase apex angle')
+            apex_min = np.arctan(bounds[0] / (dz_factor * dz/2))
+            warn_txt = f'Cone apex {xo: 1.2f} < 0\n'
+            warn_txt += 'Decreasing apex angle '
+            warn_txt += fr'from {apex * 180/np.pi}$^o$ '
+            warn_txt += fr'to {apex_min * 180/np.pi}$^o$'
+            warnings.warn(warn_txt)
+            xo, apex = 0, apex_min
         dL = (xmax-xo) / np.sin(apex)
         dCoil = dL / n_subcoil
         # add conical coils
@@ -105,7 +137,6 @@ class PlasmaMethods:
                            dt=self.dPlasma, dCoil=dCoil, dShell=0,
                            label='Zfb', feedback=True)
         self.add_mpc(self.coil.index[-2:], -1)
-
 
     @property
     def plasma_boundary(self):
@@ -238,11 +269,12 @@ class PlasmaMethods:
             polygon = shapely.geometry.Polygon(
                 pygeos.get_coordinates(polygon))
         # intersection of separatrix and plasma_boundary
-        separatrix = polygon.intersection(self.plasma_boundary)
+        #separatrix = polygon.intersection(self.plasma_boundary)
+        separatrix = polygon
         self._separatrix = separatrix
         # update coil - polygon and polygon derived attributes
-        self.coil.loc['Plasma', 'polygon'] = separatrix
-        self.coil.update_polygon(index='Plasma')
+        #self.coil.loc['Plasma', 'polygon'] = separatrix
+        #self.coil.update_polygon(index='Plasma')
         # ubdate subcoil
         self.subcoil.ionize = self.plasma_tree.query(
             pygeos.io.from_shapely(separatrix), predicate='contains')
@@ -253,6 +285,8 @@ class PlasmaMethods:
         if self.plasmagrid._update_topology_index:
             Opoint = self.plasmagrid.Opoint
             if self.plasmagrid.nO == 0:
+                self.plasmagrid.plot_flux()
+                self.plasmagrid.plot_topology(True)
                 raise TopologyError('no Opoints found')
             elif self.plasmagrid.nO == 1:
                 self._Oindex = 0
@@ -348,12 +382,16 @@ class PlasmaMethods:
             if gap <= max_gap and len(ct) >= 3:  # contour closed
                 if gap > 0:  # close gap
                     dX = np.linalg.norm(self.Xpoint-ct[0])
+                    ct = np.append(ct, ct[:1], axis=0)
+                    '''
                     if dX < max_gap and alpha == 1:
                         Xpoint = self.Xpoint.reshape(-1, 2)
-                        ct = np.append(Xpoint, np.append(ct, Xpoint, axis=0),
-                                       axis=0)
+                        #ct = np.append(Xpoint, np.append(ct, Xpoint, axis=0),
+                        #               axis=0)
+                        ct = np.append(ct, ct[:1], axis=0)
                     else:
                         ct = np.append(ct, ct[:1], axis=0)
+                    '''
                 closed_contour.append(ct)
         return closed_contour
 
@@ -375,7 +413,6 @@ class PlasmaMethods:
             polygon = shapely.geometry.Polygon(cc)
             if polygon.contains(Opoint):
                 self.separatrix = polygon
-                self.separatrix = self.separatrix
                 break
         if not self._separatrix:  # separatrix not found
             self.plot()

@@ -1,4 +1,6 @@
 import pandas as pd
+import shapely.geometry
+import numpy as np
 
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.IO.read_scenario import scenario_data
@@ -6,13 +8,16 @@ from nova.electromagnetic.IO.read_scenario import forcefield_data
 
 
 class CoilClass(CoilSet):
-    '''
-    CoilClass:
-        - implements methods to manage input and
-            output of data to/from the CoilSet class
-        - provides interface to eqdsk files containing coil data
-        - provides interface to DINA scenaria data
-    '''
+    """
+    Extends CoilSet.
+
+    - Implements methods to manage input and output to the CoilSet class.
+
+    - Provides interface to eqdsk files containing coil data.
+
+    - Provides interface to DINA scenaria data.
+
+    """
 
     def __init__(self, *args, eqdsk=None, filename=None, **kwargs):
         CoilSet.__init__(self, *args, **kwargs)  # inherent from CoilSet
@@ -20,7 +25,7 @@ class CoilClass(CoilSet):
         self.initalize_functions()
         self.initalize_metadata()
         self.filename = filename
-        
+
     def add_eqdsk(self, eqdsk):
         if eqdsk:
             coil = self.coil.get_coil(
@@ -64,25 +69,39 @@ class CoilClass(CoilSet):
 
     @property
     def scenario(self):
-        '''
-        return scenario metadata
-        '''
+        """
+        Manage scenario metadata
+
+        Parameters
+        ----------
+        to : float or str
+            Update scenario time input as time or feature_keypoint.
+
+        Returns
+        -------
+        metadata : pandas.Series
+            Metadata of current time instance.
+
+        """
         return pd.Series({'filename': self.scenario_filename,
                           'to': self.d2.to, 'ko': self.d2.ko})
 
     @scenario.setter
     def scenario(self, to):
-        '''
-        Attributes:
-            to (float): input time
-            to (str): feature_keypoint
-        '''
         self.to = to  # time or keypoint
         self.d2.to = to  # update scenario data (time or keypoint)
-        self.d3.to = self.d2.to # update forcefield data
+        #self.d3.to = self.d2.to  # update forcefield data
         self.t = self.d2.to  # time instance
-        #self.update_plasma()
+        self.update_plasma()
         self.Ic = self.d2.Ic.to_dict()
-        self.Ip = self.d2.Ip
 
-
+    def update_plasma(self, r=1.5):
+        rms, z = self.d2.vector['Rcur'], self.d2.vector['Zcur']
+        if rms > 0:
+            x = np.sqrt(rms**2 - (2*r)**2 / 16)  # rms to x, circle
+            polygon = shapely.geometry.Point(x, z).buffer(r)
+            self.separatrix = polygon
+            self.Ip = self.d2.Ip
+        else:
+            self.Ip = 0
+            self.Np = 0

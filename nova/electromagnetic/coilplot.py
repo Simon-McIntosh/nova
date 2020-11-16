@@ -34,7 +34,7 @@ class CoilPlot:
         for i, (x, z, dx, dz, cross_section,
                 current_patch, polygon, part) in enumerate(
                 coil.loc[:, ['x', 'z', 'dx', 'dz', 'cross_section', 'patch',
-                              'polygon', 'part']].values):
+                             'polygon', 'part']].values):
             if overwrite or np.array(pd.isnull(current_patch)).any():
                 if isinstance(polygon, shapely.geometry.Polygon):
                     patch[i] = [PolygonPatch(polygon)]

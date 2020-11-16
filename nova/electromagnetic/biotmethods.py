@@ -423,10 +423,10 @@ class Grid(BiotSet, Topology):
         None.
 
         """
+        CoilMatrix.solve_biot(self)
         if self.target.nT > 0:
             for attribute in self._interpolate_attributes:
                 self._evaluate_spline(attribute)
-        CoilMatrix.solve_biot(self)
 
     @property
     def grid_boundary(self):

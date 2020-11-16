@@ -348,6 +348,7 @@ class CoilMatrix():
         None.
 
         """
+        self.assemble_biotset()
         if self.target.nT == 0:
             'Return with warning if targets not set.'
             warn('Targets not set in:\n'

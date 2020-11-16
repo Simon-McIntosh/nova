@@ -36,7 +36,7 @@ def test_circle(plot=False):
 def test_polygon_separatrix(plot=False):
     cs = CoilSet(dPlasma=0.25)
     cs.add_plasma([[1, 5, 5, 1, 1], [1, 1, 5, 5, 1]])
-    cs.separatrix = shapely.geometry.Point(4, 3).buffer(1)
+    cs.separatrix = shapely.geometry.Point(3, 3).buffer(2)
     if plot:
         cs.plot(True)
     assert np.isclose(cs.subcoil.dA[cs.subcoil.plasma][cs.ionize_index].sum(),

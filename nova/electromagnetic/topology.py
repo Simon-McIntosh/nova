@@ -137,10 +137,7 @@ class Topology:
         eps_cluster = cluster_factor*dx  # max neighbour seperation in DBSCAN
         eps_unique = unique_factor*dx  # min seperation for unique nulls
         # sead nulls
-        self._Xseed, self._Oseed = list(self._Xpoint), list(self._Opoint)
-        if not self._Xseed:
-            self._Xseed = list(self.plasma_vertex)
-        self._Oseed.extend(list(self.coil_center))
+        self._seed_nulls()
         # (re)initialize null point arrays
         self._Xpoint, self._Opoint = [], []
         # field null clusters
@@ -187,6 +184,13 @@ class Topology:
         concave = p[np.argmax(np.abs(p))] < 0
         xn, zn = self.local_Opoint((xc, zc), concave)
         return xn, zn
+
+    def _seed_nulls(self):
+        self._Xseed, self._Oseed = list(self._Xpoint), list(self._Opoint)
+        if not self._Xseed:
+            self._Xseed = list(self.plasma_vertex)
+        if not self._Oseed:
+            self._Oseed = list(self.coil_center)
 
     @property
     def coil_center(self):
@@ -726,8 +730,8 @@ class Topology:
                         np.min(abs(np.array([Pmax, Pmin]))))
         if np.isclose(Pmax, 0) or np.isclose(Pmin, 0):
             raise TopologyError('Field null froms cylinder or plane surface')
-        elif Pratio > 100:
-            return '-'
+        #elif Pratio > 1e4:
+        #    return '-'
         elif np.sign(Pmax) == np.sign(Pmin):
             return 'O'
         else:
@@ -853,6 +857,7 @@ class Topology:
         return opt_instance
 
     def _field(self, x, grad):
+        plt.plot(*x, 'C3.')
         if grad.size > 0:
             grad[:] = self._gradient(x, 'B')
         return self.interpolate('B').ev(*x).item()

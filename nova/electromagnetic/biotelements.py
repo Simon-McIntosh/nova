@@ -31,6 +31,62 @@ class geometric_mean_radius:
         return r
 
 
+class SingleTurn:
+    """Self-inductance methods for a single turn circular coil."""
+
+    def __init__(self, x, cross_section='circle'):
+        self.x = x  # coil major radius
+        self.cross_section = cross_section  # coil cross_section
+        self.cross_section_factor = \
+            geometric_mean_radius.gmr_factor[self.cross_section]
+
+    def minor_radius(self, L, bounds=(0, 1)):
+        '''
+        inverse method, solve coil minor radius for given inductance
+
+        Attributes:
+            L (float): target inductance Wb
+            bounds (tuple of floats): bounds fraction of major radius
+
+        Returns:
+            dr (float): coil minor radius
+        '''
+        self.Lo = L
+        r = minimize_scalar(self.flux_err, method='bounded',
+                            bounds=bounds, args=(self.Lo),
+                            options={'xatol': 1e-12}).x
+        gmr = self.x * r
+        dr = gmr / self.cross_section_factor
+        return dr
+
+    def flux_err(self, r, *args):
+        gmr = r * self.x
+        L_target = args[0]
+        L = self.flux(gmr)
+        return (L-L_target)**2
+
+    def flux(self, gmr):
+        '''
+        calculate self-induced flux though a single-turn coil
+
+        Attributes:
+            a (float): coil major radius
+            gmr (float): coil cross-section geometric mean radius
+
+        Retuns:
+            L (float): self inductance of coil
+        '''
+        if self.x > 0:
+            L = self.x * ((1 + 3 * gmr**2 / (16 * self.x**2)) *
+                          np.log(8 * self.x / gmr) -
+                          (2 + gmr**2 / (16 * self.x**2)))
+        else:
+            L = 0
+        return biot_savart.mu_o * L  # Wb
+
+
+
+
 class Filament:
     """Compute interaction using complete circular filaments."""
 

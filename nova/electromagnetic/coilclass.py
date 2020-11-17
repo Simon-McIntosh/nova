@@ -90,18 +90,19 @@ class CoilClass(CoilSet):
     def scenario(self, to):
         self.to = to  # time or keypoint
         self.d2.to = to  # update scenario data (time or keypoint)
-        self.d3.to = self.d2.to  # update forcefield data
+        #self.d3.to = self.d2.to  # update forcefield data
         self.t = self.d2.to  # time instance
-        self.update_plasma()
+        if self._update_plasma:
+            self.update_plasma_position()
         self.Ic = self.d2.Ic.to_dict()
+        self.Ip = self.d2.Ip
 
-    def update_plasma(self, r=1.5):
+    def update_plasma_position(self, r=1.5):
         rms, z = self.d2.vector['Rcur'], self.d2.vector['Zcur']
         if rms > 0:
             x = np.sqrt(rms**2 - (2*r)**2 / 16)  # rms to x, circle
             polygon = shapely.geometry.Point(x, z).buffer(r)
             self.separatrix = polygon
-            self.Ip = self.d2.Ip
         else:
             self.Ip = 0
             self.Np = 0

@@ -244,6 +244,7 @@ class CoilMethods:
         None.
 
         """
+        kwargs['delim'] = kwargs.get('delim', '')
         index = self.coil.add_coil(*args, iloc=iloc, **kwargs)
         if subcoil:
             self.meshcoil(index=index)
@@ -494,14 +495,12 @@ class CoilMethods:
                             zm_.append(p_.centroid.y)
                             dA_.append(p_.area)
                             cs_.append('polygon')
-
         Nf = len(xm_)  # filament number
         if Nf == 0:  # no points found within polygon (skin)
             xm_, zm_, dl_, dt_ = coil.x, coil.z, coil.dl, coil.dt
             Nf = 1
         # constant current density
         Nt_ = coil['Nt']*np.array(dA_) / np.sum(dA_)
-
         # subcoil bundle
         mesh.update({'x': xm_, 'z': zm_, 'nx': nx, 'nz': nz,
                      'dl': dl_, 'dt': dt_, 'Nt': Nt_, 'Nf': Nf,

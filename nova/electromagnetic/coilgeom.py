@@ -38,14 +38,14 @@ class ITERcoilset(CoilClass):
 
     def load_coilset(self, **kwargs):
         read_txt = kwargs.pop('read_txt', self.read_txt)
-        filename, coils, kwargs = self.select_coils(**kwargs)
-        filepath = self._filepath(filename)
+        self.coilname, coils, kwargs = self.select_coils(**kwargs)
+        filepath = self._filepath(self.coilname)
         if not os.path.isfile(filepath + '.pk') or read_txt:
             self.build_coilset(coils, **kwargs)
-            self.save_coilset(filename)
+            self.save_coilset(self.coilname)
         else:
-            CoilClass.load_coilset(self, filename)
-            self.rebuild(coils, filename, **kwargs)
+            CoilClass.load_coilset(self, self.coilname)
+            self.rebuild(coils, self.coilname, **kwargs)
 
     def update_attribute(self, attribute):
         return getattr(self, attribute) != \
@@ -61,8 +61,8 @@ class ITERcoilset(CoilClass):
         coils = list(np.unique(np.sort(coils)))
         if 'vs' in coils and 'vsj' in coils:
             coils.remove('vs')  # remove vs if selection is over-defined
-        filename = '_'.join(coils)
-        return filename, coils, kwargs
+        coilname = '_'.join(coils)
+        return coilname, coils, kwargs
 
     def build_coilset(self, coils, **kwargs):
         if 'pf' in coils:  # pf coilset

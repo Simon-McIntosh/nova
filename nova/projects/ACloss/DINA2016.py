@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 from nova.electromagnetic.coilgeom import ITERcoilset
-from nova.electromagnetic.acloss import CoilDataArray
+from nova.electromagnetic.acloss import CoilDataArray, CoilDataSet
 
 from nova.utilities.pyplot import plt
 
@@ -28,10 +28,13 @@ for i, t in enumerate(cda.time):
     ITER.scenario = t
     cda.data[i] = ITER.forcefield.B
 
-cda.save('B_2016', 'Poloidal field values from DINA 2016-01 v1.1',
+cds = CoilDataSet()
+cds['B'] = cda.data
+
+cds.save('B_2016', 'Poloidal field values from DINA 2016-01 v1.1',
          code='Nova', coilname=ITER.coilname,
          dCoil=ITER.dCoil, dPlasma=ITER.dPlasma,
-         replace=False)
+         replace=True)
 
 print(f'elapsed {time.perf_counter() - tick:1.3f}s')
 

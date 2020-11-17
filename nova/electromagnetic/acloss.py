@@ -6,7 +6,7 @@ from warnings import warn
 import intake
 import yaml
 import hvplot
-from xarray import DataArray, Dataset
+from xarray import DataArray, Dataset, open_dataset
 import numpy as np
 
 from nova.definitions import root_dir
@@ -355,4 +355,7 @@ if __name__ == '__main__':
     '''
 
     ac = DataIO()
-    data = ac.catalog['B_2016'].read()
+
+    data = open_dataset(ac.catalog['B_2016'].urlpath)
+    #data = ac.catalog['B_2016'].read()
+    data.close()

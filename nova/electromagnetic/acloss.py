@@ -202,7 +202,7 @@ class DataIO:
             datafile = catalog['sources'][source_name]['args']['urlpath']
             remove_file = os.path.isfile(datafile)  # if present
             if replace:  # and diffrent from linked referance
-                remove_file &= datafile != self.source.urlpath
+                remove_file &= (datafile != self.source.urlpath)
             if remove_file:
                 os.remove(datafile)
             if not replace:
@@ -241,7 +241,7 @@ class DataIO:
 class CoilDataArray(DataIO):
     """Manage CoilSet data with an xarray.DataArray."""
 
-    _data_attributes = ['dx', 'dz', 'Nt']
+    _data_attributes = ['dx', 'dz', 'Nt', 'coil']
 
     def __init__(self, time, target, variable_name, **kwargs):
         DataIO.__init__(self)
@@ -280,7 +280,7 @@ class CoilDataArray(DataIO):
         data = np.zeros((nt, nT))
         # extract attributes
         indices = target._reduction_index  # Paired indices, slices to reduce.
-        attrs = {'nC': target._nC, 'indices': indices}
+        attrs = {'nC': target._nC, 'nT': target.nT, 'indices': indices}
         for attribute in self._data_attributes:
             if attribute in target._dataframe_attributes:
                 value = getattr(target, attribute)[indices]
@@ -289,6 +289,8 @@ class CoilDataArray(DataIO):
             else:
                 raise IndexError(f'attribute {attribute} not present in '
                                  f'target: {target.columns}')
+            if value.dtype == 'object':
+                value = value.astype('S10')  # convert to character array
             attrs[attribute] = value
         attrs.update({'rms': target.rms, 'x': target.x, 'z': target.z})
         self.data = DataArray(data, dims=dims, coords=coords,

@@ -236,6 +236,9 @@ def data_mine(path, file, xlim, ylim, **kw):
     x_ref, = ax.plot([0], [0], 'C3s')
     y_ref, = ax.plot([0], [0], 'C4s')
 
+    if label:
+        file += f'_{label}'
+
     sample_plot(data, x_origin, y_origin, x_ref, y_ref, x_fig, y_fig,
                 ax_eq, ax, fig, path, file + '_' + label,
                 xscale=xscale, yscale=yscale)
@@ -245,7 +248,9 @@ def get_filename(path, file, **kwargs):
     date = kwargs.get('date', datetime.date.today().strftime('%Y_%m_%d'))
     label = kwargs.get('label', '')
     file = stripfile(file)
-    filename = path + 'imagedata/' + date + '_' + file + '_' + label
+    filename = path + 'imagedata/' + date + '_' + file
+    if label:
+        filename += f'_{label}'
     return filename
 
 

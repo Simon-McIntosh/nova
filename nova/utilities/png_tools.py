@@ -240,7 +240,7 @@ def data_mine(path, file, xlim, ylim, **kw):
         file += f'_{label}'
 
     sample_plot(data, x_origin, y_origin, x_ref, y_ref, x_fig, y_fig,
-                ax_eq, ax, fig, path, file + '_' + label,
+                ax_eq, ax, fig, path, file,
                 xscale=xscale, yscale=yscale)
 
 

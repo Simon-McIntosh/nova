@@ -30,6 +30,9 @@ def _H(x):
 
 def log_rms(x):
     H = _H(x)
+    ##### implement here
+    w, mag = scipy.signal.bode(sys, w=omega)[:2]
+
     err = np.sqrt(np.mean((np.log10(p) - np.log10(H))**2))
     return err
 
@@ -97,7 +100,10 @@ plt.plot(omega, P*omega, label='LTI')
 
 #plt.ylim([0.1, 100])
 
-w, mag = scipy.signal.bode(sys)[:2]
+w, mag = scipy.signal.bode(sys, w=omega)[:2]
 plt.figure()
 plt.plot(omega, H, label='fit')
-plt.plot(w, 10**(mag/10), label='fit')
+plt.plot(w, 10**(mag/20), label='bode')
+plt.xscale('log')
+plt.yscale('log')
+plt.legend()

@@ -413,6 +413,8 @@ class SultanPostProcess(FTPSultan):
         self._side = None
         self._rawdata = None
         self._lowpassdata = None
+        self._heat_threshold = 0.95
+        self._heat_index = None
 
     @staticmethod
     def _initialize_dataframe():
@@ -425,7 +427,7 @@ class SultanPostProcess(FTPSultan):
             Empty dataframe with time index and default columns names.
 
         """
-        variables = [('t', 's'), ('mdot', 'kg/s'),
+        variables = [('t', 's'), ('mdot', 'kg/s'), ('Ips', 'A'),
                      ('Tin', 'K'), ('Tout', 'K'),
                      ('Pin', 'Pa'), ('Pout', 'Pa'),
                      ('hin', 'J/Kg'), ('hout', 'J/Kg'),
@@ -450,7 +452,8 @@ class SultanPostProcess(FTPSultan):
 
         """
         return pandas.Series({'raw': self._rawdata is None,
-                              'lowpass': self._lowpassdata is None})
+                              'lowpass': self._lowpassdata is None,
+                              'heat_index': self._heat_index is None})
 
     @postprocess.setter
     def postprocess(self, postprocess):
@@ -523,6 +526,7 @@ class SultanPostProcess(FTPSultan):
         data = self._initialize_dataframe()
         data['t'] = self.sultandata['Time']
         data['mdot'] = self.sultandata[f'dm/dt {self.side}'] * 1e-3
+        data['Ips'] = self.sultandata['PS EEI (I)']
         for end in ['in', 'out']:
             data[f'T{end}'] = self.sultandata[f'T {end} {self.side}']
             data[f'P{end}'] = self.sultandata[f'P {end} {self.side}'] * 1e5
@@ -532,7 +536,7 @@ class SultanPostProcess(FTPSultan):
             windowlength = int(2.5 / (dt*freq))
             if windowlength % 2 == 0:
                 windowlength += 1
-            for attribute in ['mdot', 'Tin', 'Tout', 'Pin', 'Pout']:
+            for attribute in ['mdot', 'Ips', 'Tin', 'Tout', 'Pin', 'Pout']:
                 data[attribute] = scipy.signal.savgol_filter(
                     np.squeeze(data[attribute]), windowlength, polyorder=3)
         for end in ['in', 'out']:  # Calculate enthapy
@@ -541,9 +545,8 @@ class SultanPostProcess(FTPSultan):
         # net heating
         data['Q'] = data[('mdot', 'kg/s')] * \
             (data[('hout', 'J/Kg')] - data[('hin', 'J/Kg')])
-        # normalize
+        # normalize heating by |Bdot|**2
         Ipulse = float(re.findall(r'\d+', self.shot[('Ipulse', 'A')])[0])
-        print(Ipulse)
         Bpulse = Ipulse * 0.2/230
         freq = self.shot[('P. Freq', 'Hz')]
         omega = 2*np.pi*freq
@@ -551,18 +554,38 @@ class SultanPostProcess(FTPSultan):
         data['Qnorm'] = data['Q'] / Bdot**2
         return data
 
-    def _threshold(self, data, threshold=0.9):
-        """
-        Return slice of first and last indices meeting condition.
+    @property
+    def heat_threshold(self):
+        return self._heat_threshold
 
-        Condition evaluated as data > threshold * data.abs().max()
+    @heat_threshold.setter
+    def heat_threshold(self, heat_threshold):
+        if heat_threshold != self._heat_threshold:
+            self._heat_index = None
+        if heat_threshold < 0 or heat_threshold > 1:
+            raise ValueError(f'heat threshold {heat_threshold} '
+                             'must lie between 0 and 1')
+        self._heat_threshold = heat_threshold
+
+    @property
+    def heat_index(self):
+        """Return heat index, slice."""
+        if self._heat_index is None:
+            self._evaluate_heat_index()
+        return self._heat_index
+
+    def _evaluate_heat_index(self):
+        """
+        Return slice of first and last indices meeting threshold condition.
+
+        Condition evaluated as Ips.abs() > heat_threshold * Ips.abs().max()
 
         Parameters
         ----------
         data : array-like
             Data vector.
-        threshold : float, optional
-            Threshold factor applied to data.abs().max(). The default is 0.9.
+        heat_threshold : float, optional property
+            Threshold factor applied to data.abs().max(). The default is 0.95.
 
         Returns
         -------
@@ -570,10 +593,10 @@ class SultanPostProcess(FTPSultan):
             Threshold index.
 
         """
-        Imax = data.abs().max()
-        threshold_index = np.where(data.abs() > threshold*Imax)[0]
-        index = slice(threshold_index[0], threshold_index[-1])
-        return index
+        Ips = self.sultandata['PS EEI (I)']
+        Imax = Ips.abs().max()
+        threshold_index = np.where(Ips.abs() >= self.heat_threshold*Imax)[0]
+        self._heat_index = slice(threshold_index[0], threshold_index[-1])
 
     def plot_single(self, variable, ax=None, lowpass=False):
         if lowpass:
@@ -584,7 +607,24 @@ class SultanPostProcess(FTPSultan):
             raise IndexError(f'variable {variable} not in {data.columns}')
         if ax is None:
             ax = plt.gca()
-        ax.plot(data.t, data[variable])
+        bg_color = 0.4 * np.ones(3) if lowpass else 'lightgray'
+        color = 'C3' if lowpass else 'C0'
+        label = 'lowpass' if lowpass else 'raw'
+        ax.plot(data.t, data[variable], color=bg_color)
+        ax.plot(data.t[self.heat_index], data[variable][self.heat_index],
+                color=color, label=label)
+        ax.legend()
+        ax.set_xlabel('$t$ s')
+        ax.set_ylabel('$\hat{P}$ W')
+        plt.despine()
+
+    def title(self, ax=None):
+        if ax is None:
+            ax = plt.gca()
+        I = self.shot[('Ipulse', 'A')]
+        f = self.shot[('P. Freq', 'Hz')]
+        ax.set_title(f'$I_{{ps}}$ = {I}(2$\pi$ {f} $t$)')
+
 
 
 if __name__ == '__main__':
@@ -592,13 +632,13 @@ if __name__ == '__main__':
     spp = SultanPostProcess('CSJA_7')
 
     spp.testname = 0
-    spp.shot = 13
+    spp.shot = 16
     spp.side = 'left'
-    spp.lowpassdata
-    #sultan = spp.load_datafile('AC Loss before DC', 12)
-    #sultanmetadata
 
-    #SultanPostProcess
 
     spp.plot_single('Qnorm')
     spp.plot_single('Qnorm', lowpass=True)
+    spp.title()
+    #plt.figure()
+    #spp.plot_single('Ips')
+    #spp.plot_single('Ips', lowpass=True)

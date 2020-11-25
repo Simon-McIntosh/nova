@@ -7,6 +7,9 @@ import ftputil
 import pandas
 import numpy as np
 import scipy.signal
+import scipy.integrate
+import scipy.interpolate
+import scipy.optimize
 import CoolProp.CoolProp as CoolProp
 
 from nova.definitions import root_dir
@@ -29,6 +32,7 @@ class FTPSultan:
         self._reload = True  # reload data from file
         self._testmatrix = {}
         self._note = {}
+        self._sultandata = None
         self.load_testmatrix()
 
     @property
@@ -89,7 +93,7 @@ class FTPSultan:
     @property
     def testmatrix(self):
         """Return testmatrix keys as pandas.Series, read-only."""
-        return pandas.Series(self._testmatrix.keys())
+        return pandas.Series(list(self._testmatrix.keys()))
 
     @property
     def testname(self):
@@ -297,7 +301,7 @@ class FTPSultan:
                         _testplan_index[previouslabel].append(i-1)
                     previouslabel = label[0]
         if len(_testplan_index) > 0:
-            _testplan_index[previouslabel].append(i)
+            _testplan_index[previouslabel].append(len(index)-1)
         # store test matrix data
         previouscolumns = None
         with pandas.ExcelFile(testplan) as xls:
@@ -431,7 +435,7 @@ class SultanPostProcess(FTPSultan):
                      ('Tin', 'K'), ('Tout', 'K'),
                      ('Pin', 'Pa'), ('Pout', 'Pa'),
                      ('hin', 'J/Kg'), ('hout', 'J/Kg'),
-                     ('Q', 'W')]
+                     ('Qdot', 'W'), ('Qdot_norm', 'W')]
         columns = pandas.MultiIndex.from_tuples(variables)
         return pandas.DataFrame(columns=columns)
 
@@ -508,7 +512,7 @@ class SultanPostProcess(FTPSultan):
 
     def _extract_data(self, lowpass=False):
         """
-        Extract relivant data variables and calculate Q.
+        Extract relivant data variables and calculate Qdot.
 
         Parameters
         ----------
@@ -543,7 +547,7 @@ class SultanPostProcess(FTPSultan):
             T, P = data[f'T{end}'].values, data[f'P{end}'].values
             data[f'h{end}'] = CoolProp.PropsSI('H', 'T', T, 'P', P, 'Helium')
         # net heating
-        data['Q'] = data[('mdot', 'kg/s')] * \
+        data['Qdot'] = data[('mdot', 'kg/s')] * \
             (data[('hout', 'J/Kg')] - data[('hin', 'J/Kg')])
         # normalize heating by |Bdot|**2
         Ipulse = float(re.findall(r'\d+', self.shot[('Ipulse', 'A')])[0])
@@ -551,11 +555,29 @@ class SultanPostProcess(FTPSultan):
         freq = self.shot[('P. Freq', 'Hz')]
         omega = 2*np.pi*freq
         Bdot = omega*Bpulse
-        data['Qnorm'] = data['Q'] / Bdot**2
+        data['Qdot_norm'] = data['Qdot'] / Bdot**2
         return data
 
     @property
     def heat_threshold(self):
+        """
+        Manage heat threshold parameter.
+
+        Parameters
+        ----------
+        heat_threshold : float
+            Heating idexed as Ips.abs > heat_threshold * Ips.abs.max.
+
+        Raises
+        ------
+        ValueError
+            heat_threshold must lie between 0 and 1.
+
+        Returns
+        -------
+        heat_threshold : float
+
+        """
         return self._heat_threshold
 
     @heat_threshold.setter
@@ -615,7 +637,7 @@ class SultanPostProcess(FTPSultan):
                 color=color, label=label)
         ax.legend()
         ax.set_xlabel('$t$ s')
-        ax.set_ylabel('$\hat{P}$ W')
+        ax.set_ylabel(r'$\hat{P}$ W')
         plt.despine()
 
     def title(self, ax=None):
@@ -623,8 +645,83 @@ class SultanPostProcess(FTPSultan):
             ax = plt.gca()
         I = self.shot[('Ipulse', 'A')]
         f = self.shot[('P. Freq', 'Hz')]
-        ax.set_title(f'$I_{{ps}}$ = {I}(2$\pi$ {f} $t$)')
+        ax.set_title(rf'$I_{{ps}}$ = {I}(2$\pi$ {f} $t$)')
 
+    def heat_curve(self):
+        t = self.lowpassdata.t[self.heat_index].values
+        Qdot = self.lowpassdata['Qdot'][self.heat_index].values
+        Te = np.mean([self.lowpassdata['Tin'][self.heat_index].values,
+                      self.lowpassdata['Tout'][self.heat_index].values],
+                     axis=0)
+        # offset time, power
+        t -= t[0]
+        Qdot -= Qdot[0]
+        # squeeze unit dimensions
+        t, Te, Qdot = np.squeeze(t), np.squeeze(Te), np.squeeze(Qdot)
+        return t, Te, Qdot
+
+    def cool_curve(self):
+
+        f = self.shot[('P. Freq', 'Hz')]
+
+        t_dwell = 10  # dwell time after max heating
+
+        t = self.lowpassdata[('t', 's')].values
+        Qdot = self.lowpassdata[('Qdot', 'W')].values
+
+        # start index
+        dt = np.diff(t, axis=0).mean()
+        start = Qdot.argmax() + int(t_dwell / dt)
+        # stop index
+        Qdot_max, Qdot_min = Qdot[start:].max(), Qdot[start:].min()
+        dQdot = Qdot_max - Qdot_min
+        threshold = Qdot_min + 0.1*dQdot
+        stop = start + np.where(Qdot[start:] < threshold)[0][0]
+        index = slice(start, stop)
+
+
+        #plt.plot(t[index], np.log(Q[index]))
+
+        #plt.plot(t[index], self.lowpassdata['Tout'][index])
+
+        Te = np.mean([self.lowpassdata[('Tout', 'K')],
+                      self.lowpassdata[('Tout', 'K')]], axis=0)
+        return t[index], Te[index], Qdot[index]
+
+
+class LumpedCapacitance:
+
+    def __init__(self, t, Te, Qdot):
+        self.t = t
+        self.Te = Te
+        self.Qdot = Qdot
+        self.Qnorm = np.linalg.norm(Qdot)
+        self.Te_interp = scipy.interpolate.interp1d(t, Te)
+
+    def dTdt(self, t, T, hA, C):
+        Te = self.Te_interp(t)
+        tau = C/hA
+        return -1/tau * (T-Te)
+
+    def solve(self, hA, C):
+        dTo = -1/hA * self.Qdot[0]
+        sol = scipy.integrate.solve_ivp(
+            self.dTdt, (self.t[0], self.t[-1]), [dTo],
+            args=(hA, C), t_eval=self.t, method='RK45')
+        dT = sol.y
+        Qdot = -hA * dT
+        return Qdot
+
+    def Qdot_err(self, x):
+        Qdot = self.solve(*x)
+        return np.sqrt(np.mean((Qdot-self.Qdot)**2)) / self.Qnorm
+
+    def fit_hA(self):
+        xo = [0.1, 1]
+        sol = scipy.optimize.minimize(self.Qdot_err, xo, method='COBYLA')
+        hA, C = abs(sol.x)
+        err = self.Qdot_err((hA, C))
+        return hA, C, err
 
 
 if __name__ == '__main__':
@@ -632,13 +729,38 @@ if __name__ == '__main__':
     spp = SultanPostProcess('CSJA_7')
 
     spp.testname = 0
-    spp.shot = 16
+    spp.shot = 0
     spp.side = 'left'
 
+    '''
+    testcolumns = ['B Sultan', 'dm/dt L', 'Ipulse', 'P. Freq']
+    testdata = spp.testplan.droplevel(1, axis=1).loc[:, testcolumns]
+    for s in testdata.index:
+        spp.shot = s
+        print(s)
+        lc = LumpedCapacitance(*spp.cool_curve())
+        testdata.loc[s, ['hA', 'C', 'rms']] = lc.fit_hA()
+        testdata.loc[s, 'Te_bar'] = np.mean(spp.cool_curve()[1])
+    testdata = testdata[testdata['rms'] < 0.01]
 
-    spp.plot_single('Qnorm')
-    spp.plot_single('Qnorm', lowpass=True)
-    spp.title()
+    plt.plot(testdata['dm/dt L'], testdata['C'], 'o')
+    '''
+
+    '''
+    spp.shot = 2
+    lc = LumpedCapacitance(*spp.cool_curve())
+    hA, C, err = lc.fit_hA()
+    plt.plot(lc.t, lc.Qdot)
+    plt.plot(lc.t, lc.solve(hA, C).T)
+    '''
+    t, Te, Qdot = spp.heat_curve()
+
+    plt.plot(t, Qdot)
+
+    #spp.plot_single('Qnorm')
+    #spp.plot_single('Qnorm', lowpass=True)
+    #spp.title()
     #plt.figure()
     #spp.plot_single('Ips')
     #spp.plot_single('Ips', lowpass=True)
+

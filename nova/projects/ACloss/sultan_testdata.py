@@ -14,6 +14,7 @@ import CoolProp.CoolProp as CoolProp
 
 from nova.definitions import root_dir
 from nova.utilities.pyplot import plt
+from nova.utilities.time import clock
 
 
 class FTPSultan:
@@ -138,6 +139,12 @@ class FTPSultan:
             self.reload = True
 
     @property
+    def testindex(self):
+        """Return testname index."""
+        return next((i for i, name in enumerate(self._testmatrix)
+                     if name == self.testname))
+
+    @property
     def testplan(self):
         """Return testplan, read-only."""
         return self._testmatrix[self.testname]
@@ -165,7 +172,8 @@ class FTPSultan:
         """
         if self._shot is None:
             raise IndexError('shot index not set, '
-                             f'valid range {self.shot_range}')
+                             'valid range '
+                             f'{self.shot_range[0]}-{self.shot_range[1]-1}')
         return self.testplan.iloc[self._shot, :]
 
     @shot.setter
@@ -185,7 +193,7 @@ class FTPSultan:
     def shot_range(self):
         """Return valid shot range, (int, int)."""
         index = self.testplan.index
-        return index[0], index[-1]
+        return index[0], index[-1]+1
 
     @property
     def note(self):
@@ -290,18 +298,36 @@ class FTPSultan:
         with pandas.ExcelFile(testplan) as xls:
             index = pandas.read_excel(xls, usecols=[0], header=None)
         self.testlabel = index[0][0]  # testplan name
+        self.strand = index[0][0].split()[0]
         # extract testplan indices
         _testplan_index = {}
-        previouslabel = None
+        skip_file = False
         for i, label in enumerate(index.values):
+            #label = label[0]
             if isinstance(label[0], str):
-                if label[0][:2] in ['AC', 'DC']:
-                    _testplan_index[label[0]] = [i+1]
-                    if previouslabel is not None:
-                        _testplan_index[previouslabel].append(i-1)
-                    previouslabel = label[0]
-        if len(_testplan_index) > 0:
-            _testplan_index[previouslabel].append(len(index)-1)
+                if self.strand in label[0] and _testplan_index:
+                    start_stop = 0 if _testplan_index[testname][0] == 0 else 1
+                    _testplan_index[testname][start_stop] = i
+                else:
+                    if 'test' in label[0].lower():
+                        j = i
+                        skip_file = True
+                    elif label[0].strip().capitalize() == 'File':
+                        if skip_file:
+                            skip_file = False
+                            continue
+                        j = i-1
+                    else:
+                        continue
+                    testname = index.values[j][0]
+                    if testname in _testplan_index:
+                        testname += f' {j}'
+                    _testplan_index[testname] = [0, 0]
+        for testname in list(_testplan_index.keys()):
+            if _testplan_index[testname][0] == 0:  # no files
+                _testplan_index.pop(testname)
+            elif _testplan_index[testname][1] == 0:  # single file
+                _testplan_index[testname][1] = _testplan_index[testname][0]
         # store test matrix data
         previouscolumns = None
         with pandas.ExcelFile(testplan) as xls:
@@ -309,7 +335,7 @@ class FTPSultan:
                 index = _testplan_index[label]
                 df = pandas.read_excel(
                     xls, skiprows=index[0],
-                    nrows=np.diff(index)[0], header=None)
+                    nrows=np.diff(index)[0]+1, header=None)
                 if df.iloc[0, 0] == 'File':
                     df.columns = pandas.MultiIndex.from_arrays(
                         df.iloc[:2].values)
@@ -326,8 +352,22 @@ class FTPSultan:
                     self._note[label].columns = ['Note']
                     df.drop(columns=note, inplace=True, level=0)
                 df.fillna(method='pad', inplace=True)
+                # reset index
                 df.reset_index(inplace=True)
                 df.iloc[:, 0] = df.index
+                # remove column nans
+                columns = df.columns.get_level_values(0)
+                df = df.loc[:, columns.notna()]
+                # format frequency
+                '''
+                freq = ('P. Freq', 'Hz')
+                if freq in df:
+                    if df[freq].dtype == object:
+                        print(df[freq])
+                        df[freq] = df[freq].apply(
+                            lambda x: eval(x[:-1]))
+                '''
+
                 self._testmatrix[label] = df
 
     def _get_filename(self, testname, shot):
@@ -417,8 +457,9 @@ class SultanPostProcess(FTPSultan):
         self._side = None
         self._rawdata = None
         self._lowpassdata = None
-        self._heat_threshold = 0.95
-        self._heat_index = None
+        self._Qdot_threshold = 0.95
+        self._iQdot = None
+        self._Bdot = None
 
     @staticmethod
     def _initialize_dataframe():
@@ -457,13 +498,16 @@ class SultanPostProcess(FTPSultan):
         """
         return pandas.Series({'raw': self._rawdata is None,
                               'lowpass': self._lowpassdata is None,
-                              'heat_index': self._heat_index is None})
+                              'iQdot': self._iQdot is None,
+                              'Bdot': self._Bdot is None})
 
     @postprocess.setter
     def postprocess(self, postprocess):
         if postprocess:
             self._rawdata = None
             self._lowpassdata = None
+            self._iQdot = None
+            self._Bdot = None
 
     @property
     def rawdata(self):
@@ -549,64 +593,104 @@ class SultanPostProcess(FTPSultan):
         # net heating
         data['Qdot'] = data[('mdot', 'kg/s')] * \
             (data[('hout', 'J/Kg')] - data[('hin', 'J/Kg')])
-        # normalize heating by |Bdot|**2
-        Ipulse = float(re.findall(r'\d+', self.shot[('Ipulse', 'A')])[0])
-        Bpulse = Ipulse * 0.2/230
-        freq = self.shot[('P. Freq', 'Hz')]
-        omega = 2*np.pi*freq
-        Bdot = omega*Bpulse
-        data['Qdot_norm'] = data['Qdot'] / Bdot**2
+        # normalize Qdot heating by |Bdot|**2
+        data['Qdot_norm'] = data['Qdot'] / self.Bdot**2
         return data
 
     @property
-    def heat_threshold(self):
+    def Bdot(self):
+        """Return field rate amplitude."""
+        if self._Bdot is None:
+            self._evaluate_Bdot()
+        return self._Bdot
+
+    @property
+    def Be(self):
+        """Return amplitude of excitation field, T."""
+        return self._transform_Ipulse(self.shot[('Ipulse', 'A')])
+
+    def _transform_Ipulse(self, Ipulse):
+        """
+        Return excitation field.
+
+        Parameters
+        ----------
+        Ipulse : str
+            Sultan Ipulse field.
+
+        Returns
+        -------
+        Be : float
+            Excitation field.
+
+        """
+        Ips = float(re.findall(r'\d+', Ipulse)[0])
+        Be = Ips * 0.2/230  # excitation field amplitude
+        return Be
+
+
+    def _evaluate_Bdot(self):
+        freq = self.shot[('P. Freq', 'Hz')]
+        omega = 2*np.pi*freq
+        self._Bdot = omega*self.Be  # pulse field rate amplitude
+
+    def _zero_offset(self):
+        """Correct t=0 offset in Qdot_norm heating."""
+        zero_offset = self.lowpassdata.loc[0, ('Qdot_norm', 'W')]
+        if not np.isclose(zero_offset, 0):
+            for attribute in ['rawdata', 'lowpassdata']:
+                data = getattr(self, attribute)
+                data['Qdot_norm'] -= zero_offset
+
+    @property
+    def Qdot_threshold(self):
         """
         Manage heat threshold parameter.
 
         Parameters
         ----------
-        heat_threshold : float
-            Heating idexed as Ips.abs > heat_threshold * Ips.abs.max.
+        Qdot_threshold : float
+            Heating idexed as Ips.abs > Qdot_threshold * Ips.abs.max.
 
         Raises
         ------
         ValueError
-            heat_threshold must lie between 0 and 1.
+            Qdot_threshold must lie between 0 and 1.
 
         Returns
         -------
-        heat_threshold : float
+        Qdot_threshold : float
 
         """
-        return self._heat_threshold
+        return self._Qdot_threshold
 
-    @heat_threshold.setter
-    def heat_threshold(self, heat_threshold):
-        if heat_threshold != self._heat_threshold:
-            self._heat_index = None
-        if heat_threshold < 0 or heat_threshold > 1:
-            raise ValueError(f'heat threshold {heat_threshold} '
+    @Qdot_threshold.setter
+    def Qdot_threshold(self, Qdot_threshold):
+        if Qdot_threshold != self._Qdot_threshold:
+            self._iQdot = None
+        if Qdot_threshold < 0 or Qdot_threshold > 1:
+            raise ValueError(f'heat threshold {Qdot_threshold} '
                              'must lie between 0 and 1')
-        self._heat_threshold = heat_threshold
+        self._Qdot_threshold = Qdot_threshold
 
     @property
-    def heat_index(self):
+    def iQdot(self):
         """Return heat index, slice."""
-        if self._heat_index is None:
-            self._evaluate_heat_index()
-        return self._heat_index
+        if self._iQdot is None:
+            self._evaluate_iQdot()
+        return self._iQdot
 
-    def _evaluate_heat_index(self):
+    def _evaluate_iQdot(self):
         """
         Return slice of first and last indices meeting threshold condition.
 
-        Condition evaluated as Ips.abs() > heat_threshold * Ips.abs().max()
+        Condition evaluated as Ips.abs() > Qdot_threshold * Ips.abs().max()
 
         Parameters
         ----------
         data : array-like
             Data vector.
-        heat_threshold : float, optional property
+        Qdot_threshold : float, optional property
             Threshold factor applied to data.abs().max(). The default is 0.95.
 
         Returns
@@ -617,10 +701,74 @@ class SultanPostProcess(FTPSultan):
         """
         Ips = self.sultandata['PS EEI (I)']
         Imax = Ips.abs().max()
-        threshold_index = np.where(Ips.abs() >= self.heat_threshold*Imax)[0]
-        self._heat_index = slice(threshold_index[0], threshold_index[-1])
+        threshold_index = np.where(Ips.abs() >= self.Qdot_threshold*Imax)[0]
+        self._iQdot = slice(threshold_index[0], threshold_index[-1]+1)
+
+    def extract_response(self, transient_factor=1.05, plot=False, ax=None):
+        """
+        Extract heating response at end of heat and max heat.
+
+        Flag transient when max heat >> end of heat.
+
+        Parameters
+        ----------
+        transient_factor : float, optional
+            Limit factor applied to ratio of eoh and max heat.
+            Heating is considered transient of ratio exceeds factor.
+            The default is 1.05.
+        plot : bool, optional
+            plotting flag. The default is False
+        ax : axis, optional
+            plot axis. The default is None (plt.gca())
+
+        Returns
+        -------
+        t_eoh : float
+            end of heating time.
+        Qdot_eoh : float
+            end of heating value (Qdot_norm).
+        t_max : float
+            max heating time.
+        Qdot_max : float
+            max heating value (Qdot_norm).
+        steady : bool
+            transient flag, False if Qdot_max/Qdot_eoh > transient_factor.
+
+        """
+        # extract lowpass data
+        self._zero_offset()
+        t = self.lowpassdata[('t', 's')]
+        Qdot_norm = self.lowpassdata[('Qdot_norm', 'W')]
+        # end of heating
+        t_eoh = t[self.iQdot.stop-1]
+        Qdot_eoh = Qdot_norm[self.iQdot.stop-1]
+        argmax = Qdot_norm.argmax()
+        t_max = t[argmax]
+        Qdot_max = Qdot_norm[argmax]
+        steady = False if Qdot_max/Qdot_eoh > transient_factor else True
+        if plot:
+            if ax is None:
+                ax = plt.gca()
+            ax.plot(t_eoh, Qdot_eoh, **self._get_marker(steady, 'eoh'))
+            ax.plot(t_max, Qdot_max, **self._get_marker(steady, 'max'))
+        return t_eoh, Qdot_eoh, t_max, Qdot_max, steady
+
+    def _get_marker(self, steady, location):
+        marker = {'ls': 'none', 'alpha': 1}
+        if location == 'eoh':
+            marker.update({'color': 'C6', 'label': 'eoh', 'marker': 'o'})
+        elif location == 'max':
+            marker.update({'color': 'C4', 'label': 'max', 'marker': 'd'})
+        else:
+            raise IndexError(f'location {location} not in [eof, max]')
+        if steady:
+            marker.update({'ms': 6, 'mew': 2})
+        else:
+            marker.update({'ms': 10, 'mew': 2, 'mfc': 'w'})
+        return marker
 
     def plot_single(self, variable, ax=None, lowpass=False):
+        self._zero_offset()
         if lowpass:
             data = self.lowpassdata
         else:
@@ -633,133 +781,120 @@ class SultanPostProcess(FTPSultan):
         color = 'C3' if lowpass else 'C0'
         label = 'lowpass' if lowpass else 'raw'
         ax.plot(data.t, data[variable], color=bg_color)
-        ax.plot(data.t[self.heat_index], data[variable][self.heat_index],
+        ax.plot(data.t[self.iQdot], data[variable][self.iQdot],
                 color=color, label=label)
         ax.legend()
         ax.set_xlabel('$t$ s')
-        ax.set_ylabel(r'$\hat{P}$ W')
+        ax.set_ylabel(r'$\hat{\dot{Q}}$ W')
         plt.despine()
 
     def title(self, ax=None):
         if ax is None:
             ax = plt.gca()
-        I = self.shot[('Ipulse', 'A')]
+        I = self.shot[('Ipulse', 'A')][1:]
         f = self.shot[('P. Freq', 'Hz')]
         ax.set_title(rf'$I_{{ps}}$ = {I}(2$\pi$ {f} $t$)')
 
-    def heat_curve(self):
-        t = self.lowpassdata.t[self.heat_index].values
-        Qdot = self.lowpassdata['Qdot'][self.heat_index].values
-        Te = np.mean([self.lowpassdata['Tin'][self.heat_index].values,
-                      self.lowpassdata['Tout'][self.heat_index].values],
-                     axis=0)
-        # offset time, power
-        t -= t[0]
-        Qdot -= Qdot[0]
-        # squeeze unit dimensions
-        t, Te, Qdot = np.squeeze(t), np.squeeze(Te), np.squeeze(Qdot)
-        return t, Te, Qdot
-
-    def cool_curve(self):
-
-        f = self.shot[('P. Freq', 'Hz')]
-
-        t_dwell = 10  # dwell time after max heating
-
-        t = self.lowpassdata[('t', 's')].values
-        Qdot = self.lowpassdata[('Qdot', 'W')].values
-
-        # start index
-        dt = np.diff(t, axis=0).mean()
-        start = Qdot.argmax() + int(t_dwell / dt)
-        # stop index
-        Qdot_max, Qdot_min = Qdot[start:].max(), Qdot[start:].min()
-        dQdot = Qdot_max - Qdot_min
-        threshold = Qdot_min + 0.1*dQdot
-        stop = start + np.where(Qdot[start:] < threshold)[0][0]
-        index = slice(start, stop)
+    def plot_Qdot_norm(self):
+        self._zero_offset()
+        self.plot_single('Qdot_norm')
+        self.plot_single('Qdot_norm', lowpass=True)
+        self.title()
+        response = self.extract_response(plot=True)
+        plt.legend(loc='upper right')
 
 
-        #plt.plot(t[index], np.log(Q[index]))
+class SultanEnsemble(SultanPostProcess):
 
-        #plt.plot(t[index], self.lowpassdata['Tout'][index])
+    def __init__(self, experiment, testname, side, read_txt=False):
+        SultanPostProcess.__init__(self, experiment)
+        self.testname = testname
+        self.side = side
+        self.read_txt = read_txt
+        self.load_testdata()
 
-        Te = np.mean([self.lowpassdata[('Tout', 'K')],
-                      self.lowpassdata[('Tout', 'K')]], axis=0)
-        return t[index], Te[index], Qdot[index]
+    def load_testdata(self, **kwargs):
+        read_txt = kwargs.get('read_txt', self.read_txt)
+        if read_txt or not os.path.isfile(self.ensemble_filename):
+            self._extract_testdata()
+            self._save_testdata()
+        else:
+            self.testdata = pandas.read_parquet(self.ensemble_filename)
+
+    def _extract_testdata(self):
+        self._initialize_testdata()
+        self._extract_response()
+
+    def _initialize_testdata(self):
+        testdata = self.testplan.loc[:, ['B Sultan', 'P. Freq']]
+        testdata = testdata.droplevel(1, axis=1)
+
+        testdata.rename(columns={'B Sultan': 'Be', 'P. Freq': 'f'},
+                        inplace=True)
+        print(self.testplan)
+        testdata['B'] = [self._transform_Ipulse(Ips)
+                         for Ips in self.testplan.loc[:, ('Ipulse', 'A')]]
+        testdata['Bdot'] = 2*np.pi*testdata['f'] * testdata['B']
+        self.testdata = testdata
+
+    def _extract_response(self):
+        tick = clock(self.shot_range[1],
+                     header='extracting frequency response')
+        for shot in range(*self.shot_range):
+            self.shot = shot
+            response = self.extract_response()
+            self.testdata.loc[shot, ['Qdot_eof', 'Qdot_max', 'steady']]= \
+                response[1], response[3], response[-1]
+            tick.tock()
+        self.testdata.sort_values(['Be', 'f', 'B'], inplace=True)
+
+    @property
+    def ensemble_filename(self):
+        file = f'{self.experiment}_test{self.testindex}_{self.side}.parquet'
+        return os.path.join(self.datadir, file)
+
+    def _save_testdata(self):
+        self.testdata.to_parquet(self.ensemble_filename)
+
+    def plot_response(self, ax=None):
+        if ax is None:
+            ax = plt.gca()
+        for Be in self.testdata.Be.unique():
+            index = self.testdata.Be == Be
+            f = self.testdata.f[index]
+            Qdot = self.testdata.Qdot_max[index]
+            steady = self.testdata.steady[index].astype(bool)
+            unsteady_marker = self._get_marker(False, 'max')
+            steady_marker = self._get_marker(True, 'max')
+            steady_marker.update({'ls': '-'})
+            ax.plot(f[~steady], Qdot[~steady], **unsteady_marker)
+            ax.plot(f[steady], Qdot[steady], **steady_marker)
+        ax.set_yscale('log')
+        ax.set_xscale('log')
 
 
-class LumpedCapacitance:
-
-    def __init__(self, t, Te, Qdot):
-        self.t = t
-        self.Te = Te
-        self.Qdot = Qdot
-        self.Qnorm = np.linalg.norm(Qdot)
-        self.Te_interp = scipy.interpolate.interp1d(t, Te)
-
-    def dTdt(self, t, T, hA, C):
-        Te = self.Te_interp(t)
-        tau = C/hA
-        return -1/tau * (T-Te)
-
-    def solve(self, hA, C):
-        dTo = -1/hA * self.Qdot[0]
-        sol = scipy.integrate.solve_ivp(
-            self.dTdt, (self.t[0], self.t[-1]), [dTo],
-            args=(hA, C), t_eval=self.t, method='RK45')
-        dT = sol.y
-        Qdot = -hA * dT
-        return Qdot
-
-    def Qdot_err(self, x):
-        Qdot = self.solve(*x)
-        return np.sqrt(np.mean((Qdot-self.Qdot)**2)) / self.Qnorm
-
-    def fit_hA(self):
-        xo = [0.1, 1]
-        sol = scipy.optimize.minimize(self.Qdot_err, xo, method='COBYLA')
-        hA, C = abs(sol.x)
-        err = self.Qdot_err((hA, C))
-        return hA, C, err
 
 
 if __name__ == '__main__':
 
-    spp = SultanPostProcess('CSJA_7')
-
-    spp.testname = 0
+    spp = SultanPostProcess('CSJUS1')
+    spp.testname = 1
     spp.shot = 0
-    spp.side = 'left'
+    spp.plot_Qdot_norm()
 
-    '''
-    testcolumns = ['B Sultan', 'dm/dt L', 'Ipulse', 'P. Freq']
-    testdata = spp.testplan.droplevel(1, axis=1).loc[:, testcolumns]
-    for s in testdata.index:
-        spp.shot = s
-        print(s)
-        lc = LumpedCapacitance(*spp.cool_curve())
-        testdata.loc[s, ['hA', 'C', 'rms']] = lc.fit_hA()
-        testdata.loc[s, 'Te_bar'] = np.mean(spp.cool_curve()[1])
-    testdata = testdata[testdata['rms'] < 0.01]
+    #se = SultanEnsemble('CSJUS1', 0, 'Left', read_txt=True)
+    #se.plot_response()
 
-    plt.plot(testdata['dm/dt L'], testdata['C'], 'o')
-    '''
+    #se.shot = 12
+    #se.plot_Qdot_norm()
+    #spp = SultanPostProcess('CSJA_7')
+    #spp.testname = 0
+    #spp.shot = 12
+    #spp.side = 'left'
 
-    '''
-    spp.shot = 2
-    lc = LumpedCapacitance(*spp.cool_curve())
-    hA, C, err = lc.fit_hA()
-    plt.plot(lc.t, lc.Qdot)
-    plt.plot(lc.t, lc.solve(hA, C).T)
-    '''
-    t, Te, Qdot = spp.heat_curve()
 
-    plt.plot(t, Qdot)
+    #spp.plot_Qdot_norm()
 
-    #spp.plot_single('Qnorm')
-    #spp.plot_single('Qnorm', lowpass=True)
-    #spp.title()
     #plt.figure()
     #spp.plot_single('Ips')
     #spp.plot_single('Ips', lowpass=True)

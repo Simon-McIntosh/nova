@@ -2,6 +2,7 @@
 import os
 import glob
 import re
+from warnings import warn
 
 import ftputil
 import pandas
@@ -15,9 +16,10 @@ import CoolProp.CoolProp as CoolProp
 from nova.definitions import root_dir
 from nova.utilities.pyplot import plt
 from nova.utilities.time import clock
+from nova.utilities.IO import pythonIO
 
 
-class FTPSultan:
+class FTPSultan(pythonIO):
     """
     Provide access to sultan data.
 
@@ -25,7 +27,7 @@ class FTPSultan:
 
     """
 
-    def __init__(self, experiment):
+    def __init__(self, experiment, read_txt=False):
         self._experiment = experiment
         self.datadir = self._set_datadir()
         self._testname = None  # test identifier
@@ -34,6 +36,7 @@ class FTPSultan:
         self._testmatrix = {}
         self._note = {}
         self._sultandata = None
+        self.read_txt = read_txt
         self.load_testmatrix()
 
     @property
@@ -278,8 +281,9 @@ class FTPSultan:
                 ext = os.path.split(file)[1].split('*')[-1]
                 ftpfile = [f for f in host.listdir('./') if ext in f]
                 if len(ftpfile) > 1:
-                    err_txt = f'multiple files found {file} > {ftpfile}'
-                    raise IndexError(err_txt)
+                    warn_txt = f'multiple files found {file} > {ftpfile}'
+                    warn_txt += f'\nusing {ftpfile[0]}'
+                    warn(warn_txt)
                 remotefile = ftpfile[0]
             else:
                 remotefile = os.path.split(file)[1]
@@ -292,42 +296,100 @@ class FTPSultan:
                 raise ftputil.error.FTPError(err_txt)
         return file
 
-    def load_testmatrix(self):
+    @staticmethod
+    def _check_stopindex(_testplan_index, testname):
+        """Pop testname if stopindex == 0."""
+        if testname is not None:
+            if _testplan_index[testname][1] == 0:
+                _testplan_index.pop(testname)
+        return _testplan_index
+
+    def load_testmatrix(self, **kwargs):
+        """
+        Load testmatrix from file.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            force read_txt with read_txt=True keyword argument.
+
+        Returns
+        -------
+        None.
+
+        """
+        read_txt = kwargs.get('read_txt', self.read_txt)
+        filepath = os.path.join(self.datadir, 'testmatrix')
+        if not os.path.isfile(filepath + '.pk') or read_txt:
+            self.read_testmatrix()
+            self.save_pickle(filepath,
+                             ['strand', '_testmatrix'])
+        else:
+            self.load_pickle(filepath)
+
+    def read_testmatrix(self, mode='AC'):
         """Load testmatrix."""
-        testplan = os.path.join(self.datadir, self.locate('*.xls'))
+        try:
+            testplan = os.path.join(self.datadir, self.locate('*.xls'))
+        except ftputil.error.PermanentError as error:  # folder not found
+            os.rmdir(self.datadir)
+            raise ftputil.error.PermanentError(f'{error}')
         with pandas.ExcelFile(testplan) as xls:
             index = pandas.read_excel(xls, usecols=[0], header=None)
-        self.testlabel = index[0][0]  # testplan name
-        self.strand = index[0][0].split()[0]
+        strand = next(label[0] for label in index.values
+                      if 'XXYYZZ' in label[0])
+        self.strand = strand.split('XXYYZZ')[0][:-1] + mode[0]
+        self.strand = self.strand.replace('-', '')
         # extract testplan indices
         _testplan_index = {}
+        testname = None
         skip_file = False
         for i, label in enumerate(index.values):
-            #label = label[0]
             if isinstance(label[0], str):
-                if self.strand in label[0] and _testplan_index:
-                    start_stop = 0 if _testplan_index[testname][0] == 0 else 1
-                    _testplan_index[testname][start_stop] = i
+                if label[0][:len(self.strand)] == self.strand \
+                        and testname is not None:
+                    _testplan_index[testname][1] = i  # advance stop index
                 else:
-                    if 'test' in label[0].lower():
-                        j = i
+                    islabel = 'test' in label[0].lower() \
+                        or label[0][:2] == 'AC' \
+                        or label[0][:2] == 'DC'
+                    try:
+                        nextlabel = index.values[i+1][0]
+                    except IndexError:
+                        nextlabel = ''
+                    try:
+                        isnext_file = nextlabel.strip().capitalize() == 'File'
+                    except AttributeError:
+                        isnext_file = False
+                    try:
+                        isnext_strand = self.strand in nextlabel
+                    except TypeError:
+                        isnext_strand = False
+                    if islabel and (isnext_file or isnext_strand):
+                        j = i+1
                         skip_file = True
                     elif label[0].strip().capitalize() == 'File':
                         if skip_file:
                             skip_file = False
                             continue
-                        j = i-1
+                        j = i
                     else:
+                        testname = None
                         continue
-                    testname = index.values[j][0]
+                    testname = index.values[j-1][0]
+                    try:
+                        if self.strand in testname:
+                            testname = f'noname {j}'
+                    except TypeError:
+                        testname = f'noname {j}'
+                    testname = testname.split(':')[0].split('(')[0]
                     if testname in _testplan_index:
                         testname += f' {j}'
-                    _testplan_index[testname] = [0, 0]
+                    _testplan_index[testname] = [j, 0]
+        # remove open indices
         for testname in list(_testplan_index.keys()):
-            if _testplan_index[testname][0] == 0:  # no files
+            if _testplan_index[testname][1] == 0:
                 _testplan_index.pop(testname)
-            elif _testplan_index[testname][1] == 0:  # single file
-                _testplan_index[testname][1] = _testplan_index[testname][0]
         # store test matrix data
         previouscolumns = None
         with pandas.ExcelFile(testplan) as xls:
@@ -343,6 +405,9 @@ class FTPSultan:
                     previouscolumns = df.columns
                 elif previouscolumns is not None:
                     df.columns = previouscolumns
+                # remove column nans
+                columns = df.columns.get_level_values(0)
+                df = df.loc[:, columns.notna()]
                 # extract note
                 columns = [col for col in df.columns.get_level_values(0) if
                            isinstance(col, str)]
@@ -355,20 +420,41 @@ class FTPSultan:
                 # reset index
                 df.reset_index(inplace=True)
                 df.iloc[:, 0] = df.index
-                # remove column nans
-                columns = df.columns.get_level_values(0)
-                df = df.loc[:, columns.notna()]
                 # format frequency
-                '''
-                freq = ('P. Freq', 'Hz')
-                if freq in df:
-                    if df[freq].dtype == object:
-                        print(df[freq])
-                        df[freq] = df[freq].apply(
-                            lambda x: eval(x[:-1]))
-                '''
-
+                frequency_duration = ('P. Freq', 'Hz/duration')
+                frequency_Hz = ('P. Freq', 'Hz')
+                if frequency_duration in df:
+                    df[('P. Freq', 'Hz')] = df[frequency_duration].apply(
+                            self._format_frequency)
+                elif frequency_Hz in df:
+                    if df[frequency_Hz].dtype == object:
+                        df[frequency_Hz] = df[frequency_Hz].apply(
+                            self._format_frequency)
                 self._testmatrix[label] = df
+
+    @staticmethod
+    def _format_frequency(x):
+        """
+        Return frecuency extracted from frequency/duration string.
+
+        Parameters
+        ----------
+        x : str or float
+            frequency (float) or frequency/duration (str).
+
+        Returns
+        -------
+        x : float
+            frequency.
+
+        """
+        try:
+            x = float(x.split('/')[0])
+        except ValueError:  # split string is string (BPTrapez)
+            x = -1
+        except AttributeError:  # x already float
+            pass
+        return x
 
     def _get_filename(self, testname, shot):
         """
@@ -415,9 +501,18 @@ class FTPSultan:
 
         """
         filename = self._get_filename(testname, shot)
-        datafile = self.locate(filename, subdir=subdir)
+        try:
+            datafile = self.locate(filename, subdir=subdir)
+        except ftputil.error.PermanentError:
+            datafile = self.locate(filename, subdir='TEST/AC/ACdat')
         datafile = os.path.join(self.datadir, datafile)
         sultandata = pandas.read_csv(datafile, encoding='ISO-8859-1')
+        columns = {}
+        for c in sultandata.columns:
+            if 'left' in c or 'right' in c:
+                columns[c] = c.replace('left', 'Left')
+                columns[c] = columns[c].replace('right', 'Right')
+        sultandata.rename(columns=columns, inplace=True)
         return sultandata
 
     @property
@@ -437,23 +532,21 @@ class FTPSultan:
 class SultanPostProcess(FTPSultan):
     """Post processing methods for single leg sultan coupling loss data."""
 
-    def __init__(self, experement):
+    def __init__(self, experement, read_txt=False):
         """
         Import data and initialize data structure.
 
         Parameters
         ----------
-        sultandata : pandas.DataFrame
-            Sultan test data.
-        side : str
-            Side of Sultan experement ['Left', 'Right'].
+        experement : str
+            Experement label.
 
         Returns
         -------
         None.
 
         """
-        FTPSultan.__init__(self, experement)  # link to sultan data
+        FTPSultan.__init__(self, experement, read_txt)  # link to sultan data
         self._side = None
         self._rawdata = None
         self._lowpassdata = None
@@ -584,6 +677,8 @@ class SultanPostProcess(FTPSultan):
             windowlength = int(2.5 / (dt*freq))
             if windowlength % 2 == 0:
                 windowlength += 1
+            if windowlength < 5:
+                windowlength = 5
             for attribute in ['mdot', 'Ips', 'Tin', 'Tout', 'Pin', 'Pout']:
                 data[attribute] = scipy.signal.savgol_filter(
                     np.squeeze(data[attribute]), windowlength, polyorder=3)
@@ -624,10 +719,12 @@ class SultanPostProcess(FTPSultan):
             Excitation field.
 
         """
-        Ips = float(re.findall(r'\d+', Ipulse)[0])
+        try:
+            Ips = float(re.findall(r'\d+', Ipulse)[0])
+        except TypeError:
+            Ips = 230
         Be = Ips * 0.2/230  # excitation field amplitude
         return Be
-
 
     def _evaluate_Bdot(self):
         freq = self.shot[('P. Freq', 'Hz')]
@@ -745,7 +842,11 @@ class SultanPostProcess(FTPSultan):
         argmax = Qdot_norm.argmax()
         t_max = t[argmax]
         Qdot_max = Qdot_norm[argmax]
-        steady = False if Qdot_max/Qdot_eoh > transient_factor else True
+        steady = True
+        if Qdot_max/Qdot_eoh > transient_factor:
+            steady = False
+        elif t[self.iQdot][Qdot_norm[self.iQdot].argmax()] - t_eoh > 1:
+            steady = False
         if plot:
             if ax is None:
                 ax = plt.gca()
@@ -762,9 +863,9 @@ class SultanPostProcess(FTPSultan):
         else:
             raise IndexError(f'location {location} not in [eof, max]')
         if steady:
-            marker.update({'ms': 6, 'mew': 2})
+            marker.update({'ms': 6, 'mew': 1.5})
         else:
-            marker.update({'ms': 10, 'mew': 2, 'mfc': 'w'})
+            marker.update({'ms': 6, 'mew': 1.5, 'mfc': 'w'})
         return marker
 
     def plot_single(self, variable, ax=None, lowpass=False):
@@ -800,20 +901,21 @@ class SultanPostProcess(FTPSultan):
         self.plot_single('Qdot_norm')
         self.plot_single('Qdot_norm', lowpass=True)
         self.title()
-        response = self.extract_response(plot=True)
+        self.extract_response(plot=True)
         plt.legend(loc='upper right')
 
 
 class SultanEnsemble(SultanPostProcess):
 
     def __init__(self, experiment, testname, side, read_txt=False):
-        SultanPostProcess.__init__(self, experiment)
+        SultanPostProcess.__init__(self, experiment, read_txt)
         self.testname = testname
         self.side = side
         self.read_txt = read_txt
         self.load_testdata()
 
     def load_testdata(self, **kwargs):
+        """Load testdata from file."""
         read_txt = kwargs.get('read_txt', self.read_txt)
         if read_txt or not os.path.isfile(self.ensemble_filename):
             self._extract_testdata()
@@ -826,12 +928,16 @@ class SultanEnsemble(SultanPostProcess):
         self._extract_response()
 
     def _initialize_testdata(self):
-        testdata = self.testplan.loc[:, ['B Sultan', 'P. Freq']]
+        try:
+            testdata = self.testplan.loc[:, ['B Sultan', 'P. Freq']]
+        except KeyError:
+            testdata = self.testplan.loc[:, ['B SULTAN', 'P. Freq']]
+        if ('P. Freq', 'Hz/duration') in testdata:
+            testdata.drop(columns=[('P. Freq', 'Hz/duration')],
+                          inplace=True)
         testdata = testdata.droplevel(1, axis=1)
-
         testdata.rename(columns={'B Sultan': 'Be', 'P. Freq': 'f'},
                         inplace=True)
-        print(self.testplan)
         testdata['B'] = [self._transform_Ipulse(Ips)
                          for Ips in self.testplan.loc[:, ('Ipulse', 'A')]]
         testdata['Bdot'] = 2*np.pi*testdata['f'] * testdata['B']
@@ -843,13 +949,14 @@ class SultanEnsemble(SultanPostProcess):
         for shot in range(*self.shot_range):
             self.shot = shot
             response = self.extract_response()
-            self.testdata.loc[shot, ['Qdot_eof', 'Qdot_max', 'steady']]= \
+            self.testdata.loc[shot, ['Qdot_eof', 'Qdot_max', 'steady']] = \
                 response[1], response[3], response[-1]
             tick.tock()
         self.testdata.sort_values(['Be', 'f', 'B'], inplace=True)
 
     @property
     def ensemble_filename(self):
+        """Return ensemble filename."""
         file = f'{self.experiment}_test{self.testindex}_{self.side}.parquet'
         return os.path.join(self.datadir, file)
 
@@ -857,6 +964,7 @@ class SultanEnsemble(SultanPostProcess):
         self.testdata.to_parquet(self.ensemble_filename)
 
     def plot_response(self, ax=None):
+        """Plot ensemble response."""
         if ax is None:
             ax = plt.gca()
         for Be in self.testdata.Be.unique():
@@ -873,20 +981,19 @@ class SultanEnsemble(SultanPostProcess):
         ax.set_xscale('log')
 
 
-
-
 if __name__ == '__main__':
 
-    spp = SultanPostProcess('CSJUS1')
-    spp.testname = 1
-    spp.shot = 0
-    spp.plot_Qdot_norm()
+    #spp = SultanPostProcess('MIT_Alpha', read_txt=True)
+    #spp.testname = 11
+    #spp.shot = 1
+    #spp.side = 'Left'
+    #spp.plot_Qdot_norm()
 
-    #se = SultanEnsemble('CSJUS1', 0, 'Left', read_txt=True)
-    #se.plot_response()
+    se = SultanEnsemble('CSJA_3', -1, 'left', read_txt=True)
+    se.plot_response()
 
-    #se.shot = 12
-    #se.plot_Qdot_norm()
+    se.shot = 26
+    se.plot_Qdot_norm()
     #spp = SultanPostProcess('CSJA_7')
     #spp.testname = 0
     #spp.shot = 12

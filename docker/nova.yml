@@ -5,16 +5,19 @@ channels:
 dependencies:
   - astropy
   - descartes
+  - ftputil
   - matplotlib
   - netcdf4
   - nlopt
   - numpy
   - pandas
   - pip
+  - pyarrow
   - pygeos
   - pygmo
   - pytest
   - python=3.8
+  - python-snappy
   - python-docx
   - scikit-image
   - scikit-learn

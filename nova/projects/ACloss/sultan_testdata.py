@@ -23,21 +23,57 @@ class FTPSultan(pythonIO):
     """
     Provide access to sultan data.
 
-    Datafiles stored localy. Files downloaded from ftp server if not found.
+    Datafiles stored localy. Files downloaded from ftp server if required.
 
     """
 
-    def __init__(self, experiment, read_txt=False):
-        self._experiment = experiment
-        self.datadir = self._set_datadir()
+    _attributes = ['experiment', 'testname', 'shot', 'mode']
+    _default_attributes = {'mode': 'ac', 'read_txt': False}
+
+    def __init__(self, *args, **kwargs):
+        self._experiment = None
         self._testname = None  # test identifier
         self._shot = None  # shot identifier
+        self._mode = None
         self._reload = True  # reload data from file
-        self._testmatrix = {}
+        self._testmatrix = None
         self._note = {}
         self._sultandata = None
-        self.read_txt = read_txt
-        self.load_testmatrix()
+        self._set_attributes(*args, **kwargs)
+
+    def _set_attributes(self, *args, **kwargs):
+        for attribute, value in zip(self._attributes, args):
+            if attribute == 'experiment':
+                setattr(self, f'_{attribute}', value)
+            else:
+                print(attribute)  #### setting experiment (need localdir)
+                setattr(self, attribute, value)
+            kwargs.pop(attribute, None)
+        _default_attributes = self._default_attributes.copy()
+        for attribute in _default_attributes:  # retain set attributes
+            try:
+                value = getattr(self, f'_{attribute}')
+                if value is not None:
+                    _default_attributes[attribute] = value
+            except AttributeError:  # read_txt
+                pass
+        kwargs = {**_default_attributes, **kwargs}
+        for attribute in kwargs:
+            setattr(self, attribute, kwargs[attribute])
+        self._setdir()
+
+    def validate(self):
+        """
+        Return validation status of input attributes.
+
+        Returns
+        -------
+        validate : bool
+            Validation status, True if all attributes are set.
+
+        """
+        attributes = np.array([self._testname, self._shot, self._mode])
+        return np.array(attributes != None).all()
 
     @property
     def reload(self):
@@ -64,11 +100,25 @@ class FTPSultan(pythonIO):
                 self.postprocess = True
         self._reload = reload
 
-    def _set_datadir(self):
-        datadir = os.path.join(root_dir, f'data/Sultan/{self.experiment}')
-        if not os.path.isdir(datadir):
-            os.mkdir(datadir)
-        return datadir
+    def _setdir(self):
+        if self._experiment is not None:
+            self.expdir = os.path.join(root_dir,
+                                       f'data/Sultan/{self.experiment}')
+            self.datadir = os.path.join(self.expdir, 'ftp')
+            self.localdir = os.path.join(self.expdir, 'local')
+            self._mkdir(['exp', 'data', 'local'])
+
+    def _mkdir(self, names):
+        for name in names:
+            directory = getattr(self, f'{name}dir')
+            if not os.path.isdir(directory):
+                os.mkdir(directory)
+
+    def _rmdir(self, names):
+        for name in names:
+            directory = getattr(self, f'{name}dir')
+            if os.path.isdir(directory):
+                os.rmdir(directory)
 
     @property
     def experiment(self):
@@ -87,17 +137,25 @@ class FTPSultan(pythonIO):
         experiment : str
 
         """
+        if self._experiment is None:
+            raise IndexError(f'experiment not set.\n {self.listdir()}')
         return self._experiment
 
     @experiment.setter
     def experiment(self, experiment):
         if self._experiment != experiment:  # reinitialize
-            self.__init__(experiment)
+            self.__init__()
+
+    @property
+    def testkeys(self):
+        """Return testmatrix keys as pandas.Series, read-only."""
+        return pandas.Series(list(self.testmatrix.keys()))
 
     @property
     def testmatrix(self):
-        """Return testmatrix keys as pandas.Series, read-only."""
-        return pandas.Series(list(self._testmatrix.keys()))
+        if self._testmatrix is None:
+            self.load_testmatrix()
+        return self._testmatrix
 
     @property
     def testname(self):
@@ -122,21 +180,21 @@ class FTPSultan(pythonIO):
         if self._testname is None:
             raise IndexError('testname not set, '
                              'valid range (str or int): '
-                             f'\n\n{self.testmatrix}')
+                             f'\n\n{self.testkeys}')
         return self._testname
 
     @testname.setter
     def testname(self, testname):
         if isinstance(testname, int):
             try:
-                testname = self.testmatrix.iloc[testname]
+                testname = self.testkeys.iloc[testname]
             except IndexError:
                 raise IndexError(f'testname index {testname} out of range\n\n'
-                                 f'{self.testmatrix}')
+                                 f'{self.testkeys}')
         elif isinstance(testname, str):
-            if testname not in self._testmatrix:
+            if testname not in self.testmatrix:
                 raise IndexError(f'testname {testname} not found in '
-                                 f'\n{self.testmatrix}')
+                                 f'\n{self.testkeys}')
         if testname != self._testname:
             self._testname = testname
             self.reload = True
@@ -144,13 +202,13 @@ class FTPSultan(pythonIO):
     @property
     def testindex(self):
         """Return testname index."""
-        return next((i for i, name in enumerate(self._testmatrix)
+        return next((i for i, name in enumerate(self.testmatrix)
                      if name == self.testname))
 
     @property
     def testplan(self):
         """Return testplan, read-only."""
-        return self._testmatrix[self.testname]
+        return self.testmatrix[self.testname]
 
     @property
     def shot(self):
@@ -191,6 +249,22 @@ class FTPSultan(pythonIO):
                              f'{self.testplan}')
         if shot != _shot:
             self.reload = True
+
+    @property
+    def mode(self):
+        if self._mode is None:
+            raise IndexError('mode not set, valid entries [ac, dc, full]')
+        return self._mode
+
+    @mode.setter
+    def mode(self, mode):
+        _mode = self._mode  # store previous
+        mode = mode.lower()
+        if mode not in ['ac', 'dc', 'full']:
+            raise IndexError(f'mode not in [ac, dc, full]')
+        if _mode != mode:
+            self._mode = mode
+            self._testmatrix = None
 
     @property
     def shot_range(self):
@@ -239,6 +313,38 @@ class FTPSultan(pythonIO):
         else:
             localfile = self._download(file, subdir=subdir)
         return localfile
+
+    def listdir(self, prefix='', parentdir='Daten', experiment=None,
+           subdir=None):
+        """
+        Return file/directory list.
+
+        Parameters
+        ----------
+        prefix : str, optional
+            File select prefix. The default is ''.
+        parentdir : str, optional
+            Parent (root) directory. The default is 'Daten'.
+        experiment : str, optional
+            First sub-directory. The default is None.
+        subdir : str, optional
+            Second sub-directory. The default is None.
+
+        Returns
+        -------
+        ls : array-like
+            List of file/directory names.
+
+        """
+        chdir = [parentdir, experiment, subdir]
+        with ftputil.FTPHost('ftp.psi.ch', 'sultan', '3g8S4Nbq') as host:
+            for cd in chdir:
+                if cd is not None:
+                    host.chdir(f'./{cd}')
+            ls = host.listdir('./')
+        if prefix:
+            ls = [file for file in ls if ls[:len(prefix)] == prefix]
+        return ls
 
     def _download(self, file, parentdir='Daten', subdir=None):
         """
@@ -319,34 +425,53 @@ class FTPSultan(pythonIO):
 
         """
         read_txt = kwargs.get('read_txt', self.read_txt)
-        filepath = os.path.join(self.datadir, 'testmatrix')
+        if self._experiment is None:
+            raise IndexError('experiment not set')
+        filepath = os.path.join(self.localdir, f'testmatrix_{self.mode}')
         if not os.path.isfile(filepath + '.pk') or read_txt:
             self.read_testmatrix()
-            self.save_pickle(filepath,
-                             ['strand', '_testmatrix'])
+            self.save_pickle(filepath, ['strand', '_testmatrix'])
         else:
             self.load_pickle(filepath)
 
-    def read_testmatrix(self, mode='AC'):
+    def read_testmatrix(self):
         """Load testmatrix."""
         try:
             testplan = os.path.join(self.datadir, self.locate('*.xls'))
+            self._testmatrix = {}
         except ftputil.error.PermanentError as error:  # folder not found
-            os.rmdir(self.datadir)
+            self._rmdir(['data', 'local', 'exp'])
+            self._testmatrix = None
             raise ftputil.error.PermanentError(f'{error}')
         with pandas.ExcelFile(testplan) as xls:
             index = pandas.read_excel(xls, usecols=[0], header=None)
-        strand = next(label[0] for label in index.values
-                      if 'XXYYZZ' in label[0])
-        self.strand = strand.split('XXYYZZ')[0][:-1] + mode[0]
-        self.strand = self.strand.replace('-', '')
+        if self.mode == 'full':
+            mode = 'a'
+        else:
+            mode = self.mode[0]
+        labels = [label[0] for label in index.values
+                  if isinstance(label[0], str)]
+        try:
+            strand = next(label for label in labels
+                          if f'{mode}XXYYZZ' in label
+                          or f'{mode.upper()}XXYYZZ' in label)
+        except StopIteration:
+            raise StopIteration(f'{mode}XXYYZZ not found in {labels}')
+        self.strand = strand.split('XXYYZZ')[0][:-1]
+        strandID = self.strand
+        if self.mode != 'full':  # append mode identifier
+            if f'{mode}XXYYZZ' in strand:  # lower case
+                strandID += self.mode[0]
+            else:  # upper case
+                strandID += self.mode[0].upper()
+        strandID = strandID.replace('-', '')
         # extract testplan indices
         _testplan_index = {}
         testname = None
         skip_file = False
         for i, label in enumerate(index.values):
             if isinstance(label[0], str):
-                if label[0][:len(self.strand)] == self.strand \
+                if label[0][:len(strandID)] == strandID \
                         and testname is not None:
                     _testplan_index[testname][1] = i  # advance stop index
                 else:
@@ -362,7 +487,7 @@ class FTPSultan(pythonIO):
                     except AttributeError:
                         isnext_file = False
                     try:
-                        isnext_strand = self.strand in nextlabel
+                        isnext_strand = strandID in nextlabel
                     except TypeError:
                         isnext_strand = False
                     if islabel and (isnext_file or isnext_strand):
@@ -378,7 +503,7 @@ class FTPSultan(pythonIO):
                         continue
                     testname = index.values[j-1][0]
                     try:
-                        if self.strand in testname:
+                        if strandID in testname:
                             testname = f'noname {j}'
                     except TypeError:
                         testname = f'noname {j}'
@@ -417,19 +542,34 @@ class FTPSultan(pythonIO):
                     self._note[label].columns = ['Note']
                     df.drop(columns=note, inplace=True, level=0)
                 df.fillna(method='pad', inplace=True)
-                # reset index
-                df.reset_index(inplace=True)
-                df.iloc[:, 0] = df.index
+
+                # rename columns
+                columns = {'I pulse': 'Ipulse', 'I Pulse': 'Ipulse',
+                           'B Sultan': 'Be', 'B SULTAN':  'Be',
+                           'B sultan': 'Be', 'frequency': 'frequency',
+                           'Frequency': 'frequency',
+                           'P. Freq': 'frequency',
+                           'I Sample': 'Isample'}
+                df.rename(columns=columns, inplace=True)
                 # format frequency
-                frequency_duration = ('P. Freq', 'Hz/duration')
-                frequency_Hz = ('P. Freq', 'Hz')
+                frequency_duration = ('frequency', 'Hz/duration')
+                frequency_Hz = ('frequency', 'Hz')
                 if frequency_duration in df:
-                    df[('P. Freq', 'Hz')] = df[frequency_duration].apply(
+                    df[('frequency', 'Hz')] = df[frequency_duration].apply(
                             self._format_frequency)
                 elif frequency_Hz in df:
                     if df[frequency_Hz].dtype == object:
                         df[frequency_Hz] = df[frequency_Hz].apply(
                             self._format_frequency)
+                df.sort_values([('Be', 'T'), ('Isample', 'kA')], inplace=True)
+                try:  # AC data
+                    df.sort_values([('Ipulse', 'A'), ('frequency', 'Hz')],
+                                   inplace=True)
+                except:
+                    pass
+                # reset index
+                df.reset_index(inplace=True)
+                df.drop(columns=['index'], level=0, inplace=True)
                 self._testmatrix[label] = df
 
     @staticmethod
@@ -504,7 +644,7 @@ class FTPSultan(pythonIO):
         try:
             datafile = self.locate(filename, subdir=subdir)
         except ftputil.error.PermanentError:
-            datafile = self.locate(filename, subdir='TEST/AC/ACdat')
+            datafile = self.locate(filename, subdir='AC/ACdat')
         datafile = os.path.join(self.datadir, datafile)
         sultandata = pandas.read_csv(datafile, encoding='ISO-8859-1')
         columns = {}
@@ -512,6 +652,8 @@ class FTPSultan(pythonIO):
             if 'left' in c or 'right' in c:
                 columns[c] = c.replace('left', 'Left')
                 columns[c] = columns[c].replace('right', 'Right')
+            if c[-7:] == ' (320K)':
+                columns[c] = c[:-7]
         sultandata.rename(columns=columns, inplace=True)
         return sultandata
 
@@ -532,7 +674,11 @@ class FTPSultan(pythonIO):
 class SultanPostProcess(FTPSultan):
     """Post processing methods for single leg sultan coupling loss data."""
 
-    def __init__(self, experement, read_txt=False):
+    _attributes = FTPSultan._attributes + ['side']
+    _default_attributes = {**FTPSultan._default_attributes,
+                           **{'side': 'Left'}}
+
+    def __init__(self, *args, **kwargs):
         """
         Import data and initialize data structure.
 
@@ -546,13 +692,29 @@ class SultanPostProcess(FTPSultan):
         None.
 
         """
-        FTPSultan.__init__(self, experement, read_txt)  # link to sultan data
+        FTPSultan.__init__(self)  # link to sultan
         self._side = None
         self._rawdata = None
         self._lowpassdata = None
-        self._Qdot_threshold = 0.95
+        self._Qdot_threshold = 0.75
         self._iQdot = None
         self._Bdot = None
+        self._set_attributes(*args, **kwargs)
+
+    def validate(self):
+        """
+        Return validation status of input attributes.
+
+        Extends FTPSultan.validate
+
+        Returns
+        -------
+        validate : bool
+            Validation status, True if all attributes are set.
+
+        """
+        attributes = np.array([self._side])
+        return np.array(attributes != None).all() and FTPSultan.validate(self)
 
     @staticmethod
     def _initialize_dataframe():
@@ -565,7 +727,7 @@ class SultanPostProcess(FTPSultan):
             Empty dataframe with time index and default columns names.
 
         """
-        variables = [('t', 's'), ('mdot', 'kg/s'), ('Ips', 'A'),
+        variables = [('t', 's'), ('mdot', 'kg/s'), ('Ipulse', 'A'),
                      ('Tin', 'K'), ('Tout', 'K'),
                      ('Pin', 'Pa'), ('Pout', 'Pa'),
                      ('hin', 'J/Kg'), ('hout', 'J/Kg'),
@@ -667,19 +829,19 @@ class SultanPostProcess(FTPSultan):
         data = self._initialize_dataframe()
         data['t'] = self.sultandata['Time']
         data['mdot'] = self.sultandata[f'dm/dt {self.side}'] * 1e-3
-        data['Ips'] = self.sultandata['PS EEI (I)']
+        data['Ipulse'] = self.sultandata['PS EEI (I)']
         for end in ['in', 'out']:
             data[f'T{end}'] = self.sultandata[f'T {end} {self.side}']
             data[f'P{end}'] = self.sultandata[f'P {end} {self.side}'] * 1e5
         if lowpass:
             dt = np.diff(data['t'], axis=0).mean()
-            freq = self.shot[('P. Freq', 'Hz')]
+            freq = self.shot[('frequency', 'Hz')]
             windowlength = int(2.5 / (dt*freq))
             if windowlength % 2 == 0:
                 windowlength += 1
             if windowlength < 5:
                 windowlength = 5
-            for attribute in ['mdot', 'Ips', 'Tin', 'Tout', 'Pin', 'Pout']:
+            for attribute in ['mdot', 'Ipulse', 'Tin', 'Tout', 'Pin', 'Pout']:
                 data[attribute] = scipy.signal.savgol_filter(
                     np.squeeze(data[attribute]), windowlength, polyorder=3)
         for end in ['in', 'out']:  # Calculate enthapy
@@ -720,14 +882,14 @@ class SultanPostProcess(FTPSultan):
 
         """
         try:
-            Ips = float(re.findall(r'\d+', Ipulse)[0])
+            Ipulse = float(re.findall(r'\d+', Ipulse)[0])
         except TypeError:
-            Ips = 230
-        Be = Ips * 0.2/230  # excitation field amplitude
+            Ipulse = 230
+        Be = Ipulse * 0.2/230  # excitation field amplitude
         return Be
 
     def _evaluate_Bdot(self):
-        freq = self.shot[('P. Freq', 'Hz')]
+        freq = self.shot[('frequency', 'Hz')]
         omega = 2*np.pi*freq
         self._Bdot = omega*self.Be  # pulse field rate amplitude
 
@@ -747,7 +909,7 @@ class SultanPostProcess(FTPSultan):
         Parameters
         ----------
         Qdot_threshold : float
-            Heating idexed as Ips.abs > Qdot_threshold * Ips.abs.max.
+            Heating idexed as Ipulse.abs > Qdot_threshold * Ipulse.abs.max.
 
         Raises
         ------
@@ -781,7 +943,7 @@ class SultanPostProcess(FTPSultan):
         """
         Return slice of first and last indices meeting threshold condition.
 
-        Condition evaluated as Ips.abs() > Qdot_threshold * Ips.abs().max()
+        Condition evaluated as Ipulse.abs() > Qdot_threshold * Ipulse.abs().max()
 
         Parameters
         ----------
@@ -796,9 +958,9 @@ class SultanPostProcess(FTPSultan):
             Threshold index.
 
         """
-        Ips = self.sultandata['PS EEI (I)']
-        Imax = Ips.abs().max()
-        threshold_index = np.where(Ips.abs() >= self.Qdot_threshold*Imax)[0]
+        Ipulse = self.sultandata['PS EEI (I)']
+        Imax = Ipulse.abs().max()
+        threshold_index = np.where(Ipulse.abs() >= self.Qdot_threshold*Imax)[0]
         self._iQdot = slice(threshold_index[0], threshold_index[-1]+1)
 
     def extract_response(self, transient_factor=1.05, plot=False, ax=None):
@@ -839,13 +1001,18 @@ class SultanPostProcess(FTPSultan):
         # end of heating
         t_eoh = t[self.iQdot.stop-1]
         Qdot_eoh = Qdot_norm[self.iQdot.stop-1]
+        dQdot_heat = Qdot_norm[self.iQdot].max() - Qdot_norm[self.iQdot].min()
         argmax = Qdot_norm.argmax()
         t_max = t[argmax]
         Qdot_max = Qdot_norm[argmax]
+
         steady = True
         if Qdot_max/Qdot_eoh > transient_factor:
             steady = False
-        elif t[self.iQdot][Qdot_norm[self.iQdot].argmax()] - t_eoh > 1:
+        elif Qdot_norm[self.iQdot.start] > Qdot_norm[self.iQdot.stop-1]:
+            steady = False
+        elif Qdot_norm[self.iQdot.stop-1] - Qdot_norm[self.iQdot].min() < \
+                0.95 * dQdot_heat:
             steady = False
         if plot:
             if ax is None:
@@ -854,18 +1021,16 @@ class SultanPostProcess(FTPSultan):
             ax.plot(t_max, Qdot_max, **self._get_marker(steady, 'max'))
         return t_eoh, Qdot_eoh, t_max, Qdot_max, steady
 
-    def _get_marker(self, steady, location):
-        marker = {'ls': 'none', 'alpha': 1}
+    def _get_marker(self, steady=True, location='max'):
+        marker = {'ls': 'none', 'alpha': 1, 'ms': 6, 'mew': 1.5}
         if location == 'eoh':
             marker.update({'color': 'C6', 'label': 'eoh', 'marker': 'o'})
         elif location == 'max':
             marker.update({'color': 'C4', 'label': 'max', 'marker': 'd'})
         else:
             raise IndexError(f'location {location} not in [eof, max]')
-        if steady:
-            marker.update({'ms': 6, 'mew': 1.5})
-        else:
-            marker.update({'ms': 6, 'mew': 1.5, 'mfc': 'w'})
+        if not steady:
+            marker.update({'mfc': 'w'})
         return marker
 
     def plot_single(self, variable, ax=None, lowpass=False):
@@ -893,7 +1058,7 @@ class SultanPostProcess(FTPSultan):
         if ax is None:
             ax = plt.gca()
         I = self.shot[('Ipulse', 'A')][1:]
-        f = self.shot[('P. Freq', 'Hz')]
+        f = self.shot[('frequency', 'Hz')]
         ax.set_title(rf'$I_{{ps}}$ = {I}(2$\pi$ {f} $t$)')
 
     def plot_Qdot_norm(self):
@@ -907,16 +1072,21 @@ class SultanPostProcess(FTPSultan):
 
 class SultanEnsemble(SultanPostProcess):
 
-    def __init__(self, experiment, testname, side, read_txt=False):
-        SultanPostProcess.__init__(self, experiment, read_txt)
-        self.testname = testname
-        self.side = side
-        self.read_txt = read_txt
-        self.load_testdata()
+    def __init__(self, *args, **kwargs):
+        SultanPostProcess.__init__(self, *args, **kwargs)
+        if self.validate():
+            self.load_testdata()
+
+    def extract(self):
+        for testname in self.testkeys:
+            self.testname = testname
+            for side in ['left', 'right']:
+                self.side = side
+                self.load_testdata()
 
     def load_testdata(self, **kwargs):
         """Load testdata from file."""
-        read_txt = kwargs.get('read_txt', self.read_txt)
+        read_txt = kwargs.pop('read_txt', self.read_txt)
         if read_txt or not os.path.isfile(self.ensemble_filename):
             self._extract_testdata()
             self._save_testdata()
@@ -928,72 +1098,88 @@ class SultanEnsemble(SultanPostProcess):
         self._extract_response()
 
     def _initialize_testdata(self):
-        try:
-            testdata = self.testplan.loc[:, ['B Sultan', 'P. Freq']]
-        except KeyError:
-            testdata = self.testplan.loc[:, ['B SULTAN', 'P. Freq']]
-        if ('P. Freq', 'Hz/duration') in testdata:
-            testdata.drop(columns=[('P. Freq', 'Hz/duration')],
+        testdata = self.testplan.loc[:, ['Be', 'Isample', 'frequency']]
+        if ('frequency', 'Hz/duration') in testdata:
+            testdata.drop(columns=[('frequency', 'Hz/duration')],
                           inplace=True)
         testdata = testdata.droplevel(1, axis=1)
-        testdata.rename(columns={'B Sultan': 'Be', 'P. Freq': 'f'},
-                        inplace=True)
-        testdata['B'] = [self._transform_Ipulse(Ips)
-                         for Ips in self.testplan.loc[:, ('Ipulse', 'A')]]
-        testdata['Bdot'] = 2*np.pi*testdata['f'] * testdata['B']
+        testdata['B'] = [self._transform_Ipulse(Ipulse)
+                         for Ipulse in self.testplan.loc[:, ('Ipulse', 'A')]]
+        testdata['Bdot'] = 2*np.pi*testdata['frequency'] * testdata['B']
         self.testdata = testdata
 
     def _extract_response(self):
-        tick = clock(self.shot_range[1],
-                     header='extracting frequency response')
+        header = 'Extracting frequency response: '
+        header += f'{os.path.split(self.ensemble_filename)[1].split(".")[0]}'
+        tick = clock(self.shot_range[1], header=header)
         for shot in range(*self.shot_range):
             self.shot = shot
             response = self.extract_response()
             self.testdata.loc[shot, ['Qdot_eof', 'Qdot_max', 'steady']] = \
                 response[1], response[3], response[-1]
             tick.tock()
-        self.testdata.sort_values(['Be', 'f', 'B'], inplace=True)
+        self.testdata.sort_values(['Be', 'Isample', 'B',
+                                   'frequency'], inplace=True)
 
     @property
     def ensemble_filename(self):
         """Return ensemble filename."""
-        file = f'{self.experiment}_test{self.testindex}_{self.side}.parquet'
-        return os.path.join(self.datadir, file)
+        file = f'{self.experiment}_{self.mode.upper()}'
+        file += f'{self.testindex}{self.side[0]}.pq'
+        return os.path.join(self.localdir, file)
 
     def _save_testdata(self):
         self.testdata.to_parquet(self.ensemble_filename)
 
-    def plot_response(self, ax=None):
+    def plot_response(self, unsteady=False, ax=None, color='C0'):
         """Plot ensemble response."""
         if ax is None:
             ax = plt.gca()
+        field_marker = {2: 'd', 9: 'o'}
+        current_linestyle = {0: '-', 40: ':'}
+        plot_kwargs = self._get_marker()
+        plot_kwargs.update({'color': color})
         for Be in self.testdata.Be.unique():
-            index = self.testdata.Be == Be
-            f = self.testdata.f[index]
-            Qdot = self.testdata.Qdot_max[index]
-            steady = self.testdata.steady[index].astype(bool)
-            unsteady_marker = self._get_marker(False, 'max')
-            steady_marker = self._get_marker(True, 'max')
-            steady_marker.update({'ls': '-'})
-            ax.plot(f[~steady], Qdot[~steady], **unsteady_marker)
-            ax.plot(f[steady], Qdot[steady], **steady_marker)
+            for Isample in self.testdata.Isample.unique():
+                index = self.testdata.Be == Be
+                index &= self.testdata.Isample == Isample
+                frequency = self.testdata.frequency[index]
+                Qdot = self.testdata.Qdot_max[index]
+                steady = self.testdata.steady[index].astype(bool)
+
+                marker = field_marker[Be]
+                ls = current_linestyle[Isample]
+                plot_kwargs.update({'ls': ls, 'marker': marker})
+
+                ax.plot(frequency[steady], Qdot[steady], **plot_kwargs)
+                if unsteady:
+                    plot_kwargs.update({'mfc': 'none', 'ls': 'none'})
+                    ax.plot(frequency[~steady], Qdot[~steady],
+                            **plot_kwargs)
         ax.set_yscale('log')
         ax.set_xscale('log')
 
 
 if __name__ == '__main__':
 
-    #spp = SultanPostProcess('MIT_Alpha', read_txt=True)
+    #ftp = FTPSultan('CSJA_3', 0, 0)
+
+    #spp = SultanPostProcess('CSJA_3', read_txt=True)
     #spp.testname = 11
     #spp.shot = 1
     #spp.side = 'Left'
     #spp.plot_Qdot_norm()
 
-    se = SultanEnsemble('CSJA_3', -1, 'left', read_txt=True)
-    se.plot_response()
+    se = SultanEnsemble('CFETR2020', 0, 0, read_txt=False)
+    #se.extract()
+    #se.plot_response(unsteady=True)
 
-    se.shot = 26
-    se.plot_Qdot_norm()
+    #for CSJA in ftp.listdir('CSJA'):
+    #    SultanEnsemble(CSJA).extract()
+
+    #plt.figure()
+    #se.shot = 24
+    #se.plot_Qdot_norm()
     #spp = SultanPostProcess('CSJA_7')
     #spp.testname = 0
     #spp.shot = 12
@@ -1003,6 +1189,6 @@ if __name__ == '__main__':
     #spp.plot_Qdot_norm()
 
     #plt.figure()
-    #spp.plot_single('Ips')
-    #spp.plot_single('Ips', lowpass=True)
+    #spp.plot_single('Ipulse')
+    #spp.plot_single('Ipulse', lowpass=True)
 

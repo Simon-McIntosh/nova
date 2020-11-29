@@ -42,24 +42,29 @@ class FTPSultan(pythonIO):
         self._set_attributes(*args, **kwargs)
 
     def _set_attributes(self, *args, **kwargs):
-        for attribute, value in zip(self._attributes, args):
-            if attribute == 'experiment':
-                setattr(self, f'_{attribute}', value)
-            else:
-                print(attribute)  #### setting experiment (need localdir)
-                setattr(self, attribute, value)
-            kwargs.pop(attribute, None)
+        # set kwargs first
         _default_attributes = self._default_attributes.copy()
         for attribute in _default_attributes:  # retain set attributes
             try:
                 value = getattr(self, f'_{attribute}')
                 if value is not None:
                     _default_attributes[attribute] = value
-            except AttributeError:  # read_txt
+            except AttributeError:  # skip read_txt
                 pass
         kwargs = {**_default_attributes, **kwargs}
+        if 'experiment' in kwargs:
+            self._set_experiment(kwargs.pop('experiment'))
         for attribute in kwargs:
             setattr(self, attribute, kwargs[attribute])
+        # then set *args
+        for attribute, value in zip(self._attributes, args):
+            if attribute == 'experiment':
+                self._set_experiment(value)
+            else:
+                setattr(self, attribute, value)
+
+    def _set_experiment(self, experiment):
+        self._experiment = experiment
         self._setdir()
 
     def validate(self):
@@ -144,7 +149,7 @@ class FTPSultan(pythonIO):
     @experiment.setter
     def experiment(self, experiment):
         if self._experiment != experiment:  # reinitialize
-            self.__init__()
+            self.__init__(experiment)
 
     @property
     def testkeys(self):
@@ -343,7 +348,7 @@ class FTPSultan(pythonIO):
                     host.chdir(f'./{cd}')
             ls = host.listdir('./')
         if prefix:
-            ls = [file for file in ls if ls[:len(prefix)] == prefix]
+            ls = [file for file in ls if file[:len(prefix)] == prefix]
         return ls
 
     def _download(self, file, parentdir='Daten', subdir=None):
@@ -542,7 +547,6 @@ class FTPSultan(pythonIO):
                     self._note[label].columns = ['Note']
                     df.drop(columns=note, inplace=True, level=0)
                 df.fillna(method='pad', inplace=True)
-
                 # rename columns
                 columns = {'I pulse': 'Ipulse', 'I Pulse': 'Ipulse',
                            'B Sultan': 'Be', 'B SULTAN':  'Be',
@@ -551,6 +555,7 @@ class FTPSultan(pythonIO):
                            'P. Freq': 'frequency',
                            'I Sample': 'Isample'}
                 df.rename(columns=columns, inplace=True)
+                df.rename(columns={np.nan: ''}, inplace=True, level=1)
                 # format frequency
                 frequency_duration = ('frequency', 'Hz/duration')
                 frequency_Hz = ('frequency', 'Hz')
@@ -617,7 +622,7 @@ class FTPSultan(pythonIO):
             self.testname = testname
         if shot is not None:
             self.shot = shot
-        return f'{self.shot[("File", None)]}.dat'
+        return f'{self.shot[("File", "")]}.dat'
 
     def _load_datafile(self, testname=None, shot=None, subdir='ac/dat'):
         """
@@ -652,9 +657,16 @@ class FTPSultan(pythonIO):
             if 'left' in c or 'right' in c:
                 columns[c] = c.replace('left', 'Left')
                 columns[c] = columns[c].replace('right', 'Right')
+                columns[c] = columns[c].replace('  ', ' ')
             if c[-7:] == ' (320K)':
                 columns[c] = c[:-7]
         sultandata.rename(columns=columns, inplace=True)
+        if 'T in' in sultandata.columns:
+            sultandata['T in Left'] = sultandata['T in']
+            sultandata['T in Right'] = sultandata['T in']
+        if 'P in' in sultandata.columns:
+            sultandata['P in Left'] = sultandata['P in']
+            sultandata['P in Right'] = sultandata['P in']
         return sultandata
 
     @property
@@ -692,14 +704,13 @@ class SultanPostProcess(FTPSultan):
         None.
 
         """
-        FTPSultan.__init__(self)  # link to sultan
         self._side = None
+        FTPSultan.__init__(self, *args, **kwargs)  # link to sultan
         self._rawdata = None
         self._lowpassdata = None
         self._Qdot_threshold = 0.75
         self._iQdot = None
         self._Bdot = None
-        self._set_attributes(*args, **kwargs)
 
     def validate(self):
         """
@@ -830,6 +841,7 @@ class SultanPostProcess(FTPSultan):
         data['t'] = self.sultandata['Time']
         data['mdot'] = self.sultandata[f'dm/dt {self.side}'] * 1e-3
         data['Ipulse'] = self.sultandata['PS EEI (I)']
+        #print(self.sultandata.keys())
         for end in ['in', 'out']:
             data[f'T{end}'] = self.sultandata[f'T {end} {self.side}']
             data[f'P{end}'] = self.sultandata[f'P {end} {self.side}'] * 1e5
@@ -1077,12 +1089,16 @@ class SultanEnsemble(SultanPostProcess):
         if self.validate():
             self.load_testdata()
 
-    def extract(self):
-        for testname in self.testkeys:
-            self.testname = testname
-            for side in ['left', 'right']:
-                self.side = side
-                self.load_testdata()
+    def extract(self, prefix=''):
+        if not prefix:
+            prefix = self.experiment
+        for experiment in self.listdir(prefix):
+            self.experiment = experiment
+            for testname in self.testkeys:
+                self.testname = testname
+                for side in ['left', 'right']:
+                    self.side = side
+                    self.load_testdata()
 
     def load_testdata(self, **kwargs):
         """Load testdata from file."""
@@ -1135,11 +1151,14 @@ class SultanEnsemble(SultanPostProcess):
         """Plot ensemble response."""
         if ax is None:
             ax = plt.gca()
-        field_marker = {2: 'd', 9: 'o'}
+        field_marker = {2: 'd', 9: 'o', 1: 's'}
+        field_color = {2: 'C0', 9: 'C3', 1: 'C1'}
         current_linestyle = {0: '-', 40: ':'}
         plot_kwargs = self._get_marker()
         plot_kwargs.update({'color': color})
         for Be in self.testdata.Be.unique():
+            marker = field_marker[Be]
+            color = field_color[Be]
             for Isample in self.testdata.Isample.unique():
                 index = self.testdata.Be == Be
                 index &= self.testdata.Isample == Isample
@@ -1147,17 +1166,29 @@ class SultanEnsemble(SultanPostProcess):
                 Qdot = self.testdata.Qdot_max[index]
                 steady = self.testdata.steady[index].astype(bool)
 
-                marker = field_marker[Be]
+
                 ls = current_linestyle[Isample]
-                plot_kwargs.update({'ls': ls, 'marker': marker})
+                plot_kwargs.update({'ls': ls, 'marker': marker,
+                                    'color': color, 'mfc': color})
 
                 ax.plot(frequency[steady], Qdot[steady], **plot_kwargs)
                 if unsteady:
                     plot_kwargs.update({'mfc': 'none', 'ls': 'none'})
                     ax.plot(frequency[~steady], Qdot[~steady],
                             **plot_kwargs)
+
         ax.set_yscale('log')
         ax.set_xscale('log')
+
+    def plot_ensemble(self, prefix=''):
+        if not prefix:
+            prefix = self.experiment
+        for experiment in self.listdir(prefix):
+            self.experiment = experiment
+            self.side = 'left'
+            self.testname = -1
+            self.load_testdata()
+            self.plot_response(unsteady=True)
 
 
 if __name__ == '__main__':
@@ -1170,8 +1201,11 @@ if __name__ == '__main__':
     #spp.side = 'Left'
     #spp.plot_Qdot_norm()
 
-    se = SultanEnsemble('CFETR2020', 0, 0, read_txt=False)
-    #se.extract()
+    #se = SultanEnsemble('CSJA_10', 0, 0, side='right')
+    se = SultanEnsemble()
+    #se.plot_Qdot_norm()
+    se.extract('CNPF')
+    #se.plot_ensemble('CSJA')
     #se.plot_response(unsteady=True)
 
     #for CSJA in ftp.listdir('CSJA'):

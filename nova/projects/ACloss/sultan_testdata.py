@@ -12,6 +12,7 @@ import scipy.integrate
 import scipy.interpolate
 import scipy.optimize
 import CoolProp.CoolProp as CoolProp
+from matplotlib.lines import Line2D
 
 from nova.definitions import root_dir
 from nova.utilities.pyplot import plt
@@ -43,15 +44,22 @@ class FTPSultan(pythonIO):
 
     def _set_attributes(self, *args, **kwargs):
         # set kwargs first
+        print(kwargs)
         _default_attributes = self._default_attributes.copy()
         for attribute in _default_attributes:  # retain set attributes
             try:
                 value = getattr(self, f'_{attribute}')
-                if value is not None:
-                    _default_attributes[attribute] = value
-            except AttributeError:  # skip read_txt
-                pass
+            except AttributeError:  # no underscore (read_txt)
+                try:
+                    value = getattr(self, attribute)
+                except AttributeError:
+                    value = None
+            if value is not None:
+                _default_attributes[attribute] = value
+
+        print(kwargs)
         kwargs = {**_default_attributes, **kwargs}
+        print(kwargs)
         if 'experiment' in kwargs:
             self._set_experiment(kwargs.pop('experiment'))
         for attribute in kwargs:
@@ -154,10 +162,11 @@ class FTPSultan(pythonIO):
     @property
     def testkeys(self):
         """Return testmatrix keys as pandas.Series, read-only."""
-        return pandas.Series(list(self.testmatrix.keys()))
+        return pandas.Series(list(self.testmatrix.keys()), dtype=object)
 
     @property
     def testmatrix(self):
+        """Return testmatrix, read-only."""
         if self._testmatrix is None:
             self.load_testmatrix()
         return self._testmatrix
@@ -319,15 +328,16 @@ class FTPSultan(pythonIO):
             localfile = self._download(file, subdir=subdir)
         return localfile
 
-    def listdir(self, prefix='', parentdir='Daten', experiment=None,
-           subdir=None):
+    def listdir(self, substr=None,
+                parentdir='Daten', experiment=None,
+                subdir=None):
         """
         Return file/directory list.
 
         Parameters
         ----------
-        prefix : str, optional
-            File select prefix. The default is ''.
+        substr : str, optional
+            File select substr. The default is ''.
         parentdir : str, optional
             Parent (root) directory. The default is 'Daten'.
         experiment : str, optional
@@ -347,8 +357,8 @@ class FTPSultan(pythonIO):
                 if cd is not None:
                     host.chdir(f'./{cd}')
             ls = host.listdir('./')
-        if prefix:
-            ls = [file for file in ls if file[:len(prefix)] == prefix]
+        if substr:
+            ls = [file for file in ls if substr in file]
         return ls
 
     def _download(self, file, parentdir='Daten', subdir=None):
@@ -624,7 +634,8 @@ class FTPSultan(pythonIO):
             self.shot = shot
         return f'{self.shot[("File", "")]}.dat'
 
-    def _load_datafile(self, testname=None, shot=None, subdir='ac/dat'):
+    def _load_datafile(self, testname=None, shot=None,
+                       subdir=['ac/dat', 'AC/ACdat', 'TEST/AC/ACdat']):
         """
         Return sultan dataframe and associated shot metadata.
 
@@ -634,8 +645,9 @@ class FTPSultan(pythonIO):
             Test identifier. The default is None.
         shot : int, optional
             Shot identifier. The default is None.
-        subdir : str, optional
-            Data subdirectory. The default is 'ac/dat'.
+        subdir : array-like, optional
+            List of trial data subdirectories.
+            The default is ['ac/dat', 'AC/ACdat', 'TEST/AC/ACdat'].
 
         Returns
         -------
@@ -646,11 +658,17 @@ class FTPSultan(pythonIO):
 
         """
         filename = self._get_filename(testname, shot)
+        for sdir in subdir:
+            try:
+                datafile = self.locate(filename, subdir=sdir)
+                break
+            except ftputil.error.PermanentError as error:
+                ftp_err = error
+                pass
         try:
-            datafile = self.locate(filename, subdir=subdir)
-        except ftputil.error.PermanentError:
-            datafile = self.locate(filename, subdir='AC/ACdat')
-        datafile = os.path.join(self.datadir, datafile)
+            datafile = os.path.join(self.datadir, datafile)
+        except UnboundLocalError:
+            raise ftputil.error.PermanentError(f'{ftp_err}')
         sultandata = pandas.read_csv(datafile, encoding='ISO-8859-1')
         columns = {}
         for c in sultandata.columns:
@@ -863,7 +881,7 @@ class SultanPostProcess(FTPSultan):
         data['Qdot'] = data[('mdot', 'kg/s')] * \
             (data[('hout', 'J/Kg')] - data[('hin', 'J/Kg')])
         # normalize Qdot heating by |Bdot|**2
-        data['Qdot_norm'] = data['Qdot'] / self.Bdot**2
+        data['Qdot_norm'] = data['Qdot'] / self.Bdot#**2
         return data
 
     @property
@@ -1034,7 +1052,7 @@ class SultanPostProcess(FTPSultan):
         return t_eoh, Qdot_eoh, t_max, Qdot_max, steady
 
     def _get_marker(self, steady=True, location='max'):
-        marker = {'ls': 'none', 'alpha': 1, 'ms': 6, 'mew': 1.5}
+        marker = {'ls': 'none', 'alpha': 1, 'ms': 4, 'mew': 1}
         if location == 'eoh':
             marker.update({'color': 'C6', 'label': 'eoh', 'marker': 'o'})
         elif location == 'max':
@@ -1069,9 +1087,9 @@ class SultanPostProcess(FTPSultan):
     def title(self, ax=None):
         if ax is None:
             ax = plt.gca()
-        I = self.shot[('Ipulse', 'A')][1:]
+        Ipulse = self.shot[('Ipulse', 'A')][1:]
         f = self.shot[('frequency', 'Hz')]
-        ax.set_title(rf'$I_{{ps}}$ = {I}(2$\pi$ {f} $t$)')
+        ax.set_title(rf'$I_{{pulse}}$ = {Ipulse }(2$\pi$ {f} $t$)')
 
     def plot_Qdot_norm(self):
         self._zero_offset()
@@ -1089,10 +1107,34 @@ class SultanEnsemble(SultanPostProcess):
         if self.validate():
             self.load_testdata()
 
-    def extract(self, prefix=''):
-        if not prefix:
-            prefix = self.experiment
-        for experiment in self.listdir(prefix):
+    @property
+    def substr(self):
+        """
+        Manage experiment substr.
+
+        Parameters
+        ----------
+        substr : str or None
+            Selection substr searched for in experiment name.
+
+        Returns
+        -------
+        substr : str
+            Returns self.experiment if null.
+
+        """
+        if self._substr:
+            return self._substr
+        else:
+            return self.experiment
+
+    @substr.setter
+    def substr(self, substr):
+        self._substr = substr
+
+    def extract(self, substr=None):
+        self.substr = substr
+        for experiment in self.listdir(self.substr):
             self.experiment = experiment
             for testname in self.testkeys:
                 self.testname = testname
@@ -1147,48 +1189,85 @@ class SultanEnsemble(SultanPostProcess):
     def _save_testdata(self):
         self.testdata.to_parquet(self.ensemble_filename)
 
-    def plot_response(self, unsteady=False, ax=None, color='C0'):
+    def plot_response(self, unsteady=False, ax=None, color='C0',
+                      Bexternal=None, Isample=0):
         """Plot ensemble response."""
         if ax is None:
             ax = plt.gca()
-        field_marker = {2: 'd', 9: 'o', 1: 's'}
-        field_color = {2: 'C0', 9: 'C3', 1: 'C1'}
-        current_linestyle = {0: '-', 40: ':'}
+        field_marker = {1: 'D', 2: 11, 9: 10}
         plot_kwargs = self._get_marker()
         plot_kwargs.update({'color': color})
-        for Be in self.testdata.Be.unique():
+        if Bexternal is None:
+            Bexternal = self.testdata.Be.unique()
+        else:
+            if not pandas.api.types.is_list_like(Bexternal):
+                Bexternal = [Bexternal]
+        if Isample is None:
+            Isample = self.testdata.Isample.unique()
+        else:
+            if not pandas.api.types.is_list_like(Isample):
+                Isample = [Isample]
+        for Be in Bexternal:
             marker = field_marker[Be]
-            color = field_color[Be]
-            for Isample in self.testdata.Isample.unique():
+            for Is in Isample:
+                # index data
                 index = self.testdata.Be == Be
-                index &= self.testdata.Isample == Isample
-                frequency = self.testdata.frequency[index]
-                Qdot = self.testdata.Qdot_max[index]
-                steady = self.testdata.steady[index].astype(bool)
+                index &= self.testdata.Isample == Is
+                testdata = self.testdata.loc[index]
+                # sort
+                testdata = testdata.sort_values(['Bdot'])
+                frequency = testdata.frequency
+                Qdot = testdata.Qdot_max
+                steady = testdata.steady.astype(bool)
+                plot_kwargs.update({'ls': '-', 'marker': marker,
+                                    'color': color, 'mfc': color,
+                                    'ms': 6})
 
-
-                ls = current_linestyle[Isample]
-                plot_kwargs.update({'ls': ls, 'marker': marker,
-                                    'color': color, 'mfc': color})
-
-                ax.plot(frequency[steady], Qdot[steady], **plot_kwargs)
+                ax.plot(frequency[steady], Qdot[steady],
+                        **plot_kwargs)
                 if unsteady:
                     plot_kwargs.update({'mfc': 'none', 'ls': 'none'})
                     ax.plot(frequency[~steady], Qdot[~steady],
                             **plot_kwargs)
-
         ax.set_yscale('log')
         ax.set_xscale('log')
+        return sum(index) > 0
 
-    def plot_ensemble(self, prefix=''):
-        if not prefix:
-            prefix = self.experiment
-        for experiment in self.listdir(prefix):
+    def plot_ensemble(self, substr=None, testname=0, ax=None):
+        self.substr = substr
+        if ax is None:
+            ax = plt.gca()
+        legend = [[], []]
+        for i, experiment in enumerate(self.listdir(self.substr)):
             self.experiment = experiment
             self.side = 'left'
-            self.testname = -1
+            self.testname = testname
             self.load_testdata()
-            self.plot_response(unsteady=True)
+            color = f'C{i % 10}'
+            if self.plot_response(unsteady=True, color=color):
+                legend[0].append(Line2D([0], [0], color=color, ls='-'))
+                legend[1].append(self.strand)
+        # set marker legend
+        marker_legend = plt.legend(
+            [Line2D([0], [0], marker=marker, color='C7', mew=1,
+                    ms=5, ls='none', mfc=mfc)
+             for mfc, marker in zip(['C7', 'none', 'C7', 'C7', 'C7'],
+                                    ['o', 'o', 'D', 11, 10])],
+            ['steady', 'unsteady (under-estimate)',
+             r'$B_e$ 1T', r'$B_e$ 2T', r'$B_e$ 9T'],
+            loc='lower left')
+        # label axes and add primary legend
+        ax.set_xlabel('$f$ Hz')
+        ax.set_ylabel('$\dot{Q}$ W')
+        ax.legend(*legend, loc='upper right', ncol=1,
+                  bbox_to_anchor=(1.1, 1))
+        ax.add_artist(marker_legend)
+        plt.despine()
+        test_str = 'virgin' if testname == 0 else 'cycled'
+        ax.set_title('Sultan AC loss CS frequency response '
+                     f'({test_str})')
+
+
 
 
 if __name__ == '__main__':
@@ -1202,10 +1281,10 @@ if __name__ == '__main__':
     #spp.plot_Qdot_norm()
 
     #se = SultanEnsemble('CSJA_10', 0, 0, side='right')
-    se = SultanEnsemble()
+    se = SultanEnsemble(read_txt=True)
     #se.plot_Qdot_norm()
-    se.extract('CNPF')
-    #se.plot_ensemble('CSJA')
+    #se.extract('KOCS')
+    se.plot_ensemble('CSJA')
     #se.plot_response(unsteady=True)
 
     #for CSJA in ftp.listdir('CSJA'):

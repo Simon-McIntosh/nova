@@ -1185,7 +1185,7 @@ class SultanEnsemble(SultanPostProcess):
             prefix = self.experiment
         for experiment in self.listdir(prefix):
             self.experiment = experiment
-            self.side = 'left'
+            self.side = 'right'
             self.testname = -1
             self.load_testdata()
             self.plot_response(unsteady=True)
@@ -1204,8 +1204,8 @@ if __name__ == '__main__':
     #se = SultanEnsemble('CSJA_10', 0, 0, side='right')
     se = SultanEnsemble()
     #se.plot_Qdot_norm()
-    se.extract('CNPF')
-    #se.plot_ensemble('CSJA')
+    #se.extract('CNPF')
+    se.plot_ensemble('CFETR2020')
     #se.plot_response(unsteady=True)
 
     #for CSJA in ftp.listdir('CSJA'):

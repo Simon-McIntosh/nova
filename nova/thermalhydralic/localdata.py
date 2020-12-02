@@ -1,108 +1,75 @@
-
+"""Manage local data directories."""
 import os
+from dataclasses import dataclass
 
 from nova.definitions import root_dir
-from nova.thermalhydralic.attributes import Attributes
-
-'''
-#_attributes = ['experiment', 'testname', 'shot', 'mode']
-#_default_attributes = {'mode': 'ac', 'read_txt': False}
-#_input_attributes = ['testname', 'shot', 'mode']
-'''
 
 
-class LocalData(Attributes):
-    """Manage local data structure, directorys and attributes."""
+@dataclass
+class LocalData:
+    """
+    Manage local data directories.
 
-    def __init__(self, *args, **kwargs):
-        Attributes.__init__(self)
-        self.attributes = ['experiment']
-        self.default_attributes = {'subfolder': None, 'experimentdir': None,
-                                   'datadir': None, 'localdir': None}
-        self.initialize_attributes()
-        self.set_attributes(*args, **kwargs)
+    Methods implemented for group creation and deletion of directory structure.
+    """
 
-    @property
-    def experiment(self):
-        """
-        Manage experiment identifier.
+    experiment: str
+    parent: str = ''
+    data: str = 'data'
+    post: str = 'post'
 
-        Reinitialize if changed.
-
-        Parameters
-        ----------
-        experiment : str
-            Test directory name, evaluated as ftp/parentdir/experiment.
-
-        Returns
-        -------
-        experiment : str
-
-        """
-        if self._experiment is None:
-            raise IndexError(f'experiment not set.\n {self.listdir()}')
-        return self._experiment
-
-    @experiment.setter
-    def experiment(self, experiment):
-        if self._experiment is None:
-            self._experiment = experiment
-        elif self._experiment != experiment:
-            self.__init__(experiment)
+    def __post_init__(self):
+        """Create hierarchical list used by makedir and removedir methods."""
+        self._directories = [self.experiment_directory,
+                             self.data_directory,
+                             self.post_directory]
 
     @property
-    def subfolder(self):
-        return self._subfolder
-
-    @subfolder.setter
-    def subfolder(self, subfolder):
-        self._subfolder = subfolder
-        self._experimentdir = None
+    def parent_directory(self):
+        """Return full path to parent directory."""
+        return self.getdir(os.path.join(root_dir, 'data'), self.parent)
 
     @property
-    def experimentdir(self):
-        if self._experimentdir is None:
-            directory = os.path.join(root_dir, 'data')
-            if self.subfolder:
-                directory = os.path.join(directory, f'{self.subfolder}')
-            directory = os.path.join(directory, f'{self.experiment}')
-            if not os.path.isdir(directory):
-                os.mkdir(directory)
-            self._experimentdir = directory
-        return self._experimentdir
+    def experiment_directory(self):
+        """Return full path to experiment directory."""
+        return self.getdir(self.parent_directory, self.experiment)
 
     @property
-    def datadir(self):
-        return self._datadir
+    def data_directory(self):
+        """Return full path to data directory."""
+        return self.getdir(self.experiment_directory, self.data)
 
-    def _set_experiment(self, experiment):
-        self._experiment = experiment
-        self._setdir()
+    @property
+    def post_directory(self):
+        """Return full path to data directory."""
+        return self.getdir(self.experiment_directory, self.post)
 
-    def _setdir(self):
-        if self._experiment is not None:
-            self.experimentdir = os.path.join(root_dir,
-                                       f'data/Sultan/{self.experiment}')
-            self.datadir = os.path.join(self.expdir, 'ftp')
-            self.localdir = os.path.join(self.expdir, 'local')
-            self._mkdir(['experiment', 'data', 'local'])
+    @staticmethod
+    def getdir(directory, subfolder=''):
+        """Return directory, append subfolder if passed."""
+        if subfolder:
+            directory = os.path.join(directory, subfolder)
+        return directory
 
-    def _mkdir(self, names):
-        for name in names:
-            directory = getattr(self, f'{name}dir')
-            if not os.path.isdir(directory):
-                os.mkdir(directory)
+    @staticmethod
+    def _mkdir(directory):
+        if not os.path.isdir(directory):
+            os.mkdir(directory)
 
-    def _rmdir(self, names):
-        for name in names:
-            directory = getattr(self, f'{name}dir')
-            if os.path.isdir(directory):
-                os.rmdir(directory)
+    def makedir(self):
+        """Create physical directories."""
+        for directory in self._directories:
+            self._mkdir(directory)
+
+    def removedir(self):
+        """Remove experiment and sub directories."""
+        for directory in self._directories[::-1]:
+            os.rmdir(directory)
 
 
 if __name__ == '__main__':
 
-    local = LocalData('Sultan')
-    print(local.experiment)
-    local.experiment = 'CSJA_3'
+    local = LocalData('CS1', 'Sultan')
+    local.makedir()
+    local.removedir()
     print(local.experiment)

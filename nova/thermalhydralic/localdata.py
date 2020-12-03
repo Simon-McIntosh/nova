@@ -1,6 +1,9 @@
 """Manage local data directories."""
 import os
+import glob
 from dataclasses import dataclass
+
+import numpy as np
 
 from nova.definitions import root_dir
 
@@ -14,15 +17,15 @@ class LocalData:
     """
 
     experiment: str
-    parent: str = ''
-    data: str = 'data'
-    post: str = 'post'
+    parent: str = 'Sultan'
+    source: str = 'ftp'
+    binary: str = 'local'
 
     def __post_init__(self):
         """Create hierarchical list used by makedir and removedir methods."""
         self._directories = [self.experiment_directory,
-                             self.data_directory,
-                             self.post_directory]
+                             self.source_directory,
+                             self.binary_directory]
 
     @property
     def parent_directory(self):
@@ -35,14 +38,14 @@ class LocalData:
         return self.getdir(self.parent_directory, self.experiment)
 
     @property
-    def data_directory(self):
-        """Return full path to data directory."""
-        return self.getdir(self.experiment_directory, self.data)
+    def source_directory(self):
+        """Return full path to raw data directory."""
+        return self.getdir(self.experiment_directory, self.source)
 
     @property
-    def post_directory(self):
-        """Return full path to data directory."""
-        return self.getdir(self.experiment_directory, self.post)
+    def binary_directory(self):
+        """Return full path to binary data directory."""
+        return self.getdir(self.experiment_directory, self.binary)
 
     @staticmethod
     def getdir(directory, subfolder=''):
@@ -56,6 +59,13 @@ class LocalData:
         if not os.path.isdir(directory):
             os.mkdir(directory)
 
+    def checkdir(self):
+        """Return booliean status of all tracked local directories."""
+        isdir = np.full(len(self._directories), False)
+        for i, directory in enumerate(self._directories):
+            isdir[i] = os.path.isdir(directory)
+        return isdir.all()
+
     def makedir(self):
         """Create physical directories."""
         for directory in self._directories:
@@ -66,10 +76,55 @@ class LocalData:
         for directory in self._directories[::-1]:
             os.rmdir(directory)
 
+    def locate(self, file, directory_prefix='source'):
+        """
+        Locate file on local host.
+
+        Parameters
+        ----------
+        file : str
+            Filename.
+        directory_prefix : str
+            Directory label, evaluated as f'{directory_prefix}_directory'.
+
+        Raises
+        ------
+        IndexError
+            Evaluation of filename wild card returns multiple files.
+        AttributeError
+            f'{directory_prefix}_directory' undefined.
+
+        Returns
+        -------
+        localfile : str
+            Full path of local file.
+
+        """
+        try:
+            directory = getattr(self, f'{directory_prefix}_directory')
+        except AttributeError as error:
+            raise AttributeError('directory prefix undefined '
+                                 f'{directory_prefix}') from error
+        filepath = os.path.join(directory, file)
+        localfile = ''
+        if '*' in file:
+            localfile = glob.glob(filepath)
+            if len(localfile) == 0:
+                raise FileNotFoundError(f'No files found matching {file}')
+            if len(localfile) > 1:
+                raise IndexError(f'multiple files found {file} > {localfile}')
+            localfile = os.path.split(localfile[0])[1]
+        else:
+            if os.path.isfile(filepath):
+                localfile = file
+            else:
+                raise FileNotFoundError(f'File {file} not found')
+        return localfile
+
 
 if __name__ == '__main__':
 
-    local = LocalData('CS1', 'Sultan')
-    local.makedir()
-    local.removedir()
-    print(local.experiment)
+    local = LocalData('CSJA_3', 'Sultan')
+    print(local.locate('*.xls'))
+    #local.makedir()
+    #local.removedir()

@@ -1,13 +1,101 @@
-
-import os
-
-import ftputil
-import pandas
-import numpy as np
+"""Postprocess Sultan AC loss test data."""
+import os.path
+from dataclasses import dataclass
 
 from nova.utilities.IO import pythonIO
+from nova.thermalhydralic.localdata import LocalData
+from nova.thermalhydralic.remotedata import FTPData
 
 
+@dataclass
+class TestPlan:
+
+
+    @stataticmethod
+    def _read_strand(index):
+        """Return strand label extracted from testplan index."""
+        labels = [label[0] for label in index.values
+                  if isinstance(label[0], str)]
+        try:
+            strand = next(label for label in labels
+                          if f'{mode}XXYYZZ' in label
+                          or f'{mode.upper()}XXYYZZ' in label)
+        except StopIteration:
+            raise StopIteration(f'{mode}XXYYZZ not found in {labels}')
+        self.strand = strand.split('XXYYZZ')[0][:-1]
+
+    def _read_testplan_index(self, index):
+        """Extract testplan indices."""
+        _testplan_index = {}
+        testname = None
+        skip_file = False
+        strandID = self.strand
+        if self.mode == 'full':
+            mode = 'a'
+        else:
+            mode = self.mode[0]
+            if f'{mode}XXYYZZ' in strand:  # lower case
+                strandID += self.mode[0]
+            else:  # upper case
+                strandID += self.mode[0].upper()
+        strandID = strandID.replace('-', '')
+        for i, label in enumerate(index.values):
+            if isinstance(label[0], str):
+                if label[0][:len(strandID)] == strandID \
+                        and testname is not None:
+                    _testplan_index[testname][1] = i  # advance stop index
+                else:
+                    islabel = 'test' in label[0].lower() \
+                        or label[0][:2] == 'AC' \
+                        or label[0][:2] == 'DC'
+                    try:
+                        nextlabel = index.values[i+1][0]
+                    except IndexError:
+                        nextlabel = ''
+                    try:
+                        isnext_file = nextlabel.strip().capitalize() == 'File'
+                    except AttributeError:
+                        isnext_file = False
+                    try:
+                        isnext_strand = strandID in nextlabel
+                    except TypeError:
+                        isnext_strand = False
+                    if islabel and (isnext_file or isnext_strand):
+                        j = i+1
+                        skip_file = True
+                    elif label[0].strip().capitalize() == 'File':
+                        if skip_file:
+                            skip_file = False
+                            continue
+                        j = i
+                    else:
+                        testname = None
+                        continue
+                    testname = index.values[j-1][0]
+                    try:
+                        if strandID in testname:
+                            testname = f'noname {j}'
+                    except TypeError:
+                        testname = f'noname {j}'
+                    testname = testname.split(':')[0].split('(')[0]
+                    if testname in _testplan_index:
+                        testname += f' {j}'
+                    _testplan_index[testname] = [j, 0]
+        for testname in list(_testplan_index.keys()):  # remove open indices
+            if _testplan_index[testname][1] == 0:
+                _testplan_index.pop(testname)
+        return _testplan_index
+
+    def read_testplan(self):
+        """Read *.xls testplan."""
+        testplan = self.locate('*.xls')
+        testplan = os.path.join(self.local.source_directory, testplan)
+        with pandas.ExcelFile(testplan) as xls:
+            index = pandas.read_excel(xls, usecols=[0], header=None)
+        self.strand = self._read_strand(index)
+
+
+@dataclass
 class SultanData(pythonIO):
     """
     Provide access to sultan data.
@@ -16,6 +104,119 @@ class SultanData(pythonIO):
 
     """
 
+    _experiment: str
+    _testname: int = 0  # test identifier
+    _shot: int = 0  # shot identifier
+    _mode: str = 'ac'
+
+    def __post_init__(self):
+        self.local = LocalData(self.experiment, 'Sultan', 'ftp', 'local')
+        self.ftp = FTPData(self.local)
+
+    @property
+    def experiment(self):
+        return self._experiment
+
+    @experiment.setter
+    def experiment(self, experiment):
+        self.local.experiment = experiment
+        self._experiment = experiment
+
+    #def optional(self, *args):
+    #    read_text = args + (True,)
+    #    print(read_text[0])
+
+    def locate(self, file):
+        """
+        Return full filename. Search localy first, download if not found.
+
+        Parameters
+        ----------
+        file : str
+            Filename, names of type '*.ext' permited.
+
+        Returns
+        -------
+        file : str
+            Full filename.
+
+        """
+        try:
+            localfile = self.local.locate(file)
+            return localfile
+        except FileNotFoundError:
+            remotefile = self.ftp.locate(file)
+            self.ftp.download(remotefile)
+            return remotefile
+
+
+
+
+    def read_testmatrix(self):
+        # store test matrix data
+        previouscolumns = None
+        with pandas.ExcelFile(testplan) as xls:
+            for label in _testplan_index:
+                index = _testplan_index[label]
+                df = pandas.read_excel(
+                    xls, skiprows=index[0],
+                    nrows=np.diff(index)[0]+1, header=None)
+                if df.iloc[0, 0] == 'File':
+                    df.columns = pandas.MultiIndex.from_arrays(
+                        df.iloc[:2].values)
+                    df = df.iloc[2:]
+                    previouscolumns = df.columns
+                elif previouscolumns is not None:
+                    df.columns = previouscolumns
+                # remove column nans
+                columns = df.columns.get_level_values(0)
+                df = df.loc[:, columns.notna()]
+                # extract note
+                columns = [col for col in df.columns.get_level_values(0) if
+                           isinstance(col, str)]
+                note = [col for col in columns if 'note' in col.lower()]
+                if note:
+                    self._note[label] = df[note[0]]
+                    self._note[label].columns = ['Note']
+                    df.drop(columns=note, inplace=True, level=0)
+                df.fillna(method='pad', inplace=True)
+                # rename columns
+                columns = {'I pulse': 'Ipulse', 'I Pulse': 'Ipulse',
+                           'B Sultan': 'Be', 'B SULTAN':  'Be',
+                           'B sultan': 'Be', 'frequency': 'frequency',
+                           'Frequency': 'frequency',
+                           'P. Freq': 'frequency',
+                           'I Sample': 'Isample'}
+                df.rename(columns=columns, inplace=True)
+                df.rename(columns={np.nan: ''}, inplace=True, level=1)
+                # format frequency
+                frequency_duration = ('frequency', 'Hz/duration')
+                frequency_Hz = ('frequency', 'Hz')
+                if frequency_duration in df:
+                    df[('frequency', 'Hz')] = df[frequency_duration].apply(
+                            self._format_frequency)
+                elif frequency_Hz in df:
+                    if df[frequency_Hz].dtype == object:
+                        df[frequency_Hz] = df[frequency_Hz].apply(
+                            self._format_frequency)
+                df.sort_values([('Be', 'T'), ('Isample', 'kA')], inplace=True)
+                try:  # AC data
+                    df.sort_values([('Ipulse', 'A'), ('frequency', 'Hz')],
+                                   inplace=True)
+                except KeyError:
+                    pass
+                df.reset_index(inplace=True)
+                df.drop(columns=['index'], level=0, inplace=True)
+                self._testmatrix[label] = df
+    '''
+
+
+if __name__ == '__main__':
+
+    data = SultanData('CSJA_3')
+    data.read_testplan()
+
+    '''
     _attributes = ['experiment', 'testname', 'shot', 'mode']
     _default_attributes = {'mode': 'ac', 'read_txt': False}
     _input_attributes = ['testname', 'shot', 'mode']
@@ -30,7 +231,9 @@ class SultanData(pythonIO):
         self._note = {}
         self._sultandata = None
         self._set_data_attributes(*args, **kwargs)
+    '''
 
+    '''
     @property
     def reload(self):
         """
@@ -238,142 +441,6 @@ class SultanData(pythonIO):
         else:
             self.load_pickle(filepath)
 
-    def read_testmatrix(self):
-        """Load testmatrix."""
-        try:
-            testplan = os.path.join(self.datadir, self.locate('*.xls'))
-            self._testmatrix = {}
-        except ftputil.error.PermanentError as error:  # folder not found
-            self._rmdir(['data', 'local', 'exp'])
-            self._testmatrix = None
-            raise ftputil.error.PermanentError(f'{error}')
-        with pandas.ExcelFile(testplan) as xls:
-            index = pandas.read_excel(xls, usecols=[0], header=None)
-        if self.mode == 'full':
-            mode = 'a'
-        else:
-            mode = self.mode[0]
-        labels = [label[0] for label in index.values
-                  if isinstance(label[0], str)]
-        try:
-            strand = next(label for label in labels
-                          if f'{mode}XXYYZZ' in label
-                          or f'{mode.upper()}XXYYZZ' in label)
-        except StopIteration:
-            raise StopIteration(f'{mode}XXYYZZ not found in {labels}')
-        self.strand = strand.split('XXYYZZ')[0][:-1]
-        strandID = self.strand
-        if self.mode != 'full':  # append mode identifier
-            if f'{mode}XXYYZZ' in strand:  # lower case
-                strandID += self.mode[0]
-            else:  # upper case
-                strandID += self.mode[0].upper()
-        strandID = strandID.replace('-', '')
-        # extract testplan indices
-        _testplan_index = {}
-        testname = None
-        skip_file = False
-        for i, label in enumerate(index.values):
-            if isinstance(label[0], str):
-                if label[0][:len(strandID)] == strandID \
-                        and testname is not None:
-                    _testplan_index[testname][1] = i  # advance stop index
-                else:
-                    islabel = 'test' in label[0].lower() \
-                        or label[0][:2] == 'AC' \
-                        or label[0][:2] == 'DC'
-                    try:
-                        nextlabel = index.values[i+1][0]
-                    except IndexError:
-                        nextlabel = ''
-                    try:
-                        isnext_file = nextlabel.strip().capitalize() == 'File'
-                    except AttributeError:
-                        isnext_file = False
-                    try:
-                        isnext_strand = strandID in nextlabel
-                    except TypeError:
-                        isnext_strand = False
-                    if islabel and (isnext_file or isnext_strand):
-                        j = i+1
-                        skip_file = True
-                    elif label[0].strip().capitalize() == 'File':
-                        if skip_file:
-                            skip_file = False
-                            continue
-                        j = i
-                    else:
-                        testname = None
-                        continue
-                    testname = index.values[j-1][0]
-                    try:
-                        if strandID in testname:
-                            testname = f'noname {j}'
-                    except TypeError:
-                        testname = f'noname {j}'
-                    testname = testname.split(':')[0].split('(')[0]
-                    if testname in _testplan_index:
-                        testname += f' {j}'
-                    _testplan_index[testname] = [j, 0]
-        # remove open indices
-        for testname in list(_testplan_index.keys()):
-            if _testplan_index[testname][1] == 0:
-                _testplan_index.pop(testname)
-        # store test matrix data
-        previouscolumns = None
-        with pandas.ExcelFile(testplan) as xls:
-            for label in _testplan_index:
-                index = _testplan_index[label]
-                df = pandas.read_excel(
-                    xls, skiprows=index[0],
-                    nrows=np.diff(index)[0]+1, header=None)
-                if df.iloc[0, 0] == 'File':
-                    df.columns = pandas.MultiIndex.from_arrays(
-                        df.iloc[:2].values)
-                    df = df.iloc[2:]
-                    previouscolumns = df.columns
-                elif previouscolumns is not None:
-                    df.columns = previouscolumns
-                # remove column nans
-                columns = df.columns.get_level_values(0)
-                df = df.loc[:, columns.notna()]
-                # extract note
-                columns = [col for col in df.columns.get_level_values(0) if
-                           isinstance(col, str)]
-                note = [col for col in columns if 'note' in col.lower()]
-                if note:
-                    self._note[label] = df[note[0]]
-                    self._note[label].columns = ['Note']
-                    df.drop(columns=note, inplace=True, level=0)
-                df.fillna(method='pad', inplace=True)
-                # rename columns
-                columns = {'I pulse': 'Ipulse', 'I Pulse': 'Ipulse',
-                           'B Sultan': 'Be', 'B SULTAN':  'Be',
-                           'B sultan': 'Be', 'frequency': 'frequency',
-                           'Frequency': 'frequency',
-                           'P. Freq': 'frequency',
-                           'I Sample': 'Isample'}
-                df.rename(columns=columns, inplace=True)
-                df.rename(columns={np.nan: ''}, inplace=True, level=1)
-                # format frequency
-                frequency_duration = ('frequency', 'Hz/duration')
-                frequency_Hz = ('frequency', 'Hz')
-                if frequency_duration in df:
-                    df[('frequency', 'Hz')] = df[frequency_duration].apply(
-                            self._format_frequency)
-                elif frequency_Hz in df:
-                    if df[frequency_Hz].dtype == object:
-                        df[frequency_Hz] = df[frequency_Hz].apply(
-                            self._format_frequency)
-                df.sort_values([('Be', 'T'), ('Isample', 'kA')], inplace=True)
-                try:  # AC data
-                    df.sort_values([('Ipulse', 'A'), ('frequency', 'Hz')],
-                                   inplace=True)
-                except KeyError:
-                    pass
-                df.reset_index(inplace=True)
-                df.drop(columns=['index'], level=0, inplace=True)
-                self._testmatrix[label] = df
 
     @staticmethod
     def _format_frequency(x):
@@ -487,7 +554,4 @@ class SultanData(pythonIO):
             self._sultandata = self._load_datafile()
             self.reload = False
         return self._sultandata
-
-if __name__ == '__main__':
-
-    data = SultanData()
+    '''

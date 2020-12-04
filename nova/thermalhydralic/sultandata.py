@@ -77,6 +77,17 @@ class DataBase:
         return os.path.join(self.local.source_directory, filename)
 
 
+class dataclass_property(property):
+    """Dataclass property."""
+
+    def __get__(self, obj, cls):
+        """Catch attribute error if object not found."""
+        try:
+            return super().__get__(obj, cls)
+        except AttributeError:
+            pass
+
+
 @dataclass
 class TestPlan:
     """
@@ -97,12 +108,36 @@ class TestPlan:
     database: DataBase = field(init=False, repr=False)
     index: pandas.DataFrame = field(init=False, repr=False)
 
-    def __post_init__(self):
-        """Initialize database instance and load data."""
-        if not hasattr(self, 'database'):
-            self.database = DataBase(self.experiment)
-        self.load_testplan()
+    #def __post_init__(self):
+    #    """Initialize database instance and load data."""
+    #    self.database = DataBase(self.experiment)
+    #    self.load_testplan()
 
+    @dataclass_property
+    def experiment(self):
+        """
+        Manage experiment name.
+
+        Parameters
+        ----------
+        experiment : str
+            Experiment label.
+
+        Returns
+        -------
+        experiment : str
+
+        """
+        return self.experiment
+
+    @experiment.setter
+    def experiment(self, experiment):
+        if experiment != self.experiment:
+            self.database = None
+            self.index = None
+
+
+    '''
     def __setattr__(self, name, value):
         """
         Extend __setattr__.
@@ -119,6 +154,7 @@ class TestPlan:
                 print('load')
         else:
             super().__setattr__(name, value)
+    '''
 
     def load_testplan(self):
         """Load testplan index."""
@@ -760,4 +796,4 @@ class SultanData(pythonIO):
 if __name__ == '__main__':
 
 
-    tm = TestMatrix('CSJA_3')
+    tp = TestPlan('CSJA_3')

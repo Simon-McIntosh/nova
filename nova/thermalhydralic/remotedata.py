@@ -1,31 +1,26 @@
 """Manage access to remote data."""
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from warnings import warn
+from typing import Tuple
+
 import pandas.api.types
-
 import ftputil
-
-from nova.thermalhydralic.localdata import LocalData
 
 
 @dataclass
 class FTPData:
     """Manage access to FTP database."""
 
-    local: LocalData
+    experiment: str
     parent: str = 'Daten'
     server: str = 'ftp.psi.ch'
     username: str = 'sultan'
     password: str = '3g8S4Nbq'
+    ftp_args: Tuple[str] = field(init=False)
 
     def __post_init__(self):
-        """Initialize localdata and assemble ftp arguments."""
-        if not isinstance(self.local, LocalData):
-            if not pandas.api.types.is_list_like(self.local):
-                self.local = [self.local]
-            self.local = LocalData(*self.local)
-        self.experiment = self.local.experiment
+        """Assemble ftp arguments."""
         self.ftp_args = (self.server, self.username, self.password)
 
     def locate(self, file, *relative_path):
@@ -71,7 +66,7 @@ class FTPData:
             remotefile = file
         return remotefile
 
-    def download(self, file, *relative_path):
+    def download(self, file, directory, *relative_path):
         """
         Download file from ftp server.
 
@@ -79,6 +74,8 @@ class FTPData:
         ----------
         file : str
             Full filename.
+        path : str
+            Local directory path.
         *relative_path : str, optional
             relative path below parent/experiment/.
 
@@ -94,18 +91,15 @@ class FTPData:
         None.
 
         """
+        if not os.path.isdir(directory):
+            raise FileNotFoundError(f'lLocal directory {directory} not found.')
         remotefile = self.locate(file, *relative_path)
-        isdir = self.local.checkdir()
-        if not isdir:
-            self.local.makedir()  # generate local file strucutre if required
-        localfile = os.path.join(self.local.source_directory, remotefile)
+        localfile = os.path.join(directory, remotefile)
         with ftputil.FTPHost(*self.ftp_args) as host:
             self.changedir(host, self.parent, self.experiment, *relative_path)
             try:
                 host.download(remotefile, localfile)
             except ftputil.error.PermanentError as file_not_found:
-                if not isdir:
-                    self.local.removedir()  # remove if generated bare
                 raise FileNotFoundError(
                     f'file {file} not found in {host.listdir("./")}') \
                     from file_not_found

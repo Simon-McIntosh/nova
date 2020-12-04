@@ -1,6 +1,9 @@
 """Postprocess Sultan AC loss test data."""
 import os.path
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import List
+
+import pandas
 
 from nova.utilities.IO import pythonIO
 from nova.thermalhydralic.localdata import LocalData
@@ -8,123 +11,31 @@ from nova.thermalhydralic.remotedata import FTPData
 
 
 @dataclass
-class TestPlan:
-
-
-    @stataticmethod
-    def _read_strand(index):
-        """Return strand label extracted from testplan index."""
-        labels = [label[0] for label in index.values
-                  if isinstance(label[0], str)]
-        try:
-            strand = next(label for label in labels
-                          if f'{mode}XXYYZZ' in label
-                          or f'{mode.upper()}XXYYZZ' in label)
-        except StopIteration:
-            raise StopIteration(f'{mode}XXYYZZ not found in {labels}')
-        self.strand = strand.split('XXYYZZ')[0][:-1]
-
-    def _read_testplan_index(self, index):
-        """Extract testplan indices."""
-        _testplan_index = {}
-        testname = None
-        skip_file = False
-        strandID = self.strand
-        if self.mode == 'full':
-            mode = 'a'
-        else:
-            mode = self.mode[0]
-            if f'{mode}XXYYZZ' in strand:  # lower case
-                strandID += self.mode[0]
-            else:  # upper case
-                strandID += self.mode[0].upper()
-        strandID = strandID.replace('-', '')
-        for i, label in enumerate(index.values):
-            if isinstance(label[0], str):
-                if label[0][:len(strandID)] == strandID \
-                        and testname is not None:
-                    _testplan_index[testname][1] = i  # advance stop index
-                else:
-                    islabel = 'test' in label[0].lower() \
-                        or label[0][:2] == 'AC' \
-                        or label[0][:2] == 'DC'
-                    try:
-                        nextlabel = index.values[i+1][0]
-                    except IndexError:
-                        nextlabel = ''
-                    try:
-                        isnext_file = nextlabel.strip().capitalize() == 'File'
-                    except AttributeError:
-                        isnext_file = False
-                    try:
-                        isnext_strand = strandID in nextlabel
-                    except TypeError:
-                        isnext_strand = False
-                    if islabel and (isnext_file or isnext_strand):
-                        j = i+1
-                        skip_file = True
-                    elif label[0].strip().capitalize() == 'File':
-                        if skip_file:
-                            skip_file = False
-                            continue
-                        j = i
-                    else:
-                        testname = None
-                        continue
-                    testname = index.values[j-1][0]
-                    try:
-                        if strandID in testname:
-                            testname = f'noname {j}'
-                    except TypeError:
-                        testname = f'noname {j}'
-                    testname = testname.split(':')[0].split('(')[0]
-                    if testname in _testplan_index:
-                        testname += f' {j}'
-                    _testplan_index[testname] = [j, 0]
-        for testname in list(_testplan_index.keys()):  # remove open indices
-            if _testplan_index[testname][1] == 0:
-                _testplan_index.pop(testname)
-        return _testplan_index
-
-    def read_testplan(self):
-        """Read *.xls testplan."""
-        testplan = self.locate('*.xls')
-        testplan = os.path.join(self.local.source_directory, testplan)
-        with pandas.ExcelFile(testplan) as xls:
-            index = pandas.read_excel(xls, usecols=[0], header=None)
-        self.strand = self._read_strand(index)
-
-
-@dataclass
-class SultanData(pythonIO):
+class DataBase:
     """
-    Provide access to sultan data.
+    Manage local and remote data soruces.
 
-    Datafiles stored localy. Files downloaded from ftp server if required.
+    Parameters
+    ----------
+    experiment : str
+        Experiment label
+    local_args : array-like
+        Argument list passed.
+    ftp : FTPData, optional
+        Remote data instance. The default is None.
 
     """
 
-    _experiment: str
-    _testname: int = 0  # test identifier
-    _shot: int = 0  # shot identifier
-    _mode: str = 'ac'
+    experiment: str
+    local_args: List[str] = field(default_factory=list)
+    ftp_args: List[str] = field(default_factory=list)
+    local: LocalData = field(init=False)
+    ftp: FTPData = field(init=False)
 
     def __post_init__(self):
-        self.local = LocalData(self.experiment, 'Sultan', 'ftp', 'local')
-        self.ftp = FTPData(self.local)
-
-    @property
-    def experiment(self):
-        return self._experiment
-
-    @experiment.setter
-    def experiment(self, experiment):
-        self.local.experiment = experiment
-        self._experiment = experiment
-
-    #def optional(self, *args):
-    #    read_text = args + (True,)
-    #    print(read_text[0])
+        """Initialize local and ftp data instances."""
+        self.local = LocalData(self.experiment, *self.local_args)
+        self.ftp = FTPData(self.experiment, *self.ftp_args)
 
     def locate(self, file):
         """
@@ -142,16 +53,309 @@ class SultanData(pythonIO):
 
         """
         try:
-            localfile = self.local.locate(file)
-            return localfile
+            filename = self.local.locate(file)
         except FileNotFoundError:
-            remotefile = self.ftp.locate(file)
-            self.ftp.download(remotefile)
-            return remotefile
+            filename = self.ftp.locate(file)
+            makedir = ~self.local.checkdir()  # generate structure if requred
+            if makedir:
+                self.local.makedir()
+            try:
+                self.ftp.download(filename, self.local.source_directory)
+            except FileNotFoundError as file_not_found:
+                if makedir:
+                    self.local.removedir()  # remove if generated bare
+                raise FileNotFoundError(f'File {filename} not found on '
+                                        'ftp server') from file_not_found
+        return self.source_filepath(filename)
+
+    def binary_filepath(self, filename):
+        """Return binary filepath."""
+        return os.path.join(self.local.binary_directory, filename)
+
+    def source_filepath(self, filename):
+        """Return source filepath."""
+        return os.path.join(self.local.source_directory, filename)
 
 
+@dataclass
+class TestPlan:
+    """
+    Load Sultan experiment testplan.
+
+    Parameters
+    ----------
+    database : str or DataBase
+        Experiment label or DataBase instance
+    strand : str, read-only
+        Strand name.
+
+    """
+
+    experiment: str
+    mode: str = 'ac'
+    binary: bool = True
+    database: DataBase = field(init=False, repr=False)
+    index: pandas.DataFrame = field(init=False, repr=False)
+
+    def __post_init__(self):
+        """Initialize database instance and load data."""
+        if not hasattr(self, 'database'):
+            self.database = DataBase(self.experiment)
+        self.load_testplan()
+
+    def __setattr__(self, name, value):
+        """
+        Extend __setattr__.
+
+        Update database and testplan when experiment or mode are altered.
+
+        """
+        if name in ['experiment', 'mode'] and hasattr(self, 'index'):
+            if value != getattr(self, name):  # update on change
+                super().__setattr__(name, value)
+                if name == 'experiment':  # update database
+                    self.database = DataBase(self.experiment)
+                self.load_testplan()  # update testplan
+                print('load')
+        else:
+            super().__setattr__(name, value)
+
+    def load_testplan(self):
+        """Load testplan index."""
+        testplan = self.database.binary_filepath(f'{self.mode}_testplan.pq')
+        if os.path.isfile(testplan) and self.binary:
+            self.index = pandas.read_parquet(testplan)
+        else:
+            self.index = self.read_testplan()
+            self.index.to_parquet(testplan)
+
+    def read_testplan(self):
+        """Extract data from *.xls testplan."""
+        testplan = self.database.locate('*.xls')
+        with pandas.ExcelFile(testplan) as xls:
+            index = pandas.read_excel(xls, usecols=[0], header=None)
+        _testplan_index = self._read_testplan_index(index)
+        return pandas.DataFrame(_testplan_index, index=['start', 'stop']).T
+
+    def _read_strand(self, index):
+        """
+        Extract strand name from testplan index.
+
+        Parameters
+        ----------
+        index : pandas.Series
+            First columns of testplan.
+
+        Raises
+        ------
+        StopIteration
+            Strand label not found.
+
+        Returns
+        -------
+        None.
+
+        """
+        if self.mode == 'full':
+            mode = 'a'
+        else:
+            mode = self.mode[0]
+        labels = [label[0] for label in index.values
+                  if isinstance(label[0], str)]
+        try:
+            strand = next(label for label in labels
+                          if f'{mode}XXYYZZ' in label
+                          or f'{mode.upper()}XXYYZZ' in label)
+        except StopIteration as stop:
+            raise StopIteration(f'{mode}XXYYZZ not found in {labels}') \
+                from stop
+        return strand.split('XXYYZZ')[0][:-1]
+
+    def _shot_prefix(self, index):
+        """Return shot prefix."""
+        shot_prefix = self._read_strand(index)
+        if self.mode != 'full':
+            if f'{self.mode[0]}XXYYZZ' in shot_prefix:  # lower case
+                shot_prefix += self.mode[0]
+            else:  # upper case
+                shot_prefix += self.mode[0].upper()
+        return shot_prefix.replace('-', '')
+
+    @staticmethod
+    def _islabel(label):
+        """Return True if index contains test, AC, or DC."""
+        islabel = 'test' in label[0].lower()
+        islabel |= label[0][:2] == 'AC'
+        islabel |= label[0][:2] == 'DC'
+        return islabel
+
+    @staticmethod
+    def _nextlabel(index, i):
+        """
+        Return next label in index.
+
+        Parameters
+        ----------
+        index : array-like
+            list of strings.
+        i : int
+            Current location in list.
+
+        Returns
+        -------
+        nextlabel : str
+            Next label, '' if at end of list.
+
+        """
+        try:
+            nextlabel = index.values[i+1][0]
+        except IndexError:
+            nextlabel = ''
+        return nextlabel
+
+    @staticmethod
+    def _is_file(label):
+        """
+        Return True if label == File.
+
+        Parameters
+        ----------
+        label : str
+            Next label.
+
+        Returns
+        -------
+        is_file : bool
+            True if label == File.
+
+        """
+        try:
+            is_file = label.strip().capitalize() == 'File'
+        except AttributeError:
+            is_file = False
+        return is_file
+
+    @staticmethod
+    def _isnext_strand(nextlabel, shot_prefix):
+        """
+        Return True if nextlabel contains shot_prefix.
+
+        Parameters
+        ----------
+        nextlabel : str
+            Next label.
+        shot_prefix : str
+            Shot prefix.
+
+        Returns
+        -------
+        isnext_strand : bool
+            True if nextlabel contains shot_prefix.
+
+        """
+        try:
+            isnext_strand = shot_prefix in nextlabel
+        except TypeError:
+            isnext_strand = False
+        return isnext_strand
+
+    @staticmethod
+    def _format_testname(index, j, shot_prefix, _testplan_index):
+        """
+        Return formated testname.
+
+        Ensure test name is unique. Set name to f'noname {j}' if shot_prefix
+        not found.
+
+        Parameters
+        ----------
+        index : array-like
+            First column of testplan.
+        j : int
+            Shot start index.
+        shot_prefix : str
+            Shot ID prefix.
+        _testplan_index : dict
+            Testplan index.
+
+        Returns
+        -------
+        testname : str
+            Formated testname.
+
+        """
+        testname = index.values[j-1][0]
+        try:
+            if shot_prefix in testname:
+                testname = f'noname {j}'
+        except TypeError:
+            testname = f'noname {j}'
+        testname = testname.split(':')[0].split('(')[0]
+        if testname in _testplan_index:
+            testname += f' {j}'
+        return testname
+
+    @staticmethod
+    def _format_testplan_index(_testplan_index):
+        """Remove open indeces [j, 0] from testplan index."""
+        for testname in list(_testplan_index.keys()):  # remove open indices
+            if _testplan_index[testname][1] == 0:
+                _testplan_index.pop(testname)
+        return _testplan_index
+
+    def _read_testplan_index(self, index):
+        """Extract testplan indices."""
+        _testplan_index = {}
+        testname = None
+        skip_file = False
+        shot_prefix = self._shot_prefix(index)
+        for i, label in enumerate(index.values):
+            if isinstance(label[0], str):
+                if label[0][:len(shot_prefix)] == shot_prefix \
+                        and testname is not None:
+                    _testplan_index[testname][1] = i  # advance stop index
+                else:
+                    islabel = self._islabel(label)
+                    nextlabel = self._nextlabel(index, i)
+                    isnext_file = self._is_file(nextlabel)
+                    isnext_strand = self._isnext_strand(nextlabel, shot_prefix)
+                    if islabel and (isnext_file or isnext_strand):
+                        j = i+1
+                        skip_file = True
+                    elif self._is_file(label[0]):
+                        if skip_file:
+                            skip_file = False
+                            continue
+                        j = i
+                    else:
+                        testname = None
+                        continue
+                    testname = self._format_testname(
+                        index, j, shot_prefix, _testplan_index)
+                    _testplan_index[testname] = [j, 0]  # create new test start
+        return self._format_testplan_index(_testplan_index)
 
 
+@dataclass
+class TestMatrix(pythonIO):
+    """
+    Provide access to sultan data.
+
+    Datafiles stored localy. Files downloaded from ftp server if required.
+
+    """
+
+    experiment: str
+    mode: str = 'ac'
+    testname: int = 0  # test identifier
+    shot: int = 0  # shot identifier
+    binary: bool = True
+
+    def __post_init__(self):
+        self.database = DataBase(self.experiment)
+        self.testplan = TestPlan(self.experiment, self.mode, self.binary)
+
+    '''
     def read_testmatrix(self):
         # store test matrix data
         previouscolumns = None
@@ -211,12 +415,11 @@ class SultanData(pythonIO):
     '''
 
 
-if __name__ == '__main__':
+'''
 
-    data = SultanData('CSJA_3')
-    data.read_testplan()
+@dataclass
+class SultanData(pythonIO):
 
-    '''
     _attributes = ['experiment', 'testname', 'shot', 'mode']
     _default_attributes = {'mode': 'ac', 'read_txt': False}
     _input_attributes = ['testname', 'shot', 'mode']
@@ -231,9 +434,7 @@ if __name__ == '__main__':
         self._note = {}
         self._sultandata = None
         self._set_data_attributes(*args, **kwargs)
-    '''
 
-    '''
     @property
     def reload(self):
         """
@@ -554,4 +755,9 @@ if __name__ == '__main__':
             self._sultandata = self._load_datafile()
             self.reload = False
         return self._sultandata
-    '''
+'''
+
+if __name__ == '__main__':
+
+
+    tm = TestMatrix('CSJA_3')

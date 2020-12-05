@@ -12,7 +12,7 @@ import ftputil
 class FTPData:
     """Manage access to FTP database."""
 
-    experiment: str
+    _experiment: str
     parent: str = 'Daten'
     server: str = 'ftp.psi.ch'
     username: str = 'sultan'
@@ -22,6 +22,20 @@ class FTPData:
     def __post_init__(self):
         """Assemble ftp arguments."""
         self.ftp_args = (self.server, self.username, self.password)
+        self.experiment = self._experiment
+
+    @property
+    def experiment(self):
+        """Manage experiment attribute."""
+        return self._experiment
+
+    @experiment.setter
+    def experiment(self, experiment):
+        try:
+            experiment = self.locate(experiment, '../')
+            self._experiment = experiment
+        except FileNotFoundError as file_not_found:
+            raise FileNotFoundError() from file_not_found
 
     def locate(self, file, *relative_path):
         """

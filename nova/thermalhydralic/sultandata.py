@@ -26,16 +26,36 @@ class DataBase:
 
     """
 
-    experiment: str
-    local_args: List[str] = field(default_factory=list)
-    ftp_args: List[str] = field(default_factory=list)
-    local: LocalData = field(init=False)
-    ftp: FTPData = field(init=False)
+    _experiment: str
+    _local_args: List[str] = field(default_factory=list)
+    _ftp_args: List[str] = field(default_factory=list)
+    local: LocalData = field(init=False, repr=False)
+    ftp: FTPData = field(init=False, repr=False)
 
     def __post_init__(self):
         """Initialize local and ftp data instances."""
-        self.local = LocalData(self.experiment, *self.local_args)
-        self.ftp = FTPData(self.experiment, *self.ftp_args)
+        self.experiment = self._experiment
+
+    @property
+    def experiment(self):
+        """Manage sultan experiment."""
+        return self._experiment
+
+    @experiment.setter
+    def experiment(self, experiment):
+        self.ftp = FTPData(experiment, *self.ftp_args)
+        self.local = LocalData(experiment, *self.local_args)
+        self._experiment = experiment
+
+    @property
+    def local_args(self):
+        """Return local args, read-only."""
+        return self._local_args
+
+    @property
+    def ftp_args(self):
+        """Return ftp args, read-only."""
+        return self._ftp_args
 
     def locate(self, file):
         """
@@ -77,17 +97,6 @@ class DataBase:
         return os.path.join(self.local.source_directory, filename)
 
 
-class dataclass_property(property):
-    """Dataclass property."""
-
-    def __get__(self, obj, cls):
-        """Catch attribute error if object not found."""
-        try:
-            return super().__get__(obj, cls)
-        except AttributeError:
-            pass
-
-
 @dataclass
 class TestPlan:
     """
@@ -102,68 +111,80 @@ class TestPlan:
 
     """
 
-    experiment: str
-    mode: str = 'ac'
+    _experiment: str
+    _mode: str = 'ac'
     binary: bool = True
-    database: DataBase = field(init=False, repr=False)
-    index: pandas.DataFrame = field(init=False, repr=False)
+    database: DataBase = field(init=False, repr=False, default=None)
+    _index: pandas.DataFrame = field(init=False, repr=False, default=None)
 
-    #def __post_init__(self):
-    #    """Initialize database instance and load data."""
-    #    self.database = DataBase(self.experiment)
-    #    self.load_testplan()
+    def __post_init__(self):
+        """Initialize properties."""
+        self.experiment = self._experiment  # initialize experiment
+        self.mode = self._mode  # initialize mode
 
-    @dataclass_property
+    def __repr__(self):
+        """Return string representation of dataclass."""
+        _vars = vars(self)
+        attributes = ", ".join(f"{name.replace('_', '')}={_vars[name]!r}"
+                               for name in _vars)
+        return f"{self.__class__.__name__}({attributes})"
+
+    @property
     def experiment(self):
-        """
-        Manage experiment name.
-
-        Parameters
-        ----------
-        experiment : str
-            Experiment label.
-
-        Returns
-        -------
-        experiment : str
-
-        """
-        return self.experiment
+        """Manage experiment name."""
+        return self._experiment
 
     @experiment.setter
     def experiment(self, experiment):
-        if experiment != self.experiment:
-            self.database = None
-            self.index = None
+        self.database = DataBase(experiment)
+        self._experiment = experiment
+        self._index = None
 
-
-    '''
-    def __setattr__(self, name, value):
+    @property
+    def mode(self):
         """
-        Extend __setattr__.
+        Manage sultan test mode.
 
-        Update database and testplan when experiment or mode are altered.
+        Parameters
+        ----------
+        mode : str
+            Sultan test mode.
+
+        Raises
+        ------
+        IndexError
+            Mode not in [ac, dc, full].
+
+        Returns
+        -------
+        mode : str
 
         """
-        if name in ['experiment', 'mode'] and hasattr(self, 'index'):
-            if value != getattr(self, name):  # update on change
-                super().__setattr__(name, value)
-                if name == 'experiment':  # update database
-                    self.database = DataBase(self.experiment)
-                self.load_testplan()  # update testplan
-                print('load')
-        else:
-            super().__setattr__(name, value)
-    '''
+        return self._mode
+
+    @mode.setter
+    def mode(self, mode):
+        mode = mode.lower()
+        if mode not in ['ac', 'dc', 'full']:
+            raise IndexError('mode not in [ac, dc, full]')
+        self._mode = mode
+        self._index = None
+
+    @property
+    def index(self):
+        """Return testplan index."""
+        if self._index is None:
+            self.load_testplan()
+        return self._index
 
     def load_testplan(self):
         """Load testplan index."""
         testplan = self.database.binary_filepath(f'{self.mode}_testplan.pq')
         if os.path.isfile(testplan) and self.binary:
-            self.index = pandas.read_parquet(testplan)
+            self._index = pandas.read_parquet(testplan)
         else:
-            self.index = self.read_testplan()
-            self.index.to_parquet(testplan)
+            self._index = self.read_testplan()
+            self._index.to_parquet(testplan)
 
     def read_testplan(self):
         """Extract data from *.xls testplan."""
@@ -600,40 +621,6 @@ class SultanData(pythonIO):
                              f'{self.testplan}')
         if shot != _shot:
             self.reload = True
-
-    @property
-    def mode(self):
-        """
-        Manage sultan test mode.
-
-        Parameters
-        ----------
-        mode : str
-            Sultan test mode.
-
-        Raises
-        ------
-        IndexError
-            Mode not in [ac, dc, full].
-
-        Returns
-        -------
-        mode : str
-
-        """
-        if self._mode is None:
-            raise IndexError('mode not set, valid entries [ac, dc, full]')
-        return self._mode
-
-    @mode.setter
-    def mode(self, mode):
-        _mode = self._mode  # store previous
-        mode = mode.lower()
-        if mode not in ['ac', 'dc', 'full']:
-            raise IndexError('mode not in [ac, dc, full]')
-        if _mode != mode:
-            self._mode = mode
-            self._testmatrix = None
 
     @property
     def shot_range(self):

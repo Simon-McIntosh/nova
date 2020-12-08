@@ -1,11 +1,12 @@
 """Postprocess Sultan AC loss test data."""
 import os.path
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Any
+import itertools
 
 import pandas
+import numpy as np
 
-from nova.utilities.IO import pythonIO
 from nova.thermalhydralic.localdata import LocalData
 from nova.thermalhydralic.remotedata import FTPData
 
@@ -31,10 +32,26 @@ class DataBase:
     _ftp_args: List[str] = field(default_factory=list)
     local: LocalData = field(init=False, repr=False)
     ftp: FTPData = field(init=False, repr=False)
+    datapath: str = 'ac/dat AC/ACdat TEST/AC/ACdat'
 
     def __post_init__(self):
         """Initialize local and ftp data instances."""
         self.experiment = self._experiment
+
+    def datafile(self, filename):
+        """Return full local path of datafile."""
+        for relative_path in self.datapath.split():
+            try:
+                datafile = self.locate(filename, relative_path)
+                break
+            except FileNotFoundError as file_not_found:
+                file_not_found_error = file_not_found
+                pass
+        try:
+            return self.source_filepath(datafile)
+        except AttributeError:
+            err_txt = f'datafile not found on datapath {self.datapath}'
+            raise FileNotFoundError(err_txt) from file_not_found_error
 
     @property
     def experiment(self):
@@ -57,7 +74,7 @@ class DataBase:
         """Return ftp args, read-only."""
         return self._ftp_args
 
-    def locate(self, file):
+    def locate(self, file, *relative_path):
         """
         Return full filename. Search localy first, download if not found.
 
@@ -75,7 +92,7 @@ class DataBase:
         try:
             filename = self.local.locate(file)
         except FileNotFoundError:
-            filename = self.ftp.locate(file)
+            filename = self.ftp.locate(file, *relative_path)
             makedir = ~self.local.checkdir()  # generate structure if requred
             if makedir:
                 self.local.makedir()
@@ -98,29 +115,26 @@ class DataBase:
 
 
 @dataclass
-class TestPlan:
+class TestData:
     """
-    Load Sultan experiment testplan.
+    Load Sultan experiment testplan and testdata.
 
     Parameters
     ----------
-    database : str or DataBase
-        Experiment label or DataBase instance
-    strand : str, read-only
-        Strand name.
-
+    experiment : str
+        Experiment label.
+    binary : bool
+        Load data from binary file.
     """
 
     _experiment: str
-    _mode: str = 'ac'
     binary: bool = True
     database: DataBase = field(init=False, repr=False, default=None)
-    _index: pandas.DataFrame = field(init=False, repr=False, default=None)
+    testplan: pandas.DataFrame = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Initialize properties."""
         self.experiment = self._experiment  # initialize experiment
-        self.mode = self._mode  # initialize mode
 
     def __repr__(self):
         """Return string representation of dataclass."""
@@ -136,71 +150,39 @@ class TestPlan:
 
     @experiment.setter
     def experiment(self, experiment):
-        self.database = DataBase(experiment)
         self._experiment = experiment
-        self._index = None
+        self.database = DataBase(self.experiment)
+        self.load_testplan()
 
     @property
-    def mode(self):
-        """
-        Manage sultan test mode.
-
-        Parameters
-        ----------
-        mode : str
-            Sultan test mode.
-
-        Raises
-        ------
-        IndexError
-            Mode not in [ac, dc, full].
-
-        Returns
-        -------
-        mode : str
-
-        """
-        return self._mode
-
-    @mode.setter
-    def mode(self, mode):
-        mode = mode.lower()
-        if mode not in ['ac', 'dc', 'full']:
-            raise IndexError('mode not in [ac, dc, full]')
-        self._mode = mode
-        self._index = None
-
-    @property
-    def index(self):
-        """Return testplan index."""
-        if self._index is None:
-            self.load_testplan()
-        return self._index
+    def testfile(self):
+        """Return testplan filename."""
+        return self.database.binary_filepath('testplan.h5')
 
     def load_testplan(self):
-        """Load testplan index."""
-        testplan = self.database.binary_filepath(f'{self.mode}_testplan.pq')
-        if os.path.isfile(testplan) and self.binary:
-            self._index = pandas.read_parquet(testplan)
+        """Load testplan."""
+        if os.path.isfile(self.testfile) and self.binary:
+            self._load_testplan()
         else:
-            self._index = self.read_testplan()
-            self._index.to_parquet(testplan)
+            self._read_testplan()
 
-    def read_testplan(self):
+    def _read_testplan(self):
         """Extract data from *.xls testplan."""
-        testplan = self.database.locate('*.xls')
-        with pandas.ExcelFile(testplan) as xls:
-            index = pandas.read_excel(xls, usecols=[0], header=None)
-        _testplan_index = self._read_testplan_index(index)
-        return pandas.DataFrame(_testplan_index, index=['start', 'stop']).T
+        testplan_xls = self.database.locate('*.xls')
+        with pandas.ExcelFile(testplan_xls) as xls:
+            testplan_index = self._read_testplan_index(xls)
+            testplan = self._read_testplan_metadata(xls, testplan_index)
+            self._write_testplan(testplan)
+        self.testplan = testplan
 
-    def _read_strand(self, index):
+    @staticmethod
+    def _read_strand(_xls_index):
         """
-        Extract strand name from testplan index.
+        Extract strand name from testplan _xls_index.
 
         Parameters
         ----------
-        index : pandas.Series
+        _xls_index : pandas.Series
             First columns of testplan.
 
         Raises
@@ -213,11 +195,8 @@ class TestPlan:
         None.
 
         """
-        if self.mode == 'full':
-            mode = 'a'
-        else:
-            mode = self.mode[0]
-        labels = [label[0] for label in index.values
+        mode = 'c'
+        labels = [label[0] for label in _xls_index.values
                   if isinstance(label[0], str)]
         try:
             strand = next(label for label in labels
@@ -226,25 +205,15 @@ class TestPlan:
         except StopIteration as stop:
             raise StopIteration(f'{mode}XXYYZZ not found in {labels}') \
                 from stop
-        return strand.split('XXYYZZ')[0][:-1]
-
-    def _shot_prefix(self, index):
-        """Return shot prefix."""
-        shot_prefix = self._read_strand(index)
-        if self.mode != 'full':
-            if f'{self.mode[0]}XXYYZZ' in shot_prefix:  # lower case
-                shot_prefix += self.mode[0]
-            else:  # upper case
-                shot_prefix += self.mode[0].upper()
-        return shot_prefix.replace('-', '')
+        return strand.split('XXYYZZ')[0][:-1].replace('-', '')
 
     @staticmethod
-    def _islabel(label):
-        """Return True if index contains test, AC, or DC."""
-        islabel = 'test' in label[0].lower()
-        islabel |= label[0][:2] == 'AC'
-        islabel |= label[0][:2] == 'DC'
-        return islabel
+    def _isshot(label):
+        """Return True if label contains test, AC, or DC."""
+        isshot = 'test' in label[0].lower()
+        isshot |= label[0][:2] == 'AC'
+        isshot |= label[0][:2] == 'DC'
+        return isshot
 
     @staticmethod
     def _nextlabel(index, i):
@@ -271,57 +240,57 @@ class TestPlan:
         return nextlabel
 
     @staticmethod
-    def _is_file(label):
+    def _isfile(label):
         """
         Return True if label == File.
 
         Parameters
         ----------
         label : str
-            Next label.
+            Index label.
 
         Returns
         -------
-        is_file : bool
+        isfile : bool
             True if label == File.
 
         """
         try:
-            is_file = label.strip().capitalize() == 'File'
+            isfile = label.strip().capitalize() == 'File'
         except AttributeError:
-            is_file = False
-        return is_file
+            isfile = False
+        return isfile
 
     @staticmethod
-    def _isnext_strand(nextlabel, shot_prefix):
+    def _isnext_strand(nextlabel, strand):
         """
-        Return True if nextlabel contains shot_prefix.
+        Return True if nextlabel contains strand.
 
         Parameters
         ----------
         nextlabel : str
             Next label.
-        shot_prefix : str
-            Shot prefix.
+        strand : str
+            Strand ID.
 
         Returns
         -------
         isnext_strand : bool
-            True if nextlabel contains shot_prefix.
+            True if nextlabel contains strand.
 
         """
         try:
-            isnext_strand = shot_prefix in nextlabel
+            isnext_strand = strand in nextlabel
         except TypeError:
             isnext_strand = False
         return isnext_strand
 
     @staticmethod
-    def _format_testname(index, j, shot_prefix, _testplan_index):
+    def _format_testname(index, j, strand, _testplan_index):
         """
         Return formated testname.
 
-        Ensure test name is unique. Set name to f'noname {j}' if shot_prefix
+        Ensure test name is unique. Set name to f'noname {j}' if strand
         not found.
 
         Parameters
@@ -330,8 +299,8 @@ class TestPlan:
             First column of testplan.
         j : int
             Shot start index.
-        shot_prefix : str
-            Shot ID prefix.
+        strand : str
+            Strand ID.
         _testplan_index : dict
             Testplan index.
 
@@ -343,7 +312,7 @@ class TestPlan:
         """
         testname = index.values[j-1][0]
         try:
-            if shot_prefix in testname:
+            if strand in testname:
                 testname = f'noname {j}'
         except TypeError:
             testname = f'noname {j}'
@@ -355,31 +324,57 @@ class TestPlan:
     @staticmethod
     def _format_testplan_index(_testplan_index):
         """Remove open indeces [j, 0] from testplan index."""
-        for testname in list(_testplan_index.keys()):  # remove open indices
+        # remove open indices
+        for testname in list(_testplan_index.keys()):
             if _testplan_index[testname][1] == 0:
                 _testplan_index.pop(testname)
+        # convert to DataFrame
+        _testplan_index = pandas.DataFrame(_testplan_index,
+                                           index=['start', 'stop', 'mode']).T
+        _testplan_index.reset_index(inplace=True)
+        _testplan_index['name'] = _testplan_index['index']
+        ac_index, dc_index = itertools.count(0), itertools.count(0)
+        null_index = itertools.count(0)
+        for i, name in enumerate(_testplan_index['index']):
+            if name.capitalize() == 'Instrumentation':
+                name = 'cal'
+            elif name[:2].upper() == 'AC':
+                name = f'ac{next(ac_index)}'
+            elif name[:2].upper() == 'DC':
+                name = f'dc{next(dc_index)}'
+            else:
+                name = f'ex{next(null_index)}'
+            _testplan_index.loc[i, 'index'] = name
+        _testplan_index = _testplan_index.astype(
+            {'start': int, 'stop': int, 'mode': str, 'name': str})
+        _testplan_index.set_index('index', inplace=True)
         return _testplan_index
 
-    def _read_testplan_index(self, index):
+    def _istest(self, strand, label, _xls_index, i):
+        """Return True if current label is identified as a test."""
+        isshot = self._isshot(label)
+        nextlabel = self._nextlabel(_xls_index, i)
+        isnext_file = self._isfile(nextlabel)
+        isnext_strand = self._isnext_strand(nextlabel, strand)
+        return isshot and (isnext_file or isnext_strand)
+
+    def _read_testplan_index(self, xls):
         """Extract testplan indices."""
+        _xls_index = pandas.read_excel(xls, usecols=[0], header=None)
         _testplan_index = {}
         testname = None
         skip_file = False
-        shot_prefix = self._shot_prefix(index)
-        for i, label in enumerate(index.values):
+        strand = self._read_strand(_xls_index)
+        for i, label in enumerate(_xls_index.values):
             if isinstance(label[0], str):
-                if label[0][:len(shot_prefix)] == shot_prefix \
+                if label[0][:len(strand)] == strand \
                         and testname is not None:
                     _testplan_index[testname][1] = i  # advance stop index
                 else:
-                    islabel = self._islabel(label)
-                    nextlabel = self._nextlabel(index, i)
-                    isnext_file = self._is_file(nextlabel)
-                    isnext_strand = self._isnext_strand(nextlabel, shot_prefix)
-                    if islabel and (isnext_file or isnext_strand):
+                    if self._istest(strand, label, _xls_index, i):
                         j = i+1
                         skip_file = True
-                    elif self._is_file(label[0]):
+                    elif self._isfile(label[0]):
                         if skip_file:
                             skip_file = False
                             continue
@@ -388,151 +383,213 @@ class TestPlan:
                         testname = None
                         continue
                     testname = self._format_testname(
-                        index, j, shot_prefix, _testplan_index)
-                    _testplan_index[testname] = [j, 0]  # create new test start
-        return self._format_testplan_index(_testplan_index)
+                        _xls_index, j, strand, _testplan_index)
+                    _testplan_index[testname] = [j, 0, '']  # test start
+        mode_index = len(strand)
+        for testname in _testplan_index:
+            shotlabel = _xls_index.iloc[_testplan_index[testname][1], 0]
+            shotmode = shotlabel[mode_index]
+            _testplan_index[testname][2] = shotmode.lower()
+        _testplan_index = self._format_testplan_index(_testplan_index)
+        return _testplan_index
 
+    @staticmethod
+    def _append_note(note, _testplan):
+        columns = [col for col in _testplan.columns.get_level_values(0) if
+                   isinstance(col, str)]
+        note_column = [col for col in columns if 'note' in col.lower()]
+        if note_column:
+            _note = pandas.Series(_testplan.loc[:, note_column[0]].values,
+                                  index=_testplan.iloc[:, 0])
+            note = pandas.concat([note, _note], axis=0)
+            _testplan.drop(columns=note_column, inplace=True, level=0)
+        return note
 
-@dataclass
-class TestMatrix(pythonIO):
-    """
-    Provide access to sultan data.
+    @staticmethod
+    def _format_columns(_testplan):
+        # remove column nans
+        columns = _testplan.columns.get_level_values(0)
+        drop_columns = columns[columns.isna()]
+        if len(drop_columns) > 0:
+            _testplan.drop(columns=drop_columns, inplace=True, level=0)
+        _testplan.fillna(method='pad', inplace=True)
+        # rename columns
+        columns = {'I pulse': 'Ipulse', 'I Pulse': 'Ipulse',
+                   'B Sultan': 'Be', 'B SULTAN':  'Be',
+                   'B sultan': 'Be', 'frequency': 'frequency',
+                   'Frequency': 'frequency',
+                   'P. Freq': 'frequency',
+                   'I Sample': 'Isample'}
+        _testplan.rename(columns=columns, inplace=True)
+        _testplan.rename(columns={np.nan: ''}, inplace=True, level=1)
 
-    Datafiles stored localy. Files downloaded from ftp server if required.
-
-    """
-
-    experiment: str
-    mode: str = 'ac'
-    testname: int = 0  # test identifier
-    shot: int = 0  # shot identifier
-    binary: bool = True
-
-    def __post_init__(self):
-        self.database = DataBase(self.experiment)
-        self.testplan = TestPlan(self.experiment, self.mode, self.binary)
-
-    '''
-    def read_testmatrix(self):
-        # store test matrix data
-        previouscolumns = None
-        with pandas.ExcelFile(testplan) as xls:
-            for label in _testplan_index:
-                index = _testplan_index[label]
-                df = pandas.read_excel(
-                    xls, skiprows=index[0],
-                    nrows=np.diff(index)[0]+1, header=None)
-                if df.iloc[0, 0] == 'File':
-                    df.columns = pandas.MultiIndex.from_arrays(
-                        df.iloc[:2].values)
-                    df = df.iloc[2:]
-                    previouscolumns = df.columns
-                elif previouscolumns is not None:
-                    df.columns = previouscolumns
-                # remove column nans
-                columns = df.columns.get_level_values(0)
-                df = df.loc[:, columns.notna()]
-                # extract note
-                columns = [col for col in df.columns.get_level_values(0) if
-                           isinstance(col, str)]
-                note = [col for col in columns if 'note' in col.lower()]
-                if note:
-                    self._note[label] = df[note[0]]
-                    self._note[label].columns = ['Note']
-                    df.drop(columns=note, inplace=True, level=0)
-                df.fillna(method='pad', inplace=True)
-                # rename columns
-                columns = {'I pulse': 'Ipulse', 'I Pulse': 'Ipulse',
-                           'B Sultan': 'Be', 'B SULTAN':  'Be',
-                           'B sultan': 'Be', 'frequency': 'frequency',
-                           'Frequency': 'frequency',
-                           'P. Freq': 'frequency',
-                           'I Sample': 'Isample'}
-                df.rename(columns=columns, inplace=True)
-                df.rename(columns={np.nan: ''}, inplace=True, level=1)
-                # format frequency
-                frequency_duration = ('frequency', 'Hz/duration')
-                frequency_Hz = ('frequency', 'Hz')
-                if frequency_duration in df:
-                    df[('frequency', 'Hz')] = df[frequency_duration].apply(
-                            self._format_frequency)
-                elif frequency_Hz in df:
-                    if df[frequency_Hz].dtype == object:
-                        df[frequency_Hz] = df[frequency_Hz].apply(
-                            self._format_frequency)
-                df.sort_values([('Be', 'T'), ('Isample', 'kA')], inplace=True)
-                try:  # AC data
-                    df.sort_values([('Ipulse', 'A'), ('frequency', 'Hz')],
-                                   inplace=True)
-                except KeyError:
-                    pass
-                df.reset_index(inplace=True)
-                df.drop(columns=['index'], level=0, inplace=True)
-                self._testmatrix[label] = df
-    '''
-
-
-'''
-
-@dataclass
-class SultanData(pythonIO):
-
-    _attributes = ['experiment', 'testname', 'shot', 'mode']
-    _default_attributes = {'mode': 'ac', 'read_txt': False}
-    _input_attributes = ['testname', 'shot', 'mode']
-
-    def __init__(self, *args, **kwargs):
-        self._experiment = None
-        self._testname = None  # test identifier
-        self._shot = None  # shot identifier
-        self._mode = None
-        self._reload = True  # reload data from file
-        self._testmatrix = None
-        self._note = {}
-        self._sultandata = None
-        self._set_data_attributes(*args, **kwargs)
-
-    @property
-    def reload(self):
+    @staticmethod
+    def _format_frequency_label(frequency_label):
         """
-        Manage data pipeline.
+        Return frecuency extracted from frequency/duration string.
 
         Parameters
         ----------
-        reload : bool
-            Reload status - reinitialize instance when set to True.
+        x : str or float
+            frequency (float) or frequency/duration (str).
 
         Returns
         -------
-        reload : bool
+        x : float
+            frequency.
 
         """
-        return self._reload
+        try:
+            frequency_label = float(frequency_label.split('/')[0])
+        except ValueError:  # split string is string (BPTrapez)
+            frequency_label = -1
+        except AttributeError:  # x already float
+            pass
+        return frequency_label
 
-    @reload.setter
-    def reload(self, reload):
-        if reload:
-            self._sultandata = None
-            if hasattr(self, 'postprocess'):  # update postprocess chain
-                self.postprocess = True
-        self._reload = reload
+    @staticmethod
+    def _format_frequency(_testplan):
+        frequency_duration = ('frequency', 'Hz/duration')
+        frequency_hz = ('frequency', 'Hz')
+        if frequency_duration in _testplan:
+            _testplan[('frequency', 'Hz')] = \
+                _testplan[frequency_duration].apply(
+                    TestData._format_frequency_label)
+        elif frequency_hz in _testplan:
+            if _testplan[frequency_hz].dtype == object:
+                _testplan[frequency_hz] = _testplan[frequency_hz].apply(
+                    TestData._format_frequency_label)
+
+    def _read_testplan_metadata(self, xls, testplan_index):
+        """Return testplan metadata."""
+        testplan = {'index': testplan_index}
+        note = pandas.Series(name='note', dtype=str)
+        previouscolumns = None
+        for testname in testplan['index'].index:
+            testindex = testplan['index'].loc[testname, :]
+            start, stop = testindex.loc[['start', 'stop']]
+            _header = pandas.read_excel(
+                xls, skiprows=start, nrows=stop-start+1, header=None)
+            if _header.iloc[0, 0] == 'File':
+                start += 2
+                columns = pandas.MultiIndex.from_arrays(
+                    _header.iloc[:2].values)
+                previouscolumns = columns
+            elif previouscolumns is not None:
+                columns = previouscolumns
+            _testplan = pandas.read_excel(xls, skiprows=start,
+                                          nrows=stop-start+1, header=None)
+            _testplan.columns = columns
+            self._format_columns(_testplan)
+            note = self._append_note(note, _testplan)
+            self._format_frequency(_testplan)
+            _testplan.sort_values([('Be', 'T'), ('Isample', 'kA')],
+                                  inplace=True)
+            try:  # AC data
+                _testplan.sort_values([('Ipulse', 'A'), ('frequency', 'Hz')],
+                                      inplace=True)
+            except KeyError:
+                pass
+            _testplan.reset_index(inplace=True)
+            _testplan.drop(columns=['index'], level=0, inplace=True)
+            _testplan.dropna(axis=1, inplace=True)
+            # convert object dtypes to str
+            dtypes = _testplan.dtypes
+            astype = {c: str for c in dtypes.index if dtypes[c] == object}
+            _testplan = _testplan.astype(astype)
+            # save to dict
+            testplan[testname] = _testplan
+        testplan['note'] = pandas.DataFrame(note, columns=['note'])
+        return testplan
+
+    def _write_testplan(self, testplan):
+        """Save testplan to json file."""
+        with pandas.HDFStore(self.testfile, mode='w') as store:
+            for key in testplan:
+                store.put(key, testplan[key], format='table', append=True)
+
+    def _load_testplan(self):
+        testplan = {}
+        with pandas.HDFStore(self.testfile, mode='r') as store:
+            for key in store.keys():
+                testplan[key[1:]] = store[key]
+        self.testplan = testplan
 
     @property
-    def testkeys(self):
-        """Return testmatrix keys as pandas.Series, read-only."""
-        return pandas.Series(list(self.testmatrix.keys()), dtype=object)
+    def testindex(self):
+        """Return testplan index, read-only."""
+        return self.testplan['index']
+
+    def datafile(self, filename):
+        """Return full local filepath of datafile."""
+        return self.database.datafile(filename)
+
+
+@dataclass
+class SultanTest:
+
+    _experiment: str
+    _mode: str = 'ac'
+    _testname: Any = 0
+    _shot: int = 0
+    testdata: TestData = field(init=False, repr=False)
+
+    def __post_init__(self):
+        self.testdata = TestData(self.experiment)
+        self.testname = self._testname
 
     @property
-    def testmatrix(self):
-        """Return testmatrix, read-only."""
-        if self._testmatrix is None:
-            self.load_testmatrix()
-        return self._testmatrix
+    def experiment(self):
+        return self._experiment
+
+    @experiment.setter
+    def experiment(self, experiment):
+        self.testdata.experiment = experiment
+        self._experiment = experiment
+
+    @property
+    def mode(self):
+        """
+        Manage sultan test mode.
+
+        Parameters
+        ----------
+        mode : str
+            Sultan test mode.
+
+        Raises
+        ------
+        IndexError
+            Mode not in [ac, dc, full].
+
+        Returns
+        -------
+        mode : str
+
+        """
+        return self._mode
+
+    @mode.setter
+    def mode(self, mode):
+        mode = mode.lower()
+        if mode not in ['cal', 'ac', 'dc', 'full']:
+            raise IndexError('mode not in [cal, ac, dc, full]')
+        self._mode = mode
+
+    @property
+    def testindex(self):
+        """Return testplan index, read-only."""
+        index = self.testdata.testindex
+        if self.mode == 'full':
+            names = index.loc[:, 'name']
+        else:
+            names = index.loc[index['mode'] == self.mode[0], 'name']
+        return names
 
     @property
     def testname(self):
         """
-        Manage testname, testmatrix key.
+        Manage testname.
 
         Parameters
         ----------
@@ -549,38 +606,30 @@ class SultanData(pythonIO):
         testname : str
 
         """
-        if self._testname is None:
-            raise IndexError('testname not set, '
-                             'valid range (str or int): '
-                             f'\n\n{self.testkeys}')
         return self._testname
 
     @testname.setter
     def testname(self, testname):
         if isinstance(testname, int):
+            testindex = testname
             try:
-                testname = self.testkeys.iloc[testname]
+                testname = self.testindex.index[testindex]
             except IndexError:
-                raise IndexError(f'testname index {testname} out of range\n\n'
-                                 f'{self.testkeys}')
+                raise IndexError(f'testname index {testindex} out of range\n\n'
+                                 f'{self.testindex}')
         elif isinstance(testname, str):
-            if testname not in self.testmatrix:
+            if testname not in self.testindex.index:
                 raise IndexError(f'testname {testname} not found in '
-                                 f'\n{self.testkeys}')
+                                 f'\n{self.testindex}')
+        self._testname = testname
         if testname != self._testname:
             self._testname = testname
             self.reload = True
 
     @property
-    def testindex(self):
-        """Return testname index."""
-        return next((i for i, name in enumerate(self.testmatrix)
-                     if name == self.testname))
-
-    @property
     def testplan(self):
         """Return testplan, read-only."""
-        return self.testmatrix[self.testname]
+        return self.testdata.testplan[self.testname]
 
     @property
     def shot(self):
@@ -595,7 +644,7 @@ class SultanData(pythonIO):
         Raises
         ------
         IndexError
-            Shot not set (is None) or set out of range.
+            Shot not set (is None) or is set out of range.
 
         Returns
         -------
@@ -618,137 +667,62 @@ class SultanData(pythonIO):
         except IndexError:
             self._shot = _shot  # rewind
             raise IndexError(f'shot index {shot} out of bounds \n'
-                             f'{self.testplan}')
+                             f'{self.testdata}')
         if shot != _shot:
             self.reload = True
 
     @property
     def shot_range(self):
         """Return valid shot range, (int, int)."""
-        index = self.testplan.index
+        index = self.testdata.index
         return index[0], index[-1]+1
+
+    @property
+    def file(self):
+        """Return shot filename."""
+        return self.shot.loc['File'][0]
+
+    @property
+    def filename(self):
+        """Return datafile filename."""
+        return f'{self.file}.dat'
 
     @property
     def note(self):
         """Return shot note."""
-        return self._note[self.testname].iloc[self._shot]
+        return self.testdata.testplan['note'].loc[self.file][0]
 
-    @staticmethod
-    def _check_stopindex(_testplan_index, testname):
-        """Pop testname if stopindex == 0."""
-        if testname is not None:
-            if _testplan_index[testname][1] == 0:
-                _testplan_index.pop(testname)
-        return _testplan_index
+    @property
+    def testnotes(self):
+        """Return testplan notes."""
+        note = self.testdata.testplan['note'].loc[self.testplan.File]
+        return note.reset_index()
 
-    def load_testmatrix(self, **kwargs):
+    @property
+    def datafile(self):
+        """Return full local filepath of datafile."""
+        return self.testdata.datafile(self.filename)
+
+
+@dataclass
+class SultanData:
+    """Access Sultan timeseries data."""
+
+    test: SultanTest = field(repr=False)
+    _raw: pandas.DataFrame = field(init=False, repr=False, default=None)
+    _lowpass: pandas.DataFrame = field(init=False, repr=False, default=None)
+
+    def _read_datafile(self):
         """
-        Load testmatrix from file.
-
-        Parameters
-        ----------
-        **kwargs : dict
-            force read_txt with read_txt=True keyword argument.
-
-        Returns
-        -------
-        None.
-
-        """
-        read_txt = kwargs.get('read_txt', self.read_txt)
-        if self._experiment is None:
-            raise IndexError('experiment not set')
-        filepath = os.path.join(self.localdir, f'testmatrix_{self.mode}')
-        if not os.path.isfile(filepath + '.pk') or read_txt:
-            self.read_testmatrix()
-            self.save_pickle(filepath, ['strand', '_testmatrix'])
-        else:
-            self.load_pickle(filepath)
-
-
-    @staticmethod
-    def _format_frequency(x):
-        """
-        Return frecuency extracted from frequency/duration string.
-
-        Parameters
-        ----------
-        x : str or float
-            frequency (float) or frequency/duration (str).
-
-        Returns
-        -------
-        x : float
-            frequency.
-
-        """
-        try:
-            x = float(x.split('/')[0])
-        except ValueError:  # split string is string (BPTrapez)
-            x = -1
-        except AttributeError:  # x already float
-            pass
-        return x
-
-    def _get_filename(self, testname, shot):
-        """
-        Return shot filename.
-
-        Parameters
-        ----------
-        testname : str or float
-            Test identifier.
-        shot : int
-            Shot identifier.
-
-        Returns
-        -------
-        filename : str
-            filename.
-
-        """
-        if testname is not None:
-            self.testname = testname
-        if shot is not None:
-            self.shot = shot
-        return f'{self.shot[("File", "")]}.dat'
-
-    def _load_datafile(self, testname=None, shot=None,
-                       subdir=['ac/dat', 'AC/ACdat', 'TEST/AC/ACdat']):
-        """
-        Return sultan dataframe and associated shot metadata.
-
-        Parameters
-        ----------
-        testname : str or int, optional
-            Test identifier. The default is None.
-        shot : int, optional
-            Shot identifier. The default is None.
-        subdir : array-like, optional
-            List of trial data subdirectories.
-            The default is ['ac/dat', 'AC/ACdat', 'TEST/AC/ACdat'].
+        Return sultan dataframe.
 
         Returns
         -------
         sultandata : pandas.DataFrame
             Shot data.
-        sultanmetadata : pandas.Series
-            Shot metadata.
 
         """
-        filename = self._get_filename(testname, shot)
-        for sdir in subdir:
-            try:
-                datafile = self.locate(filename, subdir=sdir)
-                break
-            except ftputil.error.PermanentError as error:
-                ftp_err = error
-                pass
-        try:
-            datafile = os.path.join(self.datadir, datafile)
-        except UnboundLocalError:
-            raise ftputil.error.PermanentError(f'{ftp_err}')
-        sultandata = pandas.read_csv(datafile, encoding='ISO-8859-1')
+        sultandata = pandas.read_csv(self.test.datafile, encoding='ISO-8859-1')
         columns = {}
         for c in sultandata.columns:
             if 'left' in c or 'right' in c:
@@ -766,21 +740,9 @@ class SultanData(pythonIO):
             sultandata['P in Right'] = sultandata['P in']
         return sultandata
 
-    @property
-    def metadata(self):
-        """Return shot metadata."""
-        return self.shot
-
-    @property
-    def sultandata(self):
-        """Return sultandata, reload if necessary."""
-        if self.reload or self._sultandata is None:
-            self._sultandata = self._load_datafile()
-            self.reload = False
-        return self._sultandata
-'''
 
 if __name__ == '__main__':
 
-
-    tp = TestPlan('CSJA_3')
+    test = SultanTest('CSJA_3', 'ac')
+    sd = SultanData(test)
+    print(sd._read_datafile())

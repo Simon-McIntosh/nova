@@ -1,10 +1,8 @@
 
+from dataclasses import dataclass, field
 import os
-import glob
 import re
-from warnings import warn
 
-import ftputil
 import pandas
 import numpy as np
 import scipy.signal
@@ -14,41 +12,26 @@ import scipy.optimize
 import CoolProp.CoolProp as CoolProp
 from matplotlib.lines import Line2D
 
-from nova.definitions import root_dir
 from nova.utilities.pyplot import plt
 from nova.utilities.time import clock
-from nova.utilities.IO import pythonIO
 
 
-class SultanPostProcess(FTPSultan):
-    """Post processing methods for single leg sultan coupling loss data."""
+@dataclass
+class SultanPostProcess:
+    """
+    Post processing methods for single leg sultan coupling loss data.
 
-    _attributes = FTPSultan._attributes + ['side']
-    _default_attributes = {**FTPSultan._default_attributes,
-                           **{'side': 'Left'}}
-    _input_attributes = FTPSultan._input_attributes + ['side']
+    Parameters
+    ----------
+    experement : str
+        Experement label.
 
-    def __init__(self, *args, **kwargs):
-        """
-        Import data and initialize data structure.
+    """
 
-        Parameters
-        ----------
-        experement : str
-            Experement label.
-
-        Returns
-        -------
-        None.
-
-        """
-        self._side = None
-        FTPSultan.__init__(self, *args, **kwargs)  # link to sultan
-        self._rawdata = None
-        self._lowpassdata = None
-        self._Qdot_threshold = 0.75
-        self._iQdot = None
-        self._Bdot = None
+    _side: str = 'left'
+    _Qdot_threshold = 0.75
+    _iQdot = None
+    _Bdot = None
 
     @staticmethod
     def _initialize_dataframe():

@@ -1,6 +1,6 @@
 """Postprocess Sultan AC loss test data."""
 import os.path
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 from typing import List, Any
 import itertools
 
@@ -11,8 +11,28 @@ from nova.thermalhydralic.localdata import LocalData
 from nova.thermalhydralic.remotedata import FTPData
 
 
+class SultanClass:
+    """Provide generic methods to Sultan classes."""
+
+    def __repr__(self):
+        """Return string representation of dataclass."""
+        _vars = vars(self)
+        attributes = ", ".join(f"{name.replace('_', '')}={_vars[name]!r}"
+                               for name in _vars)
+        return f"{self.__class__.__name__}({attributes})"
+
+    @property
+    def experiment(self):
+        """Manage sultan experiment name."""
+        return self._experiment
+
+    @experiment.setter
+    def experiment(self, experiment):
+        self._experiment = experiment
+
+
 @dataclass
-class DataBase:
+class DataBase(SultanClass):
     """
     Manage local and remote data soruces.
 
@@ -46,23 +66,18 @@ class DataBase:
                 break
             except FileNotFoundError as file_not_found:
                 file_not_found_error = file_not_found
-                pass
         try:
             return self.source_filepath(datafile)
         except AttributeError:
             err_txt = f'datafile not found on datapath {self.datapath}'
             raise FileNotFoundError(err_txt) from file_not_found_error
 
-    @property
-    def experiment(self):
-        """Manage sultan experiment."""
-        return self._experiment
-
-    @experiment.setter
+    @SultanClass.experiment.setter
     def experiment(self, experiment):
-        self.ftp = FTPData(experiment, *self.ftp_args)
-        self.local = LocalData(experiment, *self.local_args)
-        self._experiment = experiment
+        """Extend SultanClass.experiment.setter."""
+        SultanClass.experiment.fset(self, experiment)
+        self.ftp = FTPData(self.experiment, *self.ftp_args)
+        self.local = LocalData(self.experiment, *self.local_args)
 
     @property
     def local_args(self):
@@ -115,7 +130,7 @@ class DataBase:
 
 
 @dataclass
-class TestData:
+class TestData(SultanClass):
     """
     Load Sultan experiment testplan and testdata.
 
@@ -128,6 +143,7 @@ class TestData:
     """
 
     _experiment: str
+    _mode: str = 'ac'
     binary: bool = True
     database: DataBase = field(init=False, repr=False, default=None)
     testplan: pandas.DataFrame = field(init=False, repr=False, default=None)
@@ -135,22 +151,41 @@ class TestData:
     def __post_init__(self):
         """Initialize properties."""
         self.experiment = self._experiment  # initialize experiment
-
-    def __repr__(self):
-        """Return string representation of dataclass."""
-        _vars = vars(self)
-        attributes = ", ".join(f"{name.replace('_', '')}={_vars[name]!r}"
-                               for name in _vars)
-        return f"{self.__class__.__name__}({attributes})"
+        self.mode = self._mode
 
     @property
-    def experiment(self):
-        """Manage experiment name."""
-        return self._experiment
+    def mode(self):
+        """
+        Manage sultan test mode.
 
-    @experiment.setter
+        Parameters
+        ----------
+        mode : str
+            Sultan test mode.
+
+        Raises
+        ------
+        IndexError
+            Mode not in [ac, dc, full].
+
+        Returns
+        -------
+        mode : str
+
+        """
+        return self._mode
+
+    @mode.setter
+    def mode(self, mode):
+        mode = mode.lower()
+        if mode not in ['cal', 'ac', 'dc', 'full']:
+            raise IndexError('mode not in [cal, ac, dc, full]')
+        self._mode = mode
+
+    @SultanClass.experiment.setter
     def experiment(self, experiment):
-        self._experiment = experiment
+        """Extend SultanClass.experiment.setter."""
+        SultanClass.experiment.fset(self, experiment)
         self.database = DataBase(self.experiment)
         self.load_testplan()
 
@@ -172,7 +207,7 @@ class TestData:
         with pandas.ExcelFile(testplan_xls) as xls:
             testplan_index = self._read_testplan_index(xls)
             testplan = self._read_testplan_metadata(xls, testplan_index)
-            self._write_testplan(testplan)
+            self._save_testplan(testplan)
         self.testplan = testplan
 
     @staticmethod
@@ -502,8 +537,8 @@ class TestData:
         testplan['note'] = pandas.DataFrame(note, columns=['note'])
         return testplan
 
-    def _write_testplan(self, testplan):
-        """Save testplan to json file."""
+    def _save_testplan(self, testplan):
+        """Append testplan to hdf file."""
         with pandas.HDFStore(self.testfile, mode='w') as store:
             for key in testplan:
                 store.put(key, testplan[key], format='table', append=True)
@@ -524,57 +559,40 @@ class TestData:
         """Return full local filepath of datafile."""
         return self.database.datafile(filename)
 
+    def binaryfile(self, filename):
+        """Return full local filepath of bindary data file."""
+        return self.database.binary_filepath(filename)
+
 
 @dataclass
-class SultanTest:
+class SultanTest(SultanClass):
+    """Manage Sultan test attributes."""
 
     _experiment: str
-    _mode: str = 'ac'
+    _mode: InitVar[str] = 'ac'
     _testname: Any = 0
     _shot: int = 0
     testdata: TestData = field(init=False, repr=False)
 
-    def __post_init__(self):
-        self.testdata = TestData(self.experiment)
+    def __post_init__(self, mode):
+        """Initialize testdata instance and check testname."""
+        self.testdata = TestData(self.experiment, mode)
         self.testname = self._testname
 
-    @property
-    def experiment(self):
-        return self._experiment
-
-    @experiment.setter
+    @SultanClass.experiment.setter
     def experiment(self, experiment):
-        self.testdata.experiment = experiment
-        self._experiment = experiment
+        """Extend SultanClass.experiment.setter."""
+        SultanClass.experiment.fset(self, experiment)
+        self.testdata.experiment = self.experiment
 
     @property
     def mode(self):
-        """
-        Manage sultan test mode.
-
-        Parameters
-        ----------
-        mode : str
-            Sultan test mode.
-
-        Raises
-        ------
-        IndexError
-            Mode not in [ac, dc, full].
-
-        Returns
-        -------
-        mode : str
-
-        """
-        return self._mode
+        """Manage sultan testdata mode."""
+        return self.testdata._mode
 
     @mode.setter
     def mode(self, mode):
-        mode = mode.lower()
-        if mode not in ['cal', 'ac', 'dc', 'full']:
-            raise IndexError('mode not in [cal, ac, dc, full]')
-        self._mode = mode
+        self.testdata.mode = mode
 
     @property
     def testindex(self):
@@ -614,9 +632,9 @@ class SultanTest:
             testindex = testname
             try:
                 testname = self.testindex.index[testindex]
-            except IndexError:
+            except IndexError as index_error:
                 raise IndexError(f'testname index {testindex} out of range\n\n'
-                                 f'{self.testindex}')
+                                 f'{self.testindex}') from index_error
         elif isinstance(testname, str):
             if testname not in self.testindex.index:
                 raise IndexError(f'testname {testname} not found in '
@@ -652,30 +670,16 @@ class SultanTest:
             Shot identifier.
 
         """
-        if self._shot is None:
-            raise IndexError('shot index not set, '
-                             'valid range '
-                             f'{self.shot_range[0]}-{self.shot_range[1]-1}')
         return self.testplan.iloc[self._shot, :]
 
     @shot.setter
     def shot(self, shot):
         try:
-            _shot = self._shot  # store previous
-            self._shot = shot
-            self.shot
-        except IndexError:
-            self._shot = _shot  # rewind
-            raise IndexError(f'shot index {shot} out of bounds \n'
-                             f'{self.testdata}')
-        if shot != _shot:
-            self.reload = True
-
-    @property
-    def shot_range(self):
-        """Return valid shot range, (int, int)."""
-        index = self.testdata.index
-        return index[0], index[-1]+1
+            self._shot = self.testplan.index[shot]  # store previous
+        except IndexError as index_error:
+            raise IndexError(f'shot index {shot} out of bounds for testplan '
+                             f'index {self.testplan.index}') from index_error
+        self.reload = True
 
     @property
     def file(self):
@@ -700,17 +704,52 @@ class SultanTest:
 
     @property
     def datafile(self):
-        """Return full local filepath of datafile."""
+        """Return full local filepath of the source datafile."""
         return self.testdata.datafile(self.filename)
+
+    @property
+    def binaryfile(self):
+        """Return full local filepath of the binary datafile."""
+        return self.testdata.binaryfile('testdata.h5')
 
 
 @dataclass
-class SultanData:
-    """Access Sultan timeseries data."""
+class SultanData(SultanClass):
+    """Manage Sultan timeseries data."""
 
-    test: SultanTest = field(repr=False)
+    _experiment: str
+    binary: bool = True
+    test: SultanTest = field(init=False, repr=False)
+    testdata: TestData = field(init=False, repr=False)
     _raw: pandas.DataFrame = field(init=False, repr=False, default=None)
     _lowpass: pandas.DataFrame = field(init=False, repr=False, default=None)
+
+    def __post_init__(self):
+        """Init sultan test and link testdata instance."""
+        self.test = SultanTest(self.experiment)
+        self.testdata = self.test.testdata
+
+    @SultanClass.experiment.setter
+    def experiment(self, experiment):
+        """Extend SultanClass.experiment.setter."""
+        SultanClass.experiment.fset(self, experiment)
+        self.test.experiment = self.experiment
+
+    @property
+    def binaryfile(self):
+        return self.test.binaryfile
+
+    def load_datafile(self):
+        rawdata = self._read_datafile()
+        self._save_datafile('rawdata', rawdata)
+        datafile = self._load_datafile('rawdata')
+        print(datafile)
+
+    def _load_datafile(self, key):
+        """Return datafile from binary store."""
+        with pandas.HDFStore(self.binaryfile, mode='r') as store:
+            datafile = store[key]
+        return datafile
 
     def _read_datafile(self):
         """
@@ -724,13 +763,13 @@ class SultanData:
         """
         sultandata = pandas.read_csv(self.test.datafile, encoding='ISO-8859-1')
         columns = {}
-        for c in sultandata.columns:
-            if 'left' in c or 'right' in c:
-                columns[c] = c.replace('left', 'Left')
-                columns[c] = columns[c].replace('right', 'Right')
-                columns[c] = columns[c].replace('  ', ' ')
-            if c[-7:] == ' (320K)':
-                columns[c] = c[:-7]
+        for column in sultandata.columns:
+            if 'left' in column or 'right' in column:
+                columns[column] = column.replace('left', 'Left')
+                columns[column] = columns[column].replace('right', 'Right')
+                columns[column] = columns[column].replace('  ', ' ')
+            if column[-7:] == ' (320K)':
+                columns[column] = column[:-7]
         sultandata.rename(columns=columns, inplace=True)
         if 'T in' in sultandata.columns:
             sultandata['T in Left'] = sultandata['T in']
@@ -740,9 +779,13 @@ class SultanData:
             sultandata['P in Right'] = sultandata['P in']
         return sultandata
 
+    def _save_datafile(self, key, dataframe):
+        """Append dataframe to hdf file."""
+        with pandas.HDFStore(self.binaryfile, mode='w') as store:
+            store.put(key, dataframe, format='table', append=True)
+
 
 if __name__ == '__main__':
 
-    test = SultanTest('CSJA_3', 'ac')
-    sd = SultanData(test)
-    print(sd._read_datafile())
+    sd = SultanData('CSJA_3', mode='a')
+    sd.load_datafile()

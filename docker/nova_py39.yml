@@ -1,8 +1,6 @@
-name: nova
-channels:
-  - conda-forge
-  - defaults
+name: nova_py39
 dependencies:
+  - python=3.9
   - astropy
   - descartes
   - ftputil
@@ -15,9 +13,7 @@ dependencies:
   - pyarrow
   - pygeos
   - pygmo
-  - pytables
   - pytest
-  - python=3.8
   - python-snappy
   - python-docx
   - scikit-image
@@ -25,6 +21,7 @@ dependencies:
   - scipy
   - seaborn
   - shapely
+  - spyder
   - xarray
   - pip:
     - pyquaternion

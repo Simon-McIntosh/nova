@@ -17,9 +17,10 @@ class LocalData:
     """
 
     experiment: str
-    parent: str = 'Sultan'
-    source: str = 'ftp'
-    binary: str = 'local'
+    binary: bool = True
+    parent_dir: str = 'Sultan'
+    source_dir: str = 'ftp'
+    binary_dir: str = 'local'
 
     def __post_init__(self):
         """Create hierarchical list used by makedir and removedir methods."""
@@ -30,7 +31,7 @@ class LocalData:
     @property
     def parent_directory(self):
         """Return full path to parent directory."""
-        return self.getdir(os.path.join(root_dir, 'data'), self.parent)
+        return self.getdir(os.path.join(root_dir, 'data'), self.parent_dir)
 
     @property
     def experiment_directory(self):
@@ -40,12 +41,12 @@ class LocalData:
     @property
     def source_directory(self):
         """Return full path to raw data directory."""
-        return self.getdir(self.experiment_directory, self.source)
+        return self.getdir(self.experiment_directory, self.source_dir)
 
     @property
     def binary_directory(self):
         """Return full path to binary data directory."""
-        return self.getdir(self.experiment_directory, self.binary)
+        return self.getdir(self.experiment_directory, self.binary_dir)
 
     @staticmethod
     def getdir(directory, subfolder=''):
@@ -126,5 +127,3 @@ if __name__ == '__main__':
 
     local = LocalData('CSJA_3', 'Sultan')
     print(local.locate('*.xls'))
-    #local.makedir()
-    #local.removedir()

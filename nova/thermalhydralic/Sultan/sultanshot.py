@@ -2,7 +2,17 @@
 
 from dataclasses import dataclass, field
 
+import pandas
+
 from nova.thermalhydralic.Sultan.testplan import TestPlan
+
+
+@dataclass
+class Reload:
+    """Reload datastructure for testshot."""
+
+    index: bool = True
+    data: bool = True
 
 
 @dataclass
@@ -11,12 +21,12 @@ class SultanShot:
 
     testplan: TestPlan = field(repr=False)
     _shotindex: int = 0
+    reload: Reload = field(init=False, default=Reload(), repr=False)
 
     def __post_init__(self):
         """Typecheck testplan and initialize shot instance."""
         if isinstance(self.testplan, str):
             self.testplan = TestPlan(self.testplan)
-        self.shotindex = self._shotindex
 
     @property
     def shotindex(self):
@@ -39,6 +49,8 @@ class SultanShot:
             Shot identifier.
 
         """
+        if self.reload.index:
+            self.shotindex = self._shotindex
         return self._shotindex
 
     @shotindex.setter
@@ -49,18 +61,30 @@ class SultanShot:
             raise IndexError(f'shot index {shotindex} '
                              'out of bounds for testplan index '
                              f'{self.testplan.plan.index}') from index_error
+        self.reload.index = False
+        self.reload.data = True
 
     @property
     def metadata(self):
         """Return shot metadata, read-only."""
-        metadata = self.testplan.plan.iloc[self.shotindex, :]
-        metadata.loc['note'] = self.note
+        metadata = pandas.Series(self.testplan.plan.iloc[self.shotindex, :])
+        metadata['note'] = self.note
         return metadata
 
     @property
     def note(self):
         """Return shot note, read-only."""
         return self.testplan.note.loc[self.shotindex, 'note']
+
+    @property
+    def frequency(self):
+        """Return shot frequency."""
+        return self.testplan.plan.at[self.shotindex, ('frequency', 'Hz')]
+
+    @property
+    def current_label(self):
+        """Return shot excitation current string."""
+        return self.testplan.plan.at[self.shotindex, ('Ipulse', 'A')]
 
     @property
     def filename(self):

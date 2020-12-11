@@ -1,8 +1,18 @@
 """Manage Sultan testplan."""
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Optional
 
 from nova.thermalhydralic.Sultan.testcampaign import TestCampaign
+
+
+@dataclass
+class Reload:
+    """Reload datastructure for testplan."""
+
+    experiment: bool = True
+    testname: bool = True
+    mode: bool = True
+    campaign: bool = True
 
 
 @dataclass
@@ -18,24 +28,34 @@ class TestPlan:
     """
 
     _experiment: str
-    _testname: Any = 0
+    _testname: Optional[str] = field(default=0)
     _mode: str = 'ac'
+    reload: Reload = field(init=False, default=Reload(), repr=False)
 
     def __post_init__(self):
-        """Link properties."""
-        self.experiment = self._experiment
-        self.testname = self._testname
-        self.mode = self._mode
+        """Init test campaign."""
+        self._campaign = TestCampaign(self.experiment)
 
     @property
     def experiment(self):
         """Manage experiment name."""
+        if self.reload.experiment:
+            self.experiment = self._experiment
         return self._experiment
 
     @experiment.setter
     def experiment(self, experiment):
         self._experiment = experiment
-        self.campaign = TestCampaign(self.experiment)
+        self.reload.campaign = True
+        self.reload.experiment = False
+
+    @property
+    def campaign(self):
+        """Return campaign data, read-only."""
+        if self.reload.campaign:
+            self._campaign.experiment = self.experiment
+            self.reload.campaign = False
+        return self._campaign
 
     @property
     def database(self):
@@ -62,6 +82,8 @@ class TestPlan:
         mode : str
 
         """
+        if self.reload.mode:
+            self.mode = self._mode
         return self._mode
 
     @mode.setter
@@ -70,6 +92,7 @@ class TestPlan:
         if mode not in ['cal', 'ac', 'dc', 'full']:
             raise IndexError('mode not in [cal, ac, dc, full]')
         self._mode = mode
+        self.reload.mode = False
 
     @property
     def testname(self):
@@ -91,6 +114,8 @@ class TestPlan:
         testname : str
 
         """
+        if self.reload.testname:
+            self.testname = self._testname
         return self._testname
 
     @testname.setter
@@ -107,6 +132,7 @@ class TestPlan:
                 raise IndexError(f'testname {testname} not found in '
                                  f'\n{self.index}')
         self._testname = testname
+        self.reload.testname = False
 
     @property
     def index(self):

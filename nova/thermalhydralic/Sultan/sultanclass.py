@@ -1,5 +1,19 @@
 """Generic Sultan DataClass methods."""
-# pylint: disable=no-member
+import numpy as np
+
+
+class Trigger:
+    """Reload abstract base class."""
+
+    @property
+    def trigger(self):
+        """Manage trigger status."""
+        return np.fromiter(vars(self).values(), dtype=bool).any()
+
+    @trigger.setter
+    def trigger(self, status):
+        for attribute in self.__dict__:
+            setattr(self, attribute, status)
 
 
 class SultanClass:

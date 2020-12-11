@@ -24,8 +24,8 @@ class DataBase:
     """
 
     _experiment: str
-    _local_args: List[str] = field(default_factory=list)
-    _ftp_args: List[str] = field(default_factory=list)
+    _local_args: List[str] = field(default_factory=list, repr=False)
+    _ftp_args: List[str] = field(default_factory=list, repr=False)
     local: LocalData = field(init=False, repr=False)
     ftp: FTPData = field(init=False, repr=False)
     datapath: str = field(default='ac/dat AC/ACdat TEST/AC/ACdat', repr=False)

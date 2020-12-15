@@ -1,6 +1,6 @@
 
-from dataclasses import dataclass, field
-from typing import List
+from dataclasses import dataclass, field, InitVar
+from typing import Union, Any
 import os
 
 
@@ -9,19 +9,38 @@ import numpy as np
 import scipy.signal
 import scipy.integrate
 import scipy.interpolate
-import scipy.optimize
-import CoolProp.CoolProp as CoolProp
 from matplotlib.lines import Line2D
+
+from nova.thermalhydralic.sultan.testplan import TestPlan
+from nova.thermalhydralic.sultan.shot import Shot
+from nova.thermalhydralic.sultan.profile import Profile
 
 from nova.utilities.pyplot import plt
 from nova.utilities.time import clock
 
+'''
+    def plot(self, ax=None):
+        """
 
+        Parameters
+        ----------
+        ax : axis, optional
+            plot axis. The default is None (plt.gca())
 
+        Returns
+        -------
+        None
+
+        """
+        if ax is None:
+            ax = plt.gca()
+        ax.plot(t_eoh, Qdot_eoh, **self._get_marker(steady, 'eoh'))
+        ax.plot(t_max, Qdot_max, **self._get_marker(steady, 'max'))
+'''
 
 
 @dataclass
-class SultanPostProcess:
+class TestResponse:
     """
     Post processing methods for single leg sultan coupling loss data.
 
@@ -32,12 +51,65 @@ class SultanPostProcess:
 
     """
 
-    _side: str = 'left'
-    _Qdot_threshold = 0.75
-    _iQdot = None
-    _Bdot = None
+    _experiment: InitVar[str]
+    _testname: InitVar[Union[str, int]] = 0
+    _testmode: InitVar[str] = field(default='ac')
+    _side: InitVar[str] = 'Left'
+
+    def __post_init__(self, experiment, testname, testmode, side):
+        self.testplan = TestPlan(experiment, testname, testmode)
+        self.profile = Profile(Shot(self.testplan), side)
+
+    @property
+    def experiment(self):
+        """Manage experiment name."""
+        return self.testplan.experiment
+
+    @experiment.setter
+    def experiment(self, experiment):
+        self.testplan.experiment = experiment
+
+    @property
+    def testname(self):
+        """Manage test name."""
+        return self.testplan.testname
+
+    @testname.setter
+    def testname(self, testname):
+        self.testplan.testname = testname
+
+    @property
+    def testmode(self):
+        """Manage test mode, ac or dc."""
+        return self.testplan.testmode
+
+    @testmode.setter
+    def testmode(self, testmode):
+        self.testplan.mode = testmode
+
+    @property
+    def side(self):
+        """Manage leg side, Left or Right."""
+        return self.profile.side
+
+    @side.setter
+    def side(self, side):
+        self.profile.side = side
 
 
+if __name__ == '__main__':
+
+    response = TestResponse('CSJA_3')
+
+    #response.experiment = 'CSJA_5'
+    response.testname = -1
+    #print(response.testplan)
+    print(response.profile)
+    response.side = 'Right'
+    print(response.profile)
+
+
+    '''
     def _initialize_testdata(self):
         testdata = self.testplan.loc[:, ['Be', 'Isample', 'frequency']]
         if ('frequency', 'Hz/duration') in testdata:
@@ -128,27 +200,6 @@ class SultanPostProcess:
         ax.set_yscale('log')
         ax.set_xscale('log')
         return sum(index) > 0
-
-    def plot_single(self, variable, ax=None, lowpass=False):
-        self._zero_offset()
-        if lowpass:
-            data = self.lowpassdata
-        else:
-            data = self.rawdata
-        if variable not in data:
-            raise IndexError(f'variable {variable} not in {data.columns}')
-        if ax is None:
-            ax = plt.gca()
-        bg_color = 0.4 * np.ones(3) if lowpass else 'lightgray'
-        color = 'C3' if lowpass else 'C0'
-        label = 'lowpass' if lowpass else 'raw'
-        ax.plot(data.t, data[variable], color=bg_color)
-        ax.plot(data.t[self.iQdot], data[variable][self.iQdot],
-                color=color, label=label)
-        ax.legend()
-        ax.set_xlabel('$t$ s')
-        ax.set_ylabel(r'$\hat{\dot{Q}}$ W')
-        plt.despine()
 
     def title(self, ax=None):
         if ax is None:
@@ -265,6 +316,9 @@ if __name__ == '__main__':
     #plt.figure()
     se = SultanEnsemble('JACS_1', -1, 0, side='left', read_txt=False)
     #se.plot_response(unsteady=True, color='k')
+
+    '''
+
 
     '''
     V = A Bdot

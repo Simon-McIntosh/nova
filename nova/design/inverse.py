@@ -21,7 +21,7 @@ from amigo import geom
 from amigo.time import clock
 from amigo.pyplot import plt
 from nova.electromagnetic.coilclass import CoilClass
-from nova.electromagnetic.biotmethods import Target
+#from nova.electromagnetic.biotmethods import Target
 from nova.limits.tieplate import get_tie_plate
 from nova.limits.poloidal import PoloidalLimit
 
@@ -40,23 +40,33 @@ class Inverse(CoilClass, PoloidalLimit):
         x, z = np.array([[r*np.cos(t), r*np.sin(t)]
                          for t in np.linspace(0, 2*np.pi, N,
                                               endpoint=False)]).T
-        self.colocate.initialize_targets()
-        self.colocate.add_targets('Psi_bndry', xo+x, zo+z)
-        self.colocate.add_targets('Psi_bndry', xo, zo, 0, 1, d_dx=3, d_dz=2)
+        #self.colocate.initialize_targets()
+        self.colocate.add_target('Psi_bndry', xo+x, zo+z)
+        self.colocate.add_target('Psi_bndry', xo, zo, 0, 1, d_dx=3, d_dz=2)
         self.colocate.solve_interaction()
+
+    def add_polygon(self, polygon, N=20):
+        x, z = polygon.boundary.coords.xy
+        L = geom.length(x, z)
+        _l = np.linspace(0, 1, N, endpoint=False)
+        self.colocate.add_target('Psi_bndry',
+                                 interp1d(L, x)(_l),
+                                 interp1d(L, z)(_l))
+
 
     def set_foreground(self):
         '[G][Ic] = [T]'
-        self.flux = self.coil.reduce_mpc(self.colocate.flux)
-        self.G = self.flux  # full flux constraint
+        self.flux = self.coil.reduce_mpc(self.colocate._psi)
+
+        self.G = self.flux[:, self.coil.mpc_select('coil')]  # full flux constraint
         self.wG = self.G  # self.wsqrt * self.G
 
     def set_background(self):
         'contribution from passive coils'
-        self.BG = np.zeros(self.colocate.n)  # background
+        self.BG = np.zeros(self.colocate.nT)  # background
 
     def set_target(self):
-        self.T = (self.colocate.targets.value.values - self.BG)
+        self.T = (self.colocate.Psi - self.BG)
         self.wT = self.T  # self.wsqrt * self.T
 
     @property
@@ -84,8 +94,9 @@ class Inverse(CoilClass, PoloidalLimit):
 
     def solve(self):  # solve for constrained current vector
         self.solve_lstsq()  # sead with least-squares solution
-
-        opt = nlopt.opt(nlopt.LD_MMA, self.coil._nC)
+        index = self.coil._current_index
+        nC = int(sum(index))
+        opt = nlopt.opt(nlopt.LD_MMA, nC)
         opt.set_min_objective(self.frss)
         opt.set_ftol_rel(1e-6)
         #opt.set_xtol_abs(1e1)
@@ -95,14 +106,14 @@ class Inverse(CoilClass, PoloidalLimit):
 
         # limit current
         current_limit = self.get_limit('current', self.coil._mpc_index, 'A')
-        opt.set_lower_bounds(current_limit['lower'])
-        opt.set_upper_bounds(current_limit['upper'])
-        Ic = self.Ic.copy()
+        opt.set_lower_bounds(current_limit['lower'][index])
+        opt.set_upper_bounds(current_limit['upper'][index])
+        Ic = self.Ic.copy()[index]
         for bound, logic in zip(['lower', 'upper'],
                                 [operator.lt, operator.gt]):
-            index = logic(Ic, current_limit[bound])
-            Ic[index] = current_limit[bound][index]
-
+            select = logic(Ic, current_limit[bound][index])
+            Ic[select] = current_limit[bound][index][select]
+        print(np.shape(self.wG), np.shape(Ic))
         self.Ic = opt.optimize(Ic)
         '''
         print('')

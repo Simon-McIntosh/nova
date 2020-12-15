@@ -6,11 +6,11 @@ import itertools
 import pandas
 import numpy as np
 
-from nova.thermalhydralic.Sultan.database import DataBase
+from nova.thermalhydralic.sultan.database import DataBase
 
 
 @dataclass
-class TestCampaign:
+class Campaign:
     """
     Load Sultan experiment campaign metadata.
 
@@ -113,15 +113,15 @@ class TestCampaign:
         None.
 
         """
-        mode = 'c'
+        testmode = 'c'
         labels = [label[0] for label in _xls_index.values
                   if isinstance(label[0], str)]
         try:
             strand = next(label for label in labels
-                          if f'{mode}XXYYZZ' in label
-                          or f'{mode.upper()}XXYYZZ' in label)
+                          if f'{testmode}XXYYZZ' in label
+                          or f'{testmode.upper()}XXYYZZ' in label)
         except StopIteration as stop:
-            raise StopIteration(f'{mode}XXYYZZ not found in {labels}') \
+            raise StopIteration(f'{testmode}XXYYZZ not found in {labels}') \
                 from stop
         return strand.split('XXYYZZ')[0][:-1].replace('-', '')
 
@@ -248,7 +248,8 @@ class TestCampaign:
                 metadata_index.pop(testname)
         # convert to DataFrame
         metadata_index = pandas.DataFrame(metadata_index,
-                                          index=['start', 'stop', 'mode']).T
+                                          index=['start', 'stop',
+                                                 'testmode']).T
         metadata_index.reset_index(inplace=True)
         metadata_index['name'] = metadata_index['index']
         ac_index, dc_index = itertools.count(0), itertools.count(0)
@@ -264,7 +265,7 @@ class TestCampaign:
                 name = f'ex{next(null_index)}'
             metadata_index.loc[i, 'index'] = name
         metadata_index = metadata_index.astype(
-            {'start': int, 'stop': int, 'mode': str, 'name': str})
+            {'start': int, 'stop': int, 'testmode': str, 'name': str})
         metadata_index.set_index('index', inplace=True)
         return metadata_index
 
@@ -303,11 +304,11 @@ class TestCampaign:
                     testname = self._format_testname(
                         _xls_index, j, strand, metadata_index)
                     metadata_index[testname] = [j, 0, '']  # test start
-        mode_index = len(strand)
+        testmode_index = len(strand)
         for testname in metadata_index:
             shotlabel = _xls_index.iloc[metadata_index[testname][1], 0]
-            shotmode = shotlabel[mode_index]
-            metadata_index[testname][2] = shotmode.lower()
+            testmode = shotlabel[testmode_index]
+            metadata_index[testname][2] = testmode.lower()
         metadata_index = self._format_metadata_index(metadata_index)
         return metadata_index
 
@@ -372,11 +373,11 @@ class TestCampaign:
         if frequency_duration in testplan:
             testplan[('frequency', 'Hz')] = \
                 testplan[frequency_duration].apply(
-                    TestCampaign._format_frequency_label)
+                    Campaign._format_frequency_label)
         elif frequency_hz in testplan:
             if testplan[frequency_hz].dtype == object:
                 testplan[frequency_hz] = testplan[frequency_hz].apply(
-                    TestCampaign._format_frequency_label)
+                    Campaign._format_frequency_label)
 
     def _read_metadata_testplan(self, xls, metadata_index):
         """Return metadata."""
@@ -423,4 +424,4 @@ class TestCampaign:
 
 if __name__ == '__main__':
 
-    campaign = TestCampaign('CSJA_3')
+    campaign = Campaign('CSJA_3')

@@ -5,7 +5,7 @@ from nova.utilities.pyplot import plt
 
 ITER = ITERcoilset(coils='pf', dCoil=0.25, dPlasma=0.15, dField=0.25,
                    plasma_expand=0.4, plasma_n=2e4,
-                   n=1e3, read_txt=True)
+                   n=1e3, read_txt=False)
 
 ITER.filename = -1
 ITER.scenario = 'EOF'

@@ -98,8 +98,9 @@ def test_xtol_rel_attribute():
 
 if __name__ == '__main__':
     #pytest.main([__file__])
+    test_spline_update()
 
     # test_xtol_rel_attribute()
-    cs = global_null(1, plot=True)
+    #cs = global_null(1, plot=True)
 
 

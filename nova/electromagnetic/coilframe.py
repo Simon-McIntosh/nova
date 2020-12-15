@@ -3,7 +3,7 @@ from warnings import warn
 import string
 
 import numpy as np
-from pandas import DataFrame, Series, concat
+from pandas import DataFrame, Series, concat, RangeIndex
 from pandas.api.types import is_list_like
 import shapely.geometry
 import shapely.affinity
@@ -322,6 +322,8 @@ class CoilFrame(DataFrame, CoilData):
                            if is_list_like(data[key])])
         except ValueError:
             nCol = 1  # scalar input
+        if isinstance(name, RangeIndex):
+            name = None
         if is_list_like(name):
             if len(name) != nCol:
                 raise IndexError(f'missmatch between name {name} and '

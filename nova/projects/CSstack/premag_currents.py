@@ -6,28 +6,42 @@ from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.coilgeom import ITERcoilset
 from nova.electromagnetic.machinedata import MachineData
 
-build_coilset = False
+build_coilset = True
 
 pmag = Inverse()
 
 if build_coilset:
-    pmag.coilset = ITERcoilset(coils='pf vv trs dir', dCoil=0.2, n=5e4, 
+    ITER = ITERcoilset(coils='pf', dCoil=0.2, n=5e2,
                                limit=[3, 10, -5.75, 5.75], levels=61,
-                               read_txt=True).coilset
+                               biot_instances='colocate',
+                               read_txt=False)
+    pmag.coilset = ITER.coilset
     pmag.scenario_filename = -2
-    pmag.scenario = 'IM'
-    pmag.add_colocation_circle(5.7, 0, 1.6, N=30)
+    pmag.scenario = 'SOF'
+    pmag.separatrix = ITER.data['separatrix']
+    #pmag.add_colocation_circle(5.7, 0, 2.6, N=30)
+    pmag.add_polygon(pmag.separatrix, N=30)
     pmag.save_coilset('ITER')
 else:
     pmag.load_coilset('ITER')
- 
-    
+
 pmag.scenario_filename = -1
-pmag.scenario = 'IM'
+pmag.scenario = 'EOF'
+
+#pmag.colocate.update_target()
+pmag.set_foreground()
+pmag.set_background()
+pmag.set_target()
+
+pmag.current_update = 'coil'
+
+#pmag.solve_lstsq()
+pmag.solve()
 
 plt.set_aspect(1)
-pmag.plot(subcoil=False, label='all')
+pmag.plot(subcoil=True, label='coil')
 pmag.grid.plot_flux()
+pmag.colocate.plot()
 
 #pmag.target.add_targets(
 #    [pmag.coil.loc['CS1U', 'x'] - pmag.coil.loc['CS1U', 'dx']/2,
@@ -85,12 +99,12 @@ pmag.grid.plot_flux()
 machine = MachineData()
 machine.load_data()
 machine.plot_data(['firstwall', 'divertor'], color='k')
-    
+
 pmag.label_gaps()
 
 #machine.load_models()
 #machine.plot_models()
-    
+
 #machine.load_coilset()
 #machine.plot()
 """

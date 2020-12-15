@@ -4,9 +4,9 @@ from typing import Optional
 
 import pandas
 
-from nova.thermalhydralic.Sultan.database import DataBase
-from nova.thermalhydralic.Sultan.testplan import TestPlan
-from nova.thermalhydralic.Sultan.sultanshot import SultanShot
+from nova.thermalhydralic.sultan.database import DataBase
+from nova.thermalhydralic.sultan.testplan import TestPlan
+from nova.thermalhydralic.sultan.shotinstance import ShotInstance
 
 
 @dataclass
@@ -48,7 +48,7 @@ class SultanData:
         """Return raw sultan data."""
         try:
             data = self._load_data()
-        except KeyError:
+        except (KeyError, OSError):
             data = self._read_data()
             self._save_data(data)
         self.data = data
@@ -96,6 +96,6 @@ class SultanData:
 if __name__ == '__main__':
 
     testplan = TestPlan('CSJA_3')
-    shot = SultanShot(testplan)
+    shotinstance = ShotInstance(testplan)
 
-    sultandata = SultanData(testplan.database, shot.filename)
+    sultandata = SultanData(testplan.database, shotinstance.filename)

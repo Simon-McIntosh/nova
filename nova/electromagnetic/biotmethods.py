@@ -59,7 +59,7 @@ class Probe(BiotSet):
         None.
 
         """
-        self.target.add_coil(*args, name='Target', delim='', **kwargs)
+        self.target.add_coil(*args, label='Target', delim='', **kwargs)
         self.assemble_biotset()
 
     def plot_targets(self, ax=None, **kwargs):
@@ -189,12 +189,11 @@ class PlasmaFilament(Probe):
 class Colocate(Probe):
     """Colocation probes - used by inverse (nova.design)."""
 
-    _biot_attributes = ['label', 'x', 'z', 'value',
-                        'nx', 'nz', 'd_dx', 'd_dz',
-                        'factor', 'weight']
+    _target_attributes = ['label', 'x', 'z', 'value',
+                          'nx', 'nz', 'd_dx', 'd_dz',
+                          'factor', 'weight']
 
-
-    def add_targets(self, *args, **kwargs):
+    def add_target(self, *args, **kwargs):
         '''
         add colocation points
 
@@ -217,7 +216,7 @@ class Colocate(Probe):
             for key in kwargs:
                 target[key] = kwargs[key]
         # populate missing entries with defaults
-        if len(target) != self.targets.shape[1]:  # fill defaults
+        if len(target) != self.target.shape[1]:  # fill defaults
             for key in default:
                 if key not in target:
                     target[key] = default[key]
@@ -226,12 +225,14 @@ class Colocate(Probe):
         norm = np.linalg.norm([target['nx'], target['nz']], axis=0)
         for nhat in ['nx', 'nz']:
             target.loc[target.index[norm != 0], nhat] /= norm[norm != 0]
-        Probe.add_targets(self, target)  # append Biot colocation targets
+        print(target.columns)
+        Probe.add_target(self, target)  # append Biot colocation targets
 
-    def update_targets(self):
+    def update_target(self):
         'update targets.value from Psi and/or field'
-        psi_index = ['Psi' in l for l in self.targets.label]
-        self.targets.loc[psi_index, 'value'] = self.Psi[psi_index]
+        #psi_index = ['Psi' in l for l in self.target.label]
+        #self.target.loc[psi_index, 'value'] = self.Psi[psi_index]
+        self.target['value'] = self.Psi
 
     def set_weight(self, index, gradient):
         index &= (gradient > 0)  # ensure gradient > 0
@@ -329,7 +330,7 @@ class Colocate(Probe):
         '''
 
     def plot(self):
-        plt.plot(self.targets.x, self.targets.z, 'o')
+        plt.plot(self.target.x, self.target.z, 'o')
 
 
 class Grid(BiotSet, Topology):

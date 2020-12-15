@@ -1,18 +1,9 @@
 """Manage Sultan testplan."""
 from dataclasses import dataclass, field
-from typing import Optional
+from types import SimpleNamespace
+from typing import Optional, Union
 
-from nova.thermalhydralic.Sultan.testcampaign import TestCampaign
-
-
-@dataclass
-class Reload:
-    """Reload datastructure for testplan."""
-
-    experiment: bool = True
-    testname: bool = True
-    mode: bool = True
-    campaign: bool = True
+from nova.thermalhydralic.sultan.campaign import Campaign
 
 
 @dataclass
@@ -28,13 +19,16 @@ class TestPlan:
     """
 
     _experiment: str
-    _testname: Optional[str] = field(default=0)
-    _mode: str = 'ac'
-    reload: Reload = field(init=False, default=Reload(), repr=False)
+    _testname: Optional[Union[str, int]] = field(default=0)
+    _testmode: Optional[str] = field(default='ac')
+    reload: SimpleNamespace = field(
+        init=False, repr=False,
+        default=SimpleNamespace(experiment=True, testname=True, testmode=True,
+                                campaign=True))
 
     def __post_init__(self):
         """Init test campaign."""
-        self._campaign = TestCampaign(self.experiment)
+        self._campaign = Campaign(self.experiment)
 
     @property
     def experiment(self):
@@ -63,13 +57,13 @@ class TestPlan:
         return self.campaign.database
 
     @property
-    def mode(self):
+    def testmode(self):
         """
         Manage sultan test mode.
 
         Parameters
         ----------
-        mode : str
+        testmode : str
             Sultan test mode.
 
         Raises
@@ -79,20 +73,20 @@ class TestPlan:
 
         Returns
         -------
-        mode : str
+        testmode : str
 
         """
-        if self.reload.mode:
-            self.mode = self._mode
-        return self._mode
+        if self.reload.testmode:
+            self.testmode = self._testmode
+        return self._testmode
 
-    @mode.setter
-    def mode(self, mode):
-        mode = mode.lower()
-        if mode not in ['cal', 'ac', 'dc', 'full']:
-            raise IndexError('mode not in [cal, ac, dc, full]')
-        self._mode = mode
-        self.reload.mode = False
+    @testmode.setter
+    def testmode(self, testmode):
+        testmode = testmode.lower()
+        if testmode not in ['cal', 'ac', 'dc', 'full']:
+            raise IndexError('testmode not in [cal, ac, dc, full]')
+        self._testmode = testmode
+        self.reload.testmode = False
 
     @property
     def testname(self):
@@ -138,10 +132,10 @@ class TestPlan:
     def index(self):
         """Return testplan index, read-only."""
         campaign_index = self.campaign.index
-        if self.mode == 'full':
+        if self.testmode == 'full':
             index = campaign_index.loc[:, 'name']
         else:
-            testindex = campaign_index['mode'] == self.mode[0]
+            testindex = campaign_index['testmode'] == self.testmode[0]
             index = campaign_index.loc[testindex, 'name']
         return index
 
@@ -170,3 +164,4 @@ if __name__ == '__main__':
     print(testplan.testname)
     print(testplan.plan['File'])
     print(testplan.note)
+    print(testplan.testmode)

@@ -1,16 +1,10 @@
-
+"""Methods to manage single shot Sultan waveform data."""
 from dataclasses import dataclass, field, InitVar
-from typing import List, Tuple
+from typing import Tuple
 from types import SimpleNamespace
 
 import numpy as np
 import pandas
-
-from nova.thermalhydralic.Sultan.sultanshot import SultanShot
-from nova.thermalhydralic.Sultan.sultanprofile import SultanProfile
-from nova.thermalhydralic.Sultan.sultanplot import SultanPlot
-
-from nova.utilities.pyplot import plt
 
 
 @dataclass
@@ -21,8 +15,11 @@ class HeatIndex:
     _threshold: float = 0.95
     _index: slice = field(init=False, default=None)
     reload: SimpleNamespace = field(
-        init=False, repr=False,
-        default=SimpleNamespace(threshold=True, index=True))
+        init=True, repr=False, default_factory=SimpleNamespace)
+
+    def __post_init__(self):
+        self.reload.threshold = True
+        self.reload.index = True
 
     @property
     def threshold(self):
@@ -66,13 +63,16 @@ class HeatIndex:
 
         """
         if self.reload.index:
+            print('reload')
             current = self.data.loc[:, ('Ipulse', 'A')]
             abs_current = current.abs()
             max_current = abs_current.max()
             threshold_index = np.where(abs_current >=
                                        self.threshold*max_current)[0]
             self._index = slice(threshold_index[0], threshold_index[-1]+1)
-        self.reload.index = False
+            self.reload.index = False
+        else:
+            print('serve')
         return self._index
 
     @property
@@ -114,7 +114,7 @@ class DataInstance:
 
 
 @dataclass
-class Response:
+class ShotResponse:
     """
     Calculate single shot heat response.
 
@@ -139,9 +139,9 @@ class Response:
     stop: HeatInstance
         Time and heat output values at the end of input heating.
     maximum: HeatInstance
-        Time and heat output values at max input heating.
+        Time and heat output values at maximum input heating.
     minimum: HeatInstance
-        Time and heat output values at minimum input heating.
+        Time and heat output values at minimum indexed input heating.
     delta: float
         Delta heating within index.
     reload: SimpleNamespace
@@ -185,77 +185,31 @@ class Response:
 
     @property
     def maximum_ratio(self):
-        """Return ratio of max to stop heat."""
-        return self.maximum.value/self.stop.value
+        """Return ratio of offset maximum to heat delta."""
+        return (self.maximum.value-self.start.value) / self.delta
 
     @property
     def minimum_ratio(self):
-        """Return ratio of stop-minimum to delta heat."""
+        """Return ratio of stop-minimum to heat delta."""
         return (self.stop.value-self.minimum.value) / self.delta
 
     @property
-    def index_ratio(self):
-        """Return ration of start-stop heat."""
-        return self.start.value / self.stop.value
+    def limit_ratio(self):
+        """Return ration of index delta to heat delta."""
+        return (self.stop.value-self.start.value) / self.delta
 
     @property
     def steady(self):
-        """
-        Return steady flag.
-
-        False if any:
-        - max/end heat ratio > steady_threshold
-        -
-        """
-        if self.maximum_ratio > self.steady_threshold:
-            steady = False
-        elif self.minimum_ratio > self.steady_threshold:
-            steady = False
-        elif self.index_ratio > 1:
-            steady = False
-        else:
-            steady = True
-        return steady
+        """Return steady flag."""
+        return self.status.steady.all()
 
     @property
-    def steady_status(self):
+    def status(self):
         """Return pandas.DataFrame detailing stability metrics."""
-        status = pandas.DataFrame(index=['maximum', 'minimum', 'index'],
+        status = pandas.DataFrame(index=['maximum', 'minimum', 'limit'],
                                   columns=['ratio', 'steady'])
         for name in status.index:
             status.loc[name, 'ratio'] = getattr(self, f'{name}_ratio')
             status.loc[name, 'steady'] = \
                 status.loc[name, 'ratio'] < self.steady_threshold
         return status
-
-
-    def plot(self, ax=None):
-        """
-
-        Parameters
-        ----------
-        ax : axis, optional
-            plot axis. The default is None (plt.gca())
-
-        Returns
-        -------
-        None
-
-        """
-        if ax is None:
-            ax = plt.gca()
-        ax.plot(t_eoh, Qdot_eoh, **self._get_marker(steady, 'eoh'))
-        ax.plot(t_max, Qdot_max, **self._get_marker(steady, 'max'))
-
-
-if __name__ == '__main__':
-
-    shot = SultanShot('CSJA_3')
-    profile = SultanProfile(shot)
-
-    response = Response(profile.lowpassdata, HeatIndex(profile.rawdata))
-
-
-
-    #post = SultanPostProcess(profile)
-    #post.extract_response(plot=True)

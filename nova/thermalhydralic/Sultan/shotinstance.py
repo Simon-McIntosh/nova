@@ -1,27 +1,22 @@
 """Manage single Sultan shot instances."""
 
 from dataclasses import dataclass, field
+from types import SimpleNamespace
 
 import pandas
 
-from nova.thermalhydralic.Sultan.testplan import TestPlan
+from nova.thermalhydralic.sultan.testplan import TestPlan
 
 
 @dataclass
-class Reload:
-    """Reload datastructure for testshot."""
-
-    index: bool = True
-    data: bool = True
-
-
-@dataclass
-class SultanShot:
+class ShotInstance:
     """Manage Sultan test instance (shot)."""
 
-    testplan: TestPlan = field(repr=False)
-    _shotindex: int = 0
-    reload: Reload = field(init=False, default=Reload(), repr=False)
+    testplan: TestPlan = field(repr=True)
+    _index: int = 0
+    reload: SimpleNamespace = field(
+        init=False, repr=False,
+        default=SimpleNamespace(index=True, data=True))
 
     def __post_init__(self):
         """Typecheck testplan and initialize shot instance."""
@@ -29,13 +24,13 @@ class SultanShot:
             self.testplan = TestPlan(self.testplan)
 
     @property
-    def shotindex(self):
+    def index(self):
         """
         Shot identifier.
 
         Parameters
         ----------
-        shotindex : int
+        index : int
             Shot identifier.
 
         Raises
@@ -50,15 +45,15 @@ class SultanShot:
 
         """
         if self.reload.index:
-            self.shotindex = self._shotindex
-        return self._shotindex
+            self.index = self._index
+        return self._index
 
-    @shotindex.setter
-    def shotindex(self, shotindex):
+    @index.setter
+    def index(self, index):
         try:
-            self._shotindex = self.testplan.plan.index[shotindex]
+            self._index = self.testplan.plan.index[index]
         except IndexError as index_error:
-            raise IndexError(f'shot index {shotindex} '
+            raise IndexError(f'shot index {index} '
                              'out of bounds for testplan index '
                              f'{self.testplan.plan.index}') from index_error
         self.reload.index = False
@@ -67,24 +62,24 @@ class SultanShot:
     @property
     def metadata(self):
         """Return shot metadata, read-only."""
-        metadata = pandas.Series(self.testplan.plan.iloc[self.shotindex, :])
+        metadata = pandas.Series(self.testplan.plan.iloc[self.index, :])
         metadata['note'] = self.note
         return metadata
 
     @property
     def note(self):
         """Return shot note, read-only."""
-        return self.testplan.note.loc[self.shotindex, 'note']
+        return self.testplan.note.loc[self.index, 'note']
 
     @property
     def frequency(self):
         """Return shot frequency."""
-        return self.testplan.plan.at[self.shotindex, ('frequency', 'Hz')]
+        return self.testplan.plan.at[self.index, ('frequency', 'Hz')]
 
     @property
     def current_label(self):
         """Return shot excitation current string."""
-        return self.testplan.plan.at[self.shotindex, ('Ipulse', 'A')]
+        return self.testplan.plan.at[self.index, ('Ipulse', 'A')]
 
     @property
     def filename(self):
@@ -94,7 +89,7 @@ class SultanShot:
     def sequence(self):
         """Return filename generator."""
         for i in range(self.testplan.shotnumber):
-            self.shotindex = i
+            self.index = i
             yield self.filename
 
     @property
@@ -105,4 +100,4 @@ class SultanShot:
 
 if __name__ == '__main__':
 
-    shot = SultanShot('CSJA_3')
+    shot = ShotInstance('CSJA_3')

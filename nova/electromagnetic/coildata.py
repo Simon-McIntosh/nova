@@ -359,6 +359,11 @@ class CoilData():
 
     @property
     def current_index(self):
+        """Return current index."""
+        return self._current_index
+
+    @property
+    def current_status(self):
         """
         Display current index update status.
 
@@ -380,6 +385,13 @@ class CoilData():
         else:
             return DataFrame(columns=['power', 'optimize', 'plasma',
                                       'feedback', self.current_update])
+
+    def get_current(self, current_column):
+        """Return full mpc current vector."""
+        current = self._Ic
+        if current_column == 'It':  # convert to turn current
+            current *= self._Nt[self._mpc_iloc]
+        return current
 
     def _set_current(self, value, current_column='Ic', update_dataframe=True):
         """
@@ -408,9 +420,7 @@ class CoilData():
         self._update_dataframe['Ic'] = update_dataframe  # update dataframe
         self._update_dataframe['It'] = update_dataframe
         nU = sum(self._current_index)  # length of update vector
-        current = getattr(self, '_Ic')
-        if current_column == 'It':  # convert to turn current
-            current *= self._Nt[self._mpc_iloc]
+        current = self.get_current(current_column)
         if is_dict_like(value):
             for i, (index, update) in enumerate(zip(self.index[self._mpc_iloc],
                                                     self._current_index)):
@@ -423,8 +433,9 @@ class CoilData():
                 current[self._current_index] = value
             else:
                 raise IndexError(
-                        'length of input does not match '
-                        f'"{self.current_update}" coilset\n'
+                        f'length of input {len(value)} does not match '
+                        f'"{self.current_update}" coilset length'
+                        f' {nU}\n'
                         'coilset.index: '
                         f'{self._mpc_index[self._current_index]}\n'
                         f'value: {value}\n\n'
@@ -462,11 +473,12 @@ class CoilData():
 
         Returns
         -------
-        Ic : np.array, shape(nC,)
-            Line current array (all coils).
+        Ic : np.array, shape(nI,)
+            Line current array (current index).
 
         """
-        return self._Ic[self._mpc_referance] * self._mpc_factor
+        #line_current = self._Ic[self._mpc_referance] * self._mpc_factor
+        return self._Ic[self.current_index]
 
     @Ic.setter
     def Ic(self, value):
@@ -479,11 +491,13 @@ class CoilData():
 
         Returns
         -------
-        It : np.array, shape(nC,)
-            Turn current array (all coils).
+        It : np.array, shape(nI,)
+            Turn current array (current_index).
 
         """
-        return self._Ic[self._mpc_referance] * self._mpc_factor * self._Nt
+        turn_current = self._Ic[self._mpc_referance] * self._mpc_factor * \
+            self._Nt
+        return turn_current[self.current_index]
 
     @It.setter
     def It(self, value):
@@ -610,11 +624,17 @@ class CoilData():
             with self._write_to_dataframe(self):
                 for attribute in _update_dataframe:
                     if _update_dataframe[attribute]:
-                        self.loc[:, attribute] = getattr(self, attribute)
                         if attribute in ['Ic', 'It']:
+                            current = self._Ic[self._mpc_referance] * \
+                                self._mpc_factor
+                            if attribute == 'It':
+                                current *= self._Nt
+                            self.loc[:, attribute] = current
                             _attr = next(attr for attr in ['Ic', 'It']
                                          if attr != attribute)
                             self._update_dataframe[_attr] = False
+                        else:
+                            self.loc[:, attribute] = getattr(self, attribute)
 
     def refresh_coilframe(self, key):
         """

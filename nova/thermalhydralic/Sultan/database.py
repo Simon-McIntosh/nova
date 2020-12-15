@@ -3,8 +3,8 @@ import os.path
 from dataclasses import dataclass, field
 from typing import List
 
-from nova.thermalhydralic.Sultan.localdata import LocalData
-from nova.thermalhydralic.Sultan.remotedata import FTPData
+from nova.thermalhydralic.sultan.localdata import LocalData
+from nova.thermalhydralic.sultan.remotedata import FTPData
 
 
 @dataclass

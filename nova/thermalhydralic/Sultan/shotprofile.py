@@ -1,32 +1,28 @@
 """Manage sultan timeseries data."""
 import re
 from dataclasses import dataclass, field
+from types import SimpleNamespace
 
 import pandas
 import numpy as np
 import scipy.signal
 import CoolProp.CoolProp as CoolProp
 
-from nova.thermalhydralic.Sultan.sultanshot import SultanShot
-from nova.thermalhydralic.Sultan.sultandata import SultanData
+from nova.thermalhydralic.sultan.shotinstance import ShotInstance
+from nova.thermalhydralic.sultan.sultandata import SultanData
+from nova.thermalhydralic.sultan.shotresponse import HeatIndex, ShotResponse
+from nova.utilities.pyplot import plt
 
 
 @dataclass
-class Reload:
-    """Reload datastructure for testshot."""
-
-    side: bool = True
-    rawdata: bool = True
-    lowpassdata: bool = True
-
-
-@dataclass
-class SultanProfile:
+class ShotProfile:
     """Extract and filter sultan timeseries data."""
 
-    shot: SultanShot
+    shot: ShotInstance
     _side: str = 'Left'
-    reload: Reload = field(init=False, default=Reload(), repr=False)
+    reload: SimpleNamespace = field(
+        init=False, repr=False,
+        default=SimpleNamespace(side=True, rawdata=True, lowpassdata=True))
     _rawdata: pandas.DataFrame = field(init=False, repr=False)
     _lowpassdata: pandas.DataFrame = field(init=False, repr=False)
 
@@ -85,6 +81,12 @@ class SultanProfile:
             self._lowpassdata = self._extract_data(lowpass=True)
             self.reload.lowpassdata = False
         return self._lowpassdata
+
+    @property
+    def shotresponse(self):
+        """Return shot response, read-only."""
+        print('heatindex', HeatIndex(self.rawdata).reload)
+        return ShotResponse(self.lowpassdata, HeatIndex(self.rawdata))
 
     @staticmethod
     def _initialize_dataframe():
@@ -182,8 +184,41 @@ class SultanProfile:
         omega = 2*np.pi*self.shot.frequency
         return omega*self.external_field  # pulse field rate amplitude
 
+    def plot_single(self, variable, ax=None, lowpass=False):
+        data = self.lowpassdata if lowpass else self.rawdata
+        heat_index = self.shotresponse.heat_index
+
+        print(heat_index.index)
+        print(self.shotresponse.heat_index.index)
+
+        if variable not in data:
+            raise IndexError(f'variable {variable} not in {data.columns}')
+        if ax is None:
+            ax = plt.gca()
+        bg_color = 0.4 * np.ones(3) if lowpass else 'lightgray'
+        color = 'C3' if lowpass else 'C0'
+        label = 'lowpass' if lowpass else 'raw'
+        ax.plot(data.t, data[variable], color=bg_color)
+        ax.plot(data.t[heat_index.index], data[variable][heat_index.index],
+                color=color, label=label)
+        ax.legend()
+        ax.set_xlabel('$t$ s')
+        ax.set_ylabel(r'$\hat{\dot{Q}}$ W')
+        plt.despine()
+
+    def plot(self):
+        self.plot_single('Qdot_norm', lowpass=False)
+        self.plot_single('Qdot_norm', lowpass=True)
+
+
 
 if __name__ == '__main__':
 
-    shot = SultanShot('CSJA_3')
-    profile = SultanProfile(shot)
+    shotinstance = ShotInstance('CSJA_3')
+    shotprofile = ShotProfile(shotinstance)
+
+    print(shotprofile.shotresponse.heat_index.index)
+    print(shotprofile.shotresponse.heat_index.index)
+
+
+    shotprofile.plot()

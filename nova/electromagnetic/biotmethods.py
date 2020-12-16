@@ -225,7 +225,6 @@ class Colocate(Probe):
         norm = np.linalg.norm([target['nx'], target['nz']], axis=0)
         for nhat in ['nx', 'nz']:
             target.loc[target.index[norm != 0], nhat] /= norm[norm != 0]
-        print(target.columns)
         Probe.add_target(self, target)  # append Biot colocation targets
 
     def update_target(self):

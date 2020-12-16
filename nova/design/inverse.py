@@ -17,11 +17,10 @@ from pandas import DataFrame, Series, concat, isnull
 from pandas.api.types import is_list_like
 from astropy import units
 
-from amigo import geom
-from amigo.time import clock
-from amigo.pyplot import plt
+from nova.utilities import geom
+from nova.utilities.time import clock
+from nova.utilities.pyplot import plt
 from nova.electromagnetic.coilclass import CoilClass
-#from nova.electromagnetic.biotmethods import Target
 from nova.limits.tieplate import get_tie_plate
 from nova.limits.poloidal import PoloidalLimit
 

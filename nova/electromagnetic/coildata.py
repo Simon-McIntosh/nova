@@ -495,9 +495,9 @@ class CoilData():
             Turn current array (current_index).
 
         """
-        turn_current = self._Ic[self._mpc_referance] * self._mpc_factor * \
-            self._Nt
-        return turn_current[self.current_index]
+        #turn_current = self._Ic[self._mpc_referance] * self._mpc_factor * \
+        #    self._Nt
+        return self.Ic * self.Nt[self._mpc_iloc][self.current_index]
 
     @It.setter
     def It(self, value):
@@ -581,7 +581,7 @@ class CoilData():
             sum(It) (float): plasma line current [A]
 
         """
-        return self.It[self.plasma]
+        return self._Ic[self._plasma]
 
     @Ip.setter
     def Ip(self, value):

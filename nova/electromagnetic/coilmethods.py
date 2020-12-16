@@ -166,7 +166,9 @@ class CoilMethods:
     def _set_current(self, value, current_column='Ic'):
         self.relink_mpc()  # relink subcoil mpc as required
         self.coil._set_current(value, current_column)
-        self.subcoil._set_current(self.coil.Ic, 'Ic')  # [self.subcoil._current_index]
+        subvalue = self.coil._Ic[self.coil._mpc_referance]
+        self.subcoil._set_current(subvalue[self.subcoil.current_index],
+            'Ic')  # [self.subcoil._current_index]
         self.update_coil_current = True
         self.update_plasma_current = True
         #self.update_field()

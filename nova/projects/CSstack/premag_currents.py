@@ -1,6 +1,6 @@
 import numpy as np
 
-from amigo.pyplot import plt
+from nova.utilities.pyplot import plt
 from nova.design.inverse import Inverse
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.coilgeom import ITERcoilset
@@ -20,25 +20,37 @@ if build_coilset:
     pmag.scenario = 'SOF'
     pmag.separatrix = ITER.data['separatrix']
     #pmag.add_colocation_circle(5.7, 0, 2.6, N=30)
-    pmag.add_polygon(pmag.separatrix, N=30)
+    pmag.add_polygon(pmag.separatrix, N=10)
     pmag.save_coilset('ITER')
 else:
     pmag.load_coilset('ITER')
 
 pmag.scenario_filename = -1
 pmag.scenario = 'EOF'
+pmag.Ip = 0
 
 #pmag.colocate.update_target()
+print(pmag.colocate._psi)
+print(pmag.colocate.update_biot)
+
 pmag.set_foreground()
 pmag.set_background()
 pmag.set_target()
 
+
+
+print(pmag.colocate.Psi)
+
 pmag.current_update = 'coil'
 
-#pmag.solve_lstsq()
-pmag.solve()
+pmag.solve_lstsq()
 
-plt.set_aspect(1)
+print(pmag.colocate.Psi)
+print(pmag.wT)
+
+#pmag.solve()
+
+plt.set_aspect(0.8)
 pmag.plot(subcoil=True, label='coil')
 pmag.grid.plot_flux()
 pmag.colocate.plot()

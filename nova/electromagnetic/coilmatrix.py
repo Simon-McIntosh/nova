@@ -105,7 +105,7 @@ class CoilMatrix():
         """
         Save interaction matrix **M**.
 
-        Extract plasma interaction from full matrix and save as _M.
+        Extract plasma interaction from full matrix and save as _M_.
         Apply source and target turns to full matrix only.
 
         Parameters
@@ -376,9 +376,8 @@ class CoilMatrix():
 
         """
         self.solve_interaction()
-        self._dot_plasma_turns(variable)
-        self._dot_coil_current(variable)
-        self._dot_plasma_current(variable)
+        variable = variable.capitalize()
+        self._dot(variable)
         return getattr(self, f'_{variable}') + getattr(self, f'_{variable}_')
 
     def _dot(self, variable):
@@ -388,9 +387,9 @@ class CoilMatrix():
 
     def _dot_plasma_turns(self, variable):
         """
-        Update plasma turns in source interaction matrix **M**.
+        Update plasma turns in source interaction matrix **_M**.
 
-        Multiply unit plasma interaction matrix **_M** by source and target
+        Multiply unit plasma interaction matrix **_M_** by source and target
         plasma turns (dependant on source_turns and target_turns flags).
 
         Parameters
@@ -469,8 +468,9 @@ class CoilMatrix():
 
     @property
     def Fx(self):
-        return np.add.reduceat(2*np.pi*self.source.coilframe.x*self.source.coilframe.It*self.Bz,
-                      self.source._reduction_index)
+        return np.add.reduceat(
+            2*np.pi*self.source.coilframe.x*self.source.coilframe.It*self.Bz,
+            self.source._reduction_index)
 
 
 if __name__ == '__main__':

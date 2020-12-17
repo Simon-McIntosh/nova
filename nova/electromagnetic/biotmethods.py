@@ -576,13 +576,17 @@ class Grid(BiotSet, Topology):
         self._grid_polygon = polygon
         self._update_coil_center = True
 
-    def _get_expand_limit(self, expand=None, xmin=1e-3):
+    def _get_expand_limit(self, expand=None, xmin=1e-3,
+                          exclude=['Zfb0', 'Zfb1']):
         if expand is None:
             expand = self.expand  # use default
         if self.source.empty:
             raise IndexError('source coilframe empty')
-        x, z, = self.source.x, self.source.z
-        dx, dz = self.source.dx, self.source.dz
+        index = np.full(self.source.nC, True)
+        for coil in exclude:  # exclude coils (feedback pair)
+            index[self.source.coil == coil] = False
+        x, z, = self.source.x[index], self.source.z[index]
+        dx, dz = self.source.dx[index], self.source.dz[index]
         limit = np.array([(x - dx/2).min(), (x + dx/2).max(),
                           (z - dz/2).min(), (z + dz/2).max()])
         return self._expand_limit(limit, expand, xmin)

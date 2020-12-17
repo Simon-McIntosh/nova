@@ -128,7 +128,8 @@ class MachineData(CoilSet):
         self.models = {}
         self.filename = \
             'Models_for_calculation_of_axisymmetric_c_XBQF5H_v2_2.xlsx'
-        with pd.ExcelFile(path.join(self.directory, self.filename)) as self.f:
+        with pd.ExcelFile(path.join(self.directory, self.filename),
+                          engine='openpyxl') as self.f:
             self.read_model('vvin', 'Conducting structures', 10,
                             np.arange(1, 6), nrows=100)
             self.read_model('vvout', 'Conducting structures', 112,
@@ -162,7 +163,8 @@ class MachineData(CoilSet):
         self.data = {}
         self.filename = \
             'Data_for_study_of_ITER_plasma_magnetic_c_33NHXN_v3_15.xlsx'
-        with pd.ExcelFile(path.join(self.directory, self.filename)) as self.f:
+        with pd.ExcelFile(path.join(self.directory, self.filename),
+                          engine='openpyxl') as self.f:
 
             self.data['separatrix'] = \
                 self.read_sheet('Target separatrix', 7, [2, 3])

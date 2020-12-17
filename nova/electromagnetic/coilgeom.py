@@ -306,7 +306,7 @@ class PFgeom(CoilSet):  # PF/CS coilset
 
     def load(self, VS=False, source='PCR'):
         # Ro: referance FDU resistance at 0C, m: FDU mass
-        if source == 'PCR':  # update
+        if source == 'PCR' or source == 'asbuilt':  # update
             f = io.StringIO('''
                 	    X, m	Z, m	DX, m	DZ, m	N,	R, ohm	m, Kg
                 CS3U	1.6870	5.4640	0.7400	2.093	554	0.102	9.0e3
@@ -346,6 +346,11 @@ class PFgeom(CoilSet):  # PF/CS coilset
         columns['R, ohm'] = 'R'
         columns['N,'] = 'Nt'
         data = data.rename(columns=columns)
+        if source == 'asbuilt':
+            print('asbuilt')
+            data.loc['PF5', 'x'] += 0.5e-3
+            data.loc['PF5', 'dz'] -= 7.2e-3
+            data.loc['PF5', 'z'] += 7.2e-3 / 2
         part = ['CS' if 'CS' in name else 'PF' for name in data.index]
         data.rename(columns={'dx': 'dl', 'dz': 'dt'}, inplace=True)
         coil = self.coil.get_coil(data, material='steel',

@@ -23,6 +23,7 @@ dependencies:
   - shapely
   - spyder
   - xarray
+  - xlrd
   - pip:
     - pyquaternion
     - rdp

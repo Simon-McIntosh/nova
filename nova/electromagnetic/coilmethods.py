@@ -79,7 +79,7 @@ class CoilMethods:
             Coil line current [A] for all coils.
 
         """
-        return self.coil._Ic
+        return self.coil.Ic
 
     @Ic.setter
     def Ic(self, value):

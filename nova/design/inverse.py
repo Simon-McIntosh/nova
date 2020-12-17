@@ -55,14 +55,15 @@ class Inverse(CoilClass, PoloidalLimit):
 
     def set_foreground(self):
         '[G][Ic] = [T]'
-        self.flux = self.coil.reduce_mpc(self.colocate._psi)
+        self._psi = self.coil.reduce_mpc(self.colocate._psi)
 
-        self.G = self.flux[:, self.coil.mpc_select('coil')]  # full flux constraint
+        self.G = self._psi[:, self.current_index]  # full flux constraint
         self.wG = self.G  # self.wsqrt * self.G
 
     def set_background(self):
         'contribution from passive coils'
-        self.BG = np.zeros(self.colocate.nT)  # background
+        self.BG = self._psi[:, ~self.current_index] @ \
+            self.coil._Ic[~self.current_index]
 
     def set_target(self):
         self.T = (self.colocate.Psi - self.BG)
@@ -107,12 +108,11 @@ class Inverse(CoilClass, PoloidalLimit):
         current_limit = self.get_limit('current', self.coil._mpc_index, 'A')
         opt.set_lower_bounds(current_limit['lower'][index])
         opt.set_upper_bounds(current_limit['upper'][index])
-        Ic = self.Ic.copy()[index]
+        Ic = self.Ic.copy()
         for bound, logic in zip(['lower', 'upper'],
                                 [operator.lt, operator.gt]):
             select = logic(Ic, current_limit[bound][index])
             Ic[select] = current_limit[bound][index][select]
-        print(np.shape(self.wG), np.shape(Ic))
         self.Ic = opt.optimize(Ic)
         '''
         print('')
@@ -123,7 +123,6 @@ class Inverse(CoilClass, PoloidalLimit):
         print(self.get_Faxial(self.If))
         '''
         self.opt_result = opt.last_optimize_result()
-        print(self.opt_result)
 
     def Flimit(self, constraint, vector, grad):
         if self.svd:  # convert eigenvalues to current vector

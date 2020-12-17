@@ -273,8 +273,8 @@ class PlasmaMethods:
         separatrix = polygon
         self._separatrix = separatrix
         # update coil - polygon and polygon derived attributes
-        #self.coil.loc['Plasma', 'polygon'] = separatrix
-        #self.coil.update_polygon(index='Plasma')
+        self.coil.loc['Plasma', 'polygon'] = separatrix
+        self.coil.update_polygon(index='Plasma')
         # ubdate subcoil
         self.subcoil.ionize = self.plasma_tree.query(
             pygeos.io.from_shapely(separatrix), predicate='contains')

@@ -1,16 +1,44 @@
-from nova.electromagnetic.coilgeom import ITERcoilset
+
+import numpy as np
+
 from nova.utilities.pyplot import plt
+from nova.design.inverse import Inverse
+from nova.electromagnetic.coilset import CoilSet
+from nova.electromagnetic.coilgeom import ITERcoilset
+from nova.electromagnetic.machinedata import MachineData
 
-ITER = ITERcoilset(coils='pf', dCoil=0.25, dPlasma=0.15, dField=0.25,
-                   plasma_expand=0.4, plasma_n=2e4,
-                   n=1e3, read_txt=False)
+build_coilset = True
 
-ITER.filename = -1
-ITER.scenario = 'SOF'
+pmag = Inverse()
 
-#ITER.data['separatrix'].z += 0.1
-ITER.separatrix = ITER.data['separatrix']
-ITER.coil.P
+if build_coilset:
+    ITER = ITERcoilset(coils='pf vv trs dir', dCoil=-1, n=5e3,
+                       dPlasma=0.15, plasma_n=1e2,
+                       levels=31, dField=-1,
+                       biot_instances='colocate', read_txt=True)
+    pmag.coilset = ITER.coilset
+    pmag.scenario_filename = -2
+    pmag.scenario = 'SOF'
+    pmag.separatrix = ITER.data['separatrix']
+    pmag.add_polygon(pmag.separatrix, N=30)
+    pmag.save_coilset('ITER')
+else:
+    pmag.load_coilset('ITER')
 
-ITER.plot()
-ITER.plasmagrid.plot_flux(levels=31)
+pmag.scenario_filename = -1
+pmag.scenario = 'EOB'
+
+pmag.current_update = 'coil'
+
+#pmag.colocate.update_target()
+pmag.set_foreground()
+pmag.set_background()
+pmag.set_target()
+
+#pmag.wT = pmag.colocate.Psi.mean() - pmag.BG
+
+pmag.solve()
+
+plt.set_aspect(0.7)
+pmag.plot(subcoil=True, label='active')
+pmag.grid.plot_flux()

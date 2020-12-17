@@ -32,7 +32,7 @@ class SultanData:
     @property
     def filepath(self):
         """Return full path of source datafile, read-only."""
-        return self.database.source_filepath(self.filename) + '.dat'
+        return self.database.datafile(self.filename+'.dat')
 
     @property
     def filename(self):
@@ -45,7 +45,7 @@ class SultanData:
         self.load_data()
 
     def load_data(self):
-        """Return raw sultan data."""
+        """Load raw sultan data."""
         try:
             data = self._load_data()
         except (KeyError, OSError):

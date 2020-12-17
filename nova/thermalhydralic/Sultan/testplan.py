@@ -21,6 +21,7 @@ class TestPlan:
     _experiment: str
     _testname: Optional[Union[str, int]] = field(default=0)
     _testmode: Optional[str] = field(default='ac')
+    _testnameindex: int = field(init=False, default=None)
     reload: SimpleNamespace = field(
         init=False, repr=False,
         default=SimpleNamespace(experiment=True, testname=True, testmode=True,
@@ -40,6 +41,9 @@ class TestPlan:
     @experiment.setter
     def experiment(self, experiment):
         self._experiment = experiment
+        if self._testnameindex is not None:
+            self._testname = self._testnameindex
+            self.reload.testname = True
         self.reload.campaign = True
         self.reload.experiment = False
 
@@ -114,22 +118,23 @@ class TestPlan:
 
     @testname.setter
     def testname(self, testname):
+        self._testnameindex = testname  # store testname index (int or str)
         if isinstance(testname, int):
-            testindex = testname
             try:
-                testname = self.index.index[testindex]
+                testname = self.testindex.index[self._testnameindex]
             except IndexError as index_error:
-                raise IndexError(f'testname index {testindex} out of range\n\n'
-                                 f'{self.index}') from index_error
+                raise IndexError(f'testname index {self._testnameindex} '
+                                 'out of range\n\n'
+                                 f'{self.testindex}') from index_error
         elif isinstance(testname, str):
-            if testname not in self.index.index:
+            if testname not in self.testindex.index:
                 raise IndexError(f'testname {testname} not found in '
-                                 f'\n{self.index}')
+                                 f'\n{self.testindex}')
         self._testname = testname
         self.reload.testname = False
 
     @property
-    def index(self):
+    def testindex(self):
         """Return testplan index, read-only."""
         campaign_index = self.campaign.index
         if self.testmode == 'full':
@@ -160,7 +165,7 @@ class TestPlan:
 if __name__ == '__main__':
 
     testplan = TestPlan('CSJA_3', -1)
-    print(testplan.index)
+    print(testplan.testindex)
     print(testplan.testname)
     print(testplan.plan['File'])
     print(testplan.note)

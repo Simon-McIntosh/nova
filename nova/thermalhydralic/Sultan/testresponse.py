@@ -12,8 +12,8 @@ import scipy.interpolate
 from matplotlib.lines import Line2D
 
 from nova.thermalhydralic.sultan.testplan import TestPlan
-from nova.thermalhydralic.sultan.shot import Shot
-from nova.thermalhydralic.sultan.profile import Profile
+from nova.thermalhydralic.sultan.shotinstance import ShotInstance
+from nova.thermalhydralic.sultan.shotprofile import ShotProfile
 
 from nova.utilities.pyplot import plt
 from nova.utilities.time import clock
@@ -57,8 +57,9 @@ class TestResponse:
     _side: InitVar[str] = 'Left'
 
     def __post_init__(self, experiment, testname, testmode, side):
+        """Link testplan and shot profile."""
         self.testplan = TestPlan(experiment, testname, testmode)
-        self.profile = Profile(Shot(self.testplan), side)
+        self.shotprofile = ShotProfile(ShotInstance(self.testplan), side)
 
     @property
     def experiment(self):
@@ -90,11 +91,24 @@ class TestResponse:
     @property
     def side(self):
         """Manage leg side, Left or Right."""
-        return self.profile.side
+        return self.shotprofile.side
 
     @side.setter
     def side(self, side):
-        self.profile.side = side
+        self.shotprofile.side = side
+
+    def _extract_frequency_response(self):
+        header = 'Extracting frequency response: '
+        header += f'{os.path.split(self.testdata_filename)[1].split(".")[0]}'
+        tick = clock(self.shot_range[1], header=header)
+        for shot in range(*self.shot_range):
+            self.shot = shot
+            response = self.extract_response()
+            self.testdata.loc[shot, ['Qdot_eof', 'Qdot_max', 'steady']] = \
+                response[1], response[3], response[-1]
+            tick.tock()
+        self.testdata.sort_values(['Be', 'Isample', 'B',
+                                   'frequency'], inplace=True)
 
 
 if __name__ == '__main__':
@@ -104,9 +118,14 @@ if __name__ == '__main__':
     #response.experiment = 'CSJA_5'
     response.testname = -1
     #print(response.testplan)
-    print(response.profile)
+    print(response.shotprofile)
     response.side = 'Right'
-    print(response.profile)
+    response.testname = -1
+    response.experiment = 'CSJA_5'
+
+    print(response.testname)
+    response.experiment = 'CSJA_3'
+    print(response.testname)
 
 
     '''

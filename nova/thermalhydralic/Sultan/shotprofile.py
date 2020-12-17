@@ -18,7 +18,7 @@ from nova.utilities.pyplot import plt
 class ShotProfile:
     """Extract and filter sultan timeseries data."""
 
-    shot: ShotInstance
+    shotinstance: ShotInstance
     _side: str = 'Left'
     reload: SimpleNamespace = field(
         init=False, repr=False,
@@ -28,13 +28,13 @@ class ShotProfile:
 
     def __post_init__(self):
         """Build data pipeline."""
-        self._sultandata = SultanData(self.shot.database)
+        self._sultandata = SultanData(self.shotinstance.database)
 
     @property
     def sultandata(self):
         """Return sultan datafile, update shot filename if required."""
-        if self.shot.reload.data:
-            self._sultandata.filename = self.shot.filename
+        if self.shotinstance.reload.data:
+            self._sultandata.filename = self.shotinstance.filename
         return self._sultandata.data
 
     @property
@@ -135,7 +135,7 @@ class ShotProfile:
             data[f'P{end}'] = self.sultandata[f'P {end} {self.side}'] * 1e5
         if lowpass:
             timestep = np.diff(data['t'], axis=0).mean()
-            windowlength = int(2.5 / (timestep*self.shot.frequency))
+            windowlength = int(2.5 / (timestep*self.shotinstance.frequency))
             if windowlength % 2 == 0:
                 windowlength += 1
             if windowlength < 5:
@@ -172,7 +172,7 @@ class ShotProfile:
 
         """
         try:
-            current = float(re.findall(r'\d+', self.shot.current_label)[0])
+            current = float(re.findall(r'\d+', self.shotinstance.current_label)[0])
         except TypeError:
             current = 230
         external_field = current * 0.2/230  # excitation field amplitude
@@ -181,7 +181,7 @@ class ShotProfile:
     @property
     def external_field_rate(self):
         """Return amplitude of exciation field rate of change."""
-        omega = 2*np.pi*self.shot.frequency
+        omega = 2*np.pi*self.shotinstance.frequency
         return omega*self.external_field  # pulse field rate amplitude
 
     def plot_single(self, variable, ax=None, lowpass=False):

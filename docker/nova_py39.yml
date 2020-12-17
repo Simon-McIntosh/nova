@@ -2,6 +2,7 @@ name: nova_py39
 dependencies:
   - python=3.9
   - astropy
+  - coolprop
   - descartes
   - ftputil
   - matplotlib
@@ -13,6 +14,7 @@ dependencies:
   - pyarrow
   - pygeos
   - pygmo
+  - pytables
   - pytest
   - python-snappy
   - python-docx

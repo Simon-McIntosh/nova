@@ -22,13 +22,13 @@ class TestPlan:
     _testname: Optional[Union[str, int]] = field(default=0)
     _testmode: Optional[str] = field(default='ac')
     _testnameindex: int = field(init=False, default=None)
-    reload: SimpleNamespace = field(
-        init=False, repr=False,
-        default=SimpleNamespace(experiment=True, testname=True, testmode=True,
-                                campaign=True))
+    reload: SimpleNamespace = field(init=False, repr=False,
+                                    default_factory=SimpleNamespace)
 
     def __post_init__(self):
         """Init test campaign."""
+        self.reload.__init__(experiment=True, testname=True, testmode=True,
+                             campaign=True)
         self._campaign = Campaign(self.experiment)
 
     @property

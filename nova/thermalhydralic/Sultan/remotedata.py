@@ -2,7 +2,6 @@
 import os
 from dataclasses import dataclass, field
 from warnings import warn
-from typing import Tuple
 
 import pandas.api.types
 import ftputil
@@ -17,7 +16,7 @@ class FTPData:
     server: str = 'ftp.psi.ch'
     username: str = 'sultan'
     password: str = '3g8S4Nbq'
-    ftp_args: Tuple[str] = field(init=False)
+    ftp_args: tuple[str] = field(init=False)
 
     def __post_init__(self):
         """Assemble ftp arguments."""
@@ -75,7 +74,11 @@ class FTPData:
                 warn(warn_txt)
             remotefile = ftpfile[0]
         elif file not in files:
-            raise FileNotFoundError(file_not_found_error)
+            try:
+                remotefile = next(filename for filename in files
+                                  if file in filename)
+            except StopIteration as stop_error:
+                raise FileNotFoundError(file_not_found_error) from stop_error
         else:
             remotefile = file
         return remotefile
@@ -88,7 +91,7 @@ class FTPData:
         ----------
         file : str
             Full filename.
-        path : str
+        directory : str
             Local directory path.
         *relative_path : str, optional
             relative path below parent/experiment/.
@@ -147,9 +150,9 @@ class FTPData:
             try:
                 host.chdir(f'./{folder}')
             except ftputil.error.PermanentError as file_not_found:
-                pwd = host.listdir('./')
                 raise FileNotFoundError(
-                    f'folder {folder} not found in {pwd}') \
+                    f'folder {folder} not found on {host.getcwd()} '
+                    f'in {host.listdir("./")}') \
                     from file_not_found
 
     def listdir(self, *relative_path, select=''):

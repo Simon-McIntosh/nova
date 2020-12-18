@@ -14,12 +14,12 @@ class ShotInstance:
 
     testplan: TestPlan = field(repr=True)
     _index: int = 0
-    reload: SimpleNamespace = field(
-        init=False, repr=False,
-        default=SimpleNamespace(index=True, data=True))
+    reload: SimpleNamespace = field(init=False, repr=False,
+                                    default_factory=SimpleNamespace)
 
     def __post_init__(self):
         """Typecheck testplan and initialize shot instance."""
+        self.reload.__init__(index=True, data=True)
         if isinstance(self.testplan, str):
             self.testplan = TestPlan(self.testplan)
 

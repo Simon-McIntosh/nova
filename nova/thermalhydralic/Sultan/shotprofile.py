@@ -20,14 +20,14 @@ class ShotProfile:
 
     shotinstance: ShotInstance
     _side: str = 'Left'
-    reload: SimpleNamespace = field(
-        init=False, repr=False,
-        default=SimpleNamespace(side=True, rawdata=True, lowpassdata=True))
+    reload: SimpleNamespace = field(init=False, repr=False,
+                                    default_factory=SimpleNamespace)
     _rawdata: pandas.DataFrame = field(init=False, repr=False)
     _lowpassdata: pandas.DataFrame = field(init=False, repr=False)
 
     def __post_init__(self):
         """Build data pipeline."""
+        self.reload.__init__(side=True, rawdata=True, lowpassdata=True)
         self._sultandata = SultanData(self.shotinstance.database)
 
     @property
@@ -85,7 +85,6 @@ class ShotProfile:
     @property
     def shotresponse(self):
         """Return shot response, read-only."""
-        print('heatindex', HeatIndex(self.rawdata).reload)
         return ShotResponse(self.lowpassdata, HeatIndex(self.rawdata))
 
     @staticmethod
@@ -172,7 +171,8 @@ class ShotProfile:
 
         """
         try:
-            current = float(re.findall(r'\d+', self.shotinstance.current_label)[0])
+            current = float(re.findall(r'\d+',
+                                       self.shotinstance.current_label)[0])
         except TypeError:
             current = 230
         external_field = current * 0.2/230  # excitation field amplitude
@@ -185,12 +185,30 @@ class ShotProfile:
         return omega*self.external_field  # pulse field rate amplitude
 
     def plot_single(self, variable, ax=None, lowpass=False):
+        """
+        Plot single waveform.
+
+        Parameters
+        ----------
+        variable : str
+            variable name.
+        ax : axis, optional
+            Plot axis. The default is None, plt.gca().
+        lowpass : bool, optional
+            Serve lowpass filtered data. The default is False.
+
+        Raises
+        ------
+        IndexError
+            variable not found in dataframe.
+
+        Returns
+        -------
+        None.
+
+        """
         data = self.lowpassdata if lowpass else self.rawdata
         heat_index = self.shotresponse.heat_index
-
-        print(heat_index.index)
-        print(self.shotresponse.heat_index.index)
-
         if variable not in data:
             raise IndexError(f'variable {variable} not in {data.columns}')
         if ax is None:
@@ -207,9 +225,9 @@ class ShotProfile:
         plt.despine()
 
     def plot(self):
+        """Plot shot profile."""
         self.plot_single('Qdot_norm', lowpass=False)
         self.plot_single('Qdot_norm', lowpass=True)
-
 
 
 if __name__ == '__main__':
@@ -217,8 +235,6 @@ if __name__ == '__main__':
     shotinstance = ShotInstance('CSJA_3')
     shotprofile = ShotProfile(shotinstance)
 
-    print(shotprofile.shotresponse.heat_index.index)
-    print(shotprofile.shotresponse.heat_index.index)
-
+    shotinstance.index = -3
 
     shotprofile.plot()

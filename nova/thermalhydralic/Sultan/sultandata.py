@@ -32,7 +32,7 @@ class SultanData:
     @property
     def filepath(self):
         """Return full path of source datafile, read-only."""
-        return self.database.datafile(self.filename+'.dat')
+        return self.database.datafile(self.filename)
 
     @property
     def filename(self):

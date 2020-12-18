@@ -1,7 +1,6 @@
 """Manage Sultan database. Unify local and remote data access."""
 import os.path
 from dataclasses import dataclass, field
-from typing import List
 
 from nova.thermalhydralic.sultan.localdata import LocalData
 from nova.thermalhydralic.sultan.remotedata import FTPData
@@ -24,14 +23,16 @@ class DataBase:
     """
 
     _experiment: str
-    _local_args: List[str] = field(default_factory=list, repr=False)
-    _ftp_args: List[str] = field(default_factory=list, repr=False)
+    _local_args: list[str] = field(default_factory=list, repr=False)
+    _ftp_args: list[str] = field(default_factory=list, repr=False)
     local: LocalData = field(init=False, repr=False)
     ftp: FTPData = field(init=False, repr=False)
-    datapath: str = field(default='ac/dat AC/ACdat TEST/AC/ACdat', repr=False)
+    datapath: list[str] = field(default_factory=list, repr=False)
 
     def __post_init__(self):
         """Initialize local and ftp data instances."""
+        if not self.datapath:
+            self.datapath = ['ac/dat', 'AC/dat', 'TEST/AC/ACdat']
         self.experiment = self._experiment
 
     @property
@@ -45,7 +46,7 @@ class DataBase:
 
     def datafile(self, filename):
         """Return full local path of datafile."""
-        for relative_path in self.datapath.split():
+        for relative_path in self.datapath:
             try:
                 datafile = self.locate(filename, relative_path)
                 break
@@ -54,7 +55,8 @@ class DataBase:
         try:
             return self.source_filepath(datafile)
         except AttributeError:
-            err_txt = f'datafile not found on datapath {self.datapath}'
+            err_txt = f'datafile {filename} '
+            err_txt += f'not found on datapath {self.datapath}'
             raise FileNotFoundError(err_txt) from file_not_found_error
 
     @property
@@ -101,7 +103,8 @@ class DataBase:
             if makedir:
                 self.local.makedir()
             try:
-                self.ftp.download(filename, self.local.source_directory)
+                self.ftp.download(filename, self.local.source_directory,
+                                  *relative_path)
             except FileNotFoundError as file_not_found:
                 if makedir:
                     self.local.removedir()  # remove if generated bare

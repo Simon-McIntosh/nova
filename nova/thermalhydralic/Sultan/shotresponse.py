@@ -1,6 +1,5 @@
 """Methods to manage single shot Sultan waveform data."""
 from dataclasses import dataclass, field, InitVar
-from typing import Tuple
 from types import SimpleNamespace
 
 import numpy as np
@@ -14,12 +13,12 @@ class HeatIndex:
     data: pandas.DataFrame = field(repr=False)
     _threshold: float = 0.95
     _index: slice = field(init=False, default=None)
-    reload: SimpleNamespace = field(
-        init=True, repr=False, default_factory=SimpleNamespace)
+    reload: SimpleNamespace = field(init=True, repr=False,
+                                    default_factory=SimpleNamespace)
 
     def __post_init__(self):
-        self.reload.threshold = True
-        self.reload.index = True
+        """Init reload namespace."""
+        self.reload.__init__(threshold=True, index=True)
 
     @property
     def threshold(self):
@@ -63,7 +62,6 @@ class HeatIndex:
 
         """
         if self.reload.index:
-            print('reload')
             current = self.data.loc[:, ('Ipulse', 'A')]
             abs_current = current.abs()
             max_current = abs_current.max()
@@ -71,8 +69,6 @@ class HeatIndex:
                                        self.threshold*max_current)[0]
             self._index = slice(threshold_index[0], threshold_index[-1]+1)
             self.reload.index = False
-        else:
-            print('serve')
         return self._index
 
     @property
@@ -104,8 +100,8 @@ class DataInstance:
     index: int
     time: float = field(init=False)
     value: float = field(init=False)
-    time_column: Tuple[str] = field(default=('t', 's'), repr=False)
-    data_column: Tuple[str] = field(default=('Qdot', 'W'), repr=False)
+    time_column: tuple[str] = field(default=('t', 's'), repr=False)
+    data_column: tuple[str] = field(default=('Qdot', 'W'), repr=False)
 
     def __post_init__(self, data):
         """Set data values."""

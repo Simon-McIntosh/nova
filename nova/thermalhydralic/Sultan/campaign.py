@@ -24,7 +24,6 @@ class Campaign:
     """
 
     _experiment: str
-    binary: bool = True
     database: DataBase = field(init=False, repr=False, default=None)
     metadata: pandas.DataFrame = field(init=False, repr=False, default=None)
 
@@ -66,7 +65,7 @@ class Campaign:
 
     def load_metadata(self):
         """Load campaign metadata."""
-        if os.path.isfile(self.metadatafile) and self.binary:
+        if os.path.isfile(self.metadatafile):
             self._load_metadata()
         else:
             self._read_metadata()

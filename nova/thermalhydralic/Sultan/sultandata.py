@@ -1,4 +1,4 @@
-"""Postprocess Sultan AC loss test data."""
+"""Postprocess Sultan test data."""
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -97,5 +97,4 @@ if __name__ == '__main__':
 
     testplan = TestPlan('CSJA_3')
     shotinstance = ShotInstance(testplan)
-
     sultandata = SultanData(testplan.database, shotinstance.filename)

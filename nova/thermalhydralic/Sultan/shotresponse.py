@@ -11,7 +11,7 @@ class HeatIndex:
     """Index external heating."""
 
     data: pandas.DataFrame = field(repr=False)
-    _threshold: float = 0.95
+    _threshold: float = 0.9
     _index: slice = field(init=False, default=None)
     reload: SimpleNamespace = field(init=True, repr=False,
                                     default_factory=SimpleNamespace)
@@ -100,13 +100,13 @@ class DataInstance:
     index: int
     time: float = field(init=False)
     value: float = field(init=False)
-    time_column: tuple[str] = field(default=('t', 's'), repr=False)
-    data_column: tuple[str] = field(default=('Qdot', 'W'), repr=False)
+    time_label: tuple[str] = field(default=('t', 's'), repr=False)
+    data_label: tuple[str] = field(default=('Qdot_norm', 'W'), repr=False)
 
     def __post_init__(self, data):
         """Set data values."""
-        self.time = data.loc[self.index, self.time_column]
-        self.value = data.loc[self.index, self.data_column]
+        self.time = data.loc[self.index, self.time_label]
+        self.value = data.loc[self.index, self.data_label]
 
 
 @dataclass
@@ -161,23 +161,31 @@ class ShotResponse:
 
     @property
     def maximum(self):
-        """Return max heat datainstance."""
-        max_index = np.argmax(self.data[('Qdot', 'W')].abs())
+        """Return maximum heat datainstance."""
+        max_index = np.argmax(self.data[('Qdot_norm', 'W')].abs())
         return DataInstance(self.data, max_index)
 
     @property
     def minimum(self):
         """Return minimum heat datainstance."""
-        min_index = np.argmin(self.data[('Qdot', 'W')].abs())
+        min_index = np.argmin(self.data[('Qdot_norm', 'W')].abs())
         return DataInstance(self.data, min_index)
 
     @property
     def delta(self):
         """Return delta heating within self.index."""
-        index_heat = self.data.loc[self.heat_index.index, ('Qdot', 'W')]
+        index_heat = self.data.loc[self.heat_index.index, ('Qdot_norm', 'W')]
         maximum_heat = np.max(index_heat)
         minimum_heat = np.min(index_heat)
         return maximum_heat-minimum_heat
+
+    @property
+    def impulse(self):
+        """Return average impulse power response."""
+        start_index = self.heat_index.start
+        time = self.data.loc[start_index:, ('t', 's')]
+        Qdot = self.data.loc[start_index:, ('Qdot_norm', 'W')]
+        return np.trapz(Qdot, time) / (self.stop.time - self.start.time)
 
     @property
     def maximum_ratio(self):
@@ -209,3 +217,12 @@ class ShotResponse:
             status.loc[name, 'steady'] = \
                 status.loc[name, 'ratio'] < self.steady_threshold
         return status
+
+    @property
+    def dataseries(self):
+        """Return response data series."""
+        return pandas.Series([self.stop.value-self.start.value,
+                              self.maximum.value-self.start.value,
+                              self.impulse-self.start.value,
+                              self.steady],
+                             index=['stop', 'maximum', 'impulse', 'steady'])

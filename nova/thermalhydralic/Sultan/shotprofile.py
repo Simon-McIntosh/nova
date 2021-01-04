@@ -2,12 +2,14 @@
 import re
 from dataclasses import dataclass, field
 from types import SimpleNamespace
+from typing import Union
 
 import pandas
 import numpy as np
 import scipy.signal
 import CoolProp.CoolProp as CoolProp
 
+from nova.thermalhydralic.sultan.testplan import TestPlan
 from nova.thermalhydralic.sultan.shotinstance import ShotInstance
 from nova.thermalhydralic.sultan.sultandata import SultanData
 from nova.thermalhydralic.sultan.shotresponse import HeatIndex, ShotResponse
@@ -18,7 +20,7 @@ from nova.utilities.pyplot import plt
 class ShotProfile:
     """Extract and filter sultan timeseries data."""
 
-    shotinstance: ShotInstance
+    shotinstance: Union[ShotInstance, TestPlan, str]
     _side: str = 'Left'
     reload: SimpleNamespace = field(init=False, repr=False,
                                     default_factory=SimpleNamespace)
@@ -28,6 +30,8 @@ class ShotProfile:
     def __post_init__(self):
         """Build data pipeline."""
         self.reload.__init__(side=True, rawdata=True, lowpassdata=True)
+        if not isinstance(self.shotinstance, ShotInstance):
+            self.shotinstance = ShotInstance(self.shotinstance)
         self._sultandata = SultanData(self.shotinstance.database)
 
     @property
@@ -35,6 +39,9 @@ class ShotProfile:
         """Return sultan datafile, update shot filename if required."""
         if self.shotinstance.reload.data:
             self._sultandata.filename = self.shotinstance.filename
+            self.shotinstance.reload.data = False
+            self.reload.rawdata = True
+            self.reload.lowpassdata = True
         return self._sultandata.data
 
     @property
@@ -66,9 +73,16 @@ class ShotProfile:
         self.reload.rawdata = True
         self.reload.lowpassdata = True
 
+    def _reload(self):
+        """Set data chain reload flags."""
+        if self.shotinstance.reload.data:
+            self.reload.rawdata = True
+            self.reload.lowpassdata = True
+
     @property
     def rawdata(self):
         """Return rawdata, read-only."""
+        self._reload()
         if self.reload.rawdata:
             self._rawdata = self._extract_data(lowpass=False)
             self.reload.rawdata = False
@@ -77,6 +91,7 @@ class ShotProfile:
     @property
     def lowpassdata(self):
         """Return lowpassdata, read-only."""
+        self._reload()
         if self.reload.lowpassdata:
             self._lowpassdata = self._extract_data(lowpass=True)
             self.reload.lowpassdata = False
@@ -151,11 +166,11 @@ class ShotProfile:
         data['Qdot'] = data[('mdot', 'kg/s')] * \
             (data[('hout', 'J/Kg')] - data[('hin', 'J/Kg')])
         # normalize Qdot heating by |Bdot|**2
-        data['Qdot_norm'] = data['Qdot'] / self.external_field_rate**2
+        data['Qdot_norm'] = data['Qdot'] / self.excitation_field_rate**2
         return data
 
     @property
-    def external_field(self):
+    def excitation_field(self):
         """
         Return amplitude of excitation field.
 
@@ -166,7 +181,7 @@ class ShotProfile:
 
         Returns
         -------
-        external_field : float
+        excitation_field : float
             External excitation field.
 
         """
@@ -175,14 +190,14 @@ class ShotProfile:
                                        self.shotinstance.current_label)[0])
         except TypeError:
             current = 230
-        external_field = current * 0.2/230  # excitation field amplitude
-        return external_field
+        excitation_field = current * 0.2/230  # excitation field amplitude
+        return excitation_field
 
     @property
-    def external_field_rate(self):
+    def excitation_field_rate(self):
         """Return amplitude of exciation field rate of change."""
         omega = 2*np.pi*self.shotinstance.frequency
-        return omega*self.external_field  # pulse field rate amplitude
+        return omega*self.excitation_field  # pulse field rate amplitude
 
     def plot_single(self, variable, ax=None, lowpass=False):
         """
@@ -232,9 +247,6 @@ class ShotProfile:
 
 if __name__ == '__main__':
 
-    shotinstance = ShotInstance('CSJA_3')
-    shotprofile = ShotProfile(shotinstance)
-
-    shotinstance.index = -3
-
+    shotprofile = ShotProfile('CSJA_3')
+    shotprofile.shotinstance.index = -3
     shotprofile.plot()

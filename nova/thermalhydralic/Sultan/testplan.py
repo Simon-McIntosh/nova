@@ -9,7 +9,7 @@ from nova.thermalhydralic.sultan.campaign import Campaign
 @dataclass
 class TestPlan:
     """
-    Load Sultan experiment test instance (shot).
+    Load Sultan experiment test plan.
 
     Parameters
     ----------

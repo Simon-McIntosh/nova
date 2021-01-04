@@ -40,28 +40,101 @@ from nova.utilities.time import clock
 
 
 @dataclass
-class TestResponse:
-    """
-    Post processing methods for single leg sultan coupling loss data.
+class FrequencyResponse:
+    """Post processing methods for single leg sultan coupling loss data."""
 
-    Parameters
-    ----------
-    experement : str
-        Experement label.
+    shotprofile: Union[ShotInstance, TestPlan, str]
 
-    """
+    def __post_init__(self):
+        """Link shot profile and shot instance methods."""
+        if not isinstance(self.shotprofile, ShotInstance):
+            self.shotprofile = ShotProfile(self.shotprofile)
+        self.shotinstance = self.shotprofile.shotinstance
+        self.testplan = self.shotinstance.testplan
+        ###
+        self.data = pandas.DataFrame(
+            index=range(self.testplan.shotnumber),
+            columns=['file', 'external', 'excitation', 'current', 'frequency',
+                     'stop', 'maximum', 'impulse', 'steady'])
 
-    _experiment: InitVar[str]
-    _testname: InitVar[Union[str, int]] = 0
-    _testmode: InitVar[str] = field(default='ac')
-    _side: InitVar[str] = 'Left'
+    def load_frequency_response(self):
+        """Load frequency response data."""
+        try:
+            data = self._load_frequency_response()
+        except (KeyError, OSError):
+            data = self._read_data()
+            self._save_data(data)
+        self.data = data
 
-    def __post_init__(self, experiment, testname, testmode, side):
-        """Link testplan and shot profile."""
-        self.testplan = TestPlan(experiment, testname, testmode)
-        self.shotprofile = ShotProfile(ShotInstance(self.testplan), side)
+    def _load_frequency_response(self):
+        """Return data from binary store."""
+        with pandas.HDFStore(self.binaryfilepath, mode='r') as store:
+            data = store[self.filename]
+        return data
+
+    def _save_frequency_response(self, dataframe):
+        """Append dataframe to hdf file."""
+        with pandas.HDFStore(self.binaryfilepath, mode='w') as store:
+            store.put(self.filename, dataframe, format='table', append=True)
 
     @property
+    def binaryfilepath(self):
+        """Return full path of binary datafile."""
+        return self.testplan.database.binary_filepath('frequency_response.h5')
+
+    @property
+    def filename(self):
+        """Return frequency response filename."""
+        experiment = self.testplan.experiment
+        testname = self.testplan.testname
+        side = self.shotprofile.side
+        return f'{experiment}_{testname}_{side}'
+
+    def _extract_frequency_response(self):
+        header = f'Extracting frequency response: {self.filename}'
+        tick = clock(self.testplan.shotnumber, header=header)
+        for index, shot in enumerate(self.shotinstance.sequence()):
+            metadata = self.shotinstance.metadata.droplevel(1)
+            self.testdata.loc[
+                index, ['file', 'external', 'current', 'frequency']] = \
+                metadata.loc[['File', 'Be', 'Isample', 'frequency']].values
+            self.testdata.loc[index, 'excitation'] = \
+                self.shotprofile.excitation_field
+            '''
+            self.testdata.loc[
+                index, ['stop', 'maximum', 'impulse', 'steady']] = \
+                self.shotprofile.shotresponse.dataseries
+            '''
+            tick.tock()
+
+        self.testdata.sort_values(['external', 'current', 'excitation',
+                                   'frequency'], inplace=True)
+
+
+if __name__ == '__main__':
+
+    testplan = TestPlan('CSJA_3', -1)
+    response = TestResponse(testplan)
+    response._extract_frequency_response()
+    print(response.testdata)
+
+    '''
+    #response.experiment = 'CSJA_5'
+    response.testname = -1
+    #print(response.testplan)
+    print(response.shotprofile)
+    response.side = 'Right'
+    response.testname = -1
+    response.experiment = 'CSJA_5'
+
+    print(response.testname)
+    response.experiment = 'CSJA_3'
+    print(response.testname)
+    '''
+
+
+    '''
+        @property
     def experiment(self):
         """Manage experiment name."""
         return self.testplan.experiment
@@ -96,36 +169,7 @@ class TestResponse:
     @side.setter
     def side(self, side):
         self.shotprofile.side = side
-
-    def _extract_frequency_response(self):
-        header = 'Extracting frequency response: '
-        header += f'{os.path.split(self.testdata_filename)[1].split(".")[0]}'
-        tick = clock(self.shot_range[1], header=header)
-        for shot in range(*self.shot_range):
-            self.shot = shot
-            response = self.extract_response()
-            self.testdata.loc[shot, ['Qdot_eof', 'Qdot_max', 'steady']] = \
-                response[1], response[3], response[-1]
-            tick.tock()
-        self.testdata.sort_values(['Be', 'Isample', 'B',
-                                   'frequency'], inplace=True)
-
-
-if __name__ == '__main__':
-
-    response = TestResponse('CSJA_3')
-
-    #response.experiment = 'CSJA_5'
-    response.testname = -1
-    #print(response.testplan)
-    print(response.shotprofile)
-    response.side = 'Right'
-    response.testname = -1
-    response.experiment = 'CSJA_5'
-
-    print(response.testname)
-    response.experiment = 'CSJA_3'
-    print(response.testname)
+    '''
 
 
     '''
@@ -354,6 +398,3 @@ if __name__ == '__main__':
     Qbode = 10**(mag/20)
     plt.plot(f, Qbode)
     '''
-
-
-

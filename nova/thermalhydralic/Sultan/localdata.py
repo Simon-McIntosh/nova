@@ -17,7 +17,6 @@ class LocalData:
     """
 
     experiment: str
-    binary: bool = True
     parent_dir: str = 'Sultan'
     source_dir: str = 'ftp'
     binary_dir: str = 'local'

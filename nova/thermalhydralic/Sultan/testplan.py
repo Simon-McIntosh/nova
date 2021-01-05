@@ -28,7 +28,7 @@ class TestPlan:
     def __post_init__(self):
         """Init test campaign."""
         self.reload.__init__(experiment=True, testname=True, testmode=True,
-                             campaign=True)
+                             campaign=True, response=True)
         self._campaign = Campaign(self.experiment)
 
     @property
@@ -45,6 +45,7 @@ class TestPlan:
             self._testname = self._testnameindex
             self.reload.testname = True
         self.reload.campaign = True
+        self.reload.response = True
         self.reload.experiment = False
 
     @property
@@ -91,6 +92,7 @@ class TestPlan:
             raise IndexError('testmode not in [cal, ac, dc, full]')
         self._testmode = testmode
         self.reload.testmode = False
+        self.reload.response = True
 
     @property
     def testname(self):
@@ -132,6 +134,7 @@ class TestPlan:
                                  f'\n{self.testindex}')
         self._testname = testname
         self.reload.testname = False
+        self.reload.response = True
 
     @property
     def testindex(self):

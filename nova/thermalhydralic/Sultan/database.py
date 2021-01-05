@@ -35,23 +35,17 @@ class DataBase:
             self.datapath = ['ac/dat', 'AC/dat', 'TEST/AC/ACdat']
         self.experiment = self._experiment
 
-    @property
-    def binary(self):
-        """Manage binary file read flag."""
-        return self.local.binary
-
-    @binary.setter
-    def binary(self, binary):
-        self.local.binary = binary
-
     def datafile(self, filename):
         """Return full local path of datafile."""
-        for relative_path in self.datapath:
-            try:
-                datafile = self.locate(filename, relative_path)
-                break
-            except FileNotFoundError as file_not_found:
-                file_not_found_error = file_not_found
+        try:  # local search
+            return self.source_filepath(f'{filename}.dat')
+        except FileNotFoundError:  # ftp search
+            for relative_path in self.datapath:
+                try:
+                    datafile = self.locate(filename, relative_path)
+                    break
+                except FileNotFoundError as file_not_found:
+                    file_not_found_error = file_not_found
         try:
             return self.source_filepath(datafile)
         except AttributeError:

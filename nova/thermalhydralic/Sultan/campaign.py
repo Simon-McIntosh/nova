@@ -73,7 +73,7 @@ class Campaign:
     def _read_metadata(self):
         """Extract data from *.xls campaign metadata."""
         metadata_xls = self.database.locate('*.xls')
-        with pandas.ExcelFile(metadata_xls) as xls:
+        with pandas.ExcelFile(metadata_xls, engine='openpyxl') as xls:
             metadata_index = self._read_metadata_index(xls)
             metadata = self._read_metadata_testplan(xls, metadata_index)
             self._save_metadata(metadata)
@@ -128,6 +128,7 @@ class Campaign:
     def _isshot(label):
         """Return True if label contains test, AC, or DC."""
         isshot = 'test' in label[0].lower()
+        isshot &= 'tests' not in label[0].lower()
         isshot |= label[0][:2] == 'AC'
         isshot |= label[0][:2] == 'DC'
         return isshot
@@ -309,6 +310,7 @@ class Campaign:
             testmode = shotlabel[testmode_index]
             metadata_index[testname][2] = testmode.lower()
         metadata_index = self._format_metadata_index(metadata_index)
+        print(metadata_index)
         return metadata_index
 
     @staticmethod

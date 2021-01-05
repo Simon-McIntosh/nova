@@ -29,7 +29,8 @@ class ShotProfile:
 
     def __post_init__(self):
         """Build data pipeline."""
-        self.reload.__init__(side=True, rawdata=True, lowpassdata=True)
+        self.reload.__init__(side=True, rawdata=True, lowpassdata=True,
+                             response=True)
         if not isinstance(self.shotinstance, ShotInstance):
             self.shotinstance = ShotInstance(self.shotinstance)
         self._sultandata = SultanData(self.shotinstance.database)
@@ -72,6 +73,7 @@ class ShotProfile:
         self.reload.side = False
         self.reload.rawdata = True
         self.reload.lowpassdata = True
+        self.reload.response = True
 
     def _reload(self):
         """Set data chain reload flags."""

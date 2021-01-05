@@ -7,10 +7,11 @@ import pandas
 from nova.thermalhydralic.sultan.database import DataBase
 from nova.thermalhydralic.sultan.testplan import TestPlan
 from nova.thermalhydralic.sultan.shotinstance import ShotInstance
+from nova.thermalhydralic.sultan.sultanio import SultanIO
 
 
 @dataclass
-class SultanData:
+class SultanData(SultanIO):
     """Manage Sultan timeseries data."""
 
     database: DataBase
@@ -42,22 +43,7 @@ class SultanData:
     @filename.setter
     def filename(self, filename):
         self._filename = filename
-        self.load_data()
-
-    def load_data(self):
-        """Load raw sultan data."""
-        try:
-            data = self._load_data()
-        except (KeyError, OSError):
-            data = self._read_data()
-            self._save_data(data)
-        self.data = data
-
-    def _load_data(self):
-        """Return data from binary store."""
-        with pandas.HDFStore(self.binaryfilepath, mode='r') as store:
-            data = store[self.filename]
-        return data
+        self.data = self.load_data()
 
     def _read_data(self):
         """
@@ -86,11 +72,6 @@ class SultanData:
             data['P in Left'] = data['P in']
             data['P in Right'] = data['P in']
         return data
-
-    def _save_data(self, dataframe):
-        """Append dataframe to hdf file."""
-        with pandas.HDFStore(self.binaryfilepath, mode='w') as store:
-            store.put(self.filename, dataframe, format='table', append=True)
 
 
 if __name__ == '__main__':

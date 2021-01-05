@@ -14,6 +14,7 @@ from matplotlib.lines import Line2D
 from nova.thermalhydralic.sultan.testplan import TestPlan
 from nova.thermalhydralic.sultan.shotinstance import ShotInstance
 from nova.thermalhydralic.sultan.shotprofile import ShotProfile
+from nova.thermalhydralic.sultan.sultanio import SultanIO
 
 from nova.utilities.pyplot import plt
 from nova.utilities.time import clock
@@ -40,10 +41,13 @@ from nova.utilities.time import clock
 
 
 @dataclass
-class FrequencyResponse:
+class FrequencyResponse(SultanIO):
     """Post processing methods for single leg sultan coupling loss data."""
 
     shotprofile: Union[ShotInstance, TestPlan, str]
+    shotinstance: ShotInstance = field(init=False, repr=False, default=None)
+    testplan: TestPlan = field(init=False, repr=False, default=None)
+    _data: pandas.DataFrame = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Link shot profile and shot instance methods."""
@@ -51,36 +55,26 @@ class FrequencyResponse:
             self.shotprofile = ShotProfile(self.shotprofile)
         self.shotinstance = self.shotprofile.shotinstance
         self.testplan = self.shotinstance.testplan
-        ###
-        self.data = pandas.DataFrame(
-            index=range(self.testplan.shotnumber),
-            columns=['file', 'external', 'excitation', 'current', 'frequency',
-                     'stop', 'maximum', 'impulse', 'steady'])
+        self._data = self.load_data()
 
-    def load_frequency_response(self):
-        """Load frequency response data."""
-        try:
-            data = self._load_frequency_response()
-        except (KeyError, OSError):
-            data = self._read_data()
-            self._save_data(data)
-        self.data = data
+    @property
+    def data(self):
+        """Return frequency response data."""
+        if self.testplan.reload.response or self.shotprofile.reload.response:
+            self._data = self.load_data()
+        return self._data
 
-    def _load_frequency_response(self):
-        """Return data from binary store."""
-        with pandas.HDFStore(self.binaryfilepath, mode='r') as store:
-            data = store[self.filename]
+    def load_data(self):
+        """Extend SultanIO load_data."""
+        data = SultanIO.load_data(self)
+        self.testplan.reload.response = False
+        self.shotprofile.reload.response = False
         return data
-
-    def _save_frequency_response(self, dataframe):
-        """Append dataframe to hdf file."""
-        with pandas.HDFStore(self.binaryfilepath, mode='w') as store:
-            store.put(self.filename, dataframe, format='table', append=True)
 
     @property
     def binaryfilepath(self):
         """Return full path of binary datafile."""
-        return self.testplan.database.binary_filepath('frequency_response.h5')
+        return self.testplan.database.binary_filepath('response.h5')
 
     @property
     def filename(self):
@@ -90,33 +84,37 @@ class FrequencyResponse:
         side = self.shotprofile.side
         return f'{experiment}_{testname}_{side}'
 
-    def _extract_frequency_response(self):
+    def _read_data(self):
+        data = pandas.DataFrame(
+            index=range(self.testplan.shotnumber),
+            columns=['file', 'external', 'excitation', 'current', 'frequency',
+                     'stop', 'maximum', 'impulse', 'steady'])
         header = f'Extracting frequency response: {self.filename}'
         tick = clock(self.testplan.shotnumber, header=header)
         for index, shot in enumerate(self.shotinstance.sequence()):
             metadata = self.shotinstance.metadata.droplevel(1)
-            self.testdata.loc[
+            data.loc[
                 index, ['file', 'external', 'current', 'frequency']] = \
                 metadata.loc[['File', 'Be', 'Isample', 'frequency']].values
-            self.testdata.loc[index, 'excitation'] = \
-                self.shotprofile.excitation_field
-            '''
-            self.testdata.loc[
+            data.loc[index, 'excitation'] = self.shotprofile.excitation_field
+            data.loc[
                 index, ['stop', 'maximum', 'impulse', 'steady']] = \
                 self.shotprofile.shotresponse.dataseries
-            '''
             tick.tock()
-
-        self.testdata.sort_values(['external', 'current', 'excitation',
-                                   'frequency'], inplace=True)
+        data.sort_values(['external', 'current', 'excitation', 'frequency'],
+                         inplace=True)
+        data.fillna(-1, inplace=True)
+        return data
 
 
 if __name__ == '__main__':
 
-    testplan = TestPlan('CSJA_3', -1)
-    response = TestResponse(testplan)
-    response._extract_frequency_response()
-    print(response.testdata)
+    testplan = TestPlan('CSJA_3', 0)
+    response = FrequencyResponse(testplan)
+
+    response.shotinstance.index = 20
+    response.shotprofile.plot()
+
 
     '''
     #response.experiment = 'CSJA_5'

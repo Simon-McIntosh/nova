@@ -1,0 +1,51 @@
+"""Abstract methods for managing sultan data."""
+
+import abc
+
+import pandas
+
+
+class SultanIO(metaclass=abc.ABCMeta):
+    """Sultan data input/output."""
+
+    def load_data(self):
+        """Load data from HDF store."""
+        try:
+            data = self._load_data()
+        except (KeyError, OSError):
+            data = self.read_data()
+        return data
+
+    def read_data(self):
+        """Return raw data from file."""
+        data = self._read_data()
+        self._save_data(data)
+        return data
+
+    def _load_data(self):
+        """Return data from binary store."""
+        with pandas.HDFStore(self.binaryfilepath, mode='r') as store:
+            data = store[self.filename]
+        return data
+
+    def _save_data(self, data):
+        """Append data to hdf file."""
+        with pandas.HDFStore(self.binaryfilepath, mode='a') as store:
+            store.put(self.filename, data, format='table', append=True)
+
+    @property
+    @abc.abstractmethod
+    def binaryfilepath(self) -> str:
+        """Return full filepath for binary file."""
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def filename(self) -> str:
+        """Return data filename."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def _read_data(self):
+        """Return dataframe."""
+        raise NotImplementedError

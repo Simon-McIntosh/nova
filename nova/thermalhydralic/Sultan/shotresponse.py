@@ -188,11 +188,11 @@ class ShotResponse:
         return np.trapz(Qdot, time) / (self.stop.time - self.start.time)
 
     @property
-    def step(self):
+    def step(self) -> SimpleNamespace:
         """Return heat step response."""
         t = self.data.loc[self.heat_index.index, ('t', 's')].values
         Qdot = self.data.loc[self.heat_index.index, ('Qdot_norm', 'W')].values
-        return t-t[0], Qdot-Qdot[0]
+        return SimpleNamespace(t=t-t[0], Qdot=Qdot-Qdot[0])
 
     @property
     def maximum_ratio(self):

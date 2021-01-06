@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, field
 from types import SimpleNamespace
+from typing import Union
 
 import pandas
 
@@ -12,7 +13,7 @@ from nova.thermalhydralic.sultan.testplan import TestPlan
 class ShotInstance:
     """Manage Sultan test instance (shot)."""
 
-    testplan: TestPlan = field(repr=True)
+    testplan: Union[TestPlan, str] = field(repr=True)
     _index: int = 0
     reload: SimpleNamespace = field(init=False, repr=False,
                                     default_factory=SimpleNamespace)
@@ -20,7 +21,7 @@ class ShotInstance:
     def __post_init__(self):
         """Typecheck testplan and initialize shot instance."""
         self.reload.__init__(index=True, data=True)
-        if isinstance(self.testplan, str):
+        if not isinstance(self.testplan, TestPlan):
             self.testplan = TestPlan(self.testplan)
 
     @property

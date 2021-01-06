@@ -38,6 +38,7 @@ class DataBase:
     def datafile(self, filename):
         """Return full local path of datafile."""
         try:  # local search
+            datafile = self.local.locate(f'{filename}.dat')
             return self.source_filepath(f'{filename}.dat')
         except FileNotFoundError:  # ftp search
             for relative_path in self.datapath:
@@ -76,7 +77,7 @@ class DataBase:
 
     def locate(self, file, *relative_path):
         """
-        Return full filename. Search localy first, download if not found.
+        Return full filename of file mached on ftp server.
 
         Parameters
         ----------
@@ -89,21 +90,18 @@ class DataBase:
             Full filename.
 
         """
+        filename = self.ftp.locate(file, *relative_path)
+        makedir = ~self.local.checkdir()  # generate structure if requred
+        if makedir:
+            self.local.makedir()
         try:
-            filename = self.local.locate(file)
-        except FileNotFoundError:
-            filename = self.ftp.locate(file, *relative_path)
-            makedir = ~self.local.checkdir()  # generate structure if requred
+            self.ftp.download(filename, self.local.source_directory,
+                              *relative_path)
+        except FileNotFoundError as file_not_found:
             if makedir:
-                self.local.makedir()
-            try:
-                self.ftp.download(filename, self.local.source_directory,
-                                  *relative_path)
-            except FileNotFoundError as file_not_found:
-                if makedir:
-                    self.local.removedir()  # remove if generated bare
-                raise FileNotFoundError(f'File {filename} not found on '
-                                        'ftp server') from file_not_found
+                self.local.removedir()  # remove if generated bare
+            raise FileNotFoundError(f'File {filename} not found on '
+                                    'ftp server') from file_not_found
         return self.source_filepath(filename)
 
     def binary_filepath(self, filename):

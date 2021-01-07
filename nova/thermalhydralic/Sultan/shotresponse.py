@@ -1,95 +1,11 @@
 """Methods to manage single shot Sultan waveform data."""
 from dataclasses import dataclass, field, InitVar
-from types import SimpleNamespace
 
 import numpy as np
 import pandas
 
-
-@dataclass
-class HeatIndex:
-    """Index external heating."""
-
-    data: pandas.DataFrame = field(repr=False)
-    _threshold: float = 0.9
-    _index: slice = field(init=False, default=None)
-    reload: SimpleNamespace = field(init=True, repr=False,
-                                    default_factory=SimpleNamespace)
-
-    def __post_init__(self):
-        """Init reload namespace."""
-        self.reload.__init__(threshold=True, index=True)
-
-    @property
-    def threshold(self):
-        """
-        Manage heat threshold parameter.
-
-        Parameters
-        ----------
-        threshold : float
-            Heating idexed as current.abs > threshold * current.abs.max.
-
-        Raises
-        ------
-        ValueError
-            threshold must lie between 0 and 1.
-
-        Returns
-        -------
-        threshold : float
-
-        """
-        if self.reload.threshold:
-            self.threshold = self._threshold
-        return self._threshold
-
-    @threshold.setter
-    def threshold(self, threshold):
-        if threshold < 0 or threshold > 1:
-            raise ValueError(f'heat threshold {threshold} '
-                             'must lie between 0 and 1')
-        self._threshold = threshold
-        self.reload.threshold = False
-        self.reload.index = True
-
-    @property
-    def index(self):
-        """
-        Return heat index, slice, read-only.
-
-        Evaluated as current.abs() > threshold * current.abs().max()
-
-        """
-        if self.reload.index:
-            current = self.data.loc[:, ('Ipulse', 'A')]
-            abs_current = current.abs()
-            max_current = abs_current.max()
-            threshold_index = np.where(abs_current >=
-                                       self.threshold*max_current)[0]
-            self._index = slice(threshold_index[0], threshold_index[-1]+1)
-            self.reload.index = False
-        return self._index
-
-    @property
-    def start(self):
-        """Return start index."""
-        return self.index.start
-
-    @property
-    def stop(self):
-        """Return stop index."""
-        return self.index.stop
-
-    @property
-    def time(self):
-        """Return start / end time tuple of input heating period, read-only."""
-        return self.data.loc[[self.start, self.stop], ('t', 's')].values
-
-    @property
-    def time_delta(self):
-        """Return heating period, read-only."""
-        return np.diff(self.time)[0]
+from nova.thermalhydralic.sultan.stepresponse import ModelResponse
+from nova.thermalhydralic.sultan.shotprofile import HeatIndex
 
 
 @dataclass
@@ -140,13 +56,12 @@ class ShotResponse:
         Time and heat output values at minimum indexed input heating.
     delta: float
         Delta heating within index.
-    reload: SimpleNamespace
-        Boolean reload flags.
 
     """
 
     data: pandas.DataFrame = field(repr=False)
     heat_index: HeatIndex
+    npole: int = 6
     steady_threshold: float = 1.05
 
     @property
@@ -180,19 +95,19 @@ class ShotResponse:
         return maximum_heat-minimum_heat
 
     @property
-    def impulse(self):
-        """Return average impulse power response."""
+    def energy(self):
+        """Return intergral power."""
         start_index = self.heat_index.start
         time = self.data.loc[start_index:, ('t', 's')]
         Qdot = self.data.loc[start_index:, ('Qdot_norm', 'W')]
-        return np.trapz(Qdot, time) / (self.stop.time - self.start.time)
+        return np.trapz(Qdot, time)
 
     @property
-    def step(self) -> SimpleNamespace:
-        """Return heat step response."""
+    def stepdata(self):
+        """Return offset heat step response data."""
         t = self.data.loc[self.heat_index.index, ('t', 's')].values
         Qdot = self.data.loc[self.heat_index.index, ('Qdot_norm', 'W')].values
-        return SimpleNamespace(t=t-t[0], Qdot=Qdot-Qdot[0])
+        return t-t[0], Qdot-Qdot[0]
 
     @property
     def maximum_ratio(self):
@@ -214,6 +129,28 @@ class ShotResponse:
         """Return steady flag."""
         return self.status.steady.all()
 
+    def stepresponse(self):
+        """
+        Return thermo-hydralic model parameters.
+
+        Parameters
+        ----------
+        npole : int, optional
+            Number of repeated poles. The default is 6.
+
+        Returns
+        -------
+        vector : array-like
+            Optimization vector [pole, gain, delay].
+        steady_state : float
+            Step response steady state.
+
+        """
+        response = ModelResponse(*self.stepdata, self.npole)
+        vector = response.fit()
+        steady_state = response.model.steady_state
+        return vector, steady_state
+
     @property
     def status(self):
         """Return pandas.DataFrame detailing stability metrics."""
@@ -228,8 +165,8 @@ class ShotResponse:
     @property
     def dataseries(self):
         """Return response data series."""
+        (pole, gain, delay), step
         return pandas.Series([self.stop.value-self.start.value,
                               self.maximum.value-self.start.value,
-                              self.impulse-self.start.value,
                               self.steady],
-                             index=['stop', 'maximum', 'impulse', 'steady'])
+                             index=['stop', 'maximum', 'steady'])

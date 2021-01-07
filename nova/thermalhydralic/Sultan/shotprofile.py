@@ -12,8 +12,93 @@ import CoolProp.CoolProp as CoolProp
 from nova.thermalhydralic.sultan.testplan import TestPlan
 from nova.thermalhydralic.sultan.shotinstance import ShotInstance
 from nova.thermalhydralic.sultan.sultandata import SultanData
-from nova.thermalhydralic.sultan.shotresponse import HeatIndex, ShotResponse
 from nova.utilities.pyplot import plt
+
+
+@dataclass
+class HeatIndex:
+    """Index external heating."""
+
+    data: pandas.DataFrame = field(repr=False)
+    _threshold: float = 0.9
+    _index: slice = field(init=False, default=None)
+    reload: SimpleNamespace = field(init=True, repr=False,
+                                    default_factory=SimpleNamespace)
+
+    def __post_init__(self):
+        """Init reload namespace."""
+        self.reload.__init__(threshold=True, index=True)
+
+    @property
+    def threshold(self):
+        """
+        Manage heat threshold parameter.
+
+        Parameters
+        ----------
+        threshold : float
+            Heating idexed as current.abs > threshold * current.abs.max.
+
+        Raises
+        ------
+        ValueError
+            threshold must lie between 0 and 1.
+
+        Returns
+        -------
+        threshold : float
+
+        """
+        if self.reload.threshold:
+            self.threshold = self._threshold
+        return self._threshold
+
+    @threshold.setter
+    def threshold(self, threshold):
+        if threshold < 0 or threshold > 1:
+            raise ValueError(f'heat threshold {threshold} '
+                             'must lie between 0 and 1')
+        self._threshold = threshold
+        self.reload.threshold = False
+        self.reload.index = True
+
+    @property
+    def index(self):
+        """
+        Return heat index, slice, read-only.
+
+        Evaluated as current.abs() > threshold * current.abs().max()
+
+        """
+        if self.reload.index:
+            current = self.data.loc[:, ('Ipulse', 'A')]
+            abs_current = current.abs()
+            max_current = abs_current.max()
+            threshold_index = np.where(abs_current >=
+                                       self.threshold*max_current)[0]
+            self._index = slice(threshold_index[0], threshold_index[-1]+1)
+            self.reload.index = False
+        return self._index
+
+    @property
+    def start(self):
+        """Return start index."""
+        return self.index.start
+
+    @property
+    def stop(self):
+        """Return stop index."""
+        return self.index.stop
+
+    @property
+    def time(self):
+        """Return start / end time tuple of input heating period, read-only."""
+        return self.data.loc[[self.start, self.stop], ('t', 's')].values
+
+    @property
+    def time_delta(self):
+        """Return heating period, read-only."""
+        return np.diff(self.time)[0]
 
 
 @dataclass
@@ -26,11 +111,12 @@ class ShotProfile:
                                     default_factory=SimpleNamespace)
     _rawdata: pandas.DataFrame = field(init=False, repr=False)
     _lowpassdata: pandas.DataFrame = field(init=False, repr=False)
+    _heatindex: HeatIndex = field(init=False, repr=False)
 
     def __post_init__(self):
         """Build data pipeline."""
         self.reload.__init__(side=True, rawdata=True, lowpassdata=True,
-                             response=True)
+                             heatindex=True, response=True)
         if not isinstance(self.shotinstance, ShotInstance):
             self.shotinstance = ShotInstance(self.shotinstance)
         self._sultandata = SultanData(self.shotinstance.database)
@@ -43,6 +129,7 @@ class ShotProfile:
             self.shotinstance.reload.data = False
             self.reload.rawdata = True
             self.reload.lowpassdata = True
+            self.reload.heatindex = True
         return self._sultandata.data
 
     @property
@@ -73,6 +160,7 @@ class ShotProfile:
         self.reload.side = False
         self.reload.rawdata = True
         self.reload.lowpassdata = True
+        self.reload.heatindex = True
         self.reload.response = True
 
     def _reload(self):
@@ -80,6 +168,7 @@ class ShotProfile:
         if self.shotinstance.reload.data:
             self.reload.rawdata = True
             self.reload.lowpassdata = True
+            self.reload.heatindex = True
 
     @property
     def rawdata(self):
@@ -100,9 +189,13 @@ class ShotProfile:
         return self._lowpassdata
 
     @property
-    def shotresponse(self):
-        """Return shot response, read-only."""
-        return ShotResponse(self.lowpassdata, HeatIndex(self.rawdata))
+    def heatindex(self):
+        """Return heatindex."""
+        self._reload()
+        if self.reload.heatindex:
+            self._heatindex = HeatIndex(self.rawdata)
+            self.reload.heatindex = False
+        return self._heatindex
 
     @staticmethod
     def _initialize_dataframe():
@@ -201,7 +294,7 @@ class ShotProfile:
         omega = 2*np.pi*self.shotinstance.frequency
         return omega*self.excitation_field  # pulse field rate amplitude
 
-    def plot_single(self, variable, ax=None, lowpass=False):
+    def plot_single(self, variable, ax=None, lowpass=False, offset=False):
         """
         Plot single waveform.
 
@@ -213,6 +306,8 @@ class ShotProfile:
             Plot axis. The default is None, plt.gca().
         lowpass : bool, optional
             Serve lowpass filtered data. The default is False.
+        offset : bool, optional
+            Zero time and variable to start of heating. The default is False.
 
         Raises
         ------
@@ -225,7 +320,11 @@ class ShotProfile:
 
         """
         data = self.lowpassdata if lowpass else self.rawdata
-        heat_index = self.shotresponse.heat_index
+        if offset:
+            to = self.lowpassdata.loc[self.heatindex.start, 't']
+            Vo = self.lowpassdata.loc[self.heatindex.start, variable]
+        else:
+            to = Vo = 0
         if variable not in data:
             raise IndexError(f'variable {variable} not in {data.columns}')
         if ax is None:
@@ -233,18 +332,19 @@ class ShotProfile:
         bg_color = 0.4 * np.ones(3) if lowpass else 'lightgray'
         color = 'C3' if lowpass else 'C0'
         label = 'lowpass' if lowpass else 'raw'
-        ax.plot(data.t, data[variable], color=bg_color)
-        ax.plot(data.t[heat_index.index], data[variable][heat_index.index],
+        ax.plot(data.t-to, data[variable]-Vo, color=bg_color)
+        ax.plot(data.t[self.heatindex.index]-to,
+                data[variable][self.heatindex.index]-Vo,
                 color=color, label=label)
         ax.legend()
         ax.set_xlabel('$t$ s')
         ax.set_ylabel(r'$\hat{\dot{Q}}$ W')
         plt.despine()
 
-    def plot(self):
+    def plot(self, offset=False):
         """Plot shot profile."""
-        self.plot_single('Qdot_norm', lowpass=False)
-        self.plot_single('Qdot_norm', lowpass=True)
+        self.plot_single('Qdot_norm', lowpass=False, offset=offset)
+        self.plot_single('Qdot_norm', lowpass=True, offset=offset)
 
 
 if __name__ == '__main__':

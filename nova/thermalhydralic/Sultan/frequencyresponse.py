@@ -92,13 +92,17 @@ class FrequencyResponse(SultanIO):
         header = f'Extracting frequency response: {self.filename}'
         tick = clock(self.testplan.shotnumber, header=header)
         for index, shot in enumerate(self.shotinstance.sequence()):
+            profile = self.shotprofile
             metadata = self.shotinstance.metadata.droplevel(1)
             data.loc[
                 index, ['file', 'external', 'current', 'frequency']] = \
                 metadata.loc[['File', 'Be', 'Isample', 'frequency']].values
             data.loc[index, 'excitation'] = self.shotprofile.excitation_field
+            shotresponse = ShotResponse(profile.lowpassdata, profile.heatindex)
+            ####### >>>> ##### test shotresponse
+
             data.loc[
-                index, ['stop', 'maximum', 'impulse', 'steady']] = \
+                index, ['stop', 'maximum', 'step', 'steady']] = \
                 self.shotprofile.shotresponse.dataseries
             tick.tock()
         data.sort_values(['external', 'current', 'excitation', 'frequency'],

@@ -20,7 +20,7 @@ class HeatIndex:
     """Index external heating."""
 
     data: pandas.DataFrame = field(repr=False)
-    _threshold: float = 0.9
+    _threshold: float = 0.25
     _index: slice = field(init=False, default=None)
     reload: SimpleNamespace = field(init=True, repr=False,
                                     default_factory=SimpleNamespace)
@@ -105,8 +105,7 @@ class HeatIndex:
 class ShotProfile:
     """Extract and filter sultan timeseries data."""
 
-    shotinstance: Union[ShotInstance, TestPlan, str]
-    _side: str = 'Left'
+    instance: Union[ShotInstance, TestPlan, str]
     reload: SimpleNamespace = field(init=False, repr=False,
                                     default_factory=SimpleNamespace)
     _rawdata: pandas.DataFrame = field(init=False, repr=False)
@@ -115,57 +114,29 @@ class ShotProfile:
 
     def __post_init__(self):
         """Build data pipeline."""
-        self.reload.__init__(side=True, rawdata=True, lowpassdata=True,
+        self.reload.__init__(rawdata=True, lowpassdata=True,
                              heatindex=True, response=True)
-        if not isinstance(self.shotinstance, ShotInstance):
-            self.shotinstance = ShotInstance(self.shotinstance)
-        self._sultandata = SultanData(self.shotinstance.database)
+        if not isinstance(self.instance, ShotInstance):
+            self.instance = ShotInstance(self.instance)
+        self._sultandata = SultanData(self.instance.database)
+
+    @property
+    def side(self):
+        """Return experiment side, read-only."""
+        return self.instance.side
 
     @property
     def sultandata(self):
         """Return sultan datafile, update shot filename if required."""
-        if self.shotinstance.reload.data:
-            self._sultandata.filename = self.shotinstance.filename
-            self.shotinstance.reload.data = False
-            self.reload.rawdata = True
-            self.reload.lowpassdata = True
-            self.reload.heatindex = True
+        if self.instance.reload.data:
+            self._sultandata.filename = self.instance.filename
+            self._reload()
+            self.instance.reload.data = False
         return self._sultandata.data
-
-    @property
-    def side(self):
-        """
-        Manage side property. reload raw and lowpass data if changed.
-
-        Parameters
-        ----------
-        side : str
-            Side of Sultan experement ['Left', 'Right'].
-
-        Returns
-        -------
-        side : str
-
-        """
-        if self.reload.side:
-            self.side = self._side
-        return self._side
-
-    @side.setter
-    def side(self, side):
-        side = side.capitalize()
-        if side not in ['Left', 'Right']:
-            raise IndexError(f'side {side} not in [Left, Right]')
-        self._side = side
-        self.reload.side = False
-        self.reload.rawdata = True
-        self.reload.lowpassdata = True
-        self.reload.heatindex = True
-        self.reload.response = True
 
     def _reload(self):
         """Set data chain reload flags."""
-        if self.shotinstance.reload.data:
+        if self.instance.reload.data:
             self.reload.rawdata = True
             self.reload.lowpassdata = True
             self.reload.heatindex = True
@@ -244,7 +215,7 @@ class ShotProfile:
             data[f'P{end}'] = self.sultandata[f'P {end} {self.side}'] * 1e5
         if lowpass:
             timestep = np.diff(data['t'], axis=0).mean()
-            windowlength = int(2.5 / (timestep*self.shotinstance.frequency))
+            windowlength = int(2.5 / (timestep*self.instance.frequency))
             if windowlength % 2 == 0:
                 windowlength += 1
             if windowlength < 5:
@@ -281,8 +252,7 @@ class ShotProfile:
 
         """
         try:
-            current = float(re.findall(r'\d+',
-                                       self.shotinstance.current_label)[0])
+            current = float(re.findall(r'\d+', self.instance.current_label)[0])
         except TypeError:
             current = 230
         excitation_field = current * 0.2/230  # excitation field amplitude
@@ -291,10 +261,10 @@ class ShotProfile:
     @property
     def excitation_field_rate(self):
         """Return amplitude of exciation field rate of change."""
-        omega = 2*np.pi*self.shotinstance.frequency
+        omega = 2*np.pi*self.instance.frequency
         return omega*self.excitation_field  # pulse field rate amplitude
 
-    def plot_single(self, variable, ax=None, lowpass=False, offset=False):
+    def plot_single(self, variable, axes=None, lowpass=False, offset=False):
         """
         Plot single waveform.
 
@@ -302,8 +272,8 @@ class ShotProfile:
         ----------
         variable : str
             variable name.
-        ax : axis, optional
-            Plot axis. The default is None, plt.gca().
+        axes : axes, optional
+            Plot axes. The default is None, plt.gca().
         lowpass : bool, optional
             Serve lowpass filtered data. The default is False.
         offset : bool, optional
@@ -321,24 +291,25 @@ class ShotProfile:
         """
         data = self.lowpassdata if lowpass else self.rawdata
         if offset:
-            to = self.lowpassdata.loc[self.heatindex.start, 't']
-            Vo = self.lowpassdata.loc[self.heatindex.start, variable]
+            time_offset = self.lowpassdata.loc[self.heatindex.start, 't']
+            data_offset = self.lowpassdata.loc[self.heatindex.start, variable]
         else:
-            to = Vo = 0
+            time_offset = data_offset = 0
         if variable not in data:
             raise IndexError(f'variable {variable} not in {data.columns}')
-        if ax is None:
-            ax = plt.gca()
+        if axes is None:
+            axes = plt.gca()
         bg_color = 0.4 * np.ones(3) if lowpass else 'lightgray'
         color = 'C3' if lowpass else 'C0'
         label = 'lowpass' if lowpass else 'raw'
-        ax.plot(data.t-to, data[variable]-Vo, color=bg_color)
-        ax.plot(data.t[self.heatindex.index]-to,
-                data[variable][self.heatindex.index]-Vo,
-                color=color, label=label)
-        ax.legend()
-        ax.set_xlabel('$t$ s')
-        ax.set_ylabel(r'$\hat{\dot{Q}}$ W')
+        axes.plot(data.t-time_offset, data[variable]-data_offset,
+                  color=bg_color)
+        axes.plot(data.t[self.heatindex.index]-time_offset,
+                  data[variable][self.heatindex.index]-data_offset,
+                  color=color, label=label)
+        axes.legend()
+        axes.set_xlabel('$t$ s')
+        axes.set_ylabel(r'$\hat{\dot{Q}}$ W')
         plt.despine()
 
     def plot(self, offset=False):
@@ -349,6 +320,6 @@ class ShotProfile:
 
 if __name__ == '__main__':
 
-    shotprofile = ShotProfile('CSJA_3')
-    shotprofile.shotinstance.index = -3
+    shotprofile = ShotProfile('CSJA13')
+    shotprofile.instance.index = -5
     shotprofile.plot()

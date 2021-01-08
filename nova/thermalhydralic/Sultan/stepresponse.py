@@ -1,25 +1,60 @@
 """Fit state-space model to sultan thermal-hydralic step resonse."""
-from dataclasses import dataclass, field
-from types import SimpleNamespace
+from dataclasses import dataclass, field, InitVar
+from typing import Union
 
 import scipy
 import numpy as np
 import nlopt
+import pandas
 
 from nova.utilities.pyplot import plt
-from nova.thermalhydralic.sultan.testplan import TestPlan
-from nova.thermalhydralic.sultan.shotinstance import ShotInstance
-from nova.thermalhydralic.sultan.shotprofile import ShotProfile
 from nova.thermalhydralic.sultan.shotresponse import ShotResponse
 
 
 @dataclass
-class ResponseModel:
-    """Manage optimisation data."""
+class LTIModel:
+    """Manage linear time-invariant model."""
 
-    npole: int = 3
+    order: tuple[int] = field(default=(6,))
     _vector: list[float] = field(init=False, default_factory=list)
+    _pole: InitVar[Union[float, list[float]]] = 0.5
+    _delay: InitVar[float] = 5
     lti: scipy.signal.lti = field(init=False, repr=False)
+
+    def __post_init__(self, _pole, _delay):
+        """Init linear time-invariant model."""
+        if not self._vector:  # vector unset
+            self.vector = self._sead(_pole, _delay)
+        else:
+            self.vector = self._vector
+
+    def _sead(self, _pole, _delay):
+        """
+        Return sead optimization vector.
+
+        Parameters
+        ----------
+        pole : float
+            Location of repeated pole (positive).
+        delay : float
+            Time delay.
+
+        Returns
+        -------
+        sead_vector : array-like
+            Sead optimization vector [*pole, gain, delay].
+
+        """
+        if not pandas.api.types.is_list_like(_pole):
+            _pole = [_pole for __ in range(self.system_number)]
+        else:
+            _pole = list(_pole)
+        vector = _pole + [1, _delay]
+        if len(vector) != self.parameter_number:
+            raise IndexError(f'sead length {len(vector)} != '
+                             f'parameter number {self.parameter_number}\n'
+                             f'check _pole kwarg {_pole}')
+        return vector
 
     @property
     def vector(self):
@@ -40,31 +75,63 @@ class ResponseModel:
         self._generate()  # regenerate lti
 
     @property
-    def pole(self):
-        """Return location of repeated pole."""
-        return self._vector[0]
+    def system_number(self):
+        """Return system number, read-only."""
+        return len(self.order)
+
+    @property
+    def parameter_number(self):
+        """Return number of optimization parameters, read-only."""
+        return len(self.order) + 2
+
+    @property
+    def repeated_pole(self):
+        """Return repeated system poles."""
+        return self._vector[:self.system_number]
+
+    @property
+    def pole(self) -> list[float]:
+        """Return negated poles."""
+        pole_list = []
+        for pole, order in zip(self.repeated_pole, self.order):
+            pole_list += [-pole for __ in range(order)]
+        return pole_list
+
+    @property
+    def pole_gain(self):
+        """Return steady state pole gain, read-only."""
+        return np.prod(np.array(self.repeated_pole)**self.order)
 
     @property
     def gain(self):
         """Return gain."""
-        return self._vector[1]
+        return self._vector[-2]
 
     @property
     def delay(self):
         """Return time delay."""
-        return self._vector[2]
+        return self._vector[-1]
 
     @property
     def step(self):
-        """Return steady state step response."""
-        return self.gain / self.pole**self.npole
+        """Manage steady state step response."""
+        return self.gain / self.pole_gain
+
+    @step.setter
+    def step(self, step):
+        self._vector[-2] = self.pole_gain*step
 
     @property
     def label(self):
         """Return transfer function text descriptor."""
-        return (fr'$\frac{{{self.gain:1.4f}}}'
-                fr'{{(s+{self.pole:1.3f})^{self.npole}}}'
-                fr'{{\rm e}}^{{-{self.delay:1.2f}s}}$')
+        numerator = f'{self.gain:1.4f}'
+        denominator = ''.join([fr'(s+{pole:1.3f})^{order}'
+                               for pole, order in
+                               zip(self.repeated_pole, self.order)])
+        plt.title(fr'${denominator}$')
+        #return (fr'$\frac{{{self.gain:1.4f}}}'
+        #        fr'{{(s+{self.pole:1.3f})^{self.npole}}}'
+        #        fr'{{\rm e}}^{{-{self.delay:1.2f}s}}$')
 
     def _generate(self):
         """
@@ -83,45 +150,20 @@ class ResponseModel:
             linear time-invariant model.
 
         """
-        self.lti = scipy.signal.ZerosPolesGain(
-            [], -self.pole*np.ones(self.npole), self.gain)
+        self.lti = scipy.signal.ZerosPolesGain([], self.pole, self.gain)
 
 
 @dataclass
-class ModelResponse:
+class StepResponse:
     """Extract minimal realization state-space model from step response."""
 
-    time: list[float]
-    heat: list[float]
-    npole: int = 5
-    _pole: float = 0.5
-    _delay: float = 10
+    time: list[float] = field(repr=False)
+    heat: list[float] = field(repr=False)
+    model: LTIModel
 
     def __post_init__(self):
-        self.model = ResponseModel(self.npole)
-        self.model.vector = self._sead
-
-    @property
-    def _sead(self):
-        """
-        Return sead optimization vector.
-
-        Parameters
-        ----------
-        pole : float
-            Location of repeated pole (positive).
-        delay : float
-            Time delay.
-
-        Returns
-        -------
-        sead_vector : array-like
-            Sead optimization vector [pole, gain, delay].
-
-        """
-        return np.array([self._pole,
-                         self.heat[-1]*self._pole**self.model.npole,
-                         self._delay])
+        """Init model gain."""
+        self.model.step = self.heat[-1]
 
     @property
     def response(self):
@@ -183,6 +225,7 @@ class ModelResponse:
     def model_update(self, vector, grad):
         """Return L2norm error and evaluate gradient in-place."""
         err = self.model_error(vector)
+        print(err)
         if len(grad) > 0:
             grad[:] = scipy.optimize.approx_fprime(vector,
                                                    self.model_error, 1e-6)
@@ -191,15 +234,15 @@ class ModelResponse:
     def fit(self, optimizer='nlopt'):
         """Fit model to shot step response."""
         if optimizer == 'scipy':
-            res = scipy.optimize.minimize(self.model_error, self._sead)
+            res = scipy.optimize.minimize(self.model_error, self.model.vector)
             self.model.vector = res.x
         elif optimizer == 'nlopt':
-            opt = nlopt.opt(nlopt.LN_PRAXIS, 3)
-            opt.set_initial_step([0.1, 0.1, 0.5])
+            opt = nlopt.opt(nlopt.LN_PRAXIS, self.model.parameter_number)
+            opt.set_initial_step(0.05*np.array(self.model.vector))
             opt.set_min_objective(self.model_update)
-            opt.set_lower_bounds(np.zeros(3))
+            opt.set_lower_bounds(np.zeros(self.model.parameter_number))
             opt.set_ftol_rel(1e-5)
-            vector = opt.optimize(self._sead)
+            vector = opt.optimize(self.model.vector)
             self.model.vector = vector
         else:
             raise IndexError(f'optimizer {optimizer} not in [scipy, nlopt]')
@@ -224,17 +267,57 @@ class ModelResponse:
         plt.legend(loc='lower right')
         plt.despine()
 
+'''
+    npole: int = 6
+
+    def __post_init__(self):
+
+
+    def stepresponse(self):
+        """
+        Return thermo-hydralic model parameters.
+
+        Parameters
+        ----------
+        npole : int, optional
+            Number of repeated poles. The default is 6.
+
+        Returns
+        -------
+        vector : array-like
+            Optimization vector [pole, gain, delay].
+        steady_state : float
+            Step response steady state.
+
+        """
+        response = ModelResponse(*self.stepdata, self.npole)
+        vector = response.fit()
+        step = response.model.step
+        return vector, step
+'''
 
 if __name__ == '__main__':
 
-    plan = TestPlan('CSJA_3', 'ac0')
-    instance = ShotInstance(plan, 21)
+    model = LTIModel()
+
+    response = ShotResponse('CSJA13')
+    response.profile.instance.index = 11
+    response.plot()
+
+    step = StepResponse(*response.stepdata, model)
+    step.fit()
+    step.plot()
+
+    '''
+    plan = TestPlan('CSJA13', -1)
+    instance = ShotInstance(plan, -5)
     profile = ShotProfile(instance)
 
     response = ModelResponse(*profile.shotresponse.stepdata, 6)
 
     response.fit()
     response.plot()
+    '''
 
     '''
         self.profile.plot(offset=True)

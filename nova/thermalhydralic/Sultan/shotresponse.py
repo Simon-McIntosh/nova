@@ -1,11 +1,13 @@
 """Methods to manage single shot Sultan waveform data."""
 from dataclasses import dataclass, field, InitVar
+from typing import Union
 
 import numpy as np
 import pandas
 
-from nova.thermalhydralic.sultan.stepresponse import ModelResponse
-from nova.thermalhydralic.sultan.shotprofile import HeatIndex
+from nova.thermalhydralic.sultan.shotprofile import ShotProfile
+from nova.thermalhydralic.sultan.shotinstance import ShotInstance
+from nova.thermalhydralic.sultan.testplan import TestPlan
 
 
 @dataclass
@@ -59,55 +61,75 @@ class ShotResponse:
 
     """
 
-    data: pandas.DataFrame = field(repr=False)
-    heat_index: HeatIndex
-    npole: int = 6
+    profile: Union[ShotProfile, ShotInstance, TestPlan, str]
     steady_threshold: float = 1.05
+
+    def __post_init__(self):
+        """Init profile."""
+        if not isinstance(self.profile, ShotProfile):
+            self.profile = ShotProfile(self.profile)
+
+    @property
+    def plan(self):
+        """Return testplan, read-only."""
+        return self.profile.instance.testplan.plan
+
+    @property
+    def heatindex(self):
+        """Return profile heatindex, read-only."""
+        return self.profile.heatindex
+
+    @property
+    def lowpassdata(self):
+        """Return profile low-pass data, read-only."""
+        return self.profile.lowpassdata
 
     @property
     def start(self):
         """Return offset heat datainstance at index.start."""
-        return DataInstance(self.data, self.heat_index.start)
+        return DataInstance(self.lowpassdata, self.heatindex.start)
 
     @property
     def stop(self):
         """Return end heat datainstance at index.stop."""
-        return DataInstance(self.data, self.heat_index.stop)
+        return DataInstance(self.lowpassdata, self.heatindex.stop)
 
     @property
     def maximum(self):
         """Return maximum heat datainstance."""
-        max_index = np.argmax(self.data[('Qdot_norm', 'W')].abs())
-        return DataInstance(self.data, max_index)
+        max_index = np.argmax(self.lowpassdata[('Qdot_norm', 'W')].abs())
+        return DataInstance(self.lowpassdata, max_index)
 
     @property
     def minimum(self):
         """Return minimum heat datainstance."""
-        min_index = np.argmin(self.data[('Qdot_norm', 'W')].abs())
-        return DataInstance(self.data, min_index)
+        min_index = np.argmin(self.lowpassdata[('Qdot_norm', 'W')].abs())
+        return DataInstance(self.lowpassdata, min_index)
 
     @property
     def delta(self):
         """Return delta heating within self.index."""
-        index_heat = self.data.loc[self.heat_index.index, ('Qdot_norm', 'W')]
-        maximum_heat = np.max(index_heat)
-        minimum_heat = np.min(index_heat)
+        indexheat = self.lowpassdata.loc[self.heatindex.index,
+                                         ('Qdot_norm', 'W')]
+        maximum_heat = np.max(indexheat)
+        minimum_heat = np.min(indexheat)
         return maximum_heat-minimum_heat
 
     @property
     def energy(self):
         """Return intergral power."""
-        start_index = self.heat_index.start
-        time = self.data.loc[start_index:, ('t', 's')]
-        Qdot = self.data.loc[start_index:, ('Qdot_norm', 'W')]
-        return np.trapz(Qdot, time)
+        startindex = self.heatindex.start
+        time = self.lowpassdata.loc[startindex:, ('t', 's')]
+        heat = self.lowpassdata.loc[startindex:, ('Qdot_norm', 'W')]
+        return np.trapz(heat, time)
 
     @property
     def stepdata(self):
         """Return offset heat step response data."""
-        t = self.data.loc[self.heat_index.index, ('t', 's')].values
-        Qdot = self.data.loc[self.heat_index.index, ('Qdot_norm', 'W')].values
-        return t-t[0], Qdot-Qdot[0]
+        time = self.lowpassdata.loc[self.heatindex.index, ('t', 's')].values
+        heat = self.lowpassdata.loc[self.heatindex.index,
+                                    ('Qdot_norm', 'W')].values
+        return time-time[0], heat-heat[0]
 
     @property
     def maximum_ratio(self):
@@ -129,28 +151,6 @@ class ShotResponse:
         """Return steady flag."""
         return self.status.steady.all()
 
-    def stepresponse(self):
-        """
-        Return thermo-hydralic model parameters.
-
-        Parameters
-        ----------
-        npole : int, optional
-            Number of repeated poles. The default is 6.
-
-        Returns
-        -------
-        vector : array-like
-            Optimization vector [pole, gain, delay].
-        steady_state : float
-            Step response steady state.
-
-        """
-        response = ModelResponse(*self.stepdata, self.npole)
-        vector = response.fit()
-        steady_state = response.model.steady_state
-        return vector, steady_state
-
     @property
     def status(self):
         """Return pandas.DataFrame detailing stability metrics."""
@@ -162,11 +162,25 @@ class ShotResponse:
                 status.loc[name, 'ratio'] < self.steady_threshold
         return status
 
+    def plot(self, offset=True):
+        """Extend profile.plot."""
+        self.profile.plot(offset=offset)
+
+
+    '''
     @property
     def dataseries(self):
         """Return response data series."""
-        (pole, gain, delay), step
+        #(pole, gain, delay), step
         return pandas.Series([self.stop.value-self.start.value,
                               self.maximum.value-self.start.value,
                               self.steady],
                              index=['stop', 'maximum', 'steady'])
+    '''
+
+
+if __name__ == '__main__':
+
+    response = ShotResponse('CSJA13')
+    response.profile.instance.index = -7
+    response.plot()

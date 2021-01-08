@@ -15,12 +15,13 @@ class ShotInstance:
 
     testplan: Union[TestPlan, str] = field(repr=True)
     _index: int = 0
+    _side: str = 'Left'
     reload: SimpleNamespace = field(init=False, repr=False,
                                     default_factory=SimpleNamespace)
 
     def __post_init__(self):
         """Typecheck testplan and initialize shot instance."""
-        self.reload.__init__(index=True, data=True)
+        self.reload.__init__(index=True, side=True, data=True)
         if not isinstance(self.testplan, TestPlan):
             self.testplan = TestPlan(self.testplan)
 
@@ -58,6 +59,34 @@ class ShotInstance:
                              'out of bounds for testplan index '
                              f'{self.testplan.plan.index}') from index_error
         self.reload.index = False
+        self.reload.data = True
+
+    @property
+    def side(self):
+        """
+        Manage side property. reload raw and lowpass data if changed.
+
+        Parameters
+        ----------
+        side : str
+            Side of Sultan experement ['Left', 'Right'].
+
+        Returns
+        -------
+        side : str
+
+        """
+        if self.reload.side:
+            self.side = self._side
+        return self._side
+
+    @side.setter
+    def side(self, side):
+        side = side.capitalize()
+        if side not in ['Left', 'Right']:
+            raise IndexError(f'side {side} not in [Left, Right]')
+        self._side = side
+        self.reload.side = False
         self.reload.data = True
 
     @property

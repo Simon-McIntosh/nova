@@ -310,7 +310,6 @@ class Campaign:
             testmode = shotlabel[testmode_index]
             metadata_index[testname][2] = testmode.lower()
         metadata_index = self._format_metadata_index(metadata_index)
-        print(metadata_index)
         return metadata_index
 
     @staticmethod
@@ -319,8 +318,12 @@ class Campaign:
                    isinstance(col, str)]
         note_column = [col for col in columns if 'note' in col.lower()]
         if note_column:
-            _note = pandas.Series(testplan.loc[:, note_column[0]].values,
-                                  index=testplan.iloc[:, 0])
+            _note = testplan.loc[:, note_column[0]].values
+            try:
+                _note = pandas.Series(_note, index=testplan.iloc[:, 0])
+            except Exception:
+                _note = [n[0] for n in _note]
+                _note = pandas.Series(_note, index=testplan.iloc[:, 0])
             note = pandas.concat([note, _note], axis=0)
             testplan.drop(columns=note_column, inplace=True, level=0)
         return note
@@ -425,4 +428,4 @@ class Campaign:
 
 if __name__ == '__main__':
 
-    campaign = Campaign('CSJA_3')
+    campaign = Campaign('CSJA13')

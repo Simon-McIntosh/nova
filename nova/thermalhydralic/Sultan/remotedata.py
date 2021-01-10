@@ -30,11 +30,14 @@ class FTPData:
 
     @experiment.setter
     def experiment(self, experiment):
+        self._experiment = experiment
+        '''
         try:
             experiment = self.locate(experiment, '../')
             self._experiment = experiment
         except FileNotFoundError as file_not_found:
             raise FileNotFoundError() from file_not_found
+        '''
 
     def locate(self, file, *relative_path):
         """
@@ -183,5 +186,5 @@ class FTPData:
 
 if __name__ == '__main__':
 
-    ftp = FTPData('CSJA_3')
-    print(ftp.listdir(ftp.experiment, select='.OPJ'))
+    ftp = FTPData('CSJA13')
+    #print(ftp.listdir(ftp.experiment, select='.OPJ'))

@@ -9,6 +9,7 @@ import pandas
 
 from nova.utilities.pyplot import plt
 from nova.thermalhydralic.sultan.shotresponse import ShotResponse
+from nova.thermalhydralic.sultan.shotprofile import ShotProfile
 
 
 @dataclass
@@ -157,8 +158,7 @@ class LTIModel:
 class StepResponse:
     """Extract minimal realization state-space model from step response."""
 
-    time: list[float] = field(repr=False)
-    heat: list[float] = field(repr=False)
+    response: ShotResponse
     model: LTIModel
 
     def __post_init__(self):

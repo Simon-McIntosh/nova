@@ -65,7 +65,6 @@ class Campaign:
 
     def load_metadata(self):
         """Load campaign metadata."""
-        print(self.metadatafile)
         if os.path.isfile(self.metadatafile):
             self._load_metadata()
         else:

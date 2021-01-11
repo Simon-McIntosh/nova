@@ -126,10 +126,25 @@ class ShotProfile:
         return self.instance.side
 
     @property
+    def filename(self):
+        """Return instance filename."""
+        return self.instance.filename
+
+    @property
+    def frequency(self):
+        """Return instance frequency, Hz."""
+        return self.instance.frequency
+
+    @property
+    def omega(self):
+        """Return instance frequency, rad/s."""
+        return 2*np.pi*self.instance.frequency
+
+    @property
     def sultandata(self):
         """Return sultan datafile, update shot filename if required."""
         if self.instance.reload.data:
-            self._sultandata.filename = self.instance.filename
+            self._sultandata.filename = self.filename
             self._reload()
             self.instance.reload.data = False
         return self._sultandata.data
@@ -215,7 +230,7 @@ class ShotProfile:
             data[f'P{end}'] = self.sultandata[f'P {end} {self.side}'] * 1e5
         if lowpass:
             timestep = np.diff(data['t'], axis=0).mean()
-            windowlength = int(2.5 / (timestep*self.instance.frequency))
+            windowlength = int(2.5 / (timestep*self.frequency))
             if windowlength % 2 == 0:
                 windowlength += 1
             if windowlength < 5:
@@ -261,8 +276,7 @@ class ShotProfile:
     @property
     def excitation_field_rate(self):
         """Return amplitude of exciation field rate of change."""
-        omega = 2*np.pi*self.instance.frequency
-        return omega*self.excitation_field  # pulse field rate amplitude
+        return self.omega*self.excitation_field  # pulse field rate amplitude
 
     def plot_single(self, variable, axes=None, lowpass=False, offset=False):
         """
@@ -312,10 +326,10 @@ class ShotProfile:
         axes.set_ylabel(r'$\hat{\dot{Q}}$ W')
         plt.despine()
 
-    def plot(self, offset=False):
+    def plot(self, offset=False, axes=None):
         """Plot shot profile."""
-        self.plot_single('Qdot_norm', lowpass=False, offset=offset)
-        self.plot_single('Qdot_norm', lowpass=True, offset=offset)
+        self.plot_single('Qdot_norm', lowpass=False, offset=offset, axes=axes)
+        self.plot_single('Qdot_norm', lowpass=True, offset=offset, axes=axes)
 
 
 if __name__ == '__main__':

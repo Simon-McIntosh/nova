@@ -131,6 +131,11 @@ class ShotProfile:
         return self.instance.filename
 
     @property
+    def shotname(self):
+        """Return instance shotname."""
+        return self.instance.shotname
+
+    @property
     def frequency(self):
         """Return instance frequency, Hz."""
         return self.instance.frequency

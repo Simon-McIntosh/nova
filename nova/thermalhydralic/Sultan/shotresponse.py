@@ -1,5 +1,6 @@
 """Methods to manage single shot Sultan waveform data."""
 from dataclasses import dataclass, field, InitVar
+from types import SimpleNamespace
 from typing import Union
 
 import numpy as np
@@ -17,42 +18,42 @@ class DataInstance:
 
     data: InitVar[pandas.DataFrame]
     index: int
+    normalize: bool = True
+    offset: tuple[float] = field(default=(0, 0))
     time: float = field(init=False)
     value: float = field(init=False)
-    offset: tuple[float] = field(default=(0, 0))
-    time_label: tuple[str] = field(default=('t', 's'), repr=False)
-    data_label: tuple[str] = field(default=('Qdot_norm', 'W'), repr=False)
 
     def __post_init__(self, data):
         """Set data values."""
-        self.time = data.loc[self.index, self.time_label] - self.offset[0]
-        self.value = data.loc[self.index, self.data_label] - self.offset[1]
+        time_label = ('t', 's')
+        data_label = ('Qdot_norm', 'W') if self.normalize else ('Qdot', 'W')
+        self.time = data.loc[self.index, time_label] - self.offset[0]
+        self.value = data.loc[self.index, data_label] - self.offset[1]
 
 
 @dataclass
-class Waveform:
+class WaveForm:
     """Manage response waveform."""
 
-    profile: ShotProfile
-    _threshold: float = 0.25
-    _index: slice = field(init=False)
-    time_label: str = DataInstance.time_label
-    heat_label: str = DataInstance.data_label
-    reload: SimpleNamespace = field(init=True, repr=False,
-                                    default_factory=SimpleNamespace)
+    profile: InitVar[ShotProfile] = field(repr=False)
+    cooldown_threshold: float = 0.25
+    upsample: float = 11
+    normalize: bool = True
+    shotname: str = field(init=False)
+    frequency: float = field(init=False)
+    data: pandas.DataFrame = field(init=False, repr=False)
 
-    def __post_init__(self):
+    def __post_init__(self, profile):
         """Init time and heat data fields."""
-        self.reload.__init__(threshold=True, index=True)
+        self.shotname = profile.shotname
+        self.frequency = profile.frequency
+        self._check_threshold(self.cooldown_threshold)
+        self._extract_data(profile)
 
-        start_index = profile.heatindex.start
-
-        index = slice(self.start, self.stop)
-
-    @property
-    def threshold(self):
+    @staticmethod
+    def _check_threshold(threshold):
         """
-        Manage cooldown threshold parameter.
+        Check cooldown threshold parameter.
 
         Parameters
         ----------
@@ -67,62 +68,81 @@ class Waveform:
             threshold must lie between 0 and 1 or equal -1.
 
         """
-        if self.reload.threshold:
-            self.threshold = self._threshold
-        return self._threshold
-
-    @threshold.setter
-    def threshold(self, threshold):
-        if threshold == -1:
-            stop = self.profile.heatindex.stop
-        elif threshold >= 0 and threshold <= 1:
-
-
-    def cooldown_index(self):
-        """Return cool heat datainstance."""
-        heat = self.profile.lowpassdata.loc[self.profile.heatindex.index,
-                                            self.heat_label]
-
-        max_index = self.maximum.index
-        cooldown = self.lowpassdata.loc[max_index-1:, DataInstance.data_label]
-        minmax = cooldown.min(), cooldown.max()
-        delta = np.diff(minmax)[0]
-        cool_index = np.argmax(cooldown <=
-                               minmax[0] + self.cool_threshold*delta)
-        return DataInstance(self.lowpassdata, max_index+cool_index,
-                            self.offset)
-
-
+        if threshold != -1 and (threshold < 0 or threshold > 1):
+            raise ValueError(f'cooldown threshold {threshold} out of range.')
 
     @property
-    def time(self):
-        return self._loc(self.time_label)
+    def datalabel(self):
+        """Return datalabel."""
+        if self.normalize:
+            return ('Qdot_norm', 'W')
+        return ('Qdot', 'W')
 
-    @property
-    def heat(self):
-        return self._loc(self.heat_label)
+    @staticmethod
+    def extract_index(profile, threshold, datalabel):
+        """
+        Return waveform slice.
 
-    def _loc(self, label):
-        data = self.profile.lowpassdata.loc[self.index, label].values
-        return data-data[0]
+        Parameters
+        ----------
+        profile : ShotProfile
+            Shot profile.
+        threshold : float
+            Cooldown threshold.
 
+            - -1: stop = end of heating, heatindex.stop
+            - 0-1: cooldown maximum <= minimum * threshold * delta
+        datalabel : str
+            Data label.
 
-    @property
-    def index(self):
-        start = self.profile.heatindex.start
+        Returns
+        -------
+        index : slice
+            Waveform index.
 
-    @property
-    def stop(self):
-
-
-
-    def _set_index(self, profile, termination_threshold):
+        """
         start = profile.heatindex.start
+        if threshold == -1:
+            stop = profile.heatindex.stop
+        else:
+            pulse = profile.lowpassdata.loc[start:, datalabel].values
+            cooldown = pulse[pulse.argmax():]
+            minmax = cooldown.min(), cooldown.max()
+            delta = np.diff(minmax)[0]
+            stop = np.argmax(cooldown <= minmax[0] + threshold*delta)
+        return slice(start, stop)
 
+    def _extract_data(self, profile):
+        index = self.extract_index(profile, self.cooldown_threshold,
+                                   self.datalabel)
+        data = profile.lowpassdata.loc[index, self.label.values()]
+        data = data.droplevel(1, axis=1)
+        data.rename(columns={self.label['time'][0]: 'time'}, inplace=True)
 
-    def _zero(self):
-        self.time -= self.time[0]
-        self.heat -= self.heat[0]
+        self._upsample(data, profile.frequency)
+
+    def _upsample(self, data, excitation_frequency):
+
+        print(self.label['time'])
+        timestep = np.diff(data.time).mean()
+        sample_frequency = 2*np.pi / timestep
+        if sample_frequency < self.upsample*excitation_frequency:
+            print('upsample', sample_frequency, excitation_frequency)
+
+    # @property
+    # def time(self):
+    #     return self.data.loc[:, self.label['time'])
+
+    #def _values(self, label):
+    #    data = self.profile.lowpassdata.loc[self.index, label].values
+    #    return data-data[0]
+
+    ##@property
+    #def index(self):
+    #    start = self.profile.heatindex.start
+
+   # @property
+   # def stop(self):
 
     def plot(self):
         """Plot input waveform."""
@@ -136,6 +156,8 @@ class ShotResponse:
     profile: Union[ShotProfile, ShotInstance, TestPlan, str]
     zero: bool = True
     steady_threshold: float = 1.05
+    cooldown_threshold: float = 0.25
+    _waveform: WaveForm = field(init=False)
 
     def __post_init__(self):
         """Init profile."""
@@ -143,13 +165,20 @@ class ShotResponse:
             self.profile = ShotProfile(self.profile)
 
     @property
+    def waveform(self):
+        """Return offset heat step response data."""
+        if self.profile.reload.response:
+            self._waveform = WaveForm(self.profile, self.cooldown_threshold)
+            self.profile.reload.response = False
+        return self._waveform
+
+    @property
     def offset(self):
         """Return time, value offset."""
         if self.zero:
             offset_data = DataInstance(self.lowpassdata, self.heatindex.start)
             return offset_data.time, offset_data.value
-        else:
-            return 0, 0
+        return 0, 0
 
     @property
     def plan(self):
@@ -214,14 +243,6 @@ class ShotResponse:
         return np.trapz(heat, time)
 
     @property
-    def waveform(self):
-        """Return offset heat step response data."""
-        index = slice(self.start.index, self.cool.index)
-        time = self.lowpassdata.loc[index, DataInstance.time_label].values
-        heat = self.lowpassdata.loc[index, DataInstance.data_label].values
-        return time-time[0], heat-heat[0]
-
-    @property
     def minimum_ratio(self):
         """Return ratio of stop-minimum to heat delta."""
         return (self.stop.value-self.minimum.value) / self.delta
@@ -261,7 +282,7 @@ class ShotResponse:
 
         axes[1].plot(self.start.time, self.start.value, 'ko', label='start')
         axes[1].plot(self.stop.time, self.stop.value, 'ks', label='stop')
-        axes[1].plot(self.cool.time, self.cool.value, 'kd', label='cool')
+        #axes[1].plot(self.cool.time, self.cool.value, 'kd', label='cool')
         plt.legend()
 
 

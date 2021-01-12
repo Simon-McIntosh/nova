@@ -116,6 +116,21 @@ class ShotInstance:
         """Return shot filename."""
         return self.metadata.loc['File'][0]
 
+    @property
+    def experiment(self):
+        """Return experiment, read-only."""
+        return self.testplan.experiment
+
+    @property
+    def testname(self):
+        """Return testname, read-only."""
+        return self.testplan.testname
+
+    @property
+    def shotname(self):
+        """Return shotname."""
+        return f'{self.experiment}_{self.testname}_{self.side}_{self.index}'
+
     def sequence(self):
         """Return filename generator."""
         for i in range(self.testplan.shotnumber):

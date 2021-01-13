@@ -9,7 +9,6 @@ import pandas
 
 from nova.utilities.pyplot import plt
 from nova.thermalhydralic.sultan.shotresponse import ShotResponse
-from nova.thermalhydralic.sultan.shotprofile import ShotProfile
 
 
 @dataclass
@@ -163,6 +162,7 @@ class StepResponse:
 
     def __post_init__(self):
         """Init model gain."""
+        self.time, self.heat = self.response.waveform
         self.model.step = self.heat[-1]
 
     @property

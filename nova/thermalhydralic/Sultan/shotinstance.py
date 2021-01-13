@@ -21,7 +21,7 @@ class ShotInstance:
 
     def __post_init__(self):
         """Typecheck testplan and initialize shot instance."""
-        self.reload.__init__(index=True, side=True, data=True)
+        self.reload.__init__(index=True, side=True, sultandata=True)
         if not isinstance(self.testplan, TestPlan):
             self.testplan = TestPlan(self.testplan)
 
@@ -59,7 +59,7 @@ class ShotInstance:
                              'out of bounds for testplan index '
                              f'{self.testplan.plan.index}') from index_error
         self.reload.index = False
-        self.reload.data = True
+        self.reload.sultandata = True
 
     @property
     def side(self):
@@ -87,7 +87,7 @@ class ShotInstance:
             raise IndexError(f'side {side} not in [Left, Right]')
         self._side = side
         self.reload.side = False
-        self.reload.data = True
+        self.reload.sultandata = True
 
     @property
     def metadata(self):

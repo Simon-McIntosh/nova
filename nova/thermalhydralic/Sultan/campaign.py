@@ -2,6 +2,7 @@
 import os.path
 from dataclasses import dataclass, field
 import itertools
+from types import SimpleNamespace
 
 import pandas
 import numpy as np
@@ -12,40 +13,89 @@ from nova.thermalhydralic.sultan.database import DataBase
 @dataclass
 class Campaign:
     """
-    Load Sultan experiment campaign metadata.
+    Load Sultan experiment campaign data.
 
     Parameters
     ----------
     experiment : str
         Experiment label.
-    binary : bool
-        Load data from binary file.
 
     """
 
     _experiment: str
+    _mode: str = 'ac'
     database: DataBase = field(init=False, repr=False, default=None)
     metadata: pandas.DataFrame = field(init=False, repr=False, default=None)
+    reload: SimpleNamespace = field(init=False, repr=False,
+                                    default_factory=SimpleNamespace)
 
     def __post_init__(self):
         """Initialize properties."""
+        self.reload.__init__(experiment=True, mode=True, trial=True)
         self.experiment = self._experiment
 
     @property
     def experiment(self):
         """Manage experiment name."""
+        if self.reload.experiment:
+            self.experiment = self._experiment
         return self._experiment
 
     @experiment.setter
     def experiment(self, experiment):
         self._experiment = experiment
-        self.database = DataBase(self.experiment)
+        self.database = DataBase(self._experiment)
         self.load_metadata()
+        self.reload.experiment = False
+        self.reload.trial = True
 
     @property
-    def index(self):
-        """Return metadata index, read-only."""
-        return self.metadata['index']
+    def mode(self):
+        """
+        Manage sultan test mode.
+
+        Parameters
+        ----------
+        mode : str
+            Sultan test mode.
+
+        Raises
+        ------
+        IndexError
+            Mode not in [ac, dc, full].
+
+        Returns
+        -------
+        mode : str
+
+        """
+        if self.reload.mode:
+            self.mode = self._mode
+        return self._mode
+
+    @mode.setter
+    def mode(self, mode):
+        mode = mode.lower()
+        if mode not in ['cal', 'ac', 'dc', 'full']:
+            raise IndexError('mode not in [cal, ac, dc, full]')
+        self._mode = mode
+        self.reload.mode = False
+        self.reload.trial = True
+
+    @property
+    def plan(self):
+        """Return testplan index, read-only."""
+        if self.mode == 'full':
+            plan = self.metadata['index'].loc[:, 'name']
+        else:
+            index = self.metadata['index']['testmode'] == self.mode[0]
+            plan = self.metadata['index'].loc[index, 'name']
+        return plan
+
+    @property
+    def trial_plan(self):
+        """Return trial plan."""
+        return self.plan.index.to_list()
 
     @property
     def note(self):

@@ -1,60 +1,54 @@
-"""Manage Sultan testplan."""
-from dataclasses import dataclass, field
+"""Manage sultan test."""
+from dataclasses import dataclass, field, InitVar
+from typing import Union
 from types import SimpleNamespace
-from typing import Optional, Union
 
 from nova.thermalhydralic.sultan.campaign import Campaign
+from nova.thermalhydralic.sultan.trial import Trial
 
 
 @dataclass
 class TestPlan:
-    """
-    Load Sultan experiment test plan.
+    """Manage sultan test metadata."""
 
-    Parameters
-    ----------
-    experiment : str
-        Experiment label.
-
-    """
-
-    _experiment: str
-    _testname: Optional[Union[str, int]] = field(default=0)
-    _testmode: Optional[str] = field(default='ac')
-    _testnameindex: int = field(init=False, default=None)
+    campaign: Union[Campaign, str]
+    _name: Union[int, str] = field(default=0, repr=False)
+    _mode: str = field(default='ac', repr=False)
+    trial: Trial = field(init=False)
     reload: SimpleNamespace = field(init=False, repr=False,
                                     default_factory=SimpleNamespace)
 
     def __post_init__(self):
-        """Init test campaign."""
-        self.reload.__init__(experiment=True, testname=True, testmode=True,
-                             campaign=True, response=True)
-        self._campaign = Campaign(self.experiment)
+        """Init reload."""
+        self.reload.__init__(index=True)
+        if not isinstance(self.campaign, Campaign):
+            self.campaign = Campaign(self.campaign, self._mode)
+        else:
+            self.campaign.mode = self._mode
+        self.trial = Trial(self.campaign, self._name)
+        del self._name
+        del self._mode
 
     @property
-    def experiment(self):
-        """Manage experiment name."""
-        if self.reload.experiment:
-            self.experiment = self._experiment
-        return self._experiment
-
-    @experiment.setter
-    def experiment(self, experiment):
-        self._experiment = experiment
-        if self._testnameindex is not None:
-            self._testname = self._testnameindex
-            self.reload.testname = True
-        self.reload.campaign = True
-        self.reload.response = True
-        self.reload.experiment = False
+    def name(self):
+        """Return trial name."""
+        return self.trial.name
 
     @property
-    def campaign(self):
-        """Return campaign data, read-only."""
-        if self.reload.campaign:
-            self._campaign.experiment = self.experiment
-            self.reload.campaign = False
-        return self._campaign
+    def mode(self):
+        """Return campaign mode."""
+        return self.campaign.mode
+
+    def _reload(self):
+        if self.campaign.reload.trial:
+            self.reload.index = True
+            self.reload.name = True
+            self.campaign.reload.trial = False
+
+    @property
+    def plan(self):
+        """Return testplan, read-only."""
+        return self.campaign.metadata[self.name]
 
     @property
     def database(self):
@@ -62,114 +56,18 @@ class TestPlan:
         return self.campaign.database
 
     @property
-    def testmode(self):
-        """
-        Manage sultan test mode.
-
-        Parameters
-        ----------
-        testmode : str
-            Sultan test mode.
-
-        Raises
-        ------
-        IndexError
-            Mode not in [ac, dc, full].
-
-        Returns
-        -------
-        testmode : str
-
-        """
-        if self.reload.testmode:
-            self.testmode = self._testmode
-        return self._testmode
-
-    @testmode.setter
-    def testmode(self, testmode):
-        testmode = testmode.lower()
-        if testmode not in ['cal', 'ac', 'dc', 'full']:
-            raise IndexError('testmode not in [cal, ac, dc, full]')
-        self._testmode = testmode
-        self.reload.testmode = False
-        self.reload.response = True
-
-    @property
-    def testname(self):
-        """
-        Manage testname.
-
-        Parameters
-        ----------
-        testname : str or int
-            Test identifier.
-
-        Raises
-        ------
-        IndexError
-            testname out of range.
-
-        Returns
-        -------
-        testname : str
-
-        """
-        if self.reload.testname:
-            self.testname = self._testname
-        return self._testname
-
-    @testname.setter
-    def testname(self, testname):
-        self._testnameindex = testname  # store testname index (int or str)
-        if isinstance(testname, int):
-            try:
-                testname = self.testindex.index[self._testnameindex]
-            except IndexError as index_error:
-                raise IndexError(f'testname index {self._testnameindex} '
-                                 'out of range\n\n'
-                                 f'{self.testindex}') from index_error
-        elif isinstance(testname, str):
-            if testname not in self.testindex.index:
-                raise IndexError(f'testname {testname} not found in '
-                                 f'\n{self.testindex}')
-        self._testname = testname
-        self.reload.testname = False
-        self.reload.response = True
-
-    @property
-    def testindex(self):
-        """Return testplan index, read-only."""
-        campaign_index = self.campaign.index
-        if self.testmode == 'full':
-            index = campaign_index.loc[:, 'name']
-        else:
-            testindex = campaign_index['testmode'] == self.testmode[0]
-            index = campaign_index.loc[testindex, 'name']
-        return index
-
-    @property
-    def plan(self):
-        """Return testplan, read-only."""
-        return self.campaign.metadata[self.testname]
-
-    @property
     def shotnumber(self):
         """Return shot number for current test."""
         return len(self.plan.index)
 
     @property
-    def note(self):
-        """Return testplan notes."""
-        campaign_note = self.campaign.note.set_index('index')
-        note = campaign_note.loc[self.plan['File'], :]
-        return note.reset_index()
+    def notes(self):
+        """Return testplan notes, read-only."""
+        campaign_notes = self.campaign.note.set_index('index')
+        trial_notes = campaign_notes.loc[self.plan['File'], :]
+        return trial_notes.reset_index()
 
 
 if __name__ == '__main__':
 
-    testplan = TestPlan('CSJA_3', -1)
-    print(testplan.testindex)
-    print(testplan.testname)
-    print(testplan.plan['File'])
-    print(testplan.note)
-    print(testplan.testmode)
+    testplan = TestPlan('CSJA13', -1, 'ac')

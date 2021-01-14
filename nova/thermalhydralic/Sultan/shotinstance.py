@@ -5,8 +5,11 @@ from types import SimpleNamespace
 from typing import Union
 
 import pandas
+import numpy as np
 
 from nova.thermalhydralic.sultan.testplan import TestPlan
+from nova.thermalhydralic.sultan.sultandata import SultanData
+from nova.utilities.pyplot import plt
 
 
 @dataclass
@@ -14,52 +17,27 @@ class ShotInstance:
     """Manage Sultan test instance (shot)."""
 
     testplan: Union[TestPlan, str] = field(repr=True)
-    _index: int = 0
     _side: str = 'Left'
+    sultan: SultanData = field(init=False)
+    shot: ShotData = field(init=False)
     reload: SimpleNamespace = field(init=False, repr=False,
                                     default_factory=SimpleNamespace)
 
     def __post_init__(self):
         """Typecheck testplan and initialize shot instance."""
-        self.reload.__init__(index=True, side=True, sultandata=True)
+        self.reload.__init__(index=True, side=True, sultandata=True,
+                             shotdata=True)
         if not isinstance(self.testplan, TestPlan):
             self.testplan = TestPlan(self.testplan)
+        self.sultan = SultanData(self.database)
 
     @property
-    def index(self):
-        """
-        Shot identifier.
-
-        Parameters
-        ----------
-        index : int
-            Shot identifier.
-
-        Raises
-        ------
-        IndexError
-            Shot not set (is None) or is set out of range.
-
-        Returns
-        -------
-        shot : pandas.Series
-            Shot identifier.
-
-        """
-        if self.reload.index:
-            self.index = self._index
-        return self._index
-
-    @index.setter
-    def index(self, index):
-        try:
-            self._index = self.testplan.plan.index[index]
-        except IndexError as index_error:
-            raise IndexError(f'shot index {index} '
-                             'out of bounds for testplan index '
-                             f'{self.testplan.plan.index}') from index_error
-        self.reload.index = False
-        self.reload.sultandata = True
+    def sultandata(self):
+        """Return sultan datafile, update shot filename if required."""
+        if self.reload.sultandata:
+            self.sultan.filename = self.filename
+            self.reload.sultandata = False
+        return self.sultan.data
 
     @property
     def side(self):
@@ -87,7 +65,7 @@ class ShotInstance:
             raise IndexError(f'side {side} not in [Left, Right]')
         self._side = side
         self.reload.side = False
-        self.reload.sultandata = True
+        self.reload.shotdata = True
 
     @property
     def metadata(self):

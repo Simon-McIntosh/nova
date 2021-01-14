@@ -6,7 +6,6 @@ import pandas
 
 from nova.thermalhydralic.sultan.database import DataBase
 from nova.thermalhydralic.sultan.testplan import TestPlan
-from nova.thermalhydralic.sultan.shotinstance import ShotInstance
 from nova.thermalhydralic.sultan.sultanio import SultanIO
 
 
@@ -77,5 +76,4 @@ class SultanData(SultanIO):
 if __name__ == '__main__':
 
     testplan = TestPlan('CSJA_3')
-    shotinstance = ShotInstance(testplan)
-    sultandata = SultanData(testplan.database, shotinstance.filename)
+    sultandata = SultanData(testplan.database)

@@ -1,4 +1,4 @@
-"""Manage sultan shot data."""
+"""Manage sultan sample data."""
 from dataclasses import dataclass, field
 from types import SimpleNamespace
 
@@ -7,24 +7,79 @@ import numpy as np
 import scipy.signal
 import CoolProp.CoolProp as CoolProp
 
-from nova.thermalhydralic.sultandata import SultanData
-from nova.thermalhydralic.heatindex import HeatIndex
+from nova.thermalhydralic.sultan.heatindex import HeatIndex
+from nova.thermalhydralic.sultan.sourcedata import SourceData
+from nova.thermalhydralic.sultan.trial import Trial
 
 
 @dataclass
-class ShotData:
-    """Manage shot dataframes."""
+class SampleDataFrame:
+    """Manage sample dataframe."""
 
-    sultan: SultanData
-    _rawdata: pandas.DataFrame = field(init=False, repr=False)
-    _lowpassdata: pandas.DataFrame = field(init=False, repr=False)
+    source: SourceData
+    _lowpass_filter: bool = True
+    _raw: pandas.DataFrame = field(init=False, repr=False)
+    _lowpass: pandas.DataFrame = field(init=False, repr=False)
     _heatindex: HeatIndex = field(init=False, repr=False)
     reload: SimpleNamespace = field(init=False, repr=False,
                                     default_factory=SimpleNamespace)
 
     def __post_init__(self):
         """Init data pipeline."""
-        self.reload.__init__(rawdata=True, lowpassdata=True, heatindex=True)
+        self.reload.__init__(raw=True, lowpass=True, heatindex=True,
+                             profile=True)
+        self._lowpass_filter = [self._lowpass_filter for __ in range(2)]
+
+    @property
+    def lowpass_filter(self):
+        """Return low-pass filter flag."""
+        return self._lowpass_filter[0]
+
+    @lowpass_filter.setter
+    def lowpass_filter(self, lowpass_filter):
+        self._lowpass_filter[0] = lowpass_filter
+
+    def __call__(self, lowpass_filter):
+        """Store current filter flag and activate temporary value."""
+        self._lowpass_filter[1] = self._lowpass_filter[0]
+        self._lowpass_filter[0] = lowpass_filter
+        return self
+
+    def __enter__(self):
+        """Enter dunner."""
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        """Reset filter flag."""
+        self._lowpass_filter[0] = self._lowpass_filter[1]
+
+    def _reload(self):
+        """Set reload flags."""
+        if self.source.reload.sampledata:
+            self.reload.raw = True
+            self.reload.lowpass = True
+            self.reload.heatindex = True
+            self.reload.profile = True
+            self.source.reload.sampledata = False
+
+    @property
+    def sultandata(self):
+        """Return sultandata.data."""
+        return self.source.sultandata
+
+    @property
+    def side(self):
+        """Return sample side, read-only."""
+        return self.source.side
+
+    @property
+    def frequency(self):
+        """Return sample frequency, read-only."""
+        return self.source.frequency
+
+    @property
+    def excitation_field_rate(self):
+        """Return excitation field rate of change."""
+        return self.source.excitation_field_rate
 
     @staticmethod
     def _initialize_dataframe():
@@ -52,7 +107,7 @@ class ShotData:
         Parameters
         ----------
         sultandata : pandas.DataFrame
-            Sultan shot data.
+            Sultan data.
         lowpass : bool, optional
             Apply lowpass filter.
             Window length set equal to 2.5*period of driving waveform.
@@ -94,56 +149,43 @@ class ShotData:
         return data
 
     @property
-    def excitation_field(self):
-        """
-        Return amplitude of excitation field.
-
-        Parameters
-        ----------
-        Ipulse : str
-            Sultan Ipulse field.
-
-        Returns
-        -------
-        excitation_field : float
-            External excitation field.
-
-        """
-        try:
-            current = float(re.findall(r'\d+', self.instance.current_label)[0])
-        except TypeError:
-            current = 230
-        excitation_field = current * 0.2/230  # excitation field amplitude
-        return excitation_field
-
-    @property
-    def excitation_field_rate(self):
-        """Return amplitude of exciation field rate of change."""
-        return self.omega*self.excitation_field  # pulse field rate amplitude
-
-    @property
-    def rawdata(self):
-        """Return rawdata, read-only."""
+    def raw(self):
+        """Return raw data, read-only."""
         self._reload()
-        if self.reload.rawdata:
-            self._rawdata = self._extract_data(lowpass=False)
-            self.reload.rawdata = False
-        return self._rawdata
+        if self.reload.raw:
+            self._raw = self._extract_data(lowpass=False)
+            self.reload.raw = False
+        return self._raw
 
     @property
-    def lowpassdata(self):
-        """Return lowpassdata, read-only."""
+    def lowpass(self):
+        """Return lowpass data, read-only."""
         self._reload()
-        if self.reload.lowpassdata:
-            self._lowpassdata = self._extract_data(lowpass=True)
-            self.reload.lowpassdata = False
-        return self._lowpassdata
+        if self.reload.lowpass:
+            self._lowpass = self._extract_data(lowpass=True)
+            self.reload.lowpass = False
+        return self._lowpass
+
+    @property
+    def data(self):
+        """Return sample data corresponding to lowpass filter setting."""
+        if self.lowpass_filter:
+            data = self.lowpass
+        else:
+            data = self.raw
+        return data
 
     @property
     def heatindex(self):
         """Return heatindex."""
         self._reload()
         if self.reload.heatindex:
-            self._heatindex = HeatIndex(self.rawdata)
+            self._heatindex = HeatIndex(self.raw)
             self.reload.heatindex = False
         return self._heatindex
+
+
+if __name__ == '__main__':
+    trial = Trial('CSJA13', -1, 'ac')
+    source = SourceData(trial, 2)
+    dataframe = SampleDataFrame(source, False)

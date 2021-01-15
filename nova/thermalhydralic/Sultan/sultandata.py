@@ -1,11 +1,11 @@
 """Postprocess Sultan test data."""
 from dataclasses import dataclass, field
 from typing import Optional
+from types import SimpleNamespace
 
 import pandas
 
 from nova.thermalhydralic.sultan.database import DataBase
-from nova.thermalhydralic.sultan.testplan import TestPlan
 from nova.thermalhydralic.sultan.sultanio import SultanIO
 
 
@@ -15,14 +15,29 @@ class SultanData(SultanIO):
 
     database: DataBase
     _filename: Optional[str] = None
-    data: pandas.DataFrame = field(init=False, repr=False, default=None)
+    _data: pandas.DataFrame = field(init=False, repr=False, default=None)
+    reload: SimpleNamespace = field(init=False, repr=False,
+                                    default_factory=SimpleNamespace)
 
     def __post_init__(self):
         """Typecheck database."""
+        self.reload.__init__(data=True)
         if not isinstance(self.database, DataBase):
             self.database = DataBase(self.database)
         if self._filename is not None:
             self.filename = self._filename
+
+    @property
+    def data(self):
+        """Return sultandata."""
+        if self.reload.data:
+            self.data = self.load_data()
+        return self._data
+
+    @data.setter
+    def data(self, data):
+        self._data = data
+        self.reload.data = False
 
     @property
     def binaryfilepath(self):
@@ -42,7 +57,7 @@ class SultanData(SultanIO):
     @filename.setter
     def filename(self, filename):
         self._filename = filename
-        self.data = self.load_data()
+        self.reload.data = True
 
     def _read_data(self):
         """
@@ -71,9 +86,3 @@ class SultanData(SultanIO):
             data['P in Left'] = data['P in']
             data['P in Right'] = data['P in']
         return data
-
-
-if __name__ == '__main__':
-
-    testplan = TestPlan('CSJA_3')
-    sultandata = SultanData(testplan.database)

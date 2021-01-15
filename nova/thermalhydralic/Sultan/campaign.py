@@ -31,7 +31,8 @@ class Campaign:
 
     def __post_init__(self):
         """Initialize properties."""
-        self.reload.__init__(experiment=True, mode=True, trial=True)
+        self.reload.__init__(experiment=True, mode=True, phase=True)
+        self.database = DataBase(self._experiment)
         self.experiment = self._experiment
 
     @property
@@ -44,10 +45,10 @@ class Campaign:
     @experiment.setter
     def experiment(self, experiment):
         self._experiment = experiment
-        self.database = DataBase(self._experiment)
+        self.database.experiment = experiment  # DataBase(self._experiment)
         self.load_metadata()
         self.reload.experiment = False
-        self.reload.trial = True
+        self.reload.phase = True
 
     @property
     def mode(self):
@@ -80,7 +81,7 @@ class Campaign:
             raise IndexError('mode not in [cal, ac, dc, full]')
         self._mode = mode
         self.reload.mode = False
-        self.reload.trial = True
+        self.reload.phase = True
 
     @property
     def plan(self):
@@ -93,8 +94,8 @@ class Campaign:
         return plan
 
     @property
-    def trial_plan(self):
-        """Return trial plan."""
+    def index(self):
+        """Return plan.index."""
         return self.plan.index.to_list()
 
     @property

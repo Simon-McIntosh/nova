@@ -1,93 +1,81 @@
-"""Manage sultan trial."""
+"""Manage sultan test."""
 from dataclasses import dataclass, field
 from typing import Union
 from types import SimpleNamespace
 
 from nova.thermalhydralic.sultan.campaign import Campaign
+from nova.thermalhydralic.sultan.phase import Phase
 
 
 @dataclass
 class Trial:
     """Manage sultan trial."""
 
-    campaign: Campaign = field(repr=False)
-    _name: Union[str, int] = 0
-    index: int = field(init=False, default=None)
+    campaign: Union[Campaign, str]
+    _name: Union[int, str] = field(default=0, repr=False)
+    _mode: str = field(default='ac', repr=False)
+    phase: Phase = field(init=False)
     reload: SimpleNamespace = field(init=False, repr=False,
                                     default_factory=SimpleNamespace)
 
     def __post_init__(self):
         """Init reload."""
-        self.reload.__init__(plan=True, name=True)
-        self.name = self._name
-
-    def _reload(self):
-        if self.campaign.reload.trial:
-            self.reload.plan = True
-            self.reload.name = True
-
-    @property
-    def plan(self):
-        """Manage trial plan."""
-        self._reload()
-        if self.reload.plan:
-            self.plan = self.campaign.trial_plan
-        return self._plan
-
-    @plan.setter
-    def plan(self, plan):
-        self._plan = plan
-        self.reload.plan = False
-        self.reload.name = True
+        self.reload.__init__(index=True)
+        if not isinstance(self.campaign, Campaign):
+            self.campaign = Campaign(self.campaign, self._mode)
+        else:
+            self.campaign.mode = self._mode
+        self.phase = Phase(self.campaign, self._name)
+        del self._name
+        del self._mode
 
     @property
     def name(self):
-        """
-        Manage name.
+        """Return test phase name."""
+        return self.phase.name
 
-        Parameters
-        ----------
-        name : str or int
-            Test identifier.
+    @property
+    def mode(self):
+        """Return campaign mode."""
+        return self.campaign.mode
 
-        Raises
-        ------
-        IndexError
-            name out of range.
+    def _reload(self):
+        if self.campaign.reload.phase:
+            self.reload.index = True
+            self.reload.name = True
+            self.campaign.reload.phase = False
 
-        Returns
-        -------
-        name : str
+    @property
+    def plan(self):
+        """Return testplan, read-only."""
+        return self.campaign.metadata[self.name]
 
-        """
-        self._reload()
-        if self.reload.name:
-            if self.index is not None:
-                self.name = self.index
-            else:
-                self.name = self._name
-        return self._name
+    def filename(self, shot):
+        """Return shot filename."""
+        return self.plan.File[shot]
 
-    @name.setter
-    def name(self, name):
-        self.index = name  # store name index (int or str)
-        if isinstance(name, int):
-            try:
-                name = self.plan[name]
-            except IndexError as index_error:
-                raise IndexError(f'name index {name} '
-                                 'out of range\n\n'
-                                 f'{self.plan}') from index_error
-        elif isinstance(name, str):
-            if name not in self.plan:
-                raise IndexError(f'name {name} not found in '
-                                 f'\n{self.plan}')
-        self._name = name
-        self.reload.name = False
-        #self.reload.response = True
+    def frequency(self, shot):
+        """Return shot frequency."""
+        return self.plan.at[shot, ('frequency', 'Hz')]
+
+    @property
+    def database(self):
+        """Return database instance."""
+        return self.campaign.database
+
+    @property
+    def samplenumber(self):
+        """Return sample number for current trial."""
+        return len(self.plan.index)
+
+    @property
+    def notes(self):
+        """Return testplan notes, read-only."""
+        campaign_notes = self.campaign.note.set_index('index')
+        phase_notes = campaign_notes.loc[self.plan['File'], :]
+        return phase_notes.reset_index()
 
 
 if __name__ == '__main__':
 
-    campaign = Campaign('CSJA13')
-    trial = Trial(campaign)
+    trial = Trial('CSJA13', -1, 'ac')

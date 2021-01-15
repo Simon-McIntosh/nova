@@ -35,6 +35,17 @@ class DataBase:
             self.datapath = ['ac/dat', 'AC/dat', 'TEST/AC/ACdat']
         self.experiment = self._experiment
 
+    @property
+    def experiment(self):
+        """Manage sultan experiment name."""
+        return self._experiment
+
+    @experiment.setter
+    def experiment(self, experiment):
+        self._experiment = experiment
+        self.ftp = FTPData(self.experiment, *self.ftp_args)
+        self.local = LocalData(self.experiment, *self.local_args)
+
     def datafile(self, filename):
         """Return full local path of datafile."""
         try:  # local search
@@ -53,17 +64,6 @@ class DataBase:
             err_txt = f'datafile {filename} '
             err_txt += f'not found on datapath {self.datapath}'
             raise FileNotFoundError(err_txt) from file_not_found_error
-
-    @property
-    def experiment(self):
-        """Manage sultan experiment name."""
-        return self._experiment
-
-    @experiment.setter
-    def experiment(self, experiment):
-        self._experiment = experiment
-        self.ftp = FTPData(self.experiment, *self.ftp_args)
-        self.local = LocalData(self.experiment, *self.local_args)
 
     @property
     def local_args(self):

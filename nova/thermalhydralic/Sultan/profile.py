@@ -1,5 +1,5 @@
 """Manage sultan point data."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Union
 
 import numpy as np
@@ -15,18 +15,19 @@ class Profile:
     """Offset and normalize sultan timeseries data."""
 
     sample: Union[Sample, Trial, Campaign, str]
-    _offset: Union[bool, tuple[float]] = True
+    offset_data: Union[bool, tuple[float]] = True
+    _offset: tuple[float] = field(init=False)
     normalize: bool = True
     lowpass: bool = True
-    time_label: tuple[str] = ('t', 's')
-    _data_label: tuple[str] = ('Qdot', 'W')
+    columns: dict = field(default_factory=dict)
 
     def __post_init__(self):
         """Calculate offset."""
+        self.columns |= {'time': ('t', 's'), 'data': ('Qdot', 'W')}
         if not isinstance(self.sample, Sample):
             self.sample = Sample(self.sample)
-        self.sample.dataframe.lowpass_filter = self.lowpass
-        self.offset = self._offset
+        self.sample.sampledata.lowpass_filter = self.lowpass
+        self.offset = self.offset_data
 
     @property
     def offset(self):
@@ -47,26 +48,43 @@ class Profile:
             offset.
 
         """
-        ### update offset when sample is updated ###
+        if self.sample.sampledata.reload.offset:
+            self.offset = self.offset_data
         return self._offset
 
     @offset.setter
     def offset(self, offset):
+        self.sample.sampledata.reload.offset = False
         if isinstance(offset, bool):
             self._offset = (0, 0)
             if offset:
-                with self.sample.dataframe(True):
+                with self.sample.sampledata(lowpass_filter=True):
                     self._offset = self.data(self.sample.heatindex.start)
         else:
             self._offset = offset
 
+    def _get_column_label(self, key):
+        """Return time label."""
+        try:
+            label = self.columns[key]
+        except KeyError as keyerror:
+            raise KeyError(f'{key} not in self.columns {self.columns}') \
+                from keyerror
+        return label
+
+    @property
+    def time_label(self):
+        """Return time label."""
+        return self._get_column_label('time')
+
     @property
     def data_label(self):
         """Return data label."""
+        data_label = self._get_column_label('data')
         if self.normalize:
-            label = (self._data_label[0]+'_norm', self._data_label[1])
+            label = (data_label[0]+'_norm', data_label[1])
         else:
-            label = self._data_label
+            label = data_label
         return label
 
     def _locate(self, prefix, index):
@@ -75,7 +93,7 @@ class Profile:
             raise NameError(f'prefix {prefix} not in [time, data]')
         label = getattr(self, f'{prefix}_label')
         offset_index = variables.index(prefix)
-        return self.sample.dataframe.data.loc[index, label] - \
+        return self.sample.sampledata.data.loc[index, label] - \
             self.offset[offset_index]
 
     def data(self, index):
@@ -108,7 +126,7 @@ class Profile:
             axes = plt.subplots(1, 1)[1]
         axes.plot(*self.data(index), *args, **kwargs)
 
-    def plot_single(self, axes=None, lowpass=False):
+    def plot_single(self, axes=None, lowpass_filter=False):
         """
         Plot single waveform.
 
@@ -126,10 +144,10 @@ class Profile:
         """
         if axes is None:
             axes = plt.gca()
-        bg_color = 0.4 * np.ones(3) if lowpass else 'lightgray'
-        color = 'C3' if lowpass else 'C0'
-        label = 'lowpass' if lowpass else 'raw'
-        with self.sample.dataframe(lowpass):
+        bg_color = 0.4 * np.ones(3) if lowpass_filter else 'lightgray'
+        color = 'C3' if lowpass_filter else 'C0'
+        label = 'lowpass' if lowpass_filter else 'raw'
+        with self.sample.sampledata(lowpass_filter=lowpass_filter):
             axes.plot(*self.profile, color=bg_color)
             axes.plot(*self.profile[:, self.sample.heatindex.index],
                       color=color, label=label)
@@ -140,11 +158,12 @@ class Profile:
 
     def plot(self, axes=None):
         """Plot shot profile."""
-        self.plot_single(lowpass=False, axes=axes)
-        self.plot_single(lowpass=True, axes=axes)
+        self.plot_single(lowpass_filter=False, axes=axes)
+        self.plot_single(lowpass_filter=True, axes=axes)
 
 
 if __name__ == '__main__':
     profile = Profile('CSJA13')
     profile.sample.shot = -11
+    profile.sample.shot = -0
     profile.plot()

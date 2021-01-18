@@ -13,7 +13,7 @@ from nova.thermalhydralic.sultan.trial import Trial
 
 
 @dataclass
-class SampleDataFrame:
+class SampleData:
     """Manage sample dataframe."""
 
     source: SourceData
@@ -27,7 +27,7 @@ class SampleDataFrame:
     def __post_init__(self):
         """Init data pipeline."""
         self.reload.__init__(raw=True, lowpass=True, heatindex=True,
-                             profile=True)
+                             offset=True)
         self._lowpass_filter = [self._lowpass_filter for __ in range(2)]
 
     @property
@@ -39,7 +39,7 @@ class SampleDataFrame:
     def lowpass_filter(self, lowpass_filter):
         self._lowpass_filter[0] = lowpass_filter
 
-    def __call__(self, lowpass_filter):
+    def __call__(self, lowpass_filter=True):
         """Store current filter flag and activate temporary value."""
         self._lowpass_filter[1] = self._lowpass_filter[0]
         self._lowpass_filter[0] = lowpass_filter
@@ -58,7 +58,7 @@ class SampleDataFrame:
             self.reload.raw = True
             self.reload.lowpass = True
             self.reload.heatindex = True
-            self.reload.profile = True
+            self.reload.offset = True
             self.source.reload.sampledata = False
 
     @property
@@ -187,5 +187,5 @@ class SampleDataFrame:
 
 if __name__ == '__main__':
     trial = Trial('CSJA13', -1, 'ac')
-    source = SourceData(trial, 2)
-    dataframe = SampleDataFrame(source, False)
+    sourcedata = SourceData(trial, 2)
+    sampledata = SampleData(sourcedata, False)

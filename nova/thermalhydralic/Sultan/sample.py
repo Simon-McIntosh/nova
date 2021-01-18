@@ -7,7 +7,7 @@ import pandas
 from nova.thermalhydralic.sultan.campaign import Campaign
 from nova.thermalhydralic.sultan.trial import Trial
 from nova.thermalhydralic.sultan.sourcedata import SourceData
-from nova.thermalhydralic.sultan.sampledataframe import SampleDataFrame
+from nova.thermalhydralic.sultan.sampledata import SampleData
 
 
 @dataclass
@@ -17,33 +17,33 @@ class Sample:
     trial: Union[Trial, Campaign, str] = field(repr=False)
     _shot: InitVar[int] = field(default=0, repr=False)
     _side: InitVar[str] = field(default='Left', repr=False)
-    source: SourceData = field(init=False)
-    dataframe: SampleDataFrame = field(init=False)
+    sourcedata: SourceData = field(init=False)
+    sampledata: SampleData = field(init=False)
 
     def __post_init__(self, _shot, _side):
         """Init sample instance."""
         if not isinstance(self.trial, Trial):
             self.trial = Trial(self.trial)
-        self.source = SourceData(self.trial, _shot, _side)
-        self.dataframe = SampleDataFrame(self.source)
+        self.sourcedata = SourceData(self.trial, _shot, _side)
+        self.sampledata = SampleData(self.sourcedata)
 
     @property
     def shot(self):
         """Return shot index."""
-        return self.source.shot
+        return self.sourcedata.shot
 
     @shot.setter
     def shot(self, shot):
-        self.source.shot = shot
+        self.sourcedata.shot = shot
 
     @property
     def side(self):
         """Return sample side."""
-        return self.source.side
+        return self.sourcedata.side
 
     @side.setter
     def side(self, side):
-        self.source.side = side
+        self.sourcedata.side = side
 
     @property
     def plan(self):
@@ -53,22 +53,22 @@ class Sample:
     @property
     def sultandata(self):
         """Return sultan source, update sample filename if required."""
-        return self.source.sultandata
+        return self.sourcedata.sultandata
 
     @property
     def rawdata(self):
         """Return rawdata."""
-        return self.dataframe.raw
+        return self.sampledata.raw
 
     @property
     def lowpassdata(self):
         """Return lowpassdata."""
-        return self.dataframe.lowpass
+        return self.sampledata.lowpass
 
     @property
     def heatindex(self):
         """Return heatindex."""
-        return self.dataframe.heatindex
+        return self.sampledata.heatindex
 
     @property
     def metadata(self):
@@ -85,7 +85,7 @@ class Sample:
     @property
     def filename(self):
         """Return sample filename."""
-        return self.source.filename
+        return self.sourcedata.filename
 
     @property
     def experiment(self):

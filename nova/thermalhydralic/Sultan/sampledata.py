@@ -1,5 +1,6 @@
 """Manage sultan sample data."""
 from dataclasses import dataclass, field
+from typing import Union
 from types import SimpleNamespace
 
 import pandas
@@ -16,8 +17,8 @@ from nova.thermalhydralic.sultan.trial import Trial
 class SampleData:
     """Manage sample dataframe."""
 
-    source: SourceData
-    _lowpass_filter: bool = True
+    sourcedata: SourceData = field(repr=False)
+    _lowpass_filter: Union[bool, list[bool]] = True
     _raw: pandas.DataFrame = field(init=False, repr=False)
     _lowpass: pandas.DataFrame = field(init=False, repr=False)
     _heatindex: HeatIndex = field(init=False, repr=False)
@@ -28,21 +29,21 @@ class SampleData:
         """Init data pipeline."""
         self.reload.__init__(raw=True, lowpass=True, heatindex=True,
                              offset=True)
-        self._lowpass_filter = [self._lowpass_filter for __ in range(2)]
 
     @property
     def lowpass_filter(self):
         """Return low-pass filter flag."""
+        if isinstance(self._lowpass_filter, bool):
+            return self._lowpass_filter
         return self._lowpass_filter[0]
 
     @lowpass_filter.setter
     def lowpass_filter(self, lowpass_filter):
-        self._lowpass_filter[0] = lowpass_filter
+        self._lowpass_filter = lowpass_filter
 
     def __call__(self, lowpass_filter=True):
         """Store current filter flag and activate temporary value."""
-        self._lowpass_filter[1] = self._lowpass_filter[0]
-        self._lowpass_filter[0] = lowpass_filter
+        self._lowpass_filter = [lowpass_filter, self.lowpass_filter]
         return self
 
     def __enter__(self):
@@ -50,36 +51,37 @@ class SampleData:
 
     def __exit__(self, exception_type, exception_value, traceback):
         """Reset filter flag."""
-        self._lowpass_filter[0] = self._lowpass_filter[1]
+        self.lowpass_filter = self._lowpass_filter[1]
 
-    def _reload(self):
-        """Set reload flags."""
-        if self.source.reload.sampledata:
+    def propagate_reload(self):
+        """Propagate reload flags."""
+        if self.sourcedata.reload.sampledata:
             self.reload.raw = True
             self.reload.lowpass = True
             self.reload.heatindex = True
             self.reload.offset = True
-            self.source.reload.sampledata = False
+            self.reload.waveform = True
+            self.sourcedata.reload.sampledata = False
 
     @property
     def sultandata(self):
-        """Return sultandata.data."""
-        return self.source.sultandata
+        """Return source data."""
+        return self.sourcedata.data
 
     @property
     def side(self):
         """Return sample side, read-only."""
-        return self.source.side
+        return self.sourcedata.side
 
     @property
     def frequency(self):
         """Return sample frequency, read-only."""
-        return self.source.frequency
+        return self.sourcedata.frequency
 
     @property
     def excitation_field_rate(self):
         """Return excitation field rate of change."""
-        return self.source.excitation_field_rate
+        return self.sourcedata.excitation_field_rate
 
     @staticmethod
     def _initialize_dataframe():
@@ -106,8 +108,6 @@ class SampleData:
 
         Parameters
         ----------
-        sultandata : pandas.DataFrame
-            Sultan data.
         lowpass : bool, optional
             Apply lowpass filter.
             Window length set equal to 2.5*period of driving waveform.
@@ -151,7 +151,7 @@ class SampleData:
     @property
     def raw(self):
         """Return raw data, read-only."""
-        self._reload()
+        self.propagate_reload()
         if self.reload.raw:
             self._raw = self._extract_data(lowpass=False)
             self.reload.raw = False
@@ -160,7 +160,7 @@ class SampleData:
     @property
     def lowpass(self):
         """Return lowpass data, read-only."""
-        self._reload()
+        self.propagate_reload()
         if self.reload.lowpass:
             self._lowpass = self._extract_data(lowpass=True)
             self.reload.lowpass = False
@@ -178,7 +178,7 @@ class SampleData:
     @property
     def heatindex(self):
         """Return heatindex."""
-        self._reload()
+        self.propagate_reload()
         if self.reload.heatindex:
             self._heatindex = HeatIndex(self.raw)
             self.reload.heatindex = False
@@ -188,4 +188,4 @@ class SampleData:
 if __name__ == '__main__':
     trial = Trial('CSJA13', -1, 'ac')
     sourcedata = SourceData(trial, 2)
-    sampledata = SampleData(sourcedata, False)
+    sampledata = SampleData(sourcedata, True)

@@ -15,10 +15,10 @@ class Sample:
     """Manage sultan shot instance."""
 
     trial: Union[Trial, Campaign, str] = field(repr=False)
-    _shot: InitVar[int] = field(default=0, repr=False)
-    _side: InitVar[str] = field(default='Left', repr=False)
-    sourcedata: SourceData = field(init=False)
-    sampledata: SampleData = field(init=False)
+    _shot: InitVar[int] = field(default=0)
+    _side: InitVar[str] = field(default='Left')
+    sourcedata: SourceData = field(init=False, repr=True)
+    sampledata: SampleData = field(init=False, repr=False)
 
     def __post_init__(self, _shot, _side):
         """Init sample instance."""

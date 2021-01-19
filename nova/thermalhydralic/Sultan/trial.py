@@ -1,7 +1,6 @@
 """Manage sultan test."""
 from dataclasses import dataclass, field
 from typing import Union
-from types import SimpleNamespace
 
 from nova.thermalhydralic.sultan.campaign import Campaign
 from nova.thermalhydralic.sultan.phase import Phase
@@ -15,12 +14,9 @@ class Trial:
     _name: Union[int, str] = field(default=0, repr=False)
     _mode: str = field(default='ac', repr=False)
     phase: Phase = field(init=False)
-    reload: SimpleNamespace = field(init=False, repr=False,
-                                    default_factory=SimpleNamespace)
 
     def __post_init__(self):
-        """Init reload."""
-        self.reload.__init__(index=True)
+        """Init campaign and phase instances."""
         if not isinstance(self.campaign, Campaign):
             self.campaign = Campaign(self.campaign, self._mode)
         else:
@@ -38,12 +34,6 @@ class Trial:
     def mode(self):
         """Return campaign mode."""
         return self.campaign.mode
-
-    def _reload(self):
-        if self.campaign.reload.phase:
-            self.reload.index = True
-            self.reload.name = True
-            self.campaign.reload.phase = False
 
     @property
     def plan(self):

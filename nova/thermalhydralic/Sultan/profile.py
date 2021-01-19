@@ -16,18 +16,17 @@ class Profile:
 
     sample: Union[Sample, Trial, Campaign, str]
     offset_data: Union[bool, tuple[float]] = True
-    _offset: tuple[float] = field(init=False)
+    _offset: tuple[float] = field(init=False, default=(0, 0), repr=False)
     normalize: bool = True
-    lowpass: bool = True
-    columns: dict = field(default_factory=dict)
+    lowpass_filter: bool = True
+    columns: dict = field(default_factory=dict, repr=False)
 
     def __post_init__(self):
         """Calculate offset."""
         self.columns |= {'time': ('t', 's'), 'data': ('Qdot', 'W')}
         if not isinstance(self.sample, Sample):
             self.sample = Sample(self.sample)
-        self.sample.sampledata.lowpass_filter = self.lowpass
-        self.offset = self.offset_data
+        self.sample.sampledata.lowpass_filter = self.lowpass_filter
 
     @property
     def offset(self):
@@ -48,6 +47,7 @@ class Profile:
             offset.
 
         """
+        self.sample.sampledata.propagate_reload()
         if self.sample.sampledata.reload.offset:
             self.offset = self.offset_data
         return self._offset
@@ -56,10 +56,11 @@ class Profile:
     def offset(self, offset):
         self.sample.sampledata.reload.offset = False
         if isinstance(offset, bool):
-            self._offset = (0, 0)
+            self._offset = (0.0, 0.0)
             if offset:
-                with self.sample.sampledata(lowpass_filter=True):
-                    self._offset = self.data(self.sample.heatindex.start)
+                start_index = self.sample.heatindex.start
+                self._offset = self.sample.sampledata.data.loc[
+                    start_index, [self.time_label, self.data_label]].values
         else:
             self._offset = offset
 
@@ -96,14 +97,11 @@ class Profile:
         return self.sample.sampledata.data.loc[index, label] - \
             self.offset[offset_index]
 
-    def data(self, index):
-        """Return time, data tuple."""
-        return self._locate('time', index), self._locate('data', index)
-
-    @property
-    def profile(self):
+    def profile(self, index=slice(None)):
         """Return data timeseries."""
-        return np.array(self.data(slice(None)))
+        time = self._locate('time', index)
+        data = self._locate('data', index)
+        return time, data
 
     def plot_point(self, index, *args, **kwargs):
         """
@@ -124,7 +122,7 @@ class Profile:
         axes = kwargs.pop('axes', None)
         if axes is None:
             axes = plt.subplots(1, 1)[1]
-        axes.plot(*self.data(index), *args, **kwargs)
+        axes.plot(*self.profile(index), *args, **kwargs)
 
     def plot_single(self, axes=None, lowpass_filter=False):
         """
@@ -134,7 +132,7 @@ class Profile:
         ----------
         axes : axes, optional
             Plot axes. The default is None, plt.gca().
-        lowpass : bool, optional
+        lowpass_filter : bool, optional
             Serve lowpass filtered data. The default is False.
 
         Returns
@@ -148,8 +146,8 @@ class Profile:
         color = 'C3' if lowpass_filter else 'C0'
         label = 'lowpass' if lowpass_filter else 'raw'
         with self.sample.sampledata(lowpass_filter=lowpass_filter):
-            axes.plot(*self.profile, color=bg_color)
-            axes.plot(*self.profile[:, self.sample.heatindex.index],
+            axes.plot(*self.profile(), color=bg_color)
+            axes.plot(*self.profile(self.sample.heatindex.index),
                       color=color, label=label)
         axes.legend()
         axes.set_xlabel('$t$ s')
@@ -167,3 +165,5 @@ if __name__ == '__main__':
     profile.sample.shot = -11
     profile.sample.shot = -0
     profile.plot()
+
+    print(profile.sample.sampledata.lowpass_filter)

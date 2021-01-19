@@ -21,15 +21,17 @@ class Phase:
         self.reload.__init__(index=True, name=True)
         self.name = self._name
 
-    def _reload(self):
+    def propagate_reload(self):
+        """Propagate reload flags."""
         if self.campaign.reload.phase:
             self.reload.index = True
             self.reload.name = True
+            self.campaign.reload.phase = False
 
     @property
     def index(self):
         """Manage phase index."""
-        self._reload()
+        self.propagate_reload()
         if self.reload.index:
             self.index = self.campaign.index
         return self._index
@@ -60,7 +62,7 @@ class Phase:
         name : str
 
         """
-        self._reload()
+        self.propagate_reload()
         if self.reload.name:
             if self._nameindex is not None:
                 self.name = self._nameindex

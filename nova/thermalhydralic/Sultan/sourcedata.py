@@ -13,18 +13,18 @@ from nova.thermalhydralic.sultan.sultandata import SultanData
 class SourceData:
     """Manage data file parameters."""
 
-    trial: Trial
+    trial: Trial = field(repr=False)
     _shot: int = 0
     _side: str = 'Left'
-    sultan: SultanData = field(init=False, repr=False)
+    sultandata: SultanData = field(init=False, repr=False)
     reload: SimpleNamespace = field(init=False, repr=False,
                                     default_factory=SimpleNamespace)
 
     def __post_init__(self):
         """Typecheck trial and initialize shot instance."""
         self.reload.__init__(shot=True, side=True, sampledata=True)
-        self.sultan = SultanData(self.trial.database)
-        self.sultan.filename = self.filename
+        self.sultandata = SultanData(self.trial.database)
+        self.sultandata.filename = self.filename
 
     @property
     def shot(self):
@@ -60,7 +60,7 @@ class SourceData:
                              'out of bounds for trial.plan.index '
                              f'{self.trial.plan.index}') from index_error
         self.reload.shot = False
-        self.sultan.filename = self.filename
+        self.sultandata.filename = self.filename
         self.reload.sampledata = True
 
     @property
@@ -97,9 +97,9 @@ class SourceData:
         return self.trial.filename(self.shot)
 
     @property
-    def sultandata(self):
-        """Return sultan.data."""
-        return self.sultan.data
+    def data(self):
+        """Return sultan data."""
+        return self.sultandata.data
 
     @property
     def frequency(self):
@@ -142,4 +142,4 @@ class SourceData:
 
 if __name__ == '__main__':
     trial = Trial('CSJA13', -1, 'ac')
-    source = SourceData(trial, 2)
+    sourcedata = SourceData(trial, 2)

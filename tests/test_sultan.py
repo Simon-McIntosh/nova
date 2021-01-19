@@ -1,11 +1,13 @@
 import pytest
+import numpy as np
 
 from nova.thermalhydralic.sultan.campaign import Campaign
 from nova.thermalhydralic.sultan.phase import Phase
 from nova.thermalhydralic.sultan.trial import Trial
 from nova.thermalhydralic.sultan.sample import Sample
 from nova.thermalhydralic.sultan.sourcedata import SourceData
-from nova.thermalhydralic.sultan.sampledataframe import SampleDataFrame
+from nova.thermalhydralic.sultan.sampledata import SampleData
+from nova.thermalhydralic.sultan.profile import Profile
 
 
 def test_experiment():
@@ -61,38 +63,45 @@ def test_samplenumber():
 def test_database_update():
     sample = Sample('CSJA13')
     sample.trial.campaign.experiment = 'CSJA_3'
-    assert sample.source.sultan.database == sample.trial.database
+    assert sample.sourcedata.sultandata.database == sample.trial.database
 
 
 def test_sultandata_update():
     sample = Sample('CSJA13')
     sample.shot = 3
-    assert sample.filename == sample.source.sultan.filename
+    assert sample.filename == sample.sourcedata.sultandata.filename
 
 
-def test_source_name():
+def test_sourcedata_name():
     trial = Trial('CSJA13', -1, 'ac')
-    source = SourceData(trial, 2)
-    assert source.filename == 'CSJA13A110610'
+    sourcedata = SourceData(trial, 2)
+    assert sourcedata.filename == 'CSJA13A110610'
 
 
-def test_source_update():
+def test_sourcedata_update():
     trial = Trial('CSJA13', -1, 'ac')
-    source = SourceData(trial)
-    source.shot = 2
-    assert source.filename == source.sultan.filename
+    sourcedata = SourceData(trial)
+    sourcedata.shot = 2
+    assert sourcedata.filename == sourcedata.sultandata.filename
 
 
 def test_sampledataframe_lowpass_filter():
     trial = Trial('CSJA13', -1, 'ac')
-    source = SourceData(trial, 2)
-    dataframe = SampleDataFrame(source, False)
+    sourcedata = SourceData(trial, 2)
+    sampledata = SampleData(sourcedata, _lowpass_filter=False)
     lowpass_array = []
-    lowpass_array.append(dataframe.lowpass_filter)
-    with dataframe(True):
-        lowpass_array.append(dataframe.lowpass_filter)
-    lowpass_array.append(dataframe.lowpass_filter)
+    lowpass_array.append(sampledata.lowpass_filter)
+    with sampledata(lowpass_filter=True):
+        lowpass_array.append(sampledata.lowpass_filter)
+    lowpass_array.append(sampledata.lowpass_filter)
     assert lowpass_array == [False, True, False]
+
+
+def test_profile_offset():
+    profile = Profile('CSJA13')
+    profile.sample.shot = -11
+    assert np.isclose(profile.profile(profile.sample.heatindex.start),
+                      (0.0, 0.0)).all()
 
 
 if __name__ == '__main__':

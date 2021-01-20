@@ -1,6 +1,7 @@
 """Manage sultan point data."""
 from dataclasses import dataclass, field
 from typing import Union
+from types import SimpleNamespace
 
 import numpy as np
 
@@ -15,18 +16,25 @@ class Profile:
     """Offset and normalize sultan timeseries data."""
 
     sample: Union[Sample, Trial, Campaign, str]
-    offset_data: Union[bool, tuple[float]] = True
+    _data_offset: Union[bool, tuple[float]] = True
     _offset: tuple[float] = field(init=False, default=(0, 0), repr=False)
-    normalize: bool = True
-    lowpass_filter: bool = True
-    columns: dict = field(default_factory=dict, repr=False)
+    _normalize: bool = True
+    _lowpass_filter: bool = True
+    reload: SimpleNamespace = field(init=False, repr=False,
+                                    default_factory=SimpleNamespace)
 
     def __post_init__(self):
         """Calculate offset."""
-        self.columns |= {'time': ('t', 's'), 'data': ('Qdot', 'W')}
+        self.reload.__init__(waveform=True)
         if not isinstance(self.sample, Sample):
             self.sample = Sample(self.sample)
-        self.sample.sampledata.lowpass_filter = self.lowpass_filter
+        self.sample.sampledata.lowpass_filter = self._lowpass_filter
+        self.offset = self._data_offset
+
+    @property
+    def columns(self):
+        """Return timeseries column names."""
+        return {'time': ('t', 's'), 'data': ('Qdot', 'W')}
 
     @property
     def offset(self):
@@ -49,12 +57,13 @@ class Profile:
         """
         self.sample.sampledata.propagate_reload()
         if self.sample.sampledata.reload.offset:
-            self.offset = self.offset_data
+            self.offset = self._data_offset
         return self._offset
 
     @offset.setter
     def offset(self, offset):
         self.sample.sampledata.reload.offset = False
+        self._data_offset = offset
         if isinstance(offset, bool):
             self._offset = (0.0, 0.0)
             if offset:
@@ -63,6 +72,18 @@ class Profile:
                     start_index, [self.time_label, self.data_label]].values
         else:
             self._offset = offset
+        self.reload.waveform = True
+
+    @property
+    def normalize(self):
+        """Manage data normalization."""
+        return self._normalize
+
+    @normalize.setter
+    def normalize(self, normalize):
+        self._normalize = normalize
+        self.offset = self._data_offset
+        self.reload.waveform = True
 
     def _get_column_label(self, key):
         """Return time label."""
@@ -88,20 +109,27 @@ class Profile:
             label = data_label
         return label
 
-    def _locate(self, prefix, index):
-        variables = ['time', 'data']
-        if prefix not in variables:
-            raise NameError(f'prefix {prefix} not in [time, data]')
+    def _locate(self, prefix, index=slice(None)):
+        if prefix not in self.columns:
+            raise NameError(f'prefix {prefix} not in {self.columns}')
         label = getattr(self, f'{prefix}_label')
-        offset_index = variables.index(prefix)
-        return self.sample.sampledata.data.loc[index, label] - \
+        offset_index = list(self.columns).index(prefix)
+        return self.sample.sampledata.data.loc[index, label].values - \
             self.offset[offset_index]
 
-    def profile(self, index=slice(None)):
+    @property
+    def time(self):
+        """Return time array."""
+        return self._locate('time')
+
+    @property
+    def data(self):
+        """Return data array."""
+        return self._locate('data')
+
+    def timeseries(self, index=slice(None)):
         """Return data timeseries."""
-        time = self._locate('time', index)
-        data = self._locate('data', index)
-        return time, data
+        return self.time[index], self.data[index]
 
     def plot_point(self, index, *args, **kwargs):
         """
@@ -122,7 +150,7 @@ class Profile:
         axes = kwargs.pop('axes', None)
         if axes is None:
             axes = plt.subplots(1, 1)[1]
-        axes.plot(*self.profile(index), *args, **kwargs)
+        axes.plot(*self.timeseries(index), *args, **kwargs)
 
     def plot_single(self, axes=None, lowpass_filter=False):
         """
@@ -146,8 +174,8 @@ class Profile:
         color = 'C3' if lowpass_filter else 'C0'
         label = 'lowpass' if lowpass_filter else 'raw'
         with self.sample.sampledata(lowpass_filter=lowpass_filter):
-            axes.plot(*self.profile(), color=bg_color)
-            axes.plot(*self.profile(self.sample.heatindex.index),
+            axes.plot(*self.timeseries(), color=bg_color)
+            axes.plot(*self.timeseries(self.sample.heatindex.index),
                       color=color, label=label)
         axes.legend()
         axes.set_xlabel('$t$ s')
@@ -165,5 +193,3 @@ if __name__ == '__main__':
     profile.sample.shot = -11
     profile.sample.shot = -0
     profile.plot()
-
-    print(profile.sample.sampledata.lowpass_filter)

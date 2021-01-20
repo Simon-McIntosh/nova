@@ -124,7 +124,7 @@ class Campaign:
     def _read_metadata(self):
         """Extract data from *.xls campaign metadata."""
         metadata_xls = self.database.locate('*.xls')
-        with pandas.ExcelFile(metadata_xls, engine='openpyxl') as xls:
+        with pandas.ExcelFile(metadata_xls) as xls:  # engine='openpyxl'
             metadata_index = self._read_metadata_index(xls)
             metadata = self._read_metadata_testplan(xls, metadata_index)
             self._save_metadata(metadata)
@@ -383,6 +383,7 @@ class Campaign:
     def _format_columns(testplan):
         # remove column nans
         columns = testplan.columns.get_level_values(0)
+        print(columns)
         drop_columns = columns[columns.isna()]
         if len(drop_columns) > 0:
             testplan.drop(columns=drop_columns, inplace=True, level=0)

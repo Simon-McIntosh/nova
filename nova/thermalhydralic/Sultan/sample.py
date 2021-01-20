@@ -98,6 +98,11 @@ class Sample:
         return self.trial.testname
 
     @property
+    def frequency(self):
+        """Return sample frequency."""
+        return self.sourcedata.frequency
+
+    @property
     def name(self):
         """Return sample name."""
         return f'{self.experiment}_{self.testname}_{self.side}_{self.shot}'

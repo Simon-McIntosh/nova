@@ -109,6 +109,7 @@ class SourceData:
     @property
     def current_label(self):
         """Return sample excitation current string."""
+        print(self.trial.plan)
         return self.trial.plan.at[self.shot, ('Ipulse', 'A')]
 
     @property

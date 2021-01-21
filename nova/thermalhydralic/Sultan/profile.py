@@ -29,6 +29,7 @@ class Profile:
         if not isinstance(self.sample, Sample):
             self.sample = Sample(self.sample)
         self.sample.sampledata.lowpass_filter = self._lowpass_filter
+        self.normalize = self._normalize
         self.offset = self._data_offset
 
     @property
@@ -65,14 +66,15 @@ class Profile:
         self.sample.sampledata.reload.offset = False
         self._data_offset = offset
         if isinstance(offset, bool):
-            self._offset = (0.0, 0.0)
+            self._offset = (0, 0)
             if offset:
                 start_index = self.sample.heatindex.start
-                self._offset = self.sample.sampledata.data.loc[
+                self._offset = self.sample.sampledata.lowpass.loc[
                     start_index, [self.time_label, self.data_label]].values
         else:
             self._offset = offset
         self.reload.waveform = True
+        self.sample.sampledata.reload.offset = False
 
     @property
     def normalize(self):
@@ -82,7 +84,7 @@ class Profile:
     @normalize.setter
     def normalize(self, normalize):
         self._normalize = normalize
-        self.offset = self._data_offset
+        self.sample.sampledata.reload.offset = True
         self.reload.waveform = True
 
     def _get_column_label(self, key):
@@ -170,26 +172,25 @@ class Profile:
         """
         if axes is None:
             axes = plt.gca()
-        bg_color = 0.4 * np.ones(3) if lowpass_filter else 'lightgray'
-        color = 'C3' if lowpass_filter else 'C0'
+        color = 'C1' if lowpass_filter else 'C0'
         label = 'lowpass' if lowpass_filter else 'raw'
         with self.sample.sampledata(lowpass_filter=lowpass_filter):
-            axes.plot(*self.timeseries(), color=bg_color)
-            axes.plot(*self.timeseries(self.sample.heatindex.index),
-                      color=color, label=label)
-        axes.legend()
+            axes.plot(*self.timeseries(), color=color, label=label)
+
+    def plot(self, axes=None):
+        """Plot shot profile."""
+        if axes is None:
+            axes = plt.gca()
+        self.plot_single(lowpass_filter=False, axes=axes)
+        self.plot_single(lowpass_filter=True, axes=axes)
+        axes.legend(loc='upper right')
         axes.set_xlabel('$t$ s')
         axes.set_ylabel(r'$\hat{\dot{Q}}$ W')
         plt.despine()
 
-    def plot(self, axes=None):
-        """Plot shot profile."""
-        self.plot_single(lowpass_filter=False, axes=axes)
-        self.plot_single(lowpass_filter=True, axes=axes)
-
 
 if __name__ == '__main__':
-    profile = Profile('CSJA13')
-    profile.sample.shot = -11
-    profile.sample.shot = -0
+    profile = Profile('CSJA12')
+    profile.sample.shot = 0
+    #profile.sample.shot = -0
     profile.plot()

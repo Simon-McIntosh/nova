@@ -22,7 +22,8 @@ class SourceData:
 
     def __post_init__(self):
         """Typecheck trial and initialize shot instance."""
-        self.reload.__init__(shot=True, side=True, sampledata=True)
+        self.reload.__init__(shot=True, side=True, sampledata=True,
+                             waveform=True)
         self.sultandata = SultanData(self.trial.database)
         self.sultandata.filename = self.filename
 
@@ -62,6 +63,7 @@ class SourceData:
         self.reload.shot = False
         self.sultandata.filename = self.filename
         self.reload.sampledata = True
+        self.reload.waveform = True
 
     @property
     def side(self):
@@ -109,7 +111,6 @@ class SourceData:
     @property
     def current_label(self):
         """Return sample excitation current string."""
-        print(self.trial.plan)
         return self.trial.plan.at[self.shot, ('Ipulse', 'A')]
 
     @property

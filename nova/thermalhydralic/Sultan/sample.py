@@ -80,7 +80,7 @@ class Sample:
     @property
     def note(self):
         """Return sample note, read-only."""
-        return self.trial.note.loc[self.shot, 'note']
+        return self.trial.notes.loc[self.shot, 'note']
 
     @property
     def filename(self):
@@ -107,11 +107,16 @@ class Sample:
         """Return sample name."""
         return f'{self.experiment}_{self.testname}_{self.side}_{self.shot}'
 
+    @property
+    def samplenumber(self):
+        """Return trial sample number."""
+        return self.trial.samplenumber
+
     def sequence(self):
         """Return filename generator."""
-        for i in range(self.trial.samplenumber):
+        for i in range(self.samplenumber):
             self.shot = i
-            yield self.filename
+            yield self.filename, i
 
 
 if __name__ == '__main__':

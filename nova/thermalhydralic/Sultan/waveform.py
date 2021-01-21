@@ -20,18 +20,16 @@ class WaveForm:
 
     profile: Union[Profile, Sample, Trial, Campaign, str] = field(repr=False)
     _threshold: float = 0.25
-    _upsample: float = 31
-    _index: slice = field(init=False)
+    pulse: bool = True
     _data: pandas.DataFrame = field(init=False, repr=False)
     reload: SimpleNamespace = field(init=False, repr=False,
                                     default_factory=SimpleNamespace)
 
     def __post_init__(self):
         """Init time and heat data fields."""
-        self.reload.__init__(threshold=True, index=True, data=True)
+        self.reload.__init__(threshold=True, data=True)
         if not isinstance(self.profile, Profile):
             self.profile = Profile(self.profile)
-        self._extract_index()
 
     @property
     def threshold(self):
@@ -63,20 +61,17 @@ class WaveForm:
                                  'out of range.')
         self._threshold = threshold
         self.reload.threshold = False
-        self.reload.index = True
         self.reload.data = True
-
-    @property
-    def upsample(self):
-        """Return upsample factor, read-only."""
-        return self._upsample
 
     def propagate_reload(self):
         """Propagate reload flags."""
+        if self.profile.sample.sourcedata.reload.waveform:
+            self.reload.data = True
+            self.profile.sample.sourcedata.reload.waveform = False
         if self.profile.sample.sampledata.reload.waveform:
-            self.reload.index = True
             self.reload.data = True
             self.profile.sample.sampledata.reload.waveform = False
+
         if self.profile.reload.waveform:
             self.reload.data = True
             self.profile.reload.waveform = False
@@ -88,21 +83,7 @@ class WaveForm:
 
     @property
     def index(self):
-        """
-        Return waveform index.
-
-        Parameters
-        ----------
-        profile : ShotProfile
-            Shot profile.
-
-        """
-        self.propagate_reload()
-        if self.reload.index:
-            self._extract_index()
-        return self._index
-
-    def _extract_index(self):
+        """Return waveform index."""
         start = self.profile.sample.heatindex.start
         if self.threshold is None:
             start = stop = None
@@ -124,8 +105,7 @@ class WaveForm:
             delta = np.diff(minmax)[0]
             stop = np.argmax(cooldown <= minmax[1] - self.threshold*delta)
             stop += start+argmax
-        self._index = slice(start, stop)
-        self.reload.index = False
+        return slice(start, stop)
 
     @property
     def data(self):
@@ -142,7 +122,7 @@ class WaveForm:
             self._extract()
         return self._data
 
-    def _resample(self, timeseries, excitation_frequency):
+    def _resample(self, timeseries, excitation_frequency, upsample=31):
         """
         Resample timeseries.
 
@@ -165,8 +145,8 @@ class WaveForm:
         """
         timestep = np.diff(timeseries[0]).mean()
         sample_frequency = 1/timestep
-        if sample_frequency < self.upsample*excitation_frequency:
-            timestep = 1 / (self.upsample*excitation_frequency)
+        if sample_frequency < upsample*excitation_frequency:
+            timestep = 1 / (upsample*excitation_frequency)
             timebounds = timeseries[0][0], timeseries[0][-1]
             timedelta = np.diff(timebounds)[0]
             samplenumber = int(timedelta / timestep)
@@ -193,60 +173,59 @@ class WaveForm:
         timeseries, samplenumber = self._resample(timeseries, self.frequency)
         heatindex = self.heatindex(timeseries[0])
         phase_offset = np.arcsin(self.profile.sample.heatindex.threshold)
-        step_input = np.cos(timeseries[0]*self.frequency*2*np.pi +
-                            phase_offset)
-        if not self.profile.normalize:
-            step_input *= self.profile.sample.sourcedata.excitation_field_rate
-        step_input *= step_input  # squared rate of field variation
-        step_input[:heatindex.start] = 0
-        sultan_input = np.zeros(samplenumber)
-        sultan_input[heatindex] = step_input[heatindex]
+        if self.profile.normalize:
+            waveform_amplitude = 1
+        else:
+            waveform_amplitude = \
+                self.profile.sample.sourcedata.excitation_field_rate
+        waveform_input = waveform_amplitude * np.cos(
+            timeseries[0]*self.frequency*2*np.pi + phase_offset)
+        waveform_input *= waveform_input  # square input
+        waveform_input[:heatindex.start] = 0  # trim start (threshold==None)
+        if self.pulse:
+            zeroindex = np.full(samplenumber, True)
+            zeroindex[heatindex] = False
+            waveform_input[zeroindex] = 0
         self._data = pandas.DataFrame(
-            np.array([timeseries[0], sultan_input,
-                      step_input, timeseries[1]]).T,
-            columns=['time', 'sultan_input', 'step_input', 'sultan_output'])
-        self.reload.data = False
+            np.array([timeseries[0], waveform_input, timeseries[1]]).T,
+            columns=['time', 'waveform_input', 'heat_output'])
+        self._data.attrs['waveform_amplitude'] = waveform_amplitude**2
+        self._data.attrs['frequency'] = self.frequency
+        self._data.attrs['massflow'] = self.profile.sample.metadata[
+            (f'dm/dt {self.profile.sample.side[0]}', 'g/s')]
+        self._data.attrs['samplenumber'] = samplenumber
 
-    def _vector(self, column):
-        """Return vector from data dataframe."""
-        return self.data.loc[:, column]
+        self.reload.data = False
 
     @property
     def time(self):
-        """Return waveform time array."""
-        return self._vector('time')
+        """Return time array."""
+        return self.data.loc[:, 'time']
 
     @property
-    def sultan_input(self):
-        """Return waveform sultan input array."""
-        return self._vector('sultan_input')
+    def waveform_input(self):
+        """Return waveform input array."""
+        return self.data.loc[:, 'waveform_input']
 
     @property
-    def step_input(self):
-        """Return waveform step input array."""
-        return self._vector('step_input')
+    def heat_output(self):
+        """Return heat output array."""
+        return self.data.loc[:, 'heat_output']
 
     def plot(self):
-        """Plot input waveform."""
+        """Plot target waveform."""
         axes = plt.subplots(2, 1, sharex=True,
                             gridspec_kw={'height_ratios': [1, 3]})[1]
         self.profile.plot(axes[1])
-
-        axes[0].plot(self.time, self.sultan_input, 'k', label='sultan')
-        axes[0].plot(self.time, self.step_input, 'C6--', label='step')
-        axes[0].legend()
-        #data_label = self.profile.columns['data']
-        #plt.plot(self.time, self.heat)
+        axes[0].plot(self.time, self.waveform_input, 'C7')
+        axes[1].plot(self.time, self.heat_output, 'C1', lw=5)
 
 
 if __name__ == '__main__':
 
-    sample = Sample('CSJA12', 0)
-    waveform = WaveForm(sample, 0.5)
-
+    sample = Sample('CSJA13', 0)
+    waveform = WaveForm(sample, 0.9, pulse=True)
     waveform.plot()
 
-    waveform.profile.normalize = False
 
-    waveform.plot()
 

@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+import scipy
 
 from nova.thermalhydralic.sultan.campaign import Campaign
 from nova.thermalhydralic.sultan.phase import Phase
@@ -8,6 +9,7 @@ from nova.thermalhydralic.sultan.sample import Sample
 from nova.thermalhydralic.sultan.sourcedata import SourceData
 from nova.thermalhydralic.sultan.sampledata import SampleData
 from nova.thermalhydralic.sultan.profile import Profile
+from nova.thermalhydralic.sultan.model import Model
 
 
 def test_experiment():
@@ -100,8 +102,18 @@ def test_sampledataframe_lowpass_filter():
 def test_profile_offset():
     profile = Profile('CSJA13')
     profile.sample.shot = -11
-    assert np.isclose(profile.profile(profile.sample.heatindex.start),
+    assert np.isclose(profile.timeseries(profile.sample.heatindex.start),
                       (0.0, 0.0)).all()
+
+
+def test_model_dc_gain():
+    model = Model(6, _dcgain=20.5)
+    assert model.dcgain == 20.5
+
+
+def test_model_dc_gain_step():
+    model = Model(6, _dcgain=20.5)
+    assert np.isclose(scipy.signal.step(model.lti, T=[0, 1e4])[1][-1], 20.5)
 
 
 if __name__ == '__main__':

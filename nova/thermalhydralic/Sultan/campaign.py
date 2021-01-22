@@ -124,7 +124,9 @@ class Campaign:
     def _read_metadata(self):
         """Extract data from *.xls campaign metadata."""
         metadata_xls = self.database.locate('*.xls')
-        with pandas.ExcelFile(metadata_xls) as xls:  # engine='openpyxl'
+        extension = metadata_xls.split('.')[-1]
+        engine = 'openpyxl' if extension == 'xlsx' else None
+        with pandas.ExcelFile(metadata_xls, engine=engine) as xls:
             metadata_index = self._read_metadata_index(xls)
             metadata = self._read_metadata_testplan(xls, metadata_index)
             self._save_metadata(metadata)
@@ -460,12 +462,13 @@ class Campaign:
             testplan.sort_values([('Be', 'T'), ('Isample', 'kA')],
                                  inplace=True)
             try:  # AC data
-                testplan.sort_values([('Ipulse', 'A'), ('frequency', 'Hz')],
+                testplan.sort_values([('frequency', 'Hz'), ('Ipulse', 'A')],
                                      inplace=True)
             except KeyError:
                 pass
             testplan.reset_index(inplace=True)
             testplan.drop(columns=['index'], level=0, inplace=True)
+            testplan.fillna(method='ffill', inplace=True)
             testplan.dropna(axis=1, inplace=True)
             # convert object dtypes to str
             dtypes = testplan.dtypes
@@ -479,4 +482,5 @@ class Campaign:
 
 if __name__ == '__main__':
 
-    campaign = Campaign('CSJA12')
+    campaign = Campaign('CSJA13')
+    campaign._read_metadata()

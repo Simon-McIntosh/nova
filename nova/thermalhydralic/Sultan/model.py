@@ -1,32 +1,35 @@
 """Manage linear time invariant model."""
 from dataclasses import dataclass, field, InitVar
 from typing import Union
+from collections.abc import Iterable
 
 import pandas
 import scipy
 import numpy as np
-
-from nova.utilities.pyplot import plt
 
 
 @dataclass
 class Model:
     """Manage linear time-invariant model."""
 
-    order: tuple[int] = field(default=(6,))
-    _vector: list[float] = field(init=False, default_factory=list)
-    _pole: InitVar[Union[float, list[float]]] = 0.5
-    _delay: InitVar[float] = 5
+    order: Union[tuple[int], list[int], int] = field(default=(6,))
+    _pole: InitVar[Union[float, list[float]]] = 0.6
+    _dcgain: InitVar[float] = 1
+    _time_delay: InitVar[float] = 5
+    _vector: list[float] = field(default_factory=list)
     lti: scipy.signal.lti = field(init=False, repr=False)
+    reload: bool = False
 
-    def __post_init__(self, _pole, _delay):
+    def __post_init__(self, _pole, _dcgain, _time_delay):
         """Init linear time-invariant model."""
-        if not self._vector:  # vector unset
-            self.vector = self._sead(_pole, _delay)
+        if not isinstance(self.order, Iterable):
+            self.order = [self.order]
+        if not self._vector:  # vector unset - initialize with pole, time_delay
+            self.vector = self._sead(_pole, _dcgain, _time_delay)
         else:
             self.vector = self._vector
 
-    def _sead(self, _pole, _delay):
+    def _sead(self, _pole, _dcgain, _time_delay):
         """
         Return sead optimization vector.
 
@@ -34,20 +37,22 @@ class Model:
         ----------
         pole : float
             Location of repeated pole (positive).
-        delay : float
+        dcgain : float
+            DC gain.
+        time_delay : float
             Time delay.
 
         Returns
         -------
         sead_vector : array-like
-            Sead optimization vector [*pole, gain, delay].
+            Sead optimization vector [*pole, dcgain, time_delay].
 
         """
         if not pandas.api.types.is_list_like(_pole):
             _pole = [_pole for __ in range(self.system_number)]
         else:
             _pole = list(_pole)
-        vector = _pole + [1, _delay]
+        vector = _pole + [_dcgain, _time_delay]
         if len(vector) != self.parameter_number:
             raise IndexError(f'sead length {len(vector)} != '
                              f'parameter number {self.parameter_number}\n'
@@ -62,7 +67,7 @@ class Model:
         Parameters
         ----------
         vector : list
-            Optimization vector [pole, gain, delay].
+            Optimization vector [pole, gain, time_delay].
 
         """
         return self._vector
@@ -96,40 +101,30 @@ class Model:
         return pole_list
 
     @property
-    def pole_gain(self):
-        """Return steady state pole gain, read-only."""
-        return np.prod(np.array(self.repeated_pole)**self.order)
-
-    @property
-    def gain(self):
-        """Return gain."""
+    def dcgain(self):
+        """Return system steady state gain, read-only."""
         return self._vector[-2]
 
     @property
-    def delay(self):
+    def system_gain(self):
+        """Return LTI model system gain, k."""
+        return self.dcgain * \
+            np.prod(np.array(self.repeated_pole)**self.order)
+
+    @property
+    def time_delay(self):
         """Return time delay."""
         return self._vector[-1]
 
     @property
-    def step(self):
-        """Manage steady state step response."""
-        return self.gain / self.pole_gain
-
-    @step.setter
-    def step(self, step):
-        self._vector[-2] = self.pole_gain*step
-
-    @property
     def label(self):
         """Return transfer function text descriptor."""
-        numerator = f'{self.gain:1.4f}'
+        numerator = f'{self.system_gain:1.5f}'
         denominator = ''.join([fr'(s+{pole:1.3f})^{order}'
                                for pole, order in
                                zip(self.repeated_pole, self.order)])
-        plt.title(fr'${denominator}$')
-        #return (fr'$\frac{{{self.gain:1.4f}}}'
-        #        fr'{{(s+{self.pole:1.3f})^{self.npole}}}'
-        #        fr'{{\rm e}}^{{-{self.delay:1.2f}s}}$')
+        transferfunction = fr'$\frac{{{numerator}}}{{{denominator}}}$'
+        return transferfunction
 
     def _generate(self):
         """
@@ -148,8 +143,14 @@ class Model:
             linear time-invariant model.
 
         """
-        self.lti = scipy.signal.ZerosPolesGain([], self.pole, self.gain)
+        self.lti = scipy.signal.ZerosPolesGain([], self.pole, self.system_gain)
+        self.reload = True
 
 
 if __name__ == '__main__':
+
+    model = Model(6, _dcgain=20.5)
+    print(model.label)
+    print(scipy.signal.step(model.lti, T=[0, 1e3])[1])
+    print(model.dcgain)
 

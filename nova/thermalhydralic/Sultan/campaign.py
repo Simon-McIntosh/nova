@@ -383,7 +383,6 @@ class Campaign:
     def _format_columns(testplan):
         # remove column nans
         columns = testplan.columns.get_level_values(0)
-        print(columns)
         drop_columns = columns[columns.isna()]
         if len(drop_columns) > 0:
             testplan.drop(columns=drop_columns, inplace=True, level=0)
@@ -480,4 +479,4 @@ class Campaign:
 
 if __name__ == '__main__':
 
-    campaign = Campaign('CSJA13')
+    campaign = Campaign('CSJA12')

@@ -183,7 +183,7 @@ class CoilPlot:
                 if field:
                     self.update_field()
                     Blabel = coil.loc[name, 'B']
-                    txt = f'{human_format(Blabel, precision=3)}T'
+                    txt = f'{human_format(Blabel, precision=4)}T'
                     ax.text(x + drs[drs_index], z + ztext['field'], txt,
                             fontsize=fs, ha=ha, va='center',
                             color=0.2 * np.ones(3))

@@ -1,6 +1,7 @@
 import io
 import os
 import copy
+import operator
 
 import numpy as np
 import pandas as pd
@@ -39,6 +40,9 @@ class ITERcoilset(CoilClass):
     def load_coilset(self, **kwargs):
         read_txt = kwargs.pop('read_txt', self.read_txt)
         self.coilname, coils, kwargs = self.select_coils(**kwargs)
+        if 'source' in kwargs:
+            source = kwargs['source']
+            self.coilname += f'_{source}'
         filepath = self._filepath(self.coilname)
         if not os.path.isfile(filepath + '.pk') or read_txt:
             self.build_coilset(coils, **kwargs)
@@ -65,9 +69,10 @@ class ITERcoilset(CoilClass):
         return coilname, coils, kwargs
 
     def build_coilset(self, coils, **kwargs):
+        source = kwargs.pop('source', 'PCR')
         if 'pf' in coils:  # pf coilset
             self.append_coilset(PFgeom(VS=False, dCoil=self.dCoil,
-                                       source='PCR').coilset)
+                                       source=source).coilset)
         if 'vsj' in coils or 'vs' in coils:  # vs coils with/without ss jacket
             jacket = True if 'vsj' in coils else False
             self.append_coilset(VSgeom(jacket=jacket).coilset)
@@ -306,7 +311,7 @@ class PFgeom(CoilSet):  # PF/CS coilset
 
     def load(self, VS=False, source='PCR'):
         # Ro: referance FDU resistance at 0C, m: FDU mass
-        if source == 'PCR' or source == 'asbuilt':  # update
+        if source[:3] == 'PCR':  # update
             f = io.StringIO('''
                 	    X, m	Z, m	DX, m	DZ, m	N,	R, ohm	m, Kg
                 CS3U	1.6870	5.4640	0.7400	2.093	554	0.102	9.0e3
@@ -346,11 +351,20 @@ class PFgeom(CoilSet):  # PF/CS coilset
         columns['R, ohm'] = 'R'
         columns['N,'] = 'Nt'
         data = data.rename(columns=columns)
-        if source == 'asbuilt':
-            print('asbuilt')
+        if 'PF5' in source:
+            print('PF5mod')
             data.loc['PF5', 'x'] += 0.5e-3
             data.loc['PF5', 'dz'] -= 7.2e-3
             data.loc['PF5', 'z'] += 7.2e-3 / 2
+        elif 'PF3PF4' in source:
+            index = ['PF3', 'PF4']
+            dz = 8e-3  # vertical shrinkage
+            data.loc[index, 'dz'] -= dz
+            for coil, i in zip(index, np.arange(-2, 0)):
+                sign = source[i]
+                if sign in '-+':
+                    factor = 1 if sign == '+' else -1
+                    data.loc[coil, 'z'] += factor*dz/2
         part = ['CS' if 'CS' in name else 'PF' for name in data.index]
         data.rename(columns={'dx': 'dl', 'dz': 'dt'}, inplace=True)
         coil = self.coil.get_coil(data, material='steel',

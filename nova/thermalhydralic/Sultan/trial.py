@@ -36,6 +36,11 @@ class Trial:
         return self.campaign.mode
 
     @property
+    def testname(self):
+        """Return test name."""
+        return f'{self.campaign.experiment}_{self.name}'
+
+    @property
     def plan(self):
         """Return testplan, read-only."""
         return self.campaign.metadata[self.name]

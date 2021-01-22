@@ -31,7 +31,7 @@ class SultanIO(metaclass=abc.ABCMeta):
     def _save_data(self, data):
         """Append data to hdf file."""
         with pandas.HDFStore(self.binaryfilepath, mode='a') as store:
-            store.put(self.filename, data, format='table', append=True)
+            store.put(self.filename, data, format='table', append=False)
 
     @property
     @abc.abstractmethod

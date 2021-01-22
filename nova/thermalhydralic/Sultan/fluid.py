@@ -13,24 +13,24 @@ from nova.thermalhydralic.sultan.model import Model
 from nova.utilities.pyplot import plt
 
 
-def FitSeries():
-    """Return empty fit data series."""
-    return pandas.Series(index=['order', 'cutoff', 'dcgain',
-                                'time_delay',
-                                'waveform_amplitude', 'frequency',
-                                'massflow', 'L2norm', 'steadystate'],
-                         dtype=float)
+def FluidSeries():
+    """Return empty fluid data series."""
+    return pandas.Series(index=[
+        'frequency', 'massflow', 'waveform_amplitude',
+        'order', 'cutoff', 'dcgain', 'time_delay', 'steadystate',
+        'L2norm'], dtype=float)
 
 
 @dataclass
-class Fit:
+class Fluid:
     """Extract minimal realization state-space model from step response."""
 
     waveform_data: InitVar[pandas.DataFrame]
     model: Model
     data: dict = field(init=False, repr=False, default_factory=dict)
     _model_output: list[float] = field(init=False, repr=False)
-    _coefficents: pandas.Series = field(repr=False, default_factory=FitSeries)
+    _coefficents: pandas.Series = field(repr=False,
+                                        default_factory=FluidSeries)
     reload: bool = True
 
     def __post_init__(self, waveform_data):
@@ -42,7 +42,7 @@ class Fit:
     def _extract_data(self, waveform_data):
         for vector in ['time', 'waveform_input', 'heat_output']:
             self.data[vector] = waveform_data[vector].to_numpy()
-        for attributes in ['waveform_amplitude', 'frequency',
+        for attributes in ['filename', 'waveform_amplitude', 'frequency',
                            'massflow', 'samplenumber']:
             self.data[attributes] = waveform_data.attrs[attributes]
 
@@ -54,8 +54,8 @@ class Fit:
             self._coefficents['cutoff'] = self.model.repeated_pole[0]
             for attr in ['dcgain', 'time_delay']:
                 self._coefficents[attr] = getattr(self.model, attr)
-            for attr in ['waveform_amplitude', 'massflow', 'frequency',
-                         'steadystate']:
+            for attr in ['waveform_amplitude',
+                         'massflow', 'frequency', 'steadystate']:
                 self._coefficents[attr] = getattr(self, attr)
             self._coefficents['L2norm'] = self.model_error(self.model.vector)
             self.reload = False
@@ -75,6 +75,11 @@ class Fit:
     def heat_output(self):
         """Return heat output waveform."""
         return self.data['heat_output']
+
+    @property
+    def filename(self):
+        """Return shot filename."""
+        return self.data['filename']
 
     @property
     def waveform_amplitude(self):
@@ -109,7 +114,7 @@ class Fit:
         """
         if self.model.reload:
             output = scipy.signal.lsim2(self.model.lti, self.waveform_input,
-                                        T=self.time, atol=1e-4)[1]
+                                        T=self.time, atol=1e-3)[1]
             self._model_output = output
             self._model_output = self._timeshift(output)
             self.model.reload = False
@@ -156,13 +161,13 @@ class Fit:
         """
         self.model.vector = vector  # update lti model
         L2norm = np.linalg.norm(self.heat_output-self.model_output, axis=0)
-        return 1e6*L2norm/self.samplenumber
+        return 1e3*L2norm/self.samplenumber
 
     def model_update(self, vector, grad):
         """Return L2norm error and evaluate gradient in-place."""
         err = self.model_error(vector)
-        sys.stdout.write(f'\r{err}')
-        sys.stdout.flush()
+        # sys.stdout.write(f'\r{err}')
+        # sys.stdout.flush()
         if len(grad) > 0:
             grad[:] = scipy.optimize.approx_fprime(
                 vector, self.model_error, 1e-6)
@@ -174,11 +179,13 @@ class Fit:
             res = scipy.optimize.minimize(self.model_error, self.model.vector)
             self.model.vector = res.x
         elif optimizer == 'nlopt':
-            opt = nlopt.opt(nlopt.LN_COBYLA, self.model.parameter_number)
-            opt.set_initial_step(0.25*np.array(self.model.vector))
+            opt = nlopt.opt(nlopt.LN_BOBYQA, self.model.parameter_number)
+            initial_step = 0.25*np.array(self.model.vector)
+            initial_step[initial_step < 1e-3] = 1e-3
+            opt.set_initial_step(initial_step)
             opt.set_min_objective(self.model_update)
             opt.set_lower_bounds(np.zeros(self.model.parameter_number))
-            opt.set_ftol_rel(1e-5)
+            opt.set_ftol_abs(5e-3)
             vector = opt.optimize(self.model.vector)
             self.model.vector = vector
         else:
@@ -213,64 +220,13 @@ class Fit:
 
 if __name__ == '__main__':
 
-    sample = Sample('CSJA12', 13)
+    sample = Sample('CSJA12', 35)
     waveform = WaveForm(sample, 0.9, pulse=True)
     model = Model(5)
 
-    fit = Fit(waveform.data, model)
+    fluid = Fluid(waveform.data, model)
 
-    #fit.model_output(fit.model.vector)
-    fit.optimize()
-    fit.plot()
+    fluid.optimize()
+    fluid.plot()
 
-    '''
-    data = pandas.DataFrame(index=range(sample.samplenumber),
-                            columns=FitSeries().index)
-    for __, shot in sample.sequence():
-        print(shot)
-        fit = Fit(waveform.data, model)
-        fit.optimize()
-        data.iloc[shot] = fit.coefficents
-    '''
-
-
-
-
-    '''
-    response.profile.instance.index = 11
-    response.plot()
-
-    step = StepResponse(*response.stepdata, model)
-    step.fit()
-    step.plot()
-    '''
-
-    '''
-    plan = TestPlan('CSJA13', -1)
-    instance = ShotInstance(plan, -5)
-    profile = ShotProfile(instance)
-
-    response = ModelResponse(*profile.shotresponse.stepdata, 6)
-
-    response.fit()
-    response.plot()
-    '''
-
-    '''
-        self.profile.plot(offset=True)
-
-        heat_index = self.profile.shotresponse.heat_index
-        time_offset = self.profile.lowpassdata.loc[heat_index.start,
-                                                   ('t', 's')]
-
-        print(time_offset)
-        time_limit = self.profile.lowpassdata.t.iloc[-1].values[0]
-
-        t = np.linspace(0, time_limit-time_offset)
-        U = np.zeros(len(t))
-        U[t <= self.stepdata.time[-1]] = 1
-        y = scipy.signal.lsim(self.model.lti, U, t)[1]
-        y = self._timeshift(t, y)
-        plt.plot(t, y, 'C1')
-
-    '''
+    print(fluid.coefficents)

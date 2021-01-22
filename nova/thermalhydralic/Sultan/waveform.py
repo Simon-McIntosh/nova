@@ -189,6 +189,7 @@ class WaveForm:
         self._data = pandas.DataFrame(
             np.array([timeseries[0], waveform_input, timeseries[1]]).T,
             columns=['time', 'waveform_input', 'heat_output'])
+        self._data.attrs['filename'] = self.profile.sample.filename
         self._data.attrs['waveform_amplitude'] = waveform_amplitude**2
         self._data.attrs['frequency'] = self.frequency
         self._data.attrs['massflow'] = self.profile.sample.metadata[

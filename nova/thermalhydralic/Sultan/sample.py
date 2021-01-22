@@ -114,9 +114,9 @@ class Sample:
 
     def sequence(self):
         """Return filename generator."""
-        for i in range(self.samplenumber):
-            self.shot = i
-            yield self.filename, i
+        for shot in range(self.samplenumber):
+            self.shot = shot
+            yield shot
 
 
 if __name__ == '__main__':

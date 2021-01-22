@@ -483,4 +483,4 @@ class Campaign:
 if __name__ == '__main__':
 
     campaign = Campaign('CSJA13')
-    campaign._read_metadata()
+    # campaign._read_metadata()

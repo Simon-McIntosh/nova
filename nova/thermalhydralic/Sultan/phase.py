@@ -18,7 +18,7 @@ class Phase:
 
     def __post_init__(self):
         """Init reload."""
-        self.reload.__init__(index=True, name=True)
+        self.reload.__init__(index=True, name=True, sourcedata=True)
         self.name = self._name
 
     def propagate_reload(self):
@@ -86,7 +86,7 @@ class Phase:
                                  f'\n{self.index}')
         self._name = name
         self.reload.name = False
-        #self.reload.response = True
+        self.reload.sourcedata = True
 
 
 if __name__ == '__main__':

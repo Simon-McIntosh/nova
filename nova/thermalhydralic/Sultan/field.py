@@ -23,7 +23,7 @@ class Field(SultanIO):
     @property
     def binaryfilepath(self):
         """Return full path of binary datafile."""
-        return self.trial.database.binary_filepath('fluidresponse.h5')
+        return self.trial.database.binary_filepath('fluid.h5')
 
     @property
     def filename(self):
@@ -52,13 +52,16 @@ class Field(SultanIO):
         data = pandas.concat(
             [self.trial.plan.droplevel(1, axis=1), data], axis=1)
         data = data.loc[:, ~data.columns.duplicated()]
-        return data #.astype(float)
+        print(data)
+        print(data.dtypes)
+        data.drop(columns=['File', 'Ipulse'], inplace=True)
+        return data.astype(float)
 
 
 if __name__ == '__main__':
 
-    field = Field('CSJA13', -1, 'Right')
-    field.read_data()
+    field = Field('CSJA_7', -1, 'Right')
+    plt.loglog(field.response.frequency, field.response.dcgain)
 
-    #print(field.fluid_response)
+    field = Field('CSJA_8', -1, 'Right')
     plt.loglog(field.response.frequency, field.response.dcgain)

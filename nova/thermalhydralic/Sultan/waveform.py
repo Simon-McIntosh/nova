@@ -1,5 +1,5 @@
 """Methods to manage single shot Sultan waveform data."""
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 from typing import Union
 from types import SimpleNamespace
 
@@ -18,18 +18,20 @@ from nova.utilities.pyplot import plt
 class WaveForm:
     """Manage response waveform."""
 
-    profile: Union[Profile, Sample, Trial, Campaign, str] = field(repr=False)
-    _threshold: float = 0.25
-    pulse: bool = True
+    profile: Union[Profile, Sample, Trial, Campaign, str]
+    threshold: InitVar[float] = 0.95
+    pulse: InitVar[bool] = True
     _data: pandas.DataFrame = field(init=False, repr=False)
     reload: SimpleNamespace = field(init=False, repr=False,
                                     default_factory=SimpleNamespace)
 
-    def __post_init__(self):
+    def __post_init__(self, threshold, pulse):
         """Init time and heat data fields."""
         self.reload.__init__(threshold=True, data=True)
         if not isinstance(self.profile, Profile):
             self.profile = Profile(self.profile)
+        self.threshold = threshold
+        self.pulse = pulse
 
     @property
     def threshold(self):
@@ -63,7 +65,17 @@ class WaveForm:
         self.reload.threshold = False
         self.reload.data = True
 
-    def propagate_reload(self):
+    @property
+    def pulse(self):
+        """Return pulse flag."""
+        return self._pulse
+
+    @pulse.setter
+    def pulse(self, pulse):
+        self._pulse = pulse
+        self.reload.data = True
+
+    def _reload(self):
         """Propagate reload flags."""
         if self.profile.sample.sourcedata.reload.waveform:
             self.reload.data = True
@@ -71,7 +83,6 @@ class WaveForm:
         if self.profile.sample.sampledata.reload.waveform:
             self.reload.data = True
             self.profile.sample.sampledata.reload.waveform = False
-
         if self.profile.reload.waveform:
             self.reload.data = True
             self.profile.reload.waveform = False
@@ -87,6 +98,10 @@ class WaveForm:
         start = self.profile.sample.heatindex.start
         if self.threshold is None:
             start = stop = None
+        elif self.threshold == -1:
+            stop = self.profile.sample.heatindex.stop
+        elif self.threshold == 1:
+            stop = len(self.profile.time)
         elif self.threshold < 0:
             threshold = 1+self.threshold
             index = slice(self.profile.sample.heatindex.stop, None)
@@ -103,7 +118,7 @@ class WaveForm:
             cooldown = pulse[argmax:]
             minmax = cooldown.min(), cooldown.max()
             delta = np.diff(minmax)[0]
-            stop = np.argmax(cooldown <= minmax[1] - self.threshold*delta)
+            stop = np.argmax(cooldown <= minmax[1]-self.threshold*delta)
             stop += start+argmax
         return slice(start, stop)
 
@@ -117,7 +132,7 @@ class WaveForm:
         None.
 
         """
-        self.propagate_reload()
+        self._reload()
         if self.reload.data:
             self._extract()
         return self._data
@@ -157,7 +172,7 @@ class WaveForm:
             samplenumber = len(timeseries[0])
         return timeseries, samplenumber
 
-    def heatindex(self, time):
+    def _extract_heatindex(self, time):
         """Return waveform heatindex, read-only."""
         start_time = self.profile.time[self.profile.sample.heatindex.start]
         stop_time = self.profile.time[self.profile.sample.heatindex.stop]
@@ -171,62 +186,128 @@ class WaveForm:
     def _extract(self):
         timeseries = self.profile.timeseries(self.index)
         timeseries, samplenumber = self._resample(timeseries, self.frequency)
-        heatindex = self.heatindex(timeseries[0])
+        heatindex = self._extract_heatindex(timeseries[0])
         phase_offset = np.arcsin(self.profile.sample.heatindex.threshold)
         if self.profile.normalize:
-            waveform_amplitude = 1
+            field_amplitude = 1
+            fieldrate_amplitude = 1
         else:
-            waveform_amplitude = \
+            field_amplitude = \
+                self.profile.sample.sourcedata.excitation_field
+            fieldrate_amplitude = \
                 self.profile.sample.sourcedata.excitation_field_rate
-        waveform_input = waveform_amplitude * np.cos(
+        # build profiles
+        field = field_amplitude * np.sin(
             timeseries[0]*self.frequency*2*np.pi + phase_offset)
-        waveform_input *= waveform_input  # square input
-        waveform_input[:heatindex.start] = 0  # trim start (threshold==None)
+        fieldrate = fieldrate_amplitude * np.cos(
+            timeseries[0]*self.frequency*2*np.pi + phase_offset)
+        # trim start (threshold==None)
+        field[:heatindex.start] = 0
+        fieldrate[:heatindex.start] = 0
+        # set pulse
         if self.pulse:
             zeroindex = np.full(samplenumber, True)
             zeroindex[heatindex] = False
-            waveform_input[zeroindex] = 0
+            field[zeroindex] = 0
+            fieldrate[zeroindex] = 0
+        # squared
+        fieldsq = field**2
+        fieldratesq = fieldrate**2
+        # store
         self._data = pandas.DataFrame(
-            np.array([timeseries[0], waveform_input, timeseries[1]]).T,
-            columns=['time', 'waveform_input', 'heat_output'])
+            np.array([timeseries[0], field, fieldsq, fieldrate, fieldratesq,
+                      timeseries[1]]).T,
+            columns=['time', 'field', 'fieldsq', 'fieldrate', 'fieldratesq',
+                     'output'])
         self._data.attrs['filename'] = self.profile.sample.filename
-        self._data.attrs['waveform_amplitude'] = waveform_amplitude**2
+        self._data.attrs['heatindex'] = heatindex
+        self._data.attrs['field_amplitude'] = field_amplitude
+        self._data.attrs['fieldsq_amplitude'] = field_amplitude**2
+        self._data.attrs['fieldrate_amplitude'] = fieldrate_amplitude
+        self._data.attrs['fieldratesq_amplitude'] = fieldrate_amplitude**2
         self._data.attrs['frequency'] = self.frequency
-        self._data.attrs['massflow'] = self.profile.sample.metadata[
-            (f'dm/dt {self.profile.sample.side[0]}', 'g/s')]
+        self._data.attrs['massflow'] = self.profile.sample.massflow
         self._data.attrs['samplenumber'] = samplenumber
-
         self.reload.data = False
 
     @property
-    def time(self):
-        """Return time array."""
-        return self.data.loc[:, 'time']
+    def heatindex(self):
+        """Return waveform heatindex."""
+        return self.data.attrs['heatindex']
 
-    @property
-    def waveform_input(self):
-        """Return waveform input array."""
-        return self.data.loc[:, 'waveform_input']
+    def timeseries(self, threshold=None, pulse=None,
+                   input_variable='fieldratesq'):
+        """
+        Return waveform timeseries.
 
-    @property
-    def heat_output(self):
-        """Return heat output array."""
-        return self.data.loc[:, 'heat_output']
+        Parameters
+        ----------
+        threshold : float
+            Cooldown threshold >=-1 and <=1.
+        pulse : bool
+            Heating flag. The default is True
+        input_variable : str, optional
+            Input variable. The default is 'fieldratesq'.
 
-    def plot(self):
+        Returns
+        -------
+        time : array-like
+            Time array.
+        data : array-like
+            Data array.
+
+        """
+        if threshold is None:
+            threshold = self.threshold
+        if pulse is None:
+            pulse = self.pulse
+        _threshold, _pulse = self.threshold, self.pulse
+        self.threshold, self.pulse = threshold, pulse
+        time, variable = self.data.time, self.data[input_variable]
+        output = self.data.output
+        self.threshold, self.pulse = _threshold, _pulse
+        return time, variable, output
+
+    def plot(self, input_variable='fieldratesq'):
         """Plot target waveform."""
         axes = plt.subplots(2, 1, sharex=True,
-                            gridspec_kw={'height_ratios': [1, 3]})[1]
-        self.profile.plot(axes[1])
-        axes[0].plot(self.time, self.waveform_input, 'C7')
-        axes[1].plot(self.time, self.heat_output, 'C1', lw=5)
+                            gridspec_kw={'height_ratios': [4, 1]})[1]
+        if input_variable not in self.data:
+            raise IndexError(f'Input variable {input_variable} not in '
+                             f'{self.data.columns}')
+        axes[1].plot(self.data.time, self.data[input_variable], 'C3')
+        axes[0].plot(self.data.time, self.data.output, 'C0')
+        self.plot_heat(axes[0])
+        variable_label = {'field': '$B$ T', 'fieldsq': '$B^2$ T',
+                          'fieldrate': r'$\dot{B}$ Ts$^{-1}$',
+                          'fieldratesq': r'$\dot{B}^2$ T$^2$s$^{-2}$'}
+
+        input_label = variable_label[input_variable]
+        if self.profile.normalize:
+            input_label = input_label.split()[0]
+        plt.despine()
+        axes[1].set_ylabel(input_label)
+        axes[0].set_ylabel(r'$\dot{Q}$ W')
+        axes[1].set_xlabel('$t$ s')
+        axes[0].set_title(self.profile.sample.label)
+
+    def plot_heat(self, axes=None, **kwargs):
+        """Shade heated zone."""
+        if axes is None:
+            axes = plt.gca()
+        time = self.data.time[self.heatindex]
+        upper = self.data.output[self.heatindex]
+        lower = np.min([np.min(upper), 0]) * np.ones(len(time))
+        kwargs = {'color': 'lightgray'} | kwargs
+        axes.fill_between(time, lower, upper, **kwargs)
 
 
 if __name__ == '__main__':
 
     sample = Sample('CSJA13', 0)
     waveform = WaveForm(sample, 0.9, pulse=True)
-    waveform.plot()
+    waveform.profile.normalize = False
+    waveform.plot('fieldratesq')
 
 
 

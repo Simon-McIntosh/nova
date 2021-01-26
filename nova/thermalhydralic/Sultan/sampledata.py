@@ -28,7 +28,7 @@ class SampleData:
     def __post_init__(self):
         """Init data pipeline."""
         self.reload.__init__(raw=True, lowpass=True, heatindex=True,
-                             offset=True)
+                             offset=True, waveform=True)
 
     @property
     def lowpass_filter(self):
@@ -53,8 +53,9 @@ class SampleData:
         """Reset filter flag."""
         self.lowpass_filter = self._lowpass_filter[1]
 
-    def propagate_reload(self):
+    def _reload(self):
         """Propagate reload flags."""
+        self.sourcedata._reload()
         if self.sourcedata.reload.sampledata:
             self.reload.raw = True
             self.reload.lowpass = True
@@ -151,7 +152,7 @@ class SampleData:
     @property
     def raw(self):
         """Return raw data, read-only."""
-        self.propagate_reload()
+        self._reload()
         if self.reload.raw:
             self._raw = self._extract_data(lowpass=False)
             self.reload.raw = False
@@ -160,7 +161,7 @@ class SampleData:
     @property
     def lowpass(self):
         """Return lowpass data, read-only."""
-        self.propagate_reload()
+        self._reload()
         if self.reload.lowpass:
             self._lowpass = self._extract_data(lowpass=True)
             self.reload.lowpass = False
@@ -178,7 +179,7 @@ class SampleData:
     @property
     def heatindex(self):
         """Return heatindex."""
-        self.propagate_reload()
+        self._reload()
         if self.reload.heatindex:
             self._heatindex = HeatIndex(self.raw)
             self.reload.heatindex = False

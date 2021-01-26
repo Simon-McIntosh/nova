@@ -77,7 +77,7 @@ def test_sultandata_update():
 def test_sourcedata_name():
     trial = Trial('CSJA13', -1, 'ac')
     sourcedata = SourceData(trial, 2)
-    assert sourcedata.filename == 'CSJA13A110610'
+    assert sourcedata.filename == 'CSJA13A110611'
 
 
 def test_sourcedata_update():
@@ -114,6 +114,28 @@ def test_model_dc_gain():
 def test_model_dc_gain_step():
     model = Model(6, _dcgain=20.5)
     assert np.isclose(scipy.signal.step(model.lti, T=[0, 1e4])[1][-1], 20.5)
+
+
+def test_phase_name_update():
+    sample = Sample('CSJA13', 0, 'Left')
+    sample.trial.phase.name = 0
+    profile = Profile(sample)
+
+    ac0_length = len(profile.time)
+    sample.trial.phase.name = 1
+    ac1_length = len(profile.time)
+    assert ac0_length != ac1_length
+
+
+def test_model_delay_boolean():
+    model = Model([6, 3], delay=False)
+    assert len(model.vector) == 3
+
+
+def test_model_delay_update():
+    model = Model(6, delay=False)
+    model.delay = True
+    assert len(model.vector) == 3
 
 
 if __name__ == '__main__':

@@ -119,9 +119,9 @@ class Campaign:
         if os.path.isfile(self.metadatafile):
             self._load_metadata()
         else:
-            self._read_metadata()
+            self.read_metadata()
 
-    def _read_metadata(self):
+    def read_metadata(self):
         """Extract data from *.xls campaign metadata."""
         metadata_xls = self.database.locate('*.xls')
         extension = metadata_xls.split('.')[-1]
@@ -322,13 +322,19 @@ class Campaign:
         metadata_index.set_index('index', inplace=True)
         return metadata_index
 
+    def _isnext_empty(self, _xls_index, i):
+        """Return True if next label is empty."""
+        nextlabel = self._nextlabel(_xls_index, i)
+        return pandas.isna(nextlabel)
+
     def _istest(self, strand, label, _xls_index, i):
         """Return True if current label is identified as a test."""
         isshot = self._isshot(label)
         nextlabel = self._nextlabel(_xls_index, i)
         isnext_file = self._isfile(nextlabel)
         isnext_strand = self._isnext_strand(nextlabel, strand)
-        return isshot and (isnext_file or isnext_strand)
+        isnext_empty = pandas.isna(nextlabel)
+        return isshot and (isnext_file or isnext_strand or isnext_empty)
 
     def _read_metadata_index(self, xls):
         """Extract metadata indices."""
@@ -356,6 +362,9 @@ class Campaign:
                         continue
                     testname = self._format_testname(
                         _xls_index, j, strand, metadata_index)
+                    if self._isnext_empty(_xls_index, i) and \
+                            not self._isfile(label[0]):
+                        j += 1
                     metadata_index[testname] = [j, 0, '']  # test start
         testmode_index = len(strand)
         for testname in metadata_index:
@@ -441,8 +450,10 @@ class Campaign:
         metadata = {'index': metadata_index}
         note = pandas.Series(name='note', dtype=str)
         previouscolumns = None
+        previouscolumns_mode = {}
         for testname in metadata['index'].index:
             testindex = metadata['index'].loc[testname, :]
+            testmode = testindex['testmode']
             start, stop = testindex.loc[['start', 'stop']]
             _header = pandas.read_excel(
                 xls, skiprows=start, nrows=stop-start+1, header=None)
@@ -451,8 +462,9 @@ class Campaign:
                 columns = pandas.MultiIndex.from_arrays(
                     _header.iloc[:2].values)
                 previouscolumns = columns
+                previouscolumns_mode[testmode] = columns
             elif previouscolumns is not None:
-                columns = previouscolumns
+                columns = previouscolumns_mode.get(testmode, previouscolumns)
             testplan = pandas.read_excel(xls, skiprows=start,
                                          nrows=stop-start+1, header=None)
             testplan.columns = columns
@@ -482,5 +494,5 @@ class Campaign:
 
 if __name__ == '__main__':
 
-    campaign = Campaign('CSJA13')
-    # campaign._read_metadata()
+    campaign = Campaign('CSJA11', 'ac')
+    campaign.read_metadata()

@@ -23,9 +23,14 @@ class SourceData:
     def __post_init__(self):
         """Typecheck trial and initialize shot instance."""
         self.reload.__init__(shot=True, side=True, sampledata=True,
-                             waveform=True)
+                             waveform=True, fluidmodel=True)
         self.sultandata = SultanData(self.trial.database)
         self.sultandata.filename = self.filename
+
+    def _reload(self):
+        if self.trial.phase.reload.sourcedata:
+            self.shot = self._shot
+            self.trial.phase.reload.sourcedata = False
 
     @property
     def shot(self):
@@ -64,6 +69,7 @@ class SourceData:
         self.sultandata.filename = self.filename
         self.reload.sampledata = True
         self.reload.waveform = True
+        self.reload.fluidmodel = True
 
     @property
     def side(self):
@@ -95,7 +101,7 @@ class SourceData:
 
     @property
     def filename(self):
-        """Return data filename."""
+        """Return data filename, read-only."""
         return self.trial.filename(self.shot)
 
     @property

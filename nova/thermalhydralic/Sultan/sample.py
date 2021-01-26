@@ -21,7 +21,7 @@ class Sample:
     sampledata: SampleData = field(init=False, repr=False)
 
     def __post_init__(self, _shot, _side):
-        """Init sample instance."""
+        """Initialize sample instance."""
         if not isinstance(self.trial, Trial):
             self.trial = Trial(self.trial)
         self.sourcedata = SourceData(self.trial, _shot, _side)
@@ -88,11 +88,6 @@ class Sample:
         return self.sourcedata.filename
 
     @property
-    def experiment(self):
-        """Return experiment, read-only."""
-        return self.trial.experiment
-
-    @property
     def testname(self):
         """Return testname, read-only."""
         return self.trial.testname
@@ -103,9 +98,26 @@ class Sample:
         return self.sourcedata.frequency
 
     @property
-    def name(self):
+    def massflow(self):
+        """Return time average shot massflow."""
+        return self.sultandata.data[f'dm/dt {self.side}'].mean()
+
+    @property
+    def field(self):
+        """Return background field."""
+        return self.trial.plan.at[self.shot, ('Be', 'T')]
+
+    @property
+    def current(self):
+        """Return transport current."""
+        return self.trial.plan.at[self.shot, ('Isample', 'kA')]
+
+    @property
+    def samplename(self):
         """Return sample name."""
-        return f'{self.experiment}_{self.testname}_{self.side}_{self.shot}'
+        samplename = f'{self.trial.campaign.experiment} '
+        samplename += f'{self.trial.phase.name} {self.shot} {self.side}'
+        return samplename
 
     @property
     def samplenumber(self):
@@ -117,6 +129,18 @@ class Sample:
         for shot in range(self.samplenumber):
             self.shot = shot
             yield shot
+
+    @property
+    def label(self):
+        """Return sample label."""
+        label = f'{self.samplename} '
+        label += '('
+        label += fr'$\dot{{m}}$={self.massflow:1.1f}g/s, '
+        label += fr'$f$={self.frequency:1.1f}Hz, '
+        label += fr'$B$={self.field:1.0f}T, '
+        label += fr'$I$={self.current:1.0f}kA'
+        label += ')'
+        return label
 
 
 if __name__ == '__main__':

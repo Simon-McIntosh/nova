@@ -183,10 +183,15 @@ class Profile:
     def heatdelta(self):
         """Return heatup delta."""
         self._assert_lowpass()
-        heatup = self.timeseries(slice(self.heatindex.start, self.maxindex))[1]
+        if self.maxindex > self.heatindex.start:
+            index = slice(self.heatindex.start, self.maxindex)
+        else:
+            index = slice(self.heatindex.start, None)
+        heatup = self.timeseries(index)[1]
         maximum = np.max(heatup)
         minimum = np.min(heatup)
-        return maximum-minimum
+        heatdelta = maximum-minimum
+        return heatdelta
 
     @property
     def cooldown(self):
@@ -200,11 +205,11 @@ class Profile:
         self._assert_lowpass()
         cooldown = self.cooldown[1]
         maximum = cooldown[0]
-        minimum = np.max(np.min(cooldown), self.start[1])
+        minimum = np.max([np.min(cooldown), self.start[1]])
         return maximum-minimum
 
     @property
-    def coolindex(self):
+    def coldindex(self):
         """Return 95% cooldown index."""
         self._assert_lowpass()
         return self.maxindex + np.argmax(
@@ -214,13 +219,13 @@ class Profile:
     def cold(self):
         """Return 95% cooldown timesample."""
         self._assert_lowpass()
-        return self.timeseries(self.coolindex)
+        return self.timeseries(self.coldindex)
 
     @property
-    def energy(self):
+    def pulse_energy(self):
         """Return intergral power."""
         self._assert_lowpass()
-        pulse = self.timeseries(slice(self.heatindex.start, self.coolindex))
+        pulse = self.timeseries(slice(self.heatindex.start, self.coldindex))
         return np.trapz(pulse[1], pulse[0])
 
     @property
@@ -267,9 +272,9 @@ class Profile:
                 timesample = getattr(self, attribute)
                 for i, postfix in enumerate(['time', 'value']):
                     coefficents[f'{attribute}_{postfix}'] = timesample[i]
-            for attribute in ['minimum_ratio', 'maximum_ratio', 'limit_ratio',
-                              'steady', 'energy']:
+            for attribute in ['minimum_ratio', 'maximum_ratio', 'limit_ratio']:
                 coefficents[attribute] = getattr(self, attribute)
+            coefficents['energy_data'] = self.pulse_energy
         return pandas.Series(coefficents)
 
     def plot_point(self, index, *args, **kwargs):
@@ -352,11 +357,9 @@ class Profile:
 
 if __name__ == '__main__':
 
-    sample = Sample('CSJA12', -1, 'Right')
-
-    sample.trial.phase.name = -1
+    trial = Trial('CSJA_6', 'ac0')
+    sample = Sample(trial, -1, 'Left')
     profile = Profile(sample)
-
     profile.plot()
 
-    print(profile.coefficents)
+    #print(profile.coefficents)

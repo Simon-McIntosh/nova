@@ -26,6 +26,7 @@ class LocalData:
         self._directories = [self.experiment_directory,
                              self.source_directory,
                              self.binary_directory]
+        # self.makedir()
 
     @property
     def parent_directory(self):
@@ -124,5 +125,5 @@ class LocalData:
 
 if __name__ == '__main__':
 
-    local = LocalData('CSJA_3', 'Sultan')
-    print(local.locate('*.xls'))
+    local = LocalData('CSJA12', 'Sultan')
+    #print(local.locate('*.xls'))

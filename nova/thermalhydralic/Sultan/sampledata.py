@@ -129,7 +129,7 @@ class SampleData:
             data[f'P{end}'] = self.sultandata[f'P {end} {self.side}'] * 1e5
         if lowpass:
             timestep = np.diff(data['t'], axis=0).mean()
-            windowlength = int(2.5 / (timestep*self.frequency))
+            windowlength = int(5 / (timestep*self.frequency))
             if windowlength % 2 == 0:
                 windowlength += 1
             if windowlength < 5:

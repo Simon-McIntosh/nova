@@ -11,7 +11,7 @@ import ftputil
 class FTPData:
     """Manage access to FTP database."""
 
-    _experiment: str
+    _experiment: str = ''
     parent: str = 'Daten'
     server: str = 'ftp.psi.ch'
     username: str = 'sultan'
@@ -187,4 +187,4 @@ class FTPData:
 if __name__ == '__main__':
 
     ftp = FTPData('CSJA13')
-    #print(ftp.listdir(ftp.experiment, select='.OPJ'))
+    print(ftp.listdir(select='CSJA'))

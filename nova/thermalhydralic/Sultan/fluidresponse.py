@@ -1,79 +1,61 @@
-"""Fit state-space model to sultan thermal-hydralic step resonse."""
-from dataclasses import dataclass, field, InitVar
+
+from dataclasses import dataclass
 from typing import Union
 
 import pandas
-import numpy as np
 
-from nova.thermalhydralic.sultan.campaign import Campaign
 from nova.thermalhydralic.sultan.trial import Trial
 from nova.thermalhydralic.sultan.sample import Sample
-from nova.thermalhydralic.sultan.profile import Profile
-from nova.thermalhydralic.sultan.waveform import WaveForm
-from nova.thermalhydralic.sultan.model import Model
-from nova.thermalhydralic.sultan.fluidmodel import FluidModel
-from nova.thermalhydralic.sultan.fitfluid import FitFluid
+from nova.thermalhydralic.sultan.fluidprofile import FluidProfile
 from nova.thermalhydralic.sultan.sultanio import SultanIO
+from nova.thermalhydralic.sultan.remotedata import FTPData
+from nova.thermalhydralic.sultan.campaign import Campaign
 from nova.utilities.pyplot import plt
+from nova.utilities.time import clock
 
 
 @dataclass
-class FluidProfile(SultanIO):
-    """Manage fluid model and non-linear fits to experimental data."""
+class FluidResponse(SultanIO):
+    """Manage fluid response data."""
 
-    profile: Union[Sample, Trial, Campaign, str]
-    fluid: Union[FluidModel, Model, list[int], int] = field(default=8)
-    _threshold: InitVar[float] = 0
-    _delay: InitVar[bool] = False
-    reload: bool = False
-    _coefficents: pandas.Series = field(init=False, repr=False)
+    experiment: str
+    phase: Union[int, str]
+    side: str
+    order: Union[int, list[int]] = 7
+    threshold: float = 0.9
 
-    def __post_init__(self, _threshold, _delay):
-        """Init profile and waveform."""
-        if not isinstance(self.profile, Profile):
-            self.profile = Profile(self.profile)
-        if not isinstance(self.fluid, FluidModel):
-            self.fluid = FluidModel(self.fluid)
-        self.fluid.model.delay = _delay
-        self.waveform = WaveForm(self.profile, _threshold)
-        self.fit = FitFluid(self.fluid)
-        self.load_model()
+    def __post_init__(self):
+        """Create fluidprofile instance."""
+        trial = Trial(self.experiment, self.phase)
+        sample = Sample(trial, _side=self.side)
+        self.fluidprofile = FluidProfile(sample, self.order, self.threshold,
+                                         verbose=False)
+        self.coefficents = self.load_data()
+        self._load_plan()
 
-    def _reload(self):
-        """Reload on-demand (model, coefficents)."""
-        if self.profile.sample.sourcedata.reload.fluidmodel:
-            self.load_model()
+    def _load_plan(self):
+        self.plan = self.sample.trial.plan.droplevel(1, axis=1)
+        self.plan.drop(columns='File', inplace=True)
 
     @property
-    def model(self):
-        """Return fluid.model."""
-        self._reload()
-        return self.fluid.model
+    def profile(self):
+        """Return profile instance."""
+        return self.fluidprofile.profile
 
     @property
-    def timeseries(self):
-        """Return waveform timeseries."""
-        self._reload()
-        return self.waveform.timeseries
-
-    def load_model(self):
-        """Load LTI fluid model."""
-        if self.reload:
-            self._coefficents = self.read_data()
-        else:
-            self._coefficents = self.load_data()
-        self.model_coefficents = self._coefficents.copy()
-        self.profile.sample.sourcedata.reload.fluidmodel = False
+    def sample(self):
+        """Return sample instance."""
+        return self.profile.sample
 
     @property
     def database(self):
         """Return database instance."""
-        return self.profile.sample.trial.database
+        return self.sample.trial.database
 
     @property
     def binaryfilepath(self):
         """Return full path of binary datafile."""
-        return self.database.binary_filepath('fluid.h5')
+        return self.database.binary_filepath('fluidresponse.h5')
 
     @property
     def filepath(self):
@@ -83,184 +65,63 @@ class FluidProfile(SultanIO):
     @property
     def filename(self):
         """Return datafile filename."""
-        order = ''.join([str(order) for order in self.fit.fluid.model.order])
-        threshold = str(int(1000*self.waveform.threshold))
-        side = self.profile.sample.side
-        delay = 1 if self.fit.fluid.model.delay else 0
-        filename = f'{self.profile.sample.filename}_{side}'
-        filename += f'_{order}_{threshold}_{delay}'
+        filename = f'{self.sample.trial.campaign.experiment}'
+        filename += f'_{self.sample.trial.name}_{self.sample.side}'
         return filename
+
+    @property
+    def shot_coefficents(self):
+        """Return profile, model and fit shot coefficents."""
+        return pandas.concat([self.profile.coefficents,
+                              self.fluidprofile.coefficents])
 
     def _read_data(self):
         """Refit fluid model to waveform data."""
-        self.fit.optimize(self.waveform.data)
-        model_coefficents = self._flatten_coefficents(
-            self.fluid.model.coefficents)
-        fit_coefficents = self.fit.coefficents
-        return pandas.concat([model_coefficents, fit_coefficents])
+        coefficents = pandas.DataFrame(index=range(self.sample.samplenumber),
+                                       columns=self.shot_coefficents.index,
+                                       dtype='float')
+        tick = clock(self.sample.samplenumber,
+                     header=f'Calculating {self.filename} fluid response.')
+        for shot in self.sample.sequence():
+            coefficents.iloc[shot] = self.shot_coefficents
+            tick.tock()
+        return coefficents.astype('float')
 
-    def _flatten_coefficents(self, coefficents) -> pandas.Series:
-        """Return flat coefficents float dtype."""
-        distinct_poles = len(coefficents.order)
-        model = pandas.Series({'distinct_poles': distinct_poles})
-        for i in range(distinct_poles):
-            model[f'order{i}'] = coefficents['order'][i]
-            model[f'pole{i}'] = coefficents['repeated_pole'][i]
-        coefficents = coefficents.drop(index=['order', 'repeated_pole'])
-        coefficents = coefficents.astype(float)
-        coefficents = pandas.concat([model, coefficents])
-        return coefficents
-
-    def _assemble_coefficents(self, coefficents):
-        """Return coefficents in fit.model format."""
-        distinct_poles = int(coefficents.distinct_poles)
-        drop_list = ['distinct_poles']
-        order = [None for __ in range(distinct_poles)]
-        repeated_pole = [None for __ in range(distinct_poles)]
-        for i in range(distinct_poles):
-            order[i] = int(coefficents.loc[f'order{i}'])
-            repeated_pole[i] = coefficents.loc[f'pole{i}']
-            drop_list.extend([f'order{i}', f'pole{i}'])
-        coefficents.drop(drop_list, inplace=True)
-        coefficents = pandas.concat(
-            [pandas.Series({'order': order, 'repeated_pole': repeated_pole}),
-             coefficents])
-        return coefficents
-
-    @property
-    def model_coefficents(self):
-        """Manage fluid model fitting coefficents."""
-        self._reload()
-        return self.model.coefficents
-
-    @model_coefficents.setter
-    def model_coefficents(self, coefficents):
-        coefficents = self._assemble_coefficents(coefficents)
-        self.fluid.model.order = coefficents.order
-        self.fluid.model.vector = [*coefficents.repeated_pole,
-                                   coefficents.dcgain,
-                                   coefficents.time_delay]
-        self.fluid.model.delay = np.isclose(coefficents.delay, 1)
-
-    @property
-    def coefficents(self):
-        """Return response coefficents."""
-        self._reload()
-        return self._coefficents
-
-    @property
-    def fit_coefficents(self):
-        """Return fit coefficents."""
-        distinct_poles = int(self.coefficents.distinct_poles)
-        return self.coefficents.iloc[3 + 2*distinct_poles:]
-
-    @property
-    def steadystate(self):
-        """Return steadystate."""
-        return self.coefficents.steadystate
-
-    @property
-    def steadystate_error(self):
-        """Return percentage steady state error."""
-        return self.coefficents.steadystate_error
-
-    def plot(self, threshold=0.85, predict=True, correct=True, TF=True,
-             axes=None):
-        """
-        Plot fluid response.
-
-        Parameters
-        ----------
-        threshold : float, optional
-            Plot cooldown threshold. The default is 0.95.
-        predict : bool, optional
-            Plot prediction. The default is True.
-        correct : bool, optional
-            Plot correction. The default is True.
-        TF : bool, optional
-            Plot transfer function label. The default is True.
-        axes : plt.axes, optional
-            Target axes. The default is None.
-
-        Returns
-        -------
-        None.
-
-        """
-        if axes is None:
-            axes = plt.subplots(1, 1)[1]
-        self.waveform.plot_heat(axes, label=None, zorder=-5, alpha=0.5)
-        self.fluid.timeseries = self.timeseries(pulse=True)
-        self.fluid.plot(axes=axes, color='C3', label='fit')
-
-        self.plot_data(threshold, axes)
-        if predict and threshold > self.waveform.threshold:
-            self.plot_predict(threshold, axes)
-        if correct:
-            self.plot_correct(threshold, axes)
-        if TF:
-            self.plot_transfer_function(axes)
-        axes.legend(ncol=4, loc='upper center', frameon=False,
-                    bbox_to_anchor=(0.5, 1.13))
-        plt.despine()
-        axes.set_xlabel('$t$ s')
-        axes.set_ylabel(r'$\dot{Q}$ W')
-        plt.title(self.profile.sample.label, color='k', y=1.1)
-
-    def plot_data(self, threshold, axes):
-        """Plot sultan data."""
-        timeseries = self.timeseries(threshold, pulse=True)
-        axes.plot(timeseries[0], timeseries[-1], 'C0', label='data', zorder=-1)
-
-    def plot_predict(self, threshold, axes):
-        """Plot steady-state correction."""
-        self.fluid.timeseries = self.timeseries(threshold, pulse=True)
-
-        self.fluid.plot(axes=axes, color='C2', label='predict', zorder=-2)
-
-    def plot_correct(self, threshold, axes):
-        """Plot steady-state correction."""
-        self.fluid.timeseries = self.timeseries(
-            threshold, pulse=False)
-        self.fluid.plot(axes=axes, color='C4', zorder=-1, label='correct')
-        duration = self.fluid.timeseries[0].iloc[-1]
-        maximum = self.profile.maximum
-        tlim = [maximum[0], duration]
-        tdelta = np.diff(tlim)[0]
-        axes.plot([tlim[0] + 0.1*tdelta, tlim[1]],
-                  maximum[1] * np.ones(2), ':C0')
-        axes.arrow(duration, maximum[1],
-                   0, 0.95*0.01*maximum[1]*self.steadystate_error,
-                   length_includes_head=True,
-                   head_width=1, head_length=0.1, ec='C4', fc='C4')
-        axes.text(duration, maximum[1] * (1 + 0.005*self.steadystate_error),
-                  f' {self.steadystate_error:1.1f}%',
-                  ha='left', va='center', color='C4')
-        axes.text(duration, self.steadystate, f'{self.steadystate:1.1f}W',
-                  ha='right', va='bottom', color='C4')
-
-    def plot_transfer_function(self, axes):
-        """Plot transfer function label."""
-        massflow = self.profile.sample.massflow
-        transfer_function = f'{self.model.get_label(massflow)}'
-        axes.text(0.05, 0.96, transfer_function, transform=axes.transAxes,
-                  fontsize='x-large', fontweight='bold',
-                  ha='left', va='top', color='k',
-                  bbox={'boxstyle': 'round', 'facecolor': 'none',
-                        'edgecolor': 'none'})
+    def plot(self, Be):
+        """Plot frequency response."""
+        index = self.plan['Be'] == Be
+        plt.loglog(2*self.coefficents['frequency'][index],
+                   self.coefficents['steadystate'][index])
 
 
 if __name__ == '__main__':
 
-    trial = Trial('CSJA_8', 0)
-    sample = Sample(trial, 4, 'Left')
+    '''
+    ftp = FTPData('')
+    for experiment in ftp.listdir(select='CSJA'):
+        print(experiment)
+        for phase in Campaign(experiment).index:
+            for side in ['Left', 'Right']:
+                fluidresponse = FluidResponse(experiment, phase, side)
+    '''
 
-    fluidprofile = FluidProfile(sample, [6], 0, reload=False)
+    response = FluidResponse('CSJA_8', 0, 'Left')
 
-    # plt.set_context('talk')
-    fluidprofile.plot()
-    sample.shot = -1
-    fluidprofile.plot()
+    response.plot(2)
+    response.plot(9)
+    #fluidresponse.sample.shot = 5
+    #fluidresponse.fluidprofile.plot()
 
+    """
+    fluidresponse = FluidResponse('CFETR', 0, 'Left')
+    index = fluidresponse.sample.trial.plan[('Be', 'T')] == 2
+    coefficents = fluidresponse.load_data()
+    plt.loglog(2*coefficents['frequency'][index],
+               coefficents['steadystate'][index])
 
-
+    fluidresponse = FluidResponse('CSJA_8', 0, 'Left')
+    index = fluidresponse.sample.trial.plan[('Be', 'T')] == 2
+    coefficents = fluidresponse.load_data()
+    plt.loglog(2*coefficents['frequency'][index],
+               coefficents['steadystate'][index])
+    """

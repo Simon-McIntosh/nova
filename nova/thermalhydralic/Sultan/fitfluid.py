@@ -21,6 +21,7 @@ class FitFluid:
     fluid: Union[FluidModel, Model, list[int], int]
     data: SimpleNamespace = field(init=False, repr=False,
                                   default_factory=SimpleNamespace)
+    verbose: bool = True
 
     def __post_init__(self):
         """Init fluid model."""
@@ -40,8 +41,10 @@ class FitFluid:
     def initialize_model(self):
         """Init LTI model."""
         self.fluid.model.update_pole(0.056*self.data.massflow)
-        self.fluid.model.update_dcgain(
-            2*self.data.fieldratesq_amplitude * np.max(self.data.output))
+        dcgain = 2*self.data.fieldratesq_amplitude * np.max(self.data.output)
+        if dcgain < 1e-6:
+            dcgain = 1e-6
+        self.fluid.model.update_dcgain(dcgain)
 
     def model_error(self, vector):
         """
@@ -67,8 +70,9 @@ class FitFluid:
     def model_update(self, vector, grad):
         """Return L2norm error and evaluate gradient in-place."""
         err = self.model_error(vector)
-        sys.stdout.write(f'\r{err}')
-        sys.stdout.flush()
+        if self.verbose:
+            sys.stdout.write(f'\r{err}')
+            sys.stdout.flush()
         if len(grad) > 0:
             grad[:] = scipy.optimize.approx_fprime(
                 vector, self.model_error, 1e-6)
@@ -78,11 +82,11 @@ class FitFluid:
         opt = nlopt.opt(getattr(nlopt, algorithm),
                         self.fluid.model.parameter_number)
         initial_step = 0.05*np.array(self.fluid.model.vector)
-        initial_step[initial_step < 1e-3] = 1e-3
+        initial_step[initial_step < 1e-2] = 1e-2
         opt.set_initial_step(initial_step)
         opt.set_min_objective(self.model_update)
-        opt.set_lower_bounds(np.zeros(self.fluid.model.parameter_number))
-        opt.set_ftol_abs(5e-4)
+        opt.set_lower_bounds(1e-6*np.ones(self.fluid.model.parameter_number))
+        opt.set_ftol_abs(5e-3)
         return opt
 
     def optimize(self, waveform_data: pandas.DataFrame, optimizer='nlopt'):
@@ -99,6 +103,7 @@ class FitFluid:
                 vector = opt.optimize(self.fluid.model.vector)
             except nlopt.RoundoffLimited:
                 opt = self._set_nlopt('LN_COBYLA')
+                opt.set_ftol_rel(1e-2)
                 vector = opt.optimize(self.fluid.model.vector)
 
             self.fluid.model.vector = vector

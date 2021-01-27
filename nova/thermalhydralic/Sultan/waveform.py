@@ -304,7 +304,7 @@ class WaveForm:
 
 if __name__ == '__main__':
 
-    sample = Sample('CSJA13', 0)
+    sample = Sample('CSJA_6', 0)
     waveform = WaveForm(sample, 0.9, pulse=True)
     waveform.profile.normalize = False
     waveform.plot('fieldratesq')

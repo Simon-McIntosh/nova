@@ -165,7 +165,7 @@ class Campaign:
         None.
 
         """
-        testmode = 'c'
+        testmode = 'a'
         labels = [label[0] for label in _xls_index.values
                   if isinstance(label[0], str)]
         try:
@@ -494,5 +494,5 @@ class Campaign:
 
 if __name__ == '__main__':
 
-    campaign = Campaign('CSJA11', 'ac')
+    campaign = Campaign('CSJA_9', 'ac')
     campaign.read_metadata()

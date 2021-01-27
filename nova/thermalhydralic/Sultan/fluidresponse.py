@@ -89,9 +89,11 @@ class FluidResponse(SultanIO):
 
     def plot(self, Be):
         """Plot frequency response."""
-        index = self.plan['Be'] == Be
-        plt.loglog(2*self.coefficents['frequency'][index],
+        index = (self.plan['Be'] == Be) & (self.plan['Isample'] == 0)
+        plt.semilogx(2*self.coefficents['frequency'][index],
                    self.coefficents['steadystate'][index])
+        plt.semilogx(2*self.coefficents['frequency'][index],
+                   self.coefficents['maximum_value'][index])
 
 
 if __name__ == '__main__':
@@ -104,11 +106,13 @@ if __name__ == '__main__':
             for side in ['Left', 'Right']:
                 fluidresponse = FluidResponse(experiment, phase, side)
     '''
-
-    response = FluidResponse('CSJA_8', 0, 'Left')
-
+    response = FluidResponse('CSJA11', 0, 'Left')
     response.plot(2)
-    response.plot(9)
+    #response.plot(9)
+
+    #response = FluidResponse('CSJA11', -1, 'Left')
+    #response.plot(2)
+    #response.plot(9)
     #fluidresponse.sample.shot = 5
     #fluidresponse.fluidprofile.plot()
 

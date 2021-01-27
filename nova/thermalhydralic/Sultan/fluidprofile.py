@@ -274,10 +274,10 @@ class FluidProfile(SultanIO):
 
 if __name__ == '__main__':
 
-    trial = Trial('CFETR', 0)
+    trial = Trial('CSJA_6', 0)
     sample = Sample(trial, 0, 'Left')
 
-    fluidprofile = FluidProfile(sample, [3], 0.9, reload=False)
+    fluidprofile = FluidProfile(sample, [7], 0.9, reload=False)
     #print(fluidprofile.coefficents)
     # plt.set_context('talk')
     fluidprofile.plot()

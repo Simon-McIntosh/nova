@@ -22,7 +22,7 @@ class FluidProfile(SultanIO):
     """Manage fluid model and non-linear fits to experimental data."""
 
     profile: Union[Sample, Trial, Campaign, str]
-    fluid: Union[FluidModel, Model, list[int], int] = field(default=8)
+    fluid: Union[FluidModel, Model, list[int], int] = field(default=6)
     _threshold: InitVar[float] = 0
     _delay: InitVar[bool] = False
     reload: bool = False
@@ -179,7 +179,7 @@ class FluidProfile(SultanIO):
         return self.coefficents.steadystate_error
 
     def plot(self, threshold=0.85, predict=True, correct=True, TF=True,
-             axes=None):
+             heat=True, axes=None):
         """
         Plot fluid response.
 
@@ -206,15 +206,15 @@ class FluidProfile(SultanIO):
         if axes is None:
             axes = plt.subplots(1, 1)[1]
         self._reload()
-        self.waveform.plot_heat(axes, label=None, zorder=-5, alpha=0.5)
         self.fluid.timeseries = self.waveform.timeseries(pulse=True)
         self.fluid.plot(axes=axes, color='C3', label='fit')
-
         self.plot_data(threshold, axes)
         if predict and threshold > self.waveform.threshold:
             self.plot_predict(threshold, axes)
         if correct:
             self.plot_correct(threshold, axes)
+        if heat:
+            self.plot_heat(axes)
         if TF:
             self.plot_transfer_function(axes)
         axes.legend(ncol=4, loc='upper center', frameon=False,
@@ -255,31 +255,37 @@ class FluidProfile(SultanIO):
             axes.plot(duration * np.ones(2),
                       maximum[1] * np.array(
                           [1, 1 + 0.95*0.01*self.steadystate_error]), 'C4')
+        va = 'bottom' if np.sign(self.steadystate_error) < 0 else 'top'
         axes.text(duration, maximum[1] * (1 + 0.005*self.steadystate_error),
                   f' {self.steadystate_error:1.1f}%',
-                  ha='left', va='center', color='C4')
-        axes.text(duration, self.steadystate, f'{self.steadystate:1.1f}W',
-                  ha='right', va='bottom', color='C4')
+                  ha='left', va=va, color='C4')
+        va = 'bottom' if np.sign(self.steadystate_error) >= 0 else 'top'
+        axes.text(duration, self.steadystate, f' {self.steadystate:1.1f}W',
+                  ha='left', va=va, color='C4')
+
+    def plot_heat(self, axes):
+        """Plot heated zone."""
+        self.waveform.plot_heat(axes, label=None, zorder=-5, alpha=0.5)
 
     def plot_transfer_function(self, axes):
         """Plot transfer function label."""
         massflow = self.profile.sample.massflow
-        transfer_function = f'{self.model.get_label(massflow)}'
-        axes.text(0.05, 0.96, transfer_function, transform=axes.transAxes,
+        transfer_function = fr'{self.model.get_label(massflow)}'
+        axes.text(0.5, 0.5, transfer_function, transform=axes.transAxes,
                   fontsize='x-large', fontweight='bold',
-                  ha='left', va='top', color='k',
+                  ha='center', va='center', color='k',
                   bbox={'boxstyle': 'round', 'facecolor': 'none',
                         'edgecolor': 'none'})
 
 
 if __name__ == '__main__':
 
-    trial = Trial('CSJA_6', 0)
-    sample = Sample(trial, 0, 'Left')
+    trial = Trial('CSJA12', 0)
+    sample = Sample(trial, -1, 'Left')
 
-    fluidprofile = FluidProfile(sample, [7], 0.9, reload=False)
+    fluidprofile = FluidProfile(sample, [6], -1, reload=False)
+
     #print(fluidprofile.coefficents)
-    # plt.set_context('talk')
     fluidprofile.plot()
 
 

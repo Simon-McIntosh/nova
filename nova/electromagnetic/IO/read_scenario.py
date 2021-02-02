@@ -789,7 +789,7 @@ class scenario_data(read_dina, interpolate, operate):
         # filter
         if dt_filt != 0:
             n_filt = int(dt_filt/self.dt)
-            if n_filt%2 == 0:
+            if n_filt % 2 == 0:
                 n_filt += 1
             x = vector_lowpass(x.values, n_filt)
             y = vector_lowpass(y.values, n_filt)
@@ -801,9 +801,17 @@ class scenario_data(read_dina, interpolate, operate):
         else:
             if dt > dt_min:
                 strID = strID.replace(' ', '_')
-                label = self.filename.replace(strID, '')
-                ax.plot(x, y, label=label)
+                label = kwargs.pop('label',
+                                   self.filename.replace(strID, ''))
+                ax.plot(x, y, label=label, **kwargs)
         return dt
+
+    def plot_current(self, **kwargs):
+        """Plot coil current vectors."""
+        for name in self.index[self.Ic_iloc]:
+            if name != 'Ip' and 'vs' not in name:
+                label = name[1:].upper()
+                self.plot(y=name, label=name, **kwargs)
 
 
 class forcefield_data(read_dina, interpolate):
@@ -995,9 +1003,10 @@ if __name__ == '__main__':
     scn = read_scenario(database_folder='scenarios', read_txt=False)
     #scn.load_folder()
     scn.load_file(-1)
+
     #scn.load_file('15MA DT-DINA2020-04', read_txt=True)
 
-    scn.read_IDM(-1)
+    #scn.read_IDM(-1)
 
     '''
     d2 = scenario_data(read_txt=False)

@@ -124,12 +124,17 @@ class SampleData:
         data['t'] = self.sultandata['Time']
         data['mdot'] = self.sultandata[f'dm/dt {self.side}'] * 1e-3
         data['Ipulse'] = self.sultandata['PS EEI (I)']
-        for end in ['in', 'out']:
-            data[f'T{end}'] = self.sultandata[f'T {end} {self.side}']
+        side = ['Left', 'Right']
+        for end_index, end in enumerate(['in', 'out']):
+            temperature_index = 1 + side.index(self.side) + 2*end_index
+            temperature_array = [f'T{temperature_index}{1 + probe}'
+                                 for probe in range(4)]
+            data[f'T{end}'] = self.sultandata[temperature_array].mean(axis=1)
+            # data[f'T{end}'] = self.sultandata[f'T {end} {self.side}']
             data[f'P{end}'] = self.sultandata[f'P {end} {self.side}'] * 1e5
         if lowpass:
             timestep = np.diff(data['t'], axis=0).mean()
-            windowlength = int(5 / (timestep*self.frequency))
+            windowlength = int(0.5 / (timestep*self.frequency))
             if windowlength % 2 == 0:
                 windowlength += 1
             if windowlength < 5:

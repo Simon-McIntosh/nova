@@ -1,5 +1,5 @@
 """Manage sultan point data."""
-from dataclasses import dataclass, field, InitVar
+from dataclasses import dataclass, field
 from typing import Union
 from types import SimpleNamespace
 
@@ -329,13 +329,15 @@ class Profile:
         with self.sample.sampledata(lowpass_filter=lowpass_filter):
             axes.plot(*self.timeseries(), **kwargs)
 
-    def plot(self, axes=None):
+    def plot(self, axes=None, heat=True, lowpass=True):
         """Plot shot profile."""
         if axes is None:
             axes = plt.gca()
         self.plot_single(lowpass_filter=False, axes=axes)
-        self.plot_single(lowpass_filter=True, axes=axes)
-        self.plot_heat()
+        if lowpass:
+            self.plot_single(lowpass_filter=True, axes=axes)
+        if heat:
+            self.plot_heat()
         axes.legend(loc='upper right')
         axes.set_xlabel('$t$ s')
         axes.set_ylabel(r'$\dot{Q}$ W')
@@ -357,9 +359,10 @@ class Profile:
 
 if __name__ == '__main__':
 
-    trial = Trial('CSJA_6', 'ac0')
-    sample = Sample(trial, -1, 'Left')
-    profile = Profile(sample)
-    profile.plot()
+    trial = Trial('CSJA12', 'ac0')
+    sample = Sample(trial, 0, 'Left')
+    profile = Profile(sample, _normalize=True)
+
+    profile.plot(lowpass=True, heat=True)
 
     #print(profile.coefficents)

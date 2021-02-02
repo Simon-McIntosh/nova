@@ -15,7 +15,7 @@ import nova
 
 
 class read_waveform(pythonIO):
-    
+
     def __init__(self, database_folder=None, read_txt=True):
         '''
         Kwargs:
@@ -53,13 +53,12 @@ class read_waveform(pythonIO):
                 raise IndexError(txt)
             folder = self.folders[folder]
         elif isinstance(folder, str):
-            folder.split
             if folder not in self.folders:
                 folder = folder.split('_')  # remove leading underscore
                 folder = '_'.join([' '.join(folder[:2]), '_'.join(folder[2:])])
                 if folder not in self.folders:
                     txt = '\nfolder {} '.format(folder)
-                    txt += 'not found in {}'.format(self.directroy)
+                    txt += 'not found in {}'.format(self.directory)
                     raise IndexError(txt)
         elif folder is None:
             folder = self.directory
@@ -121,7 +120,7 @@ class read_waveform(pythonIO):
             file_type = file_type.split('.')[0]
             files = [f for f in listdir(folder) if isfile(join(folder, f))]
         #files = [f for f in files if file_type.lower() in f.lower()]
-        files = [f for f in files if 
+        files = [f for f in files if
                  fnmatch.fnmatch(f.lower().split('.')[0], file_type.lower())]
         if len(files) == 0:
             txt = '\nfile key {} not found '.format(file_type)
@@ -134,7 +133,7 @@ class read_waveform(pythonIO):
         self.folder = folder
         self.file = file
         return join(folder, file)
-    
+
     def load_folder(self):
         '''
         load / reload all files from specified database folder
@@ -145,7 +144,7 @@ class read_waveform(pythonIO):
         for folder in range(nfolder):
             self.load_file(folder, read_txt=True, verbose=False)
             tick.tock()
-            
+
     def multiindex(self, data, columns, units,
                    dropnan=False, dataframe=True):
         data.columns = pd.MultiIndex.from_tuples(
@@ -160,14 +159,14 @@ class read_waveform(pythonIO):
         if not dataframe:
             data = data.to_dict(orient='list')
         return data
-    
+
 
 class read_corsica(read_waveform):
     'read corsica wavefrom data'
-    
+
     def __init__(self, *args, **kwargs):
         read_waveform.__init__(self, *args, **kwargs)
-        
+
     def read_file(self):
         filename = self.locate_file('T_.txt', folder=-1)
         data = pd.DataFrame()
@@ -192,7 +191,7 @@ class read_corsica(read_waveform):
                             '(', f'{string.ascii_letters[nz_index]}(')
                         nz_index += 1
                         num = f.readline(split=True, string=True)[2::3]
-                        num = [float(n.replace('D', 'E').replace(',', '')) 
+                        num = [float(n.replace('D', 'E').replace(',', ''))
                                for n in num]
                         comment += f' ({num[0]}, {num[1]})'
                     if variable == 'Ncoils':  # read PF / CS coil currents
@@ -209,25 +208,23 @@ class read_corsica(read_waveform):
                                 f'read error for line: {label}')
                     except:
                         break
-            data.rename(columns={c: c.replace('(t)', '') 
+            data.rename(columns={c: c.replace('(t)', '')
                          for c in data.columns}, inplace=True)
-            data.rename(columns={c: c.replace(',t)', ')') 
+            data.rename(columns={c: c.replace(',t)', ')')
                          for c in data.columns}, inplace=True)
-            
-            current = {c: f'I{c.replace("current", "").strip()}' 
+
+            current = {c: f'I{c.replace("current", "").strip()}'
                        for c in data.columns if 'current' in c}
             data.rename(columns=current, inplace=True)
             kappa = {c: c.replace("Triangularity", "kappa").strip().replace(
-                '_Lower', 'L').replace('_Upper', 'U') 
+                '_Lower', 'L').replace('_Upper', 'U')
                        for c in data.columns if 'Triangularity' in c}
             data.rename(columns=kappa, inplace=True)
-            elongation = {c: c.replace('Elongation', 'dell').strip() 
+            elongation = {c: c.replace('Elongation', 'dell').strip()
                           for c in data.columns if 'Elongation' in c}
-            data.rename(columns=elongation, inplace=True)           
+            data.rename(columns=elongation, inplace=True)
             data.rename(columns={'Timebase': 't'}, inplace=True)
 
-            print(data.columns)
-                
 
 class read_dina(read_waveform):
 
@@ -235,7 +232,7 @@ class read_dina(read_waveform):
 
     def __init__(self, *args, **kwargs):
         read_waveform.__init__(self, *args, **kwargs)
-        
+
     def get_folders(self):
         read_waveform.get_folders(self)
         if self.database_folder == 'scenarios':
@@ -243,7 +240,7 @@ class read_dina(read_waveform):
                     self.folders, key=lambda x: f'{x.split("-")[1]}_'
                                                 f'{x.split("-")[2]}_'
                                                 f'{x.split("-")[0]}')
-            
+
     def get_folder_array(self, exclude=[]):
         dtype = [('name', 'U25'), ('year', int), ('mode', 'U25'),
                  ('month', int), ('version', 'U25')]
@@ -262,14 +259,14 @@ class read_dina(read_waveform):
             folder_array = folder_array[index]
         self.folder_array = folder_array
         self.folders = self.folder_array['name']
-        
+
     def locate_folder(self, file, folder, file_type='txt'):
         filepath, file_type = \
             read_waveform.locate_folder(self, file, folder, file_type)
         self.date = datetime.strptime(
                 self.filename.split('DINA')[-1].split('_')[0][:7], '%Y-%m')
         return filepath, file_type
-            
+
     def read_csv(self, filename, split='', dropnan=True, dataframe=True):
         data = pd.read_csv(filename, delimiter='\t', na_values='NAN')
         columns = {}
@@ -318,7 +315,7 @@ if __name__ == '__main__':
 
     corsica = read_corsica('corsica')
     corsica.read_file()
-    
+
     dina = read_dina('operations')
     dina.load
     #filename = dina.locate_file('data2.txt', folder=1)

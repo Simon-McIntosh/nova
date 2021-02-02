@@ -295,8 +295,11 @@ class WaveForm:
         """Shade heated zone."""
         if axes is None:
             axes = plt.gca()
+        _threshold = self.threshold
+        self.threshold = 1
         time = self.data.time[self.heatindex]
         upper = self.data.output[self.heatindex]
+        self.threshold = _threshold
         lower = np.min([np.min(upper), 0]) * np.ones(len(time))
         kwargs = {'color': 'lightgray'} | kwargs
         axes.fill_between(time, lower, upper, **kwargs)
@@ -304,10 +307,7 @@ class WaveForm:
 
 if __name__ == '__main__':
 
-    sample = Sample('CSJA_6', 0)
-    waveform = WaveForm(sample, 0.9, pulse=True)
-    waveform.profile.normalize = False
+    sample = Sample('CSJA12', 0)
+    waveform = WaveForm(sample, 1, pulse=True)
+    waveform.profile.normalize = True
     waveform.plot('fieldratesq')
-
-
-

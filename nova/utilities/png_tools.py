@@ -38,7 +38,7 @@ class sample_plot(object):
 
     def __init__(self, data, x_origin, y_origin, x_ref, y_ref,
                  x_fig, y_fig, ax_eq, ax, fig, path, file,
-                 xscale='linear', yscale='linear'):
+                 xscale='linear', yscale='linear', save=False):
         self.points = []
         self.points_data = []
         self.xscale = xscale
@@ -48,6 +48,7 @@ class sample_plot(object):
         self.data = data
         self.path = path
         self.file = file
+        self.save = save
         self.set_folder()
         self.x = []
         self.y = []
@@ -65,6 +66,7 @@ class sample_plot(object):
         self.cycle_axis = itertools.cycle([1, 2, 3, 4])
         self.count_click = next(self.cycle_click)
         self.count_axis = next(self.cycle_axis)
+        self.exit = False
         self.cid = x_origin.figure.canvas.mpl_connect(
             'button_press_event', self)
         if self.ax_eq == -1:
@@ -75,7 +77,7 @@ class sample_plot(object):
         self.file = stripfile(self.file)
         date_str = datetime.date.today().strftime('%Y_%m_%d')  # today
         self.folder = self.path + 'imagedata/'
-        if not os.path.exists(self.folder):
+        if not os.path.exists(self.folder) and self.save:
             os.makedirs(self.folder)
         self.file = date_str + '_' + self.file + '.pkl'
 
@@ -112,6 +114,8 @@ class sample_plot(object):
         if event.button == 2:  # enter button
             if len(self.x) == 0:  # exit and save (dual click)
                 self.fig.canvas.mpl_disconnect(self.cid)
+                plt.close(self.fig)
+                self.exit = True
             else:
                 if self.cord_flag == 0:
                     self.set_cord()
@@ -174,10 +178,11 @@ class sample_plot(object):
         for var in ['x_o', 'x_scale', 'x_fig', 'y_o', 'y_scale', 'y_fig',
                     'xscale', 'yscale']:
             limits[var] = getattr(self, var)
-        with open(self.folder + self.file, 'wb') as output:
-            pickle.dump(self.points, output, -1)
-            pickle.dump(self.points_data, output, -1)
-            pickle.dump(limits, output, -1)
+        if self.save:
+            with open(self.folder + self.file, 'wb') as output:
+                pickle.dump(self.points, output, -1)
+                pickle.dump(self.points_data, output, -1)
+                pickle.dump(limits, output, -1)
 
 
 def set_format(var):
@@ -197,6 +202,8 @@ def set_title(ax, var, txt):
 
 def data_mine(path, file, xlim, ylim, **kw):
     label = kw.get('label', '')
+    save = kw.get('save', False)
+    title = kw.pop('title', None)
     if 'scale' in kw:
         scale = kw.get('scale')
         xscale = scale
@@ -217,11 +224,12 @@ def data_mine(path, file, xlim, ylim, **kw):
 
     fig = plt.figure(figsize=(14, 14))
     ax = fig.add_subplot(111)
+    plt.ion()
 
     origin = 'upper'
     if '.png' not in file and '.jpg' not in file:
         file += '.png'
-    image = mpimg.imread(path + file)
+    image = mpimg.imread(os.path.join(path, file))
     ax.imshow(image, origin=origin)
 
     if ax_eq == -1:
@@ -238,10 +246,16 @@ def data_mine(path, file, xlim, ylim, **kw):
 
     if label:
         file += f'_{label}'
+    if title:
+        plt.suptitle(title)
 
-    sample_plot(data, x_origin, y_origin, x_ref, y_ref, x_fig, y_fig,
-                ax_eq, ax, fig, path, file,
-                xscale=xscale, yscale=yscale)
+
+    plot = sample_plot(data, x_origin, y_origin, x_ref, y_ref,
+                       x_fig, y_fig, ax_eq, ax, fig, path, file,
+                       xscale=xscale, yscale=yscale, save=save)
+    while not plot.exit:
+        plt.pause(1)
+    return plot
 
 
 def get_filename(path, file, **kwargs):

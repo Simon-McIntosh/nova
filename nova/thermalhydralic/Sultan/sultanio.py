@@ -26,12 +26,16 @@ class SultanIO(metaclass=abc.ABCMeta):
         """Return data from binary store."""
         with pandas.HDFStore(self.binaryfilepath, mode='r') as store:
             data = store[self.filename]
+            if 'metadata' in store.get_storer(self.filename).attrs:
+                data.attrs = store.get_storer(self.filename).attrs.metadata
         return data
 
     def _save_data(self, data):
         """Append data to hdf file."""
         with pandas.HDFStore(self.binaryfilepath, mode='a') as store:
             store.put(self.filename, data, format='table', append=False)
+            if data.attrs:
+                store.get_storer(self.filename).attrs.metadata = data.attrs
 
     @property
     @abc.abstractmethod

@@ -237,7 +237,7 @@ Cn = plt.rcParams['axes.prop_cycle'].by_key()['color']
 plt.Cn = [to_rgb(from_hex) for from_hex in Cn]  # rgb color index
 
 plt.set_context('notebook')
-# plt.set_context('talk')
+plt.set_context('talk')
 # plt.set_context('poster')
 
 if __name__ == '__main__':

@@ -86,7 +86,7 @@ class FitFluid:
         opt.set_initial_step(initial_step)
         opt.set_min_objective(self.model_update)
         opt.set_lower_bounds(1e-6*np.ones(self.fluid.model.parameter_number))
-        opt.set_ftol_abs(5e-3)
+        opt.set_ftol_rel(1e-4)
         return opt
 
     def optimize(self, waveform_data: pandas.DataFrame, optimizer='nlopt'):

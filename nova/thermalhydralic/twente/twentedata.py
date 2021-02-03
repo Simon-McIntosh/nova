@@ -117,6 +117,12 @@ class TwentePost(TwenteFile, SultanIO):
             self.read_data()
         else:
             self.read_data()
+        self.Qhys = 0
+
+    @property
+    def frequency(self):
+        """Return frequency, Hz."""
+        return self.data.frequency
 
     @property
     def omega(self):
@@ -151,7 +157,8 @@ class TwentePost(TwenteFile, SultanIO):
         self.data.loc[:, 'omega'] = 2*np.pi*self.data.frequency
         self.data.loc[:, 'Q'] = scipy.interpolate.interp1d(
             self.source.data.frequency,
-            self.source.data.Q)(self.data.frequency)
+            self.source.data.Q, bounds_error=False,
+            fill_value='extrapolate')(self.data.frequency)
 
     def frequency_matrix(self, order, index):
         """
@@ -172,35 +179,86 @@ class TwentePost(TwenteFile, SultanIO):
             Frequency matrix
 
         """
-        frequency = self.data.loc[index, 'frequency'].to_numpy().reshape(-1, 1)
+        #frequency = self.data.loc[index, 'frequency'].to_numpy().reshape(-1, 1)
+        frequency = self.source.data.loc[
+            index, 'frequency'].to_numpy().reshape(-1, 1)
         matrix = np.concatenate([frequency**i for i in range(order+1)], axis=1)
         return frequency, matrix
 
-    def fit_polynomial(self, order=2, index=slice(None)):
+    def fit_polynomial(self, order=2, index=slice(None), plot=False):
         """Fit polynomial to heat data."""
         # extract data
         frequency, matrix = self.frequency_matrix(order, index)
-        heat = self.data.loc[index, 'Q']
+        #heat = self.data.loc[index, 'Q']
+        heat = self.source.data.loc[index, 'Q']
         # fit coefficients
         coefficients = np.linalg.lstsq(matrix, heat, rcond=None)[0]
         # re-construct
         if index != slice(None):
             matrix = self.frequency_matrix(order, slice(None))[1]
-        self.data.loc[:, 'Qpoly'] = matrix @ coefficients
+        #self.data.loc[:, 'Qpoly'] = matrix @ coefficients
         self.data.attrs['polynomial'] = {'order': order, 'index': index,
                                          'coefficients': coefficients}
+        if plot:
+            self.plot_polynomial()
         return coefficients
 
-    def fit_transfer_function(self, inital_vector):
+    def plot_polynomial(self):
+        """Plot polynomial fit."""
+        axes = plt.subplots(1, 1)[1]
+        polynomial = self.data.attrs['polynomial']
+        frequency, matrix = self.frequency_matrix(polynomial['order'],
+                                                  slice(None))
+        polynomial_fit = matrix @ polynomial['coefficients']
+        axes.plot(self.frequency, self.data.Q, 'o')
+        axes.plot(frequency, polynomial_fit, '--', color='gray')
+        axes.plot(frequency[polynomial['index']],
+                  polynomial_fit[polynomial['index']], '--', color='C3')
+
+    def fit_transfer_function(self, zeros, poles, gain, Qhys):
         """Fit transfer function to heat data."""
+        nzeros = len(zeros)
 
         def model(vector):
             """Return lti model."""
-            cutoff = vector[:-1]
-            cutoff = np.ones(1)*cutoff[0]
-            dcgain = vector[-1]
-            gain = np.prod(cutoff) * dcgain
-            return scipy.signal.ZerosPolesGain([], -cutoff, gain)
+            zeros = 10**np.array(vector[:nzeros])
+            poles = 10**np.array(vector[nzeros:-2])
+
+            order = 20
+            step = 0.1
+            cutoff = vector[0]
+            poles = np.logspace(cutoff,
+                                cutoff + step*(order-1),
+                                order)
+            zeros = np.logspace(cutoff + step/2,
+                                cutoff + step*(order-1 + 0.5),
+                                order)
+            #zeros = poles[0] + np.diff(poles)
+            #poles = np.array([cutoff * k**(2*i) for i in range(order)])
+            #zeros = np.array([cutoff * k**(2*i+1) for i in range(order)])
+
+            dcgain = vector[-2]
+            gain = np.prod(poles) / np.prod(zeros) * dcgain
+            return scipy.signal.ZerosPolesGain(-zeros, -poles, gain)
+
+        def model_heat(vector):
+            """
+            Return heat magnitude response.
+
+            Parameters
+            ----------
+            vector : array-like
+                Optimization vector.
+
+            Returns
+            -------
+            Qdot : array-like
+                Heat response.
+
+            """
+            system = model(vector)
+            bode = scipy.signal.bode(system, w=self.data.omega)[1]
+            return 10**(bode/20)
 
         def model_error(vector):
             """
@@ -209,9 +267,7 @@ class TwentePost(TwenteFile, SultanIO):
             Parameters
             ----------
             vector : array-like
-                Optimization vector [pole, gain, time_delay].
-            npole : int
-                Number of poles.
+                Optimization vector.
 
             Returns
             -------
@@ -219,14 +275,9 @@ class TwentePost(TwenteFile, SultanIO):
                 L2-norm error.
 
             """
-            Qhys = self.data.attrs['polynomial']['coefficients'][0] / self.B
-            Qdot_data = (self.data.Q - self.B*Qhys)
-            Qdot_data /= 2*np.pi*self.data.omega*self.B**2
-            Qdot_data = Qdot_data**0.5
-            system = model(vector)
-            bode = scipy.signal.bode(system, w=self.data.omega)[1]
-            Qdot_model = 10**(bode/20)
-            L2norm = np.linalg.norm(Qdot_data-Qdot_model, axis=0)
+            Prms = model_heat(vector)
+            #self.Qhys = vector[-1]  # update Qhys estimate
+            L2norm = np.linalg.norm(self.Prms - Prms, axis=0)
             return 1e3*L2norm/self.nsample
 
         def model_update(vector, grad):
@@ -240,50 +291,63 @@ class TwentePost(TwenteFile, SultanIO):
                     vector, model_error, 1e-6)
             return err
 
-        opt = nlopt.opt('LN_BOBYQA', 2)
-        #opt = nlopt.opt('LN_COBYLA', 3)
-        opt.set_initial_step(0.001)
-        opt.set_min_objective(model_update)
-        opt.set_lower_bounds(1e-6)
-        opt.set_ftol_abs(1e-6)
+        def model_bound(vector):
+            """Return Qdot inequality constraint."""
+            Prms = model_heat(vector)
+            return np.max(self.Prms - Prms)
+
+        def bound_update(result, vector, grad):
+            """Set bound constraint."""
+            result[:] = model_bound(vector)
+            if len(grad) > 0:
+                grad[:] = scipy.optimize.approx_fprime(
+                    vector, model_bound, 1e-6)
+
+        def get_opt(algorithum, zeros, poles):
+            parameter_number = len(zeros) + len(poles) + 2
+            lower_bounds = [-2 for __ in zeros + poles] + [1e-12, 1e-12]
+            upper_bounds = [2 for __ in zeros + poles] + [1e12, 1e12]
+            opt = nlopt.opt(f'LN_{algorithum}', parameter_number)
+            opt.set_initial_step(0.001)
+            opt.set_min_objective(model_update)
+            opt.set_lower_bounds(lower_bounds)
+            opt.set_upper_bounds(upper_bounds)
+            opt.set_ftol_rel(1e-8)
+            return opt
+
+        inital_vector = zeros + poles + [gain, Qhys]
+
+        opt = get_opt('BOBYQA', zeros, poles)
         vector = opt.optimize(inital_vector)
 
-        print(vector)
-        return vector[0], model(vector)
+        #opt = get_opt('COBYLA', zeros, poles)
+        #opt.add_inequality_mconstraint(bound_update, [0])
+        #opt.set_ftol_rel(1e-3)
+        #vector = opt.optimize(vector)
 
+        return vector, model(vector)
 
-    def plot(self):
-        axes = plt.subplots(1, 1)[1]
-        poly = self.fit_polynomial(order=2, index=slice(60))
-        #print(0.98*poly[0])
-        #self.data.loc[:, 'Qdot'] = (self.data.Q - 0.98*poly[0])
-        #self.data.loc[:, 'Qdot'] /= 2*np.pi*self.omega*self.B**2
-        #self.data.loc[:, 'Qdot'] = self.data.loc[:, 'Qdot']**2
+    @property
+    def Qdot(self):
+        """Return heat rate."""
+        return self.data.Qdot
 
-        Qhys = 0.98*poly[0] / self.B
-        dcgain = poly[1] / (4*np.pi**2*self.B**2)
+    @property
+    def Qhys(self):
+        """Manage hysterisis heat."""
+        return self._Qhys
 
-        print(dcgain, Qhys)
-        Qhys, system = self.fit_transfer_function([0.5, dcgain**0.5])
-        bode = scipy.signal.bode(system, w=self.omega)[1]
-        Qdot_model = 10**(bode/20)
+    @Qhys.setter
+    def Qhys(self, Qhys):
+        self._Qhys = Qhys
+        Qdot = (self.data.Q - Qhys)
+        Qdot /= 2*np.pi*self.data.omega*self.B**2
+        self.data.loc[:, 'Qdot'] = Qdot
 
-        #Qhys = 0.99*poly[0] / self.B
-        Qhys = self.data.attrs['polynomial']['coefficients'][0] / self.B
-        Qdot_data = (self.data.Q - self.B*Qhys)
-        Qdot_data /= 2*np.pi*self.data.omega*self.B**2
-        Qdot_data = Qdot_data**0.5
-
-        axes.plot(self.data.frequency, Qdot_data, '.-')
-        axes.plot(self.data.frequency, Qdot_model, '-')
-
-        #axes.plot(self.data.frequency, self.data.Qpoly, '--',
-        #          label=f'i:{istart} {coef[0]:1.2f} {coef[1]:1.2f}')
-        plt.despine()
-        axes.set_xscale('log')
-        axes.set_yscale('log')
-        print(system)
-        return system
+    @property
+    def Prms(self):
+        """Return rms gain."""
+        return self.data.Qdot**0.5
 
     @property
     def binaryfilepath(self):
@@ -305,6 +369,59 @@ class TwentePost(TwenteFile, SultanIO):
         """Return esperiment index."""
         return self.source.index
 
+    def plot(self):
+        poly = self.fit_polynomial(2, index=slice(3), plot=False)
+        self.Qhys = poly[0]
+
+
+        axes = plt.subplots(1, 1)[1]
+        vector, system = self.fit_transfer_function(
+            [], [-1.2], self.Prms[0], 1.1)
+        print('\n', vector)
+        frequency = np.logspace(-3, 0.5)
+        #
+        #frequency = self.frequency
+        bode = scipy.signal.bode(system, w=2*np.pi*frequency)[1]
+        Prms_model = 10**(bode/20)
+        axes.plot(frequency, Prms_model, '-')
+
+
+        axes.plot(self.data.frequency, self.Prms, '.-')
+        plt.despine()
+        axes.set_xscale('log')
+        axes.set_yscale('log')
+        print(self.Qhys)
+
+        return system
+
+
+if __name__ == '__main__':
+
+    source = TwenteSource('CS_KAT', phase='virgin', index=0, binary=True)
+    post = TwentePost(source, binary=False)
+
+    system = post.plot()
+
+    omega = post.omega[0]
+    cycles = 50
+    t = np.linspace(0, cycles*2*np.pi/omega, 30*cycles)
+    y = np.sin(omega*t)
+    p = scipy.signal.lsim(system, y, t)[1]
+
+    #plt.figure()
+    #plt.plot(t, y)
+    #plt.plot(t, p)
+    #print(2*np.mean(p**2))
+
+
+    '''
+    for experiment in ['CSJA_7', 'CSJA_8', 'CSJA12', 'CSJA13']:
+        fluid = FluidResponse(experiment, 0, 'Left')
+        omega, gain = fluid.response(2)
+        plt.plot(omega/(2*np.pi), gain, 'o-', label=experiment)
+    '''
+
+    '''
 
     def process(self):
         rawdata = {}
@@ -330,7 +447,6 @@ class TwentePost(TwenteFile, SultanIO):
                 bounds_error=False, fill_value='extrapolate')(
                     np.log10(data['frequency']))
 
-    '''
     def plot(self):
         """Plot data."""
         axes = plt.subplots(1, 1)[1]
@@ -388,29 +504,4 @@ class TwentePost(TwenteFile, SultanIO):
         plt.despine()
         axes.set_xscale('log')
         axes.set_yscale('log')
-    '''
-
-
-if __name__ == '__main__':
-
-    source = TwenteSource('CS_KAT', phase='virgin', index=0)
-    post = TwentePost(source, binary=False)
-    system = post.plot()
-
-    omega = post.omega[0]
-    cycles = 50
-    t = np.linspace(0, cycles*2*np.pi/omega, 30*cycles)
-    y = np.sin(omega*t)
-    p = scipy.signal.lsim(system, y, t)[1]
-
-    plt.figure()
-    plt.plot(t, y)
-    plt.plot(t, p)
-    print(2*np.mean(p**2))
-
-    '''
-    for experiment in ['CSJA_7', 'CSJA_8', 'CSJA12', 'CSJA13']:
-        fluid = FluidResponse(experiment, 0, 'Left')
-        omega, gain = fluid.response(2)
-        plt.plot(omega/(2*np.pi), gain, 'o-', label=experiment)
     '''

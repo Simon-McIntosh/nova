@@ -103,9 +103,9 @@ class FluidResponse(SultanIO):
     def response(self, Be):
         index = (self.plan['Be'] == Be) & (self.plan['Isample'] == 0)
         pareto_index = self._sort_monotonic(index)
-        frequency = 2*np.pi * self.coefficents['frequency'][pareto_index].to_numpy()
+        frequency = self.coefficents['frequency'][pareto_index].to_numpy()
         gain = self.coefficents['steadystate'][pareto_index].to_numpy()
-        return frequency, gain
+        return frequency, gain**1.6
 
     def plot(self, Be, dcgain_limit=1e6):
         """Plot frequency response."""
@@ -163,7 +163,7 @@ class FluidResponse(SultanIO):
 
         def model_gain(x):
             dBgain = scipy.signal.bode(field_model(x), frequency)[1]
-            return 10**(dBgain / 40)
+            return 10**(dBgain / 20)
 
         def model_error(x):
             error = np.linalg.norm(np.log10(model_gain(x)) -
@@ -180,8 +180,8 @@ class FluidResponse(SultanIO):
             return error
 
         #opt = nlopt.opt(nlopt.LN_PRAXIS, dimension)
-        #opt = nlopt.opt(nlopt.LN_BOBYQA, dimension)
-        opt = nlopt.opt(nlopt.LN_NELDERMEAD, dimension)
+        opt = nlopt.opt(nlopt.LN_BOBYQA, dimension)
+        #opt = nlopt.opt(nlopt.LN_NELDERMEAD, dimension)
         #opt = nlopt.opt(nlopt.LN_COBYLA, dimension)
         #opt = nlopt.opt(nlopt.LD_MMA, dimension)
 
@@ -195,6 +195,7 @@ class FluidResponse(SultanIO):
         opt.set_min_objective(error)
         opt.set_lower_bounds(lower_bounds)
         opt.set_upper_bounds(upper_bounds)
+        opt.set_initial_step(0.001)
         opt.set_ftol_rel(1e-6)
         vector = opt.optimize(np.append(-np.ones(nzero+npole),
                                         np.min([gain[0], upper_bounds[-1]])))

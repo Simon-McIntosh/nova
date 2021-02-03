@@ -150,6 +150,8 @@ class SampleData:
         # net heating
         data['Qdot'] = data[('mdot', 'kg/s')] * \
             (data[('hout', 'J/Kg')] - data[('hin', 'J/Kg')])
+        # per active length
+        data['Qdot'] /= 0.39
         # normalize Qdot heating by |Bdot|**2
         data['Qdot_norm'] = data['Qdot'] / self.excitation_field_rate**2
         return data

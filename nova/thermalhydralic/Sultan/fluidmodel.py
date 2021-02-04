@@ -60,8 +60,9 @@ class FluidModel:
         if self.reload or self.model.reload:
             self.reload = False
             self.model.reload = False
-            self._output = scipy.signal.lsim2(self.model.lti, self.signal,
-                                              T=self.time, atol=2e-4)[1]
+            self._output = scipy.signal.lsim2(
+                self.model.lti, self.signal, T=self.time, rtol=5e-3,
+                hmax=15*(self.time[1]-self.time[0]))[1]
             if self.model.time_delay > 0:
                 self._output = self._timeshift(self._output)
         return self._output

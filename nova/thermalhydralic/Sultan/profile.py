@@ -19,7 +19,7 @@ class Profile:
     sample: Union[Sample, Trial, Campaign, str]
     _data_offset: Union[bool, tuple[float]] = True
     _offset: tuple[float] = field(init=False, default=(0, 0), repr=False)
-    _normalize: bool = True
+    _normalize: bool = False
     _lowpass_filter: bool = True
     reload: SimpleNamespace = field(init=False, repr=False,
                                     default_factory=SimpleNamespace)
@@ -319,13 +319,13 @@ class Profile:
         if lowpass_filter:
             color = 'C0'
             label = 'lowpass'
-            lw = 1.5
+            linewidth = 1.5
         else:
             color = 'C9'
             label = 'raw'
-            lw = 1
+            linewidth = 1
         kwargs = {'color': color, 'linestyle': '-', 'label': label,
-                  'lw': lw} | kwargs
+                  'lw': linewidth} | kwargs
         with self.sample.sampledata(lowpass_filter=lowpass_filter):
             axes.plot(*self.timeseries(), **kwargs)
 
@@ -361,8 +361,6 @@ if __name__ == '__main__':
 
     trial = Trial('CSJA12', 'ac0')
     sample = Sample(trial, 0, 'Left')
-    profile = Profile(sample, _normalize=True)
+    profile = Profile(sample, _normalize=False)
 
     profile.plot(lowpass=True, heat=True)
-
-    #print(profile.coefficents)

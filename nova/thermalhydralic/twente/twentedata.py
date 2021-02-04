@@ -223,7 +223,7 @@ class TwentePost(TwenteFile, SultanIO):
             """Return lti model."""
             zeros = 10**np.array(vector[:nzeros])
             poles = 10**np.array(vector[nzeros:-2])
-
+            '''
             order = 20
             step = 0.1
             cutoff = vector[0]
@@ -236,7 +236,8 @@ class TwentePost(TwenteFile, SultanIO):
             #zeros = poles[0] + np.diff(poles)
             #poles = np.array([cutoff * k**(2*i) for i in range(order)])
             #zeros = np.array([cutoff * k**(2*i+1) for i in range(order)])
-
+            '''
+            poles = np.array([poles[0] + 1j*poles[1], poles[0] - 1j*poles[1]])
             dcgain = vector[-2]
             gain = np.prod(poles) / np.prod(zeros) * dcgain
             return scipy.signal.ZerosPolesGain(-zeros, -poles, gain)
@@ -305,10 +306,10 @@ class TwentePost(TwenteFile, SultanIO):
 
         def get_opt(algorithum, zeros, poles):
             parameter_number = len(zeros) + len(poles) + 2
-            lower_bounds = [-2 for __ in zeros + poles] + [1e-12, 1e-12]
-            upper_bounds = [2 for __ in zeros + poles] + [1e12, 1e12]
+            lower_bounds = [-3 for __ in zeros + poles] + [1e-12, 0]
+            upper_bounds = [0.5 for __ in zeros + poles] + [1e12, 1e12]
             opt = nlopt.opt(f'LN_{algorithum}', parameter_number)
-            opt.set_initial_step(0.001)
+            opt.set_initial_step(0.1)
             opt.set_min_objective(model_update)
             opt.set_lower_bounds(lower_bounds)
             opt.set_upper_bounds(upper_bounds)
@@ -323,7 +324,7 @@ class TwentePost(TwenteFile, SultanIO):
         #opt = get_opt('COBYLA', zeros, poles)
         #opt.add_inequality_mconstraint(bound_update, [0])
         #opt.set_ftol_rel(1e-3)
-        #vector = opt.optimize(vector)
+        #vector = opt.optimize(inital_vector)
 
         return vector, model(vector)
 
@@ -371,12 +372,12 @@ class TwentePost(TwenteFile, SultanIO):
 
     def plot(self):
         poly = self.fit_polynomial(2, index=slice(3), plot=False)
-        self.Qhys = poly[0]
+        self.Qhys = 0#1.05*poly[0]
 
 
         axes = plt.subplots(1, 1)[1]
         vector, system = self.fit_transfer_function(
-            [], [-1.2], self.Prms[0], 1.1)
+            [], [-1.5, -0.4], self.Prms[0], self.Qhys)
         print('\n', vector)
         frequency = np.logspace(-3, 0.5)
         #

@@ -40,8 +40,8 @@ class FitFluid:
 
     def initialize_model(self):
         """Init LTI model."""
-        self.fluid.model.update_pole(0.056*self.data.massflow)
-        dcgain = 2*self.data.fieldratesq_amplitude * np.max(self.data.output)
+        self.fluid.model.update_pole(0.1*self.data.massflow)
+        dcgain = 2 * np.max(self.data.output) / self.data.fieldratesq_amplitude
         if dcgain < 1e-6:
             dcgain = 1e-6
         self.fluid.model.update_dcgain(dcgain)
@@ -81,12 +81,12 @@ class FitFluid:
     def _set_nlopt(self, algorithm):
         opt = nlopt.opt(getattr(nlopt, algorithm),
                         self.fluid.model.parameter_number)
-        initial_step = 0.05*np.array(self.fluid.model.vector)
-        initial_step[initial_step < 1e-2] = 1e-2
+        initial_step = 0.01*np.array(self.fluid.model.vector)
+        initial_step[initial_step < 1e-3] = 1e-3
         opt.set_initial_step(initial_step)
         opt.set_min_objective(self.model_update)
-        opt.set_lower_bounds(1e-6*np.ones(self.fluid.model.parameter_number))
-        opt.set_ftol_rel(1e-4)
+        opt.set_lower_bounds(1e-3*np.ones(self.fluid.model.parameter_number))
+        opt.set_ftol_rel(1e-2)
         return opt
 
     def optimize(self, waveform_data: pandas.DataFrame, optimizer='nlopt'):
@@ -114,7 +114,9 @@ class FitFluid:
     def coefficents(self):
         """Return fitting coefficients."""
         coefficents = {}
-        for attr in ['fieldratesq_amplitude', 'massflow', 'frequency']:
+        for attr in ['field_amplitude', 'fieldsq_amplitude',
+                     'fieldrate_amplitude', 'fieldratesq_amplitude',
+                     'massflow', 'frequency']:
             coefficents[attr] = getattr(self.data, attr)
         coefficents['steadystate'] = self.steadystate
         coefficents['steadystate_error'] = self.steadystate_error

@@ -120,6 +120,8 @@ class WaveForm:
             delta = np.diff(minmax)[0]
             stop = np.argmax(cooldown <= minmax[1]-self.threshold*delta)
             stop += start+argmax
+        if stop < self.profile.sample.heatindex.stop:
+            stop = self.profile.sample.heatindex.stop
         return slice(start, stop)
 
     @property

@@ -22,7 +22,7 @@ class FluidProfile(SultanIO):
     """Manage fluid model and non-linear fits to experimental data."""
 
     profile: Union[Sample, Trial, Campaign, str]
-    fluid: Union[FluidModel, Model, list[int], int] = field(default=6)
+    fluid: Union[FluidModel, Model, list[int], int] = field(default=4)
     _threshold: InitVar[float] = 0
     _delay: InitVar[bool] = False
     reload: bool = False
@@ -35,6 +35,7 @@ class FluidProfile(SultanIO):
             self.profile = Profile(self.profile)
         if not isinstance(self.fluid, FluidModel):
             self.fluid = FluidModel(self.fluid)
+        self.profile.normalize = False
         self.fluid.model.delay = _delay
         self.waveform = WaveForm(self.profile, _threshold)
         self.fit = FitFluid(self.fluid, verbose=verbose)
@@ -161,6 +162,11 @@ class FluidProfile(SultanIO):
         return self._coefficents
 
     @property
+    def shot_coefficents(self):
+        """Return profile and response coefficents."""
+        return pandas.concat([self.profile.coefficents, self.coefficents])
+
+    @property
     def pulse_energy(self):
         """Return intergral power."""
         self.fluid.timeseries = self.waveform.timeseries(1, pulse=True)
@@ -280,10 +286,10 @@ class FluidProfile(SultanIO):
 
 if __name__ == '__main__':
 
-    trial = Trial('CSJA12', 0)
-    sample = Sample(trial, -1, 'Left')
+    trial = Trial('CSJA_3', 0)
+    sample = Sample(trial, 0, 'Left')
 
-    fluidprofile = FluidProfile(sample, [6], -1, reload=False)
+    fluidprofile = FluidProfile(sample, [4], 0, reload=False)
 
     #print(fluidprofile.coefficents)
     fluidprofile.plot()

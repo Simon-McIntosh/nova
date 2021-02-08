@@ -1,11 +1,16 @@
-name: nova_py39
+name: nova
+channels:
+  - conda-forge
+  - defaults
 dependencies:
   - python=3.9
   - astropy
+  - beautifulsoup4
   - coolprop
   - descartes
   - ftputil
   - matplotlib
+  - mechanize
   - netcdf4
   - nlopt
   - numpy
@@ -18,14 +23,17 @@ dependencies:
   - pytest
   - python-snappy
   - python-docx
+  - regex
   - scikit-image
   - scikit-learn
   - scipy
   - seaborn
   - shapely
   - spyder
+  - urllib3
   - xarray
   - xlrd
   - pip:
+    - pymupdf
     - pyquaternion
     - rdp

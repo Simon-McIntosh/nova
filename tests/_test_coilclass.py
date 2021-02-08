@@ -1,3 +1,4 @@
+import pytest
 from numpy import allclose
 
 from nova.electromagnetic.coilclass import CoilClass
@@ -39,4 +40,5 @@ def test_IM_field(plot=False):
 
 if __name__ == '__main__':
 
-    cc = test_IM_field(plot=False)
+    pytest.main([__file__])
+    #cc = test_IM_field(plot=True)

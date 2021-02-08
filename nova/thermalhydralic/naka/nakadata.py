@@ -133,8 +133,8 @@ class NakaData:
                     names.append(name)
                     urls.append(url)
         else:
-            names = self.index[name]['names']
-            urls = self.index[name]['urls']
+            names = self.index[shot]['names']
+            urls = self.index[shot]['urls']
         localfiles = ['' for __ in range(len(names))]
         for i, (name, url) in enumerate(zip(names, urls)):
             directory = self._get_directory(name)

@@ -113,7 +113,7 @@ class CoilPlot:
                    coil=None, fs='medium', Nmax=20):
         if coil is None:
             coil = self.coil
-        if label == 'all':  # all coils
+        if label == 'all' or label == 'full':  # all coils
             parts = coil.part
         elif label == 'status':  # based on coil.update_status
             parts = coil.part[coil._current_index[coil._mpc_referance]]
@@ -151,8 +151,11 @@ class CoilPlot:
                         [label, current, field]) if value}
         for name, dz in zip(ztext, nz*dz_ref * np.linspace(1, -1, nz)):
             ztext[name] = dz
+        print(coil.index, coil.part, parts)
         for name, part in zip(coil.index, coil.part):
+            print('p', part, 'p', coil.mpc_index(label), part)
             if part in parts and N[part] < Nmax:
+                print('part', part, parts)
                 x, z = coil.loc[name, 'x'], coil.loc[name, 'z']
                 dx = coil.loc[name, 'dx']
                 drs = 2/3*dx * np.array([-1, 1])

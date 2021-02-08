@@ -3,9 +3,12 @@ import pandas
 
 from nova.thermalhydralic.naka.nakadata import NakaData
 
-naka = NakaData(2000)
-print(naka.select('AC'))
-#print(naka.locate(0))
+naka = NakaData(2015)
+#print(naka.select('AC'))
+
+name = naka.locate(0)
+naka.download()
+
 #
 '''
 naka.select_download('AC')

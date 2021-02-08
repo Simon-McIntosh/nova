@@ -3,8 +3,10 @@ import pandas
 
 from nova.thermalhydralic.naka.nakadata import NakaData
 
-naka = NakaData(2008)
+naka = NakaData(2000)
 print(naka.select('AC'))
+#print(naka.locate(0))
+#
 '''
 naka.select_download('AC')
 shot = naka.shot_index[284]

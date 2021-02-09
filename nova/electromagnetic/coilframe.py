@@ -333,7 +333,8 @@ class CoilFrame(DataFrame, CoilData):
             if name is None:
                 try:  # reverse search through coilframe index
                     offset = next(
-                        int(re.sub(r'[a-zA-Z]', '', index).replace(delim, ''))
+                        int(re.sub(r'[a-zA-Z]', '',
+                                   index).replace(delim, '').replace('_', ''))
                         for index in self.index[::-1] if label in index) + 1
                 except StopIteration:  # label not present in index
                     offset = 0

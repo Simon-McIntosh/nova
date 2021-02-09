@@ -1,267 +1,92 @@
-"""Manage access to Naka datafiles."""
+"""Manage local and remote naka test data."""
 import os
-import io
-import json
 from dataclasses import dataclass, field
 from typing import Union
 
-import regex
-import mechanize
-import urllib.request
-import fitz
 import pandas
 import numpy as np
-import scipy.signal
 
-from nova.thermalhydralic.naka.nakaserver import NakaServer
-from nova.thermalhydralic.naka.localdata import LocalData
-from nova.thermalhydralic.naka.pipeline import PipeLine
-from nova.utilities.time import clock
+from nova.thermalhydralic.naka.database import DataBase
+from nova.utilities.pandasdata import PandasHDF
 from nova.utilities.pyplot import plt
 
 
 @dataclass
-class NakaData:
-    """Serve data from Naka data center."""
+class NakaData(PandasHDF):
+    """Manage naka data."""
 
-    _year: int
-    _index: dict = field(default_factory=dict, init=False, repr=False)
-    metadata: pandas.DataFrame = field(init=False, repr=False)
-    pipeline: PipeLine = field(init=False, repr=False)
+    database: Union[DataBase, str]
+    _shot: int = 0
+    data: pandas.DataFrame = field(init=False, repr=False)
 
     def __post_init__(self):
-        """Init database year."""
-        self.pipeline = PipeLine()
-        self.year = self._year
+        """Load dataset."""
+        if not isinstance(self.database, DataBase):
+            self.database = DataBase(self.database)
+        self.shot = self._shot
 
     @property
-    def year(self):
-        """Manage database year."""
-        return self._year
+    def shot(self):
+        """Manage shot index."""
+        return self._shot
 
-    @year.setter
-    def year(self, year):
-        self._year = year
-        self.local = \
-            LocalData('', parent_dir=os.path.join('Naka', f'{self.year}'))
-        self.load_index()
-        self.load_metadata()
-
-    @property
-    def indexfile(self):
-        """Return full path to local index file."""
-        return os.path.join(self.local.parent_directory, 'index.json')
-
-    def load_index(self):
-        """Load directory index."""
-        if os.path.isfile(self.indexfile):  # serve file localy
-            with open(self.indexfile, 'r') as jsonfile:
-                self._index = json.load(jsonfile)
-        else:  # read from server
-            self._index = self._read_index()
-
-    def _read_index(self):
-        """Return index extracted from Naka server."""
-        makedir = ~self.local.checkdir()  # generate structure if requred
-        if makedir:
-            self.local.makedir()
-        try:
-            with NakaServer(self.year) as server:
-                index = server.index
-                with open(self.indexfile, 'w') as jsonfile:
-                    json.dump(index, jsonfile, indent=4)
-        except mechanize.HTTPError as http_error:
-            if makedir:
-                self.local.removedir()  # remove if generated bare
-            raise FileNotFoundError(f'Year {self.year} not found on '
-                                    'naka server') from http_error
-        return index
+    @shot.setter
+    def shot(self, shot):
+        if shot < 0:
+            shot = range(self.database.shot_number)[shot]
+        self._shot = shot
+        self.data = self.load_data()
 
     @property
-    def index(self):
-        """Return server file index."""
-        return self._index
+    def binaryfilepath(self):
+        """Return full path of binary datafile."""
+        return os.path.join(self.database.binary_filepath('testdata.h5'))
 
     @property
-    def shot_index(self):
-        """Return run index list."""
-        return list(self.index.keys())
+    def filename(self):
+        """Manage datafile filename."""
+        return self.database.shot_list[self.shot]
 
-    @property
-    def shot_number(self):
-        """Return shot number."""
-        return len(self.index)
+    def _read_dataframe(self, file):
+        """Return csv file data as pandas.DataFrame."""
+        dataframe = pandas.read_csv(file, skiprows=7, dtype=float,
+                                    na_values=['1.#INF00e+000'])
+        columns = {}
+        for name in dataframe.columns:
+            columns[name] = name.replace('(sec)', '')
+            columns[name] = columns[name].replace('phy(', '').replace(')', '')
+        dataframe.rename(columns=columns, inplace=True)
+        dataframe.dropna(inplace=True, axis=1)
+        return dataframe
 
-    def locate(self, shot: Union[int, list[int, int], str], files=[]):
-        """
-        Locate file, download from Naka server if not found.
+    def _read_dataset(self, files):
+        """Return dataset."""
+        file_number = len(files)
+        dataset = [[] for __ in range(file_number)]
+        sample_number = np.zeros(file_number, dtype=int)
+        for i, file in enumerate(files):
+            dataset[i] = self._read_dataframe(file)
+            sample_number[i] = dataset[i].shape[0]
+        stop_index = np.min(sample_number)
+        for i in range(file_number):
+            dataset[i] = dataset[i].iloc[slice(stop_index), :]
+            drop = dataset[i].select_dtypes(exclude=float).columns
+            dataset[i].drop(columns=drop, inplace=True)
+        dataset = pandas.concat(dataset, axis=1)
+        return dataset
 
-        Parameters
-        ----------
-        shot : Union[int, list[int, int], str]
-            Shot identifier.
-        files : list[str], optional
-            List of file identifiers ['pdf', 'csv',...]. The default is [].
+    def _read_data(self):
+        """Return concatinated dataset."""
+        files = self.database.locate(self.shot, files='L.csv')
+        self.database.download()
+        return self._read_dataset(files)
 
-        Raises
-        ------
-        IndexError
-            DESCRIPTION.
-
-        Returns
-        -------
-        localfiles : list[str]
-            List of local files
-
-        """
-        if isinstance(files, str):
-            files = [files]
-        if isinstance(shot, int):
-            shot = self.shot_index[shot]
-        if isinstance(shot, list):
-            mrun, srun = shot
-            shot = f'MRun{mrun:03}_SRun{srun:03}'
-        if shot not in self.index:
-            raise IndexError(f'shot {shot} not found in '
-                             f'run index \n\n{self.run_index}')
-        if files:
-            names, urls = [], []
-            identifier = regex.compile(r"\L<files>", files=files)
-            for name, url in zip(self.index[shot]['names'],
-                                 self.index[shot]['urls']):
-                if identifier.search(name):
-                    names.append(name)
-                    urls.append(url)
-        else:
-            names = self.index[shot]['names']
-            urls = self.index[shot]['urls']
-        localfiles = ['' for __ in range(len(names))]
-        for i, (name, url) in enumerate(zip(names, urls)):
-            directory = self._get_directory(name)
-            localfile = os.path.join(directory, name)
-            if not os.path.isfile(localfile):
-                self.pipeline.append(name, url)
-            localfiles[i] = localfile
-        return localfiles
-
-    def _get_directory(self, name):
-        """Return directory based on filename extension."""
-        if name[-4:] == '.pdf':
-            directory = self.local.metadata_directory
-        else:
-            directory = self.local.source_directory
-        return directory
-
-    def download(self):
-        """Download files in pipeline."""
-        if self.pipeline.count > 0:
-            tick = clock(
-                self.pipeline.count,
-                header=f'Downloading {self.pipeline.count} files '
-                f'from the Naka server.')
-            with NakaServer(self.year) as server:
-                _url = server.browser.geturl()
-                for name, url in self.pipeline.serve():
-                    url = f'{_url}/{url}'
-                    directory = self._get_directory(name)
-                    filename = os.path.join(directory, name)
-                    with urllib.request.urlopen(url) as response:
-                        with open(filename, 'wb') as localfile:
-                            localfile.write(response.read())
-                    tick.tock()
-            self.pipeline.flush()
-
-    def _download_metadata(self):
-        """Download all metadata files form Naka server for specified year."""
-        for name in self.index:
-            self.locate(name, files=['pdf'])  # build pipeline
-        self.download()  # download files
-
-    def _read_metadata(self):
-        """Return shot objective from metadata pdfs."""
-        self._download_metadata()
-        metadata = pandas.DataFrame(index=range(len(self.index)),
-                                    columns=['shot', 'objective'])
-        metadata.loc[:, 'shot'] = self.shot_index
-        for i in range(self.shot_number):
-            metadata.loc[i, 'objective'] = self.read_objective(i)
-        metadata.to_csv(self.metafile)
-        return metadata
-
-    @property
-    def metafile(self):
-        """Return full path to local metadata file."""
-        return os.path.join(self.local.parent_directory, 'metadata.csv')
-
-    def load_metadata(self):
-        """Load directory index."""
-        if os.path.isfile(self.metafile):  # serve file localy
-            self.metadata = pandas.read_csv(self.metafile)
-        else:  # read from server
-            self.metadata = self._read_metadata()
-
-    def read_objective(self, shot):
-        """Return shot objective."""
-        metafile = self.locate(shot, files='pdf')[0]
-        doc = fitz.open(metafile)
-        text = doc.loadPage(0).getText("text")
-        text = text.replace(':', '\n').split('\n')
-        text = [label.strip() for label in text]
-        if 'Object' in text:
-            index = text.index('Object')+1
-        else:
-            index = text.index('~')+5
-        objective = text[index]
-        print(objective)
-        return objective
-
-    def select(self, subobjective):
-        """Return metadata subset."""
-        index = self.metadata.objective.str.contains(subobjective)
-        return self.metadata[index]
-
-    def select_download(self, subobjective):
-        """Download selected files."""
-        for shot in self.select(subobjective).index:
-            self.locate(shot, files='csv')
-        self.download()
+    def columns(self, label):
+        """Return list of columns containing label."""
+        return [column for column in self.data.columns if label in column]
 
 
 if __name__ == '__main__':
 
-    naka = NakaData(2015)
-    naka.select_download('AC')
-    shot = naka.shot_index[284]
-    file = naka.locate(284, files='1-H')[0]
-    dataframe = pandas.read_csv(file, skiprows=7)
-    columns = {}
-    for name in dataframe.columns:
-        columns[name] = name.replace('(sec)', '')
-        columns[name] = columns[name].replace('phy(', '').replace(')', '')
-    dataframe.rename(columns=columns, inplace=True)
-    dataframe.dropna(inplace=True, axis=1)
-
-    print(dataframe.shape)
-
-    '''
-    #Tin = dataframe['ICS_TS_07L']
-    #Tout = dataframe['ICS_TS_02L']
-
-    #dT = Tout-Tin
-    index = (dataframe.time > 1600) & (dataframe.time < 2000)
-    dataframe = dataframe.loc[index, :]
-
-    dp = dataframe['ICS_PT_IN']#-dataframe['ICS_PT_IN']
-    #plt.plot(dataframe.time, dataframe['ICS_PT_IN'])
-    plt.plot(dataframe.time, dp)
-    #plt.xlim([0, 500])
-
-    fs = 1/np.mean(np.diff(dataframe.time))
-    f, Pxx = scipy.signal.welch(dp, fs)
-
-    plt.figure()
-    plt.loglog(f[1:], Pxx[1:])
-
-    1/0.005
-    '''
-
+    nakadata = NakaData(2015, 209)
+    #nakadata.read_data()

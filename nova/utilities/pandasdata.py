@@ -1,12 +1,12 @@
-"""Abstract methods for managing sultan data."""
+"""Abstract methods for managing pandas dataframes."""
 
 import abc
 
 import pandas
 
 
-class SultanIO(metaclass=abc.ABCMeta):
-    """Sultan data input/output."""
+class PandasHDF(metaclass=abc.ABCMeta):
+    """Manage dataframe input/output."""
 
     def load_data(self):
         """Load data from HDF store."""

@@ -6,11 +6,11 @@ from types import SimpleNamespace
 import pandas
 
 from nova.thermalhydralic.sultan.database import DataBase
-from nova.thermalhydralic.sultan.sultanio import SultanIO
+from nova.utilities.pandasdata import PandasHDF
 
 
 @dataclass
-class SultanData(SultanIO):
+class SultanData(PandasHDF):
     """Manage Sultan timeseries data."""
 
     database: DataBase

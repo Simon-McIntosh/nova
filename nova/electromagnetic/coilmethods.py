@@ -437,8 +437,9 @@ class CoilMethods:
             else:
                 dCoil = (dx * dz / Nf)**0.5
         cross_section = mesh['cross_section']
+        Nt = (dx * dz) / dCoil**2
         nx = int(np.round(dx / dCoil))
-        nz = int(np.round(dz / dCoil))
+        nz = int(np.round(Nt / nx))
         if nx < 1:
             nx = 1
         if nz < 1:

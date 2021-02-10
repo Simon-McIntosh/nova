@@ -421,25 +421,29 @@ class CoilMethods:
         else:
             turn_fraction = kwargs.get('turn_fraction', 1)
         if dCoil is None or dCoil == 0:
+            Nf = 1
             dCoil = np.max([dx, dz])
         elif dCoil == -1:  # mesh per-turn
+            Nf = coil['Nt']
             if 'cross_section' not in mesh:
                 mesh['cross_section'] = 'circle'
-            Nt = coil['Nt']
             if coil['cross_section'] == 'circle':
-                dCoil = (np.pi * ((dx + dz) / 4)**2 / Nt)**0.5
+                dCoil = (np.pi * ((dx + dz) / 4)**2 / Nf)**0.5
             else:
-                dCoil = (dx * dz / Nt)**0.5
+                dCoil = (dx * dz / Nf)**0.5
         elif dCoil < -1:
             Nf = -dCoil  # set filament number
             if coil['cross_section'] == 'circle':
                 dCoil = (np.pi * (dx / 2)**2 / Nf)**0.5
             else:
                 dCoil = (dx * dz / Nf)**0.5
+        elif dCoil > 0:
+            nx = np.max([1, int(np.round(dx / dCoil))])
+            nz = np.max([1, int(np.round(dz / dCoil))])
+            Nf = nx * nz
         cross_section = mesh['cross_section']
-        Nt = (dx * dz) / dCoil**2
-        nx = int(np.round(dx / dCoil))
-        nz = int(np.round(Nt / nx))
+        nx = np.max([1, int(np.round(dx / dCoil))])
+        nz = int(np.round(Nf / nx))
         if nx < 1:
             nx = 1
         if nz < 1:

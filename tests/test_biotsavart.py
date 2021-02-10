@@ -41,8 +41,7 @@ def test_solenoid_grid(plot=False):
         cs.grid.generate_grid(limit=[1e-5, 3, -0.6*L, 0.6*L], n=1e4)
         cs.grid.plot_flux()
         cs.plot()
-    else:
-        cs.grid.generate_grid(limit=[1e-9, 1.5, 0, 1], n=4)
+    cs.grid.generate_grid(limit=[1e-9, 1.5, 0, 1], n=4)
     Bz_theory = mu_o * N * Ic / L
     Bz = cs.grid.Bz[0, 0]
     assert allclose(Bz, Bz_theory, atol=5e-3)

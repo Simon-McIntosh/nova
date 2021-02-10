@@ -1,16 +1,23 @@
 """Manage local data files."""
 import os
 import glob
+from dataclasses import dataclass
 
 import numpy as np
 
 from nova.definitions import root_dir
 
 
+@dataclass
 class LocalData:
     """Local data methods."""
 
-    def __init__(self):
+    experiment: str
+    parent: str = ''
+    source: str = ''
+    binary: str = ''
+
+    def __post_init__(self):
         """Create hierarchical list used by makedir and removedir methods."""
         self._directories = [self.experiment_directory,
                              self.source_directory,
@@ -19,7 +26,7 @@ class LocalData:
     @property
     def parent_directory(self):
         """Return full path to parent directory."""
-        return self.getdir(os.path.join(root_dir, 'data'), self.parent_dir)
+        return self.getdir(os.path.join(root_dir, 'data'), self.parent)
 
     @property
     def experiment_directory(self):
@@ -29,12 +36,12 @@ class LocalData:
     @property
     def source_directory(self):
         """Return full path to raw data directory."""
-        return self.getdir(self.experiment_directory, self.source_dir)
+        return self.getdir(self.experiment_directory, self.source)
 
     @property
     def binary_directory(self):
         """Return full path to binary data directory."""
-        return self.getdir(self.experiment_directory, self.binary_dir)
+        return self.getdir(self.experiment_directory, self.binary)
 
     @staticmethod
     def getdir(directory, subfolder=''):
@@ -45,7 +52,7 @@ class LocalData:
 
     @staticmethod
     def _mkdir(directory):
-        if not os.path.isdir(directory):
+        if directory and not os.path.isdir(directory):
             os.mkdir(directory)
 
     def checkdir(self):

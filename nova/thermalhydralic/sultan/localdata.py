@@ -13,14 +13,15 @@ class LocalData(LocalData):
     """
 
     experiment: str
-    parent_dir: str = 'Sultan'
-    source_dir: str = 'ftp'
-    binary_dir: str = 'local'
+    parent: str = 'Sultan'
+    source: str = 'ftp'
+    binary: str = 'local'
 
     def __post_init__(self):
         """Extend utilities.localdata.LocalData."""
         super().__init__()
 
+
 if __name__ == '__main__':
-    local = LocalData('CSJA12', 'Sultan')
-    #print(local.locate('*.xls'))
+    local = LocalData('CSJA12', '')
+    # print(local.locate('*.xls'))

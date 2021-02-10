@@ -776,7 +776,7 @@ class scenario_data(read_dina, interpolate, operate):
             for i in range(len(xslice)):
                 if isinstance(xslice[i], str):
                     xslice[i] = self.feature_keypoints.loc[xslice[i],
-                                                         'frame_index']
+                                                           'frame_index']
         if len(xslice) == 1:
             dt = 0
             xslice = xslice[0]
@@ -809,7 +809,7 @@ class scenario_data(read_dina, interpolate, operate):
     def plot_current(self, **kwargs):
         """Plot coil current vectors."""
         for name in self.index[self.Ic_iloc]:
-            if name != 'Ip' and 'vs' not in name:
+            if name != 'Ip' and 'tf' not in name:
                 label = name[1:].upper()
                 self.plot(y=name, label=name, **kwargs)
 

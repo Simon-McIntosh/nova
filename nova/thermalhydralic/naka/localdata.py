@@ -13,9 +13,9 @@ class LocalData(LocalData):
     """
 
     experiment: str
-    parent_dir: str = 'Naka'
-    source_dir: str = 'source'
-    binary_dir: str = 'local'
+    parent: str = 'Naka'
+    source: str = 'source'
+    binary: str = 'local'
     metadata_dir: str = 'metadata'
 
     def __post_init__(self):

@@ -54,11 +54,11 @@ def test_rectangular_cross_section():
 
 
 def test_current_update():
-    'test current update for active coils (power=True)'
+    'test current update for active coils (active=True)'
     cs = CoilSet(current_update='active', dCoil=0)
-    cs.add_coil(1, 2, 0.4, 0.5, Ic=5, power=True)
-    cs.add_coil(1, 3, 0.4, 0.5, Ic=6.7, power=False)
-    cs.add_coil(1, 4, 0.4, 0.5, Ic=4, power=True)
+    cs.add_coil(1, 2, 0.4, 0.5, Ic=5, active=True)
+    cs.add_coil(1, 3, 0.4, 0.5, Ic=6.7, active=False)
+    cs.add_coil(1, 4, 0.4, 0.5, Ic=4, active=True)
     cs.Ic = [3.2, 5.8]
     cs.current_update = 'full'
     assert np.allclose(cs.Ic, [3.2, 6.7, 5.8])

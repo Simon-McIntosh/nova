@@ -118,10 +118,10 @@ class CoilPlot:
         elif label == 'status':  # based on coil.update_status
             parts = coil.part[coil._current_index[coil._mpc_referance]]
             parts = parts
-        elif label == 'active':  # power == True
-            parts = coil.part[coil.power & ~coil.plasma & ~coil.feedback]
-        elif label == 'passive':  # power == False
-            parts = coil.part[~coil.power & ~coil.plasma & ~coil.feedback]
+        elif label == 'active':  # active == True
+            parts = coil.part[coil.active & ~coil.plasma & ~coil.feedback]
+        elif label == 'passive':  # active == False
+            parts = coil.part[~coil.active & ~coil.plasma & ~coil.feedback]
         elif label == 'coil':  # plasma == False
             parts = coil.part[~coil.plasma & ~coil.feedback]
         elif label == 'plasma':  # plasma == True
@@ -151,11 +151,8 @@ class CoilPlot:
                         [label, current, field]) if value}
         for name, dz in zip(ztext, nz*dz_ref * np.linspace(1, -1, nz)):
             ztext[name] = dz
-        print(coil.index, coil.part, parts)
         for name, part in zip(coil.index, coil.part):
-            print('p', part, 'p', coil.mpc_index(label), part)
             if part in parts and N[part] < Nmax:
-                print('part', part, parts)
                 x, z = coil.loc[name, 'x'], coil.loc[name, 'z']
                 dx = coil.loc[name, 'dx']
                 drs = 2/3*dx * np.array([-1, 1])

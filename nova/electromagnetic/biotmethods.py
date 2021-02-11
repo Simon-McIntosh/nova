@@ -8,7 +8,7 @@ import shapely.geometry
 from nova.utilities.pyplot import plt
 from nova.utilities.geom import length
 from nova.electromagnetic.meshgrid import MeshGrid
-from nova.electromagnetic.biotsavart import BiotSet
+from nova.electromagnetic.biotsavart import BiotSet, BiotFrame
 from nova.electromagnetic.coilmatrix import CoilMatrix
 from nova.electromagnetic.topology import Topology
 
@@ -30,6 +30,47 @@ class ForceField(Mutual):
 
     def __init__(self, subcoil, **biot_attributes):
         Mutual.__init__(self, subcoil, **biot_attributes)
+
+
+class ACLoss(BiotSet):
+    """ACLoss interaction methods and data. Extends BiotSet class."""
+
+    _biot_attributes = []
+    _default_biot_attributes = {'target_turns': False,
+                                'reduce_target': False}
+
+    def __init__(self, subcoil, **biot_attributes):
+        BiotSet.__init__(self, source=subcoil, **biot_attributes)
+
+    def assemble_biotset(self):
+        """Extend BiotSet.assemble_biotset - add targets."""
+        coilframe = self.source.coilframe
+        self.target = BiotFrame()
+        self.target.add_coil(coilframe.loc[coilframe.acloss, :])
+        BiotSet.assemble_biotset(self)
+
+
+class Passive(BiotSet):
+    """Passive structure methods and data. Extends BiotSet class."""
+
+    _biot_attributes = []
+    _default_biot_attributes = {'target_turns': True,
+                                'reduce_target': True}
+
+    def __init__(self, subcoil, **biot_attributes):
+        BiotSet.__init__(self, source=subcoil, **biot_attributes)
+
+    def assemble_biotset(self):
+        """Extend BiotSet.assemble_biotset - add targets."""
+        print('assemble')
+        passive = self.source.coilframe.loc[~self.source.coilframe.active, :]
+
+        #coilframe = self.source.coilframe
+        #self.source = BiotFrame(passive)
+        #self.source.add_coil()
+        self.target = BiotFrame()
+        self.target.add_coil(passive)
+        BiotSet.assemble_biotset(self)
 
 
 class Probe(BiotSet):
@@ -852,6 +893,8 @@ class BiotMethods:
 
     _biot_methods = {'mutual': Mutual,
                      'forcefield': ForceField,
+                     'acloss': ACLoss,
+                     'passive': Passive,
                      'probe': Probe,
                      'field': Field,
                      'colocate': Colocate,

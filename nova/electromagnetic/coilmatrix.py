@@ -348,7 +348,9 @@ class CoilMatrix():
         None.
 
         """
+        print('pre solve')
         self.assemble_biotset()
+        print('post')
         if self.target.nT == 0:
             'Return with warning if targets not set.'
             warn('Targets not set in:\n'
@@ -415,7 +417,7 @@ class CoilMatrix():
                     _M_ *= self.source.coilframe.Np.reshape(1, -1)
                 if self.target_turns:
                     _M_[self.target.plasma, :] *= \
-                            self.target.coilframe.Np.reshape(-1, 1)
+                            self.target.Nt[self.target.plasma].reshape(-1, 1)
                 if self.reduce_source and \
                         len(self.source._plasma_reduction_index) <\
                         self.source.nP:

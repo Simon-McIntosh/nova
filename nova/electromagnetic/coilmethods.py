@@ -110,12 +110,12 @@ class CoilMethods:
     @property
     def current_index(self):
         """
-        Display power, optimize, plasma, and current_update status.
+        Display active, optimize, plasma, and current_update status.
 
         Returns
         -------
         current_index : DataFrame
-            Power, optimize, plasma status.
+            active, optimize, plasma status.
             Current_update flag and indexed coils (last column).
 
         """
@@ -134,8 +134,8 @@ class CoilMethods:
             Current update flag.
 
             - 'full': update full current vector
-            - 'active': update active coils (power & ~plasma)
-            - 'passive': update passive coils (~power & ~plasma)
+            - 'active': update active coils (active & ~plasma)
+            - 'passive': update passive coils (~active & ~plasma)
             - 'fix': update fix coils (~optimize & ~plasma)
             - 'free': update free coils (optimize & ~plasma)
             - 'plasma': update plasma (plasma)
@@ -174,9 +174,9 @@ class CoilMethods:
         #self.update_field()
 
     @property
-    def power(self):
+    def active(self):
         """
-        Manage status of coil power flag (active vs. passive).
+        Manage status of coil active flag (active vs. passive).
 
         Assignments to coils under mpc constraints are overwritten by driving
         coils.
@@ -184,20 +184,20 @@ class CoilMethods:
         Parameters
         ----------
         value : bool or array-like, shape(nC,)
-            Coil and subcoil power status.
+            Coil and subcoil active status.
 
         Returns
         -------
-        power : array-like, shape(nC,)
-            Coil power status.
+        active : array-like, shape(nC,)
+            Coil active status.
 
         """
-        return self.coil.power
+        return self.coil.active
 
-    @power.setter
-    def power(self, value):
-        self.coil.power = value
-        self.subcoil.power = value
+    @active.setter
+    def active(self, value):
+        self.coil.active = value
+        self.subcoil.active = value
 
     @property
     def optimize(self):
@@ -519,7 +519,7 @@ class CoilMethods:
         # mesh['rz'] = zm_ - zo
 
         # propagate current update flags to subcoil
-        for label in ['part', 'power', 'optimize', 'plasma']:
+        for label in ['part', 'active', 'optimize', 'plasma', 'acloss']:
             if label in coil:
                 mesh[label] = coil[label]
         mesh['Ic'] = coil['Ic']
@@ -614,7 +614,7 @@ class CoilMethods:
         label = kwargs.pop('label', kwargs.get('part', 'Shl'))
         dShell = kwargs.pop('dShell', self._default_attributes['dShell'])
         dCoil = kwargs.pop('dCoil', self._default_attributes['dCoil'])
-        power = kwargs.pop('power', False)
+        active = kwargs.pop('active', False)
         delim = kwargs.pop('delim', '')
         rho = kwargs.pop('rho', 0)
         x, z, dl, dt, dA, rho_bar, polygon, sub_segment, sub_rho, sub_dt = \
@@ -622,7 +622,7 @@ class CoilMethods:
         index = self.coil.add_coil(x, z, dl, dt, dA=dA, polygon=polygon,
                                    cross_section='shell', turn_fraction=1,
                                    turn_section='shell', dCoil=dCoil,
-                                   power=power, label=label,
+                                   active=active, label=label,
                                    delim=delim, Nt=dA, rho=rho_bar,
                                    **kwargs)
         self.coil.update_polygon()
@@ -635,7 +635,7 @@ class CoilMethods:
             subindex[i] = self.subcoil.add_coil(
                 _x, _z, _dl, _dt,
                 polygon=_polygon, coil=coil, cross_section='shell',
-                mpc=True, power=power, name=index[i], Nt=_dA,
+                mpc=True, active=active, name=index[i], Nt=_dA,
                 rho=_rho_bar, **kwargs)
             self.coil.at[index[i], 'subindex'] = subindex[i]
         self.subcoil.update_polygon()

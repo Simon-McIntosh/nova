@@ -22,8 +22,8 @@ class CoilData():
         Coil turn curent [A.turns]
     Nt : float, array-like
         Coil turn number.
-    power : bool, array-like
-        Coil power supply status.
+    active : bool, array-like
+        Coil current control status.
     optimize : bool, array-like
         Optimization flag.
     plasma : bool, array-like
@@ -50,7 +50,7 @@ class CoilData():
                          'current_index']
 
     # compact mpc attributes - subset of coilframe and coildata attributes
-    _mpc_attributes = ['Ic', 'power', 'plasma', 'optimize', 'feedback',
+    _mpc_attributes = ['Ic', 'active', 'plasma', 'optimize', 'feedback',
                        'current_index']
 
     # multi-point constraints (shared line-current)
@@ -216,7 +216,7 @@ class CoilData():
     def _extract_data_attributes(self):
         self.update_dataframe = False
         for attribute in self._dataframe_attributes + self._coildata_indices:
-            if attribute in ['power', 'plasma', 'optimize', 'feedback']:
+            if attribute in ['active', 'plasma', 'optimize', 'feedback']:
                 dtype = bool
             else:
                 dtype = float
@@ -286,8 +286,8 @@ class CoilData():
             Selection flag.
 
             - 'full' : update full current vector (~feedback)
-            - 'active' : update active coils (power & ~plasma & ~feedback)
-            - 'passive' : update passive coils (~power & ~plasma & ~feedback)
+            - 'active' : update active coils (active & ~plasma & ~feedback)
+            - 'passive' : update passive coils (~active & ~plasma & ~feedback)
             - 'free' : update free coils (optimize & ~plasma & ~feedback)
             - 'fix' : update fix coils (~optimize & ~plasma & ~feedback)
             - 'plasma' : update plasma (plasma & ~feedback)
@@ -311,9 +311,9 @@ class CoilData():
             if mpc_flag == 'full':
                 mpc_select = np.full(self._nC, True) & ~self._feedback
             elif mpc_flag == 'active':
-                mpc_select = self._power & ~self._plasma & ~self._feedback
+                mpc_select = self._active & ~self._plasma & ~self._feedback
             elif mpc_flag == 'passive':
-                mpc_select = ~self._power & ~self._plasma & ~self._feedback
+                mpc_select = ~self._active & ~self._plasma & ~self._feedback
             elif mpc_flag == 'free':
                 mpc_select = self._optimize & ~self._plasma & ~self._feedback
             elif mpc_flag == 'fix':
@@ -367,7 +367,7 @@ class CoilData():
         """
         Display current index update status.
 
-        - power
+        - active
         - optimize
         - plasma
         - feedback
@@ -376,14 +376,14 @@ class CoilData():
         """
         if self.nC > 0:
             return DataFrame(
-                    {'power': self._power,
+                    {'active': self._active,
                      'optimize': self._optimize,
                      'plasma': self._plasma,
                      'feedback': self._feedback,
                      self.current_update: self._current_index},
                     index=self._mpc_index)
         else:
-            return DataFrame(columns=['power', 'optimize', 'plasma',
+            return DataFrame(columns=['active', 'optimize', 'plasma',
                                       'feedback', self.current_update])
 
     def get_current(self, current_column):

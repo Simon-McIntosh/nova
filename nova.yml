@@ -9,6 +9,8 @@ dependencies:
   - coolprop
   - descartes
   - ftputil
+  - hvplot
+  - intake
   - matplotlib
   - mechanize
   - netcdf4

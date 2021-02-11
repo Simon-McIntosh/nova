@@ -93,7 +93,8 @@ class ITERcoilset(CoilClass):
         self.add_plasma(boundary, **kwargs)
         # generate biot objects
         self.biot_instances = kwargs.get('biot_instances', [])
-        self.biot_instances = ['field', 'grid', 'forcefield']
+        self.biot_instances = ['field', 'grid', 'forcefield', 'acloss',
+                               'passive']
         self.field.add_coil(self.coil, ['CS', 'PF'], dField=self.dField)
         self.grid.generate_grid(**kwargs)  # generate base grid (plots)
 
@@ -367,8 +368,9 @@ class PFgeom(CoilSet):  # PF/CS coilset
                     data.loc[coil, 'z'] += factor*dz/2
         part = ['CS' if 'CS' in name else 'PF' for name in data.index]
         data.rename(columns={'dx': 'dl', 'dz': 'dt'}, inplace=True)
-        coil = self.coil.get_coil(data, material='steel',
-                                  cross_section='rectangle', part=part)
+        coil = self.coil.get_coil(
+            data, material='steel', cross_section='rectangle', part=part,
+            acloss=True)
         #coil = self.cc.categorize_coilset(coil, rename=True)
         self.coil.concatenate(coil)
         self.meshcoil(index=coil.index)
@@ -454,7 +456,7 @@ class VSgeom(CoilSet):  # VS coil class
                               cross_section='skin', turn_section='skin',
                               skin_fraction=dt,
                               m=m, material='steel', dCoil=0, part='VS3j',
-                              power=False)
+                              active=False)
 
     def plot_centers(self, coil='LVS', ax=None):
         if ax is None:
@@ -601,7 +603,7 @@ class VVcoils(CoilSet):
                 self.add_coil(x, z, dx, dz, R=R, name=name, part=part,
                                  cross_section='square',
                                  turn_section='square',
-                                 m=m, material='steel', power=False)
+                                 m=m, material='steel', active=False)
         #self.cluster(20)
 
 class elm_coils:

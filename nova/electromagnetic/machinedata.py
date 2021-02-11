@@ -20,7 +20,7 @@ class MachineData(CoilSet):
 
     def __init__(self, read_txt=False, **kwargs):
         self.read_txt = read_txt
-        self.directory = path.join(root_dir, 'inputs/geometry/ITER')
+        self.directory = path.join(root_dir, 'input/geometry/ITER')
         CoilSet.__init__(self, **kwargs)
 
     @staticmethod

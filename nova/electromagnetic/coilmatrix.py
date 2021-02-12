@@ -378,7 +378,7 @@ class CoilMatrix:
         self.solve_interaction()
         variable = variable.capitalize()
         self._dot(variable)
-        return getattr(self, f'_{variable}') + getattr(self, f'_{variable}_')
+        return getattr(self, f'_{variable}') #+ getattr(self, f'_{variable}_')
 
     def _dot(self, variable):
         self._dot_plasma_turns(variable)
@@ -442,7 +442,7 @@ class CoilMatrix:
     def _dot_current(self, variable, plasma):
         index = self.source._plasma if plasma else ~self.source._plasma
         matrix = getattr(self, f'_{variable.lower()}')[:, index]
-        current = self.source.coilframe._Ic[self.source.frameindex][index]
+        current = self.source.coilframe.Ic[self.source.frameindex][index]
         vector = np.dot(matrix, current)
         return self._reshape(vector)
 

@@ -74,20 +74,18 @@ class BackGround(BiotSet):
 
     _biot_attributes = []
     _default_biot_attributes = {'target_turns': False,
-                                'reduce_target': False}
+                                'reduce_target': True}
 
     def __init__(self, subcoil, **biot_attributes):
         BiotSet.__init__(self, source=subcoil, target=subcoil,
                          **biot_attributes)
 
-    '''
     def assemble_biotset(self):
         """Extend BiotSet.assemble_biotset."""
-        #index = self.source.coilframe.active
-        #self.source.index_coil(index)  # active
-        #self.target.index_coil(~index)  # passive
+        index = self.source.coilframe.active
+        self.source.index_coil(index)  # active
+        self.target.index_coil(~index)  # passive
         BiotSet.assemble_biotset(self)
-    '''
 
 
 class Probe(BiotSet):

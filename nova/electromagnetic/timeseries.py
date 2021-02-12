@@ -86,7 +86,7 @@ class DataArray(DataProperty):
         coords = {'time': time, 'turn': index}
         data = np.zeros((nt, nT))
         # extract attributes
-        attrs = {'nT': nT, 'indices': indices}
+        attrs = {'nT': nT, 'indices': np.append(indices, nT)}
         for attr in ['dx', 'dz', 'Nt', 'coil', 'x', 'z']:
             value = target[attr].values
             if attr in ['dx', 'dz', 'Nt', 'coil']:

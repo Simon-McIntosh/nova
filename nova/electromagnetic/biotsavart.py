@@ -1,4 +1,5 @@
 import numpy as np
+import pandas
 
 from nova.electromagnetic.coilframe import CoilFrame
 from nova.electromagnetic.coilmatrix import CoilMatrix
@@ -36,7 +37,7 @@ class BiotAttributes:
             value = _biot_attributes.get(attribute, None)
             if value is not None:
                 if type(value) == BiotFrame:
-                    BiotFrame.__init__(self.target, value)  # set biot frame
+                    BiotFrame.__init__(getattr(self, attribute), value)
                     self.target.rebuild_coildata()
                 else:
                     setattr(self, attribute, value)  # set value
@@ -56,7 +57,7 @@ class BiotFrame(CoilFrame):
                           'polygon': 'square',
                           'shell': 'square'}
 
-    def __init__(self, *args):
+    def __init__(self, *args, reduce=False):
         CoilFrame.__init__(self, *args, coilframe_metadata={
             '_required_columns': ['x', 'z'],
             '_additional_columns': ['rms', 'dx', 'dz', 'Nt', 'cross_section',
@@ -70,9 +71,22 @@ class BiotFrame(CoilFrame):
             '_dataframe_attributes': ['x', 'z', 'rms', 'dx', 'dz', 'Nt',
                                       'cs_factor'] + self._mpc_attributes,
             '_coildata_attributes': {'region': '', 'nS': 0., 'nT': 0.,
-                                     'current_update': 'full'},
+                                     'reduce': reduce,
+                                     'current_update': 'full',
+                                     'frameindex': slice(None),
+                                     'framenumber': 0},
             'mode': 'overwrite'})
         self.coilframe = None
+
+    @property
+    def frameindex(self):
+        """Return frame index."""
+        return self._frameindex
+
+    @property
+    def reduce(self):
+        """Return reduction boolean."""
+        return self._reduce
 
     def add_coil(self, *args, **kwargs):
         """
@@ -97,6 +111,37 @@ class BiotFrame(CoilFrame):
             if self.coilframe.empty:
                 return
         CoilFrame.add_coil(self, *args, **kwargs)
+        self._framenumber = self.nC
+        self._update_cross_section_factor()
+
+    def update_coil(self):
+        """Update coilframe."""
+        self.drop_coil()
+        self.add_coil(self.coilframe)
+        if self.frameindex != slice(None):
+            self.index_coil(self.frameindex)
+
+    def index_coil(self, index):
+        """
+        Drop coils, index coilframe.
+
+        Parameters
+        ----------
+        index : Union[int, str, list[int], list[bool], list[str],
+                      pandas.Index, slice]
+            Coil index.
+
+        Returns
+        -------
+        None.
+
+        """
+        if not isinstance(index, pandas.Index):
+            index = self.coilframe.index[index]
+        index = np.array([name in index for name in self.coilframe.index])
+        self._frameindex = index[self.coilframe._reduction_index]
+        drop_index = self.index[~index]
+        CoilFrame.drop_coil(self, drop_index)
         self._update_cross_section_factor()
 
     def _link_coilframe(self, *args):
@@ -104,14 +149,9 @@ class BiotFrame(CoilFrame):
         if self._is_coilframe(*args, accept_dataframe=False):
             self.coilframe = args[0]
 
-    def update_coilframe(self, force_update=False):
+    def update_coilframe(self):
         """
         Rebuild coilframe following geometric changes to coilset.
-
-        Parameters
-        ----------
-        force_update : bool, optional
-            Update is lazy - flag forces update. The default is False.
 
         Returns
         -------
@@ -120,10 +160,8 @@ class BiotFrame(CoilFrame):
         """
         if hasattr(self, 'coilframe'):
             if self.coilframe is not None:
-                if self.coilframe.nC != self.nC or force_update:
-                    self.drop_coil()
-                    CoilFrame.add_coil(self, self.coilframe)
-                    self._update_cross_section_factor()
+                if self.coilframe.nC != self._framenumber:
+                    self.update_coil()
 
     def _update_cross_section_factor(self):
         """Calculate factor applied to self inductance calculations."""
@@ -224,8 +262,8 @@ class BiotSet(CoilMatrix, BiotAttributes):
     def __init__(self, source=None, target=None, **biot_attributes):
         CoilMatrix.__init__(self)
         BiotAttributes.__init__(self, **biot_attributes)
-        self.source = BiotFrame()
-        self.target = BiotFrame()
+        self.source = BiotFrame(reduce=self.reduce_source)
+        self.target = BiotFrame(reduce=self.reduce_target)
         self._nS, self._nT = 0, 0
         self.load_biotset(source, target)
 

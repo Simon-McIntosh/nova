@@ -447,6 +447,7 @@ class CoilData():
         else:
             raise AttributeError(f'current column {current_column} '
                                  'not in [Ic, It]')
+        self._It = self._Ic * self._Nt[self._mpc_iloc]
 
     @property
     def _nC(self):
@@ -554,7 +555,7 @@ class CoilData():
     def Np(self, value):
         self._Nt[self.plasma & ~self._ionize_index] = 0
         self._Nt[self.plasma & self._ionize_index] = value
-        # normalize plasma tun number
+        # normalize plasma turn number
         Nt_sum = np.sum(self._Nt[self.plasma])
         if Nt_sum > 0:
             self._Nt[self.plasma] /= Nt_sum

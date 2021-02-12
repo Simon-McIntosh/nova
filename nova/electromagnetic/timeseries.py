@@ -74,26 +74,27 @@ class DataArray(DataProperty):
         """
         # initialize data array
         nt = len(time)  # time instance number
-        nT = target.shape[0]#target.nT  # turn number
+        if target.reduce:
+            index = target.index[target._reduction_index]
+            nT = index.shape[0]
+            indices = range(nT)
+        else:
+            index = target.index
+            nT = target.nT
+            indices = target._reduction_index  # slices to reduce.
         dims = ('time', 'turn')
-        coords = {'time': time, 'turn': target.index}
+        coords = {'time': time, 'turn': index}
         data = np.zeros((nt, nT))
         # extract attributes
-        indices = target._reduction_index  # slices to reduce.
         attrs = {'nT': nT, 'indices': indices}
         for attr in ['dx', 'dz', 'Nt', 'coil', 'x', 'z']:
             value = target[attr].values
-            '''
-            if attr in target._dataframe_attributes:
-                value = getattr(target, attr)
-            elif attr in target:
-                value = target[attr].values
-            else:
-                raise IndexError(f'attribute {attr} not present in '
-                                 f'target: {self.target.columns}')
-            '''
             if attr in ['dx', 'dz', 'Nt', 'coil']:
-                value = value[indices]
+                value = value[target._reduction_index]
+            elif target.reduce:
+                value = np.add.reduceat(value, target._reduction_index)
+                value /= np.add.reduceat(np.ones(target.nT),
+                                         target._reduction_index)
             if value.dtype == 'object':
                 value = value.astype('U60')  # convert to character array
             attrs[attr] = value

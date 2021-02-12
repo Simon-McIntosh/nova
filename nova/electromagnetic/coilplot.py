@@ -92,6 +92,7 @@ class CoilPlot:
              label='active', current='A',
              field=True, zeroturn=False, feedback=False, ax=None):
         if ax is None:
+            plt.set_aspect(0.9)
             ax = plt.gca()
         if subcoil:
             self.plot_coil(self.subcoil, zeroturn=zeroturn,

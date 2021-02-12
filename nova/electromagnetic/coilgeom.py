@@ -94,7 +94,7 @@ class ITERcoilset(CoilClass):
         # generate biot objects
         self.biot_instances = kwargs.get('biot_instances', [])
         self.biot_instances = ['field', 'grid', 'forcefield', 'acloss',
-                               'passive']
+                               'passive', 'background']
         self.field.add_coil(self.coil, ['CS', 'PF'], dField=self.dField)
         self.grid.generate_grid(**kwargs)  # generate base grid (plots)
 

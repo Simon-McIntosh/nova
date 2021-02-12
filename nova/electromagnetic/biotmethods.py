@@ -51,26 +51,43 @@ class ACLoss(BiotSet):
 
 
 class Passive(BiotSet):
-    """Passive structure methods and data. Extends BiotSet class."""
+    """Passive structure self-interaction. Extends BiotSet class."""
 
     _biot_attributes = []
     _default_biot_attributes = {'target_turns': True,
                                 'reduce_target': True}
 
     def __init__(self, subcoil, **biot_attributes):
-        BiotSet.__init__(self, source=subcoil, **biot_attributes)
+        BiotSet.__init__(self, source=subcoil, target=subcoil,
+                         **biot_attributes)
 
     def assemble_biotset(self):
         """Extend BiotSet.assemble_biotset - add targets."""
-        print('assemble')
-        passive = self.source.coilframe.loc[~self.source.coilframe.active, :]
-
-        #coilframe = self.source.coilframe
-        #self.source = BiotFrame(passive)
-        #self.source.add_coil()
-        self.target = BiotFrame()
-        self.target.add_coil(passive)
+        index = ~self.source.coilframe.active
+        self.source.index_coil(index)
+        self.target.index_coil(index)
         BiotSet.assemble_biotset(self)
+
+
+class BackGround(BiotSet):
+    """Background contribution to passive strucure."""
+
+    _biot_attributes = []
+    _default_biot_attributes = {'target_turns': False,
+                                'reduce_target': False}
+
+    def __init__(self, subcoil, **biot_attributes):
+        BiotSet.__init__(self, source=subcoil, target=subcoil,
+                         **biot_attributes)
+
+    '''
+    def assemble_biotset(self):
+        """Extend BiotSet.assemble_biotset."""
+        #index = self.source.coilframe.active
+        #self.source.index_coil(index)  # active
+        #self.target.index_coil(~index)  # passive
+        BiotSet.assemble_biotset(self)
+    '''
 
 
 class Probe(BiotSet):
@@ -895,6 +912,7 @@ class BiotMethods:
                      'forcefield': ForceField,
                      'acloss': ACLoss,
                      'passive': Passive,
+                     'background': BackGround,
                      'probe': Probe,
                      'field': Field,
                      'colocate': Colocate,

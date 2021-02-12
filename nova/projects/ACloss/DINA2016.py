@@ -7,19 +7,21 @@ from nova.electromagnetic.timeseries import DataArray, DataSet
 from nova.utilities.pyplot import plt
 from nova.utilities.time import clock
 
-ITER = ITERcoilset(coils='pf vv', dCoil=0.25, dPlasma=0.25, dField=0.25,
+ITER = ITERcoilset(coils='pf trs', dCoil=0.25, dPlasma=0.25, dField=0.25,
                    plasma_expand=0.2, plasma_n=2e3,
                    n=1e3, read_txt=True)
 
+ITER.biot_instances = ['probe']
+ITER.probe.add_target(7.5, -2.7)
 
-ITER.filename = '15MA DT-DINA2016-01_v1.1'
+
+#ITER.filename = '15MA DT-DINA2016-01_v1.1'
+ITER.filename = '15MA DT-DINA2017-04_v1.2'
 ITER._update_plasma = True
 ITER.scenario = 'SOB'
 
-ITER._update_plasma = False
-
-Nt = 500
-t = np.linspace(ITER.d2.t[0], ITER.d2.t[-1], Nt)
+Nt = 1000
+t, dt = np.linspace(ITER.d2.t[0], ITER.d2.t[-1], Nt, retstep=True)
 
 def dIdt(self, It, t, *args):  # current rate (function for odeint)
     vfun = args[0]
@@ -36,20 +38,40 @@ def solve(self, t, **kwargs):
     Iode = odeint(self.dIdt, self.It, t, (vfun,)).T
     return Iode
 
-dataset = DataSet((t, ITER.acloss.target, ['Bx', 'Bz']))
+acloss = DataSet((t, ITER.acloss.target, ['Bx', 'Bz', 'Psi']))
+background = DataSet((t, ITER.background.target, ['Psi', 'dPsi']))
 
 tick = clock(Nt, print_rate=500, print_width=20, header='computing B')
 
+Psi = np.zeros((ITER.background.target.nT, 2))
 #phi_dot =
-for i, t in enumerate(dataset.time):
-    #ITER.scenario = t
-    ITER.Ic = 5e3
-    dataset['Bx'].data[i] = ITER.acloss.Bx
-    dataset['Bz'].data[i] = ITER.acloss.Bz
-    #dataset['B'].data[i] = ITER.acloss.B
+for i, t in enumerate(acloss.time):
+    ITER.scenario = t
+
+    if i == 0:
+        Psi[:, 0] = ITER.background.Psi
+    Psi[:, 1] = Psi[:, 0]
+    Psi[:, 0] = ITER.background.Psi
+    dPsi = (Psi[:, 1] - Psi[:, 0]) / dt
+
+    background['Psi'].data[i] = ITER.background.Psi
+    background['dPsi'].data[i] = dPsi
+
+    acloss['Bx'].data[i] = ITER.acloss.Bx
+    acloss['Bz'].data[i] = ITER.acloss.Bz
+    acloss['Psi'].data[i] = ITER.acloss.Psi
     tick.tock()
 
+#ITER.plot()
+#plt.plot(acloss['Psi'].time, acloss['Psi'].data)
+plt.plot(background['Psi'].time, background['Psi'].data)
+
+plt.figure()
 ITER.plot()
+plt.plot(*ITER.coil.polygon['Plasma'].boundary.xy)
+ITER.grid.plot_flux()
+
+
 
 '''
 

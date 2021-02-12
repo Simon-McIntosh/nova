@@ -8,7 +8,7 @@ import pandas as pd
 from nova.electromagnetic.biotelements import Filament
 
 
-class CoilMatrix():
+class CoilMatrix:
     r"""
     Calculation methods for Biot Savart instances.
 
@@ -348,9 +348,7 @@ class CoilMatrix():
         None.
 
         """
-        print('pre solve')
-        self.assemble_biotset()
-        print('post')
+        self.solve_interaction()
         if self.target.nT == 0:
             'Return with warning if targets not set.'
             warn('Targets not set in:\n'
@@ -444,7 +442,8 @@ class CoilMatrix():
     def _dot_current(self, variable, plasma):
         index = self.source._plasma if plasma else ~self.source._plasma
         matrix = getattr(self, f'_{variable.lower()}')[:, index]
-        vector = np.dot(matrix, self.source.coilframe._Ic[index])
+        current = self.source.coilframe._Ic[self.source.frameindex][index]
+        vector = np.dot(matrix, current)
         return self._reshape(vector)
 
     def _reshape(self, M):
@@ -470,6 +469,8 @@ class CoilMatrix():
 
     @property
     def Fx(self):
+        # TODO evaluate frame index for reduce soruce (passive)
+        #coilframe.*[self.source.frameindex]
         return np.add.reduceat(
             2*np.pi*self.source.coilframe.x*self.source.coilframe.It*self.Bz,
             self.source._reduction_index)

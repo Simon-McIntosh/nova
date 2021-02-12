@@ -96,8 +96,8 @@ class CoilClass(CoilSet):
         if self.d2.to <= self.d3.t[-1]:
             self.d3.to = self.d2.to  # update forcefield data
         self.t = self.d2.to  # time instance
-        #if self._update_plasma:
-        #    self.update_plasma_position()
+        if self._update_plasma:
+            self.update_plasma_position()
         self.Ic = self.d2.Ic.to_dict()
         self.Ip = self.d2.Ip
 

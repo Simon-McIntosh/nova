@@ -1,6 +1,7 @@
 import time
 
 import numpy as np
+import scipy
 
 from nova.electromagnetic.coilgeom import ITERcoilset
 from nova.electromagnetic.timeseries import DataArray, DataSet
@@ -43,16 +44,24 @@ background = DataSet((t, ITER.background.target, ['Psi', 'dPsi']))
 
 tick = clock(Nt, print_rate=500, print_width=20, header='computing B')
 
-Psi = np.zeros((ITER.background.target._nC, 2))
-#phi_dot =
+order = 2
+coefficents = scipy.special.binom(order, np.arange(order+1))
+kernel = (-1)**np.arange(order+1) * coefficents
+
+ITER.scenario = acloss.time[0]
+Psi = np.ones((ITER.background.target._nC, order+1))
+Psi *= ITER.background.Psi.reshape(-1, 1)
+timestep = acloss.time[0] - np.arange(1, order+2) * np.diff(acloss.time[:2])[0]
+
 for i, t in enumerate(acloss.time):
     ITER.scenario = t
 
-    if i == 0:
-        Psi[:, 0] = ITER.background.Psi
-    Psi[:, 1] = Psi[:, 0]
+    timestep[1:] = timestep[:-1]
+    timestep[0] = t
+    Psi[:, 1:] = Psi[:, :-1]
     Psi[:, 0] = ITER.background.Psi
-    dPsi = (Psi[:, 1] - Psi[:, 0]) / dt
+
+    dPsi = np.sum(Psi*kernel, axis=1) / np.prod(np.diff(timestep[::-1]))
 
     background['Psi'].data[i] = ITER.background.Psi
     background['dPsi'].data[i] = dPsi

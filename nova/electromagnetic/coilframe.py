@@ -434,9 +434,8 @@ class CoilFrame(DataFrame, CoilData):
                 rms = np.sqrt((dl**2 * dt**2 / 24 - dl**2 * dt / 8
                                + dl**2 / 8 + x**2))
             else:  # calculate directly from polygon
-                p = self.loc[key, 'polygon']
                 rms = (transform(lambda x, z:
-                                 (x**2, z), p).centroid.x)**0.5
+                                 (x**2, z), polygon).centroid.x)**0.5
             self.rms[i] = rms
         if len(index) != 0:
             self.update_dataframe = ['x', 'z', 'dx', 'dz', 'rms']

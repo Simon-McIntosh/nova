@@ -15,13 +15,13 @@ class LocalData:
     experiment: str
     parent: str = ''
     source: str = ''
-    binary: str = ''
+    data: str = ''
 
     def __post_init__(self):
         """Create hierarchical list used by makedir and removedir methods."""
         self._directories = [self.experiment_directory,
                              self.source_directory,
-                             self.binary_directory]
+                             self.data_directory]
 
     @property
     def parent_directory(self):
@@ -39,9 +39,9 @@ class LocalData:
         return self.getdir(self.experiment_directory, self.source)
 
     @property
-    def binary_directory(self):
-        """Return full path to binary data directory."""
-        return self.getdir(self.experiment_directory, self.binary)
+    def data_directory(self):
+        """Return full path to data data directory."""
+        return self.getdir(self.experiment_directory, self.data)
 
     @staticmethod
     def getdir(directory, subfolder=''):

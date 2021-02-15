@@ -7,13 +7,16 @@ CoilData Class.
 
 """
 
-from os import path
+import os
 import inspect
+from dataclasses import dataclass, field
+from typing import Union
 
 import pandas as pd
 
 from nova.definitions import root_dir
 from nova.utilities.IO import pythonIO
+from nova.utilities.localdata import LocalData
 from nova.electromagnetic.coilframe import CoilFrame
 from nova.electromagnetic.coildata import CoilData
 from nova.electromagnetic.biotmethods import BiotMethods
@@ -22,6 +25,20 @@ from nova.electromagnetic.coilmethods import CoilMethods
 from nova.electromagnetic.coilplot import CoilPlot
 
 
+@dataclass
+class Configure:
+    """Manage coil configuration."""
+
+    dCoil: float = -1
+    dPlasma: float = 0.25
+    dShell: float = 0.5
+    dField: float = 0.2
+    cross_section: str = 'rectangle'
+    turn_section: str = 'circle'
+    turn_fraction: float = 1
+
+
+@dataclass
 class CoilSet(pythonIO, BiotMethods, PlasmaMethods, CoilMethods, CoilPlot):
     """
     Instance wrapper for coilset data.
@@ -67,17 +84,54 @@ class CoilSet(pythonIO, BiotMethods, PlasmaMethods, CoilMethods, CoilPlot):
                              'Ic', 'It', 'Nt', 'Psi', 'Bx', 'Bz', 'B',
                              'Fx', 'Fz', 'xFx', 'xFz', 'zFx', 'zFz', 'My']
 
-    def __init__(self, **coilset):
+    #name: str = ''
+    #coilset: dict = field(repr=False, default_factory=dict)
+    config: Union[Configure, dict, list] = field(default_factory=Configure)
+
+    def __post_init__(self):
         self._initialize_coilset()  # initialize coil and subcoil
         BiotMethods.__init__(self)  # initialize biotmethods
         PlasmaMethods.__init__(self)  # initialize plasma methods
-        self.coilset = coilset  # exchange coilset and instance attributes
+        #self.coilset = coilset  # exchange coilset and instance attributes
+
+
+    def _initialize_coilset(self):
+        self._extract_coilset_properties()
+        self._extract_coil_configuration()
+        #self._initialize_default_attributes()
+        coil_metadata = {'_additional_columns': self._coil_columns,
+                         '_dataframe_attributes': self._dataframe_attributes,
+                         '_coildata_attributes':
+                             self._coildata_attributes | {'subcoil': False}}
+        subcoil_metadata = {'_additional_columns': self._subcoil_columns,
+                            '_dataframe_attributes':
+                                self._dataframe_attributes,
+                            '_coildata_attributes':
+                                self._coildata_attributes | {'subcoil': True}}
+        self.coil = CoilFrame(coilframe_metadata=coil_metadata)
+        self.subcoil = CoilFrame(coilframe_metadata=subcoil_metadata)
+
+    def _extract_coilset_properties(self):
+        self._coilset_properties = [p for p, __ in inspect.getmembers(
+            CoilSet, lambda o: isinstance(o, property))]
+
+    def _extract_coil_configuration(self):
+        if not isinstance(self.config, Configure):
+            if isinstance(self.config, dict):
+                self.config = Configure(**self.config)
+            else:
+                self.config = Configure(self.config)
+
+    #def _initialize_default_attributes(self):
+    #    self._default_attributes = {
+    #        'dCoil': -1, 'dPlasma': 0.25, 'dShell': 0.5, 'dField': 0.2,
+    #        'turn_fraction': 1, 'turn_section': 'circle'}
 
     @staticmethod
     def _filepath(filename, directory=None):
         if directory is None:
-            directory = path.join(root_dir, 'data/Nova/coilsets')
-        return path.join(directory, filename)
+            directory = os.path.join(root_dir, 'data/Nova/coilsets')
+        return os.path.join(directory, filename)
 
     def save_coilset(self, filename, directory=None):
         """
@@ -125,7 +179,7 @@ class CoilSet(pythonIO, BiotMethods, PlasmaMethods, CoilMethods, CoilPlot):
 
         """
         filepath = self._filepath(filename, directory)
-        if path.isfile(filepath + '.pk'):
+        if os.path.isfile(filepath + '.pk'):
             self.load_pickle(filepath)
             self._pickled_attributes = self._coilset['default_attributes']
             self.coilset = self._coilset
@@ -133,31 +187,6 @@ class CoilSet(pythonIO, BiotMethods, PlasmaMethods, CoilMethods, CoilPlot):
         else:
             raise LookupError(f'file {filepath} not found')
         return self.coilset
-
-    def _initialize_coilset(self):
-        self._extract_coilset_properties()
-        self._initialize_default_attributes()
-        coil_metadata = {'_additional_columns': self._coil_columns,
-                         '_dataframe_attributes': self._dataframe_attributes,
-                         '_coildata_attributes': {**self._coildata_attributes,
-                                                  **{'subcoil': False}}}
-        subcoil_metadata = {'_additional_columns': self._subcoil_columns,
-                            '_dataframe_attributes':
-                                self._dataframe_attributes,
-                            '_coildata_attributes':
-                                {**self._coildata_attributes,
-                                 **{'subcoil': True}}}
-        self.coil = CoilFrame(coilframe_metadata=coil_metadata)
-        self.subcoil = CoilFrame(coilframe_metadata=subcoil_metadata)
-
-    def _extract_coilset_properties(self):
-        self._coilset_properties = [p for p, __ in inspect.getmembers(
-            CoilSet, lambda o: isinstance(o, property))]
-
-    def _initialize_default_attributes(self):
-        self._default_attributes = {
-            'dCoil': -1, 'dPlasma': 0.25, 'dShell': 0.5, 'dField': 0.2,
-            'turn_fraction': 1, 'turn_section': 'circle'}
 
     @property
     def coilset(self):
@@ -292,8 +321,9 @@ class CoilSet(pythonIO, BiotMethods, PlasmaMethods, CoilMethods, CoilPlot):
                 if attribute in self._coilset_properties and not \
                         hasattr(self, f'_{attribute}'):
                     setattr(self, attribute, default_attributes[attribute])
-                self._default_attributes[attribute] = \
-                    default_attributes[attribute]
+                setattr(self.config, attribute, default_attributes[attribute])
+                #self._default_attributes[attribute] = \
+                #    default_attributes[attribute]
 
     @property
     def coilset_frames(self):
@@ -332,13 +362,17 @@ class CoilSet(pythonIO, BiotMethods, PlasmaMethods, CoilMethods, CoilPlot):
 
     def _check_default(self, attribute):
         if not hasattr(self, f'_{attribute}'):
-            setattr(self, f'_{attribute}', self._default_attributes[attribute])
+            #setattr(self, f'_{attribute}', self._default_attributes[attribute])
+            setattr(self, f'_{attribute}', getattr(self.config, attribute))
+
 
 
 if __name__ == '__main__':
 
-    cs = CoilSet(dCoil=-1, current_update='coil', turn_fraction=0.5,
-                 cross_section='circle')
+    cs = CoilSet(config=Configure(dCoil=-1,
+                                  #current_update='coil',
+                                  turn_fraction=0.5,
+                                  cross_section='circle'))
 
     cs.add_coil(1.75, 0.5, 2.5, 2.5, name='PF13', part='PF', Nt=10, It=0,
                 cross_section='circle', turn_fraction=1,

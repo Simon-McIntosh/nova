@@ -378,7 +378,7 @@ class CoilMatrix:
         self.solve_interaction()
         variable = variable.capitalize()
         self._dot(variable)
-        return getattr(self, f'_{variable}') #+ getattr(self, f'_{variable}_')
+        return getattr(self, f'_{variable}') + getattr(self, f'_{variable}_')
 
     def _dot(self, variable):
         self._dot_plasma_turns(variable)

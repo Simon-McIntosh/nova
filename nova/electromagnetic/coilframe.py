@@ -1,44 +1,23 @@
+"""Extend pandas.DataFrame to manage coil and subcoil data."""
 
-from dataclasses import dataclass, field
-from typing import Union
 import re
-from warnings import warn
 import string
+from typing import Optional, Collection, Any
+import warnings
 
+import pandas
 import numpy as np
-from pandas import DataFrame, Series, concat, RangeIndex
-from pandas.api.types import is_list_like
-import shapely.geometry
-import shapely.affinity
-from shapely.ops import transform
+import shapely
 
+from nova.electromagnetic.metaframe import MetaFrame
 from nova.electromagnetic.coildata import CoilData
+from nova.electromagnetic.polygen import polygen, root_mean_square
+
+# pylint:disable=unsubscriptable-object
+# pylint: disable=too-many-ancestors
 
 
-@dataclass
-class FrameAttributes:
-
-    required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
-    additional: list[str] = field(default_factory=lambda: ['rms'])
-    default: dict[str, Union[float, str, ]] = field(
-        init=False, repr=False, default_factory=lambda: {
-            'dCoil': 0., 'nx': 1, 'nz': 1, 'Nt': 1., 'Nf': 1,
-            'rms': 0., 'dx': 0., 'dz': 0., 'dA': 0., 'dl_x': 0., 'dl_z': 0.,
-            'm': '', 'R': 0.,  'rho': 0.,
-            'turn_fraction': 1., 'skin_fraction': 1.,
-            'cross_section': 'rectangle', 'turn_section': 'rectangle',
-            'patch': None, 'polygon': None,
-            'coil': '', 'part': '', 'subindex': None, 'material': '',
-            'mpc': '',
-            'active': True, 'optimize': False, 'plasma': False,
-            'feedback': False, 'acloss': False,
-            'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.})
-    #coildata:
-    #dataframe:
-
-
-
-class CoilSeries(Series):
+class CoilSeries(pandas.Series):
     """Provide series constructor methods."""
 
     @property
@@ -50,7 +29,7 @@ class CoilSeries(Series):
         return CoilFrame
 
 
-class CoilFrame(DataFrame, CoilData):
+class CoilFrame(pandas.DataFrame, CoilData):
     """
     CoilFrame instance inherits from Pandas DataFrame and Coildata.
 
@@ -58,85 +37,14 @@ class CoilFrame(DataFrame, CoilData):
     https://github.com/geopandas.
     """
 
-    _metadata = ['_required_columns',
-                 '_additional_columns',
-                 '_default_attributes',
-                 '_coildata_attributes',
-                 '_dataframe_attributes']
-
-    def __init__(self, *args, coilframe_metadata={}, **kwargs):
-        self._initialize_coilframe_metadata()
-        DataFrame.__init__(self, *args, **kwargs)  # inherit pandas DataFrame
-        CoilData.__init__(self)  # fast access attributes
-        self.coilframe_metadata = coilframe_metadata  # update metadata
-
-    def _initialize_coilframe_metadata(self):
-        self._initialize_required_columns()
-        self._initialize_additional_columns()
-        self._initialize_default_attributes()
-
-    def _initialize_required_columns(self):
-        'required input: self.add_coil(*args)'
-        self._required_columns = ['x', 'z', 'dl', 'dt']
-
-    def _initialize_additional_columns(self):
-        'additional input: self.add_coil(**kwargs)'
-        self._additional_columns = ['rms']
-
-    def _initialize_default_attributes(self):
-        'default attributes when not set via self.add_coil(**kwargs)'
-        self._default_attributes = \
-            {'rms': 0., 'dx': 0., 'dz': 0., 'dA': 0., 'nx': 1, 'nz': 1,
-             'Ic': 0., 'It': 0., 'm': '', 'R': 0., 'Nt': 1.,
-             'Nf': 1, 'material': '',
-             'turn_fraction': 1., 'skin_fraction': 1., 'patch': None,
-             'cross_section': 'rectangle', 'turn_section': 'rectangle',
-             'coil': '', 'part': '', 'subindex': None,
-             'dCoil': 0., 'dl_x': 0., 'dl_z': 0., 'mpc': '', 'polygon': None,
-             'active': True, 'optimize': False, 'plasma': False,
-             'feedback': False, 'acloss': False, 'rho': 0.,
-             'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.}
-
-    def _update_coilframe_metadata(self, **coilframe_metadata):
-        'extract and update coilframe_metadata'
-        mode = coilframe_metadata.pop('mode', 'append')  # [overwrite, append]
-        for key in coilframe_metadata:
-            if mode == 'overwrite':
-                null = [] if key[1:] in ['required_columns',
-                                         'additional_columns',
-                                         'dataframe_attributes'] else {}
-                setattr(self, key, null)
-            value = coilframe_metadata.get(key, None)
-            if value is not None:
-                if key == '_required_columns':
-                    self._required_columns = value  # overwrite
-                elif key == '_additional_columns':
-                    for v in value:
-                        if v not in getattr(self, key):
-                            getattr(self, key).append(v)
-                elif key == '_default_attributes':
-                    for k in value:  # set/overwrite dict
-                        self._default_attributes[k] = value[k]
-                elif key in self._default_attributes:
-                    self._default_attributes[key] = value
-                elif key == '_dataframe_attributes':
-                    self.dataframe_attributes = value
-                elif key == '_coildata_attributes':
-                    self.coildata_attributes = value
-                elif key in self._coildata_attributes:
-                    self.coildata_attributes = {key: value}
-
-    @property
-    def coilframe_metadata(self):
-        'extract coilframe_metadata attributes'
-        self._coildata_attributes = self.coildata_attributes
-        return {key: getattr(self, key) for key in self._metadata}
-
-    @coilframe_metadata.setter
-    def coilframe_metadata(self, coilframe_metadata):
-        'update coilframe_metadata attributes'
-        self._update_coilframe_metadata(**coilframe_metadata)
-        self.coildata_attributes = self._coildata_attributes
+    def __init__(self,
+                 data=None,
+                 index: Optional[Collection[Any]] = None,
+                 columns: Optional[Collection[Any]] = None,
+                 metadata: Optional[dict] = None):
+        pandas.DataFrame.__init__(self, data, index, columns)
+        self.metadata = metadata
+        #CoilData.__init__(self)  # fast access attributes
 
     @property
     def _constructor(self):
@@ -147,121 +55,219 @@ class CoilFrame(DataFrame, CoilData):
         return CoilSeries
 
     @property
-    def nC(self):
-        '''
-        Returns:
-            number of coils in dataframe
-        '''
-        return len(self.index)
+    def metaframe(self):
+        """Return MetaFrame instance."""
+        try:
+            return self.attrs['metaframe']
+        except KeyError:
+            self.attrs['metaframe'] = MetaFrame()
+            return self.attrs['metaframe']
 
     @property
-    def nCol(self):
-        '''
-        Returns:
-            number of columns
-        '''
-        return len(self.columns)
+    def metadata(self):
+        """Manage CoilFrame metadata via the MetaFrame class."""
+        return self.metaframe.metadata
 
-    def limit(self, index):
-        'returns coil limits [xmin, xmax, zmin, zmax]'
-        geom = self.loc[index, ['x', 'z', 'dx', 'dz']]
-        limit = [min(geom['x'] - geom['dx'] / 2),
-                 max(geom['x'] + geom['dx'] / 2),
-                 min(geom['z'] - geom['dz'] / 2),
-                 max(geom['z'] + geom['dz'] / 2)]
-        return limit
+    @metadata.setter
+    def metadata(self, metadata):
+        if metadata is None:
+            metadata = {}
+        if 'metaframe' in metadata:
+            self.attrs['metaframe'] = metadata.pop('metaframe')
+        self.metaframe.metadata = metadata
+
+    @property
+    def coil_number(self):
+        """Return coil number."""
+        return len(self.index)
 
     def add_coil(self, *args, iloc=None, **kwargs):
-        coil = self.get_coil(*args, **kwargs)  # additional coils
+        """
+        Add coil(s) to CoilFrame, return updated index.
+
+        Parameters
+        ----------
+        *args : Union[float, array-like]
+            Required arguments listed in self.metaframe.required.
+        iloc : int, optional
+            DESCRIPTION. The default is None.
+        **kwargs : dict[str, Union[float, array-like]]
+            Optional keyword as arguments listed in self.metaframe.additional.
+
+        Returns
+        -------
+        index : pandas.Index
+            Updated CoilFrame index.
+
+        """
+        coil = self._build_coil(*args, **kwargs)
         self.concatenate(coil, iloc=iloc)
         return coil.index
 
-    def get_coil(self, *args, **kwargs):
+    def _build_coil(self, *args, **kwargs):
+        """
+        Return CoilFrame constructed from required and optional input.
+
+        Parameters
+        ----------
+        *args : Union[float, array-like]
+            Required arguments listed in self.metaframe.required.
+        **kwargs : dict[str, Union[float, array-like, str]]
+            Optional keyword arguments listed in self.metaframe.additional.
+
+        Returns
+        -------
+        coil : TYPE
+            DESCRIPTION.
+
+        """
+        # unpack optional keyword arguments
         mpc = kwargs.pop('mpc', False)
-        args, kwargs = self._check_arguments(*args, **kwargs)
         delim = kwargs.pop('delim', '_')
         label = kwargs.pop('label', 'Coil')
         name = kwargs.pop('name', None)
-        data = self._extract_data(*args, **kwargs)
-        index = self._extract_index(data, delim, label, name)
-        coil = CoilFrame(data, index=index, columns=data.keys(),
-                         coilframe_metadata=self.coilframe_metadata)
+        args, kwargs = self._format_arguments(*args, **kwargs)
+        data = self._build_data(*args, **kwargs)
+        index = self._build_index(data, delim, label, name)
+        coil = CoilFrame(data, index=index, metadata=self.metadata)
         coil.generate_polygon()
         if mpc and coil.nC > 1:
             coil.add_mpc(coil.index.to_list())
         return coil
 
+    def _format_arguments(self, *args, **kwargs):
+        """
+        Return formated args and kwargs.
+
+            - Extract coilframe if self.isframe(args[0]).
+            - Ensure len(args) == len(self.metaframe.required).
+
+
+
+        Parameters
+        ----------
+        *args : TYPE
+            DESCRIPTION.
+        **kwargs : TYPE
+            DESCRIPTION.
+
+        Raises
+        ------
+        IndexError
+            DESCRIPTION.
+        KeyError
+            DESCRIPTION.
+
+        Returns
+        -------
+        args : TYPE
+            DESCRIPTION.
+        kwargs : TYPE
+            DESCRIPTION.
+
+        """
+        if self.isframe(*args):  # data passed as CoilFrame
+            args, kwargs = self._extract_coilframe(args[0], **kwargs)
+        elif len(self._required_columns) != len(args):  # set from kwargs
+            raise IndexError(f'\nincorrect argument number: {len(args)}\n'
+                             f'input *args as {self._required_columns} '
+                             '\nor set _default_columns=[*] in kwarg')
+        for key in self._additional_columns:
+            if key not in kwargs and key not in self._default_attributes:
+                raise KeyError(f'default_attributes not set for {key} in '
+                               f' {self._default_attributes.keys()}')
+        return args, kwargs
+
     def concatenate(self, *coil, iloc=None, sort=False):
+        """Return concatenated CoilFrames."""
         if iloc is None:  # append
             coils = [self, *coil]
         else:  # insert
             coils = [self.iloc[:iloc, :], *coil, self.iloc[iloc:, :]]
-        coil = concat(coils, sort=sort)  # concatenate
-        # new instance
-        CoilFrame.__init__(self, coil,
-                           coilframe_metadata=self.coilframe_metadata)
+        coil = pandas.concat(coils, sort=sort)  # concatenate
+        CoilFrame.__init__(self, coil, metadata=self.metadata)
         self.rebuild_coildata()  # rebuild fast index
 
     def drop_coil(self, index=None):
+        """Drop coil(s)."""
         if index is None:
             index = self.index
         self.drop_mpc(index)
         self.drop(index, inplace=True)
         self.rebuild_coildata()
 
-    def translate(self, index=None, dx=0, dz=0):
+    def translate(self, index=None, xoffset=0, zoffset=0):
+        """Translate coil(s)."""
         if index is None:
             index = self.index
-        elif not is_list_like(index):
+        elif not pandas.api.types.is_list_like(index):
             index = [index]
-        if dx != 0:
-            self.loc[index, 'x'] += dx
-        if dz != 0:
-            self.loc[index, 'z'] += dz
+        if xoffset != 0:
+            self.loc[index, 'x'] += xoffset
+        if zoffset != 0:
+            self.loc[index, 'z'] += zoffset
         for name in index:
             self.loc[name, 'polygon'] = \
                 shapely.affinity.translate(self.loc[name, 'polygon'],
-                                           xoff=dx, yoff=dz)
+                                           xoff=xoffset, yoff=zoffset)
             self.loc[name, 'patch'] = None  # re-generate coil patch
 
-    def add_mpc(self, name, factor=1):
+    def add_mpc(self, index, factor=1):
         """
         Define multi-point constraint linking a set of coils.
 
-        name: list of coil names (present in self.index)
-        factor: inter-coil coupling factor
+        Parameters
+        ----------
+        index : list[str]
+            List of coil names (present in self.index).
+        factor : float, optional
+            Inter-coil coupling factor. The default is 1.
+
+        Raises
+        ------
+        IndexError
+
+            - index must be list-like
+            - len(index) must be greater than l
+            - len(factor) must equal 1 or len(name)-1.
+
+        Returns
+        -------
+        None.
 
         """
-        if not is_list_like(name):
-            raise IndexError(f'name: {name} must be list like')
-        if len(name) == 1:
-            raise IndexError(f'len({name}) must be > 1')
-        if not is_list_like(factor):
-            factor = factor * np.ones(len(name)-1)
-        elif len(factor) != len(name)-1:
+        if not pandas.api.types.is_list_like(index):
+            raise IndexError(f'index: {index} is not list like')
+        index_number = len(index)
+        if index_number == 1:
+            raise IndexError(f'len({index}): {index_number} '
+                             'is not greater > 1')
+        if not pandas.api.types.is_list_like(factor):
+            factor = factor * np.ones(index_number-1)
+        elif len(factor) != index_number-1:
             raise IndexError(f'len(factor={factor}) must == 1 '
-                             f'or == len(name={name})-1')
-        for n, f in zip(name[1:], factor):
-            self.at[n, 'mpc'] = (name[0], f)
+                             f'or == len(index={index})-1')
+        for i in np.arange(1, index_number):
+            self.at[index[i], 'mpc'] = (index[0], factor[i])
         self.rebuild_coildata()
 
     def drop_mpc(self, index):
-        'remove multi-point constraints referancing dropped coils'
+        """Drop multi-point constraints referancing dropped coils."""
         if 'mpc' in self.columns:
-            if not is_list_like(index):
+            if not pandas.api.types.is_list_like(index):
                 index = [index]
             name = [mpc[0] if mpc else '' for mpc in self.mpc]
             drop = [n in index for n in name]
             self.remove_mpc(drop)
 
     def remove_mpc(self, index):
-        'remove multi-point constraint on indexed coils'
-        if not is_list_like(index):
+        """Remove multi-point constraint on indexed coils."""
+        if not pandas.api.types.is_list_like(index):
             index = [index]
         self.loc[index, 'mpc'] = ''
 
     def reduce_mpc(self, matrix):
-        'apply mpc constraints to coupling matrix'
+        """Apply mpc constraints to coupling matrix."""
         _matrix = matrix[:, self._mpc_iloc]  # extract primary coils
         if len(self._mpl_index) > 0:  # add multi-point links
             _matrix[:, self._mpl_index[:, 0]] += \
@@ -269,8 +275,17 @@ class CoilFrame(DataFrame, CoilData):
                 np.ones((len(matrix), 1)) @ self._mpl_factor.reshape(-1, 1)
         return _matrix
 
+    def limit(self, index):
+        """Return coil limits [xmin, xmax, zmin, zmax]."""
+        geom = self.loc[index, ['x', 'z', 'dx', 'dz']]
+        limit = [min(geom['x'] - geom['dx'] / 2),
+                 max(geom['x'] + geom['dx'] / 2),
+                 min(geom['z'] - geom['dz'] / 2),
+                 max(geom['z'] + geom['dz'] / 2)]
+        return limit
+
     @staticmethod
-    def _is_coilframe(*args, accept_dataframe=True):
+    def isframe(*args, accept_dataframe=True):
         """
         Return isinstance(arg[0], CoilFrame) flag.
 
@@ -290,7 +305,7 @@ class CoilFrame(DataFrame, CoilData):
         if len(args) == 1:
             if isinstance(args[0], CoilFrame):
                 return True
-            if isinstance(args[0], DataFrame) and accept_dataframe:
+            if isinstance(args[0], pandas.DataFrame) and accept_dataframe:
                 return True
         return False
 
@@ -302,19 +317,6 @@ class CoilFrame(DataFrame, CoilData):
             if col not in self._required_columns:
                 if col in self._additional_columns:
                     kwargs[col] = coilframe.loc[:, col]
-        return args, kwargs
-
-    def _check_arguments(self, *args, **kwargs):
-        if self._is_coilframe(*args):  # data passed as CoilFrame
-            args, kwargs = self._extract_coilframe(args[0], **kwargs)
-        elif len(self._required_columns) != len(args):  # set from kwargs
-            raise IndexError(f'\nincorrect argument number: {len(args)}\n'
-                             f'input *args as {self._required_columns} '
-                             '\nor set _default_columns=[*] in kwarg')
-        for key in self._additional_columns:
-            if key not in kwargs and key not in self._default_attributes:
-                raise KeyError(f'default_attributes not set for {key} in '
-                               f' {self._default_attributes.keys()}')
         return args, kwargs
 
     def _extract_data(self, *args, **kwargs):
@@ -335,11 +337,11 @@ class CoilFrame(DataFrame, CoilData):
         self._update_coilframe_metadata(additional_columns=additional_columns)
         self._propogate_current(current_label, data)
         if len(kwargs.keys()) > 0:
-            warn(f'\n\nunset kwargs: {list(kwargs.keys())}'
-                 '\nto use include within additional_columns:\n'
-                 f'{self._additional_columns}'
-                 '\nor within default_attributes:\n'
-                 f'{self._default_attributes}\n')
+            warnings.warn(f'\n\nunset kwargs: {list(kwargs.keys())}'
+                          '\nto use include within additional_columns:\n'
+                          f'{self._additional_columns}'
+                          '\nor within default_attributes:\n'
+                          f'{self._default_attributes}\n')
         return data
 
     def _extract_current_label(self, **kwargs):
@@ -375,12 +377,12 @@ class CoilFrame(DataFrame, CoilData):
     def _extract_index(self, data, delim, label, name):
         try:
             nCol = np.max([len(data[key]) for key in data
-                           if is_list_like(data[key])])
+                           if pandas.api.types.is_list_like(data[key])])
         except ValueError:
             nCol = 1  # scalar input
-        if isinstance(name, RangeIndex):
+        if isinstance(name, pandas.RangeIndex):
             name = None
-        if is_list_like(name):
+        if pandas.api.types.is_list_like(name):
             if len(name) != nCol:
                 raise IndexError(f'missmatch between name {name} and '
                                  f'column number: {nCol}')
@@ -426,11 +428,8 @@ class CoilFrame(DataFrame, CoilData):
         if 'polygon' in self.columns:
             for index in self.index[self.polygon.isna()]:
                 cross_section = self.loc[index, 'cross_section']
-                x, z, dl, dt = self.loc[index, ['x', 'z', 'dl', 'dt']]
-                if cross_section in ['circle', 'square']:
-                    dl = dt = np.min([dl, dt])  # set aspect equal
-                polygen = self._get_polygen(cross_section)
-                polygon = polygen(x, z, dl, dt)
+                polygon = polygen(cross_section)(
+                    *self.loc[index, ['x', 'z', 'dl', 'dt']])
                 self.loc[index, 'polygon'] = polygon
             self.update_polygon()
 
@@ -459,7 +458,7 @@ class CoilFrame(DataFrame, CoilData):
         """
         if index is None:
             index = self.index[(self.rms == 0) & (~self.polygon.isna())]
-        elif not is_list_like(index):
+        elif not pandas.api.types.is_list_like(index):
             index = [index]
         for key in index:
             i = self.index.get_loc(key)
@@ -480,135 +479,11 @@ class CoilFrame(DataFrame, CoilData):
             bounds = polygon.bounds
             self.dx[i] = bounds[2] - bounds[0]
             self.dz[i] = bounds[3] - bounds[1]
-
-            if cross_section == 'circle':
-                rms = np.sqrt(x**2 + dl**2 / 16)  # circle
-            elif cross_section in ['square', 'rectangle']:
-                rms = np.sqrt(x**2 + dl**2 / 12)  # square
-            elif cross_section == 'skin':
-                rms = np.sqrt((dl**2 * dt**2 / 24 - dl**2 * dt / 8
-                               + dl**2 / 8 + x**2))
-            else:  # calculate directly from polygon
-                rms = (transform(lambda x, z:
-                                 (x**2, z), polygon).centroid.x)**0.5
-            self.rms[i] = rms
+            self.rms[i] = root_mean_square(cross_section, x, dl, dt, polygon)
         if len(index) != 0:
             self.update_dataframe = ['x', 'z', 'dx', 'dz', 'rms']
-
-    @staticmethod
-    def _get_polygen(cross_section):
-        if cross_section == 'circle':
-            return CoilFrame._poly_circle
-        if cross_section == 'ellipse':
-            return CoilFrame._poly_ellipse
-        if cross_section == 'square':
-            return CoilFrame._poly_square
-        if cross_section == 'rectangle':
-            return CoilFrame._poly_rectangle
-        if cross_section == 'skin':
-            return CoilFrame._poly_skin
-        raise IndexError(f'cross_section: {cross_section} not implemented'
-                         '\n specify as '
-                         '[circle, ellipse, square, rectangle, skin]')
-
-    @staticmethod
-    def _poly_circle(x, z, dx, dz):
-        del dz
-        radius = dx / 2
-        circle = shapely.geometry.Point(x, z).buffer(radius, resolution=32)
-        return shapely.geometry.Polygon(circle.exterior)
-
-    @staticmethod
-    def _poly_ellipse(x, z, dx, dz):
-        circle = CoilFrame._poly_circle(x, z, dx, dx)
-        return shapely.affinity.scale(circle, 1, dz/dx)
-
-    @staticmethod
-    def _poly_square(x, z, dx, dz):
-        del dz
-        return shapely.geometry.box(x-dx/2, z-dx/2, x+dx/2, z+dx/2)
-
-    @staticmethod
-    def _poly_rectangle(x, z, dx, dz):
-        return shapely.geometry.box(x-dx/2, z-dz/2, x+dx/2, z+dz/2)
-
-    @staticmethod
-    def _poly_skin(x, z, d, dt):
-        '''
-        d: circle diameter
-        dt: fractional thickness
-        '''
-        if dt < 0 or dt > 1:
-            raise ValueError(f'skin fractional thickness not 0 <= {dt} <= 1')
-        circle_outer = CoilFrame._poly_circle(x, z, d, d)
-        if dt == 1:
-            shape = circle_outer
-        else:
-            if dt == 0:
-                dt = 1e-3
-            circle_inner = shapely.affinity.scale(circle_outer, (1-dt), (1-dt))
-            shape = circle_outer.difference(circle_inner)
-        return shape
-
-    def __setattr__(self, key, value):
-        if key in self._dataframe_attributes:
-            self._update_dataframe[key] = True
-            if key not in self._coildata_properties:
-                # set as private variable
-                if key in self._mpc_attributes:
-                    nC = self._nC  # mpc variable
-                else:
-                    nC = self.nC  # coil number
-                if not is_list_like(value):
-                    value *= np.ones(nC, dtype=type(value))
-                if len(value) != nC:
-                    raise IndexError('Length of mpc vector does not match '
-                                     'length of index')
-                key = f'_{key}'
-        return DataFrame.__setattr__(self, key, value)
-
-    def __getattr__(self, key):
-        """Extend pandas.DataFrame.__getattr__."""
-        if key in self._dataframe_attributes:
-            value = getattr(self, f'_{key}')
-            if key in self._mpc_attributes:  # inflate
-                value = value[self._mpc_referance]
-            return value
-        return DataFrame.__getattr__(self, key)
-
-    def __setitem__(self, key, value):
-        """Extend pandas.DataFrame.__setitem__."""
-        self.refresh_dataframe()  # flush dataframe updates
-        DataFrame.__setitem__(self, key, value)
-        if key in self._dataframe_attributes:
-            self.refresh_coilframe(key)
-            if key in ['Nt', 'It', 'Ic']:
-                self._It = self.It
-            if key == 'Nt':
-                self._update_dataframe['Ic'] = True
-                self._update_dataframe['It'] = True
-            if key in ['Ic', 'It']:
-                _key = next(k for k in ['Ic', 'It'] if k != key)
-                self._update_dataframe[_key] = True
-
-    def __getitem__(self, key):
-        'subclass dataframe getitem'
-        if key in self._dataframe_attributes:
-            self.refresh_dataframe()
-        return DataFrame.__getitem__(self, key)
-
-    def _get_value(self, index, col, takeable=False):
-        'subclass dataframe get_value'
-        if col in self._dataframe_attributes:
-            self.refresh_dataframe()
-        return DataFrame._get_value(self, index, col, takeable)
-
-    def __repr__(self):
-        self.refresh_dataframe()
-        return DataFrame.__repr__(self)
 
 
 if __name__ == '__main__':
 
-    metaframe = FrameAttributes()
     frame = CoilFrame()

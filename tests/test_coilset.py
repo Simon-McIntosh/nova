@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import pickle
 
-from nova.electromagnetic.coilset import Configure, CoilSet
+from nova.electromagnetic.coilset import CoilSet
 
 
 def test_dCoil():

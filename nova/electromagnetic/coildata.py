@@ -665,3 +665,61 @@ class CoilData():
                 setattr(self, f'_{key}', value)
             if key in self._update_dataframe:
                 self._update_dataframe[key] = False
+
+    def __setattr__(self, key, value):
+        if key in self._dataframe_attributes:
+            self._update_dataframe[key] = True
+            if key not in self._coildata_properties:
+                # set as private variable
+                if key in self._mpc_attributes:
+                    nC = self._nC  # mpc variable
+                else:
+                    nC = self.nC  # coil number
+                if not is_list_like(value):
+                    value *= np.ones(nC, dtype=type(value))
+                if len(value) != nC:
+                    raise IndexError('Length of mpc vector does not match '
+                                     'length of index')
+                key = f'_{key}'
+        return DataFrame.__setattr__(self, key, value)
+
+    def __getattr__(self, key):
+        """Extend pandas.DataFrame.__getattr__."""
+        if key in self._dataframe_attributes:
+            value = getattr(self, f'_{key}')
+            if key in self._mpc_attributes:  # inflate
+                value = value[self._mpc_referance]
+            return value
+        return DataFrame.__getattr__(self, key)
+
+    def __setitem__(self, key, value):
+        """Extend pandas.DataFrame.__setitem__."""
+        self.refresh_dataframe()  # flush dataframe updates
+        DataFrame.__setitem__(self, key, value)
+        if key in self._dataframe_attributes:
+            self.refresh_coilframe(key)
+            if key in ['Nt', 'It', 'Ic']:
+                self._It = self.It
+            if key == 'Nt':
+                self._update_dataframe['Ic'] = True
+                self._update_dataframe['It'] = True
+            if key in ['Ic', 'It']:
+                _key = next(k for k in ['Ic', 'It'] if k != key)
+                self._update_dataframe[_key] = True
+
+    def __getitem__(self, key):
+        'subclass dataframe getitem'
+        if key in self._dataframe_attributes:
+            self.refresh_dataframe()
+        return DataFrame.__getitem__(self, key)
+
+    def _get_value(self, index, col, takeable=False):
+        'subclass dataframe get_value'
+        if col in self._dataframe_attributes:
+            self.refresh_dataframe()
+        return DataFrame._get_value(self, index, col, takeable)
+
+    def __repr__(self):
+        self.refresh_dataframe()
+        return DataFrame.__repr__(self)
+

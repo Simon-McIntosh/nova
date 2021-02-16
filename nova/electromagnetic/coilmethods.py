@@ -334,8 +334,8 @@ class CoilMethods:
     @dCoil.setter
     def dCoil(self, dCoil):
         self._dCoil = dCoil
-        #self._default_attributes['dCoil'] = dCoil
-        self.config.dCoil = dCoil
+        self._default_attributes['dCoil'] = dCoil
+        #self.config.dCoil = dCoil
         self.coil._default_attributes['dCoil'] = dCoil
 
     def meshcoil(self, index=None, mpc=True, **kwargs):

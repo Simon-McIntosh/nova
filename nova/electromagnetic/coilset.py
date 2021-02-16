@@ -38,7 +38,7 @@ class Configure:
     turn_fraction: float = 1
 
 
-@dataclass
+#@dataclass
 class CoilSet(pythonIO, BiotMethods, PlasmaMethods, CoilMethods, CoilPlot):
     """
     Instance wrapper for coilset data.
@@ -86,19 +86,18 @@ class CoilSet(pythonIO, BiotMethods, PlasmaMethods, CoilMethods, CoilPlot):
 
     #name: str = ''
     #coilset: dict = field(repr=False, default_factory=dict)
-    config: Union[Configure, dict, list] = field(default_factory=Configure)
+    #config: Union[Configure, dict, list] = field(default_factory=Configure)
 
-    def __post_init__(self):
+    def __init__(self, **coilset):
         self._initialize_coilset()  # initialize coil and subcoil
         BiotMethods.__init__(self)  # initialize biotmethods
         PlasmaMethods.__init__(self)  # initialize plasma methods
-        #self.coilset = coilset  # exchange coilset and instance attributes
-
+        self.coilset = coilset  # exchange coilset and instance attributes
 
     def _initialize_coilset(self):
         self._extract_coilset_properties()
-        self._extract_coil_configuration()
-        #self._initialize_default_attributes()
+        #self._extract_coil_configuration()
+        self._initialize_default_attributes()
         coil_metadata = {'_additional_columns': self._coil_columns,
                          '_dataframe_attributes': self._dataframe_attributes,
                          '_coildata_attributes':
@@ -115,17 +114,17 @@ class CoilSet(pythonIO, BiotMethods, PlasmaMethods, CoilMethods, CoilPlot):
         self._coilset_properties = [p for p, __ in inspect.getmembers(
             CoilSet, lambda o: isinstance(o, property))]
 
-    def _extract_coil_configuration(self):
-        if not isinstance(self.config, Configure):
-            if isinstance(self.config, dict):
-                self.config = Configure(**self.config)
-            else:
-                self.config = Configure(self.config)
+    #def _extract_coil_configuration(self):
+    #    if not isinstance(self.config, Configure):
+    #        if isinstance(self.config, dict):
+    #            self.config = Configure(**self.config)
+    #        else:
+    #            self.config = Configure(self.config)
 
-    #def _initialize_default_attributes(self):
-    #    self._default_attributes = {
-    #        'dCoil': -1, 'dPlasma': 0.25, 'dShell': 0.5, 'dField': 0.2,
-    #        'turn_fraction': 1, 'turn_section': 'circle'}
+    def _initialize_default_attributes(self):
+        self._default_attributes = {
+            'dCoil': -1, 'dPlasma': 0.25, 'dShell': 0.5, 'dField': 0.2,
+            'turn_fraction': 1, 'turn_section': 'circle'}
 
     @staticmethod
     def _filepath(filename, directory=None):
@@ -321,9 +320,9 @@ class CoilSet(pythonIO, BiotMethods, PlasmaMethods, CoilMethods, CoilPlot):
                 if attribute in self._coilset_properties and not \
                         hasattr(self, f'_{attribute}'):
                     setattr(self, attribute, default_attributes[attribute])
-                setattr(self.config, attribute, default_attributes[attribute])
-                #self._default_attributes[attribute] = \
-                #    default_attributes[attribute]
+                #setattr(self.config, attribute, default_attributes[attribute])
+                self._default_attributes[attribute] = \
+                    default_attributes[attribute]
 
     @property
     def coilset_frames(self):
@@ -362,8 +361,8 @@ class CoilSet(pythonIO, BiotMethods, PlasmaMethods, CoilMethods, CoilPlot):
 
     def _check_default(self, attribute):
         if not hasattr(self, f'_{attribute}'):
-            #setattr(self, f'_{attribute}', self._default_attributes[attribute])
-            setattr(self, f'_{attribute}', getattr(self.config, attribute))
+            setattr(self, f'_{attribute}', self._default_attributes[attribute])
+            #setattr(self, f'_{attribute}', getattr(self.config, attribute))
 
 
 

@@ -7,7 +7,7 @@ from nova.electromagnetic.coilset import Configure, CoilSet
 
 def test_dCoil():
     'test setting of kwarg dCoil'
-    cs = CoilSet(config={'dCoil': 0.15})
+    cs = CoilSet(dCoil=0.15)
     assert cs.dCoil == 0.15
 
 
@@ -20,10 +20,8 @@ def test_dCoil_default():
 
 def test_dCoil_memory():
     'test persistance of default attributes (set once)'
-    cs = CoilSet(Configure(dCoil=0.15))
-    #print(cs.dCoil)
+    cs = CoilSet(dCoil=0.15)
     cs.coilset = {'default_attributes': {'dCoil': 3}}
-    print(cs.dCoil)
     assert cs.dCoil == 0.15
 
 
@@ -43,7 +41,7 @@ def test_add_shell():
 
 def test_circular_cross_section():
     'check subcoil area sum equals circle area'
-    cs = CoilSet(Configure(turn_fraction=0.5, cross_section='circle'))
+    cs = CoilSet(turn_fraction=0.5, cross_section='circle')
     cs.add_coil(1.75, 0.5, 2.5, 2.5, turn_fraction=1, dCoil=-20)
     assert np.isclose(np.pi*2.5**2/4, cs.subcoil.dA.sum(), rtol=1e-3)
 
@@ -89,5 +87,4 @@ def test_pickle():
 
 
 if __name__ == '__main__':
-    #pytest.main([__file__])
-    test_dCoil_memory()
+    pytest.main([__file__])

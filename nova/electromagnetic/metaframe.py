@@ -7,39 +7,15 @@ import numpy as np
 
 # pylint:disable=unsubscriptable-object
 
-
 @dataclass
-class MetaFrame:
-    """Manage CoilFrame metadata - accessed via CoilFrame['attrs']."""
-
-    required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
-    additional: list[str] = field(default_factory=lambda: ['rms', 'mpc'])
-    default: dict[str, Union[float, str, ]] = field(
-        repr=False, default_factory=lambda: {
-            'dCoil': 0., 'nx': 1, 'nz': 1, 'Nt': 1., 'Nf': 1,
-            'rms': 0., 'dx': 0., 'dz': 0., 'dA': 0., 'dl_x': 0., 'dl_z': 0.,
-            'm': '', 'R': 0.,  'rho': 0.,
-            'turn_fraction': 1., 'skin_fraction': 1.,
-            'cross_section': 'rectangle', 'turn_section': 'rectangle',
-            'patch': None, 'polygon': None,
-            'coil': '', 'part': '', 'subindex': None, 'material': '',
-            'mpc': '',
-            'active': True, 'optimize': False, 'plasma': False,
-            'feedback': False, 'acloss': False,
-            'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.})
-    coildata: dict = None
-    dataframe: dict = None
-
-    mode = {'required': 'replace',
-            'additional': 'extend',
-            'default': 'update'}
+class Meta:
+    """Meta base class. Extended by MetaFrame and MetaData."""
 
     def __post_init__(self):
         """Check that all additional attributes have default values."""
         self._check_default()
 
-    @property
-    def number_required(self):
+    def __len__(self):
         """Return number of required arguments."""
         return len(self.required)
 
@@ -56,7 +32,7 @@ class MetaFrame:
             mode = self.mode[fieldname]
             if mode == 'replace':
                 setattr(self, fieldname, metadata[attribute])
-            if mode == 'extend':
+            elif mode == 'extend':
                 unique = [attr for attr in metadata[attribute]
                           if attr not in getattr(self, fieldname)]
                 getattr(self, fieldname).extend(unique)
@@ -73,8 +49,40 @@ class MetaFrame:
                              f'{np.array(self.additional)[unset]}')
 
 
+@dataclass
+class MetaFrame(Meta):
+    """Manage CoilFrame metadata - accessed via CoilFrame['attrs']."""
+
+    required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
+    additional: list[str] = field(default_factory=lambda: ['rms', 'mpc'])
+    default: dict[str, Union[float, str, bool, None]] = field(
+        repr=False, default_factory=lambda: {
+            'dCoil': 0., 'nx': 1, 'nz': 1, 'Nt': 1., 'Nf': 1,
+            'rms': 0., 'dx': 0., 'dz': 0., 'dA': 0., 'dl_x': 0., 'dl_z': 0.,
+            'm': '', 'R': 0.,  'rho': 0.,
+            'turn_fraction': 1., 'skin_fraction': 1.,
+            'cross_section': 'rectangle', 'turn_section': 'rectangle',
+            'patch': None, 'polygon': None,
+            'coil': '', 'part': '',
+            'subindex': None, 'material': '', 'mpc': '',
+            'active': True, 'optimize': False, 'plasma': False,
+            'feedback': False, 'acloss': False,
+            'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.})
+    frame: dict[str, Union[str, bool]] = field(
+        repr=False, default_factory=lambda: {
+            'name': '', 'label': 'Coil', 'delim': '_', 'link': True})
+    #coildata: dict = field(repr=False, default_factory=lambda: {})
+    #dataframe: dict = field(repr=False, default_factory=lambda: {})
+
+    mode = {'required': 'replace',
+        'additional': 'extend',
+        'default': 'update'}
+
+
 if __name__ == '__main__':
 
     metaframe = MetaFrame()
     metaframe.metadata = {'additional': ['mpc']}
     print(metaframe.metadata)
+
+    meta = Meta()

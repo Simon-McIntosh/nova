@@ -10,7 +10,7 @@ def test_instance():
     assert isinstance(frame, CoilFrame)
 
 
-def test_subclass():
+def test_dataframe_subclass():
     assert issubclass(CoilFrame, pandas.DataFrame)
 
 
@@ -22,6 +22,12 @@ def test_columns():
 def test_index():
     frame = CoilFrame(index=['Coil0', 'Coil1'])
     assert sorted(frame.index) == sorted(['Coil0', 'Coil1'])
+
+
+def test_index_length_error():
+    frame = CoilFrame()
+    with pytest.raises(IndexError):
+        assert frame.add_coil(4, [5, 4, 6], 0.1, 0.3, name=['1, 2'])
 
 
 def test_default_columns():
@@ -41,4 +47,4 @@ def test_init():
 if __name__ == '__main__':
 
     #pytest.main([__file__])
-    test_default_columns()
+    test_index_length_error()

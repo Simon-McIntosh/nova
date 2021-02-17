@@ -165,7 +165,7 @@ class CoilData():
                 setattr(self, f'_{flag}', kwargs[flag])
 
     def rebuild_coildata(self):
-        if self.nC > 0:
+        if self.coil_number > 0:
             self._extract_mpc()  # extract multi-point constraints
             self._extract_data_attributes()  # extract from DataFrame columns
             self._extract_reduction_index()
@@ -174,15 +174,15 @@ class CoilData():
 
     def _extract_mpc(self):
         """Extract mpc interger index and factor."""
-        mpc = self.get('mpc', np.array([self._default_attributes['mpc']
-                                        for __ in range(self.nC)]))
+        mpc = self.get('mpc', np.array([self.metaframe.default['mpc']
+                                        for __ in range(self.coil_number)]))
         self._mpc_iloc = [i for i, _mpc in enumerate(mpc) if not _mpc]
         self._mpc_index = self.index[self._mpc_iloc]
-        self._mpc_referance = np.zeros(self.nC, dtype=int)
-        self._mpc_factor = np.ones(self.nC, dtype=float)
+        self._mpc_referance = np.zeros(self.coil_number, dtype=int)
+        self._mpc_factor = np.ones(self.coil_number, dtype=float)
         _mpc_list = list(self._mpc_index)
         _mpc_array = np.arange(len(_mpc_list))
-        mpc_index = mpc != self._default_attributes['mpc']
+        mpc_index = mpc != self.metaframe.default['mpc']
         self._mpc_referance[~mpc_index] = _mpc_array
         if sum(mpc_index) > 0:
             _mpc = np.array([[name, factor]
@@ -224,9 +224,9 @@ class CoilData():
                 value = self[attribute].to_numpy(dtype=dtype)
             elif attribute in self._default_attributes:  # default
                 value = np.array([self._default_attributes[attribute]
-                                  for __ in range(self.nC)], dtype=dtype)
+                                  for __ in range(self.coil_number)], dtype=dtype)
             else:
-                value = np.zeros(self.nC, dtype=dtype)
+                value = np.zeros(self.coil_number, dtype=dtype)
             if attribute in self._mpc_attributes:  # mpc compaction
                 value = value[self._mpc_iloc]
             setattr(self, f'_{attribute}', value)
@@ -248,7 +248,7 @@ class CoilData():
             self._reduction_index = np.array(_reduction_index)
             self._plasma_iloc = np.arange(len(self._reduction_index))[
                 self.plasma[self._reduction_index]]
-            filament_indices = np.append(self._reduction_index, self.nC)
+            filament_indices = np.append(self._reduction_index, self.coil_number)
             plasma_filaments = filament_indices[self._plasma_iloc+1] - \
                 filament_indices[self._plasma_iloc]
             self._plasma_reduction_index = \
@@ -307,7 +307,7 @@ class CoilData():
             Boolean selection array.
 
         """
-        if self.nC > 0 and self._mpc_iloc is not None:
+        if self.coil_number > 0 and self._mpc_iloc is not None:
             if mpc_flag == 'full':
                 mpc_select = np.full(self._nC, True) & ~self._feedback
             elif mpc_flag == 'active':
@@ -374,7 +374,7 @@ class CoilData():
         - current update
 
         """
-        if self.nC > 0:
+        if self.coil_number > 0:
             return DataFrame(
                     {'active': self._active,
                      'optimize': self._optimize,
@@ -674,7 +674,7 @@ class CoilData():
                 if key in self._mpc_attributes:
                     nC = self._nC  # mpc variable
                 else:
-                    nC = self.nC  # coil number
+                    nC = self.coil_number  # coil number
                 if not is_list_like(value):
                     value *= np.ones(nC, dtype=type(value))
                 if len(value) != nC:

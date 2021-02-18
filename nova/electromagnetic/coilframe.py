@@ -1,19 +1,59 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 
+from dataclasses import dataclass, field
 import re
 import string
-from typing import Optional, Collection, Any
+from typing import Optional, Collection, Any, Union
 
 import pandas
 import numpy as np
 import shapely
 
-from nova.electromagnetic.metaframe import MetaFrame
-from nova.electromagnetic.coildata import CoilData
+from nova.electromagnetic.metadata import MetaData
+from nova.electromagnetic.coilarray import CoilArray
 from nova.electromagnetic.polygen import polygen, root_mean_square
 
 # pylint:disable=unsubscriptable-object
 # pylint: disable=too-many-ancestors
+
+
+@dataclass
+class MetaFrame(MetaData):
+    """Manage CoilFrame metadata - accessed via CoilFrame['attrs']."""
+
+    update: dict[str, str] = field(default_factory=lambda: {
+        'required': 'replace', 'additional': 'extend', 'default': 'update'})
+    required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
+    additional: list[str] = field(default_factory=lambda: ['rms', 'mpc'])
+    default: dict[str, Union[float, str, bool, None]] = field(
+        repr=False, default_factory=lambda: {
+            'dCoil': 0., 'nx': 1, 'nz': 1, 'Nt': 1., 'Nf': 1,
+            'rms': 0., 'dx': 0., 'dz': 0., 'dA': 0., 'dl_x': 0., 'dl_z': 0.,
+            'm': '', 'R': 0.,  'rho': 0.,
+            'turn_fraction': 1., 'skin_fraction': 1.,
+            'cross_section': 'rectangle', 'turn_section': 'rectangle',
+            'patch': None, 'polygon': None,
+            'coil': '', 'part': '',
+            'subindex': None, 'material': '', 'mpc': '',
+            'active': True, 'optimize': False, 'plasma': False,
+            'feedback': False, 'acloss': False,
+            'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.})
+    frame: dict[str, Union[str, bool]] = field(
+        repr=False, default_factory=lambda: {
+            'name': '', 'label': 'Coil', 'delim': '_', 'link': True})
+
+    def validate_input(self):
+        """Confirm that all additional attributes have a default value."""
+        unset = np.array([attr not in self.default
+                          for attr in self.additional])
+        if unset.any():
+            raise ValueError('Default value not set for additional attributes '
+                             f'{np.array(self.additional)[unset]}')
+
+    @property
+    def required_number(self):
+        """Return number of required arguments."""
+        return len(self.required)
 
 
 class CoilSeries(pandas.Series):
@@ -28,9 +68,9 @@ class CoilSeries(pandas.Series):
         return CoilFrame
 
 
-class CoilFrame(pandas.DataFrame, CoilData):
+class CoilFrame(pandas.DataFrame, CoilArray):
     """
-    CoilFrame instance inherits from Pandas DataFrame and Coildata.
+    CoilFrame instance inherits from Pandas DataFrame and CoilArray.
 
     Inspiration for DataFrame inheritance taken from GeoPandas
     https://github.com/geopandas.
@@ -42,8 +82,10 @@ class CoilFrame(pandas.DataFrame, CoilData):
                  columns: Optional[Collection[Any]] = None,
                  metadata: Optional[dict] = None):
         pandas.DataFrame.__init__(self, data, index, columns)
+        CoilArray.__init__(self)
+        self.metaframe = MetaFrame()
         self.metadata = metadata
-        #CoilData.__init__(self)  # fast access attributes
+        self.validate_frame()
 
     @property
     def _constructor(self):
@@ -54,26 +96,42 @@ class CoilFrame(pandas.DataFrame, CoilData):
         return CoilSeries
 
     @property
-    def metaframe(self):
-        """Return MetaFrame instance."""
-        try:
-            return self.attrs['metaframe']
-        except KeyError:
-            self.attrs['metaframe'] = MetaFrame()
-            return self.attrs['metaframe']
-
-    @property
     def metadata(self):
         """Manage CoilFrame metadata via the MetaFrame class."""
-        return self.metaframe.metadata
+        metadata = {}
+        for instance in ['metaframe', 'metaarray']:
+            try:
+                metadata |= getattr(self, instance).metadata
+            except AttributeError:
+                pass
+        return metadata
 
     @metadata.setter
     def metadata(self, metadata):
         if metadata is None:
             metadata = {}
-        if 'metaframe' in metadata:
-            self.attrs['metaframe'] = metadata.pop('metaframe')
-        self.metaframe.metadata = metadata
+        for instance in ['metaframe', 'metaarray']:
+            try:
+                getattr(self, instance).metadata = metadata
+            except AttributeError:
+                pass
+
+    def validate_frame(self):
+        """Validate required and additional attributes in CoilFrame."""
+        if not self.empty:
+            columns = self.columns.to_list()
+            required_unset = [attr not in columns
+                              for attr in self.metaframe.required]
+            if np.array(required_unset).any():
+                unset = np.array(self.metaframe.required)[required_unset]
+                raise IndexError('required or additional attributes missing '
+                                 f'{unset}')
+            additional_unset = [attr not in columns
+                                for attr in self.metaframe.additional]
+            if np.array(additional_unset).any():
+                unset = np.array(self.metaframe.additional)[additional_unset]
+                for attr in unset:
+                    self.loc[:, attr] = self.metaframe.default[attr]
 
     @property
     def coil_number(self):
@@ -82,9 +140,7 @@ class CoilFrame(pandas.DataFrame, CoilData):
 
     def add_frame(self, *args, iloc=None, **kwargs):
         """
-        Return frame.index.
-
-        Build frame from *rgs, **kwargs and add to CoilFrame.
+        Build frame from *args, **kwargs and concatenate with CoilFrame.
 
         Parameters
         ----------
@@ -101,9 +157,22 @@ class CoilFrame(pandas.DataFrame, CoilData):
             built frame.index.
 
         """
-        frame = self._build_frame(*args, **kwargs)
-        self.concatenate(frame, iloc=iloc)
-        return frame.index
+        frames = self._build_frame(*args, **kwargs)
+        self.concat(frames, iloc=iloc)
+
+    def concat(self, *frames, iloc=None, sort=False):
+        """Concatenate *frames with CoilFrame."""
+        dataframe = pandas.DataFrame(self)
+        dataframes = [pandas.DataFrame(frame) for frame in frames]
+        if iloc is None:  # append
+            frames = [dataframe, *dataframes]
+        else:  # insert
+            frames = [dataframe.iloc[:iloc, :],
+                      *dataframes,
+                      dataframe.iloc[iloc:, :]]
+        frame = pandas.concat(frames, sort=sort)  # concatenate
+        CoilFrame.__init__(self, frame, metadata=self.metadata)
+        #self.rebuild_CoilArray()  # rebuild fast index
 
     def _build_frame(self, *args, **kwargs):
         """
@@ -152,7 +221,7 @@ class CoilFrame(pandas.DataFrame, CoilData):
         ValueError
             Required arguments not present in *frame.
         IndexError
-            Output argument number len(args) != len(self.metaframe).
+            Output argument number len(args) != self.metaframe.required_number.
 
         Returns
         -------
@@ -176,9 +245,10 @@ class CoilFrame(pandas.DataFrame, CoilData):
                 kwargs['name'] = frame.index
             kwargs |= {col: frame.loc[:, col] for col in
                        self.metaframe.additional if col in frame}
-        if len(args) != len(self.metaframe):
+        if len(args) != self.metaframe.required_number:
             raise IndexError('incorrect output argument number: '
-                             f'{len(args)} != {len(self.metaframe)}\n')
+                             f'{len(args)} != '
+                             f'{self.metaframe.required_number}\n')
         return args, kwargs
 
     @staticmethod
@@ -356,17 +426,6 @@ class CoilFrame(pandas.DataFrame, CoilData):
         elif current_label == 'It':
             data['Ic'] = data['It'] / data['Nt']
 
-    def concatenate(self, *frame, iloc=None, sort=False):
-        """Return concatenated CoilFrames."""
-        if iloc is None:  # append
-            frames = [self, *frame]
-        else:  # insert
-            frames = [self.iloc[:iloc, :], *frame, self.iloc[iloc:, :]]
-        frame = pandas.concat(frames, sort=sort)  # concatenate
-        CoilFrame.__init__(self, frame, metadata=self.metadata)
-        #self.rebuild_coildata()  # rebuild fast index
-        #  TODO relink
-
     def add_mpc(self, index, factor=1):
         """
         Define multi-point constraint linking a set of coils.
@@ -404,8 +463,7 @@ class CoilFrame(pandas.DataFrame, CoilData):
                              f'or == len(index={index})-1')
         for i in np.arange(1, index_number):
             self.at[index[i], 'mpc'] = (index[0], factor[i-1])
-        #self.rebuild_coildata()
-        #  TODO relink coildata
+        #self.rebuild_CoilArray()
 
     def drop_mpc(self, index):
         """Drop multi-point constraints referancing dropped coils."""
@@ -437,7 +495,7 @@ class CoilFrame(pandas.DataFrame, CoilData):
             index = self.index
         self.drop_mpc(index)
         self.drop(index, inplace=True)
-        self.rebuild_coildata()
+        #self.rebuild_CoilArray()
 
     def translate(self, index=None, xoffset=0, zoffset=0):
         """Translate coil(s)."""
@@ -529,4 +587,4 @@ class CoilFrame(pandas.DataFrame, CoilData):
 if __name__ == '__main__':
 
     coilframe = CoilFrame()
-    coilframe.add_frame(4, [5, 7, 12], 0.1, 0.3, name='coil3', link=True)
+    coilframe.add_frame(4, [5, 7, 12], 0.1, 0.3, name='coil1', link=True)

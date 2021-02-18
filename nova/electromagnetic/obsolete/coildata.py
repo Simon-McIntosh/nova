@@ -1,43 +1,15 @@
-from contextlib import contextmanager
-import inspect
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Feb 18 20:33:42 2021
 
-import numpy as np
-from pandas import DataFrame, Index
-from pandas.api.types import is_list_like, is_dict_like
+@author: mcintos
+"""
+
+name change:
+    _dataframe_attributes -> metaarray.data, dict
+    _coildata_attributes -> metaarray.frame
 
 
-class CoilData():
-    """
-    Methods enabling fast access to dynamic coil and subcoil data.
-
-    Provided as parent to CoilFrame. Inherited alongside DataFrame.
-    Fast access variables stored as np.arrays _*
-    Lazy data exchange implemented with parent DataFrame.
-
-    Key Attributes
-    --------------
-    Ic : float, array-like
-        Coil line current [A]
-    It : float, array-like
-        Coil turn curent [A.turns]
-    Nt : float, array-like
-        Coil turn number.
-    active : bool, array-like
-        Coil current control status.
-    optimize : bool, array-like
-        Optimization flag.
-    plasma : bool, array-like
-        Plasma flag.
-    feedback : bool, array-like
-        Feedback stabilization flag
-
-    """
-
-    # list of fast access np.array variables linked to CataFrame
-    _dataframe_attributes = []
-
-    # metadata attributes
-    _coildata_attributes = {}
 
     # current update attributes
     _coilcurrent_attributes = []
@@ -77,7 +49,7 @@ class CoilData():
 
     def _extract_coildata_properties(self):
         self._coildata_properties = [p for p, __ in inspect.getmembers(
-            CoilData, lambda o: isinstance(o, property))]
+            CoilArray, lambda o: isinstance(o, property))]
 
     def _initialize_coildata_flags(self):
         for flag in self._coildata_flags:  # update read/write
@@ -598,128 +570,4 @@ class CoilData():
     def Ip_sign(self):
         """Plasma polarity."""
         return np.sign(self.Ip_sum)
-
-    @staticmethod
-    @contextmanager
-    def _write_to_dataframe(self):
-        """
-        Apply a local attribute lock via the _update_coilframe flag.
-
-        Prevent local attribute write via __setitem__ during dataframe update.
-
-        Yields
-        ------
-        None
-            with self._write_to_dataframe(self):.
-
-        """
-        self._update_coilframe = False
-        yield
-        self._update_coilframe = True
-
-    def refresh_dataframe(self):
-        """Transfer data from coilframe attributes to dataframe."""
-        if self.update_dataframe:
-            _update_dataframe = self._update_dataframe.copy()
-            self.update_dataframe = False
-            with self._write_to_dataframe(self):
-                for attribute in _update_dataframe:
-                    if _update_dataframe[attribute]:
-                        if attribute in ['Ic', 'It']:
-                            current = self._Ic[self._mpc_referance] * \
-                                self._mpc_factor
-                            if attribute == 'It':
-                                current *= self._Nt
-                            self.loc[:, attribute] = current
-                            _attr = next(attr for attr in ['Ic', 'It']
-                                         if attr != attribute)
-                            self._update_dataframe[_attr] = False
-                        else:
-                            self.loc[:, attribute] = getattr(self, attribute)
-
-    def refresh_coilframe(self, key):
-        """
-        Transfer data from dataframe to coilframe attributes.
-
-        Parameters
-        ----------
-        key : str
-            CoilFrame column.
-
-        Returns
-        -------
-        None.
-
-        """
-        if self._update_coilframe:  # protect against regressive update
-            if key in ['Ic', 'It'] and self._mpc_iloc is not None:
-                _current_update = self.current_update
-                self.current_update = 'full'
-                self._set_current(self.loc[self.index[self._mpc_iloc], key],
-                                  current_column=key, update_dataframe=False)
-                self.current_update = _current_update
-            else:
-                value = self.loc[:, key].to_numpy()
-                if key in self._mpc_attributes:
-                    value = value[self._mpc_iloc]
-                setattr(self, f'_{key}', value)
-            if key in self._update_dataframe:
-                self._update_dataframe[key] = False
-
-    def __setattr__(self, key, value):
-        if key in self._dataframe_attributes:
-            self._update_dataframe[key] = True
-            if key not in self._coildata_properties:
-                # set as private variable
-                if key in self._mpc_attributes:
-                    nC = self._nC  # mpc variable
-                else:
-                    nC = self.coil_number  # coil number
-                if not is_list_like(value):
-                    value *= np.ones(nC, dtype=type(value))
-                if len(value) != nC:
-                    raise IndexError('Length of mpc vector does not match '
-                                     'length of index')
-                key = f'_{key}'
-        return DataFrame.__setattr__(self, key, value)
-
-    def __getattr__(self, key):
-        """Extend pandas.DataFrame.__getattr__."""
-        if key in self._dataframe_attributes:
-            value = getattr(self, f'_{key}')
-            if key in self._mpc_attributes:  # inflate
-                value = value[self._mpc_referance]
-            return value
-        return DataFrame.__getattr__(self, key)
-
-    def __setitem__(self, key, value):
-        """Extend pandas.DataFrame.__setitem__."""
-        self.refresh_dataframe()  # flush dataframe updates
-        DataFrame.__setitem__(self, key, value)
-        if key in self._dataframe_attributes:
-            self.refresh_coilframe(key)
-            if key in ['Nt', 'It', 'Ic']:
-                self._It = self.It
-            if key == 'Nt':
-                self._update_dataframe['Ic'] = True
-                self._update_dataframe['It'] = True
-            if key in ['Ic', 'It']:
-                _key = next(k for k in ['Ic', 'It'] if k != key)
-                self._update_dataframe[_key] = True
-
-    def __getitem__(self, key):
-        'subclass dataframe getitem'
-        if key in self._dataframe_attributes:
-            self.refresh_dataframe()
-        return DataFrame.__getitem__(self, key)
-
-    def _get_value(self, index, col, takeable=False):
-        'subclass dataframe get_value'
-        if col in self._dataframe_attributes:
-            self.refresh_dataframe()
-        return DataFrame._get_value(self, index, col, takeable)
-
-    def __repr__(self):
-        self.refresh_dataframe()
-        return DataFrame.__repr__(self)
 

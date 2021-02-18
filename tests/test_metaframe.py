@@ -1,6 +1,6 @@
 import pytest
 
-from nova.electromagnetic.metaframe import MetaFrame
+from nova.electromagnetic.coilframe import MetaFrame
 
 
 def test_replace_required():
@@ -25,18 +25,17 @@ def test_required_default():
 def test_metadata():
     metaframe = MetaFrame(required=['x', 'z'],
                           default={'dCoil': -1},
-                          additional=['dCoil'],
-                          coildata=None,
-                          dataframe=None)
-    assert metaframe.metadata == {'required': ['x', 'z'],
-                                  'default': {'dCoil': -1},
-                                  'additional': ['dCoil'],
-                                  'coildata': None, 'dataframe': None}
+                          additional=['dCoil'])
+    metadata = metaframe.metadata
+    del metadata['update']
+    del metadata['frame']
+    assert metadata == {'required': ['x', 'z'], 'default': {'dCoil': -1},
+                        'additional': ['dCoil']}
 
 
-def test_number_required():
+def test_required_number():
     metaframe = MetaFrame(required=['x', 'z'])
-    assert metaframe.number_required == 2
+    assert metaframe.required_number == 2
 
 
 if __name__ == '__main__':

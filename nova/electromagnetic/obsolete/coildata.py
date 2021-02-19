@@ -4,10 +4,30 @@ Created on Thu Feb 18 20:33:42 2021
 
 @author: mcintos
 """
+    """
+    Key Attributes
+    --------------
+    Ic : float, array-like
+        Coil line current [A]
+    It : float, array-like
+        Coil turn curent [A.turns]
+    Nt : float, array-like
+        Coil turn number.
+    active : bool, array-like
+        Coil current control status.
+    optimize : bool, array-like
+        Optimization flag.
+    plasma : bool, array-like
+        Plasma flag.
+    feedback : bool, array-like
+        Feedback stabilization flag
+    """
 
 name change:
     _dataframe_attributes -> metaarray.data, dict
     _coildata_attributes -> metaarray.frame
+    _update_dataframe -> metaarray.update
+    _coildata_properties -> metaarray.properties
 
 
 
@@ -40,16 +60,13 @@ name change:
                        'relink_mpc': True}
 
     def __init__(self):
-        self._extract_coildata_properties()
         self._initialize_coildata_flags()
         self._initialize_coildata_attributes()
         self._initialize_dataframe_attributes()
         self._initialize_coilcurrent_attributes()
         self._unlink_coildata_attributes()
 
-    def _extract_coildata_properties(self):
-        self._coildata_properties = [p for p, __ in inspect.getmembers(
-            CoilArray, lambda o: isinstance(o, property))]
+
 
     def _initialize_coildata_flags(self):
         for flag in self._coildata_flags:  # update read/write

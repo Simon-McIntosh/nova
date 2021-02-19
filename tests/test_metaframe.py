@@ -3,8 +3,20 @@ import pytest
 from nova.electromagnetic.coilframe import MetaFrame
 
 
+def test_init_metaframe():
+    MetaFrame()
+
+
 def test_replace_required():
     metaframe = MetaFrame(required=['x', 'z'])
+    metaframe.metadata = {'required': []}
+    metaframe.metadata = {'required': ['dx', 'dz']}
+    assert metaframe.required == ['dx', 'dz']
+
+
+def test_clear_required():
+    metaframe = MetaFrame(required=['x', 'z'])
+    metaframe.clear('required')
     metaframe.metadata = {'required': ['dx', 'dz']}
     assert metaframe.required == ['dx', 'dz']
 
@@ -27,7 +39,6 @@ def test_metadata():
                           default={'dCoil': -1},
                           additional=['dCoil'])
     metadata = metaframe.metadata
-    del metadata['update']
     del metadata['frame']
     assert metadata == {'required': ['x', 'z'], 'default': {'dCoil': -1},
                         'additional': ['dCoil']}
@@ -39,5 +50,4 @@ def test_required_number():
 
 
 if __name__ == '__main__':
-
     pytest.main([__file__])

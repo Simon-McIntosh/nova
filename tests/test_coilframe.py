@@ -1,5 +1,4 @@
 import pytest
-import numpy as np
 import pandas
 
 from nova.electromagnetic.coilframe import CoilFrame
@@ -31,17 +30,19 @@ def test_index_length_error():
 
 
 def test_required_columns():
-    frame = CoilFrame(metadata={'required': ['x', 'z']})
+    frame = CoilFrame(metadata={'Required': ['x', 'z']})
     assert frame.metadata['required'] == ['x', 'z']
 
 
 def test_required_add_frame():
-    frame = CoilFrame(metadata={'required': ['x', 'z']})
+    frame = CoilFrame(metadata={'Required': ['x', 'z']})
+    print('req', frame.metadata['required'])
+    print(frame.attrs)
     frame.add_frame(1, 2)
 
 
 def test_required_add_frame_error():
-    frame = CoilFrame(metadata={'required': ['x', 'z']})
+    frame = CoilFrame(metadata={'Required': ['x', 'z']})
     with pytest.raises(IndexError):
         assert frame.add_frame(1, 2, 3)
 
@@ -52,28 +53,42 @@ def test_reset_metadata_attribute():
 
 
 def test_frame_index():
-    frame = CoilFrame(metadata={'required': ['x', 'z'], 'additional': []})
+    frame = CoilFrame(metadata={'Required': ['x', 'z'], 'additional': []})
     frame.add_frame(0, 1)
     assert list(frame.columns) == ['x', 'z']
 
 
 def test_data_init():
     data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8]})
-    frame = CoilFrame(data, metadata={'required': ['x', 'z']})
+    frame = CoilFrame(data, metadata={'Required': ['x', 'z']})
     assert frame.coil_number == 3
 
 
 def test_data_init_required_error():
     data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8]})
     with pytest.raises(IndexError):
-        CoilFrame(data, metadata={'required': ['x', 'z', 'dl', 'dt']})
+        CoilFrame(data, metadata={'Required': ['x', 'z', 'dl', 'dt']})
 
 
 def test_data_init_additional_pass():
     data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8]})
-    frame = CoilFrame(data, metadata={'required': ['x', 'z'],
-                                      'additional': ['rms'],
-                                      'update': {'additional': 'replace'}})
+    frame = CoilFrame(data, metadata={'Required': ['x', 'z'],
+                                      'Additional': ['rms']})
+    assert list(frame.columns) == ['x', 'z', 'rms']
+
+
+def test_upper_attribute_metadata_replace():
+    CoilFrame({'x': 3, 'z': [4]}, metadata={'Required': ['x', 'z']})
+
+
+def test_upper_attribute_metadata_replace_error():
+    with pytest.raises(IndexError):
+        CoilFrame({'x': 3, 'z': [4]}, metadata={'required': ['x', 'z']})
+
+
+def test_required_additional_metadata_clash():
+    frame = CoilFrame({'x': 3, 'z': [4]}, metadata={
+        'Required': ['x', 'z'], 'Additional': ['x', 'rms']})
     assert list(frame.columns) == ['x', 'z', 'rms']
 
 

@@ -1,7 +1,7 @@
 """Manage CoilFrame metadata."""
 
 from abc import ABCMeta, abstractmethod
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, fields
 import typing
 
 # pylint:disable=unsubscriptable-object
@@ -11,50 +11,96 @@ import typing
 class MetaData(metaclass=ABCMeta):
     """Abstract base class. Extended by MetaFrame and MetaArray."""
 
-    update: dict[str, str] = field(default_factory=lambda: {})
-
     def __post_init__(self):
         """Validate input."""
-        self.validate_input()
+        self.validate()
+
+    @property
+    def types(self) -> dict[str, type]:
+        """Return field types."""
+        return {field.name: typing.get_origin(field.type)
+                if isinstance(field.type, typing.GenericAlias) else field.type
+                for field in fields(self)}
 
     @property
     def metadata(self):
-        """Manage metadata."""
+        """
+        Manage metadata.
+
+        Parameters
+        ----------
+        metadata : dict[str, Union[list, dict]]
+            Input metadata.
+                - if not value (empty, False, None): clear attribute
+                - if attribute[0].isupper(): replace field with value
+                - else: update / extend
+
+        Returns
+        -------
+        metadata : dict[str, Union[list, dict]]
+
+        """
         return {field.name: getattr(self, field.name)
                 for field in fields(self)}
 
     @metadata.setter
     def metadata(self, metadata):
-        types = {field.name: typing.get_origin(field.type)
-                 for field in fields(self)}
-        [types[attr] not in [list, dict] for attr in ]
-        for attr in [attr for attr in metadata if attr in types]:
-            if not metadata[attr]:  # empty, None or False
-                if types[attr] not in [list, dict]:
-
-                value = [] if types[attr] == list else {}
-                setattr(self, attr, metadata[attr])
-
-            if types[attr] == list:
-
-
-            else:  # replace if empty
-                mode = 'replace'
-            if mode == 'replace':
-
-            elif mode == 'extend':
-                unique = [attr for attr in metadata[attr]
-                          if attr not in getattr(self, attr)]
-                getattr(self, attr).extend(unique)
-            elif mode == 'update':
-                getattr(self, attr).update(metadata[attr])
+        types = self.types
+        for attribute in [attr for attr in metadata if attr.lower() in types]:
+            replace = attribute[0].isupper()
+            value = metadata[attribute]
+            attribute = attribute.lower()
+            if not value:  # empty, None or False
+                setattr(self, attribute, types[attribute]())
             else:
-                raise IndexError(f'mode {mode} not in '
-                                 '[replace, extend, update]')
-        self.validate_input()
-
+                if not isinstance(value, types[attribute]):
+                    raise TypeError('type missmatch: '
+                                    'type(input) != type(default) \n'
+                                    f'{type(metadata[attribute])} != '
+                                    f'{types[attribute]}')
+                if replace:
+                    setattr(self, attribute, value)
+                elif types[attribute] == dict:
+                    getattr(self, attribute).update(value)
+                elif types[attribute] == list:
+                    getattr(self, attribute).extend(
+                        [attr for attr in value
+                         if attr not in getattr(self, attribute)])
+                else:
+                    raise TypeError(f'attribute type {types[attribute]} ',
+                                    'not in [list, dict]')
+        self.validate()
 
     @abstractmethod
-    def validate_input(self):
+    def validate(self):
         """Run validation checks on input."""
-        pass
+        types = self.types
+        type_error = {name: types[name] for name in types
+                      if types[name] not in [list, dict]}
+        if type_error:
+            raise TypeError('attributes initialized with types '
+                            'not in [list, dict]:\n'
+                            f'{type_error}')
+
+    def clear(self, attribute):
+        """
+        Replace named attribute with empty strucutre matching specified type.
+
+        Parameters
+        ----------
+        attribute : str
+            Atribute to clear.
+
+        Raises
+        ------
+        AttributeError
+            Attribute not found.
+
+        Returns
+        -------
+        None.
+
+        """
+        if attribute not in self.types:
+            raise AttributeError(f'attribute {attribute} not found')
+        self.metadata = {attribute: self.types[attribute]()}

@@ -36,8 +36,6 @@ def test_required_columns():
 
 def test_required_add_frame():
     frame = CoilFrame(metadata={'Required': ['x', 'z']})
-    print('req', frame.metadata['required'])
-    print(frame.attrs)
     frame.add_frame(1, 2)
 
 
@@ -95,3 +93,4 @@ def test_required_additional_metadata_clash():
 if __name__ == '__main__':
 
     pytest.main([__file__])
+    #test_instance()

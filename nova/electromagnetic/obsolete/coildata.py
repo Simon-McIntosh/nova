@@ -29,6 +29,10 @@ name change:
     _update_dataframe -> metaarray.update
     _coildata_properties -> metaarray.properties
 
+    frame: dict[str, str] = field(
+        repr=False, default_factory=lambda: {'current_update': 'full'})
+
+
 
 
     # current update attributes

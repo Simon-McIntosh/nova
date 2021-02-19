@@ -1,68 +1,19 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 
-from dataclasses import dataclass, field
 import re
 import string
-from typing import Optional, Collection, Any, Union
+from typing import Optional, Collection, Any
 
 import pandas
 import numpy as np
 import shapely
 
-from nova.electromagnetic.metadata import MetaData
-from nova.electromagnetic.framearray import MetaArray, FrameArray
+from nova.electromagnetic.metaframe import MetaFrame
+from nova.electromagnetic.framearray import FrameArray
 from nova.electromagnetic.polygen import polygen, root_mean_square
 
 # pylint:disable=unsubscriptable-object
 # pylint: disable=too-many-ancestors
-
-
-@dataclass
-class MetaFrame(MetaData):
-    """Manage CoilFrame metadata - accessed via CoilFrame['attrs']."""
-
-    required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
-    additional: list[str] = field(default_factory=lambda: ['rms', 'mpc'])
-    default: dict[str, Union[float, str, bool, None]] = field(
-        repr=False, default_factory=lambda: {
-            'dCoil': 0., 'nx': 1, 'nz': 1, 'Nt': 1., 'Nf': 1,
-            'rms': 0., 'dx': 0., 'dz': 0., 'dA': 0., 'dl_x': 0., 'dl_z': 0.,
-            'm': '', 'R': 0.,  'rho': 0.,
-            'turn_fraction': 1., 'skin_fraction': 1.,
-            'cross_section': 'rectangle', 'turn_section': 'rectangle',
-            'patch': None, 'polygon': None,
-            'coil': '', 'part': '',
-            'subindex': None, 'material': '', 'mpc': '',
-            'active': True, 'optimize': False, 'plasma': False,
-            'feedback': False, 'acloss': False,
-            'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.})
-    frame: dict[str, Union[str, bool]] = field(
-        repr=False, default_factory=lambda: {
-            'name': '', 'label': 'Coil', 'delim': '_', 'link': True})
-
-    def validate(self):
-        """
-        Extend MetaData.validate.
-
-            - Exclude duplicate values from self.required in self.additional.
-            - Check that all additional attributes have a default value.
-
-        """
-        MetaData.validate(self)
-        # exculde duplicate values
-        self.additional = [attr for attr in self.additional
-                           if attr not in self.required]
-        # check defaults
-        unset = np.array([attr not in self.default
-                          for attr in self.additional])
-        if unset.any():
-            raise ValueError('Default value not set for additional attributes '
-                             f'{np.array(self.additional)[unset]}')
-
-    @property
-    def required_number(self):
-        """Return number of required arguments."""
-        return len(self.required)
 
 
 class CoilSeries(pandas.Series):
@@ -91,12 +42,11 @@ class CoilFrame(FrameArray, pandas.DataFrame):
                  columns: Optional[Collection[Any]] = None,
                  attrs: Optional[dict] = {},
                  metadata: Optional[dict] = {}):
-
-        pandas.DataFrame.__init__(self, data, index, columns)
-        self._update_attrs(attrs)
-        FrameArray.__init__(self)
+        super().__init__(data, index, columns)
+        #pandas.DataFrame.__init__(self, data, index, columns)
+        #FrameArray.__init__(self)
+        self.update_attrs(attrs)
         self.metadata = metadata
-        self.validate_frame()
 
     @property
     def _constructor(self):
@@ -106,17 +56,38 @@ class CoilFrame(FrameArray, pandas.DataFrame):
     def _constructor_sliced(self):
         return CoilSeries
 
-    def _update_attrs(self, attrs):
+    def update_attrs(self, attrs):
+        """Update metaframe and metaarray attributes."""
         self.attrs |= attrs
         for instance in ['frame', 'array']:
-            try:
+            if hasattr(self, f'_init_{instance}'):
                 getattr(self, f'_init_{instance}')()
-            except AttributeError:
-                pass
 
     def _init_frame(self):
         if 'metaframe' not in self.attrs:
             self.attrs['metaframe'] = MetaFrame()
+
+    def validate_metadata(self):
+        """Validate metaframe and metaarray."""
+        for instance in ['frame', 'array']:
+            if hasattr(self, f'validate_{instance}'):
+                getattr(self, f'validate_{instance}')()
+
+    def validate_frame(self):
+        """Validate required and additional attributes in CoilFrame."""
+        if not self.empty:
+            columns = self.columns.to_list()
+            required_unset = [attr not in columns
+                              for attr in self.metaframe.required]
+            if np.array(required_unset).any():
+                unset = np.array(self.metaframe.required)[required_unset]
+                raise IndexError(f'required attributes missing {unset}')
+            additional_unset = [attr not in columns
+                                for attr in self.metaframe.additional]
+            if np.array(additional_unset).any():
+                unset = np.array(self.metaframe.additional)[additional_unset]
+                for attr in unset:
+                    self.loc[:, attr] = self.metaframe.default[attr]
 
     @property
     def metaframe(self):
@@ -141,23 +112,7 @@ class CoilFrame(FrameArray, pandas.DataFrame):
                 getattr(self, instance).metadata = metadata
             except AttributeError:
                 pass
-
-    def validate_frame(self):
-        """Validate required and additional attributes in CoilFrame."""
-        print(self.metaframe)
-        if not self.empty:
-            columns = self.columns.to_list()
-            required_unset = [attr not in columns
-                              for attr in self.metaframe.required]
-            if np.array(required_unset).any():
-                unset = np.array(self.metaframe.required)[required_unset]
-                raise IndexError(f'required attributes missing {unset}')
-            additional_unset = [attr not in columns
-                                for attr in self.metaframe.additional]
-            if np.array(additional_unset).any():
-                unset = np.array(self.metaframe.additional)[additional_unset]
-                for attr in unset:
-                    self.loc[:, attr] = self.metaframe.default[attr]
+        self.validate_metadata()
 
     @property
     def coil_number(self):

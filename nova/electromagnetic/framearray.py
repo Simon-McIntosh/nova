@@ -14,19 +14,32 @@ from nova.electromagnetic.metadata import MetaData
 class MetaArray(MetaData):
     """Manage CoilFrame metadata - accessed via CoilFrame['attrs']."""
 
-    array: list[str] = field(default_factory=lambda: ['x'])
-    update: list[bool] = field(default_factory=dict)
-    frame: dict[str, str] = field(
-        repr=False, default_factory=lambda: {'current_update': 'full'})
+    array: list[str] = field(default_factory=lambda: ['x', 'z'])
+    data: dict[str, np.ndarray] = field(default_factory=dict)
+    update_array: list[bool] = field(default_factory=dict)
+    update_frame: list[bool] = field(default_factory=dict)
+
+    def __repr__(self):
+        """Return __repr__."""
+        repr_data = {field: getattr(self, field).values()
+                     for field in ['update_array', 'update_frame']}
+        return pandas.DataFrame(repr_data, index=self.array).__repr__()
 
     def validate(self):
         """Extend MetaData.validate."""
         MetaData.validate(self)
-        self.update |= {attr: False
-                        for attr in self.array if attr not in self.update}
+        # set default update flags
+        self.update_flag('array', True)
+        self.update_flag('frame', False)
+
+    def update_flag(self, instance, default):
+        attribute = getattr(self, f'update_{instance}')
+        attribute |= {attr: default for attr in self.array
+                      if attr not in attribute}
+        setattr(self, f'update_{instance}',
+                {attr: attribute[attr] for attr in self.array})
 
 
-#@dataclass
 class FrameArray(metaclass=ABCMeta):
     """
     Abstract base class enabling fast access to dynamic coil and subcoil data.
@@ -40,22 +53,17 @@ class FrameArray(metaclass=ABCMeta):
     #data: dict[str, np.ndarray] = field(init=False, repr=False)
     #attrs: dict = field(init=False, repr=False)
 
+    '''
     def __init__(self):
         """Build fast access data."""
-        self.attrs['data'] = {}
-        for attribute in self.metaarray.array:
-            self.data[attribute] = self[attribute].to_numpy()
+        #
+        #for attribute in self.metaarray.array:
+        #    self.data[attribute] = self[attribute].to_numpy()
         # extract properties
+        #self.validate_array()
         self.metaarray.properties = [p for p, __ in inspect.getmembers(
             FrameArray, lambda o: isinstance(o, property))]
-
-    @property
-    def data(self):
-        return self.attrs['data']
-
-    @abstractmethod
-    def metaframe(self):
-        """Return MetaFrame instance."""
+    '''
 
     def __repr__(self):
         """Extend pandas.DataFrame.__repr__."""
@@ -66,10 +74,40 @@ class FrameArray(metaclass=ABCMeta):
         if 'metaarray' not in self.attrs:
             self.attrs['metaarray'] = MetaArray()
 
+    def validate_array(self):
+        columns = self.metaframe.required + self.metaframe.additional
+        unset = [attr not in columns for attr in self.metaarray.array]
+        if np.array(unset).any():
+            raise IndexError(
+                f'metaarray attributes {np.array(self.metaarray.array)[unset]} '
+                f'not set in metaframe.required {self.metaframe.required} '
+                f'or metaframe.additional {self.metaframe.additional}')
+
+    @property
+    def data(self):
+        """Return fast access data dictionary."""
+        return self.metaarray.data
+
+    @abstractmethod
+    def metaframe(self):
+        """Return MetaFrame instance."""
+
     @property
     def metaarray(self):
         """Return metaarray."""
         return self.attrs['metaarray']
+
+    def __getattr__(self, key):
+        """Extend pandas.DataFrame.__getattr__."""
+        if key in self.metaarray.array:
+            if self.metaarray.update_array[key]:
+                self.data[key] = \
+                    pandas.DataFrame.__getattr__(self, key).to_numpy()
+                self.metaarray.update_array[key] = False
+            #if key in self._mpc_attributes:  # inflate
+            #    value = value[self._mpc_referance]
+            return self.data[key]
+        return pandas.DataFrame.__getattr__(self, key)
 
     def __setattr__(self, key, value):
         """Extend pandas.DataFrame.__setattr__."""
@@ -93,15 +131,6 @@ class FrameArray(metaclass=ABCMeta):
                 '''
                 return None
         return pandas.DataFrame.__setattr__(self, key, value)
-
-    def __getattr__(self, key):
-        """Extend pandas.DataFrame.__getattr__."""
-        if key in self.data:
-            value = self.data[key]
-            #if key in self._mpc_attributes:  # inflate
-            #    value = value[self._mpc_referance]
-            return value
-        return pandas.DataFrame.__getattr__(self, key)
 
 
     def refresh_dataframe(self):

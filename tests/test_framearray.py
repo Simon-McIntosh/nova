@@ -11,17 +11,30 @@ def test_getattr_():
                                 'Array': ['x']})
     assert isinstance(frame.x, np.ndarray)
 
-def test_setattr_update():
+
+def test_setattr_ndarray():
     frame = CoilFrame({'x': [3, 2], 'z': 0},
                       metadata={'Required': ['x', 'z'],
-                                'Array': ['x']})
-    #frame.x = [5, 6]
-    print(frame)
-    print(frame.x)
-    #assert isinstance(frame.x, np.ndarray)
+                                'Array': ['x', 'z']})
+    assert isinstance(frame.x, np.ndarray)
+
+
+def test_setattr_update_array_false():
+    frame = CoilFrame({'x': [3, 2], 'z': 0},
+                      metadata={'Required': ['x', 'z'],
+                                'Array': ['x', 'z']})
+    _ = frame.x
+    assert not frame.metaarray.update_frame['x']
+
+
+def test_setattr_update_array_true():
+    frame = CoilFrame({'x': [3, 2], 'z': 0},
+                      metadata={'Required': ['x', 'z'],
+                                'Array': ['x', 'z']})
+    _ = frame.x
+    assert not frame.metaarray.update_frame['z']
 
 
 if __name__ == '__main__':
 
-    #pytest.main([__file__])
-    test_setattr_update()
+    pytest.main([__file__])

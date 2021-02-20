@@ -50,6 +50,7 @@ class FrameArray(metaclass=ABCMeta):
 
     """
 
+
     #data: dict[str, np.ndarray] = field(init=False, repr=False)
     #attrs: dict = field(init=False, repr=False)
 
@@ -75,18 +76,14 @@ class FrameArray(metaclass=ABCMeta):
             self.attrs['metaarray'] = MetaArray()
 
     def validate_array(self):
-        columns = self.metaframe.required + self.metaframe.additional
-        unset = [attr not in columns for attr in self.metaarray.array]
+        """Validate metaarray."""
+        unset = [attr not in self.metaframe.columns
+                 for attr in self.metaarray.array]
         if np.array(unset).any():
             raise IndexError(
-                f'metaarray attributes {np.array(self.metaarray.array)[unset]} '
-                f'not set in metaframe.required {self.metaframe.required} '
+                f'metaarray attributes {np.array(self.metaarray.array)[unset]}'
+                f' not set in metaframe.required {self.metaframe.required} '
                 f'or metaframe.additional {self.metaframe.additional}')
-
-    @property
-    def data(self):
-        """Return fast access data dictionary."""
-        return self.metaarray.data
 
     @abstractmethod
     def metaframe(self):
@@ -97,41 +94,42 @@ class FrameArray(metaclass=ABCMeta):
         """Return metaarray."""
         return self.attrs['metaarray']
 
+    def _checkvalue(self, key, value):
+        #if key not in self.metaarray.properties:
+        if key in self._mpc_attributes:
+            shape = self.unique_coil_number  # mpc variable
+        else:
+            shape = self.coil_number  # coil number
+        if not pandas.api.types.is_list_like(value):
+            value *= np.ones(nC, dtype=type(value))
+        if len(value) != shape:
+            raise IndexError('Length of mpc vector does not match '
+                             'length of index')
+
     def __getattr__(self, key):
         """Extend pandas.DataFrame.__getattr__."""
-        if key in self.metaarray.array:
-            if self.metaarray.update_array[key]:
-                self.data[key] = \
-                    pandas.DataFrame.__getattr__(self, key).to_numpy()
-                self.metaarray.update_array[key] = False
-            #if key in self._mpc_attributes:  # inflate
-            #    value = value[self._mpc_referance]
-            return self.data[key]
+        if 'metaarray' in self.attrs:
+            if key in self.metaarray.array:
+                if self.metaarray.update_array[key]:
+                    self.metaarray.data[key] = \
+                        pandas.DataFrame.__getattr__(self, key).to_numpy()
+                    self.metaarray.update_array[key] = False
+                #if key in self._mpc_attributes:  # inflate
+                #    value = value[self._mpc_referance]
+                return self.metaarray.data[key]
         return pandas.DataFrame.__getattr__(self, key)
 
     def __setattr__(self, key, value):
         """Extend pandas.DataFrame.__setattr__."""
         if 'metaarray' in self.attrs:
             if key in self.metaarray.array:
-                self.metaarray.update[key] = True
+                self.metaarray.update_array[key] = False
+                self.metaarray.update_frame[key] = True
+                self.metaarray.data[key] = value
                 print(key)
-                '''
-                if key not in self.metaarray.properties:
-                    # set as private variable
-                    if key in self._mpc_attributes:
-                        nC = self._nC  # mpc variable
-                    else:
-                        nC = self.coil_number  # coil number
-                    if not pandas.api.types.is_list_like(value):
-                        value *= np.ones(nC, dtype=type(value))
-                    if len(value) != nC:
-                        raise IndexError('Length of mpc vector does not match '
-                                         'length of index')
-                    key = f'_{key}'
-                '''
+
                 return None
         return pandas.DataFrame.__setattr__(self, key, value)
-
 
     def refresh_dataframe(self):
         """Transfer data from coilframe attributes to dataframe."""

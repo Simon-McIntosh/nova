@@ -12,7 +12,7 @@ from nova.electromagnetic.metadata import MetaData
 
 @dataclass
 class MetaArray(MetaData):
-    """Manage CoilFrame metadata - accessed via CoilFrame['attrs']."""
+    """Manage Frame metadata - accessed via Frame['attrs']."""
 
     array: list[str] = field(default_factory=lambda: ['x', 'z'])
     data: dict[str, np.ndarray] = field(default_factory=dict)
@@ -33,6 +33,7 @@ class MetaArray(MetaData):
         self.update_flag('frame', False)
 
     def update_flag(self, instance, default):
+        """Set flag defaults for new attributes."""
         attribute = getattr(self, f'update_{instance}')
         attribute |= {attr: default for attr in self.array
                       if attr not in attribute}
@@ -40,31 +41,15 @@ class MetaArray(MetaData):
                 {attr: attribute[attr] for attr in self.array})
 
 
-class FrameArray(metaclass=ABCMeta):
+class Array(metaclass=ABCMeta):
     """
-    Abstract base class enabling fast access to dynamic coil and subcoil data.
+    Abstract base class enabling fast access to dynamic Frame fields.
 
-    Extended by CoilFrame. Inherited alongside DataFrame.
+    Extended by Frame. Inherited alongside DataFrame.
     Fast access variables stored as np.arrays _*
     Lazy data exchange implemented with parent DataFrame.
 
     """
-
-
-    #data: dict[str, np.ndarray] = field(init=False, repr=False)
-    #attrs: dict = field(init=False, repr=False)
-
-    '''
-    def __init__(self):
-        """Build fast access data."""
-        #
-        #for attribute in self.metaarray.array:
-        #    self.data[attribute] = self[attribute].to_numpy()
-        # extract properties
-        #self.validate_array()
-        self.metaarray.properties = [p for p, __ in inspect.getmembers(
-            FrameArray, lambda o: isinstance(o, property))]
-    '''
 
     def __repr__(self):
         """Extend pandas.DataFrame.__repr__."""
@@ -132,7 +117,7 @@ class FrameArray(metaclass=ABCMeta):
         return pandas.DataFrame.__setattr__(self, key, value)
 
     def refresh_dataframe(self):
-        """Transfer data from coilframe attributes to dataframe."""
+        """Transfer data from frame attributes to dataframe."""
         if self.update_dataframe:
             update = self.metaarray.update.copy()
             self.update_dataframe = False
@@ -154,7 +139,7 @@ class FrameArray(metaclass=ABCMeta):
     @contextmanager
     def _write_dataframe(self):
         """
-        Apply a local attribute lock via the _update_coilframe flag.
+        Apply a local attribute lock via the _update_frame flag.
 
         Prevent local attribute write via __setitem__ during dataframe update.
 
@@ -164,26 +149,26 @@ class FrameArray(metaclass=ABCMeta):
             with self._write_dataframe(self):.
 
         """
-        self._update_coilframe = False
+        self._update_frame = False
         yield
-        self._update_coilframe = True
+        self._update_frame = True
 
     '''
-    def refresh_coilframe(self, key):
+    def refresh_frame(self, key):
         """
-        Transfer data from dataframe to coilframe attributes.
+        Transfer data from dataframe to frame attributes.
 
         Parameters
         ----------
         key : str
-            CoilFrame column.
+            Frame column.
 
         Returns
         -------
         None.
 
         """
-        if self._update_coilframe:  # protect against regressive update
+        if self._update_frame:  # protect against regressive update
             if key in ['Ic', 'It'] and self._mpc_iloc is not None:
                 _current_update = self.current_update
                 self.current_update = 'full'
@@ -203,7 +188,7 @@ class FrameArray(metaclass=ABCMeta):
         self.refresh_dataframe()  # flush dataframe updates
         DataFrame.__setitem__(self, key, value)
         if key in self._dataframe_attributes:
-            self.refresh_coilframe(key)
+            self.refresh_frame(key)
             if key in ['Nt', 'It', 'Ic']:
                 self._It = self.It
             if key == 'Nt':

@@ -1,6 +1,6 @@
 import pytest
 
-from nova.electromagnetic.coilframe import MetaFrame
+from nova.electromagnetic.frame import MetaFrame
 
 
 def test_init_metaframe():

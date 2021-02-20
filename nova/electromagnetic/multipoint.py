@@ -2,22 +2,33 @@
 from dataclasses import dataclass, field
 
 import numpy as np
+import pandas
 
-from nova.electromagnetic.coilframe import CoilFrame
+from nova.electromagnetic.frame import Frame
 
 
 @dataclass
-class MultiPointConstraint:
+class MultiPoint:
 
-    frame: CoilFrame
+    frame: Frame
+    iloc: list[int] = field(init=False)
+    index: pandas.Index = field(init=False)
+    referance: list[int] = field(init=False)
+    factor: list[float] = field(init=False)
+    link_index: list[int, int] = field(init=False)
+    link_factor: list[float] = field(init=False)
 
     def __post_init__(self):
+        """Configure frame for multi-point constraints."""
         if 'mpc' not in self.frame.metaframe.columns:
-            self.frame.metaframe.metadata = {'additional': ['mpc']}
-            self.frame['mpc'] = self.frame.metaframe.default['mpc']
+            self.frame.add_column('mpc')
 
-    def extract(self):
-        """Extract mpc interger index and factor."""
+    def __len__(self) -> int:
+        """Return frame rank, the number of independant coils."""
+        return len(self.iloc)
+
+    def update(self):
+        """Update multi-point parameters."""
         mpc = self.get('mpc', np.array([self.metaframe.default['mpc']
                                         for __ in range(self.coil_number)]))
         self._mpc_iloc = [i for i, _mpc in enumerate(mpc) if not _mpc]
@@ -60,8 +71,8 @@ class MultiPointConstraint:
 
 if __name__ == '__main__':
 
-    frame = CoilFrame({'x': [1, 3], 'z': 0}, metadata={
-        'Required': ['x', 'z'], 'Additional': []})
-    mpc = MultiPointConstraint(frame)
-    frame.add_frame(4, 5)
+    frame = Frame({'x': [1, 3, 4, 8], 'z': 0, 'mpc': [1, 2, 3, 4]},
+                  metadata={'Required': ['x', 'z']})
+    #mpc = MultiPoint(frame)
+    #frame.add_frame(4, [7, 8])
     print(frame)

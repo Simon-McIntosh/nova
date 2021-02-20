@@ -23,6 +23,18 @@ Created on Thu Feb 18 20:33:42 2021
         Feedback stabilization flag
     """
 
+    '''
+    def __init__(self):
+        """Build fast access data."""
+        #
+        #for attribute in self.metaarray.array:
+        #    self.data[attribute] = self[attribute].to_numpy()
+        # extract properties
+        #self.validate_array()
+        self.metaarray.properties = [p for p, __ in inspect.getmembers(
+            Array, lambda o: isinstance(o, property))]
+    '''
+
 name change:
     _dataframe_attributes -> metaarray.data, dict
     _coildata_attributes -> metaarray.frame

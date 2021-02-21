@@ -24,6 +24,16 @@ Created on Thu Feb 18 20:33:42 2021
     """
 
     '''
+        def add_column(self, label):
+        """Add column to Frame initializing values to default."""
+        if label not in self.metaframe.columns:
+            self.metadata = {'additional': [label]}
+            if len(self) > 0:  # initialize with default value
+                print(label, self.metaframe.default[label])
+                self[label] = self.metaframe.default[label]
+    '''
+
+    '''
     def __init__(self):
         """Build fast access data."""
         #

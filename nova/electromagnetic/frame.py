@@ -9,9 +9,10 @@ import pandas
 import numpy as np
 import shapely
 
+from nova.electromagnetic.multipoint import MultiPoint
+from nova.electromagnetic.polygon import Polygon
 from nova.electromagnetic.metadata import MetaData
-from nova.electromagnetic.array import Array
-from nova.electromagnetic.polygen import polygen, root_mean_square
+from nova.electromagnetic.array import MetaArray, Array
 
 # pylint:disable=unsubscriptable-object
 # pylint: disable=too-many-ancestors
@@ -26,12 +27,12 @@ class MetaFrame(MetaData):
     default: dict[str, Union[float, str, bool, None]] = field(
         repr=False, default_factory=lambda: {
             'dCoil': 0., 'nx': 1, 'nz': 1, 'Nt': 1., 'Nf': 1,
-            'rms': 0., 'dx': 0., 'dz': 0., 'dA': 0., 'dl_x': 0., 'dl_z': 0.,
+            'rms': 0., 'dx': 0., 'dz': 0., 'dA': 0.,
+            'dl': 0.1, 'dt': 0.1, 'dl_x': 0., 'dl_z': 0.,
             'm': '', 'R': 0.,  'rho': 0.,
             'turn_fraction': 1., 'skin_fraction': 1.,
             'cross_section': 'rectangle', 'turn_section': 'rectangle',
-            'patch': None, 'polygon': None,
-            'coil': '', 'part': '',
+            'patch': None, 'poly': None, 'coil': '', 'part': '',
             'subindex': None, 'material': '', 'mpc': '',
             'active': True, 'optimize': False, 'plasma': False,
             'feedback': False, 'acloss': False,
@@ -58,13 +59,13 @@ class MetaFrame(MetaData):
         if unset.any():
             raise ValueError('Default value not set for additional attributes '
                              f'{np.array(self.additional)[unset]}')
-        # block frame mutable keys
+        # block frame extension
         frame_default = next(field.default_factory() for field in fields(self)
                              if field.name == 'frame')
-        mutate = np.array([attr not in frame_default for attr in self.frame])
-        if mutate.any():
-            raise IndexError('non-default attributes set in frame field '
-                             f'{np.array(list(self.frame.keys()))[mutate]}')
+        extend = np.array([attr not in frame_default for attr in self.frame])
+        if extend.any():
+            raise IndexError('additional attributes passed to frame field '
+                             f'{np.array(list(self.frame.keys()))[extend]}')
 
     @property
     def required_number(self):
@@ -89,27 +90,29 @@ class Series(pandas.Series):
         return Frame
 
 
-class Frame(Array, pandas.DataFrame):
+class Frame(pandas.DataFrame):
     """
-    Frame instance inherits from Pandas DataFrame and CoilArray.
+    Extends Pandas.DataFrame.
 
     Inspiration for DataFrame inheritance taken from GeoPandas
     https://github.com/geopandas.
     """
 
+    _attributes = {'multipoint': MultiPoint, 'polygon': Polygon}
+
     def __init__(self,
                  data=None,
                  index: Optional[Collection[Any]] = None,
-                 columns: Optional[Collection[Any]] = None,
-                 attrs: Optional[dict] = {},
-                 metadata: Optional[dict] = {},
+                 attrs: Optional[dict] = None,
+                 metadata: Optional[dict] = None,
                  **default: Optional[dict]):
-        super().__init__(data, index, columns)
+        super().__init__(data, index)
         self.update_attrs(attrs)
-        self.metadata = metadata
-        self.metaframe.default |= default
+        self.update_attributes()
+        self.update_metadata(metadata)
+        self.update_default(default)
         self.update_index()
-        self.link_frame()
+        self.multipoint.link()
 
     @property
     def _constructor(self):
@@ -119,22 +122,33 @@ class Frame(Array, pandas.DataFrame):
     def _constructor_sliced(self):
         return Series
 
-    def update_attrs(self, attrs):
-        """Update metaframe and metaarray attributes."""
-        self.attrs |= attrs
-        for instance in ['frame', 'array']:
-            if hasattr(self, f'_init_{instance}'):
-                getattr(self, f'_init_{instance}')()
+    @property
+    def metaframe(self):
+        """Return metaframe instance."""
+        return self.attrs['metaframe']
 
-    def _init_frame(self):
+    @property
+    def multipoint(self):
+        """Return multipoint instance."""
+        return self.attrs['multipoint']
+
+    @property
+    def polygon(self):
+        """Return section instance."""
+        return self.attrs['polygon']
+
+    def update_attrs(self, attrs=None):
+        """Update frame attrs and initialize."""
+        if attrs is not None:
+            self.attrs |= attrs
         if 'metaframe' not in self.attrs:
             self.attrs['metaframe'] = MetaFrame()
+            self.attrs['metadata'] = ['metaframe']
 
-    def validate_metadata(self):
-        """Validate metaframe and metaarray."""
-        for instance in ['frame', 'array']:
-            if hasattr(self, f'validate_{instance}'):
-                getattr(self, f'validate_{instance}')()
+    def update_attributes(self):
+        """Update Frame attributes."""
+        for attr in self._attributes:
+            self.attrs[attr] = self._attributes[attr](self)
 
     def validate_frame(self):
         """Validate required and additional attributes in Frame."""
@@ -158,30 +172,37 @@ class Frame(Array, pandas.DataFrame):
                 for attr in unset:
                     self.loc[:, attr] = self.metaframe.default[attr]
 
-    @property
-    def metaframe(self):
-        """Return metaframe."""
-        return self.attrs['metaframe']
+    def update_metadata(self, metadata):
+        """Update metadata."""
+        if metadata is None:
+            metadata = {}
+        self.metadata = metadata
 
     @property
     def metadata(self):
         """Manage Frame metadata via the MetaFrame class."""
         metadata = {}
-        for instance in ['metaframe', 'metaarray']:
-            try:
-                metadata |= getattr(self, instance).metadata
-            except AttributeError:
-                pass
+        for attribute in self.attrs['metadata']:
+            metadata |= getattr(self, attribute).metadata
         return metadata
 
     @metadata.setter
     def metadata(self, metadata):
-        for instance in ['metaframe', 'metaarray']:
-            try:
-                getattr(self, instance).metadata = metadata
-            except AttributeError:
-                pass
-        self.validate_metadata()
+        for attribute in self.attrs['metadata']:
+            getattr(self, attribute).metadata = metadata
+            getattr(self, attribute).validate()
+
+    def update_default(self, default):
+        """Update metaframe.defaults."""
+        if default is None:
+            default = {}
+        extend = np.array([attr not in self.metaframe.default
+                           for attr in default])
+        if extend.any():
+            raise IndexError('additional default attributes set in **default '
+                             f'{np.array(list(default.keys()))[extend]} '
+                             'extend default set using metadata.')
+        self.metaframe.default |= default
 
     def update_index(self):
         """Reset index if self.index is unset."""
@@ -189,44 +210,6 @@ class Frame(Array, pandas.DataFrame):
             self['index'] = self._build_index(self)
             self.set_index('index', inplace=True)
             self.index.name = None
-
-    def link_frame(self):
-        """
-        Apply multi-point constraints to frame.
-
-            - if 'mpc' in self.columns
-                Format mpc attribute:
-
-                - mpc is none or NaN: mpc = ''
-                - mpc is bool: mpc = '' if False else 1
-                - mpc is int or float: mpc[0] = '', mpc[1:] = factor
-
-            - elif self.link
-                Add mpc attrbute and set mpc vector to Ture
-
-            - else
-                mpc unset.
-
-        """
-        if 'mpc' in self.columns:
-            isnan = np.array([pandas.isna(mpc)
-                              for mpc in self.mpc], dtype=bool)
-            self.loc[isnan, 'mpc'] = self.metaframe.default['mpc']
-            isnumeric = np.array([isinstance(mpc, (int, float)) &
-                                  ~isinstance(mpc, bool)
-                                  for mpc in self.mpc], dtype=bool)
-            istrue = np.array([mpc is True for mpc in self.mpc], dtype=bool)
-            istuple = np.array([isinstance(mpc, tuple)
-                                for mpc in self.mpc], dtype=bool)
-            self.loc[~istrue & ~isnumeric & ~istuple, 'mpc'] = ''
-            index = self.index[istrue | isnumeric]
-            if index.empty:
-                return
-            factor = np.ones(len(self))
-            factor[isnumeric] = self.mpc[isnumeric]
-            factor = factor[istrue | isnumeric][1:]
-            if len(index) > 1:
-                self.add_mpc(index, factor)
 
     def add_frame(self, *args, iloc=None, **kwargs):
         """
@@ -248,21 +231,22 @@ class Frame(Array, pandas.DataFrame):
 
         """
         self.metadata = kwargs.pop('metadata', {})
-        frames = self._build_frame(*args, **kwargs)
-        self.concat(frames, iloc=iloc)
+        insert = self._build_frame(*args, **kwargs)
+        self.concat(insert, iloc=iloc)
 
-    def concat(self, *frames, iloc=None, sort=False):
-        """Concatenate *frames with Frame."""
+    def concat(self, insert, iloc=None, sort=False):
+        """Concatenate insert with DataFrame(self)."""
         dataframe = pandas.DataFrame(self)
-        dataframes = [pandas.DataFrame(frame) for frame in frames]
+        if not isinstance(insert, pandas.DataFrame):
+            insert = pandas.DataFrame(insert)
         if iloc is None:  # append
-            frames = [dataframe, *dataframes]
+            dataframes = [dataframe, insert]
         else:  # insert
-            frames = [dataframe.iloc[:iloc, :],
-                      *dataframes,
-                      dataframe.iloc[iloc:, :]]
-        frame = pandas.concat(frames, sort=sort)  # concatenate
-        Frame.__init__(self, frame, attrs=self.attrs)
+            dataframes = [dataframe.iloc[:iloc, :],
+                          insert,
+                          dataframe.iloc[iloc:, :]]
+        dataframe = pandas.concat(dataframes, sort=sort)  # concatenate
+        Frame.__init__(self, dataframe, attrs=self.attrs)
         #self.rebuild_CoilArray()  # rebuild fast index
 
     def _build_frame(self, *args, **kwargs):
@@ -278,16 +262,16 @@ class Frame(Array, pandas.DataFrame):
 
         Returns
         -------
-        frame : Frame
+        insert : pandas.DataFrame
 
         """
         args, kwargs = self._extract(*args, **kwargs)
         data = self._build_data(*args, **kwargs)
         index = self._build_index(data, **kwargs)
-        frame = Frame(data, index=index, attrs=self.attrs)
-        frame.generate_polygon()
-        frame.link_frame()
-        return frame
+        insert = Frame(data, index=index, attrs=self.attrs)
+        insert.polygon.generate()
+        insert.multipoint.link()
+        return pandas.DataFrame(insert)
 
     def _extract(self, *args, **kwargs):
         """
@@ -323,17 +307,18 @@ class Frame(Array, pandas.DataFrame):
         if len(args) == 0:
             raise IndexError('len(args) == 0, argument number must be > 0')
         if self.isframe(args[0], dataframe=True) and len(args) == 1:
-            frame = args[0]
-            missing = [arg not in frame for arg in self.metaframe.required]
+            dataframe = args[0]
+            missing = [arg not in dataframe for arg in self.metaframe.required]
             if np.array(missing).any():
                 required = np.array(self.metaframe.required)[missing]
                 raise ValueError(f'required arguments {required} '
-                                 f'not specified in frame {frame.columns}')
-            args = [frame.loc[:, col] for col in self.metaframe.required]
-            if not isinstance(frame.index, pandas.RangeIndex):
-                kwargs['name'] = frame.index
-            kwargs |= {col: frame.loc[:, col] for col in
-                       self.metaframe.additional if col in frame}
+                                 'not specified in dataframe '
+                                 f'{dataframe.columns}')
+            args = [dataframe.loc[:, col] for col in self.metaframe.required]
+            if not isinstance(dataframe.index, pandas.RangeIndex):
+                kwargs['name'] = dataframe.index
+            kwargs |= {col: dataframe.loc[:, col] for col in
+                       self.metaframe.additional if col in dataframe}
         if len(args) != self.metaframe.required_number:
             raise IndexError('incorrect output argument number: '
                              f'{len(args)} != '
@@ -341,13 +326,13 @@ class Frame(Array, pandas.DataFrame):
         return args, kwargs
 
     @staticmethod
-    def isframe(frame, dataframe=True):
+    def isframe(obj, dataframe=True):
         """
         Return isinstance(arg[0], Frame | DataFrame) flag.
 
         Parameters
         ----------
-        frame : Any
+        obj : Any
             Input.
         dataframe : bool, optional
             Accept pandas.DataFrame. The default is True.
@@ -358,9 +343,9 @@ class Frame(Array, pandas.DataFrame):
             Frame / pandas.DataFrame isinstance flag.
 
         """
-        if isinstance(frame, Frame):
+        if isinstance(obj, Frame):
             return True
-        if isinstance(frame, pandas.DataFrame) and dataframe:
+        if isinstance(obj, pandas.DataFrame) and dataframe:
             return True
         return False
 
@@ -488,14 +473,6 @@ class Frame(Array, pandas.DataFrame):
                              f'already defined in self.index: {self.index}')
         return index
 
-    def add_column(self, label):
-        """Add column to Frame initializing values to default."""
-        if label not in self.metaframe.columns:
-            self.metadata = {'additional': [label]}
-            if len(self) > 0:  # initialize with default value
-                print(label, self.metaframe.default[label])
-                self[label] = self.metaframe.default[label]
-
     def _current_label(self, **kwargs):
         """Return current label, Ic or It."""
         current_label = None
@@ -527,70 +504,6 @@ class Frame(Array, pandas.DataFrame):
         elif current_label == 'It':
             data['Ic'] = data['It'] / data['Nt']
 
-    def add_mpc(self, index, factor=1):
-        """
-        Define multi-point constraint linking a set of coils.
-
-        Parameters
-        ----------
-        index : list[str]
-            List of coil names (present in self.index).
-        factor : float, optional
-            Inter-coil coupling factor. The default is 1.
-
-        Raises
-        ------
-        IndexError
-
-            - index must be list-like
-            - len(index) must be greater than l
-            - len(factor) must equal 1 or len(name)-1.
-
-        Returns
-        -------
-        None.
-
-        """
-        if not pandas.api.types.is_list_like(index):
-            raise IndexError(f'index: {index} is not list like')
-        index_number = len(index)
-        if index_number == 1:
-            raise IndexError(f'len({index}): {index_number} '
-                             'is not greater > 1')
-        if not pandas.api.types.is_list_like(factor):
-            factor = factor * np.ones(index_number-1)
-        elif len(factor) != index_number-1:
-            raise IndexError(f'len(factor={factor}) must == 1 '
-                             f'or == len(index={index})-1')
-        self.at[index[0], 'mpc'] = ''
-        for i in np.arange(1, index_number):
-            self.at[index[i], 'mpc'] = (index[0], factor[i-1])
-        #self.rebuild_CoilArray()
-
-    def drop_mpc(self, index):
-        """Drop multi-point constraints referancing dropped coils."""
-        if 'mpc' in self.columns:
-            if not pandas.api.types.is_list_like(index):
-                index = [index]
-            name = [mpc[0] if mpc else '' for mpc in self.mpc]
-            drop = [n in index for n in name]
-            self.remove_mpc(drop)
-
-    def remove_mpc(self, index):
-        """Remove multi-point constraint on indexed coils."""
-        if not pandas.api.types.is_list_like(index):
-            index = [index]
-        self.loc[index, 'mpc'] = ''
-
-    def reduce_mpc(self, matrix):
-        """Apply mpc constraints to coupling matrix."""
-        _matrix = matrix[:, self._mpc_iloc]  # extract primary coils
-        if len(self._mpl_index) > 0:  # add multi-point links
-            _matrix[:, self._mpl_index[:, 0]] += \
-                matrix[:, self._mpl_index[:, 1]] * \
-                np.ones((len(matrix), 1)) @ self._mpl_factor.reshape(-1, 1)
-        return _matrix
-
     def drop_frame(self, index=None):
         """Drop frame(s)."""
         if index is None:
@@ -610,85 +523,46 @@ class Frame(Array, pandas.DataFrame):
         if zoffset != 0:
             self.loc[index, 'z'] += zoffset
         for name in index:
-            self.loc[name, 'polygon'] = \
-                shapely.affinity.translate(self.loc[name, 'polygon'],
+            self.loc[name, 'poly'] = \
+                shapely.affinity.translate(self.loc[name, 'poly'],
                                            xoff=xoffset, yoff=zoffset)
             self.loc[name, 'patch'] = None  # re-generate coil patch
+        # TODO regenerate Biot arrays...
 
-    def limit(self, index):
-        """Return coil limits [xmin, xmax, zmin, zmax]."""
-        geom = self.loc[index, ['x', 'z', 'dx', 'dz']]
-        limit = [min(geom['x'] - geom['dx'] / 2),
-                 max(geom['x'] + geom['dx'] / 2),
-                 min(geom['z'] - geom['dz'] / 2),
-                 max(geom['z'] + geom['dz'] / 2)]
-        return limit
 
-    def generate_polygon(self):
-        """Generate polygons based on coil geometroy and cross section."""
-        if 'polygon' in self.columns:
-            for index in self.index[self.polygon.isna()]:
-                cross_section = self.loc[index, 'cross_section']
-                polygon = polygen(cross_section)(
-                    *self.loc[index, ['x', 'z', 'dl', 'dt']])
-                self.loc[index, 'polygon'] = polygon
-            self.update_polygon()
+class FrameArray(Frame, Array):
+    """Extends Frame with fast attribute access provided by Array."""
 
-    def update_polygon(self, index=None):
-        """
-        Update polygon derived attributes.
+    @property
+    def metaarray(self):
+        """Return metaarray instance."""
+        return self.attrs['metaarray']
 
-        Derived attributes:
-            - x, z, dx, dz : float
-                coil centroid and bounding box
+    def update_attrs(self, attrs=None):
+        """Extend Frame.update_attrs with metaarray instance."""
+        super().update_attrs(attrs)
+        if 'metaarray' not in self.attrs:
+            self.attrs['metaarray'] = MetaArray()
+            self.attrs['metadata'].append('metaarray')
 
-        Parameters
-        ----------
-        index : str or array-like or Index, optional
-            Frame subindex. The default is None (all coils).
-
-        Raises
-        ------
-        ValueError
-            Zero cross-sectional area.
-
-        Returns
-        -------
-        None.
-
-        """
-        if index is None:
-            index = self.index[(self.rms == 0) & (~self.polygon.isna())]
-        elif not pandas.api.types.is_list_like(index):
-            index = [index]
-        for key in index:
-            i = self.index.get_loc(key)
-            polygon = self.at[key, 'polygon']
-            cross_section = self.at[key, 'cross_section']
-            length, thickness = self.dl[i], self.dt[i]
-            area = polygon.area  # update polygon area
-            if area == 0:
-                raise ValueError(
-                    f'zero area polygon entered for coil {index}\n'
-                    f'cross section: {cross_section}\n'
-                    f'length {length}\nthickness {thickness}')
-            x_center = polygon.centroid.x  # update x centroid
-            z_center = polygon.centroid.y  # update z centroid
-            self.x[i] = x_center
-            self.z[i] = z_center
-            self.loc[key, 'dA'] = area
-            bounds = polygon.bounds
-            self.dx[i] = bounds[2] - bounds[0]
-            self.dz[i] = bounds[3] - bounds[1]
-            self.rms[i] = root_mean_square(cross_section, x_center,
-                                           length, thickness, polygon)
-        if len(index) != 0:
-            self.update_dataframe = ['x', 'z', 'dx', 'dz', 'rms']
+    def validate_array(self):
+        """Validate metaarray."""
+        unset = [attr not in self.metaframe.columns
+                 for attr in self.metaarray.array]
+        if np.array(unset).any():
+            raise IndexError(
+                f'metaarray attributes {np.array(self.metaarray.array)[unset]}'
+                f' already set in metaframe.required {self.metaframe.required}'
+                f'or metaframe.additional {self.metaframe.additional}')
 
 
 if __name__ == '__main__':
 
-    frame = Frame(mpc=True, metadata={'Additional': ['mpc']})
+    frame = Frame(mpc=True)
+
+
     frame.add_frame(4, [5, 7, 12], name='coil1')
     print(frame)
 
+    #framearray = FrameArray(frame)
+    #print(framearray)

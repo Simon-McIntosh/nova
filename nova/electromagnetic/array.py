@@ -56,28 +56,15 @@ class Array(metaclass=ABCMeta):
         #self.refresh_dataframe()
         return pandas.DataFrame.__repr__(self)
 
-    def _init_array(self):
-        if 'metaarray' not in self.attrs:
-            self.attrs['metaarray'] = MetaArray()
-
-    def validate_array(self):
-        """Validate metaarray."""
-        unset = [attr not in self.metaframe.columns
-                 for attr in self.metaarray.array]
-        if np.array(unset).any():
-            raise IndexError(
-                f'metaarray attributes {np.array(self.metaarray.array)[unset]}'
-                f' not set in metaframe.required {self.metaframe.required} '
-                f'or metaframe.additional {self.metaframe.additional}')
-
+    @property
     @abstractmethod
     def metaframe(self):
         """Return MetaFrame instance."""
 
     @property
+    @abstractmethod
     def metaarray(self):
-        """Return metaarray."""
-        return self.attrs['metaarray']
+        """Return metaarray instance."""
 
     def _checkvalue(self, key, value):
         #if key not in self.metaarray.properties:

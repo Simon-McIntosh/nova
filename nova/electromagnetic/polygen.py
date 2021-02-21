@@ -166,6 +166,19 @@ def skin(x_center, z_center, diameter, fractional_thickness):
     return shape
 
 
+class Polygon(shapely.geometry.Polygon):
+    """Extend Polygon.__str__ for compact DataFrame representation."""
+
+    def __str__(self):
+        """Return compact __str__."""
+        return super().__str__().split()[0]
+
+
+def polyframe(polygon):
+    """Return polygon with compact __str__."""
+    return Polygon(polygon.exterior, polygon.interiors)
+
+
 def polygen(cross_section):
     """
     Return shapely polygon.

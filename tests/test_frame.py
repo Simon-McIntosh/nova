@@ -14,14 +14,14 @@ def test_dataframe_subclass():
     assert issubclass(Frame, pandas.DataFrame)
 
 
-def test_columns():
-    frame = Frame(columns=['x', 'z'])
-    assert sorted(frame.columns) == sorted(['x', 'z'])
+def test_columns_update_error():
+    with pytest.raises(IndexError):
+        Frame(columns=['x', 'z'])
 
 
 def test_index():
     frame = Frame(index=['Coil0', 'Coil1'])
-    assert sorted(frame.index) == sorted(['Coil0', 'Coil1'])
+    assert frame.index.to_list() == ['Coil0', 'Coil1']
 
 
 def test_index_length_error():

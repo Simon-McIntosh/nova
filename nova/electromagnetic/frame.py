@@ -559,7 +559,7 @@ class FrameArray(Frame, Array):
 if __name__ == '__main__':
 
     frame = Frame(mpc=True)
-
+    # implement antiattribute (exclude) field in metaframe
 
     frame.add_frame(4, [5, 7, 12], name='coil1')
     print(frame)

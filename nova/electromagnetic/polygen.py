@@ -1,5 +1,6 @@
 """Generate polygons for CoilFrame instances."""
 import shapely
+import shapely.geometry
 import numpy as np
 
 

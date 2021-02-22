@@ -18,18 +18,24 @@ class Polygon:
     """Geometrical methods for Frame and FrameArray."""
 
     frame: Union[Frame, FrameArray]
+    section: bool = False
+
+    _required_attributes = ['x', 'z', 'rms', 'dl', 'dt', 'dx', 'dz', 'dA',
+                            'cross_section', 'poly', 'patch']
 
     def __post_init__(self):
         """Update additional attributes."""
-        print(self.frame.metaframe.required)
-        self.frame.metadata = {
-            'additional': ['x', 'z', 'rms', 'dl', 'dt', 'dx', 'dz', 'dA',
-                           'cross_section', 'poly', 'patch']}
-        print(self.frame.metaframe.additional)
+        self.update_section()
+
+    def update_section(self):
+        """Update section flag."""
+        self.section = 'cross_section' in self.frame.columns
+        if self.section:
+            self.frame.metadata = {'additional': self._required_attributes}
 
     def generate(self):
         """Generate polygons based on coil geometroy and cross section."""
-        if 'poly' in self.frame.columns:
+        if self.section:
             for index in self.frame.index[self.frame.poly.isna()]:
                 cross_section = self.frame.loc[index, 'cross_section']
                 poly = polygen(cross_section)(

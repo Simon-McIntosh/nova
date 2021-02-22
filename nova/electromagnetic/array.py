@@ -50,21 +50,38 @@ class Array(metaclass=ABCMeta):
     Lazy data exchange implemented with parent DataFrame.
 
     """
-
-    def __repr__(self):
-        """Extend pandas.DataFrame.__repr__."""
-        #self.refresh_dataframe()
-        return pandas.DataFrame.__repr__(self)
-
     @property
     @abstractmethod
     def metaframe(self):
         """Return MetaFrame instance."""
 
     @property
-    @abstractmethod
     def metaarray(self):
         """Return metaarray instance."""
+        return self.attrs['metaarray']
+
+    def update_attrs(self, attrs=None):
+        """Extend Frame.update_attrs with metaarray instance."""
+        super().update_attrs(attrs)
+        if 'metaarray' not in self.attrs:
+            self.attrs['metaarray'] = MetaArray()
+            self.attrs['metadata'].append('metaarray')
+
+    def validate(self):
+        """Extend Frame.validate to validate metaarray."""
+        super().validate()
+        unset = [attr not in self.metaframe.columns
+                 for attr in self.metaarray.array]
+        if np.array(unset).any():
+            raise IndexError(
+                f'metaarray attributes {np.array(self.metaarray.array)[unset]}'
+                f' already set in metaframe.required {self.metaframe.required}'
+                f'or metaframe.additional {self.metaframe.additional}')
+
+    def __repr__(self):
+        """Extend pandas.DataFrame.__repr__."""
+        #self.refresh_dataframe()
+        return pandas.DataFrame.__repr__(self)
 
     def _checkvalue(self, key, value):
         #if key not in self.metaarray.properties:
@@ -197,3 +214,101 @@ class Array(metaclass=ABCMeta):
             self.refresh_dataframe()
         return DataFrame._get_value(self, index, col, takeable)
     '''
+
+    def _extract_reduction_index(self):
+        """Extract reduction incices (reduceat)."""
+        if 'coil' in self:  # subcoil
+            coil = self.coil.to_numpy()
+            if (coil == self._default_attributes['coil']).all():
+                _reduction_index = np.arange(self._nC)
+            else:
+                _name = coil[0]
+                _reduction_index = [0]
+                for i, name in enumerate(coil):
+                    if name != _name:
+                        _reduction_index.append(i)
+                        _name = name
+            self._reduction_index = np.array(_reduction_index)
+            self._plasma_iloc = np.arange(len(self._reduction_index))[
+                self.plasma[self._reduction_index]]
+            filament_indices = np.append(self._reduction_index, self.coil_number)
+            plasma_filaments = filament_indices[self._plasma_iloc+1] - \
+                filament_indices[self._plasma_iloc]
+            self._plasma_reduction_index = \
+                np.append(0, np.cumsum(plasma_filaments)[:-1])
+        else:  # coil, reduction only applied to subfilaments
+            self._reduction_index = None
+            self._plasma_iloc = None
+            self._plasma_reduction_index = None
+
+    def mpc_index(self, mpc_flag):
+        """
+        Return subset of _mpc_index based on mpc_flag.
+
+        Parameters
+        ----------
+        mpc_flag : str
+            Selection flag. Full description given in
+            :meth:`~coildata.CoilData.mpc_select`.
+
+        Returns
+        -------
+        index : pandas.DataFrame.Index
+            Subset of mpc_index based on mpc_flag.
+
+        """
+        return self._mpc_index[self.mpc_select(mpc_flag)]
+
+    def mpc_select(self, mpc_flag):
+        """
+        Return selection boolean for _mpc_index based on mpc_flag.
+
+        Parameters
+        ----------
+        mpc_flag : str
+            Selection flag.
+
+            - 'full' : update full current vector (~feedback)
+            - 'active' : update active coils (active & ~plasma & ~feedback)
+            - 'passive' : update passive coils (~active & ~plasma & ~feedback)
+            - 'free' : update free coils (optimize & ~plasma & ~feedback)
+            - 'fix' : update fix coils (~optimize & ~plasma & ~feedback)
+            - 'plasma' : update plasma (plasma & ~feedback)
+            - 'coil' : update all coils (~plasma & ~feedback)
+            - 'feedback' : update feedback stabilization coils
+
+
+        Raises
+        ------
+        IndexError
+            mpc_flag not in
+            [full, active, passive, free, fix, plasma, coil, feedback].
+
+        Returns
+        -------
+        mpc_select : array-like, shape(_nC,)
+            Boolean selection array.
+
+        """
+        if self.coil_number > 0 and self._mpc_iloc is not None:
+            if mpc_flag == 'full':
+                mpc_select = np.full(self._nC, True) & ~self._feedback
+            elif mpc_flag == 'active':
+                mpc_select = self._active & ~self._plasma & ~self._feedback
+            elif mpc_flag == 'passive':
+                mpc_select = ~self._active & ~self._plasma & ~self._feedback
+            elif mpc_flag == 'free':
+                mpc_select = self._optimize & ~self._plasma & ~self._feedback
+            elif mpc_flag == 'fix':
+                mpc_select = ~self._optimize & ~self._plasma & ~self._feedback
+            elif mpc_flag == 'plasma':
+                mpc_select = self._plasma & ~self._feedback
+            elif mpc_flag == 'coil':
+                mpc_select = ~self._plasma & ~self._feedback
+            elif mpc_flag == 'feedback':
+                mpc_select = self._feedback
+            else:
+                raise IndexError(f'flag {mpc_flag} not in '
+                                 '[full, actitve, passive, free, fix, '
+                                 'plasma, coil, feedback]')
+            return mpc_select

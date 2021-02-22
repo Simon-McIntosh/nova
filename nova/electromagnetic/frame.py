@@ -24,6 +24,7 @@ class MetaFrame(MetaData):
 
     required: list[str] = field(default_factory=lambda: ['x', 'z'])
     additional: list[str] = field(default_factory=lambda: [])
+    exclude: list[str] = field(default_factory=lambda: [])
     default: dict[str, Union[float, str, bool, None]] = field(
         repr=False, default_factory=lambda: {
             'dCoil': 0., 'nx': 1, 'nz': 1, 'Nt': 1., 'Nf': 1,
@@ -53,11 +54,21 @@ class MetaFrame(MetaData):
         # exculde duplicate values
         self.additional = [attr for attr in self.additional
                            if attr not in self.required]
+        # check for exclude attributes in required
+        exclude_required = np.array([attr in self.required
+                                     for attr in self.exclude])
+        if exclude_required.any():
+            raise IndexError('exclude attributes '
+                             f'{np.array(self.exclude)[exclude_required]} '
+                             'specified in self.required')
+        # remove exclude attributes from additional
+        self.additional = [attr for attr in self.additional
+                           if attr not in self.exclude]
         # check unset defaults
         unset = np.array([attr not in self.default
                           for attr in self.additional])
         if unset.any():
-            raise ValueError('Default value not set for additional attributes '
+            raise ValueError('default value not set for additional attributes '
                              f'{np.array(self.additional)[unset]}')
         # block frame extension
         frame_default = next(field.default_factory() for field in fields(self)
@@ -98,7 +109,7 @@ class Frame(pandas.DataFrame):
     https://github.com/geopandas.
     """
 
-    _attributes = {'multipoint': MultiPoint, 'polygon': Polygon}
+    _methods = {'multipoint': MultiPoint, 'polygon': Polygon}
 
     def __init__(self,
                  data=None,
@@ -108,11 +119,12 @@ class Frame(pandas.DataFrame):
                  **default: Optional[dict]):
         super().__init__(data, index)
         self.update_attrs(attrs)
-        self.update_attributes()
+        self.generate_methods()
         self.update_metadata(metadata)
         self.update_default(default)
         self.update_index()
         self.multipoint.link()
+        self.validate()
 
     @property
     def _constructor(self):
@@ -122,20 +134,16 @@ class Frame(pandas.DataFrame):
     def _constructor_sliced(self):
         return Series
 
+    def __getattr__(self, name):
+        """Extend getattr to serve Frame methods."""
+        if name in self._methods:
+            return self.attrs[name]
+        return super().__getattr__(name)
+
     @property
     def metaframe(self):
         """Return metaframe instance."""
         return self.attrs['metaframe']
-
-    @property
-    def multipoint(self):
-        """Return multipoint instance."""
-        return self.attrs['multipoint']
-
-    @property
-    def polygon(self):
-        """Return section instance."""
-        return self.attrs['polygon']
 
     def update_attrs(self, attrs=None):
         """Update frame attrs and initialize."""
@@ -145,12 +153,12 @@ class Frame(pandas.DataFrame):
             self.attrs['metaframe'] = MetaFrame()
             self.attrs['metadata'] = ['metaframe']
 
-    def update_attributes(self):
+    def generate_methods(self):
         """Update Frame attributes."""
-        for attr in self._attributes:
-            self.attrs[attr] = self._attributes[attr](self)
+        for method in self._methods:
+            self.attrs[method] = self._methods[method](self)
 
-    def validate_frame(self):
+    def validate(self):
         """Validate required and additional attributes in Frame."""
         if not self.empty:
             columns = self.columns.to_list()
@@ -533,36 +541,13 @@ class Frame(pandas.DataFrame):
 class FrameArray(Frame, Array):
     """Extends Frame with fast attribute access provided by Array."""
 
-    @property
-    def metaarray(self):
-        """Return metaarray instance."""
-        return self.attrs['metaarray']
-
-    def update_attrs(self, attrs=None):
-        """Extend Frame.update_attrs with metaarray instance."""
-        super().update_attrs(attrs)
-        if 'metaarray' not in self.attrs:
-            self.attrs['metaarray'] = MetaArray()
-            self.attrs['metadata'].append('metaarray')
-
-    def validate_array(self):
-        """Validate metaarray."""
-        unset = [attr not in self.metaframe.columns
-                 for attr in self.metaarray.array]
-        if np.array(unset).any():
-            raise IndexError(
-                f'metaarray attributes {np.array(self.metaarray.array)[unset]}'
-                f' already set in metaframe.required {self.metaframe.required}'
-                f'or metaframe.additional {self.metaframe.additional}')
-
 
 if __name__ == '__main__':
 
     frame = Frame(mpc=True)
     # implement antiattribute (exclude) field in metaframe
 
-    frame.add_frame(4, [5, 7, 12], name='coil1')
-    print(frame)
+    frame.add_frame(4, [5, 7, 12], name='coil1', mpc=True)
 
-    #framearray = FrameArray(frame)
-    #print(framearray)
+    framearray = FrameArray(frame)
+    print(framearray)

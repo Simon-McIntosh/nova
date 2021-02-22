@@ -187,4 +187,22 @@ class MultiPoint:
             self._mpl_index = []
             self._mpl_factor = []
         self._relink_mpc = True
+
+    @property
+    def _nC(self):
+        """
+        Return mpc coil number.
+
+        Returns
+        -------
+        _nC : int
+            Number of coils without mpc constraints.
+
+        """
+        return len(self._mpc_iloc)
+
+    @property
+    def _nI(self):
+        """Return number of indexed coils."""
+        return sum(self._current_index)
     '''

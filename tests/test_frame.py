@@ -150,6 +150,18 @@ def non_default_metaframe_frame_error():
         Frame(metadata={'frame': {'link': False}})
 
 
+def test_exclude_required_error():
+    with pytest.raises(IndexError):
+        Frame(metadata={'required': ['x', 'z'], 'Exclude': ['x']})
+
+
+def test_exclude():
+    frame = Frame(metadata={'required': ['x', 'z'],
+                            'additional': ['rms', 'poly'],
+                            'exclude': ['poly']})
+    assert list(frame.metaframe.columns) == ['x', 'z', 'rms']
+
+
 if __name__ == '__main__':
 
     pytest.main([__file__])

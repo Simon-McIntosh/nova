@@ -21,7 +21,7 @@ class Polygon:
     section: bool = False
 
     _required_attributes = ['x', 'z', 'rms', 'dl', 'dt', 'dx', 'dz', 'dA',
-                            'cross_section', 'poly', 'patch']
+                            'section', 'poly', 'patch']
 
     def __post_init__(self):
         """Update additional attributes."""
@@ -29,7 +29,7 @@ class Polygon:
 
     def update_section(self):
         """Update section flag."""
-        self.section = 'cross_section' in self.frame.columns
+        self.section = 'section' in self.frame.columns
         if self.section:
             self.frame.metadata = {'additional': self._required_attributes}
 
@@ -37,8 +37,8 @@ class Polygon:
         """Generate polygons based on coil geometroy and cross section."""
         if self.section:
             for index in self.frame.index[self.frame.poly.isna()]:
-                cross_section = self.frame.loc[index, 'cross_section']
-                poly = polygen(cross_section)(
+                section = self.frame.loc[index, 'section']
+                poly = polygen(section)(
                     *self.frame.loc[index, ['x', 'z', 'dl', 'dt']])
                 self.frame.loc[index, 'poly'] = polyframe(poly)
             self.update()
@@ -83,23 +83,21 @@ class Polygon:
         for key in index:
             i = self.frame.index.get_loc(key)
             poly = self.frame.at[key, 'poly']
-            cross_section = self.frame.at[key, 'cross_section']
+            section = self.frame.at[key, 'section']
             length, thickness = self.frame.dl[i], self.frame.dt[i]
             area = poly.area  # update polygon area
             if area == 0:
                 raise ValueError(
                     f'zero area polygon entered for coil {index}\n'
-                    f'cross section: {cross_section}\n'
+                    f'cross section: {section}\n'
                     f'length {length}\nthickness {thickness}')
             x_center = poly.centroid.x  # update x centroid
             z_center = poly.centroid.y  # update z centroid
-            self.frame.x[i] = x_center
-            self.frame.z[i] = z_center
-            self.frame.loc[key, 'dA'] = area
+            self.frame.loc[key, ['x', 'z', 'dA']] = x_center, z_center, area
             bounds = poly.bounds
-            self.frame.dx[i] = bounds[2] - bounds[0]
-            self.frame.dz[i] = bounds[3] - bounds[1]
-            self.frame.rms[i] = root_mean_square(cross_section, x_center,
-                                                 length, thickness, poly)
+            self.frame.at[key, 'dx'] = bounds[2]-bounds[0]
+            self.frame.at[key, 'dz'] = bounds[3]-bounds[1]
+            self.frame.at[key, 'rms'] = root_mean_square(
+                section, x_center, length, thickness, poly)
         #if len(index) != 0:
         #    self.update_dataframe = ['x', 'z', 'dx', 'dz', 'rms']

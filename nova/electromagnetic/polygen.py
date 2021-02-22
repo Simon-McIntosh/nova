@@ -1,6 +1,7 @@
 """Generate polygons for CoilFrame instances."""
 import shapely
 import shapely.geometry
+import shapely.ops
 import numpy as np
 
 
@@ -199,15 +200,15 @@ def polygen(cross_section):
     shape : shapely.polygon
 
     """
-    if cross_section == 'circle':
+    if cross_section in ['circle', 'c', 'o']:
         return circle
-    if cross_section == 'ellipse':
+    if cross_section in ['ellipse', 'e']:
         return ellipse
-    if cross_section == 'square':
+    if cross_section in ['square', 'sq']:
         return square
-    if cross_section == 'rectangle':
+    if cross_section in ['rectangle', 'r']:
         return rectangle
-    if cross_section == 'skin':
+    if cross_section in ['skin', 'sk']:
         return skin
     raise IndexError(f'cross_section: {cross_section} not implemented'
                      '\n specify as '

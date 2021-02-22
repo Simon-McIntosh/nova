@@ -12,7 +12,7 @@ import shapely
 from nova.electromagnetic.multipoint import MultiPoint
 from nova.electromagnetic.polygon import Polygon
 from nova.electromagnetic.metadata import MetaData
-from nova.electromagnetic.array import MetaArray, Array
+from nova.electromagnetic.array import Array
 
 # pylint:disable=unsubscriptable-object
 # pylint: disable=too-many-ancestors
@@ -22,7 +22,7 @@ from nova.electromagnetic.array import MetaArray, Array
 class MetaFrame(MetaData):
     """Manage Frame metadata - accessed via Frame['attrs']."""
 
-    required: list[str] = field(default_factory=lambda: ['x', 'z'])
+    required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
     additional: list[str] = field(default_factory=lambda: [])
     exclude: list[str] = field(default_factory=lambda: [])
     default: dict[str, Union[float, str, bool, None]] = field(
@@ -32,7 +32,7 @@ class MetaFrame(MetaData):
             'dl': 0.1, 'dt': 0.1, 'dl_x': 0., 'dl_z': 0.,
             'm': '', 'R': 0.,  'rho': 0.,
             'turn_fraction': 1., 'skin_fraction': 1.,
-            'cross_section': 'rectangle', 'turn_section': 'rectangle',
+            'section': 'rectangle', 'turn_section': 'rectangle',
             'patch': None, 'poly': None, 'coil': '', 'part': '',
             'subindex': None, 'material': '', 'mpc': '',
             'active': True, 'optimize': False, 'plasma': False,
@@ -118,6 +118,8 @@ class Frame(pandas.DataFrame):
                  metadata: Optional[dict] = None,
                  **default: Optional[dict]):
         super().__init__(data, index)
+        if isinstance(data, pandas.core.internals.managers.BlockManager):
+            return
         self.update_attrs(attrs)
         self.generate_methods()
         self.update_metadata(metadata)
@@ -154,7 +156,7 @@ class Frame(pandas.DataFrame):
             self.attrs['metadata'] = ['metaframe']
 
     def generate_methods(self):
-        """Update Frame attributes."""
+        """Initialize frame methods."""
         for method in self._methods:
             self.attrs[method] = self._methods[method](self)
 
@@ -547,7 +549,7 @@ if __name__ == '__main__':
     frame = Frame(mpc=True)
     # implement antiattribute (exclude) field in metaframe
 
-    frame.add_frame(4, [5, 7, 12], name='coil1', mpc=True)
+    frame.add_frame(4, [5, 7, 12], 0.1, 0.05, name='coil1', section='r')
 
     framearray = FrameArray(frame)
     print(framearray)

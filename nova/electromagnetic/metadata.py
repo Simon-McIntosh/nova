@@ -1,6 +1,6 @@
 """Manage CoilFrame metadata."""
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 from dataclasses import dataclass, fields
 import typing
 
@@ -10,6 +10,8 @@ import typing
 @dataclass
 class MetaData(metaclass=ABCMeta):
     """Abstract base class. Extended by MetaFrame and MetaArray."""
+
+    _internal = []  # internal field list - exclude metadata return
 
     def __post_init__(self):
         """Validate input."""
@@ -41,7 +43,7 @@ class MetaData(metaclass=ABCMeta):
 
         """
         return {field.name: getattr(self, field.name)
-                for field in fields(self)}
+                for field in fields(self) if field.name not in self._internal}
 
     @metadata.setter
     def metadata(self, metadata):
@@ -56,6 +58,8 @@ class MetaData(metaclass=ABCMeta):
                 if not isinstance(value, types[attribute]):
                     raise TypeError('type missmatch: '
                                     'type(input) != type(default) \n'
+                                    f'attribute: {attribute}\n'
+                                    f'value: {value}\n'
                                     f'{type(metadata[attribute])} != '
                                     f'{types[attribute]}')
                 if replace:
@@ -71,15 +75,14 @@ class MetaData(metaclass=ABCMeta):
                                     'not in [list, dict]')
         self.validate()
 
-    @abstractmethod
     def validate(self):
         """Run validation checks on input."""
         types = self.types
-        type_error = {name: types[name] for name in types
-                      if types[name] not in [list, dict]}
+        type_error = {field.name: types[field.name] for field in fields(self)
+                      if not isinstance(getattr(self, field.name),
+                                        types[field.name])}
         if type_error:
-            raise TypeError('attributes initialized with types '
-                            'not in [list, dict]:\n'
+            raise TypeError('attributes initialized with incorrect type:\n'
                             f'{type_error}')
 
     def clear(self, attribute):

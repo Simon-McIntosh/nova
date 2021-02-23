@@ -1,6 +1,7 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 
 from dataclasses import dataclass, field, fields
+from contextlib import contextmanager
 import re
 import string
 from typing import Optional, Collection, Any, Union
@@ -12,7 +13,7 @@ import shapely
 from nova.electromagnetic.multipoint import MultiPoint
 from nova.electromagnetic.polygon import Polygon
 from nova.electromagnetic.metadata import MetaData
-from nova.electromagnetic.array import Array
+from nova.electromagnetic.array import MetaArray, Array
 
 # pylint:disable=unsubscriptable-object
 # pylint: disable=too-many-ancestors
@@ -34,7 +35,8 @@ class MetaFrame(MetaData):
             'turn_fraction': 1., 'skin_fraction': 1.,
             'section': 'rectangle', 'turn_section': 'rectangle',
             'patch': None, 'poly': None, 'coil': '', 'part': '',
-            'subindex': None, 'material': '', 'mpc': '',
+            'subindex': None, 'material': '',
+            'mpc': '', 'factor': 1.,
             'active': True, 'optimize': False, 'plasma': False,
             'feedback': False, 'acloss': False,
             'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.})
@@ -50,7 +52,7 @@ class MetaFrame(MetaData):
             - Check that all additional attributes have a default value.
 
         """
-        MetaData.validate(self)
+        super().validate()
         # exculde duplicate values
         self.additional = [attr for attr in self.additional
                            if attr not in self.required]
@@ -101,7 +103,7 @@ class Series(pandas.Series):
         return Frame
 
 
-class Frame(pandas.DataFrame):
+class Frame(Array, pandas.DataFrame):
     """
     Extends Pandas.DataFrame.
 
@@ -110,6 +112,7 @@ class Frame(pandas.DataFrame):
     """
 
     _methods = {'multipoint': MultiPoint, 'polygon': Polygon}
+    _attributes = {'metaframe': MetaFrame, 'metaarray': MetaArray}
 
     def __init__(self,
                  data=None,
@@ -121,12 +124,12 @@ class Frame(pandas.DataFrame):
         if isinstance(data, pandas.core.internals.managers.BlockManager):
             return
         self.update_attrs(attrs)
-        self.generate_methods()
-        self.update_metadata(metadata)
+        self.extract_metadata(data)
         self.update_default(default)
+        self.update_metadata(metadata)
         self.update_index()
-        self.multipoint.link()
-        self.validate()
+        self.generate_methods()
+        self.multipoint.generate()
 
     @property
     def _constructor(self):
@@ -149,19 +152,28 @@ class Frame(pandas.DataFrame):
 
     def update_attrs(self, attrs=None):
         """Update frame attrs and initialize."""
+        super().update_attrs(attrs)
         if attrs is not None:
             self.attrs |= attrs
-        if 'metaframe' not in self.attrs:
-            self.attrs['metaframe'] = MetaFrame()
-            self.attrs['metadata'] = ['metaframe']
+        self.generate_attribute('metaframe')
+
+    def generate_attribute(self, attribute):
+        """Generate meta* attributes. Store in self.attrs."""
+        if attribute not in self.attrs:
+            self.attrs[attribute] = self._attributes[attribute]()
+            if 'metadata' in self.attrs:
+                self.attrs['metadata'].append(attribute)
+            else:
+                self.attrs['metadata'] = [attribute]
 
     def generate_methods(self):
         """Initialize frame methods."""
         for method in self._methods:
             self.attrs[method] = self._methods[method](self)
 
-    def validate(self):
+    def validate_metadata(self):
         """Validate required and additional attributes in Frame."""
+        super().validate_metadata()
         if not self.empty:
             columns = self.columns.to_list()
             required_unset = [attr not in columns
@@ -182,6 +194,13 @@ class Frame(pandas.DataFrame):
                 for attr in unset:
                     self.loc[:, attr] = self.metaframe.default[attr]
 
+    def extract_metadata(self, data):
+        """Replace metadata extracted from frame."""
+        if hasattr(data, 'metadata'):
+            metadata = {attr.capitalize(): data.metadata[attr]
+                        for attr in data.metadata}
+            self.metadata = metadata
+
     def update_metadata(self, metadata):
         """Update metadata."""
         if metadata is None:
@@ -201,6 +220,7 @@ class Frame(pandas.DataFrame):
         for attribute in self.attrs['metadata']:
             getattr(self, attribute).metadata = metadata
             getattr(self, attribute).validate()
+        self.validate_metadata()
 
     def update_default(self, default):
         """Update metaframe.defaults."""
@@ -280,7 +300,7 @@ class Frame(pandas.DataFrame):
         index = self._build_index(data, **kwargs)
         insert = Frame(data, index=index, attrs=self.attrs)
         insert.polygon.generate()
-        insert.multipoint.link()
+        insert.multipoint.generate()
         return pandas.DataFrame(insert)
 
     def _extract(self, *args, **kwargs):
@@ -431,7 +451,7 @@ class Frame(pandas.DataFrame):
         data_length = self._data_length(data)
         metaindex = self.metaframe.frame | kwargs
         metaindex['offset'] = 0
-        if kwargs.get('name', ''):  # valid name
+        if kwargs.get('name', metaindex['name']):  # valid name
             name = metaindex['name']
             if pandas.api.types.is_list_like(name) or data_length == 1:
                 return self._check_index(name, data_length)
@@ -546,10 +566,17 @@ class FrameArray(Frame, Array):
 
 if __name__ == '__main__':
 
-    frame = Frame(mpc=True)
-    # implement antiattribute (exclude) field in metaframe
+    frame = Frame(mpc=True, metadata={'Array': ['x']})
+    frame.add_frame(4, [5, 7, 12], 0.1, 0.05, section='r')
 
-    frame.add_frame(4, [5, 7, 12], 0.1, 0.05, name='coil1', section='r')
+    frame.Ic = [1, 2, 4]
+    frame.x = [1, 2, 3]
+    frame.x[1] = 6
 
-    framearray = FrameArray(frame)
-    print(framearray)
+    print(frame['x'])
+    frame.metaarray._lock = False
+
+    newframe = Frame()
+
+    print(newframe.metaarray._lock)
+    print(frame.metaarray._lock)

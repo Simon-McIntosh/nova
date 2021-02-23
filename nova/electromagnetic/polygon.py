@@ -1,6 +1,6 @@
 """Geometric methods for Frame and FrameArray."""
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Union, TYPE_CHECKING
 
 import pandas
@@ -18,7 +18,7 @@ class Polygon:
     """Geometrical methods for Frame and FrameArray."""
 
     frame: Union[Frame, FrameArray]
-    section: bool = False
+    section: bool = field(init=False)
 
     _required_attributes = ['x', 'z', 'rms', 'dl', 'dt', 'dx', 'dz', 'dA',
                             'section', 'poly', 'patch']
@@ -80,24 +80,25 @@ class Polygon:
                                      (~self.frame.poly.isna())]
         elif not pandas.api.types.is_list_like(index):
             index = [index]
+        data = {attr: getattr(self.frame, attr).copy()
+                for attr in ['x', 'z', 'dx', 'dz', 'dA', 'rms']}
         for key in index:
             i = self.frame.index.get_loc(key)
-            poly = self.frame.at[key, 'poly']
-            section = self.frame.at[key, 'section']
+            poly = self.frame.poly[i]
+            section = self.frame.section[i]
             length, thickness = self.frame.dl[i], self.frame.dt[i]
-            area = poly.area  # update polygon area
-            if area == 0:
+            data['x'][i] = poly.centroid.x  # update x centroid
+            data['z'][i] = poly.centroid.y  # update z centroid
+            bounds = poly.bounds
+            data['dx'][i] = bounds[2]-bounds[0]
+            data['dz'][i] = bounds[3]-bounds[1]
+            data['dA'][i] = poly.area  # update polygon area
+            if data['dA'][i] == 0:
                 raise ValueError(
                     f'zero area polygon entered for coil {index}\n'
                     f'cross section: {section}\n'
                     f'length {length}\nthickness {thickness}')
-            x_center = poly.centroid.x  # update x centroid
-            z_center = poly.centroid.y  # update z centroid
-            self.frame.loc[key, ['x', 'z', 'dA']] = x_center, z_center, area
-            bounds = poly.bounds
-            self.frame.at[key, 'dx'] = bounds[2]-bounds[0]
-            self.frame.at[key, 'dz'] = bounds[3]-bounds[1]
-            self.frame.at[key, 'rms'] = root_mean_square(
-                section, x_center, length, thickness, poly)
-        #if len(index) != 0:
-        #    self.update_dataframe = ['x', 'z', 'dx', 'dz', 'rms']
+            data['rms'][i] = root_mean_square(
+                section, data['x'][i], length, thickness, poly)
+        for attr in data:  # update frame
+            setattr(self.frame, attr, data[attr])

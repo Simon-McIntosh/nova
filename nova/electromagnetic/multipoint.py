@@ -7,23 +7,27 @@ import numpy as np
 import pandas
 
 from nova.electromagnetic.metadata import MetaData
+from nova.electromagnetic.metamethod import MetaMethod
 
 if TYPE_CHECKING:
     from nova.electromagnetic.frame import Frame
 
 
 @dataclass
-class MetaConstraint(MetaData):
-    """Manage Frame metadata - accessed via Frame['attrs']."""
+class MetaLink(MetaData):
+    """Manage MultiPoint metadata."""
 
-    constrain: list[str] = field(default_factory=lambda: ['Ic'])
+    link: list[str] = field(default_factory=lambda: ['Ic'])
 
 
 @dataclass
-class MultiPoint:
+class MultiPoint(MetaMethod):
+    """Manage multi-point constraints applied across frame.index."""
 
-    frame: Frame
-
+    frame: Frame = field(repr=False)
+    key_attributes: list[str] = field(default_factory=lambda: ['mpc'])
+    additional_attributes: list[str] = field(default_factory=lambda: [
+        'factor'])
     '''
     iloc: list[int] = field(init=False)
     index: pandas.Index = field(init=False)
@@ -34,48 +38,49 @@ class MultiPoint:
     '''
 
     def __post_init__(self):
-        """Configure frame for multi-point constraints."""
-        #if 'mpc' not in self.frame.metaframe.columns:
-        #    self.frame.add_column('mpc')
+        """Generate multi-point constraints."""
+        super().__post_init__()
+        self.generate()
 
-    def link(self):
+    def generate(self):
         """
-        Apply multi-point constraints to frame.
+        Generate multipoint.frame constraints if key_attributes in columns.
 
-            - if 'mpc' in self.columns
-                Format mpc attribute:
+            - mpc is none or NaN:
 
-                - mpc is none or NaN: mpc = ''
-                - mpc is bool: mpc = '' if False else 1
-                - mpc is int or float: mpc[0] = '', mpc[1:] = factor
+                - mpc = ''
+                - factor = 0
 
-            - elif self.link
-                Add mpc attrbute and set mpc vector to Ture
+            - mpc is bool:
 
-            - else
-                mpc unset.
+                - mpc = '' if False else 'index[0]'
+                - factor = 0 if False else 1
+
+            - mpc is int or float:
+
+                - mpc = 'index[0]'
+                - factor = value
 
         """
-        if 'mpc' in self.frame.columns:
-            isnan = np.array([pandas.isna(mpc)
-                              for mpc in self.frame.mpc], dtype=bool)
-            self.frame.loc[isnan, 'mpc'] = self.frame.metaframe.default['mpc']
+        if self.enable:
+            self.frame.loc[pandas.isna(self.frame.mpc), ['mpc', 'factor']] = \
+                self.frame.metaframe.default['mpc'], \
+                self.frame.metaframe.default['factor']
             isnumeric = np.array([isinstance(mpc, (int, float)) &
                                   ~isinstance(mpc, bool)
                                   for mpc in self.frame.mpc], dtype=bool)
             istrue = np.array([mpc is True for mpc in self.frame.mpc],
                               dtype=bool)
-            istuple = np.array([isinstance(mpc, tuple)
-                                for mpc in self.frame.mpc], dtype=bool)
-            self.frame.loc[~istrue & ~isnumeric & ~istuple, 'mpc'] = ''
+            isstr = np.array([isinstance(mpc, str)
+                              for mpc in self.frame.mpc], dtype=bool)
+            self.frame.loc[~istrue & ~isnumeric & ~isstr, 'mpc'] = ''
             index = self.frame.index[istrue | isnumeric]
             if index.empty:
                 return
             factor = np.ones(len(self.frame))
             factor[isnumeric] = self.frame.mpc[isnumeric]
             factor = factor[istrue | isnumeric][1:]
-            if len(index) > 1:
-                self.add_multipoint(index, factor)
+            self.add_multipoint(index, factor)
 
     def add_multipoint(self, index, factor=1):
         """
@@ -103,20 +108,19 @@ class MultiPoint:
         """
         if not pandas.api.types.is_list_like(index):
             raise IndexError(f'index: {index} is not list like')
+        self.frame.loc[index[0], ['mpc', 'factor']] = '', 1
         index_number = len(index)
         if index_number == 1:
-            raise IndexError(f'len({index}): {index_number} '
-                             'is not greater > 1')
+            return
         if not pandas.api.types.is_list_like(factor):
             factor = factor * np.ones(index_number-1)
         elif len(factor) != index_number-1:
             raise IndexError(f'len(factor={factor}) must == 1 '
                              f'or == len(index={index})-1')
-        self.frame.at[index[0], 'mpc'] = ''
         for i in np.arange(1, index_number):
-            self.frame.at[index[i], 'mpc'] = (index[0], factor[i-1])
-        #self.rebuild_CoilArray()
+            self.frame.loc[index[i], ['mpc', 'factor']] = index[0], factor[i-1]
 
+    '''
     def drop_multipoint(self, index):
         """Drop multi-point constraints referancing dropped coils."""
         if 'mpc' in self.frame.columns:
@@ -142,7 +146,24 @@ class MultiPoint:
         return _matrix
 
 
-    '''
+
+    def _checkvalue(self, key, value):
+        #if key not in self.metaarray.properties:
+        if key in self._mpc_attributes:
+            shape = self.unique_coil_number  # mpc variable
+        else:
+            shape = self.coil_number  # coil number
+        if not pandas.api.types.is_list_like(value):
+            value *= np.ones(nC, dtype=type(value))
+        if len(value) != shape:
+            raise IndexError('Length of mpc vector does not match '
+                             'length of index')
+
+
+    def __getattr__(self, key):
+        #if key in self._mpc_attributes:  # inflate
+        #    value = value[self._mpc_referance]
+
     def __len__(self) -> int:
         """Return frame rank, the number of independant coils."""
         return len(self.iloc)
@@ -205,4 +226,103 @@ class MultiPoint:
     def _nI(self):
         """Return number of indexed coils."""
         return sum(self._current_index)
-    '''
+
+
+    def _extract_reduction_index(self):
+        """Extract reduction incices (reduceat)."""
+        if 'coil' in self:  # subcoil
+            coil = self.coil.to_numpy()
+            if (coil == self._default_attributes['coil']).all():
+                _reduction_index = np.arange(self._nC)
+            else:
+                _name = coil[0]
+                _reduction_index = [0]
+                for i, name in enumerate(coil):
+                    if name != _name:
+                        _reduction_index.append(i)
+                        _name = name
+            self._reduction_index = np.array(_reduction_index)
+            self._plasma_iloc = np.arange(len(self._reduction_index))[
+                self.plasma[self._reduction_index]]
+            filament_indices = np.append(self._reduction_index, self.coil_number)
+            plasma_filaments = filament_indices[self._plasma_iloc+1] - \
+                filament_indices[self._plasma_iloc]
+            self._plasma_reduction_index = \
+                np.append(0, np.cumsum(plasma_filaments)[:-1])
+        else:  # coil, reduction only applied to subfilaments
+            self._reduction_index = None
+            self._plasma_iloc = None
+            self._plasma_reduction_index = None
+
+    def mpc_index(self, mpc_flag):
+        """
+        Return subset of _mpc_index based on mpc_flag.
+
+        Parameters
+        ----------
+        mpc_flag : str
+            Selection flag. Full description given in
+            :meth:`~coildata.CoilData.mpc_select`.
+
+        Returns
+        -------
+        index : pandas.DataFrame.Index
+            Subset of mpc_index based on mpc_flag.
+
+        """
+        return self._mpc_index[self.mpc_select(mpc_flag)]
+
+    def mpc_select(self, mpc_flag):
+        """
+        Return selection boolean for _mpc_index based on mpc_flag.
+
+        Parameters
+        ----------
+        mpc_flag : str
+            Selection flag.
+
+            - 'full' : update full current vector (~feedback)
+            - 'active' : update active coils (active & ~plasma & ~feedback)
+            - 'passive' : update passive coils (~active & ~plasma & ~feedback)
+            - 'free' : update free coils (optimize & ~plasma & ~feedback)
+            - 'fix' : update fix coils (~optimize & ~plasma & ~feedback)
+            - 'plasma' : update plasma (plasma & ~feedback)
+            - 'coil' : update all coils (~plasma & ~feedback)
+            - 'feedback' : update feedback stabilization coils
+
+
+        Raises
+        ------
+        IndexError
+            mpc_flag not in
+            [full, active, passive, free, fix, plasma, coil, feedback].
+
+        Returns
+        -------
+        mpc_select : array-like, shape(_nC,)
+            Boolean selection array.
+
+        """
+        if self.coil_number > 0 and self._mpc_iloc is not None:
+            if mpc_flag == 'full':
+                mpc_select = np.full(self._nC, True) & ~self._feedback
+            elif mpc_flag == 'active':
+                mpc_select = self._active & ~self._plasma & ~self._feedback
+            elif mpc_flag == 'passive':
+                mpc_select = ~self._active & ~self._plasma & ~self._feedback
+            elif mpc_flag == 'free':
+                mpc_select = self._optimize & ~self._plasma & ~self._feedback
+            elif mpc_flag == 'fix':
+                mpc_select = ~self._optimize & ~self._plasma & ~self._feedback
+            elif mpc_flag == 'plasma':
+                mpc_select = self._plasma & ~self._feedback
+            elif mpc_flag == 'coil':
+                mpc_select = ~self._plasma & ~self._feedback
+            elif mpc_flag == 'feedback':
+                mpc_select = self._feedback
+            else:
+                raise IndexError(f'flag {mpc_flag} not in '
+                                 '[full, actitve, passive, free, fix, '
+                                 'plasma, coil, feedback]')
+            return mpc_select
+'''

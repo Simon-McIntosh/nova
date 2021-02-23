@@ -57,62 +57,16 @@ def test_frame_index():
     assert list(frame.columns) == ['x', 'z']
 
 
-def test_frame_index_mpc():
+def test_frame_columns_multipoint():
     frame = Frame(metadata={'Required': ['x', 'z'], 'Additional': []})
     frame.add_frame(0, 1, mpc=True)
-    assert list(frame.columns) == ['x', 'z', 'mpc']
+    assert list(frame.columns) == ['x', 'z', 'mpc', 'factor']
 
 
 def test_data_init():
     data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8]})
     frame = Frame(data, metadata={'Required': ['x', 'z']})
     assert len(frame) == 3
-
-
-def test_data_init_mpc_true():
-    data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8], 'mpc': True})
-    frame = Frame(data, metadata={'Required': ['x', 'z'],
-                                  'frame': {'name': 'Coil', 'delim': ''}})
-    assert list(frame.mpc) == ['', ('Coil0', 1.0), ('Coil0', 1.0)]
-
-
-def test_add_coil_mpc_default_false():
-    frame = Frame({'x': [1, 3], 'z': 0}, mpc=False,
-                  metadata={'Required': ['x', 'z'], 'Additional': [],
-                            'frame': {'name': 'Coil', 'delim': ''}})
-    frame.add_frame(4, [7, 8], mpc=True)
-    assert list(frame.mpc) == ['', '', '', ('Coil2', 1.0)]
-
-
-def test_add_coil_mpc_default_true():
-    frame = Frame({'x': [1, 3], 'z': 0}, mpc=True,
-                  metadata={'Required': ['x', 'z'], 'Additional': [],
-                            'frame': {'name': 'Coil', 'delim': ''}})
-    frame.add_frame(4, [7, 8], mpc=True)
-    assert list(frame.mpc) == ['', ('Coil0', 1.0), '', ('Coil2', 1.0)]
-
-
-def test_add_coil_mpc_default_float():
-    frame = Frame({'x': [1, 3], 'z': 0}, mpc=0.5,
-                  metadata={'Required': ['x', 'z'], 'Additional': [],
-                            'frame': {'name': 'Coil', 'delim': ''}})
-    frame.add_frame(4, [7, 8], mpc=True)
-    assert list(frame.mpc) == ['', ('Coil0', 0.5), '', ('Coil2', 1.0)]
-
-
-def test_default_mpc_true():
-    frame = Frame(mpc=True, metadata={'Additional': ['mpc']})
-    frame.add_frame(4, [5, 7, 12], name='coil1')
-    assert list(frame.mpc) == ['', ('coil1', 1.0), ('coil1', 1.0)]
-
-
-def test_data_init_mpc_false():
-    data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8], 'mpc': False})
-    frame = Frame(data, metadata={'Required': ['x', 'z'],
-                                  'Additional': ['mpc'],
-                                  'frame': {'name': 'Coil', 'delim': ''}})
-    unset = [mpc == '' for mpc in frame.mpc]
-    assert np.array(unset).all()
 
 
 def test_data_init_required_error():
@@ -156,12 +110,33 @@ def test_exclude_required_error():
 
 
 def test_exclude():
-    frame = Frame(metadata={'required': ['x', 'z'],
-                            'additional': ['rms', 'poly'],
-                            'exclude': ['poly']})
+    frame = Frame(metadata={'Required': ['x', 'z'],
+                            'Additional': ['rms', 'section'],
+                            'Exclude': ['section']})
     assert list(frame.metaframe.columns) == ['x', 'z', 'rms']
 
 
-if __name__ == '__main__':
+def test_warn_new_attribute():
+    frame = Frame({'x': [3, 4], 'z': 0}, metadata={'Required': ['x', 'z']})
+    with pytest.warns(UserWarning,
+                      match='Pandas doesn\'t allow columns to be created '
+                            'via a new attribute name'):
+        frame.Ic = [1, 2]
 
+
+def test_restrict_lock():
+    frame = Frame(metadata={'Required': ['x'], 'Restrict': ['x']})
+    with pytest.raises(PermissionError):
+        frame.metaarray.check_lock('x')
+
+
+def test_restricted_variable_access_error():
+    frame = Frame(metadata={'Required': ['x'], 'Restrict': ['Ic'],
+                            'Additional': ['Ic']})
+    frame.add_frame(5)
+    with pytest.raises(PermissionError):
+        frame.Ic = 6
+
+
+if __name__ == '__main__':
     pytest.main([__file__])

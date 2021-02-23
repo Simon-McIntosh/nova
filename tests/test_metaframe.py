@@ -38,8 +38,8 @@ def test_metadata():
     metaframe = MetaFrame(required=['x', 'z'],
                           default={'dCoil': -1},
                           additional=['dCoil'])
-    metadata = metaframe.metadata
-    del metadata['frame']
+    metadata = {attr: metaframe.metadata[attr]
+                for attr in ['required', 'default', 'additional']}
     assert metadata == {'required': ['x', 'z'], 'default': {'dCoil': -1},
                         'additional': ['dCoil']}
 
@@ -50,4 +50,5 @@ def test_required_number():
 
 
 if __name__ == '__main__':
+
     pytest.main([__file__])

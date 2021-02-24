@@ -1,6 +1,5 @@
 import pytest
-import pandas
-import numpy as np
+
 
 from nova.electromagnetic.frame import Frame
 

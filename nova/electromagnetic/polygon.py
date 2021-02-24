@@ -1,56 +1,38 @@
 """Geometric methods for Frame and FrameArray."""
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import pandas
 
+from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.polygen import polygen, polyframe, root_mean_square
 
 if TYPE_CHECKING:
-    from nova.electromagnetic.frame import Frame, FrameArray
+    from nova.electromagnetic.frame import Frame
 
 # pylint:disable=unsubscriptable-object
 
 
 @dataclass
-class Polygon:
-    """Geometrical methods for Frame and FrameArray."""
+class Polygon(MetaMethod):
+    """Geometrical methods for Frame."""
 
-    frame: Union[Frame, FrameArray]
-    section: bool = field(init=False)
-
-    _required_attributes = ['x', 'z', 'rms', 'dl', 'dt', 'dx', 'dz', 'dA',
-                            'section', 'poly', 'patch']
-
-    def __post_init__(self):
-        """Update additional attributes."""
-        self.update_section()
-
-    def update_section(self):
-        """Update section flag."""
-        self.section = 'section' in self.frame.columns
-        if self.section:
-            self.frame.metadata = {'additional': self._required_attributes}
+    frame: Frame
+    key_attributes: list[str] = field(default_factory=lambda: ['section'])
+    additional_attributes: list[str] = field(default_factory=lambda: [
+        'x', 'z', 'rms', 'dl', 'dt', 'dx', 'dz', 'dA', 'section',
+        'poly', 'patch'])
 
     def generate(self):
         """Generate polygons based on coil geometroy and cross section."""
-        if self.section:
+        if self.enable:
             for index in self.frame.index[self.frame.poly.isna()]:
                 section = self.frame.loc[index, 'section']
                 poly = polygen(section)(
                     *self.frame.loc[index, ['x', 'z', 'dl', 'dt']])
                 self.frame.loc[index, 'poly'] = polyframe(poly)
             self.update()
-
-    def limit(self, index):
-        """Return coil limits [xmin, xmax, zmin, zmax]."""
-        geom = self.frame.loc[index, ['x', 'z', 'dx', 'dz']]
-        limit = [min(geom['x'] - geom['dx'] / 2),
-                 max(geom['x'] + geom['dx'] / 2),
-                 min(geom['z'] - geom['dz'] / 2),
-                 max(geom['z'] + geom['dz'] / 2)]
-        return limit
 
     def update(self, index=None):
         """
@@ -102,3 +84,12 @@ class Polygon:
                 section, data['x'][i], length, thickness, poly)
         for attr in data:  # update frame
             setattr(self.frame, attr, data[attr])
+
+    def limit(self, index):
+        """Return coil limits [xmin, xmax, zmin, zmax]."""
+        geom = self.frame.loc[index, ['x', 'z', 'dx', 'dz']]
+        limit = [min(geom['x'] - geom['dx'] / 2),
+                 max(geom['x'] + geom['dx'] / 2),
+                 min(geom['z'] - geom['dz'] / 2),
+                 max(geom['z'] + geom['dz'] / 2)]
+        return limit

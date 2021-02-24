@@ -7,76 +7,98 @@ from nova.electromagnetic.frame import Frame
 
 
 def test_enable_key_attribute_true():
-    frame = Frame({'mpc': [True]}, metadata={'Required': []})
+    frame = Frame({'link': [True]}, metadata={'Required': []})
     assert frame.multipoint.enable
 
 
 def test_generate_single():
-    frame = Frame({'mpc': [True]}, metadata={'Required': []})
-    assert frame.iloc[0].to_list() == ['', 1.0]
+    frame = Frame({'link': [True]}, metadata={'Required': []})
+    assert frame.iloc[0].to_list() == ['', 1.0, -1]
 
 
 def test_generate_single_float():
-    frame = Frame({'mpc': [-0.3]}, metadata={'Required': []})
-    assert frame.iloc[0].to_list() == ['', 1.0]
+    frame = Frame({'link': [-0.3]}, metadata={'Required': []})
+    assert frame.iloc[0].to_list() == ['', 1.0, -1]
 
 
 def test_generate_multi():
-    frame = Frame({'x': range(3), 'mpc': True}, metadata={
-        'Required': ['x'], 'frame': {'name': 'coil1'}})
-    assert frame.mpc.to_list() == ['', 'coil1', 'coil1']
+    frame = Frame({'x': range(3), 'link': True}, metadata={
+        'Required': ['x'], 'index': {'name': 'coil1'}})
+    assert frame.link.to_list() == ['', 'coil1', 'coil1']
 
 
 def test_data_init_multipoint_true():
-    data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8], 'mpc': True})
+    data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8], 'link': True})
     frame = Frame(data, metadata={'Required': ['x', 'z'],
-                                  'frame': {'name': 'Coil0'}})
-    assert frame.mpc.to_list() == ['', 'Coil0', 'Coil0'] and \
+                                  'index': {'name': 'Coil0'}})
+    assert frame.link.to_list() == ['', 'Coil0', 'Coil0'] and \
         frame.factor.to_list() == [1, 1, 1]
 
 
 def test_add_coil_multipoint_default_false():
-    frame = Frame({'x': [1, 3], 'z': 0}, mpc=False,
+    frame = Frame({'x': [1, 3], 'z': 0}, link=False,
                   metadata={'Required': ['x', 'z'], 'Additional': [],
-                            'frame': {'name': 'Coil0'}})
-    frame.add_frame(4, [7, 8], mpc=True)
-    assert frame.mpc.to_list() == ['', '', '', 'Coil2'] and \
+                            'index': {'name': 'Coil0'}})
+    frame.add_frame(4, [7, 8], link=True)
+    assert frame.link.to_list() == ['', '', '', 'Coil2'] and \
         frame.factor.to_list() == [1, 1, 1, 1]
 
 
 def test_add_coil_multipoint_default_true():
-    frame = Frame({'x': [1, 3], 'z': 0}, mpc=True,
+    frame = Frame({'x': [1, 3], 'z': 0}, link=True,
                   metadata={'Required': ['x', 'z'], 'Additional': [],
-                            'frame': {'name': 'Coil0'}})
-    frame.add_frame(4, [7, 8], mpc=True)
-    assert frame.mpc.to_list() == ['', 'Coil0', '', 'Coil2'] and \
+                            'index': {'name': 'Coil0'}})
+    frame.add_frame(4, [7, 8], link=True)
+    assert frame.link.to_list() == ['', 'Coil0', '', 'Coil2'] and \
         frame.factor.to_list() == [1, 1, 1, 1]
 
 
 def test_add_coil_multipoint_default_float():
-    frame = Frame({'x': [1, 3], 'z': 0}, mpc=0.5,
+    frame = Frame({'x': [1, 3], 'z': 0}, link=0.5,
                   metadata={'Required': ['x', 'z'], 'Additional': [],
-                            'frame': {'name': 'Coil0'}})
-    frame.add_frame(4, [7, 8], mpc=True)
-    assert frame.mpc.to_list() == ['', 'Coil0', '', 'Coil2'] and \
+                            'index': {'name': 'Coil0'}})
+    frame.add_frame(4, [7, 8], link=True)
+    assert frame.link.to_list() == ['', 'Coil0', '', 'Coil2'] and \
         frame.factor.to_list() == [1, 0.5, 1, 1]
 
 
 def test_default_multipoint_true():
-    frame = Frame(mpc=True, metadata={'Required': ['x', 'z'],
-                                      'Additional': ['mpc']})
+    frame = Frame(link=True, metadata={'Required': ['x', 'z'],
+                                       'Additional': ['link']})
     frame.add_frame(4, [5, 7, 12], name='coil1')
-    assert frame.mpc.to_list() == ['', 'coil1', 'coil1'] and \
+    assert frame.link.to_list() == ['', 'coil1', 'coil1'] and \
         frame.factor.to_list() == [1, 1, 1]
 
 
 def test_data_init_multipoint_false():
-    data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8], 'mpc': False})
+    data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8], 'link': False})
     frame = Frame(data, metadata={'Required': ['x', 'z'],
-                                  'Additional': ['mpc'],
-                                  'frame': {'name': 'Coil0'}})
-    unset = [mpc == '' for mpc in frame.mpc]
+                                  'Additional': ['link'],
+                                  'index': {'name': 'Coil0'}})
+    unset = [link == '' for link in frame.link]
     assert np.array(unset).all()
+
+
+def test_drop():
+    frame = Frame(link=True, metadata={'Required': ['x', 'z'],
+                                       'Additional': ['link']})
+    frame.add_frame(4, [5, 7, 12], label='coil')
+    frame.add_frame(3, [1, 2], link=False)
+    frame.add_frame(6, [7, 3])
+    frame.add_frame(12, [7, 3])
+    frame.multipoint.drop(['coil0', 'coil7'])
+    assert frame.link.to_list() == ['', '', '', '', '', '', 'coil5', '', '']
+    assert frame.factor.to_list() == [1, 1, 1, 1, 1, 1, 1, 1, 1]
+    assert frame.reference.to_list() == [-1, -1, -1, -1, -1, -1, 5, -1, -1]
+
+
+def test_drop_indexer():
+    frame = Frame(link=True, metadata={'Required': ['x', 'z'],
+                                       'Additional': ['link']})
+    frame.add_frame(4, [5, 7, 12], label='coil')
+    frame.add_frame(3, [1, 2])
+    frame.multipoint.drop('coil0')
+    assert frame.multipoint.indexer == [0, 1, 2, 3]
 
 
 if __name__ == '__main__':

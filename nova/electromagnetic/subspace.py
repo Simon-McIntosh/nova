@@ -1,22 +1,41 @@
 
+from __future__ import annotations
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+from nova.electromagnetic.metamethod import MetaMethod
+from nova.electromagnetic.multipoint import MultiPoint
+
+if TYPE_CHECKING:
+    from nova.electromagnetic.frame import Frame
 
 
-class Current:
+@dataclass
+class SubSpace(MetaMethod):
+    """Manage frame subspace (all independent coils)."""
 
-    _required_attributes = ['active', 'plasma', 'optimize', 'feedback']
+    frame: Frame = field(repr=False)
+    key_attributes: list[str] = field(default_factory=lambda: [
+        'Nt', 'It', 'Ic'])
+    additional_attributes: list[str] = field(default_factory=lambda: [
+        'Nt', 'It', 'Ic', 'active', 'plasma', 'optimize', 'feedback'])
 
-        '''
-        if key in self._dataframe_attributes:
-            self.refresh_frame(key)
-            if key in ['Nt', 'It', 'Ic']:
-                self._It = self.It
-            if key == 'Nt':
-                self.metaarray.update['Ic'] = True
-                self.metaarray.update['It'] = True
-            if key in ['Ic', 'It']:
-                _key = next(k for k in ['Ic', 'It'] if k != key)
-                self.metaarray.update[_key] = True
-        '''
+    def generate(self):
+        pass
+
+
+    '''
+    if key in self._dataframe_attributes:
+        self.refresh_frame(key)
+        if key in ['Nt', 'It', 'Ic']:
+            self._It = self.It
+        if key == 'Nt':
+            self.metaarray.update['Ic'] = True
+            self.metaarray.update['It'] = True
+        if key in ['Ic', 'It']:
+            _key = next(k for k in ['Ic', 'It'] if k != key)
+            self.metaarray.update[_key] = True
+    '''
 
     '''
 
@@ -74,6 +93,7 @@ class Current:
 
     '''
 
+    '''
     @property
     def update(self):
         """
@@ -230,3 +250,4 @@ class Current:
     @It.setter
     def It(self, value):
         self._set_current(value, 'It')
+    '''

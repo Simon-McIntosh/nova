@@ -1,6 +1,5 @@
 import pytest
 import pandas
-import numpy as np
 
 from nova.electromagnetic.frame import Frame
 
@@ -59,8 +58,8 @@ def test_frame_index():
 
 def test_frame_columns_multipoint():
     frame = Frame(metadata={'Required': ['x', 'z'], 'Additional': []})
-    frame.add_frame(0, 1, mpc=True)
-    assert list(frame.columns) == ['x', 'z', 'mpc', 'factor']
+    frame.add_frame(0, 1, link=True)
+    assert list(frame.columns) == ['x', 'z', 'link', 'factor', 'reference']
 
 
 def test_data_init():
@@ -99,9 +98,9 @@ def test_required_additional_metadata_clash():
     assert list(frame.columns) == ['x', 'z', 'rms']
 
 
-def non_default_metaframe_frame_error():
+def non_default_metaframe_index_error():
     with pytest.raises(IndexError):
-        Frame(metadata={'frame': {'link': False}})
+        Frame(metadata={'index': {'link': False}})
 
 
 def test_exclude_required_error():
@@ -139,4 +138,5 @@ def test_restricted_variable_access_error():
 
 
 if __name__ == '__main__':
+
     pytest.main([__file__])

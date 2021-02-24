@@ -1,7 +1,6 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 
 from dataclasses import dataclass, field, fields
-from contextlib import contextmanager
 import re
 import string
 from typing import Optional, Collection, Any, Union
@@ -11,6 +10,7 @@ import numpy as np
 import shapely
 
 from nova.electromagnetic.multipoint import MultiPoint
+from nova.electromagnetic.subspace import SubSpace
 from nova.electromagnetic.polygon import Polygon
 from nova.electromagnetic.metadata import MetaData
 from nova.electromagnetic.array import MetaArray, Array
@@ -33,16 +33,16 @@ class MetaFrame(MetaData):
             'dl': 0.1, 'dt': 0.1, 'dl_x': 0., 'dl_z': 0.,
             'm': '', 'R': 0.,  'rho': 0.,
             'turn_fraction': 1., 'skin_fraction': 1.,
-            'section': 'rectangle', 'turn_section': 'rectangle',
+            'section': 'rectangle', 'turn': 'rectangle',
             'patch': None, 'poly': None, 'coil': '', 'part': '',
             'subindex': None, 'material': '',
-            'mpc': '', 'factor': 1.,
+            'link': '', 'factor': 1., 'reference': 0,
             'active': True, 'optimize': False, 'plasma': False,
             'feedback': False, 'acloss': False,
             'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.})
-    frame: dict[str, Union[str, bool]] = field(
+    index: dict[str, Union[str, bool]] = field(
         repr=False, default_factory=lambda: {
-            'name': '', 'label': 'Coil', 'delim': ''})
+            'name': '', 'label': 'Coil', 'delim': '', 'offset': 0})
 
     def validate(self):
         """
@@ -72,13 +72,13 @@ class MetaFrame(MetaData):
         if unset.any():
             raise ValueError('default value not set for additional attributes '
                              f'{np.array(self.additional)[unset]}')
-        # block frame extension
-        frame_default = next(field.default_factory() for field in fields(self)
-                             if field.name == 'frame')
-        extend = np.array([attr not in frame_default for attr in self.frame])
+        # block index field extension
+        index_default = next(field.default_factory() for field in fields(self)
+                             if field.name == 'index')
+        extend = np.array([attr not in index_default for attr in self.index])
         if extend.any():
-            raise IndexError('additional attributes passed to frame field '
-                             f'{np.array(list(self.frame.keys()))[extend]}')
+            raise IndexError('additional attributes passed to index field '
+                             f'{np.array(list(self.index.keys()))[extend]}')
 
     @property
     def required_number(self):
@@ -100,10 +100,10 @@ class Series(pandas.Series):
 
     @property
     def _constructor_expanddim(self):
-        return Frame
+        return SubFrame
 
 
-class Frame(Array, pandas.DataFrame):
+class SubFrame(Array, pandas.DataFrame):
     """
     Extends Pandas.DataFrame.
 
@@ -111,7 +111,6 @@ class Frame(Array, pandas.DataFrame):
     https://github.com/geopandas.
     """
 
-    _methods = {'multipoint': MultiPoint, 'polygon': Polygon}
     _attributes = {'metaframe': MetaFrame, 'metaarray': MetaArray}
 
     def __init__(self,
@@ -128,22 +127,14 @@ class Frame(Array, pandas.DataFrame):
         self.update_default(default)
         self.update_metadata(metadata)
         self.update_index()
-        self.generate_methods()
-        self.multipoint.generate()
 
     @property
     def _constructor(self):
-        return Frame
+        return SubFrame
 
     @property
     def _constructor_sliced(self):
         return Series
-
-    def __getattr__(self, name):
-        """Extend getattr to serve Frame methods."""
-        if name in self._methods:
-            return self.attrs[name]
-        return super().__getattr__(name)
 
     @property
     def metaframe(self):
@@ -166,13 +157,8 @@ class Frame(Array, pandas.DataFrame):
             else:
                 self.attrs['metadata'] = [attribute]
 
-    def generate_methods(self):
-        """Initialize frame methods."""
-        for method in self._methods:
-            self.attrs[method] = self._methods[method](self)
-
     def validate_metadata(self):
-        """Validate required and additional attributes in Frame."""
+        """Validate required and additional attributes in SubFrame."""
         super().validate_metadata()
         if not self.empty:
             columns = self.columns.to_list()
@@ -209,7 +195,7 @@ class Frame(Array, pandas.DataFrame):
 
     @property
     def metadata(self):
-        """Manage Frame metadata via the MetaFrame class."""
+        """Manage SubFrame metadata via the MetaFrame class."""
         metadata = {}
         for attribute in self.attrs['metadata']:
             metadata |= getattr(self, attribute).metadata
@@ -240,6 +226,29 @@ class Frame(Array, pandas.DataFrame):
             self['index'] = self._build_index(self)
             self.set_index('index', inplace=True)
             self.index.name = None
+
+
+class Frame(SubFrame):
+    """Extends SubFrame."""
+
+    _methods = {'multipoint': MultiPoint,
+                'subspace': SubSpace,
+                'polygon': Polygon}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.generate_methods()
+
+    def generate_methods(self):
+        """Initialize frame methods."""
+        for method in self._methods:
+            self.attrs[method] = self._methods[method](self)
+
+    def __getattr__(self, name):
+        """Extend getattr to serve Frame methods."""
+        if name in self._methods:
+            return self.attrs[name]
+        return super().__getattr__(name)
 
     def add_frame(self, *args, iloc=None, **kwargs):
         """
@@ -277,7 +286,6 @@ class Frame(Array, pandas.DataFrame):
                           dataframe.iloc[iloc:, :]]
         dataframe = pandas.concat(dataframes, sort=sort)  # concatenate
         Frame.__init__(self, dataframe, attrs=self.attrs)
-        #self.rebuild_CoilArray()  # rebuild fast index
 
     def _build_frame(self, *args, **kwargs):
         """
@@ -299,8 +307,6 @@ class Frame(Array, pandas.DataFrame):
         data = self._build_data(*args, **kwargs)
         index = self._build_index(data, **kwargs)
         insert = Frame(data, index=index, attrs=self.attrs)
-        insert.polygon.generate()
-        insert.multipoint.generate()
         return pandas.DataFrame(insert)
 
     def _extract(self, *args, **kwargs):
@@ -384,7 +390,7 @@ class Frame(Array, pandas.DataFrame):
         data = {}  # python 3.6+ assumes dict is insertion ordered
         for key, arg in zip(self.metaframe.required, args):
             data[key] = np.array(arg, dtype=float)  # add required arguments
-        current_label = self._current_label(**kwargs)
+        # current_label = self._current_label(**kwargs)
         for key in self.metaframe.additional:
             if key in kwargs:
                 data[key] = kwargs.pop(key)
@@ -399,8 +405,8 @@ class Frame(Array, pandas.DataFrame):
             del kwargs[key]
         if len(additional) > 0:  # extend aditional arguments
             self.metaframe.metadata = {'additional': additional}
-        self._propogate_current(current_label, data)
-        unset = [key not in self.metaframe.frame for key in kwargs]
+        # self._propogate_current(current_label, data)
+        unset = [key not in self.metaframe.index for key in kwargs]
         if np.array(unset).any():
             unset_kwargs = np.array(list(kwargs.keys()))[unset]
             default = {key: '_default_value_' for key in unset_kwargs}
@@ -449,8 +455,10 @@ class Frame(Array, pandas.DataFrame):
 
     def _build_index(self, data, **kwargs):
         data_length = self._data_length(data)
-        metaindex = self.metaframe.frame | kwargs
-        metaindex['offset'] = 0
+        # update metaframe.index
+        self.metaframe.index |= {key: kwargs[key] for key in kwargs
+                                 if key in self.metaframe.index}
+        metaindex = self.metaframe.index
         if kwargs.get('name', metaindex['name']):  # valid name
             name = metaindex['name']
             if pandas.api.types.is_list_like(name) or data_length == 1:
@@ -503,6 +511,31 @@ class Frame(Array, pandas.DataFrame):
                              f'already defined in self.index: {self.index}')
         return index
 
+    def drop_frame(self, index=None):
+        """Drop frame(s)."""
+        if index is None:
+            index = self.index
+        self.multipoint.drop(index)
+        self.drop(index, inplace=True)
+
+    def translate(self, index=None, xoffset=0, zoffset=0):
+        """Translate coil(s)."""
+        if index is None:
+            index = self.index
+        elif not pandas.api.types.is_list_like(index):
+            index = [index]
+        if xoffset != 0:
+            self.loc[index, 'x'] += xoffset
+        if zoffset != 0:
+            self.loc[index, 'z'] += zoffset
+        for name in index:
+            self.loc[name, 'poly'] = \
+                shapely.affinity.translate(self.loc[name, 'poly'],
+                                           xoff=xoffset, yoff=zoffset)
+            self.loc[name, 'patch'] = None  # re-generate coil patch
+        # TODO regenerate Biot arrays...
+
+
     def _current_label(self, **kwargs):
         """Return current label, Ic or It."""
         current_label = None
@@ -534,49 +567,18 @@ class Frame(Array, pandas.DataFrame):
         elif current_label == 'It':
             data['Ic'] = data['It'] / data['Nt']
 
-    def drop_frame(self, index=None):
-        """Drop frame(s)."""
-        if index is None:
-            index = self.index
-        self.drop_mpc(index)
-        self.drop(index, inplace=True)
-        #self.rebuild_CoilArray()
-
-    def translate(self, index=None, xoffset=0, zoffset=0):
-        """Translate coil(s)."""
-        if index is None:
-            index = self.index
-        elif not pandas.api.types.is_list_like(index):
-            index = [index]
-        if xoffset != 0:
-            self.loc[index, 'x'] += xoffset
-        if zoffset != 0:
-            self.loc[index, 'z'] += zoffset
-        for name in index:
-            self.loc[name, 'poly'] = \
-                shapely.affinity.translate(self.loc[name, 'poly'],
-                                           xoff=xoffset, yoff=zoffset)
-            self.loc[name, 'patch'] = None  # re-generate coil patch
-        # TODO regenerate Biot arrays...
-
-
-class FrameArray(Frame, Array):
-    """Extends Frame with fast attribute access provided by Array."""
-
 
 if __name__ == '__main__':
 
-    frame = Frame(mpc=True, metadata={'Array': ['x']})
-    frame.add_frame(4, [5, 7, 12], 0.1, 0.05, section='r')
+    frame = Frame(link=True, metadata={'Array': ['x']})
+    frame.add_frame(4, [5, 7, 12], 0.1, 0.05, link=True)
+    frame.add_frame(4, [5, 7, 12], 0.1, 0.05, link=True)
+    #frame.multipoint.generate()
 
-    frame.Ic = [1, 2, 4]
-    frame.x = [1, 2, 3]
-    frame.x[1] = 6
+    #frame.x = [1, 2, 3]
+    #frame.x[1] = 6
 
-    print(frame['x'])
-    frame.metaarray._lock = False
+    print(frame)
 
-    newframe = Frame()
-
-    print(newframe.metaarray._lock)
-    print(frame.metaarray._lock)
+    #frame.metaarray._lock = False
+    #newframe = Frame()

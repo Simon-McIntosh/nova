@@ -1,27 +1,38 @@
 """AbstractBaseClass Extended Frame._methods."""
-from abc import ABCMeta
-from dataclasses import dataclass, field
-from typing import Any
+
+from __future__ import annotations
+from abc import ABCMeta, abstractmethod
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from nova.electromagnetic.frame import Frame
 
 
 @dataclass
 class MetaMethod(metaclass=ABCMeta):
-    """Manage Frame._methods."""
+    """Manage Frame._methods, subclass with dataclass."""
 
-    frame: Any = field(init=False)
-    key_attributes: list = field(init=False)
-    additional_attributes: list[str] = field(init=False)
-    enable: bool = field(init=False)
+    frame: Frame
+    key_attributes: list[str]
+    additional_attributes: list[str]
 
     def __post_init__(self):
-        """Check for key_attribute in frame.columns."""
-        self.update()
+        """Generate multi-point constraints."""
+        self.generate()
 
-    def update(self):
-        """Check for key_attribute in frame.columns, update additional."""
-        self.enable = np.array([attr in self.frame.columns
-                                for attr in self.key_attributes]).all()
-        if self.enable:
+    @abstractmethod
+    def generate(self):
+        """Generate method attributes."""
+
+    @property
+    def enable(self) -> bool:
+        """Return enable flag, update additional attributes if True."""
+        update = np.array([attr in self.frame.columns
+                           for attr in self.key_attributes]).any()
+        if update:
             self.frame.metadata = {'additional': self.additional_attributes}
+            return True
+        return False

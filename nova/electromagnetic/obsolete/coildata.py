@@ -45,6 +45,17 @@ Created on Thu Feb 18 20:33:42 2021
             Array, lambda o: isinstance(o, property))]
     '''
 
+    '''
+        def reduce_multipoint(self, matrix):
+        """Apply multipoint constraints to coupling matrix."""
+        _matrix = matrix[:, self._mpc_iloc]  # extract primary coils
+        if len(self._mpl_index) > 0:  # add multi-point links
+            _matrix[:, self._mpl_index[:, 0]] += \
+                matrix[:, self._mpl_index[:, 1]] * \
+                np.ones((len(matrix), 1)) @ self._mpl_factor.reshape(-1, 1)
+        return _matrix
+    '''
+
 name change:
     _dataframe_attributes -> metaarray.data, dict
     _coildata_attributes -> metaarray.frame

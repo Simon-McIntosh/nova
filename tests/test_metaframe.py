@@ -1,6 +1,6 @@
 import pytest
 
-from nova.electromagnetic.frame import MetaFrame
+from nova.electromagnetic.metaframe import MetaFrame
 
 
 def test_init_metaframe():
@@ -22,10 +22,10 @@ def test_clear_required():
 
 
 def test_extend_additional():
-    metaframe = MetaFrame(additional=[], default={'mpc': '', 'dCoil': -1})
-    metaframe.metadata = {'additional': ['mpc']}
-    metaframe.metadata = {'additional': ['mpc', 'dCoil']}
-    assert metaframe.additional == ['mpc', 'dCoil']
+    metaframe = MetaFrame(additional=[], default={'link': '', 'dCoil': -1})
+    metaframe.metadata = {'additional': ['link']}
+    metaframe.metadata = {'additional': ['link', 'dCoil']}
+    assert metaframe.additional == ['link', 'dCoil']
 
 
 def test_required_default():

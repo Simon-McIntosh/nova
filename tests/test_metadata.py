@@ -1,7 +1,7 @@
 
 import pytest
 
-from nova.electromagnetic.frame import MetaFrame
+from nova.electromagnetic.metaframe import MetaFrame
 
 
 def test_clear():

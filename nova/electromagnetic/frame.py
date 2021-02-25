@@ -2,41 +2,44 @@
 
 import re
 import string
+from typing import Optional, Collection, Any, Union
 
 import pandas
 import numpy as np
 import shapely
 
-from nova.electromagnetic.subframe import SubFrame
+from nova.electromagnetic.metaarray import MetaArray
+from nova.electromagnetic.metaframe import MetaFrame
+from nova.electromagnetic.framearray import FrameArray
 from nova.electromagnetic.multipoint import MultiPoint
 from nova.electromagnetic.subspace import SubSpace
 from nova.electromagnetic.polygon import Polygon
 
-# pylint:disable=unsubscriptable-object
 # pylint: disable=too-many-ancestors
+# pylint:disable=unsubscriptable-object
 
 
-class Frame(SubFrame):
-    """Extends SubFrame."""
+class Frame(FrameArray):
+    """Extend FrameArray. Adds boolean methods (add_frame, drop_frame...)."""
 
-    _methods = {'multipoint': MultiPoint,
-                'subspace': SubSpace,
-                'polygon': Polygon}
+    _attributes = {'multipoint': MultiPoint,
+                   'subspace': SubSpace,
+                   'polygon': Polygon}
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.generate_methods()
+    def __init__(self,
+                 data=None,
+                 index: Optional[Collection[Any]] = None,
+                 columns: Optional[Collection[Any]] = None,
+                 attrs: dict[str, Union[MetaArray, MetaFrame]] = None,
+                 metadata: Optional[dict] = None,
+                 **default: Optional[dict]):
+        super().__init__(data, index, columns, attrs, metadata, **default)
+        self.generate_attributes()
 
-    def generate_methods(self):
+    def generate_attributes(self):
         """Initialize frame methods."""
-        for method in self._methods:
-            self.attrs[method] = self._methods[method](self)
-
-    def __getattr__(self, name):
-        """Extend getattr to serve Frame methods."""
-        if name in self._methods:
-            return self.attrs[name]
-        return super().__getattr__(name)
+        for attr in self._attributes:
+            setattr(self, attr, self._attributes[attr](self))
 
     def add_frame(self, *args, iloc=None, **kwargs):
         """
@@ -94,7 +97,7 @@ class Frame(SubFrame):
         args, kwargs = self._extract(*args, **kwargs)
         data = self._build_data(*args, **kwargs)
         index = self._build_index(data, **kwargs)
-        insert = Frame(data, index=index, attrs=self.attrs)
+        insert = FrameArray(data, index=index, attrs=self.attrs)
         return pandas.DataFrame(insert)
 
     def _extract(self, *args, **kwargs):
@@ -358,15 +361,24 @@ class Frame(SubFrame):
 
 if __name__ == '__main__':
 
-    frame = Frame(link=True, metadata={'Array': ['x']})
-    frame.add_frame(4, [5, 7, 12], 0.1, 0.05, link=True)
-    frame.add_frame(4, [5, 7, 12], 0.1, 0.05, link=True)
+    frame = Frame(link=True, metadata={'Required': ['x', 'z', 'dl'],
+                                       'Additional': ['rms']},
+                  columns=['x', 'dt'])
+    print(frame)
+    print(frame.metaframe)
+    #frame.add_frame(4, [5, 7, 12])
+
+    #frame = Frame(metadata={'Required': ['x', 'z'], 'Additional': []},
+    #              columns=['x', 'z', 'rms'])
+
+    #print(frame)
+    #frame.add_frame(4, [5, 7, 12], 0.1, 0.05, link=True)
     #frame.multipoint.generate()
 
     #frame.x = [1, 2, 3]
     #frame.x[1] = 6
 
-    print(frame)
+    #print(frame)
 
     #frame.metaarray._lock = False
     #newframe = Frame()

@@ -13,9 +13,19 @@ def test_dataframe_subclass():
     assert issubclass(Frame, pandas.DataFrame)
 
 
-def test_columns_update_error():
-    with pytest.raises(IndexError):
-        Frame(columns=['x', 'z'])
+def test_columns_extend_additional():
+    frame = Frame(metadata={'Required': ['x', 'z'], 'Additional': []},
+                  columns=['x', 'z', 'rms'])
+    assert frame.columns.to_list() == ['x', 'z', 'rms']
+
+
+def test_columns():
+    frame = Frame(metadata={'Required': ['x', 'z'],
+                            'Additional': ['rms']})
+    frame.add_frame(2, [5, 6, 7])
+    frame = Frame(frame, columns=['x', 'z'])
+    print(frame)
+    assert frame.columns.to_list() == ['x', 'z']
 
 
 def test_index():
@@ -139,4 +149,5 @@ def test_restricted_variable_access_error():
 
 if __name__ == '__main__':
 
-    pytest.main([__file__])
+    test_columns()
+    #pytest.main([__file__])

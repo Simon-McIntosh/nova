@@ -6,6 +6,8 @@ import numpy as np
 
 from nova.electromagnetic.metadata import MetaData
 
+# pylint:disable=unsubscriptable-object
+
 
 @dataclass
 class MetaFrame(MetaData):

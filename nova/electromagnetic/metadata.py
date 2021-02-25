@@ -1,14 +1,14 @@
 """Manage CoilFrame metadata."""
-
-from abc import ABCMeta
+from abc import ABC
 from dataclasses import dataclass, fields
+
 import typing
 
 # pylint:disable=unsubscriptable-object
 
 
 @dataclass
-class MetaData(metaclass=ABCMeta):
+class MetaData(ABC):
     """Abstract base class. Extended by MetaFrame and MetaArray."""
 
     _internal = []  # internal field list - exclude metadata return

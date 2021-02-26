@@ -22,15 +22,29 @@ def test_columns_extend_additional():
 def test_columns():
     frame = Frame(metadata={'Required': ['x', 'z'],
                             'Additional': ['rms']})
-    frame.add_frame(2, [5, 6, 7])
+    frame.add_frame(2, [5, 6, 7], rms=5)
     frame = Frame(frame, columns=['x', 'z'])
-    print(frame)
     assert frame.columns.to_list() == ['x', 'z']
+
+
+def test_columns_metaframe_update():
+    frame = Frame(metadata={'Required': ['x', 'z', 'dl'],
+                            'Additional': ['rms']},
+                  columns=['x', 'dt'])
+    frame.add_frame(4, dt=[5, 7, 12])
+    frame = Frame(frame, columns=['x', 'dt', 'dl'])
+    assert frame.columns.to_list() == ['x', 'dt', 'dl']
 
 
 def test_index():
     frame = Frame(index=['Coil0', 'Coil1'])
     assert frame.index.to_list() == ['Coil0', 'Coil1']
+
+
+def test_reindex():
+    frame = Frame({'x': range(10)}, metadata={'Required': ['x']})
+    frame = Frame(frame, index=['Coil2', 'Coil7', 'Coil9'])
+    assert frame.x.to_list() == [2, 7, 9]
 
 
 def test_index_length_error():
@@ -78,17 +92,17 @@ def test_data_init():
     assert len(frame) == 3
 
 
-def test_data_init_required_error():
+def test_data_init_required():
     data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8]})
-    with pytest.raises(IndexError):
-        Frame(data, metadata={'Required': ['x', 'z', 'dl', 'dt']})
+    frame = Frame(data, metadata={'Required': ['x', 'z', 'dl', 'dt']})
+    assert frame.columns.to_list() == ['x', 'z']
 
 
-def test_data_init_additional_pass():
-    data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8]})
+def test_data_init_additional():
+    data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8], 'dl': 0.3})
     frame = Frame(data, metadata={'Required': ['x', 'z'],
                                   'Additional': ['rms']})
-    assert list(frame.columns) == ['x', 'z', 'rms']
+    assert list(frame.columns) == ['x', 'z', 'dl']
 
 
 def test_attribute_metadata_replace():
@@ -103,8 +117,8 @@ def test_attribute_metadata_replace_error():
 
 
 def test_required_additional_metadata_clash():
-    frame = Frame({'x': 3, 'z': [4]}, metadata={
-        'Required': ['x', 'z'], 'Additional': ['x', 'rms']})
+    frame = Frame(Required=['x', 'z'], Additional=['x', 'rms'])
+    frame.add_frame(3, 4)
     assert list(frame.columns) == ['x', 'z', 'rms']
 
 
@@ -136,18 +150,28 @@ def test_warn_new_attribute():
 def test_restrict_lock():
     frame = Frame(metadata={'Required': ['x'], 'Restrict': ['x']})
     with pytest.raises(PermissionError):
-        frame.metaarray.check_lock('x')
+        frame.metaframe.check_lock('x')
+
+
+def test_restricted_variable_access():
+    frame = Frame(metadata={'Required': ['x'], 'Restrict': ['Ic'],
+                            'Additional': ['Ic']})
+    frame.add_frame(5)
+    with frame.metaframe.unlock():
+        frame.Ic = 6
 
 
 def test_restricted_variable_access_error():
     frame = Frame(metadata={'Required': ['x'], 'Restrict': ['Ic'],
                             'Additional': ['Ic']})
     frame.add_frame(5)
-    with pytest.raises(PermissionError):
+    with frame.metaframe.unlock():
         frame.Ic = 6
+    with pytest.raises(PermissionError):
+        frame.Ic = 7
 
 
 if __name__ == '__main__':
 
-    test_columns()
-    #pytest.main([__file__])
+    test_restrict_lock()
+    pytest.main([__file__])

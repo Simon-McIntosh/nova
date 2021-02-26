@@ -22,7 +22,7 @@ class MultiPoint(MetaMethod):
         'link', 'factor', 'reference'])
 
     indexer: list[int] = field(init=False)
-    index: pandas.Index = field(init=False)
+    index: pandas.Index = field(default=pandas.Index([]))
     '''
     link_index: list[int, int] = field(init=False)
     link_factor: list[float] = field(init=False)
@@ -67,16 +67,16 @@ class MultiPoint(MetaMethod):
                 factor[isnumeric] = self.frame.link[isnumeric]
                 factor = factor[istrue | isnumeric][1:]
                 self.add(index, factor)
-            self.update()
+            self.build()
 
-    def update(self):
+    def build(self):
         """Update multi-point parameters."""
         range_index = np.arange(len(self.frame), dtype=int)
         self.indexer = list(range_index[~self.frame.link.to_numpy(bool)])
         self.index = self.frame.index[self.indexer]
-        self.frame.reference = self.frame.index.get_indexer(self.frame.link)
-
-
+        reference = self.frame.index.get_indexer(self.frame.link)
+        reference[self.indexer] = range_index[self.indexer]
+        self.frame.reference = reference
 
 
         '''

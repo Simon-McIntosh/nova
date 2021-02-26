@@ -5,23 +5,24 @@ from typing import TYPE_CHECKING
 
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.multipoint import MultiPoint
+from nova.electromagnetic.superframe import SuperFrame
 
 if TYPE_CHECKING:
     from nova.electromagnetic.frame import Frame
 
 
-@dataclass
-class SubSpace(MetaMethod):
-    """Manage frame subspace (all independent coils)."""
+#@dataclass
+class Range(SuperFrame):
+    """Manage row subspace of frame (all independent coils)."""
 
-    frame: Frame = field(repr=False)
-    key_attributes: list[str] = field(default_factory=lambda: [
-        'Nt', 'It', 'Ic'])
-    additional_attributes: list[str] = field(default_factory=lambda: [
-        'Nt', 'It', 'Ic', 'active', 'plasma', 'optimize', 'feedback'])
+    #frame: Frame = field(repr=False)
+    #attributes: list[str] = field(default_factory=lambda: [
+    #    'Nt', 'It', 'Ic', 'active', 'plasma', 'optimize', 'feedback'])
 
-    def generate(self):
-        pass
+    def __init__(self, frame):
+        with frame.metaframe.unlock():
+            frame.metadata = {'additional': frame.metaframe.reduce}
+        super().__init__(frame, index=frame.multipoint.index)
 
 
     '''

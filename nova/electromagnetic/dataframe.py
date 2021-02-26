@@ -20,10 +20,34 @@ class Series(pandas.Series):
 
     @property
     def _constructor_expanddim(self):
-        return DataArray
+        return DataFrame
 
 
-class DataArray(pandas.DataFrame):
+class DataFrame(pandas.DataFrame):
+    """pandas.DataFrame base class."""
+
+    @property
+    def _constructor(self):
+        return DataFrame
+
+    @property
+    def _constructor_sliced(self):
+        return Series
+
+
+class SeriesArray(pandas.Series):
+    """Provide series constructor methods."""
+
+    @property
+    def _constructor(self):
+        return SeriesArray
+
+    @property
+    def _constructor_expanddim(self):
+        return DataFrameArray
+
+
+class DataFrameArray(pandas.DataFrame):
     """
     Extends Pandas.DataFrame enabling fast access to dynamic fields in array.
 
@@ -46,23 +70,18 @@ class DataArray(pandas.DataFrame):
             return
         self.update_metaarray()
 
+    @property
+    def _constructor(self):
+        return DataFrameArray
+
+    @property
+    def _constructor_sliced(self):
+        return SeriesArray
+
     def update_metaarray(self):
         """Update metaarray if not present in self.attrs."""
         if 'metaarray' not in self.attrs:
             self.attrs['metaarray'] = MetaArray()
-
-    @property
-    def _constructor(self):
-        return DataArray
-
-    @property
-    def _constructor_sliced(self):
-        return Series
-
-    @property
-    def metaarray(self):
-        """Return metaarray instance."""
-        return self.attrs['metaarray']
 
     def __repr__(self):
         """Extend pandas.DataFrame.__repr__."""
@@ -106,6 +125,15 @@ class DataArray(pandas.DataFrame):
         yield
         self.metaarray.update_frame[col] = False
 
+    @property
+    def metaarray(self):
+        """
+        Return metaarray instance, protect against pandas recursion loop.
+
+        To understand recursion, you must understand recursion.
+        """
+        return self.attrs['metaarray']
+
     def __getattr__(self, col):
         """Extend pandas.DataFrame.__getattr__. (frame.*)."""
         if col in self.metaarray.array:
@@ -116,7 +144,6 @@ class DataArray(pandas.DataFrame):
 
     def __setattr__(self, col, value):
         """Extend pandas.DataFrame.__setattr__ (frame.* = *).."""
-        self.metaarray.check_lock(col)
         if col in self.metaarray.array:
             self._update_array(col=col, value=value)
             self.metaarray.update_frame[col] = True
@@ -138,20 +165,19 @@ class DataArray(pandas.DataFrame):
 
     def __setitem__(self, col, value):
         """Extend pandas.DataFrame.__setitem__. (frame['*'] = *)."""
-        self.metaarray.check_lock(col)
         if col in self.metaarray.array:
             self._update_array(col=col, value=value)
         pandas.DataFrame.__setitem__(self, col, value)
 
     def _set_value(self, index, col, value, takeable=False):
         """Extend pandas.DataFrame._set_value. (frame.at[i, '*'] = *)."""
-        self.metaarray.check_lock(col)
         if col in self.metaarray.array:
             self._update_array(index=index, col=col, value=value)
         return pandas.DataFrame._set_value(  # pylint: disable=protected-access
                                            self, index, col, value, takeable)
 
 
+
 if __name__ == '__main__':
 
-    dataarray = DataArray()
+    dataframe = DataFrame()

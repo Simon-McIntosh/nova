@@ -10,36 +10,37 @@ import shapely
 
 from nova.electromagnetic.metaarray import MetaArray
 from nova.electromagnetic.metaframe import MetaFrame
-from nova.electromagnetic.framearray import FrameArray
+from nova.electromagnetic.superframe import SuperFrame
 from nova.electromagnetic.multipoint import MultiPoint
-from nova.electromagnetic.subspace import SubSpace
+from nova.electromagnetic.range import Range
 from nova.electromagnetic.polygon import Polygon
 
 # pylint: disable=too-many-ancestors
 # pylint:disable=unsubscriptable-object
 
 
-class Frame(FrameArray):
-    """Extend FrameArray. Adds boolean methods (add_frame, drop_frame...)."""
+class Frame(SuperFrame):
+    """Extend SuperFrame. Adds boolean methods (add_frame, drop_frame...)."""
 
-    _attributes = {'multipoint': MultiPoint,
-                   'subspace': SubSpace,
-                   'polygon': Polygon}
+    _attributes = {
+                   'multipoint': MultiPoint,
+                   'range': Range,
+                   #'polygon': Polygon
+                   }
 
     def __init__(self,
                  data=None,
                  index: Optional[Collection[Any]] = None,
                  columns: Optional[Collection[Any]] = None,
                  attrs: dict[str, Union[MetaArray, MetaFrame]] = None,
-                 metadata: Optional[dict] = None,
-                 **default: Optional[dict]):
-        super().__init__(data, index, columns, attrs, metadata, **default)
+                 **metadata: Optional[dict]):
+        super().__init__(data, index, columns, attrs, **metadata)
         self.generate_attributes()
 
     def generate_attributes(self):
-        """Initialize frame methods."""
+        """Initialize frame attributes."""
         for attr in self._attributes:
-            setattr(self, attr, self._attributes[attr](self))
+            self.attrs[attr] = self._attributes[attr](self)
 
     def add_frame(self, *args, iloc=None, **kwargs):
         """
@@ -97,7 +98,7 @@ class Frame(FrameArray):
         args, kwargs = self._extract(*args, **kwargs)
         data = self._build_data(*args, **kwargs)
         index = self._build_index(data, **kwargs)
-        insert = FrameArray(data, index=index, attrs=self.attrs)
+        insert = SuperFrame(data, index=index, attrs=self.attrs)
         return pandas.DataFrame(insert)
 
     def _extract(self, *args, **kwargs):
@@ -147,9 +148,12 @@ class Frame(FrameArray):
             kwargs |= {col: dataframe.loc[:, col] for col in
                        self.metaframe.additional if col in dataframe}
         if len(args) != self.metaframe.required_number:
-            raise IndexError('incorrect output argument number: '
-                             f'{len(args)} != '
-                             f'{self.metaframe.required_number}\n')
+            raise IndexError(
+                'incorrect required argument number (*args)): '
+                f'{len(args)} != '
+                f'{self.metaframe.required_number}\n'
+                f'required *args: {self.metaframe.required}\n'
+                f'additional **kwargs: {self.metaframe.additional}')
         return args, kwargs
 
     @staticmethod
@@ -326,7 +330,6 @@ class Frame(FrameArray):
             self.loc[name, 'patch'] = None  # re-generate coil patch
         # TODO regenerate Biot arrays...
 
-
     def _current_label(self, **kwargs):
         """Return current label, Ic or It."""
         current_label = None
@@ -361,19 +364,22 @@ class Frame(FrameArray):
 
 if __name__ == '__main__':
 
-    frame = Frame(link=True, metadata={'Required': ['x', 'z', 'dl'],
-                                       'Additional': ['rms']},
-                  columns=['x', 'dt'])
-    print(frame)
-    print(frame.metaframe)
-    #frame.add_frame(4, [5, 7, 12])
+    frame = Frame(columns=['x', 'z', 'rms', 'Ic', 'dCoil'],
+                  Required=['x', 'z'], optimize=True,
+                  dCoil=5)
 
-    #frame = Frame(metadata={'Required': ['x', 'z'], 'Additional': []},
-    #              columns=['x', 'z', 'rms'])
-
-    #print(frame)
-    #frame.add_frame(4, [5, 7, 12], 0.1, 0.05, link=True)
+    frame.add_frame(4, range(3), link=True)
+    #frame.add_frame(4, range(2), link=False)
+    #frame.add_frame(4, range(4), link=True)
     #frame.multipoint.generate()
+
+    print(frame.range)
+
+    #framerange = SuperFrame(frame, index=['Coil0', 'Coil3', 'Coil5'])
+
+    #print(framerange)
+
+
 
     #frame.x = [1, 2, 3]
     #frame.x[1] = 6

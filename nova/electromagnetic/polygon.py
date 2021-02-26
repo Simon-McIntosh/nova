@@ -32,9 +32,9 @@ class Polygon(MetaMethod):
                 poly = polygen(section)(
                     *self.frame.loc[index, ['x', 'z', 'dl', 'dt']])
                 self.frame.loc[index, 'poly'] = polyframe(poly)
-            self.update()
+            self.build()
 
-    def update(self, index=None):
+    def build(self, index=None):
         """
         Update polygon derived attributes.
 

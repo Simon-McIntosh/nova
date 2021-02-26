@@ -33,6 +33,7 @@ class MetaMethod(metaclass=ABCMeta):
         update = np.array([attr in self.frame.columns
                            for attr in self.key_attributes]).any()
         if update:
-            self.frame.metadata = {'additional': self.additional_attributes}
+            self.frame.metadata = \
+                {'additional': self.additional_attributes}
             return True
         return False

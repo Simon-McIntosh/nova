@@ -1,4 +1,5 @@
 
+from contextlib import contextmanager
 from dataclasses import dataclass, field, fields
 from typing import Union
 
@@ -16,6 +17,8 @@ class MetaFrame(MetaData):
     required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
     additional: list[str] = field(default_factory=lambda: [])
     exclude: list[str] = field(default_factory=lambda: [])
+    reduce: list[str] = field(default_factory=lambda: [
+        'Ic', 'It', 'Nt', 'active', 'plasma', 'optimize', 'feedback'])
     default: dict[str, Union[float, str, bool, None]] = field(
         repr=False, default_factory=lambda: {
             'dCoil': 0., 'nx': 1, 'nz': 1, 'Nt': 1., 'Nf': 1,
@@ -33,6 +36,23 @@ class MetaFrame(MetaData):
     index: dict[str, Union[str, bool]] = field(
         repr=False, default_factory=lambda: {
             'name': '', 'label': 'Coil', 'delim': '', 'offset': 0})
+
+    _lock = True
+
+    @contextmanager
+    def unlock(self):
+        """Permit update to restricted variables."""
+        self._lock = False
+        yield
+        self._lock = True
+
+    def check_lock(self, key):
+        """Check lock on restricted attributes."""
+        if key in self.reduce and self._lock:
+            raise PermissionError(f'Access to key: {key} is restricted. '
+                                  f'Access via metaframe.unlock.\n'
+                                  'with frame.metaframe.unlock():\n'
+                                  f'    frame.{key} = *')
 
     def validate(self):
         """

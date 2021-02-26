@@ -1,11 +1,12 @@
 
-from contextlib import contextmanager
 from dataclasses import dataclass, field
+from typing import Iterable, Union
 
-import numpy as np
 import pandas
 
 from nova.electromagnetic.metadata import MetaData
+
+# pylint:disable=unsubscriptable-object
 
 
 @dataclass
@@ -13,28 +14,12 @@ class MetaArray(MetaData):
     """Manage Frame metadata - accessed via Frame['attrs']."""
 
     array: list[str] = field(default_factory=lambda: [])
-    restrict: list[str] = field(default_factory=lambda: [])
-    data: dict[str, np.ndarray] = field(default_factory=dict)
-    update_array: dict[bool] = field(default_factory=dict)
-    update_frame: dict[bool] = field(default_factory=dict)
+    data: dict[str, Iterable[Union[str, int, float]]] = \
+        field(default_factory=dict)
+    update_array: dict[str, bool] = field(default_factory=dict)
+    update_frame: dict[str, bool] = field(default_factory=dict)
 
     _internal = ['data', 'update_array', 'update_frame']
-    _lock = True
-
-    @contextmanager
-    def unlock(self):
-        """Permit update to restricted variables."""
-        self._lock = False
-        yield
-        self._lock = True
-
-    def check_lock(self, key):
-        """Check lock on restricted attributes."""
-        if key in self.restrict and self._lock:
-            raise PermissionError(f'Access to key: {key} is restricted. '
-                                  f'Access via metadata.unlock.\n'
-                                  'with frame.metaarray.unlock():\n'
-                                  f'    frame.{key} = *')
 
     def __repr__(self):
         """Return __repr__."""

@@ -1,7 +1,7 @@
 
 import pytest
 
-from nova.electromagnetic.array import MetaArray
+from nova.electromagnetic.metaarray import MetaArray
 
 
 def test_init_metaarray():

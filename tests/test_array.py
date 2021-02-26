@@ -4,7 +4,7 @@ import numpy as np
 import pandas
 
 from nova.electromagnetic.frame import Frame
-from nova.electromagnetic.array import MetaArray
+from nova.electromagnetic.metaarray import MetaArray
 
 
 def test_init_update():

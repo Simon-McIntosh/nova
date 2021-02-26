@@ -24,7 +24,7 @@ class Frame(SuperFrame):
 
     _attributes = {
                    'multipoint': MultiPoint,
-                   'range': Range,
+                   #'range': Range,
                    #'polygon': Polygon
                    }
 

@@ -47,6 +47,8 @@ class MetaData(ABC):
 
     @metadata.setter
     def metadata(self, metadata):
+        if metadata is None:
+            metadata = {}
         types = self.types
         for attribute in [attr for attr in metadata if attr.lower() in types]:
             replace = attribute[0].isupper()

@@ -34,6 +34,21 @@ Created on Thu Feb 18 20:33:42 2021
     '''
 
     '''
+        def update_columns(self):
+        """Intersect of self.columns and self.metaframe.columns."""
+        if not self.columns.empty:
+            metadata = {}
+            metadata['Required'] = [attr for attr in self.columns
+                                    if attr in self.metaframe.required]
+            metadata['Additional'] = [attr for attr in self.columns
+                                      if attr not in self.metaframe.required]
+            if self.metaframe.required != metadata['Required'] or \
+                    self.metaframe.additional != metadata['Additional']:
+                self.metaframe.metadata = metadata  # perform intersection
+
+    '''
+
+    '''
     def __init__(self):
         """Build fast access data."""
         #

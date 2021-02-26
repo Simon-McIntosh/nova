@@ -5,17 +5,21 @@ from typing import Optional, Collection, Any, Union
 import pandas
 import numpy as np
 
-from nova.electromagnetic.dataframe import DataFrame, DataFrameArray
+from nova.electromagnetic.dataframe import DataFrame
+from nova.electromagnetic.dataframearray import DataFrameArray
 from nova.electromagnetic.metaarray import MetaArray
 from nova.electromagnetic.metaframe import MetaFrame
+from nova.electromagnetic.multipoint import MultiPoint
+from nova.electromagnetic.polygon import Polygon
+
 
 # pylint: disable=too-many-ancestors
 # pylint:disable=unsubscriptable-object
 
 
-class SuperFrame(DataFrame):
+class SuperFrame(DataFrameArray):
     """
-    Extend dDataFrame or DataFrame array. Frame superclass.
+    Extend DataFrame or DataFrameArray. Frame superclass.
 
     Manage Frame metadata (metaarray, metaframe).
     """
@@ -29,9 +33,10 @@ class SuperFrame(DataFrame):
         super().__init__(data, index, columns)
         self.update_metaframe()
         self.update_attrs(data, attrs)
-        self.update_index()
-        self.update_columns()
         self.update_metadata(metadata)
+        self.update_index()
+        self.multipoint = MultiPoint(self)
+        self.polygon = Polygon(self)
 
     def __getattr__(self, col):
         """Intercept DataFrame.__getattr__ to serve self.attrs."""
@@ -173,15 +178,3 @@ class SuperFrame(DataFrame):
             self['index'] = self._build_index(self)
             self.set_index('index', inplace=True)
             self.index.name = None
-
-    def update_columns(self):
-        """Intersect of self.columns and self.metaframe.columns."""
-        if not self.columns.empty:
-            metadata = {}
-            metadata['Required'] = [attr for attr in self.columns
-                                    if attr in self.metaframe.required]
-            metadata['Additional'] = [attr for attr in self.columns
-                                      if attr not in self.metaframe.required]
-            if self.metaframe.required != metadata['Required'] or \
-                    self.metaframe.additional != metadata['Additional']:
-                self.metaframe.metadata = metadata  # perform intersection

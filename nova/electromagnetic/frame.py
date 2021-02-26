@@ -23,8 +23,8 @@ class Frame(SuperFrame):
     """Extend SuperFrame. Adds boolean methods (add_frame, drop_frame...)."""
 
     _attributes = {
-                   'multipoint': MultiPoint,
-                   #'range': Range,
+                   #'multipoint': MultiPoint,
+                   'range': Range,
                    #'polygon': Polygon
                    }
 

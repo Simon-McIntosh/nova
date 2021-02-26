@@ -140,7 +140,8 @@ def test_exclude():
 
 
 def test_warn_new_attribute():
-    frame = Frame({'x': [3, 4], 'z': 0}, metadata={'Required': ['x', 'z']})
+    frame = Frame({'x': [3, 4], 'z': 0}, Required=['x', 'z'],
+                  Reduce=[])
     with pytest.warns(UserWarning,
                       match='Pandas doesn\'t allow columns to be created '
                             'via a new attribute name'):
@@ -148,13 +149,13 @@ def test_warn_new_attribute():
 
 
 def test_restrict_lock():
-    frame = Frame(metadata={'Required': ['x'], 'Restrict': ['x']})
+    frame = Frame(metadata={'Required': ['x'], 'Reduce': ['x']})
     with pytest.raises(PermissionError):
         frame.metaframe.check_lock('x')
 
 
 def test_restricted_variable_access():
-    frame = Frame(metadata={'Required': ['x'], 'Restrict': ['Ic'],
+    frame = Frame(metadata={'Required': ['x'], 'Reduce': ['Ic'],
                             'Additional': ['Ic']})
     frame.add_frame(5)
     with frame.metaframe.unlock():
@@ -162,7 +163,7 @@ def test_restricted_variable_access():
 
 
 def test_restricted_variable_access_error():
-    frame = Frame(metadata={'Required': ['x'], 'Restrict': ['Ic'],
+    frame = Frame(metadata={'Required': ['x'], 'Reduce': ['Ic'],
                             'Additional': ['Ic']})
     frame.add_frame(5)
     with frame.metaframe.unlock():
@@ -173,5 +174,4 @@ def test_restricted_variable_access_error():
 
 if __name__ == '__main__':
 
-    test_restrict_lock()
     pytest.main([__file__])

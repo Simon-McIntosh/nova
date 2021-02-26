@@ -13,12 +13,12 @@ def test_enable_key_attribute_true():
 
 def test_generate_single():
     frame = Frame({'link': [True]}, metadata={'Required': []})
-    assert frame.iloc[0].to_list() == ['', 1.0, -1]
+    assert frame.iloc[0].to_list() == ['', 1.0, 0]
 
 
 def test_generate_single_float():
     frame = Frame({'link': [-0.3]}, metadata={'Required': []})
-    assert frame.iloc[0].to_list() == ['', 1.0, -1]
+    assert frame.iloc[0].to_list() == ['', 1.0, 0]
 
 
 def test_generate_multi():
@@ -89,7 +89,7 @@ def test_drop():
     frame.multipoint.drop(['coil0', 'coil7'])
     assert frame.link.to_list() == ['', '', '', '', '', '', 'coil5', '', '']
     assert frame.factor.to_list() == [1, 1, 1, 1, 1, 1, 1, 1, 1]
-    assert frame.reference.to_list() == [-1, -1, -1, -1, -1, -1, 5, -1, -1]
+    assert frame.reference.to_list() == [0, 1, 2, 3, 4, 5, 5, 7, 8]
 
 
 def test_drop_indexer():
@@ -103,4 +103,5 @@ def test_drop_indexer():
 
 if __name__ == '__main__':
 
+    test_add_coil_multipoint_default_true()
     pytest.main([__file__])

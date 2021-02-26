@@ -20,8 +20,9 @@ class Range(SuperFrame):
     #    'Nt', 'It', 'Ic', 'active', 'plasma', 'optimize', 'feedback'])
 
     def __init__(self, frame):
-        with frame.metaframe.unlock():
-            frame.metadata = {'additional': frame.metaframe.reduce}
+        ### implement enable - only add attributes if key found
+        #with frame.metaframe.unlock():
+        #    frame.metadata = {'additional': frame.metaframe.reduce}
         super().__init__(frame, index=frame.multipoint.index)
 
 

@@ -1,4 +1,4 @@
-
+"""Manage mulit-point constraints."""
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
@@ -17,20 +17,20 @@ class MultiPoint(MetaMethod):
     """Manage multi-point constraints applied across frame.index."""
 
     frame: Frame = field(repr=False)
-    key_attributes: list[str] = field(default_factory=lambda: ['link'])
-    additional_attributes: list[str] = field(default_factory=lambda: [
+    attributes: list[str] = field(default_factory=lambda: [
         'link', 'factor', 'reference'])
 
     indexer: list[int] = field(init=False)
     index: pandas.Index = field(default=pandas.Index([]))
+
     '''
     link_index: list[int, int] = field(init=False)
     link_factor: list[float] = field(init=False)
     '''
 
-    def generate(self):
+    def initialize(self):
         """
-        Generate multipoint.frame constraints if key_attributes in columns.
+        Init multipoint.frame constraints if key_attributes in columns.
 
             - link is none or NaN:
 

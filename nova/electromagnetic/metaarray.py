@@ -1,4 +1,4 @@
-
+"""Extend pandas.DataFrame to manage fast access attributes."""
 from dataclasses import dataclass, field
 from typing import Iterable, Union
 

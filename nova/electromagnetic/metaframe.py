@@ -17,7 +17,7 @@ class MetaFrame(MetaData):
     required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
     additional: list[str] = field(default_factory=lambda: [])
     exclude: list[str] = field(default_factory=lambda: [])
-    reduce: list[str] = field(default_factory=lambda: [
+    subspace: list[str] = field(default_factory=lambda: [
         'Ic', 'It', 'Nt', 'active', 'plasma', 'optimize', 'feedback'])
     default: dict[str, Union[float, str, bool, None]] = field(
         repr=False, default_factory=lambda: {
@@ -39,6 +39,11 @@ class MetaFrame(MetaData):
 
     _lock = True
 
+    @property
+    def lock(self):
+        """Return lock status."""
+        return self._lock
+
     @contextmanager
     def unlock(self):
         """Permit update to restricted variables."""
@@ -48,9 +53,13 @@ class MetaFrame(MetaData):
 
     def check_lock(self, key):
         """Check lock on restricted attributes."""
-        if key in self.reduce and self._lock:
+        if key in self.subspace and self._lock:
             raise PermissionError(f'Access to key: {key} is restricted. '
-                                  f'Access via metaframe.unlock.\n'
+                                  f'Unlock prior to access.\n'
+                                  'use self.subspace to '
+                                  'manage subspace attributes.\n\n'
+                                  'caveat usor, lock may be overridden '
+                                  'with the following context manager.\n'
                                   'with frame.metaframe.unlock():\n'
                                   f'    frame.{key} = *')
 

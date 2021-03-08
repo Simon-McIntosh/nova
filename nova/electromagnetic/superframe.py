@@ -9,19 +9,19 @@ from nova.electromagnetic.dataframe import DataFrame
 from nova.electromagnetic.dataframearray import DataFrameArray
 from nova.electromagnetic.metaarray import MetaArray
 from nova.electromagnetic.metaframe import MetaFrame
-from nova.electromagnetic.multipoint import MultiPoint
-from nova.electromagnetic.polygon import Polygon
 
 
 # pylint: disable=too-many-ancestors
 # pylint:disable=unsubscriptable-object
 
 
-class SuperFrame(DataFrameArray):
+class SuperFrame(DataFrame):
     """
     Extend DataFrame or DataFrameArray. Frame superclass.
 
     Manage Frame metadata (metaarray, metaframe).
+
+    Implement current properties.
     """
 
     def __init__(self,
@@ -35,8 +35,6 @@ class SuperFrame(DataFrameArray):
         self.update_attrs(data, attrs)
         self.update_metadata(metadata)
         self.update_index()
-        self.multipoint = MultiPoint(self)
-        self.polygon = Polygon(self)
 
     def __getattr__(self, col):
         """Intercept DataFrame.__getattr__ to serve self.attrs."""

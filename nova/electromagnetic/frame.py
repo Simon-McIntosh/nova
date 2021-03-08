@@ -11,8 +11,8 @@ import shapely
 from nova.electromagnetic.metaarray import MetaArray
 from nova.electromagnetic.metaframe import MetaFrame
 from nova.electromagnetic.superframe import SuperFrame
+from nova.electromagnetic.subspace import SubSpace
 from nova.electromagnetic.multipoint import MultiPoint
-from nova.electromagnetic.range import Range
 from nova.electromagnetic.polygon import Polygon
 
 # pylint: disable=too-many-ancestors
@@ -20,13 +20,13 @@ from nova.electromagnetic.polygon import Polygon
 
 
 class Frame(SuperFrame):
-    """Extend SuperFrame. Adds boolean methods (add_frame, drop_frame...)."""
+    """
+    Extend SuperFrame.
 
-    _attributes = {
-                   #'multipoint': MultiPoint,
-                   'range': Range,
-                   #'polygon': Polygon
-                   }
+    Adds boolean methods (add_frame, drop_frame...).
+    """
+
+    _attributes = ['multipoint', 'subspace', 'polygon']
 
     def __init__(self,
                  data=None,
@@ -35,12 +35,25 @@ class Frame(SuperFrame):
                  attrs: dict[str, Union[MetaArray, MetaFrame]] = None,
                  **metadata: Optional[dict]):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.generate_attributes()
+        self.multipoint = MultiPoint(self)
+        self.subspace = SubSpace(self)
+        self.polygon = Polygon(self)
 
-    def generate_attributes(self):
-        """Initialize frame attributes."""
-        for attr in self._attributes:
-            self.attrs[attr] = self._attributes[attr](self)
+    def __getattr__(self, col):
+        print(col)
+    #    """Extend SuperFrame.__getattr__. (frame.*). Get subspace"""
+    #    if col in self.metaframe.subspace:
+    #        return self.subspace.__getattr__(col)
+        return super().__getattr__(col)
+
+    def __setattr__(self, col, value):
+        """Extend SuperFrame.__setattr__ (frame.* = *). Set subspace."""
+        if col in self._attributes:
+            self.attrs[col] = value
+            return None
+        if col in self.metaframe.subspace and self.metaframe.lock:
+            return self.subspace.__setattr__(col, value)
+        return super().__setattr__(col, value)
 
     def add_frame(self, *args, iloc=None, **kwargs):
         """
@@ -51,7 +64,7 @@ class Frame(SuperFrame):
         *args : Union[float, array-like]
             Required arguments listed in self.metaframe.required.
         iloc : int, optional
-            DESCRIPTION. The default is None.
+            Row locater for inserted coil. The default is None (-1).
         **kwargs : dict[str, Union[float, array-like]]
             Optional keyword as arguments listed in self.metaframe.additional.
 
@@ -364,16 +377,16 @@ class Frame(SuperFrame):
 
 if __name__ == '__main__':
 
-    frame = Frame(columns=['x', 'z', 'rms', 'Ic', 'dCoil'],
-                  Required=['x', 'z'], optimize=True,
+    frame = Frame(Required=['x', 'z'], optimize=True,
                   dCoil=5)
 
-    frame.add_frame(4, range(3), link=True)
-    #frame.add_frame(4, range(2), link=False)
-    #frame.add_frame(4, range(4), link=True)
+
+    frame.add_frame(4, range(3), Ic=5, link=True)
+    frame.add_frame(4, range(2), link=False)
+    frame.add_frame(4, range(4), link=True)
     #frame.multipoint.generate()
 
-    print(frame.range)
+    print(frame.subspace)
 
     #framerange = SuperFrame(frame, index=['Coil0', 'Coil3', 'Coil5'])
 

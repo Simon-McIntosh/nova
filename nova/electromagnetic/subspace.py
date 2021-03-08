@@ -1,30 +1,26 @@
 
-from __future__ import annotations
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+import pandas
 
-from nova.electromagnetic.metamethod import MetaMethod
-from nova.electromagnetic.multipoint import MultiPoint
 from nova.electromagnetic.superframe import SuperFrame
 
-if TYPE_CHECKING:
-    from nova.electromagnetic.frame import Frame
 
-
-#@dataclass
-class Range(SuperFrame):
+class SubSpace(SuperFrame):
     """Manage row subspace of frame (all independent coils)."""
 
-    #frame: Frame = field(repr=False)
-    #attributes: list[str] = field(default_factory=lambda: [
-    #    'Nt', 'It', 'Ic', 'active', 'plasma', 'optimize', 'feedback'])
-
     def __init__(self, frame):
-        ### implement enable - only add attributes if key found
-        #with frame.metaframe.unlock():
-        #    frame.metadata = {'additional': frame.metaframe.reduce}
-        super().__init__(frame, index=frame.multipoint.index)
+        super().__init__(pandas.DataFrame(frame),
+                         index=frame.multipoint.index,
+                         columns=frame.metaframe.subspace)
+        self.metaframe.clear('subspace')
 
+    @property
+    def line_current(self):
+        """Manage line current."""
+        return self.Ic
+
+    @line_current.setter
+    def line_current(self, line_current):
+        super().__setattr__('Ic', line_current)
 
     '''
     if key in self._dataframe_attributes:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from abc import ABCMeta, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -16,24 +16,29 @@ class MetaMethod(metaclass=ABCMeta):
     """Manage Frame._methods, subclass with dataclass."""
 
     frame: Frame
-    key_attributes: list[str]
-    additional_attributes: list[str]
+    attributes: list[str]
 
     def __post_init__(self):
         """Generate multi-point constraints."""
-        self.generate()
+        self.update_attributes()
+        self.initialize()
 
     @abstractmethod
-    def generate(self):
-        """Generate method attributes."""
+    def initialize(self):
+        """Init method."""
 
     @property
-    def enable(self) -> bool:
-        """Return enable flag, update additional attributes if True."""
-        update = np.array([attr in self.frame.columns
-                           for attr in self.key_attributes]).any()
-        if update:
-            self.frame.metadata = \
-                {'additional': self.additional_attributes}
-            return True
-        return False
+    def column_attributes(self):
+        """Return boolean status of attributes found in frame.columns."""
+        return np.array([attr in self.frame.columns
+                         for attr in self.attributes])
+
+    def update_attributes(self) -> bool:
+        """Update additional attributes if subset exsists in frame.columns."""
+        if self.column_attributes.any():
+            self.frame.metadata = {'additional': self.attributes}
+
+    @property
+    def enable(self):
+        """Return status of required attributes in frame.columns."""
+        return self.column_attributes.all()

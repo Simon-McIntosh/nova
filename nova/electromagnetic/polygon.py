@@ -19,13 +19,12 @@ class Polygon(MetaMethod):
     """Geometrical methods for Frame."""
 
     frame: Frame
-    key_attributes: list[str] = field(default_factory=lambda: ['section'])
-    additional_attributes: list[str] = field(default_factory=lambda: [
+    attributes: list[str] = field(default_factory=lambda: [
         'x', 'z', 'rms', 'dl', 'dt', 'dx', 'dz', 'dA', 'section',
         'poly', 'patch'])
 
-    def generate(self):
-        """Generate polygons based on coil geometroy and cross section."""
+    def initialize(self):
+        """Init polygons based on coil geometroy and cross section."""
         if self.enable:
             for index in self.frame.index[self.frame.poly.isna()]:
                 section = self.frame.loc[index, 'section']

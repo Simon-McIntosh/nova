@@ -141,7 +141,7 @@ def test_exclude():
 
 def test_warn_new_attribute():
     frame = Frame({'x': [3, 4], 'z': 0}, Required=['x', 'z'],
-                  Reduce=[])
+                  Subspace=[])
     with pytest.warns(UserWarning,
                       match='Pandas doesn\'t allow columns to be created '
                             'via a new attribute name'):
@@ -149,29 +149,29 @@ def test_warn_new_attribute():
 
 
 def test_restrict_lock():
-    frame = Frame(metadata={'Required': ['x'], 'Reduce': ['x']})
+    frame = Frame(metadata={'Required': ['x'], 'Subspace': ['x']})
     with pytest.raises(PermissionError):
         frame.metaframe.check_lock('x')
 
 
 def test_restricted_variable_access():
-    frame = Frame(metadata={'Required': ['x'], 'Reduce': ['Ic'],
+    frame = Frame(metadata={'Required': ['x'], 'Subspace': ['Ic'],
                             'Additional': ['Ic']})
     frame.add_frame(5)
     with frame.metaframe.unlock():
         frame.Ic = 6
 
 
-def test_restricted_variable_access_error():
-    frame = Frame(metadata={'Required': ['x'], 'Reduce': ['Ic'],
+def test_restricted_variable_lock():
+    frame = Frame(metadata={'Required': ['x'], 'Subspace': ['Ic'],
                             'Additional': ['Ic']})
-    frame.add_frame(5)
+    frame.add_frame(5, Ic=3.2)
     with frame.metaframe.unlock():
         frame.Ic = 6
-    with pytest.raises(PermissionError):
-        frame.Ic = 7
+    assert frame.Ic[0] == 6 and frame.subspace.Ic[0] == 3.2
 
 
 if __name__ == '__main__':
 
+    ()
     pytest.main([__file__])

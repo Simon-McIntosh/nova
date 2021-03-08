@@ -8,9 +8,13 @@ class SubSpace(SuperFrame):
     """Manage row subspace of frame (all independent coils)."""
 
     def __init__(self, frame):
-        super().__init__(pandas.DataFrame(frame),
-                         index=frame.multipoint.index,
-                         columns=frame.metaframe.subspace)
+        if frame.multipoint.index.empty:
+            index = frame.index
+        else:
+            index = frame.multipoint.index
+        columns = [attr for attr in frame.metaframe.subspace
+                   if attr in frame.metaframe.columns]
+        super().__init__(pandas.DataFrame(frame), index=index, columns=columns)
         self.metaframe.clear('subspace')
 
     @property

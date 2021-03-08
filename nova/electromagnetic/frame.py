@@ -12,8 +12,7 @@ from nova.electromagnetic.metaarray import MetaArray
 from nova.electromagnetic.metaframe import MetaFrame
 from nova.electromagnetic.superframe import SuperFrame
 from nova.electromagnetic.subspace import SubSpace
-from nova.electromagnetic.multipoint import MultiPoint
-from nova.electromagnetic.polygon import Polygon
+
 
 # pylint: disable=too-many-ancestors
 # pylint:disable=unsubscriptable-object
@@ -26,8 +25,6 @@ class Frame(SuperFrame):
     Adds boolean methods (add_frame, drop_frame...).
     """
 
-    _attributes = ['multipoint', 'subspace', 'polygon']
-
     def __init__(self,
                  data=None,
                  index: Optional[Collection[Any]] = None,
@@ -35,12 +32,10 @@ class Frame(SuperFrame):
                  attrs: dict[str, Union[MetaArray, MetaFrame]] = None,
                  **metadata: Optional[dict]):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.multipoint = MultiPoint(self)
         self.subspace = SubSpace(self)
-        self.polygon = Polygon(self)
 
     def __getattr__(self, col):
-        print(col)
+    #    print(col)
     #    """Extend SuperFrame.__getattr__. (frame.*). Get subspace"""
     #    if col in self.metaframe.subspace:
     #        return self.subspace.__getattr__(col)
@@ -48,9 +43,6 @@ class Frame(SuperFrame):
 
     def __setattr__(self, col, value):
         """Extend SuperFrame.__setattr__ (frame.* = *). Set subspace."""
-        if col in self._attributes:
-            self.attrs[col] = value
-            return None
         if col in self.metaframe.subspace and self.metaframe.lock:
             return self.subspace.__setattr__(col, value)
         return super().__setattr__(col, value)
@@ -386,7 +378,7 @@ if __name__ == '__main__':
     frame.add_frame(4, range(4), link=True)
     #frame.multipoint.generate()
 
-    print(frame.subspace)
+    #print(frame.subspace)
 
     #framerange = SuperFrame(frame, index=['Coil0', 'Coil3', 'Coil5'])
 

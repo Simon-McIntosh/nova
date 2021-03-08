@@ -103,5 +103,4 @@ def test_drop_indexer():
 
 if __name__ == '__main__':
 
-    test_add_coil_multipoint_default_true()
     pytest.main([__file__])

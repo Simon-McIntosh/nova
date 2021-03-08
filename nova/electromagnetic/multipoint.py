@@ -17,8 +17,9 @@ class MultiPoint(MetaMethod):
     """Manage multi-point constraints applied across frame.index."""
 
     frame: Frame = field(repr=False)
-    attributes: list[str] = field(default_factory=lambda: [
-        'link', 'factor', 'reference'])
+    required: list[str] = field(default_factory=lambda: ['link'])
+    additional: list[str] = field(default_factory=lambda: [
+        'factor', 'reference'])
 
     indexer: list[int] = field(init=False)
     index: pandas.Index = field(default=pandas.Index([]))
@@ -175,7 +176,7 @@ class MultiPoint(MetaMethod):
                 index = [index]
             reset = [link in index for link in self.frame.link]
             self.frame.loc[reset, 'link'] = ''
-            self.generate()
+            self.initialize()
 
 
     '''

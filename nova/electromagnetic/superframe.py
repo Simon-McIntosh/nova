@@ -9,6 +9,8 @@ from nova.electromagnetic.dataframe import DataFrame
 from nova.electromagnetic.dataframearray import DataFrameArray
 from nova.electromagnetic.metaarray import MetaArray
 from nova.electromagnetic.metaframe import MetaFrame
+from nova.electromagnetic.multipoint import MultiPoint
+from nova.electromagnetic.polygon import Polygon
 
 
 # pylint: disable=too-many-ancestors
@@ -24,6 +26,8 @@ class SuperFrame(DataFrame):
     Implement current properties.
     """
 
+    _attributes = ['multipoint', 'subspace', 'polygon']
+
     def __init__(self,
                  data=None,
                  index: Optional[Collection[Any]] = None,
@@ -35,6 +39,8 @@ class SuperFrame(DataFrame):
         self.update_attrs(data, attrs)
         self.update_metadata(metadata)
         self.update_index()
+        self.multipoint = MultiPoint(self)
+        self.polygon = Polygon(self)
 
     def __getattr__(self, col):
         """Intercept DataFrame.__getattr__ to serve self.attrs."""
@@ -44,6 +50,9 @@ class SuperFrame(DataFrame):
 
     def __setattr__(self, col, value):
         """Check lock. Extend DataFrame.__setattr__ (frame.* = *).."""
+        if col in self._attributes:
+            self.attrs[col] = value
+            return None
         self.metaframe.check_lock(col)
         return super().__setattr__(col, value)
 

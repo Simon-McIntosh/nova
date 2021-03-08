@@ -10,12 +10,12 @@ def test_init():
     return frame
 
 
-def test_range_len():
+def test_subspace_len():
     frame = Frame(Required=['x', 'z'])
     frame.add_frame(4, range(30), link=True)
     frame.add_frame(4, range(2), link=False)
     frame.add_frame(4, range(4), link=True)
-    assert len(frame.range) == 4 and len(frame) == 36
+    assert len(frame.subspace) == 4 and len(frame) == 36
 
 
 if __name__ == '__main__':

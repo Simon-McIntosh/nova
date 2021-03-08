@@ -16,11 +16,12 @@ class MetaMethod(metaclass=ABCMeta):
     """Manage Frame._methods, subclass with dataclass."""
 
     frame: Frame
-    attributes: list[str]
+    required: list[str]
+    additional: list[str]
 
     def __post_init__(self):
         """Generate multi-point constraints."""
-        self.update_attributes()
+        self.update()
         self.initialize()
 
     @abstractmethod
@@ -28,17 +29,17 @@ class MetaMethod(metaclass=ABCMeta):
         """Init method."""
 
     @property
-    def column_attributes(self):
+    def required_attributes(self):
         """Return boolean status of attributes found in frame.columns."""
         return np.array([attr in self.frame.columns
-                         for attr in self.attributes])
+                         for attr in self.required])
 
-    def update_attributes(self) -> bool:
+    def update(self):
         """Update additional attributes if subset exsists in frame.columns."""
-        if self.column_attributes.any():
-            self.frame.metadata = {'additional': self.attributes}
+        if self.enable:
+            self.frame.metadata = {'additional': self.additional}
 
     @property
     def enable(self):
         """Return status of required attributes in frame.columns."""
-        return self.column_attributes.all()
+        return self.required_attributes.all()

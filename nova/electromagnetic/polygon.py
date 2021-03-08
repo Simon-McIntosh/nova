@@ -19,9 +19,10 @@ class Polygon(MetaMethod):
     """Geometrical methods for Frame."""
 
     frame: Frame
-    attributes: list[str] = field(default_factory=lambda: [
-        'x', 'z', 'rms', 'dl', 'dt', 'dx', 'dz', 'dA', 'section',
-        'poly', 'patch'])
+    required: list[str] = field(default_factory=lambda: [
+        'x', 'z', 'dl', 'dt', 'section'])
+    additional: list[str] = field(default_factory=lambda: [
+        'rms', 'dx', 'dz', 'dA', 'poly', 'patch'])
 
     def initialize(self):
         """Init polygons based on coil geometroy and cross section."""

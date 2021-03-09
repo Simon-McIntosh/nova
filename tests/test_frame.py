@@ -83,7 +83,7 @@ def test_frame_index():
 def test_frame_columns_multipoint():
     frame = Frame(metadata={'Required': ['x', 'z'], 'Additional': []})
     frame.add_frame(0, 1, link=True)
-    assert list(frame.columns) == ['x', 'z', 'link', 'factor', 'reference']
+    assert list(frame.columns) == ['x', 'z', 'link', 'factor', 'ref', 'subref']
 
 
 def test_data_init():
@@ -148,27 +148,9 @@ def test_warn_new_attribute():
         frame.Ic = [1, 2]
 
 
-def test_restrict_lock():
+def test_subspace_lock():
     frame = Frame(metadata={'Required': ['x'], 'Subspace': ['x']})
-    with pytest.raises(PermissionError):
-        frame.metaframe.check_lock('x')
-
-
-def test_restricted_variable_access():
-    frame = Frame(metadata={'Required': ['x'], 'Subspace': ['Ic'],
-                            'Additional': ['Ic']})
-    frame.add_frame(5)
-    with frame.metaframe.unlock():
-        frame.Ic = 6
-
-
-def test_restricted_variable_lock():
-    frame = Frame(metadata={'Required': ['x'], 'Subspace': ['Ic'],
-                            'Additional': ['Ic']})
-    frame.add_frame(5, Ic=3.2)
-    with frame.metaframe.unlock():
-        frame.Ic = 6
-    assert frame.Ic[0] == 6 and frame.subspace.Ic[0] == 3.2
+    assert frame.insubspace('x') and frame.metaframe.lock
 
 
 if __name__ == '__main__':

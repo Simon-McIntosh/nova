@@ -173,7 +173,7 @@ class Polygon(shapely.geometry.Polygon):
 
     def __str__(self):
         """Return compact __str__."""
-        return super().__str__().split()[0]
+        return super().__str__().split()[0][:4]
 
 
 def polyframe(polygon):

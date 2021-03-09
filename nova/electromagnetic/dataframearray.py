@@ -7,34 +7,15 @@ from typing import Optional, Collection, Any
 import pandas
 
 from nova.electromagnetic.metaarray import MetaArray
+from nova.electromagnetic.dataframe import DataFrame
 
 # pylint: disable=too-many-ancestors
 # pylint:disable=unsubscriptable-object
 
 
-class Series(pandas.Series):
-    """Provide series constructor methods."""
-
-    @property
-    def _constructor(self):
-        return Series
-
-    @property
-    def _constructor_expanddim(self):
-        return DataFrameArray
-
-
-class DataFrameArray(pandas.DataFrame):
+class DataFrameArray(DataFrame):
     """
-    Extends Pandas.DataFrame enabling fast access to dynamic fields in array.
-
-    Fast access variables stored in ...
-    Lazy data exchange implemented with parent DataFrame.
-
-    Inspiration for DataFrame inheritance taken from GeoPandas
-    https://github.com/geopandas.
-
-    Extended by Frame. Inherited alongside DataFrame.
+    Extends DataFrame enabling fast access to dynamic fields in array.
 
     """
 
@@ -44,18 +25,7 @@ class DataFrameArray(pandas.DataFrame):
                  columns: Optional[Collection[Any]] = None,
                  **metadata: Optional[dict]):
         super().__init__(data, index, columns)
-        if isinstance(data, pandas.core.internals.managers.BlockManager):
-            return
-        self.update_metaarray()
         self.metaarray.metadata = metadata
-
-    @property
-    def _constructor(self):
-        return DataFrameArray
-
-    @property
-    def _constructor_sliced(self):
-        return Series
 
     @property
     def metaarray(self):
@@ -64,6 +34,7 @@ class DataFrameArray(pandas.DataFrame):
 
         To understand recursion, you must understand recursion.
         """
+        self.update_metaarray()
         return self.attrs['metaarray']
 
     def update_metaarray(self):

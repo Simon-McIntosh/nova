@@ -2,6 +2,9 @@
 """
 Created on Thu Feb 18 20:33:42 2021
 
+#if isinstance(data, pandas.core.internals.managers.BlockManager):
+#    return
+
 @author: mcintos
 """
     """

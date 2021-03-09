@@ -8,7 +8,7 @@ import numpy as np
 from nova.electromagnetic.dataframe import DataFrame
 from nova.electromagnetic.dataframearray import DataFrameArray
 from nova.electromagnetic.metaarray import MetaArray
-from nova.electromagnetic.metaframe import MetaFrame
+from nova.electromagnetic.metaframe import MetaFrame, SubSpaceIndexError
 from nova.electromagnetic.multipoint import MultiPoint
 from nova.electromagnetic.polygon import Polygon
 
@@ -42,29 +42,126 @@ class SuperFrame(DataFrame):
         self.multipoint = MultiPoint(self)
         self.polygon = Polygon(self)
 
+    def __repr__(self):
+        """Propagate frame subspace variables prior to display."""
+        self.update_frame()
+        return super().__repr__()
+
+    def insubspace(self, col):
+        """Return True if col specified as a subspace variable else False."""
+        col = self._format_col(col)
+        return col in self.metaframe.subspace
+
+    def checksubspace(self, col):
+        """Check for col in metaframe.subspace, raise error if not found."""
+        if not self.insubspace(col):
+            raise IndexError(f'\'{col}\' not specified in metaframe.subspace '
+                             f'{self.metaframe.subspace}')
+
+    def set_frame(self, col):
+        """Inflate subspace variable and setattr in frame."""
+        self.checksubspace(col)
+        with self.metaframe.setlock(True):
+            value = getattr(self, col).to_numpy()[self.subref]
+        with self.metaframe.setlock(None):
+            super().__setattr__(col, value)
+
+    def get_frame(self, col):
+        """Return inflated subspace variable."""
+        self.checksubspace(col)
+        with self.metaframe.setlock(False):
+            return super().__getattr__(col)
+
+    def update_frame(self):
+        """Propagate subspace varables to frame."""
+        if hasattr(self, 'subspace'):
+            for col in self.subspace:
+                self.set_frame(col)
+
     def __getattr__(self, col):
-        """Intercept DataFrame.__getattr__ to serve self.attrs."""
+        """Extend DataFrame.__getattr__. (frame.*)."""
         if col in self.attrs:
             return self.attrs[col]
+        if self.insubspace(col):
+            if self.metaframe.lock is True:
+                return self.subspace.__getattr__(col)
+            if self.metaframe.lock is False:
+                self.set_frame(col)
         return super().__getattr__(col)
+
+    def __getitem__(self, col):
+        """Extend DataFrame.__getitem__. (frame['*'])."""
+        if self.insubspace(col):
+            if self.metaframe.lock is True:
+                if col in self.subspace:
+                    return self.subspace.__getattr__(col)
+            if self.metaframe.lock is False:
+                self.set_frame(col)
+        return super().__getitem__(col)
+
+    def _get_value(self, index, col, takeable=False):
+        """Extend DataFrame._get_value. (frame.at[i, '*'])."""
+        if self.insubspace(col):
+            index = self._format_subindex(index)
+            col = self._format_col(col)
+            if self.metaframe.lock is True:
+                if col in self.subspace:
+                    return self.subspace._get_value(
+                        # pylint: disable=protected-access
+                        index, col, takeable)
+            if self.metaframe.lock is False:
+                self.set_frame(col)
+        return super()._get_value(
+            # pylint: disable=protected-access
+            index, col, takeable)
 
     def __setattr__(self, col, value):
         """Check lock. Extend DataFrame.__setattr__ (frame.* = *).."""
         if col in self._attributes:
             self.attrs[col] = value
             return None
-        self.metaframe.check_lock(col)
+        if self.insubspace(col):
+            if self.metaframe.lock is True:
+                return self.subspace.__setattr__(col, value)
+            if self.metaframe.lock is False:
+                raise SubSpaceIndexError(col)
         return super().__setattr__(col, value)
 
     def __setitem__(self, col, value):
         """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
-        self.metaframe.check_lock(col)
+        if self.insubspace(col):
+            if self.metaframe.lock is True:
+                return self.subspace.__setitem__(col, value)
+            if self.metaframe.lock is False:
+                raise SubSpaceIndexError(col)
         return super().__setitem__(col, value)
 
     def _set_value(self, index, col, value, takeable=False):
-        """Check lock. Extend DataFrame._set_value. (frame.at[i, '*'] = *)."""
-        self.metaframe.check_lock(col)
-        return super()._set_value(index, col, value, takeable)
+        """Extend DataFrame._set_value. (frame.at[i, '*'] = *)."""
+        if self.insubspace(col):
+            index = self._format_subindex(index)
+            col = self._format_col(col)
+            if self.metaframe.lock is True:
+                return self.subspace._set_value(
+                    # pylint: disable=protected-access
+                    index, col, value, takeable=False)
+            if self.metaframe.lock is False:
+                raise SubSpaceIndexError(col)
+        return super()._set_value(
+            # pylint: disable=protected-access
+            index, col, value, takeable)
+
+    def _format_col(self, col: Union[int, str]) -> str:
+        """Return column name."""
+        if not isinstance(col, str):
+            return self.columns[col]
+        return col
+
+    def _format_subindex(self, index: Union[int, str]) -> str:
+        """Return subspace index label."""
+        if not isinstance(index, str):
+            return self.subspace.index[index]
+        return index
 
     def update_attrs(self, data, attrs):
         """Update DataFrame attributes, [metaarray, metaframe]'."""

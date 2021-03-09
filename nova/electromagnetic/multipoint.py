@@ -19,7 +19,7 @@ class MultiPoint(MetaMethod):
     frame: Frame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['link'])
     additional: list[str] = field(default_factory=lambda: [
-        'factor', 'reference'])
+        'factor', 'ref', 'subref'])
 
     indexer: list[int] = field(init=False)
     index: pandas.Index = field(default=pandas.Index([]))
@@ -75,10 +75,12 @@ class MultiPoint(MetaMethod):
         range_index = np.arange(len(self.frame), dtype=int)
         self.indexer = list(range_index[~self.frame.link.to_numpy(bool)])
         self.index = self.frame.index[self.indexer]
-        reference = self.frame.index.get_indexer(self.frame.link)
-        reference[self.indexer] = range_index[self.indexer]
-        self.frame.reference = reference
-
+        ref = self.frame.index.get_indexer(self.frame.link)
+        ref[self.indexer] = range_index[self.indexer]
+        self.frame.ref = ref
+        subref = np.zeros(len(self.frame), dtype=int)
+        subref[self.indexer] = np.arange(len(self.indexer), dtype=int)
+        self.frame.subref = subref[ref]
 
         '''
         _mpc_list = list(self._mpc_index)
@@ -177,7 +179,6 @@ class MultiPoint(MetaMethod):
             reset = [link in index for link in self.frame.link]
             self.frame.loc[reset, 'link'] = ''
             self.initialize()
-
 
     '''
 

@@ -10,6 +10,19 @@ from nova.electromagnetic.metadata import MetaData
 # pylint:disable=unsubscriptable-object
 
 
+class SubSpaceIndexError(IndexError):
+    """Prevent direct access to frame's subspace variables."""
+
+    def __init__(self, col):
+        super().__init__(
+            f'Access to {col} is restricted.\n'
+            'Use self.subspace to manage subspace attributes.\n\n'
+            'Lock may be overridden via the following context manager '
+            '(Cavieat Usor).\n'
+            'with frame.metaframe.lock(None):\n'
+            f'    frame.{col} = *')
+
+
 @dataclass
 class MetaFrame(MetaData):
     """Manage Frame metadata - accessed via Frame['attrs']."""
@@ -29,7 +42,7 @@ class MetaFrame(MetaData):
             'section': 'rectangle', 'turn': 'rectangle',
             'patch': None, 'poly': None, 'coil': '', 'part': '',
             'subindex': None, 'material': '',
-            'link': '', 'factor': 1., 'reference': 0,
+            'link': '', 'factor': 1., 'ref': 0, 'subref': 0,
             'active': True, 'optimize': False, 'plasma': False,
             'feedback': False, 'acloss': False,
             'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.})
@@ -40,28 +53,34 @@ class MetaFrame(MetaData):
     _lock = True
 
     @property
+    def subset(self):
+        """Return lock boolean status."""
+        return self._lock is not None
+
+    @property
     def lock(self):
         """Return lock status."""
         return self._lock
 
     @contextmanager
-    def unlock(self):
-        """Permit update to restricted variables."""
-        self._lock = False
-        yield
-        self._lock = True
+    def setlock(self, status):
+        """
+        Manage access to subspace frame variables.
 
-    def check_lock(self, key):
-        """Check lock on restricted attributes."""
-        if key in self.subspace and self._lock:
-            raise PermissionError(f'Access to key: {key} is restricted. '
-                                  f'Unlock prior to access.\n'
-                                  'use self.subspace to '
-                                  'manage subspace attributes.\n\n'
-                                  'caveat usor, lock may be overridden '
-                                  'with the following context manager.\n'
-                                  'with frame.metaframe.unlock():\n'
-                                  f'    frame.{key} = *')
+        Parameters
+        ----------
+        status : Union[bool, None]
+            Subset lock status.
+
+        Returns
+        -------
+        None.
+
+        """
+        _lock = self._lock
+        self._lock = status
+        yield
+        self._lock = _lock
 
     def validate(self):
         """

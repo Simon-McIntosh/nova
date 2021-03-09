@@ -20,9 +20,9 @@ class Polygon(MetaMethod):
 
     frame: Frame
     required: list[str] = field(default_factory=lambda: [
-        'x', 'z', 'dl', 'dt', 'section'])
+        'x', 'z', 'section'])
     additional: list[str] = field(default_factory=lambda: [
-        'rms', 'dx', 'dz', 'dA', 'poly', 'patch'])
+        'dl', 'dt', 'rms', 'dx', 'dz', 'dA', 'poly', 'patch'])
 
     def initialize(self):
         """Init polygons based on coil geometroy and cross section."""

@@ -1,5 +1,6 @@
 
 import pandas
+import numpy as np
 
 from nova.electromagnetic.superframe import SuperFrame
 
@@ -12,11 +13,29 @@ class SubSpace(SuperFrame):
             index = frame.index
         else:
             index = frame.multipoint.index
+        '''
+        if self.insubspace(frame):
+            with frame.metaframe.setlock(None):
+                frame.metadata = {'additional': frame.metaframe.subspace}
         columns = [attr for attr in frame.metaframe.subspace
                    if attr in frame.metaframe.columns]
-        super().__init__(pandas.DataFrame(frame), index=index, columns=columns)
-        self.metaframe.clear('subspace')
+        print(columns)
+        '''
+        columns = self.get_columns(frame)
+        super().__init__(pandas.DataFrame(frame),
+                         index=index, columns=columns, Subspace=[])
 
+    def get_columns(self, frame):
+        """Return subspace columns."""
+        if np.array([attr in frame.metaframe.subspace
+                     for attr in frame.columns]).any():
+            with frame.metaframe.setlock(None):  # update metaframe
+                frame.metadata = {'additional':
+                                  frame.metaframe.subspace}
+            return frame.metaframe.subspace
+        return []
+
+    '''
     @property
     def line_current(self):
         """Manage line current."""
@@ -25,6 +44,7 @@ class SubSpace(SuperFrame):
     @line_current.setter
     def line_current(self, line_current):
         super().__setattr__('Ic', line_current)
+    '''
 
     '''
     if key in self._dataframe_attributes:

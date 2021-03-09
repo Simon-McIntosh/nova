@@ -34,18 +34,15 @@ class Frame(SuperFrame):
         super().__init__(data, index, columns, attrs, **metadata)
         self.subspace = SubSpace(self)
 
-    def __getattr__(self, col):
-    #    print(col)
-    #    """Extend SuperFrame.__getattr__. (frame.*). Get subspace"""
-    #    if col in self.metaframe.subspace:
-    #        return self.subspace.__getattr__(col)
-        return super().__getattr__(col)
+    '''
+    @property
+    def line_current(self):
+        return self.loc[:, 'Ic']
 
-    def __setattr__(self, col, value):
-        """Extend SuperFrame.__setattr__ (frame.* = *). Set subspace."""
-        if col in self.metaframe.subspace and self.metaframe.lock:
-            return self.subspace.__setattr__(col, value)
-        return super().__setattr__(col, value)
+    @line_current.setter
+    def line_current(self, current):
+        self.loc[:, 'Ic'] = current
+    '''
 
     def add_frame(self, *args, iloc=None, **kwargs):
         """
@@ -370,19 +367,23 @@ class Frame(SuperFrame):
 if __name__ == '__main__':
 
     frame = Frame(Required=['x', 'z'], optimize=True,
-                  dCoil=5)
+                  dCoil=5, Additional=['Ic'])
 
-
-    frame.add_frame(4, range(3), Ic=5, link=True)
+    frame.add_frame(4, range(3), link=True)
     frame.add_frame(4, range(2), link=False)
     frame.add_frame(4, range(4), link=True)
     #frame.multipoint.generate()
+    frame.at['Coil0', 'Ic'] = 8.3
 
-    #print(frame.subspace)
 
+    print(frame.subspace)
+    print(frame)
     #framerange = SuperFrame(frame, index=['Coil0', 'Coil3', 'Coil5'])
 
     #print(framerange)
+
+    def set_current():
+        frame.Ic = np.random.rand(len(frame.subspace))
 
 
 
@@ -393,3 +394,4 @@ if __name__ == '__main__':
 
     #frame.metaarray._lock = False
     #newframe = Frame()
+

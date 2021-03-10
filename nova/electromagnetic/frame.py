@@ -10,13 +10,14 @@ from nova.electromagnetic.metaarray import MetaArray
 from nova.electromagnetic.metaframe import MetaFrame
 from nova.electromagnetic.superframe import SuperFrame
 from nova.electromagnetic.subspace import SubSpace
+from nova.electromagnetic.dataspace import DataSpaceMixin
 
 
 # pylint: disable=too-many-ancestors
 # pylint:disable=unsubscriptable-object
 
 
-class Frame(SuperFrame):
+class Frame(SuperFrame):  # DataSpaceMixin,
     """
     Extend SuperFrame.
 
@@ -30,7 +31,7 @@ class Frame(SuperFrame):
                  attrs: dict[str, Union[MetaArray, MetaFrame]] = None,
                  **metadata: Optional[dict]):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.subspace = SubSpace(self)
+        #self.subspace = SubSpace(self)
 
     '''
     @property
@@ -299,6 +300,8 @@ if __name__ == '__main__':
     frame.add_frame(4, range(3), link=True)
     frame.add_frame(4, range(2), link=False)
     frame.add_frame(4, range(4000), link=True)
+
+    print(frame)
 
     def set_current():
         frame.subspace.loc['Coil4':'Coil5', 'Ic'] = \

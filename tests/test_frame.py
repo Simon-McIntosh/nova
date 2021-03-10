@@ -150,7 +150,7 @@ def test_warn_new_attribute():
 
 def test_subspace_lock():
     frame = Frame(metadata={'Required': ['x'], 'Subspace': ['x']})
-    assert frame.insubspace('x') and frame.metaframe.lock
+    assert frame.is_subspace('x') and frame.metaframe.lock
 
 
 if __name__ == '__main__':

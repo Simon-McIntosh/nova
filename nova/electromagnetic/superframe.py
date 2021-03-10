@@ -38,8 +38,13 @@ class SuperFrame(DataFrame):
         self.update_attrs(data, attrs)
         self.update_metadata(metadata)
         self.update_index()
-        self.multipoint = MultiPoint(self)
-        self.polygon = Polygon(self)
+        #self.multipoint = MultiPoint(self)
+        #self.polygon = Polygon(self)
+
+    def __repr__(self):
+        """Propagate frame subspace variables prior to display."""
+        self.update_frame()
+        return super().__repr__()
 
     def update_attrs(self, data, attrs):
         """Update DataFrame attributes, [metaarray, metaframe]'."""
@@ -117,7 +122,7 @@ class SuperFrame(DataFrame):
     def validate_metadata(self):
         """Validate required and additional attributes in FrameArray."""
         # check for additional attributes in metaarray.array
-        if hasattr(self, 'metaarray'):
+        if 'metaarray' in self.attrs:
             unset = [attr not in self.metaframe.columns
                      for attr in self.metaarray.array]
             if np.array(unset).any():

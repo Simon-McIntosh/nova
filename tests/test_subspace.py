@@ -2,7 +2,7 @@
 import pytest
 
 from nova.electromagnetic.frame import Frame
-from nova.electromagnetic.dataframe import SubSpaceIndexError
+from nova.electromagnetic.dataspace import SubSpaceIndexError
 
 
 def test_init():

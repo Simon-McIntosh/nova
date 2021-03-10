@@ -6,7 +6,36 @@ Created on Thu Feb 18 20:33:42 2021
 #    return
 
 @author: mcintos
+
 """
+
+
+    def _subspace(self, col: str):
+        """Return True if col in metaframe.subspace else False."""
+        if isinstance(col, str) and 'metaframe' in self.obj.attrs:
+            if col in self.obj.metaframe.subspace:
+                return True
+        return False
+
+
+    def _format_col(self, col: Union[int, str]) -> str:
+        """Return column name."""
+        if not isinstance(col, str):
+            print(col)
+            raise IndexError
+            return self.columns[col]
+        return col
+
+
+    def _format_isubcol(self, col: int) -> int:
+        """Return subcolumn index."""
+        return self.subspace.columns.get_loc(self.columns[col])
+
+    def _format_subindex(self, index: Union[int, str]) -> str:
+        """Return subspace index label."""
+        if not isinstance(index, str):
+            return self.subspace.index[index]
+        return index
 
     '''
     def _get_value(self, index, col, takeable=False):

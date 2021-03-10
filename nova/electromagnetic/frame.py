@@ -292,42 +292,17 @@ class Frame(SuperFrame):
 
 if __name__ == '__main__':
 
-    frame = Frame(Required=['x', 'z'], Additional=[], label='coil')
-    frame.add_frame(4, range(7), Ic=3.2, link=True)
-    frame.add_frame(4, range(2), link=False)
-    frame.Ic = 12
 
-    #print(frame.loc[:, 'Ic'])
-    frame.subspace.iat[0, 0] = 3.6
-    #print(frame.subspace)
-    print(frame)
-
-    '''
     frame = Frame(Required=['x', 'z'], optimize=True,
                   dCoil=5, Additional=['Ic'])
 
     frame.add_frame(4, range(3), link=True)
     frame.add_frame(4, range(2), link=False)
-    frame.add_frame(4, range(4), link=True)
-    #frame.multipoint.generate()
-    frame.at['Coil0', 'Ic'] = 8.3
-    frame.x = 7
-    frame.loc[['Coil1', 'Coil5'], 'Ic'] = 4
-    frame.at['Coil0', 'Ic'] = 8.3
-
-    print(frame)
-    #frame.__getattribute__()
-
-    print(frame.subspace)
-    print(frame)
-    #framerange = SuperFrame(frame, index=['Coil0', 'Coil3', 'Coil5'])
-
-    #print(framerange)
+    frame.add_frame(4, range(4000), link=True)
 
     def set_current():
-        frame.Ic = np.random.rand(len(frame.subspace))
-    '''
-
+        frame.subspace.loc['Coil4':'Coil5', 'Ic'] = \
+            np.random.rand(2)
 
 
     #frame.x = [1, 2, 3]

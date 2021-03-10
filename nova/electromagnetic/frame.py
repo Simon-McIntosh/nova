@@ -1,7 +1,5 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 
-import re
-import string
 from typing import Optional, Collection, Any, Union
 
 import pandas
@@ -203,7 +201,7 @@ class Frame(SuperFrame):
         if len(additional) > 0:  # extend aditional arguments
             self.metaframe.metadata = {'additional': additional}
         # self._propogate_current(current_label, data)
-        unset = [key not in self.metaframe.index for key in kwargs]
+        unset = [key not in self.metaframe.tag for key in kwargs]
         if np.array(unset).any():
             unset_kwargs = np.array(list(kwargs.keys()))[unset]
             default = {key: '_default_value_' for key in unset_kwargs}
@@ -235,78 +233,6 @@ class Frame(SuperFrame):
         except ValueError:
             data_length = 1  # scalar input
         return data_length
-
-    def _set_offset(self, metaindex):
-        try:  # reverse search through frame index
-            match = next(name for name in self.index[::-1]
-                         if metaindex['label'] in name)
-            offset = re.sub(r'[a-zA-Z]', '', match)
-            if isinstance(offset, str):
-                offset = offset.replace(metaindex['delim'], '')
-                offset = offset.replace('_', '')
-                offset = int(offset)
-            offset += 1
-        except (TypeError, StopIteration):  # unit index, label not present
-            offset = 0
-        metaindex['offset'] = np.max([offset, metaindex['offset']])
-
-    def _build_index(self, data, **kwargs):
-        data_length = self._data_length(data)
-        # update metaframe.index
-        self.metaframe.index |= {key: kwargs[key] for key in kwargs
-                                 if key in self.metaframe.index}
-        metaindex = self.metaframe.index
-        if kwargs.get('name', metaindex['name']):  # valid name
-            name = metaindex['name']
-            if pandas.api.types.is_list_like(name) or data_length == 1:
-                return self._check_index(name, data_length)
-            if metaindex['delim'] and metaindex['delim'] in name:
-                split_name = name.split(metaindex['delim'])
-                metaindex['label'] = metaindex['delim'].join(split_name[:-1])
-                metaindex['offset'] = int(split_name[-1])
-            else:
-                metaindex['delim'] = ''
-                metaindex['label'] = name.rstrip(string.digits)
-                metaindex['offset'] = int(name.lstrip(string.ascii_letters))
-        self._set_offset(metaindex)
-        label_delim = metaindex['label']+metaindex['delim']
-        index = [f'{label_delim}{i+metaindex["offset"]:d}'
-                 for i in range(data_length)]
-        return self._check_index(index, data_length)
-
-    def _check_index(self, index, data_length):
-        """
-        Return new index.
-
-        Parameters
-        ----------
-        index : array-like[str]
-            new index.
-        data_length : TYPE
-            Maximum item length in data.
-
-        Raises
-        ------
-        IndexError
-            Missmatch between len(index) and data_length.
-        IndexError
-            Items in new index mirror those already defined in self.index.
-
-        Returns
-        -------
-        index : array-like[str]
-
-        """
-        if not pandas.api.types.is_list_like(index):
-            index = [index]
-        if len(index) != data_length:
-            raise IndexError(f'missmatch between len(index) {len(index)} and '
-                             f'maximum item item in data {data_length}')
-        taken = [name in self.index for name in index]
-        if np.array(taken).any():
-            raise IndexError(f'{np.array(index)[taken]} '
-                             f'already defined in self.index: {self.index}')
-        return index
 
     def drop_frame(self, index=None):
         """Drop frame(s)."""
@@ -366,6 +292,17 @@ class Frame(SuperFrame):
 
 if __name__ == '__main__':
 
+    frame = Frame(Required=['x', 'z'], Additional=[], label='coil')
+    frame.add_frame(4, range(7), Ic=3.2, link=True)
+    frame.add_frame(4, range(2), link=False)
+    frame.Ic = 12
+
+    #print(frame.loc[:, 'Ic'])
+    frame.subspace.iat[0, 0] = 3.6
+    #print(frame.subspace)
+    print(frame)
+
+    '''
     frame = Frame(Required=['x', 'z'], optimize=True,
                   dCoil=5, Additional=['Ic'])
 
@@ -374,7 +311,12 @@ if __name__ == '__main__':
     frame.add_frame(4, range(4), link=True)
     #frame.multipoint.generate()
     frame.at['Coil0', 'Ic'] = 8.3
+    frame.x = 7
+    frame.loc[['Coil1', 'Coil5'], 'Ic'] = 4
+    frame.at['Coil0', 'Ic'] = 8.3
 
+    print(frame)
+    #frame.__getattribute__()
 
     print(frame.subspace)
     print(frame)
@@ -384,6 +326,7 @@ if __name__ == '__main__':
 
     def set_current():
         frame.Ic = np.random.rand(len(frame.subspace))
+    '''
 
 
 

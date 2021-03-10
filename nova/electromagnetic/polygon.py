@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 class Polygon(MetaMethod):
     """Geometrical methods for Frame."""
 
-    frame: Frame
+    frame: Frame = field(repr=False)
     required: list[str] = field(default_factory=lambda: [
         'x', 'z', 'section'])
     additional: list[str] = field(default_factory=lambda: [

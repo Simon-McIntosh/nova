@@ -11,6 +11,7 @@ from nova.electromagnetic.dataframe import DataFrame
 
 # pylint: disable=too-many-ancestors
 # pylint:disable=unsubscriptable-object
+# pylint: disable=protected-access
 
 
 class DataFrameArray(DataFrame):
@@ -45,7 +46,8 @@ class DataFrameArray(DataFrame):
     def __repr__(self):
         """Extend pandas.DataFrame.__repr__."""
         self.reload_frame()
-        return pandas.DataFrame.__repr__(self)
+        print('reload')
+        return super().__repr__()
 
     def reload_frame(self):
         """Transfer data from metaarray.data to frame."""
@@ -76,8 +78,7 @@ class DataFrameArray(DataFrame):
     def _update_frame(self, col):
         if self.metaarray.update_frame[col]:
             with self._setframe(col):
-                pandas.DataFrame.__setitem__(self, col,
-                                             self.metaarray.data[col])
+                super().__setitem__(col, self.metaarray.data[col])
 
     @contextmanager
     def _setframe(self, col):
@@ -85,46 +86,44 @@ class DataFrameArray(DataFrame):
         self.metaarray.update_frame[col] = False
 
     def __getattr__(self, col):
-        """Extend pandas.DataFrame.__getattr__. (frame.*)."""
+        """Extend DataFrame.__getattr__. (frame.*)."""
         if col in self.metaarray.array:
             if self.metaarray.update_array[col]:
                 self._update_array(col=col)
             return self.metaarray.data[col]
-        return pandas.DataFrame.__getattr__(self, col)
+        return super().__getattr__(col)
 
     def __setattr__(self, col, value):
-        """Extend pandas.DataFrame.__setattr__ (frame.* = *).."""
+        """Extend DataFrame.__setattr__ (frame.* = *).."""
         if col in self.metaarray.array:
             self._update_array(col=col, value=value)
             self.metaarray.update_frame[col] = True
             return None
-        return pandas.DataFrame.__setattr__(self, col, value)
+        return super().__setattr__(col, value)
 
     def __getitem__(self, col):
-        """Extend pandas.DataFrame.__getitem__. (frame['*'])."""
+        """Extend DataFrame.__getitem__. (frame['*'])."""
         if col in self.metaarray.array:
             self._update_frame(col)
-        return pandas.DataFrame.__getitem__(self, col)
+        return super().__getitem__(col)
 
     def _get_value(self, index, col, takeable=False):
-        """Extend pandas.DataFrame._get_value. (frame.at[i, '*'])."""
+        """Extend DataFrame._get_value. (frame.at[i, '*'])."""
         if col in self.metaarray.array:
             self._update_frame(col)
-        return pandas.DataFrame._get_value(  # pylint: disable=protected-access
-                                           self, index, col, takeable)
+        return super()._get_value(index, col, takeable)
 
     def __setitem__(self, col, value):
-        """Extend pandas.DataFrame.__setitem__. (frame['*'] = *)."""
+        """Extend DataFrame.__setitem__. (frame['*'] = *)."""
         if col in self.metaarray.array:
             self._update_array(col=col, value=value)
-        pandas.DataFrame.__setitem__(self, col, value)
+        super().__setitem__(col, value)
 
     def _set_value(self, index, col, value, takeable=False):
-        """Extend pandas.DataFrame._set_value. (frame.at[i, '*'] = *)."""
+        """Extend DataFrame._set_value. (frame.at[i, '*'] = *)."""
         if col in self.metaarray.array:
             self._update_array(index=index, col=col, value=value)
-        return pandas.DataFrame._set_value(  # pylint: disable=protected-access
-                                           self, index, col, value, takeable)
+        return super()._set_value(index, col, value, takeable)
 
 
 if __name__ == '__main__':

@@ -7,6 +7,54 @@ Created on Thu Feb 18 20:33:42 2021
 
 @author: mcintos
 """
+
+    '''
+    def _get_value(self, index, col, takeable=False):
+        """Extend DataFrame._get_value. (frame.at[i, '*'])."""
+        if self.insubspace(col):
+            index = self._format_subindex(index)
+            col = self._format_col(col)
+            if self.metaframe.lock is True:
+                if col in self.subspace:
+                    return self.subspace._get_value(index, col, takeable)
+            if self.metaframe.lock is False:
+                self.set_frame(col)
+        return super()._get_value(index, col, takeable)
+    '''
+
+    '''
+    def _set_value(self, index, col, value, takeable=False):
+        """Extend DataFrame._set_value. (frame.at[i, '*'] = *)."""
+        value = self._format_value(col, value)
+        if self.insubspace(col):
+            index = self._format_subindex(index)
+            col = self._format_col(col)
+            if self.metaframe.lock is True:
+                return self.subspace._set_value(
+                    index, col, value, takeable=False)
+            if self.metaframe.lock is False:
+                raise SubSpaceIndexError(col)
+        return super()._set_value(index, col, value, takeable)
+    '''
+
+    def _iset_item(self, loc: int, value):
+        col = self.columns[loc]
+        value = self._format_value(col, value)
+        if self.insubspace(col):
+            print('iset', col)
+            try:
+                value = value[self.subspace.index]
+            except TypeError:
+                pass
+            if self.metaframe.lock is True:
+                self.set_frame(col)
+                print('subvalue', value)
+                return self.subspace._set_item(col, value)
+            if self.metaframe.lock is False:
+                raise SubSpaceIndexError(col)
+        return super()._iset_item(loc, value)
+
+
     """
     Key Attributes
     --------------

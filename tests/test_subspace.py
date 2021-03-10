@@ -2,6 +2,7 @@
 import pytest
 
 from nova.electromagnetic.frame import Frame
+from nova.electromagnetic.dataframe import SubSpaceIndexError
 
 
 def test_init():
@@ -50,12 +51,27 @@ def test_setitem():
 
 def test_loc():
     frame = Frame(Required=['x', 'z'], Additional=[])
-    frame.add_frame(4, range(2), Ic=5.0, link=True)
-    frame.add_frame(4, range(2), Ic=0.0, link=False)
-    print(frame)
-    print(frame.loc[:, 'It'], frame.It.to_list(), frame.It)
-    frame.loc[:, 'It'] = [3.6, 5.2, 0]
+    frame.add_frame(4, range(2), Ic=5, link=True)
+    frame.add_frame(4, range(2), Ic=0, link=False)
+    frame.subspace.loc[:, 'It'] = [3.6, 5.2, 0]
     assert frame.It.to_list() == [3.6, 5.2, 0]
+
+
+def test_loc_slice():
+    frame = Frame(Required=['x', 'z'], Additional=[], label='Coil',
+                  offset=15)
+    frame.add_frame(4, range(2), It=5, link=True)
+    frame.add_frame(4, range(2), It=7.3, link=False)
+    frame.subspace.loc['Coil15':'Coil17', 'It'] = [3.6, 5.2]
+    assert frame.It.to_list() == [3.6, 5.2, 7.3]
+
+
+def test_loc_error():
+    frame = Frame(Required=['x', 'z'], Additional=[])
+    frame.add_frame(4, range(2), Ic=5, link=True)
+    frame.add_frame(4, range(2), Ic=0, link=False)
+    with pytest.raises(SubSpaceIndexError):
+        frame.loc[:, 'It'] = [3.6, 5.2, 0]
 
 
 def test_iloc():
@@ -63,7 +79,7 @@ def test_iloc():
     frame.add_frame(4, range(7), Ic=5, link=True)
     frame.add_frame(4, range(2), link=False)
     frame.Ic = 0
-    frame.Ic.iloc[1] = 3.6
+    frame.subspace.iloc[1, 0] = 3.6
     assert frame.Ic.to_list() == [0, 3.6, 0]
 
 
@@ -72,7 +88,7 @@ def test_set_at():
     frame.add_frame(4, range(7), Ic=5, link=True)
     frame.add_frame(4, range(2), link=False)
     frame.Ic = 0.0
-    frame.at['Coil7', 'Ic'] = 3.6
+    frame.subspace.at['Coil7', 'Ic'] = 3.6
     assert frame.Ic.to_list() == [0, 3.6, 0]
 
 
@@ -81,7 +97,7 @@ def test_set_iat():
     frame.add_frame(4, range(7), Ic=5, link=True)
     frame.add_frame(4, range(2), link=False)
     frame.Ic = 0.0
-    frame.iat[-2, 2] = 3.6
+    frame.subspace.iat[-2, 0] = 3.6
     assert frame.Ic.to_list() == [0, 3.6, 0]
 
 
@@ -99,7 +115,7 @@ def test_get_at_keyerror():
     frame.add_frame(4, range(2), link=False)
     frame.Ic = [7.4, 3.2, 6.666]
     with pytest.raises(KeyError):
-        _ = frame.at['Coil6', 'Ic']
+        _ = frame.subspace.at['Coil6', 'Ic']
 
 
 def test_get_iat_indexerror():
@@ -108,7 +124,7 @@ def test_get_iat_indexerror():
     frame.add_frame(4, range(2), link=False)
     frame.Ic = [7.4, 3.2, 6.666]
     with pytest.raises(IndexError):
-        _ = frame.iat[7, 2]
+        _ = frame.subspace.iat[7, 2]
 
 
 def test_get_frame():

@@ -69,10 +69,10 @@ def test_set_slice_on_array_variable():
 
 
 def test_warn_set_slice_on_frame():
-    frame = DataFrameArray({'x': [3, 2, 5, 7, 6], 'z': 0}, Array=[])
+    frame = DataFrameArray({'x': [3, 2, 5, 7, 6], 'z': 0}, Array=['x'])
     index = frame.x < 4
     with pytest.warns(pandas.core.common.SettingWithCopyWarning):
-        frame[index].x = 5
+        frame.loc[index].x = 5
 
 
 def test_set_slice_on_col():

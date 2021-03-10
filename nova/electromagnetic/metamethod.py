@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class MetaMethod(metaclass=ABCMeta):
     """Manage Frame._methods, subclass with dataclass."""
 
-    frame: Frame
+    frame: Frame = field(repr=False)
     required: list[str]
     additional: list[str]
 

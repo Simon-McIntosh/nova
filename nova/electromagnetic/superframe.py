@@ -1,14 +1,15 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 
+import re
+import string
 from typing import Optional, Collection, Any, Union
 
 import pandas
 import numpy as np
 
 from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.dataframearray import DataFrameArray
 from nova.electromagnetic.metaarray import MetaArray
-from nova.electromagnetic.metaframe import MetaFrame, SubSpaceIndexError
+from nova.electromagnetic.metaframe import MetaFrame
 from nova.electromagnetic.multipoint import MultiPoint
 from nova.electromagnetic.polygon import Polygon
 
@@ -19,14 +20,12 @@ from nova.electromagnetic.polygon import Polygon
 
 class SuperFrame(DataFrame):
     """
-    Extend DataFrame or DataFrameArray. Frame superclass.
+    Extend DataFrame. Frame superclass.
 
     Manage Frame metadata (metaarray, metaframe).
 
     Implement current properties.
     """
-
-    _attributes = ['multipoint', 'subspace', 'polygon']
 
     def __init__(self,
                  data=None,
@@ -42,127 +41,6 @@ class SuperFrame(DataFrame):
         self.multipoint = MultiPoint(self)
         self.polygon = Polygon(self)
 
-    def __repr__(self):
-        """Propagate frame subspace variables prior to display."""
-        self.update_frame()
-        return super().__repr__()
-
-    def insubspace(self, col):
-        """Return True if col specified as a subspace variable else False."""
-        col = self._format_col(col)
-        return col in self.metaframe.subspace
-
-    def checksubspace(self, col):
-        """Check for col in metaframe.subspace, raise error if not found."""
-        if not self.insubspace(col):
-            raise IndexError(f'\'{col}\' not specified in metaframe.subspace '
-                             f'{self.metaframe.subspace}')
-
-    def set_frame(self, col):
-        """Inflate subspace variable and setattr in frame."""
-        self.checksubspace(col)
-        with self.metaframe.setlock(True):
-            value = getattr(self, col).to_numpy()[self.subref]
-        with self.metaframe.setlock(None):
-            super().__setattr__(col, value)
-
-    def get_frame(self, col):
-        """Return inflated subspace variable."""
-        self.checksubspace(col)
-        with self.metaframe.setlock(False):
-            return super().__getattr__(col)
-
-    def update_frame(self):
-        """Propagate subspace varables to frame."""
-        if hasattr(self, 'subspace'):
-            for col in self.subspace:
-                self.set_frame(col)
-
-    def __getattr__(self, col):
-        """Extend DataFrame.__getattr__. (frame.*)."""
-        if col in self.attrs:
-            return self.attrs[col]
-        if self.insubspace(col):
-            if self.metaframe.lock is True:
-                return self.subspace.__getattr__(col)
-            if self.metaframe.lock is False:
-                self.set_frame(col)
-        return super().__getattr__(col)
-
-    def __getitem__(self, col):
-        """Extend DataFrame.__getitem__. (frame['*'])."""
-        if self.insubspace(col):
-            if self.metaframe.lock is True:
-                if col in self.subspace:
-                    return self.subspace.__getattr__(col)
-            if self.metaframe.lock is False:
-                self.set_frame(col)
-        return super().__getitem__(col)
-
-    def _get_value(self, index, col, takeable=False):
-        """Extend DataFrame._get_value. (frame.at[i, '*'])."""
-        if self.insubspace(col):
-            index = self._format_subindex(index)
-            col = self._format_col(col)
-            if self.metaframe.lock is True:
-                if col in self.subspace:
-                    return self.subspace._get_value(
-                        # pylint: disable=protected-access
-                        index, col, takeable)
-            if self.metaframe.lock is False:
-                self.set_frame(col)
-        return super()._get_value(
-            # pylint: disable=protected-access
-            index, col, takeable)
-
-    def __setattr__(self, col, value):
-        """Check lock. Extend DataFrame.__setattr__ (frame.* = *).."""
-        if col in self._attributes:
-            self.attrs[col] = value
-            return None
-        if self.insubspace(col):
-            if self.metaframe.lock is True:
-                return self.subspace.__setattr__(col, value)
-            if self.metaframe.lock is False:
-                raise SubSpaceIndexError(col)
-        return super().__setattr__(col, value)
-
-    def __setitem__(self, col, value):
-        """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
-        if self.insubspace(col):
-            if self.metaframe.lock is True:
-                return self.subspace.__setitem__(col, value)
-            if self.metaframe.lock is False:
-                raise SubSpaceIndexError(col)
-        return super().__setitem__(col, value)
-
-    def _set_value(self, index, col, value, takeable=False):
-        """Extend DataFrame._set_value. (frame.at[i, '*'] = *)."""
-        if self.insubspace(col):
-            index = self._format_subindex(index)
-            col = self._format_col(col)
-            if self.metaframe.lock is True:
-                return self.subspace._set_value(
-                    # pylint: disable=protected-access
-                    index, col, value, takeable=False)
-            if self.metaframe.lock is False:
-                raise SubSpaceIndexError(col)
-        return super()._set_value(
-            # pylint: disable=protected-access
-            index, col, value, takeable)
-
-    def _format_col(self, col: Union[int, str]) -> str:
-        """Return column name."""
-        if not isinstance(col, str):
-            return self.columns[col]
-        return col
-
-    def _format_subindex(self, index: Union[int, str]) -> str:
-        """Return subspace index label."""
-        if not isinstance(index, str):
-            return self.subspace.index[index]
-        return index
-
     def update_attrs(self, data, attrs):
         """Update DataFrame attributes, [metaarray, metaframe]'."""
         if hasattr(data, 'attrs'):
@@ -177,8 +55,8 @@ class SuperFrame(DataFrame):
             self.attrs['metaframe'] = MetaFrame()
 
     def extract_metadata(self, metadata):
-        """Extract metadata. Set defaults and meta*.metadata."""
-        default = {}
+        """Extract metadata. Set default, tag, and meta*.metadata."""
+        update = {attr: {} for attr in ['default', 'tag']}
         framearray = {attr: {} for attr in self.metaattrs}
         if metadata is None:
             metadata = {}
@@ -190,14 +68,16 @@ class SuperFrame(DataFrame):
                     framearray[attr][field] = metadata.pop(field)
                     break
             else:
-                if field in self.metaframe.default:
-                    default[field] = metadata.pop(field)
+                for attr in update:
+                    if field in getattr(self.metaframe, attr):
+                        update[attr][field] = metadata.pop(field)
+        for attr in update:
+            getattr(self.metaframe, attr).update(update[attr])
         if len(metadata) > 0:
             raise IndexError('unreconised attributes set in **metadata: '
                              f'{metadata}.')
         for attr in framearray:
             getattr(self, attr).metadata |= framearray[attr]
-        self.metaframe.default |= default
 
     def update_metadata(self, metadata):
         """Update metadata."""
@@ -248,6 +128,17 @@ class SuperFrame(DataFrame):
                     f'{self.metaframe.required}'
                     f'or metaframe.additional {self.metaframe.additional}')
         if not self.empty:
+            self.format_columns()
+
+    def format_columns(self):
+        """
+        Format DataFrame columns.
+
+            - required unset: raise error
+            - additional unset: insert default
+            - isnan: insert default
+        """
+        with self.metaframe.setlock(None):
             columns = self.columns.to_list()
             required_unset = [attr not in columns
                               for attr in self.metaframe.required]
@@ -282,3 +173,75 @@ class SuperFrame(DataFrame):
             self['index'] = self._build_index(self)
             self.set_index('index', inplace=True)
             self.index.name = None
+
+    def _set_offset(self, metaindex):
+        try:  # reverse search through frame index
+            match = next(name for name in self.index[::-1]
+                         if metaindex['label'] in name)
+            offset = re.sub(r'[a-zA-Z]', '', match)
+            if isinstance(offset, str):
+                offset = offset.replace(metaindex['delim'], '')
+                offset = offset.replace('_', '')
+                offset = int(offset)
+            offset += 1
+        except (TypeError, StopIteration):  # unit index, label not present
+            offset = 0
+        metaindex['offset'] = np.max([offset, metaindex['offset']])
+
+    def _build_index(self, data, **kwargs):
+        data_length = self._data_length(data)
+        # update metaframe.tag
+        self.metaframe.tag |= {key: kwargs[key] for key in kwargs
+                               if key in self.metaframe.tag}
+        metaindex = self.metaframe.tag
+        if kwargs.get('name', metaindex['name']):  # valid name
+            name = metaindex['name']
+            if pandas.api.types.is_list_like(name) or data_length == 1:
+                return self._check_index(name, data_length)
+            if metaindex['delim'] and metaindex['delim'] in name:
+                split_name = name.split(metaindex['delim'])
+                metaindex['label'] = metaindex['delim'].join(split_name[:-1])
+                metaindex['offset'] = int(split_name[-1])
+            else:
+                metaindex['delim'] = ''
+                metaindex['label'] = name.rstrip(string.digits)
+                metaindex['offset'] = int(name.lstrip(string.ascii_letters))
+        self._set_offset(metaindex)
+        label_delim = metaindex['label']+metaindex['delim']
+        index = [f'{label_delim}{i+metaindex["offset"]:d}'
+                 for i in range(data_length)]
+        return self._check_index(index, data_length)
+
+    def _check_index(self, index, data_length):
+        """
+        Return new index.
+
+        Parameters
+        ----------
+        index : array-like[str]
+            new index.
+        data_length : TYPE
+            Maximum item length in data.
+
+        Raises
+        ------
+        IndexError
+            Missmatch between len(index) and data_length.
+        IndexError
+            Items in new index mirror those already defined in self.index.
+
+        Returns
+        -------
+        index : array-like[str]
+
+        """
+        if not pandas.api.types.is_list_like(index):
+            index = [index]
+        if len(index) != data_length:
+            raise IndexError(f'missmatch between len(index) {len(index)} and '
+                             f'maximum item item in data {data_length}')
+        taken = [name in self.index for name in index]
+        if np.array(taken).any():
+            raise IndexError(f'{np.array(index)[taken]} '
+                             f'already defined in self.index: {self.index}')
+        return index

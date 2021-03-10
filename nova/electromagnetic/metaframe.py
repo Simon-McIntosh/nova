@@ -10,19 +10,6 @@ from nova.electromagnetic.metadata import MetaData
 # pylint:disable=unsubscriptable-object
 
 
-class SubSpaceIndexError(IndexError):
-    """Prevent direct access to frame's subspace variables."""
-
-    def __init__(self, col):
-        super().__init__(
-            f'Access to {col} is restricted.\n'
-            'Use self.subspace to manage subspace attributes.\n\n'
-            'Lock may be overridden via the following context manager '
-            '(Cavieat Usor).\n'
-            'with frame.metaframe.lock(None):\n'
-            f'    frame.{col} = *')
-
-
 @dataclass
 class MetaFrame(MetaData):
     """Manage Frame metadata - accessed via Frame['attrs']."""
@@ -34,6 +21,7 @@ class MetaFrame(MetaData):
         'Ic', 'It', 'Nt', 'active', 'plasma', 'optimize', 'feedback'])
     default: dict[str, Union[float, str, bool, None]] = field(
         repr=False, default_factory=lambda: {
+            'x': 0., 'z': 0.,
             'dCoil': 0., 'nx': 1, 'nz': 1, 'Nt': 1., 'Nf': 1,
             'rms': 0., 'dx': 0., 'dz': 0., 'dA': 0.,
             'dl': 0.1, 'dt': 0.1, 'dl_x': 0., 'dl_z': 0.,
@@ -46,7 +34,7 @@ class MetaFrame(MetaData):
             'active': True, 'optimize': False, 'plasma': False,
             'feedback': False, 'acloss': False,
             'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.})
-    index: dict[str, Union[str, bool]] = field(
+    tag: dict[str, Union[str, bool]] = field(
         repr=False, default_factory=lambda: {
             'name': '', 'label': 'Coil', 'delim': '', 'offset': 0})
 
@@ -110,13 +98,13 @@ class MetaFrame(MetaData):
         if unset.any():
             raise ValueError('default value not set for additional attributes '
                              f'{np.array(self.additional)[unset]}')
-        # block index field extension
+        # block tag field extension
         index_default = next(field.default_factory() for field in fields(self)
-                             if field.name == 'index')
-        extend = np.array([attr not in index_default for attr in self.index])
+                             if field.name == 'tag')
+        extend = np.array([attr not in index_default for attr in self.tag])
         if extend.any():
-            raise IndexError('additional attributes passed to index field '
-                             f'{np.array(list(self.index.keys()))[extend]}')
+            raise IndexError('additional attributes passed to tag field '
+                             f'{np.array(list(self.tag.keys()))[extend]}')
 
     @property
     def required_number(self):

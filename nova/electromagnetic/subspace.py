@@ -2,10 +2,10 @@
 import pandas
 import numpy as np
 
-from nova.electromagnetic.superframe import SuperFrame
+from nova.electromagnetic.dataframe import DataFrame
 
 
-class SubSpace(SuperFrame):
+class SubSpace(DataFrame):
     """Manage row subspace of frame (all independent coils)."""
 
     def __init__(self, frame):
@@ -13,17 +13,8 @@ class SubSpace(SuperFrame):
             index = frame.index
         else:
             index = frame.multipoint.index
-        '''
-        if self.insubspace(frame):
-            with frame.metaframe.setlock(None):
-                frame.metadata = {'additional': frame.metaframe.subspace}
-        columns = [attr for attr in frame.metaframe.subspace
-                   if attr in frame.metaframe.columns]
-        print(columns)
-        '''
         columns = self.get_columns(frame)
-        super().__init__(pandas.DataFrame(frame),
-                         index=index, columns=columns, Subspace=[])
+        super().__init__(pandas.DataFrame(frame), index=index, columns=columns)
 
     def get_columns(self, frame):
         """Return subspace columns."""

@@ -1,9 +1,17 @@
 
+from typing import Optional, Collection, Any, Union
+
 import pandas
 import numpy as np
 
+from nova.electromagnetic.dataframe import DataFrame
+from nova.electromagnetic.superframe import SuperFrame
+from nova.electromagnetic.subspace import SubSpace
+from nova.electromagnetic.metaarray import MetaArray
+from nova.electromagnetic.metaframe import MetaFrame
 
-class SubSpaceIndexError(IndexError):
+
+class SuperSpaceIndexError(IndexError):
     """Prevent direct access to frame's subspace variables."""
 
     def __init__(self, name, col):
@@ -34,7 +42,7 @@ class IndexerMixin:
         col = self._get_col(key)
         if self.obj.is_subspace(col):
             if self.obj.metaframe.lock:
-                raise SubSpaceIndexError(self.name, col)
+                raise SuperSpaceIndexError(self.name, col)
         return super().__setitem__(key, value)
 
     def __getitem__(self, key):
@@ -76,7 +84,67 @@ class _iAtIndexer(_ScalarAccessIndexer,
     pass
 
 
-class DataSpaceMixin:
+class SuperSpace(SuperFrame):
+    """
+    Extend SuperFrame to implement super/sub space access.
+
+    - Protect setitem operations on loc, iloc, at, and iat operators.
+    - Extend set/getattr and set/getitem to serve subspace.
+    - Extend repr to update superframe prior to printing.
+
+    """
+
+    def __init__(self,
+                 data=None,
+                 index: Optional[Collection[Any]] = None,
+                 columns: Optional[Collection[Any]] = None,
+                 attrs: dict[str, Union[MetaArray, MetaFrame]] = None,
+                 **metadata: Optional[dict]):
+        super().__init__(data, index, columns, attrs, **metadata)
+        self.subspace = SubSpace(self)
+
+    def __repr__(self):
+        """Propagate frame subspace variables prior to display."""
+        self.update_frame()
+        return super().__repr__()
+
+    @property
+    def subspace(self):
+        """Return subspace instance."""
+        return self.attrs.get('subspace', DataFrame())
+
+    @subspace.setter
+    def subspace(self, subspace):
+        self.attrs['subspace'] = subspace
+
+    def is_subspace(self, col):
+        """Return Ture if col in subspace."""
+        if isinstance(col, int):
+            col = self.columns[col]
+        if np.array([attr in self.attrs for attr in ['metaframe', 'subspace']]
+                    ).all() and isinstance(col, str):
+            return col in self.metaframe.subspace
+        return False
+
+    def update_frame(self):
+        """Propagate subspace varables to frame."""
+        if hasattr(self, 'subspace'):
+            for col in self.subspace:
+                self.set_frame(col)
+
+    def set_frame(self, col):
+        """Inflate subspace variable and setattr in frame."""
+        self.check_subspace(col)
+        with self.metaframe.setlock(True):
+            value = getattr(self, col).to_numpy()[self.subref]
+        with self.metaframe.setlock(None):
+            super().__setattr__(col, value)
+
+    def get_frame(self, col):
+        """Return inflated subspace variable."""
+        self.check_subspace(col)
+        with self.metaframe.setlock(False):
+            return super().__getattr__(col)
 
     @property
     def loc(self) -> "_LocIndexer":
@@ -98,45 +166,16 @@ class DataSpaceMixin:
         """Extend DataFrame.iat, restrict subspace access."""
         return _iAtIndexer("iat", self)
 
-    def is_subspace(self, col):
-        """Return Ture if col in subspace."""
-        if isinstance(col, int):
-            col = self.columns[col]
-        if 'metaframe' in self.attrs and 'subspace' in self.attrs and \
-                isinstance(col, str):
-            return col in self.metaframe.subspace
-        return False
-
     def check_subspace(self, col):
         """Check for col in metaframe.subspace, raise error if not found."""
         if not self.is_subspace(col):
             raise IndexError(f'\'{col}\' not specified in metaframe.subspace '
                              f'{self.metaframe.subspace}')
 
-    def set_frame(self, col):
-        """Inflate subspace variable and setattr in frame."""
-        self.check_subspace(col)
-        with self.metaframe.setlock(True):
-            value = getattr(self, col).to_numpy()[self.subref]
-        with self.metaframe.setlock(None):
-            super().__setattr__(col, value)
-
-    def get_frame(self, col):
-        """Return inflated subspace variable."""
-        self.check_subspace(col)
-        with self.metaframe.setlock(False):
-            return super().__getattr__(col)
-
-    def update_frame(self):
-        """Propagate subspace varables to frame."""
-        if hasattr(self, 'subspace'):
-            for col in self.subspace:
-                self.set_frame(col)
-
     def __getattr__(self, col):
         """Extend DataFrame.__getattr__. (frame.*)."""
-        #if col in self.attrs:
-        #    return self.attrs[col]
+        if col in self.attrs:
+            return self.attrs[col]
         if self.is_subspace(col):
             if self.metaframe.lock is True:
                 return self.subspace.__getattr__(col)
@@ -156,14 +195,14 @@ class DataSpaceMixin:
     def __setattr__(self, col, value):
         """Check lock. Extend DataFrame.__setattr__ (frame.* = *).."""
         value = self._format_value(col, value)
-        if col in self._attributes:
-            self.attrs[col] = value
-            return None
+        #if col in self._attributes:
+        #    self.attrs[col] = value
+        #    return None
         if self.is_subspace(col):
             if self.metaframe.lock is True:
                 return self.subspace.__setattr__(col, value)
             if self.metaframe.lock is False:
-                raise SubSpaceIndexError('setattr', col)
+                raise SuperSpaceIndexError('setattr', col)
         return super().__setattr__(col, value)
 
     def __setitem__(self, col, value):
@@ -173,7 +212,7 @@ class DataSpaceMixin:
             if self.metaframe.lock is True:
                 return self.subspace.__setitem__(col, value)
             if self.metaframe.lock is False:
-                raise SubSpaceIndexError('setitem', col)
+                raise SuperSpaceIndexError('setitem', col)
         return super().__setitem__(col, value)
 
     def _format_value(self, col, value):
@@ -190,3 +229,19 @@ class DataSpaceMixin:
             return dtype(value)
         except (ValueError, TypeError):  # NaN conversion error
             return value
+
+
+if __name__ == '__main__':
+
+    superspace = SuperSpace(Required=['x', 'z'], Additional=['Ic'])
+
+    superspace.add_frame(4, range(3), link=True)
+    superspace.add_frame(4, range(2), link=False)
+    superspace.add_frame(4, range(40), link=True)
+
+    superspace.Ic = 12
+    superspace.subspace.loc['Coil5', 'Ic'] = 5.4
+
+    print(superspace)
+
+

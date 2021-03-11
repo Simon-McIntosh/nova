@@ -1,6 +1,7 @@
 name: nova
 channels:
   - conda-forge
+  - spyder-ide
   - defaults
 dependencies:
   - python=3.9
@@ -32,6 +33,7 @@ dependencies:
   - seaborn
   - shapely
   - spyder
+  - spyder-line-profiler
   - urllib3
   - xarray
   - xlrd

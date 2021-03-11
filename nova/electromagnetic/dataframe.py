@@ -2,7 +2,6 @@
 from typing import Optional, Collection, Any
 
 import pandas
-import numpy as np
 
 
 # pylint: disable=too-many-ancestors
@@ -25,8 +24,6 @@ class Series(pandas.Series):
 class DataFrame(pandas.DataFrame):
     """pandas.DataFrame base class."""
 
-    _attributes = ['multipoint', 'subspace', 'polygon']
-
     def __init__(self,
                  data=None,
                  index: Optional[Collection[Any]] = None,
@@ -45,3 +42,9 @@ class DataFrame(pandas.DataFrame):
         """Extend pandas.DataFrame.__getattr__. Intercept attrs."""
         if col in self.attrs:
             return self.attrs[col]
+        return super().__getattr__(col)
+
+
+if __name__ == '__main__':
+
+    df = DataFrame()

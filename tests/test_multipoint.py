@@ -6,9 +6,9 @@ import pandas
 from nova.electromagnetic.frame import Frame
 
 
-def test_enable_key_attribute_true():
+def test_generate_key_attribute_true():
     frame = Frame({'link': [True]}, metadata={'Required': []})
-    assert frame.multipoint.enable
+    assert frame.multipoint.generate
 
 
 def test_generate_single():
@@ -22,41 +22,38 @@ def test_generate_single_float():
 
 
 def test_generate_multi():
-    frame = Frame({'x': range(3), 'link': True}, metadata={
-        'Required': ['x'], 'tag': {'name': 'coil1'}})
+    frame = Frame({'x': range(3), 'link': True}, name='coil1',
+                  metadata={'Required': ['x']})
+    print(frame)
     assert frame.link.to_list() == ['', 'coil1', 'coil1']
 
 
 def test_data_init_multipoint_true():
     data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8], 'link': True})
-    frame = Frame(data, metadata={'Required': ['x', 'z'],
-                                  'tag': {'name': 'Coil0'}})
+    frame = Frame(data, name='Coil0', metadata={'Required': ['x', 'z']})
     assert frame.link.to_list() == ['', 'Coil0', 'Coil0'] and \
         frame.factor.to_list() == [1, 1, 1]
 
 
 def test_add_coil_multipoint_default_false():
-    frame = Frame({'x': [1, 3], 'z': 0}, link=False,
-                  metadata={'Required': ['x', 'z'], 'Additional': [],
-                            'tag': {'name': 'Coil0'}})
+    frame = Frame({'x': [1, 3], 'z': 0}, link=False, name='Coil0',
+                  metadata={'Required': ['x', 'z'], 'Additional': []})
     frame.add_frame(4, [7, 8], link=True)
     assert frame.link.to_list() == ['', '', '', 'Coil2'] and \
         frame.factor.to_list() == [1, 1, 1, 1]
 
 
 def test_add_coil_multipoint_default_true():
-    frame = Frame({'x': [1, 3], 'z': 0}, link=True,
-                  metadata={'Required': ['x', 'z'], 'Additional': [],
-                            'tag': {'name': 'Coil0'}})
+    frame = Frame({'x': [1, 3], 'z': 0}, link=True, name='Coil0',
+                  metadata={'Required': ['x', 'z'], 'Additional': []})
     frame.add_frame(4, [7, 8], link=True)
     assert frame.link.to_list() == ['', 'Coil0', '', 'Coil2'] and \
         frame.factor.to_list() == [1, 1, 1, 1]
 
 
 def test_add_coil_multipoint_default_float():
-    frame = Frame({'x': [1, 3], 'z': 0}, link=0.5,
-                  metadata={'Required': ['x', 'z'], 'Additional': [],
-                            'tag': {'name': 'Coil0'}})
+    frame = Frame({'x': [1, 3], 'z': 0}, link=0.5, name='Coil0',
+                  metadata={'Required': ['x', 'z'], 'Additional': []})
     frame.add_frame(4, [7, 8], link=True)
     assert frame.link.to_list() == ['', 'Coil0', '', 'Coil2'] and \
         frame.factor.to_list() == [1, 0.5, 1, 1]
@@ -72,17 +69,16 @@ def test_default_multipoint_true():
 
 def test_data_init_multipoint_false():
     data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8], 'link': False})
-    frame = Frame(data, metadata={'Required': ['x', 'z'],
-                                  'Additional': ['link'],
-                                  'tag': {'name': 'Coil0'}})
+    frame = Frame(data, name='Coil0', metadata={'Required': ['x', 'z'],
+                                                'Additional': ['link']})
     unset = [link == '' for link in frame.link]
     assert np.array(unset).all()
 
 
 def test_drop():
-    frame = Frame(link=True, metadata={'Required': ['x', 'z'],
-                                       'Additional': ['link']})
-    frame.add_frame(4, [5, 7, 12], label='coil')
+    frame = Frame(link=True, label='coil',
+                  metadata={'Required': ['x', 'z'], 'Additional': ['link']})
+    frame.add_frame(4, [5, 7, 12])
     frame.add_frame(3, [1, 2], link=False)
     frame.add_frame(6, [7, 3])
     frame.add_frame(12, [7, 3])

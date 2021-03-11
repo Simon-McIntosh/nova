@@ -87,8 +87,6 @@ if __name__ == '__main__':
     def set_current():
         frame.Ic = Ic
 
-    set_current()
-
     #frame.x = [1, 2, 3]
     #frame.x[1] = 6
 

@@ -23,16 +23,16 @@ class Polygon(MetaMethod):
         'x', 'z', 'section'])
     additional: list[str] = field(default_factory=lambda: [
         'dl', 'dt', 'rms', 'dx', 'dz', 'dA', 'poly', 'patch'])
+    require_all: bool = True
 
     def initialize(self):
         """Init polygons based on coil geometroy and cross section."""
-        if self.enable:
-            for index in self.frame.index[self.frame.poly.isna()]:
-                section = self.frame.loc[index, 'section']
-                poly = polygen(section)(
-                    *self.frame.loc[index, ['x', 'z', 'dl', 'dt']])
-                self.frame.loc[index, 'poly'] = polyframe(poly)
-            self.build()
+        for index in self.frame.index[self.frame.poly.isna()]:
+            section = self.frame.loc[index, 'section']
+            poly = polygen(section)(
+                *self.frame.loc[index, ['x', 'z', 'dl', 'dt']])
+            self.frame.loc[index, 'poly'] = polyframe(poly)
+        self.build()
 
     def build(self, index=None):
         """

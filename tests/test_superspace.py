@@ -138,7 +138,7 @@ def test_setattr_error():
     superspace = SuperSpace(Required=['x', 'z'])
     superspace.add_frame(4, range(3), Ic=5.7, link=True)
     with pytest.raises(IndexError):
-        with superspace.metaframe.setlock(False):
+        with superspace.metaframe.setlock('subspace', False):
             superspace.Ic = range(3)
 
 
@@ -146,7 +146,7 @@ def test_setitem_error():
     superspace = SuperSpace(Required=['x', 'z'])
     superspace.add_frame(4, range(3), Ic=5.7, link=True)
     with pytest.raises(IndexError):
-        with superspace.metaframe.setlock(False):
+        with superspace.metaframe.setlock('subspace', False):
             superspace['Ic'] = range(3)
 
 
@@ -158,4 +158,5 @@ def test_subspace_lock():
 
 if __name__ == '__main__':
 
-    pytest.main([__file__])
+    test_getitem()
+    #pytest.main([__file__])

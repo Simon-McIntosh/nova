@@ -46,7 +46,7 @@ def test_metadata():
 
 def test_required_number():
     metaframe = MetaFrame(required=['x', 'z'])
-    assert metaframe.required_number == 2
+    assert len(metaframe.required) == 2
 
 
 if __name__ == '__main__':

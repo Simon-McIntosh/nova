@@ -6,7 +6,7 @@ from nova.electromagnetic.dataframe import DataFrame
 
 
 class SubSpace(DataFrame):
-    """Manage row subspace of frame (all independent coils)."""
+    """Manage frame subspace (all independent rows)."""
 
     def __init__(self, frame):
         if frame.multipoint.index.empty:
@@ -20,7 +20,7 @@ class SubSpace(DataFrame):
         """Return subspace columns."""
         if np.array([attr in frame.metaframe.subspace
                      for attr in frame.columns]).any():
-            with frame.metaframe.setlock(None):  # update metaframe
+            with frame.metaframe.setlock('subspace', None):  # update metaframe
                 frame.metadata = {'additional':
                                   frame.metaframe.subspace}
             return frame.metaframe.subspace

@@ -10,6 +10,33 @@ Created on Thu Feb 18 20:33:42 2021
 """
 
 
+#class _ScalarAccessIndexer(IndexerMixin,
+#                           pandas.core.indexing._ScalarAccessIndexer):
+#    pass
+
+
+#class _LocationIndexer(IndexerMixin, pandas.core.indexing._LocationIndexer):
+#    pass
+
+
+##class _iLocIndexer(Indexer.Location(), pandas.core.indexing._iLocIndexer):
+#    pass
+
+
+#class _LocIndexer(Indexer.Location(), pandas.core.indexing._LocIndexer):
+#    pass
+
+
+#class _AtIndexer(Indexer.ScalarAccess(), pandas.core.indexing._AtIndexer):
+#    pass
+
+
+#class _iAtIndexer(Indexer.ScalarAccess(),
+#                  pandas.core.indexing._iAtIndexer):
+#    pass
+
+
+
     def _subspace(self, col: str):
         """Return True if col in metaframe.subspace else False."""
         if isinstance(col, str) and 'metaframe' in self.obj.attrs:

@@ -20,6 +20,7 @@ class MultiPoint(MetaMethod):
     required: list[str] = field(default_factory=lambda: ['link'])
     additional: list[str] = field(default_factory=lambda: [
         'factor', 'ref', 'subref'])
+    require_all: bool = True
 
     indexer: list[int] = field(init=False)
     index: pandas.Index = field(default=pandas.Index([]))
@@ -49,26 +50,25 @@ class MultiPoint(MetaMethod):
                 - factor = value
 
         """
-        if self.enable:
-            isna = pandas.isna(self.frame.link)
-            self.frame.at[isna, 'link'] = self.frame.metaframe.default['link']
-            self.frame.at[isna, 'factor'] = \
-                self.frame.metaframe.default['factor']
-            isnumeric = np.array([isinstance(link, (int, float)) &
-                                  ~isinstance(link, bool)
-                                  for link in self.frame.link], dtype=bool)
-            istrue = np.array([link is True for link in self.frame.link],
-                              dtype=bool)
-            isstr = np.array([isinstance(link, str)
+        isna = pandas.isna(self.frame.link)
+        self.frame.at[isna, 'link'] = self.frame.metaframe.default['link']
+        self.frame.at[isna, 'factor'] = \
+            self.frame.metaframe.default['factor']
+        isnumeric = np.array([isinstance(link, (int, float)) &
+                              ~isinstance(link, bool)
                               for link in self.frame.link], dtype=bool)
-            self.frame.loc[~istrue & ~isnumeric & ~isstr, 'link'] = ''
-            index = self.frame.index[istrue | isnumeric]
-            if not index.empty:
-                factor = np.ones(len(self.frame))
-                factor[isnumeric] = self.frame.link[isnumeric]
-                factor = factor[istrue | isnumeric][1:]
-                self.add(index, factor)
-            self.build()
+        istrue = np.array([link is True for link in self.frame.link],
+                          dtype=bool)
+        isstr = np.array([isinstance(link, str)
+                          for link in self.frame.link], dtype=bool)
+        self.frame.loc[~istrue & ~isnumeric & ~isstr, 'link'] = ''
+        index = self.frame.index[istrue | isnumeric]
+        if not index.empty:
+            factor = np.ones(len(self.frame))
+            factor[isnumeric] = self.frame.link[isnumeric]
+            factor = factor[istrue | isnumeric][1:]
+            self.add(index, factor)
+        self.build()
 
     def build(self):
         """Update multi-point parameters."""
@@ -173,7 +173,7 @@ class MultiPoint(MetaMethod):
         None.
 
         """
-        if self.enable:
+        if self.generate:
             if not pandas.api.types.is_list_like(index):
                 index = [index]
             reset = [link in index for link in self.frame.link]

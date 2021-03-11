@@ -18,15 +18,24 @@ class MetaMethod(metaclass=ABCMeta):
     frame: Frame = field(repr=False)
     required: list[str]
     additional: list[str]
+    require_all: bool = True
 
     def __post_init__(self):
         """Generate multi-point constraints."""
-        self.update()
-        self.initialize()
+        if self.generate:
+            self.update_additional()
+            self.initialize()
 
     @abstractmethod
     def initialize(self):
         """Init method."""
+
+    @property
+    def generate(self):
+        """Return initialization flag."""
+        if self.require_all:
+            return self.required_attributes.all()
+        return self.required_attributes.any()
 
     @property
     def required_attributes(self):
@@ -34,12 +43,8 @@ class MetaMethod(metaclass=ABCMeta):
         return np.array([attr in self.frame.columns
                          for attr in self.required])
 
-    def update(self):
+    def update_additional(self):
         """Update additional attributes if subset exsists in frame.columns."""
-        if self.enable:
-            self.frame.metadata = {'additional': self.additional}
-
-    @property
-    def enable(self):
-        """Return status of required attributes in frame.columns."""
-        return self.required_attributes.all()
+        self.frame.metadata = {'additional': self.additional}
+        if not self.require_all:
+            self.frame.metadata = {'additional': self.required}

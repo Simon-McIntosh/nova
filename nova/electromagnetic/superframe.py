@@ -11,6 +11,7 @@ import shapely
 from nova.electromagnetic.dataframe import DataFrame
 from nova.electromagnetic.metaarray import MetaArray
 from nova.electromagnetic.metaframe import MetaFrame
+from nova.electromagnetic.current import Current
 from nova.electromagnetic.multipoint import MultiPoint
 from nova.electromagnetic.polygon import Polygon
 
@@ -35,84 +36,25 @@ class SuperFrame(DataFrame):
                  attrs: dict[str, Union[MetaArray, MetaFrame]] = None,
                  **metadata: Optional[dict]):
         super().__init__(data, index, columns)
-        self.update_attrs(data, attrs)
+        self.extract_attrs(data, attrs)
         self.update_metadata(metadata)
         self.update_index()
-        self.multipoint = MultiPoint(self)
-        self.polygon = Polygon(self)
+        self.update_attrs()
 
-    @property
-    def multipoint(self):
-        """Return multipoint instance."""
-        return self.attrs.get('multipoint', None)
-
-    @multipoint.setter
-    def multipoint(self, multipoint):
-        self.attrs['multipoint'] = multipoint
-
-    @property
-    def polygon(self):
-        """Return polygon instance."""
-        return self.attrs.get('polygon', None)
-
-    @polygon.setter
-    def polygon(self, polygon):
-        self.attrs['polygon'] = polygon
-
-    def update_attrs(self, data, attrs):
-        """Update DataFrame attributes, [metaarray, metaframe]'."""
+    def extract_attrs(self, data, attrs):
+        """Extract frame attrs from data and update."""
+        self.attrs['metaframe'] = MetaFrame()
         if hasattr(data, 'attrs'):
             self.attrs |= data.attrs
-        self.update_metaframe()
         if attrs is None:
             attrs = {}
         self.attrs |= attrs
 
-    def update_metaframe(self):
-        """Update metaframe if not present in self.attrs."""
-        if 'metaframe' not in self.attrs:
-            self.attrs['metaframe'] = MetaFrame()
-
-    def extract_metadata(self, metadata):
-        """Extract metadata. Set default, tag, and meta*.metadata."""
-        update = {attr: {} for attr in ['default', 'tag']}
-        framearray = {attr: {} for attr in self.metaattrs}
-        if metadata is None:
-            metadata = {}
-        if 'metadata' in metadata:
-            metadata |= metadata.pop('metadata')
-        for field in list(metadata):
-            for attr in framearray:
-                if hasattr(getattr(self, attr), field.lower()):
-                    framearray[attr][field] = metadata.pop(field)
-                    break
-            else:
-                for attr in update:
-                    if field in getattr(self.metaframe, attr):
-                        update[attr][field] = metadata.pop(field)
-        for attr in update:
-            getattr(self.metaframe, attr).update(update[attr])
-        if len(metadata) > 0:
-            raise IndexError('unreconised attributes set in **metadata: '
-                             f'{metadata}.')
-        for attr in framearray:
-            getattr(self, attr).metadata |= framearray[attr]
-
-    def update_metadata(self, metadata):
-        """Update metadata."""
-        columns = not self.columns.empty
-        self.extract_metadata(metadata)
-        self.reset_metaframe(columns)
-
-    def reset_metaframe(self, columns):
-        """Revise metaframe to match self.columns if self.columns not empty."""
-        metadata = {}
-        if columns:
-            for attribute in ['required', 'additional']:
-                metadata[attribute.capitalize()] = [
-                    attr for attr in getattr(self.metaframe, attribute)
-                    if attr in self.columns]
-            self.metadata = metadata
+    def update_attrs(self):
+        """Compose additional attributes."""
+        self.attrs['current'] = Current(self)
+        self.attrs['multipoint'] = MultiPoint(self)
+        self.attrs['polygon'] = Polygon(self)
 
     @property
     def metaattrs(self) -> list[str]:
@@ -132,6 +74,45 @@ class SuperFrame(DataFrame):
         for attr in self.metaattrs:
             getattr(self, attr).metadata = metadata
         self.validate_metadata()
+
+    def update_metadata(self, metadata):
+        """Update metadata."""
+        columns = not self.columns.empty
+        self.extract_metadata(metadata)
+        self.reset_metaframe(columns)
+
+    def extract_metadata(self, metadata):
+        """Extract metadata. Set default and meta*.metadata."""
+        default = {}
+        framearray = {attr: {} for attr in self.metaattrs}
+        if metadata is None:
+            metadata = {}
+        if 'metadata' in metadata:
+            metadata |= metadata.pop('metadata')
+        for field in list(metadata):
+            for attr in framearray:
+                if hasattr(getattr(self, attr), field.lower()):
+                    framearray[attr][field] = metadata.pop(field)
+                    break
+            else:
+                if field in self.metaframe.default:
+                    default[field] = metadata.pop(field)
+        self.metaframe.default |= default
+        if len(metadata) > 0:
+            raise IndexError('unreconised attributes set in **metadata: '
+                             f'{metadata}.')
+        for attr in framearray:
+            getattr(self, attr).metadata |= framearray[attr]
+
+    def reset_metaframe(self, columns):
+        """Revise metaframe to match self.columns if self.columns not empty."""
+        metadata = {}
+        if columns:
+            for attribute in ['required', 'additional']:
+                metadata[attribute.capitalize()] = [
+                    attr for attr in getattr(self.metaframe, attribute)
+                    if attr in self.columns]
+            self.metadata = metadata
 
     def validate_metadata(self):
         """Validate required and additional attributes in FrameArray."""
@@ -157,7 +138,7 @@ class SuperFrame(DataFrame):
             - additional unset: insert default
             - isnan: insert default
         """
-        with self.metaframe.setlock(None):
+        with self.metaframe.setlock('subspace', None):
             columns = self.columns.to_list()
             required_unset = [attr not in columns
                               for attr in self.metaframe.required]
@@ -193,41 +174,40 @@ class SuperFrame(DataFrame):
             self.set_index('index', inplace=True)
             self.index.name = None
 
-    def _set_offset(self, metaindex):
+    def _set_offset(self, metatag):
         try:  # reverse search through frame index
             match = next(name for name in self.index[::-1]
-                         if metaindex['label'] in name)
+                         if metatag['label'] in name)
             offset = re.sub(r'[a-zA-Z]', '', match)
             if isinstance(offset, str):
-                offset = offset.replace(metaindex['delim'], '')
+                offset = offset.replace(metatag['delim'], '')
                 offset = offset.replace('_', '')
                 offset = int(offset)
             offset += 1
         except (TypeError, StopIteration):  # unit index, label not present
             offset = 0
-        metaindex['offset'] = np.max([offset, metaindex['offset']])
+        metatag['offset'] = np.max([offset, metatag['offset']])
 
     def _build_index(self, data, **kwargs):
         data_length = self._data_length(data)
-        # update metaframe.tag
-        self.metaframe.tag |= {key: kwargs[key] for key in kwargs
-                               if key in self.metaframe.tag}
-        metaindex = self.metaframe.tag
-        if kwargs.get('name', metaindex['name']):  # valid name
-            name = metaindex['name']
+        # update metaframe tag defaults with kwargs
+        metatag = {key: kwargs.get(key, self.metaframe.default[key])
+                   for key in ['name', 'label', 'delim', 'offset']}
+        if kwargs.get('name', metatag['name']):  # valid name
+            name = metatag['name']
             if pandas.api.types.is_list_like(name) or data_length == 1:
                 return self._check_index(name, data_length)
-            if metaindex['delim'] and metaindex['delim'] in name:
-                split_name = name.split(metaindex['delim'])
-                metaindex['label'] = metaindex['delim'].join(split_name[:-1])
-                metaindex['offset'] = int(split_name[-1])
+            if metatag['delim'] and metatag['delim'] in name:
+                split_name = name.split(metatag['delim'])
+                metatag['label'] = metatag['delim'].join(split_name[:-1])
+                metatag['offset'] = int(split_name[-1])
             else:
-                metaindex['delim'] = ''
-                metaindex['label'] = name.rstrip(string.digits)
-                metaindex['offset'] = int(name.lstrip(string.ascii_letters))
-        self._set_offset(metaindex)
-        label_delim = metaindex['label']+metaindex['delim']
-        index = [f'{label_delim}{i+metaindex["offset"]:d}'
+                metatag['delim'] = ''
+                metatag['label'] = name.rstrip(string.digits)
+                metatag['offset'] = int(name.lstrip(string.ascii_letters))
+        self._set_offset(metatag)
+        label_delim = metatag['label']+metatag['delim']
+        index = [f'{label_delim}{i+metatag["offset"]:d}'
                  for i in range(data_length)]
         return self._check_index(index, data_length)
 
@@ -345,7 +325,7 @@ class SuperFrame(DataFrame):
         ValueError
             Required arguments not present in *frame.
         IndexError
-            Output argument number len(args) != self.metaframe.required_number.
+            Output argument number len(args) != len(self.metaframe.required).
 
         Returns
         -------
@@ -370,11 +350,10 @@ class SuperFrame(DataFrame):
                 kwargs['name'] = dataframe.index
             kwargs |= {col: dataframe.loc[:, col] for col in
                        self.metaframe.additional if col in dataframe}
-        if len(args) != self.metaframe.required_number:
+        if len(args) != len(self.metaframe.required):
             raise IndexError(
                 'incorrect required argument number (*args)): '
-                f'{len(args)} != '
-                f'{self.metaframe.required_number}\n'
+                f'{len(args)} != {len(self.metaframe.required)}\n'
                 f'required *args: {self.metaframe.required}\n'
                 f'additional **kwargs: {self.metaframe.additional}')
         return args, kwargs
@@ -424,7 +403,7 @@ class SuperFrame(DataFrame):
         if len(additional) > 0:  # extend aditional arguments
             self.metaframe.metadata = {'additional': additional}
         # self._propogate_current(current_label, data)
-        unset = [key not in self.metaframe.tag for key in kwargs]
+        unset = [key for key in kwargs]
         if np.array(unset).any():
             unset_kwargs = np.array(list(kwargs.keys()))[unset]
             default = {key: '_default_value_' for key in unset_kwargs}
@@ -486,6 +465,10 @@ if __name__ == '__main__':
     superframe = SuperFrame(Required=['x', 'z'], Additional=['Ic'])
 
     superframe.add_frame(4, range(3), link=True)
-    superframe.add_frame(5, range(3), link=False)
-    superframe.add_frame(7, range(3), link=True)
+    superframe.add_frame(5, range(2), link=False)
+    superframe.add_frame(7, range(4000), link=True)
+
+    nIc = len(superframe)
+    Ic = np.random.rand(nIc)
+
     print(superframe)

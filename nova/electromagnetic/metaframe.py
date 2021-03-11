@@ -1,6 +1,6 @@
-
+"""Manage frame metadata."""
 from contextlib import contextmanager
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field
 from typing import Union
 
 import numpy as np
@@ -12,13 +12,20 @@ from nova.electromagnetic.metadata import MetaData
 
 @dataclass
 class MetaFrame(MetaData):
-    """Manage Frame metadata - accessed via Frame['attrs']."""
+    """
+    Manage Frame metadata.
+
+    - required: required column, set as *args
+    - additional: additional columns, set as **kwargs
+    - default
+    """
 
     required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
     additional: list[str] = field(default_factory=lambda: [])
     exclude: list[str] = field(default_factory=lambda: [])
     subspace: list[str] = field(default_factory=lambda: [
         'Ic', 'It', 'Nt', 'active', 'plasma', 'optimize', 'feedback'])
+    current: list[str] = field(default_factory=lambda: ['Ic', 'It', 'Nt'])
     default: dict[str, Union[float, str, bool, None]] = field(
         repr=False, default_factory=lambda: {
             'x': 0., 'z': 0.,
@@ -33,30 +40,32 @@ class MetaFrame(MetaData):
             'link': '', 'factor': 1., 'ref': 0, 'subref': 0,
             'active': True, 'optimize': False, 'plasma': False,
             'feedback': False, 'acloss': False,
-            'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.})
-    tag: dict[str, Union[str, bool]] = field(
-        repr=False, default_factory=lambda: {
+            'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.,
             'name': '', 'label': 'Coil', 'delim': '', 'offset': 0})
 
-    _lock = True
+    _lock = {'subspace': True, 'dependant': True}
 
-    @property
-    def subset(self):
-        """Return lock boolean status."""
-        return self._lock is not None
+    def lock(self, key):
+        """
+        Return lock status.
 
-    @property
-    def lock(self):
-        """Return lock status."""
-        return self._lock
+        Parameters
+        ----------
+        key : str
+            Lock label.
+
+        """
+        return self._lock[key]
 
     @contextmanager
-    def setlock(self, status):
+    def setlock(self, key, status):
         """
         Manage access to subspace frame variables.
 
         Parameters
         ----------
+        key : str
+            Lock label.
         status : Union[bool, None]
             Subset lock status.
 
@@ -65,17 +74,18 @@ class MetaFrame(MetaData):
         None.
 
         """
-        _lock = self._lock
-        self._lock = status
+        _lock = self._lock[key]
+        self._lock[key] = status
         yield
-        self._lock = _lock
+        self._lock[key] = _lock
 
     def validate(self):
         """
         Extend MetaData.validate.
 
-            - Exclude duplicate values from self.required in self.additional.
-            - Check that all additional attributes have a default value.
+            - Raise error if exclude attributes specified as required.
+            - Subtract reduce attributes from additional
+            - Ensure that all additional attributes have a default value.
 
         """
         super().validate()
@@ -98,18 +108,6 @@ class MetaFrame(MetaData):
         if unset.any():
             raise ValueError('default value not set for additional attributes '
                              f'{np.array(self.additional)[unset]}')
-        # block tag field extension
-        index_default = next(field.default_factory() for field in fields(self)
-                             if field.name == 'tag')
-        extend = np.array([attr not in index_default for attr in self.tag])
-        if extend.any():
-            raise IndexError('additional attributes passed to tag field '
-                             f'{np.array(list(self.tag.keys()))[extend]}')
-
-    @property
-    def required_number(self):
-        """Return number of required arguments."""
-        return len(self.required)
 
     @property
     def columns(self):

@@ -6,7 +6,6 @@ import pandas
 
 # pylint: disable=too-many-ancestors
 # pylint:disable=unsubscriptable-object
-# pylint: disable=protected-access
 
 
 class Series(pandas.Series):

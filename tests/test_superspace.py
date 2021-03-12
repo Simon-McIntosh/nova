@@ -152,11 +152,9 @@ def test_setitem_error():
 
 def test_subspace_lock():
     superspace = SuperSpace(metadata={'Required': ['x'], 'Subspace': ['x']})
-    assert superspace.is_subspace('x') and superspace.metaframe.lock
-
+    assert superspace.in_subspace('x') and superspace.metaframe.lock
 
 
 if __name__ == '__main__':
 
-    test_getitem()
-    #pytest.main([__file__])
+    pytest.main([__file__])

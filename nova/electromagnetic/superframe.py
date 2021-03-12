@@ -2,22 +2,20 @@
 
 import re
 import string
-from typing import Optional, Collection, Any, Union
+from typing import Optional, Collection, Any
 
 import pandas
 import numpy as np
 import shapely
 
+from nova.electromagnetic.indexer import IndexerMixin
 from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.metaarray import MetaArray
-from nova.electromagnetic.metaframe import MetaFrame
 from nova.electromagnetic.current import Current
 from nova.electromagnetic.multipoint import MultiPoint
 from nova.electromagnetic.polygon import Polygon
 
 
 # pylint: disable=too-many-ancestors
-# pylint:disable=unsubscriptable-object
 
 
 class SuperFrame(DataFrame):
@@ -33,28 +31,27 @@ class SuperFrame(DataFrame):
                  data=None,
                  index: Optional[Collection[Any]] = None,
                  columns: Optional[Collection[Any]] = None,
-                 attrs: dict[str, Union[MetaArray, MetaFrame]] = None,
+                 attrs: Optional[dict[str, Collection[Any]]] = None,
                  **metadata: Optional[dict]):
-        super().__init__(data, index, columns)
+        super().__init__(data, index, columns, mixin=IndexerMixin)
         self.extract_attrs(data, attrs)
         self.update_metadata(metadata)
         self.update_index()
         self.update_attrs()
-
-    def extract_attrs(self, data, attrs):
-        """Extract frame attrs from data and update."""
-        self.attrs['metaframe'] = MetaFrame()
-        if hasattr(data, 'attrs'):
-            self.attrs |= data.attrs
-        if attrs is None:
-            attrs = {}
-        self.attrs |= attrs
 
     def update_attrs(self):
         """Compose additional attributes."""
         self.attrs['current'] = Current(self)
         self.attrs['multipoint'] = MultiPoint(self)
         self.attrs['polygon'] = Polygon(self)
+
+    def extract_attrs(self, data, attrs):
+        """Extract frame attrs from data and update."""
+        if hasattr(data, 'attrs'):
+            self.attrs |= data.attrs
+        if attrs is None:
+            attrs = {}
+        self.attrs |= attrs
 
     @property
     def metaattrs(self) -> list[str]:
@@ -358,30 +355,6 @@ class SuperFrame(DataFrame):
                 f'additional **kwargs: {self.metaframe.additional}')
         return args, kwargs
 
-    @staticmethod
-    def isframe(obj, dataframe=True):
-        """
-        Return isinstance(arg[0], Frame | DataFrame) flag.
-
-        Parameters
-        ----------
-        obj : Any
-            Input.
-        dataframe : bool, optional
-            Accept pandas.DataFrame. The default is True.
-
-        Returns
-        -------
-        isframe: bool
-            Frame / pandas.DataFrame isinstance flag.
-
-        """
-        if isinstance(obj, SuperFrame):
-            return True
-        if isinstance(obj, pandas.DataFrame) and dataframe:
-            return True
-        return False
-
     def _build_data(self, *args, **kwargs):
         """Return data dict built from *args and **kwargs."""
         data = {}  # python 3.6+ assumes dict is insertion ordered
@@ -464,11 +437,11 @@ if __name__ == '__main__':
 
     superframe = SuperFrame(Required=['x', 'z'], Additional=['Ic'])
 
-    superframe.add_frame(4, range(3), link=True)
+    superframe.add_frame(4.987878, range(3), link=True)
     superframe.add_frame(5, range(2), link=False)
-    superframe.add_frame(7, range(4000), link=True)
+    superframe.add_frame(7, range(4), link=True)
 
-    nIc = len(superframe)
-    Ic = np.random.rand(nIc)
+    def set_current():
+        superframe.Ic = np.random.rand(len(superframe))
 
     print(superframe)

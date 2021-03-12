@@ -25,6 +25,20 @@ class Current(MetaMethod):
         self.frame.metadata = {'current': self.current,
                                'additional': self.current}
 
+    def in_current(self, col):
+        """Return Ture if col in metaframe.current."""
+        if isinstance(col, int):
+            col = self.columns[col]
+        if not isinstance(col, str):
+            return False
+        return col in self.frame.metaframe.current
+
+    def update(self, col):
+        if self.in_current(col):
+            print(col, self.current)
+    #def set_current(self):
+
+
     '''
     @property
     def Ic(self):

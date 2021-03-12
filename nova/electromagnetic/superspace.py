@@ -15,95 +15,6 @@ from nova.electromagnetic.metaframe import MetaFrame
 # pylint: disable=protected-access
 
 
-class SuperSpaceIndexError(IndexError):
-    """Prevent direct access to frame's subspace variables."""
-
-    def __init__(self, name, col):
-        super().__init__(
-            f'{name} access is restricted for subspace attributes. '
-            f'Use frame.subspace.{name}[:, {col}] = *.\n\n'
-            'Lock may be overridden via the following context manager '
-            'but subspace will still overwrite (Cavieat Usor):\n'
-            'with frame.metaframe.setlock(None):\n'
-            f'    frame.{name}[:, {col}] = *')
-
-
-class IndexerMixin:
-    """Protect subspace items from direct access using loc, iloc, at, iat."""
-
-    def _get_col(self, key):
-        """Return column label."""
-        if isinstance(key, tuple):
-            col = key[-1]
-        else:
-            col = key
-        if isinstance(col, int):
-            col = self.obj.columns[col]
-        return col
-
-    def __setitem__(self, key, value):
-        """Raise error when subspace variable is set directly from frame."""
-        col = self._get_col(key)
-        if self.obj.is_subspace(col):
-            if self.obj.metaframe.lock('subspace'):
-                raise SuperSpaceIndexError(self.name, col)
-        return super().__setitem__(key, value)
-
-    def __getitem__(self, key):
-        """Refresh subspace items prior to return."""
-        col = self._get_col(key)
-        if self.obj.is_subspace(col):
-            if self.obj.metaframe.lock('subspace'):
-                self.obj.set_frame(col)
-        return super().__getitem__(key)
-
-
-class Indexer:
-    """Extend pandas Indexer methods via Indexer class factory."""
-
-    @staticmethod
-    def scalaraccess():
-        """Return _ScalarAccessIndexer."""
-        return type(
-            '_ScalarAccessIndexer',
-            (IndexerMixin, pandas.core.indexing._ScalarAccessIndexer), {})
-
-    @staticmethod
-    def location():
-        """Return _LocationIndexer."""
-        return type(
-            '_LocationIndexer',
-            (IndexerMixin, pandas.core.indexing._LocationIndexer), {})
-
-    @classmethod
-    def iloc(cls, *args):
-        """Return _iLocIndexer."""
-        return type(
-            '_iLocIndexer',
-            (cls.location(), pandas.core.indexing._iLocIndexer), {})(*args)
-
-    @classmethod
-    def loc(cls, *args):
-        """Return _LocIndexer."""
-        return type(
-            '_LocIndexer',
-            (cls.location(), pandas.core.indexing._LocIndexer), {})(*args)
-
-    @classmethod
-    def at(cls, *args):
-        """Return _AtIndexer."""
-        return type(
-            '_AtIndexer',
-            (cls.scalaraccess(), pandas.core.indexing._AtIndexer), {})(*args)
-
-    @classmethod
-    def iat(cls, *args):
-        """Return _iAtIndexer."""
-        return type(
-            '_iAtIndexer',
-            (cls.scalaraccess(), pandas.core.indexing._iAtIndexer), {})(*args)
-
-
 class SuperSpace(SuperFrame):
     """
     Extend SuperFrame to implement super/sub space access.
@@ -128,28 +39,8 @@ class SuperSpace(SuperFrame):
         self.update_frame()
         return super().__repr__()
 
-    @property
-    def loc(self):
-        """Extend DataFrame.loc, restrict subspace access."""
-        return Indexer.loc("loc", self)
-
-    @property
-    def iloc(self):
-        """Extend DataFrame.iloc, restrict subspace access."""
-        return Indexer.iloc("iloc", self)
-
-    @property
-    def at(self):
-        """Extend DataFrame.at, restrict subspace access."""
-        return Indexer.at("at", self)
-
-    @property
-    def iat(self):
-        """Extend DataFrame.iat, restrict subspace access."""
-        return Indexer.iat("iat", self)
-
-    def is_subspace(self, col):
-        """Return Ture if col in subspace."""
+    def in_subspace(self, col):
+        """Return Ture if col in metaframe.subspace."""
         if isinstance(col, int):
             col = self.columns[col]
         if not isinstance(col, str):
@@ -180,7 +71,7 @@ class SuperSpace(SuperFrame):
 
     def check_subspace(self, col):
         """Check for col in metaframe.subspace, raise error if not found."""
-        if not self.is_subspace(col):
+        if not self.in_subspace(col):
             raise IndexError(f'\'{col}\' not specified in metaframe.subspace '
                              f'{self.metaframe.subspace}')
 
@@ -188,7 +79,7 @@ class SuperSpace(SuperFrame):
         """Extend DataFrame.__getattr__. (frame.*)."""
         if col in self.attrs:
             return self.attrs[col]
-        if self.is_subspace(col):
+        if self.in_subspace(col):
             if self.metaframe.lock('subspace') is True:
                 return self.subspace.__getattr__(col)
             if self.metaframe.lock('subspace') is False:
@@ -197,7 +88,7 @@ class SuperSpace(SuperFrame):
 
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
-        if self.is_subspace(col):
+        if self.in_subspace(col):
             if self.metaframe.lock('subspace') is True:
                 return self.subspace.__getattr__(col)
             if self.metaframe.lock('subspace') is False:
@@ -207,7 +98,7 @@ class SuperSpace(SuperFrame):
     def __setattr__(self, col, value):
         """Check lock. Extend DataFrame.__setattr__ (frame.* = *).."""
         value = self._format_value(col, value)
-        if self.is_subspace(col):
+        if self.in_subspace(col):
             if self.metaframe.lock('subspace') is True:
                 return self.subspace.__setattr__(col, value)
             if self.metaframe.lock('subspace') is False:
@@ -217,7 +108,7 @@ class SuperSpace(SuperFrame):
     def __setitem__(self, col, value):
         """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
         value = self._format_value(col, value)
-        if self.is_subspace(col):
+        if self.in_subspace(col):
             if self.metaframe.lock('subspace') is True:
                 return self.subspace.__setitem__(col, value)
             if self.metaframe.lock('subspace') is False:

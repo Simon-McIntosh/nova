@@ -8,11 +8,11 @@ def start():
             'expand_frame_repr': False,  # Don't wrap to multiple pages
             'max_rows': 14,
             'max_seq_items': 50,         # Max length of printed sequence
-            'precision': 2,
+            'precision': 4,
             'show_dimensions': False
         },
         'mode': {
-            'chained_assignment': None   # Controls SettingWithCopyWarning
+            'chained_assignment': 'raise'   # Controls SettingWithCopyWarning
         }
     }
 

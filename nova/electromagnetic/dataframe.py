@@ -5,10 +5,46 @@ import pandas
 import numpy as np
 
 from nova.electromagnetic.metaframe import MetaFrame
-from nova.electromagnetic.indexer import IndexerMixin, Indexer
+from nova.electromagnetic.indexer import Indexer
 
 # pylint: disable=too-many-ancestors
-# pylint:disable=unsubscriptable-object
+
+
+class SubSpaceError(IndexError):
+    """Prevent direct access to frame's subspace variables."""
+
+    def __init__(self, name, col):
+        super().__init__(
+            f'{name} access is restricted for subspace attributes. '
+            f'Use frame.subspace.{name}[:, {col}] = *.\n\n'
+            'Lock may be overridden via the following context manager '
+            'but subspace will still overwrite (Cavieat Usor):\n'
+            'with frame.metaframe.setlock(None):\n'
+            f'    frame.{name}[:, {col}] = *')
+
+
+class IndexerMixin:
+    """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
+
+    def __setitem__(self, key, value):
+        """Raise error when subspace variable is set directly from frame."""
+        col = self.obj._get_col(key)
+        value = self.obj._format_value(col, value)
+        if self.obj.in_field(col, 'subspace'):
+            if self.obj.metaframe.lock('subspace') is True:
+                raise SubSpaceError(self.name, col)
+        if self.obj.in_field(col, 'energize'):
+            if self.obj.metaframe.lock('energize') is False:
+                return self.obj.energize.__setitem__(key, value)
+        return super().__setitem__(key, value)
+
+    def __getitem__(self, key):
+        """Refresh subspace items prior to return."""
+        col = self.obj._get_col(key)
+        if self.obj.in_field(col, 'subspace'):
+            if self.obj.metaframe.lock('subspace') is True:
+                self.obj.set_frame(col)
+        return super().__getitem__(key)
 
 
 class Series(pandas.Series):
@@ -29,35 +65,15 @@ class DataFrame(pandas.DataFrame):
     def __init__(self,
                  data=None,
                  index: Optional[Collection[Any]] = None,
-                 columns: Optional[Collection[Any]] = None,
-                 mixin: IndexerMixin = IndexerMixin):
+                 columns: Optional[Collection[Any]] = None):
         super().__init__(data, index, columns)
-        self.indexer = Indexer(mixin)
+        self.indexer = Indexer(IndexerMixin)
         self.attrs['metaframe'] = MetaFrame()
 
-    @staticmethod
-    def isframe(obj, dataframe=True):
-        """
-        Return isinstance(arg[0], Frame | DataFrame) flag.
-
-        Parameters
-        ----------
-        obj : Any
-            Input.
-        dataframe : bool, optional
-            Accept pandas.DataFrame. The default is True.
-
-        Returns
-        -------
-        isframe: bool
-            Frame / pandas.DataFrame isinstance flag.
-
-        """
-        if isinstance(obj, DataFrame):
-            return True
-        if isinstance(obj, pandas.DataFrame) and dataframe:
-            return True
-        return False
+    def __repr__(self):
+        """Propagate frame subspace variables prior to display."""
+        self.update_frame()
+        return super().__repr__()
 
     @property
     def _constructor(self):
@@ -87,6 +103,30 @@ class DataFrame(pandas.DataFrame):
         """Extend DataFrame.iat, restrict subspace access."""
         return self.indexer.iat("iat", self)
 
+    @staticmethod
+    def isframe(obj, dataframe=True):
+        """
+        Return isinstance(arg[0], Frame | DataFrame) flag.
+
+        Parameters
+        ----------
+        obj : Any
+            Input.
+        dataframe : bool, optional
+            Accept pandas.DataFrame. The default is True.
+
+        Returns
+        -------
+        isframe: bool
+            Frame / pandas.DataFrame isinstance flag.
+
+        """
+        if isinstance(obj, DataFrame):
+            return True
+        if isinstance(obj, pandas.DataFrame) and dataframe:
+            return True
+        return False
+
     def _get_col(self, key):
         """Return column label."""
         if isinstance(key, tuple):
@@ -103,28 +143,83 @@ class DataFrame(pandas.DataFrame):
 
     def in_field(self, col, field):
         """Return Ture if col in metaframe.{field} and hasattr(self, field)."""
-        col = self._get_col(col)
         if not isinstance(col, str):
             return False
         if self._hasattr('metaframe') and self._hasattr(field):
-            return col in getattr(self.metaframe, field)
+            if hasattr(self.attrs[field], 'columns'):
+                return col in self.attrs[field].columns
         return False
 
+    def update_frame(self):
+        """Propagate subspace varables to frame."""
+        if self._hasattr('subspace'):
+            for col in self.subspace:
+                self.set_frame(col)
+
+    def set_frame(self, col):
+        """Inflate subspace variable and setattr in frame."""
+        self.assert_in_field(col, 'subspace')
+        with self.metaframe.setlock(True, 'subspace'):
+            value = getattr(self, col).to_numpy()[self.subref]
+        with self.metaframe.setlock(None, 'subspace'):
+            super().__setitem__(col, value)
+
+    def get_frame(self, col):
+        """Return inflated subspace variable."""
+        self.assert_in_field(col, 'subspace')
+        with self.metaframe.setlock(False, 'subspace'):
+            return super().__getitem__(col)
+
+    def assert_in_field(self, col, field):
+        """Check for col in metaframe.{field}, raise error if not found."""
+        try:
+            self.in_field(col, field)
+        except AssertionError as in_field_assert:
+            raise AssertionError(
+                f'\'{col}\' not specified in metaframe.subspace '
+                f'{self.metaframe.subspace}') from in_field_assert
+
     def __getattr__(self, col):
-        """Extend pandas.DataFrame.__getattr__. Intercept attrs."""
+        """Extend DataFrame.__getattr__. (frame.*)."""
         if col in self.attrs:
             return self.attrs[col]
         return super().__getattr__(col)
 
-    def __setattr__(self, col, value):
-        """Extend pandas.Extend DataFrame.__setattr__ (frame.* = *).."""
-        value = self._format_value(col, value)
-        return super().__setattr__(col, value)
+    def __getitem__(self, key):
+        """Extend DataFrame.__getitem__. (frame['*'])."""
+        col = self._get_col(key)
+        if self.in_field(col, 'subspace'):
+            if self.metaframe.lock('subspace') is True:
+                return self.subspace.__getattr__(col)
+            if self.metaframe.lock('subspace') is False:
+                self.set_frame(col)
+        return super().__getitem__(col)
 
-    def __setitem__(self, col, value):
-        """Extend pandas.Extend DataFrame.__setitem__. (frame['*'] = *)."""
+    '''
+    def __setattr__(self, col, value):
+        """Check lock. Extend DataFrame.__setattr__ (frame.* = *).."""
         value = self._format_value(col, value)
-        return super().__setitem__(col, value)
+        if self.in_field(col, 'subspace'):
+            if self.metaframe.lock('subspace') is True:
+                return self.subspace.__setattr__(col, value)
+            if self.metaframe.lock('subspace') is False:
+                raise SubSpaceError('setattr', col)
+        return super().__setattr__(col, value)
+    '''
+
+    def __setitem__(self, key, value):
+        """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
+        col = self._get_col(key)
+        value = self._format_value(col, value)
+        if self.in_field(col, 'subspace'):
+            if self.metaframe.lock('subspace') is True:
+                return self.subspace.__setitem__(key, value)
+            if self.metaframe.lock('subspace') is False:
+                raise SubSpaceError('setitem', col)
+        if self.in_field(col, 'energize'):
+            if self.metaframe.lock('energize') is False:
+                return self.energize.__setitem__(key, value)
+        return super().__setitem__(key, value)
 
     def _format_value(self, col, value):
         if not pandas.api.types.is_numeric_dtype(type(value)) \
@@ -145,5 +240,5 @@ class DataFrame(pandas.DataFrame):
 if __name__ == '__main__':
 
     df = DataFrame({'x': [1, 2, 3], 'z': 6.7})
-    df.x = 7
+    df.loc[:, 'x'] = 7
     print(df.loc[:, 'x'])

@@ -25,7 +25,6 @@ class MetaFrame(MetaData):
     exclude: list[str] = field(default_factory=lambda: [])
     subspace: list[str] = field(default_factory=lambda: [
         'Ic', 'It', 'Nt', 'active', 'plasma', 'optimize', 'feedback'])
-    current: list[str] = field(default_factory=lambda: ['Ic', 'It', 'Nt'])
     default: dict[str, Union[float, str, bool, None]] = field(
         repr=False, default_factory=lambda: {
             'x': 0., 'z': 0.,
@@ -42,10 +41,10 @@ class MetaFrame(MetaData):
             'feedback': False, 'acloss': False,
             'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.,
             'name': '', 'label': 'Coil', 'delim': '', 'offset': 0})
+    _lock: dict[str, bool] = field(default_factory=lambda: {
+        'subspace': True, 'energize': False}, init=False)
 
-    _lock = {'subspace': True, 'dependant': True}
-
-    def lock(self, key):
+    def lock(self, key=None):
         """
         Return lock status.
 
@@ -55,29 +54,36 @@ class MetaFrame(MetaData):
             Lock label.
 
         """
-        return self._lock[key]
+        if key is None:
+            return self._lock
+        else:
+            return self._lock[key]
 
     @contextmanager
-    def setlock(self, key, status):
+    def setlock(self, status, keys=None):
         """
         Manage access to subspace frame variables.
 
         Parameters
         ----------
-        key : str
-            Lock label.
         status : Union[bool, None]
             Subset lock status.
+        keys : Union[str, list[str]]
+            Lock label, if None set all keys in self._lock.
 
         Returns
         -------
         None.
 
         """
-        _lock = self._lock[key]
-        self._lock[key] = status
+        if keys is None:
+            keys = list(self._lock.keys())
+        if isinstance(keys, str):
+            keys = [keys]
+        _lock = {key: self._lock[key] for key in keys}
+        self._lock |= {key: status for key in keys}
         yield
-        self._lock[key] = _lock
+        self._lock |= _lock
 
     def validate(self):
         """

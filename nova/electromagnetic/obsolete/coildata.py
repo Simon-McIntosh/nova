@@ -9,6 +9,33 @@ Created on Thu Feb 18 20:33:42 2021
 
 """
 
+    def __getattr__(self, col):
+        """Extend DataFrame.__getattr__. (frame.*)."""
+        print('getattr')
+        if col in self.attrs:
+            return self.attrs[col]
+        if self.in_field(col, 'subspace'):
+            if self.metaframe.lock('subspace') is True:
+                return self.subspace.__getattr__(col)
+            if self.metaframe.lock('subspace') is False:
+                self.set_frame(col)
+        return super().__getattr__(col)
+
+    def __setattr__(self, col, value):
+        """Check lock. Extend DataFrame.__setattr__ (frame.* = *).."""
+        value = self._format_value(col, value)
+        if self.in_field(col, 'subspace'):
+            if self.metaframe.lock('subspace') is True:
+                return self.subspace.__setattr__(col, value)
+            if self.metaframe.lock('subspace') is False:
+                raise SubSpaceError('setattr', col)
+        if self.in_field(col, 'energize'):
+            if self.metaframe.lock('energize') is False:
+                print('setattr')
+        return super().__setattr__(col, value)
+
+
+
 
 #class _ScalarAccessIndexer(IndexerMixin,
 #                           pandas.core.indexing._ScalarAccessIndexer):

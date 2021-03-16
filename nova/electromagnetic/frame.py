@@ -152,6 +152,10 @@ class Frame(DataFrame):
                 unset = np.array(self.metaframe.additional)[additional_unset]
                 for attr in unset:
                     self.loc[:, attr] = self.metaframe.default[attr]
+                turn_set = np.array([attr in self.columns
+                                     for attr in ['It', 'Nt']])
+                if 'Ic' in unset and turn_set.all():
+                    self.loc[:, 'Ic'] = self.loc[:, 'It'] / self.loc[:, 'Nt']
             # update nan
             isnan = [pandas.isna(self.loc[:, attr]).any()
                      for attr in self.metaframe.additional]
@@ -356,31 +360,30 @@ class Frame(DataFrame):
     def _build_data(self, *args, **kwargs):
         """Return data dict built from *args and **kwargs."""
         data = {}  # python 3.6+ assumes dict is insertion ordered
-        for key, arg in zip(self.metaframe.required, args):
-            data[key] = np.array(arg, dtype=float)  # add required arguments
-        # current_label = self._current_label(**kwargs)
-        for key in self.metaframe.additional:
-            if key in kwargs:
-                data[key] = kwargs.pop(key)
-            else:
-                data[key] = self.metaframe.default[key]
+        for attr, arg in zip(self.metaframe.required, args):
+            data[attr] = np.array(arg, dtype=float)  # add required arguments
         additional = []
-        for key in kwargs:
-            if key in self.metaframe.default:
-                additional.append(key)
-                data[key] = kwargs[key]
-        for key in additional:
-            del kwargs[key]
-        if len(additional) > 0:  # extend aditional arguments
-            self.metaframe.metadata = {'additional': additional}
-        # self._propogate_current(current_label, data)
-        if len(kwargs) > 0:
+        for attr in list(kwargs.keys()):
+            if attr in self.metaframe.default:
+                data[attr] = kwargs.pop(attr)  # add keyword arguments
+                if attr not in self.metaframe.additional:
+                    additional.append(attr)
+        if len(kwargs) > 0:  # ckeck for unset kwargs
             unset_kwargs = np.array(list(kwargs.keys()))
             default = {key: '_default_value_' for key in unset_kwargs}
             raise IndexError(
                 f'unset kwargs: {unset_kwargs}\n'
                 'enter default value in self.metaframe.defaults\n'
                 f'set as self.metaframe.meatadata = {{default: {default}}}')
+        if 'It' in data and 'Ic' not in data:  # patch line current
+            data['Ic'] = \
+                data['It'] / data.get('Nt', self.metaframe.default['Nt'])
+        if len(additional) > 0:  # extend aditional arguments
+            self.metaframe.metadata = {'additional': additional}
+        additional_unset = [attr for attr in self.metaframe.additional
+                            if attr not in data]
+        for attr in additional_unset:  # set default attributes
+            data[attr] = self.metaframe.default[attr]
         return data
 
     @staticmethod
@@ -433,17 +436,27 @@ class Frame(DataFrame):
 if __name__ == '__main__':
 
     frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-
-    frame.add_frame(4.987878, range(3), Ic=4.1, Nt=4.3, link=True)
+    frame.add_frame(4, range(2), It=5)
+    print(frame)
+    #frame.add_frame(4.987878, range(3), It=4.3, Nt=4.3)
+    #print(frame)
+    '''
     frame.add_frame(5, range(2), link=False)
 
-    frame.Ic = 7
+    #frame.It = 7
     #frame.loc['Coil1':'Coil3', 'Ic'] = 6.6
 
-    #frame.iloc[0:3, 2] = 6.6
+    #frame.subspace.iloc[0:2, 0] = 6.6
+    #frame.subspace.loc['Coil0':'Coil4', 'It'] = 7.7
+    print()
     print(frame.Ic)
+    print(frame.It)
+    print(frame.loc[:, 'Ic'])
+    print(frame.loc[:, 'It'])
 
+    frame.Nt = 1
+    print()
+    print(frame.Ic)
+    print(frame.It)
 
-    #print(frame.Ic)
-    #print(frame.loc['Coil0'])
-    #print(frame.Ic)
+    '''

@@ -20,20 +20,9 @@ class Energize(MetaMethod):
     columns: list[str] = field(default_factory=lambda: ['Ic', 'It', 'Nt'])
     require_all: bool = False
 
-
-    # TODO remove turn current
-
     def initialize(self):
-        """Init current attributes."""
-        self.frame.metadata = {'additional': self.columns}
-
-    def __setitem__(self, key, value):
-        """Manage setattr for dependant variables."""
-        if hasattr(self, 'frame'):
-            col = self.frame._get_col(key)
-            if self.frame.in_field(col, 'energize'):
-                return self._update(key, value, col)
-        return super().__setitem__(key, value)
+        """Init attributes."""
+        pass
 
     def _get_key(self, key, col=None):
         if col is None:
@@ -42,11 +31,36 @@ class Energize(MetaMethod):
             return key
         if isinstance(key, tuple):
             if isinstance(key[-1], int):
-                col = self.frame.columns.get_loc(col)
+                if not isinstance(col, int):
+                    col = self.frame.columns.get_loc(col)
             return (*key[:-1], col)
         if isinstance(col, int):
             return self.frame.columns[col]
         return col
+
+    def _set_item(self, indexer, key, value):
+        if self.frame._get_col(key) == 'It' and \
+                self.frame.metaframe.lock('energize') is not True:
+            value /= indexer.__getitem__(self._get_key(key, 'Nt'))
+            return indexer.__setitem__(self._get_key(key, 'Ic'), value)
+        return indexer.__setitem__(key, value)
+
+    def _get_item(self, indexer, key):
+        if self.frame._get_col(key) == 'It':
+            line_current = indexer.__getitem__(self._get_key(key, 'Ic'))
+            turn_number = indexer.__getitem__(self._get_key(key, 'Nt'))
+            with self.frame.metaframe.setlock(True, 'energize'):
+                self._set_item(indexer, key, line_current*turn_number)
+        return indexer.__getitem__(key)
+
+    '''
+    def __setitem__(self, key, value):
+        """Manage setattr for dependant variables."""
+        if hasattr(self, 'frame'):
+            col = self.frame._get_col(key)
+            if self.frame.in_field(col, 'energize'):
+                return self._update(key, value, col)
+        return super().__setitem__(key, value)
 
     def is_integer_slice(self, index):
         """Return True if slice.start or slice.stop is int."""
@@ -69,6 +83,7 @@ class Energize(MetaMethod):
             return self.frame[key]
         if self.is_integer_slice(key[0]):
             return self.frame.iloc[key]
+        print(key)
         return self.frame.loc[key]
 
     def _update(self, key, value, col):
@@ -84,3 +99,4 @@ class Energize(MetaMethod):
             if col == 'Nt':  # turn number  -> update turn current
                 value *= self._get_item(key, 'Ic').values
                 self._set_item(key, value, 'It')
+    '''

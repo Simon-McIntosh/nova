@@ -9,6 +9,47 @@ Created on Thu Feb 18 20:33:42 2021
 
 """
 
+    '''
+    @property
+    def line_current(self):
+        return self.loc[:, 'Ic']
+
+    @line_current.setter
+    def line_current(self, current):
+        self.loc[:, 'Ic'] = current
+    '''
+
+    def _current_label(self, **kwargs):
+        """Return current label, Ic or It."""
+        current_label = None
+        if 'Ic' in self.metaframe.required or 'Ic' in kwargs:
+            current_label = 'Ic'
+        elif 'It' in self.metaframe.required or 'It' in kwargs:
+            current_label = 'It'
+        return current_label
+
+    @staticmethod
+    def _propogate_current(current_label, data):
+        """
+        "Propogate current data, Ic->It or It->Ic.
+
+        Parameters
+        ----------
+        current_label : str
+            Current label, Ic or It.
+        data : Union[pandas.DataFrame, dict]
+            Current / turn data.
+
+        Returns
+        -------
+        None.
+
+        """
+        if current_label == 'Ic':
+            data['It'] = data['Ic'] * data['Nt']
+        elif current_label == 'It':
+            data['Ic'] = data['It'] / data['Nt']
+
     def __getattr__(self, col):
         """Extend DataFrame.__getattr__. (frame.*)."""
         print('getattr')

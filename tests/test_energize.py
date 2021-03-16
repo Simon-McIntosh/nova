@@ -81,8 +81,6 @@ def test_subspace_Ic():
     coilframe.add_frame(0.5, [6, 8.3], Nt=0.5)
     coilframe.add_frame(0.5, range(10), Nt=3.5, link=True)
     coilframe.Ic = [6.6, 6.6, 1]
-
-    print(coilframe)
     assert coilframe.It.to_list() == [3.3, 3.3, 3.5]
 
 if __name__ == '__main__':

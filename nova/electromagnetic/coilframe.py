@@ -30,47 +30,6 @@ class CoilFrame(Frame):
         super().__init__(data, index, columns, attrs, **metadata)
         self.attrs['subspace'] = SubSpace(self)
 
-    '''
-    @property
-    def line_current(self):
-        return self.loc[:, 'Ic']
-
-    @line_current.setter
-    def line_current(self, current):
-        self.loc[:, 'Ic'] = current
-    '''
-
-    def _current_label(self, **kwargs):
-        """Return current label, Ic or It."""
-        current_label = None
-        if 'Ic' in self.metaframe.required or 'Ic' in kwargs:
-            current_label = 'Ic'
-        elif 'It' in self.metaframe.required or 'It' in kwargs:
-            current_label = 'It'
-        return current_label
-
-    @staticmethod
-    def _propogate_current(current_label, data):
-        """
-        "Propogate current data, Ic->It or It->Ic.
-
-        Parameters
-        ----------
-        current_label : str
-            Current label, Ic or It.
-        data : Union[pandas.DataFrame, dict]
-            Current / turn data.
-
-        Returns
-        -------
-        None.
-
-        """
-        if current_label == 'Ic':
-            data['It'] = data['Ic'] * data['Nt']
-        elif current_label == 'It':
-            data['Ic'] = data['It'] / data['Nt']
-
 
 if __name__ == '__main__':
 
@@ -79,12 +38,14 @@ if __name__ == '__main__':
 
     coilframe.add_frame(4, range(3), link=True)
     coilframe.add_frame(4, range(2), link=False)
-    coilframe.add_frame(4, range(4000), link=True)
+    coilframe.add_frame(4, range(4), link=True)
 
     def set_current():
         coilframe.Ic = np.random.rand(len(coilframe.subspace))
 
     set_current()
+
+    coilframe.subspace.iloc[3, 0] = 33.4
     print(coilframe)
 
     #frame.x = [1, 2, 3]

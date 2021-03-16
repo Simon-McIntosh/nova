@@ -66,10 +66,12 @@ def test_loc():
 
 
 def test_loc_slice():
-    coilframe = CoilFrame(Required=['x', 'z'], Additional=[], label='Coil',
-                          offset=15)
+    coilframe = CoilFrame(Required=['x', 'z'],
+                          Additional=['Ic'], label='Coil', offset=15)
     coilframe.add_frame(4, range(2), It=5, link=True)
     coilframe.add_frame(4, range(2), It=7.3, link=False)
+
+    print(coilframe)
     coilframe.subspace.loc['Coil15':'Coil17', 'It'] = [3.6, 5.2]
     assert coilframe.It.to_list() == [3.6, 5.2, 7.3]
 
@@ -86,10 +88,8 @@ def test_iloc():
     coilframe = CoilFrame(Required=['x', 'z'], Additional=[])
     coilframe.add_frame(4, range(7), Ic=5, link=True)
     coilframe.add_frame(4, range(2), link=False)
-    #coilframe.Ic = 0
+    coilframe.Ic = 0
     coilframe.subspace.iloc[1, 0] = 3.6
-    print(coilframe.subspace)
-    print(coilframe.Ic)
     assert coilframe.Ic.to_list() == [0, 3.6, 0]
 
 
@@ -168,5 +168,5 @@ def test_subspace_lock():
 
 if __name__ == '__main__':
 
-    test_iloc()
+    test_loc_slice()
     #pytest.main([__file__])

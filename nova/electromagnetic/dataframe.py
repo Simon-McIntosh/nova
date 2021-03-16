@@ -6,6 +6,9 @@ import numpy as np
 
 from nova.electromagnetic.metaframe import MetaFrame
 from nova.electromagnetic.indexer import Indexer
+from nova.electromagnetic.energize import Energize
+from nova.electromagnetic.multipoint import MultiPoint
+from nova.electromagnetic.polygon import Polygon
 
 # pylint: disable=too-many-ancestors
 
@@ -35,7 +38,7 @@ class IndexerMixin:
                 raise SubSpaceError(self.name, col)
         if self.obj.in_field(col, 'energize'):
             if self.obj.metaframe.lock('energize') is False:
-                return self.obj.energize.__setitem__(key, value)
+                return self.obj.energize._set_item(super(), key, value)
         return super().__setitem__(key, value)
 
     def __getitem__(self, key):
@@ -44,6 +47,9 @@ class IndexerMixin:
         if self.obj.in_field(col, 'subspace'):
             if self.obj.metaframe.lock('subspace') is True:
                 self.obj.set_frame(col)
+        if self.obj.in_field(col, 'energize'):
+            if self.obj.metaframe.lock('subspace') is not None:
+                return self.obj.energize._get_item(super(), key)
         return super().__getitem__(key)
 
 
@@ -67,7 +73,7 @@ class DataFrame(pandas.DataFrame):
                  index: Optional[Collection[Any]] = None,
                  columns: Optional[Collection[Any]] = None):
         super().__init__(data, index, columns)
-        self.indexer = Indexer(IndexerMixin)
+        self.attrs['indexer'] = Indexer(IndexerMixin)
         self.attrs['metaframe'] = MetaFrame()
 
     def __repr__(self):
@@ -148,6 +154,7 @@ class DataFrame(pandas.DataFrame):
         if self._hasattr('metaframe') and self._hasattr(field):
             if hasattr(self.attrs[field], 'columns'):
                 return col in self.attrs[field].columns
+        #if self._hasattr('metaframe') and field == 'subspace':
         return False
 
     def update_frame(self):
@@ -179,11 +186,11 @@ class DataFrame(pandas.DataFrame):
                 f'\'{col}\' not specified in metaframe.subspace '
                 f'{self.metaframe.subspace}') from in_field_assert
 
-    def __getattr__(self, col):
+    def __getattr__(self, name):
         """Extend DataFrame.__getattr__. (frame.*)."""
-        if col in self.attrs:
-            return self.attrs[col]
-        return super().__getattr__(col)
+        if name in self.attrs:
+            return self.attrs[name]
+        return super().__getattr__(name)
 
     def __getitem__(self, key):
         """Extend DataFrame.__getitem__. (frame['*'])."""
@@ -193,19 +200,10 @@ class DataFrame(pandas.DataFrame):
                 return self.subspace.__getattr__(col)
             if self.metaframe.lock('subspace') is False:
                 self.set_frame(col)
+        if self.in_field(col, 'energize'):
+            if self.metaframe.lock('subspace') is not None:
+                return self.energize._get_item(super(), key)
         return super().__getitem__(col)
-
-    '''
-    def __setattr__(self, col, value):
-        """Check lock. Extend DataFrame.__setattr__ (frame.* = *).."""
-        value = self._format_value(col, value)
-        if self.in_field(col, 'subspace'):
-            if self.metaframe.lock('subspace') is True:
-                return self.subspace.__setattr__(col, value)
-            if self.metaframe.lock('subspace') is False:
-                raise SubSpaceError('setattr', col)
-        return super().__setattr__(col, value)
-    '''
 
     def __setitem__(self, key, value):
         """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
@@ -218,7 +216,7 @@ class DataFrame(pandas.DataFrame):
                 raise SubSpaceError('setitem', col)
         if self.in_field(col, 'energize'):
             if self.metaframe.lock('energize') is False:
-                return self.energize.__setitem__(key, value)
+                return self.energize._set_item(super(), key, value)
         return super().__setitem__(key, value)
 
     def _format_value(self, col, value):

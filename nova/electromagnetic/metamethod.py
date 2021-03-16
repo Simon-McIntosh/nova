@@ -24,7 +24,8 @@ class MetaMethod(metaclass=ABCMeta):
         """Generate multi-point constraints."""
         if self.generate:
             self.update_additional()
-            self.initialize()
+            if not self.frame.empty:
+                self.initialize()
 
     @abstractmethod
     def initialize(self):
@@ -40,7 +41,7 @@ class MetaMethod(metaclass=ABCMeta):
     @property
     def required_attributes(self):
         """Return boolean status of attributes found in frame.columns."""
-        return np.array([attr in self.frame.columns
+        return np.array([attr in self.frame.metaframe.columns
                          for attr in self.required])
 
     def update_additional(self):

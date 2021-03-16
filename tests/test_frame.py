@@ -9,6 +9,29 @@ def test_instance():
     assert isinstance(frame, Frame)
 
 
+def test_Ic_unset():
+    frame = Frame(Required=['x'])
+    frame.add_frame([4, 5], It=6.5)
+    assert frame.Ic.to_list() == [6.5, 6.5]
+
+
+def test_data_It_Ic_unset():
+    frame = Frame({'x': [1, 2], 'It': 5, 'Nt': 2.5}, Required=['x'])
+    assert frame.Ic.to_list() == [2, 2]
+
+
+def test_data_It_Ic_set():
+    frame = Frame({'x': [1, 2], 'It': 5, 'Ic': 10, 'Nt': 2.5}, Required=['x'])
+    assert frame.Ic.to_list() == [10, 10]
+    assert frame.It.to_list() == [25, 25]
+
+
+def test_Ic_unset_Additional():
+    frame = Frame(Required=['x', 'z'], Additional=['Ic'])
+    frame.add_frame(4, range(2), It=5)
+    assert frame.Ic.to_list() == [5, 5]
+
+
 def test_dataframe_subclass():
     assert issubclass(Frame, pandas.DataFrame)
 
@@ -150,4 +173,5 @@ def test_warn_new_attribute():
 
 if __name__ == '__main__':
 
-    pytest.main([__file__])
+    test_Ic_unset_Additional()
+    #pytest.main([__file__])

@@ -2,10 +2,10 @@
 import pandas
 import numpy as np
 
-from nova.electromagnetic.frame import Frame
+from nova.electromagnetic.dataframe import DataFrame
 
 
-class SubSpace(Frame):
+class SubSpace(DataFrame):
     """Manage frame subspace (all independent rows)."""
 
     def __init__(self, frame):
@@ -22,9 +22,8 @@ class SubSpace(Frame):
             return frame.metaframe.subspace
         if np.array([attr in frame.metaframe.subspace
                      for attr in frame.columns]).any():
-            with frame.metaframe.setlock('subspace', None):  # update metaframe
-                frame.metadata = {'additional':
-                                  frame.metaframe.subspace}
+            with frame.metaframe.setlock(None, 'subspace'):  # update metaframe
+                frame.metadata = {'additional': frame.metaframe.subspace}
             return frame.metaframe.subspace
         return []
 

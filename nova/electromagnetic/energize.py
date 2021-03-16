@@ -26,17 +26,24 @@ class Energize(MetaMethod):
 
     def _get_key(self, key, col=None):
         if col is None:
-            if isinstance(key, int):
-                return self.frame.columns[key]
+            #if isinstance(key, int):
+            #    return self.frame.columns[key]
             return key
         if isinstance(key, tuple):
             if isinstance(key[-1], int):
                 if not isinstance(col, int):
                     col = self.frame.columns.get_loc(col)
             return (*key[:-1], col)
-        if isinstance(col, int):
-            return self.frame.columns[col]
-        return col
+        return key
+        '''
+        if isinstance(key, int):
+            if isinstance(col, int):
+                return col
+            return self.frame.columns.get_loc(col)
+        if isinstance(col, str):
+            return col
+        return self.frame.columns[col]
+        '''
 
     def _set_item(self, indexer, key, value):
         if self.frame._get_col(key) == 'It' and \

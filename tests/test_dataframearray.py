@@ -14,8 +14,8 @@ def test_init_update():
     frame = DataFrameArray(frame)
     update_array = frame.metaarray.update_array
     update_frame = frame.metaarray.update_frame
-    assert np.array(list(update_array.values())).all() and \
-        not np.array(list(update_frame.values())).any()
+    assert list(update_array.values()) == [False, True]
+    assert list(update_frame.values()) == [True, False]
 
 
 def test_exclude_internal_metadata():

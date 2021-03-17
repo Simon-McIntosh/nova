@@ -10,6 +10,23 @@ Created on Thu Feb 18 20:33:42 2021
 
 """
 
+    def _validate_metadata(self):
+        """Validate required and additional attributes in FrameArray."""
+        # check for additional attributes in metaarray.array
+        if 'metaarray' in self.attrs:
+            unset = [attr not in self.metaframe.columns
+                     for attr in self.metaarray.array]
+            if np.array(unset).any():
+                raise IndexError(
+                    'attributes in metadata.array '
+                    f'{np.array(self.metaarray.array)[unset]}'
+                    ' not found in metaframe.required '
+                    f'{self.metaframe.required}'
+                    f'or metaframe.additional {self.metaframe.additional}')
+        if not self.empty:
+            self._format_columns()
+
+
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 
 from typing import Optional, Collection, Any, Union

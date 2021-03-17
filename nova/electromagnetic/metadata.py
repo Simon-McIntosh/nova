@@ -70,7 +70,7 @@ class MetaData(ABC):
                     getattr(self, attribute).update(value)
                 elif types[attribute] == list:
                     getattr(self, attribute).extend(
-                        [attr for attr in value
+                        [attr for attr in list(dict.fromkeys(value))
                          if attr not in getattr(self, attribute)])
                 else:
                     raise TypeError(f'attribute type {types[attribute]} ',

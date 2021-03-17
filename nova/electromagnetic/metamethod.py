@@ -41,11 +41,17 @@ class MetaMethod(metaclass=ABCMeta):
     @property
     def required_attributes(self):
         """Return boolean status of attributes found in frame.columns."""
-        return np.array([attr in self.frame.metaframe.columns
-                         for attr in self.required])
+        return np.array([attr in self.frame.columns for attr in self.required])
+
+    def _unset(self, attributes: list[str]) -> list[str]:
+        """Return unset attributes."""
+        return [attr for attr in list(dict.fromkeys(attributes))
+                if attr not in self.frame.metaframe.columns]
 
     def update_additional(self):
         """Update additional attributes if subset exsists in frame.columns."""
-        self.frame.metadata = {'additional': self.additional}
+        additional = self._unset(self.additional)
         if not self.require_all:
-            self.frame.metadata = {'additional': self.required}
+            additional.extend(self._unset(self.required))
+        self.frame.metadata = {'additional': additional}
+        self.frame.update_columns()

@@ -85,4 +85,5 @@ def test_subspace_Ic():
 
 if __name__ == '__main__':
 
-    pytest.main([__file__])
+    test_set_loc_Ic()
+    #pytest.main([__file__])

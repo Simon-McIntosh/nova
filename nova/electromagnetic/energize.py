@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+import numpy as np
+
 from nova.electromagnetic.metamethod import MetaMethod
 
 if TYPE_CHECKING:
@@ -14,36 +16,33 @@ class Energize(MetaMethod):
     """Manage dependant frame energization parameters."""
 
     frame: Frame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['Ic', 'It'])
+    required: list[str] = field(default_factory=lambda: ['Ic', 'It', 'Nt'])
     additional: list[str] = field(default_factory=lambda: [
         'Ic', 'It', 'Nt', 'active', 'plasma', 'optimize', 'feedback'])
-    columns: list[str] = field(default_factory=lambda: ['Ic', 'It', 'Nt'])
     require_all: bool = False
 
     def initialize(self):
         """Init attributes."""
         pass
 
+    @property
+    def columns(self):
+        """Return required columns."""
+        return self.required
+
     def _get_key(self, key, col=None):
         if col is None:
-            #if isinstance(key, int):
-            #    return self.frame.columns[key]
             return key
         if isinstance(key, tuple):
             if isinstance(key[-1], int):
                 if not isinstance(col, int):
                     col = self.frame.columns.get_loc(col)
             return (*key[:-1], col)
-        return key
-        '''
-        if isinstance(key, int):
-            if isinstance(col, int):
-                return col
-            return self.frame.columns.get_loc(col)
-        if isinstance(col, str):
-            return col
-        return self.frame.columns[col]
-        '''
+        return col
+
+    def _hasattrs(self, attrs: list[str]):
+        """Return True if all required attributes are available else False."""
+        return np.array([attr in self.frame.columns for attr in attrs]).all()
 
     def _set_item(self, indexer, key, value):
         if self.frame._get_col(key) == 'It' and \
@@ -53,7 +52,7 @@ class Energize(MetaMethod):
         return indexer.__setitem__(key, value)
 
     def _get_item(self, indexer, key):
-        if self.frame._get_col(key) == 'It':
+        if self.frame._get_col(key) == 'It' and self._hasattrs(['Ic', 'Nt']):
             line_current = indexer.__getitem__(self._get_key(key, 'Ic'))
             turn_number = indexer.__getitem__(self._get_key(key, 'Nt'))
             with self.frame.metaframe.setlock(True, 'energize'):

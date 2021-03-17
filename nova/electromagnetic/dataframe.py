@@ -51,8 +51,7 @@ class IndexerMixin:
             if self.obj.metaframe.lock('subspace') is True:
                 self.obj.set_frame(col)
         if self.obj.in_field(col, 'energize'):
-            print(self.obj.metaframe.lock('energize'))
-            if self.obj.metaframe.lock('energize') is not None:
+            if self.obj.metaframe.lock('energize') is False:
                 return self.obj.energize._get_item(super(), key)
         return super().__getitem__(key)
 
@@ -86,21 +85,89 @@ class DataFrame(pandas.DataFrame):
                  **metadata: dict[str, Collection[Any]]):
         super().__init__(data, index, columns)
         self.attrs['indexer'] = Indexer(IndexerMixin)
-        self.attrs['metaframe'] = MetaFrame()
-        self.extract_attrs(data, attrs)
+        if isinstance(data, pandas.core.internals.managers.BlockManager):
+            return
+        self.update_attrs(data, attrs)
         self.update_metadata(metadata)
         self.update_index()
+        self.update_columns()
         self.attrs['energize'] = Energize(self)
         self.attrs['multipoint'] = MultiPoint(self)
         self.attrs['polygon'] = Polygon(self)
 
-    def extract_attrs(self, data, attrs):
+    def update_attrs(self, data, attrs):
         """Extract frame attrs from data and update."""
+        self.attrs['metaframe'] = MetaFrame()
         if hasattr(data, 'attrs'):
             self.attrs |= data.attrs
         if attrs is None:
             attrs = {}
         self.attrs |= attrs
+
+
+    @property
+    def _constructor(self):
+        return DataFrame
+
+    @property
+    def _constructor_sliced(self):
+        return Series
+
+    def __repr__(self):
+        """Propagate frame subspace variables prior to display."""
+        self.update_frame()
+        return super().__repr__()
+
+    def update_frame(self):
+        """Propagate subspace varables to frame."""
+        if self._hasattr('subspace'):
+            for col in self.subspace:
+                self.set_frame(col)
+
+    def set_frame(self, col):
+        """Inflate subspace variable and setattr in frame."""
+        self.assert_in_field(col, 'subspace')
+        with self.metaframe.setlock(True, 'subspace'):
+            value = getattr(self, col).to_numpy()
+            if hasattr(self, 'subref'):  # inflate
+                value = value[self.subref]
+        with self.metaframe.setlock(None, 'subspace'):
+            super().__setitem__(col, value)
+
+    def get_frame(self, col):
+        """Return inflated subspace variable."""
+        self.assert_in_field(col, 'subspace')
+        with self.metaframe.setlock(False, 'subspace'):
+            return super().__getitem__(col)
+
+    def assert_in_field(self, col, field):
+        """Check for col in metaframe.{field}, raise error if not found."""
+        try:
+            self.in_field(col, field)
+        except AssertionError as in_field_assert:
+            raise AssertionError(
+                f'\'{col}\' not specified in metaframe.subspace '
+                f'{self.metaframe.subspace}') from in_field_assert
+
+    @property
+    def loc(self):
+        """Extend DataFrame.loc, restrict subspace access."""
+        return self.indexer.loc("loc", self)
+
+    @property
+    def iloc(self):
+        """Extend DataFrame.iloc, restrict subspace access."""
+        return self.indexer.iloc("iloc", self)
+
+    @property
+    def at(self):
+        """Extend DataFrame.at, restrict subspace access."""
+        return self.indexer.at("at", self)
+
+    @property
+    def iat(self):
+        """Extend DataFrame.iat, restrict subspace access."""
+        return self.indexer.iat("iat", self)
 
     @property
     def metaattrs(self) -> list[str]:
@@ -119,11 +186,10 @@ class DataFrame(pandas.DataFrame):
     def metadata(self, metadata):
         for attr in self.metaattrs:
             getattr(self, attr).metadata = metadata
-        self._validate_metadata()
 
     def update_metadata(self, metadata):
         """Update metadata. Set default and meta*.metadata."""
-        columns = not self.columns.empty
+        empty = self.columns.empty
         default = {}
         framearray = {attr: {} for attr in self.metaattrs}
         if metadata is None:
@@ -144,35 +210,19 @@ class DataFrame(pandas.DataFrame):
                              f'{metadata}.')
         for attr in framearray:
             getattr(self, attr).metadata |= framearray[attr]
-        if columns:
-            self._update_metaframe()
+        if not empty:
+            self._match_columns()
 
-    def _update_metaframe(self):
+    def _match_columns(self):
         """Update metaframe to match self.columns if self.columns not empty."""
         metadata = {}
         for attribute in ['required', 'additional']:
             metadata[attribute.capitalize()] = [
                 attr for attr in getattr(self.metaframe, attribute)
                 if attr in self.columns]
-        self.metadata = metadata
+        self.metaframe.metadata = metadata
 
-    def _validate_metadata(self):
-        """Validate required and additional attributes in FrameArray."""
-        # check for additional attributes in metaarray.array
-        if 'metaarray' in self.attrs:
-            unset = [attr not in self.metaframe.columns
-                     for attr in self.metaarray.array]
-            if np.array(unset).any():
-                raise IndexError(
-                    'attributes in metadata.array '
-                    f'{np.array(self.metaarray.array)[unset]}'
-                    ' not found in metaframe.required '
-                    f'{self.metaframe.required}'
-                    f'or metaframe.additional {self.metaframe.additional}')
-        if not self.empty:
-            self._format_columns()
-
-    def _format_columns(self):
+    def update_columns(self):
         """
         Format DataFrame columns.
 
@@ -180,18 +230,29 @@ class DataFrame(pandas.DataFrame):
             - additional unset: insert default
             - isnan: insert default
         """
+        if self.columns.empty:
+            return
         with self.metaframe.setlock(None):
             columns = self.columns.to_list()
+            # check required
             required_unset = [attr not in columns
                               for attr in self.metaframe.required]
             if np.array(required_unset).any():
                 unset = np.array(self.metaframe.required)[required_unset]
                 raise IndexError(f'required attributes missing {unset}')
+            # fill nan
+            isnan = [pandas.isna(self.loc[:, attr]).any() for attr in columns]
+            if np.array(isnan).any():
+                nan = np.array(columns)[isnan]
+                for attr in nan:
+                    if attr in self.metaframe.default:
+                        index = pandas.isna(self.loc[:, attr])
+                        self.loc[index, attr] = self.metaframe.default[attr]
             # extend additional
             additional = [attr for attr in columns
                           if attr not in self.metaframe.columns]
             if additional:
-                self.metadata = {'additional': additional}
+                self.metaframe.metadata = {'additional': additional}
             # set defaults
             additional_unset = [attr not in columns
                                 for attr in self.metaframe.additional]
@@ -203,16 +264,6 @@ class DataFrame(pandas.DataFrame):
                                      for attr in ['It', 'Nt']])
                 if 'Ic' in unset and turn_set.all():
                     self.loc[:, 'Ic'] = self.loc[:, 'It'] / self.loc[:, 'Nt']
-            # update nan
-            print(self.metaframe.lock())
-            isnan = [pandas.isna(self.loc[:, attr]).any()
-                     for attr in self.metaframe.additional]
-            if np.array(isnan).any():
-                nan = np.array(self.metaframe.additional)[isnan]
-                for attr in nan:
-                    if attr in self.metaframe.default:
-                        index = pandas.isna(self.loc[:, attr])
-                        self.loc[index, attr] = self.metaframe.default[attr]
 
     def update_index(self):
         """Reset index if self.index is unset."""
@@ -348,8 +399,7 @@ class DataFrame(pandas.DataFrame):
         args, kwargs = self._extract(*args, **kwargs)
         data = self._build_data(*args, **kwargs)
         index = self._build_index(data, **kwargs)
-        insert = DataFrame(data, index=index, attrs=self.attrs)
-        return pandas.DataFrame(insert)
+        return DataFrame(data, index=index, attrs=self.attrs)
 
     def _extract(self, *args, **kwargs):
         """
@@ -410,6 +460,10 @@ class DataFrame(pandas.DataFrame):
         data = {}  # python 3.6+ assumes dict is insertion ordered
         for attr, arg in zip(self.metaframe.required, args):
             data[attr] = np.array(arg, dtype=float)  # add required arguments
+        attrs = list(data.keys()) + list(kwargs.keys())  # record passed attrs
+        for attr in self.metaframe.additional:  # set additional to default
+            data[attr] = self.metaframe.default[attr]
+        print(data)
         additional = []
         for attr in list(kwargs.keys()):
             if attr in self.metaframe.default:
@@ -423,15 +477,16 @@ class DataFrame(pandas.DataFrame):
                 f'unset kwargs: {unset_kwargs}\n'
                 'enter default value in self.metaframe.defaults\n'
                 f'set as self.metaframe.meatadata = {{default: {default}}}')
-        if 'It' in data and 'Ic' not in data:  # patch line current
+        if 'It' in attrs and 'Ic' not in attrs:  # patch line current
             data['Ic'] = \
                 data['It'] / data.get('Nt', self.metaframe.default['Nt'])
         if len(additional) > 0:  # extend aditional arguments
             self.metaframe.metadata = {'additional': additional}
-        additional_unset = [attr for attr in self.metaframe.additional
-                            if attr not in data]
-        for attr in additional_unset:  # set default attributes
-            data[attr] = self.metaframe.default[attr]
+        #additional_unset = [attr for attr in self.metaframe.additional
+        #                    if attr not in data]
+        #for attr in additional_unset:  # set default attributes
+        #    data[attr] = self.metaframe.default[attr]
+        print(data)
         return data
 
     @staticmethod
@@ -479,39 +534,6 @@ class DataFrame(pandas.DataFrame):
                 shapely.affinity.translate(self.loc[name, 'poly'],
                                            xoff=xoffset, yoff=zoffset)
             self.loc[name, 'patch'] = None  # re-generate coil patch
-
-    def __repr__(self):
-        """Propagate frame subspace variables prior to display."""
-        self.update_frame()
-        return super().__repr__()
-
-    @property
-    def _constructor(self):
-        return DataFrame
-
-    @property
-    def _constructor_sliced(self):
-        return Series
-
-    @property
-    def loc(self):
-        """Extend DataFrame.loc, restrict subspace access."""
-        return self.indexer.loc("loc", self)
-
-    @property
-    def iloc(self):
-        """Extend DataFrame.iloc, restrict subspace access."""
-        return self.indexer.iloc("iloc", self)
-
-    @property
-    def at(self):
-        """Extend DataFrame.at, restrict subspace access."""
-        return self.indexer.at("at", self)
-
-    @property
-    def iat(self):
-        """Extend DataFrame.iat, restrict subspace access."""
-        return self.indexer.iat("iat", self)
 
     @staticmethod
     def isframe(obj, dataframe=True):
@@ -561,37 +583,6 @@ class DataFrame(pandas.DataFrame):
         #if self._hasattr('metaframe') and field == 'subspace':
         return False
 
-    def update_frame(self):
-        """Propagate subspace varables to frame."""
-        if self._hasattr('subspace'):
-            for col in self.subspace:
-                self.set_frame(col)
-
-    def set_frame(self, col):
-        """Inflate subspace variable and setattr in frame."""
-        self.assert_in_field(col, 'subspace')
-        with self.metaframe.setlock(True, 'subspace'):
-            value = getattr(self, col).to_numpy()
-            if hasattr(self, 'subref'):  # inflate
-                value = value[self.subref]
-        with self.metaframe.setlock(None, 'subspace'):
-            super().__setitem__(col, value)
-
-    def get_frame(self, col):
-        """Return inflated subspace variable."""
-        self.assert_in_field(col, 'subspace')
-        with self.metaframe.setlock(False, 'subspace'):
-            return super().__getitem__(col)
-
-    def assert_in_field(self, col, field):
-        """Check for col in metaframe.{field}, raise error if not found."""
-        try:
-            self.in_field(col, field)
-        except AssertionError as in_field_assert:
-            raise AssertionError(
-                f'\'{col}\' not specified in metaframe.subspace '
-                f'{self.metaframe.subspace}') from in_field_assert
-
     def __getattr__(self, name):
         """Extend DataFrame.__getattr__. (frame.*)."""
         if name in self.attrs:
@@ -607,7 +598,7 @@ class DataFrame(pandas.DataFrame):
             if self.metaframe.lock('subspace') is False:
                 self.set_frame(col)
         if self.in_field(col, 'energize'):
-            if self.metaframe.lock('energize') is not None:
+            if self.metaframe.lock('energize') is False:
                 return self.energize._get_item(super(), key)
         return super().__getitem__(col)
 
@@ -643,7 +634,8 @@ class DataFrame(pandas.DataFrame):
 
 if __name__ == '__main__':
 
-    dataframe = DataFrame({'x': [1, 2, 3], 'z': 6.7})
-    dataframe.add_frame(1, 3, It=5)
-    dataframe.loc[:, 'x'] = 7
+    dataframe = DataFrame({'x': [1, 2, 3], 'z': 6.7}, additional=['Ic'])
+    print(dataframe.metaframe.additional)
+    dataframe.add_frame(1, range(3), It=5, link=True)
+    #dataframe.loc[:, 'x'] = 7
     print(dataframe)

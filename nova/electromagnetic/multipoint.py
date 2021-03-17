@@ -50,6 +50,7 @@ class MultiPoint(MetaMethod):
                 - factor = value
 
         """
+        self.frame.update_columns()
         isna = pandas.isna(self.frame.link)
         self.frame.at[isna, 'link'] = self.frame.metaframe.default['link']
         self.frame.at[isna, 'factor'] = \

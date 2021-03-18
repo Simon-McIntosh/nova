@@ -10,6 +10,23 @@ Created on Thu Feb 18 20:33:42 2021
 
 """
 
+    '''
+    @property
+    def metaarray(self):
+        """
+        Return metaarray instance, protect against pandas recursion loop.
+
+        To understand recursion, you must understand recursion.
+        """
+        self.update_metaarray()
+        return self.attrs['metaarray']
+
+    def update_metaarray(self):
+        """Update metaarray if not present in self.attrs."""
+        if 'metaarray' not in self.attrs:
+            self.attrs['metaarray'] = MetaArray()
+    '''
+
 
 #  data array
 

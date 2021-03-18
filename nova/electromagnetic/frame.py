@@ -43,6 +43,6 @@ if __name__ == '__main__':
         #frame.metaarray.data['Ic'] = np.random.rand(len(frame.subspace))
         frame.Ic = np.random.rand(len(frame.subspace))
 
-
-    set_current()
+    for _ in range(4000):
+        set_current()
     print(frame)

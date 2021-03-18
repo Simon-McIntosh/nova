@@ -84,7 +84,6 @@ def test_set_slice_on_col():
 
 def test_getattr_numpy():
     dataarray = DataArray({'x': [3, 2, 5, 7, 6], 'z': 0}, Array=['x'])
-    dataarray.loc[:, 'x'] = 5
     assert isinstance(dataarray.x, np.ndarray)
 
 
@@ -115,12 +114,10 @@ def test_setitem_slice_warn():
 def test_loc_update():
     dataarray = DataArray({'x': range(7), 'z': 0},
                           additional=['Ic'], Array=['Ic'], label='Coil')
+    dataarray.add_frame(1, 2)
+    dataarray.Ic = 9
+    dataarray.loc['Coil0', 'Ic'] = 7
     print(dataarray)
-    #dataarray.add_frame(1, 2)
-    #print(dataarray.columns)
-    #dataarray.Ic = 9
-    #dataarray.loc['Coil0', 'Ic'] = 7
-    #print(dataarray)
 
 if __name__ == '__main__':
 

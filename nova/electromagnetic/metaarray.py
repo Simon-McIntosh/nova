@@ -16,10 +16,15 @@ class MetaArray(MetaData):
     array: list[str] = field(default_factory=lambda: [])
     data: dict[str, Iterable[Union[str, int, float]]] = \
         field(default_factory=dict)
-    update_array: dict[str, bool] = field(default_factory=dict)
-    update_frame: dict[str, bool] = field(default_factory=dict)
+    update_array: dict[str, bool] = field(default_factory=dict, init=False)
+    update_frame: dict[str, bool] = field(default_factory=dict, init=False)
 
     _internal = ['data', 'update_array', 'update_frame']
+
+    def __post_init__(self):
+        """Init update flags."""
+        self.update_array = dict.fromkeys(self.update_array, True)
+        self.update_frame = dict.fromkeys(self.update_array, False)
 
     def __repr__(self):
         """Return __repr__."""

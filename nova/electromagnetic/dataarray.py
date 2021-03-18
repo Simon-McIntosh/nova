@@ -47,24 +47,10 @@ class DataArray(DataFrame):
         super()._extract_attrs(data, attrs)
         if not self._hasattr('metaarray'):
             self.attrs['metaarray'] = MetaArray()  # init metaframe
+        else:
+            print('post init')
+            self.metaarray.__post_init__()
         self.attrs['indexer'] = Indexer(ArrayMixin)
-
-    '''
-    @property
-    def metaarray(self):
-        """
-        Return metaarray instance, protect against pandas recursion loop.
-
-        To understand recursion, you must understand recursion.
-        """
-        self.update_metaarray()
-        return self.attrs['metaarray']
-
-    def update_metaarray(self):
-        """Update metaarray if not present in self.attrs."""
-        if 'metaarray' not in self.attrs:
-            self.attrs['metaarray'] = MetaArray()
-    '''
 
     def update_frame(self):
         """Transfer data from metaarray.data to frame."""
@@ -72,6 +58,7 @@ class DataArray(DataFrame):
             self._update_frame(col)
         super().update_frame()
 
+    @profile
     def _update_array(self, index=None, col=None, value=None):
         if index is None:
             index = slice(None)
@@ -84,13 +71,18 @@ class DataArray(DataFrame):
             value = self._getcol(col)
         self._setarray(index, col, value)
 
+    @profile
     def _setarray(self, index, col, value):
         """Set value in metaarray.data."""
-        if col not in self.metaarray.data:
-            self.metaarray.data[col] = self._getcol(col)
-        self.metaarray.data[col][index] = self._format_value(col, value)
+        if col not in self.metaarray.data or index == slice(None):
+            self.metaarray.data[col] = value
+        else:
+            self.metaarray.data[col][index] = value
+        if col not in self.columns:
+            super().__setitem__(col, value)
         self.metaarray.update_array[col] = False
 
+    @profile
     def _getcol(self, col):
         """Return col from frame."""
         try:
@@ -102,12 +94,11 @@ class DataArray(DataFrame):
     def _update_frame(self, col):
         """Copy col data to frame."""
         if self.metaarray.update_frame[col]:
-            super().__setitem__(col, self.metaarray.data[col])
+            super().__setitem__(col, self[col])
             self.metaarray.update_frame[col] = False
 
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
-        print('getitem', col)
         if col in self.metaarray.array:
             self.metaarray.update_frame[col] = True
             if self.metaarray.update_array[col]:
@@ -117,21 +108,27 @@ class DataArray(DataFrame):
 
     def __setitem__(self, col, value):
         """Extend DataFrame.__setitem__. (frame['*'] = *)."""
-        print('set item', col)
         if col in self.metaarray.array:
             self.metaarray.update_frame[col] = True
             return self._update_array(col=col, value=value)
         return super().__setitem__(col, value)
 
 
+
 if __name__ == '__main__':
 
-    dataarray = DataArray({'x': [3, 2, 5, 7, 6], 'z': 0}, Array=['x'])
-
-    dataarray.x[:3] = 5
-    dataarray.z[:3] = 5
-
-    print(dataarray.metaarray)
+    dataarray = DataArray({'x': range(7), 'z': 0},
+                          additional=['Ic'], Array=['Ic'], label='Coil')
+    dataarray.add_frame(1, range(3))
+    dataarray.Ic = 7.77
     print(dataarray)
 
-    print(dataarray.z)
+    '''
+    also...
+    dataarray = DataArray({'x': [3, 2, 5, 7, 6], 'z': 0}, Array=['x'])
+    #dataarray.loc[:, 'x'] = 5
+    print(dataarray.x)
+    '''
+
+
+

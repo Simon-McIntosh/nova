@@ -10,6 +10,47 @@ Created on Thu Feb 18 20:33:42 2021
 
 """
 
+
+#  data array
+
+    '''
+    def __getattr__(self, col):
+        """Extend DataFrame.__getattr__. (frame.*)."""
+        if col in self.metaarray.array:
+            if self.metaarray.update_array[col]:
+                self._update_array(col=col)
+            return self.metaarray.data[col]
+        return super().__getattr__(col)
+    '''
+
+        '''
+    def __setattr__(self, col, value):
+        """Extend DataFrame.__setattr__ (frame.* = *).."""
+        if col in self.metaarray.array:
+            self._update_array(col=col, value=value)
+            self.metaarray.update_frame[col] = True
+            return None
+        return super().__setattr__(col, value)
+    '''
+
+   # def _set_value(self, index, col, value, takeable=False):
+   #     """Extend DataFrame._set_value. (frame.at[i, '*'] = *)."""
+   #     if col in self.metaarray.array:
+   #         print('set value', col)
+   #         self._update_array(index=index, col=col, value=value)
+   #     return super()._set_value(index, col, value, takeable)
+
+    #def _get_value(self, index, col, takeable=False):
+    #    """Extend DataFrame._get_value. (frame.at[i, '*'])."""
+    #    if col in self.metaarray.array:
+    #        self._update_frame(col)
+    #    return super()._get_value(index, col, takeable)
+
+
+
+
+# data array
+
 # match columns
         metadata = {}
         #for attribute in ['required', 'additional']:

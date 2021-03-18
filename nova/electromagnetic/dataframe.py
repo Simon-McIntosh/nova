@@ -31,7 +31,7 @@ class SubSpaceError(IndexError):
             f'    frame.{name}[:, {col}] = *')
 
 
-class IndexerMixin:
+class FrameMixin:
     """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
 
     def __setitem__(self, key, value):
@@ -92,18 +92,63 @@ class DataFrame(pandas.DataFrame):
         self.update_columns()
         self.init_attrs()
 
-    @property
-    def _constructor(self):
-        return DataFrame
-
-    @property
-    def _constructor_sliced(self):
-        return Series
+    def update_attrs(self):
+        """Extract frame attrs from data and update."""
+        self.attrs['energize'] = Energize(self)
+        self.attrs['multipoint'] = MultiPoint(self)
+        self.attrs['polygon'] = Polygon(self)
 
     def __repr__(self):
         """Propagate frame subspace variables prior to display."""
         self.update_frame()
         return super().__repr__()
+
+    def __getattr__(self, name):
+        """Extend DataFrame.__getattr__. (frame.*)."""
+        if name in self.attrs:
+            return self.attrs[name]
+        return super().__getattr__(name)
+
+    def __getitem__(self, key):
+        """Extend DataFrame.__getitem__. (frame['*'])."""
+        col = self._get_col(key)
+        if self.in_field(col, 'subspace'):
+            if self.metaframe.lock('subspace') is True:
+                return self.subspace.__getattr__(col)
+            if self.metaframe.lock('subspace') is False:
+                self.set_frame(col)
+        if self.in_field(col, 'energize'):
+            if self.metaframe.lock('energize') is False:
+                return self.energize._get_item(super(), key)
+        return super().__getitem__(key)
+
+    def __setitem__(self, key, value):
+        """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
+        col = self._get_col(key)
+        value = self._format_value(col, value)
+        if self.in_field(col, 'subspace'):
+            if self.metaframe.lock('subspace') is True:
+                return self.subspace.__setitem__(key, value)
+            if self.metaframe.lock('subspace') is False:
+                raise SubSpaceError('setitem', col)
+        if self.in_field(col, 'energize'):
+            if self.metaframe.lock('energize') is False:
+                return self.energize._set_item(super(), key, value)
+        return super().__setitem__(key, value)
+
+    def _format_value(self, col, value):
+        if not self._hasattr('metaframe') or col == 'link':
+            return value
+        try:
+            dtype = type(self.metaframe.default[col])
+        except (KeyError, TypeError):  # no default type, isinstance(col, list)
+            return value
+        try:
+            if pandas.api.types.is_list_like(value):
+                return np.array(value, dtype)
+            return dtype(value)
+        except (ValueError, TypeError):  # NaN conversion error
+            return value
 
     def update_metadata(self, data, columns, attrs, metadata):
         """Update metadata. Set default and meta*.metadata."""
@@ -128,6 +173,7 @@ class DataFrame(pandas.DataFrame):
                 self.attrs[attr] = attrs[attr]
         if not self._hasattr('metaframe'):
             self.attrs['metaframe'] = MetaFrame()  # init metaframe
+        self.attrs['indexer'] = Indexer(FrameMixin)  # init loc indexer
 
     def _trim_columns(self, columns):
         """Trim metaframe required / additional to columns."""
@@ -181,13 +227,6 @@ class DataFrame(pandas.DataFrame):
                         if attr in self.columns]
             self.metaframe.metadata = {'Required': required}
 
-    def update_attrs(self):
-        """Extract frame attrs from data and update."""
-        self.attrs['indexer'] = Indexer(IndexerMixin)
-        self.attrs['energize'] = Energize(self)
-        self.attrs['multipoint'] = MultiPoint(self)
-        self.attrs['polygon'] = Polygon(self)
-
     def init_attrs(self):
         """Initialize attributes (metamethods)."""
         for attr in self.attrs:
@@ -206,7 +245,9 @@ class DataFrame(pandas.DataFrame):
         """Inflate subspace variable and setattr in frame."""
         self.assert_in_field(col, 'subspace')
         with self.metaframe.setlock(True, 'subspace'):
-            value = getattr(self, col).to_numpy()
+            value = getattr(self, col)
+            if not isinstance(value, np.ndarray):
+                value = value.to_numpy()
         with self.metaframe.setlock(None):
             if hasattr(self, 'subref'):  # inflate
                 value = value[self.subref]
@@ -226,6 +267,14 @@ class DataFrame(pandas.DataFrame):
             raise AssertionError(
                 f'\'{col}\' not specified in metaframe.subspace '
                 f'{self.metaframe.subspace}') from in_field_assert
+
+    @property
+    def _constructor(self):
+        return DataFrame
+
+    @property
+    def _constructor_sliced(self):
+        return Series
 
     @property
     def loc(self):
@@ -275,8 +324,6 @@ class DataFrame(pandas.DataFrame):
         """
         if self.columns.empty:
             return
-            #self.__init__(DataFrame(columns=self.metaframe.columns,
-            #                        index=self.index, attrs=self.attrs))
         with self.metaframe.setlock(None):
             columns = self.columns.to_list()
             # check required
@@ -618,54 +665,6 @@ class DataFrame(pandas.DataFrame):
             if hasattr(self.attrs[field], 'columns'):
                 return col in self.attrs[field].columns
         return False
-
-    def __getattr__(self, name):
-        """Extend DataFrame.__getattr__. (frame.*)."""
-        if name in self.attrs:
-            return self.attrs[name]
-        return super().__getattr__(name)
-
-    def __getitem__(self, key):
-        """Extend DataFrame.__getitem__. (frame['*'])."""
-        col = self._get_col(key)
-        if self.in_field(col, 'subspace'):
-            if self.metaframe.lock('subspace') is True:
-                return self.subspace.__getattr__(col)
-            if self.metaframe.lock('subspace') is False:
-                self.set_frame(col)
-        if self.in_field(col, 'energize'):
-            if self.metaframe.lock('energize') is False:
-                return self.energize._get_item(super(), key)
-        return super().__getitem__(key)
-
-    def __setitem__(self, key, value):
-        """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
-        col = self._get_col(key)
-        value = self._format_value(col, value)
-        if self.in_field(col, 'subspace'):
-            if self.metaframe.lock('subspace') is True:
-                return self.subspace.__setitem__(key, value)
-            if self.metaframe.lock('subspace') is False:
-                raise SubSpaceError('setitem', col)
-        if self.in_field(col, 'energize'):
-            if self.metaframe.lock('energize') is False:
-                return self.energize._set_item(super(), key, value)
-        return super().__setitem__(key, value)
-
-    def _format_value(self, col, value):
-        if not pandas.api.types.is_numeric_dtype(type(value)) \
-                or not self._hasattr('metaframe'):
-            return value
-        try:
-            dtype = type(self.metaframe.default[col])
-        except KeyError:  # no default type
-            return value
-        try:
-            if pandas.api.types.is_list_like(value):
-                return np.array(value, dtype)
-            return dtype(value)
-        except (ValueError, TypeError):  # NaN conversion error
-            return value
 
 
 if __name__ == '__main__':

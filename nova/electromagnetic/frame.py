@@ -5,13 +5,14 @@ from typing import Optional, Collection, Any
 import numpy as np
 
 from nova.electromagnetic.dataframe import DataFrame
+from nova.electromagnetic.dataarray import DataArray
 from nova.electromagnetic.subspace import SubSpace
 from nova.electromagnetic.metamethod import MetaMethod
 
 # pylint: disable=too-many-ancestors
 
 
-class Frame(DataFrame):
+class Frame(DataArray):
     """
     Extend DataFrame.
 
@@ -32,9 +33,16 @@ class Frame(DataFrame):
 if __name__ == '__main__':
 
     frame = Frame(Required=['x', 'z'], Additional=['It', 'Ic', 'Nt'],
-                  Subspace=[])
+                  Array=['Ic'])
     frame.add_frame(1, range(3), It=5, link=True)
     frame.add_frame(1, range(3), It=5, link=False)
-    frame.add_frame(1, range(4), It=5, Nt=334.5, link=True)
-    frame.loc[:, 'Ic'] = 7
-    print(frame.metaframe)
+    frame.add_frame(1, range(4000), It=5, Nt=334.5, link=True)
+    #frame.loc[:, 'Ic'] = 7
+
+    def set_current():
+        #frame.metaarray.data['Ic'] = np.random.rand(len(frame.subspace))
+        frame.Ic = np.random.rand(len(frame.subspace))
+
+
+    set_current()
+    print(frame)

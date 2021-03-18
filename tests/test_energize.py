@@ -11,6 +11,7 @@ def test_in_energize():
 
 def test_set_loc_Ic():
     frame = Frame(Required=['x', 'z'], Additional=['Ic'], Subspace=[])
+    print(frame.metaframe)
     frame.add_frame(0.5, [6, 8.3], Nt=0.5)
     frame.loc[:, 'Ic'] = 6.6
     assert frame.loc[:, 'It'].to_list() == [3.3, 3.3]
@@ -85,5 +86,4 @@ def test_subspace_Ic():
 
 if __name__ == '__main__':
 
-    test_set_loc_Ic()
-    #pytest.main([__file__])
+    pytest.main([__file__])

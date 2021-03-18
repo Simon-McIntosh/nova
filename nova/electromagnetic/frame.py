@@ -31,11 +31,10 @@ class Frame(DataFrame):
 
 if __name__ == '__main__':
 
-    frame = Frame(Required=['x', 'z'], Additional=['Ic', 'It', 'Nt'])
+    frame = Frame(Required=['x', 'z'], Additional=['It', 'Ic', 'Nt'],
+                  Subspace=[])
     frame.add_frame(1, range(3), It=5, link=True)
+    frame.add_frame(1, range(3), It=5, link=False)
     frame.add_frame(1, range(4), It=5, Nt=334.5, link=True)
-    frame.loc[:, 'x'] = 7
-    print(frame)
-
-
-
+    frame.loc[:, 'Ic'] = 7
+    print(frame.metaframe)

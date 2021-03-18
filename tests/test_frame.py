@@ -123,9 +123,8 @@ def test_data_init_required():
 
 def test_data_init_additional():
     data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8], 'dl': 0.3})
-    frame = Frame(data, metadata={'Required': ['x', 'z'],
-                                  'Additional': ['rms']})
-    assert list(frame.columns) == ['x', 'z', 'dl']
+    frame = Frame(data, columns=['x', 'z'], Additional=['rms'])
+    assert list(frame.columns) == ['x', 'z', 'rms']
 
 
 def test_attribute_metadata_replace():
@@ -157,14 +156,14 @@ def test_exclude_required_error():
 
 def test_exclude():
     frame = Frame(metadata={'Required': ['x', 'z'],
-                                      'Additional': ['rms', 'section'],
-                                      'Exclude': ['section']})
+                            'Additional': ['rms', 'section'],
+                            'Exclude': ['section']})
     assert list(frame.metaframe.columns) == ['x', 'z', 'rms']
 
 
 def test_warn_new_attribute():
     frame = Frame({'x': [3, 4], 'z': 0}, Required=['x', 'z'],
-                            Subspace=[])
+                  Subspace=[])
     with pytest.warns(UserWarning,
                       match='Pandas doesn\'t allow columns to be created '
                             'via a new attribute name'):
@@ -173,5 +172,4 @@ def test_warn_new_attribute():
 
 if __name__ == '__main__':
 
-    test_Ic_unset_Additional()
-    #pytest.main([__file__])
+    pytest.main([__file__])

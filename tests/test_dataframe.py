@@ -9,6 +9,11 @@ def test_instance():
     assert isinstance(dataframe, DataFrame)
 
 
+def test_init_metadata():
+    dataframe = DataFrame(Required=['x', 'z'], Additional=[])
+    assert dataframe.metaframe.required == ['x', 'z']
+
+
 def test_Ic_unset():
     dataframe = DataFrame(Required=['x'])
     dataframe.add_frame([4, 5], It=6.5)
@@ -127,7 +132,7 @@ def test_data_init_additional():
     data = pandas.DataFrame({'x': 3, 'z': [3, 6, 8], 'dl': 0.3})
     dataframe = DataFrame(data, metadata={'Required': ['x', 'z'],
                                           'Additional': ['rms']})
-    assert list(dataframe.columns) == ['x', 'z', 'dl']
+    assert list(dataframe.columns) == ['x', 'z', 'dl', 'rms']
 
 
 def test_attribute_metadata_replace():

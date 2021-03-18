@@ -22,7 +22,7 @@ class MultiPoint(MetaMethod):
         'factor', 'ref', 'subref'])
     require_all: bool = True
 
-    indexer: list[int] = field(init=False)
+    indexer: list[int] = field(init=False, repr=False)
     index: pandas.Index = field(default=pandas.Index([]))
 
     '''
@@ -50,7 +50,6 @@ class MultiPoint(MetaMethod):
                 - factor = value
 
         """
-        self.frame.update_columns()
         isna = pandas.isna(self.frame.link)
         self.frame.at[isna, 'link'] = self.frame.metaframe.default['link']
         self.frame.at[isna, 'factor'] = \

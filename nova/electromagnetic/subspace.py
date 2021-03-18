@@ -9,12 +9,18 @@ class SubSpace(DataFrame):
     """Manage frame subspace (all independent rows)."""
 
     def __init__(self, frame):
-        if frame.multipoint.index.empty:
-            index = frame.index
-        else:
-            index = frame.multipoint.index
+        index = self.get_index(frame)
         columns = self.get_columns(frame)
-        super().__init__(pandas.DataFrame(frame), index=index, columns=columns)
+        super().__init__(pandas.DataFrame(frame),
+                         index=index, columns=columns, Avalible=None)
+
+    def get_index(self, frame):
+        """Return subspace index."""
+        if not hasattr(frame, 'multipoint'):
+            return None
+        if frame.multipoint.index.empty:
+            return frame.index
+        return frame.multipoint.index
 
     def get_columns(self, frame):
         """Return subspace columns."""

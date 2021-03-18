@@ -10,6 +10,13 @@ Created on Thu Feb 18 20:33:42 2021
 
 """
 
+# match columns
+        metadata = {}
+        #for attribute in ['required', 'additional']:
+        #    metadata[attribute.capitalize()] = [
+        #        attr for attr in getattr(self.metaframe, attribute)
+        #        if attr in self.columns]
+
     def _validate_metadata(self):
         """Validate required and additional attributes in FrameArray."""
         # check for additional attributes in metaarray.array

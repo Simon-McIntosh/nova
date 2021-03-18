@@ -25,8 +25,8 @@ class DataFrameArray(DataFrame):
                  index: Optional[Collection[Any]] = None,
                  columns: Optional[Collection[Any]] = None,
                  **metadata: Optional[dict]):
-        super().__init__(data, index, columns)
-        self.metaarray.metadata = metadata
+        super().__init__(data, index, columns, metadata)
+        #self.metaarray.metadata = metadata
 
     @property
     def metaarray(self):

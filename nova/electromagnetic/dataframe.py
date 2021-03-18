@@ -7,7 +7,9 @@ import pandas
 import numpy as np
 import shapely
 
+from nova.electromagnetic.metadata import MetaData
 from nova.electromagnetic.metaframe import MetaFrame
+from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.indexer import Indexer
 from nova.electromagnetic.energize import Energize
 from nova.electromagnetic.multipoint import MultiPoint
@@ -84,26 +86,11 @@ class DataFrame(pandas.DataFrame):
                  attrs: dict[str, Collection[Any]] = None,
                  **metadata: dict[str, Collection[Any]]):
         super().__init__(data, index, columns)
-        self.attrs['indexer'] = Indexer(IndexerMixin)
-        if isinstance(data, pandas.core.internals.managers.BlockManager):
-            return
-        self.update_attrs(data, attrs)
-        self.update_metadata(metadata)
+        self.update_metadata(data, columns, attrs, metadata)
+        self.update_attrs()
         self.update_index()
         self.update_columns()
-        self.attrs['energize'] = Energize(self)
-        self.attrs['multipoint'] = MultiPoint(self)
-        self.attrs['polygon'] = Polygon(self)
-
-    def update_attrs(self, data, attrs):
-        """Extract frame attrs from data and update."""
-        self.attrs['metaframe'] = MetaFrame()
-        if hasattr(data, 'attrs'):
-            self.attrs |= data.attrs
-        if attrs is None:
-            attrs = {}
-        self.attrs |= attrs
-
+        self.init_attrs()
 
     @property
     def _constructor(self):
@@ -118,10 +105,101 @@ class DataFrame(pandas.DataFrame):
         self.update_frame()
         return super().__repr__()
 
+    def update_metadata(self, data, columns, attrs, metadata):
+        """Update metadata. Set default and meta*.metadata."""
+        self._extract_attrs(data, attrs)
+        self._trim_columns(columns)
+        self._update_avalible(data, columns)
+        self._extract_metadata(metadata)
+        self._match_columns()
+
+    def _extract_attrs(self, data, attrs):
+        """Extract metaframe / metaarray from data / attrs."""
+        if data is None:
+            data = {}
+        if attrs is None:
+            attrs = {}
+        if hasattr(data, 'attrs'):
+            for attr in data.attrs:  # update metadata from data
+                if isinstance(data.attrs[attr], MetaData):
+                    self.attrs[attr] = data.attrs[attr]
+        for attr in attrs:  # update from attrs (replacing data.attrs)
+            if isinstance(attrs[attr], MetaData):
+                self.attrs[attr] = attrs[attr]
+        if not self._hasattr('metaframe'):
+            self.attrs['metaframe'] = MetaFrame()  # init metaframe
+
+    def _trim_columns(self, columns):
+        """Trim metaframe required / additional to columns."""
+        if columns:  # trim to columns
+            required = [attr for attr in self.metaframe.required
+                        if attr in columns]
+            additional = [attr for attr in self.metaframe.additional
+                          if attr in columns]
+            avalible = [attr for attr in self.metaframe.avalible
+                        if attr in columns]
+            self.metaframe.metadata = {'Required': required,
+                                       'Additional': additional,
+                                       'Avalible': avalible}
+
+    def _update_avalible(self, data, columns):
+        """Update metaframe.avalible."""
+        try:
+            data_columns = list(data)
+        except TypeError:
+            data_columns = []
+        if columns is None:
+            columns = []
+        self.metaframe.metadata = {'avalible': data_columns+list(columns)}
+
+    def _extract_metadata(self, metadata):
+        """Extract attributes from **metadata."""
+        if metadata is None:
+            metadata = {}
+        if 'metadata' in metadata:
+            metadata |= metadata.pop('metadata')
+        meta, default = {attr: {} for attr in self.metaattrs}, {}
+        for field in list(metadata):
+            for attr in meta:
+                if hasattr(getattr(self, attr), field.lower()):
+                    meta[attr][field] = metadata.pop(field)
+                    break
+            else:
+                if field in self.metaframe.default:
+                    default[field] = metadata.pop(field)
+        self.metaframe.default |= default
+        if len(metadata) > 0:
+            raise IndexError('unreconised attributes set in **metadata: '
+                             f'{metadata}.')
+        for attr in meta:
+            getattr(self, attr).metadata |= meta[attr]
+
+    def _match_columns(self):
+        """Intersect metaframe.required with self.columns if not empty."""
+        if not self.columns.empty:
+            required = [attr for attr in self.metaframe.required
+                        if attr in self.columns]
+            self.metaframe.metadata = {'Required': required}
+
+    def update_attrs(self):
+        """Extract frame attrs from data and update."""
+        self.attrs['indexer'] = Indexer(IndexerMixin)
+        self.attrs['energize'] = Energize(self)
+        self.attrs['multipoint'] = MultiPoint(self)
+        self.attrs['polygon'] = Polygon(self)
+
+    def init_attrs(self):
+        """Initialize attributes (metamethods)."""
+        for attr in self.attrs:
+            attribute = self.attrs[attr]
+            if isinstance(attribute, MetaMethod):
+                if attribute.generate:
+                    attribute.initialize()
+
     def update_frame(self):
         """Propagate subspace varables to frame."""
         if self._hasattr('subspace'):
-            for col in self.subspace:
+            for col in [col for col in self.subspace if col in self]:
                 self.set_frame(col)
 
     def set_frame(self, col):
@@ -129,9 +207,9 @@ class DataFrame(pandas.DataFrame):
         self.assert_in_field(col, 'subspace')
         with self.metaframe.setlock(True, 'subspace'):
             value = getattr(self, col).to_numpy()
+        with self.metaframe.setlock(None):
             if hasattr(self, 'subref'):  # inflate
                 value = value[self.subref]
-        with self.metaframe.setlock(None, 'subspace'):
             super().__setitem__(col, value)
 
     def get_frame(self, col):
@@ -187,41 +265,6 @@ class DataFrame(pandas.DataFrame):
         for attr in self.metaattrs:
             getattr(self, attr).metadata = metadata
 
-    def update_metadata(self, metadata):
-        """Update metadata. Set default and meta*.metadata."""
-        empty = self.columns.empty
-        default = {}
-        framearray = {attr: {} for attr in self.metaattrs}
-        if metadata is None:
-            metadata = {}
-        if 'metadata' in metadata:
-            metadata |= metadata.pop('metadata')
-        for field in list(metadata):
-            for attr in framearray:
-                if hasattr(getattr(self, attr), field.lower()):
-                    framearray[attr][field] = metadata.pop(field)
-                    break
-            else:
-                if field in self.metaframe.default:
-                    default[field] = metadata.pop(field)
-        self.metaframe.default |= default
-        if len(metadata) > 0:
-            raise IndexError('unreconised attributes set in **metadata: '
-                             f'{metadata}.')
-        for attr in framearray:
-            getattr(self, attr).metadata |= framearray[attr]
-        if not empty:
-            self._match_columns()
-
-    def _match_columns(self):
-        """Update metaframe to match self.columns if self.columns not empty."""
-        metadata = {}
-        for attribute in ['required', 'additional']:
-            metadata[attribute.capitalize()] = [
-                attr for attr in getattr(self.metaframe, attribute)
-                if attr in self.columns]
-        self.metaframe.metadata = metadata
-
     def update_columns(self):
         """
         Format DataFrame columns.
@@ -232,6 +275,8 @@ class DataFrame(pandas.DataFrame):
         """
         if self.columns.empty:
             return
+            #self.__init__(DataFrame(columns=self.metaframe.columns,
+            #                        index=self.index, attrs=self.attrs))
         with self.metaframe.setlock(None):
             columns = self.columns.to_list()
             # check required
@@ -256,7 +301,7 @@ class DataFrame(pandas.DataFrame):
             # set defaults
             additional_unset = [attr not in columns
                                 for attr in self.metaframe.additional]
-            if np.array(additional_unset).any():
+            if np.array(additional_unset).any() and not self.index.empty:
                 unset = np.array(self.metaframe.additional)[additional_unset]
                 for attr in unset:
                     self.loc[:, attr] = self.metaframe.default[attr]
@@ -368,17 +413,15 @@ class DataFrame(pandas.DataFrame):
 
     def _concat(self, insert, iloc=None, sort=False):
         """Concatenate insert with DataFrame(self)."""
-        dataframe = pandas.DataFrame(self)
+        frame = pandas.DataFrame(self)
         if not isinstance(insert, pandas.DataFrame):
             insert = pandas.DataFrame(insert)
         if iloc is None:  # append
-            dataframes = [dataframe, insert]
+            frames = [frame, insert]
         else:  # insert
-            dataframes = [dataframe.iloc[:iloc, :],
-                          insert,
-                          dataframe.iloc[iloc:, :]]
-        dataframe = pandas.concat(dataframes, sort=sort)  # concatenate
-        self.__init__(dataframe, attrs=self.attrs)
+            frames = [frame.iloc[:iloc, :], insert, frame.iloc[iloc:, :]]
+        frame = pandas.concat(frames, sort=sort)  # concatenate
+        self.__init__(frame, attrs=self.attrs)
 
     def _build_frame(self, *args, **kwargs):
         """
@@ -434,19 +477,19 @@ class DataFrame(pandas.DataFrame):
         """
         if len(args) == 0:
             raise IndexError('len(args) == 0, argument number must be > 0')
-        if self.isframe(args[0], dataframe=True) and len(args) == 1:
-            dataframe = args[0]
-            missing = [arg not in dataframe for arg in self.metaframe.required]
+        if self.isframe(args[0], frame=True) and len(args) == 1:
+            frame = args[0]
+            missing = [arg not in frame for arg in self.metaframe.required]
             if np.array(missing).any():
                 required = np.array(self.metaframe.required)[missing]
                 raise ValueError(f'required arguments {required} '
-                                 'not specified in dataframe '
-                                 f'{dataframe.columns}')
-            args = [dataframe.loc[:, col] for col in self.metaframe.required]
-            if not isinstance(dataframe.index, pandas.RangeIndex):
-                kwargs['name'] = dataframe.index
-            kwargs |= {col: dataframe.loc[:, col] for col in
-                       self.metaframe.additional if col in dataframe}
+                                 'not specified in frame '
+                                 f'{frame.columns}')
+            args = [frame.loc[:, col] for col in self.metaframe.required]
+            if not isinstance(frame.index, pandas.RangeIndex):
+                kwargs['name'] = frame.index
+            kwargs |= {col: frame.loc[:, col] for col in
+                       self.metaframe.additional if col in frame}
         if len(args) != len(self.metaframe.required):
             raise IndexError(
                 'incorrect required argument number (*args)): '
@@ -463,13 +506,17 @@ class DataFrame(pandas.DataFrame):
         attrs = list(data.keys()) + list(kwargs.keys())  # record passed attrs
         for attr in self.metaframe.additional:  # set additional to default
             data[attr] = self.metaframe.default[attr]
-        print(data)
         additional = []
         for attr in list(kwargs.keys()):
             if attr in self.metaframe.default:
                 data[attr] = kwargs.pop(attr)  # add keyword arguments
                 if attr not in self.metaframe.additional:
                     additional.append(attr)
+        if 'It' in attrs and 'Ic' not in attrs:  # patch line current
+            data['Ic'] = \
+                data['It'] / data.get('Nt', self.metaframe.default['Nt'])
+        if len(additional) > 0:  # extend aditional arguments
+            self.metaframe.metadata = {'additional': additional}
         if len(kwargs) > 0:  # ckeck for unset kwargs
             unset_kwargs = np.array(list(kwargs.keys()))
             default = {key: '_default_value_' for key in unset_kwargs}
@@ -477,16 +524,6 @@ class DataFrame(pandas.DataFrame):
                 f'unset kwargs: {unset_kwargs}\n'
                 'enter default value in self.metaframe.defaults\n'
                 f'set as self.metaframe.meatadata = {{default: {default}}}')
-        if 'It' in attrs and 'Ic' not in attrs:  # patch line current
-            data['Ic'] = \
-                data['It'] / data.get('Nt', self.metaframe.default['Nt'])
-        if len(additional) > 0:  # extend aditional arguments
-            self.metaframe.metadata = {'additional': additional}
-        #additional_unset = [attr for attr in self.metaframe.additional
-        #                    if attr not in data]
-        #for attr in additional_unset:  # set default attributes
-        #    data[attr] = self.metaframe.default[attr]
-        print(data)
         return data
 
     @staticmethod
@@ -536,7 +573,7 @@ class DataFrame(pandas.DataFrame):
             self.loc[name, 'patch'] = None  # re-generate coil patch
 
     @staticmethod
-    def isframe(obj, dataframe=True):
+    def isframe(obj, frame=True):
         """
         Return isinstance(arg[0], Frame | DataFrame) flag.
 
@@ -544,7 +581,7 @@ class DataFrame(pandas.DataFrame):
         ----------
         obj : Any
             Input.
-        dataframe : bool, optional
+        frame : bool, optional
             Accept pandas.DataFrame. The default is True.
 
         Returns
@@ -555,7 +592,7 @@ class DataFrame(pandas.DataFrame):
         """
         if isinstance(obj, DataFrame):
             return True
-        if isinstance(obj, pandas.DataFrame) and dataframe:
+        if isinstance(obj, pandas.DataFrame) and frame:
             return True
         return False
 
@@ -580,7 +617,6 @@ class DataFrame(pandas.DataFrame):
         if self._hasattr('metaframe') and self._hasattr(field):
             if hasattr(self.attrs[field], 'columns'):
                 return col in self.attrs[field].columns
-        #if self._hasattr('metaframe') and field == 'subspace':
         return False
 
     def __getattr__(self, name):
@@ -600,7 +636,7 @@ class DataFrame(pandas.DataFrame):
         if self.in_field(col, 'energize'):
             if self.metaframe.lock('energize') is False:
                 return self.energize._get_item(super(), key)
-        return super().__getitem__(col)
+        return super().__getitem__(key)
 
     def __setitem__(self, key, value):
         """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
@@ -634,8 +670,8 @@ class DataFrame(pandas.DataFrame):
 
 if __name__ == '__main__':
 
-    dataframe = DataFrame({'x': [1, 2, 3], 'z': 6.7}, additional=['Ic'])
+    dataframe = DataFrame(Required=['x', 'dCoil'], Additional=['Ic'],
+                          Subspace=[])
+    print(dataframe.metaframe.required)
     print(dataframe.metaframe.additional)
-    dataframe.add_frame(1, range(3), It=5, link=True)
-    #dataframe.loc[:, 'x'] = 7
-    print(dataframe)
+    print(dataframe.metaframe.subspace)

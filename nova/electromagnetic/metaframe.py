@@ -23,6 +23,7 @@ class MetaFrame(MetaData):
     required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
     additional: list[str] = field(default_factory=lambda: [])
     exclude: list[str] = field(default_factory=lambda: [])
+    avalible: list[str] = field(default_factory=lambda: [])
     subspace: list[str] = field(default_factory=lambda: [
         'Ic', 'It', 'Nt', 'active', 'plasma', 'optimize', 'feedback'])
     default: dict[str, Union[float, str, bool, None]] = field(
@@ -118,4 +119,4 @@ class MetaFrame(MetaData):
     @property
     def columns(self):
         """Return metaframe columns."""
-        return self.required + self.additional
+        return list(dict.fromkeys(self.required + self.additional))

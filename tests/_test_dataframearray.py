@@ -12,10 +12,12 @@ def test_init_update():
                            Required=['x', 'z'], Array=['x', 'z'])
     frame.x = [1, 2]
     frame = DataFrameArray(frame)
+    print(frame)
+    print(frame.metaarray)
     update_array = frame.metaarray.update_array
     update_frame = frame.metaarray.update_frame
     assert list(update_array.values()) == [False, True]
-    assert list(update_frame.values()) == [True, False]
+    assert list(update_frame.values()) == [False, True]
 
 
 def test_exclude_internal_metadata():

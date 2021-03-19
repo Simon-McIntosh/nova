@@ -18,46 +18,6 @@ from nova.electromagnetic.polygon import Polygon
 # pylint: disable=too-many-ancestors
 
 
-class SubSpaceError(IndexError):
-    """Prevent direct access to frame's subspace variables."""
-
-    def __init__(self, name, col):
-        super().__init__(
-            f'{name} access is restricted for subspace attributes. '
-            f'Use frame.subspace.{name}[:, {col}] = *.\n\n'
-            'Lock may be overridden via the following context manager '
-            'but subspace will still overwrite (Cavieat Usor):\n'
-            'with frame.metaframe.setlock(None):\n'
-            f'    frame.{name}[:, {col}] = *')
-
-
-class FrameMixin:
-    """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
-
-    def __setitem__(self, key, value):
-        """Raise error when subspace variable is set directly from frame."""
-        col = self.obj._get_col(key)
-        value = self.obj._format_value(col, value)
-        if self.obj.in_field(col, 'subspace'):
-            if self.obj.metaframe.lock('subspace') is True:
-                raise SubSpaceError(self.name, col)
-        if self.obj.in_field(col, 'energize'):
-            if self.obj.metaframe.lock('energize') is False:
-                return self.obj.energize._set_item(super(), key, value)
-        return super().__setitem__(key, value)
-
-    def __getitem__(self, key):
-        """Refresh subspace items prior to return."""
-        col = self.obj._get_col(key)
-        if self.obj.in_field(col, 'subspace'):
-            if self.obj.metaframe.lock('subspace') is True:
-                self.obj.set_frame(col)
-        if self.obj.in_field(col, 'energize'):
-            if self.obj.metaframe.lock('energize') is False:
-                return self.obj.energize._get_item(super(), key)
-        return super().__getitem__(key)
-
-
 class Series(pandas.Series):
     """Provide series constructor methods."""
 
@@ -87,68 +47,20 @@ class DataFrame(pandas.DataFrame):
                  **metadata: dict[str, Collection[Any]]):
         super().__init__(data, index, columns)
         self.update_metadata(data, columns, attrs, metadata)
-        self.update_attrs()
-        self.update_index()
-        self.update_columns()
-        self.init_attrs()
 
-    def update_attrs(self):
-        """Extract frame attrs from data and update."""
-        self.attrs['energize'] = Energize(self)
-        self.attrs['multipoint'] = MultiPoint(self)
-        self.attrs['polygon'] = Polygon(self)
+    @property
+    def _constructor(self):
+        return DataFrame
 
-    def __repr__(self):
-        """Propagate frame subspace variables prior to display."""
-        self.update_frame()
-        return super().__repr__()
+    @property
+    def _constructor_sliced(self):
+        return Series
 
     def __getattr__(self, name):
-        """Extend DataFrame.__getattr__. (frame.*)."""
+        """Extend pandas.DataFrame.__getattr__. (frame.*)."""
         if name in self.attrs:
             return self.attrs[name]
         return super().__getattr__(name)
-
-    def __getitem__(self, key):
-        """Extend DataFrame.__getitem__. (frame['*'])."""
-        col = self._get_col(key)
-        if self.in_field(col, 'subspace'):
-            if self.metaframe.lock('subspace') is True:
-                return self.subspace.__getitem__(col)
-            if self.metaframe.lock('subspace') is False:
-                self.set_frame(col)
-        if self.in_field(col, 'energize'):
-            if self.metaframe.lock('energize') is False:
-                return self.energize._get_item(super(), key)
-        return super().__getitem__(key)
-
-    def __setitem__(self, key, value):
-        """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
-        col = self._get_col(key)
-        value = self._format_value(col, value)
-        if self.in_field(col, 'subspace'):
-            if self.metaframe.lock('subspace') is True:
-                return self.subspace.__setitem__(key, value)
-            if self.metaframe.lock('subspace') is False:
-                raise SubSpaceError('setitem', col)
-        if self.in_field(col, 'energize'):
-            if self.metaframe.lock('energize') is False:
-                return self.energize._set_item(super(), key, value)
-        return super().__setitem__(key, value)
-
-    def _format_value(self, col, value):
-        if not self._hasattr('metaframe') or col == 'link':
-            return value
-        try:
-            dtype = type(self.metaframe.default[col])
-        except (KeyError, TypeError):  # no default type, isinstance(col, list)
-            return value
-        try:
-            if pandas.api.types.is_list_like(value):
-                return np.array(value, dtype)
-            return dtype(value)
-        except (ValueError, TypeError):  # NaN conversion error
-            return value
 
     def update_metadata(self, data, columns, attrs, metadata):
         """Update metadata. Set default and meta*.metadata."""
@@ -173,7 +85,6 @@ class DataFrame(pandas.DataFrame):
                 self.attrs[attr] = attrs[attr]
         if not self._hasattr('metaframe'):
             self.attrs['metaframe'] = MetaFrame()  # init metaframe
-        self.attrs['indexer'] = Indexer(FrameMixin)  # init loc indexer
 
     def _trim_columns(self, columns):
         """Trim metaframe required / additional to columns."""
@@ -227,79 +138,11 @@ class DataFrame(pandas.DataFrame):
                         if attr in self.columns]
             self.metaframe.metadata = {'Required': required}
 
-    def init_attrs(self):
-        """Initialize attributes (metamethods)."""
-        for attr in self.attrs:
-            attribute = self.attrs[attr]
-            if isinstance(attribute, MetaMethod):
-                if attribute.generate:
-                    attribute.initialize()
-
-    def update_frame(self):
-        """Propagate subspace varables to frame."""
-        if self._hasattr('subspace'):
-            for col in [col for col in self.subspace if col in self]:
-                self.set_frame(col)
-
-    def set_frame(self, col):
-        """Inflate subspace variable and setattr in frame."""
-        self.assert_in_field(col, 'subspace')
-        with self.metaframe.setlock(True, 'subspace'):
-            value = getattr(self, col)
-            if not isinstance(value, np.ndarray):
-                value = value.to_numpy()
-        with self.metaframe.setlock(None):
-            if hasattr(self, 'subref'):  # inflate
-                value = value[self.subref]
-            super().__setitem__(col, value)
-
-    def get_frame(self, col):
-        """Return inflated subspace variable."""
-        self.assert_in_field(col, 'subspace')
-        with self.metaframe.setlock(False, 'subspace'):
-            return super().__getitem__(col)
-
-    def assert_in_field(self, col, field):
-        """Check for col in metaframe.{field}, raise error if not found."""
-        try:
-            self.in_field(col, field)
-        except AssertionError as in_field_assert:
-            raise AssertionError(
-                f'\'{col}\' not specified in metaframe.subspace '
-                f'{self.metaframe.subspace}') from in_field_assert
-
-    @property
-    def _constructor(self):
-        return DataFrame
-
-    @property
-    def _constructor_sliced(self):
-        return Series
-
-    @property
-    def loc(self):
-        """Extend DataFrame.loc, restrict subspace access."""
-        return self.indexer.loc("loc", self)
-
-    @property
-    def iloc(self):
-        """Extend DataFrame.iloc, restrict subspace access."""
-        return self.indexer.iloc("iloc", self)
-
-    @property
-    def at(self):
-        """Extend DataFrame.at, restrict subspace access."""
-        return self.indexer.at("at", self)
-
-    @property
-    def iat(self):
-        """Extend DataFrame.iat, restrict subspace access."""
-        return self.indexer.iat("iat", self)
-
     @property
     def metaattrs(self) -> list[str]:
-        """Return meta* attrs."""
-        return [attr for attr in self.attrs if 'meta' in attr]
+        """Return metadata attrs."""
+        return [attr for attr in self.attrs
+                if isinstance(self.attrs[attr], MetaData)]
 
     @property
     def metadata(self):
@@ -643,34 +486,18 @@ class DataFrame(pandas.DataFrame):
             return True
         return False
 
-    def _get_col(self, key):
-        """Return column label."""
-        if isinstance(key, tuple):
-            col = key[-1]
-        else:
-            col = key
-        if isinstance(col, int):
-            col = self.columns[col]
-        return col
+
 
     def _hasattr(self, attr):
         """Return True if attr in self.attrs."""
         return attr in self.attrs
-
-    def in_field(self, col, field):
-        """Return Ture if col in metaframe.{field} and hasattr(self, field)."""
-        if not isinstance(col, str):
-            return False
-        if self._hasattr('metaframe') and self._hasattr(field):
-            if hasattr(self.attrs[field], 'columns'):
-                return col in self.attrs[field].columns
-        return False
 
 
 if __name__ == '__main__':
 
     dataframe = DataFrame(Required=['x', 'dCoil'], Additional=['Ic'],
                           Subspace=[])
+    dataframe.add_frame(1, 2)
     print(dataframe.metaframe.required)
     print(dataframe.metaframe.additional)
-    print(dataframe.metaframe.subspace)
+    print(dataframe)

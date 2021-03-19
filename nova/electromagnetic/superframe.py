@@ -1,4 +1,9 @@
 """Configure superframe. Inherit DataArray for fast access else DataFrame."""
+from nova.electromagnetic.metamethod import MetaMethod
+from nova.electromagnetic.indexer import Indexer
+from nova.electromagnetic.energize import Energize
+from nova.electromagnetic.multipoint import MultiPoint
+from nova.electromagnetic.polygon import Polygon
 
 
 class SubSpaceError(IndexError):
@@ -56,6 +61,7 @@ class SuperFrame(DataFrame):
                  columns: Collection[Any] = None,
                  attrs: dict[str, Collection[Any]] = None,
                  **metadata: dict[str, Collection[Any]]):
+        super().__init__(data, index, columns, attrs, **metadata)
         super().__init__(data, index, columns)
         self.update_metadata(data, columns, attrs, metadata)
         self.update_attrs()
@@ -113,25 +119,14 @@ class SuperFrame(DataFrame):
                 return self.energize._set_item(super(), key, value)
         return super().__setitem__(key, value)
 
-    @property
-    def loc(self):
-        """Extend DataFrame.loc, restrict subspace access."""
-        return self.indexer.loc("loc", self)
-
-    @property
-    def iloc(self):
-        """Extend DataFrame.iloc, restrict subspace access."""
-        return self.indexer.iloc("iloc", self)
-
-    @property
-    def at(self):
-        """Extend DataFrame.at, restrict subspace access."""
-        return self.indexer.at("at", self)
-
-    @property
-    def iat(self):
-        """Extend DataFrame.iat, restrict subspace access."""
-        return self.indexer.iat("iat", self)
+    def _build_data(self, *args, **kwargs):
+        """Extend DataFrame._build_data add line current converter."""
+        attrs = self.metaframe.required + list(kwargs)  # record passed attrs
+        data = super()._build_data(*args, **kwargs)
+        if 'It' in attrs and 'Ic' not in attrs:  # patch line current
+            data['Ic'] = \
+                data['It'] / data.get('Nt', self.metaframe.default['Nt'])
+        return data
 
     def update_frame(self):
         """Propagate subspace varables to frame."""
@@ -165,20 +160,6 @@ class SuperFrame(DataFrame):
             raise AssertionError(
                 f'\'{col}\' not specified in metaframe.subspace '
                 f'{self.metaframe.subspace}') from in_field_assert
-
-    def _format_value(self, col, value):
-        if not self._hasattr('metaframe') or col == 'link':
-            return value
-        try:
-            dtype = type(self.metaframe.default[col])
-        except (KeyError, TypeError):  # no default type, isinstance(col, list)
-            return value
-        try:
-            if pandas.api.types.is_list_like(value):
-                return np.array(value, dtype)
-            return dtype(value)
-        except (ValueError, TypeError):  # NaN conversion error
-            return value
 
     def in_field(self, col, field):
         """Return Ture if col in metaframe.{field} and hasattr(self, field)."""

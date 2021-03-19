@@ -4,13 +4,13 @@ from typing import Optional, Collection, Any
 import numpy as np
 
 from nova.electromagnetic.metaarray import MetaArray
-from nova.electromagnetic.dataframe import DataFrame, FrameMixin
-from nova.electromagnetic.indexer import Indexer
+from nova.electromagnetic.dataframe import DataFrame
+from nova.electromagnetic.indexer import LocMinin
 
 # pylint: disable=too-many-ancestors
 
 
-class ArrayMixin(FrameMixin):
+class ArrayMixin():
     """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
 
     def __setitem__(self, key, value):
@@ -22,7 +22,7 @@ class ArrayMixin(FrameMixin):
         return super().__getitem__(key)
 
 
-class DataArray(DataFrame):
+class DataArray(DataFrame, LocMinin):
     """Extend DataFrame enabling fast access to dynamic fields in array."""
 
     def __init__(self,
@@ -32,19 +32,19 @@ class DataArray(DataFrame):
                  attrs: dict[str, Collection[Any]] = None,
                  **metadata: Optional[dict]):
         super().__init__(data, index, columns, attrs, **metadata)
+        self.loc_mixin()
 
-    def _extract_attrs(self, data, attrs):
+    def extract_attrs(self, data, attrs):
         """Extend DataFrame._extract_attrs, insert metaarray."""
-        super()._extract_attrs(data, attrs)
-        if not self._hasattr('metaarray'):
+        super().extract_attrs(data, attrs)
+        if not self.hasattrs('metaarray'):
             self.attrs['metaarray'] = MetaArray(self.index)  # init metaframe
         else:
             self.metaarray.__post_init__(self.index)
-        self.attrs['indexer'] = Indexer(ArrayMixin)
 
-    def _extract_metadata(self, metadata):
+    def extract_metadata(self, metadata):
         """Extend DataFrame._extract_metadata, init data structure."""
-        super()._extract_metadata(metadata)
+        super().extract_metadata(metadata)
         if not self.empty:
             self.update_array()
 
@@ -79,7 +79,7 @@ class DataArray(DataFrame):
         except (AttributeError, KeyError):
             value = np.full(len(self), self.metaframe.default[col])
             super().__setitem__(col, value)
-        return self._format_value(col, value)
+        return self.format_value(col, value)
 
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""

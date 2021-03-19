@@ -9,11 +9,7 @@ import shapely
 
 from nova.electromagnetic.metadata import MetaData
 from nova.electromagnetic.metaframe import MetaFrame
-from nova.electromagnetic.metamethod import MetaMethod
-from nova.electromagnetic.indexer import Indexer
-from nova.electromagnetic.energize import Energize
-from nova.electromagnetic.multipoint import MultiPoint
-from nova.electromagnetic.polygon import Polygon
+
 
 # pylint: disable=too-many-ancestors
 
@@ -45,8 +41,11 @@ class DataFrame(pandas.DataFrame):
                  columns: Collection[Any] = None,
                  attrs: dict[str, Collection[Any]] = None,
                  **metadata: dict[str, Collection[Any]]):
+        print('dataframe')
         super().__init__(data, index, columns)
         self.update_metadata(data, columns, attrs, metadata)
+        self.update_index()
+        self.update_columns()
 
     @property
     def _constructor(self):
@@ -56,6 +55,25 @@ class DataFrame(pandas.DataFrame):
     def _constructor_sliced(self):
         return Series
 
+    @property
+    def metaattrs(self) -> list[str]:
+        """Return metadata attrs."""
+        return [attr for attr in self.attrs
+                if isinstance(self.attrs[attr], MetaData)]
+
+    @property
+    def metadata(self):
+        """Manage FrameArray metadata via the MetaFrame class."""
+        metadata = {}
+        for attr in self.metaattrs:
+            metadata |= getattr(self, attr).metadata
+        return metadata
+
+    @metadata.setter
+    def metadata(self, metadata):
+        for attr in self.metaattrs:
+            getattr(self, attr).metadata = metadata
+
     def __getattr__(self, name):
         """Extend pandas.DataFrame.__getattr__. (frame.*)."""
         if name in self.attrs:
@@ -64,13 +82,13 @@ class DataFrame(pandas.DataFrame):
 
     def update_metadata(self, data, columns, attrs, metadata):
         """Update metadata. Set default and meta*.metadata."""
-        self._extract_attrs(data, attrs)
-        self._trim_columns(columns)
-        self._update_avalible(data, columns)
-        self._extract_metadata(metadata)
-        self._match_columns()
+        self.extract_attrs(data, attrs)
+        self.trim_columns(columns)
+        self.update_avalible(data, columns)
+        self.extract_metadata(metadata)
+        self.match_columns()
 
-    def _extract_attrs(self, data, attrs):
+    def extract_attrs(self, data, attrs):
         """Extract metaframe / metaarray from data / attrs."""
         if data is None:
             data = {}
@@ -83,10 +101,10 @@ class DataFrame(pandas.DataFrame):
         for attr in attrs:  # update from attrs (replacing data.attrs)
             if isinstance(attrs[attr], MetaData):
                 self.attrs[attr] = attrs[attr]
-        if not self._hasattr('metaframe'):
+        if not self.hasattrs('metaframe'):
             self.attrs['metaframe'] = MetaFrame()  # init metaframe
 
-    def _trim_columns(self, columns):
+    def trim_columns(self, columns):
         """Trim metaframe required / additional to columns."""
         if columns:  # trim to columns
             required = [attr for attr in self.metaframe.required
@@ -99,7 +117,7 @@ class DataFrame(pandas.DataFrame):
                                        'Additional': additional,
                                        'Avalible': avalible}
 
-    def _update_avalible(self, data, columns):
+    def update_avalible(self, data, columns):
         """Update metaframe.avalible."""
         try:
             data_columns = list(data)
@@ -109,7 +127,7 @@ class DataFrame(pandas.DataFrame):
             columns = []
         self.metaframe.metadata = {'avalible': data_columns+list(columns)}
 
-    def _extract_metadata(self, metadata):
+    def extract_metadata(self, metadata):
         """Extract attributes from **metadata."""
         if metadata is None:
             metadata = {}
@@ -131,31 +149,12 @@ class DataFrame(pandas.DataFrame):
         for attr in meta:
             getattr(self, attr).metadata |= meta[attr]
 
-    def _match_columns(self):
+    def match_columns(self):
         """Intersect metaframe.required with self.columns if not empty."""
         if not self.columns.empty:
             required = [attr for attr in self.metaframe.required
                         if attr in self.columns]
             self.metaframe.metadata = {'Required': required}
-
-    @property
-    def metaattrs(self) -> list[str]:
-        """Return metadata attrs."""
-        return [attr for attr in self.attrs
-                if isinstance(self.attrs[attr], MetaData)]
-
-    @property
-    def metadata(self):
-        """Manage FrameArray metadata via the MetaFrame class."""
-        metadata = {}
-        for attr in self.metaattrs:
-            metadata |= getattr(self, attr).metadata
-        return metadata
-
-    @metadata.setter
-    def metadata(self, metadata):
-        for attr in self.metaattrs:
-            getattr(self, attr).metadata = metadata
 
     def update_columns(self):
         """
@@ -206,6 +205,107 @@ class DataFrame(pandas.DataFrame):
             self['index'] = self._build_index(self)
             self.set_index('index', inplace=True)
             self.index.name = None
+
+    def add_frame(self, *args, iloc=None, **kwargs):
+        """
+        Build frame from *args, **kwargs and concatenate with DataFrame.
+
+        Parameters
+        ----------
+        *args : Union[float, array-like]
+            Required arguments listed in self.metaframe.required.
+        iloc : int, optional
+            Row locater for inserted coil. The default is None (-1).
+        **kwargs : dict[str, Union[float, array-like]]
+            Optional keyword as arguments listed in self.metaframe.additional.
+
+        Returns
+        -------
+        index : pandas.Index
+            built frame.index.
+
+        """
+        self.metadata = kwargs.pop('metadata', {})
+        insert = self._build_frame(*args, **kwargs)
+        self.concat(insert, iloc=iloc)
+
+    def concat(self, insert, iloc=None, sort=False):
+        """Concatenate insert with DataFrame(self)."""
+        frame = pandas.DataFrame(self)
+        if not isinstance(insert, pandas.DataFrame):
+            insert = pandas.DataFrame(insert)
+        if iloc is None:  # append
+            frames = [frame, insert]
+        else:  # insert
+            frames = [frame.iloc[:iloc, :], insert, frame.iloc[iloc:, :]]
+        frame = pandas.concat(frames, sort=sort)  # concatenate
+        self.__init__(frame, attrs=self.attrs)
+
+    def drop_frame(self, index=None):
+        """Drop frame(s)."""
+        if index is None:
+            index = self.index
+        self.multipoint.drop(index)
+        self.drop(index, inplace=True)
+
+    def translate(self, index=None, xoffset=0, zoffset=0):
+        """Translate coil(s)."""
+        if index is None:
+            index = self.index
+        elif not pandas.api.types.is_list_like(index):
+            index = [index]
+        if xoffset != 0:
+            self.loc[index, 'x'] += xoffset
+        if zoffset != 0:
+            self.loc[index, 'z'] += zoffset
+        for name in index:
+            self.loc[name, 'poly'] = \
+                shapely.affinity.translate(self.loc[name, 'poly'],
+                                           xoff=xoffset, yoff=zoffset)
+            self.loc[name, 'patch'] = None  # re-generate coil patch
+
+    @staticmethod
+    def isframe(obj, frame=True):
+        """
+        Return isinstance(arg[0], Frame | DataFrame) flag.
+
+        Parameters
+        ----------
+        obj : Any
+            Input.
+        frame : bool, optional
+            Accept pandas.DataFrame. The default is True.
+
+        Returns
+        -------
+        isframe: bool
+            Frame / pandas.DataFrame isinstance flag.
+
+        """
+        if isinstance(obj, DataFrame):
+            return True
+        if isinstance(obj, pandas.DataFrame) and frame:
+            return True
+        return False
+
+    def hasattrs(self, attr):
+        """Return True if attr in self.attrs."""
+        return attr in self.attrs
+
+    def format_value(self, col, value):
+        """Return vector with dtype as type(metaframe.default[col])."""
+        if not self.hasattrs('metaframe') or col == 'link':
+            return value
+        try:
+            dtype = type(self.metaframe.default[col])
+        except (KeyError, TypeError):  # no default type, isinstance(col, list)
+            return value
+        try:
+            if pandas.api.types.is_list_like(value):
+                return np.array(value, dtype)
+            return dtype(value)
+        except (ValueError, TypeError):  # NaN conversion error
+            return value
 
     def _set_offset(self, metatag):
         try:  # reverse search through frame index
@@ -277,41 +377,6 @@ class DataFrame(pandas.DataFrame):
             raise IndexError(f'{np.array(index)[taken]} '
                              f'already defined in self.index: {self.index}')
         return index
-
-    def add_frame(self, *args, iloc=None, **kwargs):
-        """
-        Build frame from *args, **kwargs and concatenate with DataFrame.
-
-        Parameters
-        ----------
-        *args : Union[float, array-like]
-            Required arguments listed in self.metaframe.required.
-        iloc : int, optional
-            Row locater for inserted coil. The default is None (-1).
-        **kwargs : dict[str, Union[float, array-like]]
-            Optional keyword as arguments listed in self.metaframe.additional.
-
-        Returns
-        -------
-        index : pandas.Index
-            built frame.index.
-
-        """
-        self.metadata = kwargs.pop('metadata', {})
-        insert = self._build_frame(*args, **kwargs)
-        self._concat(insert, iloc=iloc)
-
-    def _concat(self, insert, iloc=None, sort=False):
-        """Concatenate insert with DataFrame(self)."""
-        frame = pandas.DataFrame(self)
-        if not isinstance(insert, pandas.DataFrame):
-            insert = pandas.DataFrame(insert)
-        if iloc is None:  # append
-            frames = [frame, insert]
-        else:  # insert
-            frames = [frame.iloc[:iloc, :], insert, frame.iloc[iloc:, :]]
-        frame = pandas.concat(frames, sort=sort)  # concatenate
-        self.__init__(frame, attrs=self.attrs)
 
     def _build_frame(self, *args, **kwargs):
         """
@@ -393,7 +458,6 @@ class DataFrame(pandas.DataFrame):
         data = {}  # python 3.6+ assumes dict is insertion ordered
         for attr, arg in zip(self.metaframe.required, args):
             data[attr] = np.array(arg, dtype=float)  # add required arguments
-        attrs = list(data.keys()) + list(kwargs.keys())  # record passed attrs
         for attr in self.metaframe.additional:  # set additional to default
             data[attr] = self.metaframe.default[attr]
         additional = []
@@ -402,9 +466,6 @@ class DataFrame(pandas.DataFrame):
                 data[attr] = kwargs.pop(attr)  # add keyword arguments
                 if attr not in self.metaframe.additional:
                     additional.append(attr)
-        if 'It' in attrs and 'Ic' not in attrs:  # patch line current
-            data['Ic'] = \
-                data['It'] / data.get('Nt', self.metaframe.default['Nt'])
         if len(additional) > 0:  # extend aditional arguments
             self.metaframe.metadata = {'additional': additional}
         if len(kwargs) > 0:  # ckeck for unset kwargs
@@ -438,59 +499,6 @@ class DataFrame(pandas.DataFrame):
         except ValueError:
             data_length = 1  # scalar input
         return data_length
-
-    def drop_frame(self, index=None):
-        """Drop frame(s)."""
-        if index is None:
-            index = self.index
-        self.multipoint.drop(index)
-        self.drop(index, inplace=True)
-
-    def translate(self, index=None, xoffset=0, zoffset=0):
-        """Translate coil(s)."""
-        if index is None:
-            index = self.index
-        elif not pandas.api.types.is_list_like(index):
-            index = [index]
-        if xoffset != 0:
-            self.loc[index, 'x'] += xoffset
-        if zoffset != 0:
-            self.loc[index, 'z'] += zoffset
-        for name in index:
-            self.loc[name, 'poly'] = \
-                shapely.affinity.translate(self.loc[name, 'poly'],
-                                           xoff=xoffset, yoff=zoffset)
-            self.loc[name, 'patch'] = None  # re-generate coil patch
-
-    @staticmethod
-    def isframe(obj, frame=True):
-        """
-        Return isinstance(arg[0], Frame | DataFrame) flag.
-
-        Parameters
-        ----------
-        obj : Any
-            Input.
-        frame : bool, optional
-            Accept pandas.DataFrame. The default is True.
-
-        Returns
-        -------
-        isframe: bool
-            Frame / pandas.DataFrame isinstance flag.
-
-        """
-        if isinstance(obj, DataFrame):
-            return True
-        if isinstance(obj, pandas.DataFrame) and frame:
-            return True
-        return False
-
-
-
-    def _hasattr(self, attr):
-        """Return True if attr in self.attrs."""
-        return attr in self.attrs
 
 
 if __name__ == '__main__':

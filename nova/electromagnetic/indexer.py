@@ -8,9 +8,9 @@ import pandas
 class Indexer:
     """Extend pandas Indexer methods."""
 
-    def __init__(self, *mixin):
+    def __init__(self, *mixins):
         """Set mixin to extend get/setitem methods (scalaraccess, location)."""
-        self.mixin = [mix for mix in mixin if mix is not None]
+        self.mixin = [mixin for mixin in mixins if mixin is not None]
 
     def scalaraccess(self):
         """Return _ScalarAccessIndexer."""
@@ -49,6 +49,35 @@ class Indexer:
             (self.scalaraccess(), pandas.core.indexing._iAtIndexer), {})(*args)
 
 
-if __name__ == '__main__':
+class LocMinin:
+    """Extend pandas.DataFrame indexer methods."""
 
-    df = pandas.DataFrame()
+    def loc_mixin(self, *mixins):
+        """Init indexer method, extend getitem and setitem using mixins."""
+        if not self.hasattrs('indexer'):
+            self.attrs['indexer'] = Indexer(*mixins)
+        else:
+            mixins.extend(self.attrs['indexer'].mixin)
+            self.attrs['indexer'] = Indexer(*mixins)
+
+    @property
+    def loc(self):
+        """Extend DataFrame.loc, restrict subspace access."""
+        return self.indexer.loc("loc", self)
+
+    @property
+    def iloc(self):
+        """Extend DataFrame.iloc, restrict subspace access."""
+        return self.indexer.iloc("iloc", self)
+
+    @property
+    def at(self):
+        """Extend DataFrame.at, restrict subspace access."""
+        return self.indexer.at("at", self)
+
+    @property
+    def iat(self):
+        """Extend DataFrame.iat, restrict subspace access."""
+        return self.indexer.iat("iat", self)
+
+

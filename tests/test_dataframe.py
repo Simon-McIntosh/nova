@@ -14,30 +14,6 @@ def test_init_metadata():
     assert dataframe.metaframe.required == ['x', 'z']
 
 
-def test_Ic_unset():
-    dataframe = DataFrame(Required=['x'])
-    dataframe.add_frame([4, 5], It=6.5)
-    assert dataframe.Ic.to_list() == [6.5, 6.5]
-
-
-def test_data_It_Ic_unset():
-    dataframe = DataFrame({'x': [1, 2], 'It': 5, 'Nt': 2.5}, Required=['x'])
-    assert dataframe.Ic.to_list() == [2, 2]
-
-
-def test_data_It_Ic_set():
-    dataframe = DataFrame({'x': [1, 2], 'It': 5, 'Ic': 10, 'Nt': 2.5},
-                          Required=['x'])
-    assert dataframe.Ic.to_list() == [10, 10]
-    assert dataframe.It.to_list() == [25, 25]
-
-
-def test_Ic_unset_Additional():
-    dataframe = DataFrame(Required=['x', 'z'], Additional=['Ic'])
-    dataframe.add_frame(4, range(2), It=5)
-    assert dataframe.Ic.to_list() == [5, 5]
-
-
 def test_dataframe_subclass():
     assert issubclass(DataFrame, pandas.DataFrame)
 
@@ -107,13 +83,6 @@ def test_frame_index():
     dataframe = DataFrame(metadata={'Required': ['x', 'z'], 'Additional': []})
     dataframe.add_frame(0, 1)
     assert list(dataframe.columns) == ['x', 'z']
-
-
-def test_frame_columns_multipoint():
-    dataframe = DataFrame(metadata={'Required': ['x', 'z'], 'Additional': []})
-    dataframe.add_frame(0, 1, link=True)
-    assert list(dataframe.columns) == ['x', 'z', 'link', 'factor',
-                                       'ref', 'subref']
 
 
 def test_data_init():

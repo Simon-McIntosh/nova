@@ -88,9 +88,8 @@ def test_loc_update():
     dataarray.add_frame(1, 2)
     dataarray.Ic = 9
     dataarray.loc['Coil0', 'Ic'] = 7
-    print(dataarray)
+
 
 if __name__ == '__main__':
 
-    #test_loc_update()
     pytest.main([__file__])

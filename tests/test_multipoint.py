@@ -98,6 +98,14 @@ def test_drop_indexer():
     assert frame.multipoint.indexer == [0, 1, 2, 3]
 
 
+def test_frame_columns_multipoint():
+    dataframe = DataFrame(metadata={'Required': ['x', 'z'], 'Additional': []})
+    dataframe.add_frame(0, 1, link=True)
+    assert list(dataframe.columns) == ['x', 'z', 'link', 'factor',
+                                       'ref', 'subref']
+
+
+
 if __name__ == '__main__':
 
     pytest.main([__file__])

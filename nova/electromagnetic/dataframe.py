@@ -114,7 +114,7 @@ class DataFrame(pandas.DataFrame):
         col = self._get_col(key)
         if self.in_field(col, 'subspace'):
             if self.metaframe.lock('subspace') is True:
-                return self.subspace.__getattr__(col)
+                return self.subspace.__getitem__(col)
             if self.metaframe.lock('subspace') is False:
                 self.set_frame(col)
         if self.in_field(col, 'energize'):

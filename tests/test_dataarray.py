@@ -7,17 +7,6 @@ from nova.electromagnetic.dataarray import DataArray
 from nova.electromagnetic.metaarray import MetaArray
 
 
-def test_init_update():
-    dataarray = DataArray({'x': [3, 2], 'z': 0},
-                          Required=['x', 'z'], Array=['x', 'z'])
-    dataarray.x = [1, 2]
-    dataarray = DataArray(dataarray)
-    update_array = dataarray.metaarray.update_array
-    update_frame = dataarray.metaarray.update_frame
-    assert list(update_array.values()) == [False, False]
-    assert list(update_frame.values()) == [True, True]
-
-
 def test_exclude_internal_metadata():
     metaarray = MetaArray()
     metaarray._internal = ['data']
@@ -28,24 +17,6 @@ def test_array_ndarray():
     dataarray = DataArray({'x': [3, 2], 'z': 0},
                           Required=['x', 'z'], Array=['x'])
     assert isinstance(dataarray.x, np.ndarray)
-
-
-def test_get_array_update():
-    dataarray = DataArray({'x': [3, 2], 'z': 0},
-                          Required=['x', 'z'], Array=['x', 'z'])
-    _ = dataarray.x
-    update_array = dataarray.metaarray.update_array
-    update_frame = dataarray.metaarray.update_frame
-    assert not update_array['x'] and update_frame['x']
-
-
-def test_set_array_update():
-    dataarray = DataArray({'x': [3, 2], 'z': 0},
-                          Required=['x', 'z'], Array=['x'])
-    dataarray.x = [1, 2]
-    update_array = dataarray.metaarray.update_array
-    update_frame = dataarray.metaarray.update_frame
-    assert not update_array['x'] and update_frame['x']
 
 
 def test_array_getitem():
@@ -121,5 +92,5 @@ def test_loc_update():
 
 if __name__ == '__main__':
 
-    test_loc_update()
-    #pytest.main([__file__])
+    #test_loc_update()
+    pytest.main([__file__])

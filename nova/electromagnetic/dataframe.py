@@ -41,7 +41,6 @@ class DataFrame(pandas.DataFrame):
                  columns: Collection[Any] = None,
                  attrs: dict[str, Collection[Any]] = None,
                  **metadata: dict[str, Collection[Any]]):
-        print('dataframe')
         super().__init__(data, index, columns)
         self.update_metadata(data, columns, attrs, metadata)
         self.update_index()

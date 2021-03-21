@@ -5,7 +5,7 @@ import numpy as np
 
 from nova.electromagnetic.metaarray import MetaArray
 from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.indexer import LocMinin
+from nova.electromagnetic.indexer import Indexer
 
 # pylint: disable=too-many-ancestors
 
@@ -14,15 +14,23 @@ class ArrayMixin():
     """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
 
     def __setitem__(self, key, value):
-        #print('set loc', key)
+        print('set loc', key)
         return super().__setitem__(key, value)
 
     def __getitem__(self, key):
-        #print('get loc', key)
+        print('get loc', key)
         return super().__getitem__(key)
 
 
-class DataArray(DataFrame, LocMinin):
+class ArrayIndexer(Indexer):
+
+    @property
+    def loc_mixin(self):
+        """Return LocIndexer mixins."""
+        return ArrayMixin
+
+
+class DataArray(ArrayIndexer, DataFrame):
     """Extend DataFrame enabling fast access to dynamic fields in array."""
 
     def __init__(self,
@@ -32,10 +40,9 @@ class DataArray(DataFrame, LocMinin):
                  attrs: dict[str, Collection[Any]] = None,
                  **metadata: Optional[dict]):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.loc_mixin()
 
     def extract_attrs(self, data, attrs):
-        """Extend DataFrame._extract_attrs, insert metaarray."""
+        """Extend DataFrame.extract_attrs, insert metaarray."""
         super().extract_attrs(data, attrs)
         if not self.hasattrs('metaarray'):
             self.attrs['metaarray'] = MetaArray(self.index)  # init metaframe
@@ -43,7 +50,7 @@ class DataArray(DataFrame, LocMinin):
             self.metaarray.__post_init__(self.index)
 
     def extract_metadata(self, metadata):
-        """Extend DataFrame._extract_metadata, init data structure."""
+        """Extend DataFrame.extract_metadata, init data structure."""
         super().extract_metadata(metadata)
         if not self.empty:
             self.update_array()
@@ -98,7 +105,9 @@ class DataArray(DataFrame, LocMinin):
 if __name__ == '__main__':
 
     dataarray = DataArray(Required=['x'], Array=['x'])
+
     dataarray.add_frame(range(12), link=True)
     #dataarray.loc[:, 'x'] = 5
     print(dataarray)
+
 

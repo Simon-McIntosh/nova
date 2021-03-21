@@ -19,7 +19,7 @@ class SubSpaceError(IndexError):
             f'    frame.{name}[:, {col}] = *')
 
 
-class FrameMixin:
+class FrameMixin(ArrayMixin):
     """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
 
     def __setitem__(self, key, value):
@@ -46,7 +46,15 @@ class FrameMixin:
         return super().__getitem__(key)
 
 
-class SuperFrame(DataFrame):
+class FrameIndexer(ArrayIndexer):
+
+    @property
+    def loc_mixin(self):
+        """Return LocIndexer mixins."""
+        return FrameMixin
+
+
+class SuperFrame(FrameIndexer, DataArray):
     """
     Extend pandas.DataFrame.
 

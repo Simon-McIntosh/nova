@@ -1,15 +1,16 @@
 """Extend pandas Indexer methods."""
+from abc import ABC, abstractmethod
+
 import pandas
 
 # pylint: disable=protected-access
 # pylint: disable=invalid-name
 
 
-class Indexer:
+class LocIndexer:
     """Extend pandas Indexer methods."""
 
     def __init__(self, *mixins):
-        """Set mixin to extend get/setitem methods (scalaraccess, location)."""
         self.mixin = [mixin for mixin in mixins if mixin is not None]
 
     def scalaraccess(self):
@@ -49,16 +50,19 @@ class Indexer:
             (self.scalaraccess(), pandas.core.indexing._iAtIndexer), {})(*args)
 
 
-class LocMinin:
+class Indexer(ABC):
     """Extend pandas.DataFrame indexer methods."""
 
-    def loc_mixin(self, *mixins):
-        """Init indexer method, extend getitem and setitem using mixins."""
+    def extract_attrs(self, data, attrs):
+        """Extend DataFrame.extract_attrs, insert metaarray."""
+        super().extract_attrs(data, attrs)
         if not self.hasattrs('indexer'):
-            self.attrs['indexer'] = Indexer(*mixins)
-        else:
-            mixins.extend(self.attrs['indexer'].mixin)
-            self.attrs['indexer'] = Indexer(*mixins)
+            self.attrs['indexer'] = LocIndexer(self.loc_mixin)  # init indexer
+
+    @property
+    @abstractmethod
+    def loc_mixin(self) -> object:
+        """Return LocIndexer mixin."""
 
     @property
     def loc(self):
@@ -79,5 +83,3 @@ class LocMinin:
     def iat(self):
         """Extend DataFrame.iat, restrict subspace access."""
         return self.indexer.iat("iat", self)
-
-

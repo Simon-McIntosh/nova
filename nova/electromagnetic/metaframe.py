@@ -43,7 +43,7 @@ class MetaFrame(MetaData):
             'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.,
             'name': '', 'label': 'Coil', 'delim': '', 'offset': 0})
     _lock: dict[str, bool] = field(default_factory=lambda: {
-        'subspace': True, 'energize': False, 'array': False}, init=False)
+        'subspace': False, 'energize': False, 'array': False}, init=False)
 
     def lock(self, key=None):
         """

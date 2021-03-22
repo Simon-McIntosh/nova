@@ -46,10 +46,11 @@ class SetLocMixin(ArrayLocMixin):
 
     def __getitem__(self, key):
         """Refresh subspace items prior to return."""
+        print('getframe', key)
         col = self.obj.get_col(key)
         if self.obj.in_field(col, 'subspace'):
             if self.obj.metaframe.lock('subspace') is True:
-                self.obj.set_frame(col)
+                self.obj.subspace_to_frame(col)
         if self.obj.in_field(col, 'energize'):
             if self.obj.metaframe.lock('energize') is False:
                 return self.obj.energize._get_item(super(), key)
@@ -101,15 +102,17 @@ class FrameSet(SetIndexer, DataArray):
 
     def __getitem__(self, key):
         """Extend DataFrame.__getitem__. (frame['*'])."""
+        print('frame main getitem', key, self.metaframe.lock())
         col = self.get_col(key)
         if self.in_field(col, 'subspace'):
             if self.metaframe.lock('subspace') is True:
                 return self.subspace.__getitem__(col)
             if self.metaframe.lock('subspace') is False:
-                self.set_frame(col)
+                self.subspace_to_frame(col)
         if self.in_field(col, 'energize'):
             if self.metaframe.lock('energize') is False:
                 return self.energize._get_item(super(), key)
+        print('getting item')
         return super().__getitem__(key)
 
     def __setitem__(self, key, value):
@@ -130,24 +133,25 @@ class FrameSet(SetIndexer, DataArray):
         """Propagate subspace varables to frame."""
         if self.hasattrs('subspace'):
             for col in [col for col in self.subspace if col in self]:
-                self.set_frame(col)
+                self.subspace_to_frame(col)
 
-    def set_frame(self, col):
+    def subspace_to_frame(self, col):
         """Inflate subspace variable and setattr in frame."""
         self.assert_in_field(col, 'subspace')
+        value = getattr(self, col)
+        print('initial value', value)
+        if not isinstance(value, np.ndarray):
+            value = value.to_numpy()
         with self.metaframe.setlock(True, 'subspace'):
-            value = getattr(self, col)
-            if not isinstance(value, np.ndarray):
-                value = value.to_numpy()
-        with self.metaframe.setlock(None):
-            if hasattr(self, 'subref'):  # inflate
+            if hasattr(self, 'subref'):  # inflate subspace
                 value = value[self.subref]
+            print('inflated value', value)
             super().__setitem__(col, value)
 
     def get_frame(self, col):
         """Return inflated subspace variable."""
         self.assert_in_field(col, 'subspace')
-        with self.metaframe.setlock(False, 'subspace'):
+        with self.metaframe.setlock(True, 'subspace'):
             return super().__getitem__(col)
 
     def add_frame(self, *args, iloc=None, **kwargs):

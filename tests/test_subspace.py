@@ -174,10 +174,9 @@ def test_subarray():
 def test_link_lock():
     frame = Frame(Required=['Ic'], Array=['Ic'], Subspace=['Ic'])
     with frame.metaframe.setlock(True, 'array'):
-        assert frame.subspace.metaframe.lock('array') == True
+        assert frame.subspace.metaframe.lock('array') is True
 
 
 if __name__ == '__main__':
 
-    test_subarray()
-    #pytest.main([__file__])
+    pytest.main([__file__])

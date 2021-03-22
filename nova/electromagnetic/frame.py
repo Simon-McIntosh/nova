@@ -31,11 +31,21 @@ class Frame(FrameSet):
 
 if __name__ == '__main__':
 
-    frame = FrameSet(Required=['Ic'], Array=['Ic'])
-    print(frame.metaframe.available)
+    frame = Frame(Required=['x'], Array=['x'])
     frame.add_frame(range(3), link=True)
-    #frame.Ic = 7.7
-    print(frame)
+
+    print('\n\n setitem')
+    frame.x = 7.7
+
+    print('\n\n getloc')
+    print(frame.loc['Coil0':'Coil1', 'x'])
+
+    print('\n\n get attr')
+    print(frame.x)
+
+    #with frame.metaframe.setlock(None):
+    #    print(frame.loc[:, 'x'], frame.x)
+
     '''
 
 

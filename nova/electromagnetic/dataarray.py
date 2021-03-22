@@ -26,11 +26,12 @@ class ArrayLocMixin():
 
     def __getitem__(self, key):
         """Extend Loc getitem. Update frame prior to return if col in array."""
+        print('getarray', key)
         col = self.obj.get_col(key)
         if col in self.obj.metaarray.array:
-            self.obj._set_frame(col)  # update frame
-            with self.obj.metaframe.setlock(True, 'array'):
-                return super().__getitem__(key)
+            print('array to frame', col)
+            if self.obj.metaframe.lock('array') is True:
+                self.obj.array_to_frame(col)  # update frame
         return super().__getitem__(key)
 
 
@@ -78,15 +79,16 @@ class DataArray(ArrayIndexer, DataFrame):
         """Set col, quickly, preserving shape."""
         self.attrs['metaarray'].data[col][:] = value
 
-    def _set_frame(self, col):
+    def array_to_frame(self, col):
         """Transfer metaarray.data to frame."""
-        print('data to frame', col)
+        print('data to frame', col, col in self.metaarray.array)
         self.assert_in_field(col, 'array')
-        #with self.metaframe.setlock(None):
-        value = self.__getitem__(col)
-        with self.metaframe.setlock(True, 'array'):
-            #print(value)
-            super().__setitem__(col, value)
+        if col in self.metaarray.array:
+            #with self.metaframe.setlock(None):
+            value = self.__getitem__(col)
+            with self.metaframe.setlock(True, 'array'):
+                print('set frame', value)
+                super().__setitem__(col, value)
 
     def extract_attrs(self, data, attrs):
         """Extend DataFrame.extract_attrs, insert metaarray."""
@@ -113,7 +115,6 @@ class DataArray(ArrayIndexer, DataFrame):
         # TODO - fix frame update
         for col in self.metaarray.array:
             self._set_frame(col)
-
 
     def _get_array(self, col):
         """Return col, quickly."""

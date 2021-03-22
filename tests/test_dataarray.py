@@ -94,6 +94,7 @@ def test_get_loc_slice():
     dataarray = DataArray({'x': range(6)}, Required=['x'], Array=['x'])
     assert dataarray.loc['Coil0':'Coil3', 'x'].to_list() == [0, 1, 2, 3]
 
+test_get_loc_slice()
 
 def test_get_iloc_slice():
     dataarray = DataArray({'x': range(6)}, Required=['x'], Array=['x'])

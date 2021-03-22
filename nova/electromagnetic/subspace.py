@@ -1,24 +1,25 @@
-
+"""Manage frame subspace."""
 import pandas
 import numpy as np
 
-#from nova.electromagnetic.frame import SuperFrame
-from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.dataarray import DataArray
+from nova.electromagnetic.frameset import FrameSet
+
+# pylint: disable=too-many-ancestors
 
 
-class SubSpace(DataArray):
-    """Manage frame subspace (all independent rows)."""
+class SubSpace(FrameSet):
+    """Manage frame subspace, extract independent rows for subspace columns."""
 
     def __init__(self, frame):
-        index = self.get_index(frame)
-        columns = self.get_columns(frame)
-        array = [attr for attr in frame.metaarray.array
-                 if attr in columns]
+        index = self.get_subindex(frame)
+        columns = self.get_subcolumns(frame)
+        array = self.get_subarray(frame, columns)
         super().__init__(pandas.DataFrame(frame), index=index, columns=columns,
-                         Avalible=None, Array=array)
+                         Available=columns, Array=array)
+        self.metaframe._lock = frame.metaframe._lock  # link locks
 
-    def get_index(self, frame):
+    @staticmethod
+    def get_subindex(frame):
         """Return subspace index."""
         if not hasattr(frame, 'multipoint'):
             return None
@@ -26,7 +27,8 @@ class SubSpace(DataArray):
             return frame.index
         return frame.multipoint.index
 
-    def get_columns(self, frame):
+    @staticmethod
+    def get_subcolumns(frame):
         """Return subspace columns."""
         if frame.empty:
             return frame.metaframe.subspace
@@ -37,3 +39,7 @@ class SubSpace(DataArray):
             return frame.metaframe.subspace
         return []
 
+    @staticmethod
+    def get_subarray(frame, columns):
+        """Return subarray - fast access variables."""
+        return [attr for attr in frame.metaarray.array if attr in columns]

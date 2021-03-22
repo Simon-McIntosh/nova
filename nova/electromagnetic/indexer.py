@@ -83,3 +83,33 @@ class Indexer(ABC):
     def iat(self):
         """Extend DataFrame.iat, restrict subspace access."""
         return self.indexer.iat("iat", self)
+
+    def get_col(self, key):
+        """Return column label."""
+        if isinstance(key, tuple):
+            col = key[-1]
+        else:
+            col = key
+        if isinstance(col, int):
+            col = self.columns[col]
+        return col
+
+    def get_index(self, key) -> slice:
+        """Return index."""
+        if not isinstance(key, tuple):
+            return slice(None)
+        index = key[0]
+        if not isinstance(index, slice):
+            if isinstance(index, str):
+                return self.index.get_loc(index)
+            return index
+        _slice = [0 for __ in range(3)]
+        for i, location in enumerate(['start', 'stop', 'step']):
+            value = getattr(index, location)
+            if isinstance(value, str):
+                value = self.index.get_loc(value)
+                if location == 'stop':  # maintain consistency with pandas
+                    value += 1
+            _slice[i] = value
+        return slice(*_slice)
+

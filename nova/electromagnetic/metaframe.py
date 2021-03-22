@@ -23,7 +23,7 @@ class MetaFrame(MetaData):
     required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
     additional: list[str] = field(default_factory=lambda: [])
     exclude: list[str] = field(default_factory=lambda: [])
-    avalible: list[str] = field(default_factory=lambda: [])
+    available: list[str] = field(default_factory=lambda: [])
     subspace: list[str] = field(default_factory=lambda: [
         'Ic', 'It', 'Nt', 'active', 'plasma', 'optimize', 'feedback'])
     default: dict[str, Union[float, str, bool, None]] = field(
@@ -43,7 +43,7 @@ class MetaFrame(MetaData):
             'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.,
             'name': '', 'label': 'Coil', 'delim': '', 'offset': 0})
     _lock: dict[str, bool] = field(default_factory=lambda: {
-        'subspace': True, 'energize': False}, init=False)
+        'subspace': True, 'energize': False, 'array': False}, init=False)
 
     def lock(self, key=None):
         """

@@ -85,11 +85,64 @@ def test_setitem_slice_warn():
 def test_loc_update():
     dataarray = DataArray({'x': range(7), 'z': 0},
                           additional=['Ic'], Array=['Ic'], label='Coil')
-    dataarray.add_frame(1, 2)
     dataarray.Ic = 9
     dataarray.loc['Coil0', 'Ic'] = 7
+    assert list(dataarray.Ic[:3]) == [7, 9, 9]
+
+
+def test_get_loc_slice():
+    dataarray = DataArray({'x': range(6)}, Required=['x'], Array=['x'])
+    assert dataarray.loc['Coil0':'Coil3', 'x'].to_list() == [0, 1, 2, 3]
+
+
+def test_get_iloc_slice():
+    dataarray = DataArray({'x': range(6)}, Required=['x'], Array=['x'])
+    assert dataarray.iloc[0:4, 0].to_list() == [0, 1, 2, 3]
+
+
+def test_set_get_loc_slice():
+    dataarray = DataArray({'x': range(6)}, Required=['x'], Array=['x'])
+    dataarray.x[:2] = 7.7
+    assert dataarray.loc['Coil0':'Coil3', 'x'].to_list() == [7.7, 7.7, 2, 3]
+
+
+def test_set_loc():
+    dataarray = DataArray({'x': range(3)}, Required=['x'], Array=['x'])
+    dataarray.loc[:, 'x'] = 7.7
+    assert list(dataarray.x) == [7.7, 7.7, 7.7]
+
+
+def test_set_loc_slice():
+    dataarray = DataArray({'x': range(3)}, Required=['x'], Array=['x'])
+    dataarray.loc['Coil0':'Coil1', 'x'] = 7.7
+    assert list(dataarray.x) == [7.7, 7.7, 2.0]
+
+
+def test_set_iloc():
+    dataarray = DataArray({'x': range(3)}, Required=['x'], Array=['x'])
+    dataarray.iloc[:, 'x'] = 7.7
+    assert list(dataarray.x) == [7.7, 7.7, 7.7]
+
+
+def test_set_iloc_slice():
+    dataarray = DataArray({'x': range(3)}, Required=['x'], Array=['x'])
+    dataarray.iloc['Coil0':'Coil1', 'x'] = 7.7
+    assert list(dataarray.x) == [7.7, 7.7, 2.0]
+
+
+def test_set_at():
+    dataarray = DataArray({'x': range(3)}, Required=['x'], Array=['x'])
+    dataarray.at['Coil0', 'x'] = 7.7
+    assert list(dataarray.x) == [7.7, 1, 2]
+
+
+def test_set_iat():
+    dataarray = DataArray({'x': range(3)}, Required=['x'], Array=['x'])
+    dataarray.iat[0, 0] = 7.7
+    assert list(dataarray.x) == [7.7, 1, 2]
 
 
 if __name__ == '__main__':
 
-    pytest.main([__file__])
+    test_set_get_loc_slice()
+    #pytest.main([__file__])

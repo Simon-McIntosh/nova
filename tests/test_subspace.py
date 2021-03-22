@@ -2,7 +2,7 @@
 import pytest
 
 from nova.electromagnetic.frame import Frame
-from nova.electromagnetic.dataframe import SubSpaceError
+from nova.electromagnetic.frameset import SubSpaceError
 
 
 def test_init():
@@ -41,7 +41,7 @@ def test_setattr():
     assert frame.Ic.to_list() == [3.6, 5.2, 10.0]
 
 
-def test_setattr_energize():
+def test_setattr_current():
     frame = Frame(Required=['x', 'z'])
     frame.add_frame(4, range(7), Ic=5, Nt=3.6, link=True)
     frame.add_frame(4, range(2), Nt=5.2, link=False)
@@ -70,8 +70,6 @@ def test_loc_slice():
                   Additional=['Ic'], label='Coil', offset=15)
     frame.add_frame(4, range(2), It=5, link=True)
     frame.add_frame(4, range(2), It=7.3, link=False)
-
-    print(frame)
     frame.subspace.loc['Coil15':'Coil17', 'It'] = [3.6, 5.2]
     assert frame.It.to_list() == [3.6, 5.2, 7.3]
 
@@ -166,7 +164,20 @@ def test_subspace_lock():
     assert frame.metaframe.lock('subspace')
 
 
+def test_subarray():
+    frame = Frame(Required=['Ic'], Array=['Ic'], Subspace=['Ic'])
+    frame.add_frame([7.6, 5.5], link=True)
+    frame.add_frame([3, 3], link=True)
+    _ = frame.loc[:, 'Ic']
+
+
+def test_link_lock():
+    frame = Frame(Required=['Ic'], Array=['Ic'], Subspace=['Ic'])
+    with frame.metaframe.setlock(True, 'array'):
+        assert frame.subspace.metaframe.lock('array') == True
+
+
 if __name__ == '__main__':
 
-    test_loc_slice()
+    test_subarray()
     #pytest.main([__file__])

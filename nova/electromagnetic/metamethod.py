@@ -22,6 +22,8 @@ class MetaMethod(metaclass=ABCMeta):
 
     def __post_init__(self):
         """Generate multi-point constraints."""
+        self.columns = set(self.required)
+        #self.generate = self.isset
         if self.generate:
             self.update_additional()
 
@@ -31,7 +33,7 @@ class MetaMethod(metaclass=ABCMeta):
 
     @property
     def generate(self):
-        """Return initialization flag."""
+        """Return True if required attributes set else False."""
         if self.require_all:
             return self.required_attributes.all()
         return self.required_attributes.any()
@@ -39,7 +41,7 @@ class MetaMethod(metaclass=ABCMeta):
     @property
     def required_attributes(self):
         """Return boolean status of attributes found in frame.columns."""
-        return np.array([attr in self.frame.metaframe.avalible
+        return np.array([attr in self.frame.metaframe.available
                          for attr in self.required])
 
     def _unset(self, attributes: list[str]) -> list[str]:

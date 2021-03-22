@@ -7,7 +7,7 @@ from nova.electromagnetic.frame import Frame
 
 
 def test_generate_key_attribute_true():
-    frame = Frame({'link': [True]}, metadata={'Required': []})
+    frame = Frame({'link': [True]}, Required=[])
     assert frame.multipoint.generate
 
 
@@ -99,11 +99,9 @@ def test_drop_indexer():
 
 
 def test_frame_columns_multipoint():
-    dataframe = DataFrame(metadata={'Required': ['x', 'z'], 'Additional': []})
-    dataframe.add_frame(0, 1, link=True)
-    assert list(dataframe.columns) == ['x', 'z', 'link', 'factor',
-                                       'ref', 'subref']
-
+    frame = Frame(metadata={'Required': ['x', 'z'], 'Additional': []})
+    frame.add_frame(0, 1, link=True)
+    assert list(frame.columns) == ['x', 'z', 'link', 'factor', 'ref', 'subref']
 
 
 if __name__ == '__main__':

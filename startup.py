@@ -12,7 +12,7 @@ def start():
             'show_dimensions': False
         },
         'mode': {
-            'chained_assignment': 'raise'   # Controls SettingWithCopyWarning
+            'chained_assignment': 'warn'   # Controls SettingWithCopyWarning
         }
     }
 

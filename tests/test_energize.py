@@ -11,7 +11,6 @@ def test_in_energize():
 
 def test_set_loc_Ic():
     frame = Frame(Required=['x', 'z'], Additional=['Ic'], Subspace=[])
-    print(frame.metaframe)
     frame.add_frame(0.5, [6, 8.3], Nt=0.5)
     frame.loc[:, 'Ic'] = 6.6
     assert frame.loc[:, 'It'].to_list() == [3.3, 3.3]
@@ -81,6 +80,7 @@ def test_subspace_Ic():
     frame.add_frame(0.5, [6, 8.3], Nt=0.5)
     frame.add_frame(0.5, range(10), Nt=3.5, link=True)
     frame.Ic = [6.6, 6.6, 1]
+    print(frame)
     assert frame.It.to_list() == [3.3, 3.3, 3.5]
 
 

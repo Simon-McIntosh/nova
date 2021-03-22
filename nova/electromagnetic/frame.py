@@ -4,17 +4,14 @@ from typing import Optional, Collection, Any
 
 import numpy as np
 
-from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.dataarray import DataArray
-
-#from nova.electromagnetic.superframe import SuperFrame
+from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.subspace import SubSpace
 from nova.electromagnetic.metamethod import MetaMethod
 
 # pylint: disable=too-many-ancestors
 
 
-class Frame(DataArray):
+class Frame(FrameSet):
     """
     Extend DataFrame.
 
@@ -34,18 +31,29 @@ class Frame(DataArray):
 
 if __name__ == '__main__':
 
+    frame = FrameSet(Required=['Ic'], Array=['Ic'])
+    print(frame.metaframe.available)
+    frame.add_frame(range(3), link=True)
+    #frame.Ic = 7.7
+    print(frame)
+    '''
+
+
     frame = Frame(Required=['x', 'z'], Additional=['It', 'Ic', 'Nt'],
-                  Array=[])
+                  Array=['It', 'Ic', 'Nt'])
     frame.add_frame(1, range(3), It=5, link=True)
     frame.add_frame(1, range(3), It=5, link=False)
-    frame.add_frame(1, range(40), Ic=5, Nt=334.5, link=True)
+    frame.add_frame(1, range(4), Ic=5.7, Nt=334.5, link=True)
     #frame.loc[:, 'Ic'] = 7
 
-    #def set_current():
-    #    #frame.metaarray.data['Ic'] = np.random.rand(len(frame.subspace))
-    #    frame.Ic = np.random.rand(len(frame.subspace))
+    def set_current():
+        #frame.metaarray.data['Ic'] = np.random.rand(len(frame.subspace))
+        frame.Ic = np.random.rand(len(frame.subspace))
 
-    #for _ in range(4):
-    #    set_current()
+    for _ in range(4):
+        set_current()
+
     print(frame)
+
+    '''
 

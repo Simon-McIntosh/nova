@@ -10,6 +10,38 @@ Created on Thu Feb 18 20:33:42 2021
 
 """
 
+    def _hasattrs(self, attrs: list[str]):
+        """Return True if all required attributes are available else False."""
+        return np.array([attr in self.frame.columns for attr in attrs]).all()
+
+
+
+        def _build_data(self, *args, **kwargs):
+        """Extend DataFrame._build_data add line current converter."""
+        attrs = self.metaframe.required + list(kwargs)  # record passed attrs
+        data = super()._build_data(*args, **kwargs)
+        if 'It' in attrs and 'Ic' not in attrs:  # patch line current
+            data['Ic'] = \
+                data['It'] / data.get('Nt', self.metaframe.default['Nt'])
+        return data
+
+
+    #def validate(self):
+    #    """Extend MetaData.validate, set default update flags."""
+    #    super().validate()
+    #    self.update_flag('array', True)
+    #    self.update_flag('frame', False)
+
+    '''
+    def update_flag(self, instance, default):
+        """Set flag defaults for new attributes."""
+        attribute = getattr(self, f'update_{instance}')
+        attribute |= {attr: default for attr in self.array
+                      if attr not in attribute}
+        setattr(self, f'update_{instance}',
+                {attr: attribute[attr] for attr in self.array})
+    '''
+
 #### subspace
 
     '''

@@ -83,7 +83,7 @@ class Polygon(MetaMethod):
             data['rms'][i] = root_mean_square(
                 section, data['x'][i], length, thickness, poly)
         for attr in data:  # update frame
-            setattr(self.frame, attr, data[attr])
+            self.frame[attr] = data[attr]
 
     def limit(self, index):
         """Return coil limits [xmin, xmax, zmin, zmax]."""

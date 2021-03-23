@@ -6,7 +6,7 @@ from nova.electromagnetic.frame import Frame
 
 def test_in_energize():
     frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    assert frame.in_field('Ic', 'energize')
+    assert frame.in_field('It', 'energize')
 
 
 def test_set_loc_Ic():

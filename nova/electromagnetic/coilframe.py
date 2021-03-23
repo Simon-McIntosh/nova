@@ -1,58 +1,60 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 
-from typing import Optional, Collection, Any, Union
+from dataclasses import dataclass, field
 
-import numpy as np
-
-from nova.electromagnetic.metaarray import MetaArray
-from nova.electromagnetic.metaframe import MetaFrame
 from nova.electromagnetic.frame import Frame
-from nova.electromagnetic.subspace import SubSpace
-
-# pylint: disable=too-many-ancestors
-# pylint:disable=unsubscriptable-object
 
 
-class CoilFrame(Frame):
-    """
-    Extend SuperSpace.
+@dataclass
+class CoilFrame:
 
-    - Implement current properties.
+    required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
+    additional: list[str] = field(default_factory=lambda: [
+        'dx', 'dz', 'dA', 'dl_x', 'dl_z', 'dCoil', 'nx', 'nz', 'part', 'coil',
+        'section', 'turn', 'turn_fraction', 'skin_fraction',
+        'link', 'Ic', 'It', 'Nt', 'Nf',
+        'Psi', 'Bx', 'Bz', 'B', 'acloss'])
+    coil: Frame = field(init=False)
+    subcoil: Frame = field(init=False)
 
-    """
+    def __post_init__(self):
+        """Init coil and subcoil."""
+        self.coil = Frame(
+            Required=self.required, Additional=self.additional,
+            Exclude=['dl_x', 'dl_z', 'coil'])
+        self.subcoil = Frame(
+            Required=self.required, Additional=self.additional,
+            Exclude=['turn', 'turn_fraction', 'skin_fraction', 'Nf',
+                     'dCoil'])
 
-    def __init__(self,
-                 data=None,
-                 index: Optional[Collection[Any]] = None,
-                 columns: Optional[Collection[Any]] = None,
-                 attrs: dict[str, Union[MetaArray, MetaFrame]] = None,
-                 **metadata: Optional[dict]):
-        super().__init__(data, index, columns, attrs, **metadata)
-        self.attrs['subspace'] = SubSpace(self)
+    def add_coil(self, *required, iloc=None, subcoil=True, **additional):
+        """
+        Add coil(s) to coilframe.
+
+        Parameters
+        ----------
+        *required : Union[DataFrame, dict, list]
+            Required input.
+        iloc : int, optional
+            Index before which coils are inserted. The default is None (-1).
+        subcoil : bool, optional
+            Mesh subcoil. The default is True.
+        **additional : dict[str, Any]
+            Additional input.
+
+        Returns
+        -------
+        None.
+
+        """
+        index = self.coil.add_frame(*required, iloc=iloc, **additional)
+        #if subcoil:
+        #    self.meshcoil(index=index)
 
 
 if __name__ == '__main__':
 
-    coilframe = CoilFrame(Required=['x', 'z'], optimize=True,
-                          dCoil=5, Additional=['Ic'], Nt=10)
-
-    coilframe.add_frame(4, range(3), link=True)
-    coilframe.add_frame(4, range(2), link=False)
-    coilframe.add_frame(4, range(4), link=True)
-
-    def set_current():
-        coilframe.Ic = np.random.rand(len(coilframe.subspace))
-
-    set_current()
-
-    coilframe.subspace.iloc[3, 0] = 33.4
-    print(coilframe)
-
-    #frame.x = [1, 2, 3]
-    #frame.x[1] = 6
-
-    #print(frame)
-
-    #frame.metaarray._lock = False
-    #newframe = Frame()
+    coilframe = CoilFrame()
+    coilframe.add_coil(range(13), 1, 0.1, 0.1, link=True)
+    print(coilframe.coil.subspace)
 

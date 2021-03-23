@@ -225,30 +225,7 @@ class CoilMethods:
         self.coil.optimize = value
         self.subcoil.optimize = value
 
-    def add_coil(self, *args, iloc=None, subcoil=True, **kwargs):
-        """
-        Add coil(s) to coilframe.
 
-        Parameters
-        ----------
-        *args : coilframe or dataframe or list, shape(len(_required_columns),)
-            Input data.
-        iloc : int, optional
-            Index before which coils are inserted. The default is None.
-        subcoil : bool, optional
-            Mesh subcoil. The default is True.
-        **kwargs : dict
-            coilframe_metadata, **additional_columns.
-
-        Returns
-        -------
-        None.
-
-        """
-        kwargs['delim'] = kwargs.get('delim', '')
-        index = self.coil.add_coil(*args, iloc=iloc, **kwargs)
-        if subcoil:
-            self.meshcoil(index=index)
 
     def drop_coil(self, index=None):
         """

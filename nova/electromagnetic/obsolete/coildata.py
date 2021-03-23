@@ -10,6 +10,12 @@ Created on Thu Feb 18 20:33:42 2021
 
 """
 
+    #def __getattr__(self, col):
+    #    """Extend DataFrame.__getattr__ to provide access to subspace."""
+    #    if self.in_field(col, 'subspace'):
+    #        return self.subspace.__getattr__(col)
+    #    return super().__getattr__(col)
+
     def format_data(self, data):
         super().format_data(data)
         if isinstance(data, dict):

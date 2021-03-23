@@ -3,7 +3,7 @@ Construct coilsets for electromagnetic calculation.
 
 Coilsets constructed from a pair of CoilFrame objects derived from
 pands.DataFrames. Fast access to and from CoilFrame objects managed via the
-CoilData Class.
+DataArray Class.
 
 """
 
@@ -89,9 +89,9 @@ class CoilSet(pythonIO, BiotMethods, PlasmaMethods, CoilMethods, CoilPlot):
 
     def __init__(self, **coilset):
         self._initialize_coilset()  # initialize coil and subcoil
-        BiotMethods.__init__(self)  # initialize biotmethods
-        PlasmaMethods.__init__(self)  # initialize plasma methods
-        self.coilset = coilset  # exchange coilset and instance attributes
+        #BiotMethods.__init__(self)  # initialize biotmethods
+        #PlasmaMethods.__init__(self)  # initialize plasma methods
+        #self.coilset = coilset  # exchange coilset and instance attributes
 
     def _initialize_coilset(self):
         self._extract_coilset_properties()

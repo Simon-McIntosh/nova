@@ -22,8 +22,6 @@ class MetaMethod(metaclass=ABCMeta):
 
     def __post_init__(self):
         """Generate multi-point constraints."""
-        self.columns = set(self.required)
-        #self.generate = self.isset
         if self.generate:
             self.update_additional()
 

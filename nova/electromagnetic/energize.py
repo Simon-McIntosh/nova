@@ -21,10 +21,11 @@ class Energize(MetaMethod):
         'Ic', 'It', 'Nt', 'active', 'plasma', 'optimize', 'feedback'])
     available: dict[str, bool] = field(
         default_factory=lambda: {'Ic': False, 'Nt': False})
+    columns: list[str] = field(default_factory=lambda: ['It'])
     require_all: bool = False
 
     def initialize(self):
-        """Set True if line current and turn number set else False."""
+        """Init attribute avalibility flags and columns."""
         for attr in self.available:
             self.available[attr] = attr in self.frame.columns
 

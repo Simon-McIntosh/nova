@@ -102,12 +102,6 @@ class FrameSet(SetIndexer, DataArray):
         self.update_frame()
         return super().__repr__()
 
-    #def __getattr__(self, col):
-    #    """Extend DataFrame.__getattr__ to provide access to subspace."""
-    #    if self.in_field(col, 'subspace'):
-    #        return self.subspace.__getattr__(col)
-    #    return super().__getattr__(col)
-
     def __setattr__(self, col, value):
         """Extend DataFrame.__getattr__ to provide access to subspace."""
         if self.in_field(col, 'subspace'):
@@ -159,17 +153,17 @@ class FrameSet(SetIndexer, DataArray):
         with self.metaframe.setlock(True, 'subspace'):
             super().__setitem__(col, value)
 
-    def add_frame(self, *args, iloc=None, **kwargs):
+    def add_frame(self, *required, iloc=None, **additional):
         """
         Build frame from *args, **kwargs and concatenate with DataFrame.
 
         Parameters
         ----------
-        *args : Union[float, array-like]
+        *required : Union[float, array-like]
             Required arguments listed in self.metaframe.required.
         iloc : int, optional
             Row locater for inserted coil. The default is None (-1).
-        **kwargs : dict[str, Union[float, array-like]]
+        **additional : dict[str, Union[float, array-like]]
             Optional keyword as arguments listed in self.metaframe.additional.
 
         Returns
@@ -178,8 +172,8 @@ class FrameSet(SetIndexer, DataArray):
             built frame.index.
 
         """
-        self.metadata = kwargs.pop('metadata', {})
-        insert = self._build_frame(*args, **kwargs)
+        self.metadata = additional.pop('metadata', {})
+        insert = self._build_frame(*required, **additional)
         self.concat(insert, iloc=iloc)
 
     def concat(self, insert, iloc=None, sort=False):
@@ -323,7 +317,7 @@ class FrameSet(SetIndexer, DataArray):
 
 if __name__ == '__main__':
 
-    frameset = FrameSet(Required=['Ic'], Array=['Ic'])
-    frameset.add_frame(range(3))
+    frameset = FrameSet(Required=['x', 'z'], additional=['section'])
+    frameset.add_frame(range(3), 1)
     frameset.Ic = 7.7
-    print(frameset.Ic)
+    print(frameset.columns)

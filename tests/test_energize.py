@@ -80,11 +80,17 @@ def test_subspace_Ic():
     frame.add_frame(0.5, [6, 8.3], Nt=0.5)
     frame.add_frame(0.5, range(10), Nt=3.5, link=True)
     frame.Ic = [6.6, 6.6, 1]
-    print(frame)
     assert frame.It.to_list() == [3.3, 3.3, 3.5]
+
+
+def test_subspace_intersect_columns():
+    frame = Frame(Required=['x', 'z'], Additional=['Ic'])
+    frame.add_frame(0.5, [6, 8.3], Nt=0.5)
+    frame.add_frame(0.5, range(10), Nt=3.5, link=True)
+    frame.Ic = [6.6, 6.6, 1]
+    frame.update_frame()
 
 
 if __name__ == '__main__':
 
-    test_subspace_Ic()
-    #pytest.main([__file__])
+    pytest.main([__file__])

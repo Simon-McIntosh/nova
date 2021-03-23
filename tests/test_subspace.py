@@ -139,29 +139,29 @@ def test_get_frame():
     frame = Frame(Required=['x', 'z'])
     frame.add_frame(4, range(3), Ic=5.7, link=True)
     frame.add_frame(4, range(2), Ic=3.2, link=False)
-    assert frame.get_frame('Ic').to_list() == [5.7, 5.7, 5.7, 3.2, 3.2]
+    with frame.metaframe.setlock(True, 'subspace'):
+        assert frame.Ic.to_list() == [5.7, 5.7, 5.7, 3.2, 3.2]
 
 
 def test_setattr_error():
     frame = Frame(Required=['x', 'z'])
     frame.add_frame(4, range(3), Ic=5.7, link=True)
-    with pytest.raises(IndexError):
+    with pytest.raises(ValueError):
         with frame.metaframe.setlock(False, 'subspace'):
             frame.Ic = range(3)
 
 
-def test_setitem_error():
-    frame = Frame(Required=['x', 'z'])
+def test_setitem_value_error():
+    frame = Frame(Required=['x', 'z'], Array=[], Subspace=['Ic'])
     frame.add_frame(4, range(3), Ic=5.7, link=True)
-    with pytest.raises(IndexError):
-        with frame.metaframe.setlock(False, 'subspace'):
-            frame['Ic'] = range(3)
+    with pytest.raises(ValueError):
+        frame['Ic'] = range(3)
 
 
 def test_subspace_lock():
     frame = Frame(metadata={'Required': ['x'], 'Subspace': ['x']})
     assert frame.in_field('x', 'subspace')
-    assert frame.metaframe.lock('subspace')
+    assert frame.metaframe.lock('subspace') is False
 
 
 def test_subarray():
@@ -175,6 +175,14 @@ def test_link_lock():
     frame = Frame(Required=['Ic'], Array=['Ic'], Subspace=['Ic'])
     with frame.metaframe.setlock(True, 'array'):
         assert frame.subspace.metaframe.lock('array') is True
+
+
+def test_loc_keyerror():
+    frame = Frame(Required=['x'], Array=[], Subspace=['x'])
+    frame.add_frame([5.5, 72.4], link=True, Ic=5.7)
+    frame.add_frame([5.5, 72.4], link=True)
+    with pytest.raises(KeyError):
+        _ = frame.loc['Coil1', 'x']
 
 
 if __name__ == '__main__':

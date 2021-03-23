@@ -10,6 +10,52 @@ Created on Thu Feb 18 20:33:42 2021
 
 """
 
+    def format_data(self, data):
+        super().format_data(data)
+        if isinstance(data, dict):
+            for col in data:
+                if self.in_array(col):
+                    self._set_array(col, self._get_frame(col))
+
+
+    def match_columns(self):
+        """Extend DataFrame.match_columns, init data structure."""
+        super().match_columns()
+        if not self.empty:
+            self.update_array()
+
+    def update_array(self):
+        """Set array data and backpropagate to frame if unset (default)."""
+        for col in self.metaarray.array:
+            self.attrs['metaarray'].data[col] = self._get_frame(col)
+
+    def __getitem__(self, key):
+        """Extend Loc getitem. Update frame prior to return if col in array."""
+        print('getarray loc', key)
+        col = self.obj.get_col(key)
+        if self.obj.in_array(col):
+            #index = self.obj.get_index(key)
+            #if self.obj.metaframe.lock('array') is False:
+            #    return self.obj.__getitem__(col)[index]
+            #if self.obj.metaframe.lock('array') is True:
+            #    print('updating frame')
+            self.obj.set_frame(col)  # update frame
+            with self.obj.metaframe.setlock(True, 'array'):
+                return super().__getitem__(key)
+        return super().__getitem__(key)
+
+
+    '''
+
+    '''
+
+    def get_frame(self, col):
+        """Return inflated subspace variable."""
+        self.assert_in_field(col, 'subspace')
+        with self.metaframe.setlock(True, 'subspace'):
+            return super().__getitem__(col)
+
+
     def _hasattrs(self, attrs: list[str]):
         """Return True if all required attributes are available else False."""
         return np.array([attr in self.frame.columns for attr in attrs]).all()

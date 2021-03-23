@@ -2,6 +2,7 @@
 from typing import Optional, Collection, Any
 
 import numpy as np
+import pandas
 
 from nova.electromagnetic.metaarray import MetaArray
 from nova.electromagnetic.dataframe import DataFrame
@@ -16,22 +17,25 @@ class ArrayLocMixin():
     def __setitem__(self, key, value):
         """Extend Loc setitem."""
         col = self.obj.get_col(key)
-        if col in self.obj.metaarray.array:
+        if self.obj.in_array(col):
             index = self.obj.get_index(key)
-            if key == slice(None):
-                return self.obj.__setitem__(col, value)
-            self.obj.__getitem__(col)[index] = value
-            return None
+            if isinstance(index, slice):
+                if index == slice(None):
+                    return self.obj.__setitem__(col, value)
+            try:
+                self.obj.__getitem__(col)[index] = value
+                return None
+            except KeyError:
+                pass
         return super().__setitem__(key, value)
 
     def __getitem__(self, key):
         """Extend Loc getitem. Update frame prior to return if col in array."""
-        print('getarray', key)
         col = self.obj.get_col(key)
-        if col in self.obj.metaarray.array:
-            print('array to frame', col)
-            if self.obj.metaframe.lock('array') is True:
-                self.obj.array_to_frame(col)  # update frame
+        if self.obj.in_array(col):
+            self.obj._set_frame(col)  # update frame
+            with self.obj.metaframe.setlock(True, 'array'):
+                return super().__getitem__(key)
         return super().__getitem__(key)
 
 
@@ -60,35 +64,15 @@ class DataArray(ArrayIndexer, DataFrame):
         self.update_frame()
         return super().__repr__()
 
-    def __getitem__(self, key):
-        """Extend DataFrame.__getitem__. (frame['*'])."""
-        col = self.get_col(key)
-        if col in self.metaarray.array:
-            if self.metaframe.lock('array') is False:
-                return self._get_array(col)
-        return super().__getitem__(col)
+    @property
+    def metaarray(self):
+        """Return metaarray instance."""
+        return self.attrs['metaarray']
 
-    def __setitem__(self, col, value):
-        """Extend DataFrame.__setitem__. (frame['*'] = *)."""
-        try:
-            return self._set_array(col, value)
-        except KeyError:
-            return super().__setitem__(col, value)
-
-    def _set_array(self, col, value):
-        """Set col, quickly, preserving shape."""
-        self.attrs['metaarray'].data[col][:] = value
-
-    def array_to_frame(self, col):
-        """Transfer metaarray.data to frame."""
-        print('data to frame', col, col in self.metaarray.array)
-        self.assert_in_field(col, 'array')
-        if col in self.metaarray.array:
-            #with self.metaframe.setlock(None):
-            value = self.__getitem__(col)
-            with self.metaframe.setlock(True, 'array'):
-                print('set frame', value)
-                super().__setitem__(col, value)
+    def update_frame(self):
+        """Extend DataFrame.update_frame, transfer metaarray.data to frame."""
+        for col in self.metaarray.array:
+            self._set_frame(col)
 
     def extract_attrs(self, data, attrs):
         """Extend DataFrame.extract_attrs, insert metaarray."""
@@ -98,32 +82,49 @@ class DataArray(ArrayIndexer, DataFrame):
         else:
             self.metaarray.__post_init__(self.index)
 
-    def extract_metadata(self, metadata):
-        """Extend DataFrame.extract_metadata, init data structure."""
-        super().extract_metadata(metadata)
-        if not self.empty:
-            self.update_array()
+    def in_array(self, col):
+        """Return True if col in metaframe.array else False."""
+        return col in self.metaarray.array
 
-    def update_array(self):
-        """Set array data and backpropagate to frame if unset (default)."""
-        for col in self.metaarray.array:
-            self.attrs['metaarray'].data[col] = self._get_frame(col)
+    def __setattr__(self, col, value):
+        """Extend DataFrame.__setattr__ to gain fast access to array data."""
+        if self.in_array(col):
+            return self._set_array(col, value)
+        return super().__setattr__(col, value)
 
-    def update_frame(self):
-        """Extend DataFrame.update_frame, transfer metaarray.data to frame."""
-        super().update_frame()
-        # TODO - fix frame update
-        for col in self.metaarray.array:
-            self._set_frame(col)
+    def __getitem__(self, col):
+        """Extend DataFrame.__getitem__. (frame['*'])."""
+        if self.in_array(col):
+            if self.metaframe.lock('array') is False:
+                return self._get_array(col)
+        return super().__getitem__(col)
+
+    def __setitem__(self, col, value):
+        """Extend DataFrame.__setitem__. (frame['*'] = *)."""
+        if self.in_array(col):
+            if self.metaframe.lock('array') is False:
+                return self._set_array(col, value)
+        return super().__setitem__(col, value)
 
     def _get_array(self, col):
         """Return col, quickly."""
         try:
-            value = self.attrs['metaarray'].data[col]
+            return self.attrs['metaarray'].data[col]
         except KeyError:
             value = self._get_frame(col)
             self.attrs['metaarray'].data[col] = value
-        return value
+            return value
+
+    def _set_array(self, col, value):
+        """Set col, quickly, preserving shape."""
+        try:
+            self.attrs['metaarray'].data[col][:] = value
+        except KeyError:
+            if not pandas.api.types.is_list_like(value):
+                value = np.full(len(self), value)
+            elif len(value) != len(self):
+                raise IndexError(f'input length {len(value)} != {len(self)}')
+            self.attrs['metaarray'].data[col] = value
 
     def _get_frame(self, col):
         """Return col from frame."""
@@ -132,12 +133,31 @@ class DataArray(ArrayIndexer, DataFrame):
         except (AttributeError, KeyError):
             value = np.full(len(self), self.metaframe.default[col])
             super().__setitem__(col, value)
-        return self.format_value(col, value)
+        return value
+
+    def _set_frame(self, col):
+        """Transfer metaarray.data to frame."""
+        self.assert_in_field(col, 'array')
+        value = self._get_array(col)
+        with self.metaframe.setlock(True, 'array'):
+            super().__setitem__(col, value)
 
 
 if __name__ == '__main__':
 
+    dataarray = DataArray({'x': range(7), 'z': 0},
+                          additional=['Ic'], Array=['Ic'], label='Coil')
+
+    dataarray = DataArray({'x': range(7)},
+                          additional=['Ic'], Array=['x'], label='Coil')
+    print(dataarray)
+
+    '''
+    dataarray.Ic = 9
+
     dataarray = DataArray({'x': range(12)}, link=True,
                           Required=['x'], Array=['x'])
-    dataarray.x = 7.7
-    print(dataarray.loc[:, 'x'])
+
+    dataarray.loc['Coil0':'Coil1', 'x'] = 6.66
+    print(dataarray)
+    '''

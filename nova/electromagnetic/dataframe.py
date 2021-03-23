@@ -84,6 +84,7 @@ class DataFrame(pandas.DataFrame):
         self.update_available(data, columns)
         self.extract_metadata(metadata)
         self.match_columns()
+        self.format_data(data)
 
     def extract_attrs(self, data, attrs):
         """Extract metaframe / metaarray from data / attrs."""
@@ -154,6 +155,13 @@ class DataFrame(pandas.DataFrame):
             required = [attr for attr in self.metaframe.required
                         if attr in self.columns]
             self.metaframe.metadata = {'Required': required}
+
+    def format_data(self, data):
+        """Apply default formating to data passed as dict."""
+        if isinstance(data, dict):
+            with self.metaframe.setlock(True):
+                for col in self.columns:
+                    self.loc[:, col] = self.format_value(col, self[col])
 
     def update_index(self):
         """Reset index if self.index is unset."""
@@ -327,19 +335,12 @@ class DataFrame(pandas.DataFrame):
         """Return True if attr in self.attrs."""
         return attr in self.attrs
 
-    #@profile
     def in_field(self, col, field):
         """Return Ture if col in metaframe.{field} and hasattr(self, field)."""
         try:
             return col in self.attrs[field].columns
         except (KeyError, TypeError):
             return False
-        #if not isinstance(col, str):
-        #    return False
-        #if self.hasattrs('metaframe') and self.hasattrs(field):
-        #    if hasattr(self.attrs[field], 'columns'):
-        #        return col in self.attrs[field].columns
-        #return False
 
     def assert_in_field(self, col, field):
         """Check for col in metaframe.{field}, raise error if not found."""

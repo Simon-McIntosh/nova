@@ -82,7 +82,7 @@ def test_setitem_slice_warn():
     assert np.isclose(dataarray.x, np.array([0, 1, 2, 7, 6])).all()
 
 
-def test_loc_update():
+def test_loc_update_single():
     dataarray = DataArray({'x': range(7), 'z': 0},
                           additional=['Ic'], Array=['Ic'], label='Coil')
     dataarray.Ic = 9
@@ -90,11 +90,18 @@ def test_loc_update():
     assert list(dataarray.Ic[:3]) == [7, 9, 9]
 
 
+def test_loc_update_slice():
+    dataarray = DataArray({'x': range(7), 'z': 0},
+                          additional=['Ic'], Array=['Ic'], label='Coil')
+    dataarray.Ic = 9
+    dataarray.loc['Coil0':'Coil1', 'Ic'] = 7
+    assert list(dataarray.Ic[:3]) == [7, 7, 9]
+
+
 def test_get_loc_slice():
     dataarray = DataArray({'x': range(6)}, Required=['x'], Array=['x'])
     assert dataarray.loc['Coil0':'Coil3', 'x'].to_list() == [0, 1, 2, 3]
 
-test_get_loc_slice()
 
 def test_get_iloc_slice():
     dataarray = DataArray({'x': range(6)}, Required=['x'], Array=['x'])
@@ -145,5 +152,4 @@ def test_set_iat():
 
 if __name__ == '__main__':
 
-    test_set_get_loc_slice()
-    #pytest.main([__file__])
+    pytest.main([__file__])

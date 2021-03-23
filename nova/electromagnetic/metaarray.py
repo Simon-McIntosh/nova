@@ -28,8 +28,3 @@ class MetaArray(MetaData):
         """Return __repr__."""
         return pandas.DataFrame(self.data, index=self.index,
                                 columns=self.array).__repr__()
-
-    @property
-    def columns(self):
-        """Return array columns."""
-        return self.array

@@ -31,39 +31,26 @@ class Frame(FrameSet):
 
 if __name__ == '__main__':
 
-    frame = Frame(Required=['x'], Array=['x'])
-    frame.add_frame(range(3), link=True)
-
-    print('\n\n setitem')
-    frame.x = 7.7
-
-    print('\n\n getloc')
-    print(frame.loc['Coil0':'Coil1', 'x'])
-
-    print('\n\n get attr')
-    print(frame.x)
-
-    #with frame.metaframe.setlock(None):
-    #    print(frame.loc[:, 'x'], frame.x)
-
-    '''
-
 
     frame = Frame(Required=['x', 'z'], Additional=['It', 'Ic', 'Nt'],
                   Array=['It', 'Ic', 'Nt'])
-    frame.add_frame(1, range(3), It=5, link=True)
     frame.add_frame(1, range(3), It=5, link=False)
-    frame.add_frame(1, range(4), Ic=5.7, Nt=334.5, link=True)
+    frame.add_frame(1, range(4000), Ic=5.7, Nt=334.5, link=True)
     #frame.loc[:, 'Ic'] = 7
 
-    def set_current():
-        #frame.metaarray.data['Ic'] = np.random.rand(len(frame.subspace))
-        frame.Ic = np.random.rand(len(frame.subspace))
+    #frame.Ic = np.random.rand(len(frame.subspace))
+    frame.Ic = 9
+    #print(frame)
 
-    for _ in range(4):
+    def set_current():
+        #frame.subspace.metaarray.data['Ic'] = np.random.rand(len(frame.subspace))
+        frame.Ic = np.random.rand(len(frame.subspace))
+        #_ = frame.Ic
+
+    for _ in range(4000):
         set_current()
 
     print(frame)
 
-    '''
+
 

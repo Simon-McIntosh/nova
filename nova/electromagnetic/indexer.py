@@ -113,3 +113,28 @@ class Indexer(ABC):
             _slice[i] = value
         return slice(*_slice)
 
+    def get_subkey(self, key):
+        """Return subspace column intersection."""
+        columns = key[1]
+        if isinstance(columns, slice):
+            if columns == slice(None):
+                return key
+        try:
+            columns = self.columns[columns]  # perform slice
+            interger = True
+        except IndexError:
+            interger = False
+            pass
+        try:
+            subcols = self.subspace.columns.intersection(columns).values
+            if interger:
+                subcols = [self.subspace.columns.get_loc(i) for i in subcols]
+            return (key[0], subcols)
+        except TypeError:  # single value
+            subcol = columns
+            if subcol not in self.subspace.columns:
+                raise IndexError(f'column index {subcol} not found in '
+                                 f'subspace {self.subspace.columns}')
+            if interger:
+                subcol = self.subspace.columns.get_loc(subcol)
+            return (key[0], subcol)

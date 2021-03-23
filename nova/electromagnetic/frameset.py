@@ -37,7 +37,7 @@ class SetLocMixin(ArrayLocMixin):
         col = self.obj.get_col(key)
         value = self.obj.format_value(col, value)
         if self.obj.in_field(col, 'subspace'):
-            if self.obj.metaframe.lock('subspace') is True:
+            if self.obj.metaframe.lock('subspace') is False:
                 raise SubSpaceError(self.name, col)
         if self.obj.in_field(col, 'energize'):
             if self.obj.metaframe.lock('energize') is False:
@@ -46,11 +46,13 @@ class SetLocMixin(ArrayLocMixin):
 
     def __getitem__(self, key):
         """Refresh subspace items prior to return."""
-        print('getframe', key)
         col = self.obj.get_col(key)
         if self.obj.in_field(col, 'subspace'):
+            if self.obj.metaframe.lock('subspace') is False:
+                key = self.obj.get_subkey(key)
+                return getattr(self.obj.subspace, self.name)[key]
             if self.obj.metaframe.lock('subspace') is True:
-                self.obj.subspace_to_frame(col)
+                self.obj.inflate_subspace(col)
         if self.obj.in_field(col, 'energize'):
             if self.obj.metaframe.lock('energize') is False:
                 return self.obj.energize._get_item(super(), key)
@@ -100,59 +102,62 @@ class FrameSet(SetIndexer, DataArray):
         self.update_frame()
         return super().__repr__()
 
-    def __getitem__(self, key):
-        """Extend DataFrame.__getitem__. (frame['*'])."""
-        print('frame main getitem', key, self.metaframe.lock())
-        col = self.get_col(key)
+    #def __getattr__(self, col):
+    #    """Extend DataFrame.__getattr__ to provide access to subspace."""
+    #    if self.in_field(col, 'subspace'):
+    #        return self.subspace.__getattr__(col)
+    #    return super().__getattr__(col)
+
+    def __setattr__(self, col, value):
+        """Extend DataFrame.__getattr__ to provide access to subspace."""
         if self.in_field(col, 'subspace'):
-            if self.metaframe.lock('subspace') is True:
-                return self.subspace.__getitem__(col)
+            return self.subspace.__setattr__(col, value)
+        return super().__setattr__(col, value)
+
+    def __getitem__(self, col):
+        """Extend DataFrame.__getitem__. (frame['*'])."""
+        #col = self.get_col(key)
+        if self.in_field(col, 'subspace'):
             if self.metaframe.lock('subspace') is False:
-                self.subspace_to_frame(col)
+                return self.subspace.__getitem__(col)
+            if self.metaframe.lock('subspace') is True:
+                self.inflate_subspace(col)
         if self.in_field(col, 'energize'):
             if self.metaframe.lock('energize') is False:
-                return self.energize._get_item(super(), key)
-        print('getting item')
-        return super().__getitem__(key)
+                return self.energize._get_item(super(), col)
+        return super().__getitem__(col)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, col, value):
         """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
-        col = self.get_col(key)
-        #value = self.format_value(col, value)
+        #col = self.get_col(key)
+        value = self.format_value(col, value)
         if self.in_field(col, 'subspace'):
-            if self.metaframe.lock('subspace') is True:
-                return self.subspace.__setitem__(key, value)
             if self.metaframe.lock('subspace') is False:
+                return self.subspace.__setitem__(col, value)
+            if self.metaframe.lock('subspace') is True:
                 raise SubSpaceError('setitem', col)
         if self.in_field(col, 'energize'):
             if self.metaframe.lock('energize') is False:
-                return self.energize._set_item(super(), key, value)
-        return super().__setitem__(key, value)
+                return self.energize._set_item(super(), col, value)
+        return super().__setitem__(col, value)
 
     def update_frame(self):
         """Propagate subspace varables to frame."""
         if self.hasattrs('subspace'):
             for col in [col for col in self.subspace if col in self]:
-                self.subspace_to_frame(col)
+                self.inflate_subspace(col)
+        super().update_frame()  # update dataarray
 
-    def subspace_to_frame(self, col):
+    def inflate_subspace(self, col):
         """Inflate subspace variable and setattr in frame."""
         self.assert_in_field(col, 'subspace')
-        value = getattr(self, col)
-        print('initial value', value)
+        with self.metaframe.setlock(False, 'subspace'):
+            value = self.subspace.__getitem__(col)
         if not isinstance(value, np.ndarray):
             value = value.to_numpy()
+        value = value[self.subref]
         with self.metaframe.setlock(True, 'subspace'):
-            if hasattr(self, 'subref'):  # inflate subspace
-                value = value[self.subref]
-            print('inflated value', value)
             super().__setitem__(col, value)
-
-    def get_frame(self, col):
-        """Return inflated subspace variable."""
-        self.assert_in_field(col, 'subspace')
-        with self.metaframe.setlock(True, 'subspace'):
-            return super().__getitem__(col)
 
     def add_frame(self, *args, iloc=None, **kwargs):
         """

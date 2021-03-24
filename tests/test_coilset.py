@@ -5,31 +5,6 @@ import pickle
 from nova.electromagnetic.coilset import CoilSet
 
 
-def test_dCoil():
-    'test setting of kwarg dCoil'
-    cs = CoilSet(dCoil=0.15)
-    assert cs.dCoil == 0.15
-
-
-def test_dCoil_default():
-    'test instance default attribute setting'
-    cs = CoilSet()
-    cs.coilset = {'default_attributes': {'dCoil': 3}}
-    assert cs.dCoil == 3
-
-
-def test_dCoil_memory():
-    'test persistance of default attributes (set once)'
-    cs = CoilSet(dCoil=0.15)
-    cs.coilset = {'default_attributes': {'dCoil': 3}}
-    assert cs.dCoil == 0.15
-
-
-def test_dPlasma():
-    'test dPlasma and coilset shorthand'
-    cs = CoilSet()
-    cs.coilset = {'dPlasma': 0.333}
-    assert cs.dPlasma == 0.333
 
 
 def test_add_shell():

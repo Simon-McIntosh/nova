@@ -103,14 +103,13 @@ class FrameSet(SetIndexer, DataArray):
         return super().__repr__()
 
     def __setattr__(self, col, value):
-        """Extend DataFrame.__getattr__ to provide access to subspace."""
+        """Extend DataFrame.__setattr__ to provide access to subspace."""
         if self.in_field(col, 'subspace'):
             return self.subspace.__setattr__(col, value)
         return super().__setattr__(col, value)
 
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
-        #col = self.get_col(key)
         if self.in_field(col, 'subspace'):
             if self.metaframe.lock('subspace') is False:
                 return self.subspace.__getitem__(col)
@@ -123,7 +122,6 @@ class FrameSet(SetIndexer, DataArray):
 
     def __setitem__(self, col, value):
         """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
-        #col = self.get_col(key)
         value = self.format_value(col, value)
         if self.in_field(col, 'subspace'):
             if self.metaframe.lock('subspace') is False:
@@ -149,13 +147,18 @@ class FrameSet(SetIndexer, DataArray):
             value = self.subspace.__getitem__(col)
         if not isinstance(value, np.ndarray):
             value = value.to_numpy()
-        value = value[self.subref]
+        try:
+            value = value[self.subref]  # inflate if subref set
+        except AttributeError:
+            pass
         with self.metaframe.setlock(True, 'subspace'):
             super().__setitem__(col, value)
 
-    def add_frame(self, *required, iloc=None, **additional):
+    def insert(self, *required, iloc=None, **additional):
         """
-        Build frame from *args, **kwargs and concatenate with DataFrame.
+        Insert frame(s).
+
+        Assemble insert from *args, **kwargs and concatenate with self.
 
         Parameters
         ----------
@@ -173,27 +176,27 @@ class FrameSet(SetIndexer, DataArray):
 
         """
         self.metadata = additional.pop('metadata', {})
-        insert = self._build_frame(*required, **additional)
-        self.concat(insert, iloc=iloc)
+        insert = self.assemble(*required, **additional)
+        self.concatenate(insert, iloc=iloc)
+        return insert.index
 
-    def concat(self, insert, iloc=None, sort=False):
-        """Concatenate insert with DataFrame(self)."""
+    def concatenate(self, *insert, iloc=None, sort=False):
+        """Concatenate insert with self."""
         frame = pandas.DataFrame(self)
-        if not isinstance(insert, pandas.DataFrame):
-            insert = pandas.DataFrame(insert)
         if iloc is None:  # append
-            frames = [frame, insert]
+            frames = [frame, *insert]
         else:  # insert
-            frames = [frame.iloc[:iloc, :], insert, frame.iloc[iloc:, :]]
+            frames = [frame.iloc[:iloc, :], *insert, frame.iloc[iloc:, :]]
         frame = pandas.concat(frames, sort=sort)  # concatenate
         self.__init__(frame, attrs=self.attrs)
 
-    def drop_frame(self, index=None):
+    def drop(self, index=None):
         """Drop frame(s)."""
         if index is None:
             index = self.index
         self.multipoint.drop(index)
-        self.drop(index, inplace=True)
+        super().drop(index, inplace=True)
+        self.multipoint.initialize()
 
     def translate(self, index=None, xoffset=0, zoffset=0):
         """Translate coil(s)."""
@@ -211,7 +214,7 @@ class FrameSet(SetIndexer, DataArray):
                                            xoff=xoffset, yoff=zoffset)
             self.loc[name, 'patch'] = None  # re-generate coil patch
 
-    def _build_frame(self, *args, **kwargs):
+    def assemble(self, *args, **kwargs):
         """
         Return Frame constructed from required and optional input.
 
@@ -227,12 +230,12 @@ class FrameSet(SetIndexer, DataArray):
         insert : pandas.DataFrame
 
         """
-        args, kwargs = self._extract(*args, **kwargs)
+        args, kwargs = self._extract_frame(*args, **kwargs)
         data = self._build_data(*args, **kwargs)
         index = self._build_index(data, **kwargs)
         return FrameSet(data, index=index, attrs=self.attrs)
 
-    def _extract(self, *args, **kwargs):
+    def _extract_frame(self, *args, **kwargs):
         """
         Return *args and **kwargs with data extracted from frame.
 
@@ -296,7 +299,9 @@ class FrameSet(SetIndexer, DataArray):
             data[attr] = self.metaframe.default[attr]
         additional = []
         for attr in list(kwargs.keys()):
-            if attr in self.metaframe.default:
+            if attr in self.metaframe.tag:
+                kwargs.pop(attr)  # skip tags
+            elif attr in self.metaframe.default:
                 data[attr] = kwargs.pop(attr)  # add keyword arguments
                 if attr not in self.metaframe.additional:
                     additional.append(attr)
@@ -318,6 +323,8 @@ class FrameSet(SetIndexer, DataArray):
 if __name__ == '__main__':
 
     frameset = FrameSet(Required=['x', 'z'], additional=['section'])
-    frameset.add_frame(range(3), 1)
+    frameset.insert(range(2), 1, label='PF')
+    frameset.insert(range(2), 1)
+    frameset.insert(range(2), 1, label='PF')
     frameset.Ic = 7.7
-    print(frameset.columns)
+    print(frameset)

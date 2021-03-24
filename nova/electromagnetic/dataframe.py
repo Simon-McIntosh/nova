@@ -184,12 +184,12 @@ class DataFrame(pandas.DataFrame):
             offset = 0
         metatag['offset'] = np.max([offset, metatag['offset']])
 
-    def _build_index(self, data, **kwargs):
+    def _build_index(self, data: pandas.DataFrame, **kwargs):
         index_length = self._index_length(data)
         # update metaframe tag defaults with kwargs
         metatag = {key: kwargs.get(key, self.metaframe.default[key])
-                   for key in ['name', 'label', 'delim', 'offset']}
-        if kwargs.get('name', metatag['name']):  # valid name
+                   for key in self.metaframe.tag}
+        if metatag['name']:  # valid name
             name = metatag['name']
             if pandas.api.types.is_list_like(name) or index_length == 1:
                 return self._check_index(name, index_length)
@@ -369,8 +369,10 @@ class DataFrame(pandas.DataFrame):
 
 if __name__ == '__main__':
 
-    dataframe = DataFrame(Required=['x', 'dCoil'], Additional=['Ic'],
-                          Subspace=[])
+    dataframe = DataFrame({'x': range(3)},
+                          Required=['x'], Additional=['Ic'],
+                          Subspace=[], label='PF', Ic=3)
+    print(dataframe)
     print(dataframe.metaframe.required)
     print(dataframe.metaframe.additional)
     print(dataframe)

@@ -38,7 +38,7 @@ def test_data_init_multipoint_true():
 def test_add_coil_multipoint_default_false():
     frame = Frame({'x': [1, 3], 'z': 0}, link=False, name='Coil0',
                   metadata={'Required': ['x', 'z'], 'Additional': []})
-    frame.add_frame(4, [7, 8], link=True)
+    frame.insert(4, [7, 8], link=True)
     assert frame.link.to_list() == ['', '', '', 'Coil2'] and \
         frame.factor.to_list() == [1, 1, 1, 1]
 
@@ -46,7 +46,7 @@ def test_add_coil_multipoint_default_false():
 def test_add_coil_multipoint_default_true():
     frame = Frame({'x': [1, 3], 'z': 0}, link=True, name='Coil0',
                   metadata={'Required': ['x', 'z'], 'Additional': []})
-    frame.add_frame(4, [7, 8], link=True)
+    frame.insert(4, [7, 8], link=True)
     assert frame.link.to_list() == ['', 'Coil0', '', 'Coil2'] and \
         frame.factor.to_list() == [1, 1, 1, 1]
 
@@ -54,7 +54,7 @@ def test_add_coil_multipoint_default_true():
 def test_add_coil_multipoint_default_float():
     frame = Frame({'x': [1, 3], 'z': 0}, link=0.5, name='Coil0',
                   metadata={'Required': ['x', 'z'], 'Additional': []})
-    frame.add_frame(4, [7, 8], link=True)
+    frame.insert(4, [7, 8], link=True)
     assert frame.link.to_list() == ['', 'Coil0', '', 'Coil2'] and \
         frame.factor.to_list() == [1, 0.5, 1, 1]
 
@@ -62,7 +62,7 @@ def test_add_coil_multipoint_default_float():
 def test_default_multipoint_true():
     frame = Frame(link=True, metadata={'Required': ['x', 'z'],
                                        'Additional': ['link']})
-    frame.add_frame(4, [5, 7, 12], name='coil1')
+    frame.insert(4, [5, 7, 12], name='coil1')
     assert frame.link.to_list() == ['', 'coil1', 'coil1'] and \
         frame.factor.to_list() == [1, 1, 1]
 
@@ -78,10 +78,10 @@ def test_data_init_multipoint_false():
 def test_drop():
     frame = Frame(link=True, label='coil',
                   metadata={'Required': ['x', 'z'], 'Additional': ['link']})
-    frame.add_frame(4, [5, 7, 12])
-    frame.add_frame(3, [1, 2], link=False)
-    frame.add_frame(6, [7, 3])
-    frame.add_frame(12, [7, 3])
+    frame.insert(4, [5, 7, 12])
+    frame.insert(3, [1, 2], link=False)
+    frame.insert(6, [7, 3])
+    frame.insert(12, [7, 3])
     frame.multipoint.drop(['coil0', 'coil7'])
     assert frame.link.to_list() == ['', '', '', '', '', '', 'coil5', '', '']
     assert frame.factor.to_list() == [1, 1, 1, 1, 1, 1, 1, 1, 1]
@@ -92,15 +92,15 @@ def test_drop():
 def test_drop_indexer():
     frame = Frame(link=True, metadata={'Required': ['x', 'z'],
                                        'Additional': ['link']})
-    frame.add_frame(4, [5, 7, 12], label='coil')
-    frame.add_frame(3, [1, 2])
+    frame.insert(4, [5, 7, 12], label='coil')
+    frame.insert(3, [1, 2])
     frame.multipoint.drop('coil0')
     assert frame.multipoint.indexer == [0, 1, 2, 3]
 
 
 def test_frame_columns_multipoint():
     frame = Frame(metadata={'Required': ['x', 'z'], 'Additional': []})
-    frame.add_frame(0, 1, link=True)
+    frame.insert(0, 1, link=True)
     assert list(frame.columns) == ['x', 'z', 'link', 'factor', 'ref', 'subref']
 
 

@@ -28,32 +28,22 @@ class Frame(FrameSet):
         super().__init__(data, index, columns, attrs, **metadata)
         self.attrs['subspace'] = SubSpace(self)
 
+    def drop(self, index=None):
+        """Drop frame(s), re-initialize subspace."""
+        super().drop(index)
+        self.subspace = SubSpace(self)
+
+
+def set_current():
+    """Test current update with randomized input (check update speed)."""
+    # frame.subspace.metaarray.data['Ic'] = np.random.rand(len(frame.subspace))
+    frame.Ic = np.random.rand(len(frame.subspace))
+    # _ = frame.Ic
+
 
 if __name__ == '__main__':
 
-
-    frame = Frame(Required=['x', 'z'], Additional=['section', 'link', 'Ic'])
-    frame.add_frame(1, range(3), It=5, link=True)
+    frame = Frame(Required=['x', 'z'], Additional=[], Array=['Ic'])
+    frame.insert([4, 5], 1, Ic=6.5)
+    frame.insert(1, range(4000), It=5, link=True)
     print(frame)
-    #frame.add_frame(1, range(4000), Ic=5.7, Nt=334.5, link=True)
-    #frame.loc[:, 'Ic'] = 7
-
-    #frame.Ic = np.random.rand(len(frame.subspace))
-    #frame.Ic = 9
-    #print(frame.columns)
-
-    '''
-    def set_current():
-        #frame.subspace.metaarray.data['Ic'] = np.random.rand(len(frame.subspace))
-        frame.Ic = np.random.rand(len(frame.subspace))
-        #_ = frame.Ic
-
-    for _ in range(4000):
-        set_current()
-
-    print(frame)
-
-    '''
-
-
-

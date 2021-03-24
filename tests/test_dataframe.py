@@ -90,6 +90,15 @@ def test_warn_new_attribute():
         dataframe.Ic = [1, 2]
 
 
+def test_pass_label():
+    dataframe = DataFrame({'x': range(3)},
+                          Required=['x'], Additional=['Ic'],
+                          Subspace=[], label='PF', Ic=3)
+    print(dataframe.metaframe.default)
+    assert dataframe.columns.to_list() == ['x', 'Ic']
+
+
 if __name__ == '__main__':
 
-    pytest.main([__file__])
+    test_pass_label()
+    #pytest.main([__file__])

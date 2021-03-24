@@ -10,6 +10,13 @@ Created on Thu Feb 18 20:33:42 2021
 
 """
 
+        #metatag = {tag: self.metaframe.default[tag]
+        #           for tag in ['name', 'label', 'delim', 'offset']}
+        #for tag in metatag:
+        #    if tag in data.columns:
+        #        metatag[tag] = data[tag]
+        #        data.drop(columns=tag, inplace=True)
+
     #def __getattr__(self, col):
     #    """Extend DataFrame.__getattr__ to provide access to subspace."""
     #    if self.in_field(col, 'subspace'):

@@ -11,7 +11,7 @@ def test_instance():
 
 def test_Ic_unset():
     frame = Frame(Required=['x'])
-    frame.add_frame([4, 5], It=6.5)
+    frame.insert([4, 5], It=6.5)
     assert frame.Ic.to_list() == [6.5, 6.5]
 
 
@@ -28,7 +28,7 @@ def test_data_It_Ic_set():
 
 def test_Ic_unset_Additional():
     frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    frame.add_frame(4, range(2), It=5)
+    frame.insert(4, range(2), It=5)
     assert frame.Ic.to_list() == [5, 5]
 
 
@@ -45,7 +45,7 @@ def test_columns_extend_additional():
 def test_columns():
     frame = Frame(metadata={'Required': ['x', 'z'],
                             'Additional': ['rms']})
-    frame.add_frame(2, [5, 6, 7], rms=5)
+    frame.insert(2, [5, 6, 7], rms=5)
     frame = Frame(frame, columns=['x', 'z'])
     assert frame.columns.to_list() == ['x', 'z']
 
@@ -54,7 +54,7 @@ def test_columns_metaframe_update():
     frame = Frame(metadata={'Required': ['x', 'z', 'dl'],
                             'Additional': ['rms']},
                   columns=['x', 'dt'])
-    frame.add_frame(4, dt=[5, 7, 12])
+    frame.insert(4, dt=[5, 7, 12])
     frame = Frame(frame, columns=['x', 'dt', 'dl'])
     assert frame.columns.to_list() == ['x', 'dt', 'dl']
 
@@ -73,7 +73,7 @@ def test_reindex():
 def test_index_length_error():
     frame = Frame()
     with pytest.raises(IndexError):
-        assert frame.add_frame(4, [5, 4, 6], 0.1, 0.3, name=['1, 2'])
+        assert frame.insert(4, [5, 4, 6], 0.1, 0.3, name=['1, 2'])
 
 
 def test_required_columns():
@@ -81,15 +81,15 @@ def test_required_columns():
     assert frame.metadata['required'] == ['x', 'z']
 
 
-def test_required_add_frame():
+def test_required_add():
     frame = Frame(metadata={'Required': ['x', 'z']})
-    frame.add_frame(1, 2)
+    frame.insert(1, 2)
 
 
-def test_required_add_frame_error():
+def test_required_add_error():
     frame = Frame(metadata={'Required': ['x', 'z']})
     with pytest.raises(IndexError):
-        assert frame.add_frame(1, 2, 3)
+        assert frame.insert(1, 2, 3)
 
 
 def test_reset_metadata_attribute():
@@ -99,13 +99,13 @@ def test_reset_metadata_attribute():
 
 def test_frame_index():
     frame = Frame(metadata={'Required': ['x', 'z'], 'Additional': []})
-    frame.add_frame(0, 1)
+    frame.insert(0, 1)
     assert list(frame.columns) == ['x', 'z']
 
 
 def test_frame_columns_multipoint():
     frame = Frame(metadata={'Required': ['x', 'z'], 'Additional': []})
-    frame.add_frame(0, 1, link=True)
+    frame.insert(0, 1, link=True)
     assert list(frame.columns) == ['x', 'z', 'link', 'factor', 'ref', 'subref']
 
 
@@ -129,18 +129,18 @@ def test_data_init_additional():
 
 def test_attribute_metadata_replace():
     frame = Frame(metadata={'Required': ['x', 'z', 'dl', 'dt']})
-    frame.add_frame(3, 4, metadata={'Required': ['x', 'z']})
+    frame.insert(3, 4, metadata={'Required': ['x', 'z']})
 
 
 def test_attribute_metadata_replace_error():
     frame = Frame(metadata={'Required': ['x', 'z', 'dl', 'dt']})
     with pytest.raises(IndexError):
-        frame.add_frame(3, 4, metadata={'required': ['x', 'z']})
+        frame.insert(3, 4, metadata={'required': ['x', 'z']})
 
 
 def test_required_additional_metadata_clash():
     frame = Frame(Required=['x', 'z'], Additional=['x', 'rms'])
-    frame.add_frame(3, 4)
+    frame.insert(3, 4)
     assert list(frame.columns) == ['x', 'z', 'rms']
 
 
@@ -170,6 +170,18 @@ def test_warn_new_attribute():
         frame.Ic = [1, 2]
 
 
+def test_drop():
+    frame = Frame(Required=['x', 'z'], label='PF',
+                  Additional=['Ic'], Subspace=['Ic'])
+    frame.insert(2, range(2))
+    frame.insert(1, range(3), link=True)
+    frame.insert(3, 7)
+    frame.drop('PF4')
+    frame.drop(['PF0', 'PF1'])
+    assert frame.subspace.index.to_list() == ['PF2', 'PF5']
+
+
 if __name__ == '__main__':
 
+    test_drop()
     pytest.main([__file__])

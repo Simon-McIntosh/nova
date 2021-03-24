@@ -1,6 +1,5 @@
 import pytest
 
-
 from nova.electromagnetic.coilframe import CoilFrame
 
 

@@ -71,31 +71,6 @@ class Labels:
     font_size: str = 'medium'
     label_limit: int = 20
 
-    '''
-    @property
-    def label_index(self):
-        """Return label index."""
-        if label == 'all' or label == 'full':  # all coils
-            parts = self.frame.part
-
-        elif label == 'active':  # active == True
-            parts = coil.part[coil.active & ~coil.plasma & ~coil.feedback]
-        elif label == 'passive':  # active == False
-            parts = coil.part[~coil.active & ~coil.plasma & ~coil.feedback]
-        elif label == 'coil':  # plasma == False
-            parts = coil.part[~coil.plasma & ~coil.feedback]
-        elif label == 'plasma':  # plasma == True
-            parts = coil.part[coil.plasma & ~coil.feedback]
-        elif label == 'free':  # optimize == True
-            parts = coil.part[coil.optimize & ~coil.plasma & ~coil.feedback]
-        elif label == 'fix':  # optimize == False
-            parts = coil.part[~coil.optimize & ~coil.plasma & ~coil.feedback]
-        else:
-            if not pandas.api.types.is_list_like(label):
-                label = [label]
-            parts = self.coil.part
-            parts = [_part for _part in label if _part in parts]
-    '''
 
 
 

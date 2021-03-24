@@ -12,6 +12,7 @@ from nova.electromagnetic.dataarray import (
     )
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.energize import Energize
+from nova.electromagnetic.select import Select
 from nova.electromagnetic.multipoint import MultiPoint
 from nova.electromagnetic.polygon import Polygon
 
@@ -88,6 +89,7 @@ class FrameSet(SetIndexer, DataArray):
     def update_attrs(self):
         """Extract frame attrs from data and initialize."""
         self.attrs['energize'] = Energize(self)
+        self.attrs['select'] = Select(self)
         self.attrs['multipoint'] = MultiPoint(self)
         self.attrs['polygon'] = Polygon(self)
         self.update_columns()

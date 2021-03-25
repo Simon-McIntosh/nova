@@ -3,8 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-import numpy as np
-
 from nova.electromagnetic.metamethod import MetaMethod
 
 if TYPE_CHECKING:
@@ -17,8 +15,7 @@ class Energize(MetaMethod):
 
     frame: Frame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['Ic', 'It', 'Nt'])
-    additional: list[str] = field(default_factory=lambda: [
-        'Ic', 'It', 'Nt', 'active', 'plasma', 'optimize', 'feedback'])
+    additional: list[str] = field(default_factory=lambda: [])
     available: dict[str, bool] = field(
         default_factory=lambda: {'Ic': False, 'Nt': False})
     columns: list[str] = field(default_factory=lambda: ['It'])

@@ -1,29 +1,23 @@
 """Geometric methods for Frame and FrameArray."""
-from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
 
 import pandas
 
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.polygen import polygen, polyframe, root_mean_square
-
-if TYPE_CHECKING:
-    from nova.electromagnetic.frame import Frame
-
-# pylint:disable=unsubscriptable-object
+from nova.electromagnetic.dataframe import DataFrame
 
 
 @dataclass
 class Polygon(MetaMethod):
     """Geometrical methods for Frame."""
 
-    frame: Frame = field(repr=False)
+    frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: [
         'x', 'z', 'section'])
     additional: list[str] = field(default_factory=lambda: [
         'dl', 'dt', 'rms', 'dx', 'dz', 'dA', 'poly', 'patch'])
-    require_all: bool = True
+    require_all: bool = field(repr=False, default=True)
 
     def initialize(self):
         """Init polygons based on coil geometroy and cross section."""

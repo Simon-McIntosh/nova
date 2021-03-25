@@ -111,12 +111,6 @@ class MetaFrame(MetaData):
         # remove exclude attributes from additional
         self.additional = [attr for attr in self.additional
                            if attr not in self.exclude]
-        # check unset defaults
-        unset = np.array([attr not in self.default
-                          for attr in self.additional])
-        if unset.any():
-            raise ValueError('default value not set for additional attributes '
-                             f'{np.array(self.additional)[unset]}')
 
     @property
     def columns(self):

@@ -1,4 +1,5 @@
 """Configure superframe. Inherit DataArray for fast access else DataFrame."""
+from dataclasses import dataclass, field
 from typing import Collection, Any
 
 import numpy as np
@@ -10,11 +11,10 @@ from nova.electromagnetic.dataarray import (
     ArrayIndexer,
     DataArray
     )
+from nova.electromagnetic.dataframe import DataFrame
 from nova.electromagnetic.metamethod import MetaMethod
-from nova.electromagnetic.energize import Energize
-from nova.electromagnetic.select import Select
 from nova.electromagnetic.multipoint import MultiPoint
-from nova.electromagnetic.polygon import Polygon
+from nova.electromagnetic.energize import Energize
 
 
 class SubSpaceError(IndexError):
@@ -69,6 +69,34 @@ class SetIndexer(ArrayIndexer):
         return SetLocMixin
 
 
+@dataclass
+class Methods:
+    """Manage frame MetaMethods."""
+
+    frame: DataFrame
+    attrs: dict[Any] = field(repr=False, default_factory=dict)
+
+    def __post_init__(self):
+        """Define methods, update frame.columns and initialize methods."""
+        self.frame.add_methods()
+        self.initialize()
+
+    def __repr__(self):
+        """Return method list."""
+        return f'{list(self.attrs)}'
+
+    def initialize(self):
+        """Init attrs derived from MetaMethod."""
+        self.frame.update_columns()
+        if self.frame.empty:
+            return
+        attrs = [attr for attr in self.attrs
+                 if isinstance(self.attrs[attr], MetaMethod)]
+        for attr in attrs:
+            if self.attrs[attr].generate:
+                self.attrs[attr].initialize()
+
+
 class FrameSet(SetIndexer, DataArray):
     """
     Extend pandas.DataFrame.
@@ -84,20 +112,13 @@ class FrameSet(SetIndexer, DataArray):
                  attrs: dict[str, Collection[Any]] = None,
                  **metadata: dict[str, Collection[Any]]):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.update_attrs()
+        self.attrs['methods'] = Methods(self, self.attrs)
 
-    def update_attrs(self):
-        """Extract frame attrs from data and initialize."""
-        self.attrs['energize'] = Energize(self)
-        self.attrs['select'] = Select(self)
+    def add_methods(self):
+        """Define frameset attributes - extend to add additional methods."""
         self.attrs['multipoint'] = MultiPoint(self)
-        self.attrs['polygon'] = Polygon(self)
-        self.update_columns()
-        for attr in self.attrs:
-            attribute = self.attrs[attr]
-            if isinstance(attribute, MetaMethod) and not self.empty:
-                if attribute.generate:
-                    attribute.initialize()
+        self.attrs['energize'] = Energize(self)
+
 
     def __repr__(self):
         """Propagate frame subspace variables prior to display."""
@@ -193,12 +214,12 @@ class FrameSet(SetIndexer, DataArray):
         self.__init__(frame, attrs=self.attrs)
 
     def drop(self, index=None):
-        """Drop frame(s)."""
+        """Drop frame(s) from index."""
         if index is None:
             index = self.index
         self.multipoint.drop(index)
         super().drop(index, inplace=True)
-        self.multipoint.initialize()
+        self.__init__(self, attrs=self.attrs)
 
     def translate(self, index=None, xoffset=0, zoffset=0):
         """Translate coil(s)."""
@@ -324,9 +345,9 @@ class FrameSet(SetIndexer, DataArray):
 
 if __name__ == '__main__':
 
-    frameset = FrameSet(Required=['x', 'z'], additional=['section'])
+    frameset = FrameSet(Required=['x', 'z'], available=['section', 'link'])
     frameset.insert(range(2), 1, label='PF')
-    frameset.insert(range(2), 1)
+    frameset.insert(range(4), 1, link=True)
     frameset.insert(range(2), 1, label='PF')
-    frameset.Ic = 7.7
+    frameset.insert(range(4), 1, link=True)
     print(frameset)

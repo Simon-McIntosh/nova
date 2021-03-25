@@ -29,7 +29,6 @@ class DataFrame(pandas.DataFrame):
     Extend pandas.DataFrame.
 
     - Manage Frame metadata (metaarray, metaframe).
-    - Add boolean methods (add_frame, drop_frame...).
 
     """
 
@@ -273,6 +272,8 @@ class DataFrame(pandas.DataFrame):
             - isnan: insert default
         """
         if self.columns.empty:
+            for attr in self.metaframe.columns:
+                self[attr] = None
             return
         with self.metaframe.setlock(None):
             columns = self.columns.to_list()
@@ -369,9 +370,15 @@ class DataFrame(pandas.DataFrame):
 
 if __name__ == '__main__':
 
+    dataframe = DataFrame(Required=['x'], Additional=['Ic'],
+                          Subspace=[], label='PF', Ic=3)
+    print(dataframe)
+
+
     dataframe = DataFrame({'x': range(3)},
                           Required=['x'], Additional=['Ic'],
                           Subspace=[], label='PF', Ic=3)
+
     print(dataframe)
     print(dataframe.metaframe.required)
     print(dataframe.metaframe.additional)

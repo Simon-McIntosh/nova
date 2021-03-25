@@ -24,7 +24,6 @@ def test_generate_single_float():
 def test_generate_multi():
     frame = Frame({'x': range(3), 'link': True}, name='coil1',
                   metadata={'Required': ['x']})
-    print(frame)
     assert frame.link.to_list() == ['', 'coil1', 'coil1']
 
 
@@ -102,6 +101,11 @@ def test_frame_columns_multipoint():
     frame = Frame(metadata={'Required': ['x', 'z'], 'Additional': []})
     frame.insert(0, 1, link=True)
     assert list(frame.columns) == ['x', 'z', 'link', 'factor', 'ref', 'subref']
+
+
+def test_link_avalible():
+    frame = Frame(Required=['x'], Available=['link'])
+    frame.insert(1)
 
 
 if __name__ == '__main__':

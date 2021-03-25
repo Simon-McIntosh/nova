@@ -119,6 +119,12 @@ def test_insert_insert_label_switch():
         ['PF0', 'CS7', 'CS8', 'PF1', 'PF2', 'CS9', 'CS10']
 
 
+def test_reindex():
+    frameset = FrameSet({'x': range(10)}, Required=['x'])
+    frameset = FrameSet(frameset, index=['Coil2', 'Coil7', 'Coil9'])
+    assert frameset.x.to_list() == [2, 7, 9]
+
+
 if __name__ == '__main__':
 
     pytest.main([__file__])

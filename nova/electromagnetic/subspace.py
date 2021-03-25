@@ -14,7 +14,9 @@ class SubSpace(FrameSet):
         index = self.get_subindex(frame)
         columns = self.get_subcolumns(frame)
         array = self.get_subarray(frame, columns)
-        super().__init__(pandas.DataFrame(frame), index=index, columns=columns,
+        super().__init__(pandas.DataFrame(frame),
+                         index=index, columns=columns,
+                         Required=[], Additional=columns,
                          Available=columns, Array=array)
         self.metaframe._lock = frame.metaframe._lock  # link locks
 
@@ -30,7 +32,7 @@ class SubSpace(FrameSet):
     @staticmethod
     def get_subcolumns(frame):
         """Return subspace columns."""
-        if frame.empty:
+        if frame.columns.empty:
             return frame.metaframe.subspace
         if np.array([attr in frame.metaframe.subspace
                      for attr in frame.columns]).any():

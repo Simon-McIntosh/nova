@@ -54,7 +54,7 @@ class Display:
 
 
 @dataclass
-class Flags:
+class Flag:
     """Manage display flags."""
 
     overwrite: bool = False
@@ -63,7 +63,8 @@ class Flags:
 
 
 @dataclass
-class Labels:
+class Label:
+    """Generate plot labels."""
 
     label: str = 'coil'
     current: str = 'A'
@@ -71,14 +72,44 @@ class Labels:
     font_size: str = 'medium'
     label_limit: int = 20
 
+    '''
+    @property
+    def label_index(self):
+        """Return label index."""
+        if label == 'all' or label == 'full':  # all coils
+            parts = self.frame.part
+
+        elif label == 'active':  # active == True
+            parts = coil.part[coil.active & ~coil.plasma & ~coil.feedback]
+        elif label == 'passive':  # active == False
+            parts = coil.part[~coil.active & ~coil.plasma & ~coil.feedback]
+        elif label == 'coil':  # plasma == False
+            parts = coil.part[~coil.plasma & ~coil.feedback]
+        elif label == 'plasma':  # plasma == True
+            parts = coil.part[coil.plasma & ~coil.feedback]
+        elif label == 'free':  # optimize == True
+            parts = coil.part[coil.optimize & ~coil.plasma & ~coil.feedback]
+        elif label == 'fix':  # optimize == False
+            parts = coil.part[~coil.optimize & ~coil.plasma & ~coil.feedback]
+        else:
+            if not pandas.api.types.is_list_like(label):
+                label = [label]
+            parts = self.coil.part
+            parts = [_part for _part in label if _part in parts]
+    '''
+
+    def plot(self, axes, **kwargs):
+        self.add_labels()
 
 
+    def add_labels(self):
+        """Add plot labels."""
+        print('adding plot labels', self.label, self.frame.select,
+              self.frame.columns)
 
-    def label_coil(self, ax, label='coil',  field=True,
-               coil=None, Nmax=20):
-
-
-        parts = parts.unique()
+        parts = self.frame.part[self.frame[self.label]].to_list()
+        print(parts)
+        '''
         parts = list(parts)
         N = {p: sum(coil.part == p) for p in parts}
         # check for presence of field instance
@@ -130,9 +161,10 @@ class Labels:
                     ax.text(x + drs[drs_index], z + ztext['field'], txt,
                             fontsize=fs, ha=ha, va='center',
                             color=0.2 * np.ones(3))
+        '''
 
 @dataclass
-class PlotFrame(Display, Flags, MetaMethod):
+class PlotFrame(Display, Flag, Label, MetaMethod):
     """Methods for ploting Frame data."""
 
     frame: FrameSet = field(repr=False)
@@ -142,9 +174,15 @@ class PlotFrame(Display, Flags, MetaMethod):
 
     def initialize(self):
         """Initialize metamethod."""
-        self.frame.update_columns()
+        self.update_columns()
         if 'frame' not in self.frame:
             self.patchwork = 0
+
+    def update_columns(self):
+        unset = [attr not in self.frame.columns
+                 for attr in self.required + self.additional]
+        if np.array(unset).any():
+            self.frame.update_columns()
 
     def generate_axes(self):
         """Generate axes if unset."""
@@ -188,6 +226,7 @@ class PlotFrame(Display, Flags, MetaMethod):
             patch_collection = PatchCollection(patch, match_original=True)
             self.axes.add_collection(patch_collection, autolim=True)
             self.axes.autoscale_view()
+        super().plot(axes, **kwargs)
 
     def patch(self):
         """Update frame patch, call on-demand."""
@@ -232,11 +271,15 @@ class PlotFrame(Display, Flags, MetaMethod):
 
 if __name__ == '__main__':
 
-    frame = FrameSet(Required=['x', 'z'], additional=['section', 'Ic'])
-    frame.insert(range(2), 1, label='PF')
-    frame.insert(range(2), 0)
+    frameset = FrameSet(Required=['x', 'z'],
+                        available=['section', 'Ic', 'plasma', 'link'])
+    frameset.insert(range(2), 1, label='PF')
+    frameset.insert(range(2), 0, link=True)
 
-    plot = PlotFrame(frame)
+    plot = PlotFrame(frameset)
     plot.initialize()
 
     plot()
+
+    print(frameset)
+

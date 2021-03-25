@@ -65,7 +65,7 @@ def test_index():
 
 
 def test_reindex():
-    frame = Frame({'x': range(10)}, metadata={'Required': ['x']})
+    frame = Frame({'x': range(10)}, Required=['x'])
     frame = Frame(frame, index=['Coil2', 'Coil7', 'Coil9'])
     assert frame.x.to_list() == [2, 7, 9]
 
@@ -183,5 +183,4 @@ def test_drop():
 
 if __name__ == '__main__':
 
-    test_drop()
     pytest.main([__file__])

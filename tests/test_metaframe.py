@@ -28,12 +28,6 @@ def test_extend_additional():
     assert metaframe.additional == ['link', 'dCoil']
 
 
-def test_required_default():
-    metaframe = MetaFrame(default={'dCoil': -1}, additional=['dCoil'])
-    with pytest.raises(ValueError):
-        assert setattr(metaframe, 'metadata', {'additional': ['dShell']})
-
-
 def test_metadata():
     metaframe = MetaFrame(required=['x', 'z'],
                           default={'dCoil': -1},

@@ -30,7 +30,7 @@ def test_index():
 
 
 def test_reindex():
-    dataframe = DataFrame({'x': range(10)}, metadata={'Required': ['x']})
+    dataframe = DataFrame({'x': range(10)}, Required=['x'])
     dataframe = DataFrame(dataframe, index=['Coil2', 'Coil7', 'Coil9'])
     assert dataframe.x.to_list() == [2, 7, 9]
 
@@ -94,11 +94,9 @@ def test_pass_label():
     dataframe = DataFrame({'x': range(3)},
                           Required=['x'], Additional=['Ic'],
                           Subspace=[], label='PF', Ic=3)
-    print(dataframe.metaframe.default)
     assert dataframe.columns.to_list() == ['x', 'Ic']
 
 
 if __name__ == '__main__':
 
-    test_pass_label()
-    #pytest.main([__file__])
+    pytest.main([__file__])

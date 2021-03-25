@@ -10,6 +10,15 @@ Created on Thu Feb 18 20:33:42 2021
 
 """
 
+        # check unset defaults
+        '''
+        unset = np.array([attr not in self.default
+                          for attr in self.additional])
+        if unset.any():
+            raise ValueError('default value not set for additional attributes '
+                             f'{np.array(self.additional)[unset]}')
+        '''
+
         #metatag = {tag: self.metaframe.default[tag]
         #           for tag in ['name', 'label', 'delim', 'offset']}
         #for tag in metatag:

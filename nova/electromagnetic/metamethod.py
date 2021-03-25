@@ -1,21 +1,17 @@
 """AbstractBaseClass Extended Frame._methods."""
-
-from __future__ import annotations
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
 
 import numpy as np
 
-if TYPE_CHECKING:
-    from nova.electromagnetic.frame import Frame
+from nova.electromagnetic.dataframe import DataFrame
 
 
 @dataclass
-class MetaMethod(metaclass=ABCMeta):
+class MetaMethod(ABC):
     """Manage Frame._methods, subclass with dataclass."""
 
-    frame: Frame = field(repr=False)
+    frame: DataFrame = field(repr=False)
     required: list[str]
     additional: list[str]
     require_all: bool = True
@@ -27,11 +23,13 @@ class MetaMethod(metaclass=ABCMeta):
 
     @abstractmethod
     def initialize(self):
-        """Init method."""
+        """Init metamethod."""
 
     @property
     def generate(self):
         """Return True if required attributes set else False."""
+        if not self.required:  # required attributes empty
+            return True
         if self.require_all:
             return self.required_attributes.all()
         return self.required_attributes.any()
@@ -42,14 +40,15 @@ class MetaMethod(metaclass=ABCMeta):
         return np.array([attr in self.frame.metaframe.available
                          for attr in self.required])
 
-    def _unset(self, attributes: list[str]) -> list[str]:
+    def unset(self, attributes: list[str]) -> list[str]:
         """Return unset attributes."""
         return [attr for attr in list(dict.fromkeys(attributes))
                 if attr not in self.frame.metaframe.columns]
 
     def update_additional(self):
         """Update additional attributes if subset exsists in frame.columns."""
-        additional = self._unset(self.additional)
+        additional = self.unset(self.required + self.additional)
         if not self.require_all:
-            additional.extend(self._unset(self.required))
-        self.frame.metaframe.metadata = {'additional': additional}
+            additional.extend(self.unset(self.required))
+        if additional:
+            self.frame.metaframe.metadata = {'additional': additional}

@@ -19,7 +19,7 @@ class Frame(FrameSet):
     """
     Extend DataFrame.
 
-    - Implement subspace.
+    - Implement subspace, selection and geometory methods.
 
     """
 

@@ -1,5 +1,6 @@
 """Methods for ploting Frame data."""
 from dataclasses import dataclass, field
+from typing import Union
 import colorsys
 import functools
 import operator
@@ -60,43 +61,34 @@ class Display:
 
 
 @dataclass
-class Flag:
-    """Manage display flags."""
-
-    overwrite: bool = False
-    zeroturn: bool = False
-    feedback: bool = False
-
-
-@dataclass
 class Label:
     """Generate plot labels."""
 
     label: str = 'coil'
-    current: str = 'A'
-    field: bool = True
-    font_size: str = 'medium'
-    label_limit: int = 20
+    current_unit: str = 'A'
+    field_unit: bool = 'T'
+    zeroturn: bool = False
+    feedback: bool = False
+    options: dict[str, Union[str, int, float]] = field(
+        repr=False, default_factory=lambda: {'font_size': 'medium',
+                                             'label_limit': 20})
+    index: pandas.Index = field(init=False, repr=False)
+
+    def __post_init__(self):
+        self.update_flags()
+        super().__post_init__()
+
+    def update_flags(self):
+        """Update plot attribute flags."""
+        if hasattr(self, 'biot'):
+            if 'field' not in self.biot:
+                self.field_unit = None
+        if not self.frame.hasattrs('energize'):
+            self.current_unit = None
+
 
     '''
     @property
-    def label_index(self):
-        """Return label index."""
-        if label == 'all' or label == 'full':  # all coils
-            parts = self.frame.part
-
-        elif label == 'active':  # active == True
-            parts = coil.part[coil.active & ~coil.plasma & ~coil.feedback]
-        elif label == 'passive':  # active == False
-            parts = coil.part[~coil.active & ~coil.plasma & ~coil.feedback]
-        elif label == 'coil':  # plasma == False
-            parts = coil.part[~coil.plasma & ~coil.feedback]
-        elif label == 'plasma':  # plasma == True
-            parts = coil.part[coil.plasma & ~coil.feedback]
-        elif label == 'free':  # optimize == True
-            parts = coil.part[coil.optimize & ~coil.plasma & ~coil.feedback]
-        elif label == 'fix':  # optimize == False
-            parts = coil.part[~coil.optimize & ~coil.plasma & ~coil.feedback]
         else:
             if not pandas.api.types.is_list_like(label):
                 label = [label]
@@ -104,25 +96,29 @@ class Label:
             parts = [_part for _part in label if _part in parts]
     '''
 
-    def plot(self, axes, **kwargs):
-        self.add_labels()
+    def update_index(self):
+        """Return update index from self.label boolean."""
+        # if self.label
 
-    def add_labels(self):
+        with self.frame.metaframe.setlock(True, 'subspace'):
+            return self.frame.index[self.frame[self.label]]
+
+
+    def add_label(self):
         """Add plot labels."""
-        print('adding plot labels', self.label, self.frame.select,
-              self.frame.columns)
-
-        parts = self.frame.part[self.frame[self.label]].to_list()
-        print(parts)
+        index = self.get_index()
+        parts = self.frame.part[index]
+        print(index)
         '''
-        parts = list(parts)
-        N = {p: sum(coil.part == p) for p in parts}
+        part_number = {p: sum(coil.part == p) for p in parts}
         # check for presence of field instance
-        field = False if 'field' not in self.biot_instances else field
+
         # referance vertical length scale
-        dz_ref = np.diff(ax.get_ylim())[0] / 100
-        nz = np.sum(np.array([parts is not False, current is not None,
-                              field is not False]))
+        referance_height = np.diff(self.axes.get_ylim())[0] / 100
+        vertical_divisions = \
+            np.sum(np.array([not parts.empty,
+                             bool(self.current),
+                             field]))
         if nz == 1:
             dz_ref = 0
         ztext = {name: 0 for name, value
@@ -170,7 +166,7 @@ class Label:
 
 
 @dataclass
-class PolyPlot(Display, Flag, Label, MetaMethod):
+class PolyPlot(Display, Label, MetaMethod):
     """Methods for ploting Frame data."""
 
     frame: DataFrame = field(repr=False)
@@ -237,6 +233,8 @@ class PolyPlot(Display, Flag, Label, MetaMethod):
         patch_collection = PatchCollection(patch, match_original=True)
         self.axes.add_collection(patch_collection)
         self.axes.autoscale_view()
+        if self.label:
+            self.add_label()
 
     def shuffle(self, color):
         """Return shuffled facecolor. Alternate lightness by +-factor."""

@@ -119,7 +119,6 @@ class FrameSet(SetIndexer, DataArray):
         self.attrs['multipoint'] = MultiPoint(self)
         self.attrs['energize'] = Energize(self)
 
-
     def __repr__(self):
         """Propagate frame subspace variables prior to display."""
         self.update_frame()
@@ -235,7 +234,6 @@ class FrameSet(SetIndexer, DataArray):
             self.loc[name, 'poly'] = \
                 shapely.affinity.translate(self.loc[name, 'poly'],
                                            xoff=xoffset, yoff=zoffset)
-            self.loc[name, 'patch'] = None  # re-generate coil patch
 
     def assemble(self, *args, **kwargs):
         """

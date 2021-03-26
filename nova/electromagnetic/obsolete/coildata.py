@@ -10,6 +10,57 @@ Created on Thu Feb 18 20:33:42 2021
 
 """
 
+
+
+        '''
+        patch = self.frame.loc[index, 'patch']
+        # form list of lists
+        patch = [_patch if pandas.api.types.is_list_like(_patch)
+                 else [_patch] for _patch in patch]
+        if len(patch) > 0:  # flatten and sort
+            patch = functools.reduce(operator.concat, patch)
+            patch = np.array(patch)[np.argsort([p.zorder for p in patch])]
+            patch_collection = PatchCollection(patch, match_original=True)
+            self.axes.add_collection(patch_collection, autolim=True)
+            self.axes.autoscale_view()
+        super().plot(axes, **kwargs)
+        '''
+
+    '''
+    def patch(self):
+        """Update frame patch, call on-demand."""
+        patch = [[] for __ in range(len(self.frame))]
+        for i, (current_patch, poly, part) in enumerate(
+                self.frame.loc[:, ['patch', 'poly', 'part']].values):
+            if self.overwrite or self.update_patch(current_patch):
+                if isinstance(poly, dict):
+                    poly = shapely.geometry.shape(poly)
+                if isinstance(poly, shapely.geometry.Polygon):
+                    patch[i] = [PolygonPatch(poly)]
+                else:
+                    patch[i] = []
+            else:
+                patch[i] = [current_patch]
+            for j in range(len(patch[i])):
+                patch[i][j].set_edgecolor(self.edgecolor)
+                patch[i][j].set_linewidth(self.linewidth)
+                patch[i][j].set_antialiased(True)
+                patch[i][j].set_facecolor(self.get_color(part))
+                patch[i][j].set_zorder = self.get_zorder(part)
+                patch[i][j].set_alpha(self.get_alpha(part))
+                if self.patchwork != 0:
+                    self.shuffle(patch[i][j])
+        self.frame.loc[:, 'patch'] = np.asarray(patch, object)
+    '''
+
+    '''
+    def update_patch(self, patch=None):
+        """Return True if any patches are null else False."""
+        if patch is None:
+            patch = self.frame.patch
+        return np.array(pandas.isnull(patch)).any()
+    '''
+
         # check unset defaults
         '''
         unset = np.array([attr not in self.default

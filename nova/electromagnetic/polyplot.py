@@ -4,7 +4,7 @@ import colorsys
 import functools
 import operator
 
-from descartes import PolygonPatch
+import descartes
 import numpy as np
 import matplotlib
 from matplotlib.collections import PatchCollection
@@ -13,10 +13,8 @@ import pandas
 import shapely.geometry
 
 from nova.electromagnetic.metamethod import MetaMethod
-from nova.electromagnetic.polygon import Polygon
-from nova.electromagnetic.polygen import polygen, polyframe, root_mean_square
 
-from nova.electromagnetic.frame import FrameSet
+from nova.electromagnetic.dataframe import DataFrame
 from nova.utilities.IO import human_format
 from nova.utilities.pyplot import plt
 
@@ -32,7 +30,7 @@ class Display:
     alpha: dict[str, float] = field(default_factory=lambda: {'plasma': 0.75})
     linewidth: float = 0.25
     edgecolor: str = 'darkgrey'
-    color: dict[str, str] = field(default_factory=lambda: {
+    facecolor: dict[str, str] = field(default_factory=lambda: {
         'VS3': 'C0', 'VS3j': 'gray', 'CS': 'C0', 'PF': 'C0',
         'trs': 'C3', 'dir': 'C3', 'vv': 'C3', 'vvin': 'C3',
         'vvout': 'C3', 'bb': 'C7', 'plasma': 'C4', 'Plasma': 'C4',
@@ -44,13 +42,21 @@ class Display:
         """Return patch alpha."""
         return self.alpha.get(part, 1)
 
-    def get_color(self, part):
+    def get_facecolor(self, part):
         """Return patch facecolor."""
-        return self.color.get(part, 'C9')
+        return self.facecolor.get(part, 'C9')
 
     def get_zorder(self, part):
         """Return patch zorder."""
         return self.zorder.get(part, 0)
+
+    def patch_properties(self, parts):
+        """Return unique dict of patch properties extracted from parts list."""
+        return {part: {'alpha': self.get_alpha(part),
+                       'facecolor': self.get_facecolor(part),
+                       'zorder': self.get_zorder(part),
+                       'linewidth': self.linewidth}
+                for part in parts.unique()}
 
 
 @dataclass
@@ -100,7 +106,6 @@ class Label:
 
     def plot(self, axes, **kwargs):
         self.add_labels()
-
 
     def add_labels(self):
         """Add plot labels."""
@@ -163,11 +168,12 @@ class Label:
                             color=0.2 * np.ones(3))
         '''
 
+
 @dataclass
-class PlotFrame(Display, Flag, Label, MetaMethod):
+class PolyPlot(Display, Flag, Label, MetaMethod):
     """Methods for ploting Frame data."""
 
-    frame: FrameSet = field(repr=False)
+    frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['x', 'z', 'poly'])
     additional: list[str] = field(default_factory=lambda: [
         'part', 'patch', 'feedback', 'Nt'])
@@ -179,6 +185,7 @@ class PlotFrame(Display, Flag, Label, MetaMethod):
             self.patchwork = 0
 
     def update_columns(self):
+        """Update frame columns."""
         unset = [attr not in self.frame.columns
                  for attr in self.required + self.additional]
         if np.array(unset).any():
@@ -206,80 +213,71 @@ class PlotFrame(Display, Flag, Label, MetaMethod):
         if not self.frame.empty:
             self.plot(axes, **kwargs)
 
-    def plot(self, axes, **kwargs):
-        """Plot frame."""
-        self.axes = axes
-        if self.update_patch():
-            self.patch()  # patch on-demand
-        index = np.full(len(self.frame), True)
-        if not self.zeroturn:  # exclude zeroturn filaments (Nt == 0)
-            index &= (self.frame.loc[:, 'Nt'] != 0)
-        if not self.feedback:  # exclude stabilization coils
-            index &= ~self.frame.feedback
-        patch = self.frame.loc[index, 'patch']
-        # form list of lists
-        patch = [_patch if pandas.api.types.is_list_like(_patch)
-                 else [_patch] for _patch in patch]
-        if len(patch) > 0:  # flatten and sort
-            patch = functools.reduce(operator.concat, patch)
-            patch = np.array(patch)[np.argsort([p.zorder for p in patch])]
-            patch_collection = PatchCollection(patch, match_original=True)
-            self.axes.add_collection(patch_collection, autolim=True)
-            self.axes.autoscale_view()
-        super().plot(axes, **kwargs)
+    def plot(self, index=slice(None), axes=None):
+        """
+        Plot frame.
 
-    def patch(self):
-        """Update frame patch, call on-demand."""
-        patch = [[] for __ in range(len(self.frame))]
-        for i, (current_patch, poly, part) in enumerate(
-                self.frame.loc[:, ['patch', 'poly', 'part']].values):
-            if self.overwrite or self.update_patch(current_patch):
-                if isinstance(poly, dict):
-                    poly = shapely.geometry.shape(poly)
-                if isinstance(poly, shapely.geometry.Polygon):
-                    patch[i] = [PolygonPatch(poly)]
-                else:
-                    patch[i] = []
-            else:
-                patch[i] = [current_patch]
-            for j in range(len(patch[i])):
-                patch[i][j].set_edgecolor(self.edgecolor)
-                patch[i][j].set_linewidth(self.linewidth)
-                patch[i][j].set_antialiased(True)
-                patch[i][j].set_facecolor(self.get_color(part))
-                patch[i][j].set_zorder = self.get_zorder(part)
-                patch[i][j].set_alpha(self.get_alpha(part))
-                if self.patchwork != 0:
-                    self.shuffle(patch[i][j])
-        self.frame.loc[:, 'patch'] = np.asarray(patch, object)
+        Addapted from geoplot.PolygonPatch.
+        """
+        index = self.get_index(index)  # retrieve frame index
+        self.axes = axes  # set axes
+        patch = []
+        properties = self.patch_properties(self.frame.part)
+        basecolor = {part: properties[part]['facecolor']
+                     for part in properties}
+        for poly, part in self.frame.loc[index, ['poly', 'part']].to_numpy():
+            patch_kwargs = properties[part]
+            if self.patchwork != 0:  # Shuffle basecolor
+                patch_kwargs['facecolor'] = self.shuffle(basecolor[part])
+            try:  # MultiPolygon.
+                for _poly in poly:
+                    patch.append(descartes.PolygonPatch(_poly, **patch_kwargs))
+            except (TypeError, AssertionError):  # Polygon.
+                patch.append(descartes.PolygonPatch(poly, **patch_kwargs))
+        patch_collection = PatchCollection(patch, match_original=True)
+        self.axes.add_collection(patch_collection)
+        self.axes.autoscale_view()
 
-    def update_patch(self, patch=None):
-        """Return True if any patches are null else False."""
-        if patch is None:
-            patch = self.frame.patch
-        return np.array(pandas.isnull(patch)).any()
-
-    def shuffle(self, patch):
-        """Update patch facecolor. Alternate lightness by +- factor."""
+    def shuffle(self, color):
+        """Return shuffled facecolor. Alternate lightness by +-factor."""
         factor = (1 - 2 * np.random.rand(1)[0]) * self.patchwork
-        c = patch.get_facecolor()
-        c = colorsys.rgb_to_hls(*mc.to_rgb(c))
-        c = colorsys.hls_to_rgb(
-                c[0], max(0, min(1, (1 + factor) * c[1])), c[2])
-        patch.set_facecolor(c)
+        color = colorsys.rgb_to_hls(*mc.to_rgb(color))
+        color = colorsys.hls_to_rgb(
+                color[0], max(0, min(1, (1 + factor) * color[1])), color[2])
+        return color
 
+    def to_boolean(self, index):
+        """Return boolean index."""
+        try:
+            if index.is_boolean():
+                return index
+        except AttributeError:
+            pass
+        if index is None:
+            return np.full(len(self.frame), True)
+        if isinstance(index, (str, int)):
+            if isinstance(index, int):
+                index = self.frame.index[index]
+            index = [index]
+        elif isinstance(index, slice):
+            index = self.index[index]
+        elif np.array([isinstance(label, int) for label in index]).all():
+            index = self.frame.index[index]
+        return self.frame.index.isin(index)
 
-if __name__ == '__main__':
-
-    frameset = FrameSet(Required=['x', 'z'],
-                        available=['section', 'Ic', 'plasma', 'link'])
-    frameset.insert(range(2), 1, label='PF')
-    frameset.insert(range(2), 0, link=True)
-
-    plot = PlotFrame(frameset)
-    plot.initialize()
-
-    plot()
-
-    print(frameset)
-
+    def get_index(self, index=None):
+        """Return label based index for plot."""
+        index = self.to_boolean(index)
+        try:
+            if not self.zeroturn:  # exclude zeroturn filaments (Nt == 0)
+                with self.frame.metaframe.setlock(True, 'subspace'):
+                    index &= (self.frame.loc[:, 'Nt'] != 0)
+        except AttributeError:  # turns not set
+            pass
+        try:
+            if not self.feedback:  # exclude stabilization coils
+                with self.frame.metaframe.setlock(True, 'subspace'):
+                    index &= ~self.frame.feedback
+        except AttributeError:  # feedback not set
+            pass
+        return index

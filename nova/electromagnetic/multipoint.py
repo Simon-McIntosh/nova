@@ -64,10 +64,11 @@ class MultiPoint(MetaMethod):
         self.frame.loc[~istrue & ~isnumeric & ~isstr, 'link'] = ''
         index = self.frame.index[istrue | isnumeric]
         if not index.empty:
-            factor = np.ones(len(self.frame))
-            factor[isnumeric] = self.frame.link[isnumeric]
-            factor = factor[istrue | isnumeric][1:]
-            self.add(index, factor)
+            with self.frame.metaframe.setlock(True, 'multipoint'):
+                factor = np.ones(len(self.frame))
+                factor[isnumeric] = self.frame.link[isnumeric]
+                factor = factor[istrue | isnumeric][1:]
+                self.add(index, factor)
         self.build()
 
     def build(self):
@@ -158,6 +159,8 @@ class MultiPoint(MetaMethod):
         for i in np.arange(1, index_number):
             self.frame.at[index[i], 'link'] = index[0]
             self.frame.at[index[i], 'factor'] = factor[i-1]
+        if self.frame.metaframe.lock('multipoint') is False:
+            self.frame.__init__(self.frame)
 
     def drop(self, index):
         """

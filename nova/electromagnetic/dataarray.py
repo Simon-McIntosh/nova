@@ -122,8 +122,6 @@ class DataArray(ArrayIndexer, DataFrame):
         """Transfer metaarray.data to frame."""
         self.metaframe.assert_hascol('array', col)
         value = self._get_array(col)
-        print(self.metaframe.index)
-        print(col, value)
         with self.metaframe.setlock(True, 'array'):
             super().__setitem__(col, value)
 

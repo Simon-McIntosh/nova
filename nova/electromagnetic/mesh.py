@@ -79,8 +79,8 @@ class Mesh:
     def _mesh_poloidal(frame, link=True, **kwargs):
         """Mesh single coil."""
         delta = frame.delta
-        if 'polygon' in frame:
-            frame_polygon = frame.polygon
+        if 'poly' in frame:
+            frame_polygon = frame.poly
             bounds = frame_polygon.bounds
             dx = bounds[2] - bounds[0]
             dz = bounds[3] - bounds[1]
@@ -190,7 +190,7 @@ class Mesh:
         # subframe bundle
         mesh.update({'x': xm_, 'z': zm_, 'nx': nx, 'nz': nz,
                      'dl': dl_, 'dt': dt_, 'Nt': Nt_, 'Nf': Nf,
-                     'polygon': polygon, 'section': cs_,
+                     'poly': polygon, 'section': cs_,
                      'delta': delta})
 
         # subframe moment arms

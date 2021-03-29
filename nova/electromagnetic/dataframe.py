@@ -141,7 +141,7 @@ class DataFrame(pandas.DataFrame):
             self['index'] = self._build_index(self)
             self.set_index('index', inplace=True)
             self.index.name = None
-            self.metaframe.index = self.index
+        self.metaframe.index = self.index
 
     def _set_offset(self, metatag):
         try:  # reverse search through frame index
@@ -330,14 +330,8 @@ if __name__ == '__main__':
 
     dataframe = DataFrame(Required=['x'], Additional=['Ic'],
                           Subspace=[], label='PF', Ic=3)
-    print(dataframe)
-
 
     dataframe = DataFrame({'x': range(3)},
                           Required=['x'], Additional=['Ic'],
                           Subspace=[], label='PF', Ic=3)
-
-    print(dataframe)
-    print(dataframe.metaframe.required)
-    print(dataframe.metaframe.additional)
     print(dataframe)

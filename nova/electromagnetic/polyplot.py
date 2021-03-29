@@ -108,7 +108,6 @@ class Label:
         """Add plot labels."""
         index = self.get_index()
         parts = self.frame.part[index]
-        print(index)
         '''
         part_number = {p: sum(coil.part == p) for p in parts}
         # check for presence of field instance

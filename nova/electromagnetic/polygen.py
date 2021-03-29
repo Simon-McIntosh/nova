@@ -9,7 +9,8 @@ polyshape = \
     dict.fromkeys(['ellipse', 'e'], 'ellipse') | \
     dict.fromkeys(['square', 'sq'], 'square') | \
     dict.fromkeys(['rectangle', 'r'], 'rectangle') | \
-    dict.fromkeys(['skin', 'sk'], 'skin')
+    dict.fromkeys(['skin', 'sk'], 'skin') | \
+    dict.fromkeys(['polygon', 'poly'], 'polygon')
 
 
 def boundbox(width, height):

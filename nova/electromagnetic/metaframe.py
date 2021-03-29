@@ -21,7 +21,8 @@ class Lock:
     energize: list[str] = field(init=False, default_factory=lambda: [])
     array: list[str] = field(init=False, default_factory=lambda: [])
     _lock: dict[str, bool] = field(init=False, default_factory=lambda: {
-        'subspace': False, 'energize': False, 'array': False})
+        'subspace': False, 'energize': False, 'array': False,
+        'multipoint': False})
 
     def lock(self, key=None):
         """

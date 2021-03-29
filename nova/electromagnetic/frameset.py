@@ -148,8 +148,8 @@ class FrameSet(Mesh, Section):
 
 if __name__ == '__main__':
 
-    frameset = FrameSet(dpol=0.05, metadata={'section': 'circle'})
-    frameset.poloidal(range(3), 1, 0.75, 0.75, link=True, delta=-1)
+    frameset = FrameSet(dpol=0.05, section='circle')
+    frameset.poloidal(range(3), 1, 0.75, 0.75, link=True, delta=0.2)
     frameset.subframe.polyplot()
 
     print(frameset.frame)

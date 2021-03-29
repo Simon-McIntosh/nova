@@ -1,12 +1,12 @@
 
 import pytest
 
-from nova.electromagnetic.frame import Frame
-from nova.electromagnetic.frameset import SubSpaceError
+from nova.electromagnetic.frame import Frame, SubSpaceError
 
 
 def test_init():
-    frame = Frame(link=True, metadata={'additional': ['link']})
+    frame = Frame(link=True, required=['x', 'z', 'dl', 'dt'],
+                  metadata={'additional': ['link']})
     frame.insert(4, [5, 7, 12], 0.1, 0.05)
     return frame
 
@@ -160,11 +160,18 @@ def test_setitem_value_error():
 
 def test_subspace_lock():
     frame = Frame(metadata={'Required': ['x'], 'Subspace': ['x']})
-    assert frame.in_field('x', 'subspace')
+    assert frame.metaframe.hascol('subspace', 'x')
     assert frame.metaframe.lock('subspace') is False
 
 
 def test_subarray():
+    frame = Frame(Required=['Ic'], Array=['Ic'], Subspace=['Ic'])
+    frame.insert([7.6, 5.5], link=True)
+    frame.insert([3, 3], link=True)
+    _ = frame.loc[:, 'Ic']
+
+
+def test_subarray_print_frame():
     frame = Frame(Required=['Ic'], Array=['Ic'], Subspace=['Ic'])
     frame.insert([7.6, 5.5], link=True)
     frame.insert([3, 3], link=True)

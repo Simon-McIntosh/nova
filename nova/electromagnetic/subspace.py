@@ -2,12 +2,12 @@
 import pandas
 import numpy as np
 
-from nova.electromagnetic.frameset import FrameSet
+from nova.electromagnetic.unitset import UnitSet
 
 # pylint: disable=too-many-ancestors
 
 
-class SubSpace(FrameSet):
+class SubSpace(UnitSet):
     """Manage frame subspace, extract independent rows for subspace columns."""
 
     def __init__(self, frame):
@@ -19,6 +19,7 @@ class SubSpace(FrameSet):
                          Required=[], Additional=columns,
                          Available=columns, Array=array)
         self.metaframe._lock = frame.metaframe._lock  # link locks
+        self.metaframe.metadata = {'Subspace': []}
 
     @staticmethod
     def get_subindex(frame):
@@ -44,4 +45,4 @@ class SubSpace(FrameSet):
     @staticmethod
     def get_subarray(frame, columns):
         """Return subarray - fast access variables."""
-        return [attr for attr in frame.metaarray.array if attr in columns]
+        return [attr for attr in frame.metaframe.array if attr in columns]

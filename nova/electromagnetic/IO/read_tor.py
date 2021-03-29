@@ -1,40 +1,44 @@
 from os import path
 
 import numpy as np
-import matplotlib.animation as manimation
+#import matplotlib.animation as manimation
 from shapely.geometry import Polygon
 import pandas as pd
 from sklearn.neighbors import KDTree
 from shapely.geometry import MultiPoint
 from descartes import PolygonPatch
 
-from amigo.pyplot import plt
-from amigo.time import clock
-from amigo.IO import readtxt, pythonIO
+#from amigo.time import clock
+#from amigo.IO import readtxt, pythonIO
+
 from nova.electromagnetic.IO.read_waveform import read_dina
-from nova.electromagnetic.coilgeom import VSgeom
-from nova.electromagnetic.coilset import CoilSet
+from nova.electromagnetic.frame import Frame
 from nova.electromagnetic.machinedata import MachineData
+from nova.utilities.pyplot import plt
+from nova.utilities.IO import readtxt
 
 
-class read_tor(read_dina, CoilSet):
-    # read tor_cur_data*.dat file from DINA simulation
-    # listing of toroidal currents
 
-    def __init__(self, database_folder='disruptions', Ip_scale=1,
-                 read_txt=False):
-        read_dina.__init__(self, database_folder=database_folder,
-                           read_txt=read_txt)
-        CoilSet.__init__(self)  # coilset instance
+class read_tor(read_dina):
+    """
+    Read tor_cur_data*.dat file from DINA simulation.
 
-        #self.Ip_scale = Ip_scale
-        #self.frame_index = 0
+    Temperal listing of toroidal currents.
+
+    """
+    def __init__(self, database_folder='disruptions', read_txt=False):
+        super().__init__(database_folder, read_txt)
+        self.frame = Frame(delta=0.25, available=['section'])
 
     def load_file(self, folder, **kwargs):
         read_txt = kwargs.get('read_txt', self.read_txt)
         filepath = self.locate_file('tor_cur', folder=folder)
         filepath = '.'.join(filepath.split('.')[:-1])
         self.name = filepath.split(path.sep)[-2]
+
+        self.read_file(filepath)  # read txt file
+
+        '''
         if read_txt or not path.isfile(filepath + '.pk'):
             self.read_file(filepath)  # read txt file
             self.save_coilset('coilset', directory=self.folder)
@@ -42,20 +46,21 @@ class read_tor(read_dina, CoilSet):
         else:
             self.load_coilset('coilset', directory=self.folder)
             self.load_pickle(filepath)
+        '''
 
 
     def read_file(self, filepath):  # called by load_file
         with readtxt(filepath + '.dat') as self.rt:
             self.read_coils()
-            self.read_frames()
+            #self.read_frames()
 
     def read_coils(self):
         self.rt.skiplines(5)  # skip header
-        self.get_coils()
-        self.get_filaments()
-        self.set_plasma()
-        
-    def get_coils(self, dCoil=0.25):
+        self.insert_coils()
+        #self.get_filaments()
+        #self.set_plasma()
+
+    def insert_coils(self):
         self.rt.checkline('1.')
         self.rt.skiplines(1)
         index = self.rt.readline(True, string=True)
@@ -66,7 +71,7 @@ class read_tor(read_dina, CoilSet):
             geom[i, :] = self.rt.readblock()
         geom *= 1e-2  # cm to meters
         part = ['CS' if 'CS' in name else 'PF' for name in index]
-        self.add_coil(*geom, name=index, part=part, dCoil=dCoil)
+        self.frame.insert(*geom, name=index, part=part)
 
     def get_filaments(self, dt=60e-3, rho=0.8e-6, dCoil=0.25):
         self.rt.checkline('2.')
@@ -97,16 +102,16 @@ class read_tor(read_dina, CoilSet):
                                dShell=0, dCoil=dCoil)
                 if j == 1:  # link blanket pairs
                     self.add_mpc(self.coil.index[-2:], factor=-1)
-        
+
     def set_plasma(self, dPlasma=0.25):
         machine = MachineData()
         machine.load_data()
-        fw = pd.concat((machine.data['firstwall'].iloc[::-1], 
+        fw = pd.concat((machine.data['firstwall'].iloc[::-1],
                         machine.data['divertor']))
         fw_poly = Polygon([(x, z) for x, z in zip(fw.x, fw.z)])
         limit = [fw.x.min(), fw.x.max(), fw.z.min(), fw.z.max()]
         self.add_plasma(np.mean(limit[:2]), np.mean(limit[2:]),
-                  np.diff(limit[:2])[0], np.diff(limit[2:])[0], 
+                  np.diff(limit[:2])[0], np.diff(limit[2:])[0],
                   dPlasma=dPlasma, Nt=0, name='plasma')  #polygon=fw_poly
 
     def read_frames(self):
@@ -117,69 +122,68 @@ class read_tor(read_dina, CoilSet):
                 self.frames.append(self.get_current())
             except ValueError:
                 break
-            
+
     @staticmethod
     def get_delta(value):
         diff = np.diff(value)
         diff, count = np.unique(diff[diff > 0], return_counts=True)
         delta = diff[np.argmax(count)]
         return delta
-            
+
     def plot_plasma(self, index):
         frame = self.frames[index]
-        
+
         xp = 1e-2*np.array(frame[2][0::3])
         zp = 1e-2*np.array(frame[2][1::3])
         Ip = -1e3*np.array(frame[2][2::3])  # -kA to A
-        
+
         dx = self.get_delta(xp)
         dz = self.get_delta(zp)
         dA = dx*dz
-        
+
         points = [(x, z) for x, z in zip(xp, zp)]
-        separatrix = MultiPoint(points).buffer(np.max([dx, dz]) / 2, 
+        separatrix = MultiPoint(points).buffer(np.max([dx, dz]) / 2,
                                 cap_style=3)
-        
+
         ax = plt.subplots(1, 1)[1]
         ax.add_patch(PolygonPatch(separatrix))
         print(separatrix)
-        
-        
-        
+
+
         self.set_plasma(dPlasma=0.3)
-        
+
         self.plasma = self.subset(self.coil.plasma)
         self.plasma.plot(passive=True)
-        
-        tree = KDTree(np.array([self.plasma.subcoil.x, 
+
+        tree = KDTree(np.array([self.plasma.subcoil.x,
                                 self.plasma.subcoil.z]).T)
-        
+
         k =int((1 + 2*(np.ceil(dx / (2*self.dPlasma)))) *\
                         (1 + 2*(np.ceil(dz / (2*self.dPlasma)))))
-        
-        ind_o = tree.query(np.array([xp, zp]).T, 
+
+        ind_o = tree.query(np.array([xp, zp]).T,
                            k=1, return_distance=False).flatten()
-        
+
         print(np.shape(ind_o))
         ind = tree.query(np.array([self.plasma.subcoil.x[ind_o],
                                    self.plasma.subcoil.z[ind_o]]).T,
                          k=k, return_distance=False)
-        Ip_sum = Ip.sum() 
+        Ip_sum = Ip.sum()
         offset = 38
-        
+
         Np = np.zeros(len(self.Np))
         for i in range(1):
             plt.plot(xp[i+offset], zp[i+offset], 'C0o')
-            plt.plot(self.plasma.subcoil.x[ind[i+offset]], 
+            plt.plot(self.plasma.subcoil.x[ind[i+offset]],
                      self.plasma.subcoil.z[ind[i+offset]], 'k.')
             x = xp[i+offset] + dx/2 * np.array([-1, -1, 1, 1, -1])
             z = zp[i+offset] + dz/2 * np.array([-1, 1, 1, -1, -1])
             plt.plot(x, z, 'C3')
-        
+
         #self.plot()
         plt.plot(xp, zp, 'C3.')
         plt.axis('equal')
-        
+
         '''
         self.nt = len(frames)
         self.t = np.zeros(self.nt)
@@ -223,7 +227,7 @@ class read_tor(read_dina, CoilSet):
         plasma = self.get_plasma_current()
         coil = self.get_coil_current()
         return (t, filament, plasma, coil)
-    
+
     '''
     def plasma_filaments(self, frame, dx=0.15, dz=0.15):
         rc = np.sqrt(dx**2 + dz**2) / 4
@@ -316,12 +320,12 @@ class read_tor(read_dina, CoilSet):
 
 if __name__ == '__main__':
 
-    tor = read_tor('disruptions', read_txt=False, Ip_scale=1)
+    tor = read_tor('disruptions', read_txt=False)
     #for folder in tor.dina.folders:
     #    tor.load_file(folder, read_txt=True)
-    tor.load_file(3, read_txt=True)
-    
-    tor.plot_plasma(200)
+    tor.load_file(-1)
+
+    #tor.plot_plasma(200)
     #tor.plot(200)
 
     # tor.pf.plot(current=False, plasma=True, subcoil=True)

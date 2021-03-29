@@ -4,13 +4,13 @@ import numpy as np
 import pandas
 
 from nova.electromagnetic.dataarray import DataArray
-from nova.electromagnetic.metaarray import MetaArray
+from nova.electromagnetic.metaframe import MetaFrame
 
 
 def test_exclude_internal_metadata():
-    metaarray = MetaArray()
-    metaarray._internal = ['data']
-    assert 'data' not in metaarray.metadata and hasattr(metaarray, 'data')
+    metaframe = MetaFrame()
+    metaframe._internal = ['data']
+    assert 'data' not in metaframe.metadata and hasattr(metaframe, 'data')
 
 
 def test_array_ndarray():

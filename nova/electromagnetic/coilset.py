@@ -17,7 +17,7 @@ import pandas as pd
 from nova.definitions import root_dir
 from nova.utilities.IO import pythonIO
 from nova.utilities.localdata import LocalData
-from nova.electromagnetic.coilframe import CoilFrame
+from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.biotmethods import BiotMethods
 from nova.electromagnetic.plasmamethods import PlasmaMethods
 from nova.electromagnetic.coilmethods import CoilMethods

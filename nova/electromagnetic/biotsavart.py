@@ -1,7 +1,7 @@
 import numpy as np
 import pandas
 
-from nova.electromagnetic.coilframe import CoilFrame
+from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.coilmatrix import CoilMatrix
 from nova.utilities.pyplot import plt
 
@@ -45,7 +45,7 @@ class BiotAttributes:
                 setattr(self, attribute, default)  # set default
 
 
-class BiotFrame(CoilFrame):
+class BiotFrame(FrameSet):
     """Extend CoilFrame class with biot specific attributes and methods."""
 
     _cross_section_factor = {'circle': np.exp(-0.25),  # circle-circle
@@ -58,7 +58,7 @@ class BiotFrame(CoilFrame):
                           'shell': 'square'}
 
     def __init__(self, *args, reduce=False):
-        CoilFrame.__init__(self, *args, coilframe_metadata={
+        FrameSet.__init__(self, *args, coilframe_metadata={
             '_required_columns': ['x', 'z'],
             '_additional_columns': ['rms', 'dx', 'dz', 'Nt', 'cross_section',
                                     'cs_factor', 'coil', 'plasma', 'mpc'],

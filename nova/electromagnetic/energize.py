@@ -18,8 +18,14 @@ class Energize(MetaMethod):
     additional: list[str] = field(default_factory=lambda: [])
     available: dict[str, bool] = field(
         default_factory=lambda: {'Ic': False, 'Nt': False})
-    columns: list[str] = field(default_factory=lambda: ['It'])
     require_all: bool = False
+
+    def __post_init__(self):
+        """Update energize key."""
+        if self.generate:
+            self.frame.metaframe.energize = ['It']  # set metaframe key
+            self.frame.metaframe.metadata = {'subspace': self.required}
+        super().__post_init__()
 
     def initialize(self):
         """Init attribute avalibility flags and columns."""
@@ -52,51 +58,3 @@ class Energize(MetaMethod):
                 with self.frame.metaframe.setlock(True, 'energize'):
                     self._set_item(indexer, key, line_current*turn_number)
         return indexer.__getitem__(key)
-
-    '''
-    def __setitem__(self, key, value):
-        """Manage setattr for dependant variables."""
-        if hasattr(self, 'frame'):
-            col = self.frame.get_col(key)
-            if self.frame.in_field(col, 'energize'):
-                return self._update(key, value, col)
-        return super().__setitem__(key, value)
-
-    def is_integer_slice(self, index):
-        """Return True if slice.start or slice.stop is int."""
-        if not isinstance(index, slice):
-            return False
-        return isinstance(index.start, int) or isinstance(index.stop, int)
-
-    def _set_item(self, key, value, col=None):
-        key = self._get_key(key, col)
-        if isinstance(key, str):
-            self.frame[key] = value
-        elif self.is_integer_slice(key[0]):
-            self.frame.iloc[key] = value
-        else:
-            self.frame.loc[key] = value
-
-    def _get_item(self, key, col=None):
-        key = self._get_key(key, col)
-        if isinstance(key, str):
-            return self.frame[key]
-        if self.is_integer_slice(key[0]):
-            return self.frame.iloc[key]
-        print(key)
-        return self.frame.loc[key]
-
-    def _update(self, key, value, col):
-        """Set col, update dependant parameters."""
-        with self.frame.metaframe.setlock(True, 'energize'):
-            self._set_item(key, value)
-            if col == 'Ic':  # line current  -> update turn current
-                value *= self._get_item(key, 'Nt').values
-                self._set_item(key, value, 'It')
-            if col == 'It':  # turn current  -> update line current
-                value /= self._get_item(key, 'Nt').values
-                self._set_item(key, value, 'Ic')
-            if col == 'Nt':  # turn number  -> update turn current
-                value *= self._get_item(key, 'Ic').values
-                self._set_item(key, value, 'It')
-    '''

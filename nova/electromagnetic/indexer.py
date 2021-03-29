@@ -56,7 +56,7 @@ class Indexer(ABC):
     def extract_attrs(self, data, attrs):
         """Extend DataFrame.extract_attrs, insert metaarray."""
         super().extract_attrs(data, attrs)
-        if not self.hasattrs('indexer'):
+        if not self.hasattr('indexer'):
             self.attrs['indexer'] = LocIndexer(self.loc_mixin)  # init indexer
 
     @property

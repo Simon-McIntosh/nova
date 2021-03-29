@@ -1,7 +1,7 @@
 import pytest
 from numpy import allclose
 
-from nova.electromagnetic.coilset import CoilSet
+from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.biotelements import mu_o
 
 

@@ -83,7 +83,7 @@ class Label:
         if hasattr(self, 'biot'):
             if 'field' not in self.biot:
                 self.field_unit = None
-        if not self.frame.hasattrs('energize'):
+        if not self.frame.hasattr('energize'):
             self.current_unit = None
 
 
@@ -171,8 +171,7 @@ class PolyPlot(Display, Label, MetaMethod):
 
     frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['x', 'z', 'poly'])
-    additional: list[str] = field(default_factory=lambda: [
-        'part', 'patch', 'feedback', 'Nt'])
+    additional: list[str] = field(default_factory=lambda: ['part'])
 
     def initialize(self):
         """Initialize metamethod."""
@@ -270,12 +269,12 @@ class PolyPlot(Display, Label, MetaMethod):
             if not self.zeroturn:  # exclude zeroturn filaments (Nt == 0)
                 with self.frame.metaframe.setlock(True, 'subspace'):
                     index &= (self.frame.loc[:, 'Nt'] != 0)
-        except AttributeError:  # turns not set
+        except (AttributeError, KeyError):  # turns not set
             pass
         try:
             if not self.feedback:  # exclude stabilization coils
                 with self.frame.metaframe.setlock(True, 'subspace'):
                     index &= ~self.frame.feedback
-        except AttributeError:  # feedback not set
+        except (AttributeError, KeyError):  # feedback not set
             pass
         return index

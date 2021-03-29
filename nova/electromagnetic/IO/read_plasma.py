@@ -1,49 +1,36 @@
-import pandas as pd
-from amigo.pyplot import plt
-import numpy as np
-from amigo.addtext import linelabel
-from nep.DINA.read_dina import read_dina
-from amigo.time import time_constant
-from scipy.interpolate import interp1d
-import matplotlib.lines as mlines
-import matplotlib.patches as mpatches
-from collections import OrderedDict
-from amigo.png_tools import data_load
-import nep_data
-from amigo.IO import class_dir, pythonIO
+
 import os
-from os.path import sep, isfile
-from amigo.geom import lowpass
+
+import pandas
+import numpy as np
+from scipy.interpolate import interp1d
+
+from nova.electromagnetic.IO.read_waveform import read_dina
+from nova.utilities.pyplot import plt
 
 
-class read_plasma(pythonIO):
+class read_plasma(read_dina):
 
-    def __init__(self, database_folder='disruptions', Ip_scale=1,
-                 read_txt=False):
-        self.Ip_scale = Ip_scale
-        self.read_txt = read_txt
-        self.dina = read_dina(database_folder)
-        self.Ivs3_properties()
-        pythonIO.__init__(self)  # python read/write
+    def __init__(self, database_folder='disruptions', read_txt=False):
+        super().__init__(database_folder, read_txt)  # read utilities
 
     def load_file(self, folder, **kwargs):
         read_txt = kwargs.get('read_txt', self.read_txt)
-        filepath = self.dina.locate_file('plasma', folder=folder)
+        filepath = self.locate_file('plasma', folder=folder)
         filepath = '.'.join(filepath.split('.')[:-1])
-        self.name = filepath.split(sep)[-2]
-        if read_txt or not isfile(filepath + '.pk'):
+        self.name = filepath.split(os.path.sep)[-2]
+        if read_txt or not os.path.isfile(filepath + '.pk'):
             self.read_file(filepath)  # read txt file
             self.save_pickle(filepath,
-                             ['data', 'columns', 't', 'Ipl', 'Ivs3_o',
-                              'x', 'z', 'nt', 'dt', 'zdir', 'Iref',
-                              'Ip_scale'])
+                             ['data', 'columns', 't', 'Ip',
+                              'x', 'z', 'nt', 'dt', 'zdir'])
         else:
             self.load_pickle(filepath)
 
-    def read_file(self, filepath, dropnan=True, Rupdate=True):
+    def read_file(self, filepath, dropnan=True):
         filename = filepath + '.dat'
-        self.data = pd.read_csv(filename, delim_whitespace=True, skiprows=40,
-                                na_values='NAN')
+        self.data = pandas.read_csv(filename, delim_whitespace=True,
+                                    skiprows=40, na_values='NAN')
         if dropnan:
             self.data = self.data.dropna()  # remove NaN values
         self.columns = {}
@@ -51,13 +38,11 @@ class read_plasma(pythonIO):
             self.columns[c] = c.split('[')[0]
         self.data = self.data.rename(index=str, columns=self.columns)
         self.load_data()
-        self.scale_current(Rupdate=Rupdate)
 
     def load_data(self):
         data = {}  # convert units
         data['t'] = 1e-3*self.data['t']  # ms - s
-        data['Ipl'] = -1e3*self.data['Ip']  # -kA to A
-        data['Ivs3_o'] = -1e3*self.data.loc[:, 'I_dw'] / 4  # -kAturn to A
+        data['Ip'] = -1e3*self.data['Ip']  # -kA to A
         data['x'] = 1e-2*self.data['Rcur']  # cm - m
         data['z'] = 1e-2*self.data['Zcur']  # cm - m
         dt_min = np.nanmin(np.diff(data['t']))
@@ -69,376 +54,11 @@ class read_plasma(pythonIO):
             if var != 't':  # interpolate
                 setattr(self, var, interp1d(data['t'], data[var])(self.t))
         self.zdir = np.sign(self.z[np.argmax(abs(self.z))])
-        self.Iref = {'Ipl': np.copy(self.Ipl),  # store referance currents
-                     'Ivs3_o': np.copy(self.Ivs3_o)}
-
-    def scale_current(self, **kwargs):
-        if 'Ip_scale' in kwargs:
-            self.Ip_scale = kwargs['Ip_scale']
-        for var in self.Iref:
-            setattr(self, var, self.Ip_scale*self.Iref[var])
-
-    def plot_currents(self, ax=None):
-        if ax is None:
-            ax = plt.subplots(2, 1, sharex=True)[1]
-        ax[0].plot(1e3*self.t, 1e-6*self.Ipl, 'C0')
-        ax[0].set_ylabel('$I_{pl}$ MA')
-        ax[1].plot(1e3*self.t, 1e-3*self.Ivs3_o, 'C1')
-        ax[1].set_ylabel('$Ivs3_o$ kA')
-        ax[1].set_xlabel('$t$ ms')
-        plt.despine()
-        plt.setp(ax[0].get_xticklabels(), visible=False)
-
-    def Ivs3_properties(self, Io=60e3):
-        self.Rvs3 = {'DINA': 12.0e-3, 'LTC': 19.24e-3}  # 17.66e-3
-        self.Lvs3 = {'DINA': 1.52e-3, 'LTC': 1.52e-3}  #
-        self.tau_vs3 = {}  # vs3 timeconstant
-        for discharge in ['DINA', 'LTC']:
-            self.tau_vs3[discharge] = self.Lvs3[discharge]/self.Rvs3[discharge]
-        self.tau_d = {}
-        self.tau_d['DINA'] = {'alpha': [0.64754104,  0.13775032,  0.21254934],
-                              'tau': [0.04390661,  0.01073328,  0.19240964]}
-        self.tau_d['LTC'] = {'alpha': [0.0629583,  0.3059171,  0.63042031],
-                             'tau': [0.00068959,  0.01501697,  0.09481686]}
-        self.tau_d['LTC'] = {'alpha': [0.07656251,  0.46998035,  0.45541367],
-                             'tau': [0.00482049,  0.12326816,  0.03081627]}
-        self.tau_d['ENP'] = {'alpha': [0.4003159,  0.36687173,  0.23344466],
-                             'tau': [0.0283991,  0.12646493,  0.04291896]}
-        self.Io = Io  # control spike current magnitude
-        self.trip_dtype = [('name', '60U'),  # construct data strucutre
-                           ('t_cq', float),  # current quench
-                           ('i_cq', int),  # quench index
-                           ('I_cq', float),  # plasma current
-                           ('discharge_time', float),
-                           ('discharge_type', '60U'),
-                           ('zdir', int),  # VDE direction
-                           ('t_dz', float), ('i_dz', int),
-                           ('I_dz', float), ('z_dz', float),
-                           ('i_trip', int), ('t_trip', float)]
-        self.Ivs3_dtype = [('referance', '2float'),
-                           ('control', '2float'),
-                           ('error', '2float')]
-
-    def get_vs3_trip(self, dIdt_trip=5e7, dz_trip=0.16, plot=False):
-        self.dz_trip = dz_trip
-        self.dIdt_trip = self.Ip_scale * dIdt_trip
-        Ipl_lp = lowpass(self.Ipl, self.dt, dt_window=0.001)  # plasma current
-        dIpldt = np.gradient(Ipl_lp, self.t)
-        i_cq = next((i for i, dIdt in enumerate(dIpldt)
-                     if dIdt > self.dIdt_trip))
-        t_cq = self.t[i_cq]  # current quench time
-        tc = time_constant(self.t[i_cq:], Ipl_lp[i_cq:], trim_fraction=0.2)
-        tdis, ttype, tfit, Ifit = tc.fit(plot=False, Io=-15e6 * self.Ip_scale)
-        dZ = self.z - self.z[0]  # displacment trip
-        try:
-            i_dz = next((i for i, dz in enumerate(dZ) if abs(dz) > dz_trip))
-        except StopIteration:
-            i_dz = self.nt-1
-            pass
-        t_dz = self.t[i_dz]
-        i_trip = i_dz if i_dz < i_cq else i_cq  # select first trigger
-        t_trip = self.t[i_trip]  # trip time
-
-        trip = np.zeros(1, dtype=self.trip_dtype)
-        trip['name'] = self.name
-        trip['t_cq'] = t_cq
-        trip['i_cq'] = i_cq
-        trip['I_cq'] = self.Ipl[i_cq]
-        trip['discharge_time'] = tdis
-        trip['discharge_type'] = ttype
-        trip['zdir'] = self.zdir
-        trip['i_dz'] = i_dz
-        trip['t_dz'] = t_dz
-        trip['I_dz'] = self.Ipl[i_dz]
-        trip['z_dz'] = self.z[i_dz]
-        trip['i_trip'] = i_trip
-        trip['t_trip'] = t_trip
-
-        if plot:
-            txt = '{} discharge, t={:1.0f}ms'.format(ttype, 1e3*tdis)
-            ax = plt.subplots(2, 1, sharex=True)[1]
-            ax[0].plot(1e3*self.t, 1e-6*self.Ipl)
-            ax[0].plot(1e3*tfit, 1e-6*Ifit, label=txt)
-            ax[0].set_ylabel('$Ipl$ MA')
-            ax[0].legend()
-
-            ax[1].plot(1e3*self.t, 1e-6*dIpldt)
-
-            txt_cq = '$t_{cq}$'+'={:1.1f}ms'.format(1e3*t_cq)
-            ax[1].plot(1e3*t_cq, 1e-6*dIpldt[i_cq], '*',
-                       color='C7')
-            txt_dz = r'$t_{\Delta z}$'+'={:1.1f}ms'.format(1e3*t_dz)
-            ax[1].plot(1e3*t_dz, 1e-6*dIpldt[i_dz], '^',
-                       color='C6')
-
-            ylim = ax[1].get_ylim()
-            ax[1].plot(1e3*trip['t_dz']*np.ones(2), ylim, '--', alpha=0.7,
-                       color='C6', zorder=-10,
-                       label=txt_dz)
-            ax[1].plot(1e3*trip['t_cq']*np.ones(2), ylim, '-.', alpha=0.7,
-                       color='C7', zorder=-10, label=txt_cq)
-
-            ax[1].set_xlabel('$t$ ms')
-            ax[1].set_ylabel('$dI_p/dt$ MAs$^{-1}$')
-            ax[1].legend()
-            plt.despine()
-            plt.setp(ax[0].get_xticklabels(), visible=False)
-            ax[0].text(0.5, 1.05, self.name,
-                       transform=ax[0].transAxes,
-                       bbox=dict(alpha=0.25), va='bottom', ha='center')
-        return trip[0]
-
-    def Ivs3_single(self, folder, plot=False, discharge='DINA',
-                    dIdt_trip=5e7, dz_trip=0.16):
-        self.load_file(folder)  # load plasma file
-        # vs3 trigger
-        trip = self.get_vs3_trip(dIdt_trip=dIdt_trip, dz_trip=dz_trip)
-        Ivs3_data = {}  # VS3 system
-        Ivs3_data['t'] = self.t
-        Ivs3_data['Ireferance'] = self.Ivs3_o
-
-        Ivs3_data['tpre'] = self.t[:trip['i_cq']]
-        Ivs3_data['Ipre'] = self.Ivs3_o[:trip['i_cq']]
-        Ivs3_data['Icontrol'] = self.Ioffset(trip['t_trip'], trip['zdir'],
-                                             discharge=discharge)
-        Ivs3_data['Ierror'] = self.Ioffset(trip['t_trip'], -trip['zdir'],
-                                           discharge=discharge)
-        Ivs3 = np.zeros(1, dtype=self.Ivs3_dtype)
-        Ivs3_fun = OrderedDict()  # Ivs3 interpolator
-        for mode in Ivs3.dtype.names:
-            # max values
-            Imode = 'I{}'.format(mode)
-            index = np.argmax(abs(Ivs3_data[Imode]))
-            Ivs3[mode] = np.array([Ivs3_data['t'][index],
-                                  Ivs3_data[Imode][index]])
-            Ivs3_fun[mode] = interp1d(Ivs3_data['t'], Ivs3_data[Imode],
-                                      fill_value=(Ivs3_data[Imode][0],
-                                                  Ivs3_data[Imode][-1]),
-                                      bounds_error=False)
-        if plot:
-            plt.figure()
-            for mode, color in zip(Ivs3_fun, ['gray', 'C0', 'C3']):
-                plt.plot(1e3*self.t, 1e-3*Ivs3_fun[mode](self.t),
-                         label=mode, color=color)
-
-            ylim = plt.gca().get_ylim()
-            plt.plot(1e3*trip['t_dz']*np.ones(2), ylim, '--', alpha=0.7,
-                     color='gray', zorder=-10,
-                     label=r'$|\Delta z|>$' + '{:1.2f}m'.format(pl.dz_trip))
-            plt.plot(1e3*trip['t_cq']*np.ones(2), ylim, '-.', alpha=0.7,
-                     color='gray', zorder=-10, label='current quench')
-            plt.despine()
-            plt.legend()
-            plt.xlabel('$t$ ms')
-            plt.ylabel('$I_{vs3}$ kA')
-            plt.title(self.name)
-        return trip, Ivs3_data, Ivs3[0], Ivs3_fun
-
-    def Ivs3_ensemble(self, plot=False):
-        self.trip = np.zeros(self.dina.nfolder, dtype=self.trip_dtype)
-        self.Ivs3_data = [{} for _ in range(self.dina.nfolder)]  # Ivs data
-        self.Ivs3 = np.zeros(self.dina.nfolder, dtype=self.Ivs3_dtype)
-
-        for i in range(self.dina.nfolder):
-            self.trip[i], self.Ivs3_data[i], self.Ivs3[i] \
-                = self.Ivs3_single(i)[:3]
-        if plot:
-            self.plot_Ivs3_ensemble()
-
-    def Ioffset(self, t_cq, zdir, discharge='DINA'):
-        coef = self.tau_d[discharge]
-        Id = np.zeros(self.nt)
-        index = self.t > t_cq
-        for alpha, tau in zip(coef['alpha'], coef['tau']):
-            Id[index] += alpha*np.exp(-(self.t[index]-t_cq)/tau)
-        Ic = self.Ivs3_o - zdir*self.Io*Id
-        return Ic
-
-    def get_color(self, index):
-        t_cq = self.trip[index]['t_cq']
-        label = ''
-        if t_cq < 400e-3:  # MD
-            iax = 0
-            ic = 0
-            label += 'MD '
-        else:  # VDE
-            iax = 1
-            ic = 2
-            label += 'VDE '
-        if 'DW' in self.trip[index]['name']:
-            color = 'C{}'.format(ic)
-            label += 'down'
-        else:
-            color = 'C{}'.format(ic+1)
-            label += 'up'
-        return color, iax, label
-
-    def plot_Ivs3_ensemble(self):
-        ax = plt.subplots(2, 1)[1]
-        text, loc = [], 'min'
-        for i in range(2):
-            text.append(linelabel(postfix='kA', value='1.1f',
-                                  loc=loc, ax=ax[i]))
-        for i in range(self.dina.nfolder):
-            color, iax = self.get_color(i)[:2]
-            ax[iax].plot(
-              1e3*self.Ivs3_data[i]['t'][self.trip[i]['i_cq']:],
-              1e-3*self.Ivs3_data[i]['Ireferance'][self.trip[i]['i_cq']:],
-              color=color)
-            text[iax].add('')
-            ax[iax].plot(1e3*self.Ivs3_data[i]['tpre'],
-                         1e-3*self.Ivs3_data[i]['Ipre'], '-',
-                         color='gray', lw=0.5)
-            ax[iax].plot(
-                1e3*self.Ivs3_data[i]['t'][self.trip[i]['i_cq']],
-                1e-3*self.Ivs3_data[i]['Ireferance'][self.trip[i]['i_cq']],
-                '*', ms=10, color=color)
-            ax[iax].plot(
-                1e3*self.Ivs3_data[i]['t'][self.trip[i]['i_dz']],
-                1e-3*self.Ivs3_data[i]['Ireferance'][self.trip[i]['i_dz']],
-                '^', ms=7, color=color)
-        plt.despine()
-        for i, vde in enumerate(['MD', 'VDE']):
-            self.add_vde_legend(ax[i], i, vde)
-            ax[i].set_xlabel('$t$ ms')
-            ax[i].set_ylabel('$I_{vs3}$ kA')
-            text[i].plot()
-        plt.tight_layout()
-
-    def add_vde_legend(self, ax, i, vde):
-        h_down = mlines.Line2D([], [], color='C{}'.format(2*i),
-                               label='{} down'.format(vde))
-        h_up = mlines.Line2D([], [], color='C{}'.format(2*i+1),
-                             label='{} up'.format(vde))
-        line_legend = ax.legend(handles=[h_down, h_up], loc=1)
-        if i == 1:
-            h_cq = mlines.Line2D([], [], color='gray', marker='*',
-                                 linestyle='None',  label='cq-trip')
-            h_dz = mlines.Line2D([], [], color='gray', marker='^',
-                                 linestyle='None', label=r'$\Delta z$-trip')
-            ax.legend(handles=[h_cq, h_dz], loc=4)
-            ax.add_artist(line_legend)
-
-    def plot_displacment(self):
-        ax = plt.subplots(1, 2, figsize=(8, 6), sharey=True)[1]
-        text = []
-        for i in range(2):
-            text.append(linelabel(postfix='', value='', ax=ax[i], Ndiv=20))
-        for i in range(self.dina.nfolder):
-            self.load_file(i)  # load file
-            i_cq = self.trip[i]['i_cq']
-            I_cq = self.trip[i]['I_cq']
-            i_dz = self.trip[i]['i_dz']
-            color, iax = self.get_color(i)[:2]
-            ax[iax].plot(self.x, self.z, '-', color=color)
-            ax[iax].plot(self.x[i_dz], self.z[i_dz], '^', color=color)
-            ax[iax].plot(self.x[i_cq], self.z[i_cq], '*', color=color)
-            text[iax].add('$I_{cq}$ '+'{:1.1f}MA'.format(1e-6*I_cq))
-            ax[iax].axis('equal')
-        plt.despine()
-
-        for i, vde in enumerate(['MD', 'VDE']):
-            self.add_vde_legend(ax[i], i, vde)
-            text[i].plot()
-            ax[i].set_xlabel('$x$ m')
-        ax[0].set_ylabel('$y$ m')
-        plt.setp(ax[1].get_yticklabels(), visible=False)
-
-
-    def plot_Ivs3_max(self):
-        plt.figure()
-        X = range(self.dina.nfolder)
-        for i, x in enumerate(X):
-            for mode, color, width in zip(['referance', 'control', 'error'],
-                                          ['gray', 'C0', 'C3'],
-                                          [0.9, 0.7, 0.5]):
-                plt.bar(x, 1e-3*self.Ivs3[mode][i, 1],
-                        color=color, width=width)
-
-        max_index = np.argmax(abs(self.Ivs3['control'][:, 1]))
-        Ivs3_max = self.Ivs3['control'][max_index, 1]
-        va = 'bottom' if Ivs3_max > 0 else 'top'
-        plt.text(max_index, 1e-3*Ivs3_max,
-                 '{:1.1f}'.format(1e-3*Ivs3_max), va=va, ha='center',
-                 weight='bold')
-
-        h = []
-        for mode, color in zip(['referance', 'control', 'error'],
-                               ['gray', 'C0', 'C3']):
-            h.append(mpatches.Patch(color=color, label=mode))
-
-        plt.legend(handles=h)
-        plt.xticks(X, self.dina.folders, rotation=70)
-        plt.ylabel('$I_{vs3}$ kA')
-        plt.ylim([-110, 110])
-        plt.despine()
-
-    def plot_Ivs3_max_mode(self, mode):
-        plt.figure()
-        X = range(self.dina.nfolder)
-        for i, x in enumerate(X):
-            color, iax = self.get_color(i)[:2]
-            plt.bar(x, 1e-3*self.Ivs3[mode][i][1], color=color, width=0.8)
-        for Idir in [-1, 1]:
-            max_index = np.argmax(Idir*self.Ivs3[mode][:, 1])
-            Imax = self.Ivs3[mode][max_index, 1]
-            va = 'bottom' if Imax < 0 else 'top'
-            plt.text(max_index, 1e-3*Imax, ' {:1.0f}kA'.format(1e-3*Imax),
-                     va=va, ha='center', color='k',
-                     weight='bold', rotation=90)
-
-        h = []
-        for i, label in enumerate(['MD down', 'MD up', 'VDE down', 'VDE up']):
-            h.append(mpatches.Patch(color='C{}'.format(i), label=label))
-
-        plt.legend(handles=h)
-        plt.xticks(X, self.dina.folders, rotation=70)
-        plt.ylabel('$I_{vs3}$ kA')
-        plt.ylim([-110, 110])
-        plt.despine()
-        plt.title(mode)
 
 
 if __name__ == '__main__':
 
-    pl = read_plasma('disruptions', Ip_scale=1, read_txt=True)
+    plasma = read_plasma('disruptions', read_txt=True)
+    plasma.load_file(-1)
 
-
-    Ivs3_data = pl.Ivs3_single(10, plot=False, discharge='LTC')[1]
-    pl.get_vs3_trip(plot=True)
-
-
-
-    plt.figure()
-    # plt.plot(pl.t, pl.Ivs3_o)
-    # plt.plot(pl.t, pl.Ivs3_ode)
-    path = os.path.join(class_dir(nep_data), 'LTC/')
-    points = data_load(path, 'VS3_current', date='2018_03_15')[0]
-    # points = data_load(path, 'VS3_current_VDE', date='2018_05_24')[0]
-
-    t = points[0]['x']
-    Ic = points[0]['y']
-    plt.plot(t, -Ic)
-    plt.plot(Ivs3_data['t'], Ivs3_data['Icontrol'])
-
-    pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms
-
-    pl.plot_displacment()
-    '''
-    pl.Ivs3_single(11, plot=True)
-    pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms
-    pl.read_file(3)
-    pl.get_vs3_trip(plot=True)
-    pl.read_file(11)
-    pl.get_vs3_trip(plot=True)
-    pl.Ivs3_ensemble(plot=True)  # load Ivs3 current waveforms
-    pl.get_vs3_trip(plot=True)
-    pl.plot_Ivs3max()
-
-    pl.plot_displacment()
-    pl.plot_currents()
-    '''
-
-
-    #for mode in pl.Ivs3.dtype.names:
-    #     pl.plot_Ivs3_max_mode(mode)
+    plt.plot(plasma.t, plasma.Ip)

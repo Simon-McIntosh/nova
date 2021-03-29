@@ -10,6 +10,77 @@ Created on Thu Feb 18 20:33:42 2021
 
 """
 
+    @property
+    def metaattrs(self) -> list[str]:
+        """Return metadata attrs."""
+        return [attr for attr in self.attrs
+                if isinstance(self.attrs[attr], MetaData)]
+
+    @property
+    def metadata(self):
+        """Manage FrameArray metadata via the MetaFrame class."""
+        metadata = {}
+        for attr in self.metaattrs:
+            metadata |= getattr(self, attr).metadata
+        return metadata
+
+    @metadata.setter
+    def metadata(self, metadata):
+        for attr in self.metaattrs:
+            getattr(self, attr).metadata = metadata
+
+##### energize
+
+    '''
+    def __setitem__(self, key, value):
+        """Manage setattr for dependant variables."""
+        if hasattr(self, 'frame'):
+            col = self.frame.get_col(key)
+            if self.frame.in_field(col, 'energize'):
+                return self._update(key, value, col)
+        return super().__setitem__(key, value)
+
+    def is_integer_slice(self, index):
+        """Return True if slice.start or slice.stop is int."""
+        if not isinstance(index, slice):
+            return False
+        return isinstance(index.start, int) or isinstance(index.stop, int)
+
+    def _set_item(self, key, value, col=None):
+        key = self._get_key(key, col)
+        if isinstance(key, str):
+            self.frame[key] = value
+        elif self.is_integer_slice(key[0]):
+            self.frame.iloc[key] = value
+        else:
+            self.frame.loc[key] = value
+
+    def _get_item(self, key, col=None):
+        key = self._get_key(key, col)
+        if isinstance(key, str):
+            return self.frame[key]
+        if self.is_integer_slice(key[0]):
+            return self.frame.iloc[key]
+        print(key)
+        return self.frame.loc[key]
+
+    def _update(self, key, value, col):
+        """Set col, update dependant parameters."""
+        with self.frame.metaframe.setlock(True, 'energize'):
+            self._set_item(key, value)
+            if col == 'Ic':  # line current  -> update turn current
+                value *= self._get_item(key, 'Nt').values
+                self._set_item(key, value, 'It')
+            if col == 'It':  # turn current  -> update line current
+                value /= self._get_item(key, 'Nt').values
+                self._set_item(key, value, 'Ic')
+            if col == 'Nt':  # turn number  -> update turn current
+                value *= self._get_item(key, 'Ic').values
+                self._set_item(key, value, 'It')
+    '''
+
+energize ###
+
 
 
         '''

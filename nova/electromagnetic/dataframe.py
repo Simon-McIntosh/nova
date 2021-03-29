@@ -52,23 +52,13 @@ class DataFrame(pandas.DataFrame):
         return Series
 
     @property
-    def metaattrs(self) -> list[str]:
-        """Return metadata attrs."""
-        return [attr for attr in self.attrs
-                if isinstance(self.attrs[attr], MetaData)]
-
-    @property
     def metadata(self):
-        """Manage FrameArray metadata via the MetaFrame class."""
-        metadata = {}
-        for attr in self.metaattrs:
-            metadata |= getattr(self, attr).metadata
-        return metadata
+        """Manage DataFrame metadata via the MetaFrame class."""
+        return self.metaframe.metadata
 
     @metadata.setter
     def metadata(self, metadata):
-        for attr in self.metaattrs:
-            getattr(self, attr).metadata = metadata
+        self.metaframe.metadata = metadata
 
     def __getattr__(self, name):
         """Extend pandas.DataFrame.__getattr__. (frame.*)."""
@@ -80,8 +70,8 @@ class DataFrame(pandas.DataFrame):
         """Update metadata. Set default and meta*.metadata."""
         self.extract_attrs(data, attrs)
         self.trim_columns(columns)
-        self.update_available(data, columns)
-        self.extract_metadata(metadata)
+        self.extract_available(data, columns)
+        self.update_metaframe(metadata)
         self.match_columns()
         self.format_data(data)
 
@@ -98,8 +88,8 @@ class DataFrame(pandas.DataFrame):
         for attr in attrs:  # update from attrs (replacing data.attrs)
             if isinstance(attrs[attr], MetaData):
                 self.attrs[attr] = attrs[attr]
-        if not self.hasattrs('metaframe'):
-            self.attrs['metaframe'] = MetaFrame()  # init metaframe
+        if not self.hasattr('metaframe'):
+            self.attrs['metaframe'] = MetaFrame(self.index)  # init metaframe
 
     def trim_columns(self, columns):
         """Trim metaframe required / additional to columns."""
@@ -114,7 +104,7 @@ class DataFrame(pandas.DataFrame):
                                        'Additional': additional,
                                        'Available': available}
 
-    def update_available(self, data, columns):
+    def extract_available(self, data, columns):
         """Update metaframe.available."""
         try:
             data_columns = list(data)
@@ -122,31 +112,14 @@ class DataFrame(pandas.DataFrame):
             data_columns = []
         if columns is None:
             columns = []
-        self.metaframe.metadata = {'available': data_columns+list(columns)}
+        frame_columns = list(dict.fromkeys(list(columns)))
+        self.metaframe.metadata = {'available': data_columns+frame_columns}
 
-    def extract_metadata(self, metadata):
-        """Extract attributes from **metadata."""
-        if metadata is None:
-            metadata = {}
-        if 'metadata' in metadata:
-            metadata |= metadata.pop('metadata')
-        meta, default = {attr: {} for attr in self.metaattrs}, {}
-        for field in list(metadata):
-            for attr in meta:
-                if hasattr(getattr(self, attr), field.lower()):
-                    meta[attr][field] = metadata.pop(field)
-                    break
-            else:
-                if field in self.metaframe.default:
-                    default[field] = metadata.pop(field)
-        self.metaframe.default |= default
-        if len(metadata) > 0:
-            raise IndexError('unreconised attributes set in **metadata: '
-                             f'{metadata}.')
-        for attr in meta:
-            getattr(self, attr).metadata |= meta[attr]
+    def update_metaframe(self, metadata):
+        """Update metaframe, appending available columns if required."""
+        self.metaframe.update(metadata)
         if self.metaframe.columns:
-            self.metaframe.metadata = {'available': self.metaframe.columns}
+            self.metadata = {'available': self.metaframe.columns}
 
     def match_columns(self):
         """Intersect metaframe.required with self.columns if not empty."""
@@ -168,6 +141,7 @@ class DataFrame(pandas.DataFrame):
             self['index'] = self._build_index(self)
             self.set_index('index', inplace=True)
             self.index.name = None
+            self.metaframe.index = self.index
 
     def _set_offset(self, metatag):
         try:  # reverse search through frame index
@@ -332,29 +306,13 @@ class DataFrame(pandas.DataFrame):
             return True
         return False
 
-    def hasattrs(self, attr):
+    def hasattr(self, attr):
         """Return True if attr in self.attrs."""
         return attr in self.attrs
 
-    def in_field(self, col, field):
-        """Return Ture if col in metaframe.{field} and hasattr(self, field)."""
-        try:
-            return col in self.attrs[field].columns
-        except (KeyError, TypeError):
-            return False
-
-    def assert_in_field(self, col, field):
-        """Check for col in metaframe.{field}, raise error if not found."""
-        try:
-            self.in_field(col, field)
-        except AssertionError as in_field_assert:
-            raise AssertionError(
-                f'\'{col}\' not specified in metaframe.subspace '
-                f'{self.metaframe.subspace}') from in_field_assert
-
     def format_value(self, col, value):
         """Return vector with dtype as type(metaframe.default[col])."""
-        if not self.hasattrs('metaframe') or col == 'link':
+        if not self.hasattr('metaframe') or col == 'link':
             return value
         try:
             dtype = type(self.metaframe.default[col])

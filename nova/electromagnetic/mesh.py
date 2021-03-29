@@ -14,12 +14,12 @@ from nova.electromagnetic.polygen import polygen
 class Mesh:
     """Set default mesh dimensions."""
 
-    frame: DataFrame = field(repr=False)
-    subframe: DataFrame = field(repr=False)
     dpol: float = -1
     dplasma: float = 0.25
     dshell: float = 0.5
     dfield: float = 0.2
+    frame: DataFrame = field(init=False, repr=False)
+    subframe: DataFrame = field(init=False, repr=False)
 
     def mesh_poloidal(self, index=None, link=True, **kwargs):
         """

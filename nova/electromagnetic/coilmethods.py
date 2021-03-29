@@ -12,7 +12,7 @@ import shapely.strtree
 from scipy.interpolate import interp1d
 from sklearn.cluster import DBSCAN
 
-from nova.electromagnetic.coilframe import CoilFrame
+from nova.electromagnetic.frameset import FrameSet
 from nova.utilities import geom
 from nova.utilities.geom import amd
 
@@ -227,67 +227,7 @@ class CoilMethods:
 
 
 
-    def drop_coil(self, index=None):
-        """
-        Remove coil and subcoil from coilframes.
 
-        Parameters
-        ----------
-        index : int or list or pd.Index, optional
-            Index of coils to be removed. The default is None (all coils).
-
-        Returns
-        -------
-        iloc : [int, int]
-            CoilFrame index of first removed [coil, subcoil].
-
-        """
-        if index is None:  # drop all coils
-            index = self.coil.index
-        if not pd.api.types.is_list_like(index):
-            index = [index]
-        iloc = self._get_iloc(index)
-        for name in index:
-            if name in self.coil.index:
-                self.subcoil.drop_coil(self.coil.loc[name, 'subindex'])
-                self.coil.drop_coil(name)
-        return iloc
-
-    def _get_iloc(self, index):
-        iloc = [None, None]
-        for name in index:
-            if name in self.coil.index:
-                iloc[0] = self.coil.index.get_loc(index[0])
-                subindex = self.coil.subindex[index[0]][0]
-                iloc[1] = self.subcoil.index.get_loc(subindex)
-                break
-        return iloc
-
-    def translate(self, index=None, dx=0, dz=0):
-        """
-        Translate coil in polidal plane.
-
-        Parameters
-        ----------
-        index : int or array-like or Index, optional
-            Coil index. The default is None (all coils).
-        dx : float, optional
-            x-coordinate translation. The default is 0.
-        dz : float, optional
-            z-coordinate translation. The default is 0.
-
-        Returns
-        -------
-        None.
-
-        """
-        if index is None:
-            index = self.coil.index
-        elif not pd.api.types.is_list_like(index):
-            index = [index]
-        self.coil.translate(index, dx, dz)
-        for name in index:
-            self.subcoil.translate(self.coil.loc[name, 'subindex'], dx, dz)
 
 
     def add_mpc(self, index, factor=1):

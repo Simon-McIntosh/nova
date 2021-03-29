@@ -1,351 +1,155 @@
-"""Configure superframe. Inherit DataArray for fast access else DataFrame."""
+"""Extend pandas.DataFrame to manage coil and subcoil data."""
+
 from dataclasses import dataclass, field
-from typing import Collection, Any
+from typing import Union
 
-import numpy as np
 import pandas
-import shapely
 
-from nova.electromagnetic.dataarray import (
-    ArrayLocMixin,
-    ArrayIndexer,
-    DataArray
-    )
-from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.metamethod import MetaMethod
-from nova.electromagnetic.multipoint import MultiPoint
-from nova.electromagnetic.energize import Energize
-
-
-class SubSpaceError(IndexError):
-    """Prevent direct access to frame's subspace variables."""
-
-    def __init__(self, name, col):
-        super().__init__(
-            f'{name} access is restricted for subspace attributes. '
-            f'Use frame.subspace.{name}[:, {col}] = *.\n\n'
-            'Lock may be overridden via the following context manager '
-            'but subspace will still overwrite (Cavieat Usor):\n'
-            'with frame.metaframe.setlock(None):\n'
-            f'    frame.{name}[:, {col}] = *')
-
-
-class SetLocMixin(ArrayLocMixin):
-    """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
-
-    def __setitem__(self, key, value):
-        """Raise error when subspace variable is set directly from frame."""
-        col = self.obj.get_col(key)
-        value = self.obj.format_value(col, value)
-        if self.obj.in_field(col, 'subspace'):
-            if self.obj.metaframe.lock('subspace') is False:
-                raise SubSpaceError(self.name, col)
-        if self.obj.in_field(col, 'energize'):
-            if self.obj.metaframe.lock('energize') is False:
-                return self.obj.energize._set_item(super(), key, value)
-        return super().__setitem__(key, value)
-
-    def __getitem__(self, key):
-        """Refresh subspace items prior to return."""
-        col = self.obj.get_col(key)
-        if self.obj.in_field(col, 'subspace'):
-            if self.obj.metaframe.lock('subspace') is False:
-                key = self.obj.get_subkey(key)
-                return getattr(self.obj.subspace, self.name)[key]
-            if self.obj.metaframe.lock('subspace') is True:
-                self.obj.inflate_subspace(col)
-        if self.obj.in_field(col, 'energize'):
-            if self.obj.metaframe.lock('energize') is False:
-                return self.obj.energize._get_item(super(), key)
-        return super().__getitem__(key)
-
-
-class SetIndexer(ArrayIndexer):
-    """Extend pandas indexer."""
-
-    @property
-    def loc_mixin(self):
-        """Return LocIndexer mixins."""
-        return SetLocMixin
+from nova.electromagnetic.frame import Frame
+from nova.electromagnetic.mesh import Mesh
 
 
 @dataclass
-class Methods:
-    """Manage frame MetaMethods."""
+class Section:
+    """Set default sectional properties."""
 
-    frame: DataFrame
-    attrs: dict[Any] = field(repr=False, default_factory=dict)
+    section: str = 'rectangle'
+    turn: str = 'circle'
+    turn_fraction: float = 1
+
+
+@dataclass
+class FrameSet(Mesh, Section):
+    """
+    Build frameset.
+
+    - poloidal: add poloidal coils.
+    - shell: add poloidal shells.
+    - plasma: add plasma (poloidal).
+
+    """
+
+    required: list[str] = field(repr=False, default_factory=lambda: [
+        'x', 'z', 'dl', 'dt'])
+    additional: list[str] = field(repr=False, default_factory=lambda: [
+        'section', 'turn'])
+    available: list[str] = field(repr=False, default_factory=lambda: [
+        'link', 'part', 'frame', 'dx', 'dz', 'dA', 'dl_x', 'dl_z',
+        'delta', 'nx', 'nz', 'section', 'turn', 'turn_fraction',
+        'Ic', 'It', 'Nt', 'Nf', 'Psi', 'Bx', 'Bz', 'B', 'acloss'])
+    frame: Frame = field(init=False, repr=False)
+    subframe: Frame = field(init=False, repr=False)
+    metadata: dict[str, Union[str, dict]] = field(repr=False,
+                                                  default_factory=dict)
 
     def __post_init__(self):
-        """Define methods, update frame.columns and initialize methods."""
-        self.frame.add_methods()
-        self.initialize()
+        """Init coil and subcoil."""
+        metadata = {'section': self.section, 'turn': self.turn,
+                    'turn_fraction': self.turn_fraction}
+        metadata |= self.metadata
+        self.frame = Frame(
+            required=self.required, additional=self.additional,
+            available=self.available,
+            exclude=['dl_x', 'dl_z', 'frame'], **metadata)
+        self.subframe = Frame(
+            required=self.required, additional=self.additional,
+            available=self.available,
+            exclude=['turn', 'turn_fraction', 'Nf', 'delta'],
+            delim='_', **metadata)
 
-    def __repr__(self):
-        """Return method list."""
-        return f'{list(self.attrs)}'
-
-    def initialize(self):
-        """Init attrs derived from MetaMethod."""
-        self.frame.update_columns()
-        if self.frame.empty:
-            return
-        attrs = [attr for attr in self.attrs
-                 if isinstance(self.attrs[attr], MetaMethod)]
-        for attr in attrs:
-            if self.attrs[attr].generate:
-                self.attrs[attr].initialize()
-
-
-class FrameSet(SetIndexer, DataArray):
-    """
-    Extend pandas.DataFrame.
-
-    - Add boolean methods (add_frame, drop_frame...).
-
-    """
-
-    def __init__(self,
-                 data=None,
-                 index: Collection[Any] = None,
-                 columns: Collection[Any] = None,
-                 attrs: dict[str, Collection[Any]] = None,
-                 **metadata: dict[str, Collection[Any]]):
-        super().__init__(data, index, columns, attrs, **metadata)
-        self.attrs['methods'] = Methods(self, self.attrs)
-
-    def add_methods(self):
-        """Define frameset attributes - extend to add additional methods."""
-        self.attrs['multipoint'] = MultiPoint(self)
-        self.attrs['energize'] = Energize(self)
-
-    def __repr__(self):
-        """Propagate frame subspace variables prior to display."""
-        self.update_frame()
-        return super().__repr__()
-
-    def __setattr__(self, col, value):
-        """Extend DataFrame.__setattr__ to provide access to subspace."""
-        if self.in_field(col, 'subspace'):
-            return self.subspace.__setattr__(col, value)
-        return super().__setattr__(col, value)
-
-    def __getitem__(self, col):
-        """Extend DataFrame.__getitem__. (frame['*'])."""
-        if self.in_field(col, 'subspace'):
-            if self.metaframe.lock('subspace') is False:
-                return self.subspace.__getitem__(col)
-            if self.metaframe.lock('subspace') is True:
-                self.inflate_subspace(col)
-        if self.in_field(col, 'energize'):
-            if self.metaframe.lock('energize') is False:
-                return self.energize._get_item(super(), col)
-        return super().__getitem__(col)
-
-    def __setitem__(self, col, value):
-        """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
-        value = self.format_value(col, value)
-        if self.in_field(col, 'subspace'):
-            if self.metaframe.lock('subspace') is False:
-                return self.subspace.__setitem__(col, value)
-            if self.metaframe.lock('subspace') is True:
-                raise SubSpaceError('setitem', col)
-        if self.in_field(col, 'energize'):
-            if self.metaframe.lock('energize') is False:
-                return self.energize._set_item(super(), col, value)
-        return super().__setitem__(col, value)
-
-    def update_frame(self):
-        """Propagate subspace varables to frame."""
-        if self.hasattrs('subspace'):
-            for col in [col for col in self.subspace if col in self]:
-                self.inflate_subspace(col)
-        super().update_frame()  # update dataarray
-
-    def inflate_subspace(self, col):
-        """Inflate subspace variable and setattr in frame."""
-        self.assert_in_field(col, 'subspace')
-        with self.metaframe.setlock(False, 'subspace'):
-            value = self.subspace.__getitem__(col)
-        if not isinstance(value, np.ndarray):
-            value = value.to_numpy()
-        try:
-            value = value[self.subref]  # inflate if subref set
-        except AttributeError:
-            pass
-        with self.metaframe.setlock(True, 'subspace'):
-            super().__setitem__(col, value)
-
-    def insert(self, *required, iloc=None, **additional):
+    def poloidal(self, *required, iloc=None, mesh=True, **additional):
         """
-        Insert frame(s).
-
-        Assemble insert from *args, **kwargs and concatenate with self.
+        Add poloidal coil(s).
 
         Parameters
         ----------
-        *required : Union[float, array-like]
-            Required arguments listed in self.metaframe.required.
+        *required : Union[DataFrame, dict, list]
+            Required input.
         iloc : int, optional
-            Row locater for inserted coil. The default is None (-1).
-        **additional : dict[str, Union[float, array-like]]
-            Optional keyword as arguments listed in self.metaframe.additional.
+            Index before which coils are inserted. The default is None (-1).
+        mesh : bool, optional
+            Mesh coil. The default is True.
+        **additional : dict[str, Any]
+            Additional input.
 
         Returns
         -------
-        index : pandas.Index
-            built frame.index.
+        None.
 
         """
-        self.metadata = additional.pop('metadata', {})
-        insert = self.assemble(*required, **additional)
-        self.concatenate(insert, iloc=iloc)
-        return insert.index
-
-    def concatenate(self, *insert, iloc=None, sort=False):
-        """Concatenate insert with self."""
-        frame = pandas.DataFrame(self)
-        if iloc is None:  # append
-            frames = [frame, *insert]
-        else:  # insert
-            frames = [frame.iloc[:iloc, :], *insert, frame.iloc[iloc:, :]]
-        frame = pandas.concat(frames, sort=sort)  # concatenate
-        self.__init__(frame, attrs=self.attrs)
+        delta = additional.pop('dpol', self.dpol)
+        additional = {'delta': delta} | additional
+        index = self.frame.insert(*required, iloc=iloc, **additional)
+        if mesh:
+            self.mesh_poloidal(index=index)
 
     def drop(self, index=None):
-        """Drop frame(s) from index."""
-        if index is None:
-            index = self.index
-        self.multipoint.drop(index)
-        super().drop(index, inplace=True)
-        self.__init__(self, attrs=self.attrs)
+        """
+        Remove frame and subframe.
 
-    def translate(self, index=None, xoffset=0, zoffset=0):
-        """Translate coil(s)."""
+        Parameters
+        ----------
+        index : int or list or pandas.Index, optional
+            Index of coils to be removed. The default is None (all coils).
+
+        Returns
+        -------
+        loc : [int, int]
+            Location index of first removed [frame, subframe].
+
+        """
+        if index is None:  # drop all coils
+            index = self.coil.index
+        if not pandas.api.types.is_list_like(index):
+            index = [index]
+        loc = self.get_loc(index)
+        for name in index:
+            if name in self.frame.index:
+                self.subframe.drop(self.coil.loc[name, 'subindex'])
+                self.frame.drop(name)
+        return loc
+
+    def _get_iloc(self, index):
+        iloc = [None, None]
+        for name in index:
+            if name in self.coil.index:
+                iloc[0] = self.coil.index.get_loc(index[0])
+                subindex = self.coil.subindex[index[0]][0]
+                iloc[1] = self.subcoil.index.get_loc(subindex)
+                break
+        return iloc
+
+    def translate(self, index=None, dx=0, dz=0):
+        """
+        Translate coil in polidal plane.
+
+        Parameters
+        ----------
+        index : int or array-like or Index, optional
+            Coil index. The default is None (all coils).
+        dx : float, optional
+            x-coordinate translation. The default is 0.
+        dz : float, optional
+            z-coordinate translation. The default is 0.
+
+        Returns
+        -------
+        None.
+
+        """
         if index is None:
-            index = self.index
+            index = self.coil.index
         elif not pandas.api.types.is_list_like(index):
             index = [index]
-        if xoffset != 0:
-            self.loc[index, 'x'] += xoffset
-        if zoffset != 0:
-            self.loc[index, 'z'] += zoffset
+        self.coil.translate(index, dx, dz)
         for name in index:
-            self.loc[name, 'poly'] = \
-                shapely.affinity.translate(self.loc[name, 'poly'],
-                                           xoff=xoffset, yoff=zoffset)
-
-    def assemble(self, *args, **kwargs):
-        """
-        Return Frame constructed from required and optional input.
-
-        Parameters
-        ----------
-        *args : Union[Frame, pandas.DataFrame, array-like]
-            Required arguments listed in self.metaframe.required.
-        **kwargs : dict[str, Union[float, array-like, str]]
-            Optional keyword arguments listed in self.metaframe.additional.
-
-        Returns
-        -------
-        insert : pandas.DataFrame
-
-        """
-        args, kwargs = self._extract_frame(*args, **kwargs)
-        data = self._build_data(*args, **kwargs)
-        index = self._build_index(data, **kwargs)
-        return FrameSet(data, index=index, attrs=self.attrs)
-
-    def _extract_frame(self, *args, **kwargs):
-        """
-        Return *args and **kwargs with data extracted from frame.
-
-        If args[0] is a *frame, replace *args and update **kwargs.
-        Else pass *args, **kwargs.
-
-        Parameters
-        ----------
-        *args : Union[Frame, DataFrame, list[float], list[array-like]]
-            Arguments.
-        **kwargs : dict[str, Union[float, array-like]]
-            Keyword arguments.
-
-        Raises
-        ------
-        IndexError
-            Input argument length must be greater than 0.
-        ValueError
-            Required arguments not present in *frame.
-        IndexError
-            Output argument number len(args) != len(self.metaframe.required).
-
-        Returns
-        -------
-        args : list[Any]
-            Return argument list, replaced input arg[0] is *frame.
-        kwargs : dict[str, Any]
-            Return keyword arquments, updated if input arg[0] is *frame.
-
-        """
-        if len(args) == 0:
-            raise IndexError('len(args) == 0, argument number must be > 0')
-        if self.isframe(args[0], frame=True) and len(args) == 1:
-            frame = args[0]
-            missing = [arg not in frame for arg in self.metaframe.required]
-            if np.array(missing).any():
-                required = np.array(self.metaframe.required)[missing]
-                raise ValueError(f'required arguments {required} '
-                                 'not specified in frame '
-                                 f'{frame.columns}')
-            args = [frame.loc[:, col] for col in self.metaframe.required]
-            if not isinstance(frame.index, pandas.RangeIndex):
-                kwargs['name'] = frame.index
-            kwargs |= {col: frame.loc[:, col] for col in
-                       self.metaframe.additional if col in frame}
-        if len(args) != len(self.metaframe.required):
-            raise IndexError(
-                'incorrect required argument number (*args)): '
-                f'{len(args)} != {len(self.metaframe.required)}\n'
-                f'required *args: {self.metaframe.required}\n'
-                f'additional **kwargs: {self.metaframe.additional}')
-        return args, kwargs
-
-    def _build_data(self, *args, **kwargs):
-        """Return data dict built from *args and **kwargs."""
-        data = {}  # python 3.6+ assumes dict is insertion ordered
-        attrs = self.metaframe.required + list(kwargs)  # record passed attrs
-        for attr, arg in zip(self.metaframe.required, args):
-            data[attr] = np.array(arg, dtype=float)  # add required arguments
-        for attr in self.metaframe.additional:  # set additional to default
-            data[attr] = self.metaframe.default[attr]
-        additional = []
-        for attr in list(kwargs.keys()):
-            if attr in self.metaframe.tag:
-                kwargs.pop(attr)  # skip tags
-            elif attr in self.metaframe.default:
-                data[attr] = kwargs.pop(attr)  # add keyword arguments
-                if attr not in self.metaframe.additional:
-                    additional.append(attr)
-        if len(additional) > 0:  # extend aditional arguments
-            self.metaframe.metadata = {'additional': additional}
-        if 'It' in attrs and 'Ic' not in attrs:  # patch line current
-            data['Ic'] = \
-                data['It'] / data.get('Nt', self.metaframe.default['Nt'])
-        if len(kwargs) > 0:  # ckeck for unset kwargs
-            unset_kwargs = np.array(list(kwargs.keys()))
-            default = {key: '_default_value_' for key in unset_kwargs}
-            raise IndexError(
-                f'unset kwargs: {unset_kwargs}\n'
-                'enter default value in self.metaframe.defaults\n'
-                f'set as self.metaframe.meatadata = {{default: {default}}}')
-        return data
+            self.subcoil.translate(self.coil.loc[name, 'subindex'], dx, dz)
 
 
 if __name__ == '__main__':
 
-    frameset = FrameSet(Required=['x', 'z'], available=['section', 'link'])
-    frameset.insert(range(2), 1, label='PF')
-    frameset.insert(range(4), 1, link=True)
-    frameset.insert(range(2), 1, label='PF')
-    frameset.insert(range(4), 1, link=True)
-    print(frameset)
+    frameset = FrameSet(dpol=0.05, metadata={'section': 'circle'})
+    frameset.poloidal(range(3), 1, 0.75, 0.75, link=True, delta=-1)
+    frameset.subframe.polyplot()
+
+    print(frameset.frame)

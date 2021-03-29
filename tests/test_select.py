@@ -7,9 +7,11 @@ from nova.electromagnetic.frame import Frame
 
 def test_plasma_subspace():
     frame = Frame(Required=['x'], Available=['active', 'link'])
+    print(frame.metaframe.subspace)
     frame.insert(range(2), active=True, link=True)
     frame.insert(range(2), active=False, link=True)
     frame.insert(3, plasma=True)
+    print(frame.subspace)
     assert frame.plasma.to_list() == [False, False, True]
 
 
@@ -37,4 +39,5 @@ def test_generate_false_attrs():
 
 if __name__ == '__main__':
 
-    pytest.main([__file__])
+    test_plasma_subspace()
+    #pytest.main([__file__])

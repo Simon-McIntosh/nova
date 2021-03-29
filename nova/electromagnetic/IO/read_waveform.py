@@ -313,9 +313,9 @@ class read_dina(read_waveform):
 
 if __name__ == '__main__':
 
-    corsica = read_corsica('corsica')
-    corsica.read_file()
+    #corsica = read_corsica('corsica')
+    #corsica.read_file()
 
-    dina = read_dina('operations')
-    dina.load
+    dina = read_dina('scenarios')
+    dina.load_file(-1)
     #filename = dina.locate_file('data2.txt', folder=1)

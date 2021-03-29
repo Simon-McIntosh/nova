@@ -1000,7 +1000,7 @@ if __name__ == '__main__':
     # d3.load_folder()
     # d3.load_file('15MA DT-DINA2016-01_v1.1')
 
-    scn = read_scenario(database_folder='scenarios', read_txt=False)
+    scn = read_scenario(database_folder='scenarios', read_txt=True)
     #scn.load_folder()
     scn.load_file(-1)
 

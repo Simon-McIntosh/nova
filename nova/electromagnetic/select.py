@@ -141,7 +141,8 @@ class Select(MetaMethod):
         for label in self.labels:
             include = self.any_label(self.labels[label]['include'], True)
             exclude = self.any_label(self.labels[label]['exclude'], False)
-            self.frame.loc[:, label] = include & ~exclude
+            with self.frame.metaframe.setlock(True):
+                self.frame.loc[:, label] = include & ~exclude
 
     def any_label(self, columns, default):
         """Return boolean index evaluated as columns.any()."""

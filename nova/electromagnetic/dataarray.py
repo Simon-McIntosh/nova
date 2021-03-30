@@ -32,9 +32,9 @@ class ArrayLocMixin():
         """Extend Loc getitem. Update frame prior to return if col in array."""
         col = self.obj.get_col(key)
         if self.obj.metaframe.hascol('array', col):
-            if self.obj.metaframe.lock('array') is False:
+            if self.obj.lock('array') is False:
                 self.obj._set_frame(col)  # update frame
-                with self.obj.metaframe.setlock(True, 'array'):
+                with self.obj.setlock(True, 'array'):
                     return super().__getitem__(key)
         return super().__getitem__(key)
 
@@ -78,14 +78,14 @@ class DataArray(ArrayIndexer, DataFrame):
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
         if self.metaframe.hascol('array', col):
-            if self.metaframe.lock('array') is False:
+            if self.lock('array') is False:
                 return self._get_array(col)
         return super().__getitem__(col)
 
     def __setitem__(self, col, value):
         """Extend DataFrame.__setitem__. (frame['*'] = *)."""
         if self.metaframe.hascol('array', col):
-            if self.metaframe.lock('array') is False:
+            if self.lock('array') is False:
                 return self._set_array(col, value)
         return super().__setitem__(col, value)
 
@@ -122,7 +122,7 @@ class DataArray(ArrayIndexer, DataFrame):
         """Transfer metaarray.data to frame."""
         self.metaframe.assert_hascol('array', col)
         value = self._get_array(col)
-        with self.metaframe.setlock(True, 'array'):
+        with self.setlock(True, 'array'):
             super().__setitem__(col, value)
 
 

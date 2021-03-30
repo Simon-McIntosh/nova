@@ -116,18 +116,18 @@ class Select(MetaMethod):
         - Update additional.
         - Update defaults to include unset labels.
         """
-        metadata = {}
-        if self.additional:
-            metadata['additional'] = self.additional
-            metadata['additional'].extend([label for label in self.labels
-                                           if label not in self.additional])
-            metadata['subspace'] = metadata['additional']
-        self.frame.metaframe.metadata = metadata
-        default = [label for label in self.frame.metaframe.additional
-                   if label not in self.frame.metaframe.default]
-        if default:
-            self.frame.metaframe.metadata = \
-                {'default': dict.fromkeys(default, True)}
+        #metadata = {}
+        #if self.additional:
+        #    #metadata['additional'] = self.additional
+        #    #metadata['additional'].extend([label for label in self.labels
+        #    #                               if label not in self.additional])
+        #    metadata['subspace'] = metadata['additional']
+        self.frame.metaframe.metadata = {'additional': list(self.labels),
+                                         'subspace': list(self.labels)}
+        default = {label: True for label in self.labels
+                   if label not in self.frame.metaframe.default}
+        if len(default) > 0:
+            self.frame.metaframe.metadata = {'default': default}
 
     def update_columns(self):
         """Update frame columns if any additional unset."""
@@ -141,7 +141,7 @@ class Select(MetaMethod):
         for label in self.labels:
             include = self.any_label(self.labels[label]['include'], True)
             exclude = self.any_label(self.labels[label]['exclude'], False)
-            with self.frame.metaframe.setlock(True):
+            with self.frame.setlock(True):
                 self.frame.loc[:, label] = include & ~exclude
 
     def any_label(self, columns, default):

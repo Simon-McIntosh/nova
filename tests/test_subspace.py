@@ -194,4 +194,5 @@ def test_loc_keyerror():
 
 if __name__ == '__main__':
 
+    test_setattr_current()
     pytest.main([__file__])

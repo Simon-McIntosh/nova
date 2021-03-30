@@ -1,4 +1,5 @@
 """Subclass pandas.DataFrame."""
+from contextlib import contextmanager
 import re
 import string
 from typing import Collection, Any
@@ -131,7 +132,7 @@ class DataFrame(pandas.DataFrame):
     def format_data(self, data):
         """Apply default formating to data passed as dict."""
         if isinstance(data, dict):
-            with self.metaframe.setlock(True):
+            with self.setlock(True):
                 for col in self.columns:
                     self.loc[:, col] = self.format_value(col, self[col])
 
@@ -173,7 +174,10 @@ class DataFrame(pandas.DataFrame):
             else:
                 metatag['delim'] = ''
                 metatag['label'] = name.rstrip(string.digits)
-                metatag['offset'] = int(name.lstrip(string.ascii_letters))
+                try:
+                    metatag['offset'] = int(name.lstrip(string.ascii_letters))
+                except ValueError:  # no trailing number, use default
+                    pass
         self._set_offset(metatag)
         label_delim = metatag['label']+metatag['delim']
         index = [f'{label_delim}{i+metatag["offset"]:d}'
@@ -249,7 +253,7 @@ class DataFrame(pandas.DataFrame):
             for attr in self.metaframe.columns:
                 self[attr] = None
             return
-        with self.metaframe.setlock(None):
+        with self.setlock(None):
             columns = self.columns.to_list()
             # check required
             required_unset = [attr not in columns
@@ -324,6 +328,47 @@ class DataFrame(pandas.DataFrame):
             return dtype(value)
         except (ValueError, TypeError):  # NaN conversion error
             return value
+
+    def lock(self, key=None):
+        """
+        Return metaframe lock status.
+
+        Parameters
+        ----------
+        key : str
+            Lock label.
+
+        """
+        if key is None:
+            return self.metaframe._lock
+        else:
+            return self.metaframe._lock[key]
+
+    @contextmanager
+    def setlock(self, status, keys=None):
+        """
+        Manage access to subspace frame variables.
+
+        Parameters
+        ----------
+        status : Union[bool, None]
+            Subset lock status.
+        keys : Union[str, list[str]]
+            Lock label, if None set all keys in self._lock.
+
+        Returns
+        -------
+        None.
+
+        """
+        if keys is None:
+            keys = list(self.metaframe._lock.keys())
+        if isinstance(keys, str):
+            keys = [keys]
+        _lock = {key: self.metaframe._lock[key] for key in keys}
+        self.metaframe._lock |= {key: status for key in keys}
+        yield
+        self.metaframe._lock |= _lock
 
 
 if __name__ == '__main__':

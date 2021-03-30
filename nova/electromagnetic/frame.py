@@ -4,8 +4,8 @@ from typing import Optional, Collection, Any
 
 import numpy as np
 
-from nova.electromagnetic.unitset import (
-    UnitSet, UnitSetLocMixin, UnitSetIndexer
+from nova.electromagnetic.framearray import (
+    FrameArray, FrameArrayLocMixin, FrameArrayIndexer
     )
 from nova.electromagnetic.subspace import SubSpace
 from nova.electromagnetic.metamethod import MetaMethod
@@ -25,11 +25,11 @@ class SubSpaceError(IndexError):
             f'Use frame.subspace.{name}[:, {col}] = *.\n\n'
             'Lock may be overridden via the following context manager '
             'but subspace will still overwrite (Cavieat Usor):\n'
-            'with frame.metaframe.setlock(None):\n'
+            'with frame.setlock(None):\n'
             f'    frame.{name}[:, {col}] = *')
 
 
-class FrameLocMixin(UnitSetLocMixin):
+class FrameLocMixin(FrameArrayLocMixin):
     """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
 
     def __setitem__(self, key, value):
@@ -37,23 +37,32 @@ class FrameLocMixin(UnitSetLocMixin):
         col = self.obj.get_col(key)
         value = self.obj.format_value(col, value)
         if self.obj.metaframe.hascol('subspace', col):
-            if self.obj.metaframe.lock('subspace') is False:
+            if self.obj.lock('subspace') is False:
                 raise SubSpaceError(self.name, col)
+        if isinstance(self.obj, SubSpace):
+            print(col, self.obj.metaframe.subspace)
         return super().__setitem__(key, value)
 
     def __getitem__(self, key):
-        """Refresh subspace items prior to return."""
+        """Inflate subspace items prior to return."""
         col = self.obj.get_col(key)
         if self.obj.metaframe.hascol('subspace', col):
-            if self.obj.metaframe.lock('subspace') is False:
-                key = self.obj.get_subkey(key)
-                return getattr(self.obj.subspace, self.name)[key]
-            if self.obj.metaframe.lock('subspace') is True:
+            #if self.obj.lock('subspace') is False:
+            #    key = self.obj.get_subkey(key)
+            #    return getattr(self.obj.subspace, self.name)[key]
+            #if self.obj.lock('subspace') is True:
+            #self.obj.inflate_subspace(col)
+
+            if self.obj.lock('subspace') is False:
                 self.obj.inflate_subspace(col)
+        elif col == 'It' and self.obj.metaframe.hascol('subspace', 'Ic'):
+            if self.obj.lock('subspace') is False:
+                self.obj.inflate_subspace('Ic')
+
         return super().__getitem__(key)
 
 
-class FrameIndexer(UnitSetIndexer):
+class FrameIndexer(FrameArrayIndexer):
     """Extend pandas indexer."""
 
     @property
@@ -62,7 +71,7 @@ class FrameIndexer(UnitSetIndexer):
         return FrameLocMixin
 
 
-class Frame(FrameIndexer, UnitSet):
+class Frame(FrameIndexer, FrameArray):
     """
     Extend DataFrame.
 
@@ -80,7 +89,7 @@ class Frame(FrameIndexer, UnitSet):
         self.attrs['subspace'] = SubSpace(self)
 
     def add_methods(self):
-        """Extend UnitSet add_methods, add additional methods to attrs."""
+        """Extend FrameArray add_methods, add additional methods to attrs."""
         self.attrs['select'] = Select(self)
         self.attrs['geom'] = Geometry(self)
         self.attrs['polyplot'] = PolyPlot(self)
@@ -100,20 +109,24 @@ class Frame(FrameIndexer, UnitSet):
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
         if self.metaframe.hascol('subspace', col):
-            if self.metaframe.lock('subspace') is False:
+            if self.lock('subspace') is False:
                 return self.subspace.__getitem__(col)
-            if self.metaframe.lock('subspace') is True:
+            if self.lock('subspace') is True:
                 self.inflate_subspace(col)
+        elif col == 'It' and self.metaframe.hascol('subspace', 'Ic'):
+            if self.lock('subspace') is False:
+                self.inflate_subspace('Ic')
         return super().__getitem__(col)
 
     def __setitem__(self, col, value):
         """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
         value = self.format_value(col, value)
+        print(col, value)
         if self.hasattr('subspace'):
             if self.metaframe.hascol('subspace', col):
-                if self.metaframe.lock('subspace') is False:
+                if self.lock('subspace') is False:
                     return self.subspace.__setitem__(col, value)
-                if self.metaframe.lock('subspace') is True:
+                if self.lock('subspace') is True:
                     raise SubSpaceError('setitem', col)
         return super().__setitem__(col, value)
 
@@ -126,8 +139,7 @@ class Frame(FrameIndexer, UnitSet):
 
     def inflate_subspace(self, col):
         """Inflate subspace variable and setattr in frame."""
-        self.metaframe.assert_hascol('subspace', col)
-        with self.metaframe.setlock(False, 'subspace'):
+        with self.setlock(False, 'subspace'):
             value = self.subspace.__getitem__(col)
         if not isinstance(value, np.ndarray):
             value = value.to_numpy()
@@ -135,7 +147,7 @@ class Frame(FrameIndexer, UnitSet):
             value = value[self.subref]  # inflate if subref set
         except AttributeError:
             pass
-        with self.metaframe.setlock(True, 'subspace'):
+        with self.setlock(True, 'subspace'):
             super().__setitem__(col, value)
 
 
@@ -148,13 +160,14 @@ def set_current():
 
 if __name__ == '__main__':
 
-    frame = Frame(Required=['x', 'z'], available=['section'], Array=['Ic'])
-    frame.insert([-4, -5], 1, Ic=6.5)
-    frame.insert(*[x.flatten() for x in np.meshgrid(range(5), range(6))],
-                 dl=0.75, dt=0.3, label='PF', frame='PF', link=True,
-                 section='skin')
+    frame = Frame(required=['x', 'z'], subspace=['Ic', 'It', 'Nt', 'z'])
+    frame.insert([-4, -5], 1, Ic=6.5, label='CS')
+    frame.insert([-4, -5], 3, Ic=3, label='PF', link=True)
+    frame.multipoint.link([ 'PF1', 'CS0'], factor=1)
 
-    frame.polyplot()
+    print(frame)
+    print()
+    print(frame.subspace)
 
 
 

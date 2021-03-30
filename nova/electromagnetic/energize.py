@@ -14,23 +14,22 @@ class Energize(MetaMethod):
     """Manage dependant frame energization parameters."""
 
     frame: Frame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['Ic', 'It', 'Nt'])
-    additional: list[str] = field(default_factory=lambda: [])
-    available: dict[str, bool] = field(
-        default_factory=lambda: {'Ic': False, 'Nt': False})
+    required: list[str] = field(default_factory=lambda: ['It', 'Nt'])
+    additional: list[str] = field(default_factory=lambda: ['Ic'])
+    incol: dict[str, bool] = field(default_factory=lambda: {
+        'Ic': False, 'Nt': False})
     require_all: bool = False
 
     def __post_init__(self):
         """Update energize key."""
         if self.generate:
             self.frame.metaframe.energize = ['It']  # set metaframe key
-            self.frame.metaframe.metadata = {'subspace': self.required}
         super().__post_init__()
 
     def initialize(self):
         """Init attribute avalibility flags and columns."""
-        for attr in self.available:
-            self.available[attr] = attr in self.frame.columns
+        for attr in self.incol:
+            self.incol[attr] = attr in self.frame.columns
 
     def _get_key(self, key, col=None):
         if col is None:
@@ -44,17 +43,17 @@ class Energize(MetaMethod):
 
     def _set_item(self, indexer, key, value):
         if self.generate and self.frame.get_col(key) == 'It':
-            if self.frame.metaframe.lock('energize') is not True and \
-                    self.available['Nt']:
+            if self.frame.lock('energize') is not True and \
+                    self.incol['Nt']:
                 value /= indexer.__getitem__(self._get_key(key, 'Nt'))
                 return indexer.__setitem__(self._get_key(key, 'Ic'), value)
         return indexer.__setitem__(key, value)
 
     def _get_item(self, indexer, key):
         if self.generate and self.frame.get_col(key) == 'It':
-            if self.available['Ic'] and self.available['Nt']:
+            if self.incol['Ic'] and self.incol['Nt']:
                 line_current = indexer.__getitem__(self._get_key(key, 'Ic'))
                 turn_number = indexer.__getitem__(self._get_key(key, 'Nt'))
-                with self.frame.metaframe.setlock(True, 'energize'):
+                with self.frame.setlock(True, 'energize'):
                     self._set_item(indexer, key, line_current*turn_number)
         return indexer.__getitem__(key)

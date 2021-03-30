@@ -100,7 +100,7 @@ class Label:
         """Return update index from self.label boolean."""
         # if self.label
 
-        with self.frame.metaframe.setlock(True, 'subspace'):
+        with self.frame.setlock(True, 'subspace'):
             return self.frame.index[self.frame[self.label]]
 
 
@@ -266,13 +266,13 @@ class PolyPlot(Display, Label, MetaMethod):
         index = self.to_boolean(index)
         try:
             if not self.zeroturn:  # exclude zeroturn filaments (Nt == 0)
-                with self.frame.metaframe.setlock(True, 'subspace'):
+                with self.frame.setlock(True, 'subspace'):
                     index &= (self.frame.loc[:, 'Nt'] != 0)
         except (AttributeError, KeyError):  # turns not set
             pass
         try:
             if not self.feedback:  # exclude stabilization coils
-                with self.frame.metaframe.setlock(True, 'subspace'):
+                with self.frame.setlock(True, 'subspace'):
                     index &= ~self.frame.feedback
         except (AttributeError, KeyError):  # feedback not set
             pass

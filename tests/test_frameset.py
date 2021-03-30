@@ -69,17 +69,28 @@ def test_flag_current_update():
 
 def test_multipoint_link():
     frameset = FrameSet(dpol=0)
+
+    frameset.frame.metaframe.metadata = {'subspace': ['Ic']}
+    print(frameset.frame.metadata['subspace'])
+
     frameset.poloidal(7, -3, 1.5, 1.5, name='PF6', part='PF', Nt=4, It=1e6,
                       turn='circle', turn_fraction=0.7, dpol=0.12)
+    print(frameset.frame.metadata['subspace'])
+
     frameset.poloidal(7, -0.5, 1.5, 1.5, name='PF8', part='PF', Nt=5, Ic=2e3,
                       section='circle', turn='square', dpol=0.12)
+    print(frameset.frame.metadata['subspace'])
+
     # Ic[PF8] = -0.5*Ic[PF6]
     frameset.frame.multipoint.add(['PF6', 'PF8'], -0.5)
 
-    print(frameset.frame.loc[:, ['link', 'factor', 'ref', 'subref']])
+    print(frameset.frame.metadata['subspace'])
+
+
     print(frameset.frame.subspace)
+    print('')
     with frameset.frame.metaframe.setlock(True, 'subspace'):
-        print(frameset.frame.loc[:, 'It'])
+        print(frameset.frame.loc[:, ['Ic', 'It', 'Nt']])
     assert np.allclose(frameset.frame.loc[:, 'It'].to_list(), [1e6, -0.5*1e6/4*5])
 
     assert False

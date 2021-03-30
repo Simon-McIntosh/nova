@@ -8,9 +8,7 @@ from nova.electromagnetic.frame import Frame
 
 def test_generate_key_attribute_true():
     frame = Frame({'link': [True]}, Required=[])
-    print(frame.metaframe)
     assert frame.multipoint.generate
-test_generate_key_attribute_true()
 
 
 def test_generate_single():

@@ -1,6 +1,4 @@
 """Manage frame metadata."""
-
-from contextlib import contextmanager
 from dataclasses import dataclass, field, InitVar
 from typing import Iterable, Union
 
@@ -14,56 +12,16 @@ from nova.electromagnetic.metadata import MetaData
 
 
 @dataclass
-class Lock:
-    """Manage variable access (subspace, energize, array)."""
+class MetaSet:
+    """Manage variable access to frame subsets (subspace, energize, array)."""
 
-    subspace: list[str] = field(init=False, default_factory=lambda: [])
+    subspace: list[str] = field(init=False, default_factory=lambda: [
+        'Ic'])
     energize: list[str] = field(init=False, default_factory=lambda: [])
     array: list[str] = field(init=False, default_factory=lambda: [])
     _lock: dict[str, bool] = field(init=False, default_factory=lambda: {
         'subspace': False, 'energize': False, 'array': False,
         'multipoint': False})
-
-    def lock(self, key=None):
-        """
-        Return lock status.
-
-        Parameters
-        ----------
-        key : str
-            Lock label.
-
-        """
-        if key is None:
-            return self._lock
-        else:
-            return self._lock[key]
-
-    @contextmanager
-    def setlock(self, status, keys=None):
-        """
-        Manage access to subspace frame variables.
-
-        Parameters
-        ----------
-        status : Union[bool, None]
-            Subset lock status.
-        keys : Union[str, list[str]]
-            Lock label, if None set all keys in self._lock.
-
-        Returns
-        -------
-        None.
-
-        """
-        if keys is None:
-            keys = list(self._lock.keys())
-        if isinstance(keys, str):
-            keys = [keys]
-        _lock = {key: self._lock[key] for key in keys}
-        self._lock |= {key: status for key in keys}
-        yield
-        self._lock |= _lock
 
     def hascol(self, attr, col):
         """Return Ture if col in attr."""
@@ -78,9 +36,8 @@ class Lock:
             assert self.hascol(attr, col)
         except AssertionError as hasnot:
             raise AssertionError(
-                f'metaframe does not have {attr} or '
-                f'{col} not in metaframe.{attr} '
-                f'{getattr(self.metaframe, attr)}') from hasnot
+                f'{col} not in metaframe.{attr}: '
+                f'{getattr(self, attr)}') from hasnot
 
 
 @dataclass
@@ -106,7 +63,7 @@ class MetaArray(MetaData):
 
 
 @dataclass
-class MetaFrame(MetaArray, Lock):
+class MetaFrame(MetaArray, MetaSet):
     """
     Manage Frame metadata.
 

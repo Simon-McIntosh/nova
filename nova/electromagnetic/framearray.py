@@ -17,7 +17,7 @@ from nova.electromagnetic.multipoint import MultiPoint
 from nova.electromagnetic.energize import Energize
 
 
-class UnitSetLocMixin(ArrayLocMixin):
+class FrameArrayLocMixin(ArrayLocMixin):
     """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
 
     def __setitem__(self, key, value):
@@ -25,7 +25,7 @@ class UnitSetLocMixin(ArrayLocMixin):
         col = self.obj.get_col(key)
         value = self.obj.format_value(col, value)
         if self.obj.metaframe.hascol('energize', col):
-            if self.obj.metaframe.lock('energize') is False:
+            if self.obj.lock('energize') is False:
                 return self.obj.energize._set_item(super(), key, value)
         return super().__setitem__(key, value)
 
@@ -33,18 +33,18 @@ class UnitSetLocMixin(ArrayLocMixin):
         """Refresh subspace items prior to return."""
         col = self.obj.get_col(key)
         if self.obj.metaframe.hascol('energize', col):
-            if self.obj.metaframe.lock('energize') is False:
+            if self.obj.lock('energize') is False:
                 return self.obj.energize._get_item(super(), key)
         return super().__getitem__(key)
 
 
-class UnitSetIndexer(ArrayIndexer):
+class FrameArrayIndexer(ArrayIndexer):
     """Extend pandas indexer."""
 
     @property
     def loc_mixin(self):
         """Return LocIndexer mixins."""
-        return UnitSetLocMixin
+        return FrameArrayLocMixin
 
 
 @dataclass
@@ -75,7 +75,7 @@ class Methods:
                 self.attrs[attr].initialize()
 
 
-class UnitSet(UnitSetIndexer, DataArray):
+class FrameArray(FrameArrayIndexer, DataArray):
     """
     Extend DataArray.
 
@@ -101,7 +101,7 @@ class UnitSet(UnitSetIndexer, DataArray):
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
         if self.metaframe.hascol('energize', col):
-            if self.metaframe.lock('energize') is False:
+            if self.lock('energize') is False:
                 return self.energize._get_item(super(), col)
         return super().__getitem__(col)
 
@@ -109,7 +109,7 @@ class UnitSet(UnitSetIndexer, DataArray):
         """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
         value = self.format_value(col, value)
         if self.metaframe.hascol('energize', col):
-            if self.metaframe.lock('energize') is False:
+            if self.lock('energize') is False:
                 return self.energize._set_item(super(), col, value)
         return super().__setitem__(col, value)
 
@@ -191,7 +191,7 @@ class UnitSet(UnitSetIndexer, DataArray):
         args, kwargs = self._extract_frame(*args, **kwargs)
         data = self._build_data(*args, **kwargs)
         index = self._build_index(data, **kwargs)
-        return UnitSet(data, index=index, attrs=self.attrs)
+        return FrameArray(data, index=index, attrs=self.attrs)
 
     def _extract_frame(self, *args, **kwargs):
         """
@@ -280,9 +280,9 @@ class UnitSet(UnitSetIndexer, DataArray):
 
 if __name__ == '__main__':
 
-    unitset = UnitSet(Required=['x', 'z'], available=['section', 'link'])
-    unitset.insert(range(2), 1, label='PF')
-    unitset.insert(range(4), 1, link=True)
-    unitset.insert(range(2), 1, label='PF')
-    unitset.insert(range(4), 1, link=True)
-    print(unitset)
+    framearray = FrameArray(Required=['x', 'z'], available=['section', 'link'])
+    framearray.insert(range(2), 1, label='PF')
+    framearray.insert(range(4), 1, link=True)
+    framearray.insert(range(2), 1, label='PF')
+    framearray.insert(range(4), 1, link=True)
+    print(framearray)

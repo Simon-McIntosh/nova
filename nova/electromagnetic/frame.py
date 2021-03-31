@@ -38,9 +38,9 @@ class FrameLocMixin(FrameArrayLocMixin):
         value = self.obj.format_value(col, value)
         if self.obj.metaframe.hascol('subspace', col):
             if self.obj.lock('subspace') is False:
+                #key = self.obj.get_subkey(key)
+                #getattr(self.obj.subspace, self.name)[key] = value
                 raise SubSpaceError(self.name, col)
-        if isinstance(self.obj, SubSpace):
-            print(col, self.obj.metaframe.subspace)
         return super().__setitem__(key, value)
 
     def __getitem__(self, key):
@@ -50,15 +50,11 @@ class FrameLocMixin(FrameArrayLocMixin):
             #if self.obj.lock('subspace') is False:
             #    key = self.obj.get_subkey(key)
             #    return getattr(self.obj.subspace, self.name)[key]
-            #if self.obj.lock('subspace') is True:
-            #self.obj.inflate_subspace(col)
-
             if self.obj.lock('subspace') is False:
                 self.obj.inflate_subspace(col)
         elif col == 'It' and self.obj.metaframe.hascol('subspace', 'Ic'):
             if self.obj.lock('subspace') is False:
                 self.obj.inflate_subspace('Ic')
-
         return super().__getitem__(key)
 
 
@@ -100,18 +96,18 @@ class Frame(FrameIndexer, FrameArray):
         self.update_frame()
         return super().__repr__()
 
-    def __setattr__(self, col, value):
-        """Extend DataFrame.__setattr__ to provide access to subspace."""
-        if self.metaframe.hascol('subspace', col):
-            return self.subspace.__setattr__(col, value)
-        return super().__setattr__(col, value)
+    #def __setattr__(self, col, value):
+    #    """Extend DataFrame.__setattr__ to provide access to subspace."""
+    #    if self.metaframe.hascol('subspace', col):
+    #        return self.subspace.__setattr__(col, value)
+    #    return super().__setattr__(col, value)
 
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
         if self.metaframe.hascol('subspace', col):
+            #if self.lock('subspace') is False:
+            #    return self.subspace.__getitem__(col)
             if self.lock('subspace') is False:
-                return self.subspace.__getitem__(col)
-            if self.lock('subspace') is True:
                 self.inflate_subspace(col)
         elif col == 'It' and self.metaframe.hascol('subspace', 'Ic'):
             if self.lock('subspace') is False:
@@ -121,12 +117,11 @@ class Frame(FrameIndexer, FrameArray):
     def __setitem__(self, col, value):
         """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
         value = self.format_value(col, value)
-        print(col, value)
         if self.hasattr('subspace'):
             if self.metaframe.hascol('subspace', col):
+                #if self.lock('subspace') is False:
+                #    return self.subspace.__setitem__(col, value)
                 if self.lock('subspace') is False:
-                    return self.subspace.__setitem__(col, value)
-                if self.lock('subspace') is True:
                     raise SubSpaceError('setitem', col)
         return super().__setitem__(col, value)
 
@@ -160,10 +155,10 @@ def set_current():
 
 if __name__ == '__main__':
 
-    frame = Frame(required=['x', 'z'], subspace=['Ic', 'It', 'Nt', 'z'])
+    frame = Frame(required=['x', 'z'], Available=['It'], Subspace=['Ic'])
     frame.insert([-4, -5], 1, Ic=6.5, label='CS')
-    frame.insert([-4, -5], 3, Ic=3, label='PF', link=True)
-    frame.multipoint.link([ 'PF1', 'CS0'], factor=1)
+    frame.insert([-4, -5], 3, Ic=4, Nt=20, label='PF', link=True)
+    frame.multipoint.link(['PF1', 'CS0'], factor=1)
 
     print(frame)
     print()

@@ -249,11 +249,11 @@ class DataFrame(pandas.DataFrame):
             - additional unset: insert default
             - isnan: insert default
         """
-        if self.columns.empty:
-            for attr in self.metaframe.columns:
-                self[attr] = None
-            return
         with self.setlock(None):
+            if self.columns.empty:
+                for attr in self.metaframe.columns:
+                    self[attr] = None
+                return
             columns = self.columns.to_list()
             # check required
             required_unset = [attr not in columns

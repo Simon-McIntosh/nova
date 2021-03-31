@@ -2,12 +2,46 @@
 import pandas
 import numpy as np
 
-from nova.electromagnetic.framearray import FrameArray
+from nova.electromagnetic.framearray import (
+    FrameArray,
+    FrameArrayLocMixin,
+    FrameArrayIndexer
+    )
 
 # pylint: disable=too-many-ancestors
 
 
-class SubSpace(FrameArray):
+class SubSpaceAccessError(IndexError):
+    """Prevent direct access to variables not listed in metaframe.subspace."""
+
+    def __init__(self, col, subspace):
+        super().__init__(
+            f'{col} not specified as a subspace attribute '
+            f'metaframe.subspace {subspace}')
+
+
+class SubspaceLocMixin(FrameArrayLocMixin):
+    """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
+
+    def __setitem__(self, key, value):
+        """Raise error when subspace variable is set directly from frame."""
+        col = self.obj.get_col(key)
+        if self.obj.lock('subspace') is False:
+            if not self.obj.metaframe.hascol('subspace', col):
+                raise SubSpaceAccessError(col, self.obj.metaframe.subspace)
+        return super().__setitem__(key, value)
+
+
+class SubSpaceIndexer(FrameArrayIndexer):
+    """Extend pandas indexer."""
+
+    @property
+    def loc_mixin(self):
+        """Return LocIndexer mixins."""
+        return SubspaceLocMixin
+
+
+class SubSpace(SubSpaceIndexer, FrameArray):
     """Manage frame subspace, extract independent rows for subspace columns."""
 
     def __init__(self, frame):
@@ -19,7 +53,21 @@ class SubSpace(FrameArray):
                          Required=[], Additional=columns,
                          Available=[], Array=array)
         self.metaframe._lock = frame.metaframe._lock  # link locks
-        self.metaframe.metadata = {'Subspace': []}
+        #self.update_subspace(frame)
+
+    def update_subspace(self, frame):
+        """Update frame and subspace metadata."""
+        subspace = list(self.columns)
+        if subspace:
+            self.metaframe.metadata = {'Subspace': subspace}
+            frame.metaframe.metadata = {'subspace': subspace}
+
+    def __setitem__(self, col, value):
+        """Raise error when subspace variable is set directly from frame."""
+        if self.lock('subspace') is False:
+            if not self.metaframe.hascol('subspace', col):
+                raise SubSpaceAccessError(col, self.metaframe.subspace)
+        return super().__setitem__(col, value)
 
     @staticmethod
     def get_subindex(frame):

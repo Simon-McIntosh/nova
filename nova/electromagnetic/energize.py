@@ -14,8 +14,8 @@ class Energize(MetaMethod):
     """Manage dependant frame energization parameters."""
 
     frame: Frame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['It', 'Nt'])
-    additional: list[str] = field(default_factory=lambda: ['Ic'])
+    required: list[str] = field(default_factory=lambda: ['Ic', 'It', 'Nt'])
+    additional: list[str] = field(default_factory=lambda: [])
     incol: dict[str, bool] = field(default_factory=lambda: {
         'Ic': False, 'Nt': False})
     require_all: bool = False
@@ -43,8 +43,7 @@ class Energize(MetaMethod):
 
     def _set_item(self, indexer, key, value):
         if self.generate and self.frame.get_col(key) == 'It':
-            if self.frame.lock('energize') is not True and \
-                    self.incol['Nt']:
+            if self.frame.lock('energize') is not True and self.incol['Nt']:
                 value /= indexer.__getitem__(self._get_key(key, 'Nt'))
                 return indexer.__setitem__(self._get_key(key, 'Ic'), value)
         return indexer.__setitem__(key, value)

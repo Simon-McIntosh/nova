@@ -13,6 +13,14 @@ from nova.electromagnetic.metaframe import MetaFrame
 # pylint: disable=too-many-ancestors
 
 
+class ColumnError(IndexError):
+    """Prevent column creation."""
+
+    def __init__(self, name):
+        super().__init__('Column creation via a new attribute name '
+                         f'{name} is not allowed.')
+
+
 class Series(pandas.Series):
     """Provide series constructor methods."""
 
@@ -61,11 +69,23 @@ class DataFrame(pandas.DataFrame):
     def metadata(self, metadata):
         self.metaframe.metadata = metadata
 
+    def _check_columns(self, name):
+        """If name in metaframe.default, raise error if name in not columns."""
+        if name in self.metaframe.default and name not in self.columns:
+            raise ColumnError(name)
+
     def __getattr__(self, name):
         """Extend pandas.DataFrame.__getattr__. (frame.*)."""
         if name in self.attrs:
             return self.attrs[name]
+        self._check_columns(name)
         return super().__getattr__(name)
+
+    def __setitem__(self, key, value):
+        """Extend pandas.DataFrame setitem, check that key is in columns."""
+        if self.lock('column') is False:
+            self._check_columns(key)
+        super().__setitem__(key, value)
 
     def update_metadata(self, data, columns, attrs, metadata):
         """Update metadata. Set default and meta*.metadata."""
@@ -90,7 +110,7 @@ class DataFrame(pandas.DataFrame):
             if isinstance(attrs[attr], MetaData):
                 self.attrs[attr] = attrs[attr]
         if not self.hasattr('metaframe'):
-            self.attrs['metaframe'] = MetaFrame(self.index)  # init metaframe
+            self.attrs['metaframe'] = MetaFrame(self.index)
 
     def trim_columns(self, columns):
         """Trim metaframe required / additional to columns."""

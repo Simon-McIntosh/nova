@@ -1,21 +1,19 @@
 """Manage frame currents."""
-from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+
+import numpy as np
 
 from nova.electromagnetic.metamethod import MetaMethod
-
-if TYPE_CHECKING:
-    from nova.electromagnetic.frame import Frame
+from nova.electromagnetic.dataframe import DataFrame
 
 
 @dataclass
 class Energize(MetaMethod):
     """Manage dependant frame energization parameters."""
 
-    frame: Frame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['Ic', 'It', 'Nt'])
-    additional: list[str] = field(default_factory=lambda: [])
+    frame: DataFrame = field(repr=False)
+    required: list[str] = field(default_factory=lambda: ['Nt', 'It'])
+    additional: list[str] = field(default_factory=lambda: ['Ic'])
     incol: dict[str, bool] = field(default_factory=lambda: {
         'Ic': False, 'Nt': False})
     require_all: bool = False
@@ -24,6 +22,12 @@ class Energize(MetaMethod):
         """Update energize key."""
         if self.generate:
             self.frame.metaframe.energize = ['It']  # set metaframe key
+            if np.array([attr in self.frame.metaframe.subspace
+                         for attr in self.required]).any():
+                self.frame.metadata = {'subspace':
+                                       self.required+self.additional}
+        else:
+            self.update_available(self.additional)
         super().__post_init__()
 
     def initialize(self):

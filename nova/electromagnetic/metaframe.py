@@ -1,5 +1,5 @@
 """Manage frame metadata."""
-from dataclasses import dataclass, field, InitVar
+from dataclasses import dataclass, field
 from typing import Iterable, Union
 
 import pandas
@@ -12,16 +12,35 @@ from nova.electromagnetic.metadata import MetaData
 
 
 @dataclass
-class MetaSet:
+class MetaArray(MetaData):
+    """Manage Frame metadata - accessed via Frame['attrs']."""
+
+    index: pandas.Index = field(default=None)
+    data: dict[str, Iterable[Union[str, int, float]]] = field(init=False)
+
+    def __post_init__(self):
+        """Clear fast access data attribute."""
+        self.data = {}
+        self.metadata = {'_internal': ['index', 'data']}
+        super().__post_init__()
+
+    @property
+    def dataarray(self):
+        """Return DataFrame representation of fast access data arrays."""
+        return pandas.DataFrame(self.data, index=self.index,
+                                columns=self.array)
+
+
+@dataclass
+class MetaSet(MetaArray):
     """Manage variable access to frame subsets (subspace, energize, array)."""
 
-    subspace: list[str] = field(init=False, default_factory=lambda: [
-        'Ic'])
-    energize: list[str] = field(init=False, default_factory=lambda: [])
-    array: list[str] = field(init=False, default_factory=lambda: [])
-    _lock: dict[str, bool] = field(init=False, default_factory=lambda: {
+    subspace: list[str] = field(default_factory=lambda: ['Ic'])
+    energize: list[str] = field(default_factory=lambda: [])
+    array: list[str] = field(default_factory=lambda: [])
+    _lock: dict[str, bool] = field(default_factory=lambda: {
         'subspace': False, 'energize': False, 'array': False,
-        'multipoint': False})
+        'multipoint': False, 'column': False})
 
     def hascol(self, attr, col):
         """Return Ture if col in attr."""
@@ -41,29 +60,7 @@ class MetaSet:
 
 
 @dataclass
-class MetaArray(MetaData):
-    """Manage Frame metadata - accessed via Frame['attrs']."""
-
-    index: InitVar[list[str]] = field(default=None)
-    data: dict[str, Iterable[Union[str, int, float]]] = field(init=False)
-
-    _internal = ['index', 'data']
-
-    def __post_init__(self, index):
-        """Init update flags."""
-        self.index = index
-        self.data = {}
-        super().__post_init__()
-
-    @property
-    def dataarray(self):
-        """Return DataFrame representation of fast access data arrays."""
-        return pandas.DataFrame(self.data, index=self.index,
-                                columns=self.array)
-
-
-@dataclass
-class MetaFrame(MetaArray, MetaSet):
+class MetaFrame(MetaSet):
     """
     Manage Frame metadata.
 
@@ -104,6 +101,11 @@ class MetaFrame(MetaArray, MetaSet):
 
         """
         super().validate()
+        # propergate subspace variables to available
+        available_unset = [attr for attr in self.subspace
+                           if attr not in self.available]
+        if available_unset:
+            self.available.extend(available_unset)
         # exculde duplicate values
         self.additional = [attr for attr in self.additional
                            if attr not in self.required]

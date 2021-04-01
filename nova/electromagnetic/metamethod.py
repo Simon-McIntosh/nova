@@ -52,3 +52,10 @@ class MetaMethod(ABC):
             additional.extend(self.unset(self.required))
         if additional:
             self.frame.metaframe.metadata = {'additional': additional}
+
+    def update_available(self, attrs):
+        """Update metaframe.available if attrs unset and available."""
+        additional = [attr for attr in self.unset(attrs)
+                      if attr in self.frame.metaframe.available]
+        if additional:
+            self.frame.metaframe.metadata = {'additional': additional}

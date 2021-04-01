@@ -1,6 +1,6 @@
 """Manage CoilFrame metadata."""
 from abc import ABC
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field, fields
 
 import typing
 
@@ -11,7 +11,8 @@ import typing
 class MetaData(ABC):
     """Abstract base class. Extended by MetaFrame and MetaArray."""
 
-    _internal = []  # internal field list - exclude metadata return
+    # internal field list - exclude from metadata return
+    _internal: list[str] = field(init=False, default_factory=list)
 
     def __post_init__(self):
         """Validate input."""
@@ -80,7 +81,9 @@ class MetaData(ABC):
     def validate(self):
         """Run validation checks on input."""
         types = self.types
-        type_error = {field.name: types[field.name] for field in fields(self)
+        type_error = {field.name: [types[field.name],
+                                   type(getattr(self, field.name))]
+                      for field in fields(self)
                       if not isinstance(getattr(self, field.name),
                                         types[field.name])}
         if type_error:

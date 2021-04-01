@@ -1,6 +1,7 @@
 
 import pytest
 
+from nova.electromagnetic.dataframe import ColumnError
 from nova.electromagnetic.frame import Frame, SubSpaceError
 
 
@@ -41,8 +42,15 @@ def test_setattr():
     assert frame.subspace.Ic.to_list() == [3.6, 5.2, 10.0]
 
 
+def test_setattr_error():
+    frame = Frame(Required=['x', 'z'], Subspace=[])
+    frame.insert(4, range(7), Ic=5, Nt=3.6, link=True)
+    with pytest.raises(ColumnError):
+        frame.subspace.It = [3.6, 5.2, 10.4]
+
+
 def test_setattr_current():
-    frame = Frame(Required=['x', 'z'])
+    frame = Frame(Required=['x', 'z'], Subspace=['It'])
     frame.insert(4, range(7), Ic=5, Nt=3.6, link=True)
     frame.insert(4, range(2), Nt=5.2, link=False)
     frame.subspace.It = [3.6, 5.2, 10.4]
@@ -58,7 +66,7 @@ def test_setitem():
 
 
 def test_loc():
-    frame = Frame(Required=['x', 'z'], Additional=[])
+    frame = Frame(Required=['x', 'z'], Subspace=['Ic', 'It'])
     frame.insert(4, range(2), Ic=5, link=True)
     frame.insert(4, range(2), Ic=0, link=False)
     frame.subspace.loc[:, 'It'] = [3.6, 5.2, 0]
@@ -66,12 +74,12 @@ def test_loc():
 
 
 def test_loc_slice():
-    frame = Frame(Required=['x', 'z'],
-                  Additional=['Ic'], label='Coil', offset=15)
+    frame = Frame(Required=['x', 'z'], Subspace=['Ic'],
+                  label='Coil', offset=15)
     frame.insert(4, range(2), It=5, link=True)
     frame.insert(4, range(2), It=7.3, link=False)
-    frame.subspace.loc['Coil15':'Coil17', 'It'] = [3.6, 5.2]
-    assert frame.subspace.It.to_list() == [3.6, 5.2, 7.3]
+    frame.loc['Coil15':'Coil17', 'It'] = [3.6, 3.6, 5.2]
+    assert frame.It.to_list() == [3.6, 3.6, 5.2, 7.3]
 
 
 def test_loc_error():
@@ -188,6 +196,48 @@ def test_loc_space_access():
     frame.insert([5.5, 72.4], link=True, Ic=5.7)
     frame.insert([5.5, 72.4], link=True)
     _ = frame.loc['Coil1', 'x']
+
+
+def test_set_loc_subspace_error():
+    frame = Frame(Required=['x', 'z'], Subspace=['Ic'])
+    frame.insert(0.5, [6, 8.3], Nt=0.5, link=True)
+    with pytest.raises(IndexError):
+        frame.loc[:, 'Ic'] = 6.6
+
+
+def test_set_iloc_subspace_error():
+    frame = Frame(Required=['x', 'z'], Subspace=['Ic'])
+    frame.insert(0.5, [6, 8.3], Nt=0.5, link=True)
+    with pytest.raises(IndexError):
+        frame.iloc[:, 2] = 6.6
+
+
+def test_set_loc_label_subspace_error():
+    frame = Frame(Required=['x', 'z'], Subspace=['Ic'])
+    frame.insert(0.5, [6, 8.3], Nt=0.5, link=True)
+    with pytest.raises(IndexError):
+        frame.loc['Coil0', 'Ic'] = 6.6
+
+
+def test_set_iloc_row_subspace_error():
+    frame = Frame(Required=['x', 'z'], Subspace=['Ic'])
+    frame.insert(0.5, [6, 8.3], Nt=0.5, link=True)
+    with pytest.raises(IndexError):
+        frame.iloc[0, 2] = 6.6
+
+
+def test_set_loc_not_in_subspace_error():
+    frame = Frame(Required=['x', 'z'], Subspace=[])
+    frame.insert(0.5, [6, 8.3], Nt=0.5, link=True)
+    with pytest.raises(IndexError):
+        frame.subspace.loc[:, 'Ic'] = 6.6
+
+
+def test_set_iat_not_in_subspace_error():
+    frame = Frame(Required=['x', 'z'], Subspace=[])
+    frame.insert(0.5, [6, 8.3], Nt=0.5, link=True)
+    with pytest.raises(IndexError):
+        frame.subspace.iat[0, 2] = 6.6
 
 
 if __name__ == '__main__':

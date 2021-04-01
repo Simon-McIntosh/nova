@@ -2,6 +2,8 @@
 import pandas
 import numpy as np
 
+from nova.electromagnetic.metaframe import MetaFrame
+from nova.electromagnetic.dataframe import ColumnError
 from nova.electromagnetic.framearray import (
     FrameArray,
     FrameArrayLocMixin,
@@ -48,19 +50,19 @@ class SubSpace(SubSpaceIndexer, FrameArray):
         index = self.get_subindex(frame)
         columns = self.get_subcolumns(frame)
         array = self.get_subarray(frame, columns)
-        super().__init__(pandas.DataFrame(frame),
+        metaframe = MetaFrame(
+            index, required=[], additional=columns, available=[],
+            subspace=[], array=array, _lock=frame.metaframe._lock)
+        super().__init__(pandas.DataFrame(frame.loc[index, columns]),
                          index=index, columns=columns,
-                         Required=[], Additional=columns,
-                         Available=[], Array=array)
-        self.metaframe._lock = frame.metaframe._lock  # link locks
-        #self.update_subspace(frame)
+                         attrs={'metaframe': metaframe})
+        self.update_subspace(frame)
 
-    def update_subspace(self, frame):
-        """Update frame and subspace metadata."""
-        subspace = list(self.columns)
-        if subspace:
-            self.metaframe.metadata = {'Subspace': subspace}
-            frame.metaframe.metadata = {'subspace': subspace}
+    def __getattr__(self, name):
+        """Extend pandas.DataFrame.__getattr__. (frame.*)."""
+        if name not in self.attrs and name not in self.columns:
+            raise ColumnError(name)
+        return super().__getattr__(name)
 
     def __setitem__(self, col, value):
         """Raise error when subspace variable is set directly from frame."""
@@ -83,8 +85,8 @@ class SubSpace(SubSpaceIndexer, FrameArray):
         """Return subspace columns."""
         if frame.columns.empty:
             return frame.metaframe.subspace
-        if np.array([attr in frame.metaframe.subspace
-                     for attr in frame.columns]).any():
+        subspace = frame.metaframe.subspace
+        if np.array([attr in subspace for attr in frame.columns]).any():
             with frame.setlock(None, 'subspace'):  # update metaframe
                 frame.metadata = {'additional': frame.metaframe.subspace}
             return frame.metaframe.subspace
@@ -94,3 +96,10 @@ class SubSpace(SubSpaceIndexer, FrameArray):
     def get_subarray(frame, columns):
         """Return subarray - fast access variables."""
         return [attr for attr in frame.metaframe.array if attr in columns]
+
+    def update_subspace(self, frame):
+        """Update frame and subspace metadata."""
+        subspace = list(self.columns)
+        if subspace:
+            self.metaframe.metadata = {'Subspace': subspace}
+            frame.metaframe.metadata = {'subspace': subspace}

@@ -5,6 +5,7 @@ import numpy as np
 
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.dataframe import DataFrame
+from nova.electromagnetic.dataframe import SubSpaceLockError
 
 
 @dataclass
@@ -47,9 +48,23 @@ class Energize(MetaMethod):
 
     def _set_item(self, indexer, key, value):
         if self.generate and self.frame.get_col(key) == 'It':
-            if self.frame.lock('energize') is not True and self.incol['Nt']:
+            if self.frame.lock('energize') is False and self.incol['Nt']:
                 value /= indexer.__getitem__(self._get_key(key, 'Nt'))
+                try:
+                    self.frame['Ic'] = value
+                except SubSpaceLockError:
+                    index = self.frame.subspace.index
+                    index = index.intersection(value.index)
+                    self.frame.subspace.loc[index, 'Ic'] = value[index]
+                return
+                '''
+                if self.frame.metaframe.hascol('subspace', 'Ic'):
+                    self.frame['Ic'] = value
+                    index = self.frame.subspace.index.intersection(value.index)
+                    self.frame.subspace.loc[index, 'Ic'] = value[index]
+                    return
                 return indexer.__setitem__(self._get_key(key, 'Ic'), value)
+                '''
         return indexer.__setitem__(key, value)
 
     def _get_item(self, indexer, key):
@@ -57,6 +72,6 @@ class Energize(MetaMethod):
             if self.incol['Ic'] and self.incol['Nt']:
                 line_current = indexer.__getitem__(self._get_key(key, 'Ic'))
                 turn_number = indexer.__getitem__(self._get_key(key, 'Nt'))
-                with self.frame.setlock(True, 'energize'):
+                with self.frame.setlock(True, ['energize', 'subspace']):
                     self._set_item(indexer, key, line_current*turn_number)
         return indexer.__getitem__(key)

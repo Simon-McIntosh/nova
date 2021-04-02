@@ -21,6 +21,28 @@ class ColumnError(IndexError):
                          f'{name} is not allowed.')
 
 
+class SubSpaceColumnError(IndexError):
+    """Prevent direct access to variables not listed in metaframe.subspace."""
+
+    def __init__(self, col, subspace):
+        super().__init__(
+            f'{col} not specified as a subspace attribute '
+            f'metaframe.subspace {subspace}')
+
+
+class SubSpaceLockError(IndexError):
+    """Prevent direct access to frame's subspace variables."""
+
+    def __init__(self, name, col):
+        super().__init__(
+            f'{name} access is restricted for subspace attributes. '
+            f'Use frame.subspace.{name}[:, {col}] = *.\n\n'
+            'Lock may be overridden via the following context manager '
+            'but subspace will still overwrite (Cavieat Usor):\n'
+            'with frame.setlock(True, \'subspace\'):\n'
+            f'    frame.{name}[:, {col}] = *')
+
+
 class Series(pandas.Series):
     """Provide series constructor methods."""
 
@@ -69,7 +91,7 @@ class DataFrame(pandas.DataFrame):
     def metadata(self, metadata):
         self.metaframe.metadata = metadata
 
-    def _check_columns(self, name):
+    def check_column(self, name):
         """If name in metaframe.default, raise error if name in not columns."""
         if name in self.metaframe.default and name not in self.columns:
             raise ColumnError(name)
@@ -78,13 +100,13 @@ class DataFrame(pandas.DataFrame):
         """Extend pandas.DataFrame.__getattr__. (frame.*)."""
         if name in self.attrs:
             return self.attrs[name]
-        self._check_columns(name)
+        self.check_column(name)
         return super().__getattr__(name)
 
     def __setitem__(self, key, value):
         """Extend pandas.DataFrame setitem, check that key is in columns."""
         if self.lock('column') is False:
-            self._check_columns(key)
+            self.check_column(key)
         super().__setitem__(key, value)
 
     def update_metadata(self, data, columns, attrs, metadata):
@@ -109,7 +131,7 @@ class DataFrame(pandas.DataFrame):
         for attr in attrs:  # update from attrs (replacing data.attrs)
             if isinstance(attrs[attr], MetaData):
                 self.attrs[attr] = attrs[attr]
-        if not self.hasattr('metaframe'):
+        if not self.hasattrs('metaframe'):
             self.attrs['metaframe'] = MetaFrame(self.index)
 
     def trim_columns(self, columns):
@@ -330,13 +352,13 @@ class DataFrame(pandas.DataFrame):
             return True
         return False
 
-    def hasattr(self, attr):
+    def hasattrs(self, attr):
         """Return True if attr in self.attrs."""
         return attr in self.attrs
 
     def format_value(self, col, value):
         """Return vector with dtype as type(metaframe.default[col])."""
-        if not self.hasattr('metaframe') or col == 'link':
+        if not self.hasattrs('metaframe') or col == 'link':
             return value
         try:
             dtype = type(self.metaframe.default[col])

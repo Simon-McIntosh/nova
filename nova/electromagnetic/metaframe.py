@@ -15,7 +15,7 @@ from nova.electromagnetic.metadata import MetaData
 class MetaArray(MetaData):
     """Manage Frame metadata - accessed via Frame['attrs']."""
 
-    index: pandas.Index = field(default=None)
+    index: pandas.Index = field(default=pandas.Index([]))
     data: dict[str, Iterable[Union[str, int, float]]] = field(init=False)
 
     def __post_init__(self):
@@ -35,7 +35,7 @@ class MetaArray(MetaData):
 class MetaSet(MetaArray):
     """Manage variable access to frame subsets (subspace, energize, array)."""
 
-    subspace: list[str] = field(default_factory=lambda: ['Ic'])
+    subspace: list[str] = field(default_factory=lambda: [])
     energize: list[str] = field(default_factory=lambda: [])
     array: list[str] = field(default_factory=lambda: [])
     _lock: dict[str, bool] = field(default_factory=lambda: {

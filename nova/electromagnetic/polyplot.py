@@ -83,7 +83,7 @@ class Label:
         if hasattr(self, 'biot'):
             if 'field' not in self.biot:
                 self.field_unit = None
-        if not self.frame.hasattr('energize'):
+        if not self.frame.hasattrs('energize'):
             self.current_unit = None
 
 

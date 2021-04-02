@@ -37,6 +37,8 @@ class FrameSet(Mesh, Section):
         'link', 'part', 'frame', 'dx', 'dz', 'dA', 'dl_x', 'dl_z',
         'delta', 'nx', 'nz', 'section', 'turn', 'turn_fraction',
         'Ic', 'It', 'Nt', 'Nf', 'Psi', 'Bx', 'Bz', 'B', 'acloss'])
+    subspace: list[str] = field(repr=False, default_factory=lambda: [
+        'Ic'])
     frame: Frame = field(init=False, repr=False)
     subframe: Frame = field(init=False, repr=False)
     metadata: dict[str, Union[str, dict]] = field(repr=False,
@@ -49,11 +51,12 @@ class FrameSet(Mesh, Section):
         metadata |= self.metadata
         self.frame = Frame(
             required=self.required, additional=self.additional,
-            available=self.available,
+            available=self.available, subspace=self.subspace,
             exclude=['dl_x', 'dl_z', 'frame'], **metadata)
         self.subframe = Frame(
             required=self.required, additional=self.additional,
             available=self.available,
+            subspace=self.subspace+['It', 'Nt'],
             exclude=['turn', 'turn_fraction', 'Nf', 'delta'],
             delim='_', **metadata)
 

@@ -56,7 +56,7 @@ class Indexer(ABC):
     def extract_attrs(self, data, attrs):
         """Extend DataFrame.extract_attrs, insert metaarray."""
         super().extract_attrs(data, attrs)
-        if not self.hasattr('indexer'):
+        if not self.hasattrs('indexer'):
             self.attrs['indexer'] = LocIndexer(self.loc_mixin)  # init indexer
 
     @property
@@ -84,7 +84,7 @@ class Indexer(ABC):
         """Extend DataFrame.iat, restrict subspace access."""
         return self.indexer.iat("iat", self)
 
-    def get_col(self, key):
+    def get_col(self, key) -> str:
         """Return column label."""
         if isinstance(key, tuple):
             col = key[-1]

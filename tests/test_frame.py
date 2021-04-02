@@ -1,6 +1,7 @@
 import pytest
 import pandas
 
+from nova.electromagnetic.dataframe import ColumnError
 from nova.electromagnetic.frame import Frame
 
 
@@ -164,9 +165,7 @@ def test_exclude():
 def test_warn_new_attribute():
     frame = Frame({'x': [3, 4], 'z': 0}, Required=['x', 'z'],
                   Subspace=[])
-    with pytest.warns(UserWarning,
-                      match='Pandas doesn\'t allow columns to be created '
-                            'via a new attribute name'):
+    with pytest.raises(ColumnError):
         frame.Ic = [1, 2]
 
 

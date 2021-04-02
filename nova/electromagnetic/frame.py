@@ -4,6 +4,7 @@ from typing import Optional, Collection, Any
 
 import numpy as np
 
+from nova.electromagnetic.dataframe import SubSpaceLockError
 from nova.electromagnetic.framearray import (
     FrameArray, FrameArrayLocMixin, FrameArrayIndexer
     )
@@ -16,32 +17,9 @@ from nova.electromagnetic.polyplot import PolyPlot
 
 # pylint: disable=too-many-ancestors
 
-class SubSpaceError(IndexError):
-    """Prevent direct access to frame's subspace variables."""
-
-    def __init__(self, name, col):
-        super().__init__(
-            f'{name} access is restricted for subspace attributes. '
-            f'Use frame.subspace.{name}[:, {col}] = *.\n\n'
-            'Lock may be overridden via the following context manager '
-            'but subspace will still overwrite (Cavieat Usor):\n'
-            'with frame.setlock(None):\n'
-            f'    frame.{name}[:, {col}] = *')
-
-
 class FrameLocMixin(FrameArrayLocMixin):
     """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
 
-    def __setitem__(self, key, value):
-        """Raise error when subspace variable is set directly from frame."""
-        col = self.obj.get_col(key)
-        value = self.obj.format_value(col, value)
-        if self.obj.metaframe.hascol('subspace', col):
-            if self.obj.lock('subspace') is False:
-                #key = self.obj.get_subkey(key)
-                #getattr(self.obj.subspace, self.name)[key] = value
-                raise SubSpaceError(self.name, col)
-        return super().__setitem__(key, value)
 
     def __getitem__(self, key):
         """Inflate subspace items prior to return."""
@@ -56,6 +34,18 @@ class FrameLocMixin(FrameArrayLocMixin):
             if self.obj.lock('subspace') is False:
                 self.obj.inflate_subspace('Ic')
         return super().__getitem__(key)
+
+
+    def __setitem__(self, key, value):
+        """Raise error when subspace variable is set directly from frame."""
+        col = self.obj.get_col(key)
+        value = self.obj.format_value(col, value)
+        if self.obj.metaframe.hascol('subspace', col):
+            if self.obj.lock('subspace') is False:
+                #key = self.obj.get_subkey(key)
+                #getattr(self.obj.subspace, self.name)[key] = value
+                raise SubSpaceLockError(self.name, col)
+        return super().__setitem__(key, value)
 
 
 class FrameIndexer(FrameArrayIndexer):
@@ -117,17 +107,17 @@ class Frame(FrameIndexer, FrameArray):
     def __setitem__(self, col, value):
         """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
         value = self.format_value(col, value)
-        if self.hasattr('subspace'):
+        if self.hasattrs('subspace'):
             if self.metaframe.hascol('subspace', col):
                 #if self.lock('subspace') is False:
                 #    return self.subspace.__setitem__(col, value)
                 if self.lock('subspace') is False:
-                    raise SubSpaceError('setitem', col)
+                    raise SubSpaceLockError('setitem', col)
         return super().__setitem__(col, value)
 
     def update_frame(self):
         """Propagate subspace varables to frame."""
-        if self.hasattr('subspace'):
+        if self.hasattrs('subspace'):
             for col in [col for col in self.subspace if col in self]:
                 self.inflate_subspace(col)
         super().update_frame()  # update dataarray
@@ -140,7 +130,9 @@ class Frame(FrameIndexer, FrameArray):
             value = value.to_numpy()
         try:
             value = value[self.subref]  # inflate if subref set
-        except AttributeError:
+            if col == 'Ic':
+                value *= self.factor
+        except (AttributeError, IndexError):
             pass
         with self.setlock(True, 'subspace'):
             super().__setitem__(col, value)

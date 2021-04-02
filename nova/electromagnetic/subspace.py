@@ -3,7 +3,7 @@ import pandas
 import numpy as np
 
 from nova.electromagnetic.metaframe import MetaFrame
-from nova.electromagnetic.dataframe import ColumnError
+from nova.electromagnetic.dataframe import SubSpaceColumnError
 from nova.electromagnetic.framearray import (
     FrameArray,
     FrameArrayLocMixin,
@@ -11,15 +11,6 @@ from nova.electromagnetic.framearray import (
     )
 
 # pylint: disable=too-many-ancestors
-
-
-class SubSpaceAccessError(IndexError):
-    """Prevent direct access to variables not listed in metaframe.subspace."""
-
-    def __init__(self, col, subspace):
-        super().__init__(
-            f'{col} not specified as a subspace attribute '
-            f'metaframe.subspace {subspace}')
 
 
 class SubspaceLocMixin(FrameArrayLocMixin):
@@ -30,7 +21,7 @@ class SubspaceLocMixin(FrameArrayLocMixin):
         col = self.obj.get_col(key)
         if self.obj.lock('subspace') is False:
             if not self.obj.metaframe.hascol('subspace', col):
-                raise SubSpaceAccessError(col, self.obj.metaframe.subspace)
+                raise SubSpaceColumnError(col, self.obj.metaframe.subspace)
         return super().__setitem__(key, value)
 
 
@@ -60,15 +51,15 @@ class SubSpace(SubSpaceIndexer, FrameArray):
 
     def __getattr__(self, name):
         """Extend pandas.DataFrame.__getattr__. (frame.*)."""
-        if name not in self.attrs and name not in self.columns:
-            raise ColumnError(name)
+        if name not in self.attrs:
+            self.check_column(name)
         return super().__getattr__(name)
 
     def __setitem__(self, col, value):
         """Raise error when subspace variable is set directly from frame."""
         if self.lock('subspace') is False:
             if not self.metaframe.hascol('subspace', col):
-                raise SubSpaceAccessError(col, self.metaframe.subspace)
+                raise SubSpaceColumnError(col, self.metaframe.subspace)
         return super().__setitem__(col, value)
 
     @staticmethod

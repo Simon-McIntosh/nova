@@ -7,6 +7,17 @@ def test_init_metaframe():
     MetaFrame()
 
 
+def test_clear():
+    metaframe = MetaFrame(required=['x', 'y', 'z'])
+    metaframe.clear('required')
+    assert metaframe.required == []
+
+
+def test_type_error():
+    with pytest.raises(TypeError):
+        MetaFrame(required={'x': 3})
+
+
 def test_replace_required():
     metaframe = MetaFrame(required=['x', 'z'])
     metaframe.metadata = {'required': []}

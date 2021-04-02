@@ -51,8 +51,8 @@ class MultiPoint(MetaMethod):
 
         """
         isna = pandas.isna(self.frame.link)
-        self.frame.at[isna, 'link'] = self.frame.metaframe.default['link']
-        self.frame.at[isna, 'factor'] = \
+        self.frame.loc[isna, 'link'] = self.frame.metaframe.default['link']
+        self.frame.loc[isna, 'factor'] = \
             self.frame.metaframe.default['factor']
         isnumeric = np.array([isinstance(link, (int, float)) &
                               ~isinstance(link, bool)
@@ -67,6 +67,7 @@ class MultiPoint(MetaMethod):
             with self.frame.setlock(True, 'multipoint'):
                 factor = np.ones(len(self.frame))
                 factor[isnumeric] = self.frame.link[isnumeric]
+                factor = self.frame.factor
                 factor = factor[istrue | isnumeric][1:]
                 self.link(index, factor)
         self.build()

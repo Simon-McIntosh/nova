@@ -17,17 +17,14 @@ from nova.electromagnetic.polyplot import PolyPlot
 
 # pylint: disable=too-many-ancestors
 
+
 class FrameLocMixin(FrameArrayLocMixin):
     """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
-
 
     def __getitem__(self, key):
         """Inflate subspace items prior to return."""
         col = self.obj.get_col(key)
         if self.obj.metaframe.hascol('subspace', col):
-            #if self.obj.lock('subspace') is False:
-            #    key = self.obj.get_subkey(key)
-            #    return getattr(self.obj.subspace, self.name)[key]
             if self.obj.lock('subspace') is False:
                 self.obj.inflate_subspace(col)
         elif col == 'It' and self.obj.metaframe.hascol('subspace', 'Ic'):
@@ -35,15 +32,12 @@ class FrameLocMixin(FrameArrayLocMixin):
                 self.obj.inflate_subspace('Ic')
         return super().__getitem__(key)
 
-
     def __setitem__(self, key, value):
         """Raise error when subspace variable is set directly from frame."""
         col = self.obj.get_col(key)
         value = self.obj.format_value(col, value)
         if self.obj.metaframe.hascol('subspace', col):
             if self.obj.lock('subspace') is False:
-                #key = self.obj.get_subkey(key)
-                #getattr(self.obj.subspace, self.name)[key] = value
                 raise SubSpaceLockError(self.name, col)
         return super().__setitem__(key, value)
 
@@ -86,17 +80,9 @@ class Frame(FrameIndexer, FrameArray):
         self.update_frame()
         return super().__repr__()
 
-    #def __setattr__(self, col, value):
-    #    """Extend DataFrame.__setattr__ to provide access to subspace."""
-    #    if self.metaframe.hascol('subspace', col):
-    #        return self.subspace.__setattr__(col, value)
-    #    return super().__setattr__(col, value)
-
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
         if self.metaframe.hascol('subspace', col):
-            #if self.lock('subspace') is False:
-            #    return self.subspace.__getitem__(col)
             if self.lock('subspace') is False:
                 self.inflate_subspace(col)
         elif col == 'It' and self.metaframe.hascol('subspace', 'Ic'):
@@ -109,8 +95,6 @@ class Frame(FrameIndexer, FrameArray):
         value = self.format_value(col, value)
         if self.hasattrs('subspace'):
             if self.metaframe.hascol('subspace', col):
-                #if self.lock('subspace') is False:
-                #    return self.subspace.__setitem__(col, value)
                 if self.lock('subspace') is False:
                     raise SubSpaceLockError('setitem', col)
         return super().__setitem__(col, value)
@@ -140,16 +124,17 @@ class Frame(FrameIndexer, FrameArray):
 
 def set_current():
     """Test current update with randomized input (check update speed)."""
-    # frame.subspace.metaarray.data['Ic'] = np.random.rand(len(frame.subspace))
-    frame.Ic = np.random.rand(len(frame.subspace))
+    # frame.subspace.metaframe.data['Ic'] = np.random.rand(len(frame.subspace))
+    frame.subspace.Ic = np.random.rand(len(frame.subspace))
     # _ = frame.Ic
 
 
 if __name__ == '__main__':
 
-    frame = Frame(required=['x', 'z'], Available=['It'], Subspace=['Ic'])
+    frame = Frame(required=['x', 'z'], Available=['It'], Subspace=['Ic'],
+                  Array=['Ic'])
     frame.insert([-4, -5], 1, Ic=6.5, label='CS')
-    frame.insert([-4, -5], 3, Ic=4, Nt=20, label='PF', link=True)
+    frame.insert(range(4000), 3, Ic=4, Nt=20, label='PF', link=True)
     frame.multipoint.link(['PF1', 'CS0'], factor=1)
 
     print(frame)

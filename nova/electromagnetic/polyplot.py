@@ -15,7 +15,7 @@ import shapely.geometry
 
 from nova.electromagnetic.metamethod import MetaMethod
 
-from nova.electromagnetic.dataframe import DataFrame
+from nova.electromagnetic.dataframe import DataFrame, ColumnError
 from nova.utilities.IO import human_format
 from nova.utilities.pyplot import plt
 
@@ -268,12 +268,12 @@ class PolyPlot(Display, Label, MetaMethod):
             if not self.zeroturn:  # exclude zeroturn filaments (Nt == 0)
                 with self.frame.setlock(True, 'subspace'):
                     index &= (self.frame.loc[:, 'Nt'] != 0)
-        except (AttributeError, KeyError):  # turns not set
+        except (AttributeError, KeyError, ColumnError):  # turns not set
             pass
         try:
             if not self.feedback:  # exclude stabilization coils
                 with self.frame.setlock(True, 'subspace'):
                     index &= ~self.frame.feedback
-        except (AttributeError, KeyError):  # feedback not set
+        except (AttributeError, KeyError, ColumnError):  # feedback not set
             pass
         return index

@@ -1,17 +1,37 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 
 from dataclasses import dataclass, field
-from typing import Union
+from typing import Union, Any
 
+import numpy as np
 import pandas
+import shapely.geometry
+import shapely.strtree
+import scipy.interpolate
 
 from nova.electromagnetic.frame import Frame
-from nova.electromagnetic.mesh import Mesh
+from nova.electromagnetic.dataframe import DataFrame
+from nova.electromagnetic.pfcoil import PFcoil
+from nova.electromagnetic.pfshell import PFshell
+from nova.utilities import geom
+
+
+@dataclass
+class Mesh:
+    """Manage mesh dimensions."""
+
+    dpol: float = -1
+    dplasma: float = 0.25
+    dshell: float = 2.5
+    dsubshell: float = 0.25
+    dfield: float = 0.2
+    frame: DataFrame = field(init=False, repr=False)
+    subframe: DataFrame = field(init=False, repr=False)
 
 
 @dataclass
 class Section:
-    """Set default sectional properties."""
+    """Manage sectional properties."""
 
     section: str = 'rectangle'
     turn: str = 'circle'
@@ -19,15 +39,8 @@ class Section:
 
 
 @dataclass
-class FrameSet(Mesh, Section):
-    """
-    Build frameset.
-
-    - poloidal: add poloidal coils.
-    - shell: add poloidal shells.
-    - plasma: add plasma (poloidal).
-
-    """
+class MetaData:
+    """Manage frameset metadata."""
 
     required: list[str] = field(repr=False, default_factory=lambda: [
         'x', 'z', 'dl', 'dt'])
@@ -39,10 +52,25 @@ class FrameSet(Mesh, Section):
         'Ic', 'It', 'Nt', 'Nf', 'Psi', 'Bx', 'Bz', 'B', 'acloss'])
     subspace: list[str] = field(repr=False, default_factory=lambda: [
         'Ic'])
-    frame: Frame = field(init=False, repr=False)
-    subframe: Frame = field(init=False, repr=False)
     metadata: dict[str, Union[str, dict]] = field(repr=False,
                                                   default_factory=dict)
+
+
+@dataclass
+class FrameSet(Mesh, Section, MetaData):
+    """
+    Build frameset.
+
+    - poloidal: add poloidal coils.
+    - shell: add poloidal shells.
+    - plasma: add plasma (poloidal).
+
+    """
+
+    frame: Frame = field(init=False, repr=False)
+    subframe: Frame = field(init=False, repr=False)
+    pfcoil: PFcoil = field(init=False, repr=False)
+    pfshell: PFshell = field(init=False, repr=False)
 
     def __post_init__(self):
         """Init coil and subcoil."""
@@ -59,32 +87,9 @@ class FrameSet(Mesh, Section):
             subspace=self.subspace+['It', 'Nt'],
             exclude=['turn', 'turn_fraction', 'Nf', 'delta'],
             delim='_', **metadata)
-
-    def poloidal(self, *required, iloc=None, mesh=True, **additional):
-        """
-        Add poloidal coil(s).
-
-        Parameters
-        ----------
-        *required : Union[DataFrame, dict, list]
-            Required input.
-        iloc : int, optional
-            Index before which coils are inserted. The default is None (-1).
-        mesh : bool, optional
-            Mesh coil. The default is True.
-        **additional : dict[str, Any]
-            Additional input.
-
-        Returns
-        -------
-        None.
-
-        """
-        delta = additional.pop('dpol', self.dpol)
-        additional = {'delta': delta} | additional
-        index = self.frame.insert(*required, iloc=iloc, **additional)
-        if mesh:
-            self.mesh_poloidal(index=index)
+        self.pfcoil = PFcoil(self.frame, self.subframe, self.dpol)
+        self.pfshell = PFshell(self.frame, self.subframe,
+                               self.dshell, self.dsubshell)
 
     def drop(self, index=None):
         """
@@ -152,7 +157,9 @@ class FrameSet(Mesh, Section):
 if __name__ == '__main__':
 
     frameset = FrameSet(dpol=0.05, section='circle')
-    frameset.poloidal(range(3), 1, 0.75, 0.75, link=True, delta=0.2)
+    frameset.pfcoil.insert(range(3), 1, 0.75, 0.75, link=True, delta=0.2)
+
+    frameset.pfshell.insert([1, 2, 3], [3, 4, 4], dt=0.1)
     frameset.subframe.polyplot()
 
     print(frameset.frame)

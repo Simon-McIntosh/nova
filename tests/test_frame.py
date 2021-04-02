@@ -1,6 +1,8 @@
 import pytest
 import pandas
 
+import numpy as np
+
 from nova.electromagnetic.dataframe import ColumnError
 from nova.electromagnetic.frame import Frame
 
@@ -178,6 +180,28 @@ def test_drop():
     frame.drop('PF4')
     frame.drop(['PF0', 'PF1'])
     assert frame.subspace.index.to_list() == ['PF2', 'PF5']
+
+
+def test_multipoint_factor():
+    frame = Frame(required=['Ic'], Subspace=['Ic'], Array=['Ic'])
+    frame.update_columns()
+    frame.insert(5*np.ones(2), Nt=[1, 3])
+    frame.insert(2*np.ones(2), Nt=[2, 1], link=True, factor=-0.5)
+    frame.insert(7.75*np.ones(2))
+    frame.insert(6*np.ones(3), link=True, factor=-5.0, Nt=[1, 2, 3])
+    assert frame.loc[:, 'It'].to_list() == [5, 15, 4, -1, 7.75, 7.75,
+                                            6, -60, -90]
+
+
+def test_multipoint_factor_Ic_It():
+    frame = Frame(required=['Ic'], Subspace=['Ic', 'It'], Array=['Ic'])
+    frame.update_columns()
+    frame.insert(5*np.ones(2), Nt=[1, 3])  # note, turn info discarded
+    frame.insert(2*np.ones(2), Nt=[2, 1], link=True, factor=-0.5)
+    frame.insert(7.75*np.ones(2))
+    frame.insert(6*np.ones(3), link=True, factor=-5.0, Nt=[1, 2, 3])
+    assert frame.loc[:, 'It'].to_list() == [5, 15, 4, 4, 7.75, 7.75,
+                                            6, 6, 6]
 
 
 if __name__ == '__main__':

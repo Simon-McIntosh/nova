@@ -17,7 +17,7 @@ class ColumnError(IndexError):
     """Prevent column creation."""
 
     def __init__(self, name):
-        super().__init__('Column creation via a new attribute name '
+        super().__init__('Column access via a new attribute name '
                          f'{name} is not allowed.')
 
 
@@ -319,8 +319,12 @@ class DataFrame(pandas.DataFrame):
             # set defaults
             additional_unset = [attr not in columns
                                 for attr in self.metaframe.additional]
-            if np.array(additional_unset).any() and not self.index.empty:
+            if np.array(additional_unset).any():
                 unset = np.array(self.metaframe.additional)[additional_unset]
+                if self.index.empty:  # insert additional columns
+                    for attr in unset:
+                        self[attr] = None
+                    return
                 for attr in unset:
                     self.loc[:, attr] = self.metaframe.default[attr]
                 turn_set = np.array([attr in self.columns

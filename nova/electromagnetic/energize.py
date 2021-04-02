@@ -13,7 +13,7 @@ class Energize(MetaMethod):
     """Manage dependant frame energization parameters."""
 
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['Nt', 'It'])
+    required: list[str] = field(default_factory=lambda: ['It', 'Nt'])
     additional: list[str] = field(default_factory=lambda: ['Ic'])
     incol: dict[str, bool] = field(default_factory=lambda: {
         'Ic': False, 'Nt': False})

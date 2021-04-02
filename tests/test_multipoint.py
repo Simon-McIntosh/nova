@@ -34,7 +34,7 @@ def test_data_init_multipoint_true():
         frame.factor.to_list() == [1, 1, 1]
 
 
-def test_add_coil_multipoint_default_false():
+def test_insert_multipoint_default_false():
     frame = Frame({'x': [1, 3], 'z': 0}, link=False, name='Coil0',
                   metadata={'Required': ['x', 'z'], 'Additional': []})
     frame.insert(4, [7, 8], link=True)
@@ -42,7 +42,7 @@ def test_add_coil_multipoint_default_false():
         frame.factor.to_list() == [1, 1, 1, 1]
 
 
-def test_add_coil_multipoint_default_true():
+def test_insert_multipoint_default_true():
     frame = Frame({'x': [1, 3], 'z': 0}, link=True, name='Coil0',
                   metadata={'Required': ['x', 'z'], 'Additional': []})
     frame.insert(4, [7, 8], link=True)
@@ -50,12 +50,22 @@ def test_add_coil_multipoint_default_true():
         frame.factor.to_list() == [1, 1, 1, 1]
 
 
-def test_add_coil_multipoint_default_float():
-    frame = Frame({'x': [1, 3], 'z': 0}, link=0.5, name='Coil0',
+def test_insert_multipoint_default_float():
+    frame = Frame({'x': [1, 3], 'z': 0}, factor=0.5, name='Coil0', link=True,
                   metadata={'Required': ['x', 'z'], 'Additional': []})
-    frame.insert(4, [7, 8], link=True)
+    frame.insert(4, [7, 8], link=True, factor=1)
     assert frame.link.to_list() == ['', 'Coil0', '', 'Coil2'] and \
         frame.factor.to_list() == [1, 0.5, 1, 1]
+
+
+def test_insert_negative_factor_Ic():
+    frame = Frame({'x': [1, 3], 'z': 0}, factor=0.5, name='Coil0', link=True,
+                  metadata={'Required': ['x', 'z']},
+                  subspace=['Ic'])
+    frame.insert(4, [7, 8], link=True, factor=-0.5)
+    frame.insert(4, [7, 8], link=True, factor=-1)
+    frame.subspace.Ic = 10
+    assert frame.loc[:, 'Ic'].to_list() == [10, 5, 10, -5, 10, -10]
 
 
 def test_default_multipoint_true():

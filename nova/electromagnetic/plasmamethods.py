@@ -47,44 +47,6 @@ class PlasmaMethods:
         self._dPlasma = dPlasma
         self._default_attributes['dPlasma'] = dPlasma
 
-    def add_plasma(self, plasma_boundary, name='Plasma',
-                   dPlasma=None, **kwargs):
-        """
-        Add plasma coil to coilset and generate plasma grid.
-
-        Plasma coil inserted into coilframe with subcoils meshed accoriding
-        to dPlasma and trimmed to the inital boundary curve.
-
-        Parameters
-        ----------
-        plasma_boundary : array_like or Polygon
-            External plasma boundary. Coerced into positively oriented curve.
-        name : str, optional
-            Plasma coil name.
-        dPlasma : float, optional
-            Plasma subcoil dimension. If None defaults to self.dPlasma
-        **kwargs : dict
-            Keyword arguments passed to PlasmaGrid.generate_grid()
-
-        Returns
-        -------
-        None.
-
-        """
-        if dPlasma is not None:  # update plasma subcoil dimension
-            self.dPlasma = dPlasma
-        self.biot_instances = ['plasmafilament', 'plasmagrid']
-        self.plasma_boundary = plasma_boundary
-        # construct plasma coil from polygon
-        self.add_coil(0, 0, 0, 0, polygon=self.plasma_boundary,
-                      cross_section='polygon', turn_section='rectangle',
-                      dCoil=self.dPlasma, name=name, plasma=True, active=True,
-                      part='plasma')
-        self.plasmagrid.generate_grid(**kwargs)
-        grid_factor = self.dPlasma/self.plasmagrid.dx
-        # self._add_vertical_stabilization_coils()
-        self.plasmagrid.cluster_factor = 1.5*grid_factor
-        self.plasmafilament.add_plasma()
 
     def _add_vertical_stabilization_coils(self, apex=25, dz_factor=1.1,
                                           n_subcoil=25):

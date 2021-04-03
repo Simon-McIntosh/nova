@@ -11,7 +11,7 @@ from nova.electromagnetic.polygen import polygen
 
 
 @dataclass
-class PFcoil:
+class Coil:
     """Mesh poloidal field coils (CS and PF)."""
 
     frame: Frame = field(repr=False)

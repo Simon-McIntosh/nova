@@ -13,7 +13,7 @@ from nova.utilities import geom
 
 
 @dataclass
-class PFshell:
+class Shell:
     """Mesh poloidal shell elements."""
 
     frame: Frame = field(repr=False)

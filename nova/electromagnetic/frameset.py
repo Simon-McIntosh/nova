@@ -1,46 +1,16 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 
 from dataclasses import dataclass, field
-from typing import Union, Any
+from typing import Union
 
-import numpy as np
 import pandas
-import shapely.geometry
-import shapely.strtree
-import scipy.interpolate
 
 from nova.electromagnetic.frame import Frame
-from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.pfcoil import PFcoil
-from nova.electromagnetic.pfshell import PFshell
-from nova.utilities import geom
 
 
 @dataclass
-class Mesh:
-    """Manage mesh dimensions."""
-
-    dpol: float = -1
-    dplasma: float = 0.25
-    dshell: float = 2.5
-    dsubshell: float = 0.25
-    dfield: float = 0.2
-    frame: DataFrame = field(init=False, repr=False)
-    subframe: DataFrame = field(init=False, repr=False)
-
-
-@dataclass
-class Section:
-    """Manage sectional properties."""
-
-    section: str = 'rectangle'
-    turn: str = 'circle'
-    turn_fraction: float = 1
-
-
-@dataclass
-class MetaData:
-    """Manage frameset metadata."""
+class FrameSet:
+    """Build frameset. Link frame to subframe. Manage boolean methods."""
 
     required: list[str] = field(repr=False, default_factory=lambda: [
         'x', 'z', 'dl', 'dt'])
@@ -55,41 +25,18 @@ class MetaData:
     metadata: dict[str, Union[str, dict]] = field(repr=False,
                                                   default_factory=dict)
 
-
-@dataclass
-class FrameSet(Mesh, Section, MetaData):
-    """
-    Build frameset.
-
-    - poloidal: add poloidal coils.
-    - shell: add poloidal shells.
-    - plasma: add plasma (poloidal).
-
-    """
-
-    frame: Frame = field(init=False, repr=False)
-    subframe: Frame = field(init=False, repr=False)
-    pfcoil: PFcoil = field(init=False, repr=False)
-    pfshell: PFshell = field(init=False, repr=False)
-
     def __post_init__(self):
         """Init coil and subcoil."""
-        metadata = {'section': self.section, 'turn': self.turn,
-                    'turn_fraction': self.turn_fraction}
-        metadata |= self.metadata
         self.frame = Frame(
             required=self.required, additional=self.additional,
             available=self.available, subspace=self.subspace,
-            exclude=['dl_x', 'dl_z', 'frame'], **metadata)
+            exclude=['dl_x', 'dl_z', 'frame'], **self.metadata)
         self.subframe = Frame(
             required=self.required, additional=self.additional,
             available=self.available,
             subspace=self.subspace+['It', 'Nt'],
             exclude=['turn', 'turn_fraction', 'Nf', 'delta'],
-            delim='_', **metadata)
-        self.pfcoil = PFcoil(self.frame, self.subframe, self.dpol)
-        self.pfshell = PFshell(self.frame, self.subframe,
-                               self.dshell, self.dsubshell)
+            delim='_', **self.metadata)
 
     def drop(self, index=None):
         """
@@ -117,16 +64,6 @@ class FrameSet(Mesh, Section, MetaData):
                 self.frame.drop(name)
         return loc
 
-    def _get_iloc(self, index):
-        iloc = [None, None]
-        for name in index:
-            if name in self.coil.index:
-                iloc[0] = self.coil.index.get_loc(index[0])
-                subindex = self.coil.subindex[index[0]][0]
-                iloc[1] = self.subcoil.index.get_loc(subindex)
-                break
-        return iloc
-
     def translate(self, index=None, dx=0, dz=0):
         """
         Translate coil in polidal plane.
@@ -153,13 +90,18 @@ class FrameSet(Mesh, Section, MetaData):
         for name in index:
             self.subcoil.translate(self.coil.loc[name, 'subindex'], dx, dz)
 
+    def _get_iloc(self, index):
+        iloc = [None, None]
+        for name in index:
+            if name in self.coil.index:
+                iloc[0] = self.coil.index.get_loc(index[0])
+                subindex = self.coil.subindex[index[0]][0]
+                iloc[1] = self.subcoil.index.get_loc(subindex)
+                break
+        return iloc
+
 
 if __name__ == '__main__':
 
-    frameset = FrameSet(dpol=0.05, section='circle')
-    frameset.pfcoil.insert(range(3), 1, 0.75, 0.75, link=True, delta=0.2)
-
-    frameset.pfshell.insert([1, 2, 3], [3, 4, 4], dt=0.1)
-    frameset.subframe.polyplot()
-
+    frameset = FrameSet(required=['rms'])
     print(frameset.frame)

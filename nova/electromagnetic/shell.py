@@ -45,7 +45,7 @@ class Shell:
 
         """
         attrs = {'label': 'Shl', 'delim': '', 'section': 'shell',
-                 'turn': 'shell', 'turn_fraction': 1, 'active': False,
+                 'turn': 'shell', 'scale': 1, 'active': False,
                  'dshell': self.dshell, 'delta': self.delta}
         attrs |= additional
         shell, subshell = self._mesh(

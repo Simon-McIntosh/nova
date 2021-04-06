@@ -43,21 +43,21 @@ def test_pfcoil():
 
 def test_filament_number():
     coilset = CoilSet()
-    coilset.coil.insert(1.75, 0.5, 2.5, 2.5, turn_fraction=1, delta=-20)
+    coilset.coil.insert(1.75, 0.5, 2.5, 2.5, scale=1, delta=-20)
     assert coilset.frame['Nf'][0] == 20
 
 
 def test_circular_cross_section():
     coilset = CoilSet()
     coilset.coil.insert(1.75, 0.5, 2.5, 2.5, section='circle',
-                        turn_fraction=1, delta=-20)
+                        scale=1, delta=-20)
     assert np.isclose(np.pi*2.5**2/4, coilset.subframe.dA.sum(), rtol=1e-3)
 
 
 def test_rectangular_cross_section():
     coilset = CoilSet()
     coilset.coil.insert(1.75, 0.5, 2.5, 1.5, section='rectangle',
-                        turn_fraction=1, delta=-20)
+                        scale=1, delta=-20)
     assert np.isclose(2.5*1.5, coilset.subframe.dA.sum(), rtol=1e-3)
 
 
@@ -73,7 +73,7 @@ def test_flag_current_update():
 def test_multipoint_link():
     coilset = CoilSet(dcoil=0, subspace=['Ic'])
     coilset.coil.insert(7, -3, 1.5, 1.5, name='PF6', part='PF',
-                        Nt=4, It=1e6, turn='circle', turn_fraction=0.7,
+                        Nt=4, It=1e6, turn='circle', scale=0.7,
                         delta=0.12)
     coilset.coil.insert(7, -0.5, 1.5, 1.5, name='PF8', part='PF', Nt=5,
                         Ic=2e3, section='circle', turn='square', delta=0.12)

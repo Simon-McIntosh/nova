@@ -10,6 +10,19 @@ Created on Thu Feb 18 20:33:42 2021
 
 """
 
+@dataclass
+class Section:
+    """Manage sectional properties."""
+
+    section: str = 'rectangle'
+    turn: str = 'circle'
+    turn_fraction: float = 1
+
+    def __post_init__(self):
+        metadata = {'section': self.section, 'turn': self.turn,
+                    'turn_fraction': self.turn_fraction}
+        metadata |= self.metadata
+
     @property
     def metaattrs(self) -> list[str]:
         """Return metadata attrs."""

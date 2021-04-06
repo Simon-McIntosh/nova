@@ -7,7 +7,7 @@ import shapely.geometry
 
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.polygen import (
-    polygen, polyframe, polyshape, boundbox
+    polygen, polyframe, polyshape, boxbound
     )
 from nova.electromagnetic.dataframe import DataFrame
 
@@ -21,14 +21,18 @@ class PolyGeom:
     z_centroid: float = field(default=None)
     length: float = field(default=None)
     thickness: float = field(default=None)
+    scale: float = 1
     polygon: shapely.geometry.Polygon = field(default=None, repr=False)
 
     def __post_init__(self):
         """Update section and generate polygon as required."""
         self.section = polyshape[self.section]  # inflate shorthand
+        self.length *= self.scale
+        self.thickness *= self.scale
         if pandas.isna(self.polygon):  # generate polygon if not set
             self.polygon = polygen(self.section)(
-                self.x_centroid, self.z_centroid, self.length, self.thickness)
+                self.x_centroid, self.z_centroid,
+                self.length, self.thickness)
 
     def extract(self):
         """Return geometrical feature set."""
@@ -78,7 +82,7 @@ class PolyGeom:
         """Return width and height of polygon bounding box."""
         if self.section in polyshape:
             if self.section in ['circle', 'square']:
-                self.length = self.thickness = boundbox(self.length,
+                self.length = self.thickness = boxbound(self.length,
                                                         self.thickness)
             return self.length, self.thickness
         bounds = self.polygon.bounds
@@ -141,7 +145,8 @@ class Polygon:
             index = self.frame.index[rms_unset]
             index_length = len(index)
             section = self.frame.loc[index, 'section'].values
-            coords = self.frame.loc[index, ['x', 'z', 'dl', 'dt']].to_numpy()
+            coords = self.frame.loc[
+                index, ['x', 'z', 'dl', 'dt', 'scale']].to_numpy()
             polygon = self.frame.loc[index, 'poly'].values
             polygon_update = self.frame.loc[index, 'poly'].isna()
             geom = np.empty((index_length, len(self.features)), dtype=float)
@@ -166,7 +171,7 @@ class Geometry(MetaMethod):
     required: list[str] = field(default_factory=lambda: [
         'x', 'z', 'section'])
     additional: list[str] = field(default_factory=lambda: [
-        'dl', 'dt', 'rms', 'dx', 'dz', 'dA', 'poly'])
+        'dl', 'dt', 'scale', 'rms', 'dx', 'dz', 'dA', 'poly'])
     require_all: bool = field(repr=False, default=True)
     polygon: Polygon = field(init=False, repr=False)
 

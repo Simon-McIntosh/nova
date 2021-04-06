@@ -3,6 +3,7 @@ import shapely
 import shapely.geometry
 import shapely.ops
 import numpy as np
+import string
 
 polyshape = \
     dict.fromkeys(['circle', 'c', 'o'], 'circle') | \
@@ -11,10 +12,11 @@ polyshape = \
     dict.fromkeys(['rectangle', 'r'], 'rectangle') | \
     dict.fromkeys(['skin', 'sk'], 'skin') | \
     dict.fromkeys(['polygon', 'poly'], 'polygon') |\
-    dict.fromkeys(['shell', 'shl', 'sh'], 'shell')
+    dict.fromkeys(['shell', 'shl', 'sh'], 'shell') |\
+    dict.fromkeys(['hexagon', 'hex', 'h'], 'hexagon')
 
 
-def boundbox(width, height):
+def boxbound(width, height):
     """
     Return minimum dimension.
 
@@ -56,7 +58,7 @@ def circle(x_center, z_center, width, height=None):
     shape : shapely.polygon
 
     """
-    diameter = boundbox(width, height)
+    diameter = boxbound(width, height)
     radius = diameter / 2
     point = shapely.geometry.Point(x_center, z_center)
     buffer = point.buffer(radius, resolution=32)
@@ -107,7 +109,7 @@ def square(x_center, z_center, width, height=None):
     shape : shapely.polygon
 
     """
-    width = boundbox(width, height)
+    width = boxbound(width, height)
     return shapely.geometry.box(x_center-width/2, z_center-width/2,
                                 x_center+width/2, z_center+width/2)
 
@@ -177,6 +179,34 @@ def skin(x_center, z_center, diameter, fractional_thickness):
     return shape
 
 
+def hexagon(x_center, z_center, width, height=None):
+    """
+    Return shapely.polygon.
+
+    Parameters
+    ----------
+    x_center : float
+        Hexagon center, x-coordinate.
+    z_center : float
+        Hexagon center, z-coordinate.
+    width : float
+        Hexagon width, x-dimension.
+    height : Optional[float]
+        Hexagon height, z-dimension.
+
+    Returns
+    -------
+    shape : shapely.polygon
+
+    """
+    length = boxbound(width/1.5, height/np.sqrt(3))
+    length = width/3
+    points = [[x_center + np.cos(alpha) * length,
+               z_center + np.sin(alpha) * length]
+              for alpha in np.linspace(0, 2*np.pi, 7)]
+    return shapely.geometry.Polygon(points)
+
+
 class Polygon(shapely.geometry.Polygon):
     """Extend Polygon.__str__ for compact DataFrame representation."""
 
@@ -209,6 +239,7 @@ def polygen(section):
     shape : shapely.polygon
 
     """
+    section = section.rstrip(string.digits)
     if polyshape[section] == 'circle':
         return circle
     if polyshape[section] == 'ellipse':
@@ -219,6 +250,8 @@ def polygen(section):
         return rectangle
     if polyshape[section] == 'skin':
         return skin
+    if polyshape[section] == 'hexagon':
+        return hexagon
     raise IndexError(f'cross_section: {section} not implemented'
                      f'\n specify as {polyshape}')
 

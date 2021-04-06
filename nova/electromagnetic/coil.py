@@ -72,14 +72,9 @@ class Coil:
             index = frame.index
         _subframe = [[] for __ in range(len(index))]
         for i, name in enumerate(index):
-            if 'dpol' in kwargs:
-                frame.loc[name, 'delta'] = kwargs['dpol']
             for key in kwargs:
                 if key in frame:
                     frame.loc[name, key] = kwargs[key]
-            if 'subindex' in frame:  # drop existing subframes
-                if isinstance(frame.loc[name, 'subindex'], list):
-                    subframe.drop(frame.loc[name, 'subindex'], inplace=True)
             mesh = self._mesh_single(
                 frame.loc[name, :], link=link,  **kwargs)  # single coil
             subframe_args, subframe_kwargs = [], {}
@@ -122,6 +117,7 @@ class Coil:
             turn_fraction = kwargs.get('turn_fraction', frame['turn_fraction'])
         else:
             turn_fraction = kwargs.get('turn_fraction', 1)
+
         if delta is None or delta == 0:
             Nf = 1
             delta = np.max([dx, dz])

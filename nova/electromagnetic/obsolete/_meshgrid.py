@@ -1,14 +1,38 @@
-from matplotlib.collections import LineCollection
-import numpy as np
 
-from nova.utilities.geom import grid
+from dataclasses import dataclass, field
+
+import numpy as np
+from matplotlib.collections import LineCollection
+
 from nova.utilities.pyplot import plt
 
+'''
 
+def grid(n, limit, eqdsk=False):
+    if len(np.shape(limit)) > 1:
+        limit = np.array(limit).flatten()
+    xo, zo = limit[:2], limit[2:]
+    try:  # n ([nx, nz])
+        nx, nz = n
+    except TypeError:  # n (int)
+        dxo, dzo = (xo[-1] - xo[0]), (zo[-1] - zo[0])
+        ar = dxo / dzo
+        nz = np.max([int(np.sqrt(n / ar)), 3])
+        nx = np.max([int(n / nz), 3])
+    x = np.linspace(xo[0], xo[1], nx)
+    z = np.linspace(zo[0], zo[1], nz)
+    x2d, z2d = np.meshgrid(x, z, indexing='ij')
+    if eqdsk:
+        return {'x2d': x2d, 'z2d': z2d, 'x': x, 'z': z, 'nx': nx, 'nz': nz}
+    else:
+        return x2d, z2d, x, z, nx, nz
+
+'''
+
+
+@dataclass
 class MeshGrid:
-    '''
-    construct 2d poloidal grid
-    '''
+    """Construct 2d grid."""
 
     def __init__(self, n, limit, xscale='linear', zscale='linear'):
         '''
@@ -16,12 +40,13 @@ class MeshGrid:
             n (int or [int, int]): mesh dimension n or [nx, nz]
             limit (list): ['xmin', 'xmax', 'zmin', 'zmax']
         '''
+
         self._n = n
         self._limit = limit
         self.xscale = xscale
         self.zscale = zscale
         self.update()
-        
+
     def update(self):
         '''
         update grid
@@ -30,7 +55,7 @@ class MeshGrid:
             grid(self._n, self._limit, eqdsk=False)
         for var in ['x', 'z']:
             self.scale(var)
-        
+
     def scale(self, xz):
         if getattr(self, f'{xz}scale') == 'log':
             x = getattr(self, xz)
@@ -43,7 +68,7 @@ class MeshGrid:
             else:
                 x2d = np.dot(np.ones((nz, 1)), x.reshape(1, -1))
             setattr(self, f'{xz}2d', x2d)
-            
+
     @property
     def n(self):
         return self._n
@@ -73,7 +98,7 @@ class MeshGrid:
         if nz != self._nz:
             self._nz = nz
             self.update()
-            
+
     @property
     def n2d(self):
         return (self.nx, self.nz)
@@ -94,7 +119,7 @@ class MeshGrid:
         self.limit = limit
         if plot:
             self.plot()
-            
+
     @property
     def xz(self):
         return self.x, self.z
@@ -105,7 +130,7 @@ class MeshGrid:
         '''
         return {'x2d': self.x2d, 'z2d': self.z2d,
                 'x': self.x, 'z': self.z, 'nx': self.nx, 'nz': self.nz}
-        
+
     def plot(self, ax=None, **kwargs):
         self._plot(self.x2d, self.z2d, self.limit[:2], self.limit[2:],
                    xscale=self.xscale, zscale=self.zscale, ax=ax, **kwargs)
@@ -137,7 +162,7 @@ class MeshGrid:
             ax.set_xlim(xlim)
             ax.set_ylim(zlim)
 
-        
+
 if __name__ == '__main__':
 
     mg = MeshGrid(1e3, [5, 7.5, 8, 12], xscale='linear')

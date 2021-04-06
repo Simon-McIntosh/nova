@@ -4,21 +4,7 @@ from dataclasses import dataclass
 from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.coil import Coil
 from nova.electromagnetic.shell import Shell
-
-
-
-@dataclass
-class Section:
-    """Manage sectional properties."""
-
-    section: str = 'rectangle'
-    turn: str = 'circle'
-    turn_fraction: float = 1
-
-    def __post_init__(self):
-        metadata = {'section': self.section, 'turn': self.turn,
-                    'turn_fraction': self.turn_fraction}
-        metadata |= self.metadata
+from nova.electromagnetic.plasma import Plasma
 
 
 @dataclass
@@ -43,12 +29,18 @@ class CoilSet(FrameSet):
         self.coil = Coil(self.frame, self.subframe, self.dcoil)
         self.shell = Shell(self.frame, self.subframe,
                            self.dshell, self.dsubshell)
+        self.plasma = Plasma(self.frame, self.subframe, self.dplasma)
 
 
 if __name__ == '__main__':
 
     coilset = CoilSet(dcoil=0.05)
+
+    coilset.plasma.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 3, 4, 3, 1]])
+    coilset.subframe.polyplot()
+    '''
     coilset.coil.insert(range(3), 1, 0.75, 0.75, link=True, delta=0.2,
                         section='circle')
     coilset.shell.insert([1, 2, 3], [3, 4, 4], dt=0.1)
     coilset.subframe.polyplot()
+    '''

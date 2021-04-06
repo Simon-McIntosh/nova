@@ -169,7 +169,7 @@ class PolyPlot(Display, Label, MetaMethod):
     """Methods for ploting Frame data."""
 
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['x', 'z', 'poly'])
+    required: list[str] = field(default_factory=lambda: ['poly'])
     additional: list[str] = field(default_factory=lambda: ['part'])
 
     def initialize(self):

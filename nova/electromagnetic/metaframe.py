@@ -80,7 +80,7 @@ class MetaFrame(MetaSet):
             'rms': 0., 'dx': 0., 'dz': 0., 'dA': 0.,
             'dl': 0.1, 'dt': 0.1, 'dl_x': 0., 'dl_z': 0.,
             'm': '', 'R': 0.,  'rho': 0.,
-            'turn_fraction': 1., 'section': 'rectangle', 'turn': 'rectangle',
+            'section': 'rectangle', 'turn': 'rectangle', 'scale': 1.,
             'patch': None, 'poly': None, 'frame': '', 'part': '',
             'subindex': None, 'material': '',
             'link': '', 'factor': 1., 'ref': 0, 'subref': 0,
@@ -134,7 +134,7 @@ class MetaFrame(MetaSet):
 
         """
         if metadata is None:
-            metadata = {}
+            return
         if 'metadata' in metadata:
             metadata |= metadata.pop('metadata')
         for attr in list(metadata):

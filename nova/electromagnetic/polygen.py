@@ -13,7 +13,7 @@ polyshape = \
     dict.fromkeys(['skin', 'sk'], 'skin') | \
     dict.fromkeys(['polygon', 'poly'], 'polygon') |\
     dict.fromkeys(['shell', 'shl', 'sh'], 'shell') |\
-    dict.fromkeys(['hexagon', 'hex', 'h'], 'hexagon')
+    dict.fromkeys(['hexagon', 'hex', 'hx', 'h'], 'hexagon')
 
 
 def boxbound(width, height):

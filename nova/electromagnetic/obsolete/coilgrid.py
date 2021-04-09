@@ -11,6 +11,11 @@ Created on Fri Apr  9 11:07:12 2021
         #    #self.stop += self.grid_delta
         #    self.ndiv += 1
 
+                #if np.isclose(*grid_delta, 1e-3*np.mean(grid_delta)) and \
+        #        self.turn == 'hexagon' and self.tile:
+        #    length = boxbound(grid_delta[0]/2, grid_delta[0]/np.sqrt(3))
+        #    grid_delta = [2*length, np.sqrt(3)*length]
+
 
     def _mesh(self, index=None, link=True, **kwargs):
         """

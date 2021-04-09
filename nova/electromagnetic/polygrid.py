@@ -152,7 +152,10 @@ class PolyDelta(Polygon):
     def dimension_cell(self):
         """Return cell dimensions."""
         ndiv_x, ndiv_z = self.divide()
-        return self.width/ndiv_x, self.height/ndiv_z
+        ndiv_x, ndiv_z = np.max([ndiv_x, 1]), np.max([ndiv_z, 1])
+        if self.tile:
+            return self.width/ndiv_x, self.height/ndiv_z
+        return self.width / np.round(ndiv_x), self.height / np.round(ndiv_z)
 
     def divide(self):
         """Return number of cell divisions along x and z axis."""
@@ -166,30 +169,29 @@ class PolyDelta(Polygon):
             fill_fraction = self.area / self.box_area
             box_number = filament_number / fill_fraction
             if self.tile:
-                print('tile', self.turn, box_number)
                 if self.turn in ['circle', 'skin']:
                     box_number *= np.sqrt(3)/2
-                print(box_number)
-
+                elif self.turn == 'hexagon':
+                    box_number *= 3/8 * np.sqrt(3)
+                    print(box_number, self.turn)
 
             if np.isclose(aspect := self.width/self.height, 1) and \
                     self.turn in ['circle', 'square', 'skin']:
                 delta = np.sqrt(self.box_area / box_number)
-                ndiv_x = ndiv_z = np.max([np.round(self.width/delta), 1])
-                return ndiv_x, ndiv_z
+                return (ndiv := self.width/delta, ndiv)
             if aspect > 1:
-                ndiv_x = np.max([np.round(np.sqrt(box_number * aspect)), 1])
-                ndiv_z = np.max([np.round(box_number / ndiv_x), 1])
+                ndiv_x = np.sqrt(box_number * aspect)
+                if not self.tile:
+                    ndiv_x = np.round(ndiv_x)
+                ndiv_z = box_number / ndiv_x
                 return ndiv_x, ndiv_z
-            ndiv_z = np.max([np.round(np.sqrt(box_number / aspect)), 1])
-            ndiv_x = np.max([np.round(box_number / ndiv_z), 1])
+            ndiv_z = np.sqrt(box_number / aspect)
+            if not self.tile:
+                ndiv_z = np.round(ndiv_z)
+            ndiv_x = box_number / ndiv_z
             return ndiv_x, ndiv_z
-        if self.tile:
-            ndiv_x = self.width / self.delta
-            ndiv_z = self.height / self.delta
-            return ndiv_x, ndiv_z
-        ndiv_x = np.max([np.round(self.width / self.delta), 1])
-        ndiv_z = np.max([np.round(self.height / self.delta), 1])
+        ndiv_x = self.width / self.delta
+        ndiv_z = self.height / self.delta
         return ndiv_x, ndiv_z
 
     def dimension_grid(self):
@@ -197,14 +199,9 @@ class PolyDelta(Polygon):
         grid_delta = list(self.cell_delta)
         if self.tile:
             grid_delta = [delta := boxbound(*grid_delta), delta]
-        if np.isclose(*grid_delta, 1e-3*np.mean(grid_delta)) and \
-                self.turn == 'hexagon':
-            length = boxbound(grid_delta[0]/2, grid_delta[0]/np.sqrt(3))
-            grid_delta = [2*length, np.sqrt(3)*length]
-        if self.tile:
             if self.turn == 'hexagon':
                 grid_delta[0] *= 3/2
-                grid_delta[1] *= 0.5
+                grid_delta[1] *= np.sqrt(3)/4
                 return grid_delta
             if self.turn in ['circle', 'skin']:
                 grid_delta[1] *= np.sqrt(3)/2
@@ -262,7 +259,7 @@ class PolySpace:
     def divide(self):
         """Divide base length by delta, update stop parameter."""
         self.base_length = self.stop-self.start
-        self.ndiv = int(np.round(self.base_length / self.grid_delta))
+        self.ndiv = int(np.ceil(self.base_length / self.grid_delta))
         self.stop = self.start + self.ndiv*self.grid_delta
 
     def center(self):
@@ -391,8 +388,8 @@ class PolyGrid(PolyCell):
 
 if __name__ == '__main__':
 
-    polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
-                        turn='o', tile=True, trim=True)
+    polygrid = PolyGrid({'hx': [6, 3, 2.5, 2.5]}, delta=-60,
+                        turn='hex', tile=True, trim=True)
 
     #polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-4,
     #                    turn='sk', tile=False, trim=True)

@@ -143,9 +143,22 @@ def test_circle_effective_nfilament():
 
 
 def test_circle_effective_nfilament_tile():
-    polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
+    polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-49,
                         turn='o', tile=True, trim=True)
+    assert np.isclose(-polygrid.delta, polygrid.nfilament, 1e-2)
+
+
+def test_hexagon_effective_nfilament():
+    polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
+                        turn='hx', tile=False, trim=True)
+    polygrid.frame.polyplot()
     assert np.isclose(-polygrid.delta, polygrid.nfilament, 1e-3)
+
+
+def test_hexagon_effective_nfilament_tile():
+    polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-49,
+                        turn='hex', tile=True, trim=True)
+    assert np.isclose(-polygrid.delta, polygrid.nfilament, 1e-2)
 
 
 if __name__ == '__main__':

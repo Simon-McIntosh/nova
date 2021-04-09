@@ -18,7 +18,7 @@ class Coil:
     subframe: Frame = field(repr=False)
     delta: float
 
-    def insert(self, *required, iloc=None, mesh=True, **additional):
+    def insert(self, *required, iloc=None, subframe=True, **additional):
         """
         Add poloidal field coil(s).
 
@@ -40,12 +40,12 @@ class Coil:
         """
         additional = {'delta': self.delta} | additional
         index = self.frame.insert(*required, iloc=iloc, **additional)
-        if mesh:
-            self._mesh(index)
+        if subframe:
+            self.subgrid(index)
 
-    def _mesh(self, index):
+    def subgrid(self, index, **polyargs):
         """
-        Mesh poloidal field coil(s).
+        Grid frame.
 
         - Store filaments in subframe.
         - Link turns.
@@ -55,9 +55,8 @@ class Coil:
         # scale, fill
         subframe = []
         for i, name in enumerate(index):
-            subframe.append(
-                PolyGrid(**frame.iloc[i].to_dict(), tile=False, trim=True,
-                         label=name).frame)
+            polygrid = PolyGrid(**frame.iloc[i].to_dict(), tile=False)
+            subframe.append(polygrid(trim=True, label=name))
         self.subframe.concatenate(*subframe)
 
 

@@ -222,15 +222,15 @@ class PolyCell(PolyDelta):
         self._scale_cell()
         self._fill_cell()
 
-    def __call__(self, x_center, z_center):
+    def polycell(self, x_center, z_center):
         """Return cell polygon."""
         polygon = polygen(self.turn)(x_center, z_center, *self.cell_delta)
         return polyframe(polygon, self.turn)
 
     @property
-    def cell(self):
+    def unitcell(self):
         """Return referance polygon."""
-        return self(0, 0)  # refernace cell polygon
+        return self.polycell(0, 0)  # refernace cell polygon
 
     def _scale_cell(self):
         """Apply scaling to cell."""
@@ -306,27 +306,31 @@ class PolyVector:
 class PolyGrid(PolyCell):
     """Construct 2d grid."""
 
-    label: str = 'Poly'
-    trim: bool = True
+    additional: dict[str, str] = field(init=False, default_factory=lambda: {
+        'trim': True, 'delim': '_', 'label': 'Poly'})
     vector: PolyVector = field(init=False)
-    frame: Frame = field(init=False)
+    cells: list[PolyCell] = field(init=False)
+    _frame: Frame = field(init=False, default_factory=Frame)
 
     def __post_init__(self):
         """Generate grid."""
         super().__post_init__()
         self.vector = PolyVector(self.limit, self.cell_delta, self.grid_delta,
                                  self.tile)
-        self.frame = Frame(required=['x', 'z', 'dl', 'dt'],
-                           available=['poly'])
-        self.generate_grid()
+        self.cells = self.generate_cells()
+
+    def __call__(self, **additional):
+        """Return polygrid frame."""
+        self.generate_frame(**additional)
+        return self.frame
 
     def __len__(self):
         """Return grid length."""
         return len(self.frame)
 
-    def clear(self):
-        """Clear grid."""
-        self.frame = self.frame.iloc[0:0]
+    def generate_cells(self):
+        """Return polycells."""
+        return [self.polycell(*coord) for coord in self.coordinates]
 
     @property
     def coordinates(self):
@@ -336,21 +340,20 @@ class PolyGrid(PolyCell):
             grid[0][:, 1::2] += self.grid_delta[0]/2
         return np.hstack((grid[0].reshape(-1, 1), grid[1].reshape(-1, 1)))
 
-    def generate_grid(self):
+    def generate_frame(self, **additional):
         """Generate grid."""
-        cells = self.generate_cells()
-        if self.trim:
-            cells = self.trim_cells(cells)
-        section = [cell.name for cell in cells]
+        additional = self.additional | additional
+        cells = self.cells.copy()
+        if additional.pop('trim'):
+            cells = self.trim_cells(self.cells)
+        turn = [cell.name for cell in cells]
         cell_area = np.sum([cell.area for cell in cells])
         nturn = [self.nturn*cell.area / cell_area for cell in cells]
-        self.frame.insert(0, 0, *self.cell_delta, poly=cells,
-                          section=section, nturn=nturn, label=self.label,
-                          link=True, delim='_')
-
-    def generate_cells(self):
-        """Return polycells."""
-        return [self(*coord) for coord in self.coordinates]
+        self._frame = Frame(required=['x', 'z', 'dl', 'dt'],
+                            available=['poly'])
+        self._frame.insert(0, 0, *self.cell_delta, poly=cells,
+                           section=turn, nturn=nturn, **additional)
+        return self._frame
 
     def trim_cells(self, cells):
         """Return polycells trimed to bounding polygon."""
@@ -362,6 +365,12 @@ class PolyGrid(PolyCell):
                  if (cell := poly.intersection(buffer)) and
                  isinstance(cell, shapely.geometry.Polygon)]
         return cells
+
+    @property
+    def frame(self):
+        if self._frame.empty:
+            self.generate_frame()
+        return self._frame
 
     @property
     def cell_area(self):
@@ -376,7 +385,7 @@ class PolyGrid(PolyCell):
     @property
     def nfilament(self):
         """Return effective filament number."""
-        return self.cell_area / self.cell.area
+        return self.cell_area / self.unitcell.area
 
     def plot(self):
         """Plot polygon exterior and polycells."""
@@ -389,8 +398,8 @@ class PolyGrid(PolyCell):
 if __name__ == '__main__':
 
     polygrid = PolyGrid({'hx': [6, 3, 2.5, 2.5]}, delta=-60,
-                        turn='hex', tile=True, trim=True)
-
+                        turn='hex', tile=True)
+    polygrid.generate_frame(trim=True)
     #polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-4,
     #                    turn='sk', tile=False, trim=True)
     print(polygrid.delta, polygrid.nfilament)

@@ -27,8 +27,7 @@ def test_dfield():
 
 def test_dpol_default():
     coilset = CoilSet(dcoil=3)
-    coilset.coil.insert(range(3), 1, 0.1, 0.1, mesh=False, delta=-1,
-                        label='PF')
+    coilset.coil.insert(range(3), 1, 0.1, 0.1, delta=-1, label='PF')
     assert coilset.frame.loc['PF0', 'delta'] == -1
     assert coilset.dcoil == 3
 

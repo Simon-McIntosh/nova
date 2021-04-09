@@ -114,50 +114,49 @@ def test_polygon_cell_equality():
 
 def test_square_effective_nfilament():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
-                        turn='sq', tile=False, trim=True)
+                        turn='sq', tile=False)
     assert np.isclose(-polygrid.delta, polygrid.nfilament)
 
 
 def test_square_effective_nfilament_tile():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
-                        turn='sq', tile=True, trim=True)
+                        turn='sq', tile=True)
     assert np.isclose(-polygrid.delta, polygrid.nfilament)
 
 
 def test_rectangle_effective_nfilament():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
-                        turn='r', tile=False, trim=True)
+                        turn='r', tile=False)
     assert np.isclose(-polygrid.delta, polygrid.nfilament)
 
 
 def test_rectangle_effective_nfilament_tile():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
-                        turn='r', tile=True, trim=True)
+                        turn='r', tile=True)
     assert np.isclose(-polygrid.delta, polygrid.nfilament)
 
 
 def test_circle_effective_nfilament():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
-                        turn='o', tile=False, trim=True)
+                        turn='o', tile=False)
     assert np.isclose(-polygrid.delta, polygrid.nfilament, 1e-3)
 
 
 def test_circle_effective_nfilament_tile():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-49,
-                        turn='o', tile=True, trim=True)
+                        turn='o', tile=True)
     assert np.isclose(-polygrid.delta, polygrid.nfilament, 1e-2)
 
 
 def test_hexagon_effective_nfilament():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
-                        turn='hx', tile=False, trim=True)
-    polygrid.frame.polyplot()
+                        turn='hx', tile=False)
     assert np.isclose(-polygrid.delta, polygrid.nfilament, 1e-3)
 
 
 def test_hexagon_effective_nfilament_tile():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-49,
-                        turn='hex', tile=True, trim=True)
+                        turn='hex', tile=True)
     assert np.isclose(-polygrid.delta, polygrid.nfilament, 1e-2)
 
 

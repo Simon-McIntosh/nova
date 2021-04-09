@@ -43,12 +43,10 @@ if __name__ == '__main__':
     coilset = CoilSet(dcoil=0.05)
 
     coilset.coil.insert(range(3), 1, 0.75, 0.75, link=True, delta=-1,
-                        section='c', nturn=[3, 5, 10], turn='hex')
+                        section='hex', nturn=[3, 5, 10], turn='hex')
     #coilset.plasma.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 3, 4, 3, 1]])
     coilset.subframe.polyplot()
 
-    print(coilset.frame.dtypes)
-    print(coilset.subframe.dtypes)
     '''
     coilset.coil.insert(range(3), 1, 0.75, 0.75, link=True, delta=0.2,
                         section='circle')

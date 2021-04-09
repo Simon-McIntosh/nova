@@ -265,9 +265,9 @@ class PolyPlot(Display, Label, MetaMethod):
         """Return label based index for plot."""
         index = self.to_boolean(index)
         try:
-            if not self.zeroturn:  # exclude zeroturn filaments (Nt == 0)
+            if not self.zeroturn:  # exclude zeroturn filaments (nturn == 0)
                 with self.frame.setlock(True, 'subspace'):
-                    index &= (self.frame.loc[:, 'Nt'] != 0)
+                    index &= (self.frame.loc[:, 'nturn'] != 0)
         except (AttributeError, KeyError, ColumnError):  # turns not set
             pass
         try:

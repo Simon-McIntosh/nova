@@ -21,14 +21,14 @@ def test_circular_cross_section():
     'check frame area sum equals circle area'
     frame = Frame(Required=['x', 'z', 'dl', 'dt'])
     frame.insert(1.75, 0.5, 2.5, 2.5, section='o')
-    assert np.isclose(np.pi*2.5**2/4, frame.dA[0], rtol=1e-8)
+    assert np.isclose(np.pi*2.5**2/4, frame.area[0], rtol=1e-8)
 
 
 def test_rectangular_cross_section():
     'check subcoil area sum equals circle area'
     frame = Frame(Required=['x', 'z', 'dl', 'dt'])
     frame.insert(1.75, 0.5, 2.5, 1.5, section='rectangle')
-    assert np.isclose(2.5*1.5, frame.dA[0], rtol=1e-8)
+    assert np.isclose(2.5*1.5, frame.area[0], rtol=1e-8)
 
 
 def test_invalid_cross_section():

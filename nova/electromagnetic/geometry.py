@@ -133,7 +133,7 @@ class Polygon:
 
     frame: DataFrame = field(repr=False)
     features: list[str] = field(init=False, default_factory=lambda: [
-        'x', 'z', 'dx', 'dz', 'dA', 'rms'])
+        'x', 'z', 'dx', 'dz', 'area', 'rms'])
 
     def update(self):
         """Update frame polygons and derived data."""
@@ -167,7 +167,7 @@ class Geometry(MetaMethod):
     frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['section', 'poly'])
     additional: list[str] = field(default_factory=lambda: [
-        'x', 'z', 'dl', 'dt', 'rms', 'dx', 'dz', 'dA'])
+        'x', 'z', 'dl', 'dt', 'rms', 'dx', 'dz', 'area'])
     require_all: bool = field(repr=False, default=False)
     polygon: Polygon = field(init=False, repr=False)
 

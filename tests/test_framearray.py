@@ -87,12 +87,13 @@ def test_Ic_unset():
 
 
 def test_data_It_Ic_unset():
-    framearray = FrameArray({'x': [1, 2], 'It': 5, 'Nt': 2.5}, Required=['x'])
+    framearray = FrameArray({'x': [1, 2], 'It': 5, 'nturn': 2.5},
+                            Required=['x'])
     assert framearray.Ic.to_list() == [2, 2]
 
 
 def test_data_It_Ic_set():
-    framearray = FrameArray({'x': [1, 2], 'It': 5, 'Ic': 10, 'Nt': 2.5},
+    framearray = FrameArray({'x': [1, 2], 'It': 5, 'Ic': 10, 'nturn': 2.5},
                             Required=['x'])
     assert framearray.Ic.to_list() == [10, 10]
     assert framearray.It.to_list() == [25, 25]

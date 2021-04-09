@@ -60,15 +60,15 @@ class BiotFrame(FrameSet):
     def __init__(self, *args, reduce=False):
         FrameSet.__init__(self, *args, coilframe_metadata={
             '_required_columns': ['x', 'z'],
-            '_additional_columns': ['rms', 'dx', 'dz', 'Nt', 'cross_section',
+            '_additional_columns': ['rms', 'dx', 'dz', 'nturn', 'cross_section',
                                     'cs_factor', 'coil', 'plasma', 'mpc'],
             '_default_attributes': {'dx': 0., 'dz': 0., 'rms': 0.,
-                                    'Nt': 1, 'mpc': '', 'coil': '',
+                                    'nturn': 1, 'mpc': '', 'coil': '',
                                     'plasma': False,
                                     'cross_section': 'square',
                                     'cs_factor':
                                         self._cross_section_factor['square']},
-            '_dataframe_attributes': ['x', 'z', 'rms', 'dx', 'dz', 'Nt',
+            '_dataframe_attributes': ['x', 'z', 'rms', 'dx', 'dz', 'nturn',
                                       'cs_factor'] + self._mpc_attributes,
             '_coildata_attributes': {'region': '', 'nS': 0., 'nT': 0.,
                                      'reduce': reduce,
@@ -315,9 +315,9 @@ if __name__ == '__main__':
 
     from nova.electromagnetic.coilset import CoilSet
     cs = CoilSet(dCoil=0.2, dPlasma=0.05, turn_fraction=0.5)
-    cs.add_coil(3.943, 7.564, 0.959, 0.984, Nt=248.64, name='PF1', part='PF')
-    cs.add_coil(1.6870, 5.4640, 0.7400, 2.093, Nt=554, name='CS3U', part='CS')
-    #cs.add_coil(1.6870, 3.2780, 0.7400, 2.093, Nt=554, name='CS2U', part='CS')
+    cs.add_coil(3.943, 7.564, 0.959, 0.984, nturn=248.64, name='PF1', part='PF')
+    cs.add_coil(1.6870, 5.4640, 0.7400, 2.093, nturn=554, name='CS3U', part='CS')
+    #cs.add_coil(1.6870, 3.2780, 0.7400, 2.093, nturn=554, name='CS2U', part='CS')
     #cs.add_plasma(3.5, 4.5, 1.5, 2.5, It=-15e6, cross_section='ellipse')
 
     #cs.add_plasma(3.5, 4.5, 1.5, 2.5, dPlasma=0.5,

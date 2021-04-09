@@ -350,7 +350,7 @@ class PFgeom(CoilSet):  # PF/CS coilset
         for c in list(data):
             columns[c] = c.split(',')[0].lower()
         columns['R, ohm'] = 'R'
-        columns['N,'] = 'Nt'
+        columns['N,'] = 'nturn'
         data = data.rename(columns=columns)
         if 'PF5' in source:
             print('PF5mod')
@@ -407,10 +407,10 @@ class VSgeom(CoilSet):  # VS coil class
         self.geom = {}
         self.geom['LVS'] = {'x': 7.504, 'z': -2.495, 'dx': dx_wp, 'dz': dz_wp,
                             'theta': -37.8*np.pi/180, 'sign': 1,
-                            'Nt': 4}
+                            'nturn': 4}
         self.geom['UVS'] = {'x': 5.81, 'z': 4.904, 'dx': dx_wp, 'dz': dz_wp,
                             'theta': 25.9*np.pi/180 + np.pi, 'sign': -1,
-                            'Nt': -4}
+                            'nturn': -4}
         if not invessel:  # offest coils
             self.geom['UVS']['x'] += 1.7
             self.geom['UVS']['z'] -= 0
@@ -433,7 +433,7 @@ class VSgeom(CoilSet):  # VS coil class
                     x[0], x[1], d, dt, dCoil=0, name=subname,
                     cross_section='skin',turn_section='skin',
                     skin_fraction=dt, material='copper',part='VS3',
-                    Nt=1)
+                    nturn=1)
                 R = resistivity_cu * 2 * np.pi * x[0] / acs_turn
                 m = density_cu * 2 * np.pi * x[0] * acs_turn
                 self.coil.at[subname, 'R'] = R
@@ -634,7 +634,7 @@ class elm_coils:
     def add_coil(self, name, x, z, theta, tf):
         self.add_geom(name, x, z, theta)  # append geometry
         x, z, dx, dz = [self.geom[name][var] for var in ['x', 'z', 'dx', 'dz']]
-        self.pf.add_coil(x, z, dx, dz, 0, name=name, Nt=6,
+        self.pf.add_coil(x, z, dx, dz, 0, name=name, nturn=6,
                          categorize=False, tf=tf)
         xc = np.dot(self.pattern, rotate2D(self.geom[name]['theta'])[0])
         self.xc[name] = xc.copy()
@@ -708,7 +708,7 @@ if __name__ == '__main__':
     cc = ITER.cc
     cc.scenario_filename = -2
 
-    #cs.add_coil(6, -3, 1.5, 1.5, name='PF16', part='PF', Nt=600, It=5e5,
+    #cs.add_coil(6, -3, 1.5, 1.5, name='PF16', part='PF', nturn=600, It=5e5,
     #            turn_section='circle', turn_fraction=0.7, dCoil=0.75)
     cc.scenario = 'IM'
     #cc.scenario = 'SOP'

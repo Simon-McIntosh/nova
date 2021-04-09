@@ -87,9 +87,9 @@ class DataArray(DataProperty):
         data = np.zeros((nt, nT))
         # extract attributes
         attrs = {'nT': nT, 'indices': np.append(indices, nT)}
-        for attr in ['dx', 'dz', 'Nt', 'coil', 'x', 'z']:
+        for attr in ['dx', 'dz', 'nturn', 'coil', 'x', 'z']:
             value = target[attr].values
-            if attr in ['dx', 'dz', 'Nt', 'coil']:
+            if attr in ['dx', 'dz', 'nturn', 'coil']:
                 value = value[target._reduction_index]
             elif target.reduce:
                 value = np.add.reduceat(value, target._reduction_index)

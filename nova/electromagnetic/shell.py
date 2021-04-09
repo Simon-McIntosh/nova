@@ -94,7 +94,7 @@ class Shell:
         polygon = [[] for __ in range(nS)]
         x, z = np.zeros(nS), np.zeros(nS)
         rho_bar, dt_bar = np.zeros(nS), np.zeros(nS)
-        dl, dt, dA = np.zeros(nS), np.zeros(nS), np.zeros(nS)
+        dl, dt, area = np.zeros(nS), np.zeros(nS), np.zeros(nS)
         sub_segment = np.zeros((nS, 2, nSS))
         sub_rho, sub_dt = np.zeros((nS, nSS)), np.zeros((nS, nSS))
         for i in range(nS):
@@ -117,8 +117,9 @@ class Shell:
             z[i] = polygon[i].centroid.y
             dl[i] = dS  # sub-segment length
             dt[i] = dt_bar[i]  # sub-segment thickness
-            dA[i] = polygon[i].area
-        frame = {'x': x, 'z': z, 'dl': dl, 'dt': dt, 'rho': rho_bar, 'Nt': dA,
+            area[i] = polygon[i].area
+        frame = {'x': x, 'z': z, 'dl': dl, 'dt': dt, 'rho': rho_bar,
+                 'nturn': area,
                  'poly': polygon}
         subframe = {'segment': sub_segment, 'rho': sub_rho, 'dt': sub_dt}
         return frame, subframe

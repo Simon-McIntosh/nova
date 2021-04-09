@@ -27,8 +27,7 @@ class MetaArray(MetaData):
     @property
     def dataarray(self):
         """Return DataFrame representation of fast access data arrays."""
-        return pandas.DataFrame(self.data, index=self.index,
-                                columns=self.array)
+        return pandas.DataFrame(self.data, index=self.index)
 
 
 @dataclass
@@ -75,10 +74,9 @@ class MetaFrame(MetaSet):
     available: list[str] = field(default_factory=lambda: [])
     default: dict[str, Union[float, str, bool, None]] = field(
         repr=False, default_factory=lambda: {
-            'x': 0., 'z': 0.,
-            'delta': 0., 'nx': 1, 'nz': 1, 'Nt': 1., 'Nf': 1,
-            'rms': 0., 'dx': 0., 'dz': 0., 'dA': 0.,
-            'dl': 0.1, 'dt': 0.1, 'dl_x': 0., 'dl_z': 0.,
+            'x': 0., 'z': 0., 'dl': 0.1, 'dt': 0.1,
+            'delta': 0., 'nturn': 1., 'nfilament': 1.,
+            'rms': 0., 'dx': 0., 'dz': 0., 'area': 0.,
             'm': '', 'R': 0.,  'rho': 0.,
             'section': 'rectangle', 'turn': 'rectangle', 'scale': 1.,
             'patch': None, 'poly': None, 'frame': '', 'part': '',

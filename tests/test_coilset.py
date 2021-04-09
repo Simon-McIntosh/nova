@@ -41,24 +41,31 @@ def test_pfcoil():
     assert len(coilset.subframe) == 24
 
 
+def test_subframe_turn_number():
+    coilset = CoilSet()
+    coilset.coil.insert(1.75, 0.5, 2.5, 2.5, scale=1, delta=-20,
+                        nturn=22.2)
+    assert coilset.subframe.nturn.sum() == 22.2
+
+
 def test_filament_number():
     coilset = CoilSet()
     coilset.coil.insert(1.75, 0.5, 2.5, 2.5, scale=1, delta=-20)
-    assert coilset.frame['Nf'][0] == 20
+    assert len(coilset.subframe) == 20
 
 
 def test_circular_cross_section():
     coilset = CoilSet()
-    coilset.coil.insert(1.75, 0.5, 2.5, 2.5, section='circle',
-                        scale=1, delta=-20)
-    assert np.isclose(np.pi*2.5**2/4, coilset.subframe.dA.sum(), rtol=1e-3)
+    coilset.coil.insert(1.75, 0.5, 2.5, 2.5, section='circle', turn='r',
+                        delta=-20)
+    assert np.isclose(np.pi*2.5**2/4, coilset.subframe.area.sum(), rtol=1e-3)
 
 
 def test_rectangular_cross_section():
     coilset = CoilSet()
     coilset.coil.insert(1.75, 0.5, 2.5, 1.5, section='rectangle',
                         scale=1, delta=-20)
-    assert np.isclose(2.5*1.5, coilset.subframe.dA.sum(), rtol=1e-3)
+    assert np.isclose(2.5*1.5, coilset.subframe.area.sum(), rtol=1e-3)
 
 
 def test_flag_current_update():
@@ -73,9 +80,9 @@ def test_flag_current_update():
 def test_multipoint_link():
     coilset = CoilSet(dcoil=0, subspace=['Ic'])
     coilset.coil.insert(7, -3, 1.5, 1.5, name='PF6', part='PF',
-                        Nt=4, It=1e6, turn='circle', scale=0.7,
+                        nturn=4, It=1e6, turn='circle', scale=0.7,
                         delta=0.12)
-    coilset.coil.insert(7, -0.5, 1.5, 1.5, name='PF8', part='PF', Nt=5,
+    coilset.coil.insert(7, -0.5, 1.5, 1.5, name='PF8', part='PF', nturn=5,
                         Ic=2e3, section='circle', turn='square', delta=0.12)
     # Ic[PF8] = -0.5*Ic[PF6]
     coilset.frame.multipoint.link(['PF6', 'PF8'], -0.5)
@@ -85,7 +92,7 @@ def test_multipoint_link():
 def test_shell_cross_section():
     coilset = CoilSet()
     coilset.shell.insert([1, 1, 3], [3, 4, 4], dt=0.1)
-    assert np.isclose(coilset.frame.dA.sum(), 3*0.1, atol=5e-3)
+    assert np.isclose(coilset.frame.area.sum(), 3*0.1, atol=5e-3)
 
 
 def test_shell_additional():
@@ -103,7 +110,7 @@ def test_shell_subshell():
 def test_shell_turns():
     coilset = CoilSet()
     coilset.shell.insert([1, 2], [5, 5], dt=0.1, delta=0.1)
-    assert np.isclose(coilset.subframe.dA, coilset.subframe.Nt).all()
+    assert np.isclose(coilset.subframe.area, coilset.subframe.nturn).all()
 
 
 def test_shell():

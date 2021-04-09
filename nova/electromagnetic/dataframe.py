@@ -328,9 +328,10 @@ class DataFrame(pandas.DataFrame):
                 for attr in unset:
                     self.loc[:, attr] = self.metaframe.default[attr]
                 turn_set = np.array([attr in self.columns
-                                     for attr in ['It', 'Nt']])
+                                     for attr in ['It', 'nturn']])
                 if 'Ic' in unset and turn_set.all():
-                    self.loc[:, 'Ic'] = self.loc[:, 'It'] / self.loc[:, 'Nt']
+                    self.loc[:, 'Ic'] = \
+                        self.loc[:, 'It'] / self.loc[:, 'nturn']
 
     @staticmethod
     def isframe(obj, frame=True):
@@ -419,10 +420,6 @@ class DataFrame(pandas.DataFrame):
 
 if __name__ == '__main__':
 
-    dataframe = DataFrame(Required=['x'], Additional=['Ic'],
-                          Subspace=[], label='PF', Ic=3)
-
-    dataframe = DataFrame({'x': range(3)},
+    dataframe = DataFrame({'x': range(3), 'link': 'Coil0'},
                           Required=['x'], Additional=['Ic'],
                           Subspace=[], label='PF', Ic=3)
-    print(dataframe)

@@ -17,11 +17,10 @@ class FrameSet:
     additional: list[str] = field(repr=False, default_factory=lambda: [
         'section', 'turn'])
     available: list[str] = field(repr=False, default_factory=lambda: [
-        'link', 'part', 'frame', 'dx', 'dz', 'dA', 'dl_x', 'dl_z',
-        'delta', 'nx', 'nz', 'section', 'turn', 'turn_fraction',
-        'Ic', 'It', 'Nt', 'Nf', 'Psi', 'Bx', 'Bz', 'B', 'acloss'])
-    subspace: list[str] = field(repr=False, default_factory=lambda: [
-        'Ic'])
+        'link', 'part', 'frame', 'dx', 'dz', 'area',
+        'delta', 'section', 'turn', 'scale', 'nturn', 'nfilament',
+        'Ic', 'It', 'Psi', 'Bx', 'Bz', 'B', 'acloss'])
+    subspace: list[str] = field(repr=False, default_factory=lambda: ['Ic'])
     metadata: dict[str, Union[str, dict]] = field(repr=False,
                                                   default_factory=dict)
 
@@ -30,12 +29,12 @@ class FrameSet:
         self.frame = Frame(
             required=self.required, additional=self.additional,
             available=self.available, subspace=self.subspace,
-            exclude=['dl_x', 'dl_z', 'frame'], **self.metadata)
+            exclude=['frame'], **self.metadata)
         self.subframe = Frame(
             required=self.required, additional=self.additional,
             available=self.available,
-            subspace=self.subspace+['It', 'Nt'],
-            exclude=['turn', 'turn_fraction', 'Nf', 'delta'],
+            subspace=self.subspace+['It', 'nturn'],
+            exclude=['turn', 'scale', 'nfilament', 'delta'],
             delim='_', **self.metadata)
 
     def drop(self, index=None):

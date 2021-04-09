@@ -13,10 +13,10 @@ class Energize(MetaMethod):
     """Manage dependant frame energization parameters."""
 
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['It', 'Nt'])
+    required: list[str] = field(default_factory=lambda: ['It', 'nturn'])
     additional: list[str] = field(default_factory=lambda: ['Ic'])
     incol: dict[str, bool] = field(default_factory=lambda: {
-        'Ic': False, 'Nt': False})
+        'Ic': False, 'nturn': False})
     require_all: bool = False
 
     def __post_init__(self):
@@ -48,8 +48,8 @@ class Energize(MetaMethod):
 
     def _set_item(self, indexer, key, value):
         if self.generate and self.frame.get_col(key) == 'It':
-            if self.frame.lock('energize') is False and self.incol['Nt']:
-                value /= indexer.__getitem__(self._get_key(key, 'Nt'))
+            if self.frame.lock('energize') is False and self.incol['nturn']:
+                value /= indexer.__getitem__(self._get_key(key, 'nturn'))
                 try:
                     self.frame['Ic'] = value
                 except SubSpaceLockError:
@@ -69,9 +69,9 @@ class Energize(MetaMethod):
 
     def _get_item(self, indexer, key):
         if self.generate and self.frame.get_col(key) == 'It':
-            if self.incol['Ic'] and self.incol['Nt']:
+            if self.incol['Ic'] and self.incol['nturn']:
                 line_current = indexer.__getitem__(self._get_key(key, 'Ic'))
-                turn_number = indexer.__getitem__(self._get_key(key, 'Nt'))
+                turn_number = indexer.__getitem__(self._get_key(key, 'nturn'))
                 with self.frame.setlock(True, ['energize', 'subspace']):
                     self._set_item(indexer, key, line_current*turn_number)
         return indexer.__getitem__(key)

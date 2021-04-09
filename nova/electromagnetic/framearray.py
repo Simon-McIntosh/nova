@@ -270,7 +270,7 @@ class FrameArray(FrameArrayIndexer, DataArray):
             self.metaframe.metadata = {'additional': additional}
         if 'It' in attrs and 'Ic' not in attrs:  # patch line current
             data['Ic'] = \
-                data['It'] / data.get('Nt', self.metaframe.default['Nt'])
+                data['It'] / data.get('nturn', self.metaframe.default['nturn'])
         if len(kwargs) > 0:  # ckeck for unset kwargs
             unset_kwargs = np.array(list(kwargs.keys()))
             default = {key: '_default_value_' for key in unset_kwargs}

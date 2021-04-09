@@ -19,12 +19,13 @@ def test_Ic_unset():
 
 
 def test_data_It_Ic_unset():
-    frame = Frame({'x': [1, 2], 'It': 5, 'Nt': 2.5}, Required=['x'])
+    frame = Frame({'x': [1, 2], 'It': 5, 'nturn': 2.5}, Required=['x'])
     assert frame.Ic.to_list() == [2, 2]
 
 
 def test_data_It_Ic_set():
-    frame = Frame({'x': [1, 2], 'It': 5, 'Ic': 10, 'Nt': 2.5}, Required=['x'])
+    frame = Frame({'x': [1, 2], 'It': 5, 'Ic': 10, 'nturn': 2.5},
+                  Required=['x'])
     assert frame.Ic.to_list() == [10, 10]
     assert frame.It.to_list() == [25, 25]
 
@@ -185,10 +186,10 @@ def test_drop():
 def test_multipoint_factor():
     frame = Frame(required=['Ic'], Subspace=['Ic'], Array=['Ic'])
     frame.update_columns()
-    frame.insert(5*np.ones(2), Nt=[1, 3])
-    frame.insert(2*np.ones(2), Nt=[2, 1], link=True, factor=-0.5)
+    frame.insert(5*np.ones(2), nturn=[1, 3])
+    frame.insert(2*np.ones(2), nturn=[2, 1], link=True, factor=-0.5)
     frame.insert(7.75*np.ones(2))
-    frame.insert(6*np.ones(3), link=True, factor=-5.0, Nt=[1, 2, 3])
+    frame.insert(6*np.ones(3), link=True, factor=-5.0, nturn=[1, 2, 3])
     assert frame.loc[:, 'It'].to_list() == [5, 15, 4, -1, 7.75, 7.75,
                                             6, -60, -90]
 
@@ -196,10 +197,10 @@ def test_multipoint_factor():
 def test_multipoint_factor_Ic_It():
     frame = Frame(required=['Ic'], Subspace=['Ic', 'It'], Array=['Ic'])
     frame.update_columns()
-    frame.insert(5*np.ones(2), Nt=[1, 3])  # note, turn info discarded
-    frame.insert(2*np.ones(2), Nt=[2, 1], link=True, factor=-0.5)
+    frame.insert(5*np.ones(2), nturn=[1, 3])  # note, turn info discarded
+    frame.insert(2*np.ones(2), nturn=[2, 1], link=True, factor=-0.5)
     frame.insert(7.75*np.ones(2))
-    frame.insert(6*np.ones(3), link=True, factor=-5.0, Nt=[1, 2, 3])
+    frame.insert(6*np.ones(3), link=True, factor=-5.0, nturn=[1, 2, 3])
     assert frame.loc[:, 'It'].to_list() == [5, 15, 4, 4, 7.75, 7.75,
                                             6, 6, 6]
 

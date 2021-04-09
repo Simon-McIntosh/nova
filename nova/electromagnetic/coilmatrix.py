@@ -124,9 +124,9 @@ class CoilMatrix:
         # extract plasma interaction
         _M_ = M.reshape(self.nT, self.nS)[:, self.source.plasma]
         if self.source_turns:
-            M *= self.source._Nt_
+            M *= self.source._nturn_
         if self.target_turns:
-            M *= self.target._Nt_
+            M *= self.target._nturn_
         _M = M.reshape(self.nT, self.nS)  # source-target reshape (matrix)
         # reduce
         if self.reduce_source and len(self.source._reduction_index) < self.nS:
@@ -415,7 +415,7 @@ class CoilMatrix:
                     _M_ *= self.source.coilframe.Np.reshape(1, -1)
                 if self.target_turns:
                     _M_[self.target.plasma, :] *= \
-                            self.target.Nt[self.target.plasma].reshape(-1, 1)
+                            self.target.nturn[self.target.plasma].reshape(-1, 1)
                 if self.reduce_source and \
                         len(self.source._plasma_reduction_index) <\
                         self.source.nP:

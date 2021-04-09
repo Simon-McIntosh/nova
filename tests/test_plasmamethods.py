@@ -29,7 +29,7 @@ def test_circle(plot=False):
     cs.add_plasma(polygon)
     if plot:
         cs.plot(True)
-    assert np.isclose(cs.subcoil.dA[cs.subcoil.plasma].sum(),
+    assert np.isclose(cs.subcoil.area[cs.subcoil.plasma].sum(),
                       np.pi*0.5**2, 5e-3)
 
 
@@ -39,8 +39,9 @@ def test_polygon_separatrix(plot=False):
     cs.separatrix = shapely.geometry.Point(3, 3).buffer(2)
     if plot:
         cs.plot(True)
-    assert np.isclose(cs.subcoil.dA[cs.subcoil.plasma][cs.ionize_index].sum(),
-                      np.pi*2**2, 0.05)
+    assert np.isclose(
+        cs.subcoil.area[cs.subcoil.plasma][cs.ionize_index].sum(),
+        np.pi*2**2, 0.05)
 
 
 def test_array_separatrix(plot=False):
@@ -50,8 +51,9 @@ def test_array_separatrix(plot=False):
     if plot:
         cs.plot()
         cs.plot(True, feedback=True)
-    assert np.isclose(cs.subcoil.dA[cs.subcoil.plasma][cs.ionize_index].sum(),
-                      0.5**2, 1e-3)
+    assert np.isclose(
+        cs.subcoil.area[cs.subcoil.plasma][cs.ionize_index].sum(),
+        0.5**2, 1e-3)
 
 
 if __name__ == '__main__':

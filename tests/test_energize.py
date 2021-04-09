@@ -11,95 +11,95 @@ def test_in_energize():
 
 def test_set_loc_subspace_Ic():
     frame = Frame(Required=['x', 'z'], Subspace=['Ic'])
-    frame.insert(0.5, [6, 8.3], Nt=0.5, link=True)
+    frame.insert(0.5, [6, 8.3], nturn=0.5, link=True)
     frame.subspace.loc[:, 'Ic'] = 6.6
     assert frame.loc[:, 'It'].to_list() == [3.3, 3.3]
 
 
 def test_set_loc_subspace_Ic_It():
     frame = Frame(Required=['x', 'z'], Subspace=['Ic', 'It'])
-    frame.insert(0.5, [6, 8.3], Nt=0.5, link=True)
+    frame.insert(0.5, [6, 8.3], nturn=0.5, link=True)
     frame.subspace.loc[:, 'Ic'] = 6.6
     assert frame.loc[:, 'It'].to_list() == [3.3, 3.3]
 
 
 def test_set_loc_It():
     frame = Frame(Required=['x', 'z'], Subspace=['Ic', 'It'])
-    frame.insert(0.5, [6, 8.3], Nt=0.25)
+    frame.insert(0.5, [6, 8.3], nturn=0.25)
     frame.subspace.loc[:, 'It'] = 6.6
     assert frame.subspace.loc[:, 'Ic'].to_list() == [26.4, 26.4]
 
 
 def test_set_subspace_Ic_It_repr():
     frame = Frame(Required=['x', 'z'], Subspace=['Ic', 'It'])
-    frame.insert(0.5, [6, 8.3], Nt=0.25)
+    frame.insert(0.5, [6, 8.3], nturn=0.25)
     frame.__repr__()
 
 
-def test_set_loc_Nt():
+def test_set_loc_nturn():
     frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    frame.insert(0.5, [6, 8.3], Nt=1)
+    frame.insert(0.5, [6, 8.3], nturn=1)
     frame.loc[:, 'It'] = 6.6
-    frame.loc[:, 'Nt'] = 2.2
+    frame.loc[:, 'nturn'] = 2.2
     assert frame.loc[:, 'It'].to_list() == [14.52, 14.52]
 
 
 def test_set_item_Ic():
     frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    frame.insert(0.5, [6, 8.3], Nt=0.5)
+    frame.insert(0.5, [6, 8.3], nturn=0.5)
     frame['Ic'] = 6.6
     assert frame['It'].to_list() == [3.3, 3.3]
 
 
 def test_set_item_It():
     frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    frame.insert(0.5, [6, 8.3], Nt=0.25)
+    frame.insert(0.5, [6, 8.3], nturn=0.25)
     frame['It'] = 6.6
     assert frame['Ic'].to_list() == [26.4, 26.4]
 
 
-def test_set_item_Nt():
+def test_set_item_nturn():
     frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    frame.insert(0.5, [6, 8.3], Nt=1)
+    frame.insert(0.5, [6, 8.3], nturn=1)
     frame['It'] = 6.6
-    frame['Nt'] = 2.2
+    frame['nturn'] = 2.2
     assert frame['It'].to_list() == [14.52, 14.52]
 
 
 def test_set_attr_Ic():
     frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    frame.insert(0.5, [6, 8.3], Nt=0.5)
+    frame.insert(0.5, [6, 8.3], nturn=0.5)
     frame.Ic = 6.6
     assert frame.It.to_list() == [3.3, 3.3]
 
 
 def test_set_attr_It():
     frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    frame.insert(0.5, [6, 8.3], Nt=0.25)
+    frame.insert(0.5, [6, 8.3], nturn=0.25)
     frame.It = 6.6
     assert frame.Ic.to_list() == [26.4, 26.4]
 
 
-def test_set_attr_Nt():
+def test_set_attr_nturn():
     frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    frame.insert(0.5, [6, 8.3], Nt=1)
+    frame.insert(0.5, [6, 8.3], nturn=1)
     frame.It = 6.6
-    frame.Nt = 2.2
+    frame.nturn = 2.2
     assert frame.It.to_list() == [14.52, 14.52]
 
 
 def test_subspace_Ic():
     frame = Frame(Required=['x', 'z'], Subspace=['Ic', 'It'])
-    frame.insert(0.5, [6, 8.3], Nt=0.5)
-    frame.insert(0.5, range(10), Nt=3.5, link=True)
+    frame.insert(0.5, [6, 8.3], nturn=0.5)
+    frame.insert(0.5, range(10), nturn=3.5, link=True)
     frame.subspace.Ic = [6.6, 6.6, 1]
     assert frame.subspace.It.to_list() == [3.3, 3.3, 3.5]
 
 
 def test_subspace_intersect_columns():
     frame = Frame(Required=['x', 'z'], Subspace=['Ic', 'It'])
-    frame.insert(0.5, [6, 8.3], Nt=0.5)
-    frame.insert(0.5, range(10), Nt=3.5, link=True)
+    frame.insert(0.5, [6, 8.3], nturn=0.5)
+    frame.insert(0.5, range(10), nturn=3.5, link=True)
     frame.subspace.Ic = [6.6, 6.6, 1]
     frame.update_frame()
 

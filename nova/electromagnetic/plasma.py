@@ -262,7 +262,7 @@ class Plasma(Coil):
         Returns
         -------
         ionize : array_like, shape(n,)
-            Subcoil ionization index (Nt>0).
+            Subcoil ionization index (nturn>0).
 
         """
         return self.subcoil.ionize[self.subcoil.plasma]
@@ -285,17 +285,17 @@ class Plasma(Coil):
             Plasma filament turn number.
 
         """
-        return self._Nt[self.plasma]
+        return self._nturn[self.plasma]
 
     @Np.setter
     def Np(self, value):
-        self._Nt[self.plasma & ~self._ionize_index] = 0
-        self._Nt[self.plasma & self._ionize_index] = value
+        self._nturn[self.plasma & ~self._ionize_index] = 0
+        self._nturn[self.plasma & self._ionize_index] = value
         # normalize plasma turn number
-        Nt_sum = np.sum(self._Nt[self.plasma])
-        if Nt_sum > 0:
-            self._Nt[self.plasma] /= Nt_sum
-        self._update_dataframe['Nt'] = True
+        nturn_sum = np.sum(self._nturn[self.plasma])
+        if nturn_sum > 0:
+            self._nturn[self.plasma] /= nturn_sum
+        self._update_dataframe['nturn'] = True
 
     @property
     def nP(self):

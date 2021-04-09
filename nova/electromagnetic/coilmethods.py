@@ -343,19 +343,19 @@ class CoilMethods:
 
         """
         subset = self.subset(coil_index)
-        x = geom.rms(subset.coil.x, subset.coil.Nt)
-        z = amd(subset.coil.z, subset.coil.Nt)
+        x = geom.rms(subset.coil.x, subset.coil.nturn)
+        z = amd(subset.coil.z, subset.coil.nturn)
         dx = np.max(subset.coil.x + subset.coil.dx/2) -\
             np.min(subset.coil.x - subset.coil.dx/2)
         dz = np.max(subset.coil.z + subset.coil.dz/2) -\
             np.min(subset.coil.z - subset.coil.dz/2)
-        Ic = subset.coil.It.sum() / np.sum(abs(subset.coil.Nt))
+        Ic = subset.coil.It.sum() / np.sum(abs(subset.coil.nturn))
         if name is None:
             name = f'{coil_index[0]}-{coil_index[-1]}'
         referance_coil = subset.coil.loc[coil_index[0], :]
         kwargs = {'name': name}
         for key in subset.coil.columns:
-            if key in ['Nf', 'Nt', 'm', 'R']:
+            if key in ['Nf', 'nturn', 'm', 'R']:
                 kwargs[key] = subset.coil.loc[:, key].sum()
             elif key == 'polygon':
                 polys = [p for p in subset.coil.loc[:, 'polygon'].values]

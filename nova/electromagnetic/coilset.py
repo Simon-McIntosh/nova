@@ -8,7 +8,18 @@ from nova.electromagnetic.plasma import Plasma
 
 
 @dataclass
-class CoilSet(FrameSet):
+class FrameDelta:
+    """Default deltas."""
+
+    dcoil: float = -1
+    dplasma: float = 0.25
+    dshell: float = 2.5
+    dsubshell: float = 0.25
+    dfield: float = 0.2
+
+
+@dataclass
+class CoilSet(FrameDelta, FrameSet):
     """
     Manage coilset.
 
@@ -17,11 +28,6 @@ class CoilSet(FrameSet):
     - plasma: add plasma (poloidal).
 
     """
-    dcoil: float = -1
-    dplasma: float = 0.25
-    dshell: float = 2.5
-    dsubshell: float = 0.25
-    dfield: float = 0.2
 
     def __post_init__(self):
         """Init mesh methods."""
@@ -36,8 +42,13 @@ if __name__ == '__main__':
 
     coilset = CoilSet(dcoil=0.05)
 
-    coilset.plasma.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 3, 4, 3, 1]])
+    coilset.coil.insert(range(3), 1, 0.75, 0.75, link=True, delta=-1,
+                        section='c', nturn=[3, 5, 10], turn='hex')
+    #coilset.plasma.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 3, 4, 3, 1]])
     coilset.subframe.polyplot()
+
+    print(coilset.frame.dtypes)
+    print(coilset.subframe.dtypes)
     '''
     coilset.coil.insert(range(3), 1, 0.75, 0.75, link=True, delta=0.2,
                         section='circle')

@@ -115,7 +115,7 @@ class Frame(FrameIndexer, FrameArray):
         try:
             value = value[self.subref]  # inflate if subref set
             if col == 'Ic':
-                value *= self.factor
+                value *= self.factor.values
         except (AttributeError, IndexError):
             pass
         with self.setlock(True, 'subspace'):
@@ -134,13 +134,9 @@ if __name__ == '__main__':
     frame = Frame(required=['x', 'z'], Available=['It'], Subspace=['Ic'],
                   Array=['Ic'])
     frame.insert([-4, -5], 1, Ic=6.5, label='CS')
-    frame.insert(range(4000), 3, Ic=4, Nt=20, label='PF', link=True)
+    frame.insert(range(4000), 3, Ic=4, nturn=20, label='PF', link=True)
     frame.multipoint.link(['PF1', 'CS0'], factor=1)
 
     print(frame)
     print()
-    print(frame.subspace)
-
-
-
-
+    print(frame.dtypes)

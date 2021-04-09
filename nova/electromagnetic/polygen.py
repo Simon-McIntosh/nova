@@ -7,8 +7,8 @@ import string
 
 polyshape = \
     dict.fromkeys(['circle', 'c', 'o'], 'circle') | \
-    dict.fromkeys(['ellipse', 'e'], 'ellipse') | \
-    dict.fromkeys(['square', 'sq'], 'square') | \
+    dict.fromkeys(['ellipse', 'elp', 'e'], 'ellipse') | \
+    dict.fromkeys(['square', 'sq', 's'], 'square') | \
     dict.fromkeys(['rectangle', 'r'], 'rectangle') | \
     dict.fromkeys(['skin', 'sk'], 'skin') | \
     dict.fromkeys(['polygon', 'poly'], 'polygon') |\
@@ -62,7 +62,7 @@ def circle(x_center, z_center, width, height=None):
     radius = diameter / 2
     point = shapely.geometry.Point(x_center, z_center)
     buffer = point.buffer(radius, resolution=32)
-    return shapely.geometry.Polygon(buffer.exterior)
+    return polyframe(shapely.geometry.Polygon(buffer.exterior), 'circle')
 
 
 def ellipse(x_center, z_center, width, height):
@@ -138,7 +138,7 @@ def rectangle(x_center, z_center, width, height):
                                 x_center+width/2, z_center+height/2)
 
 
-def skin(x_center, z_center, diameter, fractional_thickness):
+def skin(x_center, z_center, diameter, fill):
     """
     Return shapely.ring.
 
@@ -150,30 +150,30 @@ def skin(x_center, z_center, diameter, fractional_thickness):
         Ring center, z-coordinate.
     diameter : float
         External diameter.
-    fractional_thickness : float
-        Fractional thickness, 1-r/R. Must be greater than 0 and less than 1.
-        Use circle for fractional_thickness=1.
+    fill : float
+        Fill, 1-r/R. Must be greater than 0 and less than 1.
+        Use circle for fill=1.
 
     Raises
     ------
     ValueError
-        fractional_thickness outside range 0-1.
+        fill outside range 0-1.
 
     Returns
     -------
     shape : shapely.polygon
 
     """
-    if fractional_thickness < 0 or fractional_thickness > 1:
-        raise ValueError('skin fractional thickness not 0 <= '
-                         f'{fractional_thickness} <= 1')
+    if fill < 0 or fill > 1:
+        raise ValueError('skin fill not 0 <= '
+                         f'{fill} <= 1')
     circle_outer = circle(x_center, z_center, diameter)
-    if fractional_thickness == 1:
+    if fill == 1:
         shape = circle_outer
     else:
-        if fractional_thickness == 0:
-            fractional_thickness = 1e-3
-        scale = 1-fractional_thickness
+        if fill == 0:
+            fill = 1e-3
+        scale = 1-fill
         circle_inner = shapely.affinity.scale(circle_outer, scale, scale)
         shape = circle_outer.difference(circle_inner)
     return shape
@@ -199,8 +199,7 @@ def hexagon(x_center, z_center, width, height=None):
     shape : shapely.polygon
 
     """
-    length = boxbound(width/1.5, height/np.sqrt(3))
-    length = width/3
+    length = boxbound(width/2, height/np.sqrt(3))
     points = [[x_center + np.cos(alpha) * length,
                z_center + np.sin(alpha) * length]
               for alpha in np.linspace(0, 2*np.pi, 7)]
@@ -210,14 +209,18 @@ def hexagon(x_center, z_center, width, height=None):
 class Polygon(shapely.geometry.Polygon):
     """Extend Polygon.__str__ for compact DataFrame representation."""
 
+    def __init__(self, shell=None, holes=None, name='poly'):
+        self.name = name
+        super().__init__(shell, holes)
+
     def __str__(self):
-        """Return compact __str__."""
-        return super().__str__().split()[0][:4]
+        """Return polygon name."""
+        return '-'
 
 
-def polyframe(polygon):
+def polyframe(polygon, name='poly'):
     """Return polygon with compact __str__."""
-    return Polygon(polygon.exterior, polygon.interiors)
+    return Polygon(polygon.exterior, polygon.interiors, name)
 
 
 def polygen(section):

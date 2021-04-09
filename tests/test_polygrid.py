@@ -1,0 +1,105 @@
+import pytest
+
+import numpy as np
+
+from nova.electromagnetic.polygrid import PolyGrid
+
+
+def test_rectangle():
+    polygrid = PolyGrid({'r': [6, 3.3, 12, 0.5]})
+    assert polygrid.area == 6
+
+
+def test_square():
+    polygrid = PolyGrid({'sq': [6, 3.3, 3]})
+    assert polygrid.area == 9
+
+
+def test_limit():
+    polygrid = PolyGrid([0, 5, 2, 3])
+    assert polygrid.area == 5
+
+
+def test_loop():
+    polygrid = PolyGrid([[0, 2, 1, 0], [0, 0, 1, 0]])
+    assert polygrid.area == 1
+
+
+def test_loop_transpose():
+    polygrid = PolyGrid(np.array([[0, 2, 1, 0], [0, 0, 1, 0]]).T)
+    assert polygrid.area == 1
+
+
+def test_multipolygon():
+    polygrid = PolyGrid({'c1': [6, 3, 12, 0.2], 'c2': [6.1999, 3, 0.3, 0.2]})
+    assert np.isclose(polygrid.area, 2 * np.pi * 0.2**2 / 4, 1e-3)
+
+
+def test_square_in_rectangle():
+    polygrid = PolyGrid({'r': [3, 5, 0.2, 0.1]}, delta=0, section='sq')
+    assert np.isclose(polygrid.cell_area, 0.1**2)
+
+
+def test_circle_in_rectangle():
+    polygrid = PolyGrid({'r': [3, 5, 0.1, 0.3]}, delta=0, section='o')
+    assert np.isclose(polygrid.cell_area, np.pi * 0.1**2 / 4)
+
+
+def test_rectangle_in_rectangle():
+    polygrid = PolyGrid({'r': [3, 5, 0.1, 0.15]}, delta=0, section='r')
+    assert np.isclose(polygrid.cell_area, 0.1*0.15)
+
+
+def test_hexagon_in_rectangle_horizontal_constraint():
+    polygrid = PolyGrid({'r': [3, 5, 0.1, 0.15]}, delta=0, section='hex')
+    edge_length = 0.1/2
+    assert np.isclose(polygrid.cell_area, 3**1.5 / 2 * edge_length**2)
+
+
+def test_hexagon_in_rectangle_vertical_constraint():
+    polygrid = PolyGrid({'r': [3, 5, 0.1, 0.05]}, delta=0, section='hex')
+    edge_length = 0.05/np.sqrt(3)
+    assert np.isclose(polygrid.cell_area, 3**1.5 / 2 * edge_length**2)
+
+
+def test_hexagon_in_circle():
+    polygrid = PolyGrid({'c': [3, 5, 0.1]}, delta=0, section='hex')
+    edge_length = 0.1/2
+    assert np.isclose(polygrid.cell_area, 3**1.5 / 2 * edge_length**2)
+
+
+def test_rectangle_grid_horizontal():
+    polygrid = PolyGrid({'r': [6, 3, 0.4, 0.2]}, delta=-5, section='c')
+    assert len(polygrid) == 6
+
+
+def test_rectangle_grid_vertical():
+    polygrid = PolyGrid({'r': [6, 3, 0.1, 0.2]}, delta=-7, section='c')
+    assert len(polygrid) == 8
+
+
+def test_circle_circle_grid_odd_under():
+    polygrid = PolyGrid({'c': [6, 3, 0.4, 0.2]}, delta=-3, section='c')
+    assert len(polygrid) == 4
+
+
+def test_circle_circle_grid_odd_over():
+    polygrid = PolyGrid({'c': [6, 3, 0.4, 0.2]}, delta=-5, section='c')
+    assert len(polygrid) == 9
+
+
+def test_circle_rectangle_grid_odd_over():
+    polygrid = PolyGrid({'c': [6, 3, 0.4, 0.2]}, delta=-5, section='r')
+    assert len(polygrid) == 9
+
+
+def test_poly_buffer():
+    polygrid = PolyGrid({'c': [6, 3, 0.4, 0.2]}, delta=-5,
+                        section='sk', scale=1, fill=0.7)
+    assert np.sum([section == 'skin'
+                   for section in polygrid.frame.section]) == 5
+
+
+if __name__ == '__main__':
+
+    pytest.main([__file__])

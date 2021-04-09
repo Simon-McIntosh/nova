@@ -21,14 +21,11 @@ class PolyGeom:
     z_centroid: float = field(default=None)
     length: float = field(default=None)
     thickness: float = field(default=None)
-    scale: float = 1
     polygon: shapely.geometry.Polygon = field(default=None, repr=False)
 
     def __post_init__(self):
         """Update section and generate polygon as required."""
         self.section = polyshape[self.section]  # inflate shorthand
-        self.length *= self.scale
-        self.thickness *= self.scale
         if pandas.isna(self.polygon):  # generate polygon if not set
             self.polygon = polygen(self.section)(
                 self.x_centroid, self.z_centroid,
@@ -59,9 +56,9 @@ class PolyGeom:
         z_centroid : float
             Polygon centroid z-coordinate.
         """
-        if self.x_centroid is None:
+        if self.x_centroid is None or self.x_centroid == 0:
             self.x_centroid = self.polygon.centroid.x  # update x centroid
-        if self.x_centroid is None:
+        if self.z_centroid is None or self.z_centroid == 0:
             self.z_centroid = self.polygon.centroid.y  # update z centroid
         return self.x_centroid, self.z_centroid
 
@@ -146,7 +143,7 @@ class Polygon:
             index_length = len(index)
             section = self.frame.loc[index, 'section'].values
             coords = self.frame.loc[
-                index, ['x', 'z', 'dl', 'dt', 'scale']].to_numpy()
+                index, ['x', 'z', 'dl', 'dt']].to_numpy()
             polygon = self.frame.loc[index, 'poly'].values
             polygon_update = self.frame.loc[index, 'poly'].isna()
             geom = np.empty((index_length, len(self.features)), dtype=float)
@@ -168,11 +165,10 @@ class Geometry(MetaMethod):
     """Geometrical methods for Frame."""
 
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: [
-        'x', 'z', 'section'])
+    required: list[str] = field(default_factory=lambda: ['section', 'poly'])
     additional: list[str] = field(default_factory=lambda: [
-        'dl', 'dt', 'scale', 'rms', 'dx', 'dz', 'dA', 'poly'])
-    require_all: bool = field(repr=False, default=True)
+        'x', 'z', 'dl', 'dt', 'rms', 'dx', 'dz', 'dA'])
+    require_all: bool = field(repr=False, default=False)
     polygon: Polygon = field(init=False, repr=False)
 
     def __post_init__(self):

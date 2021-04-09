@@ -225,7 +225,7 @@ class FrameArray(FrameArrayIndexer, DataArray):
 
         """
         if len(args) == 0:
-            raise IndexError('len(args) == 0, argument number must be > 0')
+            return args, kwargs
         if self.isframe(args[0], frame=True) and len(args) == 1:
             frame = args[0]
             missing = [arg not in frame for arg in self.metaframe.required]
@@ -251,8 +251,11 @@ class FrameArray(FrameArrayIndexer, DataArray):
         """Return data dict built from *args and **kwargs."""
         data = {}  # python 3.6+ assumes dict is insertion ordered
         attrs = self.metaframe.required + list(kwargs)  # record passed attrs
-        for attr, arg in zip(self.metaframe.required, args):
-            data[attr] = np.array(arg, dtype=float)  # add required arguments
+        for attr, arg in zip(self.metaframe.required, args):  # required
+            try:
+                data[attr] = np.array(arg, dtype=float)
+            except TypeError:
+                data[attr] = arg  # non-numeric input
         for attr in self.metaframe.additional:  # set additional to default
             data[attr] = self.metaframe.default[attr]
         additional = []

@@ -53,6 +53,12 @@ def test_filament_number():
     assert len(coilset.subframe) == 20
 
 
+def test_square_filament_number():
+    coilset = CoilSet()
+    coilset.coil.insert(1.75, 0.5, 2.5, 2.5, scale=1, delta=-20, turn='sq')
+    assert len(coilset.subframe) == 16
+
+
 def test_circular_cross_section():
     coilset = CoilSet()
     coilset.coil.insert(1.75, 0.5, 2.5, 2.5, section='circle', turn='r',
@@ -96,7 +102,7 @@ def test_shell_cross_section():
 
 def test_shell_additional():
     coilset = CoilSet()
-    coilset.shell.insert([1, 1, 3], [3, 4, 4], dt=0.1, plasma=True)
+    coilset.shell.insert([1, 1, 3], [3, 4, 4], dt=0.1, delta=0, plasma=True)
     assert coilset.frame.plasma.to_numpy().all()
 
 
@@ -118,6 +124,41 @@ def test_shell():
                          [1, 1, 2, 1.5, -1, -1.5], 0.1,
                          dshell=1, delta=-1, label='vvin')
     assert len(coilset.frame) == 11
+
+
+def test_aspect_horizontal():
+    coilset = CoilSet()
+    coilset.coil.insert(1, 1, 0.75, 0.5, link=True, delta=-9,
+                        section='r', turn='s', fill=True)
+    assert np.isclose(coilset.subframe.area.sum(), 0.75*0.5)
+
+
+def test_aspect_vertical():
+    coilset = CoilSet()
+    coilset.coil.insert(1, 1, 0.5, 0.75, link=True, delta=-9,
+                        section='r', turn='s', fill=True)
+    assert np.isclose(coilset.subframe.area.sum(), 0.75*0.5)
+
+
+def test_tile_hex():
+    coilset = CoilSet()
+    coilset.coil.insert(1, 1, 0.5, 0.75, link=True, delta=-4,
+                        section='circ', nturn=9, turn='hex', tile=True)
+    assert np.isclose(coilset.subframe.area.sum(), np.pi*0.5**2/4, 1e-3)
+
+
+def test_plasma_single():
+    coilset = CoilSet(dplasma=0)
+    coilset.plasma.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 2, 2.5, 1.5, 1]],
+                          turn='r', tile=False)
+    assert len(coilset.subframe) == 1
+
+
+def test_plasma_hex():
+    coilset = CoilSet(dplasma=0.5)
+    coilset.plasma.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 2, 2.5, 1.5, 1]])
+    assert sum([section == 'hexagon'
+                for section in coilset.subframe.section]) == 2
 
 
 if __name__ == '__main__':

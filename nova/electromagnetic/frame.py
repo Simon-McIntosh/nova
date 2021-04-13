@@ -82,6 +82,8 @@ class Frame(FrameIndexer, FrameArray):
 
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
+        if not self.hasattrs('subspace'):
+            return super().__getitem__(col)
         if self.metaframe.hascol('subspace', col):
             if self.lock('subspace') is False:
                 self.inflate_subspace(col)
@@ -93,10 +95,11 @@ class Frame(FrameIndexer, FrameArray):
     def __setitem__(self, col, value):
         """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
         value = self.format_value(col, value)
-        if self.hasattrs('subspace'):
-            if self.metaframe.hascol('subspace', col):
-                if self.lock('subspace') is False:
-                    raise SubSpaceLockError('setitem', col)
+        if not self.hasattrs('subspace'):
+            return super().__setitem__(col, value)
+        if self.metaframe.hascol('subspace', col):
+            if self.lock('subspace') is False:
+                raise SubSpaceLockError('setitem', col)
         return super().__setitem__(col, value)
 
     def update_frame(self):
@@ -133,10 +136,8 @@ if __name__ == '__main__':
 
     frame = Frame(required=['x', 'z'], Available=['It'], Subspace=['Ic'],
                   Array=['Ic'])
-    frame.insert([-4, -5], 1, Ic=6.5, label='CS')
-    frame.insert(range(4000), 3, Ic=4, nturn=20, label='PF', link=True)
-    frame.multipoint.link(['PF1', 'CS0'], factor=1)
+    frame.insert([-4, -5], 1, Ic=6.5, name='PF1')# label='CS')
+    #frame.insert(range(4000), 3, Ic=4, nturn=20, label='PF', link=True)
+    #frame.multipoint.link(['PF1', 'CS0'], factor=1)
 
     print(frame)
-    print()
-    print(frame.dtypes)

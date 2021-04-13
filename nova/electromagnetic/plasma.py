@@ -7,21 +7,37 @@ import pygeos
 import pandas
 
 from nova.electromagnetic.frame import Frame
-from nova.electromagnetic.coil import Coil
+from nova.electromagnetic.poloidalgrid import PoloidalGrid
+from nova.electromagnetic.polygrid import Polygon
 
 # self._ionize_index = self._plasma[self._mpc_referance]
 
 
 @dataclass
-class Plasma(Coil):
+class Plasma(PoloidalGrid):
     """Generate plasma."""
 
     frame: Frame = field(repr=False)
     subframe: Frame = field(repr=False)
     delta: float
-    _boundary: shapely.geometry.Polygon = field(init=False, repr=False)
+    tile: bool = field(init=False, default=True)
+    fill: bool = field(init=False, default=True)
+    turn: str = 'hexagon'
+    #_boundary: shapely.geometry.Polygon = field(init=False, repr=False)
 
-    def insert(self, boundary, iloc=None, mesh=True, **additional):
+    def update_conditionals(self):
+        """Update conditional attrs."""
+
+    #def insert(self, *required, iloc=None, **additional):
+    #    """Extend PoloidalGrid.insert."""
+    #
+    #    #PolyGeom(polygon)
+    #    #if len(required) == isinstance(required[0], (dict, list, np.ndarray)):
+
+
+
+    '''
+    def insert(self, boundary, iloc=None, **additional):
         """
         Extend Coil.insert.
 
@@ -52,23 +68,18 @@ class Plasma(Coil):
         additional['poly'] = self.boundary
         required = [additional.pop(attr, self.frame.metaframe.default[attr])
                     for attr in self.frame.metaframe.required]
-        super().insert(*required, iloc=iloc, mesh=mesh, **additional)
+        super().insert(*required, iloc=iloc, **additional)
+    '''
 
+    # name=name, plasma=True, active=True, part='plasma'
 
-        '''
-        self.add_coil(0, 0, 0, 0, polygon=self.plasma_boundary,
-                      cross_section='polygon', turn_section='rectangle',
-                      dCoil=self.dPlasma, name=name, plasma=True, active=True,
-                      part='plasma')
-        '''
-
-        '''
+    '''
         self.plasmagrid.generate_grid(**kwargs)
         grid_factor = self.dPlasma/self.plasmagrid.dx
         # self._add_vertical_stabilization_coils()
         self.plasmagrid.cluster_factor = 1.5*grid_factor
         self.plasmafilament.add_plasma()
-        '''
+    '''
 
     @property
     def boundary(self):
@@ -153,7 +164,7 @@ class Plasma(Coil):
 
     @separatrix.setter
     def separatrix(self, loop):
-        if isinstance(loop, pd.DataFrame):
+        if isinstance(loop, pandas.DataFrame):
             loop = loop.values
         if isinstance(loop, shapely.geometry.Polygon):
             polygon = loop

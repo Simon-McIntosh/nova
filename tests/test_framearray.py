@@ -42,7 +42,7 @@ def test_columns_metaframe_update():
 def test_index_length_error():
     framearray = FrameArray()
     with pytest.raises(IndexError):
-        assert framearray.insert(4, [5, 4, 6], 0.1, 0.3, name=['1, 2'])
+        framearray.insert(4, [5, 4, 6], 0.1, 0.3, name=['coil0', 'coil1'])
 
 
 def test_required_add_frame():
@@ -53,7 +53,7 @@ def test_required_add_frame():
 def test_required_add_frame_error():
     framearray = FrameArray(metadata={'Required': ['x', 'z']})
     with pytest.raises(IndexError):
-        assert framearray.insert(1, 2, 3)
+        framearray.insert(1, 2, 3)
 
 
 def test_attribute_metadata_replace():

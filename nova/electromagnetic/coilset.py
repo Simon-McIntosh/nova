@@ -8,8 +8,8 @@ from nova.electromagnetic.plasma import Plasma
 
 
 @dataclass
-class FrameDelta:
-    """Default deltas."""
+class FrameGrid:
+    """Default grid sizing parameters."""
 
     dcoil: float = -1
     dplasma: float = 0.25
@@ -19,7 +19,7 @@ class FrameDelta:
 
 
 @dataclass
-class CoilSet(FrameDelta, FrameSet):
+class CoilSet(FrameGrid, FrameSet):
     """
     Manage coilset.
 
@@ -37,15 +37,23 @@ class CoilSet(FrameDelta, FrameSet):
                            self.dshell, self.dsubshell)
         self.plasma = Plasma(self.frame, self.subframe, self.dplasma)
 
+    def plot(self):
+        """Plot coilset."""
+        self.subframe.polyplot()
+
 
 if __name__ == '__main__':
 
-    coilset = CoilSet(dcoil=0.05)
+    coilset = CoilSet(dplasma=0.25)
 
-    coilset.coil.insert(range(3), 1, 0.75, 0.75, link=True, delta=-1,
-                        section='hex', nturn=[3, 5, 10], turn='hex')
-    #coilset.plasma.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 3, 4, 3, 1]])
-    coilset.subframe.polyplot()
+    coilset.coil.insert(range(2), 1, 0.75, 0.5, link=True, delta=-10,
+                        skin=0.65, section='r',
+                        nturn=24, turn='c', tile=True)
+    coilset.plasma.insert({'sk': [1.7, 1, 0.5, 0.85]}, turn='hex', tile=True,
+                          trim=True)
+
+    coilset.plot()
+
 
     '''
     coilset.coil.insert(range(3), 1, 0.75, 0.75, link=True, delta=0.2,

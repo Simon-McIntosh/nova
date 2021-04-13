@@ -1,15 +1,17 @@
 """Generate polygons for CoilFrame instances."""
+import string
+
 import shapely
 import shapely.geometry
 import shapely.ops
 import numpy as np
-import string
+
 
 polyshape = \
-    dict.fromkeys(['circle', 'c', 'o'], 'circle') | \
+    dict.fromkeys(['circle', 'circ', 'c', 'o'], 'circle') | \
     dict.fromkeys(['ellipse', 'elp', 'e'], 'ellipse') | \
     dict.fromkeys(['square', 'sq', 's'], 'square') | \
-    dict.fromkeys(['rectangle', 'r'], 'rectangle') | \
+    dict.fromkeys(['rectangle', 'rect', 'r'], 'rectangle') | \
     dict.fromkeys(['skin', 'sk'], 'skin') | \
     dict.fromkeys(['polygon', 'poly'], 'polygon') |\
     dict.fromkeys(['shell', 'shl', 'sh'], 'shell') |\
@@ -61,8 +63,8 @@ def circle(x_center, z_center, width, height=None):
     diameter = boxbound(width, height)
     radius = diameter / 2
     point = shapely.geometry.Point(x_center, z_center)
-    buffer = point.buffer(radius, resolution=32)
-    return polyframe(shapely.geometry.Polygon(buffer.exterior), 'circle')
+    buffer = point.buffer(radius, resolution=64)
+    return PolyFrame(buffer, 'circle')
 
 
 def ellipse(x_center, z_center, width, height):
@@ -85,8 +87,9 @@ def ellipse(x_center, z_center, width, height):
     shape : shapely.polygon
 
     """
-    return shapely.affinity.scale(circle(x_center, z_center, width),
-                                  1, height/width)
+    polygon = shapely.affinity.scale(circle(x_center, z_center, width),
+                                     1, height/width)
+    return PolyFrame(polygon, name='ellipse')
 
 
 def square(x_center, z_center, width, height=None):
@@ -110,8 +113,9 @@ def square(x_center, z_center, width, height=None):
 
     """
     width = boxbound(width, height)
-    return shapely.geometry.box(x_center-width/2, z_center-width/2,
-                                x_center+width/2, z_center+width/2)
+    polygon = shapely.geometry.box(x_center-width/2, z_center-width/2,
+                                   x_center+width/2, z_center+width/2)
+    return PolyFrame(polygon, name='square')
 
 
 def rectangle(x_center, z_center, width, height):
@@ -134,11 +138,12 @@ def rectangle(x_center, z_center, width, height):
     shape : shapely.polygon
 
     """
-    return shapely.geometry.box(x_center-width/2, z_center-height/2,
-                                x_center+width/2, z_center+height/2)
+    polygon = shapely.geometry.box(x_center-width/2, z_center-height/2,
+                                   x_center+width/2, z_center+height/2)
+    return PolyFrame(polygon, name='rectangle')
 
 
-def skin(x_center, z_center, diameter, fill):
+def skin(x_center, z_center, diameter, factor):
     """
     Return shapely.ring.
 
@@ -150,33 +155,32 @@ def skin(x_center, z_center, diameter, fill):
         Ring center, z-coordinate.
     diameter : float
         External diameter.
-    fill : float
-        Fill, 1-r/R. Must be greater than 0 and less than 1.
-        Use circle for fill=1.
+    factor : float
+        factor = 1-r/R. Must be greater than 0 and less than 1.
+        Use circle for factor=1.
 
     Raises
     ------
     ValueError
-        fill outside range 0-1.
+        factor outside range 0-1.
 
     Returns
     -------
     shape : shapely.polygon
 
     """
-    if fill < 0 or fill > 1:
-        raise ValueError('skin fill not 0 <= '
-                         f'{fill} <= 1')
+    if factor < 0 or factor > 1:
+        raise ValueError('skin factor not 0 <= '
+                         f'{factor} <= 1')
     circle_outer = circle(x_center, z_center, diameter)
-    if fill == 1:
-        shape = circle_outer
-    else:
-        if fill == 0:
-            fill = 1e-3
-        scale = 1-fill
-        circle_inner = shapely.affinity.scale(circle_outer, scale, scale)
-        shape = circle_outer.difference(circle_inner)
-    return shape
+    if factor == 1:
+        return circle_outer
+    if factor == 0:
+        factor = 1e-3
+    scale = 1-factor
+    circle_inner = shapely.affinity.scale(circle_outer, scale, scale)
+    polygon = circle_outer.difference(circle_inner)
+    return PolyFrame(polygon, name='skin')
 
 
 def hexagon(x_center, z_center, width, height=None):
@@ -203,10 +207,10 @@ def hexagon(x_center, z_center, width, height=None):
     points = [[x_center + np.cos(alpha) * length,
                z_center + np.sin(alpha) * length]
               for alpha in np.linspace(0, 2*np.pi, 7)]
-    return shapely.geometry.Polygon(points)
+    return PolyFrame(points, name='hexagon')
 
 
-class Polygon(shapely.geometry.Polygon):
+class PolyFrame(shapely.geometry.Polygon):
     """Extend Polygon.__str__ for compact DataFrame representation."""
 
     def __init__(self, shell=None, holes=None, name='poly'):
@@ -216,11 +220,6 @@ class Polygon(shapely.geometry.Polygon):
     def __str__(self):
         """Return polygon name."""
         return '-'
-
-
-def polyframe(polygon, name='poly'):
-    """Return polygon with compact __str__."""
-    return Polygon(polygon.exterior, polygon.interiors, name)
 
 
 def polygen(section):

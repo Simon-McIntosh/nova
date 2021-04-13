@@ -15,6 +15,8 @@ from nova.electromagnetic.dataframe import DataFrame
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.multipoint import MultiPoint
 from nova.electromagnetic.energize import Energize
+from nova.electromagnetic.polygon import Polygon
+from nova.electromagnetic.geometry import PolyGeom
 
 
 class FrameArrayLocMixin(ArrayLocMixin):
@@ -100,6 +102,8 @@ class FrameArray(FrameArrayIndexer, DataArray):
 
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
+        if not self.hasattrs('energize'):
+            return super().__getitem__(col)
         if self.metaframe.hascol('energize', col):
             if self.lock('energize') is False:
                 return self.energize._get_item(super(), col)
@@ -108,6 +112,8 @@ class FrameArray(FrameArrayIndexer, DataArray):
     def __setitem__(self, col, value):
         """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
         value = self.format_value(col, value)
+        if not self.hasattrs('energize'):
+            return super().__setitem__(col, value)
         if self.metaframe.hascol('energize', col):
             if self.lock('energize') is False:
                 return self.energize._set_item(super(), col, value)
@@ -189,6 +195,7 @@ class FrameArray(FrameArrayIndexer, DataArray):
 
         """
         args, kwargs = self._extract_frame(*args, **kwargs)
+        args, kwargs = self._extract_polygon(*args, **kwargs)
         data = self._build_data(*args, **kwargs)
         index = self._build_index(data, **kwargs)
         return FrameArray(data, index=index, attrs=self.attrs)
@@ -224,21 +231,22 @@ class FrameArray(FrameArrayIndexer, DataArray):
             Return keyword arquments, updated if input arg[0] is *frame.
 
         """
-        if len(args) == 0:
+        if len(args) != 1:
             return args, kwargs
-        if self.isframe(args[0], frame=True) and len(args) == 1:
-            frame = args[0]
-            missing = [arg not in frame for arg in self.metaframe.required]
-            if np.array(missing).any():
-                required = np.array(self.metaframe.required)[missing]
-                raise ValueError(f'required arguments {required} '
-                                 'not specified in frame '
-                                 f'{frame.columns}')
-            args = [frame.loc[:, col] for col in self.metaframe.required]
-            if not isinstance(frame.index, pandas.RangeIndex):
-                kwargs['name'] = frame.index
-            kwargs |= {col: frame.loc[:, col] for col in
-                       self.metaframe.additional if col in frame}
+        if not self.isframe(args[0], frame=True):
+            return args, kwargs
+        frame = args[0]
+        missing = [arg not in frame for arg in self.metaframe.required]
+        if np.array(missing).any():
+            required = np.array(self.metaframe.required)[missing]
+            raise ValueError(f'required arguments {required} '
+                             'not specified in frame '
+                             f'{frame.columns}')
+        args = [frame.loc[:, col] for col in self.metaframe.required]
+        if not isinstance(frame.index, pandas.RangeIndex):
+            kwargs['name'] = frame.index
+        kwargs |= {col: frame.loc[:, col] for col in
+                   self.metaframe.additional if col in frame}
         if len(args) != len(self.metaframe.required):
             raise IndexError(
                 'incorrect required argument number (*args)): '
@@ -247,10 +255,29 @@ class FrameArray(FrameArrayIndexer, DataArray):
                 f'additional **kwargs: {self.metaframe.additional}')
         return args, kwargs
 
+    def _extract_polygon(self, *args, **kwargs):
+        """
+        Return *args and **kwargs with data extracted from frame.
+
+        If args[0].., replace *args and update **kwargs.
+        Else pass *args, **kwargs.
+        """
+        if len(args) != 1 or len(self.metaframe.required) == 1:
+            return args, kwargs
+        polygon = Polygon(args[0])
+        geometry = polygon.geometry
+        kwargs = kwargs | geometry | {'poly': polygon.poly}
+        args = [kwargs.pop(attr) for attr in self.metaframe.required]
+        return args, kwargs
+
     def _build_data(self, *args, **kwargs):
         """Return data dict built from *args and **kwargs."""
         data = {}  # python 3.6+ assumes dict is insertion ordered
         attrs = self.metaframe.required + list(kwargs)  # record passed attrs
+        if len(args) != len(self.metaframe.required):
+            raise IndexError(f'len(args) {len(args)} != '
+                             'len(self.metaframe.required) '
+                             f'{len(self.metaframe.required)}')
         for attr, arg in zip(self.metaframe.required, args):  # required
             try:
                 data[attr] = np.array(arg, dtype=float)
@@ -263,7 +290,7 @@ class FrameArray(FrameArrayIndexer, DataArray):
             if attr in self.metaframe.tag:
                 kwargs.pop(attr)  # skip tags
             elif attr in self.metaframe.default:
-                data[attr] = kwargs.pop(attr)  # add keyword arguments
+                data[attr] = np.array(kwargs.pop(attr))  # add keyword attrs
                 if attr not in self.metaframe.additional:
                     additional.append(attr)
         if len(additional) > 0:  # extend aditional arguments

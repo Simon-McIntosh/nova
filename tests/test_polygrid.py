@@ -37,35 +37,35 @@ def test_multipolygon():
 
 def test_square_in_rectangle():
     polygrid = PolyGrid({'r': [3, 5, 0.2, 0.1]}, delta=0, turn='sq')
-    assert np.isclose(polygrid.cell_area, 0.1**2)
+    assert np.isclose(polygrid.polyarea, 0.1**2)
 
 
 def test_circle_in_rectangle():
     polygrid = PolyGrid({'r': [3, 5, 0.1, 0.3]}, delta=0, turn='o')
-    assert np.isclose(polygrid.cell_area, np.pi * 0.1**2 / 4)
+    assert np.isclose(polygrid.polyarea, np.pi * 0.1**2 / 4, 1e-3)
 
 
 def test_rectangle_in_rectangle():
     polygrid = PolyGrid({'r': [3, 5, 0.1, 0.15]}, delta=0, turn='r')
-    assert np.isclose(polygrid.cell_area, 0.1*0.15)
+    assert np.isclose(polygrid.polyarea, 0.1*0.15)
 
 
 def test_hexagon_in_rectangle_horizontal_constraint():
     polygrid = PolyGrid({'r': [3, 5, 0.1, 0.15]}, delta=0, turn='hex')
     edge_length = 0.1/2
-    assert np.isclose(polygrid.cell_area, 3**1.5 / 2 * edge_length**2)
+    assert np.isclose(polygrid.polyarea, 3**1.5 / 2 * edge_length**2)
 
 
 def test_hexagon_in_rectangle_vertical_constraint():
     polygrid = PolyGrid({'r': [3, 5, 0.1, 0.05]}, delta=0, turn='hex')
     edge_length = 0.05/np.sqrt(3)
-    assert np.isclose(polygrid.cell_area, 3**1.5 / 2 * edge_length**2)
+    assert np.isclose(polygrid.polyarea, 3**1.5 / 2 * edge_length**2)
 
 
 def test_hexagon_in_circle():
     polygrid = PolyGrid({'c': [3, 5, 0.1]}, delta=0, turn='hex')
     edge_length = 0.1/2
-    assert np.isclose(polygrid.cell_area, 3**1.5 / 2 * edge_length**2)
+    assert np.isclose(polygrid.polyarea, 3**1.5 / 2 * edge_length**2)
 
 
 def test_rectangle_grid_horizontal():
@@ -100,64 +100,63 @@ def test_circle_rectangle_grid_odd_over():
 
 def test_poly_buffer():
     polygrid = PolyGrid({'c': [6, 3, 0.4, 0.2]}, delta=-5,
-                        turn='sk', scale=1, fill=0.7)
+                        turn='sk', scale=1)
     assert np.sum([section == 'skin'
                    for section in polygrid.frame.section]) == 5
 
 
 def test_polygon_cell_equality():
-    polygon = Polygon({'h': [6, 3, 0.4, 0.2]}).polygon
-    polygrid = PolyGrid(polygon, delta=0,
-                        turn='hex', scale=1, fill=0.7)
-    assert polygon.equals(polygrid.frame.poly[0])
+    poly = Polygon({'h': [6, 3, 0.4, 0.2]}).poly
+    polygrid = PolyGrid(poly, delta=0, turn='hex', scale=1)
+    assert poly.equals(polygrid.frame.poly[0])
 
 
 def test_square_effective_nfilament():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
                         turn='sq', tile=False)
-    assert np.isclose(-polygrid.delta, polygrid.nfilament)
+    assert np.isclose(-polygrid.delta, polygrid.polyfilaments)
 
 
 def test_square_effective_nfilament_tile():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
                         turn='sq', tile=True)
-    assert np.isclose(-polygrid.delta, polygrid.nfilament)
+    assert np.isclose(-polygrid.delta, polygrid.polyfilaments)
 
 
 def test_rectangle_effective_nfilament():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
                         turn='r', tile=False)
-    assert np.isclose(-polygrid.delta, polygrid.nfilament)
+    assert np.isclose(-polygrid.delta, polygrid.polyfilaments)
 
 
 def test_rectangle_effective_nfilament_tile():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
                         turn='r', tile=True)
-    assert np.isclose(-polygrid.delta, polygrid.nfilament)
+    assert np.isclose(-polygrid.delta, polygrid.polyfilaments)
 
 
 def test_circle_effective_nfilament():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
                         turn='o', tile=False)
-    assert np.isclose(-polygrid.delta, polygrid.nfilament, 1e-3)
+    assert np.isclose(-polygrid.delta, polygrid.polyfilaments, 1e-3)
 
 
 def test_circle_effective_nfilament_tile():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-49,
                         turn='o', tile=True)
-    assert np.isclose(-polygrid.delta, polygrid.nfilament, 1e-2)
+    assert np.isclose(-polygrid.delta, polygrid.polyfilaments, 1e-2)
 
 
 def test_hexagon_effective_nfilament():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
-                        turn='hx', tile=False)
-    assert np.isclose(-polygrid.delta, polygrid.nfilament, 1e-3)
+                        turn='hx', tile=False, fill=True)
+    assert np.isclose(-polygrid.delta, polygrid.polyfilaments, 1e-3)
 
 
 def test_hexagon_effective_nfilament_tile():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-49,
                         turn='hex', tile=True)
-    assert np.isclose(-polygrid.delta, polygrid.nfilament, 1e-2)
+    assert np.isclose(-polygrid.delta, polygrid.polyfilaments, 1e-2)
 
 
 if __name__ == '__main__':

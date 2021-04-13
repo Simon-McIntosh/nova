@@ -29,8 +29,8 @@ class Display:
     axes: plt.Axes = field(repr=False, default=None)
     patchwork: float = 0.15
     alpha: dict[str, float] = field(default_factory=lambda: {'plasma': 0.75})
-    linewidth: float = 0.25
-    edgecolor: str = 'darkgrey'
+    linewidth: float = 0.5
+    edgecolor: str = 'white'
     facecolor: dict[str, str] = field(default_factory=lambda: {
         'VS3': 'C0', 'VS3j': 'gray', 'CS': 'C0', 'PF': 'C0',
         'trs': 'C3', 'dir': 'C3', 'vv': 'C3', 'vvin': 'C3',
@@ -56,7 +56,8 @@ class Display:
         return {part: {'alpha': self.get_alpha(part),
                        'facecolor': self.get_facecolor(part),
                        'zorder': self.get_zorder(part),
-                       'linewidth': self.linewidth}
+                       'linewidth': self.linewidth,
+                       'edgecolor': self.edgecolor}
                 for part in parts.unique()}
 
 
@@ -75,6 +76,7 @@ class Label:
     index: pandas.Index = field(init=False, repr=False)
 
     def __post_init__(self):
+        """Update plot flags."""
         self.update_flags()
         super().__post_init__()
 
@@ -102,7 +104,6 @@ class Label:
 
         with self.frame.setlock(True, 'subspace'):
             return self.frame.index[self.frame[self.label]]
-
 
     def add_label(self):
         """Add plot labels."""
@@ -175,7 +176,7 @@ class PolyPlot(Display, Label, MetaMethod):
     def initialize(self):
         """Initialize metamethod."""
         self.update_columns()
-        if 'frame' not in self.frame:
+        if 'frame' not in self.frame or len(self.frame) == 1:
             self.patchwork = 0
 
     def update_columns(self):

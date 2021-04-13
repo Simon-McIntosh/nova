@@ -1,141 +1,31 @@
 """Geometric methods for Frame and FrameArray."""
 from dataclasses import dataclass, field
 
-import pandas
 import numpy as np
-import shapely.geometry
 
 from nova.electromagnetic.metamethod import MetaMethod
-from nova.electromagnetic.polygen import (
-    polygen, polyframe, polyshape, boxbound
-    )
+from nova.electromagnetic.polygen import PolyFrame
+from nova.electromagnetic.polygeom import PolyGeom
 from nova.electromagnetic.dataframe import DataFrame
 
 
 @dataclass
-class PolyGeom:
-    """Extract geometrical features from shapely polygons."""
+class Geometry(MetaMethod):
+    """
+    Geometrical methods for Frame.
 
-    section: str
-    x_centroid: float = field(default=None)
-    z_centroid: float = field(default=None)
-    length: float = field(default=None)
-    thickness: float = field(default=None)
-    polygon: shapely.geometry.Polygon = field(default=None, repr=False)
-
-    def __post_init__(self):
-        """Update section and generate polygon as required."""
-        self.section = polyshape[self.section]  # inflate shorthand
-        if pandas.isna(self.polygon):  # generate polygon if not set
-            self.polygon = polygen(self.section)(
-                self.x_centroid, self.z_centroid,
-                self.length, self.thickness)
-
-    def extract(self):
-        """Return geometrical feature set."""
-        x_centroid, z_centroid = self.centroid
-        width, height = self.bounding_box
-        area = self.area
-        rms = self.root_mean_square
-        if area == 0:
-            raise ValueError(f'zero area polygon \n'
-                             f'cross section: {self.section}\n'
-                             f'length {self.length}\n'
-                             f'thickness {self.thickness}')
-        return x_centroid, z_centroid, width, height, area, rms
-
-    @property
-    def centroid(self):
-        """
-        Return polygon centroid.
-
-        Returns
-        -------
-        x_centroid : float
-            Polygon centroid x-coordinate.
-        z_centroid : float
-            Polygon centroid z-coordinate.
-        """
-        if self.x_centroid is None or self.x_centroid == 0:
-            self.x_centroid = self.polygon.centroid.x  # update x centroid
-        if self.z_centroid is None or self.z_centroid == 0:
-            self.z_centroid = self.polygon.centroid.y  # update z centroid
-        return self.x_centroid, self.z_centroid
-
-    @property
-    def area(self):
-        """Return polygon area."""
-        if self.section == 'circle':
-            return np.pi * self.length**2 / 4  # circle
-        if self.section in ['square', 'rectangle']:
-            return self.length * self.thickness  # square
-        if self.section == 'skin':  # thickness = 1-r/R
-            return 4*np.pi*self.thickness / self.length**2 * \
-                (2 - self.thickness**2)
-        return self.polygon.area
-
-    @property
-    def bounding_box(self):
-        """Return width and height of polygon bounding box."""
-        if self.section in polyshape:
-            if self.section in ['circle', 'square']:
-                self.length = self.thickness = boxbound(self.length,
-                                                        self.thickness)
-            return self.length, self.thickness
-        bounds = self.polygon.bounds
-        width = bounds[2]-bounds[0]
-        height = bounds[3]-bounds[1]
-        return width, height
-
-    @property
-    def root_mean_square(self):
-        """
-        Return section root mean square radius.
-
-        Perform fast rms calculation for defined sections.
-        Numerical calculation exicuted on section is not a base geometory.
-
-        Parameters
-        ----------
-        cross_section : str
-            Cross section descriptor.
-        x_center : float
-            Radial coordinate of geometric centroid.
-        length : float
-            First characteristic dimension, dl.
-        thickness : float
-            Second characteristic dimension, dt.
-        polygon : shapely.polygon, optional
-            Polygon for numerical calculation if not in
-            [circle, square, rectangle, skin]. The default is None.
-
-        Returns
-        -------
-        radius : float
-            Root mean square radius (uniform current density current center).
-
-        """
-        if self.section == 'circle':
-            return np.sqrt(self.x_centroid**2 + self.length**2 / 16)  # circle
-        if self.section in ['square', 'rectangle']:
-            return np.sqrt(self.x_centroid**2 + self.length**2 / 12)  # square
-        if self.section == 'skin':
-            return np.sqrt((self.length**2 * self.thickness**2 / 24
-                            - self.length**2 * self.thickness / 8
-                            + self.length**2 / 8 + self.x_centroid**2))
-        return (shapely.ops.transform(
-            lambda x, z: (x**2, z), self.polygon).centroid.x)**0.5
-
-
-@dataclass
-class Polygon:
-    """Extract geometric features from shapely polygons."""
+    Extract geometric features from shapely polygons.
+    """
 
     frame: DataFrame = field(repr=False)
+    required: list[str] = field(default_factory=lambda: ['section', 'poly'])
+    additional: list[str] = field(default_factory=lambda: [
+        'x', 'z', 'dl', 'dt', 'rms', 'dx', 'dz', 'area'])
+    require_all: bool = field(init=False, repr=False, default=False)
     features: list[str] = field(init=False, default_factory=lambda: [
         'x', 'z', 'dx', 'dz', 'area', 'rms'])
 
-    def update(self):
+    def update_poly(self):
         """Update frame polygons and derived data."""
         rms_unset = self.frame.rms == 0
         if sum(rms_unset) > 0:
@@ -144,42 +34,25 @@ class Polygon:
             section = self.frame.loc[index, 'section'].values
             coords = self.frame.loc[
                 index, ['x', 'z', 'dl', 'dt']].to_numpy()
-            polygon = self.frame.loc[index, 'poly'].values
-            polygon_update = self.frame.loc[index, 'poly'].isna()
+            poly = self.frame.loc[index, 'poly'].values
+            poly_update = self.frame.loc[index, 'poly'].isna()
             geom = np.empty((index_length, len(self.features)), dtype=float)
-            # itterate over index - generate polygon as required
+            # itterate over index - generate poly as required
             for i in range(index_length):
-                polygeom = PolyGeom(section[i], *coords[i], polygon[i])
+                polygeom = PolyGeom(poly[i], section[i], *coords[i])
                 section[i] = polygeom.section  # inflate section name
-                if polygon_update[i]:
-                    polygon[i] = polyframe(polygeom.polygon)
-                geom[i] = polygeom.extract()
-            if polygon_update.any():
-                self.frame.loc[index, 'poly'] = polygon
+                if poly_update[i]:
+                    poly[i] = PolyFrame(polygeom.poly, polygeom.section)
+                geometry = polygeom.geometry  # extract geometrical features
+                geom[i] = [geometry[feature] for feature in self.features]
+            if poly_update.any():
+                self.frame.loc[index, 'poly'] = poly
             self.frame.loc[index, self.features] = geom
             self.frame.loc[index, 'section'] = section
 
-
-@dataclass
-class Geometry(MetaMethod):
-    """Geometrical methods for Frame."""
-
-    frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['section', 'poly'])
-    additional: list[str] = field(default_factory=lambda: [
-        'x', 'z', 'dl', 'dt', 'rms', 'dx', 'dz', 'area'])
-    require_all: bool = field(repr=False, default=False)
-    polygon: Polygon = field(init=False, repr=False)
-
-    def __post_init__(self):
-        """Launch polygon instance."""
-        if self.generate:
-            self.polygon = Polygon(self.frame)
-        super().__post_init__()
-
     def initialize(self):
         """Update frame polygons and derived geometrical data."""
-        self.polygon.update()
+        self.update_poly()
 
     def limit(self, index):
         """Return coil limits [xmin, xmax, zmin, zmax]."""

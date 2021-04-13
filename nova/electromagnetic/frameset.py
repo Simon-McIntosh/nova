@@ -15,7 +15,7 @@ class FrameSet:
     required: list[str] = field(repr=False, default_factory=lambda: [
         'x', 'z', 'dl', 'dt'])
     additional: list[str] = field(repr=False, default_factory=lambda: [
-        'section', 'turn'])
+        'section', 'turn', 'frame'])
     available: list[str] = field(repr=False, default_factory=lambda: [
         'link', 'part', 'frame', 'dx', 'dz', 'area',
         'delta', 'section', 'turn', 'scale', 'nturn', 'nfilament',

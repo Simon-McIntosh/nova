@@ -5,11 +5,14 @@ from typing import Union
 import shapely.geometry
 import shapely.strtree
 import numpy as np
+import pandas
 
-from nova.electromagnetic.frame import Frame
-from nova.electromagnetic.polygen import (
-    polygen, polyframe, polyshape, boxbound
-    )
+from nova.electromagnetic.dataframe import DataFrame
+from nova.electromagnetic.polygen import PolyFrame
+from nova.electromagnetic.polygon import Polygon
+from nova.electromagnetic.geometry import PolyGeom
+from nova.electromagnetic.polyplot import PolyPlot
+from nova.electromagnetic.polygen import polygen, polyshape, boxbound
 from nova.utilities.pyplot import plt
 
 
@@ -17,124 +20,14 @@ from nova.utilities.pyplot import plt
 
 
 @dataclass
-class Polygon:
-    """Generate bounding polygon."""
-
-    poly: Union[dict[str, list[float]], list[float], shapely.geometry.Polygon]
-
-    def __post_init__(self):
-        """Init bounding polygon."""
-        self.polygon = self.generate_polygon(self.poly)
-
-    def generate_polygon(self, poly):
-        """
-        Generate polygon.
-
-        Parameters
-        ----------
-        poly :
-            - dict[str, list[float]], polyname: *args
-            - list[float], shape(4,) bounding box [xmin, xmax, zmin, zmax]
-            - array-like, shape(n,2) bounding loop [x, z]
-
-        Raises
-        ------
-        IndexError
-            Malformed bounding box, shape is not (4,).
-            Malformed bounding loop, shape is not (n, 2).
-
-        Returns
-        -------
-        polygon : Polygon
-            Limit boundary.
-
-        """
-        if isinstance(poly, Polygon):
-            return poly
-        if isinstance(poly, shapely.geometry.Polygon):
-            return self.orient(poly)
-        if isinstance(poly, dict):
-            polys = [polygen(section)(*poly[section]) for section in poly]
-            polygon = shapely.ops.unary_union(polys)
-            try:
-                return self.orient(polygon)
-            except AttributeError as nonintersecting:
-                raise AttributeError('non-overlapping polygons specified in '
-                                     f'{poly}') from nonintersecting
-        poly = np.array(poly)  # to numpy array
-        if poly.ndim == 1:   # poly bounding box
-            if len(poly) == 4:  # [xmin, xmax, zmin, zmax]
-                xlim, zlim = poly[:2], poly[2:]
-                x_center, z_center = np.mean(xlim), np.mean(zlim)
-                width, height = np.diff(xlim)[0], np.diff(zlim)[0]
-                polygon = polygen('rectangle')(x_center, z_center,
-                                               width, height)
-                return self.orient(polygon)
-            raise IndexError('malformed bounding box\n'
-                             f'poly: {poly}\n'
-                             'require [xmin, xmax, zmin, zmax]')
-        if poly.shape[1] != 2:
-            poly = poly.T
-        if poly.ndim == 2 and poly.shape[1] == 2:  # loop
-            polygon = shapely.geometry.Polygon(poly)
-            return self.orient(polygon)
-        raise IndexError('malformed bounding loop\n'
-                         f'shape(poly): {poly.shape}\n'
-                         'require (n,2)')
-
-    @staticmethod
-    def orient(polygon):
-        """Return coerced polygon boundary as a positively oriented curve."""
-        return shapely.geometry.polygon.orient(polygon)
-
-    def plot_exterior(self):
-        """Plot boundary polygon."""
-        plt.plot(*self.polygon.exterior.xy)
-
-    @property
-    def xlim(self) -> tuple[float]:
-        """Return polygon bounding box x limit (xmin, xmax)."""
-        return self.polygon.bounds[::2]
-
-    @property
-    def width(self) -> float:
-        """Return polygon bounding box width."""
-        return np.diff(self.xlim)[0]
-
-    @property
-    def zlim(self) -> tuple[float]:
-        """Return polygon bounding box x limit (xmin, xmax)."""
-        return self.polygon.bounds[1::2]
-
-    @property
-    def height(self) -> float:
-        """Return polygon bounding box height, [xmin, xmax]."""
-        return np.diff(self.zlim)[0]
-
-    @property
-    def box_area(self):
-        """Return bounding box area."""
-        return self.width*self.height
-
-    @property
-    def area(self) -> float:
-        """Return polygon area."""
-        return self.polygon.area
-
-    @property
-    def limit(self):
-        """Return polygon bounding box (xmin, xmax, zmin, zmax)."""
-        return self.xlim + self.zlim
-
-
-@dataclass
 class PolyDelta(Polygon):
     """Manage grid spacing and cell dimension."""
 
     delta: Union[int, float] = 0
-    turn: str = 'hex'
+    turn: str = 'hexagon'
     nturn: float = 1.
     tile: bool = False
+    fill: bool = False
     cell_delta: list[float] = field(init=False)
     grid_delta: list[float] = field(init=False)
 
@@ -153,13 +46,13 @@ class PolyDelta(Polygon):
         """Return cell dimensions."""
         ndiv_x, ndiv_z = self.divide()
         ndiv_x, ndiv_z = np.max([ndiv_x, 1]), np.max([ndiv_z, 1])
-        if self.tile:
+        if self.tile or self.fill:
             return self.width/ndiv_x, self.height/ndiv_z
         return self.width / np.round(ndiv_x), self.height / np.round(ndiv_z)
 
     def divide(self):
         """Return number of cell divisions along x and z axis."""
-        if self.delta is None or self.delta == 0:
+        if self.delta == 0:
             return 1, 1
         if self.delta < 0:
             if self.delta == -1:
@@ -168,30 +61,33 @@ class PolyDelta(Polygon):
                 filament_number = -self.delta
             fill_fraction = self.area / self.box_area
             box_number = filament_number / fill_fraction
+            width, height = self.width, self.height
             if self.tile:
                 if self.turn in ['circle', 'skin']:
                     box_number *= np.sqrt(3)/2
                 elif self.turn == 'hexagon':
                     box_number *= 3/8 * np.sqrt(3)
-                    print(box_number, self.turn)
-
-            if np.isclose(aspect := self.width/self.height, 1) and \
+            elif self.turn == 'hexagon':
+                box_number *= np.sqrt(3)/2
+            if np.isclose(aspect := width/height, 1) and \
                     self.turn in ['circle', 'square', 'skin']:
                 delta = np.sqrt(self.box_area / box_number)
-                return (ndiv := self.width/delta, ndiv)
+                return (ndiv := width/delta, ndiv)
+            if self.turn == 'hexagon' and not self.tile:
+                aspect /= np.sqrt(3)/2
             if aspect > 1:
-                ndiv_x = np.sqrt(box_number * aspect)
-                if not self.tile:
-                    ndiv_x = np.round(ndiv_x)
-                ndiv_z = box_number / ndiv_x
-                return ndiv_x, ndiv_z
-            ndiv_z = np.sqrt(box_number / aspect)
-            if not self.tile:
-                ndiv_z = np.round(ndiv_z)
-            ndiv_x = box_number / ndiv_z
-            return ndiv_x, ndiv_z
+                return self.divide_box(box_number, aspect)
+            return self.divide_box(box_number, 1/aspect)[::-1]
         ndiv_x = self.width / self.delta
         ndiv_z = self.height / self.delta
+        return ndiv_x, ndiv_z
+
+    def divide_box(self, box_number, aspect):
+        """Return box divisions, stretch if not tile or fill."""
+        ndiv_x = np.sqrt(box_number * aspect)
+        if not (self.tile or self.fill):
+            ndiv_x = np.round(ndiv_x)
+        ndiv_z = box_number / ndiv_x
         return ndiv_x, ndiv_z
 
     def dimension_grid(self):
@@ -206,6 +102,8 @@ class PolyDelta(Polygon):
             if self.turn in ['circle', 'skin']:
                 grid_delta[1] *= np.sqrt(3)/2
                 return grid_delta
+        if self.turn == 'hexagon' and self.delta != 0:
+            grid_delta[1] *= np.sqrt(3)/2
         return grid_delta
 
 
@@ -214,32 +112,32 @@ class PolyCell(PolyDelta):
     """Define PolyGrid cell."""
 
     scale: Union[int, float] = 1
-    fill: float = 0.65
+    skin: float = 0.65
 
     def __post_init__(self):
         """Size polycell."""
         super().__post_init__()  # size grid and polycell
-        self._scale_cell()
-        self._fill_cell()
+        self._scale()
+        self._skin()
 
     def polycell(self, x_center, z_center):
         """Return cell polygon."""
         polygon = polygen(self.turn)(x_center, z_center, *self.cell_delta)
-        return polyframe(polygon, self.turn)
+        return PolyFrame(polygon, self.turn)
 
     @property
     def unitcell(self):
         """Return referance polygon."""
         return self.polycell(0, 0)  # refernace cell polygon
 
-    def _scale_cell(self):
+    def _scale(self):
         """Apply scaling to cell."""
         self.cell_delta = [self.scale*delta for delta in self.cell_delta]
 
-    def _fill_cell(self):
-        """Update fill parameter for skin sections."""
+    def _skin(self):
+        """Update thickness parameter for skin sections."""
         if self.turn == 'skin':
-            self.cell_delta[1] = self.fill
+            self.cell_delta[1] = self.skin
 
 
 @dataclass
@@ -277,6 +175,11 @@ class PolySpace:
         return np.linspace(self.start + self.grid_delta/2,
                            self.stop - self.grid_delta/2, self.ndiv)
 
+    def buffer_face(self):
+        """Return extended face centered spacing."""
+        return np.linspace(self.start - self.grid_delta/2,
+                           self.stop + self.grid_delta/2, self.ndiv+2)
+
 
 @dataclass
 class PolyVector:
@@ -285,7 +188,8 @@ class PolyVector:
     limit: tuple[float]
     cell_delta: tuple[float]
     grid_delta: tuple[float]
-    tile: bool = False
+    tile: bool
+    turn: str
     polyspace: dict[str, PolySpace] = field(init=False, default_factory=dict)
 
     def __post_init__(self):
@@ -298,6 +202,8 @@ class PolyVector:
     def __call__(self, direction):
         """Return 1D spacing vector in the requested direction."""
         if self.tile:
+            if self.turn == 'hexagon':
+                return self.polyspace[direction].buffer_face()
             return self.polyspace[direction].corner()
         return self.polyspace[direction].face()
 
@@ -306,91 +212,92 @@ class PolyVector:
 class PolyGrid(PolyCell):
     """Construct 2d grid."""
 
-    additional: dict[str, str] = field(init=False, default_factory=lambda: {
-        'trim': True, 'delim': '_', 'label': 'Poly'})
+    trim: bool = True
     vector: PolyVector = field(init=False)
-    cells: list[PolyCell] = field(init=False)
-    _frame: Frame = field(init=False, default_factory=Frame)
+    frame: pandas.DataFrame = field(init=False, repr=False)
+    columns: list[str] = field(init=False, default_factory=lambda: [
+        'x', 'z', 'dl', 'dt', 'dx', 'dz', 'rms', 'area', 'section', 'poly'])
 
     def __post_init__(self):
         """Generate grid."""
         super().__post_init__()
-        self.vector = PolyVector(self.limit, self.cell_delta, self.grid_delta,
-                                 self.tile)
-        self.cells = self.generate_cells()
-
-    def __call__(self, **additional):
-        """Return polygrid frame."""
-        self.generate_frame(**additional)
-        return self.frame
+        self.vector = PolyVector(
+            self.limit, self.cell_delta, self.grid_delta, self.tile, self.turn)
+        self.frame = self.dataframe()
 
     def __len__(self):
-        """Return grid length."""
+        """Return dataframe length."""
         return len(self.frame)
 
-    def generate_cells(self):
-        """Return polycells."""
-        return [self.polycell(*coord) for coord in self.coordinates]
-
-    @property
-    def coordinates(self):
+    def grid_coordinates(self):
         """Return grid coordinates."""
         grid = np.meshgrid(self.vector('x'), self.vector('z'), indexing='ij')
         if self.tile:
             grid[0][:, 1::2] += self.grid_delta[0]/2
         return np.hstack((grid[0].reshape(-1, 1), grid[1].reshape(-1, 1)))
 
-    def generate_frame(self, **additional):
-        """Generate grid."""
-        additional = self.additional | additional
-        cells = self.cells.copy()
-        if additional.pop('trim'):
-            cells = self.trim_cells(self.cells)
-        turn = [cell.name for cell in cells]
-        cell_area = np.sum([cell.area for cell in cells])
-        nturn = [self.nturn*cell.area / cell_area for cell in cells]
-        self._frame = Frame(required=['x', 'z', 'dl', 'dt'],
-                            available=['poly'])
-        self._frame.insert(0, 0, *self.cell_delta, poly=cells,
-                           section=turn, nturn=nturn, **additional)
-        return self._frame
+    def polycells(self, coords):
+        """Return polycells."""
+        poly = [self.polycell(*coord) for coord in coords]
+        if self.trim:
+            return self.polytrim(poly)
+        return poly
 
-    def trim_cells(self, cells):
+    def polytrim(self, poly):
         """Return polycells trimed to bounding polygon."""
-        strtree = shapely.strtree.STRtree(cells)
-        buffer = self.polygon.buffer(1e-12*self.cell_delta[0])
-        cells = [polyframe(cell, self.turn
-                           if poly.within(buffer) else 'polygon')
-                 for poly in strtree.query(self.polygon)
-                 if (cell := poly.intersection(buffer)) and
-                 isinstance(cell, shapely.geometry.Polygon)]
-        return cells
+        polytree = shapely.strtree.STRtree(poly)
+        buffer = self.poly.buffer(1e-12*self.cell_delta[0])
+        poly = [PolyFrame(polytrim, name=self.turn
+                          if poly.within(buffer) else 'polygon')
+                for poly in polytree.query(self.poly)
+                if (polytrim := poly.intersection(buffer)) and
+                isinstance(polytrim, shapely.geometry.Polygon)]
+        return poly
+
+    def polygeoms(self, polys, coords):
+        """Return polycell geometory instances."""
+        return [PolyGeom(poly, poly.name, *coord, *self.cell_delta)
+                for poly, coord in zip(polys, coords)]
+
+    def dataframe(self):
+        """Bulid polygeom dataframe."""
+        coords = self.grid_coordinates()  # build coordinate grid
+        polys = self.polycells(coords)  # build trimmed cell polygons
+        geoms = self.polygeoms(polys, coords)  # build cell geometries
+        data = [[] for __ in range(len(geoms))]
+        for i, geom in enumerate(geoms):
+            data[i] = [*geom.centroid, geom.length, geom.thickness, *geom.bbox,
+                       geom.rms, geom.area, geom.section, geom.poly]
+        frame = pandas.DataFrame(data, columns=self.columns)
+        frame['nturn'] = self.nturn * frame['area'] / frame['area'].sum()
+        return frame
 
     @property
-    def frame(self):
-        if self._frame.empty:
-            self.generate_frame()
-        return self._frame
-
-    @property
-    def cell_area(self):
+    def polyarea(self):
         """Return sum of polycell areas."""
         return self.frame.area.sum()
 
     @property
-    def cell_nturn(self):
+    def polyturns(self):
         """Return sum of polycell turns."""
         return self.frame.nturn.sum()
 
     @property
-    def nfilament(self):
+    def polyfilaments(self):
         """Return effective filament number."""
-        return self.cell_area / self.unitcell.area
+        return self.polyarea / self.unitcell.area
+
+    @property
+    def polyplot(self):
+        """Return polyplot instance."""
+        frame = self.frame.copy()
+        frame['part'] = 'Poly'
+        return PolyPlot(DataFrame(frame))
 
     def plot(self):
         """Plot polygon exterior and polycells."""
         self.plot_exterior()
-        self.frame.polyplot()
+        self.polyplot()
         plt.axis('off')
         plt.axis('equal')
 
@@ -399,8 +306,4 @@ if __name__ == '__main__':
 
     polygrid = PolyGrid({'hx': [6, 3, 2.5, 2.5]}, delta=-60,
                         turn='hex', tile=True)
-    polygrid.generate_frame(trim=True)
-    #polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-4,
-    #                    turn='sk', tile=False, trim=True)
-    print(polygrid.delta, polygrid.nfilament)
     polygrid.plot()

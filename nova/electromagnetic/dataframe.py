@@ -180,6 +180,8 @@ class DataFrame(pandas.DataFrame):
 
     def update_index(self):
         """Reset index if self.index is unset."""
+        if not self.index.is_unique:  # rebuild index
+            self.index = pandas.RangeIndex(len(self))
         if isinstance(self.index, pandas.RangeIndex):
             self['index'] = self._build_index(self)
             self.set_index('index', inplace=True)
@@ -205,8 +207,7 @@ class DataFrame(pandas.DataFrame):
         # update metaframe tag defaults with kwargs
         metatag = {key: kwargs.get(key, self.metaframe.default[key])
                    for key in self.metaframe.tag}
-        if metatag['name']:  # valid name
-            name = metatag['name']
+        if isinstance(name := metatag['name'], pandas.Index) or len(name) > 0:
             if pandas.api.types.is_list_like(name) or index_length == 1:
                 return self._check_index(name, index_length)
             if metatag['delim'] and metatag['delim'] in name:

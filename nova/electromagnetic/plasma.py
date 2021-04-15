@@ -8,9 +8,20 @@ import pandas
 
 from nova.electromagnetic.frame import Frame
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
-from nova.electromagnetic.polygrid import Polygon
 
 # self._ionize_index = self._plasma[self._mpc_referance]
+# self.biot_instances = ['plasmafilament', 'plasmagrid']
+# _boundary: shapely.geometry.Polygon = field(init=False, repr=False)
+
+# name=name, plasma=True, active=True, part='plasma'
+
+'''
+self.plasmagrid.generate_grid(**kwargs)
+grid_factor = self.dPlasma/self.plasmagrid.dx
+# self._add_vertical_stabilization_coils()
+self.plasmagrid.cluster_factor = 1.5*grid_factor
+self.plasmafilament.add_plasma()
+'''
 
 
 @dataclass
@@ -20,66 +31,25 @@ class Plasma(PoloidalGrid):
     frame: Frame = field(repr=False)
     subframe: Frame = field(repr=False)
     delta: float
-    tile: bool = field(init=False, default=True)
-    fill: bool = field(init=False, default=True)
     turn: str = 'hexagon'
-    #_boundary: shapely.geometry.Polygon = field(init=False, repr=False)
+    tile: bool = field(init=False, default=True)
+    default: dict = field(init=False, default_factory=lambda: {
+        'nturn': 1, 'part': 'plasma'})
 
-    def update_conditionals(self):
-        """Update conditional attrs."""
+    def set_conditional_attributes(self):
+        """Set conditional attrs - not required for plasma."""
 
-    #def insert(self, *required, iloc=None, **additional):
-    #    """Extend PoloidalGrid.insert."""
-    #
-    #    #PolyGeom(polygon)
-    #    #if len(required) == isinstance(required[0], (dict, list, np.ndarray)):
-
-
-
-    '''
-    def insert(self, boundary, iloc=None, **additional):
+    def insert(self, *required, iloc=None, **additional):
         """
-        Extend Coil.insert.
+        Extend PoloidalGrid.insert.
 
         Add plasma to coilset and generate plasma grid.
 
-        Plasma inserted into coilframe with subcoils meshed accoriding
-        to delta and trimmed to the inital boundary curve.
-
-        Parameters
-        ----------
-        boundary : array_like or Polygon
-            External plasma boundary. Coerced into positively oriented curve.
-        name : str, optional
-            Plasma coil name.
-        delta : float, optional
-            Plasma subcoil dimension. If None defaults to self.dPlasma
-        **kwargs : dict
-            Keyword arguments passed to PlasmaGrid.generate_grid()
-
-        Returns
-        -------
-        None.
+        Plasma inserted into frame with subframe meshed accoriding
+        to delta and trimmed to the plasma's boundary curve.
 
         """
-        #self.biot_instances = ['plasmafilament', 'plasmagrid']
-        self.boundary = boundary
-        # construct plasma coil from polygon
-        additional['poly'] = self.boundary
-        required = [additional.pop(attr, self.frame.metaframe.default[attr])
-                    for attr in self.frame.metaframe.required]
         super().insert(*required, iloc=iloc, **additional)
-    '''
-
-    # name=name, plasma=True, active=True, part='plasma'
-
-    '''
-        self.plasmagrid.generate_grid(**kwargs)
-        grid_factor = self.dPlasma/self.plasmagrid.dx
-        # self._add_vertical_stabilization_coils()
-        self.plasmagrid.cluster_factor = 1.5*grid_factor
-        self.plasmafilament.add_plasma()
-    '''
 
     @property
     def boundary(self):

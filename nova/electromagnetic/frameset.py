@@ -1,5 +1,4 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
-
 from dataclasses import dataclass, field
 from typing import Union
 
@@ -33,8 +32,8 @@ class FrameSet:
         self.subframe = Frame(
             required=self.required, additional=self.additional,
             available=self.available,
-            subspace=self.subspace+['It', 'nturn'],
-            exclude=['turn', 'scale', 'nfilament', 'delta'],
+            subspace=self.subspace+[],
+            exclude=['Ic', 'It', 'turn', 'scale', 'nfilament', 'delta'],
             delim='_', **self.metadata)
 
     def drop(self, index=None):

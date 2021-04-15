@@ -266,7 +266,8 @@ class FrameArray(FrameArrayIndexer, DataArray):
             return args, kwargs
         polygon = Polygon(args[0])
         geometry = polygon.geometry
-        kwargs = kwargs | geometry | {'poly': polygon.poly}
+        kwargs = kwargs | geometry
+        #  {'poly': polygon.poly, 'section': }
         args = [kwargs.pop(attr) for attr in self.metaframe.required]
         return args, kwargs
 

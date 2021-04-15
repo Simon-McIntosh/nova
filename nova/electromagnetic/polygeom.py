@@ -51,7 +51,8 @@ class PolyGeom:
         bbox = self.bbox
         return {'x': centroid[0], 'z': centroid[1], 'dl': self.length,
                 'dt': self.thickness, 'dx': bbox[0], 'dz': bbox[1],
-                'area': self.area, 'rms': self.rms}
+                'area': self.area, 'rms': self.rms,
+                'poly': self.poly, 'section': self.poly.name}
 
     @property
     def centroid(self):

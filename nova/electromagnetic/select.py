@@ -116,12 +116,6 @@ class Select(MetaMethod):
         - Update additional.
         - Update defaults to include unset labels.
         """
-        #metadata = {}
-        #if self.additional:
-        #    #metadata['additional'] = self.additional
-        #    #metadata['additional'].extend([label for label in self.labels
-        #    #                               if label not in self.additional])
-        #    metadata['subspace'] = metadata['additional']
         self.frame.metaframe.metadata = {'additional': list(self.labels),
                                          'subspace': list(self.labels)}
         default = {label: True for label in self.labels

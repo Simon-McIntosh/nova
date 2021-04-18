@@ -19,22 +19,21 @@ class FrameSet:
         'link', 'part', 'frame', 'dx', 'dz', 'area',
         'delta', 'section', 'turn', 'scale', 'nturn', 'nfilament',
         'Ic', 'It', 'Psi', 'Bx', 'Bz', 'B', 'acloss'])
-    subspace: list[str] = field(repr=False, default_factory=lambda: ['Ic'])
-    metadata: dict[str, Union[str, dict]] = field(repr=False,
-                                                  default_factory=dict)
+    subspace: list[str] = field(repr=False, default_factory=lambda: [
+        'Ic', 'It', 'nturn'])
 
     def __post_init__(self):
         """Init coil and subcoil."""
         self.frame = Frame(
             required=self.required, additional=self.additional,
-            available=self.available, subspace=self.subspace,
-            exclude=['frame'], **self.metadata)
+            available=self.available, subspace=[],
+            exclude=['frame', 'Ic', 'It'])
         self.subframe = Frame(
             required=self.required, additional=self.additional,
             available=self.available,
             subspace=self.subspace+[],
-            exclude=['Ic', 'It', 'turn', 'scale', 'nfilament', 'delta'],
-            delim='_', **self.metadata)
+            exclude=['turn', 'scale', 'nfilament', 'delta'],
+            delim='_')
 
     def drop(self, index=None):
         """

@@ -37,12 +37,12 @@ def test_reindex():
 
 def test_required_columns():
     dataframe = DataFrame(metadata={'Required': ['x', 'z']})
-    assert dataframe.metadata['required'] == ['x', 'z']
+    assert dataframe.metaframe.required == ['x', 'z']
 
 
 def test_reset_metadata_attribute():
     dataframe = DataFrame(metadata={'additional': []})
-    assert dataframe.metadata['additional'] == []
+    assert dataframe.metaframe.additional == []
 
 
 def test_data_init():

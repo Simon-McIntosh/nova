@@ -63,6 +63,8 @@ class DataFrame(pandas.DataFrame):
 
     """
 
+    _metadata = []  # specify persistent variables
+
     def __init__(self,
                  data=None,
                  index: Collection[Any] = None,
@@ -81,15 +83,6 @@ class DataFrame(pandas.DataFrame):
     @property
     def _constructor_sliced(self):
         return Series
-
-    @property
-    def metadata(self):
-        """Manage DataFrame metadata via the MetaFrame class."""
-        return self.metaframe.metadata
-
-    @metadata.setter
-    def metadata(self, metadata):
-        self.metaframe.metadata = metadata
 
     def check_column(self, name):
         """If name in metaframe.default, raise error if name in not columns."""
@@ -162,7 +155,7 @@ class DataFrame(pandas.DataFrame):
         """Update metaframe, appending available columns if required."""
         self.metaframe.update(metadata)
         if self.metaframe.columns:
-            self.metadata = {'available': self.metaframe.columns}
+            self.metaframe.metadata = {'available': self.metaframe.columns}
 
     def match_columns(self):
         """Intersect metaframe.required with self.columns if not empty."""

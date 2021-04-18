@@ -49,6 +49,7 @@ class SubSpace(SubSpaceIndexer, FrameArray):
                          attrs={'metaframe': metaframe})
         self.update_subspace(frame)
 
+
     def __getattr__(self, name):
         """Extend pandas.DataFrame.__getattr__. (frame.*)."""
         if name not in self.attrs:
@@ -79,7 +80,8 @@ class SubSpace(SubSpaceIndexer, FrameArray):
         subspace = frame.metaframe.subspace
         if np.array([attr in subspace for attr in frame.columns]).any():
             with frame.setlock(None, 'subspace'):  # update metaframe
-                frame.metadata = {'additional': frame.metaframe.subspace}
+                frame.metaframe.metadata = \
+                    {'additional': frame.metaframe.subspace}
             return frame.metaframe.subspace
         return []
 

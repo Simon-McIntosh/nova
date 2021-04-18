@@ -30,7 +30,6 @@ def test_circle():
 def test_plasma_turns():
     coilset = CoilSet(dplasma=0.25)
     coilset.plasma.insert({'ellipse': [1.7, 1, 0.5, 0.85]})
-    coilset.plot()
     assert coilset.frame.nturn[0] == 1 == coilset.subframe.nturn.sum()
 
 

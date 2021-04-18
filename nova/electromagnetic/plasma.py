@@ -34,7 +34,7 @@ class Plasma(PoloidalGrid):
     turn: str = 'hexagon'
     tile: bool = field(init=False, default=True)
     default: dict = field(init=False, default_factory=lambda: {
-        'nturn': 1, 'part': 'plasma'})
+        'nturn': 1, 'part': 'plasma', 'name': 'Plasma'})
 
     def set_conditional_attributes(self):
         """Set conditional attrs - not required for plasma."""

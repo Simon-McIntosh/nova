@@ -1,8 +1,6 @@
 """Manage poloidal grids."""
 from dataclasses import dataclass, field
-from typing import Union
 
-from nova.electromagnetic.frame import Frame
 from nova.electromagnetic.frameattrs import FrameAttrs
 from nova.electromagnetic.polygrid import PolyGrid
 

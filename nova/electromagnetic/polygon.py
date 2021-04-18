@@ -1,4 +1,4 @@
-"""Manage polygon creation."""
+""""Manage polygon creation."""
 from dataclasses import dataclass, field
 from typing import Union
 
@@ -6,7 +6,7 @@ import shapely.geometry
 import shapely.strtree
 import numpy as np
 
-from nova.electromagnetic.polygen import polygen
+from nova.electromagnetic.polygen import polygen, PolyFrame
 from nova.electromagnetic.geometry import PolyGeom
 from nova.utilities.pyplot import plt
 
@@ -51,7 +51,7 @@ class Polygon(PolyGeom):
 
         """
         if isinstance(poly, shapely.geometry.Polygon):
-            return poly
+            return PolyFrame(poly, name='polygon')
         if isinstance(poly, dict):
             polys = [polygen(section)(*poly[section]) for section in poly]
             if len(polys) == 1:
@@ -85,7 +85,7 @@ class Polygon(PolyGeom):
         if loop.shape[1] != 2:
             loop = loop.T
         if loop.ndim == 2 and loop.shape[1] == 2:  # loop
-            return shapely.geometry.Polygon(loop)
+            return PolyFrame(shapely.geometry.Polygon(loop), name='loop')
         raise IndexError('malformed bounding loop\n'
                          f'shape(loop): {loop.shape}\n'
                          'require (n,2)')

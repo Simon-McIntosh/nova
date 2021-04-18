@@ -2,6 +2,7 @@
 from dataclasses import dataclass, field
 from typing import Union
 import colorsys
+from collections import Counter
 import functools
 import operator
 
@@ -32,10 +33,9 @@ class Display:
     linewidth: float = 0.5
     edgecolor: str = 'white'
     facecolor: dict[str, str] = field(default_factory=lambda: {
-        'VS3': 'C0', 'VS3j': 'gray', 'CS': 'C0', 'PF': 'C0',
+        'vs3': 'C0', 'vs3j': 'gray', 'cs': 'C0', 'pf': 'C0',
         'trs': 'C3', 'dir': 'C3', 'vv': 'C3', 'vvin': 'C3',
-        'vvout': 'C3', 'bb': 'C7', 'plasma': 'C4', 'Plasma': 'C4',
-        'cryo': 'C5'})
+        'vvout': 'C3', 'bb': 'C7', 'plasma': 'C4', 'cryo': 'C5'})
     zorder: dict[str, int] = field(default_factory=lambda: {
         'VS3': 1, 'VS3j': 0, 'CS': 3, 'PF': 2})
 
@@ -59,6 +59,10 @@ class Display:
                        'linewidth': self.linewidth,
                        'edgecolor': self.edgecolor}
                 for part in parts.unique()}
+
+    def patch_number(self, parts):
+        """Return patch number for each part."""
+        return Counter(parts)
 
 
 @dataclass
@@ -85,7 +89,7 @@ class Label:
         if hasattr(self, 'biot'):
             if 'field' not in self.biot:
                 self.field_unit = None
-        if not self.frame.hasattrs('energize'):
+        if not 'energize' in self.frame.attrs:
             self.current_unit = None
 
 
@@ -172,6 +176,7 @@ class PolyPlot(Display, Label, MetaMethod):
     frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['poly'])
     additional: list[str] = field(default_factory=lambda: ['part'])
+    rng: np.random.Generator = np.random.default_rng(2025)
 
     def initialize(self):
         """Initialize metamethod."""
@@ -218,10 +223,13 @@ class PolyPlot(Display, Label, MetaMethod):
         self.axes = axes  # set axes
         patch = []
         properties = self.patch_properties(self.frame.part)
+        number = self.patch_number(self.frame.part)
         basecolor = {part: properties[part]['facecolor']
                      for part in properties}
         for poly, part in self.frame.loc[index, ['poly', 'part']].to_numpy():
             patch_kwargs = properties[part]
+            if number[part] > 1000:
+                patch_kwargs['linewidth'] = 0
             if self.patchwork != 0:  # Shuffle basecolor
                 patch_kwargs['facecolor'] = self.shuffle(basecolor[part])
             try:  # MultiPolygon.
@@ -237,7 +245,7 @@ class PolyPlot(Display, Label, MetaMethod):
 
     def shuffle(self, color):
         """Return shuffled facecolor. Alternate lightness by +-factor."""
-        factor = (1 - 2 * np.random.rand(1)[0]) * self.patchwork
+        factor = (1 - 2 * self.rng.random(1)[0]) * self.patchwork
         color = colorsys.rgb_to_hls(*mc.to_rgb(color))
         color = colorsys.hls_to_rgb(
                 color[0], max(0, min(1, (1 + factor) * color[1])), color[2])

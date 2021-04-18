@@ -204,7 +204,7 @@ class CoilMatrix:
         Method to be extended by child class(es).
 
         >>> def _flag_update(self, status):
-        >>>        super._flag_update(self, status)
+        >>>        super()._flag_update(status)
         >>>        # set local update flags here
 
 

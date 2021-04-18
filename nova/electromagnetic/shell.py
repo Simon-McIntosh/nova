@@ -1,17 +1,10 @@
-
+"""Mesh poloidal shells."""
 from dataclasses import dataclass, field
-from typing import Any
-
-import numpy as np
-import pandas
-import shapely.geometry
-import shapely.strtree
-import scipy.interpolate
 
 from nova.electromagnetic.frame import Frame
 from nova.electromagnetic.frameattrs import FrameAttrs
-from nova.electromagnetic.polygen import PolyFrame
-from nova.utilities import geom
+from nova.electromagnetic.shellgrid import ShellGrid
+from nova.electromagnetic.polygon import Polygon
 
 
 @dataclass
@@ -41,6 +34,8 @@ class Shell(FrameAttrs):
             x-coordinates of poloidal line to be meshed.
         z : array-like, shape(n,)
             z-coordinates of poloidal line to be meshed.
+        dl : float
+            Shell length.
         dt : float
             Shell thickness.
         **additional : dict[str, Any]
@@ -51,25 +46,16 @@ class Shell(FrameAttrs):
         None.
 
         """
+        if isinstance(required[1], (int, float)):
+            poly = Polygon(required[0]).poly
+            required = poly.boundary.xy + required[1:]
 
-        shell, subshell = self._mesh((x, z), dt, rho, attrs.pop('dshell'))
-        additional = shell | attrs
-        required = [additional.pop(attr)
-                    for attr in self.frame.metaframe.required]
-
-        index = self.frame.insert(*required, **additional)
-
-        attrs |= {'delim': '_'}
+        self.attrs = additional
+        shellgrid = ShellGrid(*required, delta=self.attrs['delta'])
+        index = self.frame.insert(shellgrid.frame, iloc=iloc, **self.attrs)
+        part = self.frame.loc[index, 'part']
         subframe = []
-        for i, frame in enumerate(index):
-            shell = self._mesh(
-                subshell['segment'][i], subshell['dt'][i],
-                subshell['rho'][i], attrs['delta'])[0]
-            additional = shell | attrs
-            additional |= {'frame': frame, 'label': frame, 'link': True}
-
-            required = [additional.pop(attr)
-                        for attr in self.frame.metaframe.required]
-            subframe.append(self.subframe.assemble(*required, **additional))
-
+        for _index, _subframe, _part in zip(index, shellgrid.subframe, part):
+            subframe.append(self.subframe.assemble(
+                _subframe, label=_index, delim='_', link=True, part=_part))
         self.subframe.concatenate(*subframe)

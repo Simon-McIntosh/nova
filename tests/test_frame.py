@@ -82,7 +82,7 @@ def test_index_length_error():
 
 def test_required_columns():
     frame = Frame(metadata={'Required': ['x', 'z']})
-    assert frame.metadata['required'] == ['x', 'z']
+    assert frame.metaframe.required == ['x', 'z']
 
 
 def test_required_add():
@@ -98,7 +98,7 @@ def test_required_add_error():
 
 def test_reset_metadata_attribute():
     frame = Frame(metadata={'additional': []})
-    assert frame.metadata['additional'] == []
+    assert frame.metaframe.additional == []
 
 
 def test_frame_index():
@@ -185,7 +185,6 @@ def test_drop():
 
 def test_multipoint_factor():
     frame = Frame(required=['Ic'], Subspace=['Ic'], Array=['Ic'])
-    frame.update_columns()
     frame.insert(5*np.ones(2), nturn=[1, 3])
     frame.insert(2*np.ones(2), nturn=[2, 1], link=True, factor=-0.5)
     frame.insert(7.75*np.ones(2))
@@ -195,8 +194,8 @@ def test_multipoint_factor():
 
 
 def test_multipoint_factor_Ic_It():
-    frame = Frame(required=['Ic'], Subspace=['Ic', 'It'], Array=['Ic'])
-    frame.update_columns()
+    frame = Frame(required=['Ic'],
+                  Subspace=['Ic', 'It'], Array=['Ic'])
     frame.insert(5*np.ones(2), nturn=[1, 3])  # note, turn info discarded
     frame.insert(2*np.ones(2), nturn=[2, 1], link=True, factor=-0.5)
     frame.insert(7.75*np.ones(2))

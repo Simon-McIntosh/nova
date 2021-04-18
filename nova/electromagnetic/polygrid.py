@@ -52,10 +52,8 @@ class PolyDelta(Polygon):
 
     def divide(self):
         """Return number of cell divisions along x and z axis."""
-        if self.delta == 0:
-            return 1, 1
-        if self.delta < 0:
-            if self.delta == -1:
+        if self.delta <= 0:
+            if self.delta == 0:
                 filament_number = self.nturn
             else:
                 filament_number = -self.delta

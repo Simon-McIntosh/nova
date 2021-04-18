@@ -140,7 +140,7 @@ class FrameArray(FrameArrayIndexer, DataArray):
             built frame.index.
 
         """
-        self.metadata = additional.pop('metadata', {})
+        self.metaframe.metadata = additional.pop('metadata', {})
         insert = self.assemble(*required, **additional)
         self.concatenate(insert, iloc=iloc)
         return insert.index
@@ -245,7 +245,7 @@ class FrameArray(FrameArrayIndexer, DataArray):
         args = [frame.loc[:, col] for col in self.metaframe.required]
         if not isinstance(frame.index, pandas.RangeIndex):
             kwargs['name'] = frame.index
-        kwargs |= {col: frame.loc[:, col] for col in
+        kwargs |= {col: frame.loc[:, col].values for col in
                    self.metaframe.additional if col in frame}
         if len(args) != len(self.metaframe.required):
             raise IndexError(

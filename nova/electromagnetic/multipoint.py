@@ -148,6 +148,7 @@ class MultiPoint(MetaMethod):
         """
         if not pandas.api.types.is_list_like(index):
             raise IndexError(f'index: {index} is not list like')
+        print(index[0], index[0] in self.frame.index)
         self.frame.loc[index[0], ['link', 'factor']] = '', 1
         index_number = len(index)
         if index_number == 1:

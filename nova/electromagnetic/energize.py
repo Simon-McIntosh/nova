@@ -25,8 +25,8 @@ class Energize(MetaMethod):
             self.frame.metaframe.energize = ['It']  # set metaframe key
             if np.array([attr in self.frame.metaframe.subspace
                          for attr in self.required]).any():
-                self.frame.metadata = {'subspace':
-                                       self.required+self.additional}
+                self.frame.metaframe.metadata = \
+                    {'subspace': self.required+self.additional}
         else:
             self.update_available(self.additional)
         super().__post_init__()

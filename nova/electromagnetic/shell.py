@@ -16,7 +16,7 @@ class Shell(FrameAttrs):
     delta: float
     turn: str = 'shell'
     default: dict = field(init=False, default_factory=lambda: {
-        'label': 'Shl'})
+        'label': 'Shl', 'active': False})
 
     def set_conditional_attributes(self):
         """Set conditional attrs - not required for shell."""
@@ -53,9 +53,11 @@ class Shell(FrameAttrs):
         self.attrs = additional
         shellgrid = ShellGrid(*required, delta=self.attrs['delta'])
         index = self.frame.insert(shellgrid.frame, iloc=iloc, **self.attrs)
-        part = self.frame.loc[index, 'part']
+        frame = self.frame.loc[index, :]
         subframe = []
-        for _index, _subframe, _part in zip(index, shellgrid.subframe, part):
+        for i, name in enumerate(index):
+            data = frame.iloc[i].to_dict()
+            data |= {'label': name, 'frame': name, 'delim': '_', 'link': True}
             subframe.append(self.subframe.assemble(
-                _subframe, label=_index, delim='_', link=True, part=_part))
+                shellgrid.subframe[i], **data, **self.subattrs))
         self.subframe.concatenate(*subframe)

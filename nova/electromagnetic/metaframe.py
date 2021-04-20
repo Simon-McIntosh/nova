@@ -82,7 +82,8 @@ class MetaFrame(MetaSet):
             'scale': 1., 'skin': 1.,
             'poly': None, 'frame': '', 'part': '',
             'link': '', 'factor': 1., 'ref': 0, 'subref': 0,
-            'active': True, 'optimize': False, 'plasma': False,
+            'active': True, 'fix': True, 'plasma': False,
+            'passive': False, 'free': False, 'coil': False,
             'feedback': False, 'acloss': False,
             'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.,
             'name': '', 'label': 'Coil', 'delim': '', 'offset': 0})
@@ -117,6 +118,9 @@ class MetaFrame(MetaSet):
         # remove exclude attributes from additional
         self.additional = [attr for attr in self.additional
                            if attr not in self.exclude]
+        # remove exclude attributes from available
+        self.available = [attr for attr in self.available
+                          if attr not in self.exclude]
 
     @property
     def columns(self):

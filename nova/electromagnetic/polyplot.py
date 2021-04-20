@@ -51,12 +51,22 @@ class Display:
         """Return patch zorder."""
         return self.zorder.get(part, 0)
 
+    def get_linewidth(self, part):
+        """Return patch linewidth."""
+        finesse_fraction = 0.01
+        total_area = self.frame.area.sum()
+        patch_area = self.frame.loc[self.frame.part == part, 'area'].mode()[0]
+        area_fraction = patch_area/total_area
+        if area_fraction < finesse_fraction:
+            return self.linewidth * area_fraction/finesse_fraction
+        return self.linewidth
+
     def patch_properties(self, parts):
         """Return unique dict of patch properties extracted from parts list."""
         return {part: {'alpha': self.get_alpha(part),
                        'facecolor': self.get_facecolor(part),
                        'zorder': self.get_zorder(part),
-                       'linewidth': self.linewidth,
+                       'linewidth': self.get_linewidth(part),
                        'edgecolor': self.edgecolor}
                 for part in parts.unique()}
 
@@ -223,13 +233,10 @@ class PolyPlot(Display, Label, MetaMethod):
         self.axes = axes  # set axes
         patch = []
         properties = self.patch_properties(self.frame.part)
-        number = self.patch_number(self.frame.part)
         basecolor = {part: properties[part]['facecolor']
                      for part in properties}
         for poly, part in self.frame.loc[index, ['poly', 'part']].to_numpy():
-            patch_kwargs = properties[part]
-            if number[part] > 1000:
-                patch_kwargs['linewidth'] = 0
+            patch_kwargs = properties[part].copy()
             if self.patchwork != 0:  # Shuffle basecolor
                 patch_kwargs['facecolor'] = self.shuffle(basecolor[part])
             try:  # MultiPolygon.

@@ -16,7 +16,6 @@ from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.multipoint import MultiPoint
 from nova.electromagnetic.energize import Energize
 from nova.electromagnetic.polygon import Polygon
-from nova.electromagnetic.geometry import PolyGeom
 
 
 class FrameArrayLocMixin(ArrayLocMixin):
@@ -67,9 +66,9 @@ class Methods:
 
     def initialize(self):
         """Init attrs derived from MetaMethod."""
-        self.frame.update_columns()
         if self.frame.empty:
             return
+        self.frame.update_columns()
         attrs = [attr for attr in self.attrs
                  if isinstance(self.attrs[attr], MetaMethod)]
         for attr in attrs:
@@ -242,10 +241,10 @@ class FrameArray(FrameArrayIndexer, DataArray):
             raise ValueError(f'required arguments {required} '
                              'not specified in frame '
                              f'{frame.columns}')
-        args = [frame.loc[:, col] for col in self.metaframe.required]
+        args = [frame[col] for col in self.metaframe.required]
         if not isinstance(frame.index, pandas.RangeIndex):
             kwargs['name'] = frame.index
-        kwargs |= {col: frame.loc[:, col].values for col in
+        kwargs |= {col: frame[col] for col in
                    self.metaframe.additional if col in frame}
         if len(args) != len(self.metaframe.required):
             raise IndexError(
@@ -274,6 +273,9 @@ class FrameArray(FrameArrayIndexer, DataArray):
     def _build_data(self, *args, **kwargs):
         """Return data dict built from *args and **kwargs."""
         data = {}  # python 3.6+ assumes dict is insertion ordered
+        for attr in self.metaframe.exclude:  # remove exclude attrs
+            if attr in kwargs:
+                del kwargs[attr]
         attrs = self.metaframe.required + list(kwargs)  # record passed attrs
         if len(args) != len(self.metaframe.required):
             raise IndexError(f'len(args) {len(args)} != '
@@ -311,9 +313,9 @@ class FrameArray(FrameArrayIndexer, DataArray):
 
 if __name__ == '__main__':
 
-    framearray = FrameArray(Required=['x', 'z'], available=['section', 'link'])
+    framearray = FrameArray(Required=['x', 'z'],
+                            available=['section', 'link'])
     framearray.insert(range(2), 1, label='PF')
     framearray.insert(range(4), 1, link=True)
     framearray.insert(range(2), 1, label='PF')
     framearray.insert(range(4), 1, link=True)
-    print(framearray)

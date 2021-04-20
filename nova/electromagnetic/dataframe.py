@@ -218,6 +218,8 @@ class DataFrame(pandas.DataFrame):
         label_delim = metatag['label']+metatag['delim']
         index = [f'{label_delim}{i+metatag["offset"]:d}'
                  for i in range(index_length)]
+        if 'frame' in self.columns:
+            index[0] = metatag['label']
         return self._check_index(index, index_length)
 
     @staticmethod
@@ -298,13 +300,11 @@ class DataFrame(pandas.DataFrame):
                 unset = np.array(self.metaframe.required)[required_unset]
                 raise IndexError(f'required attributes missing {unset}')
             # fill nan
-            isnan = [pandas.isna(self.loc[:, attr]).any() for attr in columns]
-            if np.array(isnan).any():
-                nan = np.array(columns)[isnan]
-                for attr in nan:
-                    if attr in self.metaframe.default:
-                        index = pandas.isna(self.loc[:, attr])
-                        self.loc[index, attr] = self.metaframe.default[attr]
+            if pandas.isna(self.values).any():
+                index = [pandas.isna(self[attr].values) for attr in columns]
+                for isna, attr in zip(index, columns):
+                    if isna.any():
+                        self.loc[isna, attr] = self.metaframe.default[attr]
             # extend additional
             additional = [attr for attr in columns
                           if attr not in self.metaframe.columns]

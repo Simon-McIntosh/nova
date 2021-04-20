@@ -1,7 +1,7 @@
 """Build coilset."""
 from dataclasses import dataclass, field
 
-from nova.electromagnetic.frameset import FrameSet
+from nova.electromagnetic.frameops import FrameOps
 from nova.electromagnetic.coil import Coil
 from nova.electromagnetic.shell import Shell
 from nova.electromagnetic.plasma import Plasma
@@ -18,7 +18,7 @@ class FrameGrid:
 
 
 @dataclass
-class CoilSet(FrameGrid, FrameSet):
+class CoilSet(FrameGrid, FrameOps):
     """
     Manage coilset.
 
@@ -39,19 +39,21 @@ class CoilSet(FrameGrid, FrameSet):
 
     def plot(self):
         """Plot coilset."""
-        self.frame.polyplot()
         self.subframe.polyplot()
 
 
 if __name__ == '__main__':
 
-    coilset = CoilSet(dplasma=-50, metadata={'source': 'PCR'})
+    coilset = CoilSet(dplasma=-50, array=['Ic'])
     coilset.coil.insert(0.8, [0.5, 1, 1.5], 0.25, 0.45, link=True, delta=-10,
-                        skin=0.65, section='r', scale=0.75,
-                        nturn=24, turn='hex', part='PF')
+                        section='r', scale=0.75,
+                        nturn=24, turn='hex', part='pf')
     coilset.shell.insert({'e': [1.5, 1, 0.75, 1.25]}, -5, 0.05,
                          delta=-40, part='vv')
-    coilset.plasma.insert({'sk': [1.5, 1, 0.5, 0.5]}, turn='hex', tile=True,
-                          trim=True)
+    #coilset.plasma.insert({'sk': [1.5, 1, 0.5, 0.5]}, turn='hex', tile=True,
+    #                      trim=True)
     coilset.plot()
+
+    def set_current():
+        coilset.current = 6
 

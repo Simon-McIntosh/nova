@@ -6,17 +6,18 @@ from nova.electromagnetic.frame import Frame
 
 
 def test_plasma_subspace():
-    frame = Frame(Required=['x'], Available=['active', 'link'])
+    frame = Frame(Required=['x'], Available=['active', 'link'],
+                  Array=['plasma'])
     frame.insert(range(2), active=True, link=True)
     frame.insert(range(2), active=False, link=True)
     frame.insert(3, plasma=True)
-    assert frame.subspace.plasma.to_list() == [False, False, True]
+    assert list(frame.subspace.plasma) == [False, False, True]
 
 
 def test_coil():
-    frame = Frame(Required=['x'], Available=['active'])
+    frame = Frame(Required=['x'], Available=['active'], Array=['coil'])
     frame.insert(range(2), plasma=[True, False])
-    assert frame.coil.to_list() == [False, True]
+    assert list(frame.coil) == [False, True]
 
 
 def test_select_subspace():

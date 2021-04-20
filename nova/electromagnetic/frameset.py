@@ -1,6 +1,5 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 from dataclasses import dataclass, field
-from typing import Union
 
 import pandas
 
@@ -20,20 +19,28 @@ class FrameSet:
         'delta', 'section', 'turn', 'scale', 'nturn', 'nfilament',
         'Ic', 'It', 'Psi', 'Bx', 'Bz', 'B', 'acloss'])
     subspace: list[str] = field(repr=False, default_factory=lambda: [
-        'Ic', 'It', 'nturn'])
+        'Ic'])
+    array: list[str] = field(repr=False, default_factory=lambda: [
+        'Ic'])
 
     def __post_init__(self):
         """Init coil and subcoil."""
         self.frame = Frame(
             required=self.required, additional=self.additional,
             available=self.available, subspace=[],
-            exclude=['frame', 'Ic', 'It'])
+            exclude=['frame', 'Ic', 'It', 'link',
+                     'active', 'plasma', 'fix', 'feedback'], array=[])
         self.subframe = Frame(
             required=self.required, additional=self.additional,
             available=self.available,
-            subspace=self.subspace+[],
+            subspace=self.subspace,
             exclude=['turn', 'scale', 'nfilament', 'delta'],
+            array=self.array,
             delim='_')
+
+    def link(self, index, factor=1):
+        """Apply multipoint link to subframe."""
+        self.subframe.multipoint.link(index, factor, expand=True)
 
     def drop(self, index=None):
         """
@@ -101,4 +108,5 @@ class FrameSet:
 if __name__ == '__main__':
 
     frameset = FrameSet(required=['rms'])
-    print(frameset.frame)
+    frameset.subframe.insert([2, 4])
+    print(frameset.subframe.frame)

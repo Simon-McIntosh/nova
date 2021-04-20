@@ -41,7 +41,7 @@ def test_square_in_rectangle():
 
 
 def test_circle_in_rectangle():
-    polygrid = PolyGrid({'r': [3, 5, 0.1, 0.3]}, delta=0, turn='o')
+    polygrid = PolyGrid({'r': [3, 5, 0.1, 0.2]}, delta=0, turn='o')
     assert np.isclose(polygrid.polyarea, np.pi * 0.1**2 / 4, 1e-3)
 
 

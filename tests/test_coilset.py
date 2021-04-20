@@ -3,6 +3,7 @@ import pytest
 import numpy as np
 
 from nova.electromagnetic.coilset import CoilSet
+from nova.electromagnetic.dataframe import ColumnError
 
 
 def test_dpol():
@@ -77,8 +78,8 @@ def test_flag_current_update():
     coilset.coil.insert(1, 2, 0.4, 0.5, Ic=5, active=True)
     coilset.coil.insert(1, 3, 0.4, 0.5, Ic=6.7, active=False)
     coilset.coil.insert(1, 4, 0.4, 0.5, Ic=4, active=True)
-    coilset.frame.subspace.loc[coilset.frame.active, 'Ic'] = [3.2, 5.8]
-    assert np.allclose(coilset.frame.Ic, [3.2, 6.7, 5.8])
+    coilset.subframe.subspace.loc[coilset.subframe.active, 'Ic'] = [3.2, 5.8]
+    assert np.allclose(coilset.subframe.Ic, [3.2, 6.7, 5.8])
 
 
 def test_multipoint_link():
@@ -89,8 +90,9 @@ def test_multipoint_link():
     coilset.coil.insert(7, -0.5, 1.5, 1.5, name='PF8', part='PF', nturn=5,
                         Ic=2e3, section='circle', turn='square', delta=0.12)
     # Ic[PF8] = -0.5*Ic[PF6]
-    coilset.frame.multipoint.link(['PF6', 'PF8'], -0.5)
-    assert coilset.frame.loc[:, 'It'].to_list() == [1e6, -0.5*1e6/4*5]
+    coilset.link(['PF6', 'PF8'], -0.5)
+    assert coilset.subframe.It[coilset.subframe.frame == 'PF8'].sum() == \
+        -0.5*1e6/4*5
 
 
 def test_shell_cross_section():
@@ -100,9 +102,9 @@ def test_shell_cross_section():
 
 
 def test_shell_additional():
-    coilset = CoilSet()
+    coilset = CoilSet(array=['plasma'])
     coilset.shell.insert([1, 1, 3], [3, 4, 4], 0, 0.1, delta=0, plasma=True)
-    assert coilset.frame.plasma.to_numpy().all()
+    assert coilset.subframe.plasma.all()
 
 
 def test_shell_subshell():
@@ -127,21 +129,21 @@ def test_shell():
 
 def test_aspect_horizontal():
     coilset = CoilSet()
-    coilset.coil.insert(1, 1, 0.75, 0.5, link=True, delta=-9,
+    coilset.coil.insert(1, 1, 0.75, 0.5, delta=-9,
                         section='r', turn='s', fill=True)
     assert np.isclose(coilset.subframe.area.sum(), 0.75*0.5)
 
 
 def test_aspect_vertical():
     coilset = CoilSet()
-    coilset.coil.insert(1, 1, 0.5, 0.75, link=True, delta=-9,
+    coilset.coil.insert(1, 1, 0.5, 0.75, delta=-9,
                         section='r', turn='s', fill=True)
     assert np.isclose(coilset.subframe.area.sum(), 0.75*0.5)
 
 
 def test_tile_hex():
     coilset = CoilSet()
-    coilset.coil.insert(1, 1, 0.5, 0.75, link=True, delta=-4,
+    coilset.coil.insert(1, 1, 0.5, 0.75, delta=-4,
                         section='circ', nturn=9, turn='hex', tile=True)
     assert np.isclose(coilset.subframe.area.sum(), np.pi*0.5**2/4, 1e-3)
 
@@ -158,6 +160,20 @@ def test_plasma_hex():
     coilset.plasma.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 2, 2.5, 1.5, 1]])
     assert sum([section == 'hexagon'
                 for section in coilset.subframe.section]) == 2
+
+
+def test_frame_link_error():
+    coilset = CoilSet(required=['x'])
+    coilset.coil.insert([1, 2], label='Coil')
+    with pytest.raises(ColumnError):
+        coilset.frame.multipoint.link(['Coil0', 'Coil1'])
+
+
+def test_frame_multipoint_link():
+    coilset = CoilSet(dcoil=-3)
+    coilset.coil.insert(0.8, [0.5, 1, 1.5], 0.25, 0.45, link=True,
+                        label='Coil')
+    assert coilset.subframe.subspace.index.to_list() == ['Coil0']
 
 
 if __name__ == '__main__':

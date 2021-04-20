@@ -1,6 +1,8 @@
 """Manage poloidal grids."""
 from dataclasses import dataclass, field
 
+import pandas
+
 from nova.electromagnetic.frameattrs import FrameAttrs
 from nova.electromagnetic.polygrid import PolyGrid
 
@@ -39,6 +41,8 @@ class PoloidalGrid(FrameAttrs):
         self.attrs = additional
         index = self.frame.insert(*required, iloc=iloc, **self.attrs)
         self.subframe_insert(index)
+        if self.link:
+            self.subframe.multipoint.link(index, expand=True)
 
     def subframe_insert(self, index):
         """
@@ -48,14 +52,23 @@ class PoloidalGrid(FrameAttrs):
         - Link turns.
 
         """
-        columns = self.required + [attr for attr in self.additional
-                                   if attr in self.frame]
-        frame = self.frame.loc[index, columns]
-        part = self.frame.loc[index, 'part']
+        frame = self.frame.loc[index, :]
+        griddata = frame.loc[:, self.required +
+                             [attr for attr in self.additional
+                              if attr in self.frame]]
         subframe = []
+        subattrs = pandas.DataFrame(self.subattrs, index=index)
+        try:
+            turncurrent = subattrs.pop('It')
+        except KeyError:
+            turncurrent = None
         for i, name in enumerate(index):
-            data = PolyGrid(**frame.iloc[i].to_dict(), **self.grid).frame
+            polygrid = PolyGrid(**griddata.iloc[i].to_dict(), **self.grid)
+            data = frame.iloc[i].to_dict()
+            data |= {'label': name, 'frame': name, 'delim': '_', 'link': True}
+            if turncurrent is not None:
+                data['It'] = turncurrent.iloc[i] * \
+                    polygrid.frame['nturn'] / polygrid.nturn
             subframe.append(self.subframe.assemble(
-                data, label=name, delim='_', link=True,
-                part=part[i]))
+                polygrid.frame, **data, **subattrs.iloc[i]))
         self.subframe.concatenate(*subframe)

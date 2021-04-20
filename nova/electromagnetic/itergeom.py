@@ -27,10 +27,7 @@ class ITERgeom(CoilSet):
         data.rename(columns=columns, inplace=True)
         data.rename(columns={'dx': 'dl', 'dz': 'dt'}, inplace=True)
         self.coil.insert(data, part=part, turn='hex')
-        self.frame.multipoint.link(['CS1U', 'CS1L'])
-        self.subframe.multipoint.link(['CS1U', 'CS1L'])
-
-
+        self.link(['CS1U', 'CS1L'])
 
     def coildata(self):
         """Return poloidal field coil geometrical data."""
@@ -73,6 +70,6 @@ class ITERgeom(CoilSet):
 
 if __name__ == '__main__':
 
-    coilset = ITERgeom(dcoil=0.5, dplasma=0.5)
+    coilset = ITERgeom(dcoil=0.5, dplasma=-150)
     coilset.plasma.insert({'elp': [6.5, 0, 5, 8]})
     coilset.plot()

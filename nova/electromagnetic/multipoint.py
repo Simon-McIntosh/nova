@@ -122,7 +122,21 @@ class MultiPoint(MetaMethod):
         self._relink_mpc = True
         '''
 
-    def link(self, index, factor=1):
+    def expand_index(self, index, factor):
+        """Return subindex extracted from frame column."""
+        if 'frame' not in self.frame:
+            raise IndexError('frame column required for index expansion')
+        factor = [1] + list(factor)
+        subindex, subfactor = [], []
+        for name, fact in zip(index, factor):
+            names = self.frame.index[self.frame.frame == name]
+            if len(names) == 0:
+                raise IndexError(f'name {name} not listed in frame')
+            subindex.extend(names)
+            subfactor.extend(fact * np.ones(len(names)))
+        return subindex, subfactor[1:]
+
+    def link(self, index, factor=1, expand=False):
         """
         Define multi-point constraint linking a set of coils.
 
@@ -148,14 +162,16 @@ class MultiPoint(MetaMethod):
         """
         if not pandas.api.types.is_list_like(index):
             raise IndexError(f'index: {index} is not list like')
-        print(index[0], index[0] in self.frame.index)
-        self.frame.loc[index[0], ['link', 'factor']] = '', 1
+        if not pandas.api.types.is_list_like(factor):
+            factor = factor * np.ones(len(index)-1)
+        if expand:
+            index, factor = self.expand_index(index, factor)
+        self.frame.loc[index[0], 'link'] = ''
+        self.frame.loc[index[0], 'factor'] = 1
         index_number = len(index)
         if index_number == 1:
             return
-        if not pandas.api.types.is_list_like(factor):
-            factor = factor * np.ones(index_number-1)
-        elif len(factor) != index_number-1:
+        if len(factor) != index_number-1:
             raise IndexError(f'len(factor={factor}) must == 1 '
                              f'or == len(index={index})-1')
         for i in np.arange(1, index_number):

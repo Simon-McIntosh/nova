@@ -25,8 +25,8 @@ self.plasmafilament.add_plasma()
 
 
 @dataclass
-class Plasma(PoloidalGrid):
-    """Generate plasma."""
+class PlasmaGrid(PoloidalGrid):
+    """Generate plasma grid."""
 
     frame: Frame = field(repr=False)
     subframe: Frame = field(repr=False)
@@ -34,7 +34,7 @@ class Plasma(PoloidalGrid):
     turn: str = 'hexagon'
     tile: bool = field(init=False, default=True)
     default: dict = field(init=False, default_factory=lambda: {
-        'nturn': 1, 'part': 'plasma', 'name': 'Plasma'})
+        'nturn': 1, 'part': 'plasma', 'name': 'Plasma', 'plasma': True})
 
     def set_conditional_attributes(self):
         """Set conditional attrs - not required for plasma."""
@@ -51,6 +51,12 @@ class Plasma(PoloidalGrid):
         """
         super().insert(*required, iloc=iloc, **additional)
 
+
+@dataclass
+class Plasma(PlasmaGrid):
+    """Generate plasma."""
+
+    '''
     @property
     def boundary(self):
         """
@@ -110,6 +116,7 @@ class Plasma(PoloidalGrid):
         self._boundary = polygon
         #if 'plasmagrid' in self.biot_instances:
         #    self.plasmagrid.plasma_boundary = polygon
+    '''
 
     @property
     def separatrix(self):

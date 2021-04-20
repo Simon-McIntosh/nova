@@ -14,7 +14,7 @@ class Label:
     include: list[str] = field(default_factory=list)
     exclude: list[str] = field(default_factory=list)
     preclude: list[str] = field(default_factory=lambda: [
-        'plasma', 'feedback'], repr=False)
+        'feedback'], repr=False)
     require: list[str] = field(init=False)
 
     def __post_init__(self):
@@ -47,8 +47,8 @@ class Select(MetaMethod):
     """Manage dependant frame energization parameters."""
 
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(init=False, default_factory=lambda: [
-        'active', 'passive', 'plasma', 'optimize', 'feedback'], repr=False)
+    required: list[str] = field(default_factory=lambda: [
+        'active', 'plasma', 'fix', 'feedback'], repr=False)
     require_all: bool = field(repr=False, default=False)
     additional: list[str] = field(init=False, default_factory=list, repr=False)
     avalible: list[str] = field(init=False, default_factory=list)
@@ -57,16 +57,22 @@ class Select(MetaMethod):
 
     def __post_init__(self):
         """Extend additional with unique values extracted from match."""
+        if not self.generate:
+            return
         self.add_label('active', 'active')
         self.add_label('passive', None, 'active')
-        self.add_label('coil', None, 'plasma')
         self.add_label('plasma', 'plasma')
-        self.add_label('fix', None, 'optimize')
-        self.add_label('free', 'optimize')
+        self.add_label('coil', None, ['plasma', 'passive'])
+        self.add_label('fix', 'fix')
+        self.add_label('free', None, 'fix')
         self.add_label('feedback', 'feedback')
-        if self.generate:  # update metaframe additional and defaults
-            self.update_metaframe()
+        self.update_metaframe()  # update metaframe additional and defaults
         super().__post_init__()
+        self.initialize()
+
+    def __call__(self, required: list[str], require_all=False):
+        """Update required attributes."""
+        self.__init__(self.frame, required, require_all)
 
     def initialize(self):
         """Insert frame labels."""
@@ -95,9 +101,9 @@ class Select(MetaMethod):
         label = Label(*args)
         self.labels[name] = label.to_dict()
         self.avalible.append(name)
-        self.additional.extend([label
-                                for label in list(dict.fromkeys(label.require))
-                                if label not in self.additional])
+        additional = [label for label in list(dict.fromkeys(label.require))
+                      if label not in self.additional]
+        self.additional.extend(additional)
 
     def clear_labels(self):
         """Reset labels dict."""
@@ -116,8 +122,9 @@ class Select(MetaMethod):
         - Update additional.
         - Update defaults to include unset labels.
         """
-        self.frame.metaframe.metadata = {'additional': list(self.labels),
-                                         'subspace': list(self.labels)}
+        labels = list(self.labels)
+        self.frame.metaframe.metadata = {
+            'additional': labels, 'subspace': labels, 'array': labels}
         default = {label: True for label in self.labels
                    if label not in self.frame.metaframe.default}
         if len(default) > 0:
@@ -141,16 +148,11 @@ class Select(MetaMethod):
     def any_label(self, columns, default):
         """Return boolean index evaluated as columns.any()."""
         if columns:
-            return self.frame.loc[:, columns].any(axis=1)
+            try:
+                return self.frame.loc[:, columns].any(axis=1)
+            except KeyError:
+                pass
         return np.full(len(self.frame), default)
-
-    '''
-        else:
-            if not pandas.api.types.is_list_like(label):
-                label = [label]
-            parts = self.coil.part
-            parts = [_part for _part in label if _part in parts]
-    '''
 
 
 if __name__ == '__main__':
@@ -158,7 +160,5 @@ if __name__ == '__main__':
     dataframe = DataFrame({'x': range(4),
                            'plasma': [True, False, True, True]})
     select = Select(dataframe)
-    select.update()
+    #select.update()
     print(dataframe)
-
-

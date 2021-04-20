@@ -13,7 +13,7 @@ class MetaMethod(ABC):
 
     frame: DataFrame = field(repr=False)
     required: list[str]
-    additional: list[str]
+    additional: list[str] = field(default_factory=list)
     require_all: bool = True
 
     def __post_init__(self):

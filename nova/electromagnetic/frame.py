@@ -134,10 +134,11 @@ def set_current():
 
 if __name__ == '__main__':
 
-    frame = Frame(required=['x', 'z'], Available=['It'], Subspace=['Ic'],
+    frame = Frame(required=['x', 'z'],
+                  Available=['It'],
+                  Subspace=['Ic'],
                   Array=['Ic'])
-    frame.insert([-4, -5], 1, Ic=6.5, name='PF1')# label='CS')
+    frame.insert([-4, -5], 1, Ic=6.5, name='PF1', active=False, plasma=True)# label='CS')
     #frame.insert(range(4000), 3, Ic=4, nturn=20, label='PF', link=True)
     #frame.multipoint.link(['PF1', 'CS0'], factor=1)
-
-    print(frame)
+    print(frame.loc[:, ['active', 'passive', 'plasma', 'coil']])

@@ -242,6 +242,7 @@ class FrameArray(FrameArrayIndexer, DataArray):
                              'not specified in frame '
                              f'{frame.columns}')
         args = [frame[col] for col in self.metaframe.required]
+        [kwargs.pop(attr, None) for attr in self.metaframe.required]
         if not isinstance(frame.index, pandas.RangeIndex):
             kwargs['name'] = frame.index
         kwargs |= {col: frame[col] for col in

@@ -84,7 +84,7 @@ class MetaFrame(MetaSet):
             'link': '', 'factor': 1., 'ref': 0, 'subref': 0,
             'active': True, 'fix': True, 'plasma': False,
             'passive': False, 'free': False, 'coil': False,
-            'feedback': False, 'acloss': False,
+            'ionize': False, 'feedback': False, 'acloss': False,
             'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.,
             'name': '', 'label': 'Coil', 'delim': '', 'offset': 0})
     tag: list[str] = field(default_factory=lambda: [

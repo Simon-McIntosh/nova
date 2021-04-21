@@ -30,7 +30,8 @@ def test_circle():
 def test_plasma_turns():
     coilset = CoilSet(dplasma=0.25)
     coilset.plasma.insert({'ellipse': [1.7, 1, 0.5, 0.85]})
-    assert coilset.frame.nturn[0] == 1 == coilset.subframe.nturn.sum()
+    assert coilset.frame.nturn[0] == 1
+    assert np.isclose(coilset.subframe.nturn.sum(), 1)
 
 
 def test_plasma_part():
@@ -40,23 +41,20 @@ def test_plasma_part():
 
 
 def test_polygon_separatrix():
-    coilset = CoilSet(dplasma=0.25)
+    coilset = CoilSet(dplasma=0.5, additional=['ionize'])
     coilset.plasma.insert([[1, 5, 5, 1, 1], [1, 1, 5, 5, 1]])
     coilset.plasma.separatrix = shapely.geometry.Point(3, 3).buffer(2)
 
     assert np.isclose(
-        coilset.subcoil.area[coilset.subcoil.plasma][coilset.ionize_index].sum(),
-        np.pi*2**2, 0.05)
+        coilset.subframe.area[coilset.subframe.ionize].sum(), np.pi*2**2, 0.05)
 
 
 def test_array_separatrix():
-    coilset = CoilSet(dplasma=0.05)
+    coilset = CoilSet(dplasma=0.1, additional=['ionize'])
     coilset.plasma.insert([[1, 2, 2, 1, 1], [1, 1, 2, 2, 1]])
-    coilset.separatrix = np.array([[1, 2, 1.5, 1], [0, 0, 2, 0]]).T
-
+    coilset.plasma.separatrix = np.array([[1, 2, 1.5, 1], [0, 0, 2, 0]]).T
     assert np.isclose(
-        coilset.subcoil.area[coilset.subcoil.plasma][coilset.ionize_index].sum(),
-        0.5**2, 1e-3)
+        coilset.subframe.area[coilset.subframe.ionize].sum(), 0.5**2, 0.1)
 
 
 if __name__ == '__main__':

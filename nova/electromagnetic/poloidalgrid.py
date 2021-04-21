@@ -35,7 +35,8 @@ class PoloidalGrid(FrameAttrs):
 
         Returns
         -------
-        None.
+        index : pandas.Index
+            Frame index.
 
         """
         self.attrs = additional
@@ -43,6 +44,7 @@ class PoloidalGrid(FrameAttrs):
         self.subframe_insert(index)
         if self.link:
             self.subframe.multipoint.link(index, expand=True)
+        return index
 
     def subframe_insert(self, index):
         """

@@ -60,10 +60,9 @@ class FrameAttrs(ABC, FrameArgs):
     def update_attrs(self):
         """Update missing attrs with instance values."""
         for attr in [attr.name for attr in fields(self)]:
-            if isinstance(getattr(self, attr), (list, dict, Frame)):
-                continue
-            if attr not in self._attrs:
-                self._attrs[attr] = getattr(self, attr)
+            if isinstance(value := getattr(self, attr), (int, float, str)) and\
+                    attr not in self._attrs:
+                self._attrs[attr] = value
 
     def ifthen(self, attr, cond, key, value):
         """Set _attrs[key] = value when _attrs[check] == cond."""

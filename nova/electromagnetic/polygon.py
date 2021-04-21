@@ -1,4 +1,4 @@
-""""Manage polygon creation."""
+"""Manage polygon creation."""
 from dataclasses import dataclass, field
 from typing import Union
 
@@ -9,7 +9,6 @@ import numpy as np
 from nova.electromagnetic.polygen import polygen, PolyFrame
 from nova.electromagnetic.geometry import PolyGeom
 from nova.utilities.pyplot import plt
-
 
 # pylint:disable=unsubscriptable-object
 
@@ -24,7 +23,7 @@ class Polygon(PolyGeom):
     def __post_init__(self):
         """Generate bounding polygon."""
         self.poly = self.generate_poly(self.poly)
-        super().__post_init__()
+        super().__post_init__()  # generate geometric parameters
 
     def generate_poly(self, poly):
         """
@@ -94,6 +93,19 @@ class Polygon(PolyGeom):
         """Return coerced polygon boundary as a positively oriented curve."""
         self.poly = shapely.geometry.polygon.orient(self.poly)
 
+    def validate(self):
+        """Repair polygon if not valid."""
+        '''
+        if not polygon.is_valid:
+            polygon = pygeos.creation.polygons(loop)
+            polygon = pygeos.constructive.make_valid(polygon)
+            area = [pygeos.area(pygeos.get_geometry(polygon, i))
+                    for i in range(pygeos.get_num_geometries(polygon))]
+            polygon = pygeos.get_geometry(polygon, np.argmax(area))
+            polygon = shapely.geometry.Polygon(
+                pygeos.get_coordinates(polygon))
+        '''
+
     def plot_exterior(self):
         """Plot boundary polygon."""
         plt.plot(*self.poly.exterior.xy)
@@ -122,11 +134,6 @@ class Polygon(PolyGeom):
     def box_area(self):
         """Return bounding box area."""
         return self.width*self.height
-
-    #@property
-    #def area(self) -> float:
-    #    """Return polygon area."""
-    #    return self.poly.area
 
     @property
     def limit(self):

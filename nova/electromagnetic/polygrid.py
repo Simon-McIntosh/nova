@@ -6,6 +6,7 @@ import shapely.geometry
 import shapely.strtree
 import numpy as np
 import pandas
+import pygeos
 
 from nova.electromagnetic.dataframe import DataFrame
 from nova.electromagnetic.polygen import PolyFrame
@@ -236,21 +237,26 @@ class PolyGrid(PolyCell):
 
     def polycells(self, coords):
         """Return polycells."""
-        poly = [self.polycell(*coord) for coord in coords]
+        polys = [self.polycell(*coord) for coord in coords]
         if self.trim:
-            return self.polytrim(poly)
-        return poly
+            return self.polytrim(coords, polys)
+        return coords, polys
 
-    def polytrim(self, poly):
+    def polytrim(self, coords, polys):
         """Return polycells trimed to bounding polygon."""
-        polytree = shapely.strtree.STRtree(poly)
+        #polytree = pygeos.STRtree(pygeos.points(coords))
+        polytree = pygeos.STRtree(pygeos.from_shapely(polys))
+        #polytree = shapely.strtree.STRtree(poly)
         buffer = self.poly.buffer(1e-12*self.cell_delta[0])
-        poly = [PolyFrame(polytrim, name=self.turn
-                          if poly.within(buffer) else 'polygon')
-                for poly in polytree.query(self.poly)
-                if (polytrim := poly.intersection(buffer)) and
-                isinstance(polytrim, shapely.geometry.Polygon)]
-        return poly
+        index = polytree.query(pygeos.from_shapely(self.poly),
+                               predicate='intersects')
+        polys = [polys[i] for i in index]
+        coords = [coords[i] for i in index]
+        polys = [PolyFrame(polytrim, name=self.turn
+                           if poly.within(buffer) else 'polygon')
+                 for poly in polys if (polytrim := poly.intersection(buffer))
+                 and isinstance(polytrim, shapely.geometry.Polygon)]
+        return coords, polys
 
     def polygeoms(self, polys, coords):
         """Return polycell geometory instances."""
@@ -260,7 +266,7 @@ class PolyGrid(PolyCell):
     def dataframe(self):
         """Bulid polygeom dataframe."""
         coords = self.grid_coordinates()  # build coordinate grid
-        polys = self.polycells(coords)  # build trimmed cell polygons
+        coords, polys = self.polycells(coords)  # build trimmed cell polygons
         geoms = self.polygeoms(polys, coords)  # build cell geometries
         data = [[] for __ in range(len(geoms))]
         for i, geom in enumerate(geoms):

@@ -1,13 +1,17 @@
 
 from dataclasses import dataclass, field
 
-import shapely.geometry
+import descartes
 import numpy as np
-import pygeos
+import numpy.typing as npt
 import pandas
+import pygeos
 
 from nova.electromagnetic.frame import Frame
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
+from nova.electromagnetic.polygon import Polygon, PolyFrame
+from nova.utilities.pyplot import plt
+
 
 # self._ionize_index = self._plasma[self._mpc_referance]
 # self.biot_instances = ['plasmafilament', 'plasmagrid']
@@ -37,148 +41,46 @@ class PlasmaGrid(PoloidalGrid):
         'nturn': 1, 'part': 'plasma', 'name': 'Plasma', 'plasma': True})
 
     def set_conditional_attributes(self):
-        """Set conditional attrs - not required for plasma."""
+        """Set conditional attrs here - not required for plasma grid."""
 
     def insert(self, *required, iloc=None, **additional):
         """
         Extend PoloidalGrid.insert.
 
-        Add plasma to coilset and generate plasma grid.
+        Add plasma to coilset and generate bounding plasma grid.
 
         Plasma inserted into frame with subframe meshed accoriding
         to delta and trimmed to the plasma's boundary curve.
 
         """
-        super().insert(*required, iloc=iloc, **additional)
+        return super().insert(*required, iloc=iloc, **additional)
 
 
 @dataclass
 class Plasma(PlasmaGrid):
-    """Generate plasma."""
+    """Set plasma separatix, ionize plasma filaments."""
 
-    '''
-    @property
-    def boundary(self):
-        """
-        Manage plasma limit boundary.
+    plasma: PolyFrame = field(init=False, repr=False, default=None)
+    bounday: PolyFrame = field(init=False, repr=False, default=None)
+    index: pandas.Index = field(init=False, repr=False, default=None)
+    #ionize: npt.ArrayLike = field(init=False, repr=False, default=None)
+    tree: pygeos.STRtree = field(init=False, repr=False, default=None)
 
-        Parameters
-        ----------
-        boundary : array-like, shape(4,) or array-like, shape(n, 2) or Polygon
-            External plasma boundary (limit).
-            Coerced as a positively oriented curve.
+    def insert(self, *required, iloc=None, **additional):
+        """Store plasma index and plasma boundary and generate STR tree."""
+        index = super().insert(*required, iloc=None, **additional)
+        self.boundary = self.frame.at[index[0], 'poly']
+        self.index = self.subframe.index[self.subframe.plasma]
+        #self.ionize = np.full(self.nfilament, False)
+        self.tree = self.generate_tree()
 
-            - array-like, shape(4,) bounding box [xmin, xmax, zmin, zmax]
-            - array-like, shape(n,2) bounding loop [x, z]
-
-        Raises
-        ------
-        IndexError
-            Malformed bounding box, shape is not (4,).
-
-            Malformed bounding loop, shape is not (n, 2).
-
-        Returns
-        -------
-        plasma_boundary : Polygon
-            Plasma limit boundary.
-
-        """
-        return self._boundary
-
-    @boundary.setter
-    def boundary(self, boundary):
-        if not isinstance(boundary, shapely.geometry.Polygon):
-            boundary = np.array(boundary)  # to numpy array
-            if boundary.ndim == 1:   # limit bounding box
-                if len(boundary) == 0:
-                    return
-                elif len(boundary) == 4:
-                    polygon = shapely.geometry.box(*boundary[::2],
-                                                   *boundary[1::2])
-                else:
-                    raise IndexError('malformed bounding box\n'
-                                     f'boundary: {boundary}\n'
-                                     'require [xmin, xmax, zmin, zmax]')
-            elif boundary.ndim == 2 and (boundary.shape[0] == 2 or
-                                         boundary.shape[1] == 2):  # loop
-                if boundary.shape[1] != 2:
-                    boundary = boundary.T
-                polygon = shapely.geometry.Polygon(boundary)
-            else:
-                raise IndexError('malformed bounding loop\n'
-                                 f'shape(boundary): {boundary.shape}\n'
-                                 'require (n,2)')
-        else:
-            polygon = boundary
-        # orient polygon
-        polygon = shapely.geometry.polygon.orient(polygon)
-        self._boundary = polygon
-        #if 'plasmagrid' in self.biot_instances:
-        #    self.plasmagrid.plasma_boundary = polygon
-    '''
-
-    @property
-    def separatrix(self):
-        """
-        Manage plasma separatrix.
-
-        Updates coil and subcoil geometries. Ionizes subcoil plasma filaments.
-        Sets plasma update turn and current flags to True.
-
-        Parameters
-        ----------
-        loop : DataFrame or array-like, shape(n,2) or Polygon
-            Bounding loop.
-
-        Returns
-        -------
-        separatrix : Polygon
-            Plasma separatrix.
-
-        """
-        return self._separatrix
-
-    @separatrix.setter
-    def separatrix(self, loop):
-        if isinstance(loop, pandas.DataFrame):
-            loop = loop.values
-        if isinstance(loop, shapely.geometry.Polygon):
-            polygon = loop
-        elif len(loop) == 0:
-            return
-        else:
-            polygon = shapely.geometry.Polygon(loop)
-        if not polygon.is_valid:
-            polygon = pygeos.creation.polygons(loop)
-            polygon = pygeos.constructive.make_valid(polygon)
-            area = [pygeos.area(pygeos.get_geometry(polygon, i))
-                    for i in range(pygeos.get_num_geometries(polygon))]
-            polygon = pygeos.get_geometry(polygon, np.argmax(area))
-            polygon = shapely.geometry.Polygon(
-                pygeos.get_coordinates(polygon))
-        # intersection of separatrix and plasma_boundary
-        #separatrix = polygon.intersection(self.plasma_boundary)
-        separatrix = polygon
-        self._separatrix = separatrix
-        # update coil - polygon and polygon derived attributes
-        self.coil.loc['Plasma', 'polygon'] = separatrix
-        self.coil.update_polygon(index='Plasma')
-        self.coil.Np = 1
-        # update subcoil
-        self.subcoil.ionize = self.plasma_tree.query(
-            pygeos.io.from_shapely(separatrix), predicate='contains')
-        self.update_plasma_turns = True
-        self.update_plasma_current = True
-
-    @property
-    def plasma_tree(self):
+    def generate_tree(self):
         """
         Return STR plasma tree, read-only.
 
         Construct STR tree from plasma filaments to enable fast search in
-        free-boundary calculations. Create link to tree on first call.
-        pygeos creates tree on first evaluation
+        free-boundary calculations.
+        Pygeos creates tree on first evaluation.
 
         Parameters
         ----------
@@ -196,12 +98,81 @@ class Plasma(PlasmaGrid):
             pygeos STRtree.
 
         """
-        if not hasattr(self, '_plasma_tree'):  # link to pygeos STRtree
-            self._plasma_tree = pygeos.STRtree(pygeos.points(
-                self.subcoil.x[self.plasma_index],
-                self.subcoil.z[self.plasma_index]))
-        return self._plasma_tree
+        coords = self.subframe.loc[self.index, ['x', 'z']].values
+        points = pygeos.points(coords)
+        return pygeos.STRtree(points)
 
+    @property
+    def separatrix(self):
+        """
+        Manage plasma separatrix.
+
+        Updates coil and subcoil geometries. Ionizes subcoil plasma filaments.
+        Sets plasma update turn and current flags to True.
+
+        Parameters
+        ----------
+        loop : dict[str, list[float]], array-like or Polygon
+            Bounding loop.
+
+        Returns
+        -------
+        separatrix : Polygon
+            Plasma separatrix.
+
+        """
+        return self.plasma
+
+    @separatrix.setter
+    def separatrix(self, loop):
+        poly = Polygon(loop).poly
+        self.plasma = poly.intersection(self.boundary)
+        within = self.tree.query(pygeos.from_shapely(poly),
+                                 predicate='contains')
+
+        self.nfilament = self.subframe.plasma.sum()
+        ionize = np.full(self.nfilament, False)
+        ionize[within] = True
+
+        self.subframe.loc[self.subframe.plasma, 'ionize'] = ionize
+
+        self.subframe.loc[self.subframe.plasma & self.subframe.ionize, 'nturn'] = 1
+        self.subframe.loc[self.subframe.plasma & ~self.subframe.ionize, 'nturn'] = 0
+
+
+        '''
+        if isinstance(loop, pandas.DataFrame):
+            loop = loop.values
+        if isinstance(loop, shapely.geometry.Polygon):
+            polygon = loop
+        elif len(loop) == 0:
+            return
+        else:
+            polygon = shapely.geometry.Polygon(loop)
+
+        # intersection of separatrix and plasma_boundary
+        #separatrix = polygon.intersection(self.plasma_boundary)
+        separatrix = polygon
+        self._separatrix = separatrix
+        # update coil - polygon and polygon derived attributes
+        self.coil.loc['Plasma', 'polygon'] = separatrix
+        self.coil.update_polygon(index='Plasma')
+        self.coil.Np = 1
+        # update subcoil
+        self.subcoil.ionize = self.plasma_tree.query(
+            pygeos.io.from_shapely(separatrix), predicate='contains')
+        self.update_plasma_turns = True
+        self.update_plasma_current = True
+        '''
+
+    def plot(self):
+        """Plot plasma boundary and separatrix."""
+        plt.plot(*self.boundary.exterior.xy, '-', color='gray')
+        axes = plt.gca()
+        axes.add_patch(descartes.PolygonPatch(
+            self.plasma, facecolor='C4', alpha=0.75, linewidth=0.5))
+
+    '''
     @property
     def ionize(self):
         """
@@ -228,6 +199,7 @@ class Plasma(PlasmaGrid):
         active[index] = True
         self._ionize_index[self.plasma] = active
         self.Np = 1  # initalize turn number
+    '''
 
     @property
     def plasma_index(self):
@@ -249,7 +221,7 @@ class Plasma(PlasmaGrid):
 
         Returns
         -------
-        ionize : array_like, shape(n,)
+        ionize : array-like, shape(n,)
             Subcoil ionization index (nturn>0).
 
         """

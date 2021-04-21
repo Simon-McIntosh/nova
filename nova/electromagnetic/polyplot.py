@@ -269,12 +269,12 @@ class PolyPlot(Display, Label, MetaMethod):
             return np.full(len(self.frame), True)
         if isinstance(index, (str, int)):
             if isinstance(index, int):
-                index = self.frame.index[index]
-            index = [index]
-        elif isinstance(index, slice):
-            index = self.index[index]
-        elif np.array([isinstance(label, int) for label in index]).all():
-            index = self.frame.index[index]
+                return self.frame.index[index]
+            return [index]
+        if isinstance(index, slice):
+            return self.index[index]
+        if np.array([isinstance(label, int) for label in index]).all():
+            return self.frame.index[index]
         return self.frame.index.isin(index)
 
     def get_index(self, index=None):

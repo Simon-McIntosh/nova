@@ -30,7 +30,7 @@ self.plasmafilament.add_plasma()
 
 @dataclass
 class PlasmaGrid(PoloidalGrid):
-    """Generate plasma grid."""
+    """Grid plasma region."""
 
     frame: Frame = field(repr=False)
     subframe: Frame = field(repr=False)
@@ -41,7 +41,9 @@ class PlasmaGrid(PoloidalGrid):
         'nturn': 1, 'part': 'plasma', 'name': 'Plasma', 'plasma': True})
 
     def set_conditional_attributes(self):
-        """Set conditional attrs here - not required for plasma grid."""
+        """Set conditional attrs for plasma grid."""
+        self.ifthen('delta', -1, 'turn', 'rectangle')
+        self.ifthen('turn', 'rectangle', 'tile', False)
 
     def insert(self, *required, iloc=None, **additional):
         """
@@ -62,16 +64,14 @@ class Plasma(PlasmaGrid):
 
     plasma: PolyFrame = field(init=False, repr=False, default=None)
     bounday: PolyFrame = field(init=False, repr=False, default=None)
-    index: pandas.Index = field(init=False, repr=False, default=None)
-    #ionize: npt.ArrayLike = field(init=False, repr=False, default=None)
+    nfilament: int = field(init=False)
     tree: pygeos.STRtree = field(init=False, repr=False, default=None)
 
     def insert(self, *required, iloc=None, **additional):
         """Store plasma index and plasma boundary and generate STR tree."""
         index = super().insert(*required, iloc=None, **additional)
+        self.nfilament = self.subframe.plasma.sum()
         self.boundary = self.frame.at[index[0], 'poly']
-        self.index = self.subframe.index[self.subframe.plasma]
-        #self.ionize = np.full(self.nfilament, False)
         self.tree = self.generate_tree()
 
     def generate_tree(self):
@@ -98,9 +98,19 @@ class Plasma(PlasmaGrid):
             pygeos STRtree.
 
         """
-        coords = self.subframe.loc[self.index, ['x', 'z']].values
+        coords = self.subframe.loc[self.subframe.plasma, ['x', 'z']].values
         points = pygeos.points(coords)
         return pygeos.STRtree(points)
+
+    @property
+    def index(self):
+        """Return plasma boolean index, read-only."""
+        return self.subframe.plasma
+
+    @property
+    def ionize(self):
+        """Return plasma ionization index, read-only."""
+        return self.subframe.ionize
 
     @property
     def separatrix(self):
@@ -127,18 +137,21 @@ class Plasma(PlasmaGrid):
     def separatrix(self, loop):
         poly = Polygon(loop).poly
         self.plasma = poly.intersection(self.boundary)
-        within = self.tree.query(pygeos.from_shapely(poly),
-                                 predicate='contains')
+        index = self.tree.query(pygeos.from_shapely(poly),
+                                predicate='contains')
 
-        self.nfilament = self.subframe.plasma.sum()
         ionize = np.full(self.nfilament, False)
-        ionize[within] = True
+        ionize[index] = True
 
-        self.subframe.loc[self.subframe.plasma, 'ionize'] = ionize
+        self.subframe.loc[self.plasma, 'ionize'] = ionize
 
-        self.subframe.loc[self.subframe.plasma & self.subframe.ionize, 'nturn'] = 1
-        self.subframe.loc[self.subframe.plasma & ~self.subframe.ionize, 'nturn'] = 0
+        self.subframe.loc[self.subframe.plasma, 'nturn'] = 0
+        self.subframe.loc[self.subframe.ionize, 'nturn'] = 1
 
+    def update_nturn(self, current=None):
+        """Update plasma filament turns."""
+        #if current is None:
+        #    current = self.subframe.
 
         '''
         if isinstance(loop, pandas.DataFrame):

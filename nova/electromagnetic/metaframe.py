@@ -37,7 +37,7 @@ class MetaSet(MetaArray):
     subspace: list[str] = field(default_factory=lambda: [])
     energize: list[str] = field(default_factory=lambda: [])
     array: list[str] = field(default_factory=lambda: [])
-    _lock: dict[str, bool] = field(default_factory=lambda: {
+    lock: dict[str, bool] = field(default_factory=lambda: {
         'subspace': False, 'energize': False, 'array': False,
         'multipoint': False, 'column': False})
 
@@ -115,6 +115,10 @@ class MetaFrame(MetaSet):
             raise IndexError('exclude attributes '
                              f'{np.array(self.exclude)[exclude_required]} '
                              'specified in self.required')
+        # add array variables
+        self.additional += [attr for attr in self.array
+                            if attr not in self.required
+                            and attr not in self.additional]
         # remove exclude attributes from additional
         self.additional = [attr for attr in self.additional
                            if attr not in self.exclude]

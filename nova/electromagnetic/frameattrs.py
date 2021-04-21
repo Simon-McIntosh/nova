@@ -23,6 +23,8 @@ class FrameAttrs(ABC, FrameArgs):
     default: dict = field(init=False, default_factory=lambda: {})
     grid: dict = field(init=False, default_factory=lambda: {})
     link: bool = field(init=False, default=False)
+    attributes: list[str] = field(init=False, default_factory=lambda: [
+        'link', 'trim', 'fill', 'delta', 'turn', 'tile'])
 
     @abstractmethod
     def set_conditional_attributes(self):
@@ -60,9 +62,8 @@ class FrameAttrs(ABC, FrameArgs):
     def update_attrs(self):
         """Update missing attrs with instance values."""
         for attr in [attr.name for attr in fields(self)]:
-            if isinstance(value := getattr(self, attr), (int, float, str)) and\
-                    attr not in self._attrs:
-                self._attrs[attr] = value
+            if attr in self.attributes and attr not in self._attrs:
+                self._attrs[attr] = getattr(self, attr)
 
     def ifthen(self, attr, cond, key, value):
         """Set _attrs[key] = value when _attrs[check] == cond."""

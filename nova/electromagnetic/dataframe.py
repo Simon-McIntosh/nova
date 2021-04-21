@@ -381,9 +381,9 @@ class DataFrame(pandas.DataFrame):
 
         """
         if key is None:
-            return self.metaframe._lock
+            return self.metaframe.lock
         else:
-            return self.metaframe._lock[key]
+            return self.metaframe.lock[key]
 
     @contextmanager
     def setlock(self, status, keys=None):
@@ -395,7 +395,7 @@ class DataFrame(pandas.DataFrame):
         status : Union[bool, None]
             Subset lock status.
         keys : Union[str, list[str]]
-            Lock label, if None set all keys in self._lock.
+            Lock label, if None set all keys in self.lock.
 
         Returns
         -------
@@ -403,13 +403,13 @@ class DataFrame(pandas.DataFrame):
 
         """
         if keys is None:
-            keys = list(self.metaframe._lock.keys())
+            keys = list(self.metaframe.lock.keys())
         if isinstance(keys, str):
             keys = [keys]
-        _lock = {key: self.metaframe._lock[key] for key in keys}
-        self.metaframe._lock |= {key: status for key in keys}
+        lock = {key: self.metaframe.lock[key] for key in keys}
+        self.metaframe.lock |= {key: status for key in keys}
         yield
-        self.metaframe._lock |= _lock
+        self.metaframe.lock |= lock
 
 
 if __name__ == '__main__':

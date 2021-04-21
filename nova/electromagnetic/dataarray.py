@@ -33,9 +33,11 @@ class ArrayLocMixin():
         col = self.obj.get_col(key)
         if self.obj.metaframe.hascol('array', col):
             if self.obj.lock('array') is False:
-                self.obj._set_frame(col)  # update frame
-                with self.obj.setlock(True, 'array'):
+                try:
                     return super().__getitem__(key)
+                except AttributeError:  # loc[slice, col]
+                    with self.obj.setlock(True, 'array'):
+                        return super().__getitem__(key)
         return super().__getitem__(key)
 
 
@@ -101,12 +103,14 @@ class DataArray(ArrayIndexer, DataFrame):
     def _set_array(self, col, value):
         """Set col, quickly, preserving shape."""
         try:
+            print(col, value)
             self.attrs['metaframe'].data[col][:] = value
-        except KeyError:
+        except KeyError as keyerror:
             if not pandas.api.types.is_list_like(value):
                 value = np.full(len(self), value)
             elif len(value) != len(self):
-                raise IndexError(f'input length {len(value)} != {len(self)}')
+                raise IndexError(f'input length {len(value)} != {len(self)}') \
+                    from keyerror
             self.attrs['metaframe'].data[col] = value
 
     def _get_frame(self, col):
@@ -134,13 +138,3 @@ if __name__ == '__main__':
     dataarray = DataArray({'x': range(7)},
                           additional=['Ic'], Array=['x'], label='Coil')
     print(dataarray)
-
-    '''
-    dataarray.Ic = 9
-
-    dataarray = DataArray({'x': range(12)}, link=True,
-                          Required=['x'], Array=['x'])
-
-    dataarray.loc['Coil0':'Coil1', 'x'] = 6.66
-    print(dataarray)
-    '''

@@ -13,19 +13,13 @@ class Switch:
     """Manage current selection logic."""
 
     frame: Frame = field(repr=False)
-    index: npt.ArrayLike = field(init=False, default=None)
     subspace: bool = field(init=False)
     array: bool = field(init=False)
 
-    def __post_init__(self):
-        """Populate selection logic, set selection flags."""
-        self.frame.select(['Ic'])
-        self.subspace = 'Ic' in self.frame.metaframe.subspace
-        self.array = 'Ic' in self.frame.metaframe.array
 
     @contextmanager
-    def __call__(self, index: str):
-        """Set index."""
+    def subset(self, index: str):
+        """Set subset index."""
         if self.subspace:
             self.index = self.frame.subspace[index]
         else:
@@ -49,9 +43,7 @@ class Switch:
     def _get_current(self, frame):
         if self.index is None:
             return frame.Ic
-        if self.array:
-            return frame.Ic[self.index]
-        return frame.loc[self.index, 'Ic']
+        return frame.Ic[self.index]
 
     def _set_current(self, frame, current):
         if self.index is None:

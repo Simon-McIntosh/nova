@@ -100,6 +100,7 @@ def test_loc_update_slice():
 
 def test_get_loc_slice():
     dataarray = DataArray({'x': range(6)}, Required=['x'], Array=['x'])
+    dataarray.loc['Coil0':'Coil1', 'x']
     assert dataarray.loc['Coil0':'Coil3', 'x'].to_list() == [0, 1, 2, 3]
 
 

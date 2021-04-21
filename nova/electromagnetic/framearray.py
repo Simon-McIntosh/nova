@@ -22,7 +22,7 @@ class FrameArrayLocMixin(ArrayLocMixin):
     """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
 
     def __setitem__(self, key, value):
-        """Raise error when subspace variable is set directly from frame."""
+        """Update dependant energize variables."""
         col = self.obj.get_col(key)
         value = self.obj.format_value(col, value)
         if self.obj.metaframe.hascol('energize', col):
@@ -262,12 +262,16 @@ class FrameArray(FrameArrayIndexer, DataArray):
         If args[0].., replace *args and update **kwargs.
         Else pass *args, **kwargs.
         """
-        if len(args) != 1 or len(self.metaframe.required) == 1:
+        if len(args) > 1:
             return args, kwargs
+        if len(args) == 1 and len(self.metaframe.required) == 1:
+            if not isinstance(args[0], (dict, shapely.geometry.Polygon)):
+                return args, kwargs
+        if len(args) == 0 and 'poly' in kwargs:
+            args = (kwargs.pop('poly'),)
         polygon = Polygon(args[0])
         geometry = polygon.geometry
         kwargs = kwargs | geometry
-        #  {'poly': polygon.poly, 'section': }
         args = [kwargs.pop(attr) for attr in self.metaframe.required]
         return args, kwargs
 

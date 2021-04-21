@@ -1,7 +1,7 @@
 """Build coilset."""
 from dataclasses import dataclass, field
 
-from nova.electromagnetic.frameops import FrameOps
+from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.coil import Coil
 from nova.electromagnetic.shell import Shell
 from nova.electromagnetic.plasma import Plasma
@@ -18,7 +18,7 @@ class FrameGrid:
 
 
 @dataclass
-class CoilSet(FrameGrid, FrameOps):
+class CoilSet(FrameGrid, FrameSet):
     """
     Manage coilset.
 
@@ -44,7 +44,7 @@ class CoilSet(FrameGrid, FrameOps):
 
 if __name__ == '__main__':
 
-    coilset = CoilSet(dplasma=-50, array=['Ic'])
+    coilset = CoilSet(dplasma=-50)
     coilset.coil.insert(0.8, [0.5, 1, 1.5], 0.25, 0.45, link=True, delta=-10,
                         section='r', scale=0.75,
                         nturn=24, turn='hex', part='pf')
@@ -54,6 +54,12 @@ if __name__ == '__main__':
     #                      trim=True)
     coilset.plot()
 
+
+    coilset.sloc[:, 'Ic'] = 9.3
+
     def set_current():
-        coilset.current = 6
+        coilset.loc[:, 'Ic'] = 6
+
+    def get_current():
+        _ = coilset.sloc['active', 'Ic']
 

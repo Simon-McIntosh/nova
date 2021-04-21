@@ -44,10 +44,11 @@ def test_polygon_separatrix():
     coilset = CoilSet(dplasma=0.5, additional=['ionize'])
     coilset.plasma.insert([[1, 5, 5, 1, 1], [1, 1, 5, 5, 1]])
     coilset.plasma.separatrix = shapely.geometry.Point(3, 3).buffer(2)
-
+    coilset.plot()
     assert np.isclose(
         coilset.subframe.area[coilset.subframe.ionize].sum(), np.pi*2**2, 0.05)
-
+#test_polygon_separatrix()
+#assert False
 
 def test_array_separatrix():
     coilset = CoilSet(dplasma=0.1, additional=['ionize'])

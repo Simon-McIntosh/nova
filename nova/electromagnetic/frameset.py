@@ -4,10 +4,11 @@ from dataclasses import dataclass, field
 import pandas
 
 from nova.electromagnetic.frame import Frame
+from nova.electromagnetic.frameloc import FrameLoc
 
 
 @dataclass
-class FrameSet:
+class FrameSet(FrameLoc):
     """Build frameset. Link frame to subframe. Manage boolean methods."""
 
     required: list[str] = field(repr=False, default_factory=lambda: [
@@ -32,11 +33,11 @@ class FrameSet:
                      'active', 'plasma', 'fix', 'feedback'], array=[])
         self.subframe = Frame(
             required=self.required, additional=self.additional,
-            available=self.available,
-            subspace=self.subspace,
+            available=self.available, subspace=self.subspace,
             exclude=['turn', 'scale', 'nfilament', 'delta'],
-            array=self.array,
-            delim='_')
+            array=self.array, delim='_')
+        self.frame.select(['Ic'])
+        self.subframe.select(['Ic'])
 
     def link(self, index, factor=1):
         """Apply multipoint link to subframe."""

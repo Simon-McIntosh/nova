@@ -17,12 +17,20 @@ class SubspaceLocMixin(FrameArrayLocMixin):
     """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
 
     def __setitem__(self, key, value):
-        """Raise error when subspace variable is set directly from frame."""
+        """Raise error when subspace variable is not found."""
         col = self.obj.get_col(key)
         if self.obj.lock('subspace') is False:
             if not self.obj.metaframe.hascol('subspace', col):
                 raise SubSpaceColumnError(col, self.obj.metaframe.subspace)
         return super().__setitem__(key, value)
+
+    def __getitem__(self, key):
+        """Raise error when subspace variable is not found."""
+        col = self.obj.get_col(key)
+        if self.obj.lock('subspace') is False:
+            if not self.obj.metaframe.hascol('subspace', col):
+                raise SubSpaceColumnError(col, self.obj.metaframe.subspace)
+        return super().__getitem__(key)
 
 
 class SubSpaceIndexer(FrameArrayIndexer):
@@ -43,7 +51,7 @@ class SubSpace(SubSpaceIndexer, FrameArray):
         array = self.get_subarray(frame, columns)
         metaframe = MetaFrame(
             index, required=[], additional=columns, available=[],
-            subspace=[], array=array, _lock=frame.metaframe._lock)
+            subspace=[], array=array, lock=frame.metaframe.lock)
         super().__init__(pandas.DataFrame(frame.loc[index, columns]),
                          index=index, columns=columns,
                          attrs={'metaframe': metaframe})

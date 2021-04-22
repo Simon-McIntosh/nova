@@ -14,7 +14,7 @@ class FrameSet(FrameLoc):
     required: list[str] = field(repr=False, default_factory=lambda: [
         'x', 'z', 'dl', 'dt'])
     additional: list[str] = field(repr=False, default_factory=lambda: [
-        'section', 'turn', 'frame'])
+        'turn', 'frame'])
     available: list[str] = field(repr=False, default_factory=lambda: [
         'link', 'part', 'frame', 'dx', 'dz', 'area',
         'delta', 'section', 'turn', 'scale', 'nturn', 'nfilament',
@@ -36,7 +36,6 @@ class FrameSet(FrameLoc):
             available=self.available, subspace=self.subspace,
             exclude=['turn', 'scale', 'nfilament', 'delta'],
             array=self.array, delim='_')
-        self.frame.select(['Ic'])
         self.subframe.select(['Ic'])
 
     def link(self, index, factor=1):

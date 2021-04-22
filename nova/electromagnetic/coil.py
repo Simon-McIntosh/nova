@@ -15,6 +15,8 @@ class Coil(PoloidalGrid):
     tile: bool = False
     fill: bool = False
     turn: str = 'rectangle'
+    default: dict = field(init=False, default_factory=lambda: {
+        'label': 'Coil', 'part': 'coil', 'active': True})
 
     def set_conditional_attributes(self):
         """Set conditional attrs."""

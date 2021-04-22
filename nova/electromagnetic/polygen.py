@@ -9,7 +9,7 @@ import numpy as np
 
 polyshape = \
     dict.fromkeys(['circle', 'circ', 'c', 'o'], 'circle') | \
-    dict.fromkeys(['ellipse', 'elp', 'e'], 'ellipse') | \
+    dict.fromkeys(['ellipse', 'ellip', 'el', 'e'], 'ellipse') | \
     dict.fromkeys(['square', 'sq', 's'], 'square') | \
     dict.fromkeys(['rectangle', 'rect', 'r'], 'rectangle') | \
     dict.fromkeys(['skin', 'sk'], 'skin') | \

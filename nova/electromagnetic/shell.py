@@ -16,7 +16,7 @@ class Shell(FrameAttrs):
     delta: float
     turn: str = 'shell'
     default: dict = field(init=False, default_factory=lambda: {
-        'label': 'Shl', 'active': False})
+        'label': 'Shl', 'part': 'shell', 'active': False})
 
     def set_conditional_attributes(self):
         """Set conditional attrs - not required for shell."""

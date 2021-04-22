@@ -103,7 +103,6 @@ class DataArray(ArrayIndexer, DataFrame):
     def _set_array(self, col, value):
         """Set col, quickly, preserving shape."""
         try:
-            print(col, value)
             self.attrs['metaframe'].data[col][:] = value
         except KeyError as keyerror:
             if not pandas.api.types.is_list_like(value):

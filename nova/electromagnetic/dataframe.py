@@ -110,6 +110,7 @@ class DataFrame(pandas.DataFrame):
         self.update_metaframe(metadata)
         self.match_columns()
         self.format_data(data)
+        self.clear_array()
 
     def extract_attrs(self, data, attrs):
         """Extract metaframe / metaarray from data / attrs."""
@@ -170,6 +171,10 @@ class DataFrame(pandas.DataFrame):
             with self.setlock(True):
                 for col in self.columns:
                     self.loc[:, col] = self.format_value(col, self[col])
+
+    def clear_array(self):
+        """Clear fast access data array."""
+        self.metaframe.data = {}
 
     def update_index(self):
         """Reset index if self.index is unset."""

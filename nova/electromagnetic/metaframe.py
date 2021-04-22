@@ -116,9 +116,9 @@ class MetaFrame(MetaSet):
                              f'{np.array(self.exclude)[exclude_required]} '
                              'specified in self.required')
         # add array variables
-        self.additional += [attr for attr in self.array
-                            if attr not in self.required
-                            and attr not in self.additional]
+        #self.additional += [attr for attr in self.array
+        #                    if attr not in self.required
+        #                    and attr not in self.additional]
         # remove exclude attributes from additional
         self.additional = [attr for attr in self.additional
                            if attr not in self.exclude]

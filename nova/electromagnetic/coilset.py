@@ -50,10 +50,13 @@ if __name__ == '__main__':
                         nturn=24, turn='hex', part='pf')
     coilset.shell.insert({'e': [1.5, 1, 0.75, 1.25]}, -5, 0.05,
                          delta=-40, part='vv')
-    #coilset.plasma.insert({'sk': [1.5, 1, 0.5, 0.5]}, turn='hex', tile=True,
-    #                      trim=True)
+    coilset.plasma.insert({'sk': [1.5, 1, 0.5, 0.5]}, turn='hex', tile=True,
+                          trim=True)
     coilset.plot()
 
+    coilset.sloc['plasma', 'Ic'] = [9.9]
+
+    print(coilset.subframe)
 
     coilset.sloc[:, 'Ic'] = 9.3
 

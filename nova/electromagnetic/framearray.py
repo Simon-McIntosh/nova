@@ -25,7 +25,7 @@ class FrameArrayLocMixin(ArrayLocMixin):
         """Update dependant energize variables."""
         col = self.obj.get_col(key)
         value = self.obj.format_value(col, value)
-        if self.obj.metaframe.hascol('energize', col):
+        if self.obj.hascol('energize', col):
             if self.obj.lock('energize') is False:
                 return self.obj.energize._set_item(super(), key, value)
         return super().__setitem__(key, value)
@@ -33,7 +33,7 @@ class FrameArrayLocMixin(ArrayLocMixin):
     def __getitem__(self, key):
         """Refresh subspace items prior to return."""
         col = self.obj.get_col(key)
-        if self.obj.metaframe.hascol('energize', col):
+        if self.obj.hascol('energize', col):
             if self.obj.lock('energize') is False:
                 return self.obj.energize._get_item(super(), key)
         return super().__getitem__(key)
@@ -99,11 +99,18 @@ class FrameArray(FrameArrayIndexer, DataArray):
         self.attrs['multipoint'] = MultiPoint(self)
         self.attrs['energize'] = Energize(self)
 
+    def __setattr__(self, name, value):
+        """Extend DataFrame.__setattr__. (frame.*)."""
+        if self.hascol('energize', name):
+            if self.lock('energize') is False:
+                return self.energize._set_item(super(), name, value)
+        return super().__setattr__(name, value)
+
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
         if not self.hasattrs('energize'):
             return super().__getitem__(col)
-        if self.metaframe.hascol('energize', col):
+        if self.hascol('energize', col):
             if self.lock('energize') is False:
                 return self.energize._get_item(super(), col)
         return super().__getitem__(col)
@@ -113,7 +120,7 @@ class FrameArray(FrameArrayIndexer, DataArray):
         value = self.format_value(col, value)
         if not self.hasattrs('energize'):
             return super().__setitem__(col, value)
-        if self.metaframe.hascol('energize', col):
+        if self.hascol('energize', col):
             if self.lock('energize') is False:
                 return self.energize._set_item(super(), col, value)
         return super().__setitem__(col, value)

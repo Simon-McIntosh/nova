@@ -1,6 +1,8 @@
 
 import pytest
 
+import numpy as np
+
 from nova.electromagnetic.frame import Frame
 
 
@@ -102,6 +104,15 @@ def test_subspace_intersect_columns():
     frame.insert(0.5, range(10), nturn=3.5, link=True)
     frame.subspace.Ic = [6.6, 6.6, 1]
     frame.update_frame()
+
+
+def test_set_It_array():
+    frame = Frame(Required=['x', 'z'], Subspace=['Ic', 'It'],
+                  Array=['Ic', 'nturn', 'It'])
+    frame.insert(0.5, [6, 8.3], nturn=0.5)
+    frame.insert(0.5, range(10), nturn=4, link=True)
+    frame.subspace.It = [6.6, 6.6, 1]
+    assert np.isclose(frame.subspace.Ic, [13.2, 13.2, 0.25]).all()
 
 
 if __name__ == '__main__':

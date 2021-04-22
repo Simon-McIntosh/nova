@@ -16,7 +16,7 @@ class ArrayLocMixin():
     def __setitem__(self, key, value):
         """Extend Loc setitem."""
         col = self.obj.get_col(key)
-        if self.obj.metaframe.hascol('array', col):
+        if self.obj.hascol('array', col):
             index = self.obj.get_index(key)
             if isinstance(index, slice):
                 if index == slice(None):
@@ -31,7 +31,7 @@ class ArrayLocMixin():
     def __getitem__(self, key):
         """Extend Loc getitem. Update frame prior to return if col in array."""
         col = self.obj.get_col(key)
-        if self.obj.metaframe.hascol('array', col):
+        if self.obj.hascol('array', col):
             if self.obj.lock('array') is False:
                 try:
                     return super().__getitem__(key)
@@ -73,20 +73,20 @@ class DataArray(ArrayIndexer, DataFrame):
 
     def __setattr__(self, col, value):
         """Extend DataFrame.__setattr__ to gain fast access to array data."""
-        if self.metaframe.hascol('array', col):
+        if self.hascol('array', col):
             return self._set_array(col, value)
         return super().__setattr__(col, value)
 
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
-        if self.metaframe.hascol('array', col):
+        if self.hascol('array', col):
             if self.lock('array') is False:
                 return self._get_array(col)
         return super().__getitem__(col)
 
     def __setitem__(self, col, value):
         """Extend DataFrame.__setitem__. (frame['*'] = *)."""
-        if self.metaframe.hascol('array', col):
+        if self.hascol('array', col):
             if self.lock('array') is False:
                 return self._set_array(col, value)
         return super().__setitem__(col, value)
@@ -106,6 +106,7 @@ class DataArray(ArrayIndexer, DataFrame):
             self.attrs['metaframe'].data[col][:] = value
         except KeyError as keyerror:
             if not pandas.api.types.is_list_like(value):
+                value = self.format_value(col, value)
                 value = np.full(len(self), value)
             elif len(value) != len(self):
                 raise IndexError(f'input length {len(value)} != {len(self)}') \

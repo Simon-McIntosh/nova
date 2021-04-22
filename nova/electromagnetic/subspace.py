@@ -3,7 +3,7 @@ import pandas
 import numpy as np
 
 from nova.electromagnetic.metaframe import MetaFrame
-from nova.electromagnetic.dataframe import SubSpaceColumnError
+from nova.electromagnetic.dataframe import SubSpaceKeyError
 from nova.electromagnetic.framearray import (
     FrameArray,
     FrameArrayLocMixin,
@@ -20,16 +20,16 @@ class SubspaceLocMixin(FrameArrayLocMixin):
         """Raise error when subspace variable is not found."""
         col = self.obj.get_col(key)
         if self.obj.lock('subspace') is False:
-            if not self.obj.metaframe.hascol('subspace', col):
-                raise SubSpaceColumnError(col, self.obj.metaframe.subspace)
+            if not self.obj.hascol('subspace', col):
+                raise SubSpaceKeyError(col, self.obj.metaframe.subspace)
         return super().__setitem__(key, value)
 
     def __getitem__(self, key):
         """Raise error when subspace variable is not found."""
         col = self.obj.get_col(key)
         if self.obj.lock('subspace') is False:
-            if not self.obj.metaframe.hascol('subspace', col):
-                raise SubSpaceColumnError(col, self.obj.metaframe.subspace)
+            if not self.obj.hascol('subspace', col):
+                raise SubSpaceKeyError(col, self.obj.metaframe.subspace)
         return super().__getitem__(key)
 
 
@@ -66,8 +66,8 @@ class SubSpace(SubSpaceIndexer, FrameArray):
     def __setitem__(self, col, value):
         """Raise error when subspace variable is set directly from frame."""
         if self.lock('subspace') is False:
-            if not self.metaframe.hascol('subspace', col):
-                raise SubSpaceColumnError(col, self.metaframe.subspace)
+            if not self.hascol('subspace', col):
+                raise SubSpaceKeyError(col, self.metaframe.subspace)
         return super().__setitem__(col, value)
 
     @staticmethod

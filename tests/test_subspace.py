@@ -2,7 +2,7 @@
 import pytest
 
 from nova.electromagnetic.dataframe import (
-    ColumnError, SubSpaceLockError, SubSpaceColumnError
+    ColumnError, SubSpaceLockError, SubSpaceKeyError
     )
 from nova.electromagnetic.frame import Frame
 
@@ -230,7 +230,7 @@ def test_set_iloc_row_subspace_lock_error():
 def test_set_loc_subspace_column_error():
     frame = Frame(Required=['x', 'z'], Subspace=[])
     frame.insert(0.5, [6, 8.3], nturn=0.5, link=True)
-    with pytest.raises(SubSpaceColumnError):
+    with pytest.raises(SubSpaceKeyError):
         frame.subspace.loc[:, 'Ic'] = 6.6
 
 

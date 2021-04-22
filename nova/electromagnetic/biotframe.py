@@ -1,80 +1,60 @@
-
+"""Biot specific Frame class."""
 import numpy as np
+
+from nova.electromagnetic.frame import Frame
+
+
+_cross_section_factor = {'circle': np.exp(-0.25),  # circle-circle
+                         'square': 2*0.447049,  # square-square
+                         'skin': 1}  # skin-skin
+
+_cross_section_key = {'rectangle': 'square',
+                      'eliplse': 'circle',
+                      'polygon': 'square',
+                      'shell': 'square'}
+
+#'cs_factor': self._cross_section_factor['square']}
+
+# pylint: disable=too-many-ancestors
 
 
 class BiotFrame(Frame):
     """Extend CoilFrame class with biot specific attributes and methods."""
 
-    _cross_section_factor = {'circle': np.exp(-0.25),  # circle-circle
-                             'square': 2*0.447049,  # square-square
-                             'skin': 1}  # skin-skin
+    def __init__(self, data=None, index=None, columns=None, attrs=None,
+                 **metadata):
+        metadata = {'required': ['x', 'z'],
+                    'available': ['link', 'section', 'poly']} | metadata
+        super().__init__(data, index, columns, attrs, **metadata)
 
-    _cross_section_key = {'rectangle': 'square',
-                          'eliplse': 'circle',
-                          'polygon': 'square',
-                          'shell': 'square'}
-
-    def __init__(self, *args, reduce=False):
-        FrameSet.__init__(self, *args, coilframe_metadata={
-            '_required_columns': ['x', 'z'],
-            '_additional_columns': ['rms', 'dx', 'dz', 'nturn', 'cross_section',
-                                    'cs_factor', 'coil', 'plasma', 'mpc'],
-            '_default_attributes': {'dx': 0., 'dz': 0., 'rms': 0.,
-                                    'nturn': 1, 'mpc': '', 'coil': '',
-                                    'plasma': False,
-                                    'cross_section': 'square',
-                                    'cs_factor':
-                                        self._cross_section_factor['square']},
-            '_dataframe_attributes': ['x', 'z', 'rms', 'dx', 'dz', 'nturn',
-                                      'cs_factor'] + self._mpc_attributes,
-            '_coildata_attributes': {'region': '', 'nS': 0., 'nT': 0.,
-                                     'reduce': reduce,
-                                     'current_update': 'full',
-                                     'frameindex': slice(None),
-                                     'framenumber': 0},
-            'mode': 'overwrite'})
-        self.coilframe = None
-
-    @property
-    def frameindex(self):
-        """Return frame index."""
-        return self._frameindex
-
-    @property
-    def reduce(self):
-        """Return reduction boolean."""
-        return self._reduce
-
-    def add_coil(self, *args, **kwargs):
+    def insert(self, *required, iloc=None, **additional):
         """
-        Extend CoilFrame.add_coil.
+        Extend FrameArray.insert.
 
-        Create link to coilframe if passed as single argument.
-
-        Parameters
-        ----------
-        *args : CoilFrame or _required_columns [x, z]
-            Frame arguments.
-        **kwargs : _additional columns
-            Ancillary data.
-
-        Returns
-        -------
-        None.
+        Create link to metaframe.data.
 
         """
-        self._link_coilframe(*args)  # store referance to CoilFrame
-        if self.coilframe is not None:
-            if self.coilframe.empty:
-                return
-        CoilFrame.add_coil(self, *args, **kwargs)
-        self._framenumber = self.nC
-        self._update_cross_section_factor()
+        if len(required) == 0:
+            return None
+        if self.isframe(required[0]):
+            self.attrs['frame'] = required[0]
+        return super().insert(*required, iloc=iloc, **additional)
+        # self._update_cross_section_factor()
 
-    def update_coil(self):
-        """Update coilframe."""
-        self.drop_coil()
-        self.add_coil(self.coilframe)
+
+if __name__ == '__main__':
+
+    biotframe = BiotFrame({'x': range(12), 'z': 5, 'section': 'sq'})
+    print(biotframe)
+    biotframe.polyplot()
+
+
+'''
+
+    def update(self):
+        """Update self."""
+        self.drop()
+        self.insert(self.frame)
         if self.frameindex != slice(None):
             self.index_coil(self.frameindex)
 
@@ -212,3 +192,4 @@ class BiotFrame(Frame):
             return value
         else:
             return CoilFrame.__getattr__(self, key)
+'''

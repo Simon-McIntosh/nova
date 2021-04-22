@@ -3,12 +3,12 @@ import pandas as pd
 def start():
     options = {
         'display': {
-            'max_columns': 9,
-            'max_colwidth': 8,
+            'max_columns': 8,
+            'max_colwidth': 10,
             'expand_frame_repr': False,  # Don't wrap to multiple pages
             'max_rows': 14,
             'max_seq_items': 50,         # Max length of printed sequence
-            'precision': 4,
+            'precision': 3,
             'show_dimensions': False
         },
         'mode': {

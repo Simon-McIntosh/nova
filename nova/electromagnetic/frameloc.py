@@ -5,31 +5,36 @@ import numpy.typing as npt
 
 from nova.electromagnetic.dataarray import DataArray
 from nova.electromagnetic.frame import Frame
+from nova.electromagnetic.dataframe import FrameKeyError
 
 
 @dataclass
 class LocIndexer:
-    """Access frame attributes."""
+    """Access frame attributes using a pandas style loc indexer."""
 
     name: str
     frame: DataArray
+    subspace: bool = field(init=False)
 
-    def unpack(self, key):
-        """Unpack item access key."""
-        if isinstance(key, tuple):
-            return self._getindex(key[0]), key[1]
-        return slice(None), key
+    def __post_init__(self):
+        """Set subspace flag."""
+        self.subspace = self.name[0] == 's'
 
-    def _getindex(self, index):
-        if isinstance(index, str):
-            if index in self.frame:
-                return getattr(self.frame, index)
-        return index
+    def __call__(self):
+        """Return frame attribute."""
+        return self.frame
+
+    def __len__(self):
+        """Return frame length."""
+        return len(self.frame)
 
     def __setitem__(self, key, value):
         """Set frame attribute."""
-        index, col = self.unpack(key)
-        if self.frame.metaframe.hascol('array', col):
+        index = self.frame.get_index(key)
+        col = self.frame.get_col(key)
+        if self.frame.hascol('subspace', col) and not self.subspace:
+            raise FrameKeyError(self.name, col)
+        if self.frame.hascol('array', col):
             if isinstance(index, slice):
                 if index == slice(None):
                     return setattr(self.frame, col, value)
@@ -39,11 +44,13 @@ class LocIndexer:
 
     def __getitem__(self, key) -> npt.ArrayLike:
         """Return frame attribute."""
-        index, col = self.unpack(key)
-        if self.frame.metaframe.hascol('array', col):
+        index = self.frame.get_index(key)
+        col = self.frame.get_col(key)
+        if self.frame.hascol('array', col):
             if isinstance(index, slice):
                 if index == slice(None):
                     return getattr(self.frame, col)
+            self.frame.get_index(key)
             return getattr(self.frame, col)[index]
         return self.frame.loc[index, col]
 

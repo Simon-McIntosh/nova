@@ -162,18 +162,29 @@ def test_plasma_hex():
                 for section in coilset.subframe.section]) == 2
 
 
-def test_frame_link_error():
-    coilset = CoilSet(required=['x'])
-    coilset.coil.insert([1, 2], label='Coil')
-    with pytest.raises(ColumnError):
-        coilset.frame.multipoint.link(['Coil0', 'Coil1'])
-
-
-def test_frame_multipoint_link():
+def test_coil_multipoint_link():
     coilset = CoilSet(dcoil=-3)
-    coilset.coil.insert(0.8, [0.5, 1, 1.5], 0.25, 0.45, link=True,
-                        label='Coil')
-    assert coilset.subframe.subspace.index.to_list() == ['Coil0']
+    coilset.coil.insert(0.8, [0.5, 1, 1.5], 0.25, 0.45, link=True)
+    coilset.coil.insert(1.8, [0.5, 1], 0.25, 0.45)
+    coilset.coil.insert(2.8, [0.5, 1, 1.5], 0.25, 0.45, link=True)
+    assert len(coilset.sLoc) == 3
+    assert len(coilset.sloc) == 3
+
+
+def test_relink():
+    coilset = CoilSet(dcoil=-3)
+    coilset.coil.insert(0.8, [0.5, 1, 1.5], 0.25, 0.45, link=True)
+    coilset.coil.insert(1.8, [0.5, 1], 0.25, 0.45, nturn=2)
+    coilset.link(['Coil2', 'Coil3'])
+    coilset.sloc['Coil0', 'Ic'] = 11.1
+    assert all(coilset.subframe.Ic == 11.1)
+
+
+def test_array_format():
+    coilset = CoilSet(dcoil=-3)
+    coilset.coil.insert(0.8, [0.5, 1, 1.5], 0.25, 0.45, link=True)
+    coilset.sloc['Ic'] = 11
+    assert isinstance(coilset.sloc[0, 'Ic'], float)
 
 
 if __name__ == '__main__':

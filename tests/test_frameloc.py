@@ -3,20 +3,22 @@ import pytest
 import numpy as np
 
 from nova.electromagnetic.coilset import CoilSet
-from nova.electromagnetic.dataframe import SubSpaceColumnError, ColumnError
+from nova.electromagnetic.dataframe import (
+    FrameKeyError, SubSpaceKeyError, ColumnError
+    )
 
 
 def test_get_subspace_error():
     coilset = CoilSet(dcoil=-2, subspace=[], array=[], required=['x'])
     coilset.coil.insert(1, Ic=[7.7])
-    with pytest.raises(SubSpaceColumnError):
+    with pytest.raises(SubSpaceKeyError):
         _ = coilset.sloc['Ic']
 
 
 def test_set_subspace_error():
     coilset = CoilSet(dcoil=-2, subspace=[], array=[], required=['x'])
     coilset.coil.insert(1, Ic=[7.7])
-    with pytest.raises(SubSpaceColumnError):
+    with pytest.raises(SubSpaceKeyError):
         coilset.sloc['Ic'] = [8.8, 8.8]
 
 
@@ -113,22 +115,29 @@ def test_set_current_frame_error():
 def test_set_current_frame_subspace_error():
     coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[], required=['x'])
     coilset.coil.insert(1.5)
-    with pytest.raises(SubSpaceColumnError):
+    with pytest.raises(SubSpaceKeyError):
         coilset.sLoc['It'] = [8.8, 8.8]
 
 
-def test_get_current_frame_error():
+def test_get_current_frame_keyerror():
     coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[], required=['x'])
     coilset.coil.insert(1.5)
     with pytest.raises(KeyError):
         _ = coilset.Loc['Ic']
 
 
-def test_get_current_frame_subspace_error():
+def test_get_current_subspace_keyerror():
     coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[], required=['x'])
     coilset.coil.insert(1.5)
-    with pytest.raises(SubSpaceColumnError):
+    with pytest.raises(SubSpaceKeyError):
         _ = coilset.sLoc['It']
+
+
+def test_set_frame_It_subspace_Ic():
+    coilset = CoilSet(dcoil=-1, subspace=['Ic'], array=[], required=['x'])
+    coilset.coil.insert(1.5, nturn=3)
+    coilset.loc['It'] = 9.9
+    assert np.isclose(coilset.sloc['Ic'][0], 3.3)
 
 
 def test_subframe_plasma_index():

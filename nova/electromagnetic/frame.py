@@ -24,10 +24,10 @@ class FrameLocMixin(FrameArrayLocMixin):
     def __getitem__(self, key):
         """Inflate subspace items prior to return."""
         col = self.obj.get_col(key)
-        if self.obj.metaframe.hascol('subspace', col):
+        if self.obj.hascol('subspace', col):
             if self.obj.lock('subspace') is False:
                 self.obj.inflate_subspace(col)
-        elif col == 'It' and self.obj.metaframe.hascol('subspace', 'Ic'):
+        elif col == 'It' and self.obj.hascol('subspace', 'Ic'):
             if self.obj.lock('subspace') is False:
                 self.obj.inflate_subspace('Ic')
         return super().__getitem__(key)
@@ -36,7 +36,7 @@ class FrameLocMixin(FrameArrayLocMixin):
         """Raise error when subspace variable is set directly from frame."""
         col = self.obj.get_col(key)
         value = self.obj.format_value(col, value)
-        if self.obj.metaframe.hascol('subspace', col):
+        if self.obj.hascol('subspace', col):
             if self.obj.lock('subspace') is False:
                 raise SubSpaceLockError(self.name, col)
         return super().__setitem__(key, value)
@@ -84,10 +84,10 @@ class Frame(FrameIndexer, FrameArray):
         """Extend DataFrame.__getitem__. (frame['*'])."""
         if not self.hasattrs('subspace'):
             return super().__getitem__(col)
-        if self.metaframe.hascol('subspace', col):
+        if self.hascol('subspace', col):
             if self.lock('subspace') is False:
                 self.inflate_subspace(col)
-        elif col == 'It' and self.metaframe.hascol('subspace', 'Ic'):
+        elif col == 'It' and self.hascol('subspace', 'Ic'):
             if self.lock('subspace') is False:
                 self.inflate_subspace('Ic')
         return super().__getitem__(col)
@@ -97,7 +97,7 @@ class Frame(FrameIndexer, FrameArray):
         value = self.format_value(col, value)
         if not self.hasattrs('subspace'):
             return super().__setitem__(col, value)
-        if self.metaframe.hascol('subspace', col):
+        if self.hascol('subspace', col):
             if self.lock('subspace') is False:
                 raise SubSpaceLockError('setitem', col)
         return super().__setitem__(col, value)

@@ -101,6 +101,8 @@ class Indexer(ABC):
         index = key[0]
         if not isinstance(index, slice):
             if isinstance(index, str):
+                if index in self:
+                    return getattr(self, index)
                 return self.index.get_loc(index)
             return index
         _slice = [0 for __ in range(3)]

@@ -21,13 +21,21 @@ class ColumnError(IndexError):
                          f'{name} is not allowed.')
 
 
-class SubSpaceColumnError(IndexError):
+class FrameKeyError(KeyError):
+    """Prevent frame access to subspace attributes."""
+
+    def __init__(self, name, col):
+        super().__init__(
+            f'{name}[\'{col}\'] access is restricted for '
+            f'subspace attributes use s{name}[\'{col}\']')
+
+
+class SubSpaceKeyError(KeyError):
     """Prevent direct access to variables not listed in metaframe.subspace."""
 
     def __init__(self, col, subspace):
         super().__init__(
-            f'{col} not specified as a subspace attribute '
-            f'metaframe.subspace {subspace}')
+            f'{col} not specified as a subspace attribute {subspace}')
 
 
 class SubSpaceLockError(IndexError):
@@ -36,7 +44,7 @@ class SubSpaceLockError(IndexError):
     def __init__(self, name, col):
         super().__init__(
             f'{name} access is restricted for subspace attributes. '
-            f'Use frame.subspace.{name}[:, {col}] = *.\n\n'
+            f'Use frame.subspace.{name}[:, \'{col}\'] = *.\n\n'
             'Lock may be overridden via the following context manager '
             'but subspace will still overwrite (Cavieat Usor):\n'
             'with frame.setlock(True, \'subspace\'):\n'
@@ -359,6 +367,10 @@ class DataFrame(pandas.DataFrame):
     def hasattrs(self, attr):
         """Return True if attr in self.attrs."""
         return attr in self.attrs
+
+    def hascol(self, attr, col):
+        """Expose metaframe.hascol."""
+        return self.metaframe.hascol(attr, col)
 
     def format_value(self, col, value):
         """Return vector with dtype as type(metaframe.default[col])."""

@@ -29,7 +29,7 @@ class FrameSet(FrameLoc):
         self.frame = Frame(
             required=self.required, additional=self.additional,
             available=self.available, subspace=[],
-            exclude=['frame', 'Ic', 'It', 'link',
+            exclude=['frame', 'Ic', 'It',
                      'active', 'plasma', 'fix', 'feedback'], array=[])
         self.subframe = Frame(
             required=self.required, additional=self.additional,
@@ -38,8 +38,19 @@ class FrameSet(FrameLoc):
             array=self.array, delim='_')
         self.subframe.select(['Ic'])
 
+    def __str__(self):
+        """Return string representation of coilset frame."""
+        columns = [col for col in ['link', 'part', 'section', 'turn',
+                                   'delta', 'nturn']
+                   if col in self.frame]
+        frame = pandas.DataFrame(self.Loc[:, columns])
+        frame['Ic'] = self.sloc['Ic'][self.frame.subref]
+        frame['It'] = frame['Ic'] * frame['nturn']
+        return frame.__str__()
+
     def link(self, index, factor=1):
         """Apply multipoint link to subframe."""
+        self.frame.multipoint.link(index, factor)
         self.subframe.multipoint.link(index, factor, expand=True)
 
     def drop(self, index=None):

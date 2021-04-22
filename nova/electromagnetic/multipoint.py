@@ -131,7 +131,8 @@ class MultiPoint(MetaMethod):
         for name, fact in zip(index, factor):
             names = self.frame.index[self.frame.frame == name]
             if len(names) == 0:
-                raise IndexError(f'name {name} not listed in frame')
+                raise IndexError(f'name {name} not listed in frame '
+                                 f'{np.unique(self.frame.frame)}')
             subindex.extend(names)
             subfactor.extend(fact * np.ones(len(names)))
         return subindex, subfactor[1:]
@@ -166,8 +167,13 @@ class MultiPoint(MetaMethod):
             factor = factor * np.ones(len(index)-1)
         if expand:
             index, factor = self.expand_index(index, factor)
-        self.frame.loc[index[0], 'link'] = ''
-        self.frame.loc[index[0], 'factor'] = 1
+        name = index[0]
+        link = self.frame.at[name, 'link']
+        if isinstance(link, str) and link != '':
+            name = link
+        else:
+            self.frame.at[name, 'link'] = ''
+            self.frame.at[name, 'factor'] = 1
         index_number = len(index)
         if index_number == 1:
             return
@@ -175,7 +181,7 @@ class MultiPoint(MetaMethod):
             raise IndexError(f'len(factor={factor}) must == 1 '
                              f'or == len(index={index})-1')
         for i in np.arange(1, index_number):
-            self.frame.at[index[i], 'link'] = index[0]
+            self.frame.at[index[i], 'link'] = name
             self.frame.at[index[i], 'factor'] = factor[i-1]
         if self.frame.lock('multipoint') is False:
             self.frame.__init__(self.frame, attrs=self.frame.attrs)

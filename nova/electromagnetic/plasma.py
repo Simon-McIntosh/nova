@@ -69,10 +69,10 @@ class Plasma(PlasmaGrid, FrameLoc):
             {'additional': ['ionize'], 'array': ['ionize', 'area', 'nturn']}
         self.subframe.update_columns()
 
-    def __repr__(self):
-        """Return dataframe representation of plasma."""
+    def __str__(self):
+        """Return string representation of plasma subframe."""
         return self.loc['ionize', ['x', 'z', 'section', 'area',
-                                   'Ic', 'It', 'nturn']].__repr__()
+                                   'Ic', 'It', 'nturn']].__str__()
 
     def insert(self, *required, iloc=None, **additional):
         """Store plasma index and plasma boundary and generate STR tree."""
@@ -153,4 +153,4 @@ class Plasma(PlasmaGrid, FrameLoc):
     @property
     def polarity(self):
         """Return plasma polarity."""
-        return np.sign(self.sloc['plasma', 'Ic'][0])
+        return np.sign(self.sloc['Plasma', 'Ic'])

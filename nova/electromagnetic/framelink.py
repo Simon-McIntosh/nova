@@ -78,6 +78,30 @@ class FrameLink(LinkIndexer, DataArray):
                     return self.energize._set_item(super(), col, value)
         return super().__setitem__(col, value)
 
+    @staticmethod
+    def isframe(obj, dataframe=True):
+        """
+        Return isinstance(arg[0], obj | DataFrame) flag.
+
+        Parameters
+        ----------
+        obj : Any
+            Input.
+        dataframe : bool, optional
+            Accept pandas.DataFrame. The default is True.
+
+        Returns
+        -------
+        isframe: bool
+            isinstance flag.
+
+        """
+        if isinstance(obj, FrameLink):
+            return True
+        if isinstance(obj, pandas.DataFrame) and dataframe:
+            return True
+        return False
+
     def insert(self, *required, iloc=None, **additional):
         # pylint: disable=arguments-differ
         """
@@ -195,7 +219,7 @@ class FrameLink(LinkIndexer, DataArray):
         """
         if len(args) != 1:
             return args, kwargs
-        if not self.isframe(args[0], frame=True):
+        if not self.isframe(args[0], dataframe=True):
             return args, kwargs
         frame = args[0]
         missing = [arg not in frame for arg in self.metaframe.required]

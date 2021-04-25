@@ -1,7 +1,7 @@
 """Biot specific Frame class."""
 import numpy as np
 
-from nova.electromagnetic.frame import Frame
+from nova.electromagnetic.framelink import FrameLink
 
 
 _cross_section_factor = {'circle': np.exp(-0.25),  # circle-circle
@@ -18,7 +18,7 @@ _cross_section_key = {'rectangle': 'square',
 # pylint: disable=too-many-ancestors
 
 
-class BiotFrame(Frame):
+class BiotFrame(FrameLink):
     """Extend CoilFrame class with biot specific attributes and methods."""
 
     def __init__(self, data=None, index=None, columns=None, attrs=None,
@@ -40,6 +40,70 @@ class BiotFrame(Frame):
             self.attrs['frame'] = required[0]
         return super().insert(*required, iloc=iloc, **additional)
         # self._update_cross_section_factor()
+
+
+    @property
+    def region(self):
+        """
+        Source / target region, read only.
+
+        Set value via self.nT or self.nS'
+
+        Returns
+        -------
+        region : str
+            region type.
+
+        """
+        return self._region
+
+    @property
+    def nS(self):
+        """
+        Manage source filament number for target region.
+
+        Parameters
+        ----------
+        value : int
+            Set source filament number.
+
+        Returns
+        -------
+        nS : int
+            Number of source turns.
+
+        """
+        return self._nS
+
+    @nS.setter
+    def set_source_number(self, value):
+        self._region = 'target'
+        self._nT = self.nC
+        self._nS = value
+
+    @property
+    def nT(self):
+        """
+        Manage target filament number for source region.
+
+        Parameters
+        ----------
+        value : int
+            Set target filament number.
+
+        Returns
+        -------
+        nT : int
+            Number of target turns.
+
+        """
+        return self._nT
+
+    @nT.setter
+    def set_target_number(self, value):
+        self._region = 'source'
+        self._nS = self.nC
+        self._nT = value
 
 
 if __name__ == '__main__':
@@ -108,68 +172,6 @@ if __name__ == '__main__':
         self.cs_factor = np.array([self._cross_section_factor[cs]
                                    for cs in cross_section])
 
-    @property
-    def region(self):
-        """
-        Source / target region, read only.
-
-        Set value via self.nT or self.nS'
-
-        Returns
-        -------
-        region : str
-            region type.
-
-        """
-        return self._region
-
-    @property
-    def nS(self):
-        """
-        Manage source filament number for target region.
-
-        Parameters
-        ----------
-        value : int
-            Set source filament number.
-
-        Returns
-        -------
-        nS : int
-            Number of source turns.
-
-        """
-        return self._nS
-
-    @nS.setter
-    def nS(self, value):
-        self._region = 'target'
-        self._nT = self.nC
-        self._nS = value
-
-    @property
-    def nT(self):
-        """
-        Manage target filament number for source region.
-
-        Parameters
-        ----------
-        value : int
-            Set target filament number.
-
-        Returns
-        -------
-        nT : int
-            Number of target turns.
-
-        """
-        return self._nT
-
-    @nT.setter
-    def nT(self, value):
-        self._region = 'source'
-        self._nS = self.nC
-        self._nT = value
 
     def __getattr__(self, key):
         """Assemble (nT,nS) matrix if key == _*_."""

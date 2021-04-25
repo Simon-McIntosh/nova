@@ -202,30 +202,6 @@ class DataFrame(FrameAttrs):
                     self.loc[:, 'Ic'] = \
                         self.loc[:, 'It'] / self.loc[:, 'nturn']
 
-    @staticmethod
-    def isframe(obj, frame=True):
-        """
-        Return isinstance(arg[0], obj | DataFrame) flag.
-
-        Parameters
-        ----------
-        obj : Any
-            Input.
-        frame : bool, optional
-            Accept pandas.DataFrame. The default is True.
-
-        Returns
-        -------
-        isframe: bool
-            isinstance flag.
-
-        """
-        if isinstance(obj, DataFrame):
-            return True
-        if isinstance(obj, pandas.DataFrame) and frame:
-            return True
-        return False
-
 
 if __name__ == '__main__':
 

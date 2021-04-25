@@ -2,13 +2,87 @@
 
 from warnings import warn
 
+from dataclasses import dataclass, field
+
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 
+from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotelements import Filament
 
+@dataclass
+class BiotSet:
 
-class BiotMatrix(ABC):
+    source: BiotFrame = field(repr=False, default=None)
+    target: BiotFrame = field(repr=False, default=None)
+
+    def __post_init__(self):
+        if not isinstance(self.source, BiotFrame):
+            self.source = BiotFrame(self.source)
+        if not isinstance(self.target, BiotFrame):
+            self.target = BiotFrame(self.target)
+
+    def __init__(self, source=None, target=None, **biot_attributes):
+        CoilMatrix.__init__(self)
+        BiotAttributes.__init__(self, **biot_attributes)
+
+        self._nS, self._nT = 0, 0
+
+
+    def assemble_biotset(self):
+        self.source.update_coilframe()
+        self.target.update_coilframe()
+        self.assemble()
+
+    @property
+    def nS(self):
+        return self._nS
+
+    @nS.setter
+    def nS(self, nS):
+        self._nS = nS
+        self.target.nS = nS  # update target source filament number
+
+    @property
+    def nT(self):
+        return self._nT
+
+    @nT.setter
+    def nT(self, nT):
+        self._nT = nT
+        self.source.nT = nT  # update source target filament number
+
+    def assemble(self):
+        self.nS = self.source.nC  # source filament number
+        self.nT = self.target.nC  # target point number
+        self.nI = self.source.nC*self.target.nC  # total number of interactions
+
+    def plot(self, ax=None):
+        if ax is None:
+            ax = plt.gca()
+        ax.plot(self.source.x, self.source.z, 'C1o', label='source')
+        ax.plot(self.target.x, self.target.z, 'C2.', label='target')
+        ax.legend()
+        ax.set_axis_off()
+        ax.set_aspect('equal')
+
+
+@dataclass
+class BiotMatrix:
+
+    frameset: BiotSet
+    static: npt.ArrayLike = field(init=False, repr=False)
+    plasma: npt.ArrayLike = field(init=False, repr=False)
+
+    def __post_init__(self):
+        if self.source is not None:
+            self.source.add_coil(source)
+        if target is not None:
+            self.target.add_coil(target)
+
+
+class BiotMatrix:
     r"""
     Calculation methods for Biot Savart instances.
 
@@ -40,6 +114,7 @@ class BiotMatrix(ABC):
             :math:`\mathrm{TA}^{-1}\mathrm{turn}^{-2}`.
 
     """
+
 
     _coilmatrix_properties = ['Psi', 'Bx', 'Bz']
     _default_coilmatrix_attributes = {'source_turns': True,

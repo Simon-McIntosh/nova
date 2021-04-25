@@ -1,4 +1,4 @@
-"""CoilMatix calculation methods."""
+"""BiotMatix calculation methods."""
 
 from warnings import warn
 
@@ -8,7 +8,7 @@ import pandas as pd
 from nova.electromagnetic.biotelements import Filament
 
 
-class CoilMatrix:
+class BiotMatrix(ABC):
     r"""
     Calculation methods for Biot Savart instances.
 

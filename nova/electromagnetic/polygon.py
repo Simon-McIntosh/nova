@@ -7,7 +7,7 @@ import shapely.strtree
 import numpy as np
 
 from nova.electromagnetic.polygen import polygen, PolyFrame
-from nova.electromagnetic.geometry import PolyGeom
+from nova.electromagnetic.polygeom import PolyGeom
 from nova.utilities.pyplot import plt
 
 # pylint:disable=unsubscriptable-object

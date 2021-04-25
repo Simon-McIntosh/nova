@@ -13,7 +13,7 @@ from nova.electromagnetic.metadata import MetaData
 
 @dataclass
 class MetaArray(MetaData):
-    """Manage Frame metadata - accessed via Frame['attrs']."""
+    """Manage DataFrame metadata - accessed via DataFrame['attrs']."""
 
     index: pandas.Index = field(default=pandas.Index([]))
     data: dict[str, Iterable[Union[str, int, float]]] = field(init=False)
@@ -61,7 +61,7 @@ class MetaSet(MetaArray):
 @dataclass
 class MetaFrame(MetaSet):
     """
-    Manage Frame metadata.
+    Manage DataFrame metadata.
 
     - required: required column, set as *args
     - additional: additional columns, set as **kwargs

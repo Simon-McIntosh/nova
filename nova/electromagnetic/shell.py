@@ -1,18 +1,18 @@
 """Mesh poloidal shells."""
 from dataclasses import dataclass, field
 
-from nova.electromagnetic.frame import Frame
-from nova.electromagnetic.frameattrs import FrameAttrs
+from nova.electromagnetic.framespace import FrameSpace
+from nova.electromagnetic.gridattrs import GridAttrs
 from nova.electromagnetic.shellgrid import ShellGrid
 from nova.electromagnetic.polygon import Polygon
 
 
 @dataclass
-class Shell(FrameAttrs):
+class Shell(GridAttrs):
     """Mesh poloidal shell elements."""
 
-    frame: Frame = field(repr=False)
-    subframe: Frame = field(repr=False)
+    frame: FrameSpace = field(repr=False)
+    subframe: FrameSpace = field(repr=False)
     delta: float
     turn: str = 'shell'
     default: dict = field(init=False, default_factory=lambda: {

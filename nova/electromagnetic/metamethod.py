@@ -1,17 +1,16 @@
-"""AbstractBaseClass Extended Frame._methods."""
+"""AbstractBaseClass Extended FrameSpace._methods."""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 import numpy as np
-
-from nova.electromagnetic.dataframe import DataFrame
+import pandas
 
 
 @dataclass
 class MetaMethod(ABC):
-    """Manage Frame._methods, subclass with dataclass."""
+    """Manage DataFrame methods."""
 
-    frame: DataFrame = field(repr=False)
+    frame: pandas.DataFrame = field(repr=False)
     required: list[str]
     additional: list[str] = field(default_factory=list)
     require_all: bool = True

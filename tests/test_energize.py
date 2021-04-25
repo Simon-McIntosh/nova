@@ -1,118 +1,64 @@
 
 import pytest
 
-import numpy as np
-
-from nova.electromagnetic.frame import Frame
+from nova.electromagnetic.framelink import FrameLink
 
 
 def test_in_energize():
-    frame = Frame(Required=['x', 'z'], Additional=['It'])
-    assert frame.metaframe.hascol('energize', 'It')
-
-
-def test_set_loc_subspace_Ic():
-    frame = Frame(Required=['x', 'z'], Subspace=['Ic'])
-    frame.insert(0.5, [6, 8.3], nturn=0.5, link=True)
-    frame.subspace.loc[:, 'Ic'] = 6.6
-    assert frame.loc[:, 'It'].to_list() == [3.3, 3.3]
-
-
-def test_set_loc_subspace_Ic_It():
-    frame = Frame(Required=['x', 'z'], Subspace=['Ic', 'It'])
-    frame.insert(0.5, [6, 8.3], nturn=0.5, link=True)
-    frame.subspace.loc[:, 'Ic'] = 6.6
-    assert frame.loc[:, 'It'].to_list() == [3.3, 3.3]
-
-
-def test_set_loc_It():
-    frame = Frame(Required=['x', 'z'], Subspace=['Ic', 'It'])
-    frame.insert(0.5, [6, 8.3], nturn=0.25)
-    frame.subspace.loc[:, 'It'] = 6.6
-    assert frame.subspace.loc[:, 'Ic'].to_list() == [26.4, 26.4]
-
-
-def test_set_subspace_Ic_It_repr():
-    frame = Frame(Required=['x', 'z'], Subspace=['Ic', 'It'])
-    frame.insert(0.5, [6, 8.3], nturn=0.25)
-    frame.__repr__()
+    framelink = FrameLink(Required=['x', 'z'], Additional=['It'])
+    assert framelink.hascol('energize', 'It')
 
 
 def test_set_loc_nturn():
-    frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    frame.insert(0.5, [6, 8.3], nturn=1)
-    frame.loc[:, 'It'] = 6.6
-    frame.loc[:, 'nturn'] = 2.2
-    assert frame.loc[:, 'It'].to_list() == [14.52, 14.52]
+    framelink = FrameLink(Required=['x', 'z'], Additional=['Ic'])
+    framelink.insert(0.5, [6, 8.3], nturn=1)
+    framelink.loc[:, 'It'] = 6.6
+    framelink.loc[:, 'nturn'] = 2.2
+    assert framelink.loc[:, 'It'].to_list() == [14.52, 14.52]
 
 
 def test_set_item_Ic():
-    frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    frame.insert(0.5, [6, 8.3], nturn=0.5)
-    frame['Ic'] = 6.6
-    assert frame['It'].to_list() == [3.3, 3.3]
+    framelink = FrameLink(Required=['x', 'z'], Additional=['Ic'])
+    framelink.insert(0.5, [6, 8.3], nturn=0.5)
+    framelink['Ic'] = 6.6
+    assert framelink['It'].to_list() == [3.3, 3.3]
 
 
 def test_set_item_It():
-    frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    frame.insert(0.5, [6, 8.3], nturn=0.25)
-    frame['It'] = 6.6
-    assert frame['Ic'].to_list() == [26.4, 26.4]
+    framelink = FrameLink(Required=['x', 'z'], Additional=['Ic'])
+    framelink.insert(0.5, [6, 8.3], nturn=0.25)
+    framelink['It'] = 6.6
+    assert framelink['Ic'].to_list() == [26.4, 26.4]
 
 
 def test_set_item_nturn():
-    frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    frame.insert(0.5, [6, 8.3], nturn=1)
-    frame['It'] = 6.6
-    frame['nturn'] = 2.2
-    assert frame['It'].to_list() == [14.52, 14.52]
+    framelink = FrameLink(Required=['x', 'z'], Additional=['Ic'])
+    framelink.insert(0.5, [6, 8.3], nturn=1)
+    framelink['It'] = 6.6
+    framelink['nturn'] = 2.2
+    assert framelink['It'].to_list() == [14.52, 14.52]
 
 
 def test_set_attr_Ic():
-    frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    frame.insert(0.5, [6, 8.3], nturn=0.5)
-    frame.Ic = 6.6
-    assert frame.It.to_list() == [3.3, 3.3]
+    framelink = FrameLink(Required=['x', 'z'], Additional=['Ic'])
+    framelink.insert(0.5, [6, 8.3], nturn=0.5)
+    framelink.Ic = 6.6
+    assert framelink.It.to_list() == [3.3, 3.3]
 
 
 def test_set_attr_It():
-    frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    frame.insert(0.5, [6, 8.3], nturn=0.25)
-    frame.It = 6.6
-    assert frame.Ic.to_list() == [26.4, 26.4]
+    framelink = FrameLink(Required=['x', 'z'], Additional=['Ic'])
+    framelink.insert(0.5, [6, 8.3], nturn=0.25)
+    framelink.It = 6.6
+    assert framelink.Ic.to_list() == [26.4, 26.4]
 
 
 def test_set_attr_nturn():
-    frame = Frame(Required=['x', 'z'], Additional=['Ic'])
-    frame.insert(0.5, [6, 8.3], nturn=1)
-    frame.It = 6.6
-    frame.nturn = 2.2
-    assert frame.It.to_list() == [14.52, 14.52]
-
-
-def test_subspace_Ic():
-    frame = Frame(Required=['x', 'z'], Subspace=['Ic', 'It'])
-    frame.insert(0.5, [6, 8.3], nturn=0.5)
-    frame.insert(0.5, range(10), nturn=3.5, link=True)
-    frame.subspace.Ic = [6.6, 6.6, 1]
-    assert frame.subspace.It.to_list() == [3.3, 3.3, 3.5]
-
-
-def test_subspace_intersect_columns():
-    frame = Frame(Required=['x', 'z'], Subspace=['Ic', 'It'])
-    frame.insert(0.5, [6, 8.3], nturn=0.5)
-    frame.insert(0.5, range(10), nturn=3.5, link=True)
-    frame.subspace.Ic = [6.6, 6.6, 1]
-    frame.update_frame()
-
-
-def test_set_It_array():
-    frame = Frame(Required=['x', 'z'], Subspace=['Ic', 'It'],
-                  Array=['Ic', 'nturn', 'It'])
-    frame.insert(0.5, [6, 8.3], nturn=0.5)
-    frame.insert(0.5, range(10), nturn=4, link=True)
-    frame.subspace.It = [6.6, 6.6, 1]
-    assert np.isclose(frame.subspace.Ic, [13.2, 13.2, 0.25]).all()
+    framelink = FrameLink(Required=['x', 'z'], Additional=['Ic'])
+    framelink.insert(0.5, [6, 8.3], nturn=1)
+    framelink.It = 6.6
+    framelink.nturn = 2.2
+    assert framelink.It.to_list() == [14.52, 14.52]
 
 
 if __name__ == '__main__':

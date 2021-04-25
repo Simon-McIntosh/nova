@@ -1,12 +1,17 @@
 import pytest
 import pandas
 
-from nova.electromagnetic.dataframe import DataFrame, ColumnError
+from nova.electromagnetic.dataframe import DataFrame
+from nova.electromagnetic.error import ColumnError
 
 
 def test_instance():
     dataframe = DataFrame()
     assert isinstance(dataframe, DataFrame)
+
+
+def test_dataframe_subclass():
+    assert issubclass(DataFrame, pandas.DataFrame)
 
 
 def test_init_metadata():

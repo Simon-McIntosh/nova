@@ -1,71 +1,200 @@
-"""Manage grid attributes."""
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, field, fields
+"""Manage DataFrame metamethods."""
+from contextlib import contextmanager
+from typing import Collection, Any
 
-from nova.electromagnetic.frame import Frame
-from nova.electromagnetic.polygen import polyshape
+import pandas
+import numpy as np
 
+from nova.electromagnetic.metaframe import MetaFrame
+from nova.electromagnetic.metamethod import MetaMethod
+from nova.electromagnetic.error import ColumnError
 
-@dataclass
-class FrameArgs:
-    """Prepend grid args."""
-
-    frame: Frame = field(repr=False)
-    subframe: Frame = field(repr=False)
-    delta: float
+# pylint: disable=too-many-ancestors
 
 
-@dataclass
-class FrameAttrs(ABC, FrameArgs):
-    """Manage frame attributes."""
+class FrameAttrs(pandas.DataFrame):
+    """
+    Extend pandas.DataFrame.
 
-    _attrs: dict = field(init=False, default_factory=dict, repr=False)
-    default: dict = field(init=False, default_factory=lambda: {})
-    grid: dict = field(init=False, default_factory=lambda: {})
-    link: bool = field(init=False, default=False)
-    attributes: list[str] = field(init=False, default_factory=lambda: [
-        'link', 'trim', 'fill', 'delta', 'turn', 'tile'])
+    - Manage DataFrame metadata (metaarray, metaframe).
 
-    @abstractmethod
-    def set_conditional_attributes(self):
+    """
+
+    def __init__(self,
+                 data=None,
+                 index: Collection[Any] = None,
+                 columns: Collection[Any] = None,
+                 attrs: dict[str, Collection[Any]] = None,
+                 **metadata: dict[str, Collection[Any]]):
+        super().__init__(data, index, columns)
+        self.update_metadata(data, columns, attrs, metadata)
+
+    def __getattr__(self, name):
+        """Extend pandas.DataFrame.__getattr__. (frame.*)."""
+        if name in self.attrs:
+            return self.attrs[name]
+        self.check_column(name)
+        return super().__getattr__(name)
+
+    def check_column(self, name):
+        """If name in metaframe.default, raise error if name in not columns."""
+        if name in self.metaframe.default and name not in self.columns:
+            raise ColumnError(name)
+
+    def __setitem__(self, key, value):
+        """Extend pandas.DataFrame setitem, check that key is in columns."""
+        if self.lock('column') is False:
+            self.check_column(key)
+        super().__setitem__(key, value)
+
+    def frame_attrs(self, *args: MetaMethod):
+        """Update metamethod attrs."""
+        for method in args:
+            name = method.name
+            if not self.hasattrs(name):
+                if not method(self).generate:
+                    continue
+                self.update_columns()
+            self.attrs[name] = method(self)
+            self.attrs[name].initialize()
+
+    def frame_attr(self, method, *method_args):
+        """Update single metamethod."""
+        name = method.name
+        if method(self, *method_args).generate:
+            self.update_columns()
+            self.attrs[name] = method(self)
+            self.attrs[name].initialize()
+
+    def update_metadata(self, data, columns, attrs, metadata):
+        """Update metadata. Set default and meta*.metadata."""
+        self.extract_attrs(data, attrs)
+        self.trim_columns(columns)
+        self.extract_available(data, columns)
+        self.update_metaframe(metadata)
+        self.match_columns()
+        self.format_data(data)
+
+    def extract_attrs(self, data, attrs):
+        """Extract metaframe / metaarray from data / attrs."""
+        if data is None:
+            data = {}
+        if attrs is None:
+            attrs = {}
+        if hasattr(data, 'attrs'):
+            for attr in data.attrs:  # update metadata from data
+                if isinstance(data.attrs[attr], (MetaFrame, MetaMethod)):
+                    self.attrs[attr] = data.attrs[attr]
+        for attr in attrs:  # update from attrs (replacing data.attrs)
+            if isinstance(attrs[attr], (MetaFrame, MetaMethod)):
+                self.attrs[attr] = attrs[attr]
+        if not self.hasattrs('metaframe'):
+            self.attrs['metaframe'] = MetaFrame(self.index)
+
+    def trim_columns(self, columns):
+        """Trim metaframe required / additional to columns."""
+        if columns:  # trim to columns
+            required = [attr for attr in self.metaframe.required
+                        if attr in columns]
+            additional = [attr for attr in self.metaframe.additional
+                          if attr in columns]
+            available = [attr for attr in self.metaframe.available
+                         if attr in columns]
+            self.metaframe.metadata = {'Required': required,
+                                       'Additional': additional,
+                                       'Available': available}
+
+    def extract_available(self, data, columns):
+        """Update metaframe.available."""
+        try:
+            data_columns = list(data)
+        except TypeError:
+            data_columns = []
+        if columns is None:
+            columns = []
+        frame_columns = list(dict.fromkeys(list(columns)))
+        self.metaframe.metadata = {'available': data_columns+frame_columns}
+
+    def update_metaframe(self, metadata):
+        """Update metaframe, appending available columns if required."""
+        self.metaframe.update(metadata)
+        if self.metaframe.columns:
+            self.metaframe.metadata = {'available': self.metaframe.columns}
+        self.metaframe.data = {}  # clear data  ! TODO check link preservation
+
+    def match_columns(self):
+        """Intersect metaframe.required with self.columns if not empty."""
+        if not self.columns.empty:
+            required = [attr for attr in self.metaframe.required
+                        if attr in self.columns]
+            self.metaframe.metadata = {'Required': required}
+
+    def format_data(self, data):
+        """Apply default formating to data passed as dict."""
+        if isinstance(data, dict):
+            with self.setlock(True):
+                for col in self.columns:
+                    self.loc[:, col] = self.format_value(col, self[col])
+
+    def hasattrs(self, attr):
+        """Return True if attr in self.attrs."""
+        return attr in self.attrs
+
+    def hascol(self, attr, col):
+        """Expose metaframe.hascol."""
+        return self.metaframe.hascol(attr, col)
+
+    def format_value(self, col, value):
+        """Return vector with dtype as type(metaframe.default[col])."""
+        if not self.hasattrs('metaframe') or col == 'link':
+            return value
+        try:
+            dtype = type(self.metaframe.default[col])
+        except (KeyError, TypeError):  # no default type, isinstance(col, list)
+            return value
+        try:
+            if pandas.api.types.is_list_like(value):
+                return np.array(value, dtype)
+            return dtype(value)
+        except (ValueError, TypeError):  # NaN conversion error
+            return value
+
+    def lock(self, key=None):
         """
-        Set conditional attributes.
+        Return metaframe lock status.
 
-        Example
+        Parameters
+        ----------
+        key : str
+            Lock label.
+
+        """
+        if key is None:
+            return self.metaframe.lock
+        return self.metaframe.lock[key]
+
+    @contextmanager
+    def setlock(self, status, keys=None):
+        """
+        Manage access to subspace frame variables.
+
+        Parameters
+        ----------
+        status : Union[bool, None]
+            Subset lock status.
+        keys : Union[str, list[str]]
+            Lock label, if None set all keys in self.lock.
+
+        Returns
         -------
-        Set turn attribute to equal 'skin' iff delta == -1:
-            self.ifthen('delta', -1, 'turn', 'skin')
+        None.
+
         """
-
-    @property
-    def attrs(self):
-        """Manage metagrid attrs."""
-        return self._attrs
-
-    @attrs.setter
-    def attrs(self, attrs):
-        self._attrs = self.default | attrs
-        self.update_attrs()
-        self._attrs['turn'] = polyshape[self._attrs['turn']]  # inflate turn
-        self.set_conditional_attributes()
-        self.grid = {attr: self._attrs.pop(attr) for attr in self.grid}
-        self.link = self._attrs.pop('link',
-                                    self.frame.metaframe.default['link'])
-
-    @property
-    def subattrs(self):
-        """Return subframe attrs."""
-        return {attr: self._attrs[attr] for attr in self._attrs
-                if attr not in self.frame
-                and attr not in self.frame.metaframe.tag}
-
-    def update_attrs(self):
-        """Update missing attrs with instance values."""
-        for attr in [attr.name for attr in fields(self)]:
-            if attr in self.attributes and attr not in self._attrs:
-                self._attrs[attr] = getattr(self, attr)
-
-    def ifthen(self, attr, cond, key, value):
-        """Set _attrs[key] = value when _attrs[check] == cond."""
-        if self._attrs.get(attr, getattr(self, attr)) == cond:
-            self._attrs[key] = value
+        if keys is None:
+            keys = list(self.metaframe.lock.keys())
+        if isinstance(keys, str):
+            keys = [keys]
+        lock = {key: self.metaframe.lock[key] for key in keys}
+        self.metaframe.lock |= {key: status for key in keys}
+        yield
+        self.metaframe.lock |= lock

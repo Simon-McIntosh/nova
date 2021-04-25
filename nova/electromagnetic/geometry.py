@@ -1,21 +1,23 @@
-"""Geometric methods for Frame and FrameArray."""
+"""Geometric methods for FrameSpace class."""
 from dataclasses import dataclass, field
 
 import numpy as np
 
 from nova.electromagnetic.metamethod import MetaMethod
+from nova.electromagnetic.dataframe import DataFrame
 from nova.electromagnetic.polygen import PolyFrame
 from nova.electromagnetic.polygeom import PolyGeom
-from nova.electromagnetic.dataframe import DataFrame
 
 
 @dataclass
 class Geometry(MetaMethod):
     """
-    Geometrical methods for Frame.
+    Geometrical methods for FrameSpace.
 
     Extract geometric features from shapely polygons.
     """
+
+    name = 'geometry'
 
     frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['section', 'poly'])

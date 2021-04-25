@@ -1,54 +1,13 @@
 """Subclass pandas.DataFrame."""
-from contextlib import contextmanager
 import re
 import string
-from typing import Collection, Any
 
 import pandas
 import numpy as np
 
-from nova.electromagnetic.metadata import MetaData
-from nova.electromagnetic.metaframe import MetaFrame
+from nova.electromagnetic.frameattrs import FrameAttrs
 
 # pylint: disable=too-many-ancestors
-
-
-class ColumnError(IndexError):
-    """Prevent column creation."""
-
-    def __init__(self, name):
-        super().__init__('Column access via a new attribute name '
-                         f'{name} is not allowed.')
-
-
-class FrameKeyError(KeyError):
-    """Prevent frame access to subspace attributes."""
-
-    def __init__(self, name, col):
-        super().__init__(
-            f'{name}[\'{col}\'] access is restricted for '
-            f'subspace attributes use s{name}[\'{col}\']')
-
-
-class SubSpaceKeyError(KeyError):
-    """Prevent direct access to variables not listed in metaframe.subspace."""
-
-    def __init__(self, col, subspace):
-        super().__init__(
-            f'{col} not specified as a subspace attribute {subspace}')
-
-
-class SubSpaceLockError(IndexError):
-    """Prevent direct access to frame's subspace variables."""
-
-    def __init__(self, name, col):
-        super().__init__(
-            f'{name} access is restricted for subspace attributes. '
-            f'Use frame.subspace.{name}[:, \'{col}\'] = *.\n\n'
-            'Lock may be overridden via the following context manager '
-            'but subspace will still overwrite (Cavieat Usor):\n'
-            'with frame.setlock(True, \'subspace\'):\n'
-            f'    frame.{name}[:, {col}] = *')
 
 
 class Series(pandas.Series):
@@ -63,24 +22,19 @@ class Series(pandas.Series):
         return DataFrame
 
 
-class DataFrame(pandas.DataFrame):
+class DataFrame(FrameAttrs):
     """
     Extend pandas.DataFrame.
 
-    - Manage Frame metadata (metaarray, metaframe).
+    - Extend boolean methods (insert, ...).
+    - DataFrame singleton (no subspace, select, geometory, multipoint,
+                           energize or plot methods)
 
     """
 
-    _metadata = []  # specify persistent variables
-
-    def __init__(self,
-                 data=None,
-                 index: Collection[Any] = None,
-                 columns: Collection[Any] = None,
-                 attrs: dict[str, Collection[Any]] = None,
-                 **metadata: dict[str, Collection[Any]]):
-        super().__init__(data, index, columns)
-        self.update_metadata(data, columns, attrs, metadata)
+    def __init__(self, data=None, index=None, columns=None,
+                 attrs=None, **metadata):
+        super().__init__(data, index, columns, attrs, **metadata)
         self.update_index()
         self.update_columns()
 
@@ -91,98 +45,6 @@ class DataFrame(pandas.DataFrame):
     @property
     def _constructor_sliced(self):
         return Series
-
-    def check_column(self, name):
-        """If name in metaframe.default, raise error if name in not columns."""
-        if name in self.metaframe.default and name not in self.columns:
-            raise ColumnError(name)
-
-    def __getattr__(self, name):
-        """Extend pandas.DataFrame.__getattr__. (frame.*)."""
-        if name in self.attrs:
-            return self.attrs[name]
-        self.check_column(name)
-        return super().__getattr__(name)
-
-    def __setitem__(self, key, value):
-        """Extend pandas.DataFrame setitem, check that key is in columns."""
-        if self.lock('column') is False:
-            self.check_column(key)
-        super().__setitem__(key, value)
-
-    def update_metadata(self, data, columns, attrs, metadata):
-        """Update metadata. Set default and meta*.metadata."""
-        self.extract_attrs(data, attrs)
-        self.trim_columns(columns)
-        self.extract_available(data, columns)
-        self.update_metaframe(metadata)
-        self.match_columns()
-        self.format_data(data)
-        self.clear_array()
-
-    def extract_attrs(self, data, attrs):
-        """Extract metaframe / metaarray from data / attrs."""
-        if data is None:
-            data = {}
-        if attrs is None:
-            attrs = {}
-        if hasattr(data, 'attrs'):
-            for attr in data.attrs:  # update metadata from data
-                if isinstance(data.attrs[attr], MetaData):
-                    self.attrs[attr] = data.attrs[attr]
-        for attr in attrs:  # update from attrs (replacing data.attrs)
-            if isinstance(attrs[attr], MetaData):
-                self.attrs[attr] = attrs[attr]
-        if not self.hasattrs('metaframe'):
-            self.attrs['metaframe'] = MetaFrame(self.index)
-
-    def trim_columns(self, columns):
-        """Trim metaframe required / additional to columns."""
-        if columns:  # trim to columns
-            required = [attr for attr in self.metaframe.required
-                        if attr in columns]
-            additional = [attr for attr in self.metaframe.additional
-                          if attr in columns]
-            available = [attr for attr in self.metaframe.available
-                         if attr in columns]
-            self.metaframe.metadata = {'Required': required,
-                                       'Additional': additional,
-                                       'Available': available}
-
-    def extract_available(self, data, columns):
-        """Update metaframe.available."""
-        try:
-            data_columns = list(data)
-        except TypeError:
-            data_columns = []
-        if columns is None:
-            columns = []
-        frame_columns = list(dict.fromkeys(list(columns)))
-        self.metaframe.metadata = {'available': data_columns+frame_columns}
-
-    def update_metaframe(self, metadata):
-        """Update metaframe, appending available columns if required."""
-        self.metaframe.update(metadata)
-        if self.metaframe.columns:
-            self.metaframe.metadata = {'available': self.metaframe.columns}
-
-    def match_columns(self):
-        """Intersect metaframe.required with self.columns if not empty."""
-        if not self.columns.empty:
-            required = [attr for attr in self.metaframe.required
-                        if attr in self.columns]
-            self.metaframe.metadata = {'Required': required}
-
-    def format_data(self, data):
-        """Apply default formating to data passed as dict."""
-        if isinstance(data, dict):
-            with self.setlock(True):
-                for col in self.columns:
-                    self.loc[:, col] = self.format_value(col, self[col])
-
-    def clear_array(self):
-        """Clear fast access data array."""
-        self.metaframe.data = {}
 
     def update_index(self):
         """Reset index if self.index is unset."""
@@ -343,7 +205,7 @@ class DataFrame(pandas.DataFrame):
     @staticmethod
     def isframe(obj, frame=True):
         """
-        Return isinstance(arg[0], Frame | DataFrame) flag.
+        Return isinstance(arg[0], obj | DataFrame) flag.
 
         Parameters
         ----------
@@ -355,7 +217,7 @@ class DataFrame(pandas.DataFrame):
         Returns
         -------
         isframe: bool
-            Frame / pandas.DataFrame isinstance flag.
+            isinstance flag.
 
         """
         if isinstance(obj, DataFrame):
@@ -364,73 +226,9 @@ class DataFrame(pandas.DataFrame):
             return True
         return False
 
-    def hasattrs(self, attr):
-        """Return True if attr in self.attrs."""
-        return attr in self.attrs
-
-    def hascol(self, attr, col):
-        """Expose metaframe.hascol."""
-        return self.metaframe.hascol(attr, col)
-
-    def format_value(self, col, value):
-        """Return vector with dtype as type(metaframe.default[col])."""
-        if not self.hasattrs('metaframe') or col == 'link':
-            return value
-        try:
-            dtype = type(self.metaframe.default[col])
-        except (KeyError, TypeError):  # no default type, isinstance(col, list)
-            return value
-        try:
-            if pandas.api.types.is_list_like(value):
-                return np.array(value, dtype)
-            return dtype(value)
-        except (ValueError, TypeError):  # NaN conversion error
-            return value
-
-    def lock(self, key=None):
-        """
-        Return metaframe lock status.
-
-        Parameters
-        ----------
-        key : str
-            Lock label.
-
-        """
-        if key is None:
-            return self.metaframe.lock
-        else:
-            return self.metaframe.lock[key]
-
-    @contextmanager
-    def setlock(self, status, keys=None):
-        """
-        Manage access to subspace frame variables.
-
-        Parameters
-        ----------
-        status : Union[bool, None]
-            Subset lock status.
-        keys : Union[str, list[str]]
-            Lock label, if None set all keys in self.lock.
-
-        Returns
-        -------
-        None.
-
-        """
-        if keys is None:
-            keys = list(self.metaframe.lock.keys())
-        if isinstance(keys, str):
-            keys = [keys]
-        lock = {key: self.metaframe.lock[key] for key in keys}
-        self.metaframe.lock |= {key: status for key in keys}
-        yield
-        self.metaframe.lock |= lock
-
 
 if __name__ == '__main__':
 
-    dataframe = DataFrame({'x': range(3), 'link': 'Coil0'},
-                          Required=['x'], Additional=['Ic'],
-                          Subspace=[], label='PF', Ic=3)
+    dataframe = DataFrame(Required=['x'], Additional=['Ic'],
+                          Subspace=[], label='PF')
+    print(dataframe)

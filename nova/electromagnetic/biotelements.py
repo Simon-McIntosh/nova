@@ -85,8 +85,6 @@ class SingleTurn:
         return biot_savart.mu_o * L  # Wb
 
 
-
-
 class Filament:
     """Compute interaction using complete circular filaments."""
 
@@ -108,7 +106,7 @@ class Filament:
 
         Parameters
         ----------
-        source : nova.BiotFrame
+        source : BiotFrame
             Source filament biotframe.
         n_fold : float, optional
             Number of e-foling lenghts within filament. The default is 1.
@@ -183,8 +181,8 @@ class Filament:
 
         # self inductance index
         self_index = np.where(dL_mag <= ro)  # seperation < dl/2
-        #self_dr = self.dl[self_index]/2  # filament characteristic radius
-        #self_ro = self_dr*self.cross_section_factor[self_index]  # seperation
+        # self_dr = self.dl[self_index]/2  # filament characteristic radius
+         #self_ro = self_dr*self.cross_section_factor[self_index]  # seperation
         self_ro = ro[self_index]
         self_factor = 1 - dL_mag[self_index]/self_ro
         dr[self_index] = self_factor*self_ro*dL_norm[0, self_index]  # radial

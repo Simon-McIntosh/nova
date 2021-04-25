@@ -5,7 +5,7 @@ import descartes
 import numpy as np
 import pygeos
 
-from nova.electromagnetic.frame import Frame
+from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.frameloc import FrameLoc
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polygon import Polygon, PolyFrame
@@ -27,8 +27,8 @@ self.plasmafilament.add_plasma()
 class PlasmaGrid(PoloidalGrid):
     """Grid plasma region."""
 
-    frame: Frame = field(repr=False)
-    subframe: Frame = field(repr=False)
+    frame: FrameSpace = field(repr=False)
+    subframe: FrameSpace = field(repr=False)
     delta: float
     turn: str = 'hexagon'
     tile: bool = field(init=False, default=True)

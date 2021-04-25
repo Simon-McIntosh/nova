@@ -3,37 +3,33 @@ import pandas
 import numpy as np
 
 from nova.electromagnetic.metaframe import MetaFrame
-from nova.electromagnetic.dataframe import SubSpaceKeyError
-from nova.electromagnetic.framearray import (
-    FrameArray,
-    FrameArrayLocMixin,
-    FrameArrayIndexer
-    )
+from nova.electromagnetic.error import SubSpaceKeyError
+from nova.electromagnetic.framelink import FrameLink, LinkLocMixin, LinkIndexer
 
 # pylint: disable=too-many-ancestors
 
 
-class SubspaceLocMixin(FrameArrayLocMixin):
+class SubspaceLocMixin(LinkLocMixin):
     """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
 
     def __setitem__(self, key, value):
         """Raise error when subspace variable is not found."""
         col = self.obj.get_col(key)
         if self.obj.lock('subspace') is False:
-            if not self.obj.hascol('subspace', col):
+            if not self.obj.hascol('subspace', col) and isinstance(col, str):
                 raise SubSpaceKeyError(col, self.obj.metaframe.subspace)
         return super().__setitem__(key, value)
 
     def __getitem__(self, key):
-        """Raise error when subspace variable is not found."""
+        """Raise error when single key subspace variable is not found."""
         col = self.obj.get_col(key)
         if self.obj.lock('subspace') is False:
-            if not self.obj.hascol('subspace', col):
+            if not self.obj.hascol('subspace', col) and isinstance(col, str):
                 raise SubSpaceKeyError(col, self.obj.metaframe.subspace)
         return super().__getitem__(key)
 
 
-class SubSpaceIndexer(FrameArrayIndexer):
+class SubSpaceIndexer(LinkIndexer):
     """Extend pandas indexer."""
 
     @property
@@ -42,7 +38,7 @@ class SubSpaceIndexer(FrameArrayIndexer):
         return SubspaceLocMixin
 
 
-class SubSpace(SubSpaceIndexer, FrameArray):
+class SubSpace(SubSpaceIndexer, FrameLink):
     """Manage frame subspace, extract independent rows for subspace columns."""
 
     def __init__(self, frame):
@@ -74,7 +70,7 @@ class SubSpace(SubSpaceIndexer, FrameArray):
     def get_subindex(frame):
         """Return subspace index."""
         if not hasattr(frame, 'multipoint'):
-            return None
+            return frame.index
         if frame.multipoint.index.empty:
             return frame.index
         return frame.multipoint.index

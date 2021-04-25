@@ -3,9 +3,8 @@ from dataclasses import dataclass, field
 
 import numpy.typing as npt
 
-from nova.electromagnetic.dataarray import DataArray
-from nova.electromagnetic.frame import Frame
-from nova.electromagnetic.dataframe import FrameKeyError
+from nova.electromagnetic.framespace import FrameSpace
+from nova.electromagnetic.error import SpaceKeyError
 
 
 @dataclass
@@ -13,7 +12,7 @@ class LocIndexer:
     """Access frame attributes using a pandas style loc indexer."""
 
     name: str
-    frame: DataArray
+    frame: FrameSpace
     subspace: bool = field(init=False)
 
     def __post_init__(self):
@@ -33,7 +32,7 @@ class LocIndexer:
         index = self.frame.get_index(key)
         col = self.frame.get_col(key)
         if self.frame.hascol('subspace', col) and not self.subspace:
-            raise FrameKeyError(self.name, col)
+            raise SpaceKeyError(self.name, col)
         if self.frame.hascol('array', col):
             if isinstance(index, slice):
                 if index == slice(None):
@@ -67,8 +66,8 @@ class FrameLoc:
 
     """
 
-    frame: Frame = field(init=False, default=None, repr=False)
-    subframe: Frame = field(init=False, default=None, repr=False)
+    frame: FrameSpace = field(init=False, default=None, repr=False)
+    subframe: FrameSpace = field(init=False, default=None, repr=False)
 
     @property
     def Loc(self):

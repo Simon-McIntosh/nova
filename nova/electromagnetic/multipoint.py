@@ -1,27 +1,24 @@
 """Manage mulit-point constraints."""
-from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas
 
 from nova.electromagnetic.metamethod import MetaMethod
-
-if TYPE_CHECKING:
-    from nova.electromagnetic.frame import Frame
+from nova.electromagnetic.dataframe import DataFrame
 
 
 @dataclass
 class MultiPoint(MetaMethod):
     """Manage multi-point constraints applied across frame.index."""
 
-    frame: Frame = field(repr=False)
+    name = 'multipoint'
+
+    frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['link'])
     additional: list[str] = field(default_factory=lambda: [
         'factor', 'ref', 'subref'])
     require_all: bool = True
-
     indexer: list[int] = field(init=False, repr=False)
     index: pandas.Index = field(default=pandas.Index([]))
 

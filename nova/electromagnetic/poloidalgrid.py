@@ -3,12 +3,12 @@ from dataclasses import dataclass, field
 
 import pandas
 
-from nova.electromagnetic.frameattrs import FrameAttrs
+from nova.electromagnetic.gridattrs import GridAttrs
 from nova.electromagnetic.polygrid import PolyGrid
 
 
 @dataclass
-class PoloidalGrid(FrameAttrs):
+class PoloidalGrid(GridAttrs):
     """Generate subframe poloidal grids from frame input."""
 
     trim: bool = True
@@ -36,7 +36,7 @@ class PoloidalGrid(FrameAttrs):
         Returns
         -------
         index : pandas.Index
-            Frame index.
+            FrameSpace index.
 
         """
         self.attrs = additional

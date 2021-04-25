@@ -6,12 +6,14 @@ import pandas
 
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.dataframe import SubSpaceLockError
+from nova.electromagnetic.error import SubSpaceLockError
 
 
 @dataclass
 class Energize(MetaMethod):
     """Manage dependant frame energization parameters."""
+
+    name = 'energize'
 
     frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['It', 'nturn'])

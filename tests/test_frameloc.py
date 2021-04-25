@@ -3,9 +3,7 @@ import pytest
 import numpy as np
 
 from nova.electromagnetic.coilset import CoilSet
-from nova.electromagnetic.dataframe import (
-    FrameKeyError, SubSpaceKeyError, ColumnError
-    )
+from nova.electromagnetic.error import SubSpaceKeyError, ColumnError
 
 
 def test_get_subspace_error():
@@ -95,9 +93,10 @@ def test_get_current_subset():
 
 def test_get_current_insert_default():
     coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=['Ic'], required=['x'])
-    coilset.coil.insert(3)
+    coilset.coil.insert(range(2), link=True)
     coilset.plasma.insert({'s': [3.25, 0, 0.25]}, delta=-2)
-    coilset.shell.insert([2.2, 3.2], [-0.1, 0.3], -2, 0.05, delta=-3)
+    coilset.shell.insert([2.2, 3.2], [-0.1, 0.3], -2, 0.05, delta=-3,
+                         link=True)
     coilset.sloc['Ic'] = 4.4
     coilset.sloc['plasma', 'Ic'] = [9.9]
     coilset.sloc['active', 'Ic'] = [3.3]

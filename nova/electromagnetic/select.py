@@ -46,6 +46,8 @@ class Label:
 class Select(MetaMethod):
     """Manage dependant frame energization parameters."""
 
+    name = 'select'
+
     frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: [
         'active', 'plasma', 'fix', 'feedback'], repr=False)
@@ -59,16 +61,16 @@ class Select(MetaMethod):
         """Extend additional with unique values extracted from match."""
         if not self.generate:
             return
+        self.add_label('feedback', 'feedback')
         self.add_label('active', 'active')
         self.add_label('passive', None, 'active')
         self.add_label('plasma', 'plasma')
         self.add_label('coil', None, ['plasma', 'passive'])
         self.add_label('fix', 'fix')
         self.add_label('free', None, 'fix')
-        self.add_label('feedback', 'feedback')
-        self.update_metaframe()  # update metaframe additional and defaults
+        self.update_metaframe()
+        self.update_columns()
         super().__post_init__()
-        self.initialize()
 
     def __call__(self, required: list[str], require_all=False):
         """Update required attributes."""
@@ -77,7 +79,6 @@ class Select(MetaMethod):
     def initialize(self):
         """Insert frame labels."""
         if not self.frame.empty and len(self.labels) > 0:
-            self.update_columns()
             self.update_labels()
 
     def add_label(self, name, *args):
@@ -109,12 +110,6 @@ class Select(MetaMethod):
         """Reset labels dict."""
         self.labels = {}
 
-    def update(self):
-        """Update frame with labels. Re-generate columns."""
-        self.update_metaframe()
-        super().__post_init__()  # add columns to avalible
-        self.initialize()
-
     def update_metaframe(self):
         """
         Update metaframe.
@@ -125,10 +120,6 @@ class Select(MetaMethod):
         labels = list(self.labels)
         self.frame.metaframe.metadata = {
             'additional': labels, 'subspace': labels, 'array': labels}
-        default = {label: True for label in self.labels
-                   if label not in self.frame.metaframe.default}
-        if len(default) > 0:
-            self.frame.metaframe.metadata = {'default': default}
 
     def update_columns(self):
         """Update frame columns if any additional unset."""
@@ -139,20 +130,17 @@ class Select(MetaMethod):
 
     def update_labels(self):
         """Update frame selection labels."""
+        self.frame.update_frame()  # update array variables (loc multi-select)
         for label in self.labels:
             include = self.any_label(self.labels[label]['include'], True)
             exclude = self.any_label(self.labels[label]['exclude'], False)
-            with self.frame.setlock(True):
-                self.frame.loc[:, label] = include & ~exclude
+            self.frame.subspace[label] = np.all([include, ~exclude], axis=0)
 
     def any_label(self, columns, default):
         """Return boolean index evaluated as columns.any()."""
         if columns:
-            try:
-                return self.frame.loc[:, columns].any(axis=1)
-            except KeyError:
-                pass
-        return np.full(len(self.frame), default)
+            return self.frame.subspace.loc[:, columns].any(axis=1).to_numpy()
+        return np.full(len(self.frame.subspace), default)
 
 
 if __name__ == '__main__':

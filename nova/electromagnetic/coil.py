@@ -1,7 +1,7 @@
 """Mesh poloidal coils."""
 from dataclasses import dataclass, field
 
-from nova.electromagnetic.frame import Frame
+from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 
 
@@ -9,8 +9,8 @@ from nova.electromagnetic.poloidalgrid import PoloidalGrid
 class Coil(PoloidalGrid):
     """Generate poloidal field coils (CS and PF)."""
 
-    frame: Frame = field(repr=False)
-    subframe: Frame = field(repr=False)
+    frame: FrameSpace = field(repr=False)
+    subframe: FrameSpace = field(repr=False)
     delta: float
     tile: bool = False
     fill: bool = False

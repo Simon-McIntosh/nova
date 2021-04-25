@@ -1,7 +1,6 @@
 import pytest
 from numpy import allclose
 
-from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.biotelements import mu_o
 
 
@@ -65,7 +64,7 @@ def test_solenoid_probe():
 if __name__ == '__main__':
     pytest.main([__file__])
 
-    test_ITER_subinductance_matrix()
+    # test_ITER_subinductance_matrix()
 
     # cs = test_ITER_subinductance_matrix(plot=True)
     # cs, Bz, Bz_theory = test_solenoid_grid(plot=True)

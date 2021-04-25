@@ -9,7 +9,7 @@ import typing
 
 @dataclass
 class MetaData(ABC):
-    """Abstract base class. Extended by MetaFrame and MetaArray."""
+    """Abstract base class. Extended by MetaFrame."""
 
     # internal field list - exclude from metadata return
     _internal: list[str] = field(init=False, default_factory=list)

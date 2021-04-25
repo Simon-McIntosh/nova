@@ -3,13 +3,14 @@ from dataclasses import dataclass, field
 
 import pandas
 
-from nova.electromagnetic.frame import Frame
+from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.frameloc import FrameLoc
+from nova.electromagnetic.select import Select
 
 
 @dataclass
-class FrameSet(FrameLoc):
-    """Build frameset. Link frame to subframe. Manage boolean methods."""
+class FramePack(FrameLoc):
+    """Package FrameSpace instances. Manage boolean methods."""
 
     required: list[str] = field(repr=False, default_factory=lambda: [
         'x', 'z', 'dl', 'dt'])
@@ -26,27 +27,27 @@ class FrameSet(FrameLoc):
 
     def __post_init__(self):
         """Init coil and subcoil."""
-        self.frame = Frame(
+        self.frame = FrameSpace(
             required=self.required, additional=self.additional,
             available=self.available, subspace=[],
             exclude=['frame', 'Ic', 'It',
                      'active', 'plasma', 'fix', 'feedback'], array=[])
-        self.subframe = Frame(
+        self.subframe = FrameSpace(
             required=self.required, additional=self.additional,
             available=self.available, subspace=self.subspace,
             exclude=['turn', 'scale', 'nfilament', 'delta'],
             array=self.array, delim='_')
-        self.subframe.select(['Ic'])
+        self.subframe.frame_attr(Select, ['Ic'])
 
     def __str__(self):
         """Return string representation of coilset frame."""
         columns = [col for col in ['link', 'part', 'section', 'turn',
                                    'delta', 'nturn']
                    if col in self.frame]
-        frame = pandas.DataFrame(self.Loc[:, columns])
-        frame['Ic'] = self.sloc['Ic'][self.frame.subref]
-        frame['It'] = frame['Ic'] * frame['nturn']
-        return frame.__str__()
+        superframe = pandas.DataFrame(self.Loc[:, columns])
+        superframe['Ic'] = self.sloc['Ic'][self.frame.subref]
+        superframe['It'] = superframe['Ic'] * superframe['nturn']
+        return superframe.__str__()
 
     def link(self, index, factor=1):
         """Apply multipoint link to subframe."""
@@ -118,6 +119,6 @@ class FrameSet(FrameLoc):
 
 if __name__ == '__main__':
 
-    frameset = FrameSet(required=['rms'])
-    frameset.subframe.insert([2, 4])
-    print(frameset.subframe.frame)
+    framepack = FramePack(required=['rms'])
+    framepack.subframe.insert([2, 4])
+    print(framepack.subframe)

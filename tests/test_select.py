@@ -2,38 +2,39 @@ import pytest
 
 import numpy as np
 
-from nova.electromagnetic.frame import Frame
+from nova.electromagnetic.framespace import FrameSpace
 
 
 def test_plasma_subspace():
-    frame = Frame(Required=['x'], Available=['active', 'link'],
-                  Array=['plasma'])
-    frame.insert(range(2), active=True, link=True)
-    frame.insert(range(2), active=False, link=True)
-    frame.insert(3, plasma=True)
-    assert list(frame.subspace.plasma) == [False, False, True]
+    framespace = FrameSpace(Required=['x'], Available=['active', 'link'],
+                            Array=['plasma'])
+    framespace.insert(range(2), active=True, link=True)
+    framespace.insert(range(2), active=False, link=True)
+    framespace.insert(3, plasma=True)
+    assert list(framespace.subspace.plasma) == [False, False, True]
 
 
 def test_coil():
-    frame = Frame(Required=['x'], Available=['active'], Array=['coil'])
-    frame.insert(range(2), plasma=[True, False])
-    assert list(frame.coil) == [False, True]
+    framespace = FrameSpace(Required=['x'], Available=['active'],
+                            Array=['coil'])
+    framespace.insert(range(3), plasma=[True, False, True])
+    assert list(framespace.coil) == [False, True, False]
 
 
 def test_select_subspace():
-    frame = Frame(Required=['x'], Available=['plasma'])
-    assert np.array([attr in frame.metaframe.subspace for attr in
-                     frame.select.avalible]).all()
+    framespace = FrameSpace(Required=['x'], Available=['plasma'])
+    assert np.array([attr in framespace.metaframe.subspace for attr in
+                     framespace.select.avalible]).all()
 
 
 def test_generate_false():
-    frame = Frame(Required=['x'])
-    assert frame.select.generate is not True
+    framespace = FrameSpace(Required=['x'])
+    assert not framespace.hasattrs('select')
 
 
 def test_generate_false_attrs():
-    frame = Frame(Required=['x'], Additional=[])
-    assert frame.columns.to_list() == ['x']
+    framespace = FrameSpace(Required=['x'], Additional=[])
+    assert framespace.columns.to_list() == ['x']
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-"""Methods for ploting Frame data."""
+"""Methods for ploting FrameSpace data."""
 from dataclasses import dataclass, field
 from typing import Union
 import colorsys
@@ -15,8 +15,8 @@ import pandas
 import shapely.geometry
 
 from nova.electromagnetic.metamethod import MetaMethod
-
-from nova.electromagnetic.dataframe import DataFrame, ColumnError
+from nova.electromagnetic.dataframe import DataFrame
+from nova.electromagnetic.error import ColumnError
 from nova.utilities.IO import human_format
 from nova.utilities.pyplot import plt
 
@@ -181,7 +181,9 @@ class Label:
 
 @dataclass
 class PolyPlot(Display, Label, MetaMethod):
-    """Methods for ploting Frame data."""
+    """Methods for ploting FrameSpace data."""
+
+    name = 'polyplot'
 
     frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['poly'])

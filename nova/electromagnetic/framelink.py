@@ -1,28 +1,34 @@
-"""Configure superframe. Inherit DataArray for fast access else DataFrame."""
-from dataclasses import dataclass, field
-from typing import Collection, Any
+"""Extend DataArray - add multipoint and link methods."""
 
 import numpy as np
 import pandas
 import shapely
 
+from nova.electromagnetic.polygon import Polygon
+from nova.electromagnetic.multipoint import MultiPoint
+from nova.electromagnetic.energize import Energize
 from nova.electromagnetic.dataarray import (
     ArrayLocMixin,
     ArrayIndexer,
     DataArray
     )
-from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.metamethod import MetaMethod
-from nova.electromagnetic.multipoint import MultiPoint
-from nova.electromagnetic.energize import Energize
-from nova.electromagnetic.polygon import Polygon
+
+# pylint: disable=too-many-ancestors
 
 
-class FrameArrayLocMixin(ArrayLocMixin):
+class LinkLocMixin(ArrayLocMixin):
     """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
 
+    def __getitem__(self, key):
+        """Extend pandas.indexer getitem. Compute turn current."""
+        col = self.obj.get_col(key)
+        if self.obj.hascol('energize', col):
+            if self.obj.lock('energize') is False:
+                return self.obj.energize._get_item(super(), key)
+        return super().__getitem__(key)
+
     def __setitem__(self, key, value):
-        """Update dependant energize variables."""
+        """Extend pandas.indexer setitem. Update energize variables."""
         col = self.obj.get_col(key)
         value = self.obj.format_value(col, value)
         if self.obj.hascol('energize', col):
@@ -30,74 +36,23 @@ class FrameArrayLocMixin(ArrayLocMixin):
                 return self.obj.energize._set_item(super(), key, value)
         return super().__setitem__(key, value)
 
-    def __getitem__(self, key):
-        """Refresh subspace items prior to return."""
-        col = self.obj.get_col(key)
-        if self.obj.hascol('energize', col):
-            if self.obj.lock('energize') is False:
-                return self.obj.energize._get_item(super(), key)
-        return super().__getitem__(key)
 
-
-class FrameArrayIndexer(ArrayIndexer):
+class LinkIndexer(ArrayIndexer):
     """Extend pandas indexer."""
 
     @property
     def loc_mixin(self):
         """Return LocIndexer mixins."""
-        return FrameArrayLocMixin
+        return LinkLocMixin
 
 
-@dataclass
-class Methods:
-    """Manage frame MetaMethods."""
+class FrameLink(LinkIndexer, DataArray):
+    """Extend DataArray. Implement multipoint link and energize methods."""
 
-    frame: DataFrame
-    attrs: dict[Any] = field(repr=False, default_factory=dict)
-
-    def __post_init__(self):
-        """Define methods, update frame.columns and initialize methods."""
-        self.frame.add_methods()
-        self.initialize()
-
-    def __repr__(self):
-        """Return method list."""
-        return f'{list(self.attrs)}'
-
-    def initialize(self):
-        """Init attrs derived from MetaMethod."""
-        if self.frame.empty:
-            return
-        self.frame.update_columns()
-        attrs = [attr for attr in self.attrs
-                 if isinstance(self.attrs[attr], MetaMethod)]
-        for attr in attrs:
-            if self.attrs[attr].generate:
-                self.attrs[attr].initialize()
-
-
-class FrameArray(FrameArrayIndexer, DataArray):
-    """
-    Extend DataArray.
-
-    - Add boolean methods (insert, drop...).
-    - Frame singleton (no subspace, select, geometory or plot methods)
-
-    """
-
-    def __init__(self,
-                 data=None,
-                 index: Collection[Any] = None,
-                 columns: Collection[Any] = None,
-                 attrs: dict[str, Collection[Any]] = None,
-                 **metadata: dict[str, Collection[Any]]):
+    def __init__(self, data=None, index=None, columns=None,
+                 attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.attrs['methods'] = Methods(self, self.attrs)
-
-    def add_methods(self):
-        """Define singleton attributes - extend to add additional methods."""
-        self.attrs['multipoint'] = MultiPoint(self)
-        self.attrs['energize'] = Energize(self)
+        self.frame_attrs(MultiPoint, Energize)
 
     def __setattr__(self, name, value):
         """Extend DataFrame.__setattr__. (frame.*)."""
@@ -108,26 +63,27 @@ class FrameArray(FrameArrayIndexer, DataArray):
 
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
-        if not self.hasattrs('energize'):
-            return super().__getitem__(col)
-        if self.hascol('energize', col):
-            if self.lock('energize') is False:
-                return self.energize._get_item(super(), col)
+        if self.hasattrs('energize'):
+            if self.hascol('energize', col):
+                if self.lock('energize') is False:
+                    return self.energize._get_item(super(), col)
         return super().__getitem__(col)
 
     def __setitem__(self, col, value):
         """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
         value = self.format_value(col, value)
-        if not self.hasattrs('energize'):
-            return super().__setitem__(col, value)
-        if self.hascol('energize', col):
-            if self.lock('energize') is False:
-                return self.energize._set_item(super(), col, value)
+        if self.hasattrs('energize'):
+            if self.hascol('energize', col):
+                if self.lock('energize') is False:
+                    return self.energize._set_item(super(), col, value)
         return super().__setitem__(col, value)
 
     def insert(self, *required, iloc=None, **additional):
+        # pylint: disable=arguments-differ
         """
-        Insert frame(s).
+        Override pandas.DataFrame.insert for column managed DataFrame.
+
+        Insert row(s).
 
         Assemble insert from *args, **kwargs and concatenate with self.
 
@@ -186,11 +142,11 @@ class FrameArray(FrameArrayIndexer, DataArray):
 
     def assemble(self, *args, **kwargs):
         """
-        Return Frame constructed from required and optional input.
+        Return FrameLink constructed from required and optional input.
 
         Parameters
         ----------
-        *args : Union[Frame, pandas.DataFrame, array-like]
+        *args : Union[DataFrame, array-like]
             Required arguments listed in self.metaframe.required.
         **kwargs : dict[str, Union[float, array-like, str]]
             Optional keyword arguments listed in self.metaframe.additional.
@@ -204,7 +160,7 @@ class FrameArray(FrameArrayIndexer, DataArray):
         args, kwargs = self._extract_polygon(*args, **kwargs)
         data = self._build_data(*args, **kwargs)
         index = self._build_index(data, **kwargs)
-        return FrameArray(data, index=index, attrs=self.attrs)
+        return FrameLink(data, index=index, attrs=self.attrs)
 
     def _extract_frame(self, *args, **kwargs):
         """
@@ -215,7 +171,7 @@ class FrameArray(FrameArrayIndexer, DataArray):
 
         Parameters
         ----------
-        *args : Union[Frame, DataFrame, list[float], list[array-like]]
+        *args : Union[DataFrame, Polygon, list[float], list[array-like]]
             Arguments.
         **kwargs : dict[str, Union[float, array-like]]
             Keyword arguments.
@@ -249,7 +205,7 @@ class FrameArray(FrameArrayIndexer, DataArray):
                              'not specified in frame '
                              f'{frame.columns}')
         args = [frame[col] for col in self.metaframe.required]
-        [kwargs.pop(attr, None) for attr in self.metaframe.required]
+        _ = [kwargs.pop(attr, None) for attr in self.metaframe.required]
         if not isinstance(frame.index, pandas.RangeIndex):
             kwargs['name'] = frame.index
         kwargs |= {col: frame[col] for col in
@@ -285,10 +241,22 @@ class FrameArray(FrameArrayIndexer, DataArray):
     def _build_data(self, *args, **kwargs):
         """Return data dict built from *args and **kwargs."""
         data = {}  # python 3.6+ assumes dict is insertion ordered
+        kwargs = self._exclude(kwargs)
+        attrs = self.metaframe.required + list(kwargs)  # record passed attrs
+        self._build_required(data, *args)
+        self._build_additional(data, **kwargs)
+        self._patch_current(data, attrs)
+        return data
+
+    def _exclude(self, kwargs):
+        """Return kwargs with exclude attributes removed."""
         for attr in self.metaframe.exclude:  # remove exclude attrs
             if attr in kwargs:
                 del kwargs[attr]
-        attrs = self.metaframe.required + list(kwargs)  # record passed attrs
+        return kwargs
+
+    def _build_required(self, data, *args):
+        """Populate required attributes from args."""
         if len(args) != len(self.metaframe.required):
             raise IndexError(f'len(args) {len(args)} != '
                              'len(self.metaframe.required) '
@@ -298,6 +266,9 @@ class FrameArray(FrameArrayIndexer, DataArray):
                 data[attr] = np.array(arg, dtype=float)
             except TypeError:
                 data[attr] = arg  # non-numeric input
+
+    def _build_additional(self, data, **kwargs):
+        """Populate data with additional attributes from kwargs."""
         for attr in self.metaframe.additional:  # set additional to default
             data[attr] = self.metaframe.default[attr]
         additional = []
@@ -310,9 +281,6 @@ class FrameArray(FrameArrayIndexer, DataArray):
                     additional.append(attr)
         if len(additional) > 0:  # extend aditional arguments
             self.metaframe.metadata = {'additional': additional}
-        if 'It' in attrs and 'Ic' not in attrs:  # patch line current
-            data['Ic'] = \
-                data['It'] / data.get('nturn', self.metaframe.default['nturn'])
         if len(kwargs) > 0:  # ckeck for unset kwargs
             unset_kwargs = np.array(list(kwargs.keys()))
             default = {key: '_default_value_' for key in unset_kwargs}
@@ -320,14 +288,26 @@ class FrameArray(FrameArrayIndexer, DataArray):
                 f'unset kwargs: {unset_kwargs}\n'
                 'enter default value in self.metaframe.defaults\n'
                 f'set as self.metaframe.meatadata = {{default: {default}}}')
-        return data
+
+    def _patch_current(self, data, attrs=None):
+        """Patch line current."""
+        if attrs is None:
+            attrs = data
+        if 'It' in attrs and 'Ic' not in attrs:
+            data['Ic'] = \
+                data['It'] / data.get('nturn', self.metaframe.default['nturn'])
+        elif 'It' in attrs and 'Ic' in attrs:
+            data['It'] = \
+                data['Ic'] * data.get('nturn', self.metaframe.default['nturn'])
 
 
 if __name__ == '__main__':
 
-    framearray = FrameArray(Required=['x', 'z'],
-                            available=['section', 'link'])
-    framearray.insert(range(2), 1, label='PF')
-    framearray.insert(range(4), 1, link=True)
-    framearray.insert(range(2), 1, label='PF')
-    framearray.insert(range(4), 1, link=True)
+    framelink = FrameLink(required=['x', 'z'], Available=['It'], Array=['Ic'])
+
+    framelink.insert([-4, -5], 1, Ic=6.5, name='PF1',
+                     active=False, plasma=True)
+    framelink.insert(range(4000), 3, Ic=4, nturn=20, label='PF', link=True)
+    #framelink.multipoint.link(['PF1', 'CS0'], factor=1)
+
+    print(framelink)

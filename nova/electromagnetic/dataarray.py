@@ -1,6 +1,4 @@
 """Manage fast access dataframe attributes."""
-from typing import Optional, Collection, Any
-
 import numpy as np
 import pandas
 
@@ -53,12 +51,8 @@ class ArrayIndexer(Indexer):
 class DataArray(ArrayIndexer, DataFrame):
     """Extend DataFrame enabling fast access to dynamic fields in array."""
 
-    def __init__(self,
-                 data=None,
-                 index: Optional[Collection[Any]] = None,
-                 columns: Optional[Collection[Any]] = None,
-                 attrs: dict[str, Collection[Any]] = None,
-                 **metadata: Optional[dict]):
+    def __init__(self, data=None, index=None, columns=None,
+                 attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
 
     def __repr__(self):
@@ -69,7 +63,8 @@ class DataArray(ArrayIndexer, DataFrame):
     def update_frame(self):
         """Extend DataFrame.update_frame, transfer metaarray.data to frame."""
         for col in self.metaframe.array:
-            self._set_frame(col)
+            if col in self:
+                self._set_frame(col)
 
     def __setattr__(self, col, value):
         """Extend DataFrame.__setattr__ to gain fast access to array data."""

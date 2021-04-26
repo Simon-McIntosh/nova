@@ -2,6 +2,7 @@
 from dataclasses import dataclass, field
 
 import numpy as np
+import pandas
 
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.dataframe import DataFrame
@@ -52,7 +53,8 @@ class Select(MetaMethod):
     required: list[str] = field(default_factory=lambda: [
         'active', 'plasma', 'fix', 'feedback'], repr=False)
     require_all: bool = field(repr=False, default=False)
-    additional: list[str] = field(init=False, default_factory=list, repr=False)
+    additional: list[str] = field(init=False, default_factory=lambda: [
+        'passive', 'coil', 'free'])
     avalible: list[str] = field(init=False, default_factory=list)
     labels: dict[str, dict[str, list[str]]] = field(init=False, repr=False,
                                                     default_factory=dict)
@@ -77,9 +79,14 @@ class Select(MetaMethod):
         self.__init__(self.frame, required, require_all)
 
     def initialize(self):
-        """Insert frame labels."""
-        if not self.frame.empty and len(self.labels) > 0:
-            self.update_labels()
+        """Update frame selection labels."""
+        if not self.frame.empty:
+            self.frame.update_frame()  # update arrays (loc multi-select)
+            for label in self.labels:
+                include = self.any_label(self.labels[label]['include'], True)
+                exclude = self.any_label(self.labels[label]['exclude'], False)
+                self.frame.subspace[label] = np.all([include, ~exclude],
+                                                    axis=0)
 
     def add_label(self, name, *args):
         """
@@ -128,14 +135,6 @@ class Select(MetaMethod):
         if unset.any():
             self.frame.update_columns()
 
-    def update_labels(self):
-        """Update frame selection labels."""
-        self.frame.update_frame()  # update array variables (loc multi-select)
-        for label in self.labels:
-            include = self.any_label(self.labels[label]['include'], True)
-            exclude = self.any_label(self.labels[label]['exclude'], False)
-            self.frame.subspace[label] = np.all([include, ~exclude], axis=0)
-
     def any_label(self, columns, default):
         """Return boolean index evaluated as columns.any()."""
         if columns:
@@ -148,5 +147,4 @@ if __name__ == '__main__':
     dataframe = DataFrame({'x': range(4),
                            'plasma': [True, False, True, True]})
     select = Select(dataframe)
-    #select.update()
     print(dataframe)

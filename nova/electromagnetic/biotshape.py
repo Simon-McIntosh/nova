@@ -1,0 +1,32 @@
+"""Shape methods for BiotFrame."""
+from dataclasses import dataclass, field
+
+from nova.electromagnetic.metamethod import MetaMethod
+from nova.electromagnetic.framelink import FrameLink
+
+
+@dataclass
+class BiotShape(MetaMethod):
+    """Shape methods for BiotFrame."""
+
+    name = 'biotshape'
+
+    frame: FrameLink = field(repr=False)
+    region: str = field(init=False, default='')
+    source: int = field(init=False, default=0)
+    target: int = field(init=False, default=0)
+
+    def initialize(self):
+        """Initialize source and target number."""
+        self.source = len(self.frame)
+        self.target = len(self.frame)
+
+    def set_source(self, number):
+        """Set source number, define frame as target."""
+        self.source = number
+        self.region = 'target'
+
+    def set_target(self, number):
+        """Set source number, define frame as source."""
+        self.target = number
+        self.region = 'source'

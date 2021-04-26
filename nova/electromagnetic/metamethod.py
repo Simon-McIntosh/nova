@@ -11,7 +11,7 @@ class MetaMethod(ABC):
     """Manage DataFrame methods."""
 
     frame: pandas.DataFrame = field(repr=False)
-    required: list[str]
+    required: list[str] = field(default_factory=list)
     additional: list[str] = field(default_factory=list)
     require_all: bool = True
 
@@ -36,7 +36,8 @@ class MetaMethod(ABC):
     @property
     def required_attributes(self):
         """Return boolean status of attributes found in frame.columns."""
-        return np.array([attr in self.frame.metaframe.available
+        return np.array([attr in self.frame
+                         or attr in self.frame.metaframe.available
                          for attr in self.required])
 
     def unset(self, attributes: list[str]) -> list[str]:

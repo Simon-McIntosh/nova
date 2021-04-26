@@ -53,6 +53,7 @@ if __name__ == '__main__':
                          delta=-40, part='vv')
     coilset.plasma.insert({'sk': [1.5, 1, 0.5, 0.5]}, turn='hex', tile=True,
                           trim=True)
+
     coilset.link(['Shl0', 'Shl4', 'Shl1'])
 
     coilset.plot()
@@ -61,9 +62,8 @@ if __name__ == '__main__':
     coilset.sloc['plasma', 'Ic'] = [9.9]
     coilset.sloc['passive', 'Ic'] = [7.7, 12, 5.5]
 
-    print(coilset)
-
     coilset.sloc[:, 'Ic'] = 9.3
+
 
     def set_current():
         coilset.loc['Ic'] = 6

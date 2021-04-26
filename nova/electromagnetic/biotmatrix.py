@@ -8,89 +8,25 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
-from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotelements import Filament
+from nova.electromagnetic.biotset import BiotSet
 
-@dataclass
-class BiotSet:
-
-    source: BiotFrame = field(repr=False, default=None)
-    target: BiotFrame = field(repr=False, default=None)
-
-    def __post_init__(self):
-        if not isinstance(self.source, BiotFrame):
-            self.source = BiotFrame(self.source)
-        if not isinstance(self.target, BiotFrame):
-            self.target = BiotFrame(self.target)
-
-    def __init__(self, source=None, target=None, **biot_attributes):
-        CoilMatrix.__init__(self)
-        BiotAttributes.__init__(self, **biot_attributes)
-
-        self._nS, self._nT = 0, 0
+'''
 
 
-    def assemble_biotset(self):
-        self.source.update_coilframe()
-        self.target.update_coilframe()
-        self.assemble()
+    _coilmatrix_properties = ['Psi', 'Bx', 'Bz']
 
-    @property
-    def nS(self):
-        return self._nS
-
-    @nS.setter
-    def nS(self, nS):
-        self._nS = nS
-        self.target.nS = nS  # update target source filament number
-
-    @property
-    def nT(self):
-        return self._nT
-
-    @nT.setter
-    def nT(self, nT):
-        self._nT = nT
-        self.source.nT = nT  # update source target filament number
-
-    def assemble(self):
-        self.nS = self.source.nC  # source filament number
-        self.nT = self.target.nC  # target point number
-        self.nI = self.source.nC*self.target.nC  # total number of interactions
-
-    def plot(self, ax=None):
-        if ax is None:
-            ax = plt.gca()
-        ax.plot(self.source.x, self.source.z, 'C1o', label='source')
-        ax.plot(self.target.x, self.target.z, 'C2.', label='target')
-        ax.legend()
-        ax.set_axis_off()
-        ax.set_aspect('equal')
+'''
 
 
 @dataclass
-class BiotMatrix:
-
-    frameset: BiotSet
-    static: npt.ArrayLike = field(init=False, repr=False)
-    plasma: npt.ArrayLike = field(init=False, repr=False)
-
-    def __post_init__(self):
-        if self.source is not None:
-            self.source.add_coil(source)
-        if target is not None:
-            self.target.add_coil(target)
-
-
 class BiotMatrix:
     r"""
     Calculation methods for Biot Savart instances.
 
-    Subclassed by BiotSet.
-
     Formulae
     --------
-        :math:`\mathbf{\Psi} = \mathbf{\psi} \: \mathbf{I_c}`
+        :math:`\pmb{\Psi} = \pmb{\psi} \: \mathbf{I_c}`
 
         :math:`\mathbf{B_x} = \mathbf{b_x} \: \mathbf{I_c}`
 
@@ -98,50 +34,22 @@ class BiotMatrix:
 
     Attributes
     ----------
-        _psi : array-like, shape(nT, nC)
-            Poloidal flux matrix, :math:`\mathrm{WbA}^{-1}`.
-        _psi_ : array-like, shape(nT, nP)
-            Poloidal flux matrix (plasma unit filaments),
-            :math:`\mathrm{WbA}^{-1}\mathrm{turn}^{-2}`.
-        _Psi : array-like, shape(nT,)
-            Target poloidal flux(coil component), :math:`\mathrm{Wb}`
-        _Psi_ : array-like, shape(nT,)
-            Target poloidal flux(plasma component), :math:`\mathrm{Wb}`
-        _bx, _bz : array-like, shape(nT, nC)
-            Field matrix (radial, vertical), :math:`\mathrm{TA}^{-1}`.
-        _bx_, _bz_ : array-like, shape(nT, nP)
-            Field matrix plasma unit filaments (radial, vertical),
-            :math:`\mathrm{TA}^{-1}\mathrm{turn}^{-2}`.
+        static : array-like, shape(target, source)
+            static interaction matrix, :math:`*\mathrm{A}^{-1}`.
+        plasma : array-like, shape(target, source)
+            static interaction matrix (plasma unit filaments),
+            :math:`*\mathrm{A}^{-1}\mathrm{turn}^{-2}`.
 
     """
 
+    frameset: BiotSet
+    static: npt.ArrayLike = field(init=False, repr=False)
+    plasma: npt.ArrayLike = field(init=False, repr=False)
 
-    _coilmatrix_properties = ['Psi', 'Bx', 'Bz']
-    _default_coilmatrix_attributes = {'source_turns': True,
-                                      'target_turns': False,
-                                      'reduce_source': True,
-                                      'reduce_target': False}
 
-    def __init__(self):
+    def __post_init__(self):
         self._initialize_coilmatrix_attributes()
 
-    def _initialize_coilmatrix_attributes(self):
-        _update_plasma_turns = {}
-        _update_coil_current = {}
-        _update_plasma_current = {}
-        self._coilmatrix_attributes = []
-        for variable in self._coilmatrix_properties:
-            self._coilmatrix_attributes.extend(
-                [f'_{variable.lower()}', f'_{variable}',
-                 f'_{variable.lower()}_', f'_{variable}_'])
-            _update_plasma_turns[variable] = True
-            _update_coil_current[variable] = True
-            _update_plasma_current[variable] = True
-        self._default_coilmatrix_attributes.update(
-                {'_update_interaction': True,
-                 '_update_plasma_turns': _update_plasma_turns,
-                 '_update_coil_current': _update_coil_current,
-                 '_update_plasma_current': _update_plasma_current})
 
     def flux_matrix(self, method):
         """Calculate filament flux (inductance) matrix."""

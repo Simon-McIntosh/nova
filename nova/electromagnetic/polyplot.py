@@ -220,12 +220,12 @@ class PolyPlot(Display, Label, MetaMethod):
     def axes(self, axes):
         self._axes = axes
 
-    def __call__(self, axes=None, **kwargs):
+    def __call__(self, index=slice(None), axes=None, **kwargs):
         """Plot frame if not empty."""
         if not self.frame.empty:
-            self.plot(axes, **kwargs)
+            self.plot(index, axes, **kwargs)
 
-    def plot(self, index=slice(None), axes=None):
+    def plot(self, index=slice(None), axes=None, **kwargs):
         """
         Plot frame.
 
@@ -241,6 +241,7 @@ class PolyPlot(Display, Label, MetaMethod):
             patch_kwargs = properties[part].copy()
             if self.patchwork != 0:  # Shuffle basecolor
                 patch_kwargs['facecolor'] = self.shuffle(basecolor[part])
+            patch_kwargs |= kwargs
             try:  # MultiPolygon.
                 for _poly in poly:
                     patch.append(descartes.PolygonPatch(_poly, **patch_kwargs))
@@ -274,7 +275,7 @@ class PolyPlot(Display, Label, MetaMethod):
                 return self.frame.index[index]
             return [index]
         if isinstance(index, slice):
-            return self.index[index]
+            return self.frame.index[index]
         if np.array([isinstance(label, int) for label in index]).all():
             return self.frame.index[index]
         return self.frame.index.isin(index)

@@ -169,16 +169,15 @@ def skin(x_center, z_center, diameter, factor):
     shape : shapely.polygon
 
     """
-    if factor < 0 or factor > 1:
+    if factor <= 0 or factor > 1:
         raise ValueError('skin factor not 0 <= '
                          f'{factor} <= 1')
     circle_outer = circle(x_center, z_center, diameter)
     if factor == 1:
         return circle_outer
-    if factor == 0:
-        factor = 1e-3
     scale = 1-factor
-    circle_inner = shapely.affinity.scale(circle_outer, scale, scale)
+    #circle_inner = shapely.affinity.scale(circle_outer, scale, scale)
+    circle_inner = circle(x_center, z_center, scale*diameter)
     polygon = circle_outer.difference(circle_inner)
     return PolyFrame(polygon, name='skin')
 

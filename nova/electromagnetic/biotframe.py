@@ -1,24 +1,16 @@
 """Biot specific Frame class."""
 import numpy as np
 
+from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.framelink import FrameLink
+from nova.electromagnetic.biotsection import BiotSection
+from nova.electromagnetic.biotshape import BiotShape
 
-
-_cross_section_factor = {'circle': np.exp(-0.25),  # circle-circle
-                         'square': 2*0.447049,  # square-square
-                         'skin': 1}  # skin-skin
-
-_cross_section_key = {'rectangle': 'square',
-                      'eliplse': 'circle',
-                      'polygon': 'square',
-                      'shell': 'square'}
-
-#'cs_factor': self._cross_section_factor['square']}
 
 # pylint: disable=too-many-ancestors
 
 
-class BiotFrame(FrameLink):
+class BiotFrame(FrameSpace):
     """Extend CoilFrame class with biot specific attributes and methods."""
 
     def __init__(self, data=None, index=None, columns=None, attrs=None,
@@ -26,90 +18,50 @@ class BiotFrame(FrameLink):
         metadata = {'required': ['x', 'z'],
                     'available': ['link', 'section', 'poly']} | metadata
         super().__init__(data, index, columns, attrs, **metadata)
+        self.frame_attrs(BiotShape, BiotSection)
+        if isinstance(data, FrameLink):
+            self.attrs['frame'] = data
+
+    def __call__(self, attr):
+        """Return flattened attribute matrix, shape(source*target,)."""
+        vector = np.array(getattr(self, attr))
+        region = self.biotshape.region
+        if self.biotshape.region == '':
+            raise IndexError('Frame region not specified.\n'
+                             'Define partner source or target number.\n'
+                             'self.set_target(number)\n'
+                             'self.set_source(number)')
+        assert region in ['source', 'target']
+        if region == 'source':
+            return np.dot(np.ones((self.biotshape.target, 1)),
+                          vector.reshape(1, -1)).flatten()
+        return np.dot(vector.reshape(-1, 1),
+                      np.ones((1, self.biotshape.source))).flatten()
 
     def insert(self, *required, iloc=None, **additional):
-        """
-        Extend FrameArray.insert.
-
-        Create link to metaframe.data.
-
-        """
-        if len(required) == 0:
-            return None
-        if self.isframe(required[0]):
-            self.attrs['frame'] = required[0]
+        """Extend FrameLink.insert. Store referance to parent frame."""
+        if len(required) > 0:
+            if isinstance(required[0], FrameLink) and len(self) == 0:
+                self.attrs['frame'] = required[0]
+            if self.hasattrs('frame') and len(self) > 0:
+                del self.attrs['frame']
         return super().insert(*required, iloc=iloc, **additional)
-        # self._update_cross_section_factor()
 
+    def set_target(self, number):
+        """Set target number."""
+        return self.biotshape.set_target(number)
 
-    @property
-    def region(self):
-        """
-        Source / target region, read only.
-
-        Set value via self.nT or self.nS'
-
-        Returns
-        -------
-        region : str
-            region type.
-
-        """
-        return self._region
-
-    @property
-    def nS(self):
-        """
-        Manage source filament number for target region.
-
-        Parameters
-        ----------
-        value : int
-            Set source filament number.
-
-        Returns
-        -------
-        nS : int
-            Number of source turns.
-
-        """
-        return self._nS
-
-    @nS.setter
-    def set_source_number(self, value):
-        self._region = 'target'
-        self._nT = self.nC
-        self._nS = value
-
-    @property
-    def nT(self):
-        """
-        Manage target filament number for source region.
-
-        Parameters
-        ----------
-        value : int
-            Set target filament number.
-
-        Returns
-        -------
-        nT : int
-            Number of target turns.
-
-        """
-        return self._nT
-
-    @nT.setter
-    def set_target_number(self, value):
-        self._region = 'source'
-        self._nS = self.nC
-        self._nT = value
+    def set_source(self, number):
+        """Set source number."""
+        return self.biotshape.set_source(number)
 
 
 if __name__ == '__main__':
 
-    biotframe = BiotFrame({'x': range(12), 'z': 5, 'section': 'sq'})
-    print(biotframe)
+    frame = FrameSpace(required=['x'])
+    frame.insert(range(3), dl=0.95, dt=0.95, section='hex',
+                 turn='hex')
+    biotframe = BiotFrame(frame)
     biotframe.polyplot()
 
 
@@ -163,35 +115,4 @@ if __name__ == '__main__':
             if self.coilframe is not None:
                 if self.coilframe.nC != self._framenumber:
                     self.update_coil()
-
-    def _update_cross_section_factor(self):
-        """Calculate factor applied to self inductance calculations."""
-        cross_section = [cs if cs in self._cross_section_factor
-                         else self._cross_section_key.get(cs, 'square')
-                         for cs in self.cross_section]
-        self.cs_factor = np.array([self._cross_section_factor[cs]
-                                   for cs in cross_section])
-
-
-    def __getattr__(self, key):
-        """Assemble (nT,nS) matrix if key == _*_."""
-        if key[0] == '_' and key[-1] == '_' \
-                and key[1:-1] in self._dataframe_attributes:
-            key = key[1:-1]
-            value = CoilFrame.__getattr__(self, f'_{key}')
-            if key in self._mpc_attributes:  # inflate
-                value = value[self._mpc_referance]
-            if self.nS is None or self.nT is None or self.region is None:
-                err_txt = 'complementary source (self.nS) or target (self.nT) '
-                err_txt += 'number not set'
-                raise IndexError(err_txt)
-            if self.region == 'source':  # assemble source
-                value = np.dot(np.ones((self.nT, 1)),
-                               value.reshape(1, -1)).flatten()
-            elif self.region == 'target':  # assemble target
-                value = np.dot(value.reshape(-1, 1),
-                               np.ones((1, self.nS))).flatten()
-            return value
-        else:
-            return CoilFrame.__getattr__(self, key)
 '''

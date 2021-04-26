@@ -8,6 +8,7 @@ import numpy as np
 from nova.electromagnetic.metaframe import MetaFrame
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.error import ColumnError
+from nova.electromagnetic.indexer import LocIndexer
 
 # pylint: disable=too-many-ancestors
 
@@ -55,7 +56,9 @@ class FrameAttrs(pandas.DataFrame):
                 if not method(self).generate:
                     continue
                 self.update_columns()
-            self.attrs[name] = method(self)
+                self.attrs[name] = method(self)
+            if name in ['multipoint', 'select']:
+                self.attrs[name] = method(self)
             self.attrs[name].initialize()
 
     def frame_attr(self, method, *method_args):
@@ -83,10 +86,12 @@ class FrameAttrs(pandas.DataFrame):
             attrs = {}
         if hasattr(data, 'attrs'):
             for attr in data.attrs:  # update metadata from data
-                if isinstance(data.attrs[attr], (MetaFrame, MetaMethod)):
+                if isinstance(data.attrs[attr], (
+                        MetaFrame, MetaMethod, LocIndexer, pandas.DataFrame)):
                     self.attrs[attr] = data.attrs[attr]
         for attr in attrs:  # update from attrs (replacing data.attrs)
-            if isinstance(attrs[attr], (MetaFrame, MetaMethod)):
+            if isinstance(attrs[attr], (
+                    MetaFrame, MetaMethod, LocIndexer, pandas.DataFrame)):
                 self.attrs[attr] = attrs[attr]
         if not self.hasattrs('metaframe'):
             self.attrs['metaframe'] = MetaFrame(self.index)

@@ -3,7 +3,6 @@ import pytest
 import numpy as np
 
 from nova.electromagnetic.coilset import CoilSet
-from nova.electromagnetic.error import ColumnError
 
 
 def test_dpol():

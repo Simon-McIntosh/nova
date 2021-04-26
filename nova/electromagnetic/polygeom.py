@@ -34,7 +34,7 @@ class PolyGeom:
                 self.section = polyshape[self.section]  # inflate shorthand
 
     def update_centroid(self):
-        """Void centroid if section not defined in polyshape."""
+        """Nulify centroid if section not defined in polyshape."""
         if self.section not in polyshape:
             self.x_centroid = self.z_centroid = None
 
@@ -82,7 +82,7 @@ class PolyGeom:
         if self.section == 'rectangle':
             return self.length * self.thickness  # rectangle
         if self.section == 'skin':  # thickness = 1-r/R
-            return 4*np.pi*self.thickness / self.length**2 * \
+            return np.pi*self.length**2*self.thickness / 4 * \
                 (2 - self.thickness**2)
         return self.poly.area
 

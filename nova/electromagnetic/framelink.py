@@ -225,7 +225,7 @@ class FrameLink(LinkIndexer, DataArray):
         missing = [arg not in frame for arg in self.metaframe.required]
         if np.array(missing).any():
             required = np.array(self.metaframe.required)[missing]
-            raise ValueError(f'required arguments {required} '
+            raise KeyError(f'required arguments {required} '
                              'not specified in frame '
                              f'{frame.columns}')
         args = [frame[col] for col in self.metaframe.required]

@@ -27,8 +27,8 @@ class Geometry(MetaMethod):
     features: list[str] = field(init=False, default_factory=lambda: [
         'x', 'z', 'dx', 'dz', 'area', 'rms'])
 
-    def update_poly(self):
-        """Update frame polygons and derived data."""
+    def initialize(self):
+        """Update frame polygons and derived geometrical data."""
         rms_unset = self.frame.rms == 0
         if sum(rms_unset) > 0:
             index = self.frame.index[rms_unset]
@@ -51,10 +51,6 @@ class Geometry(MetaMethod):
                 self.frame.loc[index, 'poly'] = poly
             self.frame.loc[index, self.features] = geom
             self.frame.loc[index, 'section'] = section
-
-    def initialize(self):
-        """Update frame polygons and derived geometrical data."""
-        self.update_poly()
 
     def limit(self, index):
         """Return coil limits [xmin, xmax, zmin, zmax]."""

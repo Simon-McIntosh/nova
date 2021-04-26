@@ -31,6 +31,18 @@ def test_rectangular_cross_section():
     assert np.isclose(2.5*1.5, framespace.area[0], rtol=1e-8)
 
 
+def test_skin_thickness_error():
+    framespace = FrameSpace(Required=['x', 'z', 'dl', 'dt'])
+    with pytest.raises(ValueError):
+        framespace.insert(1.75, 0.5, 2.5, 1.5, section='skin')
+
+
+def test_skin_section_area():
+    framespace = FrameSpace(Required=['x', 'z'])
+    framespace.insert(1.75, 0.2, dl=0.5, dt=0.1, section='skin')
+    assert np.isclose(framespace.area[0], framespace.poly[0].area, rtol=1e-1)
+
+
 def test_invalid_cross_section():
     'check framespace area sum equals circle area'
     framespace = FrameSpace(Required=['x', 'z', 'dl', 'dt'])

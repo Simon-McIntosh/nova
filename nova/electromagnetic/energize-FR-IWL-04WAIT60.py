@@ -35,7 +35,7 @@ class Energize(MetaMethod):
         super().__post_init__()
 
     def initialize(self):
-        """Set attribute avalibility flags and columns."""
+        """Init attribute avalibility flags and columns."""
         for attr in self.available:
             self.available[attr] = attr in self.frame.columns
 

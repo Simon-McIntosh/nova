@@ -56,9 +56,7 @@ class FrameAttrs(pandas.DataFrame):
                 if not method(self).generate:
                     continue
                 self.update_columns()
-                self.attrs[name] = method(self)
-            if name in ['multipoint', 'select']:
-                self.attrs[name] = method(self)
+            self.attrs[name] = method(self)
             self.attrs[name].initialize()
 
     def frame_attr(self, method, *method_args):

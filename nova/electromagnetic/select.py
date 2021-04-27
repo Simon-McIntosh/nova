@@ -6,6 +6,7 @@ import pandas
 
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.dataframe import DataFrame
+from nova.electromagnetic.error import SpaceKeyError
 
 
 @dataclass
@@ -80,13 +81,24 @@ class Select(MetaMethod):
 
     def initialize(self):
         """Update frame selection labels."""
-        if not self.frame.empty:
-            self.frame.update_frame()  # update arrays (loc multi-select)
-            for label in self.labels:
-                include = self.any_label(self.labels[label]['include'], True)
-                exclude = self.any_label(self.labels[label]['exclude'], False)
-                self.frame.subspace[label] = np.all([include, ~exclude],
-                                                    axis=0)
+        if self.frame.empty:
+            return
+        for label in self.labels:
+            include = self.any_label(self.labels[label]['include'], True)
+            exclude = self.any_label(self.labels[label]['exclude'], False)
+            value = np.all([include, ~exclude], axis=0)
+            with self.frame.setlock(True, ['subspace', 'array']):
+                self.frame[label] = value
+                    
+    def any_label(self, columns, default):
+        """Return boolean index evaluated as columns.any()."""
+        value = np.full(len(self.frame), False)
+        if columns:
+            for col in columns:
+                with self.frame.setlock(True, 'subspace'):
+                    value |= np.array(self.frame[col], bool)
+            return value
+        return np.full(len(self.frame), default)
 
     def add_label(self, name, *args):
         """
@@ -135,16 +147,12 @@ class Select(MetaMethod):
         if unset.any():
             self.frame.update_columns()
 
-    def any_label(self, columns, default):
-        """Return boolean index evaluated as columns.any()."""
-        if columns:
-            return self.frame.subspace.loc[:, columns].any(axis=1).to_numpy()
-        return np.full(len(self.frame.subspace), default)
-
 
 if __name__ == '__main__':
 
     dataframe = DataFrame({'x': range(4),
-                           'plasma': [True, False, True, True]})
+                           'plasma': [True, False, True, True],
+                           'active': [True, True, True, False]})
     select = Select(dataframe)
+    select.initialize()
     print(dataframe)

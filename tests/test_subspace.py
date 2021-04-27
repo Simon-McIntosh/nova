@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 
 from nova.electromagnetic.error import (
-    ColumnError, SubSpaceLockError, SubSpaceKeyError
+    ColumnError, SpaceKeyError, SubSpaceKeyError
     )
 from nova.electromagnetic.framespace import FrameSpace
 
@@ -88,7 +88,7 @@ def test_loc_error():
     framespace = FrameSpace(Required=['x', 'z'], Subspace=['Ic', 'It'])
     framespace.insert(4, range(2), Ic=5, link=True)
     framespace.insert(4, range(2), Ic=0, link=False)
-    with pytest.raises(SubSpaceLockError):
+    with pytest.raises(SpaceKeyError):
         framespace.loc[:, 'It'] = [3.6, 5.2, 0]
 
 
@@ -203,28 +203,28 @@ def test_loc_space_access():
 def test_set_loc_subspace_lock_error():
     framespace = FrameSpace(Required=['x', 'z'], Subspace=['Ic'])
     framespace.insert(0.5, [6, 8.3], nturn=0.5, link=True)
-    with pytest.raises(SubSpaceLockError):
+    with pytest.raises(SpaceKeyError):
         framespace.loc[:, 'Ic'] = 6.6
 
 
 def test_set_iloc_subspace_lock_error():
     framespace = FrameSpace(Required=['x', 'z'], Subspace=['Ic'])
     framespace.insert(0.5, [6, 8.3], nturn=0.5, link=True)
-    with pytest.raises(SubSpaceLockError):
+    with pytest.raises(SpaceKeyError):
         framespace.iloc[:, 2] = 6.6
 
 
 def test_set_loc_label_subspace_lock_error():
     framespace = FrameSpace(Required=['x', 'z'], Subspace=['Ic'])
     framespace.insert(0.5, [6, 8.3], nturn=0.5, link=True)
-    with pytest.raises(SubSpaceLockError):
+    with pytest.raises(SpaceKeyError):
         framespace.loc['Coil0', 'Ic'] = 6.6
 
 
 def test_set_iloc_row_subspace_lock_error():
     framespace = FrameSpace(Required=['x', 'z'], Subspace=['Ic'])
     framespace.insert(0.5, [6, 8.3], nturn=0.5, link=True)
-    with pytest.raises(SubSpaceLockError):
+    with pytest.raises(SpaceKeyError):
         framespace.iloc[0, 2] = 6.6
 
 

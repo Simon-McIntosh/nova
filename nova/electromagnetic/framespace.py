@@ -3,7 +3,7 @@ import numpy as np
 
 from nova.electromagnetic.framelink import FrameLink, LinkLocMixin, LinkIndexer
 from nova.electromagnetic.subspace import SubSpace
-from nova.electromagnetic.error import SubSpaceLockError
+from nova.electromagnetic.error import SpaceKeyError
 from nova.electromagnetic.select import Select
 from nova.electromagnetic.geometry import Geometry
 from nova.electromagnetic.polyplot import PolyPlot
@@ -39,10 +39,9 @@ class SpaceLocMixin(LinkLocMixin):
 
         """
         col = self.obj.get_col(key)
-        value = self.obj.format_value(col, value)
         if self.obj.hascol('subspace', col):
             if self.obj.lock('subspace') is False:
-                raise SubSpaceLockError(self.name, col)
+                raise SpaceKeyError(self.name, col)
         return super().__setitem__(key, value)
 
 
@@ -66,14 +65,22 @@ class FrameSpace(SpaceIndexer, FrameLink):
     def __init__(self, data=None, index=None, columns=None,
                  attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.attrs['subspace'] = SubSpace(self)
         self.frame_attrs(Select, Geometry, PolyPlot)
+        self.attrs['subspace'] = SubSpace(self)
 
     def __repr__(self):
         """Propagate frame subspace variables prior to display."""
         self.update_frame()
         return super().__repr__()
-
+    
+    def __setattr__(self, col, value):
+        """Extend DataFrame.__setattr__ to gain fast access to array data."""
+        if self.hasattrs('subspace'):
+            if self.hascol('subspace', col):
+                if self.lock('subspace') is False:
+                    raise SpaceKeyError('loc', col)
+        return super().__setattr__(col, value)
+    
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
         if self.hasattrs('subspace'):
@@ -87,11 +94,10 @@ class FrameSpace(SpaceIndexer, FrameLink):
 
     def __setitem__(self, col, value):
         """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
-        value = self.format_value(col, value)
         if self.hasattrs('subspace'):
             if self.hascol('subspace', col):
                 if self.lock('subspace') is False:
-                    raise SubSpaceLockError('setitem', col)
+                    raise SpaceKeyError('loc', col)
         return super().__setitem__(col, value)
 
     def update_frame(self):
@@ -138,9 +144,10 @@ if __name__ == '__main__':
                             Array=['Ic'])
     framespace.insert([-4, -5], 1, Ic=6.5, name='PF1',
                       active=False, plasma=True)
-    framespace.insert(range(4000), 3, Ic=4, nturn=20, label='PF', link=True)
-    framespace.multipoint.link(['PF1', 'CS0'], factor=1)
-    print(framespace.loc[:, ['active', 'passive', 'plasma', 'coil']])
+    #framespace.insert(range(4000), 3, Ic=4, nturn=20, label='PF', link=True)
+    
+    #framespace.multipoint.link(['PF1', 'CS0'], factor=1)
+    #print(framespace.loc[:, ['active', 'passive', 'plasma', 'coil']])
 
     for _ in range(1000):
         get_current()

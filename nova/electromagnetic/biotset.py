@@ -22,6 +22,7 @@ class BiotSet:
             self.source = BiotFrame(self.source)
         if not isinstance(self.target, BiotFrame):
             self.target = BiotFrame(self.target)
+        self.set_shape()
 
     def __len__(self):
         """Return interaction length."""

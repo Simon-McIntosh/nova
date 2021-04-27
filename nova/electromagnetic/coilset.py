@@ -1,14 +1,14 @@
 """Build coilset."""
 from dataclasses import dataclass, field
 
-from nova.electromagnetic.framepack import FramePack
+from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.coil import Coil
 from nova.electromagnetic.shell import Shell
 from nova.electromagnetic.plasma import Plasma
 
 
 @dataclass
-class FrameGrid:
+class CoilGrid:
     """Default grid sizing parameters."""
 
     dcoil: float = -1
@@ -18,7 +18,7 @@ class FrameGrid:
 
 
 @dataclass
-class CoilSet(FrameGrid, FramePack):
+class CoilSet(CoilGrid, FrameSet):
     """
     Manage coilset.
 
@@ -66,7 +66,7 @@ if __name__ == '__main__':
 
 
     def set_current():
-        coilset.loc['Ic'] = 6
+        coilset.sloc['Ic'] = 6
 
     def get_current():
         _ = coilset.sloc['active', 'Ic']

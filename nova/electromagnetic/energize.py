@@ -6,7 +6,7 @@ import pandas
 
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.error import SubSpaceLockError
+from nova.electromagnetic.error import SpaceKeyError
 
 
 @dataclass
@@ -56,7 +56,7 @@ class Energize(MetaMethod):
                 value /= indexer.__getitem__(self._get_key(key, 'nturn'))
                 try:
                     self.frame['Ic'] = value
-                except SubSpaceLockError:
+                except SpaceKeyError:
                     if not isinstance(value, pandas.Series):
                         index = self.frame.loc[key[0], key[1]].index
                         value = pandas.Series(value, index)

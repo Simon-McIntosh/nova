@@ -4,12 +4,12 @@ from dataclasses import dataclass, field
 import pandas
 
 from nova.electromagnetic.framespace import FrameSpace
-from nova.electromagnetic.frameloc import FrameLoc
+from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.select import Select
 
 
 @dataclass
-class FramePack(FrameLoc):
+class FrameSet(FrameSetLoc):
     """Package FrameSpace instances. Manage boolean methods."""
 
     required: list[str] = field(repr=False, default_factory=lambda: [
@@ -119,6 +119,12 @@ class FramePack(FrameLoc):
 
 if __name__ == '__main__':
 
-    framepack = FramePack(required=['rms'])
-    framepack.subframe.insert([2, 4])
-    print(framepack.subframe)
+    frameset = FrameSet(required=['rms'], additional=['Ic'])
+    frameset.subframe.insert([2, 4], It=6, link=True)
+    
+    frameset.sloc['Ic'] = 7
+    
+    print(frameset.subframe.Ic)
+    print(frameset.subframe.subspace.Ic)
+    
+    frameset.plot()

@@ -25,7 +25,7 @@ class MetaArray(MetaData):
         super().__post_init__()
 
     @property
-    def dataarray(self):
+    def dataframe(self):
         """Return DataFrame representation of fast access data arrays."""
         return pandas.DataFrame(self.data, index=self.index)
 

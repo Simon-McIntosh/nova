@@ -286,13 +286,13 @@ class PolyPlot(Display, Label, MetaMethod):
         try:
             if not self.zeroturn:  # exclude zeroturn filaments (nturn == 0)
                 with self.frame.setlock(True, 'subspace'):
-                    index &= (self.frame.loc[:, 'nturn'] != 0)
+                    index.intersection(self.frame.loc[:, 'nturn'] != 0)
         except (AttributeError, KeyError, ColumnError):  # turns not set
             pass
         try:
             if not self.feedback:  # exclude stabilization coils
                 with self.frame.setlock(True, 'subspace'):
-                    index &= ~self.frame.feedback
+                    index.intersection(~self.frame.feedback)
         except (AttributeError, KeyError, ColumnError):  # feedback not set
             pass
         return index

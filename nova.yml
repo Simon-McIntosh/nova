@@ -34,6 +34,7 @@ dependencies:
   - shapely
   - spyder
   - spyder-line-profiler
+  - spyder-unittest
   - urllib3
   - xarray
   - xlrd

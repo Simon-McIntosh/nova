@@ -6,7 +6,7 @@ import numpy as np
 import pygeos
 
 from nova.electromagnetic.framespace import FrameSpace
-from nova.electromagnetic.frameloc import FrameLoc
+from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polygon import Polygon, PolyFrame
 from nova.utilities.pyplot import plt
@@ -55,7 +55,7 @@ class PlasmaGrid(PoloidalGrid):
 
 
 @dataclass
-class Plasma(PlasmaGrid, FrameLoc):
+class Plasma(PlasmaGrid, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
     number: int = field(init=False, default=0)

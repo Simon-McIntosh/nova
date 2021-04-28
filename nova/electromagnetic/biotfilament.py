@@ -18,18 +18,8 @@ class PolidalCoordinates:
         """Extract source and target coordinates."""
         self.source_radius = self.source('rms')
         self.source_height = self.source('z')
-        self.target_radius = self.target('rms')
+        self.target_radius = self.target('x')
         self.target_height = self.target('z')
-
-    @property
-    def turn_radius(self):
-        """Return ."""
-        return
-
-    @property
-    def seperation(self):
-        """Return source-target seperation."""
-        return
 
 
 @dataclass
@@ -103,7 +93,7 @@ class BiotCircle(BiotSavart):
 
     """
 
-    name = 'filament'  # applicable cross section type
+    name = 'circle'  # applicable cross section type
 
 
     def __post_init__(self):

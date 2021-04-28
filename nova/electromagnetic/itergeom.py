@@ -70,6 +70,8 @@ class ITERgeom(CoilSet):
 
 if __name__ == '__main__':
 
-    coilset = ITERgeom(dcoil=0.5, dplasma=-150)
-    coilset.plasma.insert({'elp': [6.5, 0, 5, 8]})
+    coilset = ITERgeom(dcoil=0.25, dplasma=-150)
+    coilset.plasma.insert({'ellip': [6.5, 0.5, 4.5, 6.5]})
+    coilset.shell.insert({'ellip': [6.5, 0.5, 1.2*4.5, 1.2*6.5]}, -80, 0.25,
+                         part='vv')
     coilset.plot()

@@ -1,64 +1,43 @@
+"""Biot-Savart calculation base class."""
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from typing import Union
+
 import numpy as np
-import pandas
+import numpy.typing as npt
 
-from nova.electromagnetic.frameset import FrameSet
-from nova.electromagnetic.coilmatrix import CoilMatrix
-from nova.utilities.pyplot import plt
+from nova.electromagnetic.biotset import BiotSet
 
 
-class BiotAttributes:
-    """Manage attributes to and from Biot derived classes."""
+@dataclass
+class BiotSavart(ABC, BiotSet):
+    """Biot calculation base-class, Define calculaiton interface."""
 
-    _biot_attributes = []
-    _default_biot_attributes = {}
+    name = 'base'
 
-    def __init__(self, **biot_attributes):
-        self._append_biot_attributes(self._biot_attributes)
-        self._append_biot_attributes(self._coilmatrix_attributes)
-        self._append_biot_attributes(self._default_coilmatrix_attributes)
-        self._default_biot_attributes = {
-            **self._default_coilmatrix_attributes,
-            **self._default_biot_attributes}
-        self.biot_attributes = biot_attributes
+    update: Union[str, list[str]] = field(default_factory=lambda: ['psi'])
+    attrs: list[str] = field(init=False, default_factory=lambda: [
+        'phi', 'psi', 'radial_field', 'vertical_field'])
+    phi: npt.ArrayLike = field(init=False, repr=False, default=None)
+    psi: npt.ArrayLike = field(init=False, repr=False, default=None)
+    radial_field: npt.ArrayLike = field(init=False, repr=False, default=None)
+    vertical_field: npt.ArrayLike = field(init=False, repr=False, default=None)
 
-    def _append_biot_attributes(self, attributes):
-        self._biot_attributes += [attr for attr in attributes
-                                  if attr not in self._biot_attributes]
+    def __post_init__(self):
+        """Check update vector."""
+        super().__post_init__()
+        if isinstance(self.update, str):
+            self.update = [self.update]
+        self.check_update()
 
-    @property
-    def biot_attributes(self):
-        return {attribute: getattr(self, attribute) for attribute in
-                self._biot_attributes}
+    def check_update(self):
+        """Check avalibility of update attributes."""
+        if any(notimplemented := [attr not in self.attrs
+                                  for attr in self.update]):
+            raise NotImplementedError(
+                f'update fields {np.array(self.update)[notimplemented]} '
+                'not implemented')
 
-    @biot_attributes.setter
-    def biot_attributes(self, _biot_attributes):
-        for attribute in self._biot_attributes:
-            default = self._default_biot_attributes.get(attribute, None)
-            value = _biot_attributes.get(attribute, None)
-            if value is not None:
-                if type(value) == BiotFrame:
-                    BiotFrame.__init__(getattr(self, attribute), value)
-                    self.target.rebuild_coildata()
-                else:
-                    setattr(self, attribute, value)  # set value
-            elif not hasattr(self, attribute):
-                setattr(self, attribute, default)  # set default
-
-
-
-if __name__ == '__main__':
-
-    from nova.electromagnetic.coilset import CoilSet
-    cs = CoilSet(dCoil=0.2, dPlasma=0.05, turn_fraction=0.5)
-    cs.add_coil(3.943, 7.564, 0.959, 0.984, nturn=248.64, name='PF1', part='PF')
-    cs.add_coil(1.6870, 5.4640, 0.7400, 2.093, nturn=554, name='CS3U', part='CS')
-    #cs.add_coil(1.6870, 3.2780, 0.7400, 2.093, nturn=554, name='CS2U', part='CS')
-    #cs.add_plasma(3.5, 4.5, 1.5, 2.5, It=-15e6, cross_section='ellipse')
-
-    #cs.add_plasma(3.5, 4.5, 1.5, 2.5, dPlasma=0.5,
-    #              It=-15e6, cross_section='circle')
-
-    cs.plot(True)
-
-
-    source = BiotFrame(cs.subcoil)
+    @abstractmethod
+    def calculate(self):
+        """Calculate dependant variables."""

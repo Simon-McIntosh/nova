@@ -1,76 +1,85 @@
-from dataclasses import dataclass, field
+"""Biot-Savart calculation for complete circular filaments."""
+from dataclasses import dataclass
 
-from nova.electromagnetic.biotset import BiotSet
+import numpy as np
+
+from nova.electromagnetic.biotsavart import BiotSavart
+from nova.electromagnetic.biotframe import BiotFrame
 
 
 @dataclass
-class BiotFilament(BiotSet):
-    """Extend BiotSet, compute interaction for complete circular filaments."""
+class PolidalCoordinates:
+    """Manage poloidal coordinates."""
 
-    name = 'filament'  # applicable cross section type
+    source: BiotFrame
+    target: BiotFrame
 
-    psi:
-    radial_field:
-    vertical_field:
-        
     def __post_init__(self):
-        super().__post_init__()
+        """Extract source and target coordinates."""
         self.source_radius = self.source('rms')
-        #source_height
-        #target_radius
-        #target_height    
-    
-        #self.initialize_filaments(source, target)
-        #self.offset_filaments(source)
-        #self.calculate_coefficients()
+        self.source_height = self.source('z')
+        self.target_radius = self.target('rms')
+        self.target_height = self.target('z')
 
-    def initialize_filaments(self, source, target):
-        self.rs, self.zs = source._rms_, source._z_  # source
-        self.r, self.z = target._x_, target._z_  # target
+    @property
+    def turn_radius(self):
+        """Return ."""
+        return
 
-    def offset_filaments(self, source, n_fold=0, n_merge=1,
-                         rms_offset=True):
-        """
-        Offset source and target filaments.
+    @property
+    def seperation(self):
+        """Return source-target seperation."""
+        return
 
-        Parameters
-        ----------
-        source : BiotFrame
-            Source filament biotframe.
-        n_fold : float, optional
-            Number of e-foling lenghts within filament. The default is 1.
-        n_merge : float, optional
-            Merge radius, multiple of filament widths. The default is 1.25.
-        rms_offset : bool, optional
-            Maintain rms offset for filament pairs. The default is False.
 
-        Returns
-        -------
-        None.
+@dataclass
+class PoloidalOffset(PolidalCoordinates):
+    """Offset source and target filaments."""
 
-        """
+    fold_number: int = 0  # Number of e-foling lenghts within filament
+    merge_number: int = 1  # Merge radius, multiple of filament widths
+    rms_offset: bool = True  # Maintain rms offset for filament pairs
+
+    def __post_init__(self):
+        """Calculate source turn effective radius and source-target span."""
+        self.turn_radius = np.max([self.source('dx'),
+                                   self.source('dz')], axis=0) / 2  # df
+
+        self.calculate_seperation()
+
+    def calculate_seperation(self):
+        """Calculate source-target seperation."""
+        self.span = np.array([(self.target_radius-self.source_radius),
+                              (self.target_height-self.source_height)])  # dL
+        self.span_norm = np.linalg.norm(self.span, axis=0)  # dL_mag
+
+    def calculate(self):
         # extract interaction
-        df = np.max([source._dx_, source._dz_], axis=0) / 2
-        dL = np.array([(self.r-self.rs), (self.z-self.zs)])
-        dL_mag = np.linalg.norm(dL, axis=0)
+
+
         # select filaments within merge radius
         idx = np.where(dL_mag <= df*n_merge)[0]
+
         # reduce
         dL_mag = dL_mag[idx]
         dL = dL[:, idx]
         df = df[idx]
         ro = source._dx_[idx]*source._cs_factor_[idx]/2  # self seperation
+
         # interacton orientation
         index = np.isclose(dL_mag, 0)
         dL_norm = np.zeros((2, len(index)))
         dL_norm[0, index] = 1  # radial offset
         dL_norm[:, ~index] = dL[:, ~index] / dL_mag[~index]
+
         if n_fold == 0:
             factor = (1 - dL_mag / (df*n_merge))  # linear blending
         else:
             factor = np.exp(-n_fold*(dL_mag/df)**2)  # exponential blending
+
         dr = factor*ro*dL_norm[0, :]  # radial offset
         dz = factor*ro*dL_norm[1, :]  # vertical offset
+
         if rms_offset:
             drms = -(self.r[idx]+self.rs[idx])/4 + np.sqrt(
                 (self.r[idx]+self.rs[idx])**2 -
@@ -84,50 +93,34 @@ class BiotFilament(BiotSet):
         self.r[idx] += dr/2
         self.z[idx] += dz/2
 
-    def _offset_filaments(self):
-        'offset source and target points'
-        # point seperation
-        dL = np.array([(self.r-self.rs), (self.z-self.zs)])
-        dL_mag = np.linalg.norm(dL, axis=0)
-        dr = self.dl/2  # filament characteristic radius
-        ro = dr*self.cross_section_factor  # self seperation
 
-        # zero-seperation
-        index = np.isclose(dL_mag, 0)
-        dL_norm = np.zeros((2, self.nI))
-        dL_norm[0, index] = 1  # radial offset
-        dL_norm[:, ~index] = dL[:, ~index] / dL_mag[~index]
-        # initalize offsets
-        dr, dz = np.zeros(self.nI), np.zeros(self.nI)
+@dataclass
+class BiotCircle(BiotSavart):
+    """
+    Extend BiotSavart.
 
-        # mutual offset
-        nx = dL[0] / self.drs
-        nz = dL[1] / self.dzs
-        mutual_index = np.where((nx <= 5) & (nz <= 5))  # mutual index
-        mutual_factor = self.gmr.evaluate(nx[mutual_index], nz[mutual_index])
-        dr[mutual_index] = (mutual_factor-1) * dL[0, mutual_index]
-        dz[mutual_index] = (mutual_factor-1) * dL[1, mutual_index]
+    Compute interaction for complete circular filaments.
 
-        # self inductance index
-        self_index = np.where(dL_mag <= ro)  # seperation < dl/2
-        # self_dr = self.dl[self_index]/2  # filament characteristic radius
-        # self_ro = self_dr*self.cross_section_factor[self_index]  # seperation
-        self_ro = ro[self_index]
-        self_factor = 1 - dL_mag[self_index]/self_ro
-        dr[self_index] = self_factor*self_ro*dL_norm[0, self_index]  # radial
-        dz[self_index] = self_factor*self_ro*dL_norm[1, self_index]  # vertical
+    """
 
-        # rms offset
-        drms = -(self.r+self.rs)/4 + np.sqrt((self.r+self.rs)**2 -
-                                             8*dr*(self.r - self.rs + 2*dr))/4
-        self.rs += drms
-        self.r += drms
-        # offset source filaments
-        self.rs -= dr/2
-        self.zs -= dz/2
-        # offset target filaments
-        self.r += dr/2
-        self.z += dz/2
+    name = 'filament'  # applicable cross section type
+
+
+    def __post_init__(self):
+        super().__post_init__()
+
+
+        #self.initialize_filaments(source, target)
+        #self.offset_filaments(source)
+        #self.calculate_coefficients()
+
+    def calculate(self):
+        pass
+
+    def initialize_filaments(self, source, target):
+        self.rs, self.zs = source._rms_, source._z_  # source
+        self.r, self.z = target._x_, target._z_  # target
+
 
     def calculate_coefficients(self):
         self.b = self.rs + self.r
@@ -159,7 +152,7 @@ class BiotFilament(BiotSet):
 
 
 if __name__ == '__main__':
-    
+
     source = {'x': [3, 3.4, 3.6], 'z': [3.1, 3, 3.3],
           'dl': 0.3, 'dt': 0.3, 'section': 'hex'}
-    biotfilament = BiotFilament(source, source)
+    biotfilament = BiotFilament(source, source, update=['ps'])

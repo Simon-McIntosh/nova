@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 import numpy.typing as npt
-import pandas as pd
+import pandas
 
 from nova.electromagnetic.biotfilament import BiotFilament
 from nova.electromagnetic.biotset import BiotSet
@@ -40,7 +40,7 @@ class BiotMatrix:
     plasma: npt.ArrayLike = field(init=False, repr=False)
 
     def __post_init__(self):
-        
+
         filament = BiotFilament(self.source, self.target)
 
     def flux_matrix(self, method):
@@ -255,7 +255,7 @@ class BiotMatrix:
 
 
 if __name__ == '__main__':
-    
+
     source = {'x': [3, 3.4, 3.6], 'z': [3.1, 3, 3.3],
               'dl': 0.3, 'dt': 0.3, 'section': 'hex'}
     biotset = BiotSet(source, source)

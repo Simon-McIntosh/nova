@@ -1,5 +1,6 @@
 """Biot specific Frame class."""
 import numpy as np
+import numpy.typing as npt
 
 from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.framelink import FrameLink
@@ -22,7 +23,7 @@ class BiotFrame(FrameSpace):
         if isinstance(data, FrameLink):
             self.attrs['frame'] = data
 
-    def __call__(self, attr):
+    def __call__(self, attr) -> npt.ArrayLike:
         """Return flattened attribute matrix, shape(source*target,)."""
         vector = np.array(getattr(self, attr))
         region = self.biotshape.region

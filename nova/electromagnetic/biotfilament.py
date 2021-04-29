@@ -2,9 +2,13 @@
 from dataclasses import dataclass
 
 import numpy as np
+import numpy.typing as npt
+import scipy.special
 
 from nova.electromagnetic.biotsavart import BiotSavart
 from nova.electromagnetic.biotframe import BiotFrame
+
+# pylint: disable=no-member  # disable scipy.special module not found
 
 
 @dataclass
@@ -31,118 +35,121 @@ class PoloidalOffset(PolidalCoordinates):
     rms_offset: bool = True  # Maintain rms offset for filament pairs
 
     def __post_init__(self):
-        """Calculate source turn effective radius and source-target span."""
-        self.turn_radius = np.max([self.source('dx'),
-                                   self.source('dz')], axis=0) / 2  # df
+        """Apply radial and vertical offsets to source and target filaments."""
+        super().__post_init__()
+        self._apply_offsets()
 
-        self.calculate_seperation()
+    def effective_turn_radius(self):
+        """Return effective source turn radius."""
+        return np.max([self.source('dx'), self.source('dz')], axis=0) / 2  # df
 
-    def calculate_seperation(self):
-        """Calculate source-target seperation."""
-        self.span = np.array([(self.target_radius-self.source_radius),
-                              (self.target_height-self.source_height)])  # dL
-        self.span_norm = np.linalg.norm(self.span, axis=0)  # dL_mag
+    def source_target_seperation(self):
+        """Return source-target seperation vector."""
+        return np.array([(self.target_radius-self.source_radius),
+                         (self.target_height-self.source_height)])
 
-    def calculate(self):
-        # extract interaction
+    def turnturn_seperation(self, merge_index):
+        """Return self seperation length."""
+        return 0.5*self.source('dx')[merge_index]*self.source('turnturn')[merge_index]
 
+    def blending_factor(self, span_length, turn_radius):
+        """Return blending factor."""
+        if self.fold_number == 0:
+            # linear
+            return 1 - span_length / (turn_radius * self.merge_number)
+        # exponential
+        return np.exp(-self.fold_number * (span_length / turn_radius)**2)
 
-        # select filaments within merge radius
-        idx = np.where(dL_mag <= df*n_merge)[0]
+    def apply_rms_offset(self, merge_index, radial_offset):
+        """Return effective rms offfset."""
+        source_radius = self.source_radius[merge_index]
+        target_radius = self.target_radius[merge_index]
+        rms_delta = (np.sqrt(
+            (target_radius + source_radius)**2 -
+            8*radial_offset*(target_radius - source_radius + 2*radial_offset))
+            - (target_radius + source_radius)) / 4
+        self.source_radius[merge_index] += rms_delta
+        self.target_radius[merge_index] += rms_delta
 
+    def _apply_offsets(self):
+        """Apply radial and vertical offsets."""
+        turn_radius = self.effective_turn_radius()
+        span = self.source_target_seperation()
+        span_length = np.linalg.norm(span, axis=0)
         # reduce
-        dL_mag = dL_mag[idx]
-        dL = dL[:, idx]
-        df = df[idx]
-        ro = source._dx_[idx]*source._cs_factor_[idx]/2  # self seperation
-
+        merge_index = np.where(span_length <= turn_radius*self.merge_number)[0]
+        turn_radius = turn_radius[merge_index]
+        span = span[:, merge_index]
+        span_length = span_length[merge_index]
         # interacton orientation
-        index = np.isclose(dL_mag, 0)
-        dL_norm = np.zeros((2, len(index)))
-        dL_norm[0, index] = 1  # radial offset
-        dL_norm[:, ~index] = dL[:, ~index] / dL_mag[~index]
-
-        if n_fold == 0:
-            factor = (1 - dL_mag / (df*n_merge))  # linear blending
-        else:
-            factor = np.exp(-n_fold*(dL_mag/df)**2)  # exponential blending
-
-        dr = factor*ro*dL_norm[0, :]  # radial offset
-        dz = factor*ro*dL_norm[1, :]  # vertical offset
-
-        if rms_offset:
-            drms = -(self.r[idx]+self.rs[idx])/4 + np.sqrt(
-                (self.r[idx]+self.rs[idx])**2 -
-                8*dr*(self.r[idx] - self.rs[idx] + 2*dr))/4
-            self.rs[idx] += drms
-            self.r[idx] += drms
+        turn_index = np.isclose(span_length, 0)
+        span_norm = np.zeros((2, len(turn_index)))
+        span_norm[0, turn_index] = 1  # radial offset
+        span_norm[:, ~turn_index] = \
+            span[:, ~turn_index] / span_length[~turn_index]
+        turnturn_length = self.turnturn_seperation(merge_index)
+        # blend interaction
+        blending_factor = self.blending_factor(span_length, turn_radius)
+        radial_offset = blending_factor*turnturn_length*span_norm[0, :]
+        if self.rms_offset:
+            self.apply_rms_offset(merge_index, radial_offset)
+        vertical_offset = blending_factor*turnturn_length*span_norm[1, :]
         # offset source filaments
-        self.rs[idx] -= dr/2
-        self.zs[idx] -= dz/2
+        self.source_radius[merge_index] -= radial_offset/2
+        self.source_height[merge_index] -= vertical_offset/2
         # offset target filaments
-        self.r[idx] += dr/2
-        self.z[idx] += dz/2
+        self.target_radius[merge_index] += radial_offset/2
+        self.target_height[merge_index] += vertical_offset/2
 
 
 @dataclass
 class BiotCircle(BiotSavart):
     """
-    Extend BiotSavart.
+    Extend BiotSavart base class.
 
     Compute interaction for complete circular filaments.
 
     """
 
-    name = 'circle'  # applicable cross section type
+    filament = 'circle'  # filament type
 
+    def calculate_coefficients(self) -> dict[npt.ArrayLike]:
+        """Return interaction coefficients."""
+        offset = PoloidalOffset(self.source, self.target)
+        coeff = {'rs': offset.source_radius, 'zs': offset.source_height,
+                 'r': offset.target_radius, 'z': offset.target_height}
+        coeff['b'] = coeff['rs'] + coeff['r']
+        coeff['gamma'] = coeff['zs'] - coeff['z']
+        coeff['a2'] = coeff['gamma']**2 + (coeff['r'] + coeff['rs'])**2
+        coeff['a'] = np.sqrt(coeff['a2'])
+        coeff['k2'] = 4 * coeff['r'] * coeff['rs'] / coeff['a2']
+        coeff['ck2'] = 1 - coeff['k2']  # complementary modulus
+        coeff['K'] = scipy.special.ellipk(coeff['k2'])  # ellip integral - first kind
+        coeff['E'] = scipy.special.ellipe(coeff['k2'])  # ellip integral - second kind
+        return coeff
 
-    def __post_init__(self):
-        super().__post_init__()
+    def calculate_vector_potential(self, coeff):
+        """Calculate target vector potential (r, phi, z), Wb/Amp-turn-turn."""
+        self.vector['Ay'] = 1 / (2*np.pi) * coeff['a']/coeff['r'] * \
+            ((1 - coeff['k2']/2) * coeff['K'] - coeff['E'])
 
+    def calculate_scalar_potential(self, coeff):
+        """Calculate scalar potential."""
+        self.vector['Psi'] = 2 * np.pi * self.mu_o * coeff['r'] * self.vector['Ay']
 
-        #self.initialize_filaments(source, target)
-        #self.offset_filaments(source)
-        #self.calculate_coefficients()
-
-    def calculate(self):
-        pass
-
-    def initialize_filaments(self, source, target):
-        self.rs, self.zs = source._rms_, source._z_  # source
-        self.r, self.z = target._x_, target._z_  # target
-
-
-    def calculate_coefficients(self):
-        self.b = self.rs + self.r
-        self.gamma = self.zs - self.z
-        self.a2 = self.gamma**2 + (self.r + self.rs)**2
-        self.a = np.sqrt(self.a2)
-        self.k2 = 4 * self.r * self.rs / self.a2
-        self.ck2 = 1 - self.k2  # complementary modulus
-        self.K = ellipk(self.k2)  # first complete elliptic integral
-        self.E = ellipe(self.k2)  # second complete elliptic integral
-
-    def scalar_potential(self):
-        'vector and scalar potential'
-        Aphi = 1 / (2*np.pi) * self.a/self.r * \
-            ((1 - self.k2/2) * self.K - self.E)  # Wb/Amp-turn-turn
-        psi = 2 * np.pi * mu_o * self.r * Aphi  # scalar potential
-        return psi
-
-    def radial_field(self):
-        Br = mu_o / (2*np.pi) * self.gamma * (
-            self.K - (2-self.k2) / (2*self.ck2) * self.E) / (self.a*self.r)
-        return Br  # T / Amp-turn-turn
-
-    def vertical_field(self):  # T / Amp-turn-turn
-        Bz = mu_o / (2*np.pi) * (self.r*self.K - \
-            (2*self.r - self.b*self.k2) /
-            (2*self.ck2) * self.E) / (self.a*self.r)
-        return Bz  # T / Amp-turn-turn
+    def calculate_magnetic_field(self, coeff):
+        """Calculate magnetic field (r, phi, z), T/Amp-turn-turn."""
+        self.vector['Bx'] = self.mu_o / (2*np.pi) * \
+            coeff['gamma'] * (coeff['K'] - (2-coeff['k2']) / (2*coeff['ck2']) *
+                              coeff['E']) / (coeff['a'] * coeff['r'])
+        self.vector['Bz'] = self.mu_o / (2*np.pi) * \
+            (coeff['r']*coeff['K'] - (2*coeff['r'] - coeff['b']*coeff['k2']) /
+             (2*coeff['ck2']) * coeff['E']) / (coeff['a']*coeff['r'])
 
 
 if __name__ == '__main__':
 
     source = {'x': [3, 3.4, 3.6], 'z': [3.1, 3, 3.3],
-          'dl': 0.3, 'dt': 0.3, 'section': 'hex'}
-    biotfilament = BiotFilament(source, source, update=['ps'])
+              'dl': 0.3, 'dt': 0.3, 'section': 'hex'}
+    biotcircle = BiotCircle(source, source)
+    biotcircle.calculate()

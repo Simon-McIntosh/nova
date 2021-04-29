@@ -12,12 +12,12 @@ from nova.electromagnetic.biotshape import BiotShape
 
 
 class BiotFrame(FrameSpace):
-    """Extend CoilFrame class with biot specific attributes and methods."""
+    """Extend FrameSpace class with biot specific attributes and methods."""
 
     def __init__(self, data=None, index=None, columns=None, attrs=None,
                  **metadata):
         metadata = {'required': ['x', 'z'],
-                    'available': ['link', 'section', 'poly']} | metadata
+                    'available': ['link', 'section', 'poly', 'frame']} | metadata
         super().__init__(data, index, columns, attrs, **metadata)
         self.frame_attrs(BiotShape, BiotSection)
         if isinstance(data, FrameLink):

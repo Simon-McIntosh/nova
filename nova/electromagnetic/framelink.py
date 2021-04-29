@@ -6,6 +6,7 @@ import shapely
 
 from nova.electromagnetic.polygon import Polygon
 from nova.electromagnetic.multipoint import MultiPoint
+from nova.electromagnetic.reduce import Reduce
 from nova.electromagnetic.energize import Energize
 from nova.electromagnetic.dataarray import (
     ArrayLocMixin,
@@ -52,7 +53,7 @@ class FrameLink(LinkIndexer, DataArray):
     def __init__(self, data=None, index=None, columns=None,
                  attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.frame_attrs(MultiPoint, Energize)
+        self.frame_attrs(MultiPoint, Reduce, Energize)
 
     def __setattr__(self, name, value):
         """Extend DataFrame.__setattr__. (frame.*)."""
@@ -330,8 +331,8 @@ if __name__ == '__main__':
     framelink = FrameLink(required=['x', 'z'], Available=['It'], Array=['Ic'])
 
     framelink.insert([-4, -5], 1, Ic=6.5, name='PF1',
-                     active=False, plasma=True)
-    framelink.insert(range(4000), 3, Ic=4, nturn=20, label='PF', link=True)
-    #framelink.multipoint.link(['PF1', 'CS0'], factor=1)
+                     active=False, plasma=True, frame='coil1')
+    framelink.insert(range(4), 3, Ic=4, nturn=20, label='PF', link=True)
+    #framelink.multipoint.link(['PF1', 'PF5'], factor=1)
 
-    print(framelink)
+    print(framelink.reduce.indices)

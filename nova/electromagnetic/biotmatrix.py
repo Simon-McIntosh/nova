@@ -6,42 +6,26 @@ import numpy.typing as npt
 import pandas
 
 from nova.electromagnetic.biotfilament import BiotFilament
-from nova.electromagnetic.biotset import BiotSet
+from nova.electromagnetic.biotframe import BiotFrame
 
 # _coilmatrix_properties = ['Psi', 'Bx', 'Bz']
 
 
+if __name__ == '__main__':
+
+
+    source = {'x': [3, 3.4, 3.6], 'z': [3.1, 3, 3.3],
+              'dl': 0.3, 'dt': 0.3, 'section': 'hex'}
+    biotset = BiotSet(source, source)
+
+'''
 @dataclass
-class BiotMatrix:
-    r"""
-    Calculation methods for Biot Savart instances.
+class BiotSolver:
 
-    Formulae
-    --------
-        :math:`\pmb{\Psi} = \pmb{\psi} \: \mathbf{I_c}`
+    source: BiotFrame
+    target: BiotFrame
 
-        :math:`\mathbf{B_x} = \mathbf{b_x} \: \mathbf{I_c}`
 
-        :math:`\mathbf{B_z} = \mathbf{b_z} \: \mathbf{I_c}`
-
-    Attributes
-    ----------
-        static : array-like, shape(target, source)
-            static interaction matrix, :math:`*\mathrm{A}^{-1}`.
-        plasma : array-like, shape(target, source)
-            static interaction matrix (plasma unit filaments),
-            :math:`*\mathrm{A}^{-1}\mathrm{turn}^{-2}`.
-
-    """
-
-    frameset: BiotSet
-    variable: str
-    static: npt.ArrayLike = field(init=False, repr=False)
-    plasma: npt.ArrayLike = field(init=False, repr=False)
-
-    def __post_init__(self):
-
-        filament = BiotFilament(self.source, self.target)
 
     def flux_matrix(self, method):
         """Calculate filament flux (inductance) matrix."""
@@ -55,57 +39,6 @@ class BiotMatrix:
             _b, _b_ = self.save_matrix(self._calculate(method, field[xz]))
             setattr(self, f'_b{xz}', _b)
             setattr(self, f'_b{xz}_', _b_)
-
-    def calculate(self, method, attribute):
-        """
-        Calculate and return attribute from biot method.
-
-        Parameters
-        ----------
-        method : BiotElement.
-            Method for calculating biot interactions.
-        attribute : str
-            Requested attribute.
-            [scalar_potential, radial_field, vertical_field].
-
-        Returns
-        -------
-        value : array-like, shape(nT*nS,)
-            Requested attribute.
-
-        """
-        return getattr(method, attribute)()
-
-    def save_matrix(self, M):
-        """
-        Save interaction matrices (static and plasma.
-
-        Extract plasma interaction from full matrix.
-        Multiply static source and target turns to full matrix only.
-
-        Parameters
-        ----------
-        M : array-like, shape(target*source,)
-            Unit turn source-target interaction matrix.
-
-        Returns
-        -------
-        None.
-
-        """
-        # extract plasma interaction
-        _M_ = M.reshape(self.nT, self.nS)[:, self.source.plasma]
-        if self.source_turns:
-            M *= self.source._nturn_
-        if self.target_turns:
-            M *= self.target._nturn_
-        _M = M.reshape(self.nT, self.nS)  # source-target reshape (matrix)
-        # reduce
-        if self.reduce_source and len(self.source._reduction_index) < self.nS:
-            _M = np.add.reduceat(_M, self.source._reduction_index, axis=1)
-        if self.reduce_target and len(self.target._reduction_index) < self.nT:
-            _M = np.add.reduceat(_M, self.target._reduction_index, axis=0)
-        return _M, _M_  # turn-turn interaction, unit plasma interaction
 
     def solve_interaction(self):
         """Solve biot interaction. """
@@ -261,4 +194,25 @@ if __name__ == '__main__':
     biotset = BiotSet(source, source)
 
 
+    r"""
+    Calculation methods for Biot Savart instances.
 
+    Formulae
+    --------
+        :math:`\pmb{\Psi} = \pmb{\psi} \: \mathbf{I_c}`
+
+        :math:`\mathbf{B_x} = \mathbf{b_x} \: \mathbf{I_c}`
+
+        :math:`\mathbf{B_z} = \mathbf{b_z} \: \mathbf{I_c}`
+
+    Attributes
+    ----------
+        static : array-like, shape(target, source)
+            static interaction matrix, :math:`*\mathrm{A}^{-1}`.
+        plasma : array-like, shape(target, source)
+            static interaction matrix (plasma unit filaments),
+            :math:`*\mathrm{A}^{-1}\mathrm{turn}^{-2}`.
+
+    """
+
+'''

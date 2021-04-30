@@ -5,7 +5,7 @@ import numpy as np
 import numpy.typing as npt
 import scipy.special
 
-from nova.electromagnetic.biotsavart import BiotSavart
+from nova.electromagnetic.biotsavart import BiotMatrix
 from nova.electromagnetic.biotframe import BiotFrame
 
 # pylint: disable=no-member  # disable scipy.special module not found
@@ -41,7 +41,7 @@ class PoloidalOffset(PolidalCoordinates):
 
     def effective_turn_radius(self):
         """Return effective source turn radius."""
-        return np.max([self.source('dx'), self.source('dz')], axis=0) / 2  # df
+        return np.max([self.source('dx'), self.source('dz')], axis=0) / 2
 
     def source_target_seperation(self):
         """Return source-target seperation vector."""
@@ -50,7 +50,8 @@ class PoloidalOffset(PolidalCoordinates):
 
     def turnturn_seperation(self, merge_index):
         """Return self seperation length."""
-        return 0.5*self.source('dx')[merge_index]*self.source('turnturn')[merge_index]
+        return 0.5 * self.source('dx')[merge_index] * \
+            self.source('turnturn')[merge_index]
 
     def blending_factor(self, span_length, turn_radius):
         """Return blending factor."""
@@ -103,7 +104,7 @@ class PoloidalOffset(PolidalCoordinates):
 
 
 @dataclass
-class BiotCircle(BiotSavart):
+class BiotCircle(BiotMatrix):
     """
     Extend BiotSavart base class.
 
@@ -124,8 +125,8 @@ class BiotCircle(BiotSavart):
         coeff['a'] = np.sqrt(coeff['a2'])
         coeff['k2'] = 4 * coeff['r'] * coeff['rs'] / coeff['a2']
         coeff['ck2'] = 1 - coeff['k2']  # complementary modulus
-        coeff['K'] = scipy.special.ellipk(coeff['k2'])  # ellip integral - first kind
-        coeff['E'] = scipy.special.ellipe(coeff['k2'])  # ellip integral - second kind
+        coeff['K'] = scipy.special.ellipk(coeff['k2'])  # ellip integral - 1st
+        coeff['E'] = scipy.special.ellipe(coeff['k2'])  # ellip integral - 2nd
         return coeff
 
     def calculate_vector_potential(self, coeff):
@@ -135,7 +136,8 @@ class BiotCircle(BiotSavart):
 
     def calculate_scalar_potential(self, coeff):
         """Calculate scalar potential."""
-        self.vector['Psi'] = 2 * np.pi * self.mu_o * coeff['r'] * self.vector['Ay']
+        self.vector['Psi'] = 2 * np.pi * self.mu_o * \
+            coeff['r'] * self.vector['Ay']
 
     def calculate_magnetic_field(self, coeff):
         """Calculate magnetic field (r, phi, z), T/Amp-turn-turn."""
@@ -149,7 +151,26 @@ class BiotCircle(BiotSavart):
 
 if __name__ == '__main__':
 
-    source = {'x': [3, 3.4, 3.6], 'z': [3.1, 3, 3.3],
-              'dl': 0.3, 'dt': 0.3, 'section': 'hex'}
-    biotcircle = BiotCircle(source, source)
-    biotcircle.calculate()
+    biotframe = BiotFrame(subspace=['Ic'])
+    biotframe.insert([10, 10], [-0.5, 0.5], dl=0.95, dt=0.95, section='hex')
+    biotframe.insert(11, 0, dl=0.95, dt=0.1, section='sk')
+    #biotframe.insert([1, 3], 2, dl=0.95, dt=0.95, section='sq', link=True)
+    #biotframe.insert([1, 3], 3, dl=0.95, dt=0.6, section='sk', link=True)
+
+    biotframe.multipoint.link(['Coil0', 'Coil1'], -1)
+
+    biotframe.polyplot()
+
+    x, z = np.linspace(9.5, 11.5, 100), np.linspace(-1, 1, 300)
+    X, Z = np.meshgrid(x, z, indexing='ij')
+    target = BiotFrame()
+    target.insert(X.flatten(), Z.flatten())
+
+    biotcircle = BiotCircle(biotframe, target, reduce=[True, False])
+
+    biotframe.subspace.Ic = [1, 0.7]
+
+    from nova.utilities.pyplot import plt
+
+    Psi = np.dot(biotcircle.static.Psi, biotframe.subspace.Ic)
+    plt.contour(x, z, Psi.reshape(100, 300).T, 51)

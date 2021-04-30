@@ -6,7 +6,6 @@ import shapely
 
 from nova.electromagnetic.polygon import Polygon
 from nova.electromagnetic.multipoint import MultiPoint
-from nova.electromagnetic.reduce import Reduce
 from nova.electromagnetic.energize import Energize
 from nova.electromagnetic.dataarray import (
     ArrayLocMixin,
@@ -53,7 +52,7 @@ class FrameLink(LinkIndexer, DataArray):
     def __init__(self, data=None, index=None, columns=None,
                  attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.frame_attrs(MultiPoint, Reduce, Energize)
+        self.frame_attrs(MultiPoint, Energize)
 
     def __setattr__(self, name, value):
         """Extend DataFrame.__setattr__. (frame.*)."""
@@ -227,8 +226,8 @@ class FrameLink(LinkIndexer, DataArray):
         if np.array(missing).any():
             required = np.array(self.metaframe.required)[missing]
             raise KeyError(f'required arguments {required} '
-                             'not specified in frame '
-                             f'{frame.columns}')
+                           'not specified in frame '
+                           f'{frame.columns}')
         args = [frame[col] for col in self.metaframe.required]
         _ = [kwargs.pop(attr, None) for attr in self.metaframe.required]
         if not isinstance(frame.index, pandas.RangeIndex):
@@ -249,6 +248,7 @@ class FrameLink(LinkIndexer, DataArray):
 
         If args[0].., replace *args and update **kwargs.
         Else pass *args, **kwargs.
+
         """
         if len(args) > 1:
             return args, kwargs

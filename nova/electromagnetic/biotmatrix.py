@@ -11,14 +11,6 @@ from nova.electromagnetic.biotframe import BiotFrame
 # _coilmatrix_properties = ['Psi', 'Bx', 'Bz']
 
 
-if __name__ == '__main__':
-
-
-    source = {'x': [3, 3.4, 3.6], 'z': [3.1, 3, 3.3],
-              'dl': 0.3, 'dt': 0.3, 'section': 'hex'}
-    biotset = BiotSet(source, source)
-
-'''
 @dataclass
 class BiotSolver:
 

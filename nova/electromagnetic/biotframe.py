@@ -6,6 +6,8 @@ from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.framelink import FrameLink
 from nova.electromagnetic.biotsection import BiotSection
 from nova.electromagnetic.biotshape import BiotShape
+from nova.electromagnetic.biotreduce import BiotReduce
+from nova.electromagnetic.metaframe import MetaFrame
 
 
 # pylint: disable=too-many-ancestors
@@ -14,14 +16,23 @@ from nova.electromagnetic.biotshape import BiotShape
 class BiotFrame(FrameSpace):
     """Extend FrameSpace class with biot specific attributes and methods."""
 
+    _metadata = ['turns', 'reduce']
+
     def __init__(self, data=None, index=None, columns=None, attrs=None,
                  **metadata):
-        metadata = {'required': ['x', 'z'],
-                    'available': ['link', 'section', 'poly', 'frame']} | metadata
         super().__init__(data, index, columns, attrs, **metadata)
-        self.frame_attrs(BiotShape, BiotSection)
+        self.frame_attrs(BiotShape, BiotSection, BiotReduce)
         if isinstance(data, FrameLink):
             self.attrs['frame'] = data
+
+    def extract_attrs(self, data, attrs):
+        """Extend FrameAttrs.extract_attrs, lanuch custom metaframe."""
+        if not self.hasattrs('metaframe'):
+            self.attrs['metaframe'] = MetaFrame(
+                self.index, required=['x', 'z'],
+                additional=['plasma', 'nturn', 'link'],
+                available=['link', 'section', 'poly'])
+        super().extract_attrs(data, attrs)
 
     def __call__(self, attr) -> npt.ArrayLike:
         """Return flattened attribute matrix, shape(source*target,)."""
@@ -59,11 +70,16 @@ class BiotFrame(FrameSpace):
 
 if __name__ == '__main__':
 
-    frame = FrameSpace(required=['x'])
-    frame.insert(range(3), dl=0.95, dt=0.95, section='hex',
-                 turn='hex')
-    biotframe = BiotFrame(frame)
+    biotframe = BiotFrame()
+    biotframe.insert(range(3), 0, dl=0.95, dt=0.95, section='hex')
+    biotframe.insert(range(3), 1, dl=0.95, dt=0.95, section='circ', link=True)
+    biotframe.insert(range(3), 2, dl=0.95, dt=0.95, section='sq', link=False)
+    biotframe.insert(range(3), 3, dl=0.95, dt=0.6, section='sk', link=True)
+
+    biotframe.multipoint.link(['Coil0', 'Coil11', 'Coil2', 'Coil8'])
+
     biotframe.polyplot()
+
 
 
 '''

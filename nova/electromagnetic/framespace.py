@@ -72,7 +72,7 @@ class FrameSpace(SpaceIndexer, FrameLink):
         """Propagate frame subspace variables prior to display."""
         self.update_frame()
         return super().__repr__()
-    
+
     def __setattr__(self, col, value):
         """Extend DataFrame.__setattr__ to gain fast access to array data."""
         if self.hasattrs('subspace'):
@@ -80,7 +80,7 @@ class FrameSpace(SpaceIndexer, FrameLink):
                 if self.lock('subspace') is False:
                     raise SpaceKeyError('loc', col)
         return super().__setattr__(col, value)
-    
+
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
         if self.hasattrs('subspace'):
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     framespace.insert([-4, -5], 1, Ic=6.5, name='PF1',
                       active=False, plasma=True)
     #framespace.insert(range(4000), 3, Ic=4, nturn=20, label='PF', link=True)
-    
+
     #framespace.multipoint.link(['PF1', 'CS0'], factor=1)
     #print(framespace.loc[:, ['active', 'passive', 'plasma', 'coil']])
 

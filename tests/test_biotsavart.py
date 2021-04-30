@@ -2,6 +2,27 @@ import pytest
 from numpy import allclose
 
 from nova.electromagnetic.biotelements import mu_o
+from nova.electromagnetic.biotframe import BiotFrame
+
+
+def test_biotreduce():
+    biotframe = BiotFrame()
+    biotframe.insert(range(3), 0)
+    biotframe.insert(range(3), 1, link=True)
+    biotframe.insert(range(3), 2, link=False)
+    biotframe.insert(range(3), 3, link=True)
+    biotframe.multipoint.link(['Coil0', 'Coil11', 'Coil2', 'Coil8'])
+    assert biotframe.biotreduce.indices == [0, 1, 2, 3, 6, 7, 8, 9, 11]
+    assert biotframe.biotreduce.link == {2: 0, 6: 0, 8: 0}
+    assert biotframe.biotreduce.index.to_list() == \
+        [f'Coil{i}' for i in [0, 1, 3, 6, 7, 9]]
+
+
+def test_subframe_lock():
+    biotframe = BiotFrame(subspace=['Ic'])
+    biotframe.insert([1, 3], 0, dl=0.95, dt=0.95, section='hex')
+    biotframe.polyplot()
+    assert biotframe.lock('subspace') is False
 
 
 def test_ITER_subinductance_matrix(plot=False):

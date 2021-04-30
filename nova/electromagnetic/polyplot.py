@@ -24,10 +24,33 @@ from nova.utilities.pyplot import plt
 
 
 @dataclass
+class Axes:
+    """Manage plot axes."""
+
+    _axes: plt.Axes = field(init=False, repr=False, default=None)
+
+    def generate_axes(self):
+        """Generate axes if unset."""
+        if self._axes is None:
+            self._axes = plt.gca()
+            self._axes.set_aspect('equal')
+            self._axes.axis('off')
+
+    @property
+    def axes(self):
+        """Manage plot axes."""
+        self.generate_axes()
+        return self._axes
+
+    @axes.setter
+    def axes(self, axes):
+        self._axes = axes
+
+
+@dataclass
 class Display:
     """Manage axes parameters."""
 
-    axes: plt.Axes = field(repr=False, default=None)
     patchwork: float = 0.15
     alpha: dict[str, float] = field(default_factory=lambda: {'plasma': 0.75})
     linewidth: float = 0.5
@@ -112,12 +135,12 @@ class Label:
             parts = [_part for _part in label if _part in parts]
     '''
 
-    def update_index(self):
-        """Return update index from self.label boolean."""
-        # if self.label
-
-        with self.frame.setlock(True, 'subspace'):
-            return self.frame.index[self.frame[self.label]]
+    #def update_index(self):
+    #    """Return update index from self.label boolean."""
+    #    # if self.label#
+    #
+    #    with self.frame.setlock(True, 'subspace'):
+    #        return self.frame.index[self.frame[self.label]]
 
     def add_label(self):
         """Add plot labels."""
@@ -180,7 +203,7 @@ class Label:
 
 
 @dataclass
-class PolyPlot(Display, Label, MetaMethod):
+class PolyPlot(Axes, Display, Label, MetaMethod):
     """Methods for ploting FrameSpace data."""
 
     name = 'polyplot'
@@ -202,23 +225,6 @@ class PolyPlot(Display, Label, MetaMethod):
                  for attr in self.required + self.additional]
         if np.array(unset).any():
             self.frame.update_columns()
-
-    def generate_axes(self):
-        """Generate axes if unset."""
-        if self._axes is None:
-            self._axes = plt.gca()
-            self._axes.set_aspect('equal')
-            self._axes.axis('off')
-
-    @property
-    def axes(self):
-        """Return plot axes."""
-        self.generate_axes()
-        return self._axes
-
-    @axes.setter
-    def axes(self, axes):
-        self._axes = axes
 
     def __call__(self, index=slice(None), axes=None, **kwargs):
         """Plot frame if not empty."""
@@ -283,16 +289,15 @@ class PolyPlot(Display, Label, MetaMethod):
     def get_index(self, index=None):
         """Return label based index for plot."""
         index = self.to_boolean(index)
-        try:
-            if not self.zeroturn:  # exclude zeroturn filaments (nturn == 0)
-                with self.frame.setlock(True, 'subspace'):
+        with self.frame.setlock(True, 'subspace'):
+            try:
+                if not self.zeroturn:  # exclude zeroturn (nturn == 0)
                     index.intersection(self.frame.loc[:, 'nturn'] != 0)
-        except (AttributeError, KeyError, ColumnError):  # turns not set
-            pass
-        try:
-            if not self.feedback:  # exclude stabilization coils
-                with self.frame.setlock(True, 'subspace'):
+            except (AttributeError, KeyError, ColumnError):  # turns not set
+                pass
+            try:
+                if not self.feedback:  # exclude stabilization coils
                     index.intersection(~self.frame.feedback)
-        except (AttributeError, KeyError, ColumnError):  # feedback not set
-            pass
+            except (AttributeError, KeyError, ColumnError):  # feedback not set
+                pass
         return index

@@ -12,12 +12,14 @@ from nova.electromagnetic.select import Select
 class FrameSet(FrameSetLoc):
     """Package FrameSpace instances. Manage boolean methods."""
 
+    base: list[str] = field(repr=False, default_factory=lambda: [
+        'x', 'y', 'z', 'dx', 'dy', 'dz'])
     required: list[str] = field(repr=False, default_factory=lambda: [
         'x', 'z', 'dl', 'dt'])
     additional: list[str] = field(repr=False, default_factory=lambda: [
         'turn', 'frame'])
     available: list[str] = field(repr=False, default_factory=lambda: [
-        'link', 'part', 'frame', 'dx', 'dz', 'area',
+        'link', 'part', 'frame', 'dx', 'dy', 'dz', 'area',
         'delta', 'section', 'turn', 'scale', 'nturn', 'nfilament',
         'Ic', 'It', 'Psi', 'Bx', 'Bz', 'B', 'acloss'])
     subspace: list[str] = field(repr=False, default_factory=lambda: [
@@ -28,12 +30,12 @@ class FrameSet(FrameSetLoc):
     def __post_init__(self):
         """Init coil and subcoil."""
         self.frame = FrameSpace(
-            required=self.required, additional=self.additional,
+            base=self.base, required=self.required, additional=self.additional,
             available=self.available, subspace=[],
             exclude=['frame', 'Ic', 'It',
                      'active', 'plasma', 'fix', 'feedback'], array=[])
         self.subframe = FrameSpace(
-            required=self.required, additional=self.additional,
+            base=self.base, required=self.required, additional=self.additional,
             available=self.available, subspace=self.subspace,
             exclude=['turn', 'scale', 'nfilament', 'delta'],
             array=self.array, delim='_')
@@ -121,10 +123,5 @@ if __name__ == '__main__':
 
     frameset = FrameSet(required=['rms'], additional=['Ic'])
     frameset.subframe.insert([2, 4], It=6, link=True)
-    
-    frameset.sloc['Ic'] = 7
-    
-    print(frameset.subframe.Ic)
-    print(frameset.subframe.subspace.Ic)
-    
-    frameset.plot()
+
+    print(frameset.subframe)

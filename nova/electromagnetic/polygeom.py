@@ -1,5 +1,6 @@
 """Manage single instance polygon data."""
 from dataclasses import dataclass, field
+from typing import Union
 
 import pandas
 import numpy as np
@@ -9,21 +10,69 @@ from nova.electromagnetic.polygen import polygen, polyshape, boxbound
 
 
 @dataclass
-class PolyGeom:
-    """Extract geometrical features from shapely polygons."""
+class Poly:
+    """Order Poly variable."""
 
     poly: shapely.geometry.Polygon = field(default=None, repr=False)
-    section: str = None
-    x_centroid: float = None
-    z_centroid: float = None
+
+
+@dataclass
+class Geom(Poly):
+    """Manage segment geometrical parameters."""
+
+    x_coordinate: float = None
+    y_coordinate: float = None
+    z_coordinate: float = None
+    delta_x: float = None
+    delta_y: float = None
+    delta_z: float = None
+    segment: str = 'circle'
+
+    @property
+    def centroid(self):
+        """
+        Return segment centroid.
+
+        Returns
+        -------
+        centroid : list[float, float, float]
+            Segment centroid [x, y, z] coordinates.
+
+        """
+        if self.segment == 'circle':  # centered toroildal circle
+            if self.x_coordinate is None:
+                self.x_coordinate = self.poly.centroid.x  # update x centroid
+            if self.y_coordinate is None:
+                self.y_coordinate = 0
+            if self.z_coordinate is None:
+                self.z_coordinate = self.poly.centroid.y  # update z centroid
+        return self.x_coordinate, self.y_coordinate, self.z_coordinate
+
+
+@dataclass
+class PolyGeom(Geom):
+    """Extract section geometrical features from shapely polygons."""
+
     length: float = None
     thickness: float = None
+    section: str = 'rectangle'
 
     def __post_init__(self):
-        """Update section and generate polygon as required."""
+        """Generate polygon as required."""
         self.update_section()
-        self.update_centroid()
-        self.generate()
+        if self.segment == 'circle':
+            self.generate()
+
+    def generate(self):
+        """Generate poloidal polygon for circular filaments."""
+        if self.section not in polyshape:  # clear poloidal coordinate
+            self.x_coordinate = self.z_coordinate = None
+        if pandas.isna(self.poly):
+            self.poly = polygen(self.section)(
+                *self.centroid[::2], self.length, self.thickness)
+        self.delta_x = self.bbox[0]
+        self.delta_y = 2*np.pi*self.centroid[0]  # diameter
+        self.delta_z = self.bbox[1]
 
     def update_section(self):
         """Update section name. Extract from poly, inflate str if not found."""
@@ -32,45 +81,6 @@ class PolyGeom:
         except AttributeError:
             if self.section is not None:
                 self.section = polyshape[self.section]  # inflate shorthand
-
-    def update_centroid(self):
-        """Nulify centroid if section not defined in polyshape."""
-        if self.section not in polyshape:
-            self.x_centroid = self.z_centroid = None
-
-    def generate(self):
-        """Generate polygon if not set."""
-        if pandas.isna(self.poly):
-            self.poly = polygen(self.section)(self.x_centroid, self.z_centroid,
-                                              self.length, self.thickness)
-
-    @property
-    def geometry(self) -> dict[str, float]:
-        """Return geometrical features."""
-        centroid = self.centroid
-        bbox = self.bbox
-        return {'x': centroid[0], 'z': centroid[1], 'dl': self.length,
-                'dt': self.thickness, 'dx': bbox[0], 'dz': bbox[1],
-                'area': self.area, 'rms': self.rms,
-                'poly': self.poly, 'section': self.poly.name}
-
-    @property
-    def centroid(self):
-        """
-        Return polygon centroid.
-
-        Returns
-        -------
-        x_centroid : float
-            Polygon centroid x-coordinate.
-        z_centroid : float
-            Polygon centroid z-coordinate.
-        """
-        if self.x_centroid is None:
-            self.x_centroid = self.poly.centroid.x  # update x centroid
-        if self.z_centroid is None:
-            self.z_centroid = self.poly.centroid.y  # update z centroid
-        return self.x_centroid, self.z_centroid
 
     @property
     def area(self):
@@ -111,9 +121,9 @@ class PolyGeom:
 
         Parameters
         ----------
-        cross_section : str
+        section : str
             Cross section descriptor.
-        x_center : float
+        centroid_radius : float
             Radial coordinate of geometric centroid.
         length : float
             First characteristic dimension, dl.
@@ -129,13 +139,26 @@ class PolyGeom:
             Root mean square radius (uniform current density current center).
 
         """
+        if self.segment != 'circle':
+            return -1
+        centroid_radius = self.centroid[0]
         if self.section == 'circle':
-            return np.sqrt(self.x_centroid**2 + self.length**2 / 16)  # circle
+            return np.sqrt(centroid_radius**2 + self.length**2 / 16)  # circle
         if self.section in ['square', 'rectangle']:
-            return np.sqrt(self.x_centroid**2 + self.length**2 / 12)  # square
+            return np.sqrt(centroid_radius**2 + self.length**2 / 12)  # square
         if self.section == 'skin':
             return np.sqrt((self.length**2 * self.thickness**2 / 24
                             - self.length**2 * self.thickness / 8
-                            + self.length**2 / 8 + self.x_centroid**2))
+                            + self.length**2 / 8 + centroid_radius**2))
         return (shapely.ops.transform(
             lambda x, z: (x**2, z), self.poly).centroid.x)**0.5
+
+    @property
+    def geometry(self) -> dict[str, float]:
+        """Return geometrical features."""
+        centroid = self.centroid
+        return {'x': centroid[0], 'y': centroid[1], 'z': centroid[2],
+                'dl': self.length, 'dt': self.thickness,
+                'dx': self.delta_x, 'dy': self.delta_y, 'dz': self.delta_z,
+                'area': self.area, 'rms': self.rms,
+                'poly': self.poly, 'section': self.section}

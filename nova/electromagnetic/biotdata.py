@@ -8,7 +8,6 @@ import xarray
 
 from nova.electromagnetic.biotset import BiotSet
 from nova.electromagnetic.metaframe import MetaFrame
-from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.dataarray import DataArray
 
 
@@ -33,12 +32,11 @@ class BiotVector(DataArray):
 
 
 @dataclass
-class BiotMatrix(ABC, BiotSet):
-    """Biot calculation base-class, Define calculaiton interface."""
+class BiotMatrix(BiotSet):
+    """Store Biot matricies."""
 
-    mu_o = 4*np.pi*1e-7
-
-    vector: BiotVector = field(init=False, repr=False)
+    data_vars: list[str] = field(init=False, default_factory=lambda: [
+        'Psi', 'Ax', 'Ay', 'Az', 'Bx', 'By', 'Bz'])
     static: xarray.Dataset = field(init=False, repr=False)
     unit: xarray.Dataset = field(init=False, repr=False)
 
@@ -52,6 +50,33 @@ class BiotMatrix(ABC, BiotSet):
             coords=dict(source=self.source.index[self.source.plasma],
                         target=self.get_coord('target')))
 
+    def initialize(self):
+        """Initialize dataarrays."""
+        for var in self.data_vars:
+            self.static[var] = xarray.DataArray(0., dims=['target', 'source'],
+                                                coords=self.static.coords)
+            self.unit[var] = xarray.DataArray(0., dims=['target', 'source'],
+                                              coords=self.unit.coords)
+
+    def get_coord(self, frame):
+        """Return matrix coordinate, reduce if flag True."""
+        biotframe = getattr(self, frame)
+        if biotframe.reduce:
+            return biotframe.biotreduce.index
+        return biotframe.index
+
+
+@dataclass
+class BiotSolve(ABC, BiotMatrix):
+    """Biot-Savart base-class. Define calculaiton interface."""
+
+    mu_o = 4*np.pi*1e-7
+
+    vector: BiotVector = field(init=False, repr=False)
+
+    def __post_init__(self):
+        """Init static and unit datasets."""
+        super().__post_init__()
         self.calculate_vectors()
         self.store_matrix(self.vector)
 
@@ -87,13 +112,6 @@ class BiotMatrix(ABC, BiotSet):
         Define in cylindrical (r, phi, z) or cartesian (x, y, z) coordinates.
 
         """
-
-    def get_coord(self, frame):
-        """Return matrix coordinate, reduce if flag True."""
-        biotframe = getattr(self, frame)
-        if biotframe.reduce:
-            return biotframe.biotreduce.index
-        return biotframe.index
 
     @property
     def shape(self):

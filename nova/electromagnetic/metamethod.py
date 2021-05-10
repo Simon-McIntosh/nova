@@ -12,12 +12,14 @@ class MetaMethod(ABC):
 
     frame: pandas.DataFrame = field(repr=False)
     required: list[str] = field(default_factory=list)
+    base: list[str] = field(default_factory=list)
     additional: list[str] = field(default_factory=list)
     require_all: bool = True
 
     def __post_init__(self):
         """Generate multi-point constraints."""
         if self.generate:
+            self.update_base()
             self.update_additional()
 
     @abstractmethod
@@ -45,9 +47,14 @@ class MetaMethod(ABC):
         return [attr for attr in list(dict.fromkeys(attributes))
                 if attr not in self.frame.metaframe.columns]
 
+    def update_base(self):
+        """Update base attributes."""
+        if self.base:
+            self.frame.metaframe.metadata = {'base': self.base}
+
     def update_additional(self):
         """Update additional attributes if subset exsists in frame.columns."""
-        additional = self.unset(self.required + self.additional)
+        additional = self.unset(self.base + self.required + self.additional)
         if not self.require_all:
             additional.extend(self.unset(self.required))
         if additional:
@@ -55,7 +62,7 @@ class MetaMethod(ABC):
 
     def update_available(self, attrs):
         """Update metaframe.available if attrs unset and available."""
-        additional = [attr for attr in self.unset(attrs)
-                      if attr in self.frame.metaframe.available]
-        if additional:
-            self.frame.metaframe.metadata = {'additional': additional}
+        available = [attr for attr in self.unset(attrs)
+                     if attr in self.frame.metaframe.available]
+        if available:
+            self.frame.metaframe.metadata = {'additional': available}

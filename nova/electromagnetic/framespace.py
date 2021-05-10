@@ -138,16 +138,17 @@ def get_current():
 
 if __name__ == '__main__':
 
-    framespace = FrameSpace(required=['x', 'z'],
-                            Available=['It'],
+    framespace = FrameSpace(base=['x', 'y', 'z'],
+                            required=['x', 'z'],
+                            available=['It', 'poly'],
                             Subspace=[],
                             Array=['Ic'])
-    framespace.insert([-4, -5], 1, Ic=6.5, name='PF1',
+    framespace.insert([4, 5], 1, Ic=6.5, name='PF1',
                       active=False, plasma=True)
-    #framespace.insert(range(4000), 3, Ic=4, nturn=20, label='PF', link=True)
 
-    #framespace.multipoint.link(['PF1', 'CS0'], factor=1)
-    #print(framespace.loc[:, ['active', 'passive', 'plasma', 'coil']])
+    framespace.insert(range(4000), 3, Ic=4, nturn=20, label='PF', link=True)
+    framespace.multipoint.link(['PF1', 'CS0'], factor=1)
+    print(framespace.loc[:, ['active', 'passive', 'plasma', 'coil']])
 
     for _ in range(1000):
         get_current()

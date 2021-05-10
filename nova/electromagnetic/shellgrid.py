@@ -160,7 +160,8 @@ class ShellSegment(ShellInterp):
         data = [[] for __ in range(self.ndiv-1)]
         for i, segment in enumerate(self.divide()):
             geom = PolyGeom(segment.poly)
-            data[i] = [*geom.centroid, self.length, self.thickness, *geom.bbox,
+            data[i] = [*geom.centroid[::2],
+                       self.length, self.thickness, *geom.bbox,
                        geom.rms, geom.area, geom.section, geom.poly]
         frame = pandas.DataFrame(data, columns=self.columns)
         frame['nturn'] = frame['area']

@@ -5,8 +5,9 @@ import numpy as np
 import numpy.typing as npt
 import scipy.special
 
-from nova.electromagnetic.biotsavart import BiotMatrix
 from nova.electromagnetic.biotframe import BiotFrame
+from nova.electromagnetic.biotdata import BiotMatrix, BiotSolve
+
 
 # pylint: disable=no-member  # disable scipy.special module not found
 
@@ -104,15 +105,15 @@ class PoloidalOffset(PolidalCoordinates):
 
 
 @dataclass
-class BiotCircle(BiotMatrix):
+class BiotCircle(BiotSolve):
     """
-    Extend BiotSavart base class.
+    Extend BiotMatrix base class.
 
     Compute interaction for complete circular filaments.
 
     """
 
-    filament = 'circle'  # filament type
+    name = 'circle'  # element name
 
     def calculate_coefficients(self) -> dict[npt.ArrayLike]:
         """Return interaction coefficients."""
@@ -149,11 +150,30 @@ class BiotCircle(BiotMatrix):
              (2*coeff['ck2']) * coeff['E']) / (coeff['a']*coeff['r'])
 
 
+@dataclass
+class BiotFilament(BiotMatrix):
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.initialize()
+
+        index = np.array(self.source.segment == 'circle')
+        circle = BiotCircle(self.source.loc[index, :],
+                            self.target, turns=self.turns, reduce=self.reduce)
+
+        source_index = self.get_coord('source')
+        index = self.source.segment[source_index] == 'circle'
+
+        for var in self.data_vars:
+            self.static[var].loc[:, index.to_numpy()] = circle.static[var]
+
+
 if __name__ == '__main__':
 
     biotframe = BiotFrame(subspace=['Ic'])
     biotframe.insert([10, 10], [-0.5, 0.5], dl=0.95, dt=0.95, section='hex')
     biotframe.insert(11, 0, dl=0.95, dt=0.1, section='sk')
+    biotframe.insert(12, 0, dl=0.6, dt=0.9, section='r', segment='circle')
     #biotframe.insert([1, 3], 2, dl=0.95, dt=0.95, section='sq', link=True)
     #biotframe.insert([1, 3], 3, dl=0.95, dt=0.6, section='sk', link=True)
 
@@ -161,16 +181,16 @@ if __name__ == '__main__':
 
     biotframe.polyplot()
 
-    x, z = np.linspace(9.5, 11.5, 100), np.linspace(-1, 1, 300)
+    x, z = np.linspace(9.5, 12.5, 100), np.linspace(-1, 1, 300)
     X, Z = np.meshgrid(x, z, indexing='ij')
     target = BiotFrame()
     target.insert(X.flatten(), Z.flatten())
 
-    biotcircle = BiotCircle(biotframe, target, reduce=[True, False])
+    filament = BiotFilament(biotframe, target, reduce=[True, False])
 
-    biotframe.subspace.Ic = [1, 0.7]
+    biotframe.subspace.Ic = [1, 0.7, 1.65]
 
     from nova.utilities.pyplot import plt
 
-    Psi = np.dot(biotcircle.static.Psi, biotframe.subspace.Ic)
+    Psi = np.dot(filament.static.Psi, biotframe.subspace.Ic)
     plt.contour(x, z, Psi.reshape(100, 300).T, 51)

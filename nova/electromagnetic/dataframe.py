@@ -187,9 +187,9 @@ class DataFrame(FrameAttrs):
                 self.metaframe.metadata = {'additional': additional}
             # set defaults
             additional_unset = [attr not in columns
-                                for attr in self.metaframe.additional]
+                                for attr in self.metaframe.columns]
             if np.array(additional_unset).any():
-                unset = np.array(self.metaframe.additional)[additional_unset]
+                unset = np.array(self.metaframe.columns)[additional_unset]
                 if self.index.empty:  # insert additional columns
                     for attr in unset:
                         self[attr] = None
@@ -205,6 +205,7 @@ class DataFrame(FrameAttrs):
 
 if __name__ == '__main__':
 
-    dataframe = DataFrame(Required=['x'], Additional=['Ic'],
+    dataframe = DataFrame(base=['x', 'y', 'z'],
+                          required=['x'], additional=['Ic', 'z'],
                           Subspace=[], label='PF')
     print(dataframe)

@@ -8,7 +8,24 @@ from nova.utilities.pyplot import plt
 
 @dataclass
 class BiotSet:
-    """Construct Biot source/target frames."""
+    """
+    Construct Biot source/target frames.
+
+    Parameters
+    ----------
+    source: BiotFrame
+        Field source
+
+    target: BiotFrame
+        Calculation target
+
+    turns: list[bool, bool]
+        Multiply columns / rows by turn number (source / target) if True.
+
+    reduce: list[bool, bool]
+        Apply linked turn reduction (source / target) if True.
+
+    """
 
     source: BiotFrame = field(repr=False, default=None)
     target: BiotFrame = field(repr=False, default=None)

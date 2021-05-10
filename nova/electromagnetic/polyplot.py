@@ -271,19 +271,19 @@ class PolyPlot(Axes, Display, Label, MetaMethod):
         """Return boolean index."""
         try:
             if index.is_boolean():
-                return index
+                return index.to_numpy()
         except AttributeError:
             pass
         if index is None:
             return np.full(len(self.frame), True)
         if isinstance(index, (str, int)):
             if isinstance(index, int):
-                return self.frame.index[index]
-            return [index]
+                index = self.frame.index[index]
+            index = [index]
         if isinstance(index, slice):
-            return self.frame.index[index]
+            index = self.frame.index[index]
         if np.array([isinstance(label, int) for label in index]).all():
-            return self.frame.index[index]
+            index = self.frame.index[index]
         return self.frame.index.isin(index)
 
     def get_index(self, index=None):
@@ -292,12 +292,13 @@ class PolyPlot(Axes, Display, Label, MetaMethod):
         with self.frame.setlock(True, 'subspace'):
             try:
                 if not self.zeroturn:  # exclude zeroturn (nturn == 0)
-                    index.intersection(self.frame.loc[:, 'nturn'] != 0)
+                    index &= self.frame.loc[:, 'nturn'] != 0
             except (AttributeError, KeyError, ColumnError):  # turns not set
                 pass
             try:
                 if not self.feedback:  # exclude stabilization coils
-                    index.intersection(~self.frame.feedback)
+                    index &= ~self.frame.feedback
             except (AttributeError, KeyError, ColumnError):  # feedback not set
                 pass
+        index &= self.frame.segment == 'circle'
         return index

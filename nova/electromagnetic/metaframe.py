@@ -68,15 +68,17 @@ class MetaFrame(MetaSet):
     - default
     """
 
+    base: list[str] = field(default_factory=lambda: [])
     required: list[str] = field(default_factory=lambda: [])
     additional: list[str] = field(default_factory=lambda: [])
     exclude: list[str] = field(default_factory=lambda: [])
     available: list[str] = field(default_factory=lambda: [])
     default: dict[str, Union[float, str, bool, None]] = field(
         repr=False, default_factory=lambda: {
-            'x': 0., 'z': 0., 'dl': 0.1, 'dt': 0.1,
-            'delta': 0., 'nturn': 1., 'nfilament': 1.,
+            'x': 0., 'y': 0., 'z': 0., 'segment': 'circle',
+            'dl': 0.1, 'dt': 0.1,
             'rms': 0., 'dx': 0., 'dy': 0., 'dz': 0., 'area': 0.,
+            'delta': 0., 'nturn': 1., 'nfilament': 1.,
             'material': '', 'mass': '', 'rho': 0.,
             'section': 'rectangle', 'turn': 'rectangle', 'turnturn': 1.,
             'scale': 1., 'skin': 1.,
@@ -115,10 +117,6 @@ class MetaFrame(MetaSet):
             raise IndexError('exclude attributes '
                              f'{np.array(self.exclude)[exclude_required]} '
                              'specified in self.required')
-        # add array variables
-        #self.additional += [attr for attr in self.array
-        #                    if attr not in self.required
-        #                    and attr not in self.additional]
         # remove exclude attributes from additional
         self.additional = [attr for attr in self.additional
                            if attr not in self.exclude]
@@ -129,7 +127,7 @@ class MetaFrame(MetaSet):
     @property
     def columns(self):
         """Return metaframe columns."""
-        return list(dict.fromkeys(self.required + self.additional))
+        return list(dict.fromkeys(self.base + self.required + self.additional))
 
     def update(self, metadata):
         """

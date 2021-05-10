@@ -244,9 +244,7 @@ class PolyGrid(PolyCell):
 
     def polytrim(self, coords, polys):
         """Return polycells trimed to bounding polygon."""
-        #polytree = pygeos.STRtree(pygeos.points(coords))
         polytree = pygeos.STRtree(pygeos.from_shapely(polys))
-        #polytree = shapely.strtree.STRtree(poly)
         buffer = self.poly.buffer(1e-12*self.cell_delta[0])
         index = polytree.query(pygeos.from_shapely(self.poly),
                                predicate='intersects')
@@ -260,7 +258,10 @@ class PolyGrid(PolyCell):
 
     def polygeoms(self, polys, coords):
         """Return polycell geometory instances."""
-        return [PolyGeom(poly, poly.name, *coord, *self.cell_delta)
+        return [PolyGeom(poly, x_coordinate=coord[0], z_coordinate=coord[1],
+                         length=self.cell_delta[0],
+                         thickness=self.cell_delta[1],
+                         section=poly.name)
                 for poly, coord in zip(polys, coords)]
 
     def dataframe(self):
@@ -270,7 +271,8 @@ class PolyGrid(PolyCell):
         geoms = self.polygeoms(polys, coords)  # build cell geometries
         data = [[] for __ in range(len(geoms))]
         for i, geom in enumerate(geoms):
-            data[i] = [*geom.centroid, geom.length, geom.thickness, *geom.bbox,
+            data[i] = [*geom.centroid[::2],
+                       geom.length, geom.thickness, *geom.bbox,
                        geom.rms, geom.area, geom.section, geom.poly]
         frame = pandas.DataFrame(data, columns=self.columns)
         frame['nturn'] = self.nturn * frame['area'] / frame['area'].sum()

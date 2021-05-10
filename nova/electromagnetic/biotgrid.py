@@ -227,7 +227,6 @@ class BiotGrid:
 
 
 
-
     @property
     def grid_polygon(self):
         """

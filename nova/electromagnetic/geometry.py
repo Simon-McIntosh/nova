@@ -22,10 +22,12 @@ class Geometry(MetaMethod):
     frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['section', 'poly'])
     additional: list[str] = field(default_factory=lambda: [
-        'x', 'z', 'dl', 'dt', 'rms', 'dx', 'dz', 'area'])
+        'dl', 'dt', 'rms', 'area'])
     require_all: bool = field(init=False, repr=False, default=False)
+    base: list[str] = field(init=False, default_factory=lambda: [
+        'x', 'y', 'z', 'segment', 'dx', 'dy', 'dz'])
     features: list[str] = field(init=False, default_factory=lambda: [
-        'x', 'z', 'dx', 'dz', 'area', 'rms'])
+        'x', 'y', 'z', 'dx', 'dy', 'dz', 'area', 'rms'])
 
     def initialize(self):
         """Update frame polygons and derived geometrical data."""
@@ -35,13 +37,14 @@ class Geometry(MetaMethod):
             index_length = len(index)
             section = self.frame.loc[index, 'section'].values
             coords = self.frame.loc[
-                index, ['x', 'z', 'dl', 'dt']].to_numpy()
+                index, ['x', 'y', 'z', 'dx', 'dy', 'dz',
+                        'segment', 'dl', 'dt']].to_numpy()
             poly = self.frame.loc[index, 'poly'].values
             poly_update = self.frame.loc[index, 'poly'].isna()
             geom = np.empty((index_length, len(self.features)), dtype=float)
             # itterate over index - generate poly as required
             for i in range(index_length):
-                polygeom = PolyGeom(poly[i], section[i], *coords[i])
+                polygeom = PolyGeom(poly[i], *coords[i], section[i])
                 section[i] = polygeom.section  # inflate section name
                 if poly_update[i]:
                     poly[i] = PolyFrame(polygeom.poly, polygeom.section)

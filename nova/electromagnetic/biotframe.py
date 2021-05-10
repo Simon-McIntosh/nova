@@ -30,8 +30,9 @@ class BiotFrame(FrameSpace):
         if not self.hasattrs('metaframe'):
             self.attrs['metaframe'] = MetaFrame(
                 self.index, required=['x', 'z'],
-                additional=['plasma', 'nturn', 'link'],
-                available=['link', 'section', 'poly'])
+                additional=['plasma', 'nturn', 'link', 'segment'],
+                available=['section', 'poly'],
+                subspace=['segment'])
         super().extract_attrs(data, attrs)
 
     def __call__(self, attr) -> npt.ArrayLike:

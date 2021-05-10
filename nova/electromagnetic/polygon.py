@@ -60,7 +60,7 @@ class Polygon(PolyGeom):
                                         'length', 'thickness'], values):
                     setattr(self, attr, value)
                 return polys[0]
-            poly = shapely.ops.unary_union(polys)
+            poly = PolyFrame(shapely.ops.unary_union(polys), name='polygon')
             if not poly.is_valid:
                 raise AttributeError('non-overlapping polygons specified in '
                                      f'{self.poly}')

@@ -6,7 +6,8 @@ from nova.electromagnetic.framespace import FrameSpace
 
 
 def test_fix_aspect():
-    framespace = FrameSpace(required=['x', 'z', 'dl', 'dt'])
+    framespace = FrameSpace(required=['x', 'z', 'dl', 'dt'],
+                            available=['section', 'poly'])
     framespace.insert(4, 6, 0.1, 0.5, section='sq')
     assert framespace.dx[0] == framespace.dz[0]
 

@@ -7,6 +7,7 @@ import scipy.special
 
 from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotdata import BiotMatrix, BiotSolve
+from nova.electromagnetic.coilset import CoilSet
 
 
 # pylint: disable=no-member  # disable scipy.special module not found
@@ -151,46 +152,71 @@ class BiotCircle(BiotSolve):
 
 
 @dataclass
-class BiotFilament(BiotMatrix):
+class Biot(BiotMatrix):
+    """Manage biot interaction between multiple filament types."""
+
+    generator = {'circle': BiotCircle}
 
     def __post_init__(self):
+        """Solve biot interaction."""
         super().__post_init__()
-        self.initialize()
+        self.calculate()
 
-        index = np.array(self.source.segment == 'circle')
-        circle = BiotCircle(self.source.loc[index, :],
-                            self.target, turns=self.turns, reduce=self.reduce)
+    def calculate(self):
+        """Calculate full ensemble biot interaction."""
+        self.initialize_dataset()
+        for segment in self.source.segment.unique():
+            self.update(segment)
 
-        source_index = self.get_coord('source')
-        index = self.source.segment[source_index] == 'circle'
+    def update(self, segment):
+        """Calculate segment biot interaction."""
+        source_index = np.array(self.source.segment == segment)
+        try:
+            data = self.generator[segment](
+                self.source.loc[source_index, :], self.target,
+                turns=self.turns, reduce=self.reduce)
+        except KeyError:
+            raise NotImplementedError(f'segment {segment} not implemented '
+                                      f'in Biot.generator: {self.generator.keys()}')
 
+        static_index = np.array(self.source.segment[self.get_coord('source')]
+                                == segment)
+        unit_index = np.array(self.source.segment[self.source.index[self.source.plasma]]
+                              == segment)
         for var in self.data_vars:
-            self.static[var].loc[:, index.to_numpy()] = circle.static[var]
+            self.static[var].loc[:, static_index] = data.static[var]
+            self.unit[var].loc[:, unit_index] = data.unit[var]
 
 
 if __name__ == '__main__':
 
-    biotframe = BiotFrame(subspace=['Ic'])
-    biotframe.insert([10, 10], [-0.5, 0.5], dl=0.95, dt=0.95, section='hex')
-    biotframe.insert(11, 0, dl=0.95, dt=0.1, section='sk')
-    biotframe.insert(12, 0, dl=0.6, dt=0.9, section='r', segment='circle')
-    #biotframe.insert([1, 3], 2, dl=0.95, dt=0.95, section='sq', link=True)
+    coilset = CoilSet(dcoil=-35, dplasma=-40)
+    coilset.coil.insert(10, 0.5, 0.95, 0.95, section='hex', turn='r', nturn=3)
+    #coilset.coil.insert(10, -0.5, 0.95, 0.95, section='hex')
+
+
+    #coilset.coil.insert(11, 0, 0.95, 0.1, section='sk')
+    #coilset.coil.insert(12, 0, 0.6, 0.9, section='r', segment='circle')
+    coilset.plasma.insert({'ellip': [11.5, 0, 1.7, 1.4]})
+
     #biotframe.insert([1, 3], 3, dl=0.95, dt=0.6, section='sk', link=True)
 
-    biotframe.multipoint.link(['Coil0', 'Coil1'], -1)
+    coilset.link(['Coil0', 'Plasma'], -3)
 
-    biotframe.polyplot()
+    coilset.plot()
 
-    x, z = np.linspace(9.5, 12.5, 100), np.linspace(-1, 1, 300)
+    x, z = np.linspace(9, 13, 100), np.linspace(-1.2, 1.2, 100)
     X, Z = np.meshgrid(x, z, indexing='ij')
-    target = BiotFrame()
-    target.insert(X.flatten(), Z.flatten())
 
-    filament = BiotFilament(biotframe, target, reduce=[True, False])
+    from nova.electromagnetic.biotgrid import Grid
 
-    biotframe.subspace.Ic = [1, 0.7, 1.65]
+    grid = Grid(1e3, [9, 13, -1.2, 1.2])
+
+    filament = Biot(coilset.subframe, grid.target, reduce=[True, False])
+
+    coilset.sloc['Ic'] = 1
 
     from nova.utilities.pyplot import plt
 
-    Psi = np.dot(filament.static.Psi, biotframe.subspace.Ic)
-    plt.contour(x, z, Psi.reshape(100, 300).T, 51)
+    Psi = np.dot(filament.static.Psi, coilset.sloc['Ic'])
+    plt.contour(grid.data.x, grid.data.z, Psi.reshape(*grid.shape).T, 51)

@@ -34,8 +34,8 @@ class BiotSet:
 
     def __post_init__(self):
         """Format source and target frames."""
-        self.source = BiotFrame(self.source)
-        self.target = BiotFrame(self.target)
+        self.source = BiotFrame(self.source.to_dict())
+        self.target = BiotFrame(self.target.to_dict())
         self.set_flags()
         self.assemble()
 

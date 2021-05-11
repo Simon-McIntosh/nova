@@ -34,17 +34,19 @@ class BiotReduce(MetaMethod):
         if 'ref' not in self.frame:
             return range(len(self.frame))
         ref = np.array(self.frame.ref)
-        if np.all(ref[:-1] <= ref[1:]):  # monotonic increasing
+        factor = np.array(self.frame.factor)
+        if np.all(ref[:-1] <= ref[1:]) and np.all(factor == 1):  # monotonic increasing
             return np.unique(ref)
         indices = [ref[0]]  # sead list
         for i, index in enumerate(ref):
-            if index == indices[-1]:
-                continue
-            if index > indices[-1]:
-                indices.append(index)
-                continue
+            if factor[i] == 1:
+                if index == indices[-1]:
+                    continue
+                if index > indices[-1] and factor[i]:
+                    indices.append(index)
+                    continue
             indices.append(i)
-            self.link[len(indices)-1] = int(indices.index(index))
+            self.link[len(indices)-1] = [int(indices.index(index)), factor[i]]
         return indices
 
         '''

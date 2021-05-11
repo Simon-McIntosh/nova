@@ -1,4 +1,4 @@
-name: nova
+name: nova_sp5
 channels:
   - conda-forge
   - spyder-ide
@@ -32,7 +32,7 @@ dependencies:
   - scipy
   - seaborn
   - shapely
-  - spyder
+  - spyder=5
   - spyder-line-profiler
   - spyder-unittest
   - urllib3

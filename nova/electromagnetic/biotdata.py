@@ -50,7 +50,7 @@ class BiotMatrix(BiotSet):
             coords=dict(source=self.source.index[self.source.plasma],
                         target=self.get_coord('target')))
 
-    def initialize(self):
+    def initialize_dataset(self):
         """Initialize dataarrays."""
         for var in self.data_vars:
             self.static[var] = xarray.DataArray(0., dims=['target', 'source'],
@@ -148,16 +148,18 @@ class BiotSolve(ABC, BiotMatrix):
             source_link = self.source.biotreduce.link
             if self.source.reduce and len(source_link) > 0:
                 for link in source_link:  # sum linked columns
-                    static[:, source_link[link]] += static[:, link]
+                    ref, factor = source_link[link]
+                    static[:, ref] += factor * static[:, link]
                 static = np.delete(static, list(source_link), 1)
             # link target
             target_link = self.target.biotreduce.link
             if self.target.reduce and len(target_link) > 0:
-                for ref in target_link:  # sum linked columns
-                    static[ref, :] += static[target_link[ref], :]
-                    unit[ref, :] += unit[target_link[ref], :]
-                static = np.delete(static, target_link.values(), 0)
-                unit = np.delete(unit, target_link.values(), 0)
-
+                for link in target_link:  # sum linked columns
+                    ref, factor = target_link[link]
+                    static[ref, :] += factor * static[link, :]
+                    unit[ref, :] += factor * unit[link, :]
+                static = np.delete(static, list(target_link), 0)
+                unit = np.delete(unit, list(target_link), 0)
+            # store
             self.static[col] = (['target', 'source'], static)
             self.unit[col] = (['target', 'source'], unit)

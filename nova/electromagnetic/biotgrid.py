@@ -1,47 +1,109 @@
+"""Generate grids for BiotGrid methods."""
+from dataclasses import dataclass, field, InitVar
 
-from nova.electromagnetic.meshgrid import MeshGrid
+from matplotlib.collections import LineCollection
+import numpy as np
+import numpy.typing as npt
+import xarray
 
+from nova.electromagnetic.polyplot import Axes
+from nova.electromagnetic.biotframe import BiotFrame
 
 #for attribute in self._interpolate_attributes:
 #    self._evaluate_spline(attribute)
 
 @dataclass
-class PoloidalGrid:
+class GridCoord:
+    """Manage grid coordinates."""
 
-    def plot(self, ax=None):
-        if ax is None:
-            ax = plt.subplots(1, 1)[1]
-        linewidth = kwargs.pop('linewidth', 0.4)
-        zorder = kwargs.pop('zorder', -100)
-        color = kwargs.pop('color', 'gray')
-        alpha = kwargs.pop('alpha', 0.5)
-        for n_, step in zip(x2d.shape, [1, -1]):
-            lines = np.zeros((n_, 2, 2))
-            for i in range(2):
-                index = tuple([slice(None), -i][::step])
-                lines[:, i, 0] = x2d[index]
-                lines[:, i, 1] = z2d[index]
-            segments = LineCollection(lines, linewidth=linewidth,
-                                      zorder=zorder, color=color, alpha=alpha)
-            ax.add_collection(segments)
-        if xscale == 'linear' and zscale == 'linear':
-            ax.axis('equal')
-        else:
-            ax.set_xscale(xscale)
-            ax.set_yscale(zscale)
-        if ax.get_xlim() == (0, 1) and ax.get_ylim() == (0, 1):
-            ax.set_xlim(xlim)
-            ax.set_ylim(zlim)
-
-
-
-
+    start: float
+    stop: float
+    _num: int = field(init=False, repr=False, default=0)
 
     def __post_init__(self):
+        """Calculate coordinate spacing."""
+        self.delta = self.stop - self.start
 
-        MeshGrid(self.n, self.grid_boundary)  # set mesh
+    def __len__(self):
+        """Return coordinate dimension."""
+        return self.num
+
+    def __call__(self):
+        """Return coordinate point vector."""
+        return np.linspace(self.start, self.stop, self.num)
+
+    @property
+    def limit(self):
+        """Return coordinate limits."""
+        return self.start, self.stop
+
+    @property
+    def num(self):
+        return self._num
+
+    @num.setter
+    def num(self, num):
+        self._num = np.max([int(np.ceil(num)), 1])
 
 
+@dataclass
+class Grid(Axes):
+    """Generate grid."""
+
+    number: InitVar[int]
+    limit: list[float]
+    data: xarray.Dataset = field(init=False, repr=False)
+
+    def __post_init__(self, number):
+        """Build grid coordinates."""
+        self.xcoord = GridCoord(*self.limit[:2])
+        self.zcoord = GridCoord(*self.limit[2:])
+        self.xcoord.num = self.xcoord.delta / np.sqrt(
+            self.xcoord.delta*self.zcoord.delta / number)
+        self.zcoord.num = number / self.xcoord.num
+        self.data = xarray.Dataset(
+            coords=dict(x=self.xcoord(), z=self.zcoord()))
+        x2d, z2d = np.meshgrid(self.data.x, self.data.z, indexing='ij')
+        self.data['x2d'] = (['x', 'z'], x2d)
+        self.data['z2d'] = (['x', 'z'], z2d)
+
+    def __len__(self):
+        """Return grid number."""
+        return self.xcoord.num * self.zcoord.num
+
+    @property
+    def shape(self):
+        """Return grid shape."""
+        return self.xcoord.num, self.zcoord.num
+
+    @property
+    def target(self):
+        """Return BiotFrame target."""
+        return BiotFrame(dict(x=self.data.x2d.data.flatten(),
+                              z=self.data.z2d.data.flatten()))
+
+    def plot(self, axes=None, **kwargs):
+        self.axes = axes  # set plot axes
+        kwargs = {'linewidth': 0.4, 'color': 'gray',
+                  'alpha': 0.5, 'zorder': -100} | kwargs
+        for num, step in zip(self.shape, [1, -1]):
+            lines = np.zeros((num, 2, 2))
+            for i in range(2):
+                index = tuple([slice(None), -i][::step])
+                lines[:, i, 0] = self.data.x2d[index]
+                lines[:, i, 1] = self.data.z2d[index]
+            segments = LineCollection(lines, **kwargs)
+            self.axes.add_collection(segments, autolim=True)
+        self.axes.autoscale_view()
+
+
+if __name__ == '__main__':
+
+    grid = Grid(1e4, [1, 6, -1, 1])
+
+    grid.plot()
+
+    '''
     def generate(self, regen=False, **kwargs):
         """
         Generate grid for use as targets in Biot Savart calculations.
@@ -55,18 +117,6 @@ class PoloidalGrid:
             Force grid regeneration.
         boundary : str
             Grid boundary flag ['expand_limit' or 'limit'].
-
-        Keyword Arguments
-        -----------------
-        n : int, optional
-            Grid node number.
-        limit : array_like, size(4,)
-            Grid bounding box [xmin, xmax, zmin, zmax].
-        expand : float, optional
-            Expansion beyond coil/boundary (when limit not set)
-        nlevels : int, optional
-            Number of contour levels.
-        levels : array_like, optional
 
         Returns
         -------
@@ -197,33 +247,10 @@ class PoloidalGrid:
             limit[0] = xmin
         return limit
 
-    def plot_grid(self, ax=None, **kwargs):
-        """
-        Extend MeshGrid.plot - plot target grid.
-
-        Parameters
-        ----------
-        ax : Axes, optional
-            Plot Axes.
-        **kwargs : dict
-            Keyword arguments passed to MeshGrid.plot.
-
-        Returns
-        -------
-        None.
-
-        """
-        self.generate_grid(**kwargs)
-        if ax is None:
-            ax = plt.gca()
-        MeshGrid._plot(self.x2d, self.z2d, self._limit[:2], self._limit[2:],
-                       ax=ax, zorder=-500, **kwargs)  # plot grid
-
 
 
 @dataclass
 class BiotGrid:
-
 
 
 
@@ -304,7 +331,9 @@ class BiotGrid:
                     31, linestyles='-', alpha=0.9, zorder=4)
 
 
-'''
+    '''
+
+    '''
     """
     Grid interaction methods and data.
 
@@ -347,4 +376,4 @@ class BiotGrid:
 
     _default_biot_attributes = {'n': 1e4, 'expand': 0.05, 'nlevels': 51,
                                 'boundary': 'coilset'}
-'''
+    '''

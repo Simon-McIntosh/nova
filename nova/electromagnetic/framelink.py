@@ -233,7 +233,7 @@ class FrameLink(LinkIndexer, DataArray):
         if not isinstance(frame.index, pandas.RangeIndex):
             kwargs['name'] = frame.index
         kwargs |= {col: frame[col] for col in
-                   self.metaframe.additional if col in frame}
+                   self.metaframe.columns if col in frame}
         if len(args) != len(self.metaframe.required):
             raise IndexError(
                 'incorrect required argument number (*args)): '

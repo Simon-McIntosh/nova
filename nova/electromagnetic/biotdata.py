@@ -7,7 +7,6 @@ import numpy.typing as npt
 import xarray
 
 from nova.electromagnetic.biotset import BiotSet
-from nova.electromagnetic.metaframe import MetaFrame
 from nova.electromagnetic.dataarray import DataArray
 
 
@@ -19,46 +18,41 @@ class BiotVector(DataArray):
         super().__init__(data, index, columns, attrs, **metadata)
         self.update_columns()
 
-    def extract_attrs(self, data, attrs):
-        """Extend FrameAttrs.extract_attrs, lanuch custom metaframe."""
-        if not self.hasattrs('metaframe'):
-            self.attrs['metaframe'] = MetaFrame(
-                self.index,
-                required=['Psi', 'Ax', 'Ay', 'Az', 'Bx', 'By', 'Bz'],
-                array=['Psi', 'Ax', 'Ay', 'Az', 'Bx', 'By', 'Bz'],
-                default=dict().fromkeys(['Psi', 'Ax', 'Ay', 'Az',
-                                         'Bx', 'By', 'Bz'], 0.0))
-        super().extract_attrs(data, attrs)
+    def update_metadata(self, data, columns, attrs, metadata):
+        """Extend FrameAttrs update_metadata."""
+        if columns is not None:
+            metadata = {'required': columns, 'array': columns,
+                        'default': dict.fromkeys(columns, 0.)} | metadata
+        super().update_metadata(data, columns, attrs, metadata)
 
 
 @dataclass
 class BiotMatrix(BiotSet):
     """Store Biot matricies."""
 
-    data_vars: list[str] = field(init=False, default_factory=lambda: [
-        'Psi', 'Ax', 'Ay', 'Az', 'Bx', 'By', 'Bz'])
-    static: xarray.Dataset = field(init=False, repr=False)
-    unit: xarray.Dataset = field(init=False, repr=False)
+    columns: list[str] = field(default_factory=lambda: [])
+    data: xarray.Dataset = field(init=False, repr=False)
 
     def __post_init__(self):
-        """Init static and unit datasets."""
+        """Init data."""
         super().__post_init__()
-        self.static = xarray.Dataset(
-            coords=dict(source=self.get_coord('source'),
-                        target=self.get_coord('target')))
-        self.unit = xarray.Dataset(
-            coords=dict(source=self.source.index[self.source.plasma],
-                        target=self.get_coord('target')))
+        self.data = xarray.Dataset(
+            coords=dict(source=self.get_index('source'),
+                        plasma=self.source.index[self.source.plasma],
+                        target=self.get_index('target')))
 
     def initialize_dataset(self):
         """Initialize dataarrays."""
-        for var in self.data_vars:
-            self.static[var] = xarray.DataArray(0., dims=['target', 'source'],
-                                                coords=self.static.coords)
-            self.unit[var] = xarray.DataArray(0., dims=['target', 'source'],
-                                              coords=self.unit.coords)
+        for var in self.columns:
+            self.data[var] = xarray.DataArray(
+                0., dims=['target', 'source'],
+                coords=[self.data.target, self.data.source])
+        for var in self.columns:  # unit filaments
+            self.data[f'_{var}'] = xarray.DataArray(
+                0., dims=['target', 'plasma'],
+                coords=[self.data.target, self.data.plasma])
 
-    def get_coord(self, frame):
+    def get_index(self, frame):
         """Return matrix coordinate, reduce if flag True."""
         biotframe = getattr(self, frame)
         if biotframe.reduce:
@@ -82,7 +76,7 @@ class BiotSolve(ABC, BiotMatrix):
 
     def calculate_vectors(self):
         """Calculate vector and scalar potential and magnetic field."""
-        self.vector = BiotVector(index=self.index)
+        self.vector = BiotVector(index=self.index, columns=self.columns)
         coeff = self.calculate_coefficients()
         self.calculate_vector_potential(coeff)
         self.calculate_scalar_potential(coeff)
@@ -128,38 +122,38 @@ class BiotSolve(ABC, BiotMatrix):
 
         """
         for col in vector:
-            static = vector[col].reshape(*self.shape)
-            unit = static[:, self.source.plasma]
+            matrix = vector[col].reshape(*self.shape)
+            plasma = matrix[:, self.source.plasma]
             if self.source.turns:
-                static *= self.source('nturn').reshape(*self.shape)
+                matrix *= self.source('nturn').reshape(*self.shape)
             if self.target.turns:
-                static *= (turns := self.target('nturn').reshape(*self.shape))
-                unit *= turns[:, self.source.plasma]
+                matrix *= (turns := self.target('nturn').reshape(*self.shape))
+                plasma *= turns[:, self.source.plasma]
             # reduce
             if self.source.reduce and self.source.biotreduce.reduce:
-                static = np.add.reduceat(
-                    static, self.source.biotreduce.indices, axis=1)
+                matrix = np.add.reduceat(
+                    matrix, self.source.biotreduce.indices, axis=1)
             if self.target.reduce and self.target.biotreduce.reduce:
-                static = np.add.reduceat(
-                    static, self.target.biotreduce.indices, axis=0)
-                unit = np.add.reduceat(
-                    unit, self.target.biotreduce.indices, axis=0)
+                matrix = np.add.reduceat(
+                    matrix, self.target.biotreduce.indices, axis=0)
+                plasma = np.add.reduceat(
+                    plasma, self.target.biotreduce.indices, axis=0)
             # link source
             source_link = self.source.biotreduce.link
             if self.source.reduce and len(source_link) > 0:
                 for link in source_link:  # sum linked columns
                     ref, factor = source_link[link]
-                    static[:, ref] += factor * static[:, link]
-                static = np.delete(static, list(source_link), 1)
+                    matrix[:, ref] += factor * matrix[:, link]
+                matrix = np.delete(matrix, list(source_link), 1)
             # link target
             target_link = self.target.biotreduce.link
             if self.target.reduce and len(target_link) > 0:
                 for link in target_link:  # sum linked columns
                     ref, factor = target_link[link]
-                    static[ref, :] += factor * static[link, :]
-                    unit[ref, :] += factor * unit[link, :]
-                static = np.delete(static, list(target_link), 0)
-                unit = np.delete(unit, list(target_link), 0)
+                    matrix[ref, :] += factor * matrix[link, :]
+                    plasma[ref, :] += factor * plasma[link, :]
+                matrix = np.delete(matrix, list(target_link), 0)
+                plasma = np.delete(plasma, list(target_link), 0)
             # store
-            self.static[col] = (['target', 'source'], static)
-            self.unit[col] = (['target', 'source'], unit)
+            self.data[col] = (['target', 'source'], matrix)
+            self.data[f'_{col}'] = (['target', 'plasma'], plasma)

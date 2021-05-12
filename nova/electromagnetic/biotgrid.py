@@ -1,16 +1,19 @@
 """Generate grids for BiotGrid methods."""
 from dataclasses import dataclass, field, InitVar
+from typing import Union
 
 from matplotlib.collections import LineCollection
 import numpy as np
-import numpy.typing as npt
+import shapely.geometry
 import xarray
 
+from nova.electromagnetic.biotdata import BiotMatrix
+from nova.electromagnetic.biotfilament import Biot
+from nova.electromagnetic.coilset import CoilSet
+from nova.electromagnetic.framelink import FrameLink
+from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.polyplot import Axes
-from nova.electromagnetic.biotframe import BiotFrame
 
-#for attribute in self._interpolate_attributes:
-#    self._evaluate_spline(attribute)
 
 @dataclass
 class GridCoord:
@@ -39,6 +42,7 @@ class GridCoord:
 
     @property
     def num(self):
+        """Manage coordinate number."""
         return self._num
 
     @num.setter
@@ -76,13 +80,8 @@ class Grid(Axes):
         """Return grid shape."""
         return self.xcoord.num, self.zcoord.num
 
-    @property
-    def target(self):
-        """Return BiotFrame target."""
-        return BiotFrame(dict(x=self.data.x2d.data.flatten(),
-                              z=self.data.z2d.data.flatten()))
-
     def plot(self, axes=None, **kwargs):
+        """Plot grid."""
         self.axes = axes  # set plot axes
         kwargs = {'linewidth': 0.4, 'color': 'gray',
                   'alpha': 0.5, 'zorder': -100} | kwargs
@@ -97,11 +96,86 @@ class Grid(Axes):
         self.axes.autoscale_view()
 
 
+@dataclass
+class Expand:
+    """Calculate grid limit as a factor expansion about multipoly bounds."""
+
+    frame: FrameLink
+    xmin: float = 1e-12,
+    fix_aspect: bool = False
+
+    def __post_init__(self):
+        """Extract multipolygon bounding box."""
+        poly = shapely.geometry.MultiPolygon(self.frame.poly.to_list())
+        self.limit = [*poly.bounds[::2], *poly.bounds[1::2]]
+        self.xcoord = GridCoord(*self.limit[:2])
+        self.zcoord = GridCoord(*self.limit[2:])
+
+    def __call__(self, factor):
+        """Return expanded limit."""
+        delta_x, delta_z = self.xcoord.delta, self.zcoord.delta
+        if not self.fix_aspect:
+            delta_x = delta_z = np.mean([delta_x, delta_z])
+        limit = self.limit + factor/2 * np.array([-delta_x, delta_x,
+                                                  -delta_z, delta_z])
+        if limit[0] < self.xmin:
+            limit[0] = self.xmin
+        return limit
+
+
+@dataclass
+class BiotGrid(Axes):
+    """Compute interaction across grid."""
+
+    frame: FrameSpace
+    data: BiotMatrix = field(init=False, repr=False)
+
+    def solve(self, number: int, limit: Union[float, list[float]]):
+        """Solve Biot interaction across grid."""
+        if isinstance(limit, (int, float)):
+            limit = Expand(self.frame)(limit)
+        grid = Grid(number, limit)
+        target = dict(x=grid.data.x2d.values.flatten(),
+                      z=grid.data.z2d.values.flatten())
+        self.data = Biot(self.frame, target, reduce=[True, False],
+                         columns=['Psi', 'Br', 'Bz']).data
+        self.data.coords['x'] = grid.data.x
+        self.data.coords['z'] = grid.data.z
+        # self.data.coords['x2d'] = (['x', 'z'], grid.data.x2d)
+        # self.data.coords['z2d'] = (['x', 'z'], grid.data.z2d)
+
+    @property
+    def shape(self):
+        """Return grid shape."""
+        return self.data.dims['x'], self.data.dims['z']
+
+
+    def plot(self, axes=None):
+        self.axes = axes
+
+        Psi = np.dot(self.data.Psi, self.frame.subspace['Ic'])
+        self.axes.contour(self.data.x, self.data.z,
+                          Psi.reshape(*self.shape).T, 21)
+
+
 if __name__ == '__main__':
 
-    grid = Grid(1e4, [1, 6, -1, 1])
+    coilset = CoilSet(dcoil=-35, dplasma=-40)
+    coilset.coil.insert(10, 0.5, 0.95, 0.95, section='hex', turn='r',
+                        nturn=-0.8)
+    coilset.coil.insert(10, -0.5, 0.95, 0.95, section='hex')
+    coilset.coil.insert(11, 0, 0.95, 0.1, section='sk', nturn=-1.8)
+    coilset.coil.insert(12, 0, 0.6, 0.9, section='r', turn='sk')
+    coilset.plasma.insert({'ellip': [11.5, 0.8, 1.7, 0.4]})
+    coilset.link(['Coil0', 'Plasma'], 2)
 
-    grid.plot()
+    biotgrid = BiotGrid(coilset.subframe)
+    biotgrid.solve(1e3, 0.1)
+
+    coilset.sloc['Ic'] = 1
+
+    coilset.plot()
+    biotgrid.plot()
 
     '''
     def generate(self, regen=False, **kwargs):

@@ -1,5 +1,5 @@
 """Biot-Savart calculation for complete circular filaments."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 import numpy.typing as npt
@@ -116,6 +116,9 @@ class BiotCircle(BiotSolve):
 
     name = 'circle'  # element name
 
+    columns: list[str] = field(default_factory=lambda: [
+        'Aphi', 'Psi', 'Br', 'Bz'])
+
     def calculate_coefficients(self) -> dict[npt.ArrayLike]:
         """Return interaction coefficients."""
         offset = PoloidalOffset(self.source, self.target)
@@ -133,17 +136,17 @@ class BiotCircle(BiotSolve):
 
     def calculate_vector_potential(self, coeff):
         """Calculate target vector potential (r, phi, z), Wb/Amp-turn-turn."""
-        self.vector['Ay'] = 1 / (2*np.pi) * coeff['a']/coeff['r'] * \
+        self.vector['Aphi'] = 1 / (2*np.pi) * coeff['a']/coeff['r'] * \
             ((1 - coeff['k2']/2) * coeff['K'] - coeff['E'])
 
     def calculate_scalar_potential(self, coeff):
         """Calculate scalar potential."""
         self.vector['Psi'] = 2 * np.pi * self.mu_o * \
-            coeff['r'] * self.vector['Ay']
+            coeff['r'] * self.vector['Aphi']
 
     def calculate_magnetic_field(self, coeff):
         """Calculate magnetic field (r, phi, z), T/Amp-turn-turn."""
-        self.vector['Bx'] = self.mu_o / (2*np.pi) * \
+        self.vector['Br'] = self.mu_o / (2*np.pi) * \
             coeff['gamma'] * (coeff['K'] - (2-coeff['k2']) / (2*coeff['ck2']) *
                               coeff['E']) / (coeff['a'] * coeff['r'])
         self.vector['Bz'] = self.mu_o / (2*np.pi) * \
@@ -168,55 +171,47 @@ class Biot(BiotMatrix):
         for segment in self.source.segment.unique():
             self.update(segment)
 
+    def source_index(self, segment):
+        """Return source segment index."""
+        source = self.source.segment[self.get_index('source')]
+        return np.array(source == segment)
+
+    def plasma_index(self, segment):
+        """Return plasma segment index."""
+        plasma = self.source.segment[self.source.index[self.source.plasma]]
+        return np.array(plasma == segment)
+
     def update(self, segment):
         """Calculate segment biot interaction."""
-        source_index = np.array(self.source.segment == segment)
+        index = np.array(self.source.segment == segment)
         try:
             data = self.generator[segment](
-                self.source.loc[source_index, :], self.target,
-                turns=self.turns, reduce=self.reduce)
+                self.source.loc[index, :], self.target,
+                turns=self.turns, reduce=self.reduce).data
         except KeyError:
             raise NotImplementedError(f'segment {segment} not implemented '
-                                      f'in Biot.generator: {self.generator.keys()}')
-
-        static_index = np.array(self.source.segment[self.get_coord('source')]
-                                == segment)
-        unit_index = np.array(self.source.segment[self.source.index[self.source.plasma]]
-                              == segment)
-        for var in self.data_vars:
-            self.static[var].loc[:, static_index] = data.static[var]
-            self.unit[var].loc[:, unit_index] = data.unit[var]
+                                      f'in Biot.generator: '
+                                      '{self.generator.keys()}')
+        source_index = self.source_index(segment)
+        plasma_index = self.plasma_index(segment)
+        for var in self.columns:
+            self.data[var].loc[:, source_index] = data[var]
+            self.data[f'_{var}'].loc[:, plasma_index] = data[f'_{var}']
 
 
 if __name__ == '__main__':
 
     coilset = CoilSet(dcoil=-35, dplasma=-40)
-    coilset.coil.insert(10, 0.5, 0.95, 0.95, section='hex', turn='r', nturn=3)
-    #coilset.coil.insert(10, -0.5, 0.95, 0.95, section='hex')
+    coilset.coil.insert(10, 0.5, 0.95, 0.95, section='hex', turn='r',
+                        nturn=-0.8)
+    coilset.coil.insert(10, -0.5, 0.95, 0.95, section='hex')
 
-
-    #coilset.coil.insert(11, 0, 0.95, 0.1, section='sk')
-    #coilset.coil.insert(12, 0, 0.6, 0.9, section='r', segment='circle')
-    coilset.plasma.insert({'ellip': [11.5, 0, 1.7, 1.4]})
+    coilset.coil.insert(11, 0, 0.95, 0.1, section='sk', nturn=-1.8)
+    coilset.coil.insert(12, 0, 0.6, 0.9, section='r', turn='sk')
+    coilset.plasma.insert({'ellip': [11.5, 0.8, 1.7, 0.4]})
 
     #biotframe.insert([1, 3], 3, dl=0.95, dt=0.6, section='sk', link=True)
 
-    coilset.link(['Coil0', 'Plasma'], -3)
+    coilset.link(['Coil0', 'Plasma'], 2)
 
     coilset.plot()
-
-    x, z = np.linspace(9, 13, 100), np.linspace(-1.2, 1.2, 100)
-    X, Z = np.meshgrid(x, z, indexing='ij')
-
-    from nova.electromagnetic.biotgrid import Grid
-
-    grid = Grid(1e3, [9, 13, -1.2, 1.2])
-
-    filament = Biot(coilset.subframe, grid.target, reduce=[True, False])
-
-    coilset.sloc['Ic'] = 1
-
-    from nova.utilities.pyplot import plt
-
-    Psi = np.dot(filament.static.Psi, coilset.sloc['Ic'])
-    plt.contour(grid.data.x, grid.data.z, Psi.reshape(*grid.shape).T, 51)

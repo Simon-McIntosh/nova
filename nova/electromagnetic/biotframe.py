@@ -2,18 +2,17 @@
 import numpy as np
 import numpy.typing as npt
 
-from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.framelink import FrameLink
 from nova.electromagnetic.biotsection import BiotSection
 from nova.electromagnetic.biotshape import BiotShape
 from nova.electromagnetic.biotreduce import BiotReduce
-from nova.electromagnetic.metaframe import MetaFrame
+from nova.electromagnetic.geometry import Geometry
 
 
 # pylint: disable=too-many-ancestors
 
 
-class BiotFrame(FrameSpace):
+class BiotFrame(FrameLink):
     """Extend FrameSpace class with biot specific attributes and methods."""
 
     _metadata = ['turns', 'reduce']
@@ -21,18 +20,14 @@ class BiotFrame(FrameSpace):
     def __init__(self, data=None, index=None, columns=None, attrs=None,
                  **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.frame_attrs(BiotShape, BiotSection, BiotReduce)
-        if isinstance(data, FrameLink):
-            self.attrs['frame'] = data
+        self.frame_attrs(Geometry, BiotShape, BiotSection, BiotReduce)
 
-    def extract_attrs(self, data, attrs):
-        """Extend FrameAttrs.extract_attrs, lanuch custom metaframe."""
-        if not self.hasattrs('metaframe'):
-            self.attrs['metaframe'] = MetaFrame(
-                self.index, required=['x', 'z'],
-                additional=['plasma', 'nturn', 'link', 'segment'],
-                available=['section', 'poly'])
-        super().extract_attrs(data, attrs)
+    def update_metadata(self, data, columns, attrs, metadata):
+        """Extend FrameAttrs update_metadata."""
+        metadata = dict(required=['x', 'z'],
+                        additional=['plasma', 'nturn', 'link', 'segment'],
+                        available=['section', 'poly']) | metadata
+        super().update_metadata(data, columns, attrs, metadata)
 
     def __call__(self, attr) -> npt.ArrayLike:
         """Return flattened attribute matrix, shape(source*target,)."""
@@ -49,15 +44,6 @@ class BiotFrame(FrameSpace):
                           vector.reshape(1, -1)).flatten()
         return np.dot(vector.reshape(-1, 1),
                       np.ones((1, self.biotshape.source))).flatten()
-
-    def insert(self, *required, iloc=None, **additional):
-        """Extend FrameLink.insert. Store referance to parent frame."""
-        if len(required) > 0:
-            if isinstance(required[0], FrameLink) and len(self) == 0:
-                self.attrs['frame'] = required[0]
-            if self.hasattrs('frame') and len(self) > 0:
-                del self.attrs['frame']
-        return super().insert(*required, iloc=iloc, **additional)
 
     def set_target(self, number):
         """Set target number."""
@@ -77,9 +63,6 @@ if __name__ == '__main__':
     biotframe.insert(range(3), 3, dl=0.95, dt=0.6, section='sk', link=True)
 
     biotframe.multipoint.link(['Coil0', 'Coil11', 'Coil2', 'Coil8'])
-
-    biotframe.polyplot()
-
 
 
 '''

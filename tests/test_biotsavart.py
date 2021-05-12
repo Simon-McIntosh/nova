@@ -4,6 +4,8 @@ import numpy as np
 
 from nova.electromagnetic.biotfilament import Biot
 from nova.electromagnetic.biotframe import BiotFrame
+from nova.electromagnetic.biotgrid import BiotGrid
+from nova.electromagnetic.biotdata import BiotSolve
 from nova.electromagnetic.coilset import CoilSet
 
 
@@ -31,8 +33,8 @@ def test_link_negative_factor():
     biotframe.insert(1, 0)
     biotframe.insert(1, 0)
     biotframe.multipoint.link(['C0', 'C1'], -1)
-    biot = Biot(biotframe, biotframe, reduce=[True, True])
-    assert np.isclose(biot.static.Psi[0], 0)
+    biot = Biot(biotframe, biotframe, reduce=[True, True], columns=['Psi'])
+    assert np.isclose(biot.data.Psi[0], 0)
 
 
 def test_random_segment_error():
@@ -57,29 +59,24 @@ def test_ITER_subinductance_matrix():
     coilset.coil.insert(1.722, 3.188, 0.719, 2.075, nturn=554,
                         name='CS2U', part='CS')
     biot = Biot(coilset.subframe, coilset.subframe,
-                turns=[True, True], reduce=[True, True])
+                turns=[True, True], reduce=[True, True], columns=['Psi'])
     Mc_ddd = [[7.076E-01, 1.348E-01, 6.021E-02],  # referance
               [1.348E-01, 7.954E-01, 2.471E-01],
               [6.021E-02, 2.471E-01, 7.954E-01]]
-    assert allclose(Mc_ddd, biot.static.Psi, atol=5e-3)
+    assert allclose(Mc_ddd, biot.data.Psi, atol=5e-3)
 
 
-def test_solenoid_grid(plot=False):
+def test_solenoid_grid():
     """verify solenoid vertical field using grid biot instance."""
-    N, L, Ic = 500, 30, 1e3
-    cs = CoilSet()
-    cs.add_coil(1.5, 0, 0.01, L, Nt=N, turn_section='rectangle', dCoil=0.5)
-    cs.Ic = Ic
-    cs.biot_instances = {'grid': 'grid'}
-    if plot:
-        cs.grid.generate_grid(limit=[1e-5, 3, -0.6*L, 0.6*L], n=1e4)
-        cs.grid.plot_flux()
-        cs.plot()
-    cs.grid.generate_grid(limit=[1e-9, 1.5, 0, 1], n=4)
-    Bz_theory = mu_o * N * Ic / L
-    Bz = cs.grid.Bz[0, 0]
-    assert allclose(Bz, Bz_theory, atol=5e-3)
-    return cs, Bz, Bz_theory
+    nturn, height, current = 500, 30, 1e3
+    coilset = CoilSet(dcoil=0.5)
+    coilset.coil.insert(1.5, 0, 0.01, height, nturn=nturn, section='rect')
+    coilset.sloc['Ic'] = current
+    biotgrid = BiotGrid(coilset.subframe)
+    biotgrid.solve(4, [1e-9, 1.5, 0, 1])
+    Bz_theory = BiotSolve.mu_o * nturn * current / height
+    Bz_grid = np.dot(biotgrid.data.Bz, coilset.sloc['Ic'])
+    assert allclose(Bz_grid[0], Bz_theory, atol=5e-3)
 
 
 def test_solenoid_probe():

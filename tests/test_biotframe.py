@@ -1,11 +1,11 @@
 import pytest
 
 import numpy as np
-import pandas
 
 from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotsection import BiotSection
 from nova.electromagnetic.framelink import FrameLink
+from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.dataframe import DataFrame
 
 
@@ -40,27 +40,12 @@ def test_framelink_section():
         ['circle', 'square', 'hexagon', 'skin']
 
 
-def test_framelink_frame():
-    framelink = FrameLink(required=['x'])
-    framelink.insert(range(4), delta=-2, section=['o', 'sq', 'hex', 'skin'])
-    biotframe = BiotFrame(framelink)
-    assert biotframe.hasattrs('frame')
-
-
 def test_framelink_insert_keyerror():
     framelink = FrameLink(required=['x'])
     framelink.insert(range(4), delta=-2, section=['o', 'sq', 'hex', 'skin'])
     biotframe = BiotFrame()
     with pytest.raises(KeyError):
         biotframe.insert(framelink)
-
-
-def test_framelink_insert():
-    framelink = FrameLink(required=['x', 'z'])
-    framelink.insert(range(4), 0, delta=-2, section=['o', 'sq', 'hex', 'skin'])
-    biotframe = BiotFrame()
-    biotframe.insert(framelink)
-    assert biotframe.hasattrs('frame')
 
 
 def test_section_keyerror():

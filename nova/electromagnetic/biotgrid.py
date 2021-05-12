@@ -139,6 +139,7 @@ class BiotGrid(Axes):
                       z=grid.data.z2d.values.flatten())
         self.data = Biot(self.frame, target, reduce=[True, False],
                          columns=['Psi', 'Br', 'Bz']).data
+        # insert grid data
         self.data.coords['x'] = grid.data.x
         self.data.coords['z'] = grid.data.z
         # self.data.coords['x2d'] = (['x', 'z'], grid.data.x2d)
@@ -148,7 +149,6 @@ class BiotGrid(Axes):
     def shape(self):
         """Return grid shape."""
         return self.data.dims['x'], self.data.dims['z']
-
 
     def plot(self, axes=None):
         self.axes = axes

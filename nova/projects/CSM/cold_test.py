@@ -31,7 +31,8 @@ class cold_test(pythonIO):
               'bara': 'apressure',
               'mbar': 'pressure',
               'g/s': 'flow',
-              'ppm': 'strain',
+              #'ppm': 'strain',
+              'uStrain': 'strain',
               'mm': 'extend'}
     _labels = {'current': '$I$ kA',
                'temperature': '$T$ K',
@@ -125,12 +126,12 @@ class cold_test(pythonIO):
             data[i] = file_reader(folder, file)
             channel_index = self.split_channels(data[i])
             if group != 'rawdata':
-                print(channel_index)
                 data[i] = data[i].loc[:, channel_index[group]]
             tick.tock()
         if data:
             data = pandas.concat(data, sort=True)
             data.sort_index(inplace=True)
+            data = data[~data.index.duplicated(keep='first')]
         return data
 
     def read_coldtest_file(self, folder, filename):
@@ -144,12 +145,12 @@ class cold_test(pythonIO):
 
     def read_strain_file(self, folder, filename):
         filepath = os.path.join(self.directory, folder, filename)
-        
+
         '''
         # CSM1
         data = pandas.read_csv(filepath, skiprows=[0, 1, 2, 4, 5, 6])
         data = data.iloc[:, 3:]  # drop first three rows
-        
+
         elapsed = pandas.read_csv(filepath,
                 skiprows=6, usecols=[2])
         '''
@@ -169,6 +170,11 @@ class cold_test(pythonIO):
         if '021320 - 021420' in filename:  # correct time shift
             data.loc[:, 'timestamp'] -= datetime.timedelta(seconds=21*60+21)
         self.format_columns(data)
+        # five gauge average
+        data.loc[:, ('ST119-123', 'uStrain')] = data.loc[
+            :, [f'ST{i}' for i in range(119, 124)]].mean(1)
+        data.loc[:, ('ST124-128', 'uStrain')] = data.loc[
+            :, [f'ST{i}' for i in range(124, 129)]].mean(1)
         return data
 
     def format_columns(self, data):
@@ -180,7 +186,7 @@ class cold_test(pythonIO):
         labels = [c.split('(')[0] for c in _columns]
         units = [c.split('(')[1][:-1] for c in _columns]
         data.rename(columns={c: l for c, l in zip(columns, labels)},
-                             inplace=True)
+                    inplace=True)
         data.columns = pandas.MultiIndex.from_arrays(
                 [data.columns, units],
                 names=('ID', 'unit'))
@@ -248,8 +254,8 @@ class cold_test(pythonIO):
             # interpolate
             if sum(~index) > 2:  # surficent data for interpolation
                 interp = interp1d(t[~index], data.loc[~index, col],
-                                   bounds_error=False,
-                                   fill_value=None)
+                                  bounds_error=False,
+                                  fill_value=None)
                 data.loc[index, col] = interp(t[index])
                 # calculate high frequency content
                 dt = np.median(np.diff(t))
@@ -322,10 +328,11 @@ class cold_test(pythonIO):
                 self.load_coldtest(group)  # load dataframe
             dataframe = getattr(self, group).copy() # get dataframe
             if group in ['current']:
-                #dataframe.drop(columns=['IBus'], inplace=True) # 'Ibusfast', 
+                dataframe.drop(columns=['IBus'], inplace=True) # 'Ibusfast',
                 channels = dataframe.columns[::-1]
             dataframe = dataframe.loc[:, channels]
         dataframe = dataframe[index]
+        dataframe = dataframe[~dataframe.index.duplicated(keep='first')]
         return dataframe, group
 
     def plot(self, label, index=None, ax=None,
@@ -338,7 +345,7 @@ class cold_test(pythonIO):
         dataframe, group = self.get_dataframe(label, index)
         if group in ['current', 'temperature']:
             offset_dt = 0
-        #self.condition_signal(dataframe)
+        # self.condition_signal(dataframe)
         if offset is not None:
             dataframe -= offset
         elif offset_dt > 0:  # calculate offset
@@ -349,10 +356,9 @@ class cold_test(pythonIO):
         ax.plot(dataframe, **kwargs)
         if legend and labels:
             shift = np.floor(dataframe.shape[1] / ncol) * 0.12
-            ax.legend([c for c in
-                        dataframe.columns.droplevel(1)],
-                        ncol=ncol, loc='upper center',
-                        bbox_to_anchor=(0.5, 1+shift))
+            ax.legend([c for c in dataframe.columns.droplevel(1)],
+                      ncol=ncol, loc='upper center',
+                      bbox_to_anchor=(0.5, 1+shift))
         plt.despine()
         fig.autofmt_xdate()
         if labels:
@@ -370,7 +376,7 @@ class cold_test(pythonIO):
                   offset=offset)
 
     def plot_row(self, label, index='test', ncol=2, color=None,
-                 offset_dt=0):
+                 offset_dt=5*60):
         plt.set_aspect(0.8)
         fig = plt.figure()
         gs = matplotlib.gridspec.GridSpec(2, 1, height_ratios=[6, 1])
@@ -415,7 +421,7 @@ class cold_test(pythonIO):
         self.groups.append('shrink')
         self.fit(shrink, index='test', plot=plot, Imax=Imax)
 
-    def fit(self, label, index='test', Imin=7.5, Imax=40, plot=True,
+    def fit(self, label, index='test', Imin=7.5, Itrim=40, Imax=40, plot=True,
             ncol=2, color=None):
         index = self.get_index(index)
         # extract current
@@ -440,8 +446,10 @@ class cold_test(pythonIO):
                 dataframe.columns)
         # zero offset
         dataframe -= self.offset(dataframe, 5)
-        # trim low current
-        current_index = I > Imin
+        dI = np.gradient(I, self.t(I.index))
+
+        # trim  current
+        current_index = slice(None)#(I >= Imin) #& (I <= Itrim) & (dI < -0.02)
         I = I[current_index]
         dataframe = dataframe[current_index]
         coef = np.zeros(dataframe.shape[1])
@@ -451,6 +459,7 @@ class cold_test(pythonIO):
                 coef[i] = np.linalg.lstsq(
                         I[index].to_numpy().reshape(-1, 1)**2,
                         dataframe.loc[index, col], rcond=None)[0][0]
+
         if plot:
             ax = plt.subplots(1, 1)[1]
             if Imax is None:
@@ -492,50 +501,66 @@ class cold_test(pythonIO):
             text.plot()
 
     def get_index(self, index):
-        if index is None:
-            index = slice(None)
-        elif index == 'cooldown':
-            index = slice('2020-01-07', '2020-01-27')  # cooldown
-        elif index == 'test':
-            index = slice('2020-02-11 9:00', '2020-02-14 18:00')
-        elif index == 'strain':
-            index = slice('2020-02-11 9:00', '2020-02-14 12:00')
-        elif index == 'low_strain':
-            index = slice('2020-02-11 9:00', '2020-02-11 18:00')
-        elif index == 'low_strain_trim':
-            index = slice('2020-02-11 9:00', '2020-02-11 12:40')
-        elif index == 'medium_strain':
-            index = slice('2020-02-12 9:00', '2020-02-12 18:00')
-        elif index == 'medium_strain_trim':
-            index = slice('2020-02-12 9:00', '2020-02-12 13:50')
-        elif index == 'high_strain_trim':
-            index = slice('2020-02-14 9:30', '2020-02-14 11:10')
-        elif index == 'fit':
-            index = slice('2020-02-11 9:00', '2020-02-12 18:00')
-        elif index == 'drop':
-            index = slice('2020-02-12 16:00', '2020-02-12 17:00')
-        elif index == 'drop_trim':
-            index = slice('2020-02-12 16:10', '2020-02-12 16:27:30')
-        return index
+        if index == 'cooldown':
+            return slice('2020-01-07', '2020-01-27')  # cooldown
+        if index == 'test':
+            return slice('2020-02-11 9:00', '2020-02-14 18:00')
+        if index == 'strain':
+            return slice('2020-02-11 9:00', '2020-02-14 12:00')
+        if index == 'low_strain':
+            return slice('2020-02-11 9:00', '2020-02-11 18:00')
+        if index == 'low_strain_trim':
+            return slice('2020-02-11 9:00', '2020-02-11 12:40')
+        if index == 'medium_strain':
+            return slice('2020-02-12 9:00', '2020-02-12 18:00')
+        if index == 'medium_strain_trim':
+            return slice('2020-02-12 9:00', '2020-02-12 13:50')
+        if index == 'high_strain_trim':
+            return slice('2020-02-14 9:30', '2020-02-14 11:10')
+        if index == 'fit':
+            return slice('2020-02-11 9:00', '2020-02-12 18:00')
+        if index == 'drop':
+            return slice('2020-02-12 16:00', '2020-02-12 17:00')
+        if index == 'drop_trim':
+            return slice('2020-02-12 16:10', '2020-02-12 16:27:30')
+        if index == 'CSM2':
+            return slice('2021-03-18', '2021-04-22')
+        if index == 'CSM2_08':
+            return slice('2021-04-08 12:00:00', '2021-04-08  18:00:00')
+        if index == 'CSM2_09':
+            return slice('2021-04-09', '2021-04-09 13:20:00')
+        return slice(None)
+
+
 
 if __name__ == '__main__':
     plt.set_context('talk')
 
 
-    ct = cold_test(read_txt=False)
-    
-    #ct.load_coldtest('strain', read_txt=True)
-    
-    index = slice('2021-03-09 09:10', '2021-03-11 16:27:30')
-    
-    ct.load_coldtest('strain')
-    ct.strain.drop(columns=['ST108', 'ST109','ST110'], inplace=True)
-    ct.plot('strain', index=index)
+    ct = cold_test(project_dir='CSM2', read_txt=False)
+    #ct.load_coldtest('displace', read_txt=True)
+
+
+    #ct.fit('extend', index='CSM2_08', Imin=12.5, Itrim=27.5, Imax=40, ncol=4)
+    #ct.fit('displace', index='CSM2_09', Imin=12.5, Itrim=27.5, Imax=40, ncol=4)
+    #index = slice('2021-03-09 09:10', '2021-03-11 16:27:30')
+
+    #ct.load_coldtest('strain')
+    #ct.strain.drop(columns=['ST108', 'ST109','ST110'], inplace=True)
+    #ct.plot('strain', index=index)
     #ct.plot('extend')
-    #ct.plot('displace')
-    
-    ct.plot('current', index=index)
-    #ct.plot('temperature')
+
+    ct.load_coldtest('strain', read_txt=False)
+
+    ct.plot_row(['ST119-123', 'ST124-128'], index='CSM2_08', ncol=2)
+    ct.fit(['ST119-123', 'ST124-128'], index='CSM2_08',
+           Imin=20, Itrim=40, Imax=48.5, ncol=4)
+
+    #ct.fit(['DS001', 'DS004', 'DS007', 'DS008'],
+    #       index='CSM2_08', Imin=12.5, Itrim=30, Imax=48.5, ncol=4)
+
+    #ct.plot('current', index=ct.CSM2_index('opp'))
+
     '''
 
     #ct.plot('temperature')
@@ -594,7 +619,7 @@ if __name__ == '__main__':
     #ct.plot_col('displace', offset_dt=0)
     #ct.plot_row('displace', index='test')
 
-    
+
     ct.extract_shrinkage(sensors=['displace'])  # , 'extend'
     ct.plot('shrink', offset_dt=0)
     ct.plot_col('shrink', offset_dt=0)
@@ -605,5 +630,3 @@ if __name__ == '__main__':
 
     #myFmt = mdates.DateFormatter('%d %B')
     #ax.xaxis.set_major_formatter(myFmt)
-
-    

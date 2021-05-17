@@ -60,6 +60,7 @@ def test_ITER_subinductance_matrix():
                         name='CS2U', part='CS')
     biot = Biot(coilset.subframe, coilset.subframe,
                 turns=[True, True], reduce=[True, True], columns=['Psi'])
+    print(biot.data.Psi)
     Mc_ddd = [[7.076E-01, 1.348E-01, 6.021E-02],  # referance
               [1.348E-01, 7.954E-01, 2.471E-01],
               [6.021E-02, 2.471E-01, 7.954E-01]]

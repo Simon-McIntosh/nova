@@ -430,7 +430,7 @@ class CSmodulue(Material_Model):
         #data = (-2.05, -1.20, -0.34, 838, 457)  # 40kA
         data = (-2.04, -1.19, -0.1, 599, 531)  # 40kA CSM2
         x = minimize(self.match_shape, xo, args=data, #, 323, 455
-                     method='SLSQP', options={'ftol': 1e-4},
+                     method='SLSQP', options={'ftol': 1e-3},  # 1e-4
                      bounds=(*[Mlim for __ in range(nM)], 
                              *[Nulim for __ in range(nNu)]))
         print(x)
@@ -503,11 +503,11 @@ if __name__ == '__main__':
     #csm.Ic = 48.5e3# * 1.28
     
     csm.Ic = 40e3
-    csm.material_data = {'Ep': 30e9}
+    #csm.material_data = dict(Ep=25.9e9, Et=160.0e9, nu_pp=0.3, nu_tp=0.3)
     
     # t: 'Ep', 'Et', 'nu_pp', 'nu_pt'
-    csm._active[:] = True
-    #csm._active[0] = True
+    csm._active[:] = False
+    csm._active[:2] = True
     #csm._active[2] = True
     
     #csm._active[1] = True
@@ -525,7 +525,7 @@ if __name__ == '__main__':
     csm.extract_displacments()
 
     plt.set_context('talk')
-    csm.plot(scale=100, full=True, twin=True)
+    csm.plot(scale=100, full=True)
 
     
     

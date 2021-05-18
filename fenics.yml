@@ -1,0 +1,27 @@
+name: fenics
+channels:
+  - conda-forge
+  - spyder-ide
+  - defaults
+dependencies:
+  - python=3.9
+  - coolprop
+  - descartes
+  - fenics
+  - matplotlib
+  - netCDF4  
+  - nlopt
+  - numpy
+  - pandas
+  - pip
+  - pygeos
+  - scipy
+  - seaborn
+  - shapely
+  - spyder
+  - spyder-line-profiler
+  - spyder-unittest
+  - xarray
+  - pip:
+    - pyquaternion
+    - rdp

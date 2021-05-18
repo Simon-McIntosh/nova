@@ -1,16 +1,16 @@
+
+import numpy as np
+import pandas as pd
+from scipy.interpolate import RectBivariateSpline
+from scipy.optimize import minimize
+
 import dolfin as df
 import ufl
-from amigo.pyplot import plt
-from nep.coil_geom import PFgeom
-from nova.coil_class import CoilClass
-from nova.mesh_grid import MeshGrid
-from scipy.interpolate import interp1d
-import numpy as np
-from nova.coil_frame import CoilFrame
-import pandas as pd
-from scipy.interpolate import RectBivariateSpline, NearestNDInterpolator
-from scipy.optimize import minimize
-import mshr
+
+from nova.electromagnetic.biotgrid import BiotGrid, Grid
+from nova.electromagnetic.coilset import CoilSet
+from nova.utilities.pyplot import plt
+#from nova.mesh_grid import MeshGrid
 
 
 class Material_Model:
@@ -190,65 +190,38 @@ class JxB(df.UserExpression):
     
 class CSmodulue(Material_Model):
     
-    def __init__(self, read_txt=False, material_model='isotropic', N=None):
+    def __init__(self, read_txt=False, material_model='isotropic', num=None):
         self.read_txt = read_txt
         self._extract = False
         Material_Model.__init__(self, material_model)
         self.load_coilset()
-        self.mesh_structure(N=N)
+        self.mesh_structure(num=num)
         
     def load_coilset(self, **kwargs):
-        read_txt = kwargs.get('read_txt', self.read_txt)
-        if read_txt:
-            #cs = PFgeom(VS=False, dCoil=-1).cs  # load PF coilset
-            #cc = CoilClass(**cs.subset(['CS3U']).coilset)  # select single coil
-            #cc.coil.Nt = 568  # increase turn number
-            #cc.subcoil.Nt = cc.coil.Nt[0] / cc.coil.Nf[0]
-            cc = CoilClass(dCoil=-1, 
-                           turn_fraction=0.688,#0.688, 
-                           mutual_offset=True,
-                           turn_section='circle')  # 
-            #cc.add_coil(1.682, 0, 0.738, 2.0965, Nt=485,#Nt=544, 
-            #            name='CSM1', part='CS')  # RT
-            cc.add_coil(1.6870, 0, 0.7405, 2.1, Nt=544,#Nt=544, 
-                        name='CSM1', part='CS')  # RT
-            #cc.plot()
-            cc.solve_interaction()
-            cc.grid.generate_grid(expand=0)
-            
-            cc.save_coilset('CSM1')
-        else:
-            cc = CoilClass()
-            cc.load_coilset('CSM1')
-        self.cc = cc
-        
-    def mesh_structure(self, N=None):
-        if N is None:
-            N = self.cc.coil.Nt[0]
-        self.limit = self.cc.coil.limit(['CSM1'])  # coil bounding box
-        self.mesh = df.RectangleMesh(df.Point(self.limit[::2]), 
-                                     df.Point(self.limit[1::2]),
-                                     *MeshGrid(N, self.limit).n2d)
-        '''
-        coil = mshr.Rectangle(df.Point(self.limit[0]-10e-3, self.limit[2]), 
-                              df.Point(self.limit[1]+10e-3+1.6e-3, 
-                                       self.limit[3]))
-        wp = mshr.Rectangle(df.Point(self.limit[::2]), 
-                            df.Point(self.limit[1::2]))
-        insID = mshr.Rectangle(df.Point(self.limit[0]-10e-3, self.limit[2]), 
-                               df.Point(self.limit[0], self.limit[3]))
-        insOD = mshr.Rectangle(df.Point(self.limit[1], self.limit[2]), 
-                               df.Point(self.limit[1]+10e-3, self.limit[3]))
-        belt = mshr.Rectangle(df.Point(self.limit[1]+10e-3, self.limit[2]), 
-                               df.Point(self.limit[1]+10e-3+1.6e-3, 
-                                        self.limit[3]))
-        coil.set_subdomain(1, wp)  # winding pack
-        coil.set_subdomain(2, insID)  # ID ground insulation
-        coil.set_subdomain(3, insOD)  # OD ground insulation
-        coil.set_subdomain(4, belt)  # belt
-        self.mesh = mshr.generate_mesh(coil, 10)
-        '''
+        # read_txt = kwargs.get('read_txt', self.read_txt)
 
+        coilset = CoilSet(dcoil=0)
+
+        coilset.coil.insert(1.6870, 0, 0.7405, 2.1, nturn=544, scale=0.688, 
+                            section='rectangle', turn='circle',
+                            name='CSM1', part='CS')  # RT
+        biotgrid = BiotGrid(coilset.subframe)
+        biotgrid.solve(2*coilset.frame.nturn[0], 0)
+        self.coilset = coilset
+        self.biotgrid = biotgrid
+        
+    def mesh_structure(self, num=None):
+        bounds = self.coilset.frame.poly[0].bounds  # coil bounding box
+        self.limit = bounds[::2] + bounds[1::2]
+        if num is None:
+            num = self.coilset.frame.nturn[0]
+            grid = Grid(number=num, limit=self.limit)
+            num = (grid.data.dims['x'] + 1) * (grid.data.dims['z'] + 1)
+        grid = Grid(number=num, limit=self.limit)
+        self.mesh = df.RectangleMesh(df.Point(bounds[:2]),
+                                     df.Point(bounds[2:]),
+                                     grid.data.dims['x'], grid.data.dims['z'])
+        
         self.x = df.SpatialCoordinate(self.mesh)
         self.dx = df.Measure('dx')
         self._assemble_function_space()
@@ -284,32 +257,30 @@ class CSmodulue(Material_Model):
             
     @property
     def Ic(self):
-        return self.cc.Ic
+        return self.coilset.sloc['Ic']
     
     @Ic.setter
     def Ic(self, Ic):
-        self.cc.Ic = Ic
+        self.coilset.sloc['Ic'] = Ic
         self._update_force_interpolators()
         
     def _update_force_interpolators(self):
-        J = self.cc.coil.It / (self.cc.coil.dx * self.cc.coil.dz)
-        centers = (self.cc.subcoil.x, self.cc.subcoil.z)
-        
-        psi_x, psi_z = np.gradient(self.cc.grid.Psi / (2 * np.pi), 
-                                   self.cc.grid.dx, self.cc.grid.dz)
-        xm = self.cc.grid.x2d
+        J = self.coilset.subframe.It.sum() / (self.coilset.frame.dx[0] * 
+                                     self.coilset.frame.dz[0])
+
+        Psi = np.dot(self.biotgrid.data.Psi, self.coilset.sloc['Ic'])
+        Psi.shape = self.biotgrid.shape
+        psi_x, psi_z = np.gradient(Psi / (2 * np.pi), 
+                                   self.biotgrid.data.x, self.biotgrid.data.z)
+        xm = self.biotgrid.data.x2d.values
         xm[xm == 0] = 1e-34
         Bx = -psi_z / xm
         Bz = psi_x / xm
-        '''
-        Bx = RectBivariateSpline(self.cc.grid.x, self.cc.grid.z, Bx).ev(*centers)
-        Bz = RectBivariateSpline(self.cc.grid.x, self.cc.grid.z, Bz).ev(*centers)
-        self.fx = NearestNDInterpolator(centers, J * Bz)
-        self.fz = NearestNDInterpolator(centers, -J * Bx)
-        '''
-        self.fx = RectBivariateSpline(self.cc.grid.x, self.cc.grid.z, 
+        self.fx = RectBivariateSpline(self.biotgrid.data.x, 
+                                      self.biotgrid.data.z, 
                                       J * Bz)
-        self.fz = RectBivariateSpline(self.cc.grid.x, self.cc.grid.z,
+        self.fz = RectBivariateSpline(self.biotgrid.data.x, 
+                                      self.biotgrid.data.z,
                                       -J * Bx)
         self.f = JxB(self.fx, self.fz)
         self._assemble_forcing()
@@ -381,6 +352,7 @@ class CSmodulue(Material_Model):
                     'LOD': (self.limit[1], self.limit[-2])}
         self.f_eps.assign(df.project(self.eps(self.u), self.T))
         self.f_sigma.assign(df.project(self.sigma(self.u), self.T))
+        
         for ID in midplane:
             #sigma_xx = self.f_sigma(midplane[ID])[0]
             #sigma_zz = self.f_sigma(midplane[ID])[8]
@@ -439,11 +411,11 @@ class CSmodulue(Material_Model):
         self.solve()
         self.extract_displacments(verbose=False)
         displace = [self.displace[('ID', 'mm')], self.displace[('OD', 'mm')],
+                    self.displace[('U', 'mm')],
                     self.displace[('ID', 'ppm')], self.displace[('OD', 'ppm')]]
         err = displace_ct - np.array(displace)
-        err[2:] /= 1000  # normalize strain error
-        print(self.material_data_text(full=False), 
-              self.displace.to_numpy(), np.linalg.norm(err))
+        err[3:] /= 1000  # normalize strain error
+        print(self.material_data_text(full=False), np.linalg.norm(err))
         return np.linalg.norm(err)
     
     def extract_properties(self):
@@ -455,7 +427,8 @@ class CSmodulue(Material_Model):
         nM = np.sum(_ismodulus)
         nNu = len(xo) - nM
         #data = (-3.02, -1.77)  # 48.5 kA
-        data = (-2.05, -1.20, 838, 457)  # 40kA
+        #data = (-2.05, -1.20, -0.34, 838, 457)  # 40kA
+        data = (-2.04, -1.19, -0.1, 599, 531)  # 40kA CSM2
         x = minimize(self.match_shape, xo, args=data, #, 323, 455
                      method='SLSQP', options={'ftol': 1e-4},
                      bounds=(*[Mlim for __ in range(nM)], 
@@ -474,7 +447,7 @@ class CSmodulue(Material_Model):
             df.plot(self.f, mesh=self.mesh, scale_units='height', 
                     scale=2.5e9, width=0.0075, zorder=60)
             #self.cc.plot(ax=ax[0])
-            self.cc.grid.plot_flux(ax=ax[0], lw=1.5, color='gray')
+            self.biotgrid.plot(axes=ax[0])#, lw=1.5, color='gray')
             plt.despine()
             plt.axis('off')
             ax_disp = ax[1]
@@ -500,21 +473,21 @@ class CSmodulue(Material_Model):
         pL = [np.mean(self.limit[:2]), self.limit[-2]]
         pL += scale * self.u(*pL)
         
-        ax_disp.text(*pID, f'{csm.displace[("ID", "mm")]:1.2f}mm\n',
+        ax_disp.text(*pID, f'{self.displace[("ID", "mm")]:1.2f}mm\n',
                    ha='left', va='bottom')
-        ax_disp.text(*pOD, f'\n{csm.displace[("OD", "mm")]:1.2f}mm',
+        ax_disp.text(*pOD, f'\n{self.displace[("OD", "mm")]:1.2f}mm',
                    ha='right', va='top')
-        ax_disp.text(*pU, f'{csm.displace[("U", "mm")]:1.2f}mm',
+        ax_disp.text(*pU, f'{self.displace[("U", "mm")]:1.2f}mm',
                    ha='center', va='top', color='C3')  
-        #ax_disp.text(*pL, f'{csm.displace[("L", "mm")]:1.2f}mm',
+        #ax_disp.text(*pL, f'{self.displace[("L", "mm")]:1.2f}mm',
         #           ha='center', va='bottom')  
-        ax_disp.text(*pID, f'{csm.displace[("ID", "ppm")]:1.0f}ppm',
+        ax_disp.text(*pID, f'{self.displace[("ID", "ppm")]:1.0f}ppm',
                    ha='right', va='center', rotation=90)
-        ax_disp.text(*pUID, f'{csm.displace[("UID", "ppm")]:1.0f}ppm',
+        ax_disp.text(*pUID, f'{self.displace[("UID", "ppm")]:1.0f}ppm',
                    ha='right', va='top', rotation=90, color='C3')
-        ax_disp.text(*pUOD, f'{csm.displace[("UOD", "ppm")]:1.0f}ppm',
+        ax_disp.text(*pUOD, f'{self.displace[("UOD", "ppm")]:1.0f}ppm',
                    ha='left', va='top', rotation=-90, color='C3')
-        ax_disp.text(*pOD, f'{csm.displace[("OD", "ppm")]:1.0f}ppm',
+        ax_disp.text(*pOD, f'{self.displace[("OD", "ppm")]:1.0f}ppm',
                    ha='left', va='center', rotation=-90)
         fig.suptitle(
                 #f'{self.material_model}\n' + \
@@ -524,31 +497,35 @@ class CSmodulue(Material_Model):
     
 if __name__ == '__main__':
     
-    csm = CSmodulue(material_model='t', read_txt=True,
-                    N=None)
+    csm = CSmodulue(material_model='t', num=None)
     
     
     #csm.Ic = 48.5e3# * 1.28
     
     csm.Ic = 40e3
-    csm.material_data = {'Ep': 22.5e9}
+    csm.material_data = {'Ep': 30e9}
     
     # t: 'Ep', 'Et', 'nu_pp', 'nu_pt'
-    csm._active[:] = False
-    csm._active[1] = True
-    csm._active[2] = True
-    csm._active[3] = True
+    csm._active[:] = True
+    #csm._active[0] = True
+    #csm._active[2] = True
+    
+    #csm._active[1] = True
+    #csm._active[2] = True
+    #csm._active[3] = True
+    
     #csm._active[-1] = True
     #csm._active[-1:] = True
     
     #csm._active[-2:] = True
+    
     csm.extract_properties()
     
     csm.solve()
     csm.extract_displacments()
 
     plt.set_context('talk')
-    csm.plot(full=True)
+    csm.plot(scale=100, full=True, twin=True)
 
     
     

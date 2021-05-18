@@ -31,8 +31,7 @@ class cold_test(pythonIO):
               'bara': 'apressure',
               'mbar': 'pressure',
               'g/s': 'flow',
-              #'ppm': 'strain',
-              'uStrain': 'strain',
+              'ppm': 'strain',
               'mm': 'extend'}
     _labels = {'current': '$I$ kA',
                'temperature': '$T$ K',
@@ -170,12 +169,26 @@ class cold_test(pythonIO):
         if '021320 - 021420' in filename:  # correct time shift
             data.loc[:, 'timestamp'] -= datetime.timedelta(seconds=21*60+21)
         self.format_columns(data)
-        # five gauge average
-        data.loc[:, ('ST119-123', 'uStrain')] = data.loc[
-            :, [f'ST{i}' for i in range(119, 124)]].mean(1)
-        data.loc[:, ('ST124-128', 'uStrain')] = data.loc[
-            :, [f'ST{i}' for i in range(124, 129)]].mean(1)
+        # five gauge vertical strain
+        self.mean_strain('STvID', data, range(119, 124))
+        self.mean_strain('STvOD', data, range(124, 129))
+        # three gauge hoop strain, ID
+        self.mean_strain('SThID0', data, [101, 107, 113])
+        self.mean_strain('SThID1', data, [102, 108, 114])
+        self.mean_strain('SThID2', data, [103, 109, 115])
+        # three gauge hoop strain, OD
+        self.mean_strain('SThOD0', data, [104, 110, 116])
+        self.mean_strain('SThOD1', data, [105, 111, 117])
+        self.mean_strain('SThOD2', data, [106, 112, 118])
+        # rename ppm
+        data.rename({'uStrain': 'ppm'}, level=1, axis=1, inplace=True)
         return data
+
+    def mean_strain(self, label, data, index):
+        """Calculate mean strain."""
+        columns = [col for i in index if (col := f'ST{i}') in data]
+        data.loc[:, (label, 'uStrain')] = data.loc[:, columns].mean(1)
+
 
     def format_columns(self, data):
         data.rename(columns={'timestamp': 'timestamp_(time}'},
@@ -451,7 +464,6 @@ class cold_test(pythonIO):
         group = self.channels[dataframe.columns.droplevel(1)[0]]
         ax = plt.subplots(1, 1)[1]
         min_value = dataframe.abs().max().max()
-        print(min_value)
         for i, col in enumerate(dataframe):
             if not np.isnan(dataframe.loc[:, col]).all() and \
                     dataframe.loc[:, col].min() < -0.1:
@@ -560,6 +572,8 @@ class cold_test(pythonIO):
             return slice('2021-04-09', '2021-04-09 13:20:00')
         if index == 'CSM2_09_trim':
             return slice('2021-04-09 10:30:00', '2021-04-09 13:20:00')
+        if index == 'CSM2_19':
+            return slice('2021-03-19', '2021-03-19')
         return slice(None)
 
 
@@ -571,16 +585,24 @@ if __name__ == '__main__':
     ct = cold_test(project_dir='CSM2', read_txt=False)
     #ct.load_coldtest('displace', read_txt=True)
 
-    ct.plot_loop('displace', index='CSM2_09', ncol=4)
-    #ct.fit('extend', index='CSM2_08', Imin=12.5, Itrim=27.5, Imax=40, ncol=4)
-    ct.fit('displace', index='CSM2_09', Imin=12.5, Itrim=27.5, Imax=40, ncol=4)
+    #ct.plot_loop('displace', index='CSM2_09', ncol=4)
+    #ct.fit('extend', index='CSM2_08', Imin=12.5, Itrim=25, Imax=40, ncol=4)
+    ct.fit('displace', index='CSM2_09', Imin=12.5, Itrim=25, Imax=40, ncol=4)
     #index = slice('2021-03-09 09:10', '2021-03-11 16:27:30')
 
     #ct.load_coldtest('strain')
     #ct.strain.drop(columns=['ST108', 'ST109','ST110'], inplace=True)
-    #ct.plot_row(['DS002'], index='CSM2')
+    #ct.plot_row(['ST104'], index='CSM2_08')
     #ct.plot('extend')
 
+    ct.fit(['STvID', 'STvOD'],
+           index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=3)
+
+
+    ct.fit(['SThID0', 'SThOD0',
+            'SThID1', 'SThOD1',
+            'SThID2', 'SThOD2'],
+           index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=3)
 
     #ct.plot_row(['ST119-123', 'ST124-128'], index='CSM2_08', ncol=2)
     #ct.fit(['ST119-123', 'ST124-128'], index='CSM2_08',

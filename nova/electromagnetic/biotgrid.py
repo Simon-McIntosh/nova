@@ -142,8 +142,8 @@ class BiotGrid(Axes):
         # insert grid data
         self.data.coords['x'] = grid.data.x
         self.data.coords['z'] = grid.data.z
-        # self.data.coords['x2d'] = (['x', 'z'], grid.data.x2d)
-        # self.data.coords['z2d'] = (['x', 'z'], grid.data.z2d)
+        self.data.coords['x2d'] = (['x', 'z'], grid.data.x2d)
+        self.data.coords['z2d'] = (['x', 'z'], grid.data.z2d)
 
     @property
     def shape(self):

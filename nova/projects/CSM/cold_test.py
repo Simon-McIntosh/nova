@@ -8,7 +8,7 @@ import matplotlib.gridspec
 import numpy as np
 import pandas
 from scipy.interpolate import interp1d
-from scipy.signal import welch
+import scipy.signal
 
 from nova.definitions import root_dir
 from nova.utilities.IO import pythonIO
@@ -259,7 +259,7 @@ class cold_test(pythonIO):
                 data.loc[index, col] = interp(t[index])
                 # calculate high frequency content
                 dt = np.median(np.diff(t))
-                __, psd = welch(data.loc[:, col], 1/dt)
+                __, psd = scipy.signal.welch(data.loc[:, col], 1/dt)
                 if psd[-1] > 1 and col in Tcol:
                     data.drop(columns=col, inplace=True)
             elif col in Tcol:
@@ -332,7 +332,6 @@ class cold_test(pythonIO):
                 channels = dataframe.columns[::-1]
             dataframe = dataframe.loc[:, channels]
         dataframe = dataframe[index]
-        dataframe = dataframe[~dataframe.index.duplicated(keep='first')]
         return dataframe, group
 
     def plot(self, label, index=None, ax=None,
@@ -421,8 +420,7 @@ class cold_test(pythonIO):
         self.groups.append('shrink')
         self.fit(shrink, index='test', plot=plot, Imax=Imax)
 
-    def fit(self, label, index='test', Imin=7.5, Itrim=40, Imax=40, plot=True,
-            ncol=2, color=None):
+    def get_current(self, label, index):
         index = self.get_index(index)
         # extract current
         if not hasattr(self, 'current'):
@@ -446,10 +444,40 @@ class cold_test(pythonIO):
                 dataframe.columns)
         # zero offset
         dataframe -= self.offset(dataframe, 5)
-        dI = np.gradient(I, self.t(I.index))
+        return I, dataframe
 
+    def plot_loop(self, label, index='CSM2', ncol=2):
+        I, dataframe = self.get_current(label, index)
+        group = self.channels[dataframe.columns.droplevel(1)[0]]
+        ax = plt.subplots(1, 1)[1]
+        min_value = dataframe.abs().max().max()
+        print(min_value)
+        for i, col in enumerate(dataframe):
+            if not np.isnan(dataframe.loc[:, col]).all() and \
+                    dataframe.loc[:, col].min() < -0.1:
+                '''
+                t = self.t(dataframe.index)
+                num = int((t[-1] - t[0]) / np.min(np.diff(t)))
+                t_interp = np.linspace(t[0], t[-1], num)
+                I = scipy.interpolate.interp1d(t, I)(t_interp)
+                value = scipy.interpolate.interp1d(t, dataframe[col])(t_interp)
+                '''
+                value = scipy.signal.savgol_filter(dataframe[col], 21, 1)
+                #value = scipy.signal.medfilt(dataframe[col], 21)
+                ax.plot(I, value, '-', label=col[0], color=f'C{i}')
+        plt.despine()
+        plt.xlabel('$I$ kA')
+        plt.ylabel(self._labels[group])
+        shift = np.floor(dataframe.shape[1] / ncol) * 0.12
+        plt.legend(ncol=ncol, loc='upper center',
+                   bbox_to_anchor=(0.5, 1+shift))
+
+    def fit(self, label, index='test', Imin=7.5, Itrim=40, Imax=40, plot=True,
+            ncol=2, color=None):
+        I, dataframe = self.get_current(label, index)
+        dI = np.gradient(I, self.t(I.index))
         # trim  current
-        current_index = slice(None)#(I >= Imin) #& (I <= Itrim) & (dI < -0.02)
+        current_index = (I >= Imin) & (I <= Itrim) & (dI < -0.02)
         I = I[current_index]
         dataframe = dataframe[current_index]
         coef = np.zeros(dataframe.shape[1])
@@ -459,7 +487,6 @@ class cold_test(pythonIO):
                 coef[i] = np.linalg.lstsq(
                         I[index].to_numpy().reshape(-1, 1)**2,
                         dataframe.loc[index, col], rcond=None)[0][0]
-
         if plot:
             ax = plt.subplots(1, 1)[1]
             if Imax is None:
@@ -525,10 +552,14 @@ class cold_test(pythonIO):
             return slice('2020-02-12 16:10', '2020-02-12 16:27:30')
         if index == 'CSM2':
             return slice('2021-03-18', '2021-04-22')
+        if index == 'CSM2_trim':
+            return slice('2021-04-08', '2021-04-09')
         if index == 'CSM2_08':
             return slice('2021-04-08 12:00:00', '2021-04-08  18:00:00')
         if index == 'CSM2_09':
             return slice('2021-04-09', '2021-04-09 13:20:00')
+        if index == 'CSM2_09_trim':
+            return slice('2021-04-09 10:30:00', '2021-04-09 13:20:00')
         return slice(None)
 
 
@@ -540,21 +571,20 @@ if __name__ == '__main__':
     ct = cold_test(project_dir='CSM2', read_txt=False)
     #ct.load_coldtest('displace', read_txt=True)
 
-
+    ct.plot_loop('displace', index='CSM2_09', ncol=4)
     #ct.fit('extend', index='CSM2_08', Imin=12.5, Itrim=27.5, Imax=40, ncol=4)
-    #ct.fit('displace', index='CSM2_09', Imin=12.5, Itrim=27.5, Imax=40, ncol=4)
+    ct.fit('displace', index='CSM2_09', Imin=12.5, Itrim=27.5, Imax=40, ncol=4)
     #index = slice('2021-03-09 09:10', '2021-03-11 16:27:30')
 
     #ct.load_coldtest('strain')
     #ct.strain.drop(columns=['ST108', 'ST109','ST110'], inplace=True)
-    #ct.plot('strain', index=index)
+    #ct.plot_row(['DS002'], index='CSM2')
     #ct.plot('extend')
 
-    ct.load_coldtest('strain', read_txt=False)
 
-    ct.plot_row(['ST119-123', 'ST124-128'], index='CSM2_08', ncol=2)
-    ct.fit(['ST119-123', 'ST124-128'], index='CSM2_08',
-           Imin=20, Itrim=40, Imax=48.5, ncol=4)
+    #ct.plot_row(['ST119-123', 'ST124-128'], index='CSM2_08', ncol=2)
+    #ct.fit(['ST119-123', 'ST124-128'], index='CSM2_08',
+    #       Imin=0, Itrim=15, Imax=48.5, ncol=4)
 
     #ct.fit(['DS001', 'DS004', 'DS007', 'DS008'],
     #       index='CSM2_08', Imin=12.5, Itrim=30, Imax=48.5, ncol=4)

@@ -16,7 +16,7 @@ from nova.utilities.pyplot import plt
 class Material_Model:
     
     _models = ['isotropic', 'transversal', 'orthotropic']
-    _modulus_factor = 5e11  # normalization factor for minimise
+    _modulus_factor = 5e10  # normalization factor for minimise
     
     def __init__(self, material_model=None):
         self._material_data = pd.Series(dtype=float)
@@ -80,7 +80,7 @@ class Material_Model:
                 self.material_data = {
                          'Ex': 48.5e9,#51e9,  # x tensile modulus
                          'Et': 120.4e9,#111e9,  # toroidal tensile modulus
-                         'Ez': 46.6e9,#53e9,  # x tensile modulus
+                         'Ez': 46.6e9,#53e9,  # z tensile modulus
                          'Gxz': 6.43e9,#13.7e9,
                          'nu_xz': 0.2998,#0.29,  # poloidal Poisson's ratio
                          'nu_tx': 0.1207*120.4/48.5,#0.3,#0.3*112/52,  # Et/Ex * nu_xt
@@ -336,28 +336,32 @@ class CSmodulue(Material_Model):
     
     def extract_displacments(self, verbose=True):
         displace = {}
-        displace[('ID', 'mm')] = 1e3 * (self.u(self.limit[::3])[1] - 
-                                        self.u(self.limit[::2])[1])
-        displace[('OD', 'mm')] = 1e3 * (self.u(self.limit[1::2])[1] - 
-                                        self.u(self.limit[1:3])[1])
-        displace[('U', 'mm')] = 1e3 * (self.u(self.limit[1::2])[0] - 
-                                        self.u(self.limit[::3])[0])
-        displace[('L', 'mm')] = 1e3 * (self.u(self.limit[1:3])[0] - 
-                                        self.u(self.limit[::2])[0])        
-        midplane = {'ID': (self.limit[0], np.mean(self.limit[-2:])),
-                    'OD': (self.limit[1], np.mean(self.limit[-2:])),
-                    'UID': (self.limit[0], self.limit[-1]),
-                    'UOD': (self.limit[1], self.limit[-1]),
-                    'LID': (self.limit[0], self.limit[-2]),
-                    'LOD': (self.limit[1], self.limit[-2])}
+        displace[('IDv', 'mm')] = 1e3 * (self.u(self.limit[::3])[1] - 
+                                         self.u(self.limit[::2])[1])
+        displace[('ODv', 'mm')] = 1e3 * (self.u(self.limit[1::2])[1] - 
+                                         self.u(self.limit[1:3])[1])
+        displace[('IDr', 'mm')] = 1e3 * self.u(self.limit[::3])[0]
+        displace[('ODr', 'mm')] = 1e3 * self.u(self.limit[1::2])[0]
+        
+        midplane = np.mean(self.limit[-2:])
+        turn_height = (self.limit[-1] - self.limit[-2]) / 40
+        self.hoop = dict(IDh0=(self.limit[0], midplane),
+                    IDh1=(self.limit[0], midplane + 10*turn_height),
+                    IDh2=(self.limit[0], midplane + 18*turn_height),
+                    ODh0=(self.limit[1], midplane),
+                    ODh1=(self.limit[1], midplane + 10*turn_height),
+                    ODh2=(self.limit[1], midplane + 18*turn_height))
+        self.vertical = dict(IDv0=(self.limit[0], midplane + 0.5*turn_height),
+                        ODv0=(self.limit[1], midplane + 0.5*turn_height))
         self.f_eps.assign(df.project(self.eps(self.u), self.T))
         self.f_sigma.assign(df.project(self.sigma(self.u), self.T))
-        
-        for ID in midplane:
-            #sigma_xx = self.f_sigma(midplane[ID])[0]
-            #sigma_zz = self.f_sigma(midplane[ID])[8]
-            eps_tt = self.f_eps(midplane[ID])[4]  # hoop strain
-            displace[(ID, 'ppm')] = 1e6 * eps_tt
+        # extract data
+        for label in self.hoop:
+            eps_tt = self.f_eps(self.hoop[label])[4]  # hoop strain
+            displace[(label, 'ppm')] = 1e6 * eps_tt
+        for label in self.vertical:
+            eps_zz = self.f_eps(self.vertical[label])[8]  # vertical strain
+            displace[(label, 'ppm')] = 1e6 * eps_zz
         self.displace = pd.Series(displace)
         self.displace.index = pd.MultiIndex.from_tuples(self.displace.index)
         if verbose:
@@ -410,11 +414,22 @@ class CSmodulue(Material_Model):
         displace_ct = args  # cold test data
         self.solve()
         self.extract_displacments(verbose=False)
-        displace = [self.displace[('ID', 'mm')], self.displace[('OD', 'mm')],
-                    self.displace[('U', 'mm')],
-                    self.displace[('ID', 'ppm')], self.displace[('OD', 'ppm')]]
+        displace = [
+                    #self.displace[('IDv', 'mm')], 
+                    #self.displace[('ODv', 'mm')],
+                    #self.displace[('IDr', 'mm')], 
+                    #self.displace[('ODr', 'mm')],
+                    self.displace[('IDh0', 'ppm')],
+                    self.displace[('IDh1', 'ppm')],
+                    self.displace[('IDh2', 'ppm')],
+                    self.displace[('ODh0', 'ppm')],
+                    self.displace[('ODh1', 'ppm')],
+                    self.displace[('ODh2', 'ppm')],
+                    self.displace[('IDv0', 'ppm')],
+                    #self.displace[('ODv0', 'ppm')]
+                    ]
         err = displace_ct - np.array(displace)
-        err[3:] /= 1000  # normalize strain error
+        err[:] /= 500  # normalize strain error
         print(self.material_data_text(full=False), np.linalg.norm(err))
         return np.linalg.norm(err)
     
@@ -423,12 +438,16 @@ class CSmodulue(Material_Model):
         _ismodulus = self._ismodulus[self._active]
         xo[_ismodulus] /= self._modulus_factor  # normalize moduli
         Mlim = 1e9 * np.array([10, 160]) / self._modulus_factor
-        Nulim = (0.05, 0.9)
+        Nulim = (0, 1.2)
         nM = np.sum(_ismodulus)
         nNu = len(xo) - nM
         #data = (-3.02, -1.77)  # 48.5 kA
         #data = (-2.05, -1.20, -0.34, 838, 457)  # 40kA
-        data = (-2.04, -1.19, -0.1, 599, 531)  # 40kA CSM2
+        data = (
+            #-2.04, -1.19, 
+            #1.31/2, 1.22/2, 
+            603, 580, 602, 537, 500, 393, -1035#, -918
+            )  # 40kA CSM2 
         x = minimize(self.match_shape, xo, args=data, #, 323, 455
                      method='SLSQP', options={'ftol': 1e-3},  # 1e-4
                      bounds=(*[Mlim for __ in range(nM)], 
@@ -473,14 +492,22 @@ class CSmodulue(Material_Model):
         pL = [np.mean(self.limit[:2]), self.limit[-2]]
         pL += scale * self.u(*pL)
         
+        for label in ['IDh0', 'IDh1', 'IDh2', 'ODh0', 'ODh1', 'ODh2']:
+            coord = self.hoop[label]
+            coord += scale*self.u(*coord)
+            ax_disp.plot(*coord, 'o', ms=12)
+        
+        '''
         ax_disp.text(*pID, f'{self.displace[("ID", "mm")]:1.2f}mm\n',
                    ha='left', va='bottom')
         ax_disp.text(*pOD, f'\n{self.displace[("OD", "mm")]:1.2f}mm',
                    ha='right', va='top')
-        ax_disp.text(*pU, f'{self.displace[("U", "mm")]:1.2f}mm',
-                   ha='center', va='top', color='C3')  
+        '''
+        #ax_disp.text(*pU, f'{self.displace[("U", "mm")]:1.2f}mm',
+        #           ha='center', va='top', color='C3')  
         #ax_disp.text(*pL, f'{self.displace[("L", "mm")]:1.2f}mm',
-        #           ha='center', va='bottom')  
+        #           ha='center', va='bottom') 
+        '''
         ax_disp.text(*pID, f'{self.displace[("ID", "ppm")]:1.0f}ppm',
                    ha='right', va='center', rotation=90)
         ax_disp.text(*pUID, f'{self.displace[("UID", "ppm")]:1.0f}ppm',
@@ -489,6 +516,7 @@ class CSmodulue(Material_Model):
                    ha='left', va='top', rotation=-90, color='C3')
         ax_disp.text(*pOD, f'{self.displace[("OD", "ppm")]:1.0f}ppm',
                    ha='left', va='center', rotation=-90)
+        '''
         fig.suptitle(
                 #f'{self.material_model}\n' + \
                 f'{self.material_data_text(full=full, tex=True)}', 
@@ -503,12 +531,11 @@ if __name__ == '__main__':
     #csm.Ic = 48.5e3# * 1.28
     
     csm.Ic = 40e3
-    #csm.material_data = dict(Ep=25.9e9, Et=160.0e9, nu_pp=0.3, nu_tp=0.3)
+    csm.material_data = dict(Ep=24.6e9, Et=127.0e9, nu_pp=0.884)
     
     # t: 'Ep', 'Et', 'nu_pp', 'nu_pt'
-    csm._active[:] = False
-    csm._active[:2] = True
-    #csm._active[2] = True
+    csm._active[:] = True
+    #csm._active[:3] = True
     
     #csm._active[1] = True
     #csm._active[2] = True
@@ -525,7 +552,7 @@ if __name__ == '__main__':
     csm.extract_displacments()
 
     plt.set_context('talk')
-    csm.plot(scale=100, full=True)
+    csm.plot(scale=250, full=True, twin=True)
 
     
     

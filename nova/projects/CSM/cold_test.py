@@ -2,6 +2,7 @@
 import datetime
 import os
 from glob import glob
+import string
 
 # import matplotlib.dates as mdates
 import matplotlib.gridspec
@@ -378,6 +379,7 @@ class cold_test(pythonIO):
                 ax.set_xlabel('timestamp')
             if group in self._labels and ylabel:
                 ax.set_ylabel(self._labels[group])
+        plt.set_aspect(0.7)
         return offset
 
     def plot_col(self, label, index=['cooldown', 'test'], offset_dt=5*60):
@@ -463,20 +465,19 @@ class cold_test(pythonIO):
         I, dataframe = self.get_current(label, index)
         group = self.channels[dataframe.columns.droplevel(1)[0]]
         ax = plt.subplots(1, 1)[1]
-        min_value = dataframe.abs().max().max()
+        max_value = dataframe.abs().max().max()
         for i, col in enumerate(dataframe):
             if not np.isnan(dataframe.loc[:, col]).all() and \
-                    dataframe.loc[:, col].min() < -0.1:
-                '''
-                t = self.t(dataframe.index)
-                num = int((t[-1] - t[0]) / np.min(np.diff(t)))
-                t_interp = np.linspace(t[0], t[-1], num)
-                I = scipy.interpolate.interp1d(t, I)(t_interp)
-                value = scipy.interpolate.interp1d(t, dataframe[col])(t_interp)
-                '''
-                value = scipy.signal.savgol_filter(dataframe[col], 21, 1)
-                #value = scipy.signal.medfilt(dataframe[col], 21)
-                ax.plot(I, value, '-', label=col[0], color=f'C{i}')
+                    dataframe.loc[:, col].abs().max() > 0.05*max_value:
+                value = scipy.signal.savgol_filter(dataframe[col], 51, 1)
+                try:
+                    index = int(col[0].lstrip(string.ascii_letters))
+                    if col[0][:2] == 'ST':
+                        index += 1
+                except ValueError:
+                    index = i+1
+                ax.plot(I, value, '-', label=col[0], color=f'C{index-1}',
+                        lw=1.5)
         plt.despine()
         plt.xlabel('$I$ kA')
         plt.ylabel(self._labels[group])
@@ -492,6 +493,7 @@ class cold_test(pythonIO):
         current_index = (I >= Imin) & (I <= Itrim) & (dI < -0.02)
         I = I[current_index]
         dataframe = dataframe[current_index]
+        max_value = dataframe.abs().max().max()
         coef = np.zeros(dataframe.shape[1])
         for i, col in enumerate(dataframe):
             if not np.isnan(dataframe.loc[:, col]).all():
@@ -516,14 +518,23 @@ class cold_test(pythonIO):
                              postfix=self._units_r.get(group, 'mm'),
                              Ndiv=20)
             for i, col in enumerate(dataframe):
+                if dataframe[col].abs().max() < 0.05*max_value:
+                    continue
                 if color is None:
-                    c = f'C{i}'
+                    try:
+                        index = int(col[0].lstrip(string.ascii_letters))
+                        if col[0][:2] == 'ST':
+                            index += 1
+                    except ValueError:
+                        index = i+1
+                    c = f'C{index-1}'
                 else:
                     c = color
                 if not np.isnan(dataframe.loc[:, col]).all():
-                    plt.plot(I, dataframe[col], '.', label=col[0],
-                             color=c, alpha=1)
-                    plt.plot(_I, coef[i]*_I**2, color=c, alpha=1)
+                    plt.plot(I, dataframe[col], '.',
+                             color=c, alpha=0.75, ms=4, zorder=-20)
+                    plt.plot(_I, coef[i]*_I**2, '--',
+                             color=c, alpha=1, label=col[0])
                     text.add('')
             if xtick is not None:
                 xticks = ax.get_xticks()
@@ -566,8 +577,10 @@ class cold_test(pythonIO):
             return slice('2021-03-18', '2021-04-22')
         if index == 'CSM2_trim':
             return slice('2021-04-08', '2021-04-09')
+        if index == 'CSM2_current':
+            return slice('2021-04-08', '2021-04-09  13:20:00')
         if index == 'CSM2_08':
-            return slice('2021-04-08 12:00:00', '2021-04-08  18:00:00')
+            return slice('2021-04-08 13', '2021-04-08  16')
         if index == 'CSM2_09':
             return slice('2021-04-09', '2021-04-09 13:20:00')
         if index == 'CSM2_09_trim':
@@ -585,6 +598,37 @@ if __name__ == '__main__':
     ct = cold_test(project_dir='CSM2', read_txt=False)
     #ct.load_coldtest('displace', read_txt=True)
 
+    ct.plot_row('displace', index='CSM2_08', ncol=4)
+    ct.plot_loop('displace', index='CSM2_08', ncol=4)
+    ct.fit('displace', index='CSM2_08', Imin=12.5, Itrim=25, Imax=40, ncol=4)
+
+    ct.plot_row(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', ncol=3)
+    ct.plot_loop(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', ncol=3)
+    ct.fit(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08',
+           Imin=12.5, Itrim=25, Imax=40, ncol=3)
+
+    ct.plot_row('extend', index='CSM2_08', ncol=2)
+    ct.plot_loop('extend', index='CSM2_08', ncol=2)
+    ct.fit('extend', index='CSM2_08', Imin=12.5, Itrim=25, Imax=40, ncol=2)
+
+
+    ct.plot_row(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08', ncol=3)
+    ct.plot_loop(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08', ncol=3)
+    ct.fit(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08', Imin=0, Itrim=25,
+           Imax=40, ncol=3)
+
+    ct.plot_row(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', ncol=3)
+    ct.plot_loop(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', ncol=3)
+    ct.fit(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', Imin=0, Itrim=25,
+           Imax=40, ncol=3)
+
+
+    ct.plot_row(['STvID', 'STvOD'], index='CSM2_08', ncol=3)
+    ct.plot_loop(['STvID', 'STvOD'], index='CSM2_08', ncol=3)
+    ct.fit(['STvID', 'STvOD'],
+           index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=2)
+
+    '''
     #ct.plot_loop('displace', index='CSM2_09', ncol=4)
     #ct.fit('extend', index='CSM2_08', Imin=12.5, Itrim=25, Imax=40, ncol=4)
     ct.fit('displace', index='CSM2_09', Imin=12.5, Itrim=25, Imax=40, ncol=4)
@@ -592,18 +636,29 @@ if __name__ == '__main__':
 
     #ct.load_coldtest('strain')
     #ct.strain.drop(columns=['ST108', 'ST109','ST110'], inplace=True)
-    #ct.plot_row(['ST104'], index='CSM2_08')
     #ct.plot('extend')
 
     ct.fit(['STvID', 'STvOD'],
            index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=3)
 
+    ct.fit(['ST103', 'ST109', 'ST115'],
+           index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=3)
+    [103, 109, 115]
 
-    ct.fit(['SThID0', 'SThOD0',
-            'SThID1', 'SThOD1',
-            'SThID2', 'SThOD2'],
+
+    ct.fit(['SThID2'],
            index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=3)
 
+    ct.fit(['SThOD0', 'SThOD1', 'SThOD2'],
+           index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=3)
+
+    ct.fit(['SThOD2'],
+           index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=3)
+
+    ct.plot_loop(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08')
+    ct.plot_loop(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08')
+
+    '''
     #ct.plot_row(['ST119-123', 'ST124-128'], index='CSM2_08', ncol=2)
     #ct.fit(['ST119-123', 'ST124-128'], index='CSM2_08',
     #       Imin=0, Itrim=15, Imax=48.5, ncol=4)

@@ -1,6 +1,8 @@
 
+import itertools
 import numpy as np
 import pandas as pd
+import pandas
 from scipy.interpolate import RectBivariateSpline
 from scipy.optimize import minimize
 
@@ -22,6 +24,19 @@ class Material_Model:
         self._material_data = pd.Series(dtype=float)
         self._fenics_data = {}
         self.material_model = material_model
+        
+    def set_data(self):
+        """Set experimental data."""
+        self.data = dict(IDv=-2.04, ODv=-1.19, IDr=1.31/2, ODr=1.22/2, 
+                         IDh0=603, IDh1=580, IDh2=602, 
+                         ODh0=537, ODh1=500, ODh2=393, 
+                         IDv0=-1035, ODv0=-918) # 40kA CSM2 
+        
+    def set_labels(self, labels: list[str]):
+        """Set optimization labels."""
+        if labels is None:
+            labels = []
+        self.labels = labels
         
     def _set_attributes(self, key_attributes, derived_attributes):
         self._key_attributes = key_attributes
@@ -118,7 +133,8 @@ class Material_Model:
                            [-nu_xz/Ex, -nu_tz/Et,     1/Ez,     0],
                            [       0,        0,          0, 1/Gxz]])
         C = np.linalg.inv(self.S)  # invert to from stiffness matrix
-        self.fenics_data = {'C': df.as_matrix(C)}
+        #self.fenics_data = {'C': df.as_matrix(C)}
+        self.fenics_data = {'C': C}
         
     @property
     def material_data(self):
@@ -190,12 +206,15 @@ class JxB(df.UserExpression):
     
 class CSmodulue(Material_Model):
     
-    def __init__(self, read_txt=False, material_model='isotropic', num=None):
+    def __init__(self, read_txt=False, material_model='isotropic', num=None,
+                 labels=None):
         self.read_txt = read_txt
         self._extract = False
         Material_Model.__init__(self, material_model)
         self.load_coilset()
-        self.mesh_structure(num=num)
+        self.mesh_structure(num=num) 
+        self.set_data()
+        self.set_labels(labels)
         
     def load_coilset(self, **kwargs):
         # read_txt = kwargs.get('read_txt', self.read_txt)
@@ -231,7 +250,8 @@ class CSmodulue(Material_Model):
         self.u = df.Function(self.V, name="Displacement")
         self.du = df.TrialFunction(self.V)
         self.u_ = df.TestFunction(self.V)
-        self.eps_u_ = self.eps(self.u_)        
+        self.eps_u_ = self.eps(self.u_)   
+        self.C = df.Constant(self.fenics_data['C'])
         self._assemble_internal_work()
         self.T = df.TensorFunctionSpace(self.mesh, 'CG', degree=2,
                                         shape=(3, 3))
@@ -251,6 +271,7 @@ class CSmodulue(Material_Model):
                     
     def solve(self):
         if self._update_internal_work:
+            self.C.assign(df.Constant(self.fenics_data['C']))
             self._assemble_internal_work()
             self._update_internal_work = False
         df.solve(self.a == self.l, self.u, bcs=self.constrain())
@@ -320,7 +341,7 @@ class CSmodulue(Material_Model):
         return lmbda*df.tr(self.eps(v))*df.Identity(3) + 2.0*mu*self.eps(v)
 
     def sigma_orthotropic(self, v):
-        return self.voigt2stress(df.dot(self.fenics_data['C'], 
+        return self.voigt2stress(df.dot(self.C, 
                                         self.strain2voigt(self.eps(v))))
     
     def sigma(self, v):
@@ -335,37 +356,60 @@ class CSmodulue(Material_Model):
         return df.sqrt(3 / 2 * s[i, j] * s[j, i])  # von Mises stress
     
     def extract_displacments(self, verbose=True):
-        displace = {}
-        displace[('IDv', 'mm')] = 1e3 * (self.u(self.limit[::3])[1] - 
-                                         self.u(self.limit[::2])[1])
-        displace[('ODv', 'mm')] = 1e3 * (self.u(self.limit[1::2])[1] - 
-                                         self.u(self.limit[1:3])[1])
-        displace[('IDr', 'mm')] = 1e3 * self.u(self.limit[::3])[0]
-        displace[('ODr', 'mm')] = 1e3 * self.u(self.limit[1::2])[0]
-        
         midplane = np.mean(self.limit[-2:])
         turn_height = (self.limit[-1] - self.limit[-2]) / 40
-        self.hoop = dict(IDh0=(self.limit[0], midplane),
-                    IDh1=(self.limit[0], midplane + 10*turn_height),
-                    IDh2=(self.limit[0], midplane + 18*turn_height),
-                    ODh0=(self.limit[1], midplane),
-                    ODh1=(self.limit[1], midplane + 10*turn_height),
-                    ODh2=(self.limit[1], midplane + 18*turn_height))
-        self.vertical = dict(IDv0=(self.limit[0], midplane + 0.5*turn_height),
-                        ODv0=(self.limit[1], midplane + 0.5*turn_height))
+        self.position = dict(IDv=(self.limit[::3], self.limit[::2]),
+                             ODv=(self.limit[1::2], self.limit[1:3]),
+                             IDr=self.limit[::3], ODr=self.limit[1::2],
+                             IDh0=(self.limit[0], midplane),
+                             IDh1=(self.limit[0], midplane + 10*turn_height),
+                             IDh2=(self.limit[0], midplane + 18*turn_height),
+                             ODh0=(self.limit[1], midplane),
+                             ODh1=(self.limit[1], midplane + 10*turn_height),
+                             ODh2=(self.limit[1], midplane + 18*turn_height),
+                             IDv0=(self.limit[0], midplane + 0.5*turn_height),
+                             ODv0=(self.limit[1], midplane + 0.5*turn_height))
+                
+        displace = {}
+        displace[('IDv', 'mm')] = 1e3 * (self.u(self.position['IDv'][0])[1] - 
+                                         self.u(self.position['IDv'][1])[1])
+        displace[('ODv', 'mm')] = 1e3 * (self.u(self.position['ODv'][0])[1] - 
+                                         self.u(self.position['ODv'][1])[1])
+        displace[('IDr', 'mm')] = 1e3 * self.u(self.position['IDr'])[0]
+        displace[('ODr', 'mm')] = 1e3 * self.u(self.position['ODr'])[0]
+        
         self.f_eps.assign(df.project(self.eps(self.u), self.T))
         self.f_sigma.assign(df.project(self.sigma(self.u), self.T))
         # extract data
-        for label in self.hoop:
-            eps_tt = self.f_eps(self.hoop[label])[4]  # hoop strain
+        for label in ['IDh0', 'IDh1', 'IDh2', 'ODh0', 'ODh1', 'ODh2']:
+            eps_tt = self.f_eps(self.position[label])[4]  # hoop strain
             displace[(label, 'ppm')] = 1e6 * eps_tt
-        for label in self.vertical:
-            eps_zz = self.f_eps(self.vertical[label])[8]  # vertical strain
+        for label in ['IDv0', 'ODv0']:
+            eps_zz = self.f_eps(self.position[label])[8]  # vertical strain
             displace[(label, 'ppm')] = 1e6 * eps_zz
         self.displace = pd.Series(displace)
         self.displace.index = pd.MultiIndex.from_tuples(self.displace.index)
         if verbose:
-            print(self.displace)
+            displace = self.displace.reset_index(level=1, name='FEA')
+            displace.rename(columns=dict(level_1='unit'), inplace=True)
+            
+            dataframe = pandas.DataFrame(
+                index=displace.index,
+                columns=['sensor', 'unit', 'value', 'FEA', 
+                         'fit', 'error %'])
+            dataframe.loc[:, displace.columns] = displace
+            dataframe['sensor'] = self.data
+            dataframe['value'] = self.data.values()
+            dataframe['fit'] = [name in self.labels 
+                                for name in dataframe.index]
+            dataframe['error %'] = 1e2 * (dataframe.FEA - 
+                                        dataframe.value) / dataframe.value
+            self.dataframe = dataframe
+            if dataframe.fit.any():
+                print(dataframe)
+                print('')
+                print(dataframe.loc[dataframe['fit'], 'error %'].abs().mean())
+                print(dataframe['error %'].abs().mean())
             
     def material_data_text(self, material_data=None, full=False, tex=False):
         if material_data is None:
@@ -411,112 +455,101 @@ class CSmodulue(Material_Model):
         _x[self._ismodulus[self._active]] *= self._modulus_factor
         attributes = np.array(self._key_attributes)[self._active]
         self.material_data = {a: _x[i] for i, a in enumerate(attributes)}
-        displace_ct = args  # cold test data
+        displace_ct = np.array(args[0])  # cold test data
         self.solve()
         self.extract_displacments(verbose=False)
-        displace = [
-                    #self.displace[('IDv', 'mm')], 
-                    #self.displace[('ODv', 'mm')],
-                    #self.displace[('IDr', 'mm')], 
-                    #self.displace[('ODr', 'mm')],
-                    self.displace[('IDh0', 'ppm')],
-                    self.displace[('IDh1', 'ppm')],
-                    self.displace[('IDh2', 'ppm')],
-                    self.displace[('ODh0', 'ppm')],
-                    self.displace[('ODh1', 'ppm')],
-                    self.displace[('ODh2', 'ppm')],
-                    self.displace[('IDv0', 'ppm')],
-                    #self.displace[('ODv0', 'ppm')]
-                    ]
-        err = displace_ct - np.array(displace)
-        err[:] /= 500  # normalize strain error
-        print(self.material_data_text(full=False), np.linalg.norm(err))
-        return np.linalg.norm(err)
+        displace = self.displace.droplevel(1)
+        displace = displace.loc[self.labels].to_numpy()
+        err = 1e2 * (displace - displace_ct) / displace_ct
+        print(self.material_data_text(full=False), 
+              f'{np.mean(np.abs(err)):1.3f}')
+        return np.mean(np.abs(err))
     
-    def extract_properties(self):
+    def extract_properties(self, labels=None):
+        if labels is not None:
+            self.set_labels(labels)
         xo = self.material_data.to_numpy()[self._active]
         _ismodulus = self._ismodulus[self._active]
         xo[_ismodulus] /= self._modulus_factor  # normalize moduli
-        Mlim = 1e9 * np.array([10, 160]) / self._modulus_factor
-        Nulim = (0, 1.2)
+        Mlim = 1e9 * np.array([0.01, 160]) / self._modulus_factor
+        Nulim = (-1+1e-3, 1.2)
         nM = np.sum(_ismodulus)
         nNu = len(xo) - nM
         #data = (-3.02, -1.77)  # 48.5 kA
         #data = (-2.05, -1.20, -0.34, 838, 457)  # 40kA
-        data = (
-            #-2.04, -1.19, 
-            #1.31/2, 1.22/2, 
-            603, 580, 602, 537, 500, 393, -1035#, -918
-            )  # 40kA CSM2 
+        data = [self.data[label] for label in self.labels]
         x = minimize(self.match_shape, xo, args=data, #, 323, 455
-                     method='SLSQP', options={'ftol': 1e-3},  # 1e-4
+                     method='SLSQP', options={'ftol': 1e-5},  # 1e-4
                      bounds=(*[Mlim for __ in range(nM)], 
                              *[Nulim for __ in range(nNu)]))
         print(x)
-        self.match_shape(x.x, *data)  # propogate solution
+        self.match_shape(x.x, data)  # propogate solution
         self._extract = True
         
     def plot(self, scale=100, full=False, twin=False):
-        plt.set_aspect(1.0)
+        plt.set_aspect(0.9)
         
         if twin:
             fig, ax = plt.subplots(1, 2, sharey=True)
             plt.sca(ax[0])
             df.plot(self.mesh, alpha=0.2, zorder=50)
             df.plot(self.f, mesh=self.mesh, scale_units='height', 
-                    scale=2.5e9, width=0.0075, zorder=60)
+                    scale=2.5e9, width=0.01, zorder=60)
             #self.cc.plot(ax=ax[0])
-            self.biotgrid.plot(axes=ax[0])#, lw=1.5, color='gray')
+            self.biotgrid.plot(axes=ax[0], colors='gray', linewidths=1.5, 
+                               zorder=-50)
             plt.despine()
             plt.axis('off')
             ax_disp = ax[1]
         else:
             fig, ax_disp = plt.subplots(1, 1)
         plt.sca(ax_disp)
-        df.plot(scale*self.u, mode="displacement")
+        df.plot(scale*self.u, mode="displacement", edgecolor='lightgray',
+                linewidth=1.5, vmin=0, vmax=0, cmap='gray_r')
         plt.despine()
         plt.axis('off')
         
-        pID = [self.limit[0], np.mean(self.limit[-2:])]
-        pID += scale * self.u(*pID)
-        pOD = (self.limit[1], np.mean(self.limit[-2:]))
-        pOD += scale * self.u(*pOD)
-        
-        pUID = [self.limit[0], self.limit[-1]]
-        pUID += scale * self.u(*pUID)
-        pUOD = [self.limit[1], self.limit[-1]]
-        pUOD += scale * self.u(*pUOD)
-        
-        pU = [np.mean(self.limit[:2]), self.limit[-1]]
-        pU += scale * self.u(*pU)
-        pL = [np.mean(self.limit[:2]), self.limit[-2]]
-        pL += scale * self.u(*pL)
-        
-        for label in ['IDh0', 'IDh1', 'IDh2', 'ODh0', 'ODh1', 'ODh2']:
-            coord = self.hoop[label]
+
+        color_index = itertools.count(0)      
+        self.extract_displacments()
+        for label in ['IDv', 'ODv']:
+            color = f'C{next(color_index)%10}'
+            if label not in self.labels:
+                continue
+            coord = np.zeros((2, 2))
+            for i in range(2):
+                coord[:, i] = self.position[label][i]
+                coord[:, i] += scale*self.u(*coord[:, i])
+            label = f'{label} {self.dataframe.loc[label, "error %"]:1.2f}%'
+            ax_disp.plot(*coord, '^:', ms=6, mew=4, label=label, color=color)
+        for label in ['IDr', 'ODr']:
+            color = f'C{next(color_index)%10}'
+            if label not in self.labels:
+                continue
+            coord = self.position[label]
             coord += scale*self.u(*coord)
-            ax_disp.plot(*coord, 'o', ms=12)
+            label = f'{label} {self.dataframe.loc[label, "error %"]:1.2f}%'
+            ax_disp.plot(*coord, '>', ms=6, mew=4, label=label, color=color)
+        for label in ['IDh0', 'IDh1', 'IDh2', 'ODh0', 'ODh1', 'ODh2']:
+            color = f'C{next(color_index)%10}'
+            if label not in self.labels:
+                continue
+            coord = self.position[label]
+            coord += scale*self.u(*coord)
+            label = f'{label} {self.dataframe.loc[label, "error %"]:1.2f}%'
+            ax_disp.plot(*coord, '_', ms=18, mew=4, label=label, color=color)
+        for label in ['IDv0', 'ODv0']:
+            color = f'C{next(color_index)%10}'
+            if label not in self.labels:
+                continue
+            coord = self.position[label]
+            coord += scale*self.u(*coord)
+            label = f'{label} {self.dataframe.loc[label, "error %"]:1.2f}%'
+            ax_disp.plot(*coord, '|', ms=18, mew=4, label=label, color=color)
+        plt.legend(ncol=1, loc='center left', 
+                   bbox_transform=ax_disp.transAxes,
+                   bbox_to_anchor=(1.25, 0.5))
         
-        '''
-        ax_disp.text(*pID, f'{self.displace[("ID", "mm")]:1.2f}mm\n',
-                   ha='left', va='bottom')
-        ax_disp.text(*pOD, f'\n{self.displace[("OD", "mm")]:1.2f}mm',
-                   ha='right', va='top')
-        '''
-        #ax_disp.text(*pU, f'{self.displace[("U", "mm")]:1.2f}mm',
-        #           ha='center', va='top', color='C3')  
-        #ax_disp.text(*pL, f'{self.displace[("L", "mm")]:1.2f}mm',
-        #           ha='center', va='bottom') 
-        '''
-        ax_disp.text(*pID, f'{self.displace[("ID", "ppm")]:1.0f}ppm',
-                   ha='right', va='center', rotation=90)
-        ax_disp.text(*pUID, f'{self.displace[("UID", "ppm")]:1.0f}ppm',
-                   ha='right', va='top', rotation=90, color='C3')
-        ax_disp.text(*pUOD, f'{self.displace[("UOD", "ppm")]:1.0f}ppm',
-                   ha='left', va='top', rotation=-90, color='C3')
-        ax_disp.text(*pOD, f'{self.displace[("OD", "ppm")]:1.0f}ppm',
-                   ha='left', va='center', rotation=-90)
-        '''
         fig.suptitle(
                 #f'{self.material_model}\n' + \
                 f'{self.material_data_text(full=full, tex=True)}', 
@@ -525,17 +558,17 @@ class CSmodulue(Material_Model):
     
 if __name__ == '__main__':
     
-    csm = CSmodulue(material_model='t', num=None)
+    csm = CSmodulue(material_model='t', num=40)
     
     
     #csm.Ic = 48.5e3# * 1.28
     
     csm.Ic = 40e3
-    csm.material_data = dict(Ep=24.6e9, Et=127.0e9, nu_pp=0.884)
+    #csm.material_data = dict(Ep=24.6e9, Et=127.0e9, nu_pp=0.884)
     
     # t: 'Ep', 'Et', 'nu_pp', 'nu_pt'
     csm._active[:] = True
-    #csm._active[:3] = True
+    #csm._active[-1] = False
     
     #csm._active[1] = True
     #csm._active[2] = True
@@ -546,13 +579,22 @@ if __name__ == '__main__':
     
     #csm._active[-2:] = True
     
-    csm.extract_properties()
+    labels = ['IDh0', 'IDh1', 'IDh2', 'ODh0', 'ODh1', 'ODh2']
+    labels = ['IDv0', 'ODv0']
+    labels = ['IDh0', 'ODh0', 'ODh1', 'ODh2', 'IDv0', 'IDr', 'ODr']
+    labels = list(csm.data)
     
-    csm.solve()
-    csm.extract_displacments()
+    csm.extract_properties(labels=labels)
+    
+    csm_hf = CSmodulue(material_model=csm.material_model, num=None)
+    csm_hf.material_data = csm.material_data.to_dict()
+    csm_hf.Ic = csm.Ic
+    #csm_hf.extract_properties(labels=labels)
+    csm_hf.solve()
 
     plt.set_context('talk')
-    csm.plot(scale=250, full=True, twin=True)
+    csm_hf.labels = labels
+    csm_hf.plot(scale=250, full=True, twin=False)
 
     
     

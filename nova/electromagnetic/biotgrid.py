@@ -150,12 +150,12 @@ class BiotGrid(Axes):
         """Return grid shape."""
         return self.data.dims['x'], self.data.dims['z']
 
-    def plot(self, axes=None):
+    def plot(self, axes=None, **kwargs):
         self.axes = axes
 
         Psi = np.dot(self.data.Psi, self.frame.subspace['Ic'])
         self.axes.contour(self.data.x, self.data.z,
-                          Psi.reshape(*self.shape).T, 21)
+                          Psi.reshape(*self.shape).T, 21, **kwargs)
 
 
 if __name__ == '__main__':

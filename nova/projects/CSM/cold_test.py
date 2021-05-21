@@ -174,8 +174,8 @@ class cold_test(pythonIO):
         self.mean_strain('STvID', data, range(119, 124))
         self.mean_strain('STvOD', data, range(124, 129))
         # three gauge hoop strain, ID
-        self.mean_strain('SThID0', data, [101, 107, 113])
-        self.mean_strain('SThID1', data, [102, 108, 114])
+        self.mean_strain('SThID0', data, [101, 107])
+        self.mean_strain('SThID1', data, [108, 114])
         self.mean_strain('SThID2', data, [103, 109, 115])
         # three gauge hoop strain, OD
         self.mean_strain('SThOD0', data, [104, 110, 116])
@@ -486,13 +486,15 @@ class cold_test(pythonIO):
                    bbox_to_anchor=(0.5, 1+shift))
 
     def fit(self, label, index='test', Imin=7.5, Itrim=40, Imax=40, plot=True,
-            ncol=2, color=None):
+            ncol=2, color=None, ax=None, trim=True, loc=None, Ndiv=20,
+            xlabel=True):
         I, dataframe = self.get_current(label, index)
         dI = np.gradient(I, self.t(I.index))
         # trim  current
-        current_index = (I >= Imin) & (I <= Itrim) & (dI < -0.02)
-        I = I[current_index]
-        dataframe = dataframe[current_index]
+        if trim:
+            current_index = (I >= Imin) & (I <= Itrim) & (dI < -0.02)
+            I = I[current_index]
+            dataframe = dataframe[current_index]
         max_value = dataframe.abs().max().max()
         coef = np.zeros(dataframe.shape[1])
         for i, col in enumerate(dataframe):
@@ -502,7 +504,8 @@ class cold_test(pythonIO):
                         I[index].to_numpy().reshape(-1, 1)**2,
                         dataframe.loc[index, col], rcond=None)[0][0]
         if plot:
-            ax = plt.subplots(1, 1)[1]
+            if ax is None:
+                ax = plt.subplots(1, 1)[1]
             if Imax is None:
                 Imax = I.max()
                 xtick = None
@@ -516,7 +519,7 @@ class cold_test(pythonIO):
                 value = '1.2f'
             text = linelabel(value=value,
                              postfix=self._units_r.get(group, 'mm'),
-                             Ndiv=20)
+                             Ndiv=Ndiv, ax=ax)
             for i, col in enumerate(dataframe):
                 if dataframe[col].abs().max() < 0.05*max_value:
                     continue
@@ -531,10 +534,10 @@ class cold_test(pythonIO):
                 else:
                     c = color
                 if not np.isnan(dataframe.loc[:, col]).all():
-                    plt.plot(I, dataframe[col], '.',
-                             color=c, alpha=0.75, ms=4, zorder=-20)
-                    plt.plot(_I, coef[i]*_I**2, '--',
-                             color=c, alpha=1, label=col[0])
+                    ax.plot(I, dataframe[col], '.',
+                            color=c, alpha=0.75, ms=4, zorder=-20)
+                    ax.plot(_I, coef[i]*_I**2, '--',
+                            color=c, alpha=1, label=col[0])
                     text.add('')
             if xtick is not None:
                 xticks = ax.get_xticks()
@@ -543,11 +546,16 @@ class cold_test(pythonIO):
                 xticks = np.sort(np.append(xticks, xtick))
                 ax.set_xticks(xticks)
             plt.despine()
-            plt.xlabel('$I$ kA')
-            plt.ylabel(self._labels[group])
+            if xlabel:
+                ax.set_xlabel('$I$ kA')
+            ax.set_ylabel(self._labels[group])
             shift = np.floor(dataframe.shape[1] / ncol) * 0.12
-            plt.legend(ncol=ncol, loc='upper center',
-                       bbox_to_anchor=(0.5, 1+shift))
+            if loc is None:
+                ax.legend(ncol=ncol, loc='upper center',
+                          bbox_transform=ax.transAxes,
+                          bbox_to_anchor=(0.5, 1+shift))
+            else:
+                ax.legend(ncol=ncol, loc=loc)
             text.plot()
 
     def get_index(self, index):
@@ -598,6 +606,7 @@ if __name__ == '__main__':
     ct = cold_test(project_dir='CSM2', read_txt=False)
     #ct.load_coldtest('displace', read_txt=True)
 
+    '''
     ct.plot_row('displace', index='CSM2_08', ncol=4)
     ct.plot_loop('displace', index='CSM2_08', ncol=4)
     ct.fit('displace', index='CSM2_08', Imin=12.5, Itrim=25, Imax=40, ncol=4)
@@ -614,19 +623,76 @@ if __name__ == '__main__':
 
     ct.plot_row(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08', ncol=3)
     ct.plot_loop(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08', ncol=3)
-    ct.fit(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08', Imin=0, Itrim=25,
+    ct.fit(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08', Imin=0, Itrim=40,
            Imax=40, ncol=3)
 
     ct.plot_row(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', ncol=3)
     ct.plot_loop(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', ncol=3)
-    ct.fit(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', Imin=0, Itrim=25,
+    ct.fit(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', Imin=0, Itrim=40,
            Imax=40, ncol=3)
 
 
-    ct.plot_row(['STvID', 'STvOD'], index='CSM2_08', ncol=3)
-    ct.plot_loop(['STvID', 'STvOD'], index='CSM2_08', ncol=3)
+    ct.plot_row(['STvID', 'STvOD'], index='CSM2_08', ncol=2)
+    ct.plot_loop(['STvID', 'STvOD'], index='CSM2_08', ncol=2)
     ct.fit(['STvID', 'STvOD'],
            index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=2)
+    '''
+
+
+    '''
+    self.mean_strain('STvID', data, range(119, 124))
+    self.mean_strain('STvOD', data, range(124, 129))
+    # three gauge hoop strain, ID
+    self.mean_strain('SThID0', data, [101, 107, 113])
+    self.mean_strain('SThID1', data, [102, 108, 114])
+    self.mean_strain('SThID2', data, [103, 109, 115])
+    # three gauge hoop strain, OD
+    self.mean_strain('SThOD0', data, [104, 110, 116])
+    self.mean_strain('SThOD1', data, [105, 111, 117])
+    self.mean_strain('SThOD2', data, [106, 112, 118])
+    '''
+
+    ct.plot_row([f'ST{i}' for i in range(101, 119)], index='CSM2_08', ncol=3)
+
+    # SThID
+    plt.set_aspect(0.8)
+    ax = plt.subplots(3, 1, sharex=True)[1]
+    ct.fit([f'ST{i}' for i in [101, 107, 113]], loc='upper left', Ndiv=6,
+           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[0],
+           xlabel=False)
+    ct.fit([f'ST{i}' for i in [102, 108, 114]], loc='upper left', Ndiv=6,
+           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[1],
+           xlabel=False)
+    ct.fit([f'ST{i}' for i in [103, 109, 115]], loc='upper left', Ndiv=6,
+           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[2])
+
+    # SThOD
+    ax = plt.subplots(3, 1, sharex=True)[1]
+    ct.fit([f'ST{i}' for i in [104, 110, 116]], loc='upper left', Ndiv=6,
+           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[0],
+           xlabel=False)
+    ct.fit([f'ST{i}' for i in [105, 111, 117]], loc='upper left', Ndiv=6,
+           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[1],
+           xlabel=False)
+    ct.fit([f'ST{i}' for i in [106, 112, 118]], loc='upper left', Ndiv=6,
+           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[2])
+
+
+    plt.set_aspect(0.8)
+    ax = plt.subplots(2, 1)[1]
+    ct.fit([f'ST{i}' for i in range(119, 124)], loc='upper left', Ndiv=6,
+           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[0],
+           xlabel=False)
+    ct.fit([f'ST{i}' for i in range(124, 129)], loc='upper left', Ndiv=6,
+           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[1])
+
+    plt.set_aspect(0.8)
+    ct.fit(['SThID0', 'SThID1', 'SThID2'],
+           index='CSM2_08', trim=False, Imax=40, ncol=3)
+
+    ct.fit(['SThOD0', 'SThOD1', 'SThOD2'],
+           index='CSM2_08', trim=False, Imax=40, ncol=3)
+
 
     '''
     #ct.plot_loop('displace', index='CSM2_09', ncol=4)

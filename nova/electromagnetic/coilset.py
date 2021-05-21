@@ -37,9 +37,9 @@ class CoilSet(CoilGrid, FrameSet):
         self.shell = Shell(self.frame, self.subframe, self.dshell)
         self.plasma = Plasma(self.frame, self.subframe, self.dplasma)
 
-    def plot(self):
+    def plot(self, axes=None):
         """Plot coilset."""
-        self.subframe.polyplot()
+        self.subframe.polyplot(axes=axes)
 
 
 if __name__ == '__main__':

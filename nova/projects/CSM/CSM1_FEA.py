@@ -219,7 +219,7 @@ class CSmodulue(Material_Model):
         self.set_data()
         self.set_labels(labels)
         self.iter = itertools.count(0)
-        
+
     def load_coilset(self, **kwargs):
         # read_txt = kwargs.get('read_txt', self.read_txt)
 
@@ -471,6 +471,7 @@ class CSmodulue(Material_Model):
         displace = self.displace.droplevel(1)
         displace = displace.loc[self.labels].to_numpy()
         err = 1e2 * (displace - displace_ct) / displace_ct
+
         if verbose:
             txt = f'\r{next(self.iter)} {self.material_data_text(full=False)} '
             txt += f'{np.mean(np.abs(err)):1.3f}\t\t\t\t\t'
@@ -484,6 +485,7 @@ class CSmodulue(Material_Model):
         xo = self.material_data.to_numpy()[self._active]
         _ismodulus = self._ismodulus[self._active]
         xo[_ismodulus] /= self._modulus_factor  # normalize moduli
+
         Mlim = 1e9 * np.array([2.5, 160]) / self._modulus_factor
         Nulim = (-1+1e-3, 1.5)
         Nulim = (0, 0.5)
@@ -538,6 +540,7 @@ class CSmodulue(Material_Model):
             label = f'{label} {self.dataframe.loc[label, "error %"]:1.2f}%'
             marker = '>:' if label == 'Udr' else '^:'
             ax_disp.plot(*coord, marker, ms=6, mew=4, label=label, color=color)
+
         for label in ['IDr', 'ODr']:
             color = f'C{next(color_index)%10}'
             if label not in self.labels:
@@ -603,6 +606,7 @@ if __name__ == '__main__':
     csm._active[:] = False
     csm._active[:3] = True
     #csm._active[1] = False
+
     #csm._active[-1] = False
     
     #csm._active[1] = True
@@ -624,7 +628,6 @@ if __name__ == '__main__':
     #csm.labels = labels
     #csm.solve()
     #csm.plot(scale=250, full=True, twin=False)
-
     
     csm_hf = CSmodulue(material_model=csm.material_model, num=None)
     csm_hf.material_data = csm.material_data.to_dict()

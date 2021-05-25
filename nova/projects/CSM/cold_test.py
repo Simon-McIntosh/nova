@@ -366,7 +366,11 @@ class cold_test(pythonIO):
             dataframe -= offset
         else:
             offset = 0
-        ax.plot(dataframe, **kwargs)
+        color = kwargs.get('color', None)
+        for i, col in enumerate(dataframe):
+            if color is None:
+                kwargs['color'] = self.get_color(i, col)
+            ax.plot(dataframe[col], label=col, **kwargs)
         if legend and labels:
             shift = np.floor(dataframe.shape[1] / ncol) * 0.12
             ax.legend([c for c in dataframe.columns.droplevel(1)],
@@ -461,6 +465,16 @@ class cold_test(pythonIO):
         dataframe -= self.offset(dataframe, 5)
         return I, dataframe
 
+    def get_color(self, i, col):
+        """Return line color."""
+        try:
+            index = int(col[0].lstrip(string.ascii_letters))
+            if col[0][:2] == 'ST':
+                index += 1
+        except ValueError:
+            index = i+1
+        return f'C{index-1}'
+
     def plot_loop(self, label, index='CSM2', ncol=2):
         I, dataframe = self.get_current(label, index)
         group = self.channels[dataframe.columns.droplevel(1)[0]]
@@ -470,13 +484,8 @@ class cold_test(pythonIO):
             if not np.isnan(dataframe.loc[:, col]).all() and \
                     dataframe.loc[:, col].abs().max() > 0.05*max_value:
                 value = scipy.signal.savgol_filter(dataframe[col], 51, 1)
-                try:
-                    index = int(col[0].lstrip(string.ascii_letters))
-                    if col[0][:2] == 'ST':
-                        index += 1
-                except ValueError:
-                    index = i+1
-                ax.plot(I, value, '-', label=col[0], color=f'C{index-1}',
+                color = self.get_color(i, col)
+                ax.plot(I, value, '-', label=col[0], color=color,
                         lw=1.5)
         plt.despine()
         plt.xlabel('$I$ kA')
@@ -492,7 +501,7 @@ class cold_test(pythonIO):
         dI = np.gradient(I, self.t(I.index))
         # trim  current
         if trim:
-            current_index = (I >= Imin) & (I <= Itrim) & (dI < -0.02)
+            current_index = (I >= Imin) & (I <= Itrim) & (dI < -0.01)
             I = I[current_index]
             dataframe = dataframe[current_index]
         max_value = dataframe.abs().max().max()
@@ -524,13 +533,7 @@ class cold_test(pythonIO):
                 if dataframe[col].abs().max() < 0.05*max_value:
                     continue
                 if color is None:
-                    try:
-                        index = int(col[0].lstrip(string.ascii_letters))
-                        if col[0][:2] == 'ST':
-                            index += 1
-                    except ValueError:
-                        index = i+1
-                    c = f'C{index-1}'
+                    c = self.get_color(i, col)
                 else:
                     c = color
                 if not np.isnan(dataframe.loc[:, col]).all():
@@ -606,15 +609,21 @@ if __name__ == '__main__':
     ct = cold_test(project_dir='CSM2', read_txt=False)
     #ct.load_coldtest('displace', read_txt=True)
 
-    '''
+    ct.plot_row(['DS007', 'DS008'], index='CSM2_08', ncol=2)
+    ct.plot_loop(['DS007', 'DS008'], index='CSM2_08', ncol=2)
+    ct.fit(['DS007', 'DS008'], index='CSM2_08', Imin=5, Itrim=32.5, Imax=40, ncol=4)
+
+
+    ct.plot_row([f'DS{i:003}' for i in range(1, 7)],
+                index='CSM2_08', ncol=3)
+    ct.plot_loop([f'DS{i:003}' for i in range(1, 7)],
+                 index='CSM2_08', ncol=3)
+    ct.fit([f'DS{i:003}' for i in [1, 2, 4]], index='CSM2_08',
+           Imin=12.5, Itrim=25, Imax=40, ncol=3)
+
     ct.plot_row('displace', index='CSM2_08', ncol=4)
     ct.plot_loop('displace', index='CSM2_08', ncol=4)
     ct.fit('displace', index='CSM2_08', Imin=12.5, Itrim=25, Imax=40, ncol=4)
-
-    ct.plot_row(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', ncol=3)
-    ct.plot_loop(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', ncol=3)
-    ct.fit(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08',
-           Imin=12.5, Itrim=25, Imax=40, ncol=3)
 
     ct.plot_row('extend', index='CSM2_08', ncol=2)
     ct.plot_loop('extend', index='CSM2_08', ncol=2)
@@ -624,19 +633,18 @@ if __name__ == '__main__':
     ct.plot_row(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08', ncol=3)
     ct.plot_loop(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08', ncol=3)
     ct.fit(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08', Imin=0, Itrim=40,
-           Imax=40, ncol=3)
+           Imax=40, ncol=3, trim=False)
 
     ct.plot_row(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', ncol=3)
     ct.plot_loop(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', ncol=3)
     ct.fit(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', Imin=0, Itrim=40,
-           Imax=40, ncol=3)
-
+           Imax=40, ncol=3, trim=False)
 
     ct.plot_row(['STvID', 'STvOD'], index='CSM2_08', ncol=2)
     ct.plot_loop(['STvID', 'STvOD'], index='CSM2_08', ncol=2)
     ct.fit(['STvID', 'STvOD'],
-           index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=2)
-    '''
+           index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=2, trim=False)
+
 
 
     '''
@@ -651,6 +659,9 @@ if __name__ == '__main__':
     self.mean_strain('SThOD1', data, [105, 111, 117])
     self.mean_strain('SThOD2', data, [106, 112, 118])
     '''
+
+    ct.plot_row([f'ST{i}' for i in range(119, 124)], index='CSM2_08', ncol=2)
+
 
     ct.plot_row([f'ST{i}' for i in range(101, 119)], index='CSM2_08', ncol=3)
 

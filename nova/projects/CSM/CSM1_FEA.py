@@ -29,11 +29,11 @@ class Material_Model:
         
     def set_data(self):
         """Set experimental data."""
-        self.data = dict(IDdv=-2.04, ODdv=-0.96,
+        self.data = dict(IDdv=-2.04, ODdv=-1.15,
                          IDr=1.31/2, ODr=1.22/2, 
                          IDh0=896, IDh1=832, IDh2=604, 
                          ODh0=533, ODh1=497, ODh2=390, 
-                         IDv0=-1035, ODv0=-918) # 40kA CSM2 
+                         IDv0=-1025, ODv0=-888) # 40kA CSM2 
         
     def set_labels(self, labels: list[str]):
         """Set optimization labels."""
@@ -488,7 +488,7 @@ class CSmodulue(Material_Model):
 
         Mlim = 1e9 * np.array([2.5, 160]) / self._modulus_factor
         Nulim = (-1+1e-3, 1.5)
-        Nulim = (0, 0.5)
+        Nulim = (0.05, 0.35)
         nM = np.sum(_ismodulus)
         nNu = len(xo) - nM
         #data = (-3.02, -1.77)  # 48.5 kA
@@ -597,15 +597,15 @@ class CSmodulue(Material_Model):
     
 if __name__ == '__main__':
     
-    csm = CSmodulue(material_model='o', num=120)
+    csm = CSmodulue(material_model='t', num=120)
     
     csm.Ic = 40e3
 
 
     # t: 'Ep', 'Et', 'nu_pp', 'nu_pt'
     csm._active[:] = False
-    csm._active[:3] = True
-    #csm._active[1] = False
+    csm._active[:] = True
+    #csm._active[2:] = False
 
     #csm._active[-1] = False
     
@@ -621,8 +621,8 @@ if __name__ == '__main__':
     #csm.material_data = dict(Ez=30e9, Ex=50e9)
     #labels = ['IDh0', 'IDh1', 'IDh2', 'ODh0', 'ODh1', 'ODh2']
     #labels = ['IDdv', 'ODdv', 'IDh0']
-    labels = ['IDh0', 'ODh0', 'ODh1', 'ODh2', 'IDv0']
-    labels = list(csm.data)
+    labels = ['IDh0', 'IDh1', 'ODh0', 'ODh1', 'ODh2', 'IDv0']
+    #labels = list(csm.data)
     
     csm.extract_properties(labels=labels)
     #csm.labels = labels

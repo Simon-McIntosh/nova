@@ -152,7 +152,7 @@ class BiotGrid(Axes):
 
     def plot(self, axes=None, **kwargs):
         self.axes = axes
-        kwargs = dict(colors='gray', linewidths=1.5) | kwargs
+        kwargs = dict(colors='gray', linewidths=1.0) | kwargs
         Psi = np.dot(self.data.Psi, self.frame.subspace['Ic'])
         self.axes.contour(self.data.x, self.data.z,
                           Psi.reshape(*self.shape).T, 21, **kwargs)

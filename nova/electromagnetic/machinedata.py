@@ -5,26 +5,29 @@ import pandas as pd
 import numpy as np
 import shapely.geometry
 import shapely.algorithms
+
 from nova.definitions import root_dir
 from nova.utilities.pyplot import plt
+from nova.utilities.IO import pythonIO
 from nova.electromagnetic.coilset import CoilSet
 
 
-class MachineData(CoilSet):
-    '''
-    load ITER data and geometry
+class MachineData(CoilSet, pythonIO):
+    """
+    load ITER data and geometry.
 
     Data_for_study_of_ITER_plasma_magnetic_c_33NHXN_v3_15.xlsx
     Models_for_calculation_of_axisymmetric_c_XBQF5H_v2_2.xlsx
-    '''
+    """
 
     def __init__(self, read_txt=False, **kwargs):
         self.read_txt = read_txt
         self.directory = path.join(root_dir, 'input/geometry/ITER')
-        CoilSet.__init__(self, **kwargs)
+        super().__init__(**kwargs)
 
     @staticmethod
     def append(data, x, z, rho, dt):
+        """Append attributes to data."""
         for key, value in zip(['x', 'z', 'rho', 'dt'], [x, z, rho, dt]):
             data[key].append(value)
 
@@ -52,6 +55,7 @@ class MachineData(CoilSet):
         return frame
 
     def read_sheet(self, sheetname, skiprows, usecols, columns={}, nrows=None):
+        """Read excel worksheet."""
         sheet = pd.read_excel(self.f, sheetname, skiprows=skiprows,
                               usecols=usecols, nrows=nrows).dropna()
         columns = {**{'R, m': 'x', 'Z, m': 'z'}, **columns}
@@ -70,6 +74,7 @@ class MachineData(CoilSet):
 
     def read_model(self, name, sheetname, skiprows, usecols, nrows=None,
                    dt=0.06, ring=False, rho=None):
+        """Read geometric model."""
         columns = {'R1(m)': 'x1', 'R2(m)': 'x2', 'Z1(m)': 'z1',
                    'Z2(m)': 'z2', 'Ω(Ohm)': 'R'}
         model = self.read_sheet(sheetname, skiprows, usecols, nrows=nrows,
@@ -116,6 +121,7 @@ class MachineData(CoilSet):
         self.models[name] = data
 
     def load_models(self, **kwargs):
+        """Load models from .pk file."""
         read_txt = kwargs.get('read_txt', self.read_txt)
         filepath = path.join(self.directory, 'ITER_machine_models')
         if read_txt or not path.isfile(filepath + '.pk'):
@@ -125,6 +131,7 @@ class MachineData(CoilSet):
             self.load_pickle(filepath)
 
     def read_models(self):
+        """Read model set."""
         self.models = {}
         self.filename = \
             'Models_for_calculation_of_axisymmetric_c_XBQF5H_v2_2.xlsx'
@@ -142,6 +149,7 @@ class MachineData(CoilSet):
                             np.arange(10, 12), nrows=2, ring=True, rho=0.9)
 
     def plot_models(self):
+        """Plot geometrical models."""
         plt.set_aspect(1.1)
         for i, part in enumerate(self.models):
             for segment in self.models[part]:
@@ -151,6 +159,7 @@ class MachineData(CoilSet):
         plt.axis('off')
 
     def load_data(self, **kwargs):
+        """Load machine data."""
         read_txt = kwargs.get('read_txt', self.read_txt)
         filepath = path.join(self.directory, 'ITER_machine_data')
         if read_txt or not path.isfile(filepath + '.pk'):
@@ -160,6 +169,7 @@ class MachineData(CoilSet):
             self.load_pickle(filepath)
 
     def read_data(self):
+        """Read geometric data."""
         self.data = {}
         self.filename = \
             'Data_for_study_of_ITER_plasma_magnetic_c_33NHXN_v3_15.xlsx'
@@ -201,6 +211,7 @@ class MachineData(CoilSet):
                     'Cryostat & CST', 8, np.arange(12, 17))
 
     def plot_data(self, keys=None, ax=None, legend=False, **kwargs):
+        """Plot geometric data."""
         if ax is None:
             ax = plt.gca()
         if keys is not None:
@@ -254,7 +265,7 @@ class MachineData(CoilSet):
 
 if __name__ == '__main__':
 
-    machine = MachineData(dCoil=0.2, read_txt=False)
+    machine = MachineData(dcoil=0.2, read_txt=False)
 
     machine.load_models(read_txt=True)
     machine.plot_models()
@@ -287,5 +298,3 @@ if __name__ == '__main__':
     ax = plt.gca()
     ax.add_patch(patch)
     '''
-
-

@@ -146,9 +146,16 @@ if __name__ == '__main__':
     framespace.insert([4, 5], 1, Ic=6.5, name='PF1',
                       active=False, plasma=True)
 
-    framespace.insert(range(4000), 3, Ic=4, nturn=20, label='PF', link=True)
+    framespace.insert(range(40), 3, Ic=4, nturn=20, label='PF', link=True)
     framespace.multipoint.link(['PF1', 'CS0'], factor=1)
     print(framespace.loc[:, ['active', 'passive', 'plasma', 'coil']])
+
+    framespace.to_hdf('tmp.h5', 'frame')
+
+    #del framespace
+    #framespace = FrameSpace()
+    #framespace.read_hdf('tmp.h5', 'frame')
+    print(framespace.metaframe.metadata)
 
     for _ in range(1000):
         get_current()

@@ -1,9 +1,12 @@
+"""Read toroidal currents from DINA disruption simulations."""
 from os import path
 
 import numpy as np
+
 #import matplotlib.animation as manimation
-from shapely.geometry import Polygon
 import pandas as pd
+import shapely
+
 from sklearn.neighbors import KDTree
 from shapely.geometry import MultiPoint
 from descartes import PolygonPatch
@@ -11,12 +14,13 @@ from descartes import PolygonPatch
 #from amigo.time import clock
 #from amigo.IO import readtxt, pythonIO
 
+from nova.electromagnetic.biotgrid import BiotGrid
+from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.IO.read_waveform import read_dina
-from nova.electromagnetic.frame import Frame
 from nova.electromagnetic.machinedata import MachineData
+
 from nova.utilities.pyplot import plt
 from nova.utilities.IO import readtxt
-
 
 
 class read_tor(read_dina):
@@ -26,41 +30,43 @@ class read_tor(read_dina):
     Temperal listing of toroidal currents.
 
     """
+
     def __init__(self, database_folder='disruptions', read_txt=False):
         super().__init__(database_folder, read_txt)
-        self.frame = Frame(delta=0.25, available=['section'])
+        self.coilset = CoilSet(dcoil=0.25, dplasma=0.2, dshell=0.1)
 
     def load_file(self, folder, **kwargs):
+        """Load disruption data."""
         read_txt = kwargs.get('read_txt', self.read_txt)
         filepath = self.locate_file('tor_cur', folder=folder)
         filepath = '.'.join(filepath.split('.')[:-1])
         self.name = filepath.split(path.sep)[-2]
-
-        self.read_file(filepath)  # read txt file
-
-        '''
         if read_txt or not path.isfile(filepath + '.pk'):
             self.read_file(filepath)  # read txt file
-            self.save_coilset('coilset', directory=self.folder)
+            del self.coilset.plasma.tree
             self.save_pickle(filepath, ['frames'])
         else:
-            self.load_coilset('coilset', directory=self.folder)
             self.load_pickle(filepath)
-        '''
-
+            #self.coilset.plasma.tree = self.coilset.plasma.generate_tree()
+            #self.biot.frame = self.coilset.subframe
 
     def read_file(self, filepath):  # called by load_file
+        """Read txt data."""
         with readtxt(filepath + '.dat') as self.rt:
             self.read_coils()
-            #self.read_frames()
+            self.read_frames()
+        self.biot = BiotGrid(frame=tor.coilset.subframe)
+        self.biot.solve(5e3, 0.05)
 
     def read_coils(self):
+        """Load poloidal field filaments."""
         self.rt.skiplines(5)  # skip header
-        self.insert_coils()
-        #self.get_filaments()
-        #self.set_plasma()
+        self.insert_coils()  # insert poloidal field coils
+        self.insert_shells()
+        self.insert_plasma()
 
     def insert_coils(self):
+        """Update coilset with poloidal field coils."""
         self.rt.checkline('1.')
         self.rt.skiplines(1)
         index = self.rt.readline(True, string=True)
@@ -70,10 +76,11 @@ class read_tor(read_dina):
             self.rt.skiplines(1)
             geom[i, :] = self.rt.readblock()
         geom *= 1e-2  # cm to meters
-        part = ['CS' if 'CS' in name else 'PF' for name in index]
-        self.frame.insert(*geom, name=index, part=part)
+        part = ['cs' if 'CS' in name else 'pf' for name in index]
+        self.coilset.coil.insert(*geom, name=index, part=part, turn='hex')
 
-    def get_filaments(self, dt=60e-3, rho=0.8e-6, dCoil=0.25):
+    def insert_shells(self, dt=60e-3):
+        """Insert vessel and blanket shells."""
         self.rt.checkline('2.')
         self.rt.skiplines(1)
         self.nf = self.rt.readnumber()
@@ -98,23 +105,21 @@ class read_tor(read_dina):
                 x1, x2 = 1e-2*filament['x1'][j], 1e-2*filament['x2'][j]
                 z1, z2 = 1e-2*filament['z1'][j], 1e-2*filament['z2'][j]
                 part = 'vv' if filament['n_turn'] == 1 else 'bb'
-                self.add_shell([x1, x2], [z1, z2], dt, part=part, rho=rho,
-                               dShell=0, dCoil=dCoil)
+                self.coilset.shell.insert([x1, x2], [z1, z2], 0, dt,
+                                          label=part, part=part)
                 if j == 1:  # link blanket pairs
-                    self.add_mpc(self.coil.index[-2:], factor=-1)
+                    self.coilset.link(self.coilset.frame.index[-2:], factor=-1)
 
-    def set_plasma(self, dPlasma=0.25):
+    def insert_plasma(self):
+        """Insert plasma filaments."""
         machine = MachineData()
         machine.load_data()
-        fw = pd.concat((machine.data['firstwall'].iloc[::-1],
+        fw = pd.concat((machine.data['firstwall'],
                         machine.data['divertor']))
-        fw_poly = Polygon([(x, z) for x, z in zip(fw.x, fw.z)])
-        limit = [fw.x.min(), fw.x.max(), fw.z.min(), fw.z.max()]
-        self.add_plasma(np.mean(limit[:2]), np.mean(limit[2:]),
-                  np.diff(limit[:2])[0], np.diff(limit[2:])[0],
-                  dPlasma=dPlasma, Nt=0, name='plasma')  #polygon=fw_poly
+        self.coilset.plasma.insert(fw.to_numpy(), name='plasma', part='plasma')
 
     def read_frames(self):
+        """Read transient frame data."""
         self.frames = []
         self.rt.skiplines(6)
         while True:
@@ -122,6 +127,62 @@ class read_tor(read_dina):
                 self.frames.append(self.get_current())
             except ValueError:
                 break
+
+    def get_current(self):
+        """Read current vector from txt file."""
+        self.rt.skiplines(1)
+        t = self.rt.readnumber()
+        filament = self.get_filament_current()
+        plasma = self.get_plasma_current()
+        coil = self.get_coil_current()
+        return (t, filament, plasma, coil)
+
+    def get_filament_current(self):
+        """Read vessel / blanket current vector."""
+        self.rt.skiplines(1)
+        filament = self.rt.readblock()
+        return filament
+
+    def get_plasma_current(self):
+        """Read plasma current."""
+        self.rt.skiplines(3)
+        plasma = self.rt.readblock()
+        return plasma
+
+    def get_coil_current(self):
+        """Read poloidal field coil current."""
+        self.rt.skiplines(1)
+        coil = self.rt.readblock()
+        return coil
+
+    def set_current(self, index):
+        self.index = frame
+        self.set_coil_current(index)
+        #self.set_filament_current(self.coilset['vv_DINA'],
+        #                          frame_index, Ip_scale)
+        #self.set_filament_current(self.coilset['bb_DINA'],
+        #                          frame_index, Ip_scale)
+        #self.set_plasma_current(frame_index, Ip_scale)
+
+    def set_coil_current(self, index):
+        self.current
+
+
+    def set_filament_current(self, coilset, frame_index, Ip_scale):
+        It = {}
+        current = self.current['filament'][frame_index]
+        for name in coilset['coil']:
+            turn_index = coilset['coil'][name]['index']
+            sign = coilset['coil'][name]['sign']
+            It[name] = Ip_scale * sign * current[turn_index]
+
+    def set_plasma_current(self, frame_index, Ip_scale):
+        self.pf.coilset['plasma'] =\
+            copy.deepcopy(self.plasma_coil[frame_index])
+        for name in self.pf.coilset['plasma']:
+            self.pf.coilset['plasma'][name]['If'] *= Ip_scale
+        self.coilset['PF']['plasma'] = self.pf.coilset['plasma']
+
 
     @staticmethod
     def get_delta(value):
@@ -205,29 +266,6 @@ class read_tor(read_dina):
             self.Ibar['pl'][i] = Ipl
         '''
 
-    def get_filament_current(self):
-        self.rt.skiplines(1)
-        filament = self.rt.readblock()
-        return filament
-
-    def get_plasma_current(self):
-        self.rt.skiplines(3)
-        plasma = self.rt.readblock()
-        return plasma
-
-    def get_coil_current(self):
-        self.rt.skiplines(1)
-        coil = self.rt.readblock()
-        return coil
-
-    def get_current(self):
-        self.rt.skiplines(1)
-        t = self.rt.readnumber()
-        filament = self.get_filament_current()
-        plasma = self.get_plasma_current()
-        coil = self.get_coil_current()
-        return (t, filament, plasma, coil)
-
     '''
     def plasma_filaments(self, frame, dx=0.15, dz=0.15):
         rc = np.sqrt(dx**2 + dz**2) / 4
@@ -257,41 +295,6 @@ class read_tor(read_dina):
             It[name] = coil[name]['It']
         return It
 
-    def set_coil_current(self, frame_index, Ip_scale):
-        for label in ['CS', 'PF']:
-            It = {}
-            for name, I in zip(self.coilset[label]['coil'],
-                               self.current[label][frame_index]):
-                It[name] = Ip_scale * I
-            self.pf.update_current(It, self.coilset[label])  # update coilset
-            self.pf.update_current(It)  # update pf instance
-
-    def set_filament_current(self, coilset, frame_index, Ip_scale):
-        It = {}
-        current = self.current['filament'][frame_index]
-        for name in coilset['coil']:
-            turn_index = coilset['coil'][name]['index']
-            sign = coilset['coil'][name]['sign']
-            It[name] = Ip_scale * sign * current[turn_index]
-        self.pf.update_current(It, coilset)  # update coilset
-        self.pf.update_current(It)  # update pf instance
-
-    def set_plasma_current(self, frame_index, Ip_scale):
-        self.pf.coilset['plasma'] =\
-            copy.deepcopy(self.plasma_coil[frame_index])
-        for name in self.pf.coilset['plasma']:
-            self.pf.coilset['plasma'][name]['If'] *= Ip_scale
-        self.coilset['PF']['plasma'] = self.pf.coilset['plasma']
-
-    def set_current(self, frame_index, **kwargs):
-        Ip_scale = kwargs.get('Ip_scale', self.Ip_scale)
-        self.frame_index = frame_index
-        self.set_coil_current(frame_index, Ip_scale)
-        self.set_filament_current(self.coilset['vv_DINA'],
-                                  frame_index, Ip_scale)
-        self.set_filament_current(self.coilset['bb_DINA'],
-                                  frame_index, Ip_scale)
-        self.set_plasma_current(frame_index, Ip_scale)
 
     def plot(self, index, ax=None):
         if ax is None:
@@ -320,16 +323,25 @@ class read_tor(read_dina):
 
 if __name__ == '__main__':
 
-    tor = read_tor('disruptions', read_txt=False)
+    tor = read_tor('disruptions', read_txt=True)
+
     #for folder in tor.dina.folders:
     #    tor.load_file(folder, read_txt=True)
     tor.load_file(-1)
+
+    plt.set_aspect(1.1)
+
+    #tor.coilset.sloc['coil', 'Ic'] = 5e3
+    #tor.coilset.sloc['plasma', 'Ic'] = 25e3
+
+
+    #tor.coilset.plot()
+    #tor.biot.plot()
+
+
 
     #tor.plot_plasma(200)
     #tor.plot(200)
 
     # tor.pf.plot(current=False, plasma=True, subcoil=True)
     # tor.movie('tmp')
-
-
-

@@ -64,10 +64,8 @@ if __name__ == '__main__':
 
     coilset.sloc[:, 'Ic'] = 9.3
 
-
     def set_current():
         coilset.sloc['Ic'] = 6
 
     def get_current():
         _ = coilset.sloc['active', 'Ic']
-

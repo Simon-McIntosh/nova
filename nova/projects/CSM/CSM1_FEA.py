@@ -486,7 +486,7 @@ class CSmodulue(Material_Model):
         _ismodulus = self._ismodulus[self._active]
         xo[_ismodulus] /= self._modulus_factor  # normalize moduli
 
-        Mlim = 1e9 * np.array([2.5, 160]) / self._modulus_factor
+        Mlim = 1e9 * np.array([0.05, 180]) / self._modulus_factor
         Nulim = (-1+1e-3, 1.5)
         Nulim = (0.05, 0.35)
         nM = np.sum(_ismodulus)
@@ -597,7 +597,7 @@ class CSmodulue(Material_Model):
     
 if __name__ == '__main__':
     
-    csm = CSmodulue(material_model='t', num=120)
+    csm = CSmodulue(material_model='o', num=120)
     
     csm.Ic = 40e3
 

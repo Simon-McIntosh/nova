@@ -37,6 +37,14 @@ class CoilSet(CoilGrid, FrameSet):
         self.shell = Shell(self.frame, self.subframe, self.dshell)
         self.plasma = Plasma(self.frame, self.subframe, self.dplasma)
 
+    def store(self, file):
+        """Store coilset to hdf5 file."""
+        super().store(file)
+
+    def load(self, file):
+        """Load coilset from hdf5 file."""
+        super().load(file)
+
     def plot(self, axes=None):
         """Plot coilset."""
         self.subframe.polyplot(axes=axes)
@@ -63,6 +71,13 @@ if __name__ == '__main__':
     coilset.sloc['passive', 'Ic'] = [7.7, 12, 5.5]
 
     coilset.sloc[:, 'Ic'] = 9.3
+
+    coilset.store('tmp.h5')
+    del coilset
+    coilset = CoilSet()
+    coilset.load('tmp.h5')
+
+    coilset.plot()
 
     def set_current():
         coilset.sloc['Ic'] = 6

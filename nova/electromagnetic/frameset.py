@@ -118,17 +118,15 @@ class FrameSet(FrameSetLoc):
                 break
         return iloc
 
-    def to_hdf(self, path):
-        """Write frameset to file."""
-        self.frame.to_hdf(path, 'frame')
-        self.subframe.to_hdf(path, 'subframe')
+    def store(self, path):
+        """Store frame and subframe as groups within hdf file."""
+        self.frame.store(path, 'frame')
+        self.subframe.store(path, 'subframe')
 
-    def read_hdf(self, path):
-        """Read frameset from file."""
-        self.frame = FrameSpace()
-        self.frame.read_hdf(path, 'frame')
-        self.subframe = FrameSpace()
-        self.subframe.read_hdf(path, 'subframe')
+    def load(self, path):
+        """Load frameset from file."""
+        self.frame.load(path, 'frame')
+        self.subframe.load(path, 'subframe')
 
 
 if __name__ == '__main__':
@@ -137,10 +135,10 @@ if __name__ == '__main__':
     frameset.subframe.insert([2, 4], It=6, link=True)
     print(frameset.subframe.rms)
 
-    frameset.to_hdf('tmp.h5')
+    frameset.store('tmp.h5')
     del frameset
     frameset = FrameSet()
-    frameset.read_hdf('tmp.h5')
+    frameset.load('tmp.h5')
 
     print('')
     print(frameset.subframe.rms)

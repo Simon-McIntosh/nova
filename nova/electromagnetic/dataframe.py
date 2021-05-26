@@ -202,16 +202,15 @@ class DataFrame(FrameAttrs):
                     self.loc[:, 'Ic'] = \
                         self.loc[:, 'It'] / self.loc[:, 'nturn']
 
-    def to_hdf(self, path_or_buf, key, mode='a', **kwargs):
-        """Extend pandas.to_hdf, append metadata to attrs."""
-        with pandas.HDFStore(path_or_buf) as store:
+    def store(self, file, key, mode='a'):
+        """Store dataframe as group in hdf5 file."""
+        with pandas.HDFStore(file, mode=mode) as store:
             store.put(key, pandas.DataFrame(self))
-            metadata = self.metaframe.metadata
-            store.get_storer(key).attrs.metadata = metadata
+            store.get_storer(key).attrs.metadata = self.metaframe.metadata
 
-    def read_hdf(self, path_or_buf, key, mode='r', **kwargs):
-        """Extend pandas.read_hdf, load metadata from store.attrs."""
-        with pandas.HDFStore(path_or_buf) as store:
+    def load(self, file, key):
+        """Load dataframe from hdf file."""
+        with pandas.HDFStore(file) as store:
             frame = store[key]
             metadata = store.get_storer(key).attrs.metadata
         self.__init__(frame, **metadata)
@@ -223,8 +222,7 @@ if __name__ == '__main__':
                           required=['x'], additional=['Ic', 'z'],
                           Subspace=[], label='PF')
 
-    dataframe.to_hdf('tmp.h5', 'frame')
-
-    dataframe.read_hdf('tmp.h5', 'frame')
+    dataframe.store('tmp.h5', 'frame')
+    dataframe.load('tmp.h5', 'frame')
 
     print(dataframe)

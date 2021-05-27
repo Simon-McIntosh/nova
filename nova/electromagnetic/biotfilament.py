@@ -7,7 +7,6 @@ import scipy.special
 
 from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotdata import BiotMatrix, BiotSolve
-from nova.electromagnetic.coilset import CoilSet
 
 
 # pylint: disable=no-member  # disable scipy.special module not found
@@ -197,21 +196,3 @@ class Biot(BiotMatrix):
         for var in self.columns:
             self.data[var].loc[:, source_index] = data[var]
             self.data[f'_{var}'].loc[:, plasma_index] = data[f'_{var}']
-
-
-if __name__ == '__main__':
-
-    coilset = CoilSet(dcoil=-35, dplasma=-40)
-    coilset.coil.insert(10, 0.5, 0.95, 0.95, section='hex', turn='r',
-                        nturn=-0.8)
-    coilset.coil.insert(10, -0.5, 0.95, 0.95, section='hex')
-
-    coilset.coil.insert(11, 0, 0.95, 0.1, section='sk', nturn=-1.8)
-    coilset.coil.insert(12, 0, 0.6, 0.9, section='r', turn='sk')
-    coilset.plasma.insert({'ellip': [11.5, 0.8, 1.7, 0.4]})
-
-    #biotframe.insert([1, 3], 3, dl=0.95, dt=0.6, section='sk', link=True)
-
-    coilset.link(['Coil0', 'Plasma'], 2)
-
-    coilset.plot()

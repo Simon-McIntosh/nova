@@ -44,10 +44,8 @@ def test_metadata():
                           default={'dCoil': -1},
                           additional=['dCoil'])
     metadata = {attr: metaframe.metadata[attr]
-                for attr in ['required', 'default', 'additional']}
-    assert metadata == {'required': ['x', 'z'], 'default': {'dCoil': -1},
-                        'additional': ['dCoil']}
-
+                for attr in ['required', 'additional']}
+    assert metadata == {'required': ['x', 'z'], 'additional': ['dCoil']}
 
 def test_required_number():
     metaframe = MetaFrame(required=['x', 'z'])

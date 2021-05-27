@@ -21,7 +21,7 @@ class MetaArray(MetaData):
     def __post_init__(self):
         """Clear fast access data attribute."""
         self.data = {}
-        self.metadata = {'_internal': ['index', 'data']}
+        self.metadata = {'_internal': ['index', 'data', 'lock', 'default']}
         super().__post_init__()
 
     @property

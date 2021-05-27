@@ -39,6 +39,7 @@ dependencies:
   - xarray
   - xlrd
   - pip:
+    - geojson
     - pymupdf
     - pyquaternion
     - rdp

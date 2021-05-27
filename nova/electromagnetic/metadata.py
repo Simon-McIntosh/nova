@@ -59,12 +59,15 @@ class MetaData(ABC):
                 setattr(self, attribute, types[attribute]())
             else:
                 if not isinstance(value, types[attribute]):
-                    raise TypeError('type missmatch: '
-                                    'type(input) != type(default) \n'
-                                    f'attribute: {attribute}\n'
-                                    f'value: {value}\n'
-                                    f'{type(metadata[attribute])} != '
-                                    f'{types[attribute]}')
+                    if isinstance(value, str):
+                        value = [value]
+                    else:
+                        raise TypeError('type missmatch: '
+                                        'type(input) != type(default) \n'
+                                        f'attribute: {attribute}\n'
+                                        f'value: {value}\n'
+                                        f'{type(metadata[attribute])} != '
+                                        f'{types[attribute]}')
                 if replace:
                     setattr(self, attribute, value)
                 elif types[attribute] == dict:

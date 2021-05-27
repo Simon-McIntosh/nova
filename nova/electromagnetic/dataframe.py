@@ -2,8 +2,11 @@
 import re
 import string
 
+import geojson
 import pandas
 import numpy as np
+import shapely
+import xarray
 
 from nova.electromagnetic.frameattrs import FrameAttrs
 
@@ -202,19 +205,28 @@ class DataFrame(FrameAttrs):
                     self.loc[:, 'Ic'] = \
                         self.loc[:, 'It'] / self.loc[:, 'nturn']
 
-    def store(self, file, key, mode='a'):
+    def to_geojson(self, col='poly'):
+        """Return col as geojson list."""
+        return [geojson.dumps(geo) for geo in self[col]]
+
+    def to_poly(self, col='poly'):
+        self.loc[:, col] = [shapely.geometry.shape(geojson.loads(geo))
+                            for geo in self[col]]
+
+    def store(self, path, group, mode='w'):
         """Store dataframe as group in hdf5 file."""
-        with pandas.HDFStore(file, mode=mode) as store:
-            store.put(key, pandas.DataFrame(self))
-            store.get_storer(key).attrs.metadata = self.metaframe.metadata
+        xframe = self.to_xarray()
+        xframe.attrs = self.metaframe.metadata
+        if 'poly' in xframe:
+            xframe['poly'].values = self.to_geojson()
+        xframe.to_netcdf(path, group=group, mode=mode)
 
-    def load(self, file, key):
+    def load(self, file, group):
         """Load dataframe from hdf file."""
-        with pandas.HDFStore(file) as store:
-            frame = store[key]
-            metadata = store.get_storer(key).attrs.metadata
-        self.__init__(frame, **metadata)
-
+        with xarray.open_dataset(file, group=group) as data:
+            self.__init__(data.to_dataframe(), **data.attrs)
+        if 'poly' in self:
+            self.to_poly()
 
 if __name__ == '__main__':
 

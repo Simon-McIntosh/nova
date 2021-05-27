@@ -120,8 +120,8 @@ class FrameSet(FrameSetLoc):
 
     def store(self, path):
         """Store frame and subframe as groups within hdf file."""
-        self.frame.store(path, 'frame')
-        self.subframe.store(path, 'subframe')
+        self.frame.store(path, 'frame', mode='w')
+        self.subframe.store(path, 'subframe', mode='a')
 
     def load(self, path):
         """Load frameset from file."""

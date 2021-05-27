@@ -4,12 +4,15 @@ from os import path
 import numpy as np
 
 #import matplotlib.animation as manimation
-import pandas as pd
-import shapely
-
-from sklearn.neighbors import KDTree
-from shapely.geometry import MultiPoint
 from descartes import PolygonPatch
+
+import pandas as pd
+import pygeos
+import scipy
+import shapely
+from shapely.geometry import MultiPoint
+from sklearn.neighbors import KDTree
+import xarray
 
 #from amigo.time import clock
 #from amigo.IO import readtxt, pythonIO
@@ -43,10 +46,12 @@ class read_tor(read_dina):
         self.name = filepath.split(path.sep)[-2]
         if read_txt or not path.isfile(filepath + '.pk'):
             self.read_file(filepath)  # read txt file
-            del self.coilset.plasma.tree
+            self.coilset.grid.solve(5e3, 0.05)
+            self.coilset.store(f'{filepath}.h5')
             self.save_pickle(filepath, ['frames'])
         else:
             self.load_pickle(filepath)
+            self.coilset.load(f'{filepath}.h5')
             #self.coilset.plasma.tree = self.coilset.plasma.generate_tree()
             #self.biot.frame = self.coilset.subframe
 
@@ -55,8 +60,6 @@ class read_tor(read_dina):
         with readtxt(filepath + '.dat') as self.rt:
             self.read_coils()
             self.read_frames()
-        self.biot = BiotGrid(frame=tor.coilset.subframe)
-        self.biot.solve(5e3, 0.05)
 
     def read_coils(self):
         """Load poloidal field filaments."""
@@ -77,7 +80,13 @@ class read_tor(read_dina):
             geom[i, :] = self.rt.readblock()
         geom *= 1e-2  # cm to meters
         part = ['cs' if 'CS' in name else 'pf' for name in index]
-        self.coilset.coil.insert(*geom, name=index, part=part, turn='hex')
+        turns = dict(CS3U=554, CS2U=554, CS1U=554,
+                     CS1L=554, CS2L=554.0, CS3L=554.0,
+                     PF1=248.64, PF2=115.2, PF3=185.92,
+                     PF4=169.92, PF5=216.8, PF6=459.36)
+        nturn = [turns[name] for name in index]
+        self.coilset.coil.insert(*geom, name=index, part=part, turn='hex',
+                                 nturn=nturn)
 
     def insert_shells(self, dt=60e-3):
         """Insert vessel and blanket shells."""
@@ -127,6 +136,38 @@ class read_tor(read_dina):
                 self.frames.append(self.get_current())
             except ValueError:
                 break
+
+    def store_frames(self):
+        time = [1e-3*frame[0] for frame in self.frames]
+        data = xarray.Dataset(
+            coords=dict(index=self.coilset.subframe.subspace.index,
+                        time=time))
+        data['It'] = xarray.DataArray(
+                0., dims=['time', 'index'], coords=[data.time, data.index])
+        for i, frame in enumerate(self.frames[-20:-19]):
+            data['It'][i, :12] = -1e3*np.array(frame[3][:12])
+            data['It'][i, 12:-1] = -1e3*np.array(frame[1])
+            data['It'][i, -1] = -1e3*np.sum(frame[2][2::3])
+
+            xp = 1e-2*np.array(frame[2][0::3])
+            zp = 1e-2*np.array(frame[2][1::3])
+            Ip = -1e3*np.array(frame[2][2::3])  # -kA to A
+
+            nturn = scipy.interpolate.griddata((xp, zp), Ip,
+                                       self.coilset.loc['plasma', ['x', 'z']],
+                                       method='linear', fill_value=0)
+            self.coilset.loc['plasma', 'nturn'] = nturn / np.sum(nturn)
+            self.coilset.subframe.polyplot('plasma')
+            plt.plot(xp, zp, '.')
+        plt.axis('equal')
+        #
+
+        #self.t[i] = 1e-3*frame[0]  # ms-s
+        #self.current['filament'][i] = -1e3*np.array(frame[1])  # -kA to A
+        #self.current['CS'][i] = -1e3*np.array(frame[3][:nCS])  # -kA to A
+        #self.current['PF'][i] = -1e3*np.array(frame[3][nCS:])  # -kA to A
+
+        #print(data.It[:, -1])
 
     def get_current(self):
         """Read current vector from txt file."""
@@ -323,21 +364,26 @@ class read_tor(read_dina):
 
 if __name__ == '__main__':
 
-    tor = read_tor('disruptions', read_txt=True)
+    tor = read_tor('disruptions', read_txt=False)
 
     #for folder in tor.dina.folders:
     #    tor.load_file(folder, read_txt=True)
     tor.load_file(-1)
 
+    tor.store_frames()
+
+    '''
+
     plt.set_aspect(1.1)
 
-    #tor.coilset.sloc['coil', 'Ic'] = 5e3
-    #tor.coilset.sloc['plasma', 'Ic'] = 25e3
+    tor.coilset.sloc['PF6', 'Ic'] = -25e3 / tor.coilset.frame.nturn['PF6']
+    tor.coilset.sloc['PF1', 'Ic'] = -25e3 / tor.coilset.frame.nturn['PF1']
+    tor.coilset.sloc['plasma', 'Ic'] = -25e3
 
 
-    #tor.coilset.plot()
-    #tor.biot.plot()
-
+    tor.coilset.plot()
+    tor.coilset.grid.plot()
+    '''
 
 
     #tor.plot_plasma(200)

@@ -276,6 +276,8 @@ class PolyPlot(Axes, Display, Label, MetaMethod):
             pass
         if index is None:
             return np.full(len(self.frame), True)
+        if isinstance(index, str) and index in self.frame:
+            index = self.frame.index[self.frame[index]]
         if isinstance(index, (str, int)):
             if isinstance(index, int):
                 index = self.frame.index[index]

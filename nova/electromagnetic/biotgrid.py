@@ -9,7 +9,6 @@ import xarray
 
 from nova.electromagnetic.biotdata import BiotMatrix
 from nova.electromagnetic.biotfilament import Biot
-from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.framelink import FrameLink
 from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.polyplot import Axes
@@ -128,6 +127,7 @@ class BiotGrid(Axes):
     """Compute interaction across grid."""
 
     frame: FrameSpace
+    name: str = field(default='grid')
     data: BiotMatrix = field(init=False, repr=False)
 
     def solve(self, number: int, limit: Union[float, list[float]]):
@@ -152,30 +152,31 @@ class BiotGrid(Axes):
 
     def plot(self, axes=None, **kwargs):
         self.axes = axes
-        kwargs = dict(colors='gray', linewidths=1.0) | kwargs
+        kwargs = dict(colors='gray', linewidths=1.25,
+                      linestyles='solid') | kwargs
         Psi = np.dot(self.data.Psi, self.frame.subspace['Ic'])
         self.axes.contour(self.data.x, self.data.z,
                           Psi.reshape(*self.shape).T, 21, **kwargs)
 
+    def store(self, file):
+        """Store data as netCDF in hdf5 file."""
+        self.data.to_netcdf(file, mode='a', group=self.name)
+
+    def load(self, file):
+        """load data from hdf5."""
+        with xarray.open_dataset(file, group=self.name) as data:
+            data.load()
+            self.data = data
+
 
 if __name__ == '__main__':
 
-    coilset = CoilSet(dcoil=-35, dplasma=-40)
-    coilset.coil.insert(10, 0.5, 0.95, 0.95, section='hex', turn='r',
-                        nturn=-0.8)
-    coilset.coil.insert(10, -0.5, 0.95, 0.95, section='hex')
-    coilset.coil.insert(11, 0, 0.95, 0.1, section='sk', nturn=-1.8)
-    coilset.coil.insert(12, 0, 0.6, 0.9, section='r', turn='sk')
-    coilset.plasma.insert({'ellip': [11.5, 0.8, 1.7, 0.4]})
-    coilset.link(['Coil0', 'Plasma'], 2)
 
-    biotgrid = BiotGrid(coilset.subframe)
-    biotgrid.solve(1e3, 0.1)
 
-    coilset.sloc['Ic'] = 1
 
-    coilset.plot()
-    biotgrid.plot()
+
+
+
 
     '''
     def generate(self, regen=False, **kwargs):

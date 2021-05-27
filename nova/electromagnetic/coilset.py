@@ -2,6 +2,7 @@
 from dataclasses import dataclass, field
 
 from nova.electromagnetic.frameset import FrameSet
+from nova.electromagnetic.biotgrid import BiotGrid
 from nova.electromagnetic.coil import Coil
 from nova.electromagnetic.shell import Shell
 from nova.electromagnetic.plasma import Plasma
@@ -36,14 +37,17 @@ class CoilSet(CoilGrid, FrameSet):
         self.coil = Coil(self.frame, self.subframe, self.dcoil)
         self.shell = Shell(self.frame, self.subframe, self.dshell)
         self.plasma = Plasma(self.frame, self.subframe, self.dplasma)
+        self.grid = BiotGrid(self.subframe, 'grid')
 
     def store(self, file):
         """Store coilset to hdf5 file."""
         super().store(file)
+        self.grid.store(file)
 
     def load(self, file):
         """Load coilset from hdf5 file."""
         super().load(file)
+        self.grid.load(file)
 
     def plot(self, axes=None):
         """Plot coilset."""
@@ -51,9 +55,8 @@ class CoilSet(CoilGrid, FrameSet):
 
 
 if __name__ == '__main__':
-
+    '''
     coilset = CoilSet(dplasma=-50)
-
     coilset.coil.insert(0.8, [0.5, 1, 1.5], 0.25, 0.45, link=True, delta=-10,
                         section='r', scale=0.75,
                         nturn=24, turn='c', part='pf')
@@ -61,10 +64,7 @@ if __name__ == '__main__':
                          delta=-40, part='vv')
     coilset.plasma.insert({'sk': [1.5, 1, 0.5, 0.5]}, turn='hex', tile=True,
                           trim=True)
-
     coilset.link(['Shl0', 'Shl4', 'Shl1'])
-
-    coilset.plot()
 
     coilset.sloc['coil', 'Ic'] = [-12]
     coilset.sloc['plasma', 'Ic'] = [9.9]
@@ -72,15 +72,33 @@ if __name__ == '__main__':
 
     coilset.sloc[:, 'Ic'] = 9.3
 
-    coilset.store('tmp.h5')
-    del coilset
-    coilset = CoilSet()
-    coilset.load('tmp.h5')
 
     coilset.plot()
 
-    def set_current():
-        coilset.sloc['Ic'] = 6
+    '''
 
-    def get_current():
-        _ = coilset.sloc['active', 'Ic']
+    coilset = CoilSet(dcoil=-35, dplasma=-40)
+    coilset.coil.insert(10, 0.5, 0.95, 0.95, section='hex', turn='r',
+                        nturn=-0.8)
+    coilset.coil.insert(10, -0.5, 0.95, 0.95, section='hex')
+    coilset.coil.insert(11, 0, 0.95, 0.1, section='sk', nturn=-1.8)
+    coilset.coil.insert(12, 0, 0.6, 0.9, section='r', turn='sk')
+    coilset.plasma.insert({'ellip': [11.5, 0.8, 1.7, 0.4]})
+    coilset.link(['Coil0', 'Plasma'], 2)
+
+
+    coilset.grid.solve(1e3, 0.1)
+    coilset.store('tmp.h5')
+
+    coilset.plot()
+    del coilset
+
+
+    coilset = CoilSet()
+    coilset.load('tmp.h5')
+
+
+    coilset.sloc['Ic'] = 1
+
+    coilset.plot()
+    coilset.grid.plot()

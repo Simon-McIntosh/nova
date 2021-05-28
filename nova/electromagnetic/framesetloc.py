@@ -53,7 +53,7 @@ class LocIndexer:
             return getattr(self.frame, col)[index]
         return self.frame.loc[index, col]
 
-    
+
 @dataclass
 class FrameSetLoc:
     """

@@ -65,7 +65,7 @@ class PolyGeom(Geom):
 
     def generate(self):
         """Generate poloidal polygon for circular filaments."""
-        if self.section not in polyshape:  # clear poloidal coordinate
+        if self.section not in polyshape:  # clear
             self.x_coordinate = self.z_coordinate = None
         if pandas.isna(self.poly):
             self.poly = polygen(self.section)(

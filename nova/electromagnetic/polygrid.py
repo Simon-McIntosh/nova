@@ -254,6 +254,9 @@ class PolyGrid(PolyCell):
                            if poly.within(buffer) else 'polygon')
                  for poly in polys if (polytrim := poly.intersection(buffer))
                  and isinstance(polytrim, shapely.geometry.Polygon)]
+        #coords = [np.array(poly.exterior.centroid.xy).T[0]
+        #          if poly.name == 'polygon' else coord
+        #          for coord, poly in zip(coords, polys)]
         return coords, polys
 
     def polygeoms(self, polys, coords):

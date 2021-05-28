@@ -3,30 +3,27 @@ from os import path
 
 import numpy as np
 
-#import matplotlib.animation as manimation
-from descartes import PolygonPatch
-
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
 import pandas as pd
-import pygeos
 import scipy
 import shapely
-from shapely.geometry import MultiPoint
-from sklearn.neighbors import KDTree
 import xarray
 
-#from amigo.time import clock
-#from amigo.IO import readtxt, pythonIO
+# from amigo.time import clock
 
-from nova.electromagnetic.biotgrid import BiotGrid
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.IO.read_waveform import read_dina
 from nova.electromagnetic.machinedata import MachineData
+from nova.electromagnetic.polyplot import Axes
 
 from nova.utilities.pyplot import plt
 from nova.utilities.IO import readtxt
 
+np.random.seed(2025)
 
-class read_tor(read_dina):
+
+class read_tor(read_dina, Axes):
     """
     Read tor_cur_data*.dat file from DINA simulation.
 
@@ -36,7 +33,7 @@ class read_tor(read_dina):
 
     def __init__(self, database_folder='disruptions', read_txt=False):
         super().__init__(database_folder, read_txt)
-        self.coilset = CoilSet(dcoil=0.25, dplasma=0.2, dshell=0.1)
+        self.coilset = CoilSet(dcoil=0.5, dplasma=0.35, dshell=2.5)
 
     def load_file(self, folder, **kwargs):
         """Load disruption data."""
@@ -44,16 +41,14 @@ class read_tor(read_dina):
         filepath = self.locate_file('tor_cur', folder=folder)
         filepath = '.'.join(filepath.split('.')[:-1])
         self.name = filepath.split(path.sep)[-2]
-        if read_txt or not path.isfile(filepath + '.pk'):
+        if read_txt or not path.isfile(filepath + '.h5'):
             self.read_file(filepath)  # read txt file
-            self.coilset.grid.solve(5e3, 0.05)
+            self.coilset.grid.solve(1e4, 0.05)
             self.coilset.store(f'{filepath}.h5')
-            self.save_pickle(filepath, ['frames'])
+            self.store_data(f'{filepath}.h5')
         else:
-            self.load_pickle(filepath)
             self.coilset.load(f'{filepath}.h5')
-            #self.coilset.plasma.tree = self.coilset.plasma.generate_tree()
-            #self.biot.frame = self.coilset.subframe
+            self.load_data(f'{filepath}.h5')
 
     def read_file(self, filepath):  # called by load_file
         """Read txt data."""
@@ -125,7 +120,7 @@ class read_tor(read_dina):
         machine.load_data()
         fw = pd.concat((machine.data['firstwall'],
                         machine.data['divertor']))
-        self.coilset.plasma.insert(fw.to_numpy(), name='plasma', part='plasma')
+        self.coilset.plasma.insert(fw.to_numpy(), name='Plasma', part='plasma')
 
     def read_frames(self):
         """Read transient frame data."""
@@ -137,37 +132,62 @@ class read_tor(read_dina):
             except ValueError:
                 break
 
-    def store_frames(self):
+    def store_data(self, file=None):
+        """Read frame data and store in xarray dataset."""
         time = [1e-3*frame[0] for frame in self.frames]
-        data = xarray.Dataset(
-            coords=dict(index=self.coilset.subframe.subspace.index,
+        plasma = self.coilset.loc['plasma']
+        self.data = xarray.Dataset(
+            coords=dict(index=self.coilset.subframe.subspace.index.to_list(),
+                        plasma=self.coilset.subframe.index[plasma].to_list(),
                         time=time))
-        data['It'] = xarray.DataArray(
-                0., dims=['time', 'index'], coords=[data.time, data.index])
-        for i, frame in enumerate(self.frames[-20:-19]):
-            data['It'][i, :12] = -1e3*np.array(frame[3][:12])
-            data['It'][i, 12:-1] = -1e3*np.array(frame[1])
-            data['It'][i, -1] = -1e3*np.sum(frame[2][2::3])
-
+        self.data['It'] = xarray.DataArray(
+                0., dims=['time', 'index'],
+                coords=[self.data.time, self.data.index])
+        self.data['Ic'] = xarray.DataArray(
+                0., dims=['time', 'index'],
+                coords=[self.data.time, self.data.index])
+        self.data['nturn'] = xarray.DataArray(
+                0., dims=['time', 'plasma'],
+                coords=[self.data.time, self.data.plasma])
+        nturn = self.coilset.frame.loc[
+            self.coilset.frame.subspace.index, 'nturn']
+        for i, frame in enumerate(self.frames):
+            self.data['It'][i, :12] = -1e3*np.array(frame[3][:12])
+            self.data['It'][i, 12:-1] = -1e3*np.array(frame[1])
+            self.data['It'][i, -1] = -1e3*np.sum(frame[2][2::3])
+            self.data['Ic'][i] = self.data['It'][i] / nturn
+            # extract plasma coordinates and filament current
             xp = 1e-2*np.array(frame[2][0::3])
             zp = 1e-2*np.array(frame[2][1::3])
             Ip = -1e3*np.array(frame[2][2::3])  # -kA to A
+            if len(xp) == 0:
+                self.data['nturn'][i, :] = 0
+                continue
+            # estimate DINA grid spacing
+            delta = xp[1:] - xp[:-1]
+            try:
+                delta = scipy.stats.mode(delta[delta != 0])[0][0]
+            except IndexError:
+                delta = tor.coilset.dcoil
+            # calculte convex hull and inflate by delta/2
+            sep = shapely.geometry.MultiPoint(np.array([xp, zp]).T).convex_hull
+            # update plasma separatrix
+            self.coilset.plasma.update(sep.buffer(delta/2))
+            # calculate plasma filament turns
+            turns = scipy.interpolate.griddata(
+                (xp, zp), Ip, self.coilset.loc['ionize', ['x', 'z']],
+                method='nearest')
+            # normalize turn number
+            self.coilset.loc['ionize', 'nturn'] = turns / np.sum(turns)
+            self.data['nturn'][i] = self.coilset.loc['plasma', 'nturn']
+        if file is not None:
+            self.data.to_netcdf(file, mode='a', group='frame_data')
 
-            nturn = scipy.interpolate.griddata((xp, zp), Ip,
-                                       self.coilset.loc['plasma', ['x', 'z']],
-                                       method='linear', fill_value=0)
-            self.coilset.loc['plasma', 'nturn'] = nturn / np.sum(nturn)
-            self.coilset.subframe.polyplot('plasma')
-            plt.plot(xp, zp, '.')
-        plt.axis('equal')
-        #
-
-        #self.t[i] = 1e-3*frame[0]  # ms-s
-        #self.current['filament'][i] = -1e3*np.array(frame[1])  # -kA to A
-        #self.current['CS'][i] = -1e3*np.array(frame[3][:nCS])  # -kA to A
-        #self.current['PF'][i] = -1e3*np.array(frame[3][nCS:])  # -kA to A
-
-        #print(data.It[:, -1])
+    def load_data(self, file):
+        """Load data from hdf5."""
+        with xarray.open_dataset(file, group='frame_data') as data:
+            data.load()
+            self.data = data
 
     def get_current(self):
         """Read current vector from txt file."""
@@ -196,154 +216,7 @@ class read_tor(read_dina):
         coil = self.rt.readblock()
         return coil
 
-    def set_current(self, index):
-        self.index = frame
-        self.set_coil_current(index)
-        #self.set_filament_current(self.coilset['vv_DINA'],
-        #                          frame_index, Ip_scale)
-        #self.set_filament_current(self.coilset['bb_DINA'],
-        #                          frame_index, Ip_scale)
-        #self.set_plasma_current(frame_index, Ip_scale)
-
-    def set_coil_current(self, index):
-        self.current
-
-
-    def set_filament_current(self, coilset, frame_index, Ip_scale):
-        It = {}
-        current = self.current['filament'][frame_index]
-        for name in coilset['coil']:
-            turn_index = coilset['coil'][name]['index']
-            sign = coilset['coil'][name]['sign']
-            It[name] = Ip_scale * sign * current[turn_index]
-
-    def set_plasma_current(self, frame_index, Ip_scale):
-        self.pf.coilset['plasma'] =\
-            copy.deepcopy(self.plasma_coil[frame_index])
-        for name in self.pf.coilset['plasma']:
-            self.pf.coilset['plasma'][name]['If'] *= Ip_scale
-        self.coilset['PF']['plasma'] = self.pf.coilset['plasma']
-
-
-    @staticmethod
-    def get_delta(value):
-        diff = np.diff(value)
-        diff, count = np.unique(diff[diff > 0], return_counts=True)
-        delta = diff[np.argmax(count)]
-        return delta
-
-    def plot_plasma(self, index):
-        frame = self.frames[index]
-
-        xp = 1e-2*np.array(frame[2][0::3])
-        zp = 1e-2*np.array(frame[2][1::3])
-        Ip = -1e3*np.array(frame[2][2::3])  # -kA to A
-
-        dx = self.get_delta(xp)
-        dz = self.get_delta(zp)
-        dA = dx*dz
-
-        points = [(x, z) for x, z in zip(xp, zp)]
-        separatrix = MultiPoint(points).buffer(np.max([dx, dz]) / 2,
-                                cap_style=3)
-
-        ax = plt.subplots(1, 1)[1]
-        ax.add_patch(PolygonPatch(separatrix))
-        print(separatrix)
-
-
-        self.set_plasma(dPlasma=0.3)
-
-        self.plasma = self.subset(self.coil.plasma)
-        self.plasma.plot(passive=True)
-
-        tree = KDTree(np.array([self.plasma.subcoil.x,
-                                self.plasma.subcoil.z]).T)
-
-        k =int((1 + 2*(np.ceil(dx / (2*self.dPlasma)))) *\
-                        (1 + 2*(np.ceil(dz / (2*self.dPlasma)))))
-
-        ind_o = tree.query(np.array([xp, zp]).T,
-                           k=1, return_distance=False).flatten()
-
-        print(np.shape(ind_o))
-        ind = tree.query(np.array([self.plasma.subcoil.x[ind_o],
-                                   self.plasma.subcoil.z[ind_o]]).T,
-                         k=k, return_distance=False)
-        Ip_sum = Ip.sum()
-        offset = 38
-
-        Np = np.zeros(len(self.Np))
-        for i in range(1):
-            plt.plot(xp[i+offset], zp[i+offset], 'C0o')
-            plt.plot(self.plasma.subcoil.x[ind[i+offset]],
-                     self.plasma.subcoil.z[ind[i+offset]], 'k.')
-            x = xp[i+offset] + dx/2 * np.array([-1, -1, 1, 1, -1])
-            z = zp[i+offset] + dz/2 * np.array([-1, 1, 1, -1, -1])
-            plt.plot(x, z, 'C3')
-
-        #self.plot()
-        plt.plot(xp, zp, 'C3.')
-        plt.axis('equal')
-
-        '''
-        self.nt = len(frames)
-        self.t = np.zeros(self.nt)
-        self.Ibar = np.zeros(self.nt, dtype=[('vv', float), ('pl', float)])
-        dtype = [('filament', '{}float'.format(self.nf)),
-                 ('CS', '{}float'.format(nCS)), ('PF', '{}float'.format(nPF))]
-        self.current = np.zeros(self.nt, dtype=dtype)
-        self.plasma_coil = []
-        self.plasma_patch = []
-        self.nVV = self.coilset['vv_DINA']['nC']
-        for i, frame in enumerate(frames):
-            self.t[i] = 1e-3*frame[0]  # ms-s
-            self.current['filament'][i] = -1e3*np.array(frame[1])  # -kA to A
-            self.current['CS'][i] = -1e3*np.array(frame[3][:nCS])  # -kA to A
-            self.current['PF'][i] = -1e3*np.array(frame[3][nCS:])  # -kA to A
-            plasma_coil, Ipl = self.plasma_filaments(frame)
-            self.plasma_coil.append(plasma_coil)
-            self.Ibar['vv'][i] = np.mean(-1e3*np.array(frame[1])[:self.nVV])
-            self.Ibar['pl'][i] = Ipl
-        '''
-
     '''
-    def plasma_filaments(self, frame, dx=0.15, dz=0.15):
-        rc = np.sqrt(dx**2 + dz**2) / 4
-        npl = count(0)
-        plasma_coil = {}
-        xp = 1e-2*np.array(frame[2][0::3])
-        zp = 1e-2*np.array(frame[2][1::3])
-        Ip = -1e3*np.array(frame[2][2::3])  # -kA to A
-        for x, z, If in zip(xp, zp, Ip):
-            name = 'Plasma_{}'.format(next(npl))
-            plasma_coil[name] = {'If': If, 'dx': dx, 'dz': dz, 'rc': rc,
-                                 'x': x, 'z': z}
-        return plasma_coil, np.sum(Ip)
-
-    def get_vv_vs_index(self, vv):
-        vs_geom = VSgeom()
-        self.vv_vs_index = np.zeros(2, dtype=int)
-        for i, coil in enumerate(vs_geom.geom):
-            vs_coil = vs_geom.geom[coil]
-            self.vv_vs_index[i] = np.argmin(
-                    (vs_coil['x']-np.array(vv['x']))**2 +
-                    (vs_coil['z']-np.array(vv['z']))**2)
-
-    def package_current(self, coil):
-        It = {}
-        for name in coil:
-            It[name] = coil[name]['It']
-        return It
-
-
-    def plot(self, index, ax=None):
-        if ax is None:
-            ax = plt.subplots(figsize=(7, 10))[1]
-        self.set_current(index)
-        self.plot_coils()
-        plt.axis('off')
-
     def movie(self, filename):
         fig, ax = plt.subplots(1, 1, figsize=(7, 10))
         moviename = '../Movies/{}'.format(filename)
@@ -362,28 +235,74 @@ class read_tor(read_dina):
                 tick.tock()
     '''
 
+    def update(self, index):
+        """Update coil currents and plasma positon to match index."""
+        self.coilset.sloc['Ic'] = self.data['Ic'][index].values
+        self.coilset.sloc['coil', 'Ic'] = 0
+        #self.coilset.sloc['plasma', 'Ic'] = 0
+        self.coilset.loc['plasma', 'nturn'] = self.data['nturn'][index].values
+        ionize = self.data['nturn'][index].values != 0
+        self.coilset.loc['plasma', 'ionize'] = ionize
+        Psi = self.coilset.grid.data._Psi * self.data['nturn'][index]
+        self.coilset.grid.data['Psi'][:, -1] = Psi.sum(axis=1).values
+
+    def _update(self, index):
+        Psi = np.dot(self.coilset.grid.data.Psi, self.coilset.sloc['Ic'])
+
+    def make_frame(self, position, axes=None):
+        """Make frame for make_movie."""
+        self.axes = axes  # set axes
+        self.axes.clear()
+        start_time = self.data.time.values[0]
+        end_time = self.data.time.values[-1]
+        delta_time = end_time - start_time
+        time = start_time + delta_time*position / self.duration
+        index = scipy.interpolate.interp1d(
+            self.data.time, range(self.data.dims['time']))(time)
+        index = int(index)
+        self.update(index)
+        self.coilset.plot(axes=self.axes)
+        self.coilset.plasma.plot(axes=self.axes)
+        self.coilset.grid.plot(axes=self.axes)
+        return mplfig_to_npimage(plt.gcf())
+
+    def make_movie(self, file, duration, fps=40):
+        """Make movie."""
+        self.duration = duration
+        animation = VideoClip(self.make_frame, duration=self.duration)
+        animation.write_videofile(f'{file}.mp4', fps=fps)
+
 if __name__ == '__main__':
 
     tor = read_tor('disruptions', read_txt=False)
 
     #for folder in tor.dina.folders:
     #    tor.load_file(folder, read_txt=True)
-    tor.load_file(-1)
+    #tor.load_file(-3)
+    tor.load_file(4)
 
-    tor.store_frames()
-
-    '''
-
-    plt.set_aspect(1.1)
-
-    tor.coilset.sloc['PF6', 'Ic'] = -25e3 / tor.coilset.frame.nturn['PF6']
-    tor.coilset.sloc['PF1', 'Ic'] = -25e3 / tor.coilset.frame.nturn['PF1']
-    tor.coilset.sloc['plasma', 'Ic'] = -25e3
+    #print(tor.coilset)
 
 
-    tor.coilset.plot()
-    tor.coilset.grid.plot()
-    '''
+    #tor.coilset.sloc['PF6', 'Ic'] = -25e3 / tor.coilset.frame.nturn['PF6']
+    #tor.coilset.sloc['PF1', 'Ic'] = -25e3 / tor.coilset.frame.nturn['PF1']
+    #tor.coilset.sloc['plasma', 'Ic'] = -25e3
+
+    index = -70
+
+
+
+    #tor.coilset.sloc['coil', 'Ic'] = 0
+    #tor.coilset.sloc['passive', 'Ic'] = 0
+
+
+
+    #plt.figure()
+    #plt.plot(tor.data.time, tor.data['Ic'][:, tor.coilset.sloc['passive']])
+
+    #plt.set_aspect(1.1)
+    #tor.make_movie('tmp', 10, 20)
+
 
 
     #tor.plot_plasma(200)

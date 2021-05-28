@@ -210,6 +210,7 @@ class DataFrame(FrameAttrs):
         return [geojson.dumps(geo) for geo in self[col]]
 
     def to_poly(self, col='poly'):
+        """Load gegjson strings and convert to shapely polygons."""
         self.loc[:, col] = [shapely.geometry.shape(geojson.loads(geo))
                             for geo in self[col]]
 
@@ -227,6 +228,7 @@ class DataFrame(FrameAttrs):
             self.__init__(data.to_dataframe(), **data.attrs)
         if 'poly' in self:
             self.to_poly()
+
 
 if __name__ == '__main__':
 

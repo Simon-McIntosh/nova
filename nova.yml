@@ -10,6 +10,7 @@ dependencies:
   - coolprop
   - descartes
   - ftputil
+  - geojson
   - hvplot
   - intake
   - matplotlib

@@ -51,7 +51,7 @@ class Axes:
 class Display:
     """Manage axes parameters."""
 
-    patchwork: float = 0.15
+    patchwork: float = 0#0.15
     alpha: dict[str, float] = field(default_factory=lambda: {'plasma': 0.75})
     linewidth: float = 0.5
     edgecolor: str = 'white'

@@ -38,7 +38,7 @@ class BiotMatrix(BiotSet):
         super().__post_init__()
         self.data = xarray.Dataset(
             coords=dict(source=self.get_index('source'),
-                        plasma=self.source.index[self.source.plasma],
+                        plasma=self.source.index[self.source.plasma].to_list(),
                         target=self.get_index('target')))
 
     def initialize_dataset(self):
@@ -56,8 +56,8 @@ class BiotMatrix(BiotSet):
         """Return matrix coordinate, reduce if flag True."""
         biotframe = getattr(self, frame)
         if biotframe.reduce:
-            return biotframe.biotreduce.index
-        return biotframe.index
+            return biotframe.biotreduce.index.to_list()
+        return biotframe.index.to_list()
 
 
 @dataclass

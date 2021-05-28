@@ -52,7 +52,6 @@ class Inverse(CoilClass, PoloidalLimit):
                                  interp1d(L, x)(_l),
                                  interp1d(L, z)(_l))
 
-
     def set_foreground(self):
         '[G][Ic] = [T]'
         self._psi = self.coil.reduce_mpc(self.colocate._psi)
@@ -226,5 +225,3 @@ class Inverse(CoilClass, PoloidalLimit):
             return Faxial
         else:
             return Faxial[j]
-
-

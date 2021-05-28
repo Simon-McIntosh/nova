@@ -9,6 +9,7 @@ import xarray
 
 from nova.electromagnetic.biotdata import BiotMatrix
 from nova.electromagnetic.biotfilament import Biot
+from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.framelink import FrameLink
 from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.polyplot import Axes
@@ -123,11 +124,10 @@ class Expand:
 
 
 @dataclass
-class BiotGrid(Axes):
+class BiotGrid(BiotSolve, Axes):
     """Compute interaction across grid."""
 
-    frame: FrameSpace
-    name: str = field(default='grid')
+    frame: FrameSpace = field(default_factory=FrameSpace)
     data: BiotMatrix = field(init=False, repr=False)
 
     def solve(self, number: int, limit: Union[float, list[float]]):
@@ -145,37 +145,48 @@ class BiotGrid(Axes):
         self.data.coords['x2d'] = (['x', 'z'], grid.data.x2d)
         self.data.coords['z2d'] = (['x', 'z'], grid.data.z2d)
 
+    def update_plasma(self):
+        print(self.frame.loc[self.frame.plasma, self.frame.nturn])
+        '''
+        if self._update_plasma_turns[variable]:
+        _M = getattr(self, f'_{variable.lower()}')
+        _M_ = getattr(self, f'_{variable.lower()}_')
+        if self.source.nP > 0:  # source plasma filaments
+            _M_ = _M_.copy()  # unlink
+            if self.source_turns:
+                _M_ *= self.source.coilframe.Np.reshape(1, -1)
+            if self.target_turns:
+                _M_[self.target.plasma, :] *= \
+                        self.target.nturn[self.target.plasma].reshape(-1, 1)
+            if self.reduce_source and \
+                    len(self.source._plasma_reduction_index) <\
+                    self.source.nP:
+                _M_ = np.add.reduceat(
+                    _M_, self.source._plasma_reduction_index, axis=1)
+            if self.reduce_target and \
+                    len(self.target._reduction_index) < self.nT:
+                _M_ = np.add.reduceat(
+                    _M_, self.target._reduction_index, axis=0)
+            _M[:, self.source._plasma_iloc] = _M_
+            self._update_plasma_turns[variable] = False
+            self._update_plasma_current[variable] = True
+        '''
+
     @property
     def shape(self):
         """Return grid shape."""
         return self.data.dims['x'], self.data.dims['z']
 
     def plot(self, axes=None, **kwargs):
+        """Plot poloidal flux contours."""
         self.axes = axes
-        kwargs = dict(colors='gray', linewidths=1.25,
+        kwargs = dict(colors='lightgray', linewidths=1.5,
                       linestyles='solid') | kwargs
         Psi = np.dot(self.data.Psi, self.frame.subspace['Ic'])
         self.axes.contour(self.data.x, self.data.z,
-                          Psi.reshape(*self.shape).T, 21, **kwargs)
-
-    def store(self, file):
-        """Store data as netCDF in hdf5 file."""
-        self.data.to_netcdf(file, mode='a', group=self.name)
-
-    def load(self, file):
-        """load data from hdf5."""
-        with xarray.open_dataset(file, group=self.name) as data:
-            data.load()
-            self.data = data
-
+                          Psi.reshape(*self.shape).T, 31, **kwargs)
 
 if __name__ == '__main__':
-
-
-
-
-
-
 
 
     '''

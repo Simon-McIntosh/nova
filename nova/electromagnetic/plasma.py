@@ -4,11 +4,13 @@ from dataclasses import dataclass, field
 import descartes
 import numpy as np
 import pygeos
+import shapely
 
 from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polygon import Polygon, PolyFrame
+from nova.electromagnetic.polyplot import Axes
 from nova.utilities.pyplot import plt
 
 
@@ -55,7 +57,7 @@ class PlasmaGrid(PoloidalGrid):
 
 
 @dataclass
-class Plasma(PlasmaGrid, FrameSetLoc):
+class Plasma(PlasmaGrid, FrameSetLoc, Axes):
     """Set plasma separatix, ionize plasma filaments."""
 
     number: int = field(init=False, default=0)
@@ -76,9 +78,13 @@ class Plasma(PlasmaGrid, FrameSetLoc):
 
     def insert(self, *required, iloc=None, **additional):
         """Store plasma index and plasma boundary and generate STR tree."""
-        index = super().insert(*required, iloc=None, **additional)
+        super().insert(*required, iloc=None, **additional)
+        self.generate()
+
+    def generate(self):
+        """Generate plasma attributes, build STR tree."""
         self.number = self.subframe.plasma.sum()
-        self.boundary = self.frame.at[index[0], 'poly']
+        self.boundary = self.frame.at['Plasma', 'poly']
         self.tree = self.generate_tree()
 
     def generate_tree(self):
@@ -105,9 +111,8 @@ class Plasma(PlasmaGrid, FrameSetLoc):
             pygeos STRtree.
 
         """
-        points = pygeos.points(self.loc['plasma', 'x'],
-                               self.loc['plasma', 'z'])
-        return pygeos.STRtree(points)
+        return pygeos.STRtree([pygeos.from_shapely(poly.centroid)
+                               for poly in self.loc['plasma', 'poly']])
 
     def update(self, loop):
         """
@@ -130,7 +135,7 @@ class Plasma(PlasmaGrid, FrameSetLoc):
         poly = Polygon(loop).poly
         self.separatrix = poly.intersection(self.boundary)
         within = self.tree.query(pygeos.from_shapely(self.separatrix),
-                                 predicate='contains')
+                                 predicate='intersects')
         ionize = np.full(self.number, False)
         ionize[within] = True
         self.loc['plasma', 'ionize'] = ionize
@@ -140,13 +145,18 @@ class Plasma(PlasmaGrid, FrameSetLoc):
         # self.update_plasma_turns = True
         # self.update_plasma_current = True
 
-    def plot(self):
+    def plot(self, axes=None, boundary=True):
         """Plot plasma boundary and separatrix."""
-        plt.plot(*self.boundary.exterior.xy, '-', color='gray')
-        axes = plt.gca()
-        axes.add_patch(descartes.PolygonPatch(
-            self.separatrix, facecolor='C4', alpha=0.75, linewidth=0.5,
-            zorder=-10))
+        self.axes = axes
+        filaments = shapely.geometry.MultiPolygon(
+            self.loc['ionize', 'poly'].to_list())
+        separatrix = filaments.convex_hull.intersection(self.boundary)
+        if not separatrix.is_empty:
+            self.axes.add_patch(descartes.PolygonPatch(
+                separatrix, facecolor='C4', alpha=0.75,
+                linewidth=0.5, zorder=-10))
+        if boundary:
+            self.axes.plot(*self.boundary.exterior.xy, '-', color='gray')
         plt.axis('equal')
         plt.axis('off')
 

@@ -66,8 +66,8 @@ class FrameSetLoc:
 
     """
 
-    frame: FrameSpace = field(init=False, default=None, repr=False)
-    subframe: FrameSpace = field(init=False, default=None, repr=False)
+    frame: FrameSpace = field(default=None, repr=False)
+    subframe: FrameSpace = field(default=None, repr=False)
 
     @property
     def Loc(self):

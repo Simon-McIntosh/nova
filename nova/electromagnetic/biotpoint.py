@@ -4,20 +4,13 @@ import os
 
 from nova.definitions import root_dir
 from nova.electromagnetic.biotfilament import Biot
-from nova.electromagnetic.biotdata import BiotMatrix
 from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.coilset import CoilSet
-from nova.electromagnetic.framespace import FrameSpace
-from nova.electromagnetic.framesetloc import FrameSetLoc
 
 
 @dataclass
-class BiotPoint(BiotSolve, FrameSetLoc):
+class BiotPoint(BiotSolve):
     """Compute interaction across grid."""
-
-    frame: FrameSpace = field(repr=False)
-    subframe: FrameSpace = field(repr=False)
-    data: BiotMatrix = field(init=False, repr=False)
 
     def solve(self, points):
         """Solve Biot interaction across grid."""
@@ -31,11 +24,10 @@ class BiotPoint(BiotSolve, FrameSetLoc):
 
 if __name__ == '__main__':
 
-    file = 'ITER.h5'
+    file = 'MD_UP_exp22ms'
     coilset = CoilSet(file=os.path.join(root_dir,
-                                        f'data/NOVA/coilsets/{file}'))
-    point = BiotPoint(frame=coilset.frame, subframe=coilset.subframe,
-                      name='point')
+                                        f'data/NOVA/coilsets/{file}.h5'))
+    point = BiotPoint(coilset.frame, coilset.subframe, 'point')
     point.solve([[12, 13], [0, 1]])
 
-    #coilset.plot()
+    coilset.plot()

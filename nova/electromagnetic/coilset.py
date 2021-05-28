@@ -39,7 +39,7 @@ class CoilSet(CoilGrid, FrameSet):
         self.coil = Coil(self.frame, self.subframe, self.dcoil)
         self.shell = Shell(self.frame, self.subframe, self.dshell)
         self.plasma = Plasma(self.frame, self.subframe, self.dplasma)
-        self.grid = BiotGrid('grid', self.subframe)
+        self.grid = BiotGrid(self.frame, self.subframe, 'grid')
         if self.file is not None:
             self.load(self.file)
 

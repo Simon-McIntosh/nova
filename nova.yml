@@ -15,6 +15,7 @@ dependencies:
   - intake
   - matplotlib
   - mechanize
+  - moviepy
   - netcdf4
   - nlopt
   - numpy

@@ -1,13 +1,15 @@
 """Biot methods."""
 from dataclasses import dataclass, field
 
+import numpy as np
 import xarray
 
 from nova.electromagnetic.biotdata import BiotMatrix
+from nova.electromagnetic.framesetloc import FrameSetLoc
 
 
 @dataclass
-class BiotSolve:
+class BiotSolve(FrameSetLoc):
     """Biot data IO."""
 
     name: str = field(default=None)
@@ -22,3 +24,8 @@ class BiotSolve:
         with xarray.open_dataset(file, group=self.name) as data:
             data.load()
             self.data = data
+
+    def update_turns(self):
+        """Update plasma turns."""
+        self.data['Psi'][:, -1] = np.sum(
+            self.data._Psi*self.loc['plasma', 'nturn'], axis=1)

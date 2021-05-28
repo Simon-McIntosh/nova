@@ -124,20 +124,17 @@ class Expand:
 
 
 @dataclass
-class BiotGrid(BiotSolve, Axes):
+class BiotGrid(Axes, BiotSolve):
     """Compute interaction across grid."""
-
-    frame: FrameSpace = field(default_factory=FrameSpace)
-    data: BiotMatrix = field(init=False, repr=False)
 
     def solve(self, number: int, limit: Union[float, list[float]]):
         """Solve Biot interaction across grid."""
         if isinstance(limit, (int, float)):
-            limit = Expand(self.frame)(limit)
+            limit = Expand(self.subframe)(limit)
         grid = Grid(number, limit)
         target = dict(x=grid.data.x2d.values.flatten(),
                       z=grid.data.z2d.values.flatten())
-        self.data = Biot(self.frame, target, reduce=[True, False],
+        self.data = Biot(self.subframe, target, reduce=[True, False],
                          columns=['Psi', 'Br', 'Bz']).data
         # insert grid data
         self.data.coords['x'] = grid.data.x
@@ -146,7 +143,6 @@ class BiotGrid(BiotSolve, Axes):
         self.data.coords['z2d'] = (['x', 'z'], grid.data.z2d)
 
     def update_plasma(self):
-        print(self.frame.loc[self.frame.plasma, self.frame.nturn])
         '''
         if self._update_plasma_turns[variable]:
         _M = getattr(self, f'_{variable.lower()}')
@@ -182,7 +178,7 @@ class BiotGrid(BiotSolve, Axes):
         self.axes = axes
         kwargs = dict(colors='lightgray', linewidths=1.5,
                       linestyles='solid') | kwargs
-        Psi = np.dot(self.data.Psi, self.frame.subspace['Ic'])
+        Psi = np.dot(self.data.Psi, self.subframe.subspace['Ic'])
         self.axes.contour(self.data.x, self.data.z,
                           Psi.reshape(*self.shape).T, 31, **kwargs)
 

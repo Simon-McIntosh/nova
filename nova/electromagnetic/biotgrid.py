@@ -127,6 +127,8 @@ class Expand:
 class BiotGrid(Axes, BiotSolve):
     """Compute interaction across grid."""
 
+    levels: Union[int, list[float]] = 31
+
     def solve(self, number: int, limit: Union[float, list[float]]):
         """Solve Biot interaction across grid."""
         if isinstance(limit, (int, float)):
@@ -176,11 +178,14 @@ class BiotGrid(Axes, BiotSolve):
     def plot(self, axes=None, **kwargs):
         """Plot poloidal flux contours."""
         self.axes = axes
-        kwargs = dict(colors='lightgray', linewidths=1.5,
-                      linestyles='solid') | kwargs
+        kwargs = dict(colors='lightgray', linewidths=1.5, alpha=0.9,
+                      linestyles='solid', levels=self.levels) | kwargs
         Psi = np.dot(self.data.Psi, self.subframe.subspace['Ic'])
-        self.axes.contour(self.data.x, self.data.z,
-                          Psi.reshape(*self.shape).T, 31, **kwargs)
+        QuadContourSet = self.axes.contour(self.data.x, self.data.z,
+                          Psi.reshape(*self.shape).T, **kwargs)
+        if isinstance(self.levels, int):
+            self.levels = QuadContourSet.levels
+
 
 if __name__ == '__main__':
 

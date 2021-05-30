@@ -83,13 +83,14 @@ class Select(MetaMethod):
         """Update frame selection labels."""
         if self.frame.empty:
             return
+        #self.__post_init__()
         for label in self.labels:
             include = self.any_label(self.labels[label]['include'], True)
             exclude = self.any_label(self.labels[label]['exclude'], False)
             value = np.all([include, ~exclude], axis=0)
             with self.frame.setlock(True, ['subspace', 'array']):
                 self.frame[label] = value
-                    
+
     def any_label(self, columns, default):
         """Return boolean index evaluated as columns.any()."""
         value = np.full(len(self.frame), False)

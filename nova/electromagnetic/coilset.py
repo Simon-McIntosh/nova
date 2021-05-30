@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 
 from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.biotgrid import BiotGrid
+from nova.electromagnetic.biotpoint import BiotPoint
 from nova.electromagnetic.coil import Coil
 from nova.electromagnetic.shell import Shell
 from nova.electromagnetic.plasma import Plasma
@@ -40,6 +41,8 @@ class CoilSet(CoilGrid, FrameSet):
         self.shell = Shell(self.frame, self.subframe, self.dshell)
         self.plasma = Plasma(self.frame, self.subframe, self.dplasma)
         self.grid = BiotGrid(self.frame, self.subframe, 'grid')
+        self.point = BiotPoint(self.frame, self.subframe, 'point')
+        self.probe = BiotPoint(self.frame, self.subframe, 'probe')
         if self.file is not None:
             self.load(self.file)
 
@@ -50,6 +53,14 @@ class CoilSet(CoilGrid, FrameSet):
             self.grid.store(file)
         except AttributeError:
             pass
+        try:
+            self.point.store(file)
+        except AttributeError:
+            pass
+        try:
+            self.probe.store(file)
+        except AttributeError:
+            pass
 
     def load(self, file):
         """Load coilset from hdf5 file."""
@@ -57,6 +68,14 @@ class CoilSet(CoilGrid, FrameSet):
         self.plasma.generate()
         try:
             self.grid.load(file)
+        except OSError:
+            pass
+        try:
+            self.point.load(file)
+        except OSError:
+            pass
+        try:
+            self.probe.load(file)
         except OSError:
             pass
 

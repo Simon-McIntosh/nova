@@ -17,6 +17,8 @@ class BiotPoint(Axes, BiotSolve):
 
     def solve(self, points):
         """Solve Biot interaction across grid."""
+        points = np.array(points)
+        points.shape = (-1, 2)  # shape(n, 2)
         target = dict(x=[point[0] for point in points],
                       z=[point[1] for point in points])
         self.data = Biot(self.subframe, target, reduce=[True, False],
@@ -26,6 +28,7 @@ class BiotPoint(Axes, BiotSolve):
         self.data.coords['z'] = target['z']
 
     def plot(self, axes=None, **kwargs):
+        """Plot points."""
         self.axes = axes
         kwargs = dict(marker='o', linestyle='') | kwargs
         self.axes.plot(self.data.coords['x'], self.data.coords['z'], **kwargs)

@@ -7,11 +7,9 @@ import numpy as np
 import shapely.geometry
 import xarray
 
-from nova.electromagnetic.biotdata import BiotMatrix
 from nova.electromagnetic.biotfilament import Biot
 from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.framelink import FrameLink
-from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.polyplot import Axes
 
 
@@ -181,9 +179,9 @@ class BiotGrid(Axes, BiotSolve):
         kwargs = dict(colors='lightgray', linewidths=1.5, alpha=0.9,
                       linestyles='solid', levels=self.levels) | kwargs
         Psi = np.dot(self.data.Psi, self.subframe.subspace['Ic'])
-        QuadContourSet = self.axes.contour(self.data.x, self.data.z,
-                          Psi.reshape(*self.shape).T, **kwargs)
-        if isinstance(self.levels, int):
+        QuadContourSet = self.axes.contour(
+            self.data.x, self.data.z, Psi.reshape(*self.shape).T, **kwargs)
+        if isinstance(kwargs['levels'], int):
             self.levels = QuadContourSet.levels
 
 

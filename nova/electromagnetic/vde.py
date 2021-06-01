@@ -34,16 +34,15 @@ class VDE(Axes, CoilSet):  # read_dina,
     """
 
     folder: Union[str, int] = None
-    dcoil: float = 0.5
+    dcoil: float = 0.25
     dplasma: float = 0.35
-    dshell: float = 0.5
+    dshell: float = 0.15
     read_txt: bool = False
     file: str = field(init=False, repr=False)
     dina_file: str = field(init=False, repr=False)
 
     duration: float = 5
     fps: int = 15
-
 
     def __post_init__(self):
         """Build file paths."""
@@ -64,6 +63,7 @@ class VDE(Axes, CoilSet):  # read_dina,
         self.file = os.path.join(self.directory, f'{self.folder}.h5')
 
     def set_file(self, file):
+        """Set file paths."""
         if isinstance(file, int):
             return self.set_path(file)
         if file[-3:] == '.h5':
@@ -87,7 +87,7 @@ class VDE(Axes, CoilSet):  # read_dina,
             self.frame.drop()
             self.subframe.drop()
             self.read_file(self.dina_file)  # read txt file
-            self.grid.solve(7.5e3, 0.05)
+            self.grid.solve(2e4, 0.05)
             self.store(self.file)
         else:
             super().load(self.file)  # load coilset
@@ -96,7 +96,7 @@ class VDE(Axes, CoilSet):  # read_dina,
                 self.data = data  # load vde data
 
     def store(self, file):
-        """store data to hdf5."""
+        """Store data to hdf5."""
         if file[-3:] != '.h5':
             file = os.path.join(self.directory, f'{file}_{self.folder}.h5')
         super().store(file)  # store coilset
@@ -259,11 +259,11 @@ class VDE(Axes, CoilSet):  # read_dina,
         self.probe.update_turns()
 
     def plot(self):
-        """plot coilset."""
+        """Plot coilset."""
         super().plot(axes=self.axes)
         if self.loc['plasma', 'nturn'].sum() != 0:
             self.plasma.plot(axes=self.axes)
-        self.grid.plot(axes=self.axes)
+        self.grid.plot(axes=self.axes, levels=30)
 
     def get_index(self, position):
         """Return frame index."""
@@ -293,60 +293,81 @@ class VDE(Axes, CoilSet):  # read_dina,
             filename = f'{prefix}_{filename}'
         file = os.path.join(self.directory, '../animations', filename)
         plt.figure(figsize=(5, 7), facecolor='white')
+        make_frame(0)
         animation = VideoClip(make_frame, duration=self.duration)
         animation.write_videofile(file, fps=self.fps)
 
     def extract_waveform(self):
         """Extract probe waveforms."""
         self.probe.data['time'] = self.data.time
-        self.probe.data['psi'] = xarray.DataArray(
-            0., dims=['time', 'target'],
-            coords=[self.probe.data.time, self.probe.data.target])
-        self.probe.data['br'] = xarray.DataArray(
-            0., dims=['time', 'target'],
-            coords=[self.probe.data.time, self.probe.data.target])
-        self.probe.data['bz'] = xarray.DataArray(
-            0., dims=['time', 'target'],
-            coords=[self.probe.data.time, self.probe.data.target])
+        for attr in ['psi', 'br', 'bz', 'dbdt_r', 'dbdt_z']:
+            self.probe.data[attr] = xarray.DataArray(
+                0., dims=['time', 'target'],
+                coords=[self.probe.data.time, self.probe.data.target])
         tick = clock(self.data.dims['time'], header='Extracting waveform')
         for i in range(self.data.dims['time']):
             self.update(i, solve_grid=False)
-            self.probe.data['psi'][i, :] = np.dot(self.probe.data.Psi,
-                                               self.subframe.subspace['Ic'])
-            self.probe.data['br'][i, :] = np.dot(self.probe.data.Br,
-                                              self.subframe.subspace['Ic'])
-            self.probe.data['bz'][i, :] = np.dot(self.probe.data.Bz,
-                                              self.subframe.subspace['Ic'])
+            self.probe.data['psi'][i, :] = \
+                self.probe.data.Psi.values @ self.subframe.subspace['Ic']
+            self.probe.data['br'][i, :] = \
+                self.probe.data.Br.values @ self.subframe.subspace['Ic']
+            self.probe.data['bz'][i, :] = \
+                self.probe.data.Bz.values @ self.subframe.subspace['Ic']
             tick.tock()
+        self.probe.data['dbdt_r'][:] = np.gradient(
+            self.probe.data.br, self.probe.data.time, axis=0)
+        self.probe.data['dbdt_z'][:] = np.gradient(
+            self.probe.data.bz, self.probe.data.time, axis=0)
         self.probe.store(self.file)  # save data to file
 
-    def plot_waveform(self, index=slice(1, -10), axes=None,
+    def plot_waveform(self, index=slice(1, -10), axes=None, filt=True,
                       **kwargs):
         """Plot probe waveforms."""
         if axes is None:
             axes = plt.gca()
-        #axes.plot(self.probe.data.time[index],
-        #          self.probe.data.br[index, 0], **kwargs)
+        if filt:
+            time, bz = self.filt(self.probe.data.time[index],
+                                 self.probe.data.bz[index, 0], 25)
 
-        b = scipy.signal.savgol_filter(
-            self.probe.data.bz[index, 0].values, 3, 1)
+            dbdt_z = np.gradient(bz, time, axis=0)
+            plt.plot(time[:-200], dbdt_z[:-200], **kwargs)
+            return dbdt_z
+        plt.plot(self.probe.data.time[index],
+                 self.probe.data.dbdt_z[index, 0], **kwargs)
+        return self.probe.data.dbdt_z[index, 0]
 
-        b = self.probe.data.bz[index, 0]
-        dbdt = np.gradient(b, self.probe.data.time[index])
-        plt.plot(self.probe.data.time[index], dbdt)
+    def butter_lowpass(self, cutoff, fs, order):
+        nyq = 0.5 * fs
+        normal_cutoff = cutoff / nyq
+        b, a = scipy.signal.butter(order, normal_cutoff,
+                                   btype='low', analog=False)
+        return b, a
+
+    def butter_lowpass_filter(self, data, cutoff, fs, order=2):
+        b, a = self.butter_lowpass(cutoff, fs, order)
+        y = scipy.signal.filtfilt(b, a, data)
+        return y
+
+    def filt(self, time, value, cutoff):
+        dt_min = np.min(np.diff(time))
+        _time = np.linspace(time[0], time[-1],
+                            int((time[-1]-time[0]) / dt_min))
+        fs = 1 / (_time[1]-_time[0])
+        _value = scipy.interpolate.interp1d(time, value)(_time)
+        return _time, self.butter_lowpass_filter(_value, cutoff, fs)
 
 
-        plt.despine()
-        #plt.legend()
-
+# Filter requirements.
+order = 6
+fs = 30.0       # sample rate, Hz
+cutoff = 3.667  # desired cutoff frequency of the filter, Hz
 
 
 if __name__ == '__main__':
 
-    plt.set_aspect(0.9)
-
-    vde = VDE(folder='VDE_DW_slow', read_txt=False)
-
+    folder = 'VDE_UP_slow'
+    #folder = 'MD_DW_exp16'
+    vde = VDE(folder=folder, read_txt=False)
     '''
     points = ((9.8, 3), (5, 6.2),
               (9.3, -3), (4.7, -6.2),
@@ -360,13 +381,20 @@ if __name__ == '__main__':
     '''
 
     duck = VDE(folder=f'duck_{vde.folder}')
-    duck.sloc['free'] = duck.loc[duck.sloc().index, 'part'] == 'vv'
+    svv_index = duck.sloc[duck.loc['part'] == 'vv', :].index.to_list()
+    svv_iloc = svv_index.index('vv114')
+    duck.sloc['vv0':svv_index[svv_iloc-1], 'free'] = True
     duck.sloc['fix'] = ~duck.sloc['free']
     duck.loc[duck.loc['part'] == 'plasma', 'nturn'] = 0
     duck.loc[duck.loc['part'] == 'bb', 'nturn'] = 0
-    duck.loc['vv60':'vv116', 'nturn'] = 0
+
+    vv_index = duck.loc[duck.loc['part'] == 'vv', :].index.to_list()
+    vv_iloc = vv_index.index('vv114')
+    duck.loc[vv_index[vv_iloc]:vv_index[-1], 'nturn'] = 0
     duck.data.nturn[:] = 0  # plasma turns
-    duck.store(duck.file)
+    duck.data.It[:, ~duck.sloc['coil'] & ~duck.sloc['free']] = 0
+    duck.data.Ic[:, ~duck.sloc['coil'] & ~duck.sloc['free']] = 0
+    #duck.store(duck.file)
 
     inverse = PointInverse(duck.frame, duck.subframe, duck.point.data)
 
@@ -376,37 +404,94 @@ if __name__ == '__main__':
         for index in range(vde.data.dims['time']):
             vde.update(index, solve_grid=False)
             duck.update(index, solve_grid=False)
+            duck.sloc[~duck.sloc['coil'] & ~duck.sloc['free'], 'Ic'] = 0
             # solve
             Psi = vde.point.data.Psi.values @ vde.sloc['Ic']
-            #duck.sloc['plasma', 'Ic'] = 0
             inverse.solve_lstsq(Psi)
             # save solution to file
-            #duck.data.Ic[index, duck.sloc['plasma']] = 0
-
             duck.data.Ic[index, duck.sloc['free']] = duck.sloc['free', 'Ic']
             tick.tock()
         duck.extract_waveform()
         duck.store(duck.file)
 
     def make_frame(position, axes=None):
-        duck.axes = axes  # set axes
-        duck.axes.clear()
-        index = duck.get_index(position)
+        vde.axes = axes  # set axes
+        vde.axes.clear()
+        index = vde.get_index(position)
         vde.update(index)
-        vde.grid.plot(axes=duck.axes, colors='C0', levels=duck.grid.levels,
-                       linestyles='dashed')
+        vde.subframe.polyplot()
+        vde.plasma.plot(axes=vde.axes)
+        vde.grid.plot(axes=vde.axes, levels=20, colors='darkgray',
+                      linewidths=2)
+        # plot duck
         duck.update(index)
-        duck.plot()
-        duck.point.plot(marker='X', color='C2')
+        duck.grid.plot(axes=vde.axes, colors='C2', levels=vde.grid.levels,
+                       linestyles='dashed', linewidths=2)
+        duck.point.plot(marker='*', color='C1', ms=10)
         return mplfig_to_npimage(plt.gcf())
 
-    #fit()
-    #vde.make_movie('duck_cs', make_frame)
-    make_frame(2)
+    def animate():
+        plt.set_aspect(0.9)
+        vde.make_movie()
+        vde.make_movie('duck', make_frame)
 
-    plt.figure()
-    vde.plot_waveform()
-    duck.plot_waveform()
+    def plot_single(patchwork=0.25):
+        plt.figure()
+        vde.subframe.polyplot.patchwork = patchwork
+        vde.subframe.polyplot()
+        vde.plasma.plot()
+        vde.grid.plot()
+        vde.subframe.polyplot.patchwork = 0
+
+    def plot_single_duck(patchwork=0.25):
+        plt.set_aspect(0.9)
+        plt.figure()
+        duck.subframe.polyplot.patchwork = patchwork
+        duck.subframe.polyplot()
+        duck.subframe.polyplot.patchwork = 0
+        duck.point.plot(marker='*', color='C1', ms=25)
+        duck.probe.plot(marker='o', color='C2', ms=20)
+
+    def plot_frame(time):
+        make_frame(time)
+
+    def plot_waveform():
+        plt.figure()
+        vde_dbdt = vde.plot_waveform(label='DINA')
+        duck_dbdt = duck.plot_waveform(label='Duck')
+        plt.legend()
+        plt.xlabel(r'$t$ s')
+        plt.ylabel(r'$\dot{B_z}$ Ts$^{-1}$')
+        plt.despine()
+        rel_err = np.max(abs(vde_dbdt-duck_dbdt)) / np.max(abs(vde_dbdt))
+        plt.title(f'{vde.folder.replace("_", " ")} {1e2*rel_err:1.1f}%')
+
+    def plot_currents():
+        plot_frame(0.362)
+
+        plt.figure()
+        plt.bar(range(duck.loc['free'].sum()),
+                1e-3*vde.loc[duck.loc['free'], 'It'], label='DINA')
+        plt.bar(range(duck.loc['free'].sum()), 1e-3*duck.loc['free', 'It'],
+                alpha=0.5, label='Duck')
+        plt.despine()
+        plt.legend()
+        plt.xlabel('vessel filament index')
+        plt.ylabel(r'$I$ kA')
+
+    #fit()
+    #animate()
+    plot_waveform()
+    #plot_single()
+    plot_single_duck()
+    #plot_frame(2)
+    #duck.plot()
+
+    #vde.make_movie('duck', make_frame)
+
+
+
+
 
     '''
     vde.update(1)

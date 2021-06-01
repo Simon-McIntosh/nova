@@ -46,6 +46,11 @@ class CoilSet(CoilGrid, FrameSet):
         if self.file is not None:
             self.load(self.file)
 
+    @property
+    def frames(self):
+        """Return frame and subframe."""
+        return self.frame, self.subframe
+
     def store(self, file):
         """Store coilset to hdf5 file."""
         super().store(file)

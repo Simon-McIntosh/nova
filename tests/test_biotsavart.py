@@ -5,6 +5,7 @@ import numpy as np
 from nova.electromagnetic.biotfilament import Biot
 from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotgrid import BiotGrid
+from nova.electromagnetic.biotpoint import BiotPoint
 from nova.electromagnetic.biotdata import BiotSolve
 from nova.electromagnetic.coilset import CoilSet
 
@@ -60,7 +61,6 @@ def test_ITER_subinductance_matrix():
                         name='CS2U', part='CS')
     biot = Biot(coilset.subframe, coilset.subframe,
                 turns=[True, True], reduce=[True, True], columns=['Psi'])
-    print(biot.data.Psi)
     Mc_ddd = [[7.076E-01, 1.348E-01, 6.021E-02],  # referance
               [1.348E-01, 7.954E-01, 2.471E-01],
               [6.021E-02, 2.471E-01, 7.954E-01]]
@@ -73,7 +73,7 @@ def test_solenoid_grid():
     coilset = CoilSet(dcoil=0.5)
     coilset.coil.insert(1.5, 0, 0.01, height, nturn=nturn, section='rect')
     coilset.sloc['Ic'] = current
-    biotgrid = BiotGrid(coilset.subframe)
+    biotgrid = BiotGrid(*coilset.frames)
     biotgrid.solve(4, [1e-9, 1.5, 0, 1])
     Bz_theory = BiotSolve.mu_o * nturn * current / height
     Bz_grid = np.dot(biotgrid.data.Bz, coilset.sloc['Ic'])
@@ -82,16 +82,15 @@ def test_solenoid_grid():
 
 def test_solenoid_probe():
     """Verify solenoid vertical field using probe biot instance."""
-    N, L, Ic = 500, 30, 1e3
-    cs = CoilSet()
-    cs.add_coil(1.5, 0, 0.01, L, Nt=N, turn_section='rectangle', dCoil=0.5)
-    cs.Ic = Ic
-    cs.biot_instances = {'probe': 'probe'}
-    cs.probe.add_target(1e-9, 0)
-    Bz_theory = mu_o * N * Ic / L
-    Bz = cs.probe.Bz[0]
-    assert allclose(Bz, Bz_theory, atol=5e-3)
-    return cs, Bz, Bz_theory
+    nturn, height, current = 500, 30, 1e3
+    coilset = CoilSet(dcoil=0.5)
+    coilset.coil.insert(1.5, 0, 0.01, height, nturn=nturn, section='rectangle')
+    coilset.sloc['Ic'] = current
+    biotpoint = BiotPoint(*coilset.frames)
+    biotpoint.solve((1e-9, 0))
+    Bz_theory = BiotSolve.mu_o * nturn * current / height
+    Bz_point = np.dot(biotpoint.data.Bz, coilset.sloc['Ic'])
+    assert allclose(Bz_point, Bz_theory, atol=5e-3)
 
 
 if __name__ == '__main__':

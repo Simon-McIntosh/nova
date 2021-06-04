@@ -1,0 +1,94 @@
+!===============================================================================
+!		Version 4.0 (TF_COILS_V9_4.cdb)
+!
+! 		This macro is to Delete unneeded files
+!
+!		Following arguments are used for this macro
+!   	arg1
+!  TYPE OF MODEL, allow to choose the model to be ran 
+!	arg1=1 -> TF1-SINGLE COIL MODEL TYPE B (20 deg, symmetry plane <-10 deg;+10deg>)
+!   arg1=2 -> TF2-SINGLE COIL MODEL TYPE A (20 deg, symmetry plane <+10 deg;+30deg>)
+!   arg1=3 -> TF1&TF2-TWO COILS MODEL      (40 deg, symmetry plane <-10 deg;+30deg>)
+!
+!		arg2
+!  Revision
+!===============================================================================
+
+!===========================================================================
+!===========================================================================
+!===========================================================================
+!===========================================================================
+! SET TYPE OF MODEL (i.e. TF TYPE A, TF TYPE B OR 2 COILS MODEL)
+!
+*IF, 	%arg1%, EQ, 1, THEN
+
+	RefCaseName 	= 'TF_TYPE_1'
+
+*ELSEIF, %arg1%, EQ, 2, THEN
+		
+	RefCaseName     = 'TF_TYPE_2'
+
+*ELSEIF, %arg1%, EQ, 3, THEN
+		
+	RefCaseName     = 'TF1andTF2'
+	
+*ENDIF
+
+!===========================================================================
+! SET REVISION
+Rev = %arg2%
+
+!===========================================================================
+!===========================================================================
+
+!========================================================================
+! Move to Folder
+!	
+/CWD, './%RefCaseName%_Rev_%Rev%/MECHANICAL'
+
+!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+!
+! CHECK_POINT_1
+! (select HERE: OutFlag)
+!
+Outflag = 0
+!
+!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+
+!========================================================================
+!DELETE UNNEEDED FILES
+!
+/dele,,esav
+/dele,,ldhi
+/dele,,emat
+/dele,,osav
+/dele,,r001
+/dele,,rdb
+/dele,,full
+/dele,MAGNET_EOB,rst
+*DO,TMP,0,19
+	/dele,MAGNET_MECH%TMP%,emat
+	/dele,MAGNET_MECH%TMP%,esav
+	/dele,MAGNET_MECH%TMP%,full
+	/dele,MAGNET_MECH%TMP%,page
+	/dele,MAGNET_MECH%TMP%,rst
+	/dele,MAGNET_MECH%TMP%,stat
+	*DO,TMP1,1,9
+		/dele,MAGNET_MECH%TMP%,r00%TMP1%
+	*ENDDO
+	*DO,TMP1,10,15
+		/dele,MAGNET_MECH%TMP%,r0%TMP1%
+	*ENDDO
+	*DO,TMP1,1,9
+		/dele,MAGNET_MECH,r00%TMP1%
+	*ENDDO
+	*DO,TMP1,10,15
+		/dele,MAGNET_MECH,r0%TMP1%
+	*ENDDO
+*ENDDO
+
+! GO BACK TO VERSION FOLDER FOR NEXT MACRO FILE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+FINISH																		!
+/CLEAR,START																!
+/CWD, '../../'																!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

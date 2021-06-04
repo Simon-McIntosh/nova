@@ -1,0 +1,206 @@
+!$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$!
+!
+!		Version 4.0 (TF_COILS_V9_4.cdb)
+!
+!		This macro is to generate the folder structure
+!
+!		Following arguments are used for this macro
+!   	arg1
+!  TYPE OF MODEL, allow to choose the model to be ran
+!	arg1=1 -> TF1-SINGLE COIL MODEL TYPE B (20 deg, symmetry plane <-10 deg;+10deg>)
+!   arg1=2 -> TF2-SINGLE COIL MODEL TYPE A (20 deg, symmetry plane <+10 deg;+30deg>)
+!   arg1=3 -> TF1&TF2-TWO COILS MODEL      (40 deg, symmetry plane <-10 deg;+30deg>)
+!
+!		arg2
+!  Revision
+!
+!$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$!
+
+!=======================================================================
+! SET THE MAGNETIC NODAL PREFRENCES
+!
+/CONFIG, NRES, 4000 	!If time steps are too many, the number should be increased to store the results.
+
+!===============================================================================
+!===============================================================================
+!===============================================================================
+
+	!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+	!
+	! CHECK_POINT_1
+	! (select HERE: Revision, and Case)
+	!
+	!
+	j 			= %arg1%
+	Rev  		= %arg2%				
+	!
+	!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§	
+
+!===========================================================================
+! SET INITIAL DIRECTORY 
+!
+	
+!===========================================================================
+! SET INITIAL DIRECTORY 
+!
+*IF, 	j, EQ, 1, THEN
+
+	FolderName = 'TF_TYPE_1_Rev_%Rev%'
+	RefCaseName ='TF_TYPE_1'
+
+*ELSEIF, j, EQ, 2, THEN
+
+	FolderName = 'TF_TYPE_2_Rev_%Rev%'
+	RefCaseName = 'TF_TYPE_2'
+
+*ELSEIF, j, EQ, 3, THEN
+
+	FolderName = 'TF1andTF2_Rev_%Rev%'
+	RefCaseName = 'TF1andTF2'
+	
+*ENDIF
+	
+!===========================================================================
+! CREATE GLOBAL DIRECTORY
+!
+/MKDIR,		'%FolderName%'
+/CWD,		'./%FolderName%'
+	
+!===========================================================================
+! COPY FILES
+!
+/COPY, '../MACRO/INPUT_FILES/TF_COILS_V9_4', mats, , './TF_COILS_V9_4', mats
+
+!===========================================================================
+! CREATE FIRST LEVEL
+!
+/MKDIR, '_models'
+/MKDIR, 'MAGNETIC'
+/MKDIR, 'MECHANICAL'
+/MKDIR, 'POST'
+/MKDIR, 'THERMAL'
+/MKDIR, 'TEXTOUT'
+
+!===========================================================================
+! _MODELS
+!
+/CWD,	'./_models'
+/MKDIR, 'MAG_GEN'
+/MKDIR, 'MEC_GEN'
+/MKDIR, 'PARAMETER'
+/MKDIR, 'THE_GEN'
+/MKDIR, 'SOLIDBOLTS'
+
+!===========================================================================
+! COPY FILES
+!
+/COPY,'../../MACRO/INPUT_FILES/TF_COILS_V9_4',cdb,,'./TF_COILS_V9_4',cdb
+/COPY,'../../MACRO/INPUT_FILES/FEM_PROP_V9_4',txt,,'./PARAMETER/FEM_PROP_V9_4', txt
+	
+!===========================================================================
+! MAGNETIC
+!
+/CWD,		'../MAGNETIC'
+/MKDIR, '_loads'
+	
+!===========================================================================
+! COPY FILES
+!
+/COPY, '../../MACRO/INPUT_FILES/Current_Loads_15MA_2016', txt, , './_loads/Current_Loads_15MA_2016', txt
+
+/MKDIR, '_output'
+
+*DO, i, 1, 12
+      *IF, i, EQ, 1, THEN
+	        Scenario = 'TF_ONLY'
+      *ELSEIF, i, EQ, 2, THEN
+	        Scenario = 'SOD'
+      *ELSEIF, i, EQ, 3, THEN
+		Scenario = 'SOP'
+      *ELSEIF, i, EQ, 4, THEN
+		Scenario = 'XPF'
+      *ELSEIF, i, EQ, 5, THEN
+		Scenario = 'CS10'
+      *ELSEIF, i, EQ, 6, THEN
+		Scenario = 'CS2U0'
+      *ELSEIF, i, EQ, 7, THEN
+		Scenario = 'CS2L0'
+      *ELSEIF, i, EQ, 8, THEN
+		Scenario = 'SOF'
+      *ELSEIF, i, EQ, 9, THEN
+		Scenario = 'SOB'
+      *ELSEIF, i, EQ,10, THEN
+		Scenario = 'EOB'
+      *ELSEIF, i, EQ,11, THEN
+		Scenario = 'EOP'
+      *ELSEIF, i, EQ,12, THEN
+		Scenario = 'EOB+PD'
+      *ENDIF
+
+	/MKDIR, '%Scenario%'
+	/CWD,	'./%Scenario%'
+
+	/MKDIR, 'MAGNO'
+	/MKDIR, 'PARAMETERS'
+	/MKDIR, 'POST'
+	/CWD,	'../'
+*ENDDO
+
+!===========================================================================
+! MECHANICAL
+!
+/CWD,	'../MECHANICAL'
+/MKDIR, '_loads'
+
+!===========================================================================
+! COPY FILES
+!
+*DO, i, 1, 12
+
+    *IF, i, EQ, 1, THEN
+		Scenario = 'TF_ONLY'
+    *ELSEIF, i, EQ, 2, THEN
+		Scenario = 'SOD'
+    *ELSEIF, i, EQ, 3, THEN
+		Scenario = 'SOP'
+    *ELSEIF, i, EQ, 4, THEN
+		Scenario = 'XPF'
+    *ELSEIF, i, EQ, 5, THEN
+		Scenario = 'CS10'
+    *ELSEIF, i, EQ, 6, THEN
+		Scenario = 'CS2U0'
+    *ELSEIF, i, EQ, 7, THEN
+		Scenario = 'CS2L0'
+    *ELSEIF, i, EQ, 8, THEN
+		Scenario = 'SOF'
+    *ELSEIF, i, EQ, 9, THEN
+		Scenario = 'SOB'
+    *ELSEIF, i, EQ,10, THEN
+		Scenario = 'EOB'
+    *ELSEIF, i, EQ,11, THEN
+		Scenario = 'EOP'
+    *ELSEIF, i, EQ,12, THEN
+		Scenario = 'EOB+PD'
+    *ENDIF
+
+*ENDDO
+!===========================================================================
+! THERMAL
+!
+/CWD,		'../THERMAL'
+/MKDIR, '_output'
+
+!===========================================================================
+! THERMAL
+!
+/CWD,		'../POST'
+/MKDIR, '_OUTPUT'
+/MKDIR, 'POST_PROCESSING'
+
+! GO BACK TO VERSION FOLDER FOR NEXT MACRO FILE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+FINISH																		!
+/CLEAR,START																!
+/CWD, '../../'																!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/EOF

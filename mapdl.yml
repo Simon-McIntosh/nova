@@ -1,49 +1,32 @@
-name: nova_apdl
+name: mapdl
 channels:
   - conda-forge
   - spyder-ide
   - defaults
 dependencies:
-  - python=3.9
-  - astropy
+  - python=3.6
   - cython
-  - beautifulsoup4
-  - coolprop
-  - descartes
-  - ftputil
-  - geojson
-  - hvplot
-  - intake
   - matplotlib
-  - mechanize
   - moviepy
   - netcdf4
   - nlopt
   - numpy
   - pandas
   - pip
-  - pyarrow
-  - pygeos
   - pygmo
-  - pytables
   - pytest
-  - python-snappy
-  - python-docx
-  - regex
   - scikit-image
   - scikit-learn
   - scipy
   - seaborn
   - shapely
-  - spyder=5
+  - spyder=4
   - spyder-line-profiler
   - spyder-unittest
-  - urllib3
   - xarray
-  - xlrd
   - pip:
-    - geojson
     - ansys-mapdl-core
-    - pymupdf
-    - pyquaternion
+    - ansys-dpf-core
+    - ansys-dpf-post
+    - ansys-mapdl-reader   
     - rdp

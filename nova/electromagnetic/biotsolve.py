@@ -27,9 +27,10 @@ class BiotSolve(FrameSetLoc):
 
     def update_turns(self):
         """Update plasma turns."""
-        self.data['Psi'][:, -1] = np.sum(
-            self.data._Psi*self.loc['plasma', 'nturn'], axis=1)
-        self.data['Br'][:, -1] = np.sum(
-            self.data._Br*self.loc['plasma', 'nturn'], axis=1)
-        self.data['Bz'][:, -1] = np.sum(
-            self.data._Bz*self.loc['plasma', 'nturn'], axis=1)
+        for attr in ['Psi', 'Br', 'Bz']:
+            try:
+                self.data[attr][:, -1] = np.sum(
+                    getattr(self.data, f'_{attr}') *
+                    self.loc['plasma', 'nturn'], axis=1)
+            except AttributeError:
+                pass

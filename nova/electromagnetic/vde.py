@@ -35,8 +35,8 @@ class VDE(Axes, CoilSet):  # read_dina,
 
     folder: Union[str, int] = None
     dcoil: float = 0.25
-    dplasma: float = 0.35
-    dshell: float = 0.15
+    dplasma: float = 0.25
+    dshell: float = 0.5
     read_txt: bool = False
     file: str = field(init=False, repr=False)
     dina_file: str = field(init=False, repr=False)
@@ -106,8 +106,8 @@ class VDE(Axes, CoilSet):  # read_dina,
         """Read txt data."""
         with readtxt(filepath) as self.rt:
             self.read_coils()
-            self.read_frames()
-        self.read_data()
+            transient = self.read_transient()
+        self.read_data(transient)
 
     def read_coils(self):
         """Load poloidal field filaments."""
@@ -174,19 +174,21 @@ class VDE(Axes, CoilSet):  # read_dina,
                         machine.data['divertor']))
         self.plasma.insert(fw.to_numpy(), name='Plasma', part='plasma')
 
-    def read_frames(self):
-        """Read transient frame data."""
-        self.frames = []
+    def read_transient(self):
+        """Return transient current data."""
+        transient = []
         self.rt.skiplines(6)
         while True:
             try:
-                self.frames.append(self.get_current())
+                transient.append(self.get_current())
             except ValueError:
                 break
+        return transient
 
-    def read_data(self):
+    def read_data(self, transient):
         """Read frame data into xarray dataset."""
-        time = [1e-3*frame[0] for frame in self.frames]
+        transient = transient[1:-1]
+        time = [1e-3*frame[0] for frame in transient]
         plasma = self.loc['plasma']
         self.data = xarray.Dataset(
             coords=dict(index=self.subframe.subspace.index.to_list(),
@@ -203,7 +205,7 @@ class VDE(Axes, CoilSet):  # read_dina,
                 coords=[self.data.time, self.data.plasma])
         nturn = self.frame.loc[
             self.frame.subspace.index, 'nturn']
-        for i, frame in enumerate(self.frames[1:-1]):
+        for i, frame in enumerate(transient):
             self.data['It'][i, :12] = -1e3*np.array(frame[3][:12])
             self.data['It'][i, 12:-1] = -1e3*np.array(frame[1])
             self.data['It'][i, -1] = -1e3*np.sum(frame[2][2::3])
@@ -258,9 +260,9 @@ class VDE(Axes, CoilSet):  # read_dina,
         self.point.update_turns()
         self.probe.update_turns()
 
-    def plot(self):
+    def plot(self, axes=None):
         """Plot coilset."""
-        super().plot(axes=self.axes)
+        super().plot(axes=axes)
         if self.loc['plasma', 'nturn'].sum() != 0:
             self.plasma.plot(axes=self.axes)
         self.grid.plot(axes=self.axes, levels=30)

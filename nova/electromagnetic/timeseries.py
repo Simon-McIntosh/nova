@@ -11,7 +11,7 @@ from nova.electromagnetic.coilset import CoilSet
 
 
 class DataProperty:
-    """Properties mixing for DataArray and DataSet."""
+    """Properties mixin for DataArray and DataSet."""
 
     @property
     def time(self):

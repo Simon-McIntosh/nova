@@ -1,0 +1,1024 @@
+!===============================================================================
+!
+! 29 JULY 2020 - Fabian Krajewski ITB mbH
+!		Tel.: +49 (0)231 94536534
+!		This FE-model is part of the Framework service contract ITER/17/CT/6000000211/PMT
+!		Task Order 4, Deliverable 2, Two TF coil model
+!
+!		Version 4.0 (TF_COILS_V9_4.cdb)
+!
+! 		This macro is to modify the geometry of the IIS shear key for the 2 coil FE-model
+!
+!	  	The submodell of the IIS shear keys is modeled with a hole inside the shear key. (d_hole = 0.040 m)
+!		Define hole diameter in line 64
+!  		This hole leads to a reduce stiffness of the shear keys.
+!  		To take this reduced stiffness into account in the 2 coil model, new shear key geometry is used.
+!
+!		Following arguments are used for this macro
+!   	arg1
+!  TYPE OF MODEL, allow to choose the model to be ran 
+!	arg1=1 -> TF1-SINGLE COIL MODEL TYPE B (20 deg, symmetry plane <-10 deg;+10deg>)
+!   arg1=2 -> TF2-SINGLE COIL MODEL TYPE A (20 deg, symmetry plane <+10 deg;+30deg>)
+!   arg1=3 -> TF1&TF2-TWO COILS MODEL      (40 deg, symmetry plane <-10 deg;+30deg>)
+!
+!		arg2
+!  Revision
+!===============================================================================
+
+	!===========================================================================
+	! NUMBER OF ELEMENT ROWS FOR IIS SHEAR KEYS
+	!
+	erow5001=7
+	erow5002=10
+	erow5003=13
+	erow5004=13
+	erow5005=7
+	erow5006=10
+	erow5007=13
+	erow5008=13
+	erow5011=7
+	erow5012=10
+	erow5013=13
+	erow5014=13
+	erow5015=7
+	erow5016=10
+	erow5017=13
+	erow5018=13
+	erow5021=7
+	erow5022=10
+	erow5023=13
+	erow5024=13
+	erow5025=7
+	erow5026=10
+	erow5027=13
+	erow5028=13
+	
+	!===========================================================================
+	! TOLERANZ
+	!
+	tol=0.0014
+	
+	!===========================================================================
+	! IIS HOLE DIAMETER
+	!
+	Dhole=0.040
+	!=====================
+	! Calculated variables
+	!
+	Diis=Dhole/1.5
+	Diis30=diis/2
+	Diis60=diis/1.155
+	Riis=Dhole/2
+	Riis30=riis/2
+	Riis60=riis/1.155
+	
+	!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+	!
+	! CHECK_POINT_1
+	! (select HERE: Revision, and Case)
+	!
+	!
+	Rev  		= %arg2%
+	!
+	!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+	
+	!===========================================================================
+	!===========================================================================
+	!===========================================================================
+	!===========================================================================
+	! SET TYPE OF MODEL (i.e. TF TYPE A, TF TYPE B OR 2 COILS MODEL)
+	!
+	*IF, 	%arg1%, EQ, 1, THEN
+
+		RefCaseName 	= 'TF_TYPE_1'
+
+		nCoil		= 1
+		Coil_1		= 1
+		Coil_2		= 1
+		
+		alfa		=  20
+		alfa_1		= -10
+		alfa_2		=  10
+
+	*ELSEIF, %arg1%, EQ, 2, THEN
+		
+		RefCaseName     = 'TF_TYPE_2'
+		
+		nCoil		= 1
+		Coil_1		= 2
+		Coil_2		= 2
+		
+		alfa		=  20
+		alfa_1		=  10
+		alfa_2		=  30
+	
+	*ELSEIF, %arg1%, EQ, 3, THEN
+		
+		RefCaseName     = 'TF1andTF2'
+		
+		nCoil		= 2
+		Coil_1		= 1
+		Coil_2		= 2
+
+		alfa		=  40
+		alfa_1		= -10
+		alfa_2		=  30
+	
+	*ENDIF
+
+	!===========================================================================
+	!===========================================================================
+	
+	!==================================================================================================================================
+	! IIS shear key modification
+	!
+	FEModel		= 'TF_COILS_MECH'	! MECH MODEL
+	CaseName	= 'IIS_MOD'			! the case name
+	KIND		= '_models'
+	
+	!===============================================================================
+	!===============================================================================
+	! ASSIGN DIRECTORY, TITLE, CASENAME AND Load MECH or TH DB model 
+
+	/FILENAME,'MAGNET_MECH',1
+	
+	!========================================================================
+	! set txt OUTPUT
+	!	
+	/CWD, './%RefCaseName%_Rev_%Rev%/TEXTOUT'
+	/OUTPUT,%CaseName%,txt
+	/CWD, '../../'
+	
+	!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+	!
+	! CHECK_POINT_2
+	! (select HERE: change to PROPER DIRECTORY)
+	!
+	!
+	/CWD, './%RefCaseName%_Rev_%Rev%/%KIND%'
+	!
+	!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+
+	!========================================================================
+	! READ model
+	!		
+	
+	RESUME,'%FEModel%', db, , 1, 1
+
+	ALLSEL, ALL
+	
+	!=========================================================================
+	! set title
+	!
+	/TITLE,%RefCaseName%_Rev%Rev%  CaseName:%CaseName%
+	
+!===========================================================================
+!===========================================================================
+
+	!========================================================================
+	! PRE-PROCESSING
+	!
+	/PREP7
+	SHPP,off
+	!
+	ESEL,NONE
+	*do,itel,41,52
+		ESEL,A,MAT,,itel
+	*ENDDO
+	*do,itel,61,72
+		ESEL,A,MAT,,itel
+	*ENDDO
+	CM,e_iis,ELEM
+	NSLE
+	CPDELE,ALL,,,ALL
+	
+	*IF,arg1,EQ,1,OR,arg1,EQ,3,THEN
+		*DO,j,5001,5008
+			*DIM,n_%j%,ARRAY,erow%j%+1,56,4
+			CMSEL,S,e_iis
+			CSYS,j
+			ESEL,R,CENT,X,-0.2,0.2
+			ESEL,R,CENT,Y,-0.2,0.2
+			ESEL,R,CENT,Z,-1,1
+			eN=ELNEXT(0)
+			*GET, matID, ELEM, eN, ATTR, MAT
+			*GET, tyID, ELEM, eN, ATTR, TYPE
+			TYPE, tyID
+			MAT, matID
+			NSLE
+			CM,n_e%j%,NODE
+			CM,n_tmp,NODE
+			EDELE,ALL
+			*DO,k,1,erow%j%+1
+				CMSEL,S,n_tmp
+				*GET,nz,NODE,,MNLOC,Z
+				*DO,l,16,35
+					NSEL,R,LOC,Z,nz-8*tol,nz+8*tol
+					
+					*IF,l,EQ,30,THEN
+						tol=0.003
+						*IF,k,GT,1,THEN
+							nx=n_%j%(k-1,l,2)
+							ny=n_%j%(k-1,l,3)
+							NSEL,R,LOC,Y,ny-2*tol,ny+2*tol
+							NSEL,R,LOC,X,nx-2*tol,nx+2*tol
+							*GET,nz,NODE,,MNLOC,Z
+						*ELSE
+							*IF,j,GT,5004,THEN
+								*GET,ny,NODE,,MXLOC,Y
+							*ELSE
+								*GET,ny,NODE,,MNLOC,Y
+							*ENDIF
+							NSEL,R,LOC,Y,ny-tol,ny+tol
+							*GET,nx,NODE,,MNLOC,X
+							NSEL,R,LOC,X,nx-tol,nx+tol
+						*ENDIF
+					*ELSE
+						*IF,j,GT,5004,THEN
+							*GET,ny,NODE,,MXLOC,Y
+						*ELSE
+							*GET,ny,NODE,,MNLOC,Y
+						*ENDIF
+						NSEL,R,LOC,Y,ny-tol,ny+tol
+						*GET,nx,NODE,,MNLOC,X
+						NSEL,R,LOC,X,nx-tol,nx+tol
+					*ENDIF
+					tol=0.0014
+					
+					n_%j%(k,l,1)=NODE(nx,ny,nz)
+					n_%j%(k,l,2)=NX(n_%j%(k,l,1))
+					n_%j%(k,l,3)=NY(n_%j%(k,l,1))
+					n_%j%(k,l,4)=NZ(n_%j%(k,l,1))
+					CMSEL,S,n_tmp
+					NSEL,U,NODE,,n_%j%(k,l,1)
+					CM,n_tmp,NODE	
+				*ENDDO
+			*ENDDO			
+			
+			CMSEL,S,n_e%j%
+			*DO,k,1,erow%j%+1
+				!================
+				! NMODIF COMMANDS
+				!
+				*IF,j,GT,5004,THEN
+					NMODIF,n_%j%(k,22,1),n_%j%(k,22,2)-0.004,n_%j%(k,22,3)-0.008,n_%j%(k,22,4)		! NODE ID 22
+					NMODIF,n_%j%(k,23,1),n_%j%(k,23,2),n_%j%(k,23,3)-diis+0.003,n_%j%(k,23,4)		! NODE ID 23
+					NMODIF,n_%j%(k,24,1),n_%j%(k,24,2)+0.004,n_%j%(k,24,3)-0.008,n_%j%(k,24,4)		! NODE ID 24
+					NMODIF,n_%j%(k,31,1),n_%j%(k,31,2),n_%j%(k,31,3)-0.003,n_%j%(k,31,4)			! NODE ID 31
+				*ELSE
+					NMODIF,n_%j%(k,22,1),n_%j%(k,22,2)-0.004,n_%j%(k,22,3)+0.008,n_%j%(k,22,4)		! NODE ID 22
+					NMODIF,n_%j%(k,23,1),n_%j%(k,23,2),n_%j%(k,23,3)+diis-0.003,n_%j%(k,23,4)		! NODE ID 23
+					NMODIF,n_%j%(k,24,1),n_%j%(k,24,2)+0.004,n_%j%(k,24,3)+0.008,n_%j%(k,24,4)		! NODE ID 24
+					NMODIF,n_%j%(k,31,1),n_%j%(k,31,2),n_%j%(k,31,3)+0.003,n_%j%(k,31,4)			! NODE ID 31
+				*ENDIF
+				NMODIF,n_%j%(k,17,1),n_%j%(k,17,2)-0.005,n_%j%(k,17,3),n_%j%(k,17,4)			! NODE ID 17
+				NMODIF,n_%j%(k,18,1),n_%j%(k,18,2)+riis,n_%j%(k,18,3),n_%j%(k,18,4)				! NODE ID 18
+				NMODIF,n_%j%(k,19,1),n_%j%(k,19,2)+0.005,n_%j%(k,19,3),n_%j%(k,19,4)			! NODE ID 19
+				
+			
+				!==============
+				! NGEN COMMANDS
+				!
+				N,,n_%j%(k,18,2)-diis,n_%j%(k,18,3),n_%j%(k,18,4)									! NODE ID 38
+				*GET,n_%j%(k,38,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+diis,n_%j%(k,18,3),n_%j%(k,18,4)									! NODE ID 43
+				*GET,n_%j%(k,43,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-riis,n_%j%(k,18,3),n_%j%(k,18,4)									! NODE ID 49
+				*GET,n_%j%(k,49,1),NODE,,NUM,MAXD
+				
+				*IF,j,GT,5004,THEN
+					N,,n_%j%(k,18,2)-diis60,n_%j%(k,18,3)-diis30,n_%j%(k,18,4)							! NODE ID 39
+					*GET,n_%j%(k,39,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-diis30,n_%j%(k,18,3)-diis60,n_%j%(k,18,4)							! NODE ID 40
+					*GET,n_%j%(k,40,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+diis30,n_%j%(k,18,3)-diis60,n_%j%(k,18,4)							! NODE ID 41
+					*GET,n_%j%(k,41,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+diis60,n_%j%(k,18,3)-diis30,n_%j%(k,18,4)							! NODE ID 42
+					*GET,n_%j%(k,42,1),NODE,,NUM,MAXD	
+					N,,n_%j%(k,18,2)-riis60,n_%j%(k,18,3)-riis30,n_%j%(k,18,4)							! NODE ID 50
+					*GET,n_%j%(k,50,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-riis30,n_%j%(k,18,3)-riis60,n_%j%(k,18,4)							! NODE ID 51
+					*GET,n_%j%(k,51,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2),n_%j%(k,18,3)-riis,n_%j%(k,18,4)									! NODE ID 52
+					*GET,n_%j%(k,52,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+riis30,n_%j%(k,18,3)-riis60,n_%j%(k,18,4)							! NODE ID 53
+					*GET,n_%j%(k,53,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+riis60,n_%j%(k,18,3)-riis30,n_%j%(k,18,4)							! NODE ID 54
+					*GET,n_%j%(k,54,1),NODE,,NUM,MAXD
+				*ELSE
+					N,,n_%j%(k,18,2)-diis60,n_%j%(k,18,3)+diis30,n_%j%(k,18,4)							! NODE ID 39
+					*GET,n_%j%(k,39,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-diis30,n_%j%(k,18,3)+diis60,n_%j%(k,18,4)							! NODE ID 40
+					*GET,n_%j%(k,40,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+diis30,n_%j%(k,18,3)+diis60,n_%j%(k,18,4)							! NODE ID 41
+					*GET,n_%j%(k,41,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+diis60,n_%j%(k,18,3)+diis30,n_%j%(k,18,4)							! NODE ID 42
+					*GET,n_%j%(k,42,1),NODE,,NUM,MAXD	
+					N,,n_%j%(k,18,2)-riis60,n_%j%(k,18,3)+riis30,n_%j%(k,18,4)							! NODE ID 50
+					*GET,n_%j%(k,50,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-riis30,n_%j%(k,18,3)+riis60,n_%j%(k,18,4)							! NODE ID 51
+					*GET,n_%j%(k,51,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2),n_%j%(k,18,3)+riis,n_%j%(k,18,4)									! NODE ID 52
+					*GET,n_%j%(k,52,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+riis30,n_%j%(k,18,3)+riis60,n_%j%(k,18,4)							! NODE ID 53
+					*GET,n_%j%(k,53,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+riis60,n_%j%(k,18,3)+riis30,n_%j%(k,18,4)							! NODE ID 54
+					*GET,n_%j%(k,54,1),NODE,,NUM,MAXD
+				*ENDIF
+			*ENDDO
+			
+			*DO,k,1,erow%j%
+				!==============
+				! EGEN COMMANDS
+				!
+				m=k+1
+				E,n_%j%(k,20,1),n_%j%(k,25,1),n_%j%(k,24,1),n_%j%(k,19,1),n_%j%(m,20,1),n_%j%(m,25,1),n_%j%(m,24,1),n_%j%(m,19,1)
+				E,n_%j%(k,25,1),n_%j%(k,27,1),n_%j%(k,29,1),n_%j%(k,24,1),n_%j%(m,25,1),n_%j%(m,27,1),n_%j%(m,29,1),n_%j%(m,24,1)
+				E,n_%j%(k,27,1),n_%j%(k,32,1),n_%j%(k,34,1),n_%j%(k,29,1),n_%j%(m,27,1),n_%j%(m,32,1),n_%j%(m,34,1),n_%j%(m,29,1)
+				E,n_%j%(k,29,1),n_%j%(k,34,1),n_%j%(k,35,1),n_%j%(k,31,1),n_%j%(m,29,1),n_%j%(m,34,1),n_%j%(m,35,1),n_%j%(m,31,1)
+				E,n_%j%(k,31,1),n_%j%(k,35,1),n_%j%(k,33,1),n_%j%(k,28,1),n_%j%(m,31,1),n_%j%(m,35,1),n_%j%(m,33,1),n_%j%(m,28,1)
+				E,n_%j%(k,28,1),n_%j%(k,33,1),n_%j%(k,30,1),n_%j%(k,26,1),n_%j%(m,28,1),n_%j%(m,33,1),n_%j%(m,30,1),n_%j%(m,26,1)
+				E,n_%j%(k,22,1),n_%j%(k,28,1),n_%j%(k,26,1),n_%j%(k,21,1),n_%j%(m,22,1),n_%j%(m,28,1),n_%j%(m,26,1),n_%j%(m,21,1)
+				E,n_%j%(k,17,1),n_%j%(k,22,1),n_%j%(k,21,1),n_%j%(k,16,1),n_%j%(m,17,1),n_%j%(m,22,1),n_%j%(m,21,1),n_%j%(m,16,1)
+				E,n_%j%(k,19,1),n_%j%(k,24,1),n_%j%(k,42,1),n_%j%(k,43,1),n_%j%(m,19,1),n_%j%(m,24,1),n_%j%(m,42,1),n_%j%(m,43,1)
+				E,n_%j%(k,24,1),n_%j%(k,29,1),n_%j%(k,41,1),n_%j%(k,42,1),n_%j%(m,24,1),n_%j%(m,29,1),n_%j%(m,41,1),n_%j%(m,42,1)
+				E,n_%j%(k,41,1),n_%j%(k,29,1),n_%j%(k,31,1),n_%j%(k,23,1),n_%j%(m,41,1),n_%j%(m,29,1),n_%j%(m,31,1),n_%j%(m,23,1)
+				E,n_%j%(k,23,1),n_%j%(k,31,1),n_%j%(k,28,1),n_%j%(k,40,1),n_%j%(m,23,1),n_%j%(m,31,1),n_%j%(m,28,1),n_%j%(m,40,1)
+				E,n_%j%(k,40,1),n_%j%(k,28,1),n_%j%(k,22,1),n_%j%(k,39,1),n_%j%(m,40,1),n_%j%(m,28,1),n_%j%(m,22,1),n_%j%(m,39,1)
+				E,n_%j%(k,38,1),n_%j%(k,39,1),n_%j%(k,22,1),n_%j%(k,17,1),n_%j%(m,38,1),n_%j%(m,39,1),n_%j%(m,22,1),n_%j%(m,17,1)
+				E,n_%j%(k,43,1),n_%j%(k,42,1),n_%j%(k,54,1),n_%j%(k,18,1),n_%j%(m,43,1),n_%j%(m,42,1),n_%j%(m,54,1),n_%j%(m,18,1)
+				E,n_%j%(k,42,1),n_%j%(k,41,1),n_%j%(k,53,1),n_%j%(k,54,1),n_%j%(m,42,1),n_%j%(m,41,1),n_%j%(m,53,1),n_%j%(m,54,1)
+				E,n_%j%(k,41,1),n_%j%(k,23,1),n_%j%(k,52,1),n_%j%(k,53,1),n_%j%(m,41,1),n_%j%(m,23,1),n_%j%(m,52,1),n_%j%(m,53,1)
+				E,n_%j%(k,52,1),n_%j%(k,23,1),n_%j%(k,40,1),n_%j%(k,51,1),n_%j%(m,52,1),n_%j%(m,23,1),n_%j%(m,40,1),n_%j%(m,51,1)
+				E,n_%j%(k,51,1),n_%j%(k,40,1),n_%j%(k,39,1),n_%j%(k,50,1),n_%j%(m,51,1),n_%j%(m,40,1),n_%j%(m,39,1),n_%j%(m,50,1)
+				E,n_%j%(k,49,1),n_%j%(k,50,1),n_%j%(k,39,1),n_%j%(k,38,1),n_%j%(m,49,1),n_%j%(m,50,1),n_%j%(m,39,1),n_%j%(m,38,1)
+			*ENDDO
+		*ENDDO
+	*ENDIF
+			
+			
+
+	tol=0.0014		
+	*IF,arg1,EQ,1,THEN
+		*DO,j,5011,5018
+			*DIM,n_%j%,ARRAY,erow%j%+1,56,4
+			CMSEL,S,e_iis
+			CSYS,j
+			ESEL,R,CENT,X,-0.2,0.2
+			ESEL,R,CENT,Y,-0.2,0.2
+			ESEL,R,CENT,Z,-1,1
+			eN=ELNEXT(0)
+			*GET, matID, ELEM, eN, ATTR, MAT
+			*GET, tyID, ELEM, eN, ATTR, TYPE
+			TYPE, tyID
+			MAT, matID
+			NSLE
+			CM,n_e%j%,NODE
+			CM,n_tmp,NODE
+			EDELE,ALL
+			*DO,k,1,erow%j%+1
+				CMSEL,S,n_tmp
+				*GET,nz,NODE,,MNLOC,Z
+				*DO,l,1,20
+					NSEL,R,LOC,Z,nz-8*tol,nz+8*tol
+					*IF,j,GT,5014,THEN
+						*GET,ny,NODE,,MXLOC,Y
+					*ELSE
+						*GET,ny,NODE,,MNLOC,Y
+					*ENDIF
+					NSEL,R,LOC,Y,ny-tol,ny+tol
+					*GET,nx,NODE,,MNLOC,X
+					NSEL,R,LOC,X,nx-tol,nx+tol
+					tol=0.0014
+					
+					n_%j%(k,l,1)=NODE(nx,ny,nz)
+					n_%j%(k,l,2)=NX(n_%j%(k,l,1))
+					n_%j%(k,l,3)=NY(n_%j%(k,l,1))
+					n_%j%(k,l,4)=NZ(n_%j%(k,l,1))
+					CMSEL,S,n_tmp
+					NSEL,U,NODE,,n_%j%(k,l,1)
+					CM,n_tmp,NODE
+				*ENDDO
+			*ENDDO			
+			
+			CMSEL,S,n_e%j%
+			*DO,k,1,erow%j%+1
+				!================
+				! NMODIF COMMANDS
+				!
+				*IF,j,GT,5014,THEN
+					NMODIF,n_%j%(k,5,1),n_%j%(k,5,2),n_%j%(k,5,3)+0.003,n_%j%(k,5,4)				! NODE ID 5
+					NMODIF,n_%j%(k,12,1),n_%j%(k,12,2)-0.004,n_%j%(k,12,3)+0.008,n_%j%(k,12,4)		! NODE ID 12
+					NMODIF,n_%j%(k,13,1),n_%j%(k,13,2),n_%j%(k,13,3)+diis-0.003,n_%j%(k,13,4)		! NODE ID 13
+					NMODIF,n_%j%(k,14,1),n_%j%(k,14,2)+0.004,n_%j%(k,14,3)+0.008,n_%j%(k,14,4)		! NODE ID 14
+				*ELSE
+					NMODIF,n_%j%(k,5,1),n_%j%(k,5,2),n_%j%(k,5,3)-0.003,n_%j%(k,5,4)				! NODE ID 5
+					NMODIF,n_%j%(k,12,1),n_%j%(k,12,2)-0.004,n_%j%(k,12,3)-0.008,n_%j%(k,12,4)		! NODE ID 12
+					NMODIF,n_%j%(k,13,1),n_%j%(k,13,2),n_%j%(k,13,3)-diis+0.003,n_%j%(k,13,4)		! NODE ID 13
+					NMODIF,n_%j%(k,14,1),n_%j%(k,14,2)+0.004,n_%j%(k,14,3)-0.008,n_%j%(k,14,4)		! NODE ID 14
+				*ENDIF			
+				NMODIF,n_%j%(k,17,1),n_%j%(k,17,2)-0.005,n_%j%(k,17,3),n_%j%(k,17,4)			! NODE ID 17
+				NMODIF,n_%j%(k,18,1),n_%j%(k,18,2)+riis,n_%j%(k,18,3),n_%j%(k,18,4)				! NODE ID 18
+				NMODIF,n_%j%(k,19,1),n_%j%(k,19,2)+0.005,n_%j%(k,19,3),n_%j%(k,19,4)			! NODE ID 19
+			
+				!==============
+				! NGEN COMMANDS
+				!
+				*IF,j,GT,5014,THEN
+					N,,n_%j%(k,18,2)-diis30,n_%j%(k,18,3)+diis60,n_%j%(k,18,4)							! NODE ID 36
+					*GET,n_%j%(k,36,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-diis60,n_%j%(k,18,3)+diis30,n_%j%(k,18,4)							! NODE ID 37
+					*GET,n_%j%(k,37,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+diis60,n_%j%(k,18,3)+diis30,n_%j%(k,18,4)							! NODE ID 44
+					*GET,n_%j%(k,44,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+diis30,n_%j%(k,18,3)+diis60,n_%j%(k,18,4)							! NODE ID 45
+					*GET,n_%j%(k,45,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2),n_%j%(k,18,3)+riis,n_%j%(k,18,4)									! NODE ID 46
+					*GET,n_%j%(k,46,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-riis30,n_%j%(k,18,3)+riis60,n_%j%(k,18,4)							! NODE ID 47
+					*GET,n_%j%(k,47,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-riis60,n_%j%(k,18,3)+riis30,n_%j%(k,18,4)							! NODE ID 48
+					*GET,n_%j%(k,48,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+riis60,n_%j%(k,18,3)+riis30,n_%j%(k,18,4)							! NODE ID 55
+					*GET,n_%j%(k,55,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+riis30,n_%j%(k,18,3)+riis60,n_%j%(k,18,4)							! NODE ID 56
+					*GET,n_%j%(k,56,1),NODE,,NUM,MAXD
+				*ELSE
+					N,,n_%j%(k,18,2)-diis30,n_%j%(k,18,3)-diis60,n_%j%(k,18,4)							! NODE ID 36
+					*GET,n_%j%(k,36,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-diis60,n_%j%(k,18,3)-diis30,n_%j%(k,18,4)							! NODE ID 37
+					*GET,n_%j%(k,37,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+diis60,n_%j%(k,18,3)-diis30,n_%j%(k,18,4)							! NODE ID 44
+					*GET,n_%j%(k,44,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+diis30,n_%j%(k,18,3)-diis60,n_%j%(k,18,4)							! NODE ID 45
+					*GET,n_%j%(k,45,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2),n_%j%(k,18,3)-riis,n_%j%(k,18,4)									! NODE ID 46
+					*GET,n_%j%(k,46,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-riis30,n_%j%(k,18,3)-riis60,n_%j%(k,18,4)							! NODE ID 47
+					*GET,n_%j%(k,47,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-riis60,n_%j%(k,18,3)-riis30,n_%j%(k,18,4)							! NODE ID 48
+					*GET,n_%j%(k,48,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+riis60,n_%j%(k,18,3)-riis30,n_%j%(k,18,4)							! NODE ID 55
+					*GET,n_%j%(k,55,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+riis30,n_%j%(k,18,3)-riis60,n_%j%(k,18,4)							! NODE ID 56
+					*GET,n_%j%(k,56,1),NODE,,NUM,MAXD
+				*ENDIF	
+				N,,n_%j%(k,18,2)-diis,n_%j%(k,18,3),n_%j%(k,18,4)									! NODE ID 38
+				*GET,n_%j%(k,38,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+diis,n_%j%(k,18,3),n_%j%(k,18,4)									! NODE ID 43
+				*GET,n_%j%(k,43,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-riis,n_%j%(k,18,3),n_%j%(k,18,4)									! NODE ID 49
+				*GET,n_%j%(k,49,1),NODE,,NUM,MAXD
+			*ENDDO
+			
+			*DO,k,1,erow%j%
+				!==============
+				! EGEN COMMANDS
+				!
+				m=k+1
+				E,n_%j%(k,1,1),n_%j%(k,5,1),n_%j%(k,7,1),n_%j%(k,2,1),n_%j%(m,1,1),n_%j%(m,5,1),n_%j%(m,7,1),n_%j%(m,2,1)
+				E,n_%j%(k,2,1),n_%j%(k,7,1),n_%j%(k,9,1),n_%j%(k,4,1),n_%j%(m,2,1),n_%j%(m,7,1),n_%j%(m,9,1),n_%j%(m,4,1)
+				E,n_%j%(k,3,1),n_%j%(k,8,1),n_%j%(k,5,1),n_%j%(k,1,1),n_%j%(m,3,1),n_%j%(m,8,1),n_%j%(m,5,1),n_%j%(m,1,1)
+				E,n_%j%(k,6,1),n_%j%(k,10,1),n_%j%(k,8,1),n_%j%(k,3,1),n_%j%(m,6,1),n_%j%(m,10,1),n_%j%(m,8,1),n_%j%(m,3,1)
+				E,n_%j%(k,5,1),n_%j%(k,13,1),n_%j%(k,36,1),n_%j%(k,7,1),n_%j%(m,5,1),n_%j%(m,13,1),n_%j%(m,36,1),n_%j%(m,7,1)
+				E,n_%j%(k,8,1),n_%j%(k,45,1),n_%j%(k,13,1),n_%j%(k,5,1),n_%j%(m,8,1),n_%j%(m,45,1),n_%j%(m,13,1),n_%j%(m,5,1)
+				E,n_%j%(k,36,1),n_%j%(k,37,1),n_%j%(k,12,1),n_%j%(k,7,1),n_%j%(m,36,1),n_%j%(m,37,1),n_%j%(m,12,1),n_%j%(m,7,1)
+				E,n_%j%(k,7,1),n_%j%(k,12,1),n_%j%(k,11,1),n_%j%(k,9,1),n_%j%(m,7,1),n_%j%(m,12,1),n_%j%(m,11,1),n_%j%(m,9,1)
+				E,n_%j%(k,8,1),n_%j%(k,14,1),n_%j%(k,44,1),n_%j%(k,45,1),n_%j%(m,8,1),n_%j%(m,14,1),n_%j%(m,44,1),n_%j%(m,45,1)
+				E,n_%j%(k,10,1),n_%j%(k,15,1),n_%j%(k,14,1),n_%j%(k,8,1),n_%j%(m,10,1),n_%j%(m,15,1),n_%j%(m,14,1),n_%j%(m,8,1)
+				E,n_%j%(k,15,1),n_%j%(k,20,1),n_%j%(k,19,1),n_%j%(k,14,1),n_%j%(m,15,1),n_%j%(m,20,1),n_%j%(m,19,1),n_%j%(m,14,1)
+				E,n_%j%(k,14,1),n_%j%(k,19,1),n_%j%(k,43,1),n_%j%(k,44,1),n_%j%(m,14,1),n_%j%(m,19,1),n_%j%(m,43,1),n_%j%(m,44,1)
+				E,n_%j%(k,45,1),n_%j%(k,44,1),n_%j%(k,55,1),n_%j%(k,56,1),n_%j%(m,45,1),n_%j%(m,44,1),n_%j%(m,55,1),n_%j%(m,56,1)
+				E,n_%j%(k,44,1),n_%j%(k,43,1),n_%j%(k,18,1),n_%j%(k,55,1),n_%j%(m,44,1),n_%j%(m,43,1),n_%j%(m,18,1),n_%j%(m,55,1)
+				E,n_%j%(k,45,1),n_%j%(k,56,1),n_%j%(k,46,1),n_%j%(k,13,1),n_%j%(m,45,1),n_%j%(m,56,1),n_%j%(m,46,1),n_%j%(m,13,1)
+				E,n_%j%(k,13,1),n_%j%(k,46,1),n_%j%(k,47,1),n_%j%(k,36,1),n_%j%(m,13,1),n_%j%(m,46,1),n_%j%(m,47,1),n_%j%(m,36,1)
+				E,n_%j%(k,47,1),n_%j%(k,48,1),n_%j%(k,37,1),n_%j%(k,36,1),n_%j%(m,47,1),n_%j%(m,48,1),n_%j%(m,37,1),n_%j%(m,36,1)
+				E,n_%j%(k,48,1),n_%j%(k,49,1),n_%j%(k,38,1),n_%j%(k,37,1),n_%j%(m,48,1),n_%j%(m,49,1),n_%j%(m,38,1),n_%j%(m,37,1)
+				E,n_%j%(k,37,1),n_%j%(k,38,1),n_%j%(k,17,1),n_%j%(k,12,1),n_%j%(m,37,1),n_%j%(m,38,1),n_%j%(m,17,1),n_%j%(m,12,1)
+				E,n_%j%(k,12,1),n_%j%(k,17,1),n_%j%(k,16,1),n_%j%(k,11,1),n_%j%(m,12,1),n_%j%(m,17,1),n_%j%(m,16,1),n_%j%(m,11,1)
+			*ENDDO
+		*ENDDO
+	*ENDIF
+			
+
+	tol=0.0014		
+	*IF,arg1,EQ,2,THEN
+		*DO,j,5011,5018
+			*DIM,n_%j%,ARRAY,erow%j%+1,56,4
+			CMSEL,S,e_iis
+			CSYS,j
+			ESEL,R,CENT,X,-0.2,0.2
+			ESEL,R,CENT,Y,-0.2,0.2
+			ESEL,R,CENT,Z,-1,1
+			eN=ELNEXT(0)
+			*GET, matID, ELEM, eN, ATTR, MAT
+			*GET, tyID, ELEM, eN, ATTR, TYPE
+			TYPE, tyID
+			MAT, matID
+			NSLE
+			CM,n_e%j%,NODE
+			CM,n_tmp,NODE
+			EDELE,ALL
+			*DO,k,1,erow%j%+1
+				CMSEL,S,n_tmp
+				*GET,nz,NODE,,MNLOC,Z
+				*DO,l,16,35
+					NSEL,R,LOC,Z,nz-8*tol,nz+8*tol
+					
+					*IF,l,EQ,30,THEN
+						tol=0.003
+						*IF,k,GT,1,THEN
+							nx=n_%j%(k-1,l,2)
+							ny=n_%j%(k-1,l,3)
+							NSEL,R,LOC,Y,ny-2*tol,ny+2*tol
+							NSEL,R,LOC,X,nx-2*tol,nx+2*tol
+							*GET,nz,NODE,,MNLOC,Z
+						*ELSE
+							*IF,j,GT,5014,THEN
+								*GET,ny,NODE,,MXLOC,Y
+							*ELSE
+								*GET,ny,NODE,,MNLOC,Y
+							*ENDIF
+							NSEL,R,LOC,Y,ny-tol,ny+tol
+							*GET,nx,NODE,,MNLOC,X
+							NSEL,R,LOC,X,nx-tol,nx+tol
+						*ENDIF
+					*ELSE
+						*IF,j,GT,5014,THEN
+							*GET,ny,NODE,,MXLOC,Y
+						*ELSE
+							*GET,ny,NODE,,MNLOC,Y
+						*ENDIF
+						NSEL,R,LOC,Y,ny-tol,ny+tol
+						*GET,nx,NODE,,MNLOC,X
+						NSEL,R,LOC,X,nx-tol,nx+tol
+					*ENDIF
+					tol=0.0014
+					
+					n_%j%(k,l,1)=NODE(nx,ny,nz)
+					n_%j%(k,l,2)=NX(n_%j%(k,l,1))
+					n_%j%(k,l,3)=NY(n_%j%(k,l,1))
+					n_%j%(k,l,4)=NZ(n_%j%(k,l,1))
+					CMSEL,S,n_tmp
+					NSEL,U,NODE,,n_%j%(k,l,1)
+					CM,n_tmp,NODE
+				*ENDDO
+			*ENDDO			
+			
+			CMSEL,S,n_e%j%
+			*DO,k,1,erow%j%+1
+				!================
+				! NMODIF COMMANDS
+				!
+				*IF,j,GT,5014,THEN
+					NMODIF,n_%j%(k,22,1),n_%j%(k,22,2)-0.004,n_%j%(k,22,3)-0.008,n_%j%(k,22,4)		! NODE ID 22
+					NMODIF,n_%j%(k,23,1),n_%j%(k,23,2),n_%j%(k,23,3)-diis+0.003,n_%j%(k,23,4)		! NODE ID 23
+					NMODIF,n_%j%(k,24,1),n_%j%(k,24,2)+0.004,n_%j%(k,24,3)-0.008,n_%j%(k,24,4)		! NODE ID 24
+					NMODIF,n_%j%(k,31,1),n_%j%(k,31,2),n_%j%(k,31,3)-0.003,n_%j%(k,31,4)			! NODE ID 31
+				*ELSE
+					NMODIF,n_%j%(k,22,1),n_%j%(k,22,2)-0.004,n_%j%(k,22,3)+0.008,n_%j%(k,22,4)		! NODE ID 22
+					NMODIF,n_%j%(k,23,1),n_%j%(k,23,2),n_%j%(k,23,3)+diis-0.003,n_%j%(k,23,4)		! NODE ID 23
+					NMODIF,n_%j%(k,24,1),n_%j%(k,24,2)+0.004,n_%j%(k,24,3)+0.008,n_%j%(k,24,4)		! NODE ID 24
+					NMODIF,n_%j%(k,31,1),n_%j%(k,31,2),n_%j%(k,31,3)+0.003,n_%j%(k,31,4)			! NODE ID 31
+				*ENDIF
+				NMODIF,n_%j%(k,17,1),n_%j%(k,17,2)-0.005,n_%j%(k,17,3),n_%j%(k,17,4)			! NODE ID 17
+				NMODIF,n_%j%(k,18,1),n_%j%(k,18,2)+riis,n_%j%(k,18,3),n_%j%(k,18,4)				! NODE ID 18
+				NMODIF,n_%j%(k,19,1),n_%j%(k,19,2)+0.005,n_%j%(k,19,3),n_%j%(k,19,4)			! NODE ID 19
+				
+			
+				!==============
+				! NGEN COMMANDS
+				!
+				*IF,j,GT,5014,THEN
+					N,,n_%j%(k,18,2)-diis60,n_%j%(k,18,3)-diis30,n_%j%(k,18,4)							! NODE ID 39
+					*GET,n_%j%(k,39,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-diis30,n_%j%(k,18,3)-diis60,n_%j%(k,18,4)							! NODE ID 40
+					*GET,n_%j%(k,40,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+diis30,n_%j%(k,18,3)-diis60,n_%j%(k,18,4)							! NODE ID 41
+					*GET,n_%j%(k,41,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+diis60,n_%j%(k,18,3)-diis30,n_%j%(k,18,4)							! NODE ID 42
+					*GET,n_%j%(k,42,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-riis60,n_%j%(k,18,3)-riis30,n_%j%(k,18,4)							! NODE ID 50
+					*GET,n_%j%(k,50,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-riis30,n_%j%(k,18,3)-riis60,n_%j%(k,18,4)							! NODE ID 51
+					*GET,n_%j%(k,51,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2),n_%j%(k,18,3)-riis,n_%j%(k,18,4)									! NODE ID 52
+					*GET,n_%j%(k,52,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+riis30,n_%j%(k,18,3)-riis60,n_%j%(k,18,4)							! NODE ID 53
+					*GET,n_%j%(k,53,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+riis60,n_%j%(k,18,3)-riis30,n_%j%(k,18,4)							! NODE ID 54
+					*GET,n_%j%(k,54,1),NODE,,NUM,MAXD
+				*ELSE
+					N,,n_%j%(k,18,2)-diis60,n_%j%(k,18,3)+diis30,n_%j%(k,18,4)							! NODE ID 39
+					*GET,n_%j%(k,39,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-diis30,n_%j%(k,18,3)+diis60,n_%j%(k,18,4)							! NODE ID 40
+					*GET,n_%j%(k,40,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+diis30,n_%j%(k,18,3)+diis60,n_%j%(k,18,4)							! NODE ID 41
+					*GET,n_%j%(k,41,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+diis60,n_%j%(k,18,3)+diis30,n_%j%(k,18,4)							! NODE ID 42
+					*GET,n_%j%(k,42,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-riis60,n_%j%(k,18,3)+riis30,n_%j%(k,18,4)							! NODE ID 50
+					*GET,n_%j%(k,50,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)-riis30,n_%j%(k,18,3)+riis60,n_%j%(k,18,4)							! NODE ID 51
+					*GET,n_%j%(k,51,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2),n_%j%(k,18,3)+riis,n_%j%(k,18,4)									! NODE ID 52
+					*GET,n_%j%(k,52,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+riis30,n_%j%(k,18,3)+riis60,n_%j%(k,18,4)							! NODE ID 53
+					*GET,n_%j%(k,53,1),NODE,,NUM,MAXD
+					N,,n_%j%(k,18,2)+riis60,n_%j%(k,18,3)+riis30,n_%j%(k,18,4)							! NODE ID 54
+					*GET,n_%j%(k,54,1),NODE,,NUM,MAXD
+				*ENDIF
+				N,,n_%j%(k,18,2)-diis,n_%j%(k,18,3),n_%j%(k,18,4)									! NODE ID 38
+				*GET,n_%j%(k,38,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+diis,n_%j%(k,18,3),n_%j%(k,18,4)									! NODE ID 43
+				*GET,n_%j%(k,43,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-riis,n_%j%(k,18,3),n_%j%(k,18,4)									! NODE ID 49
+				*GET,n_%j%(k,49,1),NODE,,NUM,MAXD
+			
+			*ENDDO
+			
+			*DO,k,1,erow%j%
+				!==============
+				! EGEN COMMANDS
+				!
+				m=k+1
+				E,n_%j%(k,20,1),n_%j%(k,25,1),n_%j%(k,24,1),n_%j%(k,19,1),n_%j%(m,20,1),n_%j%(m,25,1),n_%j%(m,24,1),n_%j%(m,19,1)
+				E,n_%j%(k,25,1),n_%j%(k,27,1),n_%j%(k,29,1),n_%j%(k,24,1),n_%j%(m,25,1),n_%j%(m,27,1),n_%j%(m,29,1),n_%j%(m,24,1)
+				E,n_%j%(k,27,1),n_%j%(k,32,1),n_%j%(k,34,1),n_%j%(k,29,1),n_%j%(m,27,1),n_%j%(m,32,1),n_%j%(m,34,1),n_%j%(m,29,1)
+				E,n_%j%(k,29,1),n_%j%(k,34,1),n_%j%(k,35,1),n_%j%(k,31,1),n_%j%(m,29,1),n_%j%(m,34,1),n_%j%(m,35,1),n_%j%(m,31,1)
+				E,n_%j%(k,31,1),n_%j%(k,35,1),n_%j%(k,33,1),n_%j%(k,28,1),n_%j%(m,31,1),n_%j%(m,35,1),n_%j%(m,33,1),n_%j%(m,28,1)
+				E,n_%j%(k,28,1),n_%j%(k,33,1),n_%j%(k,30,1),n_%j%(k,26,1),n_%j%(m,28,1),n_%j%(m,33,1),n_%j%(m,30,1),n_%j%(m,26,1)
+				E,n_%j%(k,22,1),n_%j%(k,28,1),n_%j%(k,26,1),n_%j%(k,21,1),n_%j%(m,22,1),n_%j%(m,28,1),n_%j%(m,26,1),n_%j%(m,21,1)
+				E,n_%j%(k,17,1),n_%j%(k,22,1),n_%j%(k,21,1),n_%j%(k,16,1),n_%j%(m,17,1),n_%j%(m,22,1),n_%j%(m,21,1),n_%j%(m,16,1)
+				E,n_%j%(k,19,1),n_%j%(k,24,1),n_%j%(k,42,1),n_%j%(k,43,1),n_%j%(m,19,1),n_%j%(m,24,1),n_%j%(m,42,1),n_%j%(m,43,1)
+				E,n_%j%(k,24,1),n_%j%(k,29,1),n_%j%(k,41,1),n_%j%(k,42,1),n_%j%(m,24,1),n_%j%(m,29,1),n_%j%(m,41,1),n_%j%(m,42,1)
+				E,n_%j%(k,41,1),n_%j%(k,29,1),n_%j%(k,31,1),n_%j%(k,23,1),n_%j%(m,41,1),n_%j%(m,29,1),n_%j%(m,31,1),n_%j%(m,23,1)
+				E,n_%j%(k,23,1),n_%j%(k,31,1),n_%j%(k,28,1),n_%j%(k,40,1),n_%j%(m,23,1),n_%j%(m,31,1),n_%j%(m,28,1),n_%j%(m,40,1)
+				E,n_%j%(k,40,1),n_%j%(k,28,1),n_%j%(k,22,1),n_%j%(k,39,1),n_%j%(m,40,1),n_%j%(m,28,1),n_%j%(m,22,1),n_%j%(m,39,1)
+				E,n_%j%(k,38,1),n_%j%(k,39,1),n_%j%(k,22,1),n_%j%(k,17,1),n_%j%(m,38,1),n_%j%(m,39,1),n_%j%(m,22,1),n_%j%(m,17,1)
+				E,n_%j%(k,43,1),n_%j%(k,42,1),n_%j%(k,54,1),n_%j%(k,18,1),n_%j%(m,43,1),n_%j%(m,42,1),n_%j%(m,54,1),n_%j%(m,18,1)
+				E,n_%j%(k,42,1),n_%j%(k,41,1),n_%j%(k,53,1),n_%j%(k,54,1),n_%j%(m,42,1),n_%j%(m,41,1),n_%j%(m,53,1),n_%j%(m,54,1)
+				E,n_%j%(k,41,1),n_%j%(k,23,1),n_%j%(k,52,1),n_%j%(k,53,1),n_%j%(m,41,1),n_%j%(m,23,1),n_%j%(m,52,1),n_%j%(m,53,1)
+				E,n_%j%(k,52,1),n_%j%(k,23,1),n_%j%(k,40,1),n_%j%(k,51,1),n_%j%(m,52,1),n_%j%(m,23,1),n_%j%(m,40,1),n_%j%(m,51,1)
+				E,n_%j%(k,51,1),n_%j%(k,40,1),n_%j%(k,39,1),n_%j%(k,50,1),n_%j%(m,51,1),n_%j%(m,40,1),n_%j%(m,39,1),n_%j%(m,50,1)
+				E,n_%j%(k,49,1),n_%j%(k,50,1),n_%j%(k,39,1),n_%j%(k,38,1),n_%j%(m,49,1),n_%j%(m,50,1),n_%j%(m,39,1),n_%j%(m,38,1)
+			*ENDDO
+		*ENDDO
+	*ENDIF
+
+			
+	tol=0.002		
+	*IF,arg1,EQ,3,THEN
+		*DO,j,5011,5018
+			*DIM,n_%j%,ARRAY,erow%j%+1,56,4
+			CMSEL,S,e_iis
+			CSYS,j
+			ESEL,R,CENT,X,-0.2,0.2
+			ESEL,R,CENT,Y,-0.2,0.2
+			ESEL,R,CENT,Z,-1,1
+			eN=ELNEXT(0)
+			*GET, matID, ELEM, eN, ATTR, MAT
+			*GET, tyID, ELEM, eN, ATTR, TYPE
+			TYPE, tyID
+			MAT, matID
+			NSLE
+			CM,n_e%j%,NODE
+			CM,n_tmp,NODE
+			EDELE,ALL
+			*DO,k,1,erow%j%+1
+				CMSEL,S,n_tmp
+				*GET,nz,NODE,,MNLOC,Z
+				*DO,l,1,35
+					NSEL,R,LOC,Z,nz-8*tol,nz+8*tol
+					
+					*IF,l,EQ,30,THEN
+						tol=0.003
+						*IF,k,GT,1,THEN
+							nx=n_%j%(k-1,l,2)
+							ny=n_%j%(k-1,l,3)
+							NSEL,R,LOC,Y,ny-2*tol,ny+2*tol
+							NSEL,R,LOC,X,nx-2*tol,nx+2*tol
+							*GET,nz,NODE,,MNLOC,Z
+						*ELSE
+							*GET,ny,NODE,,MNLOC,Y
+							NSEL,R,LOC,Y,ny-tol,ny+tol
+							*GET,nx,NODE,,MNLOC,X
+							NSEL,R,LOC,X,nx-tol,nx+tol
+						*ENDIF
+					*ELSE
+						*GET,ny,NODE,,MNLOC,Y
+						NSEL,R,LOC,Y,ny-tol,ny+tol
+						*GET,nx,NODE,,MNLOC,X
+						NSEL,R,LOC,X,nx-tol,nx+tol
+					*ENDIF
+					tol=0.002
+					
+					n_%j%(k,l,1)=NODE(nx,ny,nz)
+					n_%j%(k,l,2)=NX(n_%j%(k,l,1))
+					n_%j%(k,l,3)=NY(n_%j%(k,l,1))
+					n_%j%(k,l,4)=NZ(n_%j%(k,l,1))
+					CMSEL,S,n_tmp
+					NSEL,U,NODE,,n_%j%(k,l,1)
+					CM,n_tmp,NODE
+				*ENDDO
+			*ENDDO			
+			
+			CMSEL,S,n_e%j%
+			*DO,k,1,erow%j%+1
+				!================
+				! NMODIF COMMANDS
+				!
+				NMODIF,n_%j%(k,5,1),n_%j%(k,5,2),n_%j%(k,5,3)-0.003,n_%j%(k,5,4)				! NODE ID 5
+				NMODIF,n_%j%(k,12,1),n_%j%(k,12,2)-0.004,n_%j%(k,12,3)-0.008,n_%j%(k,12,4)		! NODE ID 12
+				NMODIF,n_%j%(k,13,1),n_%j%(k,13,2),n_%j%(k,13,3)-diis+0.003,n_%j%(k,13,4)		! NODE ID 13
+				NMODIF,n_%j%(k,14,1),n_%j%(k,14,2)+0.004,n_%j%(k,14,3)-0.008,n_%j%(k,14,4)		! NODE ID 14
+				NMODIF,n_%j%(k,17,1),n_%j%(k,17,2)-0.005,n_%j%(k,17,3),n_%j%(k,17,4)			! NODE ID 17
+				NMODIF,n_%j%(k,18,1),n_%j%(k,18,2)+riis,n_%j%(k,18,3),n_%j%(k,18,4)				! NODE ID 18
+				NMODIF,n_%j%(k,19,1),n_%j%(k,19,2)+0.005,n_%j%(k,19,3),n_%j%(k,19,4)			! NODE ID 19
+				NMODIF,n_%j%(k,22,1),n_%j%(k,22,2)-0.004,n_%j%(k,22,3)+0.008,n_%j%(k,22,4)		! NODE ID 22
+				NMODIF,n_%j%(k,23,1),n_%j%(k,23,2),n_%j%(k,23,3)+diis-0.003,n_%j%(k,23,4)		! NODE ID 23
+				NMODIF,n_%j%(k,24,1),n_%j%(k,24,2)+0.004,n_%j%(k,24,3)+0.008,n_%j%(k,24,4)		! NODE ID 24
+				NMODIF,n_%j%(k,31,1),n_%j%(k,31,2),n_%j%(k,31,3)+0.003,n_%j%(k,31,4)			! NODE ID 31
+			
+				!==============
+				! NGEN COMMANDS
+				!
+				N,,n_%j%(k,18,2)-diis30,n_%j%(k,18,3)-diis60,n_%j%(k,18,4)							! NODE ID 36
+				*GET,n_%j%(k,36,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-diis60,n_%j%(k,18,3)-diis30,n_%j%(k,18,4)							! NODE ID 37
+				*GET,n_%j%(k,37,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-diis,n_%j%(k,18,3),n_%j%(k,18,4)									! NODE ID 38
+				*GET,n_%j%(k,38,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-diis60,n_%j%(k,18,3)+diis30,n_%j%(k,18,4)							! NODE ID 39
+				*GET,n_%j%(k,39,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-diis30,n_%j%(k,18,3)+diis60,n_%j%(k,18,4)							! NODE ID 40
+				*GET,n_%j%(k,40,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+diis30,n_%j%(k,18,3)+diis60,n_%j%(k,18,4)							! NODE ID 41
+				*GET,n_%j%(k,41,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+diis60,n_%j%(k,18,3)+diis30,n_%j%(k,18,4)							! NODE ID 42
+				*GET,n_%j%(k,42,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+diis,n_%j%(k,18,3),n_%j%(k,18,4)									! NODE ID 43
+				*GET,n_%j%(k,43,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+diis60,n_%j%(k,18,3)-diis30,n_%j%(k,18,4)							! NODE ID 44
+				*GET,n_%j%(k,44,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+diis30,n_%j%(k,18,3)-diis60,n_%j%(k,18,4)							! NODE ID 45
+				*GET,n_%j%(k,45,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2),n_%j%(k,18,3)-riis,n_%j%(k,18,4)									! NODE ID 46
+				*GET,n_%j%(k,46,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-riis30,n_%j%(k,18,3)-riis60,n_%j%(k,18,4)							! NODE ID 47
+				*GET,n_%j%(k,47,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-riis60,n_%j%(k,18,3)-riis30,n_%j%(k,18,4)							! NODE ID 48
+				*GET,n_%j%(k,48,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-riis,n_%j%(k,18,3),n_%j%(k,18,4)									! NODE ID 49
+				*GET,n_%j%(k,49,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-riis60,n_%j%(k,18,3)+riis30,n_%j%(k,18,4)							! NODE ID 50
+				*GET,n_%j%(k,50,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-riis30,n_%j%(k,18,3)+riis60,n_%j%(k,18,4)							! NODE ID 51
+				*GET,n_%j%(k,51,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2),n_%j%(k,18,3)+riis,n_%j%(k,18,4)									! NODE ID 52
+				*GET,n_%j%(k,52,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+riis30,n_%j%(k,18,3)+riis60,n_%j%(k,18,4)							! NODE ID 53
+				*GET,n_%j%(k,53,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+riis60,n_%j%(k,18,3)+riis30,n_%j%(k,18,4)							! NODE ID 54
+				*GET,n_%j%(k,54,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+riis60,n_%j%(k,18,3)-riis30,n_%j%(k,18,4)							! NODE ID 55
+				*GET,n_%j%(k,55,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+riis30,n_%j%(k,18,3)-riis60,n_%j%(k,18,4)							! NODE ID 55
+				*GET,n_%j%(k,56,1),NODE,,NUM,MAXD
+			*ENDDO
+			
+			*DO,k,1,erow%j%
+				!==============
+				! EGEN COMMANDS
+				!
+				m=k+1
+				E,n_%j%(k,1,1),n_%j%(k,5,1),n_%j%(k,7,1),n_%j%(k,2,1),n_%j%(m,1,1),n_%j%(m,5,1),n_%j%(m,7,1),n_%j%(m,2,1)
+				E,n_%j%(k,2,1),n_%j%(k,7,1),n_%j%(k,9,1),n_%j%(k,4,1),n_%j%(m,2,1),n_%j%(m,7,1),n_%j%(m,9,1),n_%j%(m,4,1)
+				E,n_%j%(k,3,1),n_%j%(k,8,1),n_%j%(k,5,1),n_%j%(k,1,1),n_%j%(m,3,1),n_%j%(m,8,1),n_%j%(m,5,1),n_%j%(m,1,1)
+				E,n_%j%(k,6,1),n_%j%(k,10,1),n_%j%(k,8,1),n_%j%(k,3,1),n_%j%(m,6,1),n_%j%(m,10,1),n_%j%(m,8,1),n_%j%(m,3,1)
+				E,n_%j%(k,5,1),n_%j%(k,13,1),n_%j%(k,36,1),n_%j%(k,7,1),n_%j%(m,5,1),n_%j%(m,13,1),n_%j%(m,36,1),n_%j%(m,7,1)
+				E,n_%j%(k,8,1),n_%j%(k,45,1),n_%j%(k,13,1),n_%j%(k,5,1),n_%j%(m,8,1),n_%j%(m,45,1),n_%j%(m,13,1),n_%j%(m,5,1)
+				E,n_%j%(k,36,1),n_%j%(k,37,1),n_%j%(k,12,1),n_%j%(k,7,1),n_%j%(m,36,1),n_%j%(m,37,1),n_%j%(m,12,1),n_%j%(m,7,1)
+				E,n_%j%(k,7,1),n_%j%(k,12,1),n_%j%(k,11,1),n_%j%(k,9,1),n_%j%(m,7,1),n_%j%(m,12,1),n_%j%(m,11,1),n_%j%(m,9,1)
+				E,n_%j%(k,8,1),n_%j%(k,14,1),n_%j%(k,44,1),n_%j%(k,45,1),n_%j%(m,8,1),n_%j%(m,14,1),n_%j%(m,44,1),n_%j%(m,45,1)
+				E,n_%j%(k,10,1),n_%j%(k,15,1),n_%j%(k,14,1),n_%j%(k,8,1),n_%j%(m,10,1),n_%j%(m,15,1),n_%j%(m,14,1),n_%j%(m,8,1)
+				E,n_%j%(k,15,1),n_%j%(k,20,1),n_%j%(k,19,1),n_%j%(k,14,1),n_%j%(m,15,1),n_%j%(m,20,1),n_%j%(m,19,1),n_%j%(m,14,1)
+				E,n_%j%(k,14,1),n_%j%(k,19,1),n_%j%(k,43,1),n_%j%(k,44,1),n_%j%(m,14,1),n_%j%(m,19,1),n_%j%(m,43,1),n_%j%(m,44,1)
+				E,n_%j%(k,45,1),n_%j%(k,44,1),n_%j%(k,55,1),n_%j%(k,56,1),n_%j%(m,45,1),n_%j%(m,44,1),n_%j%(m,55,1),n_%j%(m,56,1)
+				E,n_%j%(k,44,1),n_%j%(k,43,1),n_%j%(k,18,1),n_%j%(k,55,1),n_%j%(m,44,1),n_%j%(m,43,1),n_%j%(m,18,1),n_%j%(m,55,1)
+				E,n_%j%(k,45,1),n_%j%(k,56,1),n_%j%(k,46,1),n_%j%(k,13,1),n_%j%(m,45,1),n_%j%(m,56,1),n_%j%(m,46,1),n_%j%(m,13,1)
+				E,n_%j%(k,13,1),n_%j%(k,46,1),n_%j%(k,47,1),n_%j%(k,36,1),n_%j%(m,13,1),n_%j%(m,46,1),n_%j%(m,47,1),n_%j%(m,36,1)
+				E,n_%j%(k,47,1),n_%j%(k,48,1),n_%j%(k,37,1),n_%j%(k,36,1),n_%j%(m,47,1),n_%j%(m,48,1),n_%j%(m,37,1),n_%j%(m,36,1)
+				E,n_%j%(k,48,1),n_%j%(k,49,1),n_%j%(k,38,1),n_%j%(k,37,1),n_%j%(m,48,1),n_%j%(m,49,1),n_%j%(m,38,1),n_%j%(m,37,1)
+				E,n_%j%(k,37,1),n_%j%(k,38,1),n_%j%(k,17,1),n_%j%(k,12,1),n_%j%(m,37,1),n_%j%(m,38,1),n_%j%(m,17,1),n_%j%(m,12,1)
+				E,n_%j%(k,12,1),n_%j%(k,17,1),n_%j%(k,16,1),n_%j%(k,11,1),n_%j%(m,12,1),n_%j%(m,17,1),n_%j%(m,16,1),n_%j%(m,11,1)
+				E,n_%j%(k,20,1),n_%j%(k,25,1),n_%j%(k,24,1),n_%j%(k,19,1),n_%j%(m,20,1),n_%j%(m,25,1),n_%j%(m,24,1),n_%j%(m,19,1)
+				E,n_%j%(k,25,1),n_%j%(k,27,1),n_%j%(k,29,1),n_%j%(k,24,1),n_%j%(m,25,1),n_%j%(m,27,1),n_%j%(m,29,1),n_%j%(m,24,1)
+				E,n_%j%(k,27,1),n_%j%(k,32,1),n_%j%(k,34,1),n_%j%(k,29,1),n_%j%(m,27,1),n_%j%(m,32,1),n_%j%(m,34,1),n_%j%(m,29,1)
+				E,n_%j%(k,29,1),n_%j%(k,34,1),n_%j%(k,35,1),n_%j%(k,31,1),n_%j%(m,29,1),n_%j%(m,34,1),n_%j%(m,35,1),n_%j%(m,31,1)
+				E,n_%j%(k,31,1),n_%j%(k,35,1),n_%j%(k,33,1),n_%j%(k,28,1),n_%j%(m,31,1),n_%j%(m,35,1),n_%j%(m,33,1),n_%j%(m,28,1)
+				E,n_%j%(k,28,1),n_%j%(k,33,1),n_%j%(k,30,1),n_%j%(k,26,1),n_%j%(m,28,1),n_%j%(m,33,1),n_%j%(m,30,1),n_%j%(m,26,1)
+				E,n_%j%(k,22,1),n_%j%(k,28,1),n_%j%(k,26,1),n_%j%(k,21,1),n_%j%(m,22,1),n_%j%(m,28,1),n_%j%(m,26,1),n_%j%(m,21,1)
+				E,n_%j%(k,17,1),n_%j%(k,22,1),n_%j%(k,21,1),n_%j%(k,16,1),n_%j%(m,17,1),n_%j%(m,22,1),n_%j%(m,21,1),n_%j%(m,16,1)
+				E,n_%j%(k,19,1),n_%j%(k,24,1),n_%j%(k,42,1),n_%j%(k,43,1),n_%j%(m,19,1),n_%j%(m,24,1),n_%j%(m,42,1),n_%j%(m,43,1)
+				E,n_%j%(k,24,1),n_%j%(k,29,1),n_%j%(k,41,1),n_%j%(k,42,1),n_%j%(m,24,1),n_%j%(m,29,1),n_%j%(m,41,1),n_%j%(m,42,1)
+				E,n_%j%(k,41,1),n_%j%(k,29,1),n_%j%(k,31,1),n_%j%(k,23,1),n_%j%(m,41,1),n_%j%(m,29,1),n_%j%(m,31,1),n_%j%(m,23,1)
+				E,n_%j%(k,23,1),n_%j%(k,31,1),n_%j%(k,28,1),n_%j%(k,40,1),n_%j%(m,23,1),n_%j%(m,31,1),n_%j%(m,28,1),n_%j%(m,40,1)
+				E,n_%j%(k,40,1),n_%j%(k,28,1),n_%j%(k,22,1),n_%j%(k,39,1),n_%j%(m,40,1),n_%j%(m,28,1),n_%j%(m,22,1),n_%j%(m,39,1)
+				E,n_%j%(k,38,1),n_%j%(k,39,1),n_%j%(k,22,1),n_%j%(k,17,1),n_%j%(m,38,1),n_%j%(m,39,1),n_%j%(m,22,1),n_%j%(m,17,1)
+				E,n_%j%(k,43,1),n_%j%(k,42,1),n_%j%(k,54,1),n_%j%(k,18,1),n_%j%(m,43,1),n_%j%(m,42,1),n_%j%(m,54,1),n_%j%(m,18,1)
+				E,n_%j%(k,42,1),n_%j%(k,41,1),n_%j%(k,53,1),n_%j%(k,54,1),n_%j%(m,42,1),n_%j%(m,41,1),n_%j%(m,53,1),n_%j%(m,54,1)
+				E,n_%j%(k,41,1),n_%j%(k,23,1),n_%j%(k,52,1),n_%j%(k,53,1),n_%j%(m,41,1),n_%j%(m,23,1),n_%j%(m,52,1),n_%j%(m,53,1)
+				E,n_%j%(k,52,1),n_%j%(k,23,1),n_%j%(k,40,1),n_%j%(k,51,1),n_%j%(m,52,1),n_%j%(m,23,1),n_%j%(m,40,1),n_%j%(m,51,1)
+				E,n_%j%(k,51,1),n_%j%(k,40,1),n_%j%(k,39,1),n_%j%(k,50,1),n_%j%(m,51,1),n_%j%(m,40,1),n_%j%(m,39,1),n_%j%(m,50,1)
+				E,n_%j%(k,49,1),n_%j%(k,50,1),n_%j%(k,39,1),n_%j%(k,38,1),n_%j%(m,49,1),n_%j%(m,50,1),n_%j%(m,39,1),n_%j%(m,38,1)
+			*ENDDO
+		*ENDDO
+	*ENDIF
+					
+			
+	tol=0.0014		
+	*IF,arg1,EQ,2,OR,arg1,EQ,3,THEN
+		*DO,j,5021,5028
+			*DIM,n_%j%,ARRAY,erow%j%+1,56,4
+			CMSEL,S,e_iis
+			CSYS,j
+			ESEL,R,CENT,X,-0.2,0.2
+			ESEL,R,CENT,Y,-0.2,0.2
+			ESEL,R,CENT,Z,-1,1
+			eN=ELNEXT(0)
+			*GET, matID, ELEM, eN, ATTR, MAT
+			*GET, tyID, ELEM, eN, ATTR, TYPE
+			TYPE, tyID
+			MAT, matID
+			NSLE
+			CM,n_e%j%,NODE
+			CM,n_tmp,NODE
+			EDELE,ALL
+			*DO,k,1,erow%j%+1
+				CMSEL,S,n_tmp
+				*IF,j,GT,5024,THEN
+					*GET,nz,NODE,,MXLOC,Z
+				*ELSE
+					*GET,nz,NODE,,MNLOC,Z
+				*ENDIF
+				*DO,l,1,20
+					*IF,l,EQ,5,THEN
+						tol=0.002
+					*ELSE
+						tol=0.0014
+					*ENDIF
+					NSEL,R,LOC,Z,nz-8*tol,nz+8*tol
+					*GET,ny,NODE,,MXLOC,Y
+					NSEL,R,LOC,Y,ny-tol,ny+tol
+					*GET,nx,NODE,,MXLOC,X
+					NSEL,R,LOC,X,nx-tol,nx+tol
+
+					
+					n_%j%(k,l,1)=NODE(nx,ny,nz)
+					n_%j%(k,l,2)=NX(n_%j%(k,l,1))
+					n_%j%(k,l,3)=NY(n_%j%(k,l,1))
+					n_%j%(k,l,4)=NZ(n_%j%(k,l,1))
+					CMSEL,S,n_tmp
+					NSEL,U,NODE,,n_%j%(k,l,1)
+					CM,n_tmp,NODE
+				*ENDDO
+			*ENDDO			
+			
+			CMSEL,S,n_e%j%
+			*DO,k,1,erow%j%+1
+				!================
+				! NMODIF COMMANDS
+				!
+				!================
+				! NMODIF COMMANDS
+				!
+				NMODIF,n_%j%(k,5,1),n_%j%(k,5,2),n_%j%(k,5,3)+0.003,n_%j%(k,5,4)				! NODE ID 5
+				NMODIF,n_%j%(k,12,1),n_%j%(k,12,2)+0.004,n_%j%(k,12,3)+0.008,n_%j%(k,12,4)		! NODE ID 12
+				NMODIF,n_%j%(k,13,1),n_%j%(k,13,2),n_%j%(k,13,3)+diis-0.003,n_%j%(k,13,4)		! NODE ID 13
+				NMODIF,n_%j%(k,14,1),n_%j%(k,14,2)-0.004,n_%j%(k,14,3)+0.008,n_%j%(k,14,4)		! NODE ID 14
+				NMODIF,n_%j%(k,17,1),n_%j%(k,17,2)+0.005,n_%j%(k,17,3),n_%j%(k,17,4)			! NODE ID 17
+				NMODIF,n_%j%(k,18,1),n_%j%(k,18,2)-riis,n_%j%(k,18,3),n_%j%(k,18,4)				! NODE ID 18
+				NMODIF,n_%j%(k,19,1),n_%j%(k,19,2)-0.005,n_%j%(k,19,3),n_%j%(k,19,4)			! NODE ID 19
+			
+				!==============
+				! NGEN COMMANDS
+				!
+				N,,n_%j%(k,18,2)+diis30,n_%j%(k,18,3)+diis60,n_%j%(k,18,4)							! NODE ID 36
+				*GET,n_%j%(k,36,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+diis60,n_%j%(k,18,3)+diis30,n_%j%(k,18,4)							! NODE ID 37
+				*GET,n_%j%(k,37,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+diis,n_%j%(k,18,3),n_%j%(k,18,4)									! NODE ID 38
+				*GET,n_%j%(k,38,1),NODE,,NUM,MAXD
+
+				N,,n_%j%(k,18,2)-diis,n_%j%(k,18,3),n_%j%(k,18,4)									! NODE ID 43
+				*GET,n_%j%(k,43,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-diis60,n_%j%(k,18,3)+diis30,n_%j%(k,18,4)							! NODE ID 44
+				*GET,n_%j%(k,44,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-diis30,n_%j%(k,18,3)+diis60,n_%j%(k,18,4)							! NODE ID 45
+				*GET,n_%j%(k,45,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2),n_%j%(k,18,3)+riis,n_%j%(k,18,4)									! NODE ID 46
+				*GET,n_%j%(k,46,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+riis30,n_%j%(k,18,3)+riis60,n_%j%(k,18,4)							! NODE ID 47
+				*GET,n_%j%(k,47,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+riis60,n_%j%(k,18,3)+riis30,n_%j%(k,18,4)							! NODE ID 48
+				*GET,n_%j%(k,48,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)+riis,n_%j%(k,18,3),n_%j%(k,18,4)									! NODE ID 49
+				*GET,n_%j%(k,49,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-riis60,n_%j%(k,18,3)+riis30,n_%j%(k,18,4)							! NODE ID 55
+				*GET,n_%j%(k,55,1),NODE,,NUM,MAXD
+				N,,n_%j%(k,18,2)-riis30,n_%j%(k,18,3)+riis60,n_%j%(k,18,4)							! NODE ID 55
+				*GET,n_%j%(k,56,1),NODE,,NUM,MAXD
+			*ENDDO
+			
+			*DO,k,1,erow%j%
+				!==============
+				! EGEN COMMANDS
+				!
+				m=k+1
+				E,n_%j%(k,1,1),n_%j%(k,5,1),n_%j%(k,7,1),n_%j%(k,2,1),n_%j%(m,1,1),n_%j%(m,5,1),n_%j%(m,7,1),n_%j%(m,2,1)
+				E,n_%j%(k,2,1),n_%j%(k,7,1),n_%j%(k,9,1),n_%j%(k,4,1),n_%j%(m,2,1),n_%j%(m,7,1),n_%j%(m,9,1),n_%j%(m,4,1)
+				E,n_%j%(k,3,1),n_%j%(k,8,1),n_%j%(k,5,1),n_%j%(k,1,1),n_%j%(m,3,1),n_%j%(m,8,1),n_%j%(m,5,1),n_%j%(m,1,1)
+				E,n_%j%(k,6,1),n_%j%(k,10,1),n_%j%(k,8,1),n_%j%(k,3,1),n_%j%(m,6,1),n_%j%(m,10,1),n_%j%(m,8,1),n_%j%(m,3,1)
+				E,n_%j%(k,5,1),n_%j%(k,13,1),n_%j%(k,36,1),n_%j%(k,7,1),n_%j%(m,5,1),n_%j%(m,13,1),n_%j%(m,36,1),n_%j%(m,7,1)
+				E,n_%j%(k,8,1),n_%j%(k,45,1),n_%j%(k,13,1),n_%j%(k,5,1),n_%j%(m,8,1),n_%j%(m,45,1),n_%j%(m,13,1),n_%j%(m,5,1)
+				E,n_%j%(k,36,1),n_%j%(k,37,1),n_%j%(k,12,1),n_%j%(k,7,1),n_%j%(m,36,1),n_%j%(m,37,1),n_%j%(m,12,1),n_%j%(m,7,1)
+				E,n_%j%(k,7,1),n_%j%(k,12,1),n_%j%(k,11,1),n_%j%(k,9,1),n_%j%(m,7,1),n_%j%(m,12,1),n_%j%(m,11,1),n_%j%(m,9,1)
+				E,n_%j%(k,8,1),n_%j%(k,14,1),n_%j%(k,44,1),n_%j%(k,45,1),n_%j%(m,8,1),n_%j%(m,14,1),n_%j%(m,44,1),n_%j%(m,45,1)
+				E,n_%j%(k,10,1),n_%j%(k,15,1),n_%j%(k,14,1),n_%j%(k,8,1),n_%j%(m,10,1),n_%j%(m,15,1),n_%j%(m,14,1),n_%j%(m,8,1)
+				E,n_%j%(k,15,1),n_%j%(k,20,1),n_%j%(k,19,1),n_%j%(k,14,1),n_%j%(m,15,1),n_%j%(m,20,1),n_%j%(m,19,1),n_%j%(m,14,1)
+				E,n_%j%(k,14,1),n_%j%(k,19,1),n_%j%(k,43,1),n_%j%(k,44,1),n_%j%(m,14,1),n_%j%(m,19,1),n_%j%(m,43,1),n_%j%(m,44,1)
+				E,n_%j%(k,45,1),n_%j%(k,44,1),n_%j%(k,55,1),n_%j%(k,56,1),n_%j%(m,45,1),n_%j%(m,44,1),n_%j%(m,55,1),n_%j%(m,56,1)
+				E,n_%j%(k,44,1),n_%j%(k,43,1),n_%j%(k,18,1),n_%j%(k,55,1),n_%j%(m,44,1),n_%j%(m,43,1),n_%j%(m,18,1),n_%j%(m,55,1)
+				E,n_%j%(k,45,1),n_%j%(k,56,1),n_%j%(k,46,1),n_%j%(k,13,1),n_%j%(m,45,1),n_%j%(m,56,1),n_%j%(m,46,1),n_%j%(m,13,1)
+				E,n_%j%(k,13,1),n_%j%(k,46,1),n_%j%(k,47,1),n_%j%(k,36,1),n_%j%(m,13,1),n_%j%(m,46,1),n_%j%(m,47,1),n_%j%(m,36,1)
+				E,n_%j%(k,47,1),n_%j%(k,48,1),n_%j%(k,37,1),n_%j%(k,36,1),n_%j%(m,47,1),n_%j%(m,48,1),n_%j%(m,37,1),n_%j%(m,36,1)
+				E,n_%j%(k,48,1),n_%j%(k,49,1),n_%j%(k,38,1),n_%j%(k,37,1),n_%j%(m,48,1),n_%j%(m,49,1),n_%j%(m,38,1),n_%j%(m,37,1)
+				E,n_%j%(k,37,1),n_%j%(k,38,1),n_%j%(k,17,1),n_%j%(k,12,1),n_%j%(m,37,1),n_%j%(m,38,1),n_%j%(m,17,1),n_%j%(m,12,1)
+				E,n_%j%(k,12,1),n_%j%(k,17,1),n_%j%(k,16,1),n_%j%(k,11,1),n_%j%(m,12,1),n_%j%(m,17,1),n_%j%(m,16,1),n_%j%(m,11,1)
+			*ENDDO
+		*ENDDO
+	*ENDIF
+	
+	!=========================================================================
+	! Redifine named selections
+	!
+	ESEL,NONE
+	*do,itel,41,52
+		ESEL,A,MAT,,itel
+	*ENDDO
+	*do,itel,61,72
+		ESEL,A,MAT,,itel
+	*ENDDO
+	CM,e_iis,ELEM
+	CSYS,1
+	*IF,arg1,EQ,1,OR,arg1,EQ,3,THEN
+		ESEL,NONE
+		*do,itel,41,52
+			ESEL,A,MAT,,itel
+		*ENDDO
+		ESEL,R,CENT,Y,-10,10
+		CM,TF1_Top_shear_keys,ELEM
+		ESEL,NONE
+		*do,itel,61,72
+			ESEL,A,MAT,,itel
+		*ENDDO
+		ESEL,R,CENT,Y,-10,10
+		CM,TF1_Bottom_shear_keys,ELEM
+	*ENDIF
+	*IF,arg1,EQ,2,OR,arg1,EQ,3,THEN
+		ESEL,NONE
+		*do,itel,41,52
+			ESEL,A,MAT,,itel
+		*ENDDO
+		ESEL,R,CENT,Y,10,30
+		CM,TF2_Top_shear_keys,ELEM
+		ESEL,NONE
+		*do,itel,61,72
+			ESEL,A,MAT,,itel
+		*ENDDO
+		ESEL,R,CENT,Y,10,30
+		CM,TF2_Bottom_shear_keys,ELEM
+	*ENDIF
+	
+	
+	!=========================================================================
+	! Generate cyclic symmetry for IIS shear keys
+	!
+	CMSEL,S,e_iis
+	NSLE
+	CSYS,1
+	CPCYC, All,0.001, 1,0, alfa, 0,
+	CSYS,0
+	
+	
+	!=========================================================================
+	! Save file
+	!
+	SAVE, '%FEModel%', db
+
+! GO BACK TO VERSION FOLDER FOR NEXT MACRO FILE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+FINISH																		!
+/CLEAR,START																!
+/CWD, '../../'																!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

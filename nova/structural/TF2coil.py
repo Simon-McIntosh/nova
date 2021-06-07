@@ -27,12 +27,49 @@ class ToroidalFieldCoil:
         pymapdl.convert_script(f'{self.macro}/tf_mkdir.mac',
                                f'{self.macro}/tf_mkdir.py',
                                macros_as_functions=True,
-                               auto_exit=False)
+                               auto_exit=False,
+                               remove_temp_files=True)
 
 
     def run(self):
-        mapdl = launch_mapdl(mode='corba', override=True,
-                             start_instance=False)
+        #exec_file = 'C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64'\
+        #            '/ANSYS211.exe'
+        mapdl = launch_mapdl(additional_switches='-smp',
+                             override=True,
+                             verbose_mapdl=False,
+                             mode='grpc',
+                             start_instance=True,
+                             #start_timeout=2,
+                             run_location='C:/Users/mcintos/Ansys/mapdl')
+
+        #print(mapdl.run('/sys,dir'))
+        #print(mapdl.run(r"/cwd, C:/Users/mcintos/Work^ Folders/Code/nova/data/Ansys"))
+        #print(mapdl.run(r'cdread, db, TF_COILS_V9_4, cdb'))
+        #with mapdl.non_interactive:
+        #    #print(mapdl.run(r'cdread, db, TF_COILS_V9_4, cdb'))
+        mapdl.cwd('C:/Users/mcintos/Ansys/mapdl/')
+        #print(mapdl)
+        #print(mapdl.list_files())
+        #mapdl.cdread('db', f'{mapdl.directory}/test.cdb')
+        #print(mapdl.run('cdread, db, TF_COILS_V9_4, cdb, C:/Users/mcintos/Ansys/mapdl/'))
+        #print(mapdl.run('cdread, db, C:/Users/mcintos/Work Folders/Code/nova/data/Ansys/TF_COILS_V9_4', 'cdb'))
+        #print(mapdl.allsel())
+        #print(mapdl.nlist())
+        #print(mapdl.elist())
+        #print(mapdl.input('cdread.txt'))
+        #mapdl.eplot()
+        mapdl.ulib('TFsector.ans')
+        geom = 'TF1_TF2'
+        phys = 'th'
+        with mapdl.non_interactive:
+            mapdl.use('generate_model', geom, phys)
+            #mapdl.run('*use, generate_model, "TF1_TF2", "th"')
+
+        #mapdl.open_gui()
+        #mapdl.exit()
+        return mapdl
+
+        '''
 
         length = 10
 
@@ -49,7 +86,7 @@ class ToroidalFieldCoil:
         mapdl.desize("", 100)
 
         mapdl.vmesh("ALL")
-        #mapdl.eplot()
+        mapdl.eplot()
 
         # fixed constraint
         mapdl.nsel("s", "loc", "z", 0)
@@ -67,14 +104,15 @@ class ToroidalFieldCoil:
         mapdl.run("/solu")
         mapdl.solve()
 
-        mapdl.cdread('db', 'TF_COILS_V9_4')
+        #mapdl.cdread('db', 'TF_COILS_V9_4')
         #mapdl.post_processing.plot_nodal_displacement(lighting=False, show_edges=True)
         mapdl.exit()
         #self.mapdl = mapdl
+        '''
 
 
 
 if __name__ == '__main__':
 
     tf = ToroidalFieldCoil()
-    tf.run()
+    mapdl = tf.run()

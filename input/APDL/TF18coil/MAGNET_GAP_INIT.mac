@@ -1,0 +1,239 @@
+!===============================================================================
+! 18 MAI 2018 - Fabian Krajewski CADFEM
+!
+! This MACRO is to generate initial Gap at the inner leg of the 18 coil assembly model
+!
+! main parameter:
+!
+!    	arg1 = Revision
+!	For GapType only arg2 = 2 is possible at the moment
+! 		arg2 = GapType
+!		 	=0 -> Gaps are defined by node displacement (only torodial displacement) (uniform gap size)
+!		 	=1 -> Gaps are defined by node displacement (only torodial displacement) (non uniform gap size)
+!		 	=2 -> Gaps are defined by real constant     (only torodial displacement) (uniform gap size)
+!		 	=3 -> Gaps are defined by node displacement (toroidal displacement TF coil 1, top and bot)
+!			=4 -> Gaps are defined by node displacement (vertical displacement TF coil 1)
+!			=5 -> Gaps are defined by node displacement (radial displacement TF coil 1, new CEs (TF_ASSEMBLY_CE.mac))
+!===========================================================================
+
+!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+!
+! CHECK_POINT_1
+! (select HERE: Revision, and Case)
+!
+!
+Rev  		= %arg1%
+CaseName 	= 'GAP_INIT'
+
+!
+!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+
+!===============================================================================
+! ASSIGN DIRECTORY, CASENAME
+
+!========================================================================
+! set filename
+!
+/FILNAME,'%CaseName%',1
+
+!========================================================================
+! set txt OUTPUT
+!
+/CWD,'./MAGNET_%Rev%/TEXTOUT'
+/OUTPUT,GAP_INIT,txt
+/CWD, '../../'
+
+!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+!
+! CHECK_POINT_2
+! (select HERE: change to PROPER DIRECTORY)
+!
+!
+/CWD,		'./MAGNET_%Rev%/_models'
+!
+!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+
+!========================================================================
+! READ model
+!
+RESUME,'MAGNET_MECH', db, , 1, 1
+
+ALLSEL, ALL
+!===============================================================================
+
+!===========================================================================
+! WEDGE GAP SETTINGS
+!===========================================================================
+!===========================================================================
+*DIM, GAP_SIZE, ARRAY, 18, 21
+*VREAD, GAP_SIZE(1,1),   './PARAMETER/Gap_Size_18_Coils', txt, , JIK, 21 ,18 , , 3
+(21F8.1)
+
+!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+!
+! CHECK_POINT_3
+! (select HERE: GapType)
+!
+GapType 	= %arg2%
+!
+!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+
+/prep7
+
+! KIND OF GAP MODELATION ===================================================
+! 		arg2 = GapType
+!		 	=0 -> Gaps are defined by node displacement (only torodial displacement) (uniform gap size)
+!		 	=1 -> Gaps are defined by node displacement (only torodial displacement) (non uniform gap size)
+!		 	=2 -> Gaps are defined by real constant     (only torodial displacement) (uniform gap size)
+!		 	=3 -> Gaps are defined by node displacement (toroidal displacement TF coil 1, top and bot)
+!			=4 -> Gaps are defined by node displacement (vertical displacement TF coil 1)
+!			=5 -> Gaps are defined by node displacement (radial displacement TF coil 1, new CEs (TF_ASSEMBLY_CE.mac))
+!===========================================================================
+
+!===========================================================================
+! GAP as Constant Offset of each C-WEDGE
+! 	Gaps are defined by node displacement (only toroidal displacement) (uniform gap size)
+!
+!===========================================================================
+! GAP as Offset of each C-WEDGE nodes (use local CS from 10,001 to 10,018 to offset)
+
+*IF, GapType, EQ, 0, THEN
+
+	SHPP, OFF
+	!===========================================================================
+	! initialize output array
+	!
+	CMSEL, S, C_WEDGE_1
+	NSLE, S
+	ESLN
+	NSLE,S
+	*GET,nN,NODE,,COUNT
+	*DIM, GAP_node_Table, ARRAY, nN, 2, 18
+	!===========================================================================
+	! loop on coils
+	!
+	*DO, i, 1, 18
+		/COM,i = %i%
+
+		count = 0
+		LocSys = 10000+i
+		C_ID = GAP_SIZE(i,2)
+		C_Gap= 1E-3*(2-GAP_SIZE(i,Rev+3))
+		CMSEL, S, C_WEDGE_%i%
+		NSLE, S
+		CM,tmp2,NODE
+		ESLN
+		NSLE,S
+		CMSEL,U,tmp2
+		CM,tmp,NODE
+		CSYS, LocSys
+		NROTAT, ALL
+		CMSEL, S, C_WEDGE_%i%
+		NSLE, S
+
+		*GET,nN,NODE,,COUNT
+		*GET,iN,NODE,,NUM,MIN
+
+
+		!===========================================================================
+		! LOOP ON ELEMENTS
+		!
+		*DO, n, 1, nN
+
+			NSEL, S, NODE, , iN
+			XiN = NX(iN)
+			YiN = C_Gap
+			ZiN = NZ(iN)
+			count=count+1
+			GAP_node_Table(count,1,i)=iN
+			GAP_node_Table(count,2,i)=YiN
+			NMODIF, iN, XiN, YiN, ZiN
+			CMSEL, S, C_WEDGE_%i%
+			NSLE, S
+			*GET,iNnew,NODE,iN,NXTH
+			iN=iNnew
+
+		*ENDDO
+
+		CMSEL, S, tmp
+		*GET,nN,NODE,,COUNT
+		*GET,iN,NODE,,NUM,MIN
+		*DO, n, 1, nN
+
+			NSEL, S, NODE, , iN
+			XiN = NX(iN)
+			YiN = C_Gap-0.002
+			ZiN = NZ(iN)
+			count=count+1
+			GAP_node_Table(count,1,i)=iN
+			GAP_node_Table(count,2,i)=YiN
+			NMODIF, iN, XiN, YiN, ZiN
+			CMSEL, S, tmp
+			*GET,iNnew,NODE,iN,NXTH
+			iN=iNnew
+
+		*ENDDO
+	*ENDDO
+CSYS,0
+
+!===========================================================================
+! GAP as linear Offset of each C-WEDGE
+!	Gaps are defined by node displacement (only torodial displacement) (non uniform gap size)
+!
+!===========================================================================
+! Nonuniform gap size
+	
+*ELSEIF, GapType, EQ, 1, THEN
+	SHPP, OFF
+
+!===========================================================================
+! GAP as Constant Offset of each C-WEDGE
+!	Gaps are defined by real constant     (only torodial displacement) (uniform gap size)
+!
+!===========================================================================
+	
+*ELSEIF,     GapType, EQ, 2, THEN
+
+	!=========================================
+	! loop on coils
+	!
+	*DO, i, 1, 18
+
+		C_ID = GAP_SIZE(i,2)
+		C_Gap= 1E-3*(2-GAP_SIZE(i,Rev+3))
+		RMODIF, C_ID, 7, 0, 0, 0, C_Gap
+	*ENDDO
+	
+!===========================================================================
+! GAP as Linear Offset only on first TF coil
+!	 Gaps are defined by node displacement (toroidal displacement TF coil 1, top and bot)
+!
+!===========================================================================
+	
+*ELSEIF, GapType, EQ, 3, THEN
+	
+	
+!===========================================================================
+! GAP as Linear Offset only on first TF coil
+!	 Gaps are defined by node displacement (vertical displacement TF coil 1)
+!
+!===========================================================================
+	
+*ELSEIF, Gaptype, EQ, 4, THEN
+
+	
+!===========================================================================
+! GAP as Linear Offset only on first TF coil
+!	 Gaps are defined by node displacement (radial displacement TF coil 1, new CEs (TF_ASSEMBLY_CE.mac))
+!
+!===========================================================================
+
+*ELSEIF, Gaptype, EQ, 5, THEN
+		
+
+*ENDIF
+!=============================
+! SAVE MODEL
+!
+SAVE, './MAGNET_MECH', db
+FINISH

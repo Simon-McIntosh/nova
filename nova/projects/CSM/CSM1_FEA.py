@@ -29,11 +29,15 @@ class Material_Model:
         
     def set_data(self):
         """Set experimental data."""
+        self.data = dict(IDdv=-2.05, ODdv=-1.19, 
+                         IDh0=788, ODh0=437)  # 40kA CSM1
+        '''
         self.data = dict(IDdv=-2.04, ODdv=-1.15,
                          IDr=1.31/2, ODr=1.22/2, 
                          IDh0=896, IDh1=832, IDh2=604, 
                          ODh0=533, ODh1=497, ODh2=390, 
                          IDv0=-1025, ODv0=-888) # 40kA CSM2 
+        '''
         
     def set_labels(self, labels: list[str]):
         """Set optimization labels."""
@@ -86,7 +90,7 @@ class Material_Model:
                 self.material_data = {
                          'Ep': 32e9,#52e9,#54e9,  # poloidal tensile modulus
                          'Et': 111e9, #130e9,  # toroidal tensile modulus
-                         'nu_pp': 0.29, # poloidal-poloidal Poisson's ratio
+                         'nu_pp': 0.4,#0.29, # poloidal-poloidal Poisson's ratio
                          'nu_tp': 0.29}  # toroidal-poloidal Poisson's ratio
                 self._ismodulus[:2] = True
             elif self.material_model == 'orthotropic':
@@ -227,7 +231,7 @@ class CSmodulue(Material_Model):
 
         coilset.coil.insert(1.6870, 0, 0.7405, 2.1, nturn=544, scale=0.688, 
                             section='rectangle', name='CSM1', part='cs')  # RT
-        biotgrid = BiotGrid(coilset.subframe)
+        biotgrid = BiotGrid(*coilset.frames)
         biotgrid.solve(1e3, 0)
         self.coilset = coilset
         self.biotgrid = biotgrid
@@ -404,11 +408,10 @@ class CSmodulue(Material_Model):
             
             dataframe = pandas.DataFrame(
                 index=displace.index,
-                columns=['sensor', 'unit', 'value', 'FEA', 
+                columns=['unit', 'value', 'FEA', 
                          'fit', 'error %'])
             dataframe.loc[:, displace.columns] = displace
-            dataframe['sensor'] = self.data
-            dataframe['value'] = self.data.values()
+            dataframe.loc[self.data.keys(), 'value'] = self.data
             dataframe['fit'] = [name in self.labels 
                                 for name in dataframe.index]
             dataframe['error %'] = 1e2 * (dataframe.FEA - 
@@ -597,14 +600,15 @@ class CSmodulue(Material_Model):
     
 if __name__ == '__main__':
     
-    csm = CSmodulue(material_model='o', num=120)
+    csm = CSmodulue(material_model='t', num=120)
     
     csm.Ic = 40e3
 
 
     # t: 'Ep', 'Et', 'nu_pp', 'nu_pt'
-    csm._active[:] = False
+    
     csm._active[:] = True
+    #csm._active[-2:] = False
     #csm._active[2:] = False
 
     #csm._active[-1] = False
@@ -621,7 +625,8 @@ if __name__ == '__main__':
     #csm.material_data = dict(Ez=30e9, Ex=50e9)
     #labels = ['IDh0', 'IDh1', 'IDh2', 'ODh0', 'ODh1', 'ODh2']
     #labels = ['IDdv', 'ODdv', 'IDh0']
-    labels = ['IDh0', 'IDh1', 'ODh0', 'ODh1', 'ODh2', 'IDv0']
+    #labels = ['IDh0', 'IDh1', 'ODh0', 'ODh1', 'ODh2', 'IDv0']
+    labels = ['IDdv', 'ODdv', 'IDh0', 'ODh0']
     #labels = list(csm.data)
     
     csm.extract_properties(labels=labels)

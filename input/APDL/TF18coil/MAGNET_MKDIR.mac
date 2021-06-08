@@ -1,0 +1,244 @@
+!===============================================================================
+! 21 August 2017 - Gabriele D'Amico fusion For Energy (F4E) -  F4E_D_XXXXXX v1.0
+! 15.05.2018 - Fabian Krajewski CADFEM - V2_2
+! 	Features
+!		Smaller file structure
+! 
+! This MACRO is to generate the folder structure to perform MAGNET dynamic studies
+!
+! The following macros are called with some parameters as:
+!      											
+! 1) MAGNET_MKDIR    
+!    arg1 = Revision     
+!	 arg2 = Emac 
+!  		Emac:	0: 	Calculate only thermal and mechanical analysis
+!				1: 	Calculate all analysis (electrical, macnetic, thermal, mechanical)
+! 				2:	Calculate only the electrical and macnetic analysis	
+!
+!===============================================================================
+! SET THE MAGNETIC NODAL PREFRENCES
+!
+/CONFIG, NRES, 4000 	!If time steps are too many, the number should be increased to store the results.
+!===============================================================================
+!===============================================================================
+!===============================================================================
+	!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+	!
+	! CHECK_POINT_1
+	! (select HERE: Revision, and Case)
+	!
+	!		
+	Rev  		= %arg1%	
+	EMAG		= %arg2%
+	Model		='MAGNET'
+	!
+	!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§	
+
+!===========================================================================
+! SET DIRECTORY NAME
+!
+FolderName = 'MAGNET_%Rev%'
+
+!===========================================================================
+! CREATE GLOBAL DIRECTORY
+!
+/MKDIR,		'%FolderName%'
+/CWD,		'./%FolderName%'
+
+!===========================================================================
+! COPY FILES
+!
+/COPY, '../MACRO/INPUT_FILES/MAGNET', mats, , './MAGNET', mats
+
+!===========================================================================
+! CREATE FIRST LEVEL
+!
+/MKDIR, '_models'
+/MKDIR, 'TEXTOUT'
+*IF,EMAG,EQ,0,THEN
+	/MKDIR, 'MECHANICAL'
+	/MKDIR, 'THERMAL'
+*ELSEIF,EMAG,EQ,1,THEN
+	/MKDIR, 'MECHANICAL'
+	/MKDIR, 'THERMAL'
+	/MKDIR, 'EMAG'
+*ELSEIF,EMAG,EQ,2,THEN
+	/MKDIR, 'EMAG'
+*ENDIF
+
+!===========================================================================
+! _MODELS
+!
+/CWD,   './_models'
+/MKDIR, 'PARAMETER'
+/COPY, '../../GAP_INPUT/Gap_Size_18_Coils', txt, , './PARAMETER/Gap_Size_18_Coils',txt
+/COPY, '../../BOLT_INPUT/PRET_FACTOR_18_Coils', txt, , './PARAMETER/PRET_FACTOR_18_Coils',txt
+*IF,arg3,EQ,0,THEN
+	/COPY, '../../CurrentDB/Current_Loads_15MA_2016', txt, , './PARAMETER/REF_15MA_2016',txt
+*ELSEIF,arg3,EQ,1,THEN
+	/COPY, '../../CurrentDB/Current_Loads_5MA', txt, , './PARAMETER/DOWNGRADE_5MA',txt
+*ENDIF
+*IF,EMAG,EQ,0,THEN
+	/MKDIR, 'MECH_GEN'
+	/MKDIR, 'TH_GEN'
+	/MKDIR, 'SOLIDBOLTS'
+*ELSEIF,EMAG,EQ,1,THEN
+	/MKDIR, 'MECH_GEN'
+	/MKDIR, 'TH_GEN'
+	/MKDIR, 'EMAG_GEN'
+	/MKDIR, 'SOLIDBOLTS'
+*ELSEIF,EMAG,EQ,2,THEN
+	/MKDIR, 'EMAG_GEN'
+*ENDIF
+
+!===========================================================================
+! COPY FILES
+!
+/COPY, '../../MACRO/INPUT_FILES/%Model%', cdb, , './MAGNET', cdb
+/COPY, '../../MACRO/INPUT_FILES/MAGNET_FEM', prop, , './PARAMETER/MAGNET_FEM', prop
+
+!===========================================================================
+! MECHANICAL
+!
+
+*IF,EMAG,EQ,2,THEN
+*ELSE
+	/CWD,		'../MECHANICAL'
+	/MKDIR, '_LOADS'
+*ENDIF
+
+!===========================================================================
+! THERMAL
+!
+*IF,EMAG,EQ,2,THEN
+*ELSE
+	/CWD,		'../THERMAL'
+	/MKDIR, '_OUT'
+*ENDIF
+
+!===========================================================================
+! MAGNETIC
+!
+*IF,EMAG,EQ,0,THEN
+*ELSE
+	*IF, arg3, EQ, 0, THEN
+	
+		/CWD,		'../EMAG'
+		Scenario = 'TF_ONLY'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+
+		Scenario = 'SOD'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+		
+		Scenario = 'SOP'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+	
+		Scenario = 'XPF'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+	
+		Scenario = 'CS1_0'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+	
+		Scenario = 'CS2U0'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+	
+		Scenario = 'CS2L0'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+                
+       		Scenario = 'SOF'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+	
+		Scenario = 'SOB'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+
+		Scenario = 'EOB'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+		
+		Scenario = 'EOP'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+	
+		Scenario = 'EOB+PD'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+	
+	*ELSEIF,arg3,EQ,1,THEN
+		
+		/CWD,	'../EMAG'
+		Scenario = 'TF_ONLY'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+		
+		Scenario = 'SOD'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+		
+		Scenario = 'SOFT'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+		
+		Scenario = 'EOFT'
+		/MKDIR, '%Scenario%'
+		/CWD,	'./%Scenario%'
+		/MKDIR, 'EMAG'
+		/MKDIR, 'PARAMETERS'
+		/CWD,		'../'
+		
+	*ENDIF
+*ENDIF
+

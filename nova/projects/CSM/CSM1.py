@@ -562,7 +562,7 @@ if __name__ == '__main__':
     #ct.plot_row(['SG-340-ID', 'SG-220-OD'], index='low_strain_trim')
     #ct.fit(['SG-340-ID', 'SG-220-OD'], index='low_strain_trim')
 
-    #ct.plot_row('strain', index='medium_strain')
+    ct.plot_row('strain')#, index='medium_strain')
     #ct.plot_row(['SG-340-ID', 'SG-220-OD'], index='medium_strain')
 
     ct.plot_row(['SG-340-ID', 'SG-220-OD'], 'comp')

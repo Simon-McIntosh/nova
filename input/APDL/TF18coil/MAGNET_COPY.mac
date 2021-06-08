@@ -1,0 +1,67 @@
+!===============================================================================
+! 20 JUNI 2018 - Fabian Krajewski CADFEM
+!
+! This macro copies the db file informations from previous analyses
+!
+!===============================================================================
+!
+!	arg2
+!  	Emac:		0: 	Calculate only thermal and mechanical analysis
+!		1: 	Calculate all analysis (electrical, macnetic, thermal, mechanical)
+! 	2:	Calculate only the electrical and macnetic analysis
+!
+!=============================================================================
+
+!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+!
+! CHECK_POINT_1
+! (select HERE: Revision, and Case)
+!
+!
+Rev  		= %arg1%
+CaseName 	= 'COPYFILE'
+!
+!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+
+!===============================================================================
+! ASSIGN DIRECTORY, CASENAME
+
+!========================================================================
+! set filename
+!
+/FILNAME,'%CaseName%',1
+
+!========================================================================
+! set txt OUTPUT
+!
+/CWD, './MAGNET_%Rev%/TEXTOUT'
+/OUTPUT,,txt
+/CWD, '../..'
+
+!§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+
+*IF, arg2, EQ, 0, THEN
+	!===========================================================================
+	! COPY FILES
+	!
+	! THERMAL DB FILE
+	/COPY, './CurrentDB/V3/MAGNET_TH', db, , './MAGNET_%arg1%/_models/MAGNET_TH', db
+	! MECHANICAL DB FILE
+	/COPY, './CurrentDB/V3/MAGNET_MECH', db, , './MAGNET_%arg1%/_models/MAGNET_MECH', db
+*ELSEIF,arg2, EQ, 1, THEN
+	!===========================================================================
+	! COPY FILES
+	!
+	! THERMAL DB FILE
+	/COPY, './CurrentDB/V3/MAGNET_TH', db, , './MAGNET_%arg1%/_models/MAGNET_TH', db
+	! MECHANICAL DB FILE
+	/COPY, '../CurrentDB/V3/MAGNET_MECH', db, , './MAGNET_%arg1%/_models/MAGNET_MECH', db
+	! ELECTRO DB FILE
+	/COPY, './CurrentDB/V3/MAGNET_EMAG', db, , './MAGNET_%arg1%/_models/MAGNET_EMAG', db
+*ELSEIF, arg2, EQ, 2, THEN
+	!===========================================================================
+	! COPY FILES
+	!
+	! ELECTRO DB FILE
+	/COPY, './CurrentDB/V3/MAGNET_EMAG', db, , './MAGNET_%arg1%/_models/MAGNET_EMAG', db
+*ENDIF

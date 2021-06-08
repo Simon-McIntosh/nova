@@ -1,0 +1,1732 @@
+!===============================================================================
+! 21 August 2017 - Gabriele D'Amico fusion For Energy (F4E) -  F4E_D_XXXXXX v1.0
+!
+! 15.05.2018 - Fabian Krajewski CADFEM - V2_2
+! 	Features
+!		Smaller file structure
+!
+! 08.06.2021 - Simon McIntosh
+! refactor - flat file structure
+!
+! This MACRO is to generate FE model (*.db format) to perform MAGNET dynamic studies
+!
+!	arg1: str
+!		Physics
+!			mech: Mechanical model
+!			mag: Magnetic model
+!		 	th: Thermal model
+!
+!===============================================================================
+!
+/FILNAME,'%arg1%',1
+/TITLE,'%arg1%'
+
+!
+! Load CDB model to generate MECH and MAG DB model or load generated DB models
+! set filename
+!
+/directory,geom,all,cdb
+cdread,db,geom(1,1),cdb
+allsel
+!===========================================================================
+! LOAD materials
+!
+/directory,mats,all,mats
+/input,mats(1,1),'mats'
+!===========================================================================
+! LOAD properties
+!
+*use,properties
+/directory,props,all,props
+mpread,props(1,1),'props'
+!
+
+
+!===========================================================================
+! LOAD File Containig ET and Real Set definition
+!
+/INPUT,'../PARAMETER/MAGNET_FEM', prop
+!===========================================================================
+! LOAD materials
+!
+MPREAD,'../../MAGNET','mats',' '
+
+*if,arg1,eq,'mech',then  ! generate mechanical model
+	TF18coil/mechanical
+*endif
+/eof
+*if,arg1,eq,'',then  ! generate magnetic model
+	TF18coil/magnetic
+*endif
+/eof 
+
+*
+
+
+!===============================================================================
+!===============================================================================
+!
+! GENERATE THERMAL MODEL
+!
+!===============================================================================
+!===============================================================================
+!
+*IF, TH_GEN, EQ, TRUE, THEN
+
+	!===============================================================================
+	! PRE-PROCESSING FOR ELECTRO-MAGNETIC MODEL
+	!
+	/PREP7
+
+		!===========================================================================
+		! TOROIDAL CONSTRAINT EQUATIONS FOR SBOLTS
+		!
+		ESEL, NONE
+		NSEL, NONE
+		CMSEL, S, SB_KY
+		CMSEL, A, GS_BOLTS
+		NSLE, S
+		CEDELE, ALL
+		EDELE, ALL
+		NDELE, ALL
+
+		ESEL, NONE
+		NSEL, NONE
+
+		!===========================================================================
+		! DELETE NO-NEEDED COMPONENTS
+		!
+		ALLSEL, ALL
+		CPDELE, ALL
+		CMSEL, U, E_TH_MODEL
+		NSLE,S
+		EDELE, ALL
+		NDELE, ALL
+
+		!===========================================================================
+		! DEFINE AND SET SOLID5 KOPT
+		!
+		ET, ET_SOLSH, SOLID70
+		ET, ET_SOLID, SOLID70				! THERMA 8-NODE SOLID
+		ET, ET_LINK, LINK33
+		ET, ET_BEAM, LINK33
+
+		KEYOPT, ET_C_BOND, 1, 2
+		KEYOPT, ET_C_ST_NO_GAP, 1, 2
+
+		!===========================================================================
+		! MODIFY BEARINGS CONTACT
+		!
+		CMSEL, S, C71
+		EMODIF, ALL, TYPE, ET_C_BOND
+		CMSEL, S, T71
+		EMODIF, ALL, TYPE, ET_T_BOND
+
+		!===========================================================================
+		! DELETE MECHANICAL ET
+		!
+		ETDELE, 2, 4, 1
+		ETDELE, 7, 8, 1
+		ETDELE, 16, 16, 1
+		RDELE, 1000, 1122, 1
+		RDELE, 1141, 3000, 1
+
+		!===========================================================================
+		! Reduce component N_operating_temp
+		! Fabian Krajewski 28.05.2018
+		CSYS,1
+		CMSEL, S, n_operating_temp
+		NSEL, S, LOC, X, 10.135, 10.154
+		NSEL, R, LOC, Z, -3.66, -3.65
+		CM, TMPNODE1, NODE
+		NSEL, S, LOC, X, 10.535, 10.545
+		NSEL, R, LOC, Z, -2.94, -2.93
+		CM, TMPNODE2, NODE
+		NSEL, S, LOC, X, 10.675, 10.685
+		NSEL, R, LOC, Z, -2.62, -2.61
+		CM, TMPNODE3, NODE
+		NSEL, S, LOC, X, 10.79, 10.808
+		NSEL, R, LOC, Z, -2.30, -2.29
+		CM, TMPNODE4, NODE
+		NSEL, S, LOC, X, 10.89, 10.91
+		NSEL, R, LOC, Z, -1.99, -1.995
+		CM, TMPNODE5, NODE
+		NSEL, S, LOC, X, 10.15, 10.17
+		NSEL, R, LOC, Z, -3.64, -3.63
+		CM, TMPNODE6, NODE
+		NSEL, S, LOC, X, 10.21, 10.225
+		NSEL, R, LOC, Z, -3.55, -3.54
+		CM, TMPNODE7, NODE
+		NSEL, S, LOC, X, 10.93, 10.95
+		NSEL, R, LOC, Z, -1.845, -1.855
+		CM, TMPNODE8, NODE
+		NSEL, S, LOC, X, 10.00, 10.02
+		NSEL, R, LOC, Z, -3.87, -3.86
+		CM, TMPNODE9, NODE
+		NSEL, S, LOC, X, 10.115, 10.132
+		NSEL, R, LOC, Z, -3.696, -3.690
+		CM, TMPNODE10, NODE
+		NSEL, S, LOC, X, 10.295, 10.31
+		NSEL, R, LOC, Z, -3.397, -3.396
+		CM, TMPNODE11, NODE
+		NSEL, S, LOC, X, 10.46, 10.47
+		NSEL, R, LOC, Z, -3.095, -3.085
+		CM, TMPNODE12, NODE
+		NSEL, S, LOC, X, 10.603, 10.618
+		NSEL, R, LOC, Z, -2.78, -2.775
+		CM, TMPNODE13, NODE
+		NSEL, S, LOC, X, 10.735, 10.748
+		NSEL, R, LOC, Z, -2.46, -2.455
+		CM, TMPNODE14, NODE
+		NSEL, S, LOC, X, 10.82, 10.863
+		NSEL, R, LOC, Z, -2.13, -2.135
+		CM, TMPNODE15, NODE
+		! Define new component n_operating_temp
+		CMSEL, S, TMPNODE1
+		*DO, X, 2, 15
+			CMSEL, A, TMPNODE%X%
+		*ENDDO
+		CM, n_operating_temp, NODE
+		!===========================================================================
+		! Define component N_anker_temp
+		! Fabian Krajewski 28.05.2018
+		NSEL, S, LOC, Z,-5.5915,-5.582
+		CM, n_anker_temp, NODE
+		!===========================================================================
+
+		!===========================================================================
+		! LOAD materials
+		!
+		MPREAD,'../../MAGNET','mats',' '
+
+
+		!===========================================================================
+		! SAVE MODEL
+		!
+		SAVE, '../MAGNET_TH', db
+	FINISH
+*ENDIF
+!===============================================================================
+!===============================================================================
+!
+! GENERATE EMAG MODEL
+!
+!===============================================================================
+!===============================================================================
+!
+*IF, EMAG_GEN, EQ, TRUE, THEN
+
+	!===============================================================================
+	! PRE-PROCESSING FOR ELECTRO-MAGNETIC MODEL
+	!
+	/PREP7
+
+		!===========================================================================
+		! Deactivate shape test on elems
+		!
+		SHPP, OFF
+		!===========================================================================
+		! GS BOLTS, OIS BOLTS, GS LOWER CONTACT+SHIM, PEDESTAL RING
+		!
+		ESEL, NONE
+		NSEL, NONE
+		CMSEL, S, GS_BOLTS
+		CMSEL, A, OIS_BOLTS
+		CMSEL, A, C34
+		CMSEL, A, T34
+		CMSEL, A, GS_CRYO_RING
+		CMSEL, A, GS_BOTTOM_SHIM
+		NSLE, S
+		EDELE, ALL
+		NDELE, ALL
+
+		CSYS, 0
+
+		!===========================================================================
+		! DELETE UNEUSEFUL STUFF
+		!
+		ALLSEL, ALL
+		CPDELE, ALL
+		CMSEL, U, WP
+		CMSEL, U, PF1
+		CMSEL, U, PF2
+		CMSEL, U, PF3
+		CMSEL, U, PF4
+		CMSEL, U, PF5
+		CMSEL, U, PF6
+
+		CMSEL, U, CSL1
+		CMSEL, U, CSL2
+		CMSEL, U, CSL3
+		CMSEL, U, CSU1
+		CMSEL, U, CSU2
+		CMSEL, U, CSU3
+		NSLE,S
+		EDELE, ALL
+		NDELE, ALL
+		ETDELE, 2, 17, 1
+		RDELE, ALL
+
+		!===========================================================================
+		!CREATE TF LOCAL CS BY 3 NODES LOCATION
+		!
+
+		!===========================================================================
+		!CREATE TF NODES FOR SOURC36
+		!
+		N,  43,           1.697,             0.0,          -3.951
+		N,  42,        	  4.939,             0.0,          -4.009		! ADJUSTED - NO TANGENZA
+		N,  41,          5.3344,             0.0,         -3.1113
+		N,  40,             4.2,             0.0,           0.029
+		N,  39,            4.24,             0.0,           0.029
+		N,  36, 3.9838056878901,             0.0, -6.024863203431
+		N,  35, 6.4815771440832,             0.0, -6.110789979378
+		N,  34, 10.750008583169,             0.0,  0.027322001548
+		N,  33, 6.5001278457297,             0.0, 6.1340828568965
+		N,  38,          5.3344,             0.0,          3.1113
+		N,  37,           4.939,             0.0,           4.009
+		N,  32, 4.2017937633796,             0.0, 6.1461381367233
+		N,  31,           2.697,             0.0,           4.009
+		N,  30,           2.697,             0.0,          -3.951
+
+		!CREATE TF CYCLIC NODES FOR LOCAL COORDINATE SYSTEM
+		!
+		CSYS, 1
+		NGEN, nCoil_MAG, 20, 30, 44, 1, , 20, ,
+		CSYS, 0
+
+
+		nSys  = 7			! 7 Local Systems per TF coil
+
+		*DIM,sysId,ARRAY,nCoil_MAG,nSys
+
+
+		!===========================================================================
+		!LOOP ON COILS
+		!
+		*DO, i, 1, nCoil_MAG
+
+			!--------------------------------------------------------------
+			! FILL SYSTEM ID ARRAY
+			!
+			DELTA = ((i-1)*20)
+			sysId(i,1) = 30 + DELTA
+			sysId(i,2) = 37 + DELTA
+			sysId(i,3) = 38 + DELTA
+			sysId(i,4) = 39 + DELTA
+			sysId(i,5) = 40 + DELTA
+			sysId(i,6) = 41 + DELTA
+			sysId(i,7) = 42 + DELTA
+
+			!--------------------------------------------------------------
+			! cartesian syst for inner leg / y-dir for curvilinear abscissa
+			!
+			CS, sysId(i,1), CART , 30+DELTA, 43+DELTA, 31+DELTA
+
+
+			!--------------------------------------------------------------
+			! cylindrical for the curved regions / y-dir for curvilinear abscissa
+			!
+			CS, sysId(i,2), CYLIN, 37+DELTA, 31+DELTA, 32+DELTA  ! cylindrical syst for inner leg / y-dir for curvilinear abscissa
+			CS, sysId(i,3), CYLIN, 38+DELTA, 32+DELTA, 33+DELTA  ! cylindrical syst for inner leg / y-dir for curvilinear abscissa
+			CS, sysId(i,4), CYLIN, 39+DELTA, 33+DELTA, 34+DELTA  ! cylindrical syst for inner leg / y-dir for curvilinear abscissa
+			CS, sysId(i,5), CYLIN, 40+DELTA, 34+DELTA, 35+DELTA  ! cylindrical syst for inner leg / y-dir for curvilinear abscissa
+			CS, sysId(i,6), CYLIN, 41+DELTA, 35+DELTA, 36+DELTA  ! cylindrical syst for inner leg / y-dir for curvilinear abscissa
+			CS, sysId(i,7), CYLIN, 42+DELTA, 36+DELTA, 30+DELTA  ! cylindrical syst for inner leg / y-dir for curvilinear abscissa
+
+		*ENDDO
+
+		CSYS, 0
+
+		!===========================================================================
+		!===========================================================================
+		! MODIFY WP ESYS TO CORRECTLY APPLY MAT PROPERTIES
+		!
+
+		!===========================================================================
+		! initialize Variables
+		!
+		eFailed=0
+
+		!=======================================================================
+		! TF Geometrical data (to isolate inner leg from outer leg and first two arcs)
+		!
+		RefRadiusUP	= 4.188
+		RefRadiuslow	= 4.149
+		RefZpos   	= 4.009
+		RefZneg   	= -3.951
+		jSys		= -1E-30
+
+		!===========================================================================
+		! Loop on Coils
+		!
+
+		*DO, k, 1, nCoil_MECH
+
+			!===========================================================================
+			! Select components
+			!
+			ESEL, NONE
+			CMSEL, NONE
+			NSEL, NONE
+			CMSEL, S, E_WP_%k%
+			NSLE, S
+			!===========================================================================
+			! Get ELEM numbers
+			!
+			*GET,nE,ELEM,,COUNT
+			*GET,iE,ELEM,,NUM,MIN
+			NSEL, NONE
+			ESEL, NONE
+			CMSEL, NONE
+			!===========================================================================
+			! LOOP ON ELEMENTS
+			!
+			*DO,i,1,nE
+
+				NSEL, NONE
+				ESEL, NONE
+				ESEL, S, ELEM, , iE
+
+				!===========================================================================
+				! FIND correct Local Coordinate System
+				!
+				yMin  = 1.0E30
+				CSYS, GlobCyl
+				*GET, rELEM, ELEM, iE, CENT, X		! Centroid X local of the iE elem in global cylindrical CS
+				*GET, zELEM, ELEM, iE, CENT, Z		! Centroid X local of the iE elem in global cylindrical CS
+
+
+				!===========================================================================
+				! inner leg OR FIRST UPPER ARCS
+				!
+				*IF, rELEM, LT, RefRadiusUP, AND, zELEM, GE, 0.0, THEN
+
+					!===========================================================================
+					! inner leg
+					!
+					*IF, zELEM, LE, RefZpos, AND, zELEM, GE, RefZneg, THEN
+
+						jSys = sysId(k, 1)
+
+					!===========================================================================
+					! first two arcs
+					!
+					*ELSE
+						CSYS,sysId(k,2)
+						*GET, yC1, ELEM, iE, CENT, Y		! Centroid y local of the iE elem
+
+						CSYS,sysId(k,7)
+						*GET, yC2, ELEM, iE, CENT, Y		! Centroid y local of the iE elem
+
+						*IF,yC1,GE,0.0,AND,yC2,LT,0.0,THEN
+							jSys = sysId(k,2)
+
+						*ELSEIF,yC2,GE,0.0,AND,yC1,LT,0.0,THEN
+							jSys = sysId(k,7)
+
+						*ELSE
+							*IF,yC2,GT,yC1,THEN
+								jSys = sysId(k,2)
+
+							*ELSE,
+								jSys = sysId(k,7)
+							*ENDIF
+
+						*ENDIF
+					*ENDIF
+
+				!===========================================================================
+				! inner leg OR FIRST LOWER ARCS
+				!
+				*ELSEIF, rELEM, LT, RefRadiusLOW, AND, zELEM, LE, 0.0, THEN
+
+					!===========================================================================
+					! inner leg
+					!
+					*IF, zELEM, LE, RefZpos, AND, zELEM, GE, RefZneg, THEN
+
+						jSys = sysId(k, 1)
+
+					!===========================================================================
+					! first two arcs
+					!
+					*ELSE
+						CSYS,sysId(k,2)
+						*GET, yC1, ELEM, iE, CENT, Y		! Centroid y local of the iE elem
+
+						CSYS,sysId(k,7)
+						*GET, yC2, ELEM, iE, CENT, Y		! Centroid y local of the iE elem
+
+						*IF,yC1,GE,0.0,AND,yC2,LT,0.0,THEN
+							jSys = sysId(k,2)
+
+						*ELSEIF,yC2,GE,0.0,AND,yC1,LT,0.0,THEN
+							jSys = sysId(k,7)
+
+						*ELSE
+							*IF,yC2,GT,yC1,THEN
+								jSys = sysId(k,2)
+
+							*ELSE,
+								jSys = sysId(k,7)
+							*ENDIF
+
+						*ENDIF
+					*ENDIF
+
+				!===========================================================================
+				! OUTER LEG
+				!
+				*ELSE
+
+					*DO,j,3,6
+						CSYS,sysId(k,j)
+						*GET, yC, ELEM, iE, CENT, Y		! Centroid y local of the iE elem
+						*IF,yC,GE,0.0,AND,yC,LT,yMin,THEN
+							jSys = sysId(k,j)
+							yMin = yC
+						*ENDIF
+					*ENDDO
+
+				*ENDIF
+				!===========================================================================
+				! evaluate director cosines to get current direction in Global CS
+				!
+				*IF,jSys,GT,0,THEN
+
+					EMODIF, ALL, ESYS, jSys
+
+				*ELSE
+					CURR_nFailed=CURR_nFailed+1
+
+				*ENDIF
+
+				CMSEL, S, E_WP_%k%
+				*GET,iEnew,ELEM,iE,NXTH
+				iE=iEnew
+				jSys= -1E-30
+			*ENDDO
+		*ENDDO
+
+		!===========================================================================
+		! CORRECT MISTAKE, SOME ELEMENTS HAVE WRONG ESYS IN WINDING PACK
+		! CORRECT MISTAKE, WRONG RADIAL NODAL POSITION
+		CSYS, 1
+		*DO, i, 1, nCoil_MECH
+			DELTA = ((i-1)*20)
+			CMSEL, S, E_WP_%i%
+			ESEL, R, CENT, X, 4.13145
+			ESEL, R, CENT, Z, -10,0
+			jSys = 41+DELTA
+			EMODIF, ALL, ESYS, jSys
+
+			CMSEL, S, E_WP_%i%
+			ESEL, R, CENT, X, 4.21559
+			ESEL, R, CENT, Z, -10,0
+			jSys = 41+DELTA
+			EMODIF, ALL, ESYS, jSys
+
+			CMSEL, S, E_WP_%i%
+			ESEL, R, CENT, X, 4.0671
+			ESEL, R, CENT, Z, -6.1481
+			jSys = 41+DELTA
+			EMODIF, ALL, ESYS, jSys
+
+			CMSEL, S, E_WP_%i%
+			ESEL, R, CENT, X, 4.00577
+			ESEL, R, CENT, Z, -6.284
+			jSys = 41+DELTA
+			EMODIF, ALL, ESYS, jSys
+
+			CMSEL, S, E_WP_%i%
+			ESEL, R, CENT, X, 4.21777
+			ESEL, R, CENT, Z, 0,10
+			jSys = 37+DELTA
+			EMODIF, ALL, ESYS, jSys
+
+			CMSEL, S, E_WP_%i%
+			NSLE
+			NSEL, R, LOC, Z,  -6.6679
+			nmin = 0
+			*GET, ncount, NODE, , COUNT
+			*DO, j, 1, ncount
+				*GET, nN, NODE, nmin, NXTH
+				*GET, nNX, NODE, nN, LOC, X
+
+				NewX = 5.30
+				NewZ = -6.632
+				NMODIF, nN, NewX, , NewZ
+				nmin = nN
+			*ENDDO
+
+
+			CSYS,1
+			CMSEL, S, E_WP_%i%
+			NSLE
+			NSEL, R, LOC, X, 7.2377
+			NSEL, R, LOC, Z, -6.1527
+			nmin = 0
+			*GET, ncount, NODE, , COUNT
+			*DO, j, 1, ncount
+				*GET, nN, NODE, nmin, NXTH
+				*GET, nNX, NODE, nN, LOC, X
+
+				NewX = 7.31
+				NewZ = -6.10
+				NMODIF, nN, NewX, , NewZ
+				nmin = nN
+			*ENDDO
+
+		*ENDDO
+
+		CSYS, 0
+
+		!==========================================================================
+		! Orientation of PF coils in current direction
+		CMSEL, S, PF1
+		CMSEL, A, PF2
+		CMSEL, A, PF3
+		CMSEL, A, PF4
+		CMSEL, A, PF5
+		CMSEL, A, PF6
+		NSLE
+		EMODIF, ALL, ESYS, 11
+
+		!==========================================================================
+		! Orientation of PF coils in current direction
+		CMSEL,S,CSU1
+		CMSEL,A,CSU2
+		CMSEL,A,CSU3
+		CMSEL,A,CSL1
+		CMSEL,A,CSL2
+		CMSEL,A,CSL3
+		NSLE
+		EMODIF, ALL, ESYS, 11
+
+		CSYS, 0
+
+		!===========================================================================
+		! LOAD materials
+		!
+		MPREAD,'../../MAGNET','mats',' '
+
+		!===========================================================================
+		! DEFINE LAYER FOR GENERATION OF DOUBLE NODE
+		! DEFINE LAYER FOR WP
+		*AFUN,DEG
+		CSYS, GlobCyl
+		*DO,i,1,nCoil_MAG
+			CMSEL,S,E_WP_%i%
+			NSLE
+			NSEL, R, LOC, X, 0, 4
+			NSEL, R, LOC, Z, -0.05, 0.05
+			CM, wplayer_TF%i%, NODE
+		*ENDDO
+		! DEFINE LAYER FOR PF
+		CSYS, 0
+		*DO,i,1,nCoil_PF
+			CMSEL, S, PF%i%
+			NSLE
+			NSEL, R, LOC, X, 0, 100
+			*IF, i, EQ, 1, THEN
+				NSEL, R, LOC, Y, -0.01, 0.075
+			*ELSE
+				NSEL, R, LOC, Y, -0.01, 0.05
+			*ENDIF
+			CM, wplayer_PF%i%, NODE
+		*ENDDO
+
+		! DEFINE LAYER FOR CS
+		CSYS, 0
+		*DO,i,1,nCoil_CS+1
+			*IF, i, GT, 4, THEN
+				CMSEL, S, CSL%i-4%
+			*ELSE
+				*IF,i,EQ, 4, THEN
+				CMSEL, S, CSU3
+				*ELSE
+				CMSEL, S, CSU%i%
+				*ENDIF
+			*ENDIF
+			NSLE
+			*IF, i , EQ, 1, THEN
+				NSEL, R, LOC, Z, 0.0275
+				tmp%i% = 0.0275
+			*ENDIF
+			*IF, i, EQ, 2, THEN
+				NSEL, R, LOC, Z, 2.2200
+				tmp%i% = 2.2200
+			*ENDIF
+			*IF, i, EQ, 3, THEN
+				NSEL, R, LOC, Z, 4.4120
+				tmp%i% = 4.412
+			*ENDIF
+			*IF, i, EQ, 5, THEN
+				NSEL, R, LOC, Z, -2.1640
+				tmp%i% = -2.164
+			*ENDIF
+			*IF, i, EQ, 4, THEN
+				NSEL, R, LOC, Z, 6.605
+				tmp%i% = 6.605
+			*ENDIF
+			*IF, i, EQ, 6, THEN
+				NSEL, R, LOC, Z, -4.3560
+				tmp%i% = -4.356
+			*ENDIF
+
+			*IF, i, EQ, 7, THEN
+				NSEL, R, LOC, Z, -6.5480
+				tmp%i% = -6.5480
+			*ENDIF
+
+			*IF, i, LE, 4, THEN
+				CM, wplayer2_CSU%i%, NODE
+			*ELSE
+				CM, wplayer2_CSL%i-4%, NODE
+			*ENDIF
+		*ENDDO
+		!===========================================================================
+		! selection of layer for generation of double nodes
+		! DEFINE LAYER FOR CS
+
+		! GENERATE DUMMY NODE TO GET SAME NODE VALUES AS IN MECH CALCULATION
+		N,2236702,0,0,0
+		!===================================================================
+
+		!===========================================================================
+		! selection of layer for generation of double nodes
+		! DEFINE LAYER FOR CS
+		ALLSEL
+		*GET, maxn, NODE,, NUM, MAX
+		counter =1
+		CSYS, 0
+		*DO, i, 1, nCoil_CS+1
+			*IF, i, EQ, 5, THEN
+				N,2252831,0,0,0
+				*GET, maxn, NODE,, NUM, MAX
+				counter =0
+			*ENDIF
+			*IF, i, LE, 4, THEN
+				CMSEL, S, wplayer2_CSU%i%
+			*ELSE
+				CMSEL, S, wplayer2_CSL%i-4%
+			*ENDIF
+			ESLN
+			NSLE
+			NSEL, R, LOC, Z,-0.1+tmp%i%,1+tmp%i%
+			ESLN, R, 1
+			CM, tosel, NODE
+			CMSEL, S, tosel
+			emin = 0
+			zzn=
+			*DIM,zzn,ARRAY,8
+			*GET, ecount, ELEM, , COUNT
+			*GET, elnum, ELEM, emin, NXTH
+			*DO, ncnt, 1, ecount
+				*IF, i, LE, 4, THEN
+					CMSEL, S, wplayer2_CSU%i%
+				*ELSE
+					CMSEL, S, wplayer2_CSL%i-4%
+				*ENDIF
+				*DO,k,1,8
+					zzn(k)= NELEM(elnum,k)
+					*IF, NSEL(zzn(k)), EQ, 1, THEN
+						counter = counter +1
+						*GET, xloc, NODE, zzn(k), LOC, X
+						*GET, yloc, NODE, zzn(k), LOC, Y
+						*GET, zloc, NODE, zzn(k), LOC, Z
+						*GET, xyloc, NODE, zzn(k), ANG, XY
+						*GET, yzloc, NODE, zzn(k), ANG, YZ
+						*GET, zxloc, NODE, zzn(k), ANG, ZX
+						N, maxn+counter, xloc, yloc, zloc, xyloc, yzloc, zxloc
+						zzn(k)=maxn+counter
+					*ENDIF
+				*ENDDO
+				CMSEL, A, tosel
+				EMODIF, elnum, -1, zzn(1), zzn(2), zzn(3), zzn(4), zzn(5), zzn(6), zzn(7), zzn(8)
+				emin = elnum
+				*GET, elnum, ELEM, emin, NXTH
+			*ENDDO
+			*IF, i, LE, 4, THEN
+				*IF, i, EQ, 4, THEN
+				CMSEL, S, CSU3
+				*ELSE
+				CMSEL, S, CSU%i%
+				*ENDIF
+			*ELSE
+				CMSEL, S, CSL%i-4%
+			*ENDIF
+			NSLE
+			nummrg,node,0.001
+		*ENDDO
+		! DELETE DUMMY NODE ================================================
+		NDELE, 2236702
+		NDELE, 2252831
+		!===================================================================
+
+		! DEFINE LAYER FOR CS
+		CSYS, 0
+		*DO,i,1,nCoil_CS
+			*IF, i, GT, 3, THEN
+				CMSEL, S, CSL%i-3%
+			*ELSE
+				CMSEL, S, CSU%i%
+			*ENDIF
+			NSLE
+			NSEL, R, LOC, X, 0, 100
+			NSEL, R, LOC, Y, -0.01, 0.05
+			*IF, i, LE, 3, THEN
+				CM, wplayer_CSU%i%, NODE
+			*ELSE
+				CM, wplayer_CSL%i-3%, NODE
+			*ENDIF
+		*ENDDO
+
+		!===========================================================================
+		! DEFINE AND SET SOLID5 KOPT
+		!
+		ET, 20, SOLID5			! SOLID5
+
+		!===========================================================================
+		! SET MATERIAL for ALL
+		!
+		! FK, 20.07.2018
+		ESEL, ALL
+		EMODIF, ALL, TYPE, 20
+		EMODIF, ALL, MAT, MAT_AIR
+
+		!===========================================================================
+		! DELETE MECHANICAL ET
+		!
+		ETDELE, ET_SOLID
+
+		!===========================================================================
+		! DELETE UNNEDED NODES
+		NSEL, S, NODE,,1,383
+		NDELE, ALL
+		ALLSEL
+
+		!===========================================================================
+		! DEFINE SWALL 1
+		*DO, i, 1, nCoil_MAG
+			CSYS, 6000+i
+			CMSEL, S, E_WP_%i%
+			NSLE
+			ESLN
+			ESEL, U, ENAM,, 185
+			NSLE
+			NSEL, U, LOC, Z, -0.3, 0.3
+			CM, SWALL%i%, NODE
+
+			*GET, ZMAX, NODE, , MXLOC, Z
+			*GET, ZMIN, NODE, , MNLOC, Z
+			NSEL, R, LOC, Z, 0,10
+			*GET, ncount, NODE, , COUNT
+			nmin = 0
+			*DO, j, 1, ncount
+				*GET, nN, NODE, nmin, NXTH
+				NMODIF, nN, , , ZMAX
+				nmin = nN
+			*ENDDO
+			CMSEL, S, SWALL%i%
+			NSEL, R, LOC, Z, -10,0
+			*GET, ncount, NODE, , COUNT
+			nmin = 0
+			*DO, j, 1, ncount
+				*GET, nN, NODE, nmin, NXTH
+				NMODIF, nN, , , ZMIN
+				nmin = nN
+			*ENDDO
+
+		*ENDDO
+
+		!===========================================================================
+		! selection of layer for generation of double nodes
+		! DEFINE LAYER FOR WP
+		ALLSEL
+		*GET, maxn, NODE,, NUM, MAX
+		counter = 0
+		CSYS, 0
+		*DO, i, 1, nCoil_MECH
+			CMSEL, S, wplayer_TF%i%
+			CM, upp1_TF%i%, NODE
+			ESLN
+			NSLE
+			NSEL, R, LOC, Z,-0.1,1.
+			ESLN, R, 1
+			CM, tosel, NODE
+			emin = 0
+			zzn=
+			*DIM,zzn,ARRAY,8
+			*GET, ecount, ELEM, , COUNT
+			*GET, elnum, ELEM, emin, NXTH
+			*DO, ncnt, 1, ecount
+				CMSEL, S, wplayer_TF%i%
+				*DO,k,1,8
+					zzn(k)= NELEM(elnum,k)
+					*IF, NSEL(zzn(k)), EQ, 1, THEN
+						counter = counter +1
+						*GET, xloc, NODE, zzn(k), LOC, X
+						*GET, yloc, NODE, zzn(k), LOC, Y
+						*GET, zloc, NODE, zzn(k), LOC, Z
+						*GET, xyloc, NODE, zzn(k), ANG, XY
+						*GET, yzloc, NODE, zzn(k), ANG, YZ
+						*GET, zxloc, NODE, zzn(k), ANG, ZX
+						N, maxn+counter, xloc, yloc, zloc+0.0001, xyloc, yzloc, zxloc
+						zzn(k)=maxn+counter
+					*ENDIF
+				*ENDDO
+				CMSEL, A, tosel
+				EMODIF, elnum, -1, zzn(1), zzn(2), zzn(3), zzn(4), zzn(5), zzn(6), zzn(7), zzn(8)
+				emin = elnum
+				*GET, elnum, ELEM, emin, NXTH
+			*ENDDO
+			CMSEL, S, tosel
+			CMSEL, U, upp1_TF%i%
+			ESLN
+			NSLE
+			NSEL, R, LOC, Z, 0,0.1
+			CM, low1_TF%i%, NODE
+			nummrg,node,0.002
+		*ENDDO
+
+		! DEFINE LAYER FOR PF
+		ALLSEL
+		*GET, maxn, NODE,, NUM, MAX
+		counter = 0
+		CSYS, 0
+		*DO, i, 1, nCoil_PF
+			CMSEL, S, wplayer_PF%i%
+			CM, low1_PF%i%, NODE
+			ESLN
+			NSLE
+			NSEL, R, LOC, Y,-0.01,1.
+			ESLN, R, 1
+			CM, tosel, NODE
+
+			emin = 0
+			zzn=
+			*DIM,zzn,ARRAY,8
+			*GET, ecount, ELEM, , COUNT
+			*GET, elnum, ELEM, emin, NXTH
+			*DO, ncnt, 1, ecount
+				CMSEL, S, wplayer_PF%i%
+				*DO,k,1,8
+					zzn(k)= NELEM(elnum,k)
+					counter = counter +1
+					*IF, NSEL(zzn(k)), EQ, 1, THEN
+						*GET, xloc, NODE, zzn(k), LOC, X
+						*GET, yloc, NODE, zzn(k), LOC, Y
+						*GET, zloc, NODE, zzn(k), LOC, Z
+						*GET, xyloc, NODE, zzn(k), ANG, XY
+						*GET, yzloc, NODE, zzn(k), ANG, YZ
+						*GET, zxloc, NODE, zzn(k), ANG, ZX
+						N, maxn+counter, xloc, yloc+0.0001, zloc, xyloc, yzloc, zxloc
+						zzn(k)=maxn+counter
+					*ENDIF
+				*ENDDO
+				CMSEL, A, tosel
+				EMODIF, elnum, -1, zzn(1), zzn(2), zzn(3), zzn(4), zzn(5), zzn(6), zzn(7), zzn(8)
+				emin = elnum
+				*GET, elnum, ELEM, emin, NXTH
+			*ENDDO
+			CMSEL, S, tosel
+			CMSEL, U, low1_PF%i%
+			ESLN
+			NSLE
+			*IF,i,EQ, 1, THEN
+				NSEL, R, LOC, Y, 0, 0.08
+			*ELSE
+				NSEL, R, LOC, Y, 0,0.04
+			*ENDIF
+			CM, upp1_PF%i%, NODE
+			nummrg,node,0.002
+		*ENDDO
+
+		! DEFINE LAYER FOR CS
+		ALLSEL
+		*GET, maxn, NODE,, NUM, MAX
+		counter = 0
+		CSYS, 0
+		*DO, i, 1, nCoil_CS
+			*IF, i, GT, 3, THEN
+				CMSEL, S, wplayer_CSL%i-3%
+				CM, low1_CSL%i-3%, NODE
+			*ELSE
+				CMSEL, S, wplayer_CSU%i%
+				CM, low1_CSU%i%, NODE
+			*ENDIF
+			ESLN
+			NSLE
+			NSEL, R, LOC, Y,-0.01,1.
+			ESLN, R, 1
+			CM, tosel, NODE
+			emin = 0
+			zzn=
+			*DIM,zzn,ARRAY,8
+			*GET, ecount, ELEM, , COUNT
+			*GET, elnum, ELEM, emin, NXTH
+			*DO, ncnt, 1, ecount
+				*IF, i, GT, 3, THEN
+					CMSEL, S, wplayer_CSL%i-3%
+				*ELSE
+					CMSEL, S, wplayer_CSU%i%
+				*ENDIF
+				*DO,k,1,8
+					zzn(k)= NELEM(elnum,k)
+					*IF, NSEL(zzn(k)), EQ, 1, THEN
+						counter=counter+1
+						*GET, xloc, NODE, zzn(k), LOC, X
+						*GET, yloc, NODE, zzn(k), LOC, Y
+						*GET, zloc, NODE, zzn(k), LOC, Z
+						*GET, xyloc, NODE, zzn(k), ANG, XY
+						*GET, yzloc, NODE, zzn(k), ANG, YZ
+						*GET, zxloc, NODE, zzn(k), ANG, ZX
+						N, maxn+counter, xloc, yloc+0.0001, zloc, xyloc, yzloc, zxloc
+						zzn(k)=maxn+counter
+					*ENDIF
+				*ENDDO
+				CMSEL, A, tosel
+				EMODIF, elnum, -1, zzn(1), zzn(2), zzn(3), zzn(4), zzn(5), zzn(6), zzn(7), zzn(8)
+				emin = elnum
+				*GET, elnum, ELEM, emin, NXTH
+			*ENDDO
+			CMSEL, S, tosel
+			*IF, i, GT, 3, THEN
+				CMSEL, U, low1_CSL%i-3%
+			*ELSE
+				CMSEL, U, low1_CSU%i%
+			*ENDIF
+			ESLN
+			NSLE
+			NSEL, R, LOC, Y, 0,0.035
+			*IF, i, GT, 3, THEN
+				CM, upp1_CSL%i-3%, NODE
+			*ELSE
+				CM, upp1_CSU%i%, NODE
+			*ENDIF
+			nummrg,node,0.002
+		*ENDDO
+
+		!===========================================================================
+		! MOVE CENTRAL SOLENOID AND PF COIL TO EXCEL POSITION
+		! POSITION FEM
+		*DIM,POS_FEM,ARRAY,4,12
+		!				Zup		 Zlow	 Rin	 Rout
+		POS_FEM(1,1) =  6.6050,  4.4121, 1.3050, 2.0730 	! CSU3 POSITION
+		POS_FEM(1,2) =  4.4120,  2.2201, 1.3050, 2.0730 	! CSU2 POSITION
+		POS_FEM(1,3) =  2.2200,  0.0276, 1.3050, 2.0730 	! CSU1 POSITION
+		POS_FEM(1,4) =  0.0275, -2.1639, 1.3050, 2.0730 	! CSL1 POSITION
+		POS_FEM(1,5) = -2.1640, -4.3559, 1.3050, 2.0730 	! CSL2 POSITION
+		POS_FEM(1,6) = -4.3560, -6.5480, 1.3050, 2.0730 	! CSL3 POSITION
+		POS_FEM(1,7) =  8.1182,  7.1138, 3.4654, 4.4446 	! PF1 POSITION
+		POS_FEM(1,8) =  6.9460,  6.2120, 8.0105, 8.6095 	! PF2 POSITION
+		POS_FEM(1,9) =  3.7910,  2.8170, 11.670, 12.386 	! PF3 POSITION
+		POS_FEM(1,10) =-1.7340, -2.7080, 11.670, 12.328 	! PF4 POSITION
+		POS_FEM(1,11) =-6.2410, -7.2150, 7.9979, 8.8321 	! PF5 POSITION
+		POS_FEM(1,12) =-6.9059, -8.0341, 3.5564, 5.1376 	! PF6 POSITION
+
+		! POSITION EXCEL
+		*DIM,POS_EXC,ARRAY,4,12
+		!				Zup		 Zlow	 Rin	 Rout
+		POS_EXC(1,1) =  6.484,  4.364, 1.330, 2.064 	! CSU3 POSITION
+		POS_EXC(1,2) =  4.315,  2.195, 1.330, 2.064 	! CSU2 POSITION
+		POS_EXC(1,3) =  2.145,  0.025, 1.330, 2.064 	! CSU1 POSITION
+		POS_EXC(1,4) = -0.025, -2.145, 1.330, 2.064 	! CSL1 POSITION
+		POS_EXC(1,5) = -2.195, -4.315, 1.330, 2.064 	! CSL2 POSITION
+		POS_EXC(1,6) = -4.364, -6.484, 1.330, 2.064	! CSL3 POSITION
+		POS_EXC(1,7) =  8.056,  7.072, 3.464, 4.4226 	! PF1 POSITION
+		POS_EXC(1,8) =  6.887,  6.173, 7.995, 8.5752 	! PF2 POSITION
+		POS_EXC(1,9) =  3.742,  2.788, 11.644, 12.340 	! PF3 POSITION
+		POS_EXC(1,10) =-1.767, -2.721, 11.644, 12.282 	! PF4 POSITION
+		POS_EXC(1,11) =-6.260, -7.214, 7.985, 8.797 	! PF5 POSITION
+		POS_EXC(1,12) =-6.923, -8.030, 3.555, 5.114 	! PF6 POSITION
+
+		!===========================================================================
+		! DEFINE NODES TO MODIFY FOR CS AND PF
+		CSYS,1
+		*DO,i,1,12
+			*IF,i,LE,3,THEN
+				CMSEL, S, CSU%4-i%
+			*ELSEIF,i,LE,6
+				CMSEL, S, CSL%i-3%
+			*ELSE
+				CMSEL, S, PF%i-6%
+			*ENDIF
+			NSLE
+			NSEL, R, LOC, Z, POS_FEM(1,i)
+			CM,Zupp%i%,NODE
+			NSLE
+			NSEL, R, LOC, Z, POS_FEM(2,i)
+			CM,Zlow%i%,NODE
+			NSLE
+			NSEL, R, LOC, X, POS_FEM(3,i)
+			CM, Rin%i%, NODE
+			NSLE
+			NSEL, R, LOC, X, POS_FEM(4,i)
+			CM, Rout%i%, NODE
+			!===========================================================================
+			! MOVE Zupp TO REFERENCE NODE
+			CMSEL, S, Zupp%i%
+			*GET,ncount, NODE,, COUNT
+			nmin = 0
+			*DO, j, 1, ncount
+				*GET, iN, NODE, nmin, NXTH
+				ZiN = POS_EXC(1,i)
+				NMODIF, iN, , , ZiN
+				nmin = iN
+			*ENDDO
+			!===========================================================================
+			! MOVE Zlow TO REFERENCE NODE
+			CMSEL, S, Zlow%i%
+			*GET,ncount, NODE,, COUNT
+			nmin = 0
+			*DO, j, 1, ncount
+				*GET, iN, NODE, nmin, NXTH
+				ZiN = POS_EXC(2,i)
+				NMODIF, iN, , , ZiN
+				nmin = iN
+			*ENDDO
+			!===========================================================================
+			! MOVE Rin TO REFERENCE NODE
+			CMSEL, S, Rin%i%
+			*GET,ncount, NODE,, COUNT
+			nmin = 0
+			*DO, j, 1, ncount
+				*GET, iN, NODE, nmin, NXTH
+				RiN = POS_EXC(3,i)
+				NMODIF, iN, RiN, ,
+				nmin = iN
+			*ENDDO
+			!===========================================================================
+			! MOVE Rout TO REFERENCE NODE
+			CMSEL, S, Rout%i%
+			*GET,ncount, NODE,, COUNT
+			nmin = 0
+			*DO, j, 1, ncount
+				*GET, iN, NODE, nmin, NXTH
+				Rout = POS_EXC(4,i)
+				NMODIF, iN, Rout, ,
+				nmin = iN
+			*ENDDO
+		*ENDDO
+
+		!===========================================================================
+		! ADD ADDITIONAL ELEMENT FOR CSU2 IN VERTICAL DIRECTION
+		CSYS, 0
+		CMSEL, S, CSU2
+		NSLE
+		*GET, ZMAX, NODE,,MXLOC, Z
+		ZZNEW = ZMAX-0.02
+		NSEL, R, LOC, Z, ZMAX-0.001, ZMAX+0.001
+		*GET, ncount, NODE, , COUNT
+		nmin = 0
+		nnum = 2500000
+		*DO, k, 1, ncount
+			*GET, nN, NODE, nmin, NXTH
+			*GET, XnN, NODE, nN, LOC, X
+			*GET, YnN, NODE, nN, LOC, Y
+			NMODIF, nN, , , ZZNEW
+			nmin = nN
+			N, nN+2500000, XnN, YnN, ZMAX
+		*ENDDO
+		ESEL, R, CENT, Z, ZMAX-0.4, ZMAX
+		CM, ETMP1, ELEM
+		*GET, ecount, ELEM,, COUNT
+		emin = 0
+		TYPE, 20
+		MAT, 1
+		REAL, 1
+		*DO, k, 1, ecount
+			*GET, eN, ELEM, emin, NXTH
+			ESEL, R, ELEM,, eN
+			NSLE, S, POS, 5
+			*GET, nN1, NODE, , NUM, MIN
+			nN5 = nN1+2500000
+			NSLE, S, POS, 6
+			*GET, nN2, NODE, , NUM, MIN
+			nN6 = nN2+2500000
+			NSLE, S, POS, 7
+			*GET, nN3, NODE, , NUM, MIN
+			nN7 = nN3+2500000
+			NSLE, S, POS, 8
+			*GET, nN4, NODE, , NUM, MIN
+			nN8 = nN4+2500000
+			E, nN1, nN2, nN3, nN4, nN5, nN6, nN7, nN8
+			emin = eN
+			CMSEL, S, ETMP1
+		*ENDDO
+		CMSEL, S, CSU2
+		NSLE
+		ESLN
+		CM, CSU2, ELEM
+		! Redifine Zupp2, Rin2, Rout2
+		CMSEL, S, CSU2
+		NSLE
+		NSEL, R, LOC, Z, ZMAX
+		CMSEL, U, ZUPP2
+		CM, ZUPP2, NODE
+		NSLE
+		CSYS,1
+		NSEl, R, LOC, X, POS_EXC(3,2)
+		CM, Rin2,NODE
+		NSLE
+		NSEl, R, LOC, X, POS_EXC(4,2)
+		CM, Rout2,NODE
+
+
+		!===========================================================================
+		! ADD ADDITIONAL ELEMENT FOR CSU1 IN VERTICAL DIRECTION
+		CSYS, 0
+		CMSEL, S, CSU1
+		NSLE
+		*GET, ZMAX, NODE,,MXLOC, Z
+		ZZNEW = ZMAX-0.02
+		NSEL, R, LOC, Z, ZMAX-0.001, ZMAX+0.001
+		*GET, ncount, NODE, , COUNT
+		nmin = 0
+		nnum = 2500000
+		*DO, k, 1, ncount
+			*GET, nN, NODE, nmin, NXTH
+			*GET, XnN, NODE, nN, LOC, X
+			*GET, YnN, NODE, nN, LOC, Y
+			NMODIF, nN, , , ZZNEW
+			nmin = nN
+			N, nN+2500000, XnN, YnN, ZMAX
+		*ENDDO
+		ESEL, R, CENT, Z, ZMAX-0.4, ZMAX
+		CM, ETMP1, ELEM
+		*GET, ecount, ELEM,, COUNT
+		emin = 0
+		TYPE, 20
+		MAT, 1
+		REAL, 1
+		*DO, k, 1, ecount
+			*GET, eN, ELEM, emin, NXTH
+			ESEL, R, ELEM,, eN
+			NSLE, S, POS, 5
+			*GET, nN1, NODE, , NUM, MIN
+			nN5 = nN1+2500000
+			NSLE, S, POS, 6
+			*GET, nN2, NODE, , NUM, MIN
+			nN6 = nN2+2500000
+			NSLE, S, POS, 7
+			*GET, nN3, NODE, , NUM, MIN
+			nN7 = nN3+2500000
+			NSLE, S, POS, 8
+			*GET, nN4, NODE, , NUM, MIN
+			nN8 = nN4+2500000
+			E, nN1, nN2, nN3, nN4, nN5, nN6, nN7, nN8
+			emin = eN
+			CMSEL, S, ETMP1
+		*ENDDO
+		CMSEL, S, CSU1
+		NSLE
+		ESLN
+		CM, CSU1, ELEM
+		! Redifine Zupp3, Rin3, Rout3
+		CMSEL, S, CSU1
+		NSLE
+		NSEL, R, LOC, Z, ZMAX
+		CMSEL, U, ZUPP3
+		CM, ZUPP3, NODE
+		NSLE
+		CSYS,1
+		NSEl, R, LOC, X, POS_EXC(3,3)
+		CM, Rin3,NODE
+		NSLE
+		NSEl, R, LOC, X, POS_EXC(4,3)
+		CM, Rout3,NODE
+		! Redifine upp1_CSU2, low1_CSU2, upp1_CSU1, low1_CSU1
+		CSYS,0
+		CMSEL, S, upp1_CSU2
+		ESLN
+		NSLE
+		NSEL, R, LOC, Y, 0, 0.0003
+		CM, upp1_csu2, node
+		CMSEL, S, upp1_CSU1
+		ESLN
+		NSLE
+		NSEL, R, LOC, Y, 0, 0.0003
+		CM, upp1_csu1, node
+		CMSEL, S, low1_CSU2
+		ESLN
+		NSLE
+		NSEL, R, LOC, Y, 0, -0.0003
+		CM, low1_csu2, node
+		CMSEL, S, low1_CSU1
+		ESLN
+		NSLE
+		NSEL, R, LOC, Y, 0, -0.0003
+		CM, low1_csu1, node
+		! Define element coord sys
+		CMSEL, S, CSU2
+		EMODIF, ALL, ESYS, 11
+		CMSEL, S, CSU1
+		EMODIF, ALL, ESYS, 11
+
+		!===========================================================================
+		! Equivalent length of all Central Solenoid ELEMNTES in Vertical direction
+		CSYS,1
+		*DO, i, 1, 6
+			*IF, i, LE, 3, THEN
+				CMSEL, S, CSU%4-i%
+			*ELSE
+				CMSEL, S, CSL%i-3%
+			*ENDIF
+			NSLE
+			NSEL, R, LOC, Y, 0, 1
+			NSEl, R, LOC, X, POS_EXC(3,i)
+			*IF, i, LE, 3, THEN
+				CMSEL, R, Low1_CSU%4-i%
+			*ELSE
+				CMSEL, R, LOW1_CSL%i-3%
+			*ENDIF
+			CM, TMP1, NODE
+			*GET, ncount, NODE, , COUNT
+
+			*GET, ZMAX, NODE,,MXLOC, Z
+			*GET, ZMIN, NODE,,MNLOC, Z
+			nmin = 0
+			*DO, j, 1, ncount
+				CM, TMP1, NODE
+				NEXTZ = (ZMAX-ZMIN)*(j-1)/(ncount-1)
+				ZZ%j%NEW = ZMAX-NEXTZ
+				*GET, LOCZ, NODE,,MXLOC, Z
+				NSEL, R, LOC, Z, LOCZ-0.005,LOCZ+0.005
+				*GET, nNSave, NODE, nmin, NXTH
+				NSLE
+				NSEL, R, LOC, Z, LOCZ-0.005, LOCZ+0.005
+				*GET, ncount2, NODE,, COUNT
+				nmin2 = 0
+				*DO, k, 1, ncount2
+					*GET, nN2, NODE, nmin2, NXTH
+					NMODIF, nN2, , , ZZ%j%NEW
+					nmin2 = nN2
+				*ENDDO
+				CMSEL, S, TMP1
+				NSEL, U, NODE,, nNSave
+			*ENDDO
+		*ENDDO
+
+		!===========================================================================
+		! Equivalent length of all PF coil ELEMNTES in Vertical direction
+		CSYS,1
+		*DO, i, 1, 6
+			CMSEL, S, PF%i%
+			NSLE
+			NSEL, R, LOC, Y, 0, 2
+			NSEl, R, LOC, X, POS_EXC(3,i+6)
+			CMSEL, R, upp1_PF%i%
+			CM, TMP1, NODE
+			*GET, ncount, NODE, , COUNT
+
+			*GET, ZMAX, NODE,,MXLOC, Z
+			*GET, ZMIN, NODE,,MNLOC, Z
+			nmin = 0
+			*DO, j, 1, ncount
+				CM, TMP1, NODE
+				NEXTZ = (ZMAX-ZMIN)*(j-1)/(ncount-1)
+				ZZ%j%NEW = ZMAX-NEXTZ
+				*GET, LOCZ, NODE,,MXLOC, Z
+				NSEL, R, LOC, Z, LOCZ-0.005,LOCZ+0.005
+				*GET, nNSave, NODE, nmin, NXTH
+				NSLE
+				NSEL, R, LOC, Z, LOCZ-0.005, LOCZ+0.005
+				*GET, ncount2, NODE,, COUNT
+				nmin2 = 0
+				*DO, k, 1, ncount2
+					*GET, nN2, NODE, nmin2, NXTH
+					NMODIF, nN2, , , ZZ%j%NEW
+					nmin2 = nN2
+				*ENDDO
+				CMSEL, S, TMP1
+				NSEL, U, NODE,, nNSave
+			*ENDDO
+		*ENDDO
+
+		!===========================================================================
+		! Equivalent length of all Central Solenoid ELEMNTES in radial direction
+		CSYS,1
+		*DO, i, 1, 6
+			*IF, i, LE, 3, THEN
+				CMSEL, S, CSU%4-i%
+				TOL = 0.02
+			*ELSE
+				CMSEL, S, CSL%i-3%
+				TOL = 0.015
+			*ENDIF
+			NSLE
+			NSEL, R, LOC, Y, 0, 1
+			NSEl, R, LOC, Z, POS_EXC(1,i)
+			*IF, i, LE, 3, THEN
+				CMSEL, R, Low1_CSU%4-i%
+			*ELSE
+				CMSEL, R, LOW1_CSL%i-3%
+			*ENDIF
+			CM, TMP1, NODE
+			*GET, ncount, NODE, , COUNT
+
+			*GET, XMAX, NODE,,MXLOC, X
+			*GET, XMIN, NODE,,MNLOC, X
+			nmin = 0
+
+			*DO, j, 1, ncount
+				CM, TMP1, NODE
+				NEXTX = (XMAX-XMIN)*(j-1)/(ncount-1)
+				XX%j%NEW = XMIN+NEXTX
+				*GET, LOCX, NODE,,MNLOC, X
+				*IF, i, LE, 3, THEN
+					TOL = 0.02
+				*ELSE
+					TOL = 0.015
+				*ENDIF
+				NSEL, R, LOC, X, LOCX-TOL,LOCX+TOL
+				*GET, nNSave, NODE, nmin, NXTH
+				NSLE
+				*IF, j, GT, 1, THEN
+					CMSEL, U, TMP2
+					*IF, i, LE, 3, THEN
+						TOL = 0.07
+					*ELSE
+						TOL = 0.06
+					*ENDIF
+				*ENDIF
+				NSEL, R, LOC, X, 0, LOCX+TOL
+				*GET, ncount2, NODE,, COUNT
+				nmin2 = 0
+				*DO, k, 1, ncount2
+					*GET, nN2, NODE, nmin2, NXTH
+					NMODIF, nN2, XX%j%NEW, ,
+					nmin2 = nN2
+				*ENDDO
+				*IF, j, GT, 1, THEN
+					CMSEL, A, TMP2
+				*ENDIF
+				CM, TMP2, NODE
+				CMSEL, S, TMP1
+				NSEL, U, NODE,, nNSave
+			*ENDDO
+		*ENDDO
+
+		!===========================================================================
+		! Equivalent length of all Central Solenoid ELEMNTES in toroidal direction
+		CSYS,1
+		*AFUN,DEG
+		nETor = 126
+		EAngle = 360 / nETor
+		*DO, i, 1, 6
+			*IF, i, LE, 3, THEN
+				CMSEL, S,upp1_CSU%4-i%
+			*ELSE
+				CMSEL, S, upp1_CSL%i-3%
+			*ENDIF
+			! 126 ELEMENTS In toroidial direction
+			CM,ntmp1,NODE
+			*DO, j, 1, nETor-1
+				nAngle = EAngle*j
+				ESLN
+				NSLE
+				*IF, j, GT, 1, THEN
+					CMSEL, U, etmp1
+				*ENDIF
+				CMSEL, U, ntmp1
+				CM, ntmp2, NODE
+				CM, etmp1, ELEM
+				*GET,ncount, NODE,, COUNT
+				nmin = 0
+				*DO,k, 1, ncount
+					*GET, nN, NODE, nmin, NXTH
+					NMODIF, nN, ,nAngle ,
+					nmin = nN
+				*ENDDO
+				NSLE
+				CM, ntmp1,NODE
+				CMSEL, S, ntmp2
+			*ENDDO
+		*ENDDO
+
+		!===========================================================================
+		! Equivalent length of all PF coil ELEMNTES in radial direction
+		CSYS,1
+		*DO, i, 1, 6
+			CMSEL, S, PF%i%
+			TOL = 0.02
+			NSLE
+			NSEL, R, LOC, Y, 0, 2
+			NSEl, R, LOC, Z, POS_EXC(1,i+6)
+			CMSEL, R, upp1_PF%i%
+			CM, TMP1, NODE
+			*GET, ncount, NODE, , COUNT
+
+			*GET, XMAX, NODE,,MXLOC, X
+			*GET, XMIN, NODE,,MNLOC, X
+			nmin = 0
+
+			*DO, j, 1, ncount
+				CM, TMP1, NODE
+				NEXTX = (XMAX-XMIN)*(j-1)/(ncount-1)
+				XX%j%NEW = XMIN+NEXTX
+				*GET, LOCX, NODE,,MNLOC, X
+				TOL = 0.02
+				NSEL, R, LOC, X, LOCX-TOL,LOCX+TOL
+				*GET, nNSave, NODE, nmin, NXTH
+				NSLE
+				CMSEL, U, TMP2
+				TOL = 0.08
+				NSEL, R, LOC, X, 0, LOCX+TOL
+				*GET, ncount2, NODE,, COUNT
+				test%j% = ncount2
+				nmin2 = 0
+				*DO, k, 1, ncount2
+					*GET, nN2, NODE, nmin2, NXTH
+					NMODIF, nN2, XX%j%NEW, ,
+					nmin2 = nN2
+				*ENDDO
+				*IF, j, GT, 1, THEN
+					CMSEL, A, TMP2
+				*ENDIF
+				CM, TMP2, NODE
+				CMSEL, S, TMP1
+				NSEL, U, NODE,, nNSave
+			*ENDDO
+		*ENDDO
+
+		!===========================================================================
+		! EQUIVALENT THICKNESS FOR WP IN D-SHAPE
+		!
+		THTF = 0.625					! THICKNESS OF TF COIL IN [m]
+		TOL = 0.01
+		*DO, i, 1, nCoil_MAG
+			DELTA = ((i-1)*20)
+			CMSEL, S, low1_TF%i%
+			*DO, j, 1, 72
+				CM, ntmp1, NODE
+				ESLN
+				*IF, j, GT, 1, THEN
+					*IF, j, LT, 72,THEN
+						CMSEL, U, etmp1
+					*ENDIF
+				*ENDIF
+				CM, etmp1, ELEM
+				emin = 0
+				*GET, nE, ELEM, emin, NXTH
+				*GET, zcs, ELEM, nE, ATTR, ESYS
+				CSYS, zcs
+				*GET, NMAX, NODE,, MXLOC, X
+				*GET, NMIN, NODE,, MNLOC, X
+				NSEL, R, LOC, Z, -0.001, 0.001
+				CM, ntmp2, NODE
+				*GET, ncount, NODE,, COUNT
+				*IF, zcs, EQ, 30+%DELTA%, THEN
+					NMID = (NMAX+NMIN)/2
+				*ENDIF
+				*IF, zcs,EQ, 37+%DELTA%, THEN
+					NMID = 2.241
+				*ENDIF
+				*IF, zcs,EQ, 38+%DELTA%, THEN
+					NMID = 3.231
+				*ENDIF
+				*IF, zcs,EQ, 39+%DELTA%, THEN
+					NMID = 6.550
+				*ENDIF
+				*IF, zcs,EQ, 40+%DELTA%, THEN
+					NMID = 6.550
+				*ENDIF
+				*IF, zcs,EQ, 41+%DELTA%, THEN
+					NMID = 3.231
+				*ENDIF
+				*IF, zcs,EQ, 42+%DELTA%, THEN
+					NMID = 2.241
+				*ENDIF
+				*IF, j,EQ,15,THEN
+					NMID = NMID+0.002
+				*ENDIF
+				*IF, j,EQ,16,THEN
+					NMID = NMID+0.006
+				*ENDIF
+				*IF, j,EQ,17,THEN
+					NMID = NMID+0.001
+				*ENDIF
+				*IF, j,EQ,18,THEN
+					NMID = NMID+0.002
+				*ENDIF
+				*IF, j,EQ,19,THEN
+					NMID = NMID+0.002
+				*ENDIF
+				*IF, j,EQ,20,THEN
+					NMID = NMID+0.002
+				*ENDIF
+				*IF, j,EQ,21,THEN
+					NMID = NMID+0.002
+				*ENDIF
+				*IF, j,EQ,22,THEN
+					NMID = NMID+0.037
+				*ENDIF
+				*IF, j,EQ,35,THEN
+					NMID = NMID+0.011
+				*ENDIF
+				NLAYER = THTF/(ncount-1)
+				*DO, k, 1, ncount
+					*GET, NMIN2, NODE, , MNLOC, X
+					NSEL, R, LOC, X, NMIN2
+					*GET, nN2, NODE, , NUM, MIN
+					CMSEL, S, ntmp1
+					NSEL, R, LOC, X, NMIN2-TOL,NMIN2+TOL
+					*GET, ncount2, NODE,, COUNT
+					NUMLAY = k-3
+					nNXnew = NMID+NLAYER*NUMLAY
+					nmin3 = 0
+					*DO, z, 1, ncount2
+						*GET, nN3, NODE, nmin3, NXTH
+						NMODIF, nN3, nNXnew, ,
+						nmin3 = nN3
+					*ENDDO
+					CMSEL, S, ntmp2
+					NSEL, U, NODE,, nN2
+					CM, ntmp2, NODE
+				*ENDDO
+				NSLE
+				CMSEL, U, ntmp1
+			*ENDDO
+		*ENDDO
+
+		*DO, i, 1, nCoil_MAG
+			DELTA = ((i-1)*20)
+			CMSEL, S, low1_TF%i%
+			*DO, j, 1, 72
+				CM, ntmp1, NODE
+				ESLN
+				*IF, j, GT, 1, THEN
+					*IF, j, LT, 72,THEN
+						CMSEL, U, etmp1
+					*ENDIF
+				*ENDIF
+				CM, etmp1, ELEM
+				emin = 0
+				*GET, nE, ELEM, emin, NXTH
+				*GET, zcs, ELEM, nE, ATTR, ESYS
+				CSYS, zcs
+				NSLE
+				CMSEL, U, ntmp1
+				CM, ntmp4, NODE
+				NSLE
+				*GET, NYMIN, NODE, , MNLOC, Y
+				*GET, NYMAX, NODE, , MXLOC, Y
+				zcstmp = zcs-%DELTA%
+				*IF, zcstmp, EQ, 30, THEN
+					NDIST = NYMAX-NYMIN
+				*ELSEIF, zcstmp,EQ, 42, THEN
+					NDIST = (NYMAX-NYMIN)/15
+				*ELSE
+					NDIST = (NYMAX- NYMIN)/8
+				*ENDIF
+				*IF, NDIST, GT, 0.6, THEN		! ADD ADDITIONAL ELEMENT
+					zzn=
+					*DIM,zzn,ARRAY,8
+					zzn2=
+					*DIM,zzn2,ARRAY,8
+					*GET, maxn, NODE,, NUM, MAXD
+					counter = 0
+					yloc = (NYMAX-NYMIN)/2+NYMIN
+					emin = 0
+					*GET, ecount, ELEM, , COUNT
+					*DO,kk,1,ecount
+						*GET, elnum, ELEM, emin, NXTH
+						*DO,k,1,8
+
+							zzn(k)= NELEM(elnum,k)
+							*IF, k, GT, 4, THEN
+								counter = counter +1
+								zzn2(k)= NELEM(elnum,k)
+								*GET, xloc, NODE, zzn(k), LOC, X
+								*GET, zloc, NODE, zzn(k), LOC, Z
+								*GET, xyloc, NODE, zzn(k), ANG, XY
+								*GET, yzloc, NODE, zzn(k), ANG, YZ
+								*GET, zxloc, NODE, zzn(k), ANG, ZX
+								*IF,j,EQ,21,THEN
+									xloc=xloc-0.02
+								*ENDIF
+								*IF,j,EQ,34,THEN
+									xloc=xloc+0.025
+								*ENDIF
+								N, maxn+counter, xloc, yloc, zloc, xyloc, yzloc, zxloc
+								zzn(k)=maxn+counter
+								zzn2(k-4)=maxn+counter
+								zzn2(k)= NELEM(elnum,k)
+							*ENDIF
+						*ENDDO
+						EMODIF, elnum, -1, zzn(1), zzn(2), zzn(3), zzn(4), zzn(5), zzn(6), zzn(7), zzn(8)
+						E, zzn2(1), zzn2(2), zzn2(3), zzn2(4), zzn2(5), zzn2(6), zzn2(7), zzn2(8)
+						emin = elnum
+					*ENDDO
+					EMODIF, ALL, ESYS, zcs
+					nummrg,node,0.002
+				*ENDIF
+				CM, etmp1, ELEM
+				CMSEL, S, ntmp4
+			*ENDDO
+			CMSEL, S, E_WP_%i%
+			NSLE
+			ESLN
+			CM, E_WP_%i%, ELEM
+		*ENDDO
+
+		CMSEL, S, WP
+		NSLE
+		ESLN
+		CM, WP, ELEM
+
+		!===========================================================================
+		! EQUIVALENT THICKNESS FOR WP IN TOROIDAL DIRECTION
+		!
+		THTF = 0.84562					! THICKNESS OF TF COIL IN [m]
+		TOL = 0.01
+		*DO, i, 1, nCoil_MAG
+			CSYS,0
+			DELTA = ((i-1)*20)
+			CMSEL, S, E_WP_%i%
+			NSLE
+			CM, ntmp1, NODE
+			zcs = 30+%DELTA%
+			NSEL, R, LOC, Z, 0, 0.03
+			CSYS, zcs
+			*GET, NMAX, NODE,, MXLOC, X
+			NSEL, R, LOC, X, NMAX-0.1,NMAX+0.1
+			CMSEL, R, low1_TF%i%
+			*GET, ncount, NODE,,COUNT
+			*GET, NMIN, NODE,, MNLOC, Z
+			CM, ntmp2, NODE
+			NLAYER = THTF/(ncount-1)
+			*DO, j, 1, ncount
+				*GET, NMIN2, NODE,, MNLOC, Z
+				CMSEL, S, ntmp1
+				NSEL, R, LOC, Z, NMIN2-TOL, NMIN2+TOL
+				NUMLAY = j-3
+				NZnew = NLAYER*NUMLAY
+				*GET, ncount2, NODE,, COUNT
+				nmin = 0
+				*DO, k, 1, ncount2
+					*GET, nN, NODE, nmin, NXTH
+					NMODIF, nN, ,,NZnew
+					nmin = nN
+				*ENDDO
+				CMSEL, S, ntmp2
+				*GET, NMIN2, NODE,, MNLOC, Z
+				NSEL, U, LOC, Z, NMIN2
+				CM, ntmp2, NODE
+			*ENDDO
+		*ENDDO
+
+		ALLSEL
+
+		!===========================================================================
+		! SAVE MODEL
+		!
+		SAVE, '../MAGNET_EMAG', db
+
+	FINISH
+*ENDIF
+
+/EOF

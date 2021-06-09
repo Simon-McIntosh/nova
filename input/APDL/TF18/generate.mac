@@ -18,21 +18,19 @@
 !
 !===============================================================================
 !
-/FILNAME,'%arg1%',1
-/TITLE,'%arg1%'
+/clear,start
+/filname,'%arg1%',1
+/title,'%arg1%'
 
-!
-! Load CDB model to generate MECH and MAG DB model or load generated DB models
-! set filename
-!
-/directory,geom,all,cdb
-cdread,db,geom(1,1),cdb
-allsel
+/eof
+
+/prep7
 !===========================================================================
 ! LOAD materials
 !
 /directory,mats,all,mats
 /input,mats(1,1),'mats'
+!
 !===========================================================================
 ! LOAD properties
 !
@@ -40,16 +38,15 @@ allsel
 /directory,props,all,props
 mpread,props(1,1),'props'
 !
+!===========================================================================
+! Load CDB model to generate MECH and MAG DB model or load generated DB models
+! set filename
+!
+/directory,geom,all,cdb
+cdread,db,geom(1,1),cdb
+allsel
 
 
-!===========================================================================
-! LOAD File Containig ET and Real Set definition
-!
-/INPUT,'../PARAMETER/MAGNET_FEM', prop
-!===========================================================================
-! LOAD materials
-!
-MPREAD,'../../MAGNET','mats',' '
 
 *if,arg1,eq,'mech',then  ! generate mechanical model
 	TF18coil/mechanical
@@ -58,7 +55,7 @@ MPREAD,'../../MAGNET','mats',' '
 *if,arg1,eq,'',then  ! generate magnetic model
 	TF18coil/magnetic
 *endif
-/eof 
+/eof
 
 *
 

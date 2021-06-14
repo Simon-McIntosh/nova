@@ -42,6 +42,7 @@ dependencies:
   - xarray
   - xlrd
   - pip:
+    - ansys-dpf-post
     - geojson
     - ansys-mapdl-core
     - pymupdf

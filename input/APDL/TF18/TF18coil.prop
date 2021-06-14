@@ -1,0 +1,714 @@
+!===============================================================================
+! Original 07 August 2017 - Gabriele D'Amico fusion For Energy (F4E)
+! Modified after that several times by C. Jong (IO)
+!
+! FEM Properties Library for ITER MAGNET Structural Model
+!
+
+!===========================
+!===========================
+! ELEMENT TYPE ID
+!===========================
+!===========================
+!
+ET_SOLID		= 1
+ET_MASS			= 2
+ET_C_STAND		= 3
+ET_T_STAND		= 4
+ET_C_BOND		= 5
+ET_T_BOND		= 6
+ET_C_SLID		= 7
+ET_T_SLID		= 8
+ET_C_ST_NO_GAP		= 9
+ET_T_ST_NO_GAP		= 10
+ET_C_MPC		= 11  
+ET_T_MPC		= 12  
+ET_MPC184		= 13
+ET_LINK			= 14
+ET_SOLSH		= 15
+ET_BEAM			= 16
+ET_SPRING		= 17
+ET_C_CTJ		= 18  ! used for the seismic bolts
+ET_T_CTJ		= 19  ! used for the seismic bolts
+!-----------------------
+! ID=1 "ET_SOLID"
+!
+ET,ET_SOLID,185
+KEYOPT, ET_SOLID, 2, 2		! ENHANCED STRAIN
+
+!-----------------------
+! ID=2 "ET_MASS"
+!
+ET,ET_MASS,21
+KEYOPT,ET_MASS,3,0
+
+!-----------------------
+! ID=3 "ET_C_STAND"
+!
+ET,ET_C_STAND,173
+KEYOPT,ET_C_STAND,1,0
+KEYOPT,ET_C_STAND,2,1
+KEYOPT,ET_C_STAND,5,0
+KEYOPT,ET_C_STAND,9,0
+KEYOPT,ET_C_STAND,10,2
+KEYOPT,ET_C_STAND,12,0
+
+!-----------------------
+! ID=4 "ET_T_STAND"
+!         
+ET,ET_T_STAND,170
+
+!-----------------------
+! ID=5 "ET_C_BOND"
+!
+ET,ET_C_BOND,173
+KEYOPT,ET_C_BOND,1,0
+KEYOPT,ET_C_BOND,2,1
+KEYOPT,ET_C_BOND,5,3
+KEYOPT,ET_C_BOND,9,1
+KEYOPT,ET_C_BOND,10,2
+KEYOPT,ET_C_BOND,12,5
+
+!-----------------------
+! ID=6 "ET_T_BOND"
+!         
+ET,ET_T_BOND,170
+
+!-----------------------
+! ID=7 "ET_C_SLI"
+!         
+ET,ET_C_SLID,173
+KEYOPT,ET_C_SLID,1,0
+KEYOPT,ET_C_SLID,2,1
+KEYOPT,ET_C_SLID,5,3
+KEYOPT,ET_C_SLID,9,1
+KEYOPT,ET_C_SLID,10,2
+KEYOPT,ET_C_SLID,12,4
+
+!-----------------------
+! ID=8 "ET_T_SLI"
+!         
+ET,ET_T_SLID,170
+
+!-----------------------
+! ID=9 "ET_C_ST_NO_GAP"
+!         
+ET,ET_C_ST_NO_GAP,173
+KEYOPT,ET_C_ST_NO_GAP,1,0  ! DOF= UX, UY, UZ
+KEYOPT,ET_C_ST_NO_GAP,2,1  ! Penalty Function
+KEYOPT,ET_C_ST_NO_GAP,5,3  ! Close gap/reduce penetration with auto CNOF
+KEYOPT,ET_C_ST_NO_GAP,9,3
+KEYOPT,ET_C_ST_NO_GAP,10,2 ! Update Stiffness every ???
+KEYOPT,ET_C_ST_NO_GAP,12,0
+
+!-----------------------
+! ID=10 "ET_T_ST_NO_GAP"
+!         
+ET,ET_T_ST_NO_GAP,170
+
+!-----------------------
+! ID=11 "ET_C_MPC"
+!         
+ET,ET_C_MPC,173
+KEYOPT,ET_C_MPC,1,0
+KEYOPT,ET_C_MPC,2,2
+KEYOPT,ET_C_MPC,4,3
+KEYOPT,ET_C_MPC,5,3
+KEYOPT,ET_C_MPC,9,3
+KEYOPT,ET_C_MPC,12,5
+
+!-----------------------
+! ID=12 "ET_T_MPC"
+!         
+ET,ET_T_MPC,170
+KEYOPT,ET_T_MPC,4,111
+
+!-----------------------
+! ID=13 "ET_MPC184"
+!         
+ET,ET_MPC184,184
+KEYOPT, ET_MPC184, 2, 1			! KOPT2=1 LAGRANGE MULTIPLIER TO ALLOW THERMAL EXPANSION ON MPC184
+
+!-----------------------
+! ID=14 "ET_LINK"
+!         
+ET,ET_LINK,180
+
+!-----------------------
+! ID=15 "ET_SOLSH"
+!         
+ET,ET_SOLSH,190
+
+!-----------------------
+! ID= 16 "ET_BEAM"
+!         
+ET,ET_BEAM,188
+
+!-----------------------
+! ID=17 "ET_SPRING"
+!         
+ET,ET_SPRING,14
+KEYOPT,ET_SPRING,1,0
+KEYOPT,ET_SPRING,2,0
+KEYOPT,ET_SPRING,3,0
+!
+!-----------------------
+! ID=18 "ET_C_CTJ"
+!         
+ET,ET_C_CTJ,173
+KEYOPT,ET_C_CTJ,1,0
+KEYOPT,ET_C_CTJ,2,1
+! KEYOPT,ET_C_CTJ,5,3
+! KEYOPT,ET_C_CTJ,9,1
+KEYOPT,ET_C_CTJ,10,2
+KEYOPT,ET_C_CTJ,12,0
+
+!-----------------------
+! ID=19 "ET_T_CTJ"
+!         
+ET,ET_T_CTJ,170
+
+!===========================
+!===========================
+! REAL SETS
+!===========================
+!===========================
+!
+R_MASS			= 1000 	! not used
+R_C_WP			= 1101
+R_C_SBOLTS		= 1110  ! Used for Seismic Bolts ONLY
+R_C_RING_DOWN		= 1121
+R_C_RING_UP		= 1122
+R_C_GS_TOP_CLAMP	= 1131
+R_C_GS_TOP_PLATE	= 1132
+R_C_GS_BOT_PLATE	= 1133
+R_C_GS_BOT_SHIM		= 1134
+R_C_GS_TOP_EDGE		= 1135
+R_C_GS_BOT_EDGE		= 1136
+R_C_GS_TOP_LSHIMS	= 1137
+R_C_GS_BOT_LSHIMS	= 1138
+R_C_OIS_SHIM		= 1141
+R_C_IOIS_PINS		= 1142
+R_C_PF1_1		= 1151
+R_C_PF6_1		= 1152
+R_C_PF1_2		= 1153
+R_C_PF6_2		= 1154
+R_C_TOP_IIS		= 1161
+R_C_BOT_IIS		= 1162
+R_C_BEARINGS		= 1171
+R_C_WEDGE_1		= 2001
+R_C_WEDGE_2		= 2002
+R_C_WEDGE_3		= 2003
+R_C_WEDGE_4		= 2004
+R_C_WEDGE_5		= 2005
+R_C_WEDGE_6		= 2006
+R_C_WEDGE_7		= 2007
+R_C_WEDGE_8		= 2008
+R_C_WEDGE_9		= 2009
+R_C_WEDGE_10		= 2010
+R_C_WEDGE_11		= 2011
+R_C_WEDGE_12		= 2012
+R_C_WEDGE_13		= 2013
+R_C_WEDGE_14		= 2014
+R_C_WEDGE_15		= 2015
+R_C_WEDGE_16		= 2016
+R_C_WEDGE_17		= 2017
+R_C_WEDGE_18		= 2018
+R_IIS_SPRING		= 3000
+R_CS_SPRING		= 3002
+R_PF_SPRING		= 3003
+R_SB_SPRING		= 3004
+
+
+!-----------------------
+! DEFINITIONS
+!         
+R, R_MASS, 1.E-04, 1.E-04, 1.E-04, 1.E-04, 1.E-04, 1.E-04, 	! not used
+R, 2001,  , , 10						! increase FKN for wedging contact of a factor of 10
+R, 2018,  , , 10						! increase FKN for wedging contact of a factor of 10
+
+!-----------------------
+! DEFINITIONS
+!         
+R, R_IIS_SPRING, 1.000e+10
+R, R_CS_SPRING,  3.2E8
+
+!===============================================================================
+! CONTA TARGET WP/CASE
+!
+FAC_FKN = 10	! CONTACT STIFFNESS FACTOR
+
+
+!===========================
+! WP
+!
+R_SET=R_C_WP
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! SBOLTS
+!
+R_SET=R_C_SBOLTS
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, -1.0e-3, 1.0, 1.0,   ! specify gap of 1 mm
+RMORE,   0.0, 0.0,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! BOT PCR
+!
+R_SET=R_C_RING_DOWN
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! TOP PCR
+!
+R_SET=R_C_RING_UP
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! R_C_GS_TOP_CLAMP
+!
+R_SET=R_C_GS_TOP_CLAMP
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 1E+4,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! R_C_GS_TOP_PLATE
+!
+R_SET=R_C_GS_TOP_PLATE
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 1E+4,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! R_C_GS_BOT_PLATE
+!
+R_SET=R_C_GS_BOT_PLATE
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 1E+4,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! R_C_GS_BOT_SHIM
+!
+R_SET=R_C_GS_BOT_SHIM
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 1E+4,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! R_C_GS_TOP_EDGE
+!
+R_SET=R_C_GS_TOP_EDGE
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 1E+4,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! R_C_GS_BOT_EDGE
+!
+R_SET=R_C_GS_BOT_EDGE
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 1E+4,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! R_C_GS_TOP_LSHIMS
+!
+R_SET=R_C_GS_TOP_LSHIMS
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 1E+4,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! R_C_GS_BOT_LSHIMS
+!
+R_SET=R_C_GS_BOT_LSHIMS
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 1E+4,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! R_C_OIS_SHIM
+!
+R_SET=R_C_OIS_SHIM
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! R_C_IOIS_PINS
+!
+R_SET=R_C_IOIS_PINS
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! R_C_PF1_1
+!
+R_SET=R_C_PF1_1
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! R_C_PF6_1
+!
+R_SET=R_C_PF6_1
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+!===========================
+! R_C_PF1_2
+!
+R_SET=R_C_PF1_2
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 1.0, 0.5,             
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,             
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,            
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! R_C_PF6_2
+!
+R_SET=R_C_PF6_2
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,
+RMORE,   0.0, 0.0,  1.0, 0.0, 1.0, 0.5,
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+
+!===========================
+! R_C_TOP_IIS
+!
+R_SET=R_C_TOP_IIS
+! R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+R, R_SET, 0.0, 0.0, -1.0E13, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,  0.0, 0.0, 1.0, 1.0,  !(#10 = CNOF Negative means away from target, thus gap)
+RMORE,   0.0, 0.0,  1.0, 0.0, 1.0, 0.5,
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! R_C_BOT_IIS
+!
+R_SET=R_C_BOT_IIS
+! R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+R, R_SET, 0.0, 0.0, -1.0E+13, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,  0.0, 0.0, 1.0, 1.0,  !(#10 = CNOF Negative means away from target, thus gap)
+RMORE,   0.0, 0.0,  1.0, 0.0, 1.0, 0.5,
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+
+!===========================
+! WEDGE
+!
+*DO, i, 1, nCoil_MECH
+R_SET=R_C_WEDGE_%i%
+R, R_SET, 0.0, 0.0, 1.0*FAC_FKN, 0.1, 0.0, 0.0,
+RMORE,   0.0, 0.0,1E+20, 0.0, 1.0, 1.0,
+RMORE,   0.0, 0.0,  1.0, 0.0, 1.0, 0.5,
+RMORE,   0.0, 0.0,  1.0, 0.0, 0.0, 0.0,
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0, 0.0,
+RMORE,   0.0, 0.0,  0.0, 0.0, 0.0,
+*ENDDO
+
+!===========================
+!===========================
+! ASSIGN ET AND REAL SET TO CONTACT
+!===========================
+!===========================
+!
+ESEL, NONE
+NSEL, NONE
+
+!===========================
+! WP
+!
+CMSEL, S, C1
+CMSEL, A, C2
+EMODIF, ALL, TYPE,ET_C_ST_NO_GAP
+CMSEL, S, T1
+CMSEL, A, T2
+EMODIF, ALL, TYPE,ET_T_ST_NO_GAP
+CMSEL, A, C1
+CMSEL, A, C2
+EMODIF, ALL, REAL, R_C_WP
+
+!===========================
+! SBOLTS
+!
+CMSEL, S, C10
+EMODIF, ALL, TYPE,ET_C_CTJ
+CMSEL, S, T10
+EMODIF, ALL, TYPE,ET_T_CTJ
+CMSEL, A, C10
+EMODIF, ALL, REAL, R_C_SBOLTS
+! EDELE, ALL
+
+!===========================
+! BOT PCR
+!
+CMSEL, S, C21
+EMODIF, ALL, TYPE,ET_C_SLID
+CMSEL, S, T21
+EMODIF, ALL, TYPE,ET_T_SLID
+CMSEL, A, C21
+EMODIF, ALL, REAL, R_C_RING_DOWN 
+
+!===========================
+! TOP PCR
+!
+CMSEL, S, C22
+EMODIF, ALL, TYPE,ET_C_SLID
+CMSEL, S, T22
+EMODIF, ALL, TYPE,ET_T_SLID
+CMSEL, A, C22
+EMODIF, ALL, REAL, R_C_RING_UP
+
+!===========================
+! R_C_GS_TOP_CLAMP
+!
+CMSEL, S, C31
+EMODIF, ALL, TYPE,ET_C_ST_NO_GAP
+CMSEL, S, T31
+EMODIF, ALL, TYPE,ET_T_ST_NO_GAP
+CMSEL, A, C31
+EMODIF, ALL, REAL, R_C_GS_TOP_CLAMP
+
+!===========================
+! R_C_GS_TOP_PLATE
+!
+CMSEL, S, C32
+EMODIF, ALL, TYPE,ET_C_BOND
+CMSEL, S, T32
+EMODIF, ALL, TYPE,ET_T_BOND
+CMSEL, A, C32
+EMODIF, ALL, REAL, R_C_GS_TOP_PLATE
+
+!===========================
+! R_C_GS_BOT_PLATE
+!
+CMSEL, S, C33
+EMODIF, ALL, TYPE,ET_C_BOND
+CMSEL, S, T33
+EMODIF, ALL, TYPE,ET_T_BOND
+CMSEL, A, C33
+EMODIF, ALL, REAL,R_C_GS_BOT_PLATE
+
+!===========================
+! R_C_GS_BOT_SHIM
+!
+CMSEL, S, C34
+EMODIF, ALL, TYPE,ET_C_ST_NO_GAP
+CMSEL, S, T34
+EMODIF, ALL, TYPE,ET_T_ST_NO_GAP
+CMSEL, A, C34
+EMODIF, ALL, REAL, R_C_GS_BOT_SHIM
+
+!===========================
+! R_C_GS_TOP_EDGE
+!
+CMSEL, S, C35
+EMODIF, ALL, TYPE,ET_C_ST_NO_GAP
+CMSEL, S, T35
+EMODIF, ALL, TYPE,ET_T_ST_NO_GAP
+CMSEL, A, C36
+EMODIF, ALL, REAL,R_C_GS_TOP_EDGE
+
+!===========================
+! R_C_GS_BOT_EDGE
+!
+CMSEL, S, C36
+EMODIF, ALL, TYPE,ET_C_ST_NO_GAP
+CMSEL, S, T36
+EMODIF, ALL, TYPE,ET_T_ST_NO_GAP
+CMSEL, A, C36
+EMODIF, ALL, REAL,R_C_GS_BOT_EDGE
+
+!===========================
+! R_C_GS_TOP_LSHIMS
+!
+CMSEL, S, C37
+EMODIF, ALL, TYPE,ET_C_ST_NO_GAP
+CMSEL, S, T37
+EMODIF, ALL, TYPE,ET_T_ST_NO_GAP
+CMSEL, A, C37
+EMODIF, ALL, REAL,R_C_GS_TOP_LSHIMS
+
+!===========================
+! R_C_GS_BOT_LSHIMS
+!
+CMSEL, S, C38
+EMODIF, ALL, TYPE,ET_C_ST_NO_GAP
+CMSEL, S, T38
+EMODIF, ALL, TYPE,ET_T_ST_NO_GAP
+CMSEL, A, C38
+EMODIF, ALL, REAL,R_C_GS_BOT_LSHIMS
+
+!===========================
+! R_C_OIS_SHIM
+!
+CMSEL, S, C41
+EMODIF, ALL, TYPE,ET_C_ST_NO_GAP
+CMSEL, S, T41
+EMODIF, ALL, TYPE,ET_T_ST_NO_GAP
+CMSEL, A, C41
+EMODIF, ALL, REAL,R_C_OIS_SHIM
+
+!===========================
+! R_C_IOIS_PINS
+!
+CMSEL, S, C42
+EMODIF, ALL, TYPE,ET_C_ST_NO_GAP
+CMSEL, S, T42
+EMODIF, ALL, TYPE,ET_T_ST_NO_GAP
+CMSEL, A, C42
+EMODIF, ALL, REAL,R_C_IOIS_PINS
+
+!===========================
+! R_C_PF1_1
+!
+CMSEL, S, C51
+EMODIF, ALL, TYPE,ET_C_BOND
+CMSEL, S, T51
+EMODIF, ALL, TYPE,ET_T_BOND
+CMSEL, A, C51
+EMODIF, ALL, REAL,R_C_PF1_1
+
+!===========================
+! R_C_PF6_1
+!
+CMSEL, S, C52
+EMODIF, ALL, TYPE,ET_C_BOND
+CMSEL, S, T52
+EMODIF, ALL, TYPE,ET_T_BOND
+CMSEL, A, C52
+EMODIF, ALL, REAL,R_C_PF6_1
+
+!===========================
+! R_C_PF1_2
+!
+CMSEL, S, C53
+EMODIF, ALL, TYPE,ET_C_BOND
+CMSEL, S, T53
+EMODIF, ALL, TYPE,ET_T_BOND
+CMSEL, A, C54
+EMODIF, ALL, REAL,R_C_PF1_2
+
+!===========================
+! R_C_PF6_2
+!
+CMSEL, S, C54
+EMODIF, ALL, TYPE,ET_C_BOND
+CMSEL, S, T54
+EMODIF, ALL, TYPE,ET_T_BOND
+CMSEL, A, C54
+EMODIF, ALL, REAL,R_C_PF6_2
+
+!===========================
+! R_C_TOP_IIS
+!
+CMSEL, S, C61
+EMODIF, ALL, TYPE,ET_C_ST_NO_GAP
+CMSEL, S, T61
+EMODIF, ALL, TYPE,ET_T_ST_NO_GAP
+CMSEL, A, C61
+EMODIF, ALL, REAL,R_C_TOP_IIS
+
+!===========================
+! R_C_BOT_IIS
+!
+CMSEL, S, C62
+EMODIF, ALL, TYPE,ET_C_ST_NO_GAP
+CMSEL, S, T62
+EMODIF, ALL, TYPE,ET_T_ST_NO_GAP
+CMSEL, A, C62
+EMODIF, ALL, REAL,R_C_BOT_IIS
+
+!===========================
+! R_C_BEARINGS
+!
+CMSEL, S, C71
+EMODIF, ALL, TYPE,ET_C_SLID
+CMSEL, S, T71
+EMODIF, ALL, TYPE,ET_T_SLID
+CMSEL, A, C71
+EMODIF, ALL, REAL,R_C_BEARINGS
+
+!===========================
+! WEDGE
+!
+*DO, i, 1, nCoil_MECH
+	CMSEL, S, C_WEDGE_%i%
+	EMODIF, ALL, TYPE,ET_C_STAND
+	CMSEL, S, T_WEDGE_%i%
+	EMODIF, ALL, TYPE,ET_T_STAND
+	CMSEL, A, C_WEDGE_%i%
+	EMODIF, ALL, REAL, R_C_WEDGE_%i%	
+	
+*ENDDO
+
+
+

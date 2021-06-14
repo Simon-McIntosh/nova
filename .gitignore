@@ -8,6 +8,10 @@
 # netCDF files
 *.nc
 
+# Ansys database files 
+*.cdb
+*.db
+
 # eqdsk files
 *.eqdsk
 

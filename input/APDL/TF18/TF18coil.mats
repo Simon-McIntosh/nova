@@ -1,0 +1,498 @@
+!=================================================================
+!
+! Material Properties Library for ITER MAGNET Structural Analysis
+!
+
+!=========================================
+! DUMMY FOR ELECTRO_MAGNETIC ANALYSIS
+! Mat ID = 1
+!
+MP,	MURX	,	1,	1
+MP,	MURY	,	1,	1
+MP,	MURZ	,	1,	1
+MP,	RSVX	,	1,	1E-5
+MP,	RSVY	,	1,	1E-5
+MP,	RSVZ	,	1,	1E-5
+MP,	REFT	,	1,	292
+
+!========================================
+! MAT ID = 2 (WP SMEARED MATERIAL PROPERTIES)
+! PROPERTIES ARE UPDATED 25 AUGUST 2017 - based on 4x4 Array - Local model.
+!
+MP,	EX	,	2,	6.36E+10
+MP,	EY	,	2,	1.20E+11
+MP,	EZ	,	2,	5.13E+10
+MP,	ALPX	,	2,	1.02E-05
+MP,	ALPY	,	2,	9.76E-06
+MP,	ALPZ	,	2,	1.09E-05
+MP,	NUXY	,	2,	0.316
+MP,	NUYZ	,	2,	0.188
+MP,	NUXZ	,	2,	0.187
+MP,	GXY	,	2,	2.67E+10
+MP,	GYZ	,	2,	2.33E+10
+MP,	GXZ	,	2,	9.74E+9
+MP,	DENS	,	2,	6366
+MP,	REFT	,	2,	292
+
+!========================================
+! MAT ID = 3 (PRECOMPRESSION RING SMEARED MATERIAL PROPERTIES)
+! CNIM Properties obtained in July 2018
+!
+MP, EX , 3, 5.935e10,          ! gives 59.35 GPA at RT and 59.35 GPa at 4K
+MP, EZ , 3, 2.891e10,-4.627e7  ! gives 15.35 GPA at RT and 28.72 GPa at 4K
+MP, EY , 3, 3.287e10,-5.131e7  ! gives 15.35 GPA at RT and 28.72 GPa at 4K
+!
+MP, NUXZ , 3, 0.282,-3.806e-5  ! gives 0.272 at RT and 0.282 at 4K
+MP, NUXY , 3, 0.282,-3.806e-5  ! gives 0.272 at RT and 0.282 at 4K
+MP, NUYZ , 3, 0.270, 5.650e-4  ! gives 0.435 at RT and 0.272 at 4K
+!
+! nuyz=(ez/ey)*nuxy can also be considered
+!
+MP, GXZ , 3, 6.478e10,-5.353e6 ! gives 4.91 GPA at RT and 6.457 GPa at 4K
+MP, GXY , 3, 6.478e10,-5.353e6 ! gives 4.91 GPA at RT and 6.457 GPa at 4K
+MP, GYZ , 3, 5.963e10,-4.927e6 ! gives 4.52 GPA at RT and 5.943 GPa at 4K
+!
+MP, ALPX , 3, 3.82e-6          ! 0.11% for delta T from 292 to 4K
+MP, ALPY , 3, 1.96e-5          ! 0.56% for delta T from 292 to 4K
+MP, ALPZ , 3, 1.96e-5	       ! 0.56% for delta T from 292 to 4K
+!
+MP, DENS , 3, 3720
+MP, REFT , 3, 292
+! NEW VALUES, FK, date 04.05.2018
+!========================================
+
+!========================================
+! MAT ID = 3 (PRECOMPRESSION RING SMEARED MATERIAL PROPERTIES)
+! CASA Properties obtained in March 2018
+!
+!MP, EX , 3, 5.544e10,-1.519e7 ! gives 50.99 GPA at RT and 55.38 GPa at 4K
+!MP, EZ , 3, 2.626e10,-3.609e7 ! gives 15.69 GPA at RT and 26.12 GPa at 4K
+!MP, EY , 3, 2.626e10,-3.609e7 ! gives 15.69 GPA at RT and 26.12 GPa at 4K
+
+!MP, NUXZ , 3, 0.28,-3.460e-5  ! gives 0.270 at RT and 0.280 at 4K
+!MP, NUXY , 3, 0.28,-3.460e-5  ! gives 0.270 at RT and 0.280 at 4K
+!MP, NUYZ , 3, 0.328,3.806e-4  ! gives 0.440 at RT and 0.330 at 4K
+!
+! nuyz=(ez/ey)*nuxy can also be considered
+!
+!MP, GXZ , 3, 1.053e10,-1.879e7 ! gives 5.02 GPA at RT and 10.5 GPa at 4K
+!MP, GXY , 3, 1.053e10,-1.879e7 ! gives 5.02 GPA at RT and 10.5 GPa at 4K
+!MP, GYZ , 3,  9.88e9, -1.512e7 ! gives 5.45 GPA at RT and 9.82 GPa at 4K
+
+!MP, ALPX , 3, 2.77e-6        ! 0.08% for delta T from 292 to 4K
+!MP, ALPY , 3, 1.56e-5        ! 0.45% for delta T from 292 to 4K
+!MP, ALPZ , 3, 1.56e-5	      ! 0.45% for delta T from 292 to 4K
+
+!MP, DENS , 3, 3720
+!MP, REFT , 3, 292
+
+!================================================
+! Mat ID = 4 (INCONEL)
+!
+MP,	EX	, 4 , 205.E9
+MP,	ALPX	, 4 , 8.3044983E-6  ! 0.24% for dK = 289
+MP,	NUXY	, 4 , 0.3
+MP,	GXY	, 4 , 78.85E9
+MP,	DENS	, 4 , 7900
+MP,	REFT	, 4 , 292
+MP,	KXX	, 4 , 200.0
+MP,	C	, 4 , 1807.0
+
+!========================================
+! MAT ID = 6 (G10) - G10 as Structural material
+! PROPERTIES ARE UPDAED 25 AUGUST 2017
+!
+! Ex and Ez are in-plane directions. Ey is through thickness direction.
+! Values are such that we get for:
+! in-plane direction (X and Z direction) 33 GPa @ 4K and 25 GPa @ 292 K
+! Through thickness direction (Y-direction) 25 GPa @ 4K and 20 GPa @ 292 K
+!
+! With specifying Material properties within the Situation can occur
+! that the the stress-strain matrix for a meterial is NOT positive.
+! Definite which is required for real materials. Being Positive Definite means that.
+! (1.0- NUXY**2*EX/EY)-(NUYZ**2*EY/EZ)-(NUXZ**2*EX/EZ)-(2.0*NUXY*NUYZ*NUXZ*EX/EZ)
+! is positive
+!========================================
+MP,	EX	, 5 , 3.3111E+10,-2.7778E+7
+MP,	EY	, 5 , 2.5069E+10,-1.7361E+7
+MP,	EZ	, 5 , 3.3111E+10,-2.7778E+7
+MP,	ALPX	, 5 , 8.65E-06              ! gives 0.25%
+MP,	ALPY	, 5 , 2.40E-05              ! gives 0.70%
+MP,	ALPZ	, 5 , 8.65E-06              ! gives 0.25%
+MP,	NUXY	, 5 , 0.21083,-2.0833E-4    ! Gives 0.21 @ 4K and 0.15 @ 292 K
+MP,	NUYZ	, 5 , 0.21083,-2.0833E-4    ! Gives 0.21 @ 4K and 0.15 @ 292 K
+MP,	NUXZ	, 5 , 0.21083,-2.0833E-4    ! Gives 0.21 @ 4K and 0.15 @ 292 K
+MP,	GXY	, 5 , 1.2075E+10,-7.7773E+6
+MP,	GYZ	, 5 , 1.2075E+10,-7.7773E+6
+MP,	GXZ	, 5 , 1.3675E+10,-9.6069E+6
+MP,	DENS	, 5 , 1800 !
+MP,	KXX	, 5 , 200.0
+MP,	REFT	, 5 , 292
+!========================================
+! MAT ID = 6 (CONTA BEARINGS)
+!
+MP,	MU	, 6 ,	0.30
+MP,	REFT	, 6 ,	292
+!========================================
+! MAT ID = 7 (CONTA SHEAR KEYS)
+!
+MP,	MU	, 7 ,	0.30
+MP,	REFT	, 7 ,	292
+!========================================
+! MAT ID = 8 (CONTA FRICTION RING)
+!
+MP,	MU	, 8 ,	0.30
+MP,	REFT	, 8 ,	292
+!========================================
+! MAT ID = 9 (CONTA FRICTION WEDGE)
+!
+MP,	MU	, 9 ,	0.25
+MP,	REFT	, 9 ,	292
+!========================================
+! MAT ID = 10 (CONTA FRICTION WP)
+!
+MP,	MU	,	10,	0.25
+MP,	REFT	,	10,	292
+!========================================
+! MAT ID = 11 (CONTA FRICTION GS)
+!
+MP,	MU	,	11,	0.0
+MP,	REFT	,	11,	292
+!========================================
+! MAT ID = 12 (CONTA FRICTION IOIS)
+!
+MP,	MU	,	12,	0.25
+MP,	REFT	,	12,	292
+!========================================
+! MAT ID = 13 (CONTA FRICTION OIS)
+!
+MP,	MU	,	13,	0.25
+MP,	REFT	,	13,	292
+!========================================
+! MAT ID = 14 (CONTA FRICTION PF)
+!
+MP,	MU	,	14,	0.3
+MP,	REFT	,	14,	292
+!========================================
+! MAT ID = 15 (CONTA FRICTION SEISMIC BOLTS)
+!
+MP,	MU	,	15,	0.3
+MP,	REFT	,	15,	292
+!========================================
+! MAT ID = 16 (EQUIVALENT MAT FOR IOIS - STAINLESS STEEL*0.75)
+MP,	EX	,	16,	2.05E+11*0.75
+MP,	ALPX	,	16,	1.003E-05
+MP,	NUXY	,	16,	0.3
+MP,	GXY	,	16,	7.89E+10*0.75
+MP,	DENS	,	16,	7900
+MP,	KXX	,	16,	200.0
+MP,	C	,	16,	1807.0
+MP,	REFT	,	16,	292
+!=========================================
+! Mat ID = 17 (SS_BOLTS)
+!
+MP,	EX	,	17,	2.05E+11
+MP,	ALPX	,	17,	1.003E-05
+MP,	NUXY	,	17,	0.3
+MP,	GXY	,	17,	7.89E+10
+MP,	DENS	,	17,	0.0
+MP,	KXX	,	17,	200.0
+MP,	C	,	17,	1807.0
+MP,	REFT	,	17,	292
+!===========================================
+! Mat ID = 18 (INCONEL_BOLTS)
+!
+MP,	EX	,	18,	205E9
+MP,	ALPX	,	18,	8.3044983E-6
+MP,	NUXY	,	18,	0.3
+MP,	GXY	,	18,	78.85E9
+MP,	DENS	,	18,	0.0
+MP,	REFT	,	18,	292
+MP,	KXX	,	18,	200.0
+MP,	C	,	18,	1807.0
+
+!========================================
+! MAT ID = 19 (PF1 SMEARED)
+!
+MP,	EX	,	19,	0.4193100E+11
+MP,	EY	,	19,	0.1065760E+12
+MP,	EZ	,	19,	0.4149900E+11
+MP,	GXY	,	19,	23.034E9  
+MP,	GYZ	,	19,	22.834E9  
+MP,	GXZ	,	19,	10.979E9  
+MP,	NUXY	,	19,	0.29464 
+MP,	NUYZ	,	19,	0.11482
+MP,	NUXZ	,	19,	0.31109
+MP,	ALPX	,	19,	1.1385E-05
+MP,	ALPY	,	19,	0.997E-05
+MP,	ALPZ	,	19,	1.1426E-05
+MP,	DENS	,	19,	5356.87
+MP,	REFT	,	19,	292
+
+!========================================
+! MAT ID = 20 (PF2 SMEARED)
+!
+MP,	EX	,	20,	0.4193100E+11
+MP,	EY	,	20,	0.1065760E+12
+MP,	EZ	,	20,	0.4149900E+11
+MP,	ALPX	,	20,	0.1138560E-04
+MP,	ALPY	,	20,	0.9970000E-05
+MP,	ALPZ	,	20,	0.1142600E-04
+MP, 	PRXY	, 	20, 	0.1159240E+00
+MP, 	PRYZ	, 	20, 	0.2948790E+00
+MP, 	PRXZ	, 	20, 	0.3143320E+00
+MP,	GXY	,	20,	0.2303400E+11
+MP,	GYZ	,	20,	0.2283400E+11
+MP,	GXZ	,	20,	0.1097900E+11
+MP,	DENS	,	20,	7680.07
+MP,	REFT	,	20,	292
+
+!========================================
+! MAT ID = 21 (PF3 SMEARED)
+!
+MP,	EX	,	21,	0.4193100E+11
+MP,	EY	,	21,	0.1065760E+12
+MP,	EZ	,	21,	0.4149900E+11
+MP,	ALPX	,	21,	0.1138560E-04
+MP,	ALPY	,	21,	0.9970000E-05
+MP,	ALPZ	,	21,	0.1142600E-04
+MP, 	PRXY	, 	21, 	0.1159240E+00
+MP, 	PRYZ	, 	21, 	0.2948790E+00
+MP, 	PRXZ	, 	21, 	0.3143320E+00
+MP,	GXY	,	21,	0.2303400E+11
+MP,	GYZ	,	21,	0.2283400E+11
+MP,	GXZ	,	21,	0.1097900E+11
+MP,	DENS	,	21,	7119.53
+MP,	REFT	,	21,	292
+
+!========================================
+! MAT ID = 22 (PF4 SMEARED)
+!
+MP,	EX	,	22,	0.4193100E+11
+MP,	EY	,	22,	0.1065760E+12
+MP,	EZ	,	22,	0.4149900E+11
+MP,	ALPX	,	22,	0.1138560E-04
+MP,	ALPY	,	22,	0.9970000E-05
+MP,	ALPZ	,	22,	0.1142600E-04
+MP, 	PRXY	, 	22, 	0.1159240E+00
+MP, 	PRYZ	, 	22, 	0.2948790E+00
+MP, 	PRXZ	, 	22, 	0.3143320E+00
+MP,	GXY	,	22,	0.2303400E+11
+MP,	GYZ	,	22,	0.2283400E+11
+MP,	GXZ	,	22,	0.1097900E+11
+MP,	DENS	,	22,	7253.27
+MP,	REFT	,	22,	292
+
+!========================================
+! MAT ID = 23 (PF5 SMEARED)
+!
+MP,	EX	,	23,	0.4193100E+11
+MP,	EY	,	23,	0.1065760E+12
+MP,	EZ	,	23,	0.4149900E+11
+MP,	ALPX	,	23,	0.1138560E-04
+MP,	ALPY	,	23,	0.9970000E-05
+MP,	ALPZ	,	23,	0.1142600E-04
+MP, 	PRXY	, 	23, 	0.1159240E+00
+MP, 	PRYZ	, 	23, 	0.2948790E+00
+MP, 	PRXZ	, 	23, 	0.3143320E+00
+MP,	GXY	,	23,	0.2303400E+11
+MP,	GYZ	,	23,	0.2283400E+11
+MP,	GXZ	,	23,	0.1097900E+11
+MP,	DENS	,	23,	6320.03
+MP,	REFT	,	23,	292
+
+!========================================
+! MAT ID = 24 (PF6 SMEARED)
+!
+MP,	EX	,	24,	 40.874E9
+MP,	EY	,	24,	103.672E9
+MP,	EZ	,	24,	 40.470E9
+MP,	GXY	,	24,	22.499E9  
+MP,	GYZ	,	24,	22.331E9  
+MP,	GXZ	,	24,	10.238E9  
+MP,	NUXY	,	24,	0.29373 
+MP,	NUYZ	,	24,	0.11516
+MP,	NUXZ	,	24,	0.31799
+MP,	ALPX	,	24,	1.134E-05
+MP,	ALPY	,	24,	0.9969E-05
+MP,	ALPZ	,	24,	1.138E-05
+MP, 	PRXY	, 	24, 	0.115806
+MP, 	PRYZ	, 	24, 	0.295000
+MP, 	PRXZ	, 	24, 	0.321171
+MP,	DENS	,	24,	6165.57
+MP,	REFT	,	24,	292
+
+!========================================
+! MAT ID = 25 (CS SMEARED)
+!
+MP,	EX	,	25,	 52.0E9
+MP,	EY	,	25,	112.0E9
+MP,	EZ	,	25,	 54.0E9
+MP,	ALPX	,	25,	0.930E-05
+MP,	ALPY	,	25,	0.773E-05
+MP,	ALPZ	,	25,	0.968E-05
+MP,	NUXY	,	25,	0.14
+MP,	NUYZ	,	25,	0.14
+MP,	NUXZ	,	25,	0.28
+MP, 	PRXY	, 	25, 	0.115806
+MP, 	PRYZ	, 	25, 	0.295000
+MP, 	PRXZ	, 	25, 	0.321171
+MP,	GXY	,	25,	33.0E9
+MP,	GYZ	,	25,	33.0E9
+MP,	GXZ	,	25,	14.0E9
+MP,	DENS	,	25,	7340.	! Same as 2 coil model.
+!MP,	DENS	,	25,	7521.5	! to match DDD if no mass on Tie plates
+MP,	REFT	,	25,	292
+
+!========================================
+! MAT ID = 26 (SS IIS)
+! MP,	EX	,	26,	2.05E+11
+MP,	EX	,	26,	1.776E+11
+MP,	ALPX	,	26,	1.003E-05
+MP,	NUXY	,	26,	0.3
+! MP,	GXY	,	26,	7.89E+10
+MP,	GXY	,	26,	6.83E+10
+MP,	DENS	,	26,	7900
+MP,	KXX	,	26,	200.0	
+MP,	C	,	26,	1807.0
+MP,	REFT	,	26,	292
+
+!========================================
+! MAT ID = 27 (SS INBOARD LEG)
+MP,	EX	,	27,	2.05E+11
+MP,	ALPX	,	27,	1.003E-05
+MP,	NUXY	,	27,	0.3
+MP,	GXY	,	27,	7.89E+10
+MP,	DENS	,	27,	7900
+MP,	KXX	,	27,	200.0	
+MP,	C	,	27,	1807.0
+MP,	REFT	,	27,	292
+
+!========================================
+! MAT ID = 28 (SS OUTBOARD LEG)
+MP,	EX	,	28,	2.05E+11
+MP,	ALPX	,	28,	1.003E-05
+MP,	NUXY	,	28,	0.3
+MP,	GXY	,	28,	7.89E+10
+MP,	DENS	,	28,	7900
+MP,	KXX	,	28,	200.0	
+MP,	C	,	28,	1807.0
+MP,	REFT	,	28,	292
+
+!========================================
+! MAT ID = 29 (SS PCR)
+MP,	EX	,	29,	2.05E+11
+MP,	ALPX	,	29,	1.003E-05
+MP,	NUXY	,	29,	0.3
+MP,	GXY	,	29,	7.89E+10
+MP,	DENS	,	29,	7900
+MP,	KXX	,	29,	200.0	
+MP,	C	,	29,	1807.0
+MP,	REFT	,	29,	292
+
+
+!========================================
+! MAT ID = 30 (SS UOIS)
+MP,	EX	,	30,	2.05E+11
+MP,	ALPX	,	30,	1.003E-05
+MP,	NUXY	,	30,	0.3
+MP,	GXY	,	30,	7.89E+10
+MP,	DENS	,	30,	7900
+MP,	KXX	,	30,	200.0	
+MP,	C	,	30,	1807.0
+MP,	REFT	,	30,	292
+
+
+!========================================
+! MAT ID = 31 (SS LOIS)
+MP,	EX	,	31,	2.05E+11
+MP,	ALPX	,	31,	1.003E-05
+MP,	NUXY	,	31,	0.3
+MP,	GXY	,	31,	7.89E+10
+MP,	DENS	,	31,	7900
+MP,	KXX	,	31,	200.0	
+MP,	C	,	31,	1807.0
+MP,	REFT	,	31,	292
+
+
+!========================================
+! MAT ID = 32 (SS UIOIS)
+MP,	EX	,	32,	2.05E+11
+MP,	ALPX	,	32,	1.003E-05
+MP,	NUXY	,	32,	0.3
+MP,	GXY	,	32,	7.89E+10
+MP,	DENS	,	32,	7900
+MP,	KXX	,	32,	200.0	
+MP,	C	,	32,	1807.0
+MP,	REFT	,	32,	292
+
+
+!========================================
+! MAT ID = 33 (SS LIOIS)
+MP,	EX	,	33,	2.05E+11
+MP,	ALPX	,	33,	1.003E-05
+MP,	NUXY	,	33,	0.3
+MP,	GXY	,	33,	7.89E+10
+MP,	DENS	,	33,	7900
+MP,	KXX	,	33,	200.0	
+MP,	C	,	33,	1807.0
+MP,	REFT	,	33,	292
+
+
+!========================================
+! MAT ID = 34 (SS PF)
+MP,	EX	,	34,	2.05E+11
+MP,	ALPX	,	34,	1.003E-05
+MP,	NUXY	,	34,	0.3
+MP,	GXY	,	34,	7.89E+10
+MP,	DENS	,	34,	7900
+MP,	KXX	,	34,	200.0	
+MP,	C	,	34,	1807.0
+MP,	REFT	,	34,	292
+
+
+!========================================
+! MAT ID = 35 (SS GS)
+MP,	EX	,	35,	2.05E+11
+MP,	ALPX	,	35,	1.003E-05
+MP,	NUXY	,	35,	0.3
+MP,	GXY	,	35,	7.89E+10
+MP,	DENS	,	35,	7900
+MP,	KXX	,	35,	200.0	
+MP,	C	,	35,	1807.0
+MP,	REFT	,	35,	292
+
+
+!========================================
+! MAT ID = 36 (SS RING)
+MP,	EX	,	36,	2.05E+11
+MP,	ALPX	,	36,	1.003E-05
+MP,	NUXY	,	36,	0.3
+MP,	GXY	,	36,	7.89E+10
+MP,	DENS	,	36,	7900
+MP,	KXX	,	36,	200.0	
+MP,	C	,	36,	1807.0
+MP,	REFT	,	36,	292
+
+
+!========================================
+! MAT ID = 37 (NITRONIC50 MATERIAL) EM=1.95E+11
+MP,	EX	,	37,	2.05E+11*0.951
+MP,	ALPX	,	37,	0.9689E-05
+MP,	NUXY	,	37,	0.3
+MP,	GXY	,	37,	7.89E+10*0.951
+MP,	DENS	,	37,	8000
+MP,	KXX	,	37,	200.0	
+MP,	C	,	37,	1807.0
+MP,	REFT	,	37,	292
+
+!========================================
+! MAT ID = 38 (NITRONIC50 MATERIAL) EM=1.95E+11
+MP,	EX	,	38,	2.05E+11*0.951
+MP,	ALPX	,	38,	0.9689E-05
+MP,	NUXY	,	38,	0.3
+MP,	GXY	,	38,	7.89E+10*0.951
+MP,	DENS	,	38,	8000
+MP,	KXX	,	38,	200.0	
+MP,	C	,	38,	1807.0
+MP,	REFT	,	38,	292

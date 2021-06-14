@@ -19,45 +19,44 @@
 !===============================================================================
 !
 /clear,start
-/filname,'%arg1%',1
-/title,'%arg1%'
+! check mode attribute (arg1)
+*if,arg1,eq,'mech',then
+	mode = 'mechanical'
+*elseif,arg1,eq,'mag',then
+	mode = 'magnetic'
+*elseif,arg1,eq,'th',then
+	mode = 'thermal'
+*else
+	*msg,error,arg1
+	InputError, arg1 %C not in [mech, mag, th]
+*endif
+! set filename and tile
+/filname,mode,1
+/title,mode
 
-/eof
+macrodir = 'TF18'
+
+*dim,macrolib,string,120
+/inquire,macrolib(1),env,ansys_macrolib,1
+macrolib(1) = join(macrolib(1), macrodir)
 
 /prep7
-!===========================================================================
-! LOAD materials
-!
-/directory,mats,all,mats
-/input,mats(1,1),'mats'
-!
-!===========================================================================
-! LOAD properties
-!
-*use,properties
-/directory,props,all,props
-mpread,props(1,1),'props'
-!
-!===========================================================================
-! Load CDB model to generate MECH and MAG DB model or load generated DB models
-! set filename
-!
-/directory,geom,all,cdb
-cdread,db,geom(1,1),cdb
+/directory,cdbfile,all,cdb,macrolib(1)  ! locate cdb file
+cdread,db,cdbfile(1,1),cdb,macrolib(1)  ! load cdb
+/directory,matfile,all,mats,macrolib(1)  ! locate materials file
+/input,matfile(1,1),mats,macrolib(1)  ! load materials
+%macrodir%/parameters  ! run parameters macro
+/directory,propfile,all,prop,macrolib(1)  ! locate properties file
+mpread,propfile(1,1),prop,macrolib(1)  ! load properties
+
 allsel
+eplot
 
-
-
-*if,arg1,eq,'mech',then  ! generate mechanical model
-	TF18coil/mechanical
-*endif
-/eof
-*if,arg1,eq,'',then  ! generate magnetic model
-	TF18coil/magnetic
-*endif
 /eof
 
-*
+%macrodir%/%mode% ! generate model
+
+/eof
 
 
 !===============================================================================

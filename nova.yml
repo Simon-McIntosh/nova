@@ -1,4 +1,4 @@
-name: nova_apdl
+name: nova
 channels:
   - conda-forge
   - spyder-ide
@@ -42,9 +42,9 @@ dependencies:
   - xarray
   - xlrd
   - pip:
+    - ansys-dpf-core
     - ansys-dpf-post
     - geojson
-    - ansys-mapdl-core
     - pymupdf
     - pyquaternion
     - rdp

@@ -95,7 +95,7 @@ def timeit(_func=None, *, repeat=1, number=1000, file=sys.stdout):
 
 class clock(object):
 
-    def __init__(self, nITER=0, print_rate=1, print_width=24, header=''):
+    def __init__(self, nITER=0, print_rate=1, print_width=22, header=''):
         self.start(nITER, header)
         self.rate = print_rate
         self.width = print_width
@@ -220,7 +220,7 @@ class time_constant:
         td, Id = self.trim(**kwargs)
         to = td[0]
         td -= to  # time shift
-        xo = np.append(Id[0]/n*np.ones(n), 
+        xo = np.append(Id[0]/n*np.ones(n),
                        np.sort(tau_o*np.ones(n) * np.random.random(n))[::-1])
         #xo *= np.random.random(2*n)
         bounds = [(None, None) for __ in range(n)]

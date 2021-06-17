@@ -35,7 +35,7 @@ dependencies:
   - scipy
   - seaborn
   - shapely
-  - spyder=5
+  - spyder=4
   - spyder-line-profiler
   - spyder-unittest
   - urllib3

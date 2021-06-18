@@ -8,6 +8,7 @@ import numpy as np
 import pyvista as pv
 
 from nova.definitions import root_dir
+from nova.projects.AsBuilt.TFcenterline import TFCenterLine
 from nova.utilities.time import clock
 
 
@@ -35,13 +36,15 @@ class AnsysDPF(DataDir):
     """Access Ansys results."""
 
     model: dpf.Model = field(init=False, repr=False)
+    n_sets: int = field(init=False)
     mesh: dpf.MeshedRegion = field(init=False, repr=False)
-    dataset: pv.DataSet = field(init=False, repr=False)
+    data: pv.MultiBlock = field(init=False, repr=False)
 
     def __post_init__(self):
         """Load results model."""
         super().__post_init__()
         self.model = dpf.Model(self.rst_file)
+        self.n_sets = self.model.metadata.time_freq_support.n_sets
 
     def __str__(self):
         """Return Ansys model descriptor."""
@@ -55,10 +58,11 @@ class AnsysDPF(DataDir):
     def load_dataset(self):
         """Load dpf model instance."""
         self.mesh = self.load_mesh()
-        self.dataset = self.mesh.grid
-        self.dataset.field_arrays
+        self.data = pv.MultiBlock()
+        self.data['source'] = self.mesh.grid
+        self.data['source'].field_arrays['n_sets'] = self.n_sets
         self.load_displacement()
-        return self.dataset
+        return self.data
 
     def load_mesh(self):
         """Return scoped mesh."""
@@ -81,21 +85,41 @@ class AnsysDPF(DataDir):
         """Load displacment field to vtk dataset."""
         displace = dpf.Operator('U')
         displace.inputs.mesh.connect(self.mesh)
-        displace.inputs.time_scoping.connect(
-            range(1, self.model.metadata.time_freq_support.n_sets+1))
+        displace.inputs.time_scoping.connect(range(1, self.n_sets+1))
         if self.mesh_scoping is not None:
             displace.inputs.mesh_scoping.connect(self.mesh_scoping)
         displace.inputs.data_sources.connect(self.model.metadata.data_sources)
         displace.inputs.requested_location.connect(post.locations.nodal)
-        self.store_field('displacement', displace.outputs.fields_container())
+        fields = displace.outputs.fields_container()
+        self.interpolate_field('disp', fields)
+        #self.store_field('displacement', fields)
+
+    def interpolate_field(self, label: str, fields: dpf.FieldsContainer):
+        mapping = dpf.Operator('mapping')
+        mapping.inputs.fields_container.connect(fields)
+        print(fields[0].data[:2, :])
+        coords = dpf.Field(2)
+        coords.set_entity_data(
+            np.array([
+                [4.4038896731185, 0.3723382337672, -6.487170428489],
+                [4.4050292216978, 0.175005129591, -6.487227254177],
+                ]).flatten(),
+            0, 0)
+        print(coords.data)
+        mapping.inputs.coordinates.connect(coords)
+        fields = mapping.outputs.fields_container()
+        self.fields = fields
+
+        print(fields[0].data)
 
     def store_field(self, label: str, fields: dpf.FieldsContainer):
         """Store field to DataSet."""
         for i in range(len(fields)):
             name = f'{label}_{i}'
-            self.dataset[name] = np.full((self.mesh.nodes.n_nodes, 3), np.nan)
+            self.data['source'][name] = \
+                np.full((self.mesh.nodes.n_nodes, 3), np.nan)
             index, mask = self.mesh.nodes.map_scoping(fields[i].scoping)
-            self.dataset[name][index] = fields[i].data[mask]
+            self.data['source'][name][index] = fields[i].data[mask]
 
 
 @dataclass
@@ -152,21 +176,24 @@ class TFC18(DataDir):
         """Plot dataset."""
         if factor == 0:
             return self.dataset.plot()
-        warp = self.dataset.warp_by_vector('displacement', factor=factor)
+        warp = self.dataset.warp_by_vector('displacement_1', factor=factor)
         plotter = pv.Plotter()
-        plotter.add_mesh(self.dataset, color='w')
-        plotter.add_mesh(warp)
+        plotter.add_mesh(self.dataset, color='w', opacity=0.5)
+        #plotter.add_mesh(warp)
+
+        cl = TFCenterLine()
+        plotter.add_mesh(cl.grid)
         plotter.show()
 
 
 if __name__ == '__main__':
 
-    tf = TFC18('v4', 'WP')
-    tf.extract_winding_pack()
-    tf.plot(65)
+    #tf = TFC18('v4', 'E_WP_1')
+    #tf.extract_winding_pack()
+    #tf.plot(65)
 
-    #ansys = AnsysDPF('v4', 'E_WP_18')
-    #dataset = ansys.load_dataset()
+    ansys = AnsysDPF('v4', 'E_WP_1')
+    dataset = ansys.load_dataset()
 
     #tf.grid('WP')
     '''

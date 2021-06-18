@@ -1,3 +1,4 @@
+
 from dataclasses import dataclass, field
 import os
 
@@ -55,6 +56,7 @@ class AnsysDPF(DataDir):
         """Load dpf model instance."""
         self.mesh = self.load_mesh()
         self.dataset = self.mesh.grid
+        self.dataset.field_arrays
         self.load_displacement()
         return self.dataset
 
@@ -159,12 +161,12 @@ class TFC18(DataDir):
 
 if __name__ == '__main__':
 
-    #tf = TFC18('v4', 'WP')
-    #tf.extract_winding_pack()
-    #tf.plot(65)
+    tf = TFC18('v4', 'WP')
+    tf.extract_winding_pack()
+    tf.plot(65)
 
-    ansys = AnsysDPF('v4', 'E_WP_18')
-    dataset = ansys.load_dataset()
+    #ansys = AnsysDPF('v4', 'E_WP_18')
+    #dataset = ansys.load_dataset()
 
     #tf.grid('WP')
     '''

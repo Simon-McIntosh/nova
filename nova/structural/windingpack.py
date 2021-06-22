@@ -1,8 +1,7 @@
-
+"""Manage as-designed coil winding pack descriptors."""
 from dataclasses import dataclass, field
 import os
 
-import numpy as np
 import pandas
 import pyvista as pv
 import xarray
@@ -11,12 +10,13 @@ from nova.definitions import root_dir
 
 
 @dataclass
-class TFCenterLine:
-    """Load TFC1 referance winding pack centerline from file."""
+class WindingPack:
+    """Load referance winding pack centerlines from file."""
 
-    file: str = 'TFC1_CL'
+    file: str
     directory: str = None
     data: xarray.Dataset = field(init=False, repr=False)
+    mesh: pv.PolyData = field(init=False, repr=False)
 
     def __post_init__(self):
         """Load TF1 centerline."""
@@ -39,9 +39,9 @@ class TFCenterLine:
         return self.filepath('xlsx')
 
     @property
-    def vtm_file(self):
-        """Return vtm filepath."""
-        return self.filepath('vtm')
+    def vtk_file(self):
+        """Return vtk filepath."""
+        return self.filepath('vtk')
 
     def load_single(self):
         """Load centerline data."""
@@ -51,10 +51,10 @@ class TFCenterLine:
             self.read_excel()
             self.data.to_netcdf(self.ncdf_file)
         try:
-            self.grid = pv.read(self.vtm_file)
+            self.mesh = pv.read(self.vtk_file)
         except FileNotFoundError:
-            self.build_grid()
-            self.grid.save(self.vtm_file)
+            self.pattern_TF()
+            self.mesh.save(self.vtk_file)
 
     def read_excel(self):
         """Read warm TFC1 centerline data from excel sheet."""
@@ -77,15 +77,24 @@ class TFCenterLine:
         sheet.rename(columns=columns, inplace=True)
         return sheet
 
-    def build_grid(self):
-        """Build pyvisa grid."""
-        grid = {f'TF1_dp{i}': pv.Spline(self.data[f'dp{i}'].values)
-                for i in range(7)}
-        self.grid = pv.MultiBlock(grid)
+    def pattern_TF(self):
+        """Build pyvisa mesh."""
+        mesh = {f'TF1_dp{dp_index}':
+                pv.Spline(self.data[f'dp{dp_index}'].values)
+                for dp_index in range(7)}
+        for TF_index in range(2, 19):  # TF coils 2-18
+            for dp_index in range(7):
+                referance = f'TF1_dp{dp_index}'
+                target = f'TF{TF_index}_dp{dp_index}'
+                mesh[target] = mesh[referance].copy()
+                mesh[target].rotate_z(360 * (TF_index-1) / 18)
+        self.mesh = pv.MultiBlock(mesh).combine()
 
 
 if __name__ == '__main__':
 
-    cl = TFCenterLine()
+    wp = WindingPack('TFC1_CL')
 
-    cl.grid.plot()
+    pl = pv.Plotter()
+    pl.add_mesh(wp.mesh)
+    pl.show()

@@ -20,6 +20,7 @@ dependencies:
   - netcdf4
   - nlopt
   - numpy
+  - openpyxl  
   - pandas
   - pip
   - pyarrow

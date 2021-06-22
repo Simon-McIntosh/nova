@@ -112,6 +112,7 @@ class TFC18(AnsysDataDir, Plotter):
         self.warp('TFonly-cooldown')
 
     def animate(self):
+        """Animate displacement."""
         filename = os.path.join(self.directory, self.file)
         super().animate(filename, 'TFonly', view='xy')
 

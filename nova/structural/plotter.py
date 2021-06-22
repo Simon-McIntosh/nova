@@ -27,8 +27,8 @@ class Plotter:
                              line_smoothing=True)
 
         reference = self.mesh.copy()
-        plotter.add_mesh(reference, scalars=None, color='w', opacity=0.5,
-                         smooth_shading=True)
+        #plotter.add_mesh(reference, scalars=None, color='w', opacity=0.5,
+        #                 smooth_shading=True)
         plotter.add_mesh(self.mesh, scalars=scalars, smooth_shading=True)
         plotter.camera.zoom(1.5)
         if view != 'iso':

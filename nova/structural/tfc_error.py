@@ -36,4 +36,5 @@ class TFC(Plotter):
 if __name__ == '__main__':
 
     tfc = TFC()
+    tfc.warp()
     tfc.animate()

@@ -41,6 +41,7 @@ class TFC18(AnsysDataDir, Plotter):
     def __post_init__(self):
         """Load database."""
         super().__post_init__()
+        self.subset = 'WP'
         self.load()
 
     def __str__(self):
@@ -62,7 +63,7 @@ class TFC18(AnsysDataDir, Plotter):
 
     def load_ansys(self):
         """Load ansys vtk mesh."""
-        ansys = AnsysPost(self.file, 'WP').mesh
+        ansys = AnsysPost(self.folder, self.file, self.subset).mesh
         self.ansys = ansys.copy()
         self.ansys.clear_point_arrays()
         for scn in self.scenario:
@@ -121,7 +122,8 @@ class TFC18(AnsysDataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('v0', 'WP', scenario={'cooldown': 1, 'TFonly': 2})
+    tf = TFC18('TFC18', 'v0', scenario={'cooldown': 1, 'TFonly': 2})
+
     tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
     tf.plot()
     #tf.animate()

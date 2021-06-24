@@ -9,14 +9,14 @@ from nova.definitions import root_dir
 class AnsysDataDir:
     """Manage file paths."""
 
+    folder: str
     file: str
     subset: str = 'all'
-    directory: str = field(repr=False, default=None)
+    data_dir: str = 'data/Ansys'
 
     def __post_init__(self):
         """Set data directory."""
-        if self.directory is None:
-            self.directory = os.path.join(root_dir, 'data/Ansys/TFC18')
+        self.directory = os.path.join(root_dir, self.data_dir, self.folder)
 
     @property
     def metadata(self):

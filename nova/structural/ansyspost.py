@@ -67,17 +67,19 @@ class AnsysPost(AnsysDataDir, Plotter):
 
     def load_meshed_region(self):
         """Return scoped dpf meshed region."""
-        if hasattr(self, '_meshed_region'):
-            return self._meshed_region
+        if self.subset == 'all':
+            self.meshed_region = self.model.metadata.meshed_region
+            return
         mesh = dpf.Operator('mesh::by_scoping')  # operator instantiation
         mesh.inputs.mesh.connect(self.model.metadata.meshed_region)
-        if self.subset != 'all':
-            mesh.inputs.scoping.connect(self.mesh_scoping)
+        mesh.inputs.scoping.connect(self.mesh_scoping)
         self.meshed_region = mesh.outputs.mesh()
 
     @property
     def mesh_scoping(self):
         """Return named selection mesh scoping."""
+        if self.subset == 'all':
+            return self.model.metadata.meshed_region.nodes.scoping
         scope = dpf.Operator('scoping_provider_by_ns')
         scope.inputs.requested_location.connect(post.locations.nodal)
         scope.inputs.named_selection_name.connect(self.subset)
@@ -123,8 +125,7 @@ class AnsysPost(AnsysDataDir, Plotter):
         self.warp(f'displacement-{loadcase}', factor=factor, opacity=0.5)
 
 
-
 if __name__ == '__main__':
 
-    ansys = AnsysPost('v4', 'WP')
+    ansys = AnsysPost('TFC2_CC_design', 'p3', 'TF1_OIS_DOWN')
     ansys.plot(-1, factor=75)

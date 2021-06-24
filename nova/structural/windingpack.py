@@ -90,11 +90,13 @@ class WindingPack:
                 mesh[target].rotate_z(360 * (TF_index-1) / 18)
         self.mesh = pv.MultiBlock(mesh).combine()
 
+    def plot(self):
+        """Plot winding pack."""
+        plotter = pv.Plotter()
+        plotter.add_mesh(wp.mesh)
+        plotter.show()
+
 
 if __name__ == '__main__':
 
     wp = WindingPack('TFC1_CL')
-
-    pl = pv.Plotter()
-    pl.add_mesh(wp.mesh)
-    pl.show()

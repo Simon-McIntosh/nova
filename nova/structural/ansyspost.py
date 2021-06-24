@@ -63,6 +63,7 @@ class AnsysPost(AnsysDataDir, Plotter):
         self.mesh.field_arrays['time_support'] = self.time_support
         self.mesh.field_arrays['time_scoping'] = self.time_scoping
         self.load_displacement()
+        self.load_gap()
         self.mesh.save(self.vtk_file)
 
     def load_meshed_region(self):
@@ -98,6 +99,18 @@ class AnsysPost(AnsysDataDir, Plotter):
         fields = displace.outputs.fields_container()
         self.store_fields('displacement', fields)
 
+    def load_gap(self):
+        """Load contact gap to vtk dataset."""
+        displace = dpf.Operator('ECT_GAP')
+        displace.inputs.mesh.connect(self.meshed_region)
+        displace.inputs.time_scoping.connect(self.time_scoping)
+        if self.mesh_scoping is not None:
+            displace.inputs.mesh_scoping.connect(self.mesh_scoping)
+        displace.inputs.data_sources.connect(self.model.metadata.data_sources)
+        displace.inputs.requested_location.connect(post.locations.nodal)
+        fields = displace.outputs.fields_container()
+        self.store_fields('gap', fields, component_number=1)
+
     @property
     def n_nodes(self):
         """Return node number for dpf scoped mesh."""
@@ -118,6 +131,13 @@ class AnsysPost(AnsysDataDir, Plotter):
             index, mask = self.map_scoping(fields[i].scoping)
             self.mesh[name][index] = fields[i].data[mask]
 
+    def select(self, index, inplace=True):
+        """Return body, update mesh if inplace==True."""
+        body = self.mesh.split_bodies()[index]
+        if inplace:
+            self.mesh = body
+        return body
+
     def plot(self, loadcase=-1, factor=75):
         """Return pyvista plotter with mesh displacement."""
         if loadcase < 0:
@@ -127,5 +147,19 @@ class AnsysPost(AnsysDataDir, Plotter):
 
 if __name__ == '__main__':
 
-    ansys = AnsysPost('TFC2_CC_design', 'p3', 'TF1_OIS_DOWN')
-    ansys.plot(-1, factor=75)
+    #ansys = AnsysPost('TFC2_CentralComposite', 'p3', 'N_SYM_WEDGE_2',
+    #                  data_dir='\\\\io-ws-ccstore1\\ANSYS_Data\\mcintos')
+
+    ansys = AnsysPost('TFC18', 'V4', 'C_WEDGE_12')
+    #ansys.select(0)
+
+    #ansys.mesh['delta'] = ansys.mesh['displacement-17'] - \
+    #                ansys.mesh['displacement-3']
+    #ansys.warp('delta', factor=300)
+
+    plotter = pv.Plotter()
+    plotter.add_mesh(ansys.mesh, scalars='gap-2', smooth_shading=True)
+    plotter.show()
+
+
+    #ansys.animate('tmp', 'delta', 200)

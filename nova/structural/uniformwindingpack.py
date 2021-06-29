@@ -29,7 +29,7 @@ class UniformWindingPack:
 
     @property
     def vtk_file(self):
-        """Return vtk file path."""
+        """Return vtk file path (Uniform Current Centerline)."""
         return os.path.join(root_dir, 'input/geometry/ITER/TF_CCL.vtk')
 
     @property
@@ -43,6 +43,7 @@ class UniformWindingPack:
             self.mesh = pv.read(self.vtk_file)
         except FileNotFoundError:
             self.compute_ccl()
+            self.extract_turns()
             self.pattern_mesh()
             self.mesh.save(self.vtk_file)
 
@@ -100,16 +101,15 @@ class UniformWindingPack:
                        x_length=0.1, y_length=0.9, z_length=0.7)
         cube = self.rotate(cube, tangent)
         cube.translate(point)
-        plane = plane.clip_box(cube, invert=False)
-        return plane
+        return plane.clip_box(cube, invert=False)
 
     @staticmethod
     def rotate(mesh, tangent, referance=[1, 0, 0]):
         """Return Euler rotation angles."""
         rotvec = np.cross(referance, tangent)
         rotvec *= np.arccos(referance @ tangent) / np.linalg.norm(rotvec)
-        euler_angles = Rotation.from_rotvec(rotvec).as_euler('xyz',
-                                                             degrees=True)
+        euler_angles = \
+            Rotation.from_rotvec(rotvec).as_euler('xyz', degrees=True)
         mesh.rotate_x(euler_angles[0])
         mesh.rotate_y(euler_angles[1])
         mesh.rotate_z(euler_angles[2])
@@ -131,6 +131,18 @@ class UniformWindingPack:
         for loop in loops[:, :index]:
             self.mesh += pv.Spline(loop)
 
+    def extract_turns(self):
+        """Extract low-field midplane turn layout."""
+        self.mesh['turns'] = self.slice_coil(0, 0).points
+
+    def plot_turns(self):
+        """Plot low-field turn grid in x-y plane."""
+        points = self.mesh['turns']
+        ax = plt.subplots(1, 1)[1]
+        ax.plot(points[:, 0], points[:, 1], 'o')
+        plt.axis('off')
+        plt.axis('equal')
+
     def pattern_mesh(self):
         """Pattern TF coils."""
         TFC1 = self.mesh.copy()
@@ -144,7 +156,8 @@ class UniformWindingPack:
 if __name__ == '__main__':
 
     ccl = UniformWindingPack()
+    ccl.plot_turns()
 
-    points = ccl.mesh.points.reshape(18, 134, -1, 3)
-    loop = points[9, 0]
-    plt.plot(loop[:, 0], loop[:, 2])
+    #points = ccl.mesh.points.reshape(18, 134, -1, 3)
+    #loop = points[9, 0]
+    #plt.plot(loop[:, 0], loop[:, 2])

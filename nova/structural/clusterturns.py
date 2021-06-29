@@ -1,7 +1,7 @@
 """Manage as-designed coil winding pack descriptors."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-import numpy as np
+import numpy.typing as npt
 import pyvista as pv
 import sklearn.cluster
 
@@ -12,18 +12,19 @@ from nova.utilities.pyplot import plt
 @dataclass
 class ClusterTurns:
 
+    ccl_mesh: pv.PolyData
     n_clusters: int = 1
+    turns: npt.ArrayLike = field(init=False, repr=False)
+    mesh: pv.PolyData = field(init=False, repr=False)
 
     def __post_init__(self):
-        self.windingpack = UniformWindingPack()
-        self.points = self.windingpack.slice_coil(0, 0).points
+        n_turns = self.ccl_mesh.n_cells // 18
+        self.turns = self.ccl_mesh['turns'][:n_turns]
         self.clusters = sklearn.cluster.KMeans(
             n_clusters=self.n_clusters,
-            random_state=0).fit_predict(self.points)
+            random_state=0).fit_predict(self.turns)
 
     def build(self):
-        ccl = self.windingpack.mesh
-
         self.mesh = pv.PolyData()
         for i in range(18):
             coil = ccl.extract_cells(range(i*134, (i+1)*134))

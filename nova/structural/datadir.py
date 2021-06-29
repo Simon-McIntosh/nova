@@ -1,5 +1,5 @@
 """Manage Ansys simulation data directories."""
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 import os
 
 from nova.definitions import root_dir

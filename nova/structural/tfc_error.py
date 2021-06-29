@@ -11,22 +11,26 @@ from nova.structural.uniformwindingpack import UniformWindingPack
 
 @dataclass
 class TFC(Plotter):
+    """Construct error displacement fields for TF coilset."""
 
-    assembly: str = 'v4'
-    referance: str = 'v0'
+    loadcase: tuple[str] = ('v0', 'v4')
+    scenario: dict[str, int] = field(default_factory=lambda: {'TFonly': 2})
     mesh: pv.PolyData = field(init=False, repr=False)
 
     def __post_init__(self):
+        """Load analysis data."""
         self.directory = os.path.join(root_dir, 'data/Ansys/TFC18')
-        self.load()
+        self.load_ansys_data()
 
-    def load(self):
-        assembly = TFC18('TFC18', self.assembly, 'WP',
-                         scenario={'TFonly': 2}).mesh
-        referance = TFC18('TFC18', self.referance, 'WP',
-                          scenario={'TFonly': 2}).mesh
+    def load_ansys_data(self):
 
-        self.mesh = referance.copy()
+        assembly = TFC18(scenario=self.scenario).mesh
+
+        referance = TFC18(
+            'TFC18', self.referance, 'WP', scenario={'TFonly': 2}).mesh
+
+        self.mesh = TFC18(
+            'TFC18', self.loadcase[0], 'WP', scenario=self.scenario).mesh
         self.mesh.clear_arrays()
         self.mesh['referance'] = referance['TFonly']
         self.mesh['assembly'] = assembly['TFonly']

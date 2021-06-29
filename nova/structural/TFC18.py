@@ -18,6 +18,7 @@ class TFC18(AnsysDataDir, Plotter):
     scenario: dict[str, int] = field(default_factory=dict)
     ansys: pv.PolyData = field(init=False, repr=False)
     mesh: pv.PolyData = field(init=False, repr=False)
+    uniform: bool = True
     cluster: int = 1
 
     def __post_init__(self):
@@ -53,7 +54,7 @@ class TFC18(AnsysDataDir, Plotter):
 
     def load_windingpack(self):
         """Load conductor windingpack."""
-        if self.cluster is not None:
+        if self.uniform or self.cluster is not None:
             return UniformWindingPack().mesh
         return WindingPack('TFC1_CL').mesh
 
@@ -70,7 +71,7 @@ class TFC18(AnsysDataDir, Plotter):
 
     def interpolate_coils(self, source, target, sharpness=3, radius=1.5,
                           n_cells=7):
-        """Retun mesh interpolant."""
+        """Retun interpolated mesh."""
         return source.interpolate(target, sharpness=sharpness, radius=radius,
                                   strategy='closest_point')
 

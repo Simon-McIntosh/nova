@@ -63,7 +63,7 @@ class AnsysPost(AnsysDataDir, Plotter):
         self.mesh.field_arrays['time_support'] = self.time_support
         self.mesh.field_arrays['time_scoping'] = self.time_scoping
         self.load_displacement()
-        self.load_gap()
+        # self.load_gap()
         self.mesh.save(self.vtk_file)
 
     def load_meshed_region(self):
@@ -86,6 +86,18 @@ class AnsysPost(AnsysDataDir, Plotter):
         scope.inputs.named_selection_name.connect(self.subset)
         scope.inputs.data_sources.connect(self.model.metadata.data_sources)
         return scope.outputs.mesh_scoping
+
+    def load_field(self, label, operator, component_number):
+        """Load field data from Ansys rst file."""
+        displace = dpf.Operator(operator)
+        displace.inputs.mesh.connect(self.meshed_region)
+        displace.inputs.time_scoping.connect(self.time_scoping)
+        if self.mesh_scoping is not None:
+            displace.inputs.mesh_scoping.connect(self.mesh_scoping)
+        displace.inputs.data_sources.connect(self.model.metadata.data_sources)
+        displace.inputs.requested_location.connect(post.locations.nodal)
+        fields = displace.outputs.fields_container()
+        self.store_fields(label, fields, component_number=component_number)
 
     def load_displacement(self):
         """Load displacment field to vtk dataset."""
@@ -151,14 +163,14 @@ if __name__ == '__main__':
     #                  data_dir='\\\\io-ws-ccstore1\\ANSYS_Data\\mcintos')
 
     ansys = AnsysPost('TFC18', 'V4', 'C_WEDGE_12')
-    #ansys.select(0)
+    ansys.select(0)
 
     #ansys.mesh['delta'] = ansys.mesh['displacement-17'] - \
     #                ansys.mesh['displacement-3']
     #ansys.warp('delta', factor=300)
 
     plotter = pv.Plotter()
-    plotter.add_mesh(ansys.mesh, scalars='gap-2', smooth_shading=True)
+    plotter.add_mesh(ansys.mesh, scalars='displacement-0', smooth_shading=True)
     plotter.show()
 
 

@@ -30,7 +30,7 @@ class UniformWindingPack:
     @property
     def vtk_file(self):
         """Return vtk file path (Uniform Current Centerline)."""
-        return os.path.join(root_dir, 'input/geometry/ITER/TF_CCL.vtk')
+        return os.path.join(root_dir, 'input/geometry/ITER/TF_UCCL.vtk')
 
     @property
     def txt_file(self):

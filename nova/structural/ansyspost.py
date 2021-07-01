@@ -158,7 +158,7 @@ class AnsysPost(AnsysDataDir, Plotter):
             self.mesh = body
         return body
 
-    def plot(self, loadcase=-1, factor=75, opacity=0.5, plotter=None):
+    def plot(self, loadcase=-1, factor=275, opacity=1, plotter=None):
         """Return pyvista plotter with mesh displacement."""
         if loadcase < 0:
             loadcase = self.time_scoping[loadcase]-1
@@ -187,13 +187,13 @@ if __name__ == '__main__':
     #ansys = AnsysPost('TFC2_CentralComposite', 'p3', 'N_SYM_WEDGE_2',
     #                  data_dir='\\\\io-ws-ccstore1\\ANSYS_Data\\mcintos')
 
-    ansys = AnsysPost('TFC2_DoE', 'p1', 'TF1_CASE')
+    ansys = AnsysPost('TFC2_DoE', 'p3', 'TF1_CASE')
     #ansys.select(0)
 
     #ansys.mesh['delta'] = ansys.mesh['displacement-17'] - \
     #                ansys.mesh['displacement-3']
     #ansys.warp('delta', factor=300)
 
-    ansys.subplot()
+    ansys.plot(loadcase=6)
 
     #ansys.animate('tmp', 'delta', 200)

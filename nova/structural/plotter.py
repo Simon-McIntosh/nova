@@ -24,7 +24,7 @@ class Plotter:
         warp = self.mesh.warp_by_vector('disp', factor=factor)
         plotter.add_mesh(warp, scalars=scalars, smooth_shading=True,
                          show_scalar_bar=False, clim=[-25, 25])
-        #plotter.show()
+        plotter.show()
         return plotter
 
     def animate(self, filename: str, scalars: str, max_factor=100, frames=31,

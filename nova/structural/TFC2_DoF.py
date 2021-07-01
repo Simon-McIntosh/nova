@@ -16,7 +16,7 @@ from sklearn.base import BaseEstimator
 from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import cross_val_score
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, RANSACRegressor
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.model_selection import train_test_split
 
@@ -86,10 +86,10 @@ class TFC2_DoF(AnsysDataDir):
 
     def plot_slice(self, loadcases=[6, 7, 8, 9, 10, 11], factor=750):
         """Plot dataset slice."""
-        plotter = pv.Plotter(shape=(len(loadcases), self.n_datasets),
-                             border=False, window_size=[1750, 600])
+        plotter = pv.Plotter(shape=(len(loadcases)+1, self.n_datasets),
+                             border=False, window_size=[1400, 1400])
         sargs = dict(title_font_size=18, label_font_size=18,
-                     shadow=False, n_labels=3, vertical=False, width=0.5)
+                     shadow=False, n_labels=2, vertical=False, width=0.5)
 
         for i, dataset in enumerate(self.datasets):
             for j, loadcase in enumerate(loadcases):
@@ -103,8 +103,8 @@ class TFC2_DoF(AnsysDataDir):
                 title = f'{coil} {sign}{dataset[1]}MA'
                 plotter.add_title(title, font_size=12)
         plotter.link_views()
-        plotter.camera_position = 'yz'
-        plotter.camera.zoom(1.0)
+        plotter.camera_position = 'xz'
+        plotter.camera.zoom(1.5)
         plotter.show()
 
     @property
@@ -194,7 +194,7 @@ class Regressor:
         """Return initialized regresion model."""
         if self.model == 'linear':
             return LinearRegression()
-        return KernelRidge(alpha=0, kernel='cosine')
+        return KernelRidge(alpha=0, kernel='rbf')
 
     def load_data(self):
         """Load train and test datasets."""
@@ -210,14 +210,17 @@ class Regressor:
         """Print validation metrics."""
         score = cross_val_score(self.regressor, *self.train, cv=cv)
         print(np.mean(score), np.std(score))
+        return score
 
     def score(self):
         """Print test data score."""
-        print(self.regressor.score(*self.test))
+        score = self.regressor.score(*self.test)
+        return score
+
 
     def predict(self, feature_vector):
         """Return regressor prediction."""
-        values = np.full(self.target_index.shape, np.nan)
+        values = np.full(self.target_index.shape, 0, dtype=float)
         values[self.target_index] = self.regressor.predict(
             feature_vector.reshape(1, -1))[0]
         return values
@@ -242,30 +245,57 @@ class Simulator:
         for model in ['linear', 'kridge']:
             for attr in ['disp', 'vm']:
                 self.models[f'{model}_{attr}'] = \
-                    Regressor(self.design.data, model, attr)
+                    Regressor(self.design.data.copy(deep=True), model, attr)
 
     def predict(self, feature_vector):
         for attr in self.models:
             self.mesh[attr] = self.models[attr].predict(feature_vector)
 
-    def plot(self, model, plotter=None, factor=2000, show=True, clim=None):
+    def plot(self, model, plotter=None, factor=1e3, show=True, clim=None):
         if plotter is None:
             plotter = pv.Plotter()
-        #warp = self.mesh.warp_by_scalar(f'{model}_disp', factor=factor)
-        plotter.add_mesh(self.mesh, scalars=f'{model}_vm', clim=clim)
+        warp = self.mesh.warp_by_scalar(f'{model}_disp', factor=factor)
+        plotter.add_mesh(warp, scalars=f'{model}_vm', clim=clim)
         if show:
             plotter.show()
 
     def plot_pair(self, clim=None):
-        plotter = pv.Plotter(shape=(1, 2), border=False)
+        plotter = pv.Plotter(shape=(2, 2), border=False)
         sargs = dict(title_font_size=18, label_font_size=18,
                      shadow=False, n_labels=3, vertical=False, width=0.5)
         plotter.subplot(0, 0)
         self.plot('linear', plotter, show=False)
-        plotter.add_title('linear', font_size=12)
+        score = self.models['linear_vm'].score()
+        plotter.add_title(f'{1e2*score:1.1f}%', font_size=12)
         plotter.subplot(0, 1)
         self.plot('kridge', plotter, show=False)
-        plotter.add_title('Kridge', font_size=12)
+        score = self.models['kridge_vm'].score()
+        plotter.add_title(f'{1e2*score:1.1f}%', font_size=12)
+        plotter.link_views()
+        plotter.camera_position = 'xz'
+        plotter.camera.zoom(2.0)
+        plotter.show()
+
+    def plot_compare(self, trial, clim=None):
+        self.mesh['ground_truth'] = self.design.data['vm'][trial]
+        current = self.design.data['current'][trial].values
+        for model in ['linear', 'kridge']:
+            self.mesh[f'predict_{model}'] = \
+                self.models[f'{model}_vm'].predict(current)
+
+        plotter = pv.Plotter(shape=(2, 3))
+        #plotter.subplot(0, 0)
+        plotter.add_mesh(self.mesh, scalars='ground_truth', clim=clim)
+        plotter.add_title('ground_truth', font_size=12)
+
+        plotter.subplot(0, 1)
+        plotter.add_mesh(self.mesh, scalars=f'predict_linear', clim=clim)
+        plotter.add_title('linear', font_size=12)
+
+        plotter.subplot(0, 2)
+        plotter.add_mesh(self.mesh, scalars=f'predict_kridge', clim=clim)
+        plotter.add_title('kridge', font_size=12)
+
         plotter.link_views()
         plotter.camera_position = 'xz'
         plotter.camera.zoom(1.0)
@@ -275,8 +305,8 @@ class Simulator:
 
 if __name__ == '__main__':
 
-    subset = 'TF1_Case'
-    #subset = 'TF1_GS_TF_LEG'
+    #subset = 'TF1_Case'
+    subset = 'TF1_GS_TF_LEG'
     #subset = 'TF1_BOTTOM_SHEAR_KEYS'
     #subset = 'TF1_WP'
     #subset = 'TF1_IOIS_DOWN_PINS'
@@ -284,12 +314,13 @@ if __name__ == '__main__':
     current = np.array(list(TFC2_DoF().reference_current.values()))
     #current[8] += 5
 
-
     sim = Simulator(subset)
     sim.predict(current)
+    #sim.design.plot_slice(loadcases=[0, 8, 11])
 
-    sim.plot_pair(clim=[-10, 10])
+    sim.plot_pair()
 
+    #sim.plot_compare(50, clim=None)
     '''
     #, datasets=['m1', 'p1'])
     #dof.plot_slice(loadcases=[9], factor=50)

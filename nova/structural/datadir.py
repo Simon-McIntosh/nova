@@ -12,7 +12,7 @@ class AnsysDataDir:
     folder: str
     file: str = None
     subset: str = 'all'
-    data_dir: str = 'data/Ansys'
+    data_dir: str = '//io-ws-ccstore1/ANSYS_Data/mcintos'  # 'data/Ansys'
 
     def __post_init__(self):
         """Set data directory."""

@@ -15,10 +15,11 @@ dependencies:
   - pandas
   - pip
   - pygeos
+  - pyvista
   - scipy
   - seaborn
   - shapely
-  - spyder
+  - spyder=4
   - spyder-line-profiler
   - spyder-unittest
   - xarray

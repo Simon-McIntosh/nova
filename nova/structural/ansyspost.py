@@ -63,6 +63,7 @@ class AnsysPost(AnsysDataDir, Plotter):
         self.mesh.field_arrays['time_support'] = self.time_support
         self.mesh.field_arrays['time_scoping'] = self.time_scoping
         self.load_displacement()
+        self.load_vonmises()
         # self.load_gap()
         self.mesh.save(self.vtk_file)
 
@@ -101,6 +102,8 @@ class AnsysPost(AnsysDataDir, Plotter):
 
     def load_displacement(self):
         """Load displacment field to vtk dataset."""
+        self.load_field('disp', 'U', 3)
+        '''
         displace = dpf.Operator('U')
         displace.inputs.mesh.connect(self.meshed_region)
         displace.inputs.time_scoping.connect(self.time_scoping)
@@ -110,6 +113,11 @@ class AnsysPost(AnsysDataDir, Plotter):
         displace.inputs.requested_location.connect(post.locations.nodal)
         fields = displace.outputs.fields_container()
         self.store_fields('displacement', fields)
+        '''
+
+    def load_vonmises(self):
+        """Load VonMises stress."""
+        self.load_field('vm', 'S_eqv', 1)
 
     def load_gap(self):
         """Load contact gap to vtk dataset."""
@@ -150,11 +158,28 @@ class AnsysPost(AnsysDataDir, Plotter):
             self.mesh = body
         return body
 
-    def plot(self, loadcase=-1, factor=75):
+    def plot(self, loadcase=-1, factor=75, opacity=0.5, plotter=None):
         """Return pyvista plotter with mesh displacement."""
         if loadcase < 0:
             loadcase = self.time_scoping[loadcase]-1
-        self.warp(f'displacement-{loadcase}', factor=factor, opacity=0.5)
+        return self.warp(f'disp-{loadcase}', f'vm-{loadcase}',
+                         plotter=plotter, factor=factor, opacity=opacity)
+
+    def subplot(self):
+        """Generate linked loadcase subplot."""
+        plotter = pv.Plotter(shape=(3, 4), border=False)
+
+        index = 0
+        for col in range(4):
+            for row in range(3):
+                plotter.subplot(row, col)
+                self.plot(loadcase=index+6, plotter=plotter, opacity=0,
+                          factor=2000)
+                index += 1
+        plotter.link_views()
+        plotter.show()
+
+
 
 
 if __name__ == '__main__':
@@ -162,16 +187,13 @@ if __name__ == '__main__':
     #ansys = AnsysPost('TFC2_CentralComposite', 'p3', 'N_SYM_WEDGE_2',
     #                  data_dir='\\\\io-ws-ccstore1\\ANSYS_Data\\mcintos')
 
-    ansys = AnsysPost('TFC18', 'V4', 'C_WEDGE_12')
-    ansys.select(0)
+    ansys = AnsysPost('TFC2_DoE', 'p1', 'TF1_CASE')
+    #ansys.select(0)
 
     #ansys.mesh['delta'] = ansys.mesh['displacement-17'] - \
     #                ansys.mesh['displacement-3']
     #ansys.warp('delta', factor=300)
 
-    plotter = pv.Plotter()
-    plotter.add_mesh(ansys.mesh, scalars='displacement-0', smooth_shading=True)
-    plotter.show()
-
+    ansys.subplot()
 
     #ansys.animate('tmp', 'delta', 200)

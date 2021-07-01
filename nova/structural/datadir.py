@@ -10,7 +10,7 @@ class AnsysDataDir:
     """Manage file paths."""
 
     folder: str
-    file: str
+    file: str = None
     subset: str = 'all'
     data_dir: str = 'data/Ansys'
 

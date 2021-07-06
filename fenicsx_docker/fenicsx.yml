@@ -1,0 +1,18 @@
+name: fenicsx
+channels:
+  - conda-forge
+  - spyder-ide
+  - defaults
+dependencies:
+  - python=3.9
+  - matplotlib
+  - netCDF4  
+  - numpy
+  - pandas
+  - pyvista
+  - scipy
+  - seaborn
+  - spyder=5
+  - spyder-line-profiler
+  - spyder-unittest
+  - xarray

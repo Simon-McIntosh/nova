@@ -98,3 +98,5 @@ if pyvista.OFF_SCREEN:
     plotter.screenshot("3D_function.png", transparent_background=transparent, window_size=[figsize, figsize])
 else:
     plotter.show()
+    
+

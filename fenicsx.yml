@@ -1,18 +1,41 @@
 name: fenicsx
 channels:
-  - spyder-ide
-  - defaults
   - conda-forge
+  - spyder-ide
+  - anaconda
+  - defaults
 dependencies:
-  - python=3.9
+  - blas 
+  - boost
+  - cmake
+  - gcc_linux-64 
+  - gfortran_linux-64 
+  - gmsh
+  - gxx_linux-64
+  - hdf5=*=mpi*
+  - lapack
+  - panel
+  - petsc4py
+  - pkgconfig
+  - python=3.7
+  - python-gmsh
+  - pytest
   - matplotlib
-  - netCDF4  
+  - mpi4py
+  - mpich
+  - netCDF4
+  - numba  
   - numpy
   - pandas
+  - petsc=3.15
   - pyvista
   - scipy
   - seaborn
-  - spyder=5
+  - slepc
+  - spyder=4
   - spyder-line-profiler
   - spyder-unittest
+  - sympy
   - xarray
+  - xtensor
+  - xtensor-blas

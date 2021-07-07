@@ -17,7 +17,7 @@ dependencies:
   - panel
   - petsc4py
   - pkgconfig
-  - python=3.7
+  - python=3.9
   - python-gmsh
   - pytest
   - matplotlib

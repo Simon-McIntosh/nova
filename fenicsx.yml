@@ -5,37 +5,40 @@ channels:
   - anaconda
   - defaults
 dependencies:
+  - adios2=2.7.1
   - blas 
   - boost
   - cmake
   - gcc_linux-64 
   - gfortran_linux-64 
-  - gmsh
+  - gmsh=4.8.4
   - gxx_linux-64
   - hdf5=*=mpi*
   - lapack
   - panel
   - petsc4py
   - pkgconfig
-  - python=3.9
+  - pybind11=2.6.2  
+  - python=3.8
   - python-gmsh
   - pytest
   - matplotlib
   - mpi4py
-  - mpich
   - netCDF4
   - numba  
   - numpy
+  - openmpi
   - pandas
   - petsc=3.15
-  - pyvista
+  - pyvista=0.31.1
   - scipy
   - seaborn
-  - slepc
+  - slepc=3.15
   - spyder=4
   - spyder-line-profiler
   - spyder-unittest
   - sympy
   - xarray
-  - xtensor
-  - xtensor-blas
+  - xtensor=0.23.10
+  - xtensor-blas=0.19.1
+  - xtl=0.7.2

@@ -8,26 +8,6 @@ from nova.electromagnetic.polyplot import Axes
 
 
 @dataclass
-class _BiotLoop(Axes, BiotSolve):
-    """Compute interaction across grid."""
-
-    def solve(self, target):
-        """Solve Biot interaction."""
-        self.data = Biot(self.subframe, target,
-                         reduce=[True, True], turns=[True, True],
-                         columns=['Psi']).data
-        # insert grid data
-        self.data.coords['x'] = target.x.values
-        self.data.coords['z'] = target.z.values
-
-    def plot(self, axes=None, **kwargs):
-        """Plot points."""
-        self.axes = axes
-        kwargs = dict(marker='o', linestyle='') | kwargs
-        self.axes.plot(self.data.coords['x'], self.data.coords['z'], **kwargs)
-
-
-@dataclass
 class BiotInductance(Axes, BiotSolve):
     """Compute self interaction."""
 

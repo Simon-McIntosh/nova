@@ -209,7 +209,7 @@ class PolyVector:
 
 @dataclass
 class PolyGrid(PolyCell):
-    """Construct 2d grid."""
+    """Construct 2d grid from polycell basis."""
 
     trim: bool = True
     vector: PolyVector = field(init=False)
@@ -254,9 +254,9 @@ class PolyGrid(PolyCell):
                            if poly.within(buffer) else 'polygon')
                  for poly in polys if (polytrim := poly.intersection(buffer))
                  and isinstance(polytrim, shapely.geometry.Polygon)]
-        #coords = [np.array(poly.exterior.centroid.xy).T[0]
-        #          if poly.name == 'polygon' else coord
-        #          for coord, poly in zip(coords, polys)]
+        coords = [np.array(poly.centroid.xy).T[0]
+                  if poly.name == 'polygon' else coord
+                  for coord, poly in zip(coords, polys)]
         return coords, polys
 
     def polygeoms(self, polys, coords):

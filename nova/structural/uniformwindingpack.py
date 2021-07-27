@@ -156,7 +156,7 @@ class UniformWindingPack:
 if __name__ == '__main__':
 
     ccl = UniformWindingPack()
-    ccl.plot_turns()
+    #ccl.plot_turns()
 
     #points = ccl.mesh.points.reshape(18, 134, -1, 3)
     #loop = points[9, 0]

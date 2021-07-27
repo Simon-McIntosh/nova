@@ -24,7 +24,7 @@ class TFC(Plotter):
 
     def load_ansys_data(self):
 
-        assembly = TFC18(scenario=self.scenario).mesh
+        assembly = TFC18('TFC18', scenario=self.scenario).mesh
 
         referance = TFC18(
             'TFC18', self.referance, 'WP', scenario={'TFonly': 2}).mesh
@@ -40,6 +40,7 @@ class TFC(Plotter):
         """Animate displacement."""
         filename = os.path.join(self.directory, f'{self.assembly}_delta')
         super().animate(filename, 'TFonly', view='iso', max_factor=max_factor)
+
 
     def cluster(self, n_cluster=1):
         clusters = UniformWindingPack().cluster(n_cluster)

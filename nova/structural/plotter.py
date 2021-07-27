@@ -8,9 +8,11 @@ from nova.utilities.time import clock
 class Plotter:
     """Custom pyvista plotting methods."""
 
-    def warp(self, displace: str, scalars: str,
+    def warp(self, displace: str, scalars: str=None,
              factor=75, opacity=0.5, plotter=None, **camera):
         """Plot warped with mesh."""
+        if scalars is None:
+            scalars = displace
         if plotter is None:
             plotter = pv.Plotter()
         #for key in camera:
@@ -19,11 +21,11 @@ class Plotter:
             plotter.add_mesh(self.mesh, scalars=None, color='w',
                              opacity=opacity, smooth_shading=True)
 
-        self.mesh['disp'] = self.mesh[displace] - self.mesh['disp-5']
-        self.mesh[scalars] = 1e-6*(self.mesh[scalars] - self.mesh['vm-5'])
-        warp = self.mesh.warp_by_vector('disp', factor=factor)
-        plotter.add_mesh(warp, scalars=scalars, smooth_shading=True,
-                         show_scalar_bar=False, clim=[-25, 25])
+        #self.mesh['disp'] = self.mesh[displace] - self.mesh['disp-5']
+        #self.mesh[scalars] = 1e-6*(self.mesh[scalars] - self.mesh['vm-5'])
+        warp = self.mesh.warp_by_vector(displace, factor=factor)
+        plotter.add_mesh(warp, scalars=scalars)
+        #, smooth_shading=True, show_scalar_bar=False, clim=[-25, 25])
         plotter.show()
         return plotter
 

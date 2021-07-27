@@ -33,7 +33,6 @@ class ClusterTurns:
         """Extract clusters from low-field mid-plane section."""
         n_turns = self.ccl_mesh.n_cells // 18
         self.turns = self.ccl_mesh['turns'][:n_turns]
-
         self.clusters = sklearn.cluster.KMeans(
             n_clusters=self.n_clusters,
             random_state=6, n_init=20, tol=1e-4).fit_predict(self.turns)
@@ -44,9 +43,19 @@ class ClusterTurns:
         for i in range(18):
             coil = self.ccl_mesh.extract_cells(range(i*134, (i+1)*134))
             points = coil.points.reshape(134, -1, 3)
-            for i in range(self.n_clusters):
-                index = self.clusters == i
-                self.mesh += pv.Spline(points[index].mean(axis=0))
+            point_data = {name: coil[name].reshape(134, -1, 3)
+                          for name in coil.point_arrays if 
+                          len(coil[name].shape) == 2}
+            for cluster in range(self.n_clusters):
+                index = self.clusters == cluster
+                cell = pv.Spline(points[index].mean(axis=0))
+                cell.clear_point_arrays()
+                for name in point_data:
+                    cell[name] = point_data[name][index].mean(axis=0)
+                cell.cell_arrays['nturn'] = np.sum(index)
+                cell.cell_arrays['coil'] = i
+                cell.cell_arrays['cluster'] = cluster
+                self.mesh += cell
 
     def plot_slice(self, axes=None, ms=8):
         """Plot clusters."""
@@ -66,7 +75,7 @@ class ClusterTurns:
         axes.text(self.turns[:, 0].mean(), self.turns[:, 1].max(),
                   f'{self.n_clusters}', va='bottom')
 
-    def plot_slice_array(self, clusters=[1, 3, 5, 9]):
+    def plot_slice_array(self, clusters=[1, 5, 10]):
         """Plot low-filed mid-plane slices illustrating cluster options."""
         axes = plt.subplots(1, len(clusters))[1]
         for i, n_cluster in enumerate(clusters):
@@ -87,12 +96,14 @@ class ClusterTurns:
 if __name__ == '__main__':
 
     ccl = UniformWindingPack()
-    cluster = ClusterTurns(ccl.mesh, 8)
+    cluster = ClusterTurns(ccl.mesh, 21)
+    cluster.plot_slice()
 
-    cluster.update(3)
-    #cluster.plot_slice_array()
+    #print(cluster.mesh['nturn'])
+    #cluster.update(1)
+    cluster.plot_slice_array()
 
-    cluster.plot_turn_array()
+    #cluster.plot_turn_array()
 
 
 

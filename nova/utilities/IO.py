@@ -84,7 +84,6 @@ class pythonIO:
 
     def load_netCDF(self, filepath):
         with nc4.Dataset(filepath+'.nc', 'r') as dataset:
-            print(dataset)
             attributes = dataset.groups.keys()  # read dataset groups
         for attribute in attributes:
             with xr.open_dataset(filepath+'.nc', group=attribute) as xarray:

@@ -1,0 +1,27 @@
+name: fex
+channels:
+  - conda-forge
+  - spyder-ide
+  - anaconda
+  - defaults
+dependencies:
+  - gmsh
+  - panel
+  - pybind11  
+  - python
+  - python-gmsh
+  - pytest
+  - matplotlib
+  - mpi4py
+  - netCDF4
+  - numba  
+  - numpy
+  - pandas
+  - pyvista
+  - scipy
+  - seaborn
+  - spyder
+  - spyder-line-profiler
+  - spyder-unittest
+  - sympy
+  - xarray

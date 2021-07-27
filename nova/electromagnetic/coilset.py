@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.biotgrid import BiotGrid
-from nova.electromagnetic.biotloop import BiotLoop, BiotInductance
+from nova.electromagnetic.biotinductance import BiotInductance
 from nova.electromagnetic.biotpoint import BiotPoint
 from nova.electromagnetic.coil import Coil
 from nova.electromagnetic.shell import Shell
@@ -44,7 +44,7 @@ class CoilSet(CoilGrid, FrameSet):
         self.grid = BiotGrid(self.frame, self.subframe, 'grid')
         self.point = BiotPoint(self.frame, self.subframe, 'point')
         self.probe = BiotPoint(self.frame, self.subframe, 'probe')
-        self.loop = BiotLoop(*self.frames, 'loop')
+        #self.loop = BiotLoop(*self.frames, 'loop')
         self.inductance = BiotInductance(*self.frames, 'inductance')
         if self.file is not None:
             self.load(self.file)

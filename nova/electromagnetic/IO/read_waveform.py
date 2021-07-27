@@ -86,7 +86,9 @@ class read_waveform(pythonIO):
         return filepath, file_type
 
     def locate_folder(self, file, folder, file_type='txt'):
+        print(file, folder, file_type)
         filepath, file_type = self.locate_file_type(file, file_type, folder)
+        print(filepath, file_type)
         self.filename = filepath.split(sep)[-3].replace(' ', '_')
         self.folder = folder
         self.filepath = sep.join(filepath.split(sep)[:-1]) + sep
@@ -96,6 +98,7 @@ class read_waveform(pythonIO):
         if self.nfolder == 0:
             folder = None
         folder = self.select_folder(folder)
+        print('folder', folder)
         ext = file_type.split('.')[-1].lower()
         if ext in ['xls', 'qda', 'txt']:  # *.*
             files = []
@@ -108,6 +111,7 @@ class read_waveform(pythonIO):
                              isfile(join(subfolder, f))]
                     folder_ext = [file.split('.')[-1].lower()
                                   for file in files]
+                    print(folder_ext)
                     if ext in folder_ext:
                         folder = subfolder
                         break

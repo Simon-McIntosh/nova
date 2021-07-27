@@ -136,6 +136,7 @@ class WaveForm:
 if __name__ == '__main__':
 
     wf = WaveForm('15MA DT-DINA2017-04_v1.2', 30)
+    wf = WaveForm('15MA DT-DINA2017-04_v1.2', 30)
 
-    wf.plot_spectrum('I', attr='source', color='C0')
-    wf.plot_spectrum('I', attr='sample', color='C1')
+    #wf.plot_spectrum('I', attr='source', color='C0')
+    #wf.plot_spectrum('I', attr='sample', color='C1')

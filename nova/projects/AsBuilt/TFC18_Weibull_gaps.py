@@ -599,26 +599,32 @@ class Scenario(Ensemble):
             wavenumber = [wavenumber]
         for wn in wavenumber:
             error = self.generate_error(wn, amplitude)
-            self.gaps[f'k{wn}'] = self.generate_gaps(error)
+            self.gaps[f'k{wn}'] = self.generate_gaps(error, wn)
 
     def generate_error(self, wavenumber, amplitude=1):
         """Return Fourier mode error waveform."""
         nfft = self.data.dims['gap_index']
-        if wavenumber == nfft//2 and nfft % 2 == 0:
-            amplitude *= 2j  # repeated Nyquist coefficent for even waveforms
+        if wavenumber == 0 or (wavenumber == nfft//2 and nfft % 2 == 0):
+            amplitude *= 2  # repeated Nyquist coefficent for even waveforms
 
         coef = np.full(nfft//2 + 1, 0, dtype=complex)
-        coef[wavenumber] = -1j*amplitude * (nfft//2)
+        coef[wavenumber] = amplitude * (nfft//2)
         error = scipy.fft.irfft(coef, n=nfft)
         return error
 
-    def generate_gaps(self, error):
+    def generate_gaps(self, error, wavenumber):
         """Return Fourier mode gap waveform calculated from error waveform."""
         ncoil = len(error)
         uniform_gap = self.data.total_gap / ncoil
-        placement = error + np.cumsum(np.full(ncoil, uniform_gap))
-        gaps = np.append(placement[0], np.diff(placement))
+        gaps = error + np.cumsum(np.full(ncoil, uniform_gap))
+        gaps[1:] -= gaps[:-1]
         gaps[0] += self.data.total_gap - np.sum(gaps)
+        adjust_error = np.cumsum(gaps) - np.cumsum(np.full(ncoil, uniform_gap))
+        coef = scipy.fft.rfft(adjust_error)
+        coef[0] = 0
+        coef[wavenumber] = 0
+        assert np.isclose(np.sum(gaps), self.data.total_gap)  # total gap
+        assert np.isclose(np.sum(abs(coef)), 0)  # single mode
         return gaps
 
     def plot_gap_array(self, modes=range(1, 5)):
@@ -627,9 +633,9 @@ class Scenario(Ensemble):
         axes = plt.subplots(len(modes), 2, sharex=True, sharey='col')[1]
         for i, k in enumerate(modes):
             error = self.generate_error(k)
-            gap = self.generate_gaps(error)
-            axes[i, 0].bar(range(nfft), error, color=f'C{k-1}')
-            axes[i, 1].bar(range(nfft), gap, color=f'C{k-1}')
+            gap = self.generate_gaps(error, k)
+            axes[i, 0].bar(range(nfft), error, color=f'C{k%10}')
+            axes[i, 1].bar(range(nfft), gap, color=f'C{k%10}')
             axes[i, 0].set_ylabel(f'$k_{k}$ mm')
         axes[0, 0].set_title('placement error')
         axes[0, 1].set_title('gap waveform')
@@ -646,12 +652,12 @@ class Scenario(Ensemble):
             self.append_trial({f'{stragergy}1': ('mode',),
                                f'{stragergy}2': ('sigma', 3)})
         # append Fourier modes
-        self.append_mode(self.data.wavenumber.values[1:])
+        self.append_mode(self.data.wavenumber.values)
         self.to_clipboard()
 
     def to_clipboard(self):
         """Copy gaps table to clipboard."""
-        self.gaps.to_clipboard(float_format='{0:1.2f}'.format, index=False)
+        self.gaps.to_clipboard(float_format='{0:1.3f}'.format, index=False)
 
     def to_ansys(self):
         """Write gap data to ansys txt file."""
@@ -668,14 +674,11 @@ class Scenario(Ensemble):
                 'a*: adaptive target sampled at '
                 'distribution mode and 3-sigma.\t'
                 'k*: unit amplitude Fourier modes.\t'
-                f'Created on {datetime.datetime.today():%m/%d/%Y}\t'
+                f'Created on {datetime.datetime.today():/%d/%m/%Y}\t'
                 '@author: Simon McIntosh\t'
                 '@email: mcintos@iter.org\n\n')
             gaps.to_csv(file, sep='\t', line_terminator='\n',
                         float_format='{0:1.3f}'.format)
-
-
-
 
 
 if __name__ == '__main__':
@@ -685,7 +688,11 @@ if __name__ == '__main__':
     scn.to_ansys()
 
     #plt.set_aspect(1.1)
-    #scn.plot_gap_array(range(5,10))
+    #scn.plot_gap_array(range(5, 10))
+
+    #wavenumber = 2
+    #error = scn.generate_error(wavenumber)
+    #scn.generate_gaps(error, wavenumber)
 
 
     #assembly = Assembly(1.33/2, 0.88/2, 36, sead=2025, update_target=True)

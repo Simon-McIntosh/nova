@@ -7,6 +7,7 @@ import os
 from typing import Union
 from warnings import warn
 
+import fortranformat
 import numpy as np
 import pandas
 import scipy.fft
@@ -145,7 +146,7 @@ class PDF(ABC):
 
 @dataclass
 class Weibull(PDF):
-    """Manage Weibull PDF - construct from input mean and variance."""
+    """Manage Weibull PDF - construct PDF from input mean and variance."""
 
     name: str = 'Weibull'
 
@@ -437,6 +438,8 @@ class Ensemble:
         """Return sample index mean, mode, sigma."""
         if not isinstance(sample, str):
             return sample
+        if sample == 'sample':
+            return np.where(self.data.sample == factor)[0][0]
         if sample == 'max':
             return self.data.error_modes[:, wavenumber].argmax().values
         crv = self.get_crv(wavenumber)
@@ -550,7 +553,7 @@ class Ensemble:
 
 @dataclass
 class Scenario(Ensemble):
-    """Extract gap distributions from ensemble database."""
+    """Extract gap distributions from ensemble database(s)."""
 
     index: int = 0
     database: list[str] = field(
@@ -601,7 +604,7 @@ class Scenario(Ensemble):
             error = self.generate_error(wn, amplitude)
             self.gaps[f'k{wn}'] = self.generate_gaps(error, wn)
 
-    def generate_error(self, wavenumber, amplitude=1):
+    def generate_error(self, wavenumber, amplitude=-1j):
         """Return Fourier mode error waveform."""
         nfft = self.data.dims['gap_index']
         if wavenumber == 0 or (wavenumber == nfft//2 and nfft % 2 == 0):
@@ -665,6 +668,13 @@ class Scenario(Ensemble):
         gaps = pandas.DataFrame(index=self.data.gap_index.values)
         gaps['rid'] = 2001+self.data.gap_index
         gaps = pandas.concat([gaps, self.gaps], axis=1)
+
+        ngaps = len(self.gaps)
+        header_format = fortranformat.FortranRecordWriter(
+            f'(2A8, {ngaps}A10)')
+        gap_format = fortranformat.FortranRecordWriter(
+            f'(2F8.1, {ngaps}F10.3)')
+
         with open(filename, 'w') as file:
             file.write(
                 'Candidate TFC assembly gap waveforms proposed by SCOD for '
@@ -674,23 +684,74 @@ class Scenario(Ensemble):
                 'a*: adaptive target sampled at '
                 'distribution mode and 3-sigma.\t'
                 'k*: unit amplitude Fourier modes.\t'
-                f'Created on {datetime.datetime.today():/%d/%m/%Y}\t'
+                f'Created on {datetime.datetime.today():%d/%m/%Y}\t'
                 '@author: Simon McIntosh\t'
                 '@email: mcintos@iter.org\n\n')
-            gaps.to_csv(file, sep='\t', line_terminator='\n',
-                        float_format='{0:1.3f}'.format)
+            gaps_txt = gaps.to_csv(
+                    sep='\t', line_terminator='\n',
+                    float_format='{0:1.3f}'.format).split('\n')
+            file.write(header_format.write(gaps_txt[0].split('\t')) + '\n')
+            for line in gaps_txt[1:-1]:
+                file.write(gap_format.write(
+                    [float(gap) for gap in line.split('\t')]) + '\n')
+            # gaps.to_csv(file, sep='\t', line_terminator='\n',
+            #             float_format='{0:1.3f}'.format)
+
+    def rebuild(self, sample, factor=None, wavenumber=1):
+        """Reconstruct error from zero-phase Fourier modes."""
+        self.load_sample_data(sample, factor, wavenumber)
+        data = self.assembly.data
+
+        coef = scipy.fft.rfft(data.error.values)
+
+        ncoil = len(data.error)
+
+        modes = range(1, 10)
+
+        error = np.full(ncoil, coef[0].real / 18, dtype=float)  # k0
+        for wn in modes:
+            phase = np.angle(coef[wn])
+            wavelength = ncoil / wn
+            shift = wavelength*phase / (2*np.pi) + wavelength*np.arange(wn)
+
+            index = np.argmin(shift % 1)
+            shift = -int(np.round(shift[index]))
+            amplitude = np.abs(coef[wn]) / (ncoil//2)
+            if wn == 9:
+                amplitude /= 2
+
+            component = self.generate_error(wn, amplitude)
+            error += np.roll(component, shift)
+
+        reduced_coef = np.full(ncoil//2 + 1, 0, dtype=complex)
+        reduced_coef[0] = coef[0]
+        reduced_coef[modes] = coef[modes]
+        reduced_error = scipy.fft.irfft(reduced_coef)
+
+        plt.bar(range(ncoil), data.error)
+        plt.bar(range(ncoil), reduced_error, width=0.7)
+        plt.bar(range(ncoil), error, width=0.5)
+
+        print(np.linalg.norm(error-reduced_error))
+        print(np.max(error))
+        print(100*np.linalg.norm(error-reduced_error) / np.max(error))
 
 
 if __name__ == '__main__':
 
     scn = Scenario()
-    scn.build()
-    scn.to_ansys()
+
+    #scn.rebuild('sample', 37122)  # three sigma
+    #scn.rebuild('sample', 71348)  # mode
+
+
+    #scn.build()
+    #scn.to_ansys()
 
     #plt.set_aspect(1.1)
-    #scn.plot_gap_array(range(5, 10))
+    scn.plot_gap_array(range(5, 10))
 
-    #wavenumber = 2
+    #wavenumber = 1
     #error = scn.generate_error(wavenumber)
     #scn.generate_gaps(error, wavenumber)
 

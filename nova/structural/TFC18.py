@@ -39,11 +39,11 @@ class TFC18(AnsysDataDir, Plotter):
     def vtk_file(self):
         """Return vtk file path."""
         return os.path.join(self.directory, f'{self.file}.vtk')
-    
-    @property 
+
+    @property
     def csv_file(self):
         """Return csv filename."""
-        return os.path.join(self.directory, 
+        return os.path.join(self.directory,
                             f'{self.file}_{self.cluster}loop.csv')
 
     def load(self):
@@ -86,7 +86,7 @@ class TFC18(AnsysDataDir, Plotter):
         """Retun interpolated mesh."""
         return source.interpolate(target, sharpness=sharpness, radius=radius,
                                   strategy='closest_point')
-    
+
     def to_dataframe(self):
         """Return mesh as dataframe."""
         mesh = self.mesh.copy()
@@ -108,21 +108,24 @@ class TFC18(AnsysDataDir, Plotter):
             frames.append(pandas.DataFrame(data))
         frame = pandas.concat(frames)
         print(frame)
-        
+
         frame.to_csv(self.csv_file, index=False)
-        
+
         #index = range(len(self.mesh.cell_points(0))-1)
-        
+
         #dataset = xarray.Dataset(
         #    coords=dict(scenario=['TF-only'],
-                                             
+
         #                                     )
         #def to_xarray(self):
         #print(xarray.Dataset({'v4': frame}))
 
     def plot(self):
         """Plot warped shape."""
-        self.warp('TFonly-cooldown')
+        if 'TFonly-cooldown' not in self.mesh.array_names:
+            self.mesh['TFonly-cooldown'] = self.mesh['TFonly'] - \
+                self.mesh['cooldown']
+        self.warp('cooldown', factor=170)
 
     def animate(self):
         """Animate displacement."""
@@ -132,11 +135,11 @@ class TFC18(AnsysDataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFC18', 'v4', cluster=5)
-        
-    #tf.to_dataframe()
+    tf = TFC18('TFC18', 'c0', cluster=5)
 
-    #tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
+    #tf.to_dataframe()
+    tf.plot()
+    #
     #tf.warp('TFonly-cooldown', factor=120)
-    
+
     #tf.animate()

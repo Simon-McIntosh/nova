@@ -100,3 +100,4 @@ class WindingPack:
 if __name__ == '__main__':
 
     wp = WindingPack('TFC1_CL')
+    wp.mesh.plot()

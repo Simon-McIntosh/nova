@@ -40,10 +40,10 @@ class Plotter:
         plotter.add_mesh(reference, color='w', opacity=0.5,
                          smooth_shading=True)
         plotter.add_mesh(self.mesh, scalars=scalars, smooth_shading=False)
-        #plotter.camera.zoom(1.5)
-        #if view != 'iso':
-        #    getattr(plotter, f'view_{view}')()
-        #    plotter.camera.zoom(5)
+        plotter.camera.zoom(1.5)
+        if view != 'iso':
+            getattr(plotter, f'view_{view}')()
+            plotter.camera.zoom(5)
         filename += f'_{view}'
         plotter.open_gif(f'{filename}.gif')
 

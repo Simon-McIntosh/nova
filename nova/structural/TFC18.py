@@ -58,7 +58,8 @@ class TFC18(AnsysDataDir, Plotter):
 
     def load_ansys(self):
         """Load ansys vtk mesh."""
-        ansys = AnsysPost(self.folder, self.file, self.subset).mesh
+        ansys = AnsysPost(self.folder, self.file, self.subset,
+                          self.data_dir).mesh
         self.ansys = ansys.copy()
         self.ansys.clear_point_arrays()
         for scn in self.scenario:
@@ -125,17 +126,21 @@ class TFC18(AnsysDataDir, Plotter):
         if 'TFonly-cooldown' not in self.mesh.array_names:
             self.mesh['TFonly-cooldown'] = self.mesh['TFonly'] - \
                 self.mesh['cooldown']
-        self.warp('cooldown', factor=170)
+        self.warp('TFonly-cooldown', factor=120)
 
     def animate(self):
         """Animate displacement."""
         filename = os.path.join(self.directory, self.file)
-        super().animate(filename, 'TFonly-cooldown', view='xy')
+        super().animate(filename, 'TFonly-cooldown', view='xy',
+                        max_factor=160)
 
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFC18', 'c0', cluster=5)
+    tf = TFC18('TFCgapsG10', 'a2', cluster=5,
+               data_dir='\\\\io-ws-ccstore1\\ANSYS_Data\\mcintos')
+
+    tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
 
     #tf.to_dataframe()
     tf.plot()

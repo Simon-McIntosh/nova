@@ -13,24 +13,25 @@ from nova.structural.uniformwindingpack import UniformWindingPack
 class TFC(Plotter):
     """Construct error displacement fields for TF coilset."""
 
-    loadcase: tuple[str] = ('v0', 'v4')
+    folder: str
+    data_dir: str = '//io-ws-ccstore1/ANSYS_Data/mcintos'
+    loadcase: tuple[str] = ('k0', 'c2')
     scenario: dict[str, int] = field(default_factory=lambda: {'TFonly': 2})
     mesh: pv.PolyData = field(init=False, repr=False)
 
     def __post_init__(self):
         """Load analysis data."""
-        self.directory = os.path.join(root_dir, 'data/Ansys/TFC18')
+        #self.directory = os.path.join(root_dir, 'data/Ansys/TFC18')
+        self.directory = self.data_dir
         self.load_ansys_data()
 
     def load_ansys_data(self):
+        referance = TFC18(self.folder, self.loadcase[0],
+                          scenario=self.scenario, data_dir=self.data_dir).mesh
+        assembly = TFC18(self.folder, self.loadcase[1],
+                         scenario=self.scenario, data_dir=self.data_dir).mesh
 
-        assembly = TFC18('TFC18', scenario=self.scenario).mesh
-
-        referance = TFC18(
-            'TFC18', self.referance, 'WP', scenario={'TFonly': 2}).mesh
-
-        self.mesh = TFC18(
-            'TFC18', self.loadcase[0], 'WP', scenario=self.scenario).mesh
+        self.mesh = referance.copy()
         self.mesh.clear_arrays()
         self.mesh['referance'] = referance['TFonly']
         self.mesh['assembly'] = assembly['TFonly']
@@ -48,6 +49,12 @@ class TFC(Plotter):
 
 if __name__ == '__main__':
 
-    tfc = TFC()
-    tfc.warp('delta')
+    tfc = TFC('TFCgapsG10', data_dir='//io-ws-ccstore1/ANSYS_Data/mcintos',
+              loadcase=('k0', 'c2'))
+
+    #tfc = TFC('TFC18/parallel',
+    #          data_dir='//io-ws-ccstore1/ANSYS_Data/mcintos',
+    #          loadcase=('v0', 'v4'))
+
+    tfc.warp('delta', factor=500)
     #tfc.animate()

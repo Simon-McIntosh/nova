@@ -184,10 +184,13 @@ class AnsysPost(AnsysDataDir, Plotter):
 
 if __name__ == '__main__':
 
+    ansys = AnsysPost('TFCgapsG10', 'c0', 'N_SYM_WEDGE_2',
+                      data_dir='\\\\io-ws-ccstore1\\ANSYS_Data\\mcintos')
+
     #ansys = AnsysPost('TFC2_CentralComposite', 'p3', 'N_SYM_WEDGE_2',
     #                  data_dir='\\\\io-ws-ccstore1\\ANSYS_Data\\mcintos')
 
-    ansys = AnsysPost('TFC2_DoE', 'p3', 'TF1_CASE')
+    #ansys = AnsysPost('TFC2_DoE', 'p3', 'TF1_CASE')
     #ansys.select(0)
 
     #ansys.mesh['delta'] = ansys.mesh['displacement-17'] - \

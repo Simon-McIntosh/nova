@@ -44,7 +44,7 @@ class ClusterTurns:
             coil = self.ccl_mesh.extract_cells(range(i*134, (i+1)*134))
             points = coil.points.reshape(134, -1, 3)
             point_data = {name: coil[name].reshape(134, -1, 3)
-                          for name in coil.point_arrays if 
+                          for name in coil.point_arrays if
                           len(coil[name].shape) == 2}
             for cluster in range(self.n_clusters):
                 index = self.clusters == cluster
@@ -87,11 +87,12 @@ class ClusterTurns:
         ncols = int(np.ceil(len(clusters) / nrows))
         plotter = pv.Plotter(shape=(nrows, ncols))
         for i, n_cluster in enumerate(clusters):
-            plotter.subplot(i//nrows, i%ncols)
+            plotter.subplot(i//nrows, i % ncols)
             self.update(n_cluster)
             plotter.add_mesh(self.mesh)
         plotter.link_views()
         plotter.show()
+
 
 if __name__ == '__main__':
 

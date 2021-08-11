@@ -21,7 +21,7 @@ class TFC18(AnsysDataDir, Plotter):
 
     cluster: int = 1
     scenario: dict[str, int] = field(
-        default_factory=lambda: dict(cooldown=1, TFonly=2))
+        default_factory=lambda: dict(cooldown=1, TFonly=2, SOD=3, EOB=4))
     ansys: pv.PolyData = field(init=False, repr=False)
     mesh: pv.PolyData = field(init=False, repr=False)
 
@@ -59,7 +59,7 @@ class TFC18(AnsysDataDir, Plotter):
     def load_ansys(self):
         """Load ansys vtk mesh."""
         ansys = AnsysPost(self.folder, self.file, self.subset,
-                          self.data_dir).mesh
+                          self.rst_dir).mesh
         self.ansys = ansys.copy()
         self.ansys.clear_point_arrays()
         for scn in self.scenario:
@@ -79,7 +79,10 @@ class TFC18(AnsysDataDir, Plotter):
         self.mesh.clear_arrays()
         for scn in self.scenario:
             self.mesh[scn] = mesh[scn]
-        self.mesh['turns'] = mesh['turns']
+        try:
+            self.mesh['turns'] = mesh['turns']
+        except KeyError:
+            pass
         self.mesh.save(self.vtk_file)
 
     def interpolate_coils(self, source, target, sharpness=3, radius=1.5,
@@ -121,30 +124,33 @@ class TFC18(AnsysDataDir, Plotter):
         #def to_xarray(self):
         #print(xarray.Dataset({'v4': frame}))
 
-    def plot(self):
-        """Plot warped shape."""
-        if 'TFonly-cooldown' not in self.mesh.array_names:
-            self.mesh['TFonly-cooldown'] = self.mesh['TFonly'] - \
-                self.mesh['cooldown']
-        self.warp('TFonly-cooldown', factor=120)
+    def diff(self, displace: str, reference: str='TFonly'):
+        """Diffrence array and return name."""
+        name = f'{displace}-cooldown'
+        if name not in self.mesh.array_names:
+            self.mesh[name] = self.mesh[displace] - self.mesh[reference]
+        return name
 
-    def animate(self):
+    def plot(self, displace: str, factor=80):
+        """Plot warped shape."""
+        self.warp(self.diff(displace), factor=factor)
+
+    def animate(self, displace: str, view='xy'):
         """Animate displacement."""
         filename = os.path.join(self.directory, self.file)
-        super().animate(filename, 'TFonly-cooldown', view='xy',
-                        max_factor=160)
+        super().animate(filename, self.diff(displace), view=view,
+                        max_factor=80)
 
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'a2', cluster=5,
-               data_dir='\\\\io-ws-ccstore1\\ANSYS_Data\\mcintos')
+    tf = TFC18('TFCgapsG10', 'k1', cluster=None)
 
-    tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
+    #tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
 
     #tf.to_dataframe()
-    tf.plot()
+    #tf.plot('EOB', factor=500)
     #
     #tf.warp('TFonly-cooldown', factor=120)
 
-    #tf.animate()
+    tf.animate('EOB', view='iso')

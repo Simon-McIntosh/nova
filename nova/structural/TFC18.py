@@ -4,19 +4,21 @@ import os
 
 import numpy as np
 import pandas
+import pathlib
 import pyvista as pv
 import xarray
 
 from nova.structural.ansyspost import AnsysPost
 from nova.structural.clusterturns import ClusterTurns
-from nova.structural.datadir import AnsysDataDir
+from nova.structural.datadir import DataDir
 from nova.structural.plotter import Plotter
 from nova.structural.windingpack import WindingPack
 from nova.structural.uniformwindingpack import UniformWindingPack
+from nova.utilities.time import clock
 
 
 @dataclass
-class TFC18(AnsysDataDir, Plotter):
+class TFC18(DataDir, Plotter):
     """Post-process Ansys output from F4E's 18TF coil model."""
 
     cluster: int = 1
@@ -32,24 +34,29 @@ class TFC18(AnsysDataDir, Plotter):
         self.load()
 
     def __str__(self):
-        """Return Ansys model descriptor."""
-        return AnsysPost(*self.metadata).__str__()
+        """Return Ansys model descriptor (takes time - remote mount)."""
+        return AnsysPost(*self.ansys_args).__str__()
 
-    @property
-    def vtk_file(self):
-        """Return vtk file path."""
-        return os.path.join(self.directory, f'{self.file}.vtk')
+    def reload(self, file):
+        """Reload source file."""
+        self.file = file
+        self.__post_init__()
 
-    @property
-    def csv_file(self):
-        """Return csv filename."""
-        return os.path.join(self.directory,
-                            f'{self.file}_{self.cluster}loop.csv')
+    def load_ensemble(self):
+        """Load ensemble dataset and store reduced data in vtk format."""
+        _file = self.file
+        paths = list(pathlib.Path(self.rst_folder).rglob('*.rst'))
+        tick = clock(len(paths), header=f'loading {len(paths)} *.rst files')
+        for path in paths:
+            file = path.name.replace('.rst', '')
+            self.reload(file)
+            tick.tock()
+        self.reload(_file)
 
     def load(self):
         """Load vtm data file."""
         try:
-            self.mesh = pv.read(self.vtk_file)
+            self.mesh = pv.read(self.ccl_file)
         except FileNotFoundError:
             self.load_ansys()
             self.load_mesh()
@@ -58,12 +65,14 @@ class TFC18(AnsysDataDir, Plotter):
 
     def load_ansys(self):
         """Load ansys vtk mesh."""
-        ansys = AnsysPost(self.folder, self.file, self.subset,
-                          self.rst_dir).mesh
+        ansys = AnsysPost(*self.args).mesh
         self.ansys = ansys.copy()
         self.ansys.clear_point_arrays()
         for scn in self.scenario:
-            self.ansys[scn] = ansys[f'disp-{self.scenario[scn]}']
+            try:
+                self.ansys[scn] = ansys[f'disp-{self.scenario[scn]}']
+            except KeyError:
+                pass
 
     def load_windingpack(self):
         """Load conductor windingpack."""
@@ -78,18 +87,27 @@ class TFC18(AnsysDataDir, Plotter):
         mesh = self.mesh.copy()
         self.mesh.clear_arrays()
         for scn in self.scenario:
-            self.mesh[scn] = mesh[scn]
+            try:
+                self.mesh[scn] = mesh[scn]
+            except KeyError:
+                pass
         try:
             self.mesh['turns'] = mesh['turns']
         except KeyError:
             pass
-        self.mesh.save(self.vtk_file)
+        self.mesh.save(self.ccl_file)
 
     def interpolate_coils(self, source, target, sharpness=3, radius=1.5,
                           n_cells=7):
         """Retun interpolated mesh."""
         return source.interpolate(target, sharpness=sharpness, radius=radius,
                                   strategy='closest_point')
+
+    @property
+    def csv_file(self):
+        """Return csv filename."""
+        return os.path.join(self.directory,
+                            f'{self.file}_{self.cluster}loop.csv')
 
     def to_dataframe(self):
         """Return mesh as dataframe."""
@@ -126,14 +144,14 @@ class TFC18(AnsysDataDir, Plotter):
 
     def diff(self, displace: str, reference: str='TFonly'):
         """Diffrence array and return name."""
-        name = f'{displace}-cooldown'
+        name = f'{displace}-{reference}'
         if name not in self.mesh.array_names:
             self.mesh[name] = self.mesh[displace] - self.mesh[reference]
         return name
 
-    def plot(self, displace: str, factor=80):
+    def plot(self, displace: str, referance='TFonly', factor=80):
         """Plot warped shape."""
-        self.warp(self.diff(displace), factor=factor)
+        self.warp(self.diff(displace, referance), factor=factor)
 
     def animate(self, displace: str, view='xy'):
         """Animate displacement."""
@@ -144,13 +162,13 @@ class TFC18(AnsysDataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'k1', cluster=None)
+    tf = TFC18('TFCgapsG10', 'k0', cluster=None)
 
     #tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
 
     #tf.to_dataframe()
-    #tf.plot('EOB', factor=500)
+    tf.plot('TFonly', 'cooldown', factor=50)
     #
     #tf.warp('TFonly-cooldown', factor=120)
 
-    tf.animate('EOB', view='iso')
+    #tf.animate('EOB', view='iso')

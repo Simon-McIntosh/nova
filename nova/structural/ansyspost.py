@@ -7,12 +7,12 @@ from ansys.dpf import post
 import numpy as np
 import pyvista as pv
 
-from nova.structural.datadir import AnsysDataDir
+from nova.structural.datadir import DataDir
 from nova.structural.plotter import Plotter
 
 
 @dataclass
-class AnsysPost(AnsysDataDir, Plotter):
+class AnsysPost(DataDir, Plotter):
     """Manage access to Ansys results file."""
 
     model: dpf.Model = field(init=False, repr=False)
@@ -29,18 +29,6 @@ class AnsysPost(AnsysDataDir, Plotter):
     def __str__(self):
         """Return Ansys model descriptor."""
         return self.model.__str__()
-
-    @property
-    def rst_file(self):
-        """Return rst file path."""
-        return os.path.join(self.directory, f'{self.file}.rst')
-
-    @property
-    def vtk_file(self):
-        """Return vtk file path."""
-        if self.subset == 'all':
-            return os.path.join(self.directory, f'{self.file}.vtk')
-        return os.path.join(self.directory, f'{self.file}_{self.subset}.vtk')
 
     def load(self):
         """Load vtk mesh file."""
@@ -64,7 +52,6 @@ class AnsysPost(AnsysDataDir, Plotter):
         self.mesh.field_arrays['time_scoping'] = self.time_scoping
         self.load_displacement()
         self.load_vonmises()
-        # self.load_gap()
         self.mesh.save(self.vtk_file)
 
     def load_meshed_region(self):

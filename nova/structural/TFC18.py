@@ -46,9 +46,12 @@ class TFC18(DataDir, Plotter):
         """Load ensemble dataset and store reduced data in vtk format."""
         _file = self.file
         paths = list(pathlib.Path(self.rst_folder).rglob('*.rst'))
-        tick = clock(len(paths), header=f'loading {len(paths)} *.rst files')
-        for path in paths:
-            file = path.name.replace('.rst', '')
+        files = [file for path in paths if not
+                 os.path.isfile(self.vtk_file.replace(
+                     self.file, file := path.name[:-4]))]
+        nfiles = len(files)
+        tick = clock(nfiles, header=f'loading {nfiles} *.rst files [{files}]')
+        for file in files:
             self.reload(file)
             tick.tock()
         self.reload(_file)

@@ -19,8 +19,6 @@ class DataDir:
         """Set data directory."""
         self.directory = os.path.join(root_dir, self.data_dir, self.folder)
         self.mkdir(self.directory)
-        self.vtk_folder = os.path.join(self.directory, 'vtk')
-        self.mkdir(self.vtk_folder)
 
     def mkdir(self, path):
         """Create dir if not present."""
@@ -38,17 +36,31 @@ class DataDir:
         return os.path.join(self.rst_folder, f'{self.file}.rst')
 
     @property
-    def vtk_file(self):
+    def ansys_folder(self):
+        """Return path of Ansys part vtk folder."""
+        ansys_folder = os.path.join(self.directory, 'ansys')
+        self.mkdir(ansys_folder)
+        return ansys_folder
+
+    @property
+    def ansys_file(self):
         """Return vtk file path."""
         if self.subset == 'all':
-            return os.path.join(self.vtk_folder, f'{self.file}.vtk')
-        return os.path.join(self.vtk_folder,
+            return os.path.join(self.ansys_folder, f'{self.file}.vtk')
+        return os.path.join(self.ansys_folder,
                             f'{self.file}_{self.subset.lower()}.vtk')
+
+    @property
+    def ccl_folder(self):
+        """Return path of conductor centerline vtk folder."""
+        ccl_folder = os.path.join(self.directory, 'ccl')
+        self.mkdir(ccl_folder)
+        return ccl_folder
 
     @property
     def ccl_file(self):
         """Return ccl file path."""
-        return os.path.join(self.directory, f'{self.file}_ccl.vtk')
+        return os.path.join(self.ccl_folder, f'{self.file}_ccl.vtk')
 
     @property
     def args(self):

@@ -33,7 +33,7 @@ class AnsysPost(DataDir, Plotter):
     def load(self):
         """Load vtk mesh file."""
         try:
-            self.mesh = pv.read(self.vtk_file)
+            self.mesh = pv.read(self.ansys_file)
             self.time_support = self.mesh.field_arrays['time_support']
             self.time_scoping = self.mesh.field_arrays['time_scoping']
         except FileNotFoundError:
@@ -52,7 +52,7 @@ class AnsysPost(DataDir, Plotter):
         self.mesh.field_arrays['time_scoping'] = self.time_scoping
         self.load_displacement()
         self.load_vonmises()
-        self.mesh.save(self.vtk_file)
+        self.mesh.save(self.ansys_file)
 
     def load_meshed_region(self):
         """Return scoped dpf meshed region."""

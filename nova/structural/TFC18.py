@@ -43,14 +43,14 @@ class TFC18(DataDir, Plotter):
         self.__post_init__()
 
     def load_ensemble(self):
-        """Load ensemble dataset and store reduced data in vtk format."""
+        """Load ensemble ccl dataset and store reduced data in vtk format."""
         _file = self.file
         paths = list(pathlib.Path(self.rst_folder).rglob('*.rst'))
         files = [file for path in paths if not
-                 os.path.isfile(self.vtk_file.replace(
+                 os.path.isfile(self.ccl_file.replace(
                      self.file, file := path.name[:-4]))]
         nfiles = len(files)
-        tick = clock(nfiles, header=f'loading {nfiles} *.rst files [{files}]')
+        tick = clock(nfiles, header=f'loading {nfiles} *.rst files {files}')
         for file in files:
             self.reload(file)
             tick.tock()
@@ -62,7 +62,7 @@ class TFC18(DataDir, Plotter):
             self.mesh = pv.read(self.ccl_file)
         except FileNotFoundError:
             self.load_ansys()
-            self.load_mesh()
+            self.load_ccl()
         if self.cluster:
             self.mesh = ClusterTurns(self.mesh, self.cluster).mesh
 
@@ -83,7 +83,7 @@ class TFC18(DataDir, Plotter):
             return UniformWindingPack().mesh
         return WindingPack('TFC1_CL').mesh
 
-    def load_mesh(self):
+    def load_ccl(self):
         """Load referance windingpack ccl."""
         self.mesh = self.load_windingpack()
         self.mesh = self.interpolate_coils(self.mesh, self.ansys)

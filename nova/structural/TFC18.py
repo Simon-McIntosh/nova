@@ -164,10 +164,11 @@ if __name__ == '__main__':
 
     tf = TFC18('TFCgapsG10', 'k0', cluster=None)
 
+    tf.load_ensemble()
     #tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
 
     #tf.to_dataframe()
-    tf.plot('TFonly', 'cooldown', factor=50)
+    #tf.plot('TFonly', 'cooldown', factor=50)
     #
     #tf.warp('TFonly-cooldown', factor=120)
 

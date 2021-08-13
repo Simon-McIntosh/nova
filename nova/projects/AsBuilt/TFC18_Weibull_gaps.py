@@ -117,7 +117,7 @@ class PDF(ABC):
         plt.xlabel('gap $U$ mm')
         plt.ylabel('P($U$)')
         plt.title(f'{self.name}\n'
-                  f'$\mu={self.mean:1.1f}$, $\sigma={self.std:1.2f}$')
+                  rf'$\mu={self.mean:1.1f}$, $\sigma={self.std:1.2f}$')
 
     def plot_array(self, mean, variance, sample=None):
         """Plot distribution array."""
@@ -220,7 +220,9 @@ class Assembly:
     ssat_std: float = 1.5
     pit_std: float = 1.5
     total_gap: float = 36
-    update_target: bool = False
+    update_target: dict[str, bool] = field(
+        default=lambda: dict(ssat=True, inpit=True))
+    update_ssat: bool = False
     ncoil: int = 18
     sead: int = 2025
     pdf: PDFs = field(init=False, repr=False)
@@ -238,12 +240,14 @@ class Assembly:
         self.initialize_dataset()
         self.data.gap[0] = self.sample(self.uniform_gap, 'ssat')
         for i in range(1, 9):
-            self.set_target(2*i)
+            self.set_target(2*i, self.update_target['ssat'])
             self.data.gap[2*i] = self.sample(
-                self.data.target[2*i].values, 'ssat')
-            self.set_target(2*i-1)
+                self.data.target[2*i].values, 'ssat',
+                self.update_target['ssat'])
+            self.set_target(2*i-1, self.update_target['inpit'])
             self.data.gap[2*i-1] = self.sample(
-                self.data.target[2*i-1].values, 'inpit')
+                self.data.target[2*i-1].values, 'inpit',
+                self.update_target['inpit'])
         self.close_cage()
         self.update_error()
 
@@ -266,21 +270,28 @@ class Assembly:
         """Manage assembly attributes."""
         return dict(ssat_std=self.pdf.ssat.std, pit_std=self.pdf.inpit.std,
                     total_gap=self.total_gap,
-                    update_target=int(self.update_target), sead=self.sead)
+                    update_ssat=int(self.update_target['ssat']),
+                    update_inpit=int(self.update_target['inpit']),
+                    sead=self.sead)
 
     @attrs.setter
     def attrs(self, attrs):
         self.pdf.update_std(attrs['ssat_std'], attrs['pit_std'])
         self.total_gap = attrs['total_gap']
         self.sead = attrs['sead']
-        self.update_target = bool(attrs.get('update_target', 1))
+        if 'update_target' in attrs:
+            update = bool(attrs['update_target'])
+            self.update_target = dict(ssat=update, inpit=update)
+        else:
+            self.update_target['ssat'] = bool(attrs.get('update_ssat', 1))
+            self.update_traget['inpit'] = bool(attrs.get('update_inpit', 1))
 
-    def sample(self, mean, stage: str):
+    def sample(self, mean, stage: str, update_target=True):
         """Return sample from PDF."""
         if mean < 0.01:
             mean = 0.01
         pdf = getattr(self.pdf, stage)
-        if self.update_target:
+        if update_target:
             pdf.update_mean(mean)
         return pdf.sample(size=1)[0]
 
@@ -289,9 +300,9 @@ class Assembly:
         return np.sum(self.data.gap[:2*pair_index+1]) - \
             (2*pair_index + 1) * self.uniform_gap
 
-    def set_target(self, index):
+    def set_target(self, index: int, update_target: bool):
         """Set taget gap."""
-        if not self.update_target:
+        if not update_target:
             return
         pair_index = (index+1) // 2
         error = self.get_error(pair_index)
@@ -739,7 +750,7 @@ class Scenario(Ensemble):
 
 if __name__ == '__main__':
 
-    scn = Scenario()
+    #scn = Scenario()
 
     #scn.rebuild('sample', 37122)  # three sigma
     #scn.rebuild('sample', 71348)  # mode
@@ -749,20 +760,24 @@ if __name__ == '__main__':
     #scn.to_ansys()
 
     #plt.set_aspect(1.1)
-    scn.plot_gap_array(range(5, 10))
+    #scn.plot_gap_array(range(5, 10))
 
     #wavenumber = 1
     #error = scn.generate_error(wavenumber)
     #scn.generate_gaps(error, wavenumber)
 
 
-    #assembly = Assembly(1.33/2, 0.88/2, 36, sead=2025, update_target=True)
-    #ensemble = Ensemble('TFCgaps_at', assembly, samples=100000)
-    #ensemble.plot_sample('sigma', 3, wavenumber=1, plot_error=True)
+    assembly = Assembly(1.33/2, 0.88/2, 36, sead=2025,
+                        update_target=dict(ssat=False, inpit=True))
+    #assembly.solve()
+    #assembly.plot()
 
-    #ensemble.load_sample_data('mean')
-    #ensemble.assembly.plot_error(range(4))
-    #ensemble.plot_wavenumber_array()
+    ensemble = Ensemble('TFCgaps_ap', assembly, samples=100000)
+    ensemble.plot_sample('sigma', 3, wavenumber=1, plot_error=True)
+
+    ensemble.load_sample_data('mean')
+    ensemble.assembly.plot_error(range(4))
+    ensemble.plot_wavenumber_array()
 
     #pdf = Weibull()
     #pdf.plot()

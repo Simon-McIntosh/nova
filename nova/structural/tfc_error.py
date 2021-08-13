@@ -25,7 +25,7 @@ class TFCgap(DataDir, Plotter):
 
     def load_ansys_data(self):
         """Diffrence model data (file - baseline)."""
-        model = TFC18(*self.data_args, cluster=self.cluster)
+        model = TFC18(*self.args, cluster=self.cluster)
         self.mesh = model.mesh.copy()
         self.mesh.clear_arrays()
         target = model.mesh.copy()
@@ -59,5 +59,5 @@ if __name__ == '__main__':
     #          data_dir='//io-ws-ccstore1/ANSYS_Data/mcintos',
     #          loadcase=('v0', 'v4'))
 
-    gap.warp('EOB', factor=800)
+    gap.warp('EOB', factor=800, opacity=0)
     #gaps.animate(1000)

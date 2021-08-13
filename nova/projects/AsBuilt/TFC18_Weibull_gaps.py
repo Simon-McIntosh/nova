@@ -568,7 +568,7 @@ class Scenario(Ensemble):
 
     index: int = 0
     database: list[str] = field(
-        default_factory=lambda: ['TFCgaps_ct', 'TFCgaps_at'])
+        default_factory=lambda: ['TFCgaps_c', 'TFCgaps_a'])
     gaps: pandas.DataFrame = field(init=False, repr=False)
 
     def __post_init__(self):
@@ -607,22 +607,25 @@ class Scenario(Ensemble):
             self.load_sample_data(*columns[scenario], wavenumber=wavenumber[i])
             self.gaps[scenario] = self.assembly.data.gap.values
 
-    def append_mode(self, wavenumber, amplitude=1):
+    def append_mode(self, wavenumber, amplitude=1, phase=0, label='k'):
         """Append Fourier mode to gaps table."""
         if not isinstance(wavenumber, Iterable):
             wavenumber = [wavenumber]
+        if phase != 0:
+            wavenumber = wavenumber[1:]  # skip zero mode
+            label += 'p'
         for wn in wavenumber:
-            error = self.generate_error(wn, amplitude)
-            self.gaps[f'k{wn}'] = self.generate_gaps(error, wn)
+            error = self.generate_error(wn, amplitude, phase)
+            self.gaps[f'{label}{wn}'] = self.generate_gaps(error, wn)
 
-    def generate_error(self, wavenumber, amplitude=-1j):
+    def generate_error(self, wavenumber, amplitude=1, phase=0):
         """Return Fourier mode error waveform."""
         nfft = self.data.dims['gap_index']
         if wavenumber == 0 or (wavenumber == nfft//2 and nfft % 2 == 0):
             amplitude *= 2  # repeated Nyquist coefficent for even waveforms
 
         coef = np.full(nfft//2 + 1, 0, dtype=complex)
-        coef[wavenumber] = amplitude * (nfft//2)
+        coef[wavenumber] = amplitude * (nfft//2) * np.exp(1j*phase)
         error = scipy.fft.irfft(coef, n=nfft)
         return error
 
@@ -641,12 +644,12 @@ class Scenario(Ensemble):
         assert np.isclose(np.sum(abs(coef)), 0)  # single mode
         return gaps
 
-    def plot_gap_array(self, modes=range(1, 5)):
+    def plot_gap_array(self, modes=range(1, 5), phase=0):
         """Plot array of error waveforms for all Fourier modes."""
         nfft = self.data.dims['gap_index']
         axes = plt.subplots(len(modes), 2, sharex=True, sharey='col')[1]
         for i, k in enumerate(modes):
-            error = self.generate_error(k)
+            error = self.generate_error(k, phase=i*phase)
             gap = self.generate_gaps(error, k)
             axes[i, 0].bar(range(nfft), error, color=f'C{k%10}')
             axes[i, 1].bar(range(nfft), gap, color=f'C{k%10}')
@@ -657,25 +660,47 @@ class Scenario(Ensemble):
             axes[-1, j].set_xlabel('gap index')
         plt.despine()
 
-    def build(self):
+    def build(self, target: list[str] = '', phase_shift=False):
         """Build gap table."""
         self.initialize_gaps()
         # append mode and 3sigma assembly trials
-        for stragergy in 'ca':  # constant target, adaptive target
-            self.name = f'TFCgaps_{stragergy}t'
+        for stragergy in target:  # constant target, adaptive target
+            self.name = f'TFCgaps_{stragergy}'
             self.append_trial({f'{stragergy}1': ('mode',),
                                f'{stragergy}2': ('sigma', 3)})
         # append Fourier modes
-        self.append_mode(self.data.wavenumber.values)
+        phase = np.pi/18 if phase_shift else 0
+        self.append_mode(self.data.wavenumber.values, phase=phase)
         self.to_clipboard()
 
     def to_clipboard(self):
         """Copy gaps table to clipboard."""
         self.gaps.to_clipboard(float_format='{0:1.3f}'.format, index=False)
 
-    def to_ansys(self):
+    def file_header(self, filename):
+        """Return output file header."""
+        title = ('Candidate TFC assembly gap waveforms proposed and '
+                 'analyized by SCOD.\t')
+        scenario = dict(
+            constant_adaptive_fourier='c*: constant target sampled at '
+                                      'distribution mode and 3-sigma.\t'
+                                      'a*: adaptive target (ssat & inpit) '
+                                      'sampled at '
+                                      'distribution mode and 3-sigma.\t'
+                                      'k*: unit amplitude Fourier modes.\t',
+            constant_ssat_fourier_shift='cs*: ssat constant target & '
+                                        'inpit adaptive target '
+                                        ' sampled at '
+                                        'distribution mode and 3-sigma.\t'
+                                        'kp*: unit amplitude Fourier modes '
+                                        'phase shifted by pi/18.\t')
+        identity = (f'Created on {datetime.datetime.today():%d/%m/%Y}\t'
+                    '@author: Simon McIntosh\t @email: mcintos@iter.org')
+        return title + scenario[filename] + identity + '\n\n'
+
+    def to_ansys(self, filename: str):
         """Write gap data to ansys txt file."""
-        filename = os.path.join(self.filepath, 'TFC18_assembly_trial_gaps.txt')
+        filepath = os.path.join(self.filepath, f'{filename}.txt')
         gaps = pandas.DataFrame(index=self.data.gap_index.values)
         gaps['rid'] = 2001+self.data.gap_index
         gaps = pandas.concat([gaps, self.gaps], axis=1)
@@ -686,18 +711,8 @@ class Scenario(Ensemble):
         gap_format = fortranformat.FortranRecordWriter(
             f'(2F8.1, {ngaps}F10.3)')
 
-        with open(filename, 'w') as file:
-            file.write(
-                'Candidate TFC assembly gap waveforms proposed by SCOD for '
-                'structural analysis within the Magnets section.\t'
-                'c*: continuous target sampled at '
-                'distribution mode and 3-sigma.\t'
-                'a*: adaptive target sampled at '
-                'distribution mode and 3-sigma.\t'
-                'k*: unit amplitude Fourier modes.\t'
-                f'Created on {datetime.datetime.today():%d/%m/%Y}\t'
-                '@author: Simon McIntosh\t'
-                '@email: mcintos@iter.org\n\n')
+        with open(filepath, 'w') as file:
+            file.write(self.file_header(filename))
             gaps_txt = gaps.to_csv(
                     sep='\t', line_terminator='\n',
                     float_format='{0:1.3f}'.format).split('\n')
@@ -750,23 +765,23 @@ class Scenario(Ensemble):
 
 if __name__ == '__main__':
 
-    #scn = Scenario()
+    scn = Scenario()
 
     #scn.rebuild('sample', 37122)  # three sigma
     #scn.rebuild('sample', 71348)  # mode
 
 
-    #scn.build()
-    #scn.to_ansys()
+    scn.build(target='ca', phase_shift=False)
+    scn.to_ansys('constant_adaptive_fourier')
 
     #plt.set_aspect(1.1)
-    #scn.plot_gap_array(range(5, 10))
+    #scn.plot_gap_array(range(5, 10), phase=np.pi/18)
 
     #wavenumber = 1
     #error = scn.generate_error(wavenumber)
     #scn.generate_gaps(error, wavenumber)
 
-
+    '''
     assembly = Assembly(1.33/2, 0.88/2, 36, sead=2025,
                         update_target=dict(ssat=False, inpit=True))
     #assembly.solve()
@@ -778,6 +793,7 @@ if __name__ == '__main__':
     ensemble.load_sample_data('mean')
     ensemble.assembly.plot_error(range(4))
     ensemble.plot_wavenumber_array()
+    '''
 
     #pdf = Weibull()
     #pdf.plot()

@@ -283,8 +283,9 @@ class Assembly:
             update = bool(attrs['update_target'])
             self.update_target = dict(ssat=update, inpit=update)
         else:
-            self.update_target['ssat'] = bool(attrs.get('update_ssat', 1))
-            self.update_traget['inpit'] = bool(attrs.get('update_inpit', 1))
+            self.update_target = dict(
+                ssat=bool(attrs.get('update_ssat', 1)),
+                inpit=bool(attrs.get('update_inpit', 1)))
 
     def sample(self, mean, stage: str, update_target=True):
         """Return sample from PDF."""
@@ -568,7 +569,7 @@ class Scenario(Ensemble):
 
     index: int = 0
     database: list[str] = field(
-        default_factory=lambda: ['TFCgaps_c', 'TFCgaps_a'])
+        default_factory=lambda: ['TFCgaps_c', 'TFCgaps_a', 'TFCgaps_cs'])
     gaps: pandas.DataFrame = field(init=False, repr=False)
 
     def __post_init__(self):
@@ -673,6 +674,12 @@ class Scenario(Ensemble):
         self.append_mode(self.data.wavenumber.values, phase=phase)
         self.to_clipboard()
 
+        # store known formats
+        if target == 'ca' and not phase_shift:
+            return self.to_ansys('constant_adaptive_fourier')
+        if target == ['cs'] and phase_shift:
+            return self.to_ansys('constant_ssat_fourier_shift')
+
     def to_clipboard(self):
         """Copy gaps table to clipboard."""
         self.gaps.to_clipboard(float_format='{0:1.3f}'.format, index=False)
@@ -684,13 +691,13 @@ class Scenario(Ensemble):
         scenario = dict(
             constant_adaptive_fourier='c*: constant target sampled at '
                                       'distribution mode and 3-sigma.\t'
-                                      'a*: adaptive target (ssat & inpit) '
+                                      'a*: adaptive target (ssat & in-pit) '
                                       'sampled at '
                                       'distribution mode and 3-sigma.\t'
                                       'k*: unit amplitude Fourier modes.\t',
             constant_ssat_fourier_shift='cs*: ssat constant target & '
-                                        'inpit adaptive target '
-                                        ' sampled at '
+                                        'in-pit adaptive target '
+                                        'sampled at '
                                         'distribution mode and 3-sigma.\t'
                                         'kp*: unit amplitude Fourier modes '
                                         'phase shifted by pi/18.\t')
@@ -765,14 +772,17 @@ class Scenario(Ensemble):
 
 if __name__ == '__main__':
 
-    scn = Scenario()
+    scn = Scenario(index=2)
 
     #scn.rebuild('sample', 37122)  # three sigma
-    #scn.rebuild('sample', 71348)  # mode
+    #scn.rebuild('mode')  # mode
 
 
-    scn.build(target='ca', phase_shift=False)
-    scn.to_ansys('constant_adaptive_fourier')
+    #scn.build(target='ca', phase_shift=False)
+    scn.build(target=['cs'], phase_shift=True)
+
+    scn.load_sample_data('mode')
+    scn.assembly.plot()
 
     #plt.set_aspect(1.1)
     #scn.plot_gap_array(range(5, 10), phase=np.pi/18)

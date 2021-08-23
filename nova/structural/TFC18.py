@@ -106,16 +106,15 @@ class TFC18(DataDir, Plotter):
         return source.interpolate(target, sharpness=sharpness, radius=radius,
                                   strategy='closest_point')
 
-    @property
-    def csv_file(self):
+    def csv_file(self, scenario: str):
         """Return csv filename."""
         return os.path.join(self.directory,
-                            f'{self.file}_{self.cluster}loop.csv')
+                            f'{self.file}_{scenario}_{self.cluster}.csv')
 
-    def to_dataframe(self):
+    def to_dataframe(self, scenario):
         """Return mesh as dataframe."""
         mesh = self.mesh.copy()
-        mesh.points += mesh['TFonly']
+        mesh.points += mesh[scenario]
         frames = list()
         for cell in range(mesh.n_cells):
             points = mesh.cell_points(cell)
@@ -132,9 +131,7 @@ class TFC18(DataDir, Plotter):
                         dx=vector[:, 0], dy=vector[:, 1], dz=vector[:, 2])
             frames.append(pandas.DataFrame(data))
         frame = pandas.concat(frames)
-        print(frame)
-
-        frame.to_csv(self.csv_file, index=False)
+        frame.to_csv(self.csv_file(scenario), index=False)
 
         #index = range(len(self.mesh.cell_points(0))-1)
 
@@ -144,6 +141,16 @@ class TFC18(DataDir, Plotter):
         #                                     )
         #def to_xarray(self):
         #print(xarray.Dataset({'v4': frame}))
+
+    def export(self):
+        """Export dataset."""
+        for file in ['c1', 'c2', 'a1', 'a2'] + [f'k{i}' for i in range(10)]:
+            for cluster in [1, 5, 10]:
+                self.cluster = cluster
+                self.reload(file)
+                for scenario in ['TFonly', 'SOD', 'EOB']:
+                    print(file, cluster, scenario)
+                    self.to_dataframe(scenario)
 
     def diff(self, displace: str, reference: str='TFonly'):
         """Diffrence array and return name."""
@@ -165,13 +172,15 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'a1', cluster=None)
+    tf = TFC18('TFCgapsG10', 'a1', cluster=1)
 
     #tf.load_ensemble()
     #tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
 
-    #tf.to_dataframe()
-    tf.plot('TFonly', 'cooldown', factor=50)
+    #tf.to_dataframe('EOB')
+
+    tf.export()
+    #tf.plot('TFonly', 'cooldown', factor=50)
     #
     #tf.warp('TFonly-cooldown', factor=120)
 

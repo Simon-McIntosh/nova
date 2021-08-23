@@ -60,7 +60,8 @@ class DataDir:
     @property
     def ccl_file(self):
         """Return ccl file path."""
-        return os.path.join(self.ccl_folder, f'{self.file}_ccl.vtk')
+        postfix = 'ccl' if self.cluster is None else 'uccl'
+        return os.path.join(self.ccl_folder, f'{self.file}_{postfix}.vtk')
 
     @property
     def args(self):

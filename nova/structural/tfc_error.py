@@ -60,4 +60,4 @@ if __name__ == '__main__':
     #          loadcase=('v0', 'v4'))
 
     gap.warp('EOB', factor=800, opacity=0)
-    #gaps.animate(1000)
+    #gap.animate(1000)

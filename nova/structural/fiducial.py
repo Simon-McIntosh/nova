@@ -451,7 +451,7 @@ class FiducialData:
     def infer(self, coil_index):
 
         length = np.append(self.data.target_length.values, 1)
-        data = self.data.dn[coil_index].values
+        data = self.data.dt[coil_index].values
         data = np.append(data, data[0])
         index = ~np.isnan(data)
         length, data = length[index], data[index]
@@ -463,7 +463,7 @@ class FiducialData:
         kernel = 1.0 * RBF(length_scale=0.3, length_scale_bounds=(0.05, 1)) +\
             WhiteKernel(noise_level=0.25, noise_level_bounds=(1e-8, 1))
         gpr = GaussianProcessRegressor(kernel=kernel,
-                                       alpha=0.05).fit(length, data)
+                                       alpha=0.5).fit(length, data)
         X_ = np.linspace(0, 1, 100)
         y_mean, y_cov = gpr.predict(X_[:, np.newaxis], return_cov=True)
 
@@ -483,4 +483,4 @@ class FiducialData:
 if __name__ == '__main__':
 
     fiducial = FiducialData()
-    fiducial.infer(1)
+    fiducial.infer(0)

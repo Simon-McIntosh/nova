@@ -1,7 +1,6 @@
 """Manage as-designed coil winding pack descriptors."""
 from dataclasses import dataclass, field
 import os
-from typing import Union
 
 import numpy as np
 import pandas
@@ -9,22 +8,23 @@ import pyvista as pv
 from scipy.spatial.transform import Rotation
 
 from nova.definitions import root_dir
+from nova.structural.line import Line
 from nova.structural.windingpack import WindingPack
 from nova.utilities.pyplot import plt
 
 
 @dataclass
-class UniformWindingPack:
+class UniformWindingPack(Line):
     """Simplify TF conductor centerline for EM calculations."""
 
     wp_mesh: pv.PolyData = field(init=False, repr=False)
-    txt_mesh: pv.PolyData = field(init=False, repr=False)
+    spine_mesh: pv.PolyData = field(init=False, repr=False)
     mesh: pv.PolyData = field(init=False, repr=False)
 
     def __post_init__(self):
         """Load winding-pack mesh."""
         self.wp_mesh = WindingPack('TFC1_CL').mesh
-        self.read_txt()
+        self.read_spine()
         self.load_ccl()
 
     @property
@@ -33,8 +33,8 @@ class UniformWindingPack:
         return os.path.join(root_dir, 'input/geometry/ITER/TF_UCCL.vtk')
 
     @property
-    def txt_file(self):
-        """Return txt file path."""
+    def spine_file(self):
+        """Return spine file path."""
         return os.path.join(root_dir, 'input/geometry/ITER/TFC1_CCL.txt')
 
     def load_ccl(self):
@@ -47,36 +47,14 @@ class UniformWindingPack:
             self.pattern_mesh()
             self.mesh.save(self.vtk_file)
 
-    def read_txt(self):
-        """Read TFC1 conductor centerline from txt file."""
-        points = pandas.read_csv(self.txt_file, delimiter='\t',
+    def read_spine(self):
+        """Read TFC1 conductor centerline from spine file."""
+        points = pandas.read_csv(self.spine_file, delimiter='\t',
                                  skiprows=1, header=None).to_numpy()
         points = np.insert(points, 1, np.zeros(len(points)), axis=1)
         points = np.append(points, points[:1, :], axis=0)
-        self.txt_mesh = pv.Spline(points)
-        self.compute_tangent(self.txt_mesh)
-
-    @staticmethod
-    def normalize(vector):
-        """Return normalized vector."""
-        norm = np.linalg.norm(vector, axis=1).reshape(-1, 1) @ np.ones((1, 3))
-        return vector / norm
-
-    def compute_tangent(self, mesh):
-        """Compute centerline tangent as central diffrence."""
-        points = mesh.points
-        # forward diffrence
-        forward = np.zeros(points.shape)
-        forward[:-1] = points[1:] - points[:-1]
-        forward[-1] = forward[0]
-        forward = self.normalize(forward)
-        # backward diffrence
-        backward = np.zeros(points.shape)
-        backward[1:] = points[1:] - points[:-1]
-        backward[0] = backward[-1]
-        backward = self.normalize(backward)
-        # central diffrence
-        mesh['tangent'] = (forward + backward) / 2
+        self.spine_mesh = pv.Spline(points)
+        self.tangent(self.spine_mesh)
 
     def select_coil(self, n_coil, n_cells=7):
         """Return mesh for single TF coil."""
@@ -94,8 +72,8 @@ class UniformWindingPack:
         """Return sliced mesh."""
         if isinstance(coil, int):
             coil = self.select_coil(coil)
-        tangent = self.txt_mesh['tangent'][index]
-        point = self.txt_mesh.points[index]
+        tangent = self.spine_mesh['tangent'][index]
+        point = self.spine_mesh.points[index]
         plane = coil.slice(tangent, point)
         cube = pv.Cube(center=[0, 0, -0.03],
                        x_length=0.1, y_length=0.9, z_length=0.7)
@@ -118,9 +96,9 @@ class UniformWindingPack:
     def compute_ccl(self):
         """Extract winding centerlines from slices."""
         coil = self.select_coil(0)
-        loops = np.zeros((134, self.txt_mesh.n_points, 3))
+        loops = np.zeros((134, self.spine_mesh.n_points, 3))
         index = 0
-        for i in range(self.txt_mesh.n_points):
+        for i in range(self.spine_mesh.n_points):
             plane = self.slice_coil(coil, i)
             try:
                 loops[:, index] = plane.points
@@ -155,7 +133,7 @@ class UniformWindingPack:
 
 if __name__ == '__main__':
 
-    ccl = UniformWindingPack()
+    wp = UniformWindingPack()
     #ccl.plot_turns()
 
     #points = ccl.mesh.points.reshape(18, 134, -1, 3)

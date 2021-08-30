@@ -1,7 +1,5 @@
 """Load ccl fiducial data for ITER TF coilset."""
-from collections.abc import Iterable
 from dataclasses import dataclass, field, InitVar
-from typing import Union
 import string
 
 import numpy as np
@@ -34,7 +32,7 @@ class GaussianProcessRegressor:
         """Build Gaussian Process Regressor."""
         if self.regressor is None:
             ExpSineSquared = sklearn.gaussian_process.kernels.ExpSineSquared(
-                length_scale=0.5, length_scale_bounds=(0.1, 1e2),
+                length_scale=0.6, length_scale_bounds=(0.2, 1e2),
                 periodicity=1.0, periodicity_bounds='fixed')
             kernel = ExpSineSquared
             self.regressor = sklearn.gaussian_process.GaussianProcessRegressor(
@@ -208,17 +206,17 @@ class FiducialData:
     @property
     def _tfc02(self):
         """Return TFC02 fiducial data - JA."""
-        return self.coordinate_transform(pandas.DataFrame(
+        return pandas.DataFrame(
             index=['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
             columns=['dx', 'dy', 'dz'],
-            data=[[-0.01, -0.3, -0.71],
-                  [0.0, -0.41, -0.51],
-                  [0.31, 1.84, -0.93],
-                  [0.08, -1.95, -2.91],
-                  [-0.44, -0.79, -5.18],
-                  [1.06, -0.62, -2.29],
-                  [-1.39, -1.93, -5.96],
-                  [-0.96, -0.3, 0.73]])), 'JA'
+            data=[[-0.63, 0.41, 0.09],
+                  [-0.68, 0.43, -0.12],
+                  [-0.52, 0.92, 1.67],
+                  [-2.67, 0.92, -2.35],
+                  [-4.41, 0.53, -0.32],
+                  [-1.9, 1.69, -0.05],
+                  [-4.76, -0.68, -1.73],
+                  [0.25, -0.49, 0.04]]), 'JA'
 
     @property
     def _tfc03(self):
@@ -457,8 +455,8 @@ class FiducialData:
 
     @property
     def _tfc12(self):
-        """Return TFC12 fiducial data - JA."""
-        return pandas.DataFrame(
+        """Return TFC12 fiducial data - JA 2UD358."""
+        return self.coordinate_transform(pandas.DataFrame(
             index=['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
             columns=['dx', 'dy', 'dz'],
             data=[[-0.21,  0.17, -0.7],
@@ -468,12 +466,12 @@ class FiducialData:
                   [1.74, -0.97, -5.1],
                   [0.57, -0.89, -2.51],
                   [0.96, -2.12, -6.22],
-                  [-0.77, -0.08,  0.62]]), 'JA'
+                  [-0.77, -0.08,  0.62]])), 'JA'
 
     @property
     def _tfc13(self):
         """Return TFC13 fiducial data - JA."""
-        return pandas.DataFrame(
+        return self.coordinate_transform(pandas.DataFrame(
             index=['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
             columns=['dx', 'dy', 'dz'],
             data=[[0.58, -1.4, -0.56],
@@ -483,7 +481,7 @@ class FiducialData:
                   [-0.39, -2.12, -6.48],
                   [0.71, -1.34, -0.94],
                   [-1.3, -2.33, -4.92],
-                  [-0.7, -1.94, 0.55]]), 'JA'
+                  [-0.7, -1.94, 0.55]])), 'JA'
 
     @property
     def _tfc14(self):
@@ -587,4 +585,4 @@ if __name__ == '__main__':
 
     fiducial.plot()
 
-    fiducial.plot_gpr(-1, 0)
+    fiducial.plot_gpr(0, 0)

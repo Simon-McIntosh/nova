@@ -22,10 +22,17 @@ PETSC_SLEPC_DEBUGGING="no"
 # Ubuntu MPI variant. "mpich" or "openmpi".
 MPI="mpich"
 
+# Install directories 
+export PETSC_DIR=/usr/local/petsc 
+export SLEPC_DIR=/usr/local/slepc
 
 # Environment variables
 export OPENBLAS_NUM_THREADS=1 
 export OPENBLAS_VERBOSE=0
+
+# Use python from conda env 
+source ~/anaconda3/etc/profile.d/conda.sh
+conda activate fenicsx
 
 # Install dependencies available via apt-get.
 # - First set of packages are required to build and run FEniCS.
@@ -33,9 +40,9 @@ export OPENBLAS_VERBOSE=0
 #   documentation or tests.
 # - Third set of packages are optional, but required to run gmsh
 #   pre-built binaries.
-sudo apt-get -qq update
-sudo apt-get -yq --with-new-pkgs -o Dpkg::Options::="--force-confold" upgrade 
-sudo apt-get -y install \
+apt-get -qq update
+apt-get -yq --with-new-pkgs -o Dpkg::Options::="--force-confold" upgrade 
+apt-get -y install \
     clang \
     cmake \
     g++ \
@@ -56,14 +63,14 @@ sudo apt-get -y install \
     python3-scipy \
     python3-setuptools 
 #
-sudo apt-get -y install \
+apt-get -y install \
 	doxygen \
 	git \
 	graphviz \
 	valgrind \
 	wget 
 #
-sudo apt-get -y install \
+apt-get -y install \
 	libglu1 \
 	libxcursor-dev \
 	libxft2 \
@@ -71,23 +78,30 @@ sudo apt-get -y install \
 	libfltk1.3-dev \
 	libfreetype6-dev  \
 	libgl1-mesa-dev \
-	libocct-foundation-dev \
-	libocct-data-exchange-dev && \
+	liboce-foundation-dev \
+	liboce-modeling-dev \
+	liboce-visualization-dev
+	# libocct-foundation-dev \
+	# libocct-data-exchange-dev 
 #
-sudo apt-get clean 
-sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
+apt-get clean 
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+ 
 # Install Python packages (via pip)
 # - First set of packages are required to build and run DOLFINx Python.
 # - Second set of packages are recommended and/or required to build
 #   documentation or run tests.
 # LLVM_CONFIG required on aarch64, should be removed long-term.
-export LLVM_CONFIG=/usr/bin/llvm-config-9 pip3 install --no-cache-dir mpi4py numba 
-pip3 install --no-cache-dir cffi cppimport flake8 pybind11==${PYBIND11_VERSION} pytest pytest-xdist sphinx sphinx_rtd_theme
+LLVM_CONFIG=/usr/bin/llvm-config-9 pip3 install \
+	--trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
+	--no-cache-dir mpi4py numba 
+pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
+	-no-cache-dir cffi cppimport flake8 pybind11==${PYBIND11_VERSION} pytest pytest-xdist sphinx sphinx_rtd_theme
 
 # Upgrade numpy via pip. Exclude binaries to avoid conflicts with libblas
 # (See issue #126 and #1305)
-pip3 install --no-cache-dir --no-binary="numpy" numpy==${NUMPY_VERSION} --upgrade
+pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
+	--no-cache-dir --no-binary="numpy" numpy==${NUMPY_VERSION} --upgrade
 
 # Install xtl, xtensor, xtensor-blas.
 git clone -b ${XTL_VERSION} --single-branch https://github.com/xtensor-stack/xtl.git 
@@ -107,21 +121,25 @@ ninja install
 rm -rf xtl xtensor xtensor-blas
 
 # Install KaHIP
-wget -nc --quiet https://github.com/kahip/kahip/archive/v${KAHIP_VERSION}.tar.gz 
-tar -xf v${KAHIP_VERSION}.tar.gz 
-cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DNONATIVEOPTIMIZATIONS=on -B build-dir -S KaHIP-${KAHIP_VERSION} 
-cmake --build build-dir 
-cmake --install build-dir 
-rm -rf /tmp/*
+git clone https://github.com/KaHIP/KaHIP
+cd KaHIP
+./compile_withcmake.sh
+cd ../
 
 # Install ADIOS2
-wget -nc --quiet https://github.com/ornladios/ADIOS2/archive/v${ADIOS2_VERSION}.tar.gz -O adios2-v${ADIOS2_VERSION}.tar.gz 
-mkdir -p adios2-v${ADIOS2_VERSION} 
-tar -xf adios2-v${ADIOS2_VERSION}.tar.gz -C adios2-v${ADIOS2_VERSION} --strip-components 1 
-cmake -G Ninja -DADIOS2_USE_Fortran=off -DBUILD_TESTING=off -DADIOS2_BUILD_EXAMPLES=off -DADIOS2_USE_ZeroMQ=off -B build-dir -S ./adios2-v${ADIOS2_VERSION} 
-cmake --build build-dir 
-cmake --install build-dir 
-rm -rf /tmp/*
+git clone https://github.com/ornladios/ADIOS2.git ADIOS2
+mkdir adios2-build && cd adios2-build
+cmake ../ADIOS2 
+make -j 16 
+make install 
+cd ../
+#wget -nc --quiet https://github.com/ornladios/ADIOS2/archive/v${ADIOS2_VERSION}.tar.gz -O adios2-v${ADIOS2_VERSION}.tar.gz 
+#mkdir -p adios2-v${ADIOS2_VERSION} 
+#tar -xf adios2-v${ADIOS2_VERSION}.tar.gz -C adios2-v${ADIOS2_VERSION} --strip-components 1 
+#cmake -G Ninja -DADIOS2_USE_Fortran=off -DBUILD_TESTING=off -DADIOS2_BUILD_EXAMPLES=off -DADIOS2_USE_ZeroMQ=off -B build-dir -S ./adios2-v${ADIOS2_VERSION} 
+#cmake --build build-dir 
+#cmake --install build-dir 
+#rm -rf /tmp/*
 
 # Install GMSH
 git clone -b gmsh_${GMSH_VERSION} --single-branch https://gitlab.onelab.info/gmsh/gmsh.git 
@@ -133,12 +151,11 @@ rm -rf /tmp/*
 export PYTHONPATH=/usr/local/lib:$PYTHONPATH
 
 # Install PETSc and petsc4py with real and complex types
-export PETSC_DIR=/usr/local/petsc 
-export SLEPC_DIR=/usr/local/slepc
-sudo apt-get -qq update 
-sudo apt-get -y install bison flex 
+apt-get -qq update 
+apt-get -y install bison flex 
 wget -nc --quiet http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-${PETSC_VERSION}.tar.gz -O petsc-${PETSC_VERSION}.tar.gz 
-mkdir -p ${PETSC_DIR} && tar -xf petsc-${PETSC_VERSION}.tar.gz -C ${PETSC_DIR} --strip-components 1 
+mkdir -p ${PETSC_DIR}  
+tar -xf petsc-${PETSC_VERSION}.tar.gz -C ${PETSC_DIR} --strip-components 1 
 cd ${PETSC_DIR} 
 # Real, 32-bit int
 python3 ./configure \
@@ -221,12 +238,15 @@ python3 ./configure \
 		--download-superlu_dist \
 		--with-scalar-type=complex 
 make PETSC_DIR=/usr/local/petsc PETSC_ARCH=linux-gnu-complex-64 ${MAKEFLAGS} all 
+
 # Install petsc4py
+cd ${PETSC_DIR} 
 cd src/binding/petsc4py 
-PETSC_ARCH=linux-gnu-real-32:linux-gnu-complex-32:linux-gnu-real-64:linux-gnu-complex-64 pip3 install --no-cache-dir . 
+PETSC_ARCH=linux-gnu-real-32:linux-gnu-complex-32:linux-gnu-real-64:linux-gnu-complex-64 pip3 install \
+	--trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org --no-cache-dir . 
 # Cleanup
-sudo apt-get -y purge bison flex 
-sudo apt-get -y autoremove 
+apt-get -y purge bison flex 
+apt-get -y autoremove 
 apt-get clean 
 rm -rf \
 	${PETSC_DIR}/**/tests/ \
@@ -242,11 +262,14 @@ rm -rf \
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install SLEPc
-wget -nc --quiet https://slepc.upv.es/download/distrib/slepc-${SLEPC_VERSION}.tar.gz -O slepc-${SLEPC_VERSION}.tar.gz 
-mkdir -p ${SLEPC_DIR} && tar -xf slepc-${SLEPC_VERSION}.tar.gz -C ${SLEPC_DIR} --strip-components 1 
+wget -nc --quiet https://slepc.upv.es/download/distrib/slepc-${SLEPC_VERSION}.tar.gz -O slepc-${SLEPC_VERSION}.tar.gz --no-check-certificate
+mkdir -p ${SLEPC_DIR}
+tar -xf slepc-${SLEPC_VERSION}.tar.gz -C ${SLEPC_DIR} --strip-components 1 
+
 cd ${SLEPC_DIR} 
+
 export PETSC_ARCH=linux-gnu-real-32 
-python3 ./configure 
+python3 ./configure  
 make 
 export PETSC_ARCH=linux-gnu-complex-32 
 python3 ./configure 
@@ -257,9 +280,13 @@ make
 export PETSC_ARCH=linux-gnu-complex-64 
 python3 ./configure 
 make 
+
 # Install slepc4py
+cd ${SLEPC_DIR} 
 cd src/binding/slepc4py 
-PETSC_ARCH=linux-gnu-real-32:linux-gnu-complex-32:linux-gnu-real-64:linux-gnu-complex-64 pip3 install --no-cache-dir . 
+PETSC_ARCH=linux-gnu-real-32:linux-gnu-complex-32:linux-gnu-real-64:linux-gnu-complex-64 pip3 install \
+	 --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
+	 --no-cache-dir . 
 rm -rf ${SLEPC_DIR}/CTAGS ${SLEPC_DIR}/TAGS ${SLEPC_DIR}/docs ${SLEPC_DIR}/src/ ${SLEPC_DIR}/**/obj/ ${SLEPC_DIR}/**/test/ 
 rm -rf /tmp/*
 

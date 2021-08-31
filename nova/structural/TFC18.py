@@ -167,21 +167,21 @@ class TFC18(DataDir, Plotter):
         """Animate displacement."""
         filename = os.path.join(self.directory, self.file)
         super().animate(filename, self.diff(displace), view=view,
-                        max_factor=80)
+                        max_factor=160)
 
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'a1', cluster=1)
+    tf = TFC18('TFCgapsG10', 'v0', cluster=1)
 
     #tf.load_ensemble()
-    #tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
+    tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
 
     #tf.to_dataframe('EOB')
 
-    tf.export()
-    #tf.plot('TFonly', 'cooldown', factor=50)
+    #tf.export()
+    tf.plot('TFonly', 'cooldown', factor=180)
     #
     #tf.warp('TFonly-cooldown', factor=120)
 
-    #tf.animate('EOB', view='iso')
+    #tf.animate('TFonly-cooldown', view='xy')

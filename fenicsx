@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Requires cmake>=*, gcc>=*, boost>=*
+
 GMSH_VERSION=4_8_4
 PYBIND11_VERSION=2.7.1
 PETSC_VERSION=3.15.2
@@ -22,27 +24,38 @@ PETSC_SLEPC_DEBUGGING="no"
 # Ubuntu MPI variant. "mpich" or "openmpi".
 MPI="mpich"
 
-# Install directories 
-export PETSC_DIR=/usr/local/petsc 
-export SLEPC_DIR=/usr/local/slepc
-
 # Environment variables
 export OPENBLAS_NUM_THREADS=1 
 export OPENBLAS_VERBOSE=0
 
-# Use python from conda env 
-source ~/anaconda3/etc/profile.d/conda.sh
+# Activate python venv
+source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate fenicsx
 
+# Install directories 
+export BUILD_DIR=$(pwd)
+export PETSC_DIR=$HOME/petsc 
+export SLEPC_DIR=$HOME/slepc
+export DOLFIN_REAL_DIR=$HOME/dolfinx-real
+export DOLFIN_COMPLEX_DIR=$HOME/dolfinx-complex
+
+# Set paths Real by default. - use below to configure env
+# export PKG_CONFIG_PATH=$DOLFIN_REAL_DIR/lib/pkgconfig:$PKG_CONFIG_PATH 
+# export PETSC_ARCH=linux-gnu-real-32 
+# export PYTHONPATH=$DOLFIN_REAL_DIR/lib/python3.8/dist-packages:$PYTHONPATH 
+# export LD_LIBRARY_PATH=$DOLFIN_REAL_DIR/lib:$LD_LIBRARY_PATH
+
+: <<'EOF'
 # Install dependencies available via apt-get.
 # - First set of packages are required to build and run FEniCS.
 # - Second set of packages are recommended and/or required to build
 #   documentation or tests.
 # - Third set of packages are optional, but required to run gmsh
 #   pre-built binaries.
-apt-get -qq update
-apt-get -yq --with-new-pkgs -o Dpkg::Options::="--force-confold" upgrade 
-apt-get -y install \
+sudo apt-get -qq update
+sudo apt-get -yq --with-new-pkgs -o Dpkg::Options::="--force-confold" upgrade 
+
+sudo apt-get -y install \
     clang \
     cmake \
     g++ \
@@ -63,14 +76,14 @@ apt-get -y install \
     python3-scipy \
     python3-setuptools 
 #
-apt-get -y install \
+sudo apt-get -y install \
 	doxygen \
 	git \
 	graphviz \
 	valgrind \
 	wget 
 #
-apt-get -y install \
+sudo apt-get -y install \
 	libglu1 \
 	libxcursor-dev \
 	libxft2 \
@@ -81,12 +94,13 @@ apt-get -y install \
 	liboce-foundation-dev \
 	liboce-modeling-dev \
 	liboce-visualization-dev
+	# oce/occt for Ubuntu 20.04
 	# libocct-foundation-dev \
 	# libocct-data-exchange-dev 
 #
-apt-get clean 
-rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
- 
+sudo apt-get clean 
+sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 # Install Python packages (via pip)
 # - First set of packages are required to build and run DOLFINx Python.
 # - Second set of packages are recommended and/or required to build
@@ -96,7 +110,7 @@ LLVM_CONFIG=/usr/bin/llvm-config-9 pip3 install \
 	--trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
 	--no-cache-dir mpi4py numba 
 pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
-	-no-cache-dir cffi cppimport flake8 pybind11==${PYBIND11_VERSION} pytest pytest-xdist sphinx sphinx_rtd_theme
+	--no-cache-dir cffi cppimport flake8 pybind11==${PYBIND11_VERSION} pytest pytest-xdist sphinx sphinx_rtd_theme
 
 # Upgrade numpy via pip. Exclude binaries to avoid conflicts with libblas
 # (See issue #126 and #1305)
@@ -104,55 +118,47 @@ pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --tru
 	--no-cache-dir --no-binary="numpy" numpy==${NUMPY_VERSION} --upgrade
 
 # Install xtl, xtensor, xtensor-blas.
-git clone -b ${XTL_VERSION} --single-branch https://github.com/xtensor-stack/xtl.git 
+[ ! -d ./xtl ] && git clone -b ${XTL_VERSION} --single-branch https://github.com/xtensor-stack/xtl.git 
 cd xtl 
 cmake -G Ninja . 
-ninja install 
-cd ../ 
-git clone -b ${XTENSOR_VERSION} --single-branch https://github.com/xtensor-stack/xtensor.git 
-cd xtensor && \
+sudo ninja install 
+cd $BUILD_DIR 
+[ ! -d ./xtensor ] && git clone -b ${XTENSOR_VERSION} --single-branch https://github.com/xtensor-stack/xtensor.git 
+cd xtensor 
 cmake -G Ninja . 
-ninja install 
-cd ../ 
-git clone -b ${XTENSOR_BLAS_VERSION} --single-branch https://github.com/xtensor-stack/xtensor-blas.git 
+sudo ninja install 
+cd $BUILD_DIR
+[ ! -d ./xtensor-blas ] && git clone -b ${XTENSOR_BLAS_VERSION} --single-branch https://github.com/xtensor-stack/xtensor-blas.git 
 cd xtensor-blas 
 cmake -G Ninja . 
-ninja install 
-rm -rf xtl xtensor xtensor-blas
+sudo ninja install
+cd $BUILD_DIR
 
 # Install KaHIP
-git clone https://github.com/KaHIP/KaHIP
-cd KaHIP
-./compile_withcmake.sh
-cd ../
+wget -nc --quiet https://github.com/kahip/kahip/archive/v${KAHIP_VERSION}.tar.gz 
+tar -xf v${KAHIP_VERSION}.tar.gz 
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DNONATIVEOPTIMIZATIONS=on -B KaHIP-${KAHIP_VERSION}/build-dir -S KaHIP-${KAHIP_VERSION} 
+cmake --build KaHIP-${KAHIP_VERSION}/build-dir 
+sudo cmake --install KaHIP-${KAHIP_VERSION}/build-dir 
 
 # Install ADIOS2
-git clone https://github.com/ornladios/ADIOS2.git ADIOS2
-mkdir adios2-build && cd adios2-build
-cmake ../ADIOS2 
-make -j 16 
-make install 
-cd ../
-#wget -nc --quiet https://github.com/ornladios/ADIOS2/archive/v${ADIOS2_VERSION}.tar.gz -O adios2-v${ADIOS2_VERSION}.tar.gz 
-#mkdir -p adios2-v${ADIOS2_VERSION} 
-#tar -xf adios2-v${ADIOS2_VERSION}.tar.gz -C adios2-v${ADIOS2_VERSION} --strip-components 1 
-#cmake -G Ninja -DADIOS2_USE_Fortran=off -DBUILD_TESTING=off -DADIOS2_BUILD_EXAMPLES=off -DADIOS2_USE_ZeroMQ=off -B build-dir -S ./adios2-v${ADIOS2_VERSION} 
-#cmake --build build-dir 
-#cmake --install build-dir 
-#rm -rf /tmp/*
+wget -nc --quiet https://github.com/ornladios/ADIOS2/archive/v${ADIOS2_VERSION}.tar.gz -O adios2-v${ADIOS2_VERSION}.tar.gz 
+mkdir -p adios2-v${ADIOS2_VERSION} 
+tar -xf adios2-v${ADIOS2_VERSION}.tar.gz -C adios2-v${ADIOS2_VERSION} --strip-components 1 
+cmake -G Ninja -DADIOS2_USE_Fortran=off -DBUILD_TESTING=off -DADIOS2_BUILD_EXAMPLES=off \
+	-DADIOS2_USE_ZeroMQ=off -B adios2-v${ADIOS2_VERSION}/build-dir -S ./adios2-v${ADIOS2_VERSION} 
+cmake --build adios2-v${ADIOS2_VERSION}/build-dir 
+sudo cmake --install adios2-v${ADIOS2_VERSION}/build-dir
 
 # Install GMSH
-git clone -b gmsh_${GMSH_VERSION} --single-branch https://gitlab.onelab.info/gmsh/gmsh.git 
-cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_BUILD_DYNAMIC=1  -DENABLE_OPENMP=1 -B build-dir -S gmsh 
-cmake --build build-dir
-cmake --install build-dir
-rm -rf /tmp/*
-
-export PYTHONPATH=/usr/local/lib:$PYTHONPATH
+[ ! -d "./gmsh_${GMSH_VERSION}" ] && git clone -b gmsh_${GMSH_VERSION} --single-branch https://gitlab.onelab.info/gmsh/gmsh.git 
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_BUILD_DYNAMIC=1  -DENABLE_OPENMP=1 -B gmsh_${GMSH_VERSION}/build-dir -S gmsh 
+cmake --build gmsh_${GMSH_VERSION}/build-dir
+sudo cmake --install gmsh_${GMSH_VERSION}/build-dir
 
 # Install PETSc and petsc4py with real and complex types
-apt-get -qq update 
-apt-get -y install bison flex 
+sudo apt-get -qq update 
+sudo apt-get -y install bison flex 
 wget -nc --quiet http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-${PETSC_VERSION}.tar.gz -O petsc-${PETSC_VERSION}.tar.gz 
 mkdir -p ${PETSC_DIR}  
 tar -xf petsc-${PETSC_VERSION}.tar.gz -C ${PETSC_DIR} --strip-components 1 
@@ -178,7 +184,8 @@ python3 ./configure \
 		--download-superlu \
 		--download-superlu_dist \
 		--with-scalar-type=real 
-make PETSC_DIR=/usr/local/petsc PETSC_ARCH=linux-gnu-real-32 ${MAKEFLAGS} all 
+sudo make PETSC_DIR=$PETSC_DIR PETSC_ARCH=linux-gnu-real-32 ${MAKEFLAGS} all 
+
 # Complex, 32-bit int
 python3 ./configure \
 	PETSC_ARCH=linux-gnu-complex-32 \
@@ -199,7 +206,7 @@ python3 ./configure \
 		--download-superlu \
 		--download-superlu_dist \
 		--with-scalar-type=complex 
-make PETSC_DIR=/usr/local/petsc PETSC_ARCH=linux-gnu-complex-32 ${MAKEFLAGS} all 
+sudo make PETSC_DIR=$PETSC_DIR PETSC_ARCH=linux-gnu-complex-32 ${MAKEFLAGS} all 
 # Real, 64-bit int
 python3 ./configure \
         PETSC_ARCH=linux-gnu-real-64 \
@@ -218,7 +225,7 @@ python3 ./configure \
 		--download-suitesparse \
 		--download-superlu_dist \
 		--with-scalar-type=real 
-make PETSC_DIR=/usr/local/petsc PETSC_ARCH=linux-gnu-real-64 ${MAKEFLAGS} all 
+sudo make PETSC_DIR=$PETSC_DIR PETSC_ARCH=linux-gnu-real-64 ${MAKEFLAGS} all 
 # Complex, 64-bit int
 python3 ./configure \
 	PETSC_ARCH=linux-gnu-complex-64 \
@@ -237,7 +244,7 @@ python3 ./configure \
 		--download-suitesparse \
 		--download-superlu_dist \
 		--with-scalar-type=complex 
-make PETSC_DIR=/usr/local/petsc PETSC_ARCH=linux-gnu-complex-64 ${MAKEFLAGS} all 
+sudo make PETSC_DIR=$PETSC_DIR PETSC_ARCH=linux-gnu-complex-64 ${MAKEFLAGS} all 
 
 # Install petsc4py
 cd ${PETSC_DIR} 
@@ -245,10 +252,10 @@ cd src/binding/petsc4py
 PETSC_ARCH=linux-gnu-real-32:linux-gnu-complex-32:linux-gnu-real-64:linux-gnu-complex-64 pip3 install \
 	--trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org --no-cache-dir . 
 # Cleanup
-apt-get -y purge bison flex 
-apt-get -y autoremove 
-apt-get clean 
-rm -rf \
+sudo apt-get -y purge bison flex 
+sudo apt-get -y autoremove 
+sudo apt-get clean 
+sudo rm -rf \
 	${PETSC_DIR}/**/tests/ \
         ${PETSC_DIR}/**/obj/ \
 	${PETSC_DIR}/**/externalpackages/  \
@@ -259,18 +266,20 @@ rm -rf \
 	${PETSC_DIR}/share/ \
 	${PETSC_DIR}/src/ \
 	${PETSC_DIR}/systems/ \
-rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install SLEPc
-wget -nc --quiet https://slepc.upv.es/download/distrib/slepc-${SLEPC_VERSION}.tar.gz -O slepc-${SLEPC_VERSION}.tar.gz --no-check-certificate
+cd $BUILD_DIR
+wget -nc https://slepc.upv.es/download/distrib/slepc-${SLEPC_VERSION}.tar.gz \
+	-O slepc-${SLEPC_VERSION}.tar.gz --no-check-certificate
 mkdir -p ${SLEPC_DIR}
 tar -xf slepc-${SLEPC_VERSION}.tar.gz -C ${SLEPC_DIR} --strip-components 1 
 
 cd ${SLEPC_DIR} 
-
 export PETSC_ARCH=linux-gnu-real-32 
-python3 ./configure  
-make 
+echo $PETSC_DIR
+python3 ./configure 
+make  
 export PETSC_ARCH=linux-gnu-complex-32 
 python3 ./configure 
 make 
@@ -282,11 +291,71 @@ python3 ./configure
 make 
 
 # Install slepc4py
-cd ${SLEPC_DIR} 
+cd ${SLEPC_DIR}
 cd src/binding/slepc4py 
 PETSC_ARCH=linux-gnu-real-32:linux-gnu-complex-32:linux-gnu-real-64:linux-gnu-complex-64 pip3 install \
 	 --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
 	 --no-cache-dir . 
 rm -rf ${SLEPC_DIR}/CTAGS ${SLEPC_DIR}/TAGS ${SLEPC_DIR}/docs ${SLEPC_DIR}/src/ ${SLEPC_DIR}/**/obj/ ${SLEPC_DIR}/**/test/ 
-rm -rf /tmp/*
+EOF
 
+# The following ARGS are used in the DOLFINx layer.
+# They are safe defaults.
+# CMake build type for DOLFINx C++ build. See CMake documentation.
+export DOLFINX_CMAKE_BUILD_TYPE="RelWithDebInfo"
+# Extra CMake C++ compiler flags for DOLFINx C++ build.
+export DOLFINX_CMAKE_CXX_FLAGS
+cd $BUILD_DIR
+
+# Build/install basix
+[ ! -d "./basix" ] && git clone https://github.com/FEniCS/basix
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -B ./basix/build-dir -S ./basix/cpp
+cmake --build ./basix/build-dir 
+sudo cmake --install ./basix/build-dir 
+python3 -m pip install ./basix/python 
+
+# Install ufl
+[ ! -d "./ufl" ] && git clone https://github.com/FEniCS/ufl.git
+pip3 install --no-cache-dir ./ufl 
+
+# Install ffcx
+[ ! -d "./ffcx" ] && git clone https://github.com/FEniCS/ffcx.git
+pip3 install --no-cache-dir ./ffcx 
+
+# Install ipython
+pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org --no-cache-dir ipython
+
+[ ! -d "./dolfinx" ] && git clone https://github.com/FEniCS/dolfinx.git
+cd dolfinx 
+mkdir -p build-real 
+cd build-real 
+PETSC_ARCH=linux-gnu-real-32 cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$DOLFIN_REAL_DIR \
+	-DCMAKE_BUILD_TYPE=${DOLFINX_CMAKE_BUILD_TYPE} -DCMAKE_CXX_FLAGS=${DOLFINX_CMAKE_CXX_FLAGS} ../cpp 
+sudo ninja install 
+cd ../python 
+CXXFLAGS=${DOLFINX_CMAKE_CXX_FLAGS} PETSC_ARCH=linux-gnu-real-32 pip3 install \
+	--target $DOLFIN_REAL_DIR/lib/python3.8/dist-packages --no-dependencies . 
+cd ../ 
+mkdir -p build-complex 
+cd build-complex 
+PETSC_ARCH=linux-gnu-complex-32 cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$DOLFIN_COMPLEX_DIR \
+	-DCMAKE_BUILD_TYPE=${DOLFINX_CMAKE_BUILD_TYPE} -DCMAKE_CXX_FLAGS=${DOLFIN_CMAKE_CXX_FLAGS} ../cpp 
+sudo ninja install 
+. $DOLFIN_COMPLEX_DIR/lib/dolfinx/dolfinx.conf 
+cd ../python 
+CXXFLAGS=${DOLFINX_CMAKE_CXX_FLAGS} PETSC_ARCH=linux-gnu-complex-32 pip3 install \
+	--target $DOLFIN_COMPLEX_DIR/lib/python3.8/dist-packages --no-dependencies .
+cd $BUILD_DIR
+
+# pyvista dependencies from apt
+sudo apt-get -qq update 
+sudo apt-get -y install libgl1-mesa-dev xvfb 
+sudo apt-get clean 
+sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# pyvista dependencies from pip. Only compatible with x86-64 (amd64).
+# matplotlib improves plotting quality with better color maps and properly rendering colorbars.
+pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
+	--no-cache-dir pyvista==${PYVISTA_VERSION} 
+pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
+	--no-cache-dir matplotlibi

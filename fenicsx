@@ -32,10 +32,6 @@ MPI="mpich"
 export OPENBLAS_NUM_THREADS=1 
 export OPENBLAS_VERBOSE=0
 
-# Activate python venv
-source $HOME/miniconda3/etc/profile.d/conda.sh
-conda activate fenicsx
-
 # Install directories 
 export BUILD_DIR=$(pwd)
 export PETSC_DIR=$HOME/petsc 
@@ -43,6 +39,7 @@ export SLEPC_DIR=$HOME/slepc
 export DOLFIN_REAL_DIR=$HOME/dolfinx-real
 export DOLFIN_COMPLEX_DIR=$HOME/dolfinx-complex
 
+: <<EOF
 # Set paths Real by default. - use below to configure env
 # export PKG_CONFIG_PATH=$DOLFIN_REAL_DIR/lib/pkgconfig:$PKG_CONFIG_PATH 
 # export PETSC_ARCH=linux-gnu-real-32 
@@ -137,15 +134,16 @@ cmake -G Ninja .
 sudo ninja install
 cd $BUILD_DIR
 
+
 # Install KaHIP
-wget -nc --quiet https://github.com/kahip/kahip/archive/v${KAHIP_VERSION}.tar.gz 
+wget -nc --no-check-certificate https://github.com/kahip/kahip/archive/v${KAHIP_VERSION}.tar.gz 
 tar -xf v${KAHIP_VERSION}.tar.gz 
 cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DNONATIVEOPTIMIZATIONS=on -B KaHIP-${KAHIP_VERSION}/build-dir -S KaHIP-${KAHIP_VERSION} 
 cmake --build KaHIP-${KAHIP_VERSION}/build-dir 
 sudo cmake --install KaHIP-${KAHIP_VERSION}/build-dir 
 
 # Install ADIOS2
-wget -nc --quiet https://github.com/ornladios/ADIOS2/archive/v${ADIOS2_VERSION}.tar.gz -O adios2-v${ADIOS2_VERSION}.tar.gz 
+wget -nc --no-check-certificate https://github.com/ornladios/ADIOS2/archive/v${ADIOS2_VERSION}.tar.gz -O adios2-v${ADIOS2_VERSION}.tar.gz 
 mkdir -p adios2-v${ADIOS2_VERSION} 
 tar -xf adios2-v${ADIOS2_VERSION}.tar.gz -C adios2-v${ADIOS2_VERSION} --strip-components 1 
 cmake -G Ninja -DADIOS2_USE_Fortran=off -DBUILD_TESTING=off -DADIOS2_BUILD_EXAMPLES=off \
@@ -162,7 +160,8 @@ sudo cmake --install gmsh_${GMSH_VERSION}/build-dir
 # Install PETSc and petsc4py with real and complex types
 sudo apt-get -qq update 
 sudo apt-get -y install bison flex 
-wget -nc --quiet http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-${PETSC_VERSION}.tar.gz -O petsc-${PETSC_VERSION}.tar.gz 
+wget -nc --no-check-certificate http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-${PETSC_VERSION}.tar.gz \
+	-O petsc-${PETSC_VERSION}.tar.gz 
 mkdir -p ${PETSC_DIR}  
 tar -xf petsc-${PETSC_VERSION}.tar.gz -C ${PETSC_DIR} --strip-components 1 
 cd ${PETSC_DIR} 
@@ -271,6 +270,7 @@ sudo rm -rf \
 	${PETSC_DIR}/systems/ \
 sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+
 # Install SLEPc
 cd $BUILD_DIR
 wget -nc https://slepc.upv.es/download/distrib/slepc-${SLEPC_VERSION}.tar.gz \
@@ -280,7 +280,6 @@ tar -xf slepc-${SLEPC_VERSION}.tar.gz -C ${SLEPC_DIR} --strip-components 1
 
 cd ${SLEPC_DIR} 
 export PETSC_ARCH=linux-gnu-real-32 
-echo $PETSC_DIR
 python3 ./configure 
 make  
 export PETSC_ARCH=linux-gnu-complex-32 
@@ -292,6 +291,7 @@ make
 export PETSC_ARCH=linux-gnu-complex-64 
 python3 ./configure 
 make 
+EOF
 
 # Install slepc4py
 cd ${SLEPC_DIR}
@@ -299,8 +299,7 @@ cd src/binding/slepc4py
 PETSC_ARCH=linux-gnu-real-32:linux-gnu-complex-32:linux-gnu-real-64:linux-gnu-complex-64 pip3 install \
 	 --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
 	 --no-cache-dir . 
-rm -rf ${SLEPC_DIR}/CTAGS ${SLEPC_DIR}/TAGS ${SLEPC_DIR}/docs ${SLEPC_DIR}/src/ \
-	${SLEPC_DIR}/**/obj/ ${SLEPC_DIR}/**/test/ 
+: <<EOF
 
 # The following ARGS are used in the DOLFINx layer.
 # They are safe defaults.
@@ -361,4 +360,5 @@ sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
 	--no-cache-dir pyvista==${PYVISTA_VERSION} 
 pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
-	--no-cache-dir matplotlibi
+	--no-cache-dir matplotlib
+EOF

@@ -1,6 +1,10 @@
 #!/bin/bash
 
 # Requires cmake>=*, gcc>=*, boost>=*
+#The following directory should be added to compiler include paths:
+#    /usr/local/boost_1_77_0
+#The following directory should be added to linker library paths:
+#    /usr/local/boost_1_77_0/stage/lib
 
 GMSH_VERSION=4_8_4
 PYBIND11_VERSION=2.7.1
@@ -45,7 +49,6 @@ export DOLFIN_COMPLEX_DIR=$HOME/dolfinx-complex
 # export PYTHONPATH=$DOLFIN_REAL_DIR/lib/python3.8/dist-packages:$PYTHONPATH 
 # export LD_LIBRARY_PATH=$DOLFIN_REAL_DIR/lib:$LD_LIBRARY_PATH
 
-: <<'EOF'
 # Install dependencies available via apt-get.
 # - First set of packages are required to build and run FEniCS.
 # - Second set of packages are recommended and/or required to build
@@ -296,8 +299,8 @@ cd src/binding/slepc4py
 PETSC_ARCH=linux-gnu-real-32:linux-gnu-complex-32:linux-gnu-real-64:linux-gnu-complex-64 pip3 install \
 	 --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
 	 --no-cache-dir . 
-rm -rf ${SLEPC_DIR}/CTAGS ${SLEPC_DIR}/TAGS ${SLEPC_DIR}/docs ${SLEPC_DIR}/src/ ${SLEPC_DIR}/**/obj/ ${SLEPC_DIR}/**/test/ 
-EOF
+rm -rf ${SLEPC_DIR}/CTAGS ${SLEPC_DIR}/TAGS ${SLEPC_DIR}/docs ${SLEPC_DIR}/src/ \
+	${SLEPC_DIR}/**/obj/ ${SLEPC_DIR}/**/test/ 
 
 # The following ARGS are used in the DOLFINx layer.
 # They are safe defaults.

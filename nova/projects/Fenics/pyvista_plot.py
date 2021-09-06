@@ -21,7 +21,7 @@ import pyvista as pv
 #import dolfinx.plot
 
 # Start virtual framebuffer
-#pv.start_xvfb(wait=0.0)
+#pv.start_xvfb(wait=0.5)
 
 #import os
 #os.system('/usr/bin/Xvfb :98 -screen 0 1024x768x24 &')
@@ -38,5 +38,5 @@ import pyvista as pv
 sphere = pv.Sphere()
 sphere.plot(color='w')
 
-#plotter = pyvista.Plotter()
+#plotter = pv.Plotter()
 #plotter.show()

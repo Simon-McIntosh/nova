@@ -491,6 +491,7 @@ if __name__ == '__main__':
 
     #vde.make_movie('duck', make_frame)
 
+    vde.plot()
 
 
 

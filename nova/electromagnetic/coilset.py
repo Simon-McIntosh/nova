@@ -94,10 +94,10 @@ class CoilSet(CoilGrid, FrameSet):
             self.probe.load(file)
         except OSError:
             pass
-        try:
-            self.loop.load(file)
-        except OSError:
-            pass
+        #try:
+        #    self.loop.load(file)
+        #except OSError:
+        #    pass
         try:
             self.inductance.load(file)
         except OSError:

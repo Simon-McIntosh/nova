@@ -2,7 +2,7 @@
 import re
 import string
 
-#import geojson
+import geojson
 import pandas
 import numpy as np
 import shapely

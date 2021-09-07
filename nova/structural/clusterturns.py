@@ -97,7 +97,7 @@ class ClusterTurns:
 if __name__ == '__main__':
 
     ccl = UniformWindingPack()
-    cluster = ClusterTurns(ccl.mesh, 21)
+    cluster = ClusterTurns(ccl.mesh, 1)
     cluster.plot_slice()
 
     #print(cluster.mesh['nturn'])

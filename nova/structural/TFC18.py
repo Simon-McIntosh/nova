@@ -152,7 +152,7 @@ class TFC18(DataDir, Plotter):
                     print(file, cluster, scenario)
                     self.to_dataframe(scenario)
 
-    def diff(self, displace: str, reference: str='TFonly'):
+    def diff(self, displace: str, reference='TFonly'):
         """Diffrence array and return name."""
         name = f'{displace}-{reference}'
         if name not in self.mesh.array_names:
@@ -172,15 +172,17 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'v0', cluster=1)
+    tf = TFC18('TFCgapsG10', 'k0', cluster=1)
+    tf.to_dataframe('EOB')
+
 
     #tf.load_ensemble()
-    tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
+    #tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
 
     #tf.to_dataframe('EOB')
 
     #tf.export()
-    tf.plot('TFonly', 'cooldown', factor=180)
+    #tf.plot('TFonly', 'cooldown', factor=180)
     #
     #tf.warp('TFonly-cooldown', factor=120)
 

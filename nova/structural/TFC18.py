@@ -108,6 +108,8 @@ class TFC18(DataDir, Plotter):
 
     def csv_file(self, scenario: str):
         """Return csv filename."""
+        if self.cluster == 1:
+            return os.path.join(self.directory, f'{self.file}_{scenario}.csv')
         return os.path.join(self.directory,
                             f'{self.file}_{scenario}_{self.cluster}.csv')
 
@@ -172,15 +174,16 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'v0', cluster=1)
+    tf = TFC18('TFCgapsG10', 'v3_100', cluster=1)
+    #tf.to_dataframe('EOB')
 
-    #tf.load_ensemble()
-    tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
+    tf.load_ensemble()
+    #tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
 
     #tf.to_dataframe('EOB')
 
     #tf.export()
-    tf.plot('TFonly', 'cooldown', factor=180)
+    #tf.plot('TFonly', 'cooldown', factor=180)
     #
     #tf.warp('TFonly-cooldown', factor=120)
 

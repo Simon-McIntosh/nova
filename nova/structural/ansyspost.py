@@ -171,8 +171,8 @@ class AnsysPost(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    ansys = AnsysPost('TFCgapsG10', 'c0', 'N_SYM_WEDGE_2',
-                      data_dir='\\\\io-ws-ccstore1\\ANSYS_Data\\mcintos')
+    ansys = AnsysPost('TFCgapsG10', 'k0', 'E_TF1')
+    ansys.mesh.plot(show_edges=True, lighting=True, color='w')
 
     #ansys = AnsysPost('TFC2_CentralComposite', 'p3', 'N_SYM_WEDGE_2',
     #                  data_dir='\\\\io-ws-ccstore1\\ANSYS_Data\\mcintos')
@@ -184,6 +184,6 @@ if __name__ == '__main__':
     #                ansys.mesh['displacement-3']
     #ansys.warp('delta', factor=300)
 
-    ansys.plot(loadcase=6)
+    #ansys.plot(loadcase=6)
 
     #ansys.animate('tmp', 'delta', 200)

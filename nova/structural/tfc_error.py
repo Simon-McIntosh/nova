@@ -47,17 +47,17 @@ class TFCgap(DataDir, Plotter):
         super().animate(filename, 'delta', view='iso', max_factor=max_factor)
 
 
-    #def cluster(self, n_cluster=1):
-    #    clusters = UniformWindingPack().cluster(n_cluster)
-
-
 if __name__ == '__main__':
 
-    gap = TFCgap('TFCgapsG10', 'k3')
+    gap = TFCgap('TFCgapsG10', 'k3', baseline='k0')
 
-    #tfc = TFC('TFC18/parallel',
-    #          data_dir='//io-ws-ccstore1/ANSYS_Data/mcintos',
-    #          loadcase=('v0', 'v4'))
+    mesh = gap.mesh.slice(normal=[0, 0, 1])
+
+    clip = pv.Cylinder(direction=(0, 0, 1), radius=3)
+    gap.mesh = mesh.clip_surface(clip, invert=True)
+    #p = pv.Plotter()
+    #p.add_mesh(mesh)
+    #p.show()
 
     gap.warp('EOB', factor=800, opacity=0)
     #gap.animate(1000)

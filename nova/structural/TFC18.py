@@ -154,7 +154,7 @@ class TFC18(DataDir, Plotter):
                     print(file, cluster, scenario)
                     self.to_dataframe(scenario)
 
-    def diff(self, displace: str, reference: str='TFonly'):
+    def diff(self, displace: str, reference='TFonly'):
         """Diffrence array and return name."""
         name = f'{displace}-{reference}'
         if name not in self.mesh.array_names:
@@ -178,6 +178,7 @@ if __name__ == '__main__':
     #tf.to_dataframe('EOB')
 
     tf.load_ensemble()
+
     #tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
 
     #tf.to_dataframe('EOB')

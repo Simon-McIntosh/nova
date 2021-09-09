@@ -31,16 +31,21 @@ class Plotter:
         return plotter
 
     def animate(self, filename: str, scalars: str, max_factor=100, frames=31,
-                view='iso'):
+                view='iso', opacity=0.5):
         """Animate warped displacments."""
-        plotter = pv.Plotter(notebook=False, off_screen=True)
-        #window_size=[400, 400], multi_samples=8,
-        #line_smoothing=True
 
+        plotter = pv.Plotter(notebook=False, off_screen=True)
+
+        #clip = [0, 20, 0, 20, 0, 20]
         reference = self.mesh.copy()
-        plotter.add_mesh(reference, color='w', opacity=0.5,
-                         smooth_shading=True)
-        plotter.add_mesh(self.mesh, scalars=scalars, smooth_shading=False)
+        #reference = reference.clip_box(clip)
+        mesh = self.mesh.copy()
+        #mesh = mesh.clip_box(clip)
+
+        if opacity > 0:
+            plotter.add_mesh(reference, color='w', opacity=opacity,
+                             smooth_shading=True)
+        plotter.add_mesh(mesh, scalars=scalars, smooth_shading=False)
         plotter.camera.zoom(1.5)
         if view != 'iso':
             getattr(plotter, f'view_{view}')()

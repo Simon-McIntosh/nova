@@ -3,6 +3,7 @@ import re
 import string
 
 import geojson
+import json
 import pandas
 import numpy as np
 import shapely
@@ -208,6 +209,12 @@ class DataFrame(FrameAttrs):
     def to_geojson(self, col='poly'):
         """Return col as geojson list."""
         return [geojson.dumps(geo) for geo in self[col]]
+
+    def to_json(self, col='poly'):
+        """Return col as json list with name, link and factor attrs."""
+        return [dict(name=name, link=row['link'], factor=row['factor']) |
+                json.loads(geojson.dumps(row[col]))
+                for name, row in self.iterrows()]
 
     def to_poly(self, col='poly'):
         """Load gegjson strings and convert to shapely polygons."""

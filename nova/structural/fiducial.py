@@ -104,6 +104,8 @@ class GaussianProcessRegressor:
 class FiducialData(Plotter):
     """Manage ccl fiducial data."""
 
+    fill: bool = True
+    sead: int = 2025
     rawdata: dict[str, pandas.DataFrame] = \
         field(init=False, repr=False, default_factory=dict)
     data: xarray.Dataset = field(init=False, repr=False)
@@ -113,6 +115,8 @@ class FiducialData(Plotter):
     def __post_init__(self):
         """Load data."""
         self.build_dataset()
+        if self.fill:
+            self.fill_gaps()
         self.build_mesh()
 
     def build_dataset(self):
@@ -122,15 +126,59 @@ class FiducialData(Plotter):
         self.load_fiducials()
         self.load_fiducial_deltas()
 
+    def fill_gaps(self):
+        """Insert samples drawn from EU/JA datasets to fill gaps."""
+        metadata = xarray.Dataset(
+            coords=dict(DA=['EU', 'JA'], coil=range(1, 20)))
+        metadata['origin'] = ('coil',
+                              ['EU', 'JA', 'EU', 'EU', 'EU', 'EU', 'JA',
+                               'JA', 'EU', 'JA', 'EU', 'JA', 'JA', 'JA',
+                               'JA', 'JA', 'EU', 'EU', 'JA'])
+        rng = np.random.default_rng(self.sead)  # sead random number generator
+
+        self.data['clone'] = ('coil', np.full(self.data.dims['coil'], -1))
+        fill = []
+        for DA in metadata.DA:
+            source = self.data.coil[self.data.origin == DA].values
+            index = metadata.coil[metadata.origin == DA].values
+            target = index[~np.isin(index, source)]
+            sample = rng.integers(len(source), size=len(target))
+            copy = self.data.sel(coil=source[sample])
+            copy = copy.assign_coords(coil=target)
+            copy['clone'][:] = source[sample]
+            fill.append(copy)
+        self.data = xarray.concat([self.data, *fill],
+                                  dim='coil', data_vars='minimal')
+        self.data = self.data.sortby('coil')
+
     def build_mesh(self):
         """Build vtk mesh."""
         self.mesh = pv.PolyData()
-        for coil in self.data.coil:
-            loop = pv.Spline(1e-3*self.data.centerline)
-            loop['arc_length'] /= loop['arc_length'][-1]
-            loop['delta'] = 1e-3*self.data.centerline_delta.loc[coil]
-            loop.rotate_z((coil.values-1)*20)
-            self.mesh += loop
+        for coil in range(1, 19):
+            if coil in self.data.coil:
+                loop = pv.Spline(1e-3*self.data.centerline)
+                loop['arc_length'] /= loop['arc_length'][-1]
+                loop['delta'] = 1e-3*self.data.centerline_delta.loc[coil]
+                loop.rotate_z((coil-1)*20)
+                self.mesh += loop
+        self.add_gravity_support()
+
+    def add_gravity_support(self):
+        """Add gravity support."""
+        delta = self.mesh['delta']
+        gravity_support = pv.PolyData([10.68, 0, -9.5])
+        for i in range(18):
+            self.mesh += gravity_support
+            gravity_support.rotate_z(20)
+        '''
+        central_solinoid = pv.PolyData(
+            np.linspace([2.33, 0, -6.48], [2.33, 0, 6.48], 20))
+        for i in range(9):
+            self.mesh += central_solinoid
+            central_solinoid.rotate_z(40)
+        '''
+        self.mesh['delta'] = np.append(
+            delta, np.zeros((self.mesh.n_points-len(delta), 3)), axis=0)
 
     def initialize_dataset(self):
         """Init xarray dataset."""

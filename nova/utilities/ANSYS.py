@@ -69,9 +69,9 @@ class table(object):
         for arg in arguments:
             table = table + ',%' + arg + '%'
         table = table[1:]
-        if BC is 'hgen':
+        if BC == 'hgen':
             self.f.write('bfe,' + surface + ',' + BC + ',1,' + table + '\n\n')
-        elif BC is 'tcc':
+        elif BC == 'tcc':
             self.f.write('rmodif,' + surface + ',14,' + table + '\n\n')
         else:
             if BC in ['temp']:

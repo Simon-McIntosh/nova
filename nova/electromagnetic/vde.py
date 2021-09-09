@@ -494,6 +494,10 @@ if __name__ == '__main__':
     vde.plot()
 
 
+    import json
+    with open('blanket.json', 'w', encoding='utf-8') as f:
+        blanket = vde.frame.loc[vde.frame.part=='bb', :]
+        json.dump(blanket.to_json(), f, ensure_ascii=False, indent=4)
 
 
     '''

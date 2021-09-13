@@ -1,103 +1,66 @@
-"""Methods to morph vtk meshes to fit fiducial mesurments."""
-from dataclasses import dataclass, field
+"""Apply RBF morphing to ITER coilset."""
+from dataclasses import dataclass
+import os
+from typing import Union
 
-import numpy as np
 import pyvista as pv
-import scipy.interpolate
-import seaborn as sns
 
+from nova.definitions import root_dir
 from nova.structural.ansyspost import AnsysPost
-from nova.structural.fiducial import FiducialData
+from nova.structural.fiducialcoil import FiducialCoil
+from nova.structural.morph import Morph
 from nova.structural.plotter import Plotter
-from nova.utilities import ANSYS
 
 
 @dataclass
-class Morph(Plotter):
-    """Apply RBF morphing to VTK objects."""
+class MorphMesh(Plotter):
+    """Morph base mesh to fiducial deltas."""
 
-    mesh: pv.PolyData
-    fiducial: FiducialData = field(default_factory=FiducialData)
-    rbf: scipy.interpolate.RBFInterpolator = field(init=None)
+    fiducial: pv.PolyData
+    base: pv.PolyData
+    version: Union[str, int] = None
+    smoothing: float = 1.0
 
     def __post_init__(self):
-        """Load data."""
-        self.build_rbf()
-        #self.interpolate()
+        """Init data directory and load morphed mesh."""
+        self.load()
 
-    def build_rbf(self):
-        """Build radial basis function interpolator."""
-        index = np.unique(self.fiducial.mesh.points, axis=0,
-                          return_index=True)[1]
-        self.rbf = scipy.interpolate.RBFInterpolator(
-            self.fiducial.mesh.points[index],
-            self.fiducial.mesh['delta'][index])
+    @property
+    def name(self):
+        """Return mesh name."""
+        name = f'{self.fiducial.name}_{self.base.name}'
+        if self.version is not None:
+            name += f'_{self.version}'
+        return name
 
-    def interpolate(self):
-        """Morph mesh."""
-        self.mesh['delta'] = self.rbf(self.mesh.points)
+    @property
+    def filename(self):
+        """Return full mesh filepath."""
+        return os.path.join(root_dir, 'data/Assembly/toroidal_fiducial',
+                            f'{self.name}.vtk')
 
-    def to_ansys(self, resolution=0.2):
-        bounds = self.mesh.bounds
-        axes = [np.linspace(*bounds[2*i:2*i+2],
-                            int(np.diff(bounds[2*i:2*i+2])/resolution))
-                for i in range(3)]
+    def load(self):
+        """Load morphed vtk mesh."""
+        try:
+            self.mesh = pv.read(self.filename)
+        except FileNotFoundError:
+            self.morph()
+            self.mesh.save(self.filename)
 
-        grid = np.array(np.meshgrid(*axes)).T
-        shape = grid.shape
-        grid = grid.reshape(-1, 3)
+    def morph(self):
+        """Morph base mesh."""
+        self.mesh = Morph(self.fiducial, self.base,
+                          smoothing=self.smoothing).mesh
 
-        delta = 500*self.rbf(grid).reshape(*shape).T
-
-        with ANSYS.table('tmp', ext='.mac') as table:
-            for i, coord in enumerate('xyz'):
-                table.load(f'delta_{coord}', delta[i], [*axes])
-                table.write(['x', 'y', 'z'])
-                table.write_text('')
+    #morph.animate('TFC18_morph', 'delta', max_factor=500,
+    #              frames=31, opacity=0)
 
 
 if __name__ == '__main__':
 
-    TFC = AnsysPost('TFCgapsG10', 'k0', 'E_TF1').mesh
-    #TFC = AnsysPost('TFCgapsG10', 'k0', 'E_TF2').mesh
-    #TFC = AnsysPost('TFCgapsG10', 'k0', 'all').mesh
+    fiducial = FiducialCoil('fiducial', 10)
+    base = AnsysPost('TFCgapsG10', 'k0', 'all')
 
-    morph = Morph(TFC)
-    #morph.warp('delta', factor=500, opacity=0.05)
-    #morph.fiducial.mesh.plot()
-    #morph.animate('TFC18_morph', 'delta', max_factor=500, frames=2, opacity=0)
-    morph.to_ansys()
-
-
-'''
-
-
-plotter = pv.Plotter()
-plotter.add_mesh(ansys, color='w', opacity=0.05)
-plotter.add_mesh(ansys.warp_by_vector('delta', factor=500), scalars='delta',
-                 show_edges=True)
-plotter.show()
-
-
-plotter = pv.Plotter()
-color = sns.color_palette("hls", 18)
-
-for i in range(1, 4):
-    if i in fiducial.data.coil:
-        if i % 2 == 1:
-            morph_mesh = TF1.copy()
-            rotate = i-1
-        else:
-            morph_mesh = TF2.copy()
-            rotate = i-2
-        morph_mesh.rotate_z(rotate*20)
-
-        morph_mesh['delta'] = rbf(morph_mesh.points)
-
-        plotter.add_mesh(morph_mesh, color='w', opacity=0.05)
-        plotter.add_mesh(morph_mesh.warp_by_vector('delta', factor=500),
-                         color=color[i])
-
-#plotter.add_mesh(fiducial.mesh, line_width=8)
-plotter.show()
-'''
+    morph = MorphMesh(fiducial.mesh, base.mesh)
+    #morph.mesh = morph.mesh.slice(normal=[0, 0, 1])
+    morph.warp(500, opacity=0)

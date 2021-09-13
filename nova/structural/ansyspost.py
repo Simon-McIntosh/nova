@@ -38,6 +38,8 @@ class AnsysPost(DataDir, Plotter):
             self.time_scoping = self.mesh.field_arrays['time_scoping']
         except FileNotFoundError:
             self.load_ansys()
+        if not hasattr(self.mesh, 'name'):
+            self.mesh.name = self.subset
 
     def load_ansys(self):
         """Load Ansys rst file."""

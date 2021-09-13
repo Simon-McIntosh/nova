@@ -18,6 +18,9 @@ z=x*np.exp(-x**2-y**2)
 
 #plt.plot(1, 1, 'o')
 import pyvista as pv
+#from pyvista.utilities import xvfb
+#xvfb.start_xvfb()
+
 #import dolfinx.plot
 
 # Start virtual framebuffer
@@ -33,7 +36,7 @@ import pyvista as pv
 #pn.extension('vtk')  # this needs to be at the top of each cell for some reason
 
 #from pyvista.utilities import xvfb
-#xvfb.start_xvfb()
+#xvfb.start_xvfb(wait=0.5)
 
 sphere = pv.Sphere()
 sphere.plot(color='w')

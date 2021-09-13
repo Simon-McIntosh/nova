@@ -64,6 +64,21 @@ class DataDir:
         return os.path.join(self.ccl_folder, f'{self.file}_{postfix}.vtk')
 
     @property
+    def morph_folder(self):
+        """Return path of morphed geometry vtk folder."""
+        morph_folder = os.path.join(self.directory, 'morph')
+        self.mkdir(morph_folder)
+        return morph_folder
+
+    @property
+    def morph_file(self):
+        """Return morph file path."""
+        if self.subset == 'all':
+            return os.path.join(self.morph_folder, f'{self.file}.vtk')
+        return os.path.join(self.morph_folder,
+                            f'{self.file}_{self.subset.lower()}.vtk')
+
+    @property
     def args(self):
         """Return data dir args."""
         return self.folder, self.file, self.subset, self.data_dir

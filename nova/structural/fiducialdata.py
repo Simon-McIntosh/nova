@@ -1,103 +1,16 @@
 """Load ccl fiducial data for ITER TF coilset."""
-from dataclasses import dataclass, field, InitVar
+from dataclasses import dataclass, field
 import string
 
 import numpy as np
-import numpy.typing as npt
 import pandas
 import pyvista as pv
-import sklearn.gaussian_process
 import xarray
 
 from nova.structural.centerline import CenterLine
+from nova.structural.gaussianprocessregressor import GaussianProcessRegressor
 from nova.structural.plotter import Plotter
 from nova.utilities.pyplot import plt
-
-
-@dataclass
-class GaussianProcessRegressor:
-    """Fit cyclic 1D waveforms using a Gaussian Process Regressor."""
-
-    x: InitVar[npt.ArrayLike]
-    period: list[float, float] = field(default_factory=lambda: [0., 1.])
-    wrap: int = 0
-    regressor: sklearn.gaussian_process.GaussianProcessRegressor = None
-    data: xarray.Dataset = field(init=False)
-
-    def __post_init__(self, x):
-        """Init dataset."""
-        x = self.to_numpy(x)
-        self.data = xarray.Dataset(coords=dict(x=x))
-        self.build_regressor()
-
-    def build_regressor(self, noise_std=0.25):
-        """Build Gaussian Process Regressor."""
-        if self.regressor is None:
-            ExpSineSquared = sklearn.gaussian_process.kernels.ExpSineSquared(
-                length_scale=0.85, length_scale_bounds='fixed',
-                periodicity=1.0, periodicity_bounds='fixed')
-            kernel = ExpSineSquared
-            self.regressor = sklearn.gaussian_process.GaussianProcessRegressor(
-                kernel=kernel, alpha=noise_std**2)
-
-    @staticmethod
-    def to_numpy(array):
-        """Return numpy array."""
-        if isinstance(array, xarray.DataArray):
-            return array.values
-        return array
-
-    def fit(self, y):
-        """Fit Gaussian Process Regressor."""
-        self.data['y'] = ('x', self.to_numpy(y))
-        _x, _y = self.data.x.to_numpy(), self.data.y.to_numpy()
-        if np.isnan(_y).any():  # drop nans
-            index = ~np.isnan(_y)
-            _x, _y = _x[index], _y[index]
-        if self.wrap > 0:
-            _x = np.pad(_x, pad_width=self.wrap, mode='wrap')
-            _x[:self.wrap] -= self.period[-1]
-            _x[-self.wrap:] += self.period[-1]
-            _y = np.pad(_y, pad_width=self.wrap, mode='wrap')
-        self.data['_x'] = _x
-        self.data['_y'] = _y
-        self.regressor = self.regressor.fit(_x.reshape(-1, 1), _y)
-
-    def predict(self, x_mean):
-        """Sample Gaussian Process Regressor."""
-        if isinstance(x_mean, int):
-            x_mean = np.linspace(*self.period, x_mean)
-        else:
-            x_mean = self.to_numpy(x_mean)
-        y_mean, y_cov = self.regressor.predict(x_mean.reshape(-1, 1),
-                                               return_cov=True)
-        self.data['x_mean'] = x_mean
-        self.data['y_mean'] = ('x_mean', y_mean)
-        self.data['y_std'] = ('x_mean', np.sqrt(np.diag(y_cov)))
-        return y_mean
-
-    def evaluate(self, x, y):
-        """Return GPR prediction at x for data points y."""
-        self.fit(y)
-        return self.predict(x)
-
-    def plot(self):
-        """Plot current GP regression."""
-        axes = plt.subplots(1, 1)[1]
-        plt.scatter(self.data.x, self.data.y, c='C3', s=30, zorder=10,
-                    label='fiducial data')
-        axes.plot(self.data.x_mean, self.data.y_mean, 'gray', lw=2, zorder=9)
-        axes.fill_between(self.data.x_mean,
-                          self.data.y_mean - self.data.y_std,
-                          self.data.y_mean + self.data.y_std,
-                          alpha=0.15, color='k',
-                          label='95% confidence')
-
-        plt.despine()
-        plt.xlabel('arc length')
-        plt.ylabel('displacement, mm')
-        plt.title(self.regressor.kernel_)
-        plt.legend()
 
 
 @dataclass
@@ -161,24 +74,6 @@ class FiducialData(Plotter):
                 loop['delta'] = 1e-3*self.data.centerline_delta.loc[coil]
                 loop.rotate_z((coil-1)*20)
                 self.mesh += loop
-        self.add_gravity_support()
-
-    def add_gravity_support(self):
-        """Add gravity support."""
-        delta = self.mesh['delta']
-        gravity_support = pv.PolyData([10.68, 0, -9.5])
-        for i in range(18):
-            self.mesh += gravity_support
-            gravity_support.rotate_z(20)
-        '''
-        central_solinoid = pv.PolyData(
-            np.linspace([2.33, 0, -6.48], [2.33, 0, 6.48], 20))
-        for i in range(9):
-            self.mesh += central_solinoid
-            central_solinoid.rotate_z(40)
-        '''
-        self.mesh['delta'] = np.append(
-            delta, np.zeros((self.mesh.n_points-len(delta), 3)), axis=0)
 
     def initialize_dataset(self):
         """Init xarray dataset."""
@@ -637,11 +532,15 @@ class FiducialData(Plotter):
                            bbox_to_anchor=[0.4, 0.5])
             axes[j].set_title(origin)
 
+    def extract_cells(self, index):
+        """Return mesh subset of extracted cells."""
+        return self.mesh.extract_cells(index)
+
 
 if __name__ == '__main__':
 
     fiducial = FiducialData()
 
-    fiducial.warp('delta', factor=500)
-    #fiducial.plot()
-    #fiducial.plot_gpr(0, 2)
+    fiducial.warp(500)
+    # fiducial.plot()
+    # fiducial.plot_gpr(0, 2)

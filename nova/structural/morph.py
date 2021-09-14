@@ -40,6 +40,27 @@ class Morph(Plotter):
         """Morph mesh."""
         self.mesh['delta'] = self.rbf(self.mesh.points)
 
+    def save(self):
+        """Save morph instance."""
+
+
+def load(self):
+    f = open(self.filename, 'rb')
+    tmp_dict = cPickle.load(f)
+    f.close()
+
+    self.__dict__.update(tmp_dict)
+
+
+def save(self):
+    f = open(self.filename, 'wb')
+    cPickle.dump(self.__dict__, f, 2)
+    f.close()
+
+        @classmethod
+def loader(cls,f):
+    return cPickle.load(f)
+
 
 if __name__ == '__main__':
 

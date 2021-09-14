@@ -10,6 +10,7 @@ dependencies:
   - beautifulsoup4
   - coolprop
   - descartes
+  - dill
   - fortranformat
   - ftputil
   - geojson
@@ -31,6 +32,7 @@ dependencies:
   - pytest
   - python-snappy
   - python-docx
+  - pyvista
   - regex
   - scikit-image
   - scikit-learn
@@ -46,7 +48,6 @@ dependencies:
   - pip:
     - ansys-dpf-core
     - ansys-dpf-post
-    - geojson
     - pymupdf
     - pyquaternion
     - rdp

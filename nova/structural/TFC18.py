@@ -6,7 +6,6 @@ import numpy as np
 import pandas
 import pathlib
 import pyvista as pv
-import xarray
 
 from nova.structural.ansyspost import AnsysPost
 from nova.structural.clusterturns import ClusterTurns
@@ -35,7 +34,7 @@ class TFC18(DataDir, Plotter):
 
     def __str__(self):
         """Return Ansys model descriptor (takes time - remote mount)."""
-        return AnsysPost(*self.ansys_args).__str__()
+        return AnsysPost(*self.args).__str__()
 
     def reload(self, file):
         """Reload source file."""
@@ -174,18 +173,19 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'v3_100', cluster=1)
+    tf = TFC18('TFCgapsG10', 'ccl0_EMerr', cluster=1)
     #tf.to_dataframe('EOB')
 
-    tf.load_ensemble()
+    #tf.load_ensemble()
 
-    #tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
+    tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
+    tf.mesh['EOB-cooldown'] = tf.mesh['EOB'] - tf.mesh['cooldown']
 
     #tf.to_dataframe('EOB')
 
     #tf.export()
     #tf.plot('TFonly', 'cooldown', factor=180)
     #
-    #tf.warp('TFonly-cooldown', factor=120)
+    tf.warp(50, displace='EOB-cooldown')
 
     #tf.animate('TFonly-cooldown', view='xy')

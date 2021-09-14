@@ -49,15 +49,15 @@ class TFCgap(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    gap = TFCgap('TFCgapsG10', 'k3', baseline='k0')
+    gap = TFCgap('TFCgapsG10', 'ccl0_EMerr', baseline='k0', cluster=False)
 
-    mesh = gap.mesh.slice(normal=[0, 0, 1])
+    #mesh = gap.mesh.slice(normal=[0, 0, 1])
+    #clip = pv.Cylinder(direction=(0, 0, 1), radius=3)
+    #gap.mesh = mesh.clip_surface(clip, invert=True)
 
-    clip = pv.Cylinder(direction=(0, 0, 1), radius=3)
-    gap.mesh = mesh.clip_surface(clip, invert=True)
     #p = pv.Plotter()
     #p.add_mesh(mesh)
     #p.show()
 
-    gap.warp('EOB', factor=800, opacity=0)
+    gap.warp(50000, displace='TFonly', opacity=0)
     #gap.animate(1000)

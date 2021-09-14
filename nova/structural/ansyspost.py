@@ -28,14 +28,17 @@ class AnsysPost(DataDir, Plotter):
 
     def __str__(self):
         """Return Ansys model descriptor."""
-        return self.model.__str__()
+        try:
+            return self.model.__str__()
+        except AttributeError:
+            return dpf.Model(self.rst_file).__str__()
 
     def load(self):
         """Load vtk mesh file."""
         try:
             self.mesh = pv.read(self.ansys_file)
-            self.time_support = self.mesh.field_arrays['time_support']
-            self.time_scoping = self.mesh.field_arrays['time_scoping']
+            self.time_support = self.mesh.field_data['time_support']
+            self.time_scoping = self.mesh.field_data['time_scoping']
         except FileNotFoundError:
             self.load_ansys()
         if not hasattr(self.mesh, 'name'):
@@ -50,8 +53,9 @@ class AnsysPost(DataDir, Plotter):
             range(1, self.model.metadata.time_freq_support.n_sets+1)
         self.load_meshed_region()
         self.mesh = self.meshed_region.grid
-        self.mesh.field_arrays['time_support'] = self.time_support
-        self.mesh.field_arrays['time_scoping'] = self.time_scoping
+        self.mesh['ids'] = self.meshed_region.nodes.scoping.ids
+        self.mesh.field_data['time_support'] = self.time_support
+        self.mesh.field_data['time_scoping'] = self.time_scoping
         self.load_displacement()
         self.load_vonmises()
         self.mesh.save(self.ansys_file)
@@ -169,12 +173,13 @@ class AnsysPost(DataDir, Plotter):
         plotter.show()
 
 
-
-
 if __name__ == '__main__':
 
-    ansys = AnsysPost('TFCgapsG10', 'k0', 'E_TF1')
-    ansys.mesh.plot(show_edges=True, lighting=True, color='w')
+    ccl = AnsysPost('TFCgapsG10', 'ccl0_EMerr', 'WP')
+
+    k0 = AnsysPost('TFCgapsG10', 'k0', 'WP')
+
+    #ansys.mesh.plot(lighting=True, color='w')
 
     #ansys = AnsysPost('TFC2_CentralComposite', 'p3', 'N_SYM_WEDGE_2',
     #                  data_dir='\\\\io-ws-ccstore1\\ANSYS_Data\\mcintos')

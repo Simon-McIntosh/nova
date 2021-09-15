@@ -10,9 +10,9 @@ from nova.structural.plotter import Plotter
 @dataclass
 class AnsysDelta(Plotter):
 
-    target: str = 'ccl0_EMerr'
+    target: str = 'ccl0'
     baseline: str = 'k0'
-    part: str = 'wp'
+    part: str = 'WP'
     folder: str = 'TFCgapsG10'
 
     def __post_init__(self):
@@ -20,34 +20,20 @@ class AnsysDelta(Plotter):
         target_mesh = AnsysPost(self.folder, self.target, self.part).mesh
         baseline_mesh = AnsysPost(self.folder, self.baseline, self.part).mesh
 
-        sort = np.argsort(baseline_mesh['ids'])
-        unsort = np.zeros(baseline_mesh.n_points, dtype=int)
-        unsort[sort] = np.arange(baseline_mesh.n_points)
-        index = np.argsort(target_mesh['ids'])[unsort]
+        sort = np.argsort(target_mesh['ids'])
+        unsort = np.zeros(target_mesh.n_points, dtype=int)
+        unsort[sort] = np.arange(target_mesh.n_points)
+        index = np.argsort(baseline_mesh['ids'])[unsort]
 
         self.mesh = pv.UnstructuredGrid()
-        self.mesh.copy_structure(baseline_mesh)
+        self.mesh.copy_structure(target_mesh)
+        self.mesh.field_data.update(target_mesh.field_data)
 
-        self.mesh['delta'] = target_mesh.points[index] - baseline_mesh.points
+        self.mesh['delta'] = target_mesh.points - baseline_mesh.points[index]
 
         for array in [array for array in target_mesh.point_data
                       if array != 'ids' and array in baseline_mesh.point_data]:
-            self.mesh[array] = target_mesh[array][index] - baseline_mesh[array]
-        '''
-        self.mesh['delta'] = self.target.points - self.mesh.points
-
-        print(np.linalg.norm(self.target.points - self.mesh.points, axis=1))
-        index = np.argmax(np.linalg.norm(self.target.points -
-                                         self.mesh.points, axis=1))
-        print(self.target.points[index])
-        print(self.mesh.points[index])
-
-
-
-        #self.mesh['delta'] =
-        #ansys = AnsysPost('TFCgapsG10', 'ccl0_EMerr', 'wp')
-        #ansys = AnsysPost('TFCgapsG10', 'ccl0_EMerr', 'wp')
-        '''
+            self.mesh[array] = target_mesh[array] - baseline_mesh[array][index]
 
     def plot(self):
         plotter = pv.Plotter()
@@ -60,4 +46,6 @@ if __name__ == '__main__':
 
     delta = AnsysDelta()
     #delta.plot()
-    delta.warp(500, opacity=0, displace='disp-3')
+    #delta.mesh = delta.mesh.slice(normal=[0, 0, 1])
+    delta.warp(500, opacity=0, displace='disp-1')
+    #delta.animate('ccl0_cooldown', 'disp-1', 150)

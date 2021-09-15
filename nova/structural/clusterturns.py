@@ -40,21 +40,22 @@ class ClusterTurns:
     def build_mesh(self):
         """Generate reduced ordered mesh from clustered turn data."""
         self.mesh = pv.PolyData()
+        self.mesh.field_data.update(self.ccl_mesh.field_data)
         for i in range(18):
             coil = self.ccl_mesh.extract_cells(range(i*134, (i+1)*134))
             points = coil.points.reshape(134, -1, 3)
             point_data = {name: coil[name].reshape(134, -1, 3)
-                          for name in coil.point_arrays if
+                          for name in coil.point_data if
                           len(coil[name].shape) == 2}
             for cluster in range(self.n_clusters):
                 index = self.clusters == cluster
                 cell = pv.Spline(points[index].mean(axis=0))
-                cell.clear_point_arrays()
+                cell.clear_point_data()
                 for name in point_data:
                     cell[name] = point_data[name][index].mean(axis=0)
-                cell.cell_arrays['nturn'] = np.sum(index)
-                cell.cell_arrays['coil'] = i
-                cell.cell_arrays['cluster'] = cluster
+                cell.cell_data['nturn'] = np.sum(index)
+                cell.cell_data['coil'] = i
+                cell.cell_data['cluster'] = cluster
                 self.mesh += cell
 
     def plot_slice(self, axes=None, ms=8):

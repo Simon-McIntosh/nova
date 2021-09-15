@@ -21,8 +21,7 @@ class TFC18(DataDir, Plotter):
     """Post-process Ansys output from F4E's 18TF coil model."""
 
     cluster: int = 1
-    scenario: dict[str, int] = field(
-        default_factory=lambda: dict(cooldown=1, TFonly=2, SOD=3, EOB=4))
+    scenario: dict[str, int] = field(init=False)
     ansys: pv.PolyData = field(init=False, repr=False)
     mesh: pv.PolyData = field(init=False, repr=False)
 
@@ -69,12 +68,23 @@ class TFC18(DataDir, Plotter):
         """Load ansys vtk mesh."""
         ansys = AnsysPost(*self.args).mesh
         self.ansys = ansys.copy()
-        self.ansys.clear_point_arrays()
+        self.ansys.clear_point_data()
+        self.load_scenario()
         for scn in self.scenario:
             try:
                 self.ansys[scn] = ansys[f'disp-{self.scenario[scn]}']
             except KeyError:
                 pass
+        self.ansys.field_data['scenario'] = list(self.scenario)
+
+    def load_scenario(self):
+        """Update secenario attribute."""
+        scenario_list = ['preload', 'cooldown',
+                         'TFonly', 'SOD', 'SOP', 'XPF',
+                         'CS1_0', 'CS2U0', 'CS2L0',
+                         'SOF', 'SOB', 'EOB', 'EOP', 'EOB+PD']
+        self.scenario = {scenario_list[int(index-1)]: i for i, index in
+                         enumerate(self.ansys.field_data['time_support'])}
 
     def load_windingpack(self):
         """Load conductor windingpack."""
@@ -87,7 +97,9 @@ class TFC18(DataDir, Plotter):
         self.mesh = self.load_windingpack()
         self.mesh = self.interpolate_coils(self.mesh, self.ansys)
         mesh = self.mesh.copy()
-        self.mesh.clear_arrays()
+        self.mesh.clear_data()
+        self.mesh.field_data.update(self.ansys.field_data)
+        print(self.mesh.field_data)
         for scn in self.scenario:
             try:
                 self.mesh[scn] = mesh[scn]
@@ -173,19 +185,19 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'ccl0_EMerr', cluster=1)
+    tf = TFC18('TFCgapsG10', 'k0', cluster=1)
     #tf.to_dataframe('EOB')
 
     #tf.load_ensemble()
 
-    tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
-    tf.mesh['EOB-cooldown'] = tf.mesh['EOB'] - tf.mesh['cooldown']
+    ##tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
+    #tf.mesh['EOB-cooldown'] = tf.mesh['EOB'] - tf.mesh['cooldown']
 
     #tf.to_dataframe('EOB')
 
     #tf.export()
     #tf.plot('TFonly', 'cooldown', factor=180)
     #
-    tf.warp(50, displace='EOB-cooldown')
+    tf.warp(50, displace='EOB')
 
     #tf.animate('TFonly-cooldown', view='xy')

@@ -175,9 +175,9 @@ class AnsysPost(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    ccl = AnsysPost('TFCgapsG10', 'ccl0_EMerr', 'WP')
+    ccl = AnsysPost('TFCgapsG10', '_ccl0', 'WP')
 
-    k0 = AnsysPost('TFCgapsG10', 'k0', 'WP')
+    #k0 = AnsysPost('TFCgapsG10', 'k0', 'WP')
 
     #ansys.mesh.plot(lighting=True, color='w')
 

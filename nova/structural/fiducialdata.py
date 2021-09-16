@@ -140,6 +140,18 @@ class FiducialData(Plotter):
         self.load_gpr(coil_index, space_index)
         self.gpr.plot()
 
+    def plot_gpr_array(self, coil_index):
+        """Plot gpr array."""
+        axes = plt.subplots(3, 1, sharex=True, sharey=True,
+                            figsize=(4, 8))[1]
+        for space_index, coord in enumerate('xyz'):
+            self.load_gpr(coil_index, space_index)
+            self.gpr.plot(axes=axes[space_index], text=False)
+            axes[space_index].set_ylabel(fr'$\Delta{{{coord}}}$ mm')
+        plt.despine()
+        axes[-1].set_xlabel('arc length')
+        axes[0].legend(loc='center', bbox_to_anchor=(0, 1.1, 1, 0.1))
+
     @staticmethod
     def fiducials():
         """Return fiducial coordinates."""
@@ -532,6 +544,46 @@ class FiducialData(Plotter):
                            bbox_to_anchor=[0.4, 0.5])
             axes[j].set_title(origin)
 
+    def plot_single(self, coil=2, factor=500, axes=None):
+        """Plot single fiducial curve."""
+        if axes is None:
+            axes = plt.subplots(1, 1)[1]
+
+        axes.plot(self.data.centerline[:, 0],
+                  self.data.centerline[:, 2], 'gray', ls='--')
+
+        for fiducial in self.data.fiducial:
+            axes.plot(*fiducial[::2], 'ko')
+            axes.text(*fiducial[::2], f' {fiducial.target.values}')
+
+        axes.plot(self.data.fiducial[:, 0] +
+                  factor*self.data.fiducial_delta[coil, :, 0],
+                  self.data.fiducial[:, 2] +
+                  factor*self.data.fiducial_delta[coil, :, 2], 'C3o')
+
+        axes.plot(self.data.centerline[:, 0] +
+                  factor*self.data.centerline_delta[coil, :, 0],
+                  self.data.centerline[:, 2] +
+                  factor*self.data.centerline_delta[coil, :, 2],
+                  color=f'C0')
+        axes.axis('equal')
+        axes.axis('off')
+        #axes.set_title(f'TF{coil:02d}')
+
+        '''
+        color = 0
+
+
+        axes.plot(self.data.fiducial[:, 0] +
+                     factor*self.data.fiducial_delta[i, :, 0],
+                     self.data.fiducial[:, 2] +
+                     factor*self.data.fiducial_delta[i, :, 2], '.',
+                     color=f'C{color[j]}')
+        '''
+
+
+
+
     def extract_cells(self, index):
         """Return mesh subset of extracted cells."""
         return self.mesh.extract_cells(index)
@@ -539,8 +591,8 @@ class FiducialData(Plotter):
 
 if __name__ == '__main__':
 
-    fiducial = FiducialData()
+    fiducial = FiducialData(fill=True)
 
     fiducial.warp(500)
-    # fiducial.plot()
-    # fiducial.plot_gpr(0, 2)
+    #fiducial.plot()
+    #fiducial.plot_gpr_array(1)

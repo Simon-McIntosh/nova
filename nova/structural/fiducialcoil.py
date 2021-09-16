@@ -119,5 +119,5 @@ class FiducialCoil(Plotter):
 if __name__ == '__main__':
 
     fiducialcoil = FiducialCoil('fiducial', 10)
-    # fiducialcoil.mesh = fiducialcoil.mesh.slice((0, 0, 1))
+    fiducialcoil.mesh = fiducialcoil.mesh.slice((0, 0, 1))
     fiducialcoil.warp(500, opacity=0)

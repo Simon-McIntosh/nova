@@ -27,11 +27,12 @@ class TFCgap(DataDir, Plotter):
         """Diffrence model data (file - baseline)."""
         model = TFC18(*self.args, cluster=self.cluster)
         self.mesh = model.mesh.copy()
-        self.mesh.clear_arrays()
+        self.mesh.clear_point_data()
+        self.mesh.field_data.update(model.mesh.field_data)
         target = model.mesh.copy()
         model.reload(self.baseline)
         baseline = model.mesh.copy()
-        for scenario in model.scenario:
+        for scenario in model.mesh.field_data['scenario']:
             try:
                 self.mesh[scenario] = target[scenario] - baseline[scenario]
             except KeyError:
@@ -49,7 +50,7 @@ class TFCgap(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    gap = TFCgap('TFCgapsG10', 'ccl0_EMerr', baseline='k0', cluster=False)
+    gap = TFCgap('TFCgapsG10', 'ccl0', baseline='k0', cluster=False)
 
     #mesh = gap.mesh.slice(normal=[0, 0, 1])
     #clip = pv.Cylinder(direction=(0, 0, 1), radius=3)
@@ -59,5 +60,5 @@ if __name__ == '__main__':
     #p.add_mesh(mesh)
     #p.show()
 
-    gap.warp(50000, displace='TFonly', opacity=0)
+    gap.warp(100, displace='cooldown', opacity=0)
     #gap.animate(1000)

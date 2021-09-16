@@ -40,26 +40,28 @@ class Morph(Plotter):
         """Morph mesh."""
         self.mesh['delta'] = self.rbf(self.mesh.points)
 
+    '''
     def save(self):
         """Save morph instance."""
 
 
-def load(self):
-    f = open(self.filename, 'rb')
-    tmp_dict = cPickle.load(f)
-    f.close()
+    def load(self):
+        f = open(self.filename, 'rb')
+        tmp_dict = cPickle.load(f)
+        f.close()
 
-    self.__dict__.update(tmp_dict)
+        self.__dict__.update(tmp_dict)
 
 
-def save(self):
-    f = open(self.filename, 'wb')
-    cPickle.dump(self.__dict__, f, 2)
-    f.close()
+    def save(self):
+        f = open(self.filename, 'wb')
+        cPickle.dump(self.__dict__, f, 2)
+        f.close()
 
-        @classmethod
-def loader(cls,f):
-    return cPickle.load(f)
+            @classmethod
+    def loader(cls,f):
+        return cPickle.load(f)
+    '''
 
 
 if __name__ == '__main__':
@@ -76,7 +78,7 @@ if __name__ == '__main__':
     #fiducial.warp('delta', factor=500)
 
     morph = Morph(fiducial.mesh, mesh, kernel='linear', neighbors=1)
-    morph.mesh = morph.mesh.slice((0, 0, 1))
+    #morph.mesh = morph.mesh.slice((0, 0, 1))
     morph.warp(500)
 
     #plotter = pv.Plotter()

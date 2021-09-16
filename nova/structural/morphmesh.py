@@ -62,5 +62,11 @@ if __name__ == '__main__':
     base = AnsysPost('TFCgapsG10', 'k0', 'all')
 
     morph = MorphMesh(fiducial.mesh, base.mesh)
-    #morph.mesh = morph.mesh.slice(normal=[0, 0, 1])
-    morph.warp(500, opacity=0)
+
+
+    #morph.animate('TFC18_morph', 'delta', max_factor=500,
+    #              frames=51, opacity=0)
+
+
+
+    #morph.warp(500, opacity=0)

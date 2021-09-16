@@ -76,11 +76,12 @@ class GaussianProcessRegressor:
         self.fit(y)
         return self.predict(x)
 
-    def plot(self):
+    def plot(self, axes=None, text=True):
         """Plot current GP regression."""
-        axes = plt.subplots(1, 1)[1]
-        plt.scatter(self.data.x, self.data.y, c='C3', s=30, zorder=10,
-                    label='fiducial data')
+        if axes is None:
+            axes = plt.subplots(1, 1)[1]
+        axes.scatter(self.data.x, self.data.y, c='C3', s=30, zorder=10,
+                     label='fiducial data')
         axes.plot(self.data.x_mean, self.data.y_mean, 'gray', lw=2, zorder=9)
         axes.fill_between(self.data.x_mean,
                           self.data.y_mean - self.data.y_std,
@@ -88,8 +89,9 @@ class GaussianProcessRegressor:
                           alpha=0.15, color='k',
                           label='95% confidence')
 
-        plt.despine()
-        plt.xlabel('arc length')
-        plt.ylabel('displacement, mm')
-        plt.title(self.regressor.kernel_)
-        plt.legend()
+        if text:
+            plt.despine()
+            plt.xlabel('arc length')
+            plt.ylabel('displacement, mm')
+            plt.title(self.regressor.kernel_)
+            plt.legend()

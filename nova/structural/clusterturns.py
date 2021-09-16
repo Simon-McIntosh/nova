@@ -40,6 +40,7 @@ class ClusterTurns:
     def build_mesh(self):
         """Generate reduced ordered mesh from clustered turn data."""
         self.mesh = pv.PolyData()
+        self.mesh.field_data.update(self.ccl_mesh.field_data)
         for i in range(18):
             coil = self.ccl_mesh.extract_cells(range(i*134, (i+1)*134))
             points = coil.points.reshape(134, -1, 3)

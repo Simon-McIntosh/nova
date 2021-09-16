@@ -10,9 +10,9 @@ from nova.structural.plotter import Plotter
 @dataclass
 class AnsysDelta(Plotter):
 
-    target: str = 'ccl0_EMerr'
+    target: str = 'ccl0'
     baseline: str = 'k0'
-    part: str = 'wp'
+    part: str = 'WP'
     folder: str = 'TFCgapsG10'
 
     def __post_init__(self):
@@ -60,4 +60,4 @@ if __name__ == '__main__':
 
     delta = AnsysDelta()
     #delta.plot()
-    delta.warp(500, opacity=0, displace='disp-3')
+    delta.warp(500, opacity=0, displace='disp-0')

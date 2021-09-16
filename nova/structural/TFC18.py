@@ -69,7 +69,7 @@ class TFC18(DataDir, Plotter):
         """Load ansys vtk mesh."""
         ansys = AnsysPost(*self.args).mesh
         self.ansys = ansys.copy()
-        self.ansys.clear_point_arrays()
+        self.ansys.clear_point_data()
         for scn in self.scenario:
             try:
                 self.ansys[scn] = ansys[f'disp-{self.scenario[scn]}']
@@ -87,7 +87,7 @@ class TFC18(DataDir, Plotter):
         self.mesh = self.load_windingpack()
         self.mesh = self.interpolate_coils(self.mesh, self.ansys)
         mesh = self.mesh.copy()
-        self.mesh.clear_arrays()
+        self.mesh.clear_data()
         for scn in self.scenario:
             try:
                 self.mesh[scn] = mesh[scn]
@@ -150,7 +150,6 @@ class TFC18(DataDir, Plotter):
                 self.cluster = cluster
                 self.reload(file)
                 for scenario in ['TFonly', 'SOD', 'EOB']:
-                    print(file, cluster, scenario)
                     self.to_dataframe(scenario)
 
     def diff(self, displace: str, reference='TFonly'):
@@ -173,19 +172,19 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'ccl0_EMerr', cluster=1)
+    tf = TFC18('TFCgapsG10', 'ccl0', cluster=1)
     #tf.to_dataframe('EOB')
 
-    #tf.load_ensemble()
+    tf.load_ensemble()
 
-    tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
-    tf.mesh['EOB-cooldown'] = tf.mesh['EOB'] - tf.mesh['cooldown']
+    #tf.mesh['TFonly-cooldown'] = tf.mesh['TFonly'] - tf.mesh['cooldown']
+    #tf.mesh['EOB-cooldown'] = tf.mesh['EOB'] - tf.mesh['cooldown']
 
     #tf.to_dataframe('EOB')
 
     #tf.export()
     #tf.plot('TFonly', 'cooldown', factor=180)
     #
-    tf.warp(50, displace='EOB-cooldown')
+    #tf.warp(50, displace='EOB-cooldown')
 
     #tf.animate('TFonly-cooldown', view='xy')

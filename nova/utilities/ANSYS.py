@@ -17,7 +17,7 @@ def edge(index, Narray):
 
 class table(object):
 
-    def __init__(self, filename, ext='.lib', nedge=10):
+    def __init__(self, filename, ext='.lib', nedge=6):
         self.nedge = nedge  # number of array items per line
         f = open(filename + ext, 'w')
         self.f = f

@@ -4,6 +4,8 @@ import inspect
 import os
 
 import pyvista as pv
+import scipy.spatial
+import scipy.interpolate
 
 import numpy as np
 from nova.definitions import root_dir
@@ -55,41 +57,79 @@ class MorphAnsys:
         """Write utility cdb initialization script."""
         txt = '''
             /clear
-            cdread,db,MAGNET,cdb,./MACRO/INPUT_FILES
+            cdread,db,MAGNET,cdb,../../MACRO/INPUT_FILES
             '''
         with open(os.path.join(self.macro_dir, 'read_cdb.mac'), 'w') as f:
             f.write(inspect.cleandoc(txt))
 
+    def generate_axes(self, csys=0):
+        """Return interpolation axes."""
+        if csys == 0:  # cartesian
+            bounds = [self.base.bounds[2*i:2*i+2] for i in range(3)]
+            axes = [np.linspace(*limit, int(np.diff(limit)/self.resolution))
+                    for limit in bounds]
+            return axes
+        index = ~np.isnan(self.base.points).any(axis=1)
+        radius = np.linalg.norm(self.base.points[index, :1], axis=0)
+        rlimit = [np.min(radius), np.max(radius)]
+        zlimit = self.base.bounds[-2:]
+
+        print(int(np.diff(rlimit)/self.resolution))
+
+        axes = [np.linspace(*rlimit, int(np.diff(rlimit)/self.resolution)),
+                np.linspace(0, 2*np.pi, 5000),
+                np.linspace(*zlimit, int(np.diff(zlimit)/self.resolution))]
+        print(np.shape(axes[0]), np.diff(rlimit), rlimit)
+        return axes
+
     def write_table(self):
         """Write ansys interpolation table to file."""
-        bounds = [self.base.bounds[2*i:2*i+2] for i in range(3)]
-        axes = [np.linspace(*limit, int(np.diff(limit)/self.resolution))
-                for limit in bounds]
+        axes = self.generate_axes(csys=1)
+        '''
         grid = np.array(np.meshgrid(*axes, indexing='ij')).T
+
         shape = grid.shape
         grid = grid.reshape(-1, 3)
-        morph = Morph(self.fiducial, smoothing=self.smoothing)
-        delta = morph.rbf(grid).reshape(*shape).T
 
-        with ANSYS.table(os.path.join(self.morph_dir, self.name),
+        scipy.spatial.Delaunay()
+
+        interpolator = scipy.interpolate.LinearNDInterpolator(
+            self.fiducial.points, self.fiducial['delta'], fill_value=0.0)
+
+        #delta = morph.rbf(grid).reshape(*shape).T
+
+        delta = interpolator(grid)
+        index = np.isnan(delta).any(axis=1)
+
+        morph = Morph(self.fiducial, smoothing=self.smoothing)
+        #delta[index] = morph.rbf(grid[index, :])
+
+        delta = delta.reshape(*shape).T
+        delta *= 500
+
+        with ANSYS.table(os.path.join(self.morph_dir, f'{self.name}'),
                          ext='.mac') as table:
             for i, coord in enumerate('xyz'):
                 table.write_text('/nopr')
                 table.load(f'morph_d{coord}', delta[i], [*axes])
                 table.write(['x', 'y', 'z'])
                 table.write_text('/gopr')
+        '''
 
-    def macro(self, factor=1):
-        """Write ansys interpolation script to file."""
-        txt = f'''
+    def write_macro(self):
+        """Write ansys interpolation tables script to file."""
+        txt = '''
 
-        /filename,'morph',0
-        /cwd,'./%batchname%_%arg1%/_models'
+        *get,root_type,parm,root_dir,type
+        *if,root_type,eq,5,then
+          /filename,'morph',0
+          /cwd,'./%batchname%_%arg1%/_models'
 
-        parsav,all
-        resume,'MECH',db,,0,1
-        parres
-        allsel,all
+          parsav,all
+          resume,'MECH',db,,0,1
+          parres
+          allsel,all
+        *endif
 
         ! load interpolation table
         *use,'../../MORPH/%arg2%%arg1%.mac'
@@ -113,11 +153,6 @@ class MorphAnsys:
         *do,ii,1,3
           *vitrp,%xyz(ii)%delta,morph_d%xyz(ii)%(1,1,1),xcoord(1),ycoord(1),zcoord(1)
          *enddo
-        *if,{factor},gt,1,then
-          *do,ii,1,3
-            *voper,%xyz(ii)%delta(1),%xyz(ii)%delta(1),mult,{factor}
-          *enddo
-        *endif
         *do,ii,1,3
           *voper,%xyz(ii)%coord(1),%xyz(ii)%coord(1),add,%xyz(ii)%delta(1)
         *enddo
@@ -125,10 +160,14 @@ class MorphAnsys:
         ! move nodes
         /prep7
         shpp,off
+        /nopr
         nmodif,nds(1:nnd),xcoord(1:nnd),ycoord(1:nnd),zcoord(1:nnd)
-        save,'./MECH', db
-        finish
-        /cwd,root_dir(1)
+        /gopr
+        *if,root_type,eq,5,then
+          save,'./MECH', db
+          finish
+          /cwd,root_dir(1)
+        *endif
 
         ! cleanup
         *del,nds
@@ -155,4 +194,5 @@ if __name__ == '__main__':
     base = AnsysPost('TFCgapsG10', 'k0', 'all')
 
     ansys = MorphAnsys('ccl0', fiducial.mesh, base.mesh)
-    ansys.macro()
+    ansys.write_table()
+    ansys.write_macro()

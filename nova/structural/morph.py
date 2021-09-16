@@ -16,9 +16,9 @@ class Morph(Plotter):
 
     fiducial: pv.PolyData
     mesh: pv.PolyData = None
-    neighbors: int = None
-    smoothing: float = 0.
-    kernel: str = 'thin_plate_spline'
+    neighbors: int = 1
+    smoothing: float = 2.
+    kernel: str = 'linear'
     epsilon: float = 1
     rbf: scipy.interpolate.RBFInterpolator = field(init=None)
 
@@ -30,15 +30,36 @@ class Morph(Plotter):
 
     def build(self):
         """Build radial basis function interpolator."""
+        '''
         index = np.unique(self.fiducial.points, axis=0, return_index=True)[1]
         self.rbf = scipy.interpolate.RBFInterpolator(
             self.fiducial.points[index], self.fiducial['delta'][index],
             neighbors=self.neighbors,
             smoothing=self.smoothing, kernel=self.kernel, epsilon=self.epsilon)
+        '''
+
+
+
 
     def interpolate(self):
         """Morph mesh."""
-        self.mesh['delta'] = self.rbf(self.mesh.points)
+
+        from sklearn.gaussian_process import GaussianProcessRegressor
+        from sklearn.gaussian_process.kernels import RBF, ConstantKernel
+
+
+        kernel = RBF(length_scale=5, length_scale_bounds='fixed')
+        gpr = GaussianProcessRegressor(
+            kernel=kernel, random_state=0, alpha=0.25**2).fit(
+                self.fiducial.points,self.fiducial['delta'])
+
+        index = ~np.isnan(self.mesh.points).any(axis=1)
+        print(np.sum(~index))
+
+        self.mesh['delta'] = np.zeros((self.mesh.n_points, 3))
+        self.mesh['delta'][index , :] = gpr.predict(self.mesh.points[index , :])
+
+
 
     '''
     def save(self):
@@ -66,7 +87,7 @@ class Morph(Plotter):
 
 if __name__ == '__main__':
 
-    # mesh = AnsysPost('TFCgapsG10', 'k0', 'E_TF1').mesh
+    TF1 = AnsysPost('TFCgapsG10', 'k0', 'E_TF1').mesh
     # mesh = AnsysPost('TFCgapsG10', 'k0', 'E_TF2').mesh
     # mesh = AnsysPost('TFCgapsG10', 'k0', 'all').mesh
     mesh = AnsysPost('TFCgapsG10', 'k0', 'E_WP_1').mesh
@@ -74,54 +95,26 @@ if __name__ == '__main__':
     fiducial = FiducialMesh()
     fiducial.load_centerline([0])
 
-    #fiducial = FiducialData()
-    #fiducial.warp('delta', factor=500)
+    ilis = pv.PolyData(fiducial.mesh.points[:1])
+    ilis['delta'] = [(0, 0, 0)]
 
-    morph = Morph(fiducial.mesh, mesh, kernel='linear', neighbors=1)
+    fiducial.mesh['delta'][0] += (0.001, 0, 0)
+
+    morph = Morph(fiducial.mesh, mesh)
+
+    morph = Morph(morph.mesh, TF1)
+
+    #fiducial.mesh = fiducial.mesh.slice((0, 0, 1))
     #morph.mesh = morph.mesh.slice((0, 0, 1))
-    morph.warp(500)
 
-    #plotter = pv.Plotter()
-    #plotter.add_mesh(mesh, color='w', opacity=0.1)
-    #plotter.add_mesh(fiducial.mesh)
-    #plotter.show()
 
+    plotter = pv.Plotter()
+    morph.warp(500, plotter=plotter)
+    fiducial.warp(500, plotter=plotter, color='w')
+
+    plotter.show()
 
     # morph.warp('delta', factor=500, opacity=0.05)
     # morph.fiducial.mesh.plot()
     # morph.animate('TFC18_morph', 'delta', max_factor=500, frames=2, opacity=0)
     # morph.write_ansys_table()
-
-
-'''
-
-
-plotter = pv.Plotter()
-plotter.add_mesh(ansys, color='w', opacity=0.05)
-plotter.add_mesh(ansys.warp_by_vector('delta', factor=500), scalars='delta',
-                 show_edges=True)
-plotter.show()
-
-
-plotter = pv.Plotter()
-color = sns.color_palette("hls", 18)
-
-for i in range(1, 4):
-    if i in fiducial.data.coil:
-        if i % 2 == 1:
-            morph_mesh = TF1.copy()
-            rotate = i-1
-        else:
-            morph_mesh = TF2.copy()
-            rotate = i-2
-        morph_mesh.rotate_z(rotate*20)
-
-        morph_mesh['delta'] = rbf(morph_mesh.points)
-
-        plotter.add_mesh(morph_mesh, color='w', opacity=0.05)
-        plotter.add_mesh(morph_mesh.warp_by_vector('delta', factor=500),
-                         color=color[i])
-
-#plotter.add_mesh(fiducial.mesh, line_width=8)
-plotter.show()
-'''

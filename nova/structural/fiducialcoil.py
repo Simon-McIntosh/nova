@@ -65,7 +65,7 @@ class FiducialCoil(Plotter):
         """Return TFC1 case."""
         case = pv.PolyData()
         for part in ['case_il', 'case_ol']:
-            case += AnsysPost('TFCgapsG10', 'k0', part).mesh
+            case += AnsysPost('TFCgapsG10', 'k0', part.upper()).mesh
         case = case.clip((-np.sin(np.pi/18), np.cos(np.pi/18), 0),
                          origin=(0, 0, 0))
         case = case.clip((np.sin(np.pi/18), np.cos(np.pi/18), 0),
@@ -107,7 +107,7 @@ class FiducialCoil(Plotter):
 
     def _add_frozen(self, part, decimate):
         """Add frozen mesh to fiducial dataset."""
-        mesh = self.load_surface_mesh(part, decimate)
+        mesh = self.load_surface_mesh(part.upper(), decimate)
         self._freeze(mesh)
         self.mesh += mesh
 

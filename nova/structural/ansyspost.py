@@ -175,7 +175,7 @@ class AnsysPost(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    ccl = AnsysPost('TFCgapsG10', 'ccl0', 'WP')
+    k0 = AnsysPost('TFCgapsG10', 'k0', 'all')
 
     #k0 = AnsysPost('TFCgapsG10', 'k0', 'WP')
 

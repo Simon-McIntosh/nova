@@ -1,5 +1,6 @@
 
 import pyvista as pv
+import scipy.interpolate
 
 from nova.structural.ansyspost import AnsysPost
 from nova.structural.fiducialcoil import FiducialCoil
@@ -12,12 +13,14 @@ fiducialcoil = FiducialCoil('fiducial', 10)
 
 base = AnsysPost('TFCgapsG10', 'k0', 'case_il')
 
+
+scipy.interpolate.LinearNDInterpolator()
 #base.mesh = base.mesh.slice(normal=[0, 0, 1])
 
-morph = Morph(fiducialcoil.mesh, base.mesh)
+#morph = Morph(fiducialcoil.mesh, base.mesh, smoothing=1)
 
 #morph.mesh = morph.mesh.slice(normal=[0, 0, 1])
-morph.mesh.plot()
+#morph.warp(500)
 
 
 '''

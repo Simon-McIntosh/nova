@@ -29,7 +29,8 @@ class FiducialData(Plotter):
         """Load data."""
         self.build_dataset()
         if self.fill:
-            self.fill_gaps()
+            self.backfill()
+        self.locate_coils()
         self.build_mesh()
 
     def build_dataset(self):
@@ -39,8 +40,13 @@ class FiducialData(Plotter):
         self.load_fiducials()
         self.load_fiducial_deltas()
 
-    def fill_gaps(self):
-        """Insert samples drawn from EU/JA datasets to fill gaps."""
+    def label_coils(self, plotter, location='OD'):
+        """Add coil labels."""
+        plotter.add_point_labels(self.mesh[location][:18],
+                                 self.mesh['label'][:18], font_size=20)
+
+    def backfill(self):
+        """Insert samples drawn from EU/JA datasets as proxy for missing."""
         metadata = xarray.Dataset(
             coords=dict(DA=['EU', 'JA'], coil=range(1, 20)))
         metadata['origin'] = ('coil',
@@ -64,16 +70,36 @@ class FiducialData(Plotter):
                                   dim='coil', data_vars='minimal')
         self.data = self.data.sortby('coil')
 
+    def locate_coils(self):
+        """Update data with coil's position index."""
+        loc = [14, 15, 4, 17, 6, 7, 2, 3, 16, 5, 12, 13, 8, 9, 10, 11, 18, 1,
+               19]
+        self.data = self.data.assign_coords(
+            location=('coil', [loc.index(coil) for coil in self.data.coil]))
+        self.data = self.data.sortby('location')
+
     def build_mesh(self):
         """Build vtk mesh."""
         self.mesh = pv.PolyData()
-        for coil in range(1, 19):
-            if coil in self.data.coil:
-                loop = pv.Spline(1e-3*self.data.centerline)
-                loop['arc_length'] /= loop['arc_length'][-1]
-                loop['delta'] = 1e-3*self.data.centerline_delta.loc[coil]
-                loop.rotate_z((coil-1)*20)
-                self.mesh += loop
+        centerline = pv.Spline(1e-3*self.data.centerline)
+        centerline['arc_length'] /= centerline['arc_length'][-1]
+        for loc in self.data.location:
+            if loc.coil == 19:
+                continue
+            coil = centerline.copy()
+            coil['delta'] = 1e-3*self.data.centerline_delta.sel(coil=loc.coil)
+            coil.rotate_z(20*loc.values, point=(0, 0, 0),
+                          transform_all_input_vectors=True)
+            midplane = coil.slice(normal='z', origin=(0, 0, 0))
+            midplane.points += midplane['delta']
+            coil['coil'] = [loc.coil.values]
+            coil['ID'] = [midplane.points[0]]
+            coil['OD'] = [midplane.points[1]]
+            label = f'{loc.coil.values:02d}'
+            if (clone := self.data.clone.sel(coil=loc.coil)) != -1:
+                label += f'<{clone.values}'
+            coil['label'] = [label]
+            self.mesh = self.mesh.merge(coil, merge_points=False)
 
     def initialize_dataset(self):
         """Init xarray dataset."""
@@ -565,34 +591,19 @@ class FiducialData(Plotter):
                   factor*self.data.centerline_delta[coil, :, 0],
                   self.data.centerline[:, 2] +
                   factor*self.data.centerline_delta[coil, :, 2],
-                  color=f'C0')
+                  color='C0')
         axes.axis('equal')
         axes.axis('off')
-        #axes.set_title(f'TF{coil:02d}')
-
-        '''
-        color = 0
-
-
-        axes.plot(self.data.fiducial[:, 0] +
-                     factor*self.data.fiducial_delta[i, :, 0],
-                     self.data.fiducial[:, 2] +
-                     factor*self.data.fiducial_delta[i, :, 2], '.',
-                     color=f'C{color[j]}')
-        '''
-
-
-
-
-    def extract_cells(self, index):
-        """Return mesh subset of extracted cells."""
-        return self.mesh.extract_cells(index)
 
 
 if __name__ == '__main__':
 
     fiducial = FiducialData(fill=True)
+    plotter = pv.Plotter()
+    fiducial.warp(500, plotter=plotter)
+    fiducial.label_coils(plotter)
+    plotter.show_axes()
+    plotter.show()
 
-    fiducial.warp(500)
     #fiducial.plot()
     #fiducial.plot_gpr_array(1)

@@ -9,12 +9,13 @@ class Plotter:
     """Custom pyvista plotting methods."""
 
     def warp(self, factor=75, opacity=0.5, displace='delta', scalars=None,
-             plotter=None, show_edges=False, color=None):
+             plotter=None, show_edges=False, color=None, show=False):
         """Plot warped with mesh."""
         if scalars is None:
             scalars = displace
         if plotter is None:
             plotter = pv.Plotter()
+            show = True
         if opacity > 0:
             plotter.add_mesh(self.mesh, scalars=None, color='w',
                              opacity=opacity, smooth_shading=True,
@@ -27,7 +28,7 @@ class Plotter:
                          show_edges=show_edges, opacity=0.5,
                          color=color)
         #, smooth_shading=True, show_scalar_bar=False, clim=[-25, 25])
-        if plotter is None:
+        if show:
             plotter.show()
         return plotter
 

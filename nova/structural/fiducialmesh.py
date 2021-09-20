@@ -13,39 +13,41 @@ class FiducialMesh(Plotter):
     """Manage fiducial mesh."""
 
     mesh: pv.PolyData = field(default_factory=pv.PolyData)
-    fiducial_data: FiducialData = field(init=False)
+    data: FiducialData = field(init=False)
 
     def __post_init__(self):
         """Load fiducial database."""
-        self.fiducial_data = FiducialData(fill=True, sead=2025)
+        self.data = FiducialData(fill=True, sead=2025)
 
     def add(self, mesh):
         """Add geometry to fiducial mesh."""
-        if 'delta' not in mesh.array_names:
-            mesh['delta'] = np.zeros((mesh.n_points, 3))
-        try:
-            delta = np.append(self.mesh['delta'], mesh['delta'], axis=0)
-        except KeyError:
-            delta = mesh['delta']
-        self.mesh += mesh
-        self.mesh['delta'] = delta
+        self.mesh = self.mesh.merge(mesh, merge_points=False)
 
     def clear_mesh(self):
         """Re-initialize mesh."""
         self.mesh = pv.PolyData()
 
-    def add_centerline(self, index):
+    def load_coil(self, index):
         """Add centerline from fiducial data to mesh."""
-        self.add(self.fiducial_data.extract_cells(index))
+        self.add(self.data.mesh.extract_cells(index))
 
-    def load_centerline(self, index):
-        """Load single fiducial centerline."""
+    def load_coilset(self):
+        """Load full TF coilset."""
         self.clear_mesh()
-        self.add_centerline(index)
+        for cell_index in range(self.data.dim['coil']):
+            self.load_coil(cell_index)
 
 
 if __name__ == '__main__':
 
-    fiducial = FiducialMesh()
-    fiducial.load_centerline(0)
-    fiducial.warp(500)
+    fiducialmesh = FiducialMesh()
+    fiducialmesh.load_coil(3)
+    fiducialmesh.warp(500)
+
+    #fiducial.load_coilset()
+    fiducialmesh.clear_mesh()
+    for index in range(18):
+        fiducialmesh.load_coil(index)
+    #for index in range(19):
+    #    fiducialmesh.load_coil(index, clear_mesh=False)
+    fiducialmesh.warp(500)

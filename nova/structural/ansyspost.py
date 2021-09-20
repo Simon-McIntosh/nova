@@ -41,8 +41,8 @@ class AnsysPost(DataDir, Plotter):
             self.time_scoping = self.mesh.field_data['time_scoping']
         except FileNotFoundError:
             self.load_ansys()
-        if not hasattr(self.mesh, 'name'):
-            self.mesh.name = self.subset
+        #if not hasattr(self.mesh, 'name'):
+        #    self.mesh.name = self.subset
 
     def load_ansys(self):
         """Load Ansys rst file."""
@@ -177,6 +177,7 @@ if __name__ == '__main__':
 
     k0 = AnsysPost('TFCgapsG10', 'k0', 'all')
 
+    print(k0.mesh.field_data)
     #k0 = AnsysPost('TFCgapsG10', 'k0', 'WP')
 
     #ansys.mesh.plot(lighting=True, color='w')

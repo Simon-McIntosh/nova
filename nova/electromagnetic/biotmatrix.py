@@ -17,8 +17,6 @@ class BiotSolver:
     source: BiotFrame
     target: BiotFrame
 
-
-
     def flux_matrix(self, method):
         """Calculate filament flux (inductance) matrix."""
         psi = self._calculate(method, 'scalar_potential')
@@ -40,7 +38,6 @@ class BiotSolver:
         self.field_matrix(filament)  # assemble field interaction matricies
         self.update_biot = True
         self.update_interaction = False
-
 
     def solve_biot(self):
         """

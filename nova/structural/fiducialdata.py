@@ -55,7 +55,9 @@ class FiducialData(Plotter):
                                'JA', 'JA', 'EU', 'EU', 'JA'])
         rng = np.random.default_rng(self.sead)  # sead random number generator
 
-        self.data['clone'] = ('coil', np.full(self.data.dims['coil'], -1))
+        # self.data['clone'] = ('coil', np.full(self.data.dims['coil'], -1))
+        self.data = self.data.assign_coords(
+            clone=('coil', np.full(self.data.dims['coil'], -1)))
         fill = []
         for DA in metadata.DA:
             source = self.data.coil[self.data.origin == DA].values
@@ -64,7 +66,7 @@ class FiducialData(Plotter):
             sample = rng.integers(len(source), size=len(target))
             copy = self.data.sel(coil=source[sample])
             copy = copy.assign_coords(coil=target)
-            copy['clone'][:] = source[sample]
+            copy = copy.assign_coords(clone=('coil', source[sample]))
             fill.append(copy)
         self.data = xarray.concat([self.data, *fill],
                                   dim='coil', data_vars='minimal')

@@ -779,13 +779,13 @@ if __name__ == '__main__':
 
 
     #scn.build(target='ca', phase_shift=False)
-    scn.build(target=['cs'], phase_shift=True)
+    #scn.build(target=['cs'], phase_shift=True)
 
     scn.load_sample_data('mode')
     scn.assembly.plot()
 
-    #plt.set_aspect(1.1)
-    #scn.plot_gap_array(range(5, 10), phase=np.pi/18)
+    plt.set_aspect(0.6)
+    scn.plot_gap_array(range(1, 5), phase=np.pi/18)
 
     #wavenumber = 1
     #error = scn.generate_error(wavenumber)

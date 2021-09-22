@@ -38,19 +38,15 @@ class TFCgap(DataDir, Plotter):
             except KeyError:
                 pass
 
-    def animate(self, max_factor=200):
+    def animate(self, displace='EOB', max_factor=200):
         """Animate displacement."""
-        folder = os.path.join(self.directory, 'gif')
-        if not os.path.isdir(folder):
-            os.mkdir(folder)
-        filename = os.path.join(folder,
-                                f'{self.loadcase[0]}_{self.loadcase[1]}_delta')
-        super().animate(filename, 'delta', view='iso', max_factor=max_factor)
+        filename = f'{self.file}_{self.baseline}_{displace}'
+        super().animate(filename, displace, view='xy', max_factor=max_factor)
 
 
 if __name__ == '__main__':
 
-    gap = TFCgap('TFCgapsG10', 'ccl0', baseline='k0', cluster=False)
+    gap = TFCgap('TFCgapsG10', 'v0_100', baseline='v0_65', cluster=False)
 
     #mesh = gap.mesh.slice(normal=[0, 0, 1])
     #clip = pv.Cylinder(direction=(0, 0, 1), radius=3)
@@ -60,5 +56,5 @@ if __name__ == '__main__':
     #p.add_mesh(mesh)
     #p.show()
 
-    gap.warp(100, displace='cooldown', opacity=0)
-    #gap.animate(1000)
+    gap.warp(1000, displace='EOB', opacity=0)
+    #gap.animate('EOB', 1000)

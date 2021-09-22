@@ -336,8 +336,8 @@ sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # pyvista dependencies from pip. Only compatible with x86-64 (amd64).
 # matplotlib improves plotting quality with better color maps and properly rendering colorbars.
-pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
-	--no-cache-dir pyvista==${PYVISTA_VERSION} 
-pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
-	--no-cache-dir matplotlib
+#pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
+#	--no-cache-dir pyvista==${PYVISTA_VERSION} 
+#pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
+#	--no-cache-dir matplotlib
 

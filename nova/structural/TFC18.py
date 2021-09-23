@@ -183,15 +183,15 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'ccl0', cluster=1)
+    tf = TFC18('TFCgapsG10', 'v0_100', cluster=1)
 
     #tf.to_dataframe('EOB')
 
-    tf.load_ensemble()
+    #tf.load_ensemble()
 
     #tf.mesh['EOB-cooldown'] = tf.mesh['EOB'] - tf.mesh['cooldown']
 
-    #tf.to_dataframe('EOB')
+    tf.to_dataframe('EOB')
 
     #tf.export()
     #tf.plot('TFonly', 'cooldown', factor=180)

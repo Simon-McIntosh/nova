@@ -98,8 +98,11 @@ class FiducialData(Plotter):
             coil['ID'] = [midplane.points[0]]
             coil['OD'] = [midplane.points[1]]
             label = f'{loc.coil.values:02d}'
-            if (clone := self.data.clone.sel(coil=loc.coil)) != -1:
-                label += f'<{clone.values}'
+            try:
+                if (clone := self.data.clone.sel(coil=loc.coil)) != -1:
+                    label += f'<{clone.values}'
+            except AttributeError:
+                pass
             coil['label'] = [label]
             self.mesh = self.mesh.merge(coil, merge_points=False)
 
@@ -600,7 +603,7 @@ class FiducialData(Plotter):
 
 if __name__ == '__main__':
 
-    fiducial = FiducialData(fill=True)
+    fiducial = FiducialData(fill=False)
     plotter = pv.Plotter()
     fiducial.warp(500, plotter=plotter)
     fiducial.label_coils(plotter)

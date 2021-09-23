@@ -44,11 +44,13 @@ export SLEPC_DIR=$HOME/slepc
 export DOLFIN_REAL_DIR=$HOME/dolfinx-real
 export DOLFIN_COMPLEX_DIR=$HOME/dolfinx-complex
 
+: <<'END'
+
 #PYTHONPATH=/usr/local/lib:$PYTHONPATH
 # Set paths Real by default. - use below to configure env
 # export PKG_CONFIG_PATH=$DOLFIN_REAL_DIR/lib/pkgconfig:$PKG_CONFIG_PATH 
 # export PETSC_ARCH=linux-gnu-real-32 
-# export PYTHONPATH=$DOLFIN_REAL_DIR/lib/python3.8/dist-packages:$PYTHONPATH 
+# export PYTHONPATH=$DOLFIN_REAL_DIR/lib/python3.9/dist-packages:$PYTHONPATH 
 # export LD_LIBRARY_PATH=$DOLFIN_REAL_DIR/lib:$LD_LIBRARY_PATH
 
 # Install dependencies available via apt-get.
@@ -111,6 +113,8 @@ LLVM_CONFIG=/usr/bin/llvm-config-9 pip3 install \
 	--no-cache-dir mpi4py numba 
 pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
 	--no-cache-dir cffi cppimport flake8 pybind11==${PYBIND11_VERSION} pytest pytest-xdist sphinx sphinx_rtd_theme
+
+pip3 install --upgrade pip setuptools wheel
 
 # Upgrade numpy via pip. Exclude binaries to avoid conflicts with libblas
 # (See issue #126 and #1305)
@@ -248,6 +252,7 @@ python3 ./configure \
 		--with-scalar-type=complex 
 sudo make PETSC_DIR=$PETSC_DIR PETSC_ARCH=linux-gnu-complex-64 ${MAKEFLAGS} all 
 
+
 # Install petsc4py
 cd ${PETSC_DIR} 
 cd src/binding/petsc4py 
@@ -301,6 +306,7 @@ pip3 install --no-cache-dir --no-deps ./ffcx
 # Install ipython
 pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org --no-cache-dir ipython
 
+END
 [ ! -d "./dolfinx" ] && git clone https://github.com/FEniCS/dolfinx.git
 mkdir -p $BUILD_DIR/dolfinx/build-real && cd $BUILD_DIR/dolfinx/build-real
 PETSC_ARCH=linux-gnu-real-32 cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$DOLFIN_REAL_DIR \
@@ -312,8 +318,8 @@ sudo chown -R $USER:$USER $DOLFIN_REAL_DIR
 source $DOLFIN_REAL_DIR/lib/dolfinx/dolfinx.conf
 cd $BUILD_DIR/dolfinx/python 
 CXXFLAGS=${DOLFINX_CMAKE_CXX_FLAGS} PETSC_ARCH=linux-gnu-real-32 pip3 install \
-	--target $DOLFIN_REAL_DIR/lib/python3.8/dist-packages 
-	--no-dependencies . 
+	--target $DOLFIN_REAL_DIR/lib/python3.8/dist-packages --no-dependencies . 
+: <<END
 
 mkdir -p $BUILD_DIR/dolfinx/build-complex && cd $BUILD_DIR/dolfinx/build-complex
 PETSC_ARCH=linux-gnu-complex-32 cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$DOLFIN_COMPLEX_DIR \
@@ -336,8 +342,8 @@ sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # pyvista dependencies from pip. Only compatible with x86-64 (amd64).
 # matplotlib improves plotting quality with better color maps and properly rendering colorbars.
-#pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
-#	--no-cache-dir pyvista==${PYVISTA_VERSION} 
-#pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
-#	--no-cache-dir matplotlib
-
+pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
+	--no-cache-dir pyvista==${PYVISTA_VERSION} 
+pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org \
+	--no-cache-dir matplotlib
+END

@@ -197,6 +197,6 @@ if __name__ == '__main__':
     #tf.plot('TFonly', 'cooldown', factor=180)
     #
 
-    tf.warp(50, displace='EOB')
+    #tf.warp(50, displace='EOB')
 
     #tf.animate('TFonly-cooldown', view='xy')

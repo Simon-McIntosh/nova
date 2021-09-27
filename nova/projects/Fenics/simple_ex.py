@@ -30,11 +30,10 @@ a = ufl.dot(ufl.grad(u), ufl.grad(v)) * ufl.dx
 L = f * v * ufl.dx
 
 
-problem = dolfinx.fem.LinearProblem(a, L, bcs=[bc])
-# petsc_options={"ksp_type": "preonly", "pc_type": "lu"}
+problem = dolfinx.fem.LinearProblem(a, L, bcs=[bc], 
+                                    petsc_options={"ksp_type": "preonly", 
+                                                   "pc_type": "lu"})
 uh = problem.solve()
-
-'''
 V2 = dolfinx.FunctionSpace(mesh, ("CG", 2))
 uex = dolfinx.Function(V2)
 uex.interpolate(lambda x: 1 + x[0]**2 + 2 * x[1]**2)
@@ -48,4 +47,19 @@ u_ex_vertex_values = uex.compute_point_values()
 error_max = numpy.max(numpy.abs(u_vertex_values - u_ex_vertex_values))
 print(f"Error_L2 : {error_L2:.2e}")
 print(f"Error_max : {error_max:.2e}")
-'''
+
+
+import dolfinx.plot
+topology, cell_types = dolfinx.plot.create_vtk_topology(mesh, mesh.topology.dim)
+
+import pyvista
+grid = pyvista.UnstructuredGrid(topology, cell_types, mesh.geometry.x)
+
+grid.point_data["u"] = uh.compute_point_values().real
+grid.set_active_scalars("u")
+
+#pyvista.start_xvfb(wait=0.05)
+plotter = pyvista.Plotter()
+plotter.add_mesh(grid, show_edges=True, show_scalar_bar=True)
+plotter.view_xy()
+plotter.show()

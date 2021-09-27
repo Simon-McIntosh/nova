@@ -143,10 +143,10 @@ adj = AdjacencyList_int32(local_entities)
 ct = create_meshtags(mesh, tdim, adj, np.int32(local_values))
 
 
-import dolfinx.io
-with dolfinx.io.XDMFFile(MPI.COMM_WORLD, "mt.xdmf", "w") as xdmf:
-    xdmf.write_mesh(mesh)
-    xdmf.write_meshtags(ct)
+import dolfinx
+#with dolfinx.io.XDMFFile(MPI.COMM_WORLD, "mt.xdmf", "w") as xdmf:
+#    xdmf.write_mesh(mesh)
+#    xdmf.write_meshtags(ct)
     
     
 '''
@@ -177,7 +177,7 @@ J = dolfinx.Function(Q)
 
 with mu.vector.localForm() as loc_mu, J.vector.localForm() as loc_J:
     # As we only set some values in J, initialize all as 0
-    loc_J.set(0)
+    #loc_J.set(0)
     for tag in material_tags:
         cells = ct.indices[ct.values==tag]
         num_cells = len(cells)

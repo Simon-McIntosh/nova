@@ -43,7 +43,6 @@ export PETSC_DIR=$HOME/petsc
 export SLEPC_DIR=$HOME/slepc
 export DOLFIN_DIR=$HOME/dolfinx
 
-
 #PYTHONPATH=/usr/local/lib:$PYTHONPATH
 # Set paths Real by default. - use below to configure env
 # export PKG_CONFIG_PATH=$DOLFIN_DIR/lib/pkgconfig:$PKG_CONFIG_PATH 
@@ -214,7 +213,7 @@ pip3 install --no-cache-dir --no-deps ./ffcx
 mkdir -p $BUILD_DIR/dolfinx/build-real && cd $BUILD_DIR/dolfinx/build-real
 PETSC_ARCH=linux-gnu-real-64 cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$DOLFIN_DIR \
 	-DCMAKE_BUILD_TYPE=${DOLFINX_CMAKE_BUILD_TYPE} \
-	-DCMAKE_CXX_FLAGS=${DOLFINX_CMAKE_CXX_FLAGS} ../cpp 
+	-DCMAKE_CXX_FLAGS=${DOLFINX_CMAKE_CXX_FLAGS} -DPython3_EXECUTABLE=$(which python3) ../cpp 
 sudo ninja install 
 sudo chown -R $USER:$USER $DOLFIN_DIR
 

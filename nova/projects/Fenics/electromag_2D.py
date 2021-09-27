@@ -149,11 +149,10 @@ with dolfinx.io.XDMFFile(MPI.COMM_WORLD, "mt.xdmf", "w") as xdmf:
     xdmf.write_meshtags(ct)
     
     
+'''
     
 import pyvista
 import dolfinx.plot
-# Start virtual framebuffer
-#pyvista.start_xvfb(wait=0.0)
 
 plotter = pyvista.Plotter()
 topology, cell_types = dolfinx.plot.create_vtk_topology(mesh, mesh.topology.dim)
@@ -167,14 +166,15 @@ if not pyvista.OFF_SCREEN:
     plotter.show()
 else:
     cell_tag_fig = plotter.screenshot("cell_tags.png")
+'''
     
-    
-
 
 Q = dolfinx.FunctionSpace(mesh, ("DG", 0))
 material_tags = np.unique(ct.values)
 mu = dolfinx.Function(Q)
 J = dolfinx.Function(Q)
+
+
 with mu.vector.localForm() as loc_mu, J.vector.localForm() as loc_J:
     # As we only set some values in J, initialize all as 0
     loc_J.set(0)
@@ -194,6 +194,9 @@ with mu.vector.localForm() as loc_mu, J.vector.localForm() as loc_J:
             loc_J.setValues(cells, np.full(num_cells, 1))
         elif tag in range(2+N, 2*N + 2):
             loc_J.setValues(cells, np.full(num_cells, -1))
+
+
+'''
     
     
 import ufl
@@ -210,3 +213,5 @@ u = ufl.TrialFunction(V)
 v = ufl.TestFunction(V)
 a = (1 / mu) * ufl.dot(ufl.grad(u), ufl.grad(v)) * ufl.dx
 L = J * v * ufl.dx
+
+'''

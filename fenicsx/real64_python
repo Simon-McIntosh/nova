@@ -1,0 +1,113 @@
+#!/bin/bash
+
+# Requires cmake>=*, gcc>=8, boost>=1.6
+
+PETSC_VERSION=3.15.2
+SLEPC_VERSION=3.15.1
+
+########################################
+
+PETSC_SLEPC_OPTFLAGS="-O2"
+# PETSc and SLEPc number of make processes (--with-make-np)
+PETSC_SLEPC_MAKE_NP=2
+# Turn on PETSc and SLEPc debugging. "yes" or "no".
+PETSC_SLEPC_DEBUGGING="no"
+
+# The following ARGS are used in the DOLFINx layer.
+# They are safe defaults.
+# CMake build type for DOLFINx C++ build. See CMake documentation.
+export DOLFINX_CMAKE_BUILD_TYPE="RelWithDebInfo"
+# Extra CMake C++ compiler flags for DOLFINx C++ build.
+export DOLFINX_CMAKE_CXX_FLAGS
+
+# Environment variables
+export OPENBLAS_NUM_THREADS=1 
+export OPENBLAS_VERBOSE=0
+
+# Install directories 
+
+export BUILD_DIR=$(pwd)
+export PETSC_DIR=$HOME/petsc 
+export SLEPC_DIR=$HOME/slepc
+export DOLFIN_DIR=$HOME/dolfinx
+
+# Install PETSc and petsc4py with real and complex types
+sudo apt-get -qq update 
+sudo apt-get -y install bison flex 
+wget -nc --no-check-certificate http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-${PETSC_VERSION}.tar.gz \
+	-O petsc-${PETSC_VERSION}.tar.gz 
+mkdir -p ${PETSC_DIR}  
+tar -xf petsc-${PETSC_VERSION}.tar.gz -C ${PETSC_DIR} --strip-components 1 
+cd ${PETSC_DIR} 
+
+# Real, 64-bit int
+python3 ./configure \
+        PETSC_ARCH=linux-gnu-real-64 \
+		--COPTFLAGS="${PETSC_SLEPC_OPTFLAGS}" \
+		--CXXOPTFLAGS="${PETSC_SLEPC_OPTFLAGS}" \
+		--FOPTFLAGS="${PETSC_SLEPC_OPTFLAGS}" \
+		--with-make-np=${PETSC_SLEPC_MAKE_NP} \
+		--with-64-bit-indices=yes \
+		--with-debugging=${PETSC_SLEPC_DEBUGGING} \
+		--with-fortran-bindings=no \
+		--with-shared-libraries \
+		--download-hypre \
+		--download-mumps \
+		--download-ptscotch \
+		--download-scalapack \
+		--download-suitesparse \
+		--download-superlu_dist \
+		--with-scalar-type=real 
+sudo make PETSC_DIR=$PETSC_DIR PETSC_ARCH=linux-gnu-real-64 ${MAKEFLAGS} all 
+
+# Install petsc4py
+cd ${PETSC_DIR} 
+cd src/binding/petsc4py 
+PETSC_ARCH=linux-gnu-real-64 pip3 install .
+
+# Install SLEPc
+cd $BUILD_DIR
+wget -nc https://slepc.upv.es/download/distrib/slepc-${SLEPC_VERSION}.tar.gz \
+	-O slepc-${SLEPC_VERSION}.tar.gz --no-check-certificate
+mkdir -p ${SLEPC_DIR}
+tar -xf slepc-${SLEPC_VERSION}.tar.gz -C ${SLEPC_DIR} --strip-components 1 
+
+cd ${SLEPC_DIR} 
+export PETSC_ARCH=linux-gnu-real-64 
+python3 ./configure 
+make 
+
+# Install slepc4py
+cd ${SLEPC_DIR}/src/binding/slepc4py 
+PETSC_ARCH=linux-gnu-real-64 pip3 install .
+
+cd $BUILD_DIR
+
+# Build/install basix
+[ ! -d "./basix" ] && git clone https://github.com/FEniCS/basix
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -B ./basix/build-dir -S ./basix/cpp
+cmake --build ./basix/build-dir 
+sudo cmake --install ./basix/build-dir 
+python3 -m pip install ./basix/python 
+
+# Install ufl
+[ ! -d "./ufl" ] && git clone https://github.com/FEniCS/ufl.git
+pip3 install --no-cache-dir ./ufl 
+
+# Install ffcx
+[ ! -d "./ffcx" ] && git clone https://github.com/FEniCS/ffcx.git
+pip3 install --no-cache-dir --no-deps ./ffcx 
+
+[ ! -d "./dolfinx" ] && git clone https://github.com/FEniCS/dolfinx.git
+mkdir -p $BUILD_DIR/dolfinx/build-real && cd $BUILD_DIR/dolfinx/build-real
+PETSC_ARCH=linux-gnu-real-64 cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$DOLFIN_DIR \
+	-DCMAKE_BUILD_TYPE=${DOLFINX_CMAKE_BUILD_TYPE} \
+	-DCMAKE_CXX_FLAGS=${DOLFINX_CMAKE_CXX_FLAGS} -DPython3_EXECUTABLE=$(which python3) ../cpp 
+sudo ninja install 
+sudo chown -R $USER:$USER $DOLFIN_DIR
+
+source $DOLFIN_DIR/lib/dolfinx/dolfinx.conf
+cd $BUILD_DIR/dolfinx/python 
+CXXFLAGS=${DOLFINX_CMAKE_CXX_FLAGS} PETSC_ARCH=linux-gnu-real-64 pip3 install --no-dependencies . 
+
+

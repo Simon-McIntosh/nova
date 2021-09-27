@@ -1,6 +1,8 @@
+import dolfinx.plot
 import gmsh
 import numpy as np
 from mpi4py import MPI
+import pyvista
 
 rank = MPI.COMM_WORLD.rank
 
@@ -174,10 +176,9 @@ material_tags = np.unique(ct.values)
 mu = dolfinx.Function(Q)
 J = dolfinx.Function(Q)
 
-
 with mu.vector.localForm() as loc_mu, J.vector.localForm() as loc_J:
     # As we only set some values in J, initialize all as 0
-    #loc_J.set(0)
+    loc_J.set(0)
     for tag in material_tags:
         cells = ct.indices[ct.values==tag]
         num_cells = len(cells)
@@ -195,10 +196,6 @@ with mu.vector.localForm() as loc_mu, J.vector.localForm() as loc_J:
         elif tag in range(2+N, 2*N + 2):
             loc_J.setValues(cells, np.full(num_cells, -1))
 
-
-'''
-    
-    
 import ufl
 import dolfinx
 V = dolfinx.FunctionSpace(mesh, ("CG", 1))
@@ -214,4 +211,30 @@ v = ufl.TestFunction(V)
 a = (1 / mu) * ufl.dot(ufl.grad(u), ufl.grad(v)) * ufl.dx
 L = J * v * ufl.dx
 
-'''
+A_z = dolfinx.Function(V)
+problem = dolfinx.fem.LinearProblem(a, L, u=A_z, bcs=[bc])
+problem.solve()
+
+W = dolfinx.VectorFunctionSpace(mesh, ("DG", 0))
+p = ufl.TrialFunction(W)
+q = ufl.TestFunction(W)
+a_w = ufl.inner(p, q) * ufl.dx
+L_w = ufl.inner(ufl.as_vector((A_z.dx(1), -A_z.dx(0))), q) * ufl.dx
+projection = dolfinx.fem.LinearProblem(a_w, L_w)
+B = projection.solve()
+
+plotter = pyvista.Plotter()
+topology, cell_types = dolfinx.plot.create_vtk_topology(mesh, mesh.topology.dim)
+num_dofs_local = V.dofmap.index_map.size_local
+grid = pyvista.UnstructuredGrid(topology, cell_types, mesh.geometry.x)
+grid.point_data["A_z"] = A_z.compute_point_values()
+grid.set_active_scalars("A_z")
+warp = grid.warp_by_scalar("A_z", factor=1e7)
+actor = plotter.add_mesh(warp)
+if not pyvista.OFF_SCREEN:
+    plotter.show()
+else:
+    Az_fig = plotter.screenshot("Az.png")
+    
+print('built L')
+

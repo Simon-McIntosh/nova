@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='novastella',
       version='1.0.0',
@@ -7,4 +7,4 @@ setup(name='novastella',
       author='Simon McIntosh',
       author_email='simon.mcintosh@iter.org',
       license='MIT',
-      packages=['nova'], zip_safe=False)
+      packages=find_packages(), zip_safe=False)

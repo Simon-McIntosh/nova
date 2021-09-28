@@ -34,7 +34,6 @@ export SLEPC_DIR=$HOME/Code/slepc
 export DOLFIN_DIR=$HOME/Code/dolfinx
 export BUILD_DIR=$(pwd)
 
-: << END
 # Install dependencies available via apt.
 # - First set of packages are required to build and run FEniCS.
 # - Second set of packages are recommended and/or required to build
@@ -61,6 +60,9 @@ sudo apt-get -qq update
 sudo apt-get -y install libgl1-mesa-dev xvfb 
 sudo apt-get clean 
 sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# x11 dependencies for runing on WSL
+sudo apt-get install libxkbcommon-x11-0
 
 # Install xtl, xtensor, xtensor-blas.
 [ ! -d ./xtl ] && git clone -b $XTL_VERSION --single-branch https://github.com/xtensor-stack/xtl.git 
@@ -126,7 +128,6 @@ cd $SLEPC_DIR
 make
 make check
 
-END
 # Install slepc4py
 cd $SLEPC_DIR/src/binding/slepc4py
 pip3 install .

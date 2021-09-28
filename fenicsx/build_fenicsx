@@ -1,0 +1,163 @@
+#!/bin/bash
+
+# Requires cmake>=*, gcc>=8, boost>=1.6
+
+GMSH_VERSION=4_8_4
+PYBIND11_VERSION=2.7.1
+PETSC_VERSION=3.15.2
+SLEPC_VERSION=3.15.2
+ADIOS2_VERSION=2.7.1
+PYVISTA_VERSION=0.31.3
+NUMPY_VERSION=1.20.3
+KAHIP_VERSION=3.11
+XTENSOR_VERSION=0.23.10
+XTENSOR_BLAS_VERSION=0.19.1
+XTL_VERSION=0.7.2
+
+########################################
+
+PETSC_SLEPC_OPTFLAGS="-O2"
+PETSC_SLEPC_DEBUGGING="yes"
+MPI="mpich"
+
+export DOLFINX_CMAKE_BUILD_TYPE="RelWithDebInfo"
+export DOLFINX_CMAKE_CXX_FLAGS
+
+# Environment variables
+export OPENBLAS_NUM_THREADS=1 
+export OPENBLAS_VERBOSE=0
+
+# Install directories 
+export PETSC_ARCH=arch-linux-c-debug
+export PETSC_DIR=$HOME/Code/petsc
+export SLEPC_DIR=$HOME/Code/slepc
+export DOLFIN_DIR=$HOME/Code/dolfinx
+export BUILD_DIR=$(pwd)
+
+# Install dependencies available via apt.
+# - First set of packages are required to build and run FEniCS.
+# - Second set of packages are recommended and/or required to build
+#   documentation or tests.
+# - Third set of packages are optional, but required to run gmsh
+#   pre-built binaries.
+sudo apt-get -qq update
+sudo apt-get -yq --with-new-pkgs -o Dpkg::Options::="--force-confold" upgrade 
+
+sudo apt-get -y install clang cmake g++ gfortran libboost-dev libboost-filesystem-dev libboost-timer-dev \
+    libhdf5-${MPI}-dev liblapack-dev lib${MPI}-dev libopenblas-dev llvm-9 ninja-build pkg-config python3-dev \
+    python3-numpy python3-pip python3-scipy python3-setuptools 
+
+sudo apt-get -y install doxygen git graphviz valgrind wget 
+
+sudo apt-get -y install libglu1 libxcursor-dev libxft2 libxinerama1 libfltk1.3-dev libfreetype6-dev libgl1-mesa-dev \
+	libocct-foundation-dev libocct-data-exchange-dev 
+
+sudo apt-get -qq update
+sudo apt-get -y install bison flex
+
+# pyvista dependencies from apt
+sudo apt-get -qq update 
+sudo apt-get -y install libgl1-mesa-dev xvfb 
+sudo apt-get clean 
+sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# x11 dependencies for runing on WSL
+sudo apt-get install libxkbcommon-x11-0
+
+# Install xtl, xtensor, xtensor-blas.
+[ ! -d ./xtl ] && git clone -b $XTL_VERSION --single-branch https://github.com/xtensor-stack/xtl.git 
+cd xtl 
+cmake -G Ninja . 
+sudo ninja install 
+cd $BUILD_DIR 
+[ ! -d ./xtensor ] && git clone -b $XTENSOR_VERSION --single-branch https://github.com/xtensor-stack/xtensor.git 
+cd xtensor 
+cmake -G Ninja . 
+sudo ninja install 
+cd $BUILD_DIR
+[ ! -d ./xtensor-blas ] && git clone -b $XTENSOR_BLAS_VERSION --single-branch https://github.com/xtensor-stack/xtensor-blas.git 
+cd xtensor-blas 
+cmake -G Ninja . 
+sudo ninja install
+cd $BUILD_DIR
+
+# Install KaHIP
+wget -nc --no-check-certificate https://github.com/kahip/kahip/archive/v$KAHIP_VERSION.tar.gz 
+tar -xf v$KAHIP_VERSION.tar.gz 
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DNONATIVEOPTIMIZATIONS=on -B KaHIP-$KAHIP_VERSION/build-dir -S KaHIP-$KAHIP_VERSION 
+cmake --build KaHIP-$KAHIP_VERSION/build-dir 
+sudo cmake --install KaHIP-$KAHIP_VERSION/build-dir 
+
+# Install ADIOS2
+wget -nc --no-check-certificate https://github.com/ornladios/ADIOS2/archive/v$ADIOS2_VERSION.tar.gz -O adios2-v$ADIOS2_VERSION.tar.gz 
+mkdir -p adios2-v$ADIOS2_VERSION 
+tar -xf adios2-v$ADIOS2_VERSION.tar.gz -C adios2-v${ADIOS2_VERSION} --strip-components 1 
+cmake -G Ninja -DADIOS2_USE_Fortran=off -DBUILD_TESTING=off -DADIOS2_BUILD_EXAMPLES=off \
+	-DADIOS2_USE_ZeroMQ=off -B adios2-v$ADIOS2_VERSION/build-dir -S ./adios2-v$ADIOS2_VERSION 
+cmake --build adios2-v$ADIOS2_VERSION/build-dir 
+sudo cmake --install adios2-v$ADIOS2_VERSION/build-dir
+
+# Install GMSH
+[ ! -d "./gmsh_$GMSH_VERSION" ] && git clone -b gmsh_$GMSH_VERSION --single-branch https://gitlab.onelab.info/gmsh/gmsh.git 
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_BUILD_DYNAMIC=1  -DENABLE_OPENMP=1 -B gmsh_$GMSH_VERSION/build-dir -S gmsh 
+cmake --build gmsh_$GMSH_VERSION/build-dir
+sudo cmake --install gmsh_$GMSH_VERSION/build-dir
+
+
+# Install PETSc
+mkdir -p $PETSC_DIR
+git clone -b release https://gitlab.com/petsc/petsc.git $PETSC_DIR
+cd $PETSC_DIR
+./configure --download-metis --download-parmetis --download-ptscotch --download-suitesparse --download-mumps --download-hypre --download-scalapack \
+	--COPTFLAGS="$PETSC_SLEPC_OPTFLAGS" --CXXOPTFLAGS="$PETSC_SLEPC_OPTFLAGS" --FOPTFLAGS="$PETSC_SLEPC_OPTFLAGS" 
+make all check
+
+# Install petsc4py
+cd $PETSC_DIR/src/binding/petsc4py
+pip3 install .
+
+# Install SLEPc
+cd $BUILD_DIR
+wget --no-check-certificate https://slepc.upv.es/download/distrib/slepc-$SLEPC_VERSION.tar.gz
+
+mkdir -p $SLEPC_DIR
+tar -xf slepc-$SLEPC_VERSION.tar.gz -C $SLEPC_DIR --strip-components 1 
+
+cd $SLEPC_DIR
+./configure
+make
+make check
+
+# Install slepc4py
+cd $SLEPC_DIR/src/binding/slepc4py
+pip3 install .
+
+cd $BUILD_DIR
+
+# Build/install basix
+[ ! -d "./basix" ] && git clone https://github.com/FEniCS/basix
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -B ./basix/build-dir -S ./basix/cpp
+cmake --build ./basix/build-dir 
+sudo cmake --install ./basix/build-dir 
+python3 -m pip install ./basix/python 
+
+# Install ufl
+[ ! -d "./ufl" ] && git clone https://github.com/FEniCS/ufl.git
+pip3 install --no-cache-dir ./ufl 
+
+# Install ffcx
+[ ! -d "./ffcx" ] && git clone https://github.com/FEniCS/ffcx.git
+pip3 install --no-cache-dir --no-deps ./ffcx 
+
+[ ! -d "./dolfinx" ] && git clone https://github.com/FEniCS/dolfinx.git
+mkdir -p $BUILD_DIR/dolfinx/build-real && cd $BUILD_DIR/dolfinx/build-real
+cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$DOLFIN_DIR -DCMAKE_BUILD_TYPE=$DOLFINX_CMAKE_BUILD_TYPE \
+	-DCMAKE_CXX_FLAGS=$DOLFINX_CMAKE_CXX_FLAGS -DPython3_EXECUTABLE=$(which python3) ../cpp 
+sudo ninja install 
+sudo chown -R $USER:$USER $DOLFIN_DIR
+
+source $DOLFIN_DIR/lib/dolfinx/dolfinx.conf
+cd $BUILD_DIR/dolfinx/python 
+CXXFLAGS=$DOLFINX_CMAKE_CXX_FLAGS pip3 install --no-dependencies . 
+
+

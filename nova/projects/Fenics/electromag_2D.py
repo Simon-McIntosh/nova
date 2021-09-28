@@ -236,5 +236,4 @@ if not pyvista.OFF_SCREEN:
 else:
     Az_fig = plotter.screenshot("Az.png")
     
-print('built L')
 

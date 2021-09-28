@@ -101,7 +101,6 @@ cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_BUILD_DYNAMIC=1  -DENABLE_OPE
 cmake --build gmsh_$GMSH_VERSION/build-dir
 sudo cmake --install gmsh_$GMSH_VERSION/build-dir
 
-END
 
 # Install PETSc
 mkdir -p $PETSC_DIR
@@ -127,8 +126,9 @@ cd $SLEPC_DIR
 make
 make check
 
+END
 # Install slepc4py
-cd $PETSC_DIR/src/binding/slepc4py
+cd $SLEPC_DIR/src/binding/slepc4py
 pip3 install .
 
 cd $BUILD_DIR

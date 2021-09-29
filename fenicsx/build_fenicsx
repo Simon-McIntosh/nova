@@ -5,7 +5,7 @@
 GMSH_VERSION=4_8_4
 PYBIND11_VERSION=2.7.1
 PETSC_VERSION=3.15.2
-SLEPC_VERSION=3.15.2
+SLEPC_VERSION=3.15.1
 ADIOS2_VERSION=2.7.1
 PYVISTA_VERSION=0.31.3
 NUMPY_VERSION=1.20.3
@@ -62,7 +62,8 @@ sudo apt-get clean
 sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # x11 dependencies for runing on WSL
-sudo apt-get install libxkbcommon-x11-0
+sudo apt-get -qq update
+sudo apt-get -y install libxkbcommon-x11-0 libqt5x11extras5 
 
 # Install xtl, xtensor, xtensor-blas.
 [ ! -d ./xtl ] && git clone -b $XTL_VERSION --single-branch https://github.com/xtensor-stack/xtl.git 
@@ -103,13 +104,12 @@ cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_BUILD_DYNAMIC=1  -DENABLE_OPE
 cmake --build gmsh_$GMSH_VERSION/build-dir
 sudo cmake --install gmsh_$GMSH_VERSION/build-dir
 
-
 # Install PETSc
 mkdir -p $PETSC_DIR
 git clone -b release https://gitlab.com/petsc/petsc.git $PETSC_DIR
 cd $PETSC_DIR
-./configure --download-metis --download-parmetis --download-ptscotch --download-suitesparse --download-mumps --download-hypre --download-scalapack \
-	--COPTFLAGS="$PETSC_SLEPC_OPTFLAGS" --CXXOPTFLAGS="$PETSC_SLEPC_OPTFLAGS" --FOPTFLAGS="$PETSC_SLEPC_OPTFLAGS" 
+./configure --download-metis --download-parmetis --download-ptscotch --download-suitesparse --download-mumps --download-hypre --download-scalapack 
+# --COPTFLAGS="$PETSC_SLEPC_OPTFLAGS" --CXXOPTFLAGS="$PETSC_SLEPC_OPTFLAGS" --FOPTFLAGS="$PETSC_SLEPC_OPTFLAGS" 
 make all check
 
 # Install petsc4py
@@ -159,5 +159,4 @@ sudo chown -R $USER:$USER $DOLFIN_DIR
 source $DOLFIN_DIR/lib/dolfinx/dolfinx.conf
 cd $BUILD_DIR/dolfinx/python 
 CXXFLAGS=$DOLFINX_CMAKE_CXX_FLAGS pip3 install --no-dependencies . 
-
 

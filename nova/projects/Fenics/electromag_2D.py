@@ -12,8 +12,8 @@ R = 5     # Radius of domain
 a = 1     # Radius of inner iron cylinder
 b = 1.2   # Radius of outer iron cylinder
 N = 8     # Number of windings
-c_1 = 0.8 # Radius of inner copper wires
-c_2 = 1.4 # Radius of outer copper wires
+c_1 = 0.8  # Radius of inner copper wires
+c_2 = 1.4  # Radius of outer copper wires
 gdim = 2  # Geometric dimension of the mesh
 if rank == 0:
 
@@ -31,11 +31,13 @@ if rank == 0:
 
     # Define the copper-wires inside iron cylinder
     angles_N = [i*2*np.pi/N for i in range(N)]
-    wires_N = [(2, gmsh.model.occ.addDisk(c_1*np.cos(v), c_1*np.sin(v), 0, r, r)) for v in angles_N]
+    wires_N = [(2, gmsh.model.occ.addDisk(c_1*np.cos(v), c_1*np.sin(v),
+                                          0, r, r)) for v in angles_N]
 
     # Define the copper-wires outside the iron cylinder
     angles_S = [(i+0.5)*2*np.pi/N for i in range(N)]
-    wires_S = [(2, gmsh.model.occ.addDisk(c_2*np.cos(v), c_2*np.sin(v), 0, r, r)) for v in angles_S]
+    wires_S = [(2, gmsh.model.occ.addDisk(c_2*np.cos(v), c_2*np.sin(v),
+                                          0, r, r)) for v in angles_S]
     gmsh.model.occ.synchronize()
     # Resolve all boundaries of the different wires in the background domain
     all_surfaces = [(2, iron)]
@@ -90,9 +92,9 @@ if rank == 0:
     gmsh.model.mesh.field.setAsBackgroundMesh(2)
     # Generate mesh
     gmsh.option.setNumber("Mesh.Algorithm", 7)
-    gmsh.model.mesh.generate(gdim)    
-    
-    
+    gmsh.model.mesh.generate(gdim)
+
+
 from dolfinx.io import extract_gmsh_geometry, extract_gmsh_topology_and_markers, ufl_mesh_from_gmsh
 from dolfinx.cpp.io import perm_gmsh, extract_local_entities
 from dolfinx.cpp.mesh import to_type, cell_entity_type
@@ -149,10 +151,10 @@ import dolfinx
 #with dolfinx.io.XDMFFile(MPI.COMM_WORLD, "mt.xdmf", "w") as xdmf:
 #    xdmf.write_mesh(mesh)
 #    xdmf.write_meshtags(ct)
-    
-    
+
+
 '''
-    
+
 import pyvista
 import dolfinx.plot
 
@@ -169,7 +171,9 @@ if not pyvista.OFF_SCREEN:
 else:
     cell_tag_fig = plotter.screenshot("cell_tags.png")
 '''
-    
+
+
+
 
 Q = dolfinx.FunctionSpace(mesh, ("DG", 0))
 material_tags = np.unique(ct.values)
@@ -202,7 +206,8 @@ V = dolfinx.FunctionSpace(mesh, ("CG", 1))
 u_bc = dolfinx.Function(V)
 with u_bc.vector.localForm() as bc_loc:
     bc_loc.set(0)
-facets = dolfinx.mesh.locate_entities_boundary(mesh, tdim-1, lambda x: np.full(x.shape[1], True))
+facets = dolfinx.mesh.locate_entities_boundary(
+    mesh, tdim-1, lambda x: np.full(x.shape[1], True))
 dofs = dolfinx.fem.locate_dofs_topological(V, tdim-1, facets)
 bc = dolfinx.DirichletBC(u_bc, dofs)
 
@@ -235,5 +240,3 @@ if not pyvista.OFF_SCREEN:
     plotter.show()
 else:
     Az_fig = plotter.screenshot("Az.png")
-    
-

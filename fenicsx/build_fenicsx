@@ -18,7 +18,6 @@ XTL_VERSION=0.7.2
 
 PETSC_SLEPC_OPTFLAGS="-O2"
 PETSC_SLEPC_DEBUGGING="yes"
-MPI="mpich"
 
 export DOLFINX_CMAKE_BUILD_TYPE="RelWithDebInfo"
 export DOLFINX_CMAKE_CXX_FLAGS
@@ -34,37 +33,7 @@ export SLEPC_DIR=$HOME/Code/slepc
 export DOLFIN_DIR=$HOME/Code/dolfinx
 export BUILD_DIR=$(pwd)
 
-# Install dependencies available via apt.
-# - First set of packages are required to build and run FEniCS.
-# - Second set of packages are recommended and/or required to build
-#   documentation or tests.
-# - Third set of packages are optional, but required to run gmsh
-#   pre-built binaries.
-sudo apt-get -qq update
-sudo apt-get -yq --with-new-pkgs -o Dpkg::Options::="--force-confold" upgrade 
-
-sudo apt-get -y install clang cmake g++ gfortran libboost-dev libboost-filesystem-dev libboost-timer-dev \
-    libhdf5-${MPI}-dev liblapack-dev lib${MPI}-dev libopenblas-dev llvm-9 ninja-build pkg-config python3-dev \
-    python3-numpy python3-pip python3-scipy python3-setuptools 
-
-sudo apt-get -y install doxygen git graphviz valgrind wget 
-
-sudo apt-get -y install libglu1 libxcursor-dev libxft2 libxinerama1 libfltk1.3-dev libfreetype6-dev libgl1-mesa-dev \
-	libocct-foundation-dev libocct-data-exchange-dev 
-
-sudo apt-get -qq update
-sudo apt-get -y install bison flex
-
-# pyvista dependencies from apt
-sudo apt-get -qq update 
-sudo apt-get -y install libgl1-mesa-dev xvfb 
-sudo apt-get clean 
-sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# x11 dependencies for runing on WSL
-sudo apt-get -qq update
-sudo apt-get -y install libxkbcommon-x11-0 libqt5x11extras5 
-
+: <<END
 # Install xtl, xtensor, xtensor-blas.
 [ ! -d ./xtl ] && git clone -b $XTL_VERSION --single-branch https://github.com/xtensor-stack/xtl.git 
 cd xtl 
@@ -115,7 +84,7 @@ make all check
 # Install petsc4py
 cd $PETSC_DIR/src/binding/petsc4py
 pip3 install .
-
+END
 # Install SLEPc
 cd $BUILD_DIR
 wget --no-check-certificate https://slepc.upv.es/download/distrib/slepc-$SLEPC_VERSION.tar.gz

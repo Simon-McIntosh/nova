@@ -29,12 +29,12 @@ gmsh.option.setNumber("Mesh.MeshSizeMin", 10)
 gmsh.option.setNumber("Mesh.MeshSizeMax", 100)
 gmsh.model.mesh.generate(3)
 
-with io.BytesIO() as msh:
-    gmsh.write(msh)
+#with io.BytesIO() as msh:
+#    gmsh.write(msh)
 
+
+gmsh.fltk.run()
 '''
-#gmsh.fltk.run()
-
 gdim = 3
 
 filterwarnings("ignore")

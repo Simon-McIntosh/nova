@@ -240,3 +240,22 @@ if not pyvista.OFF_SCREEN:
     plotter.show()
 else:
     Az_fig = plotter.screenshot("Az.png")
+
+plotter = pyvista.Plotter()
+plotter.set_position([0,0,5])
+
+midpoints = dolfinx.cpp.mesh.midpoints(mesh, mesh.topology.dim, range(mesh.topology.index_map(mesh.topology.dim).size_local))
+
+num_dofs_local = W.dofmap.index_map.size_local
+values = np.zeros((num_dofs_local, 3), dtype=np.float64)
+values[:, :mesh.geometry.dim] = B.vector.array.real.reshape(num_dofs_local, W.dofmap.index_map_bs)
+cloud = pyvista.PolyData(midpoints)
+cloud["B"] = values
+glyphs = cloud.glyph("B", factor=1e6)
+actor = plotter.add_mesh(grid, style="wireframe", color="k")
+actor2 = plotter.add_mesh(glyphs)
+
+if not pyvista.OFF_SCREEN:
+    plotter.show()
+else:
+    B_fig = plotter.screenshot("B.png")

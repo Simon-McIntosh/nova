@@ -29,7 +29,7 @@ gmsh.option.setNumber("Mesh.MeshSizeMin", 10)
 gmsh.option.setNumber("Mesh.MeshSizeMax", 100)
 gmsh.model.mesh.generate(3)
 
-with io.BytesIO() as msh:
+with io.BytesIO('msh') as msh:
     gmsh.write(msh)
 
 '''

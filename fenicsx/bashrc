@@ -1,0 +1,8 @@
+source $HOME/Code/fenicsx/bin/activate
+source $HOME/Code/dolfinx/lib/dolfinx/dolfinx.conf
+export PYTHONPATH=/usr/local/lib:$PYTHONPATH
+
+export DISPLAY=$(awk '/nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/null):0
+export LIBGL_ALWAYS_INDIRECT=0
+export XDG_RUNTIME_DIR=$HOME/.xdg
+export RUNLEVEL=3

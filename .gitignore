@@ -12,6 +12,12 @@
 *.cdb
 *.db
 
+# CAD files 
+*.stp
+*.step
+*.geo
+*.msh
+
 # eqdsk files
 *.eqdsk
 

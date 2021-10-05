@@ -38,21 +38,16 @@ class CoilSet(CoilGrid, FrameSet):
     def __post_init__(self):
         """Init mesh methods."""
         super().__post_init__()
-        self.coil = Coil(self.frame, self.subframe, self.dcoil)
-        self.shell = Shell(self.frame, self.subframe, self.dshell)
-        self.plasma = Plasma(self.frame, self.subframe, self.dplasma)
-        self.grid = BiotGrid(self.frame, self.subframe, 'grid')
-        self.point = BiotPoint(self.frame, self.subframe, 'point')
-        self.probe = BiotPoint(self.frame, self.subframe, 'probe')
+        self.coil = Coil(*self.frames, self.dcoil)
+        self.shell = Shell(*self.frames, self.dshell)
+        self.plasma = Plasma(*self.frames, self.dplasma)
+        self.grid = BiotGrid(*self.frames, 'grid')
+        self.point = BiotPoint(*self.frames, 'point')
+        self.probe = BiotPoint(*self.frames, 'probe')
         #self.loop = BiotLoop(*self.frames, 'loop')
         self.inductance = BiotInductance(*self.frames, 'inductance')
         if self.file is not None:
             self.load(self.file)
-
-    @property
-    def frames(self):
-        """Return frame and subframe."""
-        return self.frame, self.subframe
 
     def store(self, file):
         """Store coilset to hdf5 file."""

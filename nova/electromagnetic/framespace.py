@@ -7,6 +7,7 @@ from nova.electromagnetic.error import SpaceKeyError
 from nova.electromagnetic.select import Select
 from nova.electromagnetic.geometry import Geometry
 from nova.electromagnetic.polyplot import PolyPlot
+from nova.electromagnetic.vtkplot import VtkPlot
 
 
 # pylint: disable=too-many-ancestors
@@ -65,7 +66,7 @@ class FrameSpace(SpaceIndexer, FrameLink):
     def __init__(self, data=None, index=None, columns=None,
                  attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.frame_attrs(Select, Geometry, PolyPlot)
+        self.frame_attrs(Select, Geometry, PolyPlot, VtkPlot)
         self.attrs['subspace'] = SubSpace(self)
 
     def __repr__(self):
@@ -146,6 +147,7 @@ if __name__ == '__main__':
     framespace.insert([4, 5], 1, Ic=6.5, name='PF1',
                       active=False, plasma=True)
 
+    '''
     framespace.insert(range(40), 3, Ic=4, nturn=20, label='PF', link=True)
     framespace.multipoint.link(['PF1', 'CS0'], factor=1)
     print(framespace.loc[:, ['active', 'passive', 'plasma', 'coil']])
@@ -159,3 +161,4 @@ if __name__ == '__main__':
 
     for _ in range(1000):
         get_current()
+    '''

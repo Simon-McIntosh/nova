@@ -76,8 +76,10 @@ class MetaFrame(MetaSet):
     default: dict[str, Union[float, str, bool, None]] = field(
         repr=False, default_factory=lambda: {
             'x': 0., 'y': 0., 'z': 0., 'segment': 'circle',
-            'dl': 0.1, 'dt': 0.1,
-            'rms': 0., 'dx': 0., 'dy': 0., 'dz': 0., 'area': 0.,
+            'dl': 0.1, 'dt': 0.1, 'rms': 0.,
+            'dx': 0., 'dy': 0., 'dz': 0.,
+            'a': 0., 'bi': 0., 'cj': 0., 'dk': 1.,
+            'area': 0., 'volume': 0.,
             'delta': 0., 'nturn': 1., 'nfilament': 1.,
             'material': '', 'mass': '', 'rho': 0.,
             'section': 'rectangle', 'turn': 'rectangle', 'turnturn': 1.,

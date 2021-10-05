@@ -5,7 +5,6 @@ import gmsh
 import numpy as np
 import open3d as o3d
 import pyvista as pv
-from scipy.spatial.transform import Rotation
 
 from nova.definitions import root_dir
 
@@ -45,8 +44,8 @@ for part in gmsh.model.getEntities(3):
     #o3d.visualization.draw_geometries([obb])
 
 plotter = pv.Plotter()
-plotter.add_mesh(points)
-plotter.add_mesh(mesh, opacity=0.2)
+#plotter.add_mesh(points)
+plotter.add_mesh(mesh, opacity=1)
 plotter.show()
 
 #gmsh.option.setNumber("Mesh.MeshOnlyVisible", 1)

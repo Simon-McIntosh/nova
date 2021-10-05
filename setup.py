@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-setup(name='novastella',
+setup(name='nova',
       version='1.0.0',
       description='equlibrium tools',
       url='https://git.iter.org/projects/SCEN/repos/nova/',

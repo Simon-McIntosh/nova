@@ -42,4 +42,6 @@ sphere = pv.Sphere()
 sphere.plot(color='w')
 
 #plotter = pv.Plotter()
+#plotter.add_mesh(sphere, color='w')
 #plotter.show()
+#plotter.close()

@@ -15,11 +15,11 @@ class FrameSet(FrameSetLoc):
     base: list[str] = field(repr=False, default_factory=lambda: [
         'x', 'y', 'z', 'dx', 'dy', 'dz'])
     required: list[str] = field(repr=False, default_factory=lambda: [
-        'x', 'z', 'dl', 'dt'])
+        'x', 'z'])  # , 'dl', 'dt'
     additional: list[str] = field(repr=False, default_factory=lambda: [
         'turn', 'frame'])
     available: list[str] = field(repr=False, default_factory=lambda: [
-        'link', 'part', 'frame', 'dx', 'dy', 'dz', 'area',
+        'link', 'part', 'frame', 'dx', 'dy', 'dz', 'area', 'volume',
         'delta', 'section', 'turn', 'scale', 'nturn', 'nfilament',
         'Ic', 'It', 'Psi', 'Bx', 'Bz', 'B', 'acloss'])
     subspace: list[str] = field(repr=False, default_factory=lambda: [
@@ -40,6 +40,11 @@ class FrameSet(FrameSetLoc):
             exclude=['turn', 'scale', 'nfilament', 'delta'],
             array=self.array, delim='_')
         self.subframe.frame_attr(Select, ['Ic'])
+
+    @property
+    def frames(self):
+        """Return frame and subframe."""
+        return self.frame, self.subframe
 
     def __str__(self):
         """Return string representation of coilset frame."""
@@ -135,6 +140,8 @@ if __name__ == '__main__':
     frameset.subframe.insert([2, 4], It=6, link=True)
     print(frameset.subframe.rms)
 
+    '''
+
     frameset.store('tmp.h5')
     del frameset
     frameset = FrameSet()
@@ -143,3 +150,4 @@ if __name__ == '__main__':
     print('')
     print(frameset.subframe.rms)
     print('')
+    '''

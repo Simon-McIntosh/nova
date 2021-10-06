@@ -33,7 +33,8 @@ def test_dpol_default():
 
 
 def test_pfcoil():
-    coilset = CoilSet(required=['x', 'z', 'dl'])
+    coilset = CoilSet()
+    coilset.coil.required = ['x', 'z', 'dl']
     coilset.coil.insert([4, 6, 7], [1, 1, 2], 0.1, delta=0.05, label='PF')
     assert len(coilset.frame) == 3
     assert len(coilset.subframe) == 12

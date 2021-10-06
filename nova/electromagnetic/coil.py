@@ -1,20 +1,18 @@
 """Mesh poloidal coils."""
 from dataclasses import dataclass, field
 
-from nova.electromagnetic.framespace import FrameSpace
+from nova.electromagnetic.frameset import Frames
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 
 
 @dataclass
-class Coil(PoloidalGrid):
+class Coil(PoloidalGrid, Frames):
     """Generate poloidal field coils (CS and PF)."""
 
-    frame: FrameSpace = field(repr=False)
-    subframe: FrameSpace = field(repr=False)
-    delta: float
     tile: bool = False
     fill: bool = False
     turn: str = 'rectangle'
+    required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
     default: dict = field(init=False, default_factory=lambda: {
         'label': 'Coil', 'part': 'coil', 'active': True})
 

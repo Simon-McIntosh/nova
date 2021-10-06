@@ -258,8 +258,8 @@ class FrameLink(LinkIndexer, DataArray):
             if not isinstance(args[0], (dict, shapely.geometry.Polygon)):
                 return args, kwargs
         if len(args) == 0:
-            if 'poly' not in kwargs:
-                return args, kwargs
+            #if 'poly' not in kwargs or len(kwargs.get('poly', [])) > 1:
+            return args, kwargs
             args = (kwargs.pop('poly'),)
         polygon = Polygon(args[0])
         geometry = polygon.geometry

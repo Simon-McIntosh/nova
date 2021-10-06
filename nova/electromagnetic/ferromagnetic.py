@@ -3,26 +3,20 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from nova.electromagnetic.frameset import Frames
 from nova.electromagnetic.frameset import FrameSet
-from nova.electromagnetic.framespace import FrameSpace
-from nova.electromagnetic.vtkplot import VtkPlot
 
 from nova.electromagnetic.coil import Coil
 
+
 @dataclass
-class FerroMagnetic:
+class FerroMagnetic(Frames):
     """Manage ferritic inserts."""
 
-    frame: FrameSpace = field(repr=False)
-    subframe: FrameSpace = field(repr=False)
-    delta: float
+    required: list[str] = field(
+        default_factory=lambda: ['x', 'y', 'z', 'volume'])
 
-    def __post_init__(self):
-        """fegegw"""
-        ##self.frame.metaframe.metadata = \
-        #    dict(additional=['volume'])
-
-    def insert(self, x, y, z, iloc=None, **additional):
+    def insert(self, *args, required=None, iloc=None, **additional):
         """
         Add ferromagnetic block to frameset.
 
@@ -47,28 +41,25 @@ class FerroMagnetic:
         None.
 
         """
-        additional |= dict(x=x, y=y, z=z)
         try:
             additional['volume'] = np.prod([additional[attr]
                                             for attr in ['dx', 'dy', 'dz']])
         except KeyError:
             pass
-        self.frame.insert(iloc=iloc, segment='volume', **additional)
+        with self.insert_required(required):
+            self.frame.insert(*args, iloc=iloc, segment='volume', **additional)
 
 
 if __name__ == '__main__':
 
     fset = FrameSet()
 
-    #fmag = FerroMagnetic(*fset.frames, 0.5)
-    #fmag.insert(1, 1, 2, volume=0.2)
-    #fmag.insert(2, 1, 2, volume=0.1)
-    #fmag.insert(1, 3, 2, volume=0.5)
+    fmag = FerroMagnetic(*fset.frames)
+    fmag.insert(0, 0, 5, 0.2)
+    fmag.insert(2, 1, 2, volume=0.1)
+    fmag.insert(1, 3, 2, volume=5)
 
     coil = Coil(*fset.frames, 0.5)
     coil.insert(1, 5, dl=0.3, dt=0.1)
 
     fset.frame.vtkplot()
-
-
-    print(fset.frame.columns)

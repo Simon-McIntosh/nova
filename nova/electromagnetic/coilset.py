@@ -129,11 +129,12 @@ if __name__ == '__main__':
     coilset = CoilSet(dcoil=-35, dplasma=-40)
     coilset.coil.insert(10, 0.5, 0.95, 0.95, section='hex', turn='r',
                         nturn=-0.8)
-
     coilset.coil.insert(10, -0.5, 0.95, 0.95, section='hex')
     coilset.coil.insert(11, 0, 0.95, 0.1, section='sk', nturn=-1.8)
     coilset.coil.insert(12, 0, 0.6, 0.9, section='r', turn='sk')
     coilset.plasma.insert({'ellip': [11.5, 0.8, 1.7, 0.4]})
+    coilset.shell.insert({'e': [13, 0, 0.75, 1.25]}, 13, 0.05,
+                         delta=-40, part='vv')
     coilset.link(['Coil0', 'Plasma'], 2)
 
     coilset.sloc['Ic'] = 1

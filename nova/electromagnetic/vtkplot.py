@@ -35,6 +35,15 @@ class VtkPlot(MetaMethod):
         if not self.frame.empty:
             self.plot(index, axes, **kwargs)
 
+    def pf_coil(self, x, z, dx, dz):
+        """Return vtk Poloidal Field coil - rectangular section."""
+        outer = pv.Cylinder(center=(0, 0, z), direction=[0, 0, 1],
+                            radius=x+dx/2, height=dz).triangulate()
+        inner = pv.Cylinder(center=(0, 0, z), direction=[0, 0, 1],
+                            radius=x-dx/2, height=1.1*dz).triangulate()
+        return outer-inner
+
+
     def plot(self, index=slice(None), axes=None, **kwargs):
         """Plot frame."""
         mesh = pv.PolyData()
@@ -47,14 +56,9 @@ class VtkPlot(MetaMethod):
 
         index = self.frame.segment == 'circle'
         for item in self.frame.index[index]:
-            center = self.frame.loc[item, ['x', 'y', 'z']].to_list()
-            outer = pv.Cylinder(center=center, direction=[1, 1, 1],
-                                radius=1, height=2).triangulate()
-            inner = pv.Cylinder(center=center, direction=[1, 1, 1],
-                                radius=0.5, height=2).triangulate()
-            #mesh += inner
-            mesh += outer.boolean_difference(inner)
+            mesh += self.pf_coil(*self.frame.loc[item, ['x', 'z', 'dx', 'dz']])
+
 
         if mesh.n_points > 0:
-            mesh.plot()
+            mesh.plot(color='w')
         pv.ParametricTorus

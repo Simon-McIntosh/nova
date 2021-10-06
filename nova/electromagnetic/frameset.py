@@ -1,4 +1,5 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 
 import pandas
@@ -9,37 +10,26 @@ from nova.electromagnetic.select import Select
 
 
 @dataclass
-class FrameSet(FrameSetLoc):
-    """Package FrameSpace instances. Manage boolean methods."""
+class Frames(FrameSetLoc):
+    """Manage frame / subframe pair."""
 
-    base: list[str] = field(repr=False, default_factory=lambda: [
-        'x', 'y', 'z', 'dx', 'dy', 'dz'])
-    required: list[str] = field(repr=False, default_factory=lambda: [
-        'x', 'z'])  # , 'dl', 'dt'
-    additional: list[str] = field(repr=False, default_factory=lambda: [
-        'turn', 'frame'])
-    available: list[str] = field(repr=False, default_factory=lambda: [
-        'link', 'part', 'frame', 'dx', 'dy', 'dz', 'area', 'volume',
-        'delta', 'section', 'turn', 'scale', 'nturn', 'nfilament',
-        'Ic', 'It', 'Psi', 'Bx', 'Bz', 'B', 'acloss'])
-    subspace: list[str] = field(repr=False, default_factory=lambda: [
-        'Ic'])
-    array: list[str] = field(repr=False, default_factory=lambda: [
-        'Ic'])
+    frame: FrameSpace = field(default=None, repr=False)
+    subframe: FrameSpace = field(default=None, repr=False)
 
-    def __post_init__(self):
-        """Init coil and subcoil."""
-        self.frame = FrameSpace(
-            base=self.base, required=self.required, additional=self.additional,
-            available=self.available, subspace=[],
-            exclude=['frame', 'Ic', 'It',
-                     'active', 'plasma', 'fix', 'feedback'], array=[])
-        self.subframe = FrameSpace(
-            base=self.base, required=self.required, additional=self.additional,
-            available=self.available, subspace=self.subspace,
-            exclude=['turn', 'scale', 'nfilament', 'delta'],
-            array=self.array, delim='_')
-        self.subframe.frame_attr(Select, ['Ic'])
+    @contextmanager
+    def insert_required(self, required=None):
+        """Manage local required arguments."""
+        _required = self.frame.metaframe.required.copy()
+        if required is None:
+            required = self.required
+        self.update_required(required)
+        yield
+        self.update_required(_required)
+
+    def update_required(self, required):
+        """Update frame and subframe required arguments."""
+        for frame in self.frames:
+            frame.update_metaframe(dict(Required=required))
 
     @property
     def frames(self):
@@ -132,6 +122,39 @@ class FrameSet(FrameSetLoc):
         """Load frameset from file."""
         self.frame.load(path, 'frame')
         self.subframe.load(path, 'subframe')
+
+
+@dataclass
+class FrameSet(Frames):
+    """Package FrameSpace instances. Manage boolean methods."""
+
+    base: list[str] = field(repr=False, default_factory=lambda: [
+        'x', 'y', 'z', 'dx', 'dy', 'dz'])
+    required: list[str] = field(repr=False, default_factory=lambda: [])
+    additional: list[str] = field(repr=False, default_factory=lambda: [
+        'turn', 'frame'])
+    available: list[str] = field(repr=False, default_factory=lambda: [
+        'link', 'part', 'frame', 'dx', 'dy', 'dz', 'area', 'volume',
+        'delta', 'section', 'turn', 'scale', 'nturn', 'nfilament',
+        'Ic', 'It', 'Psi', 'Bx', 'Bz', 'B', 'acloss'])
+    subspace: list[str] = field(repr=False, default_factory=lambda: [
+        'Ic'])
+    array: list[str] = field(repr=False, default_factory=lambda: [
+        'Ic'])
+
+    def __post_init__(self):
+        """Init coil and subcoil."""
+        self.frame = FrameSpace(
+            base=self.base, required=self.required, additional=self.additional,
+            available=self.available, subspace=[],
+            exclude=['frame', 'Ic', 'It',
+                     'active', 'plasma', 'fix', 'feedback'], array=[])
+        self.subframe = FrameSpace(
+            base=self.base, required=self.required, additional=self.additional,
+            available=self.available, subspace=self.subspace,
+            exclude=['turn', 'scale', 'nfilament', 'delta'],
+            array=self.array, delim='_')
+        self.subframe.frame_attr(Select, ['Ic'])
 
 
 if __name__ == '__main__':

@@ -1,8 +1,20 @@
-pygmsh
+descartes
+geojson
+netCDF4
+nlopt
 numpy
-open3d
+--trusted-host https://storage.googleapis.com/open3d-releases-master/python-wheels/open3d-0.13.0+6b6e3bd-cp39-cp39-manylinux_2_27_x86_64.whl
 pandas
+pygmsh
+pygeos --no-binary pygeos
+pytest
 pyvista
+pyquaternion
+rdp
+seaborn
 scipy
+shapely --no-binary shapely
 spyder
 vedo
+wheel
+xarray

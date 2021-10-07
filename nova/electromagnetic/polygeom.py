@@ -26,7 +26,7 @@ class Geom(Poly):
     delta_x: float = None
     delta_y: float = None
     delta_z: float = None
-    segment: str = 'circle'
+    segment: str = 'ring'
 
     @property
     def centroid(self):
@@ -39,7 +39,7 @@ class Geom(Poly):
             Segment centroid [x, y, z] coordinates.
 
         """
-        if self.segment == 'circle':  # centered toroildal circle
+        if self.segment == 'ring':  # centered toroildal disk
             if self.x_coordinate is None:
                 self.x_coordinate = self.poly.centroid.x  # update x centroid
             if self.y_coordinate is None:
@@ -60,7 +60,7 @@ class PolyGeom(Geom):
     def __post_init__(self):
         """Generate polygon as required."""
         self.update_section()
-        if self.segment == 'circle':
+        if self.segment == 'ring':
             self.generate()
 
     def generate(self):
@@ -85,8 +85,8 @@ class PolyGeom(Geom):
     @property
     def area(self):
         """Return polygon area."""
-        if self.section == 'circle':
-            return np.pi * self.length**2 / 4  # circle
+        if self.section == 'disk':
+            return np.pi * self.length**2 / 4  # disk
         if self.section == 'square':
             return self.length**2  # square
         if self.section == 'rectangle':
@@ -102,7 +102,7 @@ class PolyGeom(Geom):
         if self.section in polyshape and self.section != 'skin' and \
                 self.length is not None and \
                 self.thickness is not None:
-            if self.section in ['circle', 'square']:
+            if self.section in ['disk', 'square']:
                 self.length = self.thickness = boxbound(self.length,
                                                         self.thickness)
             return self.length, self.thickness
@@ -131,7 +131,7 @@ class PolyGeom(Geom):
             Second characteristic dimension, dt.
         poly : shapely.polygon, optional
             Polygon for numerical calculation if not in
-            [circle, square, rectangle, skin]. The default is None.
+            [disk, square, rectangle, skin]. The default is None.
 
         Returns
         -------
@@ -139,11 +139,11 @@ class PolyGeom(Geom):
             Root mean square radius (uniform current density current center).
 
         """
-        if self.segment != 'circle':
+        if self.segment != 'ring':
             return -1
         centroid_radius = self.centroid[0]
-        if self.section == 'circle':
-            return np.sqrt(centroid_radius**2 + self.length**2 / 16)  # circle
+        if self.section == 'disk':
+            return np.sqrt(centroid_radius**2 + self.length**2 / 16)  # disk
         if self.section in ['square', 'rectangle']:
             return np.sqrt(centroid_radius**2 + self.length**2 / 12)  # square
         if self.section == 'skin':

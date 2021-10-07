@@ -31,7 +31,7 @@ def test_loop_transpose():
 
 
 def test_multipolygon():
-    polygrid = PolyGrid({'c1': [6, 3, 12, 0.2], 'c2': [6.1999, 3, 0.3, 0.2]})
+    polygrid = PolyGrid({'o1': [6, 3, 12, 0.2], 'o2': [6.1999, 3, 0.3, 0.2]})
     assert np.isclose(polygrid.area, 2 * np.pi * 0.2**2 / 4, 1e-3)
 
 
@@ -40,7 +40,7 @@ def test_square_in_rectangle():
     assert np.isclose(polygrid.polyarea, 0.1**2)
 
 
-def test_circle_in_rectangle():
+def test_disk_in_rectangle():
     polygrid = PolyGrid({'r': [3, 5, 0.1, 0.2]}, delta=0, turn='o')
     assert np.isclose(polygrid.polyarea, np.pi * 0.1**2 / 4, 1e-3)
 
@@ -62,44 +62,44 @@ def test_hexagon_in_rectangle_vertical_constraint():
     assert np.isclose(polygrid.polyarea, 3**1.5 / 2 * edge_length**2)
 
 
-def test_hexagon_in_circle():
-    polygrid = PolyGrid({'c': [3, 5, 0.1]}, delta=0, turn='hex')
+def test_hexagon_in_disk():
+    polygrid = PolyGrid({'o': [3, 5, 0.1]}, delta=0, turn='hex')
     edge_length = 0.1/2
     assert np.isclose(polygrid.polyarea, 3**1.5 / 2 * edge_length**2)
 
 
 def test_rectangle_grid_horizontal():
-    polygrid = PolyGrid({'r': [6, 3, 0.4, 0.2]}, delta=-5, turn='c')
+    polygrid = PolyGrid({'r': [6, 3, 0.4, 0.2]}, delta=-5, turn='o')
     assert len(polygrid) == 6
 
 
 def test_rectangle_grid_vertical():
-    polygrid = PolyGrid({'r': [6, 3, 0.1, 0.2]}, delta=-7, turn='c')
+    polygrid = PolyGrid({'r': [6, 3, 0.1, 0.2]}, delta=-7, turn='o')
     assert len(polygrid) == 8
 
 
-def test_circle_circle_grid_odd_under():
-    polygrid = PolyGrid({'c': [6, 3, 0.4, 0.2]}, delta=-3, turn='c')
+def test_disk_disk_grid_odd_under():
+    polygrid = PolyGrid({'o': [6, 3, 0.4, 0.2]}, delta=-3, turn='o')
     assert len(polygrid) == 4
 
 
-def test_circle_circle_grid_odd_over():
-    polygrid = PolyGrid({'c': [6, 3, 0.4, 0.2]}, delta=-5, turn='c')
+def test_disk_disk_grid_odd_over():
+    polygrid = PolyGrid({'o': [6, 3, 0.4, 0.2]}, delta=-5, turn='o')
     assert len(polygrid) == 9
 
 
-def test_circle_square_grid_odd_over():
-    polygrid = PolyGrid({'c': [6, 3, 0.4, 0.2]}, delta=-5, turn='sq')
+def test_disk_square_grid_odd_over():
+    polygrid = PolyGrid({'o': [6, 3, 0.4, 0.2]}, delta=-5, turn='sq')
     assert len(polygrid) == 9
 
 
-def test_circle_rectangle_grid_odd_over():
-    polygrid = PolyGrid({'c': [6, 3, 0.4, 0.2]}, delta=-5, turn='r')
+def test_disk_rectangle_grid_odd_over():
+    polygrid = PolyGrid({'o': [6, 3, 0.4, 0.2]}, delta=-5, turn='r')
     assert len(polygrid) == 6
 
 
 def test_poly_buffer():
-    polygrid = PolyGrid({'c': [6, 3, 0.4, 0.2]}, delta=-5,
+    polygrid = PolyGrid({'o': [6, 3, 0.4, 0.2]}, delta=-5,
                         turn='sk', scale=1)
     assert np.sum([section == 'skin'
                    for section in polygrid.frame.section]) == 5
@@ -135,13 +135,13 @@ def test_rectangle_effective_nfilament_tile():
     assert np.isclose(-polygrid.delta, polygrid.polyfilaments)
 
 
-def test_circle_effective_nfilament():
+def test_disk_effective_nfilament():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
                         turn='o', tile=False)
     assert np.isclose(-polygrid.delta, polygrid.polyfilaments, 1e-3)
 
 
-def test_circle_effective_nfilament_tile():
+def test_disk_effective_nfilament_tile():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-49,
                         turn='o', tile=True)
     assert np.isclose(-polygrid.delta, polygrid.polyfilaments, 1e-2)

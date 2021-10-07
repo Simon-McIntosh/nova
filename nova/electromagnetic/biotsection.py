@@ -22,16 +22,16 @@ class BiotSection(MetaMethod):
     additional: list[str] = field(default_factory=lambda: ['turnturn'])
     section_factor: dict[str, float] = field(
         init=False, default_factory=lambda: {
-            'circle': np.exp(-0.25),  # circle-circle
+            'disk': np.exp(-0.25),  # disk-disk
             'square': 2*0.447049,  # square-square
             'skin': 1})  # skin-skin
     section_key: dict[str, str] = field(
         init=False, default_factory=lambda: {
             'rectangle': 'square',
-            'ellipse': 'circle',
+            'ellipse': 'disk',
             'polygon': 'square',
             'shell': 'square',
-            'hexagon': 'circle'})
+            'hexagon': 'disk'})
 
     def initialize(self):
         """Calculate section self inductance factors."""

@@ -75,7 +75,7 @@ class MetaFrame(MetaSet):
     available: list[str] = field(default_factory=lambda: [])
     default: dict[str, Union[float, str, bool, None]] = field(
         repr=False, default_factory=lambda: {
-            'x': 0., 'y': 0., 'z': 0., 'segment': 'circle',
+            'x': 0., 'y': 0., 'z': 0., 'segment': 'ring',
             'dl': 0.1, 'dt': 0.1, 'rms': 0.,
             'dx': 0., 'dy': 0., 'dz': 0.,
             'a': 0., 'bi': 0., 'cj': 0., 'dk': 1.,

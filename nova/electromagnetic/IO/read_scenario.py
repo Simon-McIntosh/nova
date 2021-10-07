@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from scipy.interpolate import interp1d
 from astropy import units
-import docx
+#import docx
 
 from nova.utilities.pyplot import plt
 from nova.utilities.geom import rdp_extract

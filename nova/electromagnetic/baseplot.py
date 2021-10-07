@@ -64,7 +64,7 @@ class BasePlot:
                     index &= ~self.frame.feedback
             except (AttributeError, KeyError, ColumnError):  # feedback not set
                 pass
-        index &= self.frame.segment == 'circle'
+        index &= self.frame.segment == 'ring'
         return index
 
 

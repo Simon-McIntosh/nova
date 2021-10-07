@@ -5,7 +5,6 @@ import numpy as np
 from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotsection import BiotSection
 from nova.electromagnetic.framelink import FrameLink
-from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.dataframe import DataFrame
 
 
@@ -16,12 +15,12 @@ def test_turnturn_square():
                       biotframe.biotsection.section_factor['square']).all()
 
 
-def test_turnturn_circle():
+def test_turnturn_disk():
     framelink = FrameLink(required=['x'])
     framelink.insert(range(3), delta=-2, section='o')
     biotframe = BiotFrame(framelink)
     assert np.isclose(biotframe.turnturn,
-                      biotframe.biotsection.section_factor['circle']).all()
+                      biotframe.biotsection.section_factor['disk']).all()
 
 
 def test_turnturn_skin():
@@ -37,7 +36,7 @@ def test_framelink_section():
     framelink.insert(range(4), delta=-2, section=['o', 'sq', 'hex', 'skin'])
     biotframe = BiotFrame(framelink)
     assert biotframe.section.to_list() == \
-        ['circle', 'square', 'hexagon', 'skin']
+        ['disk', 'square', 'hexagon', 'skin']
 
 
 def test_framelink_insert_keyerror():

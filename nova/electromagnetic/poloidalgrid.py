@@ -26,8 +26,10 @@ class PoloidalGrid(GridAttrs):
 
         Parameters
         ----------
-        *required : Union[DataFrame, dict, list]
+        *args : Union[DataFrame, dict, list]
             Required input.
+        required : list[str]
+            Required attribute names (args). The default is None.
         iloc : int, optional
             Index before which coils are inserted. The default is None (-1).
         **additional : dict[str, Any]

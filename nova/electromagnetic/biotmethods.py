@@ -388,9 +388,6 @@ class Colocate(Probe):
         plt.plot(self.target.x, self.target.z, 'o')
 
 
-
-
-
 class PlasmaGrid(Grid):
     """Plasma grid interaction methods and data. Class extends Grid."""
 

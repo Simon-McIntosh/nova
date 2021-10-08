@@ -9,9 +9,12 @@ from nova.utilities.pyplot import plt
 def test_spline_update(plot=False):
     update = np.zeros(5, dtype=bool)
 
-    cs = CoilSet()
-    cs.add_plasma([5, 6, 0, 1], dPlasma=0.25)
-    cs.add_coil(5, -0.5, 0.75, 0.75, dCoil=0.5)
+    cs = CoilSet(required=['x', 'z', 'dx', 'dz'], dplasma=0.25, dcoil=0.5)
+    cs.plasma.insert(5.5, 0.5, 1, 1, Ic=15e6)
+    cs.coil.insert(5, -0.5, 0.75, 0.75)
+    print(cs.sloc['Plasma', 'Ic'])
+    cs.plot()
+    '''
     update[0] = cs.plasmagrid._update_B_spline  # True
     cs.solve_biot()
     update[1] = cs.plasmagrid._update_B_spline  # False
@@ -23,7 +26,9 @@ def test_spline_update(plot=False):
     if plot:
         cs.plot(True)
         cs.plasmagrid.plot()
+    '''
     assert np.equal(update, [True, False, True, False, True]).all()
+#test_spline_update()
 
 
 def null_curvature(sign, plot):
@@ -102,5 +107,3 @@ if __name__ == '__main__':
 
     # test_xtol_rel_attribute()
     #cs = global_null(1, plot=True)
-
-

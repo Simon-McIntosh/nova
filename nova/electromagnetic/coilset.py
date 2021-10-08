@@ -1,11 +1,13 @@
 """Build coilset."""
 from dataclasses import dataclass, field
 
-from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.biotgrid import BiotGrid
 from nova.electromagnetic.biotinductance import BiotInductance
+from nova.electromagnetic.biotloop import BiotLoop
 from nova.electromagnetic.biotpoint import BiotPoint
+from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.coil import Coil
+from nova.electromagnetic.frameset import Frame, FrameSet
 from nova.electromagnetic.shell import Shell
 from nova.electromagnetic.plasma import Plasma
 
@@ -21,6 +23,12 @@ class CoilGrid:
     dshell: float = 0
     dfield: float = 0.2
 
+    def __post_init__(self):
+        """Construct delta lookup."""
+        self._delta = dict(coil=self.dcoil, shell=self.dshell,
+                           plasma=self.dplasma, field=self.dfield)
+        super().__post_init__()
+
 
 @dataclass
 class CoilSet(CoilGrid, FrameSet):
@@ -33,25 +41,38 @@ class CoilSet(CoilGrid, FrameSet):
 
     """
 
-    file: str = field(default=None)
+    _frame: dict[str, Frame] = field(
+        init=False, repr=False,
+        default_factory=lambda: dict(coil=Coil, shell=Shell, plasma=Plasma))
+    _biot: dict[str, BiotSolve] = field(
+        init=False, repr=False,
+        default_factory=lambda: dict(grid=BiotGrid, point=BiotPoint,
+                                     probe=BiotPoint, loop=BiotLoop,
+                                     inductance=BiotInductance))
 
     def __post_init__(self):
-        """Init mesh methods."""
+        """Init."""
         super().__post_init__()
-        self.coil = Coil(*self.frames, self.dcoil)
-        self.shell = Shell(*self.frames, self.dshell)
-        self.plasma = Plasma(*self.frames, self.dplasma)
-        self.grid = BiotGrid(*self.frames, 'grid')
-        self.point = BiotPoint(*self.frames, 'point')
-        self.probe = BiotPoint(*self.frames, 'probe')
-        #self.loop = BiotLoop(*self.frames, 'loop')
-        self.inductance = BiotInductance(*self.frames, 'inductance')
-        if self.file is not None:
-            self.load(self.file)
+
+    def __getattr__(self, attr):
+        """Intercept attribute access - implement frame methods."""
+        if attr in self._frame:
+            if isinstance(frame := self._frame.get(attr), Frame):
+                return frame
+            delta = self._delta.get(attr, self.delta)
+            self._frame[attr] = frame(*self.frames, delta)
+            return self._frame[attr]
+        if attr in self._biot:
+            if isinstance(biot := self._biot.get(attr), BiotSolve):
+                return biot
+            self._biot[attr] = biot(*self.frames, attr)
+            return self._biot[attr]
+        raise AttributeError
 
     def store(self, file):
         """Store coilset to hdf5 file."""
         super().store(file)
+        '''
         try:
             self.grid.store(file)
         except AttributeError:
@@ -72,10 +93,12 @@ class CoilSet(CoilGrid, FrameSet):
             self.inductance.store(file)
         except AttributeError:
             pass
+        '''
 
     def load(self, file):
         """Load coilset from hdf5 file."""
         super().load(file)
+        '''
         self.plasma.generate()
         try:
             self.grid.load(file)
@@ -97,6 +120,7 @@ class CoilSet(CoilGrid, FrameSet):
             self.inductance.load(file)
         except OSError:
             pass
+        '''
 
     def plot(self, axes=None):
         """Plot coilset."""
@@ -138,11 +162,17 @@ if __name__ == '__main__':
     coilset.link(['Coil0', 'Plasma'], 2)
 
     coilset.sloc['Ic'] = 1
+    coilset.sloc['Shl0', 'Ic'] = -5
+
 
     print(coilset)
 
     coilset.plot()
     plt.plot(*coilset.subframe.loc[:, ['x', 'z']].to_numpy().T, '.')
-    #coilset.grid.plot()
 
-    coilset.frame.vtkplot()
+    coilset.grid.solve(1e3, 0.05)
+    coilset.grid.plot()
+
+    coilset.store('tmp')
+
+    #coilset.frame.vtkplot()

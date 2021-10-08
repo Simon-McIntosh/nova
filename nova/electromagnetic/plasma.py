@@ -74,9 +74,9 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         return self.loc['ionize', ['x', 'z', 'section', 'area',
                                    'Ic', 'It', 'nturn']].__str__()
 
-    def insert(self, *required, iloc=None, **additional):
+    def insert(self, *args, required=None, iloc=None, **additional):
         """Store plasma index and plasma boundary and generate STR tree."""
-        super().insert(*required, iloc=None, **additional)
+        super().insert(*args, required=None, iloc=None, **additional)
         self.generate()
 
     def generate(self):

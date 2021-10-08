@@ -1,20 +1,37 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 from contextlib import contextmanager
 from dataclasses import dataclass, field
+import os
 
 import pandas
 
+from nova.definitions import root_dir
 from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.select import Select
 
 
 @dataclass
-class Frames(FrameSetLoc):
+class Frame:
+    """Frame container."""
+
+    frame: FrameSpace = field(repr=False)
+    subframe: FrameSpace = field(repr=False)
+    delta: float = -1
+
+
+@dataclass
+class Frames(FrameSetLoc, Frame):
     """Manage frame / subframe pair."""
 
     frame: FrameSpace = field(default=None, repr=False)
     subframe: FrameSpace = field(default=None, repr=False)
+    path: str = field(default=None)
+
+    def __post_init__(self):
+        """Init path."""
+        if self.path is None:
+            self.path = os.path.join(root_dir, 'data/Nova/coilsets')
 
     @contextmanager
     def insert_required(self, required=None):
@@ -113,15 +130,29 @@ class Frames(FrameSetLoc):
                 break
         return iloc
 
-    def store(self, path):
-        """Store frame and subframe as groups within hdf file."""
-        self.frame.store(path, 'frame', mode='w')
-        self.subframe.store(path, 'subframe', mode='a')
+    def _path(self, path):
+        """Return self.path if path is None."""
+        if path is None:
+            return self.path
+        return path
 
-    def load(self, path):
+    def file(self, name, path=None, extension='.nc'):
+        """Return full netCDF file path."""
+        if not os.path.splitext(name)[1]:
+            name += extension
+        return os.path.join(self._path(path), name)
+
+    def store(self, name: str, path=None):
+        """Store frame and subframe as groups within hdf file."""
+        file = self.file(name, path)
+        self.frame.store(file, 'frame', mode='w')
+        self.subframe.store(file, 'subframe', mode='a')
+
+    def load(self, name: str, path=None):
         """Load frameset from file."""
-        self.frame.load(path, 'frame')
-        self.subframe.load(path, 'subframe')
+        file = self.file(name, path)
+        self.frame.load(file, 'frame')
+        self.subframe.load(file, 'subframe')
 
 
 @dataclass
@@ -144,6 +175,7 @@ class FrameSet(Frames):
 
     def __post_init__(self):
         """Init coil and subcoil."""
+        super().__post_init__()
         self.frame = FrameSpace(
             base=self.base, required=self.required, additional=self.additional,
             available=self.available, subspace=[],
@@ -163,14 +195,11 @@ if __name__ == '__main__':
     frameset.subframe.insert([2, 4], It=6, link=True)
     print(frameset.subframe.rms)
 
-    '''
-
-    frameset.store('tmp.h5')
+    frameset.store('tmp')
     del frameset
     frameset = FrameSet()
-    frameset.load('tmp.h5')
+    frameset.load('tmp')
 
     print('')
     print(frameset.subframe.rms)
     print('')
-    '''

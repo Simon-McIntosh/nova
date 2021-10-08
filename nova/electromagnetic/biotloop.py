@@ -8,7 +8,7 @@ from nova.electromagnetic.polyplot import Axes
 
 
 @dataclass
-class _BiotLoop(Axes, BiotSolve):
+class BiotLoop(Axes, BiotSolve):
     """Compute interaction across grid."""
 
     def solve(self, target):

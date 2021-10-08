@@ -17,21 +17,24 @@ class Geom(pygmsh.occ.Geometry):
     def get_poly(self, boundary):
         """Extract polygon from frame."""
         try:
-            return self._get_poly(boundary)
+            return self.add_poly(boundary)
         except NotImplementedError:
-            outer = self._get_poly(boundary[0])
-            inner = self._get_poly(boundary[1])
+            outer = self.add_poly(boundary[0])
+            inner = self.add_poly(boundary[1])
             return self.boolean_difference(outer, inner)[0]
 
-    def _get_poly(self, boundary):
+    def add_poly(self, boundary):
         """Return occ polygon constructed from frame.poly boundary."""
+        bounds = boundary.bounds
+        length = np.min([np.diff(bounds[::2]), np.diff(bounds[1::2])])
         coords = np.array(boundary.xy)
         boundary = np.array([coords[0], np.zeros(len(coords[0])), coords[1]]).T
         index = np.unique(boundary.round(decimals=6),
                           axis=0, return_index=True)[1]
         boundary = boundary[np.sort(index)]
-        boundary = rdp(boundary, 1e-2)
-        return self.add_polygon(boundary, mesh_size=0.75)
+        boundary = rdp(boundary, 0.01*length)
+        return self.add_polygon(boundary, mesh_size=0.5*length)
+
 
 @dataclass
 class VtkPlot(MetaMethod):
@@ -55,10 +58,10 @@ class VtkPlot(MetaMethod):
         if np.array(unset).any():
             self.frame.update_columns()
 
-    def __call__(self, index=slice(None), axes=None, **kwargs):
+    def __call__(self, index=slice(None), **kwargs):
         """Plot frame if not empty."""
         if not self.frame.empty:
-            self.plot(index, axes, **kwargs)
+            self.plot(index, **kwargs)
 
     def pf_coil(self, x, z, dx, dz):
         """Return vtk Poloidal Field coil - rectangular section."""
@@ -68,25 +71,21 @@ class VtkPlot(MetaMethod):
                             radius=x-dx/2, height=1.1*dz).triangulate()
         return outer-inner
 
-    def plot(self, index=slice(None), axes=None, **kwargs):
+    def plot(self, index=slice(None),
+             axis=(0, 0, 1), point=(0, 0, 0), **kwargs):
         """Plot frame."""
         index = self.frame.segment == 'ring'
         vmesh = []
         for item in self.frame.index[index]:
             with Geom() as geom:
                 poly = geom.get_poly(self.frame.loc[item, 'poly'].boundary)
-                segment = []
-                for sign in [-1, 1]:
-                    segment.append(geom.revolve(poly,
-                                                [0.0, 0.0, 1.0],
-                                                [0.0, 0.0, 0.0],
-                                                sign*np.pi)[1])
-                geom.boolean_union(segment)
-
-                #geom.revolve(poly, [0.0, 0.0, 1.0], [0.0, 0.0, 0.0], -np.pi)
-
-                mesh = geom.generate_mesh(dim=3)
-            vmesh.append(vedo.Mesh(mesh, alpha=0.5))
+                geom.boolean_union(
+                    [geom.revolve(poly, axis, point, -np.pi)[1],
+                     geom.revolve(poly, axis, point, np.pi)[1]])
+                mesh = geom.generate_mesh(dim=2)
+            mesh = vedo.Mesh(mesh)
+            mesh.c('red').lighting('metallic')
+            vmesh.append(mesh)
 
         vedo.show(vmesh)
 

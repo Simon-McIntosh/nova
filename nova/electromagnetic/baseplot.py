@@ -50,7 +50,7 @@ class BasePlot:
             index = self.frame.index[index]
         return self.frame.index.isin(index)
 
-    def get_index(self, index=None):
+    def get_index(self, index=None, segment=None):
         """Return label based index for plot."""
         index = self.to_boolean(index)
         with self.frame.setlock(True, 'subspace'):
@@ -64,7 +64,8 @@ class BasePlot:
                     index &= ~self.frame.feedback
             except (AttributeError, KeyError, ColumnError):  # feedback not set
                 pass
-        index &= self.frame.segment == 'ring'
+        if segment:
+            index &= self.frame.segment == segment
         return index
 
 

@@ -1,3 +1,4 @@
+"""Derive plasma topology from poloidal flux maps."""
 import shapely.geometry
 import numpy as np
 import scipy.optimize
@@ -730,12 +731,11 @@ class Topology:
                         np.min(abs(np.array([Pmax, Pmin]))))
         if np.isclose(Pmax, 0) or np.isclose(Pmin, 0):
             raise TopologyError('Field null froms cylinder or plane surface')
-        #elif Pratio > 1e4:
-        #    return '-'
-        elif np.sign(Pmax) == np.sign(Pmin):
+        if Pratio > 1e4:
+            return '-'
+        if np.sign(Pmax) == np.sign(Pmin):
             return 'O'
-        else:
-            return 'X'
+        return 'X'
 
     def _flux_curvature(self, x):
         """

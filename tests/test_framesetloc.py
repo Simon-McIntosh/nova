@@ -12,6 +12,7 @@ def test_get_subspace_error():
     with pytest.raises(SubSpaceKeyError):
         _ = coilset.sloc['Ic']
 
+
 def test_set_subspace_error():
     coilset = CoilSet(dcoil=-2, subspace=[], array=[])
     coilset.coil.insert(1, required=['x'], Ic=[7.7])

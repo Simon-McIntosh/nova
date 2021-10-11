@@ -6,13 +6,13 @@ import numpy as np
 
 from nova.electromagnetic.biotfilament import Biot
 from nova.electromagnetic.framesetloc import FrameSetLoc
-from nova.electromagnetic.biotdata import BiotMatrix
-from nova.electromagnetic.biotsolve import BiotSolve
+from nova.electromagnetic.biotsolve import BiotMatrix
+from nova.electromagnetic.biotdata import BiotData
 from nova.electromagnetic.polyplot import Axes
 
 
 @dataclass
-class BiotPoint(Axes, BiotSolve):
+class BiotPoint(Axes, BiotData):
     """Compute interaction across grid."""
 
     def solve(self, points):

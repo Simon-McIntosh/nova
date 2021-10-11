@@ -5,9 +5,10 @@ from nova.electromagnetic.biotgrid import BiotGrid
 from nova.electromagnetic.biotinductance import BiotInductance
 from nova.electromagnetic.biotloop import BiotLoop
 from nova.electromagnetic.biotpoint import BiotPoint
-from nova.electromagnetic.biotsolve import BiotSolve
+from nova.electromagnetic.biotdata import BiotData
 from nova.electromagnetic.coil import Coil
-from nova.electromagnetic.frameset import Frame, FrameSet
+from nova.electromagnetic.frameset import FrameSet
+from nova.electromagnetic.framedata import FrameData
 from nova.electromagnetic.shell import Shell
 from nova.electromagnetic.plasma import Plasma
 
@@ -41,86 +42,48 @@ class CoilSet(CoilGrid, FrameSet):
 
     """
 
-    _frame: dict[str, Frame] = field(
+    _frame: dict[str, FrameData] = field(
         init=False, repr=False,
         default_factory=lambda: dict(coil=Coil, shell=Shell, plasma=Plasma))
-    _biot: dict[str, BiotSolve] = field(
+    _biot: dict[str, BiotData] = field(
         init=False, repr=False,
         default_factory=lambda: dict(grid=BiotGrid, point=BiotPoint,
                                      probe=BiotPoint, loop=BiotLoop,
                                      inductance=BiotInductance))
 
-    def __post_init__(self):
-        """Init."""
-        super().__post_init__()
-
     def __getattr__(self, attr):
         """Intercept attribute access - implement frame methods."""
         if attr in self._frame:
-            if isinstance(frame := self._frame.get(attr), Frame):
+            if isinstance(frame := self._frame.get(attr), FrameData):
                 return frame
             delta = self._delta.get(attr, self.delta)
-            self._frame[attr] = frame(*self.frames, delta)
+            self._frame[attr] = frame(*self.frames, delta=delta)
             return self._frame[attr]
         if attr in self._biot:
-            if isinstance(biot := self._biot.get(attr), BiotSolve):
+            if isinstance(biot := self._biot.get(attr), BiotData):
                 return biot
-            self._biot[attr] = biot(*self.frames, attr)
+            self._biot[attr] = biot(*self.frames, name=attr)
             return self._biot[attr]
         raise AttributeError
 
     def store(self, file):
         """Store coilset to hdf5 file."""
         super().store(file)
-        '''
-        try:
-            self.grid.store(file)
-        except AttributeError:
-            pass
-        try:
-            self.point.store(file)
-        except AttributeError:
-            pass
-        try:
-            self.probe.store(file)
-        except AttributeError:
-            pass
-        try:
-            self.loop.store(file)
-        except AttributeError:
-            pass
-        try:
-            self.inductance.store(file)
-        except AttributeError:
-            pass
-        '''
+        for attr in self._biot:
+            try:
+                getattr(self, attr).store(file)
+            except AttributeError:
+                pass
 
     def load(self, file):
         """Load coilset from hdf5 file."""
         super().load(file)
-        '''
         self.plasma.generate()
-        try:
-            self.grid.load(file)
-        except OSError:
-            pass
-        try:
-            self.point.load(file)
-        except OSError:
-            pass
-        try:
-            self.probe.load(file)
-        except OSError:
-            pass
-        #try:
-        #    self.loop.load(file)
-        #except OSError:
-        #    pass
-        try:
-            self.inductance.load(file)
-        except OSError:
-            pass
-        '''
+        for attr in self._biot:
+            try:
+                getattr(self, attr).load(file)
+            except OSError:
+                pass
 
     def plot(self, axes=None):
         """Plot coilset."""
@@ -154,10 +117,10 @@ if __name__ == '__main__':
     coilset.coil.insert(10, 0.5, 0.95, 0.95, section='hex', turn='r',
                         nturn=-0.8)
     coilset.coil.insert(10, -0.5, 0.95, 0.95, section='hex')
-    #coilset.coil.insert(11, 0, 0.95, 0.1, section='sk', nturn=-1.8)
-    #coilset.coil.insert(12, 0, 0.6, 0.9, section='r', turn='sk')
+    coilset.coil.insert(11, 0, 0.95, 0.1, section='sk', nturn=-1.8)
+    coilset.coil.insert(12, 0, 0.6, 0.9, section='r', turn='sk')
     coilset.plasma.insert({'ellip': [11.5, 0.8, 1.7, 0.4]})
-    coilset.shell.insert({'e': [11, 0, 5.75, 3.25]}, 13, 0.05,
+    coilset.shell.insert({'e': [12, -0.75, 1.75, 0.5]}, 13, 0.05,
                          delta=-40, part='vv')
     coilset.link(['Coil0', 'Plasma'], 2)
 
@@ -168,11 +131,14 @@ if __name__ == '__main__':
     print(coilset)
 
     coilset.plot()
-    plt.plot(*coilset.subframe.loc[:, ['x', 'z']].to_numpy().T, '.')
+    #plt.plot(*coilset.subframe.loc[:, ['x', 'z']].to_numpy().T, '.')
 
     coilset.grid.solve(1e3, 0.05)
     coilset.grid.plot()
 
     coilset.store('tmp')
+
+    coilset = CoilSet()
+    coilset.load('tmp')
 
     #coilset.frame.vtkplot()

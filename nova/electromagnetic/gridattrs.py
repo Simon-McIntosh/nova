@@ -2,14 +2,15 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, fields
 
-from nova.electromagnetic.frameset import Frame
+from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.polygen import polyshape
 
 
 @dataclass
-class GridAttrs(ABC, Frame):
+class GridAttrs(ABC, FrameSetLoc):
     """Manage grid attributes."""
 
+    delta: float = -1
     _attrs: dict = field(init=False, default_factory=dict, repr=False)
     default: dict = field(init=False, default_factory=lambda: {})
     grid: dict = field(init=False, default_factory=lambda: {})

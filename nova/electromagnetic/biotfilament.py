@@ -6,7 +6,7 @@ import numpy.typing as npt
 import scipy.special
 
 from nova.electromagnetic.biotframe import BiotFrame
-from nova.electromagnetic.biotdata import BiotMatrix, BiotSolve
+from nova.electromagnetic.biotsolve import BiotMatrix, BiotSolve
 
 
 # pylint: disable=no-member  # disable scipy.special module not found

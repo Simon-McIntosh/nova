@@ -1,14 +1,13 @@
 """Mesh poloidal shells."""
 from dataclasses import dataclass, field
 
-from nova.electromagnetic.frameset import Frames
 from nova.electromagnetic.gridattrs import GridAttrs
 from nova.electromagnetic.shellgrid import ShellGrid
 from nova.electromagnetic.polygon import Polygon
 
 
 @dataclass
-class Shell(GridAttrs, Frames):
+class Shell(GridAttrs):
     """Mesh poloidal shell elements."""
 
     turn: str = 'shell'

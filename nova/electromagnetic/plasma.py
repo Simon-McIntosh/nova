@@ -6,7 +6,6 @@ import numpy as np
 import pygeos
 import shapely
 
-from nova.electromagnetic.frameset import Frames
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polygon import Polygon, PolyFrame
@@ -26,7 +25,7 @@ self.plasmafilament.add_plasma()
 
 
 @dataclass
-class PlasmaGrid(PoloidalGrid, Frames):
+class PlasmaGrid(PoloidalGrid):
     """Grid plasma region."""
 
     turn: str = 'hexagon'

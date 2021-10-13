@@ -2,9 +2,10 @@ from dataclasses import dataclass, field
 import os
 
 import numpy as np
-import pyacvd
+import numpy.typing as npt
 import pyvista as pv
-import scipy.spatial
+from scipy.spatial.transform import Rotation
+
 import tetgen
 import vedo
 
@@ -39,7 +40,7 @@ class Shield:
         if self.path is None:
             self.path = os.path.join(root_dir, 'input/geometry/ITER/shield')
         self.load_mesh()
-        self.load_geom()
+        self.load_frame()
 
     @property
     def vtk_file(self):
@@ -75,8 +76,6 @@ class Shield:
 
     def load_geom(self):
         """Extract convexhull for each pannel."""
-        self.mesh = pv.PolyData()
-        self.box = pv.PolyData()
         multiblockmesh = self.load_multiblock()
         
         """
@@ -152,7 +151,8 @@ class Shield:
     @staticmethod
     def center(mesh: vedo.Mesh):
         """Return center of mass."""
-        tet = tetgen.TetGen(pv.PolyData(mesh.polydata()))
+        polydata = pv.PolyData(mesh.polydata())
+        tet = tetgen.TetGen(polydata)
         tet.tetrahedralize(order=1, quality=False)
         grid = tet.grid.compute_cell_sizes(length=False, area=False)
         return np.sum(grid['Volume'].reshape(-1, 1) * 
@@ -161,45 +161,74 @@ class Shield:
     @staticmethod 
     def rotate(mesh: vedo.Mesh):
         """Return PCA rotational transform."""
+        mesh = mesh.fillHoles()
         points = mesh.points()
         triangles = np.array(mesh.cells())
         vertex = dict(a=points[triangles[:, 0]],
                       b=points[triangles[:, 1]], 
                       c=points[triangles[:, 2]])
         normal = np.cross(vertex['b']-vertex['a'], vertex['c']-vertex['a'])
-        
-        covariance = np.cov(normal, rowvar=False, ddof=0,
-                            aweights=np.linalg.norm(normal, axis=1))
-        eigen_vectors = np.linalg.eigh(covariance)[1]
-        return scipy.spatial.transform.Rotation.from_matrix(eigen_vectors.T)
-        
-        
-    def load_multiblock(self):
-        """Retun multiblock mesh."""
-        mesh = vedo.Mesh(self.vtk_file)
-        mesh = mesh.splitByConnectivity(1)[0]
-
-        center = self.center(mesh)
-        rotate = self.rotate(mesh)
-        
-
-
-        points = points @ eigen_vectors
+        l2norm = np.linalg.norm(normal, axis=1)
+        covariance = np.cov(normal, rowvar=False, aweights=l2norm**5) 
+        eigen = np.linalg.eigh(covariance)[1]
+        eigen /= np.linalg.det(eigen)
+        return Rotation.from_matrix(eigen) 
+    
+    @staticmethod 
+    def extent(mesh: vedo.Mesh, rotate: Rotation): 
+        """Return box extent."""
+        points = rotate.inv().apply(mesh.points())
         extent = np.max(points, axis=0) - np.min(points, axis=0)
         extent *= (mesh.volume() / np.prod(extent))**(1 / 3)
-
+        return extent
+    
+    @staticmethod 
+    def box(center: npt.ArrayLike, extent: npt.ArrayLike, rotate: Rotation):
+        """Return pannel bounding box"""
         bounds = np.zeros(6)
         bounds[::2] = -extent/2
         bounds[1::2] = extent/2
         box = pv.Box(bounds)
-        box.points = box.points @ eigen_vectors.T
+        box.points = rotate.apply(box.points)
         box.points += center
-        box = vedo.Mesh(box).opacity(0.5)
+        return vedo.Mesh(box)
+    
+    @staticmethod
+    def convex_hull(mesh: vedo.Mesh):
+        """Return decimated convex hull."""
+        return vedo.ConvexHull(mesh.points()).decimate(
+                N=10, method='pro', boundaries=True)
         
-        center = vedo.Point(center).c('b')
+    def load_frame(self):
+        """Retun multiblock mesh."""
+        mesh = vedo.Mesh(self.vtk_file)
+        parts = mesh.splitByConnectivity(5000)
 
-        
-        vedo.show(mesh.opacity(0.5).c('p'), center, box)
+        blocks = []
+        tick = clock(len(parts), header='loading decimated convex hulls')
+        for part in parts:
+            self.part = part
+            part.cap()
+            convex_hull = self.convex_hull(part)
+            blocks.append(convex_hull)
+            '''
+            part.cap()
+            convex_hull = self.convex_hull(part)
+            blocks.append(convex_hull.c('b').opacity(1))
+            try:
+                center = self.center(part)
+            except RuntimeError:  # Failed to tetrahedralize (non-manifold)
+                self.part = part.clone()
+                center = self.center(part.decimate(0.1))
+            #center = self.center(convex_hull)
+            #center = part.centerOfMass()
+            #rotate = self.rotate(m)
+            #extent = self.extent(m, rotate)
+            #box.append(self.box(center, extent, rotate))
+            '''
+            tick.tock()
+
+        vedo.show(blocks)
         
         #grid.plot(show_edges=True)
 

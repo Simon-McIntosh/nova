@@ -8,7 +8,7 @@ import numpy as np
 
 
 polyshape = \
-    dict.fromkeys(['circle', 'circ', 'c', 'o'], 'circle') | \
+    dict.fromkeys(['disk', 'dsk', 'd', 'o'], 'disk') | \
     dict.fromkeys(['ellipse', 'ellip', 'el', 'e'], 'ellipse') | \
     dict.fromkeys(['square', 'sq', 's'], 'square') | \
     dict.fromkeys(['rectangle', 'rect', 'r'], 'rectangle') | \
@@ -40,20 +40,20 @@ def boxbound(width, height):
     return np.min([width, height])
 
 
-def circle(x_center, z_center, width, height=None):
+def disk(x_center, z_center, width, height=None):
     """
     Return shapely.cirle.
 
     Parameters
     ----------
     x_center : float
-        Circle center, x-coordinate.
+        Disk center, x-coordinate.
     z_center : float
-        Circle center, z-coordinate.
+        Disk center, z-coordinate.
     width : float
-        Circle bounding box, x-dimension.
+        Disk bounding box, x-dimension.
     height : Optional[float]
-        Circle bounding box, z-dimension..
+        Disk bounding box, z-dimension..
 
     Returns
     -------
@@ -64,7 +64,7 @@ def circle(x_center, z_center, width, height=None):
     radius = diameter / 2
     point = shapely.geometry.Point(x_center, z_center)
     buffer = point.buffer(radius, resolution=64)
-    return PolyFrame(buffer, 'circle')
+    return PolyFrame(buffer, 'disk')
 
 
 def ellipse(x_center, z_center, width, height):
@@ -87,7 +87,7 @@ def ellipse(x_center, z_center, width, height):
     shape : shapely.polygon
 
     """
-    polygon = shapely.affinity.scale(circle(x_center, z_center, width),
+    polygon = shapely.affinity.scale(disk(x_center, z_center, width),
                                      1, height/width)
     return PolyFrame(polygon, name='ellipse')
 
@@ -157,7 +157,7 @@ def skin(x_center, z_center, diameter, factor):
         External diameter.
     factor : float
         factor = 1-r/R. Must be greater than 0 and less than 1.
-        Use circle for factor=1.
+        Use disk for factor=1.
 
     Raises
     ------
@@ -172,13 +172,13 @@ def skin(x_center, z_center, diameter, factor):
     if factor <= 0 or factor > 1:
         raise ValueError('skin factor not 0 <= '
                          f'{factor} <= 1')
-    circle_outer = circle(x_center, z_center, diameter)
+    disk_outer = disk(x_center, z_center, diameter)
     if factor == 1:
-        return circle_outer
+        return disk_outer
     scale = 1-factor
-    #circle_inner = shapely.affinity.scale(circle_outer, scale, scale)
-    circle_inner = circle(x_center, z_center, scale*diameter)
-    polygon = circle_outer.difference(circle_inner)
+    #disk_inner = shapely.affinity.scale(disk_outer, scale, scale)
+    disk_inner = disk(x_center, z_center, scale*diameter)
+    polygon = disk_outer.difference(disk_inner)
     return PolyFrame(polygon, name='skin')
 
 
@@ -233,7 +233,7 @@ def polygen(section):
     Raises
     ------
     IndexError
-        Cross-section not in [circle, ellipse, square, rectangle, skin].
+        Cross-section not in [disk, ellipse, square, rectangle, skin].
 
     Returns
     -------
@@ -241,8 +241,8 @@ def polygen(section):
 
     """
     section = section.rstrip(string.digits)
-    if polyshape[section] == 'circle':
-        return circle
+    if polyshape[section] == 'disk':
+        return disk
     if polyshape[section] == 'ellipse':
         return ellipse
     if polyshape[section] == 'square':
@@ -259,5 +259,5 @@ def polygen(section):
 
 if __name__ == '__main__':
 
-    poly = polygen('circle')
+    poly = polygen('disk')
     print(poly(3, 4, 2))

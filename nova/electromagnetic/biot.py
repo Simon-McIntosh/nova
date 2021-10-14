@@ -27,7 +27,6 @@ class Biot:
     frame: Frame
     subframe: Frame
 
-
     '''
     _biot_methods = {'mutual': Mutual,
                      'forcefield': ForceField,
@@ -308,4 +307,3 @@ class Biot:
                     np.maximum.reduceat(getattr(self.subcoil, variable),
                                         self.subcoil._reduction_index))
     '''
-

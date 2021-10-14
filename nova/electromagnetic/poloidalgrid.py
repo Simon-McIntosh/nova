@@ -15,19 +15,21 @@ class PoloidalGrid(GridAttrs):
     fill: bool = False
     grid: dict = field(init=False, default_factory=lambda: dict.fromkeys([
         'tile', 'trim', 'fill']))
-    required: list = field(init=False, default_factory=lambda: [
+    required_columns: list = field(init=False, default_factory=lambda: [
         'poly', 'delta', 'turn', 'nturn'])
-    additional: list = field(init=False, default_factory=lambda: [
+    additional_columns: list = field(init=False, default_factory=lambda: [
         'scale', 'skin'])
 
-    def insert(self, *required, iloc=None, **additional):
+    def insert(self, *args, required=None, iloc=None, **additional):
         """
         Insert frame(s).
 
         Parameters
         ----------
-        *required : Union[DataFrame, dict, list]
+        *args : Union[DataFrame, dict, list]
             Required input.
+        required : list[str]
+            Required attribute names (args). The default is None.
         iloc : int, optional
             Index before which coils are inserted. The default is None (-1).
         **additional : dict[str, Any]
@@ -40,8 +42,9 @@ class PoloidalGrid(GridAttrs):
 
         """
         self.attrs = additional
-        index = self.frame.insert(*required, iloc=iloc, **self.attrs)
-        self.subframe_insert(index)
+        with self.insert_required(required):
+            index = self.frame.insert(*args, iloc=iloc, **self.attrs)
+            self.subframe_insert(index)
         if self.link:
             self.frame.multipoint.link(index)
             self.subframe.multipoint.link(index, expand=True)
@@ -56,8 +59,8 @@ class PoloidalGrid(GridAttrs):
 
         """
         frame = self.frame.loc[index, :]
-        griddata = frame.loc[:, self.required +
-                             [attr for attr in self.additional
+        griddata = frame.loc[:, self.required_columns +
+                             [attr for attr in self.additional_columns
                               if attr in self.frame]]
         subframe = []
         subattrs = pandas.DataFrame(self.subattrs, index=index)

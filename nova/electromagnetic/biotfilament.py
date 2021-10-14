@@ -6,7 +6,7 @@ import numpy.typing as npt
 import scipy.special
 
 from nova.electromagnetic.biotframe import BiotFrame
-from nova.electromagnetic.biotdata import BiotMatrix, BiotSolve
+from nova.electromagnetic.biotsolve import BiotMatrix, BiotSolve
 
 
 # pylint: disable=no-member  # disable scipy.special module not found
@@ -105,7 +105,7 @@ class PoloidalOffset(PolidalCoordinates):
 
 
 @dataclass
-class BiotCircle(BiotSolve):
+class BiotRing(BiotSolve):
     """
     Extend BiotMatrix base class.
 
@@ -113,7 +113,7 @@ class BiotCircle(BiotSolve):
 
     """
 
-    name = 'circle'  # element name
+    name = 'ring'  # element name
 
     columns: list[str] = field(default_factory=lambda: [
         'Aphi', 'Psi', 'Br', 'Bz'])
@@ -157,7 +157,7 @@ class BiotCircle(BiotSolve):
 class Biot(BiotMatrix):
     """Manage biot interaction between multiple filament types."""
 
-    generator = {'circle': BiotCircle}
+    generator = {'ring': BiotRing}
 
     def __post_init__(self):
         """Solve biot interaction."""

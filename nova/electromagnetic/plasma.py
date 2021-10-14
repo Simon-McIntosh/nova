@@ -6,7 +6,6 @@ import numpy as np
 import pygeos
 import shapely
 
-from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polygon import Polygon, PolyFrame
@@ -29,11 +28,9 @@ self.plasmafilament.add_plasma()
 class PlasmaGrid(PoloidalGrid):
     """Grid plasma region."""
 
-    frame: FrameSpace = field(repr=False)
-    subframe: FrameSpace = field(repr=False)
-    delta: float
     turn: str = 'hexagon'
     tile: bool = field(init=False, default=True)
+    required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
     default: dict = field(init=False, default_factory=lambda: {
         'nturn': 1, 'part': 'plasma', 'name': 'Plasma', 'plasma': True,
         'active': True})
@@ -76,9 +73,9 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         return self.loc['ionize', ['x', 'z', 'section', 'area',
                                    'Ic', 'It', 'nturn']].__str__()
 
-    def insert(self, *required, iloc=None, **additional):
+    def insert(self, *args, required=None, iloc=None, **additional):
         """Store plasma index and plasma boundary and generate STR tree."""
-        super().insert(*required, iloc=None, **additional)
+        super().insert(*args, required=None, iloc=None, **additional)
         self.generate()
 
     def generate(self):

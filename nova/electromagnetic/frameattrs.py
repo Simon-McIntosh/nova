@@ -73,7 +73,6 @@ class FrameAttrs(pandas.DataFrame):
         self.trim_columns(columns)
         self.extract_available(data, columns)
         self.update_metaframe(metadata)
-        self.match_columns()
         self.format_data(data)
 
     def extract_attrs(self, data, attrs):
@@ -123,7 +122,8 @@ class FrameAttrs(pandas.DataFrame):
         self.metaframe.update(metadata)
         if self.metaframe.columns:
             self.metaframe.metadata = {'available': self.metaframe.columns}
-        self.metaframe.data = {}  # clear data  ! TODO check link preservation
+        self.metaframe.data = {}  # TODO check link preservation (clear data)
+        self.match_columns()
 
     def match_columns(self):
         """Intersect metaframe.required with self.columns if not empty."""

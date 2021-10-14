@@ -2,15 +2,11 @@
 from dataclasses import dataclass, field
 import os
 
-import numpy as np
 import pandas
 import pyvista as pv
 import scipy.interpolate
 
 from nova.definitions import root_dir
-from nova.structural.clusterturns import ClusterTurns
-from nova.structural.plotter import Plotter
-from nova.structural.uniformwindingpack import UniformWindingPack
 
 
 @dataclass

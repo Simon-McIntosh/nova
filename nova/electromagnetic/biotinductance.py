@@ -3,12 +3,12 @@ from dataclasses import dataclass
 
 
 from nova.electromagnetic.biotfilament import Biot
-from nova.electromagnetic.biotsolve import BiotSolve
+from nova.electromagnetic.biotdata import BiotData
 from nova.electromagnetic.polyplot import Axes
 
 
 @dataclass
-class BiotInductance(Axes, BiotSolve):
+class BiotInductance(Axes, BiotData):
     """Compute self interaction."""
 
     def solve(self, index=slice(None)):

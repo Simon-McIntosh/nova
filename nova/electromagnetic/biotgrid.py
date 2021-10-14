@@ -8,7 +8,7 @@ import shapely.geometry
 import xarray
 
 from nova.electromagnetic.biotfilament import Biot
-from nova.electromagnetic.biotsolve import BiotSolve
+from nova.electromagnetic.biotdata import BiotData
 from nova.electromagnetic.framelink import FrameLink
 from nova.electromagnetic.polyplot import Axes
 
@@ -122,7 +122,7 @@ class Expand:
 
 
 @dataclass
-class BiotGrid(Axes, BiotSolve):
+class BiotGrid(Axes, BiotData):
     """Compute interaction across grid."""
 
     levels: Union[int, list[float]] = 31

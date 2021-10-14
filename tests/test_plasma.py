@@ -67,7 +67,7 @@ def test_polarity():
     coilset = CoilSet(dplasma=-10, dcoil=-10)
     coilset.coil.insert(4.65, [-0.3, 0.3], 0.1, 0.5)
     coilset.plasma.insert({'ellip': [5, 0, 0.5, 0.75]}, It=-15e6)
-    coilset.plasma.update({'circ': [5, 0, 0.3]})
+    coilset.plasma.update({'disk': [5, 0, 0.3]})
     assert coilset.plasma.polarity == -1
 
 

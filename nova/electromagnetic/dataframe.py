@@ -218,16 +218,18 @@ class DataFrame(FrameAttrs):
 
     def to_poly(self, col='poly'):
         """Load gegjson strings and convert to shapely polygons."""
-        self.loc[:, col] = [shapely.geometry.shape(geojson.loads(geo))
-                            for geo in self[col]]
+        index = [isinstance(poly, str) and poly != 'null'
+                 for poly in self[col]]
+        self.loc[index, col] = [shapely.geometry.shape(geojson.loads(geo))
+                                for geo in self.loc[index, col]]
 
-    def store(self, path, group, mode='w'):
-        """Store dataframe as group in hdf5 file."""
+    def store(self, file, group, mode='w'):
+        """Store dataframe as group in netCDF4 hdf5 file."""
         xframe = self.to_xarray()
         xframe.attrs = self.metaframe.metadata
         if 'poly' in xframe:
             xframe['poly'].values = self.to_geojson()
-        xframe.to_netcdf(path, group=group, mode=mode)
+        xframe.to_netcdf(file, group=group, mode=mode)
 
     def load(self, file, group):
         """Load dataframe from hdf file."""

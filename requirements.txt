@@ -1,29 +1,25 @@
 astropy
 descartes
-ftputil
-intake
-matplotlib
-netcdf4
+gmsh
+geojson
+netCDF4
 nlopt
-numpy
+numpy==1.20
+--trusted-host storage.googleapis.com 
+https://storage.googleapis.com/open3d-releases-master/python-wheels/open3d-0.13.0+6b6e3bd-cp39-cp39-manylinux_2_27_x86_64.whl
+openpyxl
 pandas
-pyarrow
-pygeos
-pygmo
-pyquaternion
-pytables
+pygmsh
+pygeos --no-binary pygeos
 pytest
-python-docx
-python-docx
-python-snappy
+pyvista
+pyquaternion
 rdp
-scikit-image
-scikit-learn
-scipy
 seaborn
-shapely
+scipy
+shapely --no-binary shapely
 spyder
-spyder-unittest
+tetgen
+vedo
+wheel
 xarray
-xlrd
-

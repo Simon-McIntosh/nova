@@ -6,9 +6,9 @@ import numpy as np
 from nova.electromagnetic.polygen import polygen
 
 
-def test_circle_area():
+def test_disk_area():
     diameter = 5.2
-    polygon = polygen('circle')(3, 7, diameter)
+    polygon = polygen('disk')(3, 7, diameter)
     assert np.isclose(polygon.area, np.pi*diameter**2/4, rtol=1e-3)
 
 
@@ -24,7 +24,7 @@ def test_x_centroid():
 
 
 def test_y_centroid():
-    polygon = polygen('circle')(-3, 2, 12)
+    polygon = polygen('disk')(-3, 2, 12)
     assert np.isclose(polygon.centroid.y, 2)
 
 

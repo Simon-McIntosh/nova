@@ -1,7 +1,6 @@
 """Mesh poloidal shells."""
 from dataclasses import dataclass, field
 
-from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.gridattrs import GridAttrs
 from nova.electromagnetic.shellgrid import ShellGrid
 from nova.electromagnetic.polygon import Polygon
@@ -11,17 +10,15 @@ from nova.electromagnetic.polygon import Polygon
 class Shell(GridAttrs):
     """Mesh poloidal shell elements."""
 
-    frame: FrameSpace = field(repr=False)
-    subframe: FrameSpace = field(repr=False)
-    delta: float
     turn: str = 'shell'
+    required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
     default: dict = field(init=False, default_factory=lambda: {
         'label': 'Shl', 'part': 'shell', 'active': False})
 
     def set_conditional_attributes(self):
         """Set conditional attrs - not required for shell."""
 
-    def insert(self, *required, iloc=None, **additional):
+    def insert(self, *args, required=None, iloc=None, **additional):
         """
         Add shell elements to frameset.
 
@@ -46,13 +43,14 @@ class Shell(GridAttrs):
         None.
 
         """
-        if isinstance(required[1], (int, float)):
-            poly = Polygon(required[0]).poly
-            required = poly.boundary.xy + required[1:]
+        if isinstance(args[1], (int, float)):
+            poly = Polygon(args[0]).poly
+            args = poly.boundary.xy + args[1:]
 
         self.attrs = additional
-        shellgrid = ShellGrid(*required, delta=self.attrs['delta'])
-        index = self.frame.insert(shellgrid.frame, iloc=iloc, **self.attrs)
+        with self.insert_required(required):
+            shellgrid = ShellGrid(*args, delta=self.attrs['delta'])
+            index = self.frame.insert(shellgrid.frame, iloc=iloc, **self.attrs)
         frame = self.frame.loc[index, :]
         subframe = []
         for i, name in enumerate(index):

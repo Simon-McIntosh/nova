@@ -7,94 +7,93 @@ from nova.electromagnetic.error import SubSpaceKeyError, ColumnError
 
 
 def test_get_subspace_error():
-    coilset = CoilSet(dcoil=-2, subspace=[], array=[], required=['x'])
-    coilset.coil.insert(1, Ic=[7.7])
+    coilset = CoilSet(dcoil=-2, subspace=[], array=[])
+    coilset.coil.insert(1, required=['x'], Ic=[7.7])
     with pytest.raises(SubSpaceKeyError):
         _ = coilset.sloc['Ic']
 
 
 def test_set_subspace_error():
-    coilset = CoilSet(dcoil=-2, subspace=[], array=[], required=['x'])
-    coilset.coil.insert(1, Ic=[7.7])
+    coilset = CoilSet(dcoil=-2, subspace=[], array=[])
+    coilset.coil.insert(1, required=['x'], Ic=[7.7])
     with pytest.raises(SubSpaceKeyError):
         coilset.sloc['Ic'] = [8.8, 8.8]
 
 
 def test_get_key_error():
-    coilset = CoilSet(dcoil=-2, subspace=[], array=[], required=['x'])
-    coilset.coil.insert(1, Ic=[7.7])
+    coilset = CoilSet(dcoil=-2, subspace=[], array=[])
+    coilset.coil.insert(1, required=['x'], Ic=[7.7])
     with pytest.raises(KeyError):
         _ = coilset.loc['turn']
 
 
 def test_set_column_error():
-    coilset = CoilSet(dcoil=-2, subspace=[], array=[], required=['x'])
-    coilset.coil.insert(1, Ic=[7.7])
+    coilset = CoilSet(dcoil=-2, subspace=[], array=[])
+    coilset.coil.insert(1, required=['x'], Ic=[7.7])
     with pytest.raises(ColumnError):
         coilset.loc['turn'] = [8.8, 8.8]
 
 
 def test_get_current_subframe():
-    coilset = CoilSet(dcoil=-2, subspace=[], array=[], required=['x'])
-    coilset.coil.insert(1, Ic=[7.7])
+    coilset = CoilSet(dcoil=-2, subspace=[], array=[])
+    coilset.coil.insert(1, required=['x'], Ic=[7.7])
     assert np.isclose(coilset.loc['Ic'], [7.7, 7.7]).all()
 
 
 def test_get_current_subspace():
-    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[], required=['x'])
-    coilset.coil.insert([1, 3, 7], Ic=[7.7, 8.3, 6.6])
+    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[])
+    coilset.coil.insert([1, 3, 7], required=['x'], Ic=[7.7, 8.3, 6.6])
     assert np.isclose(coilset.sloc['Ic'], [7.7, 8.3, 6.6]).all()
 
 
 def test_get_current_subspace_array():
-    coilset = CoilSet(dcoil=-1, subspace=['Ic'], array=['Ic'], required=['x'])
-    coilset.coil.insert([1, 3], Ic=[7.7, 6.6])
+    coilset = CoilSet(dcoil=-1, subspace=['Ic'], array=['Ic'])
+    coilset.coil.insert([1, 3], required=['x'], Ic=[7.7, 6.6])
     assert np.isclose(coilset.sloc['Ic'], [7.7, 6.6]).all()
 
 
 def test_set_current_subframe():
-    coilset = CoilSet(dcoil=-2, subspace=[], array=[], required=['x'],
+    coilset = CoilSet(dcoil=-2, subspace=[], array=[],
                       additional=['Ic'])
-    coilset.coil.insert(1.5)
+    coilset.coil.insert(1.5, required=['x'])
     coilset.loc['active', 'Ic'] = [8.8, 7.7]
     assert np.isclose(coilset.loc['Ic'], [8.8, 7.7]).all()
 
 
 def test_set_current_subspace():
-    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[], required=['x'])
-    coilset.coil.insert(1.5)
+    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[])
+    coilset.coil.insert(1.5, required=['x'])
     coilset.sloc['Ic'] = [8.8]
     assert np.isclose(coilset.loc['Ic'], [8.8]).all()
 
 
 def test_set_current_subspace_error():
-    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[], required=['x'])
-    coilset.coil.insert(1.5)
+    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[])
+    coilset.coil.insert(1.5, required=['x'])
     with pytest.raises(ValueError):
         coilset.sloc['Ic'] = [8.8, 8.8]
 
 
 def test_set_current_subspace_array():
-    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=['Ic'], required=['x'])
-    coilset.coil.insert(1.5)
+    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=['Ic'])
+    coilset.coil.insert(1.5, required=['x'])
     coilset.sloc['Ic'] = [8.8]
     assert np.isclose(coilset.sloc['Ic'], [8.8]).all()
 
 
 def test_get_current_subset():
-    coilset = CoilSet(dcoil=-1, subspace=['Ic'], array=['Ic'], required=['x'])
-    coilset.coil.insert(3, plasma=False)
-    coilset.coil.insert(6.6, plasma=True)
-    coilset.coil.insert([1.2, 2.2], active=False)
+    coilset = CoilSet(dcoil=-1, subspace=['Ic'], array=['Ic'])
+    coilset.coil.insert(3, required=['x'], plasma=False)
+    coilset.coil.insert(6.6, required=['x'], plasma=True)
+    coilset.coil.insert([1.2, 2.2], required=['x'], active=False)
     coilset.link(['Coil0', 'Coil3'])
     coilset.sloc['active', 'Ic'] = [8.8, 7.7]
     assert np.isclose(coilset.loc['Ic'], [8.8, 7.7, 0, 8.8]).all()
 
 
 def test_get_current_insert_default():
-    coilset = CoilSet(dcoil=-2, subspace=['Ic'], 
-                        array=['Ic'], required=['x'])
-    coilset.coil.insert(range(2), link=True)
+    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=['Ic'])
+    coilset.coil.insert(range(2), required=['x'], link=True)
     coilset.plasma.insert({'s': [3.25, 0, 0.25]}, delta=-2)
     coilset.shell.insert([2.2, 3.2], [-0.1, 0.3], -2, 0.05, delta=-3,
                          link=True)
@@ -106,39 +105,39 @@ def test_get_current_insert_default():
 
 
 def test_set_current_frame_error():
-    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[], required=['x'])
-    coilset.coil.insert(1.5)
+    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[])
+    coilset.coil.insert(1.5, required=['x'])
     with pytest.raises(ColumnError):
         coilset.Loc['Ic'] = [8.8, 8.8]
 
 
 def test_set_current_frame_subspace_error():
-    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[], required=['x'])
-    coilset.coil.insert(1.5)
+    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[])
+    coilset.coil.insert(1.5, required=['x'])
     with pytest.raises(SubSpaceKeyError):
         coilset.sLoc['It'] = [8.8, 8.8]
 
 
 def test_get_current_frame_keyerror():
-    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[], required=['x'])
-    coilset.coil.insert(1.5)
+    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[])
+    coilset.coil.insert(1.5, required=['x'])
     with pytest.raises(KeyError):
         _ = coilset.Loc['Ic']
 
 
 def test_get_current_subspace_keyerror():
-    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[], required=['x'])
-    coilset.coil.insert(1.5)
+    coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=[])
+    coilset.coil.insert(1.5, required=['x'])
     with pytest.raises(SubSpaceKeyError):
         _ = coilset.sLoc['It']
 
 
 def test_set_frame_It_subspace_Ic():
-    coilset = CoilSet(dcoil=-1, subspace=['Ic'], array=[], required=['x'])
-    coilset.coil.insert(1.5, nturn=3)
+    coilset = CoilSet(dcoil=-1, subspace=['Ic'], array=[])
+    coilset.coil.insert(1.5, required=['x'], nturn=3)
     coilset.loc['It'] = 9.9
     assert np.isclose(coilset.sloc['Ic'][0], 3.3)
-    
+
 
 def test_subframe_plasma_index():
     coilset = CoilSet(dcoil=-2)
@@ -151,4 +150,3 @@ def test_subframe_plasma_index():
 if __name__ == '__main__':
 
     pytest.main([__file__])
-

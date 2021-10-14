@@ -102,8 +102,6 @@ class PlasmaMethods:
 
 
 
-
-
     def update_topology_index(self):
         if self.plasmagrid._update_topology_index:
             Opoint = self.plasmagrid.Opoint

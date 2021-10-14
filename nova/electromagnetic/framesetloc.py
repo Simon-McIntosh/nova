@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 
 import numpy.typing as npt
 
+from nova.electromagnetic.framedata import FrameData
 from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.error import SpaceKeyError
 
@@ -55,7 +56,7 @@ class LocIndexer:
 
 
 @dataclass
-class FrameSetLoc:
+class FrameSetLoc(FrameData):
     """
     FrameSet Loc indexer.
 
@@ -65,9 +66,6 @@ class FrameSetLoc:
         - sloc: Access subframe subspace attributes.
 
     """
-
-    frame: FrameSpace = field(default=None, repr=False)
-    subframe: FrameSpace = field(default=None, repr=False)
 
     @property
     def Loc(self):

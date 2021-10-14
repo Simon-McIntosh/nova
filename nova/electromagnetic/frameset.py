@@ -3,23 +3,24 @@ from dataclasses import dataclass, field
 
 import pandas
 
-from nova.electromagnetic.framespace import FrameSpace
+from nova.electromagnetic.filepath import FilePath
 from nova.electromagnetic.framesetloc import FrameSetLoc
+from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.select import Select
 
 
 @dataclass
-class FrameSet(FrameSetLoc):
-    """Package FrameSpace instances. Manage boolean methods."""
+class FrameSet(FrameSetLoc, FilePath):
+    """Manage FrameSet instances."""
 
+    delta: float = -1
     base: list[str] = field(repr=False, default_factory=lambda: [
         'x', 'y', 'z', 'dx', 'dy', 'dz'])
-    required: list[str] = field(repr=False, default_factory=lambda: [
-        'x', 'z', 'dl', 'dt'])
+    required: list[str] = field(repr=False, default_factory=lambda: [])
     additional: list[str] = field(repr=False, default_factory=lambda: [
         'turn', 'frame'])
     available: list[str] = field(repr=False, default_factory=lambda: [
-        'link', 'part', 'frame', 'dx', 'dy', 'dz', 'area',
+        'link', 'part', 'frame', 'dx', 'dy', 'dz', 'area', 'volume',
         'delta', 'section', 'turn', 'scale', 'nturn', 'nfilament',
         'Ic', 'It', 'Psi', 'Bx', 'Bz', 'B', 'acloss'])
     subspace: list[str] = field(repr=False, default_factory=lambda: [
@@ -29,6 +30,7 @@ class FrameSet(FrameSetLoc):
 
     def __post_init__(self):
         """Init coil and subcoil."""
+        super().__post_init__()
         self.frame = FrameSpace(
             base=self.base, required=self.required, additional=self.additional,
             available=self.available, subspace=[],
@@ -51,82 +53,17 @@ class FrameSet(FrameSetLoc):
         superframe['It'] = superframe['Ic'] * superframe['nturn']
         return superframe.__str__()
 
-    def link(self, index, factor=1):
-        """Apply multipoint link to subframe."""
-        self.frame.multipoint.link(index, factor)
-        self.subframe.multipoint.link(index, factor, expand=True)
-
-    def drop(self, index=None):
-        """
-        Remove frame and subframe.
-
-        Parameters
-        ----------
-        index : int or list or pandas.Index, optional
-            Index of coils to be removed. The default is None (all coils).
-
-        Returns
-        -------
-        loc : [int, int]
-            Location index of first removed [frame, subframe].
-
-        """
-        if index is None:  # drop all coils
-            index = self.coil.index
-        if not pandas.api.types.is_list_like(index):
-            index = [index]
-        loc = self.get_loc(index)
-        for name in index:
-            if name in self.frame.index:
-                self.subframe.drop(self.coil.loc[name, 'subindex'])
-                self.frame.drop(name)
-        return loc
-
-    def translate(self, index=None, dx=0, dz=0):
-        """
-        Translate coil in polidal plane.
-
-        Parameters
-        ----------
-        index : int or array-like or Index, optional
-            Coil index. The default is None (all coils).
-        dx : float, optional
-            x-coordinate translation. The default is 0.
-        dz : float, optional
-            z-coordinate translation. The default is 0.
-
-        Returns
-        -------
-        None.
-
-        """
-        if index is None:
-            index = self.coil.index
-        elif not pandas.api.types.is_list_like(index):
-            index = [index]
-        self.coil.translate(index, dx, dz)
-        for name in index:
-            self.subcoil.translate(self.coil.loc[name, 'subindex'], dx, dz)
-
-    def _get_iloc(self, index):
-        iloc = [None, None]
-        for name in index:
-            if name in self.coil.index:
-                iloc[0] = self.coil.index.get_loc(index[0])
-                subindex = self.coil.subindex[index[0]][0]
-                iloc[1] = self.subcoil.index.get_loc(subindex)
-                break
-        return iloc
-
-    def store(self, path):
+    def store(self, filename: str, path=None):
         """Store frame and subframe as groups within hdf file."""
-        self.frame.store(path, 'frame', mode='w')
-        self.subframe.store(path, 'subframe', mode='a')
+        file = self.file(filename, path)
+        self.frame.store(file, 'frame', mode='w')
+        self.subframe.store(file, 'subframe', mode='a')
 
-    def load(self, path):
+    def load(self, filename: str, path=None):
         """Load frameset from file."""
-        self.frame.load(path, 'frame')
-        self.subframe.load(path, 'subframe')
+        file = self.file(filename, path)
+        self.frame.load(file, 'frame')
+        self.subframe.load(file, 'subframe')
 
 
 if __name__ == '__main__':
@@ -135,10 +72,10 @@ if __name__ == '__main__':
     frameset.subframe.insert([2, 4], It=6, link=True)
     print(frameset.subframe.rms)
 
-    frameset.store('tmp.h5')
+    frameset.store('tmp')
     del frameset
     frameset = FrameSet()
-    frameset.load('tmp.h5')
+    frameset.load('tmp')
 
     print('')
     print(frameset.subframe.rms)

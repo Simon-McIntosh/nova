@@ -218,6 +218,8 @@ class FrameLink(LinkIndexer, DataArray):
 
         """
         if len(args) != 1:
+            args += tuple(kwargs.pop(arg) for arg in self.metaframe.required
+                          if arg in kwargs)
             return args, kwargs
         if not self.isframe(args[0], dataframe=True):
             return args, kwargs
@@ -255,7 +257,9 @@ class FrameLink(LinkIndexer, DataArray):
         if len(args) == 1 and len(self.metaframe.required) == 1:
             if not isinstance(args[0], (dict, shapely.geometry.Polygon)):
                 return args, kwargs
-        if len(args) == 0 and 'poly' in kwargs:
+        if len(args) == 0:
+            #if 'poly' not in kwargs or len(kwargs.get('poly', [])) > 1:
+            return args, kwargs
             args = (kwargs.pop('poly'),)
         polygon = Polygon(args[0])
         geometry = polygon.geometry
@@ -312,7 +316,7 @@ class FrameLink(LinkIndexer, DataArray):
             raise IndexError(
                 f'unset kwargs: {unset_kwargs}\n'
                 'enter default value in self.metaframe.defaults\n'
-                f'set as self.metaframe.meatadata = {{default: {default}}}')
+                f'set as self.metaframe.metadata = {{default: {default}}}')
 
     def _patch_current(self, data, attrs=None):
         """Patch line current."""

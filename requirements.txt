@@ -5,8 +5,8 @@ geojson
 netCDF4
 nlopt
 numpy==1.20
---trusted-host storage.googleapis.com 
-https://storage.googleapis.com/open3d-releases-master/python-wheels/open3d-0.13.0+6b6e3bd-cp39-cp39-manylinux_2_27_x86_64.whl
+# --trusted-host storage.googleapis.com 
+# https://storage.googleapis.com/open3d-releases-master/python-wheels/open3d-0.13.0+6b6e3bd-cp39-cp39-manylinux_2_27_x86_64.whl
 openpyxl
 pandas
 pygmsh

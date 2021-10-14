@@ -8,9 +8,23 @@ from nova.utilities.time import clock
 class Plotter:
     """Custom pyvista plotting methods."""
 
-    def warp(self, factor=75, opacity=0.5, displace='delta', scalars=None,
+    def diff(self, displace: str, reference: str):
+        """Diffrence array and return name."""
+        name = f'{displace}-{reference}'
+        if name not in self.mesh.array_names:
+            self.mesh[name] = self.mesh[displace] - self.mesh[reference]
+            self.mesh.set_active_scalars(name)
+        return name
+
+    def plot(self, displace: str, referance: str, factor=80):
+        """Plot warped shape."""
+        self.warp(factor=factor, displace=self.diff(displace, referance))
+
+    def warp(self, factor=75, opacity=0.5, displace=None, scalars=None,
              plotter=None, show_edges=False, color=None, show=False):
         """Plot warped with mesh."""
+        if displace is None:
+            displace = self.mesh.active_scalars_name
         if scalars is None:
             scalars = displace
         if plotter is None:
@@ -24,7 +38,7 @@ class Plotter:
         #self.mesh['disp'] = self.mesh[displace] - self.mesh['disp-5']
         #self.mesh[scalars] = 1e-6*(self.mesh[scalars] - self.mesh['vm-5'])
         warp = self.mesh.warp_by_vector(displace, factor=factor)
-        plotter.add_mesh(warp, line_width=3,
+        plotter.add_mesh(warp, scalars=scalars, line_width=3,
                          show_edges=show_edges, opacity=0.5,
                          color=color)
         #, smooth_shading=True, show_scalar_bar=False, clim=[-25, 25])

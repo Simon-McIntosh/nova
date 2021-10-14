@@ -64,6 +64,13 @@ class TFC18(DataDir, Plotter):
         if self.cluster:
             self.mesh = ClusterTurns(self.mesh, self.cluster).mesh
 
+    def recalculate(self):
+        """Reload vtm datafile."""
+        self.load_ansys()
+        self.load_ccl()
+        if self.cluster:
+            self.mesh = ClusterTurns(self.mesh, self.cluster).mesh
+
     def load_ansys(self):
         """Load ansys vtk mesh."""
         ansys = AnsysPost(*self.args).mesh
@@ -163,17 +170,6 @@ class TFC18(DataDir, Plotter):
                 for scenario in ['TFonly', 'SOD', 'EOB']:
                     self.to_dataframe(scenario)
 
-    def diff(self, displace: str, reference='TFonly'):
-        """Diffrence array and return name."""
-        name = f'{displace}-{reference}'
-        if name not in self.mesh.array_names:
-            self.mesh[name] = self.mesh[displace] - self.mesh[reference]
-        return name
-
-    def plot(self, displace: str, referance='TFonly', factor=80):
-        """Plot warped shape."""
-        self.warp(self.diff(displace, referance), factor=factor)
-
     def animate(self, displace: str, view='xy'):
         """Animate displacement."""
         filename = os.path.join(self.directory, self.file)
@@ -183,7 +179,7 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'v0_100', cluster=1)
+    tf = TFC18('TFCgapsG10', 'v0', cluster=1)
 
     #tf.to_dataframe('EOB')
 
@@ -191,12 +187,12 @@ if __name__ == '__main__':
 
     #tf.mesh['EOB-cooldown'] = tf.mesh['EOB'] - tf.mesh['cooldown']
 
-    tf.to_dataframe('EOB')
+    #tf.to_dataframe('EOB')
 
     #tf.export()
     #tf.plot('TFonly', 'cooldown', factor=180)
     #
 
-    #tf.warp(50, displace='EOB')
+    tf.warp(50, displace='TFonly')
 
     #tf.animate('TFonly-cooldown', view='xy')

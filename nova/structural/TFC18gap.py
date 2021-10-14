@@ -15,6 +15,7 @@ from nova.structural.TFC18 import TFC18
 class TFCgap(DataDir, Plotter):
     """Construct error displacement fields for TF coilset."""
 
+    folder: str = 'TFCgapsG10'
     cluster: int = None
     baseline: str = 'k0'
     mesh: pv.PolyData = field(init=False, repr=False)
@@ -32,6 +33,8 @@ class TFCgap(DataDir, Plotter):
         target = model.mesh.copy()
         model.reload(self.baseline)
         baseline = model.mesh.copy()
+        if 'scenario' not in model.mesh.array_names:
+            model.reload_mesh()
         for scenario in model.mesh.field_data['scenario']:
             try:
                 self.mesh[scenario] = target[scenario] - baseline[scenario]
@@ -46,7 +49,7 @@ class TFCgap(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    gap = TFCgap('TFCgapsG10', 'v0_100', baseline='v0_65', cluster=False)
+    gap = TFCgap('TFCgapsG10', 'v0_65', baseline='v0', cluster=1)
 
     #mesh = gap.mesh.slice(normal=[0, 0, 1])
     #clip = pv.Cylinder(direction=(0, 0, 1), radius=3)
@@ -56,5 +59,5 @@ if __name__ == '__main__':
     #p.add_mesh(mesh)
     #p.show()
 
-    gap.warp(1000, displace='EOB', opacity=0)
+    gap.warp(160, displace='TFonly', opacity=0.5)
     #gap.animate('EOB', 1000)

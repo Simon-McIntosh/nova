@@ -1,16 +1,23 @@
-
+"""Manage 2016 F4E TFC data."""
 from dataclasses import dataclass, field
 import os
 
+import numpy as np
 import pandas
 import pyvista as pv
 import scipy.interpolate
+import vedo
 
 from nova.definitions import root_dir
+from nova.structural.clusterturns import ClusterTurns
+from nova.structural.datadir import DataDir
+from nova.structural.plotter import Plotter
+from nova.structural.TFC18gap import TFCgap
+from nova.structural.uniformwindingpack import UniformWindingPack
 
 
 @dataclass
-class F4E_Data:
+class F4E_Data(Plotter):
     """Load F4E data from 2016 study.
 
     ITER_D_TRTG3L v1.0
@@ -19,10 +26,11 @@ class F4E_Data:
     """
 
     filename: str = field(init=False, default='CCL_Deformed_Coils-nm')
-    scenarios: list[str] = field(init=False, default_factory=lambda:
-                                 ['V0', 'V1', 'V3', 'V4'])
+    gaps: list[str] = field(init=False, default_factory=lambda:
+                            ['V0', 'V1', 'V3', 'V4'])
     datasheet: pandas.DataFrame = field(init=False,
                                         default_factory=pandas.DataFrame)
+    mesh: pv.PolyData = field(init=False, repr=False)
 
     def __post_init__(self):
         """Init filename and load referance geometory."""
@@ -45,24 +53,29 @@ class F4E_Data:
         try:
             self.mesh = pv.read(self.vtk_file)
         except FileNotFoundError:
-            self.load_geometry()
-            self.load_dataset()
-            self.mesh.save(self.vtk_file)
+            self.reload()
+
+    def reload(self):
+        """Reload datafile."""
+        self.load_geometry()
+        self.load_dataset()
+        self.load_cage()
+        self.mesh.save(self.vtk_file)
 
     @property
-    def scenario(self):
-        """Return scenario identifier."""
+    def gap(self):
+        """Return gap identifier."""
         return self.datasheet.index.name
 
-    @scenario.setter
-    def scenario(self, scenario):
-        """Load scenario from excel file."""
-        self.datasheet = pandas.read_excel(self.excel_file, scenario)
-        self.datasheet.index.name = scenario
+    @gap.setter
+    def gap(self, gap):
+        """Load gap listing from excel file."""
+        self.datasheet = pandas.read_excel(self.excel_file, gap)
+        self.datasheet.index.name = gap
 
     def load_geometry(self):
         """Load single coil referance geometry."""
-        self.scenario = self.scenarios[0]
+        self.gap = self.gaps[0]
         points = self.datasheet.loc[:, ['X', 'Y', 'Z']]
         points = self.close_loop(points)
         self.mesh = pv.Spline(points)
@@ -82,13 +95,13 @@ class F4E_Data:
 
     def load_dataset(self):
         """Load full ensemble dataset."""
-        for scenario in self.scenarios:
-            self.scenario = scenario
+        for gap in self.gaps:
+            self.gap = gap
             for coil in range(1, 19):
-                self.mesh[f'{scenario}-TFC{coil}'] = self.load_data(coil)
+                self.mesh[f'{gap}-TFC{coil}'] = self.load_data(coil)
 
     def interpolate(self, mesh: pv.PolyData):
-        """Interpolate coil displacment onto new vtk mesh."""
+        """Interpolate coil displacments onto new vtk mesh."""
         for array in self.mesh.array_names:
             if array == 'arc_length':
                 continue
@@ -97,71 +110,90 @@ class F4E_Data:
                 axis=0)(mesh['arc_length'])
         return mesh
 
-    def pattern_mesh(self):
+    def pattern(self, mesh: pv.PolyData):
         """Pattern TF coils."""
-        TFC1 = self.mesh.copy()
-        TFC1.clear_point_arrays()
+        TFC1 = mesh.copy()
         mesh = pv.PolyData()
         for i in range(18):
             coil = TFC1.copy()
-            coil['V4'] = self.mesh[f'V4-TFC{i+1}']
-            coil.rotate_z(360*i / 18)
+            coil.clear_data()
+            for gap in self.gaps:
+                coil[gap.lower()] = TFC1[f'{gap}-TFC{i+1}']
+            coil.rotate_z(360*i / 18, transform_all_input_vectors=True)
             mesh += coil
         return mesh
+
+    @staticmethod
+    def load_reference():
+        """Return reference TFC1 single turn centerline."""
+        mesh = ClusterTurns(UniformWindingPack().mesh, 1).mesh.extract_cells(0)
+        mesh = pv.Spline(np.append(mesh.points, mesh.points[:1], axis=0))
+        mesh['arc_length'] /= mesh['arc_length'][-1]
+        return mesh
+
+    def load_cage(self):
+        """Interpolate excel data to referance ccl and pattern coils."""
+        mesh = self.load_reference()
+        mesh = self.interpolate(mesh)
+        self.mesh = self.pattern(mesh)
+
+
+@dataclass
+class F4E_TFC18(DataDir, Plotter):
+    """Post-process Ansys output from F4E's 18TF coil model."""
+
+    folder: str = 'TFCgapsG10'
+    mesh: pv.PolyData = field(init=False, repr=False)
+
+    def __post_init__(self):
+        """Load datafile."""
+        super().__post_init__()
+        self.load()
+
+    @property
+    def ccl_file(self):
+        """Return ccl file path."""
+        return os.path.join(self.ccl_folder, f'{self.file}_2016_uccl.vtk')
+
+    def load(self):
+        """Load vtm datafile."""
+        try:
+            self.mesh = pv.read(self.ccl_file)
+        except FileNotFoundError:
+            data = F4E_Data()
 
 
 if __name__ == '__main__':
 
     f4e = F4E_Data()
+    delta = f4e.diff('v3', 'v0')
 
-    from nova.structural.centerline import CenterLine
+    gap = TFCgap(file='v3_100', baseline='v0_100', cluster=1)
+    gap.mesh.set_active_scalars('TFonly')
 
-    cl = CenterLine()
+    gap.warp()
+    #mesh['f4e'] = f
 
-    mesh = f4e.interpolate(cl.mesh)
+    #gap = TFCgap('TFCgapsG10', 'v3_100', baseline='v0_100', cluster=1)
+
+    #f4e = F4E_TFC18(file='v0')
+
+    #f4e.plot('v3', 'v0', factor=160)
+
+
+    #print(f4e.ccl_file)
+
+    #cl = CenterLine()
+    #mesh = f4e.interpolate(cl.mesh)
     #mesh.plot()
-    mesh = f4e.pattern_mesh().tube(0.1)
+    #mesh = f4e.pattern_mesh().tube(0.1)
     #mesh.plot()
 
+    '''
     plotter = pv.Plotter()
     plotter.add_mesh(mesh, scalars=None, color='w',
                      smooth_shading=True)
-    warp = mesh.warp_by_vector('V4', factor=120)
-    plotter.add_mesh(warp, scalars='V4')
+    warp = mesh.warp_by_vector('V0', factor=120)
+    plotter.add_mesh(warp, scalars='V0')
     plotter.show()
-
-'''
-@dataclass
-class F4E_CCL(UniformWindingPack, Plotter):
-
-    cluster: int = 5
-
-    def __post_init__(self):
-        """Initalise TF coil-cage mesh."""
-        super().__post_init__()
-        self.cluster_turns()
-        self.mesh_tube()
-
-    def cluster_turns(self):
-        """Apply k-means cluster algoritum to TFC turns."""
-        if self.cluster is None:
-            return
-        self.mesh = ClusterTurns(self.mesh, self.cluster).mesh
-
-    def mesh_tube(self, radius):
-        """Generate tubes from conductor lines."""
-        if self.cluster > 10:
-            return
-        self.mesh = self.mesh.tube(0.5/self.cluster)
-
-
-        #self.mesh['V0'] = np.append(delta, delta.iloc[:1, :], axis=0)
-        #self.mesh = self.mesh.tube(radius=0.5, n_sides=9)
-        #self.mesh.tube(radius=0.1).plot(smooth_shading=True)
-
-
-if __name__ == '__main__':
-
-    ccl = F4E_CCL()
-    #ccl.warp('V0')
-'''
+    '''

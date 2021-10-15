@@ -1,81 +1,98 @@
 from dataclasses import dataclass, field
 import os
 
+import meshio
 import numpy as np
-import numpy.typing as npt
 import pyvista as pv
-from scipy.spatial.transform import Rotation
-
-import tetgen
+import tempfile
+import trimesh
 import vedo
+import vtk
 
 from nova.definitions import root_dir
 from nova.utilities.time import clock
 
 
 @dataclass
-class Block:
+class TriPanel:
 
-    mesh: Union[pv.PolyData, vedo.Mesh]
-    grid: int = field(init=False, repr=False)
+    mesh: vedo.Mesh
+    tri: trimesh.Trimesh = field(init=False, repr=False)
 
     def __post_init__(self):
-        if isinstance(self.mesh, vedo.Mesh):
-            self.mesh = pv.PolyData(self.mesh.polydata())
-
-    def tetrahedralize(self):
-        tet = tetgen.TetGen(polydata)
-        tet.tetrahedralize(order=1, quality=False)
-        grid = tet.grid.compute_cell_sizes(length=False, area=False)
-
-
-    @staticmethod
-    def center(mesh: vedo.Mesh):
-        """Return center of mass."""
-
-        return np.sum(grid['Volume'].reshape(-1, 1) *
-                      grid.cell_centers().points, axis=0) / grid.volume
-
-    @staticmethod
-    def rotate(mesh: vedo.Mesh):
-        """Return PCA rotational transform."""
-        mesh = mesh.fillHoles()
-        points = mesh.points()
-        triangles = np.array(mesh.cells())
-        vertex = dict(a=points[triangles[:, 0]],
-                      b=points[triangles[:, 1]],
-                      c=points[triangles[:, 2]])
-        normal = np.cross(vertex['b']-vertex['a'], vertex['c']-vertex['a'])
-        l2norm = np.linalg.norm(normal, axis=1)
-        covariance = np.cov(normal, rowvar=False, aweights=l2norm**5)
-        eigen = np.linalg.eigh(covariance)[1]
-        eigen /= np.linalg.det(eigen)
-        return Rotation.from_matrix(eigen)
-
-    @staticmethod
-    def extent(mesh: vedo.Mesh, rotate: Rotation):
-        """Return box extent."""
-        points = rotate.inv().apply(mesh.points())
-        extent = np.max(points, axis=0) - np.min(points, axis=0)
-        extent *= (mesh.volume() / np.prod(extent))**(1 / 3)
-        return extent
-
-    @staticmethod
-    def box(center: npt.ArrayLike, extent: npt.ArrayLike, rotate: Rotation):
-        """Return pannel bounding box."""
-        bounds = np.zeros(6)
-        bounds[::2] = -extent/2
-        bounds[1::2] = extent/2
-        box = pv.Box(bounds)
-        box.points = rotate.apply(box.points)
-        box.points += center
-        return vedo.Mesh(box)
-
-    @staticmethod
-    def convex_hull(mesh: vedo.Mesh):
+        self.tri = trimesh.Trimesh(self.mesh.points(), 
+                                   faces=self.mesh.faces()) 
+        
+    def compute_scale(self):
+        self.scale = self.tri.volume / self.convex_hull.volume()
+        
+    @property
+    def convex_hull(self) -> vedo.Mesh:
         """Return decimated convex hull."""
-        return vedo.ConvexHull(mesh.points()).decimate(
-                N=10, method='pro', boundaries=True)
+        return vedo.ConvexHull(self.mesh.points()).decimate(
+            N=6, method='pro', boundaries=True)
+    
+    @property 
+    def panel(self) -> vedo.Mesh:
+        """Return scaled convex hull."""
+        mesh = self.convex_hull
+        mesh.origin(*self.center_mass)
+        mesh.scale((self.volume / mesh.volume())**(1/3))
+        return mesh
+        
+    @property 
+    def volume(self):
+        """Return grid volume."""
+        return self.tri.volume
+    
+    @property
+    def center_mass(self):
+        """Return grid center of mass."""
+        return self.tri.center_mass
+                                         
+    
+@dataclass
+class TetPanel(TriPanel):
+    
+    tet: pv.UnstructuredGrid = field(init=False)
+    
+    def __post_init__(self):
+        super().__post_init__()
+        self.load_volume()
+        
+    def load_volume(self):
+        """Compute volume from closed surface mesh."""
+        with tempfile.NamedTemporaryFile(suffix='.msh') as tmp:
+            trimesh.interfaces.gmsh.to_volume(self.tri, file_name=tmp.name)
+            msh = meshio.read(tmp.name)
+        cells = msh.cells[0][1]
+        n_cells = len(cells)
+        cells = np.append(np.full((n_cells, 1), 4, int), cells, axis=1)
+        celltypes = np.full(n_cells, vtk.VTK_TETRA, int)
+        points = msh.points
+        self.tet = pv.UnstructuredGrid(cells, celltypes, points)
+        self.tet = self.tet.compute_cell_sizes(length=False, area=False)
+        
+    @property 
+    def cell_centers(self):
+        """Return cell centers."""
+        return self.tet.cell_centers().points
+    
+    @property 
+    def cell_volumes(self):
+        """Return cell volumes."""
+        return self.tet['Volume'].reshape(-1, 1)
+    
+    @property 
+    def volume(self):
+        """Return grid volume."""
+        return np.sum(self.cell_volumes)
+    
+    @property
+    def center_mass(self):
+        """Return grid center of mass."""
+        return np.sum(self.cell_volumes*self.cell_centers, 
+                      axis=0) / self.volume
 
 
 @dataclass
@@ -119,15 +136,23 @@ class Shield:
     def load_frame(self):
         """Retun multiblock mesh."""
         mesh = vedo.Mesh(self.vtk_file)
-        parts = mesh.splitByConnectivity(1)
-
+        parts = mesh.splitByConnectivity(10000)
+        #parts = [vedo.Mesh(pv.read('tmp.vtk'))]
         blocks = []
+        
         tick = clock(len(parts), header='loading decimated convex hulls')
-        for part in parts:
-            self.part = part
-            part.cap()
-            convex_hull = self.convex_hull(part)
-            blocks.append(convex_hull.opacity(1).c('b'))
+        for i, part in enumerate(parts):
+            #pv.PolyData(part.polydata()).save('tmp.vtk')
+            tri = TriPanel(part)
+            
+            blocks.append(tri.mesh.opacity(1).c(i))
+            blocks.append(tri.convex_hull.opacity(0.8).c(i+1))
+            blocks.append(tri.panel.opacity(1).c(i+2))
+            
+            #tet = TetPanel(tri.panel)
+            
+            #print(tri.volume, tet.volume)
+            #print(block.center_mass)
             '''
             part.cap()
             convex_hull = self.convex_hull(part)

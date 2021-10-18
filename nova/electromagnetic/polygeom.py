@@ -1,6 +1,5 @@
 """Manage single instance polygon data."""
 from dataclasses import dataclass, field
-from typing import Union
 
 import pandas
 import numpy as np

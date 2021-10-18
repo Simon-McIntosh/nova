@@ -151,7 +151,7 @@ class DataFrame(FrameAttrs):
             index = [index]
         if len(index) != index_length:
             raise IndexError(f'missmatch between len(index) {len(index)} and '
-                             f'maximum item item in data {index_length}')
+                             f'maximum length data column {index_length}')
         taken = [name in self.index for name in index]
         if np.array(taken).any():
             raise IndexError(f'{np.array(index)[taken]} '

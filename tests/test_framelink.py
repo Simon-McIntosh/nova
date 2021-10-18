@@ -206,13 +206,39 @@ def test_dataframe_addition():
     frame2 += [5, 5, 5], [2, 3, 4]
     frame3 = frame1 + frame2
     assert frame3.index.to_list() == ['a0' ,'a1', 'a2', 'b0', 'b1', 'b2']
-    
+
+
+def test_dataframe_addition_insert_required():
+    frame1 = FrameLink(required=['x', 'y'], label='a')
+    frame2 = FrameLink(required=['z'], label='b')
+    frame1 += dict(x=4, y=[1, 2, 3], z=1.2)
+    frame2 += [5, 5, 5],
+    frame3 = frame1 + frame2
+    assert frame3.z.to_list() == [1.2, 1.2, 1.2, 5, 5, 5]    
+
+
+def test_dataframe_inplace_addition_insert_required():
+    frame1 = FrameLink(required=['x', 'y'], label='a')
+    frame2 = FrameLink(required=['z'], label='b')
+    frame1 += dict(x=4, y=[1, 2, 3], z=1.2)
+    frame2 += [5, 5, 5],
+    frame2 += frame1
+    assert frame2.z.to_list() == [5, 5, 5, 1.2, 1.2, 1.2] 
+
 
 def test_frame_addition_required_error():
     framelink = FrameLink(required=['x', 'y'])
     with pytest.raises(IndexError):
         framelink += dict(x=1, z=2)
     
+def test_frame_insert_required():
+    framelink = FrameLink(required=['x', 'y'])  
+    with framelink.insert_required(['x']):
+        framelink.insert([4, 5])
+    assert framelink.x.to_list() == [4, 5]
+    assert framelink.y.to_list() == [0, 0]
+    
+        
 
 if __name__ == '__main__':
 

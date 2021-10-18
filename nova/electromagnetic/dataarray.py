@@ -132,4 +132,7 @@ if __name__ == '__main__':
 
     dataarray = DataArray({'x': range(7)},
                           additional=['Ic'], Array=['x'], label='Coil')
+    
+    dataarray = DataArray(required=['x', 'z'])
+
     print(dataarray)

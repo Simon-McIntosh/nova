@@ -66,7 +66,7 @@ class FrameAttrs(pandas.DataFrame):
             self.update_columns()
             self.attrs[name] = method(self)
             self.attrs[name].initialize()
-
+            
     def update_metadata(self, data, columns, attrs, metadata):
         """Update metadata. Set default and meta*.metadata."""
         self.extract_attrs(data, attrs)

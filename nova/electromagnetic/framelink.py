@@ -1,4 +1,5 @@
 """Extend DataArray - add multipoint and link methods."""
+from contextlib import contextmanager
 from typing import Union
 
 import numpy as np
@@ -105,20 +106,31 @@ class FrameLink(LinkIndexer, DataArray):
             return True
         return False
     
-    def _unpack_addition(self, other):
+    @contextmanager
+    def insert_required(self, required=None):
+        """Manage local required arguments."""
+        _required = self.metaframe.required.copy()
+        if required is None:
+            required = _required
+        self.update_metaframe(dict(Required=required))
+        yield
+        self.update_metaframe(dict(Required=_required))
+    
+    def _unpack_add(self, other):
         """Return required, iloc and additional input for insert operator."""
         if isinstance(other, pandas.DataFrame):
-            return [other], dict()
+            return [other], dict(), other.columns.to_list()
         if isinstance(other, dict):
-            return [], other
-        return other, dict()
+            return [], other, None
+        return other, dict(), None
     
     def __add__(self, other: Union[pandas.DataFrame, dict, npt.ArrayLike]):
-        required, additional = self._unpack_addition(other)
-        self.insert(*required, **additional)
+        args, kwargs, required = self._unpack_add(other)
+        with self.insert_required(required):
+            self.insert(*args, **kwargs)
         return self
 
-    def insert(self, *required, iloc=None, **additional):
+    def insert(self, *args, iloc=None, **kwargs):
         # pylint: disable=arguments-differ
         """
         Override pandas.DataFrame.insert for column managed DataFrame.
@@ -129,11 +141,11 @@ class FrameLink(LinkIndexer, DataArray):
 
         Parameters
         ----------
-        *required : Union[float, array-like]
+        *args : Union[float, array-like]
             Required arguments listed in self.metaframe.required.
         iloc : int, optional
             Row locater for inserted coil. The default is None (-1).
-        **additional : dict[str, Union[float, array-like]]
+        **kwargs : dict[str, Union[float, array-like]]
             Optional keyword as arguments listed in self.metaframe.additional.
 
         Returns
@@ -142,8 +154,8 @@ class FrameLink(LinkIndexer, DataArray):
             built frame.index.
 
         """
-        self.metaframe.metadata = additional.pop('metadata', {})
-        insert = self.assemble(*required, **additional)
+        self.metaframe.metadata = kwargs.pop('metadata', {})
+        insert = self.assemble(*args, **kwargs)
         self.concatenate(insert, iloc=iloc)
         return insert.index
 
@@ -279,19 +291,6 @@ class FrameLink(LinkIndexer, DataArray):
         kwargs = kwargs | geometry
         args = [kwargs.pop(attr) for attr in self.metaframe.required]
         return args, kwargs
-        '''
-        if len(args) == 1 and len(self.metaframe.required) == 1:
-            if not isinstance(args[0], (dict, shapely.geometry.Polygon)):
-                return args, kwargs
-        if len(poly := kwargs.get('poly', [])) == 1:
-            #args = (kwargs.pop('poly'),)
-            print(poly)
-            polygon = Polygon(poly[0])
-            geometry = polygon.geometry
-            kwargs = kwargs | geometry
-            #args = [kwargs.pop(attr) for attr in self.metaframe.required]
-        return args, kwargs
-        '''
 
     def _build_data(self, *args, **kwargs):
         """Return data dict built from *args and **kwargs."""
@@ -363,5 +362,6 @@ if __name__ == '__main__':
     framelink.insert([-4, -5], 1, Ic=6.5, name='PF1',
                      active=False, plasma=True, frame='coil1')
     framelink.insert(range(4), 3, Ic=4, nturn=20, label='PF', link=True)
+    
     #framelink.multipoint.link(['PF1', 'PF5'], factor=1)
 

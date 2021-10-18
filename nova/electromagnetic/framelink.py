@@ -1,17 +1,20 @@
 """Extend DataArray - add multipoint and link methods."""
+from typing import Union
 
 import numpy as np
+import numpy.typing as npt
 import pandas
 import shapely
 
-from nova.electromagnetic.polygon import Polygon
-from nova.electromagnetic.multipoint import MultiPoint
-from nova.electromagnetic.energize import Energize
 from nova.electromagnetic.dataarray import (
     ArrayLocMixin,
     ArrayIndexer,
     DataArray
     )
+from nova.electromagnetic.energize import Energize
+from nova.electromagnetic.multipoint import MultiPoint
+from nova.electromagnetic.polygon import Polygon
+
 
 # pylint: disable=too-many-ancestors
 
@@ -101,6 +104,19 @@ class FrameLink(LinkIndexer, DataArray):
         if isinstance(obj, pandas.DataFrame) and dataframe:
             return True
         return False
+    
+    def _unpack_addition(self, other):
+        """Return required, iloc and additional input for insert operator."""
+        if isinstance(other, pandas.DataFrame):
+            return [other], dict()
+        if isinstance(other, dict):
+            return [], other
+        return other, dict()
+    
+    def __add__(self, other: Union[pandas.DataFrame, dict, npt.ArrayLike]):
+        required, additional = self._unpack_addition(other)
+        self.insert(*required, **additional)
+        return self
 
     def insert(self, *required, iloc=None, **additional):
         # pylint: disable=arguments-differ
@@ -190,7 +206,7 @@ class FrameLink(LinkIndexer, DataArray):
         """
         Return *args and **kwargs with data extracted from frame.
 
-        If args[0] is a *frame, replace *args and update **kwargs.
+        If args[0] is a frame, replace *args and update **kwargs.
         Else pass *args, **kwargs.
 
         Parameters
@@ -228,6 +244,7 @@ class FrameLink(LinkIndexer, DataArray):
         if np.array(missing).any():
             required = np.array(self.metaframe.required)[missing]
             raise KeyError(f'required arguments {required} '
+                           f'from metaframe.required {self.metaframe.required} '
                            'not specified in frame '
                            f'{frame.columns}')
         args = [frame[col] for col in self.metaframe.required]
@@ -252,20 +269,29 @@ class FrameLink(LinkIndexer, DataArray):
         Else pass *args, **kwargs.
 
         """
-        if len(args) > 1:
+        if len(args) != 1:
             return args, kwargs
-        if len(args) == 1 and len(self.metaframe.required) == 1:
-            if not isinstance(args[0], (dict, shapely.geometry.Polygon)):
-                return args, kwargs
-        if len(args) == 0:
-            #if 'poly' not in kwargs or len(kwargs.get('poly', [])) > 1:
+        if len(self.metaframe.required) == 1 and not \
+                isinstance(args[0], (shapely.geometry.Polygon, dict)):
             return args, kwargs
-            args = (kwargs.pop('poly'),)
         polygon = Polygon(args[0])
         geometry = polygon.geometry
         kwargs = kwargs | geometry
         args = [kwargs.pop(attr) for attr in self.metaframe.required]
         return args, kwargs
+        '''
+        if len(args) == 1 and len(self.metaframe.required) == 1:
+            if not isinstance(args[0], (dict, shapely.geometry.Polygon)):
+                return args, kwargs
+        if len(poly := kwargs.get('poly', [])) == 1:
+            #args = (kwargs.pop('poly'),)
+            print(poly)
+            polygon = Polygon(poly[0])
+            geometry = polygon.geometry
+            kwargs = kwargs | geometry
+            #args = [kwargs.pop(attr) for attr in self.metaframe.required]
+        return args, kwargs
+        '''
 
     def _build_data(self, *args, **kwargs):
         """Return data dict built from *args and **kwargs."""
@@ -339,4 +365,3 @@ if __name__ == '__main__':
     framelink.insert(range(4), 3, Ic=4, nturn=20, label='PF', link=True)
     #framelink.multipoint.link(['PF1', 'PF5'], factor=1)
 
-    print(framelink.reduce.indices)

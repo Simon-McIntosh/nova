@@ -98,7 +98,7 @@ class TetPanel(TriPanel):
 @dataclass
 class Shield:
 
-    file: str = 'IWS_S6_BLOCKS'
+    file: str = 'IWS_FM_PLATE_S4'
     path: str = None
     mesh: pv.PolyData = field(init=False, repr=False)
     geom: pv.PolyData = field(init=False, repr=False)
@@ -125,10 +125,10 @@ class Shield:
         try:
             self.mesh = pv.read(self.vtk_file)
         except FileNotFoundError:
-            self.mesh = self.load_vtk()
+            self.mesh = self.read_stl()
 
-    def load_vtk(self):
-        """Load vtk mesh from file."""
+    def read_stl(self):
+        """Read stl file."""
         mesh = pv.read(self.stl_file)
         mesh.save(self.vtk_file)
         return mesh
@@ -136,7 +136,7 @@ class Shield:
     def load_frame(self):
         """Retun multiblock mesh."""
         mesh = vedo.Mesh(self.vtk_file)
-        parts = mesh.splitByConnectivity(10000)
+        parts = mesh.splitByConnectivity(10)
         #parts = [vedo.Mesh(pv.read('tmp.vtk'))]
         blocks = []
         

@@ -50,7 +50,9 @@ class ClusterTurns:
             for cluster in range(self.n_clusters):
                 index = self.clusters == cluster
                 cell = pv.Spline(points[index].mean(axis=0))
+                arc_length = cell['arc_length']
                 cell.clear_point_data()
+                cell['arc_length'] = arc_length
                 for name in point_data:
                     cell[name] = point_data[name][index].mean(axis=0)
                 cell.cell_data['nturn'] = np.sum(index)

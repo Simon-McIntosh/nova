@@ -30,6 +30,7 @@ class TFCgap(DataDir, Plotter):
         self.mesh = model.mesh.copy()
         self.mesh.clear_point_data()
         self.mesh.field_data.update(model.mesh.field_data)
+        self.mesh['arc_length'] = model.mesh['arc_length']
         target = model.mesh.copy()
         model.reload(self.baseline)
         baseline = model.mesh.copy()

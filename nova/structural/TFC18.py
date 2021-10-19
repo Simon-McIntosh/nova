@@ -47,6 +47,7 @@ class TFC18(DataDir, Plotter):
         files = [file for path in paths if not
                  os.path.isfile(self.ccl_file.replace(
                      self.file, file := path.name[:-4]))]
+        files = [file for file in files if file[-3:] == 'f4e']
         nfiles = len(files)
         tick = clock(nfiles, header=f'loading {nfiles} *.rst files {files}')
         for file in files:
@@ -105,6 +106,7 @@ class TFC18(DataDir, Plotter):
         self.mesh = self.interpolate_coils(self.mesh, self.ansys)
         mesh = self.mesh.copy()
         self.mesh.clear_data()
+        self.mesh['arc_length'] = mesh['arc_length']
         self.mesh.field_data.update(self.ansys.field_data)
         for scn in self.scenario:
             try:
@@ -179,9 +181,9 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'v0', cluster=1)
-
-    #tf.to_dataframe('EOB')
+    tf = TFC18('TFCgapsG10', 'v3_65_f4e', cluster=1)
+    #tf.recalculate()
+    tf.to_dataframe('EOB')
 
     #tf.load_ensemble()
 
@@ -193,6 +195,6 @@ if __name__ == '__main__':
     #tf.plot('TFonly', 'cooldown', factor=180)
     #
 
-    tf.warp(50, displace='TFonly')
+    #tf.warp(50, displace='TFonly')
 
     #tf.animate('TFonly-cooldown', view='xy')

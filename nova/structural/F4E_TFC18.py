@@ -6,11 +6,9 @@ import numpy as np
 import pandas
 import pyvista as pv
 import scipy.interpolate
-import vedo
 
 from nova.definitions import root_dir
 from nova.structural.clusterturns import ClusterTurns
-from nova.structural.datadir import DataDir
 from nova.structural.plotter import Plotter
 from nova.structural.TFC18gap import TFCgap
 from nova.structural.uniformwindingpack import UniformWindingPack
@@ -60,6 +58,7 @@ class F4E_Data(Plotter):
         self.load_geometry()
         self.load_dataset()
         self.load_cage()
+        self.diff('v3', 'v0')
         self.mesh.save(self.vtk_file)
 
     @property
@@ -117,6 +116,7 @@ class F4E_Data(Plotter):
         for i in range(18):
             coil = TFC1.copy()
             coil.clear_data()
+            coil['arc_length'] = TFC1['arc_length']
             for gap in self.gaps:
                 coil[gap.lower()] = TFC1[f'{gap}-TFC{i+1}']
             coil.rotate_z(360*i / 18, transform_all_input_vectors=True)
@@ -138,62 +138,13 @@ class F4E_Data(Plotter):
         self.mesh = self.pattern(mesh)
 
 
-@dataclass
-class F4E_TFC18(DataDir, Plotter):
-    """Post-process Ansys output from F4E's 18TF coil model."""
-
-    folder: str = 'TFCgapsG10'
-    mesh: pv.PolyData = field(init=False, repr=False)
-
-    def __post_init__(self):
-        """Load datafile."""
-        super().__post_init__()
-        self.load()
-
-    @property
-    def ccl_file(self):
-        """Return ccl file path."""
-        return os.path.join(self.ccl_folder, f'{self.file}_2016_uccl.vtk')
-
-    def load(self):
-        """Load vtm datafile."""
-        try:
-            self.mesh = pv.read(self.ccl_file)
-        except FileNotFoundError:
-            data = F4E_Data()
-
-
 if __name__ == '__main__':
 
     f4e = F4E_Data()
-    delta = f4e.diff('v3', 'v0')
+    f4e.reload()
+    #f4e.mesh.save(f4e.vtk_file)
+    f4e.warp()
 
-    gap = TFCgap(file='v3_100', baseline='v0_100', cluster=1)
-    gap.mesh.set_active_scalars('TFonly')
-
-    gap.warp()
-    #mesh['f4e'] = f
-
-    #gap = TFCgap('TFCgapsG10', 'v3_100', baseline='v0_100', cluster=1)
-
-    #f4e = F4E_TFC18(file='v0')
-
-    #f4e.plot('v3', 'v0', factor=160)
-
-
-    #print(f4e.ccl_file)
-
-    #cl = CenterLine()
-    #mesh = f4e.interpolate(cl.mesh)
-    #mesh.plot()
-    #mesh = f4e.pattern_mesh().tube(0.1)
-    #mesh.plot()
-
-    '''
-    plotter = pv.Plotter()
-    plotter.add_mesh(mesh, scalars=None, color='w',
-                     smooth_shading=True)
-    warp = mesh.warp_by_vector('V0', factor=120)
-    plotter.add_mesh(warp, scalars='V0')
-    plotter.show()
-    '''
+    gap = TFCgap(file='v3_100_f4e', baseline='v0_100_f4e', cluster=1)
+    #gap.mesh.set_active_scalars('EOB')
+    #gap.warp()

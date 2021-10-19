@@ -6,7 +6,7 @@ from nova.electromagnetic.biotfilament import Biot
 from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotgrid import BiotGrid
 from nova.electromagnetic.biotpoint import BiotPoint
-from nova.electromagnetic.biotdata import BiotSolve
+from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.coilset import CoilSet
 
 

@@ -1,17 +1,21 @@
 """Extend DataArray - add multipoint and link methods."""
+from contextlib import contextmanager
+from typing import Union
 
 import numpy as np
+import numpy.typing as npt
 import pandas
 import shapely
 
-from nova.electromagnetic.polygon import Polygon
-from nova.electromagnetic.multipoint import MultiPoint
-from nova.electromagnetic.energize import Energize
 from nova.electromagnetic.dataarray import (
     ArrayLocMixin,
     ArrayIndexer,
     DataArray
     )
+from nova.electromagnetic.energize import Energize
+from nova.electromagnetic.multipoint import MultiPoint
+from nova.electromagnetic.polygon import Polygon
+
 
 # pylint: disable=too-many-ancestors
 
@@ -101,8 +105,32 @@ class FrameLink(LinkIndexer, DataArray):
         if isinstance(obj, pandas.DataFrame) and dataframe:
             return True
         return False
+    
+    @contextmanager
+    def insert_required(self, required=None):
+        """Manage local required arguments."""
+        _required = self.metaframe.required.copy()
+        if required is None:
+            required = _required
+        self.update_metaframe(dict(Required=required))
+        yield
+        self.update_metaframe(dict(Required=_required))
+    
+    def _unpack_add(self, other):
+        """Return required, iloc and additional input for insert operator."""
+        if isinstance(other, pandas.DataFrame):
+            return [other], dict(), other.columns.to_list()
+        if isinstance(other, dict):
+            return [], other, None
+        return other, dict(), None
+    
+    def __add__(self, other: Union[pandas.DataFrame, dict, npt.ArrayLike]):
+        args, kwargs, required = self._unpack_add(other)
+        with self.insert_required(required):
+            self.insert(*args, **kwargs)
+        return self
 
-    def insert(self, *required, iloc=None, **additional):
+    def insert(self, *args, iloc=None, **kwargs):
         # pylint: disable=arguments-differ
         """
         Override pandas.DataFrame.insert for column managed DataFrame.
@@ -113,11 +141,11 @@ class FrameLink(LinkIndexer, DataArray):
 
         Parameters
         ----------
-        *required : Union[float, array-like]
+        *args : Union[float, array-like]
             Required arguments listed in self.metaframe.required.
         iloc : int, optional
             Row locater for inserted coil. The default is None (-1).
-        **additional : dict[str, Union[float, array-like]]
+        **kwargs : dict[str, Union[float, array-like]]
             Optional keyword as arguments listed in self.metaframe.additional.
 
         Returns
@@ -126,8 +154,8 @@ class FrameLink(LinkIndexer, DataArray):
             built frame.index.
 
         """
-        self.metaframe.metadata = additional.pop('metadata', {})
-        insert = self.assemble(*required, **additional)
+        self.metaframe.metadata = kwargs.pop('metadata', {})
+        insert = self.assemble(*args, **kwargs)
         self.concatenate(insert, iloc=iloc)
         return insert.index
 
@@ -190,7 +218,7 @@ class FrameLink(LinkIndexer, DataArray):
         """
         Return *args and **kwargs with data extracted from frame.
 
-        If args[0] is a *frame, replace *args and update **kwargs.
+        If args[0] is a frame, replace *args and update **kwargs.
         Else pass *args, **kwargs.
 
         Parameters
@@ -228,6 +256,7 @@ class FrameLink(LinkIndexer, DataArray):
         if np.array(missing).any():
             required = np.array(self.metaframe.required)[missing]
             raise KeyError(f'required arguments {required} '
+                           f'from metaframe.required {self.metaframe.required} '
                            'not specified in frame '
                            f'{frame.columns}')
         args = [frame[col] for col in self.metaframe.required]
@@ -252,15 +281,11 @@ class FrameLink(LinkIndexer, DataArray):
         Else pass *args, **kwargs.
 
         """
-        if len(args) > 1:
+        if len(args) != 1:
             return args, kwargs
-        if len(args) == 1 and len(self.metaframe.required) == 1:
-            if not isinstance(args[0], (dict, shapely.geometry.Polygon)):
-                return args, kwargs
-        if len(args) == 0:
-            #if 'poly' not in kwargs or len(kwargs.get('poly', [])) > 1:
+        if len(self.metaframe.required) == 1 and not \
+                isinstance(args[0], (shapely.geometry.Polygon, dict)):
             return args, kwargs
-            args = (kwargs.pop('poly'),)
         polygon = Polygon(args[0])
         geometry = polygon.geometry
         kwargs = kwargs | geometry
@@ -337,6 +362,6 @@ if __name__ == '__main__':
     framelink.insert([-4, -5], 1, Ic=6.5, name='PF1',
                      active=False, plasma=True, frame='coil1')
     framelink.insert(range(4), 3, Ic=4, nturn=20, label='PF', link=True)
+    
     #framelink.multipoint.link(['PF1', 'PF5'], factor=1)
 
-    print(framelink.reduce.indices)

@@ -10,6 +10,7 @@ import vedo
 import vtk
 
 from nova.definitions import root_dir
+from nova.electromagnetic.framespace import FrameSpace
 from nova.utilities.time import clock
 
 
@@ -49,6 +50,13 @@ class TriPanel:
     def center_mass(self):
         """Return grid center of mass."""
         return self.tri.center_mass
+    
+    @property 
+    def data(self):
+        """Return pannel data."""
+        center_mass = self.center_mass
+        return dict(x=center_mass[0], y=center_mass[1], z=center_mass[2],
+                    volume=self.volume, poly=self.convex_hull)
                                          
     
 @dataclass
@@ -98,7 +106,7 @@ class TetPanel(TriPanel):
 @dataclass
 class Shield:
 
-    file: str = 'IWS_S6_BLOCKS'
+    file: str = 'IWS_FM_PLATE_S4'
     path: str = None
     mesh: pv.PolyData = field(init=False, repr=False)
     geom: pv.PolyData = field(init=False, repr=False)
@@ -125,10 +133,10 @@ class Shield:
         try:
             self.mesh = pv.read(self.vtk_file)
         except FileNotFoundError:
-            self.mesh = self.load_vtk()
+            self.mesh = self.read_stl()
 
-    def load_vtk(self):
-        """Load vtk mesh from file."""
+    def read_stl(self):
+        """Read stl file."""
         mesh = pv.read(self.stl_file)
         mesh.save(self.vtk_file)
         return mesh
@@ -136,7 +144,10 @@ class Shield:
     def load_frame(self):
         """Retun multiblock mesh."""
         mesh = vedo.Mesh(self.vtk_file)
-        parts = mesh.splitByConnectivity(10000)
+        parts = mesh.splitByConnectivity(2)
+        
+        frame = FrameSpace(required=['x', 'y', 'z'], label='fi',
+                           segment='volume')
         #parts = [vedo.Mesh(pv.read('tmp.vtk'))]
         blocks = []
         
@@ -144,6 +155,8 @@ class Shield:
         for i, part in enumerate(parts):
             #pv.PolyData(part.polydata()).save('tmp.vtk')
             tri = TriPanel(part)
+            
+            frame += tri.data
             
             blocks.append(tri.mesh.opacity(1).c(i))
             blocks.append(tri.convex_hull.opacity(0.8).c(i+1))
@@ -169,8 +182,9 @@ class Shield:
             #box.append(self.box(center, extent, rotate))
             '''
             tick.tock()
+        print(frame.poly[0])
 
-        vedo.show(blocks)
+        vedo.show(frame.poly)
 
     def plot(self):
         """Plot mesh."""

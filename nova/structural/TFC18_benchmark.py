@@ -4,8 +4,8 @@ import os
 
 import numpy as np
 import pyvista as pv
+import scipy
 import seaborn as sns
-import vedo
 
 from nova.definitions import root_dir
 from nova.structural.F4E_TFC18 import F4E_Data
@@ -86,17 +86,16 @@ class BenchMark:
 
     def warp(self, factor=100, coil=None):
         """Plot benchmark cases."""
-        coils = []
+        plotter = pv.Plotter()
         for i, case in enumerate('ab'):
             if coil is None:
                 mesh = self.mesh
             else:
                 mesh = pv.PolyData(self.extract_coil(coil, False))
-            print(mesh)
             warp = mesh.warp_by_vector(f'displace_{case}', factor=factor)
-            coils.append(vedo.Mesh(warp).lw(5).c(i))
-        vedo.show(coils)
-
+            plotter.add_mesh(warp)
+        plotter.show()
+        
     def extract_coil(self, index: int, clip=1.001):
         """Return single coil rotated to x-z reference plane."""
         cell = self.mesh.extract_cells(index)
@@ -167,12 +166,26 @@ class BenchMark:
             rms[i] = np.sqrt(np.mean(
                 np.linalg.norm(coil['delta'][:, :2], axis=1)**2))
         return 1e3*np.sqrt(np.mean(rms**2))
-
+    
+    def bar(self, width=0.8):
+        """Generate bar plot."""
+        delta = np.zeros((18, 3))
+        for i in range(18):
+            coil = self.extract_coil(i, clip=1.001)
+            delta[i] = scipy.interpolate.interp1d(
+                coil.points[:, 2], coil['delta'], axis=0,
+                fill_value='extrapolate')(-3)
+        plt.bar(range(18), 1e3*delta[:, 0], width)
+        plt.despine()
+            
+        
 
 if __name__ == '__main__':
 
-    bm = BenchMark('benchmark')
-    bm.warp(200, 0)
+    BenchMark('pcr100').bar()
+    BenchMark('f4e').bar(width=0.4)
+    #bm.warp(200)
     #bm.build_pcr100()
     #bm.plot(1)
     #print(bm.rms)
+    #bm.bar()

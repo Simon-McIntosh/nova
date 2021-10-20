@@ -10,7 +10,6 @@ import scipy.interpolate
 from nova.definitions import root_dir
 from nova.structural.clusterturns import ClusterTurns
 from nova.structural.plotter import Plotter
-from nova.structural.TFC18gap import TFCgap
 from nova.structural.uniformwindingpack import UniformWindingPack
 
 
@@ -141,10 +140,6 @@ class F4E_Data(Plotter):
 if __name__ == '__main__':
 
     f4e = F4E_Data()
-    f4e.reload()
+    #f4e.reload()
     #f4e.mesh.save(f4e.vtk_file)
-    f4e.warp()
-
-    gap = TFCgap(file='v3_100_f4e', baseline='v0_100_f4e', cluster=1)
-    #gap.mesh.set_active_scalars('EOB')
-    #gap.warp()
+    #f4e.warp()

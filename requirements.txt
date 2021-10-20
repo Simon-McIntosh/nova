@@ -1,3 +1,5 @@
+ansys-dpf-core==0.2.1
+ansys-dpf-post
 astropy
 descartes
 gmsh
@@ -17,6 +19,7 @@ pyquaternion
 rdp
 seaborn
 scipy
+scikit-learn
 shapely --no-binary shapely
 spyder
 tetgen

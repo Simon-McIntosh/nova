@@ -1,5 +1,6 @@
 """Manage TFC18 benchmarks."""
 from dataclasses import dataclass, field
+from typing import Union
 import os
 
 import numpy as np
@@ -22,11 +23,13 @@ class BenchBase:
     mesh_a: pv.PolyData
     mesh_b: pv.PolyData
     case_names: list[str, str]
-    scenario: list[str, str]
+    scenario: Union[str, list[str, str]]
     mesh: pv.PolyData = field(init=False)
 
     def __post_init__(self):
         """Load dataset."""
+        if isinstance(self.scenario, str):
+            self.scenario = 2*[self.scenario]
         self.build()
 
     def build(self):
@@ -42,8 +45,8 @@ class BenchBase:
 
 
 @dataclass
-class BenchMark:
-    """TFC18 structural benchmark."""
+class ErrorProfile:
+    """TFC18 structural error shapes."""
 
     dataset: str = 'f4e'
     mesh: pv.PolyData = field(init=False)
@@ -57,7 +60,7 @@ class BenchMark:
         try:
             self.mesh = pv.read(self.vtk_file)
         except FileNotFoundError:
-            getattr(self, f'build_{self.dataset}')()
+            getattr(self, f'_{self.dataset}')()
             self.mesh.save(self.vtk_file)
 
     @property
@@ -66,23 +69,31 @@ class BenchMark:
         return os.path.join(root_dir, 'data/Assembly/TFC18',
                             self.dataset + '_benchmark.vtk')
 
-    def build_f4e(self):
+    def _f4e(self):
         """Build F4E dataset."""
         f4e = F4E_Data().mesh
         self.mesh = BenchBase(f4e, f4e, ['v0', 'v3'], ['v0', 'v3']).mesh
 
-    def build_pcr100(self):
+    def _pcr100(self):
         """Build PCR 100% reference case."""
         v0 = TFC18('TFCgapsG10', 'v0_100_f4e', cluster=1).mesh
         v3 = TFC18('TFCgapsG10', 'v3_100_f4e', cluster=1).mesh
-        self.mesh = BenchBase(v0, v3, ['v0', 'v3'], ['EOB', 'EOB']).mesh
+        self.mesh = BenchBase(v0, v3, ['v0', 'v3'], 'EOB').mesh
         self.mesh.save(self.vtk_file)
-
-    def build_benchmark(self):
-        """Build benchmark dataset."""
-        io = TFCgap(file='v3_100_f4e', baseline='v0_100_f4e', cluster=1).mesh
-        f4e = F4E_Data().mesh
-        self.mesh = BenchBase(io, f4e, ['io', 'f4e'], ['EOB', 'v3-v0']).mesh
+        
+    def _scod(self):
+        """Build SCOD reference case (65% PCR preload)."""
+        v0 = TFC18('TFCgapsG10', 'v0_65_f4e', cluster=1).mesh
+        v3 = TFC18('TFCgapsG10', 'v3_65_f4e', cluster=1).mesh
+        self.mesh = BenchBase(v0, v3, ['v0', 'v3'], 'TFonly').mesh
+        self.mesh.save(self.vtk_file)
+        
+    def _mag(self):
+        """Build MAG reference case."""
+        v0 = TFC18('TFCgapsG10', 'v0', cluster=1).mesh
+        v3 = TFC18('TFCgapsG10', 'v3', cluster=1).mesh
+        self.mesh = BenchBase(v0, v3, ['v0', 'v3'], 'TFonly').mesh
+        self.mesh.save(self.vtk_file)
 
     def warp(self, factor=100, coil=None):
         """Plot benchmark cases."""
@@ -170,11 +181,17 @@ class BenchMark:
     def bar(self, width=0.8):
         """Generate bar plot."""
         delta = np.zeros((18, 3))
+        
+        clip=1.001
+        #coord=dict(z=0)
+        #coord=dict(l=0)  # length interpolation
+        
         for i in range(18):
-            coil = self.extract_coil(i, clip=1.001)
-            delta[i] = scipy.interpolate.interp1d(
-                coil.points[:, 2], coil['delta'], axis=0,
-                fill_value='extrapolate')(-3)
+            coil = self.extract_coil(i, clip)
+            if clip:
+                delta[i] = scipy.interpolate.interp1d(
+                    coil.points[:, 2], coil['delta'], axis=0,
+                    fill_value='extrapolate')(-3)
         plt.bar(range(18), 1e3*delta[:, 0], width)
         plt.despine()
             
@@ -182,8 +199,8 @@ class BenchMark:
 
 if __name__ == '__main__':
 
-    BenchMark('pcr100').bar()
-    BenchMark('f4e').bar(width=0.4)
+    ErrorProfile('scod').bar()
+    ErrorProfile('mag').bar(width=0.4)
     #bm.warp(200)
     #bm.build_pcr100()
     #bm.plot(1)

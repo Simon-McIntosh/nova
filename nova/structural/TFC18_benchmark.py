@@ -6,6 +6,7 @@ import os
 
 import matplotlib.patches as mpatches
 import numpy as np
+import pandas
 import pyvista as pv
 import scipy
 import scipy.fft
@@ -207,18 +208,18 @@ class ErrorProfile:
     def bar(self, keypoint: str, coordinate: int,
             width=0.8, axes=None, label=None, annotate=True, text='keypoint'):
         """Generate bar plot."""
-        length = self.keypoints[keypoint]
         if axes is None:
             axes = plt.gca()
+        length = self.keypoints[keypoint]
         delta = self.extract_coilset_delta(length)
-        coord_label = ['r', '\phi', 'z']
+        coord_label = ['r', r'\phi', 'z']
         if label == 'mode':
             err = self.error_modes(1e3*delta[:, coordinate])
             label = f'{err[1]:1.1f}, {err[2]:1.1f}'
         axes.bar(range(18), 1e3*delta[:, coordinate], width, label=label)
         if annotate:
             axes.set_xlabel('coil index')
-            axes.set_ylabel(f'$\Delta\,{coord_label[coordinate]}$ mm')
+            axes.set_ylabel(rf'$\Delta\,{coord_label[coordinate]}$ mm')
             axes.set_xticks(range(1, 18, 2))
             axes.set_xticklabels(range(2, 19, 2))
         if text:
@@ -228,7 +229,6 @@ class ErrorProfile:
                       transform=axes.transAxes,
                       ha='right', va='top')
         plt.despine()
-
 
     def extract_coilset_delta(self, arc_length: float):
         """Return set of coilset deltas from single arc_length."""
@@ -288,10 +288,25 @@ class ErrorProfile:
         plt.axis('equal')
         plt.axis('off')
 
+    def error_frame(self):
+        """Return structural error modes dataframe."""
+        index = pandas.MultiIndex.from_product(
+            [['r', 'phi', 'z'], list('abcdef')], names=['coord', 'point'])
+        error = pandas.DataFrame(index=index,
+                                 columns=[f'k{i}' for i in range(10)])
+
+        for i, (keypoint, label) in enumerate(zip(self.keypoints, 'cbdaef')):
+            length = self.keypoints[keypoint]
+            delta = self.extract_coilset_delta(length)
+            for j, coord in enumerate(['r', 'phi', 'z']):
+                error.loc[(coord, label), :] = \
+                    self.error_modes(1e3*delta[:, j])
+        return error
 
 
 @dataclass
 class BenchMark:
+    """Perform case to case benchmarking."""
 
     case_a: str
     case_b: str
@@ -318,10 +333,8 @@ class BenchMark:
             loc = 2 if coordinate == 0 else 4
             axes.legend(loc=loc, fontsize='xx-small')
 
-    def bar_array(self, coordinate: int, scenario_label=None):
+    def bar_array(self, coordinate: int):
         """Generate bar plot array."""
-        if scenario_label is None:
-            scenario_label = self.scenario[0] != self.scenario[1]
         fig, axes_array = plt.subplots(3, 2, sharex=True, sharey=True)
         text = 'cbdaef'
         for i, (keypoint, axes) in enumerate(zip(self.profile[0].keypoints,
@@ -329,34 +342,60 @@ class BenchMark:
             self.bar(keypoint, coordinate, axes,
                      legend=True, annotate=False, text=text[i])
         axes_array[0][0].set_xticks(range(0, 18, 4))
-        axes_array[0][0].set_xticklabels(range(0, 19,4))
-        coordinate_label = ['r', '\phi', 'z']
+        axes_array[0][0].set_xticklabels(range(0, 19, 4))
+        coordinate_label = ['r', r'\phi', 'z']
         for i in range(2):
             axes_array[2][i].set_xlabel('coil index')
         axes_array[1][0].set_ylabel(
-            f'$\Delta\,{coordinate_label[coordinate]}$ mm')
-
-        labels = [self.case_a, self.case_b]
-        if scenario_label:
-            labels = [f'{label} {self.profile[i].scenario}' for i, label
-                      in enumerate(labels)]
-
+            rf'$\Delta\,{coordinate_label[coordinate]}$ mm')
+        labels = self.case_labels
         case_a = mpatches.Patch(color='C0', label=labels[0])
         case_b = mpatches.Patch(color='C1', label=labels[1])
         fig.legend(handles=[case_a, case_b], ncol=2, loc='upper center')
-        #dummy.
-        #dummy.remove()
 
+    @property
+    def case_labels(self):
+        """Return case labels."""
+        labels = [self.case_a, self.case_b]
+        if self.scenario[0] != self.scenario[1]:  # include scenario
+            labels = [f'{label} {self.profile[i].scenario}' for i, label
+                      in enumerate(labels)]
+        return labels
+
+    def error_frame(self, mode: int):
+        """Return comparitive error mode dataframe."""
+        frames = [profile.error_frame() for profile in self.profile]
+        delta = pandas.DataFrame(columns=frames[0].index)
+        for i, label in enumerate(self.case_labels):
+            delta.loc[label, :] = frames[i].loc[:, f'k{mode}']
+        delta.loc['delta', :] = delta.iloc[1, :] - delta.iloc[0, :]
+        delta.index.name = f'k{mode}'
+        return delta
+
+    def maximum_error(self):
+        """Return dataframe highlighting maxiumum error in eack mode."""
+        max_error = pandas.DataFrame(index=['coord', 'point', 'delta',
+                                            'percent'],
+                                     columns=[f'k{i}' for i in range(1, 10)])
+        for mode in range(1, 10):
+            error = self.error_frame(mode)
+            col = np.argmax(error.loc['delta', :].abs())
+            max_error.loc[['coord', 'point'], f'k{mode}'] = error.columns[col]
+            max_error.loc['delta', f'k{mode}'] = error.iloc[-1, col]
+            max_error.loc['percent', f'k{mode}'] = 1e2*(error.iloc[-1, col] /
+                                                        error.iloc[0, col])
+        return max_error
 
 
 if __name__ == '__main__':
 
-    bench = BenchMark('F4E', 'SCOD', 'EOB')
+    #bench = BenchMark('F4E', 'SCOD', 'EOB')
     #bench = BenchMark('MAG', 'SCOD', 'TFonly')
-    #bench = BenchMark('pcr100', 'pcr65', 'preload')
+    bench = BenchMark('pcr100', 'pcr65', 'EOB')
     #bench = BenchMark('SCOD', 'SCOD', ['TFonly', 'EOB'])
 
-    bench.bar_array(0)
+    #bench.bar_array(2)
+    print(bench.maximum_error())
 
     #bench.profile[0].plot_keypoints('cbdaef')
 

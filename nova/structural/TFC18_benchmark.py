@@ -6,6 +6,7 @@ import os
 
 import matplotlib.patches as mpatches
 import numpy as np
+import pandas
 import pyvista as pv
 import scipy
 import scipy.fft
@@ -52,7 +53,7 @@ class ErrorProfile:
 
     name: str
     scenario: str
-    key: dict = field(default_factory=lambda: 
+    key: dict = field(default_factory=lambda:
                       dict(scod='pcr100', SCOD='pcr100', F4E='f4e',
                            MAG='mag'))
     mesh: pv.PolyData = field(init=False)
@@ -70,22 +71,22 @@ class ErrorProfile:
         except FileNotFoundError:
             getattr(self, f'_{self.dataset}')()
             self.mesh.save(self.vtk_file)
-            
-    @property 
+
+    @property
     def dataset(self):
         """Return dataset name."""
         return self.key.get(self.name, self.name)
-        
+
     def extract_cetnerline_keypoints(self):
         """Construct TFC centerline keypoint lookup."""
         coil = self.extract_coil(0, clip_x=True)
-        interp_z = scipy.interpolate.interp1d(coil.points[:, 2], 
+        interp_z = scipy.interpolate.interp1d(coil.points[:, 2],
                                               coil['arc_length'])
         return dict(ILIS_top=interp_z(4),
-                    coil_top=coil['arc_length'][0], 
-                    HFS_midplane=interp_z(0), 
-                    LFS_midplane=0, 
-                    ILIS_base=interp_z(-4), 
+                    coil_top=coil['arc_length'][0],
+                    HFS_midplane=interp_z(0),
+                    LFS_midplane=0,
+                    ILIS_base=interp_z(-4),
                     coil_base=coil['arc_length'][-1])
 
     @property
@@ -101,7 +102,7 @@ class ErrorProfile:
             raise IndexError(f'{self.scenario} not present '
                              'in F4E dataset (only EOB)')
         self.mesh = BenchBase(f4e, f4e, ['v0', 'v3'], ['v0', 'v3']).mesh
-        
+
     def _pcr65(self):
         """Build PCR 100% reference case."""
         v0 = TFC18('TFCgapsG10', 'v0_65_f4e', cluster=1).mesh
@@ -113,7 +114,7 @@ class ErrorProfile:
         v0 = TFC18('TFCgapsG10', 'v0_100_f4e', cluster=1).mesh
         v3 = TFC18('TFCgapsG10', 'v3_100_f4e', cluster=1).mesh
         self.mesh = BenchBase(v0, v3, ['v0', 'v3'], self.scenario).mesh
-        
+
     def _mag(self):
         """Build MAG reference case."""
         v0 = TFC18('TFCgapsG10', 'v0', cluster=1).mesh
@@ -131,7 +132,7 @@ class ErrorProfile:
             warp = mesh.warp_by_vector(f'displace_{case}', factor=factor)
             plotter.add_mesh(warp)
         plotter.show()
-        
+
     def extract_coil(self, index: int, clip_x=True):
         """Return single coil rotated to x-z reference plane."""
         cell = self.mesh.extract_cells(index)
@@ -158,7 +159,7 @@ class ErrorProfile:
         """Generate 2d plots."""
         if axes is None:
             axes = plt.gca()
-        
+
         if delta:
             axes.plot(coil['abscissa'], 1e3*coil['delta'][:, coordinate],
                       color=color)
@@ -203,33 +204,32 @@ class ErrorProfile:
             rms[i] = np.sqrt(np.mean(
                 np.linalg.norm(coil['delta'][:, :2], axis=1)**2))
         return 1e3*np.sqrt(np.mean(rms**2))
-    
+
     def bar(self, keypoint: str, coordinate: int,
             width=0.8, axes=None, label=None, annotate=True, text='keypoint'):
         """Generate bar plot."""
-        length = self.keypoints[keypoint]
         if axes is None:
             axes = plt.gca()
+        length = self.keypoints[keypoint]
         delta = self.extract_coilset_delta(length)
-        coord_label = ['r', '\phi', 'z']
+        coord_label = ['r', r'\phi', 'z']
         if label == 'mode':
             err = self.error_modes(1e3*delta[:, coordinate])
             label = f'{err[1]:1.1f}, {err[2]:1.1f}'
         axes.bar(range(18), 1e3*delta[:, coordinate], width, label=label)
         if annotate:
             axes.set_xlabel('coil index')
-            axes.set_ylabel(f'$\Delta\,{coord_label[coordinate]}$ mm')
+            axes.set_ylabel(rf'$\Delta\,{coord_label[coordinate]}$ mm')
             axes.set_xticks(range(1, 18, 2))
             axes.set_xticklabels(range(2, 19, 2))
         if text:
             if text == 'keypoint':
                 text = keypoint.replace('_', ' ')
-            axes.text(0.95, 0.95, text, 
+            axes.text(0.95, 0.95, text,
                       transform=axes.transAxes,
                       ha='right', va='top')
         plt.despine()
 
-        
     def extract_coilset_delta(self, arc_length: float):
         """Return set of coilset deltas from single arc_length."""
         delta = np.zeros((18, 3))
@@ -238,7 +238,7 @@ class ErrorProfile:
             delta[i] = scipy.interpolate.interp1d(
                 coil['arc_length'], coil['delta'], axis=0)(arc_length)
         return delta
-    
+
     def error_modes(self, values, ncoil=18):
         """Return amplitudes of Fourier error modes."""
         fft_coefficents = scipy.fft.rfft(values)
@@ -246,7 +246,7 @@ class ErrorProfile:
         error_modes[0] = fft_coefficents[0].real / ncoil
         error_modes[1:] = abs(fft_coefficents[1:]) / (ncoil//2)
         return error_modes
-    
+
     def plot_wave(self, axes, values, wavenumber=1, ncoil=18):
         """Plot fft modes."""
         coef = np.zeros(ncoil//2, dtype=complex)
@@ -271,7 +271,7 @@ class ErrorProfile:
         axes.plot(np.linspace(0, ncoil-1, nifft), ifft, '-', color='C6')
         axes.text(ncoil-0.5, ifft[-1], label, va='center',
                   color='C6', fontsize='small')
-        
+
     def plot_keypoints(self, labels=None):
         """Plot location of refernace points."""
         if labels is None:
@@ -279,32 +279,47 @@ class ErrorProfile:
         coil = self.extract_coil(0, False)
         points = scipy.interpolate.interp1d(coil['arc_length'],
                                             coil.points, axis=0)
-        plt.plot(coil.points[:, 0], coil.points[:, 2], color='gray', lw=5)            
+        plt.plot(coil.points[:, 0], coil.points[:, 2], color='gray', lw=5)
         for i, keypoint in enumerate(self.keypoints):
             point = points(self.keypoints[keypoint])
             plt.plot(point[0], point[2], 'C0o', ms=12)
-            plt.text(point[0], point[2], f' {labels[i]}', 
+            plt.text(point[0], point[2], f' {labels[i]}',
                      va='bottom', ha='left')
         plt.axis('equal')
         plt.axis('off')
-            
-    
+
+    def error_frame(self):
+        """Return structural error modes dataframe."""
+        index = pandas.MultiIndex.from_product(
+            [['r', 'phi', 'z'], list('abcdef')], names=['coord', 'point'])
+        error = pandas.DataFrame(index=index,
+                                 columns=[f'k{i}' for i in range(10)])
+
+        for i, (keypoint, label) in enumerate(zip(self.keypoints, 'cbdaef')):
+            length = self.keypoints[keypoint]
+            delta = self.extract_coilset_delta(length)
+            for j, coord in enumerate(['r', 'phi', 'z']):
+                error.loc[(coord, label), :] = \
+                    self.error_modes(1e3*delta[:, j])
+        return error
+
 
 @dataclass
 class BenchMark:
-    
+    """Perform case to case benchmarking."""
+
     case_a: str
     case_b: str
     scenario: Union[str, list[str, str]]
     profile: list[ErrorProfile, ErrorProfile] = field(init=False, repr=False)
-    
+
     def __post_init__(self):
         """Load dataset."""
         if isinstance(self.scenario, str):
             self.scenario = 2*[self.scenario]
         self.profile = [ErrorProfile(self.case_a, self.scenario[0]),
                         ErrorProfile(self.case_b, self.scenario[1])]
-        
+
     def bar(self, keypoint: str, coordinate: int, axes=None, legend=True,
             annotate=True, text=None):
         """Plot single bar."""
@@ -317,49 +332,73 @@ class BenchMark:
         if legend:
             loc = 2 if coordinate == 0 else 4
             axes.legend(loc=loc, fontsize='xx-small')
-        
-    def bar_array(self, coordinate: int, scenario_label=None):
+
+    def bar_array(self, coordinate: int):
         """Generate bar plot array."""
-        if scenario_label is None:
-            scenario_label = self.scenario[0] != self.scenario[1]
         fig, axes_array = plt.subplots(3, 2, sharex=True, sharey=True)
         text = 'cbdaef'
         for i, (keypoint, axes) in enumerate(zip(self.profile[0].keypoints,
                                                  axes_array.reshape(-1))):
-            self.bar(keypoint, coordinate, axes, 
+            self.bar(keypoint, coordinate, axes,
                      legend=True, annotate=False, text=text[i])
         axes_array[0][0].set_xticks(range(0, 18, 4))
-        axes_array[0][0].set_xticklabels(range(0, 19,4))
-        coordinate_label = ['r', '\phi', 'z']
+        axes_array[0][0].set_xticklabels(range(0, 19, 4))
+        coordinate_label = ['r', r'\phi', 'z']
         for i in range(2):
             axes_array[2][i].set_xlabel('coil index')
         axes_array[1][0].set_ylabel(
-            f'$\Delta\,{coordinate_label[coordinate]}$ mm')
-        
-        labels = [self.case_a, self.case_b]
-        if scenario_label:
-            labels = [f'{label} {self.profile[i].scenario}' for i, label
-                      in enumerate(labels)]
-        
+            rf'$\Delta\,{coordinate_label[coordinate]}$ mm')
+        labels = self.case_labels
         case_a = mpatches.Patch(color='C0', label=labels[0])
         case_b = mpatches.Patch(color='C1', label=labels[1])
         fig.legend(handles=[case_a, case_b], ncol=2, loc='upper center')
-        #dummy.
-        #dummy.remove()
-        
-        
-            
+
+    @property
+    def case_labels(self):
+        """Return case labels."""
+        labels = [self.case_a, self.case_b]
+        if self.scenario[0] != self.scenario[1]:  # include scenario
+            labels = [f'{label} {self.profile[i].scenario}' for i, label
+                      in enumerate(labels)]
+        return labels
+
+    def error_frame(self, mode: int):
+        """Return comparitive error mode dataframe."""
+        frames = [profile.error_frame() for profile in self.profile]
+        delta = pandas.DataFrame(columns=frames[0].index)
+        for i, label in enumerate(self.case_labels):
+            delta.loc[label, :] = frames[i].loc[:, f'k{mode}']
+        delta.loc['delta', :] = delta.iloc[1, :] - delta.iloc[0, :]
+        delta.index.name = f'k{mode}'
+        return delta
+
+    def maximum_error(self):
+        """Return dataframe highlighting maxiumum error in eack mode."""
+        max_error = pandas.DataFrame(index=['coord', 'point', 'delta',
+                                            'percent'],
+                                     columns=[f'k{i}' for i in range(1, 10)])
+        for mode in range(1, 10):
+            error = self.error_frame(mode)
+            col = np.argmax(error.loc['delta', :].abs())
+            max_error.loc[['coord', 'point'], f'k{mode}'] = error.columns[col]
+            max_error.loc['delta', f'k{mode}'] = error.iloc[-1, col]
+            max_error.loc['percent', f'k{mode}'] = 1e2*(error.iloc[-1, col] /
+                                                        error.iloc[0, col])
+        return max_error
+
+
 if __name__ == '__main__':
 
-    bench = BenchMark('F4E', 'SCOD', 'EOB')
+    #bench = BenchMark('F4E', 'SCOD', 'EOB')
     #bench = BenchMark('MAG', 'SCOD', 'TFonly')
-    #bench = BenchMark('pcr100', 'pcr65', 'preload')
+    bench = BenchMark('pcr100', 'pcr65', 'EOB')
     #bench = BenchMark('SCOD', 'SCOD', ['TFonly', 'EOB'])
-    
-    bench.bar_array(0)
-    
+
+    #bench.bar_array(2)
+    print(bench.maximum_error())
+
     #bench.profile[0].plot_keypoints('cbdaef')
-                 
+
     #bm.warp(200)
     #bm.build_pcr100()
     #bm.plot(1)

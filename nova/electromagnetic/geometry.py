@@ -32,6 +32,8 @@ class Geometry(MetaMethod):
     def initialize(self):
         """Update frame polygons and derived geometrical data."""
         rms_unset = (self.frame.rms == 0) & (self.frame.segment == 'ring')
+
+        print(self.frame)
         if sum(rms_unset) > 0:
             index = self.frame.index[rms_unset]
             index_length = len(index)

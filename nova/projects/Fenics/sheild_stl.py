@@ -164,9 +164,9 @@ class Shield:
 
             frame += tri.data
 
-            blocks.append(tri.mesh.opacity(1).c(i))
+            #blocks.append(tri.mesh.opacity(1).c(i))
             blocks.append(tri.convex_hull.opacity(0.8).c(i+1))
-            blocks.append(tri.panel.opacity(1).c(i+2))
+            #blocks.append(tri.panel.opacity(1).c(i+2))
 
             #tet = TetPanel(tri.panel)
 
@@ -188,7 +188,7 @@ class Shield:
             #box.append(self.box(center, extent, rotate))
             '''
             tick.tock()
-        print(frame.poly[0])
+        #print(frame.poly[0])
 
         vedo.show(frame.poly)
 

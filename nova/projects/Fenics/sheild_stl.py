@@ -16,58 +16,63 @@ from nova.utilities.time import clock
 
 @dataclass
 class TriPanel:
+    """Manage panel shells."""
 
     mesh: vedo.Mesh
     tri: trimesh.Trimesh = field(init=False, repr=False)
 
     def __post_init__(self):
-        self.tri = trimesh.Trimesh(self.mesh.points(), 
-                                   faces=self.mesh.faces()) 
-        
+        """Create trimesh instance."""
+        self.tri = trimesh.Trimesh(self.mesh.points(),
+                                   faces=self.mesh.faces())
+
     def compute_scale(self):
+        """Calculate volumne scale factor."""
         self.scale = self.tri.volume / self.convex_hull.volume()
-        
+
     @property
     def convex_hull(self) -> vedo.Mesh:
         """Return decimated convex hull."""
         return vedo.ConvexHull(self.mesh.points()).decimate(
             N=6, method='pro', boundaries=True)
-    
-    @property 
+
+    @property
     def panel(self) -> vedo.Mesh:
         """Return scaled convex hull."""
         mesh = self.convex_hull
         mesh.origin(*self.center_mass)
         mesh.scale((self.volume / mesh.volume())**(1/3))
         return mesh
-        
-    @property 
+
+    @property
     def volume(self):
         """Return grid volume."""
         return self.tri.volume
-    
+
     @property
     def center_mass(self):
         """Return grid center of mass."""
         return self.tri.center_mass
-    
-    @property 
+
+    @property
     def data(self):
         """Return pannel data."""
         center_mass = self.center_mass
         return dict(x=center_mass[0], y=center_mass[1], z=center_mass[2],
                     volume=self.volume, poly=self.convex_hull)
-                                         
-    
+
+
 @dataclass
 class TetPanel(TriPanel):
-    
+    """Manage panel volumes."""
+
     tet: pv.UnstructuredGrid = field(init=False)
-    
+
     def __post_init__(self):
+        """Initialize tripanel and load volume."""
         super().__post_init__()
         self.load_volume()
-        
+
     def load_volume(self):
         """Compute volume from closed surface mesh."""
         with tempfile.NamedTemporaryFile(suffix='.msh') as tmp:
@@ -80,31 +85,32 @@ class TetPanel(TriPanel):
         points = msh.points
         self.tet = pv.UnstructuredGrid(cells, celltypes, points)
         self.tet = self.tet.compute_cell_sizes(length=False, area=False)
-        
-    @property 
+
+    @property
     def cell_centers(self):
         """Return cell centers."""
         return self.tet.cell_centers().points
-    
-    @property 
+
+    @property
     def cell_volumes(self):
         """Return cell volumes."""
         return self.tet['Volume'].reshape(-1, 1)
-    
-    @property 
+
+    @property
     def volume(self):
         """Return grid volume."""
         return np.sum(self.cell_volumes)
-    
+
     @property
     def center_mass(self):
         """Return grid center of mass."""
-        return np.sum(self.cell_volumes*self.cell_centers, 
+        return np.sum(self.cell_volumes*self.cell_centers,
                       axis=0) / self.volume
 
 
 @dataclass
 class Shield:
+    """Manage shield sector."""
 
     file: str = 'IWS_FM_PLATE_S4'
     path: str = None
@@ -145,25 +151,25 @@ class Shield:
         """Retun multiblock mesh."""
         mesh = vedo.Mesh(self.vtk_file)
         parts = mesh.splitByConnectivity(2)
-        
+
         frame = FrameSpace(required=['x', 'y', 'z'], label='fi',
                            segment='volume')
         #parts = [vedo.Mesh(pv.read('tmp.vtk'))]
         blocks = []
-        
+
         tick = clock(len(parts), header='loading decimated convex hulls')
         for i, part in enumerate(parts):
             #pv.PolyData(part.polydata()).save('tmp.vtk')
             tri = TriPanel(part)
-            
+
             frame += tri.data
-            
+
             blocks.append(tri.mesh.opacity(1).c(i))
             blocks.append(tri.convex_hull.opacity(0.8).c(i+1))
             blocks.append(tri.panel.opacity(1).c(i+2))
-            
+
             #tet = TetPanel(tri.panel)
-            
+
             #print(tri.volume, tet.volume)
             #print(block.center_mass)
             '''

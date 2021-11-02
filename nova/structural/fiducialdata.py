@@ -604,6 +604,7 @@ class FiducialData(Plotter):
 if __name__ == '__main__':
 
     fiducial = FiducialData(fill=False)
+
     plotter = pv.Plotter()
     fiducial.warp(500, plotter=plotter)
     fiducial.label_coils(plotter)

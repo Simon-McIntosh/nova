@@ -1,7 +1,7 @@
 """Calculate placement error from fiducial data."""
 from dataclasses import dataclass, field
 
-from collections import Iterable
+from collections.abc import Iterable
 import numpy as np
 import scipy.fft
 import scipy.optimize
@@ -25,8 +25,6 @@ class FiducialError:
         """Init fit dataarray - perform coilset fit."""
         self.kdtree = sklearn.neighbors.KDTree(self.data.centerline[:-1, :])
         self.calculate_error()
-
-    #def load_dataset(self):
 
     def calculate_error(self):
         """Calculate ccl placment error."""

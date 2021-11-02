@@ -14,7 +14,7 @@ class Geometry(MetaMethod):
     """
     Geometrical methods for FrameSpace.
 
-    Extract geometric features from shapely polygons.
+    Extract geometric features from shapely/vtk polygons.
     """
 
     name = 'geometry'
@@ -31,9 +31,11 @@ class Geometry(MetaMethod):
 
     def initialize(self):
         """Update frame polygons and derived geometrical data."""
-        rms_unset = (self.frame.rms == 0) & (self.frame.segment == 'ring')
+        self.initialize_section()
 
-        print(self.frame)
+    def initialize_section(self):
+        """Init cross-section polygon data."""
+        rms_unset = (self.frame.rms == 0) & (self.frame.segment != 'volume')
         if sum(rms_unset) > 0:
             index = self.frame.index[rms_unset]
             index_length = len(index)

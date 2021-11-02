@@ -75,7 +75,7 @@ class TriPanel:
         """Return optimal bounding box extents."""
         if rotate is None:
             rotate = self.rotate
-        points = self.rotate.inv().apply(self.qhull.points())
+        points = self.rotate.inv().apply(self.panel.points())
         extent = np.max(points, axis=0) - np.min(points, axis=0)
         extent *= (self.volume / np.prod(extent))**(1 / 3)
         return extent

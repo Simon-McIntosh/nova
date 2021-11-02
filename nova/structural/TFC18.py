@@ -154,15 +154,6 @@ class TFC18(DataDir, Plotter):
         frame = pandas.concat(frames)
         frame.to_csv(self.csv_file(scenario), index=False)
 
-        #index = range(len(self.mesh.cell_points(0))-1)
-
-        #dataset = xarray.Dataset(
-        #    coords=dict(scenario=['TF-only'],
-
-        #                                     )
-        #def to_xarray(self):
-        #print(xarray.Dataset({'v4': frame}))
-
     def export(self):
         """Export dataset."""
         for file in ['c1', 'c2', 'a1', 'a2'] + [f'k{i}' for i in range(10)]:

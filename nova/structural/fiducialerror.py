@@ -18,7 +18,7 @@ class FiducialError:
     """Manage fiducial error estimates."""
 
     data: xarray.Dataset
-    radial_weight: bool = True
+    radial_weight: float = -1.
     kdtree: sklearn.neighbors.KDTree = field(init=False)
 
     def __post_init__(self):
@@ -49,10 +49,11 @@ class FiducialError:
         segment /= np.linalg.norm(segment, axis=1).reshape(-1, 1)
 
         delta -= segment * np.einsum('ij,ij->i', delta, segment).reshape(-1, 1)
-        if self.radial_weight:
+        if self.radial_weight != 0:
             radius = np.linalg.norm(self.data.centerline[:, :2], axis=1)
             radius.shape = (-1, 1)
-            return np.linalg.norm(radius**-1 * delta) / np.sum(radius**-1)
+            return np.linalg.norm(radius**self.radial_weight *
+                                  delta) / np.sum(radius**self.radial_weight)
         return np.linalg.norm(delta)
 
     def transform(self, trans, centerline, origin):
@@ -114,6 +115,30 @@ class FiducialError:
         axes[1, 1].axis('off')
         axes[0, 0].legend(loc='center', bbox_to_anchor=(1.5, 0.5))
 
+    def plot_coilset(self, factor=500):
+        """Plot coilset centerlines."""
+        axes = plt.subplots(1, 2)[1]
+        centerline = self.data.centerline
+        origin = self.data.origin.values
+        coil = self.data.coil.values
+        clone = self.data.clone.values
+        for axid in range(2):
+            axes[axid].plot(centerline[:, 0], centerline[:, 2],
+                            '--', color='gray')
+        for index in range(18):
+            fit_delta = self.data.fit_delta[index]
+            axid = 0 if origin[index] == 'EU' else 1
+            label = f'{coil[index]:02d}'
+            if clone[index] != -1:
+                label += f'<{clone[index]:02d}'
+            axes[axid].plot(centerline[:, 0] + factor*fit_delta[:, 0],
+                            centerline[:, 2] + factor*fit_delta[:, 2], '-',
+                            label=label)
+        for axid in range(2):
+            axes[axid].set_aspect('equal')
+            axes[axid].axis('off')
+            axes[axid].legend(loc='center', fontsize='xx-small')
+
     def plot_wave(self, axes, values, wavenumber=1, ncoil=18):
         """Plot fft modes."""
         if wavenumber is None:
@@ -122,7 +147,7 @@ class FiducialError:
         coef = np.zeros(ncoil//2, dtype=complex)
         error_modes = np.zeros(1 + ncoil//2)
         fft_coefficents = scipy.fft.rfft(values)
-        error_modes[0] = coef[0].real / ncoil
+        error_modes[0] = fft_coefficents[0].real / ncoil
         error_modes[1:] = abs(fft_coefficents[1:]) / (ncoil//2)
 
         coef[0] = fft_coefficents[0]
@@ -133,7 +158,7 @@ class FiducialError:
             coef[wn] = fft_coefficents[wn]
             if label:
                 label += '\n'
-            label += f'$k_{wn}$='
+            label += f' $k_{wn}$='
             label += f'{error_modes[wn]:1.2f}'
 
         nifft = ncoil
@@ -149,7 +174,7 @@ class FiducialError:
         axes = plt.subplots(3, 2, sharex=True, sharey=True)[1]
         plt.subplots_adjust(wspace=0.45)
         loc = range(18)
-        wavenumber = [1, 2, 3]
+        wavenumber = [0, 1, 2]
         for i, coord in enumerate(['x', 'y', 'z']):
             delta = self.data.fit_trans.sel(trans=coord)[loc]
             self.plot_wave(axes[i, 0], delta.values, wavenumber)
@@ -177,6 +202,7 @@ if __name__ == '__main__':
     data = FiducialData(fill=True, sead=2025).data
     error = FiducialError(data)
 
-    error.plot(0)
+    error.plot_coilset()
 
-    error.plot_error()
+    #error.plot(0)
+    #error.plot_error()

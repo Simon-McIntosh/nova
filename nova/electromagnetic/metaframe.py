@@ -78,7 +78,6 @@ class MetaFrame(MetaSet):
             'x': 0., 'y': 0., 'z': 0., 'segment': 'ring',
             'dl': 0.1, 'dt': 0.1, 'rms': 0.,
             'dx': 0., 'dy': 0., 'dz': 0.,
-            'a': 0., 'bi': 0., 'cj': 0., 'dk': 1.,
             'area': 0., 'volume': 0.,
             'delta': 0., 'nturn': 1., 'nfilament': 1.,
             'material': '', 'mass': '', 'rho': 0.,

@@ -14,7 +14,7 @@ class Geometry(MetaMethod):
     """
     Geometrical methods for FrameSpace.
 
-    Extract geometric features from shapely polygons.
+    Extract geometric features from shapely/vtk polygons.
     """
 
     name = 'geometry'
@@ -36,30 +36,33 @@ class Geometry(MetaMethod):
     
     def initialize_poly(self):
         """Update frame polygons and derived geometrical data."""
-        update = (self.frame.rms == 0) & (self.frame.segment == 'ring')
-        if sum(update) == 0:
-            return
-        index = self.frame.index[update]
-        index_length = len(index)
-        section = self.frame.loc[index, 'section'].values
-        coords = self.frame.loc[
-            index, ['x', 'y', 'z', 'dx', 'dy', 'dz',
-                    'segment', 'dl', 'dt']].to_numpy()
-        poly = self.frame.loc[index, 'poly'].values
-        poly_update = self.frame.loc[index, 'poly'].isna()
-        geom = np.empty((index_length, len(self.features)), dtype=float)
-        # itterate over index - generate poly as required
-        for i in range(index_length):
-            polygeom = PolyGeom(poly[i], *coords[i], section[i])
-            section[i] = polygeom.section  # inflate section name
-            if poly_update[i]:
-                poly[i] = PolyFrame(polygeom.poly, polygeom.section)
-            geometry = polygeom.geometry  # extract geometrical features
-            geom[i] = [geometry[feature] for feature in self.features]
-        if poly_update.any():
-            self.frame.loc[index, 'poly'] = poly
-        self.frame.loc[index, self.features] = geom
-        self.frame.loc[index, 'section'] = section
+        self.initialize_section()
+
+    def initialize_section(self):
+        """Init cross-section polygon data."""
+        rms_unset = (self.frame.rms == 0) & (self.frame.segment != 'volume')
+        if sum(rms_unset) > 0:
+            index = self.frame.index[rms_unset]
+            index_length = len(index)
+            section = self.frame.loc[index, 'section'].values
+            coords = self.frame.loc[
+                index, ['x', 'y', 'z', 'dx', 'dy', 'dz',
+                        'segment', 'dl', 'dt']].to_numpy()
+            poly = self.frame.loc[index, 'poly'].values
+            poly_update = self.frame.loc[index, 'poly'].isna()
+            geom = np.empty((index_length, len(self.features)), dtype=float)
+            # itterate over index - generate poly as required
+            for i in range(index_length):
+                polygeom = PolyGeom(poly[i], *coords[i], section[i])
+                section[i] = polygeom.section  # inflate section name
+                if poly_update[i]:
+                    poly[i] = PolyFrame(polygeom.poly, polygeom.section)
+                geometry = polygeom.geometry  # extract geometrical features
+                geom[i] = [geometry[feature] for feature in self.features]
+            if poly_update.any():
+                self.frame.loc[index, 'poly'] = poly
+            self.frame.loc[index, self.features] = geom
+            self.frame.loc[index, 'section'] = section
 
     def limit(self, index):
         """Return coil limits [xmin, xmax, zmin, zmax]."""

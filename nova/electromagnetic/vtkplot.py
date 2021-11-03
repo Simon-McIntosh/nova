@@ -44,8 +44,7 @@ class VtkPlot(MetaMethod):
 
     frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['volume'])
-    additional: list[str] = field(
-        default_factory=lambda: ['a', 'bi', 'cj', 'dk'])
+    additional: list[str] = field(default_factory=lambda: [])
 
     def initialize(self):
         """Initialize metamethod."""

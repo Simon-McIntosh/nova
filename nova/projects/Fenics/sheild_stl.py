@@ -3,7 +3,9 @@ import os
 
 import meshio
 import numpy as np
+import numpy.typing as npt
 import pyvista as pv
+from scipy.spatial.transform import Rotation
 import tempfile
 import trimesh
 import vedo
@@ -20,18 +22,18 @@ class TriPanel:
 
     mesh: vedo.Mesh
     tri: trimesh.Trimesh = field(init=False, repr=False)
+    scale: float = 1e-3
+    qhull: vedo.Mesh = field(init=False, repr=False)
 
     def __post_init__(self):
         """Create trimesh instance."""
+        self.mesh = self.mesh.scale(self.scale)
         self.tri = trimesh.Trimesh(self.mesh.points(),
                                    faces=self.mesh.faces())
-
-    def compute_scale(self):
-        """Calculate volumne scale factor."""
-        self.scale = self.tri.volume / self.convex_hull.volume()
+        self.qhull = self._convex_hull
 
     @property
-    def convex_hull(self) -> vedo.Mesh:
+    def _convex_hull(self) -> vedo.Mesh:
         """Return decimated convex hull."""
         return vedo.ConvexHull(self.mesh.points()).decimate(
             N=6, method='pro', boundaries=True)
@@ -39,7 +41,7 @@ class TriPanel:
     @property
     def panel(self) -> vedo.Mesh:
         """Return scaled convex hull."""
-        mesh = self.convex_hull
+        mesh = self.qhull
         mesh.origin(*self.center_mass)
         mesh.scale((self.volume / mesh.volume())**(1/3))
         return mesh
@@ -55,11 +57,41 @@ class TriPanel:
         return self.tri.center_mass
 
     @property
-    def data(self):
-        """Return pannel data."""
-        center_mass = self.center_mass
-        return dict(x=center_mass[0], y=center_mass[1], z=center_mass[2],
-                    volume=self.volume, poly=self.convex_hull)
+    def rotate(self) -> Rotation:
+        """Return PCA rotational transform."""
+        points = self.qhull.points()
+        triangles = np.array(self.qhull.cells())
+        vertex = dict(a=points[triangles[:, 0]],
+                      b=points[triangles[:, 1]],
+                      c=points[triangles[:, 2]])
+        normal = np.cross(vertex['b']-vertex['a'], vertex['c']-vertex['a'])
+        l2norm = np.linalg.norm(normal, axis=1)
+        covariance = np.cov(normal, rowvar=False, aweights=l2norm**5)
+        eigen = np.linalg.eigh(covariance)[1]
+        eigen /= np.linalg.det(eigen)
+        return Rotation.from_matrix(eigen)
+
+    def extent(self, rotate=None):
+        """Return optimal bounding box extents."""
+        if rotate is None:
+            rotate = self.rotate
+        points = self.rotate.inv().apply(self.qhull.points())
+        extent = np.max(points, axis=0) - np.min(points, axis=0)
+        extent *= (self.volume / np.prod(extent))**(1 / 3)
+        return extent
+
+    @property
+    def frame(self):
+        """Return pannel dataframe [mm]."""
+        center = self.center_mass
+        rotate = self.rotate
+        extent = self.extent(rotate)
+        rotvec = rotate.as_rotvec()
+        area = self.volume / extent[2]
+        return dict(x=center[0], y=center[1], z=center[2],
+                    dx=rotvec[0], dy=rotvec[1], dz=rotvec[2],
+                    dl=extent[0], dt=extent[2], area=area,
+                    volume=self.volume, poly=self.panel, section='')
 
 
 @dataclass
@@ -150,7 +182,7 @@ class Shield:
     def load_frame(self):
         """Retun multiblock mesh."""
         mesh = vedo.Mesh(self.vtk_file)
-        parts = mesh.splitByConnectivity(2)
+        parts = mesh.splitByConnectivity(10)
 
         frame = FrameSpace(required=['x', 'y', 'z'], label='fi',
                            segment='volume')
@@ -162,10 +194,10 @@ class Shield:
             #pv.PolyData(part.polydata()).save('tmp.vtk')
             tri = TriPanel(part)
 
-            frame += tri.data
+            frame += tri.frame
 
             #blocks.append(tri.mesh.opacity(1).c(i))
-            blocks.append(tri.convex_hull.opacity(0.8).c(i+1))
+            blocks.append(tri.panel.opacity(1).c(i+1))
             #blocks.append(tri.panel.opacity(1).c(i+2))
 
             #tet = TetPanel(tri.panel)
@@ -188,7 +220,7 @@ class Shield:
             #box.append(self.box(center, extent, rotate))
             '''
             tick.tock()
-        #print(frame.poly[0])
+        self.frame = frame
 
         #vedo.show(frame.poly)
 

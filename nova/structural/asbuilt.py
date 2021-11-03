@@ -33,7 +33,7 @@ class AsBuilt:
     @property
     def ccl_steps(self):
         """Return list of CCL assembly steps."""
-        return self.data.columns.unique(0)[1:]
+        return self.ccl.columns.unique(0)[1:]
 
     def read_ccl(self):
         """Read xls file."""
@@ -47,6 +47,10 @@ class AsBuilt:
 
     def ccl_deltas(self):
         """Return dict of CCL deltas."""
+        coils = np.sort([int(coil[-2:]) for coil in self.ccl.index.unique(0)])
+        return {coil: self.ccl.loc[f'TF{coil:02d}', 
+                                   ('FAT', ['dx', 'dy', 'dz'])]
+                for coil in coils}
 
 
 
@@ -54,3 +58,4 @@ class AsBuilt:
 if __name__ == '__main__':
 
     asbuilt = AsBuilt()
+    print(asbuilt.ccl_deltas()[2])

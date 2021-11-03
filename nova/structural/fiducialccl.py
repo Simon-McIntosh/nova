@@ -5,6 +5,8 @@ import string
 
 import pandas
 
+from nova.structural.asbuilt import AsBuilt
+
 
 @dataclass
 class Fiducial(ABC):
@@ -391,6 +393,10 @@ class FiducialIDM(Fiducial):
 @dataclass
 class FiducialRE(Fiducial):
     """Manage Reverse Engineering fiducial data."""
+    
+    def _load_deltas(self):
+        """Load asbuilt ccl deltas."""
+        self.delta = AsBuilt().ccl_deltas()
 
 
 

@@ -20,7 +20,8 @@ class Geometry(MetaMethod):
     name = 'geometry'
 
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['section', 'poly'])
+    required: list[str] = field(default_factory=lambda: [
+        'segment', 'section', 'poly'])
     additional: list[str] = field(default_factory=lambda: [
         'dl', 'dt', 'rms', 'area'])
     require_all: bool = field(init=False, repr=False, default=False)
@@ -30,32 +31,35 @@ class Geometry(MetaMethod):
         'x', 'y', 'z', 'dx', 'dy', 'dz', 'area', 'rms'])
 
     def initialize(self):
+        """Init geometrical objects."""
+        self.initialize_poly()
+    
+    def initialize_poly(self):
         """Update frame polygons and derived geometrical data."""
-        rms_unset = (self.frame.rms == 0) & (self.frame.segment == 'ring')
-
-        print(self.frame)
-        if sum(rms_unset) > 0:
-            index = self.frame.index[rms_unset]
-            index_length = len(index)
-            section = self.frame.loc[index, 'section'].values
-            coords = self.frame.loc[
-                index, ['x', 'y', 'z', 'dx', 'dy', 'dz',
-                        'segment', 'dl', 'dt']].to_numpy()
-            poly = self.frame.loc[index, 'poly'].values
-            poly_update = self.frame.loc[index, 'poly'].isna()
-            geom = np.empty((index_length, len(self.features)), dtype=float)
-            # itterate over index - generate poly as required
-            for i in range(index_length):
-                polygeom = PolyGeom(poly[i], *coords[i], section[i])
-                section[i] = polygeom.section  # inflate section name
-                if poly_update[i]:
-                    poly[i] = PolyFrame(polygeom.poly, polygeom.section)
-                geometry = polygeom.geometry  # extract geometrical features
-                geom[i] = [geometry[feature] for feature in self.features]
-            if poly_update.any():
-                self.frame.loc[index, 'poly'] = poly
-            self.frame.loc[index, self.features] = geom
-            self.frame.loc[index, 'section'] = section
+        update = (self.frame.rms == 0) & (self.frame.segment == 'ring')
+        if sum(update) == 0:
+            return
+        index = self.frame.index[update]
+        index_length = len(index)
+        section = self.frame.loc[index, 'section'].values
+        coords = self.frame.loc[
+            index, ['x', 'y', 'z', 'dx', 'dy', 'dz',
+                    'segment', 'dl', 'dt']].to_numpy()
+        poly = self.frame.loc[index, 'poly'].values
+        poly_update = self.frame.loc[index, 'poly'].isna()
+        geom = np.empty((index_length, len(self.features)), dtype=float)
+        # itterate over index - generate poly as required
+        for i in range(index_length):
+            polygeom = PolyGeom(poly[i], *coords[i], section[i])
+            section[i] = polygeom.section  # inflate section name
+            if poly_update[i]:
+                poly[i] = PolyFrame(polygeom.poly, polygeom.section)
+            geometry = polygeom.geometry  # extract geometrical features
+            geom[i] = [geometry[feature] for feature in self.features]
+        if poly_update.any():
+            self.frame.loc[index, 'poly'] = poly
+        self.frame.loc[index, self.features] = geom
+        self.frame.loc[index, 'section'] = section
 
     def limit(self, index):
         """Return coil limits [xmin, xmax, zmin, zmax]."""

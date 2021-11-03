@@ -190,7 +190,7 @@ class Shield:
             tick.tock()
         #print(frame.poly[0])
 
-        vedo.show(frame.poly)
+        #vedo.show(frame.poly)
 
     def plot(self):
         """Plot mesh."""

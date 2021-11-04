@@ -25,6 +25,11 @@ class Fiducial(ABC):
     def _load_deltas(self):
         """Load CCL fiducial deltas - set delta and origin."""
 
+    @property
+    def data(self):
+        """Return (delta, origin)."""
+        return self.delta, self.origin
+
 
 @dataclass
 class FiducialIDM(Fiducial):
@@ -393,11 +398,10 @@ class FiducialIDM(Fiducial):
 @dataclass
 class FiducialRE(Fiducial):
     """Manage Reverse Engineering fiducial data."""
-    
+
     def _load_deltas(self):
         """Load asbuilt ccl deltas."""
         self.delta = AsBuilt().ccl_deltas()
-
 
 
 if __name__ == '__main__':

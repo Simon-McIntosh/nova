@@ -8,13 +8,14 @@ import pyvista as pv
 import xarray
 
 from nova.structural.centerline import CenterLine
+from nova.structural.fiducialccl import FiducialIDM
 from nova.structural.gaussianprocessregressor import GaussianProcessRegressor
 from nova.structural.plotter import Plotter
 from nova.utilities.pyplot import plt
 
 
 @dataclass
-class FiducialData(Plotter):
+class FiducialData(Plotter, FiducialIDM):
     """Manage ccl fiducial data."""
 
     fill: bool = True
@@ -136,7 +137,7 @@ class FiducialData(Plotter):
 
     def load_fiducial_deltas(self):
         """Load fiducial deltas."""
-        '''
+        #'''
         delta, origin = {}, []
         for i in range(1, 20):
             index = f'{i:02d}'
@@ -146,7 +147,9 @@ class FiducialData(Plotter):
                 origin.append(data[1])
             except NotImplementedError:
                 continue
-        '''
+        #'''
+        #print(self.data.target)
+        #delta, origin = FiducialIDM().data
         self.data['coil'] = list(delta)
         self.data = self.data.assign_coords(origin=('coil', origin))
         self.data['fiducial_delta'] = (('coil', 'target', 'space'),

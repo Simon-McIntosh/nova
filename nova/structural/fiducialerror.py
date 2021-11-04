@@ -179,7 +179,7 @@ class FiducialError:
         axes = plt.subplots(3, 2, sharex=True, sharey=True)[1]
         plt.subplots_adjust(wspace=0.45)
         loc = range(18)
-        wavenumber = [0, 1, 2]
+        wavenumber = [1, 2, 3]
         for i, coord in enumerate(['x', 'y', 'z']):
             delta = self.data.fit_translate.sel(translate=coord)[loc]
             self.plot_wave(axes[i, 0], delta.values, wavenumber)
@@ -211,4 +211,4 @@ if __name__ == '__main__':
     #error.plot_coilset()
 
     error.plot(0)
-    #error.plot_error()
+    error.plot_error()

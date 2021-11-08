@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, fields
 
 from nova.electromagnetic.framesetloc import FrameSetLoc
-from nova.electromagnetic.polygen import polyshape
+from nova.electromagnetic.polygen import PolyGen
 
 
 @dataclass
@@ -38,7 +38,7 @@ class GridAttrs(ABC, FrameSetLoc):
     def attrs(self, attrs):
         self._attrs = self.default | attrs
         self.update_attrs()
-        self._attrs['turn'] = polyshape[self._attrs['turn']]  # inflate turn
+        self._attrs['turn'] = PolyGen.polyshape[self._attrs['turn']]
         self.set_conditional_attributes()
         self.grid = {attr: self._attrs.pop(attr) for attr in self.grid}
         self.link = self._attrs.pop('link',

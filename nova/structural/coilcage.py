@@ -27,7 +27,7 @@ class CoilCage(DataDir, Plotter):
         """Load mesh data from xarray."""
         data = data.sortby('location')
         self.mesh = pv.PolyData()
-        centerline = pv.Spline(data.centerline)
+        centerline = pv.Spline(1e-3*data.centerline)
         for location in data.location[:18].values:
             coil = centerline.copy()
             coil.rotate_z(20*location)
@@ -47,10 +47,10 @@ class CoilCage(DataDir, Plotter):
     def add_scenario(self, data: xarray.Dataset, scenario: str,
                      source='fit_delta'):
         """Add fit_delta as scenario to vtk mesh."""
-        delta = data[source][:18].values
+        delta = data[source][:18].values.copy()
         for i in range(18):
             delta[i] = Rotation.from_euler('z', i*np.pi/9).apply(delta[i])
-        self.mesh[scenario] = delta.reshape(-1, 3)
+        self.mesh[scenario] = 1e-3*delta.reshape(-1, 3)
 
     def label_coils(self, plotter, location='OD'):
         """Add coil labels."""
@@ -88,7 +88,7 @@ class CoilCage(DataDir, Plotter):
 
     def build_dataset(self):
         """Build fiducial dataset."""
-        data = FiducialData(fill=True, sead=2025).data
+        data = FiducialData('RE', fill=True, sead=2025).data
         error = FiducialError(data)
         self.from_xarray(error.data)
         self.add_scenario(error.data, 'asbuilt', source='centerline_delta')
@@ -124,7 +124,8 @@ class CoilCage(DataDir, Plotter):
 if __name__ == '__main__':
 
     cage = CoilCage()
+    cage.build_dataset()
     cage.load_dataset()
     cage.export()
 
-    #cage.plot()
+    cage.plot()

@@ -172,9 +172,9 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'v3_65_f4e', cluster=1)
+    tf = TFC18('TFCgapsG10', 'k9', cluster=1)
     #tf.recalculate()
-    tf.to_dataframe('EOB')
+    #tf.to_dataframe('EOB')
 
     #tf.load_ensemble()
 

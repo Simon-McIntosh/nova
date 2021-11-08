@@ -13,7 +13,7 @@ class Fiducial(ABC):
     """Fiducial CCL base class."""
 
     target: list[str] = field(
-        init=False, default_factory=lambda: list(string.ascii_uppercase[:8]))
+        default_factory=lambda: list(string.ascii_uppercase[:8]))
     delta: dict[str, float] = field(init=False, default_factory=dict)
     origin: list[str] = field(init=False, default_factory=list)
 
@@ -399,9 +399,22 @@ class FiducialIDM(Fiducial):
 class FiducialRE(Fiducial):
     """Manage Reverse Engineering fiducial data."""
 
+    origin: list[str] = field(init=False, default_factory=lambda: 
+                              ['EU', 'JA', 'EU', 'EU', 'EU', 'EU', 'JA',
+                               'JA', 'EU', 'JA', 'EU', 'JA', 'JA', 'JA',
+                               'JA', 'JA', 'EU', 'EU', 'JA'])
+
+    def __post_init__(self):
+        """Propogate origin."""
+        super().__post_init__()
+        self.origin = [origin for i, origin in enumerate(self.origin)
+                       if i+1 in self.delta]
+        
     def _load_deltas(self):
         """Load asbuilt ccl deltas."""
         self.delta = AsBuilt().ccl_deltas()
+        for coil in self.delta:
+            self.delta[coil] = self.delta[coil].reindex(self.target)
 
 
 if __name__ == '__main__':

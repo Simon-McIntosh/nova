@@ -6,7 +6,7 @@ from nova.electromagnetic.framelink import FrameLink
 from nova.electromagnetic.biotsection import BiotSection
 from nova.electromagnetic.biotshape import BiotShape
 from nova.electromagnetic.biotreduce import BiotReduce
-from nova.electromagnetic.geometry import Geometry
+from nova.electromagnetic.geometry import PolyGeo
 
 
 # pylint: disable=too-many-ancestors
@@ -20,7 +20,7 @@ class BiotFrame(FrameLink):
     def __init__(self, data=None, index=None, columns=None, attrs=None,
                  **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.frame_attrs(Geometry, BiotShape, BiotSection, BiotReduce)
+        self.frame_attrs(PolyGeo, BiotShape, BiotSection, BiotReduce)
 
     def update_metadata(self, data, columns, attrs, metadata):
         """Extend FrameAttrs update_metadata."""

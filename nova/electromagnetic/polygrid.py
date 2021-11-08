@@ -9,11 +9,9 @@ import pandas
 import pygeos
 
 from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.polygen import PolyFrame
-from nova.electromagnetic.polygon import Polygon
-from nova.electromagnetic.geometry import PolyGeom
+from nova.electromagnetic.polygen import PolyGen, PolyFrame
+from nova.electromagnetic.polygeom import PolyGeom, Polygon
 from nova.electromagnetic.polyplot import PolyPlot
-from nova.electromagnetic.polygen import polygen, polyshape, boxbound
 from nova.utilities.pyplot import plt
 
 
@@ -39,7 +37,7 @@ class PolyDelta(Polygon):
 
     def generate_deltas(self):
         """Generate grid and cell deltas."""
-        self.turn = polyshape[self.turn]  # inflate turn name
+        self.turn = PolyGen.polyshape[self.turn]  # inflate turn name
         self.cell_delta = self.dimension_cell()
         self.grid_delta = self.dimension_grid()
 
@@ -93,7 +91,7 @@ class PolyDelta(Polygon):
         """Return grid delta."""
         grid_delta = list(self.cell_delta)
         if self.tile:
-            grid_delta = [delta := boxbound(*grid_delta), delta]
+            grid_delta = [delta := PolyGen.boxbound(*grid_delta), delta]
             if self.turn == 'hexagon':
                 grid_delta[0] *= 3/2
                 grid_delta[1] *= np.sqrt(3)/4
@@ -121,7 +119,7 @@ class PolyCell(PolyDelta):
 
     def polycell(self, x_center, z_center):
         """Return cell polygon."""
-        polygon = polygen(self.turn)(x_center, z_center, *self.cell_delta)
+        polygon = PolyGen(self.turn)(x_center, z_center, *self.cell_delta)
         return PolyFrame(polygon, self.turn)
 
     @property

@@ -5,7 +5,7 @@ from nova.electromagnetic.framelink import FrameLink, LinkLocMixin, LinkIndexer
 from nova.electromagnetic.subspace import SubSpace
 from nova.electromagnetic.error import SpaceKeyError
 from nova.electromagnetic.select import Select
-from nova.electromagnetic.geometry import Geometry
+from nova.electromagnetic.geometry import PolyGeo, VtkGeo
 from nova.electromagnetic.polyplot import PolyPlot
 from nova.electromagnetic.vtkplot import VtkPlot
 
@@ -66,7 +66,7 @@ class FrameSpace(SpaceIndexer, FrameLink):
     def __init__(self, data=None, index=None, columns=None,
                  attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.frame_attrs(Select, Geometry, PolyPlot, VtkPlot)
+        self.frame_attrs(Select, PolyGeo, PolyPlot, VtkGeo, VtkPlot)
         self.attrs['subspace'] = SubSpace(self)
 
     def __repr__(self):
@@ -146,6 +146,14 @@ if __name__ == '__main__':
                             Array=['Ic'])
     framespace.insert([4, 5], 1, Ic=6.5, name='PF1',
                       active=False, plasma=True)
+    
+    framespace.store('tmp', 'frame')
+    
+    framespace = FrameSpace()
+    framespace.load('tmp', 'frame')
+    #print(framespace.poly[0])
+    
+    framespace.polyplot()
 
     '''
     framespace.insert(range(40), 3, Ic=4, nturn=20, label='PF', link=True)

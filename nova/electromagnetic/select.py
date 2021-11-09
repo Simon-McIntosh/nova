@@ -2,11 +2,9 @@
 from dataclasses import dataclass, field
 
 import numpy as np
-import pandas
 
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.error import SpaceKeyError
 
 
 @dataclass
@@ -55,7 +53,7 @@ class Select(MetaMethod):
         'active', 'plasma', 'fix', 'feedback'], repr=False)
     require_all: bool = field(repr=False, default=False)
     additional: list[str] = field(init=False, default_factory=lambda: [
-        'passive', 'coil', 'free'])
+        'passive', 'coil', 'free', 'ferritic'])
     avalible: list[str] = field(init=False, default_factory=list)
     labels: dict[str, dict[str, list[str]]] = field(init=False, repr=False,
                                                     default_factory=dict)
@@ -71,6 +69,7 @@ class Select(MetaMethod):
         self.add_label('coil', None, ['plasma', 'passive'])
         self.add_label('fix', 'fix')
         self.add_label('free', None, 'fix')
+        self.add_label('ferritic', 'ferritic')
         self.update_metaframe()
         self.update_columns()
         super().__post_init__()

@@ -1,65 +1,131 @@
-"""Mesh feritic inserts."""
+"""Manage ferromagnetic insert geometry."""
 from dataclasses import dataclass, field
+import os
 
-import numpy as np
+import pandas
+import pyvista as pv
+import vedo
 
-from nova.electromagnetic.frameset import Frames
-from nova.electromagnetic.frameset import FrameSet
-
-from nova.electromagnetic.coil import Coil
+from nova.definitions import root_dir
+from nova.electromagnetic.framespace import FrameSpace
+from nova.utilities.time import clock
 
 
 @dataclass
-class FerroMagnetic(Frames):
-    """Manage ferritic inserts."""
+class ShieldSector:
+    """Manage shield sector."""
 
-    required: list[str] = field(
-        default_factory=lambda: ['x', 'y', 'z', 'volume'])
+    sector: int = 2
+    file: str = 'IWS_FM_PLATE'
+    path: str = None
+    sectors: list[int] = field(init=False,
+                               default_factory=lambda: [2, 3, 4, 6])
+    mesh: pv.PolyData = field(init=False, repr=False)
+    geom: pv.PolyData = field(init=False, repr=False)
+    frame: FrameSpace = field(init=False)
 
-    def insert(self, *args, required=None, iloc=None, **additional):
-        """
-        Add ferromagnetic block to frameset.
+    def __post_init__(self):
+        """Load datasets."""
+        self.check_sector()
+        if self.path is None:
+            self.path = os.path.join(root_dir, 'input/geometry/ITER/shield')
+        self.load_mesh()
+        self.load_frame()
 
-        Block centroid described by x, y, z coordinates
-        meshed into n coils based on
-        dblock. Each frame is meshed based on delta.
+    def check_sector(self):
+        """Check sector number."""
+        if self.sector not in self.sectors:
+            raise IndexError(f'sector {self.sector} not in {self.sectors}')
 
-        Parameters
-        ----------
-        x : array-like, shape(n,)
-            x-coordinates of block cenroids.
-        y : array-like, shape(n,)
-            y-coordinates of block cenroids.
-        z : array-like, shape(n,)
-            z-coordinates of of block cenroids.
+    def load_sector(self, sector: int):
+        """Load sector data, return self."""
+        self.sector = sector
+        self.load_mesh()
+        self.load_frame()
+        return self
 
-        **additional : dict[str, Any]
-            Additional input.
+    @property
+    def filename(self):
+        """Return sector filename."""
+        return f'{self.file}_S{self.sector}'
 
-        Returns
-        -------
-        None.
+    @property
+    def vtk_file(self):
+        """Retun full vtk filename."""
+        return os.path.join(self.path, f'{self.filename}.vtk')
 
-        """
+    @property
+    def stl_file(self):
+        """Return full stl filename."""
+        return os.path.join(self.path, f'{self.filename}.stl')
+
+    @property
+    def cdf_file(self):
+        """Return netCDF filename."""
+        return os.path.join(self.path, f'{self.file}.nc')
+
+    def load_mesh(self):
+        """Load mesh."""
+        if os.path.isfile(self.vtk_file):
+            self.mesh = vedo.Mesh(self.vtk_file)
+        else:
+            self.mesh = self.read_stl()
+
+    def read_stl(self):
+        """Read stl file."""
+        mesh = vedo.Mesh(self.stl_file).scale(1e-3)
+        mesh.write(self.vtk_file)
+        return mesh
+
+    def load_frame(self):
+        """Return shield dataframe."""
         try:
-            additional['volume'] = np.prod([additional[attr]
-                                            for attr in ['dx', 'dy', 'dz']])
-        except KeyError:
-            pass
-        with self.insert_required(required):
-            self.frame.insert(*args, iloc=iloc, segment='volume', **additional)
+            self.frame = FrameSpace().load(self.cdf_file, f'S{self.sector}')
+        except (FileNotFoundError, OSError):
+            self.frame = self.read_frame()
+
+    def read_frame(self):
+        """Return dataframe read from vtk file."""
+        parts = self.mesh.splitByConnectivity(10000)
+        frame = FrameSpace(label=f'fi{self.sector}', body='panel', delim='_')
+        tick = clock(len(parts), header='loading decimated convex hulls')
+        for i, part in enumerate(parts):
+            frame += dict(vtk=part.c(i),
+                          part=f'fi{self.sector}', ferritic=True)
+            tick.tock()
+        mode = 'a' if os.path.isfile(self.cdf_file) else 'w'
+        frame.store(self.cdf_file, f'S{self.sector}', mode=mode)
+        return frame
+
+    def plot(self):
+        """Plot vtk mesh."""
+        vedo.show(self.frame.vtk)
+
+
+@dataclass
+class FerriticInsert:
+    """Manage complete ferritic insert dataset."""
+
+    frame: FrameSpace = field(init=False, default_factory=FrameSpace)
+    shield: ShieldSector = field(init=False, default_factory=ShieldSector)
+
+    def __post_init__(self):
+        """Load sectors."""
+        for sector in self.shield.sectors:
+            self.frame = pandas.concat(
+                [self.frame, self.shield.load_sector(sector).frame])
+
+    def plot(self):
+        """Plot vtk mesh."""
+        vedo.show(self.frame.vtk)
 
 
 if __name__ == '__main__':
 
-    fset = FrameSet()
+    fi = FerriticInsert()
+    fi.plot()
+    #sheild = ShieldSector(6)
 
-    fmag = FerroMagnetic(*fset.frames)
-    fmag.insert(0, 0, 5, 0.2)
-    fmag.insert(2, 1, 2, volume=0.1)
-    fmag.insert(1, 3, 2, volume=5)
-
-    coil = Coil(*fset.frames, 0.5)
-    coil.insert(1, 5, dl=0.3, dt=0.1)
-
-    fset.frame.vtkplot()
+    #print(fi.frame)
+    #shield.read_frame()
+    # shield.plot()

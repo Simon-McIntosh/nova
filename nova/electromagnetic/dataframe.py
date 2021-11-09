@@ -36,8 +36,8 @@ class DataFrame(FrameAttrs):
                            energize or plot methods)
 
     """
-    
-    geoframe = dict(Polygon=PolyFrame, VTK=VtkFrame, Geo=GeoFrame)
+
+    geoframe = dict(Polygon=PolyFrame, VTK=VtkFrame, Geo=GeoFrame, Json=str)
 
     def __init__(self, data=None, index=None, columns=None,
                  attrs=None, **metadata):
@@ -67,7 +67,10 @@ class DataFrame(FrameAttrs):
         try:  # reverse search through frame index
             match = next(name for name in self.index[::-1]
                          if metatag['label'] in name)
-            offset = re.sub(r'[a-zA-Z]', '', match)
+            if metatag['delim'] and metatag['delim'] in match:
+                offset = int(match.split(metatag['delim'])[-1])
+            else:
+                offset = re.sub(r'[a-zA-Z]', '', match)
             if isinstance(offset, str):
                 offset = offset.replace(metatag['delim'], '')
                 offset = offset.replace('_', '')
@@ -216,12 +219,12 @@ class DataFrame(FrameAttrs):
     def _loads(self, col: str):
         """Load json strings and convert to shapely polygons."""
         geotype = [json.loads(geom)['type'] for geom in self[col]]
-        self.loc[:, col] = [self.geoframe[geo].loads(geom) 
+        self.loc[:, col] = [self.geoframe[geo].loads(geom)
                             for geom, geo in zip(self[col], geotype)]
 
     def geotype(self, geo: str, col: str):
         """Return boolean list of matching geoframe types."""
-        return np.array([isinstance(geom, self.geoframe[geo]) 
+        return np.array([isinstance(geom, self.geoframe[geo])
                          for geom in self[col]], dtype=bool)
 
     def store(self, file, group, mode='w'):
@@ -244,6 +247,7 @@ class DataFrame(FrameAttrs):
                 self._loads(col)
             except KeyError:
                 pass
+        return self
 
 
 if __name__ == '__main__':

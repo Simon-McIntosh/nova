@@ -10,30 +10,50 @@ from nova.utilities.time import clock
 
 
 @dataclass
-class Shield:
+class ShieldSector:
     """Manage shield sector."""
 
-    file: str = 'IWS_FM_PLATE_S4'
+    sector: int = 4
+    file: str = 'IWS_FM_PLATE'
     path: str = None
+    sectors: list[int] = field(init=False,
+                               default_factory=lambda: [2, 3, 4, 6])
     mesh: pv.PolyData = field(init=False, repr=False)
     geom: pv.PolyData = field(init=False, repr=False)
+    frame: FrameSpace = field(init=False)
 
     def __post_init__(self):
         """Load datasets."""
+        self.check_sector()
         if self.path is None:
             self.path = os.path.join(root_dir, 'input/geometry/ITER/shield')
         self.load_mesh()
         self.load_frame()
 
+    def check_sector(self):
+        """Check sector number."""
+        if self.sector not in self.sectors:
+            raise IndexError(f'sector {self.sector} not in {self.sectors}')
+
+    @property
+    def filename(self):
+        """Return sector filename."""
+        return f'{self.file}_S{self.sector}'
+
     @property
     def vtk_file(self):
         """Retun full vtk filename."""
-        return os.path.join(self.path, f'{self.file}.vtk')
+        return os.path.join(self.path, f'{self.filename}.vtk')
 
     @property
     def stl_file(self):
         """Return full stl filename."""
-        return os.path.join(self.path, f'{self.file}.stl')
+        return os.path.join(self.path, f'{self.filename}.stl')
+
+    @property
+    def cdf_file(self):
+        """Return netCDF filename."""
+        return os.path.join(self.path, f'{self.file}.nc')
 
     def load_mesh(self):
         """Load mesh."""
@@ -49,63 +69,33 @@ class Shield:
         return mesh
 
     def load_frame(self):
-        """Retun multiblock mesh."""
-        mesh = vedo.Mesh(self.vtk_file).scale(1e-3)
-        parts = mesh.splitByConnectivity(3)
+        """Load shield dataframe."""
+        try:
+            self.frame = FrameSpace().load(self.cdf_file, f'S{self.sector}')
+        except FileNotFoundError:
+            self.frame = self.read_frame()
 
-        frame = FrameSpace(label='fi', body='panel')
-        
-        #parts = [vedo.Mesh(pv.read('tmp.vtk'))]
-        blocks = []
-
+    def read_frame(self):
+        """Return dataframe read from vtk file."""
+        mesh = vedo.Mesh(self.vtk_file)
+        parts = mesh.splitByConnectivity(10000)
+        frame = FrameSpace(label=f'fiS{self.sector}', body='panel', delim='_')
         tick = clock(len(parts), header='loading decimated convex hulls')
         for i, part in enumerate(parts):
-            #pv.PolyData(part.polydata()).save('tmp.vtk')
-            #tri = TriPanel(part)
-
-            frame += dict(vtk=part, body='stl') #tri.frame
-
-            #blocks.append(tri.mesh.opacity(1).c(i))
-            #blocks.append(tri.panel.opacity(1).c(i+1))
-            #blocks.append(tri.panel.opacity(1).c(i+2))
-
-            #tet = TetPanel(tri.panel)
-
-            #print(tri.volume, tet.volume)
-            #print(block.center_mass)
-            '''
-            part.cap()
-            convex_hull = self.convex_hull(part)
-            blocks.append(convex_hull.c('b').opacity(1))
-            try:
-                center = self.center(part)
-            except RuntimeError:  # Failed to tetrahedralize (non-manifold)
-                self.part = part.clone()
-                center = self.center(part.decimate(0.1))
-            #center = self.center(convex_hull)
-            #center = part.centerOfMass()
-            #rotate = self.rotate(m)
-            #extent = self.extent(m, rotate)
-            #box.append(self.box(center, extent, rotate))
-            '''
+            frame += dict(vtk=part.scale(1e-3).c(i),
+                          part=f'fiS{self.sector}', ferritic=True)
             tick.tock()
-        self.frame = frame
-        #self.frame.store('tmp', 'frame')
-        #self.frame.load('tmp', 'frame')
-        vedo.show(frame.vtk)
+        frame.store(self.cdf_file, f'S{self.sector}')
+        return frame
 
     def plot(self):
-        """Plot mesh."""
-        plotter = pv.Plotter()
-        plotter.add_mesh(self.mesh, color='r', opacity=1)
-        plotter.add_mesh(self.box, color='g', opacity=0.75, show_edges=True)
-
-        #plotter.add_mesh(self.cell, color='b', opacity=1)
-        plotter.show()
+        """Plot vtk mesh."""
+        vedo.show(self.frame.vtk)
 
 
 if __name__ == '__main__':
 
-    shield = Shield('IWS_S6_BLOCKS')
-    #shield.plot()
-    #shield.load_stl()
+    shield = ShieldSector(2)
+    shield.plot()
+    #shield.read_frame()
+    # shield.plot()

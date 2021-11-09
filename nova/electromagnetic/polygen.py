@@ -22,21 +22,21 @@ class PolyFrame(shapely.geometry.Polygon, GeoFrame):
     def __str__(self):
         """Return polygon name."""
         return 'poly'
-    
+
     def dumps(self) -> str:
         """Return geojson representation."""
         return geojson.dumps(self)
-    
+
     @classmethod
     def loads(cls, poly: str):
         """Load geojson prepresentation."""
         return cls(shapely.geometry.shape(geojson.loads(poly)))
-        
-    
+
+
 @dataclass
 class PolyGen:
     """Manage shapely polygon."""
-    
+
     section: str
     polyshape: ClassVar[dict[str, str]] = \
             dict.fromkeys(['disk', 'dsk', 'd', 'o'], 'disk') | \
@@ -48,33 +48,33 @@ class PolyGen:
             dict.fromkeys(['shell', 'shl', 'sh'], 'shell') |\
             dict.fromkeys(['hexagon', 'hex', 'hx', 'h'], 'hexagon')
     poly: PolyFrame = field(init=False)
-    
+
     def __post_init__(self):
         """Generate polygon."""
         self.poly = self.generate_polygon()
-            
+
     def __call__(self, *args):
         """Evaluate poly."""
         return self.poly(*args)
-    
+
     def generate_polygon(self):
         """
         Generate shapley polygon from section name.
-        
+
         Parameters
         ----------
         section : str
             Required cross-section.
-        
+
         Raises
         ------
         IndexError
             Cross-section not in [disk, ellipse, square, rectangle, skin].
-        
+
         Returns
         -------
         shape : shapely.polygon
-        
+
         """
         section = self.section.rstrip(string.digits)
         if self.polyshape[section] == 'disk':
@@ -91,34 +91,34 @@ class PolyGen:
             return self.hexagon
         raise IndexError(f'cross_section: {self.section} not implemented'
                          f'\n specify as {self.polyshape}')
-            
+
     @staticmethod
     def boxbound(width, height):
         """
         Return minimum dimension.
-    
+
         Parameters
         ----------
         width : float
             Horizontal dimension.
         height : Union[float, None]
             Vertical dimension.
-    
+
         Returns
         -------
         mindim
             Dimension of minimum bounding box.
-    
+
         """
         if height is None:
             return width
         return np.min([width, height])
-    
+
     @staticmethod
     def disk(x_center, z_center, width, height=None):
         """
         Return shapely.cirle.
-    
+
         Parameters
         ----------
         x_center : float
@@ -129,23 +129,23 @@ class PolyGen:
             Disk bounding box, x-dimension.
         height : Optional[float]
             Disk bounding box, z-dimension..
-    
+
         Returns
         -------
         shape : shapely.polygon
-    
+
         """
         diameter = PolyGen.boxbound(width, height)
         radius = diameter / 2
         point = shapely.geometry.Point(x_center, z_center)
         buffer = point.buffer(radius, resolution=64)
         return PolyFrame(buffer, 'disk')
-    
+
     @staticmethod
     def ellipse(x_center, z_center, width, height):
         """
         Return shapely.ellipse.
-    
+
         Parameters
         ----------
         x_center : float
@@ -156,21 +156,21 @@ class PolyGen:
             Ellipse width, x-dimension.
         height : float
             Ellipse height, z-dimension.
-    
+
         Returns
         -------
         shape : shapely.polygon
-    
+
         """
         polygon = shapely.affinity.scale(PolyGen.disk(
             x_center, z_center, width), 1, height/width)
         return PolyFrame(polygon, name='ellipse')
-    
+
     @staticmethod
     def square(x_center, z_center, width, height=None):
         """
         Return shapely.square.
-    
+
         Parameters
         ----------
         x_center : float
@@ -181,22 +181,22 @@ class PolyGen:
             Square width.
         height : Optional[float]
             Square height.
-    
+
         Returns
         -------
         shape : shapely.polygon
-    
+
         """
         width = PolyGen.boxbound(width, height)
         polygon = shapely.geometry.box(x_center-width/2, z_center-width/2,
                                        x_center+width/2, z_center+width/2)
         return PolyFrame(polygon, name='square')
-    
+
     @staticmethod
     def rectangle(x_center, z_center, width, height):
         """
         Return shapely.rectangle.
-    
+
         Parameters
         ----------
         x_center : float
@@ -207,21 +207,21 @@ class PolyGen:
             Rectangle width, x-dimension.
         height : float
             Rectangle height, z-dimension.
-    
+
         Returns
         -------
         shape : shapely.polygon
-    
+
         """
         polygon = shapely.geometry.box(x_center-width/2, z_center-height/2,
                                        x_center+width/2, z_center+height/2)
         return PolyFrame(polygon, name='rectangle')
-    
+
     @staticmethod
     def skin(x_center, z_center, diameter, factor):
         """
         Return shapely.ring.
-    
+
         Parameters
         ----------
         x_center : float
@@ -233,16 +233,16 @@ class PolyGen:
         factor : float
             factor = 1-r/R. Must be greater than 0 and less than 1.
             Use disk for factor=1.
-    
+
         Raises
         ------
         ValueError
             factor outside range 0-1.
-    
+
         Returns
         -------
         shape : shapely.polygon
-    
+
         """
         if factor <= 0 or factor > 1:
             raise ValueError('skin factor not 0 <= '
@@ -254,12 +254,12 @@ class PolyGen:
         disk_inner = PolyGen.disk(x_center, z_center, scale*diameter)
         polygon = disk_outer.difference(disk_inner)
         return PolyFrame(polygon, name='skin')
-    
+
     @staticmethod
     def hexagon(x_center, z_center, width, height=None):
         """
         Return shapely.polygon.
-    
+
         Parameters
         ----------
         x_center : float
@@ -270,11 +270,11 @@ class PolyGen:
             Hexagon width, x-dimension.
         height : Optional[float]
             Hexagon height, z-dimension.
-    
+
         Returns
         -------
         shape : shapely.polygon
-    
+
         """
         length = PolyGen.boxbound(width/2, height/np.sqrt(3))
         points = [[x_center + np.cos(alpha) * length,

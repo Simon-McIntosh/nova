@@ -26,9 +26,9 @@ class TriPanel:
     mesh: vedo.Mesh
     qhull: bool = False
     tri: trimesh.Trimesh = field(init=False, repr=False)
-    features: ClassVar[list[str]] = [*'xyx', 'dx', 'dy', 'dz', 'dl','dt',
-                                     'area', 'volume']
-    
+    features: ClassVar[list[str]] = [
+        *'xyz', 'dx', 'dy', 'dz', 'dl', 'dt', 'area', 'volume']
+
     def __post_init__(self):
         """Create trimesh instance."""
         self.tri = trimesh.Trimesh(self.mesh.points(),
@@ -45,11 +45,13 @@ class TriPanel:
     def panel(self) -> vedo.Mesh:
         """Return scaled convex hull."""
         mesh = self._qhull.clone()
+        mesh.opacity(self.mesh.opacity())
+        mesh.c(self.mesh.c())
         mesh.origin(*self.center_mass)
         mesh.scale((self.volume / mesh.volume())**(1/3))
         return mesh
-    
-    @property 
+
+    @property
     def vtk(self) -> vedo.Mesh:
         """Return vtk representation."""
         if self.qhull:
@@ -89,8 +91,8 @@ class TriPanel:
         extent = np.max(points, axis=0) - np.min(points, axis=0)
         extent *= (self.volume / np.prod(extent))**(1 / 3)
         return extent
-    
-    @property 
+
+    @property
     def geom(self) -> tuple[float]:
         """Return list of geometry values as specified in self.features."""
         center = self.center_mass
@@ -99,7 +101,7 @@ class TriPanel:
         rotvec = rotate.as_rotvec()
         area = self.volume / extent[2]
         return [*center, *rotvec, extent[0], extent[2], area, self.volume]
-        
+
     @property
     def frame(self):
         """Return pannel Series."""
@@ -155,41 +157,36 @@ class TetPanel(TriPanel):
 @dataclass
 class VtkGeo(MetaMethod):
     """Volume vtk geometry."""
-    
+
     name = 'vtkgeo'
-    
+
     frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['vtk'])
     additional: list[str] = field(
         default_factory=lambda: [*TriPanel.features, 'body'])
     features: list[str] = field(
         init=False, default_factory=lambda: TriPanel.features)
-    
+    qhull: ClassVar[list[str]] = ['panel']
+    geom: ClassVar[list[str]] = ['panel', 'stl']
 
     def initialize(self):
         """Init vtk panel data."""
-        index = self.frame.index[~self.frame.geotype('Geo', 'vtk') & 
+        index = self.frame.index[~self.frame.geotype('Geo', 'vtk') &
+                                 ~self.frame.geotype('Json', 'vtk') &
                                  ~pandas.isna(self.frame.vtk != '')]
         if (index_length := len(index)) > 0:
-            #geom = np.empty((index_length, len(self.features)), dtype=float)
-            vtk = self.frame.loc[index, 'vtk'].values
+            frame = self.frame.loc[index, :]
             for i in range(index_length):
-                tri = TriPanel(vtk[i])
-                name = self.frame.index[i]
-                self.frame.loc[name, 'vtk'] = VtkFrame(tri.vtk)
-                
-                print(self.features)
-                print(tri.geom)
-                #self.frame.loc[name, self.features] = tri.geom
-                #geom[i] = tri.geom
-            #self.frame.loc[index, 'vtk'] = vtk
-            #print(self.features)
-            #print(tri.geom, np.shape(geom), index)
-            #self.frame.loc[index, self.features] = geom
-        #panel = TriPanel(part, self.frame.metaframe.default['scale'])
-        print(index)
+                tri = TriPanel(frame.vtk[i], qhull=frame.body[i] in self.qhull)
+                frame.loc[frame.index[i], 'vtk'] = \
+                    VtkFrame(tri.vtk.points(), tri.vtk.cells(),
+                             c=tri.vtk.c(), alpha=tri.vtk.opacity())
+                if frame.body[i] in self.geom:
+                    frame.loc[frame.index[i], self.features] = tri.geom
+                else:
+                    frame.loc[frame.index[i], 'volume'] = tri.volume
+            self.frame.loc[index, :] = frame
 
-    
 
 @dataclass
 class PolyGeo(MetaMethod):
@@ -214,7 +211,7 @@ class PolyGeo(MetaMethod):
 
     def initialize(self):
         """Init sectional polygon data."""
-        index = self.frame.index[~self.frame.geotype('Geo', 'poly') & 
+        index = self.frame.index[~self.frame.geotype('Geo', 'poly') &
                                  (self.frame.segment != '') &
                                  (self.frame.section != '')]
         if (index_length := len(index)) > 0:

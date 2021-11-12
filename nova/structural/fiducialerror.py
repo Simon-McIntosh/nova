@@ -47,8 +47,8 @@ class FiducialError:
         if self.radial_weight != 0:
             radius = np.linalg.norm(self.data.centerline[:, :2], axis=1)
             radius.shape = (-1, 1)
-            return np.linalg.norm(radius**self.radial_weight *
-                                  delta) / np.sum(radius**self.radial_weight)
+            weight = radius**self.radial_weight
+            return np.linalg.norm(weight * delta) / np.sum(weight)
         return np.linalg.norm(delta)
 
     def transform(self, translate, centerline, origin):
@@ -179,7 +179,7 @@ class FiducialError:
         axes = plt.subplots(3, 2, sharex=True, sharey=True)[1]
         plt.subplots_adjust(wspace=0.45)
         loc = range(18)
-        wavenumber = [0, 1, 2]
+        wavenumber = [1, 2, 3]
         for i, coord in enumerate(['x', 'y', 'z']):
             delta = self.data.fit_translate.sel(translate=coord)[loc]
             self.plot_wave(axes[i, 0], delta.values, wavenumber)
@@ -206,9 +206,9 @@ if __name__ == '__main__':
 
     data = FiducialData(fill=True, sead=2025).data
     error = FiducialError(data)
-    error.fit_coilset(radial_weight=1)
+    error.fit_coilset(radial_weight=-1)
 
-    #error.plot_coilset()
+    error.plot_coilset()
 
-    error.plot(0)
+    #error.plot(0)
     #error.plot_error()

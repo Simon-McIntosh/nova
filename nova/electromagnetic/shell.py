@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 from nova.electromagnetic.gridattrs import GridAttrs
 from nova.electromagnetic.shellgrid import ShellGrid
-from nova.electromagnetic.polygon import Polygon
+from nova.electromagnetic.polygeom import Polygon
 
 
 @dataclass

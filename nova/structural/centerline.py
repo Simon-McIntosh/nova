@@ -1,7 +1,8 @@
 """Generate geodesic centerline from uniform winding-pack mesh."""
 from dataclasses import dataclass, field
-
 import os
+
+import numpy as np
 import pyvista as pv
 
 from nova.definitions import root_dir
@@ -38,7 +39,8 @@ class CenterLine(Line):
         """Build single coil centerline from uniform winding-pack."""
         windingpack = UniformWindingPack()
         cluster = ClusterTurns(windingpack.mesh, 1)
-        self.mesh = pv.Spline(cluster.mesh.cell_points(0))
+        points = cluster.mesh.cell_points(0)
+        self.mesh = pv.Spline(np.append(points, points[:1], axis=0))
         self.mesh['arc_length'] /= self.mesh['arc_length'][-1]
         self.vector(self.mesh)
 
@@ -54,11 +56,13 @@ class CenterLine(Line):
         """Plot centerline vectors as glyphs."""
         if vector not in self.mesh.array_names:
             raise IndexError(f'vector {vector} not in {self.mesh.array_names}')
-        self.mesh.vectors = self.mesh[vector]
+        self.mesh[vector] = self.mesh[vector]
+        self.mesh.active_vectors_name = vector
         self.mesh.arrows.plot(scalars='arc_length')
 
 
 if __name__ == '__main__':
 
     cl = CenterLine()
-    cl.plot_vectors('normal')
+    #cl.mesh.plot()
+    #cl.plot_vectors('normal')

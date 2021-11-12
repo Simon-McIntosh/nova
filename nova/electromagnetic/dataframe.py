@@ -2,14 +2,15 @@
 import re
 import string
 
-import geojson
 import json
 import pandas
 import numpy as np
-import shapely
 import xarray
 
 from nova.electromagnetic.frameattrs import FrameAttrs
+from nova.electromagnetic.geoframe import GeoFrame
+from nova.electromagnetic.polygen import PolyFrame
+from nova.electromagnetic.vtkgen import VtkFrame
 
 # pylint: disable=too-many-ancestors
 
@@ -35,6 +36,8 @@ class DataFrame(FrameAttrs):
                            energize or plot methods)
 
     """
+
+    geoframe = dict(Polygon=PolyFrame, VTK=VtkFrame, Geo=GeoFrame, Json=str)
 
     def __init__(self, data=None, index=None, columns=None,
                  attrs=None, **metadata):
@@ -64,7 +67,10 @@ class DataFrame(FrameAttrs):
         try:  # reverse search through frame index
             match = next(name for name in self.index[::-1]
                          if metatag['label'] in name)
-            offset = re.sub(r'[a-zA-Z]', '', match)
+            if metatag['delim'] and metatag['delim'] in match:
+                offset = int(match.split(metatag['delim'])[-1])
+            else:
+                offset = re.sub(r'[a-zA-Z]', '', match)
             if isinstance(offset, str):
                 offset = offset.replace(metatag['delim'], '')
                 offset = offset.replace('_', '')
@@ -206,37 +212,42 @@ class DataFrame(FrameAttrs):
                     self.loc[:, 'Ic'] = \
                         self.loc[:, 'It'] / self.loc[:, 'nturn']
 
-    def to_geojson(self, col='poly'):
-        """Return col as geojson list."""
-        return [geojson.dumps(geo) for geo in self[col]]
+    def _dumps(self, col: str):
+        """Return poly as list of json strings."""
+        return [geom.dumps() for geom in self[col]]
 
-    def to_json(self, col='poly'):
-        """Return col as json list with name, link and factor attrs."""
-        return [dict(name=name, link=row['link'], factor=row['factor']) |
-                json.loads(geojson.dumps(row[col]))
-                for name, row in self.iterrows()]
+    def _loads(self, col: str):
+        """Load json strings and convert to shapely polygons."""
+        geotype = [json.loads(geom)['type'] for geom in self[col]]
+        self.loc[:, col] = [self.geoframe[geo].loads(geom)
+                            for geom, geo in zip(self[col], geotype)]
 
-    def to_poly(self, col='poly'):
-        """Load gegjson strings and convert to shapely polygons."""
-        index = [isinstance(poly, str) and poly != 'null'
-                 for poly in self[col]]
-        self.loc[index, col] = [shapely.geometry.shape(geojson.loads(geo))
-                                for geo in self.loc[index, col]]
+    def geotype(self, geo: str, col: str):
+        """Return boolean list of matching geoframe types."""
+        return np.array([isinstance(geom, self.geoframe[geo])
+                         for geom in self[col]], dtype=bool)
 
     def store(self, file, group, mode='w'):
         """Store dataframe as group in netCDF4 hdf5 file."""
         xframe = self.to_xarray()
         xframe.attrs = self.metaframe.metadata
-        if 'poly' in xframe:
-            xframe['poly'].values = self.to_geojson()
+        for col in ['poly', 'vtk']:
+            try:
+                xframe[col].values = self._dumps(col)
+            except KeyError:
+                pass
         xframe.to_netcdf(file, group=group, mode=mode)
 
     def load(self, file, group):
         """Load dataframe from hdf file."""
         with xarray.open_dataset(file, group=group) as data:
             self.__init__(data.to_dataframe(), **data.attrs)
-        if 'poly' in self:
-            self.to_poly()
+        for col in ['poly', 'vtk']:
+            try:
+                self._loads(col)
+            except KeyError:
+                pass
+        return self
 
 
 if __name__ == '__main__':

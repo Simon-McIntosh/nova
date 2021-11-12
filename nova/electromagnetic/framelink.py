@@ -14,7 +14,7 @@ from nova.electromagnetic.dataarray import (
     )
 from nova.electromagnetic.energize import Energize
 from nova.electromagnetic.multipoint import MultiPoint
-from nova.electromagnetic.polygon import Polygon
+from nova.electromagnetic.polygeom import Polygon
 
 
 # pylint: disable=too-many-ancestors

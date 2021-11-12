@@ -15,7 +15,7 @@ from nova.electromagnetic.metadata import MetaData
 class MetaArray(MetaData):
     """Manage DataFrame metadata - accessed via DataFrame['attrs']."""
 
-    index: pandas.Index = field(default=pandas.Index([]))
+    index: pandas.Index = field(repr=False, default=pandas.Index([]))
     data: dict[str, Iterable[Union[str, int, float]]] = field(init=False)
 
     def __post_init__(self):
@@ -81,13 +81,14 @@ class MetaFrame(MetaSet):
             'area': 0., 'volume': 0.,
             'delta': 0., 'nturn': 1., 'nfilament': 1.,
             'material': '', 'mass': '', 'rho': 0.,
-            'section': 'rectangle', 'turn': 'rectangle', 'turnturn': 1.,
-            'scale': 1., 'skin': 1.,
-            'poly': None, 'frame': '', 'part': '',
+            'section': 'rectangle', 'turn': 'rectangle', 'body': 'panel',
+            'turnturn': 1., 'scale': 1., 'skin': 1.,
+            'poly': None, 'vtk': None, 'frame': '', 'part': '',
             'link': '', 'factor': 1., 'ref': 0, 'subref': 0,
             'active': True, 'fix': True, 'plasma': False,
             'passive': False, 'free': False, 'coil': True,
             'ionize': False, 'feedback': False, 'acloss': False,
+            'ferritic': False,
             'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.,
             'name': '', 'label': 'Coil', 'delim': '', 'offset': 0})
     tag: list[str] = field(default_factory=lambda: [

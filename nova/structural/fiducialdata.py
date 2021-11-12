@@ -8,6 +8,7 @@ import pyvista as pv
 import xarray
 
 from nova.structural.centerline import CenterLine
+from nova.structural.fiducialccl import Fiducial, FiducialIDM, FiducialRE
 from nova.structural.gaussianprocessregressor import GaussianProcessRegressor
 from nova.structural.plotter import Plotter
 from nova.utilities.pyplot import plt
@@ -17,6 +18,7 @@ from nova.utilities.pyplot import plt
 class FiducialData(Plotter):
     """Manage ccl fiducial data."""
 
+    fiducial: Fiducial = 'RE'
     fill: bool = True
     sead: int = 2025
     rawdata: dict[str, pandas.DataFrame] = \
@@ -27,6 +29,8 @@ class FiducialData(Plotter):
 
     def __post_init__(self):
         """Load data."""
+        if not isinstance(self.fiducial, Fiducial):
+            self.fiducial = dict(RE=FiducialRE, IDM=FiducialIDM)[self.fiducial]
         self.build_dataset()
         if self.fill:
             self.backfill()
@@ -54,8 +58,6 @@ class FiducialData(Plotter):
                                'JA', 'EU', 'JA', 'EU', 'JA', 'JA', 'JA',
                                'JA', 'JA', 'EU', 'EU', 'JA'])
         rng = np.random.default_rng(self.sead)  # sead random number generator
-
-        # self.data['clone'] = ('coil', np.full(self.data.dims['coil'], -1))
         self.data = self.data.assign_coords(
             clone=('coil', np.full(self.data.dims['coil'], -1)))
         fill = []
@@ -136,23 +138,12 @@ class FiducialData(Plotter):
 
     def load_fiducial_deltas(self):
         """Load fiducial deltas."""
-        '''
-        delta, origin = {}, []
-        for i in range(1, 20):
-            index = f'{i:02d}'
-            try:
-                data = getattr(self, f'_tfc{index}')
-                delta[i] = data[0].reindex(self.data.target)
-                origin.append(data[1])
-            except NotImplementedError:
-                continue
-        '''
+        delta, origin = self.fiducial(self.data.target).data
         self.data['coil'] = list(delta)
         self.data = self.data.assign_coords(origin=('coil', origin))
         self.data['fiducial_delta'] = (('coil', 'target', 'space'),
                                        np.stack([delta[index]
                                                  for index in delta], axis=0))
-
         self.data['centerline_delta'] = xarray.DataArray(
             0., coords=[('coil', self.data.coil.values),
                         ('arc_length', self.data.arc_length.values),
@@ -256,13 +247,16 @@ class FiducialData(Plotter):
 
 if __name__ == '__main__':
 
-    fiducial = FiducialData(fill=False)
+    fiducial = FiducialData('IDM', fill=False)
+    #fiducial.plot_single(-3)
+    #fiducial.plot_gpr(1, 0)
 
+    '''
     plotter = pv.Plotter()
     fiducial.warp(500, plotter=plotter)
     fiducial.label_coils(plotter)
     plotter.show_axes()
     plotter.show()
-
-    #fiducial.plot()
+    '''
+    fiducial.plot()
     #fiducial.plot_gpr_array(1)

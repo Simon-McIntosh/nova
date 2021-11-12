@@ -50,7 +50,7 @@ class TFCgap(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    gap = TFCgap('TFCgapsG10', 'v0_65', baseline='v0', cluster=1)
+    gap = TFCgap('TFCgapsG10', 'k1', baseline='k0', cluster=1)
 
     #mesh = gap.mesh.slice(normal=[0, 0, 1])
     #clip = pv.Cylinder(direction=(0, 0, 1), radius=3)
@@ -60,5 +60,5 @@ if __name__ == '__main__':
     #p.add_mesh(mesh)
     #p.show()
 
-    gap.warp(160, displace='TFonly', opacity=0.5)
+    gap.warp(160, displace='EOB', opacity=0.5)
     #gap.animate('EOB', 1000)

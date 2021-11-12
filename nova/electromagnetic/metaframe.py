@@ -15,7 +15,7 @@ from nova.electromagnetic.metadata import MetaData
 class MetaArray(MetaData):
     """Manage DataFrame metadata - accessed via DataFrame['attrs']."""
 
-    index: pandas.Index = field(default=pandas.Index([]))
+    index: pandas.Index = field(repr=False, default=pandas.Index([]))
     data: dict[str, Iterable[Union[str, int, float]]] = field(init=False)
 
     def __post_init__(self):

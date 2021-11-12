@@ -93,14 +93,20 @@ class TriPanel:
         return extent
 
     @property
+    def rotvec(self):
+        """Return oriented bounding box rotation vector."""
+        return self.rotate.as_rotvec()
+
+    @property
     def geom(self) -> tuple[float]:
         """Return list of geometry values as specified in self.features."""
         center = self.center_mass
         rotate = self.rotate
         extent = self.extent(rotate)
-        rotvec = rotate.as_rotvec()
+        bounds = self.mesh.bounds()
+        delta = np.array(bounds[1::2]) - np.array(bounds[::2])
         area = self.volume / extent[2]
-        return [*center, *rotvec, extent[0], extent[2], area, self.volume]
+        return [*center, *delta, extent[0], extent[2], area, self.volume]
 
     @property
     def frame(self):

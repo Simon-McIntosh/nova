@@ -31,6 +31,10 @@ class VtkFrame(vedo.Mesh, GeoFrame):
         return cls(vtk['points'], vtk['cells'],
                    c=vtk['color'], alpha=vtk['opacity'])
 
+    @property
+    def mesh(self) -> vedo.Mesh:
+        """Return mesh instance."""
+        return vedo.Mesh(self).c(self.color()).opacity(self.opacity())
 
 ##@dataclass
 #class VtkGen:

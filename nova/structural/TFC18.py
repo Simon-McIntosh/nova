@@ -156,11 +156,13 @@ class TFC18(DataDir, Plotter):
 
     def export(self):
         """Export dataset."""
-        for file in ['c1', 'c2', 'a1', 'a2'] + [f'k{i}' for i in range(10)]:
-            for cluster in [1, 5, 10]:
+        files = [f'kp{i}' for i in range(5, 10)]
+        for file in files:
+            print(file)
+            for cluster in [1]:  # [1, 5, 10]:
                 self.cluster = cluster
                 self.reload(file)
-                for scenario in ['TFonly', 'SOD', 'EOB']:
+                for scenario in ['EOB']:  # ['TFonly', 'SOD', 'EOB']:
                     self.to_dataframe(scenario)
 
     def animate(self, displace: str, view='xy'):
@@ -172,9 +174,10 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'v3_65_f4e', cluster=1)
+    tf = TFC18('TFCgapsG10', 'k9', cluster=1)
     #tf.recalculate()
-    tf.to_dataframe('EOB')
+    tf.export()
+    #tf.to_dataframe('EOB')
 
     #tf.load_ensemble()
 

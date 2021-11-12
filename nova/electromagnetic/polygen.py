@@ -21,7 +21,7 @@ class PolyFrame(shapely.geometry.Polygon, GeoFrame):
 
     def __str__(self):
         """Return polygon name."""
-        return 'poly'
+        return self.name
 
     def dumps(self) -> str:
         """Return geojson representation."""
@@ -39,14 +39,14 @@ class PolyGen:
 
     section: str
     polyshape: ClassVar[dict[str, str]] = \
-            dict.fromkeys(['disk', 'dsk', 'd', 'o'], 'disk') | \
-            dict.fromkeys(['ellipse', 'ellip', 'el', 'e'], 'ellipse') | \
-            dict.fromkeys(['square', 'sq', 's'], 'square') | \
-            dict.fromkeys(['rectangle', 'rect', 'r'], 'rectangle') | \
-            dict.fromkeys(['skin', 'sk'], 'skin') | \
-            dict.fromkeys(['polygon', 'poly'], 'polygon') |\
-            dict.fromkeys(['shell', 'shl', 'sh'], 'shell') |\
-            dict.fromkeys(['hexagon', 'hex', 'hx', 'h'], 'hexagon')
+        dict.fromkeys(['disk', 'dsk', 'd', 'o'], 'disk') | \
+        dict.fromkeys(['ellipse', 'ellip', 'el', 'e'], 'ellipse') | \
+        dict.fromkeys(['square', 'sq', 's'], 'square') | \
+        dict.fromkeys(['rectangle', 'rect', 'r'], 'rectangle') | \
+        dict.fromkeys(['skin', 'sk'], 'skin') | \
+        dict.fromkeys(['polygon', 'poly'], 'polygon') |\
+        dict.fromkeys(['shell', 'shl', 'sh'], 'shell') |\
+        dict.fromkeys(['hexagon', 'hex', 'hx', 'h'], 'hexagon')
     poly: PolyFrame = field(init=False)
 
     def __post_init__(self):

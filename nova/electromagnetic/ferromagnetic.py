@@ -1,10 +1,9 @@
 """Manage ferromagnetic insert geometry."""
-from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 import os
 from typing import ClassVar
 
-import pandas
+import sklearn.cluster
 import vedo
 
 from nova.definitions import root_dir
@@ -91,9 +90,9 @@ class ShieldCad(ShieldDir, ShieldBase):
         """Return mesh."""
         if os.path.isfile(self.vtk_file):
             return vedo.Mesh(self.vtk_file)
-        return self.read_stl()
+        return self.build_mesh()
 
-    def read_stl(self):
+    def build_mesh(self):
         """Read stl file."""
         mesh = vedo.Mesh(self.stl_file).scale(1e-3)
         self.store_mesh(mesh)
@@ -135,14 +134,30 @@ class ShieldCad(ShieldDir, ShieldBase):
 class ShieldSector(ShieldCad):
     """Manage shield sector rotations."""
 
+    avalible: ClassVar[list[int]] = range(1, 10)
+
     def __post_init__(self):
         """Load base data."""
-        try:
-            super().__post_init__()
-        except (FileNotFoundError, IndexError):
-            self._rotate()
-        #if self.sector not in self.avalible:
-        #    self._rotate()
+        super().__post_init__()
+
+    def build_mesh(self):
+        """Build sector mesh via base rotation."""
+        if self.sector in ShieldCad.avalible:
+            return super().build_mesh()
+        return self.rotate('mesh')
+
+    def build_frame(self):
+        """Build sector frame via base rotation."""
+        if self.sector in ShieldCad.avalible:
+            return super().build_frame()
+        return self.rotate('frame')
+
+    def rotate(self, attribute: str):
+        """Perform base rotation."""
+        if hasattr(self, attribute):
+            return getattr(self, attribute)
+        self._rotate()
+        return getattr(self, attribute)
 
     def _rotate(self, base_sector=6):
         """Generate mesh and frame data via rotation from base."""
@@ -175,30 +190,88 @@ class ShieldSet(ShieldDir):
     file: str = 'IWS_FM'
     mesh: vedo.Mesh = field(init=False, repr=False)
     frame: FrameSpace = field(init=False, repr=False)
+    avalible: ClassVar[list[int]] = range(1, 10)
 
     def __post_init__(self):
         """Load shieldset."""
-        self.build()
+        super().__post_init__()
+        self.frame = self.load_frame()
 
-    def build(self, index=range(1, 10)):
-        """Build complete ferritic sheildset."""
-        tick = clock(len(index), header='building ferritic insert dataset')
-        mesh = vedo.Mesh()
-        frame = []
-        for i in index:
+    def load(self):
+        """Load shieldset."""
+
+    @property
+    def vtk_file(self):
+        """Retun full vtk filename."""
+        return os.path.join(self.path, f'{self.file}.vtk')
+
+    def load_mesh(self):
+        """Return mesh."""
+        if os.path.isfile(self.vtk_file):
+            return vedo.Mesh(self.vtk_file)
+        return self.build_mesh()
+
+    def load_frame(self):
+        """Return shield dataframe."""
+        try:
+            return FrameSpace().load(self.cdf_file)
+        except (FileNotFoundError, OSError):
+            return self.build_frame()
+
+    def build_mesh(self):
+        """Build complete ferritic sheildset vtk mesh."""
+        tick = clock(len(self.avalible),
+                     header='building ferritic insert mesh')
+        mesh = []
+        for i in self.avalible:
             sector = ShieldSector(i)
-            mesh += sector.mesh
+            mesh.append(sector.mesh)
+            tick.tock()
+        mesh = vedo.merge(mesh)
+        mesh.write(self.vtk_file)
+        return mesh
+
+    def build_frame(self):
+        """Build complete ferritic sheildset dataframe."""
+        tick = clock(len(self.avalible),
+                     header='building ferritic insert dataset')
+        frame = []
+        for i in self.avalible:
+            sector = ShieldSector(i)
             frame.append(sector.frame)
             tick.tock()
-        self.mesh = mesh
-        self.frame = pandas.concat(frame)
+        frame = FrameSpace().concatenate(*frame)
+        frame.store(self.cdf_file, mode='w')
+
+    @staticmethod
+    def _cluster(frame: FrameSpace, eps_factor=1.5):
+        """Cluster shield panels."""
+        points = frame.loc[:, ['x', 'y', 'z']]
+        eps = eps_factor*frame.dt.max()
+        cluster = sklearn.cluster.DBSCAN(eps=eps, min_samples=1).fit(points)
+
+        labels = set(cluster.labels_)
+
+
+
 
     def plot_mesh(self):
         """Plot vtk mesh."""
         vedo.show(self.mesh, *self.frame.vtk, axes=3)
 
+    def plot_points(self):
+        """Plot centroid point cloud."""
+        vedo.show(vedo.Mesh(self.frame.loc[:, ['x', 'y', 'z']].values))
+
 
 if __name__ == '__main__':
 
     shield = ShieldSet()
-    shield.plot_mesh()
+
+    shield._cluster(shield.frame[shield.frame])
+
+
+
+    #shield.plot_points()
+    #shield.frame.polyplot()
+    #shield.plot_mesh()

@@ -1,25 +1,15 @@
 """Methods for ploting FrameSpace data."""
 from dataclasses import dataclass, field
-from typing import Union
 import colorsys
-from collections import Counter
-import functools
-import operator
 
 import descartes
 import numpy as np
-import matplotlib
 from matplotlib.collections import PatchCollection
 import matplotlib.colors as mc
-import pandas
-import shapely.geometry
 
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.error import ColumnError
 from nova.electromagnetic.baseplot import Axes, Display, Label, BasePlot
-from nova.utilities.IO import human_format
-from nova.utilities.pyplot import plt
 
 # pylint:disable=unsubscriptable-object
 

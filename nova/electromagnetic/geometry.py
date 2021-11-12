@@ -1,5 +1,6 @@
 """Geometric methods for FrameSpace class."""
 from dataclasses import dataclass, field
+import tempfile
 from typing import ClassVar
 
 import meshio
@@ -7,7 +8,7 @@ import numpy as np
 import pandas
 import pyvista as pv
 from scipy.spatial.transform import Rotation
-import tempfile
+import shapely.geometry
 import trimesh
 import vedo
 import vtk
@@ -113,6 +114,16 @@ class TriPanel:
         """Return pannel Series."""
         return pandas.Series(self.geom, index=self.features)
 
+    @property
+    def poly(self):
+        """Return polodial polygon."""
+        points = self._qhull.points()
+        poloidal = np.zeros((len(points), 2))
+        poloidal[:, 0] = np.linalg.norm(points[:, :2], axis=1)
+        poloidal[:, 1] = points[:, 2]
+        return PolyFrame(shapely.geometry.MultiPoint(poloidal).convex_hull,
+                         name='vtk')
+
 
 @dataclass
 class TetPanel(TriPanel):
@@ -169,7 +180,8 @@ class VtkGeo(MetaMethod):
     frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['vtk'])
     additional: list[str] = field(
-        default_factory=lambda: [*TriPanel.features, 'body'])
+        default_factory=lambda: [*TriPanel.features, 'body',
+                                 'segment', 'section', 'poly'])
     features: list[str] = field(
         init=False, default_factory=lambda: TriPanel.features)
     qhull: ClassVar[list[str]] = ['panel']
@@ -179,7 +191,7 @@ class VtkGeo(MetaMethod):
         """Init vtk panel data."""
         index = self.frame.index[~self.frame.geotype('Geo', 'vtk') &
                                  ~self.frame.geotype('Json', 'vtk') &
-                                 ~pandas.isna(self.frame.vtk != '')]
+                                 ~pandas.isna(self.frame.vtk)]
         if (index_length := len(index)) > 0:
             frame = self.frame.loc[index, :]
             for i in range(index_length):
@@ -189,6 +201,8 @@ class VtkGeo(MetaMethod):
                              c=tri.vtk.c(), alpha=tri.vtk.opacity())
                 if frame.body[i] in self.geom:
                     frame.loc[frame.index[i], self.features] = tri.geom
+                    frame.loc[frame.index[i], ['segment', 'section']] = ''
+                    frame.loc[frame.index[i], 'poly'] = tri.poly
                 else:
                     frame.loc[frame.index[i], 'volume'] = tri.volume
             self.frame.loc[index, :] = frame
@@ -218,6 +232,7 @@ class PolyGeo(MetaMethod):
     def initialize(self):
         """Init sectional polygon data."""
         index = self.frame.index[~self.frame.geotype('Geo', 'poly') &
+                                 ~self.frame.geotype('Json', 'poly') &
                                  (self.frame.segment != '') &
                                  (self.frame.section != '')]
         if (index_length := len(index)) > 0:

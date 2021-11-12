@@ -82,8 +82,9 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
     def generate(self):
         """Generate plasma attributes, build STR tree."""
         self.number = self.subframe.plasma.sum()
-        self.boundary = self.frame.at['Plasma', 'poly']
-        self.tree = self.generate_tree()
+        if self.number > 0:
+            self.boundary = self.frame.at['Plasma', 'poly']
+            self.tree = self.generate_tree()
 
     def generate_tree(self):
         """

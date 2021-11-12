@@ -66,7 +66,7 @@ class FrameSpace(SpaceIndexer, FrameLink):
     def __init__(self, data=None, index=None, columns=None,
                  attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.frame_attrs(Select, PolyGeo, PolyPlot, VtkGeo, VtkPlot)
+        self.frame_attrs(Select, PolyGeo, VtkGeo, PolyPlot, VtkPlot)
         self.attrs['subspace'] = SubSpace(self)
 
     def __repr__(self):
@@ -133,8 +133,10 @@ def set_current():
 
 def get_current():
     """Test current access."""
-    _ = framespace.loc[:, 'Ic']
-    # _ = framespace['Ic']
+    _ = framespace.loc[:, 'Ic']  # 531 µs nC=40
+    # _ = framespace['Ic']  # 86.5 µs nC=40
+    # _ = framespace.Ic  # 98.6 µs nC=40
+    # _ = framespace.subspace.Ic  # 31.5 µs nC=40
 
 
 if __name__ == '__main__':
@@ -142,18 +144,13 @@ if __name__ == '__main__':
     framespace = FrameSpace(base=['x', 'y', 'z'],
                             required=['x', 'z'],
                             available=['It', 'poly'],
-                            Subspace=[],
+                            Subspace=['Ic'],
                             Array=['Ic'])
-    framespace.insert([4, 5], 1, Ic=6.5, name='PF1',
+    framespace.insert(range(40), 1, Ic=6.5, name='PF1',
                       active=False, plasma=True)
-    
-    framespace.store('tmp', 'frame')
-    
-    framespace = FrameSpace()
-    framespace.load('tmp', 'frame')
-    #print(framespace.poly[0])
-    
-    framespace.polyplot()
+
+    #for _ in range(1000):
+    #    get_current()
 
     '''
     framespace.insert(range(40), 3, Ic=4, nturn=20, label='PF', link=True)

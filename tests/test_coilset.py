@@ -1,6 +1,8 @@
-import pytest
+
+import tempfile
 
 import numpy as np
+import pytest
 
 from nova.electromagnetic.coilset import CoilSet
 
@@ -185,6 +187,17 @@ def test_array_format():
     coilset.coil.insert(0.8, [0.5, 1, 1.5], 0.25, 0.45, link=True)
     coilset.sloc['Ic'] = 11
     assert isinstance(coilset.sloc[0, 'Ic'], float)
+
+
+def test_store_load_poly():
+    coilset = CoilSet(dcoil=-35, dplasma=-40)
+    coilset.coil.insert(10, 0.5, 0.95, 0.95, section='hex', turn='r',
+                        nturn=-0.8)
+    with tempfile.NamedTemporaryFile() as tmp:
+        coilset.store(tmp.name)
+        new_coilset = CoilSet().load(tmp.name)
+    assert np.isclose(coilset.frame.poly[0].area,
+                      new_coilset.frame.poly[0].area)
 
 
 if __name__ == '__main__':

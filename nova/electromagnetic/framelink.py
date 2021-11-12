@@ -51,7 +51,12 @@ class LinkIndexer(ArrayIndexer):
 
 
 class FrameLink(LinkIndexer, DataArray):
-    """Extend DataArray. Implement multipoint link and energize methods."""
+    """
+    Extend DataArray.
+
+    - Extend boolean methods (insert, ...).
+    - Implement multipoint link and energize methods.
+    """
 
     def __init__(self, data=None, index=None, columns=None,
                  attrs=None, **metadata):
@@ -105,7 +110,7 @@ class FrameLink(LinkIndexer, DataArray):
         if isinstance(obj, pandas.DataFrame) and dataframe:
             return True
         return False
-    
+
     @contextmanager
     def insert_required(self, required=None):
         """Manage local required arguments."""
@@ -115,7 +120,7 @@ class FrameLink(LinkIndexer, DataArray):
         self.update_metaframe(dict(Required=required))
         yield
         self.update_metaframe(dict(Required=_required))
-    
+
     def _unpack_add(self, other):
         """Return required, iloc and additional input for insert operator."""
         if isinstance(other, pandas.DataFrame):
@@ -123,7 +128,7 @@ class FrameLink(LinkIndexer, DataArray):
         if isinstance(other, dict):
             return [], other, None
         return other, dict(), None
-    
+
     def __add__(self, other: Union[pandas.DataFrame, dict, npt.ArrayLike]):
         args, kwargs, required = self._unpack_add(other)
         with self.insert_required(required):
@@ -168,6 +173,7 @@ class FrameLink(LinkIndexer, DataArray):
             frames = [frame.iloc[:iloc, :], *insert, frame.iloc[iloc:, :]]
         frame = pandas.concat(frames, sort=sort)  # concatenate
         self.__init__(frame, attrs=self.attrs)
+        return self
 
     def drop(self, index=None):
         """Drop frame(s) from index."""
@@ -362,6 +368,5 @@ if __name__ == '__main__':
     framelink.insert([-4, -5], 1, Ic=6.5, name='PF1',
                      active=False, plasma=True, frame='coil1')
     framelink.insert(range(4), 3, Ic=4, nturn=20, label='PF', link=True)
-    
-    #framelink.multipoint.link(['PF1', 'PF5'], factor=1)
 
+    #framelink.multipoint.link(['PF1', 'PF5'], factor=1)

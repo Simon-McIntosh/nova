@@ -12,8 +12,6 @@ from nova.electromagnetic.framedata import FrameData
 from nova.electromagnetic.shell import Shell
 from nova.electromagnetic.plasma import Plasma
 
-from nova.utilities.pyplot import plt
-
 
 @dataclass
 class CoilGrid:
@@ -84,6 +82,7 @@ class CoilSet(CoilGrid, FrameSet):
                 getattr(self, attr).load(file)
             except OSError:
                 pass
+        return self
 
     def plot(self, axes=None):
         """Plot coilset."""
@@ -128,17 +127,11 @@ if __name__ == '__main__':
     coilset.sloc['Shl0', 'Ic'] = -5
 
 
-    print(coilset)
-
     coilset.plot()
-    #plt.plot(*coilset.subframe.loc[:, ['x', 'z']].to_numpy().T, '.')
 
     coilset.grid.solve(1e3, 0.05)
     coilset.grid.plot()
 
-    coilset.store('tmp')
 
-    coilset = CoilSet()
-    coilset.load('tmp')
 
     #coilset.frame.vtkplot()

@@ -55,7 +55,9 @@ class MetaData(ABC):
             replace = attribute[0].isupper()
             value = metadata[attribute]
             attribute = attribute.lower()
-            if not value:  # [], None or False
+            if value is None or value is False:
+                value = []
+            if len(value) == 0:  # [], None or False
                 setattr(self, attribute, types[attribute]())
             else:
                 if not isinstance(value, types[attribute]):

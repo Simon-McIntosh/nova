@@ -81,7 +81,7 @@ class PolyGeom(Geom):
             self.section = self.poly.name
         except AttributeError:
             if self.section is not None:  # inflate shorthand
-                self.section = PolyGen.polyshape[self.section]  
+                self.section = PolyGen.polyshape[self.section]
 
     @property
     def area(self):
@@ -163,7 +163,7 @@ class PolyGeom(Geom):
                 'dx': self.delta_x, 'dy': self.delta_y, 'dz': self.delta_z,
                 'area': self.area, 'rms': self.rms,
                 'poly': self.poly, 'section': self.section}
-    
+
 
 @dataclass
 class Polygon(PolyGeom):
@@ -278,4 +278,3 @@ class Polygon(PolyGeom):
     def limit(self):
         """Return polygon bounding box (xmin, xmax, zmin, zmax)."""
         return self.xlim + self.zlim
-

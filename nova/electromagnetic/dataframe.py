@@ -31,7 +31,6 @@ class DataFrame(FrameAttrs):
     """
     Extend pandas.DataFrame.
 
-    - Extend boolean methods (insert, ...).
     - DataFrame singleton (no subspace, select, geometory, multipoint,
                            energize or plot methods)
 
@@ -227,7 +226,7 @@ class DataFrame(FrameAttrs):
         return np.array([isinstance(geom, self.geoframe[geo])
                          for geom in self[col]], dtype=bool)
 
-    def store(self, file, group, mode='w'):
+    def store(self, file, group=None, mode='w'):
         """Store dataframe as group in netCDF4 hdf5 file."""
         xframe = self.to_xarray()
         xframe.attrs = self.metaframe.metadata
@@ -238,7 +237,7 @@ class DataFrame(FrameAttrs):
                 pass
         xframe.to_netcdf(file, group=group, mode=mode)
 
-    def load(self, file, group):
+    def load(self, file, group=None):
         """Load dataframe from hdf file."""
         with xarray.open_dataset(file, group=group) as data:
             self.__init__(data.to_dataframe(), **data.attrs)

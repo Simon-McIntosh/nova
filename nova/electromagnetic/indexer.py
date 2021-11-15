@@ -94,6 +94,18 @@ class Indexer(ABC):
             col = self.columns[col]
         return col
 
+    def get_key(self, key):
+        """Return formated key - implement str index formating."""
+        if not isinstance(key, tuple):
+            return key
+        if not isinstance(key[0], str):
+            return key
+        index = self.get_index(key)
+        col = self.get_col(key)
+        if isinstance(index, int):
+            return key[0], col
+        return index, col
+
     def get_index(self, key) -> slice:
         """Return index."""
         if not isinstance(key, tuple):
@@ -103,7 +115,12 @@ class Indexer(ABC):
             if isinstance(index, str):
                 if index in self:
                     return getattr(self, index)
-                return self.index.get_loc(index)
+                try:
+                    return self.index.get_loc(index)
+                except KeyError as keyerror:
+                    if 'part' in self:
+                        return index == self.part
+                    raise KeyError from keyerror
             return index
         _slice = [0 for __ in range(3)]
         for i, location in enumerate(['start', 'stop', 'step']):
@@ -126,17 +143,17 @@ class Indexer(ABC):
             interger = True
         except IndexError:
             interger = False
-            pass
         try:
             subcols = self.subspace.columns.intersection(columns).values
             if interger:
                 subcols = [self.subspace.columns.get_loc(i) for i in subcols]
             return (key[0], subcols)
-        except TypeError:  # single value
+        except TypeError as type_error:  # single value
             subcol = columns
             if subcol not in self.subspace.columns:
                 raise IndexError(f'column index {subcol} not found in '
-                                 f'subspace {self.subspace.columns}')
+                                 f'subspace {self.subspace.columns}') \
+                    from type_error
             if interger:
                 subcol = self.subspace.columns.get_loc(subcol)
             return (key[0], subcol)

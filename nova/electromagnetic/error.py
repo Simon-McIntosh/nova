@@ -15,7 +15,8 @@ class SpaceKeyError(KeyError):
     def __init__(self, name, col):
         super().__init__(
             f'{name}[\'{col}\'] access is restricted for '
-            f'subspace attributes use s{name}[\'{col}\']')
+            f'subspace attributes use s{name}[\'{col}\'] or '
+            f'subspace.{name}[\'{col}\']')
 
 
 class SubSpaceKeyError(KeyError):

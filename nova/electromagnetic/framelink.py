@@ -6,6 +6,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas
 import shapely
+import vedo
 
 from nova.electromagnetic.dataarray import (
     ArrayLocMixin,
@@ -130,6 +131,7 @@ class FrameLink(LinkIndexer, DataArray):
         return other, dict(), None
 
     def __add__(self, other: Union[pandas.DataFrame, dict, npt.ArrayLike]):
+        """Perform dataframe union."""
         args, kwargs, required = self._unpack_add(other)
         with self.insert_required(required):
             self.insert(*args, **kwargs)
@@ -289,8 +291,9 @@ class FrameLink(LinkIndexer, DataArray):
         """
         if len(args) != 1:
             return args, kwargs
-        if len(self.metaframe.required) == 1 and not \
-                isinstance(args[0], (shapely.geometry.Polygon, dict)):
+        if len(self.metaframe.required) == 1 and \
+            (not isinstance(args[0], (shapely.geometry.Polygon, dict))
+                or isinstance(args[0], vedo.Mesh)):
             return args, kwargs
         polygon = Polygon(args[0])
         geometry = polygon.geometry

@@ -11,6 +11,7 @@ from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.framedata import FrameData
 from nova.electromagnetic.shell import Shell
 from nova.electromagnetic.plasma import Plasma
+from nova.electromagnetic.ferritic import Ferritic
 
 
 @dataclass
@@ -42,7 +43,8 @@ class CoilSet(CoilGrid, FrameSet):
 
     _frame: dict[str, FrameData] = field(
         init=False, repr=False,
-        default_factory=lambda: dict(coil=Coil, shell=Shell, plasma=Plasma))
+        default_factory=lambda: dict(coil=Coil, shell=Shell, plasma=Plasma,
+                                     ferritic=Ferritic))
     _biot: dict[str, BiotData] = field(
         init=False, repr=False,
         default_factory=lambda: dict(grid=BiotGrid, point=BiotPoint,
@@ -126,11 +128,17 @@ if __name__ == '__main__':
     coilset.sloc['Ic'] = 1
     coilset.sloc['Shl0', 'Ic'] = -5
 
+    #coilset.grid.solve(1e3, 0.05)
+    #coilset.grid.plot()
 
-    coilset.plot()
+    #from nova.electromagnetic.ferritic import ShieldCluster
+    #ferriticframe = ShieldCluster().frame
 
-    coilset.grid.solve(1e3, 0.05)
-    coilset.grid.plot()
+
+    coilset.ferritic.insert('IWS_CFM')
+
+    coilset.frame.polyplot()
+
 
 
 

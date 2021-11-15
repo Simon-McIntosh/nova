@@ -1,12 +1,15 @@
 """Manage ferromagnetic insert geometry."""
 from dataclasses import dataclass, field
 import os
-from typing import ClassVar
+from string import digits
+from typing import ClassVar, Union
 
+import numpy as np
 import sklearn.cluster
 import vedo
 
 from nova.definitions import root_dir
+from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.framespace import FrameSpace
 from nova.utilities.time import clock
 
@@ -243,18 +246,6 @@ class ShieldSet(ShieldDir):
         frame = FrameSpace().concatenate(*frame)
         frame.store(self.cdf_file, mode='w')
 
-    @staticmethod
-    def _cluster(frame: FrameSpace, eps_factor=1.5):
-        """Cluster shield panels."""
-        points = frame.loc[:, ['x', 'y', 'z']]
-        eps = eps_factor*frame.dt.max()
-        cluster = sklearn.cluster.DBSCAN(eps=eps, min_samples=1).fit(points)
-
-        labels = set(cluster.labels_)
-
-
-
-
     def plot_mesh(self):
         """Plot vtk mesh."""
         vedo.show(self.mesh, *self.frame.vtk, axes=3)
@@ -264,14 +255,161 @@ class ShieldSet(ShieldDir):
         vedo.show(vedo.Mesh(self.frame.loc[:, ['x', 'y', 'z']].values))
 
 
+@dataclass
+class Cluster:
+    """Cluster source frame."""
+
+    source: FrameSpace = field(repr=False)
+    factor: float = 1.5
+    color: Union[int, str] = None
+    opacity: float = None
+    frame: FrameSpace = field(init=False)
+
+    def __post_init__(self):
+        """Apply clustering algorithum."""
+        self.frame = self.cluster()
+
+    def cluster(self):
+        """Cluster shield panels."""
+        points = self.source.loc[:, ['x', 'y', 'z']].values
+        eps = self.factor*self.source.dt.max()
+        cluster = sklearn.cluster.DBSCAN(eps=eps, min_samples=1).fit(points)
+        frame = FrameSpace()
+        for i, label in enumerate(set(cluster.labels_)):
+            index = label == cluster.labels_
+            vtksum = self.merge(index)
+            name = f'{vtksum.name.rstrip(digits)}{i}'
+            frame += vtksum.to_dict() | dict(name=name)
+            frame.loc[name, ['x', 'y', 'z']] = self.centroid(index)
+        return frame
+
+    def merge(self, index):
+        """Return vtk framespace sum."""
+        dataseries = self.source.loc[index, :].iloc[0].copy()
+        vtk = vedo.merge(*self.source.loc[index, 'vtk'])
+        if self.color is not None:
+            vtk.c(self.color)
+        if self.opacity is not None:
+            vtk.opacity(self.opacity)
+        dataseries.loc['vtk'] = vtk
+        return dataseries
+
+    def centroid(self, index):
+        """Return volume weighted centroid."""
+        centroids = self.source.loc[index, ['x', 'y', 'z']].values
+        volumes = self.source.loc[index, 'volume'].values.reshape(-1, 1)
+        centroid = np.sum(centroids * volumes, axis=0)
+        centroid /= np.sum(volumes)
+        return centroid
+
+    def plot(self):
+        """Plot source and clustered vtk framesets."""
+        vedo.show(vedo.merge(*self.source.vtk),
+                  vedo.merge(*self.frame.vtk).opacity(0.75).c('b'))
+
+
+@dataclass
+class ShieldCluster(ShieldDir):
+    """Manage clustered ferritic insert dataset."""
+
+    file: str = 'IWS_CFM'
+    frame: FrameSpace = field(init=False, default_factory=FrameSpace)
+
+    def __post_init__(self):
+        """Load dataset."""
+        super().__post_init__()
+        self.frame = self.load()
+
+    def load(self):
+        """Load clustered shield frameset."""
+        try:
+            return FrameSpace().load(self.cdf_file)
+        except (FileNotFoundError, OSError):
+            return self._build()
+
+    def rebuild(self):
+        """Rebuild clustered frameset."""
+        self.frame = self._build()
+
+    def _build(self):
+        """Build clustered frameset."""
+        frame = FrameSpace()
+        shield = ShieldSet()  # load source dataset
+        parts = shield.frame.part.unique()
+        frames = []
+        tick = clock(len(parts), header='clustering shield set')
+        for i, part in enumerate(parts):
+            frames.append(Cluster(shield.frame.loc[part, :],
+                                  color=i, opacity=1).frame)
+            tick.tock()
+        frame.concatenate(*frames)
+        frame.store(self.cdf_file, mode='w')
+        return frame
+
+    def plot(self):
+        """Plot vtk clusters."""
+        vedo.show(self.frame.vtk)
+
+
+@dataclass
+class Ferritic(FrameSetLoc):
+    """Manage ferritic inserts."""
+
+    delta: float = -1
+    required: list[str] = field(default_factory=lambda: ['vtk'])
+    default: dict = field(init=False, default_factory=lambda: {
+        'label': 'Fi', 'part': 'fi', 'ferritic': True})
+
+    def set_conditional_attributes(self):
+        """Set conditional attrs - not required for ferritic inserts."""
+
+    def insert(self, *args, required=None, iloc=None, **additional):
+        """
+        Add ferritic volumes to frameset.
+
+        volumes described by x, y, z centroid and volume.
+        Each frame is meshed based on delta.
+
+        Parameters
+        ----------
+        vtk : Union[str, vedo.Mesh]
+            Shield filename or vtk volume.
+        **additional : dict[str, Any]
+            Additional input.
+
+        Returns
+        -------
+        None.
+
+        """
+        '''
+        if isinstance(file := args[0], str):  # load frameset from file
+            frame = ShieldSet(file).frame
+        if isinstance(args[0], FrameSpace):  # unpack frame
+            args = frame
+            required = frame.columns
+        '''
+        print(self.required)
+        required = self.required
+
+        self.attrs = additional
+        with self.insert_required(required):
+            print(self.frame.metaframe.required)
+            index = self.frame.insert(*args, iloc=iloc, **self.attrs)
+
+        '''
+        frame = self.frame.loc[index, :]
+        subframe = []
+        for i, name in enumerate(index):
+            data = frame.iloc[i].to_dict()
+            data |= {'label': name, 'frame': name, 'delim': '_', 'link': True}
+            subframe.append(self.subframe.assemble(
+                shellgrid.subframe[i], **data, **self.subattrs))
+        self.subframe.concatenate(*subframe)
+        '''
+
+
 if __name__ == '__main__':
 
-    shield = ShieldSet()
-
-    shield._cluster(shield.frame[shield.frame])
-
-
-
-    #shield.plot_points()
-    #shield.frame.polyplot()
-    #shield.plot_mesh()
+    shield = ShieldSet('IWS_CFM')
+    shield.frame.polyplot()

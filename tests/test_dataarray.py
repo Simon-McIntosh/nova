@@ -101,18 +101,18 @@ def test_loc_update_slice():
 def test_get_loc_slice():
     dataarray = DataArray({'x': range(6)}, Required=['x'], Array=['x'])
     dataarray.loc['Coil0':'Coil1', 'x']
-    assert dataarray.loc['Coil0':'Coil3', 'x'].to_list() == [0, 1, 2, 3]
+    assert dataarray.loc['Coil0':'Coil3', 'x'].tolist() == [0, 1, 2, 3]
 
 
 def test_get_iloc_slice():
     dataarray = DataArray({'x': range(6)}, Required=['x'], Array=['x'])
-    assert dataarray.iloc[0:4, 0].to_list() == [0, 1, 2, 3]
+    assert dataarray.iloc[0:4, 0].tolist() == [0, 1, 2, 3]
 
 
 def test_set_get_loc_slice():
     dataarray = DataArray({'x': range(6)}, Required=['x'], Array=['x'])
     dataarray.x[:2] = 7.7
-    assert dataarray.loc['Coil0':'Coil3', 'x'].to_list() == [7.7, 7.7, 2, 3]
+    assert dataarray.loc['Coil0':'Coil3', 'x'].tolist() == [7.7, 7.7, 2, 3]
 
 
 def test_set_loc():
@@ -151,6 +151,39 @@ def test_set_iat():
     assert list(dataarray.x) == [7.7, 1, 2]
 
 
-if __name__ == '__main__':
+def test_get_loc_plasma():
+    dataarray = DataArray(dict(x=range(3), plasma=True),
+                          Required=['x'], Array=['x'])
+    assert dataarray.loc['plasma', 'x'].tolist() == [0, 1, 2]
 
-    pytest.main([__file__])
+
+def test_get_loc_plasma_subset():
+    dataarray = DataArray(dict(x=range(3), plasma=[True, False, True]),
+                          Required=['x'], Array=['x'])
+    assert dataarray.loc['plasma', 'x'].tolist() == [0, 2]
+
+
+def test_set_loc_plasma_subset():
+    dataarray = DataArray(dict(x=range(3), plasma=[True, False, True]),
+                          Required=['x'], Array=['x'])
+    dataarray.loc['plasma', 'x'] = 7.7
+    assert dataarray.x.tolist() == [7.7, 1, 7.7]
+
+
+def test_get_loc_part():
+    dataarray = DataArray(dict(x=range(5), part=['a', 'b', 'PF', 'PF', 'TF']),
+                          Required=['x'], Array=['x'])
+    assert dataarray.loc['PF', 'x'].tolist() == [2, 3]
+
+
+def test_set_loc_part():
+    dataarray = DataArray(dict(x=range(5), part=['a', 'a', 'PF', 'PF', 'TF']),
+                          Required=['x'], Array=['x'])
+    dataarray.loc['a', 'x'] = 7.3, 4
+    assert dataarray.loc[:, 'x'].tolist() == [7.3, 4, 2, 3, 4]
+
+
+if __name__ == '__main__':
+    test_set_loc_part()
+
+    # pytest.main([__file__])

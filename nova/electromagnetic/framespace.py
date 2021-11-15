@@ -146,8 +146,8 @@ if __name__ == '__main__':
                             available=['It', 'poly'],
                             Subspace=['Ic'],
                             Array=['Ic'])
-    framespace.insert(range(40), 1, Ic=6.5, name='PF1',
-                      active=False, plasma=True)
+    framespace.insert(range(40), 1, Ic=6.5, name='PF1', part='PF',
+                      active=False)
 
     #for _ in range(1000):
     #    get_current()

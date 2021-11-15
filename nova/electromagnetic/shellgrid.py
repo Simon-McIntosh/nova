@@ -217,7 +217,6 @@ if __name__ == '__main__':
                           [0, 0.1, 0, 1, -1, 0], -2, 0.1,
                           delta=0.1)
 
-
     print(shellgrid.subframe)
 
 

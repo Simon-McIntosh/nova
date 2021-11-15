@@ -14,6 +14,7 @@ class ArrayLocMixin():
     def __setitem__(self, key, value):
         """Extend Loc setitem."""
         col = self.obj.get_col(key)
+        key = self.obj.get_key(key)
         if self.obj.hascol('array', col):
             index = self.obj.get_index(key)
             if isinstance(index, slice):
@@ -29,13 +30,16 @@ class ArrayLocMixin():
     def __getitem__(self, key):
         """Extend Loc getitem. Update frame prior to return if col in array."""
         col = self.obj.get_col(key)
+        key = self.obj.get_key(key)
         if self.obj.hascol('array', col):
             if self.obj.lock('array') is False:
                 try:
                     return super().__getitem__(key)
                 except AttributeError:  # loc[slice, col]
-                    with self.obj.setlock(True, 'array'):
-                        return super().__getitem__(key)
+                    index = self.obj.get_index(key)
+                    return self.obj.__getitem__(col)[index]
+                    # with self.obj.setlock(True, 'array'):
+                    #     return super().__getitem__(key)
         return super().__getitem__(key)
 
 
@@ -102,7 +106,7 @@ class DataArray(ArrayIndexer, DataFrame):
         except KeyError as keyerror:
             if not pandas.api.types.is_list_like(value):
                 value = self.format_value(col, value)
-                value = np.full(len(self), value)
+                value = np.full(len(self), value, dtype=type(value))
             elif len(value) != len(self):
                 raise IndexError(f'input length {len(value)} != {len(self)}') \
                     from keyerror

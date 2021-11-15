@@ -1,23 +1,15 @@
 """Methods for ploting FrameSpace data."""
 from dataclasses import dataclass, field
 from typing import Union
-import colorsys
 from collections import Counter
-import functools
-import operator
+from string import digits
 
-import descartes
 import numpy as np
-import matplotlib
-from matplotlib.collections import PatchCollection
-import matplotlib.colors as mc
 import pandas
-import shapely.geometry
+import scipy.stats
 
-from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.dataframe import DataFrame
 from nova.electromagnetic.error import ColumnError
-from nova.utilities.IO import human_format
 from nova.utilities.pyplot import plt
 
 
@@ -104,9 +96,16 @@ class Display:
     facecolor: dict[str, str] = field(default_factory=lambda: {
         'vs3': 'C0', 'vs3j': 'gray', 'cs': 'C0', 'pf': 'C0',
         'trs': 'C3', 'dir': 'C3', 'vv': 'C3', 'vvin': 'C3',
-        'vvout': 'C3', 'bb': 'C7', 'plasma': 'C4', 'cryo': 'C5'})
+        'vvout': 'C3', 'bb': 'C7', 'plasma': 'C4', 'cryo': 'C5',
+        'fi': 'C7'})
     zorder: dict[str, int] = field(default_factory=lambda: {
         'VS3': 1, 'VS3j': 0, 'CS': 3, 'PF': 2})
+
+    def get_part(self, part):
+        """Return formated part name."""
+        if part.rstrip(digits) == 'fi':
+            return 'fi'
+        return part
 
     def get_alpha(self, part):
         """Return patch alpha."""
@@ -114,7 +113,7 @@ class Display:
 
     def get_facecolor(self, part):
         """Return patch facecolor."""
-        return self.facecolor.get(part, 'C9')
+        return self.facecolor.get(self.get_part(part), 'C9')
 
     def get_zorder(self, part):
         """Return patch zorder."""
@@ -124,7 +123,7 @@ class Display:
         """Return patch linewidth."""
         finesse_fraction = 0.01
         total_area = self.frame.area.sum()
-        patch_area = self.frame.loc[self.frame.part == part, 'area'].mode()[0]
+        patch_area = scipy.stats.mode(self.frame.loc[part, 'area'])[0]
         area_fraction = patch_area/total_area
         if area_fraction < finesse_fraction:
             return self.linewidth * area_fraction/finesse_fraction

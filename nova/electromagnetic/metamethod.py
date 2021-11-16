@@ -17,7 +17,7 @@ class MetaMethod(ABC):
     require_all: bool = True
 
     def __post_init__(self):
-        """Generate multi-point constraints."""
+        """Update metadata."""
         if self.generate:
             self.update_base()
             self.update_additional()

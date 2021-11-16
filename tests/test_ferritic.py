@@ -1,18 +1,72 @@
+
+import tempfile
+
+import numpy as np
 import pytest
 import vedo
 
 from nova.electromagnetic.coilset import CoilSet
 
-def test_insert():
 
+def test_insert_box_subframe():
     coilset = CoilSet()
     box = vedo.shapes.Box(pos=(5, 0, 0), length=1, width=2, height=3)
-
-    print(coilset.ferritic.required, coilset.frame.metaframe.required)
     coilset.ferritic.insert(box)
+    assert np.isclose(coilset.subframe.volume[0], 6)
 
-    #print(coilset.Loc())
+
+def test_insert_doublebox_subframe():
+    coilset = CoilSet()
+    box = [vedo.shapes.Box(pos=(5, 0, 0), length=1, width=2, height=3),
+           vedo.shapes.Box(pos=(7, 0, 1), length=1, width=2, height=3)]
+    coilset.ferritic.insert(box)
+    assert np.isclose(coilset.subframe.volume.sum(), 12)
+
+
+def test_insert_doublebox_frame_volume():
+    coilset = CoilSet()
+    box = [vedo.shapes.Box(pos=(5, 0, 0), length=1, width=2, height=3),
+           vedo.shapes.Box(pos=(7, 0, 1), length=1, width=2, height=3)]
+    coilset.ferritic.insert(box)
+    assert np.isclose(coilset.frame.volume[0], 12)
+
+
+def test_insert_doublebox_frame_centroid():
+    coilset = CoilSet()
+    box = [vedo.shapes.Box(pos=(5, 0, 0), length=1, width=2, height=3),
+           vedo.shapes.Box(pos=(7, 0, 1), length=1, width=2, height=3)]
+    coilset.ferritic.insert(box, label='Fi', offset=1)
+    assert coilset.frame.loc['Fi1', ['x', 'y', 'z']].values.tolist() == \
+        [6, 0, 0.5]
+
+
+def test_insert_frame():
+    coilset = CoilSet()
+    box = [vedo.shapes.Box(pos=(5, 0, 0), length=1, width=2, height=3),
+           vedo.shapes.Box(pos=(7, 0, 1), length=1, width=2, height=3)]
+    coilset.ferritic.insert(box, part='Fi1', label='fi', offset=1)
+    coilset.ferritic.insert(box, part='Fi2', label='Fi', offset=0)
+    subframe = coilset.subframe.copy()
+    coilset = CoilSet()
+    coilset.ferritic.insert_frame(subframe)
+    assert coilset.frame.index.to_list() == ['fi1', 'Fi0']
+    assert coilset.subframe.index.to_list() == ['fi1', 'fi1_1', 'Fi0', 'Fi0_1']
+
+
+def test_insert_frame_fromfile():
+    coilset = CoilSet()
+    box = [vedo.shapes.Box(pos=(5, 0, 0), length=1, width=2, height=3),
+           vedo.shapes.Box(pos=(7, 0, 1), length=1, width=2, height=3)]
+    coilset.ferritic.insert(box, part='Fi1', label='fi', offset=1)
+    coilset.ferritic.insert(box, part='Fi2', label='Fi', offset=0)
+    subframe = coilset.subframe.copy()
+    with tempfile.NamedTemporaryFile() as tmp:
+        subframe.store(tmp.name)
+        coilset = CoilSet()
+        coilset.ferritic.insert(tmp.name)
+    assert coilset.frame.index.to_list() == ['fi1', 'Fi0']
+
 
 if __name__ == '__main__':
 
-    test_insert()
+    test_insert_frame()

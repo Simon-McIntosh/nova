@@ -22,12 +22,10 @@ class FrameData:
     @contextmanager
     def insert_required(self, required=None):
         """Manage local required arguments."""
-        print('insert', required)
         _required = self.frame.metaframe.required.copy()
         if required is None:
             required = self.required
         self.update_required(required)
-        print('frame', self.frame.metaframe.required)
         yield
         self.update_required(_required)
 

@@ -5,6 +5,9 @@ from string import digits
 from typing import ClassVar, Union
 
 import numpy as np
+from nova.electromagnetic.polygen import PolyFrame
+from shapely.geometry import MultiPolygon
+from shapely.ops import unary_union
 import sklearn.cluster
 import vedo
 
@@ -190,7 +193,7 @@ class ShieldSector(ShieldCad):
 class ShieldSet(ShieldDir):
     """Manage complete ferritic insert dataset."""
 
-    file: str = 'IWS_FM'
+    file: str = 'Fi'
     mesh: vedo.Mesh = field(init=False, repr=False)
     frame: FrameSpace = field(init=False, repr=False)
     avalible: ClassVar[list[int]] = range(1, 10)
@@ -245,6 +248,7 @@ class ShieldSet(ShieldDir):
             tick.tock()
         frame = FrameSpace().concatenate(*frame)
         frame.store(self.cdf_file, mode='w')
+        return frame
 
     def plot_mesh(self):
         """Plot vtk mesh."""
@@ -312,13 +316,19 @@ class Cluster:
 class ShieldCluster(ShieldDir):
     """Manage clustered ferritic insert dataset."""
 
-    file: str = 'IWS_CFM'
+    file: str = 'Fi'
     frame: FrameSpace = field(init=False, default_factory=FrameSpace)
 
     def __post_init__(self):
         """Load dataset."""
         super().__post_init__()
         self.frame = self.load()
+
+    @property
+    def cdf_file(self):
+        """Return clustered cfd filename."""
+        file = os.path.splitext(super().cdf_file)
+        return f'{file[0]}_{file[1]}'
 
     def load(self):
         """Load clustered shield frameset."""
@@ -352,28 +362,34 @@ class ShieldCluster(ShieldDir):
 
 
 @dataclass
-class Ferritic(FrameSetLoc):
-    """Manage ferritic inserts."""
+class FerriticInsert(FrameSetLoc):
+    """Ferritic insert baseclass."""
 
     delta: float = -1
-    required: list[str] = field(default_factory=lambda: ['vtk'])
     default: dict = field(init=False, default_factory=lambda: {
-        'label': 'Fi', 'part': 'fi', 'ferritic': True})
+        'label': 'Fi', 'part': 'fi', 'ferritic': True, 'active': False})
 
-    def set_conditional_attributes(self):
-        """Set conditional attrs - not required for ferritic inserts."""
+    @property
+    def attrs(self):
+        """Manage ferritic attrs."""
+        return self._attrs
 
-    def insert(self, *args, required=None, iloc=None, **additional):
+    @attrs.setter
+    def attrs(self, attrs):
+        self._attrs = self.default | attrs
+        self.attrs.pop('vtk', None)
+
+    def insert(self, vtk, iloc=None, **additional):
         """
         Add ferritic volumes to frameset.
 
-        volumes described by x, y, z centroid and volume.
-        Each frame is meshed based on delta.
+        volumes described by vtk instance .
+        frame properties calculated by Vtkgeo (x, y, z centroid and volume)
 
         Parameters
         ----------
-        vtk : Union[str, vedo.Mesh]
-            Shield filename or vtk volume.
+        vtk : Union[vedo.Mesh, list[vedo.Mesh]]
+            vtk volumes.
         **additional : dict[str, Any]
             Additional input.
 
@@ -382,34 +398,71 @@ class Ferritic(FrameSetLoc):
         None.
 
         """
-        '''
-        if isinstance(file := args[0], str):  # load frameset from file
-            frame = ShieldSet(file).frame
-        if isinstance(args[0], FrameSpace):  # unpack frame
-            args = frame
-            required = frame.columns
-        '''
-        print(self.required)
-        required = self.required
-
         self.attrs = additional
-        with self.insert_required(required):
-            print(self.frame.metaframe.required)
-            index = self.frame.insert(*args, iloc=iloc, **self.attrs)
+        with self.insert_required('vtk'):
+            name = self.frame.build_index(1, **self.attrs)[0]
+            self.attrs.pop('name', None)
+            self.attrs |= dict(frame=name, label=name, delim='_')
+            # insert subframes
+            index = self.subframe.insert(vtk, iloc=iloc, **self.attrs)
+            subframe = self.subframe.loc[index, :]
+            # insert frame
+            self.attrs |= subframe.iloc[0].to_dict()
+            self.attrs |= dict(body='insert', delim='', name=name)
+            self.attrs.pop('poly', None)
+            vtk = vedo.merge(*subframe.vtk)
+            self.frame.insert(vtk, iloc=iloc, **self.attrs)
 
-        '''
-        frame = self.frame.loc[index, :]
-        subframe = []
-        for i, name in enumerate(index):
-            data = frame.iloc[i].to_dict()
-            data |= {'label': name, 'frame': name, 'delim': '_', 'link': True}
-            subframe.append(self.subframe.assemble(
-                shellgrid.subframe[i], **data, **self.subattrs))
-        self.subframe.concatenate(*subframe)
-        '''
+
+@dataclass
+class Ferritic(FerriticInsert):
+    """Manage ferritic inserts."""
+
+    def insert(self, vtk, iloc=None, **additional):
+        """
+        Add ferritic volumes to frameset.
+
+        volumes described by vtk instance .
+        frame properties calculated by Vtkgeo (x, y, z centroid and volume)
+
+        Parameters
+        ----------
+        vtk : Union[str, DataFrame, vedo.Mesh, list[vedo.Mesh]]
+            Shield filename or vtk volumes.
+        **additional : dict[str, Any]
+            Additional input.
+
+        Returns
+        -------
+        None.
+
+        """
+        if isinstance(file := vtk, str):  # load frameset from file
+            frame = self.load_frame(file)
+            return self.insert_frame(frame, **additional)
+        super().insert(vtk, iloc=iloc, **additional)
+
+    def insert_frame(self, frame, multiframe=True, iloc=None, body='vtk',
+                     **additional):
+        """Insert vtk objects from frame."""
+        if not multiframe:
+            self.attrs = additional | frame.iloc[0].to_dict()
+            return super().insert(frame, iloc=iloc, **self.attrs)
+        for part in frame.part.unique():
+            index = part == frame.part
+            _frame = frame.iloc[np.argmax(index)]
+            self.attrs = additional | _frame.to_dict()
+            self.attrs['name'] = _frame.get('frame', _frame['part'])
+            super().insert(frame.vtk[index], iloc=iloc, **self.attrs)
+
+    def load_frame(self, file: str):
+        """Load frame from file."""
+        if os.path.isfile(file):
+            return FrameSpace().load(file)
+        return ShieldSet(file).frame
 
 
 if __name__ == '__main__':
 
-    shield = ShieldSet('IWS_CFM')
+    shield = ShieldCluster()
     shield.frame.polyplot()

@@ -80,7 +80,12 @@ class DataFrame(FrameAttrs):
         metatag['offset'] = np.max([offset, metatag['offset']])
 
     def _build_index(self, data: pandas.DataFrame, **kwargs):
+        """Wrap public build_index with dataframe input."""
         index_length = self._index_length(data)
+        return self.build_index(index_length, **kwargs)
+
+    def build_index(self, index_length: int, **kwargs):
+        """Return index constructed from length and kwargs."""
         # update metaframe tag defaults with kwargs
         metatag = {key: kwargs.get(key, self.metaframe.default[key])
                    for key in self.metaframe.tag}
@@ -102,7 +107,7 @@ class DataFrame(FrameAttrs):
         label_delim = metatag['label']+metatag['delim']
         index = [f'{label_delim}{i+metatag["offset"]:d}'
                  for i in range(index_length)]
-        if 'frame' in self.columns:
+        if 'frame' in self.columns and metatag['label'] not in self.index:
             index[0] = metatag['label']
         return self._check_index(index, index_length)
 
@@ -213,11 +218,12 @@ class DataFrame(FrameAttrs):
 
     def _dumps(self, col: str):
         """Return poly as list of json strings."""
-        return [geom.dumps() for geom in self[col]]
+        return [geom.dumps() if geom else '' for geom in self[col]]
 
     def _loads(self, col: str):
         """Load json strings and convert to shapely polygons."""
-        geotype = [json.loads(geom)['type'] for geom in self[col]]
+        geotype = [json.loads(geom)['type'] if geom else None
+                   for geom in self[col]]
         self.loc[:, col] = [self.geoframe[geo].loads(geom)
                             for geom, geo in zip(self[col], geotype)]
 

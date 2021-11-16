@@ -114,7 +114,9 @@ if __name__ == '__main__':
 
     '''
 
+
     coilset = CoilSet(dcoil=-35, dplasma=-40)
+    '''
     coilset.coil.insert(10, 0.5, 0.95, 0.95, section='hex', turn='r',
                         nturn=-0.8)
     coilset.coil.insert(10, -0.5, 0.95, 0.95, section='hex')
@@ -131,15 +133,18 @@ if __name__ == '__main__':
     #coilset.grid.solve(1e3, 0.05)
     #coilset.grid.plot()
 
-    #from nova.electromagnetic.ferritic import ShieldCluster
     #ferriticframe = ShieldCluster().frame
+    '''
 
+    #from nova.electromagnetic.ferritic import ShieldSet
+    #frame = ShieldSet('IWS_CFM').frame
+    #frame.polyplot()
 
-    coilset.ferritic.insert('IWS_CFM')
+    coilset.ferritic.insert('IWS_FM', multiframe=True)
 
     coilset.frame.polyplot()
 
-
-
+    #import vedo
+    #vedo.show(coilset.frame.vtk)
 
     #coilset.frame.vtkplot()

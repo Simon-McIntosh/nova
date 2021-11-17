@@ -65,4 +65,3 @@ if __name__ == '__main__':
 
     cl = CenterLine()
     #cl.mesh.plot()
-    #cl.plot_vectors('normal')

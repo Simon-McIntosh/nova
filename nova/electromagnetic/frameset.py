@@ -64,6 +64,7 @@ class FrameSet(FrameSetLoc, FilePath):
         file = self.file(filename, path)
         self.frame.load(file, 'frame')
         self.subframe.load(file, 'subframe')
+        return self
 
 
 if __name__ == '__main__':

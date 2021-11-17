@@ -10,17 +10,19 @@ import pandas
 import pyvista as pv
 import sklearn.cluster
 from scipy.spatial.transform import Rotation
-from shapely.geometry import MultiPolygon
+import shapely.geometry
 import trimesh
 import vedo
 import vtk
 
 from nova.electromagnetic.polygen import PolyFrame
+from nova.electromagnetic.vtkgen import VtkFrame
+from nova.structural.centerline import CenterLine
 
 
 @dataclass
-class TriPanel:
-    """Manage panel shells."""
+class TriShell:
+    """Manage vtk shells."""
 
     mesh: vedo.Mesh
     qhull: bool = False
@@ -131,12 +133,13 @@ class TriPanel:
         try:
             return PolyFrame(hull, name='vtk')
         except NotImplementedError:
-            return PolyFrame(hull.convex_hull, name='vtk')
+            return PolyFrame(shapely.geometry.MultiPoint(poloidal).convex_hull,
+                             name='vtk')
 
 
 @dataclass
-class TetPanel(TriPanel):
-    """Manage panel volumes."""
+class TetVol(TriShell):
+    """Manage vtk volumes."""
 
     tet: pv.UnstructuredGrid = field(init=False)
 
@@ -178,3 +181,45 @@ class TetPanel(TriPanel):
         """Return grid center of mass."""
         return np.sum(self.cell_volumes*self.cell_centers,
                       axis=0) / self.volume
+
+
+class Poly(VtkFrame):
+    """Construct boundary line mesh from shapely polygon."""
+
+    def __init__(self, poly: shapely.geometry.Polygon, c=None, alpha=1):
+        points = np.c_[poly.boundary.xy[0],
+                       np.zeros(len(poly.boundary.coords)),
+                       poly.boundary.xy[1]]
+        lines = [list(range(len(points)))]
+        poly = vedo.utils.buildPolyData(points, lines=lines)
+        super().__init__(poly, c, alpha)
+
+
+class Ring(VtkFrame):
+    """Construct vtk volume by rotating boundary polygon about z-axis."""
+
+    def __init__(self, poly: shapely.geometry.Polygon, c=None, alpha=1):
+        mesh = Poly(poly).extrude(zshift=0, rotation=360, res=60)
+        super().__init__(mesh, c, alpha)
+        self.flat()
+
+
+class TfCoil(VtkFrame):
+    """Construct box-section TF coil in xz plane with z-axis rotation."""
+
+    def __init__(self, width, depth, rotate, offset=0.5):
+        line = CenterLine().mesh
+        loop = {}
+        loop['inner'] = line.points - offset * width * line['normal']
+        loop['outer'] = line.points + (1-offset) * width * line['normal']
+        loop['a'] = loop['inner'] - depth/2 * np.array([0, 1, 0])
+        loop['b'] = loop['inner'] + depth/2 * np.array([0, 1, 0])
+        loop['c'] = loop['outer'] + depth/2 * np.array([0, 1, 0])
+        loop['d'] = loop['outer'] - depth/2 * np.array([0, 1, 0])
+        mesh = []
+        mesh.append(vedo.Ribbon(loop['a'], loop['b']))
+        mesh.append(vedo.Ribbon(loop['b'], loop['c']))
+        mesh.append(vedo.Ribbon(loop['c'], loop['d']))
+        mesh.append(vedo.Ribbon(loop['d'], loop['a']))
+        super().__init__(vedo.merge(*mesh))
+        self.rotateZ(rotate)

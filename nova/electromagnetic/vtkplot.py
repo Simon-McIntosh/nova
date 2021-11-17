@@ -1,12 +1,14 @@
 """Methods for ploting 3D FrameSpace data."""
 from dataclasses import dataclass, field
 
+import matplotlib
 import numpy as np
 import pygmsh
 import pyvista as pv
 from rdp import rdp
 import vedo
 
+from nova.electromagnetic.baseplot import Display
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.dataframe import DataFrame
 
@@ -43,7 +45,7 @@ class VtkPlot(MetaMethod):
     name = 'vtkplot'
 
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['volume'])
+    required: list[str] = field(default_factory=lambda: ['vtk'])
     additional: list[str] = field(default_factory=lambda: [])
 
     def initialize(self):
@@ -57,10 +59,10 @@ class VtkPlot(MetaMethod):
         if np.array(unset).any():
             self.frame.update_columns()
 
-    def __call__(self, index=slice(None), **kwargs):
+    def __call__(self):
         """Plot frame if not empty."""
         if not self.frame.empty:
-            self.plot(index, **kwargs)
+            self.plot()
 
     def pf_coil(self, x, z, dx, dz):
         """Return vtk Poloidal Field coil - rectangular section."""
@@ -70,6 +72,16 @@ class VtkPlot(MetaMethod):
                             radius=x-dx/2, height=1.1*dz).triangulate()
         return outer-inner
 
+    def plot(self):
+        """Plot vtk instances."""
+        colors = matplotlib.rcParams['axes.prop_cycle'].by_key()['color']
+        index = self.frame.geotype('Geo', 'vtk')
+        color = {f'C{i}': c for i, c in enumerate(colors)}
+        vtk = [vtk.c(color[Display.get_facecolor(part)])
+               for vtk, part in self.frame.loc[index, ['vtk', 'part']].values]
+        vedo.show(*vtk).close()
+
+    '''
     def plot(self, index=slice(None),
              axis=(0, 0, 1), point=(0, 0, 0), **kwargs):
         """Plot frame."""
@@ -87,21 +99,22 @@ class VtkPlot(MetaMethod):
             vmesh.append(mesh)
 
         vedo.show(vmesh)
+    '''
 
-        '''
-        mesh = pv.PolyData()
-        index = self.frame.segment == 'volume'
-        for item in self.frame.index[index]:
-            volume = self.frame.loc[item, 'volume']
-            radius = (3 / (4*np.pi) * volume)**(1/3)
-            center = self.frame.loc[item, ['x', 'y', 'z']].to_list()
-            mesh += pv.Sphere(radius, center)
+    '''
+    mesh = pv.PolyData()
+    index = self.frame.segment == 'volume'
+    for item in self.frame.index[index]:
+        volume = self.frame.loc[item, 'volume']
+        radius = (3 / (4*np.pi) * volume)**(1/3)
+        center = self.frame.loc[item, ['x', 'y', 'z']].to_list()
+        mesh += pv.Sphere(radius, center)
 
-        index = self.frame.segment == 'ring'
-        for item in self.frame.index[index]:
-            mesh += self.pf_coil(*self.frame.loc[item, ['x', 'z', 'dx', 'dz']])
+    index = self.frame.segment == 'ring'
+    for item in self.frame.index[index]:
+        mesh += self.pf_coil(*self.frame.loc[item, ['x', 'z', 'dx', 'dz']])
 
 
-        if mesh.n_points > 0:
-            mesh.plot(color='w')
-        '''
+    if mesh.n_points > 0:
+        mesh.plot(color='w')
+    '''

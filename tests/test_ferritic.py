@@ -44,13 +44,13 @@ def test_insert_frame():
     coilset = CoilSet()
     box = [vedo.shapes.Box(pos=(5, 0, 0), length=1, width=2, height=3),
            vedo.shapes.Box(pos=(7, 0, 1), length=1, width=2, height=3)]
-    coilset.ferritic.insert(box, part='Fi1', label='fi', offset=1)
-    coilset.ferritic.insert(box, part='Fi2', label='Fi', offset=0)
+    coilset.ferritic.insert(box, part='Fi1', name='fi5', offset=0)
+    coilset.ferritic.insert(box, part='Fi2', label='fi', offset=0)
     subframe = coilset.subframe.copy()
     coilset = CoilSet()
     coilset.ferritic.insert_frame(subframe)
-    assert coilset.frame.index.to_list() == ['fi1', 'Fi0']
-    assert coilset.subframe.index.to_list() == ['fi1', 'fi1_1', 'Fi0', 'Fi0_1']
+    assert coilset.frame.index.to_list() == ['fi5', 'fi6']
+    assert coilset.subframe.index.to_list() == ['fi5', 'fi5_1', 'fi6', 'fi6_1']
 
 
 def test_insert_frame_fromfile():
@@ -69,4 +69,4 @@ def test_insert_frame_fromfile():
 
 if __name__ == '__main__':
 
-    test_insert_frame()
+    pytest.main([__file__])

@@ -1,6 +1,6 @@
 """Methods for ploting FrameSpace data."""
 from dataclasses import dataclass, field
-from typing import Union
+from typing import Union, ClassVar
 from collections import Counter
 from string import digits
 
@@ -93,15 +93,16 @@ class Display:
     alpha: dict[str, float] = field(default_factory=lambda: {'plasma': 0.75})
     linewidth: float = 0.5
     edgecolor: str = 'white'
-    facecolor: dict[str, str] = field(default_factory=lambda: {
+    facecolor: ClassVar[dict[str, str]] = {
         'vs3': 'C0', 'vs3j': 'gray', 'cs': 'C0', 'pf': 'C0',
         'trs': 'C3', 'dir': 'C3', 'vv': 'C3', 'vvin': 'C3',
         'vvout': 'C3', 'bb': 'C7', 'plasma': 'C4', 'cryo': 'C5',
-        'fi': 'C7'})
+        'fi': 'C7', 'tf': 'C3'}
     zorder: dict[str, int] = field(default_factory=lambda: {
         'VS3': 1, 'VS3j': 0, 'CS': 3, 'PF': 2})
 
-    def get_part(self, part):
+    @staticmethod
+    def get_part(part):
         """Return formated part name."""
         if part.rstrip(digits) == 'fi':
             return 'fi'
@@ -111,9 +112,10 @@ class Display:
         """Return patch alpha."""
         return self.alpha.get(part, 1)
 
-    def get_facecolor(self, part):
+    @classmethod
+    def get_facecolor(cls, part):
         """Return patch facecolor."""
-        return self.facecolor.get(self.get_part(part), 'C9')
+        return cls.facecolor.get(cls.get_part(part), 'C9')
 
     def get_zorder(self, part):
         """Return patch zorder."""

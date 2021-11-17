@@ -4,12 +4,13 @@ from typing import ClassVar
 
 import numpy as np
 import pandas
+import vedo
 
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.dataframe import DataFrame
 from nova.electromagnetic.polygeom import PolyGeom
 from nova.electromagnetic.polygen import PolyFrame
-from nova.electromagnetic.volume import TriPanel
+from nova.electromagnetic.volume import TriShell, Ring
 from nova.electromagnetic.vtkgen import VtkFrame
 
 
@@ -22,25 +23,25 @@ class VtkGeo(MetaMethod):
     frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['vtk'])
     additional: list[str] = field(
-        default_factory=lambda: [*TriPanel.features, 'body',
+        default_factory=lambda: [*TriShell.features, 'body',
                                  'segment', 'section', 'poly'])
     features: list[str] = field(
-        init=False, default_factory=lambda: TriPanel.features)
+        init=False, default_factory=lambda: TriShell.features)
     qhull: ClassVar[list[str]] = ['panel']
-    geom: ClassVar[list[str]] = ['panel', 'stl', 'insert']
+    geom: ClassVar[list[str]] = ['panel', 'stl', 'insert', '']
 
     def initialize(self):
-        """Init vtk panel data."""
+        """Init vtk data."""
         index = self.frame.index[~self.frame.geotype('Geo', 'vtk') &
                                  ~self.frame.geotype('Json', 'vtk') &
                                  ~pandas.isna(self.frame.vtk)]
         if (index_length := len(index)) > 0:
-            frame = self.frame.loc[index, :]
+            frame = self.frame.loc[index, :].copy()
             for i in range(index_length):
-                tri = TriPanel(frame.vtk[i], qhull=frame.body[i] in self.qhull)
-                frame.loc[frame.index[i], 'vtk'] = \
-                    VtkFrame(tri.vtk.points(), tri.vtk.cells(),
-                             c=tri.vtk.c(), alpha=tri.vtk.opacity())
+                tri = TriShell(frame.vtk[i], qhull=frame.body[i] in self.qhull)
+                mesh = vedo.Mesh([tri.vtk.points(), tri.vtk.cells()],
+                                 c=tri.vtk.c(), alpha=tri.vtk.opacity())
+                frame.loc[frame.index[i], 'vtk'] = VtkFrame(mesh)
                 if frame.body[i] in self.geom:
                     frame.loc[frame.index[i], self.features] = tri.geom
                     frame.loc[frame.index[i], ['segment', 'section']] = ''
@@ -48,6 +49,15 @@ class VtkGeo(MetaMethod):
                 else:
                     frame.loc[frame.index[i], 'volume'] = tri.volume
             self.frame.loc[index, :] = frame
+        self.generate_vtk()
+
+    def generate_vtk(self):
+        """Generate vtk data from poly."""
+        index = self.frame.index[~self.frame.geotype('Geo', 'vtk') &
+                                 self.frame.geotype('Geo', 'poly')]
+        if len(index) > 0:
+            self.frame.loc[index, 'vtk'] = \
+                [Ring(poly) for poly in self.frame.loc[index, 'poly'].values]
 
 
 @dataclass
@@ -91,6 +101,7 @@ class PolyGeo(MetaMethod):
                 section[i] = polygeom.section  # inflate section name
                 if poly_update[i]:
                     poly[i] = PolyFrame(polygeom.poly, polygeom.section)
+
                 geometry = polygeom.geometry  # extract geometrical features
                 geom[i] = [geometry[feature] for feature in self.features]
             if poly_update.any():

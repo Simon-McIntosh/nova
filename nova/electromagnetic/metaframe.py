@@ -81,7 +81,7 @@ class MetaFrame(MetaSet):
             'area': 0., 'volume': 0.,
             'delta': 0., 'nturn': 1., 'nfilament': 1.,
             'material': '', 'mass': '', 'rho': 0.,
-            'section': 'rectangle', 'turn': 'rectangle', 'body': 'panel',
+            'section': 'rectangle', 'turn': 'rectangle', 'body': '',
             'turnturn': 1., 'scale': 1., 'skin': 1.,
             'poly': None, 'vtk': None, 'frame': '', 'part': '',
             'link': '', 'factor': 1., 'ref': 0, 'subref': 0,

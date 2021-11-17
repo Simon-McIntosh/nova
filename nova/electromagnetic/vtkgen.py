@@ -9,9 +9,6 @@ from nova.electromagnetic.geoframe import GeoFrame
 class VtkFrame(vedo.Mesh, GeoFrame):
     """Manage vtk serialization via json strings."""
 
-    def __init__(self, points: list[float], cells: list[int], **kwargs):
-        super().__init__([points, cells], **kwargs)
-
     def __str__(self):
         """Return polygon name."""
         return 'vtk'
@@ -28,15 +25,5 @@ class VtkFrame(vedo.Mesh, GeoFrame):
     def loads(cls, vtk: str):
         """Load json prepresentation."""
         vtk = json.loads(vtk)
-        return cls(vtk['points'], vtk['cells'],
+        return cls([vtk['points'], vtk['cells']],
                    c=vtk['color'], alpha=vtk['opacity'])
-
-    @property
-    def mesh(self) -> vedo.Mesh:
-        """Return mesh instance."""
-        return vedo.Mesh(self).c(self.color()).opacity(self.opacity())
-
-##@dataclass
-#class VtkGen:
-#    """VTK generator class."""
-#    #return [json.dumps(panel.points().tolist())for panel in self[col]]

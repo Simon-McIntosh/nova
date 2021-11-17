@@ -38,7 +38,7 @@ class ShieldBase:
 class ShieldDir:
     """Manage shield filepath."""
 
-    file: str = 'IWS_FM_PLATE'
+    file: str = 'Fi'
     path: str = None
 
     def __post_init__(self):
@@ -66,6 +66,12 @@ class ShieldCad(ShieldDir, ShieldBase):
         self.frame = self.load_frame()
 
     @property
+    def cdf_file(self):
+        """Return sector cdf filename as _{file}.cdf."""
+        path, file = os.path.split(super().cdf_file)
+        return os.path.join(path, f'_{file}')
+
+    @property
     def data(self):
         """Return mesh and frame data."""
         return self.mesh, self.frame
@@ -90,7 +96,7 @@ class ShieldCad(ShieldDir, ShieldBase):
         file = os.path.join(self.path, f'{self.file}_S{self.sector}.stl')
         if not os.path.isfile(file):
             raise FileNotFoundError(f'stl file {file} not found')
-        return
+        return file
 
     def load_mesh(self):
         """Return mesh."""
@@ -141,19 +147,16 @@ class ShieldSector(ShieldCad):
     """Manage shield sector rotations."""
 
     avalible: ClassVar[list[int]] = range(1, 10)
-
-    def __post_init__(self):
-        """Load base data."""
-        super().__post_init__()
+    base_sector: ClassVar[int] = 6
 
     def build_mesh(self):
-        """Build sector mesh via base rotation."""
+        """Extend ShieldCad build sector mesh via base rotation."""
         if self.sector in ShieldCad.avalible:
             return super().build_mesh()
         return self.rotate('mesh')
 
     def build_frame(self):
-        """Build sector frame via base rotation."""
+        """Extend ShieldCad build sector frame via base rotation."""
         if self.sector in ShieldCad.avalible:
             return super().build_frame()
         return self.rotate('frame')
@@ -165,10 +168,10 @@ class ShieldSector(ShieldCad):
         self._rotate()
         return getattr(self, attribute)
 
-    def _rotate(self, base_sector=6):
+    def _rotate(self):
         """Generate mesh and frame data via rotation from base."""
-        degrees = 40*(self.sector-base_sector)
-        base = ShieldCad(base_sector)
+        degrees = 40*(self.sector-self.base_sector)
+        base = ShieldCad(self.base_sector, file=self.file)
         self.mesh = self.rotate_mesh(base.mesh, degrees)
         self.frame = self.rotate_frame(base.frame, degrees)
 
@@ -182,9 +185,13 @@ class ShieldSector(ShieldCad):
     def rotate_frame(self, base_frame: FrameSpace, degrees: float):
         """Rotate base frame and save output to netCDF file."""
         frame = FrameSpace(**self.frame_metadata)
+        tick = clock(len(base_frame),
+                     header=f'rotating baseframe {self.base_sector} '
+                            f'to {self.sector}')
         for vtk in base_frame.loc[:, 'vtk']:
             vtk = vtk.clone().rotate(degrees, axis=(0, 0, 1), point=(0, 0, 0))
             frame += self.frame_data(vtk)
+            tick.tock()
         self.store_frame(frame)
         return frame
 
@@ -201,10 +208,8 @@ class ShieldSet(ShieldDir):
     def __post_init__(self):
         """Load shieldset."""
         super().__post_init__()
+        self.mesh = self.load_mesh()
         self.frame = self.load_frame()
-
-    def load(self):
-        """Load shieldset."""
 
     @property
     def vtk_file(self):
@@ -230,7 +235,7 @@ class ShieldSet(ShieldDir):
                      header='building ferritic insert mesh')
         mesh = []
         for i in self.avalible:
-            sector = ShieldSector(i)
+            sector = ShieldSector(i, file=self.file)
             mesh.append(sector.mesh)
             tick.tock()
         mesh = vedo.merge(mesh)
@@ -243,7 +248,7 @@ class ShieldSet(ShieldDir):
                      header='building ferritic insert dataset')
         frame = []
         for i in self.avalible:
-            sector = ShieldSector(i)
+            sector = ShieldSector(i, file=self.file)
             frame.append(sector.frame)
             tick.tock()
         frame = FrameSpace().concatenate(*frame)
@@ -327,8 +332,8 @@ class ShieldCluster(ShieldDir):
     @property
     def cdf_file(self):
         """Return clustered cfd filename."""
-        file = os.path.splitext(super().cdf_file)
-        return f'{file[0]}_{file[1]}'
+        file, ext = os.path.splitext(super().cdf_file)
+        return f'{file}c{ext}'
 
     def load(self):
         """Load clustered shield frameset."""
@@ -344,7 +349,7 @@ class ShieldCluster(ShieldDir):
     def _build(self):
         """Build clustered frameset."""
         frame = FrameSpace()
-        shield = ShieldSet()  # load source dataset
+        shield = ShieldSet(self.file)  # load source dataset
         parts = shield.frame.part.unique()
         frames = []
         tick = clock(len(parts), header='clustering shield set')
@@ -362,7 +367,7 @@ class ShieldCluster(ShieldDir):
 
 
 @dataclass
-class FerriticInsert(FrameSetLoc):
+class FerriticBase(FrameSetLoc):
     """Ferritic insert baseclass."""
 
     delta: float = -1
@@ -415,8 +420,10 @@ class FerriticInsert(FrameSetLoc):
 
 
 @dataclass
-class Ferritic(FerriticInsert):
+class Ferritic(FerriticBase):
     """Manage ferritic inserts."""
+
+    cluster: bool = True
 
     def insert(self, vtk, iloc=None, **additional):
         """
@@ -442,27 +449,55 @@ class Ferritic(FerriticInsert):
             return self.insert_frame(frame, **additional)
         super().insert(vtk, iloc=iloc, **additional)
 
+    def _update_label(self, additional):
+        if 'label' in additional:
+            self.attrs['label'] = additional['label']
+            self.attrs.pop('name', None)
+
     def insert_frame(self, frame, multiframe=True, iloc=None, body='vtk',
                      **additional):
         """Insert vtk objects from frame."""
         if not multiframe:
             self.attrs = additional | frame.iloc[0].to_dict()
+            self._update_label(additional)
             return super().insert(frame, iloc=iloc, **self.attrs)
         for part in frame.part.unique():
             index = part == frame.part
             _frame = frame.iloc[np.argmax(index)]
             self.attrs = additional | _frame.to_dict()
             self.attrs['name'] = _frame.get('frame', _frame['part'])
-            super().insert(frame.vtk[index], iloc=iloc, **self.attrs)
+            self._update_label(additional)
+            super().insert(frame.loc[index, :], iloc=iloc, **self.attrs)
 
     def load_frame(self, file: str):
         """Load frame from file."""
         if os.path.isfile(file):
             return FrameSpace().load(file)
+        if self.cluster:
+            return ShieldCluster(file).frame
         return ShieldSet(file).frame
 
 
 if __name__ == '__main__':
 
+    print(sum([ShieldCad(i).frame.volume.sum() for i in range(1, 10)]))
+    #base.frame = base.build_frame()
+    #print(base.frame.volume.sum())
+    #print(base.frame.volume.sum())
+    shield = ShieldSet()
+    #shield.frame = shield.build_frame()
+    print(shield.frame.volume.sum())
+
+    #[ShieldCad(i).mesh.volume() for i in [2, 3, 4, 6]]
+    #[ShieldCad(i).mesh.volume() for i in [2, 3, 4, 6]]
+
     shield = ShieldCluster()
-    shield.frame.polyplot()
+    print(shield.frame.volume.sum())
+    vedo.show(*shield.frame.vtk)
+
+    '''
+    mesh = []
+    for i in range(1, 5):
+        mesh.append(ShieldSector(i).mesh.rotateZ(-i*40).c(i).opacity(0.5))
+    vedo.show(mesh)
+    '''

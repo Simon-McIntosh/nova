@@ -140,9 +140,9 @@ if __name__ == '__main__':
     #frame = ShieldSet('IWS_CFM').frame
     #frame.polyplot()
 
-    coilset.ferritic.insert('IWS_FM', multiframe=True)
+    coilset = CoilSet()
 
-    coilset.frame.polyplot()
+
 
     #import vedo
     #vedo.show(coilset.frame.vtk)

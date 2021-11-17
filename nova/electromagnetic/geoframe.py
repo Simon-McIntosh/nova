@@ -1,17 +1,16 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-@dataclass 
+
+@dataclass
 class GeoFrame(ABC):
     """Geometry object abstract base class."""
-    
-    @abstractmethod 
+
+    @abstractmethod
     def dumps(self) -> str:
         """Return instance string representation."""
-     
+
     @classmethod
-    @abstractmethod 
+    @abstractmethod
     def loads(cls, poly: str):
         """Load geojson prepresentation."""
-    
-    

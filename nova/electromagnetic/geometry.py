@@ -28,6 +28,7 @@ class VtkGeo(MetaMethod):
     features: list[str] = field(
         init=False, default_factory=lambda: TriShell.features)
     qhull: ClassVar[list[str]] = ['panel']
+    ahull: ClassVar[list[str]] = ['insert']
     geom: ClassVar[list[str]] = ['panel', 'stl', 'insert', '']
 
     def initialize(self):
@@ -38,7 +39,9 @@ class VtkGeo(MetaMethod):
         if (index_length := len(index)) > 0:
             frame = self.frame.loc[index, :].copy()
             for i in range(index_length):
-                tri = TriShell(frame.vtk[i], qhull=frame.body[i] in self.qhull)
+                tri = TriShell(frame.vtk[i],
+                               qhull=frame.body[i] in self.qhull,
+                               ahull=frame.body[i] in self.ahull)
                 mesh = vedo.Mesh([tri.vtk.points(), tri.vtk.cells()],
                                  c=tri.vtk.c(), alpha=tri.vtk.opacity())
                 frame.loc[frame.index[i], 'vtk'] = VtkFrame(mesh)

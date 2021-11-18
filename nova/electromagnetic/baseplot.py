@@ -97,7 +97,7 @@ class Display:
         'vs3': 'C0', 'vs3j': 'gray', 'cs': 'C0', 'pf': 'C0',
         'trs': 'C3', 'dir': 'C3', 'vv': 'C3', 'vvin': 'C3',
         'vvout': 'C3', 'bb': 'C7', 'plasma': 'C4', 'cryo': 'C5',
-        'fi': 'C7', 'tf': 'C3'}
+        'fi': 'C2', 'tf': 'C7'}
     zorder: dict[str, int] = field(default_factory=lambda: {
         'VS3': 1, 'VS3j': 0, 'CS': 3, 'PF': 2})
 

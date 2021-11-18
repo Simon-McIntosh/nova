@@ -29,19 +29,28 @@ class Line:
         mesh['tangent'] = (forward + backward) / 2
         mesh['tangent'] = self.normalize(mesh['tangent'])
 
-    def normal(self, mesh, plane=(0, 1, 0)):
+    def normal(self, mesh: pv.PolyData):
         """Compute normal vector as cross product of tangent and plane."""
+        plane = self.plane(mesh.points)
         mesh['normal'] = np.cross(plane, mesh['tangent'])
         mesh['normal'] = self.normalize(mesh['normal'])
 
-    def plane(self, mesh):
-        """Compute plane vector."""
-        self.mesh['plane'] = np.cross(self.mesh['tangent'],
-                                      self.mesh['normal'])
-        mesh['plane'] = self.normalize(mesh['plane'])
+    def cross(self, mesh: pv.PolyData):
+        """Compute cross product betweeh tangent and normal vectors."""
+        mesh['cross'] = np.cross(mesh['tangent'], mesh['normal'])
+        mesh['cross'] = self.normalize(mesh['cross'])
 
-    def vector(self, mesh):
+    def plane(self, points):
+        """Return plane vector (eigen vector of smallest eigenvalue - PCA)."""
+        points = points.copy()
+        points -= np.mean(points, axis=0)  # center
+        cov = np.cov(points, rowvar=False)  # covariance
+        evals, evecs = np.linalg.eigh(cov)  # eigen
+        index = np.argmin(evals)
+        return evecs[:, index]
+
+    def vector(self, mesh: pv.PolyData):
         """Compute line vectors."""
         self.tangent(mesh)
         self.normal(mesh)
-        self.plane(mesh)
+        self.cross(mesh)

@@ -6,6 +6,7 @@ from typing import ClassVar
 import alphashape
 import meshio
 import numpy as np
+import numpy.typing as npt
 import pandas
 import pyvista as pv
 import sklearn.cluster
@@ -17,7 +18,7 @@ import vtk
 
 from nova.electromagnetic.polygen import PolyFrame
 from nova.electromagnetic.vtkgen import VtkFrame
-from nova.structural.centerline import CenterLine
+from nova.structural.line import Line
 
 
 @dataclass
@@ -26,6 +27,7 @@ class TriShell:
 
     mesh: vedo.Mesh
     qhull: bool = False
+    ahull: bool = False
     tri: trimesh.Trimesh = field(init=False, repr=False)
     features: ClassVar[list[str]] = [
         *'xyz', 'dx', 'dy', 'dz', 'dl', 'dt', 'area', 'volume']
@@ -121,20 +123,21 @@ class TriShell:
         poloidal = np.zeros((len(points), 2))
         poloidal[:, 0] = np.linalg.norm(points[:, :2], axis=1)
         poloidal[:, 1] = points[:, 2]
-
-        cluster = sklearn.cluster.DBSCAN(eps=1e-3, min_samples=1)
-        cluster.fit(poloidal)
-        labels = np.unique(cluster.labels_)
-        keypoints = np.zeros((len(labels), 2))
-        for i, label in enumerate(labels):
-            keypoints[i, :] = np.mean(poloidal[label == cluster.labels_, :],
-                                      axis=0)
-        hull = alphashape.alphashape(keypoints, 2.5)
-        try:
-            return PolyFrame(hull, name='vtk')
-        except NotImplementedError:
-            return PolyFrame(shapely.geometry.MultiPoint(poloidal).convex_hull,
-                             name='vtk')
+        if self.ahull:
+            cluster = sklearn.cluster.DBSCAN(eps=1e-3, min_samples=1)
+            cluster.fit(poloidal)
+            labels = np.unique(cluster.labels_)
+            keypoints = np.zeros((len(labels), 2))
+            for i, label in enumerate(labels):
+                keypoints[i, :] = np.mean(
+                    poloidal[label == cluster.labels_, :], axis=0)
+            hull = alphashape.alphashape(keypoints, 2.5)
+            try:
+                return PolyFrame(hull, name='vtk')
+            except NotImplementedError:
+                pass
+        return PolyFrame(shapely.geometry.MultiPoint(poloidal).convex_hull,
+                         name='vtk')
 
 
 @dataclass
@@ -204,22 +207,47 @@ class Ring(VtkFrame):
         self.flat()
 
 
-class TfCoil(VtkFrame):
-    """Construct box-section TF coil in xz plane with z-axis rotation."""
+@dataclass
+class CenterLine(Line):
+    """Manage 3D coil centerlines."""
 
-    def __init__(self, width, depth, rotate, offset=0.5):
-        line = CenterLine().mesh
+    points: npt.ArrayLike
+    mesh: pv.PolyData = field(init=False)
+
+    def __post_init__(self):
+        """Build spline."""
+        if not np.isclose(self.points[0], self.points[-1]).all():
+            self.points = np.append(self.points, self.points[:1], axis=0)
+        self.mesh = pv.Spline(self.points)
+        self.mesh['arc_length'] /= self.mesh['arc_length'][-1]
+        self.vector(self.mesh)
+
+
+class BoxLoop(VtkFrame):
+    """Construct box-section 3D coil from centerline."""
+
+    def __init__(self, points, width, depth, offset=0.5, res=(80, 2)):
+        line = CenterLine(points).mesh
         loop = {}
         loop['inner'] = line.points - offset * width * line['normal']
         loop['outer'] = line.points + (1-offset) * width * line['normal']
-        loop['a'] = loop['inner'] - depth/2 * np.array([0, 1, 0])
-        loop['b'] = loop['inner'] + depth/2 * np.array([0, 1, 0])
-        loop['c'] = loop['outer'] + depth/2 * np.array([0, 1, 0])
-        loop['d'] = loop['outer'] - depth/2 * np.array([0, 1, 0])
+        loop['a'] = loop['inner'] - depth/2 * line['cross']
+        loop['b'] = loop['inner'] + depth/2 * line['cross']
+        loop['c'] = loop['outer'] + depth/2 * line['cross']
+        loop['d'] = loop['outer'] - depth/2 * line['cross']
+        for attr in 'abcd':  # close loops
+            loop[attr][-1] = loop[attr][0]
         mesh = []
-        mesh.append(vedo.Ribbon(loop['a'], loop['b']))
-        mesh.append(vedo.Ribbon(loop['b'], loop['c']))
-        mesh.append(vedo.Ribbon(loop['c'], loop['d']))
-        mesh.append(vedo.Ribbon(loop['d'], loop['a']))
-        super().__init__(vedo.merge(*mesh))
-        self.rotateZ(rotate)
+        mesh.append(vedo.Ribbon(loop['a'], loop['b'], res=res, closed=True))
+        mesh.append(vedo.Ribbon(loop['b'], loop['c'], res=res, closed=True))
+        mesh.append(vedo.Ribbon(loop['c'], loop['d'], res=res, closed=True))
+        mesh.append(vedo.Ribbon(loop['d'], loop['a'], res=res, closed=True))
+
+        mesh = vedo.merge(*mesh)
+
+
+        super().__init__(mesh)
+
+    def __str__(self):
+        """Return volume name."""
+        return 'boxloop'

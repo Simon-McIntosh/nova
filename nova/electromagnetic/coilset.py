@@ -9,6 +9,7 @@ from nova.electromagnetic.biotdata import BiotData
 from nova.electromagnetic.coil import Coil
 from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.framedata import FrameData
+from nova.electromagnetic.loop import Loop
 from nova.electromagnetic.shell import Shell
 from nova.electromagnetic.plasma import Plasma
 from nova.electromagnetic.ferritic import Ferritic
@@ -44,7 +45,7 @@ class CoilSet(CoilGrid, FrameSet):
     _frame: dict[str, FrameData] = field(
         init=False, repr=False,
         default_factory=lambda: dict(coil=Coil, shell=Shell, plasma=Plasma,
-                                     ferritic=Ferritic))
+                                     ferritic=Ferritic, loop=Loop))
     _biot: dict[str, BiotData] = field(
         init=False, repr=False,
         default_factory=lambda: dict(grid=BiotGrid, point=BiotPoint,

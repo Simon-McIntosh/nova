@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 import pandas
 
-from nova.electromagnetic.gridattrs import GridAttrs
+from nova.electromagnetic.coilsetattrs import GridAttrs
 from nova.electromagnetic.polygrid import PolyGrid
 
 

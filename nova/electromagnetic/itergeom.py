@@ -4,6 +4,7 @@ import io
 import pandas
 
 from nova.electromagnetic.coilset import CoilSet
+from nova.structural.centerline import CenterLine
 
 
 @dataclass
@@ -71,14 +72,17 @@ class ITERgeom(CoilSet):
 if __name__ == '__main__':
 
     coilset = ITERgeom(dcoil=0.25, dplasma=-150)
-    coilset.ferritic.insert('Fi', multiframe=True, label='Fi', offset=1)
+    #coilset.ferritic.insert('Fi', multiframe=True, label='Fi', offset=1)
     #coilset.plasma.insert({'ellip': [6.5, 0.5, 4.5, 6.5]})
     #coilset.shell.insert({'ellip': [6.5, 0.5, 1.2*4.5, 1.2*6.5]}, -80, 0.25,
     #                     part='vv')
 
-    from nova.electromagnetic.volume import TfCoil
-    for i in range(18):
-        coilset.frame.insert(vtk=TfCoil(0.7, 0.85, i*20), label='TF', offset=1,
-                             part='tf')
-    coilset.plot()
+
+    points = CenterLine().mesh.points
+    #for i in range(18):
+    import numpy as np
+    coilset.loop.insert(points, label='TF', offset=1, part='tf')
+
+    #coilset.plot()
+
     coilset.frame.vtkplot()

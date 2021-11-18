@@ -7,7 +7,7 @@ gmsh
 geojson
 netCDF4
 nlopt
-numpy==1.20
+numpy
 openpyxl
 pandas
 pygmsh
@@ -24,5 +24,6 @@ spyder
 tetgen
 trimesh
 vedo
+vtk
 wheel
 xarray

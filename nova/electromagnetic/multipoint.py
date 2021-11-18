@@ -72,7 +72,7 @@ class MultiPoint(MetaMethod):
     def build(self):
         """Update multi-point parameters."""
         range_index = np.arange(len(self.frame), dtype=int)
-        self.indexer = list(range_index[~self.frame.link.to_numpy(bool)])
+        self.indexer = list(range_index[self.frame.link == ''])
         self.index = self.frame.index[self.indexer]
         ref = self.frame.index.get_indexer(self.frame.link)
         ref[self.indexer] = range_index[self.indexer]

@@ -1,7 +1,7 @@
 """Mesh poloidal shells."""
 from dataclasses import dataclass, field
 
-from nova.electromagnetic.gridattrs import GridAttrs
+from nova.electromagnetic.coilsetattrs import GridAttrs
 from nova.electromagnetic.shellgrid import ShellGrid
 from nova.electromagnetic.polygeom import Polygon
 

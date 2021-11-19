@@ -223,6 +223,95 @@ class CenterLine(Line):
         self.vector(self.mesh)
 
 
+@dataclass
+class Section:
+    """Transform 2D sectional data."""
+
+    points: npt.ArrayLike
+    origin: npt.ArrayLike = field(
+        init=False, default_factory=lambda: np.zeros(3, float))
+    triad: npt.ArrayLike = field(
+        init=False, default_factory=lambda: np.identity(3, float))
+    mesh: list[VtkFrame] = field(init=False, default_factory=list)
+
+    def __post_init__(self):
+        """Append inital section to mesh."""
+        self.points = np.array(self.points, float)
+        self.append(self.points)
+
+    def __len__(self):
+        """Return length of mesh."""
+        return len(self.mesh)
+
+    def append(self, points: npt.ArrayLike):
+        """Generate mesh and append mesh to list."""
+        self.mesh.append(
+            VtkFrame([points, [range(len(points))]]).c(len(self)))
+
+    @staticmethod
+    def normalize(vector):
+        """Return normalized vector."""
+        return vector / np.linalg.norm(vector)
+
+    def to_vector(self, vector: npt.ArrayLike, coord: int):
+        """Rotate mesh to vector."""
+        vector = self.normalize(vector)
+        cross = np.cross(vector, self.triad[coord])
+        dot = np.dot(vector, self.triad[coord])
+        angle = -np.arctan2(np.linalg.norm(cross), dot)
+        rotation = Rotation.from_rotvec(angle*cross)
+        self.points -= self.origin
+        self.points = rotation.apply(self.points)
+        self.points += self.origin
+        self.triad = rotation.apply(self.triad)
+        self.append(self.points)
+
+    def to_point(self, point):
+        """Translate points to point and store mesh."""
+        delta = np.array(point - self.origin, float)
+        self.origin += delta
+        self.points += delta
+        self.append(self.points)
+
+    def plot(self):
+        """Plot mesh instances."""
+        vedo.show(*self.mesh).close()
+
+
+class Cell(VtkFrame):
+    """Build vtk cell from a pair of bounding polygons."""
+
+    def __init__(self, base, top, cap_base=False, cap_top=False):
+        """Construct vtk instance for cell constructed from bounding polys."""
+        base = self._open(base)
+        top = self._open(top)
+        if len(base) != len(top):
+            return IndexError('cap lengths not equal')
+        n_cap = len(base)
+        points = np.append(base, top, axis=0)
+        nodes = np.arange(0, n_cap, dtype=int)
+        cells = np.zeros((n_cap, 4), int)
+        cells[:, 0] = nodes
+        cells[:, 1] = nodes + n_cap
+        cells[:, 2] = nodes + n_cap + 1
+        cells[:, 3] = nodes + 1
+        cells[-1, :] = [n_cap-1, 2*n_cap - 1, n_cap, 0]
+        cells = cells[:, ::-1]
+        cells = list(cells)
+        if cap_base:
+            cells.append(nodes[::-1])
+        if cap_top:
+            cells.append(nodes + n_cap)
+        super().__init__([points, cells])
+
+    @staticmethod
+    def _open(points):
+        """Open loop."""
+        if np.isclose(points[0], points[-1]).all():
+            return points[:-1]
+        return points
+
+
 class BoxLoop(VtkFrame):
     """Construct box-section 3D coil from centerline."""
 
@@ -245,6 +334,20 @@ class BoxLoop(VtkFrame):
 
         mesh = vedo.merge(*mesh)
 
+        mesh = Cell(loop['a'], loop['b'], cap_base=True, cap_top=True)
+
+        base = np.array([[0, 0, 0], [1, 0, 0], [1, 2, 0], [0, 2, 0]])
+        top = base + (0, 0, 3)
+
+        print(top)
+        mesh = Cell(base, top, cap_base=True, cap_top=True)
+        mesh.triangulate()
+
+
+        print(mesh.volume())
+        print(mesh.isClosed())
+
+        #print(TriShell(mesh).volume)
 
         super().__init__(mesh)
 

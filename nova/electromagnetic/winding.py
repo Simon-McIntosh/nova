@@ -1,4 +1,4 @@
-"""Manage 3D coils."""
+"""Manage 3D coil windings."""
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -8,8 +8,8 @@ from nova.electromagnetic.volume import BoxLoop
 
 
 @dataclass
-class Loop(CoilSetAttrs):
-    """Insert 3D coilloops."""
+class Winding(CoilSetAttrs):
+    """Insert 3D coil winding."""
 
     turn: str = 'shell'
     required: list[str] = field(

@@ -81,7 +81,11 @@ if __name__ == '__main__':
     points = CenterLine().mesh.points
     #for i in range(18):
     import numpy as np
-    coilset.loop.insert(points, label='TF', offset=1, part='tf')
+    coilset.winding.insert(points, label='TF', offset=1, part='tf')
+    print(coilset.frame.vtk[-1].volume())
+
+    print(coilset.frame.vtk[-1].isClosed())
+
 
     #coilset.plot()
 

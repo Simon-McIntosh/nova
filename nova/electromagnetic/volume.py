@@ -256,10 +256,18 @@ class Section:
     def to_vector(self, vector: npt.ArrayLike, coord: int):
         """Rotate mesh to vector."""
         vector = self.normalize(vector)
-        cross = np.cross(vector, self.triad[coord])
-        dot = np.dot(vector, self.triad[coord])
-        angle = -np.arctan2(np.linalg.norm(cross), dot)
-        rotation = Rotation.from_rotvec(angle*cross)
+        cross = np.cross(self.triad[coord], vector)
+        dot = np.dot(self.triad[coord], vector)
+        if np.linalg.norm(cross) == 0 and dot == -1:  # catch -pi rotation
+            axis = np.cross(self.triad[coord], self.triad[coord][::-1])
+            rotation = Rotation.from_rotvec(-np.pi*axis)
+        else:
+            v_cross = np.array([[0, -cross[2], cross[1]],
+                                [cross[2], 0, -cross[0]],
+                                [-cross[1], cross[0], 0]])
+            Rmat = np.identity(3) + v_cross + \
+                np.dot(v_cross, v_cross) / (1+dot)
+            rotation = Rotation.from_matrix(Rmat)
         self.points -= self.origin
         self.points = rotation.apply(self.points)
         self.points += self.origin

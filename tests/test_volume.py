@@ -23,10 +23,17 @@ def test_section_rotate_triad():
     assert np.isclose(section.triad[0], (0, -1, 0)).all()
 
 
+def test_section_rotate_pi():
+    base = np.array([[0, 0, 0], [1, 0, 0], [1, 2, 0], [0, 2, 0]])
+    section = Section(base)
+    section.to_vector((-1, 0, 0), 0)
+    assert np.isclose(section.triad[0], (-1, 0, 0)).all()
+
+
 def test_section_rotate_rotate():
     base = np.array([[0, 0, 0], [1, 0, 0], [1, 2, 0], [0, 2, 0]])
     section = Section(base.copy())
-    section.to_vector((0, -2, 0), 0)
+    section.to_vector((0.5, 0.5, 66.7), 0)
     section.to_vector((1, 0, 0), 0)
     assert all([np.isclose(p, b).all()
                 for p, b in zip(section.points, base)])

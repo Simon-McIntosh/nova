@@ -1,8 +1,6 @@
-FROM continuumio/miniconda3
+FROM python:3.9
 
-COPY nova.yml /tmp/nova.yml 
-RUN conda env create -f /tmp/nova.yml
-SHELL ["conda", "run", "-n", "nova", "/bin/bash", "-c"]
-ENTRYPOINT ["conda", "run", "-n", "nova", "python"]
-CMD ["--version"]
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
+CMD ["cat", "/etc/os-release"]

@@ -3,7 +3,7 @@ import pytest
 
 import numpy as np
 
-from nova.electromagnetic.polygen import PolyGen
+from nova.geometry.polygen import PolyGen
 
 
 def test_disk_area():

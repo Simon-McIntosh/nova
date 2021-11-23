@@ -3,7 +3,7 @@ import json
 import numpy as np
 import vedo
 
-from nova.electromagnetic.geoframe import GeoFrame
+from nova.geometry.geoframe import GeoFrame
 
 
 class VtkFrame(vedo.Mesh, GeoFrame):

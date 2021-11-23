@@ -8,13 +8,13 @@ import pyvista as pv
 from scipy.spatial.transform import Rotation
 
 from nova.definitions import root_dir
-from nova.structural.line import Line
+from nova.geometry.line import Line
 from nova.structural.windingpack import WindingPack
 from nova.utilities.pyplot import plt
 
 
 @dataclass
-class UniformWindingPack(Line):
+class UniformWindingPack:
     """Simplify TF conductor centerline for EM calculations."""
 
     wp_mesh: pv.PolyData = field(init=False, repr=False)
@@ -53,8 +53,7 @@ class UniformWindingPack(Line):
                                  skiprows=1, header=None).to_numpy()
         points = np.insert(points, 1, np.zeros(len(points)), axis=1)
         points = np.append(points, points[:1, :], axis=0)
-        self.spine_mesh = pv.Spline(points)
-        self.tangent(self.spine_mesh)
+        self.spine_mesh = Line.from_points(points).mesh
 
     def select_coil(self, n_coil, n_cells=7):
         """Return mesh for single TF coil."""
@@ -134,7 +133,7 @@ class UniformWindingPack(Line):
 if __name__ == '__main__':
 
     wp = UniformWindingPack()
-    #ccl.plot_turns()
+    wp.plot_turns()
 
     #points = ccl.mesh.points.reshape(18, 134, -1, 3)
     #loop = points[9, 0]

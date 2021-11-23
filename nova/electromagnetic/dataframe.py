@@ -8,9 +8,9 @@ import numpy as np
 import xarray
 
 from nova.electromagnetic.frameattrs import FrameAttrs
-from nova.electromagnetic.geoframe import GeoFrame
-from nova.electromagnetic.polygen import PolyFrame
-from nova.electromagnetic.vtkgen import VtkFrame
+from nova.geometry.geoframe import GeoFrame
+from nova.geometry.polygen import PolyFrame
+from nova.geometry.vtkgen import VtkFrame
 
 # pylint: disable=too-many-ancestors
 

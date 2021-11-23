@@ -8,9 +8,9 @@ import shapely
 
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
-from nova.electromagnetic.polygen import PolyFrame
-from nova.electromagnetic.polygeom import Polygon
 from nova.electromagnetic.polyplot import Axes
+from nova.geometry.polygen import PolyFrame
+from nova.geometry.polygeom import Polygon
 from nova.utilities.pyplot import plt
 
 

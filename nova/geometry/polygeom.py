@@ -6,7 +6,7 @@ import pandas
 import numpy as np
 import shapely.geometry
 
-from nova.electromagnetic.polygen import PolyGen, PolyFrame
+from nova.geometry.polygen import PolyGen, PolyFrame
 from nova.utilities.pyplot import plt
 
 

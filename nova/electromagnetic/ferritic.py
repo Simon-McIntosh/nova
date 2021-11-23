@@ -5,9 +5,6 @@ from string import digits
 from typing import ClassVar, Union
 
 import numpy as np
-from nova.electromagnetic.polygen import PolyFrame
-from shapely.geometry import MultiPolygon
-from shapely.ops import unary_union
 import sklearn.cluster
 import vedo
 

@@ -8,10 +8,10 @@ import vedo
 
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.polygeom import PolyGeom
-from nova.electromagnetic.polygen import PolyFrame
-from nova.electromagnetic.volume import TriShell, Ring
-from nova.electromagnetic.vtkgen import VtkFrame
+from nova.geometry.polygeom import PolyGeom
+from nova.geometry.polygen import PolyFrame
+from nova.geometry.volume import TriShell, Ring
+from nova.geometry.vtkgen import VtkFrame
 
 
 @dataclass

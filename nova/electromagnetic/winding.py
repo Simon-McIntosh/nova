@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from nova.electromagnetic.coilsetattrs import CoilSetAttrs
-from nova.electromagnetic.volume import BoxLoop
+from nova.geometry.volume import BoxLoop
 
 
 @dataclass

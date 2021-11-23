@@ -6,7 +6,7 @@ import numpy as np
 import pyvista as pv
 
 from nova.definitions import root_dir
-from nova.structural.line import Line
+from nova.geometry.line import Line
 from nova.structural.uniformwindingpack import UniformWindingPack
 from nova.structural.clusterturns import ClusterTurns
 from nova.utilities.pyplot import plt
@@ -42,7 +42,7 @@ class CenterLine(Line):
         points = cluster.mesh.cell_points(0)
         self.mesh = pv.Spline(np.append(points, points[:1], axis=0))
         self.mesh['arc_length'] /= self.mesh['arc_length'][-1]
-        self.vector(self.mesh)
+        self.compute_vectors()
 
     def plot(self, axes=None):
         """Plot 2D loop."""
@@ -64,4 +64,5 @@ class CenterLine(Line):
 if __name__ == '__main__':
 
     cl = CenterLine()
-    #cl.mesh.plot()
+    #cl.build()
+    cl.mesh.plot()

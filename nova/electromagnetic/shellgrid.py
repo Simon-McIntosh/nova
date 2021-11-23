@@ -1,6 +1,5 @@
 """Manage shell grid."""
-from dataclasses import dataclass, field, InitVar
-from typing import Union
+from dataclasses import dataclass, field
 
 import numpy as np
 import numpy.typing as npt
@@ -10,9 +9,9 @@ import shapely.geometry
 from rdp import rdp
 
 from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.polygen import PolyFrame
-from nova.electromagnetic.polygeom import PolyGeom
 from nova.electromagnetic.polyplot import PolyPlot
+from nova.geometry.polygen import PolyFrame
+from nova.geometry.polygeom import PolyGeom
 from nova.utilities import geom
 from nova.utilities.pyplot import plt
 

@@ -10,15 +10,17 @@ import numpy.typing as npt
 import pandas
 import pyvista as pv
 import sklearn.cluster
+import scipy.interpolate
 from scipy.spatial.transform import Rotation
 import shapely.geometry
 import trimesh
 import vedo
 import vtk
 
-from nova.electromagnetic.polygen import PolyFrame
-from nova.electromagnetic.vtkgen import VtkFrame
-from nova.structural.line import Line
+from nova.geometry.polygen import PolyFrame
+from nova.geometry.vtkgen import VtkFrame
+from nova.geometry.line import Line
+from nova.structural.centerline import CenterLine
 
 
 @dataclass
@@ -208,22 +210,6 @@ class Ring(VtkFrame):
 
 
 @dataclass
-class CenterLine(Line):
-    """Manage 3D coil centerlines."""
-
-    points: npt.ArrayLike
-    mesh: pv.PolyData = field(init=False)
-
-    def __post_init__(self):
-        """Build spline."""
-        if not np.isclose(self.points[0], self.points[-1]).all():
-            self.points = np.append(self.points, self.points[:1], axis=0)
-        self.mesh = pv.Spline(self.points)
-        self.mesh['arc_length'] /= self.mesh['arc_length'][-1]
-        self.vector(self.mesh)
-
-
-@dataclass
 class Section:
     """Transform 2D sectional data."""
 
@@ -284,6 +270,58 @@ class Section:
     def plot(self):
         """Plot mesh instances."""
         vedo.show(*self.mesh).close()
+
+
+@dataclass
+class VtkPath:
+    """Manage 3D path sub-divisions."""
+
+    points: npt.ArrayLike
+    delta: float = 0.
+    mesh: pv.PolyData = field(init=False)
+    submesh: pv.PolyData = field(init=False)
+
+    def __post_init__(self):
+        """Calculate length parameters and initialize interpolator."""
+        self.mesh = Line.from_points(self.points).mesh
+        self.interpolate()
+
+    @classmethod
+    def from_points(cls, points: npt.ArrayLike, delta=0):
+        """Return submesh calculated from points and delta."""
+        return cls(points, delta).submesh
+
+    def interpolate(self):
+        """Return segment interpolator ."""
+        arc_length = self._arc_length()
+        sub_points = scipy.interpolate.interp1d(
+            self.mesh['arc_length'], self.points, axis=0)(arc_length)
+        self.submesh = Line.from_points(sub_points).mesh
+
+    def _arc_length(self) -> npt.ArrayLike:
+        """Return updated sub-segment spacing parameter."""
+        if self.delta == 0:
+            return self.mesh['arc_length']
+        if self.delta < 0:  # specify segment number
+            return np.linspace(self.mesh['arc_length'][0],
+                               self.mesh['arc_length'][-1], -self.delta)
+        segment_number = 1 + self.mesh['arc_length'][-1] / self.delta
+        return np.linspace(self.mesh['arc_length'][0],
+                           self.mesh['arc_length'][-1], segment_number)
+
+    def plot(self):
+        """Plot mesh and submesh loops."""
+        vedo.show(self.mesh, self.submesh)
+
+
+if __name__ == '__main__':
+
+    points = CenterLine().mesh.points
+    path = VtkPath(points, delta=-20)
+
+    mesh = VtkPath.from_points(points, delta=-10)
+    vedo.show(mesh)
+
 
 
 class Cell(VtkFrame):

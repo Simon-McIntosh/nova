@@ -9,7 +9,7 @@ import shapely.geometry
 import shapely.ops
 import numpy as np
 
-from nova.electromagnetic.geoframe import GeoFrame
+from nova.geometry.geoframe import GeoFrame
 
 
 class PolyFrame(shapely.geometry.Polygon, GeoFrame):

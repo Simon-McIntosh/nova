@@ -13,7 +13,7 @@ def test_insert_box_subframe():
     box = vedo.shapes.Box(pos=(5, 0, 0), length=1, width=2, height=3)
     coilset.ferritic.insert(box)
     assert np.isclose(coilset.subframe.volume[0], 6)
-test_insert_box_subframe()
+
 
 def test_insert_doublebox_subframe():
     coilset = CoilSet()

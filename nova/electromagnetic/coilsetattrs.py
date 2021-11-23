@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, fields
 
 from nova.electromagnetic.framesetloc import FrameSetLoc
-from nova.electromagnetic.polygen import PolyGen
+from nova.geometry.polygen import PolyGen
 
 
 @dataclass

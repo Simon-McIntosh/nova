@@ -9,9 +9,9 @@ import pandas
 import pygeos
 
 from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.polygen import PolyGen, PolyFrame
-from nova.electromagnetic.polygeom import PolyGeom, Polygon
 from nova.electromagnetic.polyplot import PolyPlot
+from nova.geometry.polygen import PolyGen, PolyFrame
+from nova.geometry.polygeom import PolyGeom, Polygon
 from nova.utilities.pyplot import plt
 
 

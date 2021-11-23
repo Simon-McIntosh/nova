@@ -3,8 +3,8 @@ import numpy as np
 import pytest
 
 
-from nova.electromagnetic.vtkgen import VtkFrame
-from nova.electromagnetic.volume import Section, Cell
+from nova.geometry.vtkgen import VtkFrame
+from nova.geometry.volume import Section, Cell
 
 
 def test_section_translate():
@@ -55,7 +55,6 @@ def test_cell_closed():
 
 
 def test_cell_type():
-
     base = np.array([[0, 0, 0], [1, 0, 0], [1, 2, 0], [0, 2, 0]])
     top = base + (0, 0, 3)
     mesh = Cell(base, top, cap_base=True, cap_top=True)

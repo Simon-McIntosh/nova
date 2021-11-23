@@ -34,7 +34,7 @@ class VtkPlot(MetaMethod):
     def __call__(self):
         """Plot frame if not empty."""
         if not self.frame.empty:
-            self.plot().close()
+            self.plot()
 
     def plot(self):
         """Plot vtk instances."""

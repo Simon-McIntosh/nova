@@ -426,7 +426,7 @@ class Ferritic(FerriticBase):
         """
         Add ferritic volumes to frameset.
 
-        volumes described by vtk instance .
+        volumes described by vtk instance.
         frame properties calculated by Vtkgeo (x, y, z centroid and volume)
 
         Parameters

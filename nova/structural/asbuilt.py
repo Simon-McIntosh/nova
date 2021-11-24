@@ -23,7 +23,7 @@ class AsBuilt:
     @property
     def xls_file(self):
         """Return xls filename."""
-        return os.path.join(root_dir, 'input/geometry/ITER',
+        return os.path.join(root_dir, 'input/ITER',
                             f'{self.file}.xlsx')
 
     @property

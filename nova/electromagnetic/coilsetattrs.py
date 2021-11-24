@@ -15,7 +15,7 @@ class CoilSetAttrs(ABC, FrameSetLoc):
     default: dict = field(init=False, default_factory=lambda: {})
     link: bool = field(init=False, default=False)
     attributes: list[str] = field(init=False, default_factory=lambda: [
-        'link'])
+        'link', 'delta'])
 
     @abstractmethod
     def insert(self, *args, required=None, iloc=None, **additional):

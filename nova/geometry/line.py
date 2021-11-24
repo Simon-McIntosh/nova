@@ -19,7 +19,10 @@ class Line:
     @classmethod
     def from_points(cls, points: npt.ArrayLike):
         """Return line instance generated from points."""
-        mesh = pv.Spline(points)
+        if len(points) > 2:
+            return cls(pv.Spline(points))
+        mesh = pv.PolyData(points, lines=np.arange(0, len(points)))
+        mesh['arc_length'] = [0, np.linalg.norm(np.diff(points, axis=0))]
         return cls(mesh)
 
     @staticmethod

@@ -278,3 +278,9 @@ class Polygon(PolyGeom):
     def limit(self):
         """Return polygon bounding box (xmin, xmax, zmin, zmax)."""
         return self.xlim + self.zlim
+
+    @property
+    def points(self):
+        """Return polygon points."""
+        boundary = self.poly.boundary.xy
+        return np.c_[boundary[0], np.zeros(len(boundary[0])), boundary[1]]

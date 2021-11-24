@@ -2,47 +2,54 @@
 from dataclasses import dataclass, field
 
 import numpy as np
+import vedo
 
 from nova.electromagnetic.coilsetattrs import CoilSetAttrs
-from nova.geometry.volume import BoxLoop
+from nova.geometry.polygeom import Polygon
+from nova.geometry.volume import Path, Section, Cell, Sweep, TriShell
 
 
 @dataclass
 class Winding(CoilSetAttrs):
     """Insert 3D coil winding."""
 
-    turn: str = 'shell'
+    delta: float = 0.
+    turn: str = 'disk'
     required: list[str] = field(
-        default_factory=lambda: ['x', 'y', 'z', 'dl', 'dt', 'vtk', 'volume'])
+        default_factory=lambda: ['x', 'y', 'z', 'dx', 'dy', 'dz',
+                                 'volume', 'vtk'])
     default: dict = field(init=False, default_factory=lambda: {
-        'label': 'Shl', 'part': 'shell', 'active': True})
+        'label': 'Swp', 'part': 'coil', 'active': True})
 
     def set_conditional_attributes(self):
-        """Set conditional attrs - not required for shell."""
+        """Set conditional attrs - not required for winding."""
 
-    def insert(self, *points, required=None, iloc=None, **additional):
+    def insert(self, poly, path, required=None, iloc=None, **additional):
         """
         Add 3D coils to frameset.
 
         Lines described by x, y, z coordinates meshed into n elements based on
-        dloop.
+        dloop (delta).
 
         Parameters
         ----------
-        *points : array-like, shape(n, 3)
-            Loop point data x, y, z coordinates.
+        poly :
+            - shapely.geometry.Polygon
+            - dict[str, list[float]], polyname: *args
+            - list[float], shape(4,) bounding box [xmin, xmax, zmin, zmax]
+            - array-like, shape(n,2) bounding loop [x, z]
+
+        path : npt.ArrayLike, shape(,3)
+            Swept path.
+
         required : list[str]
             Required attribute names (args). The default is None.
+
         iloc : int, optional
             Index before which coils are inserted. The default is None (-1).
+
         **additional : dict[str, Any]
             Additional input.
-        dl : float
-            Box section width (normal) or tube radius.
-        dt : float
-            Box section depth (cross).
-        dl_offset: float
-            Box section width centerline offset factor (0-1)
 
         Returns
         -------
@@ -50,73 +57,37 @@ class Winding(CoilSetAttrs):
             FrameSpace index.
 
         """
-        dl = additional.pop('dl', 0.8)
-        dt = additional.pop('dt', 0.8)
-        dl_offset = additional.pop('dl_offset', 0.5)
-        vtk = [BoxLoop(_points, dl, dt, dl_offset) for _points in points]
-        x, y, z = np.c_[[_vtk.centerOfMass() for _vtk in vtk]].T
-        volume = [_vtk.volume() for _vtk in vtk]
-
-        self.attrs = additional
+        if not isinstance(poly, Polygon):
+            poly = Polygon(poly, segment='sweep')
+        vtk = Sweep(poly, path)
+        frame_data = self.vtk_data(vtk)
+        self.attrs = additional | dict(section=poly.section, segment='sweep',
+                                       dl=poly.length, dt=poly.thickness)
         with self.insert_required(required):
-            index = self.frame.insert(x, y, z, dl, dt, vtk, volume,
-                                      iloc=iloc, **self.attrs)
-        '''
-            self.subframe_insert(index)
-        if self.link:
-            self.frame.multipoint.link(index)
-            self.subframe.multipoint.link(index, expand=True)
-        '''
+            index = self.frame.insert(*frame_data, iloc=iloc, **self.attrs)
+            subattrs = self.attrs | {'label': index[0], 'frame': index[0],
+                                     'delim': '_', 'link': True}
+
+            submesh = Path.from_points(path, delta=self.attrs['delta'])
+            section = Section(poly.points).sweep(submesh)
+
+            vtk = [Cell(section.point_array[i:i+2])
+                   for i in range(submesh.n_points-1)]
+            points = submesh.points
+            centroid = (points[1:] + points[:-1]) / 2
+            vector = points[1:] - points[:-1]
+            volume = [_vtk.clone().triangulate().volume() for _vtk in vtk]
+            poly = [TriShell(_vtk).poly for _vtk in vtk]
+            area = self.frame.loc[index, 'area']
+            self.subframe.insert(*centroid.T, *vector.T, volume, vtk,
+                                 poly=poly, area=area, **subattrs)
         return index
 
-
-    '''
-    def subframe_insert(self, index):
-        """
-        Insert subframe(s).
-
-        - Store filaments in subframe.
-        - Link turns.
-
-        """
-        frame = self.frame.loc[index, :]
-        griddata = frame.loc[:, self.required_columns +
-                             [attr for attr in self.additional_columns
-                              if attr in self.frame]]
-        subframe = []
-        #subattrs = pandas.DataFrame(self.subattrs, index=index)
-        try:
-            turncurrent = subattrs.pop('It')
-        except KeyError:
-            turncurrent = None
-        for i, name in enumerate(index):
-            #polygrid = PolyGrid(**griddata.iloc[i].to_dict(), **self.grid)
-            data = frame.iloc[i].to_dict()
-            data |= {'label': name, 'frame': name, 'delim': '_', 'link': True}
-            if turncurrent is not None:
-                data['It'] = turncurrent.iloc[i] * \
-                    polygrid.frame['nturn'] / polygrid.nturn
-            subframe.append(self.subframe.assemble(
-                polygrid.frame, **data, **subattrs.iloc[i]))
-        self.subframe.concatenate(*subframe)
-
-
-    def insert(self, *args, required=None, iloc=None, **additional):
-
-        if isinstance(args[1], (int, float)):
-            poly = Polygon(args[0]).poly
-            args = poly.boundary.xy + args[1:]
-
-        self.attrs = additional
-        with self.insert_required(required):
-            shellgrid = ShellGrid(*args, delta=self.attrs['delta'])
-            index = self.frame.insert(shellgrid.frame, iloc=iloc, **self.attrs)
-        frame = self.frame.loc[index, :]
-        subframe = []
-        for i, name in enumerate(index):
-            data = frame.iloc[i].to_dict()
-            data |= {'label': name, 'frame': name, 'delim': '_', 'link': True}
-            subframe.append(self.subframe.assemble(
-                shellgrid.subframe[i], **data, **self.subattrs))
-        self.subframe.concatenate(*subframe)
-    '''
+    @staticmethod
+    def vtk_data(vtk: vedo.Mesh):
+        """Extract data from vtk object."""
+        centroid = vtk.centerOfMass()
+        bounds = np.array(vtk.bounds())
+        bbox = bounds[1::2] - bounds[::2]
+        volume = vtk.clone().triangulate().volume()
+        return *centroid, *bbox, volume, vtk

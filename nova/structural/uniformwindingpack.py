@@ -30,12 +30,12 @@ class UniformWindingPack:
     @property
     def vtk_file(self):
         """Return vtk file path (Uniform Current Centerline)."""
-        return os.path.join(root_dir, 'input/geometry/ITER/TF_UCCL.vtk')
+        return os.path.join(root_dir, 'input/ITER/TF_UCCL.vtk')
 
     @property
     def spine_file(self):
         """Return spine file path."""
-        return os.path.join(root_dir, 'input/geometry/ITER/TFC1_CCL.txt')
+        return os.path.join(root_dir, 'input/ITER/TFC1_CCL.txt')
 
     def load_ccl(self):
         """Load single coil current centerline."""

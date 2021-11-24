@@ -21,7 +21,7 @@ class WindingPack:
     def __post_init__(self):
         """Load TF1 centerline."""
         if self.directory is None:
-            self.directory = os.path.join(root_dir, 'input/geometry/ITER')
+            self.directory = os.path.join(root_dir, 'input/ITER')
         self.load_single()
 
     def filepath(self, ext):

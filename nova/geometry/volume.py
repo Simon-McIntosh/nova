@@ -18,9 +18,9 @@ import vedo
 import vtk
 
 from nova.geometry.polygen import PolyFrame
+from nova.geometry.polygeom import Polygon
 from nova.geometry.vtkgen import VtkFrame
 from nova.geometry.line import Line
-from nova.structural.centerline import CenterLine
 
 
 @dataclass
@@ -135,11 +135,11 @@ class TriShell:
                     poloidal[label == cluster.labels_, :], axis=0)
             hull = alphashape.alphashape(keypoints, 2.5)
             try:
-                return PolyFrame(hull, name='vtk')
+                return PolyFrame(hull, name='ahull')
             except NotImplementedError:
                 pass
         return PolyFrame(shapely.geometry.MultiPoint(poloidal).convex_hull,
-                         name='vtk')
+                         name='qhull')
 
 
 @dataclass
@@ -218,21 +218,22 @@ class Section:
         init=False, default_factory=lambda: np.zeros(3, float))
     triad: npt.ArrayLike = field(
         init=False, default_factory=lambda: np.identity(3, float))
-    mesh: list[VtkFrame] = field(init=False, default_factory=list)
+    mesh_array: list[VtkFrame] = field(init=False, default_factory=list)
+    point_array: list[npt.ArrayLike] = field(init=False, default_factory=list)
 
     def __post_init__(self):
         """Append inital section to mesh."""
         self.points = np.array(self.points, float)
-        self.append(self.points)
 
     def __len__(self):
         """Return length of mesh."""
-        return len(self.mesh)
+        return len(self.mesh_array)
 
-    def append(self, points: npt.ArrayLike):
+    def append(self):
         """Generate mesh and append mesh to list."""
-        self.mesh.append(
-            VtkFrame([points, [range(len(points))]]).c(len(self)))
+        self.point_array.append(self.points.tolist())
+        self.mesh_array.append(
+            VtkFrame([self.points, [range(len(self.points))]]).c(len(self)))
 
     @staticmethod
     def normalize(vector):
@@ -258,22 +259,29 @@ class Section:
         self.points = rotation.apply(self.points)
         self.points += self.origin
         self.triad = rotation.apply(self.triad)
-        self.append(self.points)
 
     def to_point(self, point):
         """Translate points to point and store mesh."""
         delta = np.array(point - self.origin, float)
         self.origin += delta
         self.points += delta
-        self.append(self.points)
+
+    def sweep(self, mesh: pv.PolyData):
+        """Sweep section along path."""
+        for i in range(mesh.n_points):
+            self.to_point(mesh.points[i])
+            self.to_vector(mesh['normal'][i], 0)
+            self.to_vector(mesh['tangent'][i], 1)
+            self.append()
+        return self
 
     def plot(self):
         """Plot mesh instances."""
-        vedo.show(*self.mesh).close()
+        vedo.show(*self.mesh_array)
 
 
 @dataclass
-class VtkPath:
+class Path:
     """Manage 3D path sub-divisions."""
 
     points: npt.ArrayLike
@@ -292,7 +300,7 @@ class VtkPath:
         return cls(points, delta).submesh
 
     def interpolate(self):
-        """Return segment interpolator ."""
+        """Interpolate mesh to submesh."""
         arc_length = self._arc_length()
         sub_points = scipy.interpolate.interp1d(
             self.mesh['arc_length'], self.points, axis=0)(arc_length)
@@ -304,8 +312,8 @@ class VtkPath:
             return self.mesh['arc_length']
         if self.delta < 0:  # specify segment number
             return np.linspace(self.mesh['arc_length'][0],
-                               self.mesh['arc_length'][-1], -self.delta)
-        segment_number = 1 + self.mesh['arc_length'][-1] / self.delta
+                               self.mesh['arc_length'][-1], -self.delta+1)
+        segment_number = int(1 + self.mesh['arc_length'][-1] / self.delta)
         return np.linspace(self.mesh['arc_length'][0],
                            self.mesh['arc_length'][-1], segment_number)
 
@@ -314,89 +322,76 @@ class VtkPath:
         vedo.show(self.mesh, self.submesh)
 
 
-if __name__ == '__main__':
-
-    points = CenterLine().mesh.points
-    path = VtkPath(points, delta=-20)
-
-    mesh = VtkPath.from_points(points, delta=-10)
-    vedo.show(mesh)
-
-
-
 class Cell(VtkFrame):
-    """Build vtk cell from a pair of bounding polygons."""
+    """Build vtk cell from a list of sectional polygons."""
 
-    def __init__(self, base, top, cap_base=False, cap_top=False):
+    def __init__(self, point_array, link=False):
         """Construct vtk instance for cell constructed from bounding polys."""
-        base = self._open(base)
-        top = self._open(top)
-        if len(base) != len(top):
-            return IndexError('cap lengths not equal')
-        n_cap = len(base)
-        points = np.append(base, top, axis=0)
-        nodes = np.arange(0, n_cap, dtype=int)
-        cells = np.zeros((n_cap, 4), int)
-        cells[:, 0] = nodes
-        cells[:, 1] = nodes + n_cap
-        cells[:, 2] = nodes + n_cap + 1
-        cells[:, 3] = nodes + 1
-        cells[-1, :] = [n_cap-1, 2*n_cap - 1, n_cap, 0]
-        cells = cells[:, ::-1]
-        cells = list(cells)
-        if cap_base:
-            cells.append(nodes[::-1])
-        if cap_top:
-            cells.append(nodes + n_cap)
+        assert all([len(array) == len(point_array[0])
+                    for array in point_array[1:]])
+        point_array = np.array(point_array)
+        if np.isclose(point_array[0, 0], point_array[0, -1]).all():
+            point_array = point_array[:, :-1]  # open closed loop
+        n_section, n_cap = point_array.shape[:2]
+        points = np.vstack(point_array)
+        nodes = np.arange(0, len(points)).reshape(-1, n_cap)
+        cells = []
+        for i in range(n_section-1):
+            cells.extend(self._link(nodes[i], nodes[i+1]))
+        if link:  # link start and end sections
+            cells.extend(self._link(nodes[-1], nodes[0]))
+        else:  # cap
+            cells.append(nodes[0][::-1].tolist())  # base
+            cells.append(nodes[-1].tolist())  # top
         super().__init__([points, cells])
 
-    @staticmethod
-    def _open(points):
-        """Open loop."""
-        if np.isclose(points[0], points[-1]).all():
-            return points[:-1]
-        return points
-
-
-class BoxLoop(VtkFrame):
-    """Construct box-section 3D coil from centerline."""
-
-    def __init__(self, points, width, depth, offset=0.5, res=(80, 2)):
-        line = CenterLine(points).mesh
-        loop = {}
-        loop['inner'] = line.points - offset * width * line['normal']
-        loop['outer'] = line.points + (1-offset) * width * line['normal']
-        loop['a'] = loop['inner'] - depth/2 * line['cross']
-        loop['b'] = loop['inner'] + depth/2 * line['cross']
-        loop['c'] = loop['outer'] + depth/2 * line['cross']
-        loop['d'] = loop['outer'] - depth/2 * line['cross']
-        for attr in 'abcd':  # close loops
-            loop[attr][-1] = loop[attr][0]
-        mesh = []
-        mesh.append(vedo.Ribbon(loop['a'], loop['b'], res=res, closed=True))
-        mesh.append(vedo.Ribbon(loop['b'], loop['c'], res=res, closed=True))
-        mesh.append(vedo.Ribbon(loop['c'], loop['d'], res=res, closed=True))
-        mesh.append(vedo.Ribbon(loop['d'], loop['a'], res=res, closed=True))
-
-        mesh = vedo.merge(*mesh)
-
-        mesh = Cell(loop['a'], loop['b'], cap_base=True, cap_top=True)
-
-        base = np.array([[0, 0, 0], [1, 0, 0], [1, 2, 0], [0, 2, 0]])
-        top = base + (0, 0, 3)
-
-        print(top)
-        mesh = Cell(base, top, cap_base=True, cap_top=True)
-        mesh.triangulate()
-
-
-        print(mesh.volume())
-        print(mesh.isClosed())
-
-        #print(TriShell(mesh).volume)
-
-        super().__init__(mesh)
+    def _link(self, start, end):
+        """Return list of rectangular cells linking start loop to end loop."""
+        cells = np.zeros((len(start), 4), int)
+        cells[:-1, 0] = start[:-1]
+        cells[:-1, 1] = end[:-1]
+        cells[:-1, 2] = end[1:]
+        cells[:-1, 3] = start[1:]
+        cells[-1, :] = [start[-1], end[-1], end[0], start[0]]
+        cells = cells[:, ::-1]
+        return cells.tolist()
 
     def __str__(self):
         """Return volume name."""
-        return 'boxloop'
+        return 'cell'
+
+
+class Sweep(Cell):
+    """Sweep polygon along path."""
+
+    def __init__(self, poly, path, delta=0, link=False):
+        """
+        Sweep cross-section and return vedo.Mesh.
+
+        Parameters
+        ----------
+        poly :
+            - shapely.geometry.Polygon
+            - dict[str, list[float]], polyname: *args
+            - list[float], shape(4,) bounding box [xmin, xmax, zmin, zmax]
+            - array-like, shape(n,2) bounding loop [x, z]
+
+        path : npt.ArrayLike, shape(,3)
+            Swept path.
+
+        """
+        if not isinstance(poly, Polygon):
+            poly = Polygon(poly, segment='sweep')
+        if isinstance(path, pv.PolyData):
+            path = path.points
+        mesh = Path.from_points(path, delta=delta)
+        n_points = mesh.n_points
+        if np.isclose(mesh.points[0], mesh.points[-1]).all():
+            n_points -= 1
+            link = True
+        section = Section(poly.points).sweep(mesh)
+        super().__init__(section.point_array, link=link)
+
+    def __str__(self):
+        """Return volume name."""
+        return 'sweep'

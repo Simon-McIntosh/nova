@@ -45,20 +45,21 @@ class TFCgap(DataDir, Plotter):
     def animate(self, displace='EOB', max_factor=200):
         """Animate displacement."""
         filename = f'{self.file}_{self.baseline}_{displace}'
-        super().animate(filename, displace, view='xy', max_factor=max_factor)
+        super().animate(filename, displace, view='xy', max_factor=max_factor,
+                        opacity=0)
 
 
 if __name__ == '__main__':
 
-    gap = TFCgap('TFCgapsG10', 'k1', baseline='k0', cluster=1)
+    gap = TFCgap('TFCgapsG10', 'k1', baseline='k0', cluster=None)
 
-    #mesh = gap.mesh.slice(normal=[0, 0, 1])
-    #clip = pv.Cylinder(direction=(0, 0, 1), radius=3)
-    #gap.mesh = mesh.clip_surface(clip, invert=True)
+    mesh = gap.mesh.slice(normal=[0, 0, 1])
+    clip = pv.Cylinder(direction=(0, 0, 1), radius=3)
+    gap.mesh = mesh.clip_surface(clip, invert=True)
 
     #p = pv.Plotter()
     #p.add_mesh(mesh)
     #p.show()
 
-    gap.warp(160, displace='EOB', opacity=0.5)
+    gap.warp(160, displace='TFonly', opacity=0.5, view='xy')
     #gap.animate('EOB', 1000)

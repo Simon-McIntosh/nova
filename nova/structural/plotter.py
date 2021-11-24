@@ -21,7 +21,8 @@ class Plotter:
         self.warp(factor=factor, displace=self.diff(displace, referance))
 
     def warp(self, factor=75, opacity=0.5, displace=None, scalars=None,
-             plotter=None, show_edges=False, color=None, show=False):
+             plotter=None, show_edges=False, color=None, show=False,
+             view='iso'):
         """Plot warped with mesh."""
         if displace is None:
             displace = self.mesh.active_scalars_name
@@ -42,6 +43,8 @@ class Plotter:
                          show_edges=show_edges, opacity=0.5,
                          color=color)
         #, smooth_shading=True, show_scalar_bar=False, clim=[-25, 25])
+        if view != 'iso':
+            getattr(plotter, f'view_{view}')()
         if show:
             plotter.show()
         return plotter

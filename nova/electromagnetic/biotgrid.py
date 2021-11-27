@@ -99,7 +99,7 @@ class Expand:
     """Calculate grid limit as a factor expansion about multipoly bounds."""
 
     frame: FrameLink
-    xmin: float = 1e-12,
+    xmin: float = 1e-12
     fix_aspect: bool = False
 
     def __post_init__(self):
@@ -178,9 +178,9 @@ class BiotGrid(Axes, BiotData):
         self.axes = axes
         kwargs = dict(colors='lightgray', linewidths=1.5, alpha=0.9,
                       linestyles='solid', levels=self.levels) | kwargs
-        Psi = np.dot(self.data.Psi, self.subframe.subspace['Ic'])
-        QuadContourSet = self.axes.contour(
-            self.data.x, self.data.z, Psi.reshape(*self.shape).T, **kwargs)
+        QuadContourSet = self.axes.contour(self.data.x, self.data.z,
+                                           self.psi.reshape(*self.shape).T,
+                                           **kwargs)
         if isinstance(kwargs['levels'], int):
             self.levels = QuadContourSet.levels
 

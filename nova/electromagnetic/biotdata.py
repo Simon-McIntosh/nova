@@ -15,7 +15,14 @@ class BiotData(FilePath, FrameSetLoc):
     """Biot solution abstract base class."""
 
     name: str = field(default=None)
+    attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     data: BiotMatrix = field(init=False, repr=False)
+
+    def __getattr__(self, attr):
+        """Return attribute data."""
+        if (Attr := attr.capitalize()) in self.attrs:
+            return self.data[Attr].values @ self.sloc['Ic']
+        raise AttributeError(f'attribute {attr} not specified in {self.attrs}')
 
     @abstractmethod
     def solve(self, index=slice(None)):
@@ -35,7 +42,7 @@ class BiotData(FilePath, FrameSetLoc):
 
     def update_turns(self):
         """Update plasma turns."""
-        for attr in ['Psi', 'Br', 'Bz']:
+        for attr in self.attrs:
             try:
                 self.data[attr][:, -1] = np.sum(
                     getattr(self.data, f'_{attr}') *

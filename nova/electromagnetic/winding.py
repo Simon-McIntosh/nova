@@ -14,7 +14,7 @@ class Winding(CoilSetAttrs):
     """Insert 3D coil winding."""
 
     delta: float = 0.
-    turn: str = 'disk'
+    turn: str = 'disc'
     required: list[str] = field(
         default_factory=lambda: ['x', 'y', 'z', 'dx', 'dy', 'dz',
                                  'volume', 'vtk'])

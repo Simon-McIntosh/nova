@@ -5,6 +5,7 @@ import nlopt
 import numpy as np
 
 from nova.electromagnetic.biotfilament import Biot
+from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.biotsolve import BiotMatrix
 from nova.electromagnetic.biotdata import BiotData
@@ -13,14 +14,15 @@ from nova.electromagnetic.polyplot import Axes
 
 @dataclass
 class BiotPoint(Axes, BiotData):
-    """Compute interaction across grid."""
+    """Compute interaction at discrete points."""
 
     def solve(self, points):
         """Solve Biot interaction across grid."""
         points = np.array(points)
         points.shape = (-1, 2)  # shape(n, 2)
-        target = dict(x=[point[0] for point in points],
-                      z=[point[1] for point in points])
+        target = BiotFrame(dict(x=[point[0] for point in points],
+                                z=[point[1] for point in points]),
+                           label='Point')
         self.data = Biot(self.subframe, target, reduce=[True, False],
                          columns=['Psi', 'Br', 'Bz']).data
         # insert grid data

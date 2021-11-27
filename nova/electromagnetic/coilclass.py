@@ -104,7 +104,7 @@ class CoilClass(CoilSet):
     def update_plasma_position(self, r=1.5):
         rms, z = self.d2.vector['Rcur'], self.d2.vector['Zcur']
         if rms > 0:
-            x = np.sqrt(rms**2 - (2*r)**2 / 16)  # rms to x, disk
+            x = np.sqrt(rms**2 - (2*r)**2 / 16)  # rms to x, disc
             polygon = shapely.geometry.Point(x, z).buffer(r)
             self.separatrix = polygon
         else:

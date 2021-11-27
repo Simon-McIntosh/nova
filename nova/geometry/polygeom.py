@@ -40,7 +40,7 @@ class Geom(Poly):
             Segment centroid [x, y, z] coordinates.
 
         """
-        if self.segment == 'ring':  # centered toroildal disk
+        if self.segment == 'ring':  # centered toroildal disc
             if self.x_coordinate is None:
                 self.x_coordinate = self.poly.centroid.x  # update x centroid
             if self.y_coordinate is None:
@@ -86,8 +86,8 @@ class PolyGeom(Geom):
     @property
     def area(self):
         """Return polygon area."""
-        if self.section == 'disk':
-            return np.pi * self.length**2 / 4  # disk
+        if self.section == 'disc':
+            return np.pi * self.length**2 / 4  # disc
         if self.section == 'square':
             return self.length**2  # square
         if self.section == 'rectangle':
@@ -103,7 +103,7 @@ class PolyGeom(Geom):
         if self.section in PolyGen.polyshape and self.section != 'skin' and \
                 self.length is not None and \
                 self.thickness is not None:
-            if self.section in ['disk', 'square']:
+            if self.section in ['disc', 'square']:
                 self.length = self.thickness = PolyGen.boxbound(
                     self.length, self.thickness)
             return self.length, self.thickness
@@ -132,7 +132,7 @@ class PolyGeom(Geom):
             Second characteristic dimension, dt.
         poly : shapely.polygon, optional
             Polygon for numerical calculation if not in
-            [disk, square, rectangle, skin]. The default is None.
+            [disc, square, rectangle, skin]. The default is None.
 
         Returns
         -------
@@ -143,8 +143,8 @@ class PolyGeom(Geom):
         if self.segment != 'ring':
             return -1
         centroid_radius = self.centroid[0]
-        if self.section == 'disk':
-            return np.sqrt(centroid_radius**2 + self.length**2 / 16)  # disk
+        if self.section == 'disc':
+            return np.sqrt(centroid_radius**2 + self.length**2 / 16)  # disc
         if self.section in ['square', 'rectangle']:
             return np.sqrt(centroid_radius**2 + self.length**2 / 12)  # square
         if self.section == 'skin':

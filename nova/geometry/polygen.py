@@ -17,11 +17,21 @@ class PolyFrame(shapely.geometry.Polygon, GeoFrame):
 
     def __init__(self, shell=None, holes=None, name='poly'):
         self.name = name
+        self.polygon = None #shapely.geometry.Polygon(shell, holes)
         super().__init__(shell, holes)
 
+
     def __str__(self):
-        """Return polygon name."""
+        """Return polyframe name."""
         return self.name
+
+    '''
+    def __getattr__(self, attr):
+        """Return attrs from polygon else from self."""
+        if hasattr(self.polygon, attr):
+            return getattr(self.polygon, attr)
+        return getattr(self, attr)
+    '''
 
     def dumps(self) -> str:
         """Return geojson representation."""
@@ -39,7 +49,8 @@ class PolyGen:
 
     section: str
     polyshape: ClassVar[dict[str, str]] = \
-        dict.fromkeys(['disk', 'dsk', 'd', 'o'], 'disk') | \
+        dict.fromkeys(['disc', 'dsc', 'd', 'o', 'disk', 'dsk',
+                       'circle', 'c'], 'disc') | \
         dict.fromkeys(['ellipse', 'ellip', 'el', 'e'], 'ellipse') | \
         dict.fromkeys(['square', 'sq', 's'], 'square') | \
         dict.fromkeys(['rectangle', 'rect', 'r'], 'rectangle') | \
@@ -69,7 +80,7 @@ class PolyGen:
         Raises
         ------
         IndexError
-            Cross-section not in [disk, ellipse, square, rectangle, skin].
+            Cross-section not in [disc, ellipse, square, rectangle, skin].
 
         Returns
         -------
@@ -77,8 +88,8 @@ class PolyGen:
 
         """
         section = self.section.rstrip(string.digits)
-        if self.polyshape[section] == 'disk':
-            return self.disk
+        if self.polyshape[section] == 'disc':
+            return self.disc
         if self.polyshape[section] == 'ellipse':
             return self.ellipse
         if self.polyshape[section] == 'square':
@@ -115,20 +126,20 @@ class PolyGen:
         return np.min([width, height])
 
     @staticmethod
-    def disk(x_center, z_center, width, height=None):
+    def disc(x_center, z_center, width, height=None):
         """
         Return shapely.cirle.
 
         Parameters
         ----------
         x_center : float
-            Disk center, x-coordinate.
+            Disc center, x-coordinate.
         z_center : float
-            Disk center, z-coordinate.
+            Disc center, z-coordinate.
         width : float
-            Disk bounding box, x-dimension.
+            Disc bounding box, x-dimension.
         height : Optional[float]
-            Disk bounding box, z-dimension..
+            Disc bounding box, z-dimension..
 
         Returns
         -------
@@ -139,7 +150,7 @@ class PolyGen:
         radius = diameter / 2
         point = shapely.geometry.Point(x_center, z_center)
         buffer = point.buffer(radius, resolution=64)
-        return PolyFrame(buffer, 'disk')
+        return PolyFrame(buffer, 'disc')
 
     @staticmethod
     def ellipse(x_center, z_center, width, height):
@@ -162,7 +173,7 @@ class PolyGen:
         shape : shapely.polygon
 
         """
-        polygon = shapely.affinity.scale(PolyGen.disk(
+        polygon = shapely.affinity.scale(PolyGen.disc(
             x_center, z_center, width), 1, height/width)
         return PolyFrame(polygon, name='ellipse')
 
@@ -232,7 +243,7 @@ class PolyGen:
             External diameter.
         factor : float
             factor = 1-r/R. Must be greater than 0 and less than 1.
-            Use disk for factor=1.
+            Use disc for factor=1.
 
         Raises
         ------
@@ -247,12 +258,12 @@ class PolyGen:
         if factor <= 0 or factor > 1:
             raise ValueError('skin factor not 0 <= '
                              f'{factor} <= 1')
-        disk_outer = PolyGen.disk(x_center, z_center, diameter)
+        disc_outer = PolyGen.disc(x_center, z_center, diameter)
         if factor == 1:
-            return disk_outer
+            return disc_outer
         scale = 1-factor
-        disk_inner = PolyGen.disk(x_center, z_center, scale*diameter)
-        polygon = disk_outer.difference(disk_inner)
+        disc_inner = PolyGen.disc(x_center, z_center, scale*diameter)
+        polygon = disc_outer.difference(disc_inner)
         return PolyFrame(polygon, name='skin')
 
     @staticmethod
@@ -285,5 +296,5 @@ class PolyGen:
 
 if __name__ == '__main__':
 
-    poly = PolyGen('disk')
+    poly = PolyGen('disc')
     print(poly(3, 4, 2))

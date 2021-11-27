@@ -23,13 +23,13 @@ class VtkGeo(MetaMethod):
     frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: ['vtk'])
     additional: list[str] = field(
-        default_factory=lambda: [*TriShell.features, 'body',
+        default_factory=lambda: [*TriShell.features, 'part',
                                  'segment', 'section', 'poly'])
     features: list[str] = field(
         init=False, default_factory=lambda: TriShell.features)
     qhull: ClassVar[list[str]] = ['panel']
     ahull: ClassVar[list[str]] = ['insert']
-    geom: ClassVar[list[str]] = ['panel', 'stl', 'insert', '']
+    geom: ClassVar[list[str]] = ['panel', 'stl', 'insert', 'fi', 'vtk']
 
     def initialize(self):
         """Init vtk data."""
@@ -40,12 +40,12 @@ class VtkGeo(MetaMethod):
             frame = self.frame.loc[index, :].copy()
             for i in range(index_length):
                 tri = TriShell(frame.vtk[i],
-                               qhull=frame.body[i] in self.qhull,
-                               ahull=frame.body[i] in self.ahull)
+                               qhull=frame.part[i] in self.qhull,
+                               ahull=frame.part[i] in self.ahull)
                 mesh = vedo.Mesh([tri.vtk.points(), tri.vtk.cells()],
                                  c=tri.vtk.c(), alpha=tri.vtk.opacity())
                 frame.loc[frame.index[i], 'vtk'] = VtkFrame(mesh)
-                if frame.body[i] in self.geom:
+                if frame.part[i] in self.geom:
                     frame.loc[frame.index[i], self.features] = tri.geom
                     frame.loc[frame.index[i], ['segment', 'section']] = ''
                     frame.loc[frame.index[i], 'poly'] = tri.poly
@@ -61,6 +61,10 @@ class VtkGeo(MetaMethod):
         if len(index) > 0:
             self.frame.loc[index, 'vtk'] = \
                 [Ring(poly) for poly in self.frame.loc[index, 'poly'].values]
+            self.frame.loc[index, 'volume'] = \
+                [vtk.clone().triangulate().volume()
+                 for vtk in self.frame.loc[index, 'vtk'].values]
+
 
 
 @dataclass
@@ -103,8 +107,7 @@ class PolyGeo(MetaMethod):
                 polygeom = PolyGeom(poly[i], *coords[i], section[i])
                 section[i] = polygeom.section  # inflate section name
                 if poly_update[i]:
-                    poly[i] = PolyFrame(polygeom.poly, polygeom.section)
-
+                    poly[i] = PolyFrame(polygeom.poly, name=polygeom.section)
                 geometry = polygeom.geometry  # extract geometrical features
                 geom[i] = [geometry[feature] for feature in self.features]
             if poly_update.any():

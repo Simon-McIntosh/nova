@@ -204,7 +204,14 @@ class Ring(VtkFrame):
     """Construct vtk volume by rotating boundary polygon about z-axis."""
 
     def __init__(self, poly: shapely.geometry.Polygon, c=None, alpha=1):
-        mesh = Poly(poly).extrude(zshift=0, rotation=360, res=60)
+        try:
+            mesh = Poly(poly).extrude(zshift=0, rotation=360, res=60)
+        except NotImplementedError:  # multipart boundary (skin)
+            mesh = [Poly(PolyFrame(boundary)).extrude(zshift=0, rotation=360,
+                                                      res=60)
+                    for boundary in poly.boundary.geoms]
+            mesh = vedo.merge(mesh)
+
         super().__init__(mesh, c, alpha)
         self.flat()
 

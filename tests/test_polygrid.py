@@ -40,7 +40,7 @@ def test_square_in_rectangle():
     assert np.isclose(polygrid.polyarea, 0.1**2)
 
 
-def test_disk_in_rectangle():
+def test_disc_in_rectangle():
     polygrid = PolyGrid({'r': [3, 5, 0.1, 0.2]}, delta=0, turn='o')
     assert np.isclose(polygrid.polyarea, np.pi * 0.1**2 / 4, 1e-3)
 
@@ -62,7 +62,7 @@ def test_hexagon_in_rectangle_vertical_constraint():
     assert np.isclose(polygrid.polyarea, 3**1.5 / 2 * edge_length**2)
 
 
-def test_hexagon_in_disk():
+def test_hexagon_in_disc():
     polygrid = PolyGrid({'o': [3, 5, 0.1]}, delta=0, turn='hex')
     edge_length = 0.1/2
     assert np.isclose(polygrid.polyarea, 3**1.5 / 2 * edge_length**2)
@@ -78,22 +78,22 @@ def test_rectangle_grid_vertical():
     assert len(polygrid) == 8
 
 
-def test_disk_disk_grid_odd_under():
+def test_disc_disc_grid_odd_under():
     polygrid = PolyGrid({'o': [6, 3, 0.4, 0.2]}, delta=-3, turn='o')
     assert len(polygrid) == 4
 
 
-def test_disk_disk_grid_odd_over():
+def test_disc_disc_grid_odd_over():
     polygrid = PolyGrid({'o': [6, 3, 0.4, 0.2]}, delta=-5, turn='o')
     assert len(polygrid) == 9
 
 
-def test_disk_square_grid_odd_over():
+def test_disc_square_grid_odd_over():
     polygrid = PolyGrid({'o': [6, 3, 0.4, 0.2]}, delta=-5, turn='sq')
     assert len(polygrid) == 9
 
 
-def test_disk_rectangle_grid_odd_over():
+def test_disc_rectangle_grid_odd_over():
     polygrid = PolyGrid({'o': [6, 3, 0.4, 0.2]}, delta=-5, turn='r')
     assert len(polygrid) == 6
 
@@ -135,13 +135,13 @@ def test_rectangle_effective_nfilament_tile():
     assert np.isclose(-polygrid.delta, polygrid.polyfilaments)
 
 
-def test_disk_effective_nfilament():
+def test_disc_effective_nfilament():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-25,
                         turn='o', tile=False)
     assert np.isclose(-polygrid.delta, polygrid.polyfilaments, 1e-3)
 
 
-def test_disk_effective_nfilament_tile():
+def test_disc_effective_nfilament_tile():
     polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-49,
                         turn='o', tile=True)
     assert np.isclose(-polygrid.delta, polygrid.polyfilaments, 1e-2)

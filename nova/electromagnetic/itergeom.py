@@ -71,13 +71,24 @@ class ITERgeom(CoilSet):
 
 if __name__ == '__main__':
 
-
     coilset = ITERgeom(dcoil=0.25, dplasma=-150)
     coilset.ferritic.insert('Fi', multiframe=True, label='Fi', offset=1)
+
+    coilset.subframe.polyplot()
+    coilset.subframe.vtkplot()
+
+
+
+
+
+
+
+
+
     #coilset.plasma.insert({'ellip': [6.5, 0.5, 4.5, 6.5]})
     #coilset.shell.insert({'ellip': [6.5, 0.5, 1.2*4.5, 1.2*6.5]}, -80, 0.25,
     #                     part='vv')
-
+    '''
     from nova.structural.centerline import CenterLine
 
     poly = dict(r=[0, 0, 0.6, 0.8])
@@ -89,7 +100,9 @@ if __name__ == '__main__':
     coilset.link(coilset.frame.iloc[-18:].index)
 
 
-    coilset.subframe.polyplot()
+    coilset.subframe.vtkplot()
+    '''
+
 
     '''
 

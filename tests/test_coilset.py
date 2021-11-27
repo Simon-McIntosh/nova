@@ -63,7 +63,7 @@ def test_square_filament_number():
 
 def test_circular_cross_section():
     coilset = CoilSet()
-    coilset.coil.insert(1.75, 0.5, 2.5, 2.5, section='disk', turn='r',
+    coilset.coil.insert(1.75, 0.5, 2.5, 2.5, section='disc', turn='r',
                         delta=-4)
     assert np.isclose(np.pi*2.5**2/4, coilset.subframe.area.sum(), rtol=1e-3)
 
@@ -87,10 +87,10 @@ def test_flag_current_update():
 def test_multipoint_link():
     coilset = CoilSet(dcoil=0, subspace=['Ic'])
     coilset.coil.insert(7, -3, 1.5, 1.5, name='PF6', part='PF',
-                        nturn=4, It=1e6, turn='disk', scale=0.7,
+                        nturn=4, It=1e6, turn='disc', scale=0.7,
                         delta=0.12)
     coilset.coil.insert(7, -0.5, 1.5, 1.5, name='PF8', part='PF', nturn=5,
-                        Ic=2e3, section='disk', turn='square', delta=0.12)
+                        Ic=2e3, section='disc', turn='square', delta=0.12)
     # Ic[PF8] = -0.5*Ic[PF6]
     coilset.link(['PF6', 'PF8'], -0.5)
     assert coilset.subframe.It[coilset.subframe.frame == 'PF8'].sum() == \

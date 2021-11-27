@@ -6,9 +6,9 @@ import numpy as np
 from nova.geometry.polygen import PolyGen
 
 
-def test_disk_area():
+def test_disc_area():
     diameter = 5.2
-    polygon = PolyGen('disk')(3, 7, diameter)
+    polygon = PolyGen('disc')(3, 7, diameter)
     assert np.isclose(polygon.area, np.pi*diameter**2/4, rtol=1e-3)
 
 
@@ -24,7 +24,7 @@ def test_x_centroid():
 
 
 def test_y_centroid():
-    polygon = PolyGen('disk')(-3, 2, 12)
+    polygon = PolyGen('disc')(-3, 2, 12)
     assert np.isclose(polygon.centroid.y, 2)
 
 

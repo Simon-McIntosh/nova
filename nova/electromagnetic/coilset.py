@@ -98,59 +98,25 @@ class CoilSet(CoilGrid, FrameSet):
 
 
 if __name__ == '__main__':
-    '''
-    coilset = CoilSet(dplasma=-50)
-    coilset.coil.insert(0.8, [0.5, 1, 1.5], 0.25, 0.45, link=True, delta=-10,
-                        section='r', scale=0.75,
-                        nturn=24, turn='c', part='pf')
-    coilset.shell.insert({'e': [1.5, 1, 0.75, 1.25]}, -5, 0.05,
-                         delta=-40, part='vv')
-    coilset.plasma.insert({'sk': [1.5, 1, 0.5, 0.5]}, turn='hex', tile=True,
-                          trim=True)
-    coilset.link(['Shl0', 'Shl4', 'Shl1'])
-
-    coilset.sloc['coil', 'Ic'] = [-12]
-    coilset.sloc['plasma', 'Ic'] = [9.9]
-    coilset.sloc['passive', 'Ic'] = [7.7, 12, 5.5]
-
-    coilset.sloc[:, 'Ic'] = 9.3
-
-
-    coilset.plot()
-
-    '''
-
 
     coilset = CoilSet(dcoil=-35, dplasma=-40)
-    '''
-    coilset.coil.insert(10, 0.5, 0.95, 0.95, section='hex', turn='r',
+    coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
                         nturn=-0.8)
-    coilset.coil.insert(10, -0.5, 0.95, 0.95, section='hex')
-    coilset.coil.insert(11, 0, 0.95, 0.1, section='sk', nturn=-1.8)
-    coilset.coil.insert(12, 0, 0.6, 0.9, section='r', turn='sk')
-    coilset.plasma.insert({'ellip': [11.5, 0.8, 1.7, 0.4]})
-    coilset.shell.insert({'e': [12, -0.75, 1.75, 0.5]}, 13, 0.05,
+    coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex')
+    coilset.coil.insert(2, 0, 0.95, 0.1, section='sk', nturn=-1.8)
+    coilset.coil.insert(3, 0, 0.6, 0.9, section='r', turn='sk')
+    coilset.plasma.insert({'ellip': [2.5, 1.7, 1.1, 2.2]})
+    coilset.shell.insert({'e': [2.5, -1.25, 1.75, 1.0]}, 13, 0.05,
                          delta=-40, part='vv')
-    coilset.link(['Coil0', 'Plasma'], 2)
 
     coilset.sloc['Ic'] = 1
     coilset.sloc['Shl0', 'Ic'] = -5
 
-    #coilset.grid.solve(1e3, 0.05)
-    #coilset.grid.plot()
+    import numpy as np
+    coilset.probe.solve(np.random.rand(50, 2))
 
-    #ferriticframe = ShieldCluster().frame
-    '''
+    print(coilset.probe.data['Psi'])
 
-    #from nova.electromagnetic.ferritic import ShieldSet
-    #frame = ShieldSet('IWS_CFM').frame
-    #frame.polyplot()
-
-    coilset = CoilSet()
-
-
-
-    #import vedo
-    #vedo.show(coilset.frame.vtk)
-
-    #coilset.frame.vtkplot()
+    coilset.grid.solve(1e3, 0.05)
+    coilset.grid.plot()
+    coilset.plot()

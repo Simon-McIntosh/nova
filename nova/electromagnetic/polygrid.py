@@ -60,14 +60,14 @@ class PolyDelta(Polygon):
             box_number = filament_number / fill_fraction
             width, height = self.width, self.height
             if self.tile:
-                if self.turn in ['disk', 'skin']:
+                if self.turn in ['disc', 'skin']:
                     box_number *= np.sqrt(3)/2
                 elif self.turn == 'hexagon':
                     box_number *= 3/8 * np.sqrt(3)
             elif self.turn == 'hexagon':
                 box_number *= np.sqrt(3)/2
             if np.isclose(aspect := width/height, 1) and \
-                    self.turn in ['disk', 'square', 'skin']:
+                    self.turn in ['disc', 'square', 'skin']:
                 delta = np.sqrt(self.box_area / box_number)
                 return (ndiv := width/delta, ndiv)
             if self.turn == 'hexagon' and not self.tile:
@@ -96,7 +96,7 @@ class PolyDelta(Polygon):
                 grid_delta[0] *= 3/2
                 grid_delta[1] *= np.sqrt(3)/4
                 return grid_delta
-            if self.turn in ['disk', 'skin']:
+            if self.turn in ['disc', 'skin']:
                 grid_delta[1] *= np.sqrt(3)/2
                 return grid_delta
         if self.turn == 'hexagon' and self.delta != 0:

@@ -10,7 +10,7 @@ def test_spline_update(plot=False):
     update = np.zeros(5, dtype=bool)
 
     cs = CoilSet(required=['x', 'z', 'dx', 'dz'], dplasma=0.25, dcoil=0.5)
-    cs.plasma.insert(5.5, 0.5, 1, 1, Ic=15e6)
+    cs.plasma.insert(dict(disc=[5.5, 0.5, 1]), Ic=15e6)
     cs.coil.insert(5, -0.5, 0.75, 0.75)
     print(cs.sloc['Plasma', 'Ic'])
     cs.plot()

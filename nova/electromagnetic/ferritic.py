@@ -41,7 +41,7 @@ class ShieldDir:
     def __post_init__(self):
         """Define file paths."""
         if self.path is None:
-            self.path = os.path.join(root_dir, 'input/geometry/ITER/shield')
+            self.path = os.path.join(root_dir, 'input/ITER/shield')
 
     @property
     def cdf_file(self):
@@ -477,13 +477,14 @@ class Ferritic(FerriticBase):
 
 if __name__ == '__main__':
 
-    print(sum([ShieldCad(i).frame.volume.sum() for i in range(1, 10)]))
+    cad = ShieldCad(1)
+    #print(sum([ShieldCad(i).frame.volume.sum() for i in range(1, 10)]))
     #base.frame = base.build_frame()
     #print(base.frame.volume.sum())
     #print(base.frame.volume.sum())
-    shield = ShieldSet()
+    #shield = ShieldSet()
     #shield.frame = shield.build_frame()
-    print(shield.frame.volume.sum())
+    #print(shield.frame.volume.sum())
 
     #[ShieldCad(i).mesh.volume() for i in [2, 3, 4, 6]]
     #[ShieldCad(i).mesh.volume() for i in [2, 3, 4, 6]]

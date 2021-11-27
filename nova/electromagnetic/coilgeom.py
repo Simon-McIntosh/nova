@@ -709,7 +709,7 @@ if __name__ == '__main__':
     cc.scenario_filename = -2
 
     #cs.add_coil(6, -3, 1.5, 1.5, name='PF16', part='PF', nturn=600, It=5e5,
-    #            turn_section='disk', turn_fraction=0.7, dCoil=0.75)
+    #            turn_section='disc', turn_fraction=0.7, dCoil=0.75)
     cc.scenario = 'IM'
     #cc.scenario = 'SOP'
 

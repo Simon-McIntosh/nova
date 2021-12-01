@@ -97,7 +97,7 @@ class CoilSet(CoilGrid, FrameSet):
 
 if __name__ == '__main__':
 
-    coilset = CoilSet(dcoil=-35, dplasma=-40)
+    coilset = CoilSet(dcoil=-35, dplasma=-60)
     coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
                         nturn=-0.8)
     coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex')
@@ -109,22 +109,14 @@ if __name__ == '__main__':
 
     coilset.plasma.generate()
 
-
     coilset.sloc['Ic'] = 1
     coilset.sloc['Shl0', 'Ic'] = -5
 
-    #coilset.plot()
+    import numpy as np
+    coilset.probe.solve(np.random.rand(50, 2))
+    print(coilset.probe.data['Psi'])
 
-    #import numpy as np
-    #coilset.probe.solve(np.random.rand(50, 2))
-    #print(coilset.probe.data['Psi'])
-
-
-    coilset.grid.solve(65**2, 0.05)
-
-    #import numpy as np
-    #coilset.grid._Psi = np.copy(coilset.grid.data['_Psi'].values)
-    #coilset.grid.Psi = np.copy(coilset.grid.data['Psi'].values)
+    coilset.grid.solve(1e3, 0.05)
 
     from nova.geometry.polygeom import Polygon
     import numpy as np

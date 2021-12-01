@@ -84,13 +84,17 @@ class WorkPlan(Phase):
 
 if __name__ == '__main__':
 
-    plan = WorkPlan(browser=False)
+    #plan = WorkPlan(browser=False)
+    #plan.add_task('as-built data capture', 'PFP', duration=3*18+6)
 
-    plan.add_task('as-built data capture', 'PFP', duration=3*18+6)
+    #print(plan.data)
+    #plan.plot_phase()
 
-    print(plan.data)
-    plan.plot_phase()
+    plan = pandas.read_excel('work_plan.xlsx', index_col=[0, 1])
 
+    print(plan.index)
+    print(plan.columns)
+    print(plan)
 
 '''
 

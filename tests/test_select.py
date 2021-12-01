@@ -24,7 +24,8 @@ def test_coil():
 def test_select_subspace():
     framespace = FrameSpace(Required=['x'], Available=['plasma'])
     assert np.array([attr in framespace.metaframe.subspace for attr in
-                     framespace.select.avalible]).all()
+                     framespace.select.avalible
+                     if attr not in framespace.select.superspace]).all()
 
 
 def test_generate_false():

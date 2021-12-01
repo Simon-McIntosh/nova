@@ -95,12 +95,13 @@ class DataArray(ArrayIndexer, DataFrame):
         try:
             return self.attrs['metaframe'].data[col]
         except KeyError:
-            value = self._get_frame(col)
+            value = self.format_value(col, self._get_frame(col))
             self.attrs['metaframe'].data[col] = value
             return value
 
     def _set_array(self, col, value):
         """Set col, quickly, preserving shape."""
+        #value = self.format_value(col, value)
         try:
             self.attrs['metaframe'].data[col][:] = value
         except KeyError as keyerror:

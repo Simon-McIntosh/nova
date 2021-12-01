@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 
 import descartes
 import numpy as np
+import numpy.typing as npt
 import pygeos
 import shapely
 
@@ -59,15 +60,21 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
     """Set plasma separatix, ionize plasma filaments."""
 
     number: int = field(init=False, default=0)
-    bounday: PolyFrame = field(init=False, repr=False, default=None)
+    boundary: PolyFrame = field(init=False, repr=False, default=None)
     tree: pygeos.STRtree = field(init=False, repr=False, default=None)
     separatrix: PolyFrame = field(init=False, repr=False, default=None)
+    index: npt.ArrayLike = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Update subframe metadata."""
         self.subframe.metaframe.metadata = \
             {'additional': ['ionize'], 'array': ['ionize', 'area', 'nturn']}
         self.subframe.update_columns()
+        self.index = self.loc['plasma']
+
+    def __len__(self):
+        """Return number of plasma filaments."""
+        return self.index.sum()
 
     def __str__(self):
         """Return string representation of plasma subframe."""
@@ -81,10 +88,11 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
 
     def generate(self):
         """Generate plasma attributes, build STR tree."""
-        self.number = self.subframe.plasma.sum()
+        self.number = self.loc['plasma'].sum()
         if self.number > 0:
             self.boundary = self.frame.at['Plasma', 'poly']
             self.tree = self.generate_tree()
+            self.index = self.loc['plasma']
 
     def generate_tree(self):
         """
@@ -113,6 +121,17 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         return pygeos.STRtree([pygeos.from_shapely(poly.centroid)
                                for poly in self.loc['plasma', 'poly']])
 
+    def plasma_poly(self, loop):
+        """Return pygeos polygon built from loop."""
+        if isinstance(loop, pygeos.lib.Geometry):
+            return loop
+        if isinstance(loop, np.ndarray):
+            return pygeos.polygons(loop)
+        if isinstance(loop, shapely.geometry.Polygon):
+            return pygeos.from_shapely(loop)
+        return pygeos.from_shapely(
+            Polygon({'hex': [2.15, 1.2, 1.5, 1.5]}).poly)
+
     def update(self, loop):
         """
         Update plasma separatrix.
@@ -122,7 +141,7 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
 
         Parameters
         ----------
-        loop : dict[str, list[float]], array-like or Polygon
+        loop : dict[str, list[float]], array-like (n, 2) or pygeos.polygons
             Bounding loop.
 
         Returns
@@ -131,16 +150,16 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
             Plasma separatrix.
 
         """
-        poly = Polygon(loop).poly
-        self.separatrix = poly.intersection(self.boundary)
-        within = self.tree.query(pygeos.from_shapely(self.separatrix),
-                                 predicate='intersects')
-        ionize = np.full(self.number, False)
-        ionize[within] = True
-        self.loc['plasma', 'ionize'] = ionize
-        self.loc['plasma', 'nturn'] = 0
-        self.loc['ionize', 'nturn'] = \
-            self.loc['ionize', 'area'] / self.loc['ionize', 'area'].sum()
+        plasma_ionize = self.plasma_poly(loop)
+        within = self.tree.query(plasma_ionize, predicate='intersects')
+        ionize_filament = np.full(self.number, False)
+        ionize_filament[within] = True
+        self.loc[self.index, 'ionize'] = ionize_filament
+        self.loc[self.index, 'nturn'] = 0
+        ionize = self.loc['ionize']
+        self.loc[ionize, 'nturn'] = \
+            self.loc[ionize, 'area'] / np.sum(self.loc[ionize, 'area'])
+
         # self.update_plasma_turns = True
         # self.update_plasma_current = True
 

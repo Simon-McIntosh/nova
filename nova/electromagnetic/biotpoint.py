@@ -16,7 +16,7 @@ from nova.electromagnetic.polyplot import Axes
 class BiotPoint(Axes, BiotData):
     """Compute interaction at discrete points."""
 
-    def solve(self, points):
+    def _solve(self, points):
         """Solve Biot interaction across grid."""
         points = np.array(points)
         points.shape = (-1, 2)  # shape(n, 2)

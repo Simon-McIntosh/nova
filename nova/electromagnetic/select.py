@@ -57,6 +57,7 @@ class Select(MetaMethod):
     avalible: list[str] = field(init=False, default_factory=list)
     labels: dict[str, dict[str, list[str]]] = field(init=False, repr=False,
                                                     default_factory=dict)
+    superspace: list[str] = field(default_factory=lambda: [])
 
     def __post_init__(self):
         """Extend additional with unique values extracted from match."""
@@ -82,7 +83,6 @@ class Select(MetaMethod):
         """Update frame selection labels."""
         if self.frame.empty:
             return
-        #self.__post_init__()
         for label in self.labels:
             include = self.any_label(self.labels[label]['include'], True)
             exclude = self.any_label(self.labels[label]['exclude'], False)
@@ -138,7 +138,10 @@ class Select(MetaMethod):
         """
         labels = list(self.labels)
         self.frame.metaframe.metadata = {
-            'additional': labels, 'subspace': labels, 'array': labels}
+            'additional': labels,
+            'subspace': [label for label in labels
+                         if label not in self.superspace],
+            'array': labels}
 
     def update_columns(self):
         """Update frame columns if any additional unset."""

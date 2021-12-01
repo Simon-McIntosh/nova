@@ -127,7 +127,7 @@ class BiotGrid(Axes, BiotData):
 
     levels: Union[int, list[float]] = 31
 
-    def solve(self, number: int, limit: Union[float, list[float]]):
+    def _solve(self, number: int, limit: Union[float, list[float]]):
         """Solve Biot interaction across grid."""
         if isinstance(limit, (int, float)):
             limit = Expand(self.subframe)(limit)

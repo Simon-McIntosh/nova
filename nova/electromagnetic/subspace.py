@@ -79,9 +79,6 @@ class SubSpace(SubSpaceIndexer, FrameLink):
     @staticmethod
     def get_subcolumns(frame):
         """Return subspace columns."""
-        #if 'link' in frame.metaframe.available:
-        #    with frame.setlock(None, 'subspace'):
-        #        frame.metaframe.metadata = {'subspace': ['ref']}
         if frame.columns.empty:
             return frame.metaframe.subspace
         subspace = frame.metaframe.subspace

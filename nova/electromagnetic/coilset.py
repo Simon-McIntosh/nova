@@ -76,10 +76,8 @@ class CoilSet(CoilGrid, FrameSet):
         """Store coilset to hdf5 file."""
         super().store(file)
         for attr in self._biot:
-            try:
-                getattr(self, attr).store(file)
-            except AttributeError:
-                pass
+            if isinstance(biot := self._biot.get(attr), BiotData):
+                biot.store(file)
 
     def load(self, file):
         """Load coilset from hdf5 file."""
@@ -109,14 +107,38 @@ if __name__ == '__main__':
     coilset.shell.insert({'e': [2.5, -1.25, 1.75, 1.0]}, 13, 0.05,
                          delta=-40, part='vv')
 
+    coilset.plasma.generate()
+
+
     coilset.sloc['Ic'] = 1
     coilset.sloc['Shl0', 'Ic'] = -5
 
+    #coilset.plot()
+
+    #import numpy as np
+    #coilset.probe.solve(np.random.rand(50, 2))
+    #print(coilset.probe.data['Psi'])
+
+
+    coilset.grid.solve(65**2, 0.05)
+
+    #import numpy as np
+    #coilset.grid._Psi = np.copy(coilset.grid.data['_Psi'].values)
+    #coilset.grid.Psi = np.copy(coilset.grid.data['Psi'].values)
+
+    from nova.geometry.polygeom import Polygon
     import numpy as np
-    coilset.probe.solve(np.random.rand(50, 2))
+    loop = np.array(
+        Polygon({'hex': [2.15, 1.2, 1.5, 1.5]}).poly.boundary.coords)
 
-    print(coilset.probe.data['Psi'])
+    coilset.plasma.update({'hex': [2.15, 1.2, 1.5, 1.5]})
 
-    coilset.grid.solve(1e3, 0.05)
+    coilset.sloc['Ic'] = range(6)
+    coilset.sloc['Shl0', 'Ic'] = -5
+    coilset.sloc['plasma', 'Ic'] = -3
+
+    coilset.grid.update_turns()
+
     coilset.grid.plot()
+    coilset.plasma.plot()
     coilset.plot()

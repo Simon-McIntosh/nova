@@ -18,7 +18,7 @@ class FrameSet(FrameSetLoc, FilePath):
         'x', 'y', 'z', 'dx', 'dy', 'dz'])
     required: list[str] = field(repr=False, default_factory=lambda: [])
     additional: list[str] = field(repr=False, default_factory=lambda: [
-        'turn', 'frame'])
+        'turn', 'frame', 'plasma', 'Ic', 'nturn'])
     available: list[str] = field(repr=False, default_factory=lambda: [
         'link', 'part', 'frame', 'dx', 'dy', 'dz', 'area', 'volume', 'vtk',
         'delta', 'section', 'turn', 'scale', 'nturn', 'nfilament',
@@ -26,7 +26,7 @@ class FrameSet(FrameSetLoc, FilePath):
     subspace: list[str] = field(repr=False, default_factory=lambda: [
         'Ic'])
     array: list[str] = field(repr=False, default_factory=lambda: [
-        'Ic'])
+        'Ic', 'nturn'])
 
     def __post_init__(self):
         """Init coil and subcoil."""

@@ -3,6 +3,7 @@ from abc import abstractmethod
 from dataclasses import dataclass, field
 
 import numpy as np
+import numpy.typing as npt
 import xarray
 
 from nova.electromagnetic.biotsolve import BiotMatrix
@@ -16,21 +17,40 @@ class BiotData(FilePath, FrameSetLoc):
 
     name: str = field(default=None)
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
-    data: BiotMatrix = field(init=False, repr=False)
+    data: xarray.Dataset = field(init=False, repr=False)
+    current: npt.ArrayLike = field(init=False, repr=False)
+    plasma: npt.ArrayLike = field(init=False, repr=False)
+
+    def __post_init__(self):
+        """Init path and link line current and plasma index."""
+        super().__post_init__()
+        self.current = self.sloc['Ic']
+        self.plasma = self.loc['plasma']
 
     def __getattr__(self, attr):
         """Return attribute data."""
         if (Attr := attr.capitalize()) in self.attrs:
-            return self.data[Attr].values @ self.sloc['Ic']
+            return getattr(self, Attr) @ self.current
         raise AttributeError(f'attribute {attr} not specified in {self.attrs}')
 
     @abstractmethod
-    def solve(self, index=slice(None)):
-        """Solve biot interaction - update self.data."""
+    def _solve(self, *args):
+        """Solve biot interaction - extened by subclass."""
 
-    def store(self, file: str, path=None):
+    def solve(self, *args):
+        """Solve biot interaction - update attrs."""
+        self._solve(*args)
+        self.setattrs()
+
+    def setattrs(self):
+        """Update data attributes."""
+        self.nturn = self.loc['nturn']
+        for attr in self.data.data_vars:
+            setattr(self, attr, self.data[attr].data)
+
+    def store(self, filename: str, path=None):
         """Store data as netCDF in hdf5 file."""
-        file = self.file(file, path)
+        file = self.file(filename, path)
         self.data.to_netcdf(file, mode='a', group=self.name)
 
     def load(self, file: str, path=None):
@@ -44,8 +64,12 @@ class BiotData(FilePath, FrameSetLoc):
         """Update plasma turns."""
         for attr in self.attrs:
             try:
-                self.data[attr][:, -1] = np.sum(
-                    getattr(self.data, f'_{attr}') *
-                    self.loc['plasma', 'nturn'], axis=1)
+                #self.data[attr].data[:, -2] = np.sum(  # TODO fix plasma indexing and test
+                #    getattr(self.data, f'_{attr}').data *
+                #    self.loc[self.subframe.filament, 'nturn'], axis=1)
+                #self.Psi[:, -2] = np.sum(self._Psi * self.loc['plasma', 'nturn'], axis=1)
+                self.Psi[:, -2] = self._Psi @ self.nturn[self.plasma]
+                #self.data._Psi.data @ self.loc['filament', 'nturn'][:, np.newaxis]
+
             except AttributeError:
                 pass

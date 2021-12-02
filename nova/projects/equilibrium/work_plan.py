@@ -1,15 +1,19 @@
 """Develop equilibrum reconstuction workplan."""
 from dataclasses import dataclass, field
 import datetime
+import operator
 from typing import Union
+from warnings import warn
 
-from dateutil.relativedelta import relativedelta as delta
+from dateutil.relativedelta import relativedelta
+import networkx
 import numpy as np
 import pandas
 import plotly.express
 import plotly.io
 
 
+'''
 @dataclass
 class Phase:
     """Build phased approach timeline."""
@@ -31,18 +35,15 @@ class Phase:
         self.phase_start = {phase: self.phase_end[phase] -
                             delta(months=abs(self.phase_duration[phase]))
                             for phase in self.phase_duration}
-
+'''
 
 @dataclass
-class WorkPlan(Phase):
-    """Manage ITER equlibrium reconstruction workplan."""
+class Plotter:
 
     browser: bool = False
-    data: pandas.DataFrame = field(default_factory=pandas.DataFrame)
 
     def __post_init__(self):
-        """Init plotly renderer."""
-        super().__post_init__()
+        """Configure plot interface."""
         self.set_browser(self.browser)
 
     @property
@@ -57,6 +58,141 @@ class WorkPlan(Phase):
         self.browser = browser
         plotly.io.renderers.default = self.renderer
 
+
+@dataclass
+class WorkPlan(Plotter):
+    """Manage ITER equlibrium reconstruction workplan."""
+
+    file: str = 'work_plan'
+    data: pandas.DataFrame = field(default_factory=pandas.DataFrame)
+
+    def __post_init__(self):
+        """Load workplan."""
+        self.read_excel()
+        self.sort()
+
+        #self.topological_sort(self.data)
+        super().__post_init__()
+
+    def __str__(self):
+        """Return string representation of pandas dataframe."""
+        return self.data.__str__()
+
+    def read_excel(self):
+        """Read plan data from excel."""
+        self.data = pandas.read_excel(f'{self.file}.xlsx', index_col=[0, 1])
+        self.data.drop(index='.', level=0, inplace=True)  # drop dot
+        self.data.reset_index(inplace=True)
+        self.data.set_index('label', inplace=True)
+        self.check_na()
+        self.check_unique()
+
+    def sort(self, label=None):
+        """Order project phases."""
+        if label is not None:
+            index = self.data['subtask'] == 'phase'
+        else:
+            index = self.data.index
+        data = self.data.loc[index, :].copy()
+        data.loc[data.index, :] = self.update_time(data)
+        topo_index = self.topological_sort(data)
+
+        for label in topo_index:
+            if data.loc[label, 'subtask'] == 'task':
+                continue
+            before = self.get_reference_list(data.at[label, 'before'])
+            after = self.get_reference_list(data.at[label, 'after'])
+            reference = next(topo for topo in topo_index
+                             if topo in before + after)
+            if reference in before:
+                data.loc[label, 'end'] = data.at[reference, 'start']
+            elif reference in after:
+                data.loc[label, 'start'] = data.at[reference, 'end']
+            data.loc[label:, :] = self.update_time(data.loc[label:, :])
+
+        print(data.start.to_dict())
+
+    @staticmethod
+    def update_time(data):
+        """Update dataframe with endpoints calculated from duration."""
+        data = data.copy()
+        index = data.end.isna() & data.start.notna() & data.duration.notna()
+        data.loc[index, 'end'] = WorkPlan.delta(data.loc[index, :], 'start')
+        index = data.start.isna() & data.end.notna() & data.duration.notna()
+        data.loc[index, 'start'] = WorkPlan.delta(data.loc[index, :], 'end')
+        return data
+
+
+    @staticmethod
+    def get_reference_list(reference: pandas.Series):
+        """Return split reference list."""
+        if isinstance(reference, str):
+            return reference.split(',')
+        return []
+
+    def check_na(self):
+        """Check labels for nans."""
+        if self.data.index.isna().any():
+            raise IndexError('nans present in index '
+                             f'{self.data.index.tolist()}')
+
+    def check_unique(self):
+        """Check that labels form a unique set."""
+        unique_labels, counts = np.unique(self.data.index, return_counts=True)
+        if (index := counts > 1).any():
+            raise IndexError('check for duplicate labels '
+                             f'{unique_labels[index]}')
+
+    @staticmethod
+    def delta(data: pandas.DataFrame, time: str) -> list:
+        """Return list of datetimes."""
+        if time == 'start':
+            oper = operator.add
+        elif time == 'end':
+            oper = operator.sub
+        else:
+            raise NotImplementedError('time not in [start, end]')
+        return [oper(time, relativedelta(months=month))
+                for time, month in data.loc[:, [time, 'duration']].values]
+
+    @staticmethod
+    def check_reference(reference: pandas.Series):
+        """Check referance tags are present in labels."""
+        labels = reference.index.get_level_values(0)
+        index = reference.notna()
+        unique = np.unique([split for label in reference[index]
+                            for split in label.split(',')])
+        if notfound := [label for label in unique if label not in labels]:
+            raise IndexError(f'references in [{reference.name}] not present '
+                             f'in index {notfound}')
+
+    @staticmethod
+    def topological_sort(data: pandas.DataFrame):
+        """Return topological sorted index calculated from dataframe."""
+        labels = data.index.get_level_values(0)
+        WorkPlan.check_reference(data['before'])
+        WorkPlan.check_reference(data['after'])
+        # create directed graph
+        graph = networkx.DiGraph()
+        index = data.after.notna()
+        graph.add_edges_from(
+            [(split_after, label)
+             for label, after in zip(labels[index],
+                                     data.loc[index, 'after'].values)
+             for split_after in after.split(',')])
+        index = data.before.notna()
+        graph.add_edges_from(
+            [(label, split_before)
+             for label, before in zip(labels[index],
+                                      data.loc[index, 'before'].values)
+             for split_before in before.split(',')])
+        topo_index = list(networkx.topological_sort(graph))
+        if floating := [label for label in labels
+                        if label not in topo_index]:
+            raise IndexError(f'floating labels {floating}')
+        return topo_index
+
+    '''
     def relative_date(self, months: float) -> datetime.date:
         """Return date relative to first plasma."""
         return self.first_plasma + delta(months=months)
@@ -71,6 +207,7 @@ class WorkPlan(Phase):
         self.data = self.data.append(
             dict(task=task, start=start, end=end, phase=phase),
             ignore_index=True)
+    '''
 
     def plot_phase(self):
         """Plot project phases."""
@@ -84,17 +221,13 @@ class WorkPlan(Phase):
 
 if __name__ == '__main__':
 
-    #plan = WorkPlan(browser=False)
+    plan = WorkPlan(browser=False)
     #plan.add_task('as-built data capture', 'PFP', duration=3*18+6)
 
     #print(plan.data)
     #plan.plot_phase()
 
-    plan = pandas.read_excel('work_plan.xlsx', index_col=[0, 1])
 
-    print(plan.index)
-    print(plan.columns)
-    print(plan)
 
 '''
 

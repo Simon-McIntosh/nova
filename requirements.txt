@@ -2,12 +2,12 @@ alphashape
 ansys-dpf-core==0.2.1
 ansys-dpf-post
 astropy
-dateutil
 descartes
 gmsh
 geojson
 line_profiler
 netCDF4
+networkx
 nlopt
 numdifftools
 numpy
@@ -17,6 +17,7 @@ plotly
 pygmsh
 pygeos --no-binary pygeos
 pytest
+python-dateutil
 pyvista
 pyquaternion
 rdp

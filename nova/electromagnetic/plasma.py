@@ -62,7 +62,7 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
     number: int = field(init=False, default=0)
     boundary: PolyFrame = field(init=False, repr=False, default=None)
     tree: pygeos.STRtree = field(init=False, repr=False, default=None)
-    separatrix: PolyFrame = field(init=False, repr=False, default=None)
+    separatrix: pygeos.Geometry = field(init=False, repr=False, default=None)
     index: npt.ArrayLike = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
@@ -129,8 +129,7 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
             return pygeos.polygons(loop)
         if isinstance(loop, shapely.geometry.Polygon):
             return pygeos.from_shapely(loop)
-        return pygeos.from_shapely(
-            Polygon({'hex': [2.15, 1.2, 1.5, 1.5]}).poly)
+        return pygeos.from_shapely(Polygon(loop).poly)
 
     def update(self, loop):
         """
@@ -150,8 +149,8 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
             Plasma separatrix.
 
         """
-        plasma_ionize = self.plasma_poly(loop)
-        within = self.tree.query(plasma_ionize, predicate='intersects')
+        self.separatrix = self.plasma_poly(loop)
+        within = self.tree.query(self.separatrix, predicate='intersects')
         ionize_filament = np.full(self.number, False)
         ionize_filament[within] = True
         self.loc[self.index, 'ionize'] = ionize_filament
@@ -166,13 +165,10 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
     def plot(self, axes=None, boundary=True):
         """Plot plasma boundary and separatrix."""
         self.axes = axes
-        filaments = shapely.geometry.MultiPolygon(
-            self.loc['ionize', 'poly'].to_list())
-        separatrix = filaments.convex_hull.intersection(self.boundary)
-        if not separatrix.is_empty:
+        if self.separatrix is not None:
             self.axes.add_patch(descartes.PolygonPatch(
-                separatrix, facecolor='C4', alpha=0.75,
-                linewidth=0.5, zorder=-10))
+                pygeos.to_shapely(self.separatrix),
+                facecolor='C4', alpha=0.75, linewidth=0.5, zorder=-10))
         if boundary:
             self.axes.plot(*self.boundary.exterior.xy, '-', color='gray')
         plt.axis('equal')

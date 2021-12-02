@@ -97,13 +97,14 @@ class CoilSet(CoilGrid, FrameSet):
 
 if __name__ == '__main__':
 
-    coilset = CoilSet(dcoil=-35, dplasma=-60)
+    coilset = CoilSet(dcoil=-35, dplasma=-100)
     coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
                         nturn=-0.8)
-    coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex')
+    coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex', turn='c',
+                        tile=True, delta=-6, name='bubble')
     coilset.coil.insert(2, 0, 0.95, 0.1, section='sk', nturn=-1.8)
     coilset.coil.insert(3, 0, 0.6, 0.9, section='r', turn='sk')
-    coilset.plasma.insert({'ellip': [2.5, 1.7, 1.1, 2.2]})
+    coilset.plasma.insert({'ellip': [2.5, 1.4, 1.6, 2.2]}, turn='hex')
     coilset.shell.insert({'e': [2.5, -1.25, 1.75, 1.0]}, 13, 0.05,
                          delta=-40, part='vv')
 
@@ -116,21 +117,17 @@ if __name__ == '__main__':
     coilset.probe.solve(np.random.rand(50, 2))
     print(coilset.probe.data['Psi'])
 
-    coilset.grid.solve(1e3, 0.05)
-
-    from nova.geometry.polygeom import Polygon
-    import numpy as np
-    loop = np.array(
-        Polygon({'hex': [2.15, 1.2, 1.5, 1.5]}).poly.boundary.coords)
-
-    coilset.plasma.update({'hex': [2.15, 1.2, 1.5, 1.5]})
+    coilset.grid.solve(65**2, 0.05)
 
     coilset.sloc['Ic'] = range(6)
+    coilset.sloc['bubble', 'Ic'] = 5
     coilset.sloc['Shl0', 'Ic'] = -5
-    coilset.sloc['plasma', 'Ic'] = -3
+    coilset.sloc['plasma', 'Ic'] = -2
+
+    coilset.plasma.update({'e': [2.2, 1.4, 0.8, 1.1]})
 
     coilset.grid.update_turns()
 
-    coilset.grid.plot()
+    coilset.grid.plot(levels=31)
     coilset.plasma.plot()
     coilset.plot()

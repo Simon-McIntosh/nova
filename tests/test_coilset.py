@@ -91,8 +91,7 @@ def test_multipoint_link():
                         delta=0.12)
     coilset.coil.insert(7, -0.5, 1.5, 1.5, name='PF8', part='PF', nturn=5,
                         Ic=2e3, section='disc', turn='square', delta=0.12)
-    # Ic[PF8] = -0.5*Ic[PF6]
-    coilset.link(['PF6', 'PF8'], -0.5)
+    coilset.linkframe(['PF6', 'PF8'], -0.5)
     assert coilset.subframe.It[coilset.subframe.frame == 'PF8'].sum() == \
         -0.5*1e6/4*5
 
@@ -177,7 +176,7 @@ def test_relink():
     coilset = CoilSet(dcoil=-3)
     coilset.coil.insert(0.8, [0.5, 1, 1.5], 0.25, 0.45, link=True)
     coilset.coil.insert(1.8, [0.5, 1], 0.25, 0.45, nturn=2)
-    coilset.link(['Coil2', 'Coil3'])
+    coilset.linkframe(['Coil2', 'Coil3'])
     coilset.sloc['Coil0', 'Ic'] = 11.1
     assert all(coilset.subframe.Ic == 11.1)
 

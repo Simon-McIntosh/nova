@@ -90,9 +90,9 @@ class CoilSet(CoilGrid, FrameSet):
                 pass
         return self
 
-    def plot(self, axes=None):
+    def plot(self, index=None, axes=None, **kwargs):
         """Plot coilset."""
-        self.subframe.polyplot(axes=axes)
+        self.subframe.polyplot(index=index, axes=axes, **kwargs)
 
 
 if __name__ == '__main__':

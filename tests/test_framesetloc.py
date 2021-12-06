@@ -86,7 +86,7 @@ def test_get_current_subset():
     coilset.coil.insert(3, required=['x'], plasma=False)
     coilset.coil.insert(6.6, required=['x'], plasma=True)
     coilset.coil.insert([1.2, 2.2], required=['x'], active=False)
-    coilset.link(['Coil0', 'Coil3'])
+    coilset.linkframe(['Coil0', 'Coil3'])
     coilset.sloc['active', 'Ic'] = [8.8, 7.7]
     assert np.isclose(coilset.loc['Ic'], [8.8, 7.7, 0, 8.8]).all()
 

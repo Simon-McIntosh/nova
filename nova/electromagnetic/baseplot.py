@@ -24,6 +24,11 @@ class BasePlot:
     def to_boolean(self, index):
         """Return boolean index."""
         try:
+            if index.dtype == bool:
+                return index
+        except AttributeError:
+            pass
+        try:
             if index.is_boolean():
                 return index.to_numpy()
         except AttributeError:
@@ -40,6 +45,7 @@ class BasePlot:
             index = self.frame.index[index]
         if np.array([isinstance(label, int) for label in index]).all():
             index = self.frame.index[index]
+        print('frame is in')
         return self.frame.index.isin(index)
 
     def get_index(self, index=None, segment=None):

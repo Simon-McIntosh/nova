@@ -71,6 +71,88 @@ def test_polarity():
     assert coilset.plasma.polarity == -1
 
 
+def test_multiframe_area():
+    coilset = CoilSet(dplasma=0.5)
+    coilset.plasma.insert(dict(sk=(5, 0, 2, 0.2)), name='PLedge', delta=0.2)
+    coilset.plasma.insert(dict(o=(5, 0, 1.6)), name='PLcore')
+    assert np.isclose(coilset.loc['plasma', 'area'].sum(), 1/4*np.pi*2**2,
+                      atol=1e-3)
+
+
+def test_multiframe_nturn():
+    coilset = CoilSet(dplasma=0.5)
+    coilset.plasma.insert(dict(sk=(5, 0, 2, 0.2)), name='PLedge', delta=0.2)
+    coilset.coil.insert(6.5, 0, 0.2, 0.8)
+    coilset.plasma.insert(dict(o=(5, 0, 1.6)), name='PLcore')
+    assert np.isclose(coilset.loc['plasma', 'nturn'].sum(), 1)
+
+
 if __name__ == '__main__':
 
-    pytest.main([__file__])
+    #pytest.main([__file__])
+
+    coilset = CoilSet(dplasma=-50)
+    coilset.plasma.insert(dict(o=(5, 0, 1.6)))
+
+    import scipy
+    import sklearn
+    import sklearn.mixture
+
+    points = coilset.loc['plasma', ['x', 'z']].to_numpy()
+
+    center = coilset.Loc['plasma', ['x', 'z']].to_numpy()
+    delta = points - center
+    radius = np.linalg.norm(delta, axis=1)
+    angle = np.arctan2(delta[:, 1], delta[:, 0])
+
+    radius = radius**4
+    points[:, 0] = radius * np.cos(angle)
+    points[:, 1] = radius * np.sin(angle)
+
+
+
+    #norm = np.linalg.norm(points - [5, 0], axis=1).reshape(-1, 1)
+    #norm = np.exp(2*norm / np.std(norm))
+    #points = np.append(points, norm, axis=1)
+
+    #
+
+    '''
+    weight = norm @ norm.T
+    weight = np.exp(-beta * weight / np.std(weight))
+    #weight = np.exp(weight)
+    #weight /= weight.max()
+    '''
+
+    '''
+    beta = 1
+    distance = scipy.spatial.distance_matrix(points, points)
+    distance * 18*weight# np.exp(weight)
+    affinity = np.exp(-beta * distance / np.std(distance))
+    '''
+    #cluster = sklearn.cluster.AgglomerativeClustering(
+    #    n_clusters=20)
+    cluster = sklearn.cluster.KMeans(n_clusters=15, random_state=0)
+
+
+    cluster.fit(points)
+    labels = cluster.labels_
+    '''
+
+    cluster = sklearn.cluster.KMeans(n_clusters=5, random_state=0)
+
+    cluster.fit(points)
+    labels = cluster.labels_
+    '''
+
+    '''
+
+    cluster = sklearn.mixture.GaussianMixture(
+        n_components=3, covariance_type="full")
+    cluster.fit(weight)
+    labels = cluster.predict(weight)
+    '''
+    #coilset.link(['PLedge', 'PLcore'])
+
+    for label in range(len(np.unique(labels))):
+        coilset.subframe.polyplot(labels==label, facecolor=f'C{label%10}')

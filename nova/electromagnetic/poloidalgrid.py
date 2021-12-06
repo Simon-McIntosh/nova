@@ -46,8 +46,9 @@ class PoloidalGrid(GridAttrs):
             index = self.frame.insert(*args, iloc=iloc, **self.attrs)
             self.subframe_insert(index)
         if self.link:
-            self.frame.multipoint.link(index)
-            self.subframe.multipoint.link(index, expand=True)
+            self.linkframe(index)
+            #self.frame.multipoint.link(index)
+            #self.subframe.multipoint.link(index, expand=True)
         return index
 
     def subframe_insert(self, index):

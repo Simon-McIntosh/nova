@@ -34,7 +34,7 @@ class FrameData:
         for frame in self.frames:
             frame.update_metaframe(dict(Required=required))
 
-    def link(self, index, factor=1):
+    def linkframe(self, index, factor=1):
         """Apply multipoint link to subframe."""
         self.frame.multipoint.link(index, factor)
         self.subframe.multipoint.link(index, factor, expand=True)

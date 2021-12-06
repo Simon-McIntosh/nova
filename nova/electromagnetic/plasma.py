@@ -84,13 +84,24 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
     def insert(self, *args, required=None, iloc=None, **additional):
         """Store plasma index and plasma boundary and generate STR tree."""
         super().insert(*args, required=None, iloc=None, **additional)
+        self.normalize()
         self.generate()
+
+    def normalize(self):
+        """Normalize plasma turn number for multiframe plasmas."""
+        if self.sloc['plasma'].sum() == 1:
+            return
+        self.linkframe(self.Loc['plasma', :].index.tolist())
+        self.Loc['plasma', 'nturn'] = \
+            self.Loc['plasma', 'area'] / np.sum(self.Loc['plasma', 'area'])
+        self.loc['plasma', 'nturn'] = \
+            self.loc['plasma', 'area'] / np.sum(self.loc['plasma', 'area'])
 
     def generate(self):
         """Generate plasma attributes, build STR tree."""
         self.number = self.loc['plasma'].sum()
         if self.number > 0:
-            self.boundary = self.frame.at['Plasma', 'poly']
+            self.boundary = self.frame.loc['plasma', 'poly']
             self.tree = self.generate_tree()
             self.index = self.loc['plasma']
 

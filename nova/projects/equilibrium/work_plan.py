@@ -1,67 +1,22 @@
 """Develop equilibrum reconstuction workplan."""
 from dataclasses import dataclass, field
-import datetime
 import operator
-from typing import Union
-from warnings import warn
 
 from dateutil.relativedelta import relativedelta
 import networkx
 import numpy as np
 import pandas
-import plotly.express
-import plotly.io
 
-
-'''
-@dataclass
-class Phase:
-    """Build phased approach timeline."""
-
-    first_plasma: Union[str, datetime.date] = '2025-12-01'
-    phase_duration: dict[str, int] = field(
-        default_factory=lambda: dict(PFP=3*12, FP=18, PFPO1=18, PFPO2=21,
-                                     FPO1=16+8, FPO2=16+8, FPO3=16+8))
-
-    def __post_init__(self):
-        """Build phased approach timeline."""
-        if not isinstance(self.first_plasma, datetime.date):
-            self.first_plasma = datetime.date.fromisoformat(self.first_plasma)
-        duration = np.cumsum(list(self.phase_duration.values()))
-        self.phase_end = {phase: self.first_plasma -
-                          delta(months=duration[1]) +
-                          delta(months=duration[i])
-                          for i, phase in enumerate(self.phase_duration)}
-        self.phase_start = {phase: self.phase_end[phase] -
-                            delta(months=abs(self.phase_duration[phase]))
-                            for phase in self.phase_duration}
-'''
-
-@dataclass
-class Plotter:
-
-    browser: bool = False
-
-    def __post_init__(self):
-        """Configure plot interface."""
-        self.set_browser(self.browser)
-
-    @property
-    def renderer(self):
-        """Return plotly renderer string."""
-        if self.browser:
-            return 'browser'
-        return 'svg'
-
-    def set_browser(self, browser: bool):
-        """Set plotly renderer."""
-        self.browser = browser
-        plotly.io.renderers.default = self.renderer
+from nova.utilities.pyplot import plt
 
 
 @dataclass
-class WorkPlan(Plotter):
-    """Manage ITER equlibrium reconstruction workplan."""
+class WorkPlan:
+    """
+    Manage ITER equlibrium reconstruction workplan.
+
+    All durations in months.
+    """
 
     file: str = 'work_plan'
     data: pandas.DataFrame = field(default_factory=pandas.DataFrame)
@@ -69,10 +24,7 @@ class WorkPlan(Plotter):
     def __post_init__(self):
         """Load workplan."""
         self.read_excel()
-        self.sort()
-
-        #self.topological_sort(self.data)
-        super().__post_init__()
+        self.update_schedule()
 
     def __str__(self):
         """Return string representation of pandas dataframe."""
@@ -86,31 +38,51 @@ class WorkPlan(Plotter):
         self.data.set_index('label', inplace=True)
         self.check_na()
         self.check_unique()
+        self.check_duration()
 
-    def sort(self, label=None):
+    def update_schedule(self):
+        """Update time via directed graph topological sort."""
+        self.data = self.update_time(self.data)
+        self.data = self._sort()
+        self.data = self._sort(reverse=True)
+        self.data = self._sort()
+
+        index = self.data.start.notna() & self.data.end.notna() & \
+            self.data.duration.notna()
+        start = self.data.start[index].min()
+        self.data.loc[index, 'start_offset'] = \
+            (self.data.start[index] - start).dt.days / (365.25 / 12)
+        self.data.loc[index, 'end_offset'] = \
+            self.data.loc[index, 'start_offset'] + self.data.duration[index]
+
+        '''
+        if (index := self.data.start.isna()).any():
+            raise IndexError(f'start time not set \n{self.data.start[index]}')
+        if (index := self.data.end.isna()).any():
+            raise IndexError(f'end time not set \n{self.data.end[index]}')
+        '''
+
+    def _sort(self, reverse=False):
         """Order project phases."""
-        if label is not None:
-            index = self.data['subtask'] == 'phase'
-        else:
-            index = self.data.index
-        data = self.data.loc[index, :].copy()
-        data.loc[data.index, :] = self.update_time(data)
-        topo_index = self.topological_sort(data)
-
-        for label in topo_index:
+        data = self.data.copy()
+        index = self.topological_sort(data)
+        if reverse:
+            index = index[::-1]
+        for label in index:
             if data.loc[label, 'subtask'] == 'task':
                 continue
-            before = self.get_reference_list(data.at[label, 'before'])
-            after = self.get_reference_list(data.at[label, 'after'])
-            reference = next(topo for topo in topo_index
-                             if topo in before + after)
-            if reference in before:
-                data.loc[label, 'end'] = data.at[reference, 'start']
-            elif reference in after:
-                data.loc[label, 'start'] = data.at[reference, 'end']
+            before = self.get_reference(
+                data.at[label, 'before'], index, 'before')
+            after = self.get_reference(
+                data.at[label, 'after'], index, 'after')
+            if not before and not after:
+                continue
+            if before:
+                data.loc[label, 'end'] = data.at[before, 'start']
+            elif after:
+                data.loc[label, 'start'] = data.at[after, 'end']
             data.loc[label:, :] = self.update_time(data.loc[label:, :])
-
-        print(data.start.to_dict())
+        return data
 
     @staticmethod
     def update_time(data):
@@ -122,19 +94,22 @@ class WorkPlan(Plotter):
         data.loc[index, 'start'] = WorkPlan.delta(data.loc[index, :], 'end')
         return data
 
-
     @staticmethod
-    def get_reference_list(reference: pandas.Series):
+    def get_reference(reference: pandas.Series, index, side: str):
         """Return split reference list."""
         if isinstance(reference, str):
-            return reference.split(',')
+            labels = reference.split(',')
+            if side == 'before':
+                return next(label for label in index if label in labels)
+            elif side == 'after':
+                return next(label for label in index[::-1] if label in labels)
         return []
 
     def check_na(self):
         """Check labels for nans."""
-        if self.data.index.isna().any():
+        if (isnan := self.data.index.isna()).any():
             raise IndexError('nans present in index '
-                             f'{self.data.index.tolist()}')
+                             f'{self.data.loc[isnan, :]}')
 
     def check_unique(self):
         """Check that labels form a unique set."""
@@ -142,6 +117,12 @@ class WorkPlan(Plotter):
         if (index := counts > 1).any():
             raise IndexError('check for duplicate labels '
                              f'{unique_labels[index]}')
+
+    def check_duration(self):
+        """Check for surficent information to define duration."""
+        missing = self.data.duration.isna() & (self.data.subtask != 'task')
+        if missing.any():
+            raise IndexError(f'missing duration {self.data.duration[missing]}')
 
     @staticmethod
     def delta(data: pandas.DataFrame, time: str) -> list:
@@ -169,7 +150,7 @@ class WorkPlan(Plotter):
     @staticmethod
     def topological_sort(data: pandas.DataFrame):
         """Return topological sorted index calculated from dataframe."""
-        labels = data.index.get_level_values(0)
+        labels = data.index
         WorkPlan.check_reference(data['before'])
         WorkPlan.check_reference(data['after'])
         # create directed graph
@@ -187,67 +168,121 @@ class WorkPlan(Plotter):
                                       data.loc[index, 'before'].values)
              for split_before in before.split(',')])
         topo_index = list(networkx.topological_sort(graph))
-        if floating := [label for label in labels
-                        if label not in topo_index]:
+        if floating := [label for label, subtask, duration
+                        in zip(labels, data.subtask, data.duration)
+                        if label not in topo_index and subtask != 'task'
+                        and duration != 0]:
             raise IndexError(f'floating labels {floating}')
         return topo_index
 
-    '''
-    def relative_date(self, months: float) -> datetime.date:
-        """Return date relative to first plasma."""
-        return self.first_plasma + delta(months=months)
-
-    def add_task(self, task: str, phase: str, duration=None, offset=0):
-        """Insert task to data."""
-        start = self.phase_start[phase] + delta(months=offset)
-        if duration is not None:
-            end = start + delta(months=duration)
+    def plot(self, task=None, milestones=True, n_ticks=12):
+        """Plot Gantt chart."""
+        if milestones:
+            index = self.data.duration.notna()
         else:
-            end = self.phase_end[phase]
-        self.data = self.data.append(
-            dict(task=task, start=start, end=end, phase=phase),
-            ignore_index=True)
-    '''
+            index = (self.data.duration > 0)  # exclude milestones
 
-    def plot_phase(self):
-        """Plot project phases."""
-        for phase in self.phase_duration:
-            self.add_task(phase, phase)
-        fig = plotly.express.timeline(self.data, x_start='start',
-                                      x_end='end', y='task', color='phase')
-        fig.update_yaxes(autorange="reversed")
-        fig.show()
+        if task is None:
+            detail = 'task'
+            index &= self.data.task != 'phase'
+        else:
+            detail = 'subtask'
+            if isinstance(task, int):
+                task = self.data.task[index].unique()[task]
+            index &= self.data.task == task
+            index &= self.data.subtask != task
+
+        # phase index
+        phase_index = (self.data.task == 'phase')
+        phase_index &= (self.data.loc[phase_index, 'end'] >=
+                        self.data.loc[index, 'start'].min())
+        phase_index &= (self.data.loc[phase_index, 'start'] <=
+                        self.data.loc[index, 'end'].max())
+        index |= phase_index
+
+        # select data
+        data = self.data.loc[index, :].copy()
+        labels = data[detail]
+
+        # zero data offset
+        zero_offset = data.start_offset[data.start.argmin()]
+        data.loc[:, 'start_offset'] -= zero_offset
+        data.loc[:, 'end_offset'] -= zero_offset
+
+        data.loc[:, 'duration'] = [0 if label[:2] == 'ms' else duration
+                                   for label, duration
+                                   in zip(data.index, data.duration)]
+        self.labels = labels
+        width = 8 if task is None else 6
+        ax = plt.subplots(1, 1, figsize=(width, len(labels.unique())/2.5))[1]
+        ax.barh(labels, data.duration, left=data.start_offset,
+                edgecolor='w', height=0.8)
+        if milestones:
+            milestone_data = data.loc[(data.duration == 0), :]
+            if detail == 'task':
+                ax.barh(milestone_data[detail], 0,
+                        left=milestone_data.end_offset,
+                        edgecolor='C3', facecolor='k',
+                        linewidth=2, height=0.8)
+            else:
+                ax.plot(milestone_data.end_offset,
+                        milestone_data[detail], 'C3d')
+
+        plt.despine()
+
+        for label in data.index[labels == 'phase']:
+            ax.text(data.at[label, 'start_offset'] +
+                    data.at[label, 'duration'] / 2, 0, label,
+                    color='w', ha='center', va='center',
+                    fontsize='x-small')
+
+        for i, label in enumerate(labels.unique()[1:]):
+            label_data = data.loc[(data[detail] == label)]
+            end_offset = label_data.end_offset.max()
+            duration = label_data.duration.sum()
+            if duration > 0:
+                ax.text(end_offset, i+1, f' {duration:1.0f}',
+                        color='gray', ha='left', va='center',
+                        fontsize='x-small')
+
+        period = 24
+        xticks = np.arange(0, data.end_offset.max()+1, period)
+        xticks_labels = pandas.date_range(data.start.min(), end=data.end.max(),
+                                          freq='M').strftime("%Y")
+        xticks_labels = np.append(xticks_labels[::period], xticks_labels[-1])
+
+        if len(xticks_labels) > len(xticks):
+            xticks_labels = xticks_labels[:-1]
+        if len(xticks) > len(xticks_labels):
+            xticks = xticks[1:]
+
+        xticks_minor = np.arange(0, data.end_offset.max(), int(period / 2))
+        ax.set_xticks(xticks)
+        ax.set_xticks(xticks_minor, minor=True)
+        ax.set_xticklabels(xticks_labels)
+        yticks = ax.get_yticks()
+        ax.set_yticks(yticks[1:])
+        ax.invert_yaxis()
+
+        ax.spines['left'].set_visible(False)
+        ax.tick_params(axis='y', which='both', length=0)
+
+        if task is None:
+            plt.title('overview')
+        else:
+            plt.title(task)
+            ax.set_xticks([])
+            ax.tick_params(axis='x', which='both', length=0)
+            ax.spines['bottom'].set_visible(False)
+
+    def plot_subtasks(self):
+        """Plot detailed subtask breakdown for all tasks."""
+        for i in range(len(self.data.task.unique()))[1:]:
+            self.plot(i)
 
 
 if __name__ == '__main__':
 
-    plan = WorkPlan(browser=False)
-    #plan.add_task('as-built data capture', 'PFP', duration=3*18+6)
-
-    #print(plan.data)
-    #plan.plot_phase()
-
-
-
-'''
-
-start = datetime.date(2022, 1, 1)
-
-end = start + delta(months=3)
-
-print(end)
-
-
-start_date = dict(assembly=datetime.date('2022-01-01',
-             first_plasma='2022-')
-
-gantt = pandas.DataFrame([
-    dict(Task="Job A", start='0', end='18', Resource="Alex"),
-    dict(Task="Job B", start='0', end='18', Resource="Alex"),
-    dict(Task="Job C",  start='0', end='18', Resource="Max")
-])
-
-fig = plotly.express.timeline(gantt, x_start='start',
-                              x_end='end', y="Resource", color="Resource")
-fig.show()
-'''
+    plan = WorkPlan()
+    plan.plot()
+    # plan.plot_subtasks()

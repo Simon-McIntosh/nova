@@ -8,8 +8,8 @@ import vedo
 
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.dataframe import DataFrame
-from nova.geometry.polygeom import PolyGeom
-from nova.geometry.polygen import PolyFrame
+#from nova.geometry.polygeom import PolyGeom
+#from nova.geometry.polygen import PolyFrame
 from nova.geometry.volume import TriShell, Ring
 from nova.geometry.vtkgen import VtkFrame
 
@@ -64,7 +64,6 @@ class VtkGeo(MetaMethod):
             self.frame.loc[index, 'volume'] = \
                 [vtk.clone().triangulate().volume()
                  for vtk in self.frame.loc[index, 'vtk'].values]
-
 
 
 @dataclass

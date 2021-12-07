@@ -61,8 +61,8 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
 
     number: int = field(init=False, default=0)
     boundary: PolyFrame = field(init=False, repr=False, default=None)
-    tree: pygeos.STRtree = field(init=False, repr=False, default=None)
     separatrix: pygeos.Geometry = field(init=False, repr=False, default=None)
+    tree: pygeos.STRtree = field(init=False, repr=False, default=None)
     index: npt.ArrayLike = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
@@ -101,7 +101,7 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         """Generate plasma attributes, build STR tree."""
         self.number = self.loc['plasma'].sum()
         if self.number > 0:
-            self.boundary = self.frame.loc['plasma', 'poly']
+            self.boundary = self.Loc['plasma', 'poly'][0]
             self.tree = self.generate_tree()
             self.index = self.loc['plasma']
 
@@ -153,11 +153,6 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         ----------
         loop : dict[str, list[float]], array-like (n, 2) or pygeos.polygons
             Bounding loop.
-
-        Returns
-        -------
-        separatrix : Polygon
-            Plasma separatrix.
 
         """
         self.separatrix = self.plasma_poly(loop)

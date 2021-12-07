@@ -8,30 +8,21 @@ import shapely
 import shapely.geometry
 import shapely.ops
 import numpy as np
+import pygeos
 
 from nova.geometry.geoframe import GeoFrame
 
-
+'''
 class PolyFrame(shapely.geometry.Polygon, GeoFrame):
     """Extend Polygon.__str__ for compact DataFrame representation."""
 
     def __init__(self, shell=None, holes=None, name='poly'):
         self.name = name
-        self.polygon = None #shapely.geometry.Polygon(shell, holes)
         super().__init__(shell, holes)
-
 
     def __str__(self):
         """Return polyframe name."""
         return self.name
-
-    '''
-    def __getattr__(self, attr):
-        """Return attrs from polygon else from self."""
-        if hasattr(self.polygon, attr):
-            return getattr(self.polygon, attr)
-        return getattr(self, attr)
-    '''
 
     def dumps(self) -> str:
         """Return geojson representation."""
@@ -41,11 +32,12 @@ class PolyFrame(shapely.geometry.Polygon, GeoFrame):
     def loads(cls, poly: str):
         """Load geojson prepresentation."""
         return cls(shapely.geometry.shape(geojson.loads(poly)))
+'''
 
 
 @dataclass
 class PolyGen:
-    """Manage shapely polygon."""
+    """Manage shapely polygons."""
 
     section: str
     polyshape: ClassVar[dict[str, str]] = \
@@ -58,17 +50,24 @@ class PolyGen:
         dict.fromkeys(['polygon', 'poly'], 'polygon') |\
         dict.fromkeys(['shell', 'shl', 'sh'], 'shell') |\
         dict.fromkeys(['hexagon', 'hex', 'hx', 'h'], 'hexagon')
-    poly: PolyFrame = field(init=False)
 
-    def __post_init__(self):
-        """Generate polygon."""
-        self.poly = self.generate_polygon()
+    @property
+    def shape(self):
+        """Return polygeom shape name."""
+        section = self.section.rstrip(string.digits)
+        try:
+            return self.polyshape[section]
+        except AttributeError as error:
+            raise AttributeError(
+                f'cross_section: {self.section} not implemented'
+                f'\n specify as {self.polyshape}') from error
 
     def __call__(self, *args):
         """Evaluate poly."""
-        return self.poly(*args)
+        return self._generate(*args)
 
-    def generate_polygon(self):
+    @property
+    def _generate(self):
         """
         Generate shapley polygon from section name.
 
@@ -87,21 +86,7 @@ class PolyGen:
         shape : shapely.polygon
 
         """
-        section = self.section.rstrip(string.digits)
-        if self.polyshape[section] == 'disc':
-            return self.disc
-        if self.polyshape[section] == 'ellipse':
-            return self.ellipse
-        if self.polyshape[section] == 'square':
-            return self.square
-        if self.polyshape[section] == 'rectangle':
-            return self.rectangle
-        if self.polyshape[section] == 'skin':
-            return self.skin
-        if self.polyshape[section] == 'hexagon':
-            return self.hexagon
-        raise IndexError(f'cross_section: {self.section} not implemented'
-                         f'\n specify as {self.polyshape}')
+        return getattr(self, self.shape)
 
     @staticmethod
     def boxbound(width, height):
@@ -150,7 +135,7 @@ class PolyGen:
         radius = diameter / 2
         point = shapely.geometry.Point(x_center, z_center)
         buffer = point.buffer(radius, resolution=64)
-        return PolyFrame(buffer, 'disc')
+        return shapely.geometry.Polygon(buffer)
 
     @staticmethod
     def ellipse(x_center, z_center, width, height):
@@ -175,7 +160,7 @@ class PolyGen:
         """
         polygon = shapely.affinity.scale(PolyGen.disc(
             x_center, z_center, width), 1, height/width)
-        return PolyFrame(polygon, name='ellipse')
+        return shapely.geometry.Polygon(polygon)
 
     @staticmethod
     def square(x_center, z_center, width, height=None):
@@ -201,7 +186,7 @@ class PolyGen:
         width = PolyGen.boxbound(width, height)
         polygon = shapely.geometry.box(x_center-width/2, z_center-width/2,
                                        x_center+width/2, z_center+width/2)
-        return PolyFrame(polygon, name='square')
+        return shapely.geometry.Polygon(polygon)
 
     @staticmethod
     def rectangle(x_center, z_center, width, height):
@@ -226,7 +211,7 @@ class PolyGen:
         """
         polygon = shapely.geometry.box(x_center-width/2, z_center-height/2,
                                        x_center+width/2, z_center+height/2)
-        return PolyFrame(polygon, name='rectangle')
+        return shapely.geometry.Polygon(polygon)
 
     @staticmethod
     def skin(x_center, z_center, diameter, factor):
@@ -264,7 +249,7 @@ class PolyGen:
         scale = 1-factor
         disc_inner = PolyGen.disc(x_center, z_center, scale*diameter)
         polygon = disc_outer.difference(disc_inner)
-        return PolyFrame(polygon, name='skin')
+        return shapely.geometry.Polygon(polygon)
 
     @staticmethod
     def hexagon(x_center, z_center, width, height=None):
@@ -291,7 +276,7 @@ class PolyGen:
         points = [[x_center + np.cos(alpha) * length,
                    z_center + np.sin(alpha) * length]
                   for alpha in np.linspace(0, 2*np.pi, 7)]
-        return PolyFrame(points, name='hexagon')
+        return shapely.geometry.Polygon(points)
 
 
 if __name__ == '__main__':

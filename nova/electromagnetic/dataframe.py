@@ -9,7 +9,7 @@ import xarray
 
 from nova.electromagnetic.frameattrs import FrameAttrs
 from nova.geometry.geoframe import GeoFrame
-from nova.geometry.polygen import PolyFrame
+#from nova.geometry.polygen import PolyFrame
 from nova.geometry.vtkgen import VtkFrame
 
 # pylint: disable=too-many-ancestors
@@ -36,7 +36,7 @@ class DataFrame(FrameAttrs):
 
     """
 
-    geoframe = dict(Polygon=PolyFrame, VTK=VtkFrame, Geo=GeoFrame, Json=str)
+    geoframe = dict(Polygon=None, VTK=VtkFrame, Geo=GeoFrame, Json=str)
 
     def __init__(self, data=None, index=None, columns=None,
                  attrs=None, **metadata):

@@ -17,8 +17,8 @@ import trimesh
 import vedo
 import vtk
 
-from nova.geometry.polygen import PolyFrame
-from nova.geometry.polygeom import Polygon
+#from nova.geometry.polygen import PolyFrame
+from nova.geometry.polygon import Polygon
 from nova.geometry.vtkgen import VtkFrame
 from nova.geometry.line import Line
 

@@ -15,6 +15,7 @@ from nova.electromagnetic.dataarray import (
     )
 from nova.electromagnetic.energize import Energize
 from nova.electromagnetic.multipoint import MultiPoint
+from nova.geometry.polygeom import PolyGeom
 from nova.geometry.polygon import Polygon
 
 
@@ -295,9 +296,10 @@ class FrameLink(LinkIndexer, DataArray):
             (not isinstance(args[0], (shapely.geometry.Polygon, dict))
                 or isinstance(args[0], vedo.Mesh)):
             return args, kwargs
-        polygon = Polygon(args[0])
-        geometry = polygon.geometry
-        kwargs = kwargs | geometry
+        #polygon = Polygon(args[0])
+        #geometry = PolyGeom(Polygon(args[0])).geometry
+        print(PolyGeom(Polygon(args[0])).geometry)
+        kwargs = kwargs | PolyGeom(Polygon(args[0])).geometry
         args = [kwargs.pop(attr) for attr in self.metaframe.required]
         return args, kwargs
 
@@ -339,7 +341,11 @@ class FrameLink(LinkIndexer, DataArray):
             if attr in self.metaframe.tag:
                 kwargs.pop(attr)  # skip tags
             elif attr in self.metaframe.default:
-                data[attr] = np.array(kwargs.pop(attr))  # add keyword attrs
+                value = kwargs.pop(attr)
+                try:
+                    data[attr] = np.array(value)  # add keyword attrs
+                except ValueError:
+                    data[attr] = value
                 if attr not in self.metaframe.additional:
                     additional.append(attr)
         if len(additional) > 0:  # extend aditional arguments

@@ -10,8 +10,8 @@ from rdp import rdp
 
 from nova.electromagnetic.dataframe import DataFrame
 from nova.electromagnetic.polyplot import PolyPlot
-from nova.geometry.polygen import PolyFrame
 from nova.geometry.polygeom import PolyGeom
+from nova.geometry.polygon import Polygon
 from nova.utilities import geom
 from nova.utilities.pyplot import plt
 
@@ -141,7 +141,7 @@ class ShellSegment(ShellInterp):
             self.thickness/2, cap_style=2, join_style=2)
         if isinstance(poly, shapely.geometry.MultiPolygon):
             poly = poly.geoms[0]
-        return PolyFrame(poly, name='shell')
+        return Polygon(poly, name='shell').poly
 
     def divide(self):
         """Return subsegment geometry including RDP features."""
@@ -158,10 +158,12 @@ class ShellSegment(ShellInterp):
         """Return subsegment dataframe."""
         data = [[] for __ in range(self.ndiv-1)]
         for i, segment in enumerate(self.divide()):
-            geom = PolyGeom(segment.poly)
-            data[i] = [*geom.centroid[::2],
-                       self.length, self.thickness, *geom.bbox,
-                       geom.rms, geom.area, geom.section, geom.poly]
+            #geom = PolyGeom(segment.poly)
+            #data[i] = [*geom.centroid[::2],
+            #           self.length, self.thickness, *geom.bbox,
+            #           geom.rms, geom.area, geom.section, geom.poly]
+            geom = PolyGeom(segment.poly, 'ring').geometry
+            data[i] = {name: geom[name] for name in self.columns}
         frame = pandas.DataFrame(data, columns=self.columns)
         frame['nturn'] = frame['area']
         return frame
@@ -216,7 +218,7 @@ if __name__ == '__main__':
                           [0, 0.1, 0, 1, -1, 0], -2, 0.1,
                           delta=0.1)
 
-    print(shellgrid.subframe)
+    print(shellgrid.frame)
 
 
     #shellgrid = ShellGrid([[1, 1.5, 2, 2, 4, 4],

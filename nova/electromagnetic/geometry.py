@@ -8,8 +8,8 @@ import vedo
 
 from nova.electromagnetic.metamethod import MetaMethod
 from nova.electromagnetic.dataframe import DataFrame
-#from nova.geometry.polygeom import PolyGeom
-#from nova.geometry.polygen import PolyFrame
+from nova.geometry.polygeom import PolyGeom
+from nova.geometry.polygon import Polygon
 from nova.geometry.volume import TriShell, Ring
 from nova.geometry.vtkgen import VtkFrame
 
@@ -95,19 +95,18 @@ class PolyGeo(MetaMethod):
                                  (self.frame.section != '')]
         if (index_length := len(index)) > 0:
             section = self.frame.loc[index, 'section'].values
-            coords = self.frame.loc[
-                index, ['x', 'y', 'z', 'dx', 'dy', 'dz',
-                        'segment', 'dl', 'dt']].to_numpy()
+            poly_data = self.frame.loc[index, ['x', 'z', 'dl', 'dt']].values
+            segment = self.frame.loc[index, 'segment'].values
+            length = self.frame.loc[index, 'dy'].values
             poly = self.frame.loc[index, 'poly'].values
             poly_update = self.frame.loc[index, 'poly'].isna()
             geom = np.empty((index_length, len(self.features)), dtype=float)
             # itterate over index - generate poly as required
             for i in range(index_length):
-                polygeom = PolyGeom(poly[i], *coords[i], section[i])
-                section[i] = polygeom.section  # inflate section name
                 if poly_update[i]:
-                    poly[i] = PolyFrame(polygeom.poly, name=polygeom.section)
-                geometry = polygeom.geometry  # extract geometrical features
+                    poly[i] = Polygon({f'{section[i]}': poly_data[i]}).poly
+                    section[i] = poly[i].metadata['section']
+                geometry = PolyGeom(poly[i], segment[i], length[i]).geometry
                 geom[i] = [geometry[feature] for feature in self.features]
             if poly_update.any():
                 self.frame.loc[index, 'poly'] = poly

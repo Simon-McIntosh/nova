@@ -45,7 +45,6 @@ class BasePlot:
             index = self.frame.index[index]
         if np.array([isinstance(label, int) for label in index]).all():
             index = self.frame.index[index]
-        print('frame is in')
         return self.frame.index.isin(index)
 
     def get_index(self, index=None, segment=None):
@@ -131,7 +130,8 @@ class Display:
         """Return patch linewidth."""
         finesse_fraction = 0.01
         total_area = self.frame.area.sum()
-        patch_area = scipy.stats.mode(self.frame.loc[part, 'area'])[0]
+        index = self.frame.part == part
+        patch_area = scipy.stats.mode(self.frame.loc[index, 'area'])[0]
         area_fraction = patch_area/total_area
         if area_fraction < finesse_fraction:
             return self.linewidth * area_fraction/finesse_fraction

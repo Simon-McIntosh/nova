@@ -1,38 +1,12 @@
 """Generate polygons for CoilFrame instances."""
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 import string
 from typing import ClassVar
 
-import geojson
 import shapely
 import shapely.geometry
 import shapely.ops
 import numpy as np
-import pygeos
-
-from nova.geometry.geoframe import GeoFrame
-
-'''
-class PolyFrame(shapely.geometry.Polygon, GeoFrame):
-    """Extend Polygon.__str__ for compact DataFrame representation."""
-
-    def __init__(self, shell=None, holes=None, name='poly'):
-        self.name = name
-        super().__init__(shell, holes)
-
-    def __str__(self):
-        """Return polyframe name."""
-        return self.name
-
-    def dumps(self) -> str:
-        """Return geojson representation."""
-        return geojson.dumps(self)
-
-    @classmethod
-    def loads(cls, poly: str):
-        """Load geojson prepresentation."""
-        return cls(shapely.geometry.shape(geojson.loads(poly)))
-'''
 
 
 @dataclass
@@ -45,7 +19,7 @@ class PolyGen:
                        'circle', 'c'], 'disc') | \
         dict.fromkeys(['ellipse', 'ellip', 'el', 'e'], 'ellipse') | \
         dict.fromkeys(['square', 'sq', 's'], 'square') | \
-        dict.fromkeys(['rectangle', 'rect', 'r'], 'rectangle') | \
+        dict.fromkeys(['rectangle', 'rect', 'rec', 'r'], 'rectangle') | \
         dict.fromkeys(['skin', 'sk'], 'skin') | \
         dict.fromkeys(['polygon', 'poly'], 'polygon') |\
         dict.fromkeys(['shell', 'shl', 'sh'], 'shell') |\

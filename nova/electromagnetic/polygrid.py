@@ -6,12 +6,13 @@ import shapely.geometry
 import shapely.strtree
 import numpy as np
 import pandas
-import pygeos
 
 from nova.electromagnetic.dataframe import DataFrame
 from nova.electromagnetic.polyplot import PolyPlot
-from nova.geometry.polygen import PolyGen, PolyFrame
-from nova.geometry.polygeom import PolyGeom, Polygon
+from nova.geometry.polyframe import PolyFrame
+from nova.geometry.polygen import PolyGen
+from nova.geometry.polygeom import PolyGeom
+from nova.geometry.polygon import Polygon
 from nova.utilities.pyplot import plt
 
 
@@ -119,8 +120,8 @@ class PolyCell(PolyDelta):
 
     def polycell(self, x_center, z_center):
         """Return cell polygon."""
-        polygon = PolyGen(self.turn)(x_center, z_center, *self.cell_delta)
-        return PolyFrame(polygon, self.turn)
+        poly = {f'{self.turn}': (x_center, z_center, *self.cell_delta)}
+        return Polygon(poly).poly
 
     @property
     def unitcell(self):
@@ -242,21 +243,22 @@ class PolyGrid(PolyCell):
 
     def polytrim(self, coords, polys):
         """Return polycells trimed to bounding polygon."""
-        polytree = pygeos.STRtree(pygeos.from_shapely(polys))
+        polytree = shapely.STRtree([poly.poly for poly in polys])
         buffer = self.poly.buffer(1e-12*self.cell_delta[0])
-        index = polytree.query(pygeos.from_shapely(self.poly),
-                               predicate='intersects')
+        index = polytree.query_items(self.poly.poly)  # predicate='intersects'
         polys = [polys[i] for i in index]
-        coords = [coords[i] for i in index]
-        polys = [PolyFrame(polytrim, name=self.turn
-                           if poly.within(buffer) else 'polygon')
+        #coords = [coords[i] for i in index]
+        polys = [PolyFrame(polytrim, poly.metadata if poly.within(buffer)
+                           else dict(name='polygon'))
                  for poly in polys if (polytrim := poly.intersection(buffer))
                  and isinstance(polytrim, shapely.geometry.Polygon)]
-        coords = [np.array(poly.centroid.xy).T[0]
-                  if poly.name == 'polygon' else coord
-                  for coord, poly in zip(coords, polys)]
-        return coords, polys
+        #coords = [np.array(poly.centroid.xy).T[0]
+        #          if poly.name == 'polygon' else coord
+        #          for coord, poly in zip(coords, polys)]
+        #return coords, polys
+        return polys
 
+    '''
     def polygeoms(self, polys, coords):
         """Return polycell geometory instances."""
         return [PolyGeom(poly, x_coordinate=coord[0], z_coordinate=coord[1],
@@ -264,17 +266,28 @@ class PolyGrid(PolyCell):
                          thickness=self.cell_delta[1],
                          section=poly.name)
                 for poly, coord in zip(polys, coords)]
+    '''
 
     def dataframe(self):
         """Bulid polygeom dataframe."""
         coords = self.grid_coordinates()  # build coordinate grid
-        coords, polys = self.polycells(coords)  # build trimmed cell polygons
+        polys = self.polycells(coords)  # build trimmed cell polygons
+        #coords, polys = self.polycells(coords)  # build trimmed cell polygons
+        '''
         geoms = self.polygeoms(polys, coords)  # build cell geometries
         data = [[] for __ in range(len(geoms))]
         for i, geom in enumerate(geoms):
             data[i] = [*geom.centroid[::2],
                        geom.length, geom.thickness, *geom.bbox,
                        geom.rms, geom.area, geom.section, geom.poly]
+
+            geom = PolyGeom(poly, 'ring').geometry
+            data[i] = {name: geom[name] for name in self.columns}
+        '''
+        data = [[] for __ in range(len(polys))]
+        for i, poly in enumerate(polys):
+            geom = PolyGeom(poly, 'ring').geometry
+            data[i] = {name: geom[name] for name in self.columns}
         frame = pandas.DataFrame(data, columns=self.columns)
         frame['nturn'] = self.nturn * frame['area'] / frame['area'].sum()
         return frame
@@ -298,12 +311,12 @@ class PolyGrid(PolyCell):
     def polyplot(self):
         """Return polyplot instance."""
         frame = self.frame.copy()
-        frame['part'] = 'Poly'
+        frame['part'] = 'cs'
         return PolyPlot(DataFrame(frame))
 
     def plot(self):
         """Plot polygon exterior and polycells."""
-        self.plot_exterior()
+        self.plot_boundary()
         self.polyplot()
         plt.axis('off')
         plt.axis('equal')
@@ -311,6 +324,10 @@ class PolyGrid(PolyCell):
 
 if __name__ == '__main__':
 
-    polygrid = PolyGrid({'hx': [6, 3, 2.5, 2.5]}, delta=-60,
+    polygrid = PolyGrid(poly={'hx': [6, 3, 2.5, 2.5]}, delta=-60,
+                        turn='hex', tile=True)
+
+    poly = Polygon({'hx': [6, 3, 2.5, 2.5]}).poly
+    polygrid = PolyGrid(poly=poly, delta=-60,
                         turn='hex', tile=True)
     polygrid.plot()

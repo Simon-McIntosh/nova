@@ -65,7 +65,7 @@ def test_ITER_subinductance_matrix():
               [1.348E-01, 7.954E-01, 2.471E-01],
               [6.021E-02, 2.471E-01, 7.954E-01]]
     assert allclose(Mc_ddd, biot.data.Psi, atol=5e-3)
-
+test_ITER_subinductance_matrix()
 
 def test_solenoid_grid():
     """verify solenoid vertical field using grid biot instance."""

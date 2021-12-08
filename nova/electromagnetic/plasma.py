@@ -10,8 +10,8 @@ import shapely
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polyplot import Axes
-from nova.geometry.polygen import PolyFrame
-from nova.geometry.polygeom import Polygon
+from nova.geometry.polyframe import PolyFrame
+from nova.geometry.polygon import Polygon
 from nova.utilities.pyplot import plt
 
 
@@ -61,8 +61,8 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
 
     number: int = field(init=False, default=0)
     boundary: PolyFrame = field(init=False, repr=False, default=None)
-    separatrix: pygeos.Geometry = field(init=False, repr=False, default=None)
-    tree: pygeos.STRtree = field(init=False, repr=False, default=None)
+    separatrix: PolyFrame = field(init=False, repr=False, default=None)
+    tree: shapely.STRtree = field(init=False, repr=False, default=None)
     index: npt.ArrayLike = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
@@ -132,6 +132,7 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         return pygeos.STRtree([pygeos.from_shapely(poly.centroid)
                                for poly in self.loc['plasma', 'poly']])
 
+    '''
     def plasma_poly(self, loop):
         """Return pygeos polygon built from loop."""
         if isinstance(loop, pygeos.lib.Geometry):
@@ -141,6 +142,7 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         if isinstance(loop, shapely.geometry.Polygon):
             return pygeos.from_shapely(loop)
         return pygeos.from_shapely(Polygon(loop).poly)
+    '''
 
     def update(self, loop):
         """
@@ -155,7 +157,7 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
             Bounding loop.
 
         """
-        self.separatrix = self.plasma_poly(loop)
+        self.separatrix = Polygon(loop).poly
         within = self.tree.query(self.separatrix, predicate='intersects')
         ionize_filament = np.full(self.number, False)
         ionize_filament[within] = True

@@ -57,16 +57,19 @@ class PolyPlot(Axes, Display, Label, MetaMethod, BasePlot):
         properties = self.patch_properties(self.frame.part)
         basecolor = {part: properties[part]['facecolor']
                      for part in properties}
-        for poly, part in self.frame.loc[index, ['poly', 'part']].to_numpy():
+        for polyframe, part in self.frame.loc[index,
+                                              ['poly', 'part']].to_numpy():
             patch_kwargs = properties[part].copy()
             if self.patchwork != 0:  # Shuffle basecolor
                 patch_kwargs['facecolor'] = self.shuffle(basecolor[part])
             patch_kwargs |= kwargs
             try:  # MultiPolygon.
-                for _poly in poly:
-                    patch.append(descartes.PolygonPatch(_poly, **patch_kwargs))
+                for _poly in polyframe.poly:
+                    patch.append(descartes.PolygonPatch(
+                        _poly.__geo_interface__, **patch_kwargs))
             except (TypeError, AssertionError):  # Polygon.
-                patch.append(descartes.PolygonPatch(poly, **patch_kwargs))
+                patch.append(descartes.PolygonPatch(
+                    polyframe.poly.__geo_interface__, **patch_kwargs))
         patch_collection = PatchCollection(patch, match_original=True)
         self.axes.add_collection(patch_collection)
         self.axes.autoscale_view()

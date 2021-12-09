@@ -7,34 +7,35 @@ from nova.geometry.polygon import Polygon
 
 
 def test_bbox_length_thickness():
-    polygon = Polygon([0, 5, -1, 1])
-    geom = PolyGeom(polygon.poly)
+    polygon = Polygon([0, 5, -1, 1], 'polyname')
+    geom = PolyGeom(polygon)
     assert np.isclose(geom.length, 5)
     assert np.isclose(geom.thickness, 2)
 
 
 def test_dict_length_thickness():
     polygon = Polygon(dict(skin=(3, 0, 0.5, 0.2)))
-    geom = PolyGeom(polygon.poly)
+    geom = PolyGeom(polygon)
     assert np.isclose(geom.length, 0.5)
     assert np.isclose(geom.thickness, 0.2)
 
 
 def test_loop_length_thickness():
     polygon = Polygon([[0, 0], [1, 0], [1, 1]])
-    geom = PolyGeom(polygon.poly)
+    geom = PolyGeom(polygon)
     assert geom.length is None
     assert geom.thickness is None
 
 
 def test_section_name():
-    box = PolyGeom(Polygon([0, 5, -1, 1], 'box').poly)
-    skin = PolyGeom(Polygon(dict(sk=(3, 0, 0.5, 0.2)), 'hoop'))
+    box = PolyGeom(Polygon([0, 5, -1, 1], name='box'))
+    skin = PolyGeom(Polygon(dict(sk=(3, 0, 0.5, 0.2)), name='hoop'))
     loop = PolyGeom(Polygon([[0, 0], [1, 0], [1, 1]]))
     assert box.section == 'rectangle'
     assert skin.section == 'skin'
-    assert skin.poly.name == 'hoop'
+    assert skin.name == 'hoop'
     assert loop.section == 'polyloop'
+    assert loop.name == 'polyloop'
 
 
 def test_rectangular_cross_section():

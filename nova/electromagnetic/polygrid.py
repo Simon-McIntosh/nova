@@ -12,7 +12,6 @@ from nova.electromagnetic.polyplot import PolyPlot
 from nova.geometry.polyframe import PolyFrame
 from nova.geometry.polygen import PolyGen
 from nova.geometry.polygeom import PolyGeom
-from nova.geometry.polygon import Polygon
 from nova.utilities.pyplot import plt
 
 
@@ -20,7 +19,7 @@ from nova.utilities.pyplot import plt
 
 
 @dataclass
-class PolyDelta(Polygon):
+class PolyDelta(PolyGeom):
     """Manage grid spacing and cell dimension."""
 
     delta: Union[int, float] = 0
@@ -121,7 +120,7 @@ class PolyCell(PolyDelta):
     def polycell(self, x_center, z_center):
         """Return cell polygon."""
         poly = {f'{self.turn}': (x_center, z_center, *self.cell_delta)}
-        return Polygon(poly).poly
+        return PolyGeom(poly)
 
     @property
     def unitcell(self):
@@ -245,12 +244,13 @@ class PolyGrid(PolyCell):
         """Return polycells trimed to bounding polygon."""
         polytree = shapely.STRtree([poly.poly for poly in polys])
         buffer = self.poly.buffer(1e-12*self.cell_delta[0])
-        index = polytree.query_items(self.poly.poly)  # predicate='intersects'
+        index = polytree.query_items(self.poly)  # predicate='intersects'
         polys = [polys[i] for i in index]
         #coords = [coords[i] for i in index]
-        polys = [PolyFrame(polytrim, poly.metadata if poly.within(buffer)
+        polys = [PolyFrame(polytrim, poly.metadata if poly.poly.within(buffer)
                            else dict(name='polygon'))
-                 for poly in polys if (polytrim := poly.intersection(buffer))
+                 for poly in polys
+                 if (polytrim := poly.poly.intersection(buffer))
                  and isinstance(polytrim, shapely.geometry.Polygon)]
         #coords = [np.array(poly.centroid.xy).T[0]
         #          if poly.name == 'polygon' else coord
@@ -324,10 +324,6 @@ class PolyGrid(PolyCell):
 
 if __name__ == '__main__':
 
-    polygrid = PolyGrid(poly={'hx': [6, 3, 2.5, 2.5]}, delta=-60,
-                        turn='hex', tile=True)
-
-    poly = Polygon({'hx': [6, 3, 2.5, 2.5]}).poly
-    polygrid = PolyGrid(poly=poly, delta=-60,
+    polygrid = PolyGrid({'hx': [6, 3, 2.5, 2.5]}, delta=-60,
                         turn='hex', tile=True)
     polygrid.plot()

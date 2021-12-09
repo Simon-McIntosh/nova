@@ -17,17 +17,20 @@ from nova.electromagnetic.ferritic import Ferritic
 
 @dataclass
 class CoilGrid:
-    """Default grid sizing parameters."""
+    """Default grid parameters."""
 
     dcoil: float = -1
     dplasma: float = 0.25
     dshell: float = 0
     dfield: float = 0.2
+    vtk: bool = False
 
     def __post_init__(self):
         """Construct delta lookup."""
         self._delta = dict(coil=self.dcoil, shell=self.dshell,
                            plasma=self.dplasma, field=self.dfield)
+        if self.vtk and 'vtk' not in self.available:  # 3d geometry flag
+            self.available.append('vtk')
         super().__post_init__()
 
 

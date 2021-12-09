@@ -104,7 +104,7 @@ class PolyGeo(MetaMethod):
             # itterate over index - generate poly as required
             for i in range(index_length):
                 if poly_update[i]:
-                    poly[i] = Polygon({f'{section[i]}': poly_data[i]}).poly
+                    poly[i] = Polygon({f'{section[i]}': poly_data[i]})
                     section[i] = poly[i].metadata['section']
                 geometry = PolyGeom(poly[i], segment[i], length[i]).geometry
                 geom[i] = [geometry[feature] for feature in self.features]

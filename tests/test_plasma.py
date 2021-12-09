@@ -8,7 +8,6 @@ from nova.electromagnetic.coilset import CoilSet
 def test_centroid_x():
     coilset = CoilSet()
     coilset.plasma.insert([[1, 2, 2, 1, 1], [1, 1, 3, 3, 1]])
-    coilset.plot
     poly = coilset.frame.poly[0]
     assert poly.centroid.x == coilset.frame.x[0] == 1.5
 
@@ -41,12 +40,18 @@ def test_plasma_part():
 
 
 def test_polygon_separatrix():
-    coilset = CoilSet(dplasma=0.5)
+    coilset = CoilSet(dplasma=-5000)
     coilset.plasma.insert([[1, 5, 5, 1, 1], [1, 1, 5, 5, 1]])
-    coilset.plasma.update(shapely.geometry.Point(3, 3).buffer(2))
+
+    from nova.geometry.polygon import Polygon
+    loop = Polygon(dict(ellip=(3, 3, 4, 3))).points[:, ::2]
+    coilset.plasma.update(loop)
+    coilset.plasma.plot()
+    coilset.plot()
     assert np.isclose(
         coilset.subframe.area[coilset.subframe.ionize].sum(), np.pi*2**2, 0.05)
-
+    assert False
+test_polygon_separatrix()
 
 def test_array_separatrix():
     coilset = CoilSet(dplasma=0.1)
@@ -89,7 +94,7 @@ def test_multiframe_nturn():
 
 if __name__ == '__main__':
 
-    #pytest.main([__file__])
+    pytest.main([__file__])
 
     coilset = CoilSet(dplasma=-50)
     coilset.plasma.insert(dict(o=(5, 0, 1.6)))

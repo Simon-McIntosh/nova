@@ -10,7 +10,7 @@ import shapely
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polyplot import Axes
-from nova.geometry.polyframe import PolyFrame
+from nova.geometry import inpoly
 from nova.geometry.polygon import Polygon
 from nova.utilities.pyplot import plt
 
@@ -60,17 +60,17 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
     """Set plasma separatix, ionize plasma filaments."""
 
     number: int = field(init=False, default=0)
-    boundary: PolyFrame = field(init=False, repr=False, default=None)
-    separatrix: PolyFrame = field(init=False, repr=False, default=None)
+    boundary: Polygon = field(init=False, repr=False, default=None)
+    separatrix: Polygon = field(init=False, repr=False, default=None)
     tree: shapely.STRtree = field(init=False, repr=False, default=None)
-    index: npt.ArrayLike = field(init=False, repr=False, default=None)
+    plasma_index: npt.ArrayLike = field(init=False, repr=False, default=None)
+    plasma_points: npt.ArrayLike = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Update subframe metadata."""
         self.subframe.metaframe.metadata = \
             {'additional': ['ionize'], 'array': ['ionize', 'area', 'nturn']}
         self.subframe.update_columns()
-        self.index = self.loc['plasma']
 
     def __len__(self):
         """Return number of plasma filaments."""
@@ -101,9 +101,10 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         """Generate plasma attributes, build STR tree."""
         self.number = self.loc['plasma'].sum()
         if self.number > 0:
-            self.boundary = self.Loc['plasma', 'poly'][0]
+            self.boundary = Polygon(self.Loc['plasma', 'poly'][0])
             self.tree = self.generate_tree()
-            self.index = self.loc['plasma']
+            self.plasma_index = self.loc['plasma']
+            self.plasma_points = self.loc['plasma', ['x', 'z']].to_numpy()
 
     def generate_tree(self):
         """
@@ -129,8 +130,12 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
             pygeos STRtree.
 
         """
-        return pygeos.STRtree([pygeos.from_shapely(poly.centroid)
-                               for poly in self.loc['plasma', 'poly']])
+        return shapely.STRtree([polyframe.centroid
+                                for polyframe in self.loc['plasma', 'poly']])
+        '''
+        return pygeos.STRtree(
+            pygeos.points(self.loc['plasma', ['x', 'z']].to_numpy()))
+        '''
 
     '''
     def plasma_poly(self, loop):
@@ -157,12 +162,28 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
             Bounding loop.
 
         """
-        self.separatrix = Polygon(loop).poly
+
+        '''
+        try:
+            self.separatrix = pygeos.polygons(loop)
+        except TypeError:
+            loop = Polygon(loop).points[:, ::2]
+            self.separatrix = pygeos.polygons(loop)
         within = self.tree.query(self.separatrix, predicate='intersects')
+        '''
+
+        '''
+        self.separatrix = Polygon(loop)
+        within = self.tree.query_items(self.separatrix.poly)
+        within = [index for index in within
+                  if self.tree.geometries[index].within(self.separatrix.poly)]
         ionize_filament = np.full(self.number, False)
         ionize_filament[within] = True
-        self.loc[self.index, 'ionize'] = ionize_filament
-        self.loc[self.index, 'nturn'] = 0
+        '''
+
+        ionize_filament = inpoly.is_inside_sm_parallel(self.plasma_points, loop)
+        self.loc[self.plasma_index, 'ionize'] = ionize_filament
+        self.loc[self.plasma_index, 'nturn'] = 0
         ionize = self.loc['ionize']
         self.loc[ionize, 'nturn'] = \
             self.loc[ionize, 'area'] / np.sum(self.loc[ionize, 'area'])
@@ -175,10 +196,10 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         self.axes = axes
         if self.separatrix is not None:
             self.axes.add_patch(descartes.PolygonPatch(
-                pygeos.to_shapely(self.separatrix),
+                self.separatrix.poly.__geo_interface__,
                 facecolor='C4', alpha=0.75, linewidth=0.5, zorder=-10))
         if boundary:
-            self.axes.plot(*self.boundary.exterior.xy, '-', color='gray')
+            self.boundary.plot_boundary(self.axes, color='gray')
         plt.axis('equal')
         plt.axis('off')
 

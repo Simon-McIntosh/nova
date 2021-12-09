@@ -12,58 +12,65 @@ from nova.geometry.polygen import PolyGen
 
 
 @dataclass
-class Polygon:
-    """Generate bounding polygon."""
+class Polygon(PolyFrame):
+    """Generate bounding polygon.
 
-    polyframe: Union[PolyFrame, pygeos.Geometry, shapely.geometry.Polygon,
-                     dict[str, list[float]],
-                     list[float, float, float, float],
-                     npt.ArrayLike] = field(repr=False)
+    Parameters
+    ----------
+    poly :
+        - PolyFrame, pygeos.Geometry, shapely.geometry.Polygon
+        - dict[str, list[float]], polyname: *args
+        - list[float], shape(4,) bounding box [xmin, xmax, zmin, zmax]
+        - array-like, shape(n,2) bounding loop [x, z]
+
+    """
+
+    poly: Union[PolyFrame, pygeos.Geometry, shapely.geometry.Polygon,
+                dict[str, list[float]],
+                list[float, float, float, float],
+                npt.ArrayLike]
     name: str = None
+    metadata: dict = field(init=False, default_factory=dict)
 
     def __post_init__(self):
         """Process input geometry."""
         self.correct_aspect()
-        metadata = self.extract()
+        self.metadata = self.extract()
         if self.name is not None:
-            metadata |= dict(name=self.name)
-        self.name = metadata['name']
-        self.polyframe = PolyFrame(self.translate(), metadata)
-
-    def __getattr__(self, attr):
-        """Expose polyframe attribute."""
-        return getattr(self.polyframe, attr)
+            self.metadata |= dict(name=self.name)
+        self.name = self.metadata.get('name', None)
+        self.poly = self.translate()
 
     def correct_aspect(self):
         """Correct bounds to equal aspect geometries."""
-        if isinstance(self.polyframe, dict):
-            for section in self.polyframe:
+        if isinstance(self.poly, dict):
+            for section in self.poly:
                 if PolyGen(section).shape in ['square', 'disc']:
-                    if len(self.polyframe[section]) == 4:
+                    if len(self.poly[section]) == 4:
                         length = PolyGen.boxbound(
-                            *self.polyframe[section][-2:])
-                        self.polyframe[section] = \
-                            tuple(self.polyframe[section][:2]) + (length,)
+                            *self.poly[section][-2:])
+                        self.poly[section] = \
+                            tuple(self.poly[section][:2]) + (length,)
 
     def extract(self) -> dict:
         """Return metadata extracted from input polygon."""
-        if isinstance(self.polyframe, (Polygon, PolyFrame)):
-            return self.metadata
-        if isinstance(self.polyframe, (pygeos.Geometry, shapely.Geometry)):
-            return dict(name='poly')
-        if isinstance(self.polyframe, dict):
+        if isinstance(self.poly, (Polygon, PolyFrame)):
+            return self.poly.metadata
+        if isinstance(self.poly, (pygeos.Geometry, shapely.Geometry)):
+            return dict(name='polygon')
+        if isinstance(self.poly, dict):
             metadata = dict(names=[PolyGen(name).shape
-                                   for name in self.polyframe])
-            if len(self.polyframe) == 1:
+                                   for name in self.poly])
+            if len(self.poly) == 1:
                 metadata['name'] = metadata['names'][0]
                 metadata |= {attr: value for attr, value in zip(
                     ['x_centroid', 'z_centroid', 'length', 'thickness'],
-                    self.polyframe[next(iter(self.polyframe))])}
+                    self.poly[next(iter(self.poly))])}
                 metadata['section'] = metadata['name']
                 return metadata
             metadata['name'] = '-'.join(metadata['names'])
             return metadata
-        loop = np.array(self.polyframe)
+        loop = np.array(self.poly)
         if loop.ndim == 1 and len(loop) == 4:  # bounding box
             metadata = self.bounding_box(*loop)
             metadata['section'] = metadata['name']
@@ -92,14 +99,13 @@ class Polygon:
         polygon : shapely.geometry.Polygon
 
         """
-        if isinstance(self.polyframe, Polygon):
+        if isinstance(self.poly, (pygeos.Geometry, shapely.Geometry)):
             return self.poly
-        if isinstance(self.polyframe, (PolyFrame,
-                                       pygeos.Geometry, shapely.Geometry)):
-            return self.polyframe
-        if isinstance(self.polyframe, dict):
-            names = list(self.polyframe)
-            polys = [PolyGen(section)(*self.polyframe[section])
+        if isinstance(self.poly, PolyFrame):
+            return self.poly.poly
+        if isinstance(self.poly, dict):
+            names = list(self.poly)
+            polys = [PolyGen(section)(*self.poly[section])
                      for section in names]
             if len(polys) == 1:
                 return polys[0]
@@ -108,7 +114,7 @@ class Polygon:
                 raise AttributeError('non-overlapping polygons specified in '
                                      f'{self.poly}')
             return poly
-        loop = np.array(self.polyframe)  # to numpy array
+        loop = np.array(self.poly)  # to numpy array
         if loop.ndim == 1:   # poly bounding box
             if len(loop) == 4:  # [xmin, xmax, zmin, zmax]
                 bbox = self.bounding_box(*loop)

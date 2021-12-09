@@ -17,21 +17,11 @@ class PolyFrame(GeoFrame):
     poly: shapely.geometry.Polygon
     metadata: dict = field(default_factory=dict)
 
-    @property
-    def name(self):
-        """Return polygon name."""
-        return self.metadata.get('name', 'polyframe')
-
     def __eq__(self, other) -> bool:
         """Return result of comparison with other."""
         if isinstance(other, PolyFrame):
             return self.poly == other.poly
         return self.poly == other
-
-    def __getattr__(self, attr):
-        """Return shapely polygon attributes."""
-        if hasattr(self.poly, attr):
-            return getattr(self.poly, attr)
 
     def dumps(self) -> str:
         """Return geojson representation."""
@@ -44,9 +34,31 @@ class PolyFrame(GeoFrame):
         data = json.loads(data)
         return cls(shapely.geometry.shape(data['poly'], data['metadata']))
 
-    def plot_boundary(self):
+    @property
+    def name(self):
+        """Return polygon name."""
+        return self.metadata.get('name', 'polyframe')
+
+    @property
+    def section(self):
+        """Return polygon section."""
+        return self.metadata.get('section', self.name)
+
+    @property
+    def centroid(self):
+        """Return polygon centroid."""
+        return self.poly.centroid
+
+    @property
+    def area(self):
+        """Return polygon area."""
+        return self.poly.area
+
+    def plot_boundary(self, axes=None, **kwargs):
         """Plot polygon boundary."""
-        plt.plot(*self.poly.exterior.xy)
+        if axes is None:
+            axes = plt.subplots(1, 1)[1]
+        axes.plot(*self.poly.exterior.xy, **kwargs)
 
     @property
     def xlim(self) -> tuple[float]:

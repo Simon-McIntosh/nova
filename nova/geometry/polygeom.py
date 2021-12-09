@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Union
 
 import numpy as np
+import numpy.typing as npt
 import shapely.geometry
 
 from nova.geometry.polygon import PolyFrame
@@ -12,15 +13,30 @@ from nova.geometry.polygon import Polygon
 
 
 @dataclass
-class PolyGeom:
-    """Extract geometrical features from PolyFrame."""
+class PolyGeom(Polygon):
+    """Extract geometrical features from PolyFrame.
 
-    poly: Union[PolyFrame, Polygon]
+    Parameters
+    ----------
+    poly :
+        - PolyFrame, pygeos.Geometry, shapely.geometry.Polygon
+        - dict[str, list[float]], polyname: *args
+        - list[float], shape(4,) bounding box [xmin, xmax, zmin, zmax]
+        - array-like, shape(n,2) bounding loop [x, z]
+
+    """
+
+    poly: Union[Polygon, PolyFrame, shapely.geometry.Polygon,
+                dict[str, list[float]],
+                list[float, float, float, float],
+                npt.ArrayLike] = field(repr=False)
     segment: str = 'ring'
     loop_length: float = 0
+    name: str = field(init=False, default=None)
 
     def __post_init__(self):
         """Update loop length."""
+        super().__post_init__()
         if np.isclose(self.loop_length, 0):
             self.loop_length = self.reference_length
             return
@@ -47,9 +63,9 @@ class PolyGeom:
 
         """
         data = namedtuple('point', 'x y z')
-        return data(self.poly.metadata.get('x_centroid', self.poly.centroid.x),
-                    self.poly.metadata.get('y_centroid', 0),
-                    self.poly.metadata.get('z_centroid', self.poly.centroid.y))
+        return data(self.metadata.get('x_centroid', self.poly.centroid.x),
+                    self.metadata.get('y_centroid', 0),
+                    self.metadata.get('z_centroid', self.poly.centroid.y))
 
     @property
     def delta(self):
@@ -68,17 +84,12 @@ class PolyGeom:
     @property
     def length(self):
         """Return section characteristic length."""
-        return self.poly.metadata.get('length', None)
+        return self.metadata.get('length', None)
 
     @property
     def thickness(self):
         """Return section characteristic thickness."""
-        return self.poly.metadata.get('thickness', None)
-
-    @property
-    def section(self):
-        """Return section name."""
-        return self.poly.metadata.get('section', self.poly.name)
+        return self.metadata.get('thickness', None)
 
     @property
     def area(self):
@@ -105,7 +116,7 @@ class PolyGeom:
                 length = PolyGen.boxbound(self.length, self.thickness)
                 return data(length, self.loop_length, length)
             return data(self.length, self.loop_length, self.thickness)
-        return data(self.poly.width, self.loop_length, self.poly.height)
+        return data(self.width, self.loop_length, self.height)
 
     @property
     def rms(self):
@@ -150,7 +161,7 @@ class PolyGeom:
             lambda x, z: (x**2, z), self.poly).centroid.x)**0.5
 
     @property
-    def metadata(self):
+    def polydata(self):
         """Return polygon metadata."""
         centroid = self.centroid
         return dict(x_centroid=centroid.x, z_centroid=centroid.z,
@@ -164,4 +175,5 @@ class PolyGeom:
                 'dl': self.length, 'dt': self.thickness,
                 'dx': self.delta.x, 'dy': self.delta.y, 'dz': self.delta.z,
                 'area': self.area, 'rms': self.rms,
-                'poly': self.poly, 'section': self.section}
+                'poly': PolyFrame(self.poly, self.metadata),
+                'section': self.section}

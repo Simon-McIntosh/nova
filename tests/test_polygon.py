@@ -93,8 +93,8 @@ def test_polygon_names():
     polyloop = Polygon(loop)
     assert polybox.name == 'rectangle'
     assert polyname.name == 'bbox'
-    assert polyname.poly.metadata['section'] == 'rectangle'
-    assert polyloop.poly.name == 'polyloop'
+    assert polyname.metadata['section'] == 'rectangle'
+    assert polyloop.name == 'polyloop'
 
 
 def test_invalid_cross_section():

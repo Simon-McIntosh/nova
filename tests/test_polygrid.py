@@ -2,6 +2,7 @@ import pytest
 
 import numpy as np
 
+from nova.geometry.polygon import Polygon
 from nova.electromagnetic.polygrid import PolyGrid
 
 
@@ -103,12 +104,6 @@ def test_poly_buffer():
                         turn='sk', scale=1)
     assert np.sum([section == 'skin'
                    for section in polygrid.frame.section]) == 5
-
-
-##def test_polygon_cell_equality():
-#    poly = Polygon({'h': [6, 3, 0.4, 0.2]}).poly
-#    polygrid = PolyGrid(poly, delta=0, turn='hex', scale=1)
-#    assert poly.equals(polygrid.frame.poly[0])
 
 
 def test_square_effective_nfilament():

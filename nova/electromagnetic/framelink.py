@@ -296,10 +296,7 @@ class FrameLink(LinkIndexer, DataArray):
             (not isinstance(args[0], (shapely.geometry.Polygon, dict))
                 or isinstance(args[0], vedo.Mesh)):
             return args, kwargs
-        #polygon = Polygon(args[0])
-        #geometry = PolyGeom(Polygon(args[0])).geometry
-        print(PolyGeom(Polygon(args[0])).geometry)
-        kwargs = kwargs | PolyGeom(Polygon(args[0])).geometry
+        kwargs = kwargs | PolyGeom(args[0]).geometry
         args = [kwargs.pop(attr) for attr in self.metaframe.required]
         return args, kwargs
 

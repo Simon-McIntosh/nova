@@ -64,12 +64,17 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
     separatrix: Polygon = field(init=False, repr=False, default=None)
     index: npt.ArrayLike = field(init=False, repr=False, default=None)
     points: npt.ArrayLike = field(init=False, repr=False, default=None)
+    ionize: npt.ArrayLike = field(init=False, repr=False, default=None)
+    nturn: npt.ArrayLike = field(init=False, repr=False, default=None)
+    area: npt.ArrayLike = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Update subframe metadata."""
         self.subframe.metaframe.metadata = \
-            {'additional': ['ionize'], 'array': ['ionize', 'area', 'nturn']}
+            {'additional': ['ionize'],
+             'array': ['plasma', 'ionize', 'area', 'nturn']}
         self.subframe.update_columns()
+
 
     def __len__(self):
         """Return number of plasma filaments."""
@@ -102,7 +107,10 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         if self.number > 0:
             self.boundary = Polygon(self.Loc['plasma', 'poly'][0])
             self.index = self.loc['plasma']
-            self.points = self.loc['plasma', ['x', 'z']].to_numpy()
+            self.points = self.loc['plasma', ['x', 'z']].to_numpy(copy=True)
+            self.ionize = self.loc['ionize']
+            self.nturn = self.loc['nturn']
+            self.area = self.loc['area']
 
     def update(self, loop):
         """
@@ -118,15 +126,15 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
 
         """
         try:
-            ionize_filament = inpoly.polymultipoint(self.points, loop)
+            ionize = inpoly.polymultipoint(self.points, loop)
         except numba.TypingError:
             loop = Polygon(loop).points[:, ::2]
-            ionize_filament = inpoly.polymultipoint(self.points, loop)
-        self.loc[self.index, 'ionize'] = ionize_filament
-        self.loc[self.index, 'nturn'] = 0
-        ionize = self.loc['ionize']
-        self.loc[ionize, 'nturn'] = \
-            self.loc[ionize, 'area'] / np.sum(self.loc[ionize, 'area'])
+            ionize = inpoly.polymultipoint(self.points, loop)
+
+        self.ionize[self.index] = ionize
+        self.nturn[self.index] = 0
+        area = self.area[self.ionize]
+        self.nturn[self.ionize] = area / np.sum(area)
 
     def plot(self, axes=None, boundary=True):
         """Plot plasma boundary and separatrix."""

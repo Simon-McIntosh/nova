@@ -104,7 +104,8 @@ class Expand:
 
     def __post_init__(self):
         """Extract multipolygon bounding box."""
-        poly = shapely.geometry.MultiPolygon(self.frame.poly.to_list())
+        poly = shapely.geometry.MultiPolygon(
+            [polyframe.poly for polyframe in self.frame.poly])
         self.limit = [*poly.bounds[::2], *poly.bounds[1::2]]
         self.xcoord = GridCoord(*self.limit[:2])
         self.zcoord = GridCoord(*self.limit[2:])

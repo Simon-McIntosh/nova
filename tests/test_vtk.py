@@ -40,10 +40,11 @@ def test_save_load_vtk():
     box = vedo.shapes.Box(pos=(5, 0, 0), length=2, width=1e-3, height=2)
     frame = FrameSpace(part='vtk')
     frame += dict(vtk=box)
+    frame.vtk[0].triangulate()
     with tempfile.NamedTemporaryFile() as tmp:
         frame.store(tmp.name, 'frame')
         new_frame = FrameSpace().load(tmp.name, 'frame')
-    assert new_frame.vtk[0] == frame.vtk[0]
+    assert new_frame.vtk[0].volume() == frame.vtk[0].volume()
 
 
 def test_box_bounds():

@@ -3,6 +3,7 @@ import shapely.geometry
 import numpy as np
 
 from nova.electromagnetic.coilset import CoilSet
+from nova.geometry.polygon import Polygon
 
 
 def test_centroid_x():
@@ -39,19 +40,22 @@ def test_plasma_part():
     assert coilset.frame.part[0] == 'plasma'
 
 
-def test_polygon_separatrix():
-    coilset = CoilSet(dplasma=-5000)
+def test_polygon_separatrix_loop():
+    coilset = CoilSet(dplasma=-35)
     coilset.plasma.insert([[1, 5, 5, 1, 1], [1, 1, 5, 5, 1]])
-
-    from nova.geometry.polygon import Polygon
-    loop = Polygon(dict(ellip=(3, 3, 4, 3))).points[:, ::2]
+    loop = Polygon(dict(c=(3, 3, 4))).points[:, ::2]
     coilset.plasma.update(loop)
-    coilset.plasma.plot()
-    coilset.plot()
     assert np.isclose(
         coilset.subframe.area[coilset.subframe.ionize].sum(), np.pi*2**2, 0.05)
-    assert False
-test_polygon_separatrix()
+
+
+def test_polygon_separatrix_polygon():
+    coilset = CoilSet(dplasma=-35)
+    coilset.plasma.insert([[1, 5, 5, 1, 1], [1, 1, 5, 5, 1]])
+    coilset.plasma.update(dict(c=(3, 3, 4)))
+    assert np.isclose(
+        coilset.subframe.area[coilset.subframe.ionize].sum(), np.pi*2**2, 0.05)
+
 
 def test_array_separatrix():
     coilset = CoilSet(dplasma=0.1)
@@ -95,69 +99,3 @@ def test_multiframe_nturn():
 if __name__ == '__main__':
 
     pytest.main([__file__])
-
-    coilset = CoilSet(dplasma=-50)
-    coilset.plasma.insert(dict(o=(5, 0, 1.6)))
-
-    import scipy
-    import sklearn
-    import sklearn.mixture
-
-    points = coilset.loc['plasma', ['x', 'z']].to_numpy()
-
-    center = coilset.Loc['plasma', ['x', 'z']].to_numpy()
-    delta = points - center
-    radius = np.linalg.norm(delta, axis=1)
-    angle = np.arctan2(delta[:, 1], delta[:, 0])
-
-    radius = radius**4
-    points[:, 0] = radius * np.cos(angle)
-    points[:, 1] = radius * np.sin(angle)
-
-
-
-    #norm = np.linalg.norm(points - [5, 0], axis=1).reshape(-1, 1)
-    #norm = np.exp(2*norm / np.std(norm))
-    #points = np.append(points, norm, axis=1)
-
-    #
-
-    '''
-    weight = norm @ norm.T
-    weight = np.exp(-beta * weight / np.std(weight))
-    #weight = np.exp(weight)
-    #weight /= weight.max()
-    '''
-
-    '''
-    beta = 1
-    distance = scipy.spatial.distance_matrix(points, points)
-    distance * 18*weight# np.exp(weight)
-    affinity = np.exp(-beta * distance / np.std(distance))
-    '''
-    #cluster = sklearn.cluster.AgglomerativeClustering(
-    #    n_clusters=20)
-    cluster = sklearn.cluster.KMeans(n_clusters=15, random_state=0)
-
-
-    cluster.fit(points)
-    labels = cluster.labels_
-    '''
-
-    cluster = sklearn.cluster.KMeans(n_clusters=5, random_state=0)
-
-    cluster.fit(points)
-    labels = cluster.labels_
-    '''
-
-    '''
-
-    cluster = sklearn.mixture.GaussianMixture(
-        n_components=3, covariance_type="full")
-    cluster.fit(weight)
-    labels = cluster.predict(weight)
-    '''
-    #coilset.link(['PLedge', 'PLcore'])
-
-    for label in range(len(np.unique(labels))):
-        coilset.subframe.polyplot(labels==label, facecolor=f'C{label%10}')

@@ -13,6 +13,7 @@ from nova.electromagnetic.winding import Winding
 from nova.electromagnetic.shell import Shell
 from nova.electromagnetic.plasma import Plasma
 from nova.electromagnetic.ferritic import Ferritic
+from nova.geometry.polygon import Polygon
 
 
 @dataclass
@@ -127,7 +128,8 @@ if __name__ == '__main__':
     coilset.sloc['Shl0', 'Ic'] = -5
     coilset.sloc['plasma', 'Ic'] = -2
 
-    coilset.plasma.update({'e': [2.2, 1.4, 0.8, 1.1]})
+    separatrix = Polygon(dict(ellip=[2.2, 1.4, 0.8, 1.1])).boundary
+    coilset.plasma.update(separatrix)
 
     coilset.grid.update_turns()
 

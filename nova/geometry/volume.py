@@ -17,7 +17,7 @@ import trimesh
 import vedo
 import vtk
 
-#from nova.geometry.polygen import PolyFrame
+from nova.geometry.polygeom import PolyGeom
 from nova.geometry.polygon import Polygon
 from nova.geometry.vtkgen import VtkFrame
 from nova.geometry.line import Line
@@ -135,11 +135,11 @@ class TriShell:
                     poloidal[label == cluster.labels_, :], axis=0)
             hull = alphashape.alphashape(keypoints, 2.5)
             try:
-                return PolyFrame(hull, name='ahull')
+                return Polygon(hull, name='ahull')
             except NotImplementedError:
                 pass
-        return PolyFrame(shapely.geometry.MultiPoint(poloidal).convex_hull,
-                         name='qhull')
+        return Polygon(shapely.geometry.MultiPoint(poloidal).convex_hull,
+                       name='qhull')
 
 
 @dataclass
@@ -188,7 +188,7 @@ class TetVol(TriShell):
                       axis=0) / self.volume
 
 
-class Poly(VtkFrame):
+class VtkPoly(VtkFrame):
     """Construct boundary line mesh from shapely polygon."""
 
     def __init__(self, poly: shapely.geometry.Polygon, c=None, alpha=1):
@@ -205,13 +205,12 @@ class Ring(VtkFrame):
 
     def __init__(self, poly: shapely.geometry.Polygon, c=None, alpha=1):
         try:
-            mesh = Poly(poly).extrude(zshift=0, rotation=360, res=60)
+            mesh = VtkPoly(poly).extrude(zshift=0, rotation=360, res=60)
         except NotImplementedError:  # multipart boundary (skin)
-            mesh = [Poly(PolyFrame(boundary)).extrude(zshift=0, rotation=360,
-                                                      res=60)
+            mesh = [VtkPoly(Polygon(np.array(boundary.xy).T).poly).extrude(
+                    zshift=0, rotation=360, res=60)
                     for boundary in poly.boundary.geoms]
             mesh = vedo.merge(mesh)
-
         super().__init__(mesh, c, alpha)
         self.flat()
 
@@ -388,7 +387,7 @@ class Sweep(Cell):
 
         """
         if not isinstance(poly, Polygon):
-            poly = Polygon(poly, segment='sweep')
+            poly = PolyGeom(poly, segment='sweep')
         if isinstance(path, pv.PolyData):
             path = path.points
         mesh = Path.from_points(path, delta=delta)

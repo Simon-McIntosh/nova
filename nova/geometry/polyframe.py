@@ -25,14 +25,15 @@ class PolyFrame(GeoFrame):
 
     def dumps(self) -> str:
         """Return geojson representation."""
-        data = dict(poly=geojson.dumps(self.poly), metadata=self.metadata)
+        data = self.poly.__geo_interface__ | dict(metadata=self.metadata)
         return json.dumps(data)
 
     @classmethod
     def loads(cls, data: str):
         """Load geojson prepresentation."""
-        data = json.loads(data)
-        return cls(shapely.geometry.shape(data['poly'], data['metadata']))
+        polygon = json.loads(data)
+        metadata = polygon.pop('metadata', dict())
+        return cls(shapely.geometry.shape(polygon), metadata)
 
     @property
     def name(self):
@@ -95,6 +96,12 @@ class PolyFrame(GeoFrame):
         """Return polygon points."""
         boundary = self.poly.boundary.xy
         return np.c_[boundary[0], np.zeros(len(boundary[0])), boundary[1]]
+
+    @property
+    def boundary(self):
+        """Return polygon boundary."""
+        boundary = self.poly.boundary.xy
+        return np.c_[boundary[0], boundary[1]]
 
     # def orient(self):
     #     """Return coerced polygon boundary as a positively oriented curve."""

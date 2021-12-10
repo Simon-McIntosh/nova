@@ -60,7 +60,8 @@ class VtkGeo(MetaMethod):
                                  self.frame.geotype('Geo', 'poly')]
         if len(index) > 0:
             self.frame.loc[index, 'vtk'] = \
-                [Ring(poly) for poly in self.frame.loc[index, 'poly'].values]
+                [Ring(polyframe.poly)
+                 for polyframe in self.frame.loc[index, 'poly'].values]
             self.frame.loc[index, 'volume'] = \
                 [vtk.clone().triangulate().volume()
                  for vtk in self.frame.loc[index, 'vtk'].values]

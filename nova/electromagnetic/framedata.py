@@ -25,7 +25,17 @@ class FrameData:
         _required = self.frame.metaframe.required.copy()
         if required is None:
             required = self.required
+        if isinstance(required, str):
+            required = [required]
         self.update_required(required)
+        if len(required) != len(self.frame.metaframe.required):
+            raise IndexError(
+                f'required attrs not set {required} ensure that attrs are '
+                'present in frame.columns via updates to frame.metaframe:\n'
+                f'required: {self.frame.metaframe.required}\n'
+                f'additional: {self.frame.metaframe.additional}\n'
+                f'available: {self.frame.metaframe.available}\n\n'
+                f'Set Coilset(vtk=True) to build vtk objects')
         yield
         self.update_required(_required)
 

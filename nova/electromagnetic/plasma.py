@@ -2,6 +2,7 @@
 from dataclasses import dataclass, field
 
 import descartes
+import numba
 import numpy as np
 import numpy.typing as npt
 import shapely
@@ -61,9 +62,8 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
     number: int = field(init=False, default=0)
     boundary: Polygon = field(init=False, repr=False, default=None)
     separatrix: Polygon = field(init=False, repr=False, default=None)
-    tree: shapely.STRtree = field(init=False, repr=False, default=None)
-    plasma_index: npt.ArrayLike = field(init=False, repr=False, default=None)
-    plasma_points: npt.ArrayLike = field(init=False, repr=False, default=None)
+    index: npt.ArrayLike = field(init=False, repr=False, default=None)
+    points: npt.ArrayLike = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -101,52 +101,8 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         self.number = self.loc['plasma'].sum()
         if self.number > 0:
             self.boundary = Polygon(self.Loc['plasma', 'poly'][0])
-            self.tree = self.generate_tree()
-            self.plasma_index = self.loc['plasma']
-            self.plasma_points = self.loc['plasma', ['x', 'z']].to_numpy()
-
-    def generate_tree(self):
-        """
-        Return STR plasma tree, read-only.
-
-        Construct STR tree from plasma filaments to enable fast search in
-        free-boundary calculations.
-        Pygeos creates tree on first evaluation.
-
-        Parameters
-        ----------
-        tree : pygeos.STRtree
-            STR tree.
-
-        Raises
-        ------
-        TypeError
-            Tree not pygeos.STRtree.
-
-        Returns
-        -------
-        plasma_tree
-            pygeos STRtree.
-
-        """
-        return shapely.STRtree([polyframe.centroid
-                                for polyframe in self.loc['plasma', 'poly']])
-        '''
-        return pygeos.STRtree(
-            pygeos.points(self.loc['plasma', ['x', 'z']].to_numpy()))
-        '''
-
-    '''
-    def plasma_poly(self, loop):
-        """Return pygeos polygon built from loop."""
-        if isinstance(loop, pygeos.lib.Geometry):
-            return loop
-        if isinstance(loop, np.ndarray):
-            return pygeos.polygons(loop)
-        if isinstance(loop, shapely.geometry.Polygon):
-            return pygeos.from_shapely(loop)
-        return pygeos.from_shapely(Polygon(loop).poly)
-    '''
+            self.index = self.loc['plasma']
+            self.points = self.loc['plasma', ['x', 'z']].to_numpy()
 
     def update(self, loop):
         """
@@ -161,34 +117,16 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
             Bounding loop.
 
         """
-
-        '''
         try:
-            self.separatrix = pygeos.polygons(loop)
-        except TypeError:
+            ionize_filament = inpoly.polymultipoint(self.points, loop)
+        except numba.TypingError:
             loop = Polygon(loop).points[:, ::2]
-            self.separatrix = pygeos.polygons(loop)
-        within = self.tree.query(self.separatrix, predicate='intersects')
-        '''
-
-        '''
-        self.separatrix = Polygon(loop)
-        within = self.tree.query_items(self.separatrix.poly)
-        within = [index for index in within
-                  if self.tree.geometries[index].within(self.separatrix.poly)]
-        ionize_filament = np.full(self.number, False)
-        ionize_filament[within] = True
-        '''
-
-        ionize_filament = inpoly.is_inside_sm_parallel(self.plasma_points, loop)
-        self.loc[self.plasma_index, 'ionize'] = ionize_filament
-        self.loc[self.plasma_index, 'nturn'] = 0
+            ionize_filament = inpoly.polymultipoint(self.points, loop)
+        self.loc[self.index, 'ionize'] = ionize_filament
+        self.loc[self.index, 'nturn'] = 0
         ionize = self.loc['ionize']
         self.loc[ionize, 'nturn'] = \
             self.loc[ionize, 'area'] / np.sum(self.loc[ionize, 'area'])
-
-        # self.update_plasma_turns = True
-        # self.update_plasma_current = True
 
     def plot(self, axes=None, boundary=True):
         """Plot plasma boundary and separatrix."""

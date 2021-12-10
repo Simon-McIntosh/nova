@@ -1,16 +1,9 @@
 import pytest
 
 import numpy as np
-import pygeos
 import shapely.geometry
 
 from nova.geometry.polygon import Polygon
-
-
-def test_polygon_pygeos():
-    poly = pygeos.polygons([[0, 0], [0, 10], [10, 10], [10, 0]])
-    polygon = Polygon(poly)
-    assert polygon.poly == poly
 
 
 def test_polygon_shapely():
@@ -55,23 +48,23 @@ def test_polygon_bbox():
 
 
 def test_polygon_eq():
-    poly = pygeos.polygons([[0, 0], [0, 10], [10, 10], [10, 0]])
+    poly = shapely.geometry.Polygon([[0, 0], [0, 10], [10, 10], [10, 0]])
     polygon_a = Polygon(poly)
     polygon_b = Polygon(poly)
     assert polygon_a.poly == polygon_b.poly
 
 
 def test_polygon_eq_dual_source():
-    poly_a = pygeos.polygons([[0, 0], [0, 10], [10, 10], [10, 0]])
-    poly_b = pygeos.polygons([[0, 0], [0, 10], [10, 10], [10, 0]])
+    poly_a = shapely.geometry.Polygon([[0, 0], [0, 10], [10, 10], [10, 0]])
+    poly_b = shapely.geometry.Polygon([[0, 0], [0, 10], [10, 10], [10, 0]])
     polygon_a = Polygon(poly_a)
     polygon_b = Polygon(poly_b)
     assert polygon_a.poly == polygon_b.poly
 
 
 def test_polygon_ne():
-    poly_a = pygeos.polygons([[0, 0], [0, 10], [10, 10], [10, 0]])
-    poly_b = pygeos.polygons([[0, 0], [0, 10], [10, 10], [10, 2]])
+    poly_a = shapely.geometry.Polygon([[0, 0], [0, 10], [10, 10], [10, 0]])
+    poly_b = shapely.geometry.Polygon([[0, 0], [0, 10], [10, 10], [10, 2]])
     polygon_a = Polygon(poly_a)
     polygon_b = Polygon(poly_b)
     assert polygon_a.poly != polygon_b.poly

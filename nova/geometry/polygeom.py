@@ -19,7 +19,7 @@ class PolyGeom(Polygon):
     Parameters
     ----------
     poly :
-        - PolyFrame, pygeos.Geometry, shapely.geometry.Polygon
+        - PolyFrame, shapely.geometry.Polygon
         - dict[str, list[float]], polyname: *args
         - list[float], shape(4,) bounding box [xmin, xmax, zmin, zmax]
         - array-like, shape(n,2) bounding loop [x, z]

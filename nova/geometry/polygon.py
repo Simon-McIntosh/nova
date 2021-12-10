@@ -2,7 +2,6 @@
 from dataclasses import dataclass, field
 from typing import Union
 
-import pygeos
 import numpy as np
 import numpy.typing as npt
 import shapely.geometry
@@ -18,14 +17,14 @@ class Polygon(PolyFrame):
     Parameters
     ----------
     poly :
-        - PolyFrame, pygeos.Geometry, shapely.geometry.Polygon
+        - PolyFrame, shapely.geometry.Polygon
         - dict[str, list[float]], polyname: *args
         - list[float], shape(4,) bounding box [xmin, xmax, zmin, zmax]
         - array-like, shape(n,2) bounding loop [x, z]
 
     """
 
-    poly: Union[PolyFrame, pygeos.Geometry, shapely.geometry.Polygon,
+    poly: Union[PolyFrame, shapely.geometry.Polygon,
                 dict[str, list[float]],
                 list[float, float, float, float],
                 npt.ArrayLike]
@@ -56,7 +55,7 @@ class Polygon(PolyFrame):
         """Return metadata extracted from input polygon."""
         if isinstance(self.poly, (Polygon, PolyFrame)):
             return self.poly.metadata
-        if isinstance(self.poly, (pygeos.Geometry, shapely.Geometry)):
+        if isinstance(self.poly, shapely.Geometry):
             return dict(name='polygon')
         if isinstance(self.poly, dict):
             metadata = dict(names=[PolyGen(name).shape
@@ -83,7 +82,7 @@ class Polygon(PolyFrame):
         Parameters
         ----------
         poly :
-            - PolyFrame, pygeos.Geometry, shapely.geometry.Polygon
+            - PolyFrame, shapely.geometry.Polygon
             - dict[str, list[float]], polyname: *args
             - list[float], shape(4,) bounding box [xmin, xmax, zmin, zmax]
             - array-like, shape(n,2) bounding loop [x, z]
@@ -99,7 +98,7 @@ class Polygon(PolyFrame):
         polygon : shapely.geometry.Polygon
 
         """
-        if isinstance(self.poly, (pygeos.Geometry, shapely.Geometry)):
+        if isinstance(self.poly, shapely.Geometry):
             return self.poly
         if isinstance(self.poly, PolyFrame):
             return self.poly.poly

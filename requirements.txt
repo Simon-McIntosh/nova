@@ -9,13 +9,13 @@ line_profiler
 netCDF4
 networkx
 nlopt
+numba
 numdifftools
 numpy
 openpyxl
 pandas
 plotly
 pygmsh
-pygeos --no-binary pygeos
 pytest
 python-dateutil
 pyvista
@@ -24,7 +24,7 @@ rdp
 seaborn
 scipy
 scikit-learn
-shapely --no-binary shapely
+git+https://github.com/Toblerity/Shapely.git@main  # shapely 
 spyder
 tetgen
 trimesh

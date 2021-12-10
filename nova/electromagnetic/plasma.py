@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 import descartes
 import numpy as np
 import numpy.typing as npt
-import pygeos
 import shapely
 
 from nova.electromagnetic.framesetloc import FrameSetLoc
@@ -158,7 +157,7 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
 
         Parameters
         ----------
-        loop : dict[str, list[float]], array-like (n, 2) or pygeos.polygons
+        loop : array-like (n, 2), Polygon, dict[str, list[float]], list[float]
             Bounding loop.
 
         """

@@ -8,5 +8,4 @@ setup(name='nova',
       author_email='simon.mcintosh@iter.org',
       license='MIT',
       packages=find_packages(), 
-      ext_modules=[cc.distutils_extension()],
       zip_safe=False)

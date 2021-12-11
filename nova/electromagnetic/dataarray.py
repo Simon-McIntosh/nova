@@ -58,11 +58,18 @@ class DataArray(ArrayIndexer, DataFrame):
     def __init__(self, data=None, index=None, columns=None,
                  attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
+        self.update_dataarray()
 
     def __repr__(self):
         """Propagate array variables prior to display."""
         self.update_frame()
         return super().__repr__()
+
+    def update_dataarray(self):
+        """Update fast access dataarray cache."""
+        attrs = list(self.metaframe.data)
+        [self.metaframe.data.pop(attr) for attr in attrs
+         if self.metaframe.data[attr].shape[0] != self.shape[0]]
 
     def update_frame(self):
         """Extend DataFrame.update_frame, transfer metaarray.data to frame."""
@@ -101,7 +108,6 @@ class DataArray(ArrayIndexer, DataFrame):
 
     def _set_array(self, col, value):
         """Set col, quickly, preserving shape."""
-        #value = self.format_value(col, value)
         try:
             self.attrs['metaframe'].data[col][:] = value
         except KeyError as keyerror:

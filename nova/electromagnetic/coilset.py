@@ -111,7 +111,6 @@ if __name__ == '__main__':
     coilset.plasma.insert({'ellip': [2.5, 1.7, 1.6, 2.2]}, turn='hex')
     coilset.shell.insert({'e': [2.5, -1.25, 1.75, 1.0]}, 13, 0.05,
                          delta=-40, part='vv')
-
     coilset.plasma.generate()
 
     coilset.sloc['Ic'] = 1
@@ -128,11 +127,10 @@ if __name__ == '__main__':
     coilset.sloc['Shl0', 'Ic'] = -5
     coilset.sloc['plasma', 'Ic'] = -2
 
-    separatrix = Polygon(dict(ellip=[2.2, 1.4, 0.8, 1.1])).boundary
+    separatrix = Polygon(dict(ellip=[2.8, 1.4, 0.8, 1.1])).boundary
     coilset.plasma.update(separatrix)
 
     coilset.grid.update_turns()
-
     coilset.grid.plot(levels=31)
     coilset.plasma.plot()
     coilset.plot()

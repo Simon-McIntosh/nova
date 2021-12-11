@@ -130,7 +130,7 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         except numba.TypingError:
             loop = Polygon(loop).points[:, ::2]
             ionize = inpoly.polymultipoint(self.points, loop)
-
+        self.separatrix = loop
         self.ionize[self.index] = ionize
         self.nturn[self.index] = 0
         area = self.area[self.ionize]
@@ -141,7 +141,7 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         self.axes = axes
         if self.separatrix is not None:
             self.axes.add_patch(descartes.PolygonPatch(
-                self.separatrix.poly.__geo_interface__,
+                Polygon(self.separatrix).poly.__geo_interface__,
                 facecolor='C4', alpha=0.75, linewidth=0.5, zorder=-10))
         if boundary:
             self.boundary.plot_boundary(self.axes, color='gray')

@@ -25,6 +25,7 @@ class BiotData(FilePath, FrameSetLoc):
         """Init path and link line current and plasma index."""
         super().__post_init__()
         self.current = self.sloc['Ic']
+        self.nturn = self.loc['nturn']
         self.plasma = self.loc['plasma']
 
     def __getattr__(self, attr):
@@ -40,11 +41,10 @@ class BiotData(FilePath, FrameSetLoc):
     def solve(self, *args):
         """Solve biot interaction - update attrs."""
         self._solve(*args)
-        self.setattrs()
+        self.set_attrs()
 
-    def setattrs(self):
+    def set_attrs(self):
         """Update data attributes."""
-        self.nturn = self.loc['nturn']
         for attr in self.data.data_vars:
             setattr(self, attr, self.data[attr].data)
 
@@ -62,14 +62,14 @@ class BiotData(FilePath, FrameSetLoc):
 
     def update_turns(self):
         """Update plasma turns."""
+        self.Psi[:, -2] = self._Psi @ self.nturn[self.plasma]
+        '''
         for attr in self.attrs:
             try:
                 #self.data[attr].data[:, -2] = np.sum(  # TODO fix plasma indexing and test
                 #    getattr(self.data, f'_{attr}').data *
                 #    self.loc[self.subframe.filament, 'nturn'], axis=1)
-                #self.Psi[:, -2] = np.sum(self._Psi * self.loc['plasma', 'nturn'], axis=1)
                 self.Psi[:, -2] = self._Psi @ self.nturn[self.plasma]
-                #self.data._Psi.data @ self.loc['filament', 'nturn'][:, np.newaxis]
-
             except AttributeError:
                 pass
+        '''

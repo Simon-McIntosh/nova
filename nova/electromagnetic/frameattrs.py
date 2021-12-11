@@ -122,7 +122,6 @@ class FrameAttrs(pandas.DataFrame):
         self.metaframe.update(metadata)
         if self.metaframe.columns:
             self.metaframe.metadata = {'available': self.metaframe.columns}
-        self.metaframe.data = {}
         self.match_columns()
 
     def match_columns(self):

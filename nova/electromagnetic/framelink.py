@@ -58,6 +58,7 @@ class FrameLink(LinkIndexer, DataArray):
 
     - Extend boolean methods (insert, ...).
     - Implement multipoint link and energize methods.
+
     """
 
     def __init__(self, data=None, index=None, columns=None,

@@ -247,6 +247,8 @@ class DataFrame(FrameAttrs):
         """Load dataframe from hdf file."""
         with xarray.open_dataset(file, group=group) as data:
             self.__init__(data.to_dataframe(), **data.attrs)
+        if 'index' in self.version:
+            self.version['index'] = id(self.index)
         for col in ['poly', 'vtk']:
             try:
                 self._loads(col)

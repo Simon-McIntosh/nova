@@ -9,9 +9,11 @@ import pandas
 
 from nova.electromagnetic.dataframe import DataFrame
 from nova.electromagnetic.polyplot import PolyPlot
+from nova.geometry import inpoly
 from nova.geometry.polyframe import PolyFrame
 from nova.geometry.polygen import PolyGen
 from nova.geometry.polygeom import PolyGeom
+from nova.geometry.polygon import Polygon
 from nova.utilities.pyplot import plt
 
 
@@ -244,46 +246,19 @@ class PolyGrid(PolyCell):
         """Return polycells trimed to bounding polygon."""
         polytree = shapely.STRtree([poly.poly for poly in polys])
         buffer = self.poly.buffer(1e-12*self.cell_delta[0])
-        index = polytree.query_items(self.poly)  # predicate='intersects'
-        polys = [polys[i] for i in index]
-        #coords = [coords[i] for i in index]
+        index = polytree.query_items(self.poly)
+        polys = np.array(polys)[index]
         polys = [PolyFrame(polytrim, poly.metadata if poly.poly.within(buffer)
                            else dict(name='polygon'))
                  for poly in polys
                  if (polytrim := poly.poly.intersection(buffer))
                  and isinstance(polytrim, shapely.geometry.Polygon)]
-        #coords = [np.array(poly.centroid.xy).T[0]
-        #          if poly.name == 'polygon' else coord
-        #          for coord, poly in zip(coords, polys)]
-        #return coords, polys
         return polys
-
-    '''
-    def polygeoms(self, polys, coords):
-        """Return polycell geometory instances."""
-        return [PolyGeom(poly, x_coordinate=coord[0], z_coordinate=coord[1],
-                         length=self.cell_delta[0],
-                         thickness=self.cell_delta[1],
-                         section=poly.name)
-                for poly, coord in zip(polys, coords)]
-    '''
 
     def dataframe(self):
         """Bulid polygeom dataframe."""
         coords = self.grid_coordinates()  # build coordinate grid
         polys = self.polycells(coords)  # build trimmed cell polygons
-        #coords, polys = self.polycells(coords)  # build trimmed cell polygons
-        '''
-        geoms = self.polygeoms(polys, coords)  # build cell geometries
-        data = [[] for __ in range(len(geoms))]
-        for i, geom in enumerate(geoms):
-            data[i] = [*geom.centroid[::2],
-                       geom.length, geom.thickness, *geom.bbox,
-                       geom.rms, geom.area, geom.section, geom.poly]
-
-            geom = PolyGeom(poly, 'ring').geometry
-            data[i] = {name: geom[name] for name in self.columns}
-        '''
         data = [[] for __ in range(len(polys))]
         for i, poly in enumerate(polys):
             geom = PolyGeom(poly, 'ring').geometry

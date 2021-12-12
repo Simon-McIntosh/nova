@@ -35,12 +35,14 @@ class FrameSet(FrameSetLoc, FilePath):
             base=self.base, required=self.required, additional=self.additional,
             available=self.available, subspace=[],
             exclude=['frame', 'Ic', 'It',
-                     'active', 'plasma', 'fix', 'feedback'], array=[])
+                     'active', 'plasma', 'fix', 'feedback'], array=[],
+            version=['index'])
         self.subframe = FrameSpace(
             base=self.base, required=self.required, additional=self.additional,
             available=self.available, subspace=self.subspace,
             exclude=['turn', 'scale', 'nfilament', 'delta'],
-            array=self.array, delim='_')
+            array=self.array, delim='_',
+            version=['plasma', 'index'])
         self.subframe.frame_attr(Select, ['Ic'])
 
     def __str__(self):

@@ -5,7 +5,6 @@ import descartes
 import numba
 import numpy as np
 import numpy.typing as npt
-import shapely
 
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
@@ -75,7 +74,6 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
              'array': ['plasma', 'ionize', 'area', 'nturn']}
         self.subframe.update_columns()
 
-
     def __len__(self):
         """Return number of plasma filaments."""
         return self.index.sum()
@@ -112,6 +110,15 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
             self.nturn = self.loc['nturn']
             self.area = self.loc['area']
 
+    @property
+    def version(self):
+        """Manage unique separtrix identifier - store id in metaframe data."""
+        return self.subframe.metaframe.version['plasma']
+
+    @version.setter
+    def version(self, separatrix: npt.ArrayLike):
+        self.subframe.metaframe.version['plasma'] = id(separatrix)
+
     def update(self, loop):
         """
         Update plasma separatrix.
@@ -128,9 +135,10 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         try:
             ionize = inpoly.polymultipoint(self.points, loop)
         except numba.TypingError:
-            loop = Polygon(loop).points[:, ::2]
+            loop = Polygon(loop).boundary
             ionize = inpoly.polymultipoint(self.points, loop)
         self.separatrix = loop
+        self.version = loop
         self.ionize[self.index] = ionize
         self.nturn[self.index] = 0
         area = self.area[self.ionize]

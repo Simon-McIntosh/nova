@@ -30,6 +30,11 @@ class FrameAttrs(pandas.DataFrame):
         super().__init__(data, index, columns)
         self.update_metadata(data, columns, attrs, metadata)
 
+    @property
+    def version(self):
+        """Return metaframe version container."""
+        return self.metaframe.version
+
     def __getattr__(self, name):
         """Extend pandas.DataFrame.__getattr__. (frame.*)."""
         if name in self.attrs:
@@ -74,6 +79,7 @@ class FrameAttrs(pandas.DataFrame):
         self.extract_available(data, columns)
         self.update_metaframe(metadata)
         self.format_data(data)
+        self.update_version()
 
     def extract_attrs(self, data, attrs):
         """Extract metaframe / metaarray from data / attrs."""
@@ -119,6 +125,9 @@ class FrameAttrs(pandas.DataFrame):
 
     def update_metaframe(self, metadata):
         """Update metaframe, appending available columns if required."""
+        if isinstance(metadata.get('version', None), list):
+            metadata['version'] = {attr: id(None)
+                                   for attr in metadata['version']}
         self.metaframe.update(metadata)
         if self.metaframe.columns:
             self.metaframe.metadata = {'available': self.metaframe.columns}
@@ -137,6 +146,11 @@ class FrameAttrs(pandas.DataFrame):
             with self.setlock(True):
                 for col in self.columns:
                     self.loc[:, col] = self.format_value(col, self[col])
+
+    def update_version(self):
+        """Update frame.index id."""
+        if 'index' in self.version:
+            self.version['index'] = id(self.index)
 
     def hasattrs(self, attr):
         """Return True if attr in self.attrs."""

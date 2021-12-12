@@ -16,12 +16,14 @@ class MetaArray(MetaData):
     """Manage DataFrame metadata - accessed via DataFrame['attrs']."""
 
     index: pandas.Index = field(repr=False, default=pandas.Index([]))
-    data: dict[str, Iterable[Union[str, int, float]]] = field(init=False)
+    data: dict[str, Iterable[Union[str, int, float]]] = field(
+        init=False, default_factory=dict)
+    version: dict[str, int] = field(init=False, default_factory=dict)
 
     def __post_init__(self):
-        """Clear fast access data attribute."""
-        self.data = {}
-        self.metadata = {'_internal': ['index', 'data', 'lock', 'default']}
+        """Set internal data variables and initialize version dict."""
+        self.metadata = {'_internal':
+                         ['index', 'data', 'version', 'lock', 'default']}
         super().__post_init__()
 
     @property

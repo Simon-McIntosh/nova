@@ -199,6 +199,38 @@ def test_store_load_poly():
                       new_coilset.frame.poly[0].area)
 
 
+def test_plasma_array_attributes():
+    coilset = CoilSet(dplasma=-5)
+    coilset.plasma.insert({'ellip': [2.5, 1.7, 1.6, 2.2]}, turn='hex')
+    assert all([attr in coilset.subframe.metaframe.array for attr in
+                ['Ic', 'nturn', 'area']])
+
+
+def test_array_views_insert():
+    coilset = CoilSet(dplasma=-5, dcoil=-5)
+    coilset.coil.insert(3, -0.5, 0.95, 0.95)
+    coilset.plasma.insert({'ellip': [2.5, 1.7, 1.6, 2.2]}, turn='hex')
+    Ic = coilset.sloc['Ic']
+    coilset.coil.insert(1, -0.5, 0.95, 0.95)
+    assert id(Ic) == id(coilset.sloc['Ic'])
+
+
+def test_array_views_solve():
+    coilset = CoilSet(dplasma=-5, dcoil=-5)
+    coilset.coil.insert(3, -0.5, 0.95, 0.95)
+    coilset.plasma.insert({'ellip': [2.5, 1.7, 1.6, 2.2]}, turn='hex')
+    coilset.coil.insert(1, -0.5, 0.95, 0.95)
+    Ic = coilset.sloc['Ic']
+    nturn = coilset.loc['nturn']
+    coilset.sloc['Ic'] = 7.7
+    coilset.sloc['plasma', 'Ic'] = 6.6
+    coilset.grid.solve(50, 0.05)
+    Ic[:1] = 5.5
+    assert id(Ic) == id(coilset.sloc['Ic'])
+    assert id(nturn) == id(coilset.loc['nturn'])
+    assert np.allclose(Ic, coilset.sloc['Ic'])
+
+
 if __name__ == '__main__':
 
     pytest.main([__file__])

@@ -24,14 +24,11 @@ class CoilGrid:
     dplasma: float = 0.25
     dshell: float = 0
     dfield: float = 0.2
-    vtk: bool = False
 
     def __post_init__(self):
         """Construct delta lookup."""
         self._delta = dict(coil=self.dcoil, shell=self.dshell,
                            plasma=self.dplasma, field=self.dfield)
-        if self.vtk and 'vtk' not in self.available:  # 3d geometry flag
-            self.available.append('vtk')
         super().__post_init__()
 
 
@@ -74,7 +71,9 @@ class CoilSet(CoilGrid, FrameSet):
                 return biot
             self._biot[attr] = biot(*self.frames, name=attr)
             return self._biot[attr]
-        raise AttributeError
+        raise AttributeError(f'attr <{attr}> not in:\n'
+                             f'self._frame: {list(self._frame)}\n'
+                             f'self._biot {list(self._biot)}')
 
     def store(self, file):
         """Store coilset to hdf5 file."""
@@ -120,7 +119,7 @@ if __name__ == '__main__':
     coilset.probe.solve(np.random.rand(50, 2))
     print(coilset.probe.data['Psi'])
 
-    coilset.grid.solve(65**2, 0.05)
+    coilset.grid.solve(3000, 0.05)
 
     coilset.sloc['Ic'] = range(6)
     coilset.sloc['bubble', 'Ic'] = 5
@@ -130,7 +129,7 @@ if __name__ == '__main__':
     separatrix = Polygon(dict(ellip=[2.8, 1.4, 0.8, 1.1])).boundary
     coilset.plasma.update(separatrix)
 
-    coilset.grid.update_turns()
+    #coilset.grid.update_turns('Psi')
     coilset.grid.plot(levels=31)
     coilset.plasma.plot()
     coilset.plot()

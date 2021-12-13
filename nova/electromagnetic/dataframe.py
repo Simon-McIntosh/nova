@@ -2,6 +2,7 @@
 import re
 import string
 
+import copy
 import json
 import pandas
 import numpy as np
@@ -232,10 +233,27 @@ class DataFrame(FrameAttrs):
         return np.array([isinstance(geom, self.geoframe[geo])
                          for geom in self[col]], dtype=bool)
 
+    def extract_metadata(self) -> dict:
+        """Return metadata with version as attribute list."""
+        metadata = copy.deepcopy(self.metaframe.metadata)
+        if 'version' in metadata:
+            metadata['version'] = list(metadata['version'])
+        return metadata
+
+    def insert_metadata(self, attrs: dict):
+        """Return metadata wirk version as dict[str id(None)]."""
+        metadata = copy.deepcopy(attrs)
+        if 'version' in metadata:
+            if isinstance(metadata['version'], str):
+                metadata['version'] = [metadata['version']]
+            metadata['version'] = {attr: id(None)
+                                   for attr in metadata['version']}
+        return metadata
+
     def store(self, file, group=None, mode='w'):
         """Store dataframe as group in netCDF4 hdf5 file."""
         xframe = self.to_xarray()
-        xframe.attrs = self.metaframe.metadata
+        xframe.attrs = self.extract_metadata()
         for col in ['poly', 'vtk']:
             try:
                 xframe[col].values = self._dumps(col)
@@ -246,7 +264,8 @@ class DataFrame(FrameAttrs):
     def load(self, file, group=None):
         """Load dataframe from hdf file."""
         with xarray.open_dataset(file, group=group) as data:
-            self.__init__(data.to_dataframe(), **data.attrs)
+            metadata = self.insert_metadata(data.attrs)
+            self.__init__(data.to_dataframe(), **metadata)
         if 'index' in self.version:
             self.version['index'] = id(self.index)
         for col in ['poly', 'vtk']:

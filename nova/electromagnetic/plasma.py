@@ -59,8 +59,9 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
     """Set plasma separatix, ionize plasma filaments."""
 
     number: int = field(init=False, default=0)
-    boundary: Polygon = field(init=False, repr=False, default=None)
-    separatrix: Polygon = field(init=False, repr=False, default=None)
+    loop: npt.ArrayLike = field(init=False, default=None, repr=False)
+    #boundary: Polygon = field(init=False, repr=False, default=None)
+    #separatrix: Polygon = field(init=False, repr=False, default=None)
     index: npt.ArrayLike = field(init=False, repr=False, default=None)
     points: npt.ArrayLike = field(init=False, repr=False, default=None)
     ionize: npt.ArrayLike = field(init=False, repr=False, default=None)
@@ -101,9 +102,7 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
 
     def generate(self):
         """Generate plasma attributes, build STR tree."""
-        self.number = self.loc['plasma'].sum()
-        if self.number > 0:
-            self.boundary = Polygon(self.Loc['plasma', 'poly'][0])
+        if self.loc['plasma'].sum() > 0:
             self.index = self.loc['plasma']
             self.points = self.loc['plasma', ['x', 'z']].to_numpy(copy=True)
             self.ionize = self.loc['ionize']
@@ -111,13 +110,28 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
             self.area = self.loc['area']
 
     @property
+    def boundary(self) -> Polygon:
+        """Return vessel boundary."""
+        return Polygon(self.Loc['plasma', 'poly'][0])
+
+    @property
+    def separatrix(self):
+        """Manage plasma separatrix."""
+        return Polygon(self.loop).poly.intersection(self.boundary.poly)
+
+    @separatrix.setter
+    def separatrix(self, loop):
+        self.loop = loop
+        self.version = loop
+
+    @property
     def version(self):
         """Manage unique separtrix identifier - store id in metaframe data."""
-        return self.subframe.metaframe.version['plasma']
+        return self.subframe.version['plasma']
 
     @version.setter
-    def version(self, separatrix: npt.ArrayLike):
-        self.subframe.metaframe.version['plasma'] = id(separatrix)
+    def version(self, loop: npt.ArrayLike):
+        self.subframe.version['plasma'] = id(loop)
 
     def update(self, loop):
         """
@@ -138,7 +152,6 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
             loop = Polygon(loop).boundary
             ionize = inpoly.polymultipoint(self.points, loop)
         self.separatrix = loop
-        self.version = loop
         self.ionize[self.index] = ionize
         self.nturn[self.index] = 0
         area = self.area[self.ionize]
@@ -149,7 +162,7 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         self.axes = axes
         if self.separatrix is not None:
             self.axes.add_patch(descartes.PolygonPatch(
-                Polygon(self.separatrix).poly.__geo_interface__,
+                self.separatrix.__geo_interface__,
                 facecolor='C4', alpha=0.75, linewidth=0.5, zorder=-10))
         if boundary:
             self.boundary.plot_boundary(self.axes, color='gray')

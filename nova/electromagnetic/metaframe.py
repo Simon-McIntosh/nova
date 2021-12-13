@@ -23,7 +23,7 @@ class MetaArray(MetaData):
     def __post_init__(self):
         """Set internal data variables and initialize version dict."""
         self.metadata = {'_internal':
-                         ['index', 'data', 'version', 'lock', 'default']}
+                         ['index', 'data', 'lock', 'default']}
         super().__post_init__()
 
     @property

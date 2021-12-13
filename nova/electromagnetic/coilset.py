@@ -126,7 +126,7 @@ if __name__ == '__main__':
     coilset.sloc['Shl0', 'Ic'] = -5
     coilset.sloc['plasma', 'Ic'] = -2
 
-    separatrix = Polygon(dict(ellip=[2.8, 1.4, 0.8, 1.1])).boundary
+    separatrix = Polygon(dict(ellip=[3.25, 1.4, 0.8, 1.1])).boundary
     coilset.plasma.update(separatrix)
 
     #coilset.grid.update_turns('Psi')

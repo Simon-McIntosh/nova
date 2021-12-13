@@ -15,6 +15,7 @@ numpy
 openpyxl
 pandas
 plotly
+pygeos --no-binary pygeos
 pygmsh
 pytest
 python-dateutil
@@ -24,7 +25,7 @@ rdp
 seaborn
 scipy
 scikit-learn
-shapely 
+shapely --no-binary shapely
 spyder
 tetgen
 trimesh

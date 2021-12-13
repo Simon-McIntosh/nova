@@ -4,6 +4,7 @@ from typing import Union
 
 import numpy as np
 import numpy.typing as npt
+import pygeos
 import shapely.geometry
 
 from nova.geometry.polyframe import PolyFrame
@@ -124,7 +125,8 @@ class Polygon(PolyFrame):
         if loop.shape[1] != 2:
             loop = loop.T
         if loop.ndim == 2 and loop.shape[1] == 2:  # loop
-            return shapely.polygons(shapely.linearrings(loop))
+            poly = pygeos.polygons(pygeos.linearrings(loop))
+            return pygeos.to_shapely(poly)
         raise IndexError('malformed bounding loop\n'
                          f'shape(loop): {loop.shape}\n'
                          'require (n,2)')

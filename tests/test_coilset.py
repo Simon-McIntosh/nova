@@ -154,6 +154,7 @@ def test_plasma_single():
     coilset.plasma.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 2, 2.5, 1.5, 1]],
                           turn='r', tile=False)
     assert len(coilset.subframe) == 1
+test_plasma_single()
 
 
 def test_plasma_hex():

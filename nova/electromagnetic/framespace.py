@@ -118,7 +118,7 @@ class FrameSpace(SpaceIndexer, FrameLink):
             value = value[self.subref]  # inflate if subref set
             if col == 'Ic':
                 value *= self.factor.values
-        except (AttributeError, IndexError):
+        except (AttributeError, IndexError, TypeError):
             pass
         with self.setlock(True, 'subspace'):
             super().__setitem__(col, value)

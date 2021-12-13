@@ -6,7 +6,7 @@ import numba
 import numpy as np
 import numpy.typing as npt
 
-from nova.electromagnetic.framesetloc import FrameSetLoc
+from nova.electromagnetic.framesetloc import FrameSetLoc, ArrayLocIndexer
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polyplot import Axes
 from nova.geometry import inpoly
@@ -58,22 +58,29 @@ class PlasmaGrid(PoloidalGrid):
 class Plasma(PlasmaGrid, FrameSetLoc, Axes):
     """Set plasma separatix, ionize plasma filaments."""
 
-    number: int = field(init=False, default=0)
     loop: npt.ArrayLike = field(init=False, default=None, repr=False)
-    #boundary: Polygon = field(init=False, repr=False, default=None)
-    #separatrix: Polygon = field(init=False, repr=False, default=None)
-    index: npt.ArrayLike = field(init=False, repr=False, default=None)
-    points: npt.ArrayLike = field(init=False, repr=False, default=None)
-    ionize: npt.ArrayLike = field(init=False, repr=False, default=None)
-    nturn: npt.ArrayLike = field(init=False, repr=False, default=None)
-    area: npt.ArrayLike = field(init=False, repr=False, default=None)
+    _aloc: ArrayLocIndexer = field(init=False)
 
     def __post_init__(self):
         """Update subframe metadata."""
         self.subframe.metaframe.metadata = \
-            {'additional': ['ionize'],
-             'array': ['plasma', 'ionize', 'area', 'nturn']}
+            {'additional': ['plasma', 'ionize', 'area', 'nturn'],
+             'array': ['plasma', 'ionize', 'area', 'nturn', 'x', 'z']}
         self.subframe.update_columns()
+        print(self.subframe)
+        self._update_aloc()
+
+    def _update_aloc(self):
+        """Update array loc indexer."""
+        self._aloc = self.aloc  # initialize ArrayLocIndexer
+
+    def __getattr__(self, attr: str) -> npt.ArrayLike:
+        """Access data array attributes."""
+        try:
+            return self._aloc[attr]
+        except KeyError as err:
+            raise KeyError(f'attr <{attr}> not available in {self._aloc}') \
+                from err
 
     def __len__(self):
         """Return number of plasma filaments."""
@@ -85,13 +92,8 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
                                    'Ic', 'It', 'nturn']].__str__()
 
     def insert(self, *args, required=None, iloc=None, **additional):
-        """Store plasma index and plasma boundary and generate STR tree."""
+        """Insert plasma, normalize turn number for multiframe plasmas."""
         super().insert(*args, required=None, iloc=None, **additional)
-        self.normalize()
-        self.generate()
-
-    def normalize(self):
-        """Normalize plasma turn number for multiframe plasmas."""
         if self.sloc['plasma'].sum() == 1:
             return
         self.linkframe(self.Loc['plasma', :].index.tolist())
@@ -100,14 +102,10 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
         self.loc['plasma', 'nturn'] = \
             self.loc['plasma', 'area'] / np.sum(self.loc['plasma', 'area'])
 
-    def generate(self):
-        """Generate plasma attributes, build STR tree."""
-        if self.loc['plasma'].sum() > 0:
-            self.index = self.loc['plasma']
-            self.points = self.loc['plasma', ['x', 'z']].to_numpy(copy=True)
-            self.ionize = self.loc['ionize']
-            self.nturn = self.loc['nturn']
-            self.area = self.loc['area']
+    @property
+    def plasma_version(self):
+        """Manage unique separtrix identifier - store id in metaframe data."""
+        return self.subframe.version['plasma']
 
     @property
     def boundary(self) -> Polygon:
@@ -116,24 +114,10 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
 
     @property
     def separatrix(self):
-        """Manage plasma separatrix."""
+        """Return input plasma separatrix trimmed to first wall."""
         return Polygon(self.loop).poly.intersection(self.boundary.poly)
 
-    @separatrix.setter
-    def separatrix(self, loop):
-        self.loop = loop
-        self.version = loop
-
-    @property
-    def version(self):
-        """Manage unique separtrix identifier - store id in metaframe data."""
-        return self.subframe.version['plasma']
-
-    @version.setter
-    def version(self, loop: npt.ArrayLike):
-        self.subframe.version['plasma'] = id(loop)
-
-    def update(self, loop):
+    def update_separatrix(self, loop):
         """
         Update plasma separatrix.
 
@@ -146,23 +130,27 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
             Bounding loop.
 
         """
+        if self._aloc.version != self.subframe.version['index']:
+            self._update_aloc()
+        points = np.c_[self.x, self.z][self.plasma]
         try:
-            ionize = inpoly.polymultipoint(self.points, loop)
+            ionize = inpoly.polymultipoint(points, loop)
         except numba.TypingError:
             loop = Polygon(loop).boundary
-            ionize = inpoly.polymultipoint(self.points, loop)
-        self.separatrix = loop
-        self.ionize[self.index] = ionize
-        self.nturn[self.index] = 0
+            ionize = inpoly.polymultipoint(points, loop)
+        self.loop = loop
+        self.subframe.version['plasma'] = id(loop)
+        self.ionize[self.plasma] = ionize
+        self.nturn[self.plasma] = 0
         area = self.area[self.ionize]
         self.nturn[self.ionize] = area / np.sum(area)
 
     def plot(self, axes=None, boundary=True):
         """Plot plasma boundary and separatrix."""
         self.axes = axes
-        if self.separatrix is not None:
+        if (poly := self.separatrix) is not None:
             self.axes.add_patch(descartes.PolygonPatch(
-                self.separatrix.__geo_interface__,
+                poly.__geo_interface__,
                 facecolor='C4', alpha=0.75, linewidth=0.5, zorder=-10))
         if boundary:
             self.boundary.plot_boundary(self.axes, color='gray')

@@ -16,7 +16,6 @@ from nova.electromagnetic.dataarray import (
 from nova.electromagnetic.energize import Energize
 from nova.electromagnetic.multipoint import MultiPoint
 from nova.geometry.polygeom import PolyGeom
-from nova.geometry.polygon import Polygon
 
 
 # pylint: disable=too-many-ancestors
@@ -179,6 +178,7 @@ class FrameLink(LinkIndexer, DataArray):
             frames = [frame.iloc[:iloc, :], *insert, frame.iloc[iloc:, :]]
         frame = pandas.concat(frames, sort=sort)  # concatenate
         self.__init__(frame, attrs=self.attrs)
+        self.update_version()
         return self
 
     def drop(self, index=None):
@@ -188,6 +188,12 @@ class FrameLink(LinkIndexer, DataArray):
         self.multipoint.drop(index)
         super().drop(index, inplace=True)
         self.__init__(self, attrs=self.attrs)
+        self.update_version()
+
+    def update_version(self):
+        """Update frame.index id."""
+        if 'index' in self.version:
+            self.version['index'] = id(self.index)
 
     def translate(self, index=None, xoffset=0, zoffset=0):
         """Translate coil(s)."""

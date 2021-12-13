@@ -248,6 +248,13 @@ def test_array_views_solve():
     assert np.allclose(Ic, coilset.sloc['Ic'])
 
 
+def test_biot_solve_index_version():
+    coilset = CoilSet(dcoil=-5)
+    coilset.coil.insert(3, -0.5, 0.95, 0.95)
+    coilset.grid.solve(500, 0.05)
+    assert id(coilset.subframe.index) == coilset.subframe.version['index']
+
+
 if __name__ == '__main__':
 
     pytest.main([__file__])

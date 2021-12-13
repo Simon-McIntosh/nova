@@ -85,7 +85,6 @@ class CoilSet(CoilGrid, FrameSet):
     def load(self, file):
         """Load coilset from hdf5 file."""
         super().load(file)
-        self.plasma.generate()
         for attr in self._biot:
             try:
                 getattr(self, attr).load(file)
@@ -100,36 +99,34 @@ class CoilSet(CoilGrid, FrameSet):
 
 if __name__ == '__main__':
 
-    coilset = CoilSet(dcoil=-35, dplasma=-150)
+    coilset = CoilSet(dcoil=-35, dplasma=-250)
     coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
                         nturn=-0.8)
     coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex', turn='c',
                         tile=True, delta=-6, name='bubble')
     coilset.coil.insert(2, 0, 0.95, 0.1, section='sk', nturn=-1.8)
+
+    coilset.coil.insert(2.2, 1.9, 0.4, 0.4, section='sk', nturn=0.1)
+    coilset.coil.insert(2.8, 1.9, 0.4, 0.4, section='sk', nturn=-0.2)
+
     coilset.coil.insert(3, 0, 0.6, 0.9, section='r', turn='sk')
     coilset.plasma.insert({'ellip': [2.5, 1.7, 1.6, 2.2]}, turn='hex')
     coilset.shell.insert({'e': [2.5, -1.25, 1.75, 1.0]}, 13, 0.05,
                          delta=-40, part='vv')
-    coilset.plasma.generate()
 
     coilset.sloc['Ic'] = 1
     coilset.sloc['Shl0', 'Ic'] = -5
 
-    import numpy as np
-    coilset.probe.solve(np.random.rand(50, 2))
-    print(coilset.probe.data['Psi'])
+    coilset.grid.solve(1500, 0.05)
 
-    coilset.grid.solve(3000, 0.05)
-
-    coilset.sloc['Ic'] = range(6)
+    coilset.sloc['Ic'] = 6
     coilset.sloc['bubble', 'Ic'] = 5
     coilset.sloc['Shl0', 'Ic'] = -5
     coilset.sloc['plasma', 'Ic'] = -2
 
-    separatrix = Polygon(dict(ellip=[3.25, 1.4, 0.8, 1.1])).boundary
-    coilset.plasma.update(separatrix)
+    separatrix = Polygon(dict(ellip=[2.75, 0.9, 0.8, 1.1])).boundary
+    coilset.plasma.separatrix = separatrix
 
-    #coilset.grid.update_turns('Psi')
     coilset.grid.plot(levels=31)
     coilset.plasma.plot()
     coilset.plot()

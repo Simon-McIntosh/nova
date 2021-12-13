@@ -3,11 +3,9 @@ from abc import abstractmethod
 from dataclasses import dataclass, field
 from typing import Union
 
-import numpy as np
 import numpy.typing as npt
 import xarray
 
-from nova.electromagnetic.biotsolve import BiotMatrix
 from nova.electromagnetic.filepath import FilePath
 from nova.electromagnetic.framesetloc import FrameSetLoc
 
@@ -28,7 +26,7 @@ class BiotData(FilePath, FrameSetLoc):
         """Init path and link line current and plasma index."""
         super().__post_init__()
         if isinstance(self.attrs, list):
-            self.attrs = {attr: id(0) for attr in self.attrs}
+            self.attrs = {attr: id(None) for attr in self.attrs}
         self.current = self.sloc['Ic']
         self.nturn = self.loc['nturn']
         self.plasma = self.loc['plasma']
@@ -36,10 +34,10 @@ class BiotData(FilePath, FrameSetLoc):
     def __getattr__(self, attr):
         """Return attribute data."""
         if (Attr := attr.capitalize()) in self.attrs:
-            version = self.subframe.metaframe.data.get('seperatrix_id', id(-1))
-            if self.attrs[Attr] != version:
+            if self.attrs[Attr] != (plasma_version :=
+                                    self.subframe.version['plasma']):
                 self.update_turns(Attr)
-                self.attrs[Attr] = version
+                self.attrs[Attr] = plasma_version
             return getattr(self, Attr) @ self.current
         raise AttributeError(f'attribute {Attr} not specified in {self.attrs}')
 

@@ -125,7 +125,7 @@ if __name__ == '__main__':
     coilset.sloc['plasma', 'Ic'] = -2
 
     separatrix = Polygon(dict(ellip=[2.75, 0.9, 0.8, 1.1])).boundary
-    coilset.plasma.separatrix = separatrix
+    coilset.plasma.update_separatrix(separatrix)
 
     coilset.grid.plot(levels=31)
     coilset.plasma.plot()

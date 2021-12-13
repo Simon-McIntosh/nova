@@ -67,7 +67,6 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
             {'additional': ['plasma', 'ionize', 'area', 'nturn'],
              'array': ['plasma', 'ionize', 'area', 'nturn', 'x', 'z']}
         self.subframe.update_columns()
-        print(self.subframe)
         self._update_aloc()
 
     def _update_aloc(self):

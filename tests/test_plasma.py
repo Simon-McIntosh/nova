@@ -69,7 +69,7 @@ def test_separatrix_nturn():
     coilset = CoilSet(dplasma=0.5)
     coilset.plasma.insert([[1, 5, 5, 1, 1], [1, 1, 5, 5, 1]])
     coilset.plasma.update(shapely.geometry.Point(3, 3).buffer(2))
-    assert coilset.loc['plasma', 'nturn'].sum() == 1
+    assert np.isclose(coilset.loc['plasma', 'nturn'].sum(), 1)
 
 
 def test_polarity():

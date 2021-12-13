@@ -1,7 +1,6 @@
 """Manage single instance polygon data as polyframe."""
 from dataclasses import dataclass, field
 
-import geojson
 import json
 import numpy as np
 import shapely.geometry

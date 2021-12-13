@@ -55,7 +55,7 @@ class Polygon(PolyFrame):
         """Return metadata extracted from input polygon."""
         if isinstance(self.poly, (Polygon, PolyFrame)):
             return self.poly.metadata
-        if isinstance(self.poly, shapely.Geometry):
+        if isinstance(self.poly, shapely.geometry.Polygon):
             return dict(name='polygon')
         if isinstance(self.poly, dict):
             metadata = dict(names=[PolyGen(name).shape
@@ -98,7 +98,7 @@ class Polygon(PolyFrame):
         polygon : shapely.geometry.Polygon
 
         """
-        if isinstance(self.poly, shapely.Geometry):
+        if isinstance(self.poly, shapely.geometry.Polygon):
             return self.poly
         if isinstance(self.poly, PolyFrame):
             return self.poly.poly

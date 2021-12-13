@@ -170,6 +170,8 @@ class FrameLink(LinkIndexer, DataArray):
 
     def concatenate(self, *insert, iloc=None, sort=False):
         """Concatenate insert with self."""
+        if self.hasattrs('subspace'):  # unlink subspace
+            self.overwrite_array(self.subspace.metaframe.data)
         frame = pandas.DataFrame(self)
         if iloc is None:  # append
             frames = [frame, *insert]

@@ -429,15 +429,15 @@ class VSgeom(CoilSet):  # VS coil class
             self.xc[name] = xc
             for i, x in enumerate(xc):
                 subname = f'{name}{i}'
-                self.add_coil(
-                    x[0], x[1], d, dt, dCoil=0, name=subname,
-                    cross_section='skin',turn_section='skin',
-                    skin_fraction=dt, material='copper',part='VS3',
+                self.coil.insert(
+                    x[0], x[1], d, dt, delta=0, name=subname,
+                    section='skin', turn='skin',
+                    material='copper', part='VS3',
                     nturn=1)
-                R = resistivity_cu * 2 * np.pi * x[0] / acs_turn
-                m = density_cu * 2 * np.pi * x[0] * acs_turn
-                self.coil.at[subname, 'R'] = R
-                self.coil.at[subname, 'm'] = m
+                #R = resistivity_cu * 2 * np.pi * x[0] / acs_turn
+                #m = density_cu * 2 * np.pi * x[0] * acs_turn
+                #self.Loc[subname, 'R'] = R
+                #self.Loc[subname, 'm'] = m
 
     def add_jacket(self, rcs=[0.0265, 0.0295]):
         acs_turn = np.pi * (rcs[1]**2 - rcs[0]**2)  # single turn cross-section
@@ -447,16 +447,16 @@ class VSgeom(CoilSet):  # VS coil class
         for name in self.geom:
             for isub in range(Nf):
                 subname = name+'{}'.format(isub)
-                x_sub = self.subcoil.at[subname, 'x']
-                z_sub = self.subcoil.at[subname, 'z']
+                x_sub = self.subframe.at[subname, 'x']
+                z_sub = self.subframe.at[subname, 'z']
                 R = resistivity_ss * 2 * np.pi * x_sub / acs_turn
                 m = density_ss * 2 * np.pi * x_sub * acs_turn
                 jacket_name = f'{name}j{isub}'
-                self.add_coil(x_sub, z_sub, d, dt, R=R, name=jacket_name,
-                              cross_section='skin', turn_section='skin',
-                              skin_fraction=dt,
-                              m=m, material='steel', dCoil=0, part='VS3j',
-                              active=False)
+                self.coil.insert(x_sub, z_sub, d, dt, name=jacket_name,
+                                 section='skin', turn='skin',
+                                 material='steel', delta=0, part='VS3j',
+                                 active=False)
+                #  R=R, m=m
 
     def plot_centers(self, coil='LVS', ax=None):
         if ax is None:
@@ -695,6 +695,8 @@ class elm_coils:
 
 if __name__ == '__main__':
 
+    vs = VSgeom(jacket=True).cc
+
     # elm = elm_coils()
     # elm.plot()
 
@@ -702,8 +704,8 @@ if __name__ == '__main__':
     #IOdata.compare()
     #IOdata.cc.plot(label=True, ax=plt.subplots(1, 1)[1])
 
-    ITER = ITERcoilset(coils='pf', dCoil=0.2, n=2e3,
-                       limit=[4, 8.5, -3, 3], read_txt=True)
+    #ITER = ITERcoilset(coils='pf', dCoil=0.2, n=2e3,
+    #                   limit=[4, 8.5, -3, 3], read_txt=True)
     """
     cc = ITER.cc
     cc.scenario_filename = -2

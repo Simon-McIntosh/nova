@@ -59,7 +59,7 @@ class FrameSpace(SpaceIndexer, FrameLink):
     """
     Extend DataArray.
 
-    - Implement subspace, selection and geometory methods.
+    - Implement subspace, selection and geometry methods.
 
     """
 

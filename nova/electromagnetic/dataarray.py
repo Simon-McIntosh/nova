@@ -58,18 +58,26 @@ class DataArray(ArrayIndexer, DataFrame):
     def __init__(self, data=None, index=None, columns=None,
                  attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.update_dataarray()
+        self.unlink_array()
 
     def __repr__(self):
         """Propagate array variables prior to display."""
         self.update_frame()
         return super().__repr__()
 
-    def update_dataarray(self):
-        """Update fast access dataarray cache."""
+    def unlink_array(self):
+        """Unlink items in fast access dataarray cache."""
         attrs = list(self.metaframe.data)
-        [self.metaframe.data.pop(attr) for attr in attrs
-         if self.metaframe.data[attr].shape[0] != self.shape[0]]
+        unlink = {attr: self.metaframe.data.pop(attr) for attr in attrs
+                  if self.metaframe.data[attr].shape[0] != self.shape[0]}
+        self.overwrite_array(unlink)
+
+    def overwrite_array(self, data=None):
+        """Overwrite items in data with nans."""
+        if data is None:
+            data = self.metaframe.data
+        for attr in data:
+            data[attr][:] = np.nan
 
     def update_frame(self):
         """Extend DataFrame.update_frame, transfer metaarray.data to frame."""

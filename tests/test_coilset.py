@@ -92,8 +92,8 @@ def test_multipoint_link():
     coilset.coil.insert(7, -0.5, 1.5, 1.5, name='PF8', part='PF', nturn=5,
                         Ic=2e3, section='disc', turn='square', delta=0.12)
     coilset.linkframe(['PF6', 'PF8'], -0.5)
-    assert coilset.subframe.It[coilset.subframe.frame == 'PF8'].sum() == \
-        -0.5*1e6/4*5
+    index = coilset.loc['frame'] == 'PF8'
+    assert np.isclose(coilset.loc[index, 'It'].sum(), -0.5*1e6/4*5)
 
 
 def test_shell_cross_section():
@@ -207,19 +207,26 @@ def test_plasma_array_attributes():
 
 
 def test_array_views_insert():
-    coilset = CoilSet(dplasma=-5, dcoil=-5)
+    coilset = CoilSet(dcoil=-5)
     coilset.coil.insert(3, -0.5, 0.95, 0.95)
-    coilset.plasma.insert({'ellip': [2.5, 1.7, 1.6, 2.2]}, turn='hex')
+    nturn = coilset.loc['nturn']
+    coilset.coil.insert(1, -0.5, 0.95, 0.95)
+    assert id(nturn) != id(coilset.loc['nturn'])
+    assert all(np.isnan(nturn))
+
+
+def test_array_views_insert_subspace():
+    coilset = CoilSet(dcoil=-5)
+    coilset.coil.insert(3, -0.5, 0.95, 0.95)
     Ic = coilset.sloc['Ic']
     coilset.coil.insert(1, -0.5, 0.95, 0.95)
-    assert id(Ic) == id(coilset.sloc['Ic'])
+    assert id(Ic) != id(coilset.sloc['Ic'])
+    assert all(np.isnan(Ic))
 
 
 def test_array_views_solve():
-    coilset = CoilSet(dplasma=-5, dcoil=-5)
+    coilset = CoilSet(dcoil=-5)
     coilset.coil.insert(3, -0.5, 0.95, 0.95)
-    coilset.plasma.insert({'ellip': [2.5, 1.7, 1.6, 2.2]}, turn='hex')
-    coilset.coil.insert(1, -0.5, 0.95, 0.95)
     Ic = coilset.sloc['Ic']
     nturn = coilset.loc['nturn']
     coilset.sloc['Ic'] = 7.7

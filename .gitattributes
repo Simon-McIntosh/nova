@@ -15,3 +15,4 @@
 *.pyc 		binary
 *.pyd		binary
 *.pyo 		binary
+nova/_version.py export-subst

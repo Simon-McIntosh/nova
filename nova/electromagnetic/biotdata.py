@@ -24,6 +24,11 @@ class BiotData(FilePath, FrameSetLoc):
 
     def __post_init__(self):
         """Init path and link line current and plasma index."""
+        self.subframe.metaframe.metadata = \
+            {'additional': ['plasma', 'nturn'],
+             'array': ['plasma', 'nturn'],
+             'subspace': ['Ic']}
+        self.subframe.update_columns()
         super().__post_init__()
         if isinstance(self.attrs, list):
             self.attrs = {attr: id(None) for attr in self.attrs}

@@ -236,6 +236,7 @@ def test_array_views_insert_subspace():
 
 def test_array_views_solve():
     coilset = CoilSet(dcoil=-5)
+    coilset.plasma.insert(3, -0.5, 0.95, 0.95, delta=-5)
     coilset.coil.insert(3, -0.5, 0.95, 0.95)
     Ic = coilset.sloc['Ic']
     nturn = coilset.loc['nturn']

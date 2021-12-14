@@ -3,8 +3,7 @@ import versioneer
 
 long_description = """..."""
 
-extra_reqs = dict(test=['pytest'], 
-                  dev=['pytest', 'spyder'])
+extras_require = dict(test=['pytest'], develop=['pytest', 'spyder'])
 
 setup_kwargs = dict(
     name                = 'nova',
@@ -62,10 +61,10 @@ setup_kwargs = dict(
         #trimesh
         'vedo',
         #vtk
-        #wheel
+        'wheel',
         'xarray',
     ],
-    extras_require     = extra_reqs,
+    extras_require     = extras_require,
     package_data       = {},
     include_package_data=False
 )

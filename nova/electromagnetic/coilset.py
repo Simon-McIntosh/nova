@@ -105,10 +105,6 @@ if __name__ == '__main__':
     coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex', turn='c',
                         tile=True, delta=-6, name='bubble')
     coilset.coil.insert(2, 0, 0.95, 0.1, section='sk', nturn=-1.8)
-
-    coilset.coil.insert(2.2, 1.9, 0.4, 0.4, section='sk', nturn=0.1)
-    coilset.coil.insert(2.8, 1.9, 0.4, 0.4, section='sk', nturn=-0.2)
-
     coilset.coil.insert(3, 0, 0.6, 0.9, section='r', turn='sk')
     coilset.plasma.insert({'ellip': [2.5, 1.7, 1.6, 2.2]}, turn='hex')
     coilset.shell.insert({'e': [2.5, -1.25, 1.75, 1.0]}, 13, 0.05,
@@ -124,7 +120,7 @@ if __name__ == '__main__':
     coilset.sloc['Shl0', 'Ic'] = -5
     coilset.sloc['plasma', 'Ic'] = -2
 
-    separatrix = Polygon(dict(ellip=[2.75, 0.9, 0.8, 1.1])).boundary
+    separatrix = Polygon(dict(ellip=[2.5, 1.9, 0.8, 1.1])).boundary
     coilset.plasma.update_separatrix(separatrix)
 
     coilset.grid.plot(levels=31)

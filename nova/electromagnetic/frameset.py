@@ -10,7 +10,7 @@ from nova.electromagnetic.select import Select
 
 
 @dataclass
-class FrameSet(FrameSetLoc, FilePath):
+class FrameSet(FilePath, FrameSetLoc):
     """Manage FrameSet instances."""
 
     delta: float = -1

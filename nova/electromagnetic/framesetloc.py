@@ -97,6 +97,10 @@ class FrameSetLoc(FrameData):
 
     """
 
+    def __post_init__(self):
+        """Create Loc indexers."""
+        #super().__post_init__()
+
     @property
     def Loc(self):
         """Access frame attributes."""

@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
     biotframe = BiotFrame()
     biotframe.insert(range(3), 0, dl=0.95, dt=0.95, section='hex')
-    biotframe.insert(range(3), 1, dl=0.95, dt=0.95, section='circ', link=True)
+    biotframe.insert(range(3), 1, dl=0.95, dt=0.95, section='o', link=True)
     biotframe.insert(range(3), 2, dl=0.95, dt=0.95, section='sq', link=False)
     biotframe.insert(range(3), 3, dl=0.95, dt=0.6, section='sk', link=True)
 

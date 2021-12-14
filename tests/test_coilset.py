@@ -255,6 +255,27 @@ def test_biot_solve_index_version():
     assert id(coilset.subframe.index) == coilset.subframe.version['index']
 
 
+def test_biot_link_dataarray_dataset():
+    coilset = CoilSet(dplasma=-20)
+    coilset.plasma.insert(3, -0.5, 0.95, 0.95)
+    coilset.grid.solve(10, 0.05)
+    Psi = coilset.grid.array['Psi'].copy()
+    coilset.plasma.update_separatrix(((2.5, -1), (3.5, -1), (3, 0)))
+    coilset.grid.update_turns('Psi')
+    assert (coilset.grid.array['Psi'] == coilset.grid.data['Psi']).all()
+    assert (Psi != coilset.grid.data['Psi']).any()
+
+
+def test_biot_multiframe_plasma():
+    coilset = CoilSet(dplasma=-20)
+    coilset.coil.insert(3, -0.5, 0.95, 0.95)
+    coilset.plasma.insert(3, -0.5, 0.95, 0.95)
+    coilset.plasma.insert(3, 0.5, 0.95, 0.95, name='second_plasma')
+    coilset.coil.insert(3, -0.5, 0.95, 0.95)
+    coilset.grid.solve(10, 0.05)
+    assert coilset.grid.plasma_index == [1, 2]
+
+
 if __name__ == '__main__':
 
     pytest.main([__file__])

@@ -3,7 +3,7 @@ from abc import abstractmethod
 from dataclasses import dataclass, field
 from typing import Union
 
-import numpy.typing as npt
+from numpy import typing as npt
 import xarray
 
 from nova.electromagnetic.filepath import FilePath
@@ -18,27 +18,25 @@ class BiotData(FilePath, FrameSetLoc):
     attrs: Union[list[str], dict[str, int]] = field(
         default_factory=lambda: ['Br', 'Bz', 'Psi'])
     data: xarray.Dataset = field(init=False, repr=False)
-    current: npt.ArrayLike = field(init=False, repr=False)
-    nturn: npt.ArrayLike = field(init=False, repr=False)
-    plasma: npt.ArrayLike = field(init=False, repr=False)
+    array: dict[str, npt.ArrayLike] = field(init=False, default_factory=dict)
+    plasma_index: list[int] = field(init=False, default_factory=list)
+    plasma_turns: list[int] = field(init=False, default_factory=list)
 
     def __post_init__(self):
         """Init path and link line current and plasma index."""
         super().__post_init__()
         if isinstance(self.attrs, list):
             self.attrs = {attr: id(None) for attr in self.attrs}
-        self.current = self.sloc['Ic']
-        self.nturn = self.loc['nturn']
-        self.plasma = self.loc['plasma']
 
     def __getattr__(self, attr):
         """Return attribute data."""
         if (Attr := attr.capitalize()) in self.attrs:
+            self.update_indexer()
             if self.attrs[Attr] != (plasma_version :=
                                     self.subframe.version['plasma']):
                 self.update_turns(Attr)
                 self.attrs[Attr] = plasma_version
-            return getattr(self, Attr) @ self.current
+            return self.array[Attr] @ self.saloc.Ic
         raise AttributeError(f'attribute {Attr} not specified in {self.attrs}')
 
     @abstractmethod
@@ -48,12 +46,19 @@ class BiotData(FilePath, FrameSetLoc):
     def solve(self, *args):
         """Solve biot interaction - update attrs."""
         self._solve(*args)
-        self.set_attrs()
+        self.update()
 
-    def set_attrs(self):
+    def update(self):
         """Update data attributes."""
         for attr in self.data.data_vars:
-            setattr(self, attr, self.data[attr].data)
+            self.array[attr] = self.data[attr].data
+        self.plasma_index = [self.frame.index.get_loc(name) for name in
+                             self.subframe.frame[self.aloc.plasma].unique()]
+        if len(self.plasma_index) == 1:
+            self.plasma_index = self.plasma_index[0]
+            return
+        self.plasma_turns = [(self.subframe.frame == name).to_numpy()
+                             for name in self.frame.index[self.plasma_index]]
 
     def store(self, filename: str, path=None):
         """Store data as netCDF in hdf5 file."""
@@ -66,19 +71,15 @@ class BiotData(FilePath, FrameSetLoc):
         with xarray.open_dataset(file, group=self.name) as data:
             data.load()
             self.data = data
+        self.update()
 
     def update_turns(self, attr: str):
         """Update plasma turns."""
         # TODO fix plasma indexing and test
-        getattr(self, attr)[:, -2] = \
-            getattr(self, f'_{attr}') @ self.nturn[self.plasma]
-        '''
-        for attr in self.attrs:
-            try:
-                #self.data[attr].data[:, -2] = np.sum(
-                #    getattr(self.data, f'_{attr}').data *
-                #    self.loc[self.subframe.filament, 'nturn'], axis=1)
-                self.Psi[:, -2] = self._Psi @ self.nturn[self.plasma]
-            except AttributeError:
-                pass
-        '''
+        try:
+            self.array[attr][:, self.plasma_index] = \
+                self.array[f'_{attr}'] @ self.aloc.nturn[self.aloc.plasma]
+        except ValueError:  # multi-frame plasma
+            for index, turns in zip(self.plasma_index, self.plasma_turns):
+                nturn = (self.aloc.nturn * turns)[self.aloc.plasma]
+                self.array[attr][:, index] = self.array[f'_{attr}'] @ nturn

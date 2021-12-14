@@ -118,11 +118,11 @@ if __name__ == '__main__':
     coilset.sloc['Ic'] = 6
     coilset.sloc['bubble', 'Ic'] = 5
     coilset.sloc['Shl0', 'Ic'] = -5
-    coilset.sloc['plasma', 'Ic'] = -2
+    coilset.sloc['plasma', 'Ic'] = -4
 
-    separatrix = Polygon(dict(ellip=[2.5, 1.9, 0.8, 1.1])).boundary
+    separatrix = Polygon(dict(ellip=[2.5, 0.9, 0.8, 1.2])).boundary
     coilset.plasma.update_separatrix(separatrix)
 
-    coilset.grid.plot(levels=31)
+    coilset.grid.plot(levels=25)
     coilset.plasma.plot()
     coilset.plot()

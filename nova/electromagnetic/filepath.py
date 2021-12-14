@@ -16,6 +16,7 @@ class FilePath(ABC):
         """Init dataset path."""
         if self.path is None:
             self.path = os.path.join(root_dir, 'data/Nova/coilsets')
+        super().__post_init__()
 
     def check_path(self, path):
         """Return self.path if path is None."""

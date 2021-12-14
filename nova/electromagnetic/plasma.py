@@ -55,11 +55,10 @@ class PlasmaGrid(PoloidalGrid):
 
 
 @dataclass
-class Plasma(PlasmaGrid, FrameSetLoc, Axes):
+class Plasma(PlasmaGrid, Axes, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
     loop: npt.ArrayLike = field(init=False, default=None, repr=False)
-    _aloc: ArrayLocIndexer = field(init=False)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -67,23 +66,11 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
             {'additional': ['plasma', 'ionize', 'area', 'nturn'],
              'array': ['plasma', 'ionize', 'area', 'nturn', 'x', 'z']}
         self.subframe.update_columns()
-        self._update_aloc()
-
-    def _update_aloc(self):
-        """Update array loc indexer."""
-        self._aloc = self.aloc  # initialize ArrayLocIndexer
-
-    def __getattr__(self, attr: str) -> npt.ArrayLike:
-        """Access data array attributes."""
-        try:
-            return self._aloc[attr]
-        except KeyError as err:
-            raise KeyError(f'attr <{attr}> not available in {self._aloc}') \
-                from err
+        super().__post_init__()
 
     def __len__(self):
         """Return number of plasma filaments."""
-        return self.index.sum()
+        return self.aloc.plasma.sum()
 
     def __str__(self):
         """Return string representation of plasma subframe."""
@@ -114,6 +101,8 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
     @property
     def separatrix(self):
         """Return input plasma separatrix trimmed to first wall."""
+        if self.loop is None:
+            self.update_separatrix(self.boundary)
         return Polygon(self.loop).poly.intersection(self.boundary.poly)
 
     def update_separatrix(self, loop):
@@ -129,9 +118,8 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
             Bounding loop.
 
         """
-        if self._aloc.version != self.subframe.version['index']:
-            self._update_aloc()
-        points = np.c_[self.x, self.z][self.plasma]
+        self.update_indexer()
+        points = np.c_[self.aloc.x, self.aloc.z][self.aloc.plasma]
         try:
             ionize = inpoly.polymultipoint(points, loop)
         except numba.TypingError:
@@ -139,15 +127,15 @@ class Plasma(PlasmaGrid, FrameSetLoc, Axes):
             ionize = inpoly.polymultipoint(points, loop)
         self.loop = loop
         self.subframe.version['plasma'] = id(loop)
-        self.ionize[self.plasma] = ionize
-        self.nturn[self.plasma] = 0
-        area = self.area[self.ionize]
-        self.nturn[self.ionize] = area / np.sum(area)
+        self.aloc.ionize[self.aloc.plasma] = ionize
+        self.aloc.nturn[self.aloc.plasma] = 0
+        area = self.aloc.area[self.aloc.ionize]
+        self.aloc.nturn[self.aloc.ionize] = area / np.sum(area)
 
     def plot(self, axes=None, boundary=True):
         """Plot plasma boundary and separatrix."""
         self.axes = axes
-        if (poly := self.separatrix) is not None:
+        if (poly := self.separatrix) is not None and not poly.is_empty:
             self.axes.add_patch(descartes.PolygonPatch(
                 poly.__geo_interface__,
                 facecolor='C4', alpha=0.75, linewidth=0.5, zorder=-10))

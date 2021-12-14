@@ -14,7 +14,7 @@ class LocIndexer:
 
     name: str
     frame: FrameSpace
-    subspace: bool = False
+    subspace: bool = field(init=False)
 
     def __post_init__(self):
         """Set subspace flag."""
@@ -61,14 +61,13 @@ class ArrayLocIndexer:
 
     name: str
     frame: FrameSpace = field(repr=False)
-    subspace: bool = False
-    version: int = field(init=False)
-    attrs: list[str] = field(init=False)
+    subspace: bool = field(init=False, repr=False)
+    attrs: list[str] = field(init=False, default_factory=list)
     _data: dict = field(init=False, repr=False)
 
     def __post_init__(self):
-        """Extract frame.index version and referance data arrays."""
-        self.version = id(self.frame.index)
+        """Set subspace flag and referance data arrays."""
+        self.subspace = self.name[0] == 's'  # set subspace flag
         self.attrs = self.frame.attrs['metaframe'].array
         self._data = {attr: self.frame[attr] for attr in self.attrs}
 
@@ -97,9 +96,35 @@ class FrameSetLoc(FrameData):
 
     """
 
+    version: dict = field(init=False, default_factory=dict)
+    ALoc: ArrayLocIndexer = field(init=False, repr=False)
+    sALoc: ArrayLocIndexer = field(init=False, repr=False)
+    aloc: ArrayLocIndexer = field(init=False, repr=False)
+    saloc: ArrayLocIndexer = field(init=False, repr=False)
+
     def __post_init__(self):
-        """Create Loc indexers."""
-        #super().__post_init__()
+        """Create array loc indexers."""
+        self._update_frameloc()
+        self._update_subframeloc()
+
+    def _update_frameloc(self):
+        """Update frame array loc indexer."""
+        self.ALoc = ArrayLocIndexer('Array', self.frame)
+        self.sALoc = ArrayLocIndexer('sArray', self.frame.subspace)
+        self.version['frameloc'] = self.frame.version['index']
+
+    def _update_subframeloc(self):
+        """Update subframe array loc indexer."""
+        self.aloc = ArrayLocIndexer('array', self.subframe)
+        self.saloc = ArrayLocIndexer('sarray', self.subframe.subspace)
+        self.version['subframeloc'] = self.subframe.version['index']
+
+    def update_indexer(self):
+        """Update links to array loc indexer following changes to index id."""
+        if self.version['frameloc'] != self.frame.version['index']:
+            self._update_frameloc()
+        if self.version['subframeloc'] != self.subframe.version['index']:
+            self._update_subframeloc()
 
     @property
     def Loc(self):
@@ -109,7 +134,7 @@ class FrameSetLoc(FrameData):
     @property
     def sLoc(self):
         """Access subspace frame attributes."""
-        return LocIndexer('sLoc', self.frame.subspace, True)
+        return LocIndexer('sLoc', self.frame.subspace)
 
     @property
     def loc(self):
@@ -119,24 +144,4 @@ class FrameSetLoc(FrameData):
     @property
     def sloc(self):
         """Access subspace subframe attributes."""
-        return LocIndexer('sloc', self.subframe.subspace, True)
-
-    @property
-    def ALoc(self) -> dict:
-        """Return view of frame array attributes."""
-        return ArrayLocIndexer('Array', self.frame)
-
-    @property
-    def sALoc(self) -> dict:
-        """Access frame subspace array attributes."""
-        return ArrayLocIndexer('sArray', self.frame.subspace, True)
-
-    @property
-    def aloc(self) -> dict:
-        """Access subframe array attributes."""
-        return ArrayLocIndexer('array', self.subframe)
-
-    @property
-    def saloc(self) -> dict:
-        """Access subframe subspace array attributes."""
-        return ArrayLocIndexer('sarray', self.subframe.subspace, True)
+        return LocIndexer('sloc', self.subframe.subspace)

@@ -30,7 +30,6 @@ class FrameSet(FilePath, FrameSetLoc):
 
     def __post_init__(self):
         """Init coil and subcoil."""
-        super().__post_init__()
         self.frame = FrameSpace(
             base=self.base, required=self.required, additional=self.additional,
             available=self.available, subspace=[],
@@ -44,6 +43,7 @@ class FrameSet(FilePath, FrameSetLoc):
             array=self.array, delim='_',
             version=['plasma', 'index'])
         self.subframe.frame_attr(Select, ['Ic'])
+        super().__post_init__()
 
     def __str__(self):
         """Return string representation of coilset frame."""

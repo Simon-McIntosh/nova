@@ -6,7 +6,7 @@ import numba
 import numpy as np
 import numpy.typing as npt
 
-from nova.electromagnetic.framesetloc import FrameSetLoc, ArrayLocIndexer
+from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polyplot import Axes
 from nova.geometry import inpoly
@@ -96,7 +96,7 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
     @property
     def boundary(self) -> Polygon:
         """Return vessel boundary."""
-        return Polygon(self.Loc['plasma', 'poly'][0])
+        return self.Loc['plasma', 'poly'][0]
 
     @property
     def separatrix(self):

@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from nova.electromagnetic.coilset import CoilSet
+from nova.geometry.polygon import Polygon
 
 
 def test_dpol():
@@ -256,6 +257,15 @@ def test_biot_solve_index_version():
     assert id(coilset.subframe.index) == coilset.subframe.version['index']
 
 
+def test_biot_solve_no_plasma():
+    coilset = CoilSet(dcoil=-5)
+    coilset.coil.insert(3, -0.5, 0.95, 0.95)
+    coilset.plasma.update_separatrix(Polygon(dict(o=(3, 0, 1))))
+    coilset.grid.solve(500, 0.05)
+    coilset.sloc['Ic'] = 5
+    assert (coilset.grid.psi != 0).all()
+
+
 def test_biot_link_dataarray_dataset():
     coilset = CoilSet(dplasma=-20)
     coilset.plasma.insert(3, -0.5, 0.95, 0.95)
@@ -271,10 +281,9 @@ def test_biot_multiframe_plasma():
     coilset = CoilSet(dplasma=-20)
     coilset.coil.insert(3, -0.5, 0.95, 0.95)
     coilset.plasma.insert(3, -0.5, 0.95, 0.95)
-    coilset.plasma.insert(3, 0.5, 0.95, 0.95, name='second_plasma')
-    coilset.coil.insert(3, -0.5, 0.95, 0.95)
+    coilset.plasma.insert(3, 0.5, 0.95, 0.95, name='second_plasma_rejoin')
     coilset.grid.solve(10, 0.05)
-    assert coilset.grid.plasma_index == [1, 2]
+    assert coilset.grid.plasma_index == 1
 
 
 if __name__ == '__main__':

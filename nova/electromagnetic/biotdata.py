@@ -19,28 +19,26 @@ class BiotData(FilePath, FrameSetLoc):
         default_factory=lambda: ['Br', 'Bz', 'Psi'])
     data: xarray.Dataset = field(init=False, repr=False)
     array: dict[str, npt.ArrayLike] = field(init=False, default_factory=dict)
-    plasma_index: list[int] = field(init=False, default_factory=list)
-    plasma_turns: list[int] = field(init=False, default_factory=list)
+    plasma_index: int = field(init=False, default=None)
 
     def __post_init__(self):
         """Init path and link line current and plasma index."""
+        if isinstance(self.attrs, list):
+            self.attrs = {attr: id(None) for attr in self.attrs}
         self.subframe.metaframe.metadata = \
             {'additional': ['plasma', 'nturn'],
              'array': ['plasma', 'nturn'],
              'subspace': ['Ic']}
         self.subframe.update_columns()
         super().__post_init__()
-        if isinstance(self.attrs, list):
-            self.attrs = {attr: id(None) for attr in self.attrs}
 
     def __getattr__(self, attr):
         """Return attribute data."""
         if (Attr := attr.capitalize()) in self.attrs:
             self.update_indexer()
-            if self.attrs[Attr] != (plasma_version :=
-                                    self.subframe.version['plasma']):
+            if self.attrs[Attr] != self.subframe.version['plasma']:
                 self.update_turns(Attr)
-                self.attrs[Attr] = plasma_version
+                self.attrs[Attr] = self.subframe.version['plasma']
             return self.array[Attr] @ self.saloc.Ic
         raise AttributeError(f'attribute {Attr} not specified in {self.attrs}')
 
@@ -57,13 +55,13 @@ class BiotData(FilePath, FrameSetLoc):
         """Update data attributes."""
         for attr in self.data.data_vars:
             self.array[attr] = self.data[attr].data
-        self.plasma_index = [self.frame.index.get_loc(name) for name in
-                             self.subframe.frame[self.aloc.plasma].unique()]
-        if len(self.plasma_index) == 1:
-            self.plasma_index = self.plasma_index[0]
-            return
-        self.plasma_turns = [(self.subframe.frame == name).to_numpy()
-                             for name in self.frame.index[self.plasma_index]]
+        self.update_indexer()
+        try:
+            self.plasma_index = next(
+                self.frame.subspace.index.get_loc(name) for name in
+                self.subframe.frame[self.aloc.plasma].unique())
+        except StopIteration:
+            pass
 
     def store(self, filename: str, path=None):
         """Store data as netCDF in hdf5 file."""
@@ -80,11 +78,8 @@ class BiotData(FilePath, FrameSetLoc):
 
     def update_turns(self, attr: str):
         """Update plasma turns."""
-        # TODO fix plasma indexing and test
-        try:
-            self.array[attr][:, self.plasma_index] = \
-                self.array[f'_{attr}'] @ self.aloc.nturn[self.aloc.plasma]
-        except ValueError:  # multi-frame plasma
-            for index, turns in zip(self.plasma_index, self.plasma_turns):
-                nturn = (self.aloc.nturn * turns)[self.aloc.plasma]
-                self.array[attr][:, index] = self.array[f'_{attr}'] @ nturn
+        if self.plasma_index is None:
+            return
+        self.update_indexer()
+        self.array[attr][:, self.plasma_index] = \
+            self.array[f'_{attr}'] @ self.aloc.nturn[self.aloc.plasma]

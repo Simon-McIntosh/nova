@@ -4,7 +4,7 @@ import versioneer
 long_description = """..."""
 
 extra_reqs = dict(test=['pytest'], 
-                  dev=['spyder'])
+                  dev=['pytest', 'spyder'])
 
 setup_kwargs = dict(
     name                = 'nova',
@@ -13,9 +13,7 @@ setup_kwargs = dict(
     license             = 'MIT',
     keywords            = 'equilibrium reconstruction plasma Biot Savart mesh free',
     author              = 'Simon McIntosh',
-    author_email        = 'twistersi@gmai.com',
-    maintainer          = 'Simon McIntosh',
-    maintainer_email    = 'simon.mcintosh@iter.org',
+    author_email        = 'simon.mcintosh@iter.org',
     url                 = 'https://git.iter.org/projects/SCEN/repos/nova/',
     long_description    = long_description,
     packages            = find_packages(),
@@ -30,17 +28,18 @@ setup_kwargs = dict(
     cmdclass            = versioneer.get_cmdclass(),
     python_requires     = '>=3.9, <3.10',
     install_requires    = [
-        #alphashape
+        'alphashape',
         #ansys-dpf-core==0.2.1
         #ansys-dpf-post
         #astropy
-        #descartes
+        'descartes',
         #gmsh
         #geojson,
         #line_profiler
-        #netCDF4
+        'meshio',
+        'netCDF4',
         #networkx
-        #nlopt
+        'nlopt',
         'numba',
         #numdifftools
         'numpy',
@@ -51,17 +50,17 @@ setup_kwargs = dict(
         #pygmsh
         #pytest
         #python-dateutil
-        #pyvista
-        #pyquaternion
-        #rdp
-        #seaborn,
+        'pyvista',
+        'pyquaternion',
+        'rdp',
+        'seaborn',
         'scipy',
-        #scikit-learn
+        'scikit-learn',
         'shapely',
         #spyder
         #tetgen
         #trimesh
-        #vedo,
+        'vedo',
         #vtk
         #wheel
         'xarray',

@@ -56,7 +56,7 @@ class BiotData(FilePath, FrameSetLoc):
     def update(self):
         """Update data attributes."""
         for attr in self.data.data_vars:
-            self.array[attr] = self.data[attr].load().data
+            self.array[attr] = self.data[attr].data
         self.update_indexer()
         try:
             self.plasma_index = next(

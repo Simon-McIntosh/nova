@@ -60,6 +60,7 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
     loop: npt.ArrayLike = field(init=False, default=None, repr=False)
+    points: npt.ArrayLike = field(init=False, default=None, repr=False)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -120,6 +121,8 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
             Bounding loop.
 
         """
+        if self.points is None:
+            return
         self.update_indexer()
         try:
             inloop = inpoly.polymultipoint(self.points, loop)

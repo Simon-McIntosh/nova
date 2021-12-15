@@ -51,7 +51,7 @@ class BiotMatrix(BiotSet):
             self.data[f'_{var}'] = xarray.DataArray(
                 0., dims=['target', 'plasma'],
                 coords=[self.data.target, self.data.plasma])
-        self.data = self.data.chunk(dict(source=100, plasma=100, target=100))
+        # self.data = self.data.chunk(dict(source=100, plasma=100, target=100))
 
     def get_index(self, frame):
         """Return matrix coordinate, reduce if flag True."""

@@ -13,6 +13,7 @@ from nova.geometry import inpoly
 from nova.geometry.polygon import Polygon
 from nova.utilities.pyplot import plt
 
+from numba import njit
 
 # self.biot_instances = ['plasmafilament', 'plasmagrid']
 
@@ -80,6 +81,7 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
     def insert(self, *args, required=None, iloc=None, **additional):
         """Insert plasma, normalize turn number for multiframe plasmas."""
         super().insert(*args, required=None, iloc=None, **additional)
+        self.points = np.c_[self.loc['plasma', 'x'], self.loc['plasma', 'z']]
         if self.sloc['plasma'].sum() == 1:
             return
         self.linkframe(self.Loc['plasma', :].index.tolist())
@@ -119,18 +121,26 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
 
         """
         self.update_indexer()
-        points = np.c_[self.aloc.x, self.aloc.z][self.aloc.plasma]
         try:
-            ionize = inpoly.polymultipoint(points, loop)
+            inloop = inpoly.polymultipoint(self.points, loop)
         except numba.TypingError:
             loop = Polygon(loop).boundary
-            ionize = inpoly.polymultipoint(points, loop)
+            inloop = inpoly.polymultipoint(self.points, loop)
         self.loop = loop
         self.subframe.version['plasma'] = id(loop)
-        self.aloc.ionize[self.aloc.plasma] = ionize
-        self.aloc.nturn[self.aloc.plasma] = 0
-        area = self.aloc.area[self.aloc.ionize]
-        self.aloc.nturn[self.aloc.ionize] = area / np.sum(area)
+        plasma = self.aloc['plasma']
+        ionize = self.aloc['ionize']
+        nturn = self.aloc['nturn']
+        area = self.aloc['area']
+        ionize[plasma] = inloop
+        self._update_nturn(plasma, ionize, nturn, area)
+
+    @staticmethod
+    @njit
+    def _update_nturn(plasma, ionize, nturn, area):
+        nturn[plasma] = 0
+        ionize_area = area[ionize]
+        nturn[ionize] = ionize_area / np.sum(ionize_area)
 
     def plot(self, axes=None, boundary=True):
         """Plot plasma boundary and separatrix."""

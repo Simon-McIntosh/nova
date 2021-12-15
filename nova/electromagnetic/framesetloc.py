@@ -1,6 +1,7 @@
 """Manage subframe access."""
 from dataclasses import dataclass, field
 
+import numpy as np
 import numpy.typing as npt
 
 from nova.electromagnetic.framedata import FrameData
@@ -69,6 +70,10 @@ class ArrayLocIndexer:
         """Set subspace flag and referance data arrays."""
         self.subspace = self.name[0] == 's'  # set subspace flag
         self.attrs = self.frame.attrs['metaframe'].array
+        self.relink()
+
+    def relink(self):
+        """Relink data."""
         self._data = {attr: self.frame[attr] for attr in self.attrs}
 
     def __setitem__(self, key, value):
@@ -104,27 +109,31 @@ class FrameSetLoc(FrameData):
 
     def __post_init__(self):
         """Create array loc indexers."""
-        self._update_frameloc()
-        self._update_subframeloc()
-
-    def _update_frameloc(self):
-        """Update frame array loc indexer."""
         self.ALoc = ArrayLocIndexer('Array', self.frame)
         self.sALoc = ArrayLocIndexer('sArray', self.frame.subspace)
-        self.version['frameloc'] = self.frame.version['index']
-
-    def _update_subframeloc(self):
-        """Update subframe array loc indexer."""
         self.aloc = ArrayLocIndexer('array', self.subframe)
         self.saloc = ArrayLocIndexer('sarray', self.subframe.subspace)
+        self.version['frameloc'] = self.frame.version['index']
         self.version['subframeloc'] = self.subframe.version['index']
+
+    def update_frameloc(self):
+        """Update frame array loc indexer."""
+        if self.version['frameloc'] != self.frame.version['index']:
+            self.version['frameloc'] = self.frame.version['index']
+            self.ALoc.relink()
+            self.sALoc.relink()
+
+    def update_subframeloc(self):
+        """Update subframe array loc indexer."""
+        if self.version['subframeloc'] != self.subframe.version['index']:
+            self.version['subframeloc'] = self.subframe.version['index']
+            self.aloc.relink()
+            self.saloc.relink()
 
     def update_indexer(self):
         """Update links to array loc indexer following changes to index id."""
-        if self.version['frameloc'] != self.frame.version['index']:
-            self._update_frameloc()
-        if self.version['subframeloc'] != self.subframe.version['index']:
-            self._update_subframeloc()
+        self.update_frameloc()
+        self.update_subframeloc()
 
     @property
     def Loc(self):

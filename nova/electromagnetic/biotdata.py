@@ -3,6 +3,8 @@ from abc import abstractmethod
 from dataclasses import dataclass, field
 from typing import Union
 
+import numba
+import numpy as np
 from numpy import typing as npt
 import xarray
 
@@ -39,7 +41,7 @@ class BiotData(FilePath, FrameSetLoc):
             if self.attrs[Attr] != self.subframe.version['plasma']:
                 self.update_turns(Attr)
                 self.attrs[Attr] = self.subframe.version['plasma']
-            return self.array[Attr] @ self.saloc.Ic
+            return self.array[Attr] @ self.saloc['Ic']
         raise AttributeError(f'attribute {Attr} not specified in {self.attrs}')
 
     @abstractmethod
@@ -54,7 +56,7 @@ class BiotData(FilePath, FrameSetLoc):
     def update(self):
         """Update data attributes."""
         for attr in self.data.data_vars:
-            self.array[attr] = self.data[attr].data
+            self.array[attr] = self.data[attr].load().data
         self.update_indexer()
         try:
             self.plasma_index = next(
@@ -76,10 +78,26 @@ class BiotData(FilePath, FrameSetLoc):
             self.data = data
         self.update()
 
-    def update_turns(self, attr: str):
+    def update_turns(self, attr: str, solver='cpu'):
         """Update plasma turns."""
         if self.plasma_index is None:
             return
-        self.update_indexer()
-        self.array[attr][:, self.plasma_index] = \
-            self.array[f'_{attr}'] @ self.aloc.nturn[self.aloc.plasma]
+        nturn = self.aloc['nturn'][self.aloc['plasma']]
+        index = self.plasma_index
+        if solver == 'cpu':
+            self.array[attr][:, index] = self.array[f'_{attr}'] @ nturn
+            return
+        if solver == 'jit':
+            self.array[attr][:, index] = self._update_turns(
+                self.array[f'_{attr}'], nturn)
+            return
+        raise NotImplementedError(f'solver <{solver}> not implemented')
+
+    @staticmethod
+    @numba.njit(parallel=True)
+    def _update_turns(matrix, nturn):
+        row_number = len(matrix)
+        vector = np.empty(row_number)
+        for i in numba.prange(row_number):
+            vector[i] = np.dot(matrix[i], nturn)
+        return vector

@@ -33,7 +33,7 @@ class FrameAttrs(pandas.DataFrame):
     @property
     def version(self):
         """Return metaframe version container."""
-        return self.metaframe.version
+        return self.attrs['metaframe'].version
 
     def __getattr__(self, name):
         """Extend pandas.DataFrame.__getattr__. (frame.*)."""

@@ -246,7 +246,10 @@ class PolyGen:
         shape : shapely.polygon
 
         """
-        length = PolyGen.boxbound(width/2, height/np.sqrt(3))
+        if height is None:
+            length = width/2
+        else:
+            length = PolyGen.boxbound(width/2, height/np.sqrt(3))
         points = [[x_center + np.cos(alpha) * length,
                    z_center + np.sin(alpha) * length]
                   for alpha in np.linspace(0, 2*np.pi, 7)]

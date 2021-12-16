@@ -11,7 +11,7 @@ from nova.electromagnetic.polyplot import Axes
 class BiotLoop(Axes, BiotData):
     """Compute interaction across grid."""
 
-    def _solve(self, target):
+    def solve_biot(self, target):
         """Solve Biot interaction."""
         self.data = Biot(self.subframe, target,
                          reduce=[True, True], turns=[True, True],

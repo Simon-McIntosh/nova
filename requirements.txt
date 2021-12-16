@@ -1,2 +1,2 @@
-pygeos --no-binary pygeos
-shapely --no-binary shapely
+pygeos -U --no-binary pygeos
+shapely -U --no-binary shapely

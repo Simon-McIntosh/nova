@@ -99,28 +99,28 @@ class CoilSet(CoilGrid, FrameSet):
 
 if __name__ == '__main__':
 
-    coilset = CoilSet(dcoil=-35, dplasma=-250)
+    coilset = CoilSet(dcoil=-35, dplasma=-500)
     coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
                         nturn=-0.8)
     coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex', turn='c',
                         tile=True, delta=-6, name='bubble')
     coilset.coil.insert(2, 0, 0.95, 0.1, section='sk', nturn=-1.8)
     coilset.coil.insert(3, 0, 0.6, 0.9, section='r', turn='sk')
-    coilset.plasma.insert({'ellip': [2.5, 1.4, 3.6, 1.1]}, turn='hex')
+    coilset.plasma.insert({'ellip': [4, -0.4, 1.1, 3.2]}, turn='hex')
     coilset.shell.insert({'e': [2.5, -1.25, 1.75, 1.0]}, 13, 0.05,
                          delta=-40, part='vv')
 
     coilset.sloc['Ic'] = 1
     coilset.sloc['Shl0', 'Ic'] = -5
 
-    coilset.grid.solve(50_000, 0.05)
+    coilset.grid.solve(2000, 0.1)
 
     coilset.sloc['Ic'] = 6
     coilset.sloc['bubble', 'Ic'] = 5
     coilset.sloc['Shl0', 'Ic'] = -5
     coilset.sloc['plasma', 'Ic'] = -4
 
-    separatrix = Polygon(dict(c=[3.5, 1.3, 0.8])).boundary
+    separatrix = Polygon(dict(c=[4.0, -0.5, 0.8])).boundary
     coilset.plasma.update_separatrix(separatrix)
 
     coilset.grid.plot(levels=25)

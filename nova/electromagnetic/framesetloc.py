@@ -55,6 +55,10 @@ class LocIndexer:
             return getattr(self.frame, col)[index]
         return self.frame.loc[index, col]
 
+    def __getattr__(self, attr):
+        """Return frame attribute."""
+        return getattr(self.frame, attr)
+
 
 @dataclass
 class ArrayLocIndexer:

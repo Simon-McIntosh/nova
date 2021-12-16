@@ -11,7 +11,7 @@ from nova.electromagnetic.polyplot import Axes
 class BiotInductance(Axes, BiotData):
     """Compute self interaction."""
 
-    def _solve(self, index=slice(None)):
+    def solve_biot(self, index=slice(None)):
         """Solve Biot interaction across grid."""
         self.data = Biot(self.subframe, self.subframe.loc[:, index],
                          reduce=[True, True], columns=['Psi']).data

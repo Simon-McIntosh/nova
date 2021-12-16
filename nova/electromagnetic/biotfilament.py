@@ -118,7 +118,7 @@ class BiotRing(BiotSolve):
     columns: list[str] = field(default_factory=lambda: [
         'Aphi', 'Psi', 'Br', 'Bz'])
 
-    def calculate_coefficients(self) -> dict[npt.ArrayLike]:
+    def calculate_coefficients(self):
         """Return interaction coefficients."""
         offset = PoloidalOffset(self.source, self.target)
         coeff = {'rs': offset.source_radius, 'zs': offset.source_height,
@@ -183,14 +183,13 @@ class Biot(BiotMatrix):
     def update(self, segment):
         """Calculate segment biot interaction."""
         index = np.array(self.source.segment == segment)
-        try:
-            data = self.generator[segment](
-                self.source.loc[index, :], self.target,
-                turns=self.turns, reduce=self.reduce).data
-        except KeyError:
-            raise NotImplementedError(f'segment {segment} not implemented '
-                                      f'in Biot.generator: '
-                                      '{self.generator.keys()}')
+        if segment not in self.generator:
+            raise NotImplementedError(
+                f'segment <{segment}> not implemented '
+                f'in Biot.generator: {self.generator.keys()}')
+        data = self.generator[segment](
+            self.source.loc[index, :], self.target,
+            turns=self.turns, reduce=self.reduce).data
         source_index = self.source_index(segment)
         plasma_index = self.plasma_index(segment)
         for var in self.columns:

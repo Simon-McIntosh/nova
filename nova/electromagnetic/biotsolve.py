@@ -1,17 +1,55 @@
 """Biot-Savart calculation base class."""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from typing import Mapping, Union
 
 import numpy as np
 import numpy.typing as npt
+import pandas
 import xarray
 
 from nova.electromagnetic.biotset import BiotSet
 from nova.electromagnetic.dataarray import DataArray
 
 
+@dataclass
+class DaskBiotVector:
+    """Store Biot vectors - implement subset of xarray dataset interface."""
+
+    index: pandas.Index
+    chunks: Union[int, str, Mapping] = None
+    data: xarray.Dataset = field(init=False)
+
+    def __post_init__(self):
+        """Create empty dataset."""
+        self.data = xarray.Dataset(coords=dict(index=self.index))
+
+    def __setitem__(self, attr, value):
+        """Inset index aligned item to dataset."""
+        value = xarray.DataArray(value, dims=['index'])
+        if self.chunks is not None:  # convert to dask array
+            value = value.chunk(self.chunks)
+        self.data[attr] = value
+
+    def __getitem__(self, attr):
+        """Return dataarray from dataset."""
+        return self.data[attr]
+
+    def __delitem__(self, key):
+        """Delete variable from dataset."""
+        del self.data[key]
+
+    def __iter__(self):
+        """Itterate through variables in dataset."""
+        return iter(self.data)
+
+    def __len__(self):
+        """Return number of variables in dataset."""
+        return len(self.data)
+
+
 class BiotVector(DataArray):
-    """Store Biot vectors."""
+    """Biot Vector data container built from DataFrame extension."""
 
     def __init__(self, data=None, index=None, columns=None, attrs=None,
                  **metadata):
@@ -51,7 +89,6 @@ class BiotMatrix(BiotSet):
             self.data[f'_{var}'] = xarray.DataArray(
                 0., dims=['target', 'plasma'],
                 coords=[self.data.target, self.data.plasma])
-        # self.data = self.data.chunk(dict(source=100, plasma=100, target=100))
 
     def get_index(self, frame):
         """Return matrix coordinate, reduce if flag True."""
@@ -72,22 +109,16 @@ class BiotSolve(ABC, BiotMatrix):
     def __post_init__(self):
         """Init static and unit datasets."""
         super().__post_init__()
-        print('init')
-        #self.calculate_vectors()
-        #self.store_matrix(self.vector)
+        self.vector = BiotVector(index=self.index, columns=self.columns)
+        self.calculate_vectors()
+        self.store_matrix()
 
     def calculate_vectors(self):
         """Calculate vector and scalar potential and magnetic field."""
-        self.vector = BiotVector(index=self.index, columns=self.columns)
-        print('vector')
         coeff = self.calculate_coefficients()
-        print('coeff')
         self.calculate_vector_potential(coeff)
-        print('vector_potential')
         self.calculate_scalar_potential(coeff)
-        print('scalar potential')
         self.calculate_magnetic_field(coeff)
-        print('magnetic potential')
 
     @abstractmethod
     def calculate_coefficients(self) -> dict[str, npt.ArrayLike]:
@@ -119,7 +150,7 @@ class BiotSolve(ABC, BiotMatrix):
         """Return source-target shape."""
         return (len(self.target), len(self.source))
 
-    def store_matrix(self, vector: BiotVector):
+    def store_matrix(self):
         """
         Store interaction matrices.
 
@@ -128,9 +159,8 @@ class BiotSolve(ABC, BiotMatrix):
         Apply reduction summations.
 
         """
-        for col in vector:
-            print('store', col)
-            matrix = vector[col].reshape(*self.shape)
+        for col in self.vector:
+            matrix = self.vector[col].reshape(*self.shape)  # .to_numpy()
             plasma = matrix[:, self.source.plasma]
             if self.source.turns:
                 matrix *= self.source('nturn').reshape(*self.shape)

@@ -45,12 +45,12 @@ class BiotData(FilePath, FrameSetLoc):
         raise AttributeError(f'attribute {Attr} not specified in {self.attrs}')
 
     @abstractmethod
-    def _solve(self, *args):
+    def solve_biot(self, *args):
         """Solve biot interaction - extened by subclass."""
 
     def solve(self, *args):
         """Solve biot interaction - update attrs."""
-        self._solve(*args)
+        self.solve_biot(*args)
         self.update()
 
     def update(self):

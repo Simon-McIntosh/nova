@@ -30,7 +30,7 @@ def test_spline_update(plot=False):
     '''
     assert np.equal(update, [True, False, True, False, True]).all()
     assert False
-test_spline_update()
+#test_spline_update()
 
 
 def null_curvature(sign, plot):

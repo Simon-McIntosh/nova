@@ -656,7 +656,7 @@ class Topology:
     @property
     def filter_sigma(self):
         """
-        Manage kernal width for gaussian filter.
+        Manage kernel width for gaussian filter.
 
         Set width to zero to dissable filtering.
 

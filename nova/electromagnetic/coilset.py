@@ -113,7 +113,7 @@ if __name__ == '__main__':
     coilset.sloc['Ic'] = 1
     coilset.sloc['Shl0', 'Ic'] = -5
 
-    coilset.grid.solve(100_000, 0.05)
+    coilset.grid.solve(50_000, 0.05)
 
     coilset.sloc['Ic'] = 6
     coilset.sloc['bubble', 'Ic'] = 5

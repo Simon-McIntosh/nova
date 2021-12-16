@@ -72,16 +72,22 @@ class BiotSolve(ABC, BiotMatrix):
     def __post_init__(self):
         """Init static and unit datasets."""
         super().__post_init__()
-        self.calculate_vectors()
-        self.store_matrix(self.vector)
+        print('init')
+        #self.calculate_vectors()
+        #self.store_matrix(self.vector)
 
     def calculate_vectors(self):
         """Calculate vector and scalar potential and magnetic field."""
         self.vector = BiotVector(index=self.index, columns=self.columns)
+        print('vector')
         coeff = self.calculate_coefficients()
+        print('coeff')
         self.calculate_vector_potential(coeff)
+        print('vector_potential')
         self.calculate_scalar_potential(coeff)
+        print('scalar potential')
         self.calculate_magnetic_field(coeff)
+        print('magnetic potential')
 
     @abstractmethod
     def calculate_coefficients(self) -> dict[str, npt.ArrayLike]:
@@ -123,6 +129,7 @@ class BiotSolve(ABC, BiotMatrix):
 
         """
         for col in vector:
+            print('store', col)
             matrix = vector[col].reshape(*self.shape)
             plasma = matrix[:, self.source.plasma]
             if self.source.turns:

@@ -27,6 +27,7 @@ class BiotData(FilePath, FrameSetLoc):
         """Init path and link line current and plasma index."""
         if isinstance(self.attrs, list):
             self.attrs = {attr: id(None) for attr in self.attrs}
+        self.attrs['Bn'] = id(None)
         self.subframe.metaframe.metadata = \
             {'additional': ['plasma', 'nturn'],
              'array': ['plasma', 'nturn'],
@@ -38,11 +39,25 @@ class BiotData(FilePath, FrameSetLoc):
         """Return attribute data."""
         if (Attr := attr.capitalize()) in self.attrs:
             self.update_indexer()
+            if Attr == 'Bn':
+                return self.get_norm()
             if self.attrs[Attr] != self.subframe.version['plasma']:
                 self.update_turns(Attr)
                 self.attrs[Attr] = self.subframe.version['plasma']
-            return self.array[Attr] @ self.saloc['Ic']
+            return self.array[Attr] @ self.Ic
         raise AttributeError(f'attribute {Attr} not specified in {self.attrs}')
+
+    def get_norm(self):
+        """Return cached field L2 norm."""
+        version = hash(self.Ic.data.tobytes())
+        if self.attrs['Bn'] != version or 'Bn' not in self.array:
+            self.array['Bn'] = self.calculate_norm()
+            self.attrs['Bn'] = version
+        return self.array['Bn']
+
+    def calculate_norm(self):
+        """Return calculated L2 norm."""
+        return np.linalg.norm([self.Br, self.Bz], axis=0)
 
     @abstractmethod
     def solve_biot(self, *args):

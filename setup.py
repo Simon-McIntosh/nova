@@ -31,7 +31,6 @@ setup_kwargs = dict(
         #ansys-dpf-core==0.2.1
         #ansys-dpf-post
         #astropy
-        'dask',
         'descartes',
         #gmsh
         #geojson,

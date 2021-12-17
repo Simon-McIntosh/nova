@@ -110,6 +110,7 @@ class FrameSetLoc(FrameData):
     sALoc: ArrayLocIndexer = field(init=False, repr=False)
     aloc: ArrayLocIndexer = field(init=False, repr=False)
     saloc: ArrayLocIndexer = field(init=False, repr=False)
+    Ic: npt.ArrayLike = field(init=False, repr=False)
 
     def __post_init__(self):
         """Create array loc indexers."""
@@ -117,6 +118,7 @@ class FrameSetLoc(FrameData):
         self.sALoc = ArrayLocIndexer('sArray', self.frame.subspace)
         self.aloc = ArrayLocIndexer('array', self.subframe)
         self.saloc = ArrayLocIndexer('sarray', self.subframe.subspace)
+        self.Ic = self.saloc['Ic']
         self.version['frameloc'] = self.frame.version['index']
         self.version['subframeloc'] = self.subframe.version['index']
 
@@ -133,6 +135,7 @@ class FrameSetLoc(FrameData):
             self.version['subframeloc'] = self.subframe.version['index']
             self.aloc.relink()
             self.saloc.relink()
+            self.Ic = self.saloc['Ic']
 
     def update_indexer(self):
         """Update links to array loc indexer following changes to index id."""

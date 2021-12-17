@@ -99,7 +99,7 @@ class CoilSet(CoilGrid, FrameSet):
 
 if __name__ == '__main__':
 
-    coilset = CoilSet(dcoil=-35, dplasma=-500)
+    coilset = CoilSet(dcoil=-35, dplasma=-150)
     coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
                         nturn=-0.8)
     coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex', turn='c',

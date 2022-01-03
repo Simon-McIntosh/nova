@@ -71,6 +71,7 @@ class EvGrid:
 import hdbscan
 import numba
 
+
 @dataclass
 class FieldGrid:
 
@@ -89,28 +90,28 @@ class FieldGrid:
         self.points = np.c_[x2d.flatten(), z2d.flatten()]
 
 
-spec = [
-    ('field', numba.float64[:, :]),
-    ('flux', numba.float64[:, :]),
-    ('index_x', numba.boolean[:, :]),
-    ('index_o', numba.boolean[:, :])
-]
-
-
-@numba.experimental.jitclass(spec)
+@numba.experimental.jitclass(
+    dict(field=numba.float64[:, :], flux=numba.float64[:, :],
+         index_x=numba.boolean[:, :], index_o=numba.boolean[:, :]))
 class Null:
 
     def __init__(self, field, flux):
-        #kernel = self.kernel()
-        self.field = field#self.filter2d(field, kernel)
+        self.field = field
         self.flux = flux
-        self.index_o = self.grid_search(self.flux)
-        self.index_o = self.index_o | self.grid_search(-self.flux)
-        self.index_x = self.grid_search(self.field) & ~self.index_o
-        #self.index_x &= self.field < np.quantile(self.field, 0.1)
+
+        #field_count = categorize(self.field)
+        #flux_count = categorize(self.flux)
+
+        #self.index_o = flux_count == 0
+        #self.index_x = (flux_count == 4) & (field_count == 0)
+
+        self.index_o = self.minimum_search(self.flux)
+        self.index_o |= self.minimum_search(-self.flux)
+        self.index_x = self.categorize(self.flux) == 4
+        self.index_x &= self.minimum_search(self.field)
 
     @staticmethod
-    def grid_search(data):
+    def minimum_search(data):
         xdim, zdim = data.shape
         index = np.full((xdim, zdim), False)
         for i in numba.prange(1, xdim-1):
@@ -126,7 +127,35 @@ class Null:
                 index[i, j] = True
         return index
 
-    '''
+    @staticmethod
+    def categorize(data):
+        """Categorize points in 2D grid.
+
+        Count number of sign changes whilst traversing neighbour point loop.
+
+            - 0: minima / maxima point
+            - 2: regular point
+            - 4: saddle point
+
+        """
+        xdim, zdim = data.shape
+        index = np.full((xdim, zdim), -1)
+        for i in range(1, xdim-1):
+            for j in range(1, zdim-1):
+                neighbour = [data[i-1, j],
+                             data[i-1, j-1], data[i, j-1], data[i+1, j-1],
+                             data[i+1, j],
+                             data[i+1, j+1], data[i, j+1], data[i-1, j+1]]
+                sign = np.sign(neighbour[-1] - data[i, j])
+                count = 0
+                for k in range(8):
+                    _sign = np.sign(neighbour[k] - data[i, j])
+                    if _sign != sign:
+                        count += 1
+                        sign = _sign
+                index[i, j] = count
+        return index
+
     @staticmethod
     def filter2d(image, filt):
         """Return filtered data.
@@ -147,7 +176,7 @@ class Null:
                                 image[i-Mf2+ii, j-Nf2+jj])
                 result[i, j] = num
         return result
-
+    '''
     @staticmethod
     def kernel(sigma=1, length=3):
         """
@@ -168,7 +197,7 @@ if __name__ == '__main__':
     coilset.coil.insert(5, [-2, 2], 0.75, 0.75)
     coilset.coil.insert(7.8, 0, 0.75, 0.75, label='Xcoil')
     coilset.plasma.insert(dict(o=(4, 0, 0.5)), delta=0.3)
-    coilset.grid.solve(300, 0.05) #[3.2, 8.5, -2.5, 2.5])
+    coilset.grid.solve(1000, 0.05) #[3.2, 8.5, -2.5, 2.5])
     coilset.sloc['Ic'] = -15e6
 
     grid = coilset.grid
@@ -177,8 +206,7 @@ if __name__ == '__main__':
 
     #bn = scipy.ndimage.gaussian_filter(grid.bn.reshape(shape), 1.5)
 
-    null = Null(grid.bn.reshape(shape),
-                grid.psi.reshape(shape))
+    null = Null(grid.bn.reshape(shape), grid.psi.reshape(shape))
 
     plt.plot(grid.data.x2d.data[null.index_o],
              grid.data.z2d.data[null.index_o], 'o')

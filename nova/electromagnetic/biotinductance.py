@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 
 
-from nova.electromagnetic.biotfilament import Biot
+from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.biotdata import BiotData
 from nova.electromagnetic.polyplot import Axes
 
@@ -13,8 +13,8 @@ class BiotInductance(Axes, BiotData):
 
     def solve_biot(self, index=slice(None)):
         """Solve Biot interaction across grid."""
-        self.data = Biot(self.subframe, self.subframe.loc[:, index],
-                         reduce=[True, True], columns=['Psi']).data
+        self.data = BiotSolve(self.subframe, self.subframe.loc[:, index],
+                              reduce=[True, True], columns=['Psi']).data
 
     def plot(self, axes=None, **kwargs):
         """Plot points."""

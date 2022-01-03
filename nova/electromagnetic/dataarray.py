@@ -143,6 +143,11 @@ class DataArray(ArrayIndexer, DataFrame):
         with self.setlock(True, 'array'):
             super().__setitem__(col, value)
 
+    def store(self, file, group=None, mode='w'):
+        """Store dataframe as group in netCDF4 hdf5 file."""
+        self.update_frame()
+        super().store(file, group, mode)
+
 
 if __name__ == '__main__':
 

@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 import nlopt
 import numpy as np
 
-from nova.electromagnetic.biotfilament import Biot
 from nova.electromagnetic.biotframe import BiotFrame
+from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.biotsolve import BiotMatrix
 from nova.electromagnetic.biotdata import BiotData
@@ -23,8 +23,8 @@ class BiotPoint(Axes, BiotData):
         target = BiotFrame(dict(x=[point[0] for point in points],
                                 z=[point[1] for point in points]),
                            label='Point')
-        self.data = Biot(self.subframe, target, reduce=[True, False],
-                         columns=['Psi', 'Br', 'Bz']).data
+        self.data = BiotSolve(self.subframe, target, reduce=[True, False],
+                              columns=['Psi', 'Br', 'Bz']).data
         # insert grid data
         self.data.coords['x'] = target['x']
         self.data.coords['z'] = target['z']

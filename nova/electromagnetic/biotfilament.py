@@ -1,12 +1,12 @@
 """Biot-Savart calculation for complete circular filaments."""
 from dataclasses import dataclass, field
+from typing import ClassVar
 
 import numpy as np
-import numpy.typing as npt
 import scipy.special
 
 from nova.electromagnetic.biotframe import BiotFrame
-from nova.electromagnetic.biotsolve import BiotMatrix, BiotSolve
+from nova.electromagnetic.biotcalc import BiotCalc
 
 
 # pylint: disable=no-member  # disable scipy.special module not found
@@ -105,7 +105,7 @@ class PoloidalOffset(PolidalCoordinates):
 
 
 @dataclass
-class BiotRing(BiotSolve):
+class BiotRing(BiotCalc):
     """
     Extend BiotMatrix base class.
 
@@ -114,9 +114,9 @@ class BiotRing(BiotSolve):
     """
 
     name = 'ring'  # element name
-
-    columns: list[str] = field(default_factory=lambda: [
+    attrs: list[str] = field(default_factory=lambda: [
         'Aphi', 'Psi', 'Br', 'Bz'])
+    _attrs: ClassVar[list[str]] = ['Aphi', 'Psi', 'Br', 'Bz']
 
     def calculate_coefficients(self):
         """Return interaction coefficients."""
@@ -151,47 +151,3 @@ class BiotRing(BiotSolve):
         self.vector['Bz'] = self.mu_o / (2*np.pi) * \
             (coeff['r']*coeff['K'] - (2*coeff['r'] - coeff['b']*coeff['k2']) /
              (2*coeff['ck2']) * coeff['E']) / (coeff['a']*coeff['r'])
-
-
-@dataclass
-class Biot(BiotMatrix):
-    """Manage biot interaction between multiple filament types."""
-
-    generator = {'ring': BiotRing}
-
-    def __post_init__(self):
-        """Solve biot interaction."""
-        super().__post_init__()
-        self.calculate()
-
-    def calculate(self):
-        """Calculate full ensemble biot interaction."""
-        self.initialize_dataset()
-        for segment in self.source.segment.unique():
-            self.update(segment)
-
-    def source_index(self, segment):
-        """Return source segment index."""
-        source = self.source.segment[self.get_index('source')]
-        return np.array(source == segment)
-
-    def plasma_index(self, segment):
-        """Return plasma segment index."""
-        plasma = self.source.segment[self.source.index[self.source.plasma]]
-        return np.array(plasma == segment)
-
-    def update(self, segment):
-        """Calculate segment biot interaction."""
-        index = np.array(self.source.segment == segment)
-        if segment not in self.generator:
-            raise NotImplementedError(
-                f'segment <{segment}> not implemented '
-                f'in Biot.generator: {self.generator.keys()}')
-        data = self.generator[segment](
-            self.source.loc[index, :], self.target,
-            turns=self.turns, reduce=self.reduce).data
-        source_index = self.source_index(segment)
-        plasma_index = self.plasma_index(segment)
-        for var in self.columns:
-            self.data[var].loc[:, source_index] = data[var]
-            self.data[f'_{var}'].loc[:, plasma_index] = data[f'_{var}']

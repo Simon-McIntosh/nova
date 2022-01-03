@@ -8,7 +8,8 @@ from numpy import typing as npt
 import shapely.geometry
 import xarray
 
-from nova.electromagnetic.biotfilament import Biot
+from nova.electromagnetic.biotframe import BiotFrame
+from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.biotdata import BiotData
 from nova.electromagnetic.framelink import FrameLink
 from nova.electromagnetic.polyplot import Axes
@@ -130,6 +131,7 @@ class Expand:
 class BiotGrid(Axes, BiotData):
     """Compute interaction across grid."""
 
+    attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     levels: Union[int, list[float]] = 31
 
     def solve_biot(self, number: int, limit: Union[float, list[float]],
@@ -138,10 +140,11 @@ class BiotGrid(Axes, BiotData):
         if isinstance(limit, (int, float)):
             limit = Expand(self.subframe, index)(limit)
         grid = Grid(number, limit)
-        target = dict(x=grid.data.x2d.values.flatten(),
-                      z=grid.data.z2d.values.flatten())
-        self.data = Biot(self.subframe, target, reduce=[True, False],
-                         columns=['Psi', 'Br', 'Bz']).data
+        target = BiotFrame(dict(x=grid.data.x2d.values.flatten(),
+                                z=grid.data.z2d.values.flatten()),
+                           label='Grid')
+        self.data = BiotSolve(self.subframe, target, reduce=[True, False],
+                              attrs=self.attrs).data
         # insert grid data
         self.data.coords['x'] = grid.data.x
         self.data.coords['z'] = grid.data.z

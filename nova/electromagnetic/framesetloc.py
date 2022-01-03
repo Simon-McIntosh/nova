@@ -110,32 +110,27 @@ class FrameSetLoc(FrameData):
     sALoc: ArrayLocIndexer = field(init=False, repr=False)
     aloc: ArrayLocIndexer = field(init=False, repr=False)
     saloc: ArrayLocIndexer = field(init=False, repr=False)
-    Ic: npt.ArrayLike = field(init=False, repr=False)
+    current: npt.ArrayLike = field(init=False, repr=False)
 
     def __post_init__(self):
         """Create array loc indexers."""
-        self.ALoc = ArrayLocIndexer('Array', self.frame)
-        self.sALoc = ArrayLocIndexer('sArray', self.frame.subspace)
-        self.aloc = ArrayLocIndexer('array', self.subframe)
-        self.saloc = ArrayLocIndexer('sarray', self.subframe.subspace)
-        self.Ic = self.saloc['Ic']
-        self.version['frameloc'] = self.frame.version['index']
-        self.version['subframeloc'] = self.subframe.version['index']
+        self.version |= dict(frameloc=id(None), subframeloc=id(None))
+        self.update_indexer()
 
     def update_frameloc(self):
         """Update frame array loc indexer."""
         if self.version['frameloc'] != self.frame.version['index']:
             self.version['frameloc'] = self.frame.version['index']
-            self.ALoc.relink()
-            self.sALoc.relink()
+            self.ALoc = ArrayLocIndexer('Array', self.frame)
+            self.sALoc = ArrayLocIndexer('sArray', self.frame.subspace)
 
     def update_subframeloc(self):
         """Update subframe array loc indexer."""
         if self.version['subframeloc'] != self.subframe.version['index']:
             self.version['subframeloc'] = self.subframe.version['index']
-            self.aloc.relink()
-            self.saloc.relink()
-            self.Ic = self.saloc['Ic']
+            self.aloc = ArrayLocIndexer('array', self.subframe)
+            self.saloc = ArrayLocIndexer('sarray', self.subframe.subspace)
+            self.current = self.saloc['Ic']
 
     def update_indexer(self):
         """Update links to array loc indexer following changes to index id."""

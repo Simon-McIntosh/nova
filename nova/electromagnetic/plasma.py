@@ -9,8 +9,8 @@ import numpy.typing as npt
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polyplot import Axes
-from nova.geometry import inpoly
 from nova.geometry.polygon import Polygon
+from nova.geometry.polyloop import PolyLoop
 from nova.utilities.pyplot import plt
 
 from numba import njit
@@ -60,7 +60,7 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
     loop: npt.ArrayLike = field(init=False, default=None, repr=False)
-    points: npt.ArrayLike = field(init=False, default=None, repr=False)
+    polyloop: PolyLoop = field(init=False, default=None, repr=False)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -69,6 +69,7 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
              'array': ['plasma', 'ionize', 'area', 'nturn', 'x', 'z']}
         self.subframe.update_columns()
         super().__post_init__()
+        self.generate()
 
     def __len__(self):
         """Return number of plasma filaments."""
@@ -79,10 +80,14 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
         return self.loc['ionize', ['x', 'z', 'section', 'area',
                                    'Ic', 'It', 'nturn']].__str__()
 
+    def generate(self):
+        """Generate polyloop."""
+        self.polyloop = PolyLoop(self.loc['plasma', ['x', 'z']].to_numpy())
+
     def insert(self, *args, required=None, iloc=None, **additional):
         """Insert plasma, normalize turn number for multiframe plasmas."""
         super().insert(*args, required=None, iloc=None, **additional)
-        self.points = np.c_[self.loc['plasma', 'x'], self.loc['plasma', 'z']]
+        self.generate()
         if self.sloc['plasma'].sum() == 1:
             return
         self.linkframe(self.Loc['plasma', :].index.tolist())
@@ -121,14 +126,14 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
             Bounding loop.
 
         """
-        if self.points is None:
+        if self.polyloop is None:
             return
         self.update_indexer()
         try:
-            inloop = inpoly.polymultipoint(self.points, loop)
+            inloop = self.polyloop.evaluate(loop)
         except numba.TypingError:
             loop = Polygon(loop).boundary
-            inloop = inpoly.polymultipoint(self.points, loop)
+            inloop = self.polyloop.evaluate(loop)
         self.loop = loop
         self.subframe.version['plasma'] = id(loop)
         plasma = self.aloc['plasma']

@@ -1,12 +1,12 @@
 """Manage subframe access."""
 from dataclasses import dataclass, field
 
-import numpy as np
 import numpy.typing as npt
 
 from nova.electromagnetic.framedata import FrameData
 from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.error import SpaceKeyError
+from nova.utilities.xpu import xp
 
 
 @dataclass
@@ -61,24 +61,12 @@ class LocIndexer:
 
 
 @dataclass
-class ArrayLocIndexer:
-    """Access views of cached metaframe.data arrays."""
+class DataLocIndexer:
+    """Data Loc base class."""
 
     name: str
     frame: FrameSpace = field(repr=False)
-    subspace: bool = field(init=False, repr=False)
-    attrs: list[str] = field(init=False, default_factory=list)
     _data: dict = field(init=False, repr=False)
-
-    def __post_init__(self):
-        """Set subspace flag and referance data arrays."""
-        self.subspace = self.name[0] == 's'  # set subspace flag
-        self.attrs = self.frame.attrs['metaframe'].array
-        self.relink()
-
-    def relink(self):
-        """Relink data."""
-        self._data = {attr: self.frame[attr] for attr in self.attrs}
 
     def __setitem__(self, key, value):
         """Set data array item in metaframe.data dict."""
@@ -91,6 +79,32 @@ class ArrayLocIndexer:
     def __getattr__(self, attr):
         """Implement fast attribute lookup."""
         return self._data[attr]
+
+
+@dataclass
+class ArrayLocIndexer(DataLocIndexer):
+    """Access views of cached metaframe.data arrays."""
+
+    attrs: list[str] = field(init=False, default_factory=list)
+
+    def __post_init__(self):
+        """Update referance data arrays."""
+        self.attrs = self.frame.attrs['metaframe'].array
+        self._data = {attr: self.frame[attr] for attr in self.attrs}
+
+
+@dataclass
+class PlasmaLocIndexer(DataLocIndexer):
+    """Manage plasma arrays."""
+
+    attrs: list[str] = field(init=False, default_factory=lambda: [
+        'nturn', 'ionize', 'area'])
+
+    def __post_init__(self):
+        """Update referance data arrays."""
+        index = self.frame.plasma
+        self._data = {attr: xp.asarray(self.frame[attr][index])
+                      for attr in self.attrs}
 
 
 @dataclass
@@ -130,6 +144,7 @@ class FrameSetLoc(FrameData):
             self.version['subframeloc'] = self.subframe.version['index']
             self.aloc = ArrayLocIndexer('array', self.subframe)
             self.saloc = ArrayLocIndexer('sarray', self.subframe.subspace)
+            self.ploc = PlasmaLocIndexer('plasma', self.subframe)
             self.current = self.saloc['Ic']
 
     def update_indexer(self):

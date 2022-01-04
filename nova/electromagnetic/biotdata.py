@@ -2,11 +2,11 @@
 from abc import abstractmethod
 from dataclasses import dataclass, field
 
-import numpy as np
 import xarray
 
 from nova.electromagnetic.filepath import FilePath
 from nova.electromagnetic.framesetloc import FrameSetLoc
+from nova.utilities.xpu import xp, asnumpy
 
 
 @dataclass
@@ -40,7 +40,7 @@ class BiotData(FilePath, FrameSetLoc):
             if self.version[Attr] != self.subframe.version['plasma']:
                 self.update_turns(Attr)
                 self.version[Attr] = self.subframe.version['plasma']
-            return self.array[Attr] @ self.current
+            return self.array[Attr] @ xp.asarray(self.current)
         raise AttributeError(f'attribute {Attr} not specified in {self.attrs}')
 
     def get_norm(self):
@@ -53,7 +53,7 @@ class BiotData(FilePath, FrameSetLoc):
 
     def calculate_norm(self):
         """Return calculated L2 norm."""
-        return np.linalg.norm([self.Br, self.Bz], axis=0)
+        return xp.linalg.norm([self.Br, self.Bz], axis=0)
 
     @abstractmethod
     def solve_biot(self, *args):
@@ -67,13 +67,17 @@ class BiotData(FilePath, FrameSetLoc):
     def update(self):
         """Update data attributes."""
         for attr in self.data.attrs['attributes']:
-            self.array[attr] = self.data[attr].data
-            self.array[f'_{attr}'] = self.data[f'_{attr}'].data
+            self.array[attr] = xp.array(self.data[attr].data,
+                                        xp.float32)
+            self.array[f'_{attr}'] = xp.array(self.data[f'_{attr}'].data,
+                                              xp.float32)
         self.update_indexer()
         try:
             self.plasma_index = next(
                 self.frame.subspace.index.get_loc(name) for name in
-                self.subframe.frame[self.aloc.plasma].unique())
+                self.subframe.frame[asnumpy(self.aloc.plasma)].unique())
+            self.plasma_slice = slice(self.aloc['plasma'].argmax(),
+                                      -self.aloc['plasma'][::-1].argmax())
         except StopIteration:
             pass
 
@@ -92,8 +96,9 @@ class BiotData(FilePath, FrameSetLoc):
 
     def update_turns(self, attr: str):
         """Update plasma turns."""
-        if self.data.attrs['plasma_index'] is None:
+        if self.plasma_index is None:
             return
-        nturn = self.aloc['nturn'][self.aloc['plasma']]
+        nturn = xp.array(self.aloc['nturn'][self.aloc['plasma']],
+                         dtype=xp.float32)
         index = self.plasma_index
         self.array[attr][:, index] = self.array[f'_{attr}'] @ nturn

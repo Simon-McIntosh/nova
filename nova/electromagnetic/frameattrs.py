@@ -2,8 +2,8 @@
 from contextlib import contextmanager
 from typing import Collection, Any
 
-import pandas
 import numpy as np
+import pandas
 
 from nova.electromagnetic.metaframe import MetaFrame
 from nova.electromagnetic.metamethod import MetaMethod

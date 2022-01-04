@@ -141,7 +141,7 @@ class Select(MetaMethod):
             'additional': labels,
             'subspace': [label for label in labels
                          if label not in self.superspace],
-            }#'array': labels}
+            }
 
     def update_columns(self):
         """Update frame columns if any additional unset."""

@@ -28,6 +28,7 @@ setup_kwargs = dict(
     python_requires     = '>=3.9, <3.10',
     install_requires    = [
         'alphashape',
+        'cupy-cuda114',
         #ansys-dpf-core==0.2.1
         #ansys-dpf-post
         #astropy

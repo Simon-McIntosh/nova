@@ -1,4 +1,5 @@
 """Extend DataFrame - add subspace."""
+
 import numpy as np
 
 from nova.electromagnetic.framelink import FrameLink, LinkLocMixin, LinkIndexer

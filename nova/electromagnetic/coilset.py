@@ -101,10 +101,10 @@ class CoilSet(CoilGrid, FrameSet):
 if __name__ == '__main__':
 
     filename = 'tmp'
-    reload = False
+    reload = True
     if reload:
 
-        coilset = CoilSet(dcoil=-35, dplasma=-150)
+        coilset = CoilSet(dcoil=-35, dplasma=-500)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
                             nturn=-0.8)
         coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex', turn='c',
@@ -118,7 +118,7 @@ if __name__ == '__main__':
         coilset.sloc['Ic'] = 1
         coilset.sloc['Shl0', 'Ic'] = -5
 
-        coilset.grid.solve(1000, 0.1)
+        coilset.grid.solve(2000, 0.1)
 
         coilset.sloc['Ic'] = 6
         coilset.sloc['bubble', 'Ic'] = 5
@@ -128,11 +128,11 @@ if __name__ == '__main__':
     else:
         coilset = CoilSet().load(filename)
 
-    separatrix = Polygon(dict(c=[4.0, 0.25, 20.8])).boundary
+    separatrix = Polygon(dict(c=[4.0, 0.25, 0.8])).boundary
     coilset.plasma.update_separatrix(separatrix)
 
-    coilset.sloc['Ic'] = 1
-    coilset.sloc['plasma', 'Ic'] = -4
+    #coilset.sloc['Ic'] = 1
+    #coilset.sloc['plasma', 'Ic'] = -4
 
     coilset.grid.plot(levels=25)
     coilset.plasma.plot()

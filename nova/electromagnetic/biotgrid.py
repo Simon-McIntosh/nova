@@ -13,6 +13,7 @@ from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.biotdata import BiotData
 from nova.electromagnetic.framelink import FrameLink
 from nova.electromagnetic.polyplot import Axes
+from nova.utilities.xpu import asnumpy
 
 
 @dataclass
@@ -161,8 +162,8 @@ class BiotGrid(Axes, BiotData):
         self.axes = axes
         kwargs = dict(colors='lightgray', linewidths=1.5, alpha=0.9,
                       linestyles='solid', levels=self.levels) | kwargs
-        QuadContourSet = self.axes.contour(self.data.x, self.data.z,
-                                           self.psi.reshape(*self.shape).T,
+        psi = asnumpy(self.psi.reshape(*self.shape).T)
+        QuadContourSet = self.axes.contour(self.data.x, self.data.z, psi,
                                            **kwargs)
         if isinstance(kwargs['levels'], int):
             self.levels = QuadContourSet.levels

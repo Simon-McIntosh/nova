@@ -12,18 +12,9 @@ from nova.electromagnetic.polyplot import Axes
 from nova.geometry.polygon import Polygon
 from nova.geometry.polyloop import PolyLoop
 from nova.utilities.pyplot import plt
+from nova.utilities.xpu import xp, asnumpy
 
-from numba import njit
-
-# self.biot_instances = ['plasmafilament', 'plasmagrid']
-
-'''
-self.plasmagrid.generate_grid(**kwargs)
-grid_factor = self.dPlasma/self.plasmagrid.dx
-# self._add_vertical_stabilization_coils()
-self.plasmagrid.cluster_factor = 1.5*grid_factor
-self.plasmafilament.add_plasma()
-'''
+from numba import njit, cuda
 
 
 @dataclass
@@ -92,9 +83,9 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
             return
         self.linkframe(self.Loc['plasma', :].index.tolist())
         self.Loc['plasma', 'nturn'] = \
-            self.Loc['plasma', 'area'] / np.sum(self.Loc['plasma', 'area'])
+            self.Loc['plasma', 'area'] / xp.sum(self.Loc['plasma', 'area'])
         self.loc['plasma', 'nturn'] = \
-            self.loc['plasma', 'area'] / np.sum(self.loc['plasma', 'area'])
+            self.loc['plasma', 'area'] / xp.sum(self.loc['plasma', 'area'])
 
     @property
     def plasma_version(self):
@@ -136,12 +127,26 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
             inloop = self.polyloop.evaluate(loop)
         self.loop = loop
         self.subframe.version['plasma'] = id(loop)
+
         plasma = self.aloc['plasma']
         ionize = self.aloc['ionize']
         nturn = self.aloc['nturn']
         area = self.aloc['area']
         ionize[plasma] = inloop
+
+        '''
+        self.ploc['ionize'] = inloop
+        ionize_area = self.ploc['area'][inloop]
+        self.ploc['nturn'] = 0
+        self.ploc['nturn'][inloop] = ionize_area / np.sum(ionize_area)
+        '''
+
+        #threadsperblock = 32
+        #blockspergrid = (loop.size + (threadsperblock - 1)) // threadsperblock
+
         self._update_nturn(plasma, ionize, nturn, area)
+        #print(nturn[plasma])
+        #self.ploc['nturn'] = xp.asarray(nturn[plasma], dtype=xp.float32)
 
     @staticmethod
     @njit
@@ -165,4 +170,4 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
     @property
     def polarity(self):
         """Return plasma polarity."""
-        return np.sign(self.sloc['Plasma', 'Ic'])
+        return xp.sign(self.sloc['Plasma', 'Ic'])

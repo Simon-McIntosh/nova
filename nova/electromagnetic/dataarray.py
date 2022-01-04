@@ -130,7 +130,7 @@ class DataArray(ArrayIndexer, DataFrame):
     def _get_frame(self, col):
         """Return col from frame."""
         try:
-            value = super().__getitem__(col).to_numpy()
+            value = np.array(super().__getitem__(col).to_numpy())
         except (AttributeError, KeyError):
             value = np.full(len(self), self.metaframe.default[col])
             super().__setitem__(col, value)

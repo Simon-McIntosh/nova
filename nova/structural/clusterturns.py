@@ -107,7 +107,7 @@ if __name__ == '__main__':
     #cluster.update(1)
     cluster.plot_slice_array()
 
-    #cluster.plot_turn_array()
+    cluster.plot_turn_array()
 
 
 

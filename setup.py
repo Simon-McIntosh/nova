@@ -3,8 +3,10 @@ import versioneer
 
 long_description = """..."""
 
-extras_require = dict(test=['pytest'], develop=['spyder'],
+extras_require = dict(test=['pytest', 'line_profiler'], develop=['spyder'],
+                      mesh=['gmsh', 'pygmsh', 'tetgen', 'trimesh'],
                       ansys=['ansys-dpf-core==0.2.1', 'ansys-dpf-post', 'openpyxl'])
+extras_require['full'] = [module for mode in extras_require for module in extras_require[mode]]
 
 setup_kwargs = dict(
     name                = 'nova',
@@ -32,9 +34,7 @@ setup_kwargs = dict(
         'cupy-cuda115',
         #astropy
         'descartes',
-        #gmsh
         #geojson,
-        #line_profiler
         'meshio',
         'netCDF4',
         #networkx
@@ -46,8 +46,6 @@ setup_kwargs = dict(
         'pandas',
         #plotly
         'pygeos',
-        #pygmsh
-        #pytest
         #python-dateutil
         'pyvista',
         'pyquaternion',
@@ -56,11 +54,7 @@ setup_kwargs = dict(
         'scipy',
         'scikit-learn',
         'shapely',
-        #spyder
-        #tetgen
-        #trimesh
         'vedo',
-        #vtk
         'wheel',
         'xarray',
     ],

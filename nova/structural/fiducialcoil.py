@@ -1,3 +1,4 @@
+
 """Build fiducial coilset."""
 from dataclasses import dataclass, field
 import os
@@ -65,7 +66,7 @@ class FiducialCoil(Plotter):
         """Return TFC1 case."""
         case = pv.PolyData()
         for part in ['case_il', 'case_ol']:
-            case += AnsysPost('TFCgapsG10', 'k0', part.upper()).mesh
+            case = case + AnsysPost('TFCgapsG10', 'k0', part.upper()).mesh
         case = case.clip((-np.sin(np.pi/18), np.cos(np.pi/18), 0),
                          origin=(0, 0, 0))
         case = case.clip((np.sin(np.pi/18), np.cos(np.pi/18), 0),
@@ -79,7 +80,7 @@ class FiducialCoil(Plotter):
         case = self.load_case(decimate=0)
         windingpack = self.load_surface_mesh('E_WP_1', decimate=0)
         for i in range(18):
-            morph_wp = Morph(self.fiducialdata.extract_cells(i),
+            morph_wp = Morph(self.fiducialdata.mesh.extract_cells(i),
                              windingpack,
                              neighbors=1, kernel='linear').mesh
             sub_wp = morph_wp.decimate_boundary(self.decimate)

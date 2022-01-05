@@ -135,6 +135,6 @@ if __name__ == '__main__':
     wp = UniformWindingPack()
     wp.plot_turns()
 
-    #points = ccl.mesh.points.reshape(18, 134, -1, 3)
-    #loop = points[9, 0]
-    #plt.plot(loop[:, 0], loop[:, 2])
+    points = wp.mesh.points.reshape(18, 134, -1, 3)
+    loop = points[9, 0]
+    plt.plot(loop[:, 0], loop[:, 2])

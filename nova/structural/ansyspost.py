@@ -174,9 +174,10 @@ class AnsysPost(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    k0 = AnsysPost('TFCgapsG10', 'k0', 'all')
+    ansys = AnsysPost('TFCgapsG10', 'k0', 'CASE_IL')
+    #ansys.select(0)
+    #ansys.mesh.plot()
 
-    print(k0.mesh.field_data)
     #k0 = AnsysPost('TFCgapsG10', 'k0', 'WP')
 
     #ansys.mesh.plot(lighting=True, color='w')

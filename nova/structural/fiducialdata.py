@@ -93,7 +93,7 @@ class FiducialData(Plotter):
             coil = centerline.copy()
             coil['delta'] = 1e-3*self.data.centerline_delta.sel(coil=loc.coil)
             coil.rotate_z(20*loc.values, point=(0, 0, 0),
-                          transform_all_input_vectors=True)
+                          transform_all_input_vectors=True, inplace=True)
             midplane = coil.slice(normal='z', origin=(0, 0, 0))
             midplane.points += midplane['delta']
             coil['coil'] = [loc.coil.values]
@@ -247,8 +247,8 @@ class FiducialData(Plotter):
 
 if __name__ == '__main__':
 
-    fiducial = FiducialData('IDM', fill=False)
-    #fiducial.plot_single(-3)
+    fiducial = FiducialData('RE', fill=False)
+    fiducial.plot_single(-3)
     #fiducial.plot_gpr(1, 0)
 
     '''
@@ -258,5 +258,5 @@ if __name__ == '__main__':
     plotter.show_axes()
     plotter.show()
     '''
-    fiducial.plot()
+    #fiducial.plot()
     #fiducial.plot_gpr_array(1)

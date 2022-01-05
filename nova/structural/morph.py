@@ -45,8 +45,6 @@ class Morph(Plotter):
 
 if __name__ == '__main__':
 
-
-
     TF1 = AnsysPost('TFCgapsG10', 'k0', 'E_TF1')
     # mesh = AnsysPost('TFCgapsG10', 'k0', 'E_TF2').mesh
     # mesh = AnsysPost('TFCgapsG10', 'k0', 'all').mesh

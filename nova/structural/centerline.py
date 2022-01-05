@@ -25,7 +25,7 @@ class CenterLine(Line):
     @property
     def vtk_file(self):
         """Return vtk file path (Centerline)."""
-        return os.path.join(root_dir, 'input/geometry/ITER/TF_CL.vtk')
+        return os.path.join(root_dir, 'input/ITER/TF_CL.vtk')
 
     def load(self):
         """Load single coil centerline."""
@@ -64,5 +64,5 @@ class CenterLine(Line):
 if __name__ == '__main__':
 
     cl = CenterLine()
-    #cl.build()
+    # cl.build()
     cl.mesh.plot()

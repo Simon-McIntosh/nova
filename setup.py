@@ -3,7 +3,8 @@ import versioneer
 
 long_description = """..."""
 
-extras_require = dict(test=['pytest'], develop=['pytest', 'spyder'])
+extras_require = dict(test=['pytest'], develop=['spyder'],
+                      ansys=['ansys-dpf-core==0.2.1', 'ansys-dpf-post', 'openpyxl'])
 
 setup_kwargs = dict(
     name                = 'nova',
@@ -28,9 +29,7 @@ setup_kwargs = dict(
     python_requires     = '>=3.9, <3.10',
     install_requires    = [
         'alphashape',
-        'cupy-cuda114',
-        #ansys-dpf-core==0.2.1
-        #ansys-dpf-post
+        'cupy-cuda115',
         #astropy
         'descartes',
         #gmsh

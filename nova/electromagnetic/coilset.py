@@ -101,7 +101,7 @@ class CoilSet(CoilGrid, FrameSet):
 if __name__ == '__main__':
 
     filename = 'tmp'
-    reload = True
+    reload = False
     if reload:
 
         coilset = CoilSet(dcoil=-35, dplasma=-500)

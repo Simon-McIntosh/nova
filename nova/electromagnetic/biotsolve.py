@@ -12,7 +12,7 @@ from nova.electromagnetic.biotcalc import BiotMatrix
 class BiotSolve(BiotMatrix):
     """Manage biot interaction between multiple filament types."""
 
-    svd: bool = False
+    svd: bool = True
     generator: ClassVar[dict] = {'ring': BiotRing}
 
     def __post_init__(self):

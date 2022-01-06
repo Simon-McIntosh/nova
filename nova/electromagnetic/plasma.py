@@ -145,6 +145,7 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
         #blockspergrid = (loop.size + (threadsperblock - 1)) // threadsperblock
 
         self._update_nturn(plasma, ionize, nturn, area)
+        self.subframe.plasmaturns = xp.asarray(nturn[ionize], xp.float32)
         #print(nturn[plasma])
         #self.ploc['nturn'] = xp.asarray(nturn[plasma], dtype=xp.float32)
 

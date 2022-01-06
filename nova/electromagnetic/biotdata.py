@@ -71,6 +71,14 @@ class BiotData(FilePath, FrameSetLoc):
                                         xp.float32)
             self.array[f'_{attr}'] = xp.array(self.data[f'_{attr}'].data,
                                               xp.float32)
+            rank = int(len(self.data[f'_{attr}']) / 500)
+            self.array[f'_U{attr}'] = xp.array(
+                self.data[f'_U{attr}'].data[:, :rank], xp.float32)
+            self.array[f'_s{attr}'] = xp.array(
+                self.data[f'_s{attr}'].data[:rank], xp.float32)
+            self.array[f'_V{attr}'] = xp.array(
+                self.data[f'_V{attr}'].data[:rank, :], xp.float32)
+
         self.update_indexer()
         try:
             self.plasma_index = next(
@@ -98,7 +106,12 @@ class BiotData(FilePath, FrameSetLoc):
         """Update plasma turns."""
         if self.plasma_index is None:
             return
-        nturn = xp.array(self.aloc['nturn'][self.aloc['plasma']],
-                         dtype=xp.float32)
+        #nturn = xp.array(self.aloc['nturn'][self.aloc['plasma']],
+        #                 dtype=xp.float32)
         index = self.plasma_index
-        self.array[attr][:, index] = self.array[f'_{attr}'] @ nturn
+        self.array[attr][:, index] = self.array[f'_{attr}'] @ \
+            self.subframe.plasmaturns
+
+        #self.array[attr][:, index] = \
+        #    self.array[f'_U{attr}'] @ (self.array[f'_s{attr}'] *
+        #                               (self.array[f'_V{attr}'] @ nturn))

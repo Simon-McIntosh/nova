@@ -16,9 +16,14 @@ class Plotter:
             self.mesh.set_active_scalars(name)
         return name
 
-    def plot(self, displace: str, referance: str, factor=80):
-        """Plot warped shape."""
-        self.warp(factor=factor, displace=self.diff(displace, referance))
+    def plot(self):
+        """Plot mesh."""
+        plotter = pv.Plotter()
+        plotter.add_mesh(self.mesh, scalars=None, color='w',
+                         opacity=1, smooth_shading=False,
+                         line_width=3)
+        return plotter
+
 
     def warp(self, factor=75, opacity=0.5, displace=None, scalars=None,
              plotter=None, show_edges=False, color=None, show=False,

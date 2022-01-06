@@ -150,12 +150,12 @@ class AnsysPost(DataDir, Plotter):
             self.mesh = body
         return body
 
-    def plot(self, loadcase=-1, factor=275, opacity=1, plotter=None):
-        """Return pyvista plotter with mesh displacement."""
-        if loadcase < 0:
-            loadcase = self.time_scoping[loadcase]-1
-        return self.warp(f'disp-{loadcase}', f'vm-{loadcase}',
-                         plotter=plotter, factor=factor, opacity=opacity)
+    #def plot(self, loadcase=-1, factor=275, opacity=1, plotter=None):
+    #    """Return pyvista plotter with mesh displacement."""
+    #    if loadcase < 0:
+    #        loadcase = self.time_scoping[loadcase]-1
+    #    return self.warp(f'disp-{loadcase}', f'vm-{loadcase}',
+    #                     plotter=plotter, factor=factor, opacity=opacity)
 
     def subplot(self):
         """Generate linked loadcase subplot."""
@@ -176,7 +176,15 @@ if __name__ == '__main__':
 
     ansys = AnsysPost('TFCgapsG10', 'k0', 'CASE_IL')
     #ansys.select(0)
-    #ansys.mesh.plot()
+
+    plotter = ansys.plot()
+
+    points = []
+    def store(point):
+        points.append(list(point))
+
+    plotter.enable_point_picking(callback=store, point_size=3)
+    plotter.show()
 
     #k0 = AnsysPost('TFCgapsG10', 'k0', 'WP')
 

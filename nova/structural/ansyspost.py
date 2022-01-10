@@ -174,17 +174,9 @@ class AnsysPost(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    ansys = AnsysPost('TFCgapsG10', 'k0', 'CASE_IL')
-    #ansys.select(0)
-
-    plotter = ansys.plot()
-
-    points = []
-    def store(point):
-        points.append(list(point))
-
-    plotter.enable_point_picking(callback=store, point_size=3)
-    plotter.show()
+    ansys = AnsysPost('TFCgapsG10', 'k0', 'CASE_OL')
+    ansys.select(8)
+    ansys.plot()
 
     #k0 = AnsysPost('TFCgapsG10', 'k0', 'WP')
 

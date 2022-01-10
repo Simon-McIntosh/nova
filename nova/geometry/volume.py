@@ -188,6 +188,14 @@ class TetVol(TriShell):
                       axis=0) / self.volume
 
 
+class Patch(vedo.Mesh):
+    """Construct surface patch."""
+
+    def __init__(self, points: npt.ArrayLike):
+        cells = np.arange(0, len(points)).reshape(1, -1)
+        super().__init__((points, cells))
+
+
 class VtkPoly(VtkFrame):
     """Construct boundary line mesh from shapely polygon."""
 

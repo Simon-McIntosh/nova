@@ -16,11 +16,11 @@ class Plotter:
             self.mesh.set_active_scalars(name)
         return name
 
-    def plot(self):
+    def plot(self, opacity=1):
         """Plot mesh."""
         plotter = pv.Plotter()
         plotter.add_mesh(self.mesh, scalars=None, color='w',
-                         opacity=1, smooth_shading=False,
+                         opacity=opacity, smooth_shading=False,
                          line_width=3)
         return plotter
 

@@ -1,6 +1,7 @@
 """Load ccl fiducial data for ITER TF coilset."""
 from dataclasses import dataclass, field
 import string
+from typing import ClassVar
 
 import numpy as np
 import pandas
@@ -26,6 +27,8 @@ class FiducialData(Plotter):
     data: xarray.Dataset = field(init=False, repr=False)
     gpr: GaussianProcessRegressor = field(init=False, repr=False)
     mesh: pv.PolyData = field(init=False)
+    location: ClassVar[list[int]] = [14, 15, 4, 17, 6, 7, 2, 3, 16, 5,
+                                     12, 13, 8, 9, 10, 11, 18, 1, 19]
 
     def __post_init__(self):
         """Load data."""
@@ -76,10 +79,9 @@ class FiducialData(Plotter):
 
     def locate_coils(self):
         """Update data with coil's position index."""
-        loc = [14, 15, 4, 17, 6, 7, 2, 3, 16, 5, 12, 13, 8, 9, 10, 11, 18, 1,
-               19]
         self.data = self.data.assign_coords(
-            location=('coil', [loc.index(coil) for coil in self.data.coil]))
+            location=('coil', [self.location.index(coil)
+                               for coil in self.data.coil]))
         self.data = self.data.sortby('location')
 
     def build_mesh(self):

@@ -65,16 +65,16 @@ class BiotData(FilePath, FrameSetLoc):
     def solve(self, *args):
         """Solve biot interaction - update attrs."""
         self.solve_biot(*args)
-        self.update_array()
+        self.link_array()
 
-    def update_data(self):
+    def link_data(self):
         """Update data attributes."""
         for attr in self.data.attrs['attributes']:
             if attr[0] == '_':
                 continue
             self.data[attr].data = asnumpy(self.array[attr])
 
-    def update_array(self):
+    def link_array(self):
         """Update array attributes."""
         for attr in self.data.attrs['attributes']:
             self.array[attr] = xp.array(self.data[attr].data, xp.float32)
@@ -101,6 +101,7 @@ class BiotData(FilePath, FrameSetLoc):
     def store(self, filename: str, path=None):
         """Store data as netCDF in hdf5 file."""
         file = self.file(filename, path)
+        self.link_data()
         self.data.to_netcdf(file, mode='a', group=self.name)
 
     def load(self, file: str, path=None):
@@ -109,7 +110,7 @@ class BiotData(FilePath, FrameSetLoc):
         with xarray.open_dataset(file, group=self.name) as data:
             data.load()
             self.data = data
-        self.update()
+        self.link_array()
 
     def update_turns(self, attr: str):
         """Update plasma turns."""

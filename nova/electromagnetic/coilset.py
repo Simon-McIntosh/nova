@@ -101,9 +101,9 @@ class CoilSet(CoilGrid, FrameSet):
 if __name__ == '__main__':
 
     filename = 'tmp'
-    reload = True
+    reload = False
     if reload:
-        coilset = CoilSet(dcoil=-35, dplasma=-100)
+        coilset = CoilSet(dcoil=-35, dplasma=-300)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
                             nturn=-0.8)
         coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex', turn='c',
@@ -117,7 +117,7 @@ if __name__ == '__main__':
         coilset.sloc['Ic'] = 1
         coilset.sloc['Shl0', 'Ic'] = -5
 
-        coilset.grid.solve(1000, 0.1)
+        coilset.grid.solve(3000, 0.1)
 
         coilset.sloc['Ic'] = 6
         coilset.sloc['bubble', 'Ic'] = 5
@@ -127,15 +127,28 @@ if __name__ == '__main__':
     else:
         coilset = CoilSet().load(filename)
 
-    separatrix = Polygon(dict(c=[4.0, 0.25, 0.8])).boundary
+    separatrix = Polygon(dict(c=[4.0, -1.05, 0.8])).boundary
     coilset.plasma.update_separatrix(separatrix)
 
+    coilset.sloc['bubble', 'Ic'] = 5
     #coilset.sloc['Ic'] = 1
     #coilset.sloc['plasma', 'Ic'] = -4
 
-    coilset.grid.plot(levels=25)
+    coilset.grid.plot(levels=31)
     coilset.plasma.plot()
     coilset.plot()
+
+    from nova.electromagnetic.interpolate import Null
+    from nova.utilities.pyplot import plt
+
+    grid = coilset.grid
+    shape = grid.data.dims['x'], grid.data.dims['z']
+    null = Null(grid.bn.reshape(shape), grid.psi.reshape(shape))
+
+    plt.plot(grid.data.x2d.data[null.index_o],
+             grid.data.z2d.data[null.index_o], 'o')
+    plt.plot(grid.data.x2d.data[null.index_x],
+             grid.data.z2d.data[null.index_x], 'X')
 
     def update_turns(n=1000):
         update_turns = coilset.grid.update_turns

@@ -68,7 +68,7 @@ class EvGrid:
         """Initialize attribute IDs"""
         self.attrs = {attr: id(None) for attr in self.grid.attrs}
 
-import hdbscan
+#import hdbscan
 import numba
 
 
@@ -105,10 +105,13 @@ class Null:
         #self.index_o = flux_count == 0
         #self.index_x = (flux_count == 4) & (field_count == 0)
 
-        self.index_o = self.minimum_search(self.flux)
-        self.index_o |= self.minimum_search(-self.flux)
-        self.index_x = self.categorize(self.flux) == 4
-        self.index_x &= self.minimum_search(self.field)
+        #self.index_o = self.minimum_search(self.flux)
+        #self.index_o |= self.minimum_search(-self.flux)
+        #flux_category = self.categorize(self.flux)
+        #field_category = self.categorize(self.field)
+        self.index_o = self.categorize(self.flux) == 0
+        self.index_x = (self.categorize(self.flux) == 4) & (self.categorize(self.field) == 0)
+        #self.index_x &= self.minimum_search(self.field)
 
     @staticmethod
     def minimum_search(data):

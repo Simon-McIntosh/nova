@@ -59,7 +59,6 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
              'array': ['plasma', 'ionize', 'area', 'nturn', 'x', 'z']}
         self.subframe.update_columns()
         super().__post_init__()
-        self.generate()
 
     def __len__(self):
         """Return number of plasma filaments."""
@@ -70,7 +69,7 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
         return self.loc['ionize', ['x', 'z', 'section', 'area',
                                    'Ic', 'It', 'nturn']].__str__()
 
-    def generate(self):
+    def generate_polyloop(self):
         """Generate polyloop."""
         if self.sloc['plasma'].sum() == 0:
             return
@@ -79,7 +78,6 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
     def insert(self, *args, required=None, iloc=None, **additional):
         """Insert plasma, normalize turn number for multiframe plasmas."""
         super().insert(*args, required=None, iloc=None, **additional)
-        self.generate()
         if self.sloc['plasma'].sum() == 1:
             return
         self.linkframe(self.Loc['plasma', :].index.tolist())
@@ -118,8 +116,10 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
             Bounding loop.
 
         """
-        if self.polyloop is None:
+        if self.sloc['plasma'].sum() == 0:
             return
+        if self.polyloop is None:
+            self.generate_polyloop()
         self.update_indexer()
         try:
             inloop = self.polyloop.evaluate(loop)

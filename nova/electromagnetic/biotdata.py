@@ -6,7 +6,7 @@ import xarray
 
 from nova.electromagnetic.filepath import FilePath
 from nova.electromagnetic.framesetloc import FrameSetLoc
-from nova.utilities.xpu import xp, asnumpy
+from nova.utilities.xpu import array_module, asnumpy
 
 
 @dataclass
@@ -20,9 +20,12 @@ class BiotData(FilePath, FrameSetLoc):
     data: xarray.Dataset = field(init=False, repr=False)
     array: dict = field(init=False, default_factory=dict)
     plasma_index: int = field(init=False, default=None)
+    xpu: str = None
 
     def __post_init__(self):
         """Init path and link line current and plasma index."""
+        global xp
+        xp = array_module(self.xpu)
         self.version |= {attr: id(None) for attr in self.attrs}
         self.version['Bn'] = id(None)
         self.subframe.metaframe.metadata = \
@@ -62,13 +65,19 @@ class BiotData(FilePath, FrameSetLoc):
     def solve(self, *args):
         """Solve biot interaction - update attrs."""
         self.solve_biot(*args)
-        self.update()
+        self.update_array()
 
-    def update(self):
+    def update_data(self):
         """Update data attributes."""
         for attr in self.data.attrs['attributes']:
-            self.array[attr] = xp.array(self.data[attr].data,
-                                        xp.float32)
+            if attr[0] == '_':
+                continue
+            self.data[attr].data = asnumpy(self.array[attr])
+
+    def update_array(self):
+        """Update array attributes."""
+        for attr in self.data.attrs['attributes']:
+            self.array[attr] = xp.array(self.data[attr].data, xp.float32)
             self.array[f'_{attr}'] = xp.array(self.data[f'_{attr}'].data,
                                               xp.float32)
             rank = int(len(self.data[f'_{attr}']) / 500)
@@ -106,11 +115,10 @@ class BiotData(FilePath, FrameSetLoc):
         """Update plasma turns."""
         if self.plasma_index is None:
             return
-        #nturn = xp.array(self.aloc['nturn'][self.aloc['plasma']],
-        #                 dtype=xp.float32)
+        nturn = xp.array(self.aloc['nturn'][self.aloc['plasma']],
+                         dtype=xp.float32)
         index = self.plasma_index
-        self.array[attr][:, index] = self.array[f'_{attr}'] @ \
-            self.subframe.plasmaturns
+        self.array[attr][:, index] = self.array[f'_{attr}'] @ nturn
 
         #self.array[attr][:, index] = \
         #    self.array[f'_U{attr}'] @ (self.array[f'_s{attr}'] *

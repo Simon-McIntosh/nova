@@ -41,7 +41,7 @@ def test_save_load_vtk():
     frame = FrameSpace(part='vtk')
     frame += dict(vtk=box)
     frame.vtk[0].triangulate()
-    with tempfile.NamedTemporaryFile() as tmp:
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
         frame.store(tmp.name, 'frame')
         new_frame = FrameSpace().load(tmp.name, 'frame')
     assert new_frame.vtk[0].volume() == frame.vtk[0].volume()

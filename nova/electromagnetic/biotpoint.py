@@ -24,7 +24,7 @@ class BiotPoint(Axes, BiotData):
                                 z=[point[1] for point in points]),
                            label='Point')
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
-                              columns=['Psi', 'Br', 'Bz']).data
+                              attrs=['Psi', 'Br', 'Bz']).data
         # insert grid data
         self.data.coords['x'] = target['x']
         self.data.coords['z'] = target['z']

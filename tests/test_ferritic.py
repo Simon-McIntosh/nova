@@ -60,7 +60,7 @@ def test_insert_frame_fromfile():
     coilset.ferritic.insert(box, part='Fi1', label='fi', offset=1)
     coilset.ferritic.insert(box, part='Fi2', label='Fi', offset=0)
     subframe = coilset.subframe.copy()
-    with tempfile.NamedTemporaryFile() as tmp:
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
         subframe.store(tmp.name)
         coilset = CoilSet()
         coilset.ferritic.insert(tmp.name)

@@ -5,7 +5,7 @@ Code adapted from:
 
 License: Apache 2.0
 Carl Kadie
-https://fastlmm.github.io/
+https://github.com/CarlKCarlK/gpuoptional/
 
 """
 
@@ -33,7 +33,7 @@ def array_module(module=None):
         cupy or numpy.
 
     """
-    module = module or os.environ.get('XPU', 'cupy')
+    module = module or os.environ.get('XPU', 'numpy')
 
     if isinstance(module, ModuleType):
         return module

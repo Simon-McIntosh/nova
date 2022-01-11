@@ -1,11 +1,14 @@
 
 import tempfile
 
+import unittest.mock
+
 import numpy as np
 import pytest
 
 from nova.electromagnetic.coilset import CoilSet
 from nova.geometry.polygon import Polygon
+from nova.utilities.xpu import asnumpy
 
 
 def test_dpol():
@@ -266,6 +269,23 @@ def test_biot_solve_no_plasma():
     assert (coilset.grid.psi != 0).all()
 
 
+def test_biotdata_numpy():
+    with unittest.mock.patch.dict('os.environ', dict(XPU='numpy')):
+        coilset = CoilSet(dplasma=-3)
+        coilset.plasma.insert(3, -0.5, 0.95, 0.95)
+        coilset.grid.solve(10, 0.05)
+        assert isinstance(coilset.grid.array['Psi'], np.ndarray)
+
+
+def test_biotdata_cupy():
+    cp = pytest.importorskip('cupy')
+    with unittest.mock.patch.dict('os.environ', dict(XPU='cupy')):
+        coilset = CoilSet(dplasma=-3)
+        coilset.plasma.insert(3, -0.5, 0.95, 0.95)
+        coilset.grid.solve(10, 0.05)
+        assert isinstance(coilset.grid.array['Psi'], cp.ndarray)
+
+
 def test_biot_link_dataarray_dataset():
     coilset = CoilSet(dplasma=-20)
     coilset.plasma.insert(3, -0.5, 0.95, 0.95)
@@ -273,8 +293,10 @@ def test_biot_link_dataarray_dataset():
     Psi = coilset.grid.array['Psi'].copy()
     coilset.plasma.update_separatrix(((2.5, -1), (3.5, -1), (3, 0)))
     coilset.grid.update_turns('Psi')
-    assert (coilset.grid.array['Psi'] == coilset.grid.data['Psi']).all()
-    assert (Psi != coilset.grid.data['Psi']).any()
+    coilset.grid.update_data()
+    assert (asnumpy(coilset.grid.array['Psi']) ==
+            coilset.grid.data['Psi']).all()
+    assert (asnumpy(Psi) != coilset.grid.data['Psi']).any()
 
 
 def test_biot_multiframe_plasma():

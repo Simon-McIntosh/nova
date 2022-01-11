@@ -12,9 +12,8 @@ from nova.electromagnetic.polyplot import Axes
 from nova.geometry.polygon import Polygon
 from nova.geometry.polyloop import PolyLoop
 from nova.utilities.pyplot import plt
-from nova.utilities.xpu import xp, asnumpy
 
-from numba import njit, cuda
+from numba import njit
 
 
 @dataclass
@@ -73,6 +72,8 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
 
     def generate(self):
         """Generate polyloop."""
+        if self.sloc['plasma'].sum() == 0:
+            return
         self.polyloop = PolyLoop(self.loc['plasma', ['x', 'z']].to_numpy())
 
     def insert(self, *args, required=None, iloc=None, **additional):
@@ -83,9 +84,9 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
             return
         self.linkframe(self.Loc['plasma', :].index.tolist())
         self.Loc['plasma', 'nturn'] = \
-            self.Loc['plasma', 'area'] / xp.sum(self.Loc['plasma', 'area'])
+            self.Loc['plasma', 'area'] / np.sum(self.Loc['plasma', 'area'])
         self.loc['plasma', 'nturn'] = \
-            self.loc['plasma', 'area'] / xp.sum(self.loc['plasma', 'area'])
+            self.loc['plasma', 'area'] / np.sum(self.loc['plasma', 'area'])
 
     @property
     def plasma_version(self):
@@ -145,7 +146,7 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
         #blockspergrid = (loop.size + (threadsperblock - 1)) // threadsperblock
 
         self._update_nturn(plasma, ionize, nturn, area)
-        self.subframe.plasmaturns = xp.asarray(nturn[ionize], xp.float32)
+        #self.subframe.plasmaturns = np.asarray(nturn[ionize], xp.float32)
         #print(nturn[plasma])
         #self.ploc['nturn'] = xp.asarray(nturn[plasma], dtype=xp.float32)
 
@@ -171,4 +172,4 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
     @property
     def polarity(self):
         """Return plasma polarity."""
-        return xp.sign(self.sloc['Plasma', 'Ic'])
+        return np.sign(self.sloc['Plasma', 'Ic'])

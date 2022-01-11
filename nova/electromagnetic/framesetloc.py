@@ -6,7 +6,6 @@ import numpy.typing as npt
 from nova.electromagnetic.framedata import FrameData
 from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.error import SpaceKeyError
-from nova.utilities.xpu import xp
 
 
 @dataclass
@@ -94,20 +93,6 @@ class ArrayLocIndexer(DataLocIndexer):
 
 
 @dataclass
-class PlasmaLocIndexer(DataLocIndexer):
-    """Manage plasma arrays."""
-
-    attrs: list[str] = field(init=False, default_factory=lambda: [
-        'nturn', 'ionize', 'area'])
-
-    def __post_init__(self):
-        """Update referance data arrays."""
-        index = self.frame.plasma
-        self._data = {attr: xp.asarray(self.frame[attr][index])
-                      for attr in self.attrs}
-
-
-@dataclass
 class FrameSetLoc(FrameData):
     """
     FrameSet Loc indexer.
@@ -144,7 +129,6 @@ class FrameSetLoc(FrameData):
             self.version['subframeloc'] = self.subframe.version['index']
             self.aloc = ArrayLocIndexer('array', self.subframe)
             self.saloc = ArrayLocIndexer('sarray', self.subframe.subspace)
-            self.ploc = PlasmaLocIndexer('plasma', self.subframe)
             self.current = self.saloc['Ic']
 
     def update_indexer(self):

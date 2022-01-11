@@ -103,7 +103,6 @@ if __name__ == '__main__':
     filename = 'tmp'
     reload = True
     if reload:
-
         coilset = CoilSet(dcoil=-35, dplasma=-100)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
                             nturn=-0.8)

@@ -127,11 +127,11 @@ if __name__ == '__main__':
     else:
         coilset = CoilSet().load(filename)
 
-    separatrix = Polygon(dict(c=[4.0, -1.05, 0.8])).boundary
+    separatrix = Polygon(dict(c=[4.0, 1.05, 0.8])).boundary
     coilset.plasma.update_separatrix(separatrix)
 
     coilset.sloc['bubble', 'Ic'] = 5
-    #coilset.sloc['Ic'] = 1
+    coilset.sloc['passive', 'Ic'] = -2
     #coilset.sloc['plasma', 'Ic'] = -4
 
     coilset.grid.plot(levels=31)
@@ -144,7 +144,7 @@ if __name__ == '__main__':
     grid = coilset.grid
     shape = grid.data.dims['x'], grid.data.dims['z']
     bn, psi = grid.bn.reshape(shape), grid.psi.reshape(shape)
-    null = FieldNull(bn, psi)
+    null = FieldNull(psi, bn)
 
     plt.plot(grid.data.x2d.data[null.index_o],
              grid.data.z2d.data[null.index_o], 'o')

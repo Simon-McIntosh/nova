@@ -138,12 +138,13 @@ if __name__ == '__main__':
     coilset.plasma.plot()
     coilset.plot()
 
-    from nova.electromagnetic.interpolate import Null
+    from nova.electromagnetic.fieldnull import FieldNull
     from nova.utilities.pyplot import plt
 
     grid = coilset.grid
     shape = grid.data.dims['x'], grid.data.dims['z']
-    null = Null(grid.bn.reshape(shape), grid.psi.reshape(shape))
+    bn, psi = grid.bn.reshape(shape), grid.psi.reshape(shape)
+    null = FieldNull(bn, psi)
 
     plt.plot(grid.data.x2d.data[null.index_o],
              grid.data.z2d.data[null.index_o], 'o')

@@ -90,28 +90,54 @@ class FieldGrid:
         self.points = np.c_[x2d.flatten(), z2d.flatten()]
 
 
+@numba.stencil(func_or_mode='constant', cval=-1,
+               neighborhood=((-1, 1), (-1, 1)))
+def counter(data):
+    center = data[0, 0]
+    sign = data[-1, 1] > center
+    count = 0
+    for k in [(-1, 0), (-1, -1), (0, -1), (1, -1),
+              (1, 0), (1, 1), (0, 1), (-1, 1)]:
+        _sign = data[k] > center
+        if _sign != sign:
+            count += 1
+            sign = _sign
+    return count
+
+'''
 @numba.experimental.jitclass(
     dict(field=numba.float64[:, :], flux=numba.float64[:, :],
-         index_x=numba.boolean[:, :], index_o=numba.boolean[:, :]))
-class Null:
+         index_x=numba.boolean[:, :], index_o=numba.boolean[:, :],
+         pattern=numba.int16[:, :]))
+'''
+class FieldNull:
 
     def __init__(self, field, flux):
         self.field = field
         self.flux = flux
 
+        #self.pattern = np.array([[-1, 0], [-1, -1], [0, -1], [1, -1],
+        #                         [1, 0], [1, 1], [0, 1], [-1, 1]],
+        #                        dtype=numba.int16)
+
+        #self.index_o, self.index_x
         #field_count = categorize(self.field)
         #flux_count = categorize(self.flux)
+
+        #self.index_o = self.minimum_search(self.flux)
+        #self.index_o |= self.minimum_search(-self.flux)
+        #self.index_x = self.minimum_search(self.field)
+        #self.index_x &= ~self.index_o
 
         #self.index_o = flux_count == 0
         #self.index_x = (flux_count == 4) & (field_count == 0)
 
-        #self.index_o = self.minimum_search(self.flux)
-        #self.index_o |= self.minimum_search(-self.flux)
-        #flux_category = self.categorize(self.flux)
-        #field_category = self.categorize(self.field)
-        self.index_o = self.categorize(self.flux) == 0
-        self.index_x = (self.categorize(self.flux) == 4) & (self.categorize(self.field) == 0)
-        #self.index_x &= self.minimum_search(self.field)
+        self.index_o, self.index_x = self.categorize(self.flux)
+        self.index_x &= self.categorize(self.field)[0]
+
+        #count = counter(self.flux)
+        #self.index_o = count == 0
+        #self.index_x = count == 4
 
     @staticmethod
     def minimum_search(data):
@@ -130,7 +156,12 @@ class Null:
                 index[i, j] = True
         return index
 
+    def pindex(self, i, j, k):
+        index = self.pattern[k]
+        return i+index[0], j+index[1]
+
     @staticmethod
+    @numba.njit()
     def categorize(data):
         """Categorize points in 2D grid.
 
@@ -142,22 +173,24 @@ class Null:
 
         """
         xdim, zdim = data.shape
-        index = np.full((xdim, zdim), -1)
-        for i in range(1, xdim-1):
+        index_o = np.full((xdim, zdim), False, dtype=numba.boolean)
+        index_x = np.full((xdim, zdim), False, dtype=numba.boolean)
+        for i in numba.prange(1, xdim-1):
             for j in range(1, zdim-1):
-                neighbour = [data[i-1, j],
-                             data[i-1, j-1], data[i, j-1], data[i+1, j-1],
-                             data[i+1, j],
-                             data[i+1, j+1], data[i, j+1], data[i-1, j+1]]
-                sign = np.sign(neighbour[-1] - data[i, j])
+                center = data[i, j]
+                sign = data[i-1, j+1] > center
                 count = 0
-                for k in range(8):
-                    _sign = np.sign(neighbour[k] - data[i, j])
+                for k in [(-1, 0), (-1, -1), (0, -1), (1, -1),
+                          (1, 0), (1, 1), (0, 1), (-1, 1)]:
+                    _sign = data[i+k[0], j+k[1]] > center
                     if _sign != sign:
                         count += 1
                         sign = _sign
-                index[i, j] = count
-        return index
+                if count == 0:
+                    index_o[i, j] = True
+                if count == 4:
+                    index_x[i, j] = True
+        return index_o, index_x
 
     @staticmethod
     def filter2d(image, filt):

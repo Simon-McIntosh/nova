@@ -130,12 +130,13 @@ class Expand:
 
 
 @dataclass
-class BiotGrid(Axes, BiotData):
+class BiotGrid(FieldNull, BiotData):
     """Compute interaction across grid."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     levels: Union[int, list[float]] = 31
-    _null: FieldNull = field(init=False, default=None)
+    r_coordinate: npt.ArrayLike = field(repr=False, default=None)
+    z_coordinate: npt.ArrayLike = field(repr=False, default=None)
 
     def solve_biot(self, number: int, limit: Union[float, list[float]],
                    index: Union[str, slice, npt.ArrayLike] = slice(None)):
@@ -153,10 +154,27 @@ class BiotGrid(Axes, BiotData):
         self.data.coords['z'] = grid.data.z
         self.data.coords['x2d'] = (['x', 'z'], grid.data.x2d.data)
         self.data.coords['z2d'] = (['x', 'z'], grid.data.z2d.data)
-        # initialize field null instance
-        self._null = FieldNull(self.coords)
-        self.version['current'] = id(None)
+        # link to field null instance
+        self.r_coordinate = grid.data.x.data
+        self.z_coordinate = grid.data.z.data
+        self.version['fieldnull'] = id(None)
 
+    def check_null(self):
+        """Check validity of upstream data, update if nessisary."""
+        current_hash = hash(self.current.data.tobytes())
+        if current_hash != self.version['fieldnull'] or \
+                self.version['Psi'] != self.subframe.version['plasma']:
+            self.update_null(self.psi.reshape(self.shape),
+                             self.bn.reshape(self.shape))
+            self.version['fieldnull'] = current_hash
+
+    def __getattribute__(self, attr):
+        """Extend getattribute to intercept field null data access."""
+        if attr == 'data_x' or attr == 'data_o':
+            self.check_null()
+        return super().__getattribute__(attr)
+
+    '''
     @property
     def null(self):
         if (version := id(self.current)) != self.version['current']:
@@ -169,11 +187,7 @@ class BiotGrid(Axes, BiotData):
             self._null.update(psi, bn)
             self.version['current'] = version
         return self._null
-
-    @property
-    def coords(self):
-        """Return 1D grid coordinates."""
-        return self.data.x.data, self.data.z.data
+    '''
 
     @property
     def shape(self):

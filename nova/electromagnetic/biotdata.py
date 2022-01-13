@@ -35,7 +35,7 @@ class BiotData(FilePath, FrameSetLoc):
         super().__post_init__()
 
     def __getattr__(self, attr):
-        """Return variales data."""
+        """Return variable data."""
         if (Attr := attr.capitalize()) in self.version:
             self.update_indexer()
             if Attr == 'Bn':

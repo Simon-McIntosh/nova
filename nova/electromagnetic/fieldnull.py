@@ -1,4 +1,4 @@
-
+"""Methods for calculating the position and value of x-points and o-points."""
 from dataclasses import dataclass, field
 
 import numba
@@ -14,19 +14,11 @@ from nova.geometry.polygon import Polygon
 class DataNull(Axes):
     """Store sort and remove field nulls."""
 
-    coords: npt.ArrayLike = field(repr=False)
+    r_coordinate: npt.ArrayLike = field(repr=False)
+    z_coordinate: npt.ArrayLike = field(repr=False)
     loop: npt.ArrayLike = field(repr=False, default=None)
     data_o: dict[str, np.ndarray] = field(init=False, default_factory=dict)
     data_x: dict[str, np.ndarray] = field(init=False, default_factory=dict)
-
-    def check_null(self):
-        return
-
-    def __getattribute__(self, attr):
-        if attr == 'data_x':
-            self.check_null()
-            print(attr, 'trigger update here')
-        return super().__getattribute__(attr)
 
     @property
     def o_point(self):
@@ -55,7 +47,8 @@ class DataNull(Axes):
 
     def update_mask(self, mask, **field_data):
         """Return masked data dict."""
-        index, points = self._index(*self.coords, mask)
+        index, points = self._index(self.r_coordinate,
+                                    self.z_coordinate, mask)
         if self.loop is not None:
             subindex = PointLoop(points).update(self.loop)
             index = index[subindex]
@@ -68,12 +61,12 @@ class DataNull(Axes):
 
     @staticmethod
     @numba.njit
-    def _index(x_coordinate, z_coordinate, mask):
+    def _index(r_coordinate, z_coordinate, mask):
         index = np.asarray([(i, j) for i, j in zip(*np.where(mask))])
         point_number = len(index)
         points = np.empty((point_number, 2), dtype=numba.float64)
         for i in numba.prange(point_number):
-            points[i, 0] = x_coordinate[index[i][0]]
+            points[i, 0] = r_coordinate[index[i][0]]
             points[i, 1] = z_coordinate[index[i][1]]
         return index, points
 
@@ -94,7 +87,7 @@ class DataNull(Axes):
         for attr in data:
             data[attr] = np.delete(data[attr], index, axis=0)
 
-    def plot(self, axes=None):
+    def plot_null(self, axes=None):
         """Plot null points."""
         self.axes = axes
         self.axes.plot(*self.data_o['points'].T, 'C0o')
@@ -105,15 +98,16 @@ class DataNull(Axes):
 class FieldNull(DataNull):
     """Calculate positions of all field nulls."""
 
-    coords: npt.ArrayLike
+    r_coordinate: npt.ArrayLike = field(repr=False)
+    z_coordinate: npt.ArrayLike = field(repr=False)
     loop: npt.ArrayLike = None
 
-    def update_null(self, flux, bnorm=None):
+    def update_null(self, psi, bnorm=None):
         """Update calculation of field nulls."""
-        mask_o, mask_x = self.categorize(flux)
-        if field is not None:
+        mask_o, mask_x = self.categorize(psi)
+        if bnorm is not None:
             mask_x &= self.minimum(bnorm)
-        super().update_masks(mask_o, mask_x, flux=flux)
+        super().update_masks(mask_o, mask_x, psi=psi)
 
     @staticmethod
     @numba.njit
@@ -175,20 +169,23 @@ if __name__ == '__main__':
     coilset.coil.insert(5, [-2, 2], 0.75, 0.75)
     coilset.coil.insert(7.8, 0, 0.75, 0.75, label='Xcoil')
     coilset.plasma.insert(dict(o=(4, 0, 0.5)), delta=0.3)
-    coilset.grid.solve(500, 0.05) #[3.2, 8.5, -2.5, 2.5])
+    coilset.grid.solve(500, 0.05)
     coilset.sloc['Ic'] = -15e6
 
     grid = coilset.grid
+
+    '''
 
     shape = grid.data.dims['x'], grid.data.dims['z']
     psi, bn = grid.psi.reshape(shape), grid.bn.reshape(shape)
 
     loop = Polygon(dict(o=[4, 0, 30.5])).boundary
 
-    null = FieldNull(grid.coords, loop=None)
+    null = FieldNull(grid.r_coordinate, grid.z_coordinate, loop=None)
 
     null.update_null(psi, bn)
     null.plot()
+    '''
 
     coilset.plot()
     coilset.grid.plot()

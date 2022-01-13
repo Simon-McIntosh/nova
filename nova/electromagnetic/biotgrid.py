@@ -11,6 +11,7 @@ import xarray
 from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.biotdata import BiotData
+from nova.electromagnetic.fieldnull import FieldNull
 from nova.electromagnetic.framelink import FrameLink
 from nova.electromagnetic.polyplot import Axes
 from nova.utilities.xpu import asnumpy
@@ -134,6 +135,7 @@ class BiotGrid(Axes, BiotData):
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     levels: Union[int, list[float]] = 31
+    _null: FieldNull = field(init=False, default=None)
 
     def solve_biot(self, number: int, limit: Union[float, list[float]],
                    index: Union[str, slice, npt.ArrayLike] = slice(None)):
@@ -151,6 +153,27 @@ class BiotGrid(Axes, BiotData):
         self.data.coords['z'] = grid.data.z
         self.data.coords['x2d'] = (['x', 'z'], grid.data.x2d.data)
         self.data.coords['z2d'] = (['x', 'z'], grid.data.z2d.data)
+        # initialize field null instance
+        self._null = FieldNull(self.coords)
+        self.version['current'] = id(None)
+
+    @property
+    def null(self):
+        if (version := id(self.current)) != self.version['current']:
+            print('update')
+            #  TODO add plasma change check version['plasma']
+            #  TODO add version check to topology unittest
+            #  TODO subclass null from biotgrid of full intergration !!! :)
+            shape = self.data.dims['x'], self.data.dims['z']
+            psi, bn = self.psi.reshape(shape), self.bn.reshape(shape)
+            self._null.update(psi, bn)
+            self.version['current'] = version
+        return self._null
+
+    @property
+    def coords(self):
+        """Return 1D grid coordinates."""
+        return self.data.x.data, self.data.z.data
 
     @property
     def shape(self):

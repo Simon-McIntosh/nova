@@ -5,47 +5,115 @@ import numba
 import numpy as np
 import numpy.typing as npt
 
-from nova.electromagnetic.coilset import CoilSet
-from nova.utilities.pyplot import plt
-
-
-class DataNull:
-
-    mask: npt.ArrayLike
-    x_index: npt.ArrayLike = field(init=False)
-    z_index: npt.ArrayLike = field(init=False)
-
-    def __post_init__(self):
-        x_index, z_index = np.where(self.mask)
-        self.index = [(i, j) for i, j in zip(*np.where(self.mask))]
-        self.number
-
-    def sort:
-
-    def delete:
-
-
-
+from nova.electromagnetic.baseplot import Axes
+from nova.geometry.pointloop import PointLoop
+from nova.geometry.polygon import Polygon
 
 
 @dataclass
-class FieldNull:
+class DataNull(Axes):
+    """Store sort and remove field nulls."""
 
-    r_coordinate: npt.ArrayLike
-    z_coordinate: npt.ArrayLike
+    coords: npt.ArrayLike = field(repr=False)
+    loop: npt.ArrayLike = field(repr=False, default=None)
+    data_o: dict[str, np.ndarray] = field(init=False, default_factory=dict)
+    data_x: dict[str, np.ndarray] = field(init=False, default_factory=dict)
 
-    def __post_init__(self):
-        """Store first-wall profile."""
+    def check_null(self):
+        return
 
-    def update(self, flux, bnorm=None):
-        """Calculate field nulls."""
-        x_mask, o_mask = self.categorize(flux)
+    def __getattribute__(self, attr):
+        if attr == 'data_x':
+            self.check_null()
+            print(attr, 'trigger update here')
+        return super().__getattribute__(attr)
+
+    @property
+    def o_point(self):
+        """Return o-point locations."""
+        return self.data_o['points']
+
+    @property
+    def o_point_number(self):
+        """Return o-point number."""
+        return len(self.data_o['points'])
+
+    @property
+    def x_point(self):
+        """Return x-point locations."""
+        return self.data_x['points']
+
+    @property
+    def x_point_number(self):
+        """Return x-point number."""
+        return len(self.data_x['points'])
+
+    def update_masks(self, mask_o, mask_x, **field_data):
+        """Update null points."""
+        for null, mask in zip('ox', [mask_o, mask_x]):
+            setattr(self, f'data_{null}', self.update_mask(mask, **field_data))
+
+    def update_mask(self, mask, **field_data):
+        """Return masked data dict."""
+        index, points = self._index(*self.coords, mask)
+        if self.loop is not None:
+            subindex = PointLoop(points).update(self.loop)
+            index = index[subindex]
+            points = points[subindex]
+        data = dict(index=index, points=points)
+        for attr in field_data:
+            if (value := field_data[attr]) is not None:
+                data[attr] = np.array([value[tuple(i)] for i in index])
+        return data
+
+    @staticmethod
+    @numba.njit
+    def _index(x_coordinate, z_coordinate, mask):
+        index = np.asarray([(i, j) for i, j in zip(*np.where(mask))])
+        point_number = len(index)
+        points = np.empty((point_number, 2), dtype=numba.float64)
+        for i in numba.prange(point_number):
+            points[i, 0] = x_coordinate[index[i][0]]
+            points[i, 1] = z_coordinate[index[i][1]]
+        return index, points
+
+    def sort(self):
+        """Sort data."""
+        raise NotImplementedError
+
+    def delete(self, null: str, index):
+        """Delete elements in data specified by index.
+
+        Parameters
+        ----------
+            index: slice, int or array of ints
+                index to remove.
+
+        """
+        data = getattr(self, f'data_{null}')
+        for attr in data:
+            data[attr] = np.delete(data[attr], index, axis=0)
+
+    def plot(self, axes=None):
+        """Plot null points."""
+        self.axes = axes
+        self.axes.plot(*self.data_o['points'].T, 'C0o')
+        self.axes.plot(*self.data_x['points'].T, 'C3X')
+
+
+@dataclass
+class FieldNull(DataNull):
+    """Calculate positions of all field nulls."""
+
+    coords: npt.ArrayLike
+    loop: npt.ArrayLike = None
+
+    def update_null(self, flux, bnorm=None):
+        """Update calculation of field nulls."""
+        mask_o, mask_x = self.categorize(flux)
         if field is not None:
-            x_mask &= self.minimum(bnorm)
-
-
-        self.x_point = sum(self.index_x)
-        return self
+            mask_x &= self.minimum(bnorm)
+        super().update_masks(mask_o, mask_x, flux=flux)
 
     @staticmethod
     @numba.njit
@@ -101,6 +169,8 @@ class FieldNull:
 
 if __name__ == '__main__':
 
+    from nova.electromagnetic.coilset import CoilSet
+
     coilset = CoilSet(dcoil=0.5)
     coilset.coil.insert(5, [-2, 2], 0.75, 0.75)
     coilset.coil.insert(7.8, 0, 0.75, 0.75, label='Xcoil')
@@ -112,12 +182,13 @@ if __name__ == '__main__':
 
     shape = grid.data.dims['x'], grid.data.dims['z']
     psi, bn = grid.psi.reshape(shape), grid.bn.reshape(shape)
-    null = FieldNull().update(psi, bn)
 
-    plt.plot(grid.data.x2d.data[null.index_o],
-             grid.data.z2d.data[null.index_o], 'o')
-    plt.plot(grid.data.x2d.data[null.index_x],
-             grid.data.z2d.data[null.index_x], 'X')
+    loop = Polygon(dict(o=[4, 0, 30.5])).boundary
+
+    null = FieldNull(grid.coords, loop=None)
+
+    null.update_null(psi, bn)
+    null.plot()
 
     coilset.plot()
     coilset.grid.plot()

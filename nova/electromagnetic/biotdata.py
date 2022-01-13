@@ -92,7 +92,7 @@ class BiotData(FilePath, FrameSetLoc):
         try:
             self.plasma_index = next(
                 self.frame.subspace.index.get_loc(name) for name in
-                self.subframe.frame[asnumpy(self.aloc.plasma)].unique())
+                self.subframe.frame[asnumpy(self.aloc['plasma'])].unique())
             self.plasma_slice = slice(self.aloc['plasma'].argmax(),
                                       -self.aloc['plasma'][::-1].argmax())
         except StopIteration:

@@ -12,7 +12,7 @@ spec = [('points', numba.float64[:, :]),
 
 
 @numba.experimental.jitclass(spec)
-class PolyLoop:
+class PointLoop:
     """Point in loop methods."""
 
     def __init__(self, points):
@@ -82,9 +82,9 @@ class PolyLoop:
             jj += 1
         return intersections & 1
 
-    def evaluate(self, polygon):
+    def update(self, polygon):
         """
-        Polygon membership status for multiple points.
+        Update loop membership status for multiple points.
 
         Derived from is_inside_sm_parallel.
 

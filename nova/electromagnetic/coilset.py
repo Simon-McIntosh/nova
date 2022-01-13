@@ -138,6 +138,8 @@ if __name__ == '__main__':
     coilset.plasma.plot()
     coilset.plot()
 
+
+    '''
     from nova.electromagnetic.fieldnull import FieldNull
     from nova.utilities.pyplot import plt
 
@@ -155,3 +157,4 @@ if __name__ == '__main__':
         update_turns = coilset.grid.update_turns
         for __ in range(n):
             update_turns('Psi')
+    '''

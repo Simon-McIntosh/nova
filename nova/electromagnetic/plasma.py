@@ -10,7 +10,7 @@ from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polyplot import Axes
 from nova.geometry.polygon import Polygon
-from nova.geometry.polyloop import PolyLoop
+from nova.geometry.pointloop import PointLoop
 from nova.utilities.pyplot import plt
 
 from numba import njit
@@ -50,7 +50,7 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
     loop: npt.ArrayLike = field(init=False, default=None, repr=False)
-    polyloop: PolyLoop = field(init=False, default=None, repr=False)
+    pointloop: PointLoop = field(init=False, default=None, repr=False)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -69,11 +69,11 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
         return self.loc['ionize', ['x', 'z', 'section', 'area',
                                    'Ic', 'It', 'nturn']].__str__()
 
-    def generate_polyloop(self):
+    def generate_pointloop(self):
         """Generate polyloop."""
         if self.sloc['plasma'].sum() == 0:
             return
-        self.polyloop = PolyLoop(self.loc['plasma', ['x', 'z']].to_numpy())
+        self.pointloop = PointLoop(self.loc['plasma', ['x', 'z']].to_numpy())
 
     def insert(self, *args, required=None, iloc=None, **additional):
         """Insert plasma, normalize turn number for multiframe plasmas."""
@@ -118,14 +118,14 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
         """
         if self.sloc['plasma'].sum() == 0:
             return
-        if self.polyloop is None:
-            self.generate_polyloop()
+        if self.pointloop is None:
+            self.generate_pointloop()
         self.update_indexer()
         try:
-            inloop = self.polyloop.evaluate(loop)
+            inloop = self.pointloop.update(loop)
         except numba.TypingError:
             loop = Polygon(loop).boundary
-            inloop = self.polyloop.evaluate(loop)
+            inloop = self.pointloop.update(loop)
         self.loop = loop
         self.subframe.version['plasma'] = id(loop)
 

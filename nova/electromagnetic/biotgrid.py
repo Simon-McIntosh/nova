@@ -15,7 +15,6 @@ from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.fieldnull import FieldNull
 from nova.electromagnetic.framelink import FrameLink
 from nova.electromagnetic.polyplot import Axes
-from nova.utilities.xpu import asnumpy
 
 
 @dataclass
@@ -133,22 +132,31 @@ class Expand:
 class BiotPlot(ABC, Axes):
     """Flux grid plotting baseclass."""
 
+    def contour_kwargs(self, **kwargs):
+        """Return contour plot kwargs."""
+        return dict(colors='lightgray', linewidths=1.5, alpha=0.9,
+                    linestyles='solid', levels=self.levels) | kwargs
+
     @abstractmethod
     def plot(self, axes=None, **kwargs):
-        """Plot poloidal flux contours."""
+        """Set plot axes."""
         self.axes = axes
-        kwargs = dict(colors='lightgray', linewidths=1.5, alpha=0.9,
-                      linestyles='solid', levels=self.levels) | kwargs
+        super().plot(axes)
+
+    def plot_svd(self, axes=None, **kwargs):
+        """Plot influence of SVD reduction."""
+        for svd, color in zip([False, True], ['C7', 'C3']):
+            self.update_turns('Psi', svd)
+            kwargs['colors'] = color
+            self.plot(axes, **kwargs)
 
 
 @dataclass
-class BiotGrid(FieldNull, BiotPlot, BiotOperate):
+class BiotGrid(BiotPlot, FieldNull, BiotOperate):
     """Compute interaction across grid."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     levels: Union[int, list[float]] = 31
-    x_coordinate: npt.ArrayLike = field(repr=False, default=None)
-    z_coordinate: npt.ArrayLike = field(repr=False, default=None)
 
     def __post_init__(self):
         """Initialize fieldnull version."""
@@ -174,6 +182,7 @@ class BiotGrid(FieldNull, BiotPlot, BiotOperate):
         self.link_fieldnull()
         super().solve()
 
+    '''
     def link_array(self):
         """Extend biot data link_array to link field null instance."""
         super().link_array()
@@ -183,6 +192,7 @@ class BiotGrid(FieldNull, BiotPlot, BiotOperate):
         """Link to field null instance."""
         self.x_coordinate = self.data.x.data
         self.z_coordinate = self.data.z.data
+    '''
 
     def update_null(self, psi):
         """Ensure psi input 2D."""
@@ -209,20 +219,9 @@ class BiotGrid(FieldNull, BiotPlot, BiotOperate):
 
     def plot(self, axes=None, **kwargs):
         """Plot poloidal flux contours."""
-        '''
-        self.axes = axes
-        kwargs = dict(colors='lightgray', linewidths=1.5, alpha=0.9,
-                      linestyles='solid', levels=self.levels) | kwargs
-        '''
-        super().plot(axes=axes, **kwargs)
-        psi = asnumpy(self.psi.reshape(*self.shape).T)
-        QuadContourSet = self.axes.contour(self.data.x, self.data.z, psi,
-                                           **kwargs)
+        super().plot(axes=axes)
+        QuadContourSet = self.axes.contour(self.data.x, self.data.z,
+                                           self.psi.reshape(*self.shape).T,
+                                           **self.contour_kwargs(**kwargs))
         if isinstance(kwargs['levels'], int):
             self.levels = QuadContourSet.levels
-
-    def plot_svd(self):
-        """Plot influence of SVD reduction."""
-        for svd, color in zip([False, True], ['C7', 'C3']):
-            self.update_turns('Psi', svd)
-            self.plot(colors=color)

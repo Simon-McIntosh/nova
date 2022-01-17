@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 
 import numba
 import numpy as np
+import numpy.typing as npt
 
 from nova.electromagnetic.biotdata import BiotData
 
@@ -42,6 +43,7 @@ class BiotOp:
         self.plasma_matrix = plasma_matrix
         #  perform svd order reduction
         rank = int(len(plasma_s) / svd_factor)
+        print(rank)
         self.plasma_U = plasma_U[:, :rank].copy()
         self.plasma_s = plasma_s[:rank].copy()
         self.plasma_V = plasma_V[:rank, :].copy()
@@ -71,7 +73,7 @@ class BiotOperate(BiotData):
         init=False, repr=False, default_factory=dict)
     operator: dict[str, BiotOp] = field(init=False, default_factory=dict)
 
-    array: dict = field(init=False, default_factory=dict)
+    #array: dict = field(init=False, default_factory=dict)
 
     def __post_init__(self):
         """Initialize version identifiers."""
@@ -83,17 +85,21 @@ class BiotOperate(BiotData):
     def solve(self, *args):
         """Solve biot interaction - extened by subclass."""
         super().solve()
-        self.initialize_operators()
-        self.link_array()
+        self.load_operators()
+        #self.link_array()
 
     def load(self, file: str, path=None):
         """Extend BiotData load."""
         super().load(file, path)
-        self.initialize_operators()
-        self.link_array()
+        self.load_operators()
+        #self.link_array()
 
-    def initialize_operators(self):
-        """Initialize fast biot operators."""
+    def load_operators(self, svd_factor=None):
+        """Load fast biot operators."""
+        if svd_factor is not None:
+            self.svd_factor = svd_factor
+        self.x_coordinate = self.data.x.data
+        self.z_coordinate = self.data.z.data
         for attr in self.data.attrs['attributes']:
             self.operator[attr] = BiotOp(
                 self.saloc['Ic'], self.aloc['nturn'], self.aloc['plasma'],
@@ -102,16 +108,17 @@ class BiotOperate(BiotData):
                 self.svd_factor, self.data[f'_U{attr}'].data,
                 self.data[f'_s{attr}'].data, self.data[f'_V{attr}'].data)
 
-    @property
-    def bnorm(self):
-        """Return L2 norm of poloidal magnetic field."""
+    ##@@property
+    #def bnorm(self):
+    #    """Return L2 norm of poloidal magnetic field."""
 
+    '''
     def link_array(self):
         """Update array attributes."""
         for attr in self.data.attrs['attributes']:
             self.array[attr] = self.data[attr].data
             self.array[f'_{attr}'] = self.data[f'_{attr}'].data
-            rank = int(len(self.data[f'_s{attr}']) / 10)
+            rank = int(len(self.data[f'_s{attr}']) / self.svd_factor)
             self.array[f'_U{attr}'] = self.data[f'_U{attr}'].data[:, :rank]
             self.array[f'_s{attr}'] = self.data[f'_s{attr}'].data[:rank]
             self.array[f'_V{attr}'] = self.data[f'_V{attr}'].data[:rank, :]
@@ -131,15 +138,6 @@ class BiotOperate(BiotData):
             self.data[attr].data = self.array[attr]
 
     '''
-    def __post_init__(self):
-        """Extract attrs for dataset + update calculation interface."""
-
-    def __getitem__(self, key):
-        return self.calc[key]
-
-    def __getattr__(self, attr):
-        return self.calc[attr]
-    '''
 
     def __getattr__(self, attr):
         """Return variable data."""
@@ -156,7 +154,7 @@ class BiotOperate(BiotData):
 
     def update_turns(self, attr: str, svd=True):
         """Update plasma turns."""
-        if self.plasma_index is None:
+        if self.data.attrs['plasma_index'] is None:
             return
         self.operator[attr].update_turns(svd)
         '''

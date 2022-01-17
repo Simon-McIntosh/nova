@@ -27,13 +27,15 @@ class BiotData(FilePath, FrameSetLoc):
     @abstractmethod
     def solve(self, *args):
         """Solve biot interaction - extened by subclass."""
-        self.data.attrs['plasma_index'] = next(
-            self.frame.subspace.index.get_loc(name) for name in
-            self.subframe.frame[self.aloc['plasma']].unique())
+        try:
+            self.data.attrs['plasma_index'] = next(
+                self.frame.subspace.index.get_loc(name) for name in
+                self.subframe.frame[self.aloc['plasma']].unique())
+        except StopIteration:
+            self.data.attrs['plasma_index'] = None
 
     def store(self, filename: str, path=None):
         """Store data as netCDF in hdf5 file."""
-        #self.link_data()
         file = self.file(filename, path)
         self.data.to_netcdf(file, mode='a', group=self.name)
 

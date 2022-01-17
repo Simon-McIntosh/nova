@@ -105,7 +105,7 @@ if __name__ == '__main__':
     filename = 'tmp'
     reload = False
     if reload:
-        coilset = CoilSet(dcoil=-35, dplasma=-2000)
+        coilset = CoilSet(dcoil=-35, dplasma=-1000)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
                             nturn=-0.8)
         coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex', turn='c',
@@ -119,7 +119,7 @@ if __name__ == '__main__':
         coilset.sloc['Ic'] = 1
         coilset.sloc['Shl0', 'Ic'] = -5
 
-        coilset.grid.solve(2000, 0.1)
+        coilset.grid.solve(1000, 0.1, 'plasma')
         coilset.plasmagrid.solve()
 
         coilset.sloc['Ic'] = 6
@@ -144,9 +144,10 @@ if __name__ == '__main__':
     coilset.plasma.plot()
 
     coilset.grid.plot(levels=31)
-    #coilset.plasmagrid.plot(levels=coilset.grid.levels, colors='r')
+    coilset.plasmagrid.plot(levels=coilset.grid.levels, colors='r')
 
-    coilset.plasmagrid.plot_svd()
+    coilset.plasmagrid.load_operators(10)
+    coilset.plasmagrid.plot_svd(levels=coilset.grid.levels)
 
     '''
     from nova.electromagnetic.fieldnull import FieldNull

@@ -6,22 +6,20 @@ import numba
 import numpy as np
 from numpy import typing as npt
 import scipy.spatial
-import xarray
 
 from nova.electromagnetic.biotframe import BiotFrame
+from nova.electromagnetic.biotgrid import BiotPlot
 from nova.electromagnetic.biotoperate import BiotOperate
 from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.fieldnull import FieldNull
 
 
 @dataclass
-class PlasmaGrid(FieldNull, BiotOperate):
+class PlasmaGrid(BiotPlot, FieldNull, BiotOperate):
     """Compute interaction across hexagonal grid."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     levels: Union[int, list[float]] = 31
-    x_coordinate: npt.ArrayLike = field(repr=False, default=None)
-    z_coordinate: npt.ArrayLike = field(repr=False, default=None)
 
     def __post_init__(self):
         """Initialize fieldnull version."""
@@ -65,25 +63,22 @@ class PlasmaGrid(FieldNull, BiotOperate):
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
                               attrs=self.attrs).data
         self.tessellate()
-        self.link_fieldnull()
         super().solve()
 
-    def link_array(self):
-        """Extend biot data link_array to link field null instance."""
-        super().link_array()
-        self.link_fieldnull()
+    #def link_array(self):
+    #    """Extend biot data link_array to link field null instance."""
+    #    super().link_array()
+    #    self.link_fieldnull()
 
-    def link_fieldnull(self):
-        """Link to field null instance."""
-        self.x_coordinate = self.data.x.data
-        self.z_coordinate = self.data.z.data
+    def load_operators(self, svd_factor=None):
+        """Extend biot operate load_operators."""
+        super().load_operators(svd_factor)
         self.stencil = self.data.stencil.data
 
     def plot(self, axes=None, **kwargs):
         """Plot poloidal flux contours."""
-        self.axes = axes
-        kwargs = dict(colors='lightgray', linewidths=1.5, alpha=0.9,
-                      linestyles='solid', levels=self.levels) | kwargs
+        super().plot(axes)
+        kwargs = self.contour_kwargs(**kwargs)
         '''
 
         psi = asnumpy(self.psi.reshape(*self.shape).T)
@@ -97,7 +92,7 @@ class PlasmaGrid(FieldNull, BiotOperate):
         self.axes.tricontour(self.x_coordinate, self.z_coordinate,
                              self.data['triangles'].data, self.psi,
                              **kwargs)
-        super().plot()
+
 
         '''
         neighbours = loop_neighbour_vertices(points, neighbor_vertices)

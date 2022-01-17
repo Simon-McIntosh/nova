@@ -131,7 +131,7 @@ class DataNull(Axes):
         for attr in data:
             data[attr] = np.delete(data[attr], index, axis=0)
 
-    def plot(self, axes=None, **kwargs):
+    def plot(self, axes=None):
         """Plot null points."""
         self.axes = axes
         self.axes.plot(*self.data_o['points'].T, 'C0o')
@@ -142,8 +142,8 @@ class DataNull(Axes):
 class FieldNull(DataNull):
     """Calculate positions of all field nulls."""
 
-    x_coordinate: npt.ArrayLike = field(repr=False)
-    z_coordinate: npt.ArrayLike = field(repr=False)
+    x_coordinate: npt.ArrayLike = field(repr=False, default=None)
+    z_coordinate: npt.ArrayLike = field(repr=False, default=None)
     loop: npt.ArrayLike = None
     stencil: npt.ArrayLike = field(repr=False, default=None)
 

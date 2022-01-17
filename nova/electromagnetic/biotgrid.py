@@ -9,8 +9,8 @@ import shapely.geometry
 import xarray
 
 from nova.electromagnetic.biotframe import BiotFrame
+from nova.electromagnetic.biotoperate import BiotOperate
 from nova.electromagnetic.biotsolve import BiotSolve
-from nova.electromagnetic.biotdata import BiotData
 from nova.electromagnetic.fieldnull import FieldNull
 from nova.electromagnetic.framelink import FrameLink
 from nova.electromagnetic.polyplot import Axes
@@ -130,7 +130,7 @@ class Expand:
 
 
 @dataclass
-class BiotGrid(FieldNull, BiotData):
+class BiotGrid(FieldNull, BiotOperate):
     """Compute interaction across grid."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
@@ -138,8 +138,13 @@ class BiotGrid(FieldNull, BiotData):
     r_coordinate: npt.ArrayLike = field(repr=False, default=None)
     z_coordinate: npt.ArrayLike = field(repr=False, default=None)
 
-    def solve_biot(self, number: int, limit: Union[float, list[float]],
-                   index: Union[str, slice, npt.ArrayLike] = slice(None)):
+    def __post_init__(self):
+        """Initialize fieldnull version."""
+        super().__post_init__()
+        self.version['fieldnull'] = id(None)
+
+    def solve(self, number: int, limit: Union[float, list[float]],
+              index: Union[str, slice, npt.ArrayLike] = slice(None)):
         """Solve Biot interaction across grid."""
         if isinstance(limit, (int, float)):
             limit = Expand(self.subframe, index)(limit)
@@ -154,18 +159,25 @@ class BiotGrid(FieldNull, BiotData):
         self.data.coords['z'] = grid.data.z
         self.data.coords['x2d'] = (['x', 'z'], grid.data.x2d.data)
         self.data.coords['z2d'] = (['x', 'z'], grid.data.z2d.data)
-        # link to field null instance
-        self.r_coordinate = grid.data.x.data
-        self.z_coordinate = grid.data.z.data
-        self.version['fieldnull'] = id(None)
+        self.link_fieldnull()
+        super().solve()
+
+    def link_array(self):
+        """Extend biot data link_array to link field null instance."""
+        super().link_array()
+        self.link_fieldnull()
+
+    def link_fieldnull(self):
+        """Link to field null instance."""
+        self.r_coordinate = self.data.x.data
+        self.z_coordinate = self.data.z.data
 
     def check_null(self):
         """Check validity of upstream data, update if nessisary."""
         current_hash = hash(self.current.data.tobytes())
         if current_hash != self.version['fieldnull'] or \
                 self.version['Psi'] != self.subframe.version['plasma']:
-            self.update_null(self.psi.reshape(self.shape),
-                             self.bn.reshape(self.shape))
+            self.update_null(asnumpy(self.psi.reshape(self.shape)))
             self.version['fieldnull'] = current_hash
 
     def __getattribute__(self, attr):
@@ -204,3 +216,10 @@ class BiotGrid(FieldNull, BiotData):
                                            **kwargs)
         if isinstance(kwargs['levels'], int):
             self.levels = QuadContourSet.levels
+        super().plot()
+
+    def plot_svd(self):
+        """Plot influence of SVD reduction."""
+        for svd, color in zip([False, True], ['C7', 'C3']):
+            self.update_turns('Psi', svd)
+            self.plot(colors=color)

@@ -7,7 +7,6 @@ import numpy.typing as npt
 
 from nova.electromagnetic.baseplot import Axes
 from nova.geometry.pointloop import PointLoop
-from nova.geometry.polygon import Polygon
 
 
 @dataclass
@@ -40,23 +39,25 @@ class DataNull(Axes):
         """Return x-point number."""
         return len(self.data_x['points'])
 
-    def update_masks(self, mask_o, mask_x, **field_data):
+    def update_masks(self, mask_o, mask_x, psi):
         """Update null points."""
         for null, mask in zip('ox', [mask_o, mask_x]):
-            setattr(self, f'data_{null}', self.update_mask(mask, **field_data))
+            setattr(self, f'data_{null}', self.update_mask(mask, psi))
 
-    def update_mask(self, mask, **field_data):
+    def update_mask(self, mask, psi):
         """Return masked data dict."""
-        index, points = self._index(self.r_coordinate,
-                                    self.z_coordinate, mask)
+        try:
+            index, points = self._index(
+                self.r_coordinate, self.z_coordinate, mask)
+        except IndexError:  # catch empty mask
+            index, points = np.empty((0, 2), int), np.empty((0, 2), float)
+            return dict(index=index, points=points)
         if self.loop is not None:
             subindex = PointLoop(points).update(self.loop)
             index = index[subindex]
             points = points[subindex]
         data = dict(index=index, points=points)
-        for attr in field_data:
-            if (value := field_data[attr]) is not None:
-                data[attr] = np.array([value[tuple(i)] for i in index])
+        data['psi'] = np.array([psi[tuple(i)] for i in index])
         return data
 
     @staticmethod
@@ -87,7 +88,7 @@ class DataNull(Axes):
         for attr in data:
             data[attr] = np.delete(data[attr], index, axis=0)
 
-    def plot_null(self, axes=None):
+    def plot(self, axes=None):
         """Plot null points."""
         self.axes = axes
         self.axes.plot(*self.data_o['points'].T, 'C0o')
@@ -102,12 +103,10 @@ class FieldNull(DataNull):
     z_coordinate: npt.ArrayLike = field(repr=False)
     loop: npt.ArrayLike = None
 
-    def update_null(self, psi, bnorm=None):
+    def update_null(self, psi):
         """Update calculation of field nulls."""
         mask_o, mask_x = self.categorize(psi)
-        if bnorm is not None:
-            mask_x &= self.minimum(bnorm)
-        super().update_masks(mask_o, mask_x, psi=psi)
+        super().update_masks(mask_o, mask_x, psi)
 
     @staticmethod
     @numba.njit
@@ -120,6 +119,9 @@ class FieldNull(DataNull):
             - 2: regular point
             - 4: saddle point
 
+        From On detecting all saddle points in 2D images, A. Kuijper
+        TODO Extend method for true hexagonal grids.
+
         """
         xdim, zdim = data.shape
         o_mask = np.full((xdim, zdim), False)
@@ -127,11 +129,14 @@ class FieldNull(DataNull):
         for i in numba.prange(1, xdim-1):
             for j in range(1, zdim-1):
                 center = data[i, j]
-                sign = data[i-1, j+1] >= center
+                sign = data[i, j+1] > center
                 count = 0
-                for k in [(-1, 0), (-1, -1), (0, -1), (1, -1),
-                          (1, 0), (1, 1), (0, 1), (-1, 1)]:
-                    _sign = data[i+k[0], j+k[1]] >= center
+                #  use 6-point stencil
+                #  [(-1, 0), (0, -1), (1, -1), (1, 0), (0, 1), (-1, 1)]:
+                for k in [(-1, 0), (-1, -1), (0, -1),
+                          (1, 0), (1, 1), (0, 1)]:
+
+                    _sign = data[i+k[0], j+k[1]] > center
                     if _sign != sign:
                         count += 1
                         sign = _sign
@@ -171,21 +176,6 @@ if __name__ == '__main__':
     coilset.plasma.insert(dict(o=(4, 0, 0.5)), delta=0.3)
     coilset.grid.solve(500, 0.05)
     coilset.sloc['Ic'] = -15e6
-
-    grid = coilset.grid
-
-    '''
-
-    shape = grid.data.dims['x'], grid.data.dims['z']
-    psi, bn = grid.psi.reshape(shape), grid.bn.reshape(shape)
-
-    loop = Polygon(dict(o=[4, 0, 30.5])).boundary
-
-    null = FieldNull(grid.r_coordinate, grid.z_coordinate, loop=None)
-
-    null.update_null(psi, bn)
-    null.plot()
-    '''
 
     coilset.plot()
     coilset.grid.plot()

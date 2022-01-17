@@ -103,7 +103,7 @@ if __name__ == '__main__':
     filename = 'tmp'
     reload = False
     if reload:
-        coilset = CoilSet(dcoil=-35, dplasma=-300)
+        coilset = CoilSet(dcoil=-35, dplasma=-500)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
                             nturn=-0.8)
         coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex', turn='c',
@@ -117,7 +117,7 @@ if __name__ == '__main__':
         coilset.sloc['Ic'] = 1
         coilset.sloc['Shl0', 'Ic'] = -5
 
-        coilset.grid.solve(3000, 0.1)
+        coilset.grid.solve(2000, 0.1)
 
         coilset.sloc['Ic'] = 6
         coilset.sloc['bubble', 'Ic'] = 5
@@ -130,7 +130,7 @@ if __name__ == '__main__':
     separatrix = Polygon(dict(c=[4.0, 1.05, 0.8])).boundary
     coilset.plasma.update_separatrix(separatrix)
 
-    coilset.sloc['bubble', 'Ic'] = 5
+    coilset.sloc['bubble', 'Ic'] = 8
     coilset.sloc['passive', 'Ic'] = -2
     #coilset.sloc['plasma', 'Ic'] = -4
 
@@ -138,6 +138,7 @@ if __name__ == '__main__':
     coilset.plasma.plot()
     coilset.plot()
 
+    #coilset.grid.plot_svd()
 
     '''
     from nova.electromagnetic.fieldnull import FieldNull
@@ -158,3 +159,27 @@ if __name__ == '__main__':
         for __ in range(n):
             update_turns('Psi')
     '''
+
+    from scipy.spatial import Delaunay
+    from nova.utilities.pyplot import plt
+    import numpy as np
+
+    points = coilset.subframe.loc['plasma', ['x', 'z']].to_numpy()
+    tri = Delaunay(points)
+
+    p = 100
+    n = tri.vertex_neighbor_vertices
+    npp = n[1][n[0][p]:n[0][p+1]]
+
+    plt.plot(*points[p, :].T, 'C3o')
+    plt.plot(*points[npp, :].T, 'C0o')
+
+    angle = np.arctan2(*(points[npp, :] - points[p, :]).T)
+    npp = npp[np.argsort(angle)[::-1]]
+
+    for i, _np in enumerate(npp):
+        plt.text(*points[_np, :].T, f'Charlie {i}')
+
+
+    plt.triplot(*points.T, tri.vertices, lw=0.5)
+    plt.axis('equal')

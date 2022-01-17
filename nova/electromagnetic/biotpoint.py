@@ -5,18 +5,18 @@ import nlopt
 import numpy as np
 
 from nova.electromagnetic.biotframe import BiotFrame
+from nova.electromagnetic.biotoperate import BiotOperate
 from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.biotsolve import BiotMatrix
-from nova.electromagnetic.biotdata import BiotData
 from nova.electromagnetic.polyplot import Axes
 
 
 @dataclass
-class BiotPoint(Axes, BiotData):
+class BiotPoint(Axes, BiotOperate):
     """Compute interaction at discrete points."""
 
-    def solve_biot(self, points):
+    def solve(self, points):
         """Solve Biot interaction across grid."""
         points = np.array(points)
         points.shape = (-1, 2)  # shape(n, 2)
@@ -28,6 +28,7 @@ class BiotPoint(Axes, BiotData):
         # insert grid data
         self.data.coords['x'] = target['x']
         self.data.coords['z'] = target['z']
+        super().solve()
 
     def plot(self, axes=None, **kwargs):
         """Plot points."""

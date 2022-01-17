@@ -5,7 +5,8 @@ long_description = """..."""
 
 extras_require = dict(test=['pytest', 'line_profiler'], develop=['spyder'],
                       mesh=['gmsh', 'pygmsh', 'tetgen', 'trimesh'],
-                      ansys=['ansys-dpf-core', 'ansys-dpf-post', 'openpyxl'])
+                      ansys=['ansys-dpf-core', 'ansys-dpf-post', 'openpyxl'],
+                      thermofluids=['ftputil', 'coolprop'])
 
 extras_require['full'] = [module for mode in extras_require for module in extras_require[mode]]
 

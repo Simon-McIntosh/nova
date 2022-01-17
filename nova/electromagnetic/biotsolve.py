@@ -4,7 +4,7 @@ from typing import ClassVar
 
 import numpy as np
 
-from nova.electromagnetic.biotfilament import BiotRing
+from nova.electromagnetic.biotring import BiotRing
 from nova.electromagnetic.biotcalc import BiotMatrix
 
 

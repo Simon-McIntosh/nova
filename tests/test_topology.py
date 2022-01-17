@@ -32,29 +32,46 @@ def test_plasma_update(plot=False):
 def null_curvature(sign, plot):
     coilset = CoilSet(dcoil=-5, dplasma=-5)
     coilset.plasma.insert(dict(o=[5, 1, 0.5]), Ic=15e6)
-    coilset.coil.insert(5, 0, 0.75, 0.75, Ic=15e6)
-
+    coilset.coil.insert(5, 0, 0.75, 0.75, Ic=-15e6)
     coilset.grid.solve(1e2, 0.25)  # generate plasma grid
-    coilset.sloc['Ic'] *= sign
+    coilset.sloc['plasma', 'Ic'] *= sign
     if plot:
         coilset.plot()
         coilset.grid.plot()
-        coilset.grid.plot_null()
     return coilset
-
-#  TODO test +- current (ie fields with no x-points and no o-points)
 
 
 def test_Opoint_curvature_Ip_positive(plot=False):
     coilset = null_curvature(1, plot)
     assert coilset.grid.x_point_number == 0
     assert coilset.grid.o_point_number == 2
-test_Opoint_curvature_Ip_positive(plot=True)
+
 
 def test_Opoint_curvature_Ip_negative(plot=False):
     coilset = null_curvature(-1, plot)
-    assert coilset.grid.x_point_number == 0
+    assert coilset.grid.x_point_number == 1
     assert coilset.grid.o_point_number == 2
+
+
+def test_multi_xpoint(plot=False):
+    coilset = CoilSet(dcoil=-5, dplasma=-5)
+    coilset.coil.insert(5, [-1, 1], 0.75, 0.75, Ic=[1, 1])
+    coilset.plasma.insert(dict(o=[5.25, 0, 0.5]), Ic=0.1)
+    coilset.grid.solve(3e2, 1.25, 'plasma')  # generate plasma grid
+    if plot:
+        coilset.plot()
+        coilset.grid.plot()
+    assert coilset.grid.x_point_number == 3
+    assert coilset.grid.o_point_number == 2
+
+
+def test_empty():
+    coilset = CoilSet(dcoil=-5, dplasma=-5)
+    coilset.coil.insert(5, [-1, 1], 0.75, 0.75, Ic=[-1, 1])
+    coilset.plasma.insert(dict(o=[5.25, 0, 0.5]), Ic=0)
+    coilset.grid.solve(1e2, 0.25, 'plasma')  # generate plasma grid
+    assert coilset.grid.x_point_number == 0
+    assert coilset.grid.o_point_number == 0
 
 
 def global_null(sign, plot=False):
@@ -67,8 +84,6 @@ def global_null(sign, plot=False):
     if plot:
         coilset.plot()
         coilset.grid.plot(levels=51)
-        coilset.grid.plot
-        coilset.grid.plot_null()
     return coilset
 
 

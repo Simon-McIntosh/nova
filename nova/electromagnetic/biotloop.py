@@ -1,16 +1,16 @@
 """Build interaction matrix toroidal loops."""
 from dataclasses import dataclass
 
-from nova.electromagnetic.biotdata import BiotData
+from nova.electromagnetic.biotoperate import BiotOperate
 from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.polyplot import Axes
 
 
 @dataclass
-class BiotLoop(Axes, BiotData):
+class BiotLoop(Axes, BiotOperate):
     """Compute interaction across grid."""
 
-    def solve_biot(self, target):
+    def solve(self, target):
         """Solve Biot interaction."""
         self.data = BiotSolve(self.subframe, target,
                               reduce=[True, True], turns=[True, True],
@@ -18,6 +18,7 @@ class BiotLoop(Axes, BiotData):
         # insert grid data
         self.data.coords['x'] = target.x.values
         self.data.coords['z'] = target.z.values
+        super().solve()
 
     def plot(self, axes=None, **kwargs):
         """Plot points."""

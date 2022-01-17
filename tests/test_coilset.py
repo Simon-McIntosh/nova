@@ -293,7 +293,7 @@ def test_biot_link_dataarray_dataset():
     Psi = coilset.grid.array['Psi'].copy()
     coilset.plasma.update_separatrix(((2.5, -1), (3.5, -1), (3, 0)))
     coilset.grid.update_turns('Psi')
-    coilset.grid.update_data()
+    coilset.grid.link_data()
     assert (asnumpy(coilset.grid.array['Psi']) ==
             coilset.grid.data['Psi']).all()
     assert (asnumpy(Psi) != coilset.grid.data['Psi']).any()

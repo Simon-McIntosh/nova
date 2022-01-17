@@ -13,7 +13,7 @@ from nova.geometry.pointloop import PointLoop
 class DataNull(Axes):
     """Store sort and remove field nulls."""
 
-    r_coordinate: npt.ArrayLike = field(repr=False)
+    x_coordinate: npt.ArrayLike = field(repr=False)
     z_coordinate: npt.ArrayLike = field(repr=False)
     loop: npt.ArrayLike = field(repr=False, default=None)
     data_o: dict[str, np.ndarray] = field(init=False, default_factory=dict)
@@ -23,6 +23,11 @@ class DataNull(Axes):
     def o_point(self):
         """Return o-point locations."""
         return self.data_o['points']
+
+    @property
+    def o_psi(self):
+        """Return flux values at o-point locations."""
+        return self.data_o['psi']
 
     @property
     def o_point_number(self):
@@ -35,6 +40,11 @@ class DataNull(Axes):
         return self.data_x['points']
 
     @property
+    def x_psi(self):
+        """Return flux values at x-point locations."""
+        return self.data_x['psi']
+
+    @property
     def x_point_number(self):
         """Return x-point number."""
         return len(self.data_x['points'])
@@ -45,10 +55,32 @@ class DataNull(Axes):
             setattr(self, f'data_{null}', self.update_mask(mask, psi))
 
     def update_mask(self, mask, psi):
-        """Return masked data dict."""
+        """Return masked point data dict."""
+        if len(psi.shape) == 1:
+            return self.update_mask_1D(mask, psi)
+        return self.update_mask_2D(mask, psi)
+
+    def update_mask_1D(self, mask, psi):
+        """Return masked data dict from 1D input."""
         try:
-            index, points = self._index(
-                self.r_coordinate, self.z_coordinate, mask)
+            index, points = self._index_1D(
+                self.x_coordinate, self.z_coordinate, mask)
+        except IndexError:  # catch empty mask
+            index, points = np.empty((0, 2), int), np.empty((0, 2), float)
+            return dict(index=index, points=points)
+        if self.loop is not None:
+            subindex = PointLoop(points).update(self.loop)
+            index = index[subindex]
+            points = points[subindex]
+        data = dict(index=index, points=points)
+        data['psi'] = psi[index]
+        return data
+
+    def update_mask_2D(self, mask, psi):
+        """Return masked data dict from 2D input."""
+        try:
+            index, points = self._index_2D(
+                self.x_coordinate, self.z_coordinate, mask)
         except IndexError:  # catch empty mask
             index, points = np.empty((0, 2), int), np.empty((0, 2), float)
             return dict(index=index, points=points)
@@ -62,12 +94,23 @@ class DataNull(Axes):
 
     @staticmethod
     @numba.njit
-    def _index(r_coordinate, z_coordinate, mask):
+    def _index_1D(x_coordinate, z_coordinate, mask):
+        index = np.where(mask)[0]
+        point_number = len(index)
+        points = np.empty((point_number, 2), dtype=numba.float64)
+        for i in numba.prange(point_number):
+            points[i, 0] = x_coordinate[index[i]]
+            points[i, 1] = z_coordinate[index[i]]
+        return index, points
+
+    @staticmethod
+    @numba.njit
+    def _index_2D(x_coordinate, z_coordinate, mask):
         index = np.asarray([(i, j) for i, j in zip(*np.where(mask))])
         point_number = len(index)
         points = np.empty((point_number, 2), dtype=numba.float64)
         for i in numba.prange(point_number):
-            points[i, 0] = r_coordinate[index[i][0]]
+            points[i, 0] = x_coordinate[index[i][0]]
             points[i, 1] = z_coordinate[index[i][1]]
         return index, points
 
@@ -88,7 +131,7 @@ class DataNull(Axes):
         for attr in data:
             data[attr] = np.delete(data[attr], index, axis=0)
 
-    def plot(self, axes=None):
+    def plot(self, axes=None, **kwargs):
         """Plot null points."""
         self.axes = axes
         self.axes.plot(*self.data_o['points'].T, 'C0o')
@@ -99,18 +142,57 @@ class DataNull(Axes):
 class FieldNull(DataNull):
     """Calculate positions of all field nulls."""
 
-    r_coordinate: npt.ArrayLike = field(repr=False)
+    x_coordinate: npt.ArrayLike = field(repr=False)
     z_coordinate: npt.ArrayLike = field(repr=False)
     loop: npt.ArrayLike = None
+    stencil: npt.ArrayLike = field(repr=False, default=None)
 
     def update_null(self, psi):
         """Update calculation of field nulls."""
         mask_o, mask_x = self.categorize(psi)
         super().update_masks(mask_o, mask_x, psi)
 
+    def categorize(self, psi):
+        """Return o-point and x-point masks from loop sign counts."""
+        if len(psi.shape) == 1:
+            return self.categorize_1D(psi, self.stencil)
+        return self.categorize_2D(psi)
+
     @staticmethod
     @numba.njit
-    def categorize(data):
+    def categorize_1D(data, stencil):
+        """Categorize points in 1D hexagonal grid.
+
+        Count number of sign changes whilst traversing neighbour point loop.
+
+            - 0: minima / maxima point
+            - 2: regular point
+            - 4: saddle point
+
+        From On detecting all saddle points in 2D images, A. Kuijper
+
+        """
+        npoint = len(data)
+        o_mask = np.full(npoint, False)
+        x_mask = np.full(npoint, False)
+        for index in stencil:
+            center = data[index[0]]
+            sign = data[index[-1]] > center
+            count = 0
+            for k in range(1, 7):
+                _sign = data[index[k]] > center
+                if _sign != sign:
+                    count += 1
+                    sign = _sign
+            if count == 0:
+                o_mask[index[0]] = True
+            if count == 4:
+                x_mask[index[0]] = True
+        return o_mask, x_mask
+
+    @staticmethod
+    @numba.njit
+    def categorize_2D(data):
         """Categorize points in 2D grid.
 
         Count number of sign changes whilst traversing neighbour point loop.
@@ -120,22 +202,20 @@ class FieldNull(DataNull):
             - 4: saddle point
 
         From On detecting all saddle points in 2D images, A. Kuijper
-        TODO Extend method for true hexagonal grids.
 
         """
         xdim, zdim = data.shape
         o_mask = np.full((xdim, zdim), False)
         x_mask = np.full((xdim, zdim), False)
+        stencil = [(-1, 0), (0, -1), (1, -1), (1, 0), (0, 1), (-1, 1)]
+        #  stencil = [(-1, 0), (-1, -1), (0, -1), (1, 0), (1, 1), (0, 1)]
         for i in numba.prange(1, xdim-1):
             for j in range(1, zdim-1):
                 center = data[i, j]
-                sign = data[i, j+1] > center
+                sign = data[i+stencil[-1][0], j+stencil[-1][1]] > center
                 count = 0
                 #  use 6-point stencil
-                #  [(-1, 0), (0, -1), (1, -1), (1, 0), (0, 1), (-1, 1)]:
-                for k in [(-1, 0), (-1, -1), (0, -1),
-                          (1, 0), (1, 1), (0, 1)]:
-
+                for k in stencil:
                     _sign = data[i+k[0], j+k[1]] > center
                     if _sign != sign:
                         count += 1
@@ -145,25 +225,6 @@ class FieldNull(DataNull):
                 if count == 4:
                     x_mask[i, j] = True
         return o_mask, x_mask
-
-    @staticmethod
-    @numba.njit
-    def minimum(data):
-        """Return 2D boolean index indicating locations of data minima."""
-        xdim, zdim = data.shape
-        mask = np.full((xdim, zdim), False)
-        for i in numba.prange(1, xdim-1):
-            for j in numba.prange(1, zdim-1):
-                if data[i-1, j] < data[i, j]:
-                    continue
-                if data[i+1, j] < data[i, j]:
-                    continue
-                if data[i, j-1] < data[i, j]:
-                    continue
-                if data[i, j+1] < data[i, j]:
-                    continue
-                mask[i, j] = True
-        return mask
 
 
 if __name__ == '__main__':

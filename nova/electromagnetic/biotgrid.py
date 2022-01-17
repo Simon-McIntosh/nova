@@ -1,4 +1,5 @@
 """Generate grids for BiotGrid methods."""
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, InitVar
 from typing import Union
 
@@ -129,13 +130,24 @@ class Expand:
         return limit
 
 
+class BiotPlot(ABC, Axes):
+    """Flux grid plotting baseclass."""
+
+    @abstractmethod
+    def plot(self, axes=None, **kwargs):
+        """Plot poloidal flux contours."""
+        self.axes = axes
+        kwargs = dict(colors='lightgray', linewidths=1.5, alpha=0.9,
+                      linestyles='solid', levels=self.levels) | kwargs
+
+
 @dataclass
-class BiotGrid(FieldNull, BiotOperate):
+class BiotGrid(FieldNull, BiotPlot, BiotOperate):
     """Compute interaction across grid."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     levels: Union[int, list[float]] = 31
-    r_coordinate: npt.ArrayLike = field(repr=False, default=None)
+    x_coordinate: npt.ArrayLike = field(repr=False, default=None)
     z_coordinate: npt.ArrayLike = field(repr=False, default=None)
 
     def __post_init__(self):
@@ -169,15 +181,19 @@ class BiotGrid(FieldNull, BiotOperate):
 
     def link_fieldnull(self):
         """Link to field null instance."""
-        self.r_coordinate = self.data.x.data
+        self.x_coordinate = self.data.x.data
         self.z_coordinate = self.data.z.data
+
+    def update_null(self, psi):
+        """Ensure psi input 2D."""
+        super().update_null(psi.reshape(self.shape))
 
     def check_null(self):
         """Check validity of upstream data, update if nessisary."""
         current_hash = hash(self.current.data.tobytes())
         if current_hash != self.version['fieldnull'] or \
                 self.version['Psi'] != self.subframe.version['plasma']:
-            self.update_null(asnumpy(self.psi.reshape(self.shape)))
+            super().update_null(self.psi.reshape(self.shape))
             self.version['fieldnull'] = current_hash
 
     def __getattribute__(self, attr):
@@ -186,21 +202,6 @@ class BiotGrid(FieldNull, BiotOperate):
             self.check_null()
         return super().__getattribute__(attr)
 
-    '''
-    @property
-    def null(self):
-        if (version := id(self.current)) != self.version['current']:
-            print('update')
-            #  TODO add plasma change check version['plasma']
-            #  TODO add version check to topology unittest
-            #  TODO subclass null from biotgrid of full intergration !!! :)
-            shape = self.data.dims['x'], self.data.dims['z']
-            psi, bn = self.psi.reshape(shape), self.bn.reshape(shape)
-            self._null.update(psi, bn)
-            self.version['current'] = version
-        return self._null
-    '''
-
     @property
     def shape(self):
         """Return grid shape."""
@@ -208,15 +209,17 @@ class BiotGrid(FieldNull, BiotOperate):
 
     def plot(self, axes=None, **kwargs):
         """Plot poloidal flux contours."""
+        '''
         self.axes = axes
         kwargs = dict(colors='lightgray', linewidths=1.5, alpha=0.9,
                       linestyles='solid', levels=self.levels) | kwargs
+        '''
+        super().plot(axes=axes, **kwargs)
         psi = asnumpy(self.psi.reshape(*self.shape).T)
         QuadContourSet = self.axes.contour(self.data.x, self.data.z, psi,
                                            **kwargs)
         if isinstance(kwargs['levels'], int):
             self.levels = QuadContourSet.levels
-        super().plot()
 
     def plot_svd(self):
         """Plot influence of SVD reduction."""

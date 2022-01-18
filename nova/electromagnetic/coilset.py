@@ -103,7 +103,7 @@ class CoilSet(CoilGrid, FrameSet):
 if __name__ == '__main__':
 
     filename = 'tmp'
-    reload = False
+    reload = True
     if reload:
         coilset = CoilSet(dcoil=-35, dplasma=-1000)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',

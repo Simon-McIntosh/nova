@@ -39,8 +39,10 @@ class VtkPlot(MetaMethod):
     def plot(self):
         """Plot vtk instances."""
         colors = matplotlib.rcParams['axes.prop_cycle'].by_key()['color']
+        self.frame.vtkgeo.generate_vtk()
         index = self.frame.geotype('Geo', 'vtk')
         color = {f'C{i}': c for i, c in enumerate(colors)}
         vtk = [vtk.c(color[Display.get_facecolor(part)])
                for vtk, part in self.frame.loc[index, ['vtk', 'part']].values]
-        return vedo.show(*vtk)
+        if len(vtk) > 0:
+            return vedo.show(*vtk)

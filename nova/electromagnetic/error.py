@@ -25,3 +25,11 @@ class SubSpaceKeyError(KeyError):
     def __init__(self, col, subspace):
         super().__init__(
             f'{col} not specified as a subspace attribute {subspace}')
+
+
+class GridError(IndexError):
+    """Restrict access to grid solvers when requisite attributes are absent."""
+
+    def __init__(self, attribute):
+        super().__init__(
+            f'Items with required attribute {attribute} are absent.')

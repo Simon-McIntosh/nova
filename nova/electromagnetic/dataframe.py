@@ -254,6 +254,7 @@ class DataFrame(FrameAttrs):
         """Store dataframe as group in netCDF4 hdf5 file."""
         xframe = self.to_xarray()
         xframe.attrs = self.extract_metadata()
+        xframe.drop_vars('vtk', errors='ignore')
         for col in ['poly', 'vtk']:
             try:
                 xframe[col].values = self._dumps(col)

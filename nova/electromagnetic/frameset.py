@@ -20,7 +20,7 @@ class FrameSet(FilePath, FrameSetLoc):
     additional: list[str] = field(repr=False, default_factory=lambda: [
         'turn', 'frame', 'plasma', 'Ic', 'nturn'])
     available: list[str] = field(repr=False, default_factory=lambda: [
-        'link', 'part', 'frame', 'dx', 'dy', 'dz', 'area', 'volume',# 'vtk',
+        'link', 'part', 'frame', 'dx', 'dy', 'dz', 'area', 'volume', 'vtk',
         'delta', 'section', 'turn', 'scale', 'nturn', 'nfilament',
         'Ic', 'It', 'Psi', 'Bx', 'Bz', 'B', 'acloss'])
     subspace: list[str] = field(repr=False, default_factory=lambda: [

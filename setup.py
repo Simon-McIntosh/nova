@@ -9,6 +9,7 @@ extras_require = dict(test=['pytest', 'line_profiler'], develop=['spyder'],
                       thermofluids=['ftputil', 'coolprop'])
 
 extras_require['full'] = [module for mode in extras_require for module in extras_require[mode]]
+extras_require['cupy'] = ['cupy-cuda115']
 
 setup_kwargs = dict(
     name                = 'nova',
@@ -33,7 +34,6 @@ setup_kwargs = dict(
     python_requires     = '>=3.9, <3.10',
     install_requires    = [
         'alphashape',
-        'cupy-cuda115',
         #astropy
         'descartes',
         #geojson,

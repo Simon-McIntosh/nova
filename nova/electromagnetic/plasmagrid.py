@@ -4,13 +4,13 @@ from typing import Union
 
 import numba
 import numpy as np
-from numpy import typing as npt
 import scipy.spatial
 
 from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotgrid import BiotPlot
 from nova.electromagnetic.biotoperate import BiotOperate
 from nova.electromagnetic.biotsolve import BiotSolve
+from nova.electromagnetic.error import GridError
 from nova.electromagnetic.fieldnull import FieldNull
 
 
@@ -59,16 +59,13 @@ class PlasmaGrid(BiotPlot, FieldNull, BiotOperate):
 
     def solve(self,):
         """Solve Biot interaction across plasma grid."""
+        if self.sloc['plasma'].sum() == 0:
+            raise GridError('plasma')
         target = BiotFrame(self.subframe.loc['plasma', ['x', 'z']].to_dict())
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
                               attrs=self.attrs).data
         self.tessellate()
         super().solve()
-
-    #def link_array(self):
-    #    """Extend biot data link_array to link field null instance."""
-    #    super().link_array()
-    #    self.link_fieldnull()
 
     def load_operators(self, svd_factor=None):
         """Extend biot operate load_operators."""
@@ -79,40 +76,9 @@ class PlasmaGrid(BiotPlot, FieldNull, BiotOperate):
         """Plot poloidal flux contours."""
         super().plot(axes)
         kwargs = self.contour_kwargs(**kwargs)
-        '''
-
-        psi = asnumpy(self.psi.reshape(*self.shape).T)
-        QuadContourSet = self.axes.contour(self.data.x, self.data.z, psi,
-                                           **kwargs)
-        if isinstance(kwargs['levels'], int):
-            self.levels = QuadContourSet.levels
-        '''
-        #self.axes.triplot(self.x_coordinate, self.z_coordinate,
-        #                  self.data['triangles'].data, lw=0.5)
+        if kwargs.get('plot_mesh', False):
+            self.axes.triplot(self.x_coordinate, self.z_coordinate,
+                              self.data['triangles'].data, lw=0.5)
         self.axes.tricontour(self.x_coordinate, self.z_coordinate,
                              self.data['triangles'].data, self.psi,
                              **kwargs)
-
-
-        '''
-        neighbours = loop_neighbour_vertices(points, neighbor_vertices)
-
-        p = 20
-        n = tri.vertex_neighbor_vertices
-        npp = n[1][n[0][p]:n[0][p+1]]
-
-        plt.plot(*points[p, :].T, 'C3o')
-        plt.plot(*points[npp, :].T, 'C0o')
-
-        angle = np.arctan2(*(points[npp, :] - points[p, :]).T)
-        npp = npp[np.argsort(angle)[::-1]]
-
-        npp = neighbours[20]
-
-        for i, _np in enumerate(npp):
-            plt.text(*points[_np, :].T, i)
-
-            plt.axis('equal')
-
-
-        '''

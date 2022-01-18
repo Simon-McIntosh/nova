@@ -3,6 +3,7 @@ import shapely.geometry
 import numpy as np
 
 from nova.electromagnetic.coilset import CoilSet
+from nova.electromagnetic.error import GridError
 from nova.geometry.polygon import Polygon
 
 
@@ -97,9 +98,21 @@ def test_multiframe_nturn():
     assert np.isclose(coilset.loc['plasma', 'nturn'].sum(), 1)
 
 
-def test_separatrix_update():
-    pass
+def test_grid_no_plasma():
+    coilset = CoilSet(dcoil=-5)
+    coilset.coil.insert(6.5, 0, 0.2, 0.8)
+    with pytest.raises(GridError):
+        coilset.grid.solve(100,  index='plasma')
 
+
+def test_plasmagrid_no_plasma():
+    coilset = CoilSet(dcoil=-5)
+    coilset.coil.insert(6.5, 0, 0.2, 0.8)
+    with pytest.raises(GridError):
+        coilset.plasmagrid.solve()
+
+
+test_plasmagrid_no_plasma()
 
 if __name__ == '__main__':
 

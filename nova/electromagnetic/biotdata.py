@@ -32,7 +32,7 @@ class BiotData(FilePath, FrameSetLoc):
                 self.frame.subspace.index.get_loc(name) for name in
                 self.subframe.frame[self.aloc['plasma']].unique())
         except StopIteration:
-            self.data.attrs['plasma_index'] = None
+            self.data.attrs['plasma_index'] = -1
 
     def store(self, filename: str, path=None):
         """Store data as netCDF in hdf5 file."""

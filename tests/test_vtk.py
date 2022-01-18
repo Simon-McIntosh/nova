@@ -71,6 +71,7 @@ def test_vtk_poly():
 def test_vtk_skin():
     frame = FrameSpace(required=['x', 'z', 'dl', 'dt'], available=['vtk'])
     frame.insert(5, 2, 4, 0.2, section='skin')
+    frame.vtkgeo.generate_vtk()
     assert isinstance(frame.vtk[0], VtkFrame)
 
 

@@ -1,6 +1,5 @@
 import pytest
 import numpy as np
-import shapely.geometry
 
 from nova.electromagnetic.coilset import CoilSet
 from nova.geometry.polygon import Polygon

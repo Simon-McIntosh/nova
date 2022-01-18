@@ -114,7 +114,7 @@ class FrameSetLoc(FrameData):
     def __post_init__(self):
         """Create array loc indexers."""
         self.version |= dict(frameloc=id(None), subframeloc=id(None))
-        self.update_indexer()
+        self.update_loc_indexer()
 
     def update_frameloc(self):
         """Update frame array loc indexer."""
@@ -131,7 +131,7 @@ class FrameSetLoc(FrameData):
             self.saloc = ArrayLocIndexer('sarray', self.subframe.subspace)
             self.current = self.saloc['Ic']
 
-    def update_indexer(self):
+    def update_loc_indexer(self):
         """Update links to array loc indexer following changes to index id."""
         self.update_frameloc()
         self.update_subframeloc()

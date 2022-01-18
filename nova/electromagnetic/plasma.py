@@ -120,7 +120,6 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
             return
         if self.pointloop is None:
             self.generate_pointloop()
-        self.update_indexer()
         try:
             inloop = self.pointloop.update(loop)
         except numba.TypingError:
@@ -128,27 +127,13 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
             inloop = self.pointloop.update(loop)
         self.loop = loop
         self.subframe.version['plasma'] = id(loop)
-
+        self.update_loc_indexer()
         plasma = self.aloc['plasma']
         ionize = self.aloc['ionize']
         nturn = self.aloc['nturn']
         area = self.aloc['area']
         ionize[plasma] = inloop
-
-        '''
-        self.ploc['ionize'] = inloop
-        ionize_area = self.ploc['area'][inloop]
-        self.ploc['nturn'] = 0
-        self.ploc['nturn'][inloop] = ionize_area / np.sum(ionize_area)
-        '''
-
-        #threadsperblock = 32
-        #blockspergrid = (loop.size + (threadsperblock - 1)) // threadsperblock
-
         self._update_nturn(plasma, ionize, nturn, area)
-        #self.subframe.plasmaturns = np.asarray(nturn[ionize], xp.float32)
-        #print(nturn[plasma])
-        #self.ploc['nturn'] = xp.asarray(nturn[plasma], dtype=xp.float32)
 
     @staticmethod
     @njit

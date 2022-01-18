@@ -148,23 +148,3 @@ if __name__ == '__main__':
 
     coilset.plasmagrid.load_operators(10)
     coilset.plasmagrid.plot_svd(levels=coilset.grid.levels)
-
-    '''
-    from nova.electromagnetic.fieldnull import FieldNull
-    from nova.utilities.pyplot import plt
-
-    grid = coilset.grid
-    shape = grid.data.dims['x'], grid.data.dims['z']
-    bn, psi = grid.bn.reshape(shape), grid.psi.reshape(shape)
-    null = FieldNull(psi, bn)
-
-    plt.plot(grid.data.x2d.data[null.index_o],
-             grid.data.z2d.data[null.index_o], 'o')
-    plt.plot(grid.data.x2d.data[null.index_x],
-             grid.data.z2d.data[null.index_x], 'X')
-
-    def update_turns(n=1000):
-        update_turns = coilset.grid.update_turns
-        for __ in range(n):
-            update_turns('Psi')
-    '''

@@ -12,6 +12,7 @@ import xarray
 from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotoperate import BiotOperate
 from nova.electromagnetic.biotsolve import BiotSolve
+from nova.electromagnetic.error import GridError
 from nova.electromagnetic.fieldnull import FieldNull
 from nova.electromagnetic.framelink import FrameLink
 from nova.electromagnetic.polyplot import Axes
@@ -103,14 +104,17 @@ class Expand:
     """Calculate grid limit as a factor expansion about multipoly bounds."""
 
     frame: FrameLink
-    index: Union[slice, npt.ArrayLike] = slice(None)
+    index: Union[str, slice, npt.ArrayLike] = slice(None)
     xmin: float = 1e-12
     fix_aspect: bool = False
 
     def __post_init__(self):
         """Extract multipolygon bounding box."""
         if isinstance(self.index, str):
+            index = self.index
             self.index = getattr(self.frame, self.index)
+            if sum(self.index) == 0:
+                raise GridError(index)
         poly = shapely.geometry.MultiPolygon(
             [polygon.poly for polygon in self.frame.poly[self.index]])
         self.limit = [*poly.bounds[::2], *poly.bounds[1::2]]
@@ -163,7 +167,7 @@ class BiotGrid(BiotPlot, FieldNull, BiotOperate):
         super().__post_init__()
         self.version['fieldnull'] = id(None)
 
-    def solve(self, number: int, limit: Union[float, list[float]],
+    def solve(self, number: int, limit: Union[float, list[float]] = 0,
               index: Union[str, slice, npt.ArrayLike] = slice(None)):
         """Solve Biot interaction across grid."""
         if isinstance(limit, (int, float)):
@@ -179,20 +183,7 @@ class BiotGrid(BiotPlot, FieldNull, BiotOperate):
         self.data.coords['z'] = grid.data.z
         self.data.coords['x2d'] = (['x', 'z'], grid.data.x2d.data)
         self.data.coords['z2d'] = (['x', 'z'], grid.data.z2d.data)
-        self.link_fieldnull()
         super().solve()
-
-    '''
-    def link_array(self):
-        """Extend biot data link_array to link field null instance."""
-        super().link_array()
-        self.link_fieldnull()
-
-    def link_fieldnull(self):
-        """Link to field null instance."""
-        self.x_coordinate = self.data.x.data
-        self.z_coordinate = self.data.z.data
-    '''
 
     def update_null(self, psi):
         """Ensure psi input 2D."""

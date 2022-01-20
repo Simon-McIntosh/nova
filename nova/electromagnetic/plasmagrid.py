@@ -42,9 +42,13 @@ class PlasmaGrid(BiotBaseGrid):
             delta = points[neighbour_index] - center_point
             angle = np.arctan2(delta[:, 1], delta[:, 0])
             neighbours[i] = neighbour_index[np.argsort(angle)[::-1]]
-        index = neighbours[:, 0] != -1
-        return np.append(np.arange(point_number)[index].reshape(-1, 1),
-                         neighbours[index], axis=1)
+        mask = neighbours[:, 0] != -1
+        stencil_index = np.arange(point_number)[mask]
+        stencil_mask = np.full(point_number, -1)
+        stencil_mask[mask] = np.arange(len(stencil_index))
+        stencil = np.append(np.arange(point_number)[mask].reshape(-1, 1),
+                            neighbours[mask], axis=1)
+        return stencil, stencil_index, stencil_mask
 
     def tessellate(self):
         """Tesselate hexagonal mesh, compute 6-point neighbour loops."""
@@ -53,12 +57,14 @@ class PlasmaGrid(BiotBaseGrid):
         neighbor_vertices = tri.vertex_neighbor_vertices
         hull = scipy.spatial.ConvexHull(points)
         hull_vertices = hull.vertices
-        neighbours = self.loop_neighbour_vertices(points, neighbor_vertices,
-                                                  hull_vertices)
+        stencil, stencil_index, stencil_mask = self.loop_neighbour_vertices(
+            points, neighbor_vertices, hull_vertices)
         self.data.coords['x'] = points[:, 0]
         self.data.coords['z'] = points[:, 1]
+        self.data.coords['stencil_index'] = stencil_index
         self.data['triangles'] = ('tri_index', 'tri_vertex'), tri.simplices
-        self.data['stencil'] = ('stencil_index', 'stencil_vertex'), neighbours
+        self.data['stencil'] = ('stencil_index', 'stencil_vertex'), stencil
+        self.data['stencil_mask'] = 'plasma', stencil_mask
 
     def solve(self,):
         """Solve Biot interaction across plasma grid."""

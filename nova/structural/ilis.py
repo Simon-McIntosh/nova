@@ -161,16 +161,20 @@ class Coil:
         self.origin = np.linalg.solve(
             point_matrix, [0, 0, 0, self.ilis[0].pdot, self.ilis[1].pdot])[:3]
 
+    @property
+    def radius(self):
+        """Return origin radius."""
+        return np.linalg.norm(self.origin)
+
     def correct_radial_offset(self):
         """Offset coil to maintain target inter-coil gap."""
-        radius = np.linalg.norm(self.origin)
+        radius = self.radius
         offset = self.gap/2 / np.sin(np.pi/18) - radius
         for i in range(2):
             self.ilis[i].vector_offset(offset, self.origin/radius)
         self.case.mesh.translate(offset*self.origin / radius, inplace=True)
         self.calculate_origin()
-        assert np.isclose(np.linalg.norm(self.origin) * np.sin(np.pi/18),
-                          self.gap/2)
+        assert np.isclose(self.radius * np.sin(np.pi/18), self.gap/2)
 
     def add_plate_thickness(self):
         """Offset ilis plate from TF coil by thickness."""
@@ -209,11 +213,14 @@ class Cage:
 
     ilis_a: npt.ArrayLike
     ilis_b: npt.ArrayLike
+    gap: float = 0.006
+    thickness: float = 0.002
     mesh: pv.PolyData = field(init=False, default_factory=pv.PolyData)
 
     def __post_init__(self):
         """Pattern referance coil."""
-        self.coil = Coil([ILIS(self.ilis_a), ILIS(self.ilis_b)])
+        self.coil = Coil([ILIS(self.ilis_a), ILIS(self.ilis_b)],
+                         self.gap, self.thickness)
         self.data = xarray.Dataset(
             coords=dict(coil=range(1, 19),
                         side=['a', 'b'],
@@ -273,7 +280,8 @@ class Cage:
         """Plot ILIS surfaces and TF coil case mesh."""
         if plotter is None:
             plotter = pv.Plotter()
-        coil = Coil([ILIS(self.ilis_a), ILIS(self.ilis_b)])
+        coil = Coil([ILIS(self.ilis_a), ILIS(self.ilis_b)],
+                    self.gap, self.thickness)
         for i in range(18):
             coil.rotate_z(20)
             coil.plot(plotter, show=False, case=False)
@@ -294,6 +302,7 @@ if __name__ == '__main__':
               [3.2060048825775693, 0.5622588780695716, -4.577528574906],
               [2.275862490214159, 0.3982496783946659, -4.679000536586998]]
 
-    cage = Cage(ilis_a, ilis_b)
-    plotter = cage.plot_mesh(show=False)
-    cage.plot_corners(plotter)
+    cage = Cage(ilis_a, ilis_b, gap=7e-3)
+    print(cage.coil.radius)
+    #plotter = cage.plot_mesh(show=False)
+    #cage.plot_corners(plotter)

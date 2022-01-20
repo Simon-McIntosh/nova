@@ -133,8 +133,38 @@ class Expand:
         return limit
 
 
-class BiotPlot(ABC, Axes):
-    """Flux grid plotting baseclass."""
+class BiotBaseGrid(FieldNull, BiotOperate):
+    """Flux grid baseclass."""
+
+    attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
+    levels: Union[int, list[float]] = 31
+
+    def __post_init__(self):
+        """Initialize fieldnull version."""
+        super().__post_init__()
+        self.version['fieldnull'] = id(None)
+
+    def update(self):
+        """
+        Interface with fieldnull update.
+
+        Extend method to change dimensionality of psi input.
+        """
+        super().update_null(self.psi)
+
+    def check_version(self):
+        """Check validity of upstream data, update if nessisary."""
+        current_hash = hash(self.current.data.tobytes())
+        if current_hash != self.version['fieldnull'] or \
+                self.version['Psi'] != self.subframe.version['plasma']:
+            self.update()
+            self.version['fieldnull'] = current_hash
+
+    def __getattribute__(self, attr):
+        """Extend getattribute to intercept field null data access."""
+        if attr == 'data_x' or attr == 'data_o':
+            self.check_version()
+        return super().__getattribute__(attr)
 
     def contour_kwargs(self, **kwargs):
         """Return contour plot kwargs."""
@@ -156,16 +186,8 @@ class BiotPlot(ABC, Axes):
 
 
 @dataclass
-class BiotGrid(BiotPlot, FieldNull, BiotOperate):
+class BiotGrid(BiotBaseGrid):
     """Compute interaction across grid."""
-
-    attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
-    levels: Union[int, list[float]] = 31
-
-    def __post_init__(self):
-        """Initialize fieldnull version."""
-        super().__post_init__()
-        self.version['fieldnull'] = id(None)
 
     def solve(self, number: int, limit: Union[float, list[float]] = 0,
               index: Union[str, slice, npt.ArrayLike] = slice(None)):
@@ -185,23 +207,9 @@ class BiotGrid(BiotPlot, FieldNull, BiotOperate):
         self.data.coords['z2d'] = (['x', 'z'], grid.data.z2d.data)
         super().solve()
 
-    def update_null(self, psi):
-        """Ensure psi input 2D."""
-        super().update_null(psi.reshape(self.shape))
-
-    def check_null(self):
-        """Check validity of upstream data, update if nessisary."""
-        current_hash = hash(self.current.data.tobytes())
-        if current_hash != self.version['fieldnull'] or \
-                self.version['Psi'] != self.subframe.version['plasma']:
-            super().update_null(self.psi.reshape(self.shape))
-            self.version['fieldnull'] = current_hash
-
-    def __getattribute__(self, attr):
-        """Extend getattribute to intercept field null data access."""
-        if attr == 'data_x' or attr == 'data_o':
-            self.check_null()
-        return super().__getattribute__(attr)
+    def update(self):
+        """Extend update method to ensure psi input is 2D."""
+        super().update_null(self.psi.reshape(self.shape))
 
     @property
     def shape(self):

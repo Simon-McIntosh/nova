@@ -103,9 +103,9 @@ class CoilSet(CoilGrid, FrameSet):
 if __name__ == '__main__':
 
     filename = 'tmp'
-    reload = True
+    reload = False
     if reload:
-        coilset = CoilSet(dcoil=-35, dplasma=-1000)
+        coilset = CoilSet(dcoil=-35, dplasma=-65**2)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
                             nturn=-0.8)
         coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex', turn='c',
@@ -130,15 +130,15 @@ if __name__ == '__main__':
     else:
         coilset = CoilSet().load(filename)
 
-    separatrix = Polygon(dict(c=[4.5, -1.05, 0.9])).boundary
+    separatrix = Polygon(dict(c=[4.5, -1.25, 0.9])).boundary
     coilset.plasma.update_separatrix(separatrix)
 
     coilset.sloc['bubble', 'Ic'] = 8
     coilset.sloc['passive', 'Ic'] = 4
     coilset.sloc['plasma', 'Ic'] = 1
 
-    psi = coilset.plasmagrid.psi
-    coilset.plasmagrid.update_null(psi)
+    #psi = coilset.plasmagrid.psi
+    #coilset.plasmagrid.update_null(psi)
 
     coilset.plot()
     coilset.plasma.plot()

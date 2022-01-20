@@ -7,15 +7,13 @@ import numpy as np
 import scipy.spatial
 
 from nova.electromagnetic.biotframe import BiotFrame
-from nova.electromagnetic.biotgrid import BiotPlot
-from nova.electromagnetic.biotoperate import BiotOperate
+from nova.electromagnetic.biotgrid import BiotBaseGrid
 from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.error import GridError
-from nova.electromagnetic.fieldnull import FieldNull
 
 
 @dataclass
-class PlasmaGrid(BiotPlot, FieldNull, BiotOperate):
+class PlasmaGrid(BiotBaseGrid):
     """Compute interaction across hexagonal grid."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
@@ -28,11 +26,13 @@ class PlasmaGrid(BiotPlot, FieldNull, BiotOperate):
 
     @staticmethod
     @numba.njit
-    def loop_neighbour_vertices(points, neighbor_vertices):
+    def loop_neighbour_vertices(points, neighbor_vertices, hull_vertices):
         """Calculate 6-point ordered loop vertex indices."""
         point_number = len(points)
         neighbours = np.full((point_number, 6), -1)
         for i in range(len(points)):
+            if i in hull_vertices:
+                continue
             center_point = points[i, :]
             slice_index = slice(neighbor_vertices[0][i],
                                 neighbor_vertices[0][i+1])
@@ -51,7 +51,10 @@ class PlasmaGrid(BiotPlot, FieldNull, BiotOperate):
         points = self.subframe.loc['plasma', ['x', 'z']].to_numpy()
         tri = scipy.spatial.Delaunay(points)
         neighbor_vertices = tri.vertex_neighbor_vertices
-        neighbours = self.loop_neighbour_vertices(points, neighbor_vertices)
+        hull = scipy.spatial.ConvexHull(points)
+        hull_vertices = hull.vertices
+        neighbours = self.loop_neighbour_vertices(points, neighbor_vertices,
+                                                  hull_vertices)
         self.data.coords['x'] = points[:, 0]
         self.data.coords['z'] = points[:, 1]
         self.data['triangles'] = ('tri_index', 'tri_vertex'), tri.simplices

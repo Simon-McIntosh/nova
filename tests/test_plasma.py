@@ -112,7 +112,17 @@ def test_plasmagrid_no_plasma():
         coilset.plasmagrid.solve()
 
 
-test_plasmagrid_no_plasma()
+def test_plasmagrid_xpoint():
+    coilset = CoilSet(dcoil=-5, dplasma=-60)
+    coilset.coil.insert(6.5, [-1, 1], 0.4, 0.2, Ic=-15e6)
+    coilset.plasma.insert({'e': [6.5, 0, 1.2, 1.6]}, Ic=-15e6)
+    coilset.plasma.update_separatrix({'e': [6.5, 0, 0.4, 0.6]})
+    coilset.plot()
+    coilset.plasmagrid.solve()
+    coilset.plasmagrid.plot()
+    assert coilset.plasmagrid.x_point_number == 2
+    assert coilset.plasmagrid.o_point_number == 1
+
 
 if __name__ == '__main__':
 

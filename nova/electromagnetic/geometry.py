@@ -52,7 +52,7 @@ class VtkGeo(MetaMethod):
                 else:
                     frame.loc[frame.index[i], 'volume'] = tri.volume
             self.frame.loc[index, :] = frame
-        #self.generate_vtk()
+        self.generate_vtk()
 
     def generate_vtk(self):
         """Generate vtk data from poly."""

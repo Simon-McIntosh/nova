@@ -22,7 +22,7 @@ class MachineData(CoilSet, pythonIO):
 
     def __init__(self, read_txt=False, **kwargs):
         self.read_txt = read_txt
-        self.directory = path.join(root_dir, 'input/geometry/ITER')
+        self.directory = path.join(root_dir, 'input/ITER')
         super().__init__(**kwargs)
 
     @staticmethod
@@ -259,19 +259,23 @@ class MachineData(CoilSet, pythonIO):
         for part in part_list:
             for segment in self.models[part]:
                 frame = self.models[part][segment]
-                self.add_shell(frame.x, frame.z, frame.dt, rho=frame.rho,
-                               dShell=1, part=part, name=segment)
+                print(frame.dt)
+                self.shell.insert(frame.x, frame.z, self.dshell,
+                                  frame.dt, rho=frame.rho,
+                                  part=part, name=segment)
 
 
 if __name__ == '__main__':
 
-    machine = MachineData(dcoil=0.2, read_txt=False)
+    machine = MachineData(dcoil=0.2, dshell=0, read_txt=False)
 
-    machine.load_models(read_txt=True)
-    machine.plot_models()
+    machine.load_coilset(part_list='vvin vvout')
 
-    machine.load_data(read_txt=True)
-    machine.plot_data()
+    #machine.load_models(read_txt=True)
+    #machine.plot_models()
+
+    #machine.load_data(read_txt=True)
+    #machine.plot_data()
 
     '''
     machine.load_coilset(part_list='trs dir', read_txt=True)

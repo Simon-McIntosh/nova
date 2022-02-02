@@ -250,12 +250,14 @@ class DataFrame(FrameAttrs):
                                    for attr in metadata['version']}
         return metadata
 
-    def store(self, file, group=None, mode='w'):
+    def store(self, file, group=None, mode='w', vtk=False):
         """Store dataframe as group in netCDF4 hdf5 file."""
         xframe = self.to_xarray()
         xframe.attrs = self.extract_metadata()
-        xframe.drop_vars('vtk', errors='ignore')
         for col in ['poly', 'vtk']:
+            if col == 'vtk' and not vtk:
+                xframe = xframe.drop_vars('vtk', errors='ignore')
+                continue
             try:
                 xframe[col].values = self._dumps(col)
             except KeyError:

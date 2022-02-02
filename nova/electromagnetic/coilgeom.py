@@ -26,7 +26,7 @@ class ITERcoilset(CoilClass):
 
     def __init__(self, read_txt=False, **kwargs):
         self.read_txt = read_txt
-        CoilClass.__init__(self)#, **kwargs)
+        super().__init__(self)#, **kwargs)
         self.load_data(**kwargs)
         self.load_coilset(**kwargs)
 
@@ -382,7 +382,7 @@ class PFgeom(CoilSet):  # PF/CS coilset
 class VSgeom(CoilSet):  # VS coil class
 
     def __init__(self, invessel=True, jacket=True):
-        CoilSet.__init__(self)
+        super().__init__()
         self.add_conductor(invessel=invessel)
 
         reindex = {'LVS0-LVS3': 'LVS', 'UVS0-UVS3': 'UVS'}
@@ -390,10 +390,10 @@ class VSgeom(CoilSet):  # VS coil class
             self.add_jacket()  # add steel jacket
             reindex = {**reindex, 'LVSj0-LVSj3': 'LVSj', 'UVSj0-UVSj3': 'UVSj'}
         # cluster upper and lower coils and jackets
-        self.cluster(4)
-        self.rename(index=reindex)
-        self.coil.add_mpc(['LVS', 'UVS'], -1)  # link vs turns
-        self.extract()
+        #self.cluster(4)
+        #self.rename(index=reindex)
+        #self.coil.add_mpc(['LVS', 'UVS'], -1)  # link vs turns
+        #self.extract()
 
     def add_conductor(self, invessel=True):  # VS coil geometory
         co = 0.1065  # inner
@@ -411,7 +411,7 @@ class VSgeom(CoilSet):  # VS coil class
         self.geom['UVS'] = {'x': 5.81, 'z': 4.904, 'dx': dx_wp, 'dz': dz_wp,
                             'theta': 25.9*np.pi/180 + np.pi, 'sign': -1,
                             'nturn': -4}
-        if not invessel:  # offest coils
+        if not invessel:  # offset coils
             self.geom['UVS']['x'] += 1.7
             self.geom['UVS']['z'] -= 0
             self.geom['LVS']['x'] = self.geom['UVS']['x']
@@ -695,7 +695,9 @@ class elm_coils:
 
 if __name__ == '__main__':
 
-    vs = VSgeom(jacket=True).cc
+    #vs = VSgeom(jacket=True)
+    pf = PFgeom()
+    pf.plot()
 
     # elm = elm_coils()
     # elm.plot()

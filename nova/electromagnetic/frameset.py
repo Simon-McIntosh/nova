@@ -68,6 +68,10 @@ class FrameSet(FilePath, FrameSetLoc):
         self.subframe.load(file, 'subframe')
         return self
 
+    def plot(self, index=None, axes=None, **kwargs):
+        """Plot coilset."""
+        self.subframe.polyplot(index=index, axes=axes, **kwargs)
+
 
 if __name__ == '__main__':
 

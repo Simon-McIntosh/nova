@@ -26,7 +26,8 @@ class PolyGeom(Polygon):
 
     """
 
-    poly: Union[Polygon, PolyFrame, shapely.geometry.Polygon,
+    poly: Union[Polygon, PolyFrame,
+                shapely.geometry.Polygon, shapely.geometry.MultiPolygon,
                 dict[str, list[float]],
                 list[float, float, float, float],
                 npt.ArrayLike] = field(repr=False)

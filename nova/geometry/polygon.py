@@ -58,6 +58,8 @@ class Polygon(PolyFrame):
             return self.poly.metadata
         if isinstance(self.poly, shapely.geometry.Polygon):
             return dict(name='polygon')
+        if isinstance(self.poly, shapely.geometry.MultiPolygon):
+            return dict(name='multipoly')
         if isinstance(self.poly, dict):
             metadata = dict(names=[PolyGen(name).shape
                                    for name in self.poly])
@@ -99,7 +101,8 @@ class Polygon(PolyFrame):
         polygon : shapely.geometry.Polygon
 
         """
-        if isinstance(self.poly, shapely.geometry.Polygon):
+        if isinstance(self.poly, (shapely.geometry.Polygon,
+                                  shapely.geometry.MultiPolygon)):
             return self.poly
         if isinstance(self.poly, PolyFrame):
             return self.poly.poly

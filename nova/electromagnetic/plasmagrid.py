@@ -7,15 +7,13 @@ import numpy as np
 import scipy.spatial
 
 from nova.electromagnetic.biotframe import BiotFrame
-from nova.electromagnetic.biotgrid import BiotPlot
-from nova.electromagnetic.biotoperate import BiotOperate
+from nova.electromagnetic.biotgrid import BiotBaseGrid
 from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.error import GridError
-from nova.electromagnetic.fieldnull import FieldNull
 
 
 @dataclass
-class PlasmaGrid(BiotPlot, FieldNull, BiotOperate):
+class PlasmaGrid(BiotBaseGrid):
     """Compute interaction across hexagonal grid."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
@@ -28,11 +26,13 @@ class PlasmaGrid(BiotPlot, FieldNull, BiotOperate):
 
     @staticmethod
     @numba.njit
-    def loop_neighbour_vertices(points, neighbor_vertices):
+    def loop_neighbour_vertices(points, neighbor_vertices, hull_vertices):
         """Calculate 6-point ordered loop vertex indices."""
         point_number = len(points)
         neighbours = np.full((point_number, 6), -1)
         for i in range(len(points)):
+            if i in hull_vertices:
+                continue
             center_point = points[i, :]
             slice_index = slice(neighbor_vertices[0][i],
                                 neighbor_vertices[0][i+1])
@@ -42,20 +42,29 @@ class PlasmaGrid(BiotPlot, FieldNull, BiotOperate):
             delta = points[neighbour_index] - center_point
             angle = np.arctan2(delta[:, 1], delta[:, 0])
             neighbours[i] = neighbour_index[np.argsort(angle)[::-1]]
-        index = neighbours[:, 0] != -1
-        return np.append(np.arange(point_number)[index].reshape(-1, 1),
-                         neighbours[index], axis=1)
+        mask = neighbours[:, 0] != -1
+        stencil_index = np.arange(point_number)[mask]
+        stencil_mask = np.full(point_number, -1)
+        stencil_mask[mask] = np.arange(len(stencil_index))
+        stencil = np.append(np.arange(point_number)[mask].reshape(-1, 1),
+                            neighbours[mask], axis=1)
+        return stencil, stencil_index, stencil_mask
 
     def tessellate(self):
         """Tesselate hexagonal mesh, compute 6-point neighbour loops."""
         points = self.subframe.loc['plasma', ['x', 'z']].to_numpy()
         tri = scipy.spatial.Delaunay(points)
         neighbor_vertices = tri.vertex_neighbor_vertices
-        neighbours = self.loop_neighbour_vertices(points, neighbor_vertices)
+        hull = scipy.spatial.ConvexHull(points)
+        hull_vertices = hull.vertices
+        stencil, stencil_index, stencil_mask = self.loop_neighbour_vertices(
+            points, neighbor_vertices, hull_vertices)
         self.data.coords['x'] = points[:, 0]
         self.data.coords['z'] = points[:, 1]
+        self.data.coords['stencil_index'] = stencil_index
         self.data['triangles'] = ('tri_index', 'tri_vertex'), tri.simplices
-        self.data['stencil'] = ('stencil_index', 'stencil_vertex'), neighbours
+        self.data['stencil'] = ('stencil_index', 'stencil_vertex'), stencil
+        self.data['stencil_mask'] = 'plasma', stencil_mask
 
     def solve(self,):
         """Solve Biot interaction across plasma grid."""

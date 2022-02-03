@@ -302,7 +302,8 @@ class FrameLink(LinkIndexer, DataArray):
         if len(args) != 1:
             return args, kwargs
         if len(self.metaframe.required) == 1 and \
-            (not isinstance(args[0], (shapely.geometry.Polygon, dict))
+            (not isinstance(args[0], (shapely.geometry.Polygon,
+                                      shapely.geometry.MultiPolygon, dict))
                 or isinstance(args[0], vedo.Mesh)):
             return args, kwargs
         kwargs = kwargs | PolyGeom(args[0]).geometry

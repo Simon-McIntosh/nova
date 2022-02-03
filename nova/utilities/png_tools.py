@@ -249,7 +249,6 @@ def data_mine(path, file, xlim, ylim, **kw):
     if title:
         plt.suptitle(title)
 
-
     plot = sample_plot(data, x_origin, y_origin, x_ref, y_ref,
                        x_fig, y_fig, ax_eq, ax, fig, path, file,
                        xscale=xscale, yscale=yscale, save=save)

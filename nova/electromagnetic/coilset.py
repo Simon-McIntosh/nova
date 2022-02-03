@@ -11,6 +11,7 @@ from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.framedata import FrameData
 from nova.electromagnetic.winding import Winding
 from nova.electromagnetic.shell import Shell
+from nova.electromagnetic.turn import Turn
 from nova.electromagnetic.plasma import Plasma
 from nova.electromagnetic.plasmagrid import PlasmaGrid
 from nova.electromagnetic.ferritic import Ferritic
@@ -46,7 +47,8 @@ class CoilSet(CoilGrid, FrameSet):
 
     _frame: dict[str, FrameData] = field(
         init=False, repr=False,
-        default_factory=lambda: dict(coil=Coil, shell=Shell, plasma=Plasma,
+        default_factory=lambda: dict(coil=Coil, turn=Turn, shell=Shell,
+                                     plasma=Plasma,
                                      ferritic=Ferritic, winding=Winding))
     _biot: dict[str, BiotData] = field(
         init=False, repr=False,
@@ -95,13 +97,20 @@ class CoilSet(CoilGrid, FrameSet):
                 self._biot[attr] = biot
         return self
 
-    def plot(self, index=None, axes=None, **kwargs):
-        """Plot coilset."""
-        self.subframe.polyplot(index=index, axes=axes, **kwargs)
-
 
 if __name__ == '__main__':
 
+    coilset = CoilSet(dcoil=-35, dplasma=-1000)
+
+    coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
+                        nturn=-0.8)
+    coilset.turn.insert([2, 3, 3, 2], [2, 3.3, 4, 2.2], 0.5, 0.5, turn='skin')
+    coilset.plot()
+
+    from nova.utilities.pyplot import plt
+    turn = coilset.frame.iloc[-1]
+    plt.plot(turn.x, turn.z, 'X')
+    '''
     filename = 'tmp'
     reload = False
     if reload:

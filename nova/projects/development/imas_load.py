@@ -410,9 +410,11 @@ class Passive(MachineData):
                     shelldata.append(loop, element)
                     continue
                 if element.is_rectangular():
-                    # TO DO implement rectanglar build
+                    # TODO finish implementation of rectanglar build
                     coildata.append(loop, element)
                     continue
+                raise NotImplementedError(f'geometory {element.geometry.name} '
+                                          'not implemented')
 
         shelldata.insert(self.shell)
 

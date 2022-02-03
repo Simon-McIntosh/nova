@@ -42,9 +42,9 @@ def test_save_load_vtk():
     frame += dict(vtk=box)
     frame.vtk[0].triangulate()
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
-        frame.store(tmp.name, 'frame')
+        frame.store(tmp.name, 'frame', vtk=True)
         new_frame = FrameSpace().load(tmp.name, 'frame')
-    assert new_frame.vtk[0].volume() == frame.vtk[0].volume()
+    assert np.isclose(new_frame.vtk[0].volume(), frame.vtk[0].volume())
 
 
 def test_box_bounds():

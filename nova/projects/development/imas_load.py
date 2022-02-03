@@ -279,7 +279,17 @@ class FrameData(ABC):
             return 'vv'
         if 'TRI' in name:
             return 'trs'
+        if name == 'INB_RAIL':
+            return 'dir'
         return 'shell'
+
+    def update_resistivity(self, index, frame, subframe, resistance):
+        """Update frame and subframe resistivity."""
+        rho = resistance * frame.loc[index, 'area'] / frame.loc[index, 'dy']
+        frame.loc[index, 'rho'] = rho
+        for i, frame in enumerate(index):
+            subindex = subframe.frame == frame
+            subframe.loc[subindex, 'rho'] = rho[i]
 
 
 @dataclass
@@ -335,12 +345,7 @@ class ShellData(FrameData):
             index = shell.insert(*self.points[i].T, self.length, thickness,
                                  rho=0, delta=self.delta, name=self.name[i],
                                  part=part)
-            rho = self.resistance[i] * shell.frame.loc[index, 'area'] / \
-                shell.frame.loc[index, 'dy']
-            shell.frame.loc[index, 'rho'] = rho
-            for j, frame in enumerate(index):
-                subindex = shell.subframe.frame == frame
-                shell.subframe.loc[subindex, 'rho'] = rho[j]
+            self.update_resistivity(index, *shell.frames, self.resistance[i])
 
     def plot(self):
         """Plot shell centerlines."""
@@ -355,14 +360,34 @@ class ShellData(FrameData):
 class CoilData(FrameData):
     """Extract coildata from passive ids."""
 
+    delta: float
+    name: list[str] = field(init=False, default_factory=list)
+    data: dict[str, list[float]] = field(init=False)
+    attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height', 'name',
+                                  'resistance']
+
+    def __post_init__(self):
+        """Init data dict."""
+        self.data = {attr: [] for attr in self.attrs}
+
     def append(self, loop: Loop, element: Element):
         """Append coil data to internal structrue."""
         assert element.is_rectangular()
-        # TODO finish creating append / insert structure for passive coils.
+        for attr in self.attrs[:4]:  # insert element data
+            self.data[attr].append(getattr(element.geometry, attr))
+        for attr in self.attrs[4:]:  # insert loop data
+            self.data[attr].append(getattr(loop, attr))
 
     def insert(self, coil: Coil):
         """Insert data via coil method."""
-        coil.insert(self.radius, self.height, self.width, self.thickness)
+        part = self.get_part(self.data['name'][0])
+        index = coil.insert(self.data['r'], self.data['z'],
+                            self.data['width'], self.data['height'],
+                            name=self.data['name'], part=part, rho=0,
+                            passive=True)
+        self.update_resistivity(index, *coil.frames, self.data['resistance'])
+
+
 
 
 
@@ -391,13 +416,6 @@ class Passive(MachineData):
     run: int = 2
     ids_name: str = 'pf_passive'
 
-    #ids_data: object = field(repr=False)
-    #shell: ShellLoop = field(init=False, default_factory=ShellLoop)
-
-    def __post_init__(self):
-        """Load data from cache - build if not found"""
-        super().__post_init__()
-
     def build(self):
         """Build pf passive geometroy."""
         shelldata = ShellData(self.dshell)
@@ -410,13 +428,24 @@ class Passive(MachineData):
                     shelldata.append(loop, element)
                     continue
                 if element.is_rectangular():
-                    # TODO finish implementation of rectanglar build
                     coildata.append(loop, element)
                     continue
                 raise NotImplementedError(f'geometory {element.geometry.name} '
                                           'not implemented')
-
+        coildata.insert(self.coil)
         shelldata.insert(self.shell)
+
+
+@dataclass
+class Active(MachineData):
+    """Manage active poloidal loop ids, pf_passive."""
+
+    shot: int = 111001
+    run: int = 1
+    ids_name: str = 'pf_active'
+
+    def build(self):
+        """Build pf active geometroy."""
 
 
 @dataclass
@@ -429,15 +458,15 @@ class Machine(CoilSet):
 
 if __name__ == '__main__':
 
-    passive = Passive(dshell=0.25)
-    passive.build()
-    passive.plot()
+    #passive = Passive(dshell=0.25)
+    #passive.build()
+    #passive.plot()
 
     #loop = Loop(pf_passive.loop)
     #loop.frameset.plot()
 
-    #pf_passive = MachineDescription().ids(115005, 2, 'pf_passive')
-    #el = Element(pf_passive.loop[15].element[0])
+    pf_active = MachineDescription().ids(111001, 1, 'pf_active')
+    #el = Element(pf_passive.loop[1].element[0])
     #el.geom.plot()
 
     #element = pf_passive.loop[1].element[0]
@@ -452,9 +481,6 @@ vessel = ids.get('pf_passive', 0)
 ids.close()
 
 coils = [coil.identifier for coil in pf_active.coil.array]
-
-
-
 
 
 def get_part(name: str) -> str:

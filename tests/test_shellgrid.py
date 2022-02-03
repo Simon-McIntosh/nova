@@ -18,7 +18,7 @@ def test_circle_rdp_features_upscale():
 
 
 def test_min_ndiv():
-    shellgrid = ShellGrid([1, 3], [3, 5], 0, 0.1, ndiv=5)
+    shellgrid = ShellGrid([1, 3], [3, 5], -1, 0.1, ndiv=5)
     assert len(shellgrid.ldiv) == 5
 
 

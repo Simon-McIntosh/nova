@@ -20,7 +20,28 @@ from nova.utilities.pyplot import plt
 
 @dataclass
 class ShellCoords:
-    """Store shell coordinates and spacing parameters."""
+    """
+    Store shell coordinates and spacing parameters.
+
+    Parameters
+    ----------
+    x_coordinate : ArrayLike
+        shell loop x-coordinate array
+
+    z_coordinate : ArrayLike
+        shell loop z-coordinate array
+
+    length : float
+        frame length
+
+            - length < 0: segment number
+            - length == 0: coordinate alligned segmentation
+            - length > 0: segment length
+
+    thickness : float
+        shell thickness
+
+    """
 
     x_coordinate: npt.ArrayLike
     z_coordinate: npt.ArrayLike
@@ -87,20 +108,21 @@ class ShellSegment(ShellInterp):
     ndiv: int = 2
     ldiv: npt.ArrayLike = field(init=False, repr=False)
     columns: list[str] = field(init=False, default_factory=lambda: [
-        'x', 'z', 'dl', 'dt', 'dx', 'dz', 'rms', 'area', 'section', 'poly'])
+        'x', 'y', 'z', 'dl', 'dt', 'dx', 'dy', 'dz', 'rms', 'area',
+        'section', 'poly'])
 
     def __post_init__(self):
         """Construct RDP vector."""
         super().__post_init__()
         self.length = self.update_length()
         self.ndiv = self.update_ndiv()
-        self.ldiv = np.linspace(0, 1, self.ndiv)
+        self.ldiv = self.update_ldiv()
         self.rdp = self.extract_features()
 
     def update_length(self) -> float:
         """Return updated sub-segment spacing parameter."""
         if self.length == 0:
-            return self.total_length
+            return self.length
         if self.length < 0:  # specify segment number
             self.length = self.total_length / -self.length
         if self.length < self.thickness:
@@ -109,7 +131,15 @@ class ShellSegment(ShellInterp):
 
     def update_ndiv(self):
         """Return updated division number."""
+        if self.length == 0:
+            return len(self.coords)
         return int(np.max([1 + self.total_length/self.length, self.ndiv]))
+
+    def update_ldiv(self):
+        """Return updated normalize segment length."""
+        if self.length == 0:
+            return self.unit_length
+        return np.linspace(0, 1, self.ndiv)
 
     def extract_features(self):
         """
@@ -158,10 +188,6 @@ class ShellSegment(ShellInterp):
         """Return subsegment dataframe."""
         data = [[] for __ in range(self.ndiv-1)]
         for i, segment in enumerate(self.divide()):
-            #geom = PolyGeom(segment.poly)
-            #data[i] = [*geom.centroid[::2],
-            #           self.length, self.thickness, *geom.bbox,
-            #           geom.rms, geom.area, geom.section, geom.poly]
             geom = PolyGeom(segment.poly, 'ring').geometry
             data[i] = {name: geom[name] for name in self.columns}
         frame = pandas.DataFrame(data, columns=self.columns)
@@ -195,7 +221,6 @@ class ShellGrid(ShellSegment):
 
     def plot_geom(self):
         """Plot shell constructive geometory."""
-        self.segment.plot()
         self.plot_features()
         self.plot_coordinates()
         plt.legend()
@@ -208,17 +233,18 @@ class ShellGrid(ShellSegment):
 
     def plot_subframe(self):
         """Plot subframe polygons."""
-        for subframe in self.subframe:
-            PolyPlot(DataFrame(subframe, additional=['part']))()
+        for i, subframe in enumerate(self.subframe):
+            PolyPlot(DataFrame(subframe, additional=['part']),
+                     )(facecolor=f'C{i%10}')
 
 
 if __name__ == '__main__':
 
-    shellgrid = ShellGrid([1, 1.5, 2, 2, 4, 4],
-                          [0, 0.1, 0, 1, -1, 0], -2, 0.1,
+    shellgrid = ShellGrid([1, 1.5, 2, 2, 2.5, 4, 4],
+                          [0, 0.1, 0, 1, 0.5, -1, 0], 0, 0.1,
                           delta=0.1)
 
-    print(shellgrid.frame)
+    shellgrid.plot()
 
 
     #shellgrid = ShellGrid([[1, 1.5, 2, 2, 4, 4],

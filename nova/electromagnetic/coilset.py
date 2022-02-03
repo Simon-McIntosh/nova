@@ -107,9 +107,7 @@ if __name__ == '__main__':
     coilset.turn.insert([2, 3, 3, 2], [2, 3.3, 4, 2.2], 0.5, 0.5, turn='skin')
     coilset.plot()
 
-    from nova.utilities.pyplot import plt
-    turn = coilset.frame.iloc[-1]
-    plt.plot(turn.x, turn.z, 'X')
+
     '''
     filename = 'tmp'
     reload = False
@@ -141,7 +139,6 @@ if __name__ == '__main__':
 
     coilset.plasmagrid.plot(levels=151)
 
-    '''
     separatrix = Polygon(dict(c=[4.5, -1.25, 0.9])).boundary
     coilset.plasma.update_separatrix(separatrix)
 

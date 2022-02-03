@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from dataclasses import dataclass, field
+import string
 from typing import ClassVar, Union
 
 import numpy as np
@@ -10,7 +11,7 @@ import shapely
 
 import imas
 from nova.electromagnetic.coil import Coil
-from nova.electromagnetic.frameset import FrameSet
+from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.shell import Shell
 from nova.geometry.polygon import Polygon
 from nova.utilities.pyplot import plt
@@ -221,6 +222,22 @@ class Geometry:
 
 
 @dataclass
+class Loop:
+    """Poloidal loop."""
+
+    ids_data: object = field(repr=False)
+    name: str = field(init=False)
+    label: str = field(init=False)
+    resistance: float = field(init=False)
+
+    def __post_init__(self):
+        """Extract data from loop ids."""
+        self.name = self.ids_data.name.strip()
+        self.label = self.name.rstrip(string.digits + '_')
+        self.resistance = self.ids_data.resistance
+
+
+@dataclass
 class Element:
     """Poloidal element."""
 
@@ -228,44 +245,102 @@ class Element:
     index: int = 0
     name: str = field(init=False)
     nturn: float = field(init=False)
-    geom: Geometry = field(init=False)
+    geometry: Geometry = field(init=False)
 
     def __post_init__(self):
         """Extract element data from ids."""
         self.name = self.ids_data.name.strip()
         self.nturn = self.ids_data.turns_with_sign
-        self.geom = Geometry(self.ids_data.geometry)
+        self.geometry = Geometry(self.ids_data.geometry)
+
+    def is_oblique(self) -> bool:
+        """Return geometry.name == 'oblique'."""
+        return self.geometry.name == 'oblique'
+
+    def is_rectangular(self) -> bool:
+        """Return geometry.name == 'rectangle'."""
+        return self.geometry.name == 'rectangle'
+
+
+class FrameData(ABC):
+    """Frame data base class."""
+
+    @abstractmethod
+    def append(self, loop: Loop, element: Element):
+        """Append data to internal structures."""
+
+    @abstractmethod
+    def insert(self, method: object):
+        """Insert geometry into frameset."""
+
+    def get_part(self, name: str):
+        """Return part name."""
+        if 'VES' in name:
+            return 'vv'
+        if 'TRI' in name:
+            return 'trs'
+        return 'shell'
 
 
 @dataclass
-class ShellGeom:
-    """Extract shell geometries from pf_passive ids."""
+class ShellData(FrameData):
+    """Extract oblique shell geometries from pf_passive ids."""
 
-    number: int = field(init=False, default=0)
+    delta: float
+    length: float = 0
     points: list[npt.ArrayLike] = field(init=False, repr=False,
                                         default_factory=list)
-    thickness: list[npt.ArrayLike] = field(init=False, repr=False,
-                                           default_factory=list)
+    name: list[list[float]] = field(init=False, repr=False,
+                                    default_factory=list)
+    thickness: list[list[float]] = field(init=False, repr=False,
+                                         default_factory=list)
+    resistance: list[list[float]] = field(init=False, repr=False,
+                                          default_factory=list)
 
-    def append(self, start, end, thickness):
+    def __len__(self):
+        """Return loop number."""
+        return len(self.points)
+
+    def append(self, loop: Loop, element: Element):
         """Check start/end point colocation."""
+        assert element.is_oblique()
         if not self.points:
-            return self._new(start, end, thickness)
-        if np.allclose(self.points[-1][-1], start):
-            return self._end(end, thickness)
-        return self._new(start, end, thickness)
+            return self._new(loop, element)
+        if np.allclose(self.points[-1][-1], element.geometry.start):
+            return self._end(loop, element)
+        return self._new(loop, element)
 
-    def _new(self, start, end, thickness):
+    def _new(self, loop: Loop, element: Element):
         """Start new loop."""
-        self.number += 1
-        self.points.append(np.c_[start, end].T)
-        self.thickness.append(thickness * np.ones(2))
+        geometry = element.geometry
+        self.points.append(np.c_[geometry.start, geometry.end].T)
+        self.name.append([loop.name])
+        self.thickness.append([geometry.thickness])
+        self.resistance.append([loop.resistance])
 
-    def _end(self, end, thickness):
+    def _end(self, loop: Loop, element: Element):
         """Append endpoint to current loop."""
-        self.points[-1] = np.append(self.points[-1], end.reshape(1, -1),
-                                    axis=0)
-        self.thickness[-1] = np.append(self.thickness[-1], thickness)
+        geometry = element.geometry
+        self.points[-1] = np.append(
+            self.points[-1], geometry.end.reshape(1, -1), axis=0)
+        self.name[-1].append(loop.name)
+        self.thickness[-1].append(geometry.thickness)
+        self.resistance[-1].append(loop.resistance)
+
+    def insert(self, shell: Shell):
+        """Insert data into shell instance."""
+        for i in range(len(self)):
+            thickness = np.mean(self.thickness[i])
+            part = self.get_part(self.name[i][0])
+            index = shell.insert(*self.points[i].T, self.length, thickness,
+                                 rho=0, delta=self.delta, name=self.name[i],
+                                 part=part)
+            rho = self.resistance[i] * shell.frame.loc[index, 'area'] / \
+                shell.frame.loc[index, 'dy']
+            shell.frame.loc[index, 'rho'] = rho
+            for j, frame in enumerate(index):
+                subindex = shell.subframe.frame == frame
+                shell.subframe.loc[subindex, 'rho'] = rho[j]
 
     def plot(self):
         """Plot shell centerlines."""
@@ -277,34 +352,73 @@ class ShellGeom:
 
 
 @dataclass
-class Loop:
-    """Manage passive poloidal loop ids, pf_passive."""
+class CoilData(FrameData):
+    """Extract coildata from passive ids."""
 
-    ids_data: object = field(repr=False)
-    frameset: FrameSet = field(init=False, default_factory=FrameSet)
+    def append(self, loop: Loop, element: Element):
+        """Append coil data to internal structrue."""
+        assert element.is_rectangular()
+        # TODO finish creating append / insert structure for passive coils.
 
-    def __post_init__(self):
-        coil_geom = []
-        shellgeom = ShellGeom()
-        #coil = Coil(*self.frameset.frames)
-        shell = Shell(*self.frameset.frames)
-        for loop in self.ids_data:
-            for i, element in enumerate(loop.element):
-                elem = Element(element, i)
-                if elem.geom.name == 'oblique':
-                    shellgeom.append(*elem.geom.points, elem.geom.thickness)
-                else:
-                    coil_geom.append(elem)
-        for i in range(shellgeom.number):
-            thickness = np.mean(shellgeom.thickness[i])
-            shell.insert(*shellgeom.points[i].T, 0.5, thickness, delta=-3)
-            #coil.insert(Element(loop.element[0]).poly, delta=1)
+    def insert(self, coil: Coil):
+        """Insert data via coil method."""
+        coil.insert(self.radius, self.height, self.width, self.thickness)
 
 
 
 @dataclass
-class Machine:
+class MachineData(CoilSet, MachineDescription):
+    """Manage access to machine data."""
 
+    shot: int = None
+    run: int = None
+    ids_name: str = None
+
+    def load_ids_data(self):
+        """Return ids_data."""
+        return self.ids(self.shot, self.run, self.ids_name)
+
+    @abstractmethod
+    def build(self):
+        """Build geometry."""
+
+
+@dataclass
+class Passive(MachineData):
+    """Manage passive poloidal loop ids, pf_passive."""
+
+    shot: int = 115005
+    run: int = 2
+    ids_name: str = 'pf_passive'
+
+    #ids_data: object = field(repr=False)
+    #shell: ShellLoop = field(init=False, default_factory=ShellLoop)
+
+    def __post_init__(self):
+        """Load data from cache - build if not found"""
+        super().__post_init__()
+
+    def build(self):
+        """Build pf passive geometroy."""
+        shelldata = ShellData(self.dshell)
+        coildata = CoilData(self.dcoil)
+        for ids_loop in self.load_ids_data().loop:
+            loop = Loop(ids_loop)
+            for i, ids_element in enumerate(ids_loop.element):
+                element = Element(ids_element, i)
+                if element.is_oblique():
+                    shelldata.append(loop, element)
+                    continue
+                if element.is_rectangular():
+                    # TO DO implement rectanglar build
+                    coildata.append(loop, element)
+                    continue
+
+        shelldata.insert(self.shell)
+
+
+@dataclass
+class Machine(CoilSet):
 
     def pf_passive(self):
         """ """
@@ -313,12 +427,14 @@ class Machine:
 
 if __name__ == '__main__':
 
-    md = MachineDescription()
-    pf_passive = md.ids(115005, 2, 'pf_passive')
+    passive = Passive(dshell=0.25)
+    passive.build()
+    passive.plot()
 
-    loop = Loop(pf_passive.loop)
+    #loop = Loop(pf_passive.loop)
+    #loop.frameset.plot()
 
-    loop.frameset.plot()
+    #pf_passive = MachineDescription().ids(115005, 2, 'pf_passive')
     #el = Element(pf_passive.loop[15].element[0])
     #el.geom.plot()
 

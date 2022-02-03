@@ -36,6 +36,7 @@ setup_kwargs = dict(
     install_requires    = [
         'alphashape',
         #astropy
+        'cython',
         'descartes',
         #geojson,
         'meshio',

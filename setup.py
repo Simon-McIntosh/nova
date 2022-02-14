@@ -3,7 +3,8 @@ import versioneer
 
 long_description = """..."""
 
-extras_require = dict(test=['pytest', 'line_profiler'], develop=['spyder'],
+extras_require = dict(test=['pytest', 'line_profiler'], 
+                      develop=['spyder', 'spyder-unittest'],
                       mesh=['gmsh', 'pygmsh', 'tetgen', 'trimesh'],
                       ansys=['ansys-dpf-core', 'ansys-dpf-post', 'openpyxl'],
                       thermofluids=['ftputil', 'coolprop'],

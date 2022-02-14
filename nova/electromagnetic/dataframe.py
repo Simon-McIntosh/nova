@@ -127,6 +127,8 @@ class DataFrame(FrameAttrs):
             Maximum item item in data.
 
         """
+        if len(data) == 0:
+            return 0
         try:
             index_length = np.max(
                 [len(data[key]) for key in data
@@ -287,5 +289,3 @@ if __name__ == '__main__':
 
     dataframe.store('tmp.h5', 'frame')
     dataframe.load('tmp.h5', 'frame')
-
-    print(dataframe)

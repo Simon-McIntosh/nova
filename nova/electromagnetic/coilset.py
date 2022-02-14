@@ -1,41 +1,13 @@
-"""Build coilset."""
-from dataclasses import dataclass, field
+"""Construct coilset with frameset and biot factories."""
+from dataclasses import dataclass
 
-from nova.electromagnetic.biotgrid import BiotGrid
-from nova.electromagnetic.biotinductance import BiotInductance
-from nova.electromagnetic.biotloop import BiotLoop
-from nova.electromagnetic.biotpoint import BiotPoint
-from nova.electromagnetic.biotdata import BiotData
-from nova.electromagnetic.coil import Coil
-from nova.electromagnetic.frameset import FrameSet
-from nova.electromagnetic.framedata import FrameData
-from nova.electromagnetic.winding import Winding
-from nova.electromagnetic.shell import Shell
-from nova.electromagnetic.turn import Turn
-from nova.electromagnetic.plasma import Plasma
-from nova.electromagnetic.plasmagrid import PlasmaGrid
-from nova.electromagnetic.ferritic import Ferritic
+from nova.electromagnetic.framefactory import FrameFactory
+from nova.electromagnetic.biotfactory import BiotFactory
 from nova.geometry.polygon import Polygon
 
 
 @dataclass
-class CoilGrid:
-    """Default grid parameters."""
-
-    dcoil: float = -1
-    dplasma: float = 0.25
-    dshell: float = 0
-    dfield: float = 0.2
-
-    def __post_init__(self):
-        """Construct delta lookup."""
-        self._delta = dict(coil=self.dcoil, shell=self.dshell,
-                           plasma=self.dplasma, field=self.dfield)
-        super().__post_init__()
-
-
-@dataclass
-class CoilSet(CoilGrid, FrameSet):
+class CoilSet(FrameFactory, BiotFactory):
     """
     Manage coilset.
 
@@ -45,70 +17,11 @@ class CoilSet(CoilGrid, FrameSet):
 
     """
 
-    _frame: dict[str, FrameData] = field(
-        init=False, repr=False,
-        default_factory=lambda: dict(coil=Coil, turn=Turn, shell=Shell,
-                                     plasma=Plasma,
-                                     ferritic=Ferritic, winding=Winding))
-    _biot: dict[str, BiotData] = field(
-        init=False, repr=False,
-        default_factory=lambda: dict(grid=BiotGrid, plasmagrid=PlasmaGrid,
-                                     point=BiotPoint,
-                                     probe=BiotPoint, loop=BiotLoop,
-                                     inductance=BiotInductance))
-
-    def __post_init__(self):
-        """Assert _frame and _biot keys are unique."""
-        assert all([attr not in self._biot for attr in self._frame])
-        super().__post_init__()
-
-    def __getattr__(self, attr):
-        """Intercept attribute access - implement frame methods."""
-        if attr in self._frame:
-            if isinstance(frame := self._frame.get(attr), FrameData):
-                return frame
-            delta = self._delta.get(attr, self.delta)
-            self._frame[attr] = frame(*self.frames, delta=delta)
-            return self._frame[attr]
-        if attr in self._biot:
-            if isinstance(biot := self._biot.get(attr), BiotData):
-                return biot
-            self._biot[attr] = biot(*self.frames, name=attr)
-            return self._biot[attr]
-        raise AttributeError(f'attr <{attr}> not in:\n'
-                             f'self._frame: {list(self._frame)}\n'
-                             f'self._biot {list(self._biot)}')
-
-    def store(self, file):
-        """Store coilset to hdf5 file."""
-        super().store(file)
-        for attr in self._biot:
-            if isinstance(biot := self._biot.get(attr), BiotData):
-                biot.store(file)
-
-    def load(self, file):
-        """Load coilset from hdf5 file."""
-        super().load(file)
-        for attr in self._biot:
-            biot = self._biot[attr]
-            try:
-                getattr(self, attr).load(file)
-            except OSError:  # reset biot attribute
-                self._biot[attr] = biot
-        return self
-
 
 if __name__ == '__main__':
 
     coilset = CoilSet(dcoil=-35, dplasma=-1000)
 
-    coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
-                        nturn=-0.8)
-    coilset.turn.insert([2, 3, 3, 2], [2, 3.3, 4, 2.2], 0.5, 0.5, turn='skin')
-    coilset.plot()
-
-
-    '''
     filename = 'tmp'
     reload = False
     if reload:
@@ -137,8 +50,6 @@ if __name__ == '__main__':
     else:
         coilset = CoilSet().load(filename)
 
-    coilset.plasmagrid.plot(levels=151)
-
     separatrix = Polygon(dict(c=[4.5, -1.25, 0.9])).boundary
     coilset.plasma.update_separatrix(separatrix)
 
@@ -154,4 +65,3 @@ if __name__ == '__main__':
 
     coilset.plasmagrid.load_operators(10)
     coilset.plasmagrid.plot_svd(levels=coilset.grid.levels)
-    '''

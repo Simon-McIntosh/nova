@@ -19,7 +19,6 @@ def test_add_single_area_vtk():
     box = vedo.shapes.Box(pos=(5, 0, 0), length=2, width=1e-3, height=2)
     frame = FrameSpace(part='vtk')
     frame += dict(vtk=box)
-    print(frame.iloc[0])
     assert np.isclose(frame.area[0], 4)
 
 

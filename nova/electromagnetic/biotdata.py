@@ -39,9 +39,9 @@ class BiotData(FilePath, FrameSetLoc):
         file = self.file(filename, path)
         self.data.to_netcdf(file, mode='a', group=self.name)
 
-    def load(self, file: str, path=None):
+    def load(self, filename: str, path=None):
         """Load data from hdf5."""
-        file = self.file(file, path)
+        file = self.file(filename, path)
         with xarray.open_dataset(file, group=self.name) as data:
             data.load()
             self.data = data

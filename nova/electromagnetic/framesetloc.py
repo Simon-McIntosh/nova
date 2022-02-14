@@ -54,10 +54,6 @@ class LocIndexer:
             return getattr(self.frame, col)[index]
         return self.frame.loc[index, col]
 
-    #def __getattr__(self, attr):
-    #    """Return frame attribute."""
-    #    return getattr(self.frame, attr)
-
 
 @dataclass
 class DataLocIndexer:
@@ -74,10 +70,6 @@ class DataLocIndexer:
     def __getitem__(self, key) -> npt.ArrayLike:
         """Return data array item in metaframe.data dict."""
         return self._data[key]
-
-    #def __getattr__(self, attr):
-    #    """Implement fast attribute lookup."""
-    #    return self._data[attr]
 
 
 @dataclass

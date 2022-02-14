@@ -1,5 +1,6 @@
 """Extend DataArray - add multipoint and link methods."""
 from contextlib import contextmanager
+from copy import copy
 from typing import Union
 
 import numpy as np
@@ -123,7 +124,8 @@ class FrameLink(LinkIndexer, DataArray):
         yield
         self.update_metaframe(dict(Required=_required))
 
-    def _unpack_add(self, other):
+    @staticmethod
+    def _unpack_add(other):
         """Return required, iloc and additional input for insert operator."""
         if isinstance(other, pandas.DataFrame):
             return [other], dict(), other.columns.to_list()
@@ -131,8 +133,20 @@ class FrameLink(LinkIndexer, DataArray):
             return [], other, None
         return other, dict(), None
 
+    def __copy__(self):
+        """Return copy of frame."""
+        frame = self.__class__()
+        frame.__init__(self)
+        return frame
+
     def __add__(self, other: Union[pandas.DataFrame, dict, npt.ArrayLike]):
-        """Perform dataframe union."""
+        """Return union of self and other."""
+        frame = copy(self)
+        frame += other
+        return frame
+
+    def __iadd__(self, other: Union[pandas.DataFrame, dict, npt.ArrayLike]):
+        """Return self augmented by other."""
         args, kwargs, required = self._unpack_add(other)
         with self.insert_required(required):
             self.insert(*args, **kwargs)
@@ -336,7 +350,7 @@ class FrameLink(LinkIndexer, DataArray):
         for attr, arg in zip(self.metaframe.required, args):  # required
             try:
                 data[attr] = np.array(arg, dtype=float)
-            except TypeError:
+            except (TypeError, ValueError):
                 data[attr] = arg  # non-numeric input
 
     def _build_additional(self, data, **kwargs):

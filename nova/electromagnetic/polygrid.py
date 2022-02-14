@@ -299,4 +299,4 @@ if __name__ == '__main__':
 
     polygrid = PolyGrid({'hx': [6, 3, 2.5, 2.5]}, delta=-60,
                         turn='hex', tile=True)
-    polygrid.plot()
+    #polygrid.plot()

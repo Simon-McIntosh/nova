@@ -517,16 +517,11 @@ class Machine(CoilSet):
 if __name__ == '__main__':
 
     passive = Passive(dshell=0.25)
-    #passive.plot()
 
     active = Active(dcoil=0.25, tcoil='hex')
-    #active.plot()
 
-    active += passive
-    active.plot()
-
-    #coilset = passive + active
-    #coilset.plot()
+    coilset = passive + active
+    coilset.plot()
 
     #loop = Loop(pf_passive.loop)
     #loop.frameset.plot()

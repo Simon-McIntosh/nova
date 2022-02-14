@@ -517,16 +517,22 @@ class Machine(CoilSet):
 if __name__ == '__main__':
 
     passive = Passive(dshell=0.25)
-    passive.plot()
+    #passive.plot()
 
-    active = Active(dcoil=0.5, turn='hex')
+    active = Active(dcoil=0.25, tcoil='hex')
+    #active.plot()
+
+    active += passive
     active.plot()
+
+    #coilset = passive + active
+    #coilset.plot()
 
     #loop = Loop(pf_passive.loop)
     #loop.frameset.plot()
 
     #pf_passive = MachineDescription().ids(115005, 2, 'pf_passive')
-    pf_active = MachineDescription().ids(111001, 1, 'pf_active')
+    #pf_active = MachineDescription().ids(111001, 1, 'pf_active')
     #el = Element(pf_passive.loop[1].element[0])
     #el.geom.plot()
 

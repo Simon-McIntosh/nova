@@ -19,6 +19,11 @@ class FrameData:
         """Return frame and subframe."""
         return self.frame, self.subframe
 
+    @frames.setter
+    def frames(self, frames):
+        """Set frame and subframe."""
+        self.frame, self.subframe = frames
+
     @contextmanager
     def insert_required(self, required=None):
         """Manage local required arguments."""

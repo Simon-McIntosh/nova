@@ -1,5 +1,5 @@
 """Manage file data access for frame and biot instances."""
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from dataclasses import dataclass, field
 import os
 
@@ -7,7 +7,7 @@ from nova.definitions import root_dir
 
 
 @dataclass
-class FilePath(ABC):
+class FilePath:
     """Frame data base class - store/load frame and biot data."""
 
     path: str = field(default=None)

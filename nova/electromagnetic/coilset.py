@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 
 from nova.electromagnetic.framefactory import FrameFactory
+from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.biotfactory import BiotFactory
 from nova.geometry.polygon import Polygon
 
@@ -16,6 +17,21 @@ class CoilSet(FrameFactory, BiotFactory):
     - plasma: add plasma (poloidal).
 
     """
+
+    def __add__(self, other: FrameSet):
+        """Return framset union of self and other."""
+        frame = self.frame + other.frame
+        subframe = self.subframe + other.subframe
+        coilset = CoilSet()
+        coilset.frames = frame, subframe
+        return coilset
+
+    def __iadd__(self, other: FrameSet):
+        """Return self frameset augmented by other."""
+        self.clear_biot()
+        self.frame += other.frame
+        self.subframe += other.subframe
+        return self
 
 
 if __name__ == '__main__':
@@ -50,7 +66,7 @@ if __name__ == '__main__':
     else:
         coilset = CoilSet().load(filename)
 
-    separatrix = Polygon(dict(c=[4.5, -1.25, 0.9])).boundary
+    separatrix = Polygon(dict(c=[4.5, 0.25, 0.9])).boundary
     coilset.plasma.update_separatrix(separatrix)
 
     coilset.sloc['bubble', 'Ic'] = 8

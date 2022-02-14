@@ -18,13 +18,13 @@ class FrameFactory(FrameSet):
     dcoil: float = -1
     dplasma: float = 0.25
     dshell: float = 0
-    plasma_turn: str = 'hex'
-    coil_turn: str = 'rect'
+    tplasma: str = 'hex'
+    tcoil: str = 'rect'
 
     @cached_property
     def coil(self):
         """Return coil constructor."""
-        return Coil(*self.frames, turn=self.coil_turn, delta=self.dcoil)
+        return Coil(*self.frames, turn=self.tcoil, delta=self.dcoil)
 
     @cached_property
     def ferritic(self):
@@ -34,7 +34,7 @@ class FrameFactory(FrameSet):
     @cached_property
     def plasma(self):
         """Return plasma constructor."""
-        return Plasma(*self.frames, turn=self.plasma_turn, delta=self.dplasma)
+        return Plasma(*self.frames, turn=self.tplasma, delta=self.dplasma)
 
     @cached_property
     def shell(self):

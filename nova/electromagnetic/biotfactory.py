@@ -48,6 +48,15 @@ class BiotFactory(FrameSet):
         """Return biot inductance instance."""
         return BiotInductance(*self.frames, name='inductance')
 
+    def clear_biot(self):
+        """Clear all biot attributes."""
+        delattrs = []
+        for attr in self.__dict__:
+            if isinstance(getattr(self, attr), BiotData):
+                delattrs.append(attr)
+        for attr in delattrs:
+            delattr(self, attr)
+
     def store(self, filename: str, path=None):
         """Store coilset to hdf5 file."""
         super().store(filename, path)

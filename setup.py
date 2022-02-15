@@ -3,15 +3,16 @@ import versioneer
 
 long_description = """..."""
 
-extras_require = dict(test=['pytest', 'line_profiler'], 
-                      develop=['spyder', 'spyder-unittest'],
+extras_require = dict(develop=['spyder', 'spyder-unittest', 'line_profiler'],
                       mesh=['gmsh', 'pygmsh', 'tetgen', 'trimesh'],
                       ansys=['ansys-dpf-core', 'ansys-dpf-post', 'openpyxl'],
                       thermofluids=['ftputil', 'coolprop'],
                       cuda=['cupy-cuda115'],
+                      plan=['network-x', 'python-dateutil']
                       )
 
-extras_require['full'] = [module for mode in extras_require for module in extras_require[mode] if mode not in ['thermofluids', 'cuda']]
+extras_require['full'] = [module for mode in extras_require for module in extras_require[mode] 
+                          if mode not in ['thermofluids', 'cuda', 'plan']]
 
 setup_kwargs = dict(
     name                = 'nova',
@@ -39,19 +40,15 @@ setup_kwargs = dict(
         'astropy',
         'cython',
         'descartes',
-        #geojson,
         'meshio',
         'netCDF4',
-        #networkx
         'nlopt',
         'numba',
-        #numdifftools
+        'numdifftools',
         'numpy',
-        #openpyxl
         'pandas',
-        #plotly
         'pygeos',
-        #python-dateutil
+        'pytest',
         'pyvista',
         'pyquaternion',
         'rdp',

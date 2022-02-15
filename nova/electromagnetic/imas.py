@@ -516,6 +516,74 @@ class Active(MachineData):
 
 
 @dataclass
+class ContourData:
+
+    data: dict[str, npt.ArrayLike] = field(init=False, default_factory=dict)
+
+    def append(self, unit):
+        """Append contour data."""
+        self.data[unit.name] = np.array([unit.outline.r, unit.outline.z])
+
+    def plot(self):
+        """Plot contours."""
+        for component in self.data:
+            plt.plot(*self.data[component], label=component)
+        plt.axis('equal')
+        plt.despine()
+        plt.axis('off')
+        plt.legend()
+
+    def contour(self):
+
+        segments = []
+        for component in self.data:
+            print(self.data[component])
+            segment = shapely.geometry.LineString(self.data[component].T)
+            segments.append(segment)
+
+        multiline = shapely.geometry.MultiLineString(segments)
+        line = shapely.ops.linemerge(multiline)
+        print(line)
+
+
+@dataclass
+class Plasma(MachineData):
+    """Manage active poloidal loop ids, pf_passive."""
+
+    shot: int = 116000
+    run: int = 1
+    ids_name: str = 'wall'
+
+    def build(self):
+        """Build plasma bound by firstwall contour."""
+        firstwall = ContourData()
+        self.ids_data = self.load_ids_data()
+        limiter = self.load_ids_data().description_2d.array[0].limiter
+        for unit in limiter.unit:
+            firstwall.append(unit)
+
+        firstwall.plot()
+
+        self.firstwall = firstwall
+
+        firstwall.contour()
+
+
+        '''
+        for ids_loop in self.load_ids_data().coil:
+            loop = ActiveLoop(ids_loop)
+            for i, ids_element in enumerate(ids_loop.element):
+                element = Element(ids_element, i)
+                if element.is_rectangular():
+                    coildata.append(loop, element)
+                    continue
+                raise NotImplementedError(f'geometory {element.geometry.name} '
+                                          'not implemented')
+        coildata.insert(self.coil)
+        '''
+
+
+@dataclass
 class Machine(CoilSet):
     """Manage ITER machine geometry."""
 
@@ -543,12 +611,13 @@ class Machine(CoilSet):
         super().store(self.filename, self.path)
 
 
-
 if __name__ == '__main__':
 
-    coilset = Machine(dcoil=0.25, tcoil='hex', dshell=0.25)
+    #coilset = Machine(dcoil=0.25, tcoil='hex', dshell=0.25)
     # coilset.build()
-    coilset.plot()
+    #coilset.plot()
+
+    plasma = Plasma()
 
     #loop = Loop(pf_passive.loop)
     #loop.frameset.plot()

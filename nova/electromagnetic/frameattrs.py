@@ -162,12 +162,13 @@ class FrameAttrs(pandas.DataFrame):
             dtype = type(self.metaframe.default[col])
         except (KeyError, TypeError):  # no default type, isinstance(col, list)
             return value
-        try:
-            if pandas.api.types.is_list_like(value):
-                return np.array(value, dtype)
-            return dtype(value)
-        except (ValueError, TypeError):  # NaN conversion error
+        if isinstance(self.metaframe.default[col], type(None)):
             return value
+        if value is None:
+            return dtype(0)
+        if pandas.api.types.is_list_like(value):
+            return np.array(value, dtype)
+        return dtype(value)
 
     def lock(self, key=None):
         """

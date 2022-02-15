@@ -46,8 +46,8 @@ class PoloidalOffset(PolidalCoordinates):
 
     def source_target_seperation(self):
         """Return source-target seperation vector."""
-        return np.array([(self.target_radius-self.source_radius),
-                         (self.target_height-self.source_height)])
+        return np.array([self.target_radius-self.source_radius,
+                         self.target_height-self.source_height])
 
     def turnturn_seperation(self, merge_index):
         """Return self seperation length."""
@@ -77,7 +77,7 @@ class PoloidalOffset(PolidalCoordinates):
         """Apply radial and vertical offsets."""
         turn_radius = self.effective_turn_radius()
         span = self.source_target_seperation()
-        span_length = np.linalg.norm(span, axis=0)
+        span_length = np.linalg.norm(span.astype(np.float64), axis=0)
         # reduce
         merge_index = np.where(span_length <= turn_radius*self.merge_number)[0]
         turn_radius = turn_radius[merge_index]

@@ -8,7 +8,7 @@ extras_require = dict(develop=['spyder', 'spyder-unittest', 'line_profiler'],
                       ansys=['ansys-dpf-core', 'ansys-dpf-post', 'openpyxl'],
                       thermofluids=['ftputil', 'coolprop'],
                       cuda=['cupy-cuda115'],
-                      plan=['network-x', 'python-dateutil']
+                      plan=['python-dateutil']
                       )
 
 extras_require['full'] = [module for mode in extras_require for module in extras_require[mode] 

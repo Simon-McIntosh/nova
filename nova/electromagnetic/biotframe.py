@@ -31,7 +31,7 @@ class BiotFrame(FrameLink):
 
     def __call__(self, attr) -> npt.ArrayLike:
         """Return flattened attribute matrix, shape(source*target,)."""
-        vector = np.array(getattr(self, attr))
+        vector = np.array(getattr(self, attr), float)
         region = self.biotshape.region
         if self.biotshape.region == '':
             raise IndexError('Frame region not specified.\n'

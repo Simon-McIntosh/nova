@@ -20,6 +20,15 @@ from nova.utilities.pyplot import plt
 # pylint: disable=too-many-ancestors
 
 @dataclass
+class IDS:
+    """Structure IDS input as leading arguments."""
+
+    shot: int
+    run: int
+    ids_name: str
+
+
+@dataclass
 class MachineDescription:
     """Methods to access IMAS machine description data."""
 
@@ -413,7 +422,8 @@ class PassiveCoilData(CoilData):
 
     def insert(self, coil: Coil, **kwargs):
         """Insert data via coil method."""
-        kwargs = {'passive': True, 'name': self.data['name']} | kwargs
+        kwargs = {'active': False, 'name': self.data['name'],
+                  'turn': 'rect'} | kwargs
         return super().insert(coil, **kwargs)
 
 
@@ -437,12 +447,8 @@ class ActiveCoilData(CoilData):
 
 
 @dataclass
-class MachineData(CoilSet, MachineDescription):
+class MachineData(CoilSet, MachineDescription, IDS):
     """Manage access to machine data."""
-
-    shot: int = None
-    run: int = None
-    ids_name: str = None
 
     def __post_init__(self):
         """Build geometry."""
@@ -511,16 +517,37 @@ class Active(MachineData):
 
 @dataclass
 class Machine(CoilSet):
-    """Manage machine geometry."""
+    """Manage ITER machine geometry."""
+
+    filename: str = 'ITER'
+    path: str = None
+    active: tuple[int, int] = (111001, 1)
+    passive: tuple[int, int] = (115005, 2)
+
+    def __post_init__(self):
+        """Load coilset, build if not found."""
+        super().__post_init__()
+        try:
+            super().load(self.filename, self.path)
+        except FileNotFoundError:
+            self.build()
+
+    def build(self, **kwargs):
+        """Build coilset and save to file."""
+        kwargs = self.frame_attrs | kwargs
+        super().__post_init__()
+        self += Active(*self.active, **kwargs)
+        self += Passive(*self.passive, **kwargs)
+        self.linkframe(['CS1U', 'CS1L'])
+
+        super().store(self.filename, self.path)
+
 
 
 if __name__ == '__main__':
 
-    passive = Passive(dshell=0.25)
-
-    active = Active(dcoil=0.25, tcoil='hex')
-
-    coilset = passive + active
+    coilset = Machine(dcoil=0.25, tcoil='hex', dshell=0.25)
+    # coilset.build()
     coilset.plot()
 
     #loop = Loop(pf_passive.loop)

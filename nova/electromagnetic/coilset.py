@@ -39,7 +39,7 @@ if __name__ == '__main__':
     coilset = CoilSet(dcoil=-35, dplasma=-1000)
 
     filename = 'tmp'
-    reload = False
+    reload = True
     if reload:
         coilset = CoilSet(dcoil=-35, dplasma=-500)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     else:
         coilset = CoilSet().load(filename)
 
-    separatrix = Polygon(dict(c=[4.5, 0.25, 0.9])).boundary
+    separatrix = Polygon(dict(c=[4.5, -1.25, 0.9])).boundary
     coilset.plasma.update_separatrix(separatrix)
 
     coilset.sloc['bubble', 'Ic'] = 8

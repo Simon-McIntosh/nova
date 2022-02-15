@@ -21,6 +21,12 @@ class FrameFactory(FrameSet):
     tplasma: str = 'hex'
     tcoil: str = 'rect'
 
+    @property
+    def frame_attrs(self):
+        """Return frame attributes."""
+        return dict(dcoil=self.dcoil, dplasma=self.dplasma, dshell=self.dshell,
+                    tcoil=self.tcoil, tplasma=self.tplasma)
+
     @cached_property
     def coil(self):
         """Return coil constructor."""

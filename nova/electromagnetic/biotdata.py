@@ -14,7 +14,8 @@ class BiotData(FilePath, FrameSetLoc):
 
     name: str = field(default=None)
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
-    data: xarray.Dataset = field(init=False, repr=False)
+    data: xarray.Dataset = field(init=False, repr=False,
+                                 default_factory=xarray.Dataset)
 
     def __post_init__(self):
         """Init path and link line current and plasma index."""

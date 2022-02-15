@@ -297,6 +297,49 @@ def test_biot_multiframe_plasma():
     assert coilset.grid.data.attrs['plasma_index'] == 1
 
 
+def test_add_coilset():
+    active = CoilSet(dplasma=-5, dcoil=-5)
+    active.coil.insert(4, 5, 0.1, 0.1, name='PF1')
+    active.plasma.insert(3, 4, 0.5, 0.8, name='pl')
+    passive = CoilSet(dshell=-10)
+    passive.shell.insert({'e': [3, 4, 1.6, 2.2]}, -2, 0.1, name='shell')
+    coilset = active + passive
+    assert coilset.frame.index.to_list() == ['PF1', 'pl', 'shell0', 'shell1']
+
+
+def test_iadd_coilset():
+    coilset = CoilSet(dplasma=-5, dcoil=-5)
+    coilset.coil.insert(4, 5, 0.1, 0.1, name='PF1')
+    coilset.plasma.insert(3, 4, 0.5, 0.8, name='pl')
+    passive = CoilSet(dshell=-10)
+    passive.shell.insert({'e': [3, 4, 1.6, 2.2]}, -2, 0.1, name='shell')
+    coilset += passive
+    assert coilset.frame.index.to_list() == ['PF1', 'pl', 'shell0', 'shell1']
+
+
+def test_add_clear_biot():
+    active = CoilSet(dplasma=-5, dcoil=-5)
+    active.coil.insert(4, 5, 0.1, 0.1, name='PF1')
+    active.plasma.insert(3, 4, 0.5, 0.8, name='pl')
+    active.probe.solve([(1, 2), (3, 4), (1, 1)])
+    passive = CoilSet(dshell=-10)
+    passive.shell.insert({'e': [3, 4, 1.6, 2.2]}, -2, 0.1, name='shell')
+    coilset = active + passive
+    assert len(coilset.probe.data) == 0
+    assert len(active.probe.data) != 0
+
+
+def test_iadd_clear_biot():
+    coilset = CoilSet(dplasma=-5, dcoil=-5)
+    coilset.coil.insert(4, 5, 0.1, 0.1, name='PF1')
+    coilset.plasma.insert(3, 4, 0.5, 0.8, name='pl')
+    coilset.probe.solve([(1, 2), (3, 4), (1, 1)])
+    passive = CoilSet(dshell=-10)
+    passive.shell.insert({'e': [3, 4, 1.6, 2.2]}, -2, 0.1, name='shell')
+    coilset += passive
+    assert len(coilset.probe.data) == 0
+
+
 if __name__ == '__main__':
 
     pytest.main([__file__])

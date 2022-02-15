@@ -47,7 +47,6 @@ setup_kwargs = dict(
         'numdifftools',
         'numpy',
         'pandas',
-        'pygeos',
         'pytest',
         'pyvista',
         'pyquaternion',

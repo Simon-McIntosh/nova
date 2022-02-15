@@ -192,19 +192,13 @@ class DataFrame(FrameAttrs):
                 unset = np.array(self.metaframe.required)[required_unset]
                 raise IndexError(f'required attributes missing {unset}')
             # fill nan
-            '''
-            for attr in self:
-                isna = pandas.isna(self[attr])
-                if isna.any():
-                    self.loc[isna, attr] = self.metaframe.default[attr]
-            '''
-            '''
-            if pandas.isna(self.values).any():
-                index = [pandas.isna(self[attr].values) for attr in columns]
-                for isna, attr in zip(index, columns):
-                    if isna.any():
+            frame = pandas.DataFrame(self)
+            if frame.isna().values.any():
+                for attr in frame:
+                    isna = pandas.isna(frame[attr])
+                    if isna.any() and not any([value is None for value
+                                               in frame[attr].values]):
                         self.loc[isna, attr] = self.metaframe.default[attr]
-            '''
             # extend additional
             additional = [attr for attr in columns
                           if attr not in self.metaframe.columns]

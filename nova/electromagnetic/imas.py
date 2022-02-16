@@ -638,6 +638,9 @@ class Machine(CoilSet):
 
 if __name__ == '__main__':
 
-    coilset = Machine(dcoil=0.25, dshell=0.25, dplasma=-1000, tcoil='hex')
+    #ids = MachineDescription(tokamak='iter_md').ids(111001, 1, 'pf_passive')
+    ids = MachineDescription(tokamak='iter').ids(135011, 7, 'equilibrium')
+
+    # coilset = Machine(dcoil=0.25, dshell=0.25, dplasma=-1000, tcoil='hex')
     # coilset.build()
-    coilset.plot()
+    # coilset.plot()

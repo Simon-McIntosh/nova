@@ -641,14 +641,3 @@ if __name__ == '__main__':
     coilset = Machine(dcoil=0.25, dshell=0.25, dplasma=-1000, tcoil='hex')
     # coilset.build()
     coilset.plot()
-
-    #loop = Loop(pf_passive.loop)
-    #loop.frameset.plot()
-
-    #pf_passive = MachineDescription().ids(115005, 2, 'pf_passive')
-    #pf_active = MachineDescription().ids(111001, 1, 'pf_active')
-    #el = Element(pf_passive.loop[1].element[0])
-    #el.geom.plot()
-
-    #element = pf_passive.loop[1].element[0]
-    #geom = Geometry(element.geometry)

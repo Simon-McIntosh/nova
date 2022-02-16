@@ -16,8 +16,10 @@ class DataNull(Axes):
     x_coordinate: npt.ArrayLike = field(repr=False)
     z_coordinate: npt.ArrayLike = field(repr=False)
     loop: npt.ArrayLike = field(repr=False, default=None)
-    data_o: dict[str, np.ndarray] = field(init=False, default_factory=dict)
-    data_x: dict[str, np.ndarray] = field(init=False, default_factory=dict)
+    data_o: dict[str, np.ndarray] = field(init=False, default_factory=dict,
+                                          repr=False)
+    data_x: dict[str, np.ndarray] = field(init=False, default_factory=dict,
+                                          repr=False)
 
     @property
     def o_point(self):

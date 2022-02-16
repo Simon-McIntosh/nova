@@ -447,6 +447,77 @@ class ActiveCoilData(CoilData):
 
 
 @dataclass
+class ContourData:
+    """Extract contour data from ids_data."""
+
+    data: dict[str, npt.ArrayLike] = field(init=False, default_factory=dict)
+
+    def append(self, unit):
+        """Append contour data."""
+        self.data[unit.name] = np.array([unit.outline.r, unit.outline.z]).T
+
+    def plot(self):
+        """Plot contours."""
+        for component in self.data:
+            plt.plot(*self.data[component].T, label=component)
+        plt.axis('equal')
+        plt.despine()
+        plt.axis('off')
+        plt.legend()
+
+
+@dataclass
+class Contour:
+    """Extract closed contour from multiple unordered segments."""
+
+    data: dict[str, npt.ArrayLike]
+    loop: npt.ArrayLike = field(init=False, default_factory=lambda:
+                                np.ndarray((0, 2), float))
+    segments: list[npt.ArrayLike] = field(init=False)
+
+    def __post_init__(self):
+        """Create segments list."""
+        self.segments = list(self.data.values())
+        self.loop = self.segments.pop(0)
+        self.extract()
+
+    def gap(self, index: int):
+        """Return length of gap to next segment."""
+        return [np.linalg.norm(segment[index] - self.loop[-1])
+                for segment in self.segments]
+
+    def argmin(self, index: int):
+        """Return index of minimum matching segment."""
+        return np.argmin()
+
+    def append(self, index: int, flip=False):
+        """Pop matching segment and append loop."""
+        segment = self.segments.pop(index)
+        if flip:
+            segment = segment[::-1]
+        self.loop = np.append(self.loop, segment, axis=0)
+
+    def select(self):
+        """Select matching segment and join to loop."""
+        start = self.gap(0)
+        end = self.gap(-1)
+        if np.min(start) < np.min(end):
+            return self.append(np.argmin(start))
+        return self.append(np.argmin(end), flip=True)
+
+    def extract(self):
+        """Extract closed contour."""
+        while len(self.segments) > 0:
+            self.select()
+        self.loop = np.append(self.loop, self.loop[:1], axis=0)
+        assert shapely.geometry.LinearRing(self.loop).is_valid
+
+    def plot(self):
+        """Plot closed contour."""
+        plt.plot(*self.loop.T, 'C3-')
+
+
+@dataclass
 class MachineData(CoilSet, MachineDescription, IDS):
     """Manage access to machine data."""
 
@@ -516,37 +587,6 @@ class Active(MachineData):
 
 
 @dataclass
-class ContourData:
-
-    data: dict[str, npt.ArrayLike] = field(init=False, default_factory=dict)
-
-    def append(self, unit):
-        """Append contour data."""
-        self.data[unit.name] = np.array([unit.outline.r, unit.outline.z])
-
-    def plot(self):
-        """Plot contours."""
-        for component in self.data:
-            plt.plot(*self.data[component], label=component)
-        plt.axis('equal')
-        plt.despine()
-        plt.axis('off')
-        plt.legend()
-
-    def contour(self):
-
-        segments = []
-        for component in self.data:
-            print(self.data[component])
-            segment = shapely.geometry.LineString(self.data[component].T)
-            segments.append(segment)
-
-        multiline = shapely.geometry.MultiLineString(segments)
-        line = shapely.ops.linemerge(multiline)
-        print(line)
-
-
-@dataclass
 class Plasma(MachineData):
     """Manage active poloidal loop ids, pf_passive."""
 
@@ -561,26 +601,8 @@ class Plasma(MachineData):
         limiter = self.load_ids_data().description_2d.array[0].limiter
         for unit in limiter.unit:
             firstwall.append(unit)
-
-        firstwall.plot()
-
-        self.firstwall = firstwall
-
-        firstwall.contour()
-
-
-        '''
-        for ids_loop in self.load_ids_data().coil:
-            loop = ActiveLoop(ids_loop)
-            for i, ids_element in enumerate(ids_loop.element):
-                element = Element(ids_element, i)
-                if element.is_rectangular():
-                    coildata.append(loop, element)
-                    continue
-                raise NotImplementedError(f'geometory {element.geometry.name} '
-                                          'not implemented')
-        coildata.insert(self.coil)
-        '''
+        contour = Contour(firstwall.data)  # extract closed loop
+        self.plasma.insert(contour.loop)
 
 
 @dataclass
@@ -591,6 +613,7 @@ class Machine(CoilSet):
     path: str = None
     active: tuple[int, int] = (111001, 1)
     passive: tuple[int, int] = (115005, 2)
+    plasma: tuple[int, int] = (116000, 1)
 
     def __post_init__(self):
         """Load coilset, build if not found."""
@@ -606,6 +629,8 @@ class Machine(CoilSet):
         super().__post_init__()
         self += Active(*self.active, **kwargs)
         self += Passive(*self.passive, **kwargs)
+        self += Plasma(*self.plasma, **kwargs)
+
         self.linkframe(['CS1U', 'CS1L'])
 
         super().store(self.filename, self.path)
@@ -613,11 +638,9 @@ class Machine(CoilSet):
 
 if __name__ == '__main__':
 
-    #coilset = Machine(dcoil=0.25, tcoil='hex', dshell=0.25)
+    coilset = Machine(dcoil=0.25, dshell=0.25, dplasma=-1000, tcoil='hex')
     # coilset.build()
-    #coilset.plot()
-
-    plasma = Plasma()
+    coilset.plot()
 
     #loop = Loop(pf_passive.loop)
     #loop.frameset.plot()

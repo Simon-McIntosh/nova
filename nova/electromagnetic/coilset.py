@@ -27,7 +27,7 @@ class CoilSet(FrameFactory, BiotFactory):
         return coilset
 
     def __iadd__(self, other: FrameSet):
-        """Return self frameset augmented by other."""
+        """Return coilset augmented by other."""
         self.clear_biot()
         self.frame += other.frame
         self.subframe += other.subframe
@@ -36,10 +36,8 @@ class CoilSet(FrameFactory, BiotFactory):
 
 if __name__ == '__main__':
 
-    coilset = CoilSet(dcoil=-35, dplasma=-1000)
-
     filename = 'tmp'
-    reload = True
+    reload = False
     if reload:
         coilset = CoilSet(dcoil=-35, dplasma=-500)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
@@ -77,7 +75,7 @@ if __name__ == '__main__':
     coilset.plasma.plot()
 
     coilset.grid.plot(levels=31)
-    coilset.plasmagrid.plot(levels=coilset.grid.levels, colors='r')
+    coilset.plasmagrid.plot(levels=coilset.grid.levels, colors='C6')
 
     coilset.plasmagrid.load_operators(10)
     coilset.plasmagrid.plot_svd(levels=coilset.grid.levels)

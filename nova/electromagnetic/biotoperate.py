@@ -69,7 +69,8 @@ class BiotOperate(BiotData):
     svd_factor: float = 10.
     version: dict[str, int] = field(
         init=False, repr=False, default_factory=dict)
-    operator: dict[str, BiotOp] = field(init=False, default_factory=dict)
+    operator: dict[str, BiotOp] = field(init=False, default_factory=dict,
+                                        repr=False)
 
     def __post_init__(self):
         """Initialize version identifiers."""

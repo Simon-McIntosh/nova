@@ -3,7 +3,7 @@ import versioneer
 
 long_description = """..."""
 
-extras_require = dict(develop=['spyder', 'spyder-unittest', 'line_profiler'],
+extras_require = dict(develop=['spyder', 'spyder-unittest', 'line_profiler', 'numdifftools'],
                       mesh=['gmsh', 'pygmsh', 'tetgen', 'trimesh'],
                       ansys=['ansys-dpf-core', 'ansys-dpf-post', 'openpyxl'],
                       thermofluids=['ftputil', 'coolprop'],
@@ -37,14 +37,12 @@ setup_kwargs = dict(
     python_requires     = '>=3.9, <3.10',
     install_requires    = [
         'alphashape',
-        'astropy',
         'cython',
         'descartes',
         'meshio',
         'netCDF4',
         'nlopt',
         'numba',
-        'numdifftools',
         'numpy',
         'pandas',
         'pytest',
@@ -56,7 +54,6 @@ setup_kwargs = dict(
         'scikit-learn',
         'shapely',
         'vedo',
-        'wheel',
         'xarray',
     ],
     extras_require     = extras_require,

@@ -22,6 +22,7 @@ def test_biotreduce():
     assert list(biotframe.biotreduce.link) == [2, 6, 8]
     assert biotframe.biotreduce.index.to_list() == \
         [f'Coil{i}' for i in [0, 1, 3, 6, 7, 9]]
+    assert False
 
 
 def test_subframe_lock():

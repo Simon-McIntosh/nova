@@ -1,6 +1,5 @@
 """Manage access to IMAS machine data."""
 from abc import ABC, abstractmethod
-from contextlib import contextmanager
 from dataclasses import dataclass, field
 import string
 from typing import ClassVar, Union
@@ -9,46 +8,15 @@ import numpy as np
 import numpy.typing as npt
 import shapely
 
-from imas import imasdef, DBEntry
 from nova.electromagnetic.coil import Coil
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.shell import Shell
 from nova.geometry.polygon import Polygon
+from nova.imas.database import Database
 from nova.utilities.pyplot import plt
 
 
 # pylint: disable=too-many-ancestors
-
-@dataclass
-class IDS:
-    """Structure IDS input as leading arguments."""
-
-    shot: int
-    run: int
-    ids_name: str
-
-
-@dataclass
-class MachineDescription:
-    """Methods to access IMAS machine description data."""
-
-    user: str = 'public'
-    tokamak: str = 'iter_md'
-    backend: int = imasdef.MDSPLUS_BACKEND
-
-    @contextmanager
-    def database(self, shot: int, run: int, ids_name: str):
-        """Database context manager."""
-        database = DBEntry(self.backend, self.tokamak, shot, run,
-                           user_name=self.user)
-        database.open()
-        yield database.get(ids_name, 0)
-        database.close()
-
-    def ids(self, shot: int, run: int, ids_name: str):
-        """Return filled ids from dataabase."""
-        with self.database(shot, run, ids_name) as database:
-            return database
 
 
 @dataclass
@@ -458,7 +426,7 @@ class ContourData:
 
     def plot(self):
         """Plot contours."""
-        for component in self.data:
+        for component in self.data.items():
             plt.plot(*self.data[component].T, label=component)
         plt.axis('equal')
         plt.despine()
@@ -485,10 +453,6 @@ class Contour:
         """Return length of gap to next segment."""
         return [np.linalg.norm(segment[index] - self.loop[-1])
                 for segment in self.segments]
-
-    def argmin(self, index: int):
-        """Return index of minimum matching segment."""
-        return np.argmin()
 
     def append(self, index: int, flip=False):
         """Pop matching segment and append loop."""
@@ -518,17 +482,13 @@ class Contour:
 
 
 @dataclass
-class MachineData(CoilSet, MachineDescription, IDS):
+class MachineData(CoilSet, Database):
     """Manage access to machine data."""
 
     def __post_init__(self):
         """Build geometry."""
         super().__post_init__()
         self.build()
-
-    def load_ids_data(self):
-        """Return ids_data."""
-        return self.ids(self.shot, self.run, self.ids_name)
 
     @abstractmethod
     def build(self):
@@ -638,9 +598,6 @@ class Machine(CoilSet):
 
 if __name__ == '__main__':
 
-    #ids = MachineDescription(tokamak='iter_md').ids(111001, 1, 'pf_passive')
-    ids = MachineDescription(tokamak='iter').ids(135011, 7, 'equilibrium')
-
-    # coilset = Machine(dcoil=0.25, dshell=0.25, dplasma=-1000, tcoil='hex')
-    # coilset.build()
-    # coilset.plot()
+    coilset = Machine(dcoil=0.25, dshell=0.25, dplasma=-1000, tcoil='hex')
+    coilset.build()
+    coilset.plot()

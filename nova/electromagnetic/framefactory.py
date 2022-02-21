@@ -15,6 +15,7 @@ from nova.electromagnetic.ferritic import Ferritic
 class FrameFactory(FrameSet):
     """Manage methods for frameset construction."""
 
+    delta: float = -1
     dcoil: float = -1
     dplasma: float = 0.25
     dshell: float = 0

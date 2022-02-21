@@ -8,27 +8,36 @@ from nova.definitions import root_dir
 
 @dataclass
 class FilePath:
-    """Frame data base class - store/load frame and biot data."""
+    """Manage to access to data via store and load methods."""
 
     path: str = field(default=None)
 
-    def __post_init__(self):
-        """Init dataset path."""
-        if self.path is None:
-            self.path = os.path.join(root_dir, 'data/Nova/coilsets')
-        super().__post_init__()
+    def set_path(self, subpath: str):
+        """Set default path."""
+        self.path = os.path.join(root_dir, subpath)
 
     def check_path(self, path):
         """Return self.path if path is None."""
         if path is None:
+            if self.path is None:
+                raise FileNotFoundError('default path not set')
             return self.path
         return path
+
+    def check_dir(self, file, path):
+        """Return full filepath, check and make directory."""
+        if not (directory := os.path.dirname(file)):
+            directory = self.check_path(path)
+            file = os.path.join(directory, file)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        return file
 
     def file(self, file, path=None, extension='.nc'):
         """Return full netCDF file path."""
         if not os.path.splitext(file)[1]:
             file += extension
-        return os.path.join(self.check_path(path), file)
+        return self.check_dir(file, path)
 
     @abstractmethod
     def store(self, file: str, path=None):

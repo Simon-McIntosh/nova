@@ -1,6 +1,7 @@
 """Manage access to IMAS database."""
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any
 
 from imas import imasdef, DBEntry
 
@@ -13,7 +14,7 @@ class IDS:
 
     shot: int
     run: int
-    ids_name: str
+    ids_name: str = None
 
 
 @dataclass
@@ -43,6 +44,26 @@ class IMASdb:
 class Database(IMASdb, IDS):
     """Provide access to imasdb data."""
 
+    datapath: str = 'data/imasdb'
+    ids_data: Any = field(init=False, repr=False, default=None)
+
+    def __post_init__(self):
+        """Set filepath."""
+        super().__post_init__()
+        self.set_path(self.datapath)
+
+    @property
+    def filename(self):
+        """Return filename."""
+        return f'{self.tokamak}_{self.shot}{self.run:04d}'
+
     def load_ids_data(self):
         """Return ids_data."""
-        return self.ids(self.shot, self.run, self.ids_name)
+        self.ids_data = self.ids(self.shot, self.run, self.ids_name)
+        return self.ids_data
+
+    @property
+    def ids_attrs(self):
+        """Return dict of ids attributes."""
+        return dict(tokamak=self.tokamak, shot=self.shot, run=self.run,
+                    ids=self.ids_name)

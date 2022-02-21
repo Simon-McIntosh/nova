@@ -8,7 +8,7 @@ from nova.geometry.polygon import Polygon
 
 
 @dataclass
-class CoilSet(FrameFactory, BiotFactory):
+class CoilSet(BiotFactory, FrameFactory):
     """
     Manage coilset.
 
@@ -17,6 +17,11 @@ class CoilSet(FrameFactory, BiotFactory):
     - plasma: add plasma (poloidal).
 
     """
+
+    def __post_init__(self):
+        """Set filepath."""
+        self.set_path('data/Nova')
+        super().__post_init__()
 
     def __add__(self, other: FrameSet):
         """Return framset union of self and other."""
@@ -36,8 +41,8 @@ class CoilSet(FrameFactory, BiotFactory):
 
 if __name__ == '__main__':
 
-    filename = 'tmp'
-    reload = False
+    filename = 'biot'
+    reload = True
     if reload:
         coilset = CoilSet(dcoil=-35, dplasma=-500)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',

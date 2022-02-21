@@ -13,7 +13,6 @@ from nova.electromagnetic.select import Select
 class FrameSet(FilePath, FrameSetLoc):
     """Manage FrameSet instances."""
 
-    delta: float = -1
     base: list[str] = field(repr=False, default_factory=lambda: [
         'x', 'y', 'z', 'dx', 'dy', 'dz'])
     required: list[str] = field(repr=False, default_factory=lambda: [])
@@ -29,7 +28,7 @@ class FrameSet(FilePath, FrameSetLoc):
         'Ic', 'nturn'])
 
     def __post_init__(self):
-        """Init coil and subcoil."""
+        """Create frame and subframe."""
         self.frame = FrameSpace(
             base=self.base, required=self.required, additional=self.additional,
             available=self.available, subspace=[],

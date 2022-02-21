@@ -165,6 +165,8 @@ class DataFrame(FrameAttrs):
         if len(index) != index_length:
             raise IndexError(f'missmatch between len(index) {len(index)} and '
                              f'maximum length data column {index_length}')
+        if len(index) != len(np.unique(index)):
+            raise IndexError(f'index not unique {index}')
         taken = [name in self.index for name in index]
         if np.array(taken).any():
             raise IndexError(f'{np.array(index)[taken]} '

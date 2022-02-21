@@ -2,14 +2,19 @@ import pytest
 import numpy as np
 import scipy
 
-from nova.thermalhydralic.sultan.campaign import Campaign
-from nova.thermalhydralic.sultan.phase import Phase
-from nova.thermalhydralic.sultan.trial import Trial
-from nova.thermalhydralic.sultan.sample import Sample
-from nova.thermalhydralic.sultan.sourcedata import SourceData
-from nova.thermalhydralic.sultan.sampledata import SampleData
-from nova.thermalhydralic.sultan.profile import Profile
-from nova.thermalhydralic.sultan.model import Model
+try:
+    from nova.thermalhydralic.sultan.campaign import Campaign
+    from nova.thermalhydralic.sultan.phase import Phase
+    from nova.thermalhydralic.sultan.trial import Trial
+    from nova.thermalhydralic.sultan.sample import Sample
+    from nova.thermalhydralic.sultan.sourcedata import SourceData
+    from nova.thermalhydralic.sultan.sampledata import SampleData
+    from nova.thermalhydralic.sultan.profile import Profile
+    from nova.thermalhydralic.sultan.model import Model
+except ImportError:
+    pytest.skip("thermohydralic modules not available\n\n"
+                "try pip install -e .['thermohydralic']",
+                allow_module_level=True)
 
 
 def test_experiment():

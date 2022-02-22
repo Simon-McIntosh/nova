@@ -117,8 +117,8 @@ if __name__ == '__main__':
     from nova.imas.machine import Machine
 
     coilset = Machine(135011, 7,
-                      dcoil=-1, dshell=0.25, dplasma=-1000, tcoil='r')
-
+                      dcoil=0.25, dshell=0.25, dplasma=-1000, tcoil='hex')
+    # coilset.build()
     coilset.plot()
 
     eq = Equilibrium(135011, 7)

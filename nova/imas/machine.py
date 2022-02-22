@@ -615,7 +615,7 @@ class Machine(CoilSet, Database):
         super().__post_init__()
         for component in self.components:
             self.build_component(component, tokamak=self.tokamak, **kwargs)
-        super().store(self.filename, self.path)
+        super().store(self.filename)
 
 
 if __name__ == '__main__':

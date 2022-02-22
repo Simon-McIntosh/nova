@@ -115,11 +115,18 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
 if __name__ == '__main__':
 
     from nova.imas.machine import Machine
+    from nova.imas.pf_active import PFactive
 
     coilset = Machine(135011, 7,
                       dcoil=0.25, dshell=0.25, dplasma=-1000, tcoil='hex')
     # coilset.build()
-    coilset.plot()
+
+    #coilset.plasmagrid.solve()
+    #coilset.store(coilset.filename)
+
+    pf_active = PFactive(135011, 7)
+
+
 
     eq = Equilibrium(135011, 7)
     #eq.build()
@@ -127,3 +134,10 @@ if __name__ == '__main__':
     eq.plot_2d(50, 'psi')
     #eq.plot_2d(500, 'j_tor')
     #eq.plot_1d(500)
+
+    coilset.sloc['coil', 'Ic'] = pf_active.data.current[50]
+    coilset.sloc['plasma', 'Ic'] = eq.data.ip[50]
+
+    coilset.plot()
+
+    coilset.plasmagrid.plot()

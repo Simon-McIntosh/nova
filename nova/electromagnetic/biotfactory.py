@@ -83,5 +83,6 @@ class BiotFactory(FrameSet):
             for attr in f.groups:
                 if attr in ['frame', 'subframe']:
                     continue
-                getattr(self, attr).load(file)
+                if attr in self.__class__.__dict__:
+                    getattr(self, attr).load(file)
             return self

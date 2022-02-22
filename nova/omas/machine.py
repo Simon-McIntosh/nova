@@ -12,7 +12,7 @@ from nova.electromagnetic.coil import Coil
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.shell import Shell
 from nova.geometry.polygon import Polygon
-from nova.imas.database import Database
+from nova.omas.database import Database
 from nova.utilities.pyplot import plt
 
 
@@ -23,13 +23,13 @@ from nova.utilities.pyplot import plt
 class GeomData(ABC):
     """Geometry data baseclass."""
 
-    ids_data: object = field(repr=False)
+    ods: object = field(repr=False)
     data: dict[str, Union[int, float]] = field(init=False, repr=False,
                                                default_factory=dict)
     attrs: ClassVar[list[str]] = []
 
     def __post_init__(self):
-        """Extract attributes from ids_data."""
+        """Extract attributes from ods."""
         self.extract()
 
     @property
@@ -43,10 +43,10 @@ class GeomData(ABC):
         """Return patch polygon."""
 
     def extract(self):
-        """Extract attributes from ids_data and store in data."""
-        data = getattr(self.ids_data, self.name)
+        """Extract attributes from ods and store in data."""
+        data = self.ods[self.name]
         for attr in self.attrs:
-            self.data[attr] = getattr(data, attr)
+            self.data[attr] = data[attr]
 
     def __getattr__(self, attr: str):
         """Return attributes from data."""
@@ -170,14 +170,14 @@ class Arcs(GeomData):
 class Geometry:
     """Manage poloidal cross-sections."""
 
-    ids_data: object = field(repr=False)
+    ods: object = field(repr=False)
     data: GeomData = field(init=False)
     transform: ClassVar[dict[int, str]] = \
         {1: Outline, 2: Rectangle, 3: Oblique, 4: Arcs}
 
     def __post_init__(self):
         """Build geometry instance."""
-        self.data = self.transform[self.ids_data.geometry_type](self.ids_data)
+        self.data = self.transform[self.ods['geometry_type']](self.ods)
 
     def __getattr__(self, attr):
         """Return data attributes."""
@@ -188,16 +188,16 @@ class Geometry:
 class Loop:
     """Poloidal loop."""
 
-    ids_data: object = field(repr=False)
+    ods: object = field(repr=False)
     name: str = field(init=False)
     label: str = field(init=False)
     resistance: float = field(init=False)
 
     def __post_init__(self):
         """Extract data from loop ids."""
-        self.name = self.ids_data.name.strip()
+        self.name = self.ods['name'].strip()
         self.label = self.name.rstrip(string.digits + '_')
-        self.resistance = self.ids_data.resistance
+        self.resistance = self.ods['resistance']
 
 
 @dataclass
@@ -209,14 +209,14 @@ class ActiveLoop(Loop):
     def __post_init__(self):
         """Extract data from loop ids."""
         super().__post_init__()
-        self.identifier = self.ids_data.identifier
+        self.identifier = self.ods_data['identifier']
 
 
 @dataclass
 class Element:
     """Poloidal element."""
 
-    ids_data: object = field(repr=False)
+    ods: object = field(repr=False)
     index: int = 0
     name: str = field(init=False)
     nturn: float = field(init=False)
@@ -224,9 +224,9 @@ class Element:
 
     def __post_init__(self):
         """Extract element data from ids."""
-        self.name = self.ids_data.name.strip()
-        self.nturn = self.ids_data.turns_with_sign
-        self.geometry = Geometry(self.ids_data.geometry)
+        self.name = self.ods['name'].strip()
+        self.nturn = self.ods['turns_with_sign']
+        self.geometry = Geometry(self.ods['geometry'])
 
     def is_oblique(self) -> bool:
         """Return geometry.name == 'oblique'."""
@@ -283,8 +283,6 @@ class FrameData(ABC):
             return 'cs'
         if 'PF' in label:
             return 'pf'
-        if 'VS3' in label:
-            return 'vs3'
         return ''
 
     @staticmethod
@@ -301,6 +299,7 @@ class FrameData(ABC):
 class PassiveShellData(FrameData):
     """Extract oblique shell geometries from pf_passive ids."""
 
+    delta: float
     length: float = 0
     points: list[npt.ArrayLike] = field(init=False, repr=False,
                                         default_factory=list)
@@ -344,7 +343,7 @@ class PassiveShellData(FrameData):
         for i in range(len(self)):
             thickness = np.mean(self.data['thickness'][i])
             index = shell.insert(*self.points[i].T, self.length, thickness,
-                                 rho=0,
+                                 rho=0, delta=self.delta,
                                  name=self.data['name'][i], part=self.part)
             self.update_resistivity(index, *shell.frames,
                                     self.data['resistance'][i])
@@ -372,6 +371,9 @@ class CoilData(FrameData):
 
     def insert(self, coil: Coil, **kwargs):
         """Insert data via coil method."""
+        link = [''] + [self.data['name'][i-index+1] if index > 0 else ''
+                       for i, index in enumerate(self.data['index'][1:])]
+        kwargs = dict(link=link) | kwargs
         index = coil.insert(*[self.data[attr] for attr in self.geometry_attrs],
                             part=self.part, rho=0, **kwargs)
         self.update_resistivity(index, *coil.frames, self.data['resistance'])
@@ -398,7 +400,7 @@ class ActiveCoilData(CoilData):
 
     element_attrs: ClassVar[list[str]] = ['nturn', 'index', 'name']
     geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
-    loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
+    loop_attrs: ClassVar[list[str]] = ['resistance']
 
     def __post_init__(self):
         """Init data dict."""
@@ -406,18 +408,13 @@ class ActiveCoilData(CoilData):
 
     def insert(self, coil: Coil, **kwargs):
         """Insert data via coil method."""
-        factor = np.sign(self.data['nturn'])
-        self.data['nturn'] = np.abs(self.data['nturn'])
-        link = [''] + [self.data['name'][i-index+1] if index > 0 else ''
-                       for i, index in enumerate(self.data['index'][1:])]
         kwargs = {'active': True, 'name': self.data['name'],
-                  'nturn': self.data['nturn'],
-                  'link': link, 'factor': factor} | kwargs
+                  'nturn': self.data['nturn']} | kwargs
         return super().insert(coil, **kwargs)
 
 
 @dataclass
-class ActiveObliqueCoilData(ActiveCoilData):
+class ActiveObliqueCoilData(CoilData):
     """Extract coildata from active ids."""
 
     geometry_attrs: ClassVar[list[str]] = ['poly']
@@ -425,7 +422,7 @@ class ActiveObliqueCoilData(ActiveCoilData):
 
 @dataclass
 class ContourData:
-    """Extract contour data from ids_data."""
+    """Extract contour data from ods."""
 
     data: dict[str, npt.ArrayLike] = field(init=False, default_factory=dict)
 
@@ -514,9 +511,9 @@ class Passive(MachineData):
 
     def build(self):
         """Build pf passive geometroy."""
-        shelldata = PassiveShellData()
-        coildata = PassiveCoilData()
-        for ids_loop in self.load_ids_data().loop:
+        shelldata = PassiveShellData(self.dshell)
+        coildata = PassiveCoilData(self.dcoil)
+        for ids_loop in self.load_ods().loop:
             loop = Loop(ids_loop)
             for i, ids_element in enumerate(ids_loop.element):
                 element = Element(ids_element, i)
@@ -536,28 +533,33 @@ class Passive(MachineData):
 class Active(MachineData):
     """Manage active poloidal loop ids, pf_passive."""
 
-    shot: int = 111001
+    pulse: int = 111001
     run: int = 1
-    ids_name: str = 'pf_active'
+    name: str = 'pf_active'
 
     def build(self):
         """Build pf active geometroy."""
         coildata = ActiveCoilData()
-        obliquecoildata = ActiveObliqueCoilData()
-        for ids_loop in self.load_ids_data().coil:
-            loop = ActiveLoop(ids_loop)
-            for i, ids_element in enumerate(ids_loop.element):
-                element = Element(ids_element, i)
+        #obliquecoildata = ActiveObliqueCoilData(self.dcoil)
+
+        coil = self.load_ods_data()['coil']
+        for coil_index in coil:
+            loop = Loop(coil[coil_index])
+
+            for i, element_index in enumerate(loop.ods['element']):
+                element = Element(loop.ods['element'][element_index])
                 if element.is_rectangular():
                     coildata.append(loop, element)
                     continue
                 if element.is_oblique():
-                    obliquecoildata.append(loop, element)
+                    #obliquecoildata.append(loop, element)
                     continue
                 raise NotImplementedError(f'geometory {element.geometry.name} '
                                           'not implemented')
         coildata.insert(self.coil)
-        obliquecoildata.insert(self.coil)
+        #obliquecoildata.insert(self.coil)
+
+
 
 
 @dataclass
@@ -571,8 +573,8 @@ class Plasma(MachineData):
     def build(self):
         """Build plasma bound by firstwall contour."""
         firstwall = ContourData()
-        self.ids_data = self.load_ids_data()
-        limiter = self.load_ids_data().description_2d.array[0].limiter
+        self.ods = self.load_ods()
+        limiter = self.load_ods().description_2d.array[0].limiter
         for unit in limiter.unit:
             firstwall.append(unit)
         contour = Contour(firstwall.data)  # extract closed loop
@@ -583,12 +585,12 @@ class Plasma(MachineData):
 class Machine(CoilSet, Database):
     """Manage ITER machine geometry."""
 
-    shot: int = 135011
+    pulse: int = 135011
     run: int = 7
-    tokamak: str = 'iter'
+    machine: str = 'iter'
     active: Union[bool, tuple[int, int]] = True
-    passive: Union[bool, tuple[int, int]] = True
-    plasma: Union[bool, tuple[int, int]] = True
+    passive: Union[bool, tuple[int, int]] = False
+    plasma: Union[bool, tuple[int, int]] = False
 
     components: ClassVar[dict[str, MachineData]] = dict(
         active=Active, passive=Passive, plasma=Plasma)
@@ -596,17 +598,17 @@ class Machine(CoilSet, Database):
     def __post_init__(self):
         """Load coilset, build if not found."""
         super().__post_init__()
-        try:
-            super().load(self.filename)
-        except (FileNotFoundError, OSError):
-            self.build()
+        #try:
+        #    super().load(self.filename, self.path)
+        #except FileNotFoundError:
+        self.build()
 
     def build_component(self, component: str, **kwargs):
         """Build component."""
         if (index := getattr(self, component)) is False:
             return
         if index is True:
-            index = self.shot, self.run
+            index = self.pulse, self.run
         self += self.components[component](*index, **kwargs)
 
     def build(self, **kwargs):
@@ -614,8 +616,8 @@ class Machine(CoilSet, Database):
         kwargs = self.frame_attrs | kwargs
         super().__post_init__()
         for component in self.components:
-            self.build_component(component, tokamak=self.tokamak, **kwargs)
-        super().store(self.filename, self.path)
+            self.build_component(component, machine=self.machine, **kwargs)
+        #super().store(self.filename, self.path)
 
 
 if __name__ == '__main__':

@@ -15,7 +15,7 @@ class CoilSetAttrs(ABC, FrameSetLoc):
     default: dict = field(init=False, default_factory=lambda: {})
     link: bool = field(init=False, default=False)
     attributes: list[str] = field(init=False, default_factory=lambda: [
-        'link', 'delta'])
+        'delta'])
 
     @abstractmethod
     def insert(self, *args, required=None, iloc=None, **additional):
@@ -52,7 +52,7 @@ class CoilSetAttrs(ABC, FrameSetLoc):
         """
 
     def ifthen(self, attr, cond, key, value):
-        """Set _attrs[key] = value when _attrs[check] == cond."""
+        """Update _attrs[key] = value when _attrs[check] == cond."""
         if self._attrs.get(attr, getattr(self, attr)) == cond:
             self._attrs[key] = value
 
@@ -65,6 +65,7 @@ class CoilSetAttrs(ABC, FrameSetLoc):
     def attrs(self, attrs):
         self._attrs = self.default | attrs
         self.update_attrs()
+        self.update_link()
         self.set_conditional_attributes()
 
     def update_attrs(self):
@@ -73,6 +74,12 @@ class CoilSetAttrs(ABC, FrameSetLoc):
             if attr in self.attributes and attr not in self._attrs:
                 self._attrs[attr] = getattr(self, attr)
 
+    def update_link(self):
+        """Update link boolean."""
+        _link = self._attrs.get('link', self.frame.metaframe.default['link'])
+        if isinstance(_link, bool):
+            self.link = _link
+
 
 @dataclass
 class GridAttrs(CoilSetAttrs):
@@ -80,7 +87,7 @@ class GridAttrs(CoilSetAttrs):
 
     grid: dict = field(init=False, default_factory=lambda: {})
     attributes: list[str] = field(init=False, default_factory=lambda: [
-        'link', 'trim', 'fill', 'delta', 'turn', 'tile'])
+        'trim', 'fill', 'delta', 'turn', 'tile'])
 
     @property
     def attrs(self):
@@ -93,8 +100,6 @@ class GridAttrs(CoilSetAttrs):
         self._attrs['turn'] = PolyGen.polyshape[self._attrs['turn']]
         self.set_conditional_attributes()
         self.grid = {attr: self._attrs.pop(attr) for attr in self.grid}
-        self.link = self._attrs.pop('link',
-                                    self.frame.metaframe.default['link'])
 
     @property
     def subattrs(self):

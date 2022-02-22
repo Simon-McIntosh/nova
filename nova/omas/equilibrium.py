@@ -114,16 +114,9 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
 
 if __name__ == '__main__':
 
-    from nova.imas.machine import Machine
-
-    coilset = Machine(135011, 7,
-                      dcoil=-1, dshell=0.25, dplasma=-1000, tcoil='r')
-
-    coilset.plot()
-
     eq = Equilibrium(135011, 7)
     #eq.build()
-    #eq.plot_0d('ip')
-    eq.plot_2d(50, 'psi')
+    eq.plot_0d('ip')
+    #eq.plot_2d(50, 'psi')
     #eq.plot_2d(500, 'j_tor')
     #eq.plot_1d(500)

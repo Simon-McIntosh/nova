@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from imas import imasdef, DBEntry
+from nova.electromagnetic.filepath import FilePath
 
 # pylint: disable=too-many-ancestors
 
@@ -41,7 +42,7 @@ class IMASdb:
 
 
 @dataclass
-class Database(IMASdb, IDS):
+class Database(FilePath, IMASdb, IDS):
     """Provide access to imasdb data."""
 
     datapath: str = 'data/imasdb'
@@ -49,7 +50,6 @@ class Database(IMASdb, IDS):
 
     def __post_init__(self):
         """Set filepath."""
-        super().__post_init__()
         self.set_path(self.datapath)
 
     @property

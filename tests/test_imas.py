@@ -37,8 +37,6 @@ def test_database():
     assert ids_data.ids_properties.source == 'ITER_D_33NHXN'
 
 
-
-
 if __name__ == '__main__':
 
     pytest.main([__file__])

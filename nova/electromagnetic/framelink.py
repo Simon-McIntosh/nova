@@ -17,6 +17,7 @@ from nova.electromagnetic.dataarray import (
 from nova.electromagnetic.energize import Energize
 from nova.electromagnetic.multipoint import MultiPoint
 from nova.geometry.polygeom import PolyGeom
+from nova.geometry.polygon import Polygon
 
 
 # pylint: disable=too-many-ancestors
@@ -320,7 +321,17 @@ class FrameLink(LinkIndexer, DataArray):
                                       shapely.geometry.MultiPolygon, dict))
                 or isinstance(args[0], vedo.Mesh)):
             return args, kwargs
-        kwargs = kwargs | PolyGeom(args[0]).geometry
+        if isinstance(args[0], list) and all(
+                [isinstance(poly, (Polygon, shapely.geometry.Polygon))
+                 for poly in args[0]]):
+            multipoly = {attr: [] for attr in PolyGeom(args[0][0]).geometry}
+            for poly in args[0]:
+                geometry = PolyGeom(poly).geometry
+                for attr in multipoly:
+                    multipoly[attr].append(geometry[attr])
+            kwargs = kwargs | multipoly
+        else:
+            kwargs = kwargs | PolyGeom(args[0]).geometry
         args = [kwargs.pop(attr) for attr in self.metaframe.required]
         return args, kwargs
 

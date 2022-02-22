@@ -6,12 +6,13 @@ import os
 
 import xarray
 
+from nova.electromagnetic.filepath import FilePath
 from nova.imas.database import Database
 from nova.imas.timeslice import TimeSlice
 
 
 @dataclass
-class Scenario(Database):
+class Scenario(FilePath, Database):
     """Manage access to scenario data (load, store, build)."""
 
     tokamak: str = 'iter'

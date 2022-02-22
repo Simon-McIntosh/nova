@@ -54,6 +54,16 @@ class FrameData:
         self.frame.multipoint.link(index, factor)
         self.subframe.multipoint.link(index, factor, expand=True)
 
+    def linksubframe(self, index):
+        """Propogate subframe links from frame."""
+        for i, (link, factor) in enumerate(
+                zip(self.frame.loc[index, 'link'],
+                    self.frame.loc[index, 'factor'])):
+            if link == '':
+                continue
+            self.subframe.multipoint.link([link, index[i]], factor,
+                                          expand=True)
+
     def drop(self, index=None):
         """
         Remove frame and subframe.

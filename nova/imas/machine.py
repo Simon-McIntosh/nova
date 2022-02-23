@@ -505,7 +505,7 @@ class MachineData(CoilSet, Database):
 
 
 @dataclass
-class Passive(MachineData):
+class PFpassive(MachineData):
     """Manage passive poloidal loop ids, pf_passive."""
 
     shot: int = 115005
@@ -533,7 +533,7 @@ class Passive(MachineData):
 
 
 @dataclass
-class Active(MachineData):
+class PFactive(MachineData):
     """Manage active poloidal loop ids, pf_passive."""
 
     shot: int = 111001
@@ -561,8 +561,8 @@ class Active(MachineData):
 
 
 @dataclass
-class Plasma(MachineData):
-    """Manage active poloidal loop ids, pf_passive."""
+class Wall(MachineData):
+    """Manage plasma boundary, wall ids."""
 
     shot: int = 116000
     run: int = 1
@@ -586,12 +586,12 @@ class Machine(CoilSet, Database):
     shot: int = 135011
     run: int = 7
     tokamak: str = 'iter'
-    active: Union[bool, tuple[int, int]] = True
-    passive: Union[bool, tuple[int, int]] = True
-    plasma: Union[bool, tuple[int, int]] = True
+    pf_active: Union[bool, tuple[int, int]] = True
+    pf_passive: Union[bool, tuple[int, int]] = True
+    wall: Union[bool, tuple[int, int]] = True
 
     components: ClassVar[dict[str, MachineData]] = dict(
-        active=Active, passive=Passive, plasma=Plasma)
+        pf_active=PFactive, pf_passive=PFpassive, wall=Wall)
 
     def __post_init__(self):
         """Load coilset, build if not found."""
@@ -599,7 +599,7 @@ class Machine(CoilSet, Database):
         try:
             super().load(self.filename)
         except (FileNotFoundError, OSError):
-            self.build()
+            self.update()
 
     def build_component(self, component: str, **kwargs):
         """Build component."""
@@ -615,11 +615,30 @@ class Machine(CoilSet, Database):
         super().__post_init__()
         for component in self.components:
             self.build_component(component, tokamak=self.tokamak, **kwargs)
+
+    def solve(self):
+        """Solve biot instances."""
+        if self.sloc['plasma'].sum() > 0:
+            self.plasmagrid.solve()
+            wall = self.Loc['plasma', :]
+            self.plasma.update_separatrix(
+                dict(e=[wall.x, wall.z, 0.7*wall.dx, 0.5*wall.dz]))
+
+    def store(self):
+        """Store coilset data."""
         super().store(self.filename)
+
+    def update(self):
+        """Update frame and biot attributes."""
+        self.build()
+        self.solve()
+        self.store()
 
 
 if __name__ == '__main__':
 
     coilset = Machine(dcoil=-1, dshell=0.25, dplasma=-1000, tcoil='r')
-    #coilset.build()
+    coilset.update()
+
     coilset.plot()
+    coilset.plasma.plot()

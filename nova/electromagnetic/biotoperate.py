@@ -41,7 +41,7 @@ class BiotOp:
         self.matrix = matrix
         self.plasma_matrix = plasma_matrix
         #  perform svd order reduction
-        rank = int(len(plasma_s) / svd_factor)
+        rank = int(np.ceil(len(plasma_s) / svd_factor))
         self.plasma_U = plasma_U[:, :rank].copy()
         self.plasma_s = plasma_s[:rank].copy()
         self.plasma_V = plasma_V[:rank, :].copy()
@@ -76,6 +76,7 @@ class BiotOperate(BiotData):
         """Initialize version identifiers."""
         self.version |= {attr: id(None) for attr in self.attrs}
         self.version['Bn'] = id(None)
+        self.version['null'] = id(None)
         super().__post_init__()
 
     @abstractmethod
@@ -109,7 +110,8 @@ class BiotOperate(BiotData):
         if (Attr := attr.capitalize()) in self.version:
             if Attr == 'Bn':
                 return self.get_norm()
-            if self.version[Attr] != self.subframe.version['plasma']:
+            if self.version[Attr] != self.subframe.version['plasma'] or \
+                    self.version[Attr] == self.version['null']:
                 self.update_turns(Attr)
                 self.version[Attr] = self.subframe.version['plasma']
             return self.operator[Attr].evaluate()

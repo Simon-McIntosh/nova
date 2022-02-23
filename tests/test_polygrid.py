@@ -2,7 +2,6 @@ import pytest
 
 import numpy as np
 
-from nova.geometry.polygon import Polygon
 from nova.electromagnetic.polygrid import PolyGrid
 
 
@@ -53,13 +52,13 @@ def test_rectangle_in_rectangle():
 
 def test_hexagon_in_rectangle_horizontal_constraint():
     polygrid = PolyGrid({'r': [3, 5, 0.1, 0.15]}, delta=0, turn='hex')
-    edge_length = 0.1/2
+    edge_length = 0.1/np.sqrt(3)
     assert np.isclose(polygrid.polyarea, 3**1.5 / 2 * edge_length**2)
 
 
 def test_hexagon_in_rectangle_vertical_constraint():
     polygrid = PolyGrid({'r': [3, 5, 0.1, 0.05]}, delta=0, turn='hex')
-    edge_length = 0.05/np.sqrt(3)
+    edge_length = 0.05/2
     assert np.isclose(polygrid.polyarea, 3**1.5 / 2 * edge_length**2)
 
 
@@ -137,9 +136,9 @@ def test_disc_effective_nfilament():
 
 
 def test_disc_effective_nfilament_tile():
-    polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-49,
+    polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-69,
                         turn='o', tile=True)
-    assert np.isclose(-polygrid.delta, polygrid.polyfilaments, 1e-2)
+    assert np.isclose(-polygrid.delta, polygrid.polyfilaments, 1e-1)
 
 
 def test_hexagon_effective_nfilament():

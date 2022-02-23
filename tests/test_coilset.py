@@ -163,7 +163,7 @@ def test_plasma_hex():
     coilset = CoilSet(dplasma=0.5)
     coilset.plasma.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 2, 2.5, 1.5, 1]])
     assert sum([section == 'hexagon'
-                for section in coilset.subframe.section]) == 2
+                for section in coilset.subframe.section]) == 3
 
 
 def test_coil_multipoint_link():

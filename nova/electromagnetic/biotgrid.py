@@ -133,7 +133,22 @@ class Expand:
         return limit
 
 
-class BiotBaseGrid(FieldNull, BiotOperate):
+class BiotPlot(Axes):
+    """Biot plot base class."""
+
+    def contour_kwargs(self, **kwargs):
+        """Return contour plot kwargs."""
+        return dict(colors='lightgray', linewidths=1.5, alpha=0.9,
+                    linestyles='solid', levels=self.levels) | kwargs
+
+    @abstractmethod
+    def plot(self, axes=None, **kwargs):
+        """Set plot axes."""
+        self.axes = axes
+        super().plot(axes)
+
+
+class BiotBaseGrid(FieldNull, BiotOperate, BiotPlot):
     """Flux grid baseclass."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
@@ -165,17 +180,6 @@ class BiotBaseGrid(FieldNull, BiotOperate):
         if attr == 'data_x' or attr == 'data_o':
             self.check_version()
         return super().__getattribute__(attr)
-
-    def contour_kwargs(self, **kwargs):
-        """Return contour plot kwargs."""
-        return dict(colors='lightgray', linewidths=1.5, alpha=0.9,
-                    linestyles='solid', levels=self.levels) | kwargs
-
-    @abstractmethod
-    def plot(self, axes=None, **kwargs):
-        """Set plot axes."""
-        self.axes = axes
-        super().plot(axes)
 
     def plot_svd(self, axes=None, **kwargs):
         """Plot influence of SVD reduction."""
@@ -222,5 +226,5 @@ class BiotGrid(BiotBaseGrid):
         QuadContourSet = self.axes.contour(self.data.x, self.data.z,
                                            self.psi.reshape(*self.shape).T,
                                            **self.contour_kwargs(**kwargs))
-        if isinstance(kwargs['levels'], int):
+        if isinstance(kwargs.get('levels', None), int):
             self.levels = QuadContourSet.levels

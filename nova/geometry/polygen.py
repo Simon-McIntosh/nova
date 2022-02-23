@@ -247,16 +247,16 @@ class PolyGen:
 
         """
         if height is None:
-            length = width/2
+            length = width/np.sqrt(3)
         else:
-            length = PolyGen.boxbound(width/2, height/np.sqrt(3))
-        points = [[x_center + np.cos(alpha) * length,
-                   z_center + np.sin(alpha) * length]
+            length = PolyGen.boxbound(width/np.sqrt(3), height/2)
+        points = [[x_center + np.sin(alpha) * length,
+                   z_center + np.cos(alpha) * length]
                   for alpha in np.linspace(0, 2*np.pi, 7)]
         return shapely.geometry.Polygon(points)
 
 
 if __name__ == '__main__':
 
-    poly = PolyGen('disc')
+    poly = PolyGen('hex')
     print(poly(3, 4, 2))

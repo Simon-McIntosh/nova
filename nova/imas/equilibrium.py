@@ -118,11 +118,8 @@ if __name__ == '__main__':
     from nova.imas.pf_active import PFactive
 
     coilset = Machine(135011, 7,
-                      dcoil=0.25, dshell=0.25, dplasma=-1000, tcoil='hex')
-    # coilset.build()
-
-    #coilset.plasmagrid.solve()
-    #coilset.store(coilset.filename)
+                      dcoil=0.5, dshell=0.5, dplasma=-1000, tcoil='hex')
+    coilset.update()
 
     pf_active = PFactive(135011, 7)
 
@@ -138,6 +135,7 @@ if __name__ == '__main__':
     coilset.sloc['coil', 'Ic'] = pf_active.data.current[50]
     coilset.sloc['plasma', 'Ic'] = eq.data.ip[50]
 
-    coilset.plot()
-
+    plt.set_aspect(0.8)
+    coilset.plot('plasma')
+    coilset.plasma.plot()
     coilset.plasmagrid.plot()

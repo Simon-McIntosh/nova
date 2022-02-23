@@ -1,5 +1,6 @@
 """Manage plasma attributes."""
 from dataclasses import dataclass, field
+from functools import cached_property
 
 import descartes
 import numba
@@ -50,7 +51,6 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
     loop: npt.ArrayLike = field(init=False, default=None, repr=False)
-    pointloop: PointLoop = field(init=False, default=None, repr=False)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -69,11 +69,11 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
         return self.loc['ionize', ['x', 'z', 'section', 'area',
                                    'Ic', 'It', 'nturn']].__str__()
 
-    def generate_pointloop(self):
-        """Generate polyloop."""
+    @cached_property
+    def pointloop(self):
         if self.sloc['plasma'].sum() == 0:
-            return
-        self.pointloop = PointLoop(self.loc['plasma', ['x', 'z']].to_numpy())
+            raise AttributeError('No plasma filaments found.')
+        return PointLoop(self.loc['plasma', ['x', 'z']].to_numpy())
 
     def insert(self, *args, required=None, iloc=None, **additional):
         """Insert plasma, normalize turn number for multiframe plasmas."""
@@ -118,8 +118,6 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
         """
         if self.sloc['plasma'].sum() == 0:
             return
-        if self.pointloop is None:
-            self.generate_pointloop()
         try:
             inloop = self.pointloop.update(loop)
         except numba.TypingError:

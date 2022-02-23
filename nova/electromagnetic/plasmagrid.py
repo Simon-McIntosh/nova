@@ -10,6 +10,7 @@ from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotgrid import BiotBaseGrid
 from nova.electromagnetic.biotsolve import BiotSolve
 from nova.electromagnetic.error import GridError
+from nova.geometry.pointloop import PointLoop
 
 
 @dataclass
@@ -17,7 +18,7 @@ class PlasmaGrid(BiotBaseGrid):
     """Compute interaction across hexagonal grid."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
-    levels: Union[int, list[float]] = 31
+    levels: Union[int, list[float]] = 21
 
     def __post_init__(self):
         """Initialize fieldnull version."""
@@ -26,12 +27,12 @@ class PlasmaGrid(BiotBaseGrid):
 
     @staticmethod
     @numba.njit
-    def loop_neighbour_vertices(points, neighbor_vertices, hull_vertices):
+    def loop_neighbour_vertices(points, neighbor_vertices, edge_vertices):
         """Calculate 6-point ordered loop vertex indices."""
         point_number = len(points)
         neighbours = np.full((point_number, 6), -1)
         for i in range(len(points)):
-            if i in hull_vertices:
+            if i in edge_vertices:
                 continue
             center_point = points[i, :]
             slice_index = slice(neighbor_vertices[0][i],
@@ -55,14 +56,20 @@ class PlasmaGrid(BiotBaseGrid):
         points = self.subframe.loc['plasma', ['x', 'z']].to_numpy()
         tri = scipy.spatial.Delaunay(points)
         neighbor_vertices = tri.vertex_neighbor_vertices
-        hull = scipy.spatial.ConvexHull(points)
-        hull_vertices = hull.vertices
+        wall = self.Loc['plasma', 'poly'][0].poly.boundary
+        edge_vertices = np.array([i for i, polygon in
+                                  enumerate(self.loc['plasma', 'poly'])
+                                  if polygon.poly.intersects(wall)])
+        centroids = np.array([np.mean(points[simplex], axis=0)
+                              for simplex in tri.simplices])
+        inside = PointLoop(centroids).update(np.array(wall.xy).T)
+        triangles = tri.simplices[inside]
         stencil, stencil_index, stencil_mask = self.loop_neighbour_vertices(
-            points, neighbor_vertices, hull_vertices)
+            points, neighbor_vertices, edge_vertices)
         self.data.coords['x'] = points[:, 0]
         self.data.coords['z'] = points[:, 1]
         self.data.coords['stencil_index'] = stencil_index
-        self.data['triangles'] = ('tri_index', 'tri_vertex'), tri.simplices
+        self.data['triangles'] = ('tri_index', 'tri_vertex'), triangles
         self.data['stencil'] = ('stencil_index', 'stencil_vertex'), stencil
         self.data['stencil_mask'] = 'plasma', stencil_mask
 
@@ -89,5 +96,6 @@ class PlasmaGrid(BiotBaseGrid):
             self.axes.triplot(self.x_coordinate, self.z_coordinate,
                               self.data['triangles'].data, lw=0.5)
         self.axes.tricontour(self.x_coordinate, self.z_coordinate,
+
                              self.data['triangles'].data, self.psi,
                              **kwargs)

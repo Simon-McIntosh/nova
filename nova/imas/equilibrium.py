@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from nova.imas.scenario import Scenario
+from nova.electromagnetic.biotgrid import BiotPlot
 from nova.utilities.pyplot import plt
 
 
@@ -77,7 +78,7 @@ class Profile1D(Scenario):
 
 
 @dataclass
-class Profile2D(Scenario):
+class Profile2D(Scenario, BiotPlot):
     """Manage extraction of 2d profile data from imas ids."""
 
     attrs_2d: list[str] = field(
@@ -89,12 +90,16 @@ class Profile2D(Scenario):
         super().build()
         self.time_slice.build('profiles_2d', self.attrs_2d, postfix='2d')
 
-    def plot_2d(self, itime=-1, attr='psi'):
+    def plot_2d(self, itime=-1, attr='psi', axes=None, **kwargs):
         """Plot 2d profile."""
-        plt.contour(self.data.r, self.data.z,
-                    self.data[f'{attr}2d'][itime].T)
+        super().plot(axes)
+        kwargs = self.contour_kwargs(**kwargs)
+        QuadContourSet = plt.contour(self.data.r, self.data.z,
+                                     self.data[f'{attr}2d'][itime].T,
+                                     **kwargs)
         plt.axis('equal')
         plt.axis('off')
+        return QuadContourSet.levels
 
 
 @dataclass
@@ -128,7 +133,7 @@ if __name__ == '__main__':
     eq = Equilibrium(135011, 7)
     #eq.build()
     #eq.plot_0d('ip')
-    eq.plot_2d(50, 'psi')
+    levels = eq.plot_2d(50, 'psi', colors='C3', levels=21)
     #eq.plot_2d(500, 'j_tor')
     #eq.plot_1d(500)
 
@@ -138,4 +143,4 @@ if __name__ == '__main__':
     plt.set_aspect(0.8)
     coilset.plot('plasma')
     coilset.plasma.plot()
-    coilset.plasmagrid.plot()
+    coilset.plasmagrid.plot(levels=21)

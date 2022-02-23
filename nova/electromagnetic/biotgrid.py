@@ -138,14 +138,16 @@ class BiotPlot(Axes):
 
     def contour_kwargs(self, **kwargs):
         """Return contour plot kwargs."""
+        try:
+            levels = self.levels
+        except AttributeError:
+            levels = 31
         return dict(colors='lightgray', linewidths=1.5, alpha=0.9,
-                    linestyles='solid', levels=self.levels) | kwargs
+                    linestyles='solid', levels=levels) | kwargs
 
-    @abstractmethod
     def plot(self, axes=None, **kwargs):
         """Set plot axes."""
         self.axes = axes
-        super().plot(axes)
 
 
 class BiotBaseGrid(FieldNull, BiotOperate, BiotPlot):

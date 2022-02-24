@@ -69,8 +69,8 @@ if __name__ == '__main__':
     else:
         coilset = CoilSet().load(filename)
 
-    #separatrix = Polygon(dict(c=[4.5, 0.25, 0.9])).boundary
-    #coilset.plasma.update_separatrix(separatrix)
+    separatrix = Polygon(dict(c=[4.5, 0.25, 0.9])).boundary
+    coilset.plasma.update_separatrix(separatrix)
 
     coilset.sloc['bubble', 'Ic'] = 8
     coilset.sloc['passive', 'Ic'] = 4

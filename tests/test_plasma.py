@@ -123,5 +123,4 @@ def test_plasmagrid_xpoint():
 
 
 if __name__ == '__main__':
-
     pytest.main([__file__])

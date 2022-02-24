@@ -171,7 +171,7 @@ class BiotBaseGrid(FieldNull, BiotOperate, BiotPlot):
 
     def check_version(self):
         """Check validity of upstream data, update if nessisary."""
-        current_hash = hash(self.current.data.tobytes())
+        current_hash = hash(self.aloc['Ic'].data.tobytes())
         if current_hash != self.version['fieldnull'] or \
                 self.version['Psi'] != self.subframe.version['plasma']:
             self.update()

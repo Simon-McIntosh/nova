@@ -96,7 +96,6 @@ class BiotOperate(BiotData):
             self.svd_factor = svd_factor
         self.x_coordinate = self.data.x.data
         self.z_coordinate = self.data.z.data
-        self.update_loc_indexer()
         for attr in self.data.attrs['attributes']:
             self.operator[attr] = BiotOp(
                 self.saloc['Ic'], self.aloc['nturn'], self.aloc['plasma'],

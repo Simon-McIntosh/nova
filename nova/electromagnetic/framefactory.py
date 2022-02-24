@@ -41,7 +41,8 @@ class FrameFactory(FrameSet):
     @cached_property
     def plasma(self):
         """Return plasma constructor."""
-        return Plasma(*self.frames, turn=self.tplasma, delta=self.dplasma)
+        return Plasma(*self.frames, turn=self.tplasma, delta=self.dplasma,
+                      path=self.path)
 
     @cached_property
     def shell(self):
@@ -57,3 +58,14 @@ class FrameFactory(FrameSet):
     def winding(self):
         """Return winding constructor."""
         return Winding(*self.frames, delta=self.delta)
+
+    '''
+    def store(self, filename: str, path=None):
+        """Store frameset instance data to hdf5 file."""
+        super().store(filename, path)
+        file = self.file(filename, path)
+        for attr in self.__dict__:
+            if isinstance(framesetdata := getattr(self, attr), FrameSetData):
+                print('**** storing', attr)
+                framesetdata.store(file)
+    '''

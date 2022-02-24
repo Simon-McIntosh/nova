@@ -620,7 +620,7 @@ class Machine(CoilSet, Database):
         """Solve biot instances."""
         if self.sloc['plasma'].sum() > 0:
             self.plasmagrid.solve()
-            wall = self.Loc['plasma', :]
+            wall = self.Loc['plasma', :].iloc[0]
             self.plasma.update_separatrix(
                 dict(e=[wall.x, wall.z, 0.7*wall.dx, 0.5*wall.dz]))
 
@@ -637,7 +637,7 @@ class Machine(CoilSet, Database):
 
 if __name__ == '__main__':
 
-    coilset = Machine(dcoil=-1, dshell=0.25, dplasma=-1000, tcoil='r')
+    coilset = Machine(dcoil=0.25, dshell=0.25, dplasma=-1000, tcoil='r')
     coilset.update()
 
     coilset.plot()

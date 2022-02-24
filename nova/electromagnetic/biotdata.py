@@ -4,12 +4,13 @@ from dataclasses import dataclass, field
 
 import xarray
 
-from nova.electromagnetic.filepath import FilePath
+from nova.database.netcdf import netCDF
+from nova.database.filepath import FilePath
 from nova.electromagnetic.framesetloc import FrameSetLoc
 
 
 @dataclass
-class BiotData(FilePath, FrameSetLoc):
+class BiotData(netCDF, FilePath, FrameSetLoc):
     """Biot solution abstract base class."""
 
     name: str = field(default=None)
@@ -34,15 +35,3 @@ class BiotData(FilePath, FrameSetLoc):
                 self.subframe.frame[self.aloc['plasma']].unique())
         except StopIteration:
             self.data.attrs['plasma_index'] = -1
-
-    def store(self, filename: str, path=None):
-        """Store data as netCDF in hdf5 file."""
-        file = self.file(filename, path)
-        self.data.to_netcdf(file, mode='a', group=self.name)
-
-    def load(self, filename: str, path=None):
-        """Load data from hdf5."""
-        file = self.file(filename, path)
-        with xarray.open_dataset(file, group=self.name) as data:
-            data.load()
-            self.data = data

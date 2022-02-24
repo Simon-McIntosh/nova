@@ -81,6 +81,7 @@ class Winding(CoilSetAttrs):
             area = self.frame.loc[index, 'area']
             self.subframe.insert(*centroid.T, *vector.T, volume, vtk,
                                  poly=poly, area=area, **subattrs)
+        self.update_loc_indexer()
         return index
 
     @staticmethod

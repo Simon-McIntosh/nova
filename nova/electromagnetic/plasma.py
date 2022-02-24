@@ -6,7 +6,9 @@ import descartes
 import numba
 import numpy as np
 import numpy.typing as npt
+import xarray
 
+from nova.electromagnetic.framesetdata import FrameSetData
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polyplot import Axes
@@ -47,7 +49,7 @@ class PlasmaGrid(PoloidalGrid):
 
 
 @dataclass
-class Plasma(PlasmaGrid, Axes, FrameSetLoc):
+class Plasma(Axes, FrameSetData, PlasmaGrid, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
     loop: npt.ArrayLike = field(init=False, default=None, repr=False)
@@ -71,6 +73,7 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
 
     @cached_property
     def pointloop(self):
+        """Return pointloop instance, used to check loop membership."""
         if self.sloc['plasma'].sum() == 0:
             raise AttributeError('No plasma filaments found.')
         return PointLoop(self.loc['plasma', ['x', 'z']].to_numpy())
@@ -125,7 +128,6 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
             inloop = self.pointloop.update(loop)
         self.loop = loop
         self.subframe.version['plasma'] = id(loop)
-        self.update_loc_indexer()
         plasma = self.aloc['plasma']
         ionize = self.aloc['ionize']
         nturn = self.aloc['nturn']

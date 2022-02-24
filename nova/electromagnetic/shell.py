@@ -59,4 +59,5 @@ class Shell(GridAttrs):
             subframe.append(self.subframe.assemble(
                 shellgrid.subframe[i], **data, **self.subattrs))
         self.subframe.concatenate(*subframe)
+        self.update_loc_indexer()
         return index

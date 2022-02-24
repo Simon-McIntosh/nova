@@ -42,9 +42,9 @@ class CoilSet(BiotFactory, FrameFactory):
 if __name__ == '__main__':
 
     filename = 'biot'
-    reload = True
+    reload = False
     if reload:
-        coilset = CoilSet(dcoil=-35, dplasma=-50)
+        coilset = CoilSet(dcoil=-35, dplasma=-500)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
                             nturn=-0.8)
         coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex', turn='c',
@@ -58,8 +58,10 @@ if __name__ == '__main__':
         coilset.sloc['Ic'] = 1
         coilset.sloc['Shl0', 'Ic'] = -5
 
-        coilset.grid.solve(50, 0.1, 'plasma')
+        coilset.grid.solve(500, 0.1, 'plasma')
         coilset.plasmagrid.solve()
+
+        coilset.plasma.update_separatrix(dict(c=[4.5, 0.25, 0.9]))
 
         coilset.sloc['Ic'] = 6
         coilset.sloc['bubble', 'Ic'] = 5

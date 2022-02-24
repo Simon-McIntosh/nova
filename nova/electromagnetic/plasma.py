@@ -8,7 +8,7 @@ import numpy as np
 import numpy.typing as npt
 import xarray
 
-from nova.electromagnetic.framesetdata import FrameSetData
+from nova.database.netcdf import netCDF
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polyplot import Axes
@@ -49,9 +49,10 @@ class PlasmaGrid(PoloidalGrid):
 
 
 @dataclass
-class Plasma(Axes, FrameSetData, PlasmaGrid, FrameSetLoc):
+class Plasma(Axes, netCDF, PlasmaGrid, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
+    name: str = 'plasma'
     loop: npt.ArrayLike = field(init=False, default=None, repr=False)
 
     def __post_init__(self):
@@ -70,6 +71,18 @@ class Plasma(Axes, FrameSetData, PlasmaGrid, FrameSetLoc):
         """Return string representation of plasma subframe."""
         return self.loc['ionize', ['x', 'z', 'section', 'area',
                                    'Ic', 'It', 'nturn']].__str__()
+
+    def store(self, filename: str, path=None):
+        """Extend netCDF.store, store data as netCDF in hdf5 file."""
+        self.data = xarray.Dataset()
+        self.data['loop_coorinates'] = ['x', 'z']
+        self.data['loop'] = ('loop_index', 'loop_coorinates'), self.loop
+        super().store(filename, path)
+
+    def load(self, filename: str, path=None):
+        """Extend netCDF.load, load data from hdf5."""
+        super().load(filename, path)
+        self.loop = self.data['loop'].data
 
     @cached_property
     def pointloop(self):

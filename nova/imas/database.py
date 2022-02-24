@@ -3,8 +3,8 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import Any
 
+from nova.database.filepath import FilePath
 from imas import imasdef, DBEntry
-from nova.electromagnetic.filepath import FilePath
 
 # pylint: disable=too-many-ancestors
 
@@ -45,7 +45,7 @@ class IMASdb:
 class Database(FilePath, IMASdb, IDS):
     """Provide access to imasdb data."""
 
-    datapath: str = 'data/imasdb'
+    datapath: str = 'data/Imas'
     ids_data: Any = field(init=False, repr=False, default=None)
 
     def __post_init__(self):

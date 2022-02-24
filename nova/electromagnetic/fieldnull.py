@@ -241,4 +241,14 @@ if __name__ == '__main__':
     coilset.sloc['Ic'] = -15e6
 
     coilset.plot()
-    coilset.grid.plot()
+    #coilset.grid.plot()
+
+    coilset.grid.plot(levels=np.sort(coilset.grid.x_psi))
+    #coilset.grid.edge_contour()
+
+    import cv2 as cv
+    from nova.utilities.pyplot import plt
+    psi = coilset.grid.psi.reshape(*coilset.grid.shape).T
+    thresh = cv.threshold(psi, coilset.grid.x_psi[1], 1, 0)[1]
+    contours, hierarchy = cv.findContours(thresh, 2, 0)
+    plt.pcolor(thresh)

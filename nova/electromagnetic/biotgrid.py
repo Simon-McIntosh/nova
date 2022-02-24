@@ -230,3 +230,9 @@ class BiotGrid(BiotBaseGrid):
                                            **self.contour_kwargs(**kwargs))
         if isinstance(kwargs.get('levels', None), int):
             self.levels = QuadContourSet.levels
+
+    def edge_contour(self):
+        psi = self.psi.reshape(*self.shape).T
+        psi_edge = np.pad(psi, 1, constant_values=psi.max())
+        print(psi.shape, psi_edge.shape)
+        self.axes.contour(psi_edge)

@@ -124,21 +124,22 @@ if __name__ == '__main__':
 
     coilset = Machine(135011, 7,
                       dcoil=0.5, dshell=0.5, dplasma=-1000, tcoil='hex')
-    # coilset.update()
+    #coilset.update()
 
     pf_active = PFactive(135011, 7)
-
     eq = Equilibrium(135011, 7)
+
+    itime = 500
     # eq.build()
     #eq.plot_0d('ip')
-    levels = eq.plot_2d(50, 'psi', colors='C3', levels=21)
+    levels = eq.plot_2d(itime, 'psi', colors='C3', levels=21)
     #eq.plot_2d(500, 'j_tor')
     #eq.plot_1d(500)
 
-    coilset.sloc['coil', 'Ic'] = pf_active.data.current[50]
-    coilset.sloc['plasma', 'Ic'] = eq.data.ip[50]
+    coilset.sloc['coil', 'Ic'] = pf_active.data.current[itime]
+    coilset.sloc['plasma', 'Ic'] = eq.data.ip[itime]
 
     plt.set_aspect(0.8)
     coilset.plot('plasma')
     coilset.plasma.plot()
-    coilset.plasmagrid.plot(levels=21)
+    coilset.plasmagrid.plot(levels=levels, colors='C0')

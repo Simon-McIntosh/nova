@@ -58,13 +58,11 @@ class FrameSet(FilePath, FrameSetLoc):
 
     def store(self, filename: str, path=None):
         """Store frame and subframe as groups within hdf file."""
-        print('store frames and data')
         file = self.file(filename, path)
         self.frame.store(file, 'frameset/frame', mode='w')
         self.subframe.store(file, 'frameset/subframe', mode='a')
         for attr in self.__dict__:
             if isinstance(data := getattr(self, attr), netCDF):
-                print('storing', attr)
                 data.store(file)
 
     def load(self, filename: str, path=None):
@@ -74,10 +72,8 @@ class FrameSet(FilePath, FrameSetLoc):
         self.subframe.load(file, 'frameset/subframe')
         with Dataset(file) as dataset:
             for attr in dataset.groups['frameset'].groups:
-                print('try', attr)
                 if attr in dir(self.__class__) and isinstance(
                         data := getattr(self, attr), netCDF):
-                    print('loading', attr)
                     data.load(file)
         return self
 

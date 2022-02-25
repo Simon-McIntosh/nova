@@ -1,20 +1,20 @@
 """Biot data storage class."""
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 import xarray
 
 from nova.database.netcdf import netCDF
-from nova.database.filepath import FilePath
 from nova.electromagnetic.framesetloc import FrameSetLoc
 
 
 @dataclass
-class BiotData(netCDF, FilePath, FrameSetLoc):
+class BiotData(ABC, netCDF, FrameSetLoc):
     """Biot solution abstract base class."""
 
     name: str = field(default=None)
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
+    classname: str = field(init=False)
     data: xarray.Dataset = field(init=False, repr=False,
                                  default_factory=xarray.Dataset)
 
@@ -24,11 +24,20 @@ class BiotData(netCDF, FilePath, FrameSetLoc):
             {'additional': ['plasma', 'nturn'],
              'array': ['plasma', 'nturn'], 'subspace': ['Ic']}
         self.subframe.update_columns()
+        self.classname = self.__class__.__name__
         super().__post_init__()
 
+    def __len__(self):
+        """Return dataset length."""
+        return len(self.data)
+
     @abstractmethod
-    def solve(self, *args):
-        """Solve biot interaction - extened by subclass."""
+    def solve(self):
+        """Solve biot interaction."""
+
+    def post_solve(self, *args):
+        """Post process biot solution - extened by subclass."""
+        self.data.attrs['classname'] = self.classname
         try:
             self.data.attrs['plasma_index'] = next(
                 self.frame.subspace.index.get_loc(name) for name in

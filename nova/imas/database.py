@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from nova.database.filepath import FilePath
-from imas import imasdef, DBEntry
 
 # pylint: disable=too-many-ancestors
 
@@ -24,11 +23,12 @@ class IMASdb:
 
     user: str = 'public'
     tokamak: str = 'iter_md'
-    backend: int = imasdef.MDSPLUS_BACKEND
+    backend: int = 12
 
     @contextmanager
     def _database(self, shot: int, run: int, ids_name: str):
         """Database context manager."""
+        from imas import DBEntry
         database = DBEntry(self.backend, self.tokamak, shot, run,
                            user_name=self.user)
         database.open()

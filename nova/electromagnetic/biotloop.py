@@ -18,7 +18,7 @@ class BiotLoop(Axes, BiotOperate):
         # insert grid data
         self.data.coords['x'] = target.x.values
         self.data.coords['z'] = target.z.values
-        super().solve()
+        super().post_solve()
 
     def plot(self, axes=None, **kwargs):
         """Plot points."""

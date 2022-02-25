@@ -1,5 +1,5 @@
 """Generate grids for BiotGrid methods."""
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from dataclasses import dataclass, field, InitVar
 from typing import Union
 
@@ -150,7 +150,7 @@ class BiotPlot(Axes):
         self.axes = axes
 
 
-class BiotBaseGrid(FieldNull, BiotOperate, BiotPlot):
+class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
     """Flux grid baseclass."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
@@ -168,6 +168,10 @@ class BiotBaseGrid(FieldNull, BiotOperate, BiotPlot):
         Extend method to change dimensionality of psi input.
         """
         super().update_null(self.psi)
+
+    @abstractmethod
+    def solve(self):
+        """Solve biot interaction, to be extended by subclass"""
 
     def check_version(self):
         """Check validity of upstream data, update if nessisary."""
@@ -211,7 +215,7 @@ class BiotGrid(BiotBaseGrid):
         self.data.coords['z'] = grid.data.z
         self.data.coords['x2d'] = (['x', 'z'], grid.data.x2d.data)
         self.data.coords['z2d'] = (['x', 'z'], grid.data.z2d.data)
-        super().solve()
+        super().post_solve()
 
     def update(self):
         """Extend update method to ensure psi input is 2D."""
@@ -230,9 +234,3 @@ class BiotGrid(BiotBaseGrid):
                                            **self.contour_kwargs(**kwargs))
         if isinstance(kwargs.get('levels', None), int):
             self.levels = QuadContourSet.levels
-
-    def edge_contour(self):
-        psi = self.psi.reshape(*self.shape).T
-        psi_edge = np.pad(psi, 1, constant_values=psi.max())
-        print(psi.shape, psi_edge.shape)
-        self.axes.contour(psi_edge)

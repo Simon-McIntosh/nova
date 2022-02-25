@@ -1,15 +1,19 @@
 """Manage plasma attributes."""
 from dataclasses import dataclass, field
 from functools import cached_property
+from typing import ClassVar
 
 import descartes
 import numba
 import numpy as np
 import numpy.typing as npt
+import pyvista
+
 import xarray
 
 from nova.database.netcdf import netCDF
 from nova.electromagnetic.framesetloc import FrameSetLoc
+from nova.electromagnetic.plasmagrid import PlasmaGrid
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polyplot import Axes
 from nova.geometry.polygon import Polygon
@@ -20,8 +24,41 @@ from numba import njit
 
 
 @dataclass
-class PlasmaGrid(PoloidalGrid):
-    """Grid plasma region."""
+class PlasmaVTK(PlasmaGrid):
+    """Extend PlasmaGrid dataset with VTK methods."""
+
+    data: xarray.Dataset = field(repr=False, default_factory=xarray.Dataset)
+    mesh: pyvista.PolyData = field(init=False, repr=False)
+    classnames: ClassVar[list[str]] = ['PlasmaGrid', 'PlasmaVTK']
+
+    def __post_init__(self):
+        """Load biot dataset."""
+        super().__post_init__()
+        self.load_data()
+        assert self.data.attrs['classname'] in self.classnames
+        self.build_mesh()
+
+    def build_mesh(self):
+        """Build vtk mesh."""
+        points = np.c_[self.data.x, np.zeros(self.data.dims['x']), self.data.z]
+        faces = np.c_[np.full(self.data.dims['tri_index'], 3),
+                      self.data.triangles]
+        self.mesh = pyvista.PolyData(points, faces=faces)
+
+    def plot(self, **kwargs):
+        """Plot vtk mesh."""
+        self.mesh['psi'] = self.psi
+        kwargs = dict(color='purple', line_width=2,
+                      render_lines_as_tubes=True) | kwargs
+        plotter = pyvista.Plotter()
+        plotter.add_mesh(self.mesh)
+        plotter.add_mesh(self.mesh.contour(), **kwargs)
+        plotter.show()
+
+
+@dataclass
+class MeshPlasma(PoloidalGrid):
+    """Mesh plasma region."""
 
     turn: str = 'hexagon'
     tile: bool = field(init=False, default=True)
@@ -49,7 +86,7 @@ class PlasmaGrid(PoloidalGrid):
 
 
 @dataclass
-class Plasma(Axes, netCDF, PlasmaGrid, FrameSetLoc):
+class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
     name: str = 'plasma'

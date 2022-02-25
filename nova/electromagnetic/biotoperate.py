@@ -79,10 +79,9 @@ class BiotOperate(BiotData):
         self.version['null'] = id(None)
         super().__post_init__()
 
-    @abstractmethod
-    def solve(self, *args):
+    def post_solve(self, *args):
         """Solve biot interaction - extened by subclass."""
-        super().solve()
+        super().post_solve()
         self.load_operators()
 
     def load(self, file: str, path=None):
@@ -96,13 +95,21 @@ class BiotOperate(BiotData):
             self.svd_factor = svd_factor
         self.x_coordinate = self.data.x.data
         self.z_coordinate = self.data.z.data
-        for attr in self.data.attrs['attributes']:
+        self.operator = {}
+        self.attrs = self.data.attrs['attributes']
+        for attr in self.attrs:
             self.operator[attr] = BiotOp(
                 self.saloc['Ic'], self.aloc['nturn'], self.aloc['plasma'],
                 self.data.attrs['plasma_index'],
                 self.data[attr].data, self.data[f'_{attr}'].data,
                 self.svd_factor, self.data[f'_U{attr}'].data,
                 self.data[f'_s{attr}'].data, self.data[f'_V{attr}'].data)
+
+    def load_data(self):
+        """Load dataset, solve if not set."""
+        if len(self) == 0:
+            return self.solve()
+        self.load_operators()
 
     def __getattr__(self, attr):
         """Return variable data."""

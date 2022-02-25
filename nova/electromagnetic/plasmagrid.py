@@ -81,7 +81,7 @@ class PlasmaGrid(BiotBaseGrid):
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
                               attrs=self.attrs).data
         self.tessellate()
-        super().solve()
+        super().post_solve()
 
     def load_operators(self, svd_factor=None):
         """Extend biot operate load_operators."""

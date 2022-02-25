@@ -18,13 +18,13 @@ class BiotSolve(BiotMatrix):
     def __post_init__(self):
         """Solve biot interaction."""
         super().__post_init__()
-        self.calculate()
+        self.solve()
 
-    def calculate(self):
+    def solve(self):
         """Calculate full ensemble biot interaction."""
         self.initialize_dataset()
         for segment in self.source.segment.unique():
-            self._calculate(segment)
+            self._solve(segment)
         if self.svd:
             self.decompose()
 
@@ -38,7 +38,7 @@ class BiotSolve(BiotMatrix):
         plasma = self.source.segment[self.source.index[self.source.plasma]]
         return np.array(plasma == segment)
 
-    def _calculate(self, segment):
+    def _solve(self, segment):
         """Calculate segment biot interaction."""
         index = np.array(self.source.segment == segment)
         if segment not in self.generator:

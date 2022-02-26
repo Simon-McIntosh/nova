@@ -3,12 +3,14 @@ from dataclasses import dataclass
 from functools import cached_property
 
 from nova.electromagnetic.coil import Coil
+from nova.electromagnetic.framedata import FrameData
 from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.winding import Winding
 from nova.electromagnetic.shell import Shell
 from nova.electromagnetic.turn import Turn
 from nova.electromagnetic.plasma import Plasma
 from nova.electromagnetic.ferritic import Ferritic
+from nova.geometry.polygen import PolyGen
 
 
 @dataclass
@@ -21,6 +23,12 @@ class FrameFactory(FrameSet):
     dshell: float = 0
     tplasma: str = 'hex'
     tcoil: str = 'rect'
+
+    def __post_init__(self):
+        """Update turn attribute names."""
+        for attr in ['tplasma', 'tcoil']:
+            setattr(self, attr, PolyGen.polyshape[getattr(self, attr)])
+        super().__post_init__()
 
     @property
     def frame_attrs(self):
@@ -58,14 +66,3 @@ class FrameFactory(FrameSet):
     def winding(self):
         """Return winding constructor."""
         return Winding(*self.frames, delta=self.delta)
-
-    '''
-    def store(self, filename: str, path=None):
-        """Store frameset instance data to hdf5 file."""
-        super().store(filename, path)
-        file = self.file(filename, path)
-        for attr in self.__dict__:
-            if isinstance(framesetdata := getattr(self, attr), FrameSetData):
-                print('**** storing', attr)
-                framesetdata.store(file)
-    '''

@@ -1,6 +1,7 @@
 """Manage access to IMAS machine data."""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from functools import cached_property
 import string
 from typing import ClassVar, Union
 
@@ -8,6 +9,7 @@ import numpy as np
 import numpy.typing as npt
 import shapely
 
+from nova.database.netcdf import netCDF
 from nova.electromagnetic.coil import Coil
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.shell import Shell
@@ -491,7 +493,7 @@ class Contour:
 
 
 @dataclass
-class MachineData(CoilSet, Database):
+class MachineDescription(CoilSet, Database):
     """Manage access to machine data."""
 
     def __post_init__(self):
@@ -505,7 +507,7 @@ class MachineData(CoilSet, Database):
 
 
 @dataclass
-class PFpassive(MachineData):
+class PF_Passive_Geometry(MachineDescription):
     """Manage passive poloidal loop ids, pf_passive."""
 
     shot: int = 115005
@@ -533,7 +535,7 @@ class PFpassive(MachineData):
 
 
 @dataclass
-class PFactive(MachineData):
+class PF_Active_Geometry(MachineDescription):
     """Manage active poloidal loop ids, pf_passive."""
 
     shot: int = 111001
@@ -561,7 +563,7 @@ class PFactive(MachineData):
 
 
 @dataclass
-class Wall(MachineData):
+class Wall_Geometry(MachineDescription):
     """Manage plasma boundary, wall ids."""
 
     shot: int = 116000
@@ -571,7 +573,6 @@ class Wall(MachineData):
     def build(self):
         """Build plasma bound by firstwall contour."""
         firstwall = ContourData()
-        self.ids_data = self.load_ids_data()
         limiter = self.load_ids_data().description_2d.array[0].limiter
         for unit in limiter.unit:
             firstwall.append(unit)
@@ -580,43 +581,40 @@ class Wall(MachineData):
 
 
 @dataclass
-class Machine(CoilSet, Database):
+class Machine(CoilSet, netCDF, Database):
     """Manage ITER machine geometry."""
 
     shot: int = 135011
     run: int = 7
     tokamak: str = 'iter'
-    pf_active: Union[bool, tuple[int, int]] = True
-    pf_passive: Union[bool, tuple[int, int]] = True
-    wall: Union[bool, tuple[int, int]] = True
+    ids_name: str = 'multiple'
+    geometry: Union[dict[str, tuple[int, int]], list[str]] = field(
+        default_factory=lambda: ['pf_active', 'pf_passive', 'wall'])
 
-    components: ClassVar[dict[str, MachineData]] = dict(
-        pf_active=PFactive, pf_passive=PFpassive, wall=Wall)
+    machine_description: ClassVar[dict[str, MachineDescription]] = dict(
+        pf_active=PF_Active_Geometry,
+        pf_passive=PF_Passive_Geometry,
+        wall=Wall_Geometry)
 
     def __post_init__(self):
         """Load coilset, build if not found."""
         super().__post_init__()
         try:
-            super().load(self.filename)
-        except (FileNotFoundError, OSError):
-            self.update()
+            self.load(self.filename)
+        except (FileNotFoundError, OSError, KeyError):
+            self.build()
 
-    def build_component(self, component: str, **kwargs):
-        """Build component."""
-        if (index := getattr(self, component)) is False:
-            return
-        if index is True:
-            index = self.shot, self.run
-        self += self.components[component](*index, **kwargs)
+    @cached_property
+    def machine(self):
+        """Return machine netCDF data container."""
+        return netCDF(name='machine', path=self.path)
 
-    def build(self, **kwargs):
-        """Build coilset and save to file."""
-        kwargs = self.frame_attrs | kwargs
-        super().__post_init__()
-        for component in self.components:
-            self.build_component(component, tokamak=self.tokamak, **kwargs)
+    def update_geometry(self):
+        """Update geometry ids."""
+        if isinstance(self.geometry, list):
+            self.geometry = dict.fromkeys(self.geometry, [self.shot, self.run])
 
-    def solve(self):
+    def solve_biot(self):
         """Solve biot instances."""
         if self.sloc['plasma'].sum() > 0:
             self.plasmagrid.solve()
@@ -624,21 +622,35 @@ class Machine(CoilSet, Database):
             self.plasma.update_separatrix(
                 dict(e=[wall.x, wall.z, 0.7*wall.dx, 0.5*wall.dz]))
 
-    def store(self):
-        """Store coilset data."""
-        super().store(self.filename)
+    def update_metadata(self):
+        """Update metadata."""
+        self.machine.data.attrs |= self.ids_attrs
+        self.machine.data.attrs |= self.frame_attrs
+        self.machine.data.attrs['geometry'] = list(self.geometry)
+        for attr in self.geometry:
+            self.machine.data.attrs[f'{attr}_geometry'] = self.geometry[attr]
 
-    def update(self):
-        """Update frame and biot attributes."""
-        self.build()
-        self.solve()
-        self.store()
+    def build(self, **kwargs):
+        """Build dataset, frameset and, biotset and save to file."""
+        super().__post_init__()
+        kwargs = self.frame_attrs | kwargs
+        self.update_geometry()
+        self.update_metadata()
+        self.clear_frameset()
+        for attr in self.geometry:
+            self += self.machine_description[attr](
+                *self.geometry[attr], tokamak=self.tokamak, **kwargs)
+        self.solve_biot()
+        self.store(self.filename)
 
 
 if __name__ == '__main__':
 
-    coilset = Machine(dcoil=0.25, dshell=0.25, dplasma=-1000, tcoil='r')
-    coilset.update()
+    coilset = Machine(dcoil=0.5, dshell=0.5, dplasma=-250, tcoil='r')
+    #coilset.build()
 
+    #coilset.plasma.update_separatrix(dict(e=[6, -0.5, 1.5, 2.2]))
+
+    coilset.sloc['Ic'] = 1
     coilset.plot()
     coilset.plasma.plot()

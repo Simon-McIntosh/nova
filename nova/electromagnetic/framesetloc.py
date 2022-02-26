@@ -102,6 +102,7 @@ class FrameSetLoc(FrameData):
     def __post_init__(self):
         """Create array loc indexers."""
         self.version |= dict(frameloc=id(None), subframeloc=id(None))
+        self.update_loc_indexer()
 
     def _clear_cache(self, attrs: list[str]):
         """Clear cached properties."""

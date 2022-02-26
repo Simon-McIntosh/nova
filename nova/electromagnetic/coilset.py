@@ -86,8 +86,3 @@ if __name__ == '__main__':
 
     coilset.plasmagrid.load_operators(10)
     coilset.plasmagrid.plot_svd(levels=coilset.grid.levels)
-
-    from nova.electromagnetic.plasma import PlasmaVTK
-
-    vtk = PlasmaVTK(*coilset.frames, data=coilset.plasmagrid.data)
-    vtk.plot()

@@ -5,6 +5,7 @@ import numpy as np
 
 from nova.imas.scenario import Scenario
 from nova.electromagnetic.biotgrid import BiotPlot
+from nova.electromagnetic.plasma import PlasmaVTK
 from nova.utilities.pyplot import plt
 
 
@@ -119,27 +120,11 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
 
 if __name__ == '__main__':
 
-    from nova.imas.machine import Machine
-    from nova.imas.pf_active import PFactive
-
-    coilset = Machine(135011, 7,
-                      dcoil=0.5, dshell=0.5, dplasma=-1000, tcoil='hex')
-    #coilset.update()
-
-    pf_active = PFactive(135011, 7)
     eq = Equilibrium(135011, 7)
+    # eq.build()
 
     itime = 500
-    # eq.build()
     #eq.plot_0d('ip')
-    levels = eq.plot_2d(itime, 'psi', colors='C3', levels=21)
+    eq.plot_2d(itime, 'psi', colors='C3', levels=21)
     #eq.plot_2d(500, 'j_tor')
     #eq.plot_1d(500)
-
-    coilset.sloc['coil', 'Ic'] = pf_active.data.current[itime]
-    coilset.sloc['plasma', 'Ic'] = eq.data.ip[itime]
-
-    plt.set_aspect(0.8)
-    coilset.plot('plasma')
-    coilset.plasma.plot()
-    coilset.plasmagrid.plot(levels=levels, colors='C0')

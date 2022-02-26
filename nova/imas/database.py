@@ -14,7 +14,7 @@ class IDS:
 
     shot: int
     run: int
-    ids_name: str = None
+    ids_name: str = ''
 
 
 @dataclass
@@ -66,4 +66,4 @@ class Database(FilePath, IMASdb, IDS):
     def ids_attrs(self):
         """Return dict of ids attributes."""
         return dict(tokamak=self.tokamak, shot=self.shot, run=self.run,
-                    ids=self.ids_name)
+                    ids_name=self.ids_name)

@@ -24,7 +24,7 @@ class Scenario(Database):
         super().__post_init__()
         try:
             self.load()
-        except (FileNotFoundError, OSError):
+        except (FileNotFoundError, OSError, KeyError):
             self.build()
 
     def load_scenario(self):

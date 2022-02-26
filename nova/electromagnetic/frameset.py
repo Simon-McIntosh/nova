@@ -6,6 +6,7 @@ import pandas
 
 from nova.database.filepath import FilePath
 from nova.database.netcdf import netCDF
+from nova.electromagnetic.framedata import FrameData
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.select import Select
@@ -65,11 +66,22 @@ class FrameSet(FilePath, FrameSetLoc):
             if isinstance(data := getattr(self, attr), netCDF):
                 data.store(file)
 
+    def clear_frameset(self):
+        """Clear all frameset instances."""
+        delattrs = []
+        for attr in self.__dict__:
+            if isinstance(getattr(self, attr), FrameData):
+                delattrs.append(attr)
+        for attr in delattrs:
+            delattr(self, attr)
+
     def load(self, filename: str, path=None):
         """Load frameset from file."""
+        super().__post_init__()
         file = self.file(filename, path)
         self.frame.load(file, 'frameset/frame')
         self.subframe.load(file, 'frameset/subframe')
+        self.clear_frameset()
         with Dataset(file) as dataset:
             for attr in dataset.groups['frameset'].groups:
                 if attr in dir(self.__class__) and isinstance(
@@ -86,13 +98,3 @@ if __name__ == '__main__':
 
     frameset = FrameSet(required=['rms'], additional=['Ic'])
     frameset.subframe.insert([2, 4], It=6, link=True)
-    print(frameset.subframe.rms)
-
-    frameset.store('tmp')
-    del frameset
-    frameset = FrameSet()
-    frameset.load('tmp')
-
-    print('')
-    print(frameset.subframe.rms)
-    print('')

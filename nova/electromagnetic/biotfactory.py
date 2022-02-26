@@ -65,31 +65,3 @@ class BiotFactory(FrameSet):
                 delattrs.append(attr)
         for attr in delattrs:
             delattr(self, attr)
-
-    '''
-    def store(self, filename: str, path=None):
-        """Store biot instance data to hdf5 file."""
-        super().store(filename, path)
-        file = self.file(filename, path)
-        for attr in self.__dict__:
-            if isinstance(biotdata := getattr(self, attr), netCDF):
-                biotdata.store(file)
-
-    def load(self, filename: str, path=None):
-        """Load biot data from hdf5 file."""
-        super().load(filename, path)
-        file = self.file(filename, path)
-        with Dataset(file) as f:
-            for group in f.groups:
-                print('subgroups', f.groups[group].groups.keys())
-
-                for attr in group.groups:
-                    print(f'{group}/{attr}')
-                if attr in ['frame', 'subframe']:
-                    continue
-                if attr in dir(self.__class__) and isinstance(
-                        getattr(self, attr), BiotData):
-                    getattr(self, attr).load(file)
-
-            return self
-    '''

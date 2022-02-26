@@ -120,6 +120,7 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
         """Extend netCDF.load, load data from hdf5."""
         super().load(filename, path)
         self.loop = self.data['loop'].data
+        return self
 
     @cached_property
     def pointloop(self):
@@ -169,6 +170,7 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
             Bounding loop.
 
         """
+        self.update_loc_indexer()
         if self.sloc['plasma'].sum() == 0:
             return
         try:

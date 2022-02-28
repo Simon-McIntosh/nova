@@ -1,9 +1,9 @@
 """Manage frame factroy methods."""
 from dataclasses import dataclass
 from functools import cached_property
+from typing import Union
 
 from nova.electromagnetic.coil import Coil
-from nova.electromagnetic.framedata import FrameData
 from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.winding import Winding
 from nova.electromagnetic.shell import Shell
@@ -26,15 +26,27 @@ class FrameFactory(FrameSet):
 
     def __post_init__(self):
         """Update turn attribute names."""
+        self._expand_polyattrs()
+        super().__post_init__()
+
+    def _expand_polyattrs(self):
+        """Expand polyshape attrbutes."""
         for attr in ['tplasma', 'tcoil']:
             setattr(self, attr, PolyGen.polyshape[getattr(self, attr)])
-        super().__post_init__()
 
     @property
     def frame_attrs(self):
         """Return frame attributes."""
         return dict(dcoil=self.dcoil, dplasma=self.dplasma, dshell=self.dshell,
                     tcoil=self.tcoil, tplasma=self.tplasma)
+
+    @frame_attrs.setter
+    def frame_attrs(self, attrs: dict[str, Union[int, float, str]]):
+        """Set frame attributes."""
+        for attr in attrs:
+            if hasattr(self, attr):
+                setattr(self, attr, attrs[attr])
+        self._expand_polyattrs()
 
     @cached_property
     def coil(self):

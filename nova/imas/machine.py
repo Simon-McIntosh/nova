@@ -590,6 +590,7 @@ class Machine(CoilSet, netCDF, Database):
     ids_name: str = 'multiple'
     geometry: Union[dict[str, tuple[int, int]], list[str]] = field(
         default_factory=lambda: ['pf_active', 'pf_passive', 'wall'])
+    name: str = field(init=False)
 
     machine_description: ClassVar[dict[str, MachineDescription]] = dict(
         pf_active=PF_Active_Geometry,
@@ -599,20 +600,25 @@ class Machine(CoilSet, netCDF, Database):
     def __post_init__(self):
         """Load coilset, build if not found."""
         super().__post_init__()
-        try:
-            self.load(self.filename)
-        except (FileNotFoundError, OSError, KeyError):
-            self.build()
+        self.name = self.__class__.__name__.lower()
+        self.update_geometry()
+        self.load(self.filename)
+        #try:
+        #    self.load(self.filename)
+        #except (FileNotFoundError, OSError, KeyError):
+        #    self.build()
 
-    @cached_property
-    def machine(self):
-        """Return machine netCDF data container."""
-        return netCDF(name='machine', path=self.path)
+    def load(self, filename):
+        """Load machine geometry and data. Re-build if metadata diffrent."""
+        super().load(filename)
+        if self.data.attrs != self.metadata:
+            self.build()
 
     def update_geometry(self):
         """Update geometry ids."""
         if isinstance(self.geometry, list):
-            self.geometry = dict.fromkeys(self.geometry, [self.shot, self.run])
+            self.geometry = {attr: [self.shot, self.run]
+                             for attr in self.geometry}
 
     def solve_biot(self):
         """Solve biot instances."""
@@ -622,34 +628,37 @@ class Machine(CoilSet, netCDF, Database):
             self.plasma.update_separatrix(
                 dict(e=[wall.x, wall.z, 0.7*wall.dx, 0.5*wall.dz]))
 
-    def update_metadata(self):
-        """Update metadata."""
-        self.machine.data.attrs |= self.ids_attrs
-        self.machine.data.attrs |= self.frame_attrs
-        self.machine.data.attrs['geometry'] = list(self.geometry)
+    @property
+    def metadata(self):
+        """Return machine metadata."""
+        metadata = self.ids_attrs | self.frame_attrs
         for attr in self.geometry:
-            self.machine.data.attrs[f'{attr}_geometry'] = self.geometry[attr]
+            metadata[f'{attr}_shot'] = self.geometry[attr][0]
+            metadata[f'{attr}_run'] = self.geometry[attr][1]
+        return metadata
+
+    def store_metadata(self):
+        """Update metadata."""
+        self.data.attrs = self.metadata
 
     def build(self, **kwargs):
         """Build dataset, frameset and, biotset and save to file."""
         super().__post_init__()
-        kwargs = self.frame_attrs | kwargs
-        self.update_geometry()
-        self.update_metadata()
+        self.frame_attrs = kwargs
+        self.store_metadata()
         self.clear_frameset()
         for attr in self.geometry:
             self += self.machine_description[attr](
-                *self.geometry[attr], tokamak=self.tokamak, **kwargs)
+                *self.geometry[attr], tokamak=self.tokamak, **self.frame_attrs)
         self.solve_biot()
         self.store(self.filename)
 
 
 if __name__ == '__main__':
 
-    coilset = Machine(dcoil=0.5, dshell=0.5, dplasma=-250, tcoil='r')
-    #coilset.build()
+    coilset = Machine(dcoil=0.25, dshell=0.25, dplasma=-500, tcoil='hex')
 
-    #coilset.plasma.update_separatrix(dict(e=[6, -0.5, 1.5, 2.2]))
+    # coilset.plasma.update_separatrix(dict(e=[6, -0.5, 1.5, 2.2]))
 
     coilset.sloc['Ic'] = 1
     coilset.plot()

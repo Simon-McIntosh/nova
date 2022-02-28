@@ -62,6 +62,7 @@ class FrameSet(FilePath, FrameSetLoc):
         file = self.file(filename, path)
         self.frame.store(file, 'frameset/frame', mode='w')
         self.subframe.store(file, 'frameset/subframe', mode='a')
+        super().store(file)
         for attr in self.__dict__:
             if isinstance(data := getattr(self, attr), netCDF):
                 data.store(file)
@@ -82,6 +83,7 @@ class FrameSet(FilePath, FrameSetLoc):
         self.frame.load(file, 'frameset/frame')
         self.subframe.load(file, 'frameset/subframe')
         self.clear_frameset()
+        super().load(file)
         with Dataset(file) as dataset:
             for attr in dataset.groups['frameset'].groups:
                 if attr in dir(self.__class__) and isinstance(

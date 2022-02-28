@@ -9,7 +9,7 @@ from nova.utilities.pyplot import plt
 
 
 @dataclass
-class PFactive(Scenario):
+class PF_Active(Scenario):
     """Manage access to pf_active ids."""
 
     shot: int = 135011
@@ -58,6 +58,6 @@ class PFactive(Scenario):
 
 if __name__ == '__main__':
 
-    pf_active = PFactive()
-    pf_active.build()
+    pf_active = PF_Active()
+    # pf_active.build()
     pf_active.plot()

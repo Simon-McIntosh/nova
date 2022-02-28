@@ -1,15 +1,14 @@
 """Manage access to IMAS machine data."""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from functools import cached_property
 import string
 from typing import ClassVar, Union
 
+import netCDF4
 import numpy as np
 import numpy.typing as npt
 import shapely
 
-from nova.database.netcdf import netCDF
 from nova.electromagnetic.coil import Coil
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.shell import Shell
@@ -581,16 +580,17 @@ class Wall_Geometry(MachineDescription):
 
 
 @dataclass
-class Machine(CoilSet, netCDF, Database):
+class Machine(CoilSet, Database):
     """Manage ITER machine geometry."""
 
     shot: int = 135011
     run: int = 7
     tokamak: str = 'iter'
-    ids_name: str = 'multiple'
+    datapath: str = 'data/Nova'
+
     geometry: Union[dict[str, tuple[int, int]], list[str]] = field(
         default_factory=lambda: ['pf_active', 'pf_passive', 'wall'])
-    name: str = field(init=False)
+    ids_name: str = field(init=False, default='multiple')
 
     machine_description: ClassVar[dict[str, MachineDescription]] = dict(
         pf_active=PF_Active_Geometry,
@@ -600,22 +600,18 @@ class Machine(CoilSet, netCDF, Database):
     def __post_init__(self):
         """Load coilset, build if not found."""
         super().__post_init__()
-        self.name = self.__class__.__name__.lower()
-        self.update_geometry()
-        self.load(self.filename)
-        #try:
-        #    self.load(self.filename)
-        #except (FileNotFoundError, OSError, KeyError):
-        #    self.build()
-
-    def load(self, filename):
-        """Load machine geometry and data. Re-build if metadata diffrent."""
-        super().load(filename)
-        if self.data.attrs != self.metadata:
+        try:
+            self.load(self.filename)
+        except (FileNotFoundError, OSError, KeyError):
             self.build()
 
-    def update_geometry(self):
-        """Update geometry ids."""
+    def load(self, filename: str, path=None):
+        """Load machine geometry and data. Re-build if metadata diffrent."""
+        super().load(filename, path)
+        self.metadata = self.load_metadata(filename, path)
+
+    def check_geometry(self):
+        """Check geometry ids referances."""
         if isinstance(self.geometry, list):
             self.geometry = {attr: [self.shot, self.run]
                              for attr in self.geometry}
@@ -632,31 +628,37 @@ class Machine(CoilSet, netCDF, Database):
     def metadata(self):
         """Return machine metadata."""
         metadata = self.ids_attrs | self.frame_attrs
+        metadata['geometry'] = list(self.geometry)
         for attr in self.geometry:
-            metadata[f'{attr}_shot'] = self.geometry[attr][0]
-            metadata[f'{attr}_run'] = self.geometry[attr][1]
+            metadata[attr] = self.geometry[attr]
         return metadata
 
-    def store_metadata(self):
-        """Update metadata."""
-        self.data.attrs = self.metadata
+    @metadata.setter
+    def metadata(self, metadata: dict):
+        """Set instance metadata."""
+        for attr in list(self.ids_attrs) + list(self.frame_attrs):
+            setattr(self, attr, metadata[attr])
+        self.geometry = {}
+        for attr in metadata['geometry']:
+            self.geometry[attr] = list(metadata[attr])
 
     def build(self, **kwargs):
         """Build dataset, frameset and, biotset and save to file."""
         super().__post_init__()
         self.frame_attrs = kwargs
-        self.store_metadata()
         self.clear_frameset()
+        self.check_geometry()
         for attr in self.geometry:
             self += self.machine_description[attr](
                 *self.geometry[attr], tokamak=self.tokamak, **self.frame_attrs)
         self.solve_biot()
-        self.store(self.filename)
+        self.store(self.filename, metadata=self.metadata)
 
 
 if __name__ == '__main__':
 
-    coilset = Machine(dcoil=0.25, dshell=0.25, dplasma=-500, tcoil='hex')
+    coilset = Machine(135011, 7)
+    # coilset.build(dcoil=0.25, dshell=0.5, dplasma=-500, tcoil='hex')
 
     # coilset.plasma.update_separatrix(dict(e=[6, -0.5, 1.5, 2.2]))
 

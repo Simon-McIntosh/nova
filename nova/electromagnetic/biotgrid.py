@@ -148,6 +148,7 @@ class BiotPlot(Axes):
     def plot(self, axes=None, **kwargs):
         """Set plot axes."""
         self.axes = axes
+        super().plot(axes, **kwargs)
 
 
 class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):

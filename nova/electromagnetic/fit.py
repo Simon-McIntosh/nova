@@ -1,41 +1,62 @@
+"""Perform equilibrium reconstrucitons from IMAS data."""
+from dataclasses import dataclass, field
+from typing import InitVar
 
-from dataclasses import dataclass
+from functools import cached_property
+import xarray
 
+from nova.electromagnetic.biotgrid import BiotPlot
+from nova.electromagnetic.framesetloc import LocIndexer
+from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
+from nova.imas.pf_active import PF_Active
 from nova.utilities.pyplot import plt
 
-@dataclass
-class DataIDS:
-
-    shot: int
-    run: int
-
-    def load()
-
 
 @dataclass
-class Fit(Machine):
+class Current:
+
+    sloc: LocIndexer
+    index: str
+    ids_data: InitVar[xarray.Dataset]
+    data: xarray.Dataset = field(init=False, repr=False)
+
+    def __post_init__(self):
+
+
+
+@dataclass
+class Fit(BiotPlot, Machine):
+    """Manage equilibrium reconstruciton fits."""
 
     shot: int = 135011
     run: int = 7
-    data: xarray.Dataset = field(init=False, repr=False,
-                                 default_factory=xarray.Dataset)
+    data: xarray.Dataset = field(init=False, repr=False)
 
-    def update(self):
-        """Update ids datastreams."""
-        super().update()  # update coilset
+    def __post_init__(self):
+        """Load ids dataset."""
+        super().__post_init__()
+        self.data = xarray.merge([PF_Active(self.shot, self.run).data,
+                                  Equilibrium(self.shot, self.run).data],
+                                 combine_attrs='drop_conflicts')
+
+    @cached_property
+    def current(self):
+        """Return current array."""
+        return self.data.current.data
 
     def plot(self):
         """Plot fit."""
         plt.set_aspect(0.8)
         super().plot('plasma')
         self.plasma.plot()
-        self.plasmagrid.plot(levels=21, colors='C0')
+        #self.plasmagrid.plot(levels=21, colors='C0')
 
 
 if __name__ == '__main__':
 
-    fit = Fit(135011, 7, dcoil=0.5, dshell=0.5, dplasma=-1000, tcoil='hex')
+    fit = Fit(135011, 7)
+    # fit.build(dcoil=0.25, dshell=0.5, dplasma=-1000, tcoil='hex')
 
     fit.itime = 500
     #fit.build()

@@ -1,8 +1,10 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 from dataclasses import dataclass, field
+import os
 
-from netCDF4 import Dataset
+import netCDF4
 import pandas
+import xarray
 
 from nova.database.filepath import FilePath
 from nova.database.netcdf import netCDF
@@ -57,16 +59,6 @@ class FrameSet(FilePath, FrameSetLoc):
         superframe['It'] = superframe['Ic'] * superframe['nturn']
         return superframe.__str__()
 
-    def store(self, filename: str, path=None):
-        """Store frame and subframe as groups within hdf file."""
-        file = self.file(filename, path)
-        self.frame.store(file, 'frameset/frame', mode='w')
-        self.subframe.store(file, 'frameset/subframe', mode='a')
-        super().store(file)
-        for attr in self.__dict__:
-            if isinstance(data := getattr(self, attr), netCDF):
-                data.store(file)
-
     def clear_frameset(self):
         """Clear all frameset instances."""
         delattrs = []
@@ -76,20 +68,48 @@ class FrameSet(FilePath, FrameSetLoc):
         for attr in delattrs:
             delattr(self, attr)
 
+    def load_metadata(self, filename: str, path=None):
+        """Return metadata from netCDF file."""
+        file = self.file(filename, path)
+        metadata = {}
+        with netCDF4.Dataset(file) as dataset:
+            for attr in dataset.metadata:
+                metadata[attr] = getattr(dataset, attr)
+        return metadata
+
+    def store_metadata(self, filename: str, path=None, metadata=None):
+        """Store metadata to netCDF file."""
+        file = self.file(filename, path)
+        if metadata is None:
+            metadata = {}
+        with netCDF4.Dataset(file, 'a') as dataset:
+            dataset.metadata = list(metadata)
+            for attr in metadata:
+                setattr(dataset, attr, metadata[attr])
+
     def load(self, filename: str, path=None):
         """Load frameset from file."""
         super().__post_init__()
         file = self.file(filename, path)
-        self.frame.load(file, 'frameset/frame')
-        self.subframe.load(file, 'frameset/subframe')
+        self.frame.load(file, 'frame')
+        self.subframe.load(file, 'subframe')
         self.clear_frameset()
-        super().load(file)
-        with Dataset(file) as dataset:
-            for attr in dataset.groups['frameset'].groups:
+        with netCDF4.Dataset(file) as dataset:
+            for attr in dataset.groups:
                 if attr in dir(self.__class__) and isinstance(
                         data := getattr(self, attr), netCDF):
                     data.load(file)
         return self
+
+    def store(self, filename: str, path=None, metadata=None):
+        """Store frame and subframe as groups within hdf file."""
+        file = self.file(filename, path)
+        self.frame.store(file, 'frame', mode='w')
+        self.subframe.store(file, 'subframe', mode='a')
+        for attr in self.__dict__:
+            if isinstance(data := getattr(self, attr), netCDF):
+                data.store(file)
+        self.store_metadata(filename, path, metadata)
 
     def plot(self, index=None, axes=None, **kwargs):
         """Plot coilset."""

@@ -46,22 +46,17 @@ class Scenario(Database):
     def build(self):
         """Build netCDF group from ids_data."""
 
-    @property
-    def group(self) -> str:
-        """Return netCDF groupname."""
-        return f'ids/{self.ids_name}'
-
     def store(self, mode='a'):
         """Store data within hdf file."""
         file = self.file(self.filename)
         if not os.path.isfile(file):
             mode = 'w'
-        self.data.to_netcdf(file, group=self.group, mode=mode)
+        self.data.to_netcdf(file, group=self.ids_name, mode=mode)
 
     def load(self):
         """Load dataset from file (lazy)."""
         file = self.file(self.filename)
-        with xarray.open_dataset(file, group=self.group) as data:
+        with xarray.open_dataset(file, group=self.ids_name) as data:
             self.data = data
         return self
 

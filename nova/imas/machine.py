@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 import string
 from typing import ClassVar, Union
 
-import netCDF4
 import numpy as np
 import numpy.typing as npt
 import shapely
@@ -619,6 +618,7 @@ class Machine(CoilSet, Database):
     def solve_biot(self):
         """Solve biot instances."""
         if self.sloc['plasma'].sum() > 0:
+            self.plasmaboundary.solve(self.Loc['plasma', 'poly'][0].boundary)
             self.plasmagrid.solve()
             wall = self.Loc['plasma', :].iloc[0]
             self.plasma.update_separatrix(

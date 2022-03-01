@@ -14,10 +14,10 @@ from nova.electromagnetic.polyplot import Axes
 
 @dataclass
 class BiotPoint(Axes, BiotOperate):
-    """Compute interaction at discrete points."""
+    """Compute interaction for a series of discrete points."""
 
     def solve(self, points):
-        """Solve Biot interaction across grid."""
+        """Solve Biot interaction at points."""
         points = np.array(points)
         points.shape = (-1, 2)  # shape(n, 2)
         target = BiotFrame(dict(x=[point[0] for point in points],
@@ -25,7 +25,7 @@ class BiotPoint(Axes, BiotOperate):
                            label='Point')
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
                               attrs=['Psi', 'Br', 'Bz']).data
-        # insert grid data
+        # insert coordinate data
         self.data.coords['x'] = target['x']
         self.data.coords['z'] = target['z']
         super().post_solve()

@@ -1,10 +1,8 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 from dataclasses import dataclass, field
-import os
 
 import netCDF4
 import pandas
-import xarray
 
 from nova.database.filepath import FilePath
 from nova.database.netcdf import netCDF
@@ -73,6 +71,8 @@ class FrameSet(FilePath, FrameSetLoc):
         file = self.file(filename, path)
         metadata = {}
         with netCDF4.Dataset(file) as dataset:
+            if not hasattr(dataset, 'metadata'):
+                return {}
             for attr in dataset.metadata:
                 metadata[attr] = getattr(dataset, attr)
         return metadata

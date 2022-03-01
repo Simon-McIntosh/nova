@@ -1,5 +1,4 @@
 """Manage matmul operations and svd reductions on BiotData."""
-from abc import abstractmethod
 from dataclasses import dataclass, field
 
 import numba
@@ -79,7 +78,7 @@ class BiotOperate(BiotData):
         self.version['null'] = id(None)
         super().__post_init__()
 
-    def post_solve(self, *args):
+    def post_solve(self):
         """Solve biot interaction - extened by subclass."""
         super().post_solve()
         self.load_operators()
@@ -89,12 +88,16 @@ class BiotOperate(BiotData):
         super().load(file, path)
         self.load_operators()
 
+    def load_data(self):
+        """Load dataset, solve if not set."""
+        if len(self) == 0:
+            return self.solve()
+        self.load_operators()
+
     def load_operators(self, svd_factor=None):
         """Load fast biot operators."""
         if svd_factor is not None:
             self.svd_factor = svd_factor
-        self.x_coordinate = self.data.x.data
-        self.z_coordinate = self.data.z.data
         self.operator = {}
         self.attrs = self.data.attrs['attributes']
         for attr in self.attrs:
@@ -104,12 +107,6 @@ class BiotOperate(BiotData):
                 self.data[attr].data, self.data[f'_{attr}'].data,
                 self.svd_factor, self.data[f'_U{attr}'].data,
                 self.data[f'_s{attr}'].data, self.data[f'_V{attr}'].data)
-
-    def load_data(self):
-        """Load dataset, solve if not set."""
-        if len(self) == 0:
-            return self.solve()
-        self.load_operators()
 
     def __getattr__(self, attr):
         """Return variable data."""

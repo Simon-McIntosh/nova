@@ -5,6 +5,14 @@ Created on Tue Apr 20 15:39:58 2021
 @author: mcintos
 """
 
+    import cv2 as cv
+    from nova.utilities.pyplot import plt
+    psi = coilset.grid.psi.reshape(*coilset.grid.shape).T
+    thresh = cv.threshold(psi, coilset.grid.x_psi[1], 1, 0)[1]
+    contours, hierarchy = cv.findContours(thresh, 2, 0)
+    plt.pcolor(thresh)
+
+
     '''
     @property
     def boundary(self):

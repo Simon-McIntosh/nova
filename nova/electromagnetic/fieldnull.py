@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 import numba
 import numpy as np
 import numpy.typing as npt
+import xarray
 
 from nova.electromagnetic.baseplot import Axes
 from nova.geometry.pointloop import PointLoop
@@ -13,8 +14,7 @@ from nova.geometry.pointloop import PointLoop
 class DataNull(Axes):
     """Store sort and remove field nulls."""
 
-    x_coordinate: npt.ArrayLike = field(repr=False)
-    z_coordinate: npt.ArrayLike = field(repr=False)
+    data: xarray.Dataset = field(repr=False, default_factory=xarray.Dataset)
     loop: npt.ArrayLike = field(repr=False, default=None)
     data_o: dict[str, np.ndarray] = field(init=False, default_factory=dict,
                                           repr=False)
@@ -66,7 +66,7 @@ class DataNull(Axes):
         """Return masked data dict from 1D input."""
         try:
             index, points = self._index_1D(
-                self.x_coordinate, self.z_coordinate, mask)
+                self.data.x.data, self.data.z.data, mask)
         except IndexError:  # catch empty mask
             index, points = np.empty((0, 2), int), np.empty((0, 2), float)
             return dict(index=index, points=points)
@@ -82,7 +82,7 @@ class DataNull(Axes):
         """Return masked data dict from 2D input."""
         try:
             index, points = self._index_2D(
-                self.x_coordinate, self.z_coordinate, mask)
+                self.data.x.data, self.data.z.data, mask)
         except IndexError:  # catch empty mask
             index, points = np.empty((0, 2), int), np.empty((0, 2), float)
             return dict(index=index, points=points)
@@ -144,11 +144,6 @@ class DataNull(Axes):
 class FieldNull(DataNull):
     """Calculate positions of all field nulls."""
 
-    x_coordinate: npt.ArrayLike = field(repr=False, default=None)
-    z_coordinate: npt.ArrayLike = field(repr=False, default=None)
-    loop: npt.ArrayLike = None
-    stencil: npt.ArrayLike = field(repr=False, default=None)
-
     def update_null(self, psi):
         """Update calculation of field nulls."""
         mask_o, mask_x = self.categorize(psi)
@@ -157,7 +152,7 @@ class FieldNull(DataNull):
     def categorize(self, psi):
         """Return o-point and x-point masks from loop sign counts."""
         if len(psi.shape) == 1:
-            return self.categorize_1D(psi, self.stencil)
+            return self.categorize_1D(psi, self.data.stencil.data)
         return self.categorize_2D(psi)
 
     @staticmethod
@@ -241,14 +236,6 @@ if __name__ == '__main__':
     coilset.sloc['Ic'] = -15e6
 
     coilset.plot()
-    #coilset.grid.plot()
+    coilset.grid.plot()
 
-    coilset.grid.plot(levels=np.sort(coilset.grid.x_psi))
-    #coilset.grid.edge_contour()
-
-    import cv2 as cv
-    from nova.utilities.pyplot import plt
-    psi = coilset.grid.psi.reshape(*coilset.grid.shape).T
-    thresh = cv.threshold(psi, coilset.grid.x_psi[1], 1, 0)[1]
-    contours, hierarchy = cv.findContours(thresh, 2, 0)
-    plt.pcolor(thresh)
+    #coilset.grid.plot(levels=np.sort(coilset.grid.x_psi))

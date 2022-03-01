@@ -62,6 +62,7 @@ class FrameFactory(FrameSet):
     def plasma(self):
         """Return plasma constructor."""
         return Plasma(*self.frames, turn=self.tplasma, delta=self.dplasma,
+                      grid=self.plasmagrid, boundary=self.plasmaboundary,
                       path=self.path)
 
     @cached_property

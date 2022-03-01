@@ -13,7 +13,7 @@ class PoloidalGrid(GridAttrs):
 
     trim: bool = True
     fill: bool = False
-    grid: dict = field(init=False, default_factory=lambda: dict.fromkeys([
+    gridattrs: dict = field(init=False, default_factory=lambda: dict.fromkeys([
         'tile', 'trim', 'fill']))
     required_columns: list = field(init=False, default_factory=lambda: [
         'poly', 'delta', 'turn', 'nturn'])
@@ -70,7 +70,7 @@ class PoloidalGrid(GridAttrs):
         except KeyError:
             turncurrent = None
         for i, name in enumerate(index):
-            polygrid = PolyGrid(**griddata.iloc[i].to_dict(), **self.grid)
+            polygrid = PolyGrid(**griddata.iloc[i].to_dict(), **self.gridattrs)
             data = frame.iloc[i].to_dict()
             data |= {'label': name, 'frame': name, 'delim': '_', 'link': True}
             if turncurrent is not None:

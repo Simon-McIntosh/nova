@@ -13,6 +13,7 @@ import xarray
 
 from nova.database.netcdf import netCDF
 from nova.electromagnetic.framesetloc import FrameSetLoc
+from nova.electromagnetic.plasmaboundary import PlasmaBoundary
 from nova.electromagnetic.plasmagrid import PlasmaGrid
 from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polyplot import Axes
@@ -90,6 +91,8 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
     name: str = 'plasma'
+    grid: PlasmaGrid = field(repr=False, default=None)
+    boundary: PlasmaBoundary = field(repr=False, default=None)
     loop: npt.ArrayLike = field(init=False, default=None, repr=False)
 
     def __post_init__(self):
@@ -146,7 +149,7 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
         return self.subframe.version['plasma']
 
     @property
-    def boundary(self) -> Polygon:
+    def firstwall(self) -> Polygon:
         """Return vessel boundary."""
         return self.Loc['plasma', 'poly'][0]
 
@@ -154,8 +157,8 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
     def separatrix(self):
         """Return input plasma separatrix trimmed to first wall."""
         if self.loop is None:
-            self.update_separatrix(self.boundary)
-        return Polygon(self.loop).poly.intersection(self.boundary.poly)
+            self.update_separatrix(self.firstwall)
+        return Polygon(self.loop).poly.intersection(self.firstwall.poly)
 
     def update_separatrix(self, loop):
         """
@@ -202,7 +205,7 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
                 poly.__geo_interface__,
                 facecolor='C4', alpha=0.75, linewidth=0.5, zorder=-10))
         if boundary:
-            self.boundary.plot_boundary(self.axes, color='gray')
+            self.firstwall.plot_boundary(self.axes, color='gray', lw=1.5)
         plt.axis('equal')
         plt.axis('off')
 

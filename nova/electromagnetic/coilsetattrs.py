@@ -85,7 +85,7 @@ class CoilSetAttrs(ABC, FrameSetLoc):
 class GridAttrs(CoilSetAttrs):
     """Manage grid attributes."""
 
-    grid: dict = field(init=False, default_factory=lambda: {})
+    gridattrs: dict = field(init=False, default_factory=lambda: {})
     attributes: list[str] = field(init=False, default_factory=lambda: [
         'trim', 'fill', 'delta', 'turn', 'tile'])
 
@@ -99,7 +99,8 @@ class GridAttrs(CoilSetAttrs):
         CoilSetAttrs.attrs.fset(self, attrs)
         self._attrs['turn'] = PolyGen.polyshape[self._attrs['turn']]
         self.set_conditional_attributes()
-        self.grid = {attr: self._attrs.pop(attr) for attr in self.grid}
+        self.gridattrs = {attr: self._attrs.pop(attr)
+                          for attr in self.gridattrs}
 
     @property
     def subattrs(self):

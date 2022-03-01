@@ -10,6 +10,7 @@ from nova.electromagnetic.biotinductance import BiotInductance
 from nova.electromagnetic.biotloop import BiotLoop
 from nova.electromagnetic.biotpoint import BiotPoint
 from nova.electromagnetic.frameset import FrameSet
+from nova.electromagnetic.plasmaboundary import PlasmaBoundary
 from nova.electromagnetic.plasmagrid import PlasmaGrid
 
 
@@ -19,7 +20,8 @@ class BiotFactory(FrameSet):
 
     dfield: float = -1
     biot_class: ClassVar[dict[str, BiotData]] = \
-        dict(grid=BiotGrid, plasmagrid=PlasmaGrid, point=BiotPoint,
+        dict(grid=BiotGrid, plasmagrid=PlasmaGrid,
+             plasmaboundary=PlasmaBoundary, point=BiotPoint,
              probe=BiotPoint, loop=BiotLoop, inductance=BiotInductance)
 
     def _biotfactory(self):
@@ -35,6 +37,11 @@ class BiotFactory(FrameSet):
     @cached_property
     def plasmagrid(self):
         """Return plasma grid biot instance."""
+        return self._biotfactory()
+
+    @cached_property
+    def plasmaboundary(self):
+        """Return plasma boundart biot instance."""
         return self._biotfactory()
 
     @cached_property

@@ -172,7 +172,7 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
 
     @abstractmethod
     def solve(self):
-        """Solve biot interaction, to be extended by subclass"""
+        """Solve biot interaction, to be extended by subclass."""
 
     def check_version(self):
         """Check validity of upstream data, update if nessisary."""

@@ -27,12 +27,12 @@ class PlasmaGrid(BiotBaseGrid):
 
     @staticmethod
     @numba.njit
-    def loop_neighbour_vertices(points, neighbor_vertices, edge_vertices):
+    def loop_neighbour_vertices(points, neighbor_vertices, boundary_vertices):
         """Calculate 6-point ordered loop vertex indices."""
         point_number = len(points)
         neighbours = np.full((point_number, 6), -1)
         for i in range(len(points)):
-            if i in edge_vertices:
+            if i in boundary_vertices:
                 continue
             center_point = points[i, :]
             slice_index = slice(neighbor_vertices[0][i],
@@ -45,11 +45,9 @@ class PlasmaGrid(BiotBaseGrid):
             neighbours[i] = neighbour_index[np.argsort(angle)[::-1]]
         mask = neighbours[:, 0] != -1
         stencil_index = np.arange(point_number)[mask]
-        stencil_mask = np.full(point_number, -1)
-        stencil_mask[mask] = np.arange(len(stencil_index))
         stencil = np.append(np.arange(point_number)[mask].reshape(-1, 1),
                             neighbours[mask], axis=1)
-        return stencil, stencil_index, stencil_mask
+        return stencil, stencil_index
 
     def tessellate(self):
         """Tesselate hexagonal mesh, compute 6-point neighbour loops."""
@@ -57,21 +55,20 @@ class PlasmaGrid(BiotBaseGrid):
         tri = scipy.spatial.Delaunay(points)
         neighbor_vertices = tri.vertex_neighbor_vertices
         wall = self.Loc['plasma', 'poly'][0].poly.boundary
-        edge_vertices = np.array([i for i, polygon in
-                                  enumerate(self.loc['plasma', 'poly'])
-                                  if polygon.poly.intersects(wall)])
+        boundary_vertices = np.array([i for i, polygon in
+                                      enumerate(self.loc['plasma', 'poly'])
+                                      if polygon.poly.intersects(wall)])
         centroids = np.array([np.mean(points[simplex], axis=0)
                               for simplex in tri.simplices])
         inside = PointLoop(centroids).update(np.array(wall.xy).T)
         triangles = tri.simplices[inside]
-        stencil, stencil_index, stencil_mask = self.loop_neighbour_vertices(
-            points, neighbor_vertices, edge_vertices)
+        stencil, stencil_index = self.loop_neighbour_vertices(
+            points, neighbor_vertices, boundary_vertices)
         self.data.coords['x'] = points[:, 0]
         self.data.coords['z'] = points[:, 1]
         self.data.coords['stencil_index'] = stencil_index
         self.data['triangles'] = ('tri_index', 'tri_vertex'), triangles
         self.data['stencil'] = ('stencil_index', 'stencil_vertex'), stencil
-        self.data['stencil_mask'] = 'plasma', stencil_mask
 
     def solve(self,):
         """Solve Biot interaction across plasma grid."""
@@ -83,19 +80,12 @@ class PlasmaGrid(BiotBaseGrid):
         self.tessellate()
         super().post_solve()
 
-    def load_operators(self, svd_factor=None):
-        """Extend biot operate load_operators."""
-        super().load_operators(svd_factor)
-        self.stencil = self.data.stencil.data
-
     def plot(self, axes=None, **kwargs):
         """Plot poloidal flux contours."""
         super().plot(axes)
         kwargs = self.contour_kwargs(**kwargs)
         if kwargs.get('plot_mesh', False):
-            self.axes.triplot(self.x_coordinate, self.z_coordinate,
-                              self.data['triangles'].data, lw=0.5)
-        self.axes.tricontour(self.x_coordinate, self.z_coordinate,
-
-                             self.data['triangles'].data, self.psi,
-                             **kwargs)
+            self.axes.triplot(self.data.x, self.data.z,
+                              self.data.triangles, lw=0.5)
+        self.axes.tricontour(self.data.x, self.data.z, self.data.triangles,
+                             self.psi, **kwargs)

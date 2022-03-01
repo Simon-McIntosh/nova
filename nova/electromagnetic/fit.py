@@ -1,6 +1,5 @@
 """Perform equilibrium reconstrucitons from IMAS data."""
 from dataclasses import dataclass, field
-from typing import InitVar
 
 from functools import cached_property
 import xarray
@@ -18,11 +17,11 @@ class Current:
 
     sloc: LocIndexer
     index: str
-    ids_data: InitVar[xarray.Dataset]
+    ids_data: xarray.Dataset
     data: xarray.Dataset = field(init=False, repr=False)
 
     def __post_init__(self):
-
+        """ """
 
 
 @dataclass
@@ -50,17 +49,21 @@ class Fit(BiotPlot, Machine):
         plt.set_aspect(0.8)
         super().plot('plasma')
         self.plasma.plot()
-        #self.plasmagrid.plot(levels=21, colors='C0')
+        self.plasmagrid.plot(levels=21, colors='C0')
+        self.plasma.boundary.plot()
 
 
 if __name__ == '__main__':
 
     fit = Fit(135011, 7)
-    # fit.build(dcoil=0.25, dshell=0.5, dplasma=-1000, tcoil='hex')
+    fit.build(dcoil=0.25, dshell=0.5, dplasma=-1000, tcoil='hex')
 
     fit.itime = 500
-    #fit.build()
+
+    fit.sloc['Ic'] = 1
+    fit.sloc['plasma', 'Ic'] = -1000
     fit.plot()
+
 
 '''
 pf_active = PFactive(135011, 7)

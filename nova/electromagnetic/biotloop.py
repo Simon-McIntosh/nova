@@ -11,7 +11,7 @@ class BiotLoop(Axes, BiotOperate):
     """Compute interaction across grid."""
 
     def solve(self, target):
-        """Solve Biot interaction."""
+        """Solve Biot interaction at targets."""
         self.data = BiotSolve(self.subframe, target,
                               reduce=[True, True], turns=[True, True],
                               columns=['Psi']).data

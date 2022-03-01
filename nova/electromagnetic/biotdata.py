@@ -35,7 +35,7 @@ class BiotData(ABC, netCDF, FrameSetLoc):
     def solve(self):
         """Solve biot interaction."""
 
-    def post_solve(self, *args):
+    def post_solve(self):
         """Post process biot solution - extened by subclass."""
         self.data.attrs['classname'] = self.classname
         try:

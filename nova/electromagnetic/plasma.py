@@ -112,6 +112,28 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
         return self.loc['ionize', ['x', 'z', 'section', 'area',
                                    'Ic', 'It', 'nturn']].__str__()
 
+    def __iter__(self):
+        """Return class instance for next."""
+        return self
+
+    def __next__(self):
+        """Update plasma seperatrix."""
+        s_psi = self.boundary.psi.min()
+        #self.grid.plot(levels=[s_psi], colors='r')
+        #self.grid.plot(levels=21)
+
+        plasma = self.aloc['plasma']
+        ionize = self.aloc['ionize']
+        nturn = self.aloc['nturn']
+        area = self.aloc['area']
+        ionize[plasma] = self.grid.psi < s_psi
+        self._update_nturn(plasma, ionize, nturn, area)
+
+        #self.subframe.version['plasma'] = id(None)
+
+        #self.subframe.polyplot('plasma')
+        #self.boundary.plot()
+
     def store(self, filename: str, path=None):
         """Extend netCDF.store, store data as netCDF in hdf5 file."""
         self.data = xarray.Dataset()

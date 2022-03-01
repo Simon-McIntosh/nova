@@ -39,6 +39,17 @@ class FilePath:
             file += extension
         return self.check_dir(file, path)
 
+    @property
+    def filepath(self):
+        """Return full filepath for netCDF data using default path."""
+        assert self.path is not None
+        return self.file(self.filename)
+
+    @property
+    def isfile(self):
+        """Return status of default netCDF file."""
+        return os.path.isfile(self.filepath)
+
     @abstractmethod
     def store(self, file: str, path=None):
         """Store frame and subframe as groups within hdf file."""

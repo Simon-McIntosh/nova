@@ -56,9 +56,7 @@ class Fit(BiotPlot, Machine):
 if __name__ == '__main__':
 
     fit = Fit(135011, 7)
-    fit.build(dcoil=0.25, dshell=0.5, dplasma=-1000, tcoil='hex')
-
-    fit.itime = 500
+    #fit.build(dcoil=0.25, dshell=0.5, dplasma=-1000, tcoil='hex')
 
     fit.sloc['Ic'] = 1
     fit.sloc['plasma', 'Ic'] = -1000

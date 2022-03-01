@@ -599,10 +599,10 @@ class Machine(CoilSet, Database):
     def __post_init__(self):
         """Load coilset, build if not found."""
         super().__post_init__()
-        try:
+        if self.isfile:
             self.load(self.filename)
-        except (FileNotFoundError, OSError, KeyError):
-            self.build()
+        # except (FileNotFoundError, OSError, KeyError):
+        #     self.build()
 
     def load(self, filename: str, path=None):
         """Load machine geometry and data. Re-build if metadata diffrent."""

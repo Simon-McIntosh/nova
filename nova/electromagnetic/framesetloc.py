@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from functools import cached_property
 
 import numpy.typing as npt
+import xxhash
 
 from nova.electromagnetic.framedata import FrameData
 from nova.electromagnetic.framespace import FrameSpace
@@ -86,6 +87,25 @@ class ArrayLocIndexer(DataLocIndexer):
 
 
 @dataclass
+class HashLoc:
+    """Data Loc base class."""
+
+    name: str
+    aloc: ArrayLocIndexer = field(repr=False)
+    xxh64: xxhash.xxh64 = field(repr=False, init=False)
+
+    def __post_init__(self):
+        """Create xxhash generator."""
+        self.xxh64 = xxhash.xxh64()
+
+    def __getitem__(self, key) -> int:
+        """Return interger has computed on aloc data array item."""
+        self.xxh64.reset()
+        self.xxh64.update(self.aloc[key])
+        return self.xxh64.intdigest()
+
+
+@dataclass
 class FrameSetLoc(FrameData):
     """
     FrameSet Loc indexer.
@@ -101,7 +121,7 @@ class FrameSetLoc(FrameData):
 
     def __post_init__(self):
         """Create array loc indexers."""
-        self.version |= dict(frameloc=id(None), subframeloc=id(None))
+        self.version |= dict(frameloc=None, subframeloc=None)
         self.update_loc_indexer()
 
     def _clear_cache(self, attrs: list[str]):
@@ -122,12 +142,22 @@ class FrameSetLoc(FrameData):
         """Update subframe array loc indexer."""
         if self.version['subframeloc'] != self.subframe.version['index']:
             self.version['subframeloc'] = self.subframe.version['index']
-            self._clear_cache(['aloc', 'saloc'])
+            self._clear_cache(['aloc', 'saloc', 'aloc_hash', 'saloc_hash'])
 
     def update_loc_indexer(self):
         """Update links to array loc indexer following changes to index id."""
         self.update_frameloc()
         self.update_subframeloc()
+
+    @cached_property
+    def aloc_hash(self):
+        """Return interger hash computed on aloc attribute."""
+        return HashLoc('array_hash', self.aloc)
+
+    @cached_property
+    def saloc_hash(self):
+        """Return interger hash computed on saloc attribute."""
+        return HashLoc('sarray_hash', self.saloc)
 
     @cached_property
     def ALoc(self):

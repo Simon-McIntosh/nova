@@ -23,7 +23,7 @@ class PlasmaGrid(BiotBaseGrid):
     def __post_init__(self):
         """Initialize fieldnull version."""
         super().__post_init__()
-        self.version['fieldnull'] = id(None)
+        self.version['fieldnull'] = None
 
     @staticmethod
     @numba.njit

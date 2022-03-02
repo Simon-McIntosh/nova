@@ -119,8 +119,9 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
     def __next__(self):
         """Update plasma seperatrix."""
         s_psi = self.boundary.psi.min()
-        #self.grid.plot(levels=[s_psi], colors='r')
-        #self.grid.plot(levels=21)
+
+        self.grid.plot(levels=[s_psi], colors='r')
+        self.grid.plot(levels=21)
 
         plasma = self.aloc['plasma']
         ionize = self.aloc['ionize']
@@ -129,10 +130,10 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
         ionize[plasma] = self.grid.psi < s_psi
         self._update_nturn(plasma, ionize, nturn, area)
 
-        #self.subframe.version['plasma'] = id(None)
+        self.subframe.version['plasma'] = self.aloc_hash['nturn']
 
-        #self.subframe.polyplot('plasma')
-        #self.boundary.plot()
+        self.subframe.polyplot('plasma')
+        self.boundary.plot()
 
     def store(self, filename: str, path=None):
         """Extend netCDF.store, store data as netCDF in hdf5 file."""
@@ -154,11 +155,19 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
             raise AttributeError('No plasma filaments found.')
         return PointLoop(self.loc['plasma', ['x', 'z']].to_numpy())
 
+    def update_version(self):
+        """Update plasma nturn version (xxhash)."""
+        self.subframe.version['plasma'] = self.aloc_hash['nturn']
+
     def insert(self, *args, required=None, iloc=None, **additional):
-        """Insert plasma, normalize turn number for multiframe plasmas."""
+        """Insert plasma."""
         super().insert(*args, required=None, iloc=None, **additional)
-        if self.sloc['plasma'].sum() == 1:
-            return
+        if self.sloc['plasma'].sum() > 1:
+            self.normalize_multiframe()
+        self.update_version()
+
+    def normalize_multiframe(self):
+        """Nnormalize turn number for multiframe plasmas."""
         self.linkframe(self.Loc['plasma', :].index.tolist())
         self.Loc['plasma', 'nturn'] = \
             self.Loc['plasma', 'area'] / np.sum(self.Loc['plasma', 'area'])
@@ -204,13 +213,14 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
             loop = Polygon(loop).boundary
             inloop = self.pointloop.update(loop)
         self.loop = loop
-        self.subframe.version['plasma'] = id(loop)
+
         plasma = self.aloc['plasma']
         ionize = self.aloc['ionize']
         nturn = self.aloc['nturn']
         area = self.aloc['area']
         ionize[plasma] = inloop
         self._update_nturn(plasma, ionize, nturn, area)
+        self.update_version()
 
     @staticmethod
     @njit

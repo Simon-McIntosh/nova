@@ -55,6 +55,7 @@ setup_kwargs = dict(
         'shapely',
         'vedo',
         'xarray',
+        'xxhash',
     ],
     extras_require     = extras_require,
     package_data       = {},

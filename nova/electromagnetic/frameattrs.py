@@ -4,6 +4,7 @@ from typing import Collection, Any
 
 import numpy as np
 import pandas
+import xxhash
 
 from nova.electromagnetic.metaframe import MetaFrame
 from nova.electromagnetic.metamethod import MetaMethod
@@ -29,6 +30,7 @@ class FrameAttrs(pandas.DataFrame):
                  **metadata: dict[str, Collection[Any]]):
         super().__init__(data, index, columns)
         self.update_metadata(data, columns, attrs, metadata)
+        self.update_version()
 
     @property
     def version(self):
@@ -122,15 +124,32 @@ class FrameAttrs(pandas.DataFrame):
         frame_columns = list(dict.fromkeys(list(columns)))
         self.metaframe.metadata = {'available': data_columns+frame_columns}
 
+    def loc_hash(self, attr) -> int:
+        """Return xxhash of loc attribute."""
+        try:
+            return xxhash.xxh64(value := getattr(self, attr)).intdigest()
+        except TypeError:
+            return xxhash.xxh64(value.values).intdigest()
+        except ColumnError:
+            return None
+
     def update_metaframe(self, metadata):
         """Update metaframe, appending available columns if required."""
         if isinstance(metadata.get('version', None), list):
-            metadata['version'] = {attr: id(None)
-                                   for attr in metadata['version']}
+            metadata['version'] = dict.fromkeys(metadata['version'])
         self.metaframe.update(metadata)
         if self.metaframe.columns:
             self.metaframe.metadata = {'available': self.metaframe.columns}
         self.match_columns()
+
+    def update_version(self):
+        """Update metaframe version hash dict."""
+        try:
+            metadata = dict(version={attr: self.loc_hash(attr) for attr in
+                                     self.version})
+            self.attrs['metaframe'].update(metadata)
+        except ValueError:
+            pass
 
     def match_columns(self):
         """Intersect metaframe.required with self.columns if not empty."""

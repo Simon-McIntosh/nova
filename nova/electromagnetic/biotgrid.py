@@ -160,7 +160,7 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
     def __post_init__(self):
         """Initialize fieldnull version."""
         super().__post_init__()
-        self.version['fieldnull'] = id(None)
+        self.version['fieldnull'] = None
 
     def update(self):
         """
@@ -170,16 +170,28 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
         """
         super().update_null(self.psi)
 
+    @property
+    def psi_array(self):
+        """
+        Return psi re-shaped for field null calculation.
+
+        Return 1D vector as standard.
+        Extend method to change dimensionality of psi input.
+        """
+        return self.psi
+
     @abstractmethod
     def solve(self):
         """Solve biot interaction, to be extended by subclass."""
 
     def check_version(self):
         """Check validity of upstream data, update if nessisary."""
-        current_hash = hash(self.aloc['Ic'].data.tobytes())
+        print('check version', self.saloc_hash['Ic'], self.version['fieldnull'])
+        current_hash = self.saloc_hash['Ic']
         if current_hash != self.version['fieldnull'] or \
                 self.version['Psi'] != self.subframe.version['plasma']:
-            self.update()
+            print('update version', current_hash)
+            self.update_null(self.psi_array)
             self.version['fieldnull'] = current_hash
 
     def __getattribute__(self, attr):
@@ -226,6 +238,11 @@ class BiotGrid(BiotBaseGrid):
     def shape(self):
         """Return grid shape."""
         return self.data.dims['x'], self.data.dims['z']
+
+    @property
+    def psi_array(self):
+        """Return psi as 2D array."""
+        return self.psi.reshape(self.shape)
 
     def plot(self, axes=None, **kwargs):
         """Plot poloidal flux contours."""

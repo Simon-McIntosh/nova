@@ -59,8 +59,11 @@ if __name__ == '__main__':
     #fit.build(dcoil=0.25, dshell=0.5, dplasma=-1000, tcoil='hex')
 
     fit.sloc['Ic'] = 1
-    fit.sloc['plasma', 'Ic'] = -1000
+    fit.sloc['plasma', 'Ic'] = -700
     fit.plot()
+
+    fit.plasmagrid.plot()
+
 
 
 '''

@@ -247,13 +247,11 @@ class DataFrame(FrameAttrs):
         return metadata
 
     def insert_metadata(self, attrs: dict):
-        """Return metadata wirk version as dict[str id(None)]."""
+        """Return metadata with version promoted from str to list."""
         metadata = copy.deepcopy(attrs)
         if 'version' in metadata:
             if isinstance(metadata['version'], str):
                 metadata['version'] = [metadata['version']]
-            metadata['version'] = {attr: id(None)
-                                   for attr in metadata['version']}
         return metadata
 
     def store(self, file, group=None, mode='w', vtk=False):
@@ -275,13 +273,12 @@ class DataFrame(FrameAttrs):
         with xarray.open_dataset(file, group=group) as data:
             metadata = self.insert_metadata(data.attrs)
             self.__init__(data.to_dataframe(), **metadata)
-        if 'index' in self.version:
-            self.version['index'] = id(self.index)
         for col in ['poly', 'vtk']:
             try:
                 self._loads(col)
             except KeyError:
                 pass
+        self.update_version()
         return self
 
 

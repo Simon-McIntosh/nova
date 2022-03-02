@@ -205,11 +205,6 @@ class FrameLink(LinkIndexer, DataArray):
         self.__init__(self, attrs=self.attrs)
         self.update_version()
 
-    def update_version(self):
-        """Update frame.index id."""
-        if 'index' in self.version:
-            self.version['index'] = id(self.index)
-
     def translate(self, index=None, xoffset=0, zoffset=0):
         """Translate coil(s)."""
         if index is None:

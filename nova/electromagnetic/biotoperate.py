@@ -73,9 +73,8 @@ class BiotOperate(BiotData):
 
     def __post_init__(self):
         """Initialize version identifiers."""
-        self.version |= {attr: id(None) for attr in self.attrs}
-        self.version['Bn'] = id(None)
-        self.version['null'] = id(None)
+        self.version |= {attr: None for attr in self.attrs}
+        self.version['Bn'] = None
         super().__post_init__()
 
     def post_solve(self):
@@ -113,8 +112,7 @@ class BiotOperate(BiotData):
         if (Attr := attr.capitalize()) in self.version:
             if Attr == 'Bn':
                 return self.get_norm()
-            if self.version[Attr] != self.subframe.version['plasma'] or \
-                    self.version[Attr] == self.version['null']:
+            if self.version[Attr] != self.subframe.version['plasma']:
                 self.update_turns(Attr)
                 self.version[Attr] = self.subframe.version['plasma']
             return self.operator[Attr].evaluate()

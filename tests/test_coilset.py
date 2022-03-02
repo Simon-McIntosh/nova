@@ -85,7 +85,8 @@ def test_flag_current_update():
     coilset.coil.insert(1, 4, 0.4, 0.5, Ic=4, active=True)
     coilset.subframe.subspace.loc[coilset.subframe.active, 'Ic'] = [3.2, 5.8]
     assert np.allclose(coilset.subframe.Ic, [3.2, 6.7, 5.8])
-
+test_flag_current_update()
+assert False
 
 def test_multipoint_link():
     coilset = CoilSet(dcoil=0, subspace=['Ic'])
@@ -255,8 +256,9 @@ def test_array_views_solve():
 def test_biot_solve_index_version():
     coilset = CoilSet(dcoil=-5)
     coilset.coil.insert(3, -0.5, 0.95, 0.95)
-    coilset.grid.solve(500, 0.05)
-    assert id(coilset.subframe.index) == coilset.subframe.version['index']
+    coilset.grid.solve(50, 0.05)
+    index_hash = coilset.subframe.loc_hash('index')
+    assert coilset.subframe.version['index'] == index_hash
 
 
 def test_biot_solve_no_plasma():

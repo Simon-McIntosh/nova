@@ -43,7 +43,7 @@ class FrameSet(FilePath, FrameSetLoc):
             available=self.available, subspace=self.subspace,
             exclude=['turn', 'scale', 'nfilament', 'delta'],
             array=self.array, delim='_',
-            version=['plasma', 'index'])
+            version=['index', 'nturn'])
         self.subframe.frame_attr(Select, ['Ic'])
         super().__post_init__()
 

@@ -150,10 +150,9 @@ class BiotOperate(BiotData):
         if attr == 'bn':
             return self.get_norm()
         Attr = attr.capitalize()
-        if self.version[Attr] != (plasma_version :=
-                                  self.subframe.version['plasma']):
+        if self.version[Attr] != (nturn := self.subframe.version['nturn']):
             self.update_turns(Attr)
-            self.version[Attr] = plasma_version
+            self.version[Attr] = nturn
         if (version := self.aloc_hash['Ic']) != self.version[attr]:
             self.version[attr] = version
             self.array[attr][:] = self.operator[Attr].evaluate()

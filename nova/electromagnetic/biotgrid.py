@@ -179,7 +179,7 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
     def check_null(self):
         """Check validity of upstream data, update field null if nessisary."""
         if (version := self.aloc_hash['Ic']) != self.version['fieldnull'] or \
-                self.version['Psi'] != self.subframe.version['plasma']:
+                self.version['Psi'] != self.subframe.version['nturn']:
             self.update_null(self.psi_array)
             self.version['fieldnull'] = version
 

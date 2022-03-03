@@ -113,26 +113,6 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
         """Return class instance for next."""
         return self
 
-    def update(self, psi_boundary):
-        """Update plasma seperatrix."""
-        #s_psi = self.boundary.psi.min()
-        s_psi = psi_boundary.min()
-
-        #self.grid.plot(levels=[s_psi], colors='r')
-        #self.grid.plot(levels=21)
-
-        plasma = self.aloc['plasma']
-        ionize = self.aloc['ionize']
-        nturn = self.aloc['nturn']
-        area = self.aloc['area']
-        ionize[plasma] = self.grid.psi < s_psi
-        self._update_nturn(plasma, ionize, nturn, area)
-
-        self.update_version()
-
-        #self.subframe.polyplot('plasma')
-        #self.boundary.plot()
-
     def store(self, filename: str, path=None):
         """Extend netCDF.store, store data as netCDF in hdf5 file."""
         self.data = xarray.Dataset()
@@ -153,16 +133,12 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
             raise AttributeError('No plasma filaments found.')
         return PointLoop(self.loc['plasma', ['x', 'z']].to_numpy())
 
-    def update_version(self):
-        """Update plasma nturn version (xxhash)."""
-        self.subframe.version['plasma'] = self.aloc_hash['nturn']
-
     def insert(self, *args, required=None, iloc=None, **additional):
-        """Insert plasma."""
+        """Insert plasma and update plasma nturn version (xxhash)."""
         super().insert(*args, required=None, iloc=None, **additional)
         if self.sloc['plasma'].sum() > 1:
             self.normalize_multiframe()
-        self.update_version()
+        self.update_aloc_hash('nturn')
 
     def normalize_multiframe(self):
         """Nnormalize turn number for multiframe plasmas."""
@@ -173,21 +149,9 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
             self.loc['plasma', 'area'] / np.sum(self.loc['plasma', 'area'])
 
     @property
-    def plasma_version(self):
-        """Manage unique separtrix identifier - store id in metaframe data."""
-        return self.subframe.version['plasma']
-
-    @property
     def firstwall(self) -> Polygon:
         """Return vessel boundary."""
         return self.Loc['plasma', 'poly'][0]
-
-    @property
-    def separatrix(self):
-        """Return input plasma separatrix trimmed to first wall."""
-        if self.loop is None:
-            self.update_separatrix(self.firstwall)
-        return Polygon(self.loop).poly.intersection(self.firstwall.poly)
 
     def update_separatrix(self, loop):
         """
@@ -217,7 +181,7 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
         area = self.aloc['area']
         ionize[plasma] = inloop
         self._update_nturn(plasma, ionize, nturn, area)
-        self.update_version()
+        self.update_aloc_hash('nturn')
 
     @staticmethod
     @numba.njit
@@ -226,20 +190,16 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
         ionize_area = area[ionize]
         nturn[ionize] = ionize_area / np.sum(ionize_area)
 
+    @property
+    def polarity(self):
+        """Return plasma polarity."""
+        return np.sign(self.sloc['Plasma', 'Ic'])
+
     def plot(self, axes=None, boundary=True):
         """Plot plasma boundary and separatrix."""
         self.axes = axes
-        if (poly := self.separatrix) is not None and not poly.is_empty:
-            self.axes.add_patch(descartes.PolygonPatch(
-                poly.__geo_interface__,
-                facecolor='C4', alpha=0.75, linewidth=0.5, zorder=-10))
         if boundary:
             self.firstwall.plot_boundary(self.axes, color='gray', lw=1.5)
         self.subframe.polyplot('plasma')
         plt.axis('equal')
         plt.axis('off')
-
-    @property
-    def polarity(self):
-        """Return plasma polarity."""
-        return np.sign(self.sloc['Plasma', 'Ic'])

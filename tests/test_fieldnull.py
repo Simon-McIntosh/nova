@@ -14,13 +14,13 @@ def test_plasma_update(plot=False):
     coilset.grid.solve(20, 0.2, 'plasma')
     grid = coilset.grid.version
     subframe = coilset.subframe.version
-    update[0] = grid['Psi'] != subframe['plasma']  # False
+    update[0] = grid['Psi'] != subframe['nturn']  # False
     separatrix = Polygon(dict(c=[4.5, 0.5, 2.5])).boundary
     coilset.plasma.update_separatrix(separatrix)
-    update[1] = grid['Psi'] != subframe['plasma']  # True
+    update[1] = grid['Psi'] != subframe['nturn']  # True
     _ = coilset.grid.psi
-    update[2] = grid['Psi'] != subframe['plasma']  # False
-    update[3] = grid['Br'] != subframe['plasma']  # True
+    update[2] = grid['Psi'] != subframe['nturn']  # False
+    update[3] = grid['Br'] != subframe['nturn']  # True
     if plot:
         coilset.plot()
         coilset.grid.plot()

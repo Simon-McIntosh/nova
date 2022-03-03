@@ -139,6 +139,10 @@ class FrameSetLoc(FrameData):
             except AttributeError:
                 pass
 
+    def update_aloc_hash(self, attr):
+        """Update subframe version."""
+        self.subframe.version[attr] = self.aloc_hash[attr]
+
     def update_frameloc(self):
         """Update frame array loc indexer."""
         if self.version['frameloc'] != self.frame.version['index']:

@@ -44,6 +44,7 @@ class DataFrame(FrameAttrs):
         super().__init__(data, index, columns, attrs, **metadata)
         self.update_index()
         self.update_columns()
+        self.update_version()
 
     @property
     def _constructor(self):

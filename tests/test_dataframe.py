@@ -107,7 +107,6 @@ def test_loc_hash_index():
 
 def test_loc_hash_version_index():
     dataframe = DataFrame({'x': range(3)}, label='PF', version=['index'])
-    dataframe.update_version()
     index_hash = xxhash.xxh64(dataframe.index.values).intdigest()
     assert dataframe.version['index'] == index_hash
 

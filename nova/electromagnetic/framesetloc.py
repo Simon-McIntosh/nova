@@ -92,16 +92,23 @@ class HashLoc:
 
     name: str
     aloc: ArrayLocIndexer = field(repr=False)
+    saloc: ArrayLocIndexer = field(repr=False)
     xxh64: xxhash.xxh64 = field(repr=False, init=False)
 
     def __post_init__(self):
         """Create xxhash generator."""
         self.xxh64 = xxhash.xxh64()
 
+    def _array(self, key):
+        """Return loc array."""
+        if key in self.saloc.frame:
+            return self.saloc[key]
+        return self.aloc[key]
+
     def __getitem__(self, key) -> int:
         """Return interger has computed on aloc data array item."""
         self.xxh64.reset()
-        self.xxh64.update(self.aloc[key])
+        self.xxh64.update(self._array(key))
         return self.xxh64.intdigest()
 
 
@@ -142,7 +149,7 @@ class FrameSetLoc(FrameData):
         """Update subframe array loc indexer."""
         if self.version['subframeloc'] != self.subframe.version['index']:
             self.version['subframeloc'] = self.subframe.version['index']
-            self._clear_cache(['aloc', 'saloc', 'aloc_hash', 'saloc_hash'])
+            self._clear_cache(['aloc', 'saloc', 'aloc_hash'])
 
     def update_loc_indexer(self):
         """Update links to array loc indexer following changes to index id."""
@@ -151,13 +158,8 @@ class FrameSetLoc(FrameData):
 
     @cached_property
     def aloc_hash(self):
-        """Return interger hash computed on aloc attribute."""
-        return HashLoc('array_hash', self.aloc)
-
-    @cached_property
-    def saloc_hash(self):
-        """Return interger hash computed on saloc attribute."""
-        return HashLoc('sarray_hash', self.saloc)
+        """Return interger hash computed on aloc array attribute."""
+        return HashLoc('array_hash', self.aloc, self.saloc)
 
     @cached_property
     def ALoc(self):

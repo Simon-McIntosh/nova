@@ -70,27 +70,33 @@ class BiotOperate(BiotData):
         init=False, repr=False, default_factory=dict)
     operator: dict[str, BiotOp] = field(init=False, default_factory=dict,
                                         repr=False)
+    array: dict = field(init=False, repr=False, default_factory=dict)
 
     def __post_init__(self):
         """Initialize version identifiers."""
         self.version |= {attr: None for attr in self.attrs}
-        self.version['Bn'] = None
+        self.version |= {attr.lower(): None for attr in self.attrs}
+        if 'Br' in self.attrs and 'Bz' in self.attrs:
+            self.version['bn'] = None
         super().__post_init__()
 
     def post_solve(self):
         """Solve biot interaction - extened by subclass."""
         super().post_solve()
+        self.load_arrays()
         self.load_operators()
 
     def load(self, file: str, path=None):
         """Extend BiotData load."""
         super().load(file, path)
+        self.load_arrays()
         self.load_operators()
 
     def load_data(self):
         """Load dataset, solve if not set."""
         if len(self) == 0:
             return self.solve()
+        self.load_arrays()
         self.load_operators()
 
     def load_operators(self, svd_factor=None):
@@ -107,16 +113,13 @@ class BiotOperate(BiotData):
                 self.svd_factor, self.data[f'_U{attr}'].data,
                 self.data[f'_s{attr}'].data, self.data[f'_V{attr}'].data)
 
-    def __getattr__(self, attr):
-        """Return variable data."""
-        if (Attr := attr.capitalize()) in self.version:
-            if Attr == 'Bn':
-                return self.get_norm()
-            if self.version[Attr] != self.subframe.version['plasma']:
-                self.update_turns(Attr)
-                self.version[Attr] = self.subframe.version['plasma']
-            return self.operator[Attr].evaluate()
-        raise AttributeError(f'attribute {Attr} not specified in {self.attrs}')
+    def load_arrays(self):
+        """Load data arrays."""
+        shape = self.data.dims['target']
+        for attr in self.version:
+            if attr.islower() and attr.capitalize() in self.attrs:
+                self.version[attr] = None
+                self.array[attr] = np.zeros(shape)
 
     def update_turns(self, attr: str, svd=True):
         """Update plasma turns."""
@@ -124,14 +127,34 @@ class BiotOperate(BiotData):
             return
         self.operator[attr].update_turns(svd)
 
-    def get_norm(self):
-        """Return cached field L2 norm."""
-        version = hash(self.current.data.tobytes())
-        if self.version['Bn'] != version or 'Bn' not in self.array:
-            self.array['Bn'] = self.calculate_norm()
-            self.version['Bn'] = version
-        return self.array['Bn']
-
     def calculate_norm(self):
         """Return calculated L2 norm."""
-        return np.linalg.norm([self.Br, self.Bz], axis=0)
+        return np.linalg.norm([self.br, self.bz], axis=0)
+
+    def get_norm(self):
+        """Return cached field L2 norm."""
+        if (version := self.aloc_hash['Ic']) != self.version['bn']:
+            self.version['bn'] = version
+            self.array['bn'][:] = self.calculate_norm()
+        return self.array['bn']
+
+    def __getattr__(self, attr):
+        """Return variable data - lazy evaluation - cached."""
+        if attr not in (avalible := [attr for attr in self.version
+                                     if attr.islower() and
+                                     attr.capitalize() in self.attrs]):
+            raise AttributeError(f'Attribute {attr} '
+                                 f'not defined in {avalible}.')
+        if len(self.data) == 0:
+            return self.array[attr]
+        if attr == 'bn':
+            return self.get_norm()
+        Attr = attr.capitalize()
+        if self.version[Attr] != (plasma_version :=
+                                  self.subframe.version['plasma']):
+            self.update_turns(Attr)
+            self.version[Attr] = plasma_version
+        if (version := self.aloc_hash['Ic']) != self.version[attr]:
+            self.version[attr] = version
+            self.array[attr][:] = self.operator[Attr].evaluate()
+        return self.array[attr]

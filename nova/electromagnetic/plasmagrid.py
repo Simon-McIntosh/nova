@@ -20,11 +20,6 @@ class PlasmaGrid(BiotBaseGrid):
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     levels: Union[int, list[float]] = 21
 
-    def __post_init__(self):
-        """Initialize fieldnull version."""
-        super().__post_init__()
-        self.version['fieldnull'] = None
-
     @staticmethod
     @numba.njit
     def loop_neighbour_vertices(points, neighbor_vertices, boundary_vertices):

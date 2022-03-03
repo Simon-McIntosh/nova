@@ -18,7 +18,7 @@ def test_plasma_update(plot=False):
     separatrix = Polygon(dict(c=[4.5, 0.5, 2.5])).boundary
     coilset.plasma.update_separatrix(separatrix)
     update[1] = grid['Psi'] != subframe['plasma']  # True
-    _ = coilset.grid.Psi
+    _ = coilset.grid.psi
     update[2] = grid['Psi'] != subframe['plasma']  # False
     update[3] = grid['Br'] != subframe['plasma']  # True
     if plot:

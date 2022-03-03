@@ -30,7 +30,6 @@ class FrameAttrs(pandas.DataFrame):
                  **metadata: dict[str, Collection[Any]]):
         super().__init__(data, index, columns)
         self.update_metadata(data, columns, attrs, metadata)
-        self.update_version()
 
     @property
     def version(self):
@@ -124,15 +123,6 @@ class FrameAttrs(pandas.DataFrame):
         frame_columns = list(dict.fromkeys(list(columns)))
         self.metaframe.metadata = {'available': data_columns+frame_columns}
 
-    def loc_hash(self, attr) -> int:
-        """Return xxhash of loc attribute."""
-        try:
-            return xxhash.xxh64(value := getattr(self, attr)).intdigest()
-        except TypeError:
-            return xxhash.xxh64(value.values).intdigest()
-        except ColumnError:
-            return None
-
     def update_metaframe(self, metadata):
         """Update metaframe, appending available columns if required."""
         if isinstance(metadata.get('version', None), list):
@@ -142,14 +132,26 @@ class FrameAttrs(pandas.DataFrame):
             self.metaframe.metadata = {'available': self.metaframe.columns}
         self.match_columns()
 
+    def hash_array(self, attr):
+        """Return hash array."""
+        if self.hasattrs('subspace') and attr in self.subspace:
+            return getattr(self.subspace, attr)
+        return getattr(self, attr)
+
+    def loc_hash(self, attr) -> int:
+        """Return xxhash of loc attribute."""
+        try:
+            return xxhash.xxh64(value := self.hash_array(attr)).intdigest()
+        except TypeError:
+            return xxhash.xxh64(value.values).intdigest()
+        except (ColumnError, KeyError):
+            return None
+
     def update_version(self):
         """Update metaframe version hash dict."""
-        try:
-            metadata = dict(version={attr: self.loc_hash(attr) for attr in
-                                     self.version})
-            self.attrs['metaframe'].update(metadata)
-        except ValueError:
-            pass
+        metadata = dict(version={attr: self.loc_hash(attr) for attr in
+                                 self.version})
+        self.attrs['metaframe'].update(metadata)
 
     def match_columns(self):
         """Intersect metaframe.required with self.columns if not empty."""

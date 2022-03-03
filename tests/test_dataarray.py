@@ -188,7 +188,6 @@ def test_set_loc_part():
 def test_loc_hash_version_x():
     dataarray = DataArray({'x': range(3)}, Array=[],
                           label='PF', version=['x'])
-    dataarray.update_version()
     x_hash = xxhash.xxh64(dataarray.x.values).intdigest()
     assert dataarray.version['x'] == x_hash
 
@@ -196,7 +195,6 @@ def test_loc_hash_version_x():
 def test_loc_hash_version_array_x():
     dataarray = DataArray({'x': range(3)}, Array=['x'],
                           label='PF', version=['x'])
-    dataarray.update_version()
     x_hash = xxhash.xxh64(dataarray.x).intdigest()
     assert dataarray.version['x'] == x_hash
 
@@ -204,7 +202,6 @@ def test_loc_hash_version_array_x():
 def test_store_load_hash_x():
     dataarray = DataArray({'x': range(3)}, label='PF', version=['x'],
                           Array=['x'])
-    dataarray.update_version()
     with tempfile.NamedTemporaryFile() as tmp:
         dataarray.store(tmp.name)
         del dataarray

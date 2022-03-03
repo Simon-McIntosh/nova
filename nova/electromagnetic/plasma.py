@@ -8,7 +8,6 @@ import numba
 import numpy as np
 import numpy.typing as npt
 import pyvista
-
 import xarray
 
 from nova.database.netcdf import netCDF
@@ -20,8 +19,6 @@ from nova.electromagnetic.polyplot import Axes
 from nova.geometry.polygon import Polygon
 from nova.geometry.pointloop import PointLoop
 from nova.utilities.pyplot import plt
-
-from numba import njit
 
 
 @dataclass
@@ -116,12 +113,13 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
         """Return class instance for next."""
         return self
 
-    def __next__(self):
+    def update(self, psi_boundary):
         """Update plasma seperatrix."""
-        s_psi = self.boundary.psi.min()
+        #s_psi = self.boundary.psi.min()
+        s_psi = psi_boundary.min()
 
-        self.grid.plot(levels=[s_psi], colors='r')
-        self.grid.plot(levels=21)
+        #self.grid.plot(levels=[s_psi], colors='r')
+        #self.grid.plot(levels=21)
 
         plasma = self.aloc['plasma']
         ionize = self.aloc['ionize']
@@ -130,10 +128,10 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
         ionize[plasma] = self.grid.psi < s_psi
         self._update_nturn(plasma, ionize, nturn, area)
 
-        self.subframe.version['plasma'] = self.aloc_hash['nturn']
+        self.update_version()
 
-        self.subframe.polyplot('plasma')
-        self.boundary.plot()
+        #self.subframe.polyplot('plasma')
+        #self.boundary.plot()
 
     def store(self, filename: str, path=None):
         """Extend netCDF.store, store data as netCDF in hdf5 file."""
@@ -204,7 +202,6 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
             Bounding loop.
 
         """
-        self.update_loc_indexer()
         if self.sloc['plasma'].sum() == 0:
             return
         try:
@@ -223,7 +220,7 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
         self.update_version()
 
     @staticmethod
-    @njit
+    @numba.njit
     def _update_nturn(plasma, ionize, nturn, area):
         nturn[plasma] = 0
         ionize_area = area[ionize]
@@ -238,6 +235,7 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
                 facecolor='C4', alpha=0.75, linewidth=0.5, zorder=-10))
         if boundary:
             self.firstwall.plot_boundary(self.axes, color='gray', lw=1.5)
+        self.subframe.polyplot('plasma')
         plt.axis('equal')
         plt.axis('off')
 

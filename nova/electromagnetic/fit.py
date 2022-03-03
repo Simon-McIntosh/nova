@@ -2,6 +2,7 @@
 from dataclasses import dataclass, field
 
 from functools import cached_property
+import scipy.optimize
 import xarray
 
 from nova.electromagnetic.biotgrid import BiotPlot
@@ -58,11 +59,31 @@ if __name__ == '__main__':
     fit = Fit(135011, 7)
     #fit.build(dcoil=0.25, dshell=0.5, dplasma=-1000, tcoil='hex')
 
-    fit.sloc['Ic'] = 1
-    fit.sloc['plasma', 'Ic'] = -700
-    fit.plot()
+    itime = 500
+    fit.sloc['coil', 'Ic'] = fit.data.current[itime]
+    fit.sloc['plasma', 'Ic'] = fit.data.ip[itime]
 
-    fit.plasmagrid.plot()
+    fit.plot()
+    #fit.plasmagrid.plot()
+
+    '''
+
+    def psi_root(psi):
+        fit.plasma.update(psi)
+        return psi - fit.plasma.boundary.psi
+
+    import time
+    start = time.time()
+    scipy.optimize.newton_krylov(psi_root,
+                                 fit.plasma.boundary.psi,
+                                 #method='gmres',
+                                 iter=300,
+                                 verbose=True)
+    end = time.time()
+    print(end-start)
+
+    fit.plot()
+    '''
 
 
 

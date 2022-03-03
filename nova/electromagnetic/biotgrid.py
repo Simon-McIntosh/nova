@@ -162,14 +162,6 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
         super().__post_init__()
         self.version['fieldnull'] = None
 
-    def update(self):
-        """
-        Interface with fieldnull update.
-
-        Extend method to change dimensionality of psi input.
-        """
-        super().update_null(self.psi)
-
     @property
     def psi_array(self):
         """
@@ -184,20 +176,17 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
     def solve(self):
         """Solve biot interaction, to be extended by subclass."""
 
-    def check_version(self):
-        """Check validity of upstream data, update if nessisary."""
-        print('check version', self.saloc_hash['Ic'], self.version['fieldnull'])
-        current_hash = self.saloc_hash['Ic']
-        if current_hash != self.version['fieldnull'] or \
+    def check_null(self):
+        """Check validity of upstream data, update field null if nessisary."""
+        if (version := self.aloc_hash['Ic']) != self.version['fieldnull'] or \
                 self.version['Psi'] != self.subframe.version['plasma']:
-            print('update version', current_hash)
             self.update_null(self.psi_array)
-            self.version['fieldnull'] = current_hash
+            self.version['fieldnull'] = version
 
     def __getattribute__(self, attr):
         """Extend getattribute to intercept field null data access."""
         if attr == 'data_x' or attr == 'data_o':
-            self.check_version()
+            self.check_null()
         return super().__getattribute__(attr)
 
     def plot_svd(self, axes=None, **kwargs):
@@ -229,10 +218,6 @@ class BiotGrid(BiotBaseGrid):
         self.data.coords['x2d'] = (['x', 'z'], grid.data.x2d.data)
         self.data.coords['z2d'] = (['x', 'z'], grid.data.z2d.data)
         super().post_solve()
-
-    def update(self):
-        """Extend update method to ensure psi input is 2D."""
-        super().update_null(self.psi.reshape(self.shape))
 
     @property
     def shape(self):

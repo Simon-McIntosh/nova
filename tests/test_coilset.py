@@ -85,8 +85,7 @@ def test_flag_current_update():
     coilset.coil.insert(1, 4, 0.4, 0.5, Ic=4, active=True)
     coilset.subframe.subspace.loc[coilset.subframe.active, 'Ic'] = [3.2, 5.8]
     assert np.allclose(coilset.subframe.Ic, [3.2, 6.7, 5.8])
-test_flag_current_update()
-assert False
+
 
 def test_multipoint_link():
     coilset = CoilSet(dcoil=0, subspace=['Ic'])
@@ -246,7 +245,7 @@ def test_array_views_solve():
     nturn = coilset.loc['nturn']
     coilset.sloc['Ic'] = 7.7
     coilset.sloc['plasma', 'Ic'] = 6.6
-    coilset.grid.solve(50, 0.05)
+    coilset.grid.solve(10, 0.05)
     Ic[:1] = 5.5
     assert id(Ic) == id(coilset.sloc['Ic'])
     assert id(nturn) == id(coilset.loc['nturn'])
@@ -256,7 +255,7 @@ def test_array_views_solve():
 def test_biot_solve_index_version():
     coilset = CoilSet(dcoil=-5)
     coilset.coil.insert(3, -0.5, 0.95, 0.95)
-    coilset.grid.solve(50, 0.05)
+    coilset.grid.solve(10, 0.05)
     index_hash = coilset.subframe.loc_hash('index')
     assert coilset.subframe.version['index'] == index_hash
 
@@ -265,7 +264,7 @@ def test_biot_solve_no_plasma():
     coilset = CoilSet(dcoil=-5)
     coilset.coil.insert(3, -0.5, 0.95, 0.95)
     coilset.plasma.update_separatrix(Polygon(dict(o=(3, 0, 1))))
-    coilset.grid.solve(500, 0.05)
+    coilset.grid.solve(10, 0.05)
     coilset.sloc['Ic'] = 5
     assert (coilset.grid.psi != 0).all()
 

@@ -47,3 +47,4 @@ class BiotData(ABC, netCDF, FrameSetLoc):
         self.update_aloc_hash('nturn')
         for attr in self.attrs:
             self.version[attr] = self.subframe.version['nturn']
+            self.data.attrs[attr] = self.version[attr]

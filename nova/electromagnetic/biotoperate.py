@@ -1,5 +1,5 @@
 """Manage matmul operations and svd reductions on BiotData."""
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 
 import numba
 import numpy as np
@@ -24,6 +24,7 @@ def matmul(A, B):
     plasma_index=numba.int32,
     matrix=numba.float64[:, ::1],
     plasma_matrix=numba.float64[:, ::1],
+    svd_rank=numba.int32,
     plasma_U=numba.float64[:, ::1],
     plasma_s=numba.float64[::1],
     plasma_V=numba.float64[:, ::1]))
@@ -32,7 +33,7 @@ class BiotOp:
 
     def __init__(self, current, nturn, plasma,
                  plasma_index, matrix, plasma_matrix,
-                 svd_factor, plasma_U, plasma_s, plasma_V):
+                 svd_rank, plasma_U, plasma_s, plasma_V):
         self.current = current
         self.nturn = nturn
         self.plasma = plasma
@@ -40,10 +41,10 @@ class BiotOp:
         self.matrix = matrix
         self.plasma_matrix = plasma_matrix
         #  perform svd order reduction
-        rank = int(np.ceil(len(plasma_s) / svd_factor))
-        self.plasma_U = plasma_U[:, :rank].copy()
-        self.plasma_s = plasma_s[:rank].copy()
-        self.plasma_V = plasma_V[:rank, :].copy()
+        self.svd_rank = min([len(plasma_s), svd_rank])
+        self.plasma_U = plasma_U[:, :self.svd_rank].copy()
+        self.plasma_s = plasma_s[:self.svd_rank].copy()
+        self.plasma_V = plasma_V[:self.svd_rank, :].copy()
 
     def evaluate(self):
         """Return interaction."""
@@ -65,44 +66,36 @@ class BiotOp:
 class BiotOperate(BiotData):
     """Multi-attribute interface to numba Biot Evaluate methods."""
 
-    svd_factor: float = 10.
     version: dict[str, int] = field(
         init=False, repr=False, default_factory=dict)
+    _svd_rank: int = field(init=False, default=35)
     operator: dict[str, BiotOp] = field(init=False, default_factory=dict,
                                         repr=False)
     array: dict = field(init=False, repr=False, default_factory=dict)
 
-    def __post_init__(self):
-        """Initialize version identifiers."""
-        self.version |= {attr: None for attr in self.attrs}
-        self.version |= {attr.lower(): None for attr in self.attrs}
-        if 'Br' in self.attrs and 'Bz' in self.attrs:
-            self.version['bn'] = None
-        super().__post_init__()
+    @property
+    def svd_rank(self):
+        """Manage svd rank. Set to -1 to disable svd plasma turn update."""
+        return self._svd_rank
+
+    @svd_rank.setter
+    def svd_rank(self, svd_rank: int):
+        if svd_rank != self._svd_rank:
+            self._svd_rank = svd_rank
+            self.load_operators()
 
     def post_solve(self):
         """Solve biot interaction - extened by subclass."""
         super().post_solve()
-        self.load_arrays()
         self.load_operators()
 
-    def load(self, file: str, path=None):
-        """Extend BiotData load."""
-        super().load(file, path)
-        self.load_arrays()
+    def load(self, filename: str, path=None):
+        """Extend netCDF load."""
+        super().load(filename, path)
         self.load_operators()
 
-    def load_data(self):
-        """Load dataset, solve if not set."""
-        if len(self) == 0:
-            return self.solve()
-        self.load_arrays()
-        self.load_operators()
-
-    def load_operators(self, svd_factor=None):
-        """Load fast biot operators."""
-        if svd_factor is not None:
-            self.svd_factor = svd_factor
+    def load_operators(self):
+        """Link fast biot operators."""
         self.operator = {}
         self.attrs = self.data.attrs['attributes']
         for attr in self.attrs:
@@ -110,14 +103,24 @@ class BiotOperate(BiotData):
                 self.saloc['Ic'], self.aloc['nturn'], self.aloc['plasma'],
                 self.data.attrs['plasma_index'],
                 self.data[attr].data, self.data[f'_{attr}'].data,
-                self.svd_factor, self.data[f'_U{attr}'].data,
+                self.svd_rank, self.data[f'_U{attr}'].data,
                 self.data[f'_s{attr}'].data, self.data[f'_V{attr}'].data)
+        self.load_version()
+        self.load_arrays()
+
+    def load_version(self):
+        """Initialize biot version identifiers."""
+        self.version |= {attr: self.data.attrs[attr] for attr in self.attrs}
+        self.version |= {attr.lower(): None for attr in self.attrs}
+        if 'Br' in self.attrs and 'Bz' in self.attrs:
+            self.version['bn'] = None
 
     def load_arrays(self):
-        """Load data arrays."""
+        """Link data arrays."""
         shape = self.data.dims['target']
         for attr in self.version:
-            if attr.islower() and attr.capitalize() in self.attrs:
+            if attr.islower() and attr.capitalize() in self.attrs \
+                    or attr == 'bn':
                 self.version[attr] = None
                 self.array[attr] = np.zeros(shape)
 
@@ -126,6 +129,9 @@ class BiotOperate(BiotData):
         if self.data.attrs['plasma_index'] == -1:
             return
         self.operator[attr].update_turns(svd)
+        nturn = self.subframe.version['nturn']
+        self.version[attr] = self.data.attrs[attr] = nturn
+        self.version[attr.lower()] = None
 
     def calculate_norm(self):
         """Return calculated L2 norm."""
@@ -142,7 +148,8 @@ class BiotOperate(BiotData):
         """Return variable data - lazy evaluation - cached."""
         if attr not in (avalible := [attr for attr in self.version
                                      if attr.islower() and
-                                     attr.capitalize() in self.attrs]):
+                                     attr.capitalize() in self.attrs or
+                                     attr == 'bn']):
             raise AttributeError(f'Attribute {attr} '
                                  f'not defined in {avalible}.')
         if len(self.data) == 0:
@@ -150,9 +157,8 @@ class BiotOperate(BiotData):
         if attr == 'bn':
             return self.get_norm()
         Attr = attr.capitalize()
-        if self.version[Attr] != (nturn := self.subframe.version['nturn']):
+        if self.version[Attr] != self.subframe.version['nturn']:
             self.update_turns(Attr)
-            self.version[Attr] = nturn
         if (version := self.aloc_hash['Ic']) != self.version[attr]:
             self.version[attr] = version
             self.array[attr][:] = self.operator[Attr].evaluate()

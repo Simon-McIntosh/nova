@@ -1,5 +1,6 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 from dataclasses import dataclass, field
+import os
 
 import netCDF4
 import pandas
@@ -104,6 +105,8 @@ class FrameSet(FilePath, FrameSetLoc):
     def store(self, filename: str, path=None, metadata=None):
         """Store frame and subframe as groups within hdf file."""
         file = self.file(filename, path)
+        if os.path.isfile(file):
+            os.remove(file)
         self.frame.store(file, 'frame', mode='w')
         self.subframe.store(file, 'subframe', mode='a')
         for attr in self.__dict__:

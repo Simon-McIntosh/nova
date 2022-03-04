@@ -143,7 +143,10 @@ class FrameAttrs(pandas.DataFrame):
         try:
             return xxhash.xxh64(value := self.hash_array(attr)).intdigest()
         except TypeError:
-            return xxhash.xxh64(value.values).intdigest()
+            try:
+                return xxhash.xxh64(value := value.to_numpy()).intdigest()
+            except ValueError:
+                return xxhash.xxh64(np.ascontiguousarray(value)).intdigest()
         except (ColumnError, KeyError):
             return None
 

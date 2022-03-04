@@ -47,24 +47,34 @@ class Fit(BiotPlot, Machine):
 
     def plot(self):
         """Plot fit."""
-        plt.set_aspect(0.8)
-        super().plot('plasma')
+        self.axes.set_aspect(0.8)
+        super().plot(index='plasma')
         self.plasma.plot()
         self.plasmagrid.plot(levels=21, colors='C0')
-        self.plasma.boundary.plot()
+        # self.plasma.boundary.plot()
 
 
 if __name__ == '__main__':
 
     fit = Fit(135011, 7)
-    #fit.build(dcoil=0.25, dshell=0.5, dplasma=-1000, tcoil='hex')
+    #fit.build(dcoil=0.5, dshell=0.5, dplasma=-150, tcoil='hex')
 
     itime = 500
     fit.sloc['coil', 'Ic'] = fit.data.current[itime]
     fit.sloc['plasma', 'Ic'] = fit.data.ip[itime]
 
     fit.plot()
-    #fit.plasmagrid.plot()
+
+    '''
+    from nova.geometry.polygon import Polygon
+    wall = fit.Loc['plasma', :].iloc[0]
+    separatrix = Polygon(dict(e=[wall.x, wall.z, 0.7*wall.dx, 0.5*wall.dz]))
+    separatrix.plot_boundary(fit.axes)
+    fit.axes.plot(fit.loc['plasma', 'x'], fit.loc['plasma', 'z'], '.', ms=3)
+    '''
+
+    # fit.plasmagrid.plot()
+    # fit.plasmagrid.plot_svd()
 
     '''
 

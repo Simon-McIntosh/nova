@@ -3,14 +3,11 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar
 
-import descartes
 import numba
 import numpy as np
-import numpy.typing as npt
 import pyvista
 import xarray
 
-from nova.database.netcdf import netCDF
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.plasmaboundary import PlasmaBoundary
 from nova.electromagnetic.plasmagrid import PlasmaGrid
@@ -84,13 +81,12 @@ class MeshPlasma(PoloidalGrid):
 
 
 @dataclass
-class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
+class Plasma(Axes, MeshPlasma, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
     name: str = 'plasma'
     grid: PlasmaGrid = field(repr=False, default=None)
     boundary: PlasmaBoundary = field(repr=False, default=None)
-    loop: npt.ArrayLike = field(init=False, default=None, repr=False)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -108,23 +104,6 @@ class Plasma(Axes, netCDF, MeshPlasma, FrameSetLoc):
         """Return string representation of plasma subframe."""
         return self.loc['ionize', ['x', 'z', 'section', 'area',
                                    'Ic', 'It', 'nturn']].__str__()
-
-    def __iter__(self):
-        """Return class instance for next."""
-        return self
-
-    def store(self, filename: str, path=None):
-        """Extend netCDF.store, store data as netCDF in hdf5 file."""
-        self.data = xarray.Dataset()
-        self.data['loop_coorinates'] = ['x', 'z']
-        self.data['loop'] = ('loop_index', 'loop_coorinates'), self.loop
-        super().store(filename, path)
-
-    def load(self, filename: str, path=None):
-        """Extend netCDF.load, load data from hdf5."""
-        super().load(filename, path)
-        self.loop = self.data['loop'].data
-        return self
 
     @cached_property
     def pointloop(self):

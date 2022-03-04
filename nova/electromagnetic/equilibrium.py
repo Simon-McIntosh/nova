@@ -92,3 +92,21 @@ class Equilibrium(Axes, netCDF, FrameSetLoc):
             self.axes.add_patch(descartes.PolygonPatch(
                 poly.__geo_interface__,
                 facecolor='C4', alpha=0.75, linewidth=0.5, zorder=-10))
+
+'''
+    #loop: npt.ArrayLike = field(init=False, default=None, repr=False)
+
+
+    def store(self, filename: str, path=None):
+        """Extend netCDF.store, store data as netCDF in hdf5 file."""
+        self.data = xarray.Dataset()
+        self.data['loop_coorinates'] = ['x', 'z']
+        self.data['loop'] = ('loop_index', 'loop_coorinates'), self.loop
+        super().store(filename, path)
+
+    def load(self, filename: str, path=None):
+        """Extend netCDF.load, load data from hdf5."""
+        super().load(filename, path)
+        self.loop = self.data['loop'].data
+        return self
+'''

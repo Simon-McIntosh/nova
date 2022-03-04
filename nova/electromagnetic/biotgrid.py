@@ -145,10 +145,9 @@ class BiotPlot(Axes):
         return dict(colors='lightgray', linewidths=1.5, alpha=0.9,
                     linestyles='solid', levels=levels) | kwargs
 
-    def plot(self, axes=None, **kwargs):
+    def plot(self, **kwargs):
         """Set plot axes."""
-        self.axes = axes
-        super().plot(axes, **kwargs)
+        self.axes = kwargs.get('axes', None)
 
 
 class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
@@ -191,9 +190,10 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
 
     def plot_svd(self, axes=None, **kwargs):
         """Plot influence of SVD reduction."""
-        for svd, color in zip([False, True], ['C7', 'C3']):
+        for svd, color, linestyle in zip([False, True], ['C7', 'C3'],
+                                         ['solid', 'dashed']):
             self.update_turns('Psi', svd)
-            kwargs['colors'] = color
+            kwargs |= dict(colors=color, linestyles=linestyle)
             self.plot(axes, **kwargs)
 
 

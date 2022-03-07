@@ -154,16 +154,16 @@ def test_tile_hex():
 
 def test_plasma_single():
     coilset = CoilSet(dplasma=0)
-    coilset.plasma.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 2, 2.5, 1.5, 1]],
-                          turn='r', tile=False)
+    coilset.firstwall.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 2, 2.5, 1.5, 1]],
+                             turn='r', tile=False)
     assert len(coilset.subframe) == 1
 
 
 def test_plasma_hex():
     coilset = CoilSet(dplasma=0.5)
-    coilset.plasma.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 2, 2.5, 1.5, 1]])
+    coilset.firstwall.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 2, 2.5, 1.5, 1]])
     assert sum([section == 'hexagon'
-                for section in coilset.subframe.section]) == 3
+                for section in coilset.subframe.section]) == 2
 
 
 def test_coil_multipoint_link():
@@ -214,7 +214,8 @@ def test_store_load_version():
 
 def test_plasma_array_attributes():
     coilset = CoilSet(dplasma=-5)
-    coilset.plasma.insert({'ellip': [2.5, 1.7, 1.6, 2.2]}, turn='hex')
+    coilset.firstwall.insert({'ellip': [2.5, 1.7, 1.6, 2.2]}, turn='hex')
+    _ = coilset.plasma
     assert all([attr in coilset.subframe.metaframe.array for attr in
                 ['Ic', 'nturn', 'area']])
 
@@ -239,7 +240,7 @@ def test_array_views_insert_subspace():
 
 def test_array_views_solve():
     coilset = CoilSet(dcoil=-5)
-    coilset.plasma.insert(3, -0.5, 0.95, 0.95, delta=-5)
+    coilset.firstwall.insert(3, -0.5, 0.95, 0.95, delta=-5)
     coilset.coil.insert(3, -0.5, 0.95, 0.95)
     Ic = coilset.sloc['Ic']
     nturn = coilset.loc['nturn']
@@ -263,7 +264,7 @@ def test_biot_solve_index_version():
 def test_biot_solve_no_plasma():
     coilset = CoilSet(dcoil=-5)
     coilset.coil.insert(3, -0.5, 0.95, 0.95)
-    coilset.plasma.update_separatrix(Polygon(dict(o=(3, 0, 1))))
+    coilset.firstwall.separatrix = Polygon(dict(o=(3, 0, 1)))
     coilset.grid.solve(10, 0.05)
     coilset.sloc['Ic'] = 5
     assert (coilset.grid.psi != 0).all()
@@ -272,17 +273,17 @@ def test_biot_solve_no_plasma():
 def test_biotdata_numpy():
     with unittest.mock.patch.dict('os.environ', dict(XPU='numpy')):
         coilset = CoilSet(dplasma=-3)
-        coilset.plasma.insert(3, -0.5, 0.95, 0.95)
+        coilset.firstwall.insert(3, -0.5, 0.95, 0.95)
         coilset.grid.solve(10, 0.05)
         assert isinstance(coilset.grid.operator['Psi'].matrix, np.ndarray)
 
 
 def test_biot_link_dataarray_dataset():
     coilset = CoilSet(dplasma=-20)
-    coilset.plasma.insert(3, -0.5, 0.95, 0.95)
+    coilset.firstwall.insert(3, -0.5, 0.95, 0.95)
     coilset.grid.solve(10, 0.05)
     Psi = coilset.grid.operator['Psi'].matrix.copy()
-    coilset.plasma.update_separatrix(((2.5, -1), (3.5, -1), (3, 0)))
+    coilset.firstwall.separatrix = ((2.5, -1), (3.5, -1), (3, 0))
     coilset.grid.update_turns('Psi')
     assert (coilset.grid.operator['Psi'].matrix ==
             coilset.grid.data['Psi']).all()
@@ -292,8 +293,8 @@ def test_biot_link_dataarray_dataset():
 def test_biot_multiframe_plasma():
     coilset = CoilSet(dplasma=-20)
     coilset.coil.insert(3, -0.5, 0.95, 0.95)
-    coilset.plasma.insert(3, -0.5, 0.95, 0.95)
-    coilset.plasma.insert(3, 0.5, 0.95, 0.95, name='second_plasma_rejoin')
+    coilset.firstwall.insert(3, -0.5, 0.95, 0.95)
+    coilset.firstwall.insert(3, 0.5, 0.95, 0.95, name='second_plasma_rejoin')
     coilset.grid.solve(10, 0.05)
     assert coilset.grid.data.attrs['plasma_index'] == 1
 
@@ -301,7 +302,7 @@ def test_biot_multiframe_plasma():
 def test_add_coilset():
     active = CoilSet(dplasma=-5, dcoil=-5)
     active.coil.insert(4, 5, 0.1, 0.1, name='PF1')
-    active.plasma.insert(3, 4, 0.5, 0.8, name='pl')
+    active.firstwall.insert(3, 4, 0.5, 0.8, name='pl')
     passive = CoilSet(dshell=-10)
     passive.shell.insert({'e': [3, 4, 1.6, 2.2]}, -2, 0.1, name='shell')
     coilset = active + passive
@@ -311,7 +312,7 @@ def test_add_coilset():
 def test_iadd_coilset():
     coilset = CoilSet(dplasma=-5, dcoil=-5)
     coilset.coil.insert(4, 5, 0.1, 0.1, name='PF1')
-    coilset.plasma.insert(3, 4, 0.5, 0.8, name='pl')
+    coilset.firstwall.insert(3, 4, 0.5, 0.8, name='pl')
     passive = CoilSet(dshell=-10)
     passive.shell.insert({'e': [3, 4, 1.6, 2.2]}, -2, 0.1, name='shell')
     coilset += passive
@@ -321,7 +322,7 @@ def test_iadd_coilset():
 def test_add_clear_biot():
     active = CoilSet(dplasma=-5, dcoil=-5)
     active.coil.insert(4, 5, 0.1, 0.1, name='PF1')
-    active.plasma.insert(3, 4, 0.5, 0.8, name='pl')
+    active.firstwall.insert(3, 4, 0.5, 0.8, name='pl')
     active.probe.solve([(1, 2), (3, 4), (1, 1)])
     passive = CoilSet(dshell=-10)
     passive.shell.insert({'e': [3, 4, 1.6, 2.2]}, -2, 0.1, name='shell')
@@ -333,7 +334,7 @@ def test_add_clear_biot():
 def test_iadd_clear_biot():
     coilset = CoilSet(dplasma=-5, dcoil=-5)
     coilset.coil.insert(4, 5, 0.1, 0.1, name='PF1')
-    coilset.plasma.insert(3, 4, 0.5, 0.8, name='pl')
+    coilset.firstwall.insert(3, 4, 0.5, 0.8, name='pl')
     coilset.probe.solve([(1, 2), (3, 4), (1, 1)])
     passive = CoilSet(dshell=-10)
     passive.shell.insert({'e': [3, 4, 1.6, 2.2]}, -2, 0.1, name='shell')

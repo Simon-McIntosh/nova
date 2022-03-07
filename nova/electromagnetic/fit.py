@@ -48,53 +48,32 @@ class Fit(BiotPlot, Machine):
     def plot(self):
         """Plot fit."""
         self.axes.set_aspect(0.8)
-        super().plot(index='plasma')
         self.plasma.plot()
-        self.plasmagrid.plot(levels=21, colors='C0')
-        # self.plasma.boundary.plot()
 
 
 if __name__ == '__main__':
 
     fit = Fit(135011, 7)
-    #fit.build(dcoil=0.5, dshell=0.5, dplasma=-150, tcoil='hex')
+    # fit.build(dcoil=0.5, dshell=0.5, dplasma=-150, tcoil='hex')
 
-    itime = 500
+    itime = 700
     fit.sloc['coil', 'Ic'] = fit.data.current[itime]
     fit.sloc['plasma', 'Ic'] = fit.data.ip[itime]
 
-    fit.plot()
-
-    '''
-    from nova.geometry.polygon import Polygon
-    wall = fit.Loc['plasma', :].iloc[0]
-    separatrix = Polygon(dict(e=[wall.x, wall.z, 0.7*wall.dx, 0.5*wall.dz]))
-    separatrix.plot_boundary(fit.axes)
-    fit.axes.plot(fit.loc['plasma', 'x'], fit.loc['plasma', 'z'], '.', ms=3)
-    '''
-
-    # fit.plasmagrid.plot()
-    # fit.plasmagrid.plot_svd()
-
-    '''
+    # fit.plot()
 
     def psi_root(psi):
         fit.plasma.update(psi)
-        return psi - fit.plasma.boundary.psi
+        return psi - fit.plasma.psi
 
     import time
     start = time.time()
-    scipy.optimize.newton_krylov(psi_root,
-                                 fit.plasma.boundary.psi,
-                                 #method='gmres',
-                                 iter=300,
-                                 verbose=True)
+    scipy.optimize.newton_krylov(psi_root, fit.plasma.psi,
+                                 iter=100, verbose=True)
     end = time.time()
     print(end-start)
 
     fit.plot()
-    '''
-
 
 
 '''

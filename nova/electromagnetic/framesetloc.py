@@ -85,6 +85,10 @@ class ArrayLocIndexer(DataLocIndexer):
         self.attrs = self.frame.attrs['metaframe'].array
         self._data = {attr: self.frame[attr] for attr in self.attrs}
 
+    def __call__(self):
+        """Return list of frame array attributes."""
+        return list(self._data)
+
 
 @dataclass
 class HashLoc:

@@ -52,13 +52,13 @@ def test_rectangle_in_rectangle():
 
 def test_hexagon_in_rectangle_horizontal_constraint():
     polygrid = PolyGrid({'r': [3, 5, 0.1, 0.15]}, delta=0, turn='hex')
-    edge_length = 0.1/np.sqrt(3)
+    edge_length = 0.1/2
     assert np.isclose(polygrid.polyarea, 3**1.5 / 2 * edge_length**2)
 
 
 def test_hexagon_in_rectangle_vertical_constraint():
     polygrid = PolyGrid({'r': [3, 5, 0.1, 0.05]}, delta=0, turn='hex')
-    edge_length = 0.05/2
+    edge_length = 0.05/np.sqrt(3)
     assert np.isclose(polygrid.polyarea, 3**1.5 / 2 * edge_length**2)
 
 

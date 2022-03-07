@@ -68,9 +68,10 @@ class BiotOperate(BiotData):
 
     version: dict[str, int] = field(
         init=False, repr=False, default_factory=dict)
-    _svd_rank: int = field(init=False, default=35)
+    _svd_rank: int = field(init=False, default=75)
     operator: dict[str, BiotOp] = field(init=False, default_factory=dict,
                                         repr=False)
+    target_number: int = field(init=False, default=0)
     array: dict = field(init=False, repr=False, default_factory=dict)
 
     @property
@@ -117,14 +118,14 @@ class BiotOperate(BiotData):
 
     def load_arrays(self):
         """Link data arrays."""
-        shape = self.data.dims['target']
+        self.target_number = self.data.dims['target']
         for attr in self.version:
             if attr.islower() and attr.capitalize() in self.attrs \
                     or attr == 'bn':
                 self.version[attr] = None
-                self.array[attr] = np.zeros(shape)
+                self.array[attr] = np.zeros(self.target_number)
 
-    def update_turns(self, attr: str, svd=True):
+    def update_turns(self, attr: str, svd=False):
         """Update plasma turns."""
         if self.data.attrs['plasma_index'] == -1:
             return

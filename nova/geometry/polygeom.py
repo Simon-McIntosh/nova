@@ -107,7 +107,7 @@ class PolyGeom(Polygon):
             return np.pi * self.length**2 * self.thickness / 4 * \
                 (2 - self.thickness**2)
         if self.section == 'hexagon':
-            return 3/2 * self.width**2 / np.sqrt(3)
+            return 3/2 * self.height**2 / np.sqrt(3)
         return self.poly.area
 
     @cached_property

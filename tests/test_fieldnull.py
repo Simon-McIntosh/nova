@@ -9,14 +9,13 @@ def test_plasma_update(plot=False):
     update = np.full(4, False)
     coilset = CoilSet(required=['x', 'z', 'dx', 'dz'],
                       dplasma=-5, dcoil=0.5)
-    coilset.plasma.insert(dict(disc=[4.5, 0.5, 1]), Ic=15e6)
+    coilset.firstwall.insert(dict(disc=[4.5, 0.5, 1]), Ic=15e6)
     coilset.coil.insert(5, -0.5, 0.75, 0.75, Ic=15e6)
     coilset.grid.solve(20, 0.2, 'plasma')
     grid = coilset.grid.version
     subframe = coilset.subframe.version
     update[0] = grid['Psi'] != subframe['nturn']  # False
-    separatrix = Polygon(dict(c=[4.5, 0.5, 2.5])).boundary
-    coilset.plasma.update_separatrix(separatrix)
+    coilset.plasma.separatrix = Polygon(dict(c=[4.5, 0.5, 0.5])).boundary
     update[1] = grid['Psi'] != subframe['nturn']  # True
     _ = coilset.grid.psi
     update[2] = grid['Psi'] != subframe['nturn']  # False
@@ -29,7 +28,7 @@ def test_plasma_update(plot=False):
 
 def null_curvature(sign, plot):
     coilset = CoilSet(dcoil=-5, dplasma=-5)
-    coilset.plasma.insert(dict(o=[5, 1, 0.5]), Ic=15e6)
+    coilset.firstwall.insert(dict(o=[5, 1, 0.5]), Ic=15e6)
     coilset.coil.insert(5, 0, 0.75, 0.75, Ic=-15e6)
     coilset.grid.solve(1e2, 0.25)  # generate plasma grid
     coilset.sloc['plasma', 'Ic'] *= sign
@@ -54,7 +53,7 @@ def test_Opoint_curvature_Ip_negative(plot=False):
 def test_multi_xpoint(plot=False):
     coilset = CoilSet(dcoil=-5, dplasma=-5)
     coilset.coil.insert(5, [-1, 1], 0.75, 0.75, Ic=[1, 1])
-    coilset.plasma.insert(dict(o=[5.25, 0, 0.5]), Ic=0.5)
+    coilset.firstwall.insert(dict(o=[5.25, 0, 0.5]), Ic=0.5)
     coilset.grid.solve(3e2, 1.25, 'plasma')  # generate plasma grid
     if plot:
         coilset.plot()
@@ -66,7 +65,7 @@ def test_multi_xpoint(plot=False):
 def test_empty():
     coilset = CoilSet(dcoil=-5, dplasma=-5)
     coilset.coil.insert(5, [-1, 1], 0.75, 0.75, Ic=[-1, 1])
-    coilset.plasma.insert(dict(o=[5.25, 0, 0.5]), Ic=0)
+    coilset.firstwall.insert(dict(o=[5.25, 0, 0.5]), Ic=0)
     coilset.grid.solve(1e2, 0.25, 'plasma')  # generate plasma grid
     assert coilset.grid.x_point_number == 0
     assert coilset.grid.o_point_number == 0
@@ -76,7 +75,7 @@ def global_null(sign, plot=False):
     coilset = CoilSet(dcoil=0.5, dplasma=0.4)
     coilset.coil.insert(5, [-2, 2], 0.75, 0.75)
     coilset.coil.insert(7.8, 0, 0.75, 0.75, label='Xcoil')
-    coilset.plasma.insert(dict(o=(4, 0, 0.5)))
+    coilset.firstwall.insert(dict(o=(4, 0, 0.5)))
     coilset.grid.solve(500, 0.05)
     coilset.sloc['Ic'] = sign*15e6
     if plot:
@@ -100,7 +99,7 @@ def test_global_null_Ip_negative(plot=False):
 def test_plasma_coil_parity(plot=False):
     coilset = CoilSet(dcoil=-4, dplasma=-4)
     coilset.coil.insert(5, 0.75, 0.75, 0.75, turn='r')
-    coilset.plasma.insert({'r': [5, -0.75, 0.75, 0.75]}, turn='r')
+    coilset.firstwall.insert({'r': [5, -0.75, 0.75, 0.75]}, turn='r')
     coilset.grid.solve(150, 0.05)
     coilset.sloc[:, 'Ic'] = 15e6
     coilset.grid.update_turns('Psi', svd=False)

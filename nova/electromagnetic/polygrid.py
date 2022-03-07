@@ -71,7 +71,7 @@ class PolyDelta(PolyGeom):
                 delta = np.sqrt(self.box_area / box_number)
                 return (ndiv := width/delta, ndiv)
             if self.turn == 'hexagon' and not self.tile:
-                aspect *= np.sqrt(3)/2
+                aspect /= np.sqrt(3)/2
             if aspect > 1:
                 return self.divide_box(box_number, aspect)
             return self.divide_box(box_number, 1/aspect)[::-1]
@@ -93,14 +93,14 @@ class PolyDelta(PolyGeom):
         if self.tile:
             grid_delta = [delta := PolyGen.boxbound(*grid_delta), delta]
             if self.turn == 'hexagon':
-                grid_delta[0] *= np.sqrt(3)/4
-                grid_delta[1] *= 3/2
+                grid_delta[0] *= 3/2
+                grid_delta[1] *= np.sqrt(3)/4
                 return grid_delta
             if self.turn in ['disc', 'skin']:
                 grid_delta[0] *= np.sqrt(3)/2
                 return grid_delta
         if self.turn == 'hexagon' and self.delta != 0:
-            grid_delta[0] *= np.sqrt(3)/2
+            grid_delta[1] *= np.sqrt(3)/2
         return grid_delta
 
 
@@ -230,7 +230,7 @@ class PolyGrid(PolyCell):
         """Return grid coordinates."""
         grid = np.meshgrid(self.vector('x'), self.vector('z'), indexing='ij')
         if self.tile:
-            grid[1][1::2, :] += self.grid_delta[1]/2
+            grid[0][:, 1::2] += self.grid_delta[0]/2
         return np.hstack((grid[0].reshape(-1, 1), grid[1].reshape(-1, 1)))
 
     def polycells(self, coords):

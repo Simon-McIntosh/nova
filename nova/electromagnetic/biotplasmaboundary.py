@@ -7,7 +7,7 @@ from nova.electromagnetic.biotpoint import BiotPoint
 
 
 @dataclass
-class PlasmaBoundary(BiotPoint):
+class BiotPlasmaBoundary(BiotPoint):
     """Compute interaction for a series of discrete points."""
 
     def solve(self, points):
@@ -19,6 +19,9 @@ class PlasmaBoundary(BiotPoint):
 
     def plot(self, axes=None, **kwargs):
         """Plot wall pannels."""
+        if len(self.data) == 0:
+            return
         self.axes = axes
-        kwargs = dict(marker='o', linestyle='', ms=4, color='C0') | kwargs
+        kwargs = dict(marker=None, linestyle='-', ms=4, color='gray',
+                      linewidth=1.5) | kwargs
         self.axes.plot(self.data.x, self.data.z, **kwargs)

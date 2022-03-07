@@ -94,7 +94,7 @@ def test_get_current_subset():
 def test_get_current_insert_default():
     coilset = CoilSet(dcoil=-2, subspace=['Ic'], array=['Ic'])
     coilset.coil.insert(range(2), required=['x'], link=True)
-    coilset.plasma.insert({'s': [3.25, 0, 0.25]}, delta=-2)
+    coilset.firstwall.insert({'s': [3.25, 0, 0.25]}, delta=-2)
     coilset.shell.insert([2.2, 3.2], [-0.1, 0.3], -2, 0.05, delta=-3,
                          link=True)
     coilset.sloc['Ic'] = 4.4
@@ -142,8 +142,8 @@ def test_set_frame_It_subspace_Ic():
 def test_subframe_plasma_index():
     coilset = CoilSet(dcoil=-2)
     coilset.coil.insert(3, 0, 0.1, 0.1)
-    coilset.plasma.insert({'sq': [3.25, 0, 0.25]}, delta=-4, turn='sq',
-                          tile=False)
+    coilset.firstwall.insert({'sq': [3.25, 0, 0.25]}, delta=-4, turn='sq',
+                             tile=False)
     assert list(coilset.loc['plasma', 'plasma']) == [True, True, True, True]
 
 

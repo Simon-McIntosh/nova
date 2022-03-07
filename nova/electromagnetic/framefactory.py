@@ -4,11 +4,11 @@ from functools import cached_property
 from typing import Union
 
 from nova.electromagnetic.coil import Coil
+from nova.electromagnetic.firstwall import FirstWall
 from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.winding import Winding
 from nova.electromagnetic.shell import Shell
 from nova.electromagnetic.turn import Turn
-from nova.electromagnetic.plasma import Plasma
 from nova.electromagnetic.ferritic import Ferritic
 from nova.geometry.polygen import PolyGen
 
@@ -59,11 +59,9 @@ class FrameFactory(FrameSet):
         return Ferritic(*self.frames, delta=self.delta)
 
     @cached_property
-    def plasma(self):
-        """Return plasma constructor."""
-        return Plasma(*self.frames, turn=self.tplasma, delta=self.dplasma)
-    #grid=self.plasmagrid, boundary=self.plasmaboundary,
-    #path=self.path
+    def firstwall(self):
+        """Return plasma firstwall constructor."""
+        return FirstWall(*self.frames, turn=self.tplasma, delta=self.dplasma)
 
     @cached_property
     def shell(self):

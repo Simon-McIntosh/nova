@@ -575,7 +575,7 @@ class Wall_Geometry(MachineDescription):
         for unit in limiter.unit:
             firstwall.append(unit)
         contour = Contour(firstwall.data)  # extract closed loop
-        self.plasma.insert(contour.loop)
+        self.firstwall.insert(contour.loop)
 
 
 @dataclass
@@ -620,9 +620,10 @@ class Machine(CoilSet, Database):
         if self.sloc['plasma'].sum() > 0:
             self.plasmaboundary.solve(self.Loc['plasma', 'poly'][0].boundary)
             self.plasmagrid.solve()
+
             wall = self.Loc['plasma', :].iloc[0]
-            self.plasma.update_separatrix(
-                dict(e=[wall.x, wall.z, 0.7*wall.dx, 0.5*wall.dz]))
+            self.plasma.separatrix = dict(e=[wall.x, wall.z,
+                                             0.7*wall.dx, 0.5*wall.dz])
 
     @property
     def metadata(self):
@@ -658,10 +659,10 @@ class Machine(CoilSet, Database):
 if __name__ == '__main__':
 
     coilset = Machine(135011, 7)
-    # coilset.build(dcoil=0.25, dshell=0.5, dplasma=-500, tcoil='hex')
+    coilset.build(dcoil=0.25, dshell=0.5, dplasma=-1500, tcoil='hex')
 
-    # coilset.plasma.update_separatrix(dict(e=[6, -0.5, 1.5, 2.2]))
+    #coilset.plasma.separatrix = dict(e=[6, -0.5, 2.5, 2.5])
 
     coilset.sloc['Ic'] = 1
-    coilset.plot()
+    coilset.sloc['plasma', 'Ic'] = -450
     coilset.plasma.plot()

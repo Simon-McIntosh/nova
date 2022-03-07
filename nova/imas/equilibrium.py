@@ -5,7 +5,6 @@ import numpy as np
 
 from nova.imas.scenario import Scenario
 from nova.electromagnetic.biotgrid import BiotPlot
-from nova.electromagnetic.plasma import PlasmaVTK
 from nova.utilities.pyplot import plt
 
 

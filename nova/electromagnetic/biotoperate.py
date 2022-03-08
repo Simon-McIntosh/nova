@@ -1,5 +1,5 @@
 """Manage matmul operations and svd reductions on BiotData."""
-from dataclasses import dataclass, field, InitVar
+from dataclasses import dataclass, field
 
 import numba
 import numpy as np
@@ -125,14 +125,14 @@ class BiotOperate(BiotData):
                 self.version[attr] = None
                 self.array[attr] = np.zeros(self.target_number)
 
-    def update_turns(self, attr: str, svd=False):
+    def update_turns(self, Attr: str, svd=True):
         """Update plasma turns."""
         if self.data.attrs['plasma_index'] == -1:
             return
-        self.operator[attr].update_turns(svd)
+        self.operator[Attr].update_turns(svd)
         nturn = self.subframe.version['nturn']
-        self.version[attr] = self.data.attrs[attr] = nturn
-        self.version[attr.lower()] = None
+        self.version[Attr] = self.data.attrs[Attr] = nturn
+        self.version[Attr.lower()] = None
 
     def calculate_norm(self):
         """Return calculated L2 norm."""
@@ -160,7 +160,7 @@ class BiotOperate(BiotData):
         Attr = attr.capitalize()
         if self.version[Attr] != self.subframe.version['nturn']:
             self.update_turns(Attr)
-        if (version := self.aloc_hash['Ic']) != self.version[attr]:
+        if self.version[attr] != (version := self.aloc_hash['Ic']):
             self.version[attr] = version
             self.array[attr][:] = self.operator[Attr].evaluate()
         return self.array[attr]

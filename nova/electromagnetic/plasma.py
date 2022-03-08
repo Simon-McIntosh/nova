@@ -103,40 +103,86 @@ class Plasma(Axes, netCDF, FrameSetLoc):
         ionize_area = area[ionize]
         nturn[ionize] = ionize_area / np.sum(ionize_area)
 
-    def update(self, psi):
-        """Update plasma seperatrix."""
-        psi_grid = psi[:self.grid.target_number]
-        self.grid.update_null(psi_grid)
+    def residual(self, Psi):
 
-        #print(self.grid.x_psi.min())
-        psi_boundary = psi[-self.boundary.target_number:]
-        #s_psi = np.min([psi_boundary.min(), self.grid.x_psi[0]])
-        try:
-            s_psi = self.grid.x_psi[0]
-            print(s_psi)
-        except IndexError:
-            s_psi = psi_boundary.min()
-
+        self.grid.operator['Psi'].matrix[:, 115] = Psi
+        self.grid.version['psi'] = None
 
         plasma = self.aloc['plasma']
         ionize = self.aloc['ionize']
         nturn = self.aloc['nturn']
         area = self.aloc['area']
 
-        ionize[plasma] = (psi_grid < s_psi) & \
-            (self.aloc['z'][plasma] > -2.5)
+        ionize[:] = 0
+        ionize[plasma] = self.grid.psi < -50
+
         self._update_nturn(plasma, ionize, nturn, area)
+        self.grid.operator['Psi'].update_turns(True)
+
+        return Psi - self.grid.operator['Psi'].matrix[:, 115]
+
+    def _residual(self, nturn):
+        """Update plasma seperatrix."""
+
+        '''
+        psi_grid = psi[:self.grid.target_number]
+        self.grid.update_null(psi_grid)
+
+        #print(self.grid.x_psi.min())
+        psi_boundary = psi[-self.boundary.target_number:]
+        #s_psi = np.min([psi_boundary.min(), self.grid.x_psi[0]])
+        '''
+
+        '''
+        try:
+            s_psi = self.grid.x_psi[0]
+        except IndexError:
+            s_psi = self.boundary.psi.min()
+        '''
+        nturn /= sum(nturn)
+
+        # update nturn
+        plasma = self.aloc['plasma']
+        self.aloc['nturn'][plasma] = nturn
         self.update_aloc_hash('nturn')
 
-    def plot(self, turns=False):
+
+        # solve rhs
+
+        psi = self.boundary.psi.min()
+        '''
+        if len(self.grid.x_psi) > 0:
+            psi = self.grid.x_psi.min()
+        else:
+            psi = psi_boundary
+        print(psi, [psi_boundary, self.grid.x_psi])
+        '''
+
+        self.aloc['ionize'] = 0
+        self.aloc['ionize'][plasma] = self.grid.psi < psi
+        self.aloc['nturn'][plasma] = 0
+        ionize_area = self.aloc['area'][self.aloc['ionize']]
+        self.aloc['nturn'][self.aloc['ionize']] = \
+            ionize_area / np.sum(ionize_area)
+
+        print(sum(nturn), sum(self.aloc['nturn'][self.aloc['ionize']]))
+
+        #self._update_nturn(plasma, ionize,
+        #                   self.aloc['nturn'], self.aloc['area'])
+        self.update_aloc_hash('nturn')
+        return nturn - self.aloc['nturn'][plasma]
+
+    def plot(self, turns=True):
         """Plot separatirx as polygon patch."""
         if turns:
             self.subframe.polyplot('plasma')
+        '''
         poly = Polygon(self.separatrix).poly
         if not poly.is_empty:
             self.axes.add_patch(descartes.PolygonPatch(
                 poly.__geo_interface__,
                 facecolor='C4', alpha=0.75, linewidth=0, zorder=-10))
+        '''
         self.boundary.plot()
         self.grid.plot()
 

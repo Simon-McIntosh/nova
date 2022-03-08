@@ -54,7 +54,7 @@ class Fit(BiotPlot, Machine):
 if __name__ == '__main__':
 
     fit = Fit(135011, 7)
-    # fit.build(dcoil=0.5, dshell=0.5, dplasma=-150, tcoil='hex')
+    #fit.build(dcoil=0.5, dshell=0.5, dplasma=-500, tcoil='hex')
 
     itime = 700
     fit.sloc['coil', 'Ic'] = fit.data.current[itime]
@@ -62,16 +62,38 @@ if __name__ == '__main__':
 
     # fit.plot()
 
-    def psi_root(psi):
-        fit.plasma.update(psi)
-        return psi - fit.plasma.psi
+    fit.plasma.separatrix = dict(e=(6, 0, 1.5, 1.5))
+    fit.plasma.grid.update_turns('Psi')
+    plasma_index = fit.plasma.grid.data.attrs['plasma_index']
+    Psi_o = fit.plasma.grid.operator['Psi'].matrix[:, plasma_index].copy()
+
+    def solve():
+        #fit.plasma.separatrix = dict(e=(6, 0, 1.5, 1.5))
+        #x0 = fit.plasma.boundary.psi.min()
+        #x1 = fit.plasma.boundary.psi.max()
+        #return scipy.optimize.root_scalar(psi_root, method='toms748',
+        #                                  bracket=(x0, x1))
+
+        return scipy.optimize.root(
+            fit.plasma.residual, Psi_o,
+            method='krylov', tol=0.05, options=dict(disp=False))
+
+
 
     import time
     start = time.time()
-    scipy.optimize.newton_krylov(psi_root, fit.plasma.psi,
-                                 iter=100, verbose=True)
+    #scipy.optimize.newton_krylov(psi_root, fit.plasma.boundary.psi.min(),
+    #                             iter=100, verbose=False)
+    sol = solve()
+
+    #print(sol)
+    #psi_root(sol.root)
+
+    #print('sol', sol.root, fit.plasma.boundary.psi.min())
+
     end = time.time()
     print(end-start)
+    print(sol.success, sol.message)
 
     fit.plot()
 

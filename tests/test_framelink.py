@@ -93,6 +93,12 @@ def test_required_add_frame_error():
         framelink.insert(1, 2, 3)
 
 
+def test_non_unique_index_error():
+    framelink = FrameLink(Required=['x', 'z'])
+    with pytest.raises(IndexError):
+        framelink.insert([1, 2, 3], 1, name=['a', 'b', 'a'])
+
+
 def test_attribute_metadata_replace():
     framelink = FrameLink(metadata={'Required': ['x', 'z', 'dl', 'dt']})
     framelink.insert(3, 4, metadata={'Required': ['x', 'z']})

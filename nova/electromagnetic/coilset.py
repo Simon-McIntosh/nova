@@ -8,7 +8,7 @@ from nova.geometry.polygon import Polygon
 
 
 @dataclass
-class CoilSet(FrameFactory, BiotFactory):
+class CoilSet(BiotFactory, FrameFactory):
     """
     Manage coilset.
 
@@ -17,6 +17,11 @@ class CoilSet(FrameFactory, BiotFactory):
     - plasma: add plasma (poloidal).
 
     """
+
+    def __post_init__(self):
+        """Set filepath."""
+        self.set_path('data/Nova')
+        super().__post_init__()
 
     def __add__(self, other: FrameSet):
         """Return framset union of self and other."""
@@ -36,7 +41,7 @@ class CoilSet(FrameFactory, BiotFactory):
 
 if __name__ == '__main__':
 
-    filename = 'tmp'
+    filename = 'biot'
     reload = False
     if reload:
         coilset = CoilSet(dcoil=-35, dplasma=-500)
@@ -56,6 +61,8 @@ if __name__ == '__main__':
         coilset.grid.solve(500, 0.1, 'plasma')
         coilset.plasmagrid.solve()
 
+        coilset.plasma.update_separatrix(dict(c=[4.5, 0.25, 0.9]))
+
         coilset.sloc['Ic'] = 6
         coilset.sloc['bubble', 'Ic'] = 5
         coilset.sloc['Shl0', 'Ic'] = -5
@@ -64,7 +71,7 @@ if __name__ == '__main__':
     else:
         coilset = CoilSet().load(filename)
 
-    separatrix = Polygon(dict(c=[4.5, -1.25, 0.9])).boundary
+    separatrix = Polygon(dict(c=[4.5, 0.25, 0.9])).boundary
     coilset.plasma.update_separatrix(separatrix)
 
     coilset.sloc['bubble', 'Ic'] = 8

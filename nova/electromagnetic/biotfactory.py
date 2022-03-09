@@ -1,15 +1,18 @@
 """Manage biot methods."""
 from dataclasses import dataclass
 from functools import cached_property
-from netCDF4 import Dataset
+import inspect
+from typing import ClassVar
 
+from nova.electromagnetic.biotdata import BiotData
 from nova.electromagnetic.biotgrid import BiotGrid
 from nova.electromagnetic.biotinductance import BiotInductance
 from nova.electromagnetic.biotloop import BiotLoop
+from nova.electromagnetic.biotplasmagrid import BiotPlasmaGrid
+from nova.electromagnetic.biotplasmaboundary import BiotPlasmaBoundary
 from nova.electromagnetic.biotpoint import BiotPoint
-from nova.electromagnetic.biotdata import BiotData
 from nova.electromagnetic.frameset import FrameSet
-from nova.electromagnetic.plasmagrid import PlasmaGrid
+from nova.electromagnetic.plasma import Plasma
 
 
 @dataclass
@@ -17,36 +20,56 @@ class BiotFactory(FrameSet):
     """Expose biot methods as cached properties."""
 
     dfield: float = -1
+    biot_class: ClassVar[dict[str, BiotData]] = \
+        dict(point=BiotPoint, grid=BiotGrid,
+             plasmaboundary=BiotPlasmaBoundary, plasmagrid=BiotPlasmaGrid,
+             probe=BiotPoint, loop=BiotLoop, inductance=BiotInductance)
+
+    def _biotfactory(self):
+        """Return nammed biot instance."""
+        attr = inspect.stack()[1][3]  # name of caller
+        return self.biot_class[attr](*self.frames, path=self.path, name=attr)
+
+    @cached_property
+    def plasma(self):
+        """Return plasma instance."""
+        return Plasma(*self.frames, path=self.path,
+                      grid=self.plasmagrid, boundary=self.plasmaboundary)
 
     @cached_property
     def grid(self):
         """Return grid biot instance."""
-        return BiotGrid(*self.frames, name='grid')
+        return self._biotfactory()
 
     @cached_property
     def plasmagrid(self):
         """Return plasma grid biot instance."""
-        return PlasmaGrid(*self.frames, name='plasmagrid')
+        return self._biotfactory()
+
+    @cached_property
+    def plasmaboundary(self):
+        """Return plasma firstwall biot instance."""
+        return self._biotfactory()
 
     @cached_property
     def point(self):
         """Return point biot instance."""
-        return BiotPoint(*self.frames, name='point')
+        return self._biotfactory()
 
     @cached_property
     def probe(self):
         """Return biot probe instance."""
-        return BiotPoint(*self.frames, name='probe')
+        return self._biotfactory()
 
     @cached_property
     def loop(self):
         """Return biot loop instance."""
-        return BiotLoop(*self.frames, name='loop')
+        return self._biotfactory()
 
     @cached_property
     def inductance(self):
         """Return biot inductance instance."""
-        return BiotInductance(*self.frames, name='inductance')
+        return self._biotfactory()
 
     def clear_biot(self):
         """Clear all biot attributes."""
@@ -56,22 +79,3 @@ class BiotFactory(FrameSet):
                 delattrs.append(attr)
         for attr in delattrs:
             delattr(self, attr)
-
-    def store(self, filename: str, path=None):
-        """Store coilset to hdf5 file."""
-        super().store(filename, path)
-        file = self.file(filename, path)
-        for attr in self.__dict__:
-            if isinstance(biotdata := getattr(self, attr), BiotData):
-                biotdata.store(file)
-
-    def load(self, filename: str, path=None):
-        """Load biot data from hdf5 file."""
-        super().load(filename, path)
-        file = self.file(filename, path)
-        with Dataset(file) as f:
-            for attr in f.groups:
-                if attr in ['frame', 'subframe']:
-                    continue
-                getattr(self, attr).load(file)
-            return self

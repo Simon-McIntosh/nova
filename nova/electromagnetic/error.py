@@ -33,3 +33,11 @@ class GridError(IndexError):
     def __init__(self, attribute):
         super().__init__(
             f'Items with required attribute {attribute} are absent.')
+
+
+class PlasmaGridError(AttributeError):
+    """Ensure that plasma rejoin is meshed with hexagonal elements."""
+
+    def __init__(self, turn):
+        super().__init__(
+            f'Plasma must be meshed with hexagonal elements not {turn}.')

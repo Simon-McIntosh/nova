@@ -1,7 +1,9 @@
+import tempfile
 
 import pytest
 import numpy as np
 import pandas
+import xxhash
 
 from nova.electromagnetic.dataarray import DataArray
 from nova.electromagnetic.metaframe import MetaFrame
@@ -183,7 +185,30 @@ def test_set_loc_part():
     assert dataarray.loc[:, 'x'].tolist() == [7.3, 4, 2, 3, 4]
 
 
-if __name__ == '__main__':
-    test_set_loc_part()
+def test_loc_hash_version_x():
+    dataarray = DataArray({'x': range(3)}, Array=[],
+                          label='PF', version=['x'])
+    x_hash = xxhash.xxh64(dataarray.x.values).intdigest()
+    assert dataarray.version['x'] == x_hash
 
-    # pytest.main([__file__])
+
+def test_loc_hash_version_array_x():
+    dataarray = DataArray({'x': range(3)}, Array=['x'],
+                          label='PF', version=['x'])
+    x_hash = xxhash.xxh64(dataarray.x).intdigest()
+    assert dataarray.version['x'] == x_hash
+
+
+def test_store_load_hash_x():
+    dataarray = DataArray({'x': range(3)}, label='PF', version=['x'],
+                          Array=['x'])
+    with tempfile.NamedTemporaryFile() as tmp:
+        dataarray.store(tmp.name)
+        del dataarray
+        dataarray = DataArray().load(tmp.name)
+    assert dataarray.version['x'] == dataarray.loc_hash('x')
+
+
+if __name__ == '__main__':
+
+    pytest.main([__file__])

@@ -2,7 +2,6 @@ import pytest
 
 import numpy as np
 
-from nova.geometry.polygon import Polygon
 from nova.electromagnetic.polygrid import PolyGrid
 
 
@@ -137,9 +136,9 @@ def test_disc_effective_nfilament():
 
 
 def test_disc_effective_nfilament_tile():
-    polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-49,
+    polygrid = PolyGrid({'r': [6, 3, 2.5, 2.5]}, delta=-69,
                         turn='o', tile=True)
-    assert np.isclose(-polygrid.delta, polygrid.polyfilaments, 1e-2)
+    assert np.isclose(-polygrid.delta, polygrid.polyfilaments, 1e-1)
 
 
 def test_hexagon_effective_nfilament():

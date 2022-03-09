@@ -97,3 +97,5 @@ class Turn(CoilSetAttrs):
         index = self.frame.insert(poly, iloc=iloc, **self.attrs)
         geom = TurnGeom(self.subframe.loc[subindex, :])
         self.frame.loc[index, geom.columns] = geom.data.values()
+        self.update_loc_indexer()
+        return index

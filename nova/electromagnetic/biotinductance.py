@@ -14,7 +14,7 @@ class BiotInductance(Axes, BiotOperate):
         """Solve Biot interaction across grid."""
         self.data = BiotSolve(self.subframe, self.subframe.loc[:, index],
                               reduce=[True, True], columns=['Psi']).data
-        super().solve()
+        super().post_solve()
 
     def plot(self, axes=None, **kwargs):
         """Plot points."""

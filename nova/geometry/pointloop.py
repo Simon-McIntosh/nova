@@ -7,18 +7,20 @@ import numba
 import numpy as np
 
 spec = [('points', numba.float64[:, :]),
+        ('status', numba.int16),
         ('point_number', numba.int64),
-        ('inside', numba.boolean[:])]
+        ('select', numba.boolean[:])]
 
 
 @numba.experimental.jitclass(spec)
 class PointLoop:
     """Point in loop methods."""
 
-    def __init__(self, points):
+    def __init__(self, points, status=1):
         self.points = points
+        self.status = status
         self.point_number = len(self.points)
-        self.inside = np.empty(self.point_number, dtype=numba.boolean)
+        self.select = np.empty(self.point_number, dtype=numba.boolean)
 
     @staticmethod
     def point_in_polygon(point, polygon) -> bool:
@@ -38,7 +40,7 @@ class PointLoop:
         status: int
             0 - the point is outside the polygon
             1 - the point is inside the polygon
-            2 - the point is one edge (boundary)
+            2 - the point is on edge (boundary)
 
         This function gives the answer whether the given point is inside or
         outside the predefined polygon
@@ -80,7 +82,7 @@ class PointLoop:
                     return 2
             ii = jj
             jj += 1
-        return intersections & 1
+        return intersections
 
     def update(self, polygon):
         """
@@ -107,5 +109,6 @@ class PointLoop:
 
         """
         for i in numba.prange(self.point_number):
-            self.inside[i] = self.point_in_polygon(self.points[i], polygon)
-        return self.inside
+            self.select[i] = \
+                self.point_in_polygon(self.points[i], polygon) & self.status
+        return self.select

@@ -69,6 +69,7 @@ class FrameSpace(SpaceIndexer, FrameLink):
         super().__init__(data, index, columns, attrs, **metadata)
         self.frame_attrs(Select, PolyGeo, VtkGeo, PolyPlot, VtkPlot)
         self.attrs['subspace'] = SubSpace(self)
+        self.update_version()
 
     def __repr__(self):
         """Propagate frame subspace variables prior to display."""

@@ -97,7 +97,7 @@ class PolyDelta(PolyGeom):
                 grid_delta[1] *= np.sqrt(3)/4
                 return grid_delta
             if self.turn in ['disc', 'skin']:
-                grid_delta[1] *= np.sqrt(3)/2
+                grid_delta[0] *= np.sqrt(3)/2
                 return grid_delta
         if self.turn == 'hexagon' and self.delta != 0:
             grid_delta[1] *= np.sqrt(3)/2
@@ -299,4 +299,4 @@ if __name__ == '__main__':
 
     polygrid = PolyGrid({'hx': [6, 3, 2.5, 2.5]}, delta=-60,
                         turn='hex', tile=True)
-    #polygrid.plot()
+    polygrid.plot()

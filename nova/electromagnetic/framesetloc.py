@@ -1,7 +1,9 @@
 """Manage subframe access."""
 from dataclasses import dataclass, field
+from functools import cached_property
 
 import numpy.typing as npt
+import xxhash
 
 from nova.electromagnetic.framedata import FrameData
 from nova.electromagnetic.framespace import FrameSpace
@@ -83,6 +85,36 @@ class ArrayLocIndexer(DataLocIndexer):
         self.attrs = self.frame.attrs['metaframe'].array
         self._data = {attr: self.frame[attr] for attr in self.attrs}
 
+    def __call__(self):
+        """Return list of frame array attributes."""
+        return list(self._data)
+
+
+@dataclass
+class HashLoc:
+    """Data Loc base class."""
+
+    name: str
+    aloc: ArrayLocIndexer = field(repr=False)
+    saloc: ArrayLocIndexer = field(repr=False)
+    xxh64: xxhash.xxh64 = field(repr=False, init=False)
+
+    def __post_init__(self):
+        """Create xxhash generator."""
+        self.xxh64 = xxhash.xxh64()
+
+    def _array(self, key):
+        """Return loc array."""
+        if key in self.saloc.frame:
+            return self.saloc[key]
+        return self.aloc[key]
+
+    def __getitem__(self, key) -> int:
+        """Return interger has computed on aloc data array item."""
+        self.xxh64.reset()
+        self.xxh64.update(self._array(key))
+        return self.xxh64.intdigest()
+
 
 @dataclass
 class FrameSetLoc(FrameData):
@@ -97,36 +129,65 @@ class FrameSetLoc(FrameData):
     """
 
     version: dict = field(init=False, default_factory=dict)
-    ALoc: ArrayLocIndexer = field(init=False, repr=False)
-    sALoc: ArrayLocIndexer = field(init=False, repr=False)
-    aloc: ArrayLocIndexer = field(init=False, repr=False)
-    saloc: ArrayLocIndexer = field(init=False, repr=False)
-    current: npt.ArrayLike = field(init=False, repr=False)
 
     def __post_init__(self):
         """Create array loc indexers."""
-        self.version |= dict(frameloc=id(None), subframeloc=id(None))
+        self.version |= dict(frameloc=None, subframeloc=None)
         self.update_loc_indexer()
+
+    def _clear_cache(self, attrs: list[str]):
+        """Clear cached properties."""
+        for attr in attrs:
+            try:
+                delattr(self, attr)
+            except AttributeError:
+                pass
+
+    def update_aloc_hash(self, attr):
+        """Update subframe version."""
+        self.subframe.version[attr] = self.aloc_hash[attr]
 
     def update_frameloc(self):
         """Update frame array loc indexer."""
         if self.version['frameloc'] != self.frame.version['index']:
             self.version['frameloc'] = self.frame.version['index']
-            self.ALoc = ArrayLocIndexer('Array', self.frame)
-            self.sALoc = ArrayLocIndexer('sArray', self.frame.subspace)
+            self._clear_cache(['ALoc', 'sALoc'])
 
     def update_subframeloc(self):
         """Update subframe array loc indexer."""
         if self.version['subframeloc'] != self.subframe.version['index']:
             self.version['subframeloc'] = self.subframe.version['index']
-            self.aloc = ArrayLocIndexer('array', self.subframe)
-            self.saloc = ArrayLocIndexer('sarray', self.subframe.subspace)
-            self.current = self.saloc['Ic']
+            self._clear_cache(['aloc', 'saloc', 'aloc_hash'])
 
     def update_loc_indexer(self):
         """Update links to array loc indexer following changes to index id."""
         self.update_frameloc()
         self.update_subframeloc()
+
+    @cached_property
+    def aloc_hash(self):
+        """Return interger hash computed on aloc array attribute."""
+        return HashLoc('array_hash', self.aloc, self.saloc)
+
+    @cached_property
+    def ALoc(self):
+        """Return fast frame array attributes."""
+        return ArrayLocIndexer('Array', self.frame)
+
+    @cached_property
+    def sALoc(self):
+        """Return fast frame subspace array attributes."""
+        return ArrayLocIndexer('sArray', self.frame.subspace)
+
+    @cached_property
+    def aloc(self):
+        """Return fast subframe array attributes."""
+        return ArrayLocIndexer('array', self.subframe)
+
+    @cached_property
+    def saloc(self):
+        """Return fast subframe subspace array attributes."""
+        return ArrayLocIndexer('sarray', self.subframe.subspace)
 
     @property
     def Loc(self):

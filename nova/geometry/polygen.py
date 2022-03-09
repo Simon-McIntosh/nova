@@ -258,5 +258,5 @@ class PolyGen:
 
 if __name__ == '__main__':
 
-    poly = PolyGen('disc')
+    poly = PolyGen('hex')
     print(poly(3, 4, 2))

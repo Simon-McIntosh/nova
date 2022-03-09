@@ -1,5 +1,5 @@
 """Generate grids for BiotGrid methods."""
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from dataclasses import dataclass, field, InitVar
 from typing import Union
 
@@ -133,7 +133,25 @@ class Expand:
         return limit
 
 
-class BiotBaseGrid(FieldNull, BiotOperate):
+class BiotPlot(Axes):
+    """Biot plot base class."""
+
+    def contour_kwargs(self, **kwargs):
+        """Return contour plot kwargs."""
+        try:
+            levels = self.levels
+        except AttributeError:
+            levels = 31
+        return dict(colors='lightgray', linewidths=1.5, alpha=0.9,
+                    linestyles='solid', levels=levels) | kwargs
+
+    def plot(self, **kwargs):
+        """Set plot axes."""
+        self.axes = kwargs.get('axes', None)
+        super().plot()
+
+
+class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
     """Flux grid baseclass."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
@@ -142,46 +160,41 @@ class BiotBaseGrid(FieldNull, BiotOperate):
     def __post_init__(self):
         """Initialize fieldnull version."""
         super().__post_init__()
-        self.version['fieldnull'] = id(None)
+        self.version['fieldnull'] = None
 
-    def update(self):
+    @property
+    def psi_array(self):
         """
-        Interface with fieldnull update.
+        Return psi re-shaped for field null calculation.
 
+        Return 1D vector as standard.
         Extend method to change dimensionality of psi input.
         """
-        super().update_null(self.psi)
+        return self.psi
 
-    def check_version(self):
-        """Check validity of upstream data, update if nessisary."""
-        current_hash = hash(self.current.data.tobytes())
-        if current_hash != self.version['fieldnull'] or \
-                self.version['Psi'] != self.subframe.version['plasma']:
-            self.update()
-            self.version['fieldnull'] = current_hash
+    @abstractmethod
+    def solve(self):
+        """Solve biot interaction, to be extended by subclass."""
+
+    def check_null(self):
+        """Check validity of upstream data, update field null if nessisary."""
+        if (version := self.aloc_hash['Ic']) != self.version['fieldnull'] or \
+                self.version['Psi'] != self.subframe.version['nturn']:
+            self.update_null(self.psi_array)
+            self.version['fieldnull'] = version
 
     def __getattribute__(self, attr):
         """Extend getattribute to intercept field null data access."""
         if attr == 'data_x' or attr == 'data_o':
-            self.check_version()
+            self.check_null()
         return super().__getattribute__(attr)
-
-    def contour_kwargs(self, **kwargs):
-        """Return contour plot kwargs."""
-        return dict(colors='lightgray', linewidths=1.5, alpha=0.9,
-                    linestyles='solid', levels=self.levels) | kwargs
-
-    @abstractmethod
-    def plot(self, axes=None, **kwargs):
-        """Set plot axes."""
-        self.axes = axes
-        super().plot(axes)
 
     def plot_svd(self, axes=None, **kwargs):
         """Plot influence of SVD reduction."""
-        for svd, color in zip([False, True], ['C7', 'C3']):
+        for svd, color, linestyle in zip([False, True], ['C7', 'C3'],
+                                         ['solid', 'dashed']):
             self.update_turns('Psi', svd)
-            kwargs['colors'] = color
+            kwargs |= dict(colors=color, linestyles=linestyle)
             self.plot(axes, **kwargs)
 
 
@@ -205,16 +218,17 @@ class BiotGrid(BiotBaseGrid):
         self.data.coords['z'] = grid.data.z
         self.data.coords['x2d'] = (['x', 'z'], grid.data.x2d.data)
         self.data.coords['z2d'] = (['x', 'z'], grid.data.z2d.data)
-        super().solve()
-
-    def update(self):
-        """Extend update method to ensure psi input is 2D."""
-        super().update_null(self.psi.reshape(self.shape))
+        super().post_solve()
 
     @property
     def shape(self):
         """Return grid shape."""
         return self.data.dims['x'], self.data.dims['z']
+
+    @property
+    def psi_array(self):
+        """Return psi as 2D array."""
+        return self.psi.reshape(self.shape)
 
     def plot(self, axes=None, **kwargs):
         """Plot poloidal flux contours."""
@@ -222,5 +236,5 @@ class BiotGrid(BiotBaseGrid):
         QuadContourSet = self.axes.contour(self.data.x, self.data.z,
                                            self.psi.reshape(*self.shape).T,
                                            **self.contour_kwargs(**kwargs))
-        if isinstance(kwargs['levels'], int):
+        if isinstance(kwargs.get('levels', None), int):
             self.levels = QuadContourSet.levels

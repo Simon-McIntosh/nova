@@ -1,56 +1,28 @@
-"""Manage plasma attributes."""
+"""Forward free-boundary equilibrium solver."""
 from dataclasses import dataclass, field
+from functools import cached_property
 
 import descartes
 import numba
 import numpy as np
-import numpy.typing as npt
+import scipy.spatial
 
+from nova.database.netcdf import netCDF
+from nova.electromagnetic.biotplasmagrid import BiotPlasmaGrid
+from nova.electromagnetic.biotplasmaboundary import BiotPlasmaBoundary
 from nova.electromagnetic.framesetloc import FrameSetLoc
-from nova.electromagnetic.poloidalgrid import PoloidalGrid
 from nova.electromagnetic.polyplot import Axes
 from nova.geometry.polygon import Polygon
 from nova.geometry.pointloop import PointLoop
-from nova.utilities.pyplot import plt
-
-from numba import njit
 
 
 @dataclass
-class PlasmaGrid(PoloidalGrid):
-    """Grid plasma region."""
-
-    turn: str = 'hexagon'
-    tile: bool = field(init=False, default=True)
-    required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
-    default: dict = field(init=False, default_factory=lambda: {
-        'nturn': 1, 'part': 'plasma', 'name': 'Plasma', 'plasma': True,
-        'active': True})
-
-    def set_conditional_attributes(self):
-        """Set conditional attrs for plasma grid."""
-        self.ifthen('delta', -1, 'turn', 'rectangle')
-        self.ifthen('turn', 'rectangle', 'tile', False)
-
-    def insert(self, *required, iloc=None, **additional):
-        """
-        Extend PoloidalGrid.insert.
-
-        Add plasma to coilset and generate bounding plasma grid.
-
-        Plasma inserted into frame with subframe meshed accoriding
-        to delta and trimmed to the plasma's boundary curve.
-
-        """
-        return super().insert(*required, iloc=iloc, **additional)
-
-
-@dataclass
-class Plasma(PlasmaGrid, Axes, FrameSetLoc):
+class Plasma(Axes, netCDF, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
-    loop: npt.ArrayLike = field(init=False, default=None, repr=False)
-    pointloop: PointLoop = field(init=False, default=None, repr=False)
+    name: str = 'plasma'
+    grid: BiotPlasmaGrid = field(repr=False, default=None)
+    boundary: BiotPlasmaBoundary = field(repr=False, default=None)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -69,41 +41,34 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
         return self.loc['ionize', ['x', 'z', 'section', 'area',
                                    'Ic', 'It', 'nturn']].__str__()
 
-    def generate_pointloop(self):
-        """Generate polyloop."""
+    @property
+    def psi(self):
+        """Return grid an boundary psi."""
+        return np.append(self.grid.psi, self.boundary.psi)
+
+    @property
+    def polarity(self):
+        """Return plasma polarity."""
+        return np.sign(self.sloc['Plasma', 'Ic'])
+
+    @cached_property
+    def pointloop(self):
+        """Return pointloop instance, used to check loop membership."""
         if self.sloc['plasma'].sum() == 0:
-            return
-        self.pointloop = PointLoop(self.loc['plasma', ['x', 'z']].to_numpy())
-
-    def insert(self, *args, required=None, iloc=None, **additional):
-        """Insert plasma, normalize turn number for multiframe plasmas."""
-        super().insert(*args, required=None, iloc=None, **additional)
-        if self.sloc['plasma'].sum() == 1:
-            return
-        self.linkframe(self.Loc['plasma', :].index.tolist())
-        self.Loc['plasma', 'nturn'] = \
-            self.Loc['plasma', 'area'] / np.sum(self.Loc['plasma', 'area'])
-        self.loc['plasma', 'nturn'] = \
-            self.loc['plasma', 'area'] / np.sum(self.loc['plasma', 'area'])
-
-    @property
-    def plasma_version(self):
-        """Manage unique separtrix identifier - store id in metaframe data."""
-        return self.subframe.version['plasma']
-
-    @property
-    def boundary(self) -> Polygon:
-        """Return vessel boundary."""
-        return self.Loc['plasma', 'poly'][0]
+            raise AttributeError('No plasma filaments found.')
+        return PointLoop(self.loc['plasma', ['x', 'z']].to_numpy())
 
     @property
     def separatrix(self):
-        """Return input plasma separatrix trimmed to first wall."""
-        if self.loop is None:
-            self.update_separatrix(self.boundary)
-        return Polygon(self.loop).poly.intersection(self.boundary.poly)
+        """Return plasma separatrix, the convex hull of active filaments."""
+        index = self.loc['plasma', 'nturn'] > 0
+        points = self.loc['plasma', ['x', 'z']][index].values
+        hull = scipy.spatial.ConvexHull(points)
+        vertices = np.append(hull.vertices, hull.vertices[0])
+        return points[vertices]
 
-    def update_separatrix(self, loop):
+    @separatrix.setter
+    def separatrix(self, loop):
         """
         Update plasma separatrix.
 
@@ -118,43 +83,122 @@ class Plasma(PlasmaGrid, Axes, FrameSetLoc):
         """
         if self.sloc['plasma'].sum() == 0:
             return
-        if self.pointloop is None:
-            self.generate_pointloop()
         try:
             inloop = self.pointloop.update(loop)
         except numba.TypingError:
             loop = Polygon(loop).boundary
             inloop = self.pointloop.update(loop)
-        self.loop = loop
-        self.subframe.version['plasma'] = id(loop)
-        self.update_loc_indexer()
         plasma = self.aloc['plasma']
         ionize = self.aloc['ionize']
         nturn = self.aloc['nturn']
         area = self.aloc['area']
         ionize[plasma] = inloop
         self._update_nturn(plasma, ionize, nturn, area)
+        self.update_aloc_hash('nturn')
 
     @staticmethod
-    @njit
+    @numba.njit
     def _update_nturn(plasma, ionize, nturn, area):
         nturn[plasma] = 0
         ionize_area = area[ionize]
         nturn[ionize] = ionize_area / np.sum(ionize_area)
 
-    def plot(self, axes=None, boundary=True):
-        """Plot plasma boundary and separatrix."""
-        self.axes = axes
-        if (poly := self.separatrix) is not None and not poly.is_empty:
+    def residual(self, Psi):
+
+        self.grid.operator['Psi'].matrix[:, 115] = Psi
+        self.grid.version['psi'] = None
+
+        plasma = self.aloc['plasma']
+        ionize = self.aloc['ionize']
+        nturn = self.aloc['nturn']
+        area = self.aloc['area']
+
+        ionize[:] = 0
+        ionize[plasma] = self.grid.psi < -50
+
+        self._update_nturn(plasma, ionize, nturn, area)
+        self.grid.operator['Psi'].update_turns(True)
+
+        return Psi - self.grid.operator['Psi'].matrix[:, 115]
+
+    def _residual(self, nturn):
+        """Update plasma seperatrix."""
+
+        '''
+        psi_grid = psi[:self.grid.target_number]
+        self.grid.update_null(psi_grid)
+
+        #print(self.grid.x_psi.min())
+        psi_boundary = psi[-self.boundary.target_number:]
+        #s_psi = np.min([psi_boundary.min(), self.grid.x_psi[0]])
+        '''
+
+        '''
+        try:
+            s_psi = self.grid.x_psi[0]
+        except IndexError:
+            s_psi = self.boundary.psi.min()
+        '''
+        nturn /= sum(nturn)
+
+        # update nturn
+        plasma = self.aloc['plasma']
+        self.aloc['nturn'][plasma] = nturn
+        self.update_aloc_hash('nturn')
+
+
+        # solve rhs
+
+        psi = self.boundary.psi.min()
+        '''
+        if len(self.grid.x_psi) > 0:
+            psi = self.grid.x_psi.min()
+        else:
+            psi = psi_boundary
+        print(psi, [psi_boundary, self.grid.x_psi])
+        '''
+
+        self.aloc['ionize'] = 0
+        self.aloc['ionize'][plasma] = self.grid.psi < psi
+        self.aloc['nturn'][plasma] = 0
+        ionize_area = self.aloc['area'][self.aloc['ionize']]
+        self.aloc['nturn'][self.aloc['ionize']] = \
+            ionize_area / np.sum(ionize_area)
+
+        print(sum(nturn), sum(self.aloc['nturn'][self.aloc['ionize']]))
+
+        #self._update_nturn(plasma, ionize,
+        #                   self.aloc['nturn'], self.aloc['area'])
+        self.update_aloc_hash('nturn')
+        return nturn - self.aloc['nturn'][plasma]
+
+    def plot(self, turns=True):
+        """Plot separatirx as polygon patch."""
+        if turns:
+            self.subframe.polyplot('plasma')
+        '''
+        poly = Polygon(self.separatrix).poly
+        if not poly.is_empty:
             self.axes.add_patch(descartes.PolygonPatch(
                 poly.__geo_interface__,
-                facecolor='C4', alpha=0.75, linewidth=0.5, zorder=-10))
-        if boundary:
-            self.boundary.plot_boundary(self.axes, color='gray')
-        plt.axis('equal')
-        plt.axis('off')
+                facecolor='C4', alpha=0.75, linewidth=0, zorder=-10))
+        '''
+        self.boundary.plot()
+        self.grid.plot()
 
-    @property
-    def polarity(self):
-        """Return plasma polarity."""
-        return np.sign(self.sloc['Plasma', 'Ic'])
+
+'''
+
+    def store(self, filename: str, path=None):
+        """Extend netCDF.store, store data as netCDF in hdf5 file."""
+        self.data = xarray.Dataset()
+        self.data['loop_coorinates'] = ['x', 'z']
+        self.data['loop'] = ('loop_index', 'loop_coorinates'), self.loop
+        super().store(filename, path)
+
+    def load(self, filename: str, path=None):
+        """Extend netCDF.load, load data from hdf5."""
+        super().load(filename, path)
+        self.loop = self.data['loop'].data
+        return self
+'''

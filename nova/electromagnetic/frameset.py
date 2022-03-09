@@ -1,9 +1,13 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 from dataclasses import dataclass, field
+import os
 
+import netCDF4
 import pandas
 
-from nova.electromagnetic.filepath import FilePath
+from nova.database.filepath import FilePath
+from nova.database.netcdf import netCDF
+from nova.electromagnetic.framedata import FrameData
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.select import Select
@@ -13,7 +17,6 @@ from nova.electromagnetic.select import Select
 class FrameSet(FilePath, FrameSetLoc):
     """Manage FrameSet instances."""
 
-    delta: float = -1
     base: list[str] = field(repr=False, default_factory=lambda: [
         'x', 'y', 'z', 'dx', 'dy', 'dz'])
     required: list[str] = field(repr=False, default_factory=lambda: [])
@@ -29,7 +32,7 @@ class FrameSet(FilePath, FrameSetLoc):
         'Ic', 'nturn'])
 
     def __post_init__(self):
-        """Init coil and subcoil."""
+        """Create frame and subframe."""
         self.frame = FrameSpace(
             base=self.base, required=self.required, additional=self.additional,
             available=self.available, subspace=[],
@@ -41,7 +44,7 @@ class FrameSet(FilePath, FrameSetLoc):
             available=self.available, subspace=self.subspace,
             exclude=['turn', 'scale', 'nfilament', 'delta'],
             array=self.array, delim='_',
-            version=['plasma', 'index'])
+            version=['index', 'nturn'])
         self.subframe.frame_attr(Select, ['Ic'])
         super().__post_init__()
 
@@ -55,18 +58,61 @@ class FrameSet(FilePath, FrameSetLoc):
         superframe['It'] = superframe['Ic'] * superframe['nturn']
         return superframe.__str__()
 
-    def store(self, filename: str, path=None):
-        """Store frame and subframe as groups within hdf file."""
+    def clear_frameset(self):
+        """Clear all frameset instances."""
+        delattrs = []
+        for attr in self.__dict__:
+            if isinstance(getattr(self, attr), FrameData):
+                delattrs.append(attr)
+        for attr in delattrs:
+            delattr(self, attr)
+
+    def load_metadata(self, filename: str, path=None):
+        """Return metadata from netCDF file."""
         file = self.file(filename, path)
-        self.frame.store(file, 'frame', mode='w')
-        self.subframe.store(file, 'subframe', mode='a')
+        metadata = {}
+        with netCDF4.Dataset(file) as dataset:
+            if not hasattr(dataset, 'metadata'):
+                return {}
+            for attr in dataset.metadata:
+                metadata[attr] = getattr(dataset, attr)
+        return metadata
+
+    def store_metadata(self, filename: str, path=None, metadata=None):
+        """Store metadata to netCDF file."""
+        file = self.file(filename, path)
+        if metadata is None:
+            metadata = {}
+        with netCDF4.Dataset(file, 'a') as dataset:
+            dataset.metadata = list(metadata)
+            for attr in metadata:
+                setattr(dataset, attr, metadata[attr])
 
     def load(self, filename: str, path=None):
         """Load frameset from file."""
+        super().__post_init__()
         file = self.file(filename, path)
         self.frame.load(file, 'frame')
         self.subframe.load(file, 'subframe')
+        self.clear_frameset()
+        with netCDF4.Dataset(file) as dataset:
+            for attr in dataset.groups:
+                if attr in dir(self.__class__) and isinstance(
+                        data := getattr(self, attr), netCDF):
+                    data.load(file)
         return self
+
+    def store(self, filename: str, path=None, metadata=None):
+        """Store frame and subframe as groups within hdf file."""
+        file = self.file(filename, path)
+        if os.path.isfile(file):
+            os.remove(file)
+        self.frame.store(file, 'frame', mode='w')
+        self.subframe.store(file, 'subframe', mode='a')
+        for attr in self.__dict__:
+            if isinstance(data := getattr(self, attr), netCDF):
+                data.store(file)
+        self.store_metadata(filename, path, metadata)
 
     def plot(self, index=None, axes=None, **kwargs):
         """Plot coilset."""
@@ -77,13 +123,3 @@ if __name__ == '__main__':
 
     frameset = FrameSet(required=['rms'], additional=['Ic'])
     frameset.subframe.insert([2, 4], It=6, link=True)
-    print(frameset.subframe.rms)
-
-    frameset.store('tmp')
-    del frameset
-    frameset = FrameSet()
-    frameset.load('tmp')
-
-    print('')
-    print(frameset.subframe.rms)
-    print('')

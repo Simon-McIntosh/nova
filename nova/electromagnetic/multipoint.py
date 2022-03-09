@@ -62,8 +62,6 @@ class MultiPoint(MetaMethod):
         index = self.frame.index[istrue | isnumeric]
         if not index.empty:
             with self.frame.setlock(True, 'multipoint'):
-                factor = np.ones(len(self.frame))
-                factor[isnumeric] = self.frame.link[isnumeric]
                 factor = self.frame.factor
                 factor = factor[istrue | isnumeric][1:]
                 self.link(index, factor)

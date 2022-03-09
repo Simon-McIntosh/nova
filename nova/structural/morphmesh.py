@@ -28,7 +28,7 @@ class MorphMesh(Plotter):
     @property
     def name(self):
         """Return mesh name."""
-        name = f'{self.fiducial.name}_{self.base.name}'
+        name = f'{self.fiducial.name}_base'  # '_{self.base.name}'
         if self.version is not None:
             name += f'_{self.version}'
         return name
@@ -49,8 +49,10 @@ class MorphMesh(Plotter):
 
     def morph(self):
         """Morph base mesh."""
-        self.mesh = Morph(self.fiducial, self.base,
-                          smoothing=self.smoothing).mesh
+        #self.mesh = Morph(self.fiducial, self.base,
+        #                  smoothing=self.smoothing).mesh
+        self.mesh = self.base.copy()
+        Morph(self.fiducial).predict(self.base)
 
     #morph.animate('TFC18_morph', 'delta', max_factor=500,
     #              frames=31, opacity=0)
@@ -62,6 +64,8 @@ if __name__ == '__main__':
     base = AnsysPost('TFCgapsG10', 'k0', 'all')
 
     morph = MorphMesh(fiducial.mesh, base.mesh)
+
+    morph.plot()
 
 
     #morph.animate('TFC18_morph', 'delta', max_factor=500,

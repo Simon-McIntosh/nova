@@ -53,6 +53,8 @@ class Fit(BiotPlot, Machine):
 
 if __name__ == '__main__':
 
+    from scipy.optimize._nonlin import BroydenFirst, KrylovJacobian
+
     fit = Fit(135011, 7)
     #fit.build(dcoil=0.5, dshell=0.5, dplasma=-500, tcoil='hex')
 
@@ -76,7 +78,8 @@ if __name__ == '__main__':
 
         return scipy.optimize.root(
             fit.plasma.residual, Psi_o,
-            method='krylov', tol=0.05, options=dict(disp=False))
+            method='krylov', tol=0.05,
+            options=dict(disp=False, jac_options=dict(method='gmres')))
 
 
 
@@ -96,6 +99,8 @@ if __name__ == '__main__':
     print(sol.success, sol.message)
 
     fit.plot()
+
+    #import scipy.optimize
 
 
 '''

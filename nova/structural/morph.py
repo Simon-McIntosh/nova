@@ -40,7 +40,7 @@ class Morph(Plotter):
         if index is None:
             index = np.full(mesh.n_points, True)
         index &= ~np.isnan(mesh.points).any(axis=1)
-        mesh['delta'][index, :] = self.gpr.predict(mesh.points[index , :])
+        mesh['delta'][index, :] = self.gpr.predict(mesh.points[index, :])
 
 
 if __name__ == '__main__':
@@ -50,9 +50,8 @@ if __name__ == '__main__':
     # mesh = AnsysPost('TFCgapsG10', 'k0', 'all').mesh
     #mesh = AnsysPost('TFCgapsG10', 'k0', 'E_WP_1').mesh
 
-
     fiducial = FiducialMesh()
-    fiducial.load_centerline([0])
+    fiducial.load_coil([0])
 
     morph = Morph(fiducial.mesh)
 

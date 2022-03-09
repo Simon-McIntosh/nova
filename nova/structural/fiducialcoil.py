@@ -80,18 +80,22 @@ class FiducialCoil(Plotter):
         case = self.load_case(decimate=0)
         windingpack = self.load_surface_mesh('E_WP_1', decimate=0)
         for i in range(18):
-            morph_wp = Morph(self.fiducialdata.mesh.extract_cells(i),
-                             windingpack,
-                             neighbors=1, kernel='linear').mesh
+            #morph_wp = Morph(self.fiducialdata.mesh.extract_cells(i),
+            #                 windingpack,
+            #                 neighbors=1, kernel='linear').mesh
+            morph_wp = windingpack.copy()
+            Morph(self.fiducialdata.mesh.extract_cells(i)).predict(morph_wp)
             sub_wp = morph_wp.decimate_boundary(self.decimate)
             sub_wp = sub_wp.interpolate(morph_wp)
-            morph_case = Morph(sub_wp, case, smoothing=10).mesh
+            #morph_case = Morph(sub_wp, case, smoothing=10).mesh
+            morph_case = case.copy()
+            Morph(sub_wp).predict(morph_case)
             sub_case = morph_case.decimate_boundary(self.decimate)
             sub_case = sub_case.interpolate(morph_case)
             self.mesh += sub_wp
             self.mesh += sub_case
-            windingpack.rotate_z(20)
-            case.rotate_z(20)
+            windingpack.rotate_z(20, inplace=True)
+            case.rotate_z(20, inplace=True)
 
     def add_frozen(self):
         """
@@ -120,5 +124,5 @@ class FiducialCoil(Plotter):
 if __name__ == '__main__':
 
     fiducialcoil = FiducialCoil('fiducial', 10)
-    fiducialcoil.mesh = fiducialcoil.mesh.slice((0, 0, 1))
-    fiducialcoil.warp(500, opacity=0, displace='delta')
+    #fiducialcoil.mesh = fiducialcoil.mesh.slice((0, 0, 1))
+    fiducialcoil.warp(500, opacity=1, displace='delta')

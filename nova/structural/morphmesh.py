@@ -24,6 +24,8 @@ class MorphMesh(Plotter):
     def __post_init__(self):
         """Init data directory and load morphed mesh."""
         self.load()
+        #self.morph()
+        #self.mesh.save(self.filename)
 
     @property
     def name(self):
@@ -52,7 +54,8 @@ class MorphMesh(Plotter):
         #self.mesh = Morph(self.fiducial, self.base,
         #                  smoothing=self.smoothing).mesh
         self.mesh = self.base.copy()
-        Morph(self.fiducial).predict(self.base)
+        #Morph(self.fiducial).predict(self.base)
+        Morph(self.fiducial).interpolate(self.mesh, neighbors=None)
 
     #morph.animate('TFC18_morph', 'delta', max_factor=500,
     #              frames=31, opacity=0)
@@ -65,7 +68,11 @@ if __name__ == '__main__':
 
     morph = MorphMesh(fiducial.mesh, base.mesh)
 
-    morph.plot()
+    morph.mesh['displacement mm'] = 1e3*morph.mesh['delta']
+    plotter = morph.warp(0.1, 0, plotter=pv.Plotter())
+    plotter.update_scalar_bar_range(clim=[0, 6])
+    plotter.show()
+
 
 
     #morph.animate('TFC18_morph', 'delta', max_factor=500,

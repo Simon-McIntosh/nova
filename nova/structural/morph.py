@@ -42,6 +42,21 @@ class Morph(Plotter):
         index &= ~np.isnan(mesh.points).any(axis=1)
         mesh['delta'][index, :] = self.gpr.predict(mesh.points[index, :])
 
+    def interpolate(self, mesh: pv.PolyData, index=None,
+                    neighbors=None, smoothing=0, kernel='linear', epsilon=1):
+        """Build radial basis function interpolator and apply to mesh."""
+
+        _index = np.unique(self.mesh.points, axis=0, return_index=True)[1]
+        rbf = scipy.interpolate.RBFInterpolator(
+                self.mesh.points[_index], self.mesh['delta'][_index],
+                neighbors=neighbors,
+                smoothing=smoothing, kernel=kernel, epsilon=epsilon)
+        if 'delta' not in mesh.array_names:
+            mesh['delta'] = np.zeros((mesh.n_points, 3))
+        if index is None:
+            index = np.full(mesh.n_points, True)
+        mesh['delta'] = rbf(mesh.points)
+
 
 if __name__ == '__main__':
 
@@ -56,7 +71,8 @@ if __name__ == '__main__':
     morph = Morph(fiducial.mesh)
 
     index = TF1.mesh.points[:, 0] < 5.5
-    morph.predict(TF1.mesh, index=index)
+    #morph.predict(TF1.mesh, index=index)
+    morph.interpolate(TF1.mesh, index=index)
 
     TF1.warp(500)
 

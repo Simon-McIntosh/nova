@@ -27,7 +27,7 @@ class Plotter:
 
     def warp(self, factor=75, opacity=0.5, displace=None, scalars=None,
              plotter=None, show_edges=False, color=None, show=False,
-             view='iso'):
+             view='iso', clim=None):
         """Plot warped with mesh."""
         if displace is None:
             displace = self.mesh.active_scalars_name
@@ -39,13 +39,13 @@ class Plotter:
         if opacity > 0:
             plotter.add_mesh(self.mesh, scalars=None, color='w',
                              opacity=opacity, smooth_shading=True,
-                             line_width=3)
+                             line_width=3, clim=[1000, 2000])
 
         #self.mesh['disp'] = self.mesh[displace] - self.mesh['disp-5']
         #self.mesh[scalars] = 1e-6*(self.mesh[scalars] - self.mesh['vm-5'])
         warp = self.mesh.warp_by_vector(displace, factor=factor)
         plotter.add_mesh(warp, scalars=scalars, line_width=3,
-                         show_edges=show_edges, opacity=0.5,
+                         show_edges=show_edges, opacity=1,
                          color=color)
         #, smooth_shading=True, show_scalar_bar=False, clim=[-25, 25])
         if view != 'iso':

@@ -194,5 +194,6 @@ if __name__ == '__main__':
     base = AnsysPost('TFCgapsG10', 'k0', 'all')
 
     ansys = MorphAnsys('ccl0', fiducial.mesh, base.mesh)
-    ansys.write_table()
-    ansys.write_macro()
+
+    #ansys.write_table()
+    #ansys.write_macro()

@@ -68,13 +68,21 @@ class Profile1D(Scenario):
         """Build 1d profile data."""
         super().build()
         time_slice = self.time_slice('profiles_1d', 0, index=None)
-        self.data['flux_index'] = range(len(time_slice.psi))
-        self.data.attrs['profiles_1d'] = ('time', 'flux_index')
+        self.data['psi_norm'] = np.linspace(0, 1, len(time_slice.psi))
+        self.data.attrs['profiles_1d'] = ('time', 'psi_norm')
         self.time_slice.build('profiles_1d', self.attrs_1d, index=None)
+        for itime in range(self.data.dims['time']):  # normalize 1D profiles
+            psi = self.data.psi[itime]
+            if np.isclose(psi[-1] - psi[0], 0):
+                continue
+            psi_norm = (psi - psi[0]) / (psi[-1] - psi[0])
+            for attr in self.attrs_1d:
+                self.data[attr][itime] = np.interp(
+                    self.data.psi_norm, psi_norm, self.data[attr][itime])
 
     def plot_1d(self, itime=-1, attr='psi'):
         """Plot 1d profile."""
-        plt.plot(self.data.flux_index, self.data.psi[itime])
+        plt.plot(self.data.psi_norm, self.data[attr][itime])
 
 
 @dataclass
@@ -124,6 +132,7 @@ if __name__ == '__main__':
 
     itime = 500
     #eq.plot_0d('ip')
-    eq.plot_2d(itime, 'psi', colors='C3', levels=21)
+    #eq.plot_2d(itime, 'psi', colors='C3', levels=21)
     #eq.plot_2d(500, 'j_tor')
-    #eq.plot_1d(500)
+    #eq.plot_1d(itime, 'dpressure_dpsi')
+    eq.plot_1d(itime, 'f_df_dpsi')

@@ -106,7 +106,7 @@ class DataBase:
 
     def binary_filepath(self, filename):
         """Return binary filepath."""
-        return os.path.join(self.local.binary_directory, filename)
+        return os.path.join(self.local.data_directory, filename)
 
     def source_filepath(self, filename):
         """Return source filepath."""

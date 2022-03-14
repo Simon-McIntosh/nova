@@ -17,7 +17,15 @@ from nova.utilities.pyplot import plt
 
 
 @dataclass
-class Regression:
+class RegressionBase:
+    """Regresion base class to be extended by basis function factory."""
+
+    def __post_init__(self):
+        """Construct interaction matrix."""
+
+
+@dataclass
+class Regression(RegressionBase):
     """Implement full-matrix forward and inverse models."""
 
     matrix: npt.ArrayLike = field(repr=False, default=None)
@@ -27,6 +35,7 @@ class Regression:
 
     def __post_init__(self):
         """Calculate adjoint and update model and data."""
+        super().__post_init__()
         self.matrix_H = self.matrix.T.copy(order='C')
         if self.model is not None:
             self.update_model(self.model)

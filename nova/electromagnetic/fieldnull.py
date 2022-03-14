@@ -231,7 +231,7 @@ if __name__ == '__main__':
     coilset = CoilSet(dcoil=0.5)
     coilset.coil.insert(5, [-2, 2], 0.75, 0.75)
     coilset.coil.insert(7.8, 0, 0.75, 0.75, label='Xcoil')
-    coilset.plasma.insert(dict(o=(4, 0, 0.5)), delta=0.3)
+    coilset.firstwall.insert(dict(o=(4, 0, 0.5)), delta=0.3)
     coilset.grid.solve(500, 0.05)
     coilset.sloc['Ic'] = -15e6
 

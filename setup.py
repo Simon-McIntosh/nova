@@ -45,6 +45,7 @@ setup_kwargs = dict(
         'numba',
         'numpy',
         'pandas',
+        'pylops',
         'pytest',
         'pyvista',
         'pyquaternion',

@@ -189,13 +189,13 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
             self.check_null()
         return super().__getattribute__(attr)
 
-    def plot_svd(self, axes=None, **kwargs):
+    def plot_svd(self, **kwargs):
         """Plot influence of SVD reduction."""
         for svd, color, linestyle in zip([False, True], ['C7', 'C3'],
                                          ['solid', 'dashed']):
             self.update_turns('Psi', svd)
             kwargs |= dict(colors=color, linestyles=linestyle)
-            self.plot(axes, **kwargs)
+            self.plot(**kwargs)
 
 
 @dataclass

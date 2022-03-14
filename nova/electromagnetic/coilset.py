@@ -42,7 +42,7 @@ class CoilSet(BiotFactory, FrameFactory):
 if __name__ == '__main__':
 
     filename = 'biot'
-    reload = False
+    reload = True
     if reload:
         coilset = CoilSet(dcoil=-35, dplasma=-500)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
@@ -51,7 +51,7 @@ if __name__ == '__main__':
                             tile=True, delta=-6, name='bubble')
         coilset.coil.insert(2, 0, 0.95, 0.1, section='sk', nturn=-1.8)
         coilset.coil.insert(3, 0, 0.6, 0.9, section='r', turn='sk')
-        coilset.plasma.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')
+        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')
         coilset.shell.insert({'e': [2.5, -1.25, 1.75, 1.0]}, 13, 0.05,
                              delta=-40, part='vv')
 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
         coilset.grid.solve(500, 0.1, 'plasma')
         coilset.plasmagrid.solve()
 
-        coilset.plasma.update_separatrix(dict(c=[4.5, 0.25, 0.9]))
+        coilset.plasma.separatrix = dict(c=[4.5, 0.25, 0.9])
 
         coilset.sloc['Ic'] = 6
         coilset.sloc['bubble', 'Ic'] = 5
@@ -72,7 +72,7 @@ if __name__ == '__main__':
         coilset = CoilSet().load(filename)
 
     separatrix = Polygon(dict(c=[4.5, 0.25, 0.9])).boundary
-    coilset.plasma.update_separatrix(separatrix)
+    coilset.plasma.separatrix = separatrix
 
     coilset.sloc['bubble', 'Ic'] = 8
     coilset.sloc['passive', 'Ic'] = 4
@@ -84,5 +84,5 @@ if __name__ == '__main__':
     coilset.grid.plot(levels=31)
     coilset.plasmagrid.plot(levels=coilset.grid.levels, colors='C6')
 
-    coilset.plasmagrid.load_operators(10)
+    coilset.plasmagrid.svd_rank = 10
     coilset.plasmagrid.plot_svd(levels=coilset.grid.levels)

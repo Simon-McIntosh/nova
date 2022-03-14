@@ -17,17 +17,6 @@ def matmul(A, B):
     return vector
 
 
-@numba.experimental.jitclass(dict(
-    current=numba.float64[::1],
-    nturn=numba.float64[::1],
-    plasma=numba.boolean[::1],
-    plasma_index=numba.int32,
-    matrix=numba.float64[:, ::1],
-    plasma_matrix=numba.float64[:, ::1],
-    svd_rank=numba.int32,
-    plasma_U=numba.float64[:, ::1],
-    plasma_s=numba.float64[::1],
-    plasma_V=numba.float64[:, ::1]))
 class BiotOp:
     """Fast array opperations for Biot Data arrays."""
 

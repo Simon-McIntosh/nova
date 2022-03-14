@@ -10,16 +10,18 @@ class Decompose:
     """Provide svd methods."""
 
     matrix: npt.ArrayLike = None
-    shape: tuple[int, int] = None
-    svd: bool = True
     rank: int = None
-    _svd: dict = field(init=False, repr=False)
+    matrices: dict = field(repr=False, default_factory=dict)
 
     def __post_init__(self):
         """Calculate svd decomposition."""
-        super().__post_init__()
         self.initialize_rank()
         self.decompose()
+
+    @property
+    def shape(self):
+        """Return matrix shape."""
+        return self.matrix.shape
 
     def initialize_rank(self):
         """Init svd rank."""
@@ -38,18 +40,19 @@ class Decompose:
     def decompose(self):
         """Perform SVD order reduction."""
         UsVh = np.linalg.svd(self.matrix, full_matrices=False)
-        self._svd = dict(U=UsVh[0], s=UsVh[1], Vh=UsVh[2])
+        self.matrices = dict(U=UsVh[0], s=UsVh[1], Vh=UsVh[2])
         self.reduce()
         self.transpose()
-        assert (self._svd['s'] > 0).all()
+        assert (self.matrices['s'] > 0).all()
 
     def transpose(self):
         """Transpose derived svd arrays."""
-        self._svd |= dict(Uh=self._svd['U'].T, V=self._svd['Vh'].T)
+        self.matrices |= dict(Uh=self.matrices['U'].T.copy(order='C'),
+                              V=self.matrices['Vh'].T.copy(order='C'))
 
     def reduce(self):
         """Apply rank reduction to svd data."""
         if self.rank < min(self.shape):
-            self._svd['U'] = self._svd['U'][:, :self.rank]
-            self._svd['s'] = self._svd['s'][:self.rank]
-            self._svd['Vh'] = self._svd['Vh'][:self.rank, :]
+            self.matrices['U'] = self.matrices['U'][:, :self.rank]
+            self.matrices['s'] = self.matrices['s'][:self.rank]
+            self.matrices['Vh'] = self.matrices['Vh'][:self.rank, :]

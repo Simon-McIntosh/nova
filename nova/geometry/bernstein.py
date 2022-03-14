@@ -30,9 +30,9 @@ class Op:
         #  perform svd order reduction
         _U, _s, _V = np.linalg.svd(self.matri)
         self.svd_rank = min([len(_s), svd_rank])
-        self._U = _U[:, :self.svd_rank].copy()
-        self._s = _s[:self.svd_rank].copy()
-        self._V = _V[:self.svd_rank, :].copy()
+        self._U = _U[:, :self.svd_rank]
+        self._s = _s[:self.svd_rank]
+        self._V = _V[:self.svd_rank, :]
         assert all(self._s > 0)
 
     def __call__(self):

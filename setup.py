@@ -38,6 +38,7 @@ setup_kwargs = dict(
     install_requires    = [
         'alphashape',
         'cython',
+        'dask',
         'descartes',
         'meshio',
         'netCDF4',

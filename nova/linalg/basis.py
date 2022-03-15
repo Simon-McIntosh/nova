@@ -69,19 +69,23 @@ if __name__ == '__main__':
     # eq.build()
     attr = 'f_df_dpsi'
     #attr = 'dpressure_dpsi'
-    itime = 500
+    itime = 575
     profile = eq.data[attr][itime]
 
+    rng = np.random.default_rng(2025)
+
     data = profile.data.copy()
-    data += np.random.random(eq.data.dims['psi_norm'])-0.5
+    data += np.std(data) * (rng.random(eq.data.dims['psi_norm']) - 0.5)
 
     bernstein = Bernstein(eq.data.dims['psi_norm'], 25)
 
+    import scipy
     from sklearn.kernel_ridge import KernelRidge
+    from sklearn.metrics.pairwise import rbf_kernel
 
-    krr = KernelRidge(alpha=10, kernel='linear')
+    krr = KernelRidge(alpha=0.5, kernel='rbf')
 
-    X = eq.data[attr].data
+    X = eq.data[attr].data[::10]
 
     y = [bernstein / sample for sample in X]
 
@@ -95,10 +99,35 @@ if __name__ == '__main__':
 
     plt.plot(bernstein.coordinate, data, 'o')
 
-    #bernstein / data
-    #bernstein.plot(axes=plt.gca())
+    alpha = 0.5
+    K = X.copy()
 
+    import numba
 
+    @numba.jit
+    def rbf(X):
+        """Compute rbf kernel."""
+        gamma = 1 / X.shape[1]
+        K = np.zeros(len(X))
+        for i in range(len(X)):
+            L2 = 2*np.linalg.norm(X[i]) - 2 * X[i] @ X[i]
+            K[i] = np.exp(-gamma * L2)
+
+        X_norm = np.sum(X ** 2, axis = -1)
+        K = np.exp(-gamma * (2*X_norm - 2 * np.dot(X, X.T)))
+        return K
+
+    K_ = rbf(X)
+    print(rbf(X))
+
+    K = rbf_kernel(X)
+    K.flat[:: X.shape[0] + 1] += alpha
+    dual_coef = scipy.linalg.solve(K, y, sym_pos=True, overwrite_a=False)
+
+    bernstein.model = rbf_kernel(data.reshape(1, -1), X)[0] @ dual_coef
+
+    # bernstein / data
+    bernstein.plot(axes=plt.gca())
 
     '''
     #cov = np.cov(eq.data[attr][:, :-1].T)

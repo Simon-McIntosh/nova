@@ -1,31 +1,18 @@
 """Provide linear operators for regression analysis."""
-from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 import numba
 import numpy as np
 import numpy.typing as npt
 from pylops import LinearOperator
-import scipy.optimize
-import scipy.special
-import scipy.sparse
 
 from nova.electromagnetic.biotoperate import matmul
-from nova.imas.equilibrium import Equilibrium
 from nova.linalg.decompose import Decompose
 from nova.utilities.pyplot import plt
 
 
 @dataclass
-class RegressionBase:
-    """Regresion base class to be extended by basis function factory."""
-
-    def __post_init__(self):
-        """Construct interaction matrix."""
-
-
-@dataclass
-class Regression(RegressionBase):
+class Regression:
     """Implement full-matrix forward and inverse models."""
 
     matrix: npt.ArrayLike = field(repr=False, default=None)
@@ -35,7 +22,6 @@ class Regression(RegressionBase):
 
     def __post_init__(self):
         """Calculate adjoint and update model and data."""
-        super().__post_init__()
         self.matrix_H = self.matrix.T.copy(order='C')
         if self.model is not None:
             self.update_model(self.model)
@@ -119,9 +105,10 @@ class Regression(RegressionBase):
         self.model = self._inverse()
         return self.model
 
-    def plot(self):
+    def plot(self, axes=None):
         """Plot fit."""
-        axes = plt.subplots(1, 1)[1]
+        if axes is None:
+            axes = plt.subplots(1, 1)[1]
         if self.data is not None:
             axes.plot(self.coordinate, self.data, label='data')
         if self.model is not None:
@@ -181,80 +168,3 @@ class RegressionSvd(Decompose, Regression):
             return self.__inverse(self.matrices['V'], self.matrices['s'],
                                   self.matrices['Uh'], self.data)
         return super()._inverse()
-
-
-@dataclass
-class BasisFunction(ABC):
-    """Basis function base class."""
-
-    length: int
-    order: int
-
-    def __post_init__(self):
-        """Construct interaction matrix and initalize operator."""
-        self.coordinate = np.linspace(0, 1, self.length)
-        self.matrix = np.copy(
-            np.c_[[self.basis(i) for i in range(self.order+1)]].T, order='C')
-        super().__post_init__()
-
-    @abstractmethod
-    def basis(self, term: int):
-        """Return ith term basis."""
-
-    def plot_basis(self, model=None, **kwargs):
-        """Plot set of basis functions evaluated for coordinate."""
-        if model is None:
-            model = np.ones(self.order+1)
-        for i, coef in enumerate(model):
-            plt.plot(self.coordinate, coef * self.basis(i), **kwargs)
-
-
-@dataclass
-class BasisAttributes:
-    """Basis function non-default attributes."""
-
-    length: int
-    order: int
-
-
-@dataclass
-class Bernstein(BasisFunction, Regression, BasisAttributes):
-    """Berstein polynomial regression of a given order."""
-
-    def basis(self, term: int):
-        """Return Bernstein basis polynomial."""
-        super().basis(term)
-        return scipy.special.binom(self.order, term) * \
-            self.coordinate**term * (1 - self.coordinate)**(self.order - term)
-
-
-if __name__ == '__main__':
-
-    #berstein.plot()
-
-    eq = Equilibrium(135011, 7)
-    # eq.build()
-    attr = 'f_df_dpsi'
-    #attr = 'dpressure_dpsi'
-    itime = 200
-    profile = eq.data[attr][itime]
-
-    bernstein = Bernstein(eq.data.dims['psi_norm'], 21)
-
-    bernstein /= profile.data
-
-    bernstein.plot()
-
-    '''
-
-    #bernstein = Bernstein(eq.data.dims['psi_norm'], 21)
-    #lsq = scipy.optimize.lsq_linear(bernstein.matrix, profile)
-
-
-    #lop = berstein / profile
-    #np.linalg.lstsq(berstein.matrix, profile)
-
-    plt.plot(eq.data.psi_norm, profile)
-    #plt.plot(eq.data.psi_norm, bernstein.matrix @ lsq.x, '--')
-    plt.plot(eq.data.psi_norm, bernstein(), '-.')
-    '''

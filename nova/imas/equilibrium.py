@@ -126,11 +126,13 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
 
 
 if __name__ == '__main__':
-
-    eq = Equilibrium(135011, 7)
+    shot, run = 135011, 7
+    shot, run = 135013, 2
+    shot, run = 130506, 403
+    eq = Equilibrium(shot, run)
     # eq.build()
 
-    itime = 500
+    itime = 30
     #eq.plot_0d('ip')
     #eq.plot_2d(itime, 'psi', colors='C3', levels=21)
     #eq.plot_2d(500, 'j_tor')

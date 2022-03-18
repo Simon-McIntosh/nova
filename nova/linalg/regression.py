@@ -1,4 +1,5 @@
 """Provide linear operators for regression analysis."""
+from abc import abstractmethod
 from dataclasses import dataclass, field
 
 import numba
@@ -7,26 +8,40 @@ import numpy.typing as npt
 from pylops import LinearOperator
 
 from nova.electromagnetic.biotoperate import matmul
-from nova.linalg.decompose import Decompose
-from nova.utilities.pyplot import plt
+from nova.imas.equilibrium import Equilibrium
+from nova.utilities.plotter import Line
+from nova.linalg.basis import Basis, Svd, Bernstein
 
 
 @dataclass
-class Regression:
+class RegressionBase(Line):
     """Implement full-matrix forward and inverse models."""
 
-    matrix: npt.ArrayLike = field(repr=False, default=None)
+    basis: Basis
     model: npt.ArrayLike = field(default=None)
     data: npt.ArrayLike = field(repr=False, default=None)
-    matrix_H: npt.ArrayLike = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Calculate adjoint and update model and data."""
-        self.matrix_H = self.matrix.T.copy(order='C')
         if self.model is not None:
             self.update_model(self.model)
         if self.data is not None:
             self.update_data(self.data)
+
+    @property
+    def matrix(self):
+        """Return basis matrix."""
+        return self.basis.matrix
+
+    @property
+    def matrix_H(self):
+        """Return matrix transpose."""
+        return self.matrix.T.copy(order='C')
+
+    @property
+    def coordinate(self):
+        """Return basis coordinate."""
+        return self.basis.coordinate
 
     @property
     def shape(self):
@@ -82,8 +97,9 @@ class Regression:
         """Calcuate inverse vir numpy's lstsq method."""
         return np.linalg.lstsq(matrix, data)[0]
 
+    @abstractmethod
     def _inverse(self):
-        return self._lstsq(self.matrix, self.data)
+        """Solve inverse problem."""
 
     def update_data(self, data):
         """Update data if not None, check length."""
@@ -107,19 +123,56 @@ class Regression:
 
     def plot(self, axes=None):
         """Plot fit."""
-        if axes is None:
-            axes = plt.subplots(1, 1)[1]
+        self.axes = axes
         if self.data is not None:
-            axes.plot(self.coordinate, self.data, label='data')
+            self.axes.plot(self.coordinate, self.data, label='data')
         if self.model is not None:
-            # super().plot(self.model, color='gray', alpha=0.5)
-            axes.plot(self.coordinate, self.forward(), '--', label='fit')
-        plt.despine()
-        axes.legend()
+            self.axes.plot(self.coordinate, self.forward(), '--', label='fit')
+        if self.data is not None or self.model is not None:
+            self.axes.legend()
 
 
 @dataclass
-class RegressionLops(LinearOperator, Regression):
+class OdinaryLeastSquares(RegressionBase):
+    """Implement full-matrix forward and inverse models."""
+
+    @staticmethod
+    @numba.njit
+    def _lstsq(matrix, data):
+        """Calcuate inverse vir numpy's lstsq method."""
+        return np.linalg.lstsq(matrix, data)[0]
+
+    def _inverse(self):
+        return self._lstsq(self.matrix, self.data)
+
+
+if __name__ == '__main__':
+
+    basis = Svd(5, 50)
+    attr = 'f_df_dpsi'
+
+    eq = Equilibrium(135010, 5)
+    basis += eq.data[attr]
+
+    eq = Equilibrium(135011, 7)
+    #basis += eq.data[attr]
+
+    eq = Equilibrium(130506, 403)
+    basis += eq.data[attr]
+
+    #basis.interpolate(81)
+    # basis = Bernstein(50, 9)
+
+    ols = OdinaryLeastSquares(basis)
+
+    eq = Equilibrium(135011, 7)
+
+    ols /= eq.data[attr][100].data
+
+    ols.plot()
+'''
+@dataclass
+class Lops(RegressionBase, LinearOperator):
     """Extend Pylops linear operator and Nova regression classes."""
 
     dtype: type = float
@@ -140,8 +193,10 @@ class RegressionLops(LinearOperator, Regression):
 
 
 @dataclass
-class RegressionSvd(Decompose, Regression):
+class Svd(RegressionBase, Decompose):
     """Fast operators for linear regression analysis."""
+
+    svd: bool = True
 
     @staticmethod
     @numba.njit
@@ -168,3 +223,28 @@ class RegressionSvd(Decompose, Regression):
             return self.__inverse(self.matrices['V'], self.matrices['s'],
                                   self.matrices['Uh'], self.data)
         return super()._inverse()
+'''
+
+if __name__ == '__main__':
+
+
+    '''
+
+    #berstein.plot()
+
+    eq = Equilibrium(135011, 7)
+    # eq.build()
+    attr = 'f_df_dpsi'
+    #attr = 'dpressure_dpsi'
+    itime = 500
+    profile = eq.data[attr][itime]
+
+    rng = np.random.default_rng(2025)
+
+    data = profile.data.copy()
+    data += 2 * np.std(data) * (rng.random(eq.data.dims['psi_norm']) - 0.5)
+
+    bernstein = Bernstein(eq.data.dims['psi_norm'], 21)
+    bernstein /= data
+    bernstein.plot()
+    '''

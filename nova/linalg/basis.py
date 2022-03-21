@@ -2,6 +2,7 @@
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import ClassVar
+from warnings import warn
 
 import numpy as np
 import numpy.typing as npt
@@ -9,9 +10,10 @@ import scipy.optimize
 import scipy.special
 import scipy.sparse
 
-from nova.utilities.plotter import Line
+from nova.imas.connect import Connect
 from nova.imas.equilibrium import Equilibrium
 from nova.linalg.decompose import Decompose
+from nova.utilities.plotter import Line
 
 
 @dataclass
@@ -96,8 +98,15 @@ class Svd(Basis, SvdAttrs):
         self.update_coordinate()
         self.order = self.rank-1
 
-    def load_workflow(self, workflow: str):
-
+    def load_frame(self, workflow: str, attr: str):
+        """Load data from imas equilibrium workflow dataset."""
+        frame = Connect().load_frame('workflow', workflow)
+        for shot, run in zip(*frame.loc[:, ['Pulse', 'Run']].values.T):
+            data = Equilibrium(shot, run).data[attr].data
+            if np.isnan(data).any():
+                warn(f'skipping {shot}/{run} due to nans in dataset')
+                continue
+            self.append_data(data)
 
     def __iadd__(self, data):
         """Append data to SVD basis."""
@@ -146,11 +155,14 @@ if __name__ == '__main__':
     attr = 'f_df_dpsi'
 
     svd = Svd(rank=5)
+
     svd += eq.data[attr]
 
     svd.plot()
     for _ in range(20):
         svd += eq.data[attr]
+
+    svd.load_frame('DINA-IMAS', attr)
 
     #eq = Equilibrium(130506, 403)
     #svd += eq.data[attr]

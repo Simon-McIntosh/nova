@@ -9,7 +9,7 @@ import pandas
 
 
 @dataclass
-class Synchronize:
+class Connect:
     """Copy and rsync IMAS ids."""
 
     cluster: str = 'sdcc-login02.iter.org'
@@ -65,6 +65,7 @@ class Synchronize:
             ','.join(space_columns), value), delimiter=r'\s\s+')
         for i, col in enumerate(space_frame):
             self.frame[col] = space_frame.iloc[:, i]
+        return self.frame
 
     def _copy_command(self, ids: str, backend: str):
         """Return ids copy string."""
@@ -94,9 +95,9 @@ class Synchronize:
 
 if __name__ == '__main__':
 
-    sync = Synchronize()
+    connect = Connect()
     #for workflow in ['CORSICA', 'DINA-IMAS']:
-    sync.load_frame('workflow', 'DINA-IMAS')
+    connect.load_frame('workflow', 'DINA-IMAS')
     #sync.frame = sync.subframe(10)
     #sync.copy_frame('equilibrium', 'pf_active', 'pf_passive', backend='HDF5')
     #sync.rsync()

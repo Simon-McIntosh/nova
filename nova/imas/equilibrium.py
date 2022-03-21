@@ -100,7 +100,7 @@ class Profile2D(Scenario, BiotPlot):
 
     def plot_2d(self, itime=-1, attr='psi', axes=None, **kwargs):
         """Plot 2d profile."""
-        super().plot(axes)
+        super().plot(axes=axes)
         kwargs = self.contour_kwargs(**kwargs)
         QuadContourSet = plt.contour(self.data.r, self.data.z,
                                      self.data[f'{attr}2d'][itime].T,
@@ -114,8 +114,8 @@ class Profile2D(Scenario, BiotPlot):
 class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
     """Manage active poloidal loop ids, pf_passive."""
 
-    shot: int = 135011
-    run: int = 7
+    shot: int
+    run: int
     ids_name: str = 'equilibrium'
 
     def build(self):
@@ -127,14 +127,14 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
 
 if __name__ == '__main__':
     shot, run = 135011, 7
-    shot, run = 135013, 2
-    shot, run = 130506, 403
-    eq = Equilibrium(shot, run)
-    # eq.build()
+    # shot, run = 135013, 2
+    # shot, run = 130506, 403
+    eq = Equilibrium(135011, 7, backend=13)
+    eq.build()
 
-    itime = 30
+    itime = 500
     #eq.plot_0d('ip')
-    #eq.plot_2d(itime, 'psi', colors='C3', levels=21)
-    #eq.plot_2d(500, 'j_tor')
+    eq.plot_2d(itime, 'psi', colors='C3', levels=21)
+    #eq.plot_2d(itime, 'j_tor')
     #eq.plot_1d(itime, 'dpressure_dpsi')
-    eq.plot_1d(itime, 'f_df_dpsi')
+    #eq.plot_1d(itime, 'f_df_dpsi')

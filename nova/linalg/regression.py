@@ -148,12 +148,13 @@ class OdinaryLeastSquares(RegressionBase):
 
 if __name__ == '__main__':
 
-    basis = Svd(5, 50)
+    basis = Svd(5, 81)
     attr = 'f_df_dpsi'
 
-    eq = Equilibrium(135010, 5)
+    eq = Equilibrium(100504, 3)
     basis += eq.data[attr]
 
+    '''
     eq = Equilibrium(135011, 7)
     #basis += eq.data[attr]
 
@@ -163,11 +164,11 @@ if __name__ == '__main__':
     #basis.interpolate(81)
     # basis = Bernstein(50, 9)
 
-    ols = OdinaryLeastSquares(basis)
 
     eq = Equilibrium(135011, 7)
-
-    ols /= eq.data[attr][100].data
+    '''
+    ols = OdinaryLeastSquares(basis)
+    ols /= eq.data[attr][20].data
 
     ols.plot()
 '''

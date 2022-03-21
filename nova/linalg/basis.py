@@ -149,8 +149,8 @@ if __name__ == '__main__':
     for _ in range(20):
         svd += eq.data[attr]
 
-    eq = Equilibrium(130506, 403)
-    svd += eq.data[attr]
+    #eq = Equilibrium(130506, 403)
+    #svd += eq.data[attr]
 
 
     svd.plot(ls='--')

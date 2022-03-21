@@ -4,7 +4,7 @@ import numpy as np
 import pylops
 
 from nova.linalg.decompose import Decompose
-from nova.linalg.regression import Regression, RegressionLops
+from nova.linalg.regression import OdinaryLeastSquares, Lops
 
 
 matrix_shapes = [(3, 3), (2, 9), (5, 12)]
@@ -22,17 +22,25 @@ def test_model_init():
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shapes[0])
     model = rng.random(matrix.shape[1])
-    regression = Regression(matrix, model)
-    assert id(model) == id(regression.model)
+    ols = OdinaryLeastSquares(matrix, model=model)
+    assert id(model) == id(ols.model)
 
 
 def test_model_update():
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shapes[0])
     model = rng.random(matrix.shape[1])
-    regression = Regression(matrix)
-    regression.forward(model)
-    assert id(model) == id(regression.model)
+    ols = OdinaryLeastSquares(matrix)
+    ols.forward(model)
+    assert id(model) == id(ols.model)
+
+
+def test_coordinate_update_error():
+    rng = np.random.default_rng(seed=rng_seed)
+    matrix = rng.random(matrix_shapes[1])
+    coordinate = np.linspace(0, 1, matrix_shapes[0][0])
+    with pytest.raises(IndexError):
+        OdinaryLeastSquares(matrix, coordinate)
 
 
 def test_model_init_index_error():
@@ -40,24 +48,24 @@ def test_model_init_index_error():
     matrix = rng.random(matrix_shapes[1])
     model = rng.random(matrix.shape[0])
     with pytest.raises(IndexError):
-        Regression(matrix, model)
+        OdinaryLeastSquares(matrix, model=model)
 
 
 def test_model_update_index_error():
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shapes[1])
     model = rng.random(matrix.shape[0])
-    regression = Regression(matrix)
+    ols = OdinaryLeastSquares(matrix)
     with pytest.raises(IndexError):
-        regression.update_model(model)
+        ols.update_model(model)
 
 
 def test_data_init():
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shapes[0])
     data = rng.random(matrix.shape[0])
-    regression = Regression(matrix, data=data)
-    assert id(data) == id(regression.data)
+    ols = OdinaryLeastSquares(matrix, data=data)
+    assert id(data) == id(ols.data)
 
 
 def test_data_update_index_error():
@@ -65,39 +73,39 @@ def test_data_update_index_error():
     matrix = rng.random(matrix_shapes[1])
     data = rng.random(matrix.shape[1])
     with pytest.raises(IndexError):
-        Regression(matrix, data=data)
+        OdinaryLeastSquares(matrix, data=data)
 
 
 def test_no_model_attribute_error():
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shapes[0])
-    regression = Regression(matrix)
+    ols = OdinaryLeastSquares(matrix)
     with pytest.raises(AttributeError):
-        regression.update_model(None)
+        ols.update_model(None)
 
 
 def test_no_data_attribute_error():
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shapes[0])
-    regression = Regression(matrix)
+    ols = OdinaryLeastSquares(matrix)
     with pytest.raises(AttributeError):
-        regression.update_data(None)
+        ols.update_data(None)
 
 
 def test_forward_no_model_error():
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shapes[0])
-    regression = Regression(matrix)
+    ols = OdinaryLeastSquares(matrix)
     with pytest.raises(AttributeError):
-        regression.forward()
+        ols.forward()
 
 
 def test_forward_no_data_error():
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shapes[0])
-    regression = Regression(matrix)
+    ols = OdinaryLeastSquares(matrix)
     with pytest.raises(AttributeError):
-        regression.inverse()
+        ols.inverse()
 
 
 @pytest.mark.parametrize('matrix_shape', matrix_shapes)
@@ -105,8 +113,8 @@ def test_forward(matrix_shape):
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shape)
     model = rng.random(matrix.shape[1])
-    regression = Regression(matrix, model)
-    assert np.allclose(matrix @ model, regression.forward())
+    ols = OdinaryLeastSquares(matrix, model=model)
+    assert np.allclose(matrix @ model, ols.forward())
 
 
 @pytest.mark.parametrize('matrix_shape', matrix_shapes)
@@ -114,8 +122,8 @@ def test_inverse(matrix_shape):
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shape)
     data = rng.random(matrix.shape[0])
-    regression = Regression(matrix, data=data)
-    assert np.allclose(np.linalg.lstsq(matrix, data)[0], regression.inverse())
+    ols = OdinaryLeastSquares(matrix, data=data)
+    assert np.allclose(np.linalg.lstsq(matrix, data)[0], ols.inverse())
 
 
 @pytest.mark.parametrize('matrix_shape', matrix_shapes)
@@ -124,10 +132,10 @@ def test_regression_dot(matrix_shape):
     matrix = rng.random(matrix_shape)
     model = rng.random(matrix.shape[1])
     data = rng.random(matrix.shape[0])
-    regression = Regression(matrix, model, data)
+    ols = OdinaryLeastSquares(matrix, model=model, data=data)
 
-    forward = regression.forward()
-    adjoint = regression.adjoint()
+    forward = ols.forward()
+    adjoint = ols.adjoint()
 
     forward_data = forward @ data
     model_adjoint = model @ adjoint
@@ -139,7 +147,7 @@ def test_regression_dot(matrix_shape):
 def test_regression_lops_dot(matrix_shape):
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shape)
-    lops = RegressionLops(matrix)
+    lops = Lops(matrix)
     pylops.utils.dottest(lops, *matrix_shape)
 
 
@@ -148,9 +156,9 @@ def test_regression_lops(matrix_shape):
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shape)
     data = rng.random(matrix.shape[0])
-    regression = Regression(matrix, data=data)
-    lops = RegressionLops(matrix)
-    assert np.allclose(regression.inverse(), lops / data)
+    ols = OdinaryLeastSquares(matrix, data=data)
+    lops = Lops(matrix)
+    assert np.allclose(ols.inverse(), lops / data)
 
 
 if __name__ == '__main__':

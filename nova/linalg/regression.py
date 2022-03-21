@@ -6,6 +6,7 @@ import numba
 import numpy as np
 import numpy.typing as npt
 from pylops import LinearOperator
+from pylops.optimization.leastsquares import RegularizedInversion
 
 from nova.electromagnetic.biotoperate import matmul
 from nova.imas.equilibrium import Equilibrium
@@ -17,31 +18,19 @@ from nova.linalg.basis import Basis, Svd, Bernstein
 class RegressionBase(Line):
     """Implement full-matrix forward and inverse models."""
 
-    basis: Basis
+    matrix: npt.ArrayLike = field(repr=False)
+    coordinate: npt.ArrayLike = field(repr=False, default=None)
     model: npt.ArrayLike = field(default=None)
     data: npt.ArrayLike = field(repr=False, default=None)
 
     def __post_init__(self):
         """Calculate adjoint and update model and data."""
+        self.matrix_h = self.matrix.T.copy(order='C')
+        self.update_coordinate(self.coordinate)
         if self.model is not None:
             self.update_model(self.model)
         if self.data is not None:
             self.update_data(self.data)
-
-    @property
-    def matrix(self):
-        """Return basis matrix."""
-        return self.basis.matrix
-
-    @property
-    def matrix_H(self):
-        """Return matrix transpose."""
-        return self.matrix.T.copy(order='C')
-
-    @property
-    def coordinate(self):
-        """Return basis coordinate."""
-        return self.basis.coordinate
 
     @property
     def shape(self):
@@ -60,6 +49,16 @@ class RegressionBase(Line):
         """Solve inverse model inplace."""
         self.__truediv__(data)
         return self
+
+    def update_coordinate(self, coordinate):
+        """Update model coordinate, check shape."""
+        if coordinate is None:
+            self.coordinate = np.linspace(0, 1, len(self.matrix))
+            return
+        if len(coordinate) != self.shape[0]:
+            raise IndexError(f'coordinate length {len(coordinate)} != '
+                             f'matrix.shape[0] {self.shape[0]}')
+        self.coordinate = coordinate
 
     def update_model(self, model):
         """Update model coefficents, check shape."""
@@ -84,7 +83,7 @@ class RegressionBase(Line):
 
     def _adjoint(self):
         """Call numba matmul operator."""
-        return matmul(self.matrix_H, self.data)
+        return matmul(self.matrix_h, self.data)
 
     def adjoint(self, data=None):
         """Return results of adjoint transform."""
@@ -146,32 +145,6 @@ class OdinaryLeastSquares(RegressionBase):
         return self._lstsq(self.matrix, self.data)
 
 
-if __name__ == '__main__':
-
-    basis = Svd(5, 81)
-    attr = 'f_df_dpsi'
-
-    eq = Equilibrium(100504, 3)
-    basis += eq.data[attr]
-
-    '''
-    eq = Equilibrium(135011, 7)
-    #basis += eq.data[attr]
-
-    eq = Equilibrium(130506, 403)
-    basis += eq.data[attr]
-
-    #basis.interpolate(81)
-    # basis = Bernstein(50, 9)
-
-
-    eq = Equilibrium(135011, 7)
-    '''
-    ols = OdinaryLeastSquares(basis)
-    ols /= eq.data[attr][20].data
-
-    ols.plot()
-'''
 @dataclass
 class Lops(RegressionBase, LinearOperator):
     """Extend Pylops linear operator and Nova regression classes."""
@@ -190,7 +163,27 @@ class Lops(RegressionBase, LinearOperator):
 
     def _rmatvec(self, data):
         """Return results of adjoint calculation."""
-        return matmul(self.matrix_H, data)
+        return matmul(self.matrix_h, data)
+
+    def _inverse(self):
+        """Retun solution to least squares problem using default solver."""
+        return RegularizedInversion(self, [], self.data,
+                                    **dict(damp=0, iter_lim=10, show=0))
+
+
+if __name__ == '__main__':
+
+    basis = Svd(5, 81)
+    attr = 'f_df_dpsi'
+
+    eq = Equilibrium(100504, 3)
+    basis += eq.data[attr]
+
+    ols = OdinaryLeastSquares(basis.matrix)
+    ols /= eq.data[attr][20].data
+
+    ols.plot()
+'''
 
 
 @dataclass

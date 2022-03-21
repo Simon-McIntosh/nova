@@ -180,9 +180,10 @@ if __name__ == '__main__':
     basis += eq.data[attr]
 
     ols = OdinaryLeastSquares(basis.matrix)
-    ols /= eq.data[attr][20].data
+    ols /= eq.data[attr][40].data
 
     ols.plot()
+
 '''
 
 

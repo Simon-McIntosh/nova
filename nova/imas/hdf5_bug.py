@@ -12,7 +12,7 @@ class DataBase:
     shot: int
     run: int
     ids_name: str = 'equilibrium'
-    user: str = 'public'
+    user: str = 'mcintos'
     tokamak: str = 'iter'
     backend: int = imasdef.MDSPLUS_BACKEND
 

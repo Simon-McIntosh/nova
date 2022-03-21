@@ -95,9 +95,8 @@ class Synchronize:
 if __name__ == '__main__':
 
     sync = Synchronize()
-
     #for workflow in ['CORSICA', 'DINA-IMAS']:
     sync.load_frame('workflow', 'DINA-IMAS')
-    sync.frame = sync.subframe(10)
-    sync.copy_frame('equilibrium', 'pf_active', 'pf_passive', backend='HDF5')
-    sync.rsync()
+    #sync.frame = sync.subframe(10)
+    #sync.copy_frame('equilibrium', 'pf_active', 'pf_passive', backend='HDF5')
+    #sync.rsync()

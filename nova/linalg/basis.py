@@ -151,6 +151,7 @@ if __name__ == '__main__':
     #bernstein = Bernstein(50, 21)
     #bernstein.plot()
 
+
     eq = Equilibrium(135011, 7)
     attr = 'f_df_dpsi'
 

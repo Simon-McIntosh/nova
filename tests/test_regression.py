@@ -4,7 +4,7 @@ import numpy as np
 import pylops
 
 from nova.linalg.decompose import Decompose
-from nova.linalg.regression import OdinaryLeastSquares, Lops
+from nova.linalg.regression import OdinaryLeastSquares, Lops, MoorePenrose
 
 
 matrix_shapes = [(3, 3), (2, 9), (5, 12)]
@@ -159,6 +159,18 @@ def test_regression_lops(matrix_shape):
     ols = OdinaryLeastSquares(matrix, data=data)
     lops = Lops(matrix)
     assert np.allclose(ols.inverse(), lops / data)
+
+
+@pytest.mark.parametrize('matrix_shape', matrix_shapes)
+def test_moore_penrose(matrix_shape):
+    rng = np.random.default_rng(seed=rng_seed)
+    matrix = rng.random(matrix_shape)
+    data = rng.random(matrix.shape[0])
+    ols = OdinaryLeastSquares(matrix)
+    ols /= data
+    mp = MoorePenrose(matrix, rank=min(matrix_shape))
+    mp /= data
+    assert(np.allclose(ols.model, mp.model))
 
 
 if __name__ == '__main__':

@@ -1,26 +1,25 @@
 """Basis function sets for use in regression analysis."""
 from abc import abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar
-from warnings import warn
 
 import numpy as np
 import numpy.typing as npt
 import scipy.optimize
 import scipy.special
 import scipy.sparse
+import xarray
 
-from nova.imas.connect import Connect
 from nova.imas.equilibrium import Equilibrium
 from nova.linalg.decompose import Decompose
-from nova.utilities.plotter import Line
+from nova.utilities.plotter import LinePlot
 
 
 @dataclass
 class LinearSample:
     """Generate 1D linear sample."""
 
-    length: int = 50
+    length: int
 
     def __post_init__(self):
         """Update coordinate."""
@@ -34,7 +33,7 @@ class LinearSample:
 
 
 @dataclass
-class Basis(Line, LinearSample):
+class Basis(LinePlot, LinearSample):
     """Basis function base class."""
 
     order: int = None
@@ -57,7 +56,7 @@ class Basis(Line, LinearSample):
 
     def plot(self, model=None, **kwargs):
         """Plot set of basis functions evaluated for coordinate."""
-        self.axes = kwargs.get('axes', None)
+        self.axes = kwargs.pop('axes', None)
         if model is None:
             model = np.ones(self.order+1)
         for i, coef in enumerate(model):
@@ -83,6 +82,7 @@ class Bernstein(Basis):
 class SvdAttrs:
     """Non-default attributes for Svd basis class."""
 
+    length: int
     rank: int
 
 
@@ -91,22 +91,14 @@ class Svd(Basis, SvdAttrs):
     """Construct regression model from Svd reduction."""
 
     matrix: npt.ArrayLike = None
+    data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
+
     name: ClassVar[str] = 'Singular Value Decomposition'
 
     def __post_init__(self):
         """Update basis order."""
         self.update_coordinate()
         self.order = self.rank-1
-
-    def load_frame(self, workflow: str, attr: str):
-        """Load data from imas equilibrium workflow dataset."""
-        frame = Connect().load_frame('workflow', workflow)
-        for shot, run in zip(*frame.loc[:, ['Pulse', 'Run']].values.T):
-            data = Equilibrium(shot, run).data[attr].data
-            if np.isnan(data).any():
-                warn(f'skipping {shot}/{run} due to nans in dataset')
-                continue
-            self.append_data(data)
 
     def __iadd__(self, data):
         """Append data to SVD basis."""
@@ -151,27 +143,22 @@ if __name__ == '__main__':
     #bernstein = Bernstein(50, 21)
     #bernstein.plot()
 
-
     eq = Equilibrium(135011, 7)
     attr = 'f_df_dpsi'
 
-    svd = Svd(rank=5)
+    svd = Svd(50, 5)
 
     svd += eq.data[attr]
 
     svd.plot()
-    for _ in range(20):
-        svd += eq.data[attr]
 
-    svd.load_frame('DINA-IMAS', attr)
+    #svd.load_frame('DINA-IMAS', attr)
+    #svd.load_frame('CORSICA', attr)
 
     #eq = Equilibrium(130506, 403)
     #svd += eq.data[attr]
 
-
     svd.plot(ls='--')
-
-
 
     '''
 

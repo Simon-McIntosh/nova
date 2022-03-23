@@ -40,7 +40,9 @@ class Decompose:
     def decompose(self):
         """Perform SVD order reduction."""
         UsVh = np.linalg.svd(self.matrix, full_matrices=False)
-        self.matrices = dict(U=UsVh[0], s=UsVh[1], Vh=UsVh[2])
+        self.matrices = dict(U=UsVh[0].copy('C'),
+                             s=UsVh[1],
+                             Vh=UsVh[2].copy('C'))
         self.reduce()
         self.transpose()
         assert (self.matrices['s'] > 0).all()

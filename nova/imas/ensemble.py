@@ -1,6 +1,5 @@
 """Access imas 1d profile data."""
 from dataclasses import dataclass, field
-import os
 from warnings import warn
 
 import numpy as np
@@ -65,7 +64,10 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
             eq_data = Equilibrium(pulse, run).data[self.attrs]
             _isnull = eq_data.isnull().any()
             if any([getattr(_isnull, attr) for attr in _isnull]):
-                warn(f'skipping {pulse}:{run} due to nans in dataset')
+                warn(f'\nskipping {pulse}:{run} due to nans in dataset')
+                continue
+            if Equilibrium(pulse, run).data.f_df_dpsi[:, 0].max() < 0:
+                warn(f'\nskipping {pulse}:{run} due to corrupt flux function')
                 continue
             eq_data['subindex'] = 'time', i * np.ones_like(eq_data.time, int)
             data.append(eq_data)
@@ -78,21 +80,21 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
         _color = kwargs.pop('color', None)
         self.data.load()
 
-        import scipy.signal
         for i in self.data.index.data:
             index = self.data.subindex == i
 
-            data = scipy.signal.decimate(self.data[attr][index].data, 100,
-                                         ftype='fir', axis=0)
+            data = self.data[attr][index].data[::100]
             color = f'C{i%10}' if _color is None else _color
             self.axes.plot(self.data.psi_norm.data,
                            data.T, color=color,
                            label=self.data.reference.data[i],
                            **kwargs)
-            self.axes.legend()
+            #self.axes.legend()
 
 
 if __name__ == '__main__':
 
     ens = Ensemble('DINA-IMAS')
-    ens.plot('f_df_dpsi')
+    # ens.build()
+
+    #ens.plot('f_df_dpsi')

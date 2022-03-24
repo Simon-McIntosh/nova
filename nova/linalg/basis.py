@@ -100,6 +100,11 @@ class Svd(Basis, SvdAttrs):
         self.update_coordinate()
         self.order = self.rank-1
 
+    def __call__(self, data):
+        """Append data."""
+        self.append_data(data)
+        return self
+
     #def load_workflow(self, workflow: str):
 
     def __iadd__(self, data):

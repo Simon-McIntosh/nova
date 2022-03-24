@@ -11,11 +11,11 @@ from pylops.optimization.leastsquares import RegularizedInversion
 from nova.electromagnetic.biotoperate import matmul
 from nova.imas.equilibrium import Equilibrium
 from nova.linalg.decompose import Decompose
-from nova.utilities.plotter import Line
+from nova.utilities.plotter import LinePlot
 
 
 @dataclass
-class RegressionBase(Line):
+class RegressionBase(LinePlot):
     """Implement full-matrix forward and inverse models."""
 
     matrix: npt.ArrayLike = field(repr=False)
@@ -218,7 +218,7 @@ if __name__ == '__main__':
     attr = 'f_df_dpsi'
 
     #svd.load_frame('DINA-IMAS', attr)
-    svd.load_frame('CORSICA', attr)
+    #svd.load_frame('CORSICA', attr)
 
     eq = Equilibrium(100504, 3)
 

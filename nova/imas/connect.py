@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     connect = Connect()
     #for workflow in ['CORSICA', 'DINA-IMAS']:
-    connect.load_frame('workflow', 'DINA-IMAS')
+    #    connect.load_frame('workflow', workflow)
     #sync.frame = sync.subframe(10)
-    #sync.copy_frame('equilibrium', 'pf_active', 'pf_passive', backend='HDF5')
-    #sync.rsync()
+    #sync.copy_frame('equilibrium', 'pf_active', 'pf_passive')
+    connect.rsync()

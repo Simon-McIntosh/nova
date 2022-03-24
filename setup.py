@@ -40,6 +40,7 @@ setup_kwargs = dict(
         'cython',
         'dask',
         'descartes',
+        'fabric',
         'meshio',
         'netCDF4',
         'nlopt',

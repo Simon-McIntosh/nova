@@ -155,6 +155,7 @@ if __name__ == '__main__':
 
     svd = Svd(50, 5)
 
+
     svd += eq.data[attr]
 
     svd.plot()

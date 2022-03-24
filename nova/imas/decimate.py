@@ -13,34 +13,28 @@ from nova.utilities.pyplot import plt
 ens = Ensemble('DINA-IMAS')
 data = ens.data
 
+attr = 'dpressure_dpsi'
 metric = 'cityblock'
 
-dist = scipy.spatial.distance.pdist(data.f_df_dpsi.data, metric=metric)
+dist = scipy.spatial.distance.pdist(data[attr].data, metric=metric)
 dist = scipy.spatial.distance.squareform(dist)
 
-eps = 5
+eps = 0.1 * data.dims['psi_norm']
+# TODO implement standard deviation metric
 
-np.argmax(dist[0] > eps)
-
-_data = [data.f_df_dpsi.data[0]]
-
+select = [0]
 
 def threshold(index: int, eps: float):
-    while True:
-        if (step := np.argmax(dist[index, index:] > eps)) == 0:
-            break
-        index += step
-
-        _dist = scipy.spatial.distance.cdist(
-            _data, data.f_df_dpsi.data[index].reshape(1, -1), metric=metric)
-        if _dist.min() < eps/2:  # duplicate observation
+    while index < data.dims['time']:
+        if dist[:, index][select].min() < eps:  # duplicate observation
+            index += 1
             continue
-        _data.append(data.f_df_dpsi[index])
+        select.append(index)
         yield index
 
 
 for index in threshold(1, eps):
-    plt.plot(data.psi_norm, data.f_df_dpsi[index])
+    plt.plot(data.psi_norm, data[attr][index])
 
 '''
 #data = Equilibrium(135011, 7).data

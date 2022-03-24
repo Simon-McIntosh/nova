@@ -96,7 +96,7 @@ class Svd(Basis, SvdAttrs):
         self.update_coordinate()
         self.order = self.rank-1
 
-    def load_workflow(self, workflow: str):
+    #def load_workflow(self, workflow: str):
 
 
     def __iadd__(self, data):

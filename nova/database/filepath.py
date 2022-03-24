@@ -1,7 +1,8 @@
 """Manage file data access for frame and biot instances."""
-from abc import abstractmethod
 from dataclasses import dataclass, field
 import os
+
+import xarray
 
 from nova.definitions import root_dir
 
@@ -41,7 +42,7 @@ class FilePath:
 
     @property
     def filepath(self):
-        """Return full filepath for netCDF data using default path."""
+        """Return full filepath for netCDF (.nc) data using default path."""
         assert self.path is not None
         return self.file(self.filename)
 
@@ -50,10 +51,16 @@ class FilePath:
         """Return status of default netCDF file."""
         return os.path.isfile(self.filepath)
 
-    @abstractmethod
-    def store(self, file: str, path=None):
-        """Store frame and subframe as groups within hdf file."""
+    def store(self, mode='a'):
+        """Store data within hdf file."""
+        file = self.file(self.filename)
+        if not os.path.isfile(file):
+            mode = 'w'
+        self.data.to_netcdf(file, group=self.ids_name, mode=mode)
 
-    @abstractmethod
-    def load(self, file: str, path=None):
-        """Load frameset from file."""
+    def load(self):
+        """Load dataset from file (lazy)."""
+        file = self.file(self.filename)
+        with xarray.open_dataset(file, group=self.ids_name) as data:
+            self.data = data
+        return self

@@ -30,7 +30,7 @@ class BaseAxes(ABC):
         self._axes = axes
 
 
-class Line(BaseAxes):
+class LinePlot(BaseAxes):
     """Generate axes for 2d line objects."""
 
     def generate_axes(self):
@@ -41,7 +41,7 @@ class Line(BaseAxes):
             plt.despine()
 
 
-class Image(BaseAxes):
+class ImagePlot(BaseAxes):
     """Generate axes for 2d image objects."""
 
     def generate_axes(self):

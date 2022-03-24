@@ -10,8 +10,8 @@ from pylops.optimization.leastsquares import RegularizedInversion
 
 from nova.electromagnetic.biotoperate import matmul
 from nova.imas.equilibrium import Equilibrium
+from nova.linalg.decompose import Decompose
 from nova.utilities.plotter import Line
-from nova.linalg.basis import Basis, Svd, Bernstein
 
 
 @dataclass
@@ -24,7 +24,7 @@ class RegressionBase(Line):
     data: npt.ArrayLike = field(repr=False, default=None)
 
     def __post_init__(self):
-        """Calculate adjoint and update model and data."""
+        """Update coordinate, model, and data."""
         self.matrix_h = self.matrix.T.copy(order='C')
         self.update_coordinate(self.coordinate)
         if self.model is not None:
@@ -159,11 +159,11 @@ class Lops(RegressionBase, LinearOperator):
 
     def _matvec(self, model):
         """Return results of forward calculation."""
-        return matmul(self.matrix, model)
+        return self.forward(model)
 
     def _rmatvec(self, data):
         """Return results of adjoint calculation."""
-        return matmul(self.matrix_h, data)
+        return self.adjoint(data)
 
     def _inverse(self):
         """Retun solution to least squares problem using default solver."""
@@ -171,27 +171,17 @@ class Lops(RegressionBase, LinearOperator):
                                     **dict(damp=0, iter_lim=10, show=0))
 
 
-if __name__ == '__main__':
-
-    basis = Svd(5, 81)
-    attr = 'f_df_dpsi'
-
-    eq = Equilibrium(100504, 3)
-    basis += eq.data[attr]
-
-    ols = OdinaryLeastSquares(basis.matrix)
-    ols /= eq.data[attr][40].data
-
-    ols.plot()
-
-'''
-
-
 @dataclass
-class Svd(RegressionBase, Decompose):
-    """Fast operators for linear regression analysis."""
+class MoorePenrose(RegressionBase):
+    """Fast operators for linear regression analysis using pseudoinverse."""
 
+    rank: int = 10
     svd: bool = True
+
+    def __post_init__(self):
+        """Perform matrix reduction."""
+        super().__post_init__()
+        self.matrices = Decompose(self.matrix, self.rank).matrices
 
     @staticmethod
     @numba.njit
@@ -218,7 +208,36 @@ class Svd(RegressionBase, Decompose):
             return self.__inverse(self.matrices['V'], self.matrices['s'],
                                   self.matrices['Uh'], self.data)
         return super()._inverse()
-'''
+
+
+if __name__ == '__main__':
+
+    from nova.linalg.basis import Svd
+
+    svd = Svd(7, 81)
+    attr = 'f_df_dpsi'
+
+    #svd.load_frame('DINA-IMAS', attr)
+    svd.load_frame('CORSICA', attr)
+
+    eq = Equilibrium(100504, 3)
+
+    ols = OdinaryLeastSquares(svd.matrix)
+
+    itime = 30
+    profile = eq.data[attr][itime]
+
+    rng = np.random.default_rng(2025)
+    data = profile.data.copy()
+    data += np.std(data) * (rng.random(eq.data.dims['psi_norm']) - 0.5)
+
+    ols /= data
+
+    ols.plot()
+
+    from nova.utilities.pyplot import plt
+    plt.plot(ols.coordinate, profile.data)
+
 
 if __name__ == '__main__':
 

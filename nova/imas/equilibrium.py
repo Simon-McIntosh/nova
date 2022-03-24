@@ -129,7 +129,7 @@ if __name__ == '__main__':
     shot, run = 135011, 7
     # shot, run = 135013, 2
     # shot, run = 130506, 403
-    eq = Equilibrium(135011, 7, backend=13)
+    eq = Equilibrium(135011, 7, backend=12)
     eq.build()
 
     itime = 500

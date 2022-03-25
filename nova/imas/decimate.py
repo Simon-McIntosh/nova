@@ -10,8 +10,8 @@ from nova.imas.equilibrium import Equilibrium
 
 from nova.utilities.pyplot import plt
 
-ens = Ensemble('DINA_IMAS')
-ens = Ensemble('CORSICA')
+#ens = Ensemble('DINA-IMAS')
+ens = Ensemble('ASTRA')
 data = ens.data
 
 #@dataclass
@@ -25,7 +25,7 @@ signal = (data[attr] - ramp) / data[attr].std(axis=1)
 #signal = (data[attr] - data[attr].mean(axis=1)) / data[attr].std(axis=1)
 #signal /= data.dims['psi_norm']
 
-dist = scipy.spatial.distance.pdist(signal, metric='correlation')
+dist = scipy.spatial.distance.pdist(signal, metric='cosine')
 dist = scipy.spatial.distance.squareform(dist)
 
 eps = 0.05 #* data.dims['psi_norm']

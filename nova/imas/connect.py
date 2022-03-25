@@ -41,6 +41,12 @@ class Connect:
         """Return scenario summary."""
         return self.module_run(f'scenario_summary -c {columns} -s {select}')
 
+    def unique(self, column: str):
+        """Print unique column values."""
+        text = self.module_run(f'scenario_summary -c {column}')
+        frame = self._to_dataframe(text, delimiter=r'\s\s+')
+        print(frame.iloc[:, 0].unique())
+
     def _to_dataframe(self, summary_string, delimiter=r'\s+'):
         """Convert summart string to pandas dataframe."""
         return pandas.read_csv(io.StringIO(summary_string),
@@ -96,8 +102,9 @@ class Connect:
 if __name__ == '__main__':
 
     connect = Connect()
+    connect.unique('workflow')
+    connect.load_frame('workflow', 'RAPTOR')
     #for workflow in ['CORSICA', 'DINA-IMAS']:
     #    connect.load_frame('workflow', workflow)
-    #sync.frame = sync.subframe(10)
-    #sync.copy_frame('equilibrium', 'pf_active', 'pf_passive')
+    connect.copy_frame('equilibrium', 'pf_active', 'pf_passive')
     connect.rsync()

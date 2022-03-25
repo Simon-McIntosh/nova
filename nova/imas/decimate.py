@@ -11,7 +11,7 @@ from nova.imas.equilibrium import Equilibrium
 from nova.utilities.pyplot import plt
 
 ens = Ensemble('DINA_IMAS')
-#ens = Ensemble('CORSICA')
+ens = Ensemble('CORSICA')
 data = ens.data
 
 #@dataclass
@@ -20,7 +20,9 @@ attr = 'f_df_dpsi'
 #attr = 'dpressure_dpsi'
 mean = data[attr].data.mean(axis=1).reshape(-1, 1)
 ramp = mean * np.linspace(1, 0, data.dims['psi_norm'])
-signal = (data[attr] -ramp) / data[attr].std(axis=1)
+signal = (data[attr] - ramp) / data[attr].std(axis=1)
+
+#signal = (data[attr] - data[attr].mean(axis=1)) / data[attr].std(axis=1)
 #signal /= data.dims['psi_norm']
 
 dist = scipy.spatial.distance.pdist(signal, metric='correlation')

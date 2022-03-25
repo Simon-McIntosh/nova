@@ -34,8 +34,13 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
         self.set_path(self.datapath)
         try:
             self.load()
-        except FileNotFoundError:
+        except (FileNotFoundError, OSError):
             self.build()
+
+    @property
+    def group(self):
+        """Return nedCDF group."""
+        return f'{self.ids_name}/{self.workflow.replace("-", "_")}'
 
     def build(self):
         """Build dataset."""
@@ -94,7 +99,7 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
 
 if __name__ == '__main__':
 
-    ens = Ensemble('DINA-IMAS')
+    ens = Ensemble('CORSICA')
     # ens.build()
 
     #ens.plot('f_df_dpsi')

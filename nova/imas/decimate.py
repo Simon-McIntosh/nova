@@ -10,19 +10,26 @@ from nova.imas.equilibrium import Equilibrium
 
 from nova.utilities.pyplot import plt
 
-ens = Ensemble('DINA-IMAS')
+ens = Ensemble('DINA_IMAS')
+#ens = Ensemble('CORSICA')
 data = ens.data
 
-attr = 'dpressure_dpsi'
-metric = 'cityblock'
+#@dataclass
 
-dist = scipy.spatial.distance.pdist(data[attr].data, metric=metric)
+attr = 'f_df_dpsi'
+#attr = 'dpressure_dpsi'
+mean = data[attr].data.mean(axis=1).reshape(-1, 1)
+ramp = mean * np.linspace(1, 0, data.dims['psi_norm'])
+signal = (data[attr] -ramp) / data[attr].std(axis=1)
+#signal /= data.dims['psi_norm']
+
+dist = scipy.spatial.distance.pdist(signal, metric='correlation')
 dist = scipy.spatial.distance.squareform(dist)
 
-eps = 0.1 * data.dims['psi_norm']
-# TODO implement standard deviation metric
+eps = 0.05 #* data.dims['psi_norm']
 
 select = [0]
+
 
 def threshold(index: int, eps: float):
     while index < data.dims['time']:
@@ -34,7 +41,13 @@ def threshold(index: int, eps: float):
 
 
 for index in threshold(1, eps):
-    plt.plot(data.psi_norm, data[attr][index])
+    plt.plot(data.psi_norm, signal[index])
+
+plt.despine()
+plt.title(f'signal reduction {100 * len(select)/data.dims["time"]:1.1f}% '
+          f'{len(select)} of {data.dims["time"]}')
+
+#plt.ylim([-0.001, 0.001])
 
 '''
 #data = Equilibrium(135011, 7).data

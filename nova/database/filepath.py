@@ -51,16 +51,21 @@ class FilePath:
         """Return status of default netCDF file."""
         return os.path.isfile(self.filepath)
 
+    @property
+    def group(self) -> str:
+        """Return netCDF group."""
+        return self.ids_name
+
     def store(self, mode='a'):
         """Store data within hdf file."""
         file = self.file(self.filename)
         if not os.path.isfile(file):
             mode = 'w'
-        self.data.to_netcdf(file, group=self.ids_name, mode=mode)
+        self.data.to_netcdf(file, group=self.group, mode=mode)
 
     def load(self):
         """Load dataset from file (lazy)."""
         file = self.file(self.filename)
-        with xarray.open_dataset(file, group=self.ids_name) as data:
+        with xarray.open_dataset(file, group=self.group) as data:
             self.data = data
         return self

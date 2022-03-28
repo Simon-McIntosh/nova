@@ -56,12 +56,21 @@ class FilePath:
         """Return netCDF group."""
         return self.ids_name
 
+    def _disable_HDF5_lock(self):
+        """Disable HDF5 file locking via sysenv."""
+        if 'HDF5_USE_FILE_LOCKING' not in os.environ:
+            os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
+
     def store(self, mode='a'):
         """Store data within hdf file."""
         file = self.file(self.filename)
         if not os.path.isfile(file):
             mode = 'w'
-        self.data.to_netcdf(file, group=self.group, mode=mode)
+        try:
+            self.data.to_netcdf(file, group=self.group, mode=mode)
+        except OSError:
+            self._disable_HDF5_lock()
+            self.data.to_netcdf(file, group=self.group, mode=mode)
 
     def load(self):
         """Load dataset from file (lazy)."""

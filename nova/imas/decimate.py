@@ -1,5 +1,7 @@
+from dataclasses import dataclass, field
 
 import numpy as np
+import numpy.typing as npt
 import scipy.spatial
 import sklearn
 
@@ -10,44 +12,68 @@ from nova.imas.equilibrium import Equilibrium
 
 from nova.utilities.pyplot import plt
 
-#ens = Ensemble('DINA-IMAS')
-ens = Ensemble('ASTRA')
-data = ens.data
 
-#@dataclass
+@dataclass
+class Select:
+    """Select representative subset from signal."""
 
-attr = 'f_df_dpsi'
-#attr = 'dpressure_dpsi'
+    signal: npt.ArrayLike = field(repr=False)
+    eps: float = 0.5
+    norm: npt.ArrayLike = field(init=False, repr=False)
+    index: list[int] = field(init=False, default_factory=list, repr=False)
+
+    def __post_init__(self):
+        norm = self.signal / self.signal.std(axis=1)
+        dist = scipy.spatial.distance.pdist(norm, metric='correlation')
+        dist = scipy.spatial.distance.squareform(dist)
+
+        self.index = [0]
+        for index in range(1, self.shape[0]):
+            if dist[:, index][self.index].min() < self.eps:
+                continue
+            print(index, self.index)
+            self.index.append(index)
+        print(self.index)
+
+    @property
+    def shape(self):
+        """Return signal shape."""
+        return self.signal.shape
+
+    def plot(self):
+        """Plot signal reduction."""
+        plt.plot(np.linspace(0, 1, self.shape[1]), self.signal[self.index].T)
+
+        plt.despine()
+        #plt.title(f'signal reduction {len(select)} of {data.dims["time"]}'
+        #          f' ({100 * len(select)/data.dims["time"]:1.1f}%)')
+
+
+
+if __name__ == '__main__':
+
+    #ens = Ensemble('DINA-IMAS')
+    ens = Ensemble('CORSICA')
+    #ens = Ensemble('ASTRA')
+
+    attr = 'f_df_dpsi'
+    attr = 'dpressure_dpsi'
+
+    select = Select(ens.data[attr])
+    select.plot()
+
+'''
 mean = data[attr].data.mean(axis=1).reshape(-1, 1)
 ramp = mean * np.linspace(1, 0, data.dims['psi_norm'])
-signal = (data[attr] - ramp) / data[attr].std(axis=1)
+#signal = data[attr] / np.linalg.norm(data[attr], 2, axis=1).reshape(-1, 1)
+signal = data[attr] / data[attr].std(axis=1)
 
 #signal = (data[attr] - data[attr].mean(axis=1)) / data[attr].std(axis=1)
 #signal /= data.dims['psi_norm']
-
-dist = scipy.spatial.distance.pdist(signal, metric='cosine')
-dist = scipy.spatial.distance.squareform(dist)
-
-eps = 0.05 #* data.dims['psi_norm']
-
-select = [0]
+'''
 
 
-def threshold(index: int, eps: float):
-    while index < data.dims['time']:
-        if dist[:, index][select].min() < eps:  # duplicate observation
-            index += 1
-            continue
-        select.append(index)
-        yield index
-
-
-for index in threshold(1, eps):
-    plt.plot(data.psi_norm, signal[index])
-
-plt.despine()
-plt.title(f'signal reduction {100 * len(select)/data.dims["time"]:1.1f}% '
-          f'{len(select)} of {data.dims["time"]}')
+#* data.dims['psi_norm']
 
 #plt.ylim([-0.001, 0.001])
 

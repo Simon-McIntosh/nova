@@ -102,8 +102,8 @@ class Connect:
 if __name__ == '__main__':
 
     connect = Connect()
-    connect.unique('workflow')
-    connect.load_frame('workflow', 'RAPTOR')
+    #connect.unique('workflow')
+    connect.load_frame('workflow', 'ASTRA')
     #for workflow in ['CORSICA', 'DINA-IMAS']:
     #    connect.load_frame('workflow', workflow)
     connect.copy_frame('equilibrium', 'pf_active', 'pf_passive')

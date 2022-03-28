@@ -71,12 +71,9 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
             if any([getattr(_isnull, attr) for attr in _isnull]):
                 warn(f'\nskipping {pulse}:{run} due to nans in dataset')
                 continue
-            if Equilibrium(pulse, run).data.f_df_dpsi[:, 0].max() < 0:
-                warn(f'\nskipping {pulse}:{run} due to corrupt flux function')
-                continue
-            eq_data['subindex'] = 'time', i * np.ones_like(eq_data.time, int)
+            eq_data.coords['pulse_index'] = \
+                ('time', i * np.ones_like(eq_data.time, int))
             data.append(eq_data)
-
         return xarray.concat(data, 'time', combine_attrs='drop_conflicts')
 
     def plot(self, attr: str, **kwargs):
@@ -99,7 +96,7 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
 
 if __name__ == '__main__':
 
-    ens = Ensemble('CORSICA')
-    # ens.build()
+    ens = Ensemble('ASTRA')
+    ens.build()
 
     #ens.plot('f_df_dpsi')

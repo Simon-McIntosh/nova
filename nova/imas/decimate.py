@@ -4,24 +4,29 @@ import numpy as np
 import numpy.typing as npt
 import scipy.spatial
 import sklearn
+import xarray
 
-from nova.linalg.basis import Bernstein, Svd
-from nova.linalg.regression import OdinaryLeastSquares
+from nova.database.filepath import FilePath
 from nova.imas.ensemble import Ensemble
 from nova.imas.equilibrium import Equilibrium
+from nova.linalg.basis import Bernstein, Svd
+from nova.linalg.regression import OdinaryLeastSquares
+
 
 from nova.utilities.pyplot import plt
 
 
 @dataclass
-class Select:
-    """Select representative subset from signal."""
+class Reduce(FilePath):
+    """Extract representative subset from signal timeseries."""
 
-    signal: npt.ArrayLike = field(repr=False)
     eps: float = 0.5
-    norm: npt.ArrayLike = field(init=False, repr=False)
-    index: list[int] = field(init=False, default_factory=list, repr=False)
+    metric: str = 'cosine'
+    data: xarray.Dataset = field(init=False, repr=False)
+    #norm: npt.ArrayLike = field(init=False, repr=False)
+    #index: li
 
+    '''
     def __post_init__(self):
         norm = self.signal / self.signal.std(axis=1)
         dist = scipy.spatial.distance.pdist(norm, metric='correlation')
@@ -34,7 +39,21 @@ class Select:
             print(index, self.index)
             self.index.append(index)
         print(self.index)
+    '''
 
+    @property
+    def attrs(self):
+        """Return select attributes."""
+        return dict(eps=self.eps, metric=self.metric)
+
+    def build(self, signal: xarray.DataArray):
+        """Build select signal dataset."""
+        self.data = xarray.Dataset(attrs=self.attrs)
+        self.data['signal'] = signal
+        self.data['norm'] = signal.std(axis=-1)
+        return self
+
+    '''
     @property
     def shape(self):
         """Return signal shape."""
@@ -47,7 +66,7 @@ class Select:
         plt.despine()
         #plt.title(f'signal reduction {len(select)} of {data.dims["time"]}'
         #          f' ({100 * len(select)/data.dims["time"]:1.1f}%)')
-
+    '''
 
 
 if __name__ == '__main__':
@@ -59,8 +78,8 @@ if __name__ == '__main__':
     attr = 'f_df_dpsi'
     attr = 'dpressure_dpsi'
 
-    select = Select(ens.data[attr])
-    select.plot()
+    reduce = Reduce().build(ens.data[attr])
+    #select.plot()
 
 '''
 mean = data[attr].data.mean(axis=1).reshape(-1, 1)

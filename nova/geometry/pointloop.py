@@ -6,13 +6,7 @@ code adapted from https://github.com/sasamil/PointInPolygon_Py/pointInside.
 import numba
 import numpy as np
 
-spec = [('points', numba.float64[:, :]),
-        ('status', numba.int16),
-        ('point_number', numba.int64),
-        ('select', numba.boolean[:])]
 
-
-@numba.experimental.jitclass(spec)
 class PointLoop:
     """Point in loop methods."""
 
@@ -20,9 +14,10 @@ class PointLoop:
         self.points = points
         self.status = status
         self.point_number = len(self.points)
-        self.select = np.empty(self.point_number, dtype=numba.boolean)
+        self.select = np.empty(self.point_number, dtype=bool)
 
     @staticmethod
+    @numba.njit
     def point_in_polygon(point, polygon) -> bool:
         """
         Return boolean for point in polygon (is_inside_sm).
@@ -108,7 +103,7 @@ class PointLoop:
         Return boolean for point in polygon (originally - is_inside_sm).
 
         """
-        for i in numba.prange(self.point_number):
+        for i in range(self.point_number):
             self.select[i] = \
                 self.point_in_polygon(self.points[i], polygon) & self.status
         return self.select

@@ -38,6 +38,7 @@ setup_kwargs = dict(
     install_requires    = [
         'alphashape',
         'cython',
+        'dask',
         'descartes',
         'meshio',
         'netCDF4',
@@ -45,6 +46,7 @@ setup_kwargs = dict(
         'numba',
         'numpy',
         'pandas',
+        'pylops',
         'pytest',
         'pyvista',
         'pyquaternion',

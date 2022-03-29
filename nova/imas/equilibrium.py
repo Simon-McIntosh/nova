@@ -68,13 +68,21 @@ class Profile1D(Scenario):
         """Build 1d profile data."""
         super().build()
         time_slice = self.time_slice('profiles_1d', 0, index=None)
-        self.data['flux_index'] = range(len(time_slice.psi))
-        self.data.attrs['profiles_1d'] = ('time', 'flux_index')
+        self.data['psi_norm'] = np.linspace(0, 1, len(time_slice.psi))
+        self.data.attrs['profiles_1d'] = ('time', 'psi_norm')
         self.time_slice.build('profiles_1d', self.attrs_1d, index=None)
+        for itime in range(self.data.dims['time']):  # normalize 1D profiles
+            psi = self.data.psi[itime]
+            if np.isclose(psi[-1] - psi[0], 0):
+                continue
+            psi_norm = (psi - psi[0]) / (psi[-1] - psi[0])
+            for attr in self.attrs_1d:
+                self.data[attr][itime] = np.interp(
+                    self.data.psi_norm, psi_norm, self.data[attr][itime])
 
     def plot_1d(self, itime=-1, attr='psi'):
         """Plot 1d profile."""
-        plt.plot(self.data.flux_index, self.data.psi[itime])
+        plt.plot(self.data.psi_norm, self.data[attr][itime])
 
 
 @dataclass
@@ -92,7 +100,7 @@ class Profile2D(Scenario, BiotPlot):
 
     def plot_2d(self, itime=-1, attr='psi', axes=None, **kwargs):
         """Plot 2d profile."""
-        super().plot(axes)
+        super().plot(axes=axes)
         kwargs = self.contour_kwargs(**kwargs)
         QuadContourSet = plt.contour(self.data.r, self.data.z,
                                      self.data[f'{attr}2d'][itime].T,
@@ -106,8 +114,8 @@ class Profile2D(Scenario, BiotPlot):
 class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
     """Manage active poloidal loop ids, pf_passive."""
 
-    shot: int = 135011
-    run: int = 7
+    shot: int
+    run: int
     ids_name: str = 'equilibrium'
 
     def build(self):
@@ -118,12 +126,15 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
 
 
 if __name__ == '__main__':
-
-    eq = Equilibrium(135011, 7)
-    # eq.build()
+    shot, run = 135011, 7
+    # shot, run = 135013, 2
+    # shot, run = 130506, 403
+    eq = Equilibrium(135011, 7, backend=12)
+    eq.build()
 
     itime = 500
     #eq.plot_0d('ip')
     eq.plot_2d(itime, 'psi', colors='C3', levels=21)
-    #eq.plot_2d(500, 'j_tor')
-    #eq.plot_1d(500)
+    #eq.plot_2d(itime, 'j_tor')
+    #eq.plot_1d(itime, 'dpressure_dpsi')
+    #eq.plot_1d(itime, 'f_df_dpsi')

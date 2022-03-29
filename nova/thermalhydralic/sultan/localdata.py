@@ -19,7 +19,7 @@ class LocalData(LocalData):
 
     def __post_init__(self):
         """Extend utilities.localdata.LocalData."""
-        super().__init__()
+        super().__post_init__()
 
 
 if __name__ == '__main__':

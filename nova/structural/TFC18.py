@@ -176,7 +176,7 @@ if __name__ == '__main__':
 
     tf = TFC18('TFCgapsG10', 'k9', cluster=1)
     #tf.recalculate()
-    tf.export()
+    #tf.export()
     #tf.to_dataframe('EOB')
 
     #tf.load_ensemble()

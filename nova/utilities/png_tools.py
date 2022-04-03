@@ -38,7 +38,7 @@ class sample_plot(object):
 
     def __init__(self, data, x_origin, y_origin, x_ref, y_ref,
                  x_fig, y_fig, ax_eq, ax, fig, path, file,
-                 xscale='linear', yscale='linear', save=False):
+                 xscale='linear', yscale='linear', save=True):
         self.points = []
         self.points_data = []
         self.xscale = xscale
@@ -202,7 +202,7 @@ def set_title(ax, var, txt):
 
 def data_mine(path, file, xlim, ylim, **kw):
     label = kw.get('label', '')
-    save = kw.get('save', False)
+    save = kw.get('save', True)
     title = kw.pop('title', None)
     if 'scale' in kw:
         scale = kw.get('scale')

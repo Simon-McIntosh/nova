@@ -231,7 +231,7 @@ class Compose:
 
 if __name__ == '__main__':
 
-    mode = 9
+    mode = 1
     fourier = Fourier(f'k{mode}')
     compose = Compose()
 
@@ -244,6 +244,8 @@ if __name__ == '__main__':
 
     compose.plot_amplitude()
     #fourier.plot_fit()
+
+
 
 
 '''

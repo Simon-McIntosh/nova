@@ -82,10 +82,10 @@ plt.title(f'case {index+1}')
 
 print(peaktopeak[index])
 
-
+Hmax = 6
 if len(radius) > 3:
     CI = np.quantile(peaktopeak, 0.99)
-    print(6/CI)
+    print(Hmax/CI)
 
     plt.figure()
     plt.hist(peaktopeak, bins=51, rwidth=0.85)
@@ -97,4 +97,4 @@ if len(radius) > 3:
     plt.plot([CI, CI], [ylim[0], ylim[0]+0.8*(ylim[1]-ylim[0])],
              '--', color='gray', label=f'99% $\Delta r < ${factor:1.1f}mm')
     plt.legend()
-    plt.title(f'require H<4mm')
+    plt.title(f'require H<{Hmax}mm')

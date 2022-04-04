@@ -132,7 +132,7 @@ if __name__ == '__main__':
     eq = Equilibrium(135011, 7, backend=12)
     eq.build()
 
-    itime = 500
+    itime = 20
     #eq.plot_0d('ip')
     eq.plot_2d(itime, 'psi', colors='C3', levels=21)
     #eq.plot_2d(itime, 'j_tor')

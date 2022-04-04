@@ -51,16 +51,30 @@ class FilePath:
         """Return status of default netCDF file."""
         return os.path.isfile(self.filepath)
 
+    @property
+    def group(self) -> str:
+        """Return netCDF group."""
+        return self.ids_name
+
+    def _disable_HDF5_lock(self):
+        """Disable HDF5 file locking via sysenv."""
+        if 'HDF5_USE_FILE_LOCKING' not in os.environ:
+            os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
+
     def store(self, mode='a'):
         """Store data within hdf file."""
         file = self.file(self.filename)
         if not os.path.isfile(file):
             mode = 'w'
-        self.data.to_netcdf(file, group=self.ids_name, mode=mode)
+        try:
+            self.data.to_netcdf(file, group=self.group, mode=mode)
+        except OSError:
+            self._disable_HDF5_lock()
+            self.data.to_netcdf(file, group=self.group, mode=mode)
 
     def load(self):
         """Load dataset from file (lazy)."""
         file = self.file(self.filename)
-        with xarray.open_dataset(file, group=self.ids_name) as data:
+        with xarray.open_dataset(file, group=self.group) as data:
             self.data = data
         return self

@@ -1,6 +1,5 @@
 """Access imas 1d profile data."""
 from dataclasses import dataclass, field
-import os
 from warnings import warn
 
 import numpy as np
@@ -35,8 +34,13 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
         self.set_path(self.datapath)
         try:
             self.load()
-        except FileNotFoundError:
+        except (FileNotFoundError, OSError):
             self.build()
+
+    @property
+    def group(self):
+        """Return nedCDF group."""
+        return f'{self.ids_name}/{self.workflow.replace("-", "_")}'
 
     def build(self):
         """Build dataset."""
@@ -65,11 +69,11 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
             eq_data = Equilibrium(pulse, run).data[self.attrs]
             _isnull = eq_data.isnull().any()
             if any([getattr(_isnull, attr) for attr in _isnull]):
-                warn(f'skipping {pulse}:{run} due to nans in dataset')
+                warn(f'\nskipping {pulse}:{run} due to nans in dataset')
                 continue
-            eq_data['subindex'] = 'time', i * np.ones_like(eq_data.time, int)
+            eq_data.coords['pulse_index'] = \
+                ('time', i * np.ones_like(eq_data.time, int))
             data.append(eq_data)
-
         return xarray.concat(data, 'time', combine_attrs='drop_conflicts')
 
     def plot(self, attr: str, **kwargs):
@@ -78,21 +82,21 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
         _color = kwargs.pop('color', None)
         self.data.load()
 
-        import scipy.signal
         for i in self.data.index.data:
             index = self.data.subindex == i
 
-            data = scipy.signal.decimate(self.data[attr][index].data, 100,
-                                         ftype='fir', axis=0)
+            data = self.data[attr][index].data[::100]
             color = f'C{i%10}' if _color is None else _color
             self.axes.plot(self.data.psi_norm.data,
                            data.T, color=color,
                            label=self.data.reference.data[i],
                            **kwargs)
-            self.axes.legend()
+            #self.axes.legend()
 
 
 if __name__ == '__main__':
 
-    ens = Ensemble('DINA-IMAS')
-    ens.plot('f_df_dpsi')
+    ens = Ensemble('ASTRA')
+    ens.build()
+
+    #ens.plot('f_df_dpsi')

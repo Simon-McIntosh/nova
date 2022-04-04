@@ -21,7 +21,7 @@ class TFC18(DataDir, Plotter):
     """Post-process Ansys output from F4E's 18TF coil model."""
 
     cluster: int = 1
-    scenario: dict[str, int] = field(init=False)
+    scenario: dict[str, int] = field(init=False, repr=False)
     ansys: pv.PolyData = field(init=False, repr=False)
     mesh: pv.PolyData = field(init=False, repr=False)
 
@@ -174,9 +174,9 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'k9', cluster=1)
+    pass
     #tf.recalculate()
-    tf.export()
+    #tf.export()
     #tf.to_dataframe('EOB')
 
     #tf.load_ensemble()

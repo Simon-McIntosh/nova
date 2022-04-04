@@ -11,12 +11,99 @@ from nova.utilities.pyplot import plt
 
 
 @dataclass
-class Fourier:
+class Points:
+    """Extract midplane mesh and initalize dataset."""
+
+    file: str
+    folder: str = 'TFCgapsG10'
+    origin: tuple[int] = (0, 0, 0)
+    data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
+
+    ncoil: ClassVar[int] = 18
+    cluster: ClassVar[int] = 1
+
+    def __post_init__(self):
+        """Load mesh."""
+        self.build()
+
+    def slice_mesh(self):
+        """Return midplane mesh."""
+        mesh = TFC18(self.folder, self.file, cluster=self.cluster).mesh
+        return mesh.slice('z', self.origin)
+
+    @property
+    def attrs(self):
+        """Return instance attributes."""
+        return {attr: getattr(self, attr)
+                for attr in ['file', 'folder', 'origin', 'ncoil', 'cluster']}
+
+    def initialize_dataset(self):
+        """Initialize empty dataset from referance scenario."""
+        self.data = xarray.Dataset(attrs=self.attrs)
+        self.data['scenario'] = self.mesh['scenario']
+        self.data['coil_index'] = range(1, self.ncoil+1)
+        self.data['coord'] = ['x', 'y', 'z', 'radial', 'tangent']
+        self.data['points'] = xarray.DataArray(0., self.data.coords)
+
+    def build(self):
+        """Build single mesh dataset."""
+        self.mesh = self.slice_mesh()
+        self.initialize_dataset()
+        for scenario in self.data.scenario.data:  # store ansys data [mm]
+            self.data['points'].loc[scenario][:, :3] = 1e3*self.mesh[scenario]
+        self.data.points[..., -2] = np.linalg.norm(self.data.points[..., :2],
+                                                   axis=-1)
+        self.data.points[..., -1] = np.arctan2(self.data.points[..., 1],
+                                               self.data.points[..., 0])
+
+@dataclass
+class Fourier(Points):
+    """Perform Fourier deomposition on single TFC simulation."""
+
+    def initialize_dataset(self):
+        """Extend points initialize dataset."""
+        super().initialize_dataset()
+        self.data['mode'] = range(self.ncoil//2 + 1)
+        self.data['fft'] = ['radial', 'tangent']
+
+    def build(self):
+        """Extend points build."""
+        super().build()
+        reference = Points('k0').data
+        self.data['delta'] = self.data['points'] - reference['points']
+        r_norm = reference['points'][..., :2].data.copy()
+        r_norm /= np.linalg.norm(r_norm, axis=-1)[..., np.newaxis]
+        t_norm = r_norm @ np.array([[0, -1], [1, 0]])
+        self.data['delta'][..., -2] = np.einsum(
+            'ijk,ijk->ij', self.data['delta'][..., :2].data, r_norm)
+        self.data['delta'][..., -1] = np.einsum(
+            'ijk,ijk->ij', self.data['delta'][..., :2].data, t_norm)
+        self.fft()
+
+    def fft(self):
+        """Apply fft to dataset."""
+        nyquist = self.ncoil // 2
+        coef = scipy.fft.fft(self.data['delta'][..., 3:].data, axis=-2)
+        self.data['coefficient'] = ('scenario', 'mode', 'fft'), \
+            coef[:, :nyquist+1]
+        self.data['amplitude'] = np.abs(self.data['coefficient']) / nyquist
+        self.data['amplitude'][:, 0] /= 2
+        if self.ncoil % 2 == 0:
+            self.data['amplitude'][:, nyquist] /= 2
+        self.data['phase'] = xarray.zeros_like(self.data['amplitude'])
+        self.data['phase'][:] = np.angle(self.data['coefficient'])
+
+
+@dataclass
+class Compose:
     """Perform Fourier analysis on TFC deformations."""
 
     prefix: str = 'k'
     folder: str = 'TFCgapsG10'
+
     origin: tuple[int] = (0, 0, 0)
+
+    wavenumber: list[int] = field(default_factory=lambda: range(10))
     data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
 
     ncoil: ClassVar[int] = 18
@@ -26,12 +113,6 @@ class Fourier:
         """Initialize dataset."""
         self.build()
 
-    @property
-    def attrs(self):
-        """Return instance attributes."""
-        return {attr: getattr(self, attr)
-                for attr in ['prefix', 'folder', 'origin', 'ncoil', 'cluster']}
-
     def load_midplane(self, wavenumber: int):
         """Return midplane mesh."""
         file = f'{self.prefix}{wavenumber}'
@@ -40,52 +121,24 @@ class Fourier:
 
     def initialize_dataset(self, wavenumber=0):
         """Initialize empty dataset from referance scenario."""
-        self.data = xarray.Dataset(attrs=self.attrs)
-        mesh = self.load_midplane(wavenumber)
-        self.data['wavenumber'] = range(self.ncoil//2 + 1)
-        self.data['scenario'] = mesh['scenario']
-        self.data['coil_index'] = range(1, self.ncoil+1)
-        self.data['coord'] = ['x', 'y', 'z', 'radial', 'tangent']
+        data = Fourier('k0').data
+        self.data = xarray.Dataset(attrs=data.attrs)
+        self.data['prefix'] = self.prefix
+        self.data['wavenumber'] = data.mode.data
+        for coord in ['scenario', 'coil_index', 'coord']:
+            self.data[coord] = getattr(data, coord)
         self.data['points'] = xarray.DataArray(0., self.data.coords)
         self.data['mode'] = self.data['wavenumber'].data
         self.data['fft'] = ['radial', 'tangent']
 
     def build(self):
-        """Build dataset from ansys simulation data."""
-        self.initialize_dataset()
-        for wavenumber in self.data.wavenumber.data:
-            mesh = self.load_midplane(wavenumber)
-            for scenario in self.data.scenario.data:  # store ansys data [mm]
-                self.data['points'].loc[wavenumber, scenario][:, :3] = \
-                    1e3*mesh[scenario]
-        self.data.points[..., -2] = np.linalg.norm(self.data.points[..., :2],
-                                                   axis=-1)
-        self.data.points[..., -1] = np.arctan2(self.data.points[..., 1],
-                                               self.data.points[..., 0])
-        self.data['delta'] = self.data['points'] - self.data['points'][0]
-
-        r_norm = self.data['points'][0, ..., :2].data.copy()
-        r_norm /= np.linalg.norm(r_norm, axis=-1)[..., np.newaxis]
-        t_norm = r_norm @ np.array([[0, -1], [1, 0]])
-
-        self.data['delta'][..., -2] = np.einsum(
-            'ijkl,jkl->ijk', self.data['delta'][..., :2].data, r_norm)
-        self.data['delta'][..., -1] = np.einsum(
-            'ijkl,jkl->ijk', self.data['delta'][..., :2].data, t_norm)
-        self.fft()
-
-    def fft(self):
-        """Apply fft to dataset."""
-        nyquist = self.ncoil // 2
-        coef = scipy.fft.fft(self.data['delta'][:, :, :, 3:].data, axis=-2)
-        self.data['coefficient'] = ('wavenumber', 'scenario', 'mode', 'fft'), \
-            coef[:, :, :nyquist+1]
-        self.data['amplitude'] = np.abs(self.data['coefficient']) / nyquist
-        self.data['amplitude'][:, :, 0] /= 2
-        if self.ncoil % 2 == 0:
-            self.data['amplitude'][nyquist] /= 2
-        self.data['phase'] = xarray.zeros_like(self.data['amplitude'])
-        self.data['phase'][:] = np.angle(self.data['coefficient'])
+        """Build ensemble of ansys fourier component simulations."""
+        mode = []
+        for wavenumber in self.wavenumber:
+            mode.append(Fourier(f'{self.prefix}{wavenumber}').data)
+        self.data = xarray.concat(mode, 'wavenumber',
+                                  combine_attrs='drop_conflicts')
+        self.data['wavenumber'] = self.data.mode.data
 
     def plot_wave(self, wavenumber: int, scenario='TFonly'):
         """Plot fft components."""
@@ -119,11 +172,37 @@ class Fourier:
         """Plot radial amplitude magnification."""
         amplitude = np.diag(self.data.amplitude[:, 2, :, 0])
         plt.figure()
-        plt.plot(self.data.wavenumber.values[1:], amplitude[1:], 'o')
+        plt.bar(self.data.wavenumber, amplitude, label='ANSYS', width=0.75)
+
         plt.despine()
-        plt.xticks(self.data.wavenumber.values[1:])
+        plt.xticks(self.data.wavenumber.values)
         plt.xlabel('wavenumber')
-        plt.ylabel('radial amplification factor')
+        plt.ylabel('radial amplification factor '
+                   r'$\frac{\Delta r}{r \Delta \phi}$')
+        plt.legend(frameon=False)
+        plt.yscale('log')
+
+    def diag(self, attr: str, scenario='TFonly', fft='radial'):
+        """Return attribute's diagonal components."""
+        return np.diag(self.data[attr].sel(
+                        scenario=scenario, fft=fft).data)
+
+    def plot_argand(self, scenario='TFonly', fft='radial'):
+        """Plot complex transform."""
+        plt.figure()
+        amplitude = self.diag('amplitude', scenario, fft)
+        phase = self.diag('phase', scenario, fft).copy()
+        coef = amplitude * np.exp(1j * phase)
+
+        for i, mode in enumerate(coef):
+            plt.plot(mode.real, mode.imag, 'o')
+            plt.text(mode.real, mode.imag, i, va='bottom', ha='center')
+        phi = np.linspace(0, 2*np.pi)
+        plt.plot(np.cos(phi), np.sin(phi), '--', color='gray')
+        plt.plot([-1, 1], [0, 0], '-.', color='gray')
+        plt.plot([0, 0], [-1, 1], '-.', color='gray')
+        plt.axis('equal')
+        plt.axis('off')
 
     def plot_fit(self):
         """Fit model to observations."""
@@ -131,8 +210,6 @@ class Fourier:
                       0.4835, 0.4085, 0.6682, 0.4012])
         weights = np.ones(10)
         weights[1] = 0  # exclude n=1 mode
-        #weights[8] = 0
-
         amplitude = np.diag(fourier.data.amplitude[:, 2, :, 0])
         matrix = np.array([np.ones(10), amplitude]).T
 
@@ -154,14 +231,19 @@ class Fourier:
 
 if __name__ == '__main__':
 
-    fourier = Fourier()
-    fourier.plot_wave(3)
+    mode = 9
+    fourier = Fourier(f'k{mode}')
+    compose = Compose()
 
-    fourier.plot_amplitude()
-    fourier.plot_fit()
+    plt.bar(range(1, 10), fourier.data.amplitude[2, 1:, 0], width=0.8)
+    plt.bar(range(1, 10), compose.data.amplitude[mode, 2, 1:, 0], width=0.5)
 
+    compose.plot_wave(8)
 
+    compose.plot_argand()
 
+    compose.plot_amplitude()
+    #fourier.plot_fit()
 
 
 '''

@@ -22,8 +22,8 @@ class Plotter:
         plotter.add_mesh(self.mesh, scalars=None, color='w',
                          opacity=opacity, smooth_shading=False,
                          line_width=3)
-        return plotter
-
+        plotter.show()
+        #return plotter
 
     def warp(self, factor=75, opacity=0.5, displace=None, scalars=None,
              plotter=None, show_edges=False, color=None, show=False,

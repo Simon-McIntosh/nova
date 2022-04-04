@@ -24,7 +24,6 @@ class Fourier:
 
     def __post_init__(self):
         """Initialize dataset."""
-
         self.build()
 
     @property
@@ -156,7 +155,7 @@ class Fourier:
 if __name__ == '__main__':
 
     fourier = Fourier()
-    fourier.plot_wave(2)
+    fourier.plot_wave(3)
 
     fourier.plot_amplitude()
     fourier.plot_fit()

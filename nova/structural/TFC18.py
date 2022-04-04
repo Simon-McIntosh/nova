@@ -174,7 +174,9 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    pass
+    tf = TFC18('TFCgapsG10', 'k0')
+
+    tf.plot()
     #tf.recalculate()
     #tf.export()
     #tf.to_dataframe('EOB')

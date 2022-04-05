@@ -58,6 +58,6 @@ class PF_Active(Scenario):
 
 if __name__ == '__main__':
 
-    pf_active = PF_Active()
+    pf_active = PF_Active(105001, 4)
     pf_active.build()
     pf_active.plot()

@@ -211,4 +211,4 @@ if __name__ == '__main__':
     error.plot_coilset()
 
     #error.plot(0)
-    #error.plot_error()
+    error.plot_error()

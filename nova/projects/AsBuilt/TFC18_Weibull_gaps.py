@@ -574,8 +574,12 @@ class Scenario(Ensemble):
 
     def __post_init__(self):
         """Load database."""
-        self.load_dataset()
-        self.initialize_gaps()
+        try:
+            self.load_dataset()
+            self.initialize_gaps()
+        except FileNotFoundError:
+            self.data = xarray.Dataset(dict(gap_index=range(18)),
+                                       attrs=dict(total_gap=36))
 
     def load_dataset(self):
         """Extend ensemble load dataset."""
@@ -781,8 +785,8 @@ if __name__ == '__main__':
     #scn.build(target='ca', phase_shift=False)
     #scn.build(target=['cs'], phase_shift=True)
 
-    scn.load_sample_data('mode')
-    scn.assembly.plot()
+    #scn.load_sample_data('mode')
+    #scn.assembly.plot()
 
     plt.set_aspect(0.6)
     scn.plot_gap_array(range(1, 5), phase=np.pi/18)

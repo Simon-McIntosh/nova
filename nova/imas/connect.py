@@ -49,9 +49,12 @@ class Connect:
 
     def _to_dataframe(self, summary_string, delimiter=r'\s+'):
         """Convert summart string to pandas dataframe."""
-        return pandas.read_csv(io.StringIO(summary_string),
-                               delimiter=delimiter, skiprows=[0, 2],
-                               skipfooter=1, engine='python')
+        frame = pandas.read_csv(io.StringIO(summary_string),
+                                delimiter=delimiter, skiprows=[0, 2],
+                                skipfooter=1, engine='python')
+        columns = {col: col.lower() if '[' not in col else
+                   col.split('[')[0].strip() for col in frame}
+        return frame.rename(columns=columns)
 
     def load_frame(self, key: str, value: Union[str, int, float]):
         """Load scenario summary to dataframe, filtered by key value pair."""
@@ -71,13 +74,14 @@ class Connect:
             ','.join(space_columns), value), delimiter=r'\s\s+')
         for i, col in enumerate(space_frame):
             self.frame[col] = space_frame.iloc[:, i]
+        self.frame = self.frame.loc[self.frame[key] == value, :]
         return self.frame
 
     def _copy_command(self, ids: str, backend: str):
         """Return ids copy string."""
         command = [f'idscp {ids} -u public -si {shot} -ri {run} '
                    f'-so {shot} -ro {run} -do iter -bo {backend}'
-                   for shot, run in zip(self.frame.Pulse, self.frame.Run)]
+                   for shot, run in zip(self.frame.pulse, self.frame.run)]
         return ' && '.join(command)
 
     def copy_frame(self, *ids_names: str, backend='MDSPLUS', hide=False):
@@ -104,7 +108,9 @@ if __name__ == '__main__':
     connect = Connect()
     #connect.unique('workflow')
     #connect.load_frame('workflow', 'ASTRA')
-    for workflow in ['CORSICA']:
+    for workflow in ['DINA']:
         connect.load_frame('workflow', workflow)
+    connect.frame = connect.frame.iloc[-1:]
+    print(connect.frame)
     connect.copy_frame('equilibrium', 'pf_active', 'pf_passive')
     connect.rsync()

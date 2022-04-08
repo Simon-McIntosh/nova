@@ -56,6 +56,7 @@ class Points:
         self.data.points[..., -1] = np.arctan2(self.data.points[..., 1],
                                                self.data.points[..., 0])
 
+
 @dataclass
 class Fourier(Points):
     """Perform Fourier deomposition on single TFC simulation."""
@@ -113,12 +114,24 @@ class Compose:
         """Initialize dataset."""
         self.build()
 
+    def build(self):
+        """Build ensemble of ansys fourier component simulations."""
+        mode = []
+        for wavenumber in self.wavenumber:
+            mode.append(Fourier(f'{self.prefix}{wavenumber}').data)
+        self.data = xarray.concat(mode, 'wavenumber',
+                                  combine_attrs='drop_conflicts')
+        self.data['wavenumber'] = self.data.mode.data
+
+    '''
     def load_midplane(self, wavenumber: int):
         """Return midplane mesh."""
         file = f'{self.prefix}{wavenumber}'
         mesh = TFC18(self.folder, file, cluster=self.cluster).mesh
         return mesh.slice('z', self.origin)
+    '''
 
+    '''
     def initialize_dataset(self, wavenumber=0):
         """Initialize empty dataset from referance scenario."""
         data = Fourier('k0').data
@@ -130,15 +143,7 @@ class Compose:
         self.data['points'] = xarray.DataArray(0., self.data.coords)
         self.data['mode'] = self.data['wavenumber'].data
         self.data['fft'] = ['radial', 'tangent']
-
-    def build(self):
-        """Build ensemble of ansys fourier component simulations."""
-        mode = []
-        for wavenumber in self.wavenumber:
-            mode.append(Fourier(f'{self.prefix}{wavenumber}').data)
-        self.data = xarray.concat(mode, 'wavenumber',
-                                  combine_attrs='drop_conflicts')
-        self.data['wavenumber'] = self.data.mode.data
+    '''
 
     def plot_wave(self, wavenumber: int, scenario='TFonly'):
         """Plot fft components."""
@@ -170,7 +175,8 @@ class Compose:
 
     def plot_amplitude(self):
         """Plot radial amplitude magnification."""
-        amplitude = np.diag(self.data.amplitude[:, 2, :, 0])
+        amplitude = np.diag(self.data.amplitude[:, 2, :, 0]).copy()
+        amplitude[1:] /= self.data.wavenumber[1:] * np.pi/9
         plt.figure()
         plt.bar(self.data.wavenumber, amplitude, label='ANSYS', width=0.75)
 

@@ -653,11 +653,20 @@ class Scenario(Ensemble):
         """Plot array of error waveforms for all Fourier modes."""
         nfft = self.data.dims['gap_index']
         axes = plt.subplots(len(modes), 2, sharex=True, sharey='col')[1]
+        k_wave = np.linspace(0, 17)
         for i, k in enumerate(modes):
+
             error = self.generate_error(k, phase=i*phase)
             gap = self.generate_gaps(error, k)
+
+            error_wave = np.cos(k*k_wave*np.pi/9 + k*phase/2)
+            gap_wave = 2-k*np.pi/9*np.sin(k*np.pi/9*k_wave - k*phase/2)
+
             axes[i, 0].bar(range(nfft), error, color=f'C{k%10}')
+            axes[i, 0].plot(k_wave, error_wave, color=f'C{k%10}')
+
             axes[i, 1].bar(range(nfft), gap, color=f'C{k%10}')
+            axes[i, 1].plot(k_wave, gap_wave, color=f'C{k%10}')
             axes[i, 0].set_ylabel(f'$k_{k}$ mm')
         axes[0, 0].set_title('placement error')
         axes[0, 1].set_title('gap waveform')

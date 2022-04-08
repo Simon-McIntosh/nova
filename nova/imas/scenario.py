@@ -30,7 +30,6 @@ class Scenario(Database):
     def load_scenario(self):
         """Load ids_data and timeslice."""
         self.ids_data = self.load_ids_data()
-        print('homogeneous', self.ids_data.ids_properties.homogeneous_time)
         self.time_slice = TimeSlice(self.ids_data, self.data)
 
     @contextmanager

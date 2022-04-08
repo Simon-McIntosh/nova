@@ -108,9 +108,10 @@ if __name__ == '__main__':
     connect = Connect()
     #connect.unique('workflow')
     #connect.load_frame('workflow', 'ASTRA')
-    for workflow in ['DINA']:
+    for workflow in ['CORSICA']:
         connect.load_frame('workflow', workflow)
     connect.frame = connect.frame.iloc[-1:]
     print(connect.frame)
-    connect.copy_frame('equilibrium', 'pf_active', 'pf_passive')
+    connect.copy_frame('equilibrium', 'pf_active', 'pf_passive',
+                       backend='MDSPLUS')
     connect.rsync()

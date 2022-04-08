@@ -127,7 +127,8 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
 
 if __name__ == '__main__':
 
-    eq = Equilibrium(105001, 4)
+    #eq = Equilibrium(135014, 1, backend=13)
+    eq = Equilibrium(130510, 3, backend=13)
     eq.build()
 
     itime = 1
@@ -137,4 +138,4 @@ if __name__ == '__main__':
 
     #eq.plot_0d('ip')
     eq.plot_1d(itime, 'dpressure_dpsi')
-    eq.plot_1d(itime, 'f_df_dpsi')
+    #eq.plot_1d(itime, 'f_df_dpsi')

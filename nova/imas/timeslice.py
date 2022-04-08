@@ -17,8 +17,6 @@ class TimeSlice:
         """Return time slice data array."""
         if index is None:
             return getattr(self.ids_data.time_slice[itime], name)
-        print(name, itime, getattr(self.ids_data.time_slice[itime], name))
-        print(getattr(self.ids_data.time_slice[itime], name).array)
         return getattr(self.ids_data.time_slice[itime], name).array[index]
 
     def initialize(self, name: str, attrs: list[str], index=0, postfix=''):

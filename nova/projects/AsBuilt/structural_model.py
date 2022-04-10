@@ -6,6 +6,7 @@ import numpy as np
 import scipy
 import xarray
 
+from nova.database.filepath import FilePath
 from nova.structural.TFC18 import TFC18
 from nova.utilities.pyplot import plt
 
@@ -84,21 +85,25 @@ class Fourier(Points):
     def fft(self):
         """Apply fft to dataset."""
         nyquist = self.ncoil // 2
-        coef = scipy.fft.fft(self.data['delta'][..., 3:].data, axis=-2)
-        self.data['coefficient'] = ('scenario', 'mode', 'fft'), \
-            coef[:, :nyquist+1]
-        self.data['amplitude'] = np.abs(self.data['coefficient']) / nyquist
+        coefficient = scipy.fft.fft(self.data['delta'][..., 3:].data, axis=-2)
+        coefficient = coefficient[:, :nyquist+1]
+        self.data['amplitude'] = ('scenario', 'mode', 'fft'), \
+            np.abs(coefficient) / nyquist
         self.data['amplitude'][:, 0] /= 2
         if self.ncoil % 2 == 0:
             self.data['amplitude'][:, nyquist] /= 2
         self.data['phase'] = xarray.zeros_like(self.data['amplitude'])
-        self.data['phase'][:] = np.angle(self.data['coefficient'])
+        self.data['phase'][:] = np.angle(coefficient)
+        # correct amplitude and phase to match unit gap variation
+        self.data['amplitude'][:, 1:, :] /= self.data.mode[1:] * np.pi/9
+        self.data['phase'][:, 1:, :] += self.data.mode[1:] * np.pi/36
 
 
 @dataclass
-class Compose:
+class Compose(FilePath):
     """Perform Fourier analysis on TFC deformations."""
 
+    filename: str = 'fourier'
     prefix: str = 'k'
     folder: str = 'TFCgapsG10'
 
@@ -112,7 +117,11 @@ class Compose:
 
     def __post_init__(self):
         """Initialize dataset."""
-        self.build()
+        self.set_path('data/Imas')
+        try:
+            self.load()
+        except FileNotFoundError:
+            self.build()
 
     def build(self):
         """Build ensemble of ansys fourier component simulations."""
@@ -122,28 +131,7 @@ class Compose:
         self.data = xarray.concat(mode, 'wavenumber',
                                   combine_attrs='drop_conflicts')
         self.data['wavenumber'] = self.data.mode.data
-
-    '''
-    def load_midplane(self, wavenumber: int):
-        """Return midplane mesh."""
-        file = f'{self.prefix}{wavenumber}'
-        mesh = TFC18(self.folder, file, cluster=self.cluster).mesh
-        return mesh.slice('z', self.origin)
-    '''
-
-    '''
-    def initialize_dataset(self, wavenumber=0):
-        """Initialize empty dataset from referance scenario."""
-        data = Fourier('k0').data
-        self.data = xarray.Dataset(attrs=data.attrs)
-        self.data['prefix'] = self.prefix
-        self.data['wavenumber'] = data.mode.data
-        for coord in ['scenario', 'coil_index', 'coord']:
-            self.data[coord] = getattr(data, coord)
-        self.data['points'] = xarray.DataArray(0., self.data.coords)
-        self.data['mode'] = self.data['wavenumber'].data
-        self.data['fft'] = ['radial', 'tangent']
-    '''
+        self.store('w')
 
     def plot_wave(self, wavenumber: int, scenario='TFonly'):
         """Plot fft components."""
@@ -175,11 +163,9 @@ class Compose:
 
     def plot_amplitude(self):
         """Plot radial amplitude magnification."""
-        amplitude = np.diag(self.data.amplitude[:, 2, :, 0]).copy()
-        amplitude[1:] /= self.data.wavenumber[1:] * np.pi/9
+        amplitude = self.diag('amplitude')
         plt.figure()
         plt.bar(self.data.wavenumber, amplitude, label='ANSYS', width=0.75)
-
         plt.despine()
         plt.xticks(self.data.wavenumber.values)
         plt.xlabel('wavenumber')
@@ -216,7 +202,7 @@ class Compose:
                       0.4835, 0.4085, 0.6682, 0.4012])
         weights = np.ones(10)
         weights[1] = 0  # exclude n=1 mode
-        amplitude = np.diag(fourier.data.amplitude[:, 2, :, 0])
+        amplitude = self.diag('amplitude')
         matrix = np.array([np.ones(10), amplitude]).T
 
         coef = np.linalg.lstsq(matrix*weights[:, np.newaxis],
@@ -237,20 +223,13 @@ class Compose:
 
 if __name__ == '__main__':
 
-    mode = 0
-    fourier = Fourier(f'k{mode}')
     compose = Compose()
 
-    plt.bar(range(1, 10), fourier.data.amplitude[2, 1:, 0], width=0.8)
-    plt.bar(range(1, 10), compose.data.amplitude[mode, 2, 1:, 0], width=0.5)
-
-    compose.plot_wave(8)
-
-    compose.plot_argand()
-
+    #compose.plot_wave(8)
+    #compose.plot_argand()
     compose.plot_amplitude()
-    #fourier.plot_fit()
 
+    #compose.plot_fit()
 
 
 

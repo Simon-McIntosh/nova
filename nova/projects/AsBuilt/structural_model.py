@@ -161,20 +161,56 @@ class Gap(FourierData):
         self.data.points[..., 1] = self.data.points[..., 0] * 2*np.pi * \
             self.data['coil_index'] / (self.data['coil_index'][-1] + 1)
 
-        self.data['delta'] = xarray.DataArray(0., self.data.points.coords)
-        self.data['delta'][..., 1] = \
-            self.data.gap.cumsum('gap_index').data - self.data.points[..., 1]
-        self.data['delta'][..., 1] -= \
-            self.data['delta'][..., 1].mean('coil_index')
+        self.data['placement_error'] = ('simulation', 'coil_index'), \
+            self.data.gap.cumsum('gap_index').data - \
+                self.data.points[..., 1].data
+        self.data['placement_error'] -= \
+            self.data['placement_error'].mean('coil_index')
+        self.fft()
 
+    def fft(self):
+        """Extract amplitude and phase information of fourier components."""
+        self.data.attrs['nyquist'] = self.data.dims['coil_index'] // 2
+        self.data['mode'] = np.arange(self.data.nyquist+1)
+        self._fft('placement_error')
+        self._fft('gap_error')
+
+    def _fft(self, attr: str):
+        coefficient = scipy.fft.fft(self.data[attr].data, axis=-1)
+        coefficient = coefficient[:, :self.data.nyquist+1]
+        self.data[f'{attr}_amplitude'] = ('simulation', 'mode'), \
+            np.abs(coefficient)
+        self.data[f'{attr}_amplitude'] /= self.data.nyquist
+        self.data[f'{attr}_amplitude'][:, 0] /= 2
+        if self.data.dims['coil_index'] % 2 == 0:
+            self.data[f'{attr}_amplitude'][:, self.data.nyquist] /= 2
+        self.data[f'{attr}_phase'] = ('simulation', 'mode'), \
+            np.angle(coefficient)
 
     def plot(self, simulation: str):
         """Plot gap waveforms."""
         plt.bar(self.data.coil_index,
                 self.data.delta.sel(simulation=simulation)[:, 1])
+
+        self.plot_waveform('placement_error', simulation)
+        self.plot_waveform('gap_error', simulation)
+
         plt.bar(self.data.coil_index,
                 self.data.gap_error.sel(simulation=simulation), width=0.5)
 
+    def plot_waveform(self, attr: str, simulation: str):
+        """Plot fourier waveform."""
+        phi = np.linspace(0, 2*np.pi - np.pi/self.data.nyquist,
+                          20*self.data.nyquist)
+        waveform = 0
+        amplitude = self.data[f'{attr}_amplitude']
+        amplitude = amplitude.sel(simulation=simulation).data
+        phase = self.data[f'{attr}_phase']
+        phase = phase.sel(simulation=simulation).data
+        for i in np.arange(1, self.data.nyquist+1):
+            waveform += amplitude[i]*np.cos(i*phi + phase[i])
+        plt.plot(phi * self.data.dims['coil_index'] / (2*np.pi), waveform)
+        plt.despine()
 
 
 @dataclass
@@ -300,7 +336,7 @@ if __name__ == '__main__':
 
     gap = Gap()
     gap.build()
-    gap.plot('k1')
+    gap.plot('k4')
 
 
 '''

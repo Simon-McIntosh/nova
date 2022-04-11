@@ -508,7 +508,7 @@ class MachineDescription(CoilSet, Database):
 class PF_Passive_Geometry(MachineDescription):
     """Manage passive poloidal loop ids, pf_passive."""
 
-    shot: int = 115005
+    pulse: int = 115005
     run: int = 2
     ids_name: str = 'pf_passive'
 
@@ -536,8 +536,8 @@ class PF_Passive_Geometry(MachineDescription):
 class PF_Active_Geometry(MachineDescription):
     """Manage active poloidal loop ids, pf_passive."""
 
-    shot: int = 111001
-    run: int = 1
+    pulse: int = 111001
+    run: int = 4
     ids_name: str = 'pf_active'
 
     def build(self):
@@ -564,7 +564,7 @@ class PF_Active_Geometry(MachineDescription):
 class Wall_Geometry(MachineDescription):
     """Manage plasma boundary, wall ids."""
 
-    shot: int = 116000
+    pulse: int = 116000
     run: int = 1
     ids_name: str = 'wall'
 
@@ -582,9 +582,9 @@ class Wall_Geometry(MachineDescription):
 class Machine(CoilSet, Database):
     """Manage ITER machine geometry."""
 
-    shot: int = 135011
+    pulse: int = 135011
     run: int = 7
-    tokamak: str = 'iter'
+    machine: str = 'iter'
     datapath: str = 'data/Nova'
 
     geometry: Union[dict[str, tuple[int, int]], list[str]] = field(
@@ -599,10 +599,10 @@ class Machine(CoilSet, Database):
     def __post_init__(self):
         """Load coilset, build if not found."""
         super().__post_init__()
-        if self.isfile:
+        try:
             self.load(self.filename)
-        # except (FileNotFoundError, OSError, KeyError):
-        #     self.build()
+        except (FileNotFoundError, OSError, KeyError):
+            self.build()
 
     def load(self, filename: str, path=None):
         """Load machine geometry and data. Re-build if metadata diffrent."""
@@ -612,7 +612,7 @@ class Machine(CoilSet, Database):
     def check_geometry(self):
         """Check geometry ids referances."""
         if isinstance(self.geometry, list):
-            self.geometry = {attr: [self.shot, self.run]
+            self.geometry = {attr: [self.pulse, self.run]
                              for attr in self.geometry}
 
     def solve_biot(self):
@@ -651,7 +651,7 @@ class Machine(CoilSet, Database):
         self.check_geometry()
         for attr in self.geometry:
             self += self.machine_description[attr](
-                *self.geometry[attr], tokamak=self.tokamak, **self.frame_attrs)
+                *self.geometry[attr], machine=self.machine, **self.frame_attrs)
         self.solve_biot()
         self.store(self.filename, metadata=self.metadata)
 

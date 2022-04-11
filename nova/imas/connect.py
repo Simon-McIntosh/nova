@@ -12,15 +12,16 @@ import pandas
 class Connect:
     """Copy and rsync IMAS ids."""
 
+    command: str
+    machine: str
     cluster: str = 'sdcc-login02.iter.org'
-    modules: tuple[str] = ('IMAS',)
-    frame: pandas.DataFrame = field(init=False, repr=False)
-    columns: list[str] = field(
-        default_factory=lambda: ['shot', 'run', 'database', 'ip', 'b0',
-                                 'fuelling', 'workflow', 'ref_name',
-                                 'confinement'])
+    backend: str = 'HDF5'
+    columns: list[str] = field(default_factory=lambda: [])
+    frame: pandas.DataFrame = field(init=False, repr=False,
+                                    default_factory=pandas.DataFrame)
 
-    _space_columns: ClassVar[list[str]] = ['ref_name', 'confinement']
+    _space_columns: ClassVar[list[str]] = []
+    _modules: ClassVar[tuple[str]] = ('IMAS',)
 
     def __post_init__(self):
         """Connect to cluster."""
@@ -30,28 +31,31 @@ class Connect:
     @property
     def _module_load_string(self):
         """Return module load command."""
-        return ' && '.join([f'ml load {module}' for module in self.modules])
+        return ' && '.join([f'ml load {module}' for module in self._modules])
 
     def module_run(self, command: str, hide=True):
         """Run command and return stdout."""
         command = f'{self._module_load_string} && {command}'
         return self.ssh.run(command, hide=hide).stdout
 
-    def _read_summary(self, columns: str, select: str) -> str:
+    def read_summary(self, columns: str, select: str) -> str:
         """Return scenario summary."""
-        return self.module_run(f'scenario_summary -c {columns} -s {select}')
+        return self.module_run(f'{self.command} -c {columns} -s {select}')
 
     def unique(self, column: str):
-        """Print unique column values."""
-        text = self.module_run(f'scenario_summary -c {column}')
-        frame = self._to_dataframe(text, delimiter=r'\s\s+')
-        print(frame.iloc[:, 0].unique())
+        """Return unique column values."""
+        text = self.read_summary(column, select="\'\'")
+        frame = self.to_dataframe(text, delimiter=r'\s\s+')
+        return frame.iloc[:, 0].unique()
 
-    def _to_dataframe(self, summary_string, delimiter=r'\s+'):
+    def to_dataframe(self, summary_string, delimiter=r'\s+'):
         """Convert summart string to pandas dataframe."""
-        return pandas.read_csv(io.StringIO(summary_string),
-                               delimiter=delimiter, skiprows=[0, 2],
-                               skipfooter=1, engine='python')
+        frame = pandas.read_csv(io.StringIO(summary_string),
+                                delimiter=delimiter, skiprows=[0, 2],
+                                skipfooter=1, engine='python')
+        columns = {col: col.lower() if '[' not in col else
+                   col.split('[')[0].strip() for col in frame}
+        return frame.rename(columns=columns)
 
     def load_frame(self, key: str, value: Union[str, int, float]):
         """Load scenario summary to dataframe, filtered by key value pair."""
@@ -63,32 +67,35 @@ class Connect:
                          if col in self.columns]
         if key not in space_columns:
             space_columns.append(key)
-        self.frame = self._to_dataframe(self._read_summary(
-            ','.join(columns), value))
+        frame = self.to_dataframe(self.read_summary(','.join(columns), value))
         if len(space_columns) == 0:
             return
-        space_frame = self._to_dataframe(self._read_summary(
+        space_frame = self.to_dataframe(self.read_summary(
             ','.join(space_columns), value), delimiter=r'\s\s+')
         for i, col in enumerate(space_frame):
-            self.frame[col] = space_frame.iloc[:, i]
+            frame[col] = space_frame.iloc[:, i]
+        frame = frame.loc[frame[key] == value, :]
+        self.frame = pandas.concat([self.frame, frame])
         return self.frame
 
-    def _copy_command(self, ids: str, backend: str):
+    def copy_command(self, frame: pandas.DataFrame, ids: str):
         """Return ids copy string."""
-        command = [f'idscp {ids} -u public -si {shot} -ri {run} '
-                   f'-so {shot} -ro {run} -do iter -bo {backend}'
-                   for shot, run in zip(self.frame.Pulse, self.frame.Run)]
+        command = [f'idscp {ids} -u public '
+                   f'-si {pulse} -ri {run} -d {self.machine} '
+                   f'-so {pulse} -ro {run} -do {self.machine} '
+                   f'-bo {self.backend}'
+                   for pulse, run in zip(frame.pulse, frame.run)]
         return ' && '.join(command)
 
-    def copy_frame(self, *ids_names: str, backend='MDSPLUS', hide=False):
-        """Copy frame from root to global."""
+    def copy_frame(self, *ids_names: str, hide=False):
+        """Copy frame from shared to public on remote."""
         for ids in ids_names:
-            self.module_run(self._copy_command(ids, backend), hide=hide)
+            self.module_run(self.copy_command(self.frame, ids), hide=hide)
 
     def rsync(self):
-        """Syncronize local IMAS database with SDCC public."""
-        public = f'/home/ITER/{self.username}/public/imasdb/iter/'
-        local = f'/home/{self.username}/imas/shared/imasdb/iter/'
+        """Syncronize SDCC remote (user)/public with local IMAS database."""
+        public = f'/home/ITER/{self.username}/public/imasdb/{self.machine}/'
+        local = f'/home/{self.username}/imas/shared/imasdb/{self.machine}/'
         command = f'rsync -aP {self.cluster}:{public} {local}'
         subprocess.run(command.split())
 
@@ -99,12 +106,72 @@ class Connect:
         return self.frame.loc[index, :]
 
 
+@dataclass
+class Scenario(Connect):
+    """Manage public and local scenario data."""
+
+    command: str = 'scenario_summary'
+    machine: str = 'iter'
+    columns: list[str] = field(
+        default_factory=lambda: ['shot', 'run', 'database', 'ip', 'b0',
+                                 'fuelling', 'workflow', 'ref_name',
+                                 'confinement'])
+
+    _space_columns: ClassVar[list[str]] = ['ref_name', 'confinement']
+
+    def sync_workflow(self, *workflow_names):
+        """Sync scenario workflows with local repo."""
+        if len(workflow_names) == 0:
+            workflow_names = ['CORSICA', 'ASTRA', 'DINA-IMAS']
+        for workflow in workflow_names:
+            self.load_frame('workflow', workflow)
+        self.copy_frame('equilibrium', 'pf_active', 'pf_passive')
+        self.rsync()
+
+
+@dataclass
+class Machine(Connect):
+    """Manage public and local machine data."""
+
+    command: str = 'md_summary'
+    machine: str = 'iter_md'
+    columns: list[str] = field(
+        default_factory=lambda: ['pbs', 'ids'])
+
+    _space_columns: ClassVar[list[str]] = []
+
+    def load_ids(self, *ids_names: str):
+        """Load multiple ids to frame."""
+        for ids in ids_names:
+            self.load_frame('ids', ids)
+
+    def to_dataframe(self, summary_string, delimiter=r'\s+'):
+        """Extend Connect.to_dataframe to seperate shot/run column."""
+        frame = super().to_dataframe(summary_string, delimiter)
+        if 'shot/run' not in frame:
+            return frame
+        frame['pulse'] = [value.split('/')[0] for value in frame['shot/run']]
+        frame['run'] = [value.split('/')[1] for value in frame['shot/run']]
+        frame.drop(columns=['shot/run'], inplace=True)
+        return frame
+
+    def copy_ids(self, hide=False):
+        """Copy machine description ids to public on remore."""
+        for ids in self.frame.ids.unique():
+            index = self.frame.ids == ids
+            self.module_run(self.copy_command(self.frame[index], ids),
+                            hide=hide)
+
+    def sync_ids(self, *ids_names):
+        """Sync ids names with local repo."""
+        if len(ids_names) == 0:
+            ids_names = ['pf_active', 'tf', 'pf_passive', 'magnetics', 'wall']
+        self.load_ids(*ids_names)
+        self.copy_ids()
+        self.rsync()
+
+
 if __name__ == '__main__':
 
-    connect = Connect()
-    #connect.unique('workflow')
-    #connect.load_frame('workflow', 'ASTRA')
-    for workflow in ['CORSICA']:
-        connect.load_frame('workflow', workflow)
-    connect.copy_frame('equilibrium', 'pf_active', 'pf_passive')
-    connect.rsync()
+    machine = Machine().sync_ids()
+    scenario = Scenario().sync_workflow()

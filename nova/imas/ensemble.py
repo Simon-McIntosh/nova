@@ -66,6 +66,7 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
         data = []
         for i, (pulse, run) in enumerate(zip(self.data.pulse.data,
                                              self.data.run.data)):
+            print(pulse, run)
             eq_data = Equilibrium(pulse, run).data[self.attrs]
             _isnull = eq_data.isnull().any()
             if any([getattr(_isnull, attr) for attr in _isnull]):

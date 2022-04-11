@@ -12,7 +12,7 @@ from nova.database.filepath import FilePath
 class IDS:
     """Structure IDS input as leading arguments."""
 
-    shot: int
+    pulse: int
     run: int
     ids_name: str = ''
 
@@ -22,22 +22,22 @@ class IMASdb:
     """Methods to access IMAS database."""
 
     user: str = 'public'
-    tokamak: str = 'iter_md'
-    backend: int = 12
+    machine: str = 'iter_md'
+    backend: int = 13
 
     @contextmanager
-    def _database(self, shot: int, run: int, ids_name: str):
+    def _database(self, pulse: int, run: int, ids_name: str):
         """Database context manager."""
         from imas import DBEntry
-        database = DBEntry(self.backend, self.tokamak, shot, run,
+        database = DBEntry(self.backend, self.machine, pulse, run,
                            user_name=self.user)
         database.open()
         yield database.get(ids_name)
         database.close()
 
-    def ids(self, shot: int, run: int, ids_name: str):
+    def ids(self, pulse: int, run: int, ids_name: str):
         """Return filled ids from dataabase."""
-        with self._database(shot, run, ids_name) as ids_data:
+        with self._database(pulse, run, ids_name) as ids_data:
             return ids_data
 
 
@@ -50,20 +50,21 @@ class Database(FilePath, IMASdb, IDS):
 
     def __post_init__(self):
         """Set filepath."""
+        self.group = self.ids_name
         self.set_path(self.datapath)
 
     @property
     def filename(self):
         """Return filename."""
-        return f'{self.tokamak}_{self.shot}{self.run:04d}'
+        return f'{self.machine}_{self.pulse}{self.run:04d}'
 
     def load_ids_data(self):
         """Return ids_data."""
-        self.ids_data = self.ids(self.shot, self.run, self.ids_name)
+        self.ids_data = self.ids(self.pulse, self.run, self.ids_name)
         return self.ids_data
 
     @property
     def ids_attrs(self):
         """Return dict of ids attributes."""
-        return dict(tokamak=self.tokamak, shot=self.shot, run=self.run,
+        return dict(machine=self.machine, pulse=self.pulse, run=self.run,
                     ids_name=self.ids_name)

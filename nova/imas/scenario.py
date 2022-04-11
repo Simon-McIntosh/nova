@@ -14,7 +14,7 @@ from nova.imas.timeslice import TimeSlice
 class Scenario(Database):
     """Manage access to scenario data (load, store, build)."""
 
-    tokamak: str = 'iter'
+    machine: str = 'iter'
     data: xarray.Dataset = field(init=False, repr=False,
                                  default_factory=xarray.Dataset)
     time_slice: TimeSlice = field(init=False, repr=False, default=None)

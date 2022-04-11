@@ -1,5 +1,5 @@
 """Manage file data access for frame and biot instances."""
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 import os
 
 import xarray
@@ -11,7 +11,8 @@ from nova.definitions import root_dir
 class FilePath:
     """Manage to access to data via store and load methods."""
 
-    path: str = field(default=None)
+    path: str = None
+    group: str = None
 
     def set_path(self, subpath: str):
         """Set default path."""
@@ -50,11 +51,6 @@ class FilePath:
     def isfile(self):
         """Return status of default netCDF file."""
         return os.path.isfile(self.filepath)
-
-    @property
-    def group(self) -> str:
-        """Return netCDF group."""
-        return self.ids_name
 
     def _disable_HDF5_lock(self):
         """Disable HDF5 file locking via sysenv."""

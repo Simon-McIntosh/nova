@@ -12,8 +12,8 @@ from nova.utilities.pyplot import plt
 class PF_Active(Scenario):
     """Manage access to pf_active ids."""
 
-    shot: int = 135011
-    run: int = 7
+    pulse: int
+    run: int
     ids_name: ClassVar[str] = 'pf_active'
     coil_attrs: list[str] = field(
         default_factory=lambda: ['current'])
@@ -58,6 +58,6 @@ class PF_Active(Scenario):
 
 if __name__ == '__main__':
 
-    pf_active = PF_Active()
-    pf_active.build()
+    pf_active = PF_Active(135011, 7)
+    #pf_active.build()
     pf_active.plot()

@@ -574,8 +574,12 @@ class Scenario(Ensemble):
 
     def __post_init__(self):
         """Load database."""
-        self.load_dataset()
-        self.initialize_gaps()
+        try:
+            self.load_dataset()
+            self.initialize_gaps()
+        except FileNotFoundError:
+            self.data = xarray.Dataset(dict(gap_index=range(18)),
+                                       attrs=dict(total_gap=36))
 
     def load_dataset(self):
         """Extend ensemble load dataset."""
@@ -649,11 +653,20 @@ class Scenario(Ensemble):
         """Plot array of error waveforms for all Fourier modes."""
         nfft = self.data.dims['gap_index']
         axes = plt.subplots(len(modes), 2, sharex=True, sharey='col')[1]
+        k_wave = np.linspace(0, 17)
         for i, k in enumerate(modes):
+
             error = self.generate_error(k, phase=i*phase)
             gap = self.generate_gaps(error, k)
+
+            error_wave = np.cos(k*k_wave*np.pi/9 + k*phase/2)
+            gap_wave = 2-k*np.pi/9*np.sin(k*np.pi/9*k_wave - k*phase/2)
+
             axes[i, 0].bar(range(nfft), error, color=f'C{k%10}')
+            axes[i, 0].plot(k_wave, error_wave, color=f'C{k%10}')
+
             axes[i, 1].bar(range(nfft), gap, color=f'C{k%10}')
+            axes[i, 1].plot(k_wave, gap_wave, color=f'C{k%10}')
             axes[i, 0].set_ylabel(f'$k_{k}$ mm')
         axes[0, 0].set_title('placement error')
         axes[0, 1].set_title('gap waveform')
@@ -781,8 +794,8 @@ if __name__ == '__main__':
     #scn.build(target='ca', phase_shift=False)
     #scn.build(target=['cs'], phase_shift=True)
 
-    scn.load_sample_data('mode')
-    scn.assembly.plot()
+    #scn.load_sample_data('mode')
+    #scn.assembly.plot()
 
     plt.set_aspect(0.6)
     scn.plot_gap_array(range(1, 5), phase=np.pi/18)

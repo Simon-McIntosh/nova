@@ -174,7 +174,9 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'v3')
+    for file in ['c1', 'c2']:
+        print(file)
+        tf = TFC18('TFCgapsG10', file)
 
     tf.plot()
     #tf.recalculate()

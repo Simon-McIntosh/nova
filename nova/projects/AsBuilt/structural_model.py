@@ -1,8 +1,10 @@
 """Perform post-processing analysis on Fourier perterbed TFC dataset."""
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import ClassVar
 
 import numpy as np
+import pandas
 import scipy
 import xarray
 
@@ -12,31 +14,55 @@ from nova.utilities.pyplot import plt
 
 
 @dataclass
-class Points:
-    """Extract midplane mesh and initalize dataset."""
+class FourierData(FilePath, ABC):
+    """Perform Fourier analysis on TFC deformations."""
 
-    file: str
+    filename: str = 'fourier'
     folder: str = 'TFCgapsG10'
-    origin: tuple[int] = (0, 0, 0)
+    group: str = None
+    datapath: str = 'data/Assembly'
     data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
 
+    def __post_init__(self):
+        """Set dataset filepath."""
+        self.set_path(self.datapath)
+        try:
+            self.load()
+        except (FileNotFoundError, OSError, KeyError):
+            self.build()
+            self.store()
+
+    @abstractmethod
+    def build(self):
+        """Build dataset."""
+
+
+@dataclass
+class PointsAttrs:
+    """Non-default attributes for Points class."""
+
+    filename: str
+
+
+@dataclass
+class Points(FourierData, PointsAttrs):
+    """Extract midplane mesh and initalize dataset."""
+
+    origin: tuple[int] = (0, 0, 0)
     ncoil: ClassVar[int] = 18
     cluster: ClassVar[int] = 1
 
-    def __post_init__(self):
-        """Load mesh."""
-        self.build()
-
     def slice_mesh(self):
         """Return midplane mesh."""
-        mesh = TFC18(self.folder, self.file, cluster=self.cluster).mesh
+        mesh = TFC18(self.folder, self.filename, cluster=self.cluster).mesh
         return mesh.slice('z', self.origin)
 
     @property
     def attrs(self):
         """Return instance attributes."""
         return {attr: getattr(self, attr)
-                for attr in ['file', 'folder', 'origin', 'ncoil', 'cluster']}
+                for attr in ['filename', 'folder',
+                             'origin', 'ncoil', 'cluster']}
 
     def initialize_dataset(self):
         """Initialize empty dataset from referance scenario."""
@@ -95,43 +121,84 @@ class Fourier(Points):
         self.data['phase'] = xarray.zeros_like(self.data['amplitude'])
         self.data['phase'][:] = np.angle(coefficient)
         # correct amplitude and phase to match unit gap variation
-        self.data['amplitude'][:, 1:, :] /= self.data.mode[1:] * np.pi/9
-        self.data['phase'][:, 1:, :] += self.data.mode[1:] * np.pi/36
+        # self.data['amplitude'][:, 1:, :] /= self.data.mode[1:] * np.pi/9
+        # self.data['phase'][:, 1:, :] += self.data.mode[1:] * np.pi/36
+
+    def plot(self, scenario='TFonly', fft='radial', width=0.9):
+        """Plot fourier components."""
+        #plt.figure()
+        plt.bar(self.data.mode,
+                self.data.phase.sel(scenario=scenario, fft=fft),
+                label='ANSYS', width=width)
 
 
 @dataclass
-class Compose(FilePath):
+class Gap(FourierData):
+    """Manage gap input."""
+
+    filename: str = 'constant_adaptive_fourier'
+
+    def build(self):
+        """Load input gap waveforms."""
+        filename = self.file(self.filename, extension='.txt')
+        gapdata = pandas.read_csv(filename, skiprows=1, delim_whitespace=True)
+        gapdata.drop(columns=['rid'], inplace=True)
+        self.data['gap_index'] = range(len(gapdata))
+        self.data['coil_index'] = range(len(gapdata))
+        self.data['coord'] = ['radial', 'tangent']
+        self.data['simulation'] = gapdata.columns
+        self.data['gap'] = ('simulation', 'gap_index'), gapdata.values.T
+        self.data['gap_sum'] = self.data.gap.sum('gap_index')
+        self.data['gap_error'] = self.data.gap - \
+            self.data['gap_sum'] / (self.data.dims['coil_index'])
+
+        self.data['points'] = ('simulation', 'coil_index', 'coord'), \
+            np.zeros(tuple(self.data.dims[dim]
+                     for dim in ['simulation', 'coil_index', 'coord']))
+
+        self.data.points[..., 0] = \
+            self.data.gap_sum.data[:, np.newaxis] / (2*np.pi)
+        self.data.points[..., 1] = self.data.points[..., 0] * 2*np.pi * \
+            self.data['coil_index'] / (self.data['coil_index'][-1] + 1)
+
+        self.data['delta'] = xarray.DataArray(0., self.data.points.coords)
+        self.data['delta'][..., 1] = \
+            self.data.gap.cumsum('gap_index').data - self.data.points[..., 1]
+        self.data['delta'][..., 1] -= \
+            self.data['delta'][..., 1].mean('coil_index')
+
+
+    def plot(self, simulation: str):
+        """Plot gap waveforms."""
+        plt.bar(self.data.coil_index,
+                self.data.delta.sel(simulation=simulation)[:, 1])
+        plt.bar(self.data.coil_index,
+                self.data.gap_error.sel(simulation=simulation), width=0.5)
+
+
+
+@dataclass
+class Compose(FourierData):
     """Perform Fourier analysis on TFC deformations."""
 
-    filename: str = 'fourier'
     prefix: str = 'k'
-    folder: str = 'TFCgapsG10'
-
+    group: str = None
     origin: tuple[int] = (0, 0, 0)
-
     wavenumber: list[int] = field(default_factory=lambda: range(10))
-    data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
 
     ncoil: ClassVar[int] = 18
     cluster: ClassVar[int] = 1
-
-    def __post_init__(self):
-        """Initialize dataset."""
-        self.set_path('data/Imas')
-        try:
-            self.load()
-        except FileNotFoundError:
-            self.build()
 
     def build(self):
         """Build ensemble of ansys fourier component simulations."""
         mode = []
         for wavenumber in self.wavenumber:
-            mode.append(Fourier(f'{self.prefix}{wavenumber}').data)
+            fourier = Fourier(f'{self.prefix}{wavenumber}')
+            mode.append(fourier.data.copy(deep=True))
         self.data = xarray.concat(mode, 'wavenumber',
                                   combine_attrs='drop_conflicts')
         self.data['wavenumber'] = self.data.mode.data
-        self.store('w')
+        self.store()
 
     def plot_wave(self, wavenumber: int, scenario='TFonly'):
         """Plot fft components."""
@@ -223,14 +290,17 @@ class Compose(FilePath):
 
 if __name__ == '__main__':
 
-    compose = Compose()
+    #compose = Compose()
 
     #compose.plot_wave(8)
     #compose.plot_argand()
-    compose.plot_amplitude()
+    #compose.plot_amplitude()
 
     #compose.plot_fit()
 
+    gap = Gap()
+    gap.build()
+    gap.plot('k1')
 
 
 '''

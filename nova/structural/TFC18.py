@@ -174,7 +174,7 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    tf = TFC18('TFCgapsG10', 'k0')
+    tf = TFC18('TFCgapsG10', 'v3')
 
     tf.plot()
     #tf.recalculate()

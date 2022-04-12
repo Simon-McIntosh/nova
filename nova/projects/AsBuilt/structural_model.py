@@ -14,18 +14,30 @@ from nova.utilities.pyplot import plt
 
 
 @dataclass
-class FourierData(FilePath, ABC):
+class DataAttrs:
+    """Manage simulation and group dataset labels."""
+
+    simulation: str
+    filename: str = 'vault'
+    datapath: str = 'data/Assembly'
+    group: str = field(init=False, default=None)
+
+    def __post_init__(self):
+        """Set dataset group for netCDF file load/store."""
+        self.group = f'{self.__class__.__name__.lower()}/{self.simulation}'
+        self.set_path(self.datapath)
+
+
+@dataclass
+class Data(ABC, FilePath, DataAttrs):
     """Perform Fourier analysis on TFC deformations."""
 
-    filename: str = 'fourier'
     folder: str = 'TFCgapsG10'
-    group: str = None
-    datapath: str = 'data/Assembly'
     data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
 
     def __post_init__(self):
-        """Set dataset filepath."""
-        self.set_path(self.datapath)
+        """Load / build dataset."""
+        super().__post_init__()
         try:
             self.load()
         except (FileNotFoundError, OSError, KeyError):
@@ -38,14 +50,7 @@ class FourierData(FilePath, ABC):
 
 
 @dataclass
-class PointsAttrs:
-    """Non-default attributes for Points class."""
-
-    filename: str
-
-
-@dataclass
-class Points(FourierData, PointsAttrs):
+class Points(Data):
     """Extract midplane mesh and initalize dataset."""
 
     origin: tuple[int] = (0, 0, 0)
@@ -54,7 +59,7 @@ class Points(FourierData, PointsAttrs):
 
     def slice_mesh(self):
         """Return midplane mesh."""
-        mesh = TFC18(self.folder, self.filename, cluster=self.cluster).mesh
+        mesh = TFC18(self.folder, self.simulation, cluster=self.cluster).mesh
         return mesh.slice('z', self.origin)
 
     @property
@@ -68,8 +73,8 @@ class Points(FourierData, PointsAttrs):
         """Initialize empty dataset from referance scenario."""
         self.data = xarray.Dataset(attrs=self.attrs)
         self.data['scenario'] = self.mesh['scenario']
-        self.data['coil_index'] = range(1, self.ncoil+1)
-        self.data['coord'] = ['x', 'y', 'z', 'radial', 'tangent']
+        self.data['index'] = range(1, self.ncoil+1)
+        self.data['dimensions'] = ['x', 'y', 'z', 'radial', 'toroidal']
         self.data['points'] = xarray.DataArray(0., self.data.coords)
 
     def build(self):
@@ -92,7 +97,7 @@ class Fourier(Points):
         """Extend points initialize dataset."""
         super().initialize_dataset()
         self.data['mode'] = range(self.ncoil//2 + 1)
-        self.data['fft'] = ['radial', 'tangent']
+        self.data['response'] = ['radial', 'tangent']
 
     def build(self):
         """Extend points build."""
@@ -113,108 +118,94 @@ class Fourier(Points):
         nyquist = self.ncoil // 2
         coefficient = scipy.fft.fft(self.data['delta'][..., 3:].data, axis=-2)
         coefficient = coefficient[:, :nyquist+1]
-        self.data['amplitude'] = ('scenario', 'mode', 'fft'), \
+        self.data['amplitude'] = ('scenario', 'mode', 'response'), \
             np.abs(coefficient) / nyquist
         self.data['amplitude'][:, 0] /= 2
         if self.ncoil % 2 == 0:
             self.data['amplitude'][:, nyquist] /= 2
         self.data['phase'] = xarray.zeros_like(self.data['amplitude'])
         self.data['phase'][:] = np.angle(coefficient)
-        # correct amplitude and phase to match unit gap variation
-        # self.data['amplitude'][:, 1:, :] /= self.data.mode[1:] * np.pi/9
-        # self.data['phase'][:, 1:, :] += self.data.mode[1:] * np.pi/36
 
     def plot(self, scenario='TFonly', fft='radial', width=0.9):
         """Plot fourier components."""
-        #plt.figure()
+        plt.figure()
         plt.bar(self.data.mode,
-                self.data.phase.sel(scenario=scenario, fft=fft),
+                self.data.phase.sel(scenario=scenario, response=fft),
                 label='ANSYS', width=width)
 
 
 @dataclass
-class Gap(FourierData):
+class Gap(Data):
     """Manage gap input."""
 
-    filename: str = 'constant_adaptive_fourier'
+    simulation: str = 'constant_adaptive_fourier'
 
     def build(self):
         """Load input gap waveforms."""
-        filename = self.file(self.filename, extension='.txt')
-        gapdata = pandas.read_csv(filename, skiprows=1, delim_whitespace=True)
+        gapfile = self.file(self.simulation, extension='.txt')
+        gapdata = pandas.read_csv(gapfile, skiprows=1, delim_whitespace=True)
         gapdata.drop(columns=['rid'], inplace=True)
-        self.data['gap_index'] = range(len(gapdata))
-        self.data['coil_index'] = range(len(gapdata))
-        self.data['coord'] = ['radial', 'tangent']
+        self.data = xarray.Dataset()
+        self.data['index'] = range(len(gapdata))
+        self.data['signal'] = ['gap', 'tangent']
         self.data['simulation'] = gapdata.columns
-        self.data['gap'] = ('simulation', 'gap_index'), gapdata.values.T
-        self.data['gap_sum'] = self.data.gap.sum('gap_index')
-        self.data['gap_error'] = self.data.gap - \
-            self.data['gap_sum'] / (self.data.dims['coil_index'])
-
-        self.data['points'] = ('simulation', 'coil_index', 'coord'), \
+        self.data['gap'] = ('simulation', 'index'), gapdata.values.T
+        gapsum = self.data.gap.sum('index')
+        self.data['delta'] = ('simulation', 'index', 'signal'), \
             np.zeros(tuple(self.data.dims[dim]
-                     for dim in ['simulation', 'coil_index', 'coord']))
+                     for dim in ['simulation', 'index', 'signal']))
+        self.data['delta'][..., 0] = self.data.gap - \
+            gapsum / self.data.dims['index']
 
-        self.data.points[..., 0] = \
-            self.data.gap_sum.data[:, np.newaxis] / (2*np.pi)
-        self.data.points[..., 1] = self.data.points[..., 0] * 2*np.pi * \
-            self.data['coil_index'] / (self.data['coil_index'][-1] + 1)
-
-        self.data['placement_error'] = ('simulation', 'coil_index'), \
-            self.data.gap.cumsum('gap_index').data - \
-                self.data.points[..., 1].data
-        self.data['placement_error'] -= \
-            self.data['placement_error'].mean('coil_index')
+        self.data['delta'][..., 1] = \
+            self.data.gap.cumsum('index').data - \
+            gapsum * (self.data['index'] + 1) / self.data.dims['index']
+        self.data['delta'][..., 1] -= self.data['delta'][..., 1].mean('index')
         self.fft()
+        self.store()
 
     def fft(self):
         """Extract amplitude and phase information of fourier components."""
-        self.data.attrs['nyquist'] = self.data.dims['coil_index'] // 2
+        self.data.attrs['nyquist'] = self.data.dims['index'] // 2
         self.data['mode'] = np.arange(self.data.nyquist+1)
-        self._fft('placement_error')
-        self._fft('gap_error')
-
-    def _fft(self, attr: str):
-        coefficient = scipy.fft.fft(self.data[attr].data, axis=-1)
+        coefficient = scipy.fft.fft(self.data.delta.data, axis=-2)
         coefficient = coefficient[:, :self.data.nyquist+1]
-        self.data[f'{attr}_amplitude'] = ('simulation', 'mode'), \
+        self.data['amplitude'] = ('simulation', 'mode', 'signal'), \
             np.abs(coefficient)
-        self.data[f'{attr}_amplitude'] /= self.data.nyquist
-        self.data[f'{attr}_amplitude'][:, 0] /= 2
-        if self.data.dims['coil_index'] % 2 == 0:
-            self.data[f'{attr}_amplitude'][:, self.data.nyquist] /= 2
-        self.data[f'{attr}_phase'] = ('simulation', 'mode'), \
+        self.data['amplitude'] /= self.data.nyquist
+        self.data['amplitude'][:, 0] /= 2
+        if self.data.dims['index'] % 2 == 0:
+            self.data['amplitude'][:, self.data.nyquist] /= 2
+        self.data['phase'] = ('simulation', 'mode', 'signal'), \
             np.angle(coefficient)
 
     def plot(self, simulation: str):
         """Plot gap waveforms."""
-        plt.bar(self.data.coil_index,
-                self.data.delta.sel(simulation=simulation)[:, 1])
+        plt.bar(self.data.index,
+                self.data.delta.sel(simulation=simulation, coord='tangent'))
+        plt.bar(self.data.index,
+                self.data.delta.sel(simulation=simulation, coord='gap'),
+                width=0.5)
+        self.plot_waveform('tangent', simulation)
+        self.plot_waveform('gap', simulation)
 
-        self.plot_waveform('placement_error', simulation)
-        self.plot_waveform('gap_error', simulation)
-
-        plt.bar(self.data.coil_index,
-                self.data.gap_error.sel(simulation=simulation), width=0.5)
-
-    def plot_waveform(self, attr: str, simulation: str):
+    def plot_waveform(self, coord: str, simulation: str):
         """Plot fourier waveform."""
         phi = np.linspace(0, 2*np.pi - np.pi/self.data.nyquist,
                           20*self.data.nyquist)
         waveform = 0
-        amplitude = self.data[f'{attr}_amplitude']
-        amplitude = amplitude.sel(simulation=simulation).data
-        phase = self.data[f'{attr}_phase']
-        phase = phase.sel(simulation=simulation).data
+        amplitude = self.data['amplitude'].sel(
+            simulation=simulation, coord=coord).data
+        phase = self.data['phase'].sel(
+            simulation=simulation, coord=coord).data
         for i in np.arange(1, self.data.nyquist+1):
             waveform += amplitude[i]*np.cos(i*phi + phase[i])
-        plt.plot(phi * self.data.dims['coil_index'] / (2*np.pi), waveform)
+        plt.plot(phi * self.data.dims['index'] / (2*np.pi), waveform)
         plt.despine()
 
 
 @dataclass
-class Compose(FourierData):
+class Compose(Data):
     """Perform Fourier analysis on TFC deformations."""
 
     prefix: str = 'k'
@@ -324,6 +315,58 @@ class Compose(FourierData):
         plt.title(rf'$H={{{coef[0]:1.2f}}}+{{{coef[1]:1.2f}}}\Delta r$')
 
 
+@dataclass
+class TransferFunction(Data):
+    """Extract factor and phase transform from single point simulations."""
+
+    simulation: str
+    scenario: str = 'TFonly'
+    eps: float = 1e-3
+
+    def build(self):
+        """Lanuch gap and fourier instances."""
+        _input = Gap().data.sel(simulation=self.simulation)
+        _output = Fourier(self.simulation).data.sel(
+            scenario='TFonly', response='radial')
+        self.data = xarray.Dataset()
+        self.data['amplitude_factor'] = \
+            _output.amplitude / _input.amplitude
+        self.data['phase_shift'] = _output.phase - _input.phase
+        for i, coord in enumerate(self.data.coord):
+            max_factor = _input.amplitude[:, i].max()
+            index = _input.amplitude[:, i] < self.eps * max_factor
+            self.data['amplitude_factor'][index, i] = -1
+            self.data['phase_shift'][index, i] = 0
+
+
+@dataclass
+class Model(Data):
+    """Construct structural model."""
+
+    simulation: str = 'fourier'
+
+    ncoil: ClassVar[int] = 18
+
+    def build(self):
+        """Build fourier component model."""
+        self.data = xarray.Dataset()
+        self.data.attrs['nyquist'] = self.ncoil // 2
+        self.data['mode'] = np.arange(self.data.nyquist+1)
+        self.data['signal'] = ['gap', 'tangent']
+        self.data['amplitude_factor'] = xarray.DataArray(0., self.data.coords)
+        self.data['phase_shift'] = xarray.DataArray(0., self.data.coords)
+        for mode in self.data.mode.values[1:]:
+            for attr in ['amplitude_factor', 'phase_shift']:
+                component = TransferFunction(f'k{mode}')
+                self.data[attr][mode] = component.data[attr][mode]
+        self.store()
+
+    #def predict(self, signal: xarray.DataArray):
+
+
+
+
+
 if __name__ == '__main__':
 
     #compose = Compose()
@@ -334,9 +377,12 @@ if __name__ == '__main__':
 
     #compose.plot_fit()
 
+    model = Model()
+
     gap = Gap()
-    gap.build()
-    gap.plot('k4')
+
+    tf = TransferFunction('c1')
+
 
 
 '''

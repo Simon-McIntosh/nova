@@ -8,13 +8,14 @@ extras_require = dict(
                       cuda=['cupy-cuda115'],
                       develop=['spyder', 'spyder-unittest', 'line_profiler', 'numdifftools', 'pytest-xdist'],
                       mesh=['gmsh', 'pygmsh', 'tetgen', 'trimesh'],
+                      optimize=['nlopt'],
                       plan=['python-dateutil'],
                       test=['pytest', 'lizard', 'asv'],
                       thermofluids=['ftputil', 'coolprop']
                       )
 
 extras_require['full'] = [module for mode in extras_require for module in extras_require[mode] 
-                          if mode not in ['ansys', 'thermofluids', 'cuda', 'plan']]
+                          if mode not in ['ansys', 'thermofluids', 'cuda', 'plan', 'nlopt']
 
 setup_kwargs = dict(
     name                = 'nova',
@@ -46,7 +47,6 @@ setup_kwargs = dict(
         'fortranformat',
         'meshio',
         'netCDF4',
-        'nlopt',
         'numba',
         'numpy',
         'pandas',

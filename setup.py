@@ -3,16 +3,18 @@ import versioneer
 
 long_description = """..."""
 
-extras_require = dict(develop=['spyder', 'spyder-unittest', 'line_profiler', 'numdifftools', 'pytest-xdist'],
-                      mesh=['gmsh', 'pygmsh', 'tetgen', 'trimesh'],
+extras_require = dict(
                       ansys=['ansys-dpf-core', 'ansys-dpf-post', 'openpyxl'],
-                      thermofluids=['ftputil', 'coolprop'],
                       cuda=['cupy-cuda115'],
-                      plan=['python-dateutil']
+                      develop=['spyder', 'spyder-unittest', 'line_profiler', 'numdifftools', 'pytest-xdist'],
+                      mesh=['gmsh', 'pygmsh', 'tetgen', 'trimesh'],
+                      plan=['python-dateutil'],
+                      test=['pytest', 'lizard', 'asv'],
+                      thermofluids=['ftputil', 'coolprop']
                       )
 
 extras_require['full'] = [module for mode in extras_require for module in extras_require[mode] 
-                          if mode not in ['thermofluids', 'cuda', 'plan']]
+                          if mode not in ['ansys', 'thermofluids', 'cuda', 'plan']]
 
 setup_kwargs = dict(
     name                = 'nova',
@@ -49,7 +51,6 @@ setup_kwargs = dict(
         'numpy',
         'pandas',
         'pylops',
-        'pytest',
         'pyvista',
         'pyquaternion',
         'rdp',

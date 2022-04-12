@@ -15,7 +15,7 @@ extras_require = dict(
                       )
 
 extras_require['full'] = [module for mode in extras_require for module in extras_require[mode] 
-                          if mode not in ['ansys', 'thermofluids', 'cuda', 'plan', 'nlopt']
+                          if mode not in ['ansys', 'thermofluids', 'cuda', 'plan', 'optimize']]
 
 setup_kwargs = dict(
     name                = 'nova',
@@ -25,7 +25,7 @@ setup_kwargs = dict(
     keywords            = 'equilibrium reconstruction plasma Biot Savart mesh free',
     author              = 'Simon McIntosh',
     author_email        = 'simon.mcintosh@iter.org',
-    url                 = 'https://git.iter.org/projects/SCEN/repos/nova/',
+    url                 = 'https://git.iter.org/projects/EQ/repos/nova/',
     long_description    = long_description,
     packages            = find_packages(),
     classifiers         = [

@@ -127,11 +127,11 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
 
 if __name__ == '__main__':
 
-    #eq = Equilibrium(135014, 1)  # DINA-IMAS
-    eq = Equilibrium(130510, 3)
-    #eq.build()
+    eq = Equilibrium(135014, 1)  # DINA-IMAS
+    # eq = Equilibrium(130510, 3)
+    eq.build()
 
-    itime = 1
+    itime = 50
 
     eq.plot_2d(itime, 'psi', colors='C3', levels=21)
     #eq.plot_2d(itime, 'j_tor')

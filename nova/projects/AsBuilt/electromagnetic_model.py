@@ -108,7 +108,8 @@ class StructuralDataSet(BaseDataSet, ModelData):
     """Manage structural dataset."""
 
     simulations: ClassVar[list[str]] = ['k1', 'k2', 'k3', 'k4', 'k5', 'k6',
-                                        'k7', 'k8', 'k9', 'c2']
+                                        'k7', 'k8', 'k9',
+                                        'a1', 'a2', 'c1', 'c2']
     date: ClassVar[str] = '2022_04_15'
 
     def build(self):
@@ -173,7 +174,7 @@ class ElectromagneticModel(ModelBase):
     def _predict(self, delta, signal: str, ndiv=150):
         """Return fft prediction."""
         delta_hat = np.fft.rfft(delta)
-        return np.fft.irfft(delta_hat * self._filter(signal), n=ndiv) * \
+        return np.fft.irfft(delta_hat * self.filter[signal], n=ndiv) * \
             ndiv / len(delta)
 
     def predict(self, radial, tangential, ndiv=150):
@@ -192,16 +193,17 @@ if __name__ == '__main__':
     #structural.plot('k1')
     model = ElectromagneticModel()
 
-    structural = StructuralDataSet().data.sel(simulation='c2')
+    structural = StructuralDataSet().data.sel(simulation='a1')
 
-    h = model.predict(structural.delta[:, 0].data,
-                      structural.delta[:, 1].data)
+    radial = structural.delta[:, 0].data
+    tangential = structural.delta[:, 1].data
+    h = model.predict(radial, tangential)
 
     h += 0.1*np.cos(18*structural.phi)
     h -= h[0]
 
-    plt.plot(structural.phi, structural.deviation)
-    plt.plot(structural.phi, h)
+    plt.plot(structural.phi, structural.deviation - structural.deviation.mean())
+    plt.plot(structural.phi, h - h.mean(), '-')
 
 
 '''

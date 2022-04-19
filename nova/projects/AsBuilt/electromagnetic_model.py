@@ -4,13 +4,13 @@ import os
 from typing import ClassVar
 
 import numpy as np
+import pandas
 import scipy.interpolate
 import xarray
 
 from nova.definitions import root_dir
 from nova.projects.AsBuilt.model_data import ModelData, ModelBase
-from nova.projects.AsBuilt.structural_model import Transform
-from nova.utilities.png_tools import data_load
+from nova.projects.AsBuilt.structural_model import StructuralTransform
 from nova.utilities.pyplot import plt
 
 
@@ -19,12 +19,11 @@ class BaseDataSet:
     """Manage field deviation datasets."""
 
     simulations: ClassVar[list[str]] = []
-    date: ClassVar[str] = ''
     ncoil: ClassVar[int] = 18
 
-    def build(self, ndiv=150):
+    def build(self, ndiv=360):
         """Build base dataset structure."""
-        self.data = xarray.Dataset(attrs=dict(date=self.date))
+        self.data = xarray.Dataset()
         self.data['simulation'] = self.simulations
         self.data['index'] = np.arange(1, self.ncoil+1)
         self.data['response'] = ['radial', 'tangential']
@@ -33,20 +32,29 @@ class BaseDataSet:
         self.data['deviation'] = ('simulation', 'phi'), \
             np.zeros((self.data.dims['simulation'], ndiv))
         for i, simulation in enumerate(self.simulations):
-            self.data.deviation[i] = self._load_data(simulation)
+            self.data.deviation[i] = self._load_data(simulation, ndiv)
         self.data['peaktopeak'] = self.data.deviation.max(axis=-1) - \
             self.data.deviation.min(axis=-1)
         return self.store()
 
-    def _load_data(self, simulation: str, phi=None):
+    def _load_data(self, simulation: str, ndiv, ripple=True):
         """Return interpolated field line deviation dataset."""
         path = os.path.join(root_dir, 'input/Assembly/')
-        data = data_load(path, f'peaktopeak_{simulation}',
-                         date=self.date)[0][0]
-        if phi is None:
-            phi = self.data.phi
-        return scipy.interpolate.interp1d(
-            data['x'], data['y'], fill_value='extrapolate')(phi)
+        filename = os.path.join(path, f'{simulation}.csv')
+        data = pandas.read_csv(filename, header=None)
+        data.iloc[:, 0] *= np.pi/180
+        phi_sample = np.linspace(0, 2*np.pi, 3*len(data), endpoint=False)
+        data = data.loc[np.unique(data.iloc[:, 0], return_index=True)[1], :]
+        h_sample = scipy.interpolate.interp1d(
+            data.iloc[:, 0], data.iloc[:, 1],
+            fill_value='extrapolate')(phi_sample)
+        h_hat = np.fft.rfft(h_sample)
+        if ripple:
+            h_hat[self.ncoil // 2:self.ncoil] = 0
+            h_hat[self.ncoil+1:] = 0
+        else:
+            h_hat[self.ncoil // 2:] = 0
+        return np.fft.irfft(h_hat[:self.ncoil+1], n=ndiv) * ndiv/len(h_sample)
 
     def plot(self, simulation: str):
         """Plot benchmark data."""
@@ -76,7 +84,6 @@ class RadialDataSet(BaseDataSet, ModelData):
     """Manage radial dataset."""
 
     simulations: ClassVar[list[str]] = ['case1', 'case2', 'case3']
-    date: ClassVar[str] = '2022_04_01'
 
     def build(self):
         """Build radial pertibation dataset."""
@@ -110,24 +117,42 @@ class StructuralDataSet(BaseDataSet, ModelData):
     simulations: ClassVar[list[str]] = ['k1', 'k2', 'k3', 'k4', 'k5', 'k6',
                                         'k7', 'k8', 'k9',
                                         'a1', 'a2', 'c1', 'c2']
-    date: ClassVar[str] = '2022_04_15'
 
     def build(self):
         """Build structural pertibation dataset."""
         super().build()
         for i, simulation in enumerate(self.simulations):
-            self.data.delta[i] = Transform(simulation).data.response_delta
+            self.data.delta[i] = \
+                StructuralTransform(simulation).data.response_delta
         return self.store()
 
 
 @dataclass
-class ElectromagneticModel(ModelBase):
-    """Calculate HFS field line deviation using fft EM proxy."""
+class ElectromagneticBase(ModelBase):
+    """Electromagnetic baseclass."""
 
     def _filter(self, signal: str):
         """Return complex filter."""
         return self.data.filter[:, 0].sel(signal=signal) + \
             1j * self.data.filter[:, 1].sel(signal=signal)
+
+    def _predict(self, delta, signal: str, ndiv: int):
+        """Return fft prediction."""
+        delta_hat = np.fft.rfft(delta)
+        return np.fft.irfft(delta_hat * self.filter[signal], n=ndiv) * \
+            ndiv / self.ncoil
+
+    def predict(self, radial, tangential, ndiv=360):
+        """Predict field line deviation from radial and tangential signals."""
+        deviation = self._predict(radial, 'radial', ndiv) + \
+            self._predict(tangential, 'tangential', ndiv)
+        deviation -= deviation[0]
+        return deviation
+
+
+@dataclass
+class ElectromagneticTransform(ElectromagneticBase):
+    """Build component EM transform filters."""
 
     def build(self):
         """Build electromagnetic model."""
@@ -137,21 +162,17 @@ class ElectromagneticModel(ModelBase):
         self.data['coefficient'] = ['real', 'imag', 'radial', 'tangential']
         self.data['signal'] = ['radial', 'tangential']
         self.data['filter'] = xarray.DataArray(0., self.data.coords)
+
         self.build_radial()
         self.build_tangential()
         return self.store()
-
-    def _downsample(self, dataset, value):
-        """Return downsampled vector from dataset.phi to dataset.index."""
-        return np.interp(
-            np.linspace(0, 2*np.pi, dataset.dims['index'], endpoint=False),
-            dataset.phi, value)
 
     def build_radial(self, simulation='case1'):
         """Build radial filter."""
         dataset = RadialDataSet().data.sel(simulation=simulation)
         r_hat = np.fft.rfft(dataset.delta[:, 0])
-        h_hat = np.fft.rfft(self._downsample(dataset, dataset.deviation))
+        h_hat = np.fft.rfft(dataset.deviation)[:self.data.nyquist+1] * \
+            self.ncoil / dataset.dims['phi']
         _filter = h_hat / r_hat
         self.data['filter'][1:, 0, 0] = _filter.real[1:]
         self.data['filter'][1:, 1, 0] = _filter.imag[1:]
@@ -162,36 +183,32 @@ class ElectromagneticModel(ModelBase):
         r_hat = np.fft.rfft(dataset.delta[:, 0])
         t_hat = np.fft.rfft(dataset.delta[:, 1])
         # subtract radial component
-        radial_deviation = np.fft.irfft(r_hat * self._filter('radial'),
-                                        n=dataset.dims['phi']) * \
-            dataset.dims['phi'] / dataset.dims['index']
+        radial_deviation = np.fft.irfft(
+            r_hat * self._filter('radial'), n=dataset.dims['phi']) * \
+            dataset.dims['phi'] / self.ncoil
+
         tangential_deviation = dataset.deviation - radial_deviation
-        h_hat = np.fft.rfft(self._downsample(dataset, tangential_deviation))
+        h_hat = np.fft.rfft(tangential_deviation)[:self.data.nyquist+1] * \
+            self.ncoil / dataset.dims['phi']
         _filter = h_hat / t_hat
         self.data['filter'][1:, 0, 1] = _filter.real[1:]
         self.data['filter'][1:, 1, 1] = _filter.imag[1:]
 
-    def _predict(self, delta, signal: str, ndiv=150):
-        """Return fft prediction."""
-        delta_hat = np.fft.rfft(delta)
-        return np.fft.irfft(delta_hat * self.filter[signal], n=ndiv) * \
-            ndiv / len(delta)
 
-    def predict(self, radial, tangential, ndiv=150):
-        """Predict field line deviation from radial and tangential signals."""
-        deviation = self._predict(radial, 'radial', ndiv) + \
-            self._predict(tangential, 'tangential', ndiv)
-        deviation -= deviation[0]
-        return deviation
-
+@dataclass
+class ElectromagneticModel(ModelBase):
+    """Calculate HFS field line deviation using fft EM proxy."""
 
 
 if __name__ == '__main__':
 
     # radial = RadialDataSet()
-    #structural = StructuralDataSet()
-    #structural.plot('k1')
-    model = ElectromagneticModel()
+    # structural = StructuralDataSet()
+    # structural.plot('k2')
+
+    model = ElectromagneticTransform().build()
+
+    #model = ElectromagneticModel()
 
     structural = StructuralDataSet().data.sel(simulation='a1')
 
@@ -199,11 +216,19 @@ if __name__ == '__main__':
     tangential = structural.delta[:, 1].data
     h = model.predict(radial, tangential)
 
-    h += 0.1*np.cos(18*structural.phi)
+    h += 0.11*np.cos(18*structural.phi)
     h -= h[0]
 
-    plt.plot(structural.phi, structural.deviation - structural.deviation.mean())
-    plt.plot(structural.phi, h - h.mean(), '-')
+    plt.plot(structural.phi,
+             structural.deviation - structural.deviation.mean(), 'C1',
+             label='Energopul')
+    plt.plot(np.linspace(0, 2*np.pi, len(h), endpoint=False),
+             h - h.mean(), 'C2-', label='FFT proxy')
+
+    plt.despine()
+    plt.xlabel(r'$\phi$')
+    plt.ylabel(r'$h$, mm')
+    plt.legend()
 
 
 '''

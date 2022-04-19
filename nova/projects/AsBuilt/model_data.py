@@ -32,6 +32,8 @@ class ModelData(ABC, FilePath, DataAttrs):
     data: xarray.Dataset = field(init=False, repr=False,
                                  default_factory=xarray.Dataset)
 
+    ncoil: ClassVar[int] = 18
+
     def __post_init__(self):
         """Load / build dataset."""
         super().__post_init__()
@@ -48,8 +50,6 @@ class ModelData(ABC, FilePath, DataAttrs):
 @dataclass
 class ModelBase(ModelData):
     """FFT model baseclass."""
-
-    ncoil: ClassVar[int] = 18
 
     def __post_init__(self):
         """Load finite impulse response filter."""

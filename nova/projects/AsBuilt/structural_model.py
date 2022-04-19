@@ -181,7 +181,7 @@ class Gap(ModelData):
 
 
 @dataclass
-class Transform(ModelData):
+class StructuralTransform(ModelData):
     """Extract factor and phase transform from single point simulations."""
 
     name: str
@@ -256,12 +256,13 @@ class StructuralModel(ModelBase):
 
     def build(self):
         """Build fourier component model."""
-        reference = Transform('k0').data
+        reference = StructuralTransform('k0').data
         self.data = xarray.Dataset(attrs=reference.attrs)
         self.data['filter'] = xarray.zeros_like(reference.filter)
         self.data = self.data.drop('simulation')
         for mode in self.data.mode.values[1:]:
-            self.data.filter[mode] = Transform(f'k{mode}').data.filter[mode]
+            self.data.filter[mode] = \
+                StructuralTransform(f'k{mode}').data.filter[mode]
         return self.store()
 
     def predict(self, gap, response='radial'):
@@ -271,8 +272,8 @@ class StructuralModel(ModelBase):
 
     def plot_benchmark(self, simulation: str):
         """Plot structural model results."""
-        transform = Transform(simulation)
-        axes = plt.subplots(3, 1, sharex=True, sharey=True,
+        transform = StructuralTransform(simulation)
+        axes = plt.subplots(3, 1, sharex=True, sharey=False,
                             gridspec_kw=dict(height_ratios=[1, 1.5, 1.5]))[1]
         axes[0].bar(transform.data.index+0.5, transform.data.gap, width=0.75)
         axes[0].set_ylabel('gap')
@@ -321,7 +322,7 @@ if __name__ == '__main__':
     #gap = Gap()
 
 
-    #transform = Transform('k0').build()
+    #transform = StructuralTransform('k0').build()
     '''
     radius = structure.predict(transform.data.gap.data)
 

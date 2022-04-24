@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import ClassVar
 
+import numpy as np
 import xarray
 
 from nova.database.filepath import FilePath
@@ -46,6 +47,28 @@ class ModelData(ABC, FilePath, DataAttrs):
     def build(self):
         """Build dataset."""
 
+    @staticmethod
+    def fft(data, axis=-2):
+        """Apply fft to dataset."""
+        data.attrs['ncoil'] = data.dims['index']
+        data.attrs['nyquist'] = data.ncoil // 2
+        data['mode'] = range(data.nyquist + 1)
+        data['coefficient'] = ['real', 'imag', 'amplitude', 'phase']
+        dimensions = list(data.delta.dims)
+        dimensions[axis] = 'mode'
+        dimensions = tuple(dimensions) + ('coefficient',)
+        data['fft'] = dimensions, \
+            np.zeros(tuple(data.dims[dim] for dim in dimensions))
+
+        coefficient = np.fft.rfft(data['delta'].data, axis=axis)
+        data.fft[..., 0] = coefficient.real
+        data.fft[..., 1] = coefficient.imag
+        data.fft[..., 2] = np.abs(coefficient) / data.nyquist
+        data.fft[:, 0, :, 2] /= 2
+        if data.ncoil % 2 == 0:
+            data.fft[:, data.nyquist, :, 2] /= 2
+        data.fft[..., 3] = np.angle(coefficient)
+
 
 @dataclass
 class ModelBase(ModelData):
@@ -54,9 +77,13 @@ class ModelBase(ModelData):
     def __post_init__(self):
         """Load finite impulse response filter."""
         super().__post_init__()
+        self.load_filter()
+
+    def load_filter(self):
+        """Extract filter from dataset."""
         self.filter = {dimension: self._filter(dimension).data
                        for dimension in ['radial', 'tangential']}
 
     @abstractmethod
-    def _filter(self, dimension: str):
+    def _filter(self, label: str):
         """Return complex filter."""

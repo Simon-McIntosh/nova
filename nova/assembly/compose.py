@@ -5,7 +5,7 @@ from typing import ClassVar
 import numpy as np
 import xarray
 
-from nova.projects.AsBuilt.structural_model import Data, Fourier
+from nova.assembly.structural import Data, Fourier
 from nova.utilities.pyplot import plt
 
 

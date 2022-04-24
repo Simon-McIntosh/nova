@@ -4,11 +4,10 @@ from typing import ClassVar
 
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 import numpy as np
-import pandas
-import scipy
 import xarray
 
-from nova.projects.AsBuilt.model_data import ModelData, ModelBase
+from nova.assembly.gap import Gap
+from nova.assembly.model import ModelData, ModelBase
 from nova.structural.TFC18 import TFC18
 from nova.utilities.pyplot import plt
 
@@ -52,7 +51,7 @@ class Points(ModelData):
 
 @dataclass
 class Fourier(Points):
-    """Perform Fourier deomposition on single TFC simulation."""
+    """Perform Fourier deomposition on single vault simulation."""
 
     def initialize_dataset(self):
         """Extend points initialize dataset."""
@@ -78,28 +77,6 @@ class Fourier(Points):
         self.fft(self.data)
         return self.store()
 
-    @staticmethod
-    def fft(data, axis=-2):
-        """Apply fft to dataset."""
-        data.attrs['ncoil'] = data.dims['index']
-        data.attrs['nyquist'] = data.ncoil // 2
-        data['mode'] = range(data.nyquist + 1)
-        data['coefficient'] = ['real', 'imag', 'amplitude', 'phase']
-        dimensions = list(data.delta.dims)
-        dimensions[axis] = 'mode'
-        dimensions = tuple(dimensions) + ('coefficient',)
-        data['fft'] = dimensions, \
-            np.zeros(tuple(data.dims[dim] for dim in dimensions))
-
-        coefficient = scipy.fft.rfft(data['delta'].data, axis=axis)
-        data.fft[..., 0] = coefficient.real
-        data.fft[..., 1] = coefficient.imag
-        data.fft[..., 2] = np.abs(coefficient) / data.nyquist
-        data.fft[:, 0, :, 2] /= 2
-        if data.ncoil % 2 == 0:
-            data.fft[:, data.nyquist, :, 2] /= 2
-        data.fft[..., 3] = np.angle(coefficient)
-
     def plot(self, coefficient='amplitude', scenario='TFonly'):
         """Plot fourier components."""
         plt.figure()
@@ -115,73 +92,7 @@ class Fourier(Points):
 
 
 @dataclass
-class Gap(ModelData):
-    """Manage gap input."""
-
-    name: str = 'constant_adaptive_fourier'
-
-    def read_gapfile(self):
-        """Return gapfile as pandas.DataFrame."""
-        gapfile = self.file(self.name, extension='.txt')
-        if self.name in ['Gap_Size_18_Coils', 'F4E_vgap']:
-            gapdata = pandas.read_csv(gapfile, skiprows=1,
-                                      delim_whitespace=True)
-            gapdata = gapdata.iloc[1:]
-            columns = {column: column.replace('_', '').lower()
-                       for column in gapdata}
-            gapdata.rename(columns=columns, inplace=True)
-            return gapdata.drop(columns=['cid', 'rid'])
-        gapdata = pandas.read_csv(gapfile, skiprows=1, delim_whitespace=True)
-        return gapdata.drop(columns=['rid'])
-
-    def build(self):
-        """Load input gap waveforms."""
-        gapdata = self.read_gapfile()
-        self.data = xarray.Dataset()
-        self.data['index'] = np.arange(1, len(gapdata)+1)
-        self.data['signal'] = ['gap', 'tangential']
-        self.data['simulation'] = gapdata.columns
-        self.data['gap'] = ('simulation', 'index'), gapdata.values.T
-        gapsum = self.data.gap.sum('index')
-        self.data['delta'] = ('simulation', 'index', 'signal'), \
-            np.zeros(tuple(self.data.dims[dim]
-                     for dim in ['simulation', 'index', 'signal']))
-        self.data['delta'][..., 0] = self.data.gap - \
-            gapsum / self.data.dims['index']
-        self.data['delta'][..., 1] = \
-            self.data.gap.cumsum('index').data - \
-            gapsum * (self.data['index'] + 1) / self.data.dims['index']
-        self.data['delta'][..., 1] -= self.data['delta'][..., 1].mean('index')
-        Fourier.fft(self.data)
-        return self.store()
-
-    def plot(self, simulation: str):
-        """Plot gap waveforms."""
-        plt.bar(self.data.index,
-                self.data.delta.sel(simulation=simulation, coord='tangential'))
-        plt.bar(self.data.index,
-                self.data.delta.sel(simulation=simulation, coord='gap'),
-                width=0.5)
-        self.plot_waveform('tangential', simulation)
-        self.plot_waveform('gap', simulation)
-
-    def plot_waveform(self, coord: str, simulation: str):
-        """Plot fourier waveform."""
-        phi = np.linspace(0, 2*np.pi - np.pi/self.data.nyquist,
-                          20*self.data.nyquist)
-        waveform = 0
-        amplitude = self.data['amplitude'].sel(
-            simulation=simulation, coord=coord).data
-        phase = self.data['phase'].sel(
-            simulation=simulation, coord=coord).data
-        for i in np.arange(1, self.data.nyquist+1):
-            waveform += amplitude[i]*np.cos(i*phi + phase[i])
-        plt.plot(phi * self.data.dims['index'] / (2*np.pi), waveform)
-        plt.despine()
-
-
-@dataclass
-class StructuralTransform(ModelData):
+class Transform(ModelData):
     """Extract factor and phase transform from single point simulations."""
 
     name: str
@@ -190,16 +101,9 @@ class StructuralTransform(ModelData):
 
     attrs: ClassVar[list[str]] = ['delta', 'fft']
 
-    @property
-    def gapfile(self):
-        """Return gap listing filename."""
-        if self.name[0] == 'v':
-            return 'Gap_Size_18_Coils'
-        return 'constant_adaptive_fourier'
-
     def build_signal(self):
         """Build transform signal."""
-        signal_data = Gap(self.gapfile).data.sel(simulation=self.name)
+        signal_data = Gap(self.name).data
         self.data['gap'] = signal_data.gap
         for attr in self.attrs:
             self.data[f'signal_{attr}'] = signal_data[attr]
@@ -246,33 +150,34 @@ class StructuralTransform(ModelData):
 
 
 @dataclass
-class StructuralModel(ModelBase):
+class Model(ModelBase):
     """Construct structural model."""
 
-    def _filter(self, response: str):
+    name: str = 'structural'
+
+    def _filter(self, label: str):
         """Return complex filter."""
-        return self.data.filter[..., 0].sel(response=response) + \
-            1j * self.data.filter[..., 1].sel(response=response)
+        return self.data.filter[..., 0].sel(response=label) + \
+            1j * self.data.filter[..., 1].sel(response=label)
 
     def build(self):
         """Build fourier component model."""
-        reference = StructuralTransform('k0').data
+        reference = Transform('k0').data
         self.data = xarray.Dataset(attrs=reference.attrs)
         self.data['filter'] = xarray.zeros_like(reference.filter)
         self.data = self.data.drop('simulation')
         for mode in self.data.mode.values[1:]:
             self.data.filter[mode] = \
-                StructuralTransform(f'k{mode}').data.filter[mode]
+                Transform(f'k{mode}').data.filter[mode]
         return self.store()
 
     def predict(self, gap, response='radial'):
-        """Return FIR prediction of zero-gap (operational) radial waveform."""
-        coefficent = np.fft.rfft(gap)
-        return np.fft.irfft(coefficent * self.filter[response])
+        """Return prediction of zero-gap (operational) response waveform."""
+        return np.fft.irfft(np.fft.rfft(gap) * self.filter[response])
 
     def plot_benchmark(self, simulation: str):
         """Plot structural model results."""
-        transform = StructuralTransform(simulation)
+        transform = Transform(simulation)
         axes = plt.subplots(3, 1, sharex=True, sharey=False,
                             gridspec_kw=dict(height_ratios=[1, 1.5, 1.5]))[1]
         axes[0].bar(transform.data.index+0.5, transform.data.gap, width=0.75)
@@ -281,15 +186,15 @@ class StructuralModel(ModelBase):
                     width=0.85, color='C1', label='ANSYS')
         model_radial = self.predict(transform.data.gap.data, 'radial')
         axes[1].bar(transform.data.index, model_radial,
-                    width=0.45, color='C2', label='FFT proxy')
+                    width=0.45, color='C2', label='Vault proxy')
         axes[1].set_ylabel(r'$\Delta r$')
-        axes[0].set_title(f'Benchmark: {simulation}')
+        axes[0].set_title(f'Structural benchmark: {simulation}')
 
         axes[2].bar(transform.data.index, transform.data.response_delta[:, 1],
                     width=0.85, color='C1', label='ANSYS')
         model_tangential = self.predict(transform.data.gap.data, 'tangential')
         axes[2].bar(transform.data.index, model_tangential,
-                    width=0.45, color='C2', label='FFT proxy')
+                    width=0.45, color='C2', label='Vault proxy')
         axes[2].set_ylabel(r'$r\Delta \phi$')
 
         axes[-1].set_xlabel('coil index')
@@ -297,37 +202,32 @@ class StructuralModel(ModelBase):
         axes[-1].xaxis.set_major_formatter(FormatStrFormatter('%d'))
         axes[-1].xaxis.set_minor_locator(MultipleLocator(1))
         plt.despine()
-        axes[1].legend(loc='upper right', fontsize='x-small', ncol=1)
+        axes[1].legend(fontsize='x-small', ncol=2)
 
     def plot_response(self):
         """Plot radial and tangential."""
         axes = plt.subplots(1, 1, sharex=True)[1]
         axes.bar(self.data.mode,
-                 self.data.filter[..., 2].sel(response='radial'))
+                 self.data.filter[..., 2].sel(response='radial'),
+                 label='radial')
         axes.bar(self.data.mode,
                  self.data.filter[..., 2].sel(response='tangential'),
-                 width=0.5)
+                 width=0.5, label='tangential')
         axes.xaxis.set_major_locator(MultipleLocator(1))
         axes.xaxis.set_major_formatter(FormatStrFormatter('%d'))
         plt.despine()
+        plt.title('Structural response')
+        plt.xlabel(r'wavenumber $k$')
+        plt.ylabel('gap amplification factor')
+        plt.legend()
 
 
 if __name__ == '__main__':
 
-    structure = StructuralModel()
-    structure.plot_benchmark('c2')
-    #structure.plot_response()
-
-    #fourier = Fourier('k2').build()
-    #gap = Gap()
+    structural = Model()
+    structural.plot_benchmark('v3')
 
 
-    #transform = StructuralTransform('k0').build()
-    '''
-    radius = structure.predict(transform.data.gap.data)
 
-    electromagnetic = ElectromagneticModel()
-    electromagnetic.fit(2)
-    peaktopeak = electromagnetic.predict(radius, plot=True)[0]
-    print(peaktopeak)
-    '''
+    #structural.plot_response()
+    #Gap().plot('k3')

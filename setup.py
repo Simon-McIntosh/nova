@@ -51,6 +51,7 @@ setup_kwargs = dict(
         'numpy',
         'pandas',
         'pylops',
+        'pymc3',
         'pyvista',
         'pyquaternion',
         'rdp',

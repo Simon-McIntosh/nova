@@ -73,7 +73,7 @@ class Trial(Dataset, TrialAttrs):
         self.rng = np.random.default_rng(self.sead)
         super().__post_init__()
 
-    def normal(self, width: float):
+    def normal(self, variance: float):
         """Return sample with normal distribution.
 
         Parameters
@@ -81,7 +81,7 @@ class Trial(Dataset, TrialAttrs):
         width: float
             Distribution width, (2 sigma)
         """
-        scale = (width / 2)**2
+        scale = np.sqrt(variance)
         return self.rng.normal(scale=scale, size=(self.samples, self.ncoil))
 
     def uniform(self, bound: float):
@@ -155,9 +155,9 @@ class Trial(Dataset, TrialAttrs):
         plt.ylabel(r'$P(H)$')
 
         plt.text(0.65, 0.85,
-                 r'$\Delta r_{case} = \mathcal{N}\,(0, 1)$'
+                 r'$\Delta r_{ccl} = \mathcal{N}\,(0, 2)$'
                  '\n'
-                 r'$\Delta r_{ccl} = \mathcal{U}\,(\pm 2)$',
+                 r'$\Delta r_{case} = \mathcal{U}\,(\pm 2)$',
                  transform=axes.transAxes)
 
 

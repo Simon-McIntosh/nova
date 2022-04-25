@@ -1,15 +1,16 @@
 """Run Monte Carlo simulations for candidate vault assemblies."""
 from dataclasses import dataclass, field, fields
 from functools import cached_property
+from time import time
 from typing import ClassVar
 
 import numpy as np
+import scipy.stats
 import xarray
 import xxhash
 
 from nova.assembly import structural, electromagnetic
 from nova.assembly.model import Dataset
-from nova.assembly.fieldline import FieldLine
 from nova.utilities.pyplot import plt
 
 
@@ -17,12 +18,12 @@ from nova.utilities.pyplot import plt
 class TrialAttrs:
     """Manage trial attributes."""
 
-    samples: int = 100000
+    samples: int = 500_000
     sead: int = 2025
     case_radial: tuple[str, float] = ('uniform', 2)
-    case_tangential: tuple[str, float] = ('uniform', 2)
-    ccl_radial: tuple[str, float] = ('normal', 2)
-    ccl_tangential: tuple[str, float] = ('normal', 2)
+    case_tangential: tuple[str, float] = ('uniform', 0)
+    ccl_radial: tuple[str, float] = ('normal', 0)
+    ccl_tangential: tuple[str, float] = ('normal', 0)
 
     ncoil: ClassVar[int] = 18
 
@@ -90,10 +91,12 @@ class Trial(Dataset, TrialAttrs):
 
     def build(self):
         """Build Monte Carlo dataset."""
+        start = time()
         self.build_signal()
         self.build_gap()
         self.predict_structure()
         self.predict_electromagnetic()
+        print(f'build time {time() - start:1.0f}s')
         return self.store()
 
     def build_signal(self):
@@ -138,7 +141,7 @@ class Trial(Dataset, TrialAttrs):
         self.data['electromagnetic'] = self.data.structural.copy(deep=True)
         self.data.electromagnetic[..., 0] += self.data.case[..., 0]
         self.data.electromagnetic[..., 0] += self.data.ccl[..., 0]
-        self.data.electromagnetic[..., 1] += self.data.case[..., 1]
+        self.data.electromagnetic[..., 1] += self.data.ccl[..., 1]
         model = electromagnetic.Model()
         self.data['peaktopeak'] = 'sample', model.peaktopeak(
             self.data.electromagnetic[..., 0],
@@ -147,18 +150,27 @@ class Trial(Dataset, TrialAttrs):
     def plot(self):
         """Plot peak to peak distribution."""
         plt.figure()
-        plt.hist(self.data.peaktopeak, bins=51, rwidth=0.8)
+        plt.hist(self.data.peaktopeak, bins=51, density=True,
+                 rwidth=0.8)
         plt.despine()
         axes = plt.gca()
         axes.set_yticks([])
-        plt.xlabel(r'peak to peak deviation $h$, mm')
+        plt.xlabel(r'peak to peak deviation $H$, mm')
         plt.ylabel(r'$P(H)$')
+
+        self.plot_pdf()
 
         plt.text(0.65, 0.85,
                  r'$\Delta r_{ccl} = \mathcal{N}\,(0, 2)$'
                  '\n'
                  r'$\Delta r_{case} = \mathcal{U}\,(\pm 2)$',
                  transform=axes.transAxes)
+
+    def plot_pdf(self, bins=51):
+        """Plot pdf."""
+        pdf, edges = np.histogram(self.data.peaktopeak, bins,
+                                  density=True)
+        plt.plot((edges[:-1] + edges[1:]) / 2, pdf)
 
 
 if __name__ == '__main__':

@@ -68,4 +68,4 @@ if __name__ == '__main__':
     feildline = FieldLine()
 
     feildline.plot_benchmark('v3')
-    feildline.plot_peaktopeak()
+    #feildline.plot_peaktopeak()

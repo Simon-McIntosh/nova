@@ -49,7 +49,7 @@ class Base(ModelBase):
         """Return peaktopeak delta."""
         return waveform.max(axis=-1) - waveform.min(axis=-1)
 
-    def peaktopeak(self, radial=None, tangential=None, ndiv=72):
+    def peaktopeak(self, radial=None, tangential=None, ndiv=180):
         """Return peak to peak prediction."""
         deviation = self.predict(radial, tangential)
         return self._peaktopeak(deviation)
@@ -91,8 +91,9 @@ class Base(ModelBase):
     def plot_benchmark(self, simulation: str):
         """Plot Monte Carlo benchmark."""
         dataset = self.load_dataset(simulation)
-        model_deviation = self.predict(
-            dataset.delta[:, 0], dataset.delta[:, 1], dataset.dims['phi'])
+        radial = dataset.delta[:, 0]
+        tangential = dataset.delta[:, 1]
+        model_deviation = self.predict(radial, tangential, dataset.dims['phi'])
         axes = plt.subplots(2, 1, sharex=False, sharey=False,
                             gridspec_kw=dict(height_ratios=[1, 2]))[1]
         for i, label in enumerate([r'$\Delta r$', r'$r\Delta \phi$']):
@@ -215,11 +216,8 @@ class WaveModel(Base):
 if __name__ == '__main__':
 
     model = Model()
-    #model.build(False)
-
+    # model.build(False)
     model.plot_benchmark('v3')
-
-
 
 # amplitude = abs(coefficient) / self.data.nyquist
 # amplitude[..., 0] /= 2

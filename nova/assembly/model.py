@@ -20,20 +20,19 @@ class DataAttrs:
 
     def __post_init__(self):
         """Set dataset group for netCDF file load/store."""
-        self.group = f'{self.__class__.__name__.lower()}'
+        if self.group is None:
+            self.group = f'{self.__class__.__name__.lower()}'
         if self.name is not None:
             self.group += f'/{self.name}'
         self.set_path(self.datapath)
 
 
 @dataclass
-class ModelData(ABC, FilePath, DataAttrs):
-    """Perform Fourier analysis on TFC deformations."""
+class Dataset(ABC, FilePath, DataAttrs):
+    """Manage build, storage, and retrival of an xarray dataset."""
 
     data: xarray.Dataset = field(init=False, repr=False,
                                  default_factory=xarray.Dataset)
-
-    ncoil: ClassVar[int] = 18
 
     def __post_init__(self):
         """Load / build dataset."""
@@ -46,6 +45,13 @@ class ModelData(ABC, FilePath, DataAttrs):
     @abstractmethod
     def build(self):
         """Build dataset."""
+
+
+@dataclass
+class ModelData(Dataset):
+    """Perform Fourier analysis on TFC deformations."""
+
+    ncoil: ClassVar[int] = 18
 
     @staticmethod
     def fft(data, axis=-2):

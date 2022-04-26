@@ -16,7 +16,80 @@ from nova.utilities.pyplot import plt
 
 
 @dataclass
-class BaseDataSet:
+class BaseData:
+    """Manage csv datasets."""
+
+    def _load_data(self, simulation: str):
+        """Return interpolated field line deviation waveform."""
+        path = os.path.join(root_dir, 'input/Assembly/')
+        filename = os.path.join(path, f'{simulation}.csv')
+        data = pandas.read_csv(filename, header=None, delim_whitespace=True)
+        data.iloc[:, 0] *= np.pi/180  # to radians
+        data = data.loc[np.unique(data.iloc[:, 0], return_index=True)[1], :]
+        return scipy.interpolate.interp1d(
+            data.iloc[:, 0], data.iloc[:, 1],
+            fill_value='extrapolate')(self.data.sample_phi)
+
+    def _filter_data(self, waveform, ripple=True):
+        """Return filtered deviation waveform."""
+        fft = np.fft.rfft(waveform)
+        if ripple:
+            fft = fft[:self.ncoil+1] * \
+                2*self.ncoil / self.data.dims['sample_phi']
+            fft[self.ncoil // 2:self.ncoil] = 0
+            return np.fft.irfft(fft, n=self.data.dims['phi']) * \
+                self.data.dims['phi'] / (2*self.ncoil)
+        fft = fft[:self.ncoil // 2 + 1] * \
+            self.ncoil / self.data.dims['sample_phi']
+        return np.fft.irfft(fft, n=self.data.dims['phi']) * \
+            self.data.dims['phi'] / self.ncoil
+
+
+@dataclass
+class FieldData(BaseData, ModelData):
+    """Manage magnetic field datasets."""
+
+    name: str = 'v3'
+
+    def build(self, ndiv=360):
+        """Build base dataset structure."""
+        self.data = xarray.Dataset(attrs=dict(nyquist=self.ncoil // 2))
+        self.data['index'] = np.arange(1, self.ncoil+1)
+        self.data['coordinate'] = ['r', 'phi', 'z']
+        self.data['sample_phi'] = np.linspace(0, 2*np.pi, 2*ndiv)
+        self.data['sample_field'] = ('coordinate', 'sample_phi'), \
+            np.zeros((self.data.dims['coordinate'],
+                      self.data.dims['sample_phi']))
+        self.data['phi'] = np.linspace(0, 2*np.pi, ndiv)
+        self.data['field'] = ('coordinate', 'phi'), \
+            np.zeros((self.data.dims['coordinate'],
+                      self.data.dims['phi']))
+        self.data['ripple_field'] = xarray.zeros_like(self.data.field)
+        for i, coordinate in enumerate(self.data.coordinate.values):
+            simulation = f'{self.name}_b{coordinate}'
+            self.data.sample_field[i] = self._load_data(simulation)
+            self.data.field[i] = \
+                self._filter_data(self.data.sample_field[i], False)
+            self.data.ripple_field[i] = \
+                self._filter_data(self.data.sample_field[i], True)
+        return self.store()
+
+    def plot(self):
+        """Plot field waveforms."""
+        axes = plt.subplots(3, 1, sharex=True)[1]
+        for i, coordinate in enumerate(self.data.coordinate.values):
+            axes[i].plot(self.data.sample_phi, self.data.sample_field[i])
+            axes[i].plot(self.data.phi, self.data.ripple_field[i])
+            axes[i].plot(self.data.phi, self.data.field[i], '--')
+            if coordinate == 'phi':
+                coordinate = r'\phi'
+            axes[i].set_ylabel(fr'$B_{coordinate}$')
+        plt.despine()
+        axes[-1].set_xlabel(r'$\phi$')
+
+
+@dataclass
+class DeviationData(BaseData):
     """Manage field deviation datasets."""
 
     simulations: ClassVar[list[str]] = []
@@ -40,37 +113,13 @@ class BaseDataSet:
             np.zeros((self.data.dims['simulation'], ndiv))
         for i, simulation in enumerate(self.simulations):
             self.data.sample_deviation[i] = self._load_data(simulation)
-            self.data.deviation[i] = self._filter_data(simulation, False)
-            self.data.ripple_deviation[i] = self._filter_data(simulation, True)
+            self.data.deviation[i] = \
+                self._filter_data(self.data.sample_deviation[i], False)
+            self.data.ripple_deviation[i] = \
+                self._filter_data(self.data.sample_deviation[i], True)
         self.data['peaktopeak'] = self.data.deviation.max(axis=-1) - \
             self.data.deviation.min(axis=-1)
         return self.store()
-
-    def _load_data(self, simulation: str):
-        """Return interpolated field line deviation waveform."""
-        path = os.path.join(root_dir, 'input/Assembly/')
-        filename = os.path.join(path, f'{simulation}.csv')
-        data = pandas.read_csv(filename, header=None)
-        data.iloc[:, 0] *= np.pi/180  # to radians
-        data = data.loc[np.unique(data.iloc[:, 0], return_index=True)[1], :]
-        return scipy.interpolate.interp1d(
-            data.iloc[:, 0], data.iloc[:, 1],
-            fill_value='extrapolate')(self.data.sample_phi)
-
-    def _filter_data(self, simulation: str, ripple=True):
-        """Return filtered deviation waveform."""
-        h_hat = np.fft.rfft(self.data.sample_deviation.sel(
-            simulation=simulation))
-        if ripple:
-            h_hat = h_hat[:self.ncoil+1] * \
-                2*self.ncoil / self.data.dims['sample_phi']
-            h_hat[self.ncoil // 2:self.ncoil] = 0
-            return np.fft.irfft(h_hat, n=self.data.dims['phi']) * \
-                self.data.dims['phi'] / (2*self.ncoil)
-        h_hat = h_hat[:self.ncoil // 2 + 1] * \
-            self.ncoil / self.data.dims['sample_phi']
-        return np.fft.irfft(h_hat, n=self.data.dims['phi']) * \
-            self.data.dims['phi'] / self.ncoil
 
     def plot(self, simulation: str):
         """Plot benchmark data."""
@@ -105,7 +154,7 @@ class BaseDataSet:
 
 
 @dataclass
-class MonteCarlo(BaseDataSet, ModelData):
+class MonteCarlo(DeviationData, ModelData):
     """Manage radial displacment Monte Carlo dataset."""
 
     simulations: ClassVar[list[str]] = ['case1', 'case2', 'case3']
@@ -136,7 +185,7 @@ class MonteCarlo(BaseDataSet, ModelData):
 
 
 @dataclass
-class Ansys(BaseDataSet, ModelData):
+class Ansys(DeviationData, ModelData):
     """Manage ansys dataset."""
 
     simulations: ClassVar[list[str]] = ['k0', 'k1', 'k2', 'k3', 'k4',
@@ -154,6 +203,9 @@ class Ansys(BaseDataSet, ModelData):
 
 if __name__ == '__main__':
 
-    MonteCarlo().plot('case2')
+    #MonteCarlo().plot('case2')
     #ansys = Ansys().build()
     #ansys.plot('a2')
+
+    field = FieldData()
+    field.plot()

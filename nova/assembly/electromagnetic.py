@@ -29,19 +29,21 @@ class Base(ModelBase):
         return self.data.filter[:, 0].sel(signal=label) + \
             1j * self.data.filter[:, 1].sel(signal=label)
 
-    def _predict(self, delta, signal: str, ndiv: int):
+    def _predict(self, delta, signal: str, ndiv: int, offset=False):
         """Return fft prediction."""
         delta_hat = np.fft.rfft(delta)
+        if offset:
+            delta_hat[..., 1] = 0
         return np.fft.irfft(delta_hat * self.filter[signal], n=ndiv) * \
             ndiv / self.ncoil
 
-    def predict(self, radial=None, tangential=None, ndiv=360):
+    def predict(self, radial=None, tangential=None, ndiv=360, offset=False):
         """Predict field line deviation from radial and tangential signals."""
         deviation = 0
         if radial is not None:
-            deviation += self._predict(radial, 'radial', ndiv)
+            deviation += self._predict(radial, 'radial', ndiv, offset)
         if tangential is not None:
-            deviation += self._predict(tangential, 'tangential', ndiv)
+            deviation += self._predict(tangential, 'tangential', ndiv, offset)
         return deviation
 
     @staticmethod
@@ -49,10 +51,15 @@ class Base(ModelBase):
         """Return peaktopeak delta."""
         return waveform.max(axis=-1) - waveform.min(axis=-1)
 
-    def peaktopeak(self, radial=None, tangential=None, ndiv=180):
+    def peaktopeak(self, radial=None, tangential=None, ndiv=180, offset=False):
         """Return peak to peak prediction."""
-        deviation = self.predict(radial, tangential)
+        deviation = self.predict(radial, tangential, ndiv, offset)
         return self._peaktopeak(deviation)
+
+    def offset(self, radial=None, tangential=None, ndiv=36):
+        """Return magnetic axis offset prediction."""
+        deviation = self.predict(radial, tangential, ndiv)
+        return np.abs(np.fft.rfft(deviation))[..., 1] / (ndiv // 2)
 
     def load_dataset(self, simulation: str):
         """Return benchmark dataset."""

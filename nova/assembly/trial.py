@@ -19,14 +19,15 @@ from nova.utilities.pyplot import plt
 class TrialAttrs:
     """Manage trial attributes."""
 
-    samples: int = 1000_000
-    theta: list[float] = field(default_factory=lambda: [2, 2, 2, 2])
+    samples: int = 200_000
+    theta: list[float] = field(default_factory=lambda: [1.5, 1.5, 2, 2, 5, 0])
     pdf: list[str] = field(
-        default_factory=lambda: ['uniform', 'uniform', 'normal', 'normal'])
+        default_factory=lambda: ['uniform', 'uniform', 'normal', 'normal',
+                                 'uniform', 'uniform'])
     energize: Union[int, bool] = True
     sead: int = 2025
 
-    component: ClassVar[list[str]] = ['case', 'ccl']
+    component: ClassVar[list[str]] = ['case', 'ccl', 'wall']
     signal: ClassVar[list[str]] = ['radial', 'tangential']
     ncoil: ClassVar[int] = 18
     ripple: ClassVar[float] = 0.11
@@ -94,6 +95,7 @@ class Trial(Dataset, TrialAttrs):
             self.build_gap()
             self.predict_structure()
             self.predict_electromagnetic()
+            self.predict_blanket()
         return self.store()
 
     def build_signal(self):
@@ -104,6 +106,8 @@ class Trial(Dataset, TrialAttrs):
         self.data['signal'] = self.signal
         self.data['case'] = xarray.DataArray(0., self.data.coords)
         self.data['ccl'] = xarray.DataArray(0., self.data.coords)
+        self.data['wall'] = xarray.DataArray(0., self.data.coords)
+        self.data['coordinate'] = ['x', 'y']
         self.data['component'] = self.component
         self.data['theta'] = ('component', 'signal'), \
             np.array(self.theta).reshape(self.data.dims['component'],
@@ -150,12 +154,37 @@ class Trial(Dataset, TrialAttrs):
         self.data['peaktopeak'] = 'sample', model.peaktopeak(
             self.data.electromagnetic[..., 0],
             self.data.electromagnetic[..., 1])
-        self.data['offset'] = 'sample', model.offset(
-            self.data.electromagnetic[..., 0],
-            self.data.electromagnetic[..., 1])
+        self.data['offset'] = ('sample', 'coordinate'), \
+            np.zeros((self.data.dims['sample'], 2))
+        offset = model.offset(self.data.electromagnetic[..., 0],
+                              self.data.electromagnetic[..., 1])
+        self.data['offset'][..., 0] = offset.real
+        self.data['offset'][..., 1] = -offset.imag
         self.data['peaktopeak_offset'] = 'sample', model.peaktopeak(
             self.data.electromagnetic[..., 0],
             self.data.electromagnetic[..., 1], offset=True)
+
+    def predict_blanket(self, ndiv=360):
+        """Predict combined wall-fieldline deviations."""
+        model = electromagnetic.Model()
+        fieldline = model.predict(
+            self.data.electromagnetic[..., 0],
+            self.data.electromagnetic[..., 1], ndiv)
+        self.data['peaktopeak_blanket_nominal'] = 'sample', \
+            self._predict_blanket(fieldline, False, ndiv)
+        self.data['peaktopeak_blanket_offset'] = 'sample', \
+            self._predict_blanket(fieldline, True, ndiv)
+
+    def _predict_blanket(self, fieldline, offset: bool, ndiv: int):
+        """Run blanket deviation simulation."""
+        delta_hat = np.fft.rfft(self.data.wall, axis=1)[..., :2, 0]
+        if offset:
+            delta_hat[..., 0] = 0
+            delta_hat[..., 1] += self.data['offset'][..., 0].data + \
+                self.data['offset'][..., 0].data * 1j
+        firstwall = np.fft.irfft(delta_hat, n=ndiv) * ndiv / self.ncoil
+        deviation = fieldline - firstwall
+        return np.max(deviation, axis=-1) - np.min(deviation, axis=-1)
 
     @property
     def pdf_text(self):
@@ -214,6 +243,30 @@ class Trial(Dataset, TrialAttrs):
                  bbox=dict(facecolor='w', boxstyle='round, pad=0.5',
                            linewidth=0.5))
 
+    def plot_blanket(self, label='quartile'):
+        """Plot peak to peak distribution."""
+        plt.figure()
+        plt.hist(self.data.peaktopeak_blanket_nominal + self.ripple, bins=51,
+                 density=True, rwidth=0.8, label='nominal')
+        plt.hist(self.data.peaktopeak_blanket_offset + self.ripple, bins=51,
+                 density=True, rwidth=0.8, alpha=0.5, color='gray',
+                 label='n1 offset')
+        plt.despine()
+        plt.legend(loc='center', bbox_to_anchor=(0.5, 1.05),
+                   ncol=2, fontsize='small')
+        axes = plt.gca()
+        axes.set_yticks([])
+        plt.xlabel(r'peak to peak deviation $H$, mm')
+        plt.ylabel(r'$P(H)$')
+
+        self.label_quartile(self.data.peaktopeak_blanket_offset
+                            + self.ripple, 'H')
+
+        plt.text(0.95, 0.95, self.pdf_text, fontsize='small',
+                 transform=axes.transAxes, ha='right', va='top',
+                 bbox=dict(facecolor='w', boxstyle='round, pad=0.5',
+                           linewidth=0.5))
+
     def label_quartile(self, data, label: str, quartile=0.99):
         """Label quartile."""
         ylim = plt.gca().get_ylim()
@@ -249,6 +302,8 @@ class Trial(Dataset, TrialAttrs):
 
 if __name__ == '__main__':
 
-    trial = Trial(theta=[1.5, 1.5, 2, 2], energize=True)
-    trial.plot()
-    trial.plot_offset()
+    trial = Trial(theta=[1.5, 1.5, 2, 2, 4, 0]).build()
+
+
+    trial.plot_blanket()
+    #trial.plot_offset()

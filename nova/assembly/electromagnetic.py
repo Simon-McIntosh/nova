@@ -59,7 +59,7 @@ class Base(ModelBase):
     def offset(self, radial=None, tangential=None, ndiv=36):
         """Return magnetic axis offset prediction."""
         deviation = self.predict(radial, tangential, ndiv)
-        return np.abs(np.fft.rfft(deviation))[..., 1] / (ndiv // 2)
+        return np.fft.rfft(deviation)[..., 1] / (ndiv // 2)
 
     def load_dataset(self, simulation: str):
         """Return benchmark dataset."""
@@ -223,7 +223,7 @@ class WaveModel(Base):
 if __name__ == '__main__':
 
     model = Model()
-    # model.build(False)
+    model.build()
     model.plot_benchmark('v3')
 
 # amplitude = abs(coefficient) / self.data.nyquist

@@ -19,7 +19,7 @@ from nova.utilities.pyplot import plt
 class TrialAttrs:
     """Manage trial attributes."""
 
-    samples: int = 200_000
+    samples: int = 20_000
     theta: list[float] = field(default_factory=lambda: [1.5, 1.5, 2, 2, 5, 0])
     pdf: list[str] = field(
         default_factory=lambda: ['uniform', 'uniform', 'normal', 'normal',
@@ -178,10 +178,11 @@ class Trial(Dataset, TrialAttrs):
     def _predict_blanket(self, fieldline, offset: bool, ndiv: int):
         """Run blanket deviation simulation."""
         delta_hat = np.fft.rfft(self.data.wall, axis=1)[..., :2, 0]
+        delta_hat[..., 0] = 0
         if offset:
-            delta_hat[..., 0] = 0
-            delta_hat[..., 1] += self.data['offset'][..., 0].data + \
-                self.data['offset'][..., 0].data * 1j
+            nyquist = self.ncoil // 2
+            delta_hat[..., 1] += nyquist * self.data['offset'][..., 0].data - \
+                nyquist * self.data['offset'][..., 1].data * 1j
         firstwall = np.fft.irfft(delta_hat, n=ndiv) * ndiv / self.ncoil
         deviation = fieldline - firstwall
         return np.max(deviation, axis=-1) - np.min(deviation, axis=-1)
@@ -259,23 +260,26 @@ class Trial(Dataset, TrialAttrs):
         plt.xlabel(r'peak to peak deviation $H$, mm')
         plt.ylabel(r'$P(H)$')
 
+        self.label_quartile(self.data.peaktopeak_blanket_nominal
+                            + self.ripple, 'H', height=0.1, color='C0')
         self.label_quartile(self.data.peaktopeak_blanket_offset
-                            + self.ripple, 'H')
+                            + self.ripple, 'H', height=0.2, color='gray')
 
         plt.text(0.95, 0.95, self.pdf_text, fontsize='small',
                  transform=axes.transAxes, ha='right', va='top',
                  bbox=dict(facecolor='w', boxstyle='round, pad=0.5',
                            linewidth=0.5))
 
-    def label_quartile(self, data, label: str, quartile=0.99):
+    def label_quartile(self, data, label: str, quartile=0.99, height=0.15,
+                       color='gray'):
         """Label quartile."""
         ylim = plt.gca().get_ylim()
-        yline = ylim[0] + np.array([0, 0.15*(ylim[1] - ylim[0])])
+        yline = ylim[0] + np.array([0, height*(ylim[1] - ylim[0])])
         quartile = np.quantile(data, quartile)
         plt.plot(quartile*np.ones(2), yline, '-', color='gray')
-        interval_text = rf'q(0.99): ${label}={quartile:1.1f}$'
-        plt.text(quartile, yline[1], interval_text,
-                 ha='left', va='bottom', fontsize='small', color='gray')
+        text = rf'q(0.99): ${label}={quartile:1.1f}$'
+        plt.text(quartile, yline[1], text,
+                 ha='left', va='bottom', fontsize='small', color=color)
 
     def plot_pdf(self, bins=51):
         """Plot pdf."""
@@ -302,8 +306,8 @@ class Trial(Dataset, TrialAttrs):
 
 if __name__ == '__main__':
 
-    trial = Trial(theta=[1.5, 1.5, 2, 2, 4, 0]).build()
+    trial = Trial(theta=[1.5, 1.5, 2, 2, 4.5, 0]).build()
 
-
+    trial.plot()
     trial.plot_blanket()
     #trial.plot_offset()

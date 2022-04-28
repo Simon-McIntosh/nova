@@ -35,7 +35,7 @@ graph.add_edge(pydot.Edge('dt_ccl', 'add_t', label=' RdPhi ccl'))
 graph.add_edge(pydot.Edge('add_r', 'em', label=' dR em'))
 graph.add_edge(pydot.Edge('add_t', 'em', label=' RdPhi em'))
 
-graph.add_node(pydot.Node('dr_blanket', label='U(+-5)', shape='box3d'))
+graph.add_node(pydot.Node('dr_blanket', label='U(+-4.5)', shape='box3d'))
 graph.add_node(pydot.Node('wall', label='Blanket', shape='rectangle'))
 
 graph.add_edge(pydot.Edge('dr_blanket', 'wall', label=' dR blanket'))

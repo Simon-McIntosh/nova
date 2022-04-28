@@ -175,9 +175,10 @@ class Trial(Dataset, TrialAttrs):
         self.data['peaktopeak_blanket_offset'] = 'sample', \
             self._predict_blanket(fieldline, True, ndiv)
 
-    def _predict_blanket(self, fieldline, offset: bool, ndiv: int):
+    def _predict_blanket(self, fieldline, offset: bool, ndiv: int,
+                         modes=3):
         """Run blanket deviation simulation."""
-        delta_hat = np.fft.rfft(self.data.wall, axis=1)[..., :2, 0]
+        delta_hat = np.fft.rfft(self.data.wall, axis=1)[..., :modes+1, 0]
         delta_hat[..., 0] = 0
         if offset:
             nyquist = self.ncoil // 2

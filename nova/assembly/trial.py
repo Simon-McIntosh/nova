@@ -19,11 +19,12 @@ from nova.utilities.pyplot import plt
 class TrialAttrs:
     """Manage trial attributes."""
 
-    samples: int = 20_000
+    samples: int = 1_0_000
     theta: list[float] = field(default_factory=lambda: [1.5, 1.5, 2, 2, 5, 0])
     pdf: list[str] = field(
         default_factory=lambda: ['uniform', 'uniform', 'normal', 'normal',
                                  'uniform', 'uniform'])
+    blanket_modes: int = 2
     energize: Union[int, bool] = True
     sead: int = 2025
 
@@ -175,10 +176,10 @@ class Trial(Dataset, TrialAttrs):
         self.data['peaktopeak_blanket_offset'] = 'sample', \
             self._predict_blanket(fieldline, True, ndiv)
 
-    def _predict_blanket(self, fieldline, offset: bool, ndiv: int,
-                         modes=3):
+    def _predict_blanket(self, fieldline, offset: bool, ndiv: int):
         """Run blanket deviation simulation."""
-        delta_hat = np.fft.rfft(self.data.wall, axis=1)[..., :modes+1, 0]
+        delta_hat = np.fft.rfft(self.data.wall,
+                                axis=1)[..., :self.blanket_modes+1, 0]
         delta_hat[..., 0] = 0
         if offset:
             nyquist = self.ncoil // 2
@@ -251,10 +252,10 @@ class Trial(Dataset, TrialAttrs):
         plt.hist(self.data.peaktopeak_blanket_nominal + self.ripple, bins=51,
                  density=True, rwidth=0.8, label='nominal')
         plt.hist(self.data.peaktopeak_blanket_offset + self.ripple, bins=51,
-                 density=True, rwidth=0.8, alpha=0.5, color='gray',
-                 label='n1 offset')
+                 density=True, rwidth=0.8, alpha=0.75, color='C1',
+                 label='offset')
         plt.despine()
-        plt.legend(loc='center', bbox_to_anchor=(0.5, 1.05),
+        plt.legend(loc='center', bbox_to_anchor=(0.85, 0.35),
                    ncol=2, fontsize='small')
         axes = plt.gca()
         axes.set_yticks([])
@@ -264,7 +265,8 @@ class Trial(Dataset, TrialAttrs):
         self.label_quartile(self.data.peaktopeak_blanket_nominal
                             + self.ripple, 'H', height=0.1, color='C0')
         self.label_quartile(self.data.peaktopeak_blanket_offset
-                            + self.ripple, 'H', height=0.2, color='gray')
+                            + self.ripple, 'H', height=0.2, color='C1')
+        plt.title(f'blanket mode number {self.blanket_modes}')
 
         plt.text(0.95, 0.95, self.pdf_text, fontsize='small',
                  transform=axes.transAxes, ha='right', va='top',
@@ -307,7 +309,8 @@ class Trial(Dataset, TrialAttrs):
 
 if __name__ == '__main__':
 
-    trial = Trial(theta=[1.5, 1.5, 2, 2, 4.5, 0]).build()
+    trial = Trial(theta=[1.5, 1.5, 2, 2, 4.8, 0], blanket_modes=1,
+                  samples=1_00_000)
 
     trial.plot()
     trial.plot_blanket()

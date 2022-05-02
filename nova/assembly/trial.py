@@ -19,20 +19,19 @@ from nova.utilities.pyplot import plt
 class TrialAttrs:
     """Manage trial attributes."""
 
-    samples: int = 1_0_000
+    samples: int = 100_000
     theta: list[float] = field(default_factory=lambda: [1.5, 1.5, 2, 2, 5, 0])
     pdf: list[str] = field(
         default_factory=lambda: ['uniform', 'uniform', 'normal', 'normal',
                                  'uniform', 'uniform'])
-    blanket_modes: int = 2
+    modes: int = 3
     energize: Union[int, bool] = True
+    wall: bool = False
     sead: int = 2025
 
     component: ClassVar[list[str]] = ['case', 'ccl', 'wall']
     signal: ClassVar[list[str]] = ['radial', 'tangential']
     ncoil: ClassVar[int] = 18
-    ripple: ClassVar[float] = 0.11
-    peaktopeak_max: ClassVar[float] = 4
 
     @cached_property
     def _field_names(self):
@@ -49,14 +48,6 @@ class TrialAttrs:
                 attrs[attr] = value
         return attrs
 
-    @property
-    def group_name(self):
-        """Return group name as xxh32 hex hash."""
-        self.xxh32.reset()
-        self.xxh32.update(np.array(list(self.attrs.values()) +
-                                   self.theta + self.pdf))
-        return self.xxh32.hexdigest()
-
 
 @dataclass
 class Trial(Dataset, TrialAttrs):
@@ -69,9 +60,20 @@ class Trial(Dataset, TrialAttrs):
     def __post_init__(self):
         """Set dataset group for netCDF file load/store."""
         self.energize = int(self.energize)
+        self.wall = int(self.wall)
         self.group = self.group_name
         self.rng = np.random.default_rng(self.sead)
+        self.structural_model = structural.Model()
+        self.electromagnetic_model = electromagnetic.Model()
         super().__post_init__()
+
+    @property
+    def group_name(self):
+        """Return group name as xxh32 hex hash."""
+        self.xxh32.reset()
+        self.xxh32.update(np.array(list(self.attrs.values()) +
+                                   self.theta + self.pdf))
+        return self.xxh32.hexdigest()
 
     def normal(self, variance: float):
         """Return sample with normal distribution."""
@@ -96,7 +98,8 @@ class Trial(Dataset, TrialAttrs):
             self.build_gap()
             self.predict_structure()
             self.predict_electromagnetic()
-            self.predict_blanket()
+            if self.wall:
+                self.predict_wall()
         return self.store()
 
     def build_signal(self):
@@ -140,10 +143,9 @@ class Trial(Dataset, TrialAttrs):
         self.data['structural'] = ('sample', 'index', 'signal'), \
             np.zeros((self.samples, self.ncoil, self.data.dims['signal']))
         if self.energize:
-            model = structural.Model()
             for i, signal in enumerate(self.data.signal.values):
                 self.data['structural'][..., i] = \
-                    model.predict(self.data.gap, signal)
+                    self.structural_model.predict(self.data.gap, signal)
 
     def predict_electromagnetic(self):
         """Run electromagnetic simulation."""
@@ -151,49 +153,39 @@ class Trial(Dataset, TrialAttrs):
         self.data.electromagnetic[..., 0] += self.data.case[..., 0]
         self.data.electromagnetic[..., 0] += self.data.ccl[..., 0]
         self.data.electromagnetic[..., 1] += self.data.ccl[..., 1]
-        model = electromagnetic.Model()
-        self.data['peaktopeak'] = 'sample', model.peaktopeak(
-            self.data.electromagnetic[..., 0],
-            self.data.electromagnetic[..., 1])
+        self.electromagnetic_model.predict(self.data.electromagnetic[..., 0],
+                                           self.data.electromagnetic[..., 1])
+        self.data['peaktopeak'] = 'sample', \
+            self.electromagnetic_model.peaktopeak(modes=self.modes)
         self.data['offset'] = ('sample', 'coordinate'), \
             np.zeros((self.data.dims['sample'], 2))
-        offset = model.offset(self.data.electromagnetic[..., 0],
-                              self.data.electromagnetic[..., 1])
+        offset = self.electromagnetic_model.axis_offset()
         self.data['offset'][..., 0] = offset.real
         self.data['offset'][..., 1] = -offset.imag
-        self.data['peaktopeak_offset'] = 'sample', model.peaktopeak(
-            self.data.electromagnetic[..., 0],
-            self.data.electromagnetic[..., 1], offset=True)
+        self.data['peaktopeak_offset'] = 'sample', \
+            self.electromagnetic_model.peaktopeak(modes=self.modes,
+                                                  axis_offset=True)
 
-    def predict_blanket(self, ndiv=360):
+    def predict_wall(self):
         """Predict combined wall-fieldline deviations."""
-        model = electromagnetic.Model()
-        fieldline = model.predict(
-            self.data.electromagnetic[..., 0],
-            self.data.electromagnetic[..., 1], ndiv)
-        self.data['peaktopeak_blanket_nominal'] = 'sample', \
-            self._predict_blanket(fieldline, False, ndiv)
-        self.data['peaktopeak_blanket_offset'] = 'sample', \
-            self._predict_blanket(fieldline, True, ndiv)
-
-    def _predict_blanket(self, fieldline, offset: bool, ndiv: int):
-        """Run blanket deviation simulation."""
-        delta_hat = np.fft.rfft(self.data.wall,
-                                axis=1)[..., :self.blanket_modes+1, 0]
-        delta_hat[..., 0] = 0
-        if offset:
-            nyquist = self.ncoil // 2
-            delta_hat[..., 1] += nyquist * self.data['offset'][..., 0].data - \
-                nyquist * self.data['offset'][..., 1].data * 1j
-        firstwall = np.fft.irfft(delta_hat, n=ndiv) * ndiv / self.ncoil
-        deviation = fieldline - firstwall
-        return np.max(deviation, axis=-1) - np.min(deviation, axis=-1)
+        ndiv = self.electromagnetic_model.fieldline.shape[1]
+        firstwall = np.fft.irfft(np.fft.rfft(self.data.wall[..., 0]), ndiv) * \
+            ndiv / self.ncoil
+        deviation = self.electromagnetic_model.fieldline.data - firstwall.data
+        self.data['peaktopeak'] = 'sample', \
+            self.electromagnetic_model.peaktopeak(deviation, modes=self.modes,
+                                                  axis_offset=False)
+        self.data['peaktopeak_offset'] = 'sample', \
+            self.electromagnetic_model.peaktopeak(deviation, modes=self.modes,
+                                                  axis_offset=True)
 
     @property
     def pdf_text(self):
         """Return pdf text label."""
         text = ''
         for i, component in enumerate(self.component):
+            if component == 'wall' and not self.wall:
+                continue
             for j, signal in enumerate(self.signal):
                 attr = signal[0]
                 text += f'{component} '
@@ -212,77 +204,41 @@ class Trial(Dataset, TrialAttrs):
         text += f'samples: {self.samples:,}'
         return text
 
-    def plot(self, label='quartile'):
+    def plot(self, offset=True):
         """Plot peak to peak distribution."""
         plt.figure()
-        plt.hist(self.data.peaktopeak + self.ripple, bins=51, density=True,
-                 rwidth=0.8, label='as-built')
-        plt.hist(self.data.peaktopeak_offset + self.ripple, bins=51,
-                 density=True, rwidth=0.8, alpha=0.5, color='gray',
-                 label='n1 offset')
+        plt.hist(self.data.peaktopeak, bins=51, density=True,
+                 rwidth=0.8, label='machine axis', color='C1')
+        if offset:
+            plt.hist(self.data.peaktopeak_offset, bins=51,
+                     density=True, rwidth=0.8, alpha=0.85, color='C2',
+                     label='magnetic axis')
+            plt.legend(loc='center', bbox_to_anchor=(0.5, 1.05),
+                       ncol=2, fontsize='small')
+            self.label_quartile(self.data.peaktopeak_offset, 'H', color='C2')
+        else:
+            self.label_quartile(self.data.peaktopeak, 'H', color='C1')
         plt.despine()
-        plt.legend(loc='center', bbox_to_anchor=(0.5, 1.05),
-                   ncol=2, fontsize='small')
         axes = plt.gca()
         axes.set_yticks([])
         plt.xlabel(r'peak to peak deviation $H$, mm')
         plt.ylabel(r'$P(H)$')
-
-        if label is not None:
-            ylim = axes.get_ylim()
-            yline = ylim[0] + np.array([0, 0.15*(ylim[1] - ylim[0])])
-        if label == 'interval':
-            interval = scipy.stats.percentileofscore(
-                self.data.peaktopeak + self.ripple, self.peaktopeak_max)
-            plt.plot(self.peaktopeak_max*np.ones(2), yline, '-', color='gray')
-            interval_text = rf'PI$(H<{self.peaktopeak_max})={interval:1.0f}\%$'
-            plt.text(self.peaktopeak_max, yline[1], interval_text,
-                     ha='left', va='bottom', fontsize='small', color='gray')
-        elif label == 'quartile':
-            self.label_quartile(self.data.peaktopeak + self.ripple, 'H')
-
         plt.text(0.95, 0.95, self.pdf_text, fontsize='small',
                  transform=axes.transAxes, ha='right', va='top',
                  bbox=dict(facecolor='w', boxstyle='round, pad=0.5',
                            linewidth=0.5))
 
-    def plot_blanket(self, label='quartile'):
-        """Plot peak to peak distribution."""
-        plt.figure()
-        plt.hist(self.data.peaktopeak_blanket_nominal + self.ripple, bins=51,
-                 density=True, rwidth=0.8, label='nominal')
-        plt.hist(self.data.peaktopeak_blanket_offset + self.ripple, bins=51,
-                 density=True, rwidth=0.8, alpha=0.75, color='C1',
-                 label='offset')
-        plt.despine()
-        plt.legend(loc='center', bbox_to_anchor=(0.85, 0.35),
-                   ncol=2, fontsize='small')
-        axes = plt.gca()
-        axes.set_yticks([])
-        plt.xlabel(r'peak to peak deviation $H$, mm')
-        plt.ylabel(r'$P(H)$')
-
-        self.label_quartile(self.data.peaktopeak_blanket_nominal
-                            + self.ripple, 'H', height=0.1, color='C0')
-        self.label_quartile(self.data.peaktopeak_blanket_offset
-                            + self.ripple, 'H', height=0.2, color='C1')
-        plt.title(f'blanket mode number {self.blanket_modes}')
-
-        plt.text(0.95, 0.95, self.pdf_text, fontsize='small',
-                 transform=axes.transAxes, ha='right', va='top',
-                 bbox=dict(facecolor='w', boxstyle='round, pad=0.5',
-                           linewidth=0.5))
-
-    def label_quartile(self, data, label: str, quartile=0.99, height=0.15,
+    def label_quartile(self, data, label: str, quartile=0.99, height=0.1,
                        color='gray'):
         """Label quartile."""
         ylim = plt.gca().get_ylim()
         yline = ylim[0] + np.array([0, height*(ylim[1] - ylim[0])])
         quartile = np.quantile(data, quartile)
-        plt.plot(quartile*np.ones(2), yline, '-', color='gray')
+        plt.plot(quartile*np.ones(2), yline, '-', color='k')
         text = rf'q(0.99): ${label}={quartile:1.1f}$'
         plt.text(quartile, yline[1], text,
-                 ha='left', va='bottom', fontsize='small', color=color)
+                 ha='left', va='bottom', fontsize='small', color=color,
+                 bbox=dict(facecolor='w', edgecolor=color))
 
     def plot_pdf(self, bins=51):
         """Plot pdf."""
@@ -306,12 +262,61 @@ class Trial(Dataset, TrialAttrs):
                  bbox=dict(facecolor='w', boxstyle='round, pad=0.5',
                            linewidth=0.5))
 
+    def plot_sample(self, sample=0):
+        """Plot waveforms from single sample."""
+        axes = plt.subplots(4, 1, sharex=False, sharey=False,
+                            gridspec_kw=dict(height_ratios=[1, 1, 1, 2]))[1]
+
+        width = 0.8
+        signal_width = width / self.data.dims['signal']
+        for i, signal in enumerate(self.data.signal):
+            offset = i*signal_width - width / 2
+            axes[0].bar(self.data.index + offset,
+                        self.data.case[sample][..., i], width=signal_width)
+        axes[1].bar(self.data.index, self.data.gap[sample], width=width)
+        for i, signal in enumerate(self.data.signal):
+            offset = i*signal_width - width / 2
+            axes[0].bar(self.data.index + offset,
+                        self.data.case[sample][..., i], width=signal_width)
+
+        self.electromagnetic_model.predict(
+            self.data.electromagnetic[sample][:, 0],
+            self.data.electromagnetic[sample][:, 1])
+
+        fieldline = self.electromagnetic_model.fieldline[0]
+        print(fieldline)
+        axes[-1].plot(fieldline.phi, fieldline)
+        '''
+                for i, attr in enumerate(['radial', 'tangential']):
+                    waveform = getattr(self, attr)
+                    print(waveform.shape)
+                    if waveform is not None:
+                        axes[0].bar(range(len(waveform)), waveform, width=0.8 - i*0.3,
+                                    color=f'C{1+i}', label=attr)
+                axes[0].set_xticks([])
+                axes[1].plot(self.fieldline.phi, self.fieldline[sample])
+                if modes is not None:
+                    _fieldline = np.fft.irfft(
+                        np.fft.rfft(self.fieldline[sample])[:modes+1],
+                        self.fieldline.shape[1])
+                    axes[1].plot(self.fieldline.phi, _fieldline, '-.', color='gray',
+                                 label=f'<=n{modes}')
+                    axes[1].legend(fontsize='x-small')
+
+                plt.despine()
+                axes[0].legend(fontsize='x-small', ncol=2)
+                axes[0].set_ylabel(r'vault')
+                axes[1].set_ylabel('field line deviation')
+                axes[1].set_xlabel(r'$\phi$')
+        '''
+
+
 
 if __name__ == '__main__':
 
-    trial = Trial(theta=[1.5, 1.5, 2, 2, 4.8, 0], blanket_modes=1,
-                  samples=1_00_000)
-
+    trial = Trial(theta=[10, 1.5, 2, 2, 3, 0],
+                  samples=1_00_000, wall=True)
     trial.plot()
-    trial.plot_blanket()
+    trial.plot_sample(0)
+
     #trial.plot_offset()

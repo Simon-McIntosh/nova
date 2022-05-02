@@ -22,7 +22,8 @@ class FieldLine:
         """Return field line deviation waveform."""
         radial = self.structural.predict(gap, 'radial')
         tangential = self.structural.predict(gap, 'tangential')
-        return self.electromagnetic.predict(radial, tangential, ndiv)
+        self.electromagnetic.predict(radial, tangential, ndiv)
+        return self.electromagnetic.fieldline.data
 
     def peaktopeak(self, gap, ndiv=72):
         """Return predictions for peak to peak fieldline deviations."""
@@ -33,14 +34,14 @@ class FieldLine:
         """Plot combined structural+EM benchmark."""
         gap = Gap(simulation)
         dataset = self.electromagnetic.load_dataset(simulation)
-        model = self.predict(gap.data.gap, dataset.dims['phi'])
+        self.predict(gap.data.gap, dataset.dims['phi'])
         axes = plt.subplots(2, 1, sharex=False, sharey=False,
                             gridspec_kw=dict(height_ratios=[1, 2]))[1]
         axes[0].bar(gap.data.index, gap.data.gap)
         axes[0].set_ylabel('gap')
         axes[0].set_xticks([])
         self.electromagnetic.plot_deviation(
-            axes[1], dataset.phi, dataset.deviation.data, model)
+            axes[1], dataset.phi, dataset.deviation.data)
         axes[0].set_title(f'Vault+EM benchmark: {simulation}')
 
     def plot_peaktopeak(self, simulations=None):

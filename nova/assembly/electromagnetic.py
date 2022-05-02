@@ -1,5 +1,5 @@
 """Manage fft EM proxy."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 import scipy.interpolate
@@ -15,6 +15,8 @@ from nova.utilities.pyplot import plt
 class Base(ModelBase):
     """Electromagnetic baseclass."""
 
+    fieldline: xarray.DataArray = field(init=False, repr=None, default=None)
+
     def build(self):
         """Initialize electromagnetic dataset."""
         self.data = xarray.Dataset(attrs=dict(ncoil=self.ncoil,
@@ -29,37 +31,44 @@ class Base(ModelBase):
         return self.data.filter[:, 0].sel(signal=label) + \
             1j * self.data.filter[:, 1].sel(signal=label)
 
-    def _predict(self, delta, signal: str, ndiv: int, offset=False):
+    def _predict(self, delta, signal: str, ndiv: int):
         """Return fft prediction."""
-        delta_hat = np.fft.rfft(delta)
-        if offset:
-            delta_hat[..., 1] = 0
-        return np.fft.irfft(delta_hat * self.filter[signal], n=ndiv) * \
-            ndiv / self.ncoil
+        return np.fft.irfft(np.fft.rfft(delta) *
+                            self.filter[signal], n=ndiv) * ndiv / self.ncoil
 
-    def predict(self, radial=None, tangential=None, ndiv=360, offset=False):
+    def predict(self, radial=None, tangential=None, ndiv=360):
         """Predict field line deviation from radial and tangential signals."""
-        deviation = 0
+        if radial is None and tangential is None:
+            raise ValueError('predict requires radial or tangential waveform')
+        fieldline = 0
         if radial is not None:
-            deviation += self._predict(radial, 'radial', ndiv, offset)
+            fieldline += self._predict(radial, 'radial', ndiv)
         if tangential is not None:
-            deviation += self._predict(tangential, 'tangential', ndiv, offset)
-        return deviation
+            fieldline += self._predict(tangential, 'tangential', ndiv)
+        if radial.ndim == 1:
+            fieldline.shape = -1, ndiv
+        shape = fieldline.shape
+        self.fieldline = xarray.DataArray(
+            fieldline, coords=[('sample', range(shape[0])),
+                               ('phi', np.linspace(0, 2*np.pi, shape[1]))])
 
-    @staticmethod
-    def _peaktopeak(waveform):
-        """Return peaktopeak delta."""
-        return waveform.max(axis=-1) - waveform.min(axis=-1)
+    def peaktopeak(self, fieldline=None, modes=3, axis_offset=False):
+        """Return peaktopeak delta, H."""
+        if fieldline is None:
+            fieldline = self.fieldline.data
+        if modes is None:
+            modes = self.ncoil // 2
+        fieldline_hat = np.fft.rfft(fieldline)
+        if axis_offset:
+            fieldline_hat[..., 1] = 0
+        fieldline = np.fft.irfft(fieldline_hat[..., :modes+1],
+                                 fieldline.shape[-1])
+        return fieldline.max(axis=-1) - fieldline.min(axis=-1)
 
-    def peaktopeak(self, radial=None, tangential=None, ndiv=180, offset=False):
-        """Return peak to peak prediction."""
-        deviation = self.predict(radial, tangential, ndiv, offset)
-        return self._peaktopeak(deviation)
-
-    def offset(self, radial=None, tangential=None, ndiv=36):
-        """Return magnetic axis offset prediction."""
-        deviation = self.predict(radial, tangential, ndiv)
-        return np.fft.rfft(deviation)[..., 1] / (ndiv // 2)
+    def axis_offset(self):
+        """Return prediction for magnetic axis offset."""
+        return np.fft.rfft(self.fieldline.data)[..., 1] / \
+            self.fieldline.shape[1] // 2
 
     def load_dataset(self, simulation: str):
         """Return benchmark dataset."""
@@ -71,24 +80,24 @@ class Base(ModelBase):
         return dataset
 
     @staticmethod
-    def _midpoint(waveform):
-        """Return waveform midpoint."""
-        bound = [waveform.min(axis=-1), waveform.max(axis=-1)]
+    def _midpoint(fieldline):
+        """Return fieldline midpoint."""
+        bound = [fieldline.min(axis=-1), fieldline.max(axis=-1)]
         return np.mean(bound, axis=0)
 
-    def _offset(self, data, model):
-        """Offset model waveform to match data midpoint."""
-        offset = self._midpoint(model) - self._midpoint(data)
-        return model - offset
+    def _offset(self, data):
+        """Offset model fieldline waveform to match data midpoint."""
+        offset = self._midpoint(self.fieldline.data) - self._midpoint(data)
+        return self.fieldline.data - offset
 
-    def plot_deviation(self, axes, phi, benchmark, model, legend=True):
+    def plot_deviation(self, axes, phi, benchmark, legend=True, sample=0):
         """Plot field line deviation benchmark."""
         benchmark -= benchmark[..., 0]
-        model = self._offset(benchmark, model)
+        model = self._offset(benchmark)[sample]
         axes.plot(phi, benchmark, 'C0',
-                  label=f'ground truth H={self._peaktopeak(benchmark):1.2f}')
+                  label=f'ground truth H={self.peaktopeak(benchmark):1.2f}')
         axes.plot(phi, model, 'C3-.',
-                  label=f'inference H={self._peaktopeak(model):1.2f}')
+                  label=f'inference H={self.peaktopeak(model):1.2f}')
         axes.set_ylabel('field line deviation')
         axes.set_xlabel(r'$\phi$')
         plt.despine()
@@ -100,15 +109,15 @@ class Base(ModelBase):
         dataset = self.load_dataset(simulation)
         radial = dataset.delta[:, 0]
         tangential = dataset.delta[:, 1]
-        model_deviation = self.predict(radial, tangential, dataset.dims['phi'])
+        self.predict(radial, tangential, dataset.dims['phi'])
         axes = plt.subplots(2, 1, sharex=False, sharey=False,
                             gridspec_kw=dict(height_ratios=[1, 2]))[1]
         for i, label in enumerate([r'$\Delta r$', r'$r\Delta \phi$']):
             axes[0].bar(dataset.index, dataset.delta[:, i], width=0.8 - i*0.3,
                         color=f'C{1+i}', label=label)
         axes[0].set_xticks([])
-        self.plot_deviation(axes[-1], dataset.phi,
-                            dataset.deviation.data, model_deviation)
+        self.plot_deviation(axes[-1], dataset.phi, dataset.deviation.data)
+
         plt.despine()
         axes[0].legend(fontsize='x-small', ncol=2)
         axes[0].set_ylabel(r'vault')
@@ -223,8 +232,8 @@ class WaveModel(Base):
 if __name__ == '__main__':
 
     model = Model()
-    #model.build()
     model.plot_benchmark('v3')
+
 
 # amplitude = abs(coefficient) / self.data.nyquist
 # amplitude[..., 0] /= 2

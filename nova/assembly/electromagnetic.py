@@ -223,7 +223,7 @@ class WaveModel(Base):
 if __name__ == '__main__':
 
     model = Model()
-    model.build()
+    #model.build()
     model.plot_benchmark('v3')
 
 # amplitude = abs(coefficient) / self.data.nyquist

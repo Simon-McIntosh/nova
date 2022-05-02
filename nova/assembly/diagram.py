@@ -5,7 +5,7 @@ import dot2tex
 import pydot
 
 graph = pydot.Dot('my_graph', graph_type='digraph', bgcolor='white',
-                  rankdir='UD')
+                  rankdir='LR')
 
 graph.add_node(pydot.Node('dr_case', label='U(+-1.5)', shape='box3d'))
 graph.add_node(pydot.Node('dt_case', label='U(+-1.5)', shape='box3d'))
@@ -35,18 +35,23 @@ graph.add_edge(pydot.Edge('dt_ccl', 'add_t', label=' RdPhi ccl'))
 graph.add_edge(pydot.Edge('add_r', 'em', label=' dR em'))
 graph.add_edge(pydot.Edge('add_t', 'em', label=' RdPhi em'))
 
-graph.add_node(pydot.Node('dr_blanket', label='U(+-4.5)', shape='box3d'))
-graph.add_node(pydot.Node('wall', label='Blanket', shape='rectangle'))
-
-graph.add_edge(pydot.Edge('dr_blanket', 'wall', label=' dR blanket'))
-
-graph.add_node(pydot.Node('sub_h', label='-', shape='circle'))
-graph.add_edge(pydot.Edge('wall', 'sub_h', label=' dR blanket n1'))
-graph.add_edge(pydot.Edge('em', 'sub_h', label=' h(Phi)'))
-
-
 graph.add_node(pydot.Node('ph', label='P(H)', shape='none'))
-graph.add_edge(pydot.Edge('sub_h', 'ph'))
+
+if False:
+    graph.add_node(pydot.Node('dr_blanket', label='U(+-4.5)', shape='box3d'))
+    graph.add_node(pydot.Node('blanket', label='Blanket', shape='rectangle'))
+
+    graph.add_edge(pydot.Edge('dr_blanket', 'blanket', label=' dR blanket'))
+
+    graph.add_node(pydot.Node('sub_h', label='-', shape='circle'))
+    graph.add_edge(pydot.Edge('blanket', 'sub_h', label=' dR blanket n1'))
+    graph.add_edge(pydot.Edge('em', 'sub_h', label=' h(Phi)'))
+
+    graph.add_edge(pydot.Edge('sub_h', 'ph'))
+else:
+    graph.add_edge(pydot.Edge('em', 'ph', label=' h(Phi)'))
+
+
 
 
 

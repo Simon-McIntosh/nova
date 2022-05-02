@@ -2,6 +2,7 @@
 from dataclasses import dataclass, field
 import operator
 
+from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 import networkx
 import numpy as np
@@ -54,13 +55,6 @@ class WorkPlan:
             (self.data.start[index] - start).dt.days / (365.25 / 12)
         self.data.loc[index, 'end_offset'] = \
             self.data.loc[index, 'start_offset'] + self.data.duration[index]
-
-        '''
-        if (index := self.data.start.isna()).any():
-            raise IndexError(f'start time not set \n{self.data.start[index]}')
-        if (index := self.data.end.isna()).any():
-            raise IndexError(f'end time not set \n{self.data.end[index]}')
-        '''
 
     def _sort(self, reverse=False):
         """Order project phases."""
@@ -175,7 +169,8 @@ class WorkPlan:
             raise IndexError(f'floating labels {floating}')
         return topo_index
 
-    def plot(self, task=None, milestones=True, n_ticks=12):
+    def plot(self, task=None, milestones=True, n_ticks=12,
+             subtask_xticks=False):
         """Plot Gantt chart."""
         if milestones:
             index = self.data.duration.notna()
@@ -213,7 +208,7 @@ class WorkPlan:
                                    for label, duration
                                    in zip(data.index, data.duration)]
         self.labels = labels
-        width = 8 if task is None else 6
+        width = 10 if task is None else 6
         ax = plt.subplots(1, 1, figsize=(width, len(labels.unique())/2.5))[1]
         ax.barh(labels, data.duration, left=data.start_offset,
                 edgecolor='w', height=0.8)
@@ -271,9 +266,10 @@ class WorkPlan:
             plt.title('overview')
         else:
             plt.title(task)
-            ax.set_xticks([])
-            ax.tick_params(axis='x', which='both', length=0)
-            ax.spines['bottom'].set_visible(False)
+            if subtask_xticks:
+                ax.set_xticks([])
+                ax.tick_params(axis='x', which='both', length=0)
+                ax.spines['bottom'].set_visible(False)
 
     def plot_subtasks(self):
         """Plot detailed subtask breakdown for all tasks."""
@@ -285,4 +281,4 @@ if __name__ == '__main__':
 
     plan = WorkPlan()
     plan.plot()
-    # plan.plot_subtasks()
+    #plan.plot_subtasks()

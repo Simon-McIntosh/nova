@@ -204,8 +204,8 @@ class Ansys(DeviationData, ModelData):
 if __name__ == '__main__':
 
     #MonteCarlo().plot('case2')
-    #ansys = Ansys().build()
-    #ansys.plot('a2')
+    ansys = Ansys()
+    ansys.plot('v3')
 
-    field = FieldData()
-    field.plot()
+    #field = FieldData()
+    #field.plot()

@@ -281,4 +281,4 @@ if __name__ == '__main__':
 
     plan = WorkPlan()
     plan.plot()
-    #plan.plot_subtasks()
+    plan.plot_subtasks()

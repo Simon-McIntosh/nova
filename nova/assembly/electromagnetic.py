@@ -65,10 +65,11 @@ class Base(ModelBase):
                                  fieldline.shape[-1])
         return fieldline.max(axis=-1) - fieldline.min(axis=-1)
 
+    @property
     def axis_offset(self):
         """Return prediction for magnetic axis offset."""
         return np.fft.rfft(self.fieldline.data)[..., 1] / \
-            self.fieldline.shape[1] // 2
+            (self.fieldline.shape[1] // 2)
 
     def load_dataset(self, simulation: str):
         """Return benchmark dataset."""

@@ -111,3 +111,9 @@ class Gap:
     def gap(self):
         """Return gap waveform."""
         return self.data.gap.values
+
+
+if __name__ == '__main__':
+
+    gap = GapData('Gap_Size_18_Coils')
+    gap.plot('v3')

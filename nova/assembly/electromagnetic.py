@@ -51,6 +51,7 @@ class Base(ModelBase):
         self.fieldline = xarray.DataArray(
             fieldline, coords=[('sample', range(shape[0])),
                                ('phi', np.linspace(0, 2*np.pi, shape[1]))])
+        return self.fieldline
 
     def peaktopeak(self, fieldline=None, modes=3, axis_offset=False):
         """Return peaktopeak delta, H."""

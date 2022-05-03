@@ -27,6 +27,7 @@ class TrialAttrs:
     modes: int = 3
     energize: Union[int, bool] = True
     wall: bool = False
+    nominal_gap: float = 2.
     sead: int = 2025
 
     component: ClassVar[list[str]] = ['case', 'ccl', 'wall']
@@ -95,7 +96,7 @@ class Trial(Dataset, TrialAttrs):
         """Build Monte Carlo dataset."""
         with self.timer():
             self.build_signal()
-            self.build_gap()
+            self.build_positive_gap()
             self.predict_structure()
             self.predict_electromagnetic()
             if self.wall:
@@ -126,6 +127,23 @@ class Trial(Dataset, TrialAttrs):
                 pdf = self.pdf[index]
                 self.data[component].loc[..., signal] = \
                     getattr(self, pdf)(theta)
+
+    def build_positive_gap(self, nmax=20, eps=1e-3):
+        """Built gap waveform via iterative loop."""
+        self.build_gap()
+        for i in range(nmax):
+            gap = self.data.gap.sum(axis=-1).data + self.nominal_gap
+            sample_index = (gap < -eps).any(axis=1)
+            if sample_index.sum() == 0:
+                print(f'positive gap iteration converged {i}')
+                return
+            offset = gap[sample_index]
+            offset[offset >= 0] = 0
+            self.data.case[sample_index, :, 1] += offset
+            self.build_gap()
+        raise ValueError(f'gap itteration failure at iteration {nmax} '
+                         'negitive samples '
+                         f'{100*sample_index.sum()/len(gap):1.0f}%')
 
     def build_gap(self):
         """Build vault gap from radial and toroidal waveforms."""
@@ -201,9 +219,9 @@ class Trial(Dataset, TrialAttrs):
                 text += rf'$\Delta {attr}$'
                 theta = self.data.theta[i, j].data
                 if self.data.pdf[i, j] == 'normal':
-                    pdf = rf'$\mathcal{{N}}\,(0, {theta})$'
+                    pdf = rf'$\mathcal{{N}}\,(0, {theta:1.1f})$'
                 elif self.data.pdf[i, j] == 'uniform':
-                    pdf = rf'$\mathcal{{U}}\,(\pm{theta})$'
+                    pdf = rf'$\mathcal{{U}}\,(\pm{theta:1.1f})$'
                 text += ': ' + pdf
                 text += '\n'
         text += '\n'
@@ -223,7 +241,6 @@ class Trial(Dataset, TrialAttrs):
                        ncol=2, fontsize='small')
             self.label_quartile(self.data.peaktopeak_offset, 'H', color='C2',
                                 height=0.15)
-
         self.label_quartile(self.data.peaktopeak, 'H', color='C1',
                             height=0.04)
         plt.despine()
@@ -271,71 +288,89 @@ class Trial(Dataset, TrialAttrs):
                  bbox=dict(facecolor='w', boxstyle='round, pad=0.5',
                            linewidth=0.5))
 
-    def plot_sample(self, sample=0):
+    def plot_sample(self, quartile=0.99, offset=True):
         """Plot waveforms from single sample."""
-        axes = plt.subplots(2, 1, sharex=False, sharey=False,
-                            gridspec_kw=dict(height_ratios=[1, 1]))[1]
+        sample = self.sample(quartile, offset)
+        axes = plt.subplots(3, 1, sharex=False, sharey=False,
+                            gridspec_kw=dict(height_ratios=[1, 1, 2]))[1]
         width = 0.8
-        axes[1].bar(self.data.index, self.data.gap[sample].sum(axis=-1),
-                    width=width, color='gray', alpha=0.5)
 
         signal_width = width / self.data.dims['signal']
-        offset = 0.5*signal_width - width / 2
-        for i, signal in enumerate(self.data.signal):
+        for i, signal in enumerate([r'$\Delta r$', r'$r \Delta \phi$']):
+            bar_offset = (i+0.5) * signal_width - width / 2
+            axes[0].bar(self.data.index + bar_offset,
+                        self.data.case[sample][:, i], color=f'C{i+1}',
+                        width=signal_width, label=signal)
+            axes[0].plot(self.data.index,
+                         self.theta[0] * (-1)**i *
+                         np.ones_like(self.data.index), 'C7--', alpha=0.5,
+                         lw=1.5)
+        axes[0].set_ylabel('vault')
+        axes[0].legend(fontsize='xx-small', bbox_to_anchor=(1, 1))
+        axes[0].set_xticks([])
 
-            axes[i].bar(self.data.index + offset,
-                        self.data.case[sample][:, i], width=signal_width)
-            axes[i].bar(self.data.index + offset + signal_width,
-                        self.data.structural[sample][:, i], width=signal_width)
+        axes[1].bar(self.data.index,
+                    self.data.gap[sample].sum(axis=-1) + self.data.nominal_gap,
+                    width=width, color='C0')
+        axes[1].set_ylabel('gap')
+        axes[1].set_xticks([])
 
-        '''
-        self.electromagnetic_model.predict(
-            self.data.electromagnetic[sample][:, 0],
-            self.data.electromagnetic[sample][:, 1])
+        fieldline = self.electromagnetic_model.predict(
+            self.data.electromagnetic[sample, :, 0],
+            self.data.electromagnetic[sample, :, 1])[0]
+        axes[2].plot(fieldline.phi, fieldline, 'C6', label='fieldline')
 
-        fieldline = self.electromagnetic_model.fieldline[0]
-        print(fieldline)
-        axes[-1].plot(fieldline.phi, fieldline)
-        '''
+        ndiv = len(fieldline)
+        wall_hat = np.fft.rfft(self.data.wall[sample, :, 0])
+        firstwall = np.fft.irfft(wall_hat, ndiv) * ndiv / self.ncoil
+        wall_hat[1] += \
+            self.electromagnetic_model.axis_offset[0] * (self.ncoil // 2)
+        offset_firstwall = np.fft.irfft(wall_hat, ndiv) * ndiv / self.ncoil
+        axes[2].plot(fieldline.phi, firstwall, '-.', color='gray',
+                     label='wall')
+        axes[2].plot(fieldline.phi, offset_firstwall, '-', color='gray',
+                     label='offset wall')
 
-        '''
-                for i, attr in enumerate(['radial', 'tangential']):
-                    waveform = getattr(self, attr)
-                    print(waveform.shape)
-                    if waveform is not None:
-                        axes[0].bar(range(len(waveform)), waveform, width=0.8 - i*0.3,
-                                    color=f'C{1+i}', label=attr)
-                axes[0].set_xticks([])
-                axes[1].plot(self.fieldline.phi, self.fieldline[sample])
-                if modes is not None:
-                    _fieldline = np.fft.irfft(
-                        np.fft.rfft(self.fieldline[sample])[:modes+1],
-                        self.fieldline.shape[1])
-                    axes[1].plot(self.fieldline.phi, _fieldline, '-.', color='gray',
-                                 label=f'<=n{modes}')
-                    axes[1].legend(fontsize='x-small')
+        longwave = np.fft.irfft(
+            np.fft.rfft(fieldline - firstwall)[:self.modes+1], ndiv)
+        offset_longwave = np.fft.irfft(
+            np.fft.rfft(fieldline - offset_firstwall)[:self.modes+1], ndiv)
+        peaktopeak = self.electromagnetic_model.peaktopeak(longwave)
+        offset_peaktopeak = \
+            self.electromagnetic_model.peaktopeak(offset_longwave)
+        axes[2].plot(fieldline.phi, longwave, '-.C0',
+                     label=fr'$H_{{LW}}={peaktopeak:1.1f}$')
+        axes[2].plot(fieldline.phi, offset_longwave, '-C0',
+                     label=fr'offset $H_{{LW}}={offset_peaktopeak:1.1f}$')
+        axes[2].legend(fontsize='xx-small', bbox_to_anchor=(1, 1))
+        axes[2].set_ylabel('deviation')
+        axes[2].set_xlabel(r'$\phi$')
+        plt.despine()
 
-                plt.despine()
-                axes[0].legend(fontsize='x-small', ncol=2)
-                axes[0].set_ylabel(r'vault')
-                axes[1].set_ylabel('field line deviation')
-                axes[1].set_xlabel(r'$\phi$')
-        '''
+        plt.suptitle(f'quartile={quartile} offset={offset}')
 
+    def sample(self, quartile, offset=True):
+        """Return sample index closest to quartile."""
+        label = 'peaktopeak'
+        if offset:
+            label += '_offset'
+        peaktopeak = np.quantile(self.data[label], quartile)
+        return np.argmin((self.data[label].data - peaktopeak)**2)
 
 
 if __name__ == '__main__':
 
-    trial = Trial(theta=[1.5, 1.5, 2, 2, 3, 0],
-                  samples=1_00_000, wall=True, energize=True)
-    trial.plot()
+    theta = [5, 5, 2, 2, 2.7, 0]
+    #theta = [1.5, 1.5, 2, 2, 3, 0]
 
-    '''
-    quartile = np.quantile(trial.data.peaktopeak_offset, 0.99)
-    sample = np.argmin((trial.data.peaktopeak_offset.data-quartile)**2)
-    print(sample)
-    print(trial.data.peaktopeak_offset[sample])
-    print(trial.data.peaktopeak[sample])
-    trial.plot_sample(sample)
-    '''
+    trial = Trial(samples=1_000_000, theta=theta, wall=True, energize=True)
+
+    trial.plot()
     trial.plot_offset()
+
+    # case -> 1.7/0.3, 2.1/0.8
+    # ccl -> 1.4/0.9, 1.7/0.8
+    # wall -> 3.2 / 3.2
+
+    trial.plot_sample(0.99, False)
+    trial.plot_sample(0.99, True)

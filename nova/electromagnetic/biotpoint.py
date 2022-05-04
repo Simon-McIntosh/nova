@@ -1,7 +1,7 @@
 """Build interaction matrix for a set of poloidal points."""
 from dataclasses import dataclass, field
 
-import nlopt
+# import nlopt
 import numpy as np
 
 from nova.electromagnetic.biotframe import BiotFrame

@@ -21,7 +21,7 @@ class Connect:
                                     default_factory=pandas.DataFrame)
 
     _space_columns: ClassVar[list[str]] = []
-    _modules: ClassVar[tuple[str]] = ('IMAS',)
+    _modules: ClassVar[tuple[str]] = ('IMAS/3.36.0-4.10.1-2020b',)
 
     def __post_init__(self):
         """Connect to cluster."""
@@ -75,6 +75,7 @@ class Connect:
         for i, col in enumerate(space_frame):
             frame[col] = space_frame.iloc[:, i]
         frame = frame.loc[frame[key] == value, :]
+        frame = frame.astype(dict(pulse=int, run=int), errors='ignore')
         self.frame = pandas.concat([self.frame, frame])
         return self.frame
 

@@ -6,7 +6,7 @@ import numpy as np
 import xarray
 
 from nova.database.filepath import FilePath
-from nova.imas.connect import Connect
+from nova.imas.connect import Scenario
 from nova.imas.equilibrium import Equilibrium
 from nova.utilities.plotter import LinePlot
 
@@ -31,20 +31,16 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
 
     def __post_init__(self):
         """Set filepath."""
+        self.group = f'{self.ids_name}/{self.workflow.replace("-", "_")}'
         self.set_path(self.datapath)
         try:
             self.load()
         except (FileNotFoundError, OSError):
             self.build()
 
-    @property
-    def group(self):
-        """Return nedCDF group."""
-        return f'{self.ids_name}/{self.workflow.replace("-", "_")}'
-
     def build(self):
         """Build dataset."""
-        frame = Connect().load_frame('workflow', self.workflow)
+        frame = Scenario().load_frame('workflow', self.workflow)
         frame = self._format_columns(frame)
         data = xarray.Dataset.from_dataframe(frame)
         self.data = data.set_coords(frame.columns)
@@ -66,7 +62,6 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
         data = []
         for i, (pulse, run) in enumerate(zip(self.data.pulse.data,
                                              self.data.run.data)):
-            print(pulse, run)
             eq_data = Equilibrium(pulse, run).data[self.attrs]
             _isnull = eq_data.isnull().any()
             if any([getattr(_isnull, attr) for attr in _isnull]):
@@ -82,10 +77,8 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
         self.axes = kwargs.pop('axes', None)
         _color = kwargs.pop('color', None)
         self.data.load()
-
         for i in self.data.index.data:
             index = self.data.subindex == i
-
             data = self.data[attr][index].data[::100]
             color = f'C{i%10}' if _color is None else _color
             self.axes.plot(self.data.psi_norm.data,
@@ -97,7 +90,7 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
 
 if __name__ == '__main__':
 
-    ens = Ensemble('ASTRA')
+    ens = Ensemble('DINA-IMAS')
     ens.build()
 
     #ens.plot('f_df_dpsi')

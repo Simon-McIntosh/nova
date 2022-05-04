@@ -269,7 +269,7 @@ if __name__ == '__main__':
 
     machine = MachineData(dcoil=0.2, dshell=0, read_txt=False)
 
-    machine.load_coilset(part_list='vvin vvout')
+    #machine.load_coilset(part_list='vvin vvout')
 
     #machine.load_models(read_txt=True)
     #machine.plot_models()

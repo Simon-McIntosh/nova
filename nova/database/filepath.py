@@ -67,10 +67,13 @@ class FilePath:
         except OSError:
             self._disable_HDF5_lock()
             self.data.to_netcdf(file, group=self.group, mode=mode)
+        return self
 
-    def load(self):
-        """Load dataset from file (lazy)."""
+    def load(self, lazy=True):
+        """Load dataset from file."""
         file = self.file(self.filename)
         with xarray.open_dataset(file, group=self.group) as data:
             self.data = data
+            if not lazy:
+                self.data.load()
         return self

@@ -164,10 +164,9 @@ class Feature:
 
 if __name__ == '__main__':
 
-    #ens = Ensemble('DINA-IMAS')
-    ens = Ensemble('DINA')
+    ens = Ensemble('DINA-IMAS')
     #ens = Ensemble('ASTRA')
-    ens.build()
+    #ens.build()
 
     attr = 'f_df_dpsi'
     attr = 'dpressure_dpsi'

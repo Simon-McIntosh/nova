@@ -40,16 +40,16 @@ class TFC18(DataDir, Plotter):
         self.file = file
         self.__post_init__()
 
-    def load_ensemble(self):
+    def load_ensemble(self, prefix=None):
         """Load ensemble ccl dataset and store reduced data in vtk format."""
         _file = self.file
         paths = list(pathlib.Path(self.rst_folder).rglob('*.rst'))
         files = [file for path in paths if not
                  os.path.isfile(self.ccl_file.replace(
                      self.file, file := path.name[:-4]))]
-        #files = [file for file in files if file[-3:] == 'f4e']
-        files = [file for file in files if file[0] == 'w']
-        print(files)
+        if prefix is not None:
+            files = [file for file in files if file[:len(prefix)] == prefix]
+            # files = [file for file in files if file[-3:] == 'f4e']
         nfiles = len(files)
         tick = clock(nfiles, header=f'loading {nfiles} *.rst files {files}')
         for file in files:

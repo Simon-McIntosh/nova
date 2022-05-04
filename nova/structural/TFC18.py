@@ -47,7 +47,9 @@ class TFC18(DataDir, Plotter):
         files = [file for path in paths if not
                  os.path.isfile(self.ccl_file.replace(
                      self.file, file := path.name[:-4]))]
-        files = [file for file in files if file[-3:] == 'f4e']
+        #files = [file for file in files if file[-3:] == 'f4e']
+        files = [file for file in files if file[0] == 'w']
+        print(files)
         nfiles = len(files)
         tick = clock(nfiles, header=f'loading {nfiles} *.rst files {files}')
         for file in files:
@@ -174,11 +176,15 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
+    TFC18('TFCgapsG10', 'w1').load_ensemble()
+
+    '''
     for file in ['c1', 'c2']:
         print(file)
         tf = TFC18('TFCgapsG10', file)
 
     tf.plot()
+    '''
     #tf.recalculate()
     #tf.export()
     #tf.to_dataframe('EOB')

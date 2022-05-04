@@ -1,12 +1,13 @@
 """Acess gap datasets."""
 from dataclasses import dataclass
+from typing import ClassVar
 
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 import numpy as np
 import pandas
 import xarray
 
-from nova.assembly.model import ModelData
+from nova.assembly.model import Dataset, ModelData
 from nova.utilities.pyplot import plt
 
 
@@ -113,7 +114,29 @@ class Gap:
         return self.data.gap.values
 
 
+@dataclass
+class WedgeGap(Dataset):
+    """Manage access to wedge gap data files."""
+
+    filename: str = 'wedge'
+
+    simulations: ClassVar[list[str]] = ['w1', 'w2', 'w3', 'w4', 'w5']
+    ncoil: ClassVar[int] = 18
+
+    def build(self):
+        """Build gap dataset."""
+        self.data['simulation'] = self.simulations
+        self.data['index'] = range(self.ncoil)
+        self.data['point'] = ['A1', 'C1', 'B2']
+        self.data['gap'] = xarray.DataArray(0., self.data.coords)
+        for i, simulation in enumerate(self.simulations):
+            filename = self.file(simulation, extension='.json')
+            self.data.gap[i] = pandas.read_json(filename).values
+        return self.store()
+
 if __name__ == '__main__':
 
-    gap = GapData('Gap_Size_18_Coils')
-    gap.plot('v3')
+    #gap = GapData('Gap_Size_18_Coils')
+    #gap.plot('v3')
+
+    wedge = WedgeGap()

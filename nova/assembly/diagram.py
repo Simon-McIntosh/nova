@@ -1,97 +1,119 @@
-
+"""Flow charts for Monte Carlo analysis of TFC vault assembly."""
+from dataclasses import dataclass, field
 from IPython.display import Image, display
+from typing import ClassVar
 
-import dot2tex
 import pydot
 
-graph = pydot.Dot('my_graph', graph_type='digraph', bgcolor='white',
-                  rankdir='LR')
 
-graph.add_node(pydot.Node('dr_case', label='U(+-1.5)', shape='box3d'))
-graph.add_node(pydot.Node('dt_case', label='U(+-1.5)', shape='box3d'))
+@dataclass
+class Diagram:
+    """Draw diagrams to illustrate Monte Carlo analyses."""
 
-graph.add_node(pydot.Node('dr_ccl', label='N(0, 2)', shape='box3d'))
-graph.add_node(pydot.Node('dt_ccl', label='N(0, 2)', shape='box3d'))
+    theta: list[float] = field(default_factory=lambda: [1.5, 1.5, 2, 2, 5, 0])
+    pdf: list[str] = field(
+        default_factory=lambda: ['uniform', 'uniform', 'normal', 'normal',
+                                 'uniform', 'uniform'])
+    rankdir: str = 'UL'
+    wall: bool = True
 
-graph.add_edge(pydot.Edge('dr_case', 'build', label=' dR case'))
-graph.add_edge(pydot.Edge('dt_case', 'build', label=' RdPhi case'))
+    samples: ClassVar[list[str]] = ['dr_case', 'dt_case', 'dr_ccl', 'dt_ccl',
+                                    'dr_wall']
 
-graph.add_node(pydot.Node('build', label='Assembly', shape='rectangle'))
-graph.add_node(pydot.Node('ansys', label='Structural', shape='rectangle'))
-graph.add_node(pydot.Node('em', label='Electromagnetic', shape='rectangle'))
+    def __post_init__(self):
+        """Build graph."""
+        self.graph = pydot.Dot('vault_monte_carlo', graph_type='digraph',
+                               bgcolor='white', rankdir=self.rankdir)
+        self.build_samples()
+        self.build_models()
+        self.build_nodes()
+        self.build_links()
 
-graph.add_edge(pydot.Edge('build', 'ansys', label=' gap'))
+    def add_node(self, name, label, shape):
+        """Add node to graph."""
+        self.graph.add_node(pydot.Node(name, label=label, shape=shape))
 
-graph.add_node(pydot.Node('add_r', label='+', shape='circle'))
-graph.add_node(pydot.Node('add_t', label='+', shape='circle'))
+    def add_edge(self, source, sink, **attrs):
+        """Add edge to graph."""
+        self.graph.add_edge(pydot.Edge(source, sink, **attrs))
 
-graph.add_edge(pydot.Edge('ansys', 'add_r', label=' dR gap'))
-graph.add_edge(pydot.Edge('dr_case', 'add_r', label=' dR case'))
-graph.add_edge(pydot.Edge('dr_ccl', 'add_r', label=' dR ccl'))
+    def sample_label(self, index):
+        """Return sample label."""
+        pdf = self.pdf[index]
+        theta = self.theta[index]
+        if pdf == 'normal':
+            return f'N(0, {theta})'
+        return f'U(+-{theta})'
 
-graph.add_edge(pydot.Edge('ansys', 'add_t', label=' RdPhi gap'))
-graph.add_edge(pydot.Edge('dt_ccl', 'add_t', label=' RdPhi ccl'))
+    def build_samples(self, shape='box3d'):
+        """Build graph nodes."""
+        for i, name in enumerate(self.samples):
+            if not self.wall and 'wall' in name:
+                continue
+            self.add_node(name, self.sample_label(i), shape)
+        self.add_node('H', 'P(H)', shape)
 
-graph.add_edge(pydot.Edge('add_r', 'em', label=' dR em'))
-graph.add_edge(pydot.Edge('add_t', 'em', label=' RdPhi em'))
+    def build_models(self, shape='rectangle'):
+        """Build model nodes."""
+        self.add_node('build', 'Assembly', shape)
+        self.add_node('ansys', 'Structural', shape)
+        self.add_node('em', 'Electromagnetic', shape)
+        if self.wall:
+            self.add_node('wall', 'Wall Alignment', shape)
+        self.add_node('lp', 'Lowpass (k<4)', shape)
+        self.add_node('H99', 'H99', 'none')
 
-graph.add_node(pydot.Node('ph', label='P(H)', shape='none'))
+    def build_nodes(self, shape='circle'):
+        """Build summation nodes."""
+        self.add_node('add_r', '+', shape)
+        self.add_node('add_t', '+', shape)
+        if self.wall:
+            self.add_node('diffrence', '-', shape)
 
-if False:
-    graph.add_node(pydot.Node('dr_blanket', label='U(+-4.5)', shape='box3d'))
-    graph.add_node(pydot.Node('blanket', label='Blanket', shape='rectangle'))
+    def build_links(self):
+        """Link nodes."""
+        # sample input
+        self.add_edge('dr_case', 'build', label=' dR case')
+        self.add_edge('dt_case', 'build', label=' RdPhi case')
 
-    graph.add_edge(pydot.Edge('dr_blanket', 'blanket', label=' dR blanket'))
+        # model links
+        self.add_edge('build', 'ansys', label=' gap')
+        self.add_edge('add_r', 'em', label=' dR em')
+        self.add_edge('add_t', 'em', label=' RdPhi em')
 
-    graph.add_node(pydot.Node('sub_h', label='-', shape='circle'))
-    graph.add_edge(pydot.Edge('blanket', 'sub_h', label=' dR blanket n1'))
-    graph.add_edge(pydot.Edge('em', 'sub_h', label=' h(Phi)'))
+        # summation nodes
+        self.add_edge('ansys', 'add_r', label=' dR gap')
+        self.add_edge('dr_case', 'add_r', label=' dR case')
+        self.add_edge('dr_ccl', 'add_r', label=' dR ccl')
 
-    graph.add_edge(pydot.Edge('sub_h', 'ph'))
-else:
-    graph.add_edge(pydot.Edge('em', 'ph', label=' h(Phi)'))
+        self.add_edge('ansys', 'add_t', label=' RdPhi gap')
+        self.add_edge('dt_case', 'add_t', label=' RdPhi case')
+        self.add_edge('dt_ccl', 'add_t', label=' RdPhi ccl')
 
+        if self.wall:
+            self.add_edge('dr_wall', 'wall', label=' dR wall (machine)')
+            self.add_edge('em', 'wall', label=' axis offset')
+            self.add_edge('wall', 'diffrence', label=' dR wall (magnetic)')
+            self.add_edge('em', 'diffrence', label=' fieldline')
+            self.add_edge('diffrence', 'lp')
+        else:
+            self.add_edge('em', 'lp', label=' fieldline')
 
+        self.add_edge('lp', 'H')
+        self.add_edge('H', 'H99', label=' P(H<H99)=0.99')
 
+    def plot(self):
+        """Display graph."""
+        display(Image(self.graph.create_png(), height=800))
 
-
-
-
-display(Image(graph.create_png()))
-
-
-
-
-
-'''
-gtex = dot2tex.dot2tex(graph.to_string(), format='tikz',
-                       texmode='math', crop=True)
-
-import subprocess
-
-with tempfile.NamedTemporaryFile('w', suffix='.tex') as tmp:
-    tmp.write(gtex)
-    proc = subprocess.Popen(['pdflatex', tmp.name])
-    proc.communicate()
-
-print(graph.to_string())
-print(gtex)
-#with open('tmp.txt', 'w') as f:
-#    f.write(gtex)
-'''
-
-'''
-
-
-
-'''
-
-'''
-, IFrame
-
-#graph.set_type()
+    def write(self):
+        """Save graph to file."""
+        self.graph.write_png('tmp.png')
 
 
 
-IFrame(pdfl, width=600, height=300)
-'''
+if __name__ == '__main__':
+
+    diagram = Diagram([5, 5, 2, 2, 3, 0], wall=True)
+    diagram.plot()
+    diagram.write()

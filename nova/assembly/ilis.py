@@ -23,7 +23,7 @@ class Surface(pv.PolyData):
 
 @dataclass
 class ILIS:
-    """Manage ILIS plane definitinos."""
+    """Manage ILIS plane definitions."""
 
     points: npt.ArrayLike
     norm: npt.ArrayLike = field(init=False)
@@ -47,6 +47,8 @@ class ILIS:
 
     def assert_planar(self):
         """Assert that input points are planar."""
+        if len(self.points) == 3:
+            return
         assert np.allclose(self.normal(self.points[:3]),
                            self.normal(self.points[1:]))
 
@@ -304,5 +306,16 @@ if __name__ == '__main__':
 
     cage = Cage(ilis_a, ilis_b, gap=7e-3)
     print(cage.coil.radius)
-    #plotter = cage.plot_mesh(show=False)
-    #cage.plot_corners(plotter)
+    plotter = cage.plot_mesh(show=False)
+    cage.plot_corners(plotter)
+
+    ilis = np.array(ilis_a)
+    points = np.array([np.linalg.norm(ilis[:, :2], axis=1), ilis[:, -1]]).T
+
+    gap_points = np.zeros((3, 2))
+    gap_points[:2] = points[1:3]
+    gap_points[-1] = np.mean([points[0], points[-1]], axis=0)
+
+    import pandas
+    point_data = pandas.DataFrame(1e3*gap_points.T, columns=['A1', 'C1', 'B2'],
+                                  index=['radius', 'height'])

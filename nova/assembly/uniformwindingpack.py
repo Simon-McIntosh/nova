@@ -9,7 +9,7 @@ from scipy.spatial.transform import Rotation
 
 from nova.definitions import root_dir
 from nova.geometry.line import Line
-from nova.structural.windingpack import WindingPack
+from nova.assembly.windingpack import WindingPack
 from nova.utilities.pyplot import plt
 
 

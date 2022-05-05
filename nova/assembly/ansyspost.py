@@ -6,8 +6,8 @@ from ansys.dpf import post
 import numpy as np
 import pyvista as pv
 
-from nova.structural.datadir import DataDir
-from nova.structural.plotter import Plotter
+from nova.assembly.datadir import DataDir
+from nova.assembly.plotter import Plotter
 
 
 @dataclass
@@ -40,8 +40,6 @@ class AnsysPost(DataDir, Plotter):
             self.time_scoping = self.mesh.field_data['time_scoping']
         except FileNotFoundError:
             self.load_ansys()
-        #if not hasattr(self.mesh, 'name'):
-        #    self.mesh.name = self.subset
 
     def load_ansys(self):
         """Load Ansys rst file."""
@@ -95,17 +93,6 @@ class AnsysPost(DataDir, Plotter):
     def load_displacement(self):
         """Load displacment field to vtk dataset."""
         self.load_field('disp', 'U', 3)
-        '''
-        displace = dpf.Operator('U')
-        displace.inputs.mesh.connect(self.meshed_region)
-        displace.inputs.time_scoping.connect(self.time_scoping)
-        if self.mesh_scoping is not None:
-            displace.inputs.mesh_scoping.connect(self.mesh_scoping)
-        displace.inputs.data_sources.connect(self.model.metadata.data_sources)
-        displace.inputs.requested_location.connect(post.locations.nodal)
-        fields = displace.outputs.fields_container()
-        self.store_fields('displacement', fields)
-        '''
 
     def load_vonmises(self):
         """Load VonMises stress."""
@@ -149,13 +136,6 @@ class AnsysPost(DataDir, Plotter):
         if inplace:
             self.mesh = body
         return body
-
-    #def plot(self, loadcase=-1, factor=275, opacity=1, plotter=None):
-    #    """Return pyvista plotter with mesh displacement."""
-    #    if loadcase < 0:
-    #        loadcase = self.time_scoping[loadcase]-1
-    #    return self.warp(f'disp-{loadcase}', f'vm-{loadcase}',
-    #                     plotter=plotter, factor=factor, opacity=opacity)
 
     def subplot(self):
         """Generate linked loadcase subplot."""

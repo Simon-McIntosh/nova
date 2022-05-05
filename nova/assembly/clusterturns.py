@@ -6,7 +6,7 @@ import numpy.typing as npt
 import pyvista as pv
 import sklearn.cluster
 
-from nova.structural.uniformwindingpack import UniformWindingPack
+from nova.assembly.uniformwindingpack import UniformWindingPack
 from nova.utilities.pyplot import plt
 
 

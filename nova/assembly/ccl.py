@@ -7,17 +7,17 @@ import pandas
 import pathlib
 import pyvista as pv
 
-from nova.structural.ansyspost import AnsysPost
-from nova.structural.clusterturns import ClusterTurns
-from nova.structural.datadir import DataDir
-from nova.structural.plotter import Plotter
-from nova.structural.windingpack import WindingPack
-from nova.structural.uniformwindingpack import UniformWindingPack
+from nova.assembly.ansyspost import AnsysPost
+from nova.assembly.clusterturns import ClusterTurns
+from nova.assembly.datadir import DataDir
+from nova.assembly.plotter import Plotter
+from nova.assembly.windingpack import WindingPack
+from nova.assembly.uniformwindingpack import UniformWindingPack
 from nova.utilities.time import clock
 
 
 @dataclass
-class TFC18(DataDir, Plotter):
+class CCL(DataDir, Plotter):
     """Post-process Ansys output from F4E's 18TF coil model."""
 
     cluster: int = 1
@@ -176,29 +176,29 @@ class TFC18(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    TFC18('TFCgapsG10', 'w1').load_ensemble()
+    ccl = CCL('TFCgapsG10', 'w4')
+
+    ccl.mesh['TFonly-cooldown'] = ccl.mesh['TFonly'] - ccl.mesh['cooldown']
+    ccl.warp(100)
+
+    # ccl.plot()
 
     '''
-    for file in ['c1', 'c2']:
-        print(file)
-        tf = TFC18('TFCgapsG10', file)
+    #ccl.recalculate()
+    #ccl.export()
+    #ccl.to_dataframe('EOB')
 
-    tf.plot()
-    '''
-    #tf.recalculate()
-    #tf.export()
-    #tf.to_dataframe('EOB')
+    #ccl.load_ensemble()
 
-    #tf.load_ensemble()
+    #ccl.mesh['EOB-cooldown'] = ccl.mesh['EOB'] - ccl.mesh['cooldown']
 
-    #tf.mesh['EOB-cooldown'] = tf.mesh['EOB'] - tf.mesh['cooldown']
+    #ccl.to_dataframe('EOB')
 
-    #tf.to_dataframe('EOB')
-
-    #tf.export()
-    #tf.plot('TFonly', 'cooldown', factor=180)
+    #ccl.export()
+    #ccl.plot('TFonly', 'cooldown', factor=180)
     #
 
-    #tf.warp(50, displace='TFonly')
+    #ccl.warp(50, displace='TFonly')
 
-    #tf.animate('TFonly-cooldown', view='xy')
+    #ccl.animate('TFonly-cooldown', view='xy')
+    '''

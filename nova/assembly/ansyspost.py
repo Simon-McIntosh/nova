@@ -154,6 +154,13 @@ class AnsysPost(DataDir, Plotter):
 
 if __name__ == '__main__':
 
+    from nova.utilities.time import clock
+    tick = clock(10, header='loading ansys results')
+    for file in [f'w{i}' for i in range(1, 6)]:
+        for subset in ['CASE_IL', 'CASE_OL']:
+            AnsysPost('TFCgapsG10', file, subset)
+            tick.tock()
+
     ansys = AnsysPost('TFCgapsG10', 'k0', 'CASE_OL')
     ansys.select(8)
     ansys.plot()

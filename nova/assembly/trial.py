@@ -369,7 +369,7 @@ class Trial(Dataset, TrialAttrs):
 if __name__ == '__main__':
 
     theta = [5, 5, 5, 12, 2, 2, 2.6]
-    theta = [0, 0, 0, 0, 0, 0, np.sqrt(3)]
+    #theta = [0, 0, 0, 0, 0, 0, np.sqrt(3)]
     #theta = [1.5, 1.5, 2, 2, 3, 0]
 
     trial = Trial(samples=50_000, theta=theta, wall=True, energize=True)

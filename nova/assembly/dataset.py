@@ -23,7 +23,7 @@ class BaseData:
         """Return interpolated field line deviation waveform."""
         path = os.path.join(root_dir, 'input/Assembly/')
         filename = os.path.join(path, f'{simulation}.csv')
-        data = pandas.read_csv(filename, header=None, delim_whitespace=True)
+        data = pandas.read_csv(filename, header=None, delimiter=',')
         data.iloc[:, 0] *= np.pi/180  # to radians
         data = data.loc[np.unique(data.iloc[:, 0], return_index=True)[1], :]
         return scipy.interpolate.interp1d(
@@ -205,7 +205,7 @@ if __name__ == '__main__':
 
     #MonteCarlo().plot('case2')
     ansys = Ansys()
-    ansys.plot('v3')
+    #ansys.plot('v3')
 
     #field = FieldData()
     #field.plot()

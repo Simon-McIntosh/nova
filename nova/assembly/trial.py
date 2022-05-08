@@ -6,7 +6,6 @@ from time import time
 from typing import ClassVar, Union
 
 import numpy as np
-import scipy.stats
 import xarray
 import xxhash
 
@@ -20,18 +19,23 @@ class TrialAttrs:
     """Manage trial attributes."""
 
     samples: int = 100_000
-    theta: list[float] = field(default_factory=lambda: [1.5, 1.5, 2, 2, 5, 0])
+    theta: list[float] = field(default_factory=lambda: [
+        1.5, 1.5, 3, 3, 2, 2, 5])
     pdf: list[str] = field(
-        default_factory=lambda: ['uniform', 'uniform', 'normal', 'normal',
-                                 'uniform', 'uniform'])
+        default_factory=lambda: [
+            'uniform', 'uniform', 'uniform', 'uniform', 'normal', 'normal',
+            'uniform'])
     modes: int = 3
     energize: Union[int, bool] = True
     wall: bool = False
     nominal_gap: float = 2.
     sead: int = 2025
 
-    component: ClassVar[list[str]] = ['case', 'ccl', 'wall']
-    signal: ClassVar[list[str]] = ['radial', 'tangential']
+    component: ClassVar[list[str]] = ['case_radial', 'case_tangential',
+                                      'roll', 'yaw',
+                                      'ccl_radial', 'ccl_tangential',
+                                      'wall']
+    # signal: ClassVar[list[str]] = ['radial', 'tangential']
     ncoil: ClassVar[int] = 18
 
     @cached_property
@@ -108,25 +112,18 @@ class Trial(Dataset, TrialAttrs):
         self.data = xarray.Dataset(attrs=self.attrs)
         self.data['sample'] = range(self.samples)
         self.data['index'] = range(self.ncoil)
-        self.data['signal'] = self.signal
-        self.data['case'] = xarray.DataArray(0., self.data.coords)
-        self.data['ccl'] = xarray.DataArray(0., self.data.coords)
-        self.data['wall'] = xarray.DataArray(0., self.data.coords)
-        self.data['coordinate'] = ['x', 'y']
+        for component in self.component:
+            self.data[component] = xarray.DataArray(0., self.data.coords)
         self.data['component'] = self.component
-        self.data['theta'] = ('component', 'signal'), \
-            np.array(self.theta).reshape(self.data.dims['component'],
-                                         self.data.dims['signal'])
-        self.data['pdf'] = ('component', 'signal'), \
-            np.array(self.pdf).reshape(self.data.dims['component'],
-                                       self.data.dims['signal'])
+        self.data['signal'] = ['radial', 'tangential']
+        self.data['coordinate'] = ['x', 'y']
+        self.data['theta'] = 'component', self.theta
+        self.data['pdf'] = 'component', self.pdf
         for i, component in enumerate(self.component):
-            for j, signal in enumerate(self.signal):
-                index = 2*i + j
-                theta = self.theta[index]
-                pdf = self.pdf[index]
-                self.data[component].loc[..., signal] = \
-                    getattr(self, pdf)(theta)
+            theta = self.theta[i]
+            pdf = self.pdf[i]
+            self.data[component] = ('sample', 'index'), \
+                getattr(self, pdf)(theta)
 
     def build_positive_gap(self, nmax=20, eps=1e-3):
         """Built gap waveform via iterative loop."""
@@ -139,7 +136,7 @@ class Trial(Dataset, TrialAttrs):
                 return
             offset = gap[sample_index]
             offset[offset >= 0] = 0
-            self.data.case[sample_index, :, 1] += offset
+            self.data.case_tangential[sample_index] += offset
             self.build_gap()
         raise ValueError(f'gap itteration failure at iteration {nmax} '
                          'negitive samples '
@@ -147,16 +144,18 @@ class Trial(Dataset, TrialAttrs):
 
     def build_gap(self):
         """Build vault gap from radial and toroidal waveforms."""
-        self.data['gap'] = xarray.zeros_like(self.data.case)
-        self.data.gap[..., 0] = np.pi / self.ncoil * self.data['case'][..., 0]
+        self.data['gap'] = ('sample', 'index', 'signal'), \
+            np.zeros((self.data.dims['sample'], self.ncoil,
+                      self.data.dims['signal']))
+        self.data.gap[..., 0] = np.pi / self.ncoil * self.data['case_radial']
         self.data.gap[:, :-1, 0] += \
-            np.pi / self.ncoil * self.data['case'][:, 1:, 0].data
+            np.pi / self.ncoil * self.data['case_radial'][:, 1:].data
         self.data.gap[:, -1, 0] += \
-            np.pi / self.ncoil * self.data['case'][:, 0, 0].data
+            np.pi / self.ncoil * self.data['case_radial'][:, 0].data
 
-        self.data.gap[..., 1] = -self.data['case'][..., 1]
-        self.data.gap[:, :-1, 1] += self.data['case'][:, 1:, 1].data
-        self.data.gap[:, -1, 1] += self.data['case'][:, 0, 1].data
+        self.data.gap[..., 1] = -self.data['case_tangential']
+        self.data.gap[:, :-1, 1] += self.data['case_tangential'][:, 1:].data
+        self.data.gap[:, -1, 1] += self.data['case_tangential'][:, 0].data
 
     def predict_structure(self):
         """Run structural simulation."""
@@ -164,15 +163,19 @@ class Trial(Dataset, TrialAttrs):
             np.zeros((self.samples, self.ncoil, self.data.dims['signal']))
         if self.energize:
             gap = self.data.gap.sum(axis=-1)
+            roll = self.data['roll']
+            yaw = self.data['yaw']
             for i, signal in enumerate(self.data.signal.values):
                 self.data['structural'][..., i] = \
-                    self.structural_model.predict(gap, signal)
+                    self.structural_model.predict(signal, gap, roll, yaw)
 
     def predict_electromagnetic(self):
         """Run electromagnetic simulation."""
         self.data['electromagnetic'] = self.data.structural.copy(deep=True)
-        self.data.electromagnetic[:] += self.data.case
-        self.data.electromagnetic[:] += self.data.ccl
+        self.data.electromagnetic[..., 0] += self.data.case_radial
+        self.data.electromagnetic[..., 1] += self.data.case_tangential
+        self.data.electromagnetic[..., 0] += self.data.ccl_radial
+        self.data.electromagnetic[..., 1] += self.data.ccl_tangential
         self.electromagnetic_model.predict(self.data.electromagnetic[..., 0],
                                            self.data.electromagnetic[..., 1])
         self.data['peaktopeak'] = 'sample', \
@@ -189,7 +192,7 @@ class Trial(Dataset, TrialAttrs):
     def predict_wall(self):
         """Predict combined wall-fieldline deviations."""
         ndiv = self.electromagnetic_model.fieldline.shape[1]
-        wall_hat = np.fft.rfft(self.data.wall[..., 0])
+        wall_hat = np.fft.rfft(self.data.wall)
         firstwall = np.fft.irfft(wall_hat, ndiv) * ndiv / self.ncoil
         wall_hat[..., 1] += \
             self.electromagnetic_model.axis_offset * (self.ncoil // 2)
@@ -210,20 +213,24 @@ class Trial(Dataset, TrialAttrs):
         for i, component in enumerate(self.component):
             if component == 'wall' and not self.wall:
                 continue
-            for j, signal in enumerate(self.signal):
-                attr = signal[0]
-                text += f'{component} '
+            print(component)
+            attr = component.split('_')[-1]
+            # text += f'{component.split("_")[0]} '
+            if attr in ['radial', 'tangential']:
+                attr = attr[0]
                 if attr == 't':
                     text += r'$r$'
                     attr = r'\phi'
-                text += rf'$\Delta {attr}$'
-                theta = self.data.theta[i, j].data
-                if self.data.pdf[i, j] == 'normal':
-                    pdf = rf'$\mathcal{{N}}\,(0, {theta:1.1f})$'
-                elif self.data.pdf[i, j] == 'uniform':
-                    pdf = rf'$\mathcal{{U}}\,(\pm{theta:1.1f})$'
-                text += ': ' + pdf
-                text += '\n'
+                text += rf'$\Delta {attr}_{{{component.split("_")[0]}}}$'
+            else:
+                text += component.split('_')[-1]
+            theta = self.data.theta[i].data
+            if self.data.pdf[i] == 'normal':
+                pdf = rf'$\mathcal{{N}}\,(0, {theta:1.1f})$'
+            elif self.data.pdf[i] == 'uniform':
+                pdf = rf'$\mathcal{{U}}\,(\pm{theta:1.1f})$'
+            text += ': ' + pdf
+            text += '\n'
         text += '\n'
         text += f'samples: {self.samples:,}'
         return text
@@ -296,11 +303,12 @@ class Trial(Dataset, TrialAttrs):
         width = 0.8
 
         signal_width = width / self.data.dims['signal']
-        for i, signal in enumerate([r'$\Delta r$', r'$r \Delta \phi$']):
+        for i, label in enumerate([r'$\Delta r$', r'$r \Delta \phi$']):
+            signal = self.data[f'case_{self.data.signal.values[i]}']
             bar_offset = (i+0.5) * signal_width - width / 2
-            axes[0].bar(self.data.index + bar_offset,
-                        self.data.case[sample][:, i], color=f'C{i+1}',
-                        width=signal_width, label=signal)
+            axes[0].bar(self.data.index + bar_offset, signal[sample],
+                        color=f'C{i+1}',
+                        width=signal_width, label=label)
             axes[0].plot(self.data.index,
                          self.theta[0] * (-1)**i *
                          np.ones_like(self.data.index), 'C7--', alpha=0.5,
@@ -321,7 +329,7 @@ class Trial(Dataset, TrialAttrs):
         axes[2].plot(fieldline.phi, fieldline, 'C6', label='fieldline')
 
         ndiv = len(fieldline)
-        wall_hat = np.fft.rfft(self.data.wall[sample, :, 0])
+        wall_hat = np.fft.rfft(self.data.wall[sample, :])
         firstwall = np.fft.irfft(wall_hat, ndiv) * ndiv / self.ncoil
         wall_hat[1] += \
             self.electromagnetic_model.axis_offset[0] * (self.ncoil // 2)
@@ -360,17 +368,20 @@ class Trial(Dataset, TrialAttrs):
 
 if __name__ == '__main__':
 
-    theta = [5, 5, 2, 2, 2.7, 0]
+    theta = [5, 5, 5, 12, 2, 2, 2.6]
+    theta = [0, 0, 0, 0, 0, 0, np.sqrt(3)]
     #theta = [1.5, 1.5, 2, 2, 3, 0]
 
-    trial = Trial(samples=1_000_000, theta=theta, wall=True, energize=True)
+    trial = Trial(samples=50_000, theta=theta, wall=True, energize=True)
 
     trial.plot()
     trial.plot_offset()
 
     # case -> 1.7/0.3, 2.1/0.8
+    # roll -> 0.2/0.1
+    # yaw -> 0.2/0.2
     # ccl -> 1.4/0.9, 1.7/0.8
     # wall -> 3.2 / 3.2
 
-    trial.plot_sample(0.99, False)
-    trial.plot_sample(0.99, True)
+    #trial.plot_sample(0.99, False)
+    #trial.plot_sample(0.99, True)

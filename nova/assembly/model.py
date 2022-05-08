@@ -65,14 +65,13 @@ class ModelData(Dataset):
         dimensions = tuple(dimensions) + ('coefficient',)
         data['fft'] = dimensions, \
             np.zeros(tuple(data.dims[dim] for dim in dimensions))
-
         coefficient = np.fft.rfft(data['delta'].data, axis=axis)
         data.fft[..., 0] = coefficient.real
         data.fft[..., 1] = coefficient.imag
         data.fft[..., 2] = np.abs(coefficient) / data.nyquist
-        data.fft[:, 0, :, 2] /= 2
+        data.fft[..., 0, :, 2] /= 2
         if data.ncoil % 2 == 0:
-            data.fft[:, data.nyquist, :, 2] /= 2
+            data.fft[..., data.nyquist, :, 2] /= 2
         data.fft[..., 3] = np.angle(coefficient)
 
 

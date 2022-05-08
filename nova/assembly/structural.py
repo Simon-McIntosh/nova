@@ -1,5 +1,5 @@
 """Perform post-processing analysis on Fourier perterbed TFC dataset."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar
 
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
@@ -8,7 +8,7 @@ import xarray
 
 from nova.assembly.gap import Gap
 from nova.assembly.model import ModelData, ModelBase
-from nova.structural.TFC18 import TFC18
+from nova.assembly.ccl import CCL
 from nova.utilities.pyplot import plt
 
 
@@ -23,7 +23,7 @@ class Points(ModelData):
 
     def slice_mesh(self):
         """Return midplane mesh."""
-        mesh = TFC18(self.folder, self.name, cluster=self.cluster).mesh
+        mesh = CCL(self.folder, self.name, cluster=self.cluster).mesh
         return mesh.slice('z', self.origin)
 
     @property
@@ -92,28 +92,45 @@ class Fourier(Points):
 
 
 @dataclass
-class Transform(ModelData):
+class BaseTransform:
     """Extract factor and phase transform from single point simulations."""
 
-    name: str
-    scenario: str = 'TFonly'
-    eps: float = 1e-5
+    signal_fft: xarray.DataArray
+    response_fft: xarray.DataArray
+    data: xarray.Dataset = field(init=False, repr=False,
+                                 default_factory=xarray.Dataset)
 
-    attrs: ClassVar[list[str]] = ['delta', 'fft']
+    eps: ClassVar[float] = 1e-5
 
-    def build_signal(self):
-        """Build transform signal."""
-        signal_data = Gap(self.name).data
-        self.data['gap'] = signal_data.gap
-        for attr in self.attrs:
-            self.data[f'signal_{attr}'] = signal_data[attr]
-        self.data.attrs |= signal_data.attrs
+    def __post_init__(self):
+        """Build filter."""
+        self.data['signal_fft'] = self.signal_fft
+        self.data['response_fft'] = self.response_fft
+        self.build()
 
-    def build_response(self):
-        """Build transform response."""
-        response_data = Fourier(self.name).data.sel(scenario=self.scenario)
-        for attr in self.attrs:
-            self.data[f'response_{attr}'] = response_data[attr]
+    def build(self):
+        """Build signal filter."""
+        _filter = self.response_coef / self.signal_coef
+        _filter_dims = _filter.dims + ('coefficient',)
+        self.data['filter'] = _filter_dims, \
+            np.zeros(tuple(self.data.dims[dim] for dim in _filter_dims))
+        self.data.filter[..., 0] = _filter.real
+        self.data.filter[..., 1] = _filter.imag
+        self.data.filter[..., 2] = self.data.response_fft[..., 2] /\
+            self.data.signal_fft[..., 2]
+        self.data.filter[..., 3] = self.data.response_fft[..., 3] -\
+            self.data.signal_fft[..., 3]
+        # remove filter coefficients with low signal amplitudes
+        signal_amplitude = self.data.signal_fft.sel(coefficient='amplitude')
+        max_amplitude = signal_amplitude.data.max(axis=0)
+        index = (signal_amplitude < self.eps*max_amplitude) | \
+            (np.isclose(signal_amplitude, 0))
+        index = index.data
+        if index.ndim == 1:
+            self.data.filter.data[index] = 0
+            return
+        for i in range(index.shape[1]):
+            self.data.filter.data[index[:, i], :, i] = 0
 
     @property
     def signal_coef(self):
@@ -126,27 +143,42 @@ class Transform(ModelData):
         return self.data.response_fft[..., 0] + \
             1j * self.data.response_fft[..., 1]
 
-    def build(self):
-        """Lanuch gap and fourier instances."""
-        self.data = xarray.Dataset()
+
+@dataclass
+class Transform:
+    """Build transform dataset."""
+
+    simulation: str
+    signal: str = None
+    scenario: str = 'TFonly'
+    data: xarray.Dataset = field(init=False, repr=False,
+                                 default_factory=xarray.Dataset)
+
+    attrs: ClassVar[list[str]] = ['delta', 'fft']
+
+    def __post_init__(self):
+        """Load datasets and compute transform."""
         self.build_signal()
         self.build_response()
-        _filter = self.response_coef / self.signal_coef.sel(signal='gap')
-        _filter_dims = _filter.dims + ('coefficient',)
-        self.data['filter'] = _filter_dims, \
-            np.zeros(tuple(self.data.dims[dim] for dim in _filter_dims))
-        self.data.filter[..., 0] = _filter.real
-        self.data.filter[..., 1] = _filter.imag
-        self.data.filter[..., 2] = self.data.response_fft[..., 2] /\
-            self.data.signal_fft.sel(signal='gap')[..., 2]
-        self.data.filter[..., 3] = self.data.response_fft[..., 3] -\
-            self.data.signal_fft.sel(signal='gap')[..., 3]
-        signal = self.data.signal_fft.sel(
-            signal='gap', coefficient='amplitude').data
-        max_factor = signal.max()
-        mode_index = (signal < self.eps*max_factor) | np.isclose(signal, 0)
-        self.data.filter[mode_index] = 0
-        return self.store()
+        self.data['filter'] = BaseTransform(
+            self.data.signal_fft, self.data.response_fft).data.filter
+
+    def build_signal(self):
+        """Build transform signal."""
+        signal_data = Gap(self.simulation).data
+        if self.signal is not None:
+            signal_data = signal_data.sel(signal=self.signal)
+        for signal in np.atleast_1d(signal_data.signal.values):
+            self.data[signal] = signal_data[signal]
+        for attr in self.attrs:
+            self.data[f'signal_{attr}'] = signal_data[attr]
+        self.data.attrs |= signal_data.attrs
+
+    def build_response(self):
+        """Build transform response."""
+        response = Fourier(self.simulation).data.sel(scenario=self.scenario)
+        for attr in self.attrs:
+            self.data[f'response_{attr}'] = response[attr]
 
 
 @dataclass
@@ -162,29 +194,85 @@ class Model(ModelBase):
 
     def build(self):
         """Build fourier component model."""
-        reference = Transform('k0').data
-        self.data = xarray.Dataset(attrs=reference.attrs)
-        self.data['filter'] = xarray.zeros_like(reference.filter)
+        self.data = xarray.Dataset()
+        self.data['filter'] = xarray.zeros_like(Transform('k0').data.filter)
         self.data = self.data.drop('simulation')
-        for mode in self.data.mode.values[1:]:
-            self.data.filter[mode] = \
-                Transform(f'k{mode}').data.filter[mode]
+        self.build_gap_filter()
+        self.build_yaw_filter()
+        self.build_roll_filter()
         return self.store()
 
-    def predict(self, gap, response='radial'):
+    def build_gap_filter(self):
+        """Build gap filter."""
+        for mode in self.data.mode.values[1:]:
+            self.data.filter[mode, :, 0] = \
+                Transform(f'k{mode}', 'gap').data.filter[mode]
+        self.load_filter()
+
+    def build_yaw_filter(self, simulation='w3'):
+        """Build yaw filter."""
+        transform = Transform(simulation).data
+        data = transform.response_delta.to_dataset()
+        data = data.rename(dict(response_delta='delta'))
+        data.delta[:, 0] -= self.predict_radial(transform.gap)
+        data.delta[:, 1] -= self.predict_tangential(transform.gap)
+        self.fft(data)
+        self.data.filter[..., 2, :] = BaseTransform(
+            transform.signal_fft.sel(signal='yaw'), data.fft).data.filter
+        self.load_filter()
+
+    def build_roll_filter(self, simulation='w4'):
+        """Build roll filter."""
+        transform = Transform(simulation).data
+        data = transform.response_delta.to_dataset()
+        data = data.rename(dict(response_delta='delta'))
+        data.delta[:, 0] -= self.predict_radial(
+            transform.gap, yaw=transform.yaw)
+        data.delta[:, 1] -= self.predict_tangential(
+            transform.gap, yaw=transform.yaw)
+        self.fft(data)
+        self.data.filter[..., 1, :] = BaseTransform(
+            transform.signal_fft.sel(signal='roll'), data.fft).data.filter
+        self.load_filter()
+
+    def predict_radial(self, gap=None, roll=None, yaw=None):
+        """Return radial response."""
+        return self.predict('radial', gap, roll, yaw)
+
+    def predict_tangential(self, gap=None, roll=None, yaw=None):
+        """Return tangential response."""
+        return self.predict('tangential', gap, roll, yaw)
+
+    def predict(self, response, *signals):
         """Return prediction of zero-gap (operational) response waveform."""
-        return np.fft.irfft(np.fft.rfft(gap) * self.filter[response])
+        waveform = 0
+        for i, signal in enumerate(signals):  # gap, roll, yaw
+            if signal is None:
+                continue
+            waveform += np.fft.irfft(
+                np.fft.rfft(signal) * self.filter[response][:, i])
+        return waveform
 
     def plot_benchmark(self, simulation: str):
         """Plot structural model results."""
         transform = Transform(simulation)
+        transform.data.response_delta[:] -= \
+            transform.data.response_delta.mean(axis=0)
         axes = plt.subplots(3, 1, sharex=True, sharey=False,
-                            gridspec_kw=dict(height_ratios=[1, 1.5, 1.5]))[1]
-        axes[0].bar(transform.data.index+0.5, transform.data.gap, width=0.75)
-        axes[0].set_ylabel('gap')
+                            gridspec_kw=dict(height_ratios=[2, 2, 2]))[1]
+        width = 0.9/transform.data.dims['signal']
+        color = ['C0', 'C6', 'C7']
+        for i, signal in enumerate(transform.data.signal.values):
+            offset = width * (i - transform.data.dims['signal']/2)
+            axes[0].bar(transform.data.index + offset,
+                        transform.data[signal], width=width, color=color[i])
+
+        axes[0].set_ylabel('signal')
+        axes[0].legend(transform.data.signal.values,
+                       fontsize='xx-small', ncol=3)
         axes[1].bar(transform.data.index, transform.data.response_delta[:, 0],
                     width=0.85, color='C1', label='ANSYS')
-        model_radial = self.predict(transform.data.gap.data, 'radial')
+        model_radial = self.predict_radial(*transform.data.signal_delta.data.T)
         axes[1].bar(transform.data.index, model_radial,
                     width=0.45, color='C2', label='Vault proxy')
         axes[1].set_ylabel(r'$\Delta r$')
@@ -192,7 +280,8 @@ class Model(ModelBase):
 
         axes[2].bar(transform.data.index, transform.data.response_delta[:, 1],
                     width=0.85, color='C1', label='ANSYS')
-        model_tangential = self.predict(transform.data.gap.data, 'tangential')
+        model_tangential = self.predict_tangential(
+            *transform.data.signal_delta.data.T)
         axes[2].bar(transform.data.index, model_tangential,
                     width=0.45, color='C2', label='Vault proxy')
         axes[2].set_ylabel(r'$r\Delta \phi$')
@@ -202,7 +291,7 @@ class Model(ModelBase):
         axes[-1].xaxis.set_major_formatter(FormatStrFormatter('%d'))
         axes[-1].xaxis.set_minor_locator(MultipleLocator(1))
         plt.despine()
-        axes[1].legend(fontsize='x-small', ncol=2)
+        axes[-1].legend(fontsize='xx-small', ncol=2)
 
     def plot_response(self):
         """Plot radial and tangential."""
@@ -225,9 +314,7 @@ class Model(ModelBase):
 if __name__ == '__main__':
 
     structural = Model()
-    structural.plot_benchmark('v3')
-
-
+    structural.plot_benchmark('w5')
 
     #structural.plot_response()
     #Gap().plot('k3')

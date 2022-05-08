@@ -7,7 +7,7 @@ import pandas
 import pathlib
 import pyvista as pv
 
-from nova.assembly.ansyspost import AnsysPost
+from nova.assembly.ansysvtk import AnsysVTK
 from nova.assembly.clusterturns import ClusterTurns
 from nova.assembly.datadir import DataDir
 from nova.assembly.plotter import Plotter
@@ -33,7 +33,7 @@ class CCL(DataDir, Plotter):
 
     def __str__(self):
         """Return Ansys model descriptor (takes time - remote mount)."""
-        return AnsysPost(*self.args).__str__()
+        return AnsysVTK(*self.args).__str__()
 
     def reload(self, file):
         """Reload source file."""
@@ -76,25 +76,7 @@ class CCL(DataDir, Plotter):
 
     def load_ansys(self):
         """Load ansys vtk mesh."""
-        ansys = AnsysPost(*self.args).mesh
-        self.ansys = ansys.copy()
-        self.ansys.clear_point_data()
-        self.load_scenario()
-        for scn in self.scenario:
-            try:
-                self.ansys[scn] = ansys[f'disp-{self.scenario[scn]}']
-            except KeyError:
-                pass
-        self.ansys.field_data['scenario'] = list(self.scenario)
-
-    def load_scenario(self):
-        """Update secenario attribute."""
-        scenario_list = ['preload', 'cooldown',
-                         'TFonly', 'SOD', 'SOP', 'XPF',
-                         'CS1_0', 'CS2U0', 'CS2L0',
-                         'SOF', 'SOB', 'EOB', 'EOP', 'EOB+PD']
-        self.scenario = {scenario_list[int(index-1)]: i for i, index in
-                         enumerate(self.ansys.field_data['time_support'])}
+        self.ansys = AnsysVTK(*self.args).mesh
 
     def load_windingpack(self):
         """Load conductor windingpack."""
@@ -110,7 +92,7 @@ class CCL(DataDir, Plotter):
         self.mesh.clear_data()
         self.mesh['arc_length'] = mesh['arc_length']
         self.mesh.field_data.update(self.ansys.field_data)
-        for scn in self.scenario:
+        for scn in self.ansys.field_data['scenario']:
             try:
                 self.mesh[scn] = mesh[scn]
             except KeyError:
@@ -160,7 +142,6 @@ class CCL(DataDir, Plotter):
         """Export dataset."""
         files = [f'kp{i}' for i in range(5, 10)]
         for file in files:
-            print(file)
             for cluster in [1]:  # [1, 5, 10]:
                 self.cluster = cluster
                 self.reload(file)

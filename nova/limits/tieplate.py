@@ -5,7 +5,7 @@ def get_tie_plate(wp='Soft', link=False):
     tie_plate['preload'] = 201.33
     tie_plate['limit_load'] = -26  # minimum axial load
     tie_plate['mg'] = 1.18  # coil weight MN
-    
+
     if wp == 'Ansys_old':
         alpha = -0.0071#6.85e-3
         beta = np.array([0.0165, 0.0489, 0.0812,
@@ -15,7 +15,7 @@ def get_tie_plate(wp='Soft', link=False):
         alpha = -0.0025
         beta = np.array([0.0254, 0.0752, 0.1249,
                          0.1737, 0.2235, 0.2733])
-        gamma = 0.0455           
+        gamma = 0.0455
     elif wp == 'CSM1':
         alpha = -9.9e-3
         beta = np.array([0.0229, 0.0681, 0.113,
@@ -38,12 +38,11 @@ def get_tie_plate(wp='Soft', link=False):
                          0.2696, 0.3468, 0.4239])
         gamma = 0.0739
         tie_plate['preload'] = 190
-        
-        
+
     if link:  # link central pair of CS modules
         beta = np.append(np.append(beta[:2], np.sum(beta[2:4])), beta[-2:])
-        
+
     tie_plate['alpha'] = alpha  # alpha Fx (Poisson)
-    tie_plate['beta'] = beta # beta Fz
+    tie_plate['beta'] = beta  # beta Fz
     tie_plate['gamma'] = gamma  # gamma Fc (crush)
     return tie_plate

@@ -16,12 +16,13 @@ class Plotter:
             self.mesh.set_active_scalars(name)
         return name
 
-    def plot(self, opacity=1):
+    def plot(self, scalars=None, opacity=1):
         """Plot mesh."""
         plotter = pv.Plotter()
-        plotter.add_mesh(self.mesh, scalars=None, color='w',
+        plotter.add_mesh(self.mesh, scalars=scalars, color='w',
                          opacity=opacity, smooth_shading=False,
                          line_width=3)
+        plotter.show_bounds()
         plotter.show()
         #return plotter
 
@@ -55,10 +56,11 @@ class Plotter:
         return plotter
 
     def animate(self, filename: str, scalars: str, max_factor=100, frames=31,
-                view='iso', opacity=0.5):
+                view='iso', opacity=0.5, zoom=1.5):
         """Animate warped displacments."""
 
         plotter = pv.Plotter(notebook=False, off_screen=True)
+        plotter.set_background('white')
 
         #clip = [0, 20, 0, 20, 0, 20]
         reference = self.mesh.copy()
@@ -67,13 +69,13 @@ class Plotter:
         #mesh = mesh.clip_box(clip)
 
         if opacity > 0:
-            plotter.add_mesh(reference, color='w', opacity=opacity,
+            plotter.add_mesh(reference, color='k', opacity=opacity,
                              smooth_shading=True)
-        plotter.add_mesh(mesh, scalars=scalars, smooth_shading=False)
-        plotter.camera.zoom(1.5)
+        plotter.add_mesh(mesh, scalars=scalars, smooth_shading=False,
+                         show_scalar_bar=False)
+        plotter.camera.zoom(zoom)
         if view != 'iso':
             getattr(plotter, f'view_{view}')()
-            plotter.camera.zoom(5)
         filename += f'_{view}'
         plotter.open_gif(f'{filename}.gif')
 
@@ -89,4 +91,4 @@ class Plotter:
             plotter.render()
             plotter.write_frame()
             tick.tock()
-        plotter.close()
+        #plotter.close()

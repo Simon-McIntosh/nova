@@ -18,10 +18,10 @@ class FieldLine:
         self.structural = structural.Model()
         self.electromagnetic = electromagnetic.Model()
 
-    def predict(self, gap, ndiv=360):
+    def predict(self, gap, roll, yaw, ndiv=360):
         """Return field line deviation waveform."""
-        radial = self.structural.predict(gap, 'radial')
-        tangential = self.structural.predict(gap, 'tangential')
+        radial = self.structural.predict('radial', gap, roll, yaw)
+        tangential = self.structural.predict('tangential', gap, roll, yaw)
         self.electromagnetic.predict(radial, tangential, ndiv)
         return self.electromagnetic.fieldline.data
 
@@ -34,7 +34,8 @@ class FieldLine:
         """Plot combined structural+EM benchmark."""
         gap = Gap(simulation)
         dataset = self.electromagnetic.load_dataset(simulation)
-        self.predict(gap.data.gap, dataset.dims['phi'])
+        self.predict(gap.data['gap'], gap.data['roll'], gap.data['yaw'],
+                     dataset.dims['phi'])
         axes = plt.subplots(2, 1, sharex=False, sharey=False,
                             gridspec_kw=dict(height_ratios=[1, 2]))[1]
         axes[0].bar(gap.data.index, gap.data.gap)

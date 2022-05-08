@@ -1,57 +1,47 @@
 """Acess gap datasets."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar
 
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 import numpy as np
+import numpy.typing as npt
 import pandas
 import xarray
 
-from nova.assembly.ilis import ILIS
-from nova.assembly.model import Dataset, ModelData
+from nova.assembly.model import ModelData
 from nova.utilities.pyplot import plt
 
 
 @dataclass
-class GapData(ModelData):
-    """Manage gap input."""
+class GapData:
+    """Manage gap attributes."""
 
-    name: str = 'constant_adaptive_fourier'
+    simulations: list[str]
+    gap: npt.ArrayLike = None
+    roll: npt.ArrayLike = None
+    yaw: npt.ArrayLike = None
+    data: xarray.Dataset = field(init=False, repr=False)
 
-    def read_gapfile(self):
-        """Return gapfile as pandas.DataFrame."""
-        gapfile = self.file(self.name, extension='.txt')
-        if self.name in ['Gap_Size_18_Coils', 'F4E_vgap']:
-            gapdata = pandas.read_csv(gapfile, skiprows=1,
-                                      delim_whitespace=True)
-            gapdata = gapdata.iloc[1:]
-            columns = {column: column.replace('_', '').lower()
-                       for column in gapdata}
-            gapdata.rename(columns=columns, inplace=True)
-            return gapdata.drop(columns=['cid', 'rid'])
-        gapdata = pandas.read_csv(gapfile, skiprows=1, delim_whitespace=True)
-        return gapdata.drop(columns=['rid'])
+    ncoil: ClassVar[int] = 18
 
-    def build(self):
-        """Load input gap waveforms."""
-        gapdata = self.read_gapfile()
+    def __post_init__(self):
+        """Build input gap waveforms."""
         self.data = xarray.Dataset()
-        self.data['index'] = np.arange(1, len(gapdata)+1)
-        self.data['signal'] = ['gap', 'tangential']
-        self.data['simulation'] = gapdata.columns
-        self.data['gap'] = ('simulation', 'index'), gapdata.values.T
-        gapsum = self.data.gap.sum('index')
+        self.data['simulation'] = self.simulations
+        self.data['index'] = np.arange(1, self.ncoil+1)
+        self.data['signal'] = ['gap', 'roll', 'yaw']
+        for signal in self.data.signal.values:
+            value = getattr(self, signal)
+            if value is None:
+                value = np.zeros((len(self.simulations), self.ncoil))
+            self.data[signal] = ('simulation', 'index'), value
         self.data['delta'] = ('simulation', 'index', 'signal'), \
             np.zeros(tuple(self.data.dims[dim]
                      for dim in ['simulation', 'index', 'signal']))
-        self.data['delta'][..., 0] = self.data.gap - \
-            gapsum / self.data.dims['index']
-        self.data['delta'][..., 1] = \
-            self.data.gap.cumsum('index').data - \
-            gapsum * (self.data['index'] + 1) / self.data.dims['index']
-        self.data['delta'][..., 1] -= self.data['delta'][..., 1].mean('index')
-        self.fft(self.data)
-        return self.store()
+        for i, signal in enumerate(self.data.signal.values):
+            self.data.delta[..., i] = self.data[signal]
+        self.data.delta[:] -= self.data.delta.mean('index')
+        ModelData.fft(self.data)
 
     def plot(self, simulation: str):
         """Plot gap waveforms."""
@@ -93,49 +83,61 @@ class GapData(ModelData):
 
 
 @dataclass
-class Gap:
-    """Manage access to gap data files."""
+class UniformGap(ModelData):
+    """Manage uniform (parallel) gap input data."""
 
-    simulation: str
-
-    def __post_init__(self):
-        """Load gap data."""
-        self.data = GapData(self.gapfile).data.sel(simulation=self.simulation)
+    name: str
 
     @property
     def gapfile(self):
         """Return gap listing filename."""
-        if self.simulation[0] == 'v':
+        if self.name[0] == 'v':
             return 'Gap_Size_18_Coils'
         return 'constant_adaptive_fourier'
 
-    @property
-    def gap(self):
-        """Return gap waveform."""
-        return self.data.gap.values
+    def read_gapfile(self):
+        """Return gapfile as pandas.DataFrame."""
+        gapfile = self.file(self.gapfile, extension='.txt')
+        if self.gapfile in ['Gap_Size_18_Coils', 'F4E_vgap']:
+            gapdata = pandas.read_csv(gapfile, skiprows=1,
+                                      delim_whitespace=True)
+            gapdata = gapdata.iloc[1:]
+            columns = {column: column.replace('_', '').lower()
+                       for column in gapdata}
+            gapdata.rename(columns=columns, inplace=True)
+            return gapdata.drop(columns=['cid', 'rid'])
+        gapdata = pandas.read_csv(gapfile, skiprows=1, delim_whitespace=True)
+        return gapdata.drop(columns=['rid'])
+
+    def build(self):
+        """Build uniform gap dataset."""
+        gapdata = self.read_gapfile()
+        self.data = GapData(gapdata.columns, gapdata.values.T).data
+        return self.store()
 
 
 @dataclass
-class WedgeGap(Dataset):
+class WedgeGap(ModelData):
     """Manage access to wedge gap data files."""
 
-    filename: str = 'wedge'
-
     simulations: ClassVar[list[str]] = ['w1', 'w2', 'w3', 'w4', 'w5']
-    ncoil: ClassVar[int] = 18
+    length: ClassVar[dict[str, float]] = dict(roll=9.425, yaw=8.019)
 
     def build(self):
         """Build gaps and calculate coil transformations."""
         self.build_dataset()
         self.build_transforms()
-        #return self.store()
-        return self
+        self.data = self.data.merge(GapData(
+            self.simulations, self.data.gap.data,
+            self.data.rotate[..., 1].data * 1e3*self.length['roll'],
+            self.data.rotate[..., 2].data * 1e3*self.length['yaw']).data)
+        return self.store()
 
     def build_dataset(self):
         """Build gap dataset."""
         self.data = xarray.Dataset()
         self.data['simulation'] = self.simulations
-        self.data['index'] = range(self.ncoil)
+        self.data['index'] = range(1, self.ncoil+1)
         self.data['point'] = ['A1', 'C1', 'B2']
         self.data['point_gap'] = xarray.DataArray(0., self.data.coords)
         for i, simulation in enumerate(self.simulations):
@@ -145,7 +147,7 @@ class WedgeGap(Dataset):
     def build_transforms(self):
         """Calculate coil transforms to produce wedge gaps."""
         nominal_gap = self.data.point_gap.sum(axis=1) / self.ncoil
-        self.data['mean_gap'] = ('simulation', 'index'), \
+        self.data['gap'] = ('simulation', 'index'), \
             (self.data.point_gap[..., :2].sum(axis=-1) +
              2*self.data.point_gap[..., 2]).data / 4
         delta = self.data.point_gap - nominal_gap.data[:, np.newaxis, :]
@@ -156,7 +158,6 @@ class WedgeGap(Dataset):
         self.data['mean_offset'] = ('simulation', 'index'), \
             (self.data.point_offset[..., :2].sum(axis=-1) +
              2*self.data.point_offset[..., 2]).data / 4
-
         self.data['coordinate'] = ['x', 'y', 'z']
         self.data['reference'] = ('point', 'coordinate'), \
             1e3*np.array([[2.31300792, 0, 4.74626384],
@@ -168,7 +169,6 @@ class WedgeGap(Dataset):
                       np.ones((self.data.dims['simulation'], self.ncoil)))
         self.data.fiducial[..., 1] += self.data.point_offset
         self.data.fiducial[..., 1] -= self.data.mean_offset
-
         self.data['normal'] = ('simulation', 'index', 'coordinate'), \
             np.cross(
                 self.data.fiducial[..., 2, :]-self.data.fiducial[..., 0, :],
@@ -176,35 +176,58 @@ class WedgeGap(Dataset):
                 axis=-1)
         self.data['normal'] /= np.linalg.norm(self.data['normal'],
                                               axis=-1)[..., np.newaxis]
-
-        self.data.attrs['radius'] = self.data.reference[1:, 0].mean()
-        self.data['angle'] = ['roll', 'primary_yaw', 'secondary_yaw']
+        self.data.attrs['radius'] = self.data.reference[1:, 0].data.mean()
+        self.data['angle'] = ['phi', 'roll', 'yaw']
         self.data['rotate'] = ('simulation', 'index', 'angle'), \
             np.zeros((self.data.dims['simulation'], self.ncoil,
                       self.data.dims['angle']))
-
-        self.data['rotate'][..., 0] = np.arctan2(
+        self.data['rotate'][..., 0] = self.data.mean_offset / self.data.radius
+        self.data['rotate'][..., 1] = np.arctan2(
             np.cross(np.array([1, 0]), self.data['normal'][..., 1:]),
             np.dot(self.data['normal'][..., 1:], np.array([1, 0])))
-        self.data['rotate'][..., 1] = self.data.mean_offset / self.data.radius
         self.data['rotate'][..., 2] = np.arctan2(
             np.cross(np.array([0, 1]), self.data['normal'][..., :2]),
             np.dot(self.data['normal'][..., :2], np.array([0, 1])))
-
         self.data.rotate[:] -= self.data.rotate.mean(axis=1)
 
+    def write_gapfile(self):
+        """Write mean gap data to file."""
+        dataframe = self.data.mean_gap.T.to_pandas()
+        dataframe.insert(0, 'rid', range(2001, 2000+self.ncoil+1))
+        filename = self.file('wedge', extension='.txt')
+        with open(filename, 'w') as f:
+            f.write('Non-parallel gap data.\n\n')
+            dataframe.to_csv(f, sep='\t')
 
+    def plot(self, simulation: str):
+        """Plot wedge gap distributions."""
+        rotate = self.data.rotate.sel(simulation=simulation)
         for i in range(3):
-            plt.bar(range(18), self.data.rotate[3, :, i]*180/np.pi,
-                    width=0.8-(i*0.2))
+            plt.bar(range(18), rotate[:, i]*180/np.pi, width=0.8-(i*0.2))
 
 
+@dataclass
+class Gap:
+    """Manage access to gap data files."""
 
+    simulation: str
+
+    def __post_init__(self):
+        """Load gap data."""
+        self.data = self.load_data().sel(simulation=self.simulation)
+
+    def load_data(self):
+        """Return gap data."""
+        if self.simulation[0] == 'w':  # wedge gap
+            return WedgeGap().data
+        return UniformGap(self.simulation).data
+
+    @property
+    def gap(self):
+        """Return gap waveform."""
+        return self.data.gap.values
 
 
 if __name__ == '__main__':
 
-    #gap = GapData('Gap_Size_18_Coils')
-    #gap.plot('v3')
-
-    wedge = WedgeGap()
+    gap = Gap('w4')

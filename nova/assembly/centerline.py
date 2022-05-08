@@ -7,8 +7,8 @@ import pyvista as pv
 
 from nova.definitions import root_dir
 from nova.geometry.line import Line
-from nova.structural.uniformwindingpack import UniformWindingPack
-from nova.structural.clusterturns import ClusterTurns
+from nova.assembly.uniformwindingpack import UniformWindingPack
+from nova.assembly.clusterturns import ClusterTurns
 from nova.utilities.pyplot import plt
 
 
@@ -64,5 +64,4 @@ class CenterLine(Line):
 if __name__ == '__main__':
 
     cl = CenterLine()
-    # cl.build()
     cl.mesh.plot()

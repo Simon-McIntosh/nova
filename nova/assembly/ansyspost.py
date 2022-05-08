@@ -18,7 +18,7 @@ class AnsysPost(DataDir, Plotter):
     time_support: list[float] = field(init=False)
     time_scoping: list[int] = field(init=False)
     meshed_region: dpf.MeshedRegion = field(init=False, repr=False)
-    mesh: pv.PolyData = field(init=False, repr=False)
+    mesh: pv.UnstructuredGrid = field(init=False, repr=False)
 
     def __post_init__(self):
         """Load results model."""
@@ -154,24 +154,6 @@ class AnsysPost(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    ansys = AnsysPost('TFCgapsG10', 'k0', 'CASE_OL')
+    ansys = AnsysPost('TFCgapsG10', 'w1', 'wp')
     ansys.select(8)
-    ansys.plot()
-
-    #k0 = AnsysPost('TFCgapsG10', 'k0', 'WP')
-
-    #ansys.mesh.plot(lighting=True, color='w')
-
-    #ansys = AnsysPost('TFC2_CentralComposite', 'p3', 'N_SYM_WEDGE_2',
-    #                  data_dir='\\\\io-ws-ccstore1\\ANSYS_Data\\mcintos')
-
-    #ansys = AnsysPost('TFC2_DoE', 'p3', 'TF1_CASE')
-    #ansys.select(0)
-
-    #ansys.mesh['delta'] = ansys.mesh['displacement-17'] - \
-    #                ansys.mesh['displacement-3']
-    #ansys.warp('delta', factor=300)
-
-    #ansys.plot(loadcase=6)
-
-    #ansys.animate('tmp', 'delta', 200)
+    ansys.warp(displace='disp-2')

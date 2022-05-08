@@ -154,6 +154,8 @@ class AnsysPost(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    ansys = AnsysPost('TFCgapsG10', 'w1', 'wp')
-    ansys.select(8)
-    ansys.warp(displace='disp-2')
+    ansys = AnsysPost('TFCgapsG10', 'w1', 'case_il')
+    ansys.select(0)
+    ansys.mesh += AnsysPost('TFCgapsG10', 'w1', 'case_ol').select(1)
+
+    ansys.plot()

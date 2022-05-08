@@ -22,7 +22,7 @@ class Plotter:
         plotter.add_mesh(self.mesh, scalars=scalars, color='w',
                          opacity=opacity, smooth_shading=False,
                          line_width=3)
-        plotter.show_bounds()
+        #plotter.show_bounds()
         plotter.show()
         #return plotter
 

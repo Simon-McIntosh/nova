@@ -10,7 +10,9 @@ import xarray
 import xxhash
 
 from nova.assembly import structural, electromagnetic
+from nova.assembly.gap import WedgeGap
 from nova.assembly.model import Dataset
+from nova.assembly.overlap import Overlap
 from nova.utilities.pyplot import plt
 
 
@@ -103,6 +105,7 @@ class Trial(Dataset, TrialAttrs):
             self.build_positive_gap()
             self.predict_structure()
             self.predict_electromagnetic()
+            self.predict_overlap()
             if self.wall:
                 self.predict_wall()
         return self.store()
@@ -188,6 +191,22 @@ class Trial(Dataset, TrialAttrs):
         self.data['peaktopeak_offset'] = 'sample', \
             self.electromagnetic_model.peaktopeak(modes=self.modes,
                                                   axis_offset=True)
+
+    def predict_overlap(self):
+        """Predict overlap error field."""
+        overlap = Overlap()
+        self.data['plasma'] = overlap.data.plasma
+        self.data['overlap'] = ('sample', 'plasma'), \
+            np.zeros((self.samples, self.data.dims['plasma']))
+        radial = self.data.case_radial + self.data.ccl_radial
+        tangential = self.data.case_tangential + self.data.ccl_tangential
+        roll = (self.data['IIS_tangential'] -
+                self.data['case_tangential']) / (1e3*WedgeGap.length['roll'])
+        yaw = (self.data['IOIS_tangential'] -
+               self.data['case_tangential']) / (1e3*WedgeGap.length['yaw'])
+        for i, plasma in enumerate(self.data.plasma.values):
+            self.data.overlap[:, i] = overlap.predict(plasma,
+                radial, tangential, None, None, roll, yaw)
 
     def predict_wall(self):
         """Predict combined wall-fieldline deviations."""
@@ -366,17 +385,33 @@ class Trial(Dataset, TrialAttrs):
         peaktopeak = np.quantile(self.data[label], quartile)
         return np.argmin((self.data[label].data - peaktopeak)**2)
 
+    def plot_overlap(self):
+        """Plot overlap errorfield PDFs."""
+        plt.figure()
+        plt.hist(self.data.overlap, bins=51, density=True, rwidth=0.9)
+
+        #self.label_quartile(self.data.peaktopeak, 'H', color='C1',
+        #                    height=0.04)
+        plt.despine()
+        axes = plt.gca()
+        axes.set_yticks([])
+        plt.xlabel(r'Overlap error field $B/B_{limit}$')
+        plt.ylabel(r'$P(B/B_{limit})$')
+        plt.text(0.95, 0.95, self.pdf_text, fontsize='small',
+                 transform=axes.transAxes, ha='right', va='top',
+                 bbox=dict(facecolor='w', boxstyle='round, pad=0.5',
+                           linewidth=0.5))
 
 if __name__ == '__main__':
 
-    #theta = [5, 5, 5, 10, 2, 2, 2.5]
-    theta = [0, 0, 0, 10, 0, 0, 0]
+    theta = [5, 5, 5, 10, 2, 2, 2.5]
+    #theta = [0, 0, 0, 10, 0, 0, 0]
     #theta = [1.5, 1.5, 1.5, 3, 2, 2, 3]
 
     trial = Trial(samples=50_000, theta=theta, wall=True, energize=True)
 
-    trial.plot()
-    trial.plot_offset()
+    trial.plot_overlap()
+    #trial.plot_offset()
 
     # case -> 1.7/0.3, 2.1/0.8
     # roll -> 0.2/0.1

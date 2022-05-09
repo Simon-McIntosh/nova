@@ -8,10 +8,10 @@ import pandas
 import pyvista as pv
 import xarray
 
-from nova.structural.centerline import CenterLine
-from nova.structural.fiducialccl import Fiducial, FiducialIDM, FiducialRE
-from nova.structural.gaussianprocessregressor import GaussianProcessRegressor
-from nova.structural.plotter import Plotter
+from nova.assembly.centerline import CenterLine
+from nova.assembly.fiducialccl import Fiducial, FiducialIDM, FiducialRE
+from nova.assembly.gaussianprocessregressor import GaussianProcessRegressor
+from nova.assembly.plotter import Plotter
 from nova.utilities.pyplot import plt
 
 

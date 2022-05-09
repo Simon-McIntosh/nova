@@ -27,7 +27,6 @@ class Overlap(Dataset):
 
         signal_fft = np.fft.rfft(
             self.data.signal.values[..., np.newaxis], n=18)[..., 0]
-        print(self.data.signal_fft[..., 0].shape)
         self.data.signal_fft[..., 0] = signal_fft.real
         self.data.signal_fft[..., 1] = signal_fft.imag
     '''

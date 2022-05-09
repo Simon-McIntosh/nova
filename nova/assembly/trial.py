@@ -32,7 +32,7 @@ class TrialAttrs:
     sead: int = 2025
 
     component: ClassVar[list[str]] = ['case_radial', 'case_tangential',
-                                      'roll', 'yaw',
+                                      'IIS_tangential', 'IOIS_tangential',
                                       'ccl_radial', 'ccl_tangential',
                                       'wall']
     # signal: ClassVar[list[str]] = ['radial', 'tangential']
@@ -163,8 +163,8 @@ class Trial(Dataset, TrialAttrs):
             np.zeros((self.samples, self.ncoil, self.data.dims['signal']))
         if self.energize:
             gap = self.data.gap.sum(axis=-1)
-            roll = self.data['roll']
-            yaw = self.data['yaw']
+            roll = self.data['IIS_tangential'] - self.data['case_tangential']
+            yaw = self.data['IOIS_tangential'] - self.data['case_tangential']
             for i, signal in enumerate(self.data.signal.values):
                 self.data['structural'][..., i] = \
                     self.structural_model.predict(signal, gap, roll, yaw)
@@ -213,7 +213,6 @@ class Trial(Dataset, TrialAttrs):
         for i, component in enumerate(self.component):
             if component == 'wall' and not self.wall:
                 continue
-            print(component)
             attr = component.split('_')[-1]
             # text += f'{component.split("_")[0]} '
             if attr in ['radial', 'tangential']:
@@ -295,7 +294,7 @@ class Trial(Dataset, TrialAttrs):
                  bbox=dict(facecolor='w', boxstyle='round, pad=0.5',
                            linewidth=0.5))
 
-    def plot_sample(self, quartile=0.99, offset=True):
+    def plot_sample(self, quartile=0.99, offset=True, plot_deviation=False):
         """Plot waveforms from single sample."""
         sample = self.sample(quartile, offset)
         axes = plt.subplots(3, 1, sharex=False, sharey=False,
@@ -339,17 +338,19 @@ class Trial(Dataset, TrialAttrs):
         axes[2].plot(fieldline.phi, offset_firstwall, '-', color='gray',
                      label='offset wall')
 
-        longwave = np.fft.irfft(
-            np.fft.rfft(fieldline - firstwall)[:self.modes+1], ndiv)
-        offset_longwave = np.fft.irfft(
-            np.fft.rfft(fieldline - offset_firstwall)[:self.modes+1], ndiv)
-        peaktopeak = self.electromagnetic_model.peaktopeak(longwave)
-        offset_peaktopeak = \
-            self.electromagnetic_model.peaktopeak(offset_longwave)
-        axes[2].plot(fieldline.phi, longwave, '-.C0',
-                     label=fr'$H_{{LW}}={peaktopeak:1.1f}$')
-        axes[2].plot(fieldline.phi, offset_longwave, '-C0',
-                     label=fr'offset $H_{{LW}}={offset_peaktopeak:1.1f}$')
+        if plot_deviation:
+            longwave = np.fft.irfft(
+                np.fft.rfft(fieldline - firstwall)[:self.modes+1], ndiv)
+            offset_longwave = np.fft.irfft(
+                np.fft.rfft(fieldline - offset_firstwall)[:self.modes+1], ndiv)
+            peaktopeak = self.electromagnetic_model.peaktopeak(longwave)
+            offset_peaktopeak = \
+                self.electromagnetic_model.peaktopeak(offset_longwave)
+            axes[2].plot(fieldline.phi, longwave, '-.C0',
+                         label=fr'$H_{{LW}}={peaktopeak:1.1f}$')
+            axes[2].plot(fieldline.phi, offset_longwave, '-C0',
+                         label=fr'offset $H_{{LW}}={offset_peaktopeak:1.1f}$')
+
         axes[2].legend(fontsize='xx-small', bbox_to_anchor=(1, 1))
         axes[2].set_ylabel('deviation')
         axes[2].set_xlabel(r'$\phi$')
@@ -368,9 +369,9 @@ class Trial(Dataset, TrialAttrs):
 
 if __name__ == '__main__':
 
-    theta = [5, 5, 5, 12, 2, 2, 2.6]
-    #theta = [0, 0, 0, 0, 0, 0, np.sqrt(3)]
-    #theta = [1.5, 1.5, 2, 2, 3, 0]
+    #theta = [5, 5, 5, 10, 2, 2, 2.5]
+    theta = [0, 0, 0, 10, 0, 0, 0]
+    #theta = [1.5, 1.5, 1.5, 3, 2, 2, 3]
 
     trial = Trial(samples=50_000, theta=theta, wall=True, energize=True)
 

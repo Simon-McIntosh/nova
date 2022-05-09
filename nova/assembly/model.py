@@ -24,19 +24,20 @@ class DataAttrs:
             self.group = f'{self.__class__.__name__.lower()}'
         if self.name is not None:
             self.group += f'/{self.name}'
-        self.set_path(self.datapath)
 
 
 @dataclass
 class Dataset(ABC, FilePath, DataAttrs):
     """Manage build, storage, and retrival of an xarray dataset."""
 
+    filename: str = 'vault'
     data: xarray.Dataset = field(init=False, repr=False,
                                  default_factory=xarray.Dataset)
 
     def __post_init__(self):
         """Load / build dataset."""
         super().__post_init__()
+        self.set_path(self.datapath)
         try:
             self.load(lazy=False)
         except (FileNotFoundError, OSError, KeyError):

@@ -13,6 +13,8 @@ class FilePath:
 
     path: str = None
     group: str = None
+    filename: str = None
+    data: xarray.Dataset = None
 
     def set_path(self, subpath: str):
         """Set default path."""

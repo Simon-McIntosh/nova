@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from IPython.display import Image, display
 from typing import ClassVar
 
-import matplotlib
 import pydot
 
 
@@ -137,6 +136,9 @@ class Overview(DiagramBase):
 class Diagram(DiagramBase):
     """Draw diagrams to illustrate Monte Carlo analyses."""
 
+    rankdir: str = 'UL'
+    nodesep: float = 0.25
+    ranksep: float = 0.35
     theta: list[float] = field(default_factory=lambda: [1.5, 1.5,
                                                         1.5, 1.5,
                                                         2, 2,
@@ -149,7 +151,7 @@ class Diagram(DiagramBase):
     wall: bool = True
 
     samples: ClassVar[list[str]] = ['dr_case', 'dt_case',
-                                    'roll', 'yaw',
+                                    'dt_roll', 'dt_yaw',
                                     'dr_ccl', 'dt_ccl',
                                     'dr_wall']
 
@@ -199,11 +201,13 @@ class Diagram(DiagramBase):
         # sample input
         self.add_edge('dr_case', 'build', label=' dR case')
         self.add_edge('dt_case', 'build', label=' RdPhi case')
+        self.add_edge('dt_roll', 'build', label=' RdPhi IIS')
+        self.add_edge('dt_yaw', 'build', label='  RdPhi IOIS')
 
         # model links
         self.add_edge('build', 'ansys', label=' gap', **self.highlight)
-        self.add_edge('roll', 'ansys', label=' roll', **self.highlight)
-        self.add_edge('yaw', 'ansys', label=' yaw', **self.highlight)
+        self.add_edge('build', 'ansys', label=' roll', **self.highlight)
+        self.add_edge('build', 'ansys', label=' yaw', **self.highlight)
         self.add_edge('add_r', 'em', label=' dR em', **self.highlight)
         self.add_edge('add_t', 'em', label=' RdPhi em', **self.highlight)
 
@@ -231,7 +235,7 @@ class Diagram(DiagramBase):
 
 if __name__ == '__main__':
 
-    # Diagram(theta=[5, 5, 5, 12, 2, 2, 2.6], wall=True).plot()
+    Diagram(theta=[5, 5, 5, 10, 2, 2, 2.5], wall=True).plot()
     # Overview().plot()
     # Filter().plot()
-    FFT().plot()
+    # FFT().plot()

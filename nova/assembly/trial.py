@@ -9,10 +9,9 @@ import numpy as np
 import xarray
 import xxhash
 
-from nova.assembly import structural, electromagnetic
+from nova.assembly import structural, electromagnetic, overlap
 from nova.assembly.gap import WedgeGap
 from nova.assembly.model import Dataset
-from nova.assembly.overlap import Overlap
 from nova.utilities.pyplot import plt
 
 
@@ -21,27 +20,16 @@ class TrialAttrs:
     """Manage trial attributes."""
 
     samples: int = 100_000
-    theta: list[float] = field(default_factory=lambda: [
-        1.5, 1.5, 3, 3, 2, 2, 5])
-    pdf: list[str] = field(
-        default_factory=lambda: [
-            'uniform', 'uniform', 'uniform', 'uniform', 'normal', 'normal',
-            'uniform'])
-    modes: int = 3
-    energize: Union[int, bool] = True
-    wall: bool = False
+    component: list[str] = field(default_factory=list)
+    theta: list[float] = field(default_factory=list)
+    pdf: list[str] = field(default_factory=list)
     nominal_gap: float = 2.
     sead: int = 2025
 
-    component: ClassVar[list[str]] = ['case_radial', 'case_tangential',
-                                      'IIS_tangential', 'IOIS_tangential',
-                                      'ccl_radial', 'ccl_tangential',
-                                      'wall']
-    # signal: ClassVar[list[str]] = ['radial', 'tangential']
     ncoil: ClassVar[int] = 18
 
     @cached_property
-    def _field_names(self):
+    def field_names(self):
         """Return list of field names."""
         return [attr.name for attr in fields(TrialAttrs)]
 
@@ -49,7 +37,7 @@ class TrialAttrs:
     def attrs(self):
         """Return trial attrs."""
         attrs = {}
-        for attr in self._field_names:
+        for attr in self.field_names:
             value = getattr(self, attr)
             if not isinstance(value, list):
                 attrs[attr] = value
@@ -58,20 +46,16 @@ class TrialAttrs:
 
 @dataclass
 class Trial(Dataset, TrialAttrs):
-    """Run stastistical analysis on trial vault assemblies."""
+    """Run stastistical analysis on trial assemblies."""
 
-    filename: str = 'vault_trial'
+    filename: str = 'trial'
     xxh32: xxhash.xxh32 = field(repr=False, init=False,
                                 default_factory=xxhash.xxh32)
 
     def __post_init__(self):
         """Set dataset group for netCDF file load/store."""
-        self.energize = int(self.energize)
-        self.wall = int(self.wall)
         self.group = self.group_name
         self.rng = np.random.default_rng(self.sead)
-        self.structural_model = structural.Model()
-        self.electromagnetic_model = electromagnetic.Model()
         super().__post_init__()
 
     @property
@@ -90,25 +74,6 @@ class Trial(Dataset, TrialAttrs):
     def uniform(self, bound: float):
         """Return sample with uniform distribution."""
         return self.rng.uniform(-bound, bound, size=(self.samples, self.ncoil))
-
-    @contextmanager
-    def timer(self):
-        """Time build."""
-        start_time = time()
-        yield
-        print(f'build time {time() - start_time:1.0f}s')
-
-    def build(self):
-        """Build Monte Carlo dataset."""
-        with self.timer():
-            self.build_signal()
-            self.build_positive_gap()
-            self.predict_structure()
-            self.predict_electromagnetic()
-            self.predict_overlap()
-            if self.wall:
-                self.predict_wall()
-        return self.store()
 
     def build_signal(self):
         """Build input distributions."""
@@ -139,7 +104,7 @@ class Trial(Dataset, TrialAttrs):
                 return
             offset = gap[sample_index]
             offset[offset >= 0] = 0
-            self.data.case_tangential[sample_index] += offset
+            self.data.tangential[sample_index] += offset
             self.build_gap()
         raise ValueError(f'gap itteration failure at iteration {nmax} '
                          'negitive samples '
@@ -150,98 +115,40 @@ class Trial(Dataset, TrialAttrs):
         self.data['gap'] = ('sample', 'index', 'signal'), \
             np.zeros((self.data.dims['sample'], self.ncoil,
                       self.data.dims['signal']))
-        self.data.gap[..., 0] = np.pi / self.ncoil * self.data['case_radial']
+        self.data.gap[..., 0] = np.pi / self.ncoil * self.data['radial']
         self.data.gap[:, :-1, 0] += \
-            np.pi / self.ncoil * self.data['case_radial'][:, 1:].data
+            np.pi / self.ncoil * self.data['radial'][:, 1:].data
         self.data.gap[:, -1, 0] += \
-            np.pi / self.ncoil * self.data['case_radial'][:, 0].data
+            np.pi / self.ncoil * self.data['radial'][:, 0].data
+        self.data.gap[..., 1] = -self.data['tangential']
+        self.data.gap[:, :-1, 1] += self.data['tangential'][:, 1:].data
+        self.data.gap[:, -1, 1] += self.data['tangential'][:, 0].data
 
-        self.data.gap[..., 1] = -self.data['case_tangential']
-        self.data.gap[:, :-1, 1] += self.data['case_tangential'][:, 1:].data
-        self.data.gap[:, -1, 1] += self.data['case_tangential'][:, 0].data
+    @contextmanager
+    def timer(self):
+        """Time build."""
+        start_time = time()
+        yield
+        print(f'build time {time() - start_time:1.0f}s')
 
-    def predict_structure(self):
-        """Run structural simulation."""
-        self.data['structural'] = ('sample', 'index', 'signal'), \
-            np.zeros((self.samples, self.ncoil, self.data.dims['signal']))
-        if self.energize:
-            gap = self.data.gap.sum(axis=-1)
-            roll = self.data['IIS_tangential'] - self.data['case_tangential']
-            yaw = self.data['IOIS_tangential'] - self.data['case_tangential']
-            for i, signal in enumerate(self.data.signal.values):
-                self.data['structural'][..., i] = \
-                    self.structural_model.predict(signal, gap, roll, yaw)
-
-    def predict_electromagnetic(self):
-        """Run electromagnetic simulation."""
-        self.data['electromagnetic'] = self.data.structural.copy(deep=True)
-        self.data.electromagnetic[..., 0] += self.data.case_radial
-        self.data.electromagnetic[..., 1] += self.data.case_tangential
-        self.data.electromagnetic[..., 0] += self.data.ccl_radial
-        self.data.electromagnetic[..., 1] += self.data.ccl_tangential
-        self.electromagnetic_model.predict(self.data.electromagnetic[..., 0],
-                                           self.data.electromagnetic[..., 1])
-        self.data['peaktopeak'] = 'sample', \
-            self.electromagnetic_model.peaktopeak(modes=self.modes)
-        self.data['offset'] = ('sample', 'coordinate'), \
-            np.zeros((self.data.dims['sample'], 2))
-        offset = self.electromagnetic_model.axis_offset
-        self.data['offset'][..., 0] = offset.real
-        self.data['offset'][..., 1] = -offset.imag
-        self.data['peaktopeak_offset'] = 'sample', \
-            self.electromagnetic_model.peaktopeak(modes=self.modes,
-                                                  axis_offset=True)
-
-    def predict_overlap(self):
-        """Predict overlap error field."""
-        overlap = Overlap()
-        self.data['plasma'] = overlap.data.plasma
-        self.data['overlap'] = ('sample', 'plasma'), \
-            np.zeros((self.samples, self.data.dims['plasma']))
-        radial = self.data.case_radial + self.data.ccl_radial
-        tangential = self.data.case_tangential + self.data.ccl_tangential
-        roll = (self.data['IIS_tangential'] -
-                self.data['case_tangential']) / (1e3*WedgeGap.length['roll'])
-        yaw = (self.data['IOIS_tangential'] -
-               self.data['case_tangential']) / (1e3*WedgeGap.length['yaw'])
-        for i, plasma in enumerate(self.data.plasma.values):
-            self.data.overlap[:, i] = overlap.predict(plasma,
-                radial, tangential, None, None, roll, yaw)
-
-    def predict_wall(self):
-        """Predict combined wall-fieldline deviations."""
-        ndiv = self.electromagnetic_model.fieldline.shape[1]
-        wall_hat = np.fft.rfft(self.data.wall)
-        firstwall = np.fft.irfft(wall_hat, ndiv) * ndiv / self.ncoil
-        wall_hat[..., 1] += \
-            self.electromagnetic_model.axis_offset * (self.ncoil // 2)
-        offset_firstwall = np.fft.irfft(wall_hat, ndiv) * ndiv / self.ncoil
-        deviation = self.electromagnetic_model.fieldline.data - firstwall.data
-        self.data['peaktopeak'] = 'sample', \
-            self.electromagnetic_model.peaktopeak(deviation, modes=self.modes)
-        offset_deviation = self.electromagnetic_model.fieldline.data - \
-            offset_firstwall.data
-        self.data['peaktopeak_offset'] = 'sample', \
-            self.electromagnetic_model.peaktopeak(offset_deviation,
-                                                  modes=self.modes)
-
-    @property
-    def pdf_text(self):
+    def pdf_text(self, wall=False, fancy=False):
         """Return pdf text label."""
         text = ''
         for i, component in enumerate(self.component):
-            if component == 'wall' and not self.wall:
+            if component == 'wall' and not wall:
                 continue
-            attr = component.split('_')[-1]
-            # text += f'{component.split("_")[0]} '
-            if attr in ['radial', 'tangential']:
-                attr = attr[0]
-                if attr == 't':
-                    text += r'$r$'
-                    attr = r'\phi'
-                text += rf'$\Delta {attr}_{{{component.split("_")[0]}}}$'
+            if fancy:
+                attr = component.split('_')[-1]
+                if attr in ['radial', 'tangential']:
+                    attr = attr[0]
+                    if attr == 't':
+                        text += r'$r$'
+                        attr = r'\phi'
+                    text += rf'$\Delta {attr}_{{{component.split("_")[0]}}}$'
+                else:
+                    text += component.split('_')[-1]
             else:
-                text += component.split('_')[-1]
+                text += component
             theta = self.data.theta[i].data
             if self.data.pdf[i] == 'normal':
                 pdf = rf'$\mathcal{{N}}\,(0, {theta:1.1f})$'
@@ -251,30 +158,8 @@ class Trial(Dataset, TrialAttrs):
             text += '\n'
         text += '\n'
         text += f'samples: {self.samples:,}'
-        return text
-
-    def plot(self, offset=True):
-        """Plot peak to peak distribution."""
-        plt.figure()
-        plt.hist(self.data.peaktopeak, bins=51, density=True,
-                 rwidth=0.8, label='machine axis', color='C1')
-        if offset:
-            plt.hist(self.data.peaktopeak_offset, bins=51,
-                     density=True, rwidth=0.8, alpha=0.85, color='C2',
-                     label='magnetic axis')
-            plt.legend(loc='center', bbox_to_anchor=(0.5, 1.05),
-                       ncol=2, fontsize='small')
-            self.label_quartile(self.data.peaktopeak_offset, 'H', color='C2',
-                                height=0.15)
-        self.label_quartile(self.data.peaktopeak, 'H', color='C1',
-                            height=0.04)
-        plt.despine()
-        axes = plt.gca()
-        axes.set_yticks([])
-        plt.xlabel(r'peak to peak deviation $H$, mm')
-        plt.ylabel(r'$P(H)$')
-        plt.text(0.95, 0.95, self.pdf_text, fontsize='small',
-                 transform=axes.transAxes, ha='right', va='top',
+        plt.text(0.95, 0.95, text, fontsize='x-small',
+                 transform=plt.gca().transAxes, ha='right', va='top',
                  bbox=dict(facecolor='w', boxstyle='round, pad=0.5',
                            linewidth=0.5))
 
@@ -296,6 +181,124 @@ class Trial(Dataset, TrialAttrs):
                                   density=True)
         plt.plot((edges[:-1] + edges[1:]) / 2, pdf)
 
+    def sample(self, quartile, offset=True):
+        """Return sample index closest to quartile."""
+        label = 'peaktopeak'
+        if offset:
+            label += '_offset'
+        peaktopeak = np.quantile(self.data[label], quartile)
+        return np.argmin((self.data[label].data - peaktopeak)**2)
+
+
+@dataclass
+class Vault(Trial):
+    """Run vault assembly Monte Carlo trials."""
+
+    filename: str = 'vault_trial'
+    component: list[str] = field(default_factory=lambda: [
+        'radial', 'tangential', 'roll_length',
+        'yaw_length', 'radial_ccl', 'tangential_ccl', 'radial_wall'])
+    theta: list[float] = field(default_factory=lambda: [
+        1.5, 1.5, 3, 3, 2, 2, 5])
+    pdf: list[str] = field(
+        default_factory=lambda: [
+            'uniform', 'uniform', 'uniform', 'uniform', 'normal', 'normal',
+            'uniform'])
+    modes: int = 3
+    energize: Union[int, bool] = True
+    wall: bool = True
+
+    def __post_init__(self):
+        """Initialize model instances."""
+        self.energize = int(self.energize)
+        self.wall = int(self.wall)
+        self.field_names += ['modes', 'energize', 'wall']
+        self.structural_model = structural.Model()
+        self.electromagnetic_model = electromagnetic.Model()
+        super().__post_init__()
+
+    def build(self):
+        """Build Monte Carlo dataset."""
+        with self.timer():
+            self.build_signal()
+            self.build_positive_gap()
+            self.predict_structure()
+            self.predict_electromagnetic()
+            if self.wall:
+                self.predict_wall()
+        return self.store()
+
+    def predict_structure(self):
+        """Run structural simulation."""
+        self.data['structural'] = ('sample', 'index', 'signal'), \
+            np.zeros((self.samples, self.ncoil, self.data.dims['signal']))
+        if self.energize:
+            gap = self.data.gap.sum(axis=-1)
+            roll = self.data['roll_length'] - self.data['tangential']
+            yaw = self.data['yaw_length'] - self.data['tangential']
+            for i, signal in enumerate(self.data.signal.values):
+                self.data['structural'][..., i] = \
+                    self.structural_model.predict(signal, gap, roll, yaw)
+
+    def predict_electromagnetic(self):
+        """Run electromagnetic simulation."""
+        self.data['electromagnetic'] = self.data.structural.copy(deep=True)
+        self.data.electromagnetic[..., 0] += self.data.radial
+        self.data.electromagnetic[..., 1] += self.data.tangential
+        self.data.electromagnetic[..., 0] += self.data.radial_ccl
+        self.data.electromagnetic[..., 1] += self.data.tangential_ccl
+        self.electromagnetic_model.predict(self.data.electromagnetic[..., 0],
+                                           self.data.electromagnetic[..., 1])
+        self.data['peaktopeak'] = 'sample', \
+            self.electromagnetic_model.peaktopeak(modes=self.modes)
+        self.data['offset'] = ('sample', 'coordinate'), \
+            np.zeros((self.data.dims['sample'], 2))
+        offset = self.electromagnetic_model.axis_offset
+        self.data['offset'][..., 0] = offset.real
+        self.data['offset'][..., 1] = -offset.imag
+        self.data['peaktopeak_offset'] = 'sample', \
+            self.electromagnetic_model.peaktopeak(modes=self.modes,
+                                                  axis_offset=True)
+
+    def predict_wall(self):
+        """Predict combined wall-fieldline deviations."""
+        ndiv = self.electromagnetic_model.fieldline.shape[1]
+        wall_hat = np.fft.rfft(self.data.radial_wall)
+        firstwall = np.fft.irfft(wall_hat, ndiv) * ndiv / self.ncoil
+        wall_hat[..., 1] += \
+            self.electromagnetic_model.axis_offset * (self.ncoil // 2)
+        offset_firstwall = np.fft.irfft(wall_hat, ndiv) * ndiv / self.ncoil
+        deviation = self.electromagnetic_model.fieldline.data - firstwall.data
+        self.data['peaktopeak'] = 'sample', \
+            self.electromagnetic_model.peaktopeak(deviation, modes=self.modes)
+        offset_deviation = self.electromagnetic_model.fieldline.data - \
+            offset_firstwall.data
+        self.data['peaktopeak_offset'] = 'sample', \
+            self.electromagnetic_model.peaktopeak(offset_deviation,
+                                                  modes=self.modes)
+
+    def plot(self, offset=True):
+        """Plot peak to peak distribution."""
+        plt.figure()
+        plt.hist(self.data.peaktopeak, bins=51, density=True,
+                 rwidth=0.8, label='machine axis', color='C1')
+        if offset:
+            plt.hist(self.data.peaktopeak_offset, bins=51,
+                     density=True, rwidth=0.8, alpha=0.85, color='C2',
+                     label='magnetic axis')
+            plt.legend(loc='center', bbox_to_anchor=(0.5, 1.05),
+                       ncol=2, fontsize='small')
+            self.label_quartile(self.data.peaktopeak_offset, 'H', color='C2',
+                                height=0.15)
+        self.label_quartile(self.data.peaktopeak, 'H', color='C1',
+                            height=0.04)
+        plt.despine()
+        axes = plt.gca()
+        axes.set_yticks([])
+        plt.xlabel(r'peak to peak deviation $H$, mm')
+        plt.ylabel(r'$P(H)$')
+        self.pdf_text()
+
     def plot_offset(self):
         """Plot pdf of field line axis offset."""
         offset = np.linalg.norm(self.data.offset, axis=-1)
@@ -308,10 +311,7 @@ class Trial(Dataset, TrialAttrs):
         plt.ylabel(r'$P(\zeta)$')
 
         self.label_quartile(offset, r'\zeta')
-        plt.text(0.95, 0.95, self.pdf_text, fontsize='small',
-                 transform=axes.transAxes, ha='right', va='top',
-                 bbox=dict(facecolor='w', boxstyle='round, pad=0.5',
-                           linewidth=0.5))
+        self.pdf_text()
 
     def plot_sample(self, quartile=0.99, offset=True, plot_deviation=False):
         """Plot waveforms from single sample."""
@@ -320,21 +320,24 @@ class Trial(Dataset, TrialAttrs):
                             gridspec_kw=dict(height_ratios=[1, 1, 2]))[1]
         width = 0.8
 
-        signal_width = width / self.data.dims['signal']
-        for i, label in enumerate([r'$\Delta r$', r'$r \Delta \phi$']):
-            signal = self.data[f'case_{self.data.signal.values[i]}']
+        signal_width = width / self.data.dims['component']
+        for i, component in enumerate(self.data.component.values):
+            print(component)
+            signal = self.data[component]
             bar_offset = (i+0.5) * signal_width - width / 2
             axes[0].bar(self.data.index + bar_offset, signal[sample],
                         color=f'C{i+1}',
-                        width=signal_width, label=label)
-            axes[0].plot(self.data.index,
-                         self.theta[0] * (-1)**i *
-                         np.ones_like(self.data.index), 'C7--', alpha=0.5,
-                         lw=1.5)
+                        width=signal_width, label=component)
+            #axes[0].plot(self.data.index,
+            #             self.theta[0] * (-1)**i *
+            #             np.ones_like(self.data.index), 'C7--', alpha=0.5,
+            #             lw=1.5)
         axes[0].set_ylabel('vault')
         axes[0].legend(fontsize='xx-small', bbox_to_anchor=(1, 1))
         axes[0].set_xticks([])
 
+        #signal_width = width / 3
+        #for i, signal in ['gap', 'roll', 'yaw']
         axes[1].bar(self.data.index,
                     self.data.gap[sample].sum(axis=-1) + self.data.nominal_gap,
                     width=width, color='C0')
@@ -347,7 +350,7 @@ class Trial(Dataset, TrialAttrs):
         axes[2].plot(fieldline.phi, fieldline, 'C6', label='fieldline')
 
         ndiv = len(fieldline)
-        wall_hat = np.fft.rfft(self.data.wall[sample, :])
+        wall_hat = np.fft.rfft(self.data.radial_wall[sample, :])
         firstwall = np.fft.irfft(wall_hat, ndiv) * ndiv / self.ncoil
         wall_hat[1] += \
             self.electromagnetic_model.axis_offset[0] * (self.ncoil // 2)
@@ -374,43 +377,91 @@ class Trial(Dataset, TrialAttrs):
         axes[2].set_ylabel('deviation')
         axes[2].set_xlabel(r'$\phi$')
         plt.despine()
-
         plt.suptitle(f'quartile={quartile} offset={offset}')
 
-    def sample(self, quartile, offset=True):
-        """Return sample index closest to quartile."""
-        label = 'peaktopeak'
-        if offset:
-            label += '_offset'
-        peaktopeak = np.quantile(self.data[label], quartile)
-        return np.argmin((self.data[label].data - peaktopeak)**2)
 
-    def plot_overlap(self):
+@dataclass
+class ErrorField(Trial):
+    """Run Monte Carlo error field trials."""
+
+    filename: str = 'errorfield_trial'
+    component: list[str] = field(default_factory=lambda: [
+        'radial', 'tangential', 'vertical',
+        'radial_ccl', 'tangential_ccl', 'vertical_ccl',
+        'pitch_length', 'roll_length', 'yaw_length', ])
+    theta: list[float] = field(default_factory=lambda: [
+        5, 5, 5, 2, 2, 2, 5, 10, 10])
+    pdf: list[str] = field(
+        default_factory=lambda: [
+            'uniform', 'uniform', 'uniform',
+            'normal', 'normal', 'normal',
+            'uniform', 'uniform', 'uniform'])
+
+    def __post_init__(self):
+        """Initialize model instances."""
+        self.model = overlap.Model()
+        super().__post_init__()
+
+    def build(self):
+        """Build Monte Carlo dataset."""
+        with self.timer():
+            self.build_signal()
+            self.build_positive_gap()
+            self.predict()
+        return self.store()
+
+    def predict(self):
+        """Predict overlap error field."""
+        self.data['plasma'] = self.model.data.plasma
+        self.data['overlap'] = ('sample', 'plasma'), \
+            np.zeros((self.samples, self.data.dims['plasma']))
+        radial = self.data.radial + self.data.radial_ccl
+        tangential = self.data.tangential + self.data.tangential_ccl
+        vertical = self.data.vertical
+        pitch = self.data.pitch_length / (1e3*WedgeGap.length['pitch'])
+        roll = (self.data.roll_length -
+                self.data.tangential) / (1e3*WedgeGap.length['roll'])
+        yaw = (self.data.yaw_length -
+               self.data.tangential) / (1e3*WedgeGap.length['yaw'])
+        for i, plasma in enumerate(self.data.plasma.values):
+            self.data.overlap[:, i] = self.model.predict(
+                plasma, radial, tangential, vertical, pitch, roll, yaw)
+
+    def plot(self):
         """Plot overlap errorfield PDFs."""
         plt.figure()
-        plt.hist(self.data.overlap, bins=51, density=True, rwidth=0.9)
-
-        #self.label_quartile(self.data.peaktopeak, 'H', color='C1',
-        #                    height=0.04)
+        plt.hist(self.data.overlap, bins=51, density=True, rwidth=0.9,
+                 label=[f'plasma {i}' for i in self.data.plasma.values])
+        plt.legend(ncol=1, bbox_to_anchor=(0.27, 1), fontsize='x-small')
         plt.despine()
         axes = plt.gca()
         axes.set_yticks([])
         plt.xlabel(r'Overlap error field $B/B_{limit}$')
         plt.ylabel(r'$P(B/B_{limit})$')
-        plt.text(0.95, 0.95, self.pdf_text, fontsize='small',
-                 transform=axes.transAxes, ha='right', va='top',
-                 bbox=dict(facecolor='w', boxstyle='round, pad=0.5',
-                           linewidth=0.5))
+        self.pdf_text()
+
+        self.label_quartile(self.data.overlap[:, 0], r'B/B_{limit}',
+                            color='C0')
+
+
 
 if __name__ == '__main__':
 
     theta = [5, 5, 5, 10, 2, 2, 2.5]
     #theta = [0, 0, 0, 10, 0, 0, 0]
     #theta = [1.5, 1.5, 1.5, 3, 2, 2, 3]
+    vault = Vault(2_000_000, theta=theta)
 
-    trial = Trial(samples=50_000, theta=theta, wall=True, energize=True)
+    #vault.plot()
+    #vault.plot_offset()
 
-    trial.plot_overlap()
+    vault.plot_sample(0.5, False)
+
+    #theta_error = [5, 5, 5, 2, 2, 2, 5, 10, 10]
+    #theta_error = [1.5, 1.5, 1.5, 2, 2, 2, 1.5, 3, 3]
+    #error = ErrorField(2_000_000, theta=theta_error)
+    #error.plot()
+
     #trial.plot_offset()
 
     # case -> 1.7/0.3, 2.1/0.8

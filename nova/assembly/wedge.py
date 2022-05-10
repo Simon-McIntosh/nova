@@ -90,22 +90,28 @@ class Wedge(Plotter):
         """Plot warped mesh."""
         super().warp(self.factor)
 
-    def animate(self, name: str, view: str, zoom=1.3):
+    def animate(self, name: str, view: str, zoom=1.3, opacity=0.75):
         """Make animation."""
         filename = os.path.join(self.path, f'{self.file}_{name}')
         super().animate(filename, 'TFonly-cooldown', view=view,
-                        max_factor=self.factor, zoom=zoom)
+                        max_factor=self.factor, zoom=zoom, opacity=opacity)
 
 
 if __name__ == '__main__':
 
-    wedge = Wedge('w4', 'wp', factor=50)
+    wedge = Wedge('w4', factor=50)
 
     #wedge.slice_z()
-    wedge.clip_box()
+    #wedge.clip_box()
+
+    wedge.mesh = wedge.mesh.clip_box([-15, 15, -15, 15, -15, 0], invert=False)
+    #wedge.mesh = wedge.mesh.clip_box([-5, 5, -5, 5, -0.5, 0], invert=False)
+
+    wedge.animate('corrected_full', view='xy', zoom=1.3, opacity=0.75)
+
     #wedge.warp()
 
-    wedge.animate('wp_quarter', 'iso')
+    #wedge.animate('wp_quarter', 'iso')
     #reference = CCL('TFCgapsG10', 'v0')
     #wedge.mesh = wedge.mesh.clip('z', invert=True)
     #wedge

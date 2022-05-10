@@ -5,6 +5,7 @@ import ansys.dpf.core as dpf
 from ansys.dpf import post
 import numpy as np
 import pyvista as pv
+import pyvista.examples
 
 from nova.assembly.datadir import DataDir
 from nova.assembly.plotter import Plotter
@@ -158,4 +159,9 @@ if __name__ == '__main__':
     ansys.select(0)
     ansys.mesh += AnsysPost('TFCgapsG10', 'w1', 'case_ol').select(1)
 
+    airplane = pv.examples.load_airplane()
+    airplane.scale(5e-3, inplace=True)
+    airplane.translate([-4.5, -10, 0], inplace=True)
+    airplane.rotate_z(10, inplace=True)
+    #ansys.mesh += airplane
     ansys.plot()

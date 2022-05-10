@@ -121,12 +121,13 @@ class WedgeGap(ModelData):
     """Manage access to wedge gap data files."""
 
     simulations: ClassVar[list[str]] = ['w1', 'w2', 'w3', 'w4', 'w5']
-    length: ClassVar[dict[str, float]] = dict(roll=9.425, yaw=8.019)
+    length: ClassVar[dict[str, float]] = dict(pitch=8, roll=9.5, yaw=8)
 
     def build(self):
         """Build gaps and calculate coil transformations."""
         self.build_dataset()
         self.build_transforms()
+        print(self.length)
         self.data = self.data.merge(GapData(
             self.simulations, self.data.gap.data,
             self.data.rotate[..., 1].data * 1e3*self.length['roll'],

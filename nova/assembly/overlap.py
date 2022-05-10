@@ -10,7 +10,7 @@ from nova.database.filepath import FilePath
 
 
 @dataclass
-class Overlap(Dataset):
+class Model(Dataset):
     """Predict overlap error field."""
 
     filename: str = 'errorfield'
@@ -58,6 +58,7 @@ class Overlap(Dataset):
         self.data.filter[3] *= length_AE  # pitch
         self.data.filter[4] *= length_CF  # yaw
         self.data.filter[5] *= length_CF  # roll
+        return self.store()
 
     def _filter(self, plasma: int):
         """Return complex filter."""
@@ -80,4 +81,4 @@ class Overlap(Dataset):
 
 if __name__ == '__main__':
 
-    overlap = Overlap()
+    model = Model()

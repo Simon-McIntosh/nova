@@ -199,31 +199,31 @@ class Diagram(DiagramBase):
     def build_links(self):
         """Link nodes."""
         # sample input
-        self.add_edge('dr_case', 'build', label=' dR case')
-        self.add_edge('dt_case', 'build', label=' RdPhi case')
-        self.add_edge('dt_roll', 'build', label=' RdPhi IIS')
-        self.add_edge('dt_yaw', 'build', label='  RdPhi IOIS')
+        self.add_edge('dr_case', 'build', label=' radial')
+        self.add_edge('dt_case', 'build', label=' tangential')
+        self.add_edge('dt_roll', 'build', label=' roll length')
+        self.add_edge('dt_yaw', 'build', label='  yaw length')
 
         # model links
         self.add_edge('build', 'ansys', label=' gap', **self.highlight)
         self.add_edge('build', 'ansys', label=' roll', **self.highlight)
         self.add_edge('build', 'ansys', label=' yaw', **self.highlight)
-        self.add_edge('add_r', 'em', label=' dR em', **self.highlight)
-        self.add_edge('add_t', 'em', label=' RdPhi em', **self.highlight)
+        self.add_edge('add_r', 'em', label=' radial em', **self.highlight)
+        self.add_edge('add_t', 'em', label=' tangential em', **self.highlight)
 
         # summation nodes
-        self.add_edge('ansys', 'add_r', label=' dR gap')
-        self.add_edge('dr_case', 'add_r', label=' dR case')
-        self.add_edge('dr_ccl', 'add_r', label=' dR ccl')
+        self.add_edge('ansys', 'add_r', label=' radial gap')
+        self.add_edge('dr_case', 'add_r', label=' radial')
+        self.add_edge('dr_ccl', 'add_r', label=' radial ccl')
 
-        self.add_edge('ansys', 'add_t', label=' RdPhi gap')
-        self.add_edge('dt_case', 'add_t', label=' RdPhi case')
-        self.add_edge('dt_ccl', 'add_t', label=' RdPhi ccl')
+        self.add_edge('ansys', 'add_t', label=' tangential gap')
+        self.add_edge('dt_case', 'add_t', label=' tangential')
+        self.add_edge('dt_ccl', 'add_t', label=' tangential ccl')
 
         if self.wall:
-            self.add_edge('dr_wall', 'wall', label=' dR wall (machine)')
-            self.add_edge('em', 'wall', label=' axis offset')
-            self.add_edge('wall', 'diffrence', label=' dR wall (magnetic)')
+            self.add_edge('dr_wall', 'wall', label=' wall (machine)')
+            self.add_edge('em', 'wall', label=' offset')
+            self.add_edge('wall', 'diffrence', label=' wall (magnetic)')
             self.add_edge('em', 'diffrence', label=' fieldline')
             self.add_edge('diffrence', 'lp')
         else:

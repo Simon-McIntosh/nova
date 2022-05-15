@@ -1,10 +1,12 @@
 """Query and copy / rsync IMAS ids from SDCC to local filesytem."""
 from dataclasses import dataclass, field
 import io
+import re
 import subprocess
 from typing import Union, ClassVar
 
 import fabric
+import numpy as np
 import pandas
 
 
@@ -50,6 +52,9 @@ class Connect:
 
     def to_dataframe(self, summary_string, delimiter=r'\s+'):
         """Convert summart string to pandas dataframe."""
+        for skip in [' NOTE']:
+            summary_string = re.sub(rf'^{skip}.*\n?', '', summary_string,
+                                    flags=re.MULTILINE)
         frame = pandas.read_csv(io.StringIO(summary_string),
                                 delimiter=delimiter, skiprows=[0, 2],
                                 skipfooter=1, engine='python')
@@ -61,12 +66,15 @@ class Connect:
         """Load scenario summary to dataframe, filtered by key value pair."""
         columns = [col for col in self.columns
                    if col not in self._space_columns]
-        if key not in columns:
-            columns.append(key)
         space_columns = [col for col in self._space_columns
                          if col in self.columns]
-        if key not in space_columns:
-            space_columns.append(key)
+        if key not in columns+space_columns:
+            if key in self._space_columns:
+                space_columns.append(key)
+            else:
+                columns.append(key)
+
+        print(columns, self.columns, self._space_columns)
         frame = self.to_dataframe(self.read_summary(','.join(columns), value))
         if len(space_columns) == 0:
             return
@@ -118,7 +126,8 @@ class Scenario(Connect):
                                  'fuelling', 'workflow', 'ref_name',
                                  'confinement'])
 
-    _space_columns: ClassVar[list[str]] = ['ref_name', 'confinement']
+    _space_columns: ClassVar[list[str]] = ['ref_name', 'confinement',
+                                           'workflow']
 
     def sync_workflow(self, *workflow_names):
         """Sync scenario workflows with local repo."""
@@ -126,6 +135,15 @@ class Scenario(Connect):
             workflow_names = ['CORSICA', 'ASTRA', 'DINA-IMAS']
         for workflow in workflow_names:
             self.load_frame('workflow', workflow)
+        print(self.frame)
+        #self.copy_frame('equilibrium', 'pf_active', 'pf_passive')
+        #self.rsync()
+
+    def sync_shot(self, *shot: str):
+        """Sync scenario shots input as pulse/run string."""
+        self.frame = pandas.DataFrame(
+            np.array([s.split('/') for s in shot], int),
+            columns=['pulse', 'run'])
         self.copy_frame('equilibrium', 'pf_active', 'pf_passive')
         self.rsync()
 
@@ -174,5 +192,7 @@ class Machine(Connect):
 
 if __name__ == '__main__':
 
-    machine = Machine().sync_ids()
-    scenario = Scenario().sync_workflow()
+    #machine = Machine().sync_ids('pf_active')
+    scenario = Scenario()#.sync_workflow('JINTRAC')
+
+    #Scenario().sync_shot('114101/41')

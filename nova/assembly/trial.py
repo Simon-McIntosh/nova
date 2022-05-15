@@ -322,7 +322,6 @@ class Vault(Trial):
 
         signal_width = width / self.data.dims['component']
         for i, component in enumerate(self.data.component.values):
-            print(component)
             signal = self.data[component]
             bar_offset = (i+0.5) * signal_width - width / 2
             axes[0].bar(self.data.index + bar_offset, signal[sample],
@@ -450,7 +449,7 @@ if __name__ == '__main__':
     theta = [5, 5, 5, 10, 2, 2, 2.5]
     #theta = [0, 0, 0, 10, 0, 0, 0]
     #theta = [1.5, 1.5, 1.5, 3, 2, 2, 3]
-    vault = Vault(2_000_000, theta=theta)
+    vault = Vault(2_0_000, theta=theta)
 
     #vault.plot()
     #vault.plot_offset()

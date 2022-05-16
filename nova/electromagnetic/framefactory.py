@@ -70,7 +70,7 @@ class FrameFactory(FrameSet):
 
     @cached_property
     def turn(self):
-        """Return 3D coil turn constructor."""
+        """Return 2D/3D coil turn constructor."""
         return Turn(*self.frames, delta=self.delta)
 
     @cached_property

@@ -61,7 +61,7 @@ class Turn(CoilSetAttrs):
 
     def insert(self, *args, required=None, iloc=None, **additional):
         """
-        Add shell elements to frameset.
+        Add turn bundle to frameset.
 
         Lines described by x, z coordinates meshed into n coils based on
         dshell. Each frame is meshed based on delta.
@@ -73,9 +73,9 @@ class Turn(CoilSetAttrs):
         z : array-like, shape(n,)
             z-coordinates of turn geometric centers.
         dl : float
-            Turn length.
+            Turn diameter.
         dt : float
-            Turn thickness.
+            Skin fraction.
         **additional : dict[str, Any]
             Additional input.
 

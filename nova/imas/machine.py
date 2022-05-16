@@ -250,17 +250,13 @@ class Element:
         self.nturn = self.ids_data.turns_with_sign
         self.geometry = Geometry(self.ids_data.geometry)
 
-    def is_oblique(self) -> bool:
-        """Return geometry.name == 'oblique'."""
-        return self.geometry.name == 'oblique'
+    def is_poly(self) -> bool:
+        """Return True if geometry.name == 'oblique' or 'annulus'."""
+        return self.geometry.name in ['oblique', 'annulus']
 
     def is_rectangular(self) -> bool:
         """Return geometry.name == 'rectangle'."""
         return self.geometry.name == 'rectangle'
-
-    def is_annular(self) -> bool:
-        """Return geometry.name == 'annulus'."""
-        return self.geometry.name == 'annulus'
 
     def is_point(self) -> bool:
         """Return geometory validity flag."""
@@ -302,11 +298,7 @@ class FrameData(ABC):
     @property
     def part(self):
         """Return part name."""
-        #try:
-        #    label = self.data['name'][0]
-        #except KeyError:
         label = self.data['identifier'][0]
-        print(label)
         if isinstance(label, list):
             label = label[0]
         if 'VES' in label:
@@ -398,6 +390,7 @@ class PassiveShellData(FrameData):
 class CoilData(FrameData):
     """Extract coildata from ids."""
 
+    coil: Coil
     name: list[str] = field(init=False, default_factory=list)
     geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
     loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
@@ -406,8 +399,9 @@ class CoilData(FrameData):
         """Append coil data to internal structrue."""
         super().append(loop, element)
 
-    def insert(self, coil: Coil, **kwargs):
+    def insert(self, **kwargs):
         """Insert data via coil method."""
+        '''
         names = kwargs['name']
         j = 0
         _name = ''
@@ -420,10 +414,20 @@ class CoilData(FrameData):
                 j = 0
                 _name = ''
         kwargs['name'] = names
-        index = coil.insert(*[self.data[attr] for attr in self.geometry_attrs],
-                            part=self.part, rho=0, **kwargs)
-        self.update_resistivity(index, *coil.frames, self.data['resistance'])
+        '''
+        index = self.coil.insert(
+            *[self.data[attr] for attr in self.geometry_attrs],
+            part=self.part, rho=0, **kwargs)
+        self.update_resistivity(
+            index, *self.coil.frames, self.data['resistance'])
+        print(self.data)
+        super().__post_init__()
         return index
+
+    def push(self, loop: Loop, element: Element):
+        """Append and insert."""
+        self.append(loop, element)
+        self.insert()
 
 
 @dataclass
@@ -433,11 +437,11 @@ class PassiveCoilData(CoilData):
     geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
     loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
 
-    def insert(self, coil: Coil, **kwargs):
+    def insert(self, **kwargs):
         """Insert data via coil method."""
         kwargs = {'active': False, 'name': self.data['identifier'],
                   'turn': 'rect'} | kwargs
-        return super().insert(coil, **kwargs)
+        return super().insert(**kwargs)
 
 
 @dataclass
@@ -448,11 +452,11 @@ class ActiveCoilData(CoilData):
     geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
     loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
 
-    def __post_init__(self):
-        """Init data dict."""
-        self.data = {attr: [] for attr in self.attrs}
+    #def __post_init__(self):
+    #    """Init data dict."""
+    #    self.data = {attr: [] for attr in self.attrs}
 
-    def insert(self, coil: Coil, **kwargs):
+    def insert(self, **kwargs):
         """Insert data via coil method."""
         if self.empty:
             return
@@ -463,11 +467,11 @@ class ActiveCoilData(CoilData):
         kwargs = {'active': True, 'name': self.data['identifier'],
                   'nturn': self.data['nturn'],
                   'link': link, 'factor': factor} | kwargs
-        return super().insert(coil, **kwargs)
+        return super().insert(**kwargs)
 
 
 @dataclass
-class ActiveObliqueCoilData(ActiveCoilData):
+class ActivePolyCoilData(ActiveCoilData):
     """Extract coildata from active ids."""
 
     geometry_attrs: ClassVar[list[str]] = ['poly']
@@ -594,23 +598,24 @@ class PF_Active_Geometry(MachineDescription):
         """Build pf active geometroy."""
         for ids_loop in self.load_ids_data().coil:
             loop = ActiveLoop(ids_loop)
-            coildata = ActiveCoilData()
-            obliquecoildata = ActiveObliqueCoilData()
+            coildata = ActiveCoilData(self.coil)
+            polydata = ActivePolyCoilData(self.coil)
             for i, ids_element in enumerate(ids_loop.element):
                 element = Element(ids_element, i)
                 if element.is_point():
                     continue
-                if element.is_rectangular() or element.is_annular():
+                if element.is_rectangular():
                     coildata.append(loop, element)
                     continue
-                if element.is_oblique():
-                    obliquecoildata.append(loop, element)
+                if element.is_poly():
+                    print('poly')
+                    polydata.append(loop, element)
+                    print(polydata.data)
                     continue
                 raise NotImplementedError(f'geometory {element.geometry.name} '
                                           'not implemented')
-            coildata.insert(self.coil)
-            obliquecoildata.insert(self.coil)
-        return self
+                #coildata.insert()
+            polydata.insert()
 
 
 @dataclass
@@ -707,7 +712,6 @@ class Machine(CoilSet, Database):
             self += self.machine_description[attr](
                 *self.geometry[attr], machine=self.machine, **self.frame_attrs)
         self.solve_biot()
-        print('build', self.frame)
         return self.store(self.filename, metadata=self.metadata)
 
 

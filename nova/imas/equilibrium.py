@@ -36,7 +36,6 @@ class Grid(Scenario):
         self.data['r2d'] = ('r', 'z'), r2d
         self.data['z2d'] = ('r', 'z'), z2d
         self.data.attrs['profiles_2d'] = ('time', 'r', 'z')
-        self.data.attrs['outline'] = ('time', 'boundary_index')
 
 
 @dataclass
@@ -44,25 +43,29 @@ class Boundary(Scenario):
     """Load boundary timeseries from equilibrium ids."""
 
     def outline(self, itime):
-        """Return r,z
+        """Return r,z."""
+        outline = self.time_slice('boundary', itime, index=None).outline
+        return np.c_[outline.r, outline.z]
+
     def build(self):
         """Build 0D parameter timeseries."""
         super().build()
-        outline = self.time_slice('boundary', 0, index=None).outline
-        self.data['boundary_index'] = range(len(outline.r))
-        self.data.attrs['boundary'] = ('time', 'boundary_index')
-        self.data['boundary'] = ('time', 'boundary_index'), \
-            np.c_[outline.r, outline.z]
+        outline = self.outline(0)
+        self.data['boundary_index'] = range(len(outline))
+        self.data['coordinate'] = ['radial', 'vertical']
+        self.data['boundary'] = ('time', 'boundary_index', 'coordinate'), \
+            np.zeros((self.data.dims['time'],
+                      self.data.dims['boundary_index'],
+                      self.data.dims['coordinate']))
 
         for itime in range(self.data.dims['time']):
-            outline = self.time_slice('boundary', itime, index=None)
+            self.data['boundary'][itime] = self.outline(itime)
 
-        self.time_slice.build('boundary', self.attrs_boundary, index=None)
-
-    def plot_boundary(self, attr):
+    def plot_boundary(self, itime: int):
         """Plot 0D parameter timeseries."""
-        plt.plot(self.data.time, self.data[attr], label=attr)
-        plt.despine()
+        plt.plot(self.data.boundary[itime, :, 0],
+                 self.data.boundary[itime, :, 1], 'gray', alpha=0.5)
+        plt.axis('equal')
 
 
 @dataclass
@@ -155,13 +158,14 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
 
 if __name__ == '__main__':
 
-    eq = Equilibrium(114101, 41).build()
+    eq = Equilibrium(114101, 41)
     # eq = Equilibrium(130510, 3)
     #eq.build()
 
     itime = 0
 
     eq.plot_2d(itime, 'psi', colors='C3', levels=21)
+    eq.plot_boundary(itime)
     #eq.plot_2d(itime, 'j_tor')
 
     #eq.plot_0d('ip')

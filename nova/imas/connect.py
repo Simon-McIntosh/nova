@@ -73,21 +73,18 @@ class Connect:
                 space_columns.append(key)
             else:
                 columns.append(key)
-
-        print(columns, self.columns, self._space_columns)
         frame = self.to_dataframe(self.read_summary(','.join(columns), value))
-        if len(space_columns) == 0:
-            return
-        space_frame = self.to_dataframe(self.read_summary(
-            ','.join(space_columns), value), delimiter=r'\s\s+')
-        for i, col in enumerate(space_frame):
-            frame[col] = space_frame.iloc[:, i]
+        if len(space_columns) > 0:
+            space_frame = self.to_dataframe(self.read_summary(
+                ','.join(space_columns), value), delimiter=r'\s\s+')
+            for i, col in enumerate(space_frame):
+                frame[col] = space_frame.iloc[:, i]
         frame = frame.loc[frame[key] == value, :]
         frame = frame.astype(dict(pulse=int, run=int), errors='ignore')
         self.frame = pandas.concat([self.frame, frame])
         return self.frame
 
-    def copy_command(self, frame: pandas.DataFrame, ids: str):
+    def copy_command(self, frame: pandas.DataFrame, ids: str = ''):
         """Return ids copy string."""
         command = [f'idscp {ids} -u public '
                    f'-si {pulse} -ri {run} -d {self.machine} '
@@ -135,9 +132,8 @@ class Scenario(Connect):
             workflow_names = ['CORSICA', 'ASTRA', 'DINA-IMAS']
         for workflow in workflow_names:
             self.load_frame('workflow', workflow)
-        print(self.frame)
-        #self.copy_frame('equilibrium', 'pf_active', 'pf_passive')
-        #self.rsync()
+        self.copy_frame('equilibrium', 'pf_active', 'pf_passive')
+        self.rsync()
 
     def sync_shot(self, *shot: str):
         """Sync scenario shots input as pulse/run string."""
@@ -188,11 +184,25 @@ class Machine(Connect):
         self.load_ids(*ids_names)
         self.copy_ids()
         self.rsync()
+        return self
+
+    def sync_shot(self, *shot: str):
+        """Sync scenario shots input as pulse/run string."""
+        self.frame = pandas.DataFrame(
+            np.array([s.split('/') for s in shot], int),
+            columns=['pulse', 'run'])
+        self.module_run(self.copy_command(self.frame), hide=True)
+        self.rsync()
 
 
 if __name__ == '__main__':
 
-    #machine = Machine().sync_ids('pf_active')
-    scenario = Scenario()#.sync_workflow('JINTRAC')
+    # machine = Machine().sync_ids()
+
+    Machine().sync_shot('111001/3')
+
+    #scenario = Scenario()#.sync_workflow('JINTRAC')
 
     #Scenario().sync_shot('114101/41')
+
+    #111001, 4

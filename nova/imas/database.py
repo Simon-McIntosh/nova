@@ -54,11 +54,6 @@ class Database(FilePath, IMASdb, IDS):
         self.group = self.ids_name
         self.set_path(self.datapath)
 
-    #@property
-    #def filename(self):
-    #    """Return filename."""
-    #    return f'{self.machine}_{self.pulse}{self.run:04d}'
-
     def load_ids_data(self):
         """Return ids_data."""
         self.ids_data = self.ids(self.pulse, self.run, self.ids_name)

@@ -80,40 +80,48 @@ class FrameSet(FilePath, FrameSetLoc):
 
     def store_metadata(self, filename: str, path=None, metadata=None):
         """Store metadata to netCDF file."""
-        file = self.file(filename, path)
         if metadata is None:
-            metadata = {}
+            return
+        file = self.file(filename, path)
         with netCDF4.Dataset(file, 'a') as dataset:
             dataset.metadata = list(metadata)
             for attr in metadata:
                 setattr(dataset, attr, metadata[attr])
 
+    @property
+    def subgroup(self):
+        """Return netcdf group."""
+        if self.group is None:
+            return ''
+        return self.group
+
     def load(self, filename: str, path=None):
         """Load frameset from file."""
         super().__post_init__()
         file = self.file(filename, path)
-        self.frame.load(file, 'frame')
-        self.subframe.load(file, 'subframe')
+        self.frame.load(file, f'frame/{self.subgroup}')
+        self.subframe.load(file, f'subframe/{self.subgroup}')
         self.clear_frameset()
         with netCDF4.Dataset(file) as dataset:
             for attr in dataset.groups:
                 if attr in dir(self.__class__) and isinstance(
                         data := getattr(self, attr), netCDF):
-                    data.load(file)
+                    print(data.name)
+                    data.load(file, group=self.group)
         return self
 
-    def store(self, filename: str, path=None, metadata=None):
+    def store(self, filename: str, path=None):
         """Store frame and subframe as groups within hdf file."""
-        print('group', self.group)
+        print(self.group)
         file = self.file(filename, path)
         if os.path.isfile(file):
             os.remove(file)
-        self.frame.store(file, '/frame', mode='w')
-        self.subframe.store(file, '/subframe', mode='a')
+        self.frame.store(file, f'frame/{self.subgroup}', mode='w')
+        self.subframe.store(file, f'subframe/{self.subgroup}', mode='a')
         for attr in self.__dict__:
             if isinstance(data := getattr(self, attr), netCDF):
                 data.store(file)
-        self.store_metadata(filename, path, metadata)
+        return self
 
     def plot(self, index=None, axes=None, **kwargs):
         """Plot coilset."""

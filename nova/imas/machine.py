@@ -655,11 +655,24 @@ class Machine(CoilSet):
     def __post_init__(self):
         """Load coilset, build if not found."""
         super().__post_init__()
-        self.update_group()
         try:
             self.load(self.filename)
         except (FileNotFoundError, OSError, KeyError):
             self.build()
+
+    def load(self, filename: str, path=None):
+        """Load machine geometry and data. Re-build if metadata diffrent."""
+        self.update_group()
+        super().load(filename, path)
+        self.metadata = self.load_metadata(filename, path)
+        return self
+
+    def store(self, filename: str, path=None, metadata=None):
+        """Store frameset, biot attributes and metadata."""
+        self.update_group()
+        super().store(filename, path)
+        self.store_metadata(filename, path, self.metadata)
+        return self
 
     @property
     def ids_attrs(self):
@@ -668,26 +681,21 @@ class Machine(CoilSet):
         attrs = {}
         for attr in self.machine_description:
             if attr in self.geometry:
-                attrs[f'{attr}_pulse'] = self.machine_description[attr].pulse
-                attrs[f'{attr}_run'] = self.machine_description[attr].run
+                pulse = self.machine_description[attr].pulse
+                run = self.machine_description[attr].run
+            else:
+                pulse = run = 0
+            attrs[f'{attr}_pulse'] = pulse
+            attrs[f'{attr}_run'] = run
         return attrs
 
     def update_group(self):
         """Return group name as xxh32 hex hash."""
         self.xxh32.reset()
-        print('\n', self.geometry)
-        print(list(self.coilset_attrs.values())
-              + list(self.ids_attrs.values()))
         self.xxh32.update(np.array(list(self.coilset_attrs.values())
                                    + list(self.ids_attrs.values())))
         self.group = self.xxh32.hexdigest()
-        print(self.group)
         return self.group
-
-    def load(self, filename: str, path=None):
-        """Load machine geometry and data. Re-build if metadata diffrent."""
-        super().load(filename, path)
-        self.metadata = self.load_metadata(filename, path)
 
     def update_geometry(self):
         """Update geometry ids referances."""
@@ -710,9 +718,7 @@ class Machine(CoilSet):
     def metadata(self):
         """Return machine metadata."""
         metadata = self.frame_attrs | self.biot_attrs
-        print(';;;', self.geometry)
         metadata['geometry'] = list(self.geometry)
-        print(metadata['geometry'])
         for attr in self.geometry:
             metadata[attr] = self.geometry[attr]
         return metadata
@@ -722,17 +728,13 @@ class Machine(CoilSet):
         """Set instance metadata."""
         for attr in list(self.frame_attrs) + list(self.biot_attrs):
             setattr(self, attr, metadata[attr])
-        self.geometry = {}
-        print('[[[', metadata)
-        for attr in metadata['geometry']:
-            self.geometry[attr] = list(metadata[attr])
+        self.geometry = {attr: metadata[attr]
+                         for attr in np.array(metadata['geometry'], ndmin=1)}
 
     def build(self, **kwargs):
         """Build dataset, frameset and, biotset and save to file."""
-        print('+++', self.geometry)
+        print('build')
         super().__post_init__()
-        print('---', self.geometry)
-
         self.frame_attrs = kwargs
         self.clear_frameset()
         self.update_geometry()
@@ -740,13 +742,12 @@ class Machine(CoilSet):
             self += self.machine_description[attr](
                 *self.geometry[attr], machine=self.machine, **self.frame_attrs)
         self.solve_biot()
-        self.update_group()
-        return self.store(self.filename, metadata=self.metadata)
+        return self.store(self.filename)
 
 
 if __name__ == '__main__':
 
-    coilset = Machine(geometry=['pf_active'])
+    coilset = Machine(geometry=['pf_active', 'wall'], dplasma=-100)#.build(dplasma=-100, geometry=['pf_active'])
     #coilset.build(dcoil=0.25, dshell=0.5, dplasma=-1500, tcoil='hex',
     #              geometry=['pf_active', 'wall'])
 

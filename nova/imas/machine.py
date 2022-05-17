@@ -7,8 +7,9 @@ from typing import ClassVar, Union
 import numpy as np
 import numpy.typing as npt
 import shapely
+import xxhash
 
-from nova.electromagnetic.coil import Coil
+from nova.database.filepath import FilePath
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.shell import Shell
 from nova.geometry.polygon import Polygon
@@ -258,6 +259,10 @@ class Element:
         """Return geometry.name == 'rectangle'."""
         return self.geometry.name == 'rectangle'
 
+    def is_oblique(self) -> bool:
+        """Return geometry.name == 'oblique'."""
+        return self.geometry.name == 'oblique'
+
     def is_point(self) -> bool:
         """Return geometory validity flag."""
         return np.isclose(self.geometry.data.poly.area, 0)
@@ -298,7 +303,10 @@ class FrameData(ABC):
     @property
     def part(self):
         """Return part name."""
-        label = self.data['identifier'][0]
+        try:
+            label = self.data['identifier'][0]
+        except KeyError:
+            label = self.data['name'][0]
         if isinstance(label, list):
             label = label[0]
         if 'VES' in label:
@@ -326,13 +334,41 @@ class FrameData(ABC):
 
 
 @dataclass
+class CoilData(FrameData):
+    """Extract coildata from ids."""
+
+    name: list[str] = field(init=False, default_factory=list)
+    geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
+    loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
+
+    def append(self, loop: Loop, element: Element):
+        """Append coil data to internal structrue."""
+        super().append(loop, element)
+
+    def insert(self, constructor, **kwargs):
+        """Insert data via Coilset.constructor method."""
+        attrs = kwargs.pop('attrs', self.geometry_attrs)
+        index = constructor.insert(*[self.data[attr] for attr in attrs],
+                                   part=self.part, rho=0, **kwargs)
+        self.update_resistivity(
+            index, *constructor.frames, self.data['resistance'])
+        super().__post_init__()
+        return index
+
+    def push(self, loop: Loop, element: Element):
+        """Append and insert."""
+        self.append(loop, element)
+        self.insert()
+
+
+@dataclass
 class PassiveShellData(FrameData):
     """Extract oblique shell geometries from pf_passive ids."""
 
     length: float = 0
     points: list[npt.ArrayLike] = field(init=False, repr=False,
                                         default_factory=list)
-    loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
+    loop_attrs: ClassVar[list[str]] = ['name', 'resistance']
     geometry_attrs: ClassVar[list[str]] = ['thickness']
 
     def __len__(self):
@@ -372,7 +408,7 @@ class PassiveShellData(FrameData):
         for i in range(len(self)):
             thickness = np.mean(self.data['thickness'][i])
             index = shell.insert(*self.points[i].T, self.length, thickness,
-                                 rho=0, name=self.data['identifier'][i],
+                                 rho=0, name=self.data['name'][i],
                                  part=self.part)
             self.update_resistivity(index, *shell.frames,
                                     self.data['resistance'][i])
@@ -384,97 +420,6 @@ class PassiveShellData(FrameData):
             axes.plot(loop[:, 0], loop[:, 1], 'o-')
         plt.axis('equal')
         plt.axis('off')
-
-
-@dataclass
-class CoilData(FrameData):
-    """Extract coildata from ids."""
-
-    coil: Coil
-    name: list[str] = field(init=False, default_factory=list)
-    geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
-    loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
-
-    def append(self, loop: Loop, element: Element):
-        """Append coil data to internal structrue."""
-        super().append(loop, element)
-
-    def insert(self, **kwargs):
-        """Insert data via coil method."""
-        '''
-        names = kwargs['name']
-        j = 0
-        _name = ''
-        for i, name in enumerate(names[1:]):
-            if name == names[i] or name == _name:
-                j += 1
-                _name = name
-                names[i+1] += f'_{j}'
-            else:
-                j = 0
-                _name = ''
-        kwargs['name'] = names
-        '''
-        index = self.coil.insert(
-            *[self.data[attr] for attr in self.geometry_attrs],
-            part=self.part, rho=0, **kwargs)
-        self.update_resistivity(
-            index, *self.coil.frames, self.data['resistance'])
-        print(self.data)
-        super().__post_init__()
-        return index
-
-    def push(self, loop: Loop, element: Element):
-        """Append and insert."""
-        self.append(loop, element)
-        self.insert()
-
-
-@dataclass
-class PassiveCoilData(CoilData):
-    """Extract coildata from passive ids."""
-
-    geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
-    loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
-
-    def insert(self, **kwargs):
-        """Insert data via coil method."""
-        kwargs = {'active': False, 'name': self.data['identifier'],
-                  'turn': 'rect'} | kwargs
-        return super().insert(**kwargs)
-
-
-@dataclass
-class ActiveCoilData(CoilData):
-    """Extract coildata from active ids."""
-
-    element_attrs: ClassVar[list[str]] = ['nturn', 'index', 'name']
-    geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
-    loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
-
-    #def __post_init__(self):
-    #    """Init data dict."""
-    #    self.data = {attr: [] for attr in self.attrs}
-
-    def insert(self, **kwargs):
-        """Insert data via coil method."""
-        if self.empty:
-            return
-        factor = np.sign(self.data['nturn'])
-        self.data['nturn'] = np.abs(self.data['nturn'])
-        link = [''] + [self.data['identifier'][i-index+1] if index > 0 else ''
-                       for i, index in enumerate(self.data['index'][1:])]
-        kwargs = {'active': True, 'name': self.data['identifier'],
-                  'nturn': self.data['nturn'],
-                  'link': link, 'factor': factor} | kwargs
-        return super().insert(**kwargs)
-
-
-@dataclass
-class ActivePolyCoilData(ActiveCoilData):
-    """Extract coildata from active ids."""
-
-    geometry_attrs: ClassVar[list[str]] = ['poly']
 
 
 @dataclass
@@ -559,6 +504,20 @@ class MachineDescription(CoilSet, Database):
 
 
 @dataclass
+class PassiveCoilData(CoilData):
+    """Extract coildata from passive ids."""
+
+    geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
+    loop_attrs: ClassVar[list[str]] = ['name', 'resistance']
+
+    def insert(self, constructor, **kwargs):
+        """Insert data via coil method."""
+        kwargs = {'active': False, 'name': self.data['name'],
+                  'turn': 'rect'} | kwargs
+        return super().insert(constructor, **kwargs)
+
+
+@dataclass
 class PF_Passive_Geometry(MachineDescription):
     """Manage passive poloidal loop ids, pf_passive."""
 
@@ -587,6 +546,38 @@ class PF_Passive_Geometry(MachineDescription):
 
 
 @dataclass
+class ActiveCoilData(CoilData):
+    """Extract coildata from active ids."""
+
+    element_attrs: ClassVar[list[str]] = ['nturn', 'index', 'name']
+    geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
+    loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
+
+    def insert(self, constructor, **kwargs):
+        """Insert data via coil method."""
+        if self.empty:
+            return
+        factor = np.sign(self.data['nturn'])
+        self.data['nturn'] = np.abs(self.data['nturn'])
+        link = [''] + [self.data['identifier'][i-index+1] if index > 0 else ''
+                       for i, index in enumerate(self.data['index'][1:])]
+        name = [self.data['identifier'][0] if i == 0
+                else self.data['identifier'][0] + f'{i}'
+                for i in range(len(self.data['identifier']))]
+        kwargs = {'active': True, 'name': name,
+                  'delim': '_', 'nturn': self.data['nturn'],
+                  'link': link, 'factor': factor} | kwargs
+        return super().insert(constructor, **kwargs)
+
+
+@dataclass
+class ActivePolyCoilData(ActiveCoilData):
+    """Extract coildata from active ids."""
+
+    geometry_attrs: ClassVar[list[str]] = ['poly']
+
+
+@dataclass
 class PF_Active_Geometry(MachineDescription):
     """Manage active poloidal loop ids, pf_passive."""
 
@@ -598,8 +589,8 @@ class PF_Active_Geometry(MachineDescription):
         """Build pf active geometroy."""
         for ids_loop in self.load_ids_data().coil:
             loop = ActiveLoop(ids_loop)
-            coildata = ActiveCoilData(self.coil)
-            polydata = ActivePolyCoilData(self.coil)
+            coildata = ActiveCoilData()
+            polydata = ActivePolyCoilData()
             for i, ids_element in enumerate(ids_loop.element):
                 element = Element(ids_element, i)
                 if element.is_point():
@@ -608,14 +599,16 @@ class PF_Active_Geometry(MachineDescription):
                     coildata.append(loop, element)
                     continue
                 if element.is_poly():
-                    print('poly')
                     polydata.append(loop, element)
-                    print(polydata.data)
                     continue
                 raise NotImplementedError(f'geometory {element.geometry.name} '
                                           'not implemented')
-                #coildata.insert()
-            polydata.insert()
+            if i == 0:
+                constructor = self.coil
+            else:
+                constructor = self.turn
+            coildata.insert(constructor)
+            polydata.insert(constructor)
 
 
 @dataclass
@@ -623,7 +616,7 @@ class Wall_Geometry(MachineDescription):
     """Manage plasma boundary, wall ids."""
 
     pulse: int = 116000
-    run: int = 1
+    run: int = 2
     ids_name: str = 'wall'
 
     def build(self):
@@ -637,17 +630,21 @@ class Wall_Geometry(MachineDescription):
 
 
 @dataclass
-class Machine(CoilSet, Database):
+class Machine(CoilSet):
     """Manage ITER machine geometry."""
 
-    pulse: int = 135011
-    run: int = 7
+    dcoil: float = 0.25
+    dshell: float = 0.5
+    dplasma: int = -1500
+    tcoil: str = 'hex'
+    filename: str = 'iter'
     machine: str = 'iter_md'
     datapath: str = 'data/Nova'
+    xxh32: xxhash.xxh32 = field(repr=False, init=False,
+                                default_factory=xxhash.xxh32)
 
     geometry: Union[dict[str, tuple[int, int]], list[str]] = field(
-        default_factory=lambda: dict(
-            pf_active=(111001, 4), pf_passive=(115005, 2), wall=(116000, 2)))
+        default_factory=lambda: ['pf_active', 'pf_passive', 'wall'])
     ids_name: str = field(init=False, default='multiple')
 
     machine_description: ClassVar[dict[str, MachineDescription]] = dict(
@@ -658,20 +655,45 @@ class Machine(CoilSet, Database):
     def __post_init__(self):
         """Load coilset, build if not found."""
         super().__post_init__()
+        self.update_group()
         try:
             self.load(self.filename)
         except (FileNotFoundError, OSError, KeyError):
             self.build()
+
+    @property
+    def ids_attrs(self):
+        """Return ids pulse run attribute list."""
+        self.update_geometry()
+        attrs = {}
+        for attr in self.machine_description:
+            if attr in self.geometry:
+                attrs[f'{attr}_pulse'] = self.machine_description[attr].pulse
+                attrs[f'{attr}_run'] = self.machine_description[attr].run
+        return attrs
+
+    def update_group(self):
+        """Return group name as xxh32 hex hash."""
+        self.xxh32.reset()
+        print('\n', self.geometry)
+        print(list(self.coilset_attrs.values())
+              + list(self.ids_attrs.values()))
+        self.xxh32.update(np.array(list(self.coilset_attrs.values())
+                                   + list(self.ids_attrs.values())))
+        self.group = self.xxh32.hexdigest()
+        print(self.group)
+        return self.group
 
     def load(self, filename: str, path=None):
         """Load machine geometry and data. Re-build if metadata diffrent."""
         super().load(filename, path)
         self.metadata = self.load_metadata(filename, path)
 
-    def check_geometry(self):
-        """Check geometry ids referances."""
+    def update_geometry(self):
+        """Update geometry ids referances."""
         if isinstance(self.geometry, list):
-            self.geometry = {attr: [self.pulse, self.run]
+            self.geometry = {attr: [self.machine_description[attr].pulse,
+                                    self.machine_description[attr].run]
                              for attr in self.geometry}
 
     def solve_biot(self):
@@ -680,15 +702,17 @@ class Machine(CoilSet, Database):
             self.plasmaboundary.solve(self.Loc['plasma', 'poly'][0].boundary)
             self.plasmagrid.solve()
 
-            wall = self.Loc['plasma', :].iloc[0]
-            self.plasma.separatrix = dict(e=[wall.x, wall.z,
-                                             0.7*wall.dx, 0.5*wall.dz])
+            #wall = self.Loc['plasma', :].iloc[0]
+            #self.plasma.separatrix = dict(e=[wall.x, wall.z,
+            #                                 0.7*wall.dx, 0.5*wall.dz])
 
     @property
     def metadata(self):
         """Return machine metadata."""
-        metadata = self.ids_attrs | self.frame_attrs
+        metadata = self.frame_attrs | self.biot_attrs
+        print(';;;', self.geometry)
         metadata['geometry'] = list(self.geometry)
+        print(metadata['geometry'])
         for attr in self.geometry:
             metadata[attr] = self.geometry[attr]
         return metadata
@@ -696,32 +720,36 @@ class Machine(CoilSet, Database):
     @metadata.setter
     def metadata(self, metadata: dict):
         """Set instance metadata."""
-        for attr in list(self.ids_attrs) + list(self.frame_attrs):
+        for attr in list(self.frame_attrs) + list(self.biot_attrs):
             setattr(self, attr, metadata[attr])
         self.geometry = {}
+        print('[[[', metadata)
         for attr in metadata['geometry']:
             self.geometry[attr] = list(metadata[attr])
 
     def build(self, **kwargs):
         """Build dataset, frameset and, biotset and save to file."""
+        print('+++', self.geometry)
         super().__post_init__()
+        print('---', self.geometry)
+
         self.frame_attrs = kwargs
         self.clear_frameset()
-        self.check_geometry()
+        self.update_geometry()
         for attr in self.geometry:
             self += self.machine_description[attr](
                 *self.geometry[attr], machine=self.machine, **self.frame_attrs)
         self.solve_biot()
+        self.update_group()
         return self.store(self.filename, metadata=self.metadata)
 
 
 if __name__ == '__main__':
 
-    #coilset = Machine(135011, 7, geometry=dict(pf_active=(111001, 4)))
-    #coilset.build(dcoil=0.25, dshell=0.5, dplasma=-1500, tcoil='hex')
+    coilset = Machine(geometry=['pf_active'])
+    #coilset.build(dcoil=0.25, dshell=0.5, dplasma=-1500, tcoil='hex',
+    #              geometry=['pf_active', 'wall'])
 
-    pf_active = PF_Active_Geometry(111001, 4)
-    pf_active.plot()
     #coilset.plasma.separatrix = dict(e=[6, -0.5, 2.5, 2.5])
 
     #coilset.sloc['Ic'] = 1

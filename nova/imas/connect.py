@@ -197,9 +197,9 @@ class Machine(Connect):
 
 if __name__ == '__main__':
 
-    # machine = Machine().sync_ids()
+    machine = Machine().sync_ids()
 
-    Machine().sync_shot('111001/3')
+    #Machine().sync_shot('111001/3')
 
     #scenario = Scenario()#.sync_workflow('JINTRAC')
 

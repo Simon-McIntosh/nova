@@ -38,7 +38,7 @@ class FrameFactory(FrameSet):
     def frame_attrs(self):
         """Return frame attributes."""
         return dict(dcoil=self.dcoil, dplasma=self.dplasma, dshell=self.dshell,
-                    tcoil=self.tcoil, tplasma=self.tplasma)
+                    tcoil=self.tcoil, tplasma=self.tplasma, delta=self.delta)
 
     @frame_attrs.setter
     def frame_attrs(self, attrs: dict[str, Union[int, float, str]]):

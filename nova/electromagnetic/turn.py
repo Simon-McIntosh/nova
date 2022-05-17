@@ -86,7 +86,7 @@ class Turn(CoilSetAttrs):
         """
         self.attrs = additional
         name = self.attrs.get(
-            'name', self.frame.build_index(1, label=self.attrs['label'])[0])
+            'name', self.frame.build_index(1, name=self.attrs['label'])[0])
         self.attrs['name'] = name
         subattrs = {'section': self.turn, 'label': name, 'frame': name,
                     'delim': '_', 'link': True} | self.attrs

@@ -30,6 +30,11 @@ class BiotFactory(FrameSet):
         attr = inspect.stack()[1][3]  # name of caller
         return self.biot_class[attr](*self.frames, path=self.path, name=attr)
 
+    @property
+    def biot_attrs(self):
+        """Return frame attributes."""
+        return dict(dfield=self.dfield)
+
     @cached_property
     def plasma(self):
         """Return plasma instance."""

@@ -1,5 +1,8 @@
 """Construct coilset with frameset and biot factories."""
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
+from functools import cached_property
+
+import pandas
 
 from nova.electromagnetic.framefactory import FrameFactory
 from nova.electromagnetic.frameset import FrameSet
@@ -18,10 +21,17 @@ class CoilSet(BiotFactory, FrameFactory):
 
     """
 
+    datapath: str = 'data/Nova'
+
     def __post_init__(self):
         """Set filepath."""
-        self.set_path('data/Nova')
+        self.set_path(self.datapath)
         super().__post_init__()
+
+    @property
+    def coilset_attrs(self):
+        """Return coilset attrs."""
+        return self.frame_attrs | self.biot_attrs
 
     def __add__(self, other: FrameSet):
         """Return framset union of self and other."""

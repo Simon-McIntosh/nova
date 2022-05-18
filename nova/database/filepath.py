@@ -43,6 +43,13 @@ class FilePath:
             file += extension
         return self.check_dir(file, path)
 
+    def netcdf_path(self, *labels, group_prefix=True) -> str:
+        """Return path for netcdf group."""
+        if group_prefix:
+            labels = (self.group,) + labels
+        labels = [label for label in labels if label is not None]
+        return '/'.join(labels)
+
     @property
     def filepath(self):
         """Return full filepath for netCDF (.nc) data using default path."""

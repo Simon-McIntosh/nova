@@ -17,16 +17,11 @@ class netCDF(FilePath):
     def store(self, filename: str, path=None, group=None):
         """Store data as netCDF in hdf5 file."""
         file = self.file(filename, path)
-        if group is None:
-            group = ''
-        print('name', self.name)
-        self.data.to_netcdf(file, mode='a', group=f'{self.name}/{group}')
+        self.data.to_netcdf(file, mode='a', group=self.netcdf_path(self.name))
 
     def load(self, filename: str, path=None, group=None):
         """Load data from hdf5."""
         file = self.file(filename, path)
-        if group is None:
-            group = ''
-        print('name', self.name)
-        with xarray.open_dataset(file, group=f'{self.name}/{group}') as data:
+        with xarray.open_dataset(
+                file, group=self.netcdf_path(self.name)) as data:
             self.data = data

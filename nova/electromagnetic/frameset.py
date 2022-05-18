@@ -99,15 +99,15 @@ class FrameSet(FilePath, FrameSetLoc):
         """Load frameset from file."""
         super().__post_init__()
         file = self.file(filename, path)
-        self.frame.load(file, f'frame/{self.subgroup}')
-        self.subframe.load(file, f'subframe/{self.subgroup}')
+        self.frame.load(file, self.netcdf_path('frame'))
+        self.subframe.load(file, self.netcdf_path('subframe'))
         self.clear_frameset()
         with netCDF4.Dataset(file) as dataset:
             for attr in dataset.groups:
                 if attr in dir(self.__class__) and isinstance(
                         data := getattr(self, attr), netCDF):
-                    print(data.name)
-                    data.load(file, group=self.group)
+                    data.group = self.group
+                    data.load(file)
         return self
 
     def store(self, filename: str, path=None):
@@ -116,10 +116,11 @@ class FrameSet(FilePath, FrameSetLoc):
         file = self.file(filename, path)
         if os.path.isfile(file):
             os.remove(file)
-        self.frame.store(file, f'frame/{self.subgroup}', mode='w')
-        self.subframe.store(file, f'subframe/{self.subgroup}', mode='a')
+        self.frame.store(file, self.netcdf_path('frame'), mode='w')
+        self.subframe.store(file, self.netcdf_path('subframe'), mode='a')
         for attr in self.__dict__:
             if isinstance(data := getattr(self, attr), netCDF):
+                data.group = self.group
                 data.store(file)
         return self
 

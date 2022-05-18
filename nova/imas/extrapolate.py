@@ -1,6 +1,7 @@
 """Extrapolate equilibria beyond separatrix."""
 from dataclasses import dataclass, field
 
+from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
 
 
@@ -26,9 +27,23 @@ class Extrapolate(Machine):
 
 if __name__ == '__main__':
 
-    coilset = Extrapolate(dcoil=-1, dplasma=-150)
+    coilset = Extrapolate(dcoil=-1, dplasma=-1500)
     coilset.sloc['plasma', 'Ic'] = -15e6
-    #coilset.grid.solve(30, index='plasma')
+    coilset.sloc['coil', 'Ic'] = -15e6
+    coilset.sloc()
+    coilset.grid.solve(1500, 0.5, index='plasma')
+
+    eq = Equilibrium(114101, 41)
+
+    itime = 0
+    eq.plot_2d(itime, 'psi', colors='C3', levels=21)
+    eq.plot_boundary(itime)
+
+    print(coilset.plasma.version)
+    coilset.plasma.separatrix = eq.data.boundary[0]
+
+    coilset.grid.update_turns('Psi')
+    print(coilset.plasma.version)
 
     coilset.plot()
     coilset.grid.plot()

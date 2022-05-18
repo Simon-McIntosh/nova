@@ -78,7 +78,7 @@ if __name__ == '__main__':
     else:
         coilset = CoilSet().load(filename)
 
-    separatrix = Polygon(dict(c=[4.5, 0.25, 0.9])).boundary
+    separatrix = Polygon(dict(c=[4.5, -0.75, 0.9])).boundary
     coilset.plasma.separatrix = separatrix
 
     coilset.sloc['bubble', 'Ic'] = 8
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     coilset.plot()
     coilset.plasma.plot()
 
-    coilset.grid.plot(levels=31)
+    coilset.grid.plot(levels=51)
     coilset.plasmagrid.plot(levels=coilset.grid.levels, colors='C6')
 
     coilset.plasmagrid.svd_rank = 10

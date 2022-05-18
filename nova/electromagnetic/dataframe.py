@@ -269,11 +269,10 @@ class DataFrame(FrameAttrs):
                 pass
         xframe.to_netcdf(file, group=group, mode=mode)
 
-    def load(self, file, group=None, lazy=False):
+    def load(self, file, group=None):
         """Load dataframe from hdf file."""
         with xarray.open_dataset(file, group=group) as data:
-            if not lazy:
-                data.load()
+            data.load()
             metadata = self.insert_metadata(data.attrs)
             self.__init__(data.to_dataframe(), **metadata)
         for col in ['poly', 'vtk']:

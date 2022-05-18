@@ -642,8 +642,8 @@ class Machine(CoilSet):
     """Manage ITER machine geometry."""
 
     dcoil: float = 0.25
-    dshell: float = 0.1
-    dplasma: int = -2000
+    dshell: float = 0.5
+    dplasma: int = -500
     tcoil: str = 'hex'
     filename: str = 'iter'
     machine: str = 'iter_md'
@@ -663,7 +663,7 @@ class Machine(CoilSet):
     def __post_init__(self):
         """Load coilset, build if not found."""
         super().__post_init__()
-        self.load(self.filename)
+        #self.load(self.filename)
         try:
             self.load(self.filename)
         except (FileNotFoundError, OSError, KeyError):
@@ -752,7 +752,7 @@ class Machine(CoilSet):
 
 if __name__ == '__main__':
 
-    coilset = Machine(dplasma=-500)
+    coilset = Machine(geometry=['pf_active', 'wall'])
     coilset.plot()
 
     #coilset.plasma.separatrix = dict(e=[6, -0.5, 2.5, 2.5])

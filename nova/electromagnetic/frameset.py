@@ -72,6 +72,8 @@ class FrameSet(FilePath, FrameSetLoc):
         file = self.file(filename, path)
         metadata = {}
         with netCDF4.Dataset(file) as dataset:
+            if self.group is not None:
+                dataset = dataset[self.group]
             if not hasattr(dataset, 'metadata'):
                 return {}
             for attr in dataset.metadata:
@@ -84,6 +86,8 @@ class FrameSet(FilePath, FrameSetLoc):
             return
         file = self.file(filename, path)
         with netCDF4.Dataset(file, 'a') as dataset:
+            if self.group is not None:
+                dataset = dataset[self.group]
             dataset.metadata = list(metadata)
             for attr in metadata:
                 setattr(dataset, attr, metadata[attr])
@@ -110,13 +114,14 @@ class FrameSet(FilePath, FrameSetLoc):
                     data.load(file)
         return self
 
-    def store(self, filename: str, path=None):
+    def store(self, filename: str, path=None, mode='a'):
         """Store frame and subframe as groups within hdf file."""
-        print(self.group)
         file = self.file(filename, path)
-        if os.path.isfile(file):
+        if mode == 'w' and os.path.isfile(file):
             os.remove(file)
-        self.frame.store(file, self.netcdf_path('frame'), mode='w')
+        if mode == 'a' and not os.path.isfile(file):
+            mode = 'w'
+        self.frame.store(file, self.netcdf_path('frame'), mode=mode)
         self.subframe.store(file, self.netcdf_path('subframe'), mode='a')
         for attr in self.__dict__:
             if isinstance(data := getattr(self, attr), netCDF):
@@ -125,7 +130,7 @@ class FrameSet(FilePath, FrameSetLoc):
         return self
 
     def plot(self, index=None, axes=None, **kwargs):
-        """Plot coilset."""
+        """Plot coilset subframe via polyplot instance."""
         self.subframe.polyplot(index=index, axes=axes, **kwargs)
 
 

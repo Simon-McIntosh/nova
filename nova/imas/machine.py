@@ -362,6 +362,20 @@ class CoilData(FrameData):
 
 
 @dataclass
+class MachineDescription(CoilSet, Database):
+    """Manage access to machine data."""
+
+    def __post_init__(self):
+        """Build geometry."""
+        super().__post_init__()
+        self.build()
+
+    @abstractmethod
+    def build(self):
+        """Build geometry."""
+
+
+@dataclass
 class PassiveShellData(FrameData):
     """Extract oblique shell geometries from pf_passive ids."""
 
@@ -370,6 +384,10 @@ class PassiveShellData(FrameData):
                                         default_factory=list)
     loop_attrs: ClassVar[list[str]] = ['name', 'resistance']
     geometry_attrs: ClassVar[list[str]] = ['thickness']
+
+    def reset(self):
+        """Reset instance state."""
+        self.__init__()
 
     def __len__(self):
         """Return loop number."""
@@ -405,6 +423,8 @@ class PassiveShellData(FrameData):
 
     def insert(self, shell: Shell):
         """Insert data into shell instance."""
+        if self.empty:
+            return
         for i in range(len(self)):
             thickness = np.mean(self.data['thickness'][i])
             index = shell.insert(*self.points[i].T, self.length, thickness,
@@ -412,6 +432,7 @@ class PassiveShellData(FrameData):
                                  part=self.part)
             self.update_resistivity(index, *shell.frames,
                                     self.data['resistance'][i])
+        self.reset()
 
     def plot(self):
         """Plot shell centerlines."""
@@ -420,6 +441,117 @@ class PassiveShellData(FrameData):
             axes.plot(loop[:, 0], loop[:, 1], 'o-')
         plt.axis('equal')
         plt.axis('off')
+
+
+@dataclass
+class PassiveCoilData(CoilData):
+    """Extract coildata from passive ids."""
+
+    geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
+    loop_attrs: ClassVar[list[str]] = ['name', 'resistance']
+
+    def insert(self, constructor, **kwargs):
+        """Insert data via coil method."""
+        if self.empty:
+            return
+        kwargs = {'active': False, 'name': self.data['name'],
+                  'turn': 'rect'} | kwargs
+        return super().insert(constructor, **kwargs)
+
+
+@dataclass
+class PF_Passive_Geometry(MachineDescription):
+    """Manage passive poloidal loop ids, pf_passive."""
+
+    pulse: int = 115005
+    run: int = 2
+    ids_name: str = 'pf_passive'
+
+    def build(self):
+        """Build pf passive geometroy."""
+        shelldata = PassiveShellData()
+        coildata = PassiveCoilData()
+        for ids_loop in self.load_ids_data().loop:
+            loop = Loop(ids_loop)
+            for i, ids_element in enumerate(ids_loop.element):
+                element = Element(ids_element, i)
+                if element.is_oblique():
+                    shelldata.append(loop, element)
+                    continue
+                if element.is_rectangular():
+                    coildata.append(loop, element)
+                    continue
+                raise NotImplementedError(f'geometory {element.geometry.name} '
+                                          'not implemented')
+
+            coildata.insert(self.coil, delta=self.dshell)
+            shelldata.insert(self.shell)
+
+
+@dataclass
+class ActiveCoilData(CoilData):
+    """Extract coildata from active ids."""
+
+    element_attrs: ClassVar[list[str]] = ['nturn', 'index', 'name']
+    geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
+    loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
+
+    def insert(self, constructor, **kwargs):
+        """Insert data via coil method."""
+        if self.empty:
+            return
+        factor = np.sign(self.data['nturn'])
+        self.data['nturn'] = np.abs(self.data['nturn'])
+        link = [''] + [self.data['identifier'][i-index+1] if index > 0 else ''
+                       for i, index in enumerate(self.data['index'][1:])]
+        name = [self.data['identifier'][0] if i == 0
+                else self.data['identifier'][0] + f'{i}'
+                for i in range(len(self.data['identifier']))]
+        kwargs = {'active': True, 'name': name,
+                  'delim': '_', 'nturn': self.data['nturn'],
+                  'link': link, 'factor': factor} | kwargs
+        return super().insert(constructor, **kwargs)
+
+
+@dataclass
+class ActivePolyCoilData(ActiveCoilData):
+    """Extract coildata from active ids."""
+
+    geometry_attrs: ClassVar[list[str]] = ['poly']
+
+
+@dataclass
+class PF_Active_Geometry(MachineDescription):
+    """Manage active poloidal loop ids, pf_passive."""
+
+    pulse: int = 111001
+    run: int = 4
+    ids_name: str = 'pf_active'
+
+    def build(self):
+        """Build pf active geometroy."""
+        for ids_loop in self.load_ids_data().coil:
+            loop = ActiveLoop(ids_loop)
+            coildata = ActiveCoilData()
+            polydata = ActivePolyCoilData()
+            for i, ids_element in enumerate(ids_loop.element):
+                element = Element(ids_element, i)
+                if element.is_point():
+                    continue
+                if element.is_rectangular():
+                    coildata.append(loop, element)
+                    continue
+                if element.is_poly():
+                    polydata.append(loop, element)
+                    continue
+                raise NotImplementedError(f'geometory {element.geometry.name} '
+                                          'not implemented')
+            if i == 0:
+                constructor = self.coil
+            else:
+                constructor = self.turn
+            coildata.insert(constructor)
+            polydata.insert(constructor)
 
 
 @dataclass
@@ -490,128 +622,6 @@ class Contour:
 
 
 @dataclass
-class MachineDescription(CoilSet, Database):
-    """Manage access to machine data."""
-
-    def __post_init__(self):
-        """Build geometry."""
-        super().__post_init__()
-        self.build()
-
-    @abstractmethod
-    def build(self):
-        """Build geometry."""
-
-
-@dataclass
-class PassiveCoilData(CoilData):
-    """Extract coildata from passive ids."""
-
-    geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
-    loop_attrs: ClassVar[list[str]] = ['name', 'resistance']
-
-    def insert(self, constructor, **kwargs):
-        """Insert data via coil method."""
-        kwargs = {'active': False, 'name': self.data['name'],
-                  'turn': 'rect'} | kwargs
-        return super().insert(constructor, **kwargs)
-
-
-@dataclass
-class PF_Passive_Geometry(MachineDescription):
-    """Manage passive poloidal loop ids, pf_passive."""
-
-    pulse: int = 115005
-    run: int = 2
-    ids_name: str = 'pf_passive'
-
-    def build(self):
-        """Build pf passive geometroy."""
-        shelldata = PassiveShellData()
-        coildata = PassiveCoilData()
-        for ids_loop in self.load_ids_data().loop:
-            loop = Loop(ids_loop)
-            for i, ids_element in enumerate(ids_loop.element):
-                element = Element(ids_element, i)
-                if element.is_oblique():
-                    shelldata.append(loop, element)
-                    continue
-                if element.is_rectangular():
-                    coildata.append(loop, element)
-                    continue
-                raise NotImplementedError(f'geometory {element.geometry.name} '
-                                          'not implemented')
-        coildata.insert(self.coil)
-        shelldata.insert(self.shell)
-
-
-@dataclass
-class ActiveCoilData(CoilData):
-    """Extract coildata from active ids."""
-
-    element_attrs: ClassVar[list[str]] = ['nturn', 'index', 'name']
-    geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
-    loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
-
-    def insert(self, constructor, **kwargs):
-        """Insert data via coil method."""
-        if self.empty:
-            return
-        factor = np.sign(self.data['nturn'])
-        self.data['nturn'] = np.abs(self.data['nturn'])
-        link = [''] + [self.data['identifier'][i-index+1] if index > 0 else ''
-                       for i, index in enumerate(self.data['index'][1:])]
-        name = [self.data['identifier'][0] if i == 0
-                else self.data['identifier'][0] + f'{i}'
-                for i in range(len(self.data['identifier']))]
-        kwargs = {'active': True, 'name': name,
-                  'delim': '_', 'nturn': self.data['nturn'],
-                  'link': link, 'factor': factor} | kwargs
-        return super().insert(constructor, **kwargs)
-
-
-@dataclass
-class ActivePolyCoilData(ActiveCoilData):
-    """Extract coildata from active ids."""
-
-    geometry_attrs: ClassVar[list[str]] = ['poly']
-
-
-@dataclass
-class PF_Active_Geometry(MachineDescription):
-    """Manage active poloidal loop ids, pf_passive."""
-
-    pulse: int = 111001
-    run: int = 4
-    ids_name: str = 'pf_active'
-
-    def build(self):
-        """Build pf active geometroy."""
-        for ids_loop in self.load_ids_data().coil:
-            loop = ActiveLoop(ids_loop)
-            coildata = ActiveCoilData()
-            polydata = ActivePolyCoilData()
-            for i, ids_element in enumerate(ids_loop.element):
-                element = Element(ids_element, i)
-                if element.is_point():
-                    continue
-                if element.is_rectangular():
-                    coildata.append(loop, element)
-                    continue
-                if element.is_poly():
-                    polydata.append(loop, element)
-                    continue
-                raise NotImplementedError(f'geometory {element.geometry.name} '
-                                          'not implemented')
-            if i == 0:
-                constructor = self.coil
-            else:
-                constructor = self.turn
-            coildata.insert(constructor)
-            polydata.insert(constructor)
-
-
-@dataclass
 class Wall_Geometry(MachineDescription):
     """Manage plasma boundary, wall ids."""
 
@@ -634,8 +644,8 @@ class Machine(CoilSet):
     """Manage ITER machine geometry."""
 
     dcoil: float = 0.25
-    dshell: float = 0.5
-    dplasma: int = -1500
+    dshell: float = 0.1
+    dplasma: int = -2000
     tcoil: str = 'hex'
     filename: str = 'iter'
     machine: str = 'iter_md'
@@ -710,10 +720,6 @@ class Machine(CoilSet):
             self.plasmaboundary.solve(self.Loc['plasma', 'poly'][0].boundary)
             self.plasmagrid.solve()
 
-            #wall = self.Loc['plasma', :].iloc[0]
-            #self.plasma.separatrix = dict(e=[wall.x, wall.z,
-            #                                 0.7*wall.dx, 0.5*wall.dz])
-
     @property
     def metadata(self):
         """Return machine metadata."""
@@ -733,7 +739,6 @@ class Machine(CoilSet):
 
     def build(self, **kwargs):
         """Build dataset, frameset and, biotset and save to file."""
-        print('build')
         super().__post_init__()
         self.frame_attrs = kwargs
         self.clear_frameset()
@@ -747,10 +752,9 @@ class Machine(CoilSet):
 
 if __name__ == '__main__':
 
-    coilset = Machine(geometry=['pf_active', 'wall'], dplasma=-100)#.build(dplasma=-100, geometry=['pf_active'])
-    #coilset.build(dcoil=0.25, dshell=0.5, dplasma=-1500, tcoil='hex',
-    #              geometry=['pf_active', 'wall'])
+    coilset = Machine(geometry=['pf_passive'], dplasma=-200)
 
+    coilset.plot()
     #coilset.plasma.separatrix = dict(e=[6, -0.5, 2.5, 2.5])
 
     #coilset.sloc['Ic'] = 1

@@ -133,6 +133,7 @@ class Display:
         index = self.frame.part == part
         area = self.frame.loc[index, 'area']
         patch_area = scipy.stats.mode(area)[0]
+        print(part, patch_area)
         area_fraction = patch_area/total_area
         if area_fraction < finesse_fraction:
             return self.linewidth * area_fraction/finesse_fraction

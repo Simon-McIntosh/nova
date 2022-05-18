@@ -9,7 +9,6 @@ import numpy.typing as npt
 import shapely
 import xxhash
 
-from nova.database.filepath import FilePath
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.shell import Shell
 from nova.geometry.polygon import Polygon

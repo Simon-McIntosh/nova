@@ -499,7 +499,6 @@ class ActiveCoilData(CoilData):
         """Insert data via coil method."""
         if self.empty:
             return
-        factor = np.sign(self.data['nturn'])
         self.data['nturn'] = np.abs(self.data['nturn'])
         link = [''] + [self.data['identifier'][i-index+1] if index > 0 else ''
                        for i, index in enumerate(self.data['index'][1:])]
@@ -508,7 +507,7 @@ class ActiveCoilData(CoilData):
                 for i in range(len(self.data['identifier']))]
         kwargs = {'active': True, 'name': name,
                   'delim': '_', 'nturn': self.data['nturn'],
-                  'link': link, 'factor': factor} | kwargs
+                  'link': link} | kwargs
         return super().insert(constructor, **kwargs)
 
 
@@ -738,6 +737,7 @@ class Machine(CoilSet):
 
     def build(self, **kwargs):
         """Build dataset, frameset and, biotset and save to file."""
+        print('build')
         super().__post_init__()
         self.frame_attrs = kwargs
         self.clear_frameset()
@@ -751,9 +751,9 @@ class Machine(CoilSet):
 
 if __name__ == '__main__':
 
-    coilset = Machine(geometry=['pf_passive'], dplasma=-200)
-
+    coilset = Machine(dplasma=-500)
     coilset.plot()
+
     #coilset.plasma.separatrix = dict(e=[6, -0.5, 2.5, 2.5])
 
     #coilset.sloc['Ic'] = 1

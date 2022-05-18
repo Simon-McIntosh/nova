@@ -67,13 +67,18 @@ class FrameSet(FilePath, FrameSetLoc):
         for attr in delattrs:
             delattr(self, attr)
 
+    def subset(self, dataset):
+        """Return dataset subgroup."""
+        if self.group is not None:
+            return dataset[self.group]
+        return dataset
+
     def load_metadata(self, filename: str, path=None):
         """Return metadata from netCDF file."""
         file = self.file(filename, path)
         metadata = {}
         with netCDF4.Dataset(file) as dataset:
-            if self.group is not None:
-                dataset = dataset[self.group]
+            dataset = self.subset(dataset)
             if not hasattr(dataset, 'metadata'):
                 return {}
             for attr in dataset.metadata:
@@ -86,8 +91,7 @@ class FrameSet(FilePath, FrameSetLoc):
             return
         file = self.file(filename, path)
         with netCDF4.Dataset(file, 'a') as dataset:
-            if self.group is not None:
-                dataset = dataset[self.group]
+            dataset = self.subset(dataset)
             dataset.metadata = list(metadata)
             for attr in metadata:
                 setattr(dataset, attr, metadata[attr])
@@ -107,6 +111,7 @@ class FrameSet(FilePath, FrameSetLoc):
         self.subframe.load(file, self.netcdf_path('subframe'))
         self.clear_frameset()
         with netCDF4.Dataset(file) as dataset:
+            dataset = self.subset(dataset)
             for attr in dataset.groups:
                 if attr in dir(self.__class__) and isinstance(
                         data := getattr(self, attr), netCDF):
@@ -114,14 +119,16 @@ class FrameSet(FilePath, FrameSetLoc):
                     data.load(file)
         return self
 
-    def store(self, filename: str, path=None, mode='a'):
-        """Store frame and subframe as groups within hdf file."""
+    def mode(self, file: str) -> str:
+        """Return netcdf file access mode."""
+        if os.path.isfile(file):
+            return 'a'
+        return 'w'
+
+    def store(self, filename: str, path=None):
+        """Store frame, subframe and biot attrs as groups within hdf file."""
         file = self.file(filename, path)
-        if mode == 'w' and os.path.isfile(file):
-            os.remove(file)
-        if mode == 'a' and not os.path.isfile(file):
-            mode = 'w'
-        self.frame.store(file, self.netcdf_path('frame'), mode=mode)
+        self.frame.store(file, self.netcdf_path('frame'), mode=self.mode(file))
         self.subframe.store(file, self.netcdf_path('subframe'), mode='a')
         for attr in self.__dict__:
             if isinstance(data := getattr(self, attr), netCDF):

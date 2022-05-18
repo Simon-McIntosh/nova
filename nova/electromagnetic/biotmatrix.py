@@ -115,7 +115,7 @@ class BiotSolver:
                     _M_ *= self.source.coilframe.Np.reshape(1, -1)
                 if self.target_turns:
                     _M_[self.target.plasma, :] *= \
-                            self.target.nturn[self.target.plasma].reshape(-1, 1)
+                        self.target.nturn[self.target.plasma].reshape(-1, 1)
                 if self.reduce_source and \
                         len(self.source._plasma_reduction_index) <\
                         self.source.nP:

@@ -4,6 +4,7 @@ from functools import cached_property
 import inspect
 from typing import ClassVar
 
+from nova.database.netcdf import netCDF
 from nova.electromagnetic.biotdata import BiotData
 from nova.electromagnetic.biotgrid import BiotGrid
 from nova.electromagnetic.biotinductance import BiotInductance
@@ -34,6 +35,15 @@ class BiotFactory(FrameSet):
     def biot_attrs(self):
         """Return frame attributes."""
         return dict(dfield=self.dfield)
+
+    @property
+    def biot_methods(self):
+        """Return list of active biot methods."""
+        attrs = []
+        for attr in self.__dict__:
+            if isinstance(getattr(self, attr), netCDF):
+                attrs.append(attr)
+        return attrs
 
     @cached_property
     def plasma(self):

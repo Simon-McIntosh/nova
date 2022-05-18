@@ -22,7 +22,7 @@ class BiotPlasmaGrid(BiotBaseGrid):
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     levels: Union[int, list[float]] = 21
 
-    def solve(self,):
+    def solve(self):
         """Solve Biot interaction across plasma grid."""
         if self.sloc['plasma'].sum() == 0:
             raise GridError('plasma')

@@ -1,8 +1,5 @@
 """Construct coilset with frameset and biot factories."""
-from dataclasses import dataclass, fields
-from functools import cached_property
-
-import pandas
+from dataclasses import dataclass
 
 from nova.electromagnetic.framefactory import FrameFactory
 from nova.electromagnetic.frameset import FrameSet

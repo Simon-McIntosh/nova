@@ -663,6 +663,7 @@ class Machine(CoilSet):
     def __post_init__(self):
         """Load coilset, build if not found."""
         super().__post_init__()
+        self.load(self.filename)
         try:
             self.load(self.filename)
         except (FileNotFoundError, OSError, KeyError):

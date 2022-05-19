@@ -94,7 +94,9 @@ class Turn(CoilSetAttrs):
             subindex = self.subframe.insert(*args, **subattrs)
         poly = shapely.geometry.MultiPolygon(
             [polygon.poly for polygon in self.subframe.poly[subindex]])
-        index = self.frame.insert(poly, iloc=iloc, **self.attrs)
+        attrs = {attr: self.attrs[attr] for attr in self.attrs if not
+                 isinstance(self.attrs[attr], (dict, list, np.ndarray))}
+        index = self.frame.insert(poly, iloc=iloc, **attrs)
         geom = TurnGeom(self.subframe.loc[subindex, :])
         self.frame.loc[index, geom.columns] = geom.data.values()
         self.update_loc_indexer()

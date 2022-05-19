@@ -7,7 +7,7 @@ from nova.electromagnetic.biotfactory import BiotFactory
 from nova.geometry.polygon import Polygon
 
 
-@dataclass
+@dataclass(repr=False)
 class CoilSet(BiotFactory, FrameFactory):
     """
     Manage coilset.

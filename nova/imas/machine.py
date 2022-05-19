@@ -297,15 +297,15 @@ class FrameData(ABC):
         for attr in self.geometry_attrs:
             self.data[attr].append(getattr(element.geometry, attr))
         for attr in self.loop_attrs:
-            self.data[attr].append(getattr(loop, attr))
+            self.data[attr] = getattr(loop, attr)
 
     @property
     def part(self):
         """Return part name."""
         try:
-            label = self.data['identifier'][0]
+            label = self.data['identifier']
         except KeyError:
-            label = self.data['name'][0]
+            label = self.data['name']
         if isinstance(label, list):
             label = label[0]
         if 'VES' in label:
@@ -406,7 +406,7 @@ class PassiveShellData(FrameData):
         geometry = element.geometry
         self.points.append(np.c_[geometry.start, geometry.end].T)
         for attr in self.loop_attrs:
-            self.data[attr].append([getattr(loop, attr)])
+            self.data[attr].append(getattr(loop, attr))
         for attr in self.geometry_attrs:
             self.data[attr].append([getattr(geometry, attr)])
 
@@ -415,10 +415,8 @@ class PassiveShellData(FrameData):
         geometry = element.geometry
         self.points[-1] = np.append(
             self.points[-1], geometry.end.reshape(1, -1), axis=0)
-        for attr in self.loop_attrs:
-            self.data[attr][-1].append(getattr(loop, attr))
         for attr in self.geometry_attrs:
-            self.data[attr][-1].append(getattr(geometry, attr))
+            self.data[attr][-1].append(getattr(loop, attr))
 
     def insert(self, shell: Shell):
         """Insert data into shell instance."""
@@ -470,7 +468,7 @@ class PF_Passive_Geometry(MachineDescription):
         """Build pf passive geometroy."""
         shelldata = PassiveShellData()
         coildata = PassiveCoilData()
-        for ids_loop in self.load_ids_data().loop:
+        for ids_loop in self.load_ids_data('loop'):
             loop = Loop(ids_loop)
             for i, ids_element in enumerate(ids_loop.element):
                 element = Element(ids_element, i)
@@ -500,14 +498,9 @@ class ActiveCoilData(CoilData):
         if self.empty:
             return
         self.data['nturn'] = np.abs(self.data['nturn'])
-        link = [''] + [self.data['identifier'][i-index+1] if index > 0 else ''
-                       for i, index in enumerate(self.data['index'][1:])]
-        name = [self.data['identifier'][0] if i == 0
-                else self.data['identifier'][0] + f'{i}'
-                for i in range(len(self.data['identifier']))]
-        kwargs = {'active': True, 'name': name,
+        kwargs = {'active': True, 'name': self.data['identifier'],
                   'delim': '_', 'nturn': self.data['nturn'],
-                  'link': link} | kwargs
+                  } | kwargs
         return super().insert(constructor, **kwargs)
 
 
@@ -523,12 +516,17 @@ class PF_Active_Geometry(MachineDescription):
     """Manage active poloidal loop ids, pf_passive."""
 
     pulse: int = 111001
-    run: int = 4
+    run: int = 201
     ids_name: str = 'pf_active'
 
     def build(self):
-        """Build pf active geometroy."""
-        for ids_loop in self.load_ids_data().coil:
+        """Build pf active."""
+        self.build_coil()
+        self.build_circuit()
+
+    def build_coil(self):
+        """Build pf active coil geometroy."""
+        for ids_loop in self.load_ids_data('coil'):
             loop = ActiveLoop(ids_loop)
             coildata = ActiveCoilData()
             polydata = ActivePolyCoilData()
@@ -550,6 +548,16 @@ class PF_Active_Geometry(MachineDescription):
                 constructor = self.turn
             coildata.insert(constructor)
             polydata.insert(constructor)
+
+    def build_circuit(self):
+        """Build circuit influence matrix."""
+        for supply in self.load_ids_data('supply'):
+            print(supply.identifier)
+
+        for circuit in self.load_ids_data('circuit'):
+            print(circuit.identifier)
+            print(circuit.connections.shape)
+            print()
 
 
 @dataclass
@@ -630,7 +638,7 @@ class Wall_Geometry(MachineDescription):
     def build(self):
         """Build plasma bound by firstwall contour."""
         firstwall = ContourData()
-        limiter = self.load_ids_data().description_2d.array[0].limiter
+        limiter = self.load_ids_data('description_2d').array[0].limiter
         for unit in limiter.unit:
             firstwall.append(unit)
         contour = Contour(firstwall.data)  # extract closed loop
@@ -647,13 +655,12 @@ class Machine(CoilSet):
     tcoil: str = 'hex'
     filename: str = 'iter'
     machine: str = 'iter_md'
-    datapath: str = 'data/Nova'
+    datapath: str = field(default='data/Nova', repr=False)
     xxh32: xxhash.xxh32 = field(repr=False, init=False,
                                 default_factory=xxhash.xxh32)
 
     geometry: Union[dict[str, tuple[int, int]], list[str]] = field(
         default_factory=lambda: ['pf_active', 'pf_passive', 'wall'])
-    ids_name: str = field(init=False, default='multiple')
 
     machine_description: ClassVar[dict[str, MachineDescription]] = dict(
         pf_active=PF_Active_Geometry,
@@ -663,7 +670,6 @@ class Machine(CoilSet):
     def __post_init__(self):
         """Load coilset, build if not found."""
         super().__post_init__()
-        #self.load(self.filename)
         try:
             self.load(self.filename)
         except (FileNotFoundError, OSError, KeyError):
@@ -698,11 +704,15 @@ class Machine(CoilSet):
             attrs[f'{attr}_run'] = run
         return attrs
 
+    @property
+    def hash_attrs(self) -> dict:
+        """Return group attributes for generation xxh32 group hash."""
+        return self.coilset_attrs | self.ids_attrs
+
     def update_group(self):
         """Return group name as xxh32 hex hash."""
         self.xxh32.reset()
-        self.xxh32.update(np.array(list(self.coilset_attrs.values())
-                                   + list(self.ids_attrs.values())))
+        self.xxh32.update(np.array(list(self.hash_attrs.values())))
         self.group = self.xxh32.hexdigest()
         return self.group
 
@@ -752,8 +762,10 @@ class Machine(CoilSet):
 
 if __name__ == '__main__':
 
-    coilset = Machine(geometry=['pf_active', 'wall'])
-    coilset.plot()
+    #coilset = Machine(geometry=['pf_active'], dplasma=-10)
+    #coilset.plot()
+
+    pf_active = PF_Active_Geometry()
 
     #coilset.plasma.separatrix = dict(e=[6, -0.5, 2.5, 2.5])
 

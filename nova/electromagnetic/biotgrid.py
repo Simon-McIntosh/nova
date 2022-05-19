@@ -207,16 +207,19 @@ class BiotGrid(BiotBaseGrid):
         if isinstance(limit, (int, float)):
             limit = Expand(self.subframe, index)(limit)
         grid = Grid(number, limit)
-        target = BiotFrame(dict(x=grid.data.x2d.values.flatten(),
-                                z=grid.data.z2d.values.flatten()),
+        self.solve2d(grid.data.x2d.values, grid.data.z2d.values)
+
+    def solve2d(self, x2d, z2d):
+        """Solve interaction across rectangular grid."""
+        target = BiotFrame(dict(x=x2d.flatten(), z=z2d.flatten()),
                            label='Grid')
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
                               attrs=self.attrs).data
         # insert grid data
-        self.data.coords['x'] = grid.data.x
-        self.data.coords['z'] = grid.data.z
-        self.data.coords['x2d'] = (['x', 'z'], grid.data.x2d.data)
-        self.data.coords['z2d'] = (['x', 'z'], grid.data.z2d.data)
+        self.data.coords['x'] = x2d[:, 0]
+        self.data.coords['z'] = z2d[0]
+        self.data.coords['x2d'] = (['x', 'z'], x2d)
+        self.data.coords['z2d'] = (['x', 'z'], z2d)
         super().post_solve()
 
     @property

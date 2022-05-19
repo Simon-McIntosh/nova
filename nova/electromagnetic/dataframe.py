@@ -290,5 +290,5 @@ if __name__ == '__main__':
                           required=['x'], additional=['Ic', 'z'],
                           Subspace=[], label='PF')
 
-    dataframe.store('tmp.h5', 'frame')
-    dataframe.load('tmp.h5', 'frame')
+    #dataframe.store('tmp.h5', 'frame')
+    #dataframe.load('tmp.h5', 'frame')

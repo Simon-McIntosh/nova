@@ -128,7 +128,7 @@ class FrameSetLoc(FrameData):
 
     """
 
-    version: dict = field(init=False, default_factory=dict)
+    version: dict = field(init=False, default_factory=dict, repr=False)
 
     def __post_init__(self):
         """Create array loc indexers."""

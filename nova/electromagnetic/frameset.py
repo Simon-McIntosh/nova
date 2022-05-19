@@ -110,7 +110,6 @@ class FrameSet(FilePath, FrameSetLoc):
         self.frame.load(file, self.netcdf_path('frame'))
         self.subframe.load(file, self.netcdf_path('subframe'))
         self.clear_frameset()
-        '''
         with netCDF4.Dataset(file) as dataset:
             dataset = self.subset(dataset)
             for attr in dataset.groups:
@@ -118,7 +117,6 @@ class FrameSet(FilePath, FrameSetLoc):
                         data := getattr(self, attr), netCDF):
                     data.group = self.group
                     data.load(file)
-        '''
         return self
 
     def mode(self, file: str) -> str:
@@ -132,12 +130,10 @@ class FrameSet(FilePath, FrameSetLoc):
         file = self.file(filename, path)
         self.frame.store(file, self.netcdf_path('frame'), mode=self.mode(file))
         self.subframe.store(file, self.netcdf_path('subframe'), mode='a')
-        '''
         for attr in self.__dict__:
             if isinstance(data := getattr(self, attr), netCDF):
                 data.group = self.group
                 data.store(file)
-        '''
         return self
 
     def plot(self, index=None, axes=None, **kwargs):

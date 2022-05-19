@@ -26,3 +26,4 @@ class netCDF(FilePath):
         with xarray.open_dataset(
                 file, group=self.netcdf_path(self.name)) as data:
             self.data = data
+            self.data.load()

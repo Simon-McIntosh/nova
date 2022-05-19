@@ -198,6 +198,8 @@ class Machine(Connect):
 if __name__ == '__main__':
 
     machine = Machine().sync_ids()
+    #machine.load_ids('pf_active')
+    #print(machine.frame)
 
     #Machine().sync_shot('111001/3')
 

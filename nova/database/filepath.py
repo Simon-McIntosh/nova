@@ -1,5 +1,5 @@
 """Manage file data access for frame and biot instances."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import os
 
 import xarray
@@ -11,10 +11,10 @@ from nova.definitions import root_dir
 class FilePath:
     """Manage to access to data via store and load methods."""
 
-    path: str = None
-    group: str = None
-    filename: str = None
-    data: xarray.Dataset = None
+    filename: str = field(default=None, repr=True)
+    group: str = field(default=None, repr=True)
+    path: str = field(default=None, repr=False)
+    data: xarray.Dataset = field(default=None, repr=False)
 
     def set_path(self, subpath: str):
         """Set default path."""

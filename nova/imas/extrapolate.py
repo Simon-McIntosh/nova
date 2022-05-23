@@ -55,11 +55,15 @@ if __name__ == '__main__':
     #                     eq.data.z2d.values[::20, ::20])
     coilset.plasma.separatrix = eq.data.boundary[0]
 
-
     itime = 0
+
+    import scipy
+    rbs = scipy.interpolate.RectBivariateSpline(eq.data.r, eq.data.z,
+                                                eq.data.psi2d[itime])
+    psi = rbs.ev(coilset.loc['ionize', 'x'], coilset.loc['ionize', 'z'])
+
     eq.plot_2d(itime, 'psi', colors='C3', levels=21)
     eq.plot_boundary(itime)
-
 
     coilset.plot('plasma')
     coilset.grid.plot()

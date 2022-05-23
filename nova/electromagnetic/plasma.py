@@ -34,7 +34,7 @@ class Plasma(Axes, netCDF, FrameSetLoc):
 
     def __len__(self):
         """Return number of plasma filaments."""
-        return self.aloc.plasma.sum()
+        return self.aloc['plasma'].sum()
 
     def __str__(self):
         """Return string representation of plasma subframe."""

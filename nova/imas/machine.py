@@ -557,6 +557,7 @@ class PF_Active_Geometry(MachineDescription):
         self.circuit.initialize(supply, nodes)
         for circuit in self.load_ids_data('circuit'):
             self.circuit.insert(circuit.identifier, circuit.connections)
+        self.circuit.link()  # link single loop circuits
 
 
 @dataclass
@@ -769,10 +770,7 @@ if __name__ == '__main__':
     coilset = Machine(geometry=['pf_active', 'wall'])
     coilset.plot()
 
-    #pf_active = PF_Active_Geometry()
-
-    #coilset.plasma.separatrix = dict(e=[6, -0.5, 2.5, 2.5])
-
-    #coilset.sloc['Ic'] = 1
-    #coilset.sloc['plasma', 'Ic'] = -450
-    #coilset.plot()
+    # coilset.plasma.separatrix = dict(e=[6, -0.5, 2.5, 2.5])
+    # coilset.sloc['Ic'] = 1
+    # coilset.sloc['plasma', 'Ic'] = -450
+    # coilset.plot()

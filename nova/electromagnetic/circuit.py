@@ -7,6 +7,7 @@ import xarray
 
 from nova.database.netcdf import netCDF
 from nova.electromagnetic.framesetloc import FrameSetLoc
+from nova.utilities.pyplot import plt
 
 
 @dataclass
@@ -45,54 +46,67 @@ class Circuit(netCDF, FrameSetLoc):
         DiG = nx.DiGraph(edge_list.values())
         pos = nx.planar_layout(DiG)
 
-        nx.draw(DiG, pos, with_labels=True)
         edge_labels = {edge_list[edge]: edge for edge in edge_list}
-        nx.draw_networkx_edge_labels(DiG, pos, edge_labels=edge_labels)
-        nx.draw_networkx_nodes(DiG, pos)
-        #nx.draw_networkx_edges(DiG, pos,
-        #                       connectionstyle='arc3,rad=0.2')
+        if len(edge_list) == 2:
+            nx.draw_networkx_edges(DiG, pos, connectionstyle='arc3,rad=0.15')
+            nx.draw_networkx_nodes(DiG, pos)
+            nx.draw_networkx_labels(DiG, pos)
+            nx.draw_networkx_edge_labels(DiG, pos, edge_labels=edge_labels,
+                                         label_pos=0.3)
+            plt.gca().set_axis_off()
+            return
+        nx.draw(DiG, pos, with_labels=True)
+        nx.draw_networkx_edge_labels(DiG, pos, edge_labels=edge_labels,
+                                     label_pos=0.5)
+
+    def plot_all(self):
+        """Plot all circuits."""
+        for circuit in self.data.circuit:
+            plt.figure()
+            self.plot(circuit)
 
     def edge_loops(self, circuit: str):
         """Extract basis loops."""
         edge_list = self.edge_list(circuit)
+        edge_nodes = edge_list.values()
         G = nx.Graph(edge_list)
+        loops = []
         for loop in nx.cycle_basis(G):
-            loop.append(loop[0])
-            pairs = [tuple(loop[i:i+2]) for i in range(len(loop) - 1)]
-            edge_index = np.zeros(len(pairs), dtype=int)
-            direction = np.ones(len(pairs), dtype=int)
+            edge = [_loop for _loop in loop if isinstance(_loop, str)]
+            nodes = [_loop for _loop in loop if not isinstance(_loop, str)]
+            nodes.append(nodes[0])
+            pairs = [tuple(nodes[i:i+2]) for i in range(len(nodes) - 1)]
+            sign = np.ones(len(pairs), dtype=int)
             for i, pair in enumerate(pairs):
-                try:
-                    edge_index[i] = edge_list.index(pair)
-                except ValueError:
-                    edge_index[i] = edge_list.index(pair[::-1])
-                    direction[i] = -1
-            #[for index in edge_index]
-            #print(edge_list[edge], direction)
-            #print(self.data.edge[edge].values)
+                if pair in edge_nodes:
+                    continue
+                if pair[::-1] in edge_nodes:
+                    sign[i] = -1
+                    continue
+                raise IndexError(f'node pair {pair} '
+                                 f'not in edge nodes {edge_nodes}')
+            for i in range(len(edge)):
+                if edge[i] in self.frame.index:
+                    continue
+                if sign[i] == -1:
+                    sign *= -1
+            loops.append(dict(edge=edge, sign=sign))
+        return loops
 
-
-
-'''
-
-import numpy as np
-
-matrix = np.array([[1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-                   [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                   [0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0],
-                   [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0],
-                   [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1]])
-
-incidence_matrix = -matrix[:, ::2] + matrix[:, 1::2]
-edge_list = [(np.where(col == -1)[0][0], np.where(col == 1)[0][0])
-             for col in incidence_matrix.T]
-G = nx.Graph(edge_list)
-DiG = nx.DiGraph(edge_list)
-pos = nx.spring_layout(G, seed=2025)
-
-pos = {0: (0, 1), 1: (-1, 0), 2: (0, 0), 3: (1, 0), 4: (0, -1)}
-nx.draw(DiG, pos, with_labels=True)
-
-print(list(nx.cycle_basis(G)))
-
-'''
+    def link(self):
+        """Link single circuit coils."""
+        for circuit in self.data.circuit.values:
+            loops = self.edge_loops(circuit)
+            if len(loops) > 1:
+                continue
+            loop = loops[0]
+            index, factor = [], []
+            for edge, sign in zip(loop['edge'], loop['sign']):
+                if edge in self.frame.index:
+                    index.append(edge)
+                    factor.append(sign)
+            if len(index) == 1:
+                continue
+            if factor[0] == -1:
+                factor *= -1
+            self.linkframe(index, factor[1:])

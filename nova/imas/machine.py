@@ -551,13 +551,12 @@ class PF_Active_Geometry(MachineDescription):
 
     def build_circuit(self):
         """Build circuit influence matrix."""
-        for supply in self.load_ids_data('supply'):
-            print(supply.identifier)
-
+        supply = [supply.identifier
+                  for supply in self.load_ids_data('supply')]
+        nodes = len(self.load_ids_data('circuit')[0].connections)
+        self.circuit.initialize(supply, nodes)
         for circuit in self.load_ids_data('circuit'):
-            print(circuit.identifier)
-            print(circuit.connections.shape)
-            print()
+            self.circuit.insert(circuit.identifier, circuit.connections)
 
 
 @dataclass
@@ -682,7 +681,7 @@ class Machine(CoilSet):
         self.metadata = self.load_metadata(filename, path)
         return self
 
-    def store(self, filename: str, path=None, metadata=None):
+    def store(self, filename=None, path=None, metadata=None):
         """Store frameset, biot attributes and metadata."""
         self.update_group()
         super().store(filename, path)
@@ -718,6 +717,8 @@ class Machine(CoilSet):
 
     def update_geometry(self):
         """Update geometry ids referances."""
+        if isinstance(self.geometry, str):
+            self.geometry = [self.geometry]
         if isinstance(self.geometry, list):
             self.geometry = {attr: [self.machine_description[attr].pulse,
                                     self.machine_description[attr].run]
@@ -754,18 +755,21 @@ class Machine(CoilSet):
         self.clear_frameset()
         self.update_geometry()
         for attr in self.geometry:
-            self += self.machine_description[attr](
+            coilset = self.machine_description[attr](
                 *self.geometry[attr], machine=self.machine, **self.frame_attrs)
+            self += coilset
+            for attr in coilset.biot_methods:
+                getattr(self, attr).data = getattr(coilset, attr).data
         self.solve_biot()
         return self.store(self.filename)
 
 
 if __name__ == '__main__':
 
-    #coilset = Machine(geometry=['pf_active'], dplasma=-10)
-    #coilset.plot()
+    coilset = Machine(geometry=['pf_active', 'wall'])
+    coilset.plot()
 
-    pf_active = PF_Active_Geometry()
+    #pf_active = PF_Active_Geometry()
 
     #coilset.plasma.separatrix = dict(e=[6, -0.5, 2.5, 2.5])
 

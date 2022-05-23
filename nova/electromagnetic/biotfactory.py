@@ -14,6 +14,7 @@ from nova.electromagnetic.biotplasmaboundary import BiotPlasmaBoundary
 from nova.electromagnetic.biotpoint import BiotPoint
 from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.plasma import Plasma
+from nova.electromagnetic.circuit import Circuit
 
 
 @dataclass
@@ -24,12 +25,14 @@ class BiotFactory(FrameSet):
     biot_class: ClassVar[dict[str, BiotData]] = \
         dict(point=BiotPoint, grid=BiotGrid,
              plasmaboundary=BiotPlasmaBoundary, plasmagrid=BiotPlasmaGrid,
-             probe=BiotPoint, loop=BiotLoop, inductance=BiotInductance)
+             probe=BiotPoint, loop=BiotLoop, inductance=BiotInductance,
+             circuit=Circuit)
 
     def _biotfactory(self):
         """Return nammed biot instance."""
         attr = inspect.stack()[1][3]  # name of caller
-        return self.biot_class[attr](*self.frames, path=self.path, name=attr)
+        return self.biot_class[attr](*self.frames, path=self.path, name=attr,
+                                     filename=self.filename)
 
     @property
     def biot_attrs(self):
@@ -50,6 +53,11 @@ class BiotFactory(FrameSet):
         """Return plasma instance."""
         return Plasma(*self.frames, path=self.path,
                       grid=self.plasmagrid, boundary=self.plasmaboundary)
+
+    @cached_property
+    def circuit(self):
+        """Return power supply instance."""
+        return self._biotfactory()
 
     @cached_property
     def grid(self):

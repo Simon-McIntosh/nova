@@ -14,16 +14,12 @@ class netCDF(FilePath):
     data: xarray.Dataset = field(init=False, repr=False,
                                  default_factory=xarray.Dataset)
 
-    def store(self, filename: str, path=None):
+    def store(self, filename=None, path=None):
         """Store data as netCDF in hdf5 file."""
-        file = self.file(filename, path)
         group = self.netcdf_path(self.name)
-        self.data.to_netcdf(file, mode='a', group=group)
+        return super().store(filename, path, group)
 
-    def load(self, filename: str, path=None):
+    def load(self, filename=None, path=None):
         """Load data from hdf5."""
-        file = self.file(filename, path)
-        with xarray.open_dataset(
-                file, group=self.netcdf_path(self.name)) as data:
-            self.data = data
-            self.data.load()
+        group = self.netcdf_path(self.name)
+        return super().load(filename, path, group)

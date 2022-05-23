@@ -255,7 +255,7 @@ class DataFrame(FrameAttrs):
                 metadata['version'] = [metadata['version']]
         return metadata
 
-    def store(self, file, group=None, mode='w', vtk=False):
+    def store(self, file: str, group=None, mode='w', vtk=False):
         """Store dataframe as group in netCDF4 hdf5 file."""
         xframe = self.to_xarray()
         xframe.attrs = self.extract_metadata()

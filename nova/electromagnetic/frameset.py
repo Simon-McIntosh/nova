@@ -1,6 +1,5 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 from dataclasses import dataclass, field
-import os
 
 import netCDF4
 import pandas
@@ -73,7 +72,7 @@ class FrameSet(FilePath, FrameSetLoc):
             return dataset[self.group]
         return dataset
 
-    def load_metadata(self, filename: str, path=None):
+    def load_metadata(self, filename=None, path=None):
         """Return metadata from netCDF file."""
         file = self.file(filename, path)
         metadata = {}
@@ -85,7 +84,7 @@ class FrameSet(FilePath, FrameSetLoc):
                 metadata[attr] = getattr(dataset, attr)
         return metadata
 
-    def store_metadata(self, filename: str, path=None, metadata=None):
+    def store_metadata(self, filename=None, path=None, metadata=None):
         """Store metadata to netCDF file."""
         if metadata is None:
             return
@@ -103,7 +102,7 @@ class FrameSet(FilePath, FrameSetLoc):
             return ''
         return self.group
 
-    def load(self, filename: str, path=None):
+    def load(self, filename=None, path=None):
         """Load frameset from file."""
         super().__post_init__()
         file = self.file(filename, path)
@@ -119,13 +118,7 @@ class FrameSet(FilePath, FrameSetLoc):
                     data.load(file)
         return self
 
-    def mode(self, file: str) -> str:
-        """Return netcdf file access mode."""
-        if os.path.isfile(file):
-            return 'a'
-        return 'w'
-
-    def store(self, filename: str, path=None):
+    def store(self, filename=None, path=None):
         """Store frame, subframe and biot attrs as groups within hdf file."""
         file = self.file(filename, path)
         self.frame.store(file, self.netcdf_path('frame'), mode=self.mode(file))

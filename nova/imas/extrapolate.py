@@ -45,17 +45,15 @@ class Extrapolate(Machine, Grid):
 
 if __name__ == '__main__':
 
-    coilset = Extrapolate(500, dplasma=-500)
+    coilset = Extrapolate(1000, dplasma=-500)
     coilset.sloc['plasma', 'Ic'] = -15e6
-    coilset.sloc['coil', 'Ic'] = -15e6
-    #coilset.grid.solve(1500, 0.5, index='plasma')
+    coilset.sloc['coil', 'Ic'] = 15e3
 
-    '''
     eq = Equilibrium(114101, 41)
 
     #coilset.grid.solve2d(eq.data.r2d.values[::20, ::20],
     #                     eq.data.z2d.values[::20, ::20])
-    #coilset.plasma.separatrix = eq.data.boundary[0]
+    coilset.plasma.separatrix = eq.data.boundary[0]
 
 
     itime = 0
@@ -65,4 +63,3 @@ if __name__ == '__main__':
 
     coilset.plot('plasma')
     coilset.grid.plot()
-    '''

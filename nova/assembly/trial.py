@@ -163,15 +163,15 @@ class Trial(Dataset, TrialAttrs):
                  bbox=dict(facecolor='w', boxstyle='round, pad=0.5',
                            linewidth=0.5))
 
-    def label_quartile(self, data, label: str, quartile=0.99, height=0.1,
+    def label_quantile(self, data, label: str, quantile=0.99, height=0.1,
                        color='gray'):
-        """Label quartile."""
+        """Label quantile."""
         ylim = plt.gca().get_ylim()
         yline = ylim[0] + np.array([0, height*(ylim[1] - ylim[0])])
-        quartile = np.quantile(data, quartile)
-        plt.plot(quartile*np.ones(2), yline, '-', color='k', alpha=0.75)
-        text = rf'q(0.99): ${label}={quartile:1.1f}$'
-        plt.text(quartile, yline[1], text,
+        quantile = np.quantile(data, quantile)
+        plt.plot(quantile*np.ones(2), yline, '-', color='k', alpha=0.75)
+        text = rf'q(0.99): ${label}={quantile:1.2f}$'
+        plt.text(quantile, yline[1], text,
                  ha='left', va='bottom', fontsize='small', color=color,
                  bbox=dict(facecolor='w', edgecolor=color))
 
@@ -181,12 +181,12 @@ class Trial(Dataset, TrialAttrs):
                                   density=True)
         plt.plot((edges[:-1] + edges[1:]) / 2, pdf)
 
-    def sample(self, quartile, offset=True):
-        """Return sample index closest to quartile."""
+    def sample(self, quantile, offset=True):
+        """Return sample index closest to quantile."""
         label = 'peaktopeak'
         if offset:
             label += '_offset'
-        peaktopeak = np.quantile(self.data[label], quartile)
+        peaktopeak = np.quantile(self.data[label], quantile)
         return np.argmin((self.data[label].data - peaktopeak)**2)
 
 
@@ -288,9 +288,9 @@ class Vault(Trial):
                      label='magnetic axis')
             plt.legend(loc='center', bbox_to_anchor=(0.5, 1.05),
                        ncol=2, fontsize='small')
-            self.label_quartile(self.data.peaktopeak_offset, 'H', color='C2',
+            self.label_quantile(self.data.peaktopeak_offset, 'H', color='C2',
                                 height=0.15)
-        self.label_quartile(self.data.peaktopeak, 'H', color='C1',
+        self.label_quantile(self.data.peaktopeak, 'H', color='C1',
                             height=0.04)
         plt.despine()
         axes = plt.gca()
@@ -310,12 +310,12 @@ class Vault(Trial):
         plt.xlabel(r'magnetic axis offset $\zeta$, mm')
         plt.ylabel(r'$P(\zeta)$')
 
-        self.label_quartile(offset, r'\zeta')
+        self.label_quantile(offset, r'\zeta')
         self.pdf_text()
 
-    def plot_sample(self, quartile=0.99, offset=True, plot_deviation=False):
+    def plot_sample(self, quantile=0.99, offset=True, plot_deviation=False):
         """Plot waveforms from single sample."""
-        sample = self.sample(quartile, offset)
+        sample = self.sample(quantile, offset)
         axes = plt.subplots(3, 1, sharex=False, sharey=False,
                             gridspec_kw=dict(height_ratios=[1, 1, 2]))[1]
         width = 0.8
@@ -376,7 +376,7 @@ class Vault(Trial):
         axes[2].set_ylabel('deviation')
         axes[2].set_xlabel(r'$\phi$')
         plt.despine()
-        plt.suptitle(f'quartile={quartile} offset={offset}')
+        plt.suptitle(f'quantile={quantile} offset={offset}')
 
 
 @dataclass
@@ -405,7 +405,6 @@ class ErrorField(Trial):
         """Build Monte Carlo dataset."""
         with self.timer():
             self.build_signal()
-            self.build_positive_gap()
             self.predict()
         return self.store()
 
@@ -416,12 +415,10 @@ class ErrorField(Trial):
             np.zeros((self.samples, self.data.dims['plasma']))
         radial = self.data.radial + self.data.radial_ccl
         tangential = self.data.tangential + self.data.tangential_ccl
-        vertical = self.data.vertical
+        vertical = self.data.vertical + self.data.vertical_ccl
         pitch = self.data.pitch_length / (1e3*WedgeGap.length['pitch'])
-        roll = (self.data.roll_length -
-                self.data.tangential) / (1e3*WedgeGap.length['roll'])
-        yaw = (self.data.yaw_length -
-               self.data.tangential) / (1e3*WedgeGap.length['yaw'])
+        roll = self.data.roll_length / (1e3*WedgeGap.length['roll'])
+        yaw = self.data.yaw_length / (1e3*WedgeGap.length['yaw'])
         for i, plasma in enumerate(self.data.plasma.values):
             self.data.overlap[:, i] = self.model.predict(
                 plasma, radial, tangential, vertical, pitch, roll, yaw)
@@ -439,27 +436,66 @@ class ErrorField(Trial):
         plt.ylabel(r'$P(B/B_{limit})$')
         self.pdf_text()
 
-        self.label_quartile(self.data.overlap[:, 0], r'B/B_{limit}',
-                            color='C0')
+        quantile_index = \
+            np.argmax(np.quantile(self.data.overlap, 0.99, axis=0))
+        self.label_quantile(self.data.overlap[:, quantile_index],
+                            r'B/B_{limit}', color=f'C{quantile_index}')
+
+    def scan(self, quantile=0.99):
+        """Run sensitivity scan."""
+        if 'quantile_scan' in self.data and \
+                self.data.attrs.get('quantile', None) == quantile:
+            return self
+        self.data['quantile_scan'] = ('component', 'plasma'), \
+            np.ones((self.data.dims['component'], self.data.dims['plasma']))
+        for i, pdf in enumerate(self.pdf):
+            theta = list(np.zeros(len(self.pdf)))
+            theta[i] = self.data.theta.values[i]
+            error = ErrorField(self.samples, component=self.component,
+                               theta=theta, pdf=self.pdf)
+            self.data['quantile_scan'][i] = np.quantile(
+                error.data.overlap, quantile, axis=0)
+        self.data.attrs['quantile'] = quantile
+        return self.store()
+
+    def plot_scan(self, quantile=0.99):
+        """Plot sensitivity scan results."""
+        self.scan(quantile)
+        component = [component.replace('_', ' ') for component in
+                     self.data.component.values]
+        for i, plasma in enumerate(self.data.plasma.values):
+            plt.bar(component, self.data.quantile_scan[:, i],
+                    width=0.8-i*0.2, label=f'plasma {plasma}')
+            plt.xticks(rotation=90)
+        plt.legend(fontsize='x-small')
+        plt.despine()
+        plt.ylabel(r'Overlap error field $B/B_{limit}$')
 
 
 
 if __name__ == '__main__':
 
-    theta = [5, 5, 5, 10, 2, 2, 2.5]
+    #theta = [5, 5, 5, 10, 2, 2, 2.5]
     #theta = [0, 0, 0, 10, 0, 0, 0]
     #theta = [1.5, 1.5, 1.5, 3, 2, 2, 3]
-    vault = Vault(2_0_000, theta=theta)
+    #vault = Vault(2_0_000, theta=theta)
 
     #vault.plot()
     #vault.plot_offset()
 
-    vault.plot_sample(0.5, False)
+    #vault.plot_sample(0.5, False)
 
     #theta_error = [5, 5, 5, 2, 2, 2, 5, 10, 10]
-    #theta_error = [1.5, 1.5, 1.5, 2, 2, 2, 1.5, 3, 3]
-    #error = ErrorField(2_000_000, theta=theta_error)
-    #error.plot()
+
+    theta_error = [1.5, 1.5, 1.5, 2, 2, 2, 1.5, 1.5, 3]
+    #theta_error = [np.sqrt(3), np.sqrt(3), np.sqrt(3),
+    #               1, 1, 1,
+    #               np.sqrt(3), np.sqrt(3), np.sqrt(3)]
+    theta_error = list(3*np.ones(9))
+    error = ErrorField(500_000, theta=theta_error)
+
+    error.plot_scan()
+    error.plot()
 
     #trial.plot_offset()
 

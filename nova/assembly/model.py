@@ -39,7 +39,7 @@ class Dataset(ABC, FilePath, DataAttrs):
         super().__post_init__()
         self.set_path(self.datapath)
         try:
-            self.load(lazy=False)
+            self.load()
         except (FileNotFoundError, OSError, KeyError):
             self.build()
 

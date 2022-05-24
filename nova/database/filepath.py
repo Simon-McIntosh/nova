@@ -37,13 +37,15 @@ class FilePath:
             os.makedirs(directory)
         return filename
 
-    def file(self, filename=None, path=None, extension='.nc'):
+    def file(self, filename=None, path=None, group=None, extension='.nc'):
         """Return full netCDF file path."""
         if filename is None:
             filename = self.filename
+        if group is None:
+            group = self.group
         if not os.path.splitext(filename)[1]:
             filename += extension
-        return self.check_dir(filename, path)
+        return self.check_dir(filename, path), group
 
     def netcdf_path(self, *labels, group_prefix=True) -> str:
         """Return path for netcdf group."""
@@ -72,13 +74,13 @@ class FilePath:
 
     def store(self, filename=None, path=None, group=None):
         """Store data within hdf file."""
-        file = self.file(filename, path)
+        file, group = self.file(filename, path, group)
         self.data.to_netcdf(file, group=group, mode=self.mode(file))
         return self
 
     def load(self, filename=None, path=None, group=None):
         """Load dataset from file."""
-        file = self.file(filename, path)
+        file, group = self.file(filename, path, group)
         with xarray.open_dataset(file, group=group) as data:
             self.data = data
             self.data.load()

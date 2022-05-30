@@ -21,7 +21,7 @@ class FiducialData(Plotter):
 
     fiducial: Fiducial = 'RE'
     fill: bool = True
-    sead: int = 2025
+    sead: int = 2030
     rawdata: dict[str, pandas.DataFrame] = \
         field(init=False, repr=False, default_factory=dict)
     data: xarray.Dataset = field(init=False, repr=False)
@@ -249,16 +249,17 @@ class FiducialData(Plotter):
 
 if __name__ == '__main__':
 
-    fiducial = FiducialData('RE', fill=False)
+    fiducial = FiducialData('RE', fill=True)
     fiducial.plot_single(-3)
     #fiducial.plot_gpr(1, 0)
 
-    '''
+
     plotter = pv.Plotter()
-    fiducial.warp(500, plotter=plotter)
+    fiducial.mesh['delta'] *= 1e3
+    fiducial.warp(0.5, plotter=plotter)
     fiducial.label_coils(plotter)
     plotter.show_axes()
     plotter.show()
-    '''
-    #fiducial.plot()
-    #fiducial.plot_gpr_array(1)
+
+    fiducial.plot()
+    fiducial.plot_gpr_array(1)

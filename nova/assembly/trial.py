@@ -477,25 +477,30 @@ if __name__ == '__main__':
 
     #theta = [5, 5, 5, 10, 2, 2, 2.5]
     #theta = [0, 0, 0, 10, 0, 0, 0]
-    #theta = [1.5, 1.5, 1.5, 3, 2, 2, 3]
-    #vault = Vault(2_0_000, theta=theta)
+    theta = [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 3]
+    vault = Vault(200_000, theta=theta)
 
-    #vault.plot()
-    #vault.plot_offset()
+    #'radial', 'tangential', 'roll_length',
+    #'yaw_length', 'radial_ccl', 'tangential_ccl', 'radial_wall'
+
+    vault.plot()
+    vault.plot_offset()
 
     #vault.plot_sample(0.5, False)
 
+
     #theta_error = [5, 5, 5, 2, 2, 2, 5, 10, 10]
 
-    theta_error = [1.5, 1.5, 1.5, 2, 2, 2, 1.5, 1.5, 3]
+    theta_error = [1.5, 1.5, 3, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]
     #theta_error = [np.sqrt(3), np.sqrt(3), np.sqrt(3),
     #               1, 1, 1,
     #               np.sqrt(3), np.sqrt(3), np.sqrt(3)]
-    theta_error = list(3*np.ones(9))
-    error = ErrorField(500_000, theta=theta_error)
+    #theta_error = list(3*np.ones(9))
+    error = ErrorField(200_000, theta=theta_error)
 
-    error.plot_scan()
+    #error.plot_scan()
     error.plot()
+
 
     #trial.plot_offset()
 

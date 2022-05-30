@@ -9,7 +9,7 @@ import scipy.spatial.transform
 import sklearn.neighbors
 import xarray
 
-from nova.structural.fiducialdata import FiducialData
+from nova.assembly.fiducialdata import FiducialData
 from nova.utilities.pyplot import plt
 
 
@@ -204,7 +204,7 @@ class FiducialError:
 
 if __name__ == '__main__':
 
-    data = FiducialData(fill=True, sead=2025).data
+    data = FiducialData(fill=True, sead=2030).data
     error = FiducialError(data)
     error.fit_coilset(radial_weight=-1)
 

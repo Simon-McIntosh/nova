@@ -145,10 +145,6 @@ class BiotPlot(Axes):
         return dict(colors='lightgray', linewidths=1.5, alpha=0.9,
                     linestyles='solid', levels=levels) | kwargs
 
-    def plot(self, **kwargs):
-        """Set plot axes."""
-        self.axes = kwargs.get('axes', None)
-
 
 class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
     """Flux grid baseclass."""

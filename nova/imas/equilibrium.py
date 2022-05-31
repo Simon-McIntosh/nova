@@ -130,7 +130,7 @@ class Profile2D(Scenario, BiotPlot):
 
     def plot_2d(self, itime=-1, attr='psi', axes=None, **kwargs):
         """Plot 2d profile."""
-        super().plot(axes=axes)
+        self.axes = axes
         kwargs = self.contour_kwargs(**kwargs)
         QuadContourSet = plt.contour(self.data.r, self.data.z,
                                      self.data[f'{attr}2d'][itime].T,

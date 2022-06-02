@@ -1,7 +1,8 @@
 from setuptools import setup, find_packages
 import versioneer
 
-long_description = """..."""
+long_description = """for python >3.9 install with pyvista links 
+                      pip install --find-links https://wheels.pyvista.org/ --trusted-host wheels.pyvista.org -e ."""
 
 extras_require = dict(
                       ansys=['ansys-dpf-core', 'ansys-dpf-post', 'openpyxl'],
@@ -15,7 +16,7 @@ extras_require = dict(
                       )
 
 extras_require['full'] = [module for mode in extras_require for module in extras_require[mode] 
-                          if mode not in ['thermofluids', 'cuda', 'plan', 'optimize']]
+                          if mode not in ['thermofluids', 'cuda', 'plan', 'optimize', 'mesh']]
 
 setup_kwargs = dict(
     name                = 'nova',
@@ -37,7 +38,7 @@ setup_kwargs = dict(
         'Topic :: Scientific/Engineering :: Fusion',
     ],
     cmdclass            = versioneer.get_cmdclass(),
-    python_requires     = '>=3.9, <3.10',
+    python_requires     = '>=3.9',
     install_requires    = [
         'alphashape',
         'cython',

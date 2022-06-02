@@ -73,7 +73,8 @@ class Parameter0D(Scenario):
     """Load 0D parameter timeseries from equilibrium ids."""
 
     attrs_0d: list[str] = field(
-            default_factory=lambda: ['ip', 'beta_pol', 'li_3'])
+            default_factory=lambda: ['ip', 'beta_pol', 'li_3',
+                                     'psi_axis', 'psi_boundary'])
 
     def build(self):
         """Build 0D parameter timeseries."""
@@ -144,8 +145,6 @@ class Profile2D(Scenario, BiotPlot):
 class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
     """Manage active poloidal loop ids, pf_passive."""
 
-    pulse: int
-    run: int
     ids_name: str = 'equilibrium'
 
     def build(self):

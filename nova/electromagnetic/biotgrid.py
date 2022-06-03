@@ -136,21 +136,22 @@ class Expand:
 class BiotPlot(Axes):
     """Biot plot base class."""
 
+    levels: Union[int, list[float]] = 31
+
     def contour_kwargs(self, **kwargs):
         """Return contour plot kwargs."""
-        try:
-            levels = self.levels
-        except AttributeError:
-            levels = 31
+        #try:
+        #    levels = self.levels
+        #except AttributeError:
+        #    levels = 31
         return dict(colors='lightgray', linewidths=1.5, alpha=0.9,
-                    linestyles='solid', levels=levels) | kwargs
+                    linestyles='solid', levels=self.levels) | kwargs
 
 
 class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
     """Flux grid baseclass."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
-    levels: Union[int, list[float]] = 31
 
     def __post_init__(self):
         """Initialize fieldnull version."""

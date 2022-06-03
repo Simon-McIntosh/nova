@@ -1,0 +1,115 @@
+{
+    "biotoperate.PlasmaGrid.time_field_magnitude": {
+        "code": "class PlasmaGrid:\n    def time_field_magnitude(self, svd_rank):\n        \"\"\"Time computation of radial field.\"\"\"\n        return self.coilset.plasmagrid.bn\n\n    def setup(self, svd_rank):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load(self.filename)\n        self.coilset.plasmagrid.svd_rank = svd_rank\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-1500)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.store(self.filename)",
+        "min_run_count": 2,
+        "name": "biotoperate.PlasmaGrid.time_field_magnitude",
+        "number": 500,
+        "param_names": [
+            "svd_rank"
+        ],
+        "params": [
+            [
+                "10",
+                "75",
+                "200",
+                "500",
+                "1500",
+                "-1"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "setup_cache_key": "biotoperate:21",
+        "timeout": 60.0,
+        "type": "time",
+        "unit": "seconds",
+        "version": "77ba526ec5fc7d60688bc4b78a52759d755a9af27944ac93987354ee6f308dca",
+        "warmup_time": -1
+    },
+    "biotoperate.PlasmaGrid.time_flux_function": {
+        "code": "class PlasmaGrid:\n    def time_flux_function(self, svd_rank):\n        \"\"\"Time computation of radial field.\"\"\"\n        return self.coilset.plasmagrid.psi\n\n    def setup(self, svd_rank):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load(self.filename)\n        self.coilset.plasmagrid.svd_rank = svd_rank\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-1500)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.store(self.filename)",
+        "min_run_count": 2,
+        "name": "biotoperate.PlasmaGrid.time_flux_function",
+        "number": 500,
+        "param_names": [
+            "svd_rank"
+        ],
+        "params": [
+            [
+                "10",
+                "75",
+                "200",
+                "500",
+                "1500",
+                "-1"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "setup_cache_key": "biotoperate:21",
+        "timeout": 60.0,
+        "type": "time",
+        "unit": "seconds",
+        "version": "b5a57013141094cd8f1dc44f3f2c8ea9bd7580d703985f7a52362d1aecd75313",
+        "warmup_time": -1
+    },
+    "biotoperate.PlasmaGrid.time_radial_field": {
+        "code": "class PlasmaGrid:\n    def time_radial_field(self, svd_rank):\n        \"\"\"Time computation of radial field.\"\"\"\n        return self.coilset.plasmagrid.br\n\n    def setup(self, svd_rank):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load(self.filename)\n        self.coilset.plasmagrid.svd_rank = svd_rank\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-1500)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.store(self.filename)",
+        "min_run_count": 2,
+        "name": "biotoperate.PlasmaGrid.time_radial_field",
+        "number": 500,
+        "param_names": [
+            "svd_rank"
+        ],
+        "params": [
+            [
+                "10",
+                "75",
+                "200",
+                "500",
+                "1500",
+                "-1"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "setup_cache_key": "biotoperate:21",
+        "timeout": 60.0,
+        "type": "time",
+        "unit": "seconds",
+        "version": "35d97abe8f730cf46d7fe2630ada21fe8323590efd060a9e7e28f3a80e067e7b",
+        "warmup_time": -1
+    },
+    "biotoperate.PlasmaGrid.time_update_turns": {
+        "code": "class PlasmaGrid:\n    def time_update_turns(self, svd_rank):\n        \"\"\"Time generation of plasma grid.\"\"\"\n        self.coilset.plasmagrid.update_turns('Psi', svd_rank != -1)\n\n    def setup(self, svd_rank):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load(self.filename)\n        self.coilset.plasmagrid.svd_rank = svd_rank\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-1500)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.store(self.filename)",
+        "min_run_count": 2,
+        "name": "biotoperate.PlasmaGrid.time_update_turns",
+        "number": 500,
+        "param_names": [
+            "svd_rank"
+        ],
+        "params": [
+            [
+                "10",
+                "75",
+                "200",
+                "500",
+                "1500",
+                "-1"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "setup_cache_key": "biotoperate:21",
+        "timeout": 60.0,
+        "type": "time",
+        "unit": "seconds",
+        "version": "731a405ec00526fa6aaa21629c9f259b0593890e436919be40863cc8dad3f2db",
+        "warmup_time": -1
+    },
+    "version": 2
+}

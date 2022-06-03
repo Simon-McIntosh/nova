@@ -8,6 +8,7 @@ import numpy.typing as npt
 from scipy.interpolate import RectBivariateSpline, interp1d
 import xarray
 
+from nova.electromagnetic.biotgrid import BiotPlot
 from nova.imas.database import IDS
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
@@ -81,7 +82,7 @@ class TimeSlice:
 
 
 @dataclass
-class Extrapolate(Machine, Grid, IDS):
+class Extrapolate(BiotPlot, Machine, Grid, IDS):
     """Extrapolate equlibrium beyond separatrix ids."""
 
     itime: int = 0
@@ -95,7 +96,6 @@ class Extrapolate(Machine, Grid, IDS):
     def __post_init__(self):
         """Load equilibrium data."""
         super().__post_init__()
-        self.equilibrium = Equilibrium(self.pulse, self.run)
         self.data = Equilibrium(self.pulse, self.run).data
 
     @property
@@ -112,12 +112,14 @@ class Extrapolate(Machine, Grid, IDS):
     def ionize(self, itime: int):
         """Update plasma current."""
         self.itime = itime
-        time_slice = TimeSlice(self.equilibrium.data.isel(time=self.itime))
+        time_slice = TimeSlice(self.data.isel(time=self.itime))
 
         coilset.plasma.separatrix = time_slice.boundary
-        radius = self.loc['ionize', 'x']
-        height = self.loc['ionize', 'z']
-        area = self.loc['ionize', 'area']
+        ionize = self.aloc['ionize']
+        plasma = self.aloc['plasma']
+        radius = self.aloc['x'][ionize]
+        height = self.aloc['z'][ionize]
+        area = self.aloc['area'][ionize]
         psi_norm = time_slice.psi2d_norm(radius, height)
 
         current_density = radius * time_slice.p_prime(psi_norm) + \
@@ -125,33 +127,42 @@ class Extrapolate(Machine, Grid, IDS):
         current_density *= -2*np.pi
         current = current_density * area
 
-        ionize = self.aloc['ionize']
         nturn = self.aloc['nturn']
         nturn[ionize] = current / current.sum()
         self.sloc['plasma', 'Ic'] = time_slice.ip
 
-        print(self.sloc(), current.sum())
+        print(self.plasmagrid.data.Psi[ionize[plasma], :].shape)
+        print(ionize.sum())
+        self.sloc['free'] = self.sloc['coil']
+
+        #self.sl
+        #print(self.sloc(), current.sum())
 
         time_slice.plot()
 
-    #def plot_2d(self, itime=-1, attr='psi', axes=None, **kwargs):
-    #    """Expose plot_2d ."""
-    #    return Equilibrium(self, itime=-1, attr='psi', axes=None, **kwargs)
+    def plot_2d(self, itime=-1, attr='psi', axes=None, **kwargs):
+        """Expose plot_2d ."""
+        return Equilibrium.plot_2d(
+            self, itime=-1, attr='psi', axes=None, **kwargs)
 
+    def plot_boundary(self, itime: int):
+        """Expose Equilibrium plot boundary."""
+        return Equilibrium.plot_boundary(self, itime)
 
     def plot(self):
         """Plot plasma filements and polidal flux."""
         plt.figure()
         super().plot('plasma')
-        self.equilibrium.plot_2d(self.itime, 'psi', colors='C3', levels=21)
+        self.plot_2d(self.itime, 'psi', colors='C3', levels=21)
         self.plot_boundary(self.itime)
-        #self.grid.plot()
+
+        self.grid.plot()
 
 
 
 if __name__ == '__main__':
 
-    coilset = Extrapolate(114101, 41, number=1000, dplasma=-2500)
+    coilset = Extrapolate(114101, 41, number=1000, dplasma=-500)
 
     coilset.sloc['coil', 'Ic'] = 7.5e3
 

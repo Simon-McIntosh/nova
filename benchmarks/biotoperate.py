@@ -20,6 +20,7 @@ class PlasmaGrid:
         coilset = CoilSet(dplasma=-500)
         coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')
         coilset.plasmagrid.solve()
+        coilset.plasmagrid.svd_rank = 75
         coilset.store(self.filename)
 
     def remove(self):
@@ -34,7 +35,7 @@ class PlasmaGrid:
 class PlasmaTurns(PlasmaGrid):
     """Benchmark biotoperate methods."""
 
-    number = 500
+    number = 5000
     params = [10, 75, 200, 500, -1]
     param_names = ['svd_rank']
 
@@ -51,7 +52,11 @@ class PlasmaTurns(PlasmaGrid):
 class PlasmaEvaluate(PlasmaGrid):
     """Time evaluation of plasma operators."""
 
-    number = 1000
+    number = 5000
+
+    def time_flux_function_ev_only(self):
+        """Time forced evaluation of flux function."""
+        self.coilset.plasmagrid.operator['Psi'].evaluate()
 
     def time_flux_function(self):
         """Time computation of radial field."""
@@ -64,6 +69,22 @@ class PlasmaEvaluate(PlasmaGrid):
     def time_field_magnitude(self):
         """Time computation of radial field."""
         return self.coilset.plasmagrid.bn
+
+
+class PlasmaOperate(PlasmaGrid):
+    """Time plasma grid operations."""
+
+    def time_solve(self):
+        """Time plasma grid biot solution."""
+        self.coilset.plasmagrid.solve()
+
+    def time_load_operators(self):
+        """Time biot operator reload."""
+        self.coilset.plasmagrid.load_operators()
+
+
+PlasmaOperate.time_solve.number = 10
+PlasmaOperate.time_load_operators.number = 100
 
 
 if __name__ == '__main__':

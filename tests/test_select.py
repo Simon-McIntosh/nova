@@ -21,6 +21,18 @@ def test_coil():
     assert list(framespace.coil) == [False, True, False]
 
 
+def test_fix():
+    framespace = FrameSpace(Required=['x'])
+    framespace.insert(range(3), free=[True, False, True])
+    assert list(framespace.fix) == [False, True, False]
+
+
+def test_ferritic():
+    framespace = FrameSpace(Required=['x'])
+    framespace.insert(range(3), ferritic=[True, False, True])
+    assert list(framespace.ferritic) == [True, False, True]
+
+
 def test_select_subspace():
     framespace = FrameSpace(Required=['x'], Available=['plasma'])
     assert np.array([attr in framespace.metaframe.subspace for attr in

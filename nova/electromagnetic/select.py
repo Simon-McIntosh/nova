@@ -13,8 +13,7 @@ class Label:
 
     include: list[str] = field(default_factory=list)
     exclude: list[str] = field(default_factory=list)
-    preclude: list[str] = field(default_factory=lambda: [
-        'feedback'], repr=False)
+    preclude: list[str] = field(default_factory=list, repr=False)
     require: list[str] = field(init=False)
 
     def __post_init__(self):
@@ -50,10 +49,10 @@ class Select(MetaMethod):
 
     frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: [
-        'active', 'plasma', 'fix', 'feedback'], repr=False)
+        'active', 'plasma', 'free', 'ferritic'], repr=False)
     require_all: bool = field(repr=False, default=False)
     additional: list[str] = field(init=False, default_factory=lambda: [
-        'passive', 'coil', 'free', 'ferritic'])
+        'passive', 'coil', 'fix'])
     avalible: list[str] = field(init=False, default_factory=list)
     labels: dict[str, dict[str, list[str]]] = field(init=False, repr=False,
                                                     default_factory=dict)
@@ -63,13 +62,12 @@ class Select(MetaMethod):
         """Extend additional with unique values extracted from match."""
         if not self.generate:
             return
-        self.add_label('feedback', 'feedback')
         self.add_label('active', 'active')
         self.add_label('passive', None, 'active')
         self.add_label('plasma', 'plasma')
         self.add_label('coil', None, ['plasma', 'passive'])
-        self.add_label('fix', 'fix')
-        self.add_label('free', None, 'fix')
+        self.add_label('free', 'free')
+        self.add_label('fix', None, 'free')
         self.add_label('ferritic', 'ferritic')
         self.update_metaframe()
         self.update_columns()
@@ -87,7 +85,7 @@ class Select(MetaMethod):
             include = self.any_label(self.labels[label]['include'], True)
             exclude = self.any_label(self.labels[label]['exclude'], False)
             value = np.all([include, ~exclude], axis=0)
-            with self.frame.setlock(True, ['subspace', 'array']):
+            with self.frame.setlock(True):  # , ['subspace', 'array']
                 self.frame[label] = value
 
     def any_label(self, columns, default):
@@ -96,7 +94,7 @@ class Select(MetaMethod):
         if columns:
             for col in columns:
                 with self.frame.setlock(True, 'subspace'):
-                    value |= np.array(self.frame[col], bool)
+                    value |= np.array(self.frame.get(col, False), bool)
             return value
         return np.full(len(self.frame), default)
 
@@ -158,4 +156,5 @@ if __name__ == '__main__':
                            'active': [True, True, True, False]})
     select = Select(dataframe)
     select.initialize()
+    print(dataframe.free)
     print(dataframe)

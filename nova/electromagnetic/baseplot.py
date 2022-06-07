@@ -56,11 +56,6 @@ class BasePlot:
                     index &= self.frame.loc[:, 'nturn'] != 0
             except (AttributeError, KeyError, ColumnError):  # turns not set
                 pass
-            try:
-                if not self.feedback:  # exclude stabilization coils
-                    index &= ~self.frame.feedback
-            except (AttributeError, KeyError, ColumnError):  # feedback not set
-                pass
         if segment:
             index &= self.frame.segment == segment
         return index
@@ -160,7 +155,6 @@ class Label:
     current_unit: str = 'A'
     field_unit: bool = 'T'
     zeroturn: bool = False
-    feedback: bool = False
     options: dict[str, Union[str, int, float]] = field(
         repr=False, default_factory=lambda: {'font_size': 'medium',
                                              'label_limit': 20})

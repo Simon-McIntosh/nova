@@ -1,5 +1,5 @@
 """Manage biot methods."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 import inspect
 from typing import ClassVar
@@ -21,7 +21,7 @@ from nova.electromagnetic.circuit import Circuit
 class BiotFactory(FrameSet):
     """Expose biot methods as cached properties."""
 
-    dfield: float = -1
+    dfield: float = field(default=-1, repr=False)
     biot_class: ClassVar[dict[str, BiotData]] = \
         dict(point=BiotPoint, grid=BiotGrid,
              plasmaboundary=BiotPlasmaBoundary, plasmagrid=BiotPlasmaGrid,

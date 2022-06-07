@@ -90,7 +90,7 @@ class MetaFrame(MetaSet):
             'active': True, 'fix': True,
             'plasma': False, 'filament': False,
             'passive': False, 'free': False, 'coil': True,
-            'ionize': False, 'feedback': False, 'acloss': False,
+            'ionize': False, 'acloss': False,
             'ferritic': False,
             'Ic': 0., 'It': 0., 'Psi': 0., 'Bx': 0., 'Bz': 0., 'B': 0.,
             'name': '', 'label': 'Coil', 'delim': '', 'offset': 0})

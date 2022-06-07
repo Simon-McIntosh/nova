@@ -68,11 +68,13 @@ class Connect:
                    if col not in self._space_columns]
         space_columns = [col for col in self._space_columns
                          if col in self.columns]
-        if key not in columns+space_columns:
-            if key in self._space_columns:
-                space_columns.append(key)
-            else:
-                columns.append(key)
+        #if key not in columns+space_columns:
+        #    if key in self._space_columns:
+        #        space_columns.append(key)
+        #    else:
+        #       columns.append(key)
+        space_columns.append(key)
+        columns.append(key)
         frame = self.to_dataframe(self.read_summary(','.join(columns), value))
         if len(space_columns) > 0:
             space_frame = self.to_dataframe(self.read_summary(
@@ -197,13 +199,15 @@ class Machine(Connect):
 
 if __name__ == '__main__':
 
-    machine = Machine().sync_ids()
+    #machine = Machine().sync_ids()
     #machine.load_ids('pf_active')
     #print(machine.frame)
 
     #Machine().sync_shot('111001/3')
 
-    #scenario = Scenario()#.sync_workflow('JINTRAC')
+    #scenario = Scenario()
+    #scenario.load_frame('workflow', 'CORSICA')
+    Scenario().sync_workflow('CORSICA')
 
     #Scenario().sync_shot('114101/41')
 

@@ -28,7 +28,8 @@ class FrameSet(FilePath, FrameSetLoc):
     subspace: list[str] = field(repr=False, default_factory=lambda: [
         'Ic'])
     array: list[str] = field(repr=False, default_factory=lambda: [
-        'Ic', 'nturn'])
+        'Ic', 'nturn', 'active', 'passive', 'plasma', 'coil',
+        'fix', 'free', 'ferritic'])
 
     def __post_init__(self):
         """Create frame and subframe."""
@@ -36,7 +37,8 @@ class FrameSet(FilePath, FrameSetLoc):
             base=self.base, required=self.required, additional=self.additional,
             available=self.available, subspace=[],
             exclude=['frame', 'Ic', 'It',
-                     'active', 'plasma', 'fix', 'feedback'], array=[],
+                     'active', 'passive', 'plasma', 'coil',
+                     'fix', 'free', 'ferritic'], array=[],
             version=['index'])
         self.subframe = FrameSpace(
             base=self.base, required=self.required, additional=self.additional,

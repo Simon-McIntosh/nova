@@ -123,7 +123,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         psi_norm = time_slice.psi2d_norm(radius, height)
 
         current_density = radius * time_slice.p_prime(psi_norm) + \
-            time_slice.ff_prime(psi_norm) / (radius * self.mu_o)
+            time_slice.ff_prime(psi_norm) / (self.mu_o * radius)
         current_density *= -2*np.pi
         current = current_density * area
 
@@ -131,8 +131,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         nturn[ionize] = current / current.sum()
         self.sloc['plasma', 'Ic'] = time_slice.ip
 
-        print(self.plasmagrid.data.Psi[ionize[plasma], :].shape)
-        print(ionize.sum())
+        print(current.sum(), time_slice.ip)
         self.sloc['free'] = self.sloc['coil']
 
         #self.sl
@@ -143,7 +142,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
     def plot_2d(self, itime=-1, attr='psi', axes=None, **kwargs):
         """Expose plot_2d ."""
         return Equilibrium.plot_2d(
-            self, itime=-1, attr='psi', axes=None, **kwargs)
+            self, itime=itime, attr='psi', axes=None, **kwargs)
 
     def plot_boundary(self, itime: int):
         """Expose Equilibrium plot boundary."""
@@ -159,14 +158,15 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         self.grid.plot()
 
 
-
 if __name__ == '__main__':
 
-    coilset = Extrapolate(114101, 41, number=1000, dplasma=-500)
+    pulse, run = 114101, 41  # JINTRAC
+    pulse, run = 130506, 403  # CORSICA
+    coilset = Extrapolate(pulse, run, number=1000, dplasma=-500)
 
     coilset.sloc['coil', 'Ic'] = 7.5e3
 
-    coilset.ionize(0)
+    coilset.ionize(10)
 
     coilset.plot()
 

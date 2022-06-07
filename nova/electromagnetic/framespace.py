@@ -126,21 +126,6 @@ class FrameSpace(SpaceIndexer, FrameLink):
             super().__setitem__(col, value)
 
 
-def set_current():
-    """Test current update with randomized input (check update speed)."""
-    # framespace.subspace.metaframe.data['Ic'] = \
-    #    np.random.rand(len(frame.subspace))
-    framespace.subspace.Ic = np.random.rand(len(framespace.subspace))
-
-
-def get_current():
-    """Test current access."""
-    _ = framespace.loc[:, 'Ic']  # 531 µs nC=40
-    # _ = framespace['Ic']  # 86.5 µs nC=40
-    # _ = framespace.Ic  # 98.6 µs nC=40
-    # _ = framespace.subspace.Ic  # 31.5 µs nC=40
-
-
 if __name__ == '__main__':
 
     framespace = FrameSpace(base=['x', 'y', 'z'],
@@ -151,21 +136,4 @@ if __name__ == '__main__':
     framespace.insert(range(40), 1, Ic=6.5, name='PF1', part='PF',
                       active=False)
 
-    #for _ in range(1000):
-    #    get_current()
-
-    '''
-    framespace.insert(range(40), 3, Ic=4, nturn=20, label='PF', link=True)
-    framespace.multipoint.link(['PF1', 'CS0'], factor=1)
-    print(framespace.loc[:, ['active', 'passive', 'plasma', 'coil']])
-
-    framespace.to_hdf('tmp.h5', 'frame')
-
-    #del framespace
-    #framespace = FrameSpace()
-    #framespace.read_hdf('tmp.h5', 'frame')
-    print(framespace.metaframe.metadata)
-
-    for _ in range(1000):
-        get_current()
-    '''
+    print(framespace.passive)

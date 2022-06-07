@@ -89,6 +89,10 @@ class ArrayLocIndexer(DataLocIndexer):
         """Return list of frame array attributes."""
         return list(self._data)
 
+    def __len__(self):
+        """Return frame array length."""
+        return len(self._data)
+
 
 @dataclass
 class HashLoc:

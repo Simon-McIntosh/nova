@@ -38,8 +38,6 @@ class ArrayLocMixin():
                 except AttributeError:  # loc[slice, col]
                     index = self.obj.get_index(key)
                     return self.obj.__getitem__(col)[index]
-                    # with self.obj.setlock(True, 'array'):
-                    #     return super().__getitem__(key)
         return super().__getitem__(key)
 
 

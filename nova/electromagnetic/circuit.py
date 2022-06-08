@@ -109,4 +109,9 @@ class Circuit(netCDF, FrameSetLoc):
                 continue
             if factor[0] == -1:
                 factor *= -1
+            # TODO fix this
+            index = [index for _, index in
+                     sorted(zip(self.frame.index, index))]
+            print('+++', 'link', index)
+
             self.linkframe(index, factor[1:])

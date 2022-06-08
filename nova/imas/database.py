@@ -59,14 +59,21 @@ class Database(FilePath, IMASdb, IDS):
             self.filename = None
         self.group = self.ids_name
         self.set_path(self.datapath)
-        self.load_ids_data()
+        self.set_ids_data()
+
+    def set_ids_data(self):
+        """Set ids_data."""
+        if self.ids_data is not None:
+            self.pulse = self.run = self.ids_name = None  # don't know
+            return
+        self.ids_data = self.ids(self.pulse, self.run, self.ids_name, None)
 
     def load_ids_data(self, ids_path=None):
         """Return ids_data."""
-        if self.ids_data is not None:
+        if ids_path is None:
             return self.ids_data
-        self.ids_data = self.ids(self.pulse, self.run, self.ids_name, ids_path)
-        return self.ids_data
+        return getattr(self.ids_data, ids_path)
+        #return self.ids(self.pulse, self.run, self.ids_name, ids_path)
 
     @property
     def ids_attrs(self):

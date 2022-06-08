@@ -158,9 +158,9 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
 
 if __name__ == '__main__':
 
-    #database = Database(114101, 41, 'equilibrium', machine='iter')
-    #eq = Equilibrium(ids_data=database.ids_data)
-    eq = Equilibrium(114101, 41)
+    database = Database(114101, 41, 'equilibrium', machine='iter')
+    eq = Equilibrium(ids_data=database.ids_data)
+    #eq = Equilibrium(114101, 41)
     # eq = Equilibrium(130510, 3)
     #eq.build()
 

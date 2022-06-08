@@ -767,7 +767,8 @@ class Machine(CoilSet):
 
 if __name__ == '__main__':
 
-    coilset = Machine(geometry=['pf_active', 'wall'])
+    coilset = Machine(geometry=['pf_active', 'wall'],
+                      dplasma=-100, dcoil=-10).build()
     coilset.plot()
 
     # coilset.plasma.separatrix = dict(e=[6, -0.5, 2.5, 2.5])

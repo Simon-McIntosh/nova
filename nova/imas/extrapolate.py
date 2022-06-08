@@ -153,7 +153,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         """Plot plasma filements and polidal flux."""
         plt.figure()
         super().plot('plasma')
-        levels = self.grid.plot(levels=41, colors='gray', nulls=False)
+        levels = self.grid.plot(levels=41, colors='C0', nulls=False)
         self.plot_2d(self.itime, 'psi', colors='C3', levels=levels,
                      linestyles='dashed')
         self.plot_boundary(self.itime)
@@ -162,9 +162,9 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
 if __name__ == '__main__':
 
     pulse, run = 114101, 41  # JINTRAC
-    #pulse, run = 130506, 403  # CORSICA
+    pulse, run = 130506, 403  # CORSICA
 
     database = Database(pulse, run, 'equilibrium', machine='iter')
-    coilset = Extrapolate(ids_data=database.ids_data)
+    coilset = Extrapolate(ids_data=database.ids_data, dplasma=-1500)
     coilset.ionize(0)
     coilset.plot()

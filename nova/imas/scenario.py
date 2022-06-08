@@ -22,12 +22,13 @@ class Scenario(Database):
     def __post_init__(self):
         """Load data."""
         super().__post_init__()
+        self.load_ids()
         try:
             self.load()
         except (FileNotFoundError, OSError, KeyError):
             self.build()
 
-    def load_scenario(self):
+    def load_ids(self):
         """Load ids_data and timeslice."""
         self.ids_data = self.load_ids_data()
         self.time_slice = TimeSlice(self.ids_data, self.data)
@@ -37,7 +38,6 @@ class Scenario(Database):
         """Manage dataset creation and storage."""
         self.close_dataset()
         self.data = xarray.Dataset()
-        self.load_scenario()
         self.data.attrs |= self.ids_attrs
         yield
         self.store()

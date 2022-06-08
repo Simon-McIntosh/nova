@@ -134,7 +134,7 @@ class Profile2D(Scenario, BiotPlot):
         self.axes = axes
         kwargs = self.contour_kwargs(**kwargs)
         QuadContourSet = plt.contour(self.data.r, self.data.z,
-                                     self.data[f'{attr}2d'][itime].T,
+                                     -self.data[f'{attr}2d'][itime].T,
                                      **kwargs)
         plt.axis('equal')
         plt.axis('off')

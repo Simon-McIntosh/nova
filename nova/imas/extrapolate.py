@@ -9,7 +9,7 @@ from scipy.interpolate import RectBivariateSpline, interp1d
 import xarray
 
 from nova.electromagnetic.biotgrid import BiotPlot
-from nova.imas.database import IDS
+from nova.imas.database import Database, IDS
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
 from nova.utilities.pyplot import plt
@@ -19,8 +19,8 @@ from nova.utilities.pyplot import plt
 class Grid:
     """Specify interpolation grid attributes."""
 
-    number: int = 1000
-    limit: Union[float, list[float]] = 0.15
+    number: int = 2000
+    limit: Union[float, list[float]] = 0.5
     index: Union[str, slice, npt.ArrayLike] = 'plasma'
 
     @property
@@ -38,20 +38,20 @@ class TimeSlice:
 
     def __post_init__(self):
         """Load dataset."""
-        self.data['psi2d_norm'] = self._psi_norm(self.data.psi2d)
+        self.data['psi2d_norm'] = self.normalize(self.data.psi2d)
 
     def __getattr__(self, attr: str):
         """Return attribute from xarray dataset."""
         return getattr(self.data, attr).values
 
-    def _psi_norm(self, psi):
+    def normalize(self, psi):
         """Return normalized poloidal flux."""
         return (psi - self.psi_axis) / (self.psi_boundary - self.psi_axis)
 
     @cached_property
-    def psi2d_norm(self):
+    def psi_rbs(self):
         """Return cached 2D RectBivariateSpline psi interpolant."""
-        return RectBivariateSpline(self.r, self.z, self.data.psi2d_norm).ev
+        return RectBivariateSpline(self.r, self.z, self.data.psi2d).ev
 
     def _interp1d(self, x, y):
         """Return 1D interpolant."""
@@ -115,12 +115,13 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         time_slice = TimeSlice(self.data.isel(time=self.itime))
 
         coilset.plasma.separatrix = time_slice.boundary
-        ionize = self.aloc['ionize']
         plasma = self.aloc['plasma']
+        ionize = self.aloc['ionize']
         radius = self.aloc['x'][ionize]
         height = self.aloc['z'][ionize]
         area = self.aloc['area'][ionize]
-        psi_norm = time_slice.psi2d_norm(radius, height)
+        psi = time_slice.psi_rbs(radius, height)
+        psi_norm = time_slice.normalize(psi)
 
         current_density = radius * time_slice.p_prime(psi_norm) + \
             time_slice.ff_prime(psi_norm) / (self.mu_o * radius)
@@ -130,14 +131,12 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         nturn = self.aloc['nturn']
         nturn[ionize] = current / current.sum()
         self.sloc['plasma', 'Ic'] = time_slice.ip
+        self.plasmagrid.update_turns('Psi', svd=False)
 
-        print(current.sum(), time_slice.ip)
-        self.sloc['free'] = self.sloc['coil']
+        Psi = self.plasmagrid.data.Psi.values[ionize[plasma]]
 
-        #self.sl
-        #print(self.sloc(), current.sum())
-
-        time_slice.plot()
+        self.saloc['Ic'][:-2] = np.linalg.lstsq(
+            Psi[:, :-2], -psi - Psi[:, -1]*time_slice.ip)[0]
 
     def plot_2d(self, itime=-1, attr='psi', axes=None, **kwargs):
         """Expose plot_2d ."""
@@ -151,49 +150,19 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
     def plot(self):
         """Plot plasma filements and polidal flux."""
         plt.figure()
-        super().plot('plasma')
-        self.plot_2d(self.itime, 'psi', colors='C3', levels=21)
+        super().plot()
+        levels = self.grid.plot(levels=41, colors='C0', nulls=False)
+        self.plot_2d(self.itime, 'psi', colors='C3', levels=levels,
+                     linestyles='dashed')
         self.plot_boundary(self.itime)
-
-        self.grid.plot()
 
 
 if __name__ == '__main__':
 
     pulse, run = 114101, 41  # JINTRAC
-    pulse, run = 130506, 403  # CORSICA
-    coilset = Extrapolate(pulse, run, number=1000, dplasma=-500)
+    #pulse, run = 130506, 403  # CORSICA
 
-    coilset.sloc['coil', 'Ic'] = 7.5e3
-
-    coilset.ionize(10)
-
+    ids_data = Database(pulse, run)()
+    coilset = Extrapolate(ids_data=ids_data, number=4000, dplasma=-2000)
+    coilset.ionize(0)
     coilset.plot()
-
-
-    #interp.plot()
-    #eq = Equilibrium(114101, 41)
-
-    #coilset.plasma.separatrix = eq.data.boundary[0]
-    '''
-    #coilset.grid.solve2d(eq.data.r2d.values[::20, ::20],
-    #                     eq.data.z2d.values[::20, ::20])
-
-    from nova.electromagnetic.fieldnull import FieldNull
-
-    null = FieldNull(xarray.Dataset(dict(x=eq.data.r, z=eq.data.z)))
-    null.update_null(eq.data.psi2d[0].values)
-    null.plot()
-
-    '''
-
-    '''
-
-    self.Ip = self.dA * self.bp[index] /
-    '''
-
-    '''
-    coilset.plasmagrid.psi = rbs.ev(coilset.loc['plasma', 'x'],
-                                    coilset.loc['plasma', 'z'])
-    coilset.plasmagrid.plot()
-    '''

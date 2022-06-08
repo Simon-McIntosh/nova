@@ -140,10 +140,6 @@ class BiotPlot(Axes):
 
     def contour_kwargs(self, **kwargs):
         """Return contour plot kwargs."""
-        #try:
-        #    levels = self.levels
-        #except AttributeError:
-        #    levels = 31
         return dict(colors='lightgray', linewidths=1.5, alpha=0.9,
                     linestyles='solid', levels=self.levels) | kwargs
 
@@ -229,11 +225,14 @@ class BiotGrid(BiotBaseGrid):
         """Return psi as 2D array."""
         return self.psi.reshape(self.shape)
 
-    def plot(self, axes=None, **kwargs):
+    def plot(self, axes=None, nulls=True, **kwargs):
         """Plot poloidal flux contours."""
-        super().plot(axes=axes)
+        self.axes = axes
+        if nulls:
+            super().plot(axes=axes)
         QuadContourSet = self.axes.contour(self.data.x, self.data.z,
                                            self.psi.reshape(*self.shape).T,
                                            **self.contour_kwargs(**kwargs))
         if isinstance(kwargs.get('levels', None), int):
             self.levels = QuadContourSet.levels
+        return QuadContourSet.levels

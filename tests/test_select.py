@@ -23,8 +23,8 @@ def test_coil():
 
 def test_fix():
     framespace = FrameSpace(Required=['x'])
-    framespace.insert(range(3), free=[True, False, True])
-    assert list(framespace.fix) == [False, True, False]
+    framespace.insert(range(3), fix=[True, False, True])
+    assert list(framespace.free) == [False, True, False]
 
 
 def test_ferritic():

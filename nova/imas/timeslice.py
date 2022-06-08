@@ -1,6 +1,5 @@
 """Manage access to timeslice data."""
 from dataclasses import dataclass
-from typing import Any
 
 import numpy as np
 import xarray
@@ -10,7 +9,7 @@ import xarray
 class TimeSlice:
     """Manage methods for accessing time slice data."""
 
-    ids_data: Any
+    ids_data: object
     data: xarray.Dataset
 
     def __call__(self, name: str, itime: int, index=0):

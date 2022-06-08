@@ -49,10 +49,10 @@ class Select(MetaMethod):
 
     frame: DataFrame = field(repr=False)
     required: list[str] = field(default_factory=lambda: [
-        'active', 'plasma', 'free', 'ferritic'], repr=False)
+        'active', 'plasma', 'fix', 'ferritic'], repr=False)
     require_all: bool = field(repr=False, default=False)
     additional: list[str] = field(init=False, default_factory=lambda: [
-        'passive', 'coil', 'fix'])
+        'passive', 'coil', 'free'])
     avalible: list[str] = field(init=False, default_factory=list)
     labels: dict[str, dict[str, list[str]]] = field(init=False, repr=False,
                                                     default_factory=dict)
@@ -66,8 +66,8 @@ class Select(MetaMethod):
         self.add_label('passive', None, 'active')
         self.add_label('plasma', 'plasma')
         self.add_label('coil', None, ['plasma', 'passive'])
-        self.add_label('free', 'free')
-        self.add_label('fix', None, 'free')
+        self.add_label('fix', 'fix')
+        self.add_label('free', None, 'fix')
         self.add_label('ferritic', 'ferritic')
         self.update_metaframe()
         self.update_columns()
@@ -85,7 +85,7 @@ class Select(MetaMethod):
             include = self.any_label(self.labels[label]['include'], True)
             exclude = self.any_label(self.labels[label]['exclude'], False)
             value = np.all([include, ~exclude], axis=0)
-            with self.frame.setlock(True):  # , ['subspace', 'array']
+            with self.frame.setlock(True, ['subspace', 'array']):
                 self.frame[label] = value
 
     def any_label(self, columns, default):
@@ -153,7 +153,8 @@ if __name__ == '__main__':
 
     dataframe = DataFrame({'x': range(4),
                            'plasma': [True, False, True, True],
-                           'active': [True, True, True, False]})
+                           'active': [True, True, True, False],
+                           'fix': [False, True, False, False]})
     select = Select(dataframe)
     select.initialize()
     print(dataframe.free)

@@ -53,13 +53,13 @@ class Database(FilePath, IMASdb, IDS):
 
     def __post_init__(self):
         """Set filepath."""
-        self.filename = f'{self.machine}_{self.pulse}{self.run:04d}'
+        try:
+            self.filename = f'{self.machine}_{self.pulse}{self.run:04d}'
+        except TypeError:
+            self.filename = None
         self.group = self.ids_name
         self.set_path(self.datapath)
-
-    def __call__(self):
-        """Return ids data."""
-        return self.load_ids_data()
+        self.load_ids_data()
 
     def load_ids_data(self, ids_path=None):
         """Return ids_data."""

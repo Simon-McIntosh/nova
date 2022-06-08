@@ -25,19 +25,19 @@ class Scenario(Database):
         self.load_ids()
         try:
             self.load()
-        except (FileNotFoundError, OSError, KeyError):
+        except (FileNotFoundError, OSError, KeyError, TypeError):
             self.build()
 
     def load_ids(self):
         """Load ids_data and timeslice."""
         self.ids_data = self.load_ids_data()
-        self.time_slice = TimeSlice(self.ids_data, self.data)
 
     @contextmanager
     def build_scenario(self):
         """Manage dataset creation and storage."""
-        self.close_dataset()
+        #self.close_dataset()
         self.data = xarray.Dataset()
+        self.time_slice = TimeSlice(self.ids_data, self.data)
         self.data.attrs |= self.ids_attrs
         yield
         self.store()
@@ -48,6 +48,8 @@ class Scenario(Database):
 
     def store(self, mode='a'):
         """Store data within hdf file."""
+        if self.filename is None:
+            return
         file = self.file(self.filename)
         if not os.path.isfile(file):
             mode = 'w'
@@ -60,9 +62,9 @@ class Scenario(Database):
             self.data = data
         return self
 
-    def close_dataset(self):
-        """Force dataset closure."""
-        try:
-            xarray.open_dataset(self.file(self.filename)).close()
-        except FileNotFoundError:
-            pass
+    #def close_dataset(self):
+    #    """Force dataset closure."""
+    #    try:
+    #        xarray.open_dataset(self.file(self.filename)).close()
+    #    except FileNotFoundError:
+    #        pass

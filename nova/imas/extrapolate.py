@@ -19,8 +19,8 @@ from nova.utilities.pyplot import plt
 class Grid:
     """Specify interpolation grid attributes."""
 
-    number: int = 2000
-    limit: Union[float, list[float]] = 0.5
+    number: int = 1000
+    limit: Union[float, list[float]] = 0.25
     index: Union[str, slice, npt.ArrayLike] = 'plasma'
 
     @property
@@ -88,7 +88,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
     itime: int = 0
     ids_name: str = 'equilibrium'
     filename: str = 'iter'
-    dplasma: float = -200
+    dplasma: float = -750
     geometry: list[str] = field(default_factory=lambda: ['pf_active', 'wall'])
 
     mu_o: ClassVar[float] = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
@@ -96,7 +96,9 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
     def __post_init__(self):
         """Load equilibrium data."""
         super().__post_init__()
-        self.data = Equilibrium(self.pulse, self.run).data
+        equilibrium = Equilibrium(self.pulse, self.run, ids_data=self.ids_data)
+        for attr in ['ids_data', 'data']:
+            setattr(self, attr, getattr(equilibrium, attr))
 
     @property
     def hash_attrs(self):
@@ -150,8 +152,8 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
     def plot(self):
         """Plot plasma filements and polidal flux."""
         plt.figure()
-        super().plot()
-        levels = self.grid.plot(levels=41, colors='C0', nulls=False)
+        super().plot('plasma')
+        levels = self.grid.plot(levels=41, colors='gray', nulls=False)
         self.plot_2d(self.itime, 'psi', colors='C3', levels=levels,
                      linestyles='dashed')
         self.plot_boundary(self.itime)
@@ -162,7 +164,7 @@ if __name__ == '__main__':
     pulse, run = 114101, 41  # JINTRAC
     #pulse, run = 130506, 403  # CORSICA
 
-    ids_data = Database(pulse, run)()
-    coilset = Extrapolate(ids_data=ids_data, number=4000, dplasma=-2000)
+    database = Database(pulse, run, 'equilibrium', machine='iter')
+    coilset = Extrapolate(ids_data=database.ids_data)
     coilset.ionize(0)
     coilset.plot()

@@ -148,19 +148,26 @@ class CCL(DataDir, Plotter):
                 for scenario in ['EOB']:  # ['TFonly', 'SOD', 'EOB']:
                     self.to_dataframe(scenario)
 
-    def animate(self, displace: str, view='xy'):
+    def animate(self, displace: str, view='xy', max_factor=100):
         """Animate displacement."""
         filename = os.path.join(self.directory, self.file)
-        super().animate(filename, self.diff(displace), view=view,
-                        max_factor=160)
+        super().animate(filename, displace, view=view,
+                        max_factor=max_factor)
 
 
 if __name__ == '__main__':
 
-    ccl = CCL('TFCgapsG10', 'w4')
+    ccl = CCL('TFCgapsG10', 'k1', cluster=None)
 
     ccl.mesh['TFonly-cooldown'] = ccl.mesh['TFonly'] - ccl.mesh['cooldown']
-    ccl.warp(100)
+
+
+    mesh = ccl.mesh.slice(normal=[0, 0, 1])
+    clip = pv.Cylinder(direction=(0, 0, 1), radius=3)
+    ccl.mesh = mesh.clip_surface(clip, invert=True)
+
+    ccl.animate('TFonly-cooldown', 'iso')
+    #ccl.warp(100)
 
     # ccl.plot()
 

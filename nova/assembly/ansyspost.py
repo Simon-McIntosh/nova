@@ -155,7 +155,9 @@ class AnsysPost(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    ansys = AnsysPost('TFCgapsG10', 'w1', 'case_il')
+    ansys = AnsysPost('TFCgapsG10', 'k1', 'all')
+
+    '''
     ansys.select(0)
     ansys.mesh += AnsysPost('TFCgapsG10', 'w1', 'case_ol').select(1)
 
@@ -164,4 +166,5 @@ if __name__ == '__main__':
     airplane.translate([-4.5, -10, 0], inplace=True)
     airplane.rotate_z(10, inplace=True)
     #ansys.mesh += airplane
+    '''
     ansys.plot()

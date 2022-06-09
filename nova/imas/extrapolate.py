@@ -6,6 +6,7 @@ from typing import ClassVar, Union
 import numpy as np
 import numpy.typing as npt
 from scipy.interpolate import RectBivariateSpline, interp1d
+import scipy.sparse.linalg
 import xarray
 
 from nova.electromagnetic.biotgrid import BiotPlot
@@ -153,8 +154,9 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         """Plot plasma filements and polidal flux."""
         plt.figure()
         super().plot('plasma')
-        levels = self.grid.plot(levels=41, colors='C0', nulls=False)
-        self.plot_2d(self.itime, 'psi', colors='C3', levels=levels,
+
+        levels = self.grid.plot(levels=51, colors='C0', nulls=False)
+        self.plot_2d(self.itime, 'psi', colors='C3', levels=-levels[::-1],
                      linestyles='dashed')
         self.plot_boundary(self.itime)
 
@@ -165,6 +167,9 @@ if __name__ == '__main__':
     pulse, run = 130506, 403  # CORSICA
 
     database = Database(pulse, run, 'equilibrium', machine='iter')
-    coilset = Extrapolate(ids_data=database.ids_data, dplasma=-1500)
-    coilset.ionize(0)
+    coilset = Extrapolate(ids_data=database.ids_data,
+                          geometry=['pf_active', 'wall'],
+                          number=1000, dplasma=-1500,
+                          limit=[2.75, 8.9, -5.49, 5.51])
+    coilset.ionize(10)
     coilset.plot()

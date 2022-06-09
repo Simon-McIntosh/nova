@@ -1,5 +1,6 @@
 """Manage access to IMAS machine data."""
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 import string
 from typing import ClassVar, Union
@@ -709,10 +710,24 @@ class Machine(CoilSet):
         """Return group attributes for generation xxh32 group hash."""
         return self.coilset_attrs | self.ids_attrs
 
+    @staticmethod
+    def flatten(xs):
+        """Return flattened list.
+
+        https://stackoverflow.com/questions/2158395/
+        flatten-an-irregular-list-of-lists
+        """
+        for x in xs:
+            if isinstance(x, Iterable) and not isinstance(x, (str, bytes)):
+                yield from Machine.flatten(x)
+            else:
+                yield x
+
     def update_group(self):
         """Return group name as xxh32 hex hash."""
         self.xxh32.reset()
-        self.xxh32.update(np.array(list(self.hash_attrs.values())))
+        self.xxh32.update(np.array(
+            list(self.flatten(self.hash_attrs.values()))))
         self.group = self.xxh32.hexdigest()
         return self.group
 
@@ -768,7 +783,7 @@ class Machine(CoilSet):
 if __name__ == '__main__':
 
     coilset = Machine(geometry=['pf_active', 'wall'],
-                      dplasma=-100, dcoil=-10).build()
+                      dplasma=-100, dcoil=-10)
     coilset.plot()
 
     # coilset.plasma.separatrix = dict(e=[6, -0.5, 2.5, 2.5])

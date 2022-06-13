@@ -106,6 +106,8 @@ class Base(ModelBase):
         if legend:
             axes.legend(fontsize='x-small')
 
+        print((model-benchmark).std()/(benchmark.max() - benchmark.min()))
+
     def plot_benchmark(self, simulation: str):
         """Plot Monte Carlo benchmark."""
         dataset = self.load_dataset(simulation)

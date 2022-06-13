@@ -238,4 +238,4 @@ if __name__ == '__main__':
     Diagram(theta=[5, 5, 5, 10, 2, 2, 2.5], wall=True).plot()
     # Overview().plot()
     # Filter().plot()
-    # FFT().plot()
+    FFT().plot()

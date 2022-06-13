@@ -3,16 +3,18 @@ from dataclasses import dataclass, field, fields
 from functools import cached_property
 from typing import ClassVar, Union
 
+import imas
 import numpy as np
 import numpy.typing as npt
 from scipy.interpolate import RectBivariateSpline, interp1d
-import scipy.sparse.linalg
 import xarray
 
 from nova.electromagnetic.biotgrid import BiotPlot
+from nova.imas.code import Code
 from nova.imas.database import Database, IDS
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
+from nova.imas.properties import Properties
 from nova.utilities.pyplot import plt
 
 
@@ -20,7 +22,7 @@ from nova.utilities.pyplot import plt
 class Grid:
     """Specify interpolation grid attributes."""
 
-    number: int = 1000
+    number: int = 2500
     limit: Union[float, list[float]] = 0.25
     index: Union[str, slice, npt.ArrayLike] = 'plasma'
 
@@ -86,25 +88,52 @@ class TimeSlice:
 class Extrapolate(BiotPlot, Machine, Grid, IDS):
     """Extrapolate equlibrium beyond separatrix ids."""
 
-    itime: int = 0
+    limit: Union[list[float], list[list[float], list[float]], str] = 'ids'
     ids_name: str = 'equilibrium'
     filename: str = 'iter'
-    dplasma: float = -750
     geometry: list[str] = field(default_factory=lambda: ['pf_active', 'wall'])
+    itime: int = field(init=False, default=0)
 
     mu_o: ClassVar[float] = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
 
     def __post_init__(self):
-        """Load equilibrium data."""
+        """Load equilibrium and coilset."""
+        self.load_ids()
         super().__post_init__()
+
+    def __call__(self):
+        """Return extrapolated equilibrium ids."""
+        ids_data = imas.equilibrium()
+        Properties('Equilibrium extrapolation',
+                   provider='Simon McIntosh',
+                   provenance_ids=self.ids_data)(ids_data.ids_properties)
+        Code(self.machine_attrs)(ids_data.code)
+        ids_data.vacuum_toroidal_field = self.ids_data.vacuum_toroidal_field
+        return ids_data
+
+    def load_ids(self):
+        """Load equilibrium data and grid limits."""
         equilibrium = Equilibrium(self.pulse, self.run, ids_data=self.ids_data)
         for attr in ['ids_data', 'data']:
             setattr(self, attr, getattr(equilibrium, attr))
+        if self.limit == 'ids':  # Load grid limit from ids.
+            if equilibrium.data.grid_type not in [1, -999999999]:
+                raise TypeError('ids limits only valid for rectangular grids'
+                                f'grid_type={equilibrium.data.grid_type}')
+            limit = [equilibrium.data.r.values, equilibrium.data.z.values]
+            if self.number == 'ids':
+                self.limit = limit
+            else:
+                self.limit = [limit[0][0], limit[0][-1],
+                              limit[1][0], limit[1][-1]]
+        if self.number == 'ids':
+            self.number = equilibrium.data.dims['r'] * \
+                equilibrium.data.dims['z']
 
     @property
-    def hash_attrs(self):
+    def machine_attrs(self):
         """Extend machine hash attributes."""
-        return super().hash_attrs | self.grid_attrs
+        return super().machine_attrs | self.grid_attrs
 
     def build(self, **kwargs):
         """Build frameset and interpolation grid."""
@@ -154,7 +183,6 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         """Plot plasma filements and polidal flux."""
         plt.figure()
         super().plot('plasma')
-
         levels = self.grid.plot(levels=51, colors='C0', nulls=False)
         self.plot_2d(self.itime, 'psi', colors='C3', levels=-levels[::-1],
                      linestyles='dashed')
@@ -164,12 +192,10 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
 if __name__ == '__main__':
 
     pulse, run = 114101, 41  # JINTRAC
-    pulse, run = 130506, 403  # CORSICA
+    #pulse, run = 130506, 403  # CORSICA
 
     database = Database(pulse, run, 'equilibrium', machine='iter')
     coilset = Extrapolate(ids_data=database.ids_data,
-                          geometry=['pf_active', 'wall'],
-                          number=1000, dplasma=-1500,
-                          limit=[2.75, 8.9, -5.49, 5.51])
-    coilset.ionize(10)
+                          dplasma=-1500, limit='ids')
+    coilset.ionize(0)
     coilset.plot()

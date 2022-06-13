@@ -35,7 +35,6 @@ class Scenario(Database):
     @contextmanager
     def build_scenario(self):
         """Manage dataset creation and storage."""
-        #self.close_dataset()
         self.data = xarray.Dataset()
         self.time_slice = TimeSlice(self.ids_data, self.data)
         self.data.attrs |= self.ids_attrs
@@ -61,10 +60,3 @@ class Scenario(Database):
         with xarray.open_dataset(file, group=self.ids_name) as data:
             self.data = data
         return self
-
-    #def close_dataset(self):
-    #    """Force dataset closure."""
-    #    try:
-    #        xarray.open_dataset(self.file(self.filename)).close()
-    #    except FileNotFoundError:
-    #        pass

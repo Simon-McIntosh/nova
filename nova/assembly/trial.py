@@ -478,7 +478,7 @@ if __name__ == '__main__':
     #theta = [5, 5, 5, 10, 2, 2, 2.5]
     #theta = [0, 0, 0, 10, 0, 0, 0]
     theta = [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 3]
-    vault = Vault(200_000, theta=theta)
+    vault = Vault(2_000_000, theta=theta)
 
     #'radial', 'tangential', 'roll_length',
     #'yaw_length', 'radial_ccl', 'tangential_ccl', 'radial_wall'
@@ -496,7 +496,7 @@ if __name__ == '__main__':
     #               1, 1, 1,
     #               np.sqrt(3), np.sqrt(3), np.sqrt(3)]
     #theta_error = list(3*np.ones(9))
-    error = ErrorField(200_000, theta=theta_error)
+    error = ErrorField(2_000_000, theta=theta_error)
 
     #error.plot_scan()
     error.plot()

@@ -46,6 +46,7 @@ setup_kwargs = dict(
         'descartes',
         'fabric',
         'fortranformat',
+        'gitpython',
         'meshio',
         'netCDF4',
         'numba',

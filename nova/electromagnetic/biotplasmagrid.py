@@ -82,7 +82,7 @@ class BiotPlasmaGrid(BiotBaseGrid):
 
     def plot(self, **kwargs):
         """Plot poloidal flux contours."""
-        super().plot(**kwargs)
+        super().plot(axes=kwargs.get('axes', None))
         kwargs = self.contour_kwargs(**kwargs)
         if kwargs.get('plot_mesh', False):
             self.axes.triplot(self.data.x, self.data.z,

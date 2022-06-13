@@ -706,7 +706,7 @@ class Machine(CoilSet):
         return attrs
 
     @property
-    def hash_attrs(self) -> dict:
+    def machine_attrs(self) -> dict:
         """Return group attributes for generation xxh32 group hash."""
         return self.coilset_attrs | self.ids_attrs
 
@@ -727,7 +727,7 @@ class Machine(CoilSet):
         """Return group name as xxh32 hex hash."""
         self.xxh32.reset()
         self.xxh32.update(np.array(
-            list(self.flatten(self.hash_attrs.values()))))
+            list(self.flatten(self.machine_attrs.values()))))
         self.group = self.xxh32.hexdigest()
         return self.group
 

@@ -1,6 +1,9 @@
 """Construct coilset with frameset and biot factories."""
 from dataclasses import dataclass
 
+import git
+
+import nova
 from nova.electromagnetic.framefactory import FrameFactory
 from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.biotfactory import BiotFactory

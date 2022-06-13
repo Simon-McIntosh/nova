@@ -1,6 +1,6 @@
 """Generate grids for BiotGrid methods."""
 from abc import abstractmethod
-from dataclasses import dataclass, field, InitVar
+from dataclasses import dataclass, field
 from typing import Union
 
 from matplotlib.collections import LineCollection
@@ -57,31 +57,46 @@ class GridCoord:
 class Grid(Axes):
     """Generate grid."""
 
-    number: InitVar[int]
-    limit: list[float]
+    number: int = field(default=None)
+    limit: list[float] = field(default=None)
+    xcoord: list[float] = field(init=False, repr=False)
+    zcoord: list[float] = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, repr=False)
 
-    def __post_init__(self, number):
+    def __post_init__(self):
         """Build grid coordinates."""
-        self.xcoord = GridCoord(*self.limit[:2])
-        self.zcoord = GridCoord(*self.limit[2:])
-        self.xcoord.num = self.xcoord.delta / np.sqrt(
-            self.xcoord.delta*self.zcoord.delta / number)
-        self.zcoord.num = number / self.xcoord.num
+        self.xcoord, self.zcoord = self.generate()
         self.data = xarray.Dataset(
-            coords=dict(x=self.xcoord(), z=self.zcoord()))
+            coords=dict(x=self.xcoord, z=self.zcoord))
         x2d, z2d = np.meshgrid(self.data.x, self.data.z, indexing='ij')
         self.data['x2d'] = (['x', 'z'], x2d)
         self.data['z2d'] = (['x', 'z'], z2d)
 
+    def generate(self):
+        """Return grid coordinates."""
+        if len(self.limit) == 2:  # grid coordinates
+            xcoord, zcoord = self.limit
+            self.number = len(xcoord) * len(zcoord)
+            self.limit = [xcoord[0], xcoord[-1], zcoord[0], zcoord[-1]]
+            return xcoord, zcoord
+        if len(self.limit) == 4:  # grid limits
+            xgrid = GridCoord(*self.limit[:2])
+            zgrid = GridCoord(*self.limit[2:])
+            xgrid.num = xgrid.delta / np.sqrt(
+                xgrid.delta*zgrid.delta / self.number)
+            zgrid.num = self.number / xgrid.num
+            self.number = xgrid.num * zgrid.num
+            return xgrid(), zgrid()
+        raise IndexError(f'len(limit) {len(self.limit)} not in [2, 4]')
+
     def __len__(self):
         """Return grid number."""
-        return self.xcoord.num * self.zcoord.num
+        return len(self.xcoord) * len(self.zcoord)
 
     @property
     def shape(self):
         """Return grid shape."""
-        return self.xcoord.num, self.zcoord.num
+        return len(self.xcoord), len(self.zcoord)
 
     def plot(self, axes=None, **kwargs):
         """Plot grid."""

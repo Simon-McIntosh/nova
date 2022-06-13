@@ -19,7 +19,9 @@ class Grid(Scenario):
         time_slice = self.time_slice('profiles_2d', 0)
         grid_type, grid = time_slice.grid_type, time_slice.grid
         self.data.attrs['grid_type'] = grid_type.index
-        if grid_type.index == 1 or grid_type.index == -999999999:
+        if self.data.grid_type == -999999999:  # unset
+            self.data.attrs['grid_type'] = 1
+        if self.data.grid_type == 1:
             return self.rectangular_grid(grid)
         raise NotImplementedError(f'grid {grid_type} not implemented.')
 

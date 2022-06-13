@@ -116,17 +116,17 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         equilibrium = Equilibrium(self.pulse, self.run, ids_data=self.ids_data)
         for attr in ['ids_data', 'data']:
             setattr(self, attr, getattr(equilibrium, attr))
-        if self.limit == 'ids':  # Load grid limit from ids.
-            if equilibrium.data.grid_type not in [1, -999999999]:
+        if self.limit == 'ids_data':  # Load grid limit from ids.
+            if equilibrium.data.grid_type != 1:
                 raise TypeError('ids limits only valid for rectangular grids'
-                                f'grid_type={equilibrium.data.grid_type}')
+                                f'{equilibrium.data.grid_type} != 1')
             limit = [equilibrium.data.r.values, equilibrium.data.z.values]
-            if self.number == 'ids':
+            if self.number == 'ids_data':
                 self.limit = limit
             else:
                 self.limit = [limit[0][0], limit[0][-1],
                               limit[1][0], limit[1][-1]]
-        if self.number == 'ids':
+        if self.number == 'ids_data':
             self.number = equilibrium.data.dims['r'] * \
                 equilibrium.data.dims['z']
 
@@ -185,17 +185,19 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         super().plot('plasma')
         levels = self.grid.plot(levels=51, colors='C0', nulls=False)
         self.plot_2d(self.itime, 'psi', colors='C3', levels=-levels[::-1],
-                     linestyles='dashed')
+                     linestyles='dashdot')
         self.plot_boundary(self.itime)
+
+    #def plot_field(self)
 
 
 if __name__ == '__main__':
 
     pulse, run = 114101, 41  # JINTRAC
-    #pulse, run = 130506, 403  # CORSICA
+    pulse, run = 130506, 403  # CORSICA
 
     database = Database(pulse, run, 'equilibrium', machine='iter')
     coilset = Extrapolate(ids_data=database.ids_data,
-                          dplasma=-1500, limit='ids')
-    coilset.ionize(0)
+                          dplasma=-1500, limit='ids_data')
+    coilset.ionize(20)
     coilset.plot()

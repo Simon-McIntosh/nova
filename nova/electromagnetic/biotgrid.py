@@ -240,14 +240,15 @@ class BiotGrid(BiotBaseGrid):
         """Return psi as 2D array."""
         return self.psi.reshape(self.shape)
 
-    def plot(self, axes=None, nulls=True, **kwargs):
-        """Plot poloidal flux contours."""
+    def plot(self, attr='psi', axes=None, nulls=True, **kwargs):
+        """Plot contours."""
         self.axes = axes
         if nulls:
             super().plot(axes=axes)
-        QuadContourSet = self.axes.contour(self.data.x, self.data.z,
-                                           self.psi.reshape(*self.shape).T,
-                                           **self.contour_kwargs(**kwargs))
+        QuadContourSet = self.axes.contour(
+            self.data.x, self.data.z,
+            getattr(self, attr).reshape(*self.shape).T,
+            **self.contour_kwargs(**kwargs))
         if isinstance(kwargs.get('levels', None), int):
             self.levels = QuadContourSet.levels
         return QuadContourSet.levels

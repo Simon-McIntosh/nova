@@ -136,6 +136,7 @@ class BiotOperate(BiotData):
 
     def __getattr__(self, attr):
         """Return variable data - lazy evaluation - cached."""
+        attr = attr.replace('_field_', '')
         if attr not in (avalible := [attr for attr in self.version
                                      if attr.islower() and
                                      attr.capitalize() in self.attrs or

@@ -93,7 +93,7 @@ class Select(MetaMethod):
         value = np.full(len(self.frame), False)
         if columns:
             for col in columns:
-                with self.frame.setlock(True, 'subspace'):
+                with self.frame.setlock(True, ['subspace', 'array']):
                     value |= np.array(self.frame.get(col, False), bool)
             return value
         return np.full(len(self.frame), default)

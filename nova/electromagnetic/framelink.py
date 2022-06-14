@@ -16,6 +16,7 @@ from nova.electromagnetic.dataarray import (
     )
 from nova.electromagnetic.energize import Energize
 from nova.electromagnetic.multipoint import MultiPoint
+from nova.electromagnetic.select import Select
 from nova.geometry.polygeom import PolyGeom
 from nova.geometry.polygon import Polygon
 
@@ -65,7 +66,7 @@ class FrameLink(LinkIndexer, DataArray):
     def __init__(self, data=None, index=None, columns=None,
                  attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.frame_attrs(MultiPoint, Energize)
+        self.frame_attrs(Select, MultiPoint, Energize)
 
     def __setattr__(self, name, value):
         """Extend DataFrame.__setattr__. (frame.*)."""

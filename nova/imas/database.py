@@ -73,7 +73,6 @@ class Database(FilePath, IMASdb, IDS):
         if ids_path is None:
             return self.ids_data
         return getattr(self.ids_data, ids_path)
-        #return self.ids(self.pulse, self.run, self.ids_name, ids_path)
 
     @property
     def ids_attrs(self):

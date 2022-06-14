@@ -90,7 +90,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
 
     limit: Union[list[float], list[list[float], list[float]], str] = 'ids'
     ids_name: str = 'equilibrium'
-    filename: str = 'iter'
+    filename: str = 'extrapolate'
     geometry: list[str] = field(default_factory=lambda: ['pf_active', 'wall'])
     itime: int = field(init=False, default=0)
 
@@ -173,22 +173,20 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
     def plot_2d(self, itime=-1, attr='psi', axes=None, **kwargs):
         """Expose plot_2d ."""
         return Equilibrium.plot_2d(
-            self, itime=itime, attr='psi', axes=None, **kwargs)
+            self, itime=itime, attr=attr, axes=None, **kwargs)
 
     def plot_boundary(self, itime: int):
         """Expose Equilibrium plot boundary."""
         return Equilibrium.plot_boundary(self, itime)
 
-    def plot(self):
+    def plot(self, attr='psi'):
         """Plot plasma filements and polidal flux."""
         plt.figure()
         super().plot('plasma')
-        levels = self.grid.plot(levels=51, colors='C0', nulls=False)
-        self.plot_2d(self.itime, 'psi', colors='C3', levels=-levels[::-1],
-                     linestyles='dashdot')
+        levels = self.grid.plot(attr, levels=51, colors='C0', nulls=False)
+        #self.plot_2d(self.itime, attr, colors='C3', levels=levels,
+        #             linestyles='dashdot')
         self.plot_boundary(self.itime)
-
-    #def plot_field(self)
 
 
 if __name__ == '__main__':
@@ -200,4 +198,4 @@ if __name__ == '__main__':
     coilset = Extrapolate(ids_data=database.ids_data,
                           dplasma=-1500, limit='ids_data')
     coilset.ionize(20)
-    coilset.plot()
+    coilset.plot('b_field_r')

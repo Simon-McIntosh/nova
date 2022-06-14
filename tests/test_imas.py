@@ -6,12 +6,12 @@ except ImportError:
     pytest.skip("IMAS installation unabalible", allow_module_level=True)
 
 
-pulse, run = 111001, 4
+pulse, run = 111001, 201
 
 
 def load_pf_active():
     try:
-        return IMASdb('public', 'iter_md').ids(pulse, run, 'pf_active')
+        return IMASdb('public', 'iter_md').ids(pulse, run, 'pf_active', None)
     except Exception:
         return False
 
@@ -29,13 +29,14 @@ def test_ids():
 
 @pf_active
 def test_IMASdb():
-    pf_active = IMASdb('public', 'iter_md').ids(pulse, run, 'pf_active')
+    pf_active = IMASdb('public', 'iter_md').ids(pulse, run, 'pf_active', None)
     assert pf_active.coil.array[0].identifier == 'CS3U'
 
 
 @pf_active
 def test_database():
-    database = Database(pulse, run, 'pf_active', 'public', 'iter_md')
+    database = Database(pulse, run, 'pf_active',
+                        user='public', machine='iter_md')
     ids_data = database.load_ids_data()
     assert 'ITER_D_33NHXN' in ids_data.ids_properties.source
 

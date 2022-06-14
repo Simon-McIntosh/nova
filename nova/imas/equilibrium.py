@@ -125,7 +125,7 @@ class Profile2D(Scenario, BiotPlot):
 
     attrs_2d: list[str] = field(
         default_factory=lambda: ['psi', 'phi', 'j_tor', 'j_parallel',
-                                 'b_r', 'b_z', 'b_tor'])
+                                 'b_field_r', 'b_field_z', 'b_field_tor'])
 
     def build(self):
         """Build profile 2d data and store to xarray data structure."""

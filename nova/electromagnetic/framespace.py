@@ -5,7 +5,7 @@ import numpy as np
 from nova.electromagnetic.framelink import FrameLink, LinkLocMixin, LinkIndexer
 from nova.electromagnetic.subspace import SubSpace
 from nova.electromagnetic.error import SpaceKeyError
-from nova.electromagnetic.select import Select
+#from nova.electromagnetic.select import Select
 from nova.electromagnetic.geometry import PolyGeo, VtkGeo
 from nova.electromagnetic.polyplot import PolyPlot
 from nova.electromagnetic.vtkplot import VtkPlot
@@ -67,7 +67,7 @@ class FrameSpace(SpaceIndexer, FrameLink):
     def __init__(self, data=None, index=None, columns=None,
                  attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.frame_attrs(Select, PolyGeo, VtkGeo, PolyPlot, VtkPlot)
+        self.frame_attrs(PolyGeo, VtkGeo, PolyPlot, VtkPlot)
         self.attrs['subspace'] = SubSpace(self)
         self.update_version()
 

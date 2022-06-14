@@ -499,7 +499,8 @@ class ActiveCoilData(CoilData):
         if self.empty:
             return
         self.data['nturn'] = np.abs(self.data['nturn'])
-        kwargs = {'active': True, 'name': self.data['identifier'],
+        kwargs = {'active': True, 'fix': False,
+                  'name': self.data['identifier'],
                   'delim': '_', 'nturn': self.data['nturn'],
                   } | kwargs
         return super().insert(constructor, **kwargs)
@@ -700,7 +701,7 @@ class Machine(CoilSet):
                 pulse = self.machine_description[attr].pulse
                 run = self.machine_description[attr].run
             else:
-                pulse = run = 0
+                pulse = run = None
             attrs[f'{attr}_pulse'] = pulse
             attrs[f'{attr}_run'] = run
         return attrs
@@ -726,8 +727,9 @@ class Machine(CoilSet):
     def update_group(self):
         """Return group name as xxh32 hex hash."""
         self.xxh32.reset()
-        self.xxh32.update(np.array(
-            list(self.flatten(self.machine_attrs.values()))))
+        attrs = [attr if attr is not None else 'None' for attr in
+                 self.flatten(self.machine_attrs.values())]
+        self.xxh32.update(np.array(attrs))
         self.group = self.xxh32.hexdigest()
         return self.group
 

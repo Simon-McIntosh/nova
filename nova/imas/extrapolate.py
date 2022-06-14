@@ -183,9 +183,11 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         """Plot plasma filements and polidal flux."""
         plt.figure()
         super().plot('plasma')
-        levels = self.grid.plot(attr, levels=51, colors='C0', nulls=False)
-        #self.plot_2d(self.itime, attr, colors='C3', levels=levels,
-        #             linestyles='dashdot')
+        levels = np.linspace(0, 1, 31)
+        self.grid.plot(attr, levels=levels, colors='C0', nulls=False)
+        print(levels)
+        self.plot_2d(self.itime, attr, colors='C3', levels=levels,
+                     linestyles='dashdot')
         self.plot_boundary(self.itime)
 
 

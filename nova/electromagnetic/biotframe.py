@@ -1,6 +1,6 @@
 """Biot specific Frame class."""
+import dask.array as da
 import numpy as np
-import numpy.typing as npt
 
 from nova.electromagnetic.framelink import FrameLink
 from nova.electromagnetic.biotsection import BiotSection
@@ -30,10 +30,10 @@ class BiotFrame(FrameLink):
                         array=['x', 'z']) | metadata
         super().update_metadata(data, columns, attrs, metadata)
 
-    def __call__(self, attr) -> npt.ArrayLike:
-        """Return flattened attribute matrix, shape(source*target,)."""
+    def __call__(self, attr, chunks=1000) -> da.Array:
+        """Return attribute matrix, shape(target, source)."""
         # vector = np.array(getattr(self, attr), float)
-        vector = np.array(self[attr])
+        vector = da.from_array(self[attr][:, np.newaxis], chunks=chunks)
         region = self.biotshape.region
         if self.biotshape.region == '':
             raise IndexError('Frame region not specified.\n'
@@ -42,10 +42,8 @@ class BiotFrame(FrameLink):
                              'self.set_source(number)')
         assert region in ['source', 'target']
         if region == 'source':
-            return np.dot(np.ones((self.biotshape.target, 1)),
-                          vector.reshape(1, -1)).flatten()
-        return np.dot(vector.reshape(-1, 1),
-                      np.ones((1, self.biotshape.source))).flatten()
+            return vector.map_blocks(np.tile, reps=self.biotshape.target).T
+        return vector.map_blocks(np.tile, reps=self.biotshape.source)
 
     def set_target(self, number):
         """Set target number."""
@@ -60,9 +58,10 @@ if __name__ == '__main__':
 
     biotframe = BiotFrame()
     biotframe.insert(range(3), 0, dl=0.95, dt=0.95, section='hex')
-    biotframe.insert(range(3), 1, dl=0.95, dt=0.95, section='o', link=True)
-    biotframe.insert(range(3), 2, dl=0.95, dt=0.95, section='sq', link=False)
-    biotframe.insert(range(3), 3, dl=0.95, dt=0.6, section='sk', link=True)
+    biotframe.insert(range(3), 1, dl=0.95, dt=0.95, section='disc', link=True)
+    biotframe.insert(range(3), 2, dl=0.95, dt=0.95, section='square',
+                     link=False)
+    biotframe.insert(range(3), 3, dl=0.95, dt=0.6, section='skin', link=True)
 
     biotframe.multipoint.link(['Coil0', 'Coil11', 'Coil2', 'Coil8'])
 

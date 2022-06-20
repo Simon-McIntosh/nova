@@ -1,8 +1,8 @@
 """Biot-Savart calculation for complete circular filaments."""
 from dataclasses import dataclass, field
-from functools import cached_property
 from typing import ClassVar
 
+import dask.array as da
 import numpy as np
 import scipy.special
 
@@ -22,10 +22,10 @@ class PolidalCoordinates:
 
     def __post_init__(self):
         """Extract source and target coordinates."""
-        self.source_radius = self.source('rms')
-        self.source_height = self.source('z')
-        self.target_radius = self.target('x')
-        self.target_height = self.target('z')
+        self.source_radius = self.source('rms').compute()
+        self.source_height = self.source('z').compute()
+        self.target_radius = self.target('x').compute()
+        self.target_height = self.target('z').compute()
 
 
 @dataclass
@@ -52,8 +52,8 @@ class PoloidalOffset(PolidalCoordinates):
 
     def turnturn_seperation(self, merge_index):
         """Return self seperation length."""
-        return 0.5 * self.source('dx')[merge_index] * \
-            self.source('turnturn')[merge_index]
+        return 0.5 * self.source('dx').compute()[merge_index] * \
+            self.source('turnturn').compute()[merge_index]
 
     def blending_factor(self, span_length, turn_radius):
         """Return blending factor."""
@@ -78,15 +78,16 @@ class PoloidalOffset(PolidalCoordinates):
         """Apply radial and vertical offsets."""
         turn_radius = self.effective_turn_radius()
         span = self.source_target_seperation()
-        span_length = np.linalg.norm(span.astype(np.float64), axis=0)
+        span_length = np.linalg.norm(span, axis=0)
         # reduce
-        merge_index = np.where(span_length <= turn_radius*self.merge_number)[0]
+        merge_index = \
+            np.where(span_length <= turn_radius*self.merge_number)[:2]
         turn_radius = turn_radius[merge_index]
-        span = span[:, merge_index]
+        span = da.from_array([span[i][merge_index] for i in range(2)])
         span_length = span_length[merge_index]
         # interacton orientation
         turn_index = np.isclose(span_length, 0)
-        span_norm = np.zeros((2, len(turn_index)))
+        span_norm = np.zeros((2, *turn_index.shape))
         span_norm[0, turn_index] = 1  # radial offset
         span_norm[:, ~turn_index] = \
             span[:, ~turn_index] / span_length[~turn_index]
@@ -119,57 +120,9 @@ class BiotRing(BiotBase):
         'Aphi', 'Psi', 'Br', 'Bz'])
     _attrs: ClassVar[list[str]] = ['Aphi', 'Psi', 'Br', 'Bz']
 
-
     def calculate_coefficients(self):
         """Return interaction coefficients."""
         offset = PoloidalOffset(self.source, self.target)
-        coeff = {'rs': offset.source_radius, 'zs': offset.source_height,
-                 'r': offset.target_radius, 'z': offset.target_height}
-        coeff['b'] = coeff['rs'] + coeff['r']
-        coeff['gamma'] = coeff['zs'] - coeff['z']
-        coeff['a2'] = coeff['gamma']**2 + (coeff['r'] + coeff['rs'])**2
-        coeff['a'] = np.sqrt(coeff['a2'])
-        coeff['k2'] = 4 * coeff['r'] * coeff['rs'] / coeff['a2']
-        coeff['ck2'] = 1 - coeff['k2']  # complementary modulus
-        coeff['K'] = scipy.special.ellipk(coeff['k2'])  # ellip integral - 1st
-        coeff['E'] = scipy.special.ellipe(coeff['k2'])  # ellip integral - 2nd
-        return coeff
-
-    def calculate_vector_potential(self, coeff):
-        """Calculate target vector potential (r, phi, z), Wb/Amp-turn-turn."""
-        self.vector['Aphi'] = 1 / (2*np.pi) * coeff['a']/coeff['r'] * \
-            ((1 - coeff['k2']/2) * coeff['K'] - coeff['E'])
-
-    def calculate_scalar_potential(self, coeff):
-        """Calculate scalar potential."""
-        self.vector['Psi'] = 2 * np.pi * self.mu_o * \
-            coeff['r'] * self.vector['Aphi']
-
-    def calculate_magnetic_field(self, coeff):
-        """Calculate magnetic field (r, phi, z), T/Amp-turn-turn."""
-        self.vector['Br'] = self.mu_o / (2*np.pi) * \
-            coeff['gamma'] * (coeff['K'] - (2-coeff['k2']) / (2*coeff['ck2']) *
-                              coeff['E']) / (coeff['a'] * coeff['r'])
-        self.vector['Bz'] = self.mu_o / (2*np.pi) * \
-            (coeff['r']*coeff['K'] - (2*coeff['r'] - coeff['b']*coeff['k2']) /
-             (2*coeff['ck2']) * coeff['E']) / (coeff['a']*coeff['r'])
-
-
-@dataclass
-class BiotCylinder(BiotRing):
-    """
-    Extend Biot ring class.
-
-    Compute interaction for complete circular filaments with rectangular
-    cross-sections.
-
-    """
-
-    name = 'cylinder'  # element name
-
-    def calculate_coefficients(self):
-        """Return interaction coefficients."""
-        coordinates = PolidalCoordinates(self.source, self.target)
         coeff = {'rs': offset.source_radius, 'zs': offset.source_height,
                  'r': offset.target_radius, 'z': offset.target_height}
         coeff['b'] = coeff['rs'] + coeff['r']

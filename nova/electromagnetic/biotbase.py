@@ -16,17 +16,19 @@ from nova.electromagnetic.dataarray import DataArray
 class DaskBiotVector:
     """Store Biot vectors - implement subset of xarray dataset interface."""
 
-    index: pandas.Index
+    source: list[str]
+    target: list[str]
     chunks: Union[int, str, Mapping] = None
     data: xarray.Dataset = field(init=False)
 
     def __post_init__(self):
         """Create empty dataset."""
-        self.data = xarray.Dataset(coords=dict(index=self.index))
+        self.data = xarray.Dataset(coords=dict(source=self.source,
+                                               target=self.target))
 
     def __setitem__(self, attr, value):
         """Inset index aligned item to dataset."""
-        value = xarray.DataArray(value, dims=['index'])
+        value = xarray.DataArray(value, dims=['target', 'source'])
         if self.chunks is not None:  # convert to dask array
             value = value.chunk(self.chunks)
         self.data[attr] = value
@@ -91,10 +93,10 @@ class BiotMatrix(BiotSet):
                 0., dims=['target', 'plasma'],
                 coords=[self.data.target, self.data.plasma])
 
-    def get_index(self, frame):
+    def get_index(self, frame, reduce=True):
         """Return matrix coordinate, reduce if flag True."""
         biotframe = getattr(self, frame)
-        if biotframe.reduce:
+        if biotframe.reduce and reduce:
             return biotframe.biotreduce.index.to_list()
         return biotframe.index.to_list()
 
@@ -103,7 +105,7 @@ class BiotMatrix(BiotSet):
 class BiotBase(ABC, BiotMatrix):
     """Biot-Savart base-class. Define calculaiton interface."""
 
-    vector: BiotVector = field(init=False, repr=False)
+    vector: DaskBiotVector = field(init=False, repr=False)
     _attrs: ClassVar[list[str]] = []
     mu_o: ClassVar[float] = 4*np.pi*1e-7
 
@@ -111,7 +113,9 @@ class BiotBase(ABC, BiotMatrix):
         """Build full and unit-turn datasets."""
         super().__post_init__()
         self.assert_available()
-        self.vector = BiotVector(index=self.index, columns=self._attrs)
+        self.vector = DaskBiotVector(
+            source=self.get_index('source', reduce=False),
+            target=self.get_index('target', reduce=False))
         self.calculate_vectors()
         self.store_matrix()
 
@@ -166,12 +170,12 @@ class BiotBase(ABC, BiotMatrix):
 
         """
         for attr in self.attrs:
-            matrix = self.vector[attr].reshape(*self.shape)  # .to_numpy()
+            matrix = self.vector[attr].data
             plasma = matrix[:, self.source.plasma]
             if self.source.turns:
-                matrix *= self.source('nturn').reshape(*self.shape)
+                matrix *= self.source('nturn').compute()
             if self.target.turns:
-                matrix *= (turns := self.target('nturn').reshape(*self.shape))
+                matrix *= (turns := self.target('nturn').compute())
                 plasma *= turns[:, self.source.plasma]
             # reduce
             if self.source.reduce and self.source.biotreduce.reduce:

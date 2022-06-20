@@ -51,7 +51,7 @@ if __name__ == '__main__':
     filename = 'biot'
     reload = True
     if reload:
-        coilset = CoilSet(dcoil=-35, dplasma=-500)
+        coilset = CoilSet(dcoil=-5, dplasma=-500)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
                             nturn=-0.8)
         coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex', turn='c',
@@ -60,7 +60,7 @@ if __name__ == '__main__':
         coilset.coil.insert(3, 0, 0.6, 0.9, section='r', turn='sk')
         coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')
         coilset.shell.insert({'e': [2.5, -1.25, 1.75, 1.0]}, 13, 0.05,
-                             delta=-40, part='vv')
+                             delta=-4, part='vv')
 
         coilset.sloc['Ic'] = 1
         coilset.sloc['Shl0', 'Ic'] = -5
@@ -74,7 +74,7 @@ if __name__ == '__main__':
         coilset.sloc['bubble', 'Ic'] = 5
         coilset.sloc['Shl0', 'Ic'] = -5
         coilset.sloc['plasma', 'Ic'] = -1
-        coilset.store(filename)
+        # coilset.store(filename)
     else:
         coilset = CoilSet().load(filename)
 

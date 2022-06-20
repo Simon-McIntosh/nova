@@ -125,17 +125,17 @@ class BiotBase(ABC, BiotMatrix):
 
     def calculate_vectors(self):
         """Calculate vector and scalar potential and magnetic field."""
-        coeff = self.calculate_coefficients()
-        self.calculate_vector_potential(coeff)
-        self.calculate_scalar_potential(coeff)
-        self.calculate_magnetic_field(coeff)
+        self.calculate_coefficients()
+        self.calculate_vector_potential()
+        self.calculate_scalar_potential()
+        self.calculate_magnetic_field()
 
     @abstractmethod
     def calculate_coefficients(self) -> dict[str, npt.ArrayLike]:
         """Return interaction coefficients."""
 
     @abstractmethod
-    def calculate_vector_potential(self, coeff) -> dict[str, npt.ArrayLike]:
+    def calculate_vector_potential(self) -> dict[str, npt.ArrayLike]:
         """
         Calculate target vector potential, Wb/Amp-turn-turn..
 
@@ -143,11 +143,11 @@ class BiotBase(ABC, BiotMatrix):
 
         """
 
-    def calculate_scalar_potential(self, coeff) -> npt.ArrayLike:
+    def calculate_scalar_potential(self) -> npt.ArrayLike:
         """Calculate scalar potential, axisymmetric-only."""
 
     @abstractmethod
-    def calculate_magnetic_field(self, coeff):
+    def calculate_magnetic_field(self):
         """
         Calculate magnetic field, T/Amp-turn-turn.
 

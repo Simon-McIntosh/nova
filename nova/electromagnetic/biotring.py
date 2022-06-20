@@ -133,23 +133,27 @@ class BiotRing(BiotBase):
         coeff['ck2'] = 1 - coeff['k2']  # complementary modulus
         coeff['K'] = scipy.special.ellipk(coeff['k2'])  # ellip integral - 1st
         coeff['E'] = scipy.special.ellipe(coeff['k2'])  # ellip integral - 2nd
-        return coeff
+        self.coef = coeff
 
-    def calculate_vector_potential(self, coeff):
+    def calculate_vector_potential(self):
         """Calculate target vector potential (r, phi, z), Wb/Amp-turn-turn."""
-        self.vector['Aphi'] = 1 / (2*np.pi) * coeff['a']/coeff['r'] * \
-            ((1 - coeff['k2']/2) * coeff['K'] - coeff['E'])
+        self.vector['Aphi'] = 1 / (2*np.pi) * self.coef['a']/self.coef['r'] * \
+            ((1 - self.coef['k2']/2) * self.coef['K'] - self.coef['E'])
 
-    def calculate_scalar_potential(self, coeff):
+    def calculate_scalar_potential(self):
         """Calculate scalar potential."""
         self.vector['Psi'] = 2 * np.pi * self.mu_o * \
-            coeff['r'] * self.vector['Aphi']
+            self.coef['r'] * self.vector['Aphi']
 
-    def calculate_magnetic_field(self, coeff):
+    def calculate_magnetic_field(self):
         """Calculate magnetic field (r, phi, z), T/Amp-turn-turn."""
-        self.vector['Br'] = self.mu_o / (2*np.pi) * \
-            coeff['gamma'] * (coeff['K'] - (2-coeff['k2']) / (2*coeff['ck2']) *
-                              coeff['E']) / (coeff['a'] * coeff['r'])
-        self.vector['Bz'] = self.mu_o / (2*np.pi) * \
-            (coeff['r']*coeff['K'] - (2*coeff['r'] - coeff['b']*coeff['k2']) /
-             (2*coeff['ck2']) * coeff['E']) / (coeff['a']*coeff['r'])
+        self.vector['Br'] = \
+            self.mu_o / (2*np.pi) * self.coef['gamma'] * \
+            (self.coef['K'] - (2-self.coef['k2']) / (2*self.coef['ck2']) *
+             self.coef['E']) / (self.coef['a'] * self.coef['r'])
+        self.vector['Bz'] = \
+            self.mu_o / (2*np.pi) * \
+            (self.coef['r']*self.coef['K'] -
+             (2*self.coef['r'] - self.coef['b']*self.coef['k2']) /
+             (2*self.coef['ck2']) * self.coef['E']) / \
+            (self.coef['a']*self.coef['r'])

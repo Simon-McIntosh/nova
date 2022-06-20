@@ -30,7 +30,7 @@ class FieldLine:
         deviation = self.predict(gap, ndiv)
         return deviation.max(axis=-1) - deviation.min(axis=-1)
 
-    def plot_benchmark(self, simulation: str):
+    def plot_benchmark(self, simulation: str, title=True):
         """Plot combined structural+EM benchmark."""
         gap = Gap(simulation)
         dataset = self.electromagnetic.load_dataset(simulation)
@@ -43,7 +43,9 @@ class FieldLine:
         axes[0].set_xticks([])
         self.electromagnetic.plot_deviation(
             axes[1], dataset.phi, dataset.deviation.data)
-        axes[0].set_title(f'Vault+EM benchmark: {simulation}')
+        if title:
+            axes[0].set_title(f'Vault+EM benchmark: {simulation}')
+        plt.savefig('tmp.png', bbox_inches='tight')
 
     def plot_peaktopeak(self, simulations=None):
         """Plot peak to peak benchmark."""
@@ -70,5 +72,5 @@ if __name__ == '__main__':
 
     feildline = FieldLine()
 
-    feildline.plot_benchmark('v3')
+    feildline.plot_benchmark('v3', title=False)
     #feildline.plot_peaktopeak()

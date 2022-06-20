@@ -26,12 +26,14 @@ class BiotFrame(FrameLink):
         """Extend FrameAttrs update_metadata."""
         metadata = dict(required=['x', 'z'],
                         additional=['plasma', 'nturn', 'link', 'segment'],
-                        available=['section', 'poly']) | metadata
+                        available=['section', 'poly'],
+                        array=['x', 'z']) | metadata
         super().update_metadata(data, columns, attrs, metadata)
 
     def __call__(self, attr) -> npt.ArrayLike:
         """Return flattened attribute matrix, shape(source*target,)."""
-        vector = np.array(getattr(self, attr), float)
+        # vector = np.array(getattr(self, attr), float)
+        vector = np.array(self[attr])
         region = self.biotshape.region
         if self.biotshape.region == '':
             raise IndexError('Frame region not specified.\n'

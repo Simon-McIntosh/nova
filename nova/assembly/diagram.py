@@ -133,6 +133,57 @@ class Overview(DiagramBase):
 
 
 @dataclass
+class ErrorField(DiagramBase):
+    """Draw error field computational graph."""
+
+    rankdir: str = 'UL'
+    nodesep: float = 0.1
+    ranksep: float = 1.3
+
+    samples: ClassVar[list[str]] = \
+        ['radial', 'tangential', 'vertical',
+         'radial ccl', 'tangential cc', 'vertical ccl',
+         'pitch', 'roll', 'yaw']
+
+    def __post_init__(self):
+        """Build model."""
+        super().__post_init__()
+        self.build_samples()
+        self.build_models()
+        self.build_nodes()
+        self.build_links()
+
+    def build_samples(self, shape='box3d'):
+        """Build graph nodes."""
+        for sample in self.samples:
+            self.add_node(sample, sample, shape, **self.sample)
+        for i in range(1, 4):
+            self.add_node(f'pdf{i}', f'P(B{i})', shape, **self.sample)
+
+    def build_models(self):
+        """Build graph models."""
+        self.add_node('B99', 'P(B<B99)=0.99', 'none')
+
+    def build_nodes(self, shape='rectangle'):
+        """Build model nodes."""
+        self.add_node('error',
+                      'Error field (n1)\n----------------\n '
+                      'Displacment -> '
+                      'Fraction of Locked Mode Threshold',
+                      shape, **self.highlight)
+
+    def build_links(self):
+        """Link nodes."""
+        # sample input
+        for sample in self.samples:
+            self.add_edge(sample, 'error', **self.highlight)
+        for i in range(1, 4):
+            self.add_edge('error', f'pdf{i}',
+                          label=f' Plasma{i}',  **self.highlight)
+            self.add_edge(f'pdf{i}', 'B99')
+
+
+@dataclass
 class Diagram(DiagramBase):
     """Draw diagrams to illustrate Monte Carlo analyses."""
 
@@ -235,7 +286,8 @@ class Diagram(DiagramBase):
 
 if __name__ == '__main__':
 
-    Diagram(theta=[5, 5, 5, 10, 2, 2, 2.5], wall=True).plot()
+    Diagram(theta=[1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 3], wall=True).plot()
     # Overview().plot()
     # Filter().plot()
     # FFT().plot()
+    #ErrorField().plot()

@@ -2,7 +2,7 @@ import pytest
 from numpy import allclose
 import numpy as np
 
-from nova.electromagnetic.biotcalc import BiotCalc
+from nova.electromagnetic.biotbase import BiotBase
 from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotgrid import BiotGrid
 from nova.electromagnetic.biotpoint import BiotPoint
@@ -76,7 +76,7 @@ def test_solenoid_grid():
     coilset.sloc['Ic'] = current
     biotgrid = BiotGrid(*coilset.frames)
     biotgrid.solve(4, [1e-9, 1.5, 0, 1])
-    Bz_theory = BiotCalc.mu_o * nturn * current / height
+    Bz_theory = BiotBase.mu_o * nturn * current / height
     Bz_grid = np.dot(biotgrid.data.Bz, coilset.sloc['Ic'])
     assert allclose(Bz_grid[0], Bz_theory, atol=5e-3)
 
@@ -89,7 +89,7 @@ def test_solenoid_probe():
     coilset.sloc['Ic'] = current
     biotpoint = BiotPoint(*coilset.frames)
     biotpoint.solve((1e-9, 0))
-    Bz_theory = BiotCalc.mu_o * nturn * current / height
+    Bz_theory = BiotBase.mu_o * nturn * current / height
     Bz_point = np.dot(biotpoint.data.Bz, coilset.sloc['Ic'])
     assert allclose(Bz_point, Bz_theory, atol=5e-3)
 

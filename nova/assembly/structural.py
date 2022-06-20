@@ -253,45 +253,52 @@ class Model(ModelBase):
                 np.fft.rfft(signal) * self.filter[response][:, i])
         return waveform
 
-    def plot_benchmark(self, simulation: str):
+    def plot_benchmark(self, simulation: str, title=True):
         """Plot structural model results."""
         transform = Transform(simulation)
         transform.data.response_delta[:] -= \
             transform.data.response_delta.mean(axis=0)
-        axes = plt.subplots(3, 1, sharex=True, sharey=False,
-                            gridspec_kw=dict(height_ratios=[2, 2, 2]))[1]
+        fig, axes = plt.subplots(3, 1, sharex=True, sharey=False,
+                                 gridspec_kw=dict(height_ratios=[2, 2, 2]))
         width = 0.9/transform.data.dims['signal']
         color = ['C0', 'C6', 'C7']
         for i, signal in enumerate(transform.data.signal.values):
+            if np.allclose(transform.data[signal], 0):
+                continue
             offset = width * (i - transform.data.dims['signal']/2)
             axes[0].bar(transform.data.index + offset,
-                        transform.data[signal], width=width, color=color[i])
+                        transform.data[signal], width=width, color=color[i],
+                        label=transform.data.signal[i].values)
 
         axes[0].set_ylabel('signal')
-        axes[0].legend(transform.data.signal.values,
-                       fontsize='xx-small', ncol=3)
+        axes[0].legend(fontsize='xx-small', ncol=3)
         axes[1].bar(transform.data.index, transform.data.response_delta[:, 0],
                     width=0.85, color='C1', label='ANSYS')
-        model_radial = self.predict_radial(*transform.data.signal_delta.data.T)
-        axes[1].bar(transform.data.index, model_radial,
-                    width=0.45, color='C2', label='Vault proxy')
         axes[1].set_ylabel(r'$\Delta r$')
-        axes[0].set_title(f'Structural benchmark: {simulation}')
-
+        if title:
+            axes[0].set_title(f'Structural benchmark: {simulation}')
         axes[2].bar(transform.data.index, transform.data.response_delta[:, 1],
                     width=0.85, color='C1', label='ANSYS')
-        model_tangential = self.predict_tangential(
-            *transform.data.signal_delta.data.T)
-        axes[2].bar(transform.data.index, model_tangential,
-                    width=0.45, color='C2', label='Vault proxy')
         axes[2].set_ylabel(r'$r\Delta \phi$')
-
         axes[-1].set_xlabel('coil index')
         axes[-1].xaxis.set_major_locator(MultipleLocator(2))
         axes[-1].xaxis.set_major_formatter(FormatStrFormatter('%d'))
         axes[-1].xaxis.set_minor_locator(MultipleLocator(1))
         plt.despine()
         axes[-1].legend(fontsize='xx-small', ncol=2)
+
+        # plt.savefig('tmp.png', bbox_inches='tight')
+
+        model_radial = self.predict_radial(*transform.data.signal_delta.data.T)
+        axes[1].bar(transform.data.index, model_radial,
+                    width=0.45, color='C2', label='Proxy')
+        model_tangential = self.predict_tangential(
+            *transform.data.signal_delta.data.T)
+        axes[2].bar(transform.data.index, model_tangential,
+                    width=0.45, color='C2', label='Proxy')
+        axes[-1].legend(fontsize='xx-small', ncol=2, loc='lower right')
+
+        # plt.savefig('tmp.png', bbox_inches='tight')
 
     def plot_response(self):
         """Plot radial and tangential."""
@@ -314,7 +321,7 @@ class Model(ModelBase):
 if __name__ == '__main__':
 
     structural = Model()
-    structural.plot_benchmark('w5')
+    structural.plot_benchmark('w5', title=False)
 
     #structural.plot_response()
     #Gap().plot('k3')

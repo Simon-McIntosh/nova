@@ -100,7 +100,10 @@ class Base(ModelBase):
                   label=f'ground truth H={self.peaktopeak(benchmark):1.2f}')
         axes.plot(phi, model, 'C3-.',
                   label=f'inference H={self.peaktopeak(model):1.2f}')
-        axes.set_ylabel('field line deviation')
+        model_delta = model.max() - model.min()
+        axes.set_ylim(model.min() - 0.05*model_delta,
+                      model.max() + 0.05*model_delta)
+        axes.set_ylabel('field line')
         axes.set_xlabel(r'$\phi$')
         plt.despine()
         if legend:
@@ -108,24 +111,27 @@ class Base(ModelBase):
 
         print((model-benchmark).std()/(benchmark.max() - benchmark.min()))
 
-    def plot_benchmark(self, simulation: str):
+    def plot_benchmark(self, simulation: str, title=True):
         """Plot Monte Carlo benchmark."""
         dataset = self.load_dataset(simulation)
         radial = dataset.delta[:, 0]
         tangential = dataset.delta[:, 1]
         self.predict(radial, tangential, dataset.dims['phi'])
-        axes = plt.subplots(2, 1, sharex=False, sharey=False,
-                            gridspec_kw=dict(height_ratios=[1, 2]))[1]
+        axes = plt.subplots(3, 1, sharex=False, sharey=False,
+                            gridspec_kw=dict(height_ratios=[1, 1, 3]))[1]
         for i, label in enumerate([r'$\Delta r$', r'$r\Delta \phi$']):
-            axes[0].bar(dataset.index, dataset.delta[:, i], width=0.8 - i*0.3,
-                        color=f'C{1+i}', label=label)
-        axes[0].set_xticks([])
+            axes[i].bar(dataset.index, dataset.delta[:, i], width=0.8,
+                        color='C1')
+            axes[i].set_xticks([])
+            axes[i].set_ylabel(label)
+        axes[0].legend(['ANSYS'], fontsize='xx-small', loc='lower left')
         self.plot_deviation(axes[-1], dataset.phi, dataset.deviation.data)
 
         plt.despine()
-        axes[0].legend(fontsize='x-small', ncol=2)
-        axes[0].set_ylabel(r'vault')
-        axes[0].set_title(f'EM benchmark: {simulation}')
+        if title:
+            axes[0].set_title(f'EM benchmark: {simulation}')
+
+        plt.savefig('tmp.png', bbox_inches='tight')
 
 
 @dataclass
@@ -236,7 +242,7 @@ class WaveModel(Base):
 if __name__ == '__main__':
 
     model = Model()
-    model.plot_benchmark('v3')
+    model.plot_benchmark('v3', title=False)
 
 
 # amplitude = abs(coefficient) / self.data.nyquist

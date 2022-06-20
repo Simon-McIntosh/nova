@@ -486,7 +486,7 @@ if __name__ == '__main__':
     vault.plot()
     vault.plot_offset()
 
-    #vault.plot_sample(0.5, False)
+    vault.plot_sample(0.99, False)
 
 
     #theta_error = [5, 5, 5, 2, 2, 2, 5, 10, 10]

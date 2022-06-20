@@ -100,7 +100,7 @@ class BiotMatrix(BiotSet):
 
 
 @dataclass
-class BiotCalc(ABC, BiotMatrix):
+class BiotBase(ABC, BiotMatrix):
     """Biot-Savart base-class. Define calculaiton interface."""
 
     vector: BiotVector = field(init=False, repr=False)

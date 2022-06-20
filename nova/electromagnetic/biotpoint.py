@@ -26,8 +26,8 @@ class BiotPoint(Axes, BiotOperate):
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
                               attrs=['Psi', 'Br', 'Bz']).data
         # insert coordinate data
-        self.data.coords['x'] = target['x'].values
-        self.data.coords['z'] = target['z'].values
+        self.data.coords['x'] = target['x']
+        self.data.coords['z'] = target['z']
         super().post_solve()
 
     def plot(self, axes=None, **kwargs):

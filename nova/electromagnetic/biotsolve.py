@@ -7,7 +7,7 @@ import numpy as np
 import xarray
 
 from nova.electromagnetic.biotring import BiotRing
-from nova.electromagnetic.biotcalc import BiotMatrix
+from nova.electromagnetic.biotbase import BiotMatrix
 
 
 @dataclass

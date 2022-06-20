@@ -203,5 +203,3 @@ if __name__ == '__main__':
             :math:`*\mathrm{A}^{-1}\mathrm{turn}^{-2}`.
 
     """
-
-'''

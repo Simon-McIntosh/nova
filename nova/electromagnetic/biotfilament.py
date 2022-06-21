@@ -134,7 +134,6 @@ class BiotFilament(BiotBase):
 
 if __name__ == '__main__':
 
-    from nova.electromagnetic.biotframe import BiotFrame
     from nova.electromagnetic.framespace import FrameSpace
 
     radius, height = np.meshgrid(np.linspace(4, 7, 100),

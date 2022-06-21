@@ -41,9 +41,13 @@ class BiotFrame(FrameLink):
                              'self.set_target(number)\n'
                              'self.set_source(number)')
         assert region in ['source', 'target']
+        partner = next(partner for partner in
+                       ['source', 'target'] if partner != region)
+        reps = getattr(self.biotshape, partner)
+        matrix = vector.map_blocks(np.tile, reps=reps).compute_chunk_sizes()
         if region == 'source':
-            return vector.map_blocks(np.tile, reps=self.biotshape.target).T
-        return vector.map_blocks(np.tile, reps=self.biotshape.source)
+            return matrix.T
+        return matrix
 
     def set_target(self, number):
         """Set target number."""

@@ -22,10 +22,10 @@ class PolidalCoordinates:
 
     def __post_init__(self):
         """Extract source and target coordinates."""
-        self.source_radius = self.source('rms').compute()
-        self.source_height = self.source('z').compute()
-        self.target_radius = self.target('x').compute()
-        self.target_height = self.target('z').compute()
+        self.source_radius = self.source('rms')
+        self.source_height = self.source('z')
+        self.target_radius = self.target('x')
+        self.target_height = self.target('z')
 
 
 @dataclass
@@ -47,8 +47,8 @@ class PoloidalOffset(PolidalCoordinates):
 
     def source_target_seperation(self):
         """Return source-target seperation vector."""
-        return np.array([self.target_radius-self.source_radius,
-                         self.target_height-self.source_height])
+        return da.from_array([self.target_radius-self.source_radius,
+                              self.target_height-self.source_height])
 
     def turnturn_seperation(self, merge_index):
         """Return self seperation length."""
@@ -65,12 +65,20 @@ class PoloidalOffset(PolidalCoordinates):
 
     def apply_rms_offset(self, merge_index, radial_offset):
         """Return effective rms offfset."""
-        source_radius = self.source_radius[merge_index]
-        target_radius = self.target_radius[merge_index]
-        rms_delta = (np.sqrt(
+        source_radius = self.source_radius.compute()[merge_index]
+        target_radius = self.target_radius.compute()[merge_index]
+        rms_delta = (da.sqrt(
             (target_radius + source_radius)**2 -
             8*radial_offset*(target_radius - source_radius + 2*radial_offset))
             - (target_radius + source_radius)) / 4
+        merge_index = merge_index.compute_chunk_sizes()
+        print(rms_delta.compute())
+
+        self.source_radius.map_blocks(
+            )
+
+        didx.map_blocks(lambda block, lut=None: lut[block], lut=lut)
+
         self.source_radius[merge_index] += rms_delta
         self.target_radius[merge_index] += rms_delta
 
@@ -78,19 +86,20 @@ class PoloidalOffset(PolidalCoordinates):
         """Apply radial and vertical offsets."""
         turn_radius = self.effective_turn_radius()
         span = self.source_target_seperation()
-        span_length = np.linalg.norm(span, axis=0)
+        span_length = da.linalg.norm(span, axis=0)
         # reduce
-        merge_index = \
-            np.where(span_length <= turn_radius*self.merge_number)[:2]
+        merge_index = span_length <= turn_radius*self.merge_number
+        # \np.where(span_length <= turn_radius*self.merge_number)[:2]
         turn_radius = turn_radius[merge_index]
         span = da.from_array([span[i][merge_index] for i in range(2)])
-        span_length = span_length[merge_index]
+        span_length = span_length[merge_index].compute_chunk_sizes()
         # interacton orientation
-        turn_index = np.isclose(span_length, 0)
-        span_norm = np.zeros((2, *turn_index.shape))
+        turn_index = da.isclose(span_length, 0)
+        span_norm = da.zeros((2, *turn_index.shape))
         span_norm[0, turn_index] = 1  # radial offset
         span_norm[:, ~turn_index] = \
-            span[:, ~turn_index] / span_length[~turn_index]
+            span[:, ~turn_index].compute_chunk_sizes() / \
+            span_length[~turn_index].compute_chunk_sizes()
         turnturn_length = self.turnturn_seperation(merge_index)
         # blend interaction
         blending_factor = self.blending_factor(span_length, turn_radius)

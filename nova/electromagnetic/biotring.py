@@ -63,6 +63,14 @@ class PoloidalOffset(PolidalCoordinates):
         # exponential
         return np.exp(-self.fold_number * (span_length / turn_radius)**2)
 
+    def map_offset(self, attr: str, index: da.Array, offset: da.Array):
+        """Apply indexed offset to dask array."""
+        def iadd(array, index, offset):
+            array[index] += offset
+            return array
+        array = getattr(self, attr)
+        setattr(self, attr, array.map_blocks(iadd, index, offset, dtype=float))
+
     def apply_rms_offset(self, merge_index, radial_offset):
         """Return effective rms offfset."""
         source_radius = self.source_radius.compute()[merge_index]
@@ -71,16 +79,12 @@ class PoloidalOffset(PolidalCoordinates):
             (target_radius + source_radius)**2 -
             8*radial_offset*(target_radius - source_radius + 2*radial_offset))
             - (target_radius + source_radius)) / 4
-        merge_index = merge_index.compute_chunk_sizes()
-        print(rms_delta.compute())
 
-        self.source_radius.map_blocks(
-            )
+        self.map_offset('source_radius', merge_index, rms_delta)
+        self.map_offset('target_radius', merge_index, rms_delta)
 
-        didx.map_blocks(lambda block, lut=None: lut[block], lut=lut)
-
-        self.source_radius[merge_index] += rms_delta
-        self.target_radius[merge_index] += rms_delta
+        #self.source_radius[merge_index] += rms_delta
+        #self.target_radius[merge_index] += rms_delta
 
     def _apply_offsets(self):
         """Apply radial and vertical offsets."""
@@ -90,6 +94,7 @@ class PoloidalOffset(PolidalCoordinates):
         # reduce
         merge_index = span_length <= turn_radius*self.merge_number
         # \np.where(span_length <= turn_radius*self.merge_number)[:2]
+        merge_index = merge_index.compute()
         turn_radius = turn_radius[merge_index]
         span = da.from_array([span[i][merge_index] for i in range(2)])
         span_length = span_length[merge_index].compute_chunk_sizes()
@@ -108,11 +113,17 @@ class PoloidalOffset(PolidalCoordinates):
             self.apply_rms_offset(merge_index, radial_offset)
         vertical_offset = blending_factor*turnturn_length*span_norm[1, :]
         # offset source filaments
-        self.source_radius[merge_index] -= radial_offset/2
-        self.source_height[merge_index] -= vertical_offset/2
+        self.map_offset('source_radius', merge_index, -radial_offset/2)
+        self.map_offset('source_height', merge_index, -vertical_offset/2)
+
+        #self.source_radius[merge_index] -= radial_offset/2
+        #self.source_height[merge_index] -= vertical_offset/2
         # offset target filaments
-        self.target_radius[merge_index] += radial_offset/2
-        self.target_height[merge_index] += vertical_offset/2
+        self.map_offset('target_radius', merge_index, radial_offset/2)
+        self.map_offset('target_height', merge_index, vertical_offset/2)
+
+        #self.target_radius[merge_index] += radial_offset/2
+        #self.target_height[merge_index] += vertical_offset/2
 
 
 @dataclass
@@ -144,25 +155,42 @@ class BiotRing(BiotBase):
         coeff['E'] = scipy.special.ellipe(coeff['k2'])  # ellip integral - 2nd
         self.coef = coeff
 
-    def calculate_vector_potential(self):
-        """Calculate target vector potential (r, phi, z), Wb/Amp-turn-turn."""
-        self.vector['Aphi'] = 1 / (2*np.pi) * self.coef['a']/self.coef['r'] * \
+    @property
+    def Aphi(self):
+        """Return Aphi dask array."""
+        return 1 / (2*np.pi) * self.coef['a']/self.coef['r'] * \
             ((1 - self.coef['k2']/2) * self.coef['K'] - self.coef['E'])
 
-    def calculate_scalar_potential(self):
-        """Calculate scalar potential."""
-        self.vector['Psi'] = 2 * np.pi * self.mu_o * \
-            self.coef['r'] * self.vector['Aphi']
+    @property
+    def Psi(self):
+        """Return Psi dask array."""
+        return 2 * np.pi * self.mu_o * self.coef['r'] * self.vector['Aphi']
 
-    def calculate_magnetic_field(self):
-        """Calculate magnetic field (r, phi, z), T/Amp-turn-turn."""
-        self.vector['Br'] = \
-            self.mu_o / (2*np.pi) * self.coef['gamma'] * \
+    @property
+    def Br(self):
+        """Return radial field dask array."""
+        return self.mu_o / (2*np.pi) * self.coef['gamma'] * \
             (self.coef['K'] - (2-self.coef['k2']) / (2*self.coef['ck2']) *
              self.coef['E']) / (self.coef['a'] * self.coef['r'])
-        self.vector['Bz'] = \
-            self.mu_o / (2*np.pi) * \
+
+    @property
+    def Bz(self):
+        """Return vertical field dask array."""
+        return self.mu_o / (2*np.pi) * \
             (self.coef['r']*self.coef['K'] -
              (2*self.coef['r'] - self.coef['b']*self.coef['k2']) /
              (2*self.coef['ck2']) * self.coef['E']) / \
             (self.coef['a']*self.coef['r'])
+
+    def calculate_vector_potential(self):
+        """Calculate target vector potential (r, phi, z), Wb/Amp-turn-turn."""
+        self.vector['Aphi'] = self.Aphi.compute()
+
+    def calculate_scalar_potential(self):
+        """Calculate scalar potential."""
+        self.vector['Psi'] = self.Psi.compute()
+
+    def calculate_magnetic_field(self):
+        """Calculate magnetic field (r, phi, z), T/Amp-turn-turn."""
+        self.vector['Br'] = self.Br.compute()
+        self.vector['Bz'] = self.Bz.compute()

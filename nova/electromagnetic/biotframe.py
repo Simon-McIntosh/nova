@@ -30,7 +30,7 @@ class BiotFrame(FrameLink):
                         array=['x', 'z']) | metadata
         super().update_metadata(data, columns, attrs, metadata)
 
-    def __call__(self, attr, chunks=1000) -> da.Array:
+    def __call__(self, attr, chunks=500) -> da.Array:
         """Return attribute matrix, shape(target, source)."""
         # vector = np.array(getattr(self, attr), float)
         vector = da.from_array(self[attr][:, np.newaxis], chunks=chunks)
@@ -44,10 +44,10 @@ class BiotFrame(FrameLink):
         partner = next(partner for partner in
                        ['source', 'target'] if partner != region)
         reps = getattr(self.biotshape, partner)
-        matrix = vector.map_blocks(np.tile, reps=reps).compute_chunk_sizes()
+        matrix = vector.map_blocks(np.tile, reps=reps)
         if region == 'source':
-            return matrix.T
-        return matrix
+            return da.transpose(matrix).compute_chunk_sizes()
+        return matrix.compute_chunk_sizes()
 
     def set_target(self, number):
         """Set target number."""

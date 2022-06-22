@@ -13,63 +13,6 @@ from nova.electromagnetic.biotbase import BiotBase
 
 
 # pylint: disable=no-member  # disable scipy.special module not found
-# pylint: disable=W0631  # disable short names
-
-
-@dataclass
-class Coefficients:
-    """Manage biot calculation coefficents."""
-
-    source_radius: da.Array
-    source_height: da.Array
-    target_radius: da.Array
-    target_height: da.Array
-    cache_size: InitVar[float] = 2e9
-
-    def __post_init__(self, cache_size):
-        """Register dask cache."""
-        cache = Cache(cache_size)
-        cache.register()
-
-    @cached_property
-    def b(self):
-        """Return b coefficient."""
-        return self.source_radius + self.target_radius
-
-    @cached_property
-    def gamma(self):
-        """Return gamma coefficient."""
-        return self.source_height - self.target_height
-
-    @cached_property
-    def a2(self):
-        """Return a2 coefficient."""
-        return self.gamma**2 + (self.source_radius + self.target_radius)**2
-
-    @cached_property
-    def a(self):
-        """Return a coefficient."""
-        return da.sqrt(self.a2)
-
-    @cached_property
-    def k2(self):
-        """Return k2 coefficient."""
-        return 4*self.target_radius*self.source_radius / self.a2
-
-    @cached_property
-    def ck2(self):
-        """Return complementary modulus."""
-        return 1 - self.k2
-
-    @cached_property
-    def K(self):
-        """Return elliptic intergral of the 1st kind."""
-        return self.k2.map_blocks(scipy.special.ellipk, dtype=float)
-
-    @cached_property
-    def E(self):
-        """Return elliptic intergral of the 2nd kind."""
-        return self.k2.map_blocks(scipy.special.ellipe, dtype=float)
 
 
 @dataclass

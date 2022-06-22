@@ -1,59 +1,48 @@
 """Biot-Savart calculation for complete circular filaments."""
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import ClassVar
 
 import dask.array as da
 import numpy as np
-import scipy.special
+import xarray
 
-from nova.electromagnetic.biotframe import BiotFrame
-from nova.electromagnetic.biotbase import BiotBase
-
-
-# pylint: disable=no-member  # disable scipy.special module not found
+from nova.electromagnetic.biotconstants import BiotConstants
+from nova.electromagnetic.biotmatrix import BiotMatrix
 
 
 @dataclass
-class PolidalCoordinates:
-    """Manage poloidal coordinates."""
-
-    source: BiotFrame
-    target: BiotFrame
-
-    def __post_init__(self):
-        """Extract source and target coordinates."""
-        self.source_radius = self.source('rms')
-        self.source_height = self.source('z')
-        self.target_radius = self.target('x')
-        self.target_height = self.target('z')
-
-
-@dataclass
-class PoloidalOffset(PolidalCoordinates):
+class OffsetFilaments:
     """Offset source and target filaments."""
+
+    data: dict[str, da.Array]
 
     fold_number: int = 0  # Number of e-foling lenghts within filament
     merge_number: int = 1  # Merge radius, multiple of filament widths
     rms_offset: bool = True  # Maintain rms offset for filament pairs
 
     def __post_init__(self):
-        """Apply radial and vertical offsets to source and target filaments."""
-        super().__post_init__()
-        self._apply_offsets()
+        """Offset coincident filaments."""
+        self.apply_offset()
+
+    def __getitem__(self, attr):
+        """Return attributes from dataset."""
+        return self.data[attr]
+
+    def __setitem__(self, attr, value):
+        """Update dataset attribute."""
+        self.data[attr] = value
 
     def effective_turn_radius(self):
         """Return effective source turn radius."""
-        return np.max([self.source('dx'), self.source('dz')], axis=0) / 2
+        return da.max(da.stack([self['dx'], self['dz']]), axis=0) / 2
 
     def source_target_seperation(self):
         """Return source-target seperation vector."""
-        return da.from_array([self.target_radius-self.source_radius,
-                              self.target_height-self.source_height])
+        return da.stack([self['r']-self['rs'], self['z']-self['zs']])
 
-    def turnturn_seperation(self, merge_index):
+    def turnturn_seperation(self):
         """Return self seperation length."""
-        return 0.5 * self.source('dx').compute()[merge_index] * \
-            self.source('turnturn').compute()[merge_index]
+        return 0.5 * self['dx'] * self['turnturn']
 
     def blending_factor(self, span_length, turn_radius):
         """Return blending factor."""
@@ -65,69 +54,68 @@ class PoloidalOffset(PolidalCoordinates):
 
     def map_offset(self, attr: str, index: da.Array, offset: da.Array):
         """Apply indexed offset to dask array."""
-        def iadd(array, index, offset):
-            array[index] += offset
-            return array
-        array = getattr(self, attr)
-        setattr(self, attr, array.map_blocks(iadd, index, offset, dtype=float))
+        index.compute_chunk_sizes()
+        print(self[attr].shape, index.shape, offset.shape)
+        _offset = da.zeros(self[attr].shape)
+        _offset.compute_chunk_sizes()
+        _offset[index] += offset
+        print(_offset)
+        self[attr] += _offset
+        #print(self[attr], index, offset)
+        #self[attr] = self[attr].map_blocks(lambda block, offset: , index, offset, dtype=float)
 
     def apply_rms_offset(self, merge_index, radial_offset):
         """Return effective rms offfset."""
-        source_radius = self.source_radius.compute()[merge_index]
-        target_radius = self.target_radius.compute()[merge_index]
+        source_radius = self['rs'].compute()[merge_index]
+        target_radius = self['r'].compute()[merge_index]
         rms_delta = (da.sqrt(
             (target_radius + source_radius)**2 -
             8*radial_offset*(target_radius - source_radius + 2*radial_offset))
             - (target_radius + source_radius)) / 4
+        self.map_offset('rs', merge_index, rms_delta)
+        self.map_offset('r', merge_index, rms_delta)
 
-        self.map_offset('source_radius', merge_index, rms_delta)
-        self.map_offset('target_radius', merge_index, rms_delta)
-
-        #self.source_radius[merge_index] += rms_delta
-        #self.target_radius[merge_index] += rms_delta
-
-    def _apply_offsets(self):
+    def apply_offset(self):
         """Apply radial and vertical offsets."""
         turn_radius = self.effective_turn_radius()
         span = self.source_target_seperation()
         span_length = da.linalg.norm(span, axis=0)
         # reduce
         merge_index = span_length <= turn_radius*self.merge_number
-        # \np.where(span_length <= turn_radius*self.merge_number)[:2]
-        merge_index = merge_index.compute()
-        turn_radius = turn_radius[merge_index]
-        span = da.from_array([span[i][merge_index] for i in range(2)])
-        span_length = span_length[merge_index].compute_chunk_sizes()
+        if not merge_index.any().compute():
+            return
+
+        print(merge_index.any().compute())
+        #turn_radius = turn_radius[merge_index]
+        #span = da.from_array([span[i][merge_index] for i in range(2)])
+        #span_length = span_length[merge_index].compute_chunk_sizes()
         # interacton orientation
-        turn_index = da.isclose(span_length, 0)
+        turn_index = np.isclose(span_length, 0).compute()
+        pair_index = np.invert(turn_index)
         span_norm = da.zeros((2, *turn_index.shape))
         span_norm[0, turn_index] = 1  # radial offset
-        span_norm[:, ~turn_index] = \
-            span[:, ~turn_index].compute_chunk_sizes() / \
-            span_length[~turn_index].compute_chunk_sizes()
-        turnturn_length = self.turnturn_seperation(merge_index)
+        span_norm[:, pair_index] = \
+            span[:, pair_index] / span_length[pair_index]
+        turnturn_length = self.turnturn_seperation()
         # blend interaction
         blending_factor = self.blending_factor(span_length, turn_radius)
         radial_offset = blending_factor*turnturn_length*span_norm[0, :]
+
+        '''
         if self.rms_offset:
             self.apply_rms_offset(merge_index, radial_offset)
         vertical_offset = blending_factor*turnturn_length*span_norm[1, :]
         # offset source filaments
-        self.map_offset('source_radius', merge_index, -radial_offset/2)
-        self.map_offset('source_height', merge_index, -vertical_offset/2)
-
-        #self.source_radius[merge_index] -= radial_offset/2
-        #self.source_height[merge_index] -= vertical_offset/2
+        self.map_offset('rs', merge_index, -radial_offset/2)
+        self.map_offset('zs', merge_index, -vertical_offset/2)
         # offset target filaments
-        self.map_offset('target_radius', merge_index, radial_offset/2)
-        self.map_offset('target_height', merge_index, vertical_offset/2)
-
-        #self.target_radius[merge_index] += radial_offset/2
-        #self.target_height[merge_index] += vertical_offset/2
+        self.map_offset('r', merge_index, radial_offset/2)
+        self.map_offset('z', merge_index, vertical_offset/2)
+        '''
 
 
 @dataclass
-class BiotRing(BiotBase):
+class BiotRing(BiotMatrix):
     """
     Extend Biot base class.
 
@@ -135,62 +123,40 @@ class BiotRing(BiotBase):
 
     """
 
-    name = 'ring'  # element name
-    attrs: list[str] = field(default_factory=lambda: [
-        'Aphi', 'Psi', 'Br', 'Bz'])
-    _attrs: ClassVar[list[str]] = ['Aphi', 'Psi', 'Br', 'Bz']
+    name: ClassVar[str] = 'ring'  # element name
+    attrs: ClassVar[list[str]] = dict(
+        rs='rms', zs='z', dx='dx', dz='dz', turnturn='turnturn', r='x', z='z')
 
-    def calculate_coefficients(self):
-        """Return interaction coefficients."""
-        offset = PoloidalOffset(self.source, self.target)
-        coeff = {'rs': offset.source_radius, 'zs': offset.source_height,
-                 'r': offset.target_radius, 'z': offset.target_height}
-        coeff['b'] = coeff['rs'] + coeff['r']
-        coeff['gamma'] = coeff['zs'] - coeff['z']
-        coeff['a2'] = coeff['gamma']**2 + (coeff['r'] + coeff['rs'])**2
-        coeff['a'] = np.sqrt(coeff['a2'])
-        coeff['k2'] = 4 * coeff['r'] * coeff['rs'] / coeff['a2']
-        coeff['ck2'] = 1 - coeff['k2']  # complementary modulus
-        coeff['K'] = scipy.special.ellipk(coeff['k2'])  # ellip integral - 1st
-        coeff['E'] = scipy.special.ellipe(coeff['k2'])  # ellip integral - 2nd
-        self.coef = coeff
+    def __post_init__(self):
+        """Load intergration constants."""
+        super().__post_init__()
+        OffsetFilaments(self.data)
+        self.const = BiotConstants(self['rs'], self['zs'],
+                                   self['r'], self['z'])
 
     @property
     def Aphi(self):
         """Return Aphi dask array."""
-        return 1 / (2*np.pi) * self.coef['a']/self.coef['r'] * \
-            ((1 - self.coef['k2']/2) * self.coef['K'] - self.coef['E'])
+        return 1 / (2*np.pi) * self.const['a']/self['r'] * \
+            ((1 - self.const['k2']/2) * self.const['K'] - self.const['E'])
 
     @property
     def Psi(self):
         """Return Psi dask array."""
-        return 2 * np.pi * self.mu_o * self.coef['r'] * self.vector['Aphi']
+        return 2 * np.pi * self.mu_o * self['r'] * self.Aphi
 
     @property
     def Br(self):
         """Return radial field dask array."""
-        return self.mu_o / (2*np.pi) * self.coef['gamma'] * \
-            (self.coef['K'] - (2-self.coef['k2']) / (2*self.coef['ck2']) *
-             self.coef['E']) / (self.coef['a'] * self.coef['r'])
+        return self.mu_o / (2*np.pi) * self.const['gamma'] * \
+            (self.const['K'] - (2-self.const['k2']) / (2*self.const['ck2']) *
+             self.const['E']) / (self.const['a'] * self['r'])
 
     @property
     def Bz(self):
         """Return vertical field dask array."""
         return self.mu_o / (2*np.pi) * \
-            (self.coef['r']*self.coef['K'] -
-             (2*self.coef['r'] - self.coef['b']*self.coef['k2']) /
-             (2*self.coef['ck2']) * self.coef['E']) / \
-            (self.coef['a']*self.coef['r'])
-
-    def calculate_vector_potential(self):
-        """Calculate target vector potential (r, phi, z), Wb/Amp-turn-turn."""
-        self.vector['Aphi'] = self.Aphi.compute()
-
-    def calculate_scalar_potential(self):
-        """Calculate scalar potential."""
-        self.vector['Psi'] = self.Psi.compute()
-
-    def calculate_magnetic_field(self):
-        """Calculate magnetic field (r, phi, z), T/Amp-turn-turn."""
-        self.vector['Br'] = self.Br.compute()
-        self.vector['Bz'] = self.Bz.compute()
+            (self['r']*self.const['K'] -
+             (2*self['r'] - self.const['b']*self.const['k2']) /
+             (2*self.const['ck2']) * self.const['E']) / \
+            (self.const['a']*self['r'])

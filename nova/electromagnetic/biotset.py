@@ -45,7 +45,7 @@ class BiotSet:
         return len(self.source) * len(self.target)
 
     def set_flags(self):
-        """Set turn and reduce flags on source and target BiotFrames."""
+        """Set turn and reduction flags on source and target BiotFrames."""
         if isinstance(self.turns, bool):
             self.turns = [self.turns, self.turns]
         if isinstance(self.reduce, bool):

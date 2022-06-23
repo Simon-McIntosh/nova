@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from functools import cached_property
 
 import dask.array as da
+import numpy as np
 import scipy.special
 
 
@@ -62,3 +63,26 @@ class BiotConstants:
     def E(self):
         """Return elliptic intergral of the 2nd kind."""
         return self.k2.map_blocks(scipy.special.ellipe, dtype=float)
+
+    def phi(self, alpha):
+        """Return sysrem invariant angle transformation."""
+        return np.pi - 2*alpha
+
+    def B2(self, alpha):
+        """Return B2 coefficient."""
+        phi = self.phi(alpha)
+        return self.rs**2 + self.r**2 - 2*self.r*self.rs*np.cos(phi)
+
+    def G2(self, alpha):
+        """Return G2 coefficient."""
+        phi = self.phi(alpha)
+        return self.gamma**2 + self.r**2 * np.sin(phi)**2
+
+    def beta1(self, alpha):
+        """Return beta1 coefficient."""
+        phi = self.phi(alpha)
+        return (self.rs - self.r * np.cos(phi)) / np.sqrt(self.G2(alpha))
+
+    def beta2(self, alpha):
+        """Return beta2 coefficient."""
+        return self.gamma / np.sqrt(self.B2(alpha))

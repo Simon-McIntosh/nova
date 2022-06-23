@@ -4,7 +4,6 @@ from typing import ClassVar
 
 import dask.array as da
 import numpy as np
-import xarray
 
 from nova.electromagnetic.biotconstants import BiotConstants
 from nova.electromagnetic.biotmatrix import BiotMatrix

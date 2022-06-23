@@ -44,7 +44,7 @@ class BiotFrame(FrameLink):
         partner = next(partner for partner in
                        ['source', 'target'] if partner != region)
         reps = getattr(self.biotshape, partner)
-        matrix = vector.map_blocks(np.tile, reps=reps)
+        matrix = vector.map_blocks(np.tile, reps=reps, chunks=(chunks, chunks))
         if region == 'source':
             return da.transpose(matrix).compute_chunk_sizes()
         return matrix.compute_chunk_sizes()

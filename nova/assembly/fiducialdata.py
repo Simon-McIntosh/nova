@@ -169,14 +169,15 @@ class FiducialData(Plotter):
     def plot_gpr_array(self, coil_index):
         """Plot gpr array."""
         axes = plt.subplots(3, 1, sharex=True, sharey=True,
-                            figsize=(4, 8))[1]
+                            figsize=(6, 4))[1]
         for space_index, coord in enumerate('xyz'):
             self.load_gpr(coil_index, space_index)
             self.gpr.plot(axes=axes[space_index], text=False)
             axes[space_index].set_ylabel(fr'$\Delta{{{coord}}}$ mm')
         plt.despine()
         axes[-1].set_xlabel('arc length')
-        axes[0].legend(loc='center', bbox_to_anchor=(0, 1.1, 1, 0.1))
+        axes[0].legend(loc='center', bbox_to_anchor=(0, 1.25, 1, 0.1),
+                       ncol=2)
 
     @staticmethod
     def fiducials():
@@ -253,13 +254,14 @@ if __name__ == '__main__':
     fiducial.plot_single(-3)
     #fiducial.plot_gpr(1, 0)
 
-
+    '''
     plotter = pv.Plotter()
     fiducial.mesh['delta'] *= 1e3
     fiducial.warp(0.5, plotter=plotter)
     fiducial.label_coils(plotter)
     plotter.show_axes()
     plotter.show()
+    '''
 
     fiducial.plot()
     fiducial.plot_gpr_array(1)

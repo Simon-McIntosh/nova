@@ -52,66 +52,49 @@ class OffsetFilaments:
         # exponential
         return np.exp(-self.fold_number * (span_length / turn_radius)**2)
 
-    def map_offset(self, attr: str, index: da.Array, offset: da.Array):
-        """Apply indexed offset to dask array."""
-        index.compute_chunk_sizes()
-        print(self[attr].shape, index.shape, offset.shape)
-        _offset = da.zeros(self[attr].shape)
-        _offset.compute_chunk_sizes()
-        _offset[index] += offset
-        print(_offset)
-        self[attr] += _offset
-        #print(self[attr], index, offset)
-        #self[attr] = self[attr].map_blocks(lambda block, offset: , index, offset, dtype=float)
-
     def apply_rms_offset(self, merge_index, radial_offset):
         """Return effective rms offfset."""
-        source_radius = self['rs'].compute()[merge_index]
-        target_radius = self['r'].compute()[merge_index]
-        rms_delta = (da.sqrt(
+        merge_index = merge_index.compute()
+        source_radius = self['rs'][merge_index].compute_chunk_sizes()
+        target_radius = self['r'][merge_index].compute_chunk_sizes()
+        radial_offset = radial_offset[merge_index].compute_chunk_sizes()
+        rms_delta = np.zeros(merge_index.shape)
+        rms_delta[merge_index] = (np.sqrt(
             (target_radius + source_radius)**2 -
             8*radial_offset*(target_radius - source_radius + 2*radial_offset))
             - (target_radius + source_radius)) / 4
-        self.map_offset('rs', merge_index, rms_delta)
-        self.map_offset('r', merge_index, rms_delta)
+        self['rs'] += rms_delta
+        self['r'] += rms_delta
 
     def apply_offset(self):
         """Apply radial and vertical offsets."""
         turn_radius = self.effective_turn_radius()
         span = self.source_target_seperation()
         span_length = da.linalg.norm(span, axis=0)
-        # reduce
+        # index
         merge_index = span_length <= turn_radius*self.merge_number
         if not merge_index.any().compute():
             return
-
-        print(merge_index.any().compute())
-        #turn_radius = turn_radius[merge_index]
-        #span = da.from_array([span[i][merge_index] for i in range(2)])
-        #span_length = span_length[merge_index].compute_chunk_sizes()
         # interacton orientation
-        turn_index = np.isclose(span_length, 0).compute()
-        pair_index = np.invert(turn_index)
+        turn_index = da.isclose(span_length, 0)
+        pair_index = da.invert(turn_index)
         span_norm = da.zeros((2, *turn_index.shape))
-        span_norm[0, turn_index] = 1  # radial offset
-        span_norm[:, pair_index] = \
-            span[:, pair_index] / span_length[pair_index]
+        span_norm[0] = da.where(turn_index, 1, span_norm[0])  # radial offset
+        for i in range(2):
+            span_norm[i] = da.where(pair_index, span[i] / span_length, 0)
         turnturn_length = self.turnturn_seperation()
         # blend interaction
         blending_factor = self.blending_factor(span_length, turn_radius)
         radial_offset = blending_factor*turnturn_length*span_norm[0, :]
-
-        '''
         if self.rms_offset:
             self.apply_rms_offset(merge_index, radial_offset)
         vertical_offset = blending_factor*turnturn_length*span_norm[1, :]
         # offset source filaments
-        self.map_offset('rs', merge_index, -radial_offset/2)
-        self.map_offset('zs', merge_index, -vertical_offset/2)
+        self['rs'] -= np.where(merge_index, radial_offset/2, 0)
+        self['zs'] -= np.where(merge_index, vertical_offset/2, 0)
         # offset target filaments
-        self.map_offset('r', merge_index, radial_offset/2)
-        self.map_offset('z', merge_index, vertical_offset/2)
-        '''
+        self['r'] += np.where(merge_index, radial_offset/2, 0)
+        self['z'] += np.where(merge_index, vertical_offset/2, 0)
 
 
 @dataclass

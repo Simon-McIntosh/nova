@@ -1,9 +1,8 @@
 """Biot-Savart intergration constants."""
-from dataclasses import dataclass, InitVar
+from dataclasses import dataclass
 from functools import cached_property
 
 import dask.array as da
-from dask.cache import Cache
 import scipy.special
 
 
@@ -19,12 +18,6 @@ class BiotConstants:
     zs: da.Array
     r: da.Array
     z: da.Array
-    cache_size: InitVar[float] = 2e9
-
-    def __post_init__(self, cache_size):
-        """Register dask cache."""
-        cache = Cache(cache_size)
-        cache.register()
 
     def __getitem__(self, attr):
         """Provide dict-like access to attributes."""

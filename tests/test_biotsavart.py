@@ -2,7 +2,7 @@ import pytest
 from numpy import allclose
 import numpy as np
 
-from nova.electromagnetic.biotbase import BiotBase
+from nova.electromagnetic.biotmatrix import BiotMatrix
 from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotgrid import BiotGrid
 from nova.electromagnetic.biotpoint import BiotPoint
@@ -35,8 +35,8 @@ def test_link_negative_factor():
     biotframe.insert(1, 0)
     biotframe.insert(1, 0)
     biotframe.multipoint.link(['C0', 'C1'], -1)
-    biot = BiotRing(biotframe, biotframe, reduce=[True, True], attrs=['Psi'])
-    assert np.isclose(biot.data.Psi[0], 0)
+    biot = BiotRing(biotframe, biotframe, reduce=[True, True])
+    assert np.isclose(biot.compute('Psi')[0][0, 0], 0)
 
 
 def test_random_segment_error():
@@ -61,11 +61,11 @@ def test_ITER_subinductance_matrix():
     coilset.coil.insert(1.722, 3.188, 0.719, 2.075, nturn=554,
                         name='CS2U', part='CS')
     biot = BiotRing(coilset.subframe, coilset.subframe,
-                    turns=[True, True], reduce=[True, True], attrs=['Psi'])
+                    turns=[True, True], reduce=[True, True])
     Mc_ddd = [[7.076E-01, 1.348E-01, 6.021E-02],  # referance
               [1.348E-01, 7.954E-01, 2.471E-01],
               [6.021E-02, 2.471E-01, 7.954E-01]]
-    assert allclose(Mc_ddd, biot.data.Psi, atol=5e-3)
+    assert allclose(Mc_ddd, biot.compute('Psi')[0], atol=5e-3)
 
 
 def test_solenoid_grid():
@@ -76,7 +76,7 @@ def test_solenoid_grid():
     coilset.sloc['Ic'] = current
     biotgrid = BiotGrid(*coilset.frames)
     biotgrid.solve(4, [1e-9, 1.5, 0, 1])
-    Bz_theory = BiotBase.mu_o * nturn * current / height
+    Bz_theory = BiotMatrix.mu_o * nturn * current / height
     Bz_grid = np.dot(biotgrid.data.Bz, coilset.sloc['Ic'])
     assert allclose(Bz_grid[0], Bz_theory, atol=5e-3)
 
@@ -89,7 +89,7 @@ def test_solenoid_probe():
     coilset.sloc['Ic'] = current
     biotpoint = BiotPoint(*coilset.frames)
     biotpoint.solve((1e-9, 0))
-    Bz_theory = BiotBase.mu_o * nturn * current / height
+    Bz_theory = BiotMatrix.mu_o * nturn * current / height
     Bz_point = np.dot(biotpoint.data.Bz, coilset.sloc['Ic'])
     assert allclose(Bz_point, Bz_theory, atol=5e-3)
 

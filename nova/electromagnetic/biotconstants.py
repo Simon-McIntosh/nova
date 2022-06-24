@@ -73,6 +73,10 @@ class BiotConstants:
         phi = self.phi(alpha)
         return self.rs**2 + self.r**2 - 2*self.r*self.rs*np.cos(phi)
 
+    def D2(self, alpha):
+        """Return D2 coefficient."""
+        return self.gamma**2 + self.B2(alpha)
+
     def G2(self, alpha):
         """Return G2 coefficient."""
         phi = self.phi(alpha)
@@ -86,3 +90,11 @@ class BiotConstants:
     def beta2(self, alpha):
         """Return beta2 coefficient."""
         return self.gamma / np.sqrt(self.B2(alpha))
+
+    def beta3(self, alpha):
+        """Return beta3 coefficient."""
+        phi = self.phi(alpha)
+        if np.isclose(phi, 0):  # arctan(1/0)
+            phi += 1e-16
+        return self.gamma*(self.rs - self.r * np.cos(phi)) / \
+            (self.r * np.sin(phi) * np.sqrt(self.D2(alpha)))

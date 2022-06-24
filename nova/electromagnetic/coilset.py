@@ -65,7 +65,7 @@ if __name__ == '__main__':
         coilset.sloc['Ic'] = 1
         coilset.sloc['Shl0', 'Ic'] = -5
 
-        coilset.grid.solve(50000, 0.1, 'plasma')
+        coilset.grid.solve(5000, 0.1, 'plasma')
         coilset.plasmagrid.solve()
 
         coilset.plasma.separatrix = dict(c=[4.5, 0.25, 0.9])

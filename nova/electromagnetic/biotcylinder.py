@@ -33,13 +33,19 @@ class BiotCylinder(BiotMatrix):
 
     def _Cphi(self, i: int, alpha: float):
         """Return Cphi(alpha) constant evaluated at corner i."""
-        return 0.5*self.const[i]['gamma']*self.const[i].a * \
+        return 1/2 * self.const[i]['gamma']*self.const[i].a * \
             np.sqrt(1 - self.const[i].k2 * np.sin(alpha)**2) * \
             -np.sin(2*alpha) - 1/6*np.arcsinh(self.const[i].beta2(alpha)) * \
             np.sin(2*alpha) * (2*self['r']**2 * np.sin(2*alpha)**2 +
                                3*(self['rs']**2 - self['r']**2)) - \
             1/4*self.const[i].gamma*self['r'] * \
-            np.arcsinh(self.const[i].beta1(alpha))
+            np.arcsinh(self.const[i].beta1(alpha)) * \
+            -np.sin(4*alpha) - 1/3*self['r']**2 * \
+            np.arctan(self.const[i].beta3(alpha)) * -np.cos(2*alpha)**3
+
+    def Cphi(self, i: int):
+        """Return Cphi coefficient."""
+        return self._Cphi(i, np.pi/2) - self._Cphi(i, 0)
 
     @property
     def Aphi(self):
@@ -79,4 +85,4 @@ if __name__ == '__main__':
                             z=height.flatten(), segment='cylinder'))
 
     cylinder = BiotCylinder(frame, frame)
-    print(cylinder._Cphi(0, np.pi).compute())
+    print(cylinder.Cphi(0).compute())

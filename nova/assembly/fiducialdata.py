@@ -154,6 +154,7 @@ class FiducialData(Plotter):
             for space_index in range(self.data.dims['space']):
                 self.data['centerline_delta'][coil_index, :, space_index] = \
                     self.load_gpr(coil_index, space_index)
+        self.data.attrs['source'] = self.fiducial().source
 
     def load_gpr(self, coil_index, space_index):
         """Return Gaussian Process regression."""
@@ -250,7 +251,7 @@ class FiducialData(Plotter):
 
 if __name__ == '__main__':
 
-    fiducial = FiducialData('RE', fill=True)
+    fiducial = FiducialData('RE', fill=False)
     fiducial.plot_single(-3)
     #fiducial.plot_gpr(1, 0)
 
@@ -264,4 +265,4 @@ if __name__ == '__main__':
     '''
 
     fiducial.plot()
-    fiducial.plot_gpr_array(1)
+    fiducial.plot_gpr_array(5)

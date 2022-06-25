@@ -2,9 +2,10 @@
 from dataclasses import dataclass, field
 import os
 
+from appdirs import AppDirs
 import xarray
 
-from nova.definitions import root_dir
+import nova
 
 
 @dataclass
@@ -14,11 +15,16 @@ class FilePath:
     filename: str = field(default=None, repr=True)
     group: str = field(default=None, repr=True)
     path: str = field(default=None, repr=False)
+    directory: str = 'user_cache_dir'
     data: xarray.Dataset = field(default=None, repr=False)
 
-    def set_path(self, subpath: str):
+    def set_path(self, subpath=None):
         """Set default path."""
-        self.path = os.path.join(root_dir, subpath)
+        appdir = AppDirs(appname=nova.__name__, version=nova.__version__)
+        self.path = getattr(appdir, self.directory)
+        if subpath is not None:
+            self.path = os.path.join(self.path, subpath)
+        #self.path = os.path.join(files('nova'), '../', subpath)
 
     def check_path(self, path):
         """Return self.path if path is None."""

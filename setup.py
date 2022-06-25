@@ -29,6 +29,8 @@ setup_kwargs = dict(
     url                 = 'https://git.iter.org/projects/EQ/repos/nova/',
     long_description    = long_description,
     packages            = find_packages(),
+    include_package_data= True,
+    package_data        = {},
     classifiers         = [
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
@@ -41,6 +43,8 @@ setup_kwargs = dict(
     python_requires     = '>=3.9',
     install_requires    = [
         'alphashape',
+        'appdirs',
+        'click',
         'cython',
         'dask',
         'descartes',
@@ -66,8 +70,8 @@ setup_kwargs = dict(
         'xxhash',
     ],
     extras_require     = extras_require,
-    package_data       = {},
-    include_package_data=False
+    entry_points={'console_scripts': [
+                      'benchmark = nova.scripts.benchmark:benchmark']},
 )
 
 setup(**setup_kwargs)

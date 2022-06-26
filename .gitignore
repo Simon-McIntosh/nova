@@ -148,6 +148,9 @@ venv.bak/
 .pylint.d/
 .pytest_cache
 
+# Air Speed Velocity
+.asv 
+
 # Rope project settings
 .ropeproject
 

@@ -20,7 +20,8 @@ def pyperf():
 def benchmark(count, name):
     """Run asv benchmarks with pyperf tune."""
     with pyperf():
-        subprocess.run(['asv', 'run', 'EXISTING', '--cpu-affinity', '0-3'])
+        subprocess.run(['asv', 'run', '2022.0.0..main',
+                        '--cpu-affinity', '0-3'])
 
 
 if __name__ == '__main__':

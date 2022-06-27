@@ -4,6 +4,7 @@ from functools import cached_property
 
 import dask.array as da
 import numpy as np
+import scipy.integrate
 import scipy.special
 
 
@@ -36,13 +37,23 @@ class BiotConstants:
 
     @cached_property
     def a2(self):
-        """Return a2 coefficient."""
+        """Return a**2 coefficient."""
         return self.gamma**2 + (self.rs + self.r)**2
 
     @cached_property
     def a(self):
         """Return a coefficient."""
         return da.sqrt(self.a2)
+
+    @cached_property
+    def c2(self):
+        """Return c**2 coefficient."""
+        return self.gamma**2 + self.r**2
+
+    @cached_property
+    def c(self):
+        """Return c coefficient."""
+        return da.sqrt(self.c2)
 
     @cached_property
     def k2(self):
@@ -63,6 +74,47 @@ class BiotConstants:
     def E(self):
         """Return elliptic intergral of the 2nd kind."""
         return self.k2.map_blocks(scipy.special.ellipe, dtype=float)
+
+    @staticmethod
+    def ellippi(n, m):
+        """Taken from https://github.com/scipy/scipy/issues/4452."""
+        #if m >= 1:
+        #    print(m)
+        #    raise ValueError('m must be < 1')
+        y = 1 - m
+        rf = scipy.special.elliprf(0, y, 1)
+        rj = scipy.special.elliprj(0, y, 1, 1 - n)
+        return rf + rj * n / 3
+
+    def np2(self, p: int):
+        """Return np**2 constant."""
+        if p == 1:
+            return 2*self.r / (self.r - self.c)
+        if p == 2:
+            return 2*self.r / (self.r + self.c)
+        if p == 3:
+            return 4*self.r*self.rs / self.b**2
+
+    def Pphi(self, p: int):
+        """Return Pphi coefficient, q=2."""
+        if p == 1:
+            return 0
+        if p == 2:
+            return (self.rs - (-1)**p * self.c) * self.np2(p) * self.c * \
+                (3*self.r**2 - self.c2) / (2*self.r)
+        if p == 3:
+            return -self.rs / self.b * (self.rs - self.r) * \
+                (3*self.r**2 - self.rs**2)
+
+    def Pi(self, p: int):
+        """Return complete elliptc intergral of the 3rd kind."""
+        return da.map_blocks(self.ellippi, self.np2(p), self.k2)
+
+    @cached_property
+    def U(self):
+        """Return U coefficient."""
+        return self.k2 * (4*self.gamma**2 +
+                          3*self.rs**2 - 5*self.r**2) / (4*self.r)
 
     def phi(self, alpha):
         """Return sysrem invariant angle transformation."""
@@ -98,3 +150,27 @@ class BiotConstants:
             phi += 1e-16
         return self.gamma*(self.rs - self.r * np.cos(phi)) / \
             (self.r * np.sin(phi) * np.sqrt(self.D2(alpha)))
+
+    def Cphi_coef(self, alpha: float):
+        """Return Cphi(alpha) coefficient."""
+        return 1/2 * self.gamma*self.a * \
+            np.sqrt(1 - self.k2 * np.sin(alpha)**2) * \
+            -np.sin(2*alpha) - 1/6*np.arcsinh(self.beta2(alpha)) * \
+            np.sin(2*alpha) * (2*self.r**2 * np.sin(2*alpha)**2 +
+                               3*(self.rs**2 -
+                                  self.r**2)) - \
+            1/4*self.gamma*self.r * \
+            np.arcsinh(self.beta1(alpha)) * \
+            -np.sin(4*alpha) - 1/3*self.r**2 * \
+            np.arctan(self.beta3(alpha)) * -np.cos(2*alpha)**3
+
+    def Cphi(self, alpha: float):
+        """Return Cphi intergration constant."""
+        return self.Cphi_coef(alpha) - self.Cphi_coef(0)
+
+    def zeta(self, alpha, num=7):
+        """Return zeta coefficient calculated using trapizodal rule."""
+        alpha, dalpha = da.linspace(0, alpha, num, retstep=True)
+        beta1 = da.stack([self.beta1(_alpha) for _alpha in alpha])
+        asinh_beta1 = np.arcsinh(beta1)
+        return dalpha * da.sum(asinh_beta1[:-1] + asinh_beta1[1:], axis=0) / 2

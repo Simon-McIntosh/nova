@@ -14,9 +14,6 @@ def pyperf():
 
 
 @click.command()
-@click.option('--count', default=1, help='Number of greetings.')
-@click.option('--name', default='Your name',
-              help='The person to greet.')
 def benchmark(count, name):
     """Run asv benchmarks with pyperf tune."""
     with pyperf():

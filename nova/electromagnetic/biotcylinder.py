@@ -1,7 +1,8 @@
 """Biot-Savart calculation for complete circular cylinders."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar
 
+import dask.array as da
 import numpy as np
 
 from nova.electromagnetic.biotconstants import BiotConstants
@@ -17,6 +18,8 @@ class BiotCylinder(BiotMatrix):
 
     """
 
+    _corner: int = field(init=False, default=0, repr=False)
+
     name: ClassVar[str] = 'cylinder'  # element name
     attrs: ClassVar[list[str]] = dict(
         rs='x', zs='z', dx='dx', dz='dz', r='x', z='z')
@@ -31,22 +34,31 @@ class BiotCylinder(BiotMatrix):
                 self['rs']+_dx*self['dx'], self['zs']+_dz*self['dz'],
                 self['r'], self['z'])
 
-    def _Cphi(self, i: int, alpha: float):
-        """Return Cphi(alpha) constant evaluated at corner i."""
-        return 1/2 * self.const[i]['gamma']*self.const[i].a * \
-            np.sqrt(1 - self.const[i].k2 * np.sin(alpha)**2) * \
-            -np.sin(2*alpha) - 1/6*np.arcsinh(self.const[i].beta2(alpha)) * \
-            np.sin(2*alpha) * (2*self['r']**2 * np.sin(2*alpha)**2 +
-                               3*(self['rs']**2 - self['r']**2)) - \
-            1/4*self.const[i].gamma*self['r'] * \
-            np.arcsinh(self.const[i].beta1(alpha)) * \
-            -np.sin(4*alpha) - 1/3*self['r']**2 * \
-            np.arctan(self.const[i].beta3(alpha)) * -np.cos(2*alpha)**3
+    @property
+    def corner(self):
+        """Return corner index."""
+        return self._corner
 
-    def Cphi(self, i: int):
-        """Return Cphi coefficient."""
-        return self._Cphi(i, np.pi/2) - self._Cphi(i, 0)
+    @corner.setter
+    def corner(self, i: int):
+        """Update corner index."""
+        self._corner = i
 
+    def __getattr__(self, attr):
+        """Return coefficent evaluated at self.corner."""
+        return self.const[self.corner][attr]
+
+    def Aphi_hat(self, i: int):
+        """Return Aphi intergration coefficient."""
+        self.corner = i
+        return self.Cphi(np.pi/2) + self.gamma*self.r*self.zeta(np.pi/2) + \
+            self.gamma*self.a / (6*self.r) * \
+            (self.U*self.K - 2*self.rs*self.E) + \
+            self.gamma / (6*self.a*self.r) * \
+            da.sum(da.stack([(-1)**p * self.Pphi(p) * self.Pi(p) for
+                             p in range(1, 4)]), axis=0)
+
+    '''
     @property
     def Aphi(self):
         """Return Aphi dask array."""
@@ -73,6 +85,7 @@ class BiotCylinder(BiotMatrix):
              (2*self['r'] - self.const['b']*self.const['k2']) /
              (2*self.const['ck2']) * self.const['E']) / \
             (self.const['a']*self['r'])
+    '''
 
 
 if __name__ == '__main__':
@@ -85,4 +98,5 @@ if __name__ == '__main__':
                             z=height.flatten(), segment='cylinder'))
 
     cylinder = BiotCylinder(frame, frame)
-    print(cylinder.Cphi(0).compute())
+
+    print(cylinder.Aphi_hat(0).compute())

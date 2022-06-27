@@ -6,6 +6,7 @@ from appdirs import AppDirs
 import xarray
 
 import nova
+from nova.definitions import root_dir
 
 
 @dataclass
@@ -20,11 +21,11 @@ class FilePath:
 
     def set_path(self, subpath=None):
         """Set default path."""
-        appdir = AppDirs(appname=nova.__name__, version=nova.__version__)
-        self.path = getattr(appdir, self.directory)
-        if subpath is not None:
-            self.path = os.path.join(self.path, subpath)
-        #self.path = os.path.join(files('nova'), '../', subpath)
+        #appdir = AppDirs(appname=nova.__name__, version=nova.__version__)
+        #self.path = getattr(appdir, self.directory)
+        #if subpath is not None:
+        #    self.path = os.path.join(self.path, subpath)
+        self.path = os.path.join(root_dir, subpath)
 
     def check_path(self, path):
         """Return self.path if path is None."""

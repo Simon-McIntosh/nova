@@ -78,9 +78,6 @@ class BiotConstants:
     @staticmethod
     def ellippi(n, m):
         """Taken from https://github.com/scipy/scipy/issues/4452."""
-        #if m >= 1:
-        #    print(m)
-        #    raise ValueError('m must be < 1')
         y = 1 - m
         rf = scipy.special.elliprf(0, y, 1)
         rj = scipy.special.elliprj(0, y, 1, 1 - n)
@@ -147,7 +144,7 @@ class BiotConstants:
         """Return beta3 coefficient."""
         phi = self.phi(alpha)
         if np.isclose(phi, 0):  # arctan(1/0)
-            phi += 1e-16
+            phi = 1e-16
         return self.gamma*(self.rs - self.r * np.cos(phi)) / \
             (self.r * np.sin(phi) * np.sqrt(self.D2(alpha)))
 
@@ -157,8 +154,7 @@ class BiotConstants:
             np.sqrt(1 - self.k2 * np.sin(alpha)**2) * \
             -np.sin(2*alpha) - 1/6*np.arcsinh(self.beta2(alpha)) * \
             np.sin(2*alpha) * (2*self.r**2 * np.sin(2*alpha)**2 +
-                               3*(self.rs**2 -
-                                  self.r**2)) - \
+                               3*(self.rs**2 - self.r**2)) - \
             1/4*self.gamma*self.r * \
             np.arcsinh(self.beta1(alpha)) * \
             -np.sin(4*alpha) - 1/3*self.r**2 * \
@@ -168,9 +164,10 @@ class BiotConstants:
         """Return Cphi intergration constant."""
         return self.Cphi_coef(alpha) - self.Cphi_coef(0)
 
-    def zeta(self, alpha, num=7):
+    def zeta(self, alpha, num=21):
         """Return zeta coefficient calculated using trapizodal rule."""
         alpha, dalpha = da.linspace(0, alpha, num, retstep=True)
         beta1 = da.stack([self.beta1(_alpha) for _alpha in alpha])
         asinh_beta1 = np.arcsinh(beta1)
-        return dalpha * da.sum(asinh_beta1[:-1] + asinh_beta1[1:], axis=0) / 2
+        return dalpha * (da.sum(asinh_beta1[1:-1], axis=0) +
+                         (asinh_beta1[0] + asinh_beta1[-1]) / 2)

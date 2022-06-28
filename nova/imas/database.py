@@ -28,7 +28,7 @@ class IMASdb:
 
     @contextmanager
     def _database(self, pulse: int, run: int, ids_name: str, ids_path: str):
-        """Database context manager."""
+        """Yield database with context manager."""
         from imas import DBEntry
         database = DBEntry(self.backend, self.machine, pulse, run,
                            user_name=self.user)

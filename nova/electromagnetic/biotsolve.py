@@ -5,6 +5,7 @@ from typing import ClassVar
 import numpy as np
 import xarray
 
+from nova.electromagnetic.biotcylinder import BiotCylinder
 from nova.electromagnetic.biotring import BiotRing
 from nova.electromagnetic.biotset import BiotSet
 
@@ -18,7 +19,7 @@ class BiotSolve(BiotSet):
     svd: bool = True
     data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
 
-    generator: ClassVar[dict] = {'ring': BiotRing}
+    generator: ClassVar[dict] = {'ring': BiotRing, 'cylinder': BiotCylinder}
 
     def __post_init__(self):
         """Initialise dataset and compute biot interaction."""

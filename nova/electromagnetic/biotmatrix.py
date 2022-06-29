@@ -26,7 +26,6 @@ class BiotMatrix(BiotSet):
 
     def __getitem__(self, attr):
         """Return attributes from data."""
-        print('item', attr)
         return self.data[attr]
 
     def get_frame(self, attr: str):

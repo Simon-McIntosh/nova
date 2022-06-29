@@ -17,10 +17,10 @@ def pyperf():
 def benchmark():
     """Run asv benchmarks with pyperf tune."""
     with pyperf():
-        subprocess.run(['asv', 'run', '2022.1.1..main',
+        subprocess.run(['asv', 'run', '2022.0.0..main',
                         '--cpu-affinity', '0',
                         '--record-samples', '--append-samples',
-                        '--interleave-rounds', '-a', 'rounds=4',
+                        '-a', 'rounds=4',
                         '-a', 'repeat=(2, 10, 20.0)',
                         '-a', 'warmup_time=1.0'])
 

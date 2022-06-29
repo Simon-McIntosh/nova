@@ -86,7 +86,7 @@ class BiotConstants:
     def np2(self, p: int):
         """Return np**2 constant."""
         if p == 1:
-            return 2*self.r / (self.r - self.c)
+            return 2*self.r / self.zero_offset(self.r - self.c)
         if p == 2:
             return 2*self.r / (self.r + self.c)
         if p == 3:
@@ -94,14 +94,11 @@ class BiotConstants:
 
     def Pphi(self, p: int):
         """Return Pphi coefficient, q=2."""
-        if p == 1:
-            return 0
-        if p == 2:
-            return (self.rs - (-1)**p * self.c) * self.np2(p) * self.c * \
-                (3*self.r**2 - self.c2) / (2*self.r)
         if p == 3:
             return -self.rs / self.b * (self.rs - self.r) * \
                 (3*self.r**2 - self.rs**2)
+        return (self.rs - (-1)**p * self.c) * self.np2(p) * self.c * \
+            (3*self.r**2 - self.c2) / (2*self.r)
 
     def Pi(self, p: int):
         """Return complete elliptc intergral of the 3rd kind."""
@@ -113,14 +110,24 @@ class BiotConstants:
         return self.k2 * (4*self.gamma**2 +
                           3*self.rs**2 - 5*self.r**2) / (4*self.r)
 
+    def zero_offset(self, array, atol=1e-16):
+        """Return array with values close to zero offset to 1e-16."""
+        if (index := da.isclose(array, 0, atol=atol)).any():
+            array[index] = atol
+        return array
+
     def phi(self, alpha):
         """Return sysrem invariant angle transformation."""
-        return np.pi - 2*alpha
+        phi = np.pi - 2*alpha
+        if np.isclose(phi, 0, atol=1e-16):
+            phi = 1e-16
+        return phi
 
     def B2(self, alpha):
         """Return B2 coefficient."""
         phi = self.phi(alpha)
-        return self.rs**2 + self.r**2 - 2*self.r*self.rs*np.cos(phi)
+        return self.zero_offset(self.rs**2 + self.r**2 -
+                                2*self.r*self.rs*np.cos(phi))
 
     def D2(self, alpha):
         """Return D2 coefficient."""
@@ -143,8 +150,6 @@ class BiotConstants:
     def beta3(self, alpha):
         """Return beta3 coefficient."""
         phi = self.phi(alpha)
-        if np.isclose(phi, 0):  # arctan(1/0)
-            phi = 1e-16
         return self.gamma*(self.rs - self.r * np.cos(phi)) / \
             (self.r * np.sin(phi) * np.sqrt(self.D2(alpha)))
 
@@ -164,10 +169,13 @@ class BiotConstants:
         """Return Cphi intergration constant."""
         return self.Cphi_coef(alpha) - self.Cphi_coef(0)
 
-    def zeta(self, alpha, num=21):
-        """Return zeta coefficient calculated using trapizodal rule."""
-        alpha, dalpha = da.linspace(0, alpha, num, retstep=True)
+    def zeta(self, alpha, k=7):
+        """Return zeta coefficient calculated using Romberg integration."""
+        alpha, dalpha = da.linspace(0, alpha, 2**k + 1, retstep=True)
         beta1 = da.stack([self.beta1(_alpha) for _alpha in alpha])
-        asinh_beta1 = np.arcsinh(beta1)
-        return dalpha * (da.sum(asinh_beta1[1:-1], axis=0) +
-                         (asinh_beta1[0] + asinh_beta1[-1]) / 2)
+        asinh_beta1 = np.arcsinh(beta1).rechunk({0: -1, 1: 'auto', 2: 'auto'},
+                                                block_size_limit=1e8)
+        return asinh_beta1.map_blocks(scipy.integrate.romb, dx=dalpha, axis=0,
+                                      dtype=float, drop_axis=0)
+        #print(asinh_beta1.chunks)
+        #return scipy.integrate.romb(asinh_beta1, dx=dalpha, axis=0)

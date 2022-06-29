@@ -23,18 +23,19 @@ class BiotCylinder(BiotMatrix):
 
     name: ClassVar[str] = 'cylinder'  # element name
     attrs: ClassVar[list[str]] = dict(
-        rs='x', zs='z', dx='dx', dz='dz', r='x', z='z')
+        rs='x', zs='z', dx='dx', dz='dz', r='x', z='z',
+        area='area')
 
     def __post_init__(self):
         """Load intergration constants."""
         super().__post_init__()
         self.constant = [[] for _ in range(4)]
-        for i, (dx, dz) in enumerate(zip([-0.5, 0.5, 0.5, -0.5],
-                                         [-0.5, -0.5, 0.5, 0.5])):
+        for i, (delta_x, delta_z) in enumerate(zip([-1, 1, 1, -1],
+                                                   [-1, -1, 1, 1])):
             self.constant[i] = BiotConstants(
-                self.data['rs'] + dx*self.data['dx'],
-                self.data['zs'] + dz*self.data['dz'],
-                self.data['r'], self.data['z'])
+                self['rs'] + delta_x/2 * self['dx'],
+                self['zs'] + delta_z/2 * self['dz'],
+                self['r'], self['z'])
 
     @property
     def corner(self):
@@ -48,14 +49,11 @@ class BiotCylinder(BiotMatrix):
 
     def __getattr__(self, attr):
         """Return coefficent evaluated at self.corner."""
-        print('attr', attr)
         return self.constant[self.corner][attr]
 
     def Aphi_hat(self, i: int):
         """Return Aphi intergration coefficient."""
         self.corner = i
-
-        rs = self.constant[i]['r'] # TODO fix this ****
         return self.Cphi(np.pi/2) + \
             self.gamma*self.r*self.zeta(np.pi/2) + \
             self.gamma*self.a / (6*self.r) * \
@@ -67,16 +65,14 @@ class BiotCylinder(BiotMatrix):
     @cached_property
     def Aphi(self):
         """Return Aphi dask array."""
-        return 1 / (4*np.pi) * ((self.Aphi_hat(2) - self.Aphi_hat(1)) -
-                                (self.Aphi_hat(3) - self.Aphi_hat(0)))
+        return 1 / (4*np.pi*self['area']) * \
+            ((self.Aphi_hat(2) - self.Aphi_hat(1)) -
+             (self.Aphi_hat(3) - self.Aphi_hat(0)))
 
     @property
     def Psi(self):
         """Return Psi dask array."""
-        print('data', self.data['r'])
-        print('data2', self['r'])
-        print('data3', self.r)
-        return 2 * np.pi * self.mu_o * self.data['r'] * self.Aphi
+        return 2 * np.pi * self.mu_o * self['r'] * self.Aphi
 
     @property
     def Br(self):
@@ -93,24 +89,32 @@ if __name__ == '__main__':
 
     from nova.electromagnetic.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-1, dplasma=-150)
-    coilset.coil.insert(5, 0.5, 0.4, 0.8, section='r', turn='r',
-                        nturn=300, segment='cylinder', name='CS1')
+    coilset = CoilSet(dcoil=1, dplasma=-150)
+    coilset.coil.insert(5, 0.5, 0.01, 0.8, section='r', turn='r',
+                        nturn=300, segment='cylinder')
+    coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, section='r', turn='r',
+                        nturn=300, segment='cylinder')
+    coilset.coil.insert(5.1, 0.5-0.4, 0.2, 0.01, section='r', turn='r',
+                        nturn=300, segment='cylinder')
+    coilset.coil.insert(5.2, 0.5, 0.01, 0.8, section='r', turn='r',
+                        nturn=300, segment='cylinder')
     coilset.saloc['Ic'] = 5e3
 
-    coilset.grid.solve(1000, limit=[4.5, 6, 0, 1])
-    coilset.grid.plot()
+    coilset.grid.solve(2000, 1)
+    coilset.grid.plot(colors='C1')
     coilset.plot()
+
     '''
-    coilset = CoilSet(dcoil=-50, dplasma=-150)
-    coilset.coil.insert(5, 0.5, 0.4, 0.4, section='r', turn='r',
+    coilset = CoilSet(dcoil=-2, dplasma=-150)
+    coilset.coil.insert(5, 0.5, 0.4, 0.8, section='r', turn='r',
                         nturn=300, segment='ring')
     coilset.saloc['Ic'] = 5e3
 
     coilset.grid.solve(1000, limit=[4.5, 6, 0, 1])
-    coilset.grid.plot()
+    coilset.grid.plot(colors='C0')
     coilset.plot()
     '''
+
 
 
 

@@ -12,11 +12,11 @@ extras_require = dict(
                       optimize=['nlopt', 'pygmo'],
                       plan=['python-dateutil'],
                       test=['pytest', 'lizard', 'asv', 'virtualenv'],
-                      thermofluids=['ftputil', 'coolprop']
+                      thermofluids=['ftputil', 'coolprop', 'tables', 'xlrd']
                       )
 
 extras_require['full'] = [module for mode in extras_require for module in extras_require[mode] 
-                          if mode not in ['thermofluids', 'cuda', 'plan', 'optimize', 'mesh']]
+                          if mode not in ['cuda', 'plan', 'optimize', 'mesh']]
 
 setup_kwargs = dict(
     name                = 'nova',

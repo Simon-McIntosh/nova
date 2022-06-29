@@ -13,7 +13,7 @@ try:
     from nova.thermalhydralic.sultan.model import Model
 except ImportError:
     pytest.skip("thermohydralic modules not available\n\n"
-                "try pip install -e .['thermohydralic']",
+                "try pip install -e .['thermofluids']",
                 allow_module_level=True)
 
 

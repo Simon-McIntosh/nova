@@ -1,3 +1,4 @@
+import os
 import tempfile
 
 import pytest
@@ -202,10 +203,11 @@ def test_loc_hash_version_array_x():
 def test_store_load_hash_x():
     dataarray = DataArray({'x': range(3)}, label='PF', version=['x'],
                           Array=['x'])
-    with tempfile.NamedTemporaryFile() as tmp:
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
         dataarray.store(tmp.name)
         del dataarray
         dataarray = DataArray().load(tmp.name)
+    os.unlink(tmp.name)
     assert dataarray.version['x'] == dataarray.loc_hash('x')
 
 

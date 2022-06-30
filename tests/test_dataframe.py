@@ -1,3 +1,4 @@
+import os
 import tempfile
 
 import pytest
@@ -113,19 +114,21 @@ def test_loc_hash_version_index():
 
 def test_store_load():
     dataframe = DataFrame({'x': range(3)}, label='PF')
-    with tempfile.NamedTemporaryFile() as tmp:
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
         dataframe.store(tmp.name)
         del dataframe
         dataframe = DataFrame().load(tmp.name)
+    os.unlink(tmp.name)
     assert dataframe.index.to_list() == ['PF0', 'PF1', 'PF2']
 
 
 def test_store_load_hash_index():
     dataframe = DataFrame({'x': range(3)}, label='PF', version=['index'])
-    with tempfile.NamedTemporaryFile() as tmp:
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
         dataframe.store(tmp.name)
         del dataframe
         dataframe = DataFrame().load(tmp.name)
+    os.unlink(tmp.name)
     assert dataframe.version['index'] == dataframe.loc_hash('index')
 
 

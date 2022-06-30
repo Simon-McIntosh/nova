@@ -1,8 +1,7 @@
 from setuptools import setup, find_packages
 import versioneer
 
-long_description = """for python >3.9 install with pyvista links 
-                      pip install --find-links https://wheels.pyvista.org/ --trusted-host wheels.pyvista.org -e ."""
+long_description = """ """ 
 
 extras_require = dict(
                       ansys=['ansys-dpf-core', 'ansys-dpf-post', 'openpyxl'],
@@ -36,11 +35,11 @@ setup_kwargs = dict(
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Topic :: Scientific/Engineering :: Fusion',
     ],
     cmdclass            = versioneer.get_cmdclass(),
-    python_requires     = '>=3.9',
+    python_requires     = '>=3.10',
     install_requires    = [
         'alphashape',
         'appdirs',

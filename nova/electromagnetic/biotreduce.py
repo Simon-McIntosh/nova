@@ -15,7 +15,7 @@ class BiotReduce(MetaMethod):
     name = 'biotreduce'
 
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: [])
+    required: list[str] = field(default_factory=lambda: ['factor'])
     index: pandas.Index = field(default=pandas.Index([]), repr=False)
     indices: list[int] = field(init=False, repr=False, default_factory=list)
     link: dict[int, int] = field(init=False, repr=False, default_factory=dict)

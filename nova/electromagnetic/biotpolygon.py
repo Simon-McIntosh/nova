@@ -7,8 +7,8 @@ import dask.array as da
 import numpy as np
 
 from nova.electromagnetic.biotconstants import BiotConstants
+from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotmatrix import BiotMatrix
-
 
 
 class BiotPolygon(BiotMatrix):
@@ -23,12 +23,26 @@ class BiotPolygon(BiotMatrix):
 
     name: ClassVar[str] = 'polygon'  # element name
     attrs: ClassVar[list[str]] = dict(area='area', r='x', z='z')
+    metadata: ClassVar[dict[str, str]] = dict(
+        required=['ref', 'r1', 'z1', 'r2', 'z2'], additional=[],
+        available=[], array=[], base=[])
 
     def __post_init__(self):
         """Extract polygon edges."""
         super().__post_init__()
-        rs = [list(poly.poly.boundary.xy[0]) for poly in self.source.poly]
-        print(rs)
+
+        edge = BiotFrame(**self.metadata, label='edge', delim='-')
+        for i, poly in enumerate(self.source.poly):
+            coords = poly.poly.boundary.xy
+            edge.insert(i,
+                        coords[0][:-1], coords[0][1:],
+                        coords[1][:-1], coords[1][1:],
+                        metadata=self.metadata)
+        edge.set_target(len(self.target))
+        print(len(self.target))
+        print(edge('r1'))
+        #self.edge = BiotFrame(required=['r1', 'z1', 'r2', 'z2'])
+
 
 
 

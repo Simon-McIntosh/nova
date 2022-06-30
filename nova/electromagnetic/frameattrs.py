@@ -58,9 +58,9 @@ class FrameAttrs(pandas.DataFrame):
         """Update metamethod attrs."""
         for method in args:
             name = method.name
+            if not method(self).generate:
+                continue
             if not self.hasattrs(name):
-                if not method(self).generate:
-                    continue
                 self.update_columns()
             self.attrs[name] = method(self)
             self.attrs[name].initialize()

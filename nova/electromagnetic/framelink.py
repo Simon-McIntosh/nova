@@ -193,7 +193,8 @@ class FrameLink(LinkIndexer, DataArray):
         else:  # insert
             frames = [frame.iloc[:iloc, :], *insert, frame.iloc[iloc:, :]]
         frame = pandas.concat(frames, sort=sort)  # concatenate
-        self.__init__(frame, attrs=self.attrs)
+        self.__init__(frame, attrs=self.attrs,
+                      metadata=self.metaframe.metadata)
         self.update_version()
         return self
 

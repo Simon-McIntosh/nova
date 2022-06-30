@@ -116,9 +116,6 @@ if __name__ == '__main__':
     '''
 
 
-
-
-
     '''
     from nova.electromagnetic.framespace import FrameSpace
     radius, height = np.meshgrid(np.linspace(4, 7, 5),

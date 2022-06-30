@@ -8,4 +8,5 @@ COPY tests ./tests
 COPY .git ./.git
 RUN pip install --no-cache-dir --upgrade pip wheel
 RUN pip install --no-cache-dir .['test']
+RUN pip uninstall nova -y
 RUN rm -rf ./.git

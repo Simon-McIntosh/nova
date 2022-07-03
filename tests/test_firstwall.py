@@ -45,7 +45,7 @@ def test_multiframe_area():
     coilset.firstwall.insert(dict(sk=(5, 0, 2, 0.2)), name='PLedge', delta=0.2)
     coilset.firstwall.insert(dict(o=(5, 0, 1.6)), name='PLcore')
     assert np.isclose(coilset.loc['plasma', 'area'].sum(), 1/4*np.pi*2**2,
-                      atol=1e-3)
+                      atol=1e-2)
 
 
 def test_multiframe_nturn():

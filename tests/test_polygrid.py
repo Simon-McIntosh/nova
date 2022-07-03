@@ -32,7 +32,7 @@ def test_loop_transpose():
 
 def test_multipolygon():
     polygrid = PolyGrid({'o1': [6, 3, 12, 0.2], 'o2': [6.1999, 3, 0.3, 0.2]})
-    assert np.isclose(polygrid.area, 2 * np.pi * 0.2**2 / 4, 1e-3)
+    assert np.isclose(polygrid.area, 2 * np.pi * 0.2**2 / 4, 5e-3)
 
 
 def test_square_in_rectangle():

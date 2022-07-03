@@ -29,12 +29,12 @@ def test_polygon_square_max_min():
 
 def test_polygon_disc():
     polygon = Polygon(dict(o=(1, 2, 0.2)))
-    assert np.isclose(polygon.poly.area, np.pi*0.1**2, rtol=1e-3)
+    assert np.isclose(polygon.poly.area, np.pi*0.1**2, rtol=5e-3)
 
 
 def test_polygon_disc_max_min():
     polygon = Polygon(dict(o=(1, 2, 0.6, 0.2)))
-    assert np.isclose(polygon.poly.area, np.pi*0.1**2, rtol=1e-3)
+    assert np.isclose(polygon.poly.area, np.pi*0.1**2, rtol=5e-3)
 
 
 def test_polygon_multi_dict():

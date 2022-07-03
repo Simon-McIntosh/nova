@@ -108,7 +108,7 @@ class PolyGen:
         diameter = PolyGen.boxbound(width, height)
         radius = diameter / 2
         point = shapely.geometry.Point(x_center, z_center)
-        buffer = point.buffer(radius, resolution=64)
+        buffer = point.buffer(radius, resolution=16)
         return shapely.geometry.Polygon(buffer)
 
     @staticmethod

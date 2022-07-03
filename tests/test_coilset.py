@@ -68,7 +68,7 @@ def test_circular_cross_section():
     coilset = CoilSet()
     coilset.coil.insert(1.75, 0.5, 2.5, 2.5, section='disc', turn='r',
                         delta=-4)
-    assert np.isclose(np.pi*2.5**2/4, coilset.subframe.area.sum(), rtol=1e-3)
+    assert np.isclose(np.pi*2.5**2/4, coilset.subframe.area.sum(), rtol=5e-3)
 
 
 def test_rectangular_cross_section():
@@ -149,7 +149,7 @@ def test_tile_hex():
     coilset = CoilSet()
     coilset.coil.insert(1, 1, 0.5, 0.75, delta=-4,
                         section='dsk', nturn=9, turn='hex', tile=True)
-    assert np.isclose(coilset.subframe.area.sum(), np.pi*0.5**2/4, 1e-3)
+    assert np.isclose(coilset.subframe.area.sum(), np.pi*0.5**2/4, 5e-3)
 
 
 def test_plasma_single():

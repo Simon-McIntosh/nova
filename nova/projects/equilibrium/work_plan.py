@@ -197,7 +197,8 @@ class WorkPlan:
 
         # select data
         data = self.data.loc[index, :].copy()
-        labels = data[detail]
+        labels = data[detail].copy()
+        labels.loc[data.task == 'phase'] = 'phase'
 
         # zero data offset
         zero_offset = data.start_offset[data.start.argmin()]
@@ -208,10 +209,14 @@ class WorkPlan:
                                    for label, duration
                                    in zip(data.index, data.duration)]
         self.labels = labels
-        width = 10 if task is None else 6
+        width = 16 if task is None else 10
         ax = plt.subplots(1, 1, figsize=(width, len(labels.unique())/2.5))[1]
+        data['color'] = 'C0'
+        data.loc[data.subtask == 'assembly', 'color'] = 'darkgray'
+        data.loc[data.subtask == 'integrated commissioning', 'color'] = 'gray'
+        data.loc[data.subtask == 'shutdown', 'color'] = 'darkgray'
         ax.barh(labels, data.duration, left=data.start_offset,
-                edgecolor='w', height=0.8)
+                color=data.color, edgecolor='w', height=0.8)
         if milestones:
             milestone_data = data.loc[(data.duration == 0), :]
             if detail == 'task':
@@ -229,7 +234,7 @@ class WorkPlan:
             ax.text(data.at[label, 'start_offset'] +
                     data.at[label, 'duration'] / 2, 0, label,
                     color='w', ha='center', va='center',
-                    fontsize='x-small')
+                    fontsize='xx-small')
 
         for i, label in enumerate(labels.unique()[1:]):
             label_data = data.loc[(data[detail] == label)]
@@ -255,6 +260,7 @@ class WorkPlan:
         ax.set_xticks(xticks)
         ax.set_xticks(xticks_minor, minor=True)
         ax.set_xticklabels(xticks_labels)
+
         yticks = ax.get_yticks()
         ax.set_yticks(yticks[1:])
         ax.invert_yaxis()
@@ -280,5 +286,5 @@ class WorkPlan:
 if __name__ == '__main__':
 
     plan = WorkPlan()
-    plan.plot()
-    plan.plot_subtasks()
+    plan.plot('linear reconstruction')
+    #plan.plot_subtasks()

@@ -209,7 +209,7 @@ class WorkPlan:
                                    for label, duration
                                    in zip(data.index, data.duration)]
         self.labels = labels
-        width = 16 if task is None else 10
+        width = 12 if task is None else 9
         ax = plt.subplots(1, 1, figsize=(width, len(labels.unique())/2.5))[1]
         data['color'] = 'C0'
         data.loc[data.subtask == 'assembly', 'color'] = 'darkgray'
@@ -286,5 +286,5 @@ class WorkPlan:
 if __name__ == '__main__':
 
     plan = WorkPlan()
-    plan.plot('linear reconstruction')
+    plan.plot()
     #plan.plot_subtasks()

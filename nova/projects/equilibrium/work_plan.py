@@ -1,8 +1,8 @@
 """Develop equilibrum reconstuction workplan."""
 from dataclasses import dataclass, field
+from datetime import datetime
 import operator
 
-from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 import networkx
 import numpy as np
@@ -170,7 +170,8 @@ class WorkPlan:
         return topo_index
 
     def plot(self, task=None, milestones=True, n_ticks=12,
-             subtask_xticks=False):
+             subtask_xticks=False, axes=None, width=16,
+             header_only=False):
         """Plot Gantt chart."""
         if milestones:
             index = self.data.duration.notna()
@@ -195,6 +196,11 @@ class WorkPlan:
                         self.data.loc[index, 'end'].max())
         index |= phase_index
 
+        if header_only:
+            index &= ((self.data.subtask == 'phase') |
+                      (self.data.subtask == 'assembly') |
+                      (self.data.subtask == 'integrated commissioning'))
+
         # select data
         data = self.data.loc[index, :].copy()
         labels = data[detail].copy()
@@ -209,82 +215,156 @@ class WorkPlan:
                                    for label, duration
                                    in zip(data.index, data.duration)]
         self.labels = labels
-        width = 12 if task is None else 9
-        ax = plt.subplots(1, 1, figsize=(width, len(labels.unique())/2.5))[1]
+        if axes is None:
+            axes = plt.subplots(1, 1,
+                                figsize=(width, len(labels.unique())/2.5),
+                                constrained_layout=~header_only)[1]
+
         data['color'] = 'C0'
         data.loc[data.subtask == 'assembly', 'color'] = 'darkgray'
         data.loc[data.subtask == 'integrated commissioning', 'color'] = 'gray'
+        data.loc[data.subtask == 'phase', 'color'] = 'black'
         data.loc[data.subtask == 'shutdown', 'color'] = 'darkgray'
-        ax.barh(labels, data.duration, left=data.start_offset,
-                color=data.color, edgecolor='w', height=0.8)
+
+        axes.barh(labels, data.duration, left=data.start_offset,
+                  color=data.color, edgecolor='w', height=0.8)
         if milestones:
             milestone_data = data.loc[(data.duration == 0), :]
             if detail == 'task':
-                ax.barh(milestone_data[detail], 0,
-                        left=milestone_data.end_offset,
-                        edgecolor='C3', facecolor='k',
-                        linewidth=2, height=0.8)
+                axes.barh(milestone_data[detail], 0,
+                          left=milestone_data.end_offset,
+                          edgecolor='C3', facecolor='k',
+                          linewidth=2, height=0.8)
             else:
-                ax.plot(milestone_data.end_offset,
-                        milestone_data[detail], 'C3d')
-
+                axes.plot(milestone_data.end_offset,
+                          milestone_data[detail], 'C3d')
         plt.despine()
 
         for label in data.index[labels == 'phase']:
-            ax.text(data.at[label, 'start_offset'] +
-                    data.at[label, 'duration'] / 2, 0, label,
-                    color='w', ha='center', va='center',
-                    fontsize='xx-small')
+            axes.text(data.at[label, 'start_offset'] +
+                      data.at[label, 'duration'] / 2, 0, label,
+                      color='w', ha='center', va='center',
+                      fontsize='xx-small')
 
         for i, label in enumerate(labels.unique()[1:]):
             label_data = data.loc[(data[detail] == label)]
             end_offset = label_data.end_offset.max()
             duration = label_data.duration.sum()
             if duration > 0:
-                ax.text(end_offset, i+1, f' {duration:1.0f}',
-                        color='gray', ha='left', va='center',
-                        fontsize='x-small')
+                axes.text(end_offset, i+1, f' {duration:1.0f}',
+                          color='gray', ha='left', va='center',
+                          fontsize='x-small')
 
-        period = 24
-        xticks = np.arange(0, data.end_offset.max()+1, period)
-        xticks_labels = pandas.date_range(data.start.min(), end=data.end.max(),
-                                          freq='M').strftime("%Y")
-        xticks_labels = np.append(xticks_labels[::period], xticks_labels[-1])
+        self.set_xticks(data, axes)
+
+        yticks = axes.get_yticks()
+        axes.set_yticks(yticks[1:])
+        axes.invert_yaxis()
+
+        axes.spines['left'].set_visible(False)
+        axes.tick_params(axis='y', which='both', length=0)
+
+        if task is None:
+            task = 'overview'
+        #else:
+        #    if subtask_xticks:
+        #        #axes.set_xticks([])
+        #        axes.tick_params(axis='x', which='both', length=0)
+        #        axes.spines['bottom'].set_visible(False)
+
+        plt.savefig(f'{task}.png')
+
+    def set_xticks(self, data, axes, period=24, origin=0):
+        """Set axis xticks."""
+        xticks = np.arange(origin, data.end_offset.max()+1, period)
+        xticks_minor = np.arange(origin, data.end_offset.max(), int(period / 2))
+        xticks_range = pandas.date_range(
+            data.start.min(), end=data.end.max() + pandas.offsets.MonthEnd(),
+            freq='M')
+        xticks_labels = xticks_range.strftime('%Y')[::period]
 
         if len(xticks_labels) > len(xticks):
             xticks_labels = xticks_labels[:-1]
         if len(xticks) > len(xticks_labels):
             xticks = xticks[1:]
 
-        xticks_minor = np.arange(0, data.end_offset.max(), int(period / 2))
-        ax.set_xticks(xticks)
-        ax.set_xticks(xticks_minor, minor=True)
-        ax.set_xticklabels(xticks_labels)
+        start_delta = \
+            xticks_range[0] - datetime.strptime(xticks_labels[0], '%Y')
+        start_offset = start_delta.days * 12 / 365 - 12
+        xticks += start_offset
+        xticks_minor += start_offset
 
-        yticks = ax.get_yticks()
-        ax.set_yticks(yticks[1:])
-        ax.invert_yaxis()
-
-        ax.spines['left'].set_visible(False)
-        ax.tick_params(axis='y', which='both', length=0)
-
-        if task is None:
-            plt.title('overview')
-        else:
-            plt.title(task)
-            if subtask_xticks:
-                ax.set_xticks([])
-                ax.tick_params(axis='x', which='both', length=0)
-                ax.spines['bottom'].set_visible(False)
+        axes.set_xticks(xticks)
+        axes.set_xticks(xticks_minor, minor=True)
+        axes.set_xticklabels(xticks_labels)
 
     def plot_subtasks(self):
         """Plot detailed subtask breakdown for all tasks."""
         for i in range(len(self.data.task.unique()))[1:]:
             self.plot(i)
 
+    @property
+    def phase(self):
+        """Return phase dataframe."""
+        return self.data.loc[(self.data.task == 'phase')]
+
+    def start_offset(self, data):
+        """Return start offset."""
+        return (data.start.min() - self.phase.start.min()).days * \
+            12 / 365
+
+    def resource(self):
+        """Calculate and display overall ppy resource requirements."""
+        data = self.data.loc[(self.data.task != 'phase') &
+                             (self.data.duration > 0)]
+
+        data = data.loc[(data.task == 'equilibrium generation') |
+                        (data.task == 'linear reconstruction') |
+                        (data.task == 'non-linear reconstruction')]
+
+        date_range = pandas.date_range(
+            self.data.start.min(), self.data.end.max()
+            + pandas.offsets.YearEnd(), freq='Y')
+        composite = pandas.Series(0, index=date_range, dtype=int)
+        for subtask in data.index:
+            start = data.loc[subtask, 'start']
+            end = data.loc[subtask, 'end']
+            index = pandas.date_range(start, end, freq='M')
+            series = pandas.Series(0, index=index, dtype=int).resample(
+                'Y', convention='end').count()
+            composite.loc[series.index] += series
+        composite /= 12
+
+        date_range -= date_range[0]
+        date_range = date_range.days * 12 / 365 - 12
+
+        print(date_range)
+
+        start_offset = self.start_offset(data)
+
+        axes = plt.subplots(2, 1, sharex=True, figsize=(14, 8),
+                            gridspec_kw={'height_ratios': [1, 10],
+                                         'hspace': 0.3})[1]
+        self.plot(axes=axes[0], header_only=True)
+        axes[1].bar(date_range - start_offset, composite, width=10)
+        for i in range(len(composite)):
+            if composite[i] < 1:
+                continue
+            axes[1].text(date_range[i] - start_offset, composite[i],
+                         f' {composite[i]:1.1f} ', rotation=90,
+                         ha='center', va='top', color='w')
+        #self.set_xticks(data, axes[0], origin=start_offset)
+        #self.set_xticks(data, axes[1], origin=0)
+        #axes[0].get_yaxis().set_visible(False)
+        #axes[0].spines['bottom'].set_visible(False)
+        axes[1].set_ylabel('people per year')
+
+        print(date_range, start_offset)
+
 
 if __name__ == '__main__':
 
     plan = WorkPlan()
-    plan.plot()
+    plan.resource()
+    #plan.plot(0)
     #plan.plot_subtasks()

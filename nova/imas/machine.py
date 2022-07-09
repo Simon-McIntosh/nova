@@ -518,7 +518,7 @@ class PF_Active_Geometry(MachineDescription):
     """Manage active poloidal loop ids, pf_passive."""
 
     pulse: int = 111001
-    run: int = 201
+    run: int = 202
     ids_name: str = 'pf_active'
 
     def build(self):
@@ -555,7 +555,9 @@ class PF_Active_Geometry(MachineDescription):
         """Build circuit influence matrix."""
         supply = [supply.identifier
                   for supply in self.load_ids_data('supply')]
-        nodes = len(self.load_ids_data('circuit')[0].connections)
+        nodes = max([len(circuit.connections)
+                     for circuit in self.load_ids_data('circuit')])
+        #nodes = len(self.load_ids_data('circuit')[0].connections)
         self.circuit.initialize(supply, nodes)
         for circuit in self.load_ids_data('circuit'):
             self.circuit.insert(circuit.identifier, circuit.connections)
@@ -786,7 +788,8 @@ if __name__ == '__main__':
 
     coilset = Machine(geometry=['pf_active', 'wall'],
                       dplasma=-100, dcoil=-10)
-    coilset.plot()
+    #coilset.plot()
+    coilset.circuit.plot('VS3')
 
     # coilset.plasma.separatrix = dict(e=[6, -0.5, 2.5, 2.5])
     # coilset.sloc['Ic'] = 1

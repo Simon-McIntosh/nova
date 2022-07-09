@@ -16,6 +16,7 @@ class Connect:
 
     command: str
     machine: str
+    user: str = 'public'
     cluster: str = 'sdcc-login02.iter.org'
     backend: str = 'HDF5'
     columns: list[str] = field(default_factory=lambda: [])
@@ -68,11 +69,6 @@ class Connect:
                    if col not in self._space_columns]
         space_columns = [col for col in self._space_columns
                          if col in self.columns]
-        #if key not in columns+space_columns:
-        #    if key in self._space_columns:
-        #        space_columns.append(key)
-        #    else:
-        #       columns.append(key)
         space_columns.append(key)
         columns.append(key)
         frame = self.to_dataframe(self.read_summary(','.join(columns), value))
@@ -88,7 +84,7 @@ class Connect:
 
     def copy_command(self, frame: pandas.DataFrame, ids: str = ''):
         """Return ids copy string."""
-        command = [f'idscp {ids} -u public '
+        command = [f'idscp {ids} -u {self.user} '
                    f'-si {pulse} -ri {run} -d {self.machine} '
                    f'-so {pulse} -ro {run} -do {self.machine} '
                    f'-bo {self.backend}'
@@ -203,11 +199,11 @@ if __name__ == '__main__':
     #machine.load_ids('pf_active')
     #print(machine.frame)
 
-    #Machine().sync_shot('111001/3')
+    Machine(user='hosokam', machine='ITER_MD').sync_shot('111001/102')
 
     #scenario = Scenario()
     #scenario.load_frame('workflow', 'CORSICA')
-    Scenario().sync_workflow('CORSICA')
+    #Scenario().sync_workflow('CORSICA')
 
     #Scenario().sync_shot('114101/41')
 

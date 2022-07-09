@@ -1,6 +1,6 @@
 """Develop equilibrum reconstuction workplan."""
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from matplotlib.patches import Patch
 import operator
 
@@ -223,9 +223,10 @@ class WorkPlan:
                                        if label[:2] == 'ms' else start_offset
                                        for label, start_offset
                                        in zip(data.index, data.start_offset)]
-        data = pandas.concat(
-            [data.loc[header_index],
-             data.loc[~header_index].sort_values('start_offset')])
+        if task is not None:
+            data = pandas.concat(
+                [data.loc[header_index],
+                 data.loc[~header_index].sort_values('start_offset')])
 
         labels = data[detail].copy()
         labels.loc[data.task == 'phase'] = 'phase'
@@ -240,9 +241,12 @@ class WorkPlan:
         data.loc[data.subtask == 'integrated commissioning', 'color'] = 'gray'
         data.loc[data.subtask == 'phase', 'color'] = 'black'
         data.loc[data.subtask == 'shutdown', 'color'] = 'darkgray'
-        for i, task in enumerate(tasks):
-            data.loc[data.task == task, 'color'] = f'C{i}'
-        if (ntask := len(tasks)) > 1:
+        if task is None:
+            data.loc[~header_index, 'color'] = 'C0'
+        else:
+            for i, task in enumerate(tasks):
+                data.loc[data.task == task, 'color'] = f'C{i}'
+        if task is not None and ((ntask := len(tasks)) > 1):
             axes.legend(handles=[Patch(facecolor=f'C{i}', label=task)
                                  for i, task in enumerate(tasks)],
                         loc='center', ncol=ntask,
@@ -259,7 +263,8 @@ class WorkPlan:
                           linewidth=2, height=0.8)
             else:
                 axes.plot(milestone_data.end_offset,
-                          milestone_data[detail], 'kd')
+                          milestone_data[detail], 'd',
+                          color='C3')
         plt.despine()
 
         for label in data.index[labels == 'phase']:
@@ -267,21 +272,26 @@ class WorkPlan:
                       data.at[label, 'duration'] / 2, 0, label,
                       color='w', ha='center', va='center',
                       fontsize='xx-small')
-        xlim = axes.get_xlim()
         for i, label in enumerate(labels.unique()[1:]):
             label_data = data.loc[(data[detail] == label)]
+            start_offset = label_data.start_offset.min()
             end_offset = label_data.end_offset.max()
             duration = label_data.duration.sum()
+            if task is not None:
+                axes.text(start_offset, i+1, f'{label}  ',
+                          color='gray', ha='right', va='center',
+                          fontsize='x-small')
             if duration > 0:
-                axes.text(end_offset, i+1, f' {duration:1.0f}',
+                axes.text(end_offset, i+1, f' {duration:1.0f}m',
                           color='gray', ha='left', va='center',
                           fontsize='x-small')
-            if ntask > 1:
-                if label_data.index[0][:2] == 'ms':
-                    color = 'k'
-                else:
-                    color = label_data.color[0]
-                axes.plot(xlim[0]-3, i+1, marker=5, ms=8, color=color)
+            else:
+                date = self.data.start.min() + \
+                    timedelta(end_offset * 365/12)
+                axes.text(end_offset, i+1,
+                          datetime.strftime(date, '  %m/%Y'),
+                          color='gray', ha='left', va='center',
+                          fontsize='x-small')
 
         self.set_xticks(data, axes)
         yticks = axes.get_yticks()
@@ -289,10 +299,12 @@ class WorkPlan:
         axes.invert_yaxis()
         axes.spines['left'].set_visible(False)
         axes.tick_params(axis='y', which='both', length=0)
-
         if task is None:
-            task = 'overview'
-        plt.savefig(f'{task}.png')
+            filename = 'overview'
+        else:
+            axes.set_yticks([])
+            filename = '_'.join(tasks).replace(' ', '-')
+        plt.savefig(f'{filename}.png')
 
     def set_xticks(self, data, axes, period=24):
         """Set axis xticks."""
@@ -340,10 +352,6 @@ class WorkPlan:
         data = self.data.loc[(self.data.task != 'phase') &
                              (self.data.duration > 0)]
 
-        #data = data.loc[(data.task == 'equilibrium generation') |
-        #                (data.task == 'linear reconstruction') |
-        #                (data.task == 'non-linear reconstruction')]
-
         date_range = pandas.date_range(
             self.data.start.min(), self.data.end.max()
             + pandas.offsets.YearEnd(), freq='Y')
@@ -356,6 +364,9 @@ class WorkPlan:
                 'Y', convention='end').count()
             composite.loc[series.index] += series
         composite /= 12
+        index = composite[composite != 0].index[-1]
+        composite = composite.loc[:index]
+        date_range = date_range[:composite.index.get_loc(index)+1]
         date_range -= date_range[0]
         date_range = date_range.days * 12 / 365
 
@@ -381,5 +392,6 @@ if __name__ == '__main__':
 
     plan = WorkPlan()
     #plan.resource()
-    plan.plot([4, 5, 6])
+    plan.plot([1, 2, 3, 4])
+    #plan.plot([7, 8, 9])
     #plan.plot_subtasks()

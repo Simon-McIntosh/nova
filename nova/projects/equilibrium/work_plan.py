@@ -395,6 +395,6 @@ if __name__ == '__main__':
 
     plan = WorkPlan()
     #plan.resource()
-    plan.plot([1, 2, 3, 4])
+    plan.plot([1])
     #plan.plot([7, 8, 9])
     #plan.plot_subtasks()

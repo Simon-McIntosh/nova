@@ -184,6 +184,7 @@ class WorkPlan:
             index &= self.data.task != 'phase'
         else:
             detail = 'subtask'
+            detail = 'task'
             match task:
                 case str():
                     tasks = [task]
@@ -234,7 +235,7 @@ class WorkPlan:
         self.labels = labels
         if axes is None:
             axes = plt.subplots(1, 1,
-                                figsize=(width, len(labels.unique())/4.5),
+                                figsize=(width, len(labels.unique())/2.5),
                                 constrained_layout=~header_only)[1]
 
         data.loc[data.subtask == 'assembly', 'color'] = 'darkgray'
@@ -246,11 +247,12 @@ class WorkPlan:
         else:
             for i, task in enumerate(tasks):
                 data.loc[data.task == task, 'color'] = f'C{i}'
-        if task is not None and ((ntask := len(tasks)) > 1):
+        if task is not None and ((ntask := len(tasks)) > 1) and \
+                detail == 'subtask':
             axes.legend(handles=[Patch(facecolor=f'C{i}', label=task)
                                  for i, task in enumerate(tasks)],
                         loc='center', ncol=ntask,
-                        bbox_to_anchor=(0.5, -0.08))
+                        bbox_to_anchor=(0.5, -0.8))
 
         axes.barh(labels, data.duration, left=data.start_offset,
                   color=data.color, edgecolor='w', height=0.8)
@@ -277,7 +279,7 @@ class WorkPlan:
             start_offset = label_data.start_offset.min()
             end_offset = label_data.end_offset.max()
             duration = label_data.duration.sum()
-            if task is not None:
+            if detail == 'subtask':
                 axes.text(start_offset, i+1, f'{label}  ',
                           color='gray', ha='right', va='center',
                           fontsize='x-small')
@@ -302,8 +304,9 @@ class WorkPlan:
         if task is None:
             filename = 'overview'
         else:
-            axes.set_yticks([])
             filename = '_'.join(tasks).replace(' ', '-')
+        if detail == 'subtask':
+            axes.set_yticks([])
         plt.savefig(f'{filename}.png')
 
     def set_xticks(self, data, axes, period=24):

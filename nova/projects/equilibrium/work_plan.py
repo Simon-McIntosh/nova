@@ -234,7 +234,7 @@ class WorkPlan:
 
         self.labels = labels
         if axes is None:
-            axes = plt.subplots(1, 1,
+            axes = plt.subplots(1, 1, sharex=True,
                                 figsize=(width, len(labels.unique())/2.5),
                                 constrained_layout=~header_only)[1]
 
@@ -309,24 +309,19 @@ class WorkPlan:
             axes.set_yticks([])
         plt.savefig(f'{filename}.png')
 
-    def set_xticks(self, data, axes, period=24):
+    def set_xticks(self, data, axes, period=2):
         """Set axis xticks."""
         xticks = np.arange(data.start_offset.min(),
-                           data.end_offset.max()+1, period)
-        xticks_minor = np.arange(data.start_offset.min(),
-                                 data.end_offset.max(), int(period / 2))
+                           data.end_offset.max()+1, 12*period)
+        xticks_minor = np.arange(xticks[0], xticks[-1], 6*period)
         xticks_range = pandas.date_range(
-            data.start.min(), end=data.end.max() + pandas.offsets.MonthEnd(),
-            freq='M')
-        xticks_labels = xticks_range.strftime('%Y')[::period]
-
+            data.start.min(), end=data.end.max() + pandas.offsets.YearEnd(),
+            freq=f'{period}Y', normalize=True)
+        xticks_labels = xticks_range.strftime('%Y')
         if len(xticks_labels) > len(xticks):
             xticks_labels = xticks_labels[:-1]
-        if len(xticks) > len(xticks_labels):
-            xticks = xticks[1:]
 
-        start_delta = \
-            xticks_range[0] - datetime.strptime(xticks_labels[0], '%Y')
+        start_delta = xticks_range[0] - data.start.min()
         start_offset = start_delta.days * 12 / 365 - 12
         xticks += start_offset
         xticks_minor += start_offset
@@ -339,16 +334,6 @@ class WorkPlan:
         """Plot detailed subtask breakdown for all tasks."""
         for i in range(len(self.data.task.unique()))[1:]:
             self.plot(i)
-
-    @property
-    def phase(self):
-        """Return phase dataframe."""
-        return self.data.loc[(self.data.task == 'phase')]
-
-    def start_offset(self, data):
-        """Return start offset."""
-        return (data.start.min() - self.phase.start.min()).days * \
-            12 / 365
 
     def resource(self):
         """Calculate and display overall ppy resource requirements."""
@@ -384,7 +369,7 @@ class WorkPlan:
             axes[1].text(date_range[i], composite[i],
                          f' {composite[i]:1.1f} ', rotation=90,
                          ha='center', va='top', color='w')
-        self.set_xticks(data, axes[1])
+        self.set_xticks(data, axes[0])
         axes[0].get_xaxis().set_visible(False)
         axes[0].get_yaxis().set_visible(False)
         axes[0].spines['bottom'].set_visible(False)
@@ -394,7 +379,7 @@ class WorkPlan:
 if __name__ == '__main__':
 
     plan = WorkPlan()
-    #plan.resource()
-    plan.plot([1])
+    plan.resource()
+    plan.plot(0)
     #plan.plot([7, 8, 9])
     #plan.plot_subtasks()

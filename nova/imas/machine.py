@@ -789,7 +789,7 @@ if __name__ == '__main__':
     coilset = Machine(geometry=['pf_active', 'wall'],
                       dplasma=-100, dcoil=-10)
     #coilset.plot()
-    coilset.circuit.plot('VS3')
+    coilset.circuit.plot('CS1')
 
     # coilset.plasma.separatrix = dict(e=[6, -0.5, 2.5, 2.5])
     # coilset.sloc['Ic'] = 1

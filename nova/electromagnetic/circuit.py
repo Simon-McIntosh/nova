@@ -28,13 +28,8 @@ class Circuit(netCDF, FrameSetLoc):
         data = self.data.coords.to_dataset()
         data['circuit'] = [circuit]
         connection = connection[:, :2*self.data.dims['edge']]
-        print(circuit, connection.shape)
-
-        data['incidence_matrix'] = ('node', 'edge'), np.zeros(
-            (data.dims['node'], data.dims['edge']))
-        data['incidence_matrix'][:len(connection)] = \
+        data['incidence_matrix'] = ('node', 'edge'), \
             -connection[:, ::2] + connection[:, 1::2]
-        print(data['incidence_matrix'])
         self.data = xarray.concat([self.data, data], 'circuit')
 
     def edge_list(self, circuit: str):
@@ -104,7 +99,6 @@ class Circuit(netCDF, FrameSetLoc):
             loops = self.edge_loops(circuit)
             if len(loops) > 1:
                 continue
-            print(loops)
             loop = loops[0]
             index, factor = [], []
             for edge, sign in zip(loop['edge'], loop['sign']):
@@ -117,6 +111,5 @@ class Circuit(netCDF, FrameSetLoc):
                 factor *= -1
             sort = sorted(zip(index, factor),
                           key=lambda x: self.frame.index.get_loc(x[0]))
-            print(list(map(list, zip(*sort))))
             index, factor = list(map(list, zip(*sort)))
             self.linkframe(index, factor[1:])

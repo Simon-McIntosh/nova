@@ -38,6 +38,8 @@ class WorkPlan:
         self.data.drop(index='.', level=0, inplace=True)  # drop dot
         self.data.reset_index(inplace=True)
         self.data.set_index('label', inplace=True)
+        self.data.loc[:, 'assignment'] = self.data.assignment.fillna(
+            method='ffill')
         self.check_na()
         self.check_unique()
         self.check_duration()
@@ -171,7 +173,7 @@ class WorkPlan:
         return topo_index
 
     def plot(self, task=None, milestones=True, n_ticks=12,
-             subtask_xticks=False, axes=None, width=14,
+             subtask_xticks=False, axes=None, width=10,
              header_only=False):
         """Plot Gantt chart."""
         if milestones:
@@ -180,19 +182,24 @@ class WorkPlan:
             index = (self.data.duration > 0)  # exclude milestones
 
         if task is None:
-            detail = 'task'
+            detail = 'assignment'
             index &= self.data.task != 'phase'
+            filename = 'overview'
         else:
             detail = 'subtask'
-            detail = 'task'
             match task:
                 case str():
                     tasks = [task]
+                    filename = task
                 case int():
                     tasks = [self.data.task[index].unique()[task]]
+                    filename = tasks[0]
                 case [*tasks]:
+                    detail = 'task'
                     tasks = [self.data.task[index].unique()[task]
                              for task in tasks]
+                    filename = 'overview-' + '-'.join(str(t) for t in task)
+
             task_index = np.zeros_like(index, dtype=bool)
             for task in tasks:
                 task_index |= self.data.task == task
@@ -201,9 +208,9 @@ class WorkPlan:
 
         # phase index
         phase_index = (self.data.task == 'phase')
-        phase_index &= (self.data.loc[phase_index, 'end'] >=
+        phase_index &= (self.data.loc[phase_index, 'end'] >
                         self.data.loc[index, 'start'].min())
-        phase_index &= (self.data.loc[phase_index, 'start'] <=
+        phase_index &= (self.data.loc[phase_index, 'start'] <
                         self.data.loc[index, 'end'].max())
         index |= phase_index
         header_index = ((self.data.subtask == 'phase') |
@@ -235,7 +242,7 @@ class WorkPlan:
         self.labels = labels
         if axes is None:
             axes = plt.subplots(1, 1, sharex=True,
-                                figsize=(width, len(labels.unique())/2.5),
+                                figsize=(width, len(labels.unique())/2.75),
                                 constrained_layout=~header_only)[1]
 
         data.loc[data.subtask == 'assembly', 'color'] = 'darkgray'
@@ -243,13 +250,17 @@ class WorkPlan:
         data.loc[data.subtask == 'phase', 'color'] = 'black'
         data.loc[data.subtask == 'shutdown', 'color'] = 'darkgray'
         if task is None:
-            data.loc[~header_index, 'color'] = 'C0'
+            for i, assignment in enumerate(data.assignment.unique()[1:]):
+                data.loc[data.assignment == assignment, 'color'] = \
+                    f'C{i if i < 3 else i+1}'
         else:
             for i, task in enumerate(tasks):
-                data.loc[data.task == task, 'color'] = f'C{i}'
+                data.loc[data.task == task, 'color'] = \
+                    f'C{i if i < 3 else i+1}'
         if task is not None and ((ntask := len(tasks)) > 1) and \
                 detail == 'subtask':
-            axes.legend(handles=[Patch(facecolor=f'C{i}', label=task)
+            axes.legend(handles=[Patch(facecolor=f'C{i if i < 3 else i+1}',
+                                       label=task)
                                  for i, task in enumerate(tasks)],
                         loc='center', ncol=ntask,
                         bbox_to_anchor=(0.5, -0.8))
@@ -281,19 +292,19 @@ class WorkPlan:
             duration = label_data.duration.sum()
             if detail == 'subtask':
                 axes.text(start_offset, i+1, f'{label}  ',
-                          color='gray', ha='right', va='center',
-                          fontsize='x-small')
+                          color='k', ha='right', va='center',
+                          fontsize='small')
             if duration > 0:
                 axes.text(end_offset, i+1, f' {duration:1.0f}m',
-                          color='gray', ha='left', va='center',
-                          fontsize='x-small')
+                          color='k', ha='left', va='center',
+                          fontsize='small')
             else:
                 date = self.data.start.min() + \
                     timedelta(end_offset * 365/12)
                 axes.text(end_offset, i+1,
                           datetime.strftime(date, '  %m/%Y'),
-                          color='gray', ha='left', va='center',
-                          fontsize='x-small')
+                          color='k', ha='left', va='center',
+                          fontsize='small')
 
         self.set_xticks(data, axes)
         yticks = axes.get_yticks()
@@ -301,10 +312,6 @@ class WorkPlan:
         axes.invert_yaxis()
         axes.spines['left'].set_visible(False)
         axes.tick_params(axis='y', which='both', length=0)
-        if task is None:
-            filename = 'overview'
-        else:
-            filename = '_'.join(tasks).replace(' ', '-')
         if detail == 'subtask':
             axes.set_yticks([])
         plt.savefig(f'{filename}.png')
@@ -358,7 +365,7 @@ class WorkPlan:
         date_range -= date_range[0]
         date_range = date_range.days * 12 / 365
 
-        axes = plt.subplots(2, 1, sharex=True, figsize=(14, 8),
+        axes = plt.subplots(2, 1, sharex=True, figsize=(10, 6),
                             gridspec_kw={'height_ratios': [1, 16],
                                          'hspace': 0})[1]
         self.plot(axes=axes[0], header_only=True)
@@ -374,12 +381,15 @@ class WorkPlan:
         axes[0].get_yaxis().set_visible(False)
         axes[0].spines['bottom'].set_visible(False)
         axes[1].set_ylabel('full-time equivalent')
+        plt.savefig('resource.png')
 
 
 if __name__ == '__main__':
 
     plan = WorkPlan()
     plan.resource()
-    plan.plot(0)
+
+
+    #plan.plot([8, 9, 10])
     #plan.plot([7, 8, 9])
     #plan.plot_subtasks()

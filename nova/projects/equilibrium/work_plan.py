@@ -390,6 +390,6 @@ if __name__ == '__main__':
     plan.resource()
 
 
-    #plan.plot([8, 9, 10])
+    plan.plot(5)
     #plan.plot([7, 8, 9])
     #plan.plot_subtasks()

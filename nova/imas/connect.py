@@ -199,7 +199,7 @@ if __name__ == '__main__':
     #machine.load_ids('pf_active')
     #print(machine.frame)
 
-    Machine(user='hosokam', machine='ITER_MD').sync_shot('111001/102')
+    Machine(user='hosokam', machine='ITER_MD').sync_shot('111001/202')
 
     #scenario = Scenario()
     #scenario.load_frame('workflow', 'CORSICA')

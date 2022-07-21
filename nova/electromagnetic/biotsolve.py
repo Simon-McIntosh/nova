@@ -34,6 +34,7 @@ class BiotSolve(BiotSet):
     def check_segments(self):
         """Check for segment in self.generator."""
         for segment in self.source.segment.unique():
+            print(segment)
             if segment not in self.generator:
                 raise NotImplementedError(
                     f'segment <{segment}> not implemented '
@@ -98,6 +99,7 @@ class BiotSolve(BiotSet):
         else:
             sigma = 'target'
         for attr in self.attrs:
+            print(np.sum(np.isnan(self.data[f'_{attr}'].values)))
             UsV = np.linalg.svd(self.data[f'_{attr}'], full_matrices=False)
             self.data[f'_U{attr}'] = ('target', sigma), UsV[0]
             self.data[f'_s{attr}'] = sigma, UsV[1]

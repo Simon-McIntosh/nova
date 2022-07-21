@@ -653,10 +653,10 @@ class Wall_Geometry(MachineDescription):
 class Machine(CoilSet):
     """Manage ITER machine geometry."""
 
-    dcoil: float = 0.25
+    dcoil: float = -1
     dshell: float = 0.5
     dplasma: int = -500
-    tcoil: str = 'hex'
+    tcoil: str = 'rect'
     filename: str = 'iter'
     machine: str = 'iter_md'
     datapath: str = field(default='data/Nova', repr=False)

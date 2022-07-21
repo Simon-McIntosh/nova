@@ -116,17 +116,17 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         equilibrium = Equilibrium(self.pulse, self.run, ids_data=self.ids_data)
         for attr in ['ids_data', 'data']:
             setattr(self, attr, getattr(equilibrium, attr))
-        if self.limit == 'ids_data':  # Load grid limit from ids.
+        if self.limit == 'ids':  # Load grid limit from ids.
             if equilibrium.data.grid_type != 1:
                 raise TypeError('ids limits only valid for rectangular grids'
                                 f'{equilibrium.data.grid_type} != 1')
             limit = [equilibrium.data.r.values, equilibrium.data.z.values]
-            if self.number == 'ids_data':
+            if self.number == 'ids':
                 self.limit = limit
             else:
                 self.limit = [limit[0][0], limit[0][-1],
                               limit[1][0], limit[1][-1]]
-        if self.number == 'ids_data':
+        if self.number == 'ids':
             self.number = equilibrium.data.dims['r'] * \
                 equilibrium.data.dims['z']
 
@@ -182,16 +182,18 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
     def plot(self, attr='psi'):
         """Plot plasma filements and polidal flux."""
         plt.figure()
-        super().plot('plasma')
+        super().plot()  # 'plasma'
 
+        '''
         _ = self.grid.br
         psi2d = self.grid.psi.reshape(*self.grid.shape) / (2*np.pi)
         br = -1/self.grid.data.x2d.values * \
             np.gradient(psi2d, self.grid.data.z, axis=1, edge_order=2)
         self.grid.array['br'][:] = br.flatten()
+        '''
 
         levels = self.grid.plot(attr, levels=51, colors='C0', nulls=False)
-        self.plot_2d(self.itime, attr, colors='C3', levels=levels,
+        self.plot_2d(self.itime, attr, colors='C3', levels=-levels[::-1],
                      linestyles='dashdot')
         self.plot_boundary(self.itime)
 
@@ -199,11 +201,10 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
 if __name__ == '__main__':
 
     pulse, run = 114101, 41  # JINTRAC
-    pulse, run = 130506, 403  # CORSICA
+    #pulse, run = 130506, 403  # CORSICA
 
     database = Database(pulse, run, 'equilibrium', machine='iter')
     coilset = Extrapolate(ids_data=database.ids_data,
-                          dplasma=-500, limit=[5, 6.5, -0.5, 1.5],
-                          number=500)
-    coilset.ionize(10)
-    coilset.plot('b_field_r')
+                          dplasma=-50, number=50)
+    coilset.ionize(0)
+    coilset.plot('psi')

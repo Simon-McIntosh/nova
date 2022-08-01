@@ -57,8 +57,8 @@ class GridCoord:
 class Grid(Axes):
     """Generate grid."""
 
-    number: int = field(default=None)
-    limit: list[float] = field(default=None)
+    number: int | None = field(default=None)
+    limit: list[float] | None = field(default=None)
     xcoord: list[float] = field(init=False, repr=False)
     zcoord: list[float] = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, repr=False)

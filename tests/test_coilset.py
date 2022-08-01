@@ -291,7 +291,7 @@ def test_biot_link_dataarray_dataset():
 
 
 def test_biot_multiframe_plasma():
-    coilset = CoilSet(dplasma=-20)
+    coilset = CoilSet(dplasma=-20, dcoil=-1)
     coilset.coil.insert(3, -0.5, 0.95, 0.95)
     coilset.firstwall.insert(3, -0.5, 0.95, 0.95)
     coilset.firstwall.insert(3, 0.5, 0.95, 0.95, name='second_plasma_rejoin')

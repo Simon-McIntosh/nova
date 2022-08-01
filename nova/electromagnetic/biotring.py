@@ -106,7 +106,7 @@ class BiotRing(BiotMatrix):
     """
 
     name: ClassVar[str] = 'ring'  # element name
-    attrs: ClassVar[list[str]] = dict(
+    attrs: ClassVar[dict[str, str]] = dict(
         rs='rms', zs='z', dx='dx', dz='dz', turnturn='turnturn', r='x', z='z')
 
     def __post_init__(self):

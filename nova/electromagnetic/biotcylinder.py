@@ -22,7 +22,7 @@ class BiotCylinder(BiotMatrix):
     _corner: int = field(init=False, default=0, repr=False)
 
     name: ClassVar[str] = 'cylinder'  # element name
-    attrs: ClassVar[list[str]] = dict(
+    attrs: ClassVar[dict[str, str]] = dict(
         rs='x', zs='z', dx='dx', dz='dz', r='x', z='z',
         area='area')
 
@@ -30,11 +30,11 @@ class BiotCylinder(BiotMatrix):
         """Load intergration constants."""
         super().__post_init__()
         self.constant = [[] for _ in range(4)]
-        for i, (delta_x, delta_z) in enumerate(zip([-1, 1, 1, -1],
-                                                   [-1, -1, 1, 1])):
+        for i, (unit_x, unit_z) in enumerate(zip([-1, 1, 1, -1],
+                                                 [-1, -1, 1, 1])):
             self.constant[i] = BiotConstants(
-                self['rs'] + delta_x/2 * self['dx'],
-                self['zs'] + delta_z/2 * self['dz'],
+                self['rs'] + unit_x/2 * self['dx'],
+                self['zs'] + unit_z/2 * self['dz'],
                 self['r'], self['z'])
 
     @property

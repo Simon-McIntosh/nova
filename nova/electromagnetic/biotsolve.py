@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import ClassVar
 
 import numpy as np
+import pandas
 import xarray
 
 from nova.electromagnetic.biotcylinder import BiotCylinder
@@ -34,7 +35,6 @@ class BiotSolve(BiotSet):
     def check_segments(self):
         """Check for segment in self.generator."""
         for segment in self.source.segment.unique():
-            print(segment)
             if segment not in self.generator:
                 raise NotImplementedError(
                     f'segment <{segment}> not implemented '
@@ -83,8 +83,10 @@ class BiotSolve(BiotSet):
         source_index = self.source_index(segment)
         plasma_index = self.plasma_index(segment)
         generator = self.generator[segment](
-            self.source.loc[self.source.segment == segment, :],
+            pandas.DataFrame(
+                self.source.loc[self.source.segment == segment, :]),
             self.target, turns=self.turns, reduce=self.reduce)
+        generator.source.metaframe.data = {}
         for attr in self.attrs:
             matrix, plasma = generator.compute(attr)
             self.data[attr].loc[:, source_index] = matrix
@@ -99,7 +101,6 @@ class BiotSolve(BiotSet):
         else:
             sigma = 'target'
         for attr in self.attrs:
-            print(np.sum(np.isnan(self.data[f'_{attr}'].values)))
             UsV = np.linalg.svd(self.data[f'_{attr}'], full_matrices=False)
             self.data[f'_U{attr}'] = ('target', sigma), UsV[0]
             self.data[f'_s{attr}'] = sigma, UsV[1]

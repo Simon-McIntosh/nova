@@ -81,6 +81,8 @@ class PolyDelta(PolyGeom):
 
     def divide_box(self, box_number, aspect):
         """Return box divisions, stretch if not tile or fill."""
+        if np.isclose(box_number, 1):
+            return 1, 1
         ndiv_x = np.sqrt(box_number * aspect)
         if not (self.tile or self.fill):
             ndiv_x = np.round(ndiv_x)

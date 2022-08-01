@@ -2,7 +2,7 @@
 import dask.array as da
 import numpy as np
 
-from nova.electromagnetic.framelink import FrameLink
+from nova.electromagnetic.framespace import FrameSpace
 from nova.electromagnetic.biotsection import BiotSection
 from nova.electromagnetic.biotshape import BiotShape
 from nova.electromagnetic.biotreduce import BiotReduce
@@ -12,7 +12,7 @@ from nova.electromagnetic.geometry import PolyGeo
 # pylint: disable=too-many-ancestors
 
 
-class BiotFrame(FrameLink):
+class BiotFrame(FrameSpace):
     """Extend FrameSpace class with biot specific attributes and methods."""
 
     _metadata = ['turns', 'reduce']
@@ -32,7 +32,6 @@ class BiotFrame(FrameLink):
 
     def __call__(self, attr, chunks=1000) -> da.Array:
         """Return attribute matrix, shape(target, source)."""
-        # vector = np.array(getattr(self, attr), float)
         vector = da.from_array(self[attr][:, np.newaxis], chunks=chunks)
         region = self.biotshape.region
         if self.biotshape.region == '':

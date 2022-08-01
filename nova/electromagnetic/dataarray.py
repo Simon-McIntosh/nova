@@ -69,6 +69,7 @@ class DataArray(ArrayIndexer, DataFrame):
         unlink = {attr: self.metaframe.data.pop(attr) for attr in attrs
                   if self.metaframe.data[attr].shape[0] != self.shape[0]}
         self.overwrite_array(unlink)
+        return self
 
     def overwrite_array(self, data=None):
         """Overwrite items in data with nans."""

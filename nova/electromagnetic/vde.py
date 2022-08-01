@@ -33,7 +33,7 @@ class VDE(Axes, CoilSet):  # read_dina,
 
     """
 
-    folder: Union[str, int] = None
+    folder: str | int | None = None
     dcoil: float = 0.25
     dplasma: float = 0.25
     dshell: float = 0.5

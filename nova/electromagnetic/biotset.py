@@ -1,6 +1,5 @@
 """Manage source and target biotframes."""
 from dataclasses import dataclass, field
-from typing import Union
 
 import itertools
 from nova.electromagnetic.biotframe import BiotFrame
@@ -28,8 +27,8 @@ class BiotSet:
 
     """
 
-    source: BiotFrame = field(repr=False, default=None)
-    target: Union[dict, BiotFrame] = field(repr=False, default=None)
+    source: BiotFrame = field(repr=False, default_factory=BiotFrame)
+    target: BiotFrame = field(repr=False, default_factory=BiotFrame)
     turns: list[bool] = field(default_factory=lambda: [True, False])
     reduce: list[bool] = field(default_factory=lambda: [True, True])
 

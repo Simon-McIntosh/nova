@@ -19,7 +19,7 @@ from nova.utilities.pyplot import plt
 class FiducialData(Plotter):
     """Manage ccl fiducial data."""
 
-    fiducial: Fiducial = 'RE'
+    fiducial: Fiducial | str = 'RE'
     fill: bool = True
     sead: int = 2030
     rawdata: dict[str, pandas.DataFrame] = \

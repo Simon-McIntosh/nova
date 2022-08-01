@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 from functools import cached_property
 import inspect
-from typing import ClassVar
+from typing import ClassVar, Any
 
 from nova.database.netcdf import netCDF
 from nova.electromagnetic.biotdata import BiotData
@@ -22,7 +22,7 @@ class BiotFactory(FrameSet):
     """Expose biot methods as cached properties."""
 
     dfield: float = field(default=-1, repr=False)
-    biot_class: ClassVar[dict[str, BiotData]] = \
+    biot_class: ClassVar[dict[str, Any]] = \
         dict(point=BiotPoint, grid=BiotGrid,
              plasmaboundary=BiotPlasmaBoundary, plasmagrid=BiotPlasmaGrid,
              probe=BiotPoint, loop=BiotLoop, inductance=BiotInductance,

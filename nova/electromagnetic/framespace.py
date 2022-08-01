@@ -5,7 +5,6 @@ import numpy as np
 from nova.electromagnetic.framelink import FrameLink, LinkLocMixin, LinkIndexer
 from nova.electromagnetic.subspace import SubSpace
 from nova.electromagnetic.error import SpaceKeyError
-#from nova.electromagnetic.select import Select
 from nova.electromagnetic.geometry import PolyGeo, VtkGeo
 from nova.electromagnetic.polyplot import PolyPlot
 from nova.electromagnetic.vtkplot import VtkPlot

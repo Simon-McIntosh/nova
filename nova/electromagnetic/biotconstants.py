@@ -58,7 +58,7 @@ class BiotConstants:
     @cached_property
     def k2(self):
         """Return k2 coefficient."""
-        return 4*self.r*self.rs / self.a2
+        return self.unit_offset(4*self.r*self.rs / self.a2)
 
     @cached_property
     def ck2(self):
@@ -102,7 +102,8 @@ class BiotConstants:
 
     def Pi(self, p: int):
         """Return complete elliptc intergral of the 3rd kind."""
-        return da.map_blocks(self.ellippi, self.np2(p), self.k2)
+        return da.map_blocks(
+            self.ellippi, self.unit_offset(self.np2(p)), self.k2)
 
     @cached_property
     def U(self):
@@ -111,16 +112,23 @@ class BiotConstants:
                           3*self.rs**2 - 5*self.r**2) / (4*self.r)
 
     def zero_offset(self, array, atol=1e-16):
-        """Return array with values close to zero offset to 1e-16."""
+        """Return array with values close to zero offset to atol."""
         if (index := da.isclose(array, 0, atol=atol)).any():
             array[index] = atol
         return array
 
-    def phi(self, alpha):
+    def unit_offset(self, array, atol=1e-16):
+        #return array
+        """Return array with values close to one offset to 1-atol."""
+        if (index := da.isclose(array, 1, atol=atol)).any():
+            array[index] = 1-atol
+        return array
+
+    def phi(self, alpha, atol=1e-16):
         """Return sysrem invariant angle transformation."""
         phi = np.pi - 2*alpha
-        if np.isclose(phi, 0, atol=1e-16):
-            phi = 1e-16
+        if np.isclose(phi, 0, atol=atol):
+            phi = atol
         return phi
 
     def B2(self, alpha):
@@ -169,7 +177,7 @@ class BiotConstants:
         """Return Cphi intergration constant."""
         return self.Cphi_coef(alpha) - self.Cphi_coef(0)
 
-    def zeta(self, alpha, k=7):
+    def zeta(self, alpha, k=8):
         """Return zeta coefficient calculated using Romberg integration."""
         alpha, dalpha = da.linspace(0, alpha, 2**k + 1, retstep=True)
         beta1 = da.stack([self.beta1(_alpha) for _alpha in alpha])
@@ -177,5 +185,3 @@ class BiotConstants:
                                                 block_size_limit=1e8)
         return asinh_beta1.map_blocks(scipy.integrate.romb, dx=dalpha, axis=0,
                                       dtype=float, drop_axis=0)
-        #print(asinh_beta1.chunks)
-        #return scipy.integrate.romb(asinh_beta1, dx=dalpha, axis=0)

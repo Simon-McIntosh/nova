@@ -6,11 +6,12 @@ long_description = """ """
 extras_require = dict(
                       ansys=['ansys-dpf-core', 'ansys-dpf-post', 'openpyxl'],
                       cuda=['cupy-cuda115'],
-                      develop=['spyder', 'spyder-unittest', 'line_profiler', 'numdifftools', 'pytest-xdist'],
+                      develop=['spyder', 'spyder-unittest', 'line_profiler', 'pylsp-mypy', 
+                               'numdifftools', 'pytest-xdist'],
                       mesh=['gmsh', 'pygmsh', 'tetgen', 'trimesh'],
                       optimize=['nlopt', 'pygmo'],
                       plan=['python-dateutil'],
-                      test=['pytest', 'lizard', 'asv', 'virtualenv'],
+                      test=['pytest', 'mypy', 'lizard', 'asv', 'virtualenv'],
                       thermofluids=['ftputil', 'coolprop', 'tables', 'xlrd']
                       )
 

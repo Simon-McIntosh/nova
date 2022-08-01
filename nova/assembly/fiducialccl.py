@@ -41,7 +41,6 @@ class FiducialIDM(Fiducial):
 
     name: ClassVar[str] = ''
 
-
     def _load_deltas(self):
         for i in range(1, 20):
             index = f'{i:02d}'

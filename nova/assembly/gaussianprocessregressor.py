@@ -14,7 +14,8 @@ class GaussianProcessRegressor:
     """Fit cyclic 1D waveforms using a Gaussian Process Regressor."""
 
     x: InitVar[npt.ArrayLike]
-    period: list[float, float] = field(default_factory=lambda: [0., 1.])
+    variance: float = 1
+    period: list[float] = field(default_factory=lambda: [0., 1.])
     wrap: int = 0
     regressor: sklearn.gaussian_process.GaussianProcessRegressor = None
     data: xarray.Dataset = field(init=False)
@@ -25,7 +26,7 @@ class GaussianProcessRegressor:
         self.data = xarray.Dataset(coords=dict(x=x))
         self.build_regressor()
 
-    def build_regressor(self, noise_std=0.25):
+    def build_regressor(self):
         """Build Gaussian Process Regressor."""
         if self.regressor is None:
             ExpSineSquared = sklearn.gaussian_process.kernels.ExpSineSquared(
@@ -33,7 +34,7 @@ class GaussianProcessRegressor:
                 periodicity=1.0, periodicity_bounds='fixed')
             kernel = ExpSineSquared
             self.regressor = sklearn.gaussian_process.GaussianProcessRegressor(
-                kernel=kernel, alpha=noise_std**2)
+                kernel=kernel, alpha=self.variance)
 
     @staticmethod
     def to_numpy(array):
@@ -66,6 +67,10 @@ class GaussianProcessRegressor:
             x_mean = self.to_numpy(x_mean)
         y_mean, y_cov = self.regressor.predict(x_mean.reshape(-1, 1),
                                                return_cov=True)
+        try:
+            self.data = self.data.drop_vars(['x_mean', 'y_mean', 'y_std'])
+        except ValueError:
+            pass
         self.data['x_mean'] = x_mean
         self.data['y_mean'] = ('x_mean', y_mean)
         self.data['y_std'] = ('x_mean', np.sqrt(np.diag(y_cov)))

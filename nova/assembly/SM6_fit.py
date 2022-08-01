@@ -7,7 +7,9 @@ from scipy.optimize import minimize
 from scipy.spatial.transform import Rotation
 import xarray
 
+from nova.assembly.centerline import CenterLine
 from nova.assembly.fiducialdata import FiducialData
+from nova.assembly.gaussianprocessregressor import GaussianProcessRegressor
 from nova.utilities.pyplot import plt
 
 
@@ -15,31 +17,86 @@ from nova.utilities.pyplot import plt
 class SectorTransform:
     """Perform optimal sector transforms fiting fiducials to targets."""
 
+    infer: bool = True
+    variance: float = 1
+    gpr: GaussianProcessRegressor = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, repr=False,
                                  default_factory=xarray.Dataset)
     clock: Rotation = Rotation.from_euler('z', 10, degrees=True)
     anticlock: Rotation = Rotation.from_euler('z', -10, degrees=True)
 
     def __post_init__(self):
-        """Load sector data."""
+        """Load data."""
+        self.load_reference()
+        self.load_centerline()
+        self.load_gpr()
+        self.fit_reference()
+
+    def load_reference(self):
+        """Load reference sector data."""
         self.data['reference'] = self.load_sector(6)
         fiducial = FiducialData(fill=False).data.fiducial.drop(
-            labels=['target_index', 'target_length']).rename(
+            labels=['target_index']).rename(
                 dict(target='fiducial')).sel(
                     fiducial=self.data.reference.fiducial)
+        self.data.coords['target_length'] = \
+            'fiducial', fiducial.target_length.values
         self.data['target'] = xarray.zeros_like(self.data.reference)
         self.data['target'][0] = self.anticlock.apply(fiducial)
         self.data['target'][1] = self.clock.apply(fiducial)
-
-        self.data['reference'][0] = \
-            self.anticlock.apply(self.data['reference'][0])
-        self.data['reference'][1] = \
-            self.clock.apply(self.data['reference'][1])
         self.data['reference'] += self.data['target']
+        self.data = self.data.sortby('target_length')
+
+    def load_centerline(self):
+        """Load geodesic centerline."""
+        centerline = CenterLine()
+        self.data['arc_length'] = centerline.mesh['arc_length']
+        self.data['nominal_centerline'] = \
+            ('arc_length', 'space'), 1e3*centerline.mesh.points
+        self.data['centerline'] = xarray.concat([
+            self.data.nominal_centerline, self.data.nominal_centerline],
+            dim='coil')
+        self.data['centerline'][0] = \
+            self.anticlock.apply(self.data['centerline'][0])
+        self.data['centerline'][1] = \
+            self.clock.apply(self.data['centerline'][1])
+
+    def fit_reference(self):
+        """Evaluate gpr for reference fiducials."""
+        self.fit_gpr('reference', self.data.reference)
+
+    def fit_gpr(self, label: str, data_array: xarray.DataArray):
+        """Evaluate gpr."""
+        delta = data_array - self.data.target
+        target = f'{label}_target'
+        centerline = f'{label}_centerline'
+        self.data[target] = xarray.zeros_like(self.data.target)
+        self.data[centerline] = xarray.zeros_like(self.data.centerline)
+        for coil_index in range(self.data.dims['coil']):
+            for space_index in range(self.data.dims['space']):
+                self.gpr.fit(delta[coil_index, :, space_index])
+                self.data[target][coil_index, :, space_index] = \
+                    self.gpr.predict(self.data.target_length)
+                self.data[centerline][coil_index, :, space_index] = \
+                    self.gpr.predict(self.data.arc_length)
+        self.data[f'{label}_target'] += self.data.target
+        self.data[f'{label}_centerline'] += self.data.centerline
+
+    def load_gpr(self):
+        """Load gaussian process regressor."""
+        self.gpr = GaussianProcessRegressor(self.data.target_length,
+                                            self.variance)
+
+    @property
+    def points(self):
+        """Return reference points."""
+        if self.infer:  # use gpr inference
+            return self.data.reference_target.copy()
+        return self.data.reference.copy()
 
     def transform(self, x) -> xarray.DataArray:
         """Return transformed sector."""
-        points = self.data.reference.copy()
+        points = self.points
         points[:] += x[:3]
         if len(x) == 6:
             rotate = Rotation.from_euler('xyz', x[-3:], degrees=True)
@@ -47,38 +104,40 @@ class SectorTransform:
                 points[i] = rotate.apply(points[i])
         return points
 
-    def delta(self, x):
+    def delta(self, points):
         """Return coil-frame deltas."""
-        delta = self.transform(x) - self.data['target']
+        delta = points - self.data['target']
         delta[0] = self.clock.apply(delta[0])
         delta[1] = self.anticlock.apply(delta[1])
         return delta
 
+    @staticmethod
+    def error_vector(delta):
+        """Return error vector."""
+        error = np.zeros(3)
+        error[0] = np.max(abs(delta[:, [5, 3, 4], 0]))  # radial (A, B, H)
+        error[1] = np.max(abs(delta[..., 1]))  # toroidal (all)
+        error[2] = 0.5*np.max(abs(delta[:, [2, 1, -1, -2]]))  # (C, D, E, F)
+        return error
+
     def error(self, x):
         """Return fit error."""
-        delta = self.delta(x)
-        error = np.zeros(3)
-        error[0] = np.max(abs(delta[:, [0, 1, -1], 0]))  # radial fit (A, B, H)
-        error[1] = np.max(abs(delta[..., 1]))  # toroidal fit
-        error[2] = 0.5*np.max(abs(delta[:, 3:-1, 2]))  # vertical fit
-        return error
+        points = self.transform(x)
+        delta = self.delta(points)
+        return self.error_vector(delta)
 
     def max_error(self, x):
         """Return maximum absolute error."""
-        error = self.error(x)
-        return np.max(abs(error))
+        return np.max(self.error(x))
 
     def fit(self):
         """Perform sector fit."""
         xo = np.zeros(6)
         opp = minimize(self.max_error, xo, method='SLSQP')
-        delta = self.transform(opp.x) - self.data['target']
-        self.data['fit'] = xarray.zeros_like(self.data.reference)
-        self.data['fit'][0] = self.anticlock.apply(delta[0])
-        self.data['fit'][1] = self.clock.apply(delta[1])
-        self.data['fit'] += self.data['target']
+        self.data['fit'] = self.transform(opp.x)
         self.data['opp_x'] = 'tansform', opp.x
         self.data['error'] = 'space', self.error(opp.x)
+        self.fit_gpr('fit', self.data.fit)
 
     def load_sector(self, sector: int) -> xarray.DataArray:
         """Return sector data."""
@@ -109,56 +168,96 @@ class SectorTransform:
                                 fiducial=list('ABCDEFGH'),
                                 space=list('xyz')))
 
-    def plot(self, factor: float = 250):
-        """Plot fidicual to target fit."""
-        reference = self.data.reference - self.data.target
-        fit = self.data.fit - self.data.target
-        radius = np.linalg.norm(self.data.target[..., :2], axis=-1)
+    def to_cylindrical(self, data_array: xarray.DataArray) -> xarray.DataArray:
+        """Retun dataarray in cylindrical coordinates."""
+        cylindrical_data = data_array.copy().assign_coords(
+            dict(space=['r', 'phi', 'z']))
+        cylindrical_data[0] = self.clock.apply(data_array[0])
+        cylindrical_data[1] = self.anticlock.apply(data_array[1])
+        return cylindrical_data
 
-        toroidal = xarray.zeros_like(self.data.target[..., 1])
-        toroidal[0] = self.clock.apply(self.data.target[0])[:, 1]
-        toroidal[1] = self.anticlock.apply(self.data.target[1])[:, 1]
-        height = self.data.target[..., 2]
+    def plot_box(self, data_array: xarray.DataArray):
+        """Plot bounding box around target."""
 
+    def plot_target(self, axes, target, centerline):
+        """Plot fiducial targets."""
+        for i in range(2):
+            axes[0].plot(centerline[i, :, 0], centerline[i, :, 2],
+                         '--', color='gray')
+            axes[1].plot(centerline[i, :, 1], centerline[i, :, 2],
+                         '--', color='gray')
+            axes[0].plot(target[i, :, 0], target[i, :, 2], 'o', color='gray')
+            axes[1].plot(target[i, :, 1], target[i, :, 2], 'o', color='gray')
+
+    def plot_fiducial(self, axes, target, factor, delta, marker, color):
+        """Plot fiducial deltas."""
+        for i in range(2):
+            axes[0].scatter(target[i, :, 0] + factor*delta[i, :, 0],
+                            target[i, :, 2] + factor*delta[i, :, 2],
+                            marker=marker, color=color)
+            axes[1].scatter(target[i, :, 1] + factor*delta[i, :, 1],
+                            target[i, :, 2] + factor*delta[i, :, 2],
+                            marker=marker, color=color)
+
+    def plot_centerline(self, axes, target, factor, delta, color):
+        """Plot gpr centerline."""
+        for i in range(2):
+            axes[0].plot(target[i, :, 0] + factor*delta[i, :, 0],
+                         target[i, :, 2] + factor*delta[i, :, 2],
+                         color=color)
+            axes[1].plot(target[i, :, 1] + factor*delta[i, :, 1],
+                         target[i, :, 2] + factor*delta[i, :, 2],
+                         color=color)
+
+    def plot(self, factor: float = 500):
+        """Plot fidicual to target fit in cylindrical coordinates."""
+        target = self.to_cylindrical(self.data.target)
+        centerline = self.to_cylindrical(self.data.centerline)
+        reference = self.to_cylindrical(self.data.reference) - target
+        reference_centerline = \
+            self.to_cylindrical(self.data.reference_centerline) - centerline
+        fit = self.to_cylindrical(self.data.fit) - target
+        fit_centerline = \
+            self.to_cylindrical(self.data.fit_centerline) - centerline
         axes = plt.subplots(1, 2, sharey=True,
                             gridspec_kw=dict(width_ratios=[3, 1]))[1]
-        for i in range(2):
+        self.plot_target(axes, target, centerline)
+        self.plot_fiducial(axes, target, factor, reference, 'd', 'C0')
+        self.plot_centerline(axes, centerline, factor,
+                             reference_centerline, 'C0')
 
-            axes[0].plot(radius[i], height[i], 'o', color='gray')
-            axes[0].plot(radius[i] +
-                         factor*np.linalg.norm(reference[i, :, :2], axis=-1),
-                         height[i] + factor*reference[i, :, 2], 'C0d')
-            axes[0].plot(radius[i] +
-                         factor*np.linalg.norm(fit[i, :, :2], axis=-1),
-                         height[i] + factor*fit[i, :, 2], 'C1s')
+        self.plot_fiducial(axes, target, factor, fit, 's', 'C1')
+        self.plot_centerline(axes, centerline, factor, fit_centerline, 'C1')
 
-            axes[1].plot(toroidal[i], height[i], 'o', color='gray')
-            axes[1].plot(toroidal[i] +
-                         factor*Rotation.from_euler(
-                             'x', 10 - i*20, degrees=True).apply(
-                             reference[i])[:, 1],
-                         height[i] + factor*reference[i, :, 2], 'C0d')
-            axes[1].plot(toroidal[i] +
-                         factor*Rotation.from_euler(
-                             'x', 10 - i*20, degrees=True).apply(
-                                 fit[i])[:, 1],
-                         height[i] + factor*fit[i, :, 2], 'C1s')
-        for _radius, _height, label in zip(radius[0], height[0],
+        for _radius, _height, label in zip(target[0, :, 0], target[0, :, 2],
                                            self.data.fiducial.values):
             axes[0].text(_radius, _height, f'{label} ', ha='right',
                          color='gray')
         axes[0].set_xlabel('radius')
         axes[0].set_ylabel('height')
         axes[1].set_xlabel('toroidal')
-        minmax_error = np.max(abs(self.data.error.values))
 
+        reference_error = np.max(
+            self.error_vector(self.delta(self.data.reference)))
+        minmax_error = np.max(abs(self.data.error.values))
         legend = [Line2D([0], [0], markerfacecolor='C0', marker='d',
-                         color='w', label='lstsq 3.7mm'),
+                         color='w',
+                         label=f'reference {reference_error:1.1f}mm'),
                   Line2D([0], [0], markerfacecolor='C1', marker='s',
                          color='w',
-                         label=f'min max error {minmax_error:1.1f}mm')]
+                         label=f'max error {minmax_error:1.1f}mm')]
         axes[0].legend(handles=legend, bbox_to_anchor=[1, 1.1], ncol=2)
-
+        opp_x = self.data.opp_x.values
+        deg_to_mm = 10570*np.pi/180
+        axes[0].text(0.35, 0.5,
+                     f'dx: {opp_x[0]:1.2f}mm\n' +
+                     f'dy: {opp_x[1]:1.2f}mm\n' +
+                     f'dz: {opp_x[2]:1.2f}mm\n' +
+                     f'rx: {opp_x[3]*deg_to_mm:1.2f}mm\n' +
+                     f'ry: {opp_x[4]*deg_to_mm:1.2f}mm\n' +
+                     f'rz: {opp_x[5]*deg_to_mm:1.2f}',
+                     va='center', ha='left',
+                     transform=axes[0].transAxes)
         for i in range(2):
             axes[i].axis('equal')
             axes[i].set_xticks([])
@@ -168,6 +267,6 @@ class SectorTransform:
 
 if __name__ == '__main__':
 
-    transform = SectorTransform()
+    transform = SectorTransform(True)
     transform.fit()
     transform.plot()

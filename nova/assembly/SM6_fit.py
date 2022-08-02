@@ -4,8 +4,6 @@ from dataclasses import dataclass, field, InitVar
 from functools import cached_property
 from typing import ClassVar
 
-import matplotlib
-from matplotlib.lines import Line2D
 import numpy as np
 from scipy.optimize import minimize
 from scipy.spatial.transform import Rotation
@@ -34,7 +32,7 @@ class Plotter:
     fiducial_labels: bool = True
 
     color: ClassVar[dict[str, str]] = dict(
-        fit='C0', fit_target='C1', reference='C4', reference_target='C6')
+        fit='C1', fit_target='C0', reference='C4', reference_target='C6')
     marker: ClassVar[dict[str, str]] = dict(
         fit='X', fit_target='d', reference='X', reference_target='d')
 
@@ -42,7 +40,7 @@ class Plotter:
         """Transform data to cylindrical coordinates."""
         self.extract(data)
 
-    def __call__(self, label: str = 'target', stage: int = 3):
+    def __call__(self, label: str = 'target', stage: int = 2):
         """Plot fiducial and centerline fits."""
         if label == 'target':
             return self.target()
@@ -50,9 +48,7 @@ class Plotter:
             self.fiducial(label)
         if stage > 1:
             self.fiducial(f'{label}_target')
-        if stage > 2:
             self.centerline(label)
-
 
     def extract(self, data: xarray.Dataset):
         """Extract cartisean data and map to cylindrical coordinates."""
@@ -135,7 +131,7 @@ class Plotter:
 
     def centerline(self, label: str):
         """Plot gpr centerline."""
-        color = self.color[label]
+        color = self.color[f'{label}_target']
         for i in range(2):
             delta = self.delta(f'{label}_centerline')
             self.axes[0].plot(self.data.centerline[i, :, 0] + delta[i, :, 0],
@@ -145,55 +141,18 @@ class Plotter:
                               self.data.centerline[i, :, 2] + delta[i, :, 2],
                               color=color)
 
-    '''
-
-
-
-    self.plot_target(axes, target, centerline)
-
-    if mode in ['reference', 'both']:
-        self.plot_fiducial(axes, target, factor, reference, 'd', 'C0')
-        self.plot_centerline(axes, centerline, factor,
-                             reference_centerline, 'C0')
-    if mode in ['fit', 'both']:
-        self.plot_fiducial(axes, target, factor, fit, 's', 'C1')
-        self.plot_centerline(axes, centerline, factor,
-                             fit_centerline, 'C1')
-
-
-    reference_error = np.max(
-        self.error_vector(self.delta(self.data.reference)))
-    minmax_error = np.max(abs(self.data.error.values))
-    legend = [Line2D([0], [0], markerfacecolor='C0', marker='d',
-                     color='w',
-                     label=f'reference {reference_error:1.1f}mm'),
-              Line2D([0], [0], markerfacecolor='C1', marker='s',
-                     color='w',
-                     label=f'max error {minmax_error:1.1f}mm')]
-    axes[0].legend(handles=legend, bbox_to_anchor=[1, 1.1], ncol=2)
-    opp_x = self.data.opp_x.values
-    deg_to_mm = 10570*np.pi/180
-    axes[0].text(0.35, 0.5,
-                 f'dx: {opp_x[0]:1.2f}mm\n' +
-                 f'dy: {opp_x[1]:1.2f}mm\n' +
-                 f'dz: {opp_x[2]:1.2f}mm\n' +
-                 f'rx: {opp_x[3]*deg_to_mm:1.2f}mm\n' +
-                 f'ry: {opp_x[4]*deg_to_mm:1.2f}mm\n' +
-                 f'rz: {opp_x[5]*deg_to_mm:1.2f}',
-                 va='center', ha='left',
-                 transform=axes[0].transAxes)
-    '''
-
 
 @dataclass
 class SectorTransform:
     """Perform optimal sector transforms fiting fiducials to targets."""
 
+    sector: int = 6
     infer: bool = True
     variance: float = 1
     gpr: GaussianProcessRegressor = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, repr=False,
                                  default_factory=xarray.Dataset)
+    plotter: Plotter = field(init=False, repr=False)
     clock: Rotation = Transform.clock
     anticlock: Rotation = Transform.anticlock
 
@@ -203,10 +162,12 @@ class SectorTransform:
         self.load_centerline()
         self.load_gpr()
         self.fit_reference()
+        self.fit()
+        self.plotter = Plotter(self.data)
 
     def load_reference(self):
         """Load reference sector data."""
-        self.data['reference'] = self.load_sector(6)
+        self.data['reference'] = self.load_sector(self.sector)
         fiducial = FiducialData(fill=False).data.fiducial.drop(
             labels=['target_index']).rename(
                 dict(target='fiducial')).sel(
@@ -286,10 +247,17 @@ class SectorTransform:
     @staticmethod
     def error_vector(delta):
         """Return error vector."""
+        '''
         error = np.zeros(3)
         error[0] = np.max(abs(delta[:, [5, 3, 4], 0]))  # radial (A, B, H)
         error[1] = np.max(abs(delta[..., 1]))  # toroidal (all)
-        error[2] = 0.5*np.max(abs(delta[:, [2, 1, -1, -2]]))  # (C, D, E, F)
+        error[2] = 0.5*np.max(abs(delta[:, [2, 1, -1, -2], 2]))  # (C, D, E, F)
+        '''
+
+        error = np.zeros(3)
+        error[0] = np.mean(delta[:, [5, 3, 4], 0]**2)
+        error[1] = np.mean(delta[..., 1]**2)
+        error[2] = np.mean(delta[:, [2, 1, -1, -2], 2]**2)
         return error
 
     def error(self, x):
@@ -299,13 +267,17 @@ class SectorTransform:
         return self.error_vector(delta)
 
     def max_error(self, x):
-        """Return maximum absolute error."""
+        """Return maximum error."""
         return np.max(self.error(x))
+
+    def mean_error(self, x):
+        """Return mean error."""
+        return np.mean(self.error(x))
 
     def fit(self):
         """Perform sector fit."""
         xo = np.zeros(6)
-        opp = minimize(self.max_error, xo, method='SLSQP')
+        opp = minimize(self.mean_error, xo, method='SLSQP')
         self.data['fit'] = self.transform(opp.x)
         self.data['opp_x'] = 'tansform', opp.x
         self.data['error'] = 'space', self.error(opp.x)
@@ -315,6 +287,24 @@ class SectorTransform:
         """Return sector data."""
         match sector:
             case 6:
+                coils = [12, 13]
+                data = [[[0.27, -0.7, 2.04],
+                         [-1.43, -0.2, 0.34],
+                         [-2.02, 2.02, 1.46],
+                         [-3.33, 0.71, -1.15],
+                         [-4.64, 0.73, 0.97],
+                         [-0.99, 0.87, 0.5],
+                         [-5.02, -0.87, -0.01],
+                         [-0.22, 0.01, 0.43]],
+                        [[0.7, 1.98, -0.35],
+                         [-1.33, 1., -1.29],
+                         [-4.5, 2.96, 1.57],
+                         [-2.28, 2.69, -1.85],
+                         [-5.54, 0.87, -1.63],
+                         [1.44, 1.54, -0.81],
+                         [-4.04, 2.5, -2.2],
+                         [0.33, -0.15, -1.32]]]
+            case 26:  # inital allignment data
                 coils = [12, 13]
                 data = [[[0.4, -0.6, 2.1],
                          [-1.4, -0.5, 0.3],
@@ -340,16 +330,49 @@ class SectorTransform:
                                 fiducial=list('ABCDEFGH'),
                                 space=list('xyz')))
 
-    def plot(self, mode: str = 'both'):
-        """plot ."""
-        plot = Plotter(self.data)
-        plot()
-        plot('fit')
-        plot('reference')
+    def reference_error(self, stage: int):
+        """Return estimate for maximum reference error."""
+        if stage == 2:
+            points = self.data.reference_target
+        else:
+            points = self.data.reference
+        return np.max(self.error_vector(self.delta(points)))
+
+    def plot(self, label: str):
+        """Plot fits."""
+        self.plotter('target')
+        if label != 'target':
+            stage = 1 + int(self.infer)
+            self.plotter(label, stage)
+            match label:
+                case 'reference':
+                    error = self.reference_error(stage)
+                case 'fit':
+                    error = np.max(self.data.error.values)
+            self.plotter.axes[0].set_title(
+                f'{label} {error:1.2f}mm (infer: {self.infer})')
+            #if label == 'fit' and stage == 2:
+            self.text_transform(self.plotter.axes[0])
+        plt.savefig('fit.png')
+
+    def text_transform(self, axes):
+        """Display text transform."""
+        opp_x = self.data.opp_x.values
+        deg_to_mm = 10570*np.pi/180
+        axes.text(0.3, 0.5,
+                  f'dx: {opp_x[0]:1.2f}mm\n' +
+                  f'dy: {opp_x[1]:1.2f}mm\n' +
+                  f'dz: {opp_x[2]:1.2f}mm\n' +
+                  f'rx: {opp_x[3]*deg_to_mm:1.2f}mm\n' +
+                  f'ry: {opp_x[4]*deg_to_mm:1.2f}mm\n' +
+                  f'rz: {opp_x[5]*deg_to_mm:1.2f}',
+                  va='center', ha='left',
+                  transform=axes.transAxes)
 
 
 if __name__ == '__main__':
 
-    transform = SectorTransform(True)
-    transform.fit()
-    transform.plot()
+    transform = SectorTransform(6, True)
+    #transform.plot('target')
+    #transform.plot('reference')
+    transform.plot('fit')

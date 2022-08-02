@@ -1,6 +1,10 @@
 """Perform fit for SM6 to fiducial mesurments."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
+from functools import cached_property
+from typing import ClassVar
+
+import matplotlib
 from matplotlib.lines import Line2D
 import numpy as np
 from scipy.optimize import minimize
@@ -14,6 +18,174 @@ from nova.utilities.pyplot import plt
 
 
 @dataclass
+class Transform:
+    """Provide clocking transform."""
+
+    clock: Rotation = Rotation.from_euler('z', 10, degrees=True)
+    anticlock: Rotation = Rotation.from_euler('z', -10, degrees=True)
+
+
+@dataclass
+class Plotter:
+    """Plot fidicual to target fit in cylindrical coordinates."""
+
+    data: InitVar[xarray.Dataset]
+    factor: float = 500
+    fiducial_labels: bool = True
+
+    color: ClassVar[dict[str, str]] = dict(
+        fit='C0', fit_target='C1', reference='C4', reference_target='C6')
+    marker: ClassVar[dict[str, str]] = dict(
+        fit='X', fit_target='d', reference='X', reference_target='d')
+
+    def __post_init__(self, data: xarray.Dataset):
+        """Transform data to cylindrical coordinates."""
+        self.extract(data)
+
+    def __call__(self, label: str = 'target', stage: int = 3):
+        """Plot fiducial and centerline fits."""
+        if label == 'target':
+            return self.target()
+        if stage > 0:
+            self.fiducial(label)
+        if stage > 1:
+            self.fiducial(f'{label}_target')
+        if stage > 2:
+            self.centerline(label)
+
+
+    def extract(self, data: xarray.Dataset):
+        """Extract cartisean data and map to cylindrical coordinates."""
+        self.data = xarray.Dataset()
+
+        self.data['target'] = self.to_cylindrical(data.target)
+        self.data['centerline'] = self.to_cylindrical(data.centerline)
+        for attr in ['reference', 'fit']:
+            self.data[attr] = self.to_cylindrical(data[attr]) - \
+                    self.data.target
+            for norm in ['target', 'centerline']:
+                self.data[f'{attr}_{norm}'] = \
+                    self.to_cylindrical(data[f'{attr}_{norm}']) - \
+                    self.data[norm]
+
+    @cached_property
+    def axes(self):
+        """Return axes instance."""
+        axes = plt.subplots(1, 2, sharey=True,
+                            gridspec_kw=dict(width_ratios=[3, 1]))[1]
+        axes[0].set_xlabel('radius')
+        axes[0].set_ylabel('height')
+        axes[1].set_xlabel('toroidal')
+        for i in range(2):
+            axes[i].axis('equal')
+            axes[i].set_xticks([])
+            axes[i].set_yticks([])
+            plt.despine()
+        return axes
+
+    def to_cylindrical(self, data_array: xarray.DataArray) -> xarray.DataArray:
+        """Retun dataarray in cylindrical coordinates."""
+        cylindrical_data = data_array.copy().assign_coords(
+            dict(space=['r', 'phi', 'z']))
+        cylindrical_data[0] = Transform.clock.apply(data_array[0])
+        cylindrical_data[1] = Transform.anticlock.apply(data_array[1])
+        return cylindrical_data
+
+    def plot_box(self, data_array: xarray.DataArray):
+        """Plot bounding box around target."""
+
+    def target(self):
+        """Plot fiducial targets."""
+        for i in range(2):
+            self.axes[0].plot(self.data.centerline[i, :, 0],
+                              self.data.centerline[i, :, 2],
+                              '--', color='gray')
+            self.axes[1].plot(self.data.centerline[i, :, 1],
+                              self.data.centerline[i, :, 2],
+                              '--', color='gray')
+            self.axes[0].plot(self.data.target[i, :, 0],
+                              self.data.target[i, :, 2], 'o', color='gray')
+            self.axes[1].plot(self.data.target[i, :, 1],
+                              self.data.target[i, :, 2], 'o', color='gray')
+        if self.fiducial_labels:
+            for radius, height, label in zip(
+                    self.data.target[0, :, 0],
+                    self.data.target[0, :, 2],
+                    self.data.fiducial.values):
+                self.axes[0].text(radius, height, f'{label} ',
+                                  ha='right', va='center', color='gray',
+                                  fontsize='x-large', zorder=-10)
+
+    def delta(self, label: str):
+        """Return displacment delta multiplied by scale factor."""
+        return self.factor * self.data[f'{label}']
+
+    def fiducial(self, label: str):
+        """Plot fiducial deltas."""
+        color = self.color.get(label, self.color[label.split('_')[0]])
+        marker = self.marker[label]
+        for i in range(2):
+            delta = self.delta(label)
+            self.axes[0].plot(self.data.target[i, :, 0] + delta[i, :, 0],
+                              self.data.target[i, :, 2] + delta[i, :, 2],
+                              color+marker)
+            self.axes[1].plot(self.data.target[i, :, 1] + delta[i, :, 1],
+                              self.data.target[i, :, 2] + delta[i, :, 2],
+                              color+marker)
+
+    def centerline(self, label: str):
+        """Plot gpr centerline."""
+        color = self.color[label]
+        for i in range(2):
+            delta = self.delta(f'{label}_centerline')
+            self.axes[0].plot(self.data.centerline[i, :, 0] + delta[i, :, 0],
+                              self.data.centerline[i, :, 2] + delta[i, :, 2],
+                              color=color)
+            self.axes[1].plot(self.data.centerline[i, :, 1] + delta[i, :, 1],
+                              self.data.centerline[i, :, 2] + delta[i, :, 2],
+                              color=color)
+
+    '''
+
+
+
+    self.plot_target(axes, target, centerline)
+
+    if mode in ['reference', 'both']:
+        self.plot_fiducial(axes, target, factor, reference, 'd', 'C0')
+        self.plot_centerline(axes, centerline, factor,
+                             reference_centerline, 'C0')
+    if mode in ['fit', 'both']:
+        self.plot_fiducial(axes, target, factor, fit, 's', 'C1')
+        self.plot_centerline(axes, centerline, factor,
+                             fit_centerline, 'C1')
+
+
+    reference_error = np.max(
+        self.error_vector(self.delta(self.data.reference)))
+    minmax_error = np.max(abs(self.data.error.values))
+    legend = [Line2D([0], [0], markerfacecolor='C0', marker='d',
+                     color='w',
+                     label=f'reference {reference_error:1.1f}mm'),
+              Line2D([0], [0], markerfacecolor='C1', marker='s',
+                     color='w',
+                     label=f'max error {minmax_error:1.1f}mm')]
+    axes[0].legend(handles=legend, bbox_to_anchor=[1, 1.1], ncol=2)
+    opp_x = self.data.opp_x.values
+    deg_to_mm = 10570*np.pi/180
+    axes[0].text(0.35, 0.5,
+                 f'dx: {opp_x[0]:1.2f}mm\n' +
+                 f'dy: {opp_x[1]:1.2f}mm\n' +
+                 f'dz: {opp_x[2]:1.2f}mm\n' +
+                 f'rx: {opp_x[3]*deg_to_mm:1.2f}mm\n' +
+                 f'ry: {opp_x[4]*deg_to_mm:1.2f}mm\n' +
+                 f'rz: {opp_x[5]*deg_to_mm:1.2f}',
+                 va='center', ha='left',
+                 transform=axes[0].transAxes)
+    '''
+
+
+@dataclass
 class SectorTransform:
     """Perform optimal sector transforms fiting fiducials to targets."""
 
@@ -22,8 +194,8 @@ class SectorTransform:
     gpr: GaussianProcessRegressor = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, repr=False,
                                  default_factory=xarray.Dataset)
-    clock: Rotation = Rotation.from_euler('z', 10, degrees=True)
-    anticlock: Rotation = Rotation.from_euler('z', -10, degrees=True)
+    clock: Rotation = Transform.clock
+    anticlock: Rotation = Transform.anticlock
 
     def __post_init__(self):
         """Load data."""
@@ -168,101 +340,12 @@ class SectorTransform:
                                 fiducial=list('ABCDEFGH'),
                                 space=list('xyz')))
 
-    def to_cylindrical(self, data_array: xarray.DataArray) -> xarray.DataArray:
-        """Retun dataarray in cylindrical coordinates."""
-        cylindrical_data = data_array.copy().assign_coords(
-            dict(space=['r', 'phi', 'z']))
-        cylindrical_data[0] = self.clock.apply(data_array[0])
-        cylindrical_data[1] = self.anticlock.apply(data_array[1])
-        return cylindrical_data
-
-    def plot_box(self, data_array: xarray.DataArray):
-        """Plot bounding box around target."""
-
-    def plot_target(self, axes, target, centerline):
-        """Plot fiducial targets."""
-        for i in range(2):
-            axes[0].plot(centerline[i, :, 0], centerline[i, :, 2],
-                         '--', color='gray')
-            axes[1].plot(centerline[i, :, 1], centerline[i, :, 2],
-                         '--', color='gray')
-            axes[0].plot(target[i, :, 0], target[i, :, 2], 'o', color='gray')
-            axes[1].plot(target[i, :, 1], target[i, :, 2], 'o', color='gray')
-
-    def plot_fiducial(self, axes, target, factor, delta, marker, color):
-        """Plot fiducial deltas."""
-        for i in range(2):
-            axes[0].scatter(target[i, :, 0] + factor*delta[i, :, 0],
-                            target[i, :, 2] + factor*delta[i, :, 2],
-                            marker=marker, color=color)
-            axes[1].scatter(target[i, :, 1] + factor*delta[i, :, 1],
-                            target[i, :, 2] + factor*delta[i, :, 2],
-                            marker=marker, color=color)
-
-    def plot_centerline(self, axes, target, factor, delta, color):
-        """Plot gpr centerline."""
-        for i in range(2):
-            axes[0].plot(target[i, :, 0] + factor*delta[i, :, 0],
-                         target[i, :, 2] + factor*delta[i, :, 2],
-                         color=color)
-            axes[1].plot(target[i, :, 1] + factor*delta[i, :, 1],
-                         target[i, :, 2] + factor*delta[i, :, 2],
-                         color=color)
-
-    def plot(self, factor: float = 500):
-        """Plot fidicual to target fit in cylindrical coordinates."""
-        target = self.to_cylindrical(self.data.target)
-        centerline = self.to_cylindrical(self.data.centerline)
-        reference = self.to_cylindrical(self.data.reference) - target
-        reference_centerline = \
-            self.to_cylindrical(self.data.reference_centerline) - centerline
-        fit = self.to_cylindrical(self.data.fit) - target
-        fit_centerline = \
-            self.to_cylindrical(self.data.fit_centerline) - centerline
-        axes = plt.subplots(1, 2, sharey=True,
-                            gridspec_kw=dict(width_ratios=[3, 1]))[1]
-        self.plot_target(axes, target, centerline)
-        self.plot_fiducial(axes, target, factor, reference, 'd', 'C0')
-        self.plot_centerline(axes, centerline, factor,
-                             reference_centerline, 'C0')
-
-        self.plot_fiducial(axes, target, factor, fit, 's', 'C1')
-        self.plot_centerline(axes, centerline, factor, fit_centerline, 'C1')
-
-        for _radius, _height, label in zip(target[0, :, 0], target[0, :, 2],
-                                           self.data.fiducial.values):
-            axes[0].text(_radius, _height, f'{label} ', ha='right',
-                         color='gray')
-        axes[0].set_xlabel('radius')
-        axes[0].set_ylabel('height')
-        axes[1].set_xlabel('toroidal')
-
-        reference_error = np.max(
-            self.error_vector(self.delta(self.data.reference)))
-        minmax_error = np.max(abs(self.data.error.values))
-        legend = [Line2D([0], [0], markerfacecolor='C0', marker='d',
-                         color='w',
-                         label=f'reference {reference_error:1.1f}mm'),
-                  Line2D([0], [0], markerfacecolor='C1', marker='s',
-                         color='w',
-                         label=f'max error {minmax_error:1.1f}mm')]
-        axes[0].legend(handles=legend, bbox_to_anchor=[1, 1.1], ncol=2)
-        opp_x = self.data.opp_x.values
-        deg_to_mm = 10570*np.pi/180
-        axes[0].text(0.35, 0.5,
-                     f'dx: {opp_x[0]:1.2f}mm\n' +
-                     f'dy: {opp_x[1]:1.2f}mm\n' +
-                     f'dz: {opp_x[2]:1.2f}mm\n' +
-                     f'rx: {opp_x[3]*deg_to_mm:1.2f}mm\n' +
-                     f'ry: {opp_x[4]*deg_to_mm:1.2f}mm\n' +
-                     f'rz: {opp_x[5]*deg_to_mm:1.2f}',
-                     va='center', ha='left',
-                     transform=axes[0].transAxes)
-        for i in range(2):
-            axes[i].axis('equal')
-            axes[i].set_xticks([])
-            axes[i].set_yticks([])
-            plt.despine()
+    def plot(self, mode: str = 'both'):
+        """plot ."""
+        plot = Plotter(self.data)
+        plot()
+        plot('fit')
+        plot('reference')
 
 
 if __name__ == '__main__':

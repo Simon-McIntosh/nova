@@ -3,6 +3,7 @@
 from dataclasses import dataclass, field, InitVar
 from functools import cached_property
 from typing import ClassVar
+import warnings
 
 import numpy as np
 from scipy.optimize import minimize
@@ -148,13 +149,12 @@ class SectorTransform:
 
     sector: int = 6
     infer: bool = True
+    method: str = 'rms'
     variance: float = 1
+    weights: list[float] = field(default_factory=lambda: [1, 1, 0.5])
     gpr: GaussianProcessRegressor = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, repr=False,
                                  default_factory=xarray.Dataset)
-    plotter: Plotter = field(init=False, repr=False)
-    clock: Rotation = Transform.clock
-    anticlock: Rotation = Transform.anticlock
 
     def __post_init__(self):
         """Load data."""
@@ -163,7 +163,6 @@ class SectorTransform:
         self.load_gpr()
         self.fit_reference()
         self.fit()
-        self.plotter = Plotter(self.data)
 
     def load_reference(self):
         """Load reference sector data."""
@@ -175,8 +174,14 @@ class SectorTransform:
         self.data.coords['target_length'] = \
             'fiducial', fiducial.target_length.values
         self.data['target'] = xarray.zeros_like(self.data.reference)
-        self.data['target'][0] = self.anticlock.apply(fiducial)
-        self.data['target'][1] = self.clock.apply(fiducial)
+        self.data['target'][0] = Transform.anticlock.apply(fiducial)
+        self.data['target'][1] = Transform.clock.apply(fiducial)
+        '''
+        self.data['reference'][0] = \
+            Transform.anticlock.apply(self.data['reference'][0])
+        self.data['reference'][1] = \
+            Transform.clock.apply(self.data['reference'][1])
+        '''
         self.data['reference'] += self.data['target']
         self.data = self.data.sortby('target_length')
 
@@ -190,15 +195,15 @@ class SectorTransform:
             self.data.nominal_centerline, self.data.nominal_centerline],
             dim='coil')
         self.data['centerline'][0] = \
-            self.anticlock.apply(self.data['centerline'][0])
+            Transform.anticlock.apply(self.data['centerline'][0])
         self.data['centerline'][1] = \
-            self.clock.apply(self.data['centerline'][1])
+            Transform.clock.apply(self.data['centerline'][1])
 
     def fit_reference(self):
         """Evaluate gpr for reference fiducials."""
-        self.fit_gpr('reference', self.data.reference)
+        self.evaluate_gpr('reference', self.data.reference)
 
-    def fit_gpr(self, label: str, data_array: xarray.DataArray):
+    def evaluate_gpr(self, label: str, data_array: xarray.DataArray):
         """Evaluate gpr."""
         delta = data_array - self.data.target
         target = f'{label}_target'
@@ -227,9 +232,10 @@ class SectorTransform:
             return self.data.reference_target.copy()
         return self.data.reference.copy()
 
-    def transform(self, x) -> xarray.DataArray:
+    def transform(self, x, points=None) -> xarray.DataArray:
         """Return transformed sector."""
-        points = self.points
+        if points is None:
+            points = self.points
         points[:] += x[:3]
         if len(x) == 6:
             rotate = Rotation.from_euler('xyz', x[-3:], degrees=True)
@@ -240,48 +246,65 @@ class SectorTransform:
     def delta(self, points):
         """Return coil-frame deltas."""
         delta = points - self.data['target']
-        delta[0] = self.clock.apply(delta[0])
-        delta[1] = self.anticlock.apply(delta[1])
+        delta[0] = Transform.clock.apply(delta[0])
+        delta[1] = Transform.anticlock.apply(delta[1])
         return delta
 
     @staticmethod
-    def error_vector(delta):
+    def error_vector(delta, method='rms'):
         """Return error vector."""
-        '''
         error = np.zeros(3)
+        if method == 'rms':
+            error[0] = np.mean(delta[:, [5, 3, 4], 0]**2)
+            error[1] = np.mean(delta[..., 1]**2)
+            error[2] = np.mean(delta[:, [2, 1, -1, -2], 2]**2)
+            return error
         error[0] = np.max(abs(delta[:, [5, 3, 4], 0]))  # radial (A, B, H)
         error[1] = np.max(abs(delta[..., 1]))  # toroidal (all)
-        error[2] = 0.5*np.max(abs(delta[:, [2, 1, -1, -2], 2]))  # (C, D, E, F)
-        '''
-
-        error = np.zeros(3)
-        error[0] = np.mean(delta[:, [5, 3, 4], 0]**2)
-        error[1] = np.mean(delta[..., 1]**2)
-        error[2] = np.mean(delta[:, [2, 1, -1, -2], 2]**2)
+        error[2] = np.max(abs(delta[:, [2, 1, -1, -2], 2]))  # (C, D, E, F)
         return error
 
-    def error(self, x):
-        """Return fit error."""
-        points = self.transform(x)
+    def transform_error(self, x, points=None, method=None):
+        """Return transform error vector."""
+        if method is None:
+            method = self.method
+        points = self.transform(x, points)
+        return self.point_error(points, method)
+
+    def weighted_transform_error(self, x, points=None, method=None):
+        """Return weighted transform error vector."""
+        return self.transform_error(x, points, method='max') * self.weights
+
+    def point_error(self, points, method=None):
+        """Return error vector."""
+        if method is None:
+            method = self.method
         delta = self.delta(points)
-        return self.error_vector(delta)
+        return self.error_vector(delta, method)
 
-    def max_error(self, x):
+    def max_transform_error(self, x, points=None):
         """Return maximum error."""
-        return np.max(self.error(x))
+        return np.max(self.weighted_transform_error(x, points, method='max'))
 
-    def mean_error(self, x):
+    def rms_transform_error(self, x, points=None):
         """Return mean error."""
-        return np.mean(self.error(x))
+        return np.sqrt(np.mean(
+            self.weighted_transform_error(x, points, method='rms')))
+
+    def scalar_error(self, x):
+        """Return scalar mesure for fit error."""
+        return getattr(self, f'{self.method}_transform_error')(x)
 
     def fit(self):
         """Perform sector fit."""
         xo = np.zeros(6)
-        opp = minimize(self.mean_error, xo, method='SLSQP')
+        opp = minimize(self.scalar_error, xo, method='SLSQP')
+        if not opp.success:
+            warnings.warn('optimization failed')
         self.data['fit'] = self.transform(opp.x)
-        self.data['opp_x'] = 'tansform', opp.x
-        self.data['error'] = 'space', self.error(opp.x)
-        self.fit_gpr('fit', self.data.fit)
+        self.data['opp_x'] = 'transform', opp.x
+        self.data['error'] = 'space', self.transform_error(opp.x)
+        self.evaluate_gpr('fit', self.data.fit)
 
     def load_sector(self, sector: int) -> xarray.DataArray:
         """Return sector data."""
@@ -330,30 +353,16 @@ class SectorTransform:
                                 fiducial=list('ABCDEFGH'),
                                 space=list('xyz')))
 
-    def reference_error(self, stage: int):
-        """Return estimate for maximum reference error."""
-        if stage == 2:
-            points = self.data.reference_target
-        else:
-            points = self.data.reference
-        return np.max(self.error_vector(self.delta(points)))
-
     def plot(self, label: str):
         """Plot fits."""
-        self.plotter('target')
+        plotter = Plotter(self.data)
+        plotter('target')
         if label != 'target':
             stage = 1 + int(self.infer)
-            self.plotter(label, stage)
-            match label:
-                case 'reference':
-                    error = self.reference_error(stage)
-                case 'fit':
-                    error = np.max(self.data.error.values)
-            self.plotter.axes[0].set_title(
-                f'{label} {error:1.2f}mm (infer: {self.infer})')
-            #if label == 'fit' and stage == 2:
-            self.text_transform(self.plotter.axes[0])
-        plt.savefig('fit.png')
+            plotter(label, stage)
+            plotter.axes[0].set_title(label)
+            self.text_fit(plotter.axes[0], label)
+        # plt.savefig('fit.png')
 
     def text_transform(self, axes):
         """Display text transform."""
@@ -369,10 +378,34 @@ class SectorTransform:
                   va='center', ha='left',
                   transform=axes.transAxes)
 
+    def fit_error(self, method: str):
+        """Return fit error vector."""
+        return self.transform_error(self.data.opp_x.values,
+                                    self.data.reference.copy(), method)
+
+    def reference_error(self, method: str):
+        """Return reference error vector."""
+        return self.point_error(self.data.reference, method)
+
+    def text_fit(self, axes, label: str):
+        """Display text transform."""
+        error_vector = getattr(self, f'{label}_error')
+        error = dict(rms=np.sqrt(error_vector('rms')),
+                     max=error_vector('max'))
+        text = ''
+        for i, coordinate in enumerate(['radial: A,B,H', 'toroidal: all',
+                                        'vertical: C,D,E,F']):
+            text += '\n' + coordinate + '\n'
+            for method in ['rms', 'max']:
+                text += f'    {method}: {error[method][i]:1.2f}\n'
+        axes.text(0.3, 0.5, text,
+                  va='center', ha='left',
+                  transform=axes.transAxes, fontsize='xx-small')
+
 
 if __name__ == '__main__':
 
     transform = SectorTransform(6, True)
     #transform.plot('target')
-    #transform.plot('reference')
+    transform.plot('reference')
     transform.plot('fit')

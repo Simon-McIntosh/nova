@@ -255,9 +255,9 @@ class SectorTransform:
         '''
 
         error = np.zeros(3)
-        error[0] = np.mean(delta[:, [5, 3, 4], 0]**2)
-        error[1] = np.mean(delta[..., 1]**2)
-        error[2] = np.mean(delta[:, [2, 1, -1, -2], 2]**2)
+        error[0] = np.mean(delta[:, [5, 3, 4], 0]**2)  # radial
+        error[1] = np.mean(delta[..., 1]**2)  # toroidal
+        error[2] = 0.5*np.mean(delta[:, [2, 1, -1, -2], 2]**2)  # vertical
         return error
 
     def error(self, x):

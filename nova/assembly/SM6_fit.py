@@ -171,11 +171,14 @@ class SectorTransform:
             labels=['target_index']).rename(
                 dict(target='fiducial')).sel(
                     fiducial=self.data.reference.fiducial)
+
         self.data.coords['target_length'] = \
             'fiducial', fiducial.target_length.values
         self.data['target'] = xarray.zeros_like(self.data.reference)
         self.data['target'][0] = Transform.anticlock.apply(fiducial)
         self.data['target'][1] = Transform.clock.apply(fiducial)
+
+        print(self.data.target)
         '''
         self.data['reference'][0] = \
             Transform.anticlock.apply(self.data['reference'][0])

@@ -264,7 +264,7 @@ class SectorTransform:
             return error
         error[0] = np.max(abs(delta[:, [5, 3, 4], 0]))  # radial (A, B, H)
         error[1] = np.max(abs(delta[..., 1]))  # toroidal (all)
-        error[2] = np.max(abs(delta[:, [2, 1, -1, -2], 2]))  # (C, D, E, F)
+        error[2] = 0.5*np.max(abs(delta[:, [2, 1, -1, -2], 2]))  # (C, D, E, F)
         return error
 
     def transform_error(self, x, points=None, method=None):

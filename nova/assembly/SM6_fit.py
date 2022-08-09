@@ -13,15 +13,9 @@ import xarray
 from nova.assembly.centerline import CenterLine
 from nova.assembly.fiducialdata import FiducialData
 from nova.assembly.gaussianprocessregressor import GaussianProcessRegressor
+from nova.assembly.spacialanalyzer import SpacialAnalyzer
+from nova.assembly.transform import Rotate
 from nova.utilities.pyplot import plt
-
-
-@dataclass
-class Transform:
-    """Provide clocking transform."""
-
-    clock: Rotation = Rotation.from_euler('z', 10, degrees=True)
-    anticlock: Rotation = Rotation.from_euler('z', -10, degrees=True)
 
 
 @dataclass
@@ -31,6 +25,7 @@ class Plotter:
     data: InitVar[xarray.Dataset]
     factor: float = 500
     fiducial_labels: bool = True
+    rotate: Rotate = field(init=False, default_factory=Rotate)
 
     color: ClassVar[dict[str, str]] = dict(
         fit='C1', fit_target='C0', reference='C4', reference_target='C6')
@@ -55,15 +50,17 @@ class Plotter:
         """Extract cartisean data and map to cylindrical coordinates."""
         self.data = xarray.Dataset()
 
-        self.data['target'] = self.to_cylindrical(data.target)
-        self.data['centerline'] = self.to_cylindrical(data.centerline)
+        self.data['target'] = self.rotate.to_cylindrical(data.target)
+        self.data['centerline'] = self.rotate.to_cylindrical(data.centerline)
         for attr in ['reference', 'fit']:
-            self.data[attr] = self.to_cylindrical(data[attr]) - \
+            self.data[attr] = self.rotate.to_cylindrical(data[attr]) - \
                     self.data.target
             for norm in ['target', 'centerline']:
                 self.data[f'{attr}_{norm}'] = \
-                    self.to_cylindrical(data[f'{attr}_{norm}']) - \
+                    self.rotate.to_cylindrical(data[f'{attr}_{norm}']) - \
                     self.data[norm]
+        self.data.target[..., 1] = 0
+        self.data.centerline[..., 1] = 0
 
     @cached_property
     def axes(self):
@@ -79,14 +76,6 @@ class Plotter:
             axes[i].set_yticks([])
             plt.despine()
         return axes
-
-    def to_cylindrical(self, data_array: xarray.DataArray) -> xarray.DataArray:
-        """Retun dataarray in cylindrical coordinates."""
-        cylindrical_data = data_array.copy().assign_coords(
-            dict(space=['r', 'phi', 'z']))
-        cylindrical_data[0] = Transform.clock.apply(data_array[0])
-        cylindrical_data[1] = Transform.anticlock.apply(data_array[1])
-        return cylindrical_data
 
     def plot_box(self, data_array: xarray.DataArray):
         """Plot bounding box around target."""
@@ -150,14 +139,19 @@ class SectorTransform:
     sector: int = 6
     infer: bool = True
     method: str = 'rms'
-    variance: float = 1
-    weights: list[float] = field(default_factory=lambda: [1, 1, 0.5])
+    files: dict[str, str] = field(default_factory=dict)
     gpr: GaussianProcessRegressor = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, repr=False,
                                  default_factory=xarray.Dataset)
 
+    variance: ClassVar[float] = 1
+    weights: ClassVar[list[float]] = [1, 1, 0.5]
+
     def __post_init__(self):
         """Load data."""
+        self.rotate = Rotate()
+        self.spacial_analyzer = SpacialAnalyzer(
+            sector=self.sector, files=self.files)
         self.load_reference()
         self.load_centerline()
         self.load_gpr()
@@ -166,26 +160,15 @@ class SectorTransform:
 
     def load_reference(self):
         """Load reference sector data."""
-        self.data['reference'] = self.load_sector(self.sector)
+        self.data['reference'] = self.spacial_analyzer.reference_ccl
         fiducial = FiducialData(fill=False).data.fiducial.drop(
             labels=['target_index']).rename(
                 dict(target='fiducial')).sel(
                     fiducial=self.data.reference.fiducial)
-
-        self.data.coords['target_length'] = \
-            'fiducial', fiducial.target_length.values
-        self.data['target'] = xarray.zeros_like(self.data.reference)
-        self.data['target'][0] = Transform.anticlock.apply(fiducial)
-        self.data['target'][1] = Transform.clock.apply(fiducial)
-
-        print(self.data.target)
-        '''
-        self.data['reference'][0] = \
-            Transform.anticlock.apply(self.data['reference'][0])
-        self.data['reference'][1] = \
-            Transform.clock.apply(self.data['reference'][1])
-        '''
-        self.data['reference'] += self.data['target']
+        self.data['target_length'] = fiducial.target_length
+        self.data['target'] = self.spacial_analyzer.nominal_ccl
+        self.data['target_cylindrical'] = \
+            self.rotate.to_cylindrical(self.data.target)
         self.data = self.data.sortby('target_length')
 
     def load_centerline(self):
@@ -198,9 +181,9 @@ class SectorTransform:
             self.data.nominal_centerline, self.data.nominal_centerline],
             dim='coil')
         self.data['centerline'][0] = \
-            Transform.anticlock.apply(self.data['centerline'][0])
+            self.rotate.anticlock(self.data['centerline'][0])
         self.data['centerline'][1] = \
-            Transform.clock.apply(self.data['centerline'][1])
+            self.rotate.clock(self.data['centerline'][1])
 
     def fit_reference(self):
         """Evaluate gpr for reference fiducials."""
@@ -248,10 +231,8 @@ class SectorTransform:
 
     def delta(self, points):
         """Return coil-frame deltas."""
-        delta = points - self.data['target']
-        delta[0] = Transform.clock.apply(delta[0])
-        delta[1] = Transform.anticlock.apply(delta[1])
-        return delta
+        return self.rotate.to_cylindrical(points) - \
+            self.data.target_cylindrical
 
     @staticmethod
     def error_vector(delta, method='rms'):
@@ -301,60 +282,14 @@ class SectorTransform:
     def fit(self):
         """Perform sector fit."""
         xo = np.zeros(6)
-        opp = minimize(self.scalar_error, xo, method='SLSQP')
-        if not opp.success:
-            warnings.warn('optimization failed')
-        self.data['fit'] = self.transform(opp.x)
-        self.data['opp_x'] = 'transform', opp.x
-        self.data['error'] = 'space', self.transform_error(opp.x)
+        opt = minimize(self.scalar_error, xo, method='SLSQP')
+        if not opt.success:
+            warnings.warn(f'optimization failed {opt}')
+
+        self.data['fit'] = self.transform(opt.x)
+        self.data['opt_x'] = 'transform', opt.x
+        self.data['error'] = 'space', self.transform_error(opt.x)
         self.evaluate_gpr('fit', self.data.fit)
-
-    def load_sector(self, sector: int) -> xarray.DataArray:
-        """Return sector data."""
-        match sector:
-            case 6:
-                coils = [12, 13]
-                data = [[[0.27, -0.7, 2.04],
-                         [-1.43, -0.2, 0.34],
-                         [-2.02, 2.02, 1.46],
-                         [-3.33, 0.71, -1.15],
-                         [-4.64, 0.73, 0.97],
-                         [-0.99, 0.87, 0.5],
-                         [-5.02, -0.87, -0.01],
-                         [-0.22, 0.01, 0.43]],
-                        [[0.7, 1.98, -0.35],
-                         [-1.33, 1., -1.29],
-                         [-4.5, 2.96, 1.57],
-                         [-2.28, 2.69, -1.85],
-                         [-5.54, 0.87, -1.63],
-                         [1.44, 1.54, -0.81],
-                         [-4.04, 2.5, -2.2],
-                         [0.33, -0.15, -1.32]]]
-            case 26:  # inital allignment data
-                coils = [12, 13]
-                data = [[[0.4, -0.6, 2.1],
-                         [-1.4, -0.5, 0.3],
-                         [-2.3, 1.6, 1.5],
-                         [-3.4, 0.1, -1.2],
-                         [-4.7, -0.1, 1.0],
-                         [-4.8, -1.7, 0.0],
-                         [-1.1, 0.7, 0.5],
-                         [-0.2, 0.0, 0.4]],
-                        [[1.0, 1.8, -0.3],
-                         [-1.1, 1.2, -1.3],
-                         [-3.9, 3.7, 1.6],
-                         [-1.8, 3.0, -1.9],
-                         [-5.3, 1.8, -1.6],
-                         [-3.5, 3.2, -2.2],
-                         [1.7, 1.3, -0.8],
-                         [0.3, -0.2, -1.3]]]
-            case _:
-                raise NotImplementedError(f'sector {sector} not specified')
-
-        return xarray.DataArray(data, dims=('coil', 'fiducial', 'space'),
-                                coords=dict(coil=coils,
-                                fiducial=list('ABCDEFGH'),
-                                space=list('xyz')))
 
     def plot(self, label: str):
         """Plot fits."""
@@ -369,26 +304,26 @@ class SectorTransform:
 
     def text_transform(self, axes):
         """Display text transform."""
-        opp_x = self.data.opp_x.values
+        opt_x = self.data.opt_x.values
         deg_to_mm = 10570*np.pi/180
         axes.text(0.3, 0.5,
-                  f'dx: {opp_x[0]:1.2f}mm\n' +
-                  f'dy: {opp_x[1]:1.2f}mm\n' +
-                  f'dz: {opp_x[2]:1.2f}mm\n' +
-                  f'rx: {opp_x[3]*deg_to_mm:1.2f}mm\n' +
-                  f'ry: {opp_x[4]*deg_to_mm:1.2f}mm\n' +
-                  f'rz: {opp_x[5]*deg_to_mm:1.2f}',
+                  f'dx: {opt_x[0]:1.2f}mm\n' +
+                  f'dy: {opt_x[1]:1.2f}mm\n' +
+                  f'dz: {opt_x[2]:1.2f}mm\n' +
+                  f'rx: {opt_x[3]*deg_to_mm:1.2f}mm\n' +
+                  f'ry: {opt_x[4]*deg_to_mm:1.2f}mm\n' +
+                  f'rz: {opt_x[5]*deg_to_mm:1.2f}',
                   va='center', ha='left',
                   transform=axes.transAxes)
 
     def fit_error(self, method: str):
         """Return fit error vector."""
-        return self.transform_error(self.data.opp_x.values,
+        return self.transform_error(self.data.opt_x.values,
                                     self.data.reference.copy(), method)
 
     def reference_error(self, method: str):
         """Return reference error vector."""
-        return self.point_error(self.data.reference, method)
+        return self.point_error(self.data.reference.copy(), method)
 
     def text_fit(self, axes, label: str):
         """Display text transform."""
@@ -405,10 +340,19 @@ class SectorTransform:
                   va='center', ha='left',
                   transform=axes.transAxes, fontsize='xx-small')
 
+    def write(self):
+        """Write fit to file."""
+        fit_target = self.data.fit_target
+        fit_target.attrs['group'] = 'SCOD_fit'
+        self.spacial_analyzer.write(fit_target)
+
 
 if __name__ == '__main__':
 
-    transform = SectorTransform(6, True)
-    #transform.plot('target')
+    transform = SectorTransform(6, True,
+                                files=dict(reference_ccl='reference_ccl'))
+    # transform.plot('target')
     transform.plot('reference')
     transform.plot('fit')
+
+    #transform.data.target

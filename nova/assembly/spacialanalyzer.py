@@ -133,7 +133,7 @@ class SpacialAnalyzer:
 
     def read_points(self, filename: str) -> xarray.DataArray:
         """Read point group."""
-        dataframe = self._read_csv(filename)
+        dataframe = self.read_csv(filename)
         dataarray = xarray.DataArray(
             dataframe.loc[:, ['x', 'y', 'z']].values,
             dims=['fiducial_ex', 'space'],
@@ -150,18 +150,18 @@ class SpacialAnalyzer:
                 file.write(f'// {attrs[attr]}\n')
             file.write('\n')
             for nominal in self.files:
-                self._to_file(file, getattr(self, nominal), collection)
+                self.to_file(file, getattr(self, nominal), collection)
             for dataarray in data:
-                self._to_file(file, dataarray, collection)
+                self.to_file(file, dataarray, collection)
 
-    def _to_file(self, file, data: xarray.DataArray, collection: str):
+    def to_file(self, file, data: xarray.DataArray, collection: str):
         """Write data to file in source frame."""
         # data = self.from_datum(data)
         if 'coil' in data.coords:
-            return self._write_ccl(file, data, collection)
-        return self._write_dataarray(file, data, collection)
+            return self.write_ccl(file, data, collection)
+        return self.write_dataarray(file, data, collection)
 
-    def _to_dataframe(self, dataarray, collection: str):
+    def to_dataframe(self, dataarray, collection: str):
         """Return dataframe from dataarray whilst propagating xarray attrs."""
         dataframe = dataarray.to_pandas()
         dataframe['collection'] = collection
@@ -169,19 +169,19 @@ class SpacialAnalyzer:
         dataframe['point'] = dataframe.index
         return dataframe[self.columns]
 
-    def _write_ccl(self, file, dataarray: xarray.DataArray, collection: str):
+    def write_ccl(self, file, dataarray: xarray.DataArray, collection: str):
         """Write ccl dataarray to file."""
         for coil in dataarray.coil.values:
-            dataframe = self._to_dataframe(dataarray.sel(coil=coil),
-                                           collection)
+            dataframe = self.to_dataframe(dataarray.sel(coil=coil),
+                                          collection)
             dataframe['point'] = \
                 [f'TFC{coil}-{fiducial}' for fiducial in dataframe.index]
             dataframe.to_csv(file, header=False, index=False)
 
-    def _write_dataarray(self, file, dataarray: xarray.DataArray,
-                         collection: str):
+    def write_dataarray(self, file, dataarray: xarray.DataArray,
+                        collection: str):
         """Write 2D xarray dataarray to file."""
-        dataframe = self._to_dataframe(dataarray, collection)
+        dataframe = self.to_dataframe(dataarray, collection)
         dataframe.to_csv(file, header=False, index=False)
 
 

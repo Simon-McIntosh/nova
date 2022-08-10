@@ -222,7 +222,7 @@ class SectorTransform:
         """Return transformed sector."""
         if points is None:
             points = self.points
-        points[:] += x[:3]
+        points = points[:] + x[:3]
         if len(x) == 6:
             rotate = Rotation.from_euler('xyz', x[-3:], degrees=True)
             for i in range(2):
@@ -342,9 +342,9 @@ class SectorTransform:
 
     def write(self):
         """Write fit to file."""
-        fit_target = self.data.fit_target
-        fit_target.attrs['group'] = 'SCOD_fit'
-        self.spacial_analyzer.write(fit_target)
+        fit = self.data.fit
+        fit.attrs['group'] = 'SCOD_fit'
+        self.spacial_analyzer.write(fit)
 
 
 if __name__ == '__main__':
@@ -354,5 +354,6 @@ if __name__ == '__main__':
     # transform.plot('target')
     transform.plot('reference')
     transform.plot('fit')
+    transform.write
 
     #transform.data.target

@@ -34,12 +34,12 @@ class Rotate:
 
     def to_cylindrical(self, dataarray: xarray.DataArray) -> xarray.DataArray:
         """Retun dataarray in cylindrical coordinates."""
-        phi = np.arctan2(dataarray[..., 1], dataarray[..., 0])
+        phi = np.arctan2(dataarray[..., 1].data, dataarray[..., 0].data)
         dataarray = dataarray.copy().rename(
             dict(space='cylindrical')).assign_coords(
                 dict(cylindrical=['r', 'rphi', 'z']))
         dataarray[..., 0] = np.linalg.norm(dataarray[..., :2], axis=-1)
-        dataarray[..., 1] = dataarray[..., 0] * phi.values
+        dataarray[..., 1] = dataarray[..., 0] * phi
         return dataarray
 
 

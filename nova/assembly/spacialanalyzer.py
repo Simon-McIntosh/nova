@@ -22,7 +22,7 @@ class SpacialAnalyzer:
     sector: int = 6
     subpath: str = 'input/Assembly/Magnets/TFC'
     files: dict[str, str] = field(default_factory=dict)
-    datum: tuple[float] = field(init=False, default=(0, 0, 0))
+    datum: tuple = field(init=False, default=(0, 0, -0.7, 0))
     rotate: Rotate = field(init=False, default_factory=Rotate)
 
     header: ClassVar[list[str]] = ['version', 'frame', 'axes', 'format']
@@ -46,7 +46,7 @@ class SpacialAnalyzer:
         """Return datum error."""
         nominal = nominal_ccl.copy()
         nominal[..., :2] -= datum[:2]
-        self.rotate_array(nominal, -datum[2])
+        self.rotate_array(nominal, -datum[-1])
         return np.mean(self.rotate.clock(nominal[0])[..., 1]**2 +
                        self.rotate.anticlock(nominal[1])[..., 1]**2)
 
@@ -57,18 +57,20 @@ class SpacialAnalyzer:
                        method='SLSQP')
         if not opt.success:
             warnings.warn(f'datum extraction failed {opt}')
-        self.datum = opt.x
+        self.datum = tuple(opt.x[:2]) + (self.datum[2],) + (opt.x[-1],)
 
     def to_datum(self, dataarray: xarray.DataArray):
         """Return dataarray shifted from nominal frame into datum frame."""
-        dataarray[..., :2] -= self.datum[:2]
-        self.rotate_array(dataarray, -self.datum[2])
+        dataarray = dataarray.copy()
+        dataarray[:] -= self.datum[:3]
+        self.rotate_array(dataarray, -self.datum[-1])
         return dataarray
 
     def from_datum(self, dataarray: xarray.DataArray):
         """Return dataarray shifted from datum frame back to nominal frame."""
-        dataarray[..., :2] += self.datum[:2]
-        self.rotate_array(dataarray, self.datum[2])
+        dataarray = dataarray.copy()
+        dataarray[:] += self.datum[:3]
+        self.rotate_array(dataarray, self.datum[-1])
         return dataarray
 
     @cached_property
@@ -116,9 +118,10 @@ class SpacialAnalyzer:
 
         coils = dataframe.coil.unique()
         fiducial = dataframe.index.unique().values
-        dataarray = xarray.DataArray(0., dims=['coil', 'fiducial', 'space'],
+        dataarray = xarray.DataArray(0.,
+                                     dims=['coil', 'fiducial', 'cartesian'],
                                      coords=dict(coil=coils, fiducial=fiducial,
-                                                 space=list('xyz')))
+                                                 cartesian=list('xyz')))
         for i, coil in enumerate(coils):
             dataarray[i] = dataframe.loc[dataframe.coil == coil,
                                          ['x', 'y', 'z']].values
@@ -136,8 +139,9 @@ class SpacialAnalyzer:
         dataframe = self.read_csv(filename)
         dataarray = xarray.DataArray(
             dataframe.loc[:, ['x', 'y', 'z']].values,
-            dims=['fiducial_ex', 'space'],
-            coords=dict(fiducial_ex=dataframe.index.values, space=list('xyz')))
+            dims=['fiducial_ex', 'cartesian'],
+            coords=dict(fiducial_ex=dataframe.index.values,
+                        cartesian=list('xyz')))
         dataarray.attrs |= dataframe.attrs
         return dataarray
 
@@ -149,39 +153,44 @@ class SpacialAnalyzer:
             for attr in self.header:
                 file.write(f'// {attrs[attr]}\n')
             file.write('\n')
-            for nominal in self.files:
-                self.to_file(file, getattr(self, nominal), collection)
+            for group in self.files:
+                self.to_file(file, getattr(self, group), collection, group)
             for dataarray in data:
-                self.to_file(file, dataarray, collection)
+                self.to_file(file, dataarray.copy(), collection)
 
-    def to_file(self, file, data: xarray.DataArray, collection: str):
+    def to_file(self, file, data: xarray.DataArray, collection: str,
+                group: str = ''):
         """Write data to file in source frame."""
-        # data = self.from_datum(data)
+        data = self.from_datum(data)
         if 'coil' in data.coords:
-            return self.write_ccl(file, data, collection)
-        return self.write_dataarray(file, data, collection)
+            return self.write_ccl(file, data, collection, group)
+        return self.write_dataarray(file, data, collection, group)
 
-    def to_dataframe(self, dataarray, collection: str):
+    def to_dataframe(self, dataarray, collection: str, group: str):
         """Return dataframe from dataarray whilst propagating xarray attrs."""
         dataframe = dataarray.to_pandas()
         dataframe['collection'] = collection
-        dataframe['group'] = dataarray.attrs['group']
+        group_label = dataarray.attrs['group']
+        if group:
+            group_label = f'{group} [{group_label}]'
+        dataframe['group'] = group_label
         dataframe['point'] = dataframe.index
         return dataframe[self.columns]
 
-    def write_ccl(self, file, dataarray: xarray.DataArray, collection: str):
+    def write_ccl(self, file, dataarray: xarray.DataArray,
+                  collection: str, group: str):
         """Write ccl dataarray to file."""
         for coil in dataarray.coil.values:
             dataframe = self.to_dataframe(dataarray.sel(coil=coil),
-                                          collection)
+                                          collection, group)
             dataframe['point'] = \
                 [f'TFC{coil}-{fiducial}' for fiducial in dataframe.index]
             dataframe.to_csv(file, header=False, index=False)
 
     def write_dataarray(self, file, dataarray: xarray.DataArray,
-                        collection: str):
+                        collection: str, group: str):
         """Write 2D xarray dataarray to file."""
-        dataframe = self.to_dataframe(dataarray, collection)
+        dataframe = self.to_dataframe(dataarray, collection, group)
         dataframe.to_csv(file, header=False, index=False)
 
 
@@ -192,8 +201,7 @@ if __name__ == '__main__':
     from nova.assembly.transform import Rotate
 
     rotate = Rotate()
-    print(rotate.clock(space.nominal_ccl[0]) -
-          rotate.anticlock(space.nominal_ccl[1]))
+    print(rotate.clock(space.nominal_ccl[0])[..., 1])
     # space.write()
     print(space.nominal_ccl)
     print(rotate.clock(space.nominal_ccl[0])[..., 1])

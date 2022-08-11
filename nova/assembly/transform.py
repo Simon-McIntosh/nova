@@ -33,13 +33,24 @@ class Rotate:
         return self.rotate(reverse=True).apply(vector)
 
     def to_cylindrical(self, dataarray: xarray.DataArray) -> xarray.DataArray:
-        """Retun dataarray in cylindrical coordinates."""
+        """Retun dataarray transformed from cartesian to cylindrical coords."""
         phi = np.arctan2(dataarray[..., 1].data, dataarray[..., 0].data)
         dataarray = dataarray.copy().rename(
-            dict(space='cylindrical')).assign_coords(
-                dict(cylindrical=['r', 'rphi', 'z']))
+            dict(cartesian='cylindrical')).assign_coords(
+            dict(cylindrical=['r', 'rphi', 'z']))
         dataarray[..., 0] = np.linalg.norm(dataarray[..., :2], axis=-1)
         dataarray[..., 1] = dataarray[..., 0] * phi
+        return dataarray
+
+    def to_cartesian(self, dataarray: xarray.DataArray) -> xarray.DataArray:
+        """Retun dataarray transformed from cylindrical to cartesian coords."""
+        radius = dataarray[..., 0].data
+        phi = dataarray[..., 1].data / radius
+        dataarray = dataarray.copy().rename(
+            dict(cylindrical='cartesian')).assign_coords(
+            dict(cartesian=['x', 'y', 'z']))
+        dataarray[..., 0] = radius * np.cos(phi)
+        dataarray[..., 1] = radius * np.sin(phi)
         return dataarray
 
 

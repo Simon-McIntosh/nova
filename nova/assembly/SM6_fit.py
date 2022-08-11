@@ -23,7 +23,7 @@ class Plotter:
     """Plot fidicual to target fit in cylindrical coordinates."""
 
     data: InitVar[xarray.Dataset]
-    factor: float = 500
+    factor: float = 750
     fiducial_labels: bool = True
     rotate: Rotate = field(init=False, default_factory=Rotate)
 
@@ -176,7 +176,7 @@ class SectorTransform:
         centerline = CenterLine()
         self.data['arc_length'] = centerline.mesh['arc_length']
         self.data['nominal_centerline'] = \
-            ('arc_length', 'space'), 1e3*centerline.mesh.points
+            ('arc_length', 'cartesian'), 1e3*centerline.mesh.points
         self.data['centerline'] = xarray.concat([
             self.data.nominal_centerline, self.data.nominal_centerline],
             dim='coil')
@@ -184,27 +184,33 @@ class SectorTransform:
             self.rotate.anticlock(self.data['centerline'][0])
         self.data['centerline'][1] = \
             self.rotate.clock(self.data['centerline'][1])
+        self.data['centerline_cylindrical'] = self.rotate.to_cylindrical(
+                self.data.centerline)
 
     def fit_reference(self):
         """Evaluate gpr for reference fiducials."""
         self.evaluate_gpr('reference', self.data.reference)
 
     def evaluate_gpr(self, label: str, data_array: xarray.DataArray):
-        """Evaluate gpr."""
-        delta = data_array - self.data.target
+        """Evaluate gpr in cylindrical coordinate system."""
+        delta = self.rotate.to_cylindrical(data_array) - \
+            self.data.target_cylindrical
         target = f'{label}_target'
         centerline = f'{label}_centerline'
-        self.data[target] = xarray.zeros_like(self.data.target)
-        self.data[centerline] = xarray.zeros_like(self.data.centerline)
+        self.data[target] = xarray.zeros_like(self.data.target_cylindrical)
+        self.data[centerline] = \
+            xarray.zeros_like(self.data.centerline_cylindrical)
         for coil_index in range(self.data.dims['coil']):
-            for space_index in range(self.data.dims['space']):
+            for space_index in range(self.data.dims['cylindrical']):
                 self.gpr.fit(delta[coil_index, :, space_index])
                 self.data[target][coil_index, :, space_index] = \
                     self.gpr.predict(self.data.target_length)
                 self.data[centerline][coil_index, :, space_index] = \
                     self.gpr.predict(self.data.arc_length)
-        self.data[f'{label}_target'] += self.data.target
-        self.data[f'{label}_centerline'] += self.data.centerline
+        self.data[target] += self.data.target_cylindrical
+        self.data[centerline] += self.data.centerline_cylindrical
+        for attr in [target, centerline]:
+            self.data[attr] = self.rotate.to_cartesian(self.data[attr])
 
     def load_gpr(self):
         """Load gaussian process regressor."""
@@ -215,10 +221,10 @@ class SectorTransform:
     def points(self):
         """Return reference points."""
         if self.infer:  # use gpr inference
-            return self.data.reference_target.copy()
-        return self.data.reference.copy()
+            return self.data['reference_target'].copy()
+        return self.data['reference'].copy()
 
-    def transform(self, x, points=None) -> xarray.DataArray:
+    def transform(self, x, points) -> xarray.DataArray:
         """Return transformed sector."""
         if points is None:
             points = self.points
@@ -248,14 +254,14 @@ class SectorTransform:
         error[2] = 0.5*np.max(abs(delta[:, [2, 1, -1, -2], 2]))  # (C, D, E, F)
         return error
 
-    def transform_error(self, x, points=None, method=None):
+    def transform_error(self, x, points, method=None):
         """Return transform error vector."""
         if method is None:
             method = self.method
         points = self.transform(x, points)
         return self.point_error(points, method)
 
-    def weighted_transform_error(self, x, points=None, method=None):
+    def weighted_transform_error(self, x, points, method=None):
         """Return weighted transform error vector."""
         return self.transform_error(x, points, method='max') * self.weights
 
@@ -266,29 +272,27 @@ class SectorTransform:
         delta = self.delta(points)
         return self.error_vector(delta, method)
 
-    def max_transform_error(self, x, points=None):
+    def max_transform_error(self, x, points):
         """Return maximum error."""
         return np.max(self.weighted_transform_error(x, points, method='max'))
 
-    def rms_transform_error(self, x, points=None):
+    def rms_transform_error(self, x, points):
         """Return mean error."""
         return np.sqrt(np.mean(
             self.weighted_transform_error(x, points, method='rms')))
 
-    def scalar_error(self, x):
+    def scalar_error(self, x, points):
         """Return scalar mesure for fit error."""
-        return getattr(self, f'{self.method}_transform_error')(x)
+        return getattr(self, f'{self.method}_transform_error')(x, points)
 
     def fit(self):
         """Perform sector fit."""
         xo = np.zeros(6)
-        opt = minimize(self.scalar_error, xo, method='SLSQP')
+        opt = minimize(self.scalar_error, xo, method='SLSQP', args=(None,))
         if not opt.success:
             warnings.warn(f'optimization failed {opt}')
-
-        self.data['fit'] = self.transform(opt.x)
         self.data['opt_x'] = 'transform', opt.x
-        self.data['error'] = 'space', self.transform_error(opt.x)
+        self.data['fit'] = self.transform(opt.x, self.data.reference.copy())
         self.evaluate_gpr('fit', self.data.fit)
 
     def plot(self, label: str):
@@ -297,10 +301,21 @@ class SectorTransform:
         plotter('target')
         if label != 'target':
             stage = 1 + int(self.infer)
+            stage = 2
             plotter(label, stage)
             plotter.axes[0].set_title(label)
             self.text_fit(plotter.axes[0], label)
-        # plt.savefig('fit.png')
+        plt.tight_layout()
+        plt.savefig('fit.png')
+
+    def plot_transform(self):
+        """Plot transform text."""
+        plotter = Plotter(self.data)
+        plotter('target')
+        self.text_transform(plotter.axes[0])
+        plotter.axes[0].set_title('transform: reference -> fit')
+        plt.tight_layout()
+        plt.savefig('fit.png')
 
     def text_transform(self, axes):
         """Display text transform."""
@@ -312,9 +327,9 @@ class SectorTransform:
                   f'dz: {opt_x[2]:1.2f}mm\n' +
                   f'rx: {opt_x[3]*deg_to_mm:1.2f}mm\n' +
                   f'ry: {opt_x[4]*deg_to_mm:1.2f}mm\n' +
-                  f'rz: {opt_x[5]*deg_to_mm:1.2f}',
+                  f'rz: {opt_x[5]*deg_to_mm:1.2f}mm',
                   va='center', ha='left',
-                  transform=axes.transAxes)
+                  transform=axes.transAxes, fontsize='x-small')
 
     def fit_error(self, method: str):
         """Return fit error vector."""
@@ -342,18 +357,21 @@ class SectorTransform:
 
     def write(self):
         """Write fit to file."""
-        fit = self.data.fit
-        fit.attrs['group'] = 'SCOD_fit'
-        self.spacial_analyzer.write(fit)
+        fit = self.transform(self.data.opt_x.values,
+                             self.spacial_analyzer.nominal)
+        fit.attrs['group'] = 'fit'
+        fit_ccl = self.data.fit
+        fit_ccl.attrs['group'] = 'fit_ccl'
+
+        self.spacial_analyzer.write(fit, fit_ccl)
 
 
 if __name__ == '__main__':
 
-    transform = SectorTransform(6, True,
+    transform = SectorTransform(6, True, method='rms',
                                 files=dict(reference_ccl='reference_ccl'))
     # transform.plot('target')
     transform.plot('reference')
     transform.plot('fit')
-    transform.write
-
-    #transform.data.target
+    transform.plot_transform()
+    # transform.write()

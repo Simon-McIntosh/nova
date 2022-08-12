@@ -66,7 +66,7 @@ class Plotter:
     def axes(self):
         """Return axes instance."""
         axes = plt.subplots(1, 2, sharey=True,
-                            gridspec_kw=dict(width_ratios=[3, 1]))[1]
+                            gridspec_kw=dict(width_ratios=[2.5, 1]))[1]
         axes[0].set_xlabel('radius')
         axes[0].set_ylabel('height')
         axes[1].set_xlabel('toroidal')
@@ -101,6 +101,8 @@ class Plotter:
                 self.axes[0].text(radius, height, f'{label} ',
                                   ha='right', va='center', color='gray',
                                   fontsize='x-large', zorder=-10)
+        self.axes[0].plot([800, 12000], [-8000, 8000], 'w.')
+        self.axes[1].plot([-2500, 2500], [-8000, 8000], 'w.')
 
     def delta(self, label: str):
         """Return displacment delta multiplied by scale factor."""
@@ -321,7 +323,7 @@ class SectorTransform:
         """Display text transform."""
         opt_x = self.data.opt_x.values
         deg_to_mm = 10570*np.pi/180
-        axes.text(0.3, 0.5,
+        axes.text(0.8, 0.5,
                   f'dx: {opt_x[0]:1.2f}mm\n' +
                   f'dy: {opt_x[1]:1.2f}mm\n' +
                   f'dz: {opt_x[2]:1.2f}mm\n' +
@@ -351,9 +353,9 @@ class SectorTransform:
             text += '\n' + coordinate + '\n'
             for method in ['rms', 'max']:
                 text += f'    {method}: {error[method][i]:1.2f}\n'
-        axes.text(0.3, 0.5, text,
+        axes.text(0.8, 0.5, text,
                   va='center', ha='left',
-                  transform=axes.transAxes, fontsize='xx-small')
+                  transform=axes.transAxes, fontsize='x-small')
 
     def write(self):
         """Write fit to file."""
@@ -370,8 +372,8 @@ if __name__ == '__main__':
 
     transform = SectorTransform(6, True, method='rms',
                                 files=dict(reference_ccl='reference_ccl'))
-    # transform.plot('target')
+    #transform.plot('target')
     transform.plot('reference')
-    transform.plot('fit')
-    transform.plot_transform()
+    #transform.plot('fit')
+    #transform.plot_transform()
     # transform.write()

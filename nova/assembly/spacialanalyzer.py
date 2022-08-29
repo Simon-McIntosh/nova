@@ -132,7 +132,7 @@ class SpacialAnalyzer:
         dataarray = dataarray.sel(fiducial=list('ABCDEFGH'))
         dataarray['clock'] = np.mean(np.arctan2(dataarray[..., 1],
                                                 dataarray[..., 0]), axis=1)
-        return dataarray.sortby('clock')
+        return dataarray.sortby(['clock'])
 
     def read_points(self, filename: str) -> xarray.DataArray:
         """Read point group."""
@@ -148,13 +148,16 @@ class SpacialAnalyzer:
     def write(self, *data: xarray.DataArray, collection='SCOD'):
         """Write spacial analyzer point groups including optimal fit."""
         filename = f'SM{self.sector}_{collection}.txt'
-        attrs = self.nominal.attrs
+        attrs = self.nominal_ccl.attrs
         with open(self.path + filename, 'w') as file:
             for attr in self.header:
                 file.write(f'// {attrs[attr]}\n')
             file.write('\n')
             for group in self.files:
-                self.to_file(file, getattr(self, group), collection, group)
+                try:
+                    self.to_file(file, getattr(self, group), collection, group)
+                except FileNotFoundError:
+                    pass
             for dataarray in data:
                 self.to_file(file, dataarray.copy(), collection)
 
@@ -184,7 +187,7 @@ class SpacialAnalyzer:
             dataframe = self.to_dataframe(dataarray.sel(coil=coil),
                                           collection, group)
             dataframe['point'] = \
-                [f'TFC{coil}-{fiducial}' for fiducial in dataframe.index]
+                [f'TFC{coil:02d}-{fiducial}' for fiducial in dataframe.index]
             dataframe.to_csv(file, header=False, index=False)
 
     def write_dataarray(self, file, dataarray: xarray.DataArray,
@@ -196,8 +199,10 @@ class SpacialAnalyzer:
 
 if __name__ == '__main__':
 
-    space = SpacialAnalyzer()
+    space = SpacialAnalyzer(7)
+    print(space.reference_ccl)
 
+    '''
     from nova.assembly.transform import Rotate
 
     rotate = Rotate()
@@ -205,3 +210,4 @@ if __name__ == '__main__':
     # space.write()
     print(space.nominal_ccl)
     print(rotate.clock(space.nominal_ccl[0])[..., 1])
+    '''

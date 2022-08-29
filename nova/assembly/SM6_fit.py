@@ -22,7 +22,8 @@ from nova.utilities.pyplot import plt
 class Plotter:
     """Plot fidicual to target fit in cylindrical coordinates."""
 
-    data: InitVar[xarray.Dataset]
+    cartisean_data: InitVar[xarray.Dataset]
+    data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
     factor: float = 750
     fiducial_labels: bool = True
     rotate: Rotate = field(init=False, default_factory=Rotate)
@@ -46,18 +47,23 @@ class Plotter:
             self.fiducial(f'{label}_target')
             self.centerline(label)
 
-    def extract(self, data: xarray.Dataset):
+    def extract(self, cartisean_data: xarray.Dataset):
         """Extract cartisean data and map to cylindrical coordinates."""
         self.data = xarray.Dataset()
-
-        self.data['target'] = self.rotate.to_cylindrical(data.target)
-        self.data['centerline'] = self.rotate.to_cylindrical(data.centerline)
+        self.data['target'] = \
+            self.rotate.to_cylindrical(cartisean_data.target)
+        self.data['centerline'] = \
+            self.rotate.to_cylindrical(cartisean_data.centerline)
         for attr in ['reference', 'fit']:
-            self.data[attr] = self.rotate.to_cylindrical(data[attr]) - \
-                    self.data.target
+            if attr not in cartisean_data:
+                continue
+            self.data[attr] = \
+                self.rotate.to_cylindrical(cartisean_data[attr]) - \
+                self.data.target
             for norm in ['target', 'centerline']:
                 self.data[f'{attr}_{norm}'] = \
-                    self.rotate.to_cylindrical(data[f'{attr}_{norm}']) - \
+                    self.rotate.to_cylindrical(
+                        cartisean_data[f'{attr}_{norm}']) - \
                     self.data[norm]
         self.data.target[..., 1] = 0
         self.data.centerline[..., 1] = 0
@@ -232,7 +238,7 @@ class SectorTransform:
             points = self.points
         points = points[:] + x[:3]
         if len(x) == 6:
-            rotate = Rotation.from_euler('xyz', x[-3:], degrees=True)
+            rotate = Rotation.from_euler('XYZ', x[-3:], degrees=True)
             for i in range(2):
                 points[i] = rotate.apply(points[i])
         return points
@@ -253,7 +259,7 @@ class SectorTransform:
             return error
         error[0] = np.max(abs(delta[:, [5, 3, 4], 0]))  # radial (A, B, H)
         error[1] = np.max(abs(delta[..., 1]))  # toroidal (all)
-        error[2] = 0.5*np.max(abs(delta[:, [2, 1, -1, -2], 2]))  # (C, D, E, F)
+        error[2] = np.max(abs(delta[:, [2, 1, -1, -2], 2]))  # (C, D, E, F)
         return error
 
     def transform_error(self, x, points, method=None):
@@ -308,7 +314,7 @@ class SectorTransform:
             plotter.axes[0].set_title(label)
             self.text_fit(plotter.axes[0], label)
         plt.tight_layout()
-        plt.savefig('fit.png')
+        # plt.savefig('fit.png')
 
     def plot_transform(self):
         """Plot transform text."""
@@ -317,19 +323,19 @@ class SectorTransform:
         self.text_transform(plotter.axes[0])
         plotter.axes[0].set_title('transform: reference -> fit')
         plt.tight_layout()
-        plt.savefig('fit.png')
+        # plt.savefig('fit.png')
 
     def text_transform(self, axes):
         """Display text transform."""
         opt_x = self.data.opt_x.values
-        deg_to_mm = 10570*np.pi/180
+        deg_to_mm = 1  # 10570*np.pi/180
         axes.text(0.8, 0.5,
                   f'dx: {opt_x[0]:1.2f}mm\n' +
                   f'dy: {opt_x[1]:1.2f}mm\n' +
                   f'dz: {opt_x[2]:1.2f}mm\n' +
-                  f'rx: {opt_x[3]*deg_to_mm:1.2f}mm\n' +
-                  f'ry: {opt_x[4]*deg_to_mm:1.2f}mm\n' +
-                  f'rz: {opt_x[5]*deg_to_mm:1.2f}mm',
+                  f'rx: {opt_x[3]*deg_to_mm:1.2e}' + r'$^o$' + '\n' +
+                  f'ry: {opt_x[4]*deg_to_mm:1.2e}' + r'$^o$' + '\n' +
+                  f'rz: {opt_x[5]*deg_to_mm:1.2e}' + r'$^o$',
                   va='center', ha='left',
                   transform=axes.transAxes, fontsize='x-small')
 
@@ -359,21 +365,25 @@ class SectorTransform:
 
     def write(self):
         """Write fit to file."""
-        fit = self.transform(self.data.opt_x.values,
-                             self.spacial_analyzer.nominal)
-        fit.attrs['group'] = 'fit'
         fit_ccl = self.data.fit
         fit_ccl.attrs['group'] = 'fit_ccl'
-
-        self.spacial_analyzer.write(fit, fit_ccl)
+        data = [fit_ccl]
+        try:
+            fit = self.transform(self.data.opt_x.values,
+                                 self.spacial_analyzer.nominal)
+            fit.attrs['group'] = 'fit'
+            data.append(fit)
+        except FileNotFoundError:
+            pass
+        self.spacial_analyzer.write(*data)
 
 
 if __name__ == '__main__':
 
-    transform = SectorTransform(6, True, method='rms',
+    transform = SectorTransform(7, True, method='rms',
                                 files=dict(reference_ccl='reference_ccl'))
     #transform.plot('target')
-    transform.plot('reference')
-    #transform.plot('fit')
-    #transform.plot_transform()
-    # transform.write()
+    #transform.plot('reference')
+    transform.plot('fit')
+    transform.plot_transform()
+    transform.write()

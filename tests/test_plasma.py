@@ -81,7 +81,7 @@ def test_coil_cylinder_xpoint():
     assert coilset.grid.o_point_number == 1
 
 
-@pytest.mark.skip('biot ring dask refactor')
+#@pytest.mark.skip('biot ring dask refactor')
 def test_grid_xpoint():
     coilset = CoilSet(dcoil=-5, dplasma=-80)
     coilset.coil.insert(6.5, [-1, 1], 0.4, 0.1, Ic=-15e6)
@@ -93,7 +93,8 @@ def test_grid_xpoint():
 
     assert coilset.grid.x_point_number == 2
     assert coilset.grid.o_point_number == 1
-
+test_grid_xpoint()
+assert False
 
 @pytest.mark.skip('biot ring dask refactor')
 def test_plasmagrid_xpoint():

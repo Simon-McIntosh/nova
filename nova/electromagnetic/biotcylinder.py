@@ -65,9 +65,10 @@ class BiotCylinder(BiotMatrix):
     @cached_property
     def Aphi(self):
         """Return Aphi dask array."""
-        return 1 / (4*np.pi*self['area']) * \
-            ((self.Aphi_hat(2) - self.Aphi_hat(1)) -
-             (self.Aphi_hat(3) - self.Aphi_hat(0)))
+        return 1 / (4*np.pi*self['area']) * self.Aphi_hat(0)
+        #* \
+        #    ((self.Aphi_hat(2) - self.Aphi_hat(1)) -
+        #     (self.Aphi_hat(3) - self.Aphi_hat(0)))
 
     @property
     def Psi(self):

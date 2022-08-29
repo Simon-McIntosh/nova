@@ -264,7 +264,7 @@ def test_biot_solve_index_version():
 def test_biot_solve_no_plasma():
     coilset = CoilSet(dcoil=-5)
     coilset.coil.insert(3, -0.5, 0.95, 0.95)
-    coilset.firstwall.separatrix = Polygon(dict(o=(3, 0, 1)))
+    coilset.plasma.separatrix = Polygon(dict(o=(3, 0, 1)))
     coilset.grid.solve(10, 0.05)
     coilset.sloc['Ic'] = 5
     assert (coilset.grid.psi != 0).all()
@@ -283,7 +283,7 @@ def test_biot_link_dataarray_dataset():
     coilset.firstwall.insert(3, -0.5, 0.95, 0.95)
     coilset.grid.solve(10, 0.05)
     Psi = coilset.grid.operator['Psi'].matrix.copy()
-    coilset.firstwall.separatrix = ((2.5, -1), (3.5, -1), (3, 0))
+    coilset.plasma.separatrix = ((2.5, -1), (3.5, -1), (3, 0))
     coilset.grid.update_turns('Psi')
     assert (coilset.grid.operator['Psi'].matrix ==
             coilset.grid.data['Psi']).all()
@@ -292,10 +292,10 @@ def test_biot_link_dataarray_dataset():
 
 def test_biot_multiframe_plasma():
     coilset = CoilSet(dplasma=-20, dcoil=-1)
-    coilset.coil.insert(3, -0.5, 0.95, 0.95)
-    coilset.firstwall.insert(3, -0.5, 0.95, 0.95)
-    coilset.firstwall.insert(3, 0.5, 0.95, 0.95, name='second_plasma_rejoin')
-    coilset.grid.solve(10, 0.05)
+    coilset.coil.insert(3, 0, 0.25, 0.25, Ic=1)
+    coilset.firstwall.insert(3, -0.5, 0.5, 0.5, Ic=1)
+    coilset.firstwall.insert(3, 0.5, 0.5, 0.5, name='second_plasma_rejoin')
+    coilset.grid.solve(50, 0.05)
     assert coilset.grid.data.attrs['plasma_index'] == 1
 
 

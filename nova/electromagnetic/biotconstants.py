@@ -58,7 +58,7 @@ class BiotConstants:
     @cached_property
     def k2(self):
         """Return k2 coefficient."""
-        return self.unit_offset(4*self.r*self.rs / self.a2)
+        return 4*self.r*self.rs / self.a2
 
     @cached_property
     def ck2(self):
@@ -86,7 +86,7 @@ class BiotConstants:
     def np2(self, p: int):
         """Return np**2 constant."""
         if p == 1:
-            return 2*self.r / self.zero_offset(self.r - self.c)
+            return 2*self.r / self.r - self.c
         if p == 2:
             return 2*self.r / (self.r + self.c)
         if p == 3:
@@ -103,7 +103,7 @@ class BiotConstants:
     def Pi(self, p: int):
         """Return complete elliptc intergral of the 3rd kind."""
         return da.map_blocks(
-            self.ellippi, self.unit_offset(self.np2(p)), self.k2)
+            self.ellippi, self.np2(p), self.unit_offset(self.k2))
 
     @cached_property
     def U(self):
@@ -111,20 +111,19 @@ class BiotConstants:
         return self.k2 * (4*self.gamma**2 +
                           3*self.rs**2 - 5*self.r**2) / (4*self.r)
 
-    def zero_offset(self, array, atol=1e-16):
+    def _zero_offset(self, array, atol=1e-16):
         """Return array with values close to zero offset to atol."""
         if (index := da.isclose(array, 0, atol=atol)).any():
             array[index] = atol
         return array
 
     def unit_offset(self, array, atol=1e-16):
-        #return array
         """Return array with values close to one offset to 1-atol."""
         if (index := da.isclose(array, 1, atol=atol)).any():
             array[index] = 1-atol
         return array
 
-    def phi(self, alpha, atol=1e-16):
+    def phi(self, alpha, atol=1e-6):
         """Return sysrem invariant angle transformation."""
         phi = np.pi - 2*alpha
         if np.isclose(phi, 0, atol=atol):
@@ -134,8 +133,7 @@ class BiotConstants:
     def B2(self, alpha):
         """Return B2 coefficient."""
         phi = self.phi(alpha)
-        return self.zero_offset(self.rs**2 + self.r**2 -
-                                2*self.r*self.rs*np.cos(phi))
+        return self.rs**2 + self.r**2 - 2*self.r*self.rs*np.cos(phi)
 
     def D2(self, alpha):
         """Return D2 coefficient."""
@@ -177,7 +175,7 @@ class BiotConstants:
         """Return Cphi intergration constant."""
         return self.Cphi_coef(alpha) - self.Cphi_coef(0)
 
-    def zeta(self, alpha, k=8):
+    def zeta(self, alpha, k=5):
         """Return zeta coefficient calculated using Romberg integration."""
         alpha, dalpha = da.linspace(0, alpha, 2**k + 1, retstep=True)
         beta1 = da.stack([self.beta1(_alpha) for _alpha in alpha])

@@ -53,6 +53,7 @@ def test_ring_ring_coil_pair():
     assert np.isclose(coilset.point.psi, 0)
 
 
+@pytest.mark.skip('await biot cylinder speedup')
 def test_cyliner_cylinder_coil_pair():
     coilset = CoilSet(dcoil=-1)
     coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=-15e6, segment='cylinder')
@@ -73,38 +74,42 @@ def test_coil_xpoint():
 @pytest.mark.skip('biot cylinder dev')
 def test_coil_cylinder_xpoint():
     coilset = CoilSet(dcoil=-1)
-    coilset.coil.insert(6.5, [-1, 0, 1], 0.4, 0.4, Ic=-15e6)
+    coilset.coil.insert(6.5, [-1, 0, 1], 0.4, 0.4, Ic=-15e6,
+                        segment='cylinder')
     coilset.grid.solve(60, [6, 7.0, -0.8, 0.8])
     coilset.plot()
     coilset.grid.plot()
+
     assert coilset.grid.x_point_number == 2
     assert coilset.grid.o_point_number == 1
 
 
-#@pytest.mark.skip('biot ring dask refactor')
+def test_grid_xpoint_coil():
+    coilset = CoilSet(dcoil=-5)
+    coilset.coil.insert(6.5, [-1, 1], 0.4, 0.1, Ic=-15e6)
+    coilset.coil.insert(dict(e=[6.5, 0, 0.4, 0.6]), Ic=-15e6,
+                        turn='h', delta=-10)
+    coilset.grid.solve(60, [6, 6.8, -0.95, 0.95])
+    assert coilset.grid.x_point_number == 2
+    assert coilset.grid.o_point_number == 1
+
+
 def test_grid_xpoint():
-    coilset = CoilSet(dcoil=-5, dplasma=-80)
+    coilset = CoilSet(dcoil=-5, dplasma=-75)
     coilset.coil.insert(6.5, [-1, 1], 0.4, 0.1, Ic=-15e6)
     coilset.firstwall.insert({'e': [6.5, 0, 1.2, 1.6]}, Ic=-15e6)
     coilset.plasma.separatrix = {'e': [6.5, 0, 0.4, 0.6]}
     coilset.grid.solve(60, [6, 6.8, -0.95, 0.95])
-    coilset.plot()
-    coilset.grid.plot()
-
     assert coilset.grid.x_point_number == 2
     assert coilset.grid.o_point_number == 1
-test_grid_xpoint()
-assert False
 
-@pytest.mark.skip('biot ring dask refactor')
+
 def test_plasmagrid_xpoint():
     coilset = CoilSet(dcoil=-5, dplasma=-80)
     coilset.coil.insert(6.5, [-1, 1], 0.4, 0.2, Ic=-15e6)
     coilset.firstwall.insert({'e': [6.5, 0, 1.2, 1.6]}, Ic=-15e6)
     coilset.plasma.separatrix = {'e': [6.5, 0, 0.4, 0.6]}
     coilset.plasmagrid.solve()
-    coilset.plot()
-    coilset.plasmagrid.plot()
     assert coilset.plasmagrid.x_point_number == 2
     assert coilset.plasmagrid.o_point_number == 1
 

@@ -14,7 +14,7 @@ def test_nturn_hash_update():
 
 
 def test_nturn_Psi_update():
-    coilset = CoilSet(dcoil=-5, dplasma=-5)
+    coilset = CoilSet(dcoil=-5, dplasma=-4)
     coilset.firstwall.insert(dict(o=[5, 1, 5]), Ic=15e6)
     coilset.plasmagrid.solve()
     Psi = coilset.plasmagrid.data['Psi'].values.copy()

@@ -18,7 +18,7 @@ class Coil(PoloidalGrid):
     def set_conditional_attributes(self):
         """Set conditional attrs."""
         self.ifthen('delta', -1, 'turn', 'rectangle')
-        self.ifthen('delta', -1, 'segment', 'cylinder')
+        # self.ifthen('delta', -1, 'segment', 'cylinder')
         self.ifthen('turn', 'hexagon', 'tile', True)
         self.ifthen('turn', 'hexagon', 'scale', 1)
         self.ifthen('delta', 0, 'turn', 'skin')

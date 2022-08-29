@@ -43,7 +43,7 @@ class Plasma(Axes, netCDF, FrameSetLoc):
 
     @property
     def psi(self):
-        """Return grid an boundary psi."""
+        """Return concatenated array of grid and boundary psi values."""
         return np.append(self.grid.psi, self.boundary.psi)
 
     @property
@@ -103,7 +103,7 @@ class Plasma(Axes, netCDF, FrameSetLoc):
         ionize_area = area[ionize]
         nturn[ionize] = ionize_area / np.sum(ionize_area)
 
-    def residual(self, Psi):
+    def __XXX_residual(self, Psi):
 
         self.grid.operator['Psi'].matrix[:, 115] = Psi
         self.grid.version['psi'] = None
@@ -121,7 +121,7 @@ class Plasma(Axes, netCDF, FrameSetLoc):
 
         return Psi - self.grid.operator['Psi'].matrix[:, 115]
 
-    def _residual(self, nturn):
+    def _XXX_residual(self, nturn):
         """Update plasma seperatrix."""
 
         '''

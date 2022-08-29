@@ -44,7 +44,3 @@ class BiotData(ABC, netCDF, FrameSetLoc):
                 self.subframe.frame[self.aloc['plasma']].unique())
         except StopIteration:
             self.data.attrs['plasma_index'] = -1
-        self.update_aloc_hash('nturn')
-        for attr in self.attrs:
-            self.version[attr] = self.subframe.version['nturn']
-            self.data.attrs[attr] = self.version[attr]

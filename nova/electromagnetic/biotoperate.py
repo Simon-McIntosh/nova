@@ -12,7 +12,7 @@ def matmul(A, B):
     """Perform fast matmul operation."""
     row_number = len(A)
     vector = np.empty(row_number, dtype=numba.float64)
-    for i in numba.prange(row_number):
+    for i in numba.prange(row_number):  # pylint: disable=not-an-iterable
         vector[i] = np.dot(A[i], B)
     return vector
 
@@ -31,6 +31,7 @@ class BiotOp:
         self.plasma_matrix = plasma_matrix
         #  perform svd order reduction
         self.svd_rank = min([len(plasma_s), svd_rank])
+        # TODO fix svd_rank == -1 bug - crop plasma_U
         self.plasma_U = plasma_U[:, :self.svd_rank].copy()
         self.plasma_s = plasma_s[:self.svd_rank].copy()
         self.plasma_V = plasma_V[:self.svd_rank, :].copy()
@@ -47,6 +48,7 @@ class BiotOp:
                        self.plasma_s * matmul(self.plasma_V,
                                               self.nturn[self.plasma]))
             return
+        print('svd == -1')
         self.matrix[:, self.plasma_index] = matmul(
             self.plasma_matrix, self.nturn[self.plasma])
 
@@ -78,8 +80,10 @@ class BiotOperate(BiotData):
         """Solve biot interaction - extened by subclass."""
         super().post_solve()
         self.load_operators()
+        for attr in self.attrs:
+            self.update_turns(attr)
 
-    def load(self, filename: str, path=None):
+    def load(self, filename: str = None, path=None):
         """Extend netCDF load."""
         super().load(filename, path)
         self.load_operators()
@@ -100,7 +104,8 @@ class BiotOperate(BiotData):
 
     def load_version(self):
         """Initialize biot version identifiers."""
-        self.version |= {attr: self.data.attrs[attr] for attr in self.attrs}
+        self.version |= {attr: self.data.attrs.get(attr, None)
+                         for attr in self.attrs}
         self.version |= {attr.lower(): None for attr in self.attrs}
         if 'Br' in self.attrs and 'Bz' in self.attrs:
             self.version['bn'] = None
@@ -119,8 +124,8 @@ class BiotOperate(BiotData):
         if self.data.attrs['plasma_index'] == -1:
             return
         self.operator[Attr].update_turns(svd)
-        nturn = self.subframe.version['nturn']
-        self.version[Attr] = self.data.attrs[Attr] = nturn
+        self.version[Attr] = self.data.attrs[Attr] = \
+            self.subframe.version['nturn']
         self.version[Attr.lower()] = None
 
     def calculate_norm(self):

@@ -80,9 +80,12 @@ def test_coil_cylinder_xpoint():
     coilset.plot()
     coilset.grid.plot()
 
+    print(coilset.grid.psi)
+
     assert coilset.grid.x_point_number == 2
     assert coilset.grid.o_point_number == 1
-
+#test_coil_cylinder_xpoint()
+#assert False
 
 def test_grid_xpoint_coil():
     coilset = CoilSet(dcoil=-5)

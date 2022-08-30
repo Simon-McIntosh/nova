@@ -81,12 +81,14 @@ class BiotConstants:
         y = 1 - m
         rf = scipy.special.elliprf(0, y, 1)
         rj = scipy.special.elliprj(0, y, 1, 1 - n)
+        if (index := np.isclose(1 - n, 1 - m, rtol=1e-3)).any():
+            rj[index] = scipy.special.elliprd(0, 1, 1 - n[index])
         return rf + rj * n / 3
 
     def np2(self, p: int):
         """Return np**2 constant."""
         if p == 1:
-            return 2*self.r / self.r - self.c
+            return 2*self.r / self.zero_offset(self.r - self.c)
         if p == 2:
             return 2*self.r / (self.r + self.c)
         if p == 3:
@@ -103,7 +105,7 @@ class BiotConstants:
     def Pi(self, p: int):
         """Return complete elliptc intergral of the 3rd kind."""
         return da.map_blocks(
-            self.ellippi, self.np2(p), self.unit_offset(self.k2))
+            self.ellippi, self.np2(p), self.k2, dtype=float)
 
     @cached_property
     def U(self):
@@ -111,7 +113,7 @@ class BiotConstants:
         return self.k2 * (4*self.gamma**2 +
                           3*self.rs**2 - 5*self.r**2) / (4*self.r)
 
-    def _zero_offset(self, array, atol=1e-16):
+    def zero_offset(self, array, atol=1e-16):
         """Return array with values close to zero offset to atol."""
         if (index := da.isclose(array, 0, atol=atol)).any():
             array[index] = atol
@@ -123,11 +125,11 @@ class BiotConstants:
             array[index] = 1-atol
         return array
 
-    def phi(self, alpha, atol=1e-6):
+    def phi(self, alpha, atol=1e-16):
         """Return sysrem invariant angle transformation."""
         phi = np.pi - 2*alpha
         if np.isclose(phi, 0, atol=atol):
-            phi = atol
+            return atol
         return phi
 
     def B2(self, alpha):

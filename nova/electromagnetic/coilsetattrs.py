@@ -53,7 +53,10 @@ class CoilSetAttrs(ABC, FrameSetLoc):
 
     def ifthen(self, attr, cond, key, value):
         """Update _attrs[key] = value when _attrs[check] == cond."""
-        if self._attrs.get(attr, getattr(self, attr)) == cond:
+        if isinstance(attr, str):
+            attr, cond = [attr], [cond]
+        if all([self._attrs.get(_attr, getattr(self, _attr)) == _cond
+                for _attr, _cond in zip(attr, cond)]):
             self._attrs[key] = value
 
     @property
@@ -87,7 +90,7 @@ class GridAttrs(CoilSetAttrs):
 
     gridattrs: dict = field(init=False, default_factory=lambda: {})
     attributes: list[str] = field(init=False, default_factory=lambda: [
-        'trim', 'fill', 'delta', 'turn', 'tile'])
+        'trim', 'fill', 'delta', 'section', 'turn', 'tile'])
 
     @property
     def attrs(self):

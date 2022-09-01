@@ -54,18 +54,20 @@ class BiotCylinder(BiotMatrix):
     def Aphi_hat(self, i: int):
         """Return Aphi intergration coefficient."""
         self.corner = i
-        return self.Cphi(np.pi/2) + \
+        result = self.Cphi(np.pi/2) + \
             self.gamma*self.r*self.zeta(np.pi/2) + \
             self.gamma*self.a / (6*self.r) * \
             (self.U*self.K - 2*self.rs*self.E) + \
             self.gamma / (6*self.a*self.r) * \
             da.sum(da.stack([(-1)**p * self.Pphi(p) * self.Pi(p) for
                              p in range(1, 4)]), axis=0)
+        if (index := np.isclose(self.gamma, 0)).any():
+            result[index] = 0
+        return result
 
     @cached_property
     def Aphi(self):
         """Return Aphi dask array."""
-        return self.np2(2)
         return 1 / (4*np.pi*self['area']) * \
             ((self.Aphi_hat(2) - self.Aphi_hat(1)) -
              (self.Aphi_hat(3) - self.Aphi_hat(0)))

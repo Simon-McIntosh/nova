@@ -16,7 +16,7 @@ class OffsetFilaments:
     data: dict[str, da.Array]
 
     fold_number: int = 0  # Number of e-foling lenghts within filament
-    merge_number: float = 1.5  # Merge radius, multiple of filament widths
+    merge_number: float = 1.0  # Merge radius, multiple of filament widths
     rms_offset: bool = True  # Maintain rms offset for filament pairs
 
     def __post_init__(self):
@@ -75,12 +75,13 @@ class OffsetFilaments:
         if not merge_index.any().compute():
             return
         # interacton orientation
-        turn_index = da.isclose(span_length, 0)
+        turn_index = da.isclose(span_length, 0)#, atol=5e-2*turn_radius)
         pair_index = da.invert(turn_index)
         span_norm = da.zeros((2, *turn_index.shape))
         span_norm[0] = da.where(turn_index, 1, span_norm[0])  # radial offset
         for i in range(2):
-            span_norm[i] = da.where(pair_index, span[i] / span_length, 0)
+            span_norm[i] = da.where(pair_index, span[i] / span_length,
+                                    span_norm[i])
         turnturn_length = self.turnturn_seperation()
         # blend interaction
         blending_factor = self.blending_factor(span_length, turn_radius)

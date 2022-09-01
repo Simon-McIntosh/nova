@@ -23,7 +23,7 @@ class Grid:
     """Specify interpolation grid attributes."""
 
     number: int = 2500
-    limit: Union[float, list[float]] = 0.25
+    limit: float | list[float] | str = 0.25
     index: Union[str, slice, npt.ArrayLike] = 'plasma'
 
     @property
@@ -88,7 +88,7 @@ class TimeSlice:
 class Extrapolate(BiotPlot, Machine, Grid, IDS):
     """Extrapolate equlibrium beyond separatrix ids."""
 
-    limit: Union[list[float], list[list[float], list[float]], str] = 'ids'
+    limit: float | list[float] | str = 'ids'
     ids_name: str = 'equilibrium'
     filename: str = 'extrapolate'
     geometry: list[str] = field(default_factory=lambda: ['pf_active', 'wall'])
@@ -146,7 +146,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         self.itime = itime
         time_slice = TimeSlice(self.data.isel(time=self.itime))
 
-        coilset.plasma.separatrix = time_slice.boundary
+        self.plasma.separatrix = time_slice.boundary
         plasma = self.aloc['plasma']
         ionize = self.aloc['ionize']
         radius = self.aloc['x'][ionize]
@@ -182,8 +182,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
     def plot(self, attr='psi'):
         """Plot plasma filements and polidal flux."""
         plt.figure()
-        super().plot()  # 'plasma'
-
+        super().plot('plasma')
         '''
         _ = self.grid.br
         psi2d = self.grid.psi.reshape(*self.grid.shape) / (2*np.pi)
@@ -191,6 +190,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
             np.gradient(psi2d, self.grid.data.z, axis=1, edge_order=2)
         self.grid.array['br'][:] = br.flatten()
         '''
+
 
         levels = self.grid.plot(attr, levels=51, colors='C0', nulls=False)
         self.plot_2d(self.itime, attr, colors='C3', levels=-levels[::-1],
@@ -201,10 +201,10 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
 if __name__ == '__main__':
 
     pulse, run = 114101, 41  # JINTRAC
-    # pulse, run = 130506, 403  # CORSICA
+    #pulse, run = 130506, 403  # CORSICA
 
     database = Database(pulse, run, 'equilibrium', machine='iter')
     coilset = Extrapolate(ids_data=database.ids_data,
-                          dplasma=-50, number=50).build()
+                          dplasma=-500, number=500).build()
     coilset.ionize(0)
-    coilset.plot('psi')
+    coilset.plot('bz')

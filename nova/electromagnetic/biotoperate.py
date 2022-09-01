@@ -57,9 +57,9 @@ class BiotOp:
 class BiotOperate(BiotData):
     """Multi-attribute interface to numba Biot Evaluate methods."""
 
-    version: dict[str, int] = field(
+    version: dict[str, int | None] = field(
         init=False, repr=False, default_factory=dict)
-    _svd_rank: int = field(init=False, default=75)
+    _svd_rank: int = field(init=False, default=-1)
     operator: dict[str, BiotOp] = field(init=False, default_factory=dict,
                                         repr=False)
     target_number: int = field(init=False, default=0)
@@ -83,7 +83,7 @@ class BiotOperate(BiotData):
         for attr in self.attrs:
             self.update_turns(attr)
 
-    def load(self, filename: str = None, path=None):
+    def load(self, filename=None, path=None):
         """Extend netCDF load."""
         super().load(filename, path)
         self.load_operators()

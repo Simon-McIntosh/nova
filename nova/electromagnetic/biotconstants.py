@@ -78,11 +78,9 @@ class BiotConstants:
     @staticmethod
     def ellippi(n, m):
         """Taken from https://github.com/scipy/scipy/issues/4452."""
-        y = 1 - m
-        rf = scipy.special.elliprf(0, y, 1)
-        rj = scipy.special.elliprj(0, y, 1, 1 - n)
-        if (index := np.isclose(1 - n, 1 - m, rtol=1e-3)).any():
-            rj[index] = scipy.special.elliprd(0, 1, 1 - n[index])
+        x, y, z, p = 0, 1-m, 1, 1-n
+        rf = scipy.special.elliprf(x, y, z)
+        rj = scipy.special.elliprj(x, y, z, p)
         return rf + rj * n / 3
 
     def np2(self, p: int):
@@ -104,8 +102,7 @@ class BiotConstants:
 
     def Pi(self, p: int):
         """Return complete elliptc intergral of the 3rd kind."""
-        return da.map_blocks(
-            self.ellippi, self.np2(p), self.k2, dtype=float)
+        return da.map_blocks(self.ellippi, self.np2(p), self.k2, dtype=float)
 
     @cached_property
     def U(self):
@@ -113,23 +110,17 @@ class BiotConstants:
         return self.k2 * (4*self.gamma**2 +
                           3*self.rs**2 - 5*self.r**2) / (4*self.r)
 
-    def zero_offset(self, array, atol=1e-16):
+    def zero_offset(self, array):
         """Return array with values close to zero offset to atol."""
-        if (index := da.isclose(array, 0, atol=atol)).any():
-            array[index] = atol
+        if (index := da.isclose(array, 0)).any():
+            array[index] = 1e-8
         return array
 
-    def unit_offset(self, array, atol=1e-16):
-        """Return array with values close to one offset to 1-atol."""
-        if (index := da.isclose(array, 1, atol=atol)).any():
-            array[index] = 1-atol
-        return array
-
-    def phi(self, alpha, atol=1e-16):
+    def phi(self, alpha):
         """Return sysrem invariant angle transformation."""
         phi = np.pi - 2*alpha
-        if np.isclose(phi, 0, atol=atol):
-            return atol
+        if np.isclose(phi, 0):
+            return 1e-8
         return phi
 
     def B2(self, alpha):

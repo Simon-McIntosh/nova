@@ -111,5 +111,6 @@ class Circuit(netCDF, FrameSetLoc):
                 factor *= -1
             sort = sorted(zip(index, factor),
                           key=lambda x: self.frame.index.get_loc(x[0]))
+            print(sort)
             index, factor = list(map(list, zip(*sort)))
             self.linkframe(index, factor[1:])

@@ -53,7 +53,6 @@ def test_ring_ring_coil_pair():
     assert np.isclose(coilset.point.psi, 0)
 
 
-@pytest.mark.skip('await biot cylinder speedup')
 def test_cyliner_cylinder_coil_pair():
     coilset = CoilSet(dcoil=-1)
     coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=-15e6, segment='cylinder')
@@ -71,21 +70,22 @@ def test_coil_xpoint():
     assert coilset.grid.o_point_number == 1
 
 
-@pytest.mark.skip('biot cylinder dev')
+def test_coil_cylinder_isfinite():
+    coilset = CoilSet(dcoil=-1)
+    coilset.coil.insert(6.5, [-1, 0, 1], 0.4, 0.4, Ic=-15e6,
+                        segment='cylinder')
+    coilset.grid.solve(60, [6, 7.0, -0.8, 0.8])
+    assert np.isfinite(coilset.grid.psi).all()
+
+
 def test_coil_cylinder_xpoint():
     coilset = CoilSet(dcoil=-1)
     coilset.coil.insert(6.5, [-1, 0, 1], 0.4, 0.4, Ic=-15e6,
                         segment='cylinder')
     coilset.grid.solve(60, [6, 7.0, -0.8, 0.8])
-    coilset.plot()
-    coilset.grid.plot()
-
-    print(coilset.grid.psi)
-
     assert coilset.grid.x_point_number == 2
     assert coilset.grid.o_point_number == 1
-#test_coil_cylinder_xpoint()
-#assert False
+
 
 def test_grid_xpoint_coil():
     coilset = CoilSet(dcoil=-5)

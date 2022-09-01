@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 import string
-from typing import ClassVar, Union
+from typing import Any, ClassVar, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -666,7 +666,7 @@ class Machine(CoilSet):
     geometry: Union[dict[str, tuple[int, int]], list[str]] = field(
         default_factory=lambda: ['pf_active', 'pf_passive', 'wall'])
 
-    machine_description: ClassVar[dict[str, MachineDescription]] = dict(
+    machine_description: ClassVar[dict[str, Any]] = dict(
         pf_active=PF_Active_Geometry,
         pf_passive=PF_Passive_Geometry,
         wall=Wall_Geometry)
@@ -679,7 +679,7 @@ class Machine(CoilSet):
         except (FileNotFoundError, OSError, KeyError):
             self.build()
 
-    def load(self, filename: str, path=None):
+    def load(self, filename=None, path=None):
         """Load machine geometry and data. Re-build if metadata diffrent."""
         self.update_group()
         super().load(filename, path)

@@ -7,7 +7,6 @@ from typing import ClassVar
 import dask.array as da
 import numpy as np
 
-from nova.electromagnetic.biotconstants import BiotConstants
 from nova.electromagnetic.biotframe import BiotFrame
 from nova.electromagnetic.biotmatrix import BiotMatrix
 
@@ -25,8 +24,8 @@ class BiotPolygon(BiotMatrix):
     reduction_matrix: da.Array = field(repr=False, init=False)
 
     name: ClassVar[str] = 'polygon'  # element name
-    attrs: ClassVar[list[str]] = dict(area='area')
-    metadata: ClassVar[dict[str, str]] = dict(
+    attrs: ClassVar[dict[str, str]] = dict(area='area')
+    metadata: ClassVar[dict[str, list]] = dict(
         required=['ref', 'r1', 'z1', 'r2', 'z2'], additional=[],
         available=[], array=['ref'], base=[])
 
@@ -128,7 +127,7 @@ class BiotPolygon(BiotMatrix):
         return (self.r1 - self.r * np.cos(phi))**2 + \
             self.a0**2 * self.r**2 * np.sin(phi)**2
 
-    @cached_property
+    #@cached_property
     def cphi(self, alpha):
         """Return the anti-derivative of Cphi(alpha)."""
 
@@ -139,11 +138,11 @@ if __name__ == '__main__':
 
     from nova.electromagnetic.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-1, dplasma=-150)
+    coilset = CoilSet(dcoil=-2, dplasma=-150)
     coilset.coil.insert([5, 6], 0.5, 0.2, 0.2, section='h', turn='r',
                         nturn=300, segment='polygon')
     coilset.coil.insert(5.5, 0.5, 0.6, 0.6, section='c', turn='r',
                         nturn=300, segment='polygon')
     coilset.plot()
 
-    coilset.grid.solve(3)
+    coilset.grid.solve(100)

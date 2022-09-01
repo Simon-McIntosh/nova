@@ -561,7 +561,9 @@ class PF_Active_Geometry(MachineDescription):
         self.circuit.initialize(supply, nodes)
         for circuit in self.load_ids_data('circuit'):
             self.circuit.insert(circuit.identifier, circuit.connections)
+        print('build circuit')
         self.circuit.link()  # link single loop circuits
+        print('post build')
 
 
 @dataclass

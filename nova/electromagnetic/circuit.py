@@ -43,20 +43,20 @@ class Circuit(netCDF, FrameSetLoc):
     def plot(self, circuit: str):
         """Plot directed graph."""
         edge_list = self.edge_list(circuit)
-        DiG = nx.DiGraph(edge_list.values())
-        pos = nx.planar_layout(DiG)
+        dig = nx.DiGraph(edge_list.values())
+        pos = nx.planar_layout(dig)
 
         edge_labels = {edge_list[edge]: edge for edge in edge_list}
         if len(edge_list) == 2:
-            nx.draw_networkx_edges(DiG, pos, connectionstyle='arc3,rad=0.15')
-            nx.draw_networkx_nodes(DiG, pos)
-            nx.draw_networkx_labels(DiG, pos)
-            nx.draw_networkx_edge_labels(DiG, pos, edge_labels=edge_labels,
+            nx.draw_networkx_edges(dig, pos, connectionstyle='arc3,rad=0.15')
+            nx.draw_networkx_nodes(dig, pos)
+            nx.draw_networkx_labels(dig, pos)
+            nx.draw_networkx_edge_labels(dig, pos, edge_labels=edge_labels,
                                          label_pos=0.3)
             plt.gca().set_axis_off()
             return
-        nx.draw(DiG, pos, with_labels=True)
-        nx.draw_networkx_edge_labels(DiG, pos, edge_labels=edge_labels,
+        nx.draw(dig, pos, with_labels=True)
+        nx.draw_networkx_edge_labels(dig, pos, edge_labels=edge_labels,
                                      label_pos=0.5)
 
     def plot_all(self):
@@ -69,9 +69,9 @@ class Circuit(netCDF, FrameSetLoc):
         """Extract basis loops."""
         edge_list = self.edge_list(circuit)
         edge_nodes = edge_list.values()
-        G = nx.Graph(edge_list)
+        graph = nx.Graph(edge_list)
         loops = []
-        for loop in nx.cycle_basis(G):
+        for loop in nx.cycle_basis(graph):
             edge = [_loop for _loop in loop if isinstance(_loop, str)]
             nodes = [_loop for _loop in loop if not isinstance(_loop, str)]
             nodes.append(nodes[0])
@@ -85,8 +85,8 @@ class Circuit(netCDF, FrameSetLoc):
                     continue
                 raise IndexError(f'node pair {pair} '
                                  f'not in edge nodes {edge_nodes}')
-            for i in range(len(edge)):
-                if edge[i] in self.frame.index:
+            for i, name in enumerate(edge):
+                if name in self.frame.index:
                     continue
                 if sign[i] == -1:
                     sign *= -1
@@ -108,9 +108,8 @@ class Circuit(netCDF, FrameSetLoc):
             if len(index) == 1:
                 continue
             if factor[0] == -1:
-                factor *= -1
+                factor = [-f for f in factor]
             sort = sorted(zip(index, factor),
                           key=lambda x: self.frame.index.get_loc(x[0]))
-            print(sort)
             index, factor = list(map(list, zip(*sort)))
             self.linkframe(index, factor[1:])

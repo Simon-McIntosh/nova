@@ -62,6 +62,22 @@ def test_cyliner_cylinder_coil_pair():
     assert np.isclose(coilset.point.psi, 0)
 
 
+@pytest.mark.skip('awaiting cylinder psi debug')
+def test_cylinder_ring_coil_pair():
+    coilset = CoilSet(dcoil=-1)
+    #coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=-15e6, segment='cylinder')
+    coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=15e6, segment='ring',
+                        delta=-10)
+    coilset.point.solve([[8, 0]])
+
+    coilset.grid.solve(300, 3)
+    coilset.grid.plot()
+    coilset.plot()
+
+    print(coilset.point.psi)
+    assert np.isclose(coilset.point.psi, 0)
+
+
 def test_coil_xpoint():
     coilset = CoilSet(dcoil=-5)
     coilset.coil.insert(6.5, [-1, 0, 1], 0.4, 0.4, Ic=-15e6)

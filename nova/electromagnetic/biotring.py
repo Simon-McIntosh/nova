@@ -16,7 +16,7 @@ class OffsetFilaments:
     data: dict[str, da.Array]
 
     fold_number: int = 0  # Number of e-foling lenghts within filament
-    merge_number: float = 1.0  # Merge radius, multiple of filament widths
+    merge_number: float = 1.5  # Merge radius, multiple of filament widths
     rms_offset: bool = True  # Maintain rms offset for filament pairs
 
     def __post_init__(self):

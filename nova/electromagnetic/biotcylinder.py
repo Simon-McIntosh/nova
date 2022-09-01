@@ -1,6 +1,6 @@
 """Biot-Savart calculation for complete circular cylinders."""
 from dataclasses import dataclass, field
-from functools import cached_property
+from functools import cached_property, wraps
 from typing import ClassVar
 
 import dask.array as da
@@ -8,6 +8,17 @@ import numpy as np
 
 from nova.electromagnetic.biotconstants import BiotConstants
 from nova.electromagnetic.biotmatrix import BiotMatrix
+
+
+def gamma_zero(func):
+    """Return result protected against degenerate values as gamma -> 0."""
+    @wraps(func)
+    def wrapper(self, i: int):
+        result = func(self, i)
+        if (index := np.isclose(self.gamma, 0)).any():
+            result[index] = 0
+        return result
+    return wrapper
 
 
 @dataclass
@@ -51,26 +62,40 @@ class BiotCylinder(BiotMatrix):
         """Return coefficent evaluated at self.corner."""
         return self.constant[self.corner][attr]
 
+    @gamma_zero
     def Aphi_hat(self, i: int):
-        """Return Aphi intergration coefficient."""
+        """Return vector potential intergration coefficient."""
         self.corner = i
-        result = self.Cphi(np.pi/2) + \
+        return self.Cphi(np.pi/2) + \
             self.gamma*self.r*self.zeta(np.pi/2) + \
             self.gamma*self.a / (6*self.r) * \
             (self.U*self.K - 2*self.rs*self.E) + \
             self.gamma / (6*self.a*self.r) * \
             da.sum(da.stack([(-1)**p * self.Pphi(p) * self.Pi(p) for
                              p in range(1, 4)]), axis=0)
-        if (index := np.isclose(self.gamma, 0)).any():
-            result[index] = 0
-        return result
+
+    @gamma_zero
+    def Br_hat(self, i: int):
+        """Return radial magnetic field intergration coefficient."""
+        self.corner = i
+
+        return da.zeros_like(self['r'])
+
+    @gamma_zero
+    def Bz_hat(self, i: int):
+        """Return vertical magnetic field intergration coefficient."""
+        self.corner = i
+        return da.zeros_like(self['r'])
+
+    def _intergrate(self, func):
+        """Return corner intergration."""
+        return 1 / (4*np.pi*self['area']) * \
+            ((func(2) - func(1)) - (func(3) - func(0)))
 
     @cached_property
     def Aphi(self):
         """Return Aphi dask array."""
-        return 1 / (4*np.pi*self['area']) * \
-            ((self.Aphi_hat(2) - self.Aphi_hat(1)) -
-             (self.Aphi_hat(3) - self.Aphi_hat(0)))
+        return self._intergrate(self.Aphi_hat)
 
     @property
     def Psi(self):
@@ -80,12 +105,12 @@ class BiotCylinder(BiotMatrix):
     @property
     def Br(self):
         """Return radial field dask array."""
-        return da.zeros_like(self['r'])
+        return self.mu_o * self._intergrate(self.Br_hat)
 
     @property
     def Bz(self):
         """Return vertical field dask array."""
-        return da.zeros_like(self['r'])
+        return self.mu_o * self._intergrate(self.Bz_hat)
 
 
 if __name__ == '__main__':

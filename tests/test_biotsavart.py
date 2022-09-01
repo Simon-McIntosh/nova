@@ -94,5 +94,26 @@ def test_solenoid_probe():
     assert allclose(Bz_point, Bz_theory, atol=5e-3)
 
 
+@pytest.mark.skip('awaiting field implementation in biot cylinder')
+def test_solenoid_probe_cylinder():
+    """Verify solenoid vertical field using probe biot instance."""
+    nturn, height, current = 500, 30, 1e3
+    coilset = CoilSet(dcoil=-1)
+    coilset.coil.insert(1.5, 0, 0.01, height, nturn=nturn, section='rectangle')
+    coilset.sloc['Ic'] = current
+
+    coilset.plot()
+    coilset.grid.solve(500, 2)
+    coilset.grid.plot()
+
+    biotpoint = BiotPoint(*coilset.frames)
+    biotpoint.solve((1e-9, 0))
+    Bz_theory = BiotMatrix.mu_o * nturn * current / height
+    Bz_point = np.dot(biotpoint.data.Bz, coilset.sloc['Ic'])
+
+    print(Bz_point, Bz_theory)
+    assert allclose(Bz_point, Bz_theory, atol=5e-3)
+
+
 if __name__ == '__main__':
     pytest.main([__file__])

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from nova.electromagnetic.biotpoint import BiotPoint
+from nova.biot.biotpoint import BiotPoint
 
 
 @dataclass

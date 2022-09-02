@@ -5,13 +5,13 @@ import inspect
 from typing import ClassVar, Any
 
 from nova.database.netcdf import netCDF
-from nova.electromagnetic.biotdata import BiotData
-from nova.electromagnetic.biotgrid import BiotGrid
-from nova.electromagnetic.biotinductance import BiotInductance
-from nova.electromagnetic.biotloop import BiotLoop
-from nova.electromagnetic.biotplasmagrid import BiotPlasmaGrid
-from nova.electromagnetic.biotplasmaboundary import BiotPlasmaBoundary
-from nova.electromagnetic.biotpoint import BiotPoint
+from nova.biot.biotdata import BiotData
+from nova.biot.biotgrid import BiotGrid
+from nova.biot.biotinductance import BiotInductance
+from nova.biot.biotloop import BiotLoop
+from nova.biot.biotplasmagrid import BiotPlasmaGrid
+from nova.biot.biotplasmaboundary import BiotPlasmaBoundary
+from nova.biot.biotpoint import BiotPoint
 from nova.electromagnetic.frameset import FrameSet
 from nova.electromagnetic.plasma import Plasma
 from nova.electromagnetic.circuit import Circuit

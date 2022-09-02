@@ -8,8 +8,8 @@ import numpy as np
 import scipy.spatial
 
 from nova.database.netcdf import netCDF
-from nova.electromagnetic.biotplasmagrid import BiotPlasmaGrid
-from nova.electromagnetic.biotplasmaboundary import BiotPlasmaBoundary
+from nova.biot.biotplasmagrid import BiotPlasmaGrid
+from nova.biot.biotplasmaboundary import BiotPlasmaBoundary
 from nova.electromagnetic.framesetloc import FrameSetLoc
 from nova.electromagnetic.polyplot import Axes
 from nova.geometry.polygon import Polygon

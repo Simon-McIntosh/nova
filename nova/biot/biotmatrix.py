@@ -5,7 +5,7 @@ from typing import ClassVar
 import dask.array as da
 import numpy as np
 
-from nova.electromagnetic.biotset import BiotSet
+from nova.biot.biotset import BiotSet
 
 
 @dataclass

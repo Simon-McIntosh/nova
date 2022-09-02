@@ -8,9 +8,9 @@ import pyvista
 import scipy.spatial
 import xarray
 
-from nova.electromagnetic.biotframe import BiotFrame
-from nova.electromagnetic.biotgrid import BiotBaseGrid
-from nova.electromagnetic.biotsolve import BiotSolve
+from nova.biot.biotframe import BiotFrame
+from nova.biot.biotgrid import BiotBaseGrid
+from nova.biot.biotsolve import BiotSolve
 from nova.electromagnetic.error import GridError, PlasmaGridError
 from nova.geometry.pointloop import PointLoop
 

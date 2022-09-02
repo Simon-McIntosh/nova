@@ -3,9 +3,9 @@ import dask.array as da
 import numpy as np
 
 from nova.electromagnetic.framespace import FrameSpace
-from nova.electromagnetic.biotsection import BiotSection
-from nova.electromagnetic.biotshape import BiotShape
-from nova.electromagnetic.biotreduce import BiotReduce
+from nova.biot.biotsection import BiotSection
+from nova.biot.biotshape import BiotShape
+from nova.biot.biotreduce import BiotReduce
 from nova.electromagnetic.geometry import PolyGeo
 
 

@@ -4,9 +4,9 @@ from dataclasses import dataclass
 # import nlopt
 import numpy as np
 
-from nova.electromagnetic.biotframe import BiotFrame
-from nova.electromagnetic.biotoperate import BiotOperate
-from nova.electromagnetic.biotsolve import BiotSolve
+from nova.biot.biotframe import BiotFrame
+from nova.biot.biotoperate import BiotOperate
+from nova.biot.biotsolve import BiotSolve
 from nova.electromagnetic.polyplot import Axes
 
 

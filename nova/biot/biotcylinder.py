@@ -6,8 +6,8 @@ from typing import ClassVar
 import dask.array as da
 import numpy as np
 
-from nova.electromagnetic.biotconstants import BiotConstants
-from nova.electromagnetic.biotmatrix import BiotMatrix
+from nova.biot.biotconstants import BiotConstants
+from nova.biot.biotmatrix import BiotMatrix
 
 
 def gamma_zero(func):

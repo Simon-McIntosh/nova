@@ -6,10 +6,10 @@ import numpy as np
 import pandas
 import xarray
 
-from nova.electromagnetic.biotcylinder import BiotCylinder
-from nova.electromagnetic.biotpolygon import BiotPolygon
-from nova.electromagnetic.biotring import BiotRing
-from nova.electromagnetic.biotset import BiotSet
+from nova.biot.biotcylinder import BiotCylinder
+from nova.biot.biotpolygon import BiotPolygon
+from nova.biot.biotring import BiotRing
+from nova.biot.biotset import BiotSet
 
 
 @dataclass

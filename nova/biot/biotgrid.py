@@ -9,9 +9,9 @@ from numpy import typing as npt
 import shapely.geometry
 import xarray
 
-from nova.electromagnetic.biotframe import BiotFrame
-from nova.electromagnetic.biotoperate import BiotOperate
-from nova.electromagnetic.biotsolve import BiotSolve
+from nova.biot.biotframe import BiotFrame
+from nova.biot.biotoperate import BiotOperate
+from nova.biot.biotsolve import BiotSolve
 from nova.electromagnetic.error import GridError
 from nova.electromagnetic.fieldnull import FieldNull
 from nova.electromagnetic.framelink import FrameLink

@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 
 import itertools
-from nova.electromagnetic.biotframe import BiotFrame
+from nova.biot.biotframe import BiotFrame
 from nova.utilities.pyplot import plt
 
 

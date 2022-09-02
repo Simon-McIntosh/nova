@@ -8,7 +8,7 @@ import numpy.typing as npt
 from pylops import LinearOperator
 from pylops.optimization.leastsquares import RegularizedInversion
 
-from nova.electromagnetic.biotoperate import matmul
+from nova.biot.biotoperate import matmul
 from nova.imas.equilibrium import Equilibrium
 from nova.linalg.decompose import Decompose
 from nova.utilities.plotter import LinePlot

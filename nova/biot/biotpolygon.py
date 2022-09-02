@@ -7,8 +7,9 @@ from typing import ClassVar
 import dask.array as da
 import numpy as np
 
-from nova.electromagnetic.biotframe import BiotFrame
-from nova.electromagnetic.biotmatrix import BiotMatrix
+from nova.biot.biotconstants import BiotConstants
+from nova.biot.biotframe import BiotFrame
+from nova.biot.biotmatrix import BiotMatrix
 
 
 @dataclass
@@ -70,7 +71,7 @@ class PolyConstants:
 
 
 @dataclass
-class BiotPolygon(BiotMatrix):
+class BiotPolygon(BiotConstants, BiotMatrix):
     """
     Extend Biotmatrix base class.
 
@@ -126,9 +127,8 @@ class BiotPolygon(BiotMatrix):
         for i in range(len(self.source)):
             self.reduction_matrix[:, i] = self.edge.loc[:, 'ref'] == i
 
-        print(self.edge)
+        print(self.rs.compute())
         assert False
-
 
 
 if __name__ == '__main__':
@@ -141,7 +141,5 @@ if __name__ == '__main__':
     coilset.coil.insert(5.5, 0.5, 0.6, 0.6, section='c', turn='r',
                         nturn=300, segment='polygon')
     coilset.plot()
-
-    print(coilset.frame.segment)
 
     coilset.grid.solve(100)

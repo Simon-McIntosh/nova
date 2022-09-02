@@ -2,12 +2,13 @@ import pytest
 from numpy import allclose
 import numpy as np
 
-from nova.electromagnetic.biotmatrix import BiotMatrix
-from nova.electromagnetic.biotframe import BiotFrame
-from nova.electromagnetic.biotgrid import BiotGrid
-from nova.electromagnetic.biotpoint import BiotPoint
-from nova.electromagnetic.biotring import BiotRing
-from nova.electromagnetic.biotsolve import BiotSolve
+
+from nova.biot.biotmatrix import BiotMatrix
+from nova.biot.biotframe import BiotFrame
+from nova.biot.biotgrid import BiotGrid
+from nova.biot.biotpoint import BiotPoint
+from nova.biot.biotring import BiotRing
+from nova.biot.biotsolve import BiotSolve
 from nova.electromagnetic.coilset import CoilSet
 
 

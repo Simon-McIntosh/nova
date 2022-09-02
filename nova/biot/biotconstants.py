@@ -1,5 +1,5 @@
 """Biot-Savart intergration constants."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 
 import dask.array as da
@@ -16,10 +16,10 @@ import scipy.special
 class BiotConstants:
     """Manage biot intergration constants."""
 
-    rs: da.Array
-    zs: da.Array
-    r: da.Array
-    z: da.Array
+    rs: da.Array = field(default_factory=lambda: da.empty([]))
+    zs: da.Array = field(default_factory=lambda: da.empty([]))
+    r: da.Array = field(default_factory=lambda: da.empty([]))
+    z: da.Array = field(default_factory=lambda: da.empty([]))
 
     def __getitem__(self, attr):
         """Provide dict-like access to attributes."""

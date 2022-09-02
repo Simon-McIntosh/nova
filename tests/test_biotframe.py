@@ -2,8 +2,8 @@ import pytest
 
 import numpy as np
 
-from nova.electromagnetic.biotframe import BiotFrame
-from nova.electromagnetic.biotsection import BiotSection
+from nova.biot.biotframe import BiotFrame
+from nova.biot.biotsection import BiotSection
 from nova.electromagnetic.framelink import FrameLink
 from nova.electromagnetic.dataframe import DataFrame
 

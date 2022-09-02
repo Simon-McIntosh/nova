@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 import numba
 import numpy as np
 
-from nova.electromagnetic.biotdata import BiotData
+from nova.biot.biotdata import BiotData
 
 
 @numba.njit(fastmath=True, parallel=True)

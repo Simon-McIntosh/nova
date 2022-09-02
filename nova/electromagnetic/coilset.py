@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from nova.electromagnetic.framefactory import FrameFactory
 from nova.electromagnetic.frameset import FrameSet
-from nova.electromagnetic.biotfactory import BiotFactory
+from nova.biot.biotfactory import BiotFactory
 from nova.geometry.polygon import Polygon
 
 

@@ -5,7 +5,7 @@ import numpy as np
 
 from nova.imas.database import Database
 from nova.imas.scenario import Scenario
-from nova.electromagnetic.biotgrid import BiotPlot
+from nova.biot.biotgrid import BiotPlot
 from nova.utilities.pyplot import plt
 
 

@@ -1,8 +1,8 @@
 """Build interaction matrix toroidal loops."""
 from dataclasses import dataclass
 
-from nova.electromagnetic.biotoperate import BiotOperate
-from nova.electromagnetic.biotsolve import BiotSolve
+from nova.biot.biotoperate import BiotOperate
+from nova.biot.biotsolve import BiotSolve
 from nova.electromagnetic.polyplot import Axes
 
 

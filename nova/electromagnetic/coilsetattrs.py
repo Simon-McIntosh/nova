@@ -76,6 +76,8 @@ class CoilSetAttrs(ABC, FrameSetLoc):
         for attr in [attr.name for attr in fields(self)]:
             if attr in self.attributes and attr not in self._attrs:
                 self._attrs[attr] = getattr(self, attr)
+            if attr in ['section', 'turn']:
+                self._attrs[attr] = PolyGen.polyshape[self._attrs[attr]]
 
     def update_link(self):
         """Update link boolean."""
@@ -90,7 +92,7 @@ class GridAttrs(CoilSetAttrs):
 
     gridattrs: dict = field(init=False, default_factory=lambda: {})
     attributes: list[str] = field(init=False, default_factory=lambda: [
-        'trim', 'fill', 'delta', 'section', 'turn', 'tile'])
+        'trim', 'fill', 'delta', 'turn', 'section', 'tile'])
 
     @property
     def attrs(self):
@@ -100,7 +102,7 @@ class GridAttrs(CoilSetAttrs):
     @attrs.setter
     def attrs(self, attrs):
         CoilSetAttrs.attrs.fset(self, attrs)
-        self._attrs['turn'] = PolyGen.polyshape[self._attrs['turn']]
+        #self._attrs['turn'] = PolyGen.polyshape[self._attrs['turn']]
         self.set_conditional_attributes()
         self.gridattrs = {attr: self._attrs.pop(attr)
                           for attr in self.gridattrs}

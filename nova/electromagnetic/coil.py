@@ -11,13 +11,15 @@ class Coil(PoloidalGrid):
     tile: bool = False
     fill: bool = False
     turn: str = 'rectangle'
+    section: str = 'rectangle'
+    segment: str = 'ring'
     required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
     default: dict = field(init=False, default_factory=lambda: {
         'label': 'Coil', 'part': 'coil', 'active': True})
 
     def set_conditional_attributes(self):
         """Set conditional attrs."""
-        self.ifthen(['delta', 'turn'],
+        self.ifthen(['delta', 'section'],
                     [-1, 'rectangle'],
                     'segment', 'cylinder')
         self.ifthen('turn', 'hexagon', 'tile', True)

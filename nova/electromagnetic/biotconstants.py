@@ -25,6 +25,13 @@ class BiotConstants:
         """Provide dict-like access to attributes."""
         return getattr(self, attr)
 
+    def phi(self, alpha):
+        """Return sysrem invariant angle transformation."""
+        phi = np.pi - 2*alpha
+        if np.isclose(phi, 0):
+            return 1e-8
+        return phi
+
     @cached_property
     def b(self):
         """Return b coefficient."""
@@ -115,13 +122,6 @@ class BiotConstants:
         if (index := da.isclose(array, 0)).any():
             array[index] = 1e-8
         return array
-
-    def phi(self, alpha):
-        """Return sysrem invariant angle transformation."""
-        phi = np.pi - 2*alpha
-        if np.isclose(phi, 0):
-            return 1e-8
-        return phi
 
     def B2(self, alpha):
         """Return B2 coefficient."""

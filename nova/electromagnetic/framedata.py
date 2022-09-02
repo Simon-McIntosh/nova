@@ -11,8 +11,8 @@ from nova.electromagnetic.framespace import FrameSpace
 class FrameData:
     """Package FrameSpace instances. Manage boolean methods."""
 
-    frame: FrameSpace | None = field(default=None, repr=False)
-    subframe: FrameSpace | None = field(default=None, repr=False)
+    frame: FrameSpace = field(repr=False, default_factory=FrameSpace)
+    subframe: FrameSpace = field(repr=False, default_factory=FrameSpace)
 
     @property
     def frames(self):

@@ -143,3 +143,23 @@ class BiotRing(BiotMatrix):
              (2*self['r'] - self.const['b']*self.const['k2']) /
              (2*self.const['ck2']) * self.const['E']) / \
             (self.const['a']*self['r'])
+
+
+if __name__ == '__main__':
+
+    from nova.electromagnetic.coilset import CoilSet
+
+    coilset = CoilSet(dcoil=-50, dplasma=-150)
+    coilset.coil.insert(5, 0.5, 0.01, 0.8, section='r', turn='r',
+                        nturn=300, segment='ring')
+    coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, section='r', turn='r',
+                        nturn=300, segment='ring')
+    coilset.coil.insert(5.1, 0.5-0.4, 0.2, 0.01, section='r', turn='r',
+                        nturn=300, segment='ring')
+    coilset.coil.insert(5.2, 0.5, 0.01, 0.8, section='r', turn='r',
+                        nturn=300, segment='ring')
+    coilset.saloc['Ic'] = 5e3
+
+    coilset.grid.solve(2000, 1)
+    coilset.grid.plot(colors='C1')
+    coilset.plot()

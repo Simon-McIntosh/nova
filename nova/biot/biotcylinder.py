@@ -5,6 +5,7 @@ from typing import ClassVar
 
 import dask.array as da
 import numpy as np
+import scipy.integrate
 
 from nova.biot.biotconstants import BiotConstants
 from nova.biot.biotmatrix import BiotMatrix
@@ -19,6 +20,74 @@ def gamma_zero(func):
             result[index] = 0
         return result
     return wrapper
+
+
+@dataclass
+class CylinderConstants(BiotConstants):
+    """Extend BiotConstants class."""
+
+    romberg_k: int = 8
+
+    alpha: ClassVar[float] = np.pi/2
+
+    def __post_init__(self):
+        """Build intergration parameters."""
+        self.phi_zeta, self.dphi_zeta = \
+            da.linspace(np.pi, np.pi - 2*self.alpha,
+                        2**self.romberg_k + 1, retstep=True)
+        print(self.dphi_zeta)
+
+    def B2(self, phi):
+        """Return B2 coefficient."""
+        return self.rs**2 + self.r**2 - 2*self.r*self.rs*np.cos(phi)
+
+    def D2(self, phi):
+        """Return D2 coefficient."""
+        return self.gamma**2 + self.B2(phi)
+
+    def G2(self, phi):
+        """Return G2 coefficient."""
+        return self.gamma**2 + self.r**2 * np.sin(phi)**2
+
+    def beta1(self, phi):
+        """Return beta1 coefficient."""
+        return (self.rs - self.r * np.cos(phi)) / np.sqrt(self.G2(phi))
+
+    def beta2(self, phi):
+        """Return beta2 coefficient."""
+        return self.gamma / np.sqrt(self.B2(phi))
+
+    def beta3(self, phi):
+        """Return beta3 coefficient."""
+        return self.gamma*(self.rs - self.r * np.cos(phi)) / \
+            (self.r * np.sin(phi) * np.sqrt(self.D2(phi)))
+
+    def Cphi_coef(self, alpha):
+        """Return Cphi(alpha) coefficient."""
+        phi = self.phi(alpha)
+        return 1/2 * self.gamma*self.a * \
+            np.sqrt(1 - self.k2 * np.sin(alpha)**2) * \
+            -np.sin(2*alpha) - 1/6*np.arcsinh(self.beta2(phi)) * \
+            np.sin(2*alpha) * (2*self.r**2 * np.sin(2*alpha)**2 +
+                               3*(self.rs**2 - self.r**2)) - \
+            1/4*self.gamma*self.r * \
+            np.arcsinh(self.beta1(phi)) * \
+            -np.sin(4*alpha) - 1/3*self.r**2 * \
+            np.arctan(self.beta3(phi)) * -np.cos(2*alpha)**3
+
+    @property
+    def Cphi(self):
+        """Return Cphi intergration constant."""
+        return self.Cphi_coef(self.alpha) - self.Cphi_coef(0)
+
+    @property
+    def zeta(self):
+        """Return zeta coefficient calculated using Romberg integration."""
+        beta1 = da.stack([self.beta1(phi) for phi in self.phi_zeta])
+        asinh_beta1 = np.arcsinh(beta1).rechunk({0: -1, 1: 'auto', 2: 'auto'},
+                                                block_size_limit=1e8)
+        return asinh_beta1.map_blocks(scipy.integrate.romb, dx=self.dphi_zeta,
+                                      axis=0, dtype=float, drop_axis=0)
 
 
 @dataclass
@@ -43,7 +112,7 @@ class BiotCylinder(BiotMatrix):
         self.constant = [[] for _ in range(4)]
         for i, (unit_x, unit_z) in enumerate(zip([-1, 1, 1, -1],
                                                  [-1, -1, 1, 1])):
-            self.constant[i] = BiotConstants(
+            self.constant[i] = CylinderConstants(
                 self['rs'] + unit_x/2 * self['dx'],
                 self['zs'] + unit_z/2 * self['dz'],
                 self['r'], self['z'])
@@ -66,8 +135,7 @@ class BiotCylinder(BiotMatrix):
     def Aphi_hat(self, i: int):
         """Return vector potential intergration coefficient."""
         self.corner = i
-        return self.Cphi(np.pi/2) + \
-            self.gamma*self.r*self.zeta(np.pi/2) + \
+        return self.Cphi + self.gamma*self.r*self.zeta + \
             self.gamma*self.a / (6*self.r) * \
             (self.U*self.K - 2*self.rs*self.E) + \
             self.gamma / (6*self.a*self.r) * \
@@ -131,27 +199,3 @@ if __name__ == '__main__':
     coilset.grid.solve(2000, 1)
     coilset.grid.plot(colors='C1')
     coilset.plot()
-
-    '''
-    coilset = CoilSet(dcoil=-2, dplasma=-150)
-    coilset.coil.insert(5, 0.5, 0.4, 0.8, section='r', turn='r',
-                        nturn=300, segment='ring')
-    coilset.saloc['Ic'] = 5e3
-
-    coilset.grid.solve(1000, limit=[4.5, 6, 0, 1])
-    coilset.grid.plot(colors='C0')
-    coilset.plot()
-    '''
-
-
-    '''
-    from nova.electromagnetic.framespace import FrameSpace
-    radius, height = np.meshgrid(np.linspace(4, 7, 5),
-                                 np.linspace(-1, 1, 10))
-    frame = FrameSpace(dict(x=radius.flatten(),
-                            z=height.flatten(), segment='cylinder'))
-
-    cylinder = BiotCylinder(frame, frame)
-
-    print(cylinder.Aphi_hat(0).compute())
-    '''

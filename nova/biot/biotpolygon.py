@@ -13,32 +13,23 @@ from nova.biot.biotmatrix import BiotMatrix
 
 
 @dataclass
-class PolyConstants:
+class PolygonConstants(BiotConstants):
+    """Extend biot constants class to include polygon specific attributes."""
 
-    def beta1(self, alpha):
-        """Return beta1 coefficient."""
-        phi = self.phi(alpha)
-        return (self.r1 - self.r * np.cos(phi))**2 / self.G2(alpha)
+    @cached_property
+    def delta_r(self):
+        """Return delta rs coefficent."""
+        return self.rv2 - self.rv1
+
+    @cached_property
+    def delta_z(self):
+        """Return delta zs coefficent."""
+        return self.zv2 - self.zv1
 
     @cached_property
     def gamma(self):
-        """Return gamma coefficient."""
-        return self.z1 - self.z
-
-    def Gamma(self, alpha):
-        """Return Gamma coefficient."""
-        phi = self.phi(alpha)
-        return self.gamma + self.b1*(self.r1 - self.r*np.cos(phi))
-
-    @cached_property
-    def a0(self):
-        """Return a0 coefficient."""
-        return 1 + self.b1**2
-
-    @cached_property
-    def a2(self):
-        """Return a2 coefficent."""
-        return self.gamma**2 + self.rs
+        """Return gamma coefficient (override BiotConstant)."""
+        return self.zv1 - self.z
 
     @cached_property
     def b1(self):
@@ -46,32 +37,58 @@ class PolyConstants:
         return self.delta_r / self.delta_z
 
     @cached_property
-    def delta_r(self):
-        """Return delta r coefficient."""
-        return self.r2 - self.r1
+    def r1(self):
+        """Return r1 coefficient."""
+        return self.rv1 - self.b1
 
     @cached_property
-    def delta_z(self):
-        """Return delta r coefficient."""
-        return self.z2 - self.z1
+    def a02(self):
+        """Return a0**2 coefficient."""
+        return 1 + self.b1**2
 
-    def G2(self, alpha):
-        """Return G2 coefficient."""
-        phi = self.phi(alpha)
+    def Gamma(self, phi):
+        """Return Gamma coefficient."""
+        return self.gamma + self.b1*(self.rs - self.r * np.cos(phi))
+
+    def G2(self, phi):
+        """Return G**2 coefficient (override BiotConstant)."""
         return self.gamma**2 + self.r**2 * np.sin(phi)**2
 
-    def B2(self, alpha):
-        """Return B2 coefficient."""
-        phi = self.phi(alpha)
+    def B2(self, phi):
+        """Return B2 coefficient (override BiotConstant)."""
         return (self.r1 - self.r * np.cos(phi))**2 + \
-            self.a0**2 * self.r**2 * np.sin(phi)**2
+            self.a02 * self.r**2 * np.sin(phi)**2
+
+    def D2(self, phi):
+        """Return D2 coefficient (override BiotConstant)."""
+        return self.gamma**2 + self.r**2 * np.sin(phi)**2 + \
+            (self.rs - self.r * np.cos(phi))**2
+
+    def beta1(self, phi):
+        """Return beta1 coefficient."""
+        return (self.rs - self.r * np.cos(phi)) / np.sqrt(self.G2(phi))
+
+    def beta2(self, phi):
+        """Return beta2 coefficient."""
+        return self.Gamma(phi) / np.sqrt(self.B2(phi))
+
+    def beta3(self, phi):
+        """Return beta3 coefficient."""
+        return (self.gamma * (self.rs - self.r * np.cos(phi)) - self.b1 *
+                self.G2(phi)) / (self.r * np.sin(phi) * np.sqrt(self.D2(phi)))
+
+    @cached_property
+    def a2(self):
+        """Return a2 coefficent."""
+        return self.gamma**2 + self.rs
+
 
     def cphi(self, alpha):
         """Return the anti-derivative of Cphi(alpha)."""
 
 
 @dataclass
-class BiotPolygon(BiotConstants, BiotMatrix):
+class BiotPolygon(PolygonConstants, BiotMatrix):
     """
     Extend Biotmatrix base class.
 
@@ -85,7 +102,7 @@ class BiotPolygon(BiotConstants, BiotMatrix):
     name: ClassVar[str] = 'polygon'  # element name
     attrs: ClassVar[dict[str, str]] = dict(area='area')
     metadata: ClassVar[dict[str, list]] = dict(
-        required=['ref', 'r1', 'z1', 'r2', 'z2'], additional=[],
+        required=['ref', 'rv1', 'rv2', 'zv1', 'zv2'], additional=[],
         available=[], array=['ref'], base=[])
 
     def __post_init__(self):
@@ -121,13 +138,14 @@ class BiotPolygon(BiotConstants, BiotMatrix):
         with self.target_edge():
             attrs = dict(r='x', z='z')
             for attr in attrs:
-                self.data[attr] = self.target(attrs[attr])
+                setattr(self, attr, self.target(attrs[attr]))
         self.reduction_matrix = da.zeros((len(self.edge), len(self.source)),
                                          dtype=bool)
         for i in range(len(self.source)):
             self.reduction_matrix[:, i] = self.edge.loc[:, 'ref'] == i
-
-        print(self.rs.compute())
+        self.rs = self.r1 + self.b1 * self.gamma
+        #  self.r1 @ self.reduction_matrix).compute()
+        print(self.beta1(0).shape)
         assert False
 
 

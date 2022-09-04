@@ -35,7 +35,9 @@ class CylinderConstants(BiotConstants):
         self.phi_zeta, self.dphi_zeta = \
             da.linspace(np.pi, np.pi - 2*self.alpha,
                         2**self.romberg_k + 1, retstep=True)
-        print(self.dphi_zeta)
+
+        self.alpha, self.dalpha = da.linspace(0, self.alpha,
+                                              2**self.romberg_k + 1, retstep=True)
 
     def B2(self, alpha):
         """Return B2 coefficient."""
@@ -84,11 +86,10 @@ class CylinderConstants(BiotConstants):
 
     def zeta(self, alpha, k=8):
         """Return zeta coefficient calculated using Romberg integration."""
-        alpha, dalpha = da.linspace(0, alpha, 2**k + 1, retstep=True)
-        beta1 = da.stack([self.beta1(_alpha) for _alpha in alpha])
+        beta1 = da.stack([self.beta1(_alpha) for _alpha in self.alpha])
         asinh_beta1 = np.arcsinh(beta1).rechunk({0: -1, 1: 'auto', 2: 'auto'},
                                                 block_size_limit=1e8)
-        return asinh_beta1.map_blocks(scipy.integrate.romb, dx=dalpha, axis=0,
+        return asinh_beta1.map_blocks(scipy.integrate.romb, dx=self.dalpha, axis=0,
                                       dtype=float, drop_axis=0)
 
 

@@ -43,12 +43,12 @@ class BiotMatrix(BiotSet):
         Apply reduction summations.
 
         """
-        matrix = np.array(getattr(self, attr).compute())
+        matrix = getattr(self, attr).compute() #np.array()  #
         plasma = matrix[:, self.source.plasma]
         if self.source.turns:
-            matrix *= self.source('nturn').compute()
+            matrix *= self.source('nturn').compute() #.compute()
         if self.target.turns:
-            matrix *= (turns := self.target('nturn').compute())
+            matrix *= (turns := self.target('nturn').compute())  #.compute()
             plasma *= turns[:, self.source.plasma]
         # reduce
         if self.source.reduce and self.source.biotreduce.reduce:

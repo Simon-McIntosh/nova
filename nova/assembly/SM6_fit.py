@@ -412,8 +412,8 @@ if __name__ == '__main__':
     transform = SectorTransform(7, True, method='rms',
                                 files=dict(reference_ccl='reference_ccl'))
     #transform.plot('target')
-    #transform.plot('reference')
-    transform.plot('fit', ': gaussian process')
+    transform.plot('reference')
+    transform.plot('fit')
     #transform.plot_transform()
     #transform.write()
 

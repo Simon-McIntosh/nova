@@ -30,10 +30,8 @@ class BiotFrame(FrameSpace):
                         array=['x', 'z']) | metadata
         super().update_metadata(data, columns, attrs, metadata)
 
-    def __call__(self, attr, chunks=5000) -> da.Array:
+    def __call__(self, attr, chunks=1000) -> da.Array:
         """Return attribute matrix, shape(target, source)."""
-        #vector = da.from_array(self[attr][:, np.newaxis], chunks=chunks)
-        vector = self[attr][:, np.newaxis]
         region = self.biotshape.region
         if self.biotshape.region == '':
             raise IndexError('Frame region not specified.\n'
@@ -44,10 +42,15 @@ class BiotFrame(FrameSpace):
         partner = next(partner for partner in
                        ['source', 'target'] if partner != region)
         reps = getattr(self.biotshape, partner)
-        matrix = da.from_array(np.tile(vector, reps), chunks=(chunks, chunks))
-        #matrix = vector.map_blocks(np.tile, reps=reps, chunks=(chunks, chunks))
+        #vector = self[attr][:, np.newaxis]
+        #matrix = da.from_array(np.tile(vector, reps), chunks=(chunks, chunks))
+        print(reps)
+        vector = da.from_array(self[attr][:, np.newaxis], chunks=chunks)
+        matrix = vector.map_blocks(np.tile, reps=reps, dtype=float,
+                                   chunks=(chunks, chunks))
         if region == 'source':
             return da.transpose(matrix).compute_chunk_sizes()
+        print(attr, matrix)
         return matrix.compute_chunk_sizes()
 
     def set_target(self, number):

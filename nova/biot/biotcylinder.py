@@ -112,6 +112,9 @@ class BiotCylinder(BiotMatrix):
         """Load intergration constants."""
         super().__post_init__()
         self.constant = [[] for _ in range(4)]
+        print('r', self.target('x'))
+        print('rs', self.source('x'))
+
         for i, (unit_x, unit_z) in enumerate(zip([-1, 1, 1, -1],
                                                  [-1, -1, 1, 1])):
             self.constant[i] = CylinderConstants(

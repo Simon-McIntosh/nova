@@ -27,8 +27,8 @@ class BiotConstants:
     def phi(self, alpha):
         """Return sysrem invariant angle transformation."""
         phi = np.pi - 2*alpha
-        if np.isclose(phi, 0, atol=1e-16):
-            return 1e-16
+        #if da.isclose(phi, 0, atol=1e-16):
+        #    return 1e-16
         return phi
 
     @cached_property
@@ -92,7 +92,7 @@ class BiotConstants:
     def np2(self, p: int):
         """Return np**2 constant."""
         if p == 1:
-            return 2*self.r / self.zero_offset(self.r - self.c)
+            return 2*self.r / (self.r - self.c)  # self.zero_offset
         if p == 2:
             return 2*self.r / (self.r + self.c)
         if p == 3:

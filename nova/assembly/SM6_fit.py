@@ -37,15 +37,16 @@ class Plotter:
         """Transform data to cylindrical coordinates."""
         self.extract(data)
 
-    def __call__(self, label: str = 'target', stage: int = 2):
+    def __call__(self, label: str = 'target', stage: int = 2,
+                 coil_index=range(2)):
         """Plot fiducial and centerline fits."""
         if label == 'target':
             return self.target()
         if stage > 0:
-            self.fiducial(label)
+            self.fiducial(label, coil_index=coil_index)
         if stage > 1:
-            self.fiducial(f'{label}_target')
-            self.centerline(label)
+            self.fiducial(f'{label}_target', coil_index=coil_index)
+            self.centerline(label, coil_index=coil_index)
 
     def extract(self, cartisean_data: xarray.Dataset):
         """Extract cartisean data and map to cylindrical coordinates."""
@@ -86,9 +87,9 @@ class Plotter:
     def plot_box(self, data_array: xarray.DataArray):
         """Plot bounding box around target."""
 
-    def target(self):
+    def target(self, coil_index=range(2)):
         """Plot fiducial targets."""
-        for i in range(2):
+        for i in coil_index:
             self.axes[0].plot(self.data.centerline[i, :, 0],
                               self.data.centerline[i, :, 2],
                               '--', color='gray')
@@ -114,11 +115,11 @@ class Plotter:
         """Return displacment delta multiplied by scale factor."""
         return self.factor * self.data[f'{label}']
 
-    def fiducial(self, label: str):
+    def fiducial(self, label: str, coil_index=range(2)):
         """Plot fiducial deltas."""
         color = self.color.get(label, self.color[label.split('_')[0]])
         marker = self.marker[label]
-        for i in range(2):
+        for i in coil_index:
             delta = self.delta(label)
             self.axes[0].plot(self.data.target[i, :, 0] + delta[i, :, 0],
                               self.data.target[i, :, 2] + delta[i, :, 2],
@@ -127,10 +128,10 @@ class Plotter:
                               self.data.target[i, :, 2] + delta[i, :, 2],
                               color+marker)
 
-    def centerline(self, label: str):
+    def centerline(self, label: str, coil_index=range(2)):
         """Plot gpr centerline."""
         color = self.color[f'{label}_target']
-        for i in range(2):
+        for i in coil_index:
             delta = self.delta(f'{label}_centerline')
             self.axes[0].plot(self.data.centerline[i, :, 0] + delta[i, :, 0],
                               self.data.centerline[i, :, 2] + delta[i, :, 2],
@@ -220,6 +221,34 @@ class SectorTransform:
         for attr in [target, centerline]:
             self.data[attr] = self.rotate.to_cartesian(self.data[attr])
 
+    def plot_gpr(self, label: str, coil_index: int):
+        """Load gaussian process regressor."""
+        delta = self.rotate.to_cylindrical(self.data[label]) - \
+            self.data.target_cylindrical
+        axes = plt.subplots(3, 1, sharex=True)[1]
+        for space_index in range(self.data.dims['cylindrical']):
+            self.gpr.fit(delta[coil_index, :, space_index])
+            self.gpr.predict(self.data.arc_length)
+            self.gpr.plot(axes[space_index], text=False,
+                          marker='X', color='C1', line_color='C0')
+            self.gpr.predict(self.data.target_length)
+            #axes[space_index].plot(self.data.target_length,
+            #                       self.gpr.data.y_mean, 'dC0')
+            coord = str(self.data.cylindrical[space_index].values)
+            coord = coord.replace('phi', r'\phi')
+            axes[space_index].set_ylabel(rf'${coord}$')
+        plt.despine()
+        axes[-1].set_xlabel('arc length')
+        axes[0].set_title(f'TF{self.data.coil[coil_index].values:1d}')
+        plt.tight_layout()
+        plt.savefig('gpr.png')
+
+    def plot_coil(self, label: str, coil_index: int):
+        plotter = Plotter(self.data)
+        plotter(label, 2, coil_index=[coil_index])
+        plotter.axes[0].set_title(f'TF{self.data.coil[coil_index].values:d}')
+        plt.savefig('coil.png')
+
     def load_gpr(self):
         """Load gaussian process regressor."""
         self.gpr = GaussianProcessRegressor(self.data.target_length,
@@ -303,7 +332,7 @@ class SectorTransform:
         self.data['fit'] = self.transform(opt.x, self.data.reference.copy())
         self.evaluate_gpr('fit', self.data.fit)
 
-    def plot(self, label: str):
+    def plot(self, label: str, postfix=''):
         """Plot fits."""
         plotter = Plotter(self.data)
         plotter('target')
@@ -311,10 +340,10 @@ class SectorTransform:
             stage = 1 + int(self.infer)
             stage = 2
             plotter(label, stage)
-            plotter.axes[0].set_title(label)
+            plotter.axes[0].set_title(label + postfix)
             self.text_fit(plotter.axes[0], label)
         plt.tight_layout()
-        # plt.savefig('fit.png')
+        plt.savefig('fit.png')
 
     def plot_transform(self):
         """Plot transform text."""
@@ -384,6 +413,9 @@ if __name__ == '__main__':
                                 files=dict(reference_ccl='reference_ccl'))
     #transform.plot('target')
     #transform.plot('reference')
-    transform.plot('fit')
-    transform.plot_transform()
-    transform.write()
+    transform.plot('fit', ': gaussian process')
+    #transform.plot_transform()
+    #transform.write()
+
+    #transform.plot_gpr('reference', 0)
+    #transform.plot_gpr('reference', 1)

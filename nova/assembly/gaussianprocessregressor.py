@@ -32,7 +32,9 @@ class GaussianProcessRegressor:
             ExpSineSquared = sklearn.gaussian_process.kernels.ExpSineSquared(
                 length_scale=0.85, length_scale_bounds='fixed',
                 periodicity=1.0, periodicity_bounds='fixed')
-            kernel = ExpSineSquared
+            Constant = sklearn.gaussian_process.kernels.ConstantKernel(
+                constant_value=1.0, constant_value_bounds=(1e-12, 1e2))
+            kernel = ExpSineSquared + Constant
             self.regressor = sklearn.gaussian_process.GaussianProcessRegressor(
                 kernel=kernel, alpha=self.variance)
 
@@ -81,13 +83,16 @@ class GaussianProcessRegressor:
         self.fit(y)
         return self.predict(x)
 
-    def plot(self, axes=None, text=True):
+    def plot(self, axes=None, text=True,
+             marker='o', color='C3', line_color='gray'):
         """Plot current GP regression."""
         if axes is None:
             axes = plt.subplots(1, 1)[1]
-        axes.scatter(self.data.x, self.data.y, c='C3', s=30, zorder=10,
+        axes.scatter(self.data.x, self.data.y, marker=marker,
+                     color=color, s=30, zorder=10,
                      label='fiducial data')
-        axes.plot(self.data.x_mean, self.data.y_mean, 'gray', lw=2, zorder=9)
+        axes.plot(self.data.x_mean, self.data.y_mean, line_color,
+                  lw=2, zorder=9)
         axes.fill_between(self.data.x_mean,
                           self.data.y_mean - self.data.y_std,
                           self.data.y_mean + self.data.y_std,

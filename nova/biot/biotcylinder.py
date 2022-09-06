@@ -16,8 +16,9 @@ def gamma_zero(func):
     @wraps(func)
     def wrapper(self, i: int):
         result = func(self, i)
-        if (index := np.isclose(self.gamma, 0)).any():
-            result[index] = 0
+        #if (index := da.isclose(self.gamma, 0)).any():
+        #    result[index] = 0
+        result[da.isclose(self.gamma, 0)] = 0
         return result
     return wrapper
 
@@ -27,70 +28,67 @@ class CylinderConstants(BiotConstants):
     """Extend BiotConstants class."""
 
     romberg_k: int = 8
-
-    alpha: ClassVar[float] = np.pi/2
+    alpha: float = np.pi/2
 
     def __post_init__(self):
         """Build intergration parameters."""
-        self.phi_zeta, self.dphi_zeta = \
-            da.linspace(np.pi, np.pi - 2*self.alpha,
-                        2**self.romberg_k + 1, retstep=True)
+        if self.alpha >= np.pi/2:
+            self.alpha -= 1e-14
+        self.phi_zeta = da.linspace(np.pi, np.pi - 2*self.alpha,
+                                    2**self.romberg_k + 1)
+        self.dalpha_zeta = self.alpha / 2**self.romberg_k
 
-        self.alpha, self.dalpha = da.linspace(0, self.alpha,
-                                              2**self.romberg_k + 1, retstep=True)
-
-    def B2(self, alpha):
+    def B2(self, phi):
         """Return B2 coefficient."""
-        phi = self.phi(alpha)
-        return self.rs**2 + self.r**2 - 2*self.r*self.rs*np.cos(phi)
+        return self.rs**2 + self.r**2 - 2*self.r*self.rs*da.cos(phi)
 
-    def D2(self, alpha):
+    def D2(self, phi):
         """Return D2 coefficient."""
-        return self.gamma**2 + self.B2(alpha)
+        return self.gamma**2 + self.B2(phi)
 
-    def G2(self, alpha):
+    def G2(self, phi):
         """Return G2 coefficient."""
-        phi = self.phi(alpha)
-        return self.gamma**2 + self.r**2 * np.sin(phi)**2
+        return self.gamma**2 + self.r**2 * da.sin(phi)**2
 
-    def beta1(self, alpha):
+    def beta1(self, phi):
         """Return beta1 coefficient."""
-        phi = self.phi(alpha)
-        return (self.rs - self.r * np.cos(phi)) / np.sqrt(self.G2(alpha))
+        return (self.rs - self.r * da.cos(phi)) / da.sqrt(self.G2(phi))
 
-    def beta2(self, alpha):
+    def beta2(self, phi):
         """Return beta2 coefficient."""
-        return self.gamma / np.sqrt(self.B2(alpha))
+        return self.gamma / da.sqrt(self.B2(phi))
 
-    def beta3(self, alpha):
+    def beta3(self, phi):
         """Return beta3 coefficient."""
-        phi = self.phi(alpha)
-        return self.gamma*(self.rs - self.r * np.cos(phi)) / \
-            (self.r * np.sin(phi) * np.sqrt(self.D2(alpha)))
+        return self.gamma*(self.rs - self.r * da.cos(phi)) / \
+            (self.r * da.sin(phi) * da.sqrt(self.D2(phi)))
 
     def Cphi_coef(self, alpha):
         """Return Cphi(alpha) coefficient."""
+        phi = np.pi - 2*alpha
         return 1/2 * self.gamma*self.a * \
-            np.sqrt(1 - self.k2 * np.sin(alpha)**2) * \
-            -np.sin(2*alpha) - 1/6*np.arcsinh(self.beta2(alpha)) * \
-            np.sin(2*alpha) * (2*self.r**2 * np.sin(2*alpha)**2 +
+            da.sqrt(1 - self.k2 * da.sin(alpha)**2) * \
+            -da.sin(2*alpha) - 1/6*da.arcsinh(self.beta2(phi)) * \
+            da.sin(2*alpha) * (2*self.r**2 * da.sin(2*alpha)**2 +
                                3*(self.rs**2 - self.r**2)) - \
             1/4*self.gamma*self.r * \
-            np.arcsinh(self.beta1(alpha)) * \
-            -np.sin(4*alpha) - 1/3*self.r**2 * \
-            np.arctan(self.beta3(alpha)) * -np.cos(2*alpha)**3
+            da.arcsinh(self.beta1(phi)) * \
+            -da.sin(4*alpha) - 1/3*self.r**2 * \
+            da.arctan(self.beta3(phi)) * -da.cos(2*alpha)**3
 
-    def Cphi(self, alpha):
+    @property
+    def Cphi(self):
         """Return Cphi intergration constant."""
-        return self.Cphi_coef(alpha) - self.Cphi_coef(0)
+        return self.Cphi_coef(self.alpha) - self.Cphi_coef(0)
 
-    def zeta(self, alpha, k=8):
+    @property
+    def zeta(self):
         """Return zeta coefficient calculated using Romberg integration."""
-        beta1 = da.stack([self.beta1(_alpha) for _alpha in self.alpha])
-        asinh_beta1 = np.arcsinh(beta1).rechunk({0: -1, 1: 'auto', 2: 'auto'},
-                                                block_size_limit=1e8)
-        return asinh_beta1.map_blocks(scipy.integrate.romb, dx=self.dalpha, axis=0,
-                                      dtype=float, drop_axis=0)
+        asinh_beta1 = da.stack([da.arcsinh(self.beta1(phi))
+                                for phi in self.phi_zeta])
+        return asinh_beta1.map_blocks(
+            scipy.integrate.romb, dx=self.dalpha_zeta, axis=0, dtype=float,
+            drop_axis=0)
 
 
 @dataclass
@@ -102,6 +100,7 @@ class BiotCylinder(BiotMatrix):
 
     """
 
+    romberg_k: int = 8
     _corner: int = field(init=False, default=0, repr=False)
 
     name: ClassVar[str] = 'cylinder'  # element name
@@ -118,7 +117,7 @@ class BiotCylinder(BiotMatrix):
             self.constant[i] = CylinderConstants(
                 self['rs'] + unit_x/2 * self['dx'],
                 self['zs'] + unit_z/2 * self['dz'],
-                self['r'], self['z'])
+                self['r'], self['z'], romberg_k=self.romberg_k)
 
     @property
     def corner(self):
@@ -138,8 +137,7 @@ class BiotCylinder(BiotMatrix):
     def Aphi_hat(self, i: int):
         """Return vector potential intergration coefficient."""
         self.corner = i
-        return self.Cphi(np.pi/2) + \
-            self.gamma*self.r*self.zeta(np.pi/2) + \
+        return self.Cphi + self.gamma*self.r*self.zeta +\
             self.gamma*self.a / (6*self.r) * \
             (self.U*self.K - 2*self.rs*self.E) + \
             self.gamma / (6*self.a*self.r) * \
@@ -150,7 +148,6 @@ class BiotCylinder(BiotMatrix):
     def Br_hat(self, i: int):
         """Return radial magnetic field intergration coefficient."""
         self.corner = i
-
         return da.zeros_like(self['r'])
 
     @gamma_zero

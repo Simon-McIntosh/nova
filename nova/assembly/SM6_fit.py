@@ -66,6 +66,9 @@ class Plotter:
                     self.rotate.to_cylindrical(
                         cartisean_data[f'{attr}_{norm}']) - \
                     self.data[norm]
+            self.data[f'{attr}_centerline_sample'] = \
+                cartisean_data[f'{attr}_centerline_sample'] - \
+                self.data['centerline']
         self.data.target[..., 1] = 0
         self.data.centerline[..., 1] = 0
 
@@ -128,11 +131,14 @@ class Plotter:
                               self.data.target[i, :, 2] + delta[i, :, 2],
                               color+marker)
 
-    def centerline(self, label: str, coil_index=range(2)):
+    def centerline(self, label: str, coil_index=range(2), samples=True):
         """Plot gpr centerline."""
         color = self.color[f'{label}_target']
+        attr = f'{label}_centerline'
+        if samples:
+            attr += '_sample'
         for i in coil_index:
-            delta = self.delta(f'{label}_centerline')
+            delta = self.delta(attr)
             self.axes[0].plot(self.data.centerline[i, :, 0] + delta[i, :, 0],
                               self.data.centerline[i, :, 2] + delta[i, :, 2],
                               color=color)
@@ -148,6 +154,7 @@ class SectorTransform:
     sector: int = 6
     infer: bool = True
     method: str = 'rms'
+    n_samples: int = 10
     files: dict[str, str] = field(default_factory=dict)
     gpr: GaussianProcessRegressor = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, repr=False,
@@ -206,9 +213,13 @@ class SectorTransform:
             self.data.target_cylindrical
         target = f'{label}_target'
         centerline = f'{label}_centerline'
+        sample = f'{label}_centerline_sample'
         self.data[target] = xarray.zeros_like(self.data.target_cylindrical)
         self.data[centerline] = \
             xarray.zeros_like(self.data.centerline_cylindrical)
+        self.data[sample] = \
+            xarray.zeros_like(self.data[centerline]).expand_dims(
+                dict(samples=self.n_samples), axis=-1).copy()
         for coil_index in range(self.data.dims['coil']):
             for space_index in range(self.data.dims['cylindrical']):
                 self.gpr.fit(delta[coil_index, :, space_index])
@@ -216,12 +227,18 @@ class SectorTransform:
                     self.gpr.predict(self.data.target_length)
                 self.data[centerline][coil_index, :, space_index] = \
                     self.gpr.predict(self.data.arc_length)
+                self.data[sample][coil_index, :, space_index, :] = \
+                    self.gpr.sample(self.data.arc_length, self.n_samples)
         self.data[target] += self.data.target_cylindrical
         self.data[centerline] += self.data.centerline_cylindrical
+        self.data[sample] += self.data.centerline_cylindrical
         for attr in [target, centerline]:
             self.data[attr] = self.rotate.to_cartesian(self.data[attr])
+        #for i in range(self.n_samples):
+        #    self.data[sample][..., i] = \
+        #        self.rotate.to_cartesian(self.data[sample][..., i])
 
-    def plot_gpr(self, label: str, coil_index: int):
+    def plot_gpr(self, label: str, coil_index: int, n_samples=10):
         """Load gaussian process regressor."""
         delta = self.rotate.to_cylindrical(self.data[label]) - \
             self.data.target_cylindrical
@@ -231,9 +248,13 @@ class SectorTransform:
             self.gpr.predict(self.data.arc_length)
             self.gpr.plot(axes[space_index], text=False,
                           marker='X', color='C1', line_color='C0')
+            if n_samples > 0:
+                self.gpr.sample(self.data.arc_length, n_samples)
+                self.gpr.plot_samples(axes[space_index])
+
             self.gpr.predict(self.data.target_length)
-            #axes[space_index].plot(self.data.target_length,
-            #                       self.gpr.data.y_mean, 'dC0')
+            axes[space_index].plot(self.data.target_length,
+                                   self.gpr.data.y_mean, 'dC0')
             coord = str(self.data.cylindrical[space_index].values)
             coord = coord.replace('phi', r'\phi')
             axes[space_index].set_ylabel(rf'${coord}$')
@@ -243,9 +264,15 @@ class SectorTransform:
         plt.tight_layout()
         plt.savefig('gpr.png')
 
-    def plot_coil(self, label: str, coil_index: int):
+    def plot_coil(self, label: str, coil_index: int, n_samples=10):
+        """Plot single coil."""
         plotter = Plotter(self.data)
         plotter(label, 2, coil_index=[coil_index])
+        if n_samples > 0:
+            self.gpr.sample(self.data.arc_length, n_samples)
+            plotter.axis[0].plot()
+
+
         plotter.axes[0].set_title(f'TF{self.data.coil[coil_index].values:d}')
         plt.savefig('coil.png')
 
@@ -324,7 +351,7 @@ class SectorTransform:
 
     def fit(self):
         """Perform sector fit."""
-        xo = np.zeros(6)
+        xo = np.ones(6)
         opt = minimize(self.scalar_error, xo, method='SLSQP', args=(None,))
         if not opt.success:
             warnings.warn(f'optimization failed {opt}')
@@ -417,5 +444,5 @@ if __name__ == '__main__':
     #transform.plot_transform()
     #transform.write()
 
-    #transform.plot_gpr('reference', 0)
+    transform.plot_gpr('reference', 0, 10)
     #transform.plot_gpr('reference', 1)

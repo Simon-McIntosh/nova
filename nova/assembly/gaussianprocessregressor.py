@@ -29,12 +29,12 @@ class GaussianProcessRegressor:
     def build_regressor(self):
         """Build Gaussian Process Regressor."""
         if self.regressor is None:
-            ExpSineSquared = sklearn.gaussian_process.kernels.ExpSineSquared(
-                length_scale=0.85, length_scale_bounds='fixed',
+            expsinesquared = sklearn.gaussian_process.kernels.ExpSineSquared(
+                length_scale=1.5, length_scale_bounds='fixed',
                 periodicity=1.0, periodicity_bounds='fixed')
-            Constant = sklearn.gaussian_process.kernels.ConstantKernel(
-                constant_value=1.0, constant_value_bounds=(1e-12, 1e2))
-            kernel = ExpSineSquared + Constant
+            constant = sklearn.gaussian_process.kernels.ConstantKernel(
+                constant_value=1.0, constant_value_bounds=(1e-14, 1e2))
+            kernel = expsinesquared + constant
             self.regressor = sklearn.gaussian_process.GaussianProcessRegressor(
                 kernel=kernel, alpha=self.variance)
 
@@ -61,13 +61,16 @@ class GaussianProcessRegressor:
         self.data['_y'] = _y
         self.regressor = self.regressor.fit(_x.reshape(-1, 1), _y)
 
+    def x_space(self, x: int | npt.ArrayLike) -> np.ndarray:
+        """Return input as numpy array."""
+        if isinstance(x, int):
+            return np.linspace(self.period[0], self.period[1], x)
+        return self.to_numpy(x)
+
     def predict(self, x_mean):
-        """Sample Gaussian Process Regressor."""
-        if isinstance(x_mean, int):
-            x_mean = np.linspace(*self.period, x_mean)
-        else:
-            x_mean = self.to_numpy(x_mean)
-        y_mean, y_cov = self.regressor.predict(x_mean.reshape(-1, 1),
+        """Return mean Gaussian Process Regressor."""
+        x_mean = self.x_space(x_mean)
+        y_mean, y_cov = self.regressor.predict(x_mean[:, np.newaxis],
                                                return_cov=True)
         try:
             self.data = self.data.drop_vars(['x_mean', 'y_mean', 'y_std'])
@@ -77,6 +80,25 @@ class GaussianProcessRegressor:
         self.data['y_mean'] = ('x_mean', y_mean)
         self.data['y_std'] = ('x_mean', np.sqrt(np.diag(y_cov)))
         return y_mean
+
+    def sample(self, x_sample, n_samples: int):
+        """Return mean Gaussian Process Regressor."""
+        x_sample = self.x_space(x_sample)
+        y_sample = self.regressor.sample_y(x_sample[:, np.newaxis], n_samples)
+        try:
+            self.data = self.data.drop_vars(
+                ['samples', 'x_sample', 'y_sample'])
+        except ValueError:
+            pass
+        self.data['x_sample'] = x_sample
+        self.data['samples'] = range(n_samples)
+        self.data['y_sample'] = ('x_sample', 'samples'), y_sample
+        return y_sample
+
+    def plot_samples(self, axes):
+        """Plot gpr samples."""
+        axes.plot(self.data.x_sample, self.data.y_sample, 'gray',
+                  lw=0.5, zorder=-5)
 
     def evaluate(self, x, y):
         """Return GPR prediction at x for data points y."""

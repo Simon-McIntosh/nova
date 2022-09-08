@@ -13,7 +13,7 @@ from nova.biot.biotmatrix import BiotMatrix
 class OffsetFilaments:
     """Offset source and target filaments."""
 
-    data: dict[str, da.Array]
+    data: dict[str, da.Array | np.ndarray]
 
     fold_number: int = 0  # Number of e-foling lenghts within filament
     merge_number: float = 1.5  # Merge radius, multiple of filament widths
@@ -33,11 +33,11 @@ class OffsetFilaments:
 
     def effective_turn_radius(self):
         """Return effective source turn radius."""
-        return da.max(da.stack([self['dx'], self['dz']]), axis=0) / 2
+        return np.max(np.stack([self['dx'], self['dz']]), axis=0) / 2
 
     def source_target_seperation(self):
         """Return source-target seperation vector."""
-        return da.stack([self['r']-self['rs'], self['z']-self['zs']])
+        return np.stack([self['r']-self['rs'], self['z']-self['zs']])
 
     def turnturn_seperation(self):
         """Return self seperation length."""
@@ -53,10 +53,10 @@ class OffsetFilaments:
 
     def apply_rms_offset(self, merge_index, radial_offset):
         """Return effective rms offfset."""
-        merge_index = merge_index.compute()
-        source_radius = self['rs'][merge_index].compute_chunk_sizes()
-        target_radius = self['r'][merge_index].compute_chunk_sizes()
-        radial_offset = radial_offset[merge_index].compute_chunk_sizes()
+        merge_index = merge_index
+        source_radius = self['rs'][merge_index]
+        target_radius = self['r'][merge_index]
+        radial_offset = radial_offset[merge_index]
         rms_delta = np.zeros(merge_index.shape)
         rms_delta[merge_index] = (np.sqrt(
             (target_radius + source_radius)**2 -
@@ -69,19 +69,16 @@ class OffsetFilaments:
         """Apply radial and vertical offsets."""
         turn_radius = self.effective_turn_radius()
         span = self.source_target_seperation()
-        span_length = da.linalg.norm(span, axis=0)
+        span_length = np.linalg.norm(span, axis=0)
         # index
         merge_index = span_length <= turn_radius*self.merge_number
-        if not merge_index.any().compute():
+        if not merge_index.any():
             return
         # interacton orientation
-        turn_index = da.isclose(span_length, 0)#, atol=5e-2*turn_radius)
-        pair_index = da.invert(turn_index)
-        span_norm = da.zeros((2, *turn_index.shape))
-        span_norm[0] = da.where(turn_index, 1, span_norm[0])  # radial offset
-        for i in range(2):
-            span_norm[i] = da.where(pair_index, span[i] / span_length,
-                                    span_norm[i])
+        turn_index = np.isclose(span_length, 0, atol=5e-2*np.max(turn_radius))
+        span_norm = span / span_length
+        span_norm[0] = np.where(turn_index, 1, span_norm[0])  # radial offset
+        span_norm[1] = np.where(turn_index, 0, span_norm[1])
         turnturn_length = self.turnturn_seperation()
         # blend interaction
         blending_factor = self.blending_factor(span_length, turn_radius)
@@ -149,7 +146,7 @@ if __name__ == '__main__':
 
     from nova.electromagnetic.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-50, dplasma=-150)
+    coilset = CoilSet(dcoil=-100, dplasma=-150)
     coilset.coil.insert(5, 0.5, 0.01, 0.8, section='r', turn='r',
                         nturn=300, segment='ring')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, section='r', turn='r',

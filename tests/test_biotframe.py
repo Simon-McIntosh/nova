@@ -79,7 +79,7 @@ def test_region_not_set_errot():
 def test_matrix_shape():
     biotframe = BiotFrame({'x': range(2), 'z': range(2)})
     biotframe.biotshape.set_target(6)
-    assert biotframe('x').compute().shape == (6, 2)
+    assert biotframe('x').shape == (6, 2)
 
 
 if __name__ == '__main__':

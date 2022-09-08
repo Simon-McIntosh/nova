@@ -27,10 +27,11 @@ class BiotFrame(FrameSpace):
         metadata = dict(required=['x', 'z'],
                         additional=['plasma', 'nturn', 'link', 'segment'],
                         available=['section', 'poly'],
-                        array=['x', 'z']) | metadata
+                        array=['x', 'z', 'dx', 'dz',
+                               'area', 'nturn']) | metadata
         super().update_metadata(data, columns, attrs, metadata)
 
-    def __call__(self, attr, chunks=1000) -> da.Array:
+    def __call__(self, attr) -> da.Array | np.ndarray:
         """Return attribute matrix, shape(target, source)."""
         region = self.biotshape.region
         if self.biotshape.region == '':
@@ -42,16 +43,13 @@ class BiotFrame(FrameSpace):
         partner = next(partner for partner in
                        ['source', 'target'] if partner != region)
         reps = getattr(self.biotshape, partner)
-        #vector = self[attr][:, np.newaxis]
-        #matrix = da.from_array(np.tile(vector, reps), chunks=(chunks, chunks))
-        print(reps)
-        vector = da.from_array(self[attr][:, np.newaxis], chunks=chunks)
-        matrix = vector.map_blocks(np.tile, reps=reps, dtype=float,
-                                   chunks=(chunks, chunks))
-        if region == 'source':
-            return da.transpose(matrix).compute_chunk_sizes()
-        print(attr, matrix)
-        return matrix.compute_chunk_sizes()
+        matrix = np.tile(self[attr], reps=(reps, 1))
+        if region == 'target':
+            matrix = np.transpose(matrix)
+        return matrix
+        if attr == 'nturn':
+            return matrix
+        return da.from_array(matrix, chunks=1000)
 
     def set_target(self, number):
         """Set target number."""

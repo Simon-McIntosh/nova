@@ -16,7 +16,7 @@ extras_require = dict(
                       )
 
 extras_require['full'] = [module for mode in extras_require for module in extras_require[mode] 
-                          if mode not in ['cuda', 'plan', 'optimize', 'mesh']]
+                          if mode not in ['ansys', 'cuda', 'plan', 'optimize', 'mesh', 'thermofluids']]
 
 setup_kwargs = dict(
     name                = 'nova',

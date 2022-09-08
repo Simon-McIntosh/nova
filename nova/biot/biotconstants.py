@@ -1,6 +1,6 @@
 """Biot-Savart intergration constants."""
 from dataclasses import dataclass, field
-from functools import cached_property
+from functools import cached_property, wraps
 
 import dask.array as da
 import numpy as np
@@ -24,12 +24,14 @@ class BiotConstants:
         """Provide dict-like access to attributes."""
         return getattr(self, attr)
 
+    '''
     def phi(self, alpha):
         """Return sysrem invariant angle transformation."""
         phi = np.pi - 2*alpha
-        #if da.isclose(phi, 0, atol=1e-16):
+        #if np.isclose(phi, 0, atol=1e-16):
         #    return 1e-16
         return phi
+    '''
 
     @cached_property
     def b(self):
@@ -49,7 +51,7 @@ class BiotConstants:
     @cached_property
     def a(self):
         """Return a coefficient."""
-        return da.sqrt(self.a2)
+        return np.sqrt(self.a2)
 
     @cached_property
     def c2(self):
@@ -59,7 +61,7 @@ class BiotConstants:
     @cached_property
     def c(self):
         """Return c coefficient."""
-        return da.sqrt(self.c2)
+        return np.sqrt(self.c2)
 
     @cached_property
     def k2(self):
@@ -74,12 +76,14 @@ class BiotConstants:
     @cached_property
     def K(self):
         """Return elliptic intergral of the 1st kind."""
-        return self.k2.map_blocks(scipy.special.ellipk, dtype=float)
+        return scipy.special.ellipk(self.k2)
+        #return self.k2.map_blocks(scipy.special.ellipk, dtype=float)
 
     @cached_property
     def E(self):
         """Return elliptic intergral of the 2nd kind."""
-        return self.k2.map_blocks(scipy.special.ellipe, dtype=float)
+        return scipy.special.ellipe(self.k2)
+        #return self.k2.map_blocks(scipy.special.ellipe, dtype=float)
 
     @staticmethod
     def ellippi(n, m):
@@ -108,7 +112,8 @@ class BiotConstants:
 
     def Pi(self, p: int):
         """Return complete elliptc intergral of the 3rd kind."""
-        return da.map_blocks(self.ellippi, self.np2(p), self.k2, dtype=float)
+        return self.ellippi(self.np2(p), self.k2)
+        #return da.map_blocks(self.ellippi, self.np2(p), self.k2, dtype=float)
 
     @cached_property
     def U(self):
@@ -118,6 +123,6 @@ class BiotConstants:
 
     def zero_offset(self, array):
         """Return array with values close to zero offset to atol."""
-        if (index := da.isclose(array, 0, atol=1e-16)).any():
+        if (index := np.isclose(array, 0, atol=1e-16)).any():
             array[index] = 1e-16
         return array

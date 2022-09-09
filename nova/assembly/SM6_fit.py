@@ -234,9 +234,6 @@ class SectorTransform:
         self.data[sample] += self.data.centerline_cylindrical
         for attr in [target, centerline]:
             self.data[attr] = self.rotate.to_cartesian(self.data[attr])
-        #for i in range(self.n_samples):
-        #    self.data[sample][..., i] = \
-        #        self.rotate.to_cartesian(self.data[sample][..., i])
 
     def plot_gpr(self, label: str, coil_index: int, n_samples=10):
         """Load gaussian process regressor."""
@@ -271,8 +268,6 @@ class SectorTransform:
         if n_samples > 0:
             self.gpr.sample(self.data.arc_length, n_samples)
             plotter.axis[0].plot()
-
-
         plotter.axes[0].set_title(f'TF{self.data.coil[coil_index].values:d}')
         plt.savefig('coil.png')
 
@@ -436,13 +431,13 @@ class SectorTransform:
 
 if __name__ == '__main__':
 
-    transform = SectorTransform(7, True, method='rms',
+    transform = SectorTransform(6, True, method='rms', n_samples=5,
                                 files=dict(reference_ccl='reference_ccl'))
     #transform.plot('target')
-    transform.plot('reference')
-    transform.plot('fit')
+    #transform.plot('reference')
+    #transform.plot('fit')
     #transform.plot_transform()
     #transform.write()
 
-    transform.plot_gpr('reference', 0, 10)
+    transform.plot_gpr('reference', 0)
     #transform.plot_gpr('reference', 1)

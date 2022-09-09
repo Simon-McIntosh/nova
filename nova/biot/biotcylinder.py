@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from functools import cached_property, wraps
 from typing import ClassVar
 
-import dask.array as da
 import numpy as np
 import scipy.integrate
 
@@ -16,9 +15,7 @@ def gamma_zero(func):
     @wraps(func)
     def wrapper(self, i: int):
         result = func(self, i)
-        #if (index := da.isclose(self.gamma, 0)).any():
-        #    result[index] = 0
-        result[np.isclose(self.gamma, 0)] = 0
+        result[self.gamma_zero] = 0
         return result
     return wrapper
 
@@ -40,7 +37,8 @@ class CylinderConstants(BiotConstants):
 
     def B2(self, phi):
         """Return B2 coefficient."""
-        return self.rs**2 + self.r**2 - 2*self.r*self.rs*np.cos(phi)
+        return self.zero_offset(self.rs**2 + self.r**2 -
+                                2*self.r*self.rs*np.cos(phi))
 
     def D2(self, phi):
         """Return D2 coefficient."""
@@ -87,11 +85,6 @@ class CylinderConstants(BiotConstants):
         asinh_beta1 = np.stack([np.arcsinh(self.beta1(phi))
                                 for phi in self.phi_zeta])
         return scipy.integrate.romb(asinh_beta1, dx=self.dalpha_zeta, axis=0)
-        '''
-        return asinh_beta1.map_blocks(
-            scipy.integrate.romb, dx=self.dalpha_zeta, axis=0, dtype=float,
-            drop_axis=0)
-        '''
 
 
 @dataclass
@@ -164,7 +157,7 @@ class BiotCylinder(BiotMatrix):
         return 1 / (4*np.pi*self['area']) * \
             ((func(2) - func(1)) - (func(3) - func(0)))
 
-    @cached_property
+    @property
     def Aphi(self):
         """Return Aphi dask array."""
         return self._intergrate(self.Aphi_hat)
@@ -189,8 +182,8 @@ if __name__ == '__main__':
 
     from nova.electromagnetic.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-1, dplasma=-150)
-
+    coilset = CoilSet(dcoil=-4, dplasma=-150)
+    '''
     coilset.coil.insert(5, 0.5, 0.01, 0.8, section='r', turn='r',
                         nturn=300, segment='cylinder')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, section='r', turn='r',
@@ -199,11 +192,11 @@ if __name__ == '__main__':
                         nturn=300, segment='cylinder')
     coilset.coil.insert(5.2, 0.5, 0.01, 0.8, section='r', turn='r',
                         nturn=300, segment='cylinder')
-
-    #coilset.coil.insert(5.1, 0.5, 0.02, 0.02, section='r', turn='r',
-    #                    nturn=300, segment='cylinder')
+    '''
+    coilset.coil.insert(5.1, 0.5, 0.02, 0.02, section='r', turn='r',
+                        nturn=300, segment='cylinder')
     coilset.saloc['Ic'] = 5e3
 
-    coilset.grid.solve(2e4, 1)
-    coilset.grid.plot(colors='C1')
+    coilset.grid.solve(20000, 1)
+    coilset.grid.plot(colors='C1', nulls=False)
     coilset.plot()

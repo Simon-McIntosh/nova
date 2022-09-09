@@ -26,9 +26,9 @@ class Polygon(PolyFrame):
 
     poly: Union[PolyFrame, shapely.geometry.Polygon,
                 dict[str, list[float]],
-                list[float, float, float, float],
+                list[float],
                 npt.ArrayLike]
-    name: str = None
+    name: str | None = None
     metadata: dict = field(init=False, default_factory=dict)
 
     def __post_init__(self):

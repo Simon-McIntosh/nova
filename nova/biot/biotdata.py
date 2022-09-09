@@ -12,7 +12,7 @@ from nova.electromagnetic.framesetloc import FrameSetLoc
 class BiotData(ABC, netCDF, FrameSetLoc):
     """Biot solution abstract base class."""
 
-    name: str = field(default=None)
+    name: str = field(default='')
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     classname: str = field(init=False)
     data: xarray.Dataset = field(init=False, repr=False,
@@ -31,9 +31,9 @@ class BiotData(ABC, netCDF, FrameSetLoc):
         """Return dataset length."""
         return len(self.data)
 
-    @abstractmethod
-    def solve(self):
-        """Solve biot interaction."""
+    #@abstractmethod
+    #def solve(self):
+    #    """Solve biot interaction."""
 
     def post_solve(self):
         """Post process biot solution - extened by subclass."""

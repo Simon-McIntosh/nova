@@ -31,7 +31,7 @@ class BiotPlasmaGrid(BiotBaseGrid):
             raise PlasmaGridError(self.Loc['plasma', 'turn'].values)
         target = BiotFrame(self.subframe.loc['plasma', ['x', 'z']].to_dict())
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
-                              attrs=self.attrs).data
+                              attrs=self.attrs, chunks=self.chunks).data
         self.tessellate()
         super().post_solve()
 

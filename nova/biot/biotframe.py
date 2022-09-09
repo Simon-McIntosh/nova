@@ -15,12 +15,14 @@ from nova.electromagnetic.geometry import PolyGeo
 class BiotFrame(FrameSpace):
     """Extend FrameSpace class with biot specific attributes and methods."""
 
-    _metadata = ['turns', 'reduce']
+    _metadata = ['turns', 'reduce', 'chunks']
 
     def __init__(self, data=None, index=None, columns=None, attrs=None,
                  **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
         self.frame_attrs(PolyGeo, BiotShape, BiotSection, BiotReduce)
+        for attr in self._metadata:
+            setattr(self, attr, None)
 
     def update_metadata(self, data, columns, attrs, metadata):
         """Extend FrameAttrs update_metadata."""
@@ -46,10 +48,9 @@ class BiotFrame(FrameSpace):
         matrix = np.tile(self[attr], reps=(reps, 1))
         if region == 'target':
             matrix = np.transpose(matrix)
-        return matrix
-        if attr == 'nturn':
+        if attr == 'nturn' or self.chunks is None:
             return matrix
-        return da.from_array(matrix, chunks=1000)
+        return da.from_array(matrix, chunks=self.chunks)
 
     def set_target(self, number):
         """Set target number."""
@@ -70,56 +71,3 @@ if __name__ == '__main__':
     biotframe.insert(range(3), 3, dl=0.95, dt=0.6, section='skin', link=True)
 
     biotframe.multipoint.link(['Coil0', 'Coil11', 'Coil2', 'Coil8'])
-
-
-'''
-
-    def update(self):
-        """Update self."""
-        self.drop()
-        self.insert(self.frame)
-        if self.frameindex != slice(None):
-            self.index_coil(self.frameindex)
-
-    def index_coil(self, index):
-        """
-        Drop coils, index coilframe.
-
-        Parameters
-        ----------
-        index : Union[int, str, list[int], list[bool], list[str],
-                      pandas.Index, slice]
-            Coil index.
-
-        Returns
-        -------
-        None.
-
-        """
-        if not isinstance(index, pandas.Index):
-            index = self.coilframe.index[index]
-        index = np.array([name in index for name in self.coilframe.index])
-        self._frameindex = index[self.coilframe._reduction_index]
-        drop_index = self.index[~index]
-        CoilFrame.drop_coil(self, drop_index)
-        self._update_cross_section_factor()
-
-    def _link_coilframe(self, *args):
-        """Link to coilframe instance to propagate future coilframe updates."""
-        if self._is_coilframe(*args, accept_dataframe=False):
-            self.coilframe = args[0]
-
-    def update_coilframe(self):
-        """
-        Rebuild coilframe following geometric changes to coilset.
-
-        Returns
-        -------
-        None.
-
-        """
-        if hasattr(self, 'coilframe'):
-            if self.coilframe is not None:
-                if self.coilframe.nC != self._framenumber:
-                    self.update_coil()
-'''

@@ -85,7 +85,8 @@ class BiotSolve(BiotSet):
         generator = self.generator[segment](
             pandas.DataFrame(
                 self.source.loc[self.source.segment == segment, :]),
-            self.target, turns=self.turns, reduce=self.reduce)
+            self.target, turns=self.turns, reduce=self.reduce,
+            chunks=self.chunks)
         generator.source.metaframe.data = {}
         for attr in self.attrs:
             matrix, plasma = generator.compute(attr)

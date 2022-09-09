@@ -1,11 +1,12 @@
 """Biot-Savart intergration constants."""
 from dataclasses import dataclass, field
-from functools import cached_property, wraps
+from functools import cached_property
 
 import dask.array as da
 import numpy as np
 import scipy.special
 
+Array = da.Array | np.ndarray
 
 # pylint: disable=no-member  # disable scipy.special module not found
 # pylint: disable=W0631  # disable short names
@@ -15,88 +16,97 @@ import scipy.special
 class BiotConstants:
     """Manage biot intergration constants."""
 
-    rs: da.Array = field(default_factory=lambda: da.zeros_like([]))
-    zs: da.Array = field(default_factory=lambda: da.zeros_like([]))
-    r: da.Array = field(default_factory=lambda: da.zeros_like([]))
-    z: da.Array = field(default_factory=lambda: da.zeros_like([]))
+    rs: Array = field(default_factory=lambda: da.zeros_like([]))
+    zs: Array = field(default_factory=lambda: da.zeros_like([]))
+    r: Array = field(default_factory=lambda: da.zeros_like([]))
+    z: Array = field(default_factory=lambda: da.zeros_like([]))
 
     def __getitem__(self, attr):
         """Provide dict-like access to attributes."""
         return getattr(self, attr)
 
-    '''
-    def phi(self, alpha):
-        """Return sysrem invariant angle transformation."""
-        phi = np.pi - 2*alpha
-        #if np.isclose(phi, 0, atol=1e-16):
-        #    return 1e-16
-        return phi
-    '''
-
-    @cached_property
+    @property
     def b(self):
         """Return b coefficient."""
         return self.rs + self.r
 
-    @cached_property
+    @property
     def gamma(self):
         """Return gamma coefficient."""
         return self.zs - self.z
 
-    @cached_property
+    @property
+    def gamma_zero(self):
+        """Return gamma zero index."""
+        return np.isclose(self.gamma, 0, atol=1e-12)
+
+    @property
+    def pi_zero(self):
+        """Return rs-r zero index."""
+        return np.isclose(self.rs - self.r, 0)
+
+    @property
     def a2(self):
         """Return a**2 coefficient."""
         return self.gamma**2 + (self.rs + self.r)**2
 
-    @cached_property
+    @property
     def a(self):
         """Return a coefficient."""
         return np.sqrt(self.a2)
 
-    @cached_property
+    @property
     def c2(self):
         """Return c**2 coefficient."""
         return self.gamma**2 + self.r**2
 
-    @cached_property
+    @property
     def c(self):
         """Return c coefficient."""
         return np.sqrt(self.c2)
 
-    @cached_property
+    @property
     def k2(self):
         """Return k2 coefficient."""
         return 4*self.r*self.rs / self.a2
 
-    @cached_property
+    @property
     def ck2(self):
         """Return complementary modulus."""
         return 1 - self.k2
 
-    @cached_property
+    @property
     def K(self):
         """Return elliptic intergral of the 1st kind."""
         return scipy.special.ellipk(self.k2)
-        #return self.k2.map_blocks(scipy.special.ellipk, dtype=float)
 
-    @cached_property
+    @property
     def E(self):
         """Return elliptic intergral of the 2nd kind."""
         return scipy.special.ellipe(self.k2)
-        #return self.k2.map_blocks(scipy.special.ellipe, dtype=float)
 
     @staticmethod
     def ellippi(n, m):
         """Taken from https://github.com/scipy/scipy/issues/4452."""
+        atol = 1e-18
         x, y, z, p = 0, 1-m, 1, 1-n
         rf = scipy.special.elliprf(x, y, z)
+        index = (np.isclose(x - z, 0, atol=atol) |
+                 np.isclose(y - z, 0, atol=atol))
+        if index.any():
+            rf[index] = scipy.special.elliprc(x, y[index])
         rj = scipy.special.elliprj(x, y, z, p)
+        index = (np.isclose(x - p, 0, atol=atol) |
+                 np.isclose(y - p, 0, atol=atol) |
+                 np.isclose(z - p, 0, atol=atol))
+        if index.any():
+            rj[index] = scipy.special.elliprd(x, y[index], z)
         return rf + rj * n / 3
 
     def np2(self, p: int):
         """Return np**2 constant."""
         if p == 1:
-            return 2*self.r / (self.r - self.c)  # self.zero_offset
+            return 2*self.r / self.zero_offset(self.r - self.c)
         if p == 2:
             return 2*self.r / (self.r + self.c)
         if p == 3:
@@ -113,9 +123,8 @@ class BiotConstants:
     def Pi(self, p: int):
         """Return complete elliptc intergral of the 3rd kind."""
         return self.ellippi(self.np2(p), self.k2)
-        #return da.map_blocks(self.ellippi, self.np2(p), self.k2, dtype=float)
 
-    @cached_property
+    @property
     def U(self):
         """Return U coefficient."""
         return self.k2 * (4*self.gamma**2 +
@@ -123,6 +132,6 @@ class BiotConstants:
 
     def zero_offset(self, array):
         """Return array with values close to zero offset to atol."""
-        if (index := np.isclose(array, 0, atol=1e-16)).any():
-            array[index] = 1e-16
+        if (index := np.isclose(array, 0, atol=1e-12)).any():
+            array[index] = 1e-12
         return array

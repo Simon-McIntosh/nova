@@ -21,6 +21,7 @@ from nova.electromagnetic.circuit import Circuit
 class BiotFactory(FrameSet):
     """Expose biot methods as cached properties."""
 
+    chunks: int | None = None
     dfield: float = field(default=-1, repr=False)
     biot_class: ClassVar[dict[str, Any]] = \
         dict(point=BiotPoint, grid=BiotGrid,
@@ -32,7 +33,8 @@ class BiotFactory(FrameSet):
         """Return nammed biot instance."""
         attr = inspect.stack()[1][3]  # name of caller
         return self.biot_class[attr](*self.frames, path=self.path, name=attr,
-                                     filename=self.filename)
+                                     filename=self.filename,
+                                     chunks=self.chunks)
 
     @property
     def biot_attrs(self):

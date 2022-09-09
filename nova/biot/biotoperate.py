@@ -57,6 +57,7 @@ class BiotOp:
 class BiotOperate(BiotData):
     """Multi-attribute interface to numba Biot Evaluate methods."""
 
+    chunks: int | None = None
     version: dict[str, int | None] = field(
         init=False, repr=False, default_factory=dict)
     _svd_rank: int = field(init=False, default=-1)

@@ -30,11 +30,11 @@ class PolyGeom(Polygon):
     poly: Union[Polygon, PolyFrame,
                 shapely.geometry.Polygon, shapely.geometry.MultiPolygon,
                 dict[str, list[float]],
-                list[float, float, float, float],
+                list[float],
                 npt.ArrayLike] = field(repr=False)
     segment: str = 'ring'
     loop_length: float = 0
-    name: str = field(init=False, default=None)
+    name: str | None = field(init=False, default=None)
 
     def __post_init__(self):
         """Update loop length."""
@@ -173,7 +173,7 @@ class PolyGeom(Polygon):
                     length=self.length, thickness=self.thickness)
 
     @cached_property
-    def geometry(self) -> dict[str, float]:
+    def geometry(self) -> dict[str, float | PolyFrame]:
         """Return geometrical features."""
         centroid = self.centroid
         return {'x': centroid.x, 'y': centroid.y, 'z': centroid.z,

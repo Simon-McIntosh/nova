@@ -179,9 +179,9 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
         """
         return self.psi
 
-    @abstractmethod
-    def solve(self):
-        """Solve biot interaction, implemented by subclass."""
+    #@abstractmethod
+    #def solve(self):
+    #    """Solve biot interaction, implemented by subclass."""
 
     def check_null(self):
         """Check validity of upstream data, update field null if nessisary."""
@@ -210,7 +210,8 @@ class BiotGrid(BiotBaseGrid):
     """Compute interaction across grid."""
 
     def solve(self, number: int, limit: Union[float, list[float]] = 0,
-              index: Union[str, slice, npt.ArrayLike] = slice(None)):
+              index: Union[str, slice, npt.ArrayLike] = slice(None),
+              chunks=None):
         """Solve Biot interaction across grid."""
         if isinstance(limit, (int, float)):
             limit = Expand(self.subframe, index)(limit)
@@ -220,9 +221,9 @@ class BiotGrid(BiotBaseGrid):
     def solve2d(self, x2d, z2d):
         """Solve interaction across rectangular grid."""
         target = BiotFrame(dict(x=x2d.flatten(), z=z2d.flatten()),
-                           label='Grid')
+                           additional=[], available=[], label='Grid')
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
-                              attrs=self.attrs).data
+                              attrs=self.attrs, chunks=self.chunks).data
         # insert grid data
         self.data.coords['x'] = x2d[:, 0]
         self.data.coords['z'] = z2d[0]

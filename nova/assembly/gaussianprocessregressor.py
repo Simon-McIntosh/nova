@@ -30,7 +30,7 @@ class GaussianProcessRegressor:
         """Build Gaussian Process Regressor."""
         if self.regressor is None:
             expsinesquared = sklearn.gaussian_process.kernels.ExpSineSquared(
-                length_scale=1.5, length_scale_bounds='fixed',
+                length_scale=0.85, length_scale_bounds='fixed',
                 periodicity=1.0, periodicity_bounds='fixed')
             constant = sklearn.gaussian_process.kernels.ConstantKernel(
                 constant_value=1.0, constant_value_bounds=(1e-14, 1e2))

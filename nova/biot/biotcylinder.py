@@ -154,7 +154,7 @@ class BiotCylinder(BiotMatrix):
 
     def _intergrate(self, func):
         """Return corner intergration."""
-        return 1 / (4*np.pi*self['area']) * \
+        return 1 / (2*np.pi*self['area']) * \
             ((func(2) - func(1)) - (func(3) - func(0)))
 
     @property
@@ -182,8 +182,8 @@ if __name__ == '__main__':
 
     from nova.electromagnetic.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-4, dplasma=-150)
-    '''
+    coilset = CoilSet(dcoil=-1, dplasma=-150, chunks=None)
+
     coilset.coil.insert(5, 0.5, 0.01, 0.8, section='r', turn='r',
                         nturn=300, segment='cylinder')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, section='r', turn='r',
@@ -192,11 +192,11 @@ if __name__ == '__main__':
                         nturn=300, segment='cylinder')
     coilset.coil.insert(5.2, 0.5, 0.01, 0.8, section='r', turn='r',
                         nturn=300, segment='cylinder')
-    '''
-    coilset.coil.insert(5.1, 0.5, 0.02, 0.02, section='r', turn='r',
-                        nturn=300, segment='cylinder')
+
+    #coilset.coil.insert(5.1, 0.5, 0.02, 0.02, section='r', turn='r',
+    #                    nturn=300, segment='cylinder')
     coilset.saloc['Ic'] = 5e3
 
-    coilset.grid.solve(20000, 1)
-    coilset.grid.plot(colors='C1', nulls=False)
+    coilset.grid.solve(1000, 1)
+    coilset.grid.plot(colors='C1')
     coilset.plot()

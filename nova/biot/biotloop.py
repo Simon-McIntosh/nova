@@ -23,5 +23,5 @@ class BiotLoop(Axes, BiotOperate):
     def plot(self, axes=None, **kwargs):
         """Plot points."""
         self.axes = axes
-        kwargs = dict(marker='o', linestyle='') | kwargs
+        kwargs = dict(marker='o', linestyle='', color='C1') | kwargs
         self.axes.plot(self.data.coords['x'], self.data.coords['z'], **kwargs)

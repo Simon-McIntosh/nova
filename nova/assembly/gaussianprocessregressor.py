@@ -33,7 +33,7 @@ class GaussianProcessRegressor:
                 length_scale=0.85, length_scale_bounds='fixed',
                 periodicity=1.0, periodicity_bounds='fixed')
             constant = sklearn.gaussian_process.kernels.ConstantKernel(
-                constant_value=1.0, constant_value_bounds=(1e-14, 1e2))
+                constant_value=1e-8, constant_value_bounds=(1e-22, 1e2))
             kernel = expsinesquared + constant
             self.regressor = sklearn.gaussian_process.GaussianProcessRegressor(
                 kernel=kernel, alpha=self.variance)

@@ -50,7 +50,7 @@ class BiotFrame(FrameSpace):
             matrix = np.transpose(matrix)
         if attr == 'nturn' or self.chunks is None:
             return matrix
-        return da.from_array(matrix, chunks=self.chunks)
+        return da.from_array(matrix, chunks=(self.chunks, self.chunks))
 
     def set_target(self, number):
         """Set target number."""
@@ -59,6 +59,16 @@ class BiotFrame(FrameSpace):
     def set_source(self, number):
         """Set source number."""
         return self.biotshape.set_source(number)
+
+
+class BiotTarget(BiotFrame):
+    """Extend BiotFrame dropping additional and available metadata."""
+
+    def __init__(self, data=None, index=None, columns=None, attrs=None,
+                 **metadata):
+        for attr in ['additional', 'available']:
+            metadata[attr] = []
+        super().__init__(data, index, columns, attrs, **metadata)
 
 
 if __name__ == '__main__':

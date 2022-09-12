@@ -7,6 +7,7 @@ import pandas
 import xarray
 
 from nova.biot.biotcylinder import BiotCylinder
+from nova.biot.biotframe import BiotFrame
 from nova.biot.biotpolygon import BiotPolygon
 from nova.biot.biotring import BiotRing
 from nova.biot.biotset import BiotSet

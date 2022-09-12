@@ -48,7 +48,8 @@ def test_random_segment_error():
         BiotSolve(biotframe, biotframe)
 
 
-def test_ITER_subinductance_matrix():
+@pytest.mark.parametrize('segment', ['ring', 'cylinder'])
+def test_ITER_subinductance_matrix(segment):
     """
     Test inductance calculation against DDD values for 2 CS and 1 PF coil.
 
@@ -56,11 +57,11 @@ def test_ITER_subinductance_matrix():
     """
     coilset = CoilSet(dcoil=0.25)
     coilset.coil.insert(3.9431, 7.5641, 0.9590, 0.9841, nturn=248.64,
-                        name='PF1', part='PF')
+                        name='PF1', part='PF', segment=segment)
     coilset.coil.insert(1.722, 5.313, 0.719, 2.075, nturn=554,
-                        name='CS3U', part='CS')
+                        name='CS3U', part='CS', segment=segment)
     coilset.coil.insert(1.722, 3.188, 0.719, 2.075, nturn=554,
-                        name='CS2U', part='CS')
+                        name='CS2U', part='CS', segment=segment)
     biot = BiotRing(coilset.subframe, coilset.subframe,
                     turns=[True, True], reduce=[True, True])
     Mc_ddd = [[7.076E-01, 1.348E-01, 6.021E-02],  # referance
@@ -114,6 +115,51 @@ def test_solenoid_probe_cylinder():
 
     print(Bz_point, Bz_theory)
     assert allclose(Bz_point, Bz_theory, atol=5e-3)
+
+
+def test_ring_ring_coil_pair():
+    coilset = CoilSet(dcoil=-10)
+    coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=-15e6, segment='ring')
+    coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=15e6, segment='ring')
+    coilset.point.solve([[8, 0]])
+    assert np.isclose(coilset.point.psi, 0)
+
+
+def test_cyliner_cylinder_coil_pair():
+    coilset = CoilSet(dcoil=-1)
+    coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=-15e6, segment='cylinder')
+    coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=15e6, segment='cylinder',
+                        delta=-10)
+    coilset.point.solve([[8, 0]])
+    assert np.isclose(coilset.point.psi, 0)
+
+
+def test_cylinder_ring_coil_pair():
+    coilset = CoilSet(dcoil=-1)
+    coilset.coil.insert(6.6, 0, 0.2, 0.2, Ic=-15e6, segment='cylinder')
+    coilset.coil.insert(6.6, 0, 0.2, 0.2, Ic=15e6, segment='ring',
+                        delta=-10)
+    coilset.point.solve([[7, 0]])
+    assert np.isclose(coilset.point.psi, 0, atol=1e-3)
+
+
+@pytest.mark.parametrize('segment', ['ring', 'cylinder'])
+def test_hemholtz_flux(segment):
+    coilset = CoilSet(dcoil=-20)
+    coilset.coil.insert(1, [-0.5, 0.5], 0.1, 0.1, Ic=1, segment=segment)
+    point_radius = 0.1
+    coilset.point.solve([[point_radius, 0]])
+    Bz = (4/5)**(3/2) * BiotMatrix.mu_o
+    psi = Bz * np.pi*point_radius**2
+    assert np.isclose(coilset.point.psi[0], psi)
+
+
+def test_coil_cylinder_isfinite():
+    coilset = CoilSet(dcoil=-1)
+    coilset.coil.insert(6.5, [-1, 0, 1], 0.4, 0.4, Ic=-15e6,
+                        segment='cylinder')
+    coilset.grid.solve(60, [6, 7.0, -0.8, 0.8])
+    assert np.isfinite(coilset.grid.psi).all()
 
 
 if __name__ == '__main__':

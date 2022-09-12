@@ -8,7 +8,7 @@ import pyvista
 import scipy.spatial
 import xarray
 
-from nova.biot.biotframe import BiotFrame
+from nova.biot.biotframe import BiotTarget
 from nova.biot.biotgrid import BiotBaseGrid
 from nova.biot.biotsolve import BiotSolve
 from nova.electromagnetic.error import GridError, PlasmaGridError
@@ -29,7 +29,7 @@ class BiotPlasmaGrid(BiotBaseGrid):
         if not self.Loc['plasma', 'turn'].apply(
                 lambda turn: turn == 'hexagon').all():
             raise PlasmaGridError(self.Loc['plasma', 'turn'].values)
-        target = BiotFrame(self.subframe.loc['plasma', ['x', 'z']].to_dict())
+        target = BiotTarget(self.subframe.loc['plasma', ['x', 'z']].to_dict())
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
                               attrs=self.attrs, chunks=self.chunks).data
         self.tessellate()

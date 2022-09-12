@@ -9,7 +9,7 @@ from numpy import typing as npt
 import shapely.geometry
 import xarray
 
-from nova.biot.biotframe import BiotFrame
+from nova.biot.biotframe import BiotTarget, BiotFrame
 from nova.biot.biotoperate import BiotOperate
 from nova.biot.biotsolve import BiotSolve
 from nova.electromagnetic.error import GridError
@@ -58,7 +58,7 @@ class Grid(Axes):
     """Generate grid."""
 
     number: int | None = field(default=None)
-    limit: list[float] | None = field(default=None)
+    limit: npt.ArrayLike | None = field(default=None)
     xcoord: list[float] = field(init=False, repr=False)
     zcoord: list[float] = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, repr=False)
@@ -132,11 +132,11 @@ class Expand:
                 raise GridError(index)
         poly = shapely.geometry.MultiPolygon(
             [polygon.poly for polygon in self.frame.poly[self.index]])
-        self.limit = [*poly.bounds[::2], *poly.bounds[1::2]]
+        self.limit = np.array([*poly.bounds[::2], *poly.bounds[1::2]])
         self.xcoord = GridCoord(*self.limit[:2])
         self.zcoord = GridCoord(*self.limit[2:])
 
-    def __call__(self, factor):
+    def __call__(self, factor) -> np.ndarray:
         """Return expanded limit."""
         delta_x, delta_z = self.xcoord.delta, self.zcoord.delta
         if not self.fix_aspect:
@@ -179,10 +179,6 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
         """
         return self.psi
 
-    #@abstractmethod
-    #def solve(self):
-    #    """Solve biot interaction, implemented by subclass."""
-
     def check_null(self):
         """Check validity of upstream data, update field null if nessisary."""
         if (version := self.aloc_hash['Ic']) != self.version['fieldnull'] or \
@@ -209,7 +205,7 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
 class BiotGrid(BiotBaseGrid):
     """Compute interaction across grid."""
 
-    def solve(self, number: int, limit: Union[float, list[float]] = 0,
+    def solve(self, number: int, limit: float | npt.ArrayLike = 0,
               index: Union[str, slice, npt.ArrayLike] = slice(None),
               chunks=None):
         """Solve Biot interaction across grid."""
@@ -220,8 +216,8 @@ class BiotGrid(BiotBaseGrid):
 
     def solve2d(self, x2d, z2d):
         """Solve interaction across rectangular grid."""
-        target = BiotFrame(dict(x=x2d.flatten(), z=z2d.flatten()),
-                           additional=[], available=[], label='Grid')
+        target = BiotTarget(dict(x=x2d.flatten(), z=z2d.flatten()),
+                            label='Grid')
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
                               attrs=self.attrs, chunks=self.chunks).data
         # insert grid data

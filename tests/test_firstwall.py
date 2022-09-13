@@ -70,12 +70,5 @@ def test_plasmagrid_no_plasma():
         coilset.plasmagrid.solve()
 
 
-def test_nohex_plasma_grid_error():
-    coilset = CoilSet(dcoil=-5, dplasma=-10, tplasma='rect')
-    coilset.firstwall.insert({'e': [6.5, 0, 1.2, 1.6]}, Ic=-15e6)
-    with pytest.raises(PlasmaGridError):
-        coilset.plasmagrid.solve()
-
-
 if __name__ == '__main__':
     pytest.main([__file__])

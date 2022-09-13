@@ -9,7 +9,7 @@ import numpy.typing as npt
 from scipy.interpolate import RectBivariateSpline, interp1d
 import xarray
 
-from nova.electromagnetic.biotgrid import BiotPlot
+from nova.biot.biotgrid import BiotPlot
 from nova.imas.code import Code
 from nova.imas.database import Database, IDS
 from nova.imas.equilibrium import Equilibrium
@@ -183,28 +183,23 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         """Plot plasma filements and polidal flux."""
         plt.figure()
         super().plot('plasma')
-        '''
-        _ = self.grid.br
-        psi2d = self.grid.psi.reshape(*self.grid.shape) / (2*np.pi)
-        br = -1/self.grid.data.x2d.values * \
-            np.gradient(psi2d, self.grid.data.z, axis=1, edge_order=2)
-        self.grid.array['br'][:] = br.flatten()
-        '''
-
-
         levels = self.grid.plot(attr, levels=51, colors='C0', nulls=False)
-        self.plot_2d(self.itime, attr, colors='C3', levels=-levels[::-1],
-                     linestyles='dashdot')
+        try:
+            self.plot_2d(self.itime, attr, colors='C3', levels=-levels[::-1],
+                         linestyles='dashdot')
+        except KeyError:
+            pass
         self.plot_boundary(self.itime)
 
 
 if __name__ == '__main__':
 
-    pulse, run = 114101, 41  # JINTRAC
+    #  pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
 
     database = Database(pulse, run, 'equilibrium', machine='iter')
     coilset = Extrapolate(ids_data=database.ids_data,
-                          dplasma=-500, number=500)#.build()
-    coilset.ionize(20)
+                          dplasma=-500, number=2000)
+    #  coilset.build()
+    coilset.ionize(50)
     coilset.plot('psi')

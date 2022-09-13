@@ -43,13 +43,9 @@ class BiotMatrix(BiotSet):
         Apply reduction summations.
 
         """
-        matrix = getattr(self, attr) #.compute() #np.array()  #
-        # plasma = matrix[:, self.source.plasma]
-        #.compute() #.compute()
+        matrix = getattr(self, attr)
         if self.target.turns:
             matrix *= self.target('nturn')
-            #matrix *= (turns := self.target('nturn')) #.compute())  #.compute()
-            #plasma *= turns[:, self.source.plasma]
         if isinstance(matrix, da.Array):
             matrix = matrix.compute()
         plasma = matrix[:, self.source.plasma]

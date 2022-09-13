@@ -77,6 +77,8 @@ class CoilSetAttrs(ABC, FrameSetLoc):
             if attr in self.attributes and attr not in self._attrs:
                 self._attrs[attr] = getattr(self, attr)
             if attr in ['section', 'turn']:
+                if attr not in self._attrs:
+                    continue
                 self._attrs[attr] = PolyGen.polyshape[self._attrs[attr]]
 
     def update_link(self):

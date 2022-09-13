@@ -557,13 +557,10 @@ class PF_Active_Geometry(MachineDescription):
                   for supply in self.load_ids_data('supply')]
         nodes = max([len(circuit.connections)
                      for circuit in self.load_ids_data('circuit')])
-        #nodes = len(self.load_ids_data('circuit')[0].connections)
         self.circuit.initialize(supply, nodes)
         for circuit in self.load_ids_data('circuit'):
             self.circuit.insert(circuit.identifier, circuit.connections)
-        print('build circuit')
         self.circuit.link()  # link single loop circuits
-        print('post build')
 
 
 @dataclass
@@ -658,7 +655,8 @@ class Machine(CoilSet):
     dcoil: float = -1
     dshell: float = 0.5
     dplasma: int = -500
-    tcoil: str = 'rect'
+    tcoil: str = 'rectangle'
+    tplasma: str = 'rectangle'
     filename: str = 'iter'
     machine: str = 'iter_md'
     datapath: str = field(default='data/Nova', repr=False)

@@ -37,7 +37,7 @@ class CylinderConstants(BiotConstants):
 
     @property
     def v(self):
-        """Return v coefficent."""
+        """Return v coefficient."""
         return 1 + self.k2*(self.gamma**2 - self.b*self.r) / (2*self.r*self.rs)
 
     def B2(self, phi):
@@ -79,18 +79,24 @@ class CylinderConstants(BiotConstants):
             -np.sin(4*alpha) - 1/3*self.r**2 * \
             np.arctan(self.beta3(phi)) * -np.cos(2*alpha)**3
 
-    @property
+    @cached_property
     def Cphi(self):
         """Return Cphi intergration constant."""
         return self.Cphi_coef(self.alpha) - self.Cphi_coef(0)
 
     def Qr(self, p: int):
-        """Return Qr(p) coefficent."""
+        """Return Qr(p) coefficient."""
         if p <= 2:
             return (self.rs - (-1)**p * self.c) * self.np2(p) * \
                 self.gamma**2 * self.c / self.r
-        if p == 3:
-            return 0
+        return 0
+
+    def Qz(self, p: int):
+        """Return Qz(p) coefficient."""
+        if p <= 2:
+            return (self.rs - (-1)**p * self.c) * \
+                -2*self.gamma*self.c*self.np2(p)
+        return self.gamma*self.b*(self.rs - self.r)*self.np2(p)
 
     @cached_property
     def zeta(self):
@@ -98,6 +104,11 @@ class CylinderConstants(BiotConstants):
         asinh_beta1 = np.stack([np.arcsinh(self.beta1(phi))
                                 for phi in self.phi_zeta])
         return scipy.integrate.romb(asinh_beta1, dx=self.dalpha_zeta, axis=0)
+
+    @property
+    def Dz(self):
+        """Return Dz coefficient."""
+        return 3/self.r*self.Cphi
 
 
 @dataclass
@@ -139,7 +150,7 @@ class BiotCylinder(BiotMatrix):
         self._corner = i
 
     def __getattr__(self, attr):
-        """Return coefficent evaluated at self.corner."""
+        """Return coefficient evaluated at self.corner."""
         return self.constant[self.corner][attr]
 
     @gamma_zero
@@ -166,7 +177,10 @@ class BiotCylinder(BiotMatrix):
     def Bz_hat(self, i: int):
         """Return vertical magnetic field intergration coefficient."""
         self.corner = i
-        return np.zeros_like(self['r'])
+        return self.Dz + 2*self.gamma*self.zeta - self.a / (2*self.r) * \
+            3/2 * self.gamma*self.k2*self.K - 1/(4*self.a*self.r) * \
+            np.sum(np.stack([(-1)**p * self.Qz(p) * self.Pi(p) for
+                             p in range(1, 4)]), axis=0)
 
     def _intergrate(self, func):
         """Return corner intergration."""
@@ -198,22 +212,6 @@ if __name__ == '__main__':
 
     from nova.electromagnetic.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-100, dplasma=-150, chunks=None)
-    coilset.coil.insert(5, 0.5, 0.01, 0.8, section='r', turn='r',
-                        nturn=300, segment='ring')
-    coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, section='r', turn='r',
-                        nturn=300, segment='ring')
-    coilset.coil.insert(5.1, 0.5-0.4, 0.2, 0.01, section='r', turn='r',
-                        nturn=300, segment='ring')
-    coilset.coil.insert(5.2, 0.5, 0.01, 0.8, section='r', turn='r',
-                        nturn=300, segment='ring')
-    coilset.saloc['Ic'] = 5e3
-
-    coilset.grid.solve(2000, 1)
-    levels = coilset.grid.plot('br', colors='C0')
-
-
-
     coilset = CoilSet(dcoil=-1, dplasma=-150, chunks=None)
 
     coilset.coil.insert(5, 0.5, 0.01, 0.8, section='r', turn='r',
@@ -225,10 +223,10 @@ if __name__ == '__main__':
     coilset.coil.insert(5.2, 0.5, 0.01, 0.8, section='r', turn='r',
                         nturn=300, segment='cylinder')
 
-    #coilset.coil.insert(5.1, 0.5, 0.02, 0.02, section='r', turn='r',
-    #                    nturn=300, segment='cylinder')
+    #  coilset.coil.insert(5.1, 0.5, 0.02, 0.02, section='r', turn='r',
+    #                      nturn=300, segment='ring', tile=True)
     coilset.saloc['Ic'] = 5e3
 
-    coilset.grid.solve(3000, 1)
-    coilset.grid.plot('br', colors='C1', levels=levels)
+    coilset.grid.solve(9000, 1)
+    coilset.grid.plot('br', colors='C1', nulls=False)
     coilset.plot()

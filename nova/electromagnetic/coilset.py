@@ -1,14 +1,15 @@
 """Construct coilset with frameset and biot factories."""
 from dataclasses import dataclass
 
-from nova.electromagnetic.framefactory import FrameFactory
+from nova.biot.biot import Biot
+from nova.electromagnetic.control import Control
+from nova.electromagnetic.frame import Frame
 from nova.electromagnetic.frameset import FrameSet
-from nova.biot.biotfactory import BiotFactory
 from nova.geometry.polygon import Polygon
 
 
 @dataclass(repr=False)
-class CoilSet(BiotFactory, FrameFactory):
+class CoilSet(Biot, Control, Frame):
     """
     Manage coilset.
 
@@ -58,7 +59,8 @@ if __name__ == '__main__':
                             tile=True, delta=-6, name='bubble')
         coilset.coil.insert(2, 0, 0.95, 0.1, section='sk', nturn=-1.8)
         coilset.coil.insert(3, 0, 0.6, 0.9, section='r', turn='sk')
-        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')
+        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]},
+                                 turn='r', segment='cylinder')
         coilset.shell.insert({'e': [2.5, -1.25, 1.75, 1.0]}, 13, 0.05,
                              delta=-4, part='vv')
 
@@ -86,10 +88,10 @@ if __name__ == '__main__':
     coilset.sloc['plasma', 'Ic'] = 1
 
     coilset.plot()
-    coilset.plasma.plot()
 
-    coilset.grid.plot(levels=51)
+    coilset.grid.plot(levels=51, nulls=False)
+    coilset.plasma.plot(levels=coilset.grid.levels)
     coilset.plasmagrid.plot(levels=coilset.grid.levels, colors='C6')
 
-    coilset.plasmagrid.svd_rank = 10
+    coilset.plasmagrid.svd_rank = 50
     coilset.plasmagrid.plot_svd(levels=coilset.grid.levels)

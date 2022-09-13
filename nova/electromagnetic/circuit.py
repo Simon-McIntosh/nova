@@ -14,6 +14,8 @@ from nova.utilities.pyplot import plt
 class Circuit(netCDF, FrameSetLoc):
     """Manage coil supplies."""
 
+    name: str = 'circuit'
+
     def initialize(self, supply: list[str], nodes: int):
         """Initialize dataset."""
         self.data = xarray.Dataset()

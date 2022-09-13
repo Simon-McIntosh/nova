@@ -111,35 +111,36 @@ class BiotRing(BiotMatrix):
         """Load intergration constants."""
         super().__post_init__()
         OffsetFilaments(self.data)
-        self.const = BiotConstants(self['rs'], self['zs'],
-                                   self['r'], self['z'])
+        self.constant = BiotConstants(self['rs'], self['zs'],
+                                      self['r'], self['z'])
+
+    def __getattr__(self, attr):
+        """Return coefficient evaluated at self.corner."""
+        return self.constant[attr]
 
     @property
     def Aphi(self):
-        """Return Aphi dask array."""
-        return 1 / (2*np.pi) * self.const['a']/self['r'] * \
-            ((1 - self.const['k2']/2) * self.const['K'] - self.const['E'])
+        """Return Aphi array."""
+        return 1 / (2*np.pi) * self.a/self.r * \
+            ((1 - self.k2/2) * self.K - self.E)
 
     @property
     def Psi(self):
-        """Return Psi dask array."""
-        return 2 * np.pi * self.mu_o * self['r'] * self.Aphi
+        """Return Psi array."""
+        return 2 * np.pi * self.mu_o * self.r * self.Aphi
 
     @property
     def Br(self):
-        """Return radial field dask array."""
-        return self.mu_o / (2*np.pi) * self.const['gamma'] * \
-            (self.const['K'] - (2-self.const['k2']) / (2*self.const['ck2']) *
-             self.const['E']) / (self.const['a'] * self['r'])
+        """Return radial field array."""
+        return self.mu_o / (2*np.pi) * self.gamma * \
+            (self.K - (2-self.k2) / (2*self.ck2) * self.E) / (self.a * self.r)
 
     @property
     def Bz(self):
-        """Return vertical field dask array."""
+        """Return vertical field array."""
         return self.mu_o / (2*np.pi) * \
-            (self['r']*self.const['K'] -
-             (2*self['r'] - self.const['b']*self.const['k2']) /
-             (2*self.const['ck2']) * self.const['E']) / \
-            (self.const['a']*self['r'])
+            (self.r*self.K - (2*self.r - self.b*self.k2) /
+             (2*self.ck2) * self.E) / (self.a*self.r)
 
 
 if __name__ == '__main__':
@@ -158,5 +159,5 @@ if __name__ == '__main__':
     coilset.saloc['Ic'] = 5e3
 
     coilset.grid.solve(2000, 1)
-    coilset.grid.plot('br', colors='C1')
+    coilset.grid.plot('bz', colors='C1')
     coilset.plot()

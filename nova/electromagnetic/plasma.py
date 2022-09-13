@@ -21,8 +21,9 @@ class Plasma(Axes, netCDF, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
     name: str = 'plasma'
-    grid: BiotPlasmaGrid = field(repr=False, default=None)
-    boundary: BiotPlasmaBoundary = field(repr=False, default=None)
+    grid: BiotPlasmaGrid = field(repr=False, default_factory=BiotPlasmaGrid)
+    boundary: BiotPlasmaBoundary = field(repr=False,
+                                         default_factory=BiotPlasmaBoundary)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -172,7 +173,7 @@ class Plasma(Axes, netCDF, FrameSetLoc):
         self.update_aloc_hash('nturn')
         return nturn - self.aloc['nturn'][plasma]
 
-    def plot(self, turns=True):
+    def plot(self, turns=True, **kwargs):
         """Plot separatirx as polygon patch."""
         if turns:
             self.subframe.polyplot('plasma')
@@ -184,7 +185,7 @@ class Plasma(Axes, netCDF, FrameSetLoc):
                 facecolor='C4', alpha=0.75, linewidth=0, zorder=-10))
         '''
         self.boundary.plot()
-        self.grid.plot()
+        self.grid.plot(**kwargs)
 
 
 '''

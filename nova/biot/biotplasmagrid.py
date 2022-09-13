@@ -11,7 +11,7 @@ import xarray
 from nova.biot.biotframe import BiotTarget
 from nova.biot.biotgrid import BiotBaseGrid
 from nova.biot.biotsolve import BiotSolve
-from nova.electromagnetic.error import GridError, PlasmaGridError
+from nova.electromagnetic.error import GridError
 from nova.geometry.pointloop import PointLoop
 
 
@@ -26,9 +26,6 @@ class BiotPlasmaGrid(BiotBaseGrid):
         """Solve Biot interaction across plasma grid."""
         if self.sloc['plasma'].sum() == 0:
             raise GridError('plasma')
-        if not self.Loc['plasma', 'turn'].apply(
-                lambda turn: turn == 'hexagon').all():
-            raise PlasmaGridError(self.Loc['plasma', 'turn'].values)
         target = BiotTarget(self.subframe.loc['plasma', ['x', 'z']].to_dict())
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
                               attrs=self.attrs, chunks=self.chunks).data

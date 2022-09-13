@@ -11,6 +11,8 @@ from nova.biot.biotring import BiotRing
 from nova.biot.biotsolve import BiotSolve
 from nova.electromagnetic.coilset import CoilSet
 
+segments = ['ring', 'cylinder']
+
 
 def test_biotreduce():
     biotframe = BiotFrame()
@@ -48,7 +50,7 @@ def test_random_segment_error():
         BiotSolve(biotframe, biotframe)
 
 
-@pytest.mark.parametrize('segment', ['ring', 'cylinder'])
+@pytest.mark.parametrize('segment', segments)
 def test_ITER_subinductance_matrix(segment):
     """
     Test inductance calculation against DDD values for 2 CS and 1 PF coil.
@@ -83,37 +85,18 @@ def test_solenoid_grid():
     assert allclose(Bz_grid[0], Bz_theory, atol=5e-3)
 
 
-def test_solenoid_probe():
+@pytest.mark.parametrize('segment', segments)
+def test_solenoid_probe(segment):
     """Verify solenoid vertical field using probe biot instance."""
     nturn, height, current = 500, 30, 1e3
     coilset = CoilSet(dcoil=0.5)
-    coilset.coil.insert(1.5, 0, 0.01, height, nturn=nturn, section='rectangle')
+    coilset.coil.insert(1.5, 0, 0.01, height, nturn=nturn,
+                        section='rectangle', segment=segment)
     coilset.sloc['Ic'] = current
     biotpoint = BiotPoint(*coilset.frames)
     biotpoint.solve((1e-9, 0))
     Bz_theory = BiotMatrix.mu_o * nturn * current / height
     Bz_point = np.dot(biotpoint.data.Bz, coilset.sloc['Ic'])
-    assert allclose(Bz_point, Bz_theory, atol=5e-3)
-
-
-@pytest.mark.skip('awaiting field implementation in biot cylinder')
-def test_solenoid_probe_cylinder():
-    """Verify solenoid vertical field using probe biot instance."""
-    nturn, height, current = 500, 30, 1e3
-    coilset = CoilSet(dcoil=-1)
-    coilset.coil.insert(1.5, 0, 0.01, height, nturn=nturn, section='rectangle')
-    coilset.sloc['Ic'] = current
-
-    coilset.plot()
-    coilset.grid.solve(500, 2)
-    coilset.grid.plot()
-
-    biotpoint = BiotPoint(*coilset.frames)
-    biotpoint.solve((1e-9, 0))
-    Bz_theory = BiotMatrix.mu_o * nturn * current / height
-    Bz_point = np.dot(biotpoint.data.Bz, coilset.sloc['Ic'])
-
-    print(Bz_point, Bz_theory)
     assert allclose(Bz_point, Bz_theory, atol=5e-3)
 
 
@@ -143,15 +126,24 @@ def test_cylinder_ring_coil_pair():
     assert np.isclose(coilset.point.psi, 0, atol=1e-3)
 
 
-@pytest.mark.parametrize('segment', ['ring', 'cylinder'])
+@pytest.mark.parametrize('segment', segments)
 def test_hemholtz_flux(segment):
-    coilset = CoilSet(dcoil=-20)
-    coilset.coil.insert(1, [-0.5, 0.5], 0.1, 0.1, Ic=1, segment=segment)
+    coilset = CoilSet(dcoil=-2)
+    coilset.coil.insert(1, [-0.5, 0.5], 0.01, 0.01, Ic=1, segment=segment)
     point_radius = 0.1
     coilset.point.solve([[point_radius, 0]])
     Bz = (4/5)**(3/2) * BiotMatrix.mu_o
     psi = Bz * np.pi*point_radius**2
     assert np.isclose(coilset.point.psi[0], psi)
+
+
+@pytest.mark.parametrize('segment', segments)
+def test_hemholtz_field(segment):
+    coilset = CoilSet(dcoil=-2)
+    coilset.coil.insert(1, [-0.5, 0.5], 0.01, 0.01, Ic=1, segment=segment)
+    coilset.point.solve([[1e-3, 0]])
+    bz = (4/5)**(3/2) * BiotMatrix.mu_o
+    assert np.isclose(coilset.point.bz[0], bz)
 
 
 def test_coil_cylinder_isfinite():

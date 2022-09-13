@@ -2,7 +2,6 @@
 from dataclasses import dataclass, field
 from typing import Union, ClassVar
 
-import numba
 import numpy as np
 import pyvista
 import scipy.spatial
@@ -33,7 +32,6 @@ class BiotPlasmaGrid(BiotBaseGrid):
         super().post_solve()
 
     @staticmethod
-    @numba.njit
     def loop_neighbour_vertices(points, neighbor_vertices, boundary_vertices):
         """Calculate 6-point ordered loop vertex indices."""
         point_number = len(points)

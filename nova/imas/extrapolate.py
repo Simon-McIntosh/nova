@@ -194,12 +194,12 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
 
 if __name__ == '__main__':
 
-    #  pulse, run = 114101, 41  # JINTRAC
-    pulse, run = 130506, 403  # CORSICA
+    pulse, run = 114101, 41  # JINTRAC
+    #  pulse, run = 130506, 403  # CORSICA
 
     database = Database(pulse, run, 'equilibrium', machine='iter')
     coilset = Extrapolate(ids_data=database.ids_data,
-                          dplasma=-500, number=2000)
-    #  coilset.build()
-    coilset.ionize(50)
-    coilset.plot('psi')
+                          dplasma=-1000, number=2000)
+    #coilset.build()
+    #coilset.ionize(0)
+    #coilset.plot('psi')

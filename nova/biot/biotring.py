@@ -158,5 +158,5 @@ if __name__ == '__main__':
     coilset.saloc['Ic'] = 5e3
 
     coilset.grid.solve(2000, 1)
-    coilset.grid.plot(colors='C1')
+    coilset.grid.plot('br', colors='C1')
     coilset.plot()

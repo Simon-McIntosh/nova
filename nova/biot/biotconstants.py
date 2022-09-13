@@ -75,12 +75,12 @@ class BiotConstants:
         """Return complementary modulus."""
         return 1 - self.k2
 
-    @property
+    @cached_property
     def K(self):
         """Return elliptic intergral of the 1st kind."""
         return scipy.special.ellipk(self.k2)
 
-    @property
+    @cached_property
     def E(self):
         """Return elliptic intergral of the 2nd kind."""
         return scipy.special.ellipe(self.k2)

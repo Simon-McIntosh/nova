@@ -12,8 +12,8 @@ extras_require = dict(
                       mesh=['gmsh', 'pygmsh', 'tetgen', 'trimesh'],
                       optimize=['nlopt', 'pygmo'],
                       plan=['python-dateutil'],
-                      test=['coverage2clover', 'pytest', 'pytest-xdist', 'mypy', 'lizard', 
-                            'asv', 'virtualenv', 'snakeviz'],
+                      test=['coverage2clover', 'pytest', 'pytest-cov', 'pytest-xdist', 
+                            'mypy', 'lizard', 'asv', 'virtualenv', 'snakeviz'],
                       thermofluids=['ftputil', 'coolprop', 'tables', 'xlrd']
                       )
 

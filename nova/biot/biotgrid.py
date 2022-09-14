@@ -209,6 +209,8 @@ class BiotGrid(BiotBaseGrid):
               index: Union[str, slice, npt.ArrayLike] = slice(None),
               chunks=None):
         """Solve Biot interaction across grid."""
+        if chunks is not None:
+            self.chunks = chunks
         if isinstance(limit, (int, float)):
             limit = Expand(self.subframe, index)(limit)
         grid = Grid(number, limit)

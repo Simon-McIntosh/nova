@@ -1,6 +1,5 @@
 """Biot-Savart intergration constants."""
 from dataclasses import dataclass, field
-from functools import cached_property
 
 import dask.array as da
 import numpy as np
@@ -68,26 +67,30 @@ class BiotConstants:
     @property
     def k2(self):
         """Return k2 coefficient."""
-        return 4*self.r*self.rs / self.a2
+        return self.unit_offset(4*self.r*self.rs / self.a2)
 
     @property
     def ck2(self):
         """Return complementary modulus."""
         return 1 - self.k2
 
-    @cached_property
+    @property
     def K(self):
-        """Return elliptic intergral of the 1st kind."""
+        """Return complete elliptic intergral of the 1st kind."""
         return scipy.special.ellipk(self.k2)
 
-    @cached_property
+    @property
     def E(self):
-        """Return elliptic intergral of the 2nd kind."""
+        """Return complete elliptic intergral of the 2nd kind."""
         return scipy.special.ellipe(self.k2)
 
     @staticmethod
     def ellippi(n, m):
-        """Taken from https://github.com/scipy/scipy/issues/4452."""
+        """
+        Return complete elliptic intergral of the 3rd kind.
+
+        Taken from https://github.com/scipy/scipy/issues/4452.
+        """
         atol = 1e-18
         x, y, z, p = 0, 1-m, 1, 1-n
         rf = scipy.special.elliprf(x, y, z)
@@ -122,7 +125,7 @@ class BiotConstants:
 
     def Pi(self, p: int):
         """Return complete elliptc intergral of the 3rd kind."""
-        return self.ellippi(self.np2(p), self.k2)
+        return self.ellippi(self.np2(p), self.unit_offset(self.k2))
 
     @property
     def U(self):
@@ -134,4 +137,10 @@ class BiotConstants:
         """Return array with values close to zero offset to atol."""
         if (index := np.isclose(array, 0, atol=1e-12)).any():
             array[index] = 1e-12
+        return array
+
+    def unit_offset(self, array):
+        """Return array with values close to zero offset to atol."""
+        if (index := array >= 1).any():
+            array[index] = 1 - 1e-12
         return array

@@ -32,9 +32,9 @@ class BiotOp:
         #  perform svd order reduction
         self.svd_rank = min([len(plasma_s), svd_rank])
         # TODO fix svd_rank == -1 bug - crop plasma_U
-        self.plasma_U = plasma_U[:, :self.svd_rank].copy()
-        self.plasma_s = plasma_s[:self.svd_rank].copy()
-        self.plasma_V = plasma_V[:self.svd_rank, :].copy()
+        self.plasma_U = plasma_U.copy()#[:, :self.svd_rank].copy()
+        self.plasma_s = plasma_s.copy()#[:self.svd_rank].copy()
+        self.plasma_V = plasma_V.copy()#[:self.svd_rank, :].copy()
 
     def evaluate(self):
         """Return interaction."""

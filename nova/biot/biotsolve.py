@@ -12,7 +12,6 @@ from nova.biot.biotpolygon import BiotPolygon
 from nova.biot.biotring import BiotRing
 from nova.biot.biotset import BiotSet
 
-
 @dataclass
 class BiotSolve(BiotSet):
     """Manage biot interaction between multiple filament types."""

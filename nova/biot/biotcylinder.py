@@ -1,6 +1,6 @@
 """Biot-Savart calculation for complete circular cylinders."""
 from dataclasses import dataclass, field
-from functools import cached_property, wraps
+from functools import wraps
 from typing import ClassVar
 
 import numpy as np
@@ -79,7 +79,7 @@ class CylinderConstants(BiotConstants):
             -np.sin(4*alpha) - 1/3*self.r**2 * \
             np.arctan(self.beta3(phi)) * -np.cos(2*alpha)**3
 
-    @cached_property
+    @property
     def Cphi(self):
         """Return Cphi intergration constant."""
         return self.Cphi_coef(self.alpha) - self.Cphi_coef(0)
@@ -89,7 +89,7 @@ class CylinderConstants(BiotConstants):
         if p <= 2:
             return (self.rs - (-1)**p * self.c) * self.np2(p) * \
                 self.gamma**2 * self.c / self.r
-        return 0
+        return np.zeros_like(self.r)
 
     def Qz(self, p: int):
         """Return Qz(p) coefficient."""
@@ -98,7 +98,7 @@ class CylinderConstants(BiotConstants):
                 -2*self.gamma*self.c*self.np2(p)
         return self.gamma*self.b*(self.rs - self.r)*self.np2(p)
 
-    @cached_property
+    @property
     def zeta(self):
         """Return zeta coefficient calculated using Romberg integration."""
         asinh_beta1 = np.stack([np.arcsinh(self.beta1(phi))
@@ -212,8 +212,9 @@ if __name__ == '__main__':
 
     from nova.electromagnetic.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-1, dplasma=-150, chunks=None)
+    coilset = CoilSet(dcoil=-1, dplasma=-50, chunks=None)
 
+    '''
     coilset.coil.insert(5, 0.5, 0.01, 0.8, section='r', turn='r',
                         nturn=300, segment='cylinder')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, section='r', turn='r',
@@ -222,11 +223,17 @@ if __name__ == '__main__':
                         nturn=300, segment='cylinder')
     coilset.coil.insert(5.2, 0.5, 0.01, 0.8, section='r', turn='r',
                         nturn=300, segment='cylinder')
+    '''
 
-    #  coilset.coil.insert(5.1, 0.5, 0.02, 0.02, section='r', turn='r',
-    #                      nturn=300, segment='ring', tile=True)
+    coilset.coil.insert(5.1, 0.5, 0.02, 0.02, section='r', turn='r',
+                        nturn=1, delta=-15, tile=True, segment='cylinder')
+
+    coilset.firstwall.insert(5.1, 0.5, 0.02, 0.02, section='r', turn='r',
+                             nturn=1, delta=-15, tile=True)
+
     coilset.saloc['Ic'] = 5e3
+    coilset.sloc['plasma', 'Ic'] = -5e3
 
-    coilset.grid.solve(9000, 1)
+    coilset.grid.solve(150, 0)
     coilset.grid.plot('br', colors='C1', nulls=False)
     coilset.plot()

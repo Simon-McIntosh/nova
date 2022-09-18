@@ -28,7 +28,7 @@ class CylinderConstants(BiotConstants):
 
     def __post_init__(self):
         """Build intergration parameters."""
-        scheme = quadpy.c1.gauss_patterson(4)
+        scheme = quadpy.c1.gauss_patterson(3)
         self.phi_points = np.pi - self.alpha * (scheme.points + 1)
         self.phi_weights = scheme.weights * self.alpha / 2
 
@@ -208,10 +208,10 @@ if __name__ == '__main__':
 
     coilset = CoilSet(dcoil=-1, dplasma=-250)
 
-    coilset.coil.insert(5, 0.5, 0.01, 0.8, section='r', turn='r')
-    coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, section='r', turn='r')
-    coilset.coil.insert(5.1, 0.5-0.4, 0.2, 0.01, section='r', turn='r')
-    coilset.coil.insert(5.2, 0.5, 0.01, 0.8, section='r', turn='r')
+    coilset.coil.insert(5, 0.5, 0.01, 0.8, segment='cylinder')
+    coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, segment='cylinder')
+    coilset.coil.insert(5.1, 0.5-0.4, 0.2, 0.01, segment='cylinder')
+    coilset.coil.insert(5.2, 0.5, 0.01, 0.8, segment='cylinder')
 
     #coilset.coil.insert(2, 0, 0.5, 0.5, section='r', turn='r',
     #                    delta=-1, tile=False, segment='cylinder')

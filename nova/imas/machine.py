@@ -656,7 +656,7 @@ class Machine(CoilSet):
     dshell: float = 0.5
     dplasma: int = -500
     tcoil: str = 'rectangle'
-    tplasma: str = 'hex'
+    tplasma: str = 'rectangle'
     filename: str = 'iter'
     machine: str = 'iter_md'
     datapath: str = field(default='data/Nova', repr=False)

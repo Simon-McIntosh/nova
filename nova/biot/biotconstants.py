@@ -126,15 +126,15 @@ class BiotConstants:
         Taken from https://github.com/scipy/scipy/issues/4452.
         """
         x, y, z, p = 0, 1-m, 1, 1-n
-        rf = scipy.special.elliprf(x, y, z)  # m=1 inf
-        rj = scipy.special.elliprj(x, y, z, p)  # m=1 inf, n=1 nan
+        rf = scipy.special.elliprf(x, y, z)
+        rj = scipy.special.elliprj(x, y, z, p)
         result = rf + rj * n / 3
         return result
 
     @gamma_zero
     def np2_1(self, r, c):
         """Return np**2(p=1) constant."""
-        return 2*r / (r-c)
+        return 2*r / (r - c)
 
     def np2(self, p: int):
         """Return np**2 constant."""

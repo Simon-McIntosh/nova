@@ -8,7 +8,6 @@ import numpy.typing as npt
 from pylops import LinearOperator
 from pylops.optimization.leastsquares import RegularizedInversion
 
-from nova.biot.biotoperate import matmul
 from nova.imas.equilibrium import Equilibrium
 from nova.linalg.decompose import Decompose
 from nova.utilities.plotter import LinePlot
@@ -73,8 +72,8 @@ class RegressionBase(LinePlot):
         self.model = model
 
     def _forward(self):
-        """Call numba matmul."""
-        return matmul(self.matrix, self.model)
+        """Return forward model result."""
+        return self.matrix @ self.model
 
     def forward(self, model=None):
         """Return results of forward model evaluation."""
@@ -82,8 +81,8 @@ class RegressionBase(LinePlot):
         return self._forward()
 
     def _adjoint(self):
-        """Call numba matmul operator."""
-        return matmul(self.matrix_h, self.data)
+        """Return adjoint operator result."""
+        return self.matrix_h @ self.data
 
     def adjoint(self, data=None):
         """Return results of adjoint transform."""
@@ -184,10 +183,9 @@ class MoorePenrose(RegressionBase):
         self.matrices = Decompose(self.matrix, self.rank).matrices
 
     @staticmethod
-    @numba.njit
     def __forward(U, s, Vh, model):
         """Return results of forward model evaluation."""
-        return matmul(U, s * matmul(Vh, model))
+        return U @ (s * (Vh @ model))
 
     def _forward(self):
         """Call numba forward model - apply svd reduction if flag==True."""
@@ -197,10 +195,9 @@ class MoorePenrose(RegressionBase):
         return super()._forward()
 
     @staticmethod
-    @numba.njit
     def __inverse(V, s, Uh, data):
         """Calcuate inverse via svd psudo inverse."""
-        return matmul(V, matmul(Uh, data) / s)
+        return V @ ((Uh @ data) / s)
 
     def _inverse(self):
         """Extend Regression._inverse to include option for svd reduction."""

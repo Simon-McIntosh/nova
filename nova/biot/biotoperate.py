@@ -6,7 +6,7 @@ import numpy as np
 
 from nova.biot.biotdata import BiotData
 
-
+'''
 @numba.njit(fastmath=True, parallel=True)
 def matmul(A, B):
     """Perform fast matmul operation."""
@@ -15,6 +15,7 @@ def matmul(A, B):
     for i in numba.prange(row_number):  # pylint: disable=not-an-iterable
         vector[i] = np.dot(A[i], B)
     return vector
+'''
 
 
 class BiotOp:
@@ -38,19 +39,17 @@ class BiotOp:
 
     def evaluate(self):
         """Return interaction."""
-        return matmul(self.matrix, self.current)
+        return self.matrix @ self.current
 
     def update_turns(self, svd=True):
         """Update plasma turns."""
         if svd:
-            self.matrix[:, self.plasma_index] = \
-                matmul(self.plasma_U,
-                       self.plasma_s * matmul(self.plasma_V,
-                                              self.nturn[self.plasma]))
+            self.matrix[:, self.plasma_index] = self.plasma_U @ \
+                (self.plasma_s * (self.plasma_V @ self.nturn[self.plasma]))
             return
         print('svd == -1')
-        self.matrix[:, self.plasma_index] = matmul(
-            self.plasma_matrix, self.nturn[self.plasma])
+        self.matrix[:, self.plasma_index] = \
+            self.plasma_matrix @ self.nturn[self.plasma]
 
 
 @dataclass

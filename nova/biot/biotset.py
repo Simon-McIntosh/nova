@@ -1,7 +1,9 @@
 """Manage source and target biotframes."""
 from dataclasses import dataclass, field
-
 import itertools
+
+import numpy as np
+
 from nova.biot.biotframe import BiotFrame
 from nova.utilities.pyplot import plt
 
@@ -44,7 +46,12 @@ class BiotSet:
 
     def __len__(self):
         """Return interaction length."""
-        return len(self.source) * len(self.target)
+        return np.prod(self.shape)
+
+    @property
+    def shape(self):
+        """Return interaction matrix shape."""
+        return len(self.target), len(self.source)
 
     def set_flags(self):
         """Set turn and reduction flags on source and target BiotFrames."""

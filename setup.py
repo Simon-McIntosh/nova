@@ -7,7 +7,7 @@ extras_require = dict(
                       ansys=['ansys-dpf-core', 'ansys-dpf-post', 'openpyxl'],
                       cuda=['cupy-cuda115'],
                       develop=['spyder', 'spyder-unittest', 'spyder-line-profiler', 
-                               'line_profiler', 'pylsp-mypy', 
+                               'spyder-memory-profiler', 'line_profiler', 'pylsp-mypy', 
                                'numdifftools', 'pytest-xdist'],
                       mesh=['gmsh', 'pygmsh', 'tetgen', 'trimesh'],
                       optimize=['nlopt', 'pygmo'],

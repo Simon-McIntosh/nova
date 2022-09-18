@@ -199,7 +199,7 @@ if __name__ == '__main__':
 
     database = Database(pulse, run, 'equilibrium', machine='iter')
     coilset = Extrapolate(ids_data=database.ids_data,
-                          dplasma=-500, number=500)
-    #coilset.build()
-    coilset.ionize(50)
+                          dplasma=-1000, number=1000)
+    # coilset.build()
+    coilset.ionize(25)
     coilset.plot('br')

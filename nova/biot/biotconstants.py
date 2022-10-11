@@ -1,6 +1,6 @@
 """Biot-Savart intergration constants."""
 from dataclasses import dataclass, field
-from functools import wraps
+from functools import cached_property, wraps
 
 import dask.array as da
 import numpy as np
@@ -16,7 +16,7 @@ def gamma_zero(func):
     """Return result protected against degenerate values as gamma -> 0."""
     @wraps(func)
     def wrapper(self, r, c):
-        index = np.isclose(self.gamma, 0)
+        index = self.gamma_zero_index
         result = np.zeros_like(self.r)
         result[~index] = func(self, r[~index], c[~index])
         return result
@@ -54,19 +54,20 @@ class BiotConstants:
     r: Array = field(default_factory=lambda: da.zeros_like([]))
     z: Array = field(default_factory=lambda: da.zeros_like([]))
 
-    def __getitem__(self, attr):
-        """Provide dict-like access to attributes."""
-        return getattr(self, attr)
-
     @property
     def b(self):
         """Return b coefficient."""
         return self.rs + self.r
 
-    @property
+    @cached_property
     def gamma(self):
         """Return gamma coefficient."""
         return self.zs - self.z
+
+    @cached_property
+    def gamma_zero_index(self):
+        """Return gamma==zero index."""
+        return np.isclose(self.gamma, 0)
 
     @property
     def a2(self):
@@ -88,7 +89,7 @@ class BiotConstants:
         """Return c coefficient."""
         return np.sqrt(self.c2)
 
-    @property
+    @cached_property
     def k2(self):
         """Return k2 coefficient."""
         return 4*self.r*self.rs / self.a2
@@ -98,12 +99,12 @@ class BiotConstants:
         """Return complementary modulus."""
         return 1 - self.k2
 
-    @property
+    @cached_property
     def K(self):
         """Return complete elliptic intergral of the 1st kind."""
         return self.ellipk(self.k2)
 
-    @property
+    @cached_property
     def E(self):
         """Return complete elliptic intergral of the 2nd kind."""
         return self.ellipe(self.k2)
@@ -128,8 +129,7 @@ class BiotConstants:
         x, y, z, p = 0, 1-m, 1, 1-n
         rf = scipy.special.elliprf(x, y, z)
         rj = scipy.special.elliprj(x, y, z, p)
-        result = rf + rj * n / 3
-        return result
+        return rf + rj * n / 3
 
     @gamma_zero
     def np2_1(self, r, c):
@@ -153,18 +153,33 @@ class BiotConstants:
         return (self.rs - (-1)**p * self.c) * self.np2(p) * self.c * \
             (3*self.r**2 - self.c2) / (2*self.r)
 
-    def Pi(self, p: int):
+    def Pi_p(self, p: int):
         """Return complete elliptc intergral of the 3rd kind."""
         return self.ellippi(self.np2(p), self.k2)
+
+    @cached_property
+    def Pi_1(self):
+        """Return Pi(1)."""
+        return self.ellippi(self.np2(1), self.k2)
+
+    @cached_property
+    def Pi_2(self):
+        """Return Pi(2)."""
+        return self.ellippi(self.np2(2), self.k2)
+
+    @cached_property
+    def Pi_3(self):
+        """Return Pi(3)."""
+        return self.ellippi(self.np2(3), self.k2)
 
     def p_sum(self, func):
         """Return p sum."""
         result = np.zeros_like(self.r)
         for p in range(1, 4):
-            result += (-1)**p * func(p) * self.Pi(p)
+            result += (-1)**p * func(p) * getattr(self, f'Pi_{p}')
         return result
 
-    @property
+    @cached_property
     def U(self):
         """Return U coefficient."""
         return self.k2 * (4*self.gamma**2 +

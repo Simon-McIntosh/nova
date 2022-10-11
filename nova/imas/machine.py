@@ -21,7 +21,7 @@ from nova.utilities.pyplot import plt
 
 
 @dataclass
-class GeomData(ABC):
+class GeomData:
     """Geometry data baseclass."""
 
     ids_data: object = field(repr=False)
@@ -195,7 +195,7 @@ class Geometry:
 
     ids_data: object = field(repr=False)
     data: GeomData = field(init=False)
-    transform: ClassVar[dict[int, str]] = \
+    transform: ClassVar[dict[int, object]] = \
         {1: Outline, 2: Rectangle, 3: Oblique, 4: Arcs, 5: Annulus}
 
     def __post_init__(self):

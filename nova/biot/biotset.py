@@ -1,6 +1,5 @@
 """Manage source and target biotframes."""
 from dataclasses import dataclass, field
-import itertools
 
 import numpy as np
 
@@ -77,9 +76,10 @@ class BiotSet:
 
     def update_index(self):
         """Update index. Product of source and target BiotFrames."""
-        self.index = ['_'.join(label) for label
-                      in itertools.product(self.source.index,
-                                           self.target.index)]
+        self.index = range(len(self))
+        #self.index = ['_'.join(label) for label
+        #              in itertools.product(self.source.index,
+        #                                   self.target.index)]
 
     def plot(self, axes=None):
         """Plot source and target markers."""

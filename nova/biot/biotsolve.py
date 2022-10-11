@@ -1,9 +1,11 @@
 """Biot-Savart calculation base class."""
 from dataclasses import dataclass, field
+from itertools import zip_longest
 from typing import ClassVar
 
 import numpy as np
 import pandas
+from tqdm import tqdm
 import xarray
 
 from nova.biot.biotcylinder import BiotCylinder
@@ -18,7 +20,9 @@ class BiotSolve(BiotSet):
 
     attrs: list[str] = field(default_factory=lambda: [
         'Aphi', 'Psi', 'Br', 'Bz'])
+
     svd: bool = True
+    source_segment: np.ndarray = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
 
     generator: ClassVar[dict] = {'ring': BiotRing, 'cylinder': BiotCylinder,
@@ -30,15 +34,26 @@ class BiotSolve(BiotSet):
         self.check_segments()
         self.initialize()
         self.compose()
-        self.decompose()
+        #self.decompose()
 
     def check_segments(self):
         """Check for segment in self.generator."""
-        for segment in self.source.segment.unique():
+        self.source_segment = self.source.segment.copy()
+        for segment in self.source_segment.unique():
             if segment not in self.generator:
                 raise NotImplementedError(
                     f'segment <{segment}> not implemented '
                     f'in Biot.generator: {self.generator.keys()}')
+            index = self.source.index[self.source_segment == segment]
+            for i, chunk in enumerate(
+                    self.group_segments(index, 25, index[-1])):
+                self.source_segment.loc[chunk] = f'{segment}_{i}'
+
+    @staticmethod
+    def group_segments(iterable, length, fillvalue):
+        """Return grouped itterable."""
+        args = length * [iter(iterable)]
+        return zip_longest(*args, fillvalue=fillvalue)
 
     def initialize(self):
         """Initialize dataset."""
@@ -47,6 +62,10 @@ class BiotSolve(BiotSet):
                         plasma=self.source.index[self.source.plasma].to_list(),
                         target=self.get_index('target')))
         self.data.attrs['attributes'] = self.attrs
+        if self.data.dims['plasma'] < self.data.dims['target']:
+            sigma = 'plasma'
+        else:
+            sigma = 'target'
         for attr in self.attrs:
             self.data[attr] = xarray.DataArray(
                 0., dims=['target', 'source'],
@@ -55,6 +74,15 @@ class BiotSolve(BiotSet):
             self.data[f'_{attr}'] = xarray.DataArray(
                 0., dims=['target', 'plasma'],
                 coords=[self.data.target, self.data.plasma])
+        for attr in self.attrs:  # svd matricies
+            self.data[f'_U{attr}'] = xarray.DataArray(
+                0., dims=['target', sigma],
+                coords=[self.data.target, self.data[sigma]])
+            self.data[f'_s{attr}'] = xarray.DataArray(
+                0., dims=[sigma], coords=[self.data[sigma]])
+            self.data[f'_V{attr}'] = xarray.DataArray(
+                0., dims=[sigma, 'plasma'],
+                coords=[self.data[sigma], self.data.plasma])
 
     def get_index(self, frame: str) -> list[str]:
         """Return matrix coordinate, reduce if flag True."""
@@ -65,33 +93,32 @@ class BiotSolve(BiotSet):
 
     def compose(self):
         """Calculate full ensemble biot interaction."""
-        for segment in self.source.segment.unique():
+        for segment in tqdm(self.source_segment.unique(), desc='compute'):
             self.compute(segment)
 
     def source_index(self, segment):
         """Return source segment index."""
-        source = self.source.segment[self.get_index('source')]
-        return np.array(source == segment)
+        frame = self.source.frame[self.source_segment == segment]
+        return np.isin(self.get_index('source'), frame)
 
     def plasma_index(self, segment):
         """Return plasma segment index."""
-        plasma = self.source.segment[self.source.index[self.source.plasma]]
+        plasma = self.source_segment[self.source.index[self.source.plasma]]
         return np.array(plasma == segment)
 
     def compute(self, segment: str):
         """Compute segment and update dataset."""
         source_index = self.source_index(segment)
         plasma_index = self.plasma_index(segment)
-        generator = self.generator[segment](
+        generator = self.generator[segment.split('_')[0]](
             pandas.DataFrame(
-                self.source.loc[self.source.segment == segment, :]),
+                self.source.loc[self.source_segment == segment, :]),
             self.target, turns=self.turns, reduce=self.reduce,
             chunks=self.chunks)
-        generator.source.metaframe.data = {}
         for attr in self.attrs:
             matrix, plasma = generator.compute(attr)
-            self.data[attr].loc[:, source_index] = matrix
-            self.data[f'_{attr}'].loc[:, plasma_index] = plasma
+            self.data[attr].loc[:, source_index] += matrix
+            self.data[f'_{attr}'].loc[:, plasma_index] += plasma
 
     def decompose(self):
         """Compute plasma svd and update dataset."""

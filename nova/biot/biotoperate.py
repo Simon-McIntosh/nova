@@ -43,11 +43,13 @@ class BiotOp:
 
     def update_turns(self, svd=True):
         """Update plasma turns."""
+        '''
         if svd:
             self.matrix[:, self.plasma_index] = self.plasma_U @ \
                 (self.plasma_s * (self.plasma_V @ self.nturn[self.plasma]))
             return
         print('svd == -1')
+        '''
         self.matrix[:, self.plasma_index] = \
             self.plasma_matrix @ self.nturn[self.plasma]
 

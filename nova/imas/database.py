@@ -1,7 +1,6 @@
 """Manage access to IMAS database."""
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import Any
 
 from nova.database.filepath import FilePath
 
@@ -12,8 +11,8 @@ from nova.database.filepath import FilePath
 class IDS:
     """Structure IDS input as leading arguments."""
 
-    pulse: int = None
-    run: int = None
+    pulse: int | None = None
+    run: int | None = None
     ids_name: str = ''
     ids_data: object = field(repr=False, default=None)
 

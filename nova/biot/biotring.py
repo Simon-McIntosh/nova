@@ -95,7 +95,7 @@ class OffsetFilaments:
 
 
 @dataclass
-class BiotRing(BiotMatrix):
+class BiotRing(BiotConstants, BiotMatrix):
     """
     Extend Biot base class.
 
@@ -111,12 +111,8 @@ class BiotRing(BiotMatrix):
         """Load intergration constants."""
         super().__post_init__()
         OffsetFilaments(self.data)
-        self.constant = BiotConstants(self['rs'], self['zs'],
-                                      self['r'], self['z'])
-
-    def __getattr__(self, attr):
-        """Return coefficient evaluated at self.corner."""
-        return self.constant[attr]
+        for attr in ['rs', 'zs', 'r', 'z']:
+            setattr(self, attr, self.data[attr])
 
     @property
     def Aphi(self):
@@ -159,5 +155,5 @@ if __name__ == '__main__':
     coilset.saloc['Ic'] = 5e3
 
     coilset.grid.solve(2000, 1)
-    coilset.grid.plot('bz', colors='C1')
+    coilset.grid.plot('psi', colors='C1')
     coilset.plot()

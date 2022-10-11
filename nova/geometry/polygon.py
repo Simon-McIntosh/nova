@@ -124,6 +124,7 @@ class Polygon(PolyFrame):
             raise IndexError('malformed bounding box\n'
                              f'loop: {loop}\n'
                              'require [xmin, xmax, zmin, zmax]')
+        print(loop)
         if loop.shape[1] != 2:
             loop = loop.T
         if loop.ndim == 2 and loop.shape[1] == 2:  # loop

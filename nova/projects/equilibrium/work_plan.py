@@ -242,7 +242,7 @@ class WorkPlan:
         self.labels = labels
         if axes is None:
             axes = plt.subplots(1, 1, sharex=True,
-                                figsize=(width, len(labels.unique())/2.75),
+                                figsize=(width, len(labels.unique())/2.25),
                                 constrained_layout=~header_only)[1]
 
         data.loc[data.subtask == 'assembly', 'color'] = 'darkgray'
@@ -281,10 +281,16 @@ class WorkPlan:
         plt.despine()
 
         for label in data.index[labels == 'phase']:
+            if label == 'FP+EO':
+                text_label = 'FP\nEO'
+                fontsize = 8
+            else:
+                text_label = label
+                fontsize = 'xx-small'
             axes.text(data.at[label, 'start_offset'] +
-                      data.at[label, 'duration'] / 2, 0, label,
+                      data.at[label, 'duration'] / 2, 0, text_label,
                       color='w', ha='center', va='center',
-                      fontsize='xx-small')
+                      fontsize=fontsize)
         for i, label in enumerate(labels.unique()[1:]):
             label_data = data.loc[(data[detail] == label)]
             start_offset = label_data.start_offset.min()
@@ -389,7 +395,8 @@ if __name__ == '__main__':
     plan = WorkPlan()
     plan.resource()
 
-
-    plan.plot(5)
-    #plan.plot([7, 8, 9])
-    #plan.plot_subtasks()
+    plan.plot()
+    plan.plot([1, 2, 3, 4])
+    plan.plot([5, 6, 7])
+    plan.plot([8, 9, 10])
+    plan.plot_subtasks()

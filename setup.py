@@ -6,17 +6,20 @@ long_description = """ """
 extras_require = dict(
                       ansys=['ansys-dpf-core', 'ansys-dpf-post', 'openpyxl'],
                       cuda=['cupy-cuda115'],
-                      develop=['spyder', 'spyder-unittest', 'line_profiler', 'pylsp-mypy', 
+                      develop=['spyder', 'spyder-unittest', 'spyder-line-profiler', 
+                               'spyder-memory-profiler', 'line_profiler', 'pylsp-mypy', 
                                'numdifftools', 'pytest-xdist'],
                       mesh=['gmsh', 'pygmsh', 'tetgen', 'trimesh'],
                       optimize=['nlopt', 'pygmo'],
                       plan=['python-dateutil'],
-                      test=['pytest', 'mypy', 'lizard', 'asv', 'virtualenv'],
+                      test=['coverage2clover', 'pytest', 'pytest-cov', 'pytest-xdist', 
+                            'mypy', 'lizard', 'asv', 'virtualenv', 'snakeviz'],
                       thermofluids=['ftputil', 'coolprop', 'tables', 'xlrd']
                       )
 
-extras_require['full'] = [module for mode in extras_require for module in extras_require[mode] 
-                          if mode not in ['ansys', 'cuda', 'plan', 'optimize', 'mesh', 'thermofluids']]
+extras_require['full'] = [module for mode in extras_require for 
+                          module in extras_require[mode] if mode not in 
+                          ['ansys', 'cuda', 'plan', 'optimize', 'mesh', 'thermofluids']]
 
 setup_kwargs = dict(
     name                = 'nova',
@@ -61,11 +64,13 @@ setup_kwargs = dict(
         'pyperf',
         'pyvista',
         'pyquaternion',
+        'quadpy',
         'rdp',
         'seaborn',
         'scipy',
         'scikit-learn',
         'shapely',
+        'tqdm',
         'vedo',
         'wheel',
         'xarray',

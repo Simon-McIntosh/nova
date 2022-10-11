@@ -1,5 +1,4 @@
 """Biot data storage class."""
-from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 import xarray
@@ -9,7 +8,7 @@ from nova.electromagnetic.framesetloc import FrameSetLoc
 
 
 @dataclass
-class BiotData(ABC, netCDF, FrameSetLoc):
+class BiotData(netCDF, FrameSetLoc):
     """Biot solution abstract base class."""
 
     name: str = field(default='')
@@ -30,10 +29,6 @@ class BiotData(ABC, netCDF, FrameSetLoc):
     def __len__(self):
         """Return dataset length."""
         return len(self.data)
-
-    #@abstractmethod
-    #def solve(self):
-    #    """Solve biot interaction."""
 
     def post_solve(self):
         """Post process biot solution - extened by subclass."""

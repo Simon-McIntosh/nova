@@ -319,5 +319,5 @@ class coil_cage(object):
         return E
 
 
-if __name__ is '__main__':
+if __name__ == '__main__':
     print('coil cage example listed in coils.py')

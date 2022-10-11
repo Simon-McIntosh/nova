@@ -24,7 +24,7 @@ class Connect:
                                     default_factory=pandas.DataFrame)
 
     _space_columns: ClassVar[list[str]] = []
-    _modules: ClassVar[tuple[str]] = ('IMAS/3.36.0-4.10.1-2020b',)
+    _modules: ClassVar[tuple[str]] = ('IMAS',)  # /3.36.0-4.10.1-2020b
 
     def __post_init__(self):
         """Connect to cluster."""
@@ -39,6 +39,7 @@ class Connect:
     def module_run(self, command: str, hide=True):
         """Run command and return stdout."""
         command = f'{self._module_load_string} && {command}'
+        print(command)
         return self.ssh.run(command, hide=hide).stdout
 
     def read_summary(self, columns: str, select: str) -> str:
@@ -138,7 +139,7 @@ class Scenario(Connect):
         self.frame = pandas.DataFrame(
             np.array([s.split('/') for s in shot], int),
             columns=['pulse', 'run'])
-        self.copy_frame('equilibrium', 'pf_active', 'pf_passive')
+        self.copy_frame('equilibrium', 'pf_active', 'pf_passive', 'magnetics')
         self.rsync()
 
 
@@ -199,8 +200,13 @@ if __name__ == '__main__':
     #machine.load_ids('pf_active')
     #print(machine.frame)
 
-    Machine(user='hosokam', machine='ITER_MD').sync_shot('111001/202')
+    # Machine(user='hosokam', machine='ITER_MD').sync_shot('111001/202')
 
+    # Machine(machine='ITER_MD').sync_shot('150100/4')
+
+    Scenario(user='tribolp').sync_shot('135011/21')
+
+    #Scenario().sync_shot('130012/1')
     #scenario = Scenario()
     #scenario.load_frame('workflow', 'CORSICA')
     #Scenario().sync_workflow('CORSICA')

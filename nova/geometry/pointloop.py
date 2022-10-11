@@ -18,7 +18,7 @@ class PointLoop:
 
     @staticmethod
     @numba.njit
-    def point_in_polygon(point, polygon) -> bool:
+    def point_in_polygon(point, polygon) -> int:
         """
         Return boolean for point in polygon (is_inside_sm).
 

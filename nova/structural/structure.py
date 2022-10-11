@@ -597,7 +597,7 @@ class torsion(object):
         return J
 
 
-if __name__ is '__main__':
+if __name__ == '__main__':
 
     nTF = 16
     base = {'TF': 'demo', 'eq': 'DEMO_SN_SOF'}
@@ -622,5 +622,3 @@ if __name__ is '__main__':
     atec.plot_connections(fig)
     atec.plot_transition()
     atec.plot_tf_section()
-
-

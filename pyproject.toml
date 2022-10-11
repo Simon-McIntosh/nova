@@ -2,3 +2,8 @@
 requires = ["setuptools", "wheel", "versioneer-518"]
 build-backend = "setuptools.build_meta"
 
+[tool.coverage.run]
+omit = ["nova/ansys/*", "nova/assembly/*", "nova/design/*", 
+	"nova/development/*", "nova/dina/*", "nova/obsolete/*",
+	"nova/projects/*", "nova/scripts/*", "nova/thermalhydralic/*", 
+	"nova/utilities/*"]

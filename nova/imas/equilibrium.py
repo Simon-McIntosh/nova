@@ -65,7 +65,7 @@ class Boundary(Scenario):
             self.data['boundary'][itime] = self.outline(itime)
 
     def plot_boundary(self, itime: int):
-        """Plot 0D parameter timeseries."""
+        """Plot 2D boundary at itime."""
         plt.plot(self.data.boundary[itime, :, 0],
                  self.data.boundary[itime, :, 1], 'gray', alpha=0.5)
         plt.axis('equal')
@@ -159,8 +159,8 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
 
 
 if __name__ == '__main__':
-
-    database = Database(114101, 41, 'equilibrium', machine='iter')
+    #  114101, 41
+    database = Database(135011, 21, 'equilibrium', machine='iter')
     eq = Equilibrium(ids_data=database.ids_data)
     #eq = Equilibrium(114101, 41)
     # eq = Equilibrium(130510, 3)

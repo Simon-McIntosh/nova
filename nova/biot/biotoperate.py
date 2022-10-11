@@ -6,7 +6,7 @@ import numpy as np
 
 from nova.biot.biotdata import BiotData
 
-
+'''
 @numba.njit(fastmath=True, parallel=True)
 def matmul(A, B):
     """Perform fast matmul operation."""
@@ -15,6 +15,7 @@ def matmul(A, B):
     for i in numba.prange(row_number):  # pylint: disable=not-an-iterable
         vector[i] = np.dot(A[i], B)
     return vector
+'''
 
 
 class BiotOp:
@@ -32,25 +33,25 @@ class BiotOp:
         #  perform svd order reduction
         self.svd_rank = min([len(plasma_s), svd_rank])
         # TODO fix svd_rank == -1 bug - crop plasma_U
-        self.plasma_U = plasma_U[:, :self.svd_rank].copy()
-        self.plasma_s = plasma_s[:self.svd_rank].copy()
-        self.plasma_V = plasma_V[:self.svd_rank, :].copy()
+        self.plasma_U = plasma_U.copy()#[:, :self.svd_rank].copy()
+        self.plasma_s = plasma_s.copy()#[:self.svd_rank].copy()
+        self.plasma_V = plasma_V.copy()#[:self.svd_rank, :].copy()
 
     def evaluate(self):
         """Return interaction."""
-        return matmul(self.matrix, self.current)
+        return self.matrix @ self.current
 
     def update_turns(self, svd=True):
         """Update plasma turns."""
+        '''
         if svd:
-            self.matrix[:, self.plasma_index] = \
-                matmul(self.plasma_U,
-                       self.plasma_s * matmul(self.plasma_V,
-                                              self.nturn[self.plasma]))
+            self.matrix[:, self.plasma_index] = self.plasma_U @ \
+                (self.plasma_s * (self.plasma_V @ self.nturn[self.plasma]))
             return
         print('svd == -1')
-        self.matrix[:, self.plasma_index] = matmul(
-            self.plasma_matrix, self.nturn[self.plasma])
+        '''
+        self.matrix[:, self.plasma_index] = \
+            self.plasma_matrix @ self.nturn[self.plasma]
 
 
 @dataclass

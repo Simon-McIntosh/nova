@@ -163,7 +163,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         nturn = self.aloc['nturn']
         nturn[ionize] = current / current.sum()
         self.sloc['plasma', 'Ic'] = time_slice.ip
-        self.plasmagrid.update_turns('Psi', svd=False)
+        self.plasmagrid.update_turns('Psi')
 
         Psi = self.plasmagrid.data.Psi.values[ionize[plasma]]
 
@@ -194,12 +194,12 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
 
 if __name__ == '__main__':
 
-    #pulse, run = 114101, 41  # JINTRAC
-    #  pulse, run = 130506, 403  # CORSICA
+    #  pulse, run = 114101, 41  # JINTRAC
+    pulse, run = 130506, 403  # CORSICA
 
     database = Database(pulse, run, 'equilibrium', machine='iter')
     coilset = Extrapolate(ids_data=database.ids_data,
-                          dplasma=-2000, number=2000)
-    #coilset.build()
-    coilset.ionize(0)
-    coilset.plot('psi')
+                          dplasma=-1000, number=3000).build()
+    # coilset.build()
+    coilset.ionize(25)
+    coilset.plot('br')

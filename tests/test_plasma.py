@@ -58,6 +58,8 @@ def test_coil_cylinder_xpoint():
     coilset.coil.insert(6.5, [-1, 0, 1], 0.4, 0.4, Ic=-15e6,
                         segment='cylinder')
     coilset.grid.solve(60, [6, 7.0, -0.8, 0.8])
+    coilset.plot()
+    coilset.grid.plot()
     assert coilset.grid.x_point_number == 2
     assert coilset.grid.o_point_number == 1
 

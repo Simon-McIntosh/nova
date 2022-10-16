@@ -221,7 +221,8 @@ class BiotGrid(BiotBaseGrid):
         target = BiotTarget(dict(x=x2d.flatten(), z=z2d.flatten()),
                             label='Grid')
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
-                              attrs=self.attrs, chunks=self.chunks).data
+                              name=self.name, attrs=self.attrs,
+                              chunks=self.chunks).data
         # insert grid data
         self.data.coords['x'] = x2d[:, 0]
         self.data.coords['z'] = z2d[0]

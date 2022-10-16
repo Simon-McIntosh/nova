@@ -15,7 +15,7 @@ class BiotMatrix(BiotSet):
     data: dict[str, da.Array] = field(init=False, repr=False,
                                       default_factory=dict)
 
-    attrs: ClassVar[dict[str, str]] = dict(rs='x', zs='z', r='x', z='z')
+    attrs: ClassVar[dict[str, str]] = dict()
     mu_o: ClassVar[float] = 4*np.pi*1e-7
 
     def __post_init__(self):

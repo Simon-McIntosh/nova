@@ -18,6 +18,7 @@ from nova.biot.biotset import BiotSet
 class BiotSolve(BiotSet):
     """Manage biot interaction between multiple filament types."""
 
+    name: str = 'biot'
     attrs: list[str] = field(default_factory=lambda: [
         'Aphi', 'Psi', 'Br', 'Bz'])
 
@@ -34,7 +35,7 @@ class BiotSolve(BiotSet):
         self.check_segments()
         self.initialize()
         self.compose()
-        #self.decompose()
+        self.decompose()
 
     def check_segments(self):
         """Check for segment in self.generator."""
@@ -46,7 +47,7 @@ class BiotSolve(BiotSet):
                     f'in Biot.generator: {self.generator.keys()}')
             index = self.source.index[self.source_segment == segment]
             for i, chunk in enumerate(
-                    self.group_segments(index, 25, index[-1])):
+                    self.group_segments(index, 150, index[-1])):
                 self.source_segment.loc[chunk] = f'{segment}_{i}'
 
     @staticmethod
@@ -62,19 +63,25 @@ class BiotSolve(BiotSet):
                         plasma=self.source.index[self.source.plasma].to_list(),
                         target=self.get_index('target')))
         self.data.attrs['attributes'] = self.attrs
-        if self.data.dims['plasma'] < self.data.dims['target']:
-            sigma = 'plasma'
-        else:
-            sigma = 'target'
+
         for attr in self.attrs:
             self.data[attr] = xarray.DataArray(
                 0., dims=['target', 'source'],
                 coords=[self.data.target, self.data.source])
+        self._initialize_svd('target', 'source')
+
         for attr in self.attrs:  # unit filaments
             self.data[f'_{attr}'] = xarray.DataArray(
                 0., dims=['target', 'plasma'],
                 coords=[self.data.target, self.data.plasma])
-        for attr in self.attrs:  # svd matricies
+
+        self._initialize_svd('target', 'plasma', '_')
+        '''
+        if self.data.dims['plasma'] < self.data.dims['target']:
+            sigma = 'plasma'
+        else:
+            sigma = 'target'
+        for attr in self.attrs:  # unit filament svd matricies
             self.data[f'_U{attr}'] = xarray.DataArray(
                 0., dims=['target', sigma],
                 coords=[self.data.target, self.data[sigma]])
@@ -83,6 +90,23 @@ class BiotSolve(BiotSet):
             self.data[f'_V{attr}'] = xarray.DataArray(
                 0., dims=[sigma, 'plasma'],
                 coords=[self.data[sigma], self.data.plasma])
+        '''
+
+    def _initialize_svd(self, row: str, column: str, prefix=''):
+        """Initialize svd data structures."""
+        if self.data.dims[column] < self.data.dims[row]:
+            sigma = column
+        else:
+            sigma = row
+        for attr in self.attrs:  # unit filament svd matricies
+            self.data[f'{prefix}U{attr}'] = xarray.DataArray(
+                0., dims=[row, sigma],
+                coords=[self.data[row], self.data[sigma]])
+            self.data[f'{prefix}s{attr}'] = xarray.DataArray(
+                0., dims=[sigma], coords=[self.data[sigma]])
+            self.data[f'{prefix}V{attr}'] = xarray.DataArray(
+                0., dims=[sigma, column],
+                coords=[self.data[sigma], self.data[column]])
 
     def get_index(self, frame: str) -> list[str]:
         """Return matrix coordinate, reduce if flag True."""
@@ -93,7 +117,8 @@ class BiotSolve(BiotSet):
 
     def compose(self):
         """Calculate full ensemble biot interaction."""
-        for segment in tqdm(self.source_segment.unique(), desc='compute'):
+        for segment in tqdm(self.source_segment.unique(), ncols=65,
+                            desc=self.name):
             self.compute(segment)
 
     def source_index(self, segment):

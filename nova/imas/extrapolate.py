@@ -6,6 +6,7 @@ from typing import ClassVar, Union
 import imas
 import numpy as np
 import numpy.typing as npt
+from sklearn.linear_model import Ridge
 from scipy.interpolate import RectBivariateSpline, interp1d
 import xarray
 
@@ -157,7 +158,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
 
         current_density = radius * time_slice.p_prime(psi_norm) + \
             time_slice.ff_prime(psi_norm) / (self.mu_o * radius)
-        current_density *= -2*np.pi
+        #current_density *= -2*np.pi
         current = current_density * area
 
         nturn = self.aloc['nturn']
@@ -166,6 +167,8 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         self.plasmagrid.update_turns('Psi')
 
         Psi = self.plasmagrid.data.Psi.values[ionize[plasma]]
+
+        #self.saloc['Ic'][:-2] =
 
         self.saloc['Ic'][:-2] = np.linalg.lstsq(
             Psi[:, :-2], -psi - Psi[:, -1]*time_slice.ip)[0]
@@ -179,8 +182,9 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         """Expose Equilibrium plot boundary."""
         return Equilibrium.plot_boundary(self, itime)
 
-    def plot(self, attr='psi'):
+    def plot(self, attr='psi', axes=None):
         """Plot plasma filements and polidal flux."""
+
         plt.figure()
         super().plot('plasma')
         levels = self.grid.plot(attr, levels=51, colors='C0', nulls=False)
@@ -199,7 +203,20 @@ if __name__ == '__main__':
 
     database = Database(pulse, run, 'equilibrium', machine='iter')
     coilset = Extrapolate(ids_data=database.ids_data,
-                          dplasma=-1000, number=3000).build()
-    # coilset.build()
-    coilset.ionize(25)
-    coilset.plot('br')
+                          dplasma=-2000, number=4000)  # 100
+    coilset.build()
+
+    coilset.ionize(20)
+
+    axes = plt.plot()
+    coilset.plot('psi')
+
+    '''
+    index = np.where(~np.isfinite(coilset.plasmagrid.data._Psi))
+    Machine.plot(coilset, 'plasma')
+    for i in range(2):
+        plt.plot(coilset.plasmagrid.data.x[index[i]],
+                 coilset.plasmagrid.data.z[index[i]], 'o')
+    '''
+
+    #coilset.plasmagrid.plot()

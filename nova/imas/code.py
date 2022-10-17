@@ -12,7 +12,7 @@ from nova.imas.attrs import Attrs
 class Code(Attrs):
     """Methods for retriving and formating code metadata."""
 
-    parameter_dict: dict = field(default=None, repr=False)
+    parameter_dict: dict | None = field(default=None, repr=False)
     output_flag: int = 1
 
     name: ClassVar[str] = 'Nova'
@@ -57,4 +57,4 @@ if __name__ == '__main__':
     code = Code()
     code.parameters = dict(dcoil=30, plasma=-50)
 
-    print(code())
+    print(code.parameters)

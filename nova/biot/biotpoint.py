@@ -22,7 +22,8 @@ class BiotPoint(Axes, BiotOperate):
                                  z=[point[1] for point in points]),
                             label='Point')
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
-                              attrs=['Psi', 'Br', 'Bz']).data
+                              attrs=['Psi', 'Br', 'Bz'],
+                              name=self.name).data
         # insert coordinate data
         self.data.coords['x'] = target['x']
         self.data.coords['z'] = target['z']

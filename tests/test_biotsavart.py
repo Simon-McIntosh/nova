@@ -146,11 +146,18 @@ def test_hemholtz_field(segment):
     assert np.isclose(coilset.point.bz[0], bz)
 
 
-def test_coil_cylinder_isfinite():
+def test_coil_cylinder_isfinite_farfield():
     coilset = CoilSet(dcoil=-1)
     coilset.coil.insert(6.5, [-1, 0, 1], 0.4, 0.4, Ic=-15e6,
                         segment='cylinder')
     coilset.grid.solve(60, [6, 7.0, -0.8, 0.8])
+    assert np.isfinite(coilset.grid.psi).all()
+
+
+def test_coil_cylinder_isfinite_coil():
+    coilset = CoilSet(dcoil=-2**3)
+    coilset.coil.insert(0.3, 0, 0.15, 0.15, segment='cylinder', Ic=5e3)
+    coilset.grid.solve(10**2, 0)
     assert np.isfinite(coilset.grid.psi).all()
 
 

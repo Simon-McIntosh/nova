@@ -92,7 +92,7 @@ class RegressionBase(LinePlot):
     @staticmethod
     @numba.njit
     def _lstsq(matrix, data):
-        """Calcuate inverse vir numpy's lstsq method."""
+        """Calcuate inverse via numpy's lstsq method."""
         return np.linalg.lstsq(matrix, data)[0]
 
     @abstractmethod

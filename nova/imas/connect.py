@@ -204,7 +204,7 @@ if __name__ == '__main__':
 
     # Machine(machine='ITER_MD').sync_shot('150100/4')
 
-    Scenario(user='tribolp').sync_shot('135011/21')
+    # Scenario(user='tribolp').sync_shot('135011/21')
 
     #Scenario().sync_shot('130012/1')
     #scenario = Scenario()

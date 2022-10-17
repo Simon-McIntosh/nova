@@ -1,5 +1,5 @@
 """Biot-Savart calculation for complete circular cylinders."""
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from functools import cached_property, wraps
 from typing import ClassVar
 
@@ -15,6 +15,7 @@ def gamma_zero(func):
     @wraps(func)
     def wrapper(self):
         result = func(self)
+        return result
         result[self.gamma_zero_index] = 0
         result[np.isclose(self.r - self.rs, 0)] = 0
         return result
@@ -67,13 +68,13 @@ class CylinderConstants(BiotConstants):
     @cached_property
     def Cphi_0(self):
         """Return Cphi(alpha=0) coefficient."""
-        return -1/3*self.r**2 * np.pi/2 * np.sign(self.gamma)
+        return -1/3*self.r**2 * np.pi/2 * self.sign(self.gamma)
 
     @cached_property
     def Cphi_pi_2(self):
         """Return Cphi(alpha=pi/2) coefficient."""
         return -1/3*self.r**2 * np.pi/2 * \
-            np.sign(self.gamma*(self.rs - self.r))
+            self.sign(self.gamma * (self.rs - self.r))
 
     def Cphi_alpha(self, alpha):
         """Return Cphi(alpha) coefficient."""
@@ -101,21 +102,23 @@ class CylinderConstants(BiotConstants):
             result += weight * np.arcsinh(self.beta1(phi))
         return result
 
-    def Qr(self, p: int):
+    @property
+    def Qr(self) -> dict[int, np.ndarray]:
         """Return Qr(p) coefficient."""
-        if p <= 2:
-            return (self.rs - (-1)**p * self.c) * self.np2(p) * \
-                self.gamma**2 * self.c / self.r
-        return np.zeros_like(self.r)
+        Qr = {p: (self.rs - (-1)**p * self.c) * self.np2[p] *
+              self.gamma**2 * self.c / self.r for p in [1, 2]}
+        Qr[3] = np.zeros_like(self.r)
+        return Qr
 
-    def Qz(self, p: int):
+    @property
+    def Qz(self) -> dict[int, np.ndarray]:
         """Return Qz(p) coefficient."""
-        if p <= 2:
-            return (self.rs - (-1)**p * self.c) * \
-                -2*self.gamma*self.c*self.np2(p)
-        return self.gamma*self.b*(self.rs - self.r)*self.np2(p)
+        Qz = {p: (self.rs - (-1)**p * self.c) *
+              -2*self.gamma*self.c*self.np2[p] for p in [1, 2]}
+        Qz[3] = self.gamma*self.b*(self.rs - self.r)*self.np2[3]
+        return Qz
 
-    @cached_property
+    @property
     def Dz(self):
         """Return Dz coefficient."""
         return 3/self.r*self.Cphi
@@ -130,10 +133,7 @@ class BiotCylinder(CylinderConstants, BiotMatrix):
 
     """
 
-    corner: BiotConstants | None = field(init=False, repr=False, default=None)
-
     name: ClassVar[str] = 'cylinder'  # element name
-    attrs: ClassVar[dict[str, str]] = dict()
 
     def __post_init__(self):
         """Load intergration constants."""
@@ -147,7 +147,6 @@ class BiotCylinder(CylinderConstants, BiotMatrix):
         self.r = np.stack([self.target('x') for _ in range(4)], axis=-1)
         self.z = np.stack([self.target('z') for _ in range(4)], axis=-1)
 
-    @gamma_zero
     def Aphi_hat(self):
         """Return vector potential intergration coefficient."""
         return self.Cphi + self.gamma*self.r*self.zeta + \
@@ -155,14 +154,12 @@ class BiotCylinder(CylinderConstants, BiotMatrix):
             (self.U*self.K - 2*self.rs*self.E) + \
             self.gamma / (6*self.a*self.r) * self.p_sum(self.Pphi)
 
-    @gamma_zero
     def Br_hat(self):
         """Return radial magnetic field intergration coefficient."""
         return self.r*self.zeta - self.a / (2*self.r) * self.rs*(
             self.E - self.v*self.K) - 1/(4*self.a*self.r) * \
             self.p_sum(self.Qr)
 
-    @gamma_zero
     def Bz_hat(self):
         """Return vertical magnetic field intergration coefficient."""
         return self.Dz + 2*self.gamma*self.zeta - self.a / (2*self.r) * \
@@ -174,7 +171,7 @@ class BiotCylinder(CylinderConstants, BiotMatrix):
         return 1 / (2*np.pi*self.source('area')) * \
             ((data[..., 2] - data[..., 3]) - (data[..., 1] - data[..., 0]))
 
-    @property
+    @cached_property
     def Aphi(self):
         """Return Aphi dask array."""
         return self._intergrate(self.Aphi_hat())
@@ -199,23 +196,37 @@ if __name__ == '__main__':
 
     from nova.electromagnetic.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-2, dplasma=-5**2)
+    coilset = CoilSet(dcoil=-2, dplasma=-30)
     '''
     coilset.coil.insert(5, 0.5, 0.01, 0.8, segment='cylinder')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, segment='cylinder')
     coilset.coil.insert(5.1, 0.5-0.4, 0.2, 0.01, segment='cylinder')
     coilset.coil.insert(5.2, 0.5, 0.01, 0.8, segment='cylinder')
     '''
-    coilset.firstwall.insert(0.3, 0.5, 0.15, 0.15,
-                             section='r', turn='r',
-                             tile=False, segment='cylinder')
+    coilset.firstwall.insert(5, 0, 1, 3,
+                             turn='s', tile=True, segment='cylinder')
+
+    #coilset.coil.insert(0.3, 0, 0.15, 0.15, segment='cylinder', delta=-1000)
 
     coilset.saloc['Ic'] = 5e3
-    coilset.sloc['plasma', 'Ic'] = -5e3
-    coilset.plot()
+    coilset.plasmagrid.solve()
+    #coilset.grid.solve(1000, 0.1)
 
-    coilset.grid.solve(80**2, 1)
-    levels = coilset.grid.plot('psi', colors='C1', nulls=False)
+    print()
+    print(np.isfinite(coilset.plasmagrid.psi).all())
+    print(np.sum(~np.isfinite(coilset.plasmagrid.psi)))
+    index = np.where(~np.isfinite(coilset.plasmagrid.data._Psi))
+    from nova.utilities.pyplot import plt
+
+    i = 0
+    subindex = np.where(index[0] == index[0][i])
+    plt.plot(coilset.plasmagrid.data.x[index[0][i]],
+             coilset.plasmagrid.data.z[index[0][i]], 'o', ms=12)
+    plt.plot(coilset.plasmagrid.data.x[index[1][subindex]],
+             coilset.plasmagrid.data.z[index[1][subindex]], 'X')
+
+    coilset.plot()
+    #levels = coilset.grid.plot('psi', colors='C1', nulls=False)
 
     '''
     coilset = CoilSet()

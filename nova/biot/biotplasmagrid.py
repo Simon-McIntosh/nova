@@ -27,7 +27,8 @@ class BiotPlasmaGrid(BiotBaseGrid):
             raise GridError('plasma')
         target = BiotTarget(self.subframe.loc['plasma', ['x', 'z']].to_dict())
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
-                              attrs=self.attrs, chunks=self.chunks).data
+                              attrs=self.attrs, name=self.name,
+                              chunks=self.chunks).data
         self.tessellate()
         super().post_solve()
 
@@ -79,7 +80,7 @@ class BiotPlasmaGrid(BiotBaseGrid):
         """Plot poloidal flux contours."""
         super().plot(axes=kwargs.get('axes', None))
         kwargs = self.contour_kwargs(**kwargs)
-        if kwargs.get('plot_mesh', False):
+        if kwargs.pop('plot_mesh', False):
             self.axes.triplot(self.data.x, self.data.z,
                               self.data.triangles, lw=0.5)
         self.axes.tricontour(self.data.x, self.data.z, self.data.triangles,

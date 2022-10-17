@@ -72,11 +72,11 @@ class FirstWall(Axes, PlasmaGrid, FrameSetLoc):
         """Return firstwall polygon."""
         return self.Loc['plasma', 'poly'][0]
 
-    def plot(self, axes=None, boundary=True):
+    def plot(self, axes=None, plasma=False):
         """Plot plasma boundary and separatrix."""
         self.axes = axes
-        if boundary:
-            self.poly.plot_boundary(self.axes, color='gray', lw=1.5)
-        self.subframe.polyplot('plasma')
+        self.poly.plot_boundary(self.axes, color='gray', lw=1.5)
+        if plasma:
+            self.plot('plasma')
         plt.axis('equal')
         plt.axis('off')

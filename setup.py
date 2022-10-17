@@ -78,7 +78,8 @@ setup_kwargs = dict(
     ],
     extras_require     = extras_require,
     entry_points={'console_scripts': [
-                      'benchmark = nova.scripts.benchmark:benchmark']},
+                      'benchmark = nova.scripts.benchmark:benchmark',
+                      'extrapolate_ids = nova.electromagnetic.extrapolate:extrapolate_ids']},
 )
 
 setup(**setup_kwargs)

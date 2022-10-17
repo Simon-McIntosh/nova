@@ -5,7 +5,6 @@ import os
 from appdirs import AppDirs
 import xarray
 
-import nova
 from nova.definitions import root_dir
 
 
@@ -13,11 +12,11 @@ from nova.definitions import root_dir
 class FilePath:
     """Manage to access to data via store and load methods."""
 
-    filename: str = field(default=None, repr=True)
-    group: str = field(default=None, repr=True)
-    path: str = field(default=None, repr=False)
+    filename: str | None = field(default=None, repr=True)
+    group: str | None = field(default=None, repr=True)
+    path: str | None = field(default=None, repr=False)
     directory: str = 'user_cache_dir'
-    data: xarray.Dataset = field(default=None, repr=False)
+    data: xarray.Dataset | None = field(default=None, repr=False)
 
     def set_path(self, subpath=None):
         """Set default path."""

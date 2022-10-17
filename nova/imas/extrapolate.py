@@ -3,6 +3,7 @@ from dataclasses import dataclass, field, fields
 from functools import cached_property
 from typing import ClassVar, Union
 
+import click
 import imas
 import numpy as np
 import numpy.typing as npt
@@ -23,7 +24,7 @@ from nova.utilities.pyplot import plt
 class Grid:
     """Specify interpolation grid attributes."""
 
-    number: int = 2500
+    resolution: int = 2500
     limit: float | list[float] | str = 0.25
     index: Union[str, slice, npt.ArrayLike] = 'plasma'
 
@@ -122,13 +123,13 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
                 raise TypeError('ids limits only valid for rectangular grids'
                                 f'{equilibrium.data.grid_type} != 1')
             limit = [equilibrium.data.r.values, equilibrium.data.z.values]
-            if self.number == 'ids':
+            if self.resolution == 'ids':
                 self.limit = limit
             else:
                 self.limit = [limit[0][0], limit[0][-1],
                               limit[1][0], limit[1][-1]]
-        if self.number == 'ids':
-            self.number = equilibrium.data.dims['r'] * \
+        if self.resolution == 'ids':
+            self.resolution = equilibrium.data.dims['r'] * \
                 equilibrium.data.dims['z']
 
     @property
@@ -158,7 +159,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
 
         current_density = radius * time_slice.p_prime(psi_norm) + \
             time_slice.ff_prime(psi_norm) / (self.mu_o * radius)
-        #current_density *= -2*np.pi
+        current_density *= -2*np.pi
         current = current_density * area
 
         nturn = self.aloc['nturn']
@@ -167,8 +168,6 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         self.plasmagrid.update_turns('Psi')
 
         Psi = self.plasmagrid.data.Psi.values[ionize[plasma]]
-
-        #self.saloc['Ic'][:-2] =
 
         self.saloc['Ic'][:-2] = np.linalg.lstsq(
             Psi[:, :-2], -psi - Psi[:, -1]*time_slice.ip)[0]
@@ -184,7 +183,6 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
 
     def plot(self, attr='psi', axes=None):
         """Plot plasma filements and polidal flux."""
-
         plt.figure()
         super().plot('plasma')
         levels = self.grid.plot(attr, levels=51, colors='C0', nulls=False)
@@ -196,20 +194,40 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         self.plot_boundary(self.itime)
 
 
+@click.command()
+@click.option('--pulse', default=None, help='Pulse number.')
+@click.option('--run', default=None, help='Run number.')
+@click.option('--ids_data', default=None, help='Equilibrium IDS.')
+@click.option('--name')
+def extrapolate_ids():
+    """
+    Extrapolate poloidal flux and magnetic field beyond separatrix.
+
+    Reads flux functions from equilibrium IDS and solves coil currents
+    in a least squares sense to fit poloidal flux interior to separatrix.
+
+    Requires an equilibrium IDS as ids_data or pulse and run numbers as input.
+
+    Returns equilibrium IDS including extrapolated flux and field values.
+    """
+
+
 if __name__ == '__main__':
 
-    #  pulse, run = 114101, 41  # JINTRAC
+    # pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
 
     database = Database(pulse, run, 'equilibrium', machine='iter')
+
     coilset = Extrapolate(ids_data=database.ids_data,
-                          dplasma=-2000, number=4000)  # 100
-    coilset.build()
+                          dplasma=-1000, resolution=2000,
+                          limit=0)  # 1Equilibrium IDS00
+    #coilset.build()
 
     coilset.ionize(20)
 
-    axes = plt.plot()
-    coilset.plot('psi')
+    coilset.plot('bz')
+
 
     '''
     index = np.where(~np.isfinite(coilset.plasmagrid.data._Psi))

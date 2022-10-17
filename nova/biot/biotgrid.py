@@ -57,7 +57,7 @@ class GridCoord:
 class Grid(Axes):
     """Generate grid."""
 
-    number: int | None = field(default=None)
+    resolution: int | None = field(default=None)
     limit: npt.ArrayLike | None = field(default=None)
     xcoord: list[float] = field(init=False, repr=False)
     zcoord: list[float] = field(init=False, repr=False)
@@ -76,21 +76,21 @@ class Grid(Axes):
         """Return grid coordinates."""
         if len(self.limit) == 2:  # grid coordinates
             xcoord, zcoord = self.limit
-            self.number = len(xcoord) * len(zcoord)
+            self.resolution = len(xcoord) * len(zcoord)
             self.limit = [xcoord[0], xcoord[-1], zcoord[0], zcoord[-1]]
             return xcoord, zcoord
         if len(self.limit) == 4:  # grid limits
             xgrid = GridCoord(*self.limit[:2])
             zgrid = GridCoord(*self.limit[2:])
             xgrid.num = xgrid.delta / np.sqrt(
-                xgrid.delta*zgrid.delta / self.number)
-            zgrid.num = self.number / xgrid.num
-            self.number = xgrid.num * zgrid.num
+                xgrid.delta*zgrid.delta / self.resolution)
+            zgrid.num = self.resolution / xgrid.num
+            self.resolution = xgrid.num * zgrid.num
             return xgrid(), zgrid()
         raise IndexError(f'len(limit) {len(self.limit)} not in [2, 4]')
 
     def __len__(self):
-        """Return grid number."""
+        """Return grid resolution."""
         return len(self.xcoord) * len(self.zcoord)
 
     @property
@@ -205,7 +205,7 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
 class BiotGrid(BiotBaseGrid):
     """Compute interaction across grid."""
 
-    def solve(self, number: int, limit: float | npt.ArrayLike = 0,
+    def solve(self, resolution: int, limit: float | npt.ArrayLike = 0,
               index: Union[str, slice, npt.ArrayLike] = slice(None),
               chunks=None):
         """Solve Biot interaction across grid."""
@@ -213,7 +213,7 @@ class BiotGrid(BiotBaseGrid):
             self.chunks = chunks
         if isinstance(limit, (int, float)):
             limit = Expand(self.subframe, index)(limit)
-        grid = Grid(number, limit)
+        grid = Grid(resolution, limit)
         self.solve2d(grid.data.x2d.values, grid.data.z2d.values)
 
     def solve2d(self, x2d, z2d):

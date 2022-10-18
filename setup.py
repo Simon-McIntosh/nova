@@ -79,7 +79,7 @@ setup_kwargs = dict(
     extras_require     = extras_require,
     entry_points={'console_scripts': [
                       'benchmark = nova.scripts.benchmark:benchmark',
-                      'extrapolate = nova.imas.extrapolate:extrapolate']},
+                      'extrapolate = nova.imas.scripts:extrapolate']},
 )
 
 setup(**setup_kwargs)

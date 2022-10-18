@@ -3,7 +3,6 @@ from dataclasses import dataclass, field, fields
 from functools import cached_property
 from typing import ClassVar, Union
 
-import click
 import imas
 import numpy as np
 import numpy.typing as npt
@@ -24,7 +23,7 @@ from nova.utilities.pyplot import plt
 class Grid:
     """Specify interpolation grid attributes."""
 
-    resolution: int = 2500
+    resolution: int | str = 2500
     limit: float | list[float] | str = 0.25
     index: Union[str, slice, npt.ArrayLike] = 'plasma'
 
@@ -88,21 +87,37 @@ class TimeSlice:
 
 @dataclass
 class Extrapolate(BiotPlot, Machine, Grid, IDS):
-    """Extrapolate equlibrium beyond separatrix ids."""
+    """
+    Extrapolate fixed boundary equilibrium beyond separatrix ids.
 
-    limit: float | list[float] | str = 'ids'
+    Parameters
+    ----------
+        attr : TYPE, optional
+            DESCRIPTION. The default is 'psi'.
+        axes : TYPE, optional
+            DESCRIPTION. The default is None.
+
+
+
+    Returns
+    -------
+    None.
+
+    """
     ids_name: str = 'equilibrium'
     filename: str = 'extrapolate'
     geometry: list[str] = field(default_factory=lambda: ['pf_active', 'wall'])
     itime: int = field(init=False, default=0)
 
+
     mu_o: ClassVar[float] = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
 
     def __post_init__(self):
         """Load equilibrium and coilset."""
-        self.load_ids()
+        self.load_equilibrium()
         super().__post_init__()
 
+    '''
     def __call__(self):
         """Return extrapolated equilibrium ids."""
         ids = imas.equilibrium()
@@ -112,9 +127,10 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         Code(self.machine_attrs)(ids.code)
         ids.vacuum_toroidal_field = self.ids.vacuum_toroidal_field
         return ids
+    '''
 
-    def load_ids(self):
-        """Load equilibrium data and grid limits."""
+    def load_equilibrium(self):
+        """Load equilibrium data and update grid limits."""
         equilibrium = Equilibrium(self.pulse, self.run, ids=self.ids)
         for attr in ['ids', 'data']:
             setattr(self, attr, getattr(equilibrium, attr))
@@ -192,39 +208,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         except KeyError:
             pass
         self.plot_boundary(self.itime)
-
-
-@click.group()
-@click.option('-pi', '--pulse', 'pulse', type=int, required=True,
-              help='input pulse number')
-@click.option('-ri', '--run', 'run', type=int, required=True,
-              help='input run number')
-@click.option('--ids', default=None, help='Equilibrium IDS')
-@click.version_option(package_name='nova',
-                      message=f'{Extrapolate.__module__}.%(prog)s, '
-                               'version %(version)s')
-def extrapolate(ctx):
-    """
-    Extrapolate poloidal flux and magnetic field beyond separatrix.
-
-    Reads flux functions from equilibrium IDS and solves coil currents
-    in a least squares sense to fit poloidal flux interior to separatrix.
-
-    Requires an equilibrium IDS as ids or pulse and run numbers as input.
-
-    Returns equilibrium IDS including extrapolated flux and field values.
-    """
-
-
-@extrapolate.command()
-def wall():
-    """Define input wall ids."""
-
-
-@extrapolate.command()
-def ids():
-    pass
-
+        plt.show()
 
 
 if __name__ == '__main__':
@@ -234,9 +218,7 @@ if __name__ == '__main__':
 
     database = Database(pulse, run, 'equilibrium', machine='iter')
 
-    coilset = Extrapolate(ids=database.ids,
-                          dplasma=-200, resolution=500,
-                          limit='ids')
+    coilset = Extrapolate(dplasma=-200, resolution=500, limit='ids')
     #coilset.build()
 
     coilset.ionize(20)

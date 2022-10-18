@@ -14,7 +14,7 @@ class IDS:
     pulse: int | None = None
     run: int | None = None
     ids_name: str = ''
-    ids_data: object = field(repr=False, default=None)
+    ids: object | None = field(repr=False, default=None)
 
 
 @dataclass
@@ -38,7 +38,7 @@ class IMASdb:
             yield database.partial_get(ids_name, ids_path)
         database.close()
 
-    def ids(self, pulse: int, run: int, ids_name: str, ids_path: str):
+    def get_ids(self, pulse: int, run: int, ids_name: str, ids_path: str):
         """Return filled ids from dataabase."""
         with self._database(pulse, run, ids_name, ids_path) as ids:
             return ids
@@ -58,20 +58,20 @@ class Database(FilePath, IMASdb, IDS):
             self.filename = None
         self.group = self.ids_name
         self.set_path(self.datapath)
-        self.set_ids_data()
+        self.set_ids()
 
-    def set_ids_data(self):
-        """Set ids_data."""
-        if self.ids_data is not None:
+    def set_ids(self):
+        """Set ids."""
+        if self.ids is not None:
             self.pulse = self.run = self.ids_name = None  # don't know
             return
-        self.ids_data = self.ids(self.pulse, self.run, self.ids_name, None)
+        self.ids = self.get_ids(self.pulse, self.run, self.ids_name, None)
 
-    def load_ids_data(self, ids_path=None):
-        """Return ids_data."""
+    def load_ids(self, ids_path=None):
+        """Return ids."""
         if ids_path is None:
-            return self.ids_data
-        return getattr(self.ids_data, ids_path)
+            return self.ids
+        return getattr(self.ids, ids_path)
 
     @property
     def ids_attrs(self):

@@ -9,14 +9,14 @@ import xarray
 class TimeSlice:
     """Manage methods for accessing time slice data."""
 
-    ids_data: object
+    ids: object
     data: xarray.Dataset
 
     def __call__(self, name: str, itime: int, index=0):
         """Return time slice data array."""
         if index is None:
-            return getattr(self.ids_data.time_slice[itime], name)
-        return getattr(self.ids_data.time_slice[itime], name).array[index]
+            return getattr(self.ids.time_slice[itime], name)
+        return getattr(self.ids.time_slice[itime], name).array[index]
 
     def initialize(self, name: str, attrs: list[str], index=0, postfix=''):
         """Create xarray time slice data entries."""

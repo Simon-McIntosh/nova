@@ -24,13 +24,13 @@ from nova.utilities.pyplot import plt
 class GeomData:
     """Geometry data baseclass."""
 
-    ids_data: object = field(repr=False)
+    ids: object = field(repr=False)
     data: dict[str, Union[int, float]] = field(init=False, repr=False,
                                                default_factory=dict)
     attrs: ClassVar[list[str]] = []
 
     def __post_init__(self):
-        """Extract attributes from ids_data."""
+        """Extract attributes from ids."""
         self.extract()
 
     @property
@@ -44,8 +44,8 @@ class GeomData:
         """Return patch polygon."""
 
     def extract(self):
-        """Extract attributes from ids_data and store in data."""
-        data = getattr(self.ids_data, self.name)
+        """Extract attributes from ids and store in data."""
+        data = getattr(self.ids, self.name)
         for attr in self.attrs:
             self.data[attr] = getattr(data, attr)
 
@@ -193,14 +193,14 @@ class Annulus(GeomData):
 class Geometry:
     """Manage poloidal cross-sections."""
 
-    ids_data: object = field(repr=False)
+    ids: object = field(repr=False)
     data: GeomData = field(init=False)
     transform: ClassVar[dict[int, object]] = \
         {1: Outline, 2: Rectangle, 3: Oblique, 4: Arcs, 5: Annulus}
 
     def __post_init__(self):
         """Build geometry instance."""
-        self.data = self.transform[self.ids_data.geometry_type](self.ids_data)
+        self.data = self.transform[self.ids.geometry_type](self.ids)
 
     def __getattr__(self, attr):
         """Return data attributes."""
@@ -211,16 +211,16 @@ class Geometry:
 class Loop:
     """Poloidal loop."""
 
-    ids_data: object = field(repr=False)
+    ids: object = field(repr=False)
     name: str = field(init=False)
     label: str = field(init=False)
     resistance: float = field(init=False)
 
     def __post_init__(self):
         """Extract data from loop ids."""
-        self.name = self.ids_data.name.strip()
+        self.name = self.ids.name.strip()
         self.label = self.name.rstrip(string.digits + '_')
-        self.resistance = self.ids_data.resistance
+        self.resistance = self.ids.resistance
 
 
 @dataclass
@@ -232,14 +232,14 @@ class ActiveLoop(Loop):
     def __post_init__(self):
         """Extract data from loop ids."""
         super().__post_init__()
-        self.identifier = self.ids_data.identifier
+        self.identifier = self.ids.identifier
 
 
 @dataclass
 class Element:
     """Poloidal element."""
 
-    ids_data: object = field(repr=False)
+    ids: object = field(repr=False)
     index: int = 0
     name: str = field(init=False)
     nturn: float = field(init=False)
@@ -247,9 +247,9 @@ class Element:
 
     def __post_init__(self):
         """Extract element data from ids."""
-        self.name = self.ids_data.name.strip()
-        self.nturn = self.ids_data.turns_with_sign
-        self.geometry = Geometry(self.ids_data.geometry)
+        self.name = self.ids.name.strip()
+        self.nturn = self.ids.turns_with_sign
+        self.geometry = Geometry(self.ids.geometry)
 
     def is_poly(self) -> bool:
         """Return True if geometry.name == 'oblique' or 'annulus'."""
@@ -469,7 +469,7 @@ class PF_Passive_Geometry(MachineDescription):
         """Build pf passive geometroy."""
         shelldata = PassiveShellData()
         coildata = PassiveCoilData()
-        for ids_loop in self.load_ids_data('loop'):
+        for ids_loop in self.load_ids('loop'):
             loop = Loop(ids_loop)
             for i, ids_element in enumerate(ids_loop.element):
                 element = Element(ids_element, i)
@@ -528,7 +528,7 @@ class PF_Active_Geometry(MachineDescription):
 
     def build_coil(self):
         """Build pf active coil geometroy."""
-        for ids_loop in self.load_ids_data('coil'):
+        for ids_loop in self.load_ids('coil'):
             loop = ActiveLoop(ids_loop)
             coildata = ActiveCoilData()
             polydata = ActivePolyCoilData()
@@ -554,18 +554,18 @@ class PF_Active_Geometry(MachineDescription):
     def build_circuit(self):
         """Build circuit influence matrix."""
         supply = [supply.identifier
-                  for supply in self.load_ids_data('supply')]
+                  for supply in self.load_ids('supply')]
         nodes = max([len(circuit.connections)
-                     for circuit in self.load_ids_data('circuit')])
+                     for circuit in self.load_ids('circuit')])
         self.circuit.initialize(supply, nodes)
-        for circuit in self.load_ids_data('circuit'):
+        for circuit in self.load_ids('circuit'):
             self.circuit.insert(circuit.identifier, circuit.connections)
         self.circuit.link()  # link single loop circuits
 
 
 @dataclass
 class ContourData:
-    """Extract contour data from ids_data."""
+    """Extract contour data from ids."""
 
     data: dict[str, npt.ArrayLike] = field(init=False, default_factory=dict)
 
@@ -641,7 +641,7 @@ class Wall_Geometry(MachineDescription):
     def build(self):
         """Build plasma bound by firstwall contour."""
         firstwall = ContourData()
-        limiter = self.load_ids_data('description_2d').array[0].limiter
+        limiter = self.load_ids('description_2d').array[0].limiter
         for unit in limiter.unit:
             firstwall.append(unit)
         contour = Contour(firstwall.data)  # extract closed loop

@@ -105,18 +105,18 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
 
     def __call__(self):
         """Return extrapolated equilibrium ids."""
-        ids_data = imas.equilibrium()
+        ids = imas.equilibrium()
         Properties('Equilibrium extrapolation',
                    provider='Simon McIntosh',
-                   provenance_ids=self.ids_data)(ids_data.ids_properties)
-        Code(self.machine_attrs)(ids_data.code)
-        ids_data.vacuum_toroidal_field = self.ids_data.vacuum_toroidal_field
-        return ids_data
+                   provenance_ids=self.ids)(ids.ids_properties)
+        Code(self.machine_attrs)(ids.code)
+        ids.vacuum_toroidal_field = self.ids.vacuum_toroidal_field
+        return ids
 
     def load_ids(self):
         """Load equilibrium data and grid limits."""
-        equilibrium = Equilibrium(self.pulse, self.run, ids_data=self.ids_data)
-        for attr in ['ids_data', 'data']:
+        equilibrium = Equilibrium(self.pulse, self.run, ids=self.ids)
+        for attr in ['ids', 'data']:
             setattr(self, attr, getattr(equilibrium, attr))
         if self.limit == 'ids':  # Load grid limit from ids.
             if equilibrium.data.grid_type != 1:
@@ -195,6 +195,9 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
 
 
 @click.command()
+@click.option('--pulse', default=None, help='Pulse number.')
+@click.option('--run', default=None, help='Run number.')
+@click.option('--ids', default=None, help='Equilibrium IDS.')
 def extrapolate():
     """
     Extrapolate poloidal flux and magnetic field beyond separatrix.
@@ -202,38 +205,27 @@ def extrapolate():
     Reads flux functions from equilibrium IDS and solves coil currents
     in a least squares sense to fit poloidal flux interior to separatrix.
 
-    Requires an equilibrium IDS as ids_data or pulse and run numbers as input.
+    Requires an equilibrium IDS as ids or pulse and run numbers as input.
 
     Returns equilibrium IDS including extrapolated flux and field values.
     """
 
 
-@extrapolate.command()
-@click.option('--pulse', default=None, help='Pulse number.')
-@click.option('--run', default=None, help='Run number.')
-@click.option('--ids_data', default=None, help='Equilibrium IDS.')
-def equilibrium():
-    """Extrapolate equilibrium ids."""
-
-
-
-extrapolate_ids
-
 
 
 if __name__ == '__main__':
 
-    pulse, run = 114101, 41  # JINTRAC
-    #pulse, run = 130506, 403  # CORSICA
+    # pulse, run = 114101, 41  # JINTRAC
+    pulse, run = 130506, 403  # CORSICA
 
     database = Database(pulse, run, 'equilibrium', machine='iter')
 
-    coilset = Extrapolate(ids_data=database.ids_data,
-                          dplasma=-2000, resolution=2000,
-                          limit=0)
+    coilset = Extrapolate(ids=database.ids,
+                          dplasma=-200, resolution=500,
+                          limit='ids')
     #coilset.build()
 
-    coilset.ionize(0)
+    coilset.ionize(20)
 
     coilset.plot('psi')
 

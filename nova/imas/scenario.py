@@ -17,33 +17,29 @@ class Scenario(Database):
     machine: str = 'iter'
     data: xarray.Dataset = field(init=False, repr=False,
                                  default_factory=xarray.Dataset)
-    time_slice: TimeSlice = field(init=False, repr=False, default=None)
+    time_slice: TimeSlice | None = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Load data."""
         super().__post_init__()
-        self.load_ids()
+        self.ids = self.load_ids()
         try:
             self.load()
         except (FileNotFoundError, OSError, KeyError, TypeError):
             self.build()
 
-    def load_ids(self):
-        """Load ids_data and timeslice."""
-        self.ids_data = self.load_ids_data()
-
     @contextmanager
     def build_scenario(self):
         """Manage dataset creation and storage."""
         self.data = xarray.Dataset()
-        self.time_slice = TimeSlice(self.ids_data, self.data)
+        self.time_slice = TimeSlice(self.ids, self.data)
         self.data.attrs |= self.ids_attrs
         yield
         self.store()
 
     @abstractmethod
     def build(self):
-        """Build netCDF group from ids_data."""
+        """Build netCDF group from ids."""
 
     def store(self, mode='a'):
         """Store data within hdf file."""

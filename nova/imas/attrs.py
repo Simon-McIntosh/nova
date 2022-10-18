@@ -10,7 +10,7 @@ class Attrs(ABC):
 
     attributes: ClassVar[list[str]] = []
 
-    def __call__(self, ids_data: object):
+    def __call__(self, ids: object):
         """Update code metadata."""
         for attr in self.attributes:
             try:
@@ -19,4 +19,4 @@ class Attrs(ABC):
                 continue
             if attribute is None:
                 continue
-            setattr(ids_data, attr, attribute)
+            setattr(ids, attr, attribute)

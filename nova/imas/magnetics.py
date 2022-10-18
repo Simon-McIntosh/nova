@@ -41,7 +41,7 @@ class Magnetics(Database):
         """Extract magnetics data."""
         for diagnostic in self.diagnostic:
             name, identifier, diagnostic_name, diagnostic_type = [], [], [], []
-            for ids in self.load_ids_data(diagnostic):
+            for ids in self.load_ids(diagnostic):
                 name.append(ids.name)
                 identifier.append(ids.identifier)
                 diagnostic_name.append(diagnostic)

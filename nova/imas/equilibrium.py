@@ -153,7 +153,7 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
         with self.build_scenario():
-            self.data['time'] = self.ids_data.time
+            self.data['time'] = self.ids.time
             super().build()
         return self
 
@@ -161,7 +161,7 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
 if __name__ == '__main__':
     #  114101, 41
     database = Database(135011, 21, 'equilibrium', machine='iter')
-    eq = Equilibrium(ids_data=database.ids_data)
+    eq = Equilibrium(ids=database.ids)
     #eq = Equilibrium(114101, 41)
     # eq = Equilibrium(130510, 3)
     #eq.build()

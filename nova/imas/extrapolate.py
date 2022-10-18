@@ -195,11 +195,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
 
 
 @click.command()
-@click.option('--pulse', default=None, help='Pulse number.')
-@click.option('--run', default=None, help='Run number.')
-@click.option('--ids_data', default=None, help='Equilibrium IDS.')
-@click.option('--name')
-def extrapolate_ids():
+def extrapolate():
     """
     Extrapolate poloidal flux and magnetic field beyond separatrix.
 
@@ -212,21 +208,34 @@ def extrapolate_ids():
     """
 
 
+@extrapolate.command()
+@click.option('--pulse', default=None, help='Pulse number.')
+@click.option('--run', default=None, help='Run number.')
+@click.option('--ids_data', default=None, help='Equilibrium IDS.')
+def equilibrium():
+    """Extrapolate equilibrium ids."""
+
+
+
+extrapolate_ids
+
+
+
 if __name__ == '__main__':
 
-    # pulse, run = 114101, 41  # JINTRAC
-    pulse, run = 130506, 403  # CORSICA
+    pulse, run = 114101, 41  # JINTRAC
+    #pulse, run = 130506, 403  # CORSICA
 
     database = Database(pulse, run, 'equilibrium', machine='iter')
 
     coilset = Extrapolate(ids_data=database.ids_data,
-                          dplasma=-1000, resolution=2000,
-                          limit=0)  # 1Equilibrium IDS00
+                          dplasma=-2000, resolution=2000,
+                          limit=0)
     #coilset.build()
 
-    coilset.ionize(20)
+    coilset.ionize(0)
 
-    coilset.plot('bz')
+    coilset.plot('psi')
 
 
     '''

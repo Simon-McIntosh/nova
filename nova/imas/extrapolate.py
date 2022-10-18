@@ -170,7 +170,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         Psi = self.plasmagrid.data.Psi.values[ionize[plasma]]
 
         self.saloc['Ic'][:-2] = np.linalg.lstsq(
-            Psi[:, :-2], -psi - Psi[:, -1]*time_slice.ip)[0]
+            Psi[:, :-2], -psi - Psi[:, -1]*time_slice.ip, rcond=None)[0]
 
     def plot_2d(self, itime=-1, attr='psi', axes=None, **kwargs):
         """Expose plot_2d ."""
@@ -194,11 +194,16 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         self.plot_boundary(self.itime)
 
 
-@click.command()
-@click.option('--pulse', default=None, help='Pulse number.')
-@click.option('--run', default=None, help='Run number.')
-@click.option('--ids', default=None, help='Equilibrium IDS.')
-def extrapolate():
+@click.group()
+@click.option('-pi', '--pulse', 'pulse', type=int, required=True,
+              help='input pulse number')
+@click.option('-ri', '--run', 'run', type=int, required=True,
+              help='input run number')
+@click.option('--ids', default=None, help='Equilibrium IDS')
+@click.version_option(package_name='nova',
+                      message=f'{Extrapolate.__module__}.%(prog)s, '
+                               'version %(version)s')
+def extrapolate(ctx):
     """
     Extrapolate poloidal flux and magnetic field beyond separatrix.
 
@@ -210,6 +215,15 @@ def extrapolate():
     Returns equilibrium IDS including extrapolated flux and field values.
     """
 
+
+@extrapolate.command()
+def wall():
+    """Define input wall ids."""
+
+
+@extrapolate.command()
+def ids():
+    pass
 
 
 

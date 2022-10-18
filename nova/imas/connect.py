@@ -39,7 +39,6 @@ class Connect:
     def module_run(self, command: str, hide=True):
         """Run command and return stdout."""
         command = f'{self._module_load_string} && {command}'
-        print(command)
         return self.ssh.run(command, hide=hide).stdout
 
     def read_summary(self, columns: str, select: str) -> str:

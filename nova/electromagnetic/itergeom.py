@@ -201,7 +201,7 @@ class ITERgeom(CoilSet):
 
 if __name__ == '__main__':
 
-    coilset = ITERgeom(dcoil=0.25, dplasma=-150)
+    coilset = ITERgeom(dcoil=0.25, nplasma=150)
 
     index = (coilset.subframe.frame == 'VS3U')
     index |= (coilset.subframe.frame == 'VS3Uj')

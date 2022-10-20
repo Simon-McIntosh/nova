@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from itertools import zip_longest
 from typing import ClassVar
 
+import click
 import numpy as np
 import pandas
 from tqdm import tqdm

@@ -153,7 +153,7 @@ if __name__ == '__main__':
 
     from nova.electromagnetic.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-1, dplasma=-150)
+    coilset = CoilSet(dcoil=-1, nplasma=150)
     coilset.coil.insert([5, 6], 0.5, 0.2, 0.2, section='h', turn='r',
                         nturn=300, segment='polygon')
     coilset.coil.insert(5.5, 0.5, 0.6, 0.6, section='c', turn='r',

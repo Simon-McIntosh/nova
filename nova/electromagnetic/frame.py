@@ -19,7 +19,7 @@ class Frame(FrameSet):
 
     delta: float = -1
     dcoil: float = -1
-    dplasma: float = 0.25
+    nplasma: float = 0.25
     dshell: float = 0
     tplasma: str = 'hex'
     tcoil: str = 'rect'
@@ -37,7 +37,7 @@ class Frame(FrameSet):
     @property
     def frame_attrs(self):
         """Return frame attributes."""
-        return dict(dcoil=self.dcoil, dplasma=self.dplasma, dshell=self.dshell,
+        return dict(dcoil=self.dcoil, nplasma=self.nplasma, dshell=self.dshell,
                     tcoil=self.tcoil, tplasma=self.tplasma, delta=self.delta)
 
     @frame_attrs.setter
@@ -61,7 +61,7 @@ class Frame(FrameSet):
     @cached_property
     def firstwall(self):
         """Return plasma firstwall constructor."""
-        return FirstWall(*self.frames, turn=self.tplasma, delta=self.dplasma)
+        return FirstWall(*self.frames, turn=self.tplasma, delta=-self.nplasma)
 
     @cached_property
     def shell(self):

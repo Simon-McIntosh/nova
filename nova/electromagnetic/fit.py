@@ -56,7 +56,7 @@ if __name__ == '__main__':
     from scipy.optimize._nonlin import BroydenFirst, KrylovJacobian
 
     fit = Fit(135011, 7)
-    #fit.build(dcoil=0.5, dshell=0.5, dplasma=-500, tcoil='hex')
+    #fit.build(dcoil=0.5, dshell=0.5, nplasma=500, tcoil='hex')
 
     itime = 700
     fit.sloc['coil', 'Ic'] = fit.data.current[itime]

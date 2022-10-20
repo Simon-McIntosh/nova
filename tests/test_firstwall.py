@@ -28,20 +28,20 @@ def test_circle():
 
 
 def test_plasma_turns():
-    coilset = CoilSet(dplasma=0.25)
+    coilset = CoilSet(nplasma=-0.25)
     coilset.firstwall.insert({'ellipse': [1.7, 1, 0.5, 0.85]})
     assert coilset.frame.nturn[0] == 1
     assert np.isclose(coilset.subframe.nturn.sum(), 1)
 
 
 def test_plasma_part():
-    coilset = CoilSet(dplasma=0)
+    coilset = CoilSet(nplasma=-0)
     coilset.firstwall.insert({'o': [1.7, 1, 0.5]})
     assert coilset.frame.part[0] == 'plasma'
 
 
 def test_multiframe_area():
-    coilset = CoilSet(dplasma=0.5)
+    coilset = CoilSet(nplasma=-0.5)
     coilset.firstwall.insert(dict(sk=(5, 0, 2, 0.2)), name='PLedge', delta=0.2)
     coilset.firstwall.insert(dict(o=(5, 0, 1.6)), name='PLcore')
     assert np.isclose(coilset.loc['plasma', 'area'].sum(), 1/4*np.pi*2**2,
@@ -49,7 +49,7 @@ def test_multiframe_area():
 
 
 def test_multiframe_nturn():
-    coilset = CoilSet(dplasma=0.5)
+    coilset = CoilSet(nplasma=-0.5)
     coilset.firstwall.insert(dict(sk=(5, 0, 2, 0.2)), name='PLedge', delta=0.2)
     coilset.coil.insert(6.5, 0, 0.2, 0.8)
     coilset.firstwall.insert(dict(o=(5, 0, 1.6)), name='PLcore')

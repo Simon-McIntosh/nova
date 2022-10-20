@@ -2,9 +2,15 @@
 from dataclasses import dataclass, field
 import os
 
-from appdirs import AppDirs
+import appdirs
+try:
+    import imas
+    import_imas = True
+except ImportError:
+    import_imas = False
 import xarray
 
+import nova
 from nova.definitions import root_dir
 
 
@@ -15,16 +21,29 @@ class FilePath:
     filename: str | None = field(default=None, repr=True)
     group: str | None = field(default=None, repr=True)
     path: str | None = field(default=None, repr=False)
-    directory: str = 'user_cache_dir'
-    data: xarray.Dataset | None = field(default=None, repr=False)
+    directory: str = 'root'
+    data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
+
+    @staticmethod
+    def get_path(directory: str, subpath: str) -> str:
+        """Return full filepath."""
+        if hasattr(appdirs, (appattr := f'{directory}_dir')):
+            app = getattr(appdirs, appattr)
+            if subpath == 'nova':
+                return app(nova.__name__, version=nova.__version__)
+            if subpath == 'imas' and import_imas:
+                name, version = imas.__name__.split('_', 1)
+                return app(appname=name, version=version)
+            return app(subpath)
+        if directory == 'root':
+            directory = root_dir
+        if subpath is None:
+            return directory
+        return os.path.join(directory, subpath)
 
     def set_path(self, subpath=None):
         """Set default path."""
-        #appdir = AppDirs(appname=nova.__name__, version=nova.__version__)
-        #self.path = getattr(appdir, self.directory)
-        #if subpath is not None:
-        #    self.path = os.path.join(self.path, subpath)
-        self.path = os.path.join(root_dir, subpath)
+        self.path = self.get_path(self.directory, subpath)
 
     def check_path(self, path):
         """Return self.path if path is None."""
@@ -61,7 +80,7 @@ class FilePath:
         """Return path for netcdf group."""
         if group_prefix:
             labels = (self.group,) + labels
-        labels = [label for label in labels if label is not None]
+        labels = tuple(label for label in labels if label is not None)
         return '/'.join(labels)
 
     @staticmethod

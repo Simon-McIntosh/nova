@@ -13,7 +13,7 @@ import xxhash
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.shell import Shell
 from nova.geometry.polygon import Polygon
-from nova.imas.database import Database
+from nova.imas.database import Database, IMASal
 from nova.utilities.pyplot import plt
 
 
@@ -469,7 +469,7 @@ class PF_Passive_Geometry(MachineDescription):
         """Build pf passive geometroy."""
         shelldata = PassiveShellData()
         coildata = PassiveCoilData()
-        for ids_loop in self.load_ids('loop'):
+        for ids_loop in getattr(self.ids, 'loop'):
             loop = Loop(ids_loop)
             for i, ids_element in enumerate(ids_loop.element):
                 element = Element(ids_element, i)
@@ -528,7 +528,8 @@ class PF_Active_Geometry(MachineDescription):
 
     def build_coil(self):
         """Build pf active coil geometroy."""
-        for ids_loop in self.load_ids('coil'):
+        print(self.ids)
+        for ids_loop in getattr(self.ids, 'coil'):
             loop = ActiveLoop(ids_loop)
             coildata = ActiveCoilData()
             polydata = ActivePolyCoilData()
@@ -554,11 +555,11 @@ class PF_Active_Geometry(MachineDescription):
     def build_circuit(self):
         """Build circuit influence matrix."""
         supply = [supply.identifier
-                  for supply in self.load_ids('supply')]
+                  for supply in getattr(self.ids, 'supply')]
         nodes = max([len(circuit.connections)
-                     for circuit in self.load_ids('circuit')])
+                     for circuit in getattr(self.ids, 'circuit')])
         self.circuit.initialize(supply, nodes)
-        for circuit in self.load_ids('circuit'):
+        for circuit in getattr(self.ids, 'circuit'):
             self.circuit.insert(circuit.identifier, circuit.connections)
         self.circuit.link()  # link single loop circuits
 
@@ -641,7 +642,7 @@ class Wall_Geometry(MachineDescription):
     def build(self):
         """Build plasma bound by firstwall contour."""
         firstwall = ContourData()
-        limiter = self.load_ids('description_2d').array[0].limiter
+        limiter = getattr(self.ids, 'description_2d').array[0].limiter
         for unit in limiter.unit:
             firstwall.append(unit)
         contour = Contour(firstwall.data)  # extract closed loop
@@ -649,17 +650,16 @@ class Wall_Geometry(MachineDescription):
 
 
 @dataclass
-class Machine(CoilSet):
+class Machine(CoilSet, IMASal):
     """Manage ITER machine geometry."""
 
     dcoil: float = -1
     dshell: float = 0.5
-    dplasma: int = -500
+    nplasma: int = 500
     tcoil: str = 'rectangle'
     tplasma: str = 'rectangle'
     filename: str = 'iter'
-    machine: str = 'iter_md'
-    datapath: str = field(default='data/Nova', repr=False)
+    datapath: str = field(default='nova', repr=False)
     xxh32: xxhash.xxh32 = field(repr=False, init=False,
                                 default_factory=xxhash.xxh32)
 
@@ -709,9 +709,15 @@ class Machine(CoilSet):
         return attrs
 
     @property
+    def database_attrs(self):
+        """Return database attrs."""
+        return {attr: getattr(self, attr)
+                for attr in ['user', 'machine', 'backend']}
+
+    @property
     def machine_attrs(self) -> dict:
         """Return group attributes for generation xxh32 group hash."""
-        return self.coilset_attrs | self.ids_attrs
+        return self.coilset_attrs | self.ids_attrs | self.database_attrs
 
     @staticmethod
     def flatten(xs):
@@ -775,7 +781,8 @@ class Machine(CoilSet):
         self.update_geometry()
         for attr in self.geometry:
             coilset = self.machine_description[attr](
-                *self.geometry[attr], machine=self.machine, **self.frame_attrs)
+                *self.geometry[attr], **self.database_attrs,
+                **self.frame_attrs)
             self += coilset
             for attr in coilset.biot_methods:
                 getattr(self, attr).data = getattr(coilset, attr).data
@@ -786,7 +793,7 @@ class Machine(CoilSet):
 if __name__ == '__main__':
 
     coilset = Machine(geometry=['pf_active', 'wall'],
-                      dplasma=-100, dcoil=-10)
+                      nplasma=100, dcoil=-10)
     #coilset.plot()
     coilset.circuit.plot('CS1')
 

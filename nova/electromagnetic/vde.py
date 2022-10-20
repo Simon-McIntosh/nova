@@ -35,7 +35,7 @@ class VDE(Axes, CoilSet):  # read_dina,
 
     folder: str | int | None = None
     dcoil: float = 0.25
-    dplasma: float = 0.25
+    nplasma: float = 0.25
     dshell: float = 0.5
     read_txt: bool = False
     file: str = field(init=False, repr=False)

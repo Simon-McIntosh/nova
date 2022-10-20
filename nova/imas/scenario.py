@@ -22,7 +22,6 @@ class Scenario(Database):
     def __post_init__(self):
         """Load data."""
         super().__post_init__()
-        self.ids = self.load_ids()
         try:
             self.load()
         except (FileNotFoundError, OSError, KeyError, TypeError):

@@ -5,8 +5,7 @@ from typing import ClassVar, Union
 
 import imas
 import numpy as np
-import numpy.typing as npt
-from sklearn.linear_model import Ridge
+import pandas
 from scipy.interpolate import RectBivariateSpline, interp1d
 import xarray
 
@@ -25,7 +24,7 @@ class Grid:
 
     resolution: int | str = 2500
     limit: float | list[float] | str = 0.25
-    index: Union[str, slice, npt.ArrayLike] = 'plasma'
+    index: Union[str, slice, pandas.Index] = 'plasma'
 
     @property
     def grid_attrs(self) -> dict:
@@ -87,28 +86,129 @@ class TimeSlice:
 
 @dataclass
 class Extrapolate(BiotPlot, Machine, Grid, IDS):
-    """
-    Extrapolate fixed boundary equilibrium beyond separatrix ids.
+    r"""
+    An interface class for the extrapolation of equilibrium solutions.
+
+    Solves for external coil currents in a least squares sense to match
+    internal flux values provided by the source equilibrium.
+
+    The class may be run in one of three modes:
+
+        - As an python IMAS **actor**, taking and returning IDS(s)
+        - As an python IMAS **code**, reading and writing IDS(s) to file
+        - As a command line **script** see `$extrapolate --help` for details
 
     Parameters
     ----------
-        attr : TYPE, optional
-            DESCRIPTION. The default is 'psi'.
-        axes : TYPE, optional
-            DESCRIPTION. The default is None.
+
+        pulse : int, required when ids not set, otherwise optional
+            Equilibrium pulse number. The default is None.
+
+        run : int, required when ids not set, otherwise optional
+            Equilibrium run number. The default is None.
+
+        ids : imas.ids, required when pulse and run not set, otherwise optional
+            Equilibrium ids. The class is run in **actor** mode when set.
+            The default is None
 
 
 
-    Returns
-    -------
-    None.
+        scenario_db : dict[str, str], optional
+            Equilibrium user and machine.
+            The default is dict(user='public', machine='iter')
+
+        resolution : int | str, optional
+            Grid resolution.
+        limit :
+
+        index : str | slice | pandas.index, optional
+
+    Attributes
+    ----------
+        pulse : int
+            Equilibrium pulse number.
+        run : int
+            Equilibrium run number.
+        ids_name : str
+            Equilibrium ids name.
+        ids : imas.ids, required when pulse and run not set, otherwise optional
+            Equilibrium ids. The class is run in **actor** mode when set.
+            The default is None
+
+    Raises
+    ------
+    LinAlgError
+        If computation does not converge.
+
+
+    Notes
+    -----
+    The plasama and coils are modeled as finite area filliments with peicewise
+    constant current distributions. Interactions between filiments are solved
+    via the Biot Savart equation.
+
+    Currents for each plasma filament :math:`I_i` are solved at the
+    center of each filament as follows,
+
+    .. math::
+        I_i = -2 \pi A [r p\prime (\psi\prime) +
+                        f f\prime(\psi\prime) / (\mu_o r)]
+
+    With a total plasma current :math:`I_p` condition enforced such that,
+
+    .. math::
+        I_p = \sum_i I_i
+
+    Once the coil and plasma filament currents are known, the
+    original solution may be mapped to a new grid with a boundary and a
+    resolution diffrent to that given by the source equilibrium solution.
+
+    Examples
+    --------
+
+    Pass a pulse and run number to initiate as an ***IMAS code***:
+
+    >>> from nova.imas.extrapolate import Extrapolate
+    >>>
+    >>> pulse, run = 130506, 403  # CORSICA equilibrium solution
+    >>> extrapolate = Extrapolate(pulse, run)
+    >>> extrapolate.pulse, extrapolate.run
+    130506, 403
+
+    The equilibrium ids is read from file and stored as an ids attribute:
+
+    >>> extrapolate.ids.code.name
+    'CORSICA'
+
+
+    To run code as an actor, first load an apropriate equilibrium IDS,
+
+    >>> from nova.imas.database import Database
+
+    >>> pulse, run = 130506, 403  # CORSICA equilibrium solution
+    >>> equilibrium = Database(130506, 403, 'equilibrium', machine='iter')
+    >>> equilibrium.pulse, equilibrium.run
+    130506, 403
+
+    then pass this ids to the Extrapolate class
+    >>> from nova.imas.extrapolate import Extrapolate
+
+    >>> coilset = Extrapolate(ids=equilibrium.ids,
+                              nplasma=200, resolution=500, limit='ids')
+    >>> coilset.solve(20)
+    >>> coilset.itime
+    20
+
+    >>> extrapolate.plot('psi', itime=20)
+
 
     """
-    ids_name: str = 'equilibrium'
-    filename: str = 'extrapolate'
-    geometry: list[str] = field(default_factory=lambda: ['pf_active', 'wall'])
-    itime: int = field(init=False, default=0)
+    #scenario_db:
 
+    geometry: list[str] = field(default_factory=lambda: ['pf_active', 'wall'])
+    filename: str = 'extrapolate'
+
+    itime: int = field(init=False, default=0)
 
     mu_o: ClassVar[float] = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
 
@@ -117,7 +217,6 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         self.load_equilibrium()
         super().__post_init__()
 
-    '''
     def __call__(self):
         """Return extrapolated equilibrium ids."""
         ids = imas.equilibrium()
@@ -127,7 +226,6 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         Code(self.machine_attrs)(ids.code)
         ids.vacuum_toroidal_field = self.ids.vacuum_toroidal_field
         return ids
-    '''
 
     def load_equilibrium(self):
         """Load equilibrium data and update grid limits."""
@@ -147,6 +245,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         if self.resolution == 'ids':
             self.resolution = equilibrium.data.dims['r'] * \
                 equilibrium.data.dims['z']
+        #return equilibrium.ids
 
     @property
     def machine_attrs(self):
@@ -197,8 +296,10 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         """Expose Equilibrium plot boundary."""
         return Equilibrium.plot_boundary(self, itime)
 
-    def plot(self, attr='psi', axes=None):
+    def plot(self, attr='psi', itime=0):
         """Plot plasma filements and polidal flux."""
+        if self.itime != itime:
+            self.ionize(itime)
         plt.figure()
         super().plot('plasma')
         levels = self.grid.plot(attr, levels=51, colors='C0', nulls=False)
@@ -208,22 +309,26 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         except KeyError:
             pass
         self.plot_boundary(self.itime)
-        plt.show()
 
 
 if __name__ == '__main__':
 
+    #import doctest
+    #doctest.testmod(verbose=True)
+
+
     # pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
 
-    database = Database(pulse, run, 'equilibrium', machine='iter')
+    equilibrium = Database(pulse, run, 'equilibrium', machine='iter').ids
 
-    coilset = Extrapolate(dplasma=-200, resolution=500, limit='ids')
+    coilset = Extrapolate(pulse, run, limit='ids')
     #coilset.build()
 
     coilset.ionize(20)
 
     coilset.plot('psi')
+
 
 
     '''

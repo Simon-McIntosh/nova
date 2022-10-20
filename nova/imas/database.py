@@ -2,6 +2,8 @@
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 
+from imas import DBEntry
+
 from nova.database.filepath import FilePath
 
 # pylint: disable=too-many-ancestors
@@ -13,68 +15,78 @@ class IDS:
 
     pulse: int | None = None
     run: int | None = None
-    ids_name: str = ''
+    ids_name: str | None = None
     ids: object | None = field(repr=False, default=None)
 
 
 @dataclass
-class IMASdb:
-    """Methods to access IMAS database."""
+class IMASal:
+    """Define IMAS access layer attributes."""
 
     user: str = 'public'
     machine: str = 'iter_md'
     backend: int = 13
 
-    @contextmanager
-    def _database(self, pulse: int, run: int, ids_name: str, ids_path: str):
-        """Yield database with context manager."""
-        from imas import DBEntry
-        database = DBEntry(self.backend, self.machine, pulse, run,
-                           user_name=self.user)
-        database.open()
-        if ids_path is None:
-            yield database.get(ids_name)
-        else:
-            yield database.partial_get(ids_name, ids_path)
-        database.close()
 
-    def get_ids(self, pulse: int, run: int, ids_name: str, ids_path: str):
-        """Return filled ids from dataabase."""
-        with self._database(pulse, run, ids_name, ids_path) as ids:
-            return ids
+@dataclass
+class IMASdb(IMASal, IDS):
+    """Methods to access IMAS database."""
+
+    @contextmanager
+    def get_ids(self):
+        """Yield database with context manager."""
+        db_entry = DBEntry(self.backend, self.machine,
+                           self.pulse, self.run, user_name=self.user)
+        try:
+            db_entry.open()
+        except TypeError as error:
+            raise TypeError(f'malformed input to DBEntry\n{error}\n'
+                            f'backend: {self.backend}\n'
+                            f'machine {self.machine}\n'
+                            f'pulse {self.pulse}\n'
+                            f'run {self.run}\n'
+                            f'user {self.user}\n')
+        try:
+            ids_name, ids_path = self.ids_name.split('.', 1)
+            yield db_entry.partial_get(ids_name, ids_path)
+        except ValueError:
+            yield db_entry.get(self.ids_name)
+        db_entry.close()
+
+    def set_ids(self):
+        """Set ids from pulse/run."""
+        if self.ids is None:
+            with self.get_ids() as ids:
+                self.ids = ids
+        self.ids_name = self.ids.__name__
 
 
 @dataclass
-class Database(FilePath, IMASdb, IDS):
+class Database(FilePath, IMASdb):
     """Provide access to imasdb data."""
 
-    datapath: str = 'data/Imas'
+    directory: str = 'user_data'
+    datapath: str = 'imas'
 
     def __post_init__(self):
-        """Set filepath."""
+        """Set ids and filepath."""
+        self.set_ids()
         try:
             self.filename = f'{self.machine}_{self.pulse}{self.run:04d}'
         except TypeError:
             self.filename = None
         self.group = self.ids_name
         self.set_path(self.datapath)
-        self.set_ids()
-
-    def set_ids(self):
-        """Set ids."""
-        if self.ids is not None:
-            self.pulse = self.run = self.ids_name = None  # don't know
-            return
-        self.ids = self.get_ids(self.pulse, self.run, self.ids_name, None)
-
-    def load_ids(self, ids_path=None):
-        """Return ids."""
-        if ids_path is None:
-            return self.ids
-        return getattr(self.ids, ids_path)
 
     @property
     def ids_attrs(self):
         """Return dict of ids attributes."""
         return dict(machine=self.machine, pulse=self.pulse, run=self.run,
                     ids_name=self.ids_name)
+
+
+if __name__ == '__main__':
+
+    database = Database(130506, 403, 'equilibrium', machine='iter')
+
+    db2 = Database(ids=database.ids)

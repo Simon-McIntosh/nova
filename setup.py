@@ -9,6 +9,7 @@ extras_require = dict(
                       develop=['spyder', 'spyder-unittest', 'spyder-line-profiler', 
                                'spyder-memory-profiler', 'line_profiler', 'pylsp-mypy', 
                                'numdifftools', 'pytest-xdist'],
+                      docs=['pandoc', 'jupyter'],
                       mesh=['gmsh', 'pygmsh', 'tetgen', 'trimesh'],
                       optimize=['nlopt', 'pygmo'],
                       plan=['python-dateutil'],

@@ -7,7 +7,7 @@ from nova.geometry.polygon import Polygon
 
 
 def test_polygon_separatrix_loop():
-    coilset = CoilSet(dplasma=-35)
+    coilset = CoilSet(nplasma=35)
     coilset.firstwall.insert([[1, 5, 5, 1, 1], [1, 1, 5, 5, 1]])
     coilset.plasma.separatrix = Polygon(dict(c=(3, 3, 4))).points[:, ::2]
     assert np.isclose(
@@ -15,7 +15,7 @@ def test_polygon_separatrix_loop():
 
 
 def test_polygon_separatrix_polygon():
-    coilset = CoilSet(dplasma=-35)
+    coilset = CoilSet(nplasma=35)
     coilset.firstwall.insert([[1, 5, 5, 1, 1], [1, 1, 5, 5, 1]])
     coilset.plasma.separatrix = dict(c=(3, 3, 4))
     assert np.isclose(
@@ -23,7 +23,7 @@ def test_polygon_separatrix_polygon():
 
 
 def test_array_separatrix():
-    coilset = CoilSet(dplasma=0.1)
+    coilset = CoilSet(nplasma=-0.1)
     coilset.firstwall.insert([[1, 2, 2, 1, 1], [1, 1, 2, 2, 1]])
     coilset.plasma.separatrix = np.array([[1, 2, 1.5, 1], [0, 0, 2, 0]]).T
     assert np.isclose(
@@ -31,14 +31,14 @@ def test_array_separatrix():
 
 
 def test_separatrix_nturn():
-    coilset = CoilSet(dplasma=0.5)
+    coilset = CoilSet(nplasma=-0.5)
     coilset.firstwall.insert([[1, 5, 5, 1, 1], [1, 1, 5, 5, 1]])
     coilset.plasma.separatrix = shapely.geometry.Point(3, 3).buffer(2)
     assert np.isclose(coilset.loc['plasma', 'nturn'].sum(), 1)
 
 
 def test_polarity():
-    coilset = CoilSet(dplasma=-10, dcoil=-10)
+    coilset = CoilSet(nplasma=10, dcoil=-10)
     coilset.coil.insert(4.65, [-0.3, 0.3], 0.1, 0.5)
     coilset.firstwall.insert({'ellip': [5, 0, 0.5, 0.75]}, It=-15e6)
     coilset.plasma.separatrix = {'disc': [5, 0, 0.3]}
@@ -73,7 +73,7 @@ def test_grid_xpoint_coil():
 
 
 def test_grid_xpoint():
-    coilset = CoilSet(dcoil=-5, dplasma=-75)
+    coilset = CoilSet(dcoil=-5, nplasma=75)
     coilset.coil.insert(6.5, [-1, 1], 0.4, 0.1, Ic=-15e6)
     coilset.firstwall.insert({'e': [6.5, 0, 1.2, 1.6]}, Ic=-15e6)
     coilset.plasma.separatrix = {'e': [6.5, 0, 0.4, 0.6]}
@@ -83,7 +83,7 @@ def test_grid_xpoint():
 
 
 def test_plasmagrid_xpoint():
-    coilset = CoilSet(dcoil=-5, dplasma=-80)
+    coilset = CoilSet(dcoil=-5, nplasma=80)
     coilset.coil.insert(6.5, [-1, 1], 0.4, 0.2, Ic=-15e6)
     coilset.firstwall.insert({'e': [6.5, 0, 1.2, 1.6]}, Ic=-15e6)
     coilset.plasma.separatrix = {'e': [6.5, 0, 0.4, 0.6]}

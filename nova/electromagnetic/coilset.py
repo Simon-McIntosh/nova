@@ -52,7 +52,7 @@ if __name__ == '__main__':
     filename = 'biot'
     reload = True
     if reload:
-        coilset = CoilSet(dcoil=-5, dplasma=-150)
+        coilset = CoilSet(dcoil=-5, nplasma=150)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
                             nturn=-5.8, delta=-1)
         coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex', turn='c',

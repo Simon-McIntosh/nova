@@ -6,7 +6,7 @@ from nova.electromagnetic.coilset import CoilSet
 
 
 def test_nturn_hash_update():
-    coilset = CoilSet(dcoil=-5, dplasma=-5)
+    coilset = CoilSet(dcoil=-5, nplasma=5)
     coilset.firstwall.insert(dict(o=[5, 1, 5]), Ic=15e6)
     nturn_hash = coilset.subframe.version['nturn']
     coilset.plasma.separatrix = dict(o=[5, 1, 2.5])
@@ -14,7 +14,7 @@ def test_nturn_hash_update():
 
 
 def test_nturn_Psi_update():
-    coilset = CoilSet(dcoil=-5, dplasma=-4)
+    coilset = CoilSet(dcoil=-5, nplasma=4)
     coilset.firstwall.insert(dict(o=[5, 1, 5]), Ic=15e6)
     coilset.plasmagrid.solve()
     Psi = coilset.plasmagrid.data['Psi'].values.copy()
@@ -24,7 +24,7 @@ def test_nturn_Psi_update():
 
 
 def test_nturn_skip_Psi_update():
-    coilset = CoilSet(dcoil=-5, dplasma=-5)
+    coilset = CoilSet(dcoil=-5, nplasma=5)
     coilset.firstwall.insert(dict(o=[5, 1, 5]), Ic=15e6)
     coilset.plasmagrid.solve()
     coilset.sloc['Ic'] = 1
@@ -36,7 +36,7 @@ def test_nturn_skip_Psi_update():
 
 
 def test_nturn_current_update():
-    coilset = CoilSet(dcoil=-5, dplasma=-5)
+    coilset = CoilSet(dcoil=-5, nplasma=5)
     coilset.firstwall.insert(dict(o=[5, 1, 5]), Ic=15e6)
     coilset.plasmagrid.solve()
     coilset.sloc['Ic'] = 1e6
@@ -46,7 +46,7 @@ def test_nturn_current_update():
 
 
 def test_nturn_skip_current_update():
-    coilset = CoilSet(dcoil=-5, dplasma=-5)
+    coilset = CoilSet(dcoil=-5, nplasma=5)
     coilset.firstwall.insert(dict(o=[5, 1, 5]), Ic=15e6)
     coilset.plasmagrid.solve()
     coilset.sloc['Ic'] = 1

@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from itertools import zip_longest
 from typing import ClassVar
 
-import click
 import numpy as np
 import pandas
 from tqdm import tqdm
@@ -47,13 +46,15 @@ class BiotSolve(BiotSet):
                     f'segment <{segment}> not implemented '
                     f'in Biot.generator: {self.generator.keys()}')
             index = self.source.index[self.source_segment == segment]
-            for i, chunk in enumerate(
-                    self.group_segments(index, 150, index[-1])):
-                self.source_segment.loc[chunk] = f'{segment}_{i}'
+            #for i, chunk in enumerate(
+            #        self.group_segments(index, 150, index[-1])):
+            #    print(self.source_segment)
+            #    self.source_segment.loc[chunk, 'segment'] = f'{segment}_{i}'
 
     @staticmethod
     def group_segments(iterable, length, fillvalue):
         """Return grouped itterable."""
+        length = min([length, len(iterable)])
         args = length * [iter(iterable)]
         return zip_longest(*args, fillvalue=fillvalue)
 
@@ -76,7 +77,7 @@ class BiotSolve(BiotSet):
                 0., dims=['target', 'plasma'],
                 coords=[self.data.target, self.data.plasma])
 
-        self._initialize_svd('target', 'plasma', '_')
+        self._initialize_svd('target', 'plasma', prefix='_')
         '''
         if self.data.dims['plasma'] < self.data.dims['target']:
             sigma = 'plasma'

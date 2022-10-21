@@ -44,7 +44,7 @@ class TriShell:
     def _convex_hull(self) -> vedo.Mesh:
         """Return decimated convex hull."""
         return vedo.ConvexHull(self.mesh.points()).decimate(
-            N=6, method='pro', boundaries=True)
+            n=6, method='pro', boundaries=True)
 
     @property
     def panel(self) -> vedo.Mesh:

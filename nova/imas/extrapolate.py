@@ -87,29 +87,32 @@ class TimeSlice:
 @dataclass
 class Extrapolate(BiotPlot, Machine, Grid, IDS):
     r"""
-    An interface class for the extrapolation of equilibrium solutions.
+    An interface class for the extrapolation of an equilibrium IDS.
 
-    Solves for external coil currents in a least squares sense to match
-    internal flux values provided by the source equilibrium.
+    Solves external coil currents in a least squares sense to match
+    internal flux values provided by a source equilibrium containting:
+
+        - values of :math:`\psi` internal to a boundary contour
+        - flux functions :math:`p^\prime` and :math:`f f^\prime`
 
     The class may be run in one of three modes:
 
-        - As an python IMAS **actor**, taking and returning IDS(s)
-        - As an python IMAS **code**, reading and writing IDS(s) to file
+        - As an python IMAS **actor**, takes and returns IDS(s)
+        - As an python IMAS **code**, reads and writes IDS(s)
         - As a command line **script** see `$extrapolate --help` for details
 
     Parameters
     ----------
 
-        pulse : int, required when ids not set, otherwise optional
+        pulse : int, optional (required when ids not set)
             Equilibrium pulse number. The default is None.
 
-        run : int, required when ids not set, otherwise optional
+        run : int, optional (required when ids not set)
             Equilibrium run number. The default is None.
 
-        ids : imas.ids, required when pulse and run not set, otherwise optional
-            Equilibrium ids. The class is run in **actor** mode when set.
-            The default is None
+        ids : imas.ids, optional (required when pulse and run not set)
+            Equilibrium ids. When set the ids parameter takes prefrence.
+            The default is None.
 
 
 

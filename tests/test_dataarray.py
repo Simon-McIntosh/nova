@@ -46,7 +46,7 @@ def test_set_slice_on_array_variable():
 def test_warn_set_slice_on_frame():
     dataarray = DataArray({'x': [3, 2, 5, 7, 6], 'z': 0}, Array=['x'])
     index = dataarray.x < 4
-    with pytest.warns(pandas.core.common.SettingWithCopyWarning):
+    with pytest.warns(pandas.errors.SettingWithCopyWarning):
         dataarray.loc[index].x = 5
 
 

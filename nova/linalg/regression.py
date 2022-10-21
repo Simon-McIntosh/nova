@@ -150,6 +150,10 @@ class Lops(RegressionBase, LinearOperator):
 
     dtype: type = float
     explicit: bool = True
+    matvec_count: int = 0
+    rmatvec_count: int = 0
+    matmat_count: int = 0
+    rmatmat_count: int = 0
 
     def __post_init__(self):
         """Link matrix attribute to Pylops LinearOperator.A."""
@@ -215,7 +219,7 @@ if __name__ == '__main__':
     attr = 'f_df_dpsi'
 
     #svd.load_frame('DINA-IMAS', attr)
-    #svd.load_frame('CORSICA', attr)
+    svd.load_frame('CORSICA', attr)
 
     eq = Equilibrium(100504, 3)
 

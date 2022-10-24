@@ -496,6 +496,6 @@ if __name__ == '__main__':
     '''
     mesh = []
     for i in range(1, 5):
-        mesh.append(ShieldSector(i).mesh.rotateZ(-i*40).c(i).opacity(0.5))
+        mesh.append(ShieldSector(i).mesh.rotate_z(-i*40).c(i).opacity(0.5))
     vedo.show(mesh)
     '''

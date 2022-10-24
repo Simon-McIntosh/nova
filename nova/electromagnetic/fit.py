@@ -5,7 +5,7 @@ from functools import cached_property
 import scipy.optimize
 import xarray
 
-from nova.electromagnetic.biotgrid import BiotPlot
+from nova.biot.biotgrid import BiotPlot
 from nova.electromagnetic.framesetloc import LocIndexer
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine

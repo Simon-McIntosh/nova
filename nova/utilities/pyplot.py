@@ -140,7 +140,8 @@ class plstyle:
         set sns context style sheet
         '''
         try:
-            plt.style.use('seaborn-{}'.format(context))
+            sns.set_style('white')
+            # plt.style.use('seaborn-{}'.format(context))
         except OSError:
             errtxt = 'context \'{}\''.format(context)
             errtxt += 'not avalible as seabone style\n'

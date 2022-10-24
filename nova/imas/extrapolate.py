@@ -111,7 +111,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
             Equilibrium run number. The default is None.
 
         ids : imas.ids, optional (required when pulse and run not set)
-            Equilibrium ids. When set the ids parameter takes prefrence.
+            Equilibrium ids. The ids parameter takes prefrence when not None.
             The default is None.
 
 
@@ -248,7 +248,6 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         if self.resolution == 'ids':
             self.resolution = equilibrium.data.dims['r'] * \
                 equilibrium.data.dims['z']
-        #return equilibrium.ids
 
     @property
     def machine_attrs(self):

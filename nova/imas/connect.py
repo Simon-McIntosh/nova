@@ -194,6 +194,7 @@ class Machine(Connect):
 
 
 if __name__ == '__main__':
+    pass
 
     #machine = Machine().sync_ids()
     #machine.load_ids('pf_active')
@@ -211,5 +212,3 @@ if __name__ == '__main__':
     #Scenario().sync_workflow('CORSICA')
 
     #Scenario().sync_shot('114101/41')
-
-    #111001, 4

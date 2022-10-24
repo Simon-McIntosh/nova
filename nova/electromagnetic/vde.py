@@ -12,9 +12,9 @@ import scipy
 import shapely
 import xarray
 
+# from nova.biot.biotpoint import PointInverse
 from nova.electromagnetic.coilset import CoilSet
 from nova.definitions import root_dir
-from nova.electromagnetic.biotpoint import PointInverse
 from nova.electromagnetic.IO.read_waveform import read_dina
 from nova.electromagnetic.machinedata import MachineData
 from nova.electromagnetic.polyplot import Axes

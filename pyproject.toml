@@ -54,7 +54,7 @@ dependencies = [
   "scikit-learn",
   "shapely",
   "tqdm",
-  "vedo",
+  "vedo>=2022.4",
   "wheel",
   "xarray",
   "xxhash"
@@ -76,7 +76,8 @@ dev = [
   "spyder-line-profiler", 
   "spyder-memory-profiler", 
   "pylsp-mypy",
-  "line_profiler", 
+  "line_profiler",
+  "moviepy", 
   "numdifftools", 
   "pytest-xdist"
 ]
@@ -131,13 +132,13 @@ tag_prefix = ""
 parentdir_prefix = "nova-"
 
 [tool.pytest.ini_options]
-addopts = "-ra --strict-markers"
 xfail_strict = true
 testpaths = "tests"
 filterwarnings = [
-    "once::Warning",
+  "once::Warning",
+  "ignore::DeprecationWarning",
+  "ignore::FutureWarning"
 ]
-asyncio_mode = "auto"
 
 [tool.mypy]
 warn_unused_ignores = true

@@ -25,13 +25,13 @@ def test_add_single_area_vtk():
 def test_add_single_framearea_rotate_vtk():
     box = vedo.shapes.Box(pos=(5, 0, 0), length=2, width=1e-3, height=2)
     frame = FrameSpace(part='vtk')
-    frame += dict(vtk=box.rotateZ(45))
+    frame += dict(vtk=box.rotate_z(45))
     assert np.isclose(frame.area[0], 4)
 
 
 def test_add_single_polyarea_rotate_vtk():
     box = vedo.shapes.Box(pos=(5, 0, 0), length=2, width=1e-3, height=2)
-    frame = FrameSpace(part='vtk') + dict(vtk=box.rotateZ(45))
+    frame = FrameSpace(part='vtk') + dict(vtk=box.rotate_z(45))
     assert np.isclose(frame.poly[0].area, 4)
 
 

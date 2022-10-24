@@ -6,7 +6,7 @@ from typing import Union
 import xarray
 import numpy as np
 
-from nova.electromagnetic.biotsavart import BiotFrame
+from nova.biot.biotframe import BiotFrame
 from nova.electromagnetic.coilset import CoilSet
 
 

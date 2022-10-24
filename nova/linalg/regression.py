@@ -170,8 +170,7 @@ class Lops(RegressionBase, LinearOperator):
 
     def _inverse(self):
         """Retun solution to least squares problem using default solver."""
-        return RegularizedInversion(self, [], self.data,
-                                    **dict(damp=0, iter_lim=10, show=0))
+        return RegularizedInversion(self, [], self.data)
 
 
 @dataclass

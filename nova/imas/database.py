@@ -2,7 +2,11 @@
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 
-from imas import DBEntry
+try:
+    from imas import DBEntry
+    import_imas = True
+except ImportError:
+    import_imas = False
 
 from nova.database.filepath import FilePath
 
@@ -35,6 +39,8 @@ class IMASdb(IMASal, IDS):
     @contextmanager
     def get_ids(self):
         """Yield database with context manager."""
+        if not import_imas:
+            raise ImportError('imas module not found')
         db_entry = DBEntry(self.backend, self.machine,
                            self.pulse, self.run, user_name=self.user)
         try:

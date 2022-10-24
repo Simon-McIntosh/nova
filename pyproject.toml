@@ -1,9 +1,163 @@
 [build-system]
-requires = ["setuptools", "wheel", "versioneer-518"]
+requires = ["setuptools", "wheel", "versioneer[toml]"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "nova"
+description = "Equilibrium generation and inference"
+authors = [
+  {name = "Simon McIntosh", email = "simon.mcintosh@iter.org"}
+]
+readme = "README.md"
+license = {file = "LICENSE.txt"}
+requires-python = ">=3.10"
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: ITER GIP License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Topic :: Scientific/Engineering :: Fusion',
+]
+dynamic = ["version"]
+keywords = ["equilibrium", "generation", "reconstruction", "inference", "plasma", "Biot-Savart", "mesh-free"]
+
+dependencies = [
+  "alphashape",
+  "appdirs",
+  "click",
+  "cython",
+  "bokeh",
+  "dask[distributed]",
+  "descartes",
+  "fabric",
+  "fortranformat",
+  "gitpython",
+  "meshio",
+  "netCDF4",
+  "numba",
+  "numpy",
+  "pandas>=1.5",
+  "pylops>=2.0",
+  "pyperf",
+  "pyvista",
+  "pyquaternion",
+  "quadpy",
+  "rdp",
+  "seaborn",
+  "scipy",
+  "scikit-learn",
+  "shapely",
+  "tqdm",
+  "vedo",
+  "wheel",
+  "xarray",
+  "xxhash"
+]
+ 
+[project.optional-dependencies]
+ansys = [
+  "ansys-dpf-core", 
+  "ansys-dpf-post", 
+  "openpyxl"
+]
+cuda = [
+  "cupy-cuda115"
+]
+dev = [
+  "nova[tests, docs]",
+  "spyder", 
+  "spyder-unittest", 
+  "spyder-line-profiler", 
+  "spyder-memory-profiler", 
+  "pylsp-mypy",
+  "line_profiler", 
+  "numdifftools", 
+  "pytest-xdist"
+]
+docs = [
+  "pandoc", 
+  "jupyter"
+]
+mesh = [
+  "gmsh", 
+  "pygmsh", 
+  "tetgen", 
+  "trimesh"
+]
+optimize = [
+  "nlopt", 
+  "pygmo"
+]
+plan = [
+  "python-dateutil"
+]
+test = [
+  "coverage2clover", 
+  "pytest", 
+  "pytest-cov", 
+  "pytest-xdist", 
+  "lizard", 
+  "mypy",
+  "asv", 
+  "virtualenv", 
+  "snakeviz"
+]
+thermofluids = [
+  "ftputil", 
+  "coolprop", 
+  "tables", 
+  "xlrd"
+]
+
+[project.scripts]
+benchmark = "nova.scripts.benchmark:benchmark"
+extrapolate = "nova.imas.scripts:extrapolate"
+
+[project.urls]
+"homepage" = "https://git.iter.org/projects/EQ/repos/nova/"
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "_version.py"
+tag_prefix = ""
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers"
+xfail_strict = true
+testpaths = "tests"
+filterwarnings = [
+    "once::Warning",
+]
+asyncio_mode = "auto"
+
+[tool.mypy]
+warn_unused_ignores = true
+follow_imports = "normal"
+ignore_missing_imports = true
+disallow_untyped_calls = true
+warn_no_return = true
+warn_redundant_casts = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+
 [tool.coverage.run]
-omit = ["nova/ansys/*", "nova/assembly/*", "nova/design/*", 
-	"nova/development/*", "nova/dina/*", "nova/obsolete/*",
-	"nova/projects/*", "nova/scripts/*", "nova/thermalhydralic/*", 
-	"nova/utilities/*"]
+omit = [
+  "nova/ansys/*", 
+  "nova/assembly/*", 
+  "nova/design/*", 
+  "nova/development/*", 
+  "nova/dina/*", 
+  "nova/obsolete/*",
+  "nova/projects/*", 
+  "nova/scripts/*", 
+  "nova/thermalhydralic/*", 
+  "nova/utilities/*"
+]

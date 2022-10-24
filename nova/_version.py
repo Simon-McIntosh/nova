@@ -45,8 +45,8 @@ def get_config():
     cfg.VCS = "git"
     cfg.style = "pep440"
     cfg.tag_prefix = ""
-    cfg.parentdir_prefix = "None"
-    cfg.versionfile_source = "_version.py"
+    cfg.parentdir_prefix = "nova-"
+    cfg.versionfile_source = "nova/_version.py"
     cfg.verbose = False
     return cfg
 

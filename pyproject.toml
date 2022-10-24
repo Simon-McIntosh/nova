@@ -125,8 +125,10 @@ extrapolate = "nova.imas.scripts:extrapolate"
 [tool.versioneer]
 VCS = "git"
 style = "pep440"
-versionfile_source = "_version.py"
+versionfile_source = "nova/_version.py"
+versionfile_build = "nova/_version.py"
 tag_prefix = ""
+parentdir_prefix = "nova-"
 
 [tool.pytest.ini_options]
 addopts = "-ra --strict-markers"

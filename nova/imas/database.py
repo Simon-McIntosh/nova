@@ -15,26 +15,44 @@ from nova.database.filepath import FilePath
 
 @dataclass
 class IDS:
-    """Structure IDS input as leading arguments."""
+    """
+    Methods to access IMAS database
 
-    pulse: int | None = None
-    run: int | None = None
-    ids_name: str | None = None
+    Parameters
+    ----------
+    pulse: int, optional (required when ids not set)
+        Pulse number. The default is 0.
+    run: int, optional (required when ids not set)
+        Run number. The default is 0.
+    ids_name: str, optional (required when ids not set)
+        Ids name. The default is ''.
+    user: str, optional (required when ids not set)
+        User name. The default is public.
+    machine: str, optional (required when ids not set)
+        Machine name. The default is iter.
+    backend: int, optional (required when ids not set)
+        Access layer backend. The default is 13 (HDF5).
+    ids: imas.ids, optional
+        When set the ids parameter takes prefrence. The default is None.
+
+    Examples
+    --------
+
+    >>> eq_ids = IDS(130506, 403, 'equilibrium')
+
+    """
+
+    pulse: int = field(default=0)
+    run: int = field(default=0)
+    ids_name: str = field(default='')
+    user: str = field(default='public')
+    machine: str = field(default='iter')
+    backend: int = field(default=13)
     ids: object | None = field(repr=False, default=None)
 
-
-@dataclass
-class IMASal:
-    """Define IMAS access layer attributes."""
-
-    user: str = 'public'
-    machine: str = 'iter_md'
-    backend: int = 13
-
-
-@dataclass
-class IMASdb(IMASal, IDS):
-    """Methods to access IMAS database."""
+    def __post_init__(self):
+        """Load parameters and set ids."""
+        self.set_ids()
 
     @contextmanager
     def get_ids(self):
@@ -68,7 +86,7 @@ class IMASdb(IMASal, IDS):
 
 
 @dataclass
-class Database(FilePath, IMASdb):
+class Database(FilePath, IDS):
     """Provide access to imasdb data."""
 
     directory: str = 'user_data'
@@ -76,7 +94,7 @@ class Database(FilePath, IMASdb):
 
     def __post_init__(self):
         """Set ids and filepath."""
-        self.set_ids()
+        super().__post_init__()
         try:
             self.filename = f'{self.machine}_{self.pulse}{self.run:04d}'
         except TypeError:

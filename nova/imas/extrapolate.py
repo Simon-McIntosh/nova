@@ -111,7 +111,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
             Equilibrium run number. The default is None.
 
         ids : imas.ids, optional (required when pulse and run not set)
-            Equilibrium ids. The ids parameter takes prefrence when not None.
+            Equilibrium ids. When set the ids parameter takes prefrence.
             The default is None.
 
 
@@ -248,6 +248,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         if self.resolution == 'ids':
             self.resolution = equilibrium.data.dims['r'] * \
                 equilibrium.data.dims['z']
+        #return equilibrium.ids
 
     @property
     def machine_attrs(self):
@@ -298,9 +299,9 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         """Expose Equilibrium plot boundary."""
         return Equilibrium.plot_boundary(self, itime)
 
-    def plot(self, attr='psi', itime=0):
+    def plot(self, attr='psi', itime=None):
         """Plot plasma filements and polidal flux."""
-        if self.itime != itime:
+        if self.itime != itime and itime is not None:
             self.ionize(itime)
         plt.figure()
         super().plot('plasma')
@@ -324,7 +325,7 @@ if __name__ == '__main__':
 
     equilibrium = Database(pulse, run, 'equilibrium', machine='iter').ids
 
-    coilset = Extrapolate(pulse, run, limit='ids')
+    coilset = Extrapolate(pulse, run, nplasma=130, limit='ids')
     #coilset.build()
 
     coilset.ionize(20)

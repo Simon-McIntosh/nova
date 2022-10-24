@@ -19,7 +19,7 @@ class Frame(FrameSet):
 
     delta: float = -1
     dcoil: float = -1
-    nplasma: float = 0.25
+    nplasma: float = 500
     dshell: float = 0
     tplasma: str = 'hex'
     tcoil: str = 'rect'

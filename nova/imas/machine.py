@@ -13,7 +13,7 @@ import xxhash
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.shell import Shell
 from nova.geometry.polygon import Polygon
-from nova.imas.database import Database, IMASal
+from nova.imas.database import Database, IDS
 from nova.utilities.pyplot import plt
 
 
@@ -528,7 +528,6 @@ class PF_Active_Geometry(MachineDescription):
 
     def build_coil(self):
         """Build pf active coil geometroy."""
-        print(self.ids)
         for ids_loop in getattr(self.ids, 'coil'):
             loop = ActiveLoop(ids_loop)
             coildata = ActiveCoilData()
@@ -650,7 +649,7 @@ class Wall_Geometry(MachineDescription):
 
 
 @dataclass
-class Machine(CoilSet, IMASal):
+class Machine(CoilSet, IDS):
     """Manage ITER machine geometry."""
 
     dcoil: float = -1

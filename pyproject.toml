@@ -2,6 +2,9 @@
 requires = ["setuptools", "wheel", "versioneer[toml]"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+packages = ["nova"]
+
 [project]
 name = "nova"
 description = "Equilibrium generation and inference"
@@ -9,7 +12,7 @@ authors = [
   {name = "Simon McIntosh", email = "simon.mcintosh@iter.org"}
 ]
 readme = "README.md"
-license = {file = "LICENSE.txt"}
+license = {text = "ITER GIP"}
 requires-python = ">=3.10"
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -19,7 +22,7 @@ classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
-  "Topic :: Scientific/Engineering :: Fusion',
+  "Topic :: Scientific/Engineering :: Fusion",
 ]
 dynamic = ["version"]
 keywords = ["equilibrium", "generation", "reconstruction", "inference", "plasma", "Biot-Savart", "mesh-free"]

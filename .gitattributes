@@ -16,3 +16,4 @@
 *.pyd		binary
 *.pyo 		binary
 nova/_version.py export-subst
+_version.py export-subst

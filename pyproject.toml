@@ -87,8 +87,7 @@ mesh = [
   "trimesh"
 ]
 optimize = [
-  "nlopt", 
-  "pygmo"
+  "nlopt" 
 ]
 plan = [
   "python-dateutil"

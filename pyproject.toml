@@ -41,6 +41,7 @@ dependencies = [
   "meshio",
   "netCDF4",
   "numba",
+  "numdifftools", 
   "numpy",
   "pandas>=1.5",
   "pylops>=2.0",
@@ -69,21 +70,15 @@ ansys = [
 cuda = [
   "cupy-cuda115"
 ]
-dev = [
-  "nova[tests, docs]",
-  "spyder", 
-  "spyder-unittest", 
-  "spyder-line-profiler", 
-  "spyder-memory-profiler", 
-  "pylsp-mypy",
-  "line_profiler",
-  "moviepy", 
-  "numdifftools", 
-  "pytest-xdist"
-]
+dev = [ 
+  "nova[docs, mesh, optimize, spyder, tests]",
+]	
 docs = [
   "pandoc", 
   "jupyter"
+]
+full = [
+  "nova[ansys, docs, mesh, optimize, plan, spyder, test, thermofluids]"
 ]
 mesh = [
   "gmsh", 
@@ -97,6 +92,15 @@ optimize = [
 ]
 plan = [
   "python-dateutil"
+]
+spyder = [
+  "spyder", 
+  "spyder-unittest", 
+  "spyder-line-profiler", 
+  "spyder-memory-profiler", 
+  "pylsp-mypy",
+  "line_profiler",
+  "moviepy", 
 ]
 test = [
   "coverage2clover", 

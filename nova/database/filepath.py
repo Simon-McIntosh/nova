@@ -8,7 +8,10 @@ try:
     import_imas = True
 except ImportError:
     import_imas = False
+
+import json
 import xarray
+import xxhash
 
 import nova
 from nova.definitions import root_dir
@@ -21,12 +24,19 @@ class FilePath:
     filename: str | None = field(default=None, repr=True)
     group: str | None = field(default=None, repr=True)
     path: str | None = field(default=None, repr=False)
-    directory: str = 'root'
+    directory: str = 'user_data'
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
 
     def __post_init__(self):
         """Forward post init for for cooperative inheritance."""
-        super().__post_init__()
+        if hasattr(super(), '__post_init__'):
+            super().__post_init__()
+
+    def set_group(self, attrs: dict):
+        """Set group name as xxh32 hex hash."""
+        xxh32 = xxhash.xxh32()
+        xxh32.update(json.dumps(attrs))
+        self.group = xxh32.hexdigest()
 
     @staticmethod
     def get_path(directory: str, subpath: str) -> str:

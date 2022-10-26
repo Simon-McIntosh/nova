@@ -1,19 +1,17 @@
 """Manage access to IMAS machine data."""
 from abc import ABC, abstractmethod
-from collections.abc import Iterable
 from dataclasses import dataclass, field
 import string
-from typing import Any, ClassVar, Union
+from typing import ClassVar, Union
 
 import numpy as np
 import numpy.typing as npt
 import shapely
-import xxhash
 
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.shell import Shell
 from nova.geometry.polygon import Polygon
-from nova.imas.database import Database, Datafile, ImasIds
+from nova.imas.database import DataAttrs, Database, Datafile, ImasIds
 from nova.utilities.pyplot import plt
 
 
@@ -357,15 +355,19 @@ class CoilData(FrameData):
 
 
 @dataclass
-class MachineDescription(CoilSet, Datafile):
+class MachineDescription(CoilSet, Database):
     """Manage access to machine data."""
 
     user: str = 'public'
     machine: str = 'iter_md'
+    datapath: str = 'nova'
+    filename: str = 'iter'
 
     def __post_init__(self):
         """Build geometry."""
         super().__post_init__()
+        self.set_group(self.ids_attrs)
+        print('+++', self.directory, self.datapath, self.filename, self.group)
         self.build()
 
     @abstractmethod
@@ -456,7 +458,7 @@ class PassiveCoilData(CoilData):
 
 
 @dataclass
-class PfPassiveGeometry(MachineDescription):
+class PoloidalFieldPassive(MachineDescription):
     """Manage passive poloidal loop ids, pf_passive."""
 
     pulse: int = 115005
@@ -512,7 +514,7 @@ class ActivePolyCoilData(ActiveCoilData):
 
 
 @dataclass
-class PfActiveGeometry(MachineDescription):
+class PoloidalFieldActive(MachineDescription):
     """Manage active poloidal loop ids, pf_passive."""
 
     pulse: int = 111001
@@ -629,7 +631,7 @@ class Contour:
 
 
 @dataclass
-class WallGeometry(MachineDescription):
+class Wall(MachineDescription):
     """Manage plasma boundary, wall ids."""
 
     pulse: int = 116000
@@ -662,30 +664,29 @@ class MachineGeometry:
     >>> geometry = MachineGeometry(wall=False)
     >>> geometry.wall
     False
-    >>> geometry.pf_active == PfActiveGeometry.default_ids_attrs()
+    >>> geometry.pf_active == PoloidalFieldActive.default_ids_attrs()
     True
-    >>> geometry.pf_passive == PfPassiveGeometry.default_ids_attrs()
+    >>> geometry.pf_passive == PoloidalFieldPassive.default_ids_attrs()
     True
 
-    Specify geometry attribute as a partial dict:
+    Modify pf_active attrs via dict input:
 
-    >>> pf_active = MachineGeometry(pf_active=dict(pulse=3, run=4)).pf_active
-    >>> pf_active['pulse'], pf_active['run'], pf_active['machine']
-    (3, 4, 'iter_md')
+    >>> pf_active = MachineGeometry(pf_active=dict(run=101)).pf_active
+    >>> pf_active == PoloidalFieldActive.default_ids_attrs() | dict(run=101)
+    True
 
-    Specify geometry attribute as a Database:
+    Specify pf_active as an ids:
 
-    >>> database = Database(111001, 101, 'pf_active', machine='iter_md')
-    >>> pf_active = MachineGeometry(pf_active=database).pf_active
+    >>> database = Database(111001, 202, 'pf_active', machine='iter_md')
+    >>> pf_active = MachineGeometry(database.ids).pf_active
     >>> pf_active['run']
-    101
+    1072318551
 
-    Specify geometry attribute as an ids, return hashed pulse and run numbers:
+    Specify pf_active as an itterable:
 
-    >>> pf_active = MachineGeometry(pf_active=database.ids).pf_active
-    >>> pf_active['pulse'], pf_active['run'], pf_active['ids'].__name__
-    (1693993641, 1693993641, 'pf_active')
-
+    >>> pf_active = MachineGeometry(pf_active=(111001, 202)).pf_active
+    >>> tuple(pf_active[attr] for attr in ['pulse', 'run', 'name', 'machine'])
+    (111001, 202, 'pf_active', 'iter_md')
 
     """
 
@@ -693,30 +694,20 @@ class MachineGeometry:
     pf_passive: GeometryIds = True
     wall: GeometryIds = True
 
-    machine_geometry: ClassVar[dict[str, Any]] = dict(
-        pf_active=PfActiveGeometry,
-        pf_passive=PfPassiveGeometry,
-        wall=WallGeometry)
+    geometry: ClassVar[dict] = dict(pf_active=PoloidalFieldActive,
+                                    pf_passive=PoloidalFieldPassive,
+                                    wall=Wall)
 
     def __post_init__(self):
         """Map geometry parameters to dict attributes."""
-        for attr in self.machine_geometry:
-            if (geometry := getattr(self, attr)) is False:
-                continue
-            if isinstance(geometry, MachineDescription):
-                continue
-            if isinstance(geometry, Database):
-                setattr(self, attr, geometry.ids_attrs)
-                continue
-            ids_attrs = self.machine_geometry[attr].default_ids_attrs()
-            if geometry is True:
-                setattr(self, attr, ids_attrs)
-                continue
-            if isinstance(geometry, dict):
-                setattr(self, attr, ids_attrs | geometry)
-                continue
-            database = Database(**ids_attrs, ids=geometry)
-            setattr(self, attr, database.ids_attrs | dict(ids=geometry))
+        for attr in self.geometry:
+            attrs = DataAttrs(getattr(self, attr), self.geometry[attr]).attrs
+            setattr(self, attr, attrs)
+
+    @property
+    def geometry_attrs(self) -> dict:
+        """Return geometry attributes."""
+        return {attr: getattr(self, attr) for attr in self.geometry}
 
 
 @dataclass
@@ -730,110 +721,29 @@ class Machine(CoilSet, MachineGeometry):
     tplasma: str = 'rectangle'
 
     filename: str = 'iter'
-    datapath: str = 'nova'
-
-    '''
-    geometry: Union[dict[str, tuple[int, int]], list[str]] = field(
-        default_factory=lambda: ['pf_active', 'pf_passive', 'wall'])
-
-
-    '''
 
     def __post_init__(self):
         """Load coilset, build if not found."""
         super().__post_init__()
-        '''
-        super().__post_init__()
+        self.set_group(self.machine_attrs)
+        print('***', self.directory, self.datapath, self.filename, self.group)
         try:
             self.load(self.filename)
-        except (FileNotFoundError, OSError, KeyError):
+        except (FileNotFoundError, OSError, KeyError, AttributeError):
             self.build()
-        '''
 
-    def load(self, filename=None, path=None):
-        """Load machine geometry and data. Re-build if metadata diffrent."""
-        self.update_group()
-        super().load(filename, path)
-        self.metadata = self.load_metadata(filename, path)
-        return self
-
-    def store(self, filename=None, path=None, metadata=None):
-        """Store frameset, biot attributes and metadata."""
-        self.update_group()
-        super().store(filename, path)
-        self.store_metadata(filename, path, self.metadata)
-        return self
-
-    @property
-    def ids_attrs(self):
-        """Return ids pulse run attribute list."""
-        self.update_geometry()
-        attrs = {}
-        for attr in self.machine_description:
-            if attr in self.geometry:
-                pulse = self.machine_description[attr].pulse
-                run = self.machine_description[attr].run
-            else:
-                pulse = run = None
-            attrs[f'{attr}_pulse'] = pulse
-            attrs[f'{attr}_run'] = run
-        return attrs
-
-    @property
-    def database_attrs(self):
-        """Return database attrs."""
-        return {attr: getattr(self, attr)
-                for attr in ['user', 'machine', 'backend']}
-
-    @property
-    def machine_attrs(self) -> dict:
-        """Return group attributes for generation xxh32 group hash."""
-        return self.coilset_attrs | self.ids_attrs | self.database_attrs
-
-    @staticmethod
-    def flatten(xs):
-        """Return flattened list.
-
-        https://stackoverflow.com/questions/2158395/
-        flatten-an-irregular-list-of-lists
-        """
-        for x in xs:
-            if isinstance(x, Iterable) and not isinstance(x, (str, bytes)):
-                yield from Machine.flatten(x)
-            else:
-                yield x
-
-    def update_group(self):
-        """Return group name as xxh32 hex hash."""
-        xxh32 = xxhash.xxh32
-        attrs = [attr if attr is not None else 'None' for attr in
-                 self.flatten(self.machine_attrs.values())]
-        xxh32.update(np.array(attrs))
-        self.group = xxh32.hexdigest()
-        return self.group
-
-    def update_geometry(self):
-        """Update geometry ids referances."""
-        if isinstance(self.geometry, str):
-            self.geometry = [self.geometry]
-        if isinstance(self.geometry, list):
-            self.geometry = {attr: [self.machine_description[attr].pulse,
-                                    self.machine_description[attr].run]
-                             for attr in self.geometry}
-
-    def solve_biot(self):
-        """Solve biot instances."""
-        if self.sloc['plasma'].sum() > 0:
-            self.plasmaboundary.solve(self.Loc['plasma', 'poly'][0].boundary)
-            self.plasmagrid.solve()
-
+    '''
     @property
     def metadata(self):
         """Return machine metadata."""
         metadata = self.frame_attrs | self.biot_attrs
-        metadata['geometry'] = list(self.geometry)
-        for attr in self.geometry:
-            metadata[attr] = self.geometry[attr]
+        for geometry in self.geometry:
+            geometry_attrs = getattr(self, geometry)
+            if isinstance(geometry_attrs, bool):
+                metadata[geometry] = geometry_attrs
+                continue
+            for attr in geometry_attrs:
+                metadata[f'{geometry}_{attr}'] = attr
         return metadata
 
     @metadata.setter
@@ -841,24 +751,57 @@ class Machine(CoilSet, MachineGeometry):
         """Set instance metadata."""
         for attr in list(self.frame_attrs) + list(self.biot_attrs):
             setattr(self, attr, metadata[attr])
-        self.geometry = {attr: metadata[attr]
-                         for attr in np.array(metadata['geometry'], ndmin=1)}
+        for geometry in self.geometry:
+            if geometry in metadata:
+                setattr(self, geometry, metadata[geometry])
+                continue
+            setattr(self, geometry, {})
+            geometry_attrs = [attr.split('_')[-1] for attr in metadata
+                              if attr.split('_')[0] == geometry]
+            for attr in geometry_attrs:
+                getattr(self, geometry)[attr] = metadata[f'{geometry}_{attr}']
+    '''
+
+    @property
+    def machine_attrs(self) -> dict:
+        """Return group attributes for generation xxh32 group hash."""
+        return self.coilset_attrs | self.geometry_attrs
+
+    def solve_biot(self):
+        """Solve biot instances."""
+        if self.sloc['plasma'].sum() > 0:
+            self.plasmaboundary.solve(self.Loc['plasma', 'poly'][0].boundary)
+            self.plasmagrid.solve()
 
     def build(self, **kwargs):
         """Build dataset, frameset and, biotset and save to file."""
         super().__post_init__()
         self.frame_attrs = kwargs
         self.clear_frameset()
-        self.update_geometry()
         for attr in self.geometry:
-            coilset = self.machine_description[attr](
-                *self.geometry[attr], **self.database_attrs,
-                **self.frame_attrs)
-            self += coilset
+            print(getattr(self, attr))
+            if (geometry := getattr(self, attr)):
+                coilset = self.geometry[attr](**geometry, **self.frame_attrs)
+                self += coilset
             for attr in coilset.biot_methods:
                 getattr(self, attr).data = getattr(coilset, attr).data
         self.solve_biot()
-        return self.store(self.filename)
+        print(self.filename, self.group)
+        #return self.store(self.filename)
+
+    '''
+    def load(self, filename=None, path=None):
+        """Load machine geometry and data. Re-build if metadata diffrent."""
+        super().load(filename, path)
+        self.metadata = self.load_metadata(filename, path)
+        return self
+
+    def store(self, filename=None, path=None, metadata=None):
+        """Store frameset, biot attributes and metadata."""
+        super().store(filename, path)
+        self.store_metadata(filename, path, self.metadata)
+        return self
+    '''
 
 
 if __name__ == '__main__':

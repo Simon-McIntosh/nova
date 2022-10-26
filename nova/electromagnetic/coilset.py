@@ -19,7 +19,7 @@ class CoilSet(Biot, Control, Frame):
 
     """
 
-    datapath: str = 'data/Nova'
+    datapath: str = 'nova'
 
     def __post_init__(self):
         """Set filepath."""

@@ -14,10 +14,6 @@ class FrameData:
     frame: FrameSpace = field(repr=False, default_factory=FrameSpace)
     subframe: FrameSpace = field(repr=False, default_factory=FrameSpace)
 
-    def __post_init__(self):
-        """Forward post init for for cooperative inheritance."""
-        super().__post_init__()
-
     @property
     def frames(self):
         """Return frame and subframe."""

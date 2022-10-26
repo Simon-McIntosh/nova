@@ -1,7 +1,7 @@
 """Manage access to IMAS database."""
 from contextlib import contextmanager
-from dataclasses import dataclass, field
-from typing import TypeVar
+from dataclasses import dataclass, field, InitVar
+from typing import ClassVar, Type
 
 try:
     from imas import DBEntry
@@ -12,9 +12,8 @@ import xxhash
 
 from nova.database.filepath import FilePath
 
-# pylint: disable=too-many-ancestors
+# _pylint: disable=too-many-ancestors
 
-DatabaseT = TypeVar('DatabaseT', bound='Database')
 ImasIds = object
 
 
@@ -51,7 +50,7 @@ class Database:
     -----
     The Database class regulates access to IMAS ids data. Requests may be made
     via pulse, run, name identifiers or as direct referances to
-    open ids handels.
+    open ids handles.
 
     See Also
     --------
@@ -84,7 +83,7 @@ class Database:
     Traceback (most recent call last):
         ...
     ValueError: When self.ids is None require:
-    pulse 0 > 0, run 0 > 0 or name "" != ""
+    pulse (0 > 0) & run (0 > 0) & name ("" != "")
 
     Malformed inputs are thrown as TypeErrors:
 
@@ -114,7 +113,7 @@ class Database:
     The equilibrium and database instances may be shown to share the same ids
     by comparing their respective hashes:
 
-    >>> hash(equilibrium) == hash(database)
+    >>> equilibrium.ids_hash == database.ids_hash
     True
 
     However, due to differences if the pulse and run numbers of the database
@@ -129,18 +128,8 @@ class Database:
 
     >>> equilibrium.ids_attrs == dict(pulse=130506, run=403, \
                                       name='equilibrium', user='public', \
-                                      machine='iter')
+                                      machine='iter', backend=13)
     True
-
-    The get_ids_attrs method is used to resolve a full ids_attrs dict from
-    a partial input. If the input to get_ids_attrs is boolean then True
-    returns the instance's default':
-
-
-    whilst False returns False:
-
-    >>> equilibrium.get_ids_attrs(False)
-    False
 
     """
 
@@ -152,8 +141,17 @@ class Database:
     backend: int = field(default=13)
     ids: ImasIds | None = field(repr=False, default=None)
 
+    attrs: ClassVar[list[str]] = \
+        ['pulse', 'run', 'name', 'user', 'machine', 'backend']
+
     def __post_init__(self):
         """Load parameters and set ids."""
+        self.set_ids()
+        if hasattr(super(), '__post_init__'):
+            super().__post_init__()
+
+    def set_ids(self):
+        """Set ids attribute."""
         if self.ids is None:
             return self.get_ids()
         return self.load_ids()
@@ -161,44 +159,20 @@ class Database:
     @classmethod
     def default_ids_attrs(cls):
         """Return dict of ids attributes."""
-        return dict(pulse=cls.pulse, run=cls.run, name=cls.name,
-                    user=cls.user, machine=cls.machine)
+        return {attr: getattr(cls, attr) for attr in cls.attrs}
 
     @property
     def ids_attrs(self):
         """Return dict of ids attributes."""
-        return dict(pulse=self.pulse, run=self.run, name=self.name,
-                    user=self.user, machine=self.machine)
-
-    def get_ids_attrs(self, attr: bool | dict | DatabaseT | ImasIds) -> dict:
-        """Return formated database attributes."""
-        if attr is False:
-            return False
-        #try:
-        return attr.ids_attrs
-        '''
-            continue
-        if isinstance(geometry, Database):
-            setattr(self, attr, geometry.ids_attrs)
-            continue
-        ids_attrs = self.machine_geometry[attr].default_ids_attrs()
-        if geometry is True:
-            setattr(self, attr, ids_attrs)
-            continue
-        if isinstance(geometry, dict):
-            setattr(self, attr, ids_attrs | geometry)
-            continue
-        database = Database(**ids_attrs, ids=geometry)
-        setattr(self, attr, database.ids_attrs | dict(ids=geometry))
-        '''
+        return {attr: getattr(self, attr) for attr in self.attrs}
 
     def get_ids(self):
         """Set ids from pulse/run."""
         if self.pulse == 0 or self.run == 0 or self.name == '':
             raise ValueError(
                 f'When self.ids is None require:\n'
-                f'pulse {self.pulse} > 0, run {self.run} > 0 or '
-                f'name "{self.name}" != ""')
+                f'pulse ({self.pulse} > 0) & run ({self.run} > 0) & '
+                f'name ("{self.name}" != "")')
         with self._get_ids() as ids:
             self.ids = ids
 
@@ -226,7 +200,8 @@ class Database:
             yield db_entry.get(self.name)
         db_entry.close()
 
-    def __hash__(self) -> int:
+    @property
+    def ids_hash(self) -> int:
         """
         Return ids hash.
 
@@ -245,12 +220,123 @@ class Database:
         Set unknown pulse and run numbers to the ids hash
         Update name to match ids.__name__
         """
-        self.pulse = self.run = hash(self)
+        self.pulse = self.run = self.ids_hash
         self.name = self.ids.__name__
 
 
 @dataclass
-class Datafile(FilePath, Database):
+class DataAttrs:
+    """
+    Methods to handle the formating of database attributes.
+
+    Parameters
+    ----------
+    attrs: bool | dict | Database | ImasIds | list | tuple
+        Input attributes.
+    subclass: Type[Database], optional
+        Subclass instance or class. The default is Database.
+
+    Attributes
+    ----------
+    attrs: dict
+        Resolved attributes.
+
+    Raises
+    ------
+    TypeError
+        Malformed attrs input passed to class.
+
+    Examples
+    --------
+    The get_ids_attrs method is used to resolve a full ids_attrs dict from
+    a partial input. If the input to get_ids_attrs is boolean then True
+    returns the instance's default':
+
+    >>> DataAttrs(True).attrs == Database.default_ids_attrs()
+    True
+
+    whilst False returns False:
+
+    >>> DataAttrs(False).attrs
+    False
+
+    Database attributes may be extracted from any class derived from Database:
+
+    >>> database = Database(130506, 403, 'equilibrium', machine='iter')
+    >>> DataAttrs(database).attrs == database.ids_attrs
+    True
+
+    Passing a fully defined attribute dict returns this input:
+
+    >>> attrs = dict(pulse=130506, run=403, name='pf_active', user='other', \
+                     machine='iter', backend=13)
+    >>> DataAttrs(attrs).attrs == attrs
+    True
+
+    DataAttrs updates attrs with defaults for all missing values:
+
+    >>> _ = attrs.pop('user')
+    >>> DataAttrs(attrs).attrs == attrs | dict(user='public')
+    True
+
+    An additional example with attrs as a partial dict:
+
+    >>> attrs = DataAttrs(dict(pulse=3, run=4)).attrs
+    >>> attrs['pulse'], attrs['run'], attrs['machine']
+    (3, 4, 'iter')
+
+    Attrs may be input as an ids. In this case attrs is returned with
+    hashed pulse and run numbers in additional to the original ids attribute:
+
+    >>> attrs = DataAttrs(database.ids).attrs
+    >>> attrs['pulse'], attrs['run'], attrs['ids'].__name__
+    (3600040824, 3600040824, 'equilibrium')
+
+    Attrs may be input as a list or tuple of args. This input is
+    expanded by the passed subclass and must resolve to a valid ids. Partial
+    input is acepted as long as the defaults enable a correct resolution.
+
+    >>> DataAttrs((130506, 403, 'equilibrium')).attrs == database.ids_attrs
+    True
+
+    Raises TypeError when input attrs are malformed:
+
+    >>> DataAttrs('equilibrium')
+    Traceback (most recent call last):
+        ...
+    TypeError: malformed attrs: <class 'str'>
+
+    """
+
+    attrs: bool | dict | Database | ImasIds | list | tuple
+    subclass: InitVar[Type[Database]] = Database
+    default_attrs: dict = field(init=False, default_factory=dict)
+
+    def __post_init__(self, subclass):
+        """Update database attributes."""
+        self.default_attrs = subclass.default_ids_attrs()
+        self.attrs = self.update_attrs()
+
+    def update_attrs(self) -> dict | bool:
+        """Return formated database attributes."""
+        if self.attrs is False:
+            return False
+        if self.attrs is True:
+            return self.default_attrs
+        if isinstance(self.attrs, Database):
+            return self.attrs.ids_attrs
+        if isinstance(self.attrs, dict):
+            return self.default_attrs | self.attrs
+        if hasattr(self.attrs, 'ids_properties'):  # IMAS ids
+            database = Database(**self.default_attrs, ids=self.attrs)
+            return database.ids_attrs | dict(ids=self.attrs)
+        if isinstance(self.attrs, list | tuple):
+            return self.default_attrs | dict(zip(Database.attrs, self.attrs))
+        raise TypeError(f'malformed attrs: {type(self.attrs)}')
+
+
+@dataclass
+class Datafile(Database, FilePath):
     """
     Provide cached acces to imas ids data.
 
@@ -272,7 +358,6 @@ class Datafile(FilePath, Database):
             self.filename = f'{self.machine}_{self.pulse}{self.run:04d}'
         except TypeError:
             self.filename = None
-        self.group = self.name
         self.set_path(self.datapath)
 
 

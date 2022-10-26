@@ -13,7 +13,7 @@ class Magnetics(Database):
 
     pulse: int = 150100
     run: int = 4
-    ids_name: str = 'magnetics'
+    name: str = 'magnetics'
     data: pandas.DataFrame = field(init=False,
                                    default_factory=pandas.DataFrame)
 

@@ -32,7 +32,6 @@ class BiotSet:
     target: BiotFrame = field(repr=False, default_factory=BiotFrame)
     turns: list[bool] = field(default_factory=lambda: [True, False])
     reduce: list[bool] = field(default_factory=lambda: [True, True])
-    chunks: int | None = None
 
     def __post_init__(self):
         """Format source and target frames."""
@@ -62,7 +61,6 @@ class BiotSet:
         self.target.turns = self.turns[1]
         self.source.reduce = self.reduce[0]
         self.target.reduce = self.reduce[1]
-        self.source.chunks = self.target.chunks = self.chunks
 
     def assemble(self):
         """Assemble BiotSet."""

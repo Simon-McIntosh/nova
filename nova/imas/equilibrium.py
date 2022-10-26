@@ -148,7 +148,7 @@ class Profile2D(Scenario, BiotPlot):
 class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
     """Manage active poloidal loop ids, pf_passive."""
 
-    ids_name: str = 'equilibrium'
+    name: str = 'equilibrium'
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""

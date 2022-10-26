@@ -13,7 +13,7 @@ import xxhash
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.shell import Shell
 from nova.geometry.polygon import Polygon
-from nova.imas.database import Database, IDS
+from nova.imas.database import Database, Datafile, ImasIds
 from nova.utilities.pyplot import plt
 
 
@@ -264,7 +264,7 @@ class Element:
         return self.geometry.name == 'oblique'
 
     def is_point(self) -> bool:
-        """Return geometory validity flag."""
+        """Return geometry validity flag."""
         return np.isclose(self.geometry.data.poly.area, 0)
 
 
@@ -355,15 +355,13 @@ class CoilData(FrameData):
         super().__post_init__()
         return index
 
-    def push(self, loop: Loop, element: Element):
-        """Append and insert."""
-        self.append(loop, element)
-        self.insert()
-
 
 @dataclass
-class MachineDescription(CoilSet, Database):
+class MachineDescription(CoilSet, Datafile):
     """Manage access to machine data."""
+
+    user: str = 'public'
+    machine: str = 'iter_md'
 
     def __post_init__(self):
         """Build geometry."""
@@ -458,12 +456,12 @@ class PassiveCoilData(CoilData):
 
 
 @dataclass
-class PF_Passive_Geometry(MachineDescription):
+class PfPassiveGeometry(MachineDescription):
     """Manage passive poloidal loop ids, pf_passive."""
 
     pulse: int = 115005
     run: int = 2
-    ids_name: str = 'pf_passive'
+    name: str = 'pf_passive'
 
     def build(self):
         """Build pf passive geometroy."""
@@ -514,12 +512,12 @@ class ActivePolyCoilData(ActiveCoilData):
 
 
 @dataclass
-class PF_Active_Geometry(MachineDescription):
+class PfActiveGeometry(MachineDescription):
     """Manage active poloidal loop ids, pf_passive."""
 
     pulse: int = 111001
     run: int = 202
-    ids_name: str = 'pf_active'
+    name: str = 'pf_active'
 
     def build(self):
         """Build pf active."""
@@ -631,12 +629,12 @@ class Contour:
 
 
 @dataclass
-class Wall_Geometry(MachineDescription):
+class WallGeometry(MachineDescription):
     """Manage plasma boundary, wall ids."""
 
     pulse: int = 116000
     run: int = 2
-    ids_name: str = 'wall'
+    name: str = 'wall'
 
     def build(self):
         """Build plasma bound by firstwall contour."""
@@ -648,35 +646,109 @@ class Wall_Geometry(MachineDescription):
         self.firstwall.insert(contour.loop)
 
 
+GeometryIds = (MachineDescription | Database | ImasIds |
+               dict[str, int | str] | bool)
+
+
 @dataclass
-class Machine(CoilSet, IDS):
+class MachineGeometry:
+    """
+    Update geometry attributes.
+
+    Examples
+    --------
+    Turn off wall geometry:
+
+    >>> geometry = MachineGeometry(wall=False)
+    >>> geometry.wall
+    False
+    >>> geometry.pf_active == PfActiveGeometry.default_ids_attrs()
+    True
+    >>> geometry.pf_passive == PfPassiveGeometry.default_ids_attrs()
+    True
+
+    Specify geometry attribute as a partial dict:
+
+    >>> pf_active = MachineGeometry(pf_active=dict(pulse=3, run=4)).pf_active
+    >>> pf_active['pulse'], pf_active['run'], pf_active['machine']
+    (3, 4, 'iter_md')
+
+    Specify geometry attribute as a Database:
+
+    >>> database = Database(111001, 101, 'pf_active', machine='iter_md')
+    >>> pf_active = MachineGeometry(pf_active=database).pf_active
+    >>> pf_active['run']
+    101
+
+    Specify geometry attribute as an ids, return hashed pulse and run numbers:
+
+    >>> pf_active = MachineGeometry(pf_active=database.ids).pf_active
+    >>> pf_active['pulse'], pf_active['run'], pf_active['ids'].__name__
+    (1693993641, 1693993641, 'pf_active')
+
+
+    """
+
+    pf_active: GeometryIds = True
+    pf_passive: GeometryIds = True
+    wall: GeometryIds = True
+
+    machine_geometry: ClassVar[dict[str, Any]] = dict(
+        pf_active=PfActiveGeometry,
+        pf_passive=PfPassiveGeometry,
+        wall=WallGeometry)
+
+    def __post_init__(self):
+        """Map geometry parameters to dict attributes."""
+        for attr in self.machine_geometry:
+            if (geometry := getattr(self, attr)) is False:
+                continue
+            if isinstance(geometry, MachineDescription):
+                continue
+            if isinstance(geometry, Database):
+                setattr(self, attr, geometry.ids_attrs)
+                continue
+            ids_attrs = self.machine_geometry[attr].default_ids_attrs()
+            if geometry is True:
+                setattr(self, attr, ids_attrs)
+                continue
+            if isinstance(geometry, dict):
+                setattr(self, attr, ids_attrs | geometry)
+                continue
+            database = Database(**ids_attrs, ids=geometry)
+            setattr(self, attr, database.ids_attrs | dict(ids=geometry))
+
+
+@dataclass
+class Machine(CoilSet, MachineGeometry):
     """Manage ITER machine geometry."""
 
     dcoil: float = -1
     dshell: float = 0.5
-    nplasma: int = 500
+    nplasma: float = 500
     tcoil: str = 'rectangle'
     tplasma: str = 'rectangle'
-    filename: str = 'iter'
-    datapath: str = field(default='nova', repr=False)
-    xxh32: xxhash.xxh32 = field(repr=False, init=False,
-                                default_factory=xxhash.xxh32)
 
+    filename: str = 'iter'
+    datapath: str = 'nova'
+
+    '''
     geometry: Union[dict[str, tuple[int, int]], list[str]] = field(
         default_factory=lambda: ['pf_active', 'pf_passive', 'wall'])
 
-    machine_description: ClassVar[dict[str, Any]] = dict(
-        pf_active=PF_Active_Geometry,
-        pf_passive=PF_Passive_Geometry,
-        wall=Wall_Geometry)
+
+    '''
 
     def __post_init__(self):
         """Load coilset, build if not found."""
+        super().__post_init__()
+        '''
         super().__post_init__()
         try:
             self.load(self.filename)
         except (FileNotFoundError, OSError, KeyError):
             self.build()
+        '''
 
     def load(self, filename=None, path=None):
         """Load machine geometry and data. Re-build if metadata diffrent."""
@@ -733,11 +805,11 @@ class Machine(CoilSet, IDS):
 
     def update_group(self):
         """Return group name as xxh32 hex hash."""
-        self.xxh32.reset()
+        xxh32 = xxhash.xxh32
         attrs = [attr if attr is not None else 'None' for attr in
                  self.flatten(self.machine_attrs.values())]
-        self.xxh32.update(np.array(attrs))
-        self.group = self.xxh32.hexdigest()
+        xxh32.update(np.array(attrs))
+        self.group = xxh32.hexdigest()
         return self.group
 
     def update_geometry(self):
@@ -791,10 +863,13 @@ class Machine(CoilSet, IDS):
 
 if __name__ == '__main__':
 
-    coilset = Machine(geometry=['pf_active', 'wall'],
-                      nplasma=100, dcoil=-10)
+    #import doctest
+    #doctest.testmod()
+
+    machine = Machine(wall=False, nplasma=100, dcoil=-10)
+
     #coilset.plot()
-    coilset.circuit.plot('CS1')
+    #coilset.circuit.plot('CS1')
 
     # coilset.plasma.separatrix = dict(e=[6, -0.5, 2.5, 2.5])
     # coilset.sloc['Ic'] = 1

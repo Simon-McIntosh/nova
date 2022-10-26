@@ -206,11 +206,8 @@ class BiotGrid(BiotBaseGrid):
     """Compute interaction across grid."""
 
     def solve(self, resolution: int, limit: float | npt.ArrayLike = 0,
-              index: Union[str, slice, npt.ArrayLike] = slice(None),
-              chunks=None):
+              index: Union[str, slice, npt.ArrayLike] = slice(None)):
         """Solve Biot interaction across grid."""
-        if chunks is not None:
-            self.chunks = chunks
         if isinstance(limit, (int, float)):
             limit = Expand(self.subframe, index)(limit)
         grid = Grid(resolution, limit)
@@ -221,8 +218,7 @@ class BiotGrid(BiotBaseGrid):
         target = BiotTarget(dict(x=x2d.flatten(), z=z2d.flatten()),
                             label='Grid')
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
-                              name=self.name, attrs=self.attrs,
-                              chunks=self.chunks).data
+                              name=self.name, attrs=self.attrs).data
         # insert grid data
         self.data.coords['x'] = x2d[:, 0]
         self.data.coords['z'] = z2d[0]

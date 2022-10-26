@@ -14,7 +14,7 @@ class PF_Active(Scenario):
 
     pulse: int
     run: int
-    ids_name: str = 'pf_active'
+    name: str = 'pf_active'
     coil_attrs: list[str] = field(
         default_factory=lambda: ['current'])
 

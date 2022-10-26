@@ -135,8 +135,11 @@ tag_prefix = ""
 parentdir_prefix = "nova-"
 
 [tool.pytest.ini_options]
-xfail_strict = true
-testpaths = "tests"
+addopts = "-re -q"
+testpaths = [
+  "tests",
+  "nova/imas"
+]
 filterwarnings = [
   "once::Warning",
   "ignore::DeprecationWarning",

@@ -24,6 +24,10 @@ class FilePath:
     directory: str = 'root'
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
 
+    def __post_init__(self):
+        """Forward post init for for cooperative inheritance."""
+        super().__post_init__()
+
     @staticmethod
     def get_path(directory: str, subpath: str) -> str:
         """Return full filepath."""

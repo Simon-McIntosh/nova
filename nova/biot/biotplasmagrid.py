@@ -27,8 +27,7 @@ class BiotPlasmaGrid(BiotBaseGrid):
             raise GridError('plasma')
         target = BiotTarget(self.subframe.loc['plasma', ['x', 'z']].to_dict())
         self.data = BiotSolve(self.subframe, target, reduce=[True, False],
-                              attrs=self.attrs, name=self.name,
-                              chunks=self.chunks).data
+                              attrs=self.attrs, name=self.name).data
         self.tessellate()
         super().post_solve()
 

@@ -23,6 +23,7 @@ class CoilSet(Biot, Control, Frame):
 
     def __post_init__(self):
         """Set filepath."""
+        print(self.datapath)
         self.set_path(self.datapath)
         super().__post_init__()
 

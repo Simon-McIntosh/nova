@@ -47,11 +47,11 @@ class Scenario(Database):
         file = self.file(self.filename)
         if not os.path.isfile(file):
             mode = 'w'
-        self.data.to_netcdf(file, group=self.ids_name, mode=mode)
+        self.data.to_netcdf(file, group=self.name, mode=mode)
 
     def load(self):
         """Load dataset from file (lazy)."""
         file = self.file(self.filename)
-        with xarray.open_dataset(file, group=self.ids_name) as data:
+        with xarray.open_dataset(file, group=self.name) as data:
             self.data = data
         return self

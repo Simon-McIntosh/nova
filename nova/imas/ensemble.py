@@ -16,7 +16,7 @@ class EnsembleAttrs:
     """Specify non-default attributes for Profile class."""
 
     workflow: str
-    ids_name: str = 'equilibrium'
+    name: str = 'equilibrium'
     attrs: list[str] = field(
             default_factory=lambda: ['f_df_dpsi', 'dpressure_dpsi'])
 
@@ -31,7 +31,7 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
 
     def __post_init__(self):
         """Set filepath."""
-        self.group = f'{self.ids_name}/{self.workflow.replace("-", "_")}'
+        self.group = f'{self.name}/{self.workflow.replace("-", "_")}'
         self.set_path(self.datapath)
         try:
             self.load()

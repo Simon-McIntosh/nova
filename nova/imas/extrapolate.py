@@ -11,7 +11,7 @@ import xarray
 
 from nova.biot.biotgrid import BiotPlot
 from nova.imas.code import Code
-from nova.imas.database import Database, IDS
+from nova.imas.database import Database
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
 from nova.imas.properties import Properties
@@ -132,7 +132,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
             Equilibrium pulse number.
         run : int
             Equilibrium run number.
-        ids_name : str
+        name : str
             Equilibrium ids name.
         ids : imas.ids, required when pulse and run not set, otherwise optional
             Equilibrium ids. The class is run in **actor** mode when set.

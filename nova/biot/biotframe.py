@@ -15,7 +15,7 @@ from nova.electromagnetic.geometry import PolyGeo
 class BiotFrame(FrameSpace):
     """Extend FrameSpace class with biot specific attributes and methods."""
 
-    _metadata = ['turns', 'reduce', 'chunks']
+    _metadata = ['turns', 'reduce']
 
     def __init__(self, data=None, index=None, columns=None, attrs=None,
                  **metadata):
@@ -48,9 +48,7 @@ class BiotFrame(FrameSpace):
         matrix = np.tile(self[attr], reps=(reps, 1))
         if region == 'target':
             matrix = np.transpose(matrix)
-        if attr == 'nturn' or self.chunks is None:
-            return matrix
-        return da.from_array(matrix, chunks=(self.chunks, self.chunks))
+        return matrix
 
     def set_target(self, number):
         """Set target number."""

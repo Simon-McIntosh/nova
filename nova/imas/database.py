@@ -1,6 +1,7 @@
 """Manage access to IMAS database."""
 from contextlib import contextmanager
 from dataclasses import dataclass, field
+from typing import TypeVar
 
 try:
     from imas import DBEntry
@@ -13,6 +14,7 @@ from nova.database.filepath import FilePath
 
 # pylint: disable=too-many-ancestors
 
+DatabaseT = TypeVar('DatabaseT', bound='Database')
 ImasIds = object
 
 
@@ -82,7 +84,7 @@ class Database:
     Traceback (most recent call last):
         ...
     ValueError: When self.ids is None require:
-    pulse 0 > 0, run 0 > 0 and name "" != ""
+    pulse 0 > 0, run 0 > 0 or name "" != ""
 
     Malformed inputs are thrown as TypeErrors:
 
@@ -130,6 +132,16 @@ class Database:
                                       machine='iter')
     True
 
+    The get_ids_attrs method is used to resolve a full ids_attrs dict from
+    a partial input. If the input to get_ids_attrs is boolean then True
+    returns the instance's default':
+
+
+    whilst False returns False:
+
+    >>> equilibrium.get_ids_attrs(False)
+    False
+
     """
 
     pulse: int = field(default=0)
@@ -158,12 +170,34 @@ class Database:
         return dict(pulse=self.pulse, run=self.run, name=self.name,
                     user=self.user, machine=self.machine)
 
+    def get_ids_attrs(self, attr: bool | dict | DatabaseT | ImasIds) -> dict:
+        """Return formated database attributes."""
+        if attr is False:
+            return False
+        #try:
+        return attr.ids_attrs
+        '''
+            continue
+        if isinstance(geometry, Database):
+            setattr(self, attr, geometry.ids_attrs)
+            continue
+        ids_attrs = self.machine_geometry[attr].default_ids_attrs()
+        if geometry is True:
+            setattr(self, attr, ids_attrs)
+            continue
+        if isinstance(geometry, dict):
+            setattr(self, attr, ids_attrs | geometry)
+            continue
+        database = Database(**ids_attrs, ids=geometry)
+        setattr(self, attr, database.ids_attrs | dict(ids=geometry))
+        '''
+
     def get_ids(self):
         """Set ids from pulse/run."""
         if self.pulse == 0 or self.run == 0 or self.name == '':
             raise ValueError(
                 f'When self.ids is None require:\n'
-                f'pulse {self.pulse} > 0, run {self.run} > 0 and '
+                f'pulse {self.pulse} > 0, run {self.run} > 0 or '
                 f'name "{self.name}" != ""')
         with self._get_ids() as ids:
             self.ids = ids

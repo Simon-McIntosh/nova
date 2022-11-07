@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 import string
-from typing import ClassVar, Union
+from typing import ClassVar
 
 import numpy as np
 import numpy.typing as npt
@@ -11,7 +11,7 @@ import shapely
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.shell import Shell
 from nova.geometry.polygon import Polygon
-from nova.imas.database import DataAttrs, Database, Datafile, ImasIds
+from nova.imas.database import CoilData, Database, Ids
 from nova.utilities.pyplot import plt
 
 
@@ -23,8 +23,8 @@ class GeomData:
     """Geometry data baseclass."""
 
     ids: object = field(repr=False)
-    data: dict[str, Union[int, float]] = field(init=False, repr=False,
-                                               default_factory=dict)
+    data: dict[str, int | float] = field(init=False, repr=False,
+                                         default_factory=dict)
     attrs: ClassVar[list[str]] = []
 
     def __post_init__(self):
@@ -270,7 +270,7 @@ class Element:
 class FrameData(ABC):
     """Frame data base class."""
 
-    data: dict[str, list[float]] = field(init=False)
+    data: dict[str, list[list[float]]] = field(init=False)
     element_attrs: ClassVar[list[str]] = []
     geometry_attrs: ClassVar[list[str]] = []
     loop_attrs: ClassVar[list[str]] = []
@@ -332,7 +332,7 @@ class FrameData(ABC):
 
 
 @dataclass
-class CoilData(FrameData):
+class IdsCoilData(FrameData):
     """Extract coildata from ids."""
 
     name: list[str] = field(init=False, default_factory=list)
@@ -355,33 +355,12 @@ class CoilData(FrameData):
 
 
 @dataclass
-class MachineDescription(CoilSet, Database):
-    """Manage access to machine data."""
-
-    user: str = 'public'
-    machine: str = 'iter_md'
-    datapath: str = 'nova'
-    filename: str = 'iter'
-
-    def __post_init__(self):
-        """Build geometry."""
-        super().__post_init__()
-        self.set_group(self.ids_attrs)
-        print('+++', self.directory, self.datapath, self.filename, self.group)
-        self.build()
-
-    @abstractmethod
-    def build(self):
-        """Build geometry."""
-
-
-@dataclass
 class PassiveShellData(FrameData):
     """Extract oblique shell geometries from pf_passive ids."""
 
     length: float = 0
-    points: list[npt.ArrayLike] = field(init=False, repr=False,
-                                        default_factory=list)
+    points: list[np.ndarray] = field(init=False, repr=False,
+                                     default_factory=list)
     loop_attrs: ClassVar[list[str]] = ['name', 'resistance']
     geometry_attrs: ClassVar[list[str]] = ['thickness']
 
@@ -428,7 +407,7 @@ class PassiveShellData(FrameData):
             index = shell.insert(*self.points[i].T, self.length, thickness,
                                  rho=0, name=self.data['name'][i],
                                  part=self.part)
-            self.update_resistivity(index, *shell.frames,
+            self.update_resistivity(index, shell.frame, shell.subframe,
                                     self.data['resistance'][i])
         self.reset()
 
@@ -442,7 +421,7 @@ class PassiveShellData(FrameData):
 
 
 @dataclass
-class PassiveCoilData(CoilData):
+class PassiveCoilData(IdsCoilData):
     """Extract coildata from passive ids."""
 
     geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
@@ -458,7 +437,23 @@ class PassiveCoilData(CoilData):
 
 
 @dataclass
-class PoloidalFieldPassive(MachineDescription):
+class CoilDatabase(CoilSet, CoilData, Database):
+    """Manage coilset construction from ids structures."""
+
+    machine: str = 'iter_md'
+
+    @property
+    def group_attrs(self) -> dict:
+        """
+        Return group attrs.
+
+        Extends :func:`~nova.imas.database.CoilData`.
+        """
+        return self.coilset_attrs | self.ids_attrs
+
+
+@dataclass
+class PoloidalFieldPassive(CoilDatabase):
     """Manage passive poloidal loop ids, pf_passive."""
 
     pulse: int = 115005
@@ -487,7 +482,7 @@ class PoloidalFieldPassive(MachineDescription):
 
 
 @dataclass
-class ActiveCoilData(CoilData):
+class ActiveCoilData(IdsCoilData):
     """Extract coildata from active ids."""
 
     element_attrs: ClassVar[list[str]] = ['nturn', 'index', 'name']
@@ -514,7 +509,7 @@ class ActivePolyCoilData(ActiveCoilData):
 
 
 @dataclass
-class PoloidalFieldActive(MachineDescription):
+class PoloidalFieldActive(CoilDatabase):
     """Manage active poloidal loop ids, pf_passive."""
 
     pulse: int = 111001
@@ -588,9 +583,9 @@ class Contour:
     """Extract closed contour from multiple unordered segments."""
 
     data: dict[str, npt.ArrayLike]
-    loop: npt.ArrayLike = field(init=False, default_factory=lambda:
-                                np.ndarray((0, 2), float))
-    segments: list[npt.ArrayLike] = field(init=False)
+    loop: np.ndarray = field(init=False, default_factory=lambda:
+                             np.ndarray((0, 2), float))
+    segments: list[np.ndarray] = field(init=False)
 
     def __post_init__(self):
         """Create segments list."""
@@ -631,7 +626,7 @@ class Contour:
 
 
 @dataclass
-class Wall(MachineDescription):
+class Wall(CoilDatabase):
     """Manage plasma boundary, wall ids."""
 
     pulse: int = 116000
@@ -648,18 +643,24 @@ class Wall(MachineDescription):
         self.firstwall.insert(contour.loop)
 
 
-GeometryIds = (MachineDescription | Database | ImasIds |
-               dict[str, int | str] | bool)
-
-
 @dataclass
 class MachineGeometry:
     """
-    Update geometry attributes.
+    Manage IDS geometry attributes.
+
+    Parameters
+    ----------
+    pf_active: Ids | bool, optional
+        pf active IDS. The default is True
+    pf_passive: Ids | bool, optional
+        pf passive IDS. The default is True
+    wall: Ids | bool, optional
+        wall IDS. The default is True
+
 
     Examples
     --------
-    Turn off wall geometry:
+    Dissable wall geometry via boolean input:
 
     >>> geometry = MachineGeometry(wall=False)
     >>> geometry.wall
@@ -690,9 +691,9 @@ class MachineGeometry:
 
     """
 
-    pf_active: GeometryIds = True
-    pf_passive: GeometryIds = True
-    wall: GeometryIds = True
+    pf_active: Ids | bool = True
+    pf_passive: Ids | bool = True
+    wall: Ids | bool = True
 
     geometry: ClassVar[dict] = dict(pf_active=PoloidalFieldActive,
                                     pf_passive=PoloidalFieldPassive,
@@ -701,8 +702,10 @@ class MachineGeometry:
     def __post_init__(self):
         """Map geometry parameters to dict attributes."""
         for attr in self.geometry:
-            attrs = DataAttrs(getattr(self, attr), self.geometry[attr]).attrs
+            attrs = self.geometry[attr].update_ids_attrs(getattr(self, attr))
             setattr(self, attr, attrs)
+        if hasattr(super(), '__post_init__'):
+            super().__post_init__()
 
     @property
     def geometry_attrs(self) -> dict:
@@ -711,7 +714,7 @@ class MachineGeometry:
 
 
 @dataclass
-class Machine(CoilSet, MachineGeometry):
+class Machine(CoilSet, MachineGeometry, CoilData):
     """Manage ITER machine geometry."""
 
     dcoil: float = -1
@@ -722,49 +725,54 @@ class Machine(CoilSet, MachineGeometry):
 
     filename: str = 'iter'
 
-    def __post_init__(self):
-        """Load coilset, build if not found."""
-        super().__post_init__()
-        self.set_group(self.machine_attrs)
-        print('***', self.directory, self.datapath, self.filename, self.group)
-        try:
-            self.load(self.filename)
-        except (FileNotFoundError, OSError, KeyError, AttributeError):
-            self.build()
-
-    '''
     @property
     def metadata(self):
-        """Return machine metadata."""
-        metadata = self.frame_attrs | self.biot_attrs
+        """Manage machine metadata.
+
+        Raises
+        ------
+            AssertionError:
+                A change in the metadata group hash has been detected.
+        """
+        metadata = self.coilset_attrs
         for geometry in self.geometry:
-            geometry_attrs = getattr(self, geometry)
-            if isinstance(geometry_attrs, bool):
-                metadata[geometry] = geometry_attrs
+            if (attrs := self.geometry_attrs[geometry]) is False:
                 continue
-            for attr in geometry_attrs:
-                metadata[f'{geometry}_{attr}'] = attr
+            metadata[geometry] = ','.join([str(attrs[attr]) for attr in attrs])
         return metadata
 
     @metadata.setter
     def metadata(self, metadata: dict):
-        """Set instance metadata."""
-        for attr in list(self.frame_attrs) + list(self.biot_attrs):
+        """Set instance metadata, assert consistent attr_hash."""
+        attr_hash = self.hash_attrs(self.group_attrs)
+        for attr in self.coilset_attrs:
             setattr(self, attr, metadata[attr])
         for geometry in self.geometry:
-            if geometry in metadata:
-                setattr(self, geometry, metadata[geometry])
+            if geometry not in metadata:
+                setattr(self, geometry, False)
                 continue
-            setattr(self, geometry, {})
-            geometry_attrs = [attr.split('_')[-1] for attr in metadata
-                              if attr.split('_')[0] == geometry]
-            for attr in geometry_attrs:
-                getattr(self, geometry)[attr] = metadata[f'{geometry}_{attr}']
-    '''
+            values = [self._format_geometry_attrs(attr)
+                      for attr in metadata[geometry].split(',')]
+            setattr(self, geometry, dict(zip(Database.attrs, values)))
+        assert attr_hash == self.hash_attrs(self.group_attrs)
+
+    @staticmethod
+    def _format_geometry_attrs(attr: str) -> str | int | float:
+        """Return formated attr. Try int conversion except return str."""
+        if '.' in attr:
+            return float(attr)
+        try:
+            return int(attr)
+        except ValueError:
+            return attr
 
     @property
-    def machine_attrs(self) -> dict:
-        """Return group attributes for generation xxh32 group hash."""
+    def group_attrs(self) -> dict:
+        """
+        Return group attrs.
+
+        Extends :func:`~nova.imas.database.CoilData.group_attrs`.
+        """
         return self.coilset_attrs | self.geometry_attrs
 
     def solve_biot(self):
@@ -775,23 +783,19 @@ class Machine(CoilSet, MachineGeometry):
 
     def build(self, **kwargs):
         """Build dataset, frameset and, biotset and save to file."""
-        super().__post_init__()
         self.frame_attrs = kwargs
         self.clear_frameset()
         for attr in self.geometry:
-            print(getattr(self, attr))
             if (geometry := getattr(self, attr)):
                 coilset = self.geometry[attr](**geometry, **self.frame_attrs)
                 self += coilset
             for attr in coilset.biot_methods:
                 getattr(self, attr).data = getattr(coilset, attr).data
         self.solve_biot()
-        print(self.filename, self.group)
-        #return self.store(self.filename)
+        return self.store()
 
-    '''
     def load(self, filename=None, path=None):
-        """Load machine geometry and data. Re-build if metadata diffrent."""
+        """Load machine geometry and data."""
         super().load(filename, path)
         self.metadata = self.load_metadata(filename, path)
         return self
@@ -801,15 +805,19 @@ class Machine(CoilSet, MachineGeometry):
         super().store(filename, path)
         self.store_metadata(filename, path, self.metadata)
         return self
-    '''
 
 
 if __name__ == '__main__':
 
-    #import doctest
-    #doctest.testmod()
+    import doctest
+    doctest.testmod()
 
-    machine = Machine(wall=False, nplasma=100, dcoil=-10)
+    machine = Machine(pf_passive=True, nplasma=500)
+
+    machine.sloc['Ic'] = 1
+    machine.sloc['plasma', 'Ic'] = -10000
+    machine.plot()
+    machine.plasmagrid.plot()
 
     #coilset.plot()
     #coilset.circuit.plot('CS1')

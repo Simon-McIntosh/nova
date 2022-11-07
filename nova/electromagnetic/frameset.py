@@ -106,7 +106,6 @@ class FrameSet(FilePath, FrameSetLoc):
 
     def load(self, filename=None, path=None):
         """Load frameset from file."""
-        super().__post_init__()
         file = self.file(filename, path)
         self.frame.load(file, self.netcdf_path('frame'))
         self.subframe.load(file, self.netcdf_path('subframe'))

@@ -5,11 +5,9 @@ import os
 import appdirs
 try:
     import imas
-    import_imas = True
+    IMPORT_IMAS = True
 except ImportError:
-    import_imas = False
-
-import json
+    IMPORT_IMAS = False
 import xarray
 import xxhash
 
@@ -32,12 +30,6 @@ class FilePath:
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
 
-    def set_group(self, attrs: dict):
-        """Set group name as xxh32 hex hash."""
-        xxh32 = xxhash.xxh32()
-        xxh32.update(json.dumps(attrs))
-        self.group = xxh32.hexdigest()
-
     @staticmethod
     def get_path(directory: str, subpath: str) -> str:
         """Return full filepath."""
@@ -45,13 +37,13 @@ class FilePath:
             app = getattr(appdirs, appattr)
             if subpath == 'nova':
                 return app(nova.__name__, version=nova.__version__)
-            if subpath == 'imas' and import_imas:
+            if subpath == 'imas' and IMPORT_IMAS:
                 name, version = imas.__name__.split('_', 1)
                 return app(appname=name, version=version)
             return app(subpath)
         if directory == 'root':
             directory = root_dir
-        if subpath is None:
+        if not subpath:
             return directory
         return os.path.join(directory, subpath)
 
@@ -114,6 +106,12 @@ class FilePath:
     def isfile(self):
         """Return status of default netCDF file."""
         return os.path.isfile(self.filepath)
+
+    def hash_attrs(self, attrs: dict) -> str:
+        """Return xxh32 hex hash of attrs dict."""
+        xxh32 = xxhash.xxh32()
+        xxh32.update(attrs.__str__())
+        return xxh32.hexdigest()
 
     def store(self, filename=None, path=None, group=None):
         """Store data within hdf file."""

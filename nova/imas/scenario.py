@@ -6,26 +6,18 @@ import os
 
 import xarray
 
-from nova.imas.database import Database
+from nova.imas.database import IdsData
 from nova.imas.timeslice import TimeSlice
 
 
 @dataclass
-class Scenario(Database):
+class Scenario(IdsData):
     """Manage access to scenario data (load, store, build)."""
 
     machine: str = 'iter'
     data: xarray.Dataset = field(init=False, repr=False,
                                  default_factory=xarray.Dataset)
     time_slice: TimeSlice | None = field(init=False, repr=False, default=None)
-
-    def __post_init__(self):
-        """Load data."""
-        super().__post_init__()
-        try:
-            self.load()
-        except (FileNotFoundError, OSError, KeyError, TypeError):
-            self.build()
 
     @contextmanager
     def build_scenario(self):

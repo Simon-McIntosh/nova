@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from nova.imas.database import Database
 from nova.imas.scenario import Scenario
 from nova.biot.biotgrid import BiotPlot
 from nova.utilities.pyplot import plt
@@ -117,6 +116,7 @@ class Profile1D(Scenario):
     def plot_1d(self, itime=-1, attr='psi'):
         """Plot 1d profile."""
         plt.plot(self.data.psi_norm, self.data[attr][itime])
+        plt.despine()
 
 
 @dataclass
@@ -146,7 +146,87 @@ class Profile2D(Scenario, BiotPlot):
 
 @dataclass
 class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
-    """Manage active poloidal loop ids, pf_passive."""
+    """
+    Manage active equilibrium ids.
+
+    Load, cache and plot equilibrium ids data taking database identifiers to
+    load from file or operating directly on an open ids.
+
+    Parameters
+    ----------
+    pulse: int, optional (required when ids not set)
+        Pulse number. The default is 0.
+    run: int, optional (required when ids not set)
+        Run number. The default is 0.
+    name: str, optional
+        Ids name. The default is 'equilibrium'.
+    user: str, optional
+        User name. The default is public.
+    machine: str, optional
+        Machine name. The default is iter.
+    backend: int, optional (required when ids not set)
+        Access layer backend. The default is 13 (HDF5).
+    ids: ImasIds, optional
+        When set the ids parameter takes prefrence. The default is None.
+
+    Attributes
+    ----------
+    attrs_0d: list[str]
+        Avalible 0D attribute list.
+    attrs_1d: list[str]
+        Avalible 1D attribute list.
+    attrs_2d: list[str]
+        Avalible 2D attribute list.
+    filepath: str
+        Location of cached netCDF datafile.
+
+    See Also
+    --------
+    nova.imas.Database
+
+    Examples
+    --------
+    Load equilibrium data from pulse and run indicies
+    asuming defaults for others:
+
+    >>> equilibrium = Equilibrium(130506, 403)
+    >>> equilibrium.name, equilibrium.user, equilibrium.machine
+    ('equilibrium', 'public', 'iter')
+
+    >>> equilibrium.filename
+    'iter_130506_403'
+    >>> equilibrium.group
+    'equilibrium'
+
+    (re)build equilibrium ids reading data from imas database:
+
+    >>> equilibrium_reload = equilibrium.build()
+    >>> equilibrium_reload == equilibrium
+    True
+
+    Plot poloidal flux at itime=10:
+
+    >>> itime = 20
+    >>> fig = plt.figure()
+    >>> levels = equilibrium.plot_2d(itime, 'psi', colors='C3', levels=31)
+    >>> equilibrium.plot_boundary(itime)
+
+    Plot contour map of toroidal current density at itime=10:
+
+    >>> fig = plt.figure()
+    >>> levels = equilibrium.plot_2d(itime, 'j_tor')
+
+    Plot 1D dpressure_dpsi profile.
+
+    >>> fig = plt.figure()
+    >>> equilibrium.plot_1d(itime, 'dpressure_dpsi')
+
+    Plot plasma current waveform.
+
+    >>> fig = plt.figure()
+    >>> equilibrium.plot_0d('ip')
+
+    """
 
     name: str = 'equilibrium'
 
@@ -160,18 +240,5 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
 
 if __name__ == '__main__':
 
-    #database = Database(130506, 403, 'equilibrium', machine='iter')
-    #eq = Equilibrium(ids=database.ids)
-    eq = Equilibrium(130506, 403)
-    # eq = Equilibrium(130510, 3)
-    #eq.build()
-
-    itime = 0
-
-    eq.plot_2d(itime, 'psi', colors='C3', levels=21)
-    eq.plot_boundary(itime)
-    #eq.plot_2d(itime, 'j_tor')
-
-    #eq.plot_0d('ip')
-    #eq.plot_1d(itime, 'dpressure_dpsi')
-    #eq.plot_1d(itime, 'f_df_dpsi')
+    import doctest
+    doctest.testmod()

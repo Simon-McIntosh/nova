@@ -4,7 +4,7 @@ from dataclasses import dataclass, field, InitVar
 from typing import ClassVar, Type
 
 try:
-    from imas import DBEntry
+    import imas
     IMPORT_IMAS = True
 except ImportError:
     IMPORT_IMAS = False
@@ -15,6 +15,7 @@ from nova.database.filepath import FilePath
 # _pylint: disable=too-many-ancestors
 
 ImasIds = object
+Ids = (ImasIds | dict[str, int | str] | tuple[int | str])
 
 
 @dataclass
@@ -90,7 +91,7 @@ class Database:
     >>> Database(None, 403, 'equilibrium')
     Traceback (most recent call last):
         ...
-    TypeError: malformed input to DBEntry
+    TypeError: malformed input to imas.DBEntry
     an integer is required
     pulse None, run 403, user public
     machine iter, backend: 13
@@ -131,6 +132,12 @@ class Database:
                                       machine='iter', backend=13)
     True
 
+    Database instances may be created via the set_attrs class method:
+
+    >>> database = Database.from_ids_attrs(equilibrium.ids)
+    >>> database.pulse, database.run, database.name
+    (3600040824, 3600040824, 'equilibrium')
+
     """
 
     pulse: int = field(default=0)
@@ -149,6 +156,18 @@ class Database:
         self.set_ids()
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
+
+    @classmethod
+    def update_ids_attrs(cls, ids_attrs: bool | Ids):
+        """Return class attributes."""
+        return DataAttrs(ids_attrs, cls).attrs
+
+    @classmethod
+    def from_ids_attrs(cls, ids_attrs: bool | Ids):
+        """Initialize database instance from ids attributes."""
+        if isinstance(attrs := cls.update_ids_attrs(ids_attrs), dict):
+            return cls(**attrs)
+        return False
 
     def set_ids(self):
         """Set ids attribute."""
@@ -182,12 +201,12 @@ class Database:
         if not IMPORT_IMAS:
             raise ImportError('imas module not found'
                               'try module load IMAS')
-        db_entry = DBEntry(self.backend, self.machine,
-                           self.pulse, self.run, user_name=self.user)
+        db_entry = imas.DBEntry(self.backend, self.machine,
+                                self.pulse, self.run, user_name=self.user)
         try:
             db_entry.open()
         except TypeError as error:
-            raise TypeError(f'malformed input to DBEntry\n{error}\n'
+            raise TypeError(f'malformed input to imas.DBEntry\n{error}\n'
                             f'pulse {self.pulse}, '
                             f'run {self.run}, '
                             f'user {self.user}\n'
@@ -231,7 +250,7 @@ class DataAttrs:
 
     Parameters
     ----------
-    attrs: bool | dict | Database | ImasIds | list | tuple
+    attrs: bool | Database | Ids
         Input attributes.
     subclass: Type[Database], optional
         Subclass instance or class. The default is Database.
@@ -255,7 +274,7 @@ class DataAttrs:
     >>> DataAttrs(True).attrs == Database.default_ids_attrs()
     True
 
-    whilst False returns False:
+    whilst False returns an empty dict:
 
     >>> DataAttrs(False).attrs
     False
@@ -301,46 +320,53 @@ class DataAttrs:
 
     Raises TypeError when input attrs are malformed:
 
-    >>> DataAttrs('equilibrium')
+    >>> DataAttrs('equilibrium').attrs
     Traceback (most recent call last):
         ...
     TypeError: malformed attrs: <class 'str'>
 
     """
 
-    attrs: bool | dict | Database | ImasIds | list | tuple
+    ids_attrs: bool | Database | Ids
     subclass: InitVar[Type[Database]] = Database
     default_attrs: dict = field(init=False, default_factory=dict)
 
     def __post_init__(self, subclass):
         """Update database attributes."""
         self.default_attrs = subclass.default_ids_attrs()
-        self.attrs = self.update_attrs()
+
+    @property
+    def attrs(self) -> dict | bool:
+        """Return output from update_attrs."""
+        return self.update_attrs()
 
     def update_attrs(self) -> dict | bool:
         """Return formated database attributes."""
-        if self.attrs is False:
+        if self.ids_attrs is False:
             return False
-        if self.attrs is True:
+        if self.ids_attrs is True:
             return self.default_attrs
-        if isinstance(self.attrs, Database):
-            return self.attrs.ids_attrs
-        if isinstance(self.attrs, dict):
-            return self.default_attrs | self.attrs
-        if hasattr(self.attrs, 'ids_properties'):  # IMAS ids
-            database = Database(**self.default_attrs, ids=self.attrs)
-            return database.ids_attrs | dict(ids=self.attrs)
-        if isinstance(self.attrs, list | tuple):
-            return self.default_attrs | dict(zip(Database.attrs, self.attrs))
-        raise TypeError(f'malformed attrs: {type(self.attrs)}')
+        if isinstance(self.ids_attrs, Database):
+            return self.ids_attrs.ids_attrs
+        if isinstance(self.ids_attrs, dict):
+            return self.default_attrs | self.ids_attrs
+        if hasattr(self.ids_attrs, 'ids_properties'):  # IMAS ids
+            database = Database(**self.default_attrs, ids=self.ids_attrs)
+            return database.ids_attrs | dict(ids=self.ids_attrs)
+        if isinstance(self.ids_attrs, list | tuple):
+            return self.default_attrs | dict(zip(Database.attrs,
+                                                 self.ids_attrs))
+        raise TypeError(f'malformed attrs: {type(self.ids_attrs)}')
 
 
 @dataclass
-class Datafile(Database, FilePath):
+class Datafile(FilePath):
     """
     Provide cached acces to imas ids data.
 
     Extends Database class via the provision of load and store methods.
+
+    .. _RST Overview:
 
     See Also
     --------
@@ -348,17 +374,72 @@ class Datafile(Database, FilePath):
 
     """
 
-    directory: str = 'user_data'
-    datapath: str = 'imas'
+    datapath: str = ''
 
     def __post_init__(self):
         """Set ids and filepath."""
         super().__post_init__()
-        try:
-            self.filename = f'{self.machine}_{self.pulse}{self.run:04d}'
-        except TypeError:
-            self.filename = None
         self.set_path(self.datapath)
+        self.load_build()
+
+    def load_build(self):
+        """
+        Load netCDF data.
+
+        Raises
+        ------
+        FileNotFoundError
+            File not present: self.filepath
+        OSError
+            Group not present in netCDF file: self.group
+        """
+        try:
+            self.load()
+        except (FileNotFoundError, OSError):  # KeyError, TypeError):
+            self.build()
+
+
+@dataclass
+class IdsData(Datafile, Database):
+    """Provide cached acces to imas ids data."""
+
+    datapath: str = 'imas'
+
+    def set_path(self, subpath=None):
+        """Extend FilePath.set_path to update filename and group."""
+        super().set_path(subpath)
+        self.filename = f'{self.machine}_{self.pulse}_{self.run}'
+        self.group = self.name
+
+
+@dataclass
+class CoilData(Datafile):
+    """
+    Provide cached acces to coilset data.
+
+    Extends: :class:`~nova.imas.database.Datafile`
+
+    See Also
+    --------
+    :class:`~nova.imas.database.Datafile`
+    """
+
+    datapath: str = 'nova'
+
+    def set_path(self, subpath=None):
+        """Extend FilePath.set_path to update filename and group."""
+        super().set_path(subpath)
+        self.group = self.hash_attrs(self.group_attrs)
+
+    @property
+    def group_attrs(self):
+        """
+        Return group attributes.
+
+        Group attrs used by :func:`~nova.database.filepath.FilePath.hash_attrs`
+        to generate a unique hex hash to label data within a netCDF file.
+        """
+        return dict()
 
 
 if __name__ == '__main__':

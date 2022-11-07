@@ -14,6 +14,8 @@ class netCDF(FilePath):
     data: xarray.Dataset = field(init=False, repr=False,
                                  default_factory=xarray.Dataset)
 
+    #def
+
     def store(self, filename=None, path=None):
         """Store data as netCDF in hdf5 file."""
         group = self.netcdf_path(self.name)

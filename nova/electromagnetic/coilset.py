@@ -19,11 +19,11 @@ class CoilSet(Biot, Control, Frame):
 
     """
 
+    filename: str = 'coilset'
     datapath: str = 'nova'
 
     def __post_init__(self):
         """Set filepath."""
-        print(self.datapath)
         self.set_path(self.datapath)
         super().__post_init__()
 
@@ -50,8 +50,7 @@ class CoilSet(Biot, Control, Frame):
 
 if __name__ == '__main__':
 
-    filename = 'biot'
-    reload = True
+    reload = False
     if reload:
         coilset = CoilSet(dcoil=-5, nplasma=150)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
@@ -77,9 +76,9 @@ if __name__ == '__main__':
         coilset.sloc['bubble', 'Ic'] = 5
         coilset.sloc['Shl0', 'Ic'] = -5
         coilset.sloc['plasma', 'Ic'] = -1
-        # coilset.store(filename)
+        coilset.store()
     else:
-        coilset = CoilSet().load(filename)
+        coilset = CoilSet().load()
 
     separatrix = Polygon(dict(c=[4.5, -0.75, 0.9])).boundary
     coilset.plasma.separatrix = separatrix

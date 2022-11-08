@@ -22,7 +22,7 @@ class BiotConstants:
     r: Array = field(default_factory=lambda: da.zeros_like([]))
     z: Array = field(default_factory=lambda: da.zeros_like([]))
 
-    eps: ClassVar[np.float64] = 1e4 * np.finfo(float).eps
+    eps: ClassVar[np.float64] = 1e5 * np.finfo(float).eps
 
     def sign(self, x):
         """Return sign of array -1 if x < 0 else 1."""

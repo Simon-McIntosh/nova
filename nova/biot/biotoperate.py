@@ -92,6 +92,8 @@ class BiotOperate(BiotData):
     def load_operators(self):
         """Link fast biot operators."""
         self.operator = {}
+        if 'attributes' not in self.data.attrs:
+            return
         self.attrs = self.data.attrs['attributes']
         for attr in self.attrs:
             self.operator[attr] = BiotOp(

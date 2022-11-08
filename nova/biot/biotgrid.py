@@ -57,7 +57,7 @@ class GridCoord:
 class Grid(Axes):
     """Generate grid."""
 
-    resolution: int | None = field(default=None)
+    ngrid: int | None = field(default=None)
     limit: npt.ArrayLike | None = field(default=None)
     xcoord: list[float] = field(init=False, repr=False)
     zcoord: list[float] = field(init=False, repr=False)
@@ -76,16 +76,16 @@ class Grid(Axes):
         """Return grid coordinates."""
         if len(self.limit) == 2:  # grid coordinates
             xcoord, zcoord = self.limit
-            self.resolution = len(xcoord) * len(zcoord)
+            self.ngrid = len(xcoord) * len(zcoord)
             self.limit = [xcoord[0], xcoord[-1], zcoord[0], zcoord[-1]]
             return xcoord, zcoord
         if len(self.limit) == 4:  # grid limits
             xgrid = GridCoord(*self.limit[:2])
             zgrid = GridCoord(*self.limit[2:])
             xgrid.num = xgrid.delta / np.sqrt(
-                xgrid.delta*zgrid.delta / self.resolution)
-            zgrid.num = self.resolution / xgrid.num
-            self.resolution = xgrid.num * zgrid.num
+                xgrid.delta*zgrid.delta / self.ngrid)
+            zgrid.num = self.ngrid / xgrid.num
+            self.ngrid = xgrid.num * zgrid.num
             return xgrid(), zgrid()
         raise IndexError(f'len(limit) {len(self.limit)} not in [2, 4]')
 
@@ -205,12 +205,12 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
 class BiotGrid(BiotBaseGrid):
     """Compute interaction across grid."""
 
-    def solve(self, resolution: int, limit: float | npt.ArrayLike = 0,
+    def solve(self, ngrid: int, limit: float | npt.ArrayLike = 0,
               index: Union[str, slice, npt.ArrayLike] = slice(None)):
         """Solve Biot interaction across grid."""
         if isinstance(limit, (int, float)):
             limit = Expand(self.subframe, index)(limit)
-        grid = Grid(resolution, limit)
+        grid = Grid(ngrid, limit)
         self.solve2d(grid.data.x2d.values, grid.data.z2d.values)
 
     def solve2d(self, x2d, z2d):

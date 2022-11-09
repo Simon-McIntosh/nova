@@ -1,7 +1,11 @@
 
 import click
 
-import imas
+try:
+    import imas
+    IMPORT_IMAS = True
+except ImportError:
+    IMPORT_IMAS = False
 from nova.imas.database import Database
 from nova.imas.extrapolate import Extrapolate
 

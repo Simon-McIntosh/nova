@@ -3,7 +3,6 @@ from dataclasses import dataclass, field, fields
 from functools import cached_property
 from typing import ClassVar, Union
 
-import imas
 import numpy as np
 import pandas
 from scipy.interpolate import RectBivariateSpline, interp1d
@@ -295,6 +294,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         """Load equilibrium and coilset."""
         super().__post_init__()
 
+    '''
     def __call__(self):
         """Return extrapolated equilibrium ids."""
         ids = imas.equilibrium()
@@ -304,6 +304,7 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         Code(self.group_attrs)(ids.code)
         ids.vacuum_toroidal_field = self.ids.vacuum_toroidal_field
         return ids
+    '''
 
     @property
     def group_attrs(self):

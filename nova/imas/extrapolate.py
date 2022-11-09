@@ -27,12 +27,12 @@ class ExtrapolationGrid:
     Parameters
     ----------
     ngrid : {int, 'ids'}, optional
-        Grid dimension. The default is 5000.
+        ExtrapolationGrid dimension. The default is 5000.
 
         - int: use input to set aproximate total node number
         - ids: aproximate total node number extracted from equilibrium ids.
     limit : {float, list[float], 'ids'}, optional
-        Grid bounds. The default is 0.25.
+        ExtrapolationGrid bounds. The default is 0.25.
 
         - float: expansion relative to coilset index. Must be greater than -1.
         - list[float]: explicit grid bounds [rmin, rmax, zmin, zmax].
@@ -46,20 +46,21 @@ class ExtrapolationGrid:
     Examples
     --------
     Manualy specify grid relitive to coilset:
-    >>> Grid(100, 0, 'coil').grid_attrs
+    >>> ExtrapolationGrid(100, 0, 'coil').grid_attrs
     {'ngrid': 100, 'limit': 0, 'index': 'coil'}
 
     Specify grid relitive to equilibrium ids.
     >>> equilibrium = Equilibrium(130506, 403)
-    >>> Grid(50, 'ids', equilibrium=equilibrium).grid_attrs
+    >>> ExtrapolationGrid(50, 'ids', equilibrium=equilibrium).grid_attrs
     {'ngrid': 50, 'limit': [2.75, 8.9, -5.49, 5.51], 'index': 'plasma'}
 
     Extract exact grid from equilibrium ids.
-    >>> Grid('ids', 'ids', equilibrium=equilibrium).grid_attrs['ngrid']
+    >>> grid = ExtrapolationGrid('ids', 'ids', equilibrium=equilibrium)
+    >>> grid.grid_attrs['ngrid']
     8385
 
     Raises attribute error when grid initialied with unset equilibrium ids:
-    >>> Grid(1000, 'ids', 'coil')
+    >>> ExtrapolationGrid(1000, 'ids', 'coil')
     Traceback (most recent call last):
         ...
     AttributeError: equilibrium ids is None
@@ -361,10 +362,9 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
 
 if __name__ == '__main__':
 
-    import doctest
-    doctest.testmod()
+    #import doctest
+    # doctest.testmod()
 
-    from nova.imas.database import Database
 
     pulse, run = 114101, 41  # JINTRAC
     #pulse, run = 130506, 403  # CORSICA

@@ -20,7 +20,7 @@ from nova.utilities.pyplot import plt
 
 
 @dataclass
-class Grid:
+class ExtrapolationGrid:
     """
     Specify extrapolation grid.
 
@@ -50,12 +50,11 @@ class Grid:
     {'ngrid': 100, 'limit': 0, 'index': 'coil'}
 
     Specify grid relitive to equilibrium ids.
-    equilibrium = Equilibrium(130506, 403)
+    >>> equilibrium = Equilibrium(130506, 403)
     >>> Grid(50, 'ids', equilibrium=equilibrium).grid_attrs
     {'ngrid': 50, 'limit': [2.75, 8.9, -5.49, 5.51], 'index': 'plasma'}
 
     Extract exact grid from equilibrium ids.
-    equilibrium = Equilibrium(130506, 403)
     >>> Grid('ids', 'ids', equilibrium=equilibrium).grid_attrs['ngrid']
     8385
 
@@ -63,7 +62,7 @@ class Grid:
     >>> Grid(1000, 'ids', 'coil')
     Traceback (most recent call last):
         ...
-    AttributeError: valid equilibrium ids is None
+    AttributeError: equilibrium ids is None
     require valid ids when limit:ids or ngrid:1000 == 'ids'
     """
 
@@ -82,7 +81,7 @@ class Grid:
     def grid_attrs(self) -> dict:
         """Return grid attributes."""
         return {attr: getattr(self, attr)
-                for attr in [attr.name for attr in fields(Grid)]
+                for attr in [attr.name for attr in fields(ExtrapolationGrid)]
                 if attr != 'equilibrium'}
 
     def update_grid(self):
@@ -161,7 +160,7 @@ class TimeSlice:
 
 
 @dataclass
-class Extrapolate(Machine, Grid, Database):
+class Extrapolate(Machine, ExtrapolationGrid, Database):
     r"""
     An interface class for the extrapolation of an equilibrium IDS.
 
@@ -258,8 +257,7 @@ class Extrapolate(Machine, Grid, Database):
     (130506, 403)
 
     then pass this ids to the Extrapolate class
-    >>> extrapolate = Extrapolate(\
-        ids=equilibrium.ids, limit='ids', ngrid=500, nplasma=100)
+    >>> extrapolate = Extrapolate(ids=equilibrium.ids, limit='ids', ngrid=500, nplasma=100)
     >>> extrapolate.ionize(20)
     >>> extrapolate.itime
     20
@@ -271,7 +269,7 @@ class Extrapolate(Machine, Grid, Database):
     pf_active: Ids | bool = True
     pf_passive: Ids | bool = False
     wall: Ids | bool = True
-    name: str = field(init=False, default='equilibrium')
+    name: str = 'equilibrium'
     filename: str = field(init=False, default='extrapolate')
     equilibrium: Equilibrium = field(init=False, repr=False)
     itime: int = field(init=False, default=0)
@@ -364,7 +362,7 @@ class Extrapolate(Machine, Grid, Database):
 if __name__ == '__main__':
 
     import doctest
-    doctest.testmod(name='Grid')
+    doctest.testmod()
 
     from nova.imas.database import Database
 

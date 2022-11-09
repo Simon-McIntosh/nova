@@ -62,6 +62,7 @@ def test_database_minimum_required_input():
     assert 'When self.ids is None require:' in str(error.value)
 
 
+@mark['equilibrium']
 def test_database_malformed_input():
     with pytest.raises(TypeError) as error:
         equilibrium = ids_attrs['equilibrium'] | dict(run=None)

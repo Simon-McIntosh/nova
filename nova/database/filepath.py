@@ -1,6 +1,7 @@
 """Manage file data access for frame and biot instances."""
 from dataclasses import dataclass, field
 import os
+import sys
 
 import appdirs
 try:
@@ -99,8 +100,18 @@ class FilePath:
     @property
     def filepath(self):
         """Return full filepath for netCDF (.nc) data using default path."""
-        assert self.path is not None
         return self.file(self.filename)
+
+    @property
+    def clear_cache(self):
+        """Clear cached datafile at self.filepath."""
+        if os.path.isfile(self.filepath):
+            remove = input('Confirm removal of the followig cached datafile:'
+                           f'\n{self.filepath}\n[Yn] ')
+            if remove == '' or remove.lower() == 'y':
+                os.remove(self.filepath)
+            return
+        sys.stdout.write(f'Cached datafile clear:\n{self.filepath}')
 
     @property
     def isfile(self):

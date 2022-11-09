@@ -132,7 +132,7 @@ class Database:
                                       machine='iter', backend=13)
     True
 
-    Database instances may be created via the set_attrs class method:
+    Database instances may be created via the from_ids_attrs class method:
 
     >>> database = Database.from_ids_attrs(equilibrium.ids)
     >>> database.pulse, database.run, database.name

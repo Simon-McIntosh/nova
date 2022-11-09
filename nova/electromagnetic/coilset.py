@@ -80,7 +80,7 @@ if __name__ == '__main__':
     else:
         coilset = CoilSet().load()
 
-    separatrix = Polygon(dict(c=[4.5, -0.75, 0.9])).boundary
+    separatrix = Polygon(dict(c=[4.0, -0.75, 0.9])).boundary
     coilset.plasma.separatrix = separatrix
 
     coilset.sloc['bubble', 'Ic'] = 8

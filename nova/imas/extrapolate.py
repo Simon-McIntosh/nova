@@ -8,9 +8,8 @@ import pandas
 from scipy.interpolate import RectBivariateSpline, interp1d
 import xarray
 
-from nova.biot.biotgrid import BiotPlot
 from nova.imas.code import Code
-from nova.imas.database import Ids
+from nova.imas.database import Database, Ids
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
 from nova.imas.properties import Properties
@@ -20,79 +19,57 @@ from nova.utilities.pyplot import plt
 
 
 @dataclass
-class IDS:
-    """Manage ids inputs."""
-
-    equilibrium: Ids
-    pf_active: Ids | bool = True
-    pf_passive: Ids | bool = False
-    wall: Ids | bool = True
-
-    def __post_init__(self):
-        """Initialize equilibrium instance from ids attributes."""
-        self.equilibrium = Equilibrium.update_ids_attrs(self.equilibrium)
-        if hasattr(super(), '__post_init__'):
-            super().__post_init__()
-
-    @property
-    def ids_attrs(self) -> dict:
-        """Return ids attributes."""
-        return {attr: getattr(self, attr)
-                for attr in [attr.name for attr in fields(IDS)]}
-
-
-@dataclass
-class Grid:
+class ExtrapolationGrid:
     """
     Specify extrapolation grid.
 
     Parameters
     ----------
     ngrid : {int, 'ids'}, optional
-        Grid dimension. The default is 2500.
+        ExtrapolationGrid dimension. The default is 5000.
 
         - int: use input to set aproximate total node number
         - ids: aproximate total node number extracted from equilibrium ids.
     limit : {float, list[float], 'ids'}, optional
-        Grid bounds. The default is 0.25.
+        ExtrapolationGrid bounds. The default is 0.25.
 
         - float: expansion relative to coilset index. Must be greater than -1.
         - list[float]: explicit grid bounds [rmin, rmax, zmin, zmax].
         - ids: bounds extracted from from equilibrium ids.
     index : {'plasma', 'coil', slice, pandas.Index}
         Filament index from which relative grid limits are set.
-    equilibrium : Ids | bool, optional
+    equilibrium : Equilibrium, optional
         Equilibrium ids required for equilibrium derived grid dimensions.
         The default is False
 
     Examples
     --------
     Manualy specify grid relitive to coilset:
-    >>> Grid(100, 0, 'coil').grid_attrs
+    >>> ExtrapolationGrid(100, 0, 'coil').grid_attrs
     {'ngrid': 100, 'limit': 0, 'index': 'coil'}
 
     Specify grid relitive to equilibrium ids.
-    equilibrium = Equilibrium(130506, 403)
-    >>> Grid(50, 'ids', equilibrium=equilibrium).grid_attrs
+    >>> equilibrium = Equilibrium(130506, 403)
+    >>> ExtrapolationGrid(50, 'ids', equilibrium=equilibrium).grid_attrs
     {'ngrid': 50, 'limit': [2.75, 8.9, -5.49, 5.51], 'index': 'plasma'}
 
     Extract exact grid from equilibrium ids.
-    equilibrium = Equilibrium(130506, 403)
-    >>> Grid('ids', 'ids', equilibrium=equilibrium).grid_attrs['ngrid']
+    >>> grid = ExtrapolationGrid('ids', 'ids', equilibrium=equilibrium)
+    >>> grid.grid_attrs['ngrid']
     8385
 
     Raises attribute error when grid initialied with unset equilibrium ids:
-    >>> Grid(1000, 'ids', 'coil')
+    >>> ExtrapolationGrid(1000, 'ids', 'coil')
     Traceback (most recent call last):
         ...
-    AttributeError: valid equilibrium ids False
-    required when limit ids == ids or ngrid 1000 == ids
+    AttributeError: equilibrium ids is None
+    require valid ids when limit:ids or ngrid:1000 == 'ids'
     """
 
     ngrid: int | str = 2500
     limit: float | list[float] | str = 0.25
     index: Union[str, slice, pandas.Index] = 'plasma'
-    equilibrium: Ids | bool = False
+    equilibrium: Equilibrium | None = None
 
     def __post_init__(self):
         """Update grid attributes for equilibrium derived properties."""
@@ -104,31 +81,31 @@ class Grid:
     def grid_attrs(self) -> dict:
         """Return grid attributes."""
         return {attr: getattr(self, attr)
-                for attr in [attr.name for attr in fields(Grid)]
+                for attr in [attr.name for attr in fields(ExtrapolationGrid)]
                 if attr != 'equilibrium'}
 
     def update_grid(self):
         """Update  and update grid limits."""
         if self.limit != 'ids' and self.ngrid != 'ids':
             return
-        if self.equilibrium is False:
-            raise AttributeError(f'valid equilibrium ids {self.equilibrium}\n'
-                                 f'required when limit {self.limit} == ids '
-                                 f'or ngrid {self.ngrid} == ids')
-        equilibrium_data = Equilibrium.from_ids_attrs(self.equilibrium).data
+        if self.equilibrium is None:
+            raise AttributeError('equilibrium ids is None\n'
+                                 f'require valid ids when limit:{self.limit} '
+                                 f'or ngrid:{self.ngrid} == \'ids\'')
         if self.limit == 'ids':  # Load grid limit from equilibrium ids.
-            if equilibrium_data.grid_type != 1:
+            if self.equilibrium.data.grid_type != 1:
                 raise TypeError('ids limits only valid for rectangular grids'
-                                f'{equilibrium_data.grid_type} != 1')
-            limit = [equilibrium_data.r.values, equilibrium_data.z.values]
+                                f'{self.equilibrium.data.grid_type} != 1')
+            limit = [self.equilibrium.data.r.values,
+                     self.equilibrium.data.z.values]
             if self.ngrid == 'ids':
                 self.limit = limit
             else:
                 self.limit = [limit[0][0], limit[0][-1],
                               limit[1][0], limit[1][-1]]
         if self.ngrid == 'ids':
-            self.ngrid = equilibrium_data.dims['r'] * \
-                equilibrium_data.dims['z']
+            self.ngrid = self.equilibrium.data.dims['r'] * \
+                self.equilibrium.data.dims['z']
 
 
 @dataclass
@@ -183,8 +160,9 @@ class TimeSlice:
 
 
 @dataclass
-class Extrapolate(BiotPlot, Machine, Grid, IDS):
-    r"""An interface class for the extrapolation of an equilibrium IDS.
+class Extrapolate(Machine, ExtrapolationGrid, Database):
+    r"""
+    An interface class for the extrapolation of an equilibrium IDS.
 
     Solves external coil currents in a least squares sense to match
     internal flux values provided by a source equilibrium containting:
@@ -208,15 +186,24 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
         pf passive IDS. The default is False
     wall : Ids | bool, optional
         wall IDS. The default is True
-    ngrid : int | str, optional
-        Grid resolution.
-    limit :
+    ngrid : {int, 'ids'}, optional
+        Grid dimension. The default is 5000.
 
-    index : str | slice | pandas.index, optional
+        - int: use input to set aproximate total node number
+        - ids: aproximate total node number extracted from equilibrium ids.
+    limit : {float, list[float], 'ids'}, optional
+        Grid bounds. The default is 0.25.
+
+        - float: expansion relative to coilset index. Must be greater than -1.
+        - list[float]: explicit grid bounds [rmin, rmax, zmin, zmax].
+        - ids: bounds extracted from from equilibrium ids.
+    index : {'plasma', 'coil', slice, pandas.Index}
+        Filament index from which relative grid limits are set.
 
     Attributes
     ----------
-
+    group_attributes: dict
+        Instance metadata.
 
     Raises
     ------
@@ -251,65 +238,67 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
     Pass a pulse and run number to initiate as an **IMAS code**:
 
     >>> from nova.imas.extrapolate import Extrapolate
-    >>>
     >>> pulse, run = 130506, 403  # CORSICA equilibrium solution
-    >>> extrapolate = Extrapolate((pulse, run))
+    >>> extrapolate = Extrapolate(pulse, run, ngrid=10, nplasma=10)
     >>> extrapolate.pulse, extrapolate.run
-    130506, 403
+    (130506, 403)
 
     The equilibrium ids is read from file and stored as an ids attribute:
 
     >>> extrapolate.ids.code.name
     'CORSICA'
 
-
     To run code as an actor, first load an apropriate equilibrium IDS,
 
     >>> from nova.imas.database import Database
-
     >>> pulse, run = 130506, 403  # CORSICA equilibrium solution
     >>> equilibrium = Database(130506, 403, 'equilibrium', machine='iter')
     >>> equilibrium.pulse, equilibrium.run
-    130506, 403
+    (130506, 403)
 
     then pass this ids to the Extrapolate class
-    >>> from nova.imas.extrapolate import Extrapolate
-
-    >>> coilset = Extrapolate(ids=equilibrium.ids,
-                              nplasma=200, ngrid=500, limit='ids')
-    >>> coilset.solve(20)
-    >>> coilset.itime
+    >>> extrapolate = Extrapolate(ids=equilibrium.ids, limit='ids', ngrid=500, nplasma=100)
+    >>> extrapolate.ionize(20)
+    >>> extrapolate.itime
     20
 
-    >>> extrapolate.plot('psi', itime=20)
+    >>> extrapolate.plot('psi')
 
     """
 
-    filename: str = 'extrapolate'
+    pf_active: Ids | bool = True
+    pf_passive: Ids | bool = False
+    wall: Ids | bool = True
+    name: str = 'equilibrium'
+    filename: str = field(init=False, default='extrapolate')
+    equilibrium: Equilibrium = field(init=False, repr=False)
     itime: int = field(init=False, default=0)
 
     mu_o: ClassVar[float] = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
 
     def __post_init__(self):
         """Load equilibrium and coilset."""
+        self.load_equilibrium()
         super().__post_init__()
 
-    '''
-    def __call__(self):
+    def load_equilibrium(self):
+        """Load equilibrium dataset."""
+        self.equilibrium = Equilibrium(**self.ids_attrs, ids=self.ids)
+        self.data = self.equilibrium.data
+
+    def update_metadata(self):
         """Return extrapolated equilibrium ids."""
         ids = imas.equilibrium()
         Properties('Equilibrium extrapolation',
-                   provider='Simon McIntosh',
-                   provenance_ids=self.ids)(ids.ids_properties)
+                   provider='Simon McIntosh')(ids.ids_properties)
         Code(self.group_attrs)(ids.code)
         ids.vacuum_toroidal_field = self.ids.vacuum_toroidal_field
         return ids
-    '''
 
     @property
     def group_attrs(self):
         """Return group attributes."""
-        return self.ids_attrs | self.grid_attrs
+        return super().group_attrs | self.grid_attrs
 
     def build(self, **kwargs):
         """Build frameset and interpolation grid."""
@@ -347,13 +336,13 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
             Psi[:, :-2], -psi - Psi[:, -1]*time_slice.ip, rcond=None)[0]
 
     def plot_2d(self, itime=-1, attr='psi', axes=None, **kwargs):
-        """Expose plot_2d ."""
-        return Equilibrium.plot_2d(
-            self, itime=itime, attr=attr, axes=None, **kwargs)
+        """Expose equilibrium plot_2d ."""
+        return self.equilibrium.plot_2d(
+            itime=itime, attr=attr, axes=None, **kwargs)
 
     def plot_boundary(self, itime: int):
-        """Expose Equilibrium plot boundary."""
-        return Equilibrium.plot_boundary(self, itime)
+        """Expose self._equilibrium plot boundary."""
+        return self.equilibrium.plot_boundary(itime)
 
     def plot(self, attr='psi', itime=None):
         """Plot plasma filements and polidal flux."""
@@ -373,16 +362,13 @@ class Extrapolate(BiotPlot, Machine, Grid, IDS):
 if __name__ == '__main__':
 
     #import doctest
-    #doctest.testmod(name='Grid')
+    # doctest.testmod()
 
-    from nova.imas.database import Database
 
-    # pulse, run = 114101, 41  # JINTRAC
-    pulse, run = 130506, 403  # CORSICA
+    pulse, run = 114101, 41  # JINTRAC
+    #pulse, run = 130506, 403  # CORSICA
 
-    extrapolate = Extrapolate((pulse, run), nplasma=130, limit='ids')
-    #coilset.build()
+    extrapolate = Extrapolate(pulse, run)
 
-    #coilset.ionize(20)
-    #coilset.plot('psi')
-    # coilset.plasmagrid.plot()
+    extrapolate.ionize(0)
+    extrapolate.plot('psi')

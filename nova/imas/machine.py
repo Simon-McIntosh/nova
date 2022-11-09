@@ -719,7 +719,7 @@ class Machine(CoilSet, MachineGeometry, CoilData):
 
     dcoil: float = -1
     dshell: float = 0.5
-    nplasma: float = 500
+    nplasma: float = 1000
     tcoil: str = 'rectangle'
     tplasma: str = 'rectangle'
 
@@ -812,7 +812,7 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-    machine = Machine(pf_passive=True, nplasma=500)
+    machine = Machine(pf_passive=False, nplasma=500)
 
     machine.sloc['Ic'] = 1
     machine.sloc['plasma', 'Ic'] = -10000

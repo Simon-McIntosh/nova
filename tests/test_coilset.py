@@ -161,7 +161,8 @@ def test_plasma_single():
 
 def test_plasma_hex():
     coilset = CoilSet(nplasma=-0.5)
-    coilset.firstwall.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 2, 2.5, 1.5, 1]])
+    coilset.firstwall.insert([[1, 2, 2, 1.5, 1, 1], [1, 1, 2, 2.5, 1.5, 1]],
+                             turn='hex')
     assert sum([section == 'hexagon'
                 for section in coilset.subframe.section]) == 2
 

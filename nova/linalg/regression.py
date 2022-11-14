@@ -150,13 +150,10 @@ class Lops(RegressionBase, LinearOperator):
 
     dtype: type = float
     explicit: bool = True
-    matvec_count: int = 0
-    rmatvec_count: int = 0
-    matmat_count: int = 0
-    rmatmat_count: int = 0
 
     def __post_init__(self):
         """Link matrix attribute to Pylops LinearOperator.A."""
+        LinearOperator.__init__(self)
         super().__post_init__()
         self.A = self.matrix
 
@@ -170,7 +167,7 @@ class Lops(RegressionBase, LinearOperator):
 
     def _inverse(self):
         """Retun solution to least squares problem using default solver."""
-        return RegularizedInversion(self, [], self.data)
+        return RegularizedInversion(self).solve(self.data, None)[0]
 
 
 @dataclass

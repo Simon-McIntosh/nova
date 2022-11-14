@@ -85,7 +85,7 @@ def test_grid_xpoint():
 def test_plasmagrid_xpoint():
     coilset = CoilSet(dcoil=-5, nplasma=80)
     coilset.coil.insert(6.5, [-1, 1], 0.4, 0.2, Ic=-15e6)
-    coilset.firstwall.insert({'e': [6.5, 0, 1.2, 1.6]}, Ic=-15e6)
+    coilset.firstwall.insert({'e': [6.5, 0, 1.2, 1.6]}, Ic=-15e6, turn='hex')
     coilset.plasma.separatrix = {'e': [6.5, 0, 0.4, 0.6]}
     coilset.plasmagrid.solve()
     assert coilset.plasmagrid.x_point_number == 2

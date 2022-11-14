@@ -29,7 +29,7 @@ def test_plasma_update(plot=False):
 def null_curvature(sign, plot):
     coilset = CoilSet(dcoil=-5, nplasma=5)
     coilset.firstwall.insert(dict(o=[5, 1, 0.5]), Ic=15e6)
-    coilset.coil.insert(5, 0, 0.75, 0.75, Ic=-15e6)
+    coilset.coil.insert(5, -0.25, 0.75, 0.75, Ic=-15e6)
     coilset.grid.solve(1e2, 0.25)  # generate plasma grid
     coilset.sloc['plasma', 'Ic'] *= sign
     if plot:
@@ -52,9 +52,9 @@ def test_Opoint_curvature_Ip_negative(plot=False):
 
 def test_multi_xpoint(plot=False):
     coilset = CoilSet(dcoil=-5, nplasma=5)
-    coilset.coil.insert(5, [-1, 1], 0.75, 0.75, Ic=[1, 1])
+    coilset.coil.insert(5, [-1.1, 1.1], 0.75, 0.75, Ic=[1, 1])
     coilset.firstwall.insert(dict(o=[5.25, 0, 0.5]), Ic=0.5)
-    coilset.grid.solve(3e2, 1.25, 'plasma')  # generate plasma grid
+    coilset.grid.solve(3e2, 1.5, 'plasma')  # generate plasma grid
     if plot:
         coilset.plot()
         coilset.grid.plot()

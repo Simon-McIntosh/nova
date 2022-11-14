@@ -178,8 +178,20 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
 
     Parameters
     ----------
-    equilibrium : Ids
-        Equilibrium IDS.
+    pulse: int, optional (required when ids not set)
+        Pulse number. The default is 0.
+    run: int, optional (required when ids not set)
+        Run number. The default is 0.
+    name: str, optional (required when ids not set)
+        Ids name. The default is ''.
+    user: str, optional (required when ids not set)
+        User name. The default is public.
+    machine: str, optional (required when ids not set)
+        Machine name. The default is iter.
+    backend: int, optional (required when ids not set)
+        Access layer backend. The default is 13 (HDF5).
+    ids: ImasIds, optional
+        When set the ids parameter takes prefrence. The default is None.
     pf_active : Ids | bool, optional
         pf active IDS. The default is True
     pf_passive : Ids | bool, optional
@@ -342,8 +354,8 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
 
         U, s, V = np.linalg.svd(Psi[:, :-2], full_matrices=False)
 
-        #alpha = 1e-5 * np.max(s)
-        alpha = 1e-5
+        alpha = 1e-6
+        #alpha = 0
 
         target = -psi - Psi[:, -1]*time_slice.ip
         self.saloc['Ic'][:-2] = V.T @ ((U.T @ target) * s / (s**2 + alpha**2))
@@ -376,11 +388,10 @@ if __name__ == '__main__':
     # import doctest
     # doctest.testmod()
 
-    pulse, run = 114101, 41  # JINTRAC
-    #pulse, run = 130506, 403  # CORSICA
+    #pulse, run = 114101, 41  # JINTRAC
+    pulse, run = 130506, 403  # CORSICA
 
-    extrapolate = Extrapolate(pulse, run, nplasma=500, ngrid=200,
-                              pf_passive=False)
+    extrapolate = Extrapolate(pulse, run, nplasma=1000, ngrid=5000)
 
-    extrapolate.ionize(-1)
-    extrapolate.plot('br')
+    extrapolate.ionize(0)
+    extrapolate.plot('psi')

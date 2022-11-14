@@ -28,7 +28,7 @@ class Biot(FrameSet):
 
     def _biotfactory(self):
         """Return nammed biot instance."""
-        attr = inspect.stack()[1][3]  # name of caller
+        attr = inspect.getframeinfo(inspect.currentframe().f_back, 0)[2]
         return self.biot_class[attr](*self.frames, path=self.path, name=attr,
                                      filename=self.filename)
 

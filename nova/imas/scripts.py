@@ -6,7 +6,6 @@ try:
     IMPORT_IMAS = True
 except ImportError:
     IMPORT_IMAS = False
-from nova.imas.database import Database
 from nova.imas.extrapolate import Extrapolate
 from nova.utilities.pyplot import plt
 
@@ -49,54 +48,52 @@ class LimType(click.ParamType):
             pass
         if value == 'ids':
             return value
-        self.fail(f'{value!r} is not a valid float, list[float], or "ids"',
+        self.fail(f'{value!r} is not a valid float or "ids"',
                   param, ctx)
 
 
 @click.group(invoke_without_command=True,
              context_settings={'show_default': True, 'max_content_width': 160})
-@click.option('-eq', '--equilibrium', 'equilibrium', nargs=2, type=int,
-              required=True, help='equilibrium ids [pulse, run]')
-@click.option('-ngrid', '--grid_number', 'grid_number',
-              type=ResType(), default=5000,
+@click.argument('pulse', type=int)
+@click.argument('run', type=int)
+@click.option('-ngrid', 'ngrid', type=ResType(), default=5000,
               help="""\b
                       interpolation grid node number (aprox.)
                           int: user defined node number
-                          ids: node number from equilibrium ids
+                          ids: node number is read from equilibrium ids
                         """)
-@click.option('-nplasma', '--plasma_number', 'plasma_number',
-              type=click.IntRange(min=1),
-              default=2000, help='plasma filiment number (aprox.)')
-@click.option('-lim', '--limit', 'limit', type=LimType(), default=0.25,
+@click.option('-nplasma', 'nplasma', type=int, default=1000,
+              help='plasma filiment number (aprox.)')
+@click.option('-limit', 'limit', type=LimType(), default=0.25,
               help="""\b
                       interpolation grid limits
                           float: expansion factor applied to index
-                          ids: grid limits from equilibrium ids
+                          str: {ids} grid limits are read from equilibrium ids
                         """)
-@click.option('-idx', '--index', 'index',
+@click.option('-index', 'index',
               type=click.Choice(['coil', 'plasma'], case_sensitive=True),
               default='plasma',
               help='coil subset, used iif type(limit) == float')
-@click.option('-pf', '--pf_active', 'pf_active', nargs=2, type=int,
+@click.option('-pf_active', 'pf_active', nargs=2, type=int,
               default=(111001, 202),
               help='pf_active machine description ids')
-@click.option('-fw', '--first_wall', 'wall', nargs=2, type=int,
+@click.option('-wall', 'wall', nargs=2, type=int,
               default=(116000, 2),
               help='first wall machine description ids')
-@click.option('-sdb', '--scenario_db', 'scenario_db',
+@click.option('-scenario_db', 'scenario_db',
               nargs=2, type=str, default=('public', 'iter'),
               help='scenario database (user, machine)')
-@click.option('-mdb', '--machine_db', 'machine_db',
+@click.option('-machine_db', 'machine_db',
               nargs=2, type=str, default=('public', 'iter_md'),
               help='machine database (user, machine)')
-@click.option('-b', '--backend', 'backend', default='HDF5',
+@click.option('-backend', 'backend', default='HDF5',
               type=click.Choice(['MDSPLUS', 'HDF5'], case_sensitive=True),
               help='access layer backend')
 @click.version_option(package_name='nova',
                       message=f'{Extrapolate.__module__}.%(prog)s, '
                               'version %(version)s')
 @click.pass_context
-def extrapolate(ctx, equilibrium, grid_number, plasma_number,
+def extrapolate(ctx, pulse, run, ngrid, nplasma,
                 limit, index, pf_active, wall,
                 scenario_db, machine_db, backend):
     """
@@ -106,26 +103,24 @@ def extrapolate(ctx, equilibrium, grid_number, plasma_number,
     in a least squares sense to fit known poloidal flux interior to separatrix.
 
     """
-    equilibrium_ids = Database(
-        *equilibrium, 'equilibrium',
-        **dict(zip(['user', 'machine'], scenario_db))).ids
     backend = getattr(imas.imasdef, f'{backend}_BACKEND')
-    ctx.obj = Extrapolate(*equilibrium)
+    machine_db = dict(zip(['user', 'machine'], machine_db))
+    machine_db |= dict(backend=backend)
+    pf_active = machine_db | dict(zip(['pulse', 'run'], pf_active))
+    wall = machine_db | dict(zip(['pulse', 'run'], wall))
+    ctx.obj = Extrapolate(pulse, run, ngrid=ngrid, nplasma=nplasma,
+                          limit=limit, index=index,
+                          user=scenario_db[0], machine=scenario_db[1],
+                          backend=backend, pf_active=pf_active, wall=wall)
 
 
 @extrapolate.command()
-@click.option('-i', '--itime', 'itime', default=0)
-@click.option('--attr', 'attr', default='psi',
+@click.argument('itime', type=int)
+@click.option('-attr', default='psi',
               type=click.Choice(['psi', 'br', 'bz']))
 @click.pass_context
 def plot(ctx, itime, attr):
-    """Define input wall ids."""
+    """Plot extrapolation result at itime."""
     ctx.obj.ionize(itime)
     ctx.obj.plot(attr)
     plt.show()
-
-
-@extrapolate.command()
-@click.pass_context
-def put(ctx):
-    pass

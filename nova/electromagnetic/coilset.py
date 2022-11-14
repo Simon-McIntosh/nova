@@ -50,7 +50,7 @@ class CoilSet(Biot, Control, Frame):
 
 if __name__ == '__main__':
 
-    reload = False
+    reload = True
     if reload:
         coilset = CoilSet(dcoil=-5, nplasma=150)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',

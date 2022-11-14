@@ -313,10 +313,8 @@ class FrameData(ABC):
             return 'trs'
         if label == 'INB_RAIL':
             return 'dir'
-        if 'CS' in label:
-            return 'cs'
-        if 'PF' in label:
-            return 'pf'
+        if 'CS' in label or 'PF' in label:
+            return label[:2].lower()
         if 'VS3' in label:
             return 'vs3'
         return ''
@@ -338,10 +336,6 @@ class IdsCoilData(FrameData):
     name: list[str] = field(init=False, default_factory=list)
     geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
     loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
-
-    def append(self, loop: Loop, element: Element):
-        """Append coil data to internal structrue."""
-        super().append(loop, element)
 
     def insert(self, constructor, **kwargs):
         """Insert data via Coilset.constructor method."""
@@ -366,7 +360,9 @@ class PassiveShellData(FrameData):
 
     def reset(self):
         """Reset instance state."""
-        self.__init__()
+        self.length = 0
+        self.points = []
+        super().__init__()
 
     def __len__(self):
         """Return loop number."""
@@ -430,7 +426,7 @@ class PassiveCoilData(IdsCoilData):
     def insert(self, constructor, **kwargs):
         """Insert data via coil method."""
         if self.empty:
-            return
+            return None
         kwargs = {'active': False, 'name': self.data['name'],
                   'turn': 'rect'} | kwargs
         return super().insert(constructor, **kwargs)
@@ -492,7 +488,7 @@ class ActiveCoilData(IdsCoilData):
     def insert(self, constructor, **kwargs):
         """Insert data via coil method."""
         if self.empty:
-            return
+            return None
         self.data['nturn'] = np.abs(self.data['nturn'])
         kwargs = {'active': True, 'fix': False,
                   'name': self.data['identifier'],
@@ -539,7 +535,7 @@ class PoloidalFieldActive(CoilDatabase):
                     continue
                 raise NotImplementedError(f'geometory {element.geometry.name} '
                                           'not implemented')
-            if i == 0:
+            if len(ids_loop.element) == 1:
                 constructor = self.coil
             else:
                 constructor = self.turn
@@ -550,8 +546,8 @@ class PoloidalFieldActive(CoilDatabase):
         """Build circuit influence matrix."""
         supply = [supply.identifier
                   for supply in getattr(self.ids, 'supply')]
-        nodes = max([len(circuit.connections)
-                     for circuit in getattr(self.ids, 'circuit')])
+        nodes = max((len(circuit.connections)
+                     for circuit in getattr(self.ids, 'circuit')))
         self.circuit.initialize(supply, nodes)
         for circuit in getattr(self.ids, 'circuit'):
             self.circuit.insert(circuit.identifier, circuit.connections)
@@ -701,8 +697,8 @@ class MachineGeometry:
 
     def __post_init__(self):
         """Map geometry parameters to dict attributes."""
-        for attr in self.geometry:
-            attrs = self.geometry[attr].update_ids_attrs(getattr(self, attr))
+        for attr, geometry in self.geometry.items():
+            attrs = geometry.update_ids_attrs(getattr(self, attr))
             setattr(self, attr, attrs)
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
@@ -716,12 +712,6 @@ class MachineGeometry:
 @dataclass
 class Machine(CoilSet, MachineGeometry, CoilData):
     """Manage ITER machine geometry."""
-
-    dcoil: float = -1
-    dshell: float = 0.5
-    nplasma: float = 1000
-    tcoil: str = 'rectangle'
-    tplasma: str = 'rectangle'
 
     filename: str = 'iter'
 
@@ -785,9 +775,11 @@ class Machine(CoilSet, MachineGeometry, CoilData):
         """Build dataset, frameset and, biotset and save to file."""
         self.frame_attrs = kwargs
         self.clear_frameset()
-        for attr in self.geometry:
-            if (geometry := getattr(self, attr)):
-                coilset = self.geometry[attr](**geometry, **self.frame_attrs)
+        for attr, geometry in self.geometry.items():
+            geometry_attrs = getattr(self, attr)
+            # pylint: disable=not-a-mapping
+            if isinstance(geometry_attrs, dict):
+                coilset = geometry(**geometry_attrs, **self.frame_attrs)
                 self += coilset
             for attr in coilset.biot_methods:
                 getattr(self, attr).data = getattr(coilset, attr).data
@@ -800,7 +792,7 @@ class Machine(CoilSet, MachineGeometry, CoilData):
         self.metadata = self.load_metadata(filename, path)
         return self
 
-    def store(self, filename=None, path=None, metadata=None):
+    def store(self, filename=None, path=None):
         """Store frameset, biot attributes and metadata."""
         super().store(filename, path)
         self.store_metadata(filename, path, self.metadata)
@@ -809,8 +801,8 @@ class Machine(CoilSet, MachineGeometry, CoilData):
 
 if __name__ == '__main__':
 
-    import doctest
-    doctest.testmod()
+    #import doctest
+    #doctest.testmod()
 
     machine = Machine(pf_passive=False, nplasma=500)
 
@@ -818,11 +810,3 @@ if __name__ == '__main__':
     machine.sloc['plasma', 'Ic'] = -10000
     machine.plot()
     machine.plasmagrid.plot()
-
-    #coilset.plot()
-    #coilset.circuit.plot('CS1')
-
-    # coilset.plasma.separatrix = dict(e=[6, -0.5, 2.5, 2.5])
-    # coilset.sloc['Ic'] = 1
-    # coilset.sloc['plasma', 'Ic'] = -450
-    # coilset.plot()

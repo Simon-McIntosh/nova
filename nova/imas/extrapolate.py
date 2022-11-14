@@ -8,7 +8,7 @@ import pandas
 from scipy.interpolate import RectBivariateSpline, interp1d
 import xarray
 
-from nova.imas.code import Code
+#from nova.imas.code import Code
 from nova.imas.database import Database, Ids
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
@@ -66,7 +66,7 @@ class ExtrapolationGrid:
     require valid ids when limit:ids or ngrid:1000 == 'ids'
     """
 
-    ngrid: int | str = 2500
+    ngrid: int | str = 5000
     limit: float | list[float] | str = 0.25
     index: Union[str, slice, pandas.Index] = 'plasma'
     equilibrium: Equilibrium | None = None
@@ -269,7 +269,7 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
     pf_active: Ids | bool = True
     pf_passive: Ids | bool = False
     wall: Ids | bool = True
-    name: str = 'equilibrium'
+
     filename: str = field(init=False, default='extrapolate')
     equilibrium: Equilibrium = field(init=False, repr=False)
     itime: int = field(init=False, default=0)
@@ -283,9 +283,11 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
 
     def load_equilibrium(self):
         """Load equilibrium dataset."""
+        self.name = 'equilibrium'
         self.equilibrium = Equilibrium(**self.ids_attrs, ids=self.ids)
         self.data = self.equilibrium.data
 
+    '''
     def update_metadata(self):
         """Return extrapolated equilibrium ids."""
         ids = imas.equilibrium()
@@ -294,6 +296,7 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
         Code(self.group_attrs)(ids.code)
         ids.vacuum_toroidal_field = self.ids.vacuum_toroidal_field
         return ids
+    '''
 
     @property
     def group_attrs(self):
@@ -308,6 +311,7 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
 
     def ionize(self, itime: int):
         """Update plasma current."""
+
         self.itime = itime
         time_slice = TimeSlice(self.data.isel(time=self.itime))
 
@@ -328,6 +332,7 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
         nturn = self.aloc['nturn']
         nturn[ionize] = current / current.sum()
         self.sloc['plasma', 'Ic'] = time_slice.ip
+
         self.plasmagrid.update_turns('Psi')
 
         Psi = self.plasmagrid.data['Psi'].values[ionize[plasma]]
@@ -335,10 +340,18 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
         self.saloc['Ic'][:-2] = np.linalg.lstsq(
             Psi[:, :-2], -psi - Psi[:, -1]*time_slice.ip, rcond=None)[0]
 
-    def plot_2d(self, itime=-1, attr='psi', axes=None, **kwargs):
+        U, s, V = np.linalg.svd(Psi[:, :-2], full_matrices=False)
+
+        #alpha = 1e-5 * np.max(s)
+        alpha = 1e-5
+
+        target = -psi - Psi[:, -1]*time_slice.ip
+        self.saloc['Ic'][:-2] = V.T @ ((U.T @ target) * s / (s**2 + alpha**2))
+
+
+    def plot_2d(self, itime=-1, attr='psi', **kwargs):
         """Expose equilibrium plot_2d ."""
-        return self.equilibrium.plot_2d(
-            itime=itime, attr=attr, axes=None, **kwargs)
+        return self.equilibrium.plot_2d(itime=itime, attr=attr, **kwargs)
 
     def plot_boundary(self, itime: int):
         """Expose self._equilibrium plot boundary."""
@@ -348,7 +361,6 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
         """Plot plasma filements and polidal flux."""
         if self.itime != itime and itime is not None:
             self.ionize(itime)
-        plt.figure()
         super().plot('plasma')
         levels = self.grid.plot(attr, levels=51, colors='C0', nulls=False)
         try:
@@ -361,14 +373,14 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
 
 if __name__ == '__main__':
 
-    #import doctest
+    # import doctest
     # doctest.testmod()
-
 
     pulse, run = 114101, 41  # JINTRAC
     #pulse, run = 130506, 403  # CORSICA
 
-    extrapolate = Extrapolate(pulse, run)
+    extrapolate = Extrapolate(pulse, run, nplasma=500, ngrid=200,
+                              pf_passive=False)
 
-    extrapolate.ionize(0)
-    extrapolate.plot('psi')
+    extrapolate.ionize(-1)
+    extrapolate.plot('br')

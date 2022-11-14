@@ -19,10 +19,10 @@ class Frame(FrameSet):
 
     delta: float = -1
     dcoil: float = -1
-    nplasma: float = 500
+    nplasma: float = 1000
     dshell: float = 0
-    tplasma: str = 'hex'
-    tcoil: str = 'rect'
+    tcoil: str = 'rectangle'
+    tplasma: str = 'rectangle'
 
     def __post_init__(self):
         """Update turn attribute names."""

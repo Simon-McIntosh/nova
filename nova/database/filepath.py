@@ -107,7 +107,7 @@ class FilePath:
         """Clear cached datafile at self.filepath."""
         if os.path.isfile(self.filepath):
             remove = input('Confirm removal of the followig cached datafile:'
-                           f'\n{self.filepath}\n[Yn] ')
+                           f'\n{self.filepath}\nProceed (Y/n)?')
             if remove == '' or remove.lower() == 'y':
                 os.remove(self.filepath)
             return
@@ -135,7 +135,6 @@ class FilePath:
         """Load dataset from file."""
         file = self.file(filename, path)
         group = self.netcdf_group(group)
-        with xarray.open_dataset(file, group=group) as data:
+        with xarray.open_dataset(file, group=group, engine='h5netcdf') as data:
             self.data = data
-            self.data.load()
         return self

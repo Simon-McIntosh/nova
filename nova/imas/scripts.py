@@ -1,4 +1,4 @@
-
+"""Manage script access to extrapolate class."""
 import click
 
 try:
@@ -8,6 +8,7 @@ except ImportError:
     IMPORT_IMAS = False
 from nova.imas.database import Database
 from nova.imas.extrapolate import Extrapolate
+from nova.utilities.pyplot import plt
 
 
 class ResType(click.ParamType):
@@ -66,7 +67,7 @@ class LimType(click.ParamType):
 @click.option('-nplasma', '--plasma_number', 'plasma_number',
               type=click.IntRange(min=1),
               default=2000, help='plasma filiment number (aprox.)')
-@click.option('-lim', '--limit', 'limit', type=LimType(), default=0,
+@click.option('-lim', '--limit', 'limit', type=LimType(), default=0.25,
               help="""\b
                       interpolation grid limits
                           float: expansion factor applied to index
@@ -109,11 +110,7 @@ def extrapolate(ctx, equilibrium, grid_number, plasma_number,
         *equilibrium, 'equilibrium',
         **dict(zip(['user', 'machine'], scenario_db))).ids
     backend = getattr(imas.imasdef, f'{backend}_BACKEND')
-    ctx.obj = Extrapolate(
-        ids=equilibrium_ids, resolution=grid_number, nplasma=plasma_number,
-        limit=limit, index=index,
-        geometry=dict(zip(['pf_active', 'wall'], [pf_active, wall])),
-        **dict(zip(['user', 'machine'], machine_db)), backend=backend)
+    ctx.obj = Extrapolate(*equilibrium)
 
 
 @extrapolate.command()
@@ -125,6 +122,7 @@ def plot(ctx, itime, attr):
     """Define input wall ids."""
     ctx.obj.ionize(itime)
     ctx.obj.plot(attr)
+    plt.show()
 
 
 @extrapolate.command()

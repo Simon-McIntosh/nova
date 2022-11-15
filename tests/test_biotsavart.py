@@ -80,7 +80,7 @@ def test_solenoid_grid():
     coilset.sloc['Ic'] = current
     biotgrid = BiotGrid(*coilset.frames)
     biotgrid.solve(4, [1e-9, 1.5, 0, 1])
-    Bz_theory = BiotMatrix.mu_o * nturn * current / height
+    Bz_theory = BiotMatrix.mu_0 * nturn * current / height
     Bz_grid = np.dot(biotgrid.data.Bz, coilset.sloc['Ic'])
     assert allclose(Bz_grid[0], Bz_theory, atol=5e-3)
 
@@ -95,7 +95,7 @@ def test_solenoid_probe(segment):
     coilset.sloc['Ic'] = current
     biotpoint = BiotPoint(*coilset.frames)
     biotpoint.solve((1e-9, 0))
-    Bz_theory = BiotMatrix.mu_o * nturn * current / height
+    Bz_theory = BiotMatrix.mu_0 * nturn * current / height
     Bz_point = np.dot(biotpoint.data.Bz, coilset.sloc['Ic'])
     assert allclose(Bz_point, Bz_theory, atol=5e-3)
 
@@ -132,7 +132,7 @@ def test_hemholtz_flux(segment):
     coilset.coil.insert(1, [-0.5, 0.5], 0.01, 0.01, Ic=1, segment=segment)
     point_radius = 0.1
     coilset.point.solve([[point_radius, 0]])
-    Bz = (4/5)**(3/2) * BiotMatrix.mu_o
+    Bz = (4/5)**(3/2) * BiotMatrix.mu_0
     psi = Bz * np.pi*point_radius**2
     assert np.isclose(coilset.point.psi[0], psi)
 
@@ -142,7 +142,7 @@ def test_hemholtz_field(segment):
     coilset = CoilSet(dcoil=-2)
     coilset.coil.insert(1, [-0.5, 0.5], 0.01, 0.01, Ic=1, segment=segment)
     coilset.point.solve([[1e-3, 0]])
-    bz = (4/5)**(3/2) * BiotMatrix.mu_o
+    bz = (4/5)**(3/2) * BiotMatrix.mu_0
     assert np.isclose(coilset.point.bz[0], bz)
 
 

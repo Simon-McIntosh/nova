@@ -37,7 +37,8 @@ class FilePath:
         if hasattr(appdirs, (appattr := f'{directory}_dir')):
             app = getattr(appdirs, appattr)
             if subpath == 'nova':
-                return app(nova.__name__, version=nova.__version__)
+                version_tag = nova.__version__.split('+')[0]
+                return app(nova.__name__, version=version_tag)
             if subpath == 'imas' and IMPORT_IMAS:
                 name, version = imas.__name__.split('_', 1)
                 return app(appname=name, version=version)

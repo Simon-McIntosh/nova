@@ -6,6 +6,7 @@ import dask.array as da
 import numpy as np
 
 from nova.biot.biotset import BiotSet
+import scipy.constants
 
 
 @dataclass
@@ -16,7 +17,7 @@ class BiotMatrix(BiotSet):
                                       default_factory=dict)
 
     attrs: ClassVar[dict[str, str]] = dict()
-    mu_o: ClassVar[float] = 4*np.pi*1e-7
+    mu_0: ClassVar[float] = scipy.constants.mu_0
 
     def __post_init__(self):
         """Initialize input data."""

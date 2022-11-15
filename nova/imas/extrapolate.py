@@ -6,13 +6,14 @@ from typing import ClassVar, Union
 import numpy as np
 import pandas
 from scipy.interpolate import RectBivariateSpline, interp1d
+from scipy.constants import mu_0
 import xarray
 
 #from nova.imas.code import Code
 from nova.imas.database import Database, Ids
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
-from nova.imas.properties import Properties
+#from nova.imas.properties import Properties
 from nova.utilities.pyplot import plt
 
 # pylint: disable=too-many-ancestors
@@ -128,8 +129,12 @@ class TimeSlice:
 
     @cached_property
     def psi_rbs(self):
-        """Return cached 2D RectBivariateSpline psi interpolant."""
-        return RectBivariateSpline(self.r, self.z, self.data.psi2d).ev
+        """Return cached 2D RectBivariateSpline psi2d interpolant."""
+        return self._rbs('psi2d')
+
+    def _rbs(self, attr):
+        """Return 2D RectBivariateSpline interpolant."""
+        return RectBivariateSpline(self.r, self.z, self.data[attr]).ev
 
     def _interp1d(self, x, y):
         """Return 1D interpolant."""
@@ -234,7 +239,7 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
 
     .. math::
         I_i = -2 \pi A [r p\prime (\psi\prime) +
-                        f f\prime(\psi\prime) / (\mu_o r)]
+                        f f\prime(\psi\prime) / (\mu_0 r)]
 
     With a total plasma current :math:`I_p` condition enforced such that,
 
@@ -284,14 +289,21 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
 
     filename: str = field(init=False, default='extrapolate')
     equilibrium: Equilibrium = field(init=False, repr=False)
-    itime: int = field(init=False, default=0)
-
-    mu_o: ClassVar[float] = 4*np.pi*1e-7  # magnetic constant [Vs/Am]
 
     def __post_init__(self):
         """Load equilibrium and coilset."""
         self.load_equilibrium()
         super().__post_init__()
+        self._itime = 0
+
+    @property
+    def itime(self):
+        """Manage itime attribute, ionize plasma and solve pf_active."""
+        return self._itime
+
+    @itime.setter
+    def itime(self, itime):
+        self._itime = itime
 
     def load_equilibrium(self):
         """Load equilibrium dataset."""
@@ -325,41 +337,43 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
         """Update plasma current."""
 
         self.itime = itime
-        time_slice = TimeSlice(self.data.isel(time=self.itime))
 
+        time_slice = TimeSlice(self.data.isel(time=self.itime))
         self.plasma.separatrix = time_slice.boundary
+        self.sloc['plasma', 'Ic'] = time_slice.ip
+
         plasma = self.aloc['plasma']
         ionize = self.aloc['ionize']
         radius = self.aloc['x'][ionize]
         height = self.aloc['z'][ionize]
-        area = self.aloc['area'][ionize]
         psi = time_slice.psi_rbs(radius, height)
         psi_norm = time_slice.normalize(psi)
 
         current_density = radius * time_slice.p_prime(psi_norm) + \
-            time_slice.ff_prime(psi_norm) / (self.mu_o * radius)
+            time_slice.ff_prime(psi_norm) / (mu_0 * radius)
         current_density *= -2*np.pi
-        current = current_density * area
+        current = current_density * self.aloc['area'][ionize]
 
-        nturn = self.aloc['nturn']
-        nturn[ionize] = current / current.sum()
-        self.sloc['plasma', 'Ic'] = time_slice.ip
+        self.aloc['nturn'][ionize] = current / current.sum()
+
 
         self.plasmagrid.update_turns('Psi')
 
-        Psi = self.plasmagrid.data['Psi'].values[ionize[plasma]]
 
-        self.saloc['Ic'][:-2] = np.linalg.lstsq(
-            Psi[:, :-2], -psi - Psi[:, -1]*time_slice.ip, rcond=None)[0]
+        attr = 'Psi'
+
+
+        Psi = self.plasmagrid.Psi.values[ionize[plasma]]
+
+        psi = -time_slice._rbs('psi2d')(radius, height)
 
         U, s, V = np.linalg.svd(Psi[:, :-2], full_matrices=False)
 
         alpha = 1e-6
         #alpha = 0
 
-        target = -psi - Psi[:, -1]*time_slice.ip
+        target = psi - Psi[:, -1]*time_slice.ip
         self.saloc['Ic'][:-2] = V.T @ ((U.T @ target) * s / (s**2 + alpha**2))
-
 
     def plot_2d(self, itime=-1, attr='psi', **kwargs):
         """Expose equilibrium plot_2d ."""
@@ -388,10 +402,19 @@ if __name__ == '__main__':
     # import doctest
     # doctest.testmod()
 
-    #pulse, run = 114101, 41  # JINTRAC
+    # pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
 
-    extrapolate = Extrapolate(pulse, run, nplasma=1000, ngrid=5000)
+    extrapolate = Extrapolate(pulse, run)
 
-    extrapolate.ionize(0)
+    extrapolate.ionize(20)
     extrapolate.plot('psi')
+
+    '''
+    index = [index for index in pf_active.data.coil_name.data
+    if index in extrapolate.sloc.frame.index]
+
+    extrapolate.sloc[index, ['Ic']]
+
+    pf_active.data.isel(time=20).current.data
+    '''

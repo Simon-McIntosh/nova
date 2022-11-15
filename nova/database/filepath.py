@@ -137,4 +137,5 @@ class FilePath:
         group = self.netcdf_group(group)
         with xarray.open_dataset(file, group=group) as data:
             self.data = data
+            self.data.load()
         return self

@@ -123,18 +123,18 @@ class BiotRing(BiotConstants, BiotMatrix):
     @property
     def Psi(self):
         """Return Psi array."""
-        return 2 * np.pi * self.mu_o * self.r * self.Aphi
+        return 2 * np.pi * self.mu_0 * self.r * self.Aphi
 
     @property
     def Br(self):
         """Return radial field array."""
-        return self.mu_o / (2*np.pi) * self.gamma * \
+        return self.mu_0 / (2*np.pi) * self.gamma * \
             (self.K - (2-self.k2) / (2*self.ck2) * self.E) / (self.a * self.r)
 
     @property
     def Bz(self):
         """Return vertical field array."""
-        return self.mu_o / (2*np.pi) * \
+        return self.mu_0 / (2*np.pi) * \
             (self.r*self.K - (2*self.r - self.b*self.k2) /
              (2*self.ck2) * self.E) / (self.a*self.r)
 

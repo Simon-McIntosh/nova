@@ -1,6 +1,5 @@
 """Manage access to dynamic coil data data."""
 from dataclasses import dataclass, field
-from typing import ClassVar
 
 import numpy as np
 
@@ -16,7 +15,7 @@ class PF_Active(Scenario):
     run: int
     name: str = 'pf_active'
     coil_attrs: list[str] = field(
-        default_factory=lambda: ['current'])
+        default_factory=lambda: ['current', 'b_field_max_timed'])
 
     @staticmethod
     def coil_name(coil):
@@ -40,7 +39,8 @@ class PF_Active(Scenario):
         """Build netCDF database using data extracted from imasdb."""
         with self.build_scenario():
             self.data['time'] = self.ids.time
-            coil_names = [self.coil_name(coil) for coil in self.ids.coil]
+            coil_names = [self.coil_name(coil).strip()
+                          for coil in self.ids.coil]
             self.data['coil_index'] = range(len(coil_names))
             self.data['coil_name'] = 'coil_index', coil_names
             self.data.attrs['pf_active'] = ['time', 'coil_index']
@@ -49,6 +49,7 @@ class PF_Active(Scenario):
                 coil = self.ids.coil[i]
                 for attr in self.coil_attrs:
                     self.data[attr][:, i] = getattr(coil, attr).data
+        return self
 
     def plot(self):
         """Plot current timeseries."""
@@ -59,5 +60,4 @@ class PF_Active(Scenario):
 if __name__ == '__main__':
 
     pf_active = PF_Active(135011, 7)
-    #pf_active.build()
     pf_active.plot()

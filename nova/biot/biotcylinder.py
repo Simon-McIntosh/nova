@@ -179,17 +179,17 @@ class BiotCylinder(CylinderConstants, BiotMatrix):
     @property
     def Psi(self):
         """Return Psi dask array."""
-        return 2 * np.pi * self.mu_o * self.target('x') * self.Aphi
+        return 2 * np.pi * self.mu_0 * self.target('x') * self.Aphi
 
     @property
     def Br(self):
         """Return radial field dask array."""
-        return self.mu_o * self._intergrate(self.Br_hat())
+        return self.mu_0 * self._intergrate(self.Br_hat())
 
     @property
     def Bz(self):
         """Return vertical field dask array."""
-        return self.mu_o * self._intergrate(self.Bz_hat())
+        return self.mu_0 * self._intergrate(self.Bz_hat())
 
 
 if __name__ == '__main__':

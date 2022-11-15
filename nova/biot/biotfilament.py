@@ -43,19 +43,19 @@ class BiotFilament(BiotBase):
     @property
     def Psi(self):
         """Return Psi dask array."""
-        return 2 * np.pi * self.mu_o * self.coef.target_radius * self.Aphi
+        return 2 * np.pi * self.mu_0 * self.coef.target_radius * self.Aphi
 
     @property
     def Br(self):
         """Return radial field dask array."""
-        return self.mu_o / (2*np.pi) * self.coef.gamma * \
+        return self.mu_0 / (2*np.pi) * self.coef.gamma * \
             (self.coef.K - (2-self.coef.k2) / (2*self.coef.ck2) *
              self.coef.E) / (self.coef.a * self.coef.target_radius)
 
     @property
     def Bz(self):
         """Return vertical field dask array."""
-        return self.mu_o / (2*np.pi) * \
+        return self.mu_0 / (2*np.pi) * \
             (self.coef.target_radius*self.coef.K -
              (2*self.coef.target_radius - self.coef.b*self.coef.k2) /
              (2*self.coef.ck2) * self.coef.E) / \

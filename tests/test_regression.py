@@ -14,7 +14,7 @@ rng_seed = 2025
 def test_svd_matrices():
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shapes[0])
-    svd = Decompose(matrix, rank=None)
+    svd = Decompose(matrix, rank=0)
     assert all([attr in svd.matrices for attr in ['U', 's', 'Vh', 'Uh', 'V']])
 
 

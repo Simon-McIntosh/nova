@@ -1,10 +1,12 @@
 """Manage matmul operations and svd reductions on BiotData."""
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 
 import numba
 import numpy as np
+import xarray
 
 from nova.biot.biotdata import BiotData
+from nova.electromagnetic.framesetloc import ArrayLocIndexer
 
 '''
 @numba.njit(fastmath=True, parallel=True)
@@ -18,40 +20,51 @@ def matmul(A, B):
 '''
 
 
+@dataclass
 class BiotOp:
     """Fast array opperations for Biot Data arrays."""
 
-    def __init__(self, current, nturn, plasma,
-                 plasma_index, matrix, plasma_matrix,
-                 svd_rank, plasma_U, plasma_s, plasma_V):
-        self.current = current
-        self.nturn = nturn
-        self.plasma = plasma
-        self.plasma_index = plasma_index
-        self.matrix = matrix
-        self.plasma_matrix = plasma_matrix
+    aloc: ArrayLocIndexer
+    saloc: ArrayLocIndexer
+    dataset: InitVar[xarray.Dataset]
+
+    def __post_init__(self, dataset):
+        """Extract matrix, plasma_matrix and plasma_index from dataset."""
+        data_vars = list(dataset.data_vars)
+        self.matrix = dataset[data_vars[0]].data
+        self.plasma_matrix = dataset[data_vars[1]].data
+        self.plasma_index = dataset.attrs['plasma_index']
+
+        '''
         #  perform svd order reduction
         self.svd_rank = min([len(plasma_s), svd_rank])
+
         # TODO fix svd_rank == -1 bug - crop plasma_U
         self.plasma_U = plasma_U.copy()#[:, :self.svd_rank].copy()
         self.plasma_s = plasma_s.copy()#[:self.svd_rank].copy()
         self.plasma_V = plasma_V.copy()#[:self.svd_rank, :].copy()
+        '''
 
     def evaluate(self):
         """Return interaction."""
-        return self.matrix @ self.current
+        return self.matrix @ self.saloc['Ic']
+
+    @property
+    def plasma_nturn(self):
+        """Return plasma turns."""
+        return self.aloc['nturn'][self.aloc['plasma']]
 
     def update_turns(self, svd=True):
         """Update plasma turns."""
         '''
         if svd:
             self.matrix[:, self.plasma_index] = self.plasma_U @ \
-                (self.plasma_s * (self.plasma_V @ self.nturn[self.plasma]))
+                (self.plasma_s * (self.plasma_V @ self.plasma_nturn))
             return
         print('svd == -1')
         '''
         self.matrix[:, self.plasma_index] = \
-            self.plasma_matrix @ self.nturn[self.plasma]
+            self.plasma_matrix @ self.plasma_nturn
 
 
 @dataclass
@@ -96,12 +109,8 @@ class BiotOperate(BiotData):
             return
         self.attrs = self.data.attrs['attributes']
         for attr in self.attrs:
-            self.operator[attr] = BiotOp(
-                self.saloc['Ic'], self.aloc['nturn'], self.aloc['plasma'],
-                self.data.attrs['plasma_index'],
-                self.data[attr].data, self.data[f'_{attr}'].data,
-                self.svd_rank, self.data[f'_U{attr}'].data,
-                self.data[f'_s{attr}'].data, self.data[f'_V{attr}'].data)
+            self.operator[attr] = BiotOp(self.aloc, self.saloc,
+                                         self.data[[attr, f'_{attr}']])
         self.load_version()
         self.load_arrays()
 
@@ -158,11 +167,13 @@ class BiotOperate(BiotData):
         Attr = attr.capitalize()
         if self.version[Attr] != self.subframe.version['nturn']:
             self.update_turns(Attr)
-            print('update', Attr, self.version[Attr])
         if attr == Attr:
-            print(self.version[Attr], Attr)
             return self.array[attr]
         if self.version[attr] != (version := self.aloc_hash['Ic']):
             self.version[attr] = version
             self.array[attr][:] = self.operator[Attr].evaluate()
         return self.array[attr]
+
+    def __getitem__(self, attr):
+        """Return array attribute via dict-like access."""
+        return getattr(self, attr)

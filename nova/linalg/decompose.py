@@ -2,16 +2,15 @@
 from dataclasses import dataclass, field
 
 import numpy as np
-import numpy.typing as npt
 
 
 @dataclass
 class Decompose:
-    """Provide svd methods."""
+    """Provide access to svd methods."""
 
-    matrix: npt.ArrayLike = None
-    rank: int = None
-    matrices: dict = field(repr=False, default_factory=dict)
+    matrix: np.ndarray
+    rank: int = 0
+    matrices: dict = field(init=False, repr=False, default_factory=dict)
 
     def __post_init__(self):
         """Calculate svd decomposition."""
@@ -23,12 +22,14 @@ class Decompose:
         """Return matrix shape."""
         return self.matrix.shape
 
+    def __getitem__(self, key: str):
+        """Return array from matrices dict."""
+        return self.matrices[key]
+
     def initialize_rank(self):
         """Init svd rank."""
-        if self.rank == 0:
-            raise ValueError('rank == 0, set rank=None for full rank.')
         full_rank = min(self.shape)
-        if self.rank is None:
+        if self.rank == 0:
             self.rank = full_rank
         if self.rank < 0:
             self.rank += full_rank

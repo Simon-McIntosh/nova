@@ -21,8 +21,6 @@ class BiotSolve(BiotSet):
     name: str = 'biot'
     attrs: list[str] = field(default_factory=lambda: [
         'Aphi', 'Psi', 'Br', 'Bz'])
-
-    svd: bool = True
     source_segment: np.ndarray = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
 
@@ -35,7 +33,7 @@ class BiotSolve(BiotSet):
         self.check_segments()
         self.initialize()
         self.compose()
-        self.decompose()
+        #self.decompose()
 
     def check_segments(self):
         """Check for segment in self.generator."""
@@ -64,19 +62,18 @@ class BiotSolve(BiotSet):
                         plasma=self.source.index[self.source.plasma].to_list(),
                         target=self.get_index('target')))
         self.data.attrs['attributes'] = self.attrs
+        for source, prefix in zip(['source', 'plasma'], ['', '_']):
+            for attr in self.attrs:
+                self.data[f'{prefix}{attr}'] = xarray.DataArray(
+                    0., dims=['target', source],
+                    coords=[self.data.target, self.data[source]])
 
-        for attr in self.attrs:
-            self.data[attr] = xarray.DataArray(
-                0., dims=['target', 'source'],
-                coords=[self.data.target, self.data.source])
-        self._initialize_svd('target', 'source')
+        #    self.data[f'_{attr}'] = xarray.DataArray(
+        #        0., dims=['target', 'plasma'],
+        #        coords=[self.data.target, self.data.plasma])
 
-        for attr in self.attrs:  # unit filaments
-            self.data[f'_{attr}'] = xarray.DataArray(
-                0., dims=['target', 'plasma'],
-                coords=[self.data.target, self.data.plasma])
-
-        self._initialize_svd('target', 'plasma', prefix='_')
+        #self._initialize_svd('target', 'source')
+        #self._initialize_svd('target', 'plasma', prefix='_')
         '''
         if self.data.dims['plasma'] < self.data.dims['target']:
             sigma = 'plasma'
@@ -100,12 +97,12 @@ class BiotSolve(BiotSet):
         else:
             sigma = row
         for attr in self.attrs:  # unit filament svd matricies
-            self.data[f'{prefix}U{attr}'] = xarray.DataArray(
+            self.data[f'{prefix}{attr}_U'] = xarray.DataArray(
                 0., dims=[row, sigma],
                 coords=[self.data[row], self.data[sigma]])
-            self.data[f'{prefix}s{attr}'] = xarray.DataArray(
+            self.data[f'{prefix}{attr}_s'] = xarray.DataArray(
                 0., dims=[sigma], coords=[self.data[sigma]])
-            self.data[f'{prefix}V{attr}'] = xarray.DataArray(
+            self.data[f'{prefix}{attr}_V'] = xarray.DataArray(
                 0., dims=[sigma, column],
                 coords=[self.data[sigma], self.data[column]])
 
@@ -147,14 +144,14 @@ class BiotSolve(BiotSet):
 
     def decompose(self):
         """Compute plasma svd and update dataset."""
-        if not self.svd:
-            return
-        if self.data.dims['plasma'] < self.data.dims['target']:
-            sigma = 'plasma'
-        else:
-            sigma = 'target'
-        for attr in self.attrs:
-            UsV = np.linalg.svd(self.data[f'_{attr}'], full_matrices=False)
-            self.data[f'_U{attr}'] = ('target', sigma), UsV[0]
-            self.data[f'_s{attr}'] = sigma, UsV[1]
-            self.data[f'_V{attr}'] = (sigma, 'plasma'), UsV[2]
+        for source, prefix in zip(['source', 'plasma'], ['', '_']):
+            if self.data.dims[source] < self.data.dims['target']:
+                sigma = source
+            else:
+                sigma = 'target'
+            for attr in self.attrs:
+                matrix = self.data[f'{prefix}{attr}']
+                UsV = np.linalg.svd(matrix, full_matrices=False)
+                self.data[f'{prefix}{attr}_U'] = ('target', sigma), UsV[0]
+                self.data[f'{prefix}{attr}_s'] = sigma, UsV[1]
+                self.data[f'{prefix}{attr}_V'] = (sigma, source), UsV[2]

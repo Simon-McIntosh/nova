@@ -165,7 +165,27 @@ class TimeSlice:
 
 
 @dataclass
-class Extrapolate(Machine, ExtrapolationGrid, Database):
+class ExtrapolateMachine(Machine):
+    """
+    Extend Machine with default values for Extrapolate class.
+
+    Parameters
+    ----------
+    pf_active: Ids | bool, optional
+        pf active IDS. The default is True
+    pf_passive: Ids | bool, optional
+        pf passive IDS. The default is False
+    wall: Ids | bool, optional
+        wall IDS. The default is True
+    """
+
+    pf_active: Ids | bool = True
+    pf_passive: Ids | bool = False
+    wall: Ids | bool = True
+
+
+@dataclass
+class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
     r"""
     An interface class for the extrapolation of an equilibrium IDS.
 
@@ -273,7 +293,8 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
     >>> equilibrium.pulse, equilibrium.run
     (130506, 403)
 
-    then pass this ids to the Extrapolate class
+    then pass this ids to the Extrapolate class:
+
     >>> extrapolate = Extrapolate(ids=equilibrium.ids, limit='ids', ngrid=500, nplasma=100)
     >>> extrapolate.ionize(20)
     >>> extrapolate.itime
@@ -283,10 +304,7 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
 
     """
 
-    pf_active: Ids | bool = True
-    pf_passive: Ids | bool = False
-    wall: Ids | bool = True
-
+    _itime: int = field(init=False, repr=False, default=0)
     filename: str = field(init=False, default='extrapolate')
     equilibrium: Equilibrium = field(init=False, repr=False)
 
@@ -303,6 +321,8 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
 
     @itime.setter
     def itime(self, itime):
+        if itime is None:
+            return
         self._itime = itime
 
     def load_equilibrium(self):
@@ -335,7 +355,6 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
 
     def ionize(self, itime: int):
         """Update plasma current."""
-
         self.itime = itime
 
         time_slice = TimeSlice(self.data.isel(time=self.itime))
@@ -356,56 +375,57 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
 
         self.aloc['nturn'][ionize] = current / current.sum()
 
-        #self.plasmagrid.update_turns('Psi')
-
-        attr = 'Psi'
-
-        Psi = self.plasmagrid.Psi[ionize[plasma]]
+        Psi = self.plasmagrid['Psi'][ionize[plasma]]
 
         psi = -time_slice._rbs('psi2d')(radius, height)
 
         U, s, V = np.linalg.svd(Psi[:, :-2], full_matrices=False)
 
+        #U = self.plasmagrid.dat
+
         alpha = 1e-6
-        #alpha = 0
 
         target = psi - Psi[:, -1]*time_slice.ip
         self.saloc['Ic'][:-2] = V.T @ ((U.T @ target) * s / (s**2 + alpha**2))
-
-    def plot_2d(self, itime=-1, attr='psi', **kwargs):
-        """Expose equilibrium plot_2d ."""
-        return self.equilibrium.plot_2d(itime=itime, attr=attr, **kwargs)
 
     def plot_boundary(self, itime: int):
         """Expose self._equilibrium plot boundary."""
         return self.equilibrium.plot_boundary(itime)
 
-    def plot(self, attr='psi', itime=None):
+    def plot_2d(self, attr='psi', itime=None):
         """Plot plasma filements and polidal flux."""
+        self.itime = itime
+
         if self.itime != itime and itime is not None:
             self.ionize(itime)
         super().plot('plasma')
         levels = self.grid.plot(attr, levels=51, colors='C0', nulls=False)
         try:
-            self.plot_2d(self.itime, attr, colors='C3', levels=-levels[::-1],
-                         linestyles='dashdot')
+            self.equilibrium.plot_2d(self.itime, attr, colors='C3',
+                                     levels=-levels[::-1])
         except KeyError:
             pass
         self.plot_boundary(self.itime)
 
+    def plot_bar(self, itime=None):
+        """Plot coil currents for single time-slice"""
+        self.itime = itime
+
+    def plot_waveform(self):
+        """ """
 
 if __name__ == '__main__':
 
     # import doctest
     # doctest.testmod()
 
-    # pulse, run = 114101, 41  # JINTRAC
+    #pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
 
     extrapolate = Extrapolate(pulse, run)
 
     extrapolate.ionize(20)
-    extrapolate.plot('psi')
+    extrapolate.plot_2d('psi')
 
     '''
     index = [index for index in pf_active.data.coil_name.data

@@ -356,11 +356,11 @@ class Extrapolate(Machine, ExtrapolationGrid, Database):
 
         self.aloc['nturn'][ionize] = current / current.sum()
 
-        self.plasmagrid.update_turns('Psi')
+        #self.plasmagrid.update_turns('Psi')
 
         attr = 'Psi'
 
-        Psi = self.plasmagrid.data['Psi'].values[ionize[plasma]]
+        Psi = self.plasmagrid.Psi[ionize[plasma]]
 
         psi = -time_slice._rbs('psi2d')(radius, height)
 

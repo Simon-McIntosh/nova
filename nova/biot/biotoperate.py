@@ -117,10 +117,11 @@ class BiotOperate(BiotData):
         """Link data arrays."""
         self.target_number = self.data.dims['target']
         for attr in self.version:
-            if attr.islower() and attr.capitalize() in self.attrs \
-                    or attr == 'bn':
-                self.version[attr] = None
-                self.array[attr] = np.zeros(self.target_number)
+            if attr.capitalize() in self.attrs or attr == 'bn':
+                if attr.islower():
+                    self.array[attr] = np.zeros(self.target_number)
+                    continue
+                self.array[attr] = self.operator[attr].matrix
 
     def update_turns(self, Attr: str, svd=True):
         """Update plasma turns."""
@@ -146,9 +147,8 @@ class BiotOperate(BiotData):
         """Return variable data - lazy evaluation - cached."""
         attr = attr.replace('_field_', '')
         if attr not in (avalible := [attr for attr in self.version
-                                     if attr.islower() and
-                                     attr.capitalize() in self.attrs or
-                                     attr == 'bn']):
+                                     if attr.capitalize() in self.attrs
+                                     or attr == 'bn']):
             raise AttributeError(f'Attribute {attr} '
                                  f'not defined in {avalible}.')
         if len(self.data) == 0:
@@ -158,6 +158,10 @@ class BiotOperate(BiotData):
         Attr = attr.capitalize()
         if self.version[Attr] != self.subframe.version['nturn']:
             self.update_turns(Attr)
+            print('update', Attr, self.version[Attr])
+        if attr == Attr:
+            print(self.version[Attr], Attr)
+            return self.array[attr]
         if self.version[attr] != (version := self.aloc_hash['Ic']):
             self.version[attr] = version
             self.array[attr][:] = self.operator[Attr].evaluate()

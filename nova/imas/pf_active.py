@@ -41,9 +41,9 @@ class PF_Active(Scenario):
             self.data['time'] = self.ids.time
             coil_names = [self.coil_name(coil).strip()
                           for coil in self.ids.coil]
-            self.data['coil_index'] = range(len(coil_names))
-            self.data['coil_name'] = 'coil_index', coil_names
-            self.data.attrs['pf_active'] = ['time', 'coil_index']
+            self.data['coil_name'] = coil_names
+            self.data['coil_index'] = 'coil_name', range(len(coil_names))
+            self.data.attrs['pf_active'] = ['time', 'coil_name']
             self.initalize()
             for i in range(len(coil_names)):
                 coil = self.ids.coil[i]

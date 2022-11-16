@@ -13,6 +13,7 @@ import xarray
 from nova.imas.database import Database, Ids
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
+from nova.imas.pf_active import PF_Active
 #from nova.imas.properties import Properties
 from nova.utilities.pyplot import plt
 
@@ -182,6 +183,7 @@ class ExtrapolateMachine(Machine):
     pf_active: Ids | bool = True
     pf_passive: Ids | bool = False
     wall: Ids | bool = True
+    nplasma: int = 1500
 
 
 @dataclass
@@ -304,26 +306,14 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
 
     """
 
-    _itime: int = field(init=False, repr=False, default=0)
     filename: str = field(init=False, default='extrapolate')
     equilibrium: Equilibrium = field(init=False, repr=False)
+    itime: int = field(init=False, repr=False, default=0)
 
     def __post_init__(self):
         """Load equilibrium and coilset."""
         self.load_equilibrium()
         super().__post_init__()
-        self._itime = 0
-
-    @property
-    def itime(self):
-        """Manage itime attribute, ionize plasma and solve pf_active."""
-        return self._itime
-
-    @itime.setter
-    def itime(self, itime):
-        if itime is None:
-            return
-        self._itime = itime
 
     def load_equilibrium(self):
         """Load equilibrium dataset."""
@@ -392,12 +382,8 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
         """Expose self._equilibrium plot boundary."""
         return self.equilibrium.plot_boundary(itime)
 
-    def plot_2d(self, attr='psi', itime=None):
+    def plot_2d(self, attr='psi'):
         """Plot plasma filements and polidal flux."""
-        self.itime = itime
-
-        if self.itime != itime and itime is not None:
-            self.ionize(itime)
         super().plot('plasma')
         levels = self.grid.plot(attr, levels=51, colors='C0', nulls=False)
         try:
@@ -407,9 +393,27 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
             pass
         self.plot_boundary(self.itime)
 
-    def plot_bar(self, itime=None):
+    def plot_bar(self):
         """Plot coil currents for single time-slice"""
-        self.itime = itime
+        pf_active = PF_Active(**self.ids_attrs | dict(name='pf_active'))
+
+        index = [name for name in self.subframe.subspace.index
+                 if name in pf_active.data.coil_name.data]
+
+        print(self.sloc[index, ['Ic']].squeeze().values)
+
+        plt.figure()
+        plt.bar(index, 1e-3*self.sloc[index, ['Ic']].squeeze().values)
+        plt.bar(index,
+                1e-3 * pf_active.data.current.isel(time=self.itime).loc[index].data,
+                width=0.5)
+        plt.despine()
+
+        '''
+        pf_active.data.isel(time=20).current.data
+
+        plt.bar()
+        '''
 
     def plot_waveform(self):
         """ """
@@ -419,19 +423,16 @@ if __name__ == '__main__':
     # import doctest
     # doctest.testmod()
 
-    #pulse, run = 114101, 41  # JINTRAC
-    pulse, run = 130506, 403  # CORSICA
+    pulse, run = 114101, 41  # JINTRAC
+    #pulse, run = 130506, 403  # CORSICA
 
     extrapolate = Extrapolate(pulse, run)
 
-    extrapolate.ionize(-1)
+    extrapolate.ionize(0)
     extrapolate.plot_2d('psi')
 
+    #extrapolate.plot_bar()
+
     '''
-    index = [index for index in pf_active.data.coil_name.data
-    if index in extrapolate.sloc.frame.index]
 
-    extrapolate.sloc[index, ['Ic']]
-
-    pf_active.data.isel(time=20).current.data
     '''

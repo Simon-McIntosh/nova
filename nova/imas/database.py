@@ -1,6 +1,6 @@
 """Manage access to IMAS database."""
 from contextlib import contextmanager
-from dataclasses import dataclass, field, InitVar
+from dataclasses import dataclass, field, fields, InitVar
 from typing import ClassVar, Type
 
 try:
@@ -141,12 +141,12 @@ class Database:
 
     """
 
-    pulse: int = field(default=0)
-    run: int = field(default=0)
-    name: str = field(default='')
-    user: str = field(default='public')
-    machine: str = field(default='iter')
-    backend: int = field(default=13)
+    pulse: int = 0
+    run: int = 0
+    name: str | None = None
+    user: str = 'public'
+    machine: str = 'iter'
+    backend: int = 13
     ids: ImasIds | None = field(repr=False, default=None)
 
     attrs: ClassVar[list[str]] = \
@@ -154,9 +154,16 @@ class Database:
 
     def __post_init__(self):
         """Load parameters and set ids."""
+        self.load_name()
         self.load_database()
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
+
+    def load_name(self):
+        """Update name if default is not None."""
+        if (name := next(field for field in fields(self)
+                         if field.name == 'name').default) is not None:
+            self.name = name
 
     @property
     def ids_data(self):

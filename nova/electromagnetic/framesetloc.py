@@ -54,6 +54,7 @@ class LocIndexer:
                     return getattr(self.frame, col)
             self.frame.get_index(key)
             return getattr(self.frame, col)[index]
+        self.frame.update_frame()
         return self.frame.loc[index, col]
 
 

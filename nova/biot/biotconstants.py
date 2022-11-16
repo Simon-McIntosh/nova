@@ -1,6 +1,6 @@
 """Biot-Savart intergration constants."""
 from dataclasses import dataclass, field
-from functools import cache, cached_property, wraps
+from functools import cached_property
 from typing import ClassVar
 
 import dask.array as da
@@ -22,12 +22,11 @@ class BiotConstants:
     r: Array = field(default_factory=lambda: da.zeros_like([]))
     z: Array = field(default_factory=lambda: da.zeros_like([]))
 
-    eps: ClassVar[np.float64] = 1e3 * np.finfo(float).eps
+    eps: ClassVar[np.float64] = 2 * np.finfo(float).eps
 
     def sign(self, x):
         """Return sign of array -1 if x < 0 else 1."""
-        return np.where(x < -self.eps, -1, 1)
-        return 2*(x >= 0) - 1
+        return np.where(x < 1e-10, -1, 1)
 
     @cached_property
     def gamma(self):

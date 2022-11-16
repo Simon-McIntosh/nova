@@ -122,5 +122,5 @@ def extrapolate(ctx, pulse, run, ngrid, nplasma,
 def plot(ctx, itime, attr):
     """Plot extrapolation result at itime."""
     ctx.obj.ionize(itime)
-    ctx.obj.plot(attr)
+    ctx.obj.plot_2d(attr)
     plt.show()

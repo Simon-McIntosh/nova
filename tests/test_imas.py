@@ -4,6 +4,7 @@ from nova.imas.database import Database
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import (MachineGeometry,
                                PoloidalFieldActive, PoloidalFieldPassive)
+from nova.imas.pf_active import PF_Active
 
 ids_attrs = dict(
     pf_active=dict(pulse=111001, run=202, name='pf_active', machine='iter_md'),
@@ -141,6 +142,14 @@ def test_machine_geometry_pf_active_as_itterable():
     pf_active = MachineGeometry(pf_active=pulse_run).pf_active
     assert all(pf_active[attr] == ids_attrs['pf_active'][attr]
                for attr in ids_attrs['pf_active'])
+
+
+@mark['equilibrium']
+def test_pf_active_default_name():
+    equilibrium = Equilibrium(**ids_attrs['equilibrium'])
+    pf_active = PF_Active(**ids_attrs['equilibrium'])
+    assert equilibrium.name == ids_attrs['equilibrium']['name']
+    assert pf_active.name == 'pf_active'
 
 
 if __name__ == '__main__':

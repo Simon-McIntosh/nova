@@ -38,7 +38,9 @@ dependencies = [
   "fabric",
   "fortranformat",
   "gitpython",
+  "h5netcdf",
   "meshio",
+  "moviepy", 
   "netCDF4",
   "numba",
   "numdifftools", 
@@ -99,7 +101,6 @@ spyder = [
   "spyder-memory-profiler", 
   "pylsp-mypy",
   "line_profiler",
-  "moviepy", 
 ]
 test = [
   "coverage2clover", 
@@ -124,7 +125,7 @@ benchmark = "nova.scripts.benchmark:benchmark"
 extrapolate = "nova.imas.scripts:extrapolate"
 
 [project.urls]
-"homepage" = "https://git.iter.org/projects/EQ/repos/nova/"
+homepage = "https://git.iter.org/projects/EQ/repos/nova/"
 
 [tool.versioneer]
 VCS = "git"

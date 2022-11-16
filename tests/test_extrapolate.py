@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 
-from nova.imas.database import Database
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.extrapolate import Extrapolate, ExtrapolationGrid, TimeSlice
 from tests.test_imas import ids_attrs, load_ids, mark
@@ -44,14 +43,14 @@ def test_extrapolate_attrs():
     extrapolate = Extrapolate(**ids_attrs['CORSICA'], ngrid=10, nplasma=10)
     assert extrapolate.pulse == ids_attrs['CORSICA']['pulse']
     assert extrapolate.run == ids_attrs['CORSICA']['run']
-    assert extrapolate.ids.code.name == 'CORSICA'
+    assert extrapolate.ids_data.code.name == 'CORSICA'
 
 
 @mark['CORSICA']
 @pytest.mark.parametrize('itime', [5, 10, 20, 30, 35, 40])
 def test_extrapolate_rms_error(itime):
     equilibrium = Equilibrium(**ids_attrs['CORSICA'])
-    extrapolate = Extrapolate(ids=equilibrium.ids, limit='ids', ngrid=50,
+    extrapolate = Extrapolate(ids=equilibrium.ids_data, limit='ids', ngrid=50,
                               nplasma=250)
     extrapolate.ionize(itime)
     extrapolate_psi = extrapolate.grid.psi_array

@@ -4,12 +4,14 @@ from dataclasses import dataclass
 import numpy as np
 import xarray
 
+from nova.imas.database import ImasIds
+
 
 @dataclass
 class TimeSlice:
     """Manage methods for accessing time slice data."""
 
-    ids: object
+    ids: ImasIds
     data: xarray.Dataset
 
     def __call__(self, name: str, itime: int, index=0):

@@ -23,7 +23,7 @@ class Scenario(IdsData):
     def build_scenario(self):
         """Manage dataset creation and storage."""
         self.data = xarray.Dataset()
-        self.time_slice = TimeSlice(self.ids, self.data)
+        self.time_slice = TimeSlice(self.ids_data, self.data)
         self.data.attrs |= self.ids_attrs
         yield
         self.store()

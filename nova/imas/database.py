@@ -42,7 +42,7 @@ class Database:
 
     Attributes
     ----------
-    ids: ImasIds
+    ids_data: ImasIds
         IMAS ids.
     ids_attrs: dict
         Ids attributes as dict with keys [pulse, run, name, user, machine]
@@ -88,7 +88,8 @@ class Database:
 
     Malformed inputs are thrown as TypeErrors:
 
-    >>> Database(None, 403, 'equilibrium')
+    >>> malformed_database = Database(None, 403, 'equilibrium')
+    >>> malformed_database.ids_data
     Traceback (most recent call last):
         ...
     TypeError: malformed input to imas.DBEntry
@@ -99,7 +100,7 @@ class Database:
     The database class may also be initiated with an ids from which the
     name attribute may be recovered:
 
-    >>> database = Database(ids=equilibrium.ids)
+    >>> database = Database(ids=equilibrium.ids_data)
     >>> database.name
     'equilibrium'
 
@@ -153,9 +154,40 @@ class Database:
 
     def __post_init__(self):
         """Load parameters and set ids."""
-        self.set_ids()
+        self.load_database()
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
+
+    @property
+    def ids_data(self):
+        """Return ids data, lazy load."""
+        if self.ids is None:
+            self.get_ids()
+        return self.ids
+
+    def load_database(self):
+        """Load instance database attributes."""
+        if self.ids is not None:
+            return self._load_from_ids()
+        return self._load_from_attrs()
+
+    def _load_from_ids(self):
+        """
+        Initialize database class directly from an ids.
+
+        Set unknown pulse and run numbers to the ids hash
+        Update name to match ids.__name__
+        """
+        self.pulse = self.run = self.ids_hash
+        self.name = self.ids_data.__name__
+
+    def _load_from_attrs(self):
+        """Confirm minimum working set of input attributes."""
+        if self.pulse == 0 or self.run == 0 or self.name == '':
+            raise ValueError(
+                f'When self.ids is None require:\n'
+                f'pulse ({self.pulse} > 0) & run ({self.run} > 0) & '
+                f'name ("{self.name}" != "")')
 
     @classmethod
     def update_ids_attrs(cls, ids_attrs: bool | Ids):
@@ -169,12 +201,6 @@ class Database:
             return cls(**attrs)
         return False
 
-    def set_ids(self):
-        """Set ids attribute."""
-        if self.ids is None:
-            return self.get_ids()
-        return self.load_ids()
-
     @classmethod
     def default_ids_attrs(cls):
         """Return dict of ids attributes."""
@@ -186,12 +212,7 @@ class Database:
         return {attr: getattr(self, attr) for attr in self.attrs}
 
     def get_ids(self):
-        """Set ids from pulse/run."""
-        if self.pulse == 0 or self.run == 0 or self.name == '':
-            raise ValueError(
-                f'When self.ids is None require:\n'
-                f'pulse ({self.pulse} > 0) & run ({self.run} > 0) & '
-                f'name ("{self.name}" != "")')
+        """Get ids from pulse/run."""
         with self._get_ids() as ids:
             self.ids = ids
 
@@ -229,18 +250,8 @@ class Database:
         underway to provide ids hashes via the IMAS access layer.
         """
         xxh32 = xxhash.xxh32()
-        xxh32.update(self.ids.__str__())
+        xxh32.update(self.ids_data.__str__())
         return xxh32.intdigest()
-
-    def load_ids(self):
-        """
-        Initialize database class directly from an ids.
-
-        Set unknown pulse and run numbers to the ids hash
-        Update name to match ids.__name__
-        """
-        self.pulse = self.run = self.ids_hash
-        self.name = self.ids.__name__
 
 
 @dataclass
@@ -307,7 +318,7 @@ class DataAttrs:
     Attrs may be input as an ids. In this case attrs is returned with
     hashed pulse and run numbers in additional to the original ids attribute:
 
-    >>> attrs = DataAttrs(database.ids).attrs
+    >>> attrs = DataAttrs(database.ids_data).attrs
     >>> attrs['pulse'], attrs['run'], attrs['ids'].__name__
     (3600040824, 3600040824, 'equilibrium')
 

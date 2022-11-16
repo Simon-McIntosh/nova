@@ -11,7 +11,7 @@ import shapely
 from nova.electromagnetic.coilset import CoilSet
 from nova.electromagnetic.shell import Shell
 from nova.geometry.polygon import Polygon
-from nova.imas.database import CoilData, Database, Ids
+from nova.imas.database import CoilData, Database, Ids, ImasIds
 from nova.utilities.pyplot import plt
 
 
@@ -22,7 +22,7 @@ from nova.utilities.pyplot import plt
 class GeomData:
     """Geometry data baseclass."""
 
-    ids: object = field(repr=False)
+    ids: ImasIds = field(repr=False)
     data: dict[str, int | float] = field(init=False, repr=False,
                                          default_factory=dict)
     attrs: ClassVar[list[str]] = []
@@ -191,7 +191,7 @@ class Annulus(GeomData):
 class Geometry:
     """Manage poloidal cross-sections."""
 
-    ids: object = field(repr=False)
+    ids: ImasIds = field(repr=False)
     data: GeomData = field(init=False)
     transform: ClassVar[dict[int, object]] = \
         {1: Outline, 2: Rectangle, 3: Oblique, 4: Arcs, 5: Annulus}
@@ -209,7 +209,7 @@ class Geometry:
 class Loop:
     """Poloidal loop."""
 
-    ids: object = field(repr=False)
+    ids: ImasIds = field(repr=False)
     name: str = field(init=False)
     label: str = field(init=False)
     resistance: float = field(init=False)
@@ -237,7 +237,7 @@ class ActiveLoop(Loop):
 class Element:
     """Poloidal element."""
 
-    ids: object = field(repr=False)
+    ids: ImasIds = field(repr=False)
     index: int = 0
     name: str = field(init=False)
     nturn: float = field(init=False)
@@ -460,7 +460,7 @@ class PoloidalFieldPassive(CoilDatabase):
         """Build pf passive geometroy."""
         shelldata = PassiveShellData()
         coildata = PassiveCoilData()
-        for ids_loop in getattr(self.ids, 'loop'):
+        for ids_loop in getattr(self.ids_data, 'loop'):
             loop = Loop(ids_loop)
             for i, ids_element in enumerate(ids_loop.element):
                 element = Element(ids_element, i)
@@ -519,7 +519,7 @@ class PoloidalFieldActive(CoilDatabase):
 
     def build_coil(self):
         """Build pf active coil geometroy."""
-        for ids_loop in getattr(self.ids, 'coil'):
+        for ids_loop in getattr(self.ids_data, 'coil'):
             loop = ActiveLoop(ids_loop)
             coildata = ActiveCoilData()
             polydata = ActivePolyCoilData()
@@ -545,11 +545,11 @@ class PoloidalFieldActive(CoilDatabase):
     def build_circuit(self):
         """Build circuit influence matrix."""
         supply = [supply.identifier
-                  for supply in getattr(self.ids, 'supply')]
+                  for supply in getattr(self.ids_data, 'supply')]
         nodes = max((len(circuit.connections)
-                     for circuit in getattr(self.ids, 'circuit')))
+                     for circuit in getattr(self.ids_data, 'circuit')))
         self.circuit.initialize(supply, nodes)
-        for circuit in getattr(self.ids, 'circuit'):
+        for circuit in getattr(self.ids_data, 'circuit'):
             self.circuit.insert(circuit.identifier, circuit.connections)
         self.circuit.link()  # link single loop circuits
 
@@ -632,7 +632,7 @@ class Wall(CoilDatabase):
     def build(self):
         """Build plasma bound by firstwall contour."""
         firstwall = ContourData()
-        limiter = getattr(self.ids, 'description_2d').array[0].limiter
+        limiter = getattr(self.ids_data, 'description_2d').array[0].limiter
         for unit in limiter.unit:
             firstwall.append(unit)
         contour = Contour(firstwall.data)  # extract closed loop
@@ -675,7 +675,7 @@ class MachineGeometry:
     Specify pf_active as an ids:
 
     >>> database = Database(111001, 202, 'pf_active', machine='iter_md')
-    >>> pf_active = MachineGeometry(database.ids).pf_active
+    >>> pf_active = MachineGeometry(database.ids_data).pf_active
     >>> pf_active['run']
     1072318551
 

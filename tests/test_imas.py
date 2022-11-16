@@ -35,14 +35,14 @@ def test_pf_active_attrs():
 
 @mark['pf_active']
 def test_pf_active_ids():
-    ids = load_ids(**ids_attrs['pf_active']).ids
+    ids = load_ids(**ids_attrs['pf_active']).ids_data
     assert ids.coil.array[0].identifier == 'CS3U'
 
 
 @mark['pf_active']
 def test_pf_active_properties():
     pf_active = Database(**ids_attrs['pf_active'])
-    assert 'ITER_D_33NHXN' in pf_active.ids.ids_properties.source
+    assert 'ITER_D_33NHXN' in pf_active.ids_data.ids_properties.source
 
 
 @mark['equilibrium']
@@ -66,14 +66,14 @@ def test_database_minimum_required_input():
 def test_database_malformed_input():
     with pytest.raises(TypeError) as error:
         equilibrium = ids_attrs['equilibrium'] | dict(run=None)
-        Database(**equilibrium)
+        Database(**equilibrium).ids_data
     assert 'malformed input to imas.DBEntry' in str(error.value)
 
 
 @mark['equilibrium']
 def test_equilibrium_database_from_ids_str_hash():
     equilibrium_from_attrs = Database(**ids_attrs['equilibrium'])
-    equilibrium_from_ids = Database(ids=equilibrium_from_attrs.ids)
+    equilibrium_from_ids = Database(ids=equilibrium_from_attrs.ids_data)
     assert equilibrium_from_ids.name == ids_attrs['equilibrium']['name']
     assert equilibrium_from_ids.pulse == 3600040824
     assert equilibrium_from_ids.run == 3600040824
@@ -130,7 +130,7 @@ def test_machinegeometry_update_run():
 @mark['pf_active']
 def test_machine_geometry_pf_active_as_ids_hash():
     database = Database(**ids_attrs['pf_active'])
-    pf_active = MachineGeometry(database.ids).pf_active
+    pf_active = MachineGeometry(database.ids_data).pf_active
     assert pf_active['run'] == 1072318551
 
 

@@ -424,7 +424,7 @@ if __name__ == '__main__':
 
     extrapolate = Extrapolate(pulse, run)
 
-    extrapolate.ionize(20)
+    extrapolate.ionize(-1)
     extrapolate.plot_2d('psi')
 
     '''

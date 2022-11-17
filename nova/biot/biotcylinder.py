@@ -1,6 +1,6 @@
 """Biot-Savart calculation for complete circular cylinders."""
 from dataclasses import dataclass
-from functools import cached_property, wraps
+from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
@@ -8,18 +8,6 @@ import quadpy.c1
 
 from nova.biot.biotconstants import BiotConstants
 from nova.biot.biotmatrix import BiotMatrix
-
-
-def gamma_zero(func):
-    """Return result protected against degenerate values as gamma -> 0."""
-    @wraps(func)
-    def wrapper(self):
-        result = func(self)
-        return result
-        result[self.gamma_zero_index] = 0
-        result[np.isclose(self.r - self.rs, 0)] = 0
-        return result
-    return wrapper
 
 
 @dataclass
@@ -65,17 +53,6 @@ class CylinderConstants(BiotConstants):
         return self.gamma*(self.rs - self.r * np.cos(phi)) / \
             (self.r * np.sin(phi) * np.sqrt(self.D2(phi)))
 
-    @cached_property
-    def Cphi_0(self):
-        """Return Cphi(alpha=0) coefficient."""
-        return -1/3*self.r**2 * np.pi/2 * self.sign(self.gamma)
-
-    @cached_property
-    def Cphi_pi_2(self):
-        """Return Cphi(alpha=pi/2) coefficient."""
-        return -1/3*self.r**2 * np.pi/2 * \
-            self.sign(self.gamma * (self.rs - self.r))
-
     def Cphi_alpha(self, alpha):
         """Return Cphi(alpha) coefficient."""
         phi = np.pi - 2*alpha
@@ -90,9 +67,20 @@ class CylinderConstants(BiotConstants):
             np.arctan(self.beta3(phi)) * -np.cos(2*alpha)**3
 
     @cached_property
+    def Cphi_0(self):
+        """Return Cphi(alpha=0) coefficient."""
+        return -1/3*self.r**2 * np.pi/2 * self.sign(self.gamma + self.eps)
+
+    @cached_property
+    def Cphi_pi_2(self):
+        """Return Cphi(alpha=pi/2) coefficient."""
+        return -1/3*self.r**2 * np.pi/2 * \
+            self.sign(self.gamma * (self.rs - self.r) - self.eps)
+
+    @cached_property
     def Cphi(self):
         """Return Cphi intergration constant evaluated between 0 and pi/2."""
-        return self.Cphi_pi_2 - self.Cphi_0
+        return self.Cphi_pi_2 #- self.Cphi_0
 
     @cached_property
     def zeta(self):
@@ -196,37 +184,38 @@ if __name__ == '__main__':
 
     from nova.electromagnetic.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-2, nplasma=30)
+    coilset = CoilSet(dcoil=-2, nplasma=4)
     '''
     coilset.coil.insert(5, 0.5, 0.01, 0.8, segment='cylinder')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, segment='cylinder')
     coilset.coil.insert(5.1, 0.5-0.4, 0.2, 0.01, segment='cylinder')
     coilset.coil.insert(5.2, 0.5, 0.01, 0.8, segment='cylinder')
     '''
-    coilset.firstwall.insert(5, 0, 1, 3,
-                             turn='s', tile=True, segment='cylinder')
+    coilset.firstwall.insert(5, 0, 1, 1,
+                             turn='s', tile=False, segment='cylinder')
 
     #coilset.coil.insert(0.3, 0, 0.15, 0.15, segment='cylinder', delta=-1000)
 
     coilset.saloc['Ic'] = 5e3
-    coilset.plasmagrid.solve()
-    #coilset.grid.solve(1000, 0.1)
+    coilset.grid.solve(40**2, 1)
 
     print()
-    print(np.isfinite(coilset.plasmagrid.psi).all())
-    print(np.sum(~np.isfinite(coilset.plasmagrid.psi)))
-    index = np.where(~np.isfinite(coilset.plasmagrid.data._Psi))
+    print(np.isfinite(coilset.grid.psi).all())
+    print(np.sum(~np.isfinite(coilset.grid.psi)))
+    print(coilset.grid.Psi)
+    index = np.where(~np.isfinite(coilset.grid.data._Psi))
     from nova.utilities.pyplot import plt
 
-    i = 0
-    subindex = np.where(index[0] == index[0][i])
-    plt.plot(coilset.plasmagrid.data.x[index[0][i]],
-             coilset.plasmagrid.data.z[index[0][i]], 'o', ms=12)
-    plt.plot(coilset.plasmagrid.data.x[index[1][subindex]],
-             coilset.plasmagrid.data.z[index[1][subindex]], 'X')
+    if not np.isfinite(coilset.grid.psi).all():
+        i = 0
+        subindex = np.where(index[0] == index[0][i])
+        plt.plot(coilset.grid.data.x[index[0][i]],
+                 coilset.grid.data.z[index[0][i]], 'o', ms=12)
+        plt.plot(coilset.grid.data.x[index[1][subindex]],
+                 coilset.grid.data.z[index[1][subindex]], 'X')
 
     coilset.plot()
-    #levels = coilset.grid.plot('psi', colors='C1', nulls=False)
+    levels = coilset.grid.plot('psi', colors='C1', nulls=False)
 
     '''
     coilset = CoilSet()

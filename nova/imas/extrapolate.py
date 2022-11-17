@@ -183,7 +183,7 @@ class ExtrapolateMachine(Machine):
     pf_active: Ids | bool = True
     pf_passive: Ids | bool = False
     wall: Ids | bool = True
-    nplasma: int = 1500
+    nplasma: int = 500
 
 
 @dataclass
@@ -430,6 +430,7 @@ if __name__ == '__main__':
 
     extrapolate.ionize(0)
     extrapolate.plot_2d('psi')
+    # extrapolate.plasmagrid.plot()
 
     #extrapolate.plot_bar()
 

@@ -183,7 +183,7 @@ class ExtrapolateMachine(Machine):
     pf_active: Ids | bool = True
     pf_passive: Ids | bool = False
     wall: Ids | bool = True
-    nplasma: int = 500
+    nplasma: int = 2000
 
 
 @dataclass

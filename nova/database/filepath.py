@@ -136,7 +136,7 @@ class FilePath:
         """Load dataset from file."""
         file = self.file(filename, path)
         group = self.netcdf_group(group)
-        with xarray.open_dataset(file, group=group, engine='h5netcdf') as data:
+        with xarray.open_dataset(file, group=group) as data:
             self.data = data
-            #self.data.load()
+            self.data.load()
         return self

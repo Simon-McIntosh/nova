@@ -77,7 +77,7 @@ class CylinderConstants(BiotConstants):
         """Return Cphi(alpha=pi/2) coefficient."""
         #return -1/3*self.r**2 * np.arctan(self.beta3(1e-6))
         return -1/3*self.r**2 * np.pi/2 * \
-            self.sign(self.gamma) * self.sign(self.rs - self.r)
+            self.sign(self.gamma * (self.rs - self.r))
 
     @cached_property
     def Cphi(self):
@@ -201,6 +201,14 @@ if __name__ == '__main__':
 
     coilset.saloc['Ic'] = 5e3
     coilset.grid.solve(100, 1)
+
+    coilset = CoilSet(dcoil=-2, nplasma=25**2)
+
+    coilset = CoilSet(dcoil=-5, nplasma=5)
+    #coilset.coil.insert(5, [-1.1, 1.1], 0.75, 0.75, Ic=[1, 1])
+    coilset.firstwall.insert(dict(o=[5.25, 0, 0.5]), Ic=0.5)
+    coilset.grid.solve(3e2, 1.5, 'plasma')  # generate plasma grid
+
 
     print()
     print(np.isfinite(coilset.grid.psi).all())

@@ -76,8 +76,8 @@ def test_equilibrium_database_from_ids_str_hash():
     equilibrium_from_attrs = Database(**ids_attrs['equilibrium'])
     equilibrium_from_ids = Database(ids=equilibrium_from_attrs.ids_data)
     assert equilibrium_from_ids.name == ids_attrs['equilibrium']['name']
-    assert equilibrium_from_ids.pulse == 3600040824
-    assert equilibrium_from_ids.run == 3600040824
+    assert equilibrium_from_ids.pulse != ids_attrs['equilibrium']['pulse']
+    assert equilibrium_from_ids.run != ids_attrs['equilibrium']['run']
     assert equilibrium_from_attrs.ids_hash == equilibrium_from_ids.ids_hash
     assert equilibrium_from_attrs != equilibrium_from_ids
 
@@ -132,7 +132,7 @@ def test_machinegeometry_update_run():
 def test_machine_geometry_pf_active_as_ids_hash():
     database = Database(**ids_attrs['pf_active'])
     pf_active = MachineGeometry(database.ids_data).pf_active
-    assert pf_active['run'] == 1072318551
+    assert pf_active['run'] != ids_attrs['pf_active']['run']
 
 
 @mark['pf_active']

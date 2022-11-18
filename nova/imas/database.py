@@ -84,7 +84,7 @@ class Database:
     Traceback (most recent call last):
         ...
     ValueError: When self.ids is None require:
-    pulse (0 > 0) & run (0 > 0) & name ("" != "")
+    pulse (0 > 0) & run (0 > 0) & name (None != None)
 
     Malformed inputs are thrown as TypeErrors:
 
@@ -109,8 +109,10 @@ class Database:
     the ids. This enables automatic caching of ids derived data by downstream
     actors:
 
-    >>> database.pulse, database.run
-    (3600040824, 3600040824)
+    >>> database.pulse != 130506
+    True
+    >>> database.run != 403
+    True
 
     The equilibrium and database instances may be shown to share the same ids
     by comparing their respective hashes:
@@ -136,8 +138,12 @@ class Database:
     Database instances may be created via the from_ids_attrs class method:
 
     >>> database = Database.from_ids_attrs(equilibrium.ids)
-    >>> database.pulse, database.run, database.name
-    (3600040824, 3600040824, 'equilibrium')
+    >>> database.pulse != 130506
+    True
+    >>> database.run != 403
+    True
+    >>> database.name
+    'equilibrium'
 
     """
 
@@ -194,7 +200,7 @@ class Database:
             raise ValueError(
                 f'When self.ids is None require:\n'
                 f'pulse ({self.pulse} > 0) & run ({self.run} > 0) & '
-                f'name ("{self.name}" != "")')
+                f'name ({self.name} != None)')
 
     @classmethod
     def update_ids_attrs(cls, ids_attrs: bool | Ids):
@@ -326,8 +332,12 @@ class DataAttrs:
     hashed pulse and run numbers in additional to the original ids attribute:
 
     >>> attrs = DataAttrs(database.ids_data).attrs
-    >>> attrs['pulse'], attrs['run'], attrs['ids'].__name__
-    (3600040824, 3600040824, 'equilibrium')
+    >>> attrs['pulse'] != 130506
+    True
+    >>> attrs['run'] != 403
+    True
+    >>> attrs['ids'].__name__
+    'equilibrium'
 
     Attrs may be input as a list or tuple of args. This input is
     expanded by the passed subclass and must resolve to a valid ids. Partial

@@ -1,8 +1,10 @@
 """Manage local data files."""
-import os
-import glob
 from dataclasses import dataclass
+import glob
+import os
+import pathlib
 
+import appdirs
 import numpy as np
 
 from nova.definitions import root_dir
@@ -26,7 +28,7 @@ class LocalData:
     @property
     def parent_directory(self):
         """Return full path to parent directory."""
-        return self.getdir(os.path.join(root_dir, 'data'), self.parent)
+        return appdirs.user_data_dir(appname=self.parent)
 
     @property
     def experiment_directory(self):
@@ -53,7 +55,7 @@ class LocalData:
     @staticmethod
     def _mkdir(directory):
         if directory and not os.path.isdir(directory):
-            os.mkdir(directory)
+            pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
 
     def checkdir(self):
         """Return booliean status of all tracked local directories."""

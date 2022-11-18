@@ -31,6 +31,8 @@ class Circuit(netCDF, FrameSetLoc):
         data['circuit'] = [circuit]
         connection = connection[:, :2*self.data.dims['edge']]
         data['incidence_matrix'] = ('node', 'edge'), \
+            np.zeros((self.data.dims['node'], self.data.dims['edge']))
+        data['incidence_matrix'][:len(connection)] = \
             -connection[:, ::2] + connection[:, 1::2]
         self.data = xarray.concat([self.data, data], 'circuit')
 

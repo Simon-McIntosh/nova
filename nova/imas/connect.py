@@ -1,6 +1,7 @@
 """Query and copy / rsync IMAS ids from SDCC to local filesytem."""
 from dataclasses import dataclass, field
 import io
+import pathlib
 import re
 import subprocess
 from typing import Union, ClassVar
@@ -100,6 +101,7 @@ class Connect:
         """Syncronize SDCC remote (user)/public with local IMAS database."""
         public = f'/home/ITER/{self.username}/public/imasdb/{self.machine}/'
         local = f'/home/{self.username}/imas/shared/imasdb/{self.machine}/'
+        pathlib.Path(local).mkdir(parents=True, exist_ok=True)
         command = f'rsync -aP {self.cluster}:{public} {local}'
         subprocess.run(command.split())
 
@@ -111,7 +113,7 @@ class Connect:
 
 
 @dataclass
-class Scenario(Connect):
+class ScenarioDatabase(Connect):
     """Manage public and local scenario data."""
 
     command: str = 'scenario_summary'
@@ -143,7 +145,7 @@ class Scenario(Connect):
 
 
 @dataclass
-class Machine(Connect):
+class MachineDatabase(Connect):
     """Manage public and local machine data."""
 
     command: str = 'md_summary'
@@ -196,19 +198,19 @@ class Machine(Connect):
 if __name__ == '__main__':
     pass
 
-    #machine = Machine().sync_ids()
+    #machine = MachineDatabase().sync_ids()
     #machine.load_ids('pf_active')
     #print(machine.frame)
 
-    # Machine(user='hosokam', machine='ITER_MD').sync_shot('111001/202')
+    # MachineDatabase(user='hosokam', machine='ITER_MD').sync_shot('111001/202')
 
-    # Machine(machine='ITER_MD').sync_shot('150100/4')
+    # MachineDatabase(machine='ITER_MD').sync_shot('150100/4')
 
-    # Scenario(user='tribolp').sync_shot('135011/21')
+    # ScenarioDatabase(user='tribolp').sync_shot('135011/21')
 
-    #Scenario().sync_shot('130012/1')
-    #scenario = Scenario()
+    #ScenarioDatabase().sync_shot('130012/1')
+    #scenario = ScenarioDatabase()
     #scenario.load_frame('workflow', 'CORSICA')
-    #Scenario().sync_workflow('CORSICA')
+    #ScenarioDatabase().sync_workflow('CORSICA')
 
-    #Scenario().sync_shot('114101/41')
+    #ScenarioDatabase().sync_shot('114101/41')

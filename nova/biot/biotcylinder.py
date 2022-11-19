@@ -70,20 +70,22 @@ class CylinderConstants(BiotConstants):
     def Cphi_0(self):
         """Return Cphi(alpha=0) coefficient."""
         #return -1/3*self.r**2 * np.arctan(self.beta3(np.pi))
-        return 1/3*self.r**2 * np.pi/2 * self.sign(self.gamma)
+        return 1/3*self.r**2 * np.pi/2 * np.sign(self.gamma)
 
     @cached_property
     def Cphi_pi_2(self):
         """Return Cphi(alpha=pi/2) coefficient."""
         #return -1/3*self.r**2 * np.arctan(self.beta3(1e-6))
         return -1/3*self.r**2 * np.pi/2 * \
-            self.sign(self.gamma * (self.rs - self.r))
+            (np.sign(self.gamma) * self.sign(self.rs - self.r))
 
     @cached_property
     def Cphi(self):
         """Return Cphi intergration constant evaluated between 0 and pi/2."""
         #return self.Cphi_alpha(np.pi/2-1e-6) - self.Cphi_alpha(1e-6)
-        return self.Cphi_pi_2 - self.Cphi_0
+        #return self.Cphi_pi_2 - self.Cphi_0
+        return  -1/3*self.r**2 * np.pi/2 * self.sign(self.gamma) * (
+            self.sign(self.rs - self.r) + 1)
 
     @cached_property
     def zeta(self):
@@ -199,6 +201,7 @@ if __name__ == '__main__':
 
     #coilset.coil.insert(0.3, 0, 0.15, 0.15, segment='cylinder', delta=-1000)
 
+    '''
     coilset.saloc['Ic'] = 5e3
     coilset.grid.solve(100, 1)
 
@@ -208,6 +211,12 @@ if __name__ == '__main__':
     #coilset.coil.insert(5, [-1.1, 1.1], 0.75, 0.75, Ic=[1, 1])
     coilset.firstwall.insert(dict(o=[5.25, 0, 0.5]), Ic=0.5)
     coilset.grid.solve(3e2, 1.5, 'plasma')  # generate plasma grid
+    '''
+
+    coilset = CoilSet(dcoil=-1)
+    coilset.coil.insert(6.5, [-1, 0, 1], 0.4, 0.4, Ic=-15e6,
+                        segment='cylinder')
+    coilset.grid.solve(60, [6, 7.0, -0.8, 0.8])
 
 
     print()

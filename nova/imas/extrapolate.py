@@ -183,7 +183,7 @@ class ExtrapolateMachine(Machine):
     pf_active: Ids | bool = True
     pf_passive: Ids | bool = False
     wall: Ids | bool = True
-    nplasma: int = 2000
+    nplasma: int = 2500
 
 
 @dataclass
@@ -373,7 +373,8 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
 
         #U = self.plasmagrid.dat
 
-        alpha = 1e-6
+        alpha = 1.2e-6
+        #alpha = 0
 
         target = psi - Psi[:, -1]*time_slice.ip
         self.saloc['Ic'][:-2] = V.T @ ((U.T @ target) * s / (s**2 + alpha**2))
@@ -400,13 +401,16 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
         index = [name for name in self.subframe.subspace.index
                  if name in pf_active.data.coil_name.data]
 
-        print(self.sloc[index, ['Ic']].squeeze().values)
+        #print(self.sloc[index, ['Ic']].squeeze().values)
 
         plt.figure()
         plt.bar(index, 1e-3*self.sloc[index, ['Ic']].squeeze().values)
         plt.bar(index,
                 1e-3 * pf_active.data.current.isel(time=self.itime).loc[index].data,
                 width=0.5)
+
+        print(np.linalg.norm(1e-3*self.sloc[index, ['Ic']].squeeze().values -
+                             1e-3 * pf_active.data.current.isel(time=self.itime).loc[index].data))
         plt.despine()
 
         '''
@@ -429,7 +433,7 @@ if __name__ == '__main__':
     extrapolate = Extrapolate(pulse, run)
 
     extrapolate.ionize(0)
-    extrapolate.plot_2d('psi')
+    extrapolate.plot_2d('br')
     # extrapolate.plasmagrid.plot()
 
     #extrapolate.plot_bar()

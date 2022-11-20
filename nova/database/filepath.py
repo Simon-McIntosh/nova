@@ -129,14 +129,15 @@ class FilePath:
         """Store data within hdf file."""
         file = self.file(filename, path)
         group = self.netcdf_group(group)
-        self.data.to_netcdf(file, group=group, mode=self.mode(file))
+        self.data.to_netcdf(file, group=group, engine='h5netcdf',
+                            mode=self.mode(file))
         return self
 
     def load(self, filename=None, path=None, group=None):
         """Load dataset from file."""
         file = self.file(filename, path)
         group = self.netcdf_group(group)
-        with xarray.open_dataset(file, group=group) as data:
+        with xarray.open_dataset(file, group=group, engine='h5netcdf') as data:
             self.data = data
             self.data.load()
         return self

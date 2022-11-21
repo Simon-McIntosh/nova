@@ -26,8 +26,7 @@ class BiotConstants:
 
     def sign(self, x):
         """Return sign of array -1 if x < 0 else 1."""
-        #return np.sign(x)
-        return np.where(abs(x) > 1e-10, np.sign(x), 0)
+        return np.where(abs(x) > 1e3*self.eps, np.sign(x), 0)
 
     @cached_property
     def gamma(self):

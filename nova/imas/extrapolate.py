@@ -15,6 +15,7 @@ from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
 from nova.imas.pf_active import PF_Active
 #from nova.imas.properties import Properties
+from nova.linalg.regression import MoorePenrose
 from nova.utilities.pyplot import plt
 
 # pylint: disable=too-many-ancestors
@@ -306,20 +307,27 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
 
     """
 
+    alpha: float = 1.2e-6
+    nturn: int = 10
     filename: str = field(init=False, default='extrapolate')
     equilibrium: Equilibrium = field(init=False, repr=False)
-    itime: int = field(init=False, repr=False, default=0)
+    time_slice: TimeSlice = field(init=False, repr=False)
 
     def __post_init__(self):
         """Load equilibrium and coilset."""
         self.load_equilibrium()
         super().__post_init__()
+        self.set_free()
 
     def load_equilibrium(self):
         """Load equilibrium dataset."""
         self.name = 'equilibrium'
         self.equilibrium = Equilibrium(**self.ids_attrs, ids=self.ids)
-        self.data = self.equilibrium.data
+
+    def set_free(self):
+        """Set free coils."""
+        self.saloc['free'] = [self.loc[name, 'nturn'] >= self.nturn
+                              for name in self.sloc.frame.index]
 
     '''
     def update_metadata(self):
@@ -343,41 +351,45 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
         self.grid.solve(**self.grid_attrs)
         return self.store(self.filename)
 
-    def ionize(self, itime: int):
-        """Update plasma current."""
-        self.itime = itime
+    @property
+    def itime(self) -> int:
+        """Return time slice."""
+        return int(self.time_slice.data.itime)
 
-        time_slice = TimeSlice(self.data.isel(time=self.itime))
-        self.plasma.separatrix = time_slice.boundary
-        self.sloc['plasma', 'Ic'] = time_slice.ip
+    def _update_time_slice(self, itime: int):
+        """Update time slice instance."""
+        self.time_slice = TimeSlice(self.equilibrium.data.isel(time=itime))
 
-        plasma = self.aloc['plasma']
+    def _update_turns(self):
+        """Update plasma current distribution via filament nturns."""
+        self.plasma.separatrix = self.time_slice.boundary
+        self.sloc['plasma', 'Ic'] = self.time_slice.ip
         ionize = self.aloc['ionize']
         radius = self.aloc['x'][ionize]
         height = self.aloc['z'][ionize]
-        psi = time_slice.psi_rbs(radius, height)
-        psi_norm = time_slice.normalize(psi)
-
-        current_density = radius * time_slice.p_prime(psi_norm) + \
-            time_slice.ff_prime(psi_norm) / (mu_0 * radius)
+        psi = self.time_slice.psi_rbs(radius, height)
+        psi_norm = self.time_slice.normalize(psi)
+        current_density = radius * self.time_slice.p_prime(psi_norm) + \
+            self.time_slice.ff_prime(psi_norm) / (mu_0 * radius)
         current_density *= -2*np.pi
         current = current_density * self.aloc['area'][ionize]
-
         self.aloc['nturn'][ionize] = current / current.sum()
 
-        Psi = self.plasmagrid['Psi'][ionize[plasma]]
-
-        psi = -time_slice._rbs('psi2d')(radius, height)
-
-        U, s, V = np.linalg.svd(Psi[:, :-2], full_matrices=False)
-
-        #U = self.plasmagrid.dat
-
-        alpha = 1.2e-6
-        #alpha = 0
-
-        target = psi - Psi[:, -1]*time_slice.ip
-        self.saloc['Ic'][:-2] = V.T @ ((U.T @ target) * s / (s**2 + alpha**2))
+    def ionize(self, itime: int):
+        """Solve pf_active currents to fit internal flux."""
+        self._update_time_slice(itime)
+        self._update_turns()
+        ionize = self.aloc['ionize']
+        plasma = self.aloc['plasma']
+        radius = self.aloc['x'][ionize]
+        height = self.aloc['z'][ionize]
+        plasma_index = self.plasmagrid.data.plasma_index
+        matrix = self.plasmagrid['Psi'][ionize[plasma]]
+        internal = -self.time_slice._rbs('psi2d')(radius, height)  # COCOS11
+        target = internal - matrix[:, plasma_index]*self.time_slice.ip
+        moore_penrose = MoorePenrose(matrix=matrix[:, self.saloc['free']],
+                                     alpha=self.alpha)
+        self.saloc['Ic'][self.saloc['free']] = moore_penrose / target
 
     def plot_boundary(self, itime: int):
         """Expose self._equilibrium plot boundary."""
@@ -428,15 +440,15 @@ if __name__ == '__main__':
     # doctest.testmod()
 
     pulse, run = 114101, 41  # JINTRAC
-    #pulse, run = 130506, 403  # CORSICA
+    pulse, run = 130506, 403  # CORSICA
 
-    extrapolate = Extrapolate(pulse, run)
+    extrapolate = Extrapolate(pulse, run, ngrid=500, nplasma=100)
 
-    extrapolate.ionize(0)
-    extrapolate.plot_2d('br')
+    extrapolate.ionize(-1)
+    extrapolate.plot_2d('b_field_r')
     # extrapolate.plasmagrid.plot()
 
-    #extrapolate.plot_bar()
+    extrapolate.plot_bar()
 
     '''
 

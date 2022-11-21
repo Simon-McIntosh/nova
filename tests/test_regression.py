@@ -168,9 +168,9 @@ def test_moore_penrose(matrix_shape):
     data = rng.random(matrix.shape[0])
     ols = OdinaryLeastSquares(matrix)
     ols /= data
-    mp = MoorePenrose(matrix, rank=min(matrix_shape))
-    mp /= data
-    assert(np.allclose(ols.model, mp.model))
+    mpen = MoorePenrose(matrix, rank=min(matrix_shape))
+    mpen /= data
+    assert np.allclose(ols.model, mpen.model)
 
 
 if __name__ == '__main__':

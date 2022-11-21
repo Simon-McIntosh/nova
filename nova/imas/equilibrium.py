@@ -234,6 +234,7 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
         """Build netCDF database using data extracted from imasdb."""
         with self.build_scenario():
             self.data['time'] = self.ids_data.time
+            self.data['itime'] = 'time', range(len(self.data['time']))
             super().build()
         return self
 

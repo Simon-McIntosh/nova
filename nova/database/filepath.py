@@ -31,17 +31,20 @@ class FilePath:
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
 
-    @staticmethod
-    def get_path(directory: str, subpath: str) -> str:
+    @property
+    def _tag(self):
+        """Return nova tag."""
+        return nova.__version__.split('+')[0]
+
+    def get_path(self, directory: str, subpath: str) -> str:
         """Return full filepath."""
         if hasattr(appdirs, (appattr := f'{directory}_dir')):
             app = getattr(appdirs, appattr)
             if subpath == 'nova':
-                version_tag = nova.__version__.split('+')[0]
-                return app(nova.__name__, version=version_tag)
+                return app(nova.__name__, version=self._tag)
             if subpath == 'imas' and IMPORT_IMAS:
-                name, version = imas.__name__.split('_', 1)
-                return app(appname=name, version=version)
+                return app(nova.__name__,
+                           version=f'{self._tag}/{imas.__name__}')
             return app(subpath)
         if directory == 'root':
             directory = root_dir
@@ -129,15 +132,14 @@ class FilePath:
         """Store data within hdf file."""
         file = self.file(filename, path)
         group = self.netcdf_group(group)
-        self.data.to_netcdf(file, group=group, engine='h5netcdf',
-                            mode=self.mode(file))
+        self.data.to_netcdf(file, group=group, mode=self.mode(file))
         return self
 
     def load(self, filename=None, path=None, group=None):
         """Load dataset from file."""
         file = self.file(filename, path)
         group = self.netcdf_group(group)
-        with xarray.open_dataset(file, group=group, engine='h5netcdf') as data:
+        with xarray.open_dataset(file, group=group) as data:
             self.data = data
             self.data.load()
         return self

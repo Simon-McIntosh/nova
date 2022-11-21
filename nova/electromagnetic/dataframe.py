@@ -240,6 +240,11 @@ class DataFrame(FrameAttrs):
         return np.array([isinstance(geom, self.geoframe[geo])
                          for geom in self[col]], dtype=bool)
 
+    def _astype(self, metadata: dict[str, list[str]], dtype: str) -> dict:
+        """Return type cast metadata dict ."""
+        return {key: np.array(value, dtype=dtype).tolist()
+                for key, value in metadata.items()}
+
     def extract_metadata(self) -> dict:
         """Return metadata with version as attribute list."""
         metadata = copy.deepcopy(self.metaframe.metadata)
@@ -267,12 +272,11 @@ class DataFrame(FrameAttrs):
                 xframe[col].values = self._dumps(col)
             except KeyError:
                 pass
-        xframe.to_netcdf(file, group=group, engine='h5netcdf', mode=mode)
+        xframe.to_netcdf(file, group=group, mode=mode)
 
     def load(self, file, group=None):
         """Load dataframe from hdf file."""
-        with xarray.open_dataset(file, group=group, engine='h5netcdf') as data:
-            data.load()
+        with xarray.open_dataset(file, group=group) as data:
             metadata = self.insert_metadata(data.attrs)
             self.__init__(data.to_dataframe(), **metadata)
         for col in ['poly', 'vtk']:

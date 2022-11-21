@@ -74,29 +74,6 @@ class FrameSet(FilePath, FrameSetLoc):
             return dataset[self.group]
         return dataset
 
-    def load_metadata(self, filename=None, path=None):
-        """Return metadata from netCDF file."""
-        file = self.file(filename, path)
-        metadata = {}
-        with netCDF4.Dataset(file) as dataset:
-            dataset = self.subset(dataset)
-            if not hasattr(dataset, 'metadata'):
-                return {}
-            for attr in dataset.metadata:
-                metadata[attr] = getattr(dataset, attr)
-        return metadata
-
-    def store_metadata(self, filename=None, path=None, metadata=None):
-        """Store metadata to netCDF file."""
-        if metadata is None:
-            return
-        file = self.file(filename, path)
-        with netCDF4.Dataset(file, 'a') as dataset:
-            dataset = self.subset(dataset)
-            dataset.metadata = list(metadata)
-            for attr in metadata:
-                setattr(dataset, attr, metadata[attr])
-
     @property
     def subgroup(self):
         """Return netcdf group."""

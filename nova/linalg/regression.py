@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 
 import numba
 import numpy as np
-import numpy.typing as npt
 from pylops import LinearOperator
 from pylops.optimization.leastsquares import RegularizedInversion
 
@@ -17,10 +16,10 @@ from nova.utilities.plotter import LinePlot
 class RegressionBase(LinePlot):
     """Implement full-matrix forward and inverse models."""
 
-    matrix: npt.ArrayLike = field(repr=False)
-    coordinate: npt.ArrayLike = field(repr=False, default=None)
-    model: npt.ArrayLike = field(default=None)
-    data: npt.ArrayLike = field(repr=False, default=None)
+    matrix: np.ndarray = field(repr=False)
+    coordinate: np.ndarray | None = field(repr=False, default=None)
+    model: np.ndarray | None = field(default=None)
+    data: np.ndarray | None = field(repr=False, default=None)
 
     def __post_init__(self):
         """Update coordinate, model, and data."""
@@ -135,7 +134,6 @@ class OdinaryLeastSquares(RegressionBase):
     """Implement full-matrix forward and inverse models."""
 
     @staticmethod
-    @numba.njit
     def _lstsq(matrix, data):
         """Calcuate inverse vir numpy's lstsq method."""
         return np.linalg.lstsq(matrix, data)[0]
@@ -174,8 +172,8 @@ class Lops(RegressionBase, LinearOperator):
 class MoorePenrose(RegressionBase):
     """Fast operators for linear regression analysis using pseudoinverse."""
 
-    rank: int = 10
-    svd: bool = True
+    alpha: float = 0
+    rank: int = 0
 
     def __post_init__(self):
         """Perform matrix reduction."""
@@ -189,22 +187,17 @@ class MoorePenrose(RegressionBase):
 
     def _forward(self):
         """Call numba forward model - apply svd reduction if flag==True."""
-        if self.svd:
-            return self.__forward(self.matrices['U'], self.matrices['s'],
-                                  self.matrices['Vh'], self.model)
-        return super()._forward()
+        self.__forward(self.matrices['U'], self.matrices['s'],
+                       self.matrices['Vh'], self.model)
 
-    @staticmethod
-    def __inverse(V, s, Uh, data):
+    def __inverse(self, V, s, Uh, data):
         """Calcuate inverse via svd psudo inverse."""
-        return V @ ((Uh @ data) / s)
+        return V @ ((Uh @ data) * s / (s**2 + self.alpha**2))
 
     def _inverse(self):
         """Extend Regression._inverse to include option for svd reduction."""
-        if self.svd:
-            return self.__inverse(self.matrices['V'], self.matrices['s'],
-                                  self.matrices['Uh'], self.data)
-        return super()._inverse()
+        return self.__inverse(self.matrices['V'], self.matrices['s'],
+                              self.matrices['Uh'], self.data)
 
 
 if __name__ == '__main__':

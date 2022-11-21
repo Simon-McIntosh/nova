@@ -2,7 +2,6 @@
 from abc import abstractmethod
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-import os
 
 import xarray
 
@@ -32,18 +31,10 @@ class Scenario(IdsData):
     def build(self):
         """Build netCDF group from ids."""
 
-    def store(self, mode='a'):
-        """Store data within hdf file."""
-        if self.filename is None:
-            return
-        file = self.file(self.filename)
-        if not os.path.isfile(file):
-            mode = 'w'
-        self.data.to_netcdf(file, group=self.name, mode=mode)
+    def store(self):
+        """Extend FilePath.store."""
+        return super().store(group=self.name)
 
     def load(self):
-        """Load dataset from file (lazy)."""
-        file = self.file(self.filename)
-        with xarray.open_dataset(file, group=self.name) as data:
-            self.data = data
-        return self
+        """Extend FilePath.load."""
+        return super().load(group=self.name)

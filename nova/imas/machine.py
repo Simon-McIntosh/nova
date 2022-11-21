@@ -789,13 +789,13 @@ class Machine(CoilSet, MachineGeometry, CoilData):
     def load(self, filename=None, path=None):
         """Load machine geometry and data."""
         super().load(filename, path)
-        self.metadata = self.load_metadata(filename, path)
+        #self.metadata = self.load_metadata(filename, path)
         return self
 
     def store(self, filename=None, path=None):
         """Store frameset, biot attributes and metadata."""
         super().store(filename, path)
-        self.store_metadata(filename, path, self.metadata)
+        #self.store_metadata(filename, path, self.metadata)
         return self
 
 

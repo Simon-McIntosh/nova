@@ -3,7 +3,7 @@ import pytest
 
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.extrapolate import Extrapolate, ExtrapolationGrid, TimeSlice
-from tests.test_imas import ids_attrs, load_ids, mark
+from nova.imas.utilities import ids_attrs, load_ids, mark
 
 ids_attrs['CORSICA'] = dict(pulse=130506, run=403, name='equilibrium')
 mark['CORSICA'] = pytest.mark.skipif(not load_ids(**ids_attrs['CORSICA']),

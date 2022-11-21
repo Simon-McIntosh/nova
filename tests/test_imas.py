@@ -5,25 +5,7 @@ from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import (MachineGeometry,
                                PoloidalFieldActive, PoloidalFieldPassive)
 from nova.imas.pf_active import PF_Active
-
-ids_attrs = dict(
-    pf_active=dict(pulse=111001, run=202, name='pf_active', machine='iter_md'),
-    equilibrium=dict(pulse=130506, run=403, name='equilibrium'),
-    wall=dict(pulse=116000, run=2, name='wall', machine='iter_md'),
-    pf_passive=dict(pulse=115005, run=2, name='pf_passive', machine='iter_md'))
-
-
-def load_ids(*args, **kwargs):
-    try:
-        return Database(*args, **kwargs)
-    except Exception:
-        return False
-
-
-mark = {}
-for attr in ids_attrs:
-    mark[attr] = pytest.mark.skipif(
-        not load_ids(**ids_attrs[attr]), reason=f'{attr} database unavalible')
+from nova.imas.utilities import ids_attrs, load_ids, mark
 
 
 @mark['pf_active']

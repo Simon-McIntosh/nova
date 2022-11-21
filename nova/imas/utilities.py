@@ -1,0 +1,34 @@
+"""Manage test utility funcitons."""
+import pytest
+
+from nova.imas.database import Database
+
+try:
+    import imas
+    IMPORT_IMAS = True
+except ImportError:
+    IMPORT_IMAS = False
+
+ids_attrs = dict(
+    pf_active=dict(pulse=111001, run=202, name='pf_active', machine='iter_md'),
+    equilibrium=dict(pulse=130506, run=403, name='equilibrium'),
+    wall=dict(pulse=116000, run=2, name='wall', machine='iter_md'),
+    pf_passive=dict(pulse=115005, run=2, name='pf_passive', machine='iter_md'))
+
+
+def load_ids(*args, **kwargs):
+    """Return database instance."""
+    if not IMPORT_IMAS:
+        return False
+    try:
+        database = Database(*args, **kwargs)
+        database.get_ids()
+        return database
+    except (ModuleNotFoundError, imas.hli_exception.ALException):
+        return False
+
+
+mark = {}
+for attr in ids_attrs:
+    mark[attr] = pytest.mark.skipif(
+        not load_ids(**ids_attrs[attr]), reason=f'{attr} database unavalible')

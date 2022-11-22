@@ -442,14 +442,10 @@ if __name__ == '__main__':
     pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
 
-    extrapolate = Extrapolate(pulse, run, ngrid=500, nplasma=100)
+    extrapolate = Extrapolate(pulse, run)
 
-    extrapolate.ionize(-1)
-    extrapolate.plot_2d('b_field_r')
+    # extrapolate.ionize(20)
+    # extrapolate.plot_2d('psi')
     # extrapolate.plasmagrid.plot()
 
-    extrapolate.plot_bar()
-
-    '''
-
-    '''
+    # extrapolate.plot_bar()

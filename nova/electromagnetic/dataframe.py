@@ -276,7 +276,7 @@ class DataFrame(FrameAttrs):
 
     def load(self, file, group=None):
         """Load dataframe from hdf file."""
-        with xarray.open_dataset(file, group=group) as data:
+        with xarray.open_dataset(file, group=group, cache=False) as data:
             metadata = self.insert_metadata(data.attrs)
             self.__init__(data.to_dataframe(), **metadata)
         for col in ['poly', 'vtk']:

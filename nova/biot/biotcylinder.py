@@ -3,11 +3,23 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import ClassVar
 
+import numba
 import numpy as np
 import quadpy.c1
 
 from nova.biot.biotconstants import BiotConstants
 from nova.biot.biotmatrix import BiotMatrix
+
+
+@numba.njit(parallel=True)
+def zeta(r, rs, z, zs, phi, weight):
+    """Return zeta coefficent."""
+    result = np.zeros_like(r)
+    for i in numba.prange(len(phi)):
+        result += weight[i] * np.arcsinh(
+            (rs - r * np.cos(phi[i])) /
+            np.sqrt((zs - z)**2 + r**2 * np.sin(phi[i])**2))
+    return result
 
 
 @dataclass
@@ -36,13 +48,14 @@ class CylinderConstants(BiotConstants):
         """Return D2 coefficient."""
         return self.gamma**2 + self.B2(phi)
 
-    def G2(self, phi):
+    def G2(self, phi, shape=(...)):
         """Return G2 coefficient."""
-        return self.gamma**2 + self.r**2 * np.sin(phi)**2
+        return self.gamma[shape]**2 + self.r[shape]**2 * np.sin(phi)**2
 
-    def beta1(self, phi):
+    def beta1(self, phi, shape=(...)):
         """Return beta1 coefficient."""
-        return (self.rs - self.r * np.cos(phi)) / np.sqrt(self.G2(phi))
+        return (self.rs[shape] - self.r[shape] * np.cos(phi)) / \
+            np.sqrt(self.G2(phi, shape))
 
     def beta2(self, phi):
         """Return beta2 coefficient."""
@@ -75,7 +88,12 @@ class CylinderConstants(BiotConstants):
     @cached_property
     def zeta(self):
         """Return zeta coefficient calculated using Romberg integration."""
-        result = np.zeros_like(self.r)
+        #return np.sum(self.phi_weights * np.arcsinh(
+        #    self.beta1(self.phi_points, shape=(..., np.newaxis))), axis=-1)
+        return zeta(self.r, self.rs, self.z, self.zs,
+                    self.phi_points, self.phi_weights)
+
+        result = np.zeros_like(self.r, np.float_)
         for phi, weight in zip(self.phi_points, self.phi_weights):
             result += weight * np.arcsinh(self.beta1(phi))
         return result
@@ -174,31 +192,18 @@ if __name__ == '__main__':
 
     from nova.electromagnetic.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-1, nplasma=15**2)
+    coilset = CoilSet(dcoil=-1, nplasma=15**2, field_attrs=['Psi', 'Br'])
+    '''
     coilset.coil.insert(5, 0.5, 0.01, 0.8, segment='cylinder')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, segment='cylinder')
     coilset.coil.insert(5.1, 0.5-0.4, 0.2, 0.01, segment='cylinder')
     coilset.coil.insert(5.2, 0.5, 0.01, 0.8, segment='cylinder')
+    '''
     coilset.firstwall.insert(5.1, 0.52, 0.05, 0.05,
                              turn='s', tile=False, segment='cylinder')
 
     coilset.saloc['Ic'] = 5e3
-    coilset.grid.solve(2000, 1)
-
-    print()
-    print(np.isfinite(coilset.grid.psi).all())
-    print(np.sum(~np.isfinite(coilset.grid.psi)))
+    coilset.grid.solve(1000, 0.5)
 
     coilset.plot()
     coilset.grid.plot('psi', colors='C1', nulls=True)
-
-    '''
-    coilset = CoilSet()
-    coilset.coil.insert(2, 0, 0.5, 0.5, section='r', turn='r',
-                        delta=-8**2, tile=False, segment='ring')
-    coilset.saloc['Ic'] = 5e3
-
-    coilset.grid.solve(50**2, 0)
-    levels = coilset.grid.plot('psi', colors='C0', nulls=False,
-                               levels=levels)
-    '''

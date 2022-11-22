@@ -20,7 +20,9 @@ from nova.electromagnetic.plasma import Plasma
 class Biot(FrameSet):
     """Expose biot methods as cached properties."""
 
+    field_attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     dfield: float = field(default=-1, repr=False)
+
     biot_class: ClassVar[dict[str, Any]] = \
         dict(point=BiotPoint, grid=BiotGrid,
              plasmaboundary=BiotPlasmaBoundary, plasmagrid=BiotPlasmaGrid,
@@ -30,12 +32,13 @@ class Biot(FrameSet):
         """Return nammed biot instance."""
         attr = inspect.getframeinfo(inspect.currentframe().f_back, 0)[2]
         return self.biot_class[attr](*self.frames, path=self.path, name=attr,
-                                     filename=self.filename)
+                                     filename=self.filename,
+                                     attrs=self.field_attrs)
 
     @property
     def biot_attrs(self):
         """Return frame attributes."""
-        return dict(dfield=self.dfield)
+        return dict(dfield=self.dfield, field_attrs=self.field_attrs)
 
     @property
     def biot_methods(self):

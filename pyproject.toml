@@ -8,8 +8,8 @@ packages = ["nova"]
 [project]
 name = "nova"
 description = "Equilibrium generation and inference"
-authors = [
-  {name = "Simon McIntosh", email = "simon.mcintosh@iter.org"}
+author = "Simon McIntosh"
+author-email = "simon.mcintosh@iter.org"
 ]
 readme = "README.md"
 license = {text = "ITER GIP"}
@@ -124,7 +124,7 @@ benchmark = "nova.scripts.benchmark:benchmark"
 extrapolate = "nova.imas.scripts:extrapolate"
 
 [project.urls]
-homepage = "https://git.iter.org/projects/EQ/repos/nova/"
+home-page = "https://git.iter.org/projects/EQ/repos/nova/"
 
 [tool.versioneer]
 VCS = "git"

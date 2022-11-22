@@ -1,5 +1,8 @@
+import lazy_loader as lazy
+
 from os import path
 
+#sns = lazy.load('seaborn')
 import seaborn as sns
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -222,27 +225,32 @@ def insert_yticks(ticks, ax=None, N=8):
     ax.set_yticks(np.sort(yticks))
 
 
-mpl.rc('text', usetex=True)
-mpl.rcParams['text.latex.preamble'] = r"\usepackage{amsmath}"
-
-plt.despine = sns.despine  # add despine function to plt object
-plt.set_context = sns.set_context
-plt.plstyle = plstyle()
-plt.detick = detick
-plt.add_colorbar = add_colorbar
-plt.set_xticks = set_xticks
-plt.insert_yticks = insert_yticks
-plt.set_aspect = plt.plstyle.set_aspect
-
-Cn = plt.rcParams['axes.prop_cycle'].by_key()['color']
-plt.Cn = [to_rgb(from_hex) for from_hex in Cn]  # rgb color index
-
-#plt.set_context('paper')
-plt.set_context('notebook')
-#plt.set_context('talk')
-#plt.set_context('poster')
-
 if __name__ == '__main__':
+
+    """
+
+    mpl.rc('text', usetex=True)
+    mpl.rcParams['text.latex.preamble'] = r'usepackage{amsmath}'
+
+    plt.despine = sns.despine  # add despine function to plt object
+    plt.set_context = sns.set_context
+    plt.plstyle = plstyle()
+    plt.detick = detick
+    plt.add_colorbar = add_colorbar
+    plt.set_xticks = set_xticks
+    plt.insert_yticks = insert_yticks
+    plt.set_aspect = plt.plstyle.set_aspect
+
+    Cn = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    plt.Cn = [to_rgb(from_hex) for from_hex in Cn]  # rgb color index
+
+    #plt.set_context('paper')
+    plt.set_context('notebook')
+    #plt.set_context('talk')
+    #plt.set_context('poster')
+
+    """
+
 
     from numpy.random import rand
 

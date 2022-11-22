@@ -10,7 +10,6 @@ name = "nova"
 description = "Equilibrium generation and inference"
 author = "Simon McIntosh"
 author-email = "simon.mcintosh@iter.org"
-]
 readme = "README.md"
 license = {text = "ITER GIP"}
 requires-python = ">=3.10"
@@ -106,6 +105,7 @@ test = [
   "pytest", 
   "pytest-cov", 
   "pytest-xdist", 
+  "tuna",
   "lizard", 
   "mypy",
   "asv", 

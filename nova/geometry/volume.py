@@ -17,6 +17,9 @@ import trimesh
 import vedo
 import vtk
 
+#from . import (alphashape, meshio, pyvista, Rotation, trimesh, vedo, vtk)
+
+
 from nova.geometry.polygeom import PolyGeom
 from nova.geometry.polygon import Polygon
 from nova.geometry.vtkgen import VtkFrame

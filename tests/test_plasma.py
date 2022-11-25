@@ -2,7 +2,7 @@ import pytest
 import shapely.geometry
 import numpy as np
 
-from nova.electromagnetic.coilset import CoilSet
+from nova.frame.coilset import CoilSet
 from nova.geometry.polygon import Polygon
 
 

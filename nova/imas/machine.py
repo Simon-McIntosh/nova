@@ -8,11 +8,11 @@ import numpy as np
 import numpy.typing as npt
 import shapely
 
-from nova.electromagnetic.coilset import CoilSet
-from nova.electromagnetic.shell import Shell
+from nova.frame.coilset import CoilSet
+from nova.frame.shell import Shell
 from nova.geometry.polygon import Polygon
 from nova.imas.database import CoilData, Database, Ids, ImasIds
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 # pylint: disable=too-many-ancestors

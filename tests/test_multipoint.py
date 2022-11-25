@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 import pandas
 
-from nova.electromagnetic.framelink import FrameLink
+from nova.frame.framelink import FrameLink
 
 
 def test_generate_key_attribute_true():

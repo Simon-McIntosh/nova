@@ -19,8 +19,8 @@ from astropy import units
 
 from nova.utilities import geom
 from nova.utilities.time import clock
-from nova.utilities.pyplot import plt
-from nova.electromagnetic.coilclass import CoilClass
+from nova.plot import plt
+from nova.frame.coilclass import CoilClass
 from nova.limits.tieplate import get_tie_plate
 from nova.limits.poloidal import PoloidalLimit
 

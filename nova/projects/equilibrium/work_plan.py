@@ -9,7 +9,7 @@ import networkx
 import numpy as np
 import pandas
 
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

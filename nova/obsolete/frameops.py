@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 
 import numpy.typing as npt
 
-from nova.electromagnetic.frameset import FrameSet
-from nova.electromagnetic.frame import Frame
+from nova.frame.frameset import FrameSet
+from nova.frame.frame import Frame
 
 
 @dataclass

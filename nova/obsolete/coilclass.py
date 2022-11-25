@@ -5,9 +5,9 @@ import pandas as pd
 import shapely.geometry
 import numpy as np
 
-from nova.electromagnetic.coilset import CoilSet
-from nova.electromagnetic.IO.read_scenario import scenario_data
-from nova.electromagnetic.IO.read_scenario import forcefield_data
+from nova.frame.coilset import CoilSet
+from nova.frame.IO.read_scenario import scenario_data
+from nova.frame.IO.read_scenario import forcefield_data
 
 
 class CoilClass(CoilSet):

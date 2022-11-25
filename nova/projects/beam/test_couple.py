@@ -1,6 +1,6 @@
 
 from nova.structural.finiteframe import finiteframe, scale
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 ff = finiteframe(frame='2D')

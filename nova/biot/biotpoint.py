@@ -7,7 +7,7 @@ import numpy as np
 from nova.biot.biotframe import BiotTarget
 from nova.biot.biotoperate import BiotOperate
 from nova.biot.biotsolve import BiotSolve
-from nova.electromagnetic.polyplot import Axes
+from nova.frame.polyplot import Axes
 
 
 @dataclass

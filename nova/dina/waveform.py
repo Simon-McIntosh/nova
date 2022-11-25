@@ -6,8 +6,8 @@ import scipy
 import pandas
 
 from nova.utilities.localdata import LocalData
-from nova.electromagnetic.IO.read_scenario import scenario_data
-from nova.utilities.pyplot import plt
+from nova.frame.IO.read_scenario import scenario_data
+from nova.plot import plt
 
 
 @dataclass

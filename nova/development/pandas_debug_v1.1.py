@@ -1,5 +1,5 @@
-from nova.electromagnetic.coilset import CoilSet
-from nova.electromagnetic.coilframe import CoilFrame
+from nova.frame.coilset import CoilSet
+from nova.frame.coilframe import CoilFrame
 
 
 cs = CoilSet()

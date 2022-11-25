@@ -11,7 +11,7 @@ import intake
 import yaml
 import hvplot
 
-from nova.electromagnetic.coilset import CoilSet
+from nova.frame.coilset import CoilSet
 from nova.utilities.IO import pythonIO
 
 

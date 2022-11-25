@@ -8,7 +8,7 @@ import xarray
 from nova.database.filepath import FilePath
 from nova.imas.connect import Scenario
 from nova.imas.equilibrium import Equilibrium
-from nova.utilities.plotter import LinePlot
+from nova.plot.plotter import LinePlot
 
 
 @dataclass

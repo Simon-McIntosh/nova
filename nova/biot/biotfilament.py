@@ -8,8 +8,8 @@ from dask.cache import Cache
 import numpy as np
 import scipy.special
 
-from nova.electromagnetic.biotframe import BiotFrame
-from nova.electromagnetic.biotbase import BiotBase
+from nova.frame.biotframe import BiotFrame
+from nova.frame.biotbase import BiotBase
 
 
 # pylint: disable=no-member  # disable scipy.special module not found
@@ -77,7 +77,7 @@ class BiotFilament(BiotBase):
 
 if __name__ == '__main__':
 
-    from nova.electromagnetic.framespace import FrameSpace
+    from nova.frame.framespace import FrameSpace
 
     radius, height = np.meshgrid(np.linspace(4, 7, 100),
                                  np.linspace(-1, 1, 10))

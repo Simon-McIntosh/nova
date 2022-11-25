@@ -15,8 +15,8 @@ import seaborn as sns
 from nova.definitions import root_dir
 from nova.structural.F4E_TFC18 import F4E_Data
 from nova.structural.TFC18 import TFC18
-from nova.utilities.pyplot import plt
-from nova.utilities.addtext import linelabel
+from nova.plot import plt
+from nova.plot.addtext import linelabel
 
 
 @dataclass

@@ -10,7 +10,7 @@ import sklearn.neighbors
 import xarray
 
 from nova.assembly.fiducialdata import FiducialData
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

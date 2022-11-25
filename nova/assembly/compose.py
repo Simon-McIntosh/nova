@@ -6,7 +6,7 @@ import numpy as np
 import xarray
 
 from nova.assembly.structural import Data, Fourier
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

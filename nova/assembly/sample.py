@@ -2,7 +2,7 @@
 import numpy as np
 import pymc3 as pm
 
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 with pm.Model() as model:
 

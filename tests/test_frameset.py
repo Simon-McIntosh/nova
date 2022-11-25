@@ -3,8 +3,8 @@ import tempfile
 
 import numpy as np
 
-from nova.electromagnetic.frameset import FrameSet
-from nova.electromagnetic.error import SpaceKeyError
+from nova.frame.frameset import FrameSet
+from nova.frame.error import SpaceKeyError
 
 
 def test_space_setattr_error():

@@ -4,7 +4,7 @@ import timeit
 
 import numpy as np
 
-from nova.electromagnetic.framespace import FrameSpace
+from nova.frame.framespace import FrameSpace
 
 
 class Current:

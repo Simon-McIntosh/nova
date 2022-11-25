@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from nova.biot.biotframe import BiotFrame
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

@@ -1,26 +1,48 @@
-import pandas as pd
+"""Configure python environment."""
 
-def start():
-    options = {
-        'display': {
-            'max_columns': 8,
-            'max_colwidth': 8,
-            'expand_frame_repr': False,  # Don't wrap to multiple pages
-            'max_rows': 16,
-            'max_seq_items': 50,         # Max length of printed sequence
-            'precision': 2,
-            'show_dimensions': False
-        },
-        'mode': {
-            'chained_assignment': 'warn'   # Controls SettingWithCopyWarning
+import numpy as np
+
+import pandas
+from nova.plot import (mpl, sns)
+
+
+class Startup:
+    """Manage environment settings."""
+
+    def __init__(self):
+        """Configure environment."""
+        self.pandas()
+        self.seaborn()
+
+    @staticmethod
+    def seaborn():
+        """Set seaborn context."""
+        sns.set_context('talk')
+        mpl.rcParams['figure.figsize'] = np.array([4, 3]) / 0.394
+
+    @staticmethod
+    def pandas():
+        """Set pandas options."""
+        options = {
+            'display': {
+                'max_columns': 8,
+                'max_colwidth': 8,
+                'expand_frame_repr': False,  # Don't wrap to multiple pages
+                'max_rows': 16,
+                'max_seq_items': 50,         # Max length of printed sequence
+                'precision': 2,
+                'show_dimensions': False
+            },
+            'mode': {
+                'chained_assignment': 'warn'   # Control SettingWithCopyWarning
+            }
         }
-    }
 
-    for category, option in options.items():
-        for op, value in option.items():
-            pd.set_option(f'{category}.{op}', value)  # Python 3.6+
+        for category, option in options.items():
+            for op, value in option.items():
+                pandas.set_option(f'{category}.{op}', value)  # Python 3.6+
 
 
 if __name__ == '__main__':
-    start()
-    del start  # Clean up namespace in the interpreter
+    Startup()
+    del Startup  # Clean up namespace in the interpreter

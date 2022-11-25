@@ -9,7 +9,7 @@ import nlopt
 
 from nova.definitions import root_dir
 from nova.utilities.png_tools import data_mine, data_load
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 path = os.path.join(root_dir, 'input/ACLoss/')
 #data_mine(path, 'CS_twist_pitch',

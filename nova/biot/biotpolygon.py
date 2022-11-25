@@ -151,7 +151,7 @@ class BiotPolygon(PolygonConstants, BiotMatrix):
 
 if __name__ == '__main__':
 
-    from nova.electromagnetic.coilset import CoilSet
+    from nova.frame.coilset import CoilSet
 
     coilset = CoilSet(dcoil=-1, nplasma=150)
     coilset.coil.insert([5, 6], 0.5, 0.2, 0.2, section='h', turn='r',

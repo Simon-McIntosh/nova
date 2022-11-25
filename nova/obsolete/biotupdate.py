@@ -4,9 +4,9 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas
 
-from nova.electromagnetic.metamethod import MetaMethod
-from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.error import SubSpaceLockError
+from nova.frame.metamethod import MetaMethod
+from nova.frame.dataframe import DataFrame
+from nova.frame.error import SubSpaceLockError
 
 
 @dataclass

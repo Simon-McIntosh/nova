@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 
-from nova.electromagnetic.framespace import FrameSpace
+from nova.frame.framespace import FrameSpace
 
 
 def test_plasma_subspace():

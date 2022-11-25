@@ -6,7 +6,7 @@ import unittest.mock
 import numpy as np
 import pytest
 
-from nova.electromagnetic.coilset import CoilSet
+from nova.frame.coilset import CoilSet
 from nova.geometry.polygon import Polygon
 
 

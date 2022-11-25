@@ -1,8 +1,8 @@
 import numpy as np
 
-from nova.electromagnetic.coilgeom import ITERcoilset
-from nova.electromagnetic.IO.read_scenario import forcefield_data
-from nova.utilities.pyplot import plt
+from nova.frame.coilgeom import ITERcoilset
+from nova.frame.IO.read_scenario import forcefield_data
+from nova.plot import plt
 
 #hp = hpy()  # initialize memory manager
 

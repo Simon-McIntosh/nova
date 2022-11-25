@@ -6,11 +6,11 @@ from typing import Union
 import numpy as np
 import scipy
 
-from nova.electromagnetic.coilset import CoilSet
-from nova.electromagnetic.coilgeom import ITERcoilset
-from nova.electromagnetic.timeseries import DataArray, DataSet
+from nova.frame.coilset import CoilSet
+from nova.frame.coilgeom import ITERcoilset
+from nova.frame.timeseries import DataArray, DataSet
 from nova.utilities.localdata import LocalData
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 from nova.utilities.time import clock
 
 

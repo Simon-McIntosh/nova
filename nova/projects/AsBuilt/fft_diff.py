@@ -1,7 +1,7 @@
 
 import numpy as np
 
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 ndiv = 500
 wavenumber = 3

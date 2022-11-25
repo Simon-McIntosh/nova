@@ -7,7 +7,7 @@ from moviepy.editor import VideoClip
 from moviepy.video.io.bindings import mplfig_to_npimage
 import numpy as np
 
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

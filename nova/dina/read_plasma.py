@@ -5,8 +5,8 @@ import pandas
 import numpy as np
 from scipy.interpolate import interp1d
 
-from nova.electromagnetic.IO.read_waveform import read_dina
-from nova.utilities.pyplot import plt
+from nova.frame.IO.read_waveform import read_dina
+from nova.plot import plt
 
 
 class read_plasma(read_dina):

@@ -9,7 +9,7 @@ import xarray
 from nova.assembly.gap import Gap
 from nova.assembly.model import ModelData, ModelBase
 from nova.assembly.ccl import CCL
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

@@ -1,8 +1,8 @@
 """Shape methods for BiotFrame."""
 from dataclasses import dataclass, field
 
-from nova.electromagnetic.metamethod import MetaMethod
-from nova.electromagnetic.framelink import FrameLink
+from nova.frame.metamethod import MetaMethod
+from nova.frame.framelink import FrameLink
 
 
 @dataclass

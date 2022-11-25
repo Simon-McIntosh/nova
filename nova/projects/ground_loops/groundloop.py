@@ -7,12 +7,12 @@ import numpy.typing as npt
 import scipy
 import xarray
 
-from nova.electromagnetic.biotfilament import Biot
-from nova.electromagnetic.biotframe import BiotFrame
-from nova.electromagnetic.vde import VDE
+from nova.frame.biotfilament import Biot
+from nova.frame.biotframe import BiotFrame
+from nova.frame.vde import VDE
 from nova.utilities.time import clock
-from nova.utilities.pyplot import plt
-from nova.utilities.addtext import linelabel
+from nova.plot import plt
+from nova.plot.addtext import linelabel
 
 
 @dataclass

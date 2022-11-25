@@ -2,10 +2,10 @@
 import pytest
 import numpy as np
 
-from nova.electromagnetic.error import (
+from nova.frame.error import (
     ColumnError, SpaceKeyError, SubSpaceKeyError
     )
-from nova.electromagnetic.framespace import FrameSpace
+from nova.frame.framespace import FrameSpace
 
 
 def test_init():

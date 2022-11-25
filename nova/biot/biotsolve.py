@@ -43,10 +43,10 @@ class BiotSolve(BiotSet):
                 raise NotImplementedError(
                     f'segment <{segment}> not implemented '
                     f'in Biot.generator: {self.generator.keys()}')
-            #index = self.source.index[self.source_segment == segment]
-            #for i, chunk in enumerate(
-            #        self.group_segments(index, 100, index[-1])):
-            #    self.source_segment.loc[list(chunk)] = f'{segment}_{i}'
+            index = self.source.index[self.source_segment == segment]
+            for i, chunk in enumerate(
+                    self.group_segments(index, 500, index[-1])):
+                self.source_segment.loc[list(chunk)] = f'{segment}_{i}'
 
     @staticmethod
     def group_segments(iterable, length, fillvalue):

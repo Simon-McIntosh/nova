@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from nova.imas.scenario import Scenario
-from nova.biot.biotgrid import BiotPlot
-from nova.utilities.pyplot import plt
+from nova.biot import BiotPlot
+from nova.plot import plt
 
 
 @dataclass

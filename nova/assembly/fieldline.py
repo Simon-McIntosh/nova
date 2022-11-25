@@ -6,7 +6,7 @@ import xarray
 
 from nova.assembly import structural, electromagnetic
 from nova.assembly.gap import Gap
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

@@ -6,7 +6,7 @@ import numpy as np
 import xarray
 
 from nova.biot.biotdata import BiotData
-from nova.electromagnetic.framesetloc import ArrayLocIndexer
+from nova.frame.framesetloc import ArrayLocIndexer
 
 '''
 @numba.njit(fastmath=True, parallel=True)

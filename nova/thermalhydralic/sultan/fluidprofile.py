@@ -14,7 +14,7 @@ from nova.thermalhydralic.sultan.model import Model
 from nova.thermalhydralic.sultan.fluidmodel import FluidModel
 from nova.thermalhydralic.sultan.fitfluid import FitFluid
 from nova.thermalhydralic.sultan.sultanio import SultanIO
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

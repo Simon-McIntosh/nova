@@ -5,10 +5,10 @@ from typing import Optional, Collection, Any, Union
 import pandas
 import numpy as np
 
-from nova.electromagnetic.superframe import SuperFrame
-from nova.electromagnetic.subspace import SubSpace
-from nova.electromagnetic.metaarray import MetaArray
-from nova.electromagnetic.metaframe import MetaFrame
+from nova.frame.superframe import SuperFrame
+from nova.frame.subspace import SubSpace
+from nova.frame.metaarray import MetaArray
+from nova.frame.metaframe import MetaFrame
 
 # pylint: disable=too-many-ancestors
 # pylint:disable=unsubscriptable-object

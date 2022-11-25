@@ -5,7 +5,7 @@ import pyvista as pv
 import vedo
 
 from nova.definitions import root_dir
-from nova.electromagnetic.framespace import FrameSpace
+from nova.frame.framespace import FrameSpace
 from nova.utilities.time import clock
 
 

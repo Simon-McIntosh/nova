@@ -1,8 +1,8 @@
 
 from matplotlib.lines import Line2D
 
-from nova.electromagnetic.IO.read_scenario import scenario_data
-from nova.utilities.pyplot import plt
+from nova.frame.IO.read_scenario import scenario_data
+from nova.plot import plt
 
 d2 = scenario_data(read_txt=False)
 scenarios = ['15MA DT-DINA2016-01_v1.1',

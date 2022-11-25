@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 
-from nova.electromagnetic.polygrid import PolyGrid
+from nova.frame.polygrid import PolyGrid
 
 
 def test_rectangle():

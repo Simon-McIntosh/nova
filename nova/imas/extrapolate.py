@@ -1,23 +1,24 @@
 """Extrapolate equilibria beyond separatrix."""
+from __future__ import annotations
 from dataclasses import dataclass, field, fields
 from functools import cached_property
-from typing import ClassVar, Union
+from typing import TYPE_CHECKING
 
 import numpy as np
-import pandas
+#import pandas
 from scipy.interpolate import RectBivariateSpline, interp1d
 from scipy.constants import mu_0
-import xarray
+#import xarray
 
-#from nova.imas.code import Code
-from nova.imas.database import Database, Ids
-from nova.imas.equilibrium import Equilibrium
-from nova.imas.machine import Machine
-from nova.imas.pf_active import PF_Active
-#from nova.imas.properties import Properties
+from nova.frame import (pandas, xarray)
+#from nova.imas import (Database, Equilibrium, Ids, Machine, PF_Active)
+# Code Properties
+import nova.imas
 from nova.linalg.regression import MoorePenrose
-from nova.utilities.pyplot import plt
+from nova.plot import (plt, sns)
 
+if TYPE_CHECKING:
+    from nova.imas import (Equilibrium, Ids)
 # pylint: disable=too-many-ancestors
 
 
@@ -71,7 +72,7 @@ class ExtrapolationGrid:
 
     ngrid: int | str = 5000
     limit: float | list[float] | str = 0.25
-    index: Union[str, slice, pandas.Index] = 'plasma'
+    index: str | slice | pandas.Index = 'plasma'
     equilibrium: Equilibrium | None = None
 
     def __post_init__(self):
@@ -163,11 +164,11 @@ class TimeSlice:
         axes[0].set_ylabel(r'$P^\prime$')
         axes[1].set_ylabel(r'$FF^\prime$')
         axes[1].set_xlabel(r'$\psi_{norm}$')
-        plt.despine()
+        sns.despine()
 
 
 @dataclass
-class ExtrapolateMachine(Machine):
+class ExtrapolateMachine(nova.imas.Machine):
     """
     Extend Machine with default values for Extrapolate class.
 
@@ -188,7 +189,7 @@ class ExtrapolateMachine(Machine):
 
 
 @dataclass
-class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
+class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, nova.imas.Database):
     r"""
     An interface class for the extrapolation of an equilibrium IDS.
 
@@ -322,23 +323,21 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
     def load_equilibrium(self):
         """Load equilibrium dataset."""
         self.name = 'equilibrium'
-        self.equilibrium = Equilibrium(**self.ids_attrs, ids=self.ids)
+        self.equilibrium = nova.imas.Equilibrium(**self.ids_attrs, ids=self.ids)
 
     def set_free(self):
         """Set free coils."""
         self.saloc['free'] = [self.loc[name, 'nturn'] >= self.nturn
                               for name in self.sloc.frame.index]
 
-    '''
-    def update_metadata(self):
-        """Return extrapolated equilibrium ids."""
-        ids = imas.equilibrium()
-        Properties('Equilibrium extrapolation',
-                   provider='Simon McIntosh')(ids.ids_properties)
-        Code(self.group_attrs)(ids.code)
-        ids.vacuum_toroidal_field = self.ids.vacuum_toroidal_field
-        return ids
-    '''
+    #def update_metadata(self):
+    #    """Return extrapolated equilibrium ids."""
+    #    ids = imas.equilibrium()
+    #    Properties('Equilibrium extrapolation',
+    #               provider='Simon McIntosh')(ids.ids_properties)
+    #    Code(self.group_attrs)(ids.code)
+    #    ids.vacuum_toroidal_field = self.ids.vacuum_toroidal_field
+    #    return ids
 
     @property
     def group_attrs(self):
@@ -407,8 +406,9 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
         self.plot_boundary(self.itime)
 
     def plot_bar(self):
-        """Plot coil currents for single time-slice"""
-        pf_active = PF_Active(**self.ids_attrs | dict(name='pf_active'))
+        """Plot coil currents for single time-slice."""
+        pf_active = nova.imas.PF_Active(**self.ids_attrs |
+                                        dict(name='pf_active'))
 
         index = [name for name in self.subframe.subspace.index
                  if name in pf_active.data.coil_name.data]
@@ -423,29 +423,32 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
 
         print(np.linalg.norm(1e-3*self.sloc[index, ['Ic']].squeeze().values -
                              1e-3 * pf_active.data.current.isel(time=self.itime).loc[index].data))
-        plt.despine()
+        sns.despine()
 
-        '''
-        pf_active.data.isel(time=20).current.data
 
-        plt.bar()
-        '''
+        #pf_active.data.isel(time=20).current.data
+        #plt.bar()
+
 
     def plot_waveform(self):
         """ """
 
+
 if __name__ == '__main__':
+    print('running code')
+
+
 
     # import doctest
     # doctest.testmod()
 
-    pulse, run = 114101, 41  # JINTRAC
+    # pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
 
-    extrapolate = Extrapolate(pulse, run)
+    extrapolate = Extrapolate(pulse, run, ngrid=200, nplasma=200)
 
-    # extrapolate.ionize(20)
-    # extrapolate.plot_2d('psi')
+    extrapolate.ionize(5)
+    extrapolate.plot_2d('psi')
     # extrapolate.plasmagrid.plot()
 
-    # extrapolate.plot_bar()
+    extrapolate.plot_bar()

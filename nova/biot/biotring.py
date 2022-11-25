@@ -141,7 +141,7 @@ class BiotRing(BiotConstants, BiotMatrix):
 
 if __name__ == '__main__':
 
-    from nova.electromagnetic.coilset import CoilSet
+    from nova.frame.coilset import CoilSet
 
     coilset = CoilSet(dcoil=-100, nplasma=150, chunks=None)
     coilset.coil.insert(5, 0.5, 0.01, 0.8, section='r', turn='r',

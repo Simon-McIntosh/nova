@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 import xarray
 
 from nova.database.netcdf import netCDF
-from nova.electromagnetic.framesetloc import FrameSetLoc
+from nova.frame.framesetloc import FrameSetLoc
 
 
 @dataclass

@@ -4,7 +4,7 @@ import pytest
 import tempfile
 import vedo
 
-from nova.electromagnetic.framespace import FrameSpace
+from nova.frame.framespace import FrameSpace
 from nova.geometry.volume import VtkFrame
 
 

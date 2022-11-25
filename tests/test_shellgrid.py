@@ -2,7 +2,7 @@ import pytest
 import shapely.geometry
 import shapely
 
-from nova.electromagnetic.shellgrid import ShellGrid
+from nova.frame.shellgrid import ShellGrid
 
 
 def test_circle_rdp_features():

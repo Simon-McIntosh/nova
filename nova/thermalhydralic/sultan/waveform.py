@@ -11,7 +11,7 @@ from nova.thermalhydralic.sultan.profile import Profile
 from nova.thermalhydralic.sultan.campaign import Campaign
 from nova.thermalhydralic.sultan.trial import Trial
 from nova.thermalhydralic.sultan.sample import Sample
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

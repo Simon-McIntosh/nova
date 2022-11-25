@@ -5,12 +5,12 @@ from pandas.api.types import is_list_like
 from scipy.interpolate import interp1d
 import shapely.geometry
 
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 from nova.utilities.geom import length
-from nova.electromagnetic.meshgrid import MeshGrid
-from nova.electromagnetic.biotsavart import BiotSet, BiotFrame
-from nova.electromagnetic.coilmatrix import CoilMatrix
-from nova.electromagnetic.topology import Topology
+from nova.frame.meshgrid import MeshGrid
+from nova.frame.biotsavart import BiotSet, BiotFrame
+from nova.frame.coilmatrix import CoilMatrix
+from nova.frame.topology import Topology
 
 
 class Mutual(BiotSet):
@@ -541,7 +541,7 @@ class PlasmaGrid(Grid):
 
 if __name__ == '__main__':
 
-    from nova.electromagnetic.coilset import CoilSet
+    from nova.frame.coilset import CoilSet
 
     cs = CoilSet()
     #polygon = shapely.geometry.Point(5, 1).buffer(0.5)

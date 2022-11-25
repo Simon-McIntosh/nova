@@ -1,7 +1,7 @@
 
 import numpy as np
 
-from nova.electromagnetic.coilset import CoilSet
+from nova.frame.coilset import CoilSet
 
 cs = CoilSet(dCoil=-1, turn_fraction=0.665,
              turn_section='skin', skin_fraction=0.75, biot_instances='grid')

@@ -9,7 +9,7 @@ import pandas
 from nova.thermalhydralic.sultan.shotprofile import ShotProfile
 from nova.thermalhydralic.sultan.shotinstance import ShotInstance
 from nova.thermalhydralic.sultan.testplan import TestPlan
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

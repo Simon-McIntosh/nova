@@ -4,8 +4,8 @@ import numpy as np
 
 from nova.biot.biotframe import BiotFrame
 from nova.biot.biotsection import BiotSection
-from nova.electromagnetic.framelink import FrameLink
-from nova.electromagnetic.dataframe import DataFrame
+from nova.frame.framelink import FrameLink
+from nova.frame.dataframe import DataFrame
 
 
 def test_turnturn_square():

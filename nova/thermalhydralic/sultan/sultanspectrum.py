@@ -14,7 +14,7 @@ from nova.thermalhydralic.sultan.sample import Sample
 from nova.thermalhydralic.sultan.fluidprofile import FluidProfile
 from nova.thermalhydralic.sultan.sultanio import SultanIO
 from nova.thermalhydralic.sultan.database import DataBase
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 from nova.utilities.time import clock
 
 

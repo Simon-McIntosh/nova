@@ -4,7 +4,7 @@ import scipy.integrate
 import scipy.interpolate
 
 from nova.assembly.dataset import Ansys, FieldData
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 Bo = -8.0045
 radius = 4.1053

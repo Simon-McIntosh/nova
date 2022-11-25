@@ -9,7 +9,7 @@ from nova.biot.biotgrid import BiotGrid
 from nova.biot.biotpoint import BiotPoint
 from nova.biot.biotring import BiotRing
 from nova.biot.biotsolve import BiotSolve
-from nova.electromagnetic.coilset import CoilSet
+from nova.frame.coilset import CoilSet
 
 segments = ['ring', 'cylinder']
 

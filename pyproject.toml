@@ -8,8 +8,10 @@ packages = ["nova"]
 [project]
 name = "nova"
 description = "Equilibrium generation and inference"
-author = "Simon McIntosh"
-author-email = "simon.mcintosh@iter.org"
+authors = [
+  {name = "Simon McIntosh"},
+  {email = "simon.mcintosh@iter.org"}
+]
 readme = "README.md"
 license = {text = "ITER GIP"}
 requires-python = ">=3.10"
@@ -124,7 +126,7 @@ benchmark = "nova.scripts.benchmark:benchmark"
 extrapolate = "nova.imas.scripts:extrapolate"
 
 [project.urls]
-home-page = "https://git.iter.org/projects/EQ/repos/nova/"
+Homepage = "https://git.iter.org/projects/EQ/repos/nova/"
 
 [tool.versioneer]
 VCS = "git"
@@ -145,19 +147,9 @@ filterwarnings = [
   "ignore::FutureWarning"
 ]
 
-[tool.mypy]
-warn_unused_ignores = true
-follow_imports = "normal"
-ignore_missing_imports = true
-disallow_untyped_calls = true
-warn_no_return = true
-warn_redundant_casts = true
-disallow_untyped_defs = true
-check_untyped_defs = true
-
 [[tool.mypy.overrides]]
-module = "tests.*"
-ignore_errors = true
+module = "lazy_loader"
+ignore_missing_imports = true
 
 [tool.coverage.run]
 omit = [

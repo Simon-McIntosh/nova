@@ -11,9 +11,9 @@ from scipy.optimize import minimize
 import dolfin as df
 import ufl
 
-from nova.electromagnetic.biotgrid import BiotGrid, Grid
-from nova.electromagnetic.coilset import CoilSet
-from nova.utilities.pyplot import plt
+from nova.frame.biotgrid import BiotGrid, Grid
+from nova.frame.coilset import CoilSet
+from nova.plot import plt
 #from nova.mesh_grid import MeshGrid
 
 

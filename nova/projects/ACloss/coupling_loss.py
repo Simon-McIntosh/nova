@@ -4,8 +4,8 @@ import numpy as np
 import scipy.integrate
 import scipy.interpolate
 
-from nova.electromagnetic.acloss import DataIO
-from nova.utilities.pyplot import plt
+from nova.frame.acloss import DataIO
+from nova.plot import plt
 
 coil = 'CS3L'
 

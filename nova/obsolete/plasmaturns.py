@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 
 
-from nova.electromagnetic.metamethod import MetaMethod
-from nova.electromagnetic.dataframe import DataFrame
+from nova.frame.metamethod import MetaMethod
+from nova.frame.dataframe import DataFrame
 from nova.utilities.xpu import xp
 
 

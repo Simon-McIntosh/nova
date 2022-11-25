@@ -2,7 +2,7 @@
 import numpy as np
 import scipy
 
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 t, dt = np.linspace(0, 1000, 2**9, retstep=True)
 

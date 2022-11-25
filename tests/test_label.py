@@ -1,6 +1,6 @@
 import pytest
 
-from nova.electromagnetic.select import Label
+from nova.frame.select import Label
 
 
 def test_default():

@@ -3,7 +3,7 @@ from scipy.optimize import brentq, minimize
 
 from nova.structural.finiteframe import finiteframe
 from nova.utilities import geom
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 class catenary(finiteframe):

@@ -5,8 +5,8 @@ import numpy as np
 import numpy.typing as npt
 import pandas
 
-from nova.electromagnetic.biotfilament import BiotFilament
-from nova.electromagnetic.biotframe import BiotFrame
+from nova.frame.biotfilament import BiotFilament
+from nova.frame.biotframe import BiotFrame
 
 # _coilmatrix_properties = ['Psi', 'Bx', 'Bz']
 

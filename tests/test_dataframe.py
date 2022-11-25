@@ -5,8 +5,8 @@ import pytest
 import pandas
 import xxhash
 
-from nova.electromagnetic.dataframe import DataFrame
-from nova.electromagnetic.error import ColumnError
+from nova.frame.dataframe import DataFrame
+from nova.frame.error import ColumnError
 
 
 def test_instance():

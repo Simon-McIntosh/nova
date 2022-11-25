@@ -12,7 +12,7 @@ import numpy.typing as npt
 import xarray
 
 from nova.geometry.polygon import Polygon
-from nova.utilities.plotter import ImagePlot
+from nova.plot.plotter import ImagePlot
 
 
 @dataclass

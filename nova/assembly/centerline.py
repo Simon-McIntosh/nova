@@ -9,7 +9,7 @@ from nova.definitions import root_dir
 from nova.geometry.line import Line
 from nova.assembly.uniformwindingpack import UniformWindingPack
 from nova.assembly.clusterturns import ClusterTurns
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

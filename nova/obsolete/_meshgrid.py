@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 import numpy as np
 from matplotlib.collections import LineCollection
 
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 '''
 

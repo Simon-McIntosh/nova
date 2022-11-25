@@ -2,7 +2,7 @@ import numpy as np
 
 from nova.structural.finiteframe import finiteframe, scale
 from nova.structural.catenary import catenary
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 def test_couple(plot=False):

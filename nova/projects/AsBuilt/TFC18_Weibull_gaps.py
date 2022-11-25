@@ -17,7 +17,7 @@ import scipy.stats
 import xarray
 
 from nova.definitions import root_dir
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 from nova.utilities.time import clock
 
 

@@ -2,8 +2,8 @@
 from dataclasses import dataclass, field, InitVar
 from typing import Union
 
-from nova.electromagnetic.frame import Frame
-from nova.electromagnetic.multipoint import MultiPoint
+from nova.frame.frame import Frame
+from nova.frame.multipoint import MultiPoint
 
 
 @dataclass

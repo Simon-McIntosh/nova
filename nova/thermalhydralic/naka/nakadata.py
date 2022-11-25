@@ -8,7 +8,7 @@ import numpy as np
 
 from nova.thermalhydralic.naka.database import DataBase
 from nova.utilities.pandasdata import PandasHDF
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

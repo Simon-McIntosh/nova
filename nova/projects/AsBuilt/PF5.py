@@ -1,11 +1,11 @@
 
 import numpy as np
 
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 from nova.design.inverse import Inverse
-from nova.electromagnetic.coilset import CoilSet
-from nova.electromagnetic.coilgeom import ITERcoilset
-from nova.electromagnetic.machinedata import MachineData
+from nova.frame.coilset import CoilSet
+from nova.frame.coilgeom import ITERcoilset
+from nova.frame.machinedata import MachineData
 
 build_coilset = True
 

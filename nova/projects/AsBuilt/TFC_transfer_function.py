@@ -2,7 +2,7 @@
 import numpy as np
 import scipy
 
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 coef = np.array([ 0.        +0.00000000e+00j,  0.25730663+7.12056556e-01j,
        -0.46931815-5.57185997e-01j, -0.37108191-2.14703542e-01j,

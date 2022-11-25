@@ -1,5 +1,5 @@
 
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 from nova.thermalhydralic.sultan.fluidresponse import FluidResponse
 from nova.thermalhydralic.twente.twentedata import TwenteSource, TwentePost

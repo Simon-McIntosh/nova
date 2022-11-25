@@ -12,7 +12,7 @@ import xxhash
 from nova.assembly import structural, electromagnetic, overlap
 from nova.assembly.gap import WedgeGap
 from nova.assembly.model import Dataset
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

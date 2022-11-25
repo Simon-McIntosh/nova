@@ -12,7 +12,7 @@ from nova.imas.ensemble import Ensemble
 from nova.imas.equilibrium import Equilibrium
 from nova.linalg.basis import Bernstein, Svd
 from nova.linalg.regression import OdinaryLeastSquares
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

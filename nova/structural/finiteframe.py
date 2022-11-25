@@ -9,8 +9,8 @@ from scipy.interpolate import interp1d
 from mpl_toolkits.mplot3d import Axes3D
 
 from nova.structural.properties import secondmoment
-from nova.utilities.pyplot import plt
-from nova.utilities.addtext import linelabel
+from nova.plot import plt
+from nova.plot.addtext import linelabel
 from nova.utilities import geom
 
 

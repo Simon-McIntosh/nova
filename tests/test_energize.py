@@ -1,7 +1,7 @@
 
 import pytest
 
-from nova.electromagnetic.framelink import FrameLink
+from nova.frame.framelink import FrameLink
 
 
 def test_in_energize():

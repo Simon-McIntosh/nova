@@ -5,7 +5,7 @@ import numpy as np
 
 from nova.definitions import root_dir
 from nova.utilities.png_tools import data_load
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 ncoil = 18
 

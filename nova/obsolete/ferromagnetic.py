@@ -3,10 +3,10 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from nova.electromagnetic.frameset import Frames
-from nova.electromagnetic.frameset import FrameSet
+from nova.frame.frameset import Frames
+from nova.frame.frameset import FrameSet
 
-from nova.electromagnetic.coil import Coil
+from nova.frame.coil import Coil
 
 
 @dataclass

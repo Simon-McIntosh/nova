@@ -9,7 +9,7 @@ from pylops.optimization.leastsquares import RegularizedInversion
 
 from nova.imas.equilibrium import Equilibrium
 from nova.linalg.decompose import Decompose
-from nova.utilities.plotter import LinePlot
+from nova.plot.plotter import LinePlot
 
 
 @dataclass
@@ -225,7 +225,7 @@ if __name__ == '__main__':
 
     ols.plot()
 
-    from nova.utilities.pyplot import plt
+    from nova.plot import plt
     plt.plot(ols.coordinate, profile.data)
 
 

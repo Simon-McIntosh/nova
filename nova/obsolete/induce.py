@@ -1,4 +1,4 @@
-from nova.electromagnetic.coilset import CoilSet
+from nova.frame.coilset import CoilSet
 from scipy.special import ellipk, ellipe
 import numpy as np
 

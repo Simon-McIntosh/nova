@@ -17,11 +17,11 @@ import pandas as pd
 from nova.definitions import root_dir
 from nova.utilities.IO import pythonIO
 from nova.utilities.localdata import LocalData
-from nova.electromagnetic.frameset import FrameSet
-from nova.electromagnetic.biotmethods import BiotMethods
-from nova.electromagnetic.plasmamethods import PlasmaMethods
-from nova.electromagnetic.coilmethods import CoilMethods
-from nova.electromagnetic.coilplot import CoilPlot
+from nova.frame.frameset import FrameSet
+from nova.frame.biotmethods import BiotMethods
+from nova.frame.plasmamethods import PlasmaMethods
+from nova.frame.coilmethods import CoilMethods
+from nova.frame.coilplot import CoilPlot
 
 
 @dataclass

@@ -12,7 +12,7 @@ import xarray
 from nova.definitions import root_dir
 from nova.assembly.model import ModelData
 from nova.assembly import structural
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

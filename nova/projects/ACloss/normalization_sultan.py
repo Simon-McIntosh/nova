@@ -2,7 +2,7 @@
 import numpy as np
 
 from nova.thermalhydralic.sultan.fluidresponse import FluidResponse
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 fluid = FluidResponse('CSJA_6', 0, 'Left')

@@ -15,7 +15,7 @@ from nova.assembly.fiducialdata import FiducialData
 from nova.assembly.gaussianprocessregressor import GaussianProcessRegressor
 from nova.assembly.spacialanalyzer import SpacialAnalyzer
 from nova.assembly.transform import Rotate
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

@@ -7,6 +7,7 @@ import numba
 import numpy as np
 import quadpy.c1
 
+#from nova.biot import quadpy
 from nova.biot.biotconstants import BiotConstants
 from nova.biot.biotmatrix import BiotMatrix
 
@@ -190,7 +191,7 @@ class BiotCylinder(CylinderConstants, BiotMatrix):
 
 if __name__ == '__main__':
 
-    from nova.electromagnetic.coilset import CoilSet
+    from nova.frame.coilset import CoilSet
 
     coilset = CoilSet(dcoil=-1, nplasma=15**2, field_attrs=['Psi', 'Br'])
     '''

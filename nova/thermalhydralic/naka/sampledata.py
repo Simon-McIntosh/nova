@@ -10,7 +10,7 @@ import scipy
 from nova.thermalhydralic.naka.database import DataBase
 from nova.thermalhydralic.naka.nakadata import NakaData
 from nova.utilities.pandasdata import PandasHDF
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

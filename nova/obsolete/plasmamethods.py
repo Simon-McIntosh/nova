@@ -13,8 +13,8 @@ import pandas as pd
 import shapely
 import pygeos
 
-from nova.electromagnetic.topology import TopologyError
-from nova.utilities.pyplot import plt
+from nova.frame.topology import TopologyError
+from nova.plot import plt
 
 
 class PlasmaMethods:

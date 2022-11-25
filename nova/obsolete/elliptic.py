@@ -16,8 +16,8 @@ from scipy.optimize import newton
 from amigo import geom
 from amigo.geom import poly_inloop
 from amigo.pyplot import plt
-from nova.electromagnetic.streamfunction import SF
-from nova.electromagnetic.coilclass import CoilClass
+from nova.frame.streamfunction import SF
+from nova.frame.coilclass import CoilClass
 #import nova.cross_coil as cc
 
 

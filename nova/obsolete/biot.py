@@ -1,7 +1,7 @@
 """Build biotset."""
 from dataclasses import dataclass, field
 
-from nova.electromagnetic.frame import Frame
+from nova.frame.frame import Frame
 
 
 @dataclass

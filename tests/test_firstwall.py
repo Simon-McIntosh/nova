@@ -2,8 +2,8 @@ import pytest
 import shapely.geometry
 import numpy as np
 
-from nova.electromagnetic.coilset import CoilSet
-from nova.electromagnetic.error import GridError, PlasmaGridError
+from nova.frame.coilset import CoilSet
+from nova.frame.error import GridError, PlasmaGridError
 
 
 def test_centroid_x():

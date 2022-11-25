@@ -8,7 +8,7 @@ import scipy.signal
 
 from nova.definitions import root_dir
 from nova.utilities.png_tools import data_mine, data_load
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 path = os.path.join(root_dir, 'inputs/ACLoss/')

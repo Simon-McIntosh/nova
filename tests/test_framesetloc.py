@@ -2,8 +2,8 @@ import pytest
 
 import numpy as np
 
-from nova.electromagnetic.coilset import CoilSet
-from nova.electromagnetic.error import SubSpaceKeyError, ColumnError
+from nova.frame.coilset import CoilSet
+from nova.frame.error import SubSpaceKeyError, ColumnError
 
 
 def test_get_subspace_error():

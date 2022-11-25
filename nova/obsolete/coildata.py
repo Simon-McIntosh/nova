@@ -612,10 +612,10 @@ from typing import Optional, Collection, Any, Union
 
 import numpy as np
 
-from nova.electromagnetic.metaarray import MetaArray
-from nova.electromagnetic.metaframe import MetaFrame
-from nova.electromagnetic.frame import Frame
-from nova.electromagnetic.subspace import SubSpace
+from nova.frame.metaarray import MetaArray
+from nova.frame.metaframe import MetaFrame
+from nova.frame.frame import Frame
+from nova.frame.subspace import SubSpace
 
 # pylint: disable=too-many-ancestors
 # pylint:disable=unsubscriptable-object

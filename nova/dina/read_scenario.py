@@ -8,10 +8,10 @@ from scipy.interpolate import interp1d
 from astropy import units
 #import docx
 
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 from nova.utilities.geom import rdp_extract
 from nova.utilities.geom import vector_lowpass
-from nova.electromagnetic.IO.read_waveform import read_dina
+from nova.frame.IO.read_waveform import read_dina
 
 
 class operate:

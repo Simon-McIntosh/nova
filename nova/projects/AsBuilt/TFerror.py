@@ -7,7 +7,7 @@ import os
 import ansys.dpf.core as dpf
 
 from nova.definitions import root_dir
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 from ansys.mapdl.core import launch_mapdl

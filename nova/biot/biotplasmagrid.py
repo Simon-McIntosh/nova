@@ -10,7 +10,7 @@ import xarray
 from nova.biot.biotframe import BiotTarget
 from nova.biot.biotgrid import BiotBaseGrid
 from nova.biot.biotsolve import BiotSolve
-from nova.electromagnetic.error import GridError
+from nova.frame.error import GridError
 from nova.geometry.pointloop import PointLoop
 
 

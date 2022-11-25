@@ -3,21 +3,22 @@ from dataclasses import dataclass, field
 import tempfile
 from typing import ClassVar
 
-import alphashape
-import meshio
+#import alphashape
+#import meshio
 import numpy as np
 import numpy.typing as npt
 import pandas
-import pyvista as pv
+#import pyvista as pv
 import sklearn.cluster
 import scipy.interpolate
 from scipy.spatial.transform import Rotation
 import shapely.geometry
-import trimesh
-import vedo
+#import trimesh
+#import vedo
 import vtk
 
-#from . import (alphashape, meshio, pyvista, Rotation, trimesh, vedo, vtk)
+from nova.geometry import (alphashape, meshio, pyvista, Trimesh,
+                           trimesh_interfaces, vedo)
 
 
 from nova.geometry.polygeom import PolyGeom
@@ -33,14 +34,13 @@ class TriShell:
     mesh: vedo.Mesh
     qhull: bool = False
     ahull: bool = False
-    tri: trimesh.Trimesh = field(init=False, repr=False)
+    tri: Trimesh = field(init=False, repr=False)
     features: ClassVar[list[str]] = [
         *'xyz', 'dx', 'dy', 'dz', 'dl', 'dt', 'area', 'volume']
 
     def __post_init__(self):
         """Create trimesh instance."""
-        self.tri = trimesh.Trimesh(self.mesh.points(),
-                                   faces=self.mesh.faces())
+        self.tri = Trimesh(self.mesh.points(), faces=self.mesh.faces())
         self._qhull = self._convex_hull
 
     @property
@@ -149,7 +149,7 @@ class TriShell:
 class TetVol(TriShell):
     """Manage vtk volumes."""
 
-    tet: pv.UnstructuredGrid = field(init=False)
+    tet: pyvista.UnstructuredGrid = field(init=False)
 
     def __post_init__(self):
         """Initialize tripanel and load volume."""
@@ -159,14 +159,14 @@ class TetVol(TriShell):
     def load_volume(self):
         """Compute volume from closed surface mesh."""
         with tempfile.NamedTemporaryFile(suffix='.msh') as tmp:
-            trimesh.interfaces.gmsh.to_volume(self.tri, file_name=tmp.name)
+            trimesh_interfaces.gmsh.to_volume(self.tri, file_name=tmp.name)
             msh = meshio.read(tmp.name)
         cells = msh.cells[0][1]
         n_cells = len(cells)
         cells = np.append(np.full((n_cells, 1), 4, int), cells, axis=1)
         celltypes = np.full(n_cells, vtk.VTK_TETRA, int)
         points = msh.points
-        self.tet = pv.UnstructuredGrid(cells, celltypes, points)
+        self.tet = pyvista.UnstructuredGrid(cells, celltypes, points)
         self.tet = self.tet.compute_cell_sizes(length=False, area=False)
 
     @property
@@ -283,7 +283,7 @@ class Section:
         self.origin += delta
         self.points += delta
 
-    def sweep(self, mesh: pv.PolyData):
+    def sweep(self, mesh: pyvista.PolyData):
         """Sweep section along path."""
         for i in range(mesh.n_points):
             self.to_point(mesh.points[i])
@@ -303,8 +303,8 @@ class Path:
 
     points: npt.ArrayLike
     delta: float = 0.
-    mesh: pv.PolyData = field(init=False)
-    submesh: pv.PolyData = field(init=False)
+    mesh: pyvista.PolyData = field(init=False)
+    submesh: pyvista.PolyData = field(init=False)
 
     def __post_init__(self):
         """Calculate length parameters and initialize interpolator."""
@@ -399,7 +399,7 @@ class Sweep(Cell):
         """
         if not isinstance(poly, Polygon):
             poly = PolyGeom(poly, segment='sweep')
-        if isinstance(path, pv.PolyData):
+        if isinstance(path, pyvista.PolyData):
             path = path.points
         mesh = Path.from_points(path, delta=delta)
         n_points = mesh.n_points

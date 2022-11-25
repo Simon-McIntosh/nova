@@ -9,11 +9,11 @@ import pandas as pd
 from nova.definitions import root_dir
 from nova.utilities.IO import pythonIO
 from nova.utilities.geom import rotate2D
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 from nova.utilities.png_tools import data_load
-from nova.electromagnetic.coilclass import CoilClass
-from nova.electromagnetic.coilset import CoilSet
-from nova.electromagnetic.machinedata import MachineData
+from nova.frame.coilclass import CoilClass
+from nova.frame.coilset import CoilSet
+from nova.frame.machinedata import MachineData
 
 resistivity_ss = 0.815e-6  # steel electrical resistivity at 100C
 resistivity_cu = 0.029e-6  # copper electrical resistivity at 100C

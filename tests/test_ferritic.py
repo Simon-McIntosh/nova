@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import vedo
 
-from nova.electromagnetic.coilset import CoilSet
+from nova.frame.coilset import CoilSet
 
 
 def test_insert_box_subframe():

@@ -6,7 +6,7 @@ import scipy
 import numpy as np
 
 from nova.thermalhydralic.sultan.model import Model
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 
 @dataclass

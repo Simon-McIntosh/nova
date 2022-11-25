@@ -1,7 +1,7 @@
 import numpy as np
 
 from nova.structural.finiteframe import finiteframe, scale
-from nova.utilities.pyplot import plt
+from nova.plot import plt
 
 ff = finiteframe(frame='3D')
 ff.add_shape('circ', r=0.2, ro=0.1)

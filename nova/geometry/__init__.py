@@ -1,6 +1,20 @@
+__all__ = [
+    "alphashape",
+    "meshio",
+    "pyvista",
+    "Trimesh",
+    "trimesh_interfaces"
+    "vedo",
+    ]
+
 import lazy_loader as lazy
 
-__getattr__, __dir__, __all__ = lazy.attach_stub(__name__, __file__)
+alphashape = lazy.load('alphashape')
+meshio = lazy.load('meshio')
+pyvista = lazy.load('pyvista')
+Trimesh = lazy.load('trimesh.Trimesh')
+trimesh_interfaces = lazy.load('trimesh.interfaces')
+vedo = lazy.load('vedo')
 
-#alphashape = lazy.load('alphashape')
-#vtk = lazy.load('vtk')
+#__getattr__, __dir__, __stub__ = lazy.attach_stub(__name__, __file__)
+#__all__.append(__stub__)

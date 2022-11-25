@@ -6,8 +6,8 @@ import numpy as np
 import pandas
 import xxhash
 
-from nova.electromagnetic.dataarray import DataArray
-from nova.electromagnetic.metaframe import MetaFrame
+from nova.frame.dataarray import DataArray
+from nova.frame.metaframe import MetaFrame
 
 
 def test_exclude_internal_metadata():

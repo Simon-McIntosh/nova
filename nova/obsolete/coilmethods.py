@@ -12,7 +12,7 @@ import shapely.strtree
 from scipy.interpolate import interp1d
 from sklearn.cluster import DBSCAN
 
-from nova.electromagnetic.frameset import FrameSet
+from nova.frame.frameset import FrameSet
 from nova.utilities import geom
 from nova.utilities.geom import amd
 

@@ -1,3 +1,18 @@
-import lazy_loader as lazy
+"""Manage access to IMAS data structures."""
 
-__getattr__, __dir__, __all__ = lazy.attach_stub(__name__, __file__)
+__all__ = [
+    'CoilData',
+    'Database',
+    'Ids',
+    'ImasIds',
+    'Equilibrium',
+    'Machine',
+    'PF_Active',
+    'Scenario',
+    ]
+
+from .database import (CoilData, Database, Ids, ImasIds)
+from .equilibrium import Equilibrium
+from .machine import Machine
+from .pf_active import PF_Active
+from .scenario import Scenario

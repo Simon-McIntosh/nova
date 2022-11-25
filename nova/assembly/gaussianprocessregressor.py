@@ -14,7 +14,7 @@ class GaussianProcessRegressor:
     """Fit cyclic 1D waveforms using a Gaussian Process Regressor."""
 
     x: InitVar[npt.ArrayLike]
-    variance: float = 1
+    variance: float = 0.5
     period: list[float] = field(default_factory=lambda: [0., 1.])
     wrap: int = 0
     regressor: sklearn.gaussian_process.GaussianProcessRegressor = None

@@ -1,24 +1,19 @@
 """Extrapolate equilibria beyond separatrix."""
-from __future__ import annotations
 from dataclasses import dataclass, field, fields
 from functools import cached_property
-from typing import TYPE_CHECKING
 
 import numpy as np
-#import pandas
+import pandas
 from scipy.interpolate import RectBivariateSpline, interp1d
 from scipy.constants import mu_0
-#import xarray
+import xarray
 
-from nova.frame import (pandas, xarray)
-#from nova.imas import (Database, Equilibrium, Ids, Machine, PF_Active)
-# Code Properties
-import nova.imas
+from nova.imas import (Database, Equilibrium, Ids, Machine, PF_Active)
+
 from nova.linalg.regression import MoorePenrose
 from nova.plot import (plt, sns)
 
-if TYPE_CHECKING:
-    from nova.imas import (Equilibrium, Ids)
+
 # pylint: disable=too-many-ancestors
 
 
@@ -168,7 +163,7 @@ class TimeSlice:
 
 
 @dataclass
-class ExtrapolateMachine(nova.imas.Machine):
+class ExtrapolateMachine(Machine):
     """
     Extend Machine with default values for Extrapolate class.
 
@@ -189,7 +184,7 @@ class ExtrapolateMachine(nova.imas.Machine):
 
 
 @dataclass
-class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, nova.imas.Database):
+class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
     r"""
     An interface class for the extrapolation of an equilibrium IDS.
 
@@ -323,7 +318,7 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, nova.imas.Database):
     def load_equilibrium(self):
         """Load equilibrium dataset."""
         self.name = 'equilibrium'
-        self.equilibrium = nova.imas.Equilibrium(**self.ids_attrs, ids=self.ids)
+        self.equilibrium = Equilibrium(**self.ids_attrs, ids=self.ids)
 
     def set_free(self):
         """Set free coils."""
@@ -407,7 +402,7 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, nova.imas.Database):
 
     def plot_bar(self):
         """Plot coil currents for single time-slice."""
-        pf_active = nova.imas.PF_Active(**self.ids_attrs |
+        pf_active = PF_Active(**self.ids_attrs |
                                         dict(name='pf_active'))
 
         index = [name for name in self.subframe.subspace.index
@@ -436,8 +431,6 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, nova.imas.Database):
 
 if __name__ == '__main__':
     print('running code')
-
-
 
     # import doctest
     # doctest.testmod()

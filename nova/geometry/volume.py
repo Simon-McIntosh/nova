@@ -3,23 +3,19 @@ from dataclasses import dataclass, field
 import tempfile
 from typing import ClassVar
 
-#import alphashape
-#import meshio
+import alphashape
+import meshio
 import numpy as np
 import numpy.typing as npt
 import pandas
-#import pyvista as pv
+import pyvista
 import sklearn.cluster
 import scipy.interpolate
 from scipy.spatial.transform import Rotation
 import shapely.geometry
-#import trimesh
-#import vedo
+import trimesh
+import vedo
 import vtk
-
-from nova.geometry import (alphashape, meshio, pyvista, Trimesh,
-                           trimesh_interfaces, vedo)
-
 
 from nova.geometry.polygeom import PolyGeom
 from nova.geometry.polygon import Polygon
@@ -34,13 +30,13 @@ class TriShell:
     mesh: vedo.Mesh
     qhull: bool = False
     ahull: bool = False
-    tri: Trimesh = field(init=False, repr=False)
+    tri: trimesh.Trimesh = field(init=False, repr=False)
     features: ClassVar[list[str]] = [
         *'xyz', 'dx', 'dy', 'dz', 'dl', 'dt', 'area', 'volume']
 
     def __post_init__(self):
         """Create trimesh instance."""
-        self.tri = Trimesh(self.mesh.points(), faces=self.mesh.faces())
+        self.tri = trimesh.Trimesh(self.mesh.points(), faces=self.mesh.faces())
         self._qhull = self._convex_hull
 
     @property

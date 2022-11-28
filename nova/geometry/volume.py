@@ -3,17 +3,14 @@ from dataclasses import dataclass, field
 import tempfile
 from typing import ClassVar
 
-import alphashape
 import meshio
 import numpy as np
 import numpy.typing as npt
 import pandas
 import pyvista
-import sklearn.cluster
 import scipy.interpolate
 from scipy.spatial.transform import Rotation
 import shapely.geometry
-import trimesh
 import vedo
 import vtk
 
@@ -30,12 +27,12 @@ class TriShell:
     mesh: vedo.Mesh
     qhull: bool = False
     ahull: bool = False
-    tri: trimesh.Trimesh = field(init=False, repr=False)
     features: ClassVar[list[str]] = [
         *'xyz', 'dx', 'dy', 'dz', 'dl', 'dt', 'area', 'volume']
 
     def __post_init__(self):
         """Create trimesh instance."""
+        import trimesh
         self.tri = trimesh.Trimesh(self.mesh.points(), faces=self.mesh.faces())
         self._qhull = self._convex_hull
 
@@ -125,14 +122,22 @@ class TriShell:
         poloidal[:, 0] = np.linalg.norm(points[:, :2], axis=1)
         poloidal[:, 1] = points[:, 2]
         if self.ahull:
-            cluster = sklearn.cluster.DBSCAN(eps=1e-3, min_samples=1)
+            try:
+                from alphashape import alphashape
+                from sklearn.cluster import DBSCAN
+            except ImportError as error:
+                raise ImportError('Generation of ahull poloidal polygons '
+                                  'requires nova[\'mesh\']\n'
+                                  'pip install nova[\'mesh\']') \
+                    from error
+            cluster = DBSCAN(eps=1e-3, min_samples=1)
             cluster.fit(poloidal)
             labels = np.unique(cluster.labels_)
             keypoints = np.zeros((len(labels), 2))
             for i, label in enumerate(labels):
                 keypoints[i, :] = np.mean(
                     poloidal[label == cluster.labels_, :], axis=0)
-            hull = alphashape.alphashape(keypoints, 2.5)
+            hull = alphashape(keypoints, 2.5)
             try:
                 return Polygon(hull, name='ahull')
             except NotImplementedError:
@@ -154,6 +159,7 @@ class TetVol(TriShell):
 
     def load_volume(self):
         """Compute volume from closed surface mesh."""
+        import trimesh
         with tempfile.NamedTemporaryFile(suffix='.msh') as tmp:
             trimesh.interfaces.gmsh.to_volume(self.tri, file_name=tmp.name)
             msh = meshio.read(tmp.name)
@@ -340,8 +346,8 @@ class Cell(VtkFrame):
 
     def __init__(self, point_array, link=False):
         """Construct vtk instance for cell constructed from bounding polys."""
-        assert all([len(array) == len(point_array[0])
-                    for array in point_array[1:]])
+        assert all((len(array) == len(point_array[0])
+                    for array in point_array[1:]))
         point_array = np.array(point_array)
         if np.isclose(point_array[0, 0], point_array[0, -1]).all():
             point_array = point_array[:, :-1]  # open closed loop

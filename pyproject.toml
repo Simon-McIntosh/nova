@@ -83,6 +83,7 @@ full = [
   "nova[ansys, docs, mesh, optimize, plan, spyder, test, thermofluids]"
 ]
 mesh = [
+  "alphashape",
   "gmsh", 
   "pygmsh", 
   "tetgen", 

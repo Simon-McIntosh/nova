@@ -5,9 +5,7 @@ from typing import ClassVar
 
 import numba
 import numpy as np
-import quadpy.c1
 
-#from nova.biot import quadpy
 from nova.biot.biotconstants import BiotConstants
 from nova.biot.biotmatrix import BiotMatrix
 
@@ -31,6 +29,7 @@ class CylinderConstants(BiotConstants):
 
     def __post_init__(self):
         """Build intergration parameters."""
+        import quadpy
         scheme = quadpy.c1.gauss_patterson(4)
         self.phi_points = np.pi - self.alpha * (scheme.points + 1)
         self.phi_weights = scheme.weights * self.alpha / 2

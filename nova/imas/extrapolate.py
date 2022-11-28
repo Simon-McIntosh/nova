@@ -2,12 +2,10 @@
 from dataclasses import dataclass, field, fields
 from functools import cached_property
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas
 from scipy.interpolate import RectBivariateSpline, interp1d
 from scipy.constants import mu_0
-import seaborn as sns
 import xarray
 
 from nova.imas import (Database, Equilibrium, Ids, Machine, PF_Active)
@@ -151,6 +149,7 @@ class TimeSlice:
 
     def plot(self):
         """Plot flux function interpolants."""
+        from nova.plot import plt, sns
         psi_norm = np.linspace(0, 1, 500)
         axes = plt.subplots(2, 1, sharex=True)[1]
         axes[0].plot(self.psi_norm, self.dpressure_dpsi, '.')
@@ -403,6 +402,7 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
 
     def plot_bar(self):
         """Plot coil currents for single time-slice."""
+        from nova.plot import plt, sns
         pf_active = PF_Active(**self.ids_attrs | dict(name='pf_active'))
 
         index = [name for name in self.subframe.subspace.index
@@ -432,7 +432,7 @@ if __name__ == '__main__':
 
     # import doctest
     # doctest.testmod()
-
+    """
     # pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
 
@@ -443,3 +443,4 @@ if __name__ == '__main__':
     # extrapolate.plasmagrid.plot()
 
     extrapolate.plot_bar()
+    """

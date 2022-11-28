@@ -17,7 +17,7 @@ from scipy.spatial import ConvexHull
 from rdp import rdp
 from pyquaternion import Quaternion
 
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 def rms(x, Nt):

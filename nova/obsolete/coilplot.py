@@ -11,7 +11,7 @@ import pandas as pd
 import shapely.geometry
 
 from nova.utilities.IO import human_format
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 class CoilPlot:

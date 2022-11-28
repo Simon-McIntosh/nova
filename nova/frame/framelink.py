@@ -5,12 +5,10 @@ from typing import Union
 
 import numpy as np
 import numpy.typing as npt
-#import pandas
+import pandas
 import shapely
-#import vedo
+import vedo
 
-from nova.frame import pandas
-from nova.geometry import vedo
 from nova.frame.dataarray import (
     ArrayLocMixin,
     ArrayIndexer,

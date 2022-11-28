@@ -7,7 +7,7 @@ from moviepy.video.io.bindings import mplfig_to_npimage
 import numpy as np
 
 from nova.assembly import structural
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 @dataclass

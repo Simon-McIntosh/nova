@@ -4,7 +4,7 @@ import pandas
 import numpy as np
 
 from nova.thermalhydralic.sultan import SultanEnsemble
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 class FrequencyResponse:

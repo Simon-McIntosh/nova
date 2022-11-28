@@ -225,7 +225,7 @@ if __name__ == '__main__':
 
     ols.plot()
 
-    from nova.plot import plt
+    import matplotlib.pyplot as plt
     plt.plot(ols.coordinate, profile.data)
 
 

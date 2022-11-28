@@ -9,7 +9,7 @@ import pandas as pd
 from nova.definitions import root_dir
 from nova.utilities.IO import pythonIO
 from nova.utilities.geom import rotate2D
-from nova.plot import plt
+import matplotlib.pyplot as plt
 from nova.utilities.png_tools import data_load
 from nova.frame.coilclass import CoilClass
 from nova.frame.coilset import CoilSet

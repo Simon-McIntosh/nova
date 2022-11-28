@@ -8,7 +8,7 @@ import xarray
 
 from nova.assembly.dataset import Ansys, MonteCarlo
 from nova.assembly.model import ModelBase
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 @dataclass

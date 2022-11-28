@@ -9,7 +9,7 @@ import sklearn.cluster
 import nlopt
 import pandas as pd
 
-from nova.plot import plt
+import matplotlib.pyplot as plt
 from nova.utilities import geom
 
 

@@ -1,4 +1,18 @@
+__all__ = [
+    "BiotData",
+    "BiotGrid",
+    "BiotInductance",
+    "BiotLoop",
+    "BiotPlasmaBoundary",
+    "BiotPlasmaGrid",
+    "BiotPoint",
+    "BiotPlot",
+    ]
 
-import lazy_loader as lazy
-
-__getattr__, __dir__, __all__ = lazy.attach_stub(__name__, __file__)
+from .biotdata import BiotData
+from .biotgrid import BiotGrid, BiotPlot
+from .biotinductance import BiotInductance
+from .biotloop import BiotLoop
+from .biotplasmaboundary import BiotPlasmaBoundary
+from .biotplasmagrid import BiotPlasmaGrid
+from .biotpoint import BiotPoint

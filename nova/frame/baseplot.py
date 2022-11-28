@@ -10,7 +10,7 @@ import scipy.stats
 
 from nova.frame.dataframe import DataFrame
 from nova.frame.error import ColumnError
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 @dataclass

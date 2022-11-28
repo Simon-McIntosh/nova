@@ -5,7 +5,7 @@ from fenics import *
 import fenics as fe
 import pyvista as pv
 
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 def boundary(_, on_boundary):
     return on_boundary

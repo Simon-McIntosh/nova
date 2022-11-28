@@ -19,7 +19,7 @@ from nova.frame.IO.read_waveform import read_dina
 from nova.frame.machinedata import MachineData
 from nova.frame.polyplot import Axes
 
-from nova.plot import plt
+import matplotlib.pyplot as plt
 from nova.utilities.IO import readtxt
 from nova.utilities.time import clock
 

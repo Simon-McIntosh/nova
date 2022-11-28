@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from nova.imas.scenario import Scenario
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 @dataclass

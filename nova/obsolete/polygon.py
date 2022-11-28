@@ -8,7 +8,7 @@ import numpy as np
 
 from nova.frame.polygen import polygen, PolyFrame
 from nova.frame.polygeom import PolyGeom
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 # pylint:disable=unsubscriptable-object
 

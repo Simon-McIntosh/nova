@@ -7,7 +7,7 @@ import pyvista as pv
 import sklearn.cluster
 
 from nova.assembly.uniformwindingpack import UniformWindingPack
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 @dataclass

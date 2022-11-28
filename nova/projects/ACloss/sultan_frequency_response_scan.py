@@ -4,7 +4,7 @@ from matplotlib.lines import Line2D
 from nova.thermalhydralic.sultan.fluidresponse import FluidResponse
 from nova.thermalhydralic.sultan.campaign import Campaign
 from nova.thermalhydralic.sultan.remotedata import FTPData
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 linestyle = {'ac0': '-', 'ac1': '--', 'ac2': ':'}
 strand = {'CSJA_6': {'Left': 'Jastec', 'Right': 'Jastec'},

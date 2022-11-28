@@ -6,7 +6,7 @@ import numpy as np
 
 from nova.definitions import root_dir
 from nova.utilities.IO import readtxt
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 class MultiFilament:

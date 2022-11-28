@@ -1,7 +1,7 @@
 import numpy as np
 
 from nova.frame.coilset import CoilSet
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 cs = CoilSet(biot_instances='grid', n=2e4)
 cs.add_coil(3, 0, 0.25, 0.5, dCoil=0.05, part='PF')

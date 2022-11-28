@@ -3,7 +3,7 @@ import numpy as np
 from nova.structural.finiteframe import finiteframe
 from nova.structural.properties import second_moment
 from nova.utilities import geom
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 class testbeam(finiteframe):  

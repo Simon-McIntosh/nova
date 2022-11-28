@@ -12,7 +12,7 @@ from nova.frame.polyplot import PolyPlot
 from nova.geometry.polyframe import PolyFrame
 from nova.geometry.polygen import PolyGen
 from nova.geometry.polygeom import PolyGeom
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 # pylint:disable=unsubscriptable-object

@@ -16,7 +16,7 @@ from nova.thermalhydralic.sultan.shotinstance import ShotInstance
 from nova.thermalhydralic.sultan.shotprofile import ShotProfile
 from nova.thermalhydralic.sultan.sultanio import SultanIO
 
-from nova.plot import plt
+import matplotlib.pyplot as plt
 from nova.utilities.time import clock
 
 '''

@@ -2,7 +2,7 @@ import numpy as np
 
 from nova.frame.coilgeom import ITERcoilset
 from nova.frame.IO.read_scenario import forcefield_data
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 #hp = hpy()  # initialize memory manager
 

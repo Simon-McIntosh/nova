@@ -2,16 +2,17 @@
 from dataclasses import dataclass, field, fields
 from functools import cached_property
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas
 from scipy.interpolate import RectBivariateSpline, interp1d
 from scipy.constants import mu_0
+import seaborn as sns
 import xarray
 
 from nova.imas import (Database, Equilibrium, Ids, Machine, PF_Active)
 
 from nova.linalg.regression import MoorePenrose
-from nova.plot import (plt, sns)
 
 
 # pylint: disable=too-many-ancestors

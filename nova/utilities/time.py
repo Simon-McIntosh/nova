@@ -12,7 +12,7 @@ import numpy as np
 from scipy.optimize import minimize
 from timeit import default_timer as _timer
 
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 def quit_function(fn_name):

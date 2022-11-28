@@ -12,7 +12,7 @@ from nova.frame.coilset import CoilSet
 from nova.frame.shell import Shell
 from nova.geometry.polygon import Polygon
 from nova.imas.database import CoilData, Database, Ids, ImasIds
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 # pylint: disable=too-many-ancestors
@@ -786,7 +786,6 @@ class Machine(CoilSet, MachineGeometry, CoilData):
         self.solve_biot()
         return self.store()
 
-    @profile
     def load(self, filename=None, path=None):
         """Load machine geometry and data."""
         super().load(filename, path)
@@ -807,7 +806,7 @@ if __name__ == '__main__':
 
     machine = Machine(pf_passive=False, nplasma=500)
 
-    #machine.sloc['Ic'] = 1
-    #machine.sloc['plasma', 'Ic'] = -10000
-    #machine.plot()
-    #machine.plasmagrid.plot()
+    machine.sloc['Ic'] = 1
+    machine.sloc['plasma', 'Ic'] = -10000
+    machine.plot()
+    machine.plasmagrid.plot()

@@ -9,7 +9,7 @@ from scipy.interpolate import interp1d
 from mpl_toolkits.mplot3d import Axes3D
 
 from nova.structural.properties import secondmoment
-from nova.plot import plt
+import matplotlib.pyplot as plt
 from nova.plot.addtext import linelabel
 from nova.utilities import geom
 

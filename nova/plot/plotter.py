@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 @dataclass

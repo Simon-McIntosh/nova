@@ -8,7 +8,7 @@ from scipy.interpolate import interp1d
 from astropy import units
 #import docx
 
-from nova.plot import plt
+import matplotlib.pyplot as plt
 from nova.utilities.geom import rdp_extract
 from nova.utilities.geom import vector_lowpass
 from nova.frame.IO.read_waveform import read_dina

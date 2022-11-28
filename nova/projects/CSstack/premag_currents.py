@@ -1,6 +1,6 @@
 import numpy as np
 
-from nova.plot import plt
+import matplotlib.pyplot as plt
 from nova.design.inverse import Inverse
 from nova.frame.coilset import CoilSet
 from nova.frame.coilgeom import ITERcoilset

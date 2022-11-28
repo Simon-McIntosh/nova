@@ -1,8 +1,5 @@
-import lazy_loader as lazy
-
 from os import path
 
-#sns = lazy.load('seaborn')
 import seaborn as sns
 import matplotlib as mpl
 from matplotlib import pyplot as plt

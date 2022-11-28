@@ -5,7 +5,7 @@ from pandas.api.types import is_list_like
 from scipy.interpolate import interp1d
 import shapely.geometry
 
-from nova.plot import plt
+import matplotlib.pyplot as plt
 from nova.utilities.geom import length
 from nova.frame.meshgrid import MeshGrid
 from nova.frame.biotsavart import BiotSet, BiotFrame

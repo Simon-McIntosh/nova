@@ -6,7 +6,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 from nova.frame.IO.read_waveform import read_dina
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 class read_plasma(read_dina):

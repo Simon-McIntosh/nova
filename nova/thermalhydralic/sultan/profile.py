@@ -9,7 +9,7 @@ import pandas
 from nova.thermalhydralic.sultan.campaign import Campaign
 from nova.thermalhydralic.sultan.trial import Trial
 from nova.thermalhydralic.sultan.sample import Sample
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 @dataclass

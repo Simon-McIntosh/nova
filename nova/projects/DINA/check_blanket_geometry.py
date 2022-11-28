@@ -7,7 +7,7 @@ import pandas
 import scipy
 
 from nova.database.filepath import FilePath
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 @dataclass

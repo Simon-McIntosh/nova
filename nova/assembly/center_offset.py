@@ -2,7 +2,7 @@
 import numpy as np
 import scipy
 
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 phi = np.linspace(0, 2*np.pi, 300)
 

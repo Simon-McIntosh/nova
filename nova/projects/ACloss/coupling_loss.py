@@ -5,7 +5,7 @@ import scipy.integrate
 import scipy.interpolate
 
 from nova.frame.acloss import DataIO
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 coil = 'CS3L'
 

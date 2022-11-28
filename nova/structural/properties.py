@@ -1,6 +1,6 @@
 import numpy as np
 
-from nova.plot import plt
+import matplotlib.pyplot as plt
 from nova.utilities import geom
 
 

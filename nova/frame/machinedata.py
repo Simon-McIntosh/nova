@@ -7,7 +7,7 @@ import shapely.geometry
 import shapely.algorithms
 
 from nova.definitions import root_dir
-from nova.plot import plt
+import matplotlib.pyplot as plt
 from nova.utilities.IO import pythonIO
 from nova.frame.coilset import CoilSet
 

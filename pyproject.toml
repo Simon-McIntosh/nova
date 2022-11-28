@@ -150,12 +150,6 @@ filterwarnings = [
 [tool.mypy]
 warn_return_any = true
 warn_unused_configs = true 
-
-[[tool.mypy.overrides]]
-module = [
-  "lazy_loader.*",
-  "imas.*"
-]
 ignore_missing_imports = true
 
 [tool.coverage.run]

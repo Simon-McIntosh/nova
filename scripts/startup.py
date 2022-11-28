@@ -1,9 +1,9 @@
 """Configure python environment."""
 
+import matplotlib as mpl
 import numpy as np
-
 import pandas
-from nova.plot import (mpl, sns)
+import seaborn as sns
 
 
 class Startup:

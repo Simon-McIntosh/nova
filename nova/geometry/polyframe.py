@@ -6,7 +6,7 @@ import numpy as np
 import shapely.geometry
 
 from nova.geometry.geoframe import GeoFrame
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 @dataclass

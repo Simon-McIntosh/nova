@@ -6,7 +6,7 @@ import os
 import numpy as np
 import matplotlib.image as mpimg
 
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 def log_coef(xlim):

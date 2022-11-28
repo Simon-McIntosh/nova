@@ -10,7 +10,7 @@ from nova.frame.coilset import CoilSet
 from nova.frame.coilgeom import ITERcoilset
 from nova.frame.timeseries import DataArray, DataSet
 from nova.utilities.localdata import LocalData
-from nova.plot import plt
+import matplotlib.pyplot as plt
 from nova.utilities.time import clock
 
 

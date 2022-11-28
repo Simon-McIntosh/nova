@@ -9,7 +9,7 @@ import pandas
 import xarray
 
 from nova.assembly.model import ModelData
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 @dataclass

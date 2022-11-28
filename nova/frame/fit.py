@@ -10,7 +10,7 @@ from nova.frame.framesetloc import LocIndexer
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
 from nova.imas.pf_active import PF_Active
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 @dataclass

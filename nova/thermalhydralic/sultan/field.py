@@ -8,7 +8,7 @@ from nova.thermalhydralic.sultan.model import Model
 from nova.thermalhydralic.sultan.fluid import Fluid, FluidSeries
 from nova.thermalhydralic.sultan.sultanio import SultanIO
 from nova.utilities.time import clock
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 class Field(SultanIO):

@@ -11,7 +11,7 @@ import nlopt
 
 from nova.definitions import root_dir
 from nova.thermalhydralic.sultan.sultanio import SultanIO
-from nova.plot import plt
+import matplotlib.pyplot as plt
 from nova.utilities.png_tools import data_mine
 
 

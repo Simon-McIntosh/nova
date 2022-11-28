@@ -12,7 +12,7 @@ import scipy.signal
 
 from nova.definitions import root_dir
 from nova.utilities.IO import pythonIO
-from nova.plot import plt
+import matplotlib.pyplot as plt
 from nova.utilities.time import clock
 from nova.plot.addtext import linelabel
 

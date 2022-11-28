@@ -14,7 +14,7 @@ import shapely
 import pygeos
 
 from nova.frame.topology import TopologyError
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 class PlasmaMethods:

@@ -13,7 +13,7 @@ from nova.frame.polyplot import PolyPlot
 from nova.geometry.polygeom import PolyGeom
 from nova.geometry.polygon import Polygon
 from nova.utilities import geom
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 # pylint:disable=no-member
 

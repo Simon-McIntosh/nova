@@ -7,7 +7,7 @@ import xarray
 
 from nova.database.netcdf import netCDF
 from nova.frame.framesetloc import FrameSetLoc
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 @dataclass

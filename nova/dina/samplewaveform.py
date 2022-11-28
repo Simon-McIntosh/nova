@@ -9,7 +9,7 @@ import pandas
 
 from nova.utilities.localdata import LocalData
 from nova.frame.IO.read_scenario import scenario_data
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 @dataclass

@@ -6,7 +6,7 @@ import numpy.typing as npt
 import sklearn.gaussian_process
 import xarray
 
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 @dataclass

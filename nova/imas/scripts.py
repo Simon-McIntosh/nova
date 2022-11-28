@@ -7,7 +7,7 @@ try:
 except ImportError:
     IMPORT_IMAS = False
 from nova.imas.extrapolate import Extrapolate
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 class ResType(click.ParamType):

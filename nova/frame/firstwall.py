@@ -7,7 +7,7 @@ from nova.frame.framesetloc import FrameSetLoc
 from nova.frame.poloidalgrid import PoloidalGrid
 from nova.frame.polyplot import Axes
 from nova.geometry.polygon import Polygon
-from nova.plot import plt
+import matplotlib.pyplot as plt
 
 
 @dataclass

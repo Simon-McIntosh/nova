@@ -13,7 +13,7 @@ import ufl
 
 from nova.frame.biotgrid import BiotGrid, Grid
 from nova.frame.coilset import CoilSet
-from nova.plot import plt
+import matplotlib.pyplot as plt
 #from nova.mesh_grid import MeshGrid
 
 

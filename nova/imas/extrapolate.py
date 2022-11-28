@@ -402,8 +402,7 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
 
     def plot_bar(self):
         """Plot coil currents for single time-slice."""
-        pf_active = PF_Active(**self.ids_attrs |
-                                        dict(name='pf_active'))
+        pf_active = PF_Active(**self.ids_attrs | dict(name='pf_active'))
 
         index = [name for name in self.subframe.subspace.index
                  if name in pf_active.data.coil_name.data]
@@ -428,9 +427,7 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
     def plot_waveform(self):
         """ """
 
-
 if __name__ == '__main__':
-    print('running code')
 
     # import doctest
     # doctest.testmod()
@@ -438,7 +435,7 @@ if __name__ == '__main__':
     # pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
 
-    extrapolate = Extrapolate(pulse, run, ngrid=200, nplasma=200)
+    extrapolate = Extrapolate(pulse, run)
 
     extrapolate.ionize(5)
     extrapolate.plot_2d('psi')

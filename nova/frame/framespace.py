@@ -126,7 +126,7 @@ class FrameSpace(SpaceIndexer, FrameLink):
 
 
 if __name__ == '__main__':
-
+    '''
     framespace = FrameSpace(base=['x', 'y', 'z'],
                             required=['x', 'z'],
                             available=['It', 'poly'],
@@ -136,3 +136,4 @@ if __name__ == '__main__':
                       active=False)
 
     print(framespace.passive)
+    '''

@@ -786,16 +786,17 @@ class Machine(CoilSet, MachineGeometry, CoilData):
         self.solve_biot()
         return self.store()
 
+    @profile
     def load(self, filename=None, path=None):
         """Load machine geometry and data."""
         super().load(filename, path)
-        #self.metadata = self.load_metadata(filename, path)
+        self.metadata = self.load_metadata(filename, path)
         return self
 
     def store(self, filename=None, path=None):
         """Store frameset, biot attributes and metadata."""
         super().store(filename, path)
-        #self.store_metadata(filename, path, self.metadata)
+        self.store_metadata(filename, path, self.metadata)
         return self
 
 
@@ -806,7 +807,7 @@ if __name__ == '__main__':
 
     machine = Machine(pf_passive=False, nplasma=500)
 
-    machine.sloc['Ic'] = 1
-    machine.sloc['plasma', 'Ic'] = -10000
-    machine.plot()
-    machine.plasmagrid.plot()
+    #machine.sloc['Ic'] = 1
+    #machine.sloc['plasma', 'Ic'] = -10000
+    #machine.plot()
+    #machine.plasmagrid.plot()

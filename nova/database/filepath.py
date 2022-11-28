@@ -4,11 +4,6 @@ import os
 import sys
 
 import appdirs
-try:
-    import imas
-    IMPORT_IMAS = True
-except ImportError:
-    IMPORT_IMAS = False
 import xarray
 import xxhash
 
@@ -42,9 +37,13 @@ class FilePath:
             app = getattr(appdirs, appattr)
             if subpath == 'nova':
                 return app(nova.__name__, version=self._tag)
-            if subpath == 'imas' and IMPORT_IMAS:
-                return app(nova.__name__,
-                           version=f'{self._tag}/{imas.__name__}')
+            if subpath == 'imas':
+                try:
+                    import imas
+                    return app(nova.__name__,
+                               version=f'{self._tag}/{imas.__name__}')
+                except ImportError:
+                    pass
             return app(subpath)
         if directory == 'root':
             directory = root_dir

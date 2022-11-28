@@ -59,6 +59,7 @@ class VtkGeo(MetaMethod):
         index = self.frame.index[~self.frame.geotype('Geo', 'vtk') &
                                  self.frame.geotype('Geo', 'poly')]
         if len(index) > 0:
+
             self.frame.loc[index, 'vtk'] = \
                 [Ring(polyframe.poly)
                  for polyframe in self.frame.loc[index, 'poly'].values]

@@ -3,4 +3,4 @@
 
 #from nova.geometry import alphashape
 
-import vtk
+from nova.frame.coilset import CoilSet

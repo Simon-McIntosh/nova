@@ -102,7 +102,7 @@ class TriShell:
         return self.rotate.as_rotvec()
 
     @property
-    def geom(self) -> tuple[float]:
+    def geom(self) -> list[float]:
         """Return list of geometry values as specified in self.features."""
         center = self.center_mass
         rotate = self.rotate
@@ -155,7 +155,7 @@ class TetVol(TriShell):
     def load_volume(self):
         """Compute volume from closed surface mesh."""
         with tempfile.NamedTemporaryFile(suffix='.msh') as tmp:
-            trimesh_interfaces.gmsh.to_volume(self.tri, file_name=tmp.name)
+            trimesh.interfaces.gmsh.to_volume(self.tri, file_name=tmp.name)
             msh = meshio.read(tmp.name)
         cells = msh.cells[0][1]
         n_cells = len(cells)

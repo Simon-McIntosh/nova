@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from nova.biot.biotframe import BiotFrame
-import matplotlib.pyplot as plt
 
 
 @dataclass
@@ -81,6 +80,7 @@ class BiotSet:
 
     def plot(self, axes=None):
         """Plot source and target markers."""
+        from nova.plot import plt
         if axes is None:
             axes = plt.gca()
         self.source.plot('x', 'z', 'scatter', ax=axes,

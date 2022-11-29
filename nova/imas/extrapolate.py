@@ -437,7 +437,7 @@ if __name__ == '__main__':
 
     # import doctest
     # doctest.testmod()
-    '''
+
     # pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
     # pulse, run = 105028, 1  # DINA
@@ -448,5 +448,4 @@ if __name__ == '__main__':
     extrapolate.plot_2d('psi')
     extrapolate.plasmagrid.plot()
 
-    #extrapolate.plot_bar()
-    '''
+    extrapolate.plot_bar()

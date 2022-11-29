@@ -134,7 +134,7 @@ def test_get_at_keyerror():
     framespace.subspace.Ic = [7.4, 3.2, 6.666]
     with pytest.raises(KeyError):
         _ = framespace.subspace.at['Coil6', 'Ic']
-test_get_at_keyerror()
+
 
 def test_get_iat_indexerror():
     framespace = FrameSpace(Required=['x', 'z'], Subspace=['Ic'])

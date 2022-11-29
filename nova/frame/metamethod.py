@@ -130,8 +130,23 @@ class Energize(MetaMethod):
     name: str = field(init=False, default='energize')
     required: list[str] = field(default_factory=lambda: ['It', 'nturn'])
     require_all: bool = False
+    additional: list[str] = field(default_factory=lambda: ['Ic'])
+    available: dict[str, bool] = field(default_factory=lambda: {
+        'Ic': False, 'nturn': False})
 
     _subclass: ClassVar[str] = '.frame.energize.Energize'
+
+    def __post_init__(self):
+        """Update energize key."""
+        if self.generate:
+            self.frame.metaframe.energize = ['It']  # set metaframe key
+            if np.array([attr in self.frame.metaframe.subspace
+                         for attr in self.required]).any():
+                self.frame.metaframe.metadata = \
+                    {'subspace': self.required+self.additional}
+        else:
+            self.update_available(self.additional)
+        super().__post_init__()
 
 
 @dataclass

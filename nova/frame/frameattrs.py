@@ -24,9 +24,9 @@ class FrameAttrs(pandas.DataFrame):
 
     def __init__(self,
                  data=None,
-                 index: Collection[Any] = None,
-                 columns: Collection[Any] = None,
-                 attrs: dict[str, Collection[Any]] = None,
+                 index: Collection[Any] | None = None,
+                 columns: Collection[Any] | None = None,
+                 attrs: dict[str, Collection[Any]] | None = None,
                  **metadata: dict[str, Collection[Any]]):
         super().__init__(data, index, columns)
         self.update_metadata(data, columns, attrs, metadata)
@@ -57,10 +57,8 @@ class FrameAttrs(pandas.DataFrame):
     def frame_attrs(self, *args):
         """Update metamethod attrs."""
         for metamethod in (arg(self) for arg in args):
-            print(metamethod.name)
             if not metamethod.generate:
                 continue
-            print(metamethod.name, 'generate')
             method = metamethod()
             if not self.hasattrs(method.name):
                 self.update_columns()

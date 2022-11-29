@@ -1,4 +1,5 @@
 """Subclass pandas.DataFrame."""
+from importlib import import_module
 import re
 import string
 
@@ -9,9 +10,9 @@ import numpy as np
 import xarray
 
 from nova.frame.frameattrs import FrameAttrs
-from nova.geometry.geoframe import GeoFrame
-from nova.geometry.polyframe import PolyFrame
-from nova.geometry.vtkgen import VtkFrame
+#from nova.geometry.geoframe import GeoFrame
+#from nova.geometry.polyframe import PolyFrame
+#from nova.geometry.vtkgen import VtkFrame
 
 # pylint: disable=too-many-ancestors
 
@@ -37,7 +38,10 @@ class DataFrame(FrameAttrs):
 
     """
 
-    geoframe = dict(Polygon=PolyFrame, VTK=VtkFrame, Geo=GeoFrame, Json=str)
+    _geoframe = dict(
+        Polygon='.geometry.polyframe.PolyFrame',
+        VTK='.geometry.vtkgen.VtkFrame',
+        Geo='.geometry.geoframe.GeoFrame')
 
     def __init__(self, data=None, index=None, columns=None,
                  attrs=None, **metadata):
@@ -53,6 +57,14 @@ class DataFrame(FrameAttrs):
     @property
     def _constructor_sliced(self):
         return Series
+
+    def geoframe(self, geo: str):
+        """Return geoframe."""
+        if geo == 'Json':
+            return str
+        _module = '.'.join(self._geoframe[geo].split('.')[:-1])
+        _method = self._geoframe[geo].split('.')[-1]
+        return getattr(import_module(_module, 'nova'), _method)
 
     def update_index(self):
         """Reset index if self.index is unset."""
@@ -232,12 +244,12 @@ class DataFrame(FrameAttrs):
         """Load json strings and convert to shapely polygons."""
         geotype = [json.loads(geom)['type'] if geom else None
                    for geom in self[col]]
-        self.loc[:, col] = [self.geoframe[geo].loads(geom)
+        self.loc[:, col] = [self.geoframe(geo).loads(geom)
                             for geom, geo in zip(self[col], geotype)]
 
     def geotype(self, geo: str, col: str):
         """Return boolean list of matching geoframe types."""
-        return np.array([isinstance(geom, self.geoframe[geo])
+        return np.array([isinstance(geom, self.geoframe(geo))
                          for geom in self[col]], dtype=bool)
 
     def _astype(self, metadata: dict[str, list[str]], dtype: str) -> dict:

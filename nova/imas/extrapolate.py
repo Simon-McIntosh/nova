@@ -120,6 +120,11 @@ class TimeSlice:
         """Return attribute from xarray dataset."""
         return getattr(self.data, attr).values
 
+    @property
+    def boundary(self):
+        """Return boundary contour, override getattr to trim contour."""
+        return self.data.boundary[:self.data.boundary_length.values].values
+
     def normalize(self, psi):
         """Return normalized poloidal flux."""
         return (psi - self.psi_axis) / (self.psi_boundary - self.psi_axis)
@@ -432,15 +437,16 @@ if __name__ == '__main__':
 
     # import doctest
     # doctest.testmod()
-    """
+    '''
     # pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
+    # pulse, run = 105028, 1  # DINA
 
-    extrapolate = Extrapolate(pulse, run)
+    extrapolate = Extrapolate(pulse, run, ngrid=50, nplasma=50)
 
-    extrapolate.ionize(5)
+    extrapolate.ionize(20)
     extrapolate.plot_2d('psi')
-    # extrapolate.plasmagrid.plot()
+    extrapolate.plasmagrid.plot()
 
-    extrapolate.plot_bar()
-    """
+    #extrapolate.plot_bar()
+    '''

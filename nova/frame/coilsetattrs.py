@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, fields
 
 from nova.frame.framesetloc import FrameSetLoc
-from nova.geometry.polygen import PolyGen
+from nova.geometry.polyshape import PolyShape
 
 
 @dataclass
@@ -79,7 +79,7 @@ class CoilSetAttrs(ABC, FrameSetLoc):
             if attr in ['section', 'turn']:
                 if attr not in self._attrs:
                     continue
-                self._attrs[attr] = PolyGen.polyshape[self._attrs[attr]]
+                self._attrs[attr] = PolyShape(self._attrs[attr]).shape
 
     def update_link(self):
         """Update link boolean."""
@@ -104,7 +104,6 @@ class GridAttrs(CoilSetAttrs):
     @attrs.setter
     def attrs(self, attrs):
         CoilSetAttrs.attrs.fset(self, attrs)
-        #self._attrs['turn'] = PolyGen.polyshape[self._attrs['turn']]
         self.set_conditional_attributes()
         self.gridattrs = {attr: self._attrs.pop(attr)
                           for attr in self.gridattrs}

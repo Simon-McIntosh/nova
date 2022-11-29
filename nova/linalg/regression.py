@@ -9,11 +9,10 @@ from pylops.optimization.leastsquares import RegularizedInversion
 
 from nova.imas.equilibrium import Equilibrium
 from nova.linalg.decompose import Decompose
-from nova.plot.plotter import LinePlot
 
 
 @dataclass
-class RegressionBase(LinePlot):
+class RegressionBase():
     """Implement full-matrix forward and inverse models."""
 
     matrix: np.ndarray = field(repr=False)
@@ -120,13 +119,15 @@ class RegressionBase(LinePlot):
 
     def plot(self, axes=None):
         """Plot fit."""
-        self.axes = axes
+        from nova.plot import plt
+        if axes is None:
+            axes = plt.subplots(1, 1)[0]
         if self.data is not None:
-            self.axes.plot(self.coordinate, self.data, label='data')
+            axes.plot(self.coordinate, self.data, label='data')
         if self.model is not None:
-            self.axes.plot(self.coordinate, self.forward(), '--', label='fit')
+            axes.plot(self.coordinate, self.forward(), '--', label='fit')
         if self.data is not None or self.model is not None:
-            self.axes.legend()
+            axes.legend()
 
 
 @dataclass

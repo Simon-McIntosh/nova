@@ -3,12 +3,12 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from nova.frame.metamethod import MetaMethod
+import nova.frame.metamethod as metamethod
 from nova.frame.framelink import FrameLink
 
 
 @dataclass
-class BiotSection(MetaMethod):
+class BiotSection(metamethod.BiotSection):
     """
     Section methods for BiotFrame.
 
@@ -18,7 +18,6 @@ class BiotSection(MetaMethod):
     name = 'biotsection'
 
     frame: FrameLink = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['section'])
     additional: list[str] = field(default_factory=lambda: ['turnturn'])
     section_factor: dict[str, float] = field(
         init=False, default_factory=lambda: {

@@ -3,10 +3,12 @@ import dask.array as da
 import numpy as np
 
 from nova.frame.framespace import FrameSpace
-from nova.biot.biotsection import BiotSection
-from nova.biot.biotshape import BiotShape
-from nova.biot.biotreduce import BiotReduce
-from nova.frame.geometry import PolyGeo
+#from nova.biot.biotsection import BiotSection
+#from nova.biot.biotshape import BiotShape
+#from nova.biot.biotreduce import BiotReduce
+#from nova.frame.geometry import PolyGeo
+
+from nova.frame.metamethod import BiotSection, BiotShape, BiotReduce, PolyGeo
 
 
 # pylint: disable=too-many-ancestors

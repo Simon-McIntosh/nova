@@ -54,16 +54,18 @@ class FrameAttrs(pandas.DataFrame):
             self.check_column(key)
         super().__setitem__(key, value)
 
-    def frame_attrs(self, *args: MetaMethod):
+    def frame_attrs(self, *args):
         """Update metamethod attrs."""
-        for method in args:
-            name = method.name
-            if not method(self).generate:
+        for metamethod in (arg(self) for arg in args):
+            print(metamethod.name)
+            if not metamethod.generate:
                 continue
-            if not self.hasattrs(name):
+            print(metamethod.name, 'generate')
+            method = metamethod()
+            if not self.hasattrs(method.name):
                 self.update_columns()
-            self.attrs[name] = method(self)
-            self.attrs[name].initialize()
+            self.attrs[method.name] = method
+            self.attrs[method.name].initialize()
 
     def frame_attr(self, method, *method_args):
         """Update single metamethod."""

@@ -50,23 +50,29 @@ class Boundary(Scenario):
         return np.c_[outline.r, outline.z]
 
     def build(self):
-        """Build 0D parameter timeseries."""
+        """Build outline timeseries."""
         super().build()
-        outline = self.outline(0)
-        self.data['boundary_index'] = range(len(outline))
+        outline_length = max(len(self.outline(itime))
+                             for itime in range(self.data.dims['time']))
+        self.data['boundary_index'] = range(outline_length)
         self.data['coordinate'] = ['radial', 'vertical']
         self.data['boundary'] = ('time', 'boundary_index', 'coordinate'), \
             np.zeros((self.data.dims['time'],
                       self.data.dims['boundary_index'],
                       self.data.dims['coordinate']))
-
+        self.data['boundary_length'] = 'time', \
+            np.zeros(self.data.dims['time'], dtype=int)
         for itime in range(self.data.dims['time']):
-            self.data['boundary'][itime] = self.outline(itime)
+            outline = self.outline(itime)
+            self.data['boundary_length'][itime] = len(outline)
+            self.data['boundary'][itime, :len(outline)] = outline
 
     def plot_boundary(self, itime: int):
         """Plot 2D boundary at itime."""
-        plt.plot(self.data.boundary[itime, :, 0],
-                 self.data.boundary[itime, :, 1], 'gray', alpha=0.5)
+        length = self.data.boundary_length[itime].values
+        plt.plot(self.data.boundary[itime, :length, 0],
+                 self.data.boundary[itime, :length, 1],
+                 'gray', alpha=0.5)
         plt.axis('equal')
 
 
@@ -241,5 +247,9 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
 
 if __name__ == '__main__':
 
-    import doctest
-    doctest.testmod()
+    #import doctest
+    #doctest.testmod()
+
+    equilibrium = Equilibrium(105028, 1)
+    #equilibrium.plot_2d(50, 'psi')
+    #equilibrium.plot_boundary(50)

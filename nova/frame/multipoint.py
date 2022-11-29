@@ -4,21 +4,19 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas
 
-from nova.frame.metamethod import MetaMethod
+import nova.frame.metamethod as metamethod
 from nova.frame.dataframe import DataFrame
 
 
 @dataclass
-class MultiPoint(MetaMethod):
+class MultiPoint(metamethod.MultiPoint):
     """Manage multi-point constraints applied across frame.index."""
 
     name = 'multipoint'
 
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['link'])
     additional: list[str] = field(default_factory=lambda: [
         'factor', 'ref', 'subref'])
-    require_all: bool = True
     indexer: list[int] = field(init=False, repr=False)
     index: pandas.Index = field(default=pandas.Index([]))
 

@@ -1,40 +1,17 @@
 """Generate polygons for CoilFrame instances."""
 from dataclasses import dataclass
-import string
-from typing import ClassVar
 
 import shapely
 import shapely.geometry
 import shapely.ops
 import numpy as np
 
+from nova.geometry.polyshape import PolyShape
+
 
 @dataclass
-class PolyGen:
+class PolyGen(PolyShape):
     """Manage shapely polygons."""
-
-    section: str
-    polyshape: ClassVar[dict[str, str]] = \
-        dict.fromkeys(['disc', 'dsc', 'd', 'o', 'disk', 'dsk',
-                       'circle', 'c'], 'disc') | \
-        dict.fromkeys(['ellipse', 'ellip', 'el', 'e'], 'ellipse') | \
-        dict.fromkeys(['square', 'sq', 's'], 'square') | \
-        dict.fromkeys(['rectangle', 'rect', 'rec', 'r'], 'rectangle') | \
-        dict.fromkeys(['skin', 'sk'], 'skin') | \
-        dict.fromkeys(['polygon', 'poly'], 'polygon') |\
-        dict.fromkeys(['shell', 'shl', 'sh'], 'shell') |\
-        dict.fromkeys(['hexagon', 'hex', 'hx', 'h'], 'hexagon')
-
-    @property
-    def shape(self):
-        """Return polygeom shape name."""
-        section = self.section.rstrip(string.digits)
-        try:
-            return self.polyshape[section]
-        except AttributeError as error:
-            raise AttributeError(
-                f'cross_section: {self.section} not implemented'
-                f'\n specify as {self.polyshape}') from error
 
     def __call__(self, *args):
         """Evaluate poly."""

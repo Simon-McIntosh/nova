@@ -2,13 +2,11 @@
 from dataclasses import dataclass, field
 from functools import cached_property
 import inspect
-from typing import ClassVar, Any
+from typing import ClassVar
 
-from nova.biot import (BiotData, BiotGrid, BiotInductance, BiotLoop,
-                       BiotPlasmaGrid, BiotPlasmaBoundary, BiotPoint)
+from nova.biot.biotdata import BiotData
 from nova.database.netcdf import netCDF
 from nova.frame.frameset import FrameSet
-from nova.frame.plasma import Plasma
 
 
 @dataclass
@@ -18,17 +16,23 @@ class Biot(FrameSet):
     field_attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     dfield: float = field(default=-1, repr=False)
 
-    biot_class: ClassVar[dict[str, Any]] = \
-        dict(point=BiotPoint, grid=BiotGrid,
-             plasmaboundary=BiotPlasmaBoundary, plasmagrid=BiotPlasmaGrid,
-             probe=BiotPoint, loop=BiotLoop, inductance=BiotInductance)
+    _biot: ClassVar[dict[str, str]] = dict(
+        plasma='.plasma.Plasma',
+        point='.biotpoint.BiotPoint',
+        grid='.biotgrid.BiotGrid',
+        plasmaboundary='.biotplasmaboundary.BiotPlasmaBoundary',
+        plasmagrid='.biotplasmagrid.BiotPlasmaGrid',
+        probe='.biotpoint.BiotPoint',
+        loop='.biotloop.BiotLoop',
+        inductance='.boitinductance.BiotInductance',
+        )
 
     def _biotfactory(self):
         """Return nammed biot instance."""
-        attr = inspect.getframeinfo(inspect.currentframe().f_back, 0)[2]
-        return self.biot_class[attr](*self.frames, path=self.path, name=attr,
-                                     filename=self.filename,
-                                     attrs=self.field_attrs)
+        name = inspect.getframeinfo(inspect.currentframe().f_back, 0)[2]
+        method = self.import_method(self._biot[name], 'nova.biot')
+        return method(*self.frames, path=self.path, name=name,
+                      filename=self.filename, attrs=self.field_attrs)
 
     @property
     def biot_attrs(self):
@@ -47,6 +51,7 @@ class Biot(FrameSet):
     @cached_property
     def plasma(self):
         """Return plasma instance."""
+        Plasma = self.import_method(self._biot['plasma'], 'nova.frame')
         return Plasma(*self.frames, path=self.path,
                       grid=self.plasmagrid, boundary=self.plasmaboundary)
 

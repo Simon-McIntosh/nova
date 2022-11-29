@@ -1,5 +1,6 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 from dataclasses import dataclass, field
+from importlib import import_module
 
 import netCDF4
 import pandas
@@ -58,6 +59,14 @@ class FrameSet(FilePath, FrameSetLoc):
         superframe['Ic'] = self.sloc['Ic'][self.frame.subref]
         superframe['It'] = superframe['Ic'] * superframe['nturn']
         return superframe.__str__()
+
+    @staticmethod
+    def import_method(name: str, package: str):
+        """Return method imported from dot seperated module lookup."""
+        module_name = '.'.join(name.split('.')[:-1])
+        method_name = name.split('.')[-1]
+        module = import_module(module_name, package=package)
+        return getattr(module, method_name)
 
     def clear_frameset(self):
         """Clear all frameset instances."""

@@ -7,18 +7,19 @@ import numpy as np
 import numpy.typing as npt
 import pandas
 import shapely
-import vedo
 
 from nova.frame.dataarray import (
     ArrayLocMixin,
     ArrayIndexer,
     DataArray
     )
-from nova.frame.energize import Energize
-from nova.frame.multipoint import MultiPoint
-from nova.frame.select import Select
+#from nova.frame.energize import Energize
+#from nova.frame.multipoint import MultiPoint
+#from nova.frame.select import Select
 from nova.geometry.polygeom import PolyGeom
 from nova.geometry.polygon import Polygon
+
+from nova.frame.metamethod import Energize, MultiPoint, Select
 
 
 # pylint: disable=too-many-ancestors
@@ -313,6 +314,7 @@ class FrameLink(LinkIndexer, DataArray):
         """
         if len(args) != 1:
             return args, kwargs
+        import vedo
         if len(self.metaframe.required) == 1 and \
             (not isinstance(args[0], (shapely.geometry.Polygon,
                                       shapely.geometry.MultiPolygon, dict))

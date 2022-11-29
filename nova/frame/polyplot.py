@@ -7,7 +7,7 @@ import numpy as np
 from matplotlib.collections import PatchCollection
 import matplotlib.colors as mc
 
-from nova.frame.metamethod import MetaMethod
+import nova.frame.metamethod as metamethod
 from nova.frame.dataframe import DataFrame
 from nova.frame.baseplot import Axes, Display, Label, BasePlot
 
@@ -15,13 +15,12 @@ from nova.frame.baseplot import Axes, Display, Label, BasePlot
 
 
 @dataclass
-class PolyPlot(Axes, Display, Label, MetaMethod, BasePlot):
+class PolyPlot(Axes, Display, Label, metamethod.PolyPlot, BasePlot):
     """Methods for ploting FrameSpace data."""
 
     name = 'polyplot'
 
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['poly'])
     additional: list[str] = field(default_factory=lambda: ['part'])
     rng: np.random.Generator = np.random.default_rng(2025)
 

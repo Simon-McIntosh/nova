@@ -1,12 +1,12 @@
 """Shape methods for BiotFrame."""
 from dataclasses import dataclass, field
 
-from nova.frame.metamethod import MetaMethod
+import nova.frame.metamethod as metamethod
 from nova.frame.framelink import FrameLink
 
 
 @dataclass
-class BiotShape(MetaMethod):
+class BiotShape(metamethod.BiotShape):
     """Shape methods for BiotFrame."""
 
     name = 'biotshape'

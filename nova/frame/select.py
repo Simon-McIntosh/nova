@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from nova.frame.metamethod import MetaMethod
+import nova.frame.metamethod as metamethod
 from nova.frame.dataframe import DataFrame
 
 
@@ -42,15 +42,12 @@ class Label:
 
 
 @dataclass
-class Select(MetaMethod):
+class Select(metamethod.Select):
     """Manage dependant frame energization parameters."""
 
     name = 'select'
 
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: [
-        'active', 'plasma', 'fix', 'ferritic'], repr=False)
-    require_all: bool = field(repr=False, default=False)
     additional: list[str] = field(init=False, default_factory=lambda: [
         'passive', 'coil', 'free'])
     avalible: list[str] = field(init=False, default_factory=list)

@@ -1,13 +1,14 @@
 """AbstractBaseClass Extended FrameSpace._methods."""
-from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from importlib import import_module
+from typing import ClassVar
 
 import numpy as np
 import pandas
 
 
 @dataclass
-class MetaMethod(ABC):
+class MetaMethod:
     """Manage DataFrame methods."""
 
     frame: pandas.DataFrame = field(repr=False)
@@ -16,15 +17,23 @@ class MetaMethod(ABC):
     additional: list[str] = field(default_factory=list)
     require_all: bool = True
 
+    _subclass: ClassVar[str] = '.frame.metamethod.MetaMethod'
+
     def __post_init__(self):
         """Update metadata."""
         if self.generate:
             self.update_base()
             self.update_additional()
 
-    @abstractmethod
+    def __call__(self):
+        """Return metamethod subclass."""
+        _module = '.'.join(self._subclass.split('.')[:-1])
+        _method = self._subclass.split('.')[-1]
+        return getattr(import_module(_module, 'nova'), _method)(self.frame)
+
     def initialize(self):
         """Init metamethod."""
+        raise NotImplementedError()
 
     @property
     def generate(self):
@@ -66,3 +75,115 @@ class MetaMethod(ABC):
                      if attr in self.frame.metaframe.available]
         if available:
             self.frame.metaframe.metadata = {'additional': available}
+
+
+@dataclass
+class VtkGeo(MetaMethod):
+    """Volume vtk geometry metamethod."""
+
+    name: str = field(init=False, default='vtkgeo')
+    required: list[str] = field(default_factory=lambda: ['vtk'])
+
+    _subclass: ClassVar[str] = '.frame.geometry.VtkGeo'
+
+
+@dataclass
+class PolyGeo(MetaMethod):
+    """
+    Polygon geometrical methods for FrameSpace.
+
+    Extract geometric features from shapely polygons.
+    """
+
+    name: str = field(init=False, default='polygeo')
+    required: list[str] = field(default_factory=lambda: [
+        'segment', 'section', 'poly'])
+    require_all: bool = False
+
+    _subclass: ClassVar[str] = '.frame.geometry.PolyGeo'
+
+
+@dataclass
+class PolyPlot(MetaMethod):
+    """Methods for ploting FrameSpace data."""
+
+    name: str = field(init=False, default='polyplot')
+    required: list[str] = field(default_factory=lambda: ['poly'])
+
+    _subclass: ClassVar[str] = '.frame.polyplot.PolyPlot'
+
+
+@dataclass
+class VtkPlot(MetaMethod):
+    """Methods for ploting 3D FrameSpace data."""
+
+    name: str = field(init=False, default='vtkplot')
+    required: list[str] = field(default_factory=lambda: ['vtk'])
+
+    _subclass: ClassVar[str] = '.frame.vtkplot.VtkPlot'
+
+
+@dataclass
+class Energize(MetaMethod):
+    """Manage dependant frame energization parameters."""
+
+    name: str = field(init=False, default='energize')
+    required: list[str] = field(default_factory=lambda: ['It', 'nturn'])
+    require_all: bool = False
+
+    _subclass: ClassVar[str] = '.frame.energize.Energize'
+
+
+@dataclass
+class MultiPoint(MetaMethod):
+    """Manage multi-point constraints applied across frame.index."""
+
+    name: str = field(init=False, default='multipoint')
+    required: list[str] = field(default_factory=lambda: ['link'])
+    require_all: bool = True
+
+    _subclass: ClassVar[str] = '.frame.multipoint.MultiPoint'
+
+
+@dataclass
+class Select(MetaMethod):
+    """Manage dependant frame energization parameters."""
+
+    name: str = field(init=False, default='select')
+    required: list[str] = field(default_factory=lambda: [
+        'active', 'plasma', 'fix', 'ferritic'], repr=False)
+    require_all: bool = False
+
+    _subclass: ClassVar[str] = '.frame.select.Select'
+
+
+@dataclass
+class BiotSection(MetaMethod):
+    """
+    Section methods for BiotFrame.
+
+    Set cross-section factors used in Biot_Savart calculations.
+    """
+
+    name: str = field(init=False, default='biotsection')
+    required: list[str] = field(default_factory=lambda: ['section'])
+
+    _subclass: ClassVar[str] = '.biot.biotsection.BiotSection'
+
+
+@dataclass
+class BiotShape(MetaMethod):
+    """Shape methods for BiotFrame."""
+
+    name: str = field(init=False, default='biotshape')
+
+    _subclass: ClassVar[str] = '.biot.biotshape.BiotShape'
+
+
+@dataclass
+class BiotReduce(MetaMethod):
+    """Calculate reduction indices for reduceat."""
+
+    name: str = field(init=False, default='biotreduce')
+
+    _subclass: ClassVar[str] = '.biot.biotreduce.BiotReduce'

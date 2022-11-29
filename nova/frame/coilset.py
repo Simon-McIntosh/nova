@@ -30,7 +30,7 @@ class CoilSet(Biot, Control, Frame):
     @property
     def coilset_attrs(self):
         """Return coilset attrs."""
-        return self.frame_attrs | self.biot_attrs
+        return self.frameset_attrs | self.biot_attrs
 
     def __add__(self, other: FrameSet):
         """Return framset union of self and other."""

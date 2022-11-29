@@ -4,23 +4,21 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas
 
-from nova.frame.metamethod import MetaMethod
+import nova.frame.metamethod as metamethod
 from nova.frame.dataframe import DataFrame
 from nova.frame.error import SpaceKeyError
 
 
 @dataclass
-class Energize(MetaMethod):
+class Energize(metamethod.Energize):
     """Manage dependant frame energization parameters."""
 
     name = 'energize'
 
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['It', 'nturn'])
     additional: list[str] = field(default_factory=lambda: ['Ic'])
     available: dict[str, bool] = field(default_factory=lambda: {
         'Ic': False, 'nturn': False})
-    require_all: bool = False
 
     def __post_init__(self):
         """Update energize key."""

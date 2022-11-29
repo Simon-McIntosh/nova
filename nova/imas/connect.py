@@ -196,7 +196,6 @@ class MachineDatabase(Connect):
 
 
 if __name__ == '__main__':
-    pass
 
     #machine = MachineDatabase().sync_ids()
     #machine.load_ids('pf_active')
@@ -207,6 +206,8 @@ if __name__ == '__main__':
     # MachineDatabase(machine='ITER_MD').sync_shot('150100/4')
 
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')
+    # ScenarioDatabase(user='dubrovm').sync_shot('105028/1')
+
 
     #ScenarioDatabase().sync_shot('130012/1')
     #scenario = ScenarioDatabase()

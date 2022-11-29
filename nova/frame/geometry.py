@@ -6,7 +6,7 @@ import numpy as np
 import pandas
 import vedo
 
-from nova.frame.metamethod import MetaMethod
+import nova.frame.metamethod as metamethod
 from nova.frame.dataframe import DataFrame
 from nova.geometry.polygeom import PolyGeom
 from nova.geometry.polygon import Polygon
@@ -15,13 +15,10 @@ from nova.geometry.vtkgen import VtkFrame
 
 
 @dataclass
-class VtkGeo(MetaMethod):
+class VtkGeo(metamethod.VtkGeo):
     """Volume vtk geometry."""
 
-    name = 'vtkgeo'
-
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['vtk'])
     additional: list[str] = field(
         default_factory=lambda: [*TriShell.features, 'part',
                                  'segment', 'section', 'poly'])
@@ -59,7 +56,6 @@ class VtkGeo(MetaMethod):
         index = self.frame.index[~self.frame.geotype('Geo', 'vtk') &
                                  self.frame.geotype('Geo', 'poly')]
         if len(index) > 0:
-
             self.frame.loc[index, 'vtk'] = \
                 [Ring(polyframe.poly)
                  for polyframe in self.frame.loc[index, 'poly'].values]
@@ -69,7 +65,7 @@ class VtkGeo(MetaMethod):
 
 
 @dataclass
-class PolyGeo(MetaMethod):
+class PolyGeo(metamethod.PolyGeo):
     """
     Polygon geometrical methods for FrameSpace.
 

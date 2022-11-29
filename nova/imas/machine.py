@@ -773,13 +773,13 @@ class Machine(CoilSet, MachineGeometry, CoilData):
 
     def build(self, **kwargs):
         """Build dataset, frameset and, biotset and save to file."""
-        self.frame_attrs = kwargs
+        self.frameset_attrs = kwargs
         self.clear_frameset()
         for attr, geometry in self.geometry.items():
             geometry_attrs = getattr(self, attr)
             # pylint: disable=not-a-mapping
             if isinstance(geometry_attrs, dict):
-                coilset = geometry(**geometry_attrs, **self.frame_attrs)
+                coilset = geometry(**geometry_attrs, **self.frameset_attrs)
                 self += coilset
             for attr in coilset.biot_methods:
                 getattr(self, attr).data = getattr(coilset, attr).data

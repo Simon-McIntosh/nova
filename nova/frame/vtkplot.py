@@ -6,18 +6,17 @@ import numpy as np
 import vedo
 
 from nova.frame.baseplot import Display
-from nova.frame.metamethod import MetaMethod
+import nova.frame.metamethod as metamethod
 from nova.frame.dataframe import DataFrame
 
 
 @dataclass
-class VtkPlot(MetaMethod):
+class VtkPlot(metamethod.VtkPlot):
     """Methods for ploting 3D FrameSpace data."""
 
     name = 'vtkplot'
 
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: ['vtk'])
     additional: list[str] = field(default_factory=lambda: [])
 
     def initialize(self):

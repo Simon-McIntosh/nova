@@ -6,7 +6,6 @@ import numpy as np
 import shapely.geometry
 
 from nova.geometry.geoframe import GeoFrame
-import matplotlib.pyplot as plt
 
 
 @dataclass
@@ -56,6 +55,7 @@ class PolyFrame(GeoFrame):
 
     def plot_boundary(self, axes=None, **kwargs):
         """Plot polygon boundary."""
+        from nova.plot import plt
         if axes is None:
             axes = plt.subplots(1, 1)[1]
         axes.plot(*self.poly.exterior.xy, **kwargs)

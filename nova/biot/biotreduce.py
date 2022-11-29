@@ -4,18 +4,17 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas
 
-from nova.frame.metamethod import MetaMethod
+import nova.frame.metamethod as metamethod
 from nova.frame.dataframe import DataFrame
 
 
 @dataclass
-class BiotReduce(MetaMethod):
+class BiotReduce(metamethod.BiotReduce):
     """Calculate reduction indices for reduceat."""
 
     name = 'biotreduce'
 
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=list)
     index: pandas.Index = field(default=pandas.Index([]), repr=False)
     indices: list[int] = field(init=False, repr=False, default_factory=list)
     link: dict[int, int] = field(init=False, repr=False, default_factory=dict)

@@ -37,7 +37,7 @@ class PolyDelta(PolyGeom):
 
     def generate_deltas(self):
         """Generate grid and cell deltas."""
-        self.turn = PolyGen.polyshape[self.turn]  # inflate turn name
+        self.turn = PolyGen(self.turn).shape  # inflate turn name
         self.cell_delta = self.dimension_cell()
         self.grid_delta = self.dimension_grid()
 

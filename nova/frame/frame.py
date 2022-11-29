@@ -1,16 +1,11 @@
 """Manage frame factroy methods."""
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Union
+import inspect
+from typing import ClassVar, Union
 
-from nova.frame.coil import Coil
-from nova.frame.firstwall import FirstWall
 from nova.frame.frameset import FrameSet
-from nova.frame.winding import Winding
-from nova.frame.shell import Shell
-from nova.frame.turn import Turn
-from nova.frame.ferritic import Ferritic
-from nova.geometry.polygen import PolyGen
+from nova.geometry.polyshape import PolyShape
 
 
 @dataclass
@@ -24,6 +19,15 @@ class Frame(FrameSet):
     tcoil: str = 'rectangle'
     tplasma: str = 'rectangle'
 
+    _frame: ClassVar[dict[str, str]] = dict(
+        coil='.coil.Coil',
+        firstwall='.firstwall.FirstWall',
+        winding='winding.Winding',
+        shell='.shell.Shell',
+        turn='.turn.Turn',
+        ferritic='.ferritic.Ferritic',
+        )
+
     def __post_init__(self):
         """Update turn attribute names."""
         self._expand_polyattrs()
@@ -32,48 +36,54 @@ class Frame(FrameSet):
     def _expand_polyattrs(self):
         """Expand polyshape attrbutes."""
         for attr in ['tplasma', 'tcoil']:
-            setattr(self, attr, PolyGen.polyshape[getattr(self, attr)])
+            setattr(self, attr, PolyShape(getattr(self, attr)).shape)
 
     @property
-    def frame_attrs(self):
+    def frameset_attrs(self):
         """Return frame attributes."""
         return dict(dcoil=self.dcoil, nplasma=self.nplasma, dshell=self.dshell,
                     tcoil=self.tcoil, tplasma=self.tplasma, delta=self.delta)
 
-    @frame_attrs.setter
-    def frame_attrs(self, attrs: dict[str, Union[int, float, str]]):
+    @frameset_attrs.setter
+    def frameset_attrs(self, attrs: dict[str, Union[int, float, str]]):
         """Set frame attributes."""
         for attr in attrs:
             if hasattr(self, attr):
                 setattr(self, attr, attrs[attr])
         self._expand_polyattrs()
 
+    def _framefactory(self, **kwargs):
+        """Return nammed biot instance."""
+        name = inspect.getframeinfo(inspect.currentframe().f_back, 0)[2]
+        method = self.import_method(self._frame[name], 'nova.frame')
+        return method(*self.frames, **kwargs)
+
     @cached_property
     def coil(self):
         """Return coil constructor."""
-        return Coil(*self.frames, turn=self.tcoil, delta=self.dcoil)
+        return self._framefactory(turn=self.tcoil, delta=self.dcoil)
 
     @cached_property
     def ferritic(self):
         """Return ferritic insert constructor."""
-        return Ferritic(*self.frames, delta=self.delta)
+        return self._framefactory(delta=self.delta)
 
     @cached_property
     def firstwall(self):
         """Return plasma firstwall constructor."""
-        return FirstWall(*self.frames, turn=self.tplasma, delta=-self.nplasma)
+        return self._framefactory(turn=self.tplasma, delta=-self.nplasma)
 
     @cached_property
     def shell(self):
         """Return shell constructor."""
-        return Shell(*self.frames, delta=self.dshell)
+        return self._framefactory(delta=self.dshell)
 
     @cached_property
     def turn(self):
         """Return 2D/3D coil turn constructor."""
-        return Turn(*self.frames, delta=self.delta)
+        return self._framefactory(delta=self.delta)
 
     @cached_property
     def winding(self):
         """Return winding constructor."""
-        return Winding(*self.frames, delta=self.delta)
+        return self._framefactory(delta=self.delta)

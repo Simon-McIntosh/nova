@@ -1,18 +1,19 @@
 """Manage access to IMAS machine data."""
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from importlib import import_module
 import string
-from typing import ClassVar
+from typing import ClassVar, TYPE_CHECKING
 
 import numpy as np
 
 from nova.frame.baseplot import Plot
 from nova.frame.coilset import CoilSet
-from nova.frame.shell import Shell
-from nova.geometry.polygon import Polygon
 from nova.imas.database import CoilData, Database, Ids, ImasIds
-
+from nova.geometry.polygon import Polygon
+if TYPE_CHECKING:
+    from nova.frame.shell import Shell
 
 # pylint: disable=too-many-ancestors
 

@@ -2,7 +2,6 @@
 from abc import abstractmethod
 from dataclasses import dataclass, field
 
-import numba
 import numpy as np
 
 from nova.imas.equilibrium import Equilibrium
@@ -86,7 +85,6 @@ class RegressionBase():
         return self._adjoint()
 
     @staticmethod
-    @numba.njit
     def _lstsq(matrix, data):
         """Calcuate inverse via numpy's lstsq method."""
         return np.linalg.lstsq(matrix, data)[0]
@@ -159,7 +157,7 @@ class MoorePenrose(RegressionBase):
         return U @ (s * (Vh @ model))
 
     def _forward(self):
-        """Call numba forward model - apply svd reduction if flag==True."""
+        """Call forward model - apply svd reduction if flag==True."""
         self.__forward(self.matrices['U'], self.matrices['s'],
                        self.matrices['Vh'], self.model)
 

@@ -1,8 +1,8 @@
 """Generate grids for BiotGrid methods."""
 from dataclasses import dataclass, field
-from importlib import import_module
 
 import numpy as np
+import shapely.geometry
 import xarray
 
 from nova.biot.biotframe import BiotTarget
@@ -12,6 +12,7 @@ from nova.frame.baseplot import Plot
 from nova.frame.error import GridError
 from nova.frame.fieldnull import FieldNull
 from nova.frame.framelink import FrameLink
+from nova.plot.biotplot import BiotPlot
 
 
 @dataclass
@@ -126,7 +127,7 @@ class Expand:
             self.index = getattr(self.frame, self.index)
             if sum(self.index) == 0:
                 raise GridError(index)
-        poly = import_module('shapely.geometry').MultiPolygon(
+        poly = shapely.geometry.MultiPolygon(
             [polygon.poly for polygon in self.frame.poly[self.index]])
         self.limit = np.array([*poly.bounds[::2], *poly.bounds[1::2]])
         self.xcoord = GridCoord(*self.limit[:2])
@@ -142,17 +143,6 @@ class Expand:
         if limit[0] < self.xmin:
             limit[0] = self.xmin
         return limit
-
-
-class BiotPlot(Plot):
-    """Biot plot base class."""
-
-    levels: int | list[float] = 31
-
-    def contour_kwargs(self, **kwargs):
-        """Return contour plot kwargs."""
-        return dict(colors='lightgray', linewidths=1.5, alpha=0.9,
-                    linestyles='solid', levels=self.levels) | kwargs
 
 
 class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):

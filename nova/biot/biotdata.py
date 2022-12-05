@@ -1,8 +1,6 @@
 """Biot data storage class."""
 from dataclasses import dataclass, field
 
-import xarray
-
 from nova.database.netcdf import netCDF
 from nova.frame.framesetloc import FrameSetLoc
 
@@ -14,8 +12,6 @@ class BiotData(netCDF, FrameSetLoc):
     name: str = field(default='')
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     classname: str = field(init=False)
-    data: xarray.Dataset = field(init=False, repr=False,
-                                 default_factory=xarray.Dataset)
 
     def __post_init__(self):
         """Init path and link line current and plasma index."""

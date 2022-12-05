@@ -19,7 +19,7 @@ class Frame(FrameSet):
     tcoil: str = 'rectangle'
     tplasma: str = 'rectangle'
 
-    _frame: ClassVar[dict[str, str]] = dict(
+    _framemethods: ClassVar[dict[str, str]] = dict(
         coil='.coil.Coil',
         firstwall='.firstwall.FirstWall',
         winding='winding.Winding',
@@ -55,7 +55,7 @@ class Frame(FrameSet):
     def _framefactory(self, **kwargs):
         """Return nammed biot instance."""
         name = inspect.getframeinfo(inspect.currentframe().f_back, 0)[2]
-        method = self.import_method(self._frame[name], 'nova.frame')
+        method = self.import_method(self._framemethods[name], 'nova.frame')
         return method(*self.frames, **kwargs)
 
     @cached_property

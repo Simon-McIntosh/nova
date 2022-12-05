@@ -6,9 +6,10 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 
 import numpy as np
-import pandas
 from scipy.constants import mu_0
+
 if TYPE_CHECKING:
+    import pandas
     import xarray
 
 from nova.frame.baseplot import Plot
@@ -440,7 +441,7 @@ class Extrapolate(Plot, ExtrapolateMachine, ExtrapolationGrid, Database):
 if __name__ == '__main__':
 
     pass
-    '''
+
     # import doctest
     # doctest.testmod()
 
@@ -458,4 +459,3 @@ if __name__ == '__main__':
         extrapolate.plot_bar()
     except IndexError:
         pass
-    '''

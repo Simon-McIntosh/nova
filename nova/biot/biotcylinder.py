@@ -192,7 +192,7 @@ if __name__ == '__main__':
 
     from nova.frame.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-1, nplasma=15**2, field_attrs=['Psi', 'Br'])
+    coilset = CoilSet(dcoil=-1, nplasma=15**2, field_attrs=['Psi'])
     '''
     coilset.coil.insert(5, 0.5, 0.01, 0.8, segment='cylinder')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, segment='cylinder')
@@ -203,7 +203,7 @@ if __name__ == '__main__':
                              turn='s', tile=False, segment='cylinder')
 
     coilset.saloc['Ic'] = 5e3
-    coilset.grid.solve(1000, 0.5)
+    coilset.grid.solve(1000, -0.75)
 
-    coilset.plot()
+    # coilset.plot()
     coilset.grid.plot('psi', colors='C1', nulls=True)

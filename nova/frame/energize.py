@@ -1,7 +1,6 @@
 """Manage frame currents."""
 from dataclasses import dataclass, field
 
-import numpy as np
 import pandas
 
 import nova.frame.metamethod as metamethod

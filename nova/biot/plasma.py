@@ -1,11 +1,11 @@
 """Forward free-boundary equilibrium solver."""
 from dataclasses import dataclass, field
 from functools import cached_property
-from importlib import import_module
 
 import descartes
 import numba
 import numpy as np
+import scipy.spatial
 
 from nova.database.netcdf import netCDF
 from nova.biot.biotplasmagrid import BiotPlasmaGrid
@@ -64,7 +64,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         """Return plasma separatrix, the convex hull of active filaments."""
         index = self.loc['plasma', 'nturn'] > 0
         points = self.loc['plasma', ['x', 'z']][index].values
-        hull = import_module('scipy.spatial').ConvexHull(points)
+        hull = scipy.spatial.ConvexHull(points)
         vertices = np.append(hull.vertices, hull.vertices[0])
         return points[vertices]
 

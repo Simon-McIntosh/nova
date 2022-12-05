@@ -2,16 +2,10 @@
 
 import numpy as np
 
-from nova.frame.framelink import FrameLink, LinkLocMixin, LinkIndexer
-from nova.frame.subspace import SubSpace
 from nova.frame.error import SpaceKeyError
-
-#from nova.frame.geometry import PolyGeo, VtkGeo
-#from nova.frame.polyplot import PolyPlot
-#from nova.frame.vtkplot import VtkPlot
-
+from nova.frame.framelink import FrameLink, LinkLocMixin, LinkIndexer
 from nova.frame.metamethod import PolyGeo, VtkGeo, PolyPlot, VtkPlot
-
+from nova.frame.subspace import SubSpace
 
 # pylint: disable=too-many-ancestors
 

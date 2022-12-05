@@ -16,7 +16,7 @@ class Biot(FrameSet):
     field_attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     dfield: float = field(default=-1, repr=False)
 
-    _biot: ClassVar[dict[str, str]] = dict(
+    _biotmethods: ClassVar[dict[str, str]] = dict(
         plasma='.plasma.Plasma',
         point='.biotpoint.BiotPoint',
         grid='.biotgrid.BiotGrid',
@@ -30,7 +30,7 @@ class Biot(FrameSet):
     def _biotfactory(self):
         """Return nammed biot instance."""
         name = inspect.getframeinfo(inspect.currentframe().f_back, 0)[2]
-        method = self.import_method(self._biot[name], 'nova.biot')
+        method = self.import_method(self._biotmethods[name], 'nova.biot')
         return method(*self.frames, path=self.path, name=name,
                       filename=self.filename, attrs=self.field_attrs)
 
@@ -51,7 +51,7 @@ class Biot(FrameSet):
     @cached_property
     def plasma(self):
         """Return plasma instance."""
-        Plasma = self.import_method(self._biot['plasma'], 'nova.frame')
+        Plasma = self.import_method(self._biotmethods['plasma'], 'nova.biot')
         return Plasma(*self.frames, path=self.path,
                       grid=self.plasmagrid, boundary=self.plasmaboundary)
 

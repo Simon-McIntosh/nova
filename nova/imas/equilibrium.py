@@ -5,7 +5,7 @@ import numpy as np
 
 from nova.frame.baseplot import Plot
 from nova.imas.scenario import Scenario
-from nova.biot.biotgrid import BiotPlot
+from nova.plot.biotplot import BiotPlot
 
 
 @dataclass
@@ -41,7 +41,7 @@ class Grid(Scenario):
 
 
 @dataclass
-class Boundary(Scenario, Plot):
+class Boundary(Plot, Scenario):
     """Load boundary timeseries from equilibrium ids."""
 
     def outline(self, itime):
@@ -77,7 +77,7 @@ class Boundary(Scenario, Plot):
 
 
 @dataclass
-class Parameter0D(Scenario, Plot):
+class Parameter0D(Plot, Scenario):
     """Load 0D parameter timeseries from equilibrium ids."""
 
     attrs_0d: list[str] = field(
@@ -98,7 +98,7 @@ class Parameter0D(Scenario, Plot):
 
 
 @dataclass
-class Profile1D(Scenario, Plot):
+class Profile1D(Plot, Scenario):
     """Manage extraction of 1d profile data from imas ids."""
 
     attrs_1d: list[str] = field(
@@ -127,7 +127,7 @@ class Profile1D(Scenario, Plot):
 
 
 @dataclass
-class Profile2D(Scenario, BiotPlot):
+class Profile2D(BiotPlot, Scenario):
     """Manage extraction of 2d profile data from imas ids."""
 
     attrs_2d: list[str] = field(

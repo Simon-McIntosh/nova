@@ -27,6 +27,8 @@ class FilePath:
 
     def __post_init__(self):
         """Forward post init for for cooperative inheritance."""
+        if self.data is None:
+            self.data = import_module('xarray').Dataset()
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
 

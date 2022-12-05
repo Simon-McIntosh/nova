@@ -1,14 +1,17 @@
 """Methods for ploting FrameSpace data."""
+from __future__ import annotations
 from dataclasses import dataclass, field
 from functools import cached_property
 from importlib import import_module
-from typing import ClassVar, Optional
+from typing import ClassVar, Optional, TYPE_CHECKING
 from collections import Counter
 from string import digits
 
 import numpy as np
-import pandas
 import statistics
+
+if TYPE_CHECKING:
+    import pandas
 
 from nova.frame.dataframe import DataFrame
 from nova.frame.error import ColumnError

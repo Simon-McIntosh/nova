@@ -1,8 +1,8 @@
 """Methods for ploting FrameSpace data."""
 from dataclasses import dataclass, field
 import colorsys
-from importlib import import_module
 
+import descartes
 import numpy as np
 
 import nova.frame.metamethod as metamethod
@@ -44,7 +44,7 @@ class PolyPlot(Plot, Display, Label, metamethod.PolyPlot, BasePlot):
 
         Addapted from geoplot.PolygonPatch.
         """
-        PolygonPatch = import_module('descartes').PolygonPatch
+        PolygonPatch = descartes.PolygonPatch
         index = self.get_index(index)  # retrieve frame index
         if sum(index) == 0:
             return

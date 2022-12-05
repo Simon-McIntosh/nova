@@ -1,6 +1,7 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 from dataclasses import dataclass, field
 from importlib import import_module
+from typing import Optional
 
 import netCDF4
 import pandas
@@ -61,7 +62,7 @@ class FrameSet(FilePath, FrameSetLoc):
         return superframe.__str__()
 
     @staticmethod
-    def import_method(name: str, package: str):
+    def import_method(name: str, package: Optional[str]):
         """Return method imported from dot seperated module lookup."""
         module_name = '.'.join(name.split('.')[:-1])
         method_name = name.split('.')[-1]

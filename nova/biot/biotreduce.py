@@ -47,23 +47,3 @@ class BiotReduce(metamethod.BiotReduce):
             indices.append(i)
             self.link[len(indices)-1] = [int(indices.index(index)), factor[i]]
         return indices
-
-        '''
-            if (coil == self._default_attributes['coil']).all():
-                _reduction_index = np.arange(self._nC)
-            else:
-                _name = coil[0]
-                _reduction_index = [0]
-                for i, name in enumerate(coil):
-                    if name != _name:
-                        _reduction_index.append(i)
-                        _name = name
-            self._reduction_index = np.array(_reduction_index)
-            self._plasma_iloc = np.arange(len(self._reduction_index))[
-                self.plasma[self._reduction_index]]
-            filament_indices = np.append(self._reduction_index, self.coil_number)
-            plasma_filaments = filament_indices[self._plasma_iloc+1] - \
-                filament_indices[self._plasma_iloc]
-            self._plasma_reduction_index = \
-                np.append(0, np.cumsum(plasma_filaments)[:-1])
-        '''

@@ -3,18 +3,18 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import ClassVar
 
-from numba import njit, prange
+import numba
 import numpy as np
 
 from nova.biot.biotconstants import BiotConstants
 from nova.biot.biotmatrix import BiotMatrix
 
 
-@njit(parallel=True)
+@numba.njit(parallel=True)
 def zeta(r, rs, z, zs, phi, weight):
     """Return zeta coefficent."""
     result = np.zeros_like(r)
-    for i in prange(len(phi)):
+    for i in numba.prange(len(phi)):
         result += weight[i] * np.arcsinh(
             (rs - r * np.cos(phi[i])) /
             np.sqrt((zs - z)**2 + r**2 * np.sin(phi[i])**2))
@@ -30,7 +30,7 @@ class CylinderConstants(BiotConstants):
     def __post_init__(self):
         """Build intergration parameters."""
         import quadpy
-        scheme = quadpy.c1.gauss_patterson(3)
+        scheme = quadpy.c1.gauss_patterson(4)
         self.phi_points = np.pi - self.alpha * (scheme.points + 1)
         self.phi_weights = scheme.weights * self.alpha / 2
         super().__post_init__()
@@ -82,22 +82,12 @@ class CylinderConstants(BiotConstants):
     @cached_property
     def Cphi(self):
         """Return Cphi intergration constant evaluated between 0 and pi/2."""
-        return -1/3*self.r**2 * np.pi/2 * np.where(self.zs > self.z, 1, -1) * \
-            (np.where(self.rs > self.r, 1, -1) + 1)
-
-    @staticmethod
-    def _zeta(phi, r, rs, z, zs):
-        """Return zeta intergrand."""
-        return np.arcsinh((rs - r * np.cos(phi)) /
-                          np.sqrt((zs - z)**2 + r**2 * np.sin(phi)**2))
+        return -1/3*self.r**2 * np.pi/2 * self.sign(self.gamma) * (
+            self.sign(self.rs - self.r) + 1)
 
     @cached_property
     def zeta(self):
         """Return zeta coefficient calculated using Romberg integration."""
-        #import scipy.integrate
-        #return scipy.integrate.quad_vec(
-        #    self._zeta, 0, np.pi, epsabs=1e-2, epsrel=1e-2,
-        #    args=(self.r, self.rs, self.z, self.zs))[0]
         #return np.sum(self.phi_weights * np.arcsinh(
         #    self.beta1(self.phi_points, shape=(..., np.newaxis))), axis=-1)
         return zeta(self.r, self.rs, self.z, self.zs,
@@ -202,7 +192,7 @@ if __name__ == '__main__':
 
     from nova.frame.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-1, nplasma=15**2, field_attrs=['Psi'])
+    coilset = CoilSet(dcoil=-1, nplasma=15**2, field_attrs=['Psi', 'Br'])
     '''
     coilset.coil.insert(5, 0.5, 0.01, 0.8, segment='cylinder')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, segment='cylinder')
@@ -212,8 +202,8 @@ if __name__ == '__main__':
     coilset.firstwall.insert(5.1, 0.52, 0.05, 0.05,
                              turn='s', tile=False, segment='cylinder')
 
-    coilset.saloc['Ic'] = 1
-    coilset.grid.solve(500, -0.85)
+    coilset.saloc['Ic'] = 5e3
+    coilset.grid.solve(1000, 0.5)
 
-    #coilset.plot()
+    coilset.plot()
     coilset.grid.plot('psi', colors='C1', nulls=True)

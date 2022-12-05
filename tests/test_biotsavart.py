@@ -123,14 +123,8 @@ def test_cylinder_ring_coil_pair():
     coilset.coil.insert(6.6, 0, 0.2, 0.2, Ic=15e6, segment='ring',
                         delta=-10)
     coilset.point.solve([[7, 0]])
-    coilset.plot()
-    coilset.grid.solve(1000)
-    coilset.grid.plot()
-    print(coilset.point.psi)
     assert np.isclose(coilset.point.psi, 0, atol=1e-3)
 
-test_cylinder_ring_coil_pair()
-assert False
 
 @pytest.mark.parametrize('segment', segments)
 def test_hemholtz_flux(segment):

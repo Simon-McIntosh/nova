@@ -3,9 +3,9 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from nova.frame.baseplot import Plot
 from nova.imas.scenario import Scenario
 from nova.biot.biotgrid import BiotPlot
-import matplotlib.pyplot as plt
 
 
 @dataclass
@@ -41,7 +41,7 @@ class Grid(Scenario):
 
 
 @dataclass
-class Boundary(Scenario):
+class Boundary(Scenario, Plot):
     """Load boundary timeseries from equilibrium ids."""
 
     def outline(self, itime):
@@ -67,17 +67,17 @@ class Boundary(Scenario):
             self.data['boundary_length'][itime] = len(outline)
             self.data['boundary'][itime, :len(outline)] = outline
 
-    def plot_boundary(self, itime: int):
+    def plot_boundary(self, itime: int, axes=None):
         """Plot 2D boundary at itime."""
+        self.get_axes(axes, '2d')
         length = self.data.boundary_length[itime].values
-        plt.plot(self.data.boundary[itime, :length, 0],
-                 self.data.boundary[itime, :length, 1],
-                 'gray', alpha=0.5)
-        plt.axis('equal')
+        self.axes.plot(self.data.boundary[itime, :length, 0],
+                       self.data.boundary[itime, :length, 1],
+                       'gray', alpha=0.5)
 
 
 @dataclass
-class Parameter0D(Scenario):
+class Parameter0D(Scenario, Plot):
     """Load 0D parameter timeseries from equilibrium ids."""
 
     attrs_0d: list[str] = field(
@@ -90,14 +90,15 @@ class Parameter0D(Scenario):
         self.data.attrs['global_quantities'] = ('time',)
         self.time_slice.build('global_quantities', self.attrs_0d, index=None)
 
-    def plot_0d(self, attr):
+    def plot_0d(self, attr, axes=None):
         """Plot 0D parameter timeseries."""
-        plt.plot(self.data.time, self.data[attr], label=attr)
-        plt.despine()
+        self.set_axes(axes, '1d')
+        self.axes.plot(self.data.time, self.data[attr], label=attr)
+        self.axes.despine()
 
 
 @dataclass
-class Profile1D(Scenario):
+class Profile1D(Scenario, Plot):
     """Manage extraction of 1d profile data from imas ids."""
 
     attrs_1d: list[str] = field(
@@ -119,10 +120,10 @@ class Profile1D(Scenario):
                 self.data[attr][itime] = np.interp(
                     self.data.psi_norm, psi_norm, self.data[attr][itime])
 
-    def plot_1d(self, itime=-1, attr='psi'):
+    def plot_1d(self, itime=-1, attr='psi', axes=None):
         """Plot 1d profile."""
-        plt.plot(self.data.psi_norm, self.data[attr][itime])
-        plt.despine()
+        self.set_axes(axes, '1d')
+        self.axes.plot(self.data.psi_norm, self.data[attr][itime])
 
 
 @dataclass
@@ -140,13 +141,11 @@ class Profile2D(Scenario, BiotPlot):
 
     def plot_2d(self, itime=-1, attr='psi', axes=None, **kwargs):
         """Plot 2d profile."""
-        self.axes = axes
+        self.set_axes(axes, '2d')
         kwargs = self.contour_kwargs(**kwargs)
-        QuadContourSet = plt.contour(self.data.r, self.data.z,
-                                     self.data[f'{attr}2d'][itime].T,
-                                     **kwargs)
-        plt.axis('equal')
-        plt.axis('off')
+        QuadContourSet = self.axes.contour(
+            self.data.r, self.data.z, self.data[f'{attr}2d'][itime].T,
+            **kwargs)
         return QuadContourSet.levels
 
 
@@ -251,5 +250,5 @@ if __name__ == '__main__':
     #doctest.testmod()
 
     equilibrium = Equilibrium(105028, 1)
-    #equilibrium.plot_2d(50, 'psi')
-    #equilibrium.plot_boundary(50)
+    equilibrium.plot_2d(50, 'psi')
+    equilibrium.plot_boundary(50)

@@ -3,12 +3,12 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from nova.frame.baseplot import Plot
 from nova.imas.scenario import Scenario
-import matplotlib.pyplot as plt
 
 
 @dataclass
-class PF_Active(Scenario):
+class PF_Active(Plot, Scenario):
     """Manage access to pf_active ids."""
 
     pulse: int
@@ -51,10 +51,10 @@ class PF_Active(Scenario):
                     self.data[attr][:, i] = getattr(coil, attr).data
         return self
 
-    def plot(self):
+    def plot(self, axes=None):
         """Plot current timeseries."""
-        plt.plot(self.data.current)
-        plt.despine()
+        self.set_axes(axes, '1d')
+        self.axes.plot(self.data.current)
 
 
 if __name__ == '__main__':

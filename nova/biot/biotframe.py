@@ -1,13 +1,7 @@
 """Biot specific Frame class."""
-import dask.array as da
 import numpy as np
 
 from nova.frame.framespace import FrameSpace
-#from nova.biot.biotsection import BiotSection
-#from nova.biot.biotshape import BiotShape
-#from nova.biot.biotreduce import BiotReduce
-#from nova.frame.geometry import PolyGeo
-
 from nova.frame.metamethod import BiotSection, BiotShape, BiotReduce, PolyGeo
 
 
@@ -35,7 +29,7 @@ class BiotFrame(FrameSpace):
                                'area', 'nturn']) | metadata
         super().update_metadata(data, columns, attrs, metadata)
 
-    def __call__(self, attr) -> da.Array | np.ndarray:
+    def __call__(self, attr):
         """Return attribute matrix, shape(target, source)."""
         region = self.biotshape.region
         if self.biotshape.region == '':

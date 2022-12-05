@@ -3,11 +3,10 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from nova.frame.baseplot import Plot
 from nova.frame.framesetloc import FrameSetLoc
 from nova.frame.poloidalgrid import PoloidalGrid
-from nova.frame.polyplot import Axes
 from nova.geometry.polygon import Polygon
-import matplotlib.pyplot as plt
 
 
 @dataclass
@@ -39,7 +38,7 @@ class PlasmaGrid(PoloidalGrid):
 
 
 @dataclass
-class FirstWall(Axes, PlasmaGrid, FrameSetLoc):
+class FirstWall(Plot, PlasmaGrid, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
     name: str = 'firstwall'
@@ -78,5 +77,3 @@ class FirstWall(Axes, PlasmaGrid, FrameSetLoc):
         self.poly.plot_boundary(self.axes, color='gray', lw=1.5)
         if plasma:
             self.plot('plasma')
-        plt.axis('equal')
-        plt.axis('off')

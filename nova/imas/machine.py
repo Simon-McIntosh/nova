@@ -1,18 +1,17 @@
 """Manage access to IMAS machine data."""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from importlib import import_module
 import string
 from typing import ClassVar
 
 import numpy as np
-import numpy.typing as npt
-import shapely
 
+from nova.frame.baseplot import Plot
 from nova.frame.coilset import CoilSet
 from nova.frame.shell import Shell
 from nova.geometry.polygon import Polygon
 from nova.imas.database import CoilData, Database, Ids, ImasIds
-import matplotlib.pyplot as plt
 
 
 # pylint: disable=too-many-ancestors
@@ -38,7 +37,7 @@ class GeomData:
 
     @property
     @abstractmethod
-    def poly(self) -> shapely.geometry.Polygon:
+    def poly(self):
         """Return patch polygon."""
 
     def extract(self):
@@ -85,7 +84,7 @@ class Rectangle(GeomData):
 
 
 @dataclass
-class Oblique(GeomData):
+class Oblique(Plot, GeomData):
     """Oblique poloidal patch (parallelogram)."""
 
     name: str = 'oblique'
@@ -142,14 +141,13 @@ class Oblique(GeomData):
         """Return oplique pannel thickness."""
         return self.area / self.length
 
-    def plot(self):
+    def plot(self, axes=None):
         """Plot oblique patch verticies and start/end points."""
-        axes = plt.gca()
-        axes.plot(*self.poly.boundary.xy, 'o', label='vertex')
-        axes.plot(*self.start, 'C1o', label='start')
-        axes.plot(*self.end, 'C3o', label='end')
-        axes.axis('equal')
-        axes.legend()
+        self.set_axes(axes, '2d')
+        self.axes.plot(*self.poly.boundary.xy, 'o', label='vertex')
+        self.axes.plot(*self.start, 'C1o', label='start')
+        self.axes.plot(*self.end, 'C3o', label='end')
+        self.axes.legend()
 
 
 @dataclass
@@ -349,7 +347,7 @@ class IdsCoilData(FrameData):
 
 
 @dataclass
-class PassiveShellData(FrameData):
+class PassiveShellData(Plot, FrameData):
     """Extract oblique shell geometries from pf_passive ids."""
 
     length: float = 0
@@ -407,13 +405,11 @@ class PassiveShellData(FrameData):
                                     self.data['resistance'][i])
         self.reset()
 
-    def plot(self):
+    def plot(self, axes=None):
         """Plot shell centerlines."""
-        axes = plt.gca()
+        self.set_axes(axes, '2d')
         for loop in self.points:
-            axes.plot(loop[:, 0], loop[:, 1], 'o-')
-        plt.axis('equal')
-        plt.axis('off')
+            self.axes.plot(loop[:, 0], loop[:, 1], 'o-')
 
 
 @dataclass
@@ -555,30 +551,28 @@ class PoloidalFieldActive(CoilDatabase):
 
 
 @dataclass
-class ContourData:
+class ContourData(Plot):
     """Extract contour data from ids."""
 
-    data: dict[str, npt.ArrayLike] = field(init=False, default_factory=dict)
+    data: dict[str, np.ndarray] = field(init=False, default_factory=dict)
 
     def append(self, unit):
         """Append contour data."""
         self.data[unit.name] = np.array([unit.outline.r, unit.outline.z]).T
 
-    def plot(self):
+    def plot(self, axes=None):
         """Plot contours."""
+        self.axes.set_axes(axes, '2d')
         for component in self.data.items():
-            plt.plot(*self.data[component].T, label=component)
-        plt.axis('equal')
-        plt.despine()
-        plt.axis('off')
-        plt.legend()
+            self.axes.plot(*self.data[component].T, label=component)
+        self.axes.legend()
 
 
 @dataclass
-class Contour:
+class Contour(Plot):
     """Extract closed contour from multiple unordered segments."""
 
-    data: dict[str, npt.ArrayLike]
+    data: dict[str, np.ndarray]
     loop: np.ndarray = field(init=False, default_factory=lambda:
                              np.ndarray((0, 2), float))
     segments: list[np.ndarray] = field(init=False)
@@ -614,11 +608,12 @@ class Contour:
         while len(self.segments) > 0:
             self.select()
         self.loop = np.append(self.loop, self.loop[:1], axis=0)
-        assert shapely.geometry.LinearRing(self.loop).is_valid
+        assert import_module('shapely.geometry').LinearRing(self.loop).is_valid
 
-    def plot(self):
+    def plot(self, axes=None):
         """Plot closed contour."""
-        plt.plot(*self.loop.T, 'C3-')
+        self.set_axes(axes, '2d')
+        self.axes.plot(*self.loop.T, 'C3-')
 
 
 @dataclass

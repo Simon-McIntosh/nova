@@ -196,7 +196,7 @@ class MachineDatabase(Connect):
 
 
 if __name__ == '__main__':
-
+    pass
     #machine = MachineDatabase().sync_ids()
     #machine.load_ids('pf_active')
     #print(machine.frame)
@@ -214,4 +214,4 @@ if __name__ == '__main__':
     #scenario.load_frame('workflow', 'CORSICA')
     #ScenarioDatabase().sync_workflow('CORSICA')
 
-    #ScenarioDatabase().sync_shot('114101/41')
+    ScenarioDatabase().sync_shot('135011/7')

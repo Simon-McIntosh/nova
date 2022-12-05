@@ -1,21 +1,17 @@
 """Generate grids for BiotGrid methods."""
-from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import Union
+from importlib import import_module
 
-from matplotlib.collections import LineCollection
 import numpy as np
-from numpy import typing as npt
-import shapely.geometry
 import xarray
 
 from nova.biot.biotframe import BiotTarget
 from nova.biot.biotoperate import BiotOperate
 from nova.biot.biotsolve import BiotSolve
+from nova.frame.baseplot import Plot
 from nova.frame.error import GridError
 from nova.frame.fieldnull import FieldNull
 from nova.frame.framelink import FrameLink
-from nova.frame.polyplot import Axes
 
 
 @dataclass
@@ -54,11 +50,11 @@ class GridCoord:
 
 
 @dataclass
-class Grid(Axes):
+class Grid(Plot):
     """Generate grid."""
 
     ngrid: int | None = field(default=None)
-    limit: npt.ArrayLike | None = field(default=None)
+    limit: np.ndarray | None = field(default=None)
     xcoord: list[float] = field(init=False, repr=False)
     zcoord: list[float] = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, repr=False)
@@ -109,7 +105,7 @@ class Grid(Axes):
                 index = tuple([slice(None), -i][::step])
                 lines[:, i, 0] = self.data.x2d[index]
                 lines[:, i, 1] = self.data.z2d[index]
-            segments = LineCollection(lines, **kwargs)
+            segments = self.mpl['LineCollection'](lines, **kwargs)
             self.axes.add_collection(segments, autolim=True)
         self.axes.autoscale_view()
 
@@ -119,7 +115,7 @@ class Expand:
     """Calculate grid limit as a factor expansion about multipoly bounds."""
 
     frame: FrameLink
-    index: Union[str, slice, npt.ArrayLike] = slice(None)
+    index: str | slice | np.ndarray = slice(None)
     xmin: float = 1e-12
     fix_aspect: bool = False
 
@@ -130,7 +126,7 @@ class Expand:
             self.index = getattr(self.frame, self.index)
             if sum(self.index) == 0:
                 raise GridError(index)
-        poly = shapely.geometry.MultiPolygon(
+        poly = import_module('shapely.geometry').MultiPolygon(
             [polygon.poly for polygon in self.frame.poly[self.index]])
         self.limit = np.array([*poly.bounds[::2], *poly.bounds[1::2]])
         self.xcoord = GridCoord(*self.limit[:2])
@@ -148,10 +144,10 @@ class Expand:
         return limit
 
 
-class BiotPlot(Axes):
+class BiotPlot(Plot):
     """Biot plot base class."""
 
-    levels: Union[int, list[float]] = 31
+    levels: int | list[float] = 31
 
     def contour_kwargs(self, **kwargs):
         """Return contour plot kwargs."""
@@ -205,8 +201,8 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
 class BiotGrid(BiotBaseGrid):
     """Compute interaction across grid."""
 
-    def solve(self, ngrid: int, limit: float | npt.ArrayLike = 0,
-              index: Union[str, slice, npt.ArrayLike] = slice(None)):
+    def solve(self, ngrid: int, limit: float | np.ndarray = 0,
+              index: str | slice | np.ndarray = slice(None)):
         """Solve Biot interaction across grid."""
         if isinstance(limit, (int, float)):
             limit = Expand(self.subframe, index)(limit)

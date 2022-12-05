@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 
 import numba
 import numpy as np
-import numpy.typing as npt
 import xarray
 
 from nova.frame.baseplot import Axes
@@ -15,7 +14,7 @@ class DataNull(Axes):
     """Store sort and remove field nulls."""
 
     data: xarray.Dataset = field(repr=False, default_factory=xarray.Dataset)
-    loop: npt.ArrayLike = field(repr=False, default=None)
+    loop: np.ndarray | None = field(repr=False, default=None)
     data_o: dict[str, np.ndarray] = field(init=False, default_factory=dict,
                                           repr=False)
     data_x: dict[str, np.ndarray] = field(init=False, default_factory=dict,

@@ -4,7 +4,8 @@ import numpy as np
 import pylops
 
 from nova.linalg.decompose import Decompose
-from nova.linalg.regression import OdinaryLeastSquares, Lops, MoorePenrose
+from nova.linalg.regression import OdinaryLeastSquares, MoorePenrose
+from nova.linalg.lops import Lops
 
 
 matrix_shapes = [(3, 3), (2, 9), (5, 12)]

@@ -1,16 +1,17 @@
 """Methods for ploting FrameSpace data."""
 from dataclasses import dataclass, field
-from typing import Union, ClassVar
+from functools import cached_property
+from importlib import import_module
+from typing import ClassVar, Optional
 from collections import Counter
 from string import digits
 
 import numpy as np
 import pandas
-import scipy.stats
+import statistics
 
 from nova.frame.dataframe import DataFrame
 from nova.frame.error import ColumnError
-import matplotlib.pyplot as plt
 
 
 @dataclass
@@ -65,24 +66,117 @@ class BasePlot:
 class Axes:
     """Manage plot axes."""
 
-    _axes: plt.Axes = field(init=False, repr=False, default=None)
+    style: str = '2d'
 
-    def generate_axes(self):
-        """Generate axes if unset."""
-        if self._axes is None:
-            self._axes = plt.gca()
-            self._axes.set_aspect('equal')
-            self._axes.axis('off')
+    def generate(self, style='2d'):
+        """Generate new axis instance."""
+        plt = import_module('matplotlib.pyplot')
+        self.axes = plt.subplots(1, 1)[1]
+        self.set_style(style)
+
+    def gca(self):
+        """Link axes instance to current axes."""
+        plt = import_module('matplotlib.pyplot')
+        self._axes = plt.gca()
+
+    def despine(self):
+        """Remove spines from axes instance."""
+        sns = import_module('seaborn')
+        sns.despine(ax=self.axes)
+
+    def set_style(self, style: Optional[str] = None):
+        """Set axes style."""
+        if style is None:
+            style = self.style
+        match style:
+            case '1d':
+                self.axes.set_aspect('auto')
+                self.axes.axis('on')
+                self.despine()
+            case '2d':
+                self.axes.set_aspect('equal')
+                self.axes.axis('off')
+            case _:
+                raise NotImplementedError(f'style {style} not implemented')
+        self.style = style
+
+    @cached_property
+    def _axes(self):
+        """Cache axes instance."""
+        return None
 
     @property
     def axes(self):
         """Manage plot axes."""
-        self.generate_axes()
+        if self._axes is None:
+            self.gca()
+            self.set_style()
         return self._axes
 
     @axes.setter
     def axes(self, axes):
         self._axes = axes
+
+
+@dataclass
+class MatPlotLib:
+    """Manage matplotlib libaries."""
+
+    def __getitem__(self, key: str):
+        """Get item from matplotlib collections libary."""
+        if 'Collection' in key:
+            return getattr(self.collections, key)
+        return import_module(f'matplotlib.{key}')
+
+    @cached_property
+    def collections(self):
+        """Return matplotlib collections."""
+        return import_module('matplotlib.collections')
+
+
+@dataclass
+class Plot:
+    """Manage plot workflow."""
+
+    def __post_init__(self):
+        """Link matplotlib libaries."""
+        self.mpl_axes = Axes()
+        self.mpl = MatPlotLib()
+        if hasattr(super(), '__post_init__'):
+            super().__post_init__()
+
+    @property
+    def axes(self):
+        """Expose mpl axes instance."""
+        return self.mpl_axes.axes
+
+    @axes.setter
+    def axes(self, axes):
+        self.mpl_axes.axes = axes
+
+    @property
+    def axes_style(self):
+        """Manage axes style."""
+        return self.mpl_axes.style
+
+    @axes_style.setter
+    def axes_style(self, style: str):
+        self.mpl_axes.set_style(style)
+
+    def set_axes(self, axes, style: Optional[str] = None):
+        """Set axes instance and style."""
+        if axes is None:
+            return self.mpl_axes.generate(style)
+        return self.get_axes(axes, style)
+
+    def get_axes(self, axes, style: Optional[str] = None):
+        """Get current axes instance and set style."""
+        self.axes = axes
+        self.axes_style = style
+
+    def legend(self, *args, **Kwargs):
+        """Expose axes legend."""
+        self.mpl_axes.legend(*args, **Kwargs)
 
 
 @dataclass
@@ -127,7 +221,7 @@ class Display:
         total_area = self.frame.area.sum()
         index = self.frame.part == part
         area = self.frame.loc[index, 'area']
-        patch_area = scipy.stats.mode(area)[0]
+        patch_area = statistics.mode(area)
         area_fraction = patch_area/total_area
         if area_fraction < finesse_fraction:
             return self.linewidth * area_fraction/finesse_fraction
@@ -153,9 +247,9 @@ class Label:
 
     label: str = 'coil'
     current_unit: str = 'A'
-    field_unit: bool = 'T'
+    field_unit: bool | str = 'T'
     zeroturn: bool = False
-    options: dict[str, Union[str, int, float]] = field(
+    options: dict[str, str | int | float] = field(
         repr=False, default_factory=lambda: {'font_size': 'medium',
                                              'label_limit': 20})
     index: pandas.Index = field(init=False, repr=False)
@@ -163,7 +257,8 @@ class Label:
     def __post_init__(self):
         """Update plot flags."""
         self.update_flags()
-        super().__post_init__()
+        if hasattr(super(), '__post_init__'):
+            super().__post_init__()
 
     def update_flags(self):
         """Update plot attribute flags."""

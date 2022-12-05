@@ -1,17 +1,17 @@
 """Manage coilset supplies."""
 from dataclasses import dataclass
+from importlib import import_module
 
-import networkx as nx
 import numpy as np
 import xarray
 
 from nova.database.netcdf import netCDF
+from nova.frame.baseplot import Plot
 from nova.frame.framesetloc import FrameSetLoc
-import matplotlib.pyplot as plt
 
 
 @dataclass
-class Circuit(netCDF, FrameSetLoc):
+class Circuit(Plot, netCDF, FrameSetLoc):
     """Manage coil supplies."""
 
     name: str = 'circuit'
@@ -44,38 +44,40 @@ class Circuit(netCDF, FrameSetLoc):
                                      incidence_matrix.values.T)
                 if (-1 in col and 1 in col)}
 
-    def plot(self, circuit: str):
+    def plot(self, circuit: str, axes=None):
         """Plot directed graph."""
+        self.set_axes(axes, '2d')
         edge_list = self.edge_list(circuit)
-        dig = nx.DiGraph(edge_list.values())
-        pos = nx.planar_layout(dig)
+        networkx = import_module('networkx')
+        dig = networkx.DiGraph(edge_list.values())
+        pos = networkx.planar_layout(dig)
 
         edge_labels = {edge_list[edge]: edge for edge in edge_list}
         if len(edge_list) == 2:
-            nx.draw_networkx_edges(dig, pos, connectionstyle='arc3,rad=0.15')
-            nx.draw_networkx_nodes(dig, pos)
-            nx.draw_networkx_labels(dig, pos)
-            nx.draw_networkx_edge_labels(dig, pos, edge_labels=edge_labels,
-                                         label_pos=0.3)
-            plt.gca().set_axis_off()
+            networkx.draw_networkx_edges(dig, pos,
+                                         connectionstyle='arc3,rad=0.15')
+            networkx.draw_networkx_nodes(dig, pos)
+            networkx.draw_networkx_labels(dig, pos)
+            networkx.draw_networkx_edge_labels(
+                dig, pos, edge_labels=edge_labels, label_pos=0.3)
             return
-        nx.draw(dig, pos, with_labels=True)
-        nx.draw_networkx_edge_labels(dig, pos, edge_labels=edge_labels,
-                                     label_pos=0.5)
+        networkx.draw(dig, pos, with_labels=True)
+        networkx.draw_networkx_edge_labels(
+            dig, pos, edge_labels=edge_labels, label_pos=0.5)
 
     def plot_all(self):
         """Plot all circuits."""
         for circuit in self.data.circuit:
-            plt.figure()
-            self.plot(circuit)
+            self.plot(circuit, None)
 
     def edge_loops(self, circuit: str):
         """Extract basis loops."""
         edge_list = self.edge_list(circuit)
         edge_nodes = edge_list.values()
-        graph = nx.Graph(edge_list)
+        networkx = import_module('networkx')
+        graph = networkx.Graph(edge_list)
         loops = []
-        for loop in nx.cycle_basis(graph):
+        for loop in networkx.cycle_basis(graph):
             edge = [_loop for _loop in loop if isinstance(_loop, str)]
             nodes = [_loop for _loop in loop if not isinstance(_loop, str)]
             nodes.append(nodes[0])

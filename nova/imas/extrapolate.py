@@ -1,15 +1,15 @@
 """Extrapolate equilibria beyond separatrix."""
 from dataclasses import dataclass, field, fields
+from importlib import import_module
 from functools import cached_property
 
 import numpy as np
 import pandas
-from scipy.interpolate import RectBivariateSpline, interp1d
 from scipy.constants import mu_0
 import xarray
 
+from nova.frame.baseplot import Plot
 from nova.imas import (Database, Equilibrium, Ids, Machine, PF_Active)
-
 from nova.linalg.regression import MoorePenrose
 
 
@@ -136,11 +136,13 @@ class TimeSlice:
 
     def _rbs(self, attr):
         """Return 2D RectBivariateSpline interpolant."""
-        return RectBivariateSpline(self.r, self.z, self.data[attr]).ev
+        return import_module('scipy.interpolate').RectBivariateSpline(
+            self.r, self.z, self.data[attr]).ev
 
     def _interp1d(self, x, y):
         """Return 1D interpolant."""
-        return interp1d(x, y, kind='quadratic', fill_value='extrapolate')
+        return import_module('scipy.interpolate').interp1d(
+            x, y, kind='quadratic', fill_value='extrapolate')
 
     @cached_property
     def p_prime(self):
@@ -189,7 +191,7 @@ class ExtrapolateMachine(Machine):
 
 
 @dataclass
-class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
+class Extrapolate(Plot, ExtrapolateMachine, ExtrapolationGrid, Database):
     r"""
     An interface class for the extrapolation of an equilibrium IDS.
 
@@ -256,7 +258,7 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
     -----
     The plasama and coils are modeled as finite area filliments with peicewise
     constant current distributions. Interactions between filiments are solved
-    via the Biot Savart equation.
+    via the Biot Savart law.
 
     Currents for each plasma filament :math:`I_i` are solved at the
     center of each filament as follows,
@@ -289,7 +291,8 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
     >>> extrapolate.ids.code.name
     'CORSICA'
 
-    To run code as an actor, first load an apropriate equilibrium IDS,
+    To run code as an **IMAS actor**,
+    first load an apropriate equilibrium IDS,
 
     >>> from nova.imas.database import Database
     >>> pulse, run = 130506, 403  # CORSICA equilibrium solution
@@ -394,37 +397,35 @@ class Extrapolate(ExtrapolateMachine, ExtrapolationGrid, Database):
         """Expose self._equilibrium plot boundary."""
         return self.equilibrium.plot_boundary(itime)
 
-    def plot_2d(self, attr='psi'):
+    def plot_2d(self, attr='psi', axes=None):
         """Plot plasma filements and polidal flux."""
+        self.set_axes(axes, '2d')
         super().plot('plasma')
         levels = self.grid.plot(attr, levels=51, colors='C0', nulls=False)
         try:
             self.equilibrium.plot_2d(self.itime, attr, colors='C3',
-                                     levels=-levels[::-1])
+                                     levels=-levels[::-1], axes=self.axes)
         except KeyError:
+            print('keyarror', attr)
             pass
         self.plot_boundary(self.itime)
 
     def plot_bar(self):
         """Plot coil currents for single time-slice."""
-        from nova.plot import plt, sns
         pf_active = PF_Active(**self.ids_attrs | dict(name='pf_active'))
 
         index = [name for name in self.subframe.subspace.index
                  if name in pf_active.data.coil_name.data]
 
         #print(self.sloc[index, ['Ic']].squeeze().values)
-
-        plt.figure()
-        plt.bar(index, 1e-3*self.sloc[index, ['Ic']].squeeze().values)
-        plt.bar(index,
+        self.mpl_axes.generate('1d')
+        self.axes.bar(index, 1e-3*self.sloc[index, ['Ic']].squeeze().values)
+        self.axes.bar(index,
                 1e-3 * pf_active.data.current.isel(time=self.itime).loc[index].data,
                 width=0.5)
 
         print(np.linalg.norm(1e-3*self.sloc[index, ['Ic']].squeeze().values -
                              1e-3 * pf_active.data.current.isel(time=self.itime).loc[index].data))
-        sns.despine()
-
 
         #pf_active.data.isel(time=20).current.data
         #plt.bar()
@@ -442,10 +443,13 @@ if __name__ == '__main__':
     pulse, run = 130506, 403  # CORSICA
     # pulse, run = 105028, 1  # DINA
 
-    extrapolate = Extrapolate(pulse, run, ngrid=50, nplasma=50)
+    extrapolate = Extrapolate(pulse, run, limit='ids')
 
-    extrapolate.ionize(20)
+    extrapolate.ionize(35)
     extrapolate.plot_2d('psi')
-    extrapolate.plasmagrid.plot()
+    #extrapolate.plasmagrid.plot()
 
-    extrapolate.plot_bar()
+    try:
+        extrapolate.plot_bar()
+    except IndexError:
+        pass

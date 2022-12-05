@@ -2,7 +2,6 @@
 from dataclasses import dataclass, field
 from typing import ClassVar
 
-import dask.array as da
 import numpy as np
 
 from nova.biot.biotset import BiotSet
@@ -13,8 +12,8 @@ import scipy.constants
 class BiotMatrix(BiotSet):
     """Compute Biot interaction matricies."""
 
-    data: dict[str, da.Array] = field(init=False, repr=False,
-                                      default_factory=dict)
+    data: dict[str, np.ndarray] = field(init=False, repr=False,
+                                        default_factory=dict)
 
     attrs: ClassVar[dict[str, str]] = dict()
     mu_0: ClassVar[float] = scipy.constants.mu_0
@@ -47,15 +46,16 @@ class BiotMatrix(BiotSet):
         matrix = getattr(self, attr)
         if self.target.turns:
             matrix *= self.target('nturn')
-        if isinstance(matrix, da.Array):
-            matrix = matrix.compute()
+        #if isinstance(matrix, da.Array):
+        #    matrix = matrix.compute()
         plasma = matrix[:, self.source.plasma]
         if self.source.turns:
             matrix *= self.source('nturn')
         # reduce
         if self.source.reduce and self.source.biotreduce.reduce:
             matrix = np.add.reduceat(
-                matrix, self.source.biotreduce.indices, axis=1)
+                matrix, self.source.biotreduce.indices,
+                axis=1, dtype=np.float128)
         if self.target.reduce and self.target.biotreduce.reduce:
             matrix = np.add.reduceat(
                 matrix, self.target.biotreduce.indices, axis=0)

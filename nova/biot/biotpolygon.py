@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar
 
-import dask.array as da
 import numpy as np
 
 from nova.biot.biotconstants import BiotConstants
@@ -97,7 +96,7 @@ class BiotPolygon(PolygonConstants, BiotMatrix):
     """
 
     edge: BiotFrame = field(repr=False, init=False)
-    reduction_matrix: da.Array = field(repr=False, init=False)
+    reduction_matrix: np.ndarray = field(repr=False, init=False)
 
     name: ClassVar[str] = 'polygon'  # element name
     attrs: ClassVar[dict[str, str]] = dict(area='area')
@@ -139,7 +138,7 @@ class BiotPolygon(PolygonConstants, BiotMatrix):
             attrs = dict(r='x', z='z')
             for attr in attrs:
                 setattr(self, attr, self.target(attrs[attr]))
-        self.reduction_matrix = da.zeros((len(self.edge), len(self.source)),
+        self.reduction_matrix = np.zeros((len(self.edge), len(self.source)),
                                          dtype=bool)
         for i in range(len(self.source)):
             self.reduction_matrix[:, i] = self.edge.loc[:, 'ref'] == i

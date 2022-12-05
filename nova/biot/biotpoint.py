@@ -7,11 +7,11 @@ import numpy as np
 from nova.biot.biotframe import BiotTarget
 from nova.biot.biotoperate import BiotOperate
 from nova.biot.biotsolve import BiotSolve
-from nova.frame.polyplot import Axes
+from nova.frame.baseplot import Plot
 
 
 @dataclass
-class BiotPoint(Axes, BiotOperate):
+class BiotPoint(Plot, BiotOperate):
     """Compute interaction for a series of discrete points."""
 
     def solve(self, points):

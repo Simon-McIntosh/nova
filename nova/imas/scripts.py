@@ -1,14 +1,9 @@
 """Manage script access to extrapolate class."""
+from importlib import import_module
+
 import click
 
-try:
-    import imas
-    IMPORT_IMAS = True
-except ImportError:
-    IMPORT_IMAS = False
 from nova.imas.extrapolate import Extrapolate
-import matplotlib.pyplot as plt
-
 
 class ResType(click.ParamType):
     """
@@ -62,7 +57,7 @@ class LimType(click.ParamType):
                           int: user defined node number
                           ids: node number is read from equilibrium ids
                         """)
-@click.option('-nplasma', 'nplasma', type=int, default=1000,
+@click.option('-nplasma', 'nplasma', type=int, default=2500,
               help='plasma filiment number (aprox.)')
 @click.option('-limit', 'limit', type=LimType(), default=0.25,
               help="""\b
@@ -87,11 +82,12 @@ class LimType(click.ParamType):
               nargs=2, type=str, default=('public', 'iter_md'),
               help='machine database (user, machine)')
 @click.option('-backend', 'backend', default='HDF5',
-              type=click.Choice(['MDSPLUS', 'HDF5'], case_sensitive=True),
+              type=click.Choice(['HDF5', 'MDSPLUS', 'MEMORY',
+                                 'ASCII'], case_sensitive=True),
               help='access layer backend')
-@click.version_option(package_name='nova',
-                      message=f'{Extrapolate.__module__}.%(prog)s, '
-                              'version %(version)s')
+@click.version_option(package_name='nova', message='%(package)s %(version)s')
+
+
 @click.pass_context
 def extrapolate(ctx, pulse, run, ngrid, nplasma,
                 limit, index, pf_active, wall,
@@ -102,16 +98,28 @@ def extrapolate(ctx, pulse, run, ngrid, nplasma,
     Reads flux functions from equilibrium IDS and solves for coil currents
     in a least squares sense to fit known poloidal flux interior to separatrix.
 
+    This funciton is a command line script.
+    Python workflows should use the nova.imas.extrapolate.Extrapolate class
+    as a imas actor.
+
+    \b
+    Examples
+    --------
+    Extrapolate from LCFS CORSICA solution to standard grid and plot
+    radial field.
+
+    >>> extrapolate 130506 403 plot 25 -attr br
     """
-    backend = getattr(imas.imasdef, f'{backend}_BACKEND')
+    backend = dict(HDF5=13, MDSPLUS=12,
+                   MEMORY=14, ASCII=11).get(backend.upper())
     machine_db = dict(zip(['user', 'machine'], machine_db))
     machine_db |= dict(backend=backend)
     pf_active = machine_db | dict(zip(['pulse', 'run'], pf_active))
     wall = machine_db | dict(zip(['pulse', 'run'], wall))
-    ctx.obj = Extrapolate(pulse, run, ngrid=ngrid, nplasma=nplasma,
-                          limit=limit, index=index,
-                          user=scenario_db[0], machine=scenario_db[1],
-                          backend=backend, pf_active=pf_active, wall=wall)
+    ctx.obj = import_module('nova.imas.extrapolate').Extrapolate(
+        pulse, run, ngrid=ngrid, nplasma=nplasma, limit=limit, index=index,
+        user=scenario_db[0], machine=scenario_db[1], backend=backend,
+        pf_active=pf_active, wall=wall)
 
 
 @extrapolate.command()
@@ -121,6 +129,7 @@ def extrapolate(ctx, pulse, run, ngrid, nplasma,
 @click.pass_context
 def plot(ctx, itime, attr):
     """Plot extrapolation result at itime."""
+    plt = import_module('matplotlib.pyplot')
     ctx.obj.ionize(itime)
     ctx.obj.plot_2d(attr)
     plt.show()

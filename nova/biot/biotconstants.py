@@ -3,13 +3,9 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar
 
-import dask.array as da
 import numpy as np
 import scipy.special
 
-Array = da.Array | np.ndarray
-
-# pylint: disable=no-member  # disable scipy.special module not found
 # pylint: disable=W0631  # disable short names
 
 
@@ -17,16 +13,16 @@ Array = da.Array | np.ndarray
 class BiotConstants:
     """Manage biot intergration constants."""
 
-    rs: Array = field(default_factory=lambda: da.zeros_like([]))
-    zs: Array = field(default_factory=lambda: da.zeros_like([]))
-    r: Array = field(default_factory=lambda: da.zeros_like([]))
-    z: Array = field(default_factory=lambda: da.zeros_like([]))
+    rs: np.ndarray = field(default_factory=lambda: np.zeros_like([]))
+    zs: np.ndarray = field(default_factory=lambda: np.zeros_like([]))
+    r: np.ndarray = field(default_factory=lambda: np.zeros_like([]))
+    z: np.ndarray = field(default_factory=lambda: np.zeros_like([]))
 
-    eps: ClassVar[np.float64] = 2 * np.finfo(float).eps
+    eps: ClassVar[np.float64] = 1.5 * np.finfo(float).eps
 
     def sign(self, x):
         """Return sign of array -1 if x < 0 else 1."""
-        return np.where(abs(x) > 1e4*self.eps, np.sign(x), 0)
+        return np.where(abs(x) > self.eps, np.sign(x), 0)
 
     @cached_property
     def gamma(self):
@@ -85,36 +81,43 @@ class BiotConstants:
                           3*self.rs**2 - 5*self.r**2) / (4*self.r)
 
     @staticmethod
-    def ellipk(m):
-        """Return complete elliptic intergral of the 1st kind."""
-        return scipy.special.ellipk(m)
+    def _ellip(kind: str, /, *args, out=None, shape=None, where=True):
+        if out is None:
+            out = np.zeros_like(args[0], dtype=float, shape=shape)
+        func = getattr(scipy.special, f'ellip{kind}')
+        return func(*args, out=out, where=where)
 
-    @staticmethod
-    def ellipe(m):
+    @classmethod
+    def ellipk(cls, m):
         """Return complete elliptic intergral of the 1st kind."""
-        return scipy.special.ellipe(m)
+        return cls._ellip('k', m)
 
-    @staticmethod
-    def ellippi(n, m):
+    @classmethod
+    def ellipe(cls, m):
+        """Return complete elliptic intergral of the 2nd kind."""
+        return cls._ellip('e', m)
+
+    @classmethod
+    def ellippi(cls, n, m):
         """
         Return complete elliptic intergral of the 3rd kind.
 
-        Taken from https://github.com/scipy/scipy/issues/4452.
+        Adapted from https://github.com/scipy/scipy/issues/4452.
         """
         x, y, z, p = 0, 1-m, 1, 1-n
-        rf = scipy.special.elliprf(x, y, z)
-        rf[(y == 0) | (y == 1)] = scipy.special.elliprc(0, 1)
-        rj = scipy.special.elliprj(x, y, z, p)
-        rj[y == p] = scipy.special.elliprd(x, z, p[y == p])
-        rj[p == 1] = scipy.special.elliprd(x, y[p == 1], 1)
+        rf = cls._ellip('rf', x, y, z, shape=m.shape, where=(m < 1))
+        #cls._ellip('rc', 0, 1, out=rf, where=np.isclose(y, 1))
+        rj = cls._ellip('rj', x, y, z, p, shape=m.shape, where=(m < 1))
+        #cls._ellip('rd', x, z, p, out=rj, where=np.isclose(y, p))
+        #cls._ellip('rd', x, y, p, out=rj, where=np.isclose(p, 1))
         return rf + rj * n / 3
 
     @cached_property
     def np2(self) -> dict[int, np.ndarray]:
         """Return np**2 constant."""
         return {1: 2*self.r / (self.r - self.c - self.eps),
-                2: (1-self.eps) * 2*self.r / (self.r + self.c),
-                3: (1-self.eps) * 4*self.r*self.rs / self.b**2}
+                2: 2*self.r / (self.r + self.c),
+                3: 4*self.r*self.rs / self.b**2}
 
     @cached_property
     def Pphi(self) -> dict[int, np.ndarray]:

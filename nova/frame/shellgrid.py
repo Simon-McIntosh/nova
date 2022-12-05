@@ -1,25 +1,21 @@
 """Manage shell grid."""
 from dataclasses import dataclass, field
+from importlib import import_module
 
 import numpy as np
-import numpy.typing as npt
 import pandas
-import scipy.interpolate
-import shapely.geometry
-from rdp import rdp
 
+from nova.frame.baseplot import Plot
 from nova.frame.dataframe import DataFrame
 from nova.frame.polyplot import PolyPlot
 from nova.geometry.polygeom import PolyGeom
 from nova.geometry.polygon import Polygon
-from nova.utilities import geom
-import matplotlib.pyplot as plt
 
 # pylint:disable=no-member
 
 
 @dataclass
-class ShellCoords:
+class ShellCoords(Plot):
     """
     Store shell coordinates and spacing parameters.
 
@@ -43,8 +39,8 @@ class ShellCoords:
 
     """
 
-    x_coordinate: npt.ArrayLike
-    z_coordinate: npt.ArrayLike
+    x_coordinate: np.ndarray
+    z_coordinate: np.ndarray
     length: float
     thickness: float
     delta: float = 0
@@ -69,9 +65,11 @@ class ShellCoords:
         if self.thickness <= 0:
             raise ValueError(f'Shell thickness {self.thickness} <= 0')
 
-    def plot_coordinates(self):
+    def plot_coordinates(self, axes=None):
         """Plot shell coordinates."""
-        plt.plot(self.x_coordinate, self.z_coordinate, '.-', label='coords')
+        self.set_axes(axes, '2d')
+        self.asxes.plot(self.x_coordinate, self.z_coordinate, '.-',
+                        label='coords')
 
 
 @dataclass
@@ -79,8 +77,7 @@ class ShellInterp(ShellCoords):
     """Calculate total and unit shell lengths and generate interpolator."""
 
     total_length: float = field(init=False)
-    unit_length: npt.ArrayLike = field(init=False, repr=False)
-    interp: scipy.interpolate.interp1d = field(init=False, repr=False)
+    unit_length: np.ndarray = field(init=False, repr=False)
 
     def __post_init__(self):
         """Check coordinate shape and calculate segment length."""
@@ -90,13 +87,14 @@ class ShellInterp(ShellCoords):
 
     def segment_length(self):
         """Return total segment length and unit length vector."""
-        length = geom.length(self.x_coordinate, self.z_coordinate, norm=False)
+        length = np.append(0, np.cumsum(np.sqrt(
+            np.diff(self.x_coordinate)**2 + np.diff(self.z_coordinate)**2)))
         return length[-1], length/length[-1]
 
     def generate_interpolator(self):
         """Return segment interpolator ."""
-        return scipy.interpolate.interp1d(self.unit_length, self.coords,
-                                          axis=0)
+        return import_module('scipy.interpolate').interp1d(
+            self.unit_length, self.coords, axis=0)
 
 
 @dataclass
@@ -104,9 +102,9 @@ class ShellSegment(ShellInterp):
     """Set vector spacing and Identify geometrical features within segment."""
 
     eps: float = 1e-3
-    rdp: npt.ArrayLike = field(init=False, repr=False)
+    rdp: np.ndarray = field(init=False, repr=False)
     ndiv: int = 2
-    ldiv: npt.ArrayLike = field(init=False, repr=False)
+    ldiv: np.ndarray = field(init=False, repr=False)
     columns: list[str] = field(init=False, default_factory=lambda: [
         'x', 'y', 'z', 'dl', 'dt', 'dx', 'dy', 'dz', 'rms', 'area',
         'section', 'poly'])
@@ -155,21 +153,23 @@ class ShellSegment(ShellInterp):
         None.
 
         """
-        mask = rdp(self.coords, epsilon=self.eps*self.total_length,
-                   return_mask=True)
+        mask = import_module('rdp').rdp(
+            self.coords, epsilon=self.eps*self.total_length, return_mask=True)
         return self.unit_length[mask]
 
-    def plot_features(self):
+    def plot_features(self, axes=None):
         """Plot RDP features."""
-        plt.plot(*self.interp(self.rdp).T, 's', label='rdp')
+        self.set_axes(axes, '2d')
+        self.axes.plot(*self.interp(self.rdp).T, 's', label='rdp')
 
     @property
     def poly(self):
         """Return segment polygon."""
+        geometry = import_module('shapely.geometry')
         coords = self.interp(self.rdp)
-        poly = shapely.geometry.LineString(coords).buffer(
+        poly = geometry.LineString(coords).buffer(
             self.thickness/2, cap_style=2, join_style=2)
-        if isinstance(poly, shapely.geometry.MultiPolygon):
+        if isinstance(poly, geometry.MultiPolygon):
             poly = poly.geoms[0]
         return Polygon(poly, name='shell').poly
 
@@ -223,9 +223,7 @@ class ShellGrid(ShellSegment):
         """Plot shell constructive geometory."""
         self.plot_features()
         self.plot_coordinates()
-        plt.legend()
-        plt.axis('equal')
-        plt.axis('off')
+        self.legend()
 
     def plot_frame(self):
         """Plot frame polygons."""

@@ -2,7 +2,6 @@
 from dataclasses import dataclass
 from typing import ClassVar
 
-import dask.array as da
 import numpy as np
 
 from nova.biot.biotconstants import BiotConstants
@@ -13,7 +12,7 @@ from nova.biot.biotmatrix import BiotMatrix
 class OffsetFilaments:
     """Offset source and target filaments."""
 
-    data: dict[str, da.Array | np.ndarray]
+    data: dict[str, np.ndarray]
 
     fold_number: int = 0  # Number of e-foling lenghts within filament
     merge_number: float = 1.5  # Merge radius, multiple of filament widths

@@ -5,7 +5,9 @@ from functools import cached_property
 from typing import ClassVar
 import warnings
 
+import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 from scipy.optimize import minimize
 from scipy.spatial.transform import Rotation
 import xarray
@@ -15,7 +17,6 @@ from nova.assembly.fiducialdata import FiducialData
 from nova.assembly.gaussianprocessregressor import GaussianProcessRegressor
 from nova.assembly.spacialanalyzer import SpacialAnalyzer
 from nova.assembly.transform import Rotate
-import matplotlib.pyplot as plt
 
 
 @dataclass
@@ -84,7 +85,7 @@ class Plotter:
             axes[i].axis('equal')
             axes[i].set_xticks([])
             axes[i].set_yticks([])
-            plt.despine()
+            sns.despine()
         return axes
 
     def plot_box(self, data_array: xarray.DataArray):
@@ -255,7 +256,7 @@ class SectorTransform:
             coord = str(self.data.cylindrical[space_index].values)
             coord = coord.replace('phi', r'\phi')
             axes[space_index].set_ylabel(rf'${coord}$')
-        plt.despine()
+        sns.despine()
         axes[-1].set_xlabel('arc length')
         axes[0].set_title(f'TF{self.data.coil[coil_index].values:1d}')
         plt.tight_layout()
@@ -439,5 +440,5 @@ if __name__ == '__main__':
     #transform.plot_transform()
     #transform.write()
 
-    transform.plot_gpr('reference', 0)
+    transform.plot_gpr('reference', 0, n_samples=5)
     #transform.plot_gpr('reference', 1)

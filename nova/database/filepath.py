@@ -1,10 +1,14 @@
 """Manage file data access for frame and biot instances."""
+from __future__ import annotations
 from dataclasses import dataclass, field
+from importlib import import_module
 import os
 import sys
+from typing import TYPE_CHECKING
 
 import appdirs
-import xarray
+if TYPE_CHECKING:
+    import xarray
 import xxhash
 
 import nova
@@ -19,7 +23,7 @@ class FilePath:
     group: str | None = field(default=None, repr=True)
     path: str | None = field(default=None, repr=False)
     directory: str = 'user_data'
-    data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
+    data: xarray.Dataset | None = field(default=None, repr=False)
 
     def __post_init__(self):
         """Forward post init for for cooperative inheritance."""
@@ -39,9 +43,9 @@ class FilePath:
                 return app(nova.__name__, version=self._tag)
             if subpath == 'imas':
                 try:
-                    import imas
+                    imas_name = import_module('imas').__name__
                     return app(nova.__name__,
-                               version=f'{self._tag}/{imas.__name__}')
+                               version=f'{self._tag}/{imas_name}')
                 except ImportError:
                     pass
             return app(subpath)
@@ -138,7 +142,8 @@ class FilePath:
         """Load dataset from file."""
         file = self.file(filename, path)
         group = self.netcdf_group(group)
-        with xarray.open_dataset(file, group=group, cache=True) as data:
+        with import_module('xarray').open_dataset(
+                file, group=group, cache=True) as data:
             self.data = data
             self.data.load()
         return self

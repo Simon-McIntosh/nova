@@ -1,8 +1,12 @@
 """Manage access to timeslice data."""
+from __future__ import annotations
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
 
 import numpy as np
-import xarray
+if TYPE_CHECKING:
+    import xarray
 
 from nova.imas.database import ImasIds
 

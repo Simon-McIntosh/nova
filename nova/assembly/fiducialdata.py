@@ -12,7 +12,8 @@ from nova.assembly.centerline import CenterLine
 from nova.assembly.fiducialccl import Fiducial, FiducialIDM, FiducialRE
 from nova.assembly.gaussianprocessregressor import GaussianProcessRegressor
 from nova.assembly.plotter import Plotter
-import matplotlib.pyplot as plt, sns
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 @dataclass

@@ -1,12 +1,15 @@
 """Extrapolate equilibria beyond separatrix."""
+from __future__ import annotations
 from dataclasses import dataclass, field, fields
-from importlib import import_module
 from functools import cached_property
+from importlib import import_module
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas
 from scipy.constants import mu_0
-import xarray
+if TYPE_CHECKING:
+    import xarray
 
 from nova.frame.baseplot import Plot
 from nova.imas import (Database, Equilibrium, Ids, Machine, PF_Active)
@@ -436,6 +439,8 @@ class Extrapolate(Plot, ExtrapolateMachine, ExtrapolationGrid, Database):
 
 if __name__ == '__main__':
 
+    pass
+    '''
     # import doctest
     # doctest.testmod()
 
@@ -453,3 +458,4 @@ if __name__ == '__main__':
         extrapolate.plot_bar()
     except IndexError:
         pass
+    '''

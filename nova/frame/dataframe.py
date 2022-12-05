@@ -7,12 +7,8 @@ import copy
 import json
 import pandas
 import numpy as np
-import xarray
 
 from nova.frame.frameattrs import FrameAttrs
-#from nova.geometry.geoframe import GeoFrame
-#from nova.geometry.polyframe import PolyFrame
-#from nova.geometry.vtkgen import VtkFrame
 
 # pylint: disable=too-many-ancestors
 
@@ -288,7 +284,8 @@ class DataFrame(FrameAttrs):
 
     def load(self, file, group=None):
         """Load dataframe from hdf file."""
-        with xarray.open_dataset(file, group=group, cache=True) as data:
+        with import_module('xarray').open_dataset(
+                file, group=group, cache=True) as data:
             data.load()
             metadata = self.insert_metadata(data.attrs)
             self.__init__(data.to_dataframe(), **metadata)

@@ -102,6 +102,7 @@ spyder = [
   "spyder-memory-profiler", 
   "pylsp-mypy",
   "line_profiler",
+  "pandas-stubs",
 ]
 test = [
   "coverage2clover", 

@@ -1,6 +1,8 @@
 """Manage biot methods."""
 from dataclasses import dataclass, field
 
+from nova.biot import (BiotGrid, BiotInductance, BiotLoop, BiotPlasmaBoundary,
+                       BiotPlasmaGrid, BiotPoint, Plasma)
 from nova.biot.biotdata import BiotData
 from nova.database.netcdf import netCDF
 from nova.frame.frameset import FrameSet, frame_factory
@@ -33,43 +35,43 @@ class Biot(FrameSet):
                 attrs.append(attr)
         return attrs
 
-    @frame_factory('nova.biot.plasma.Plasma')
+    @frame_factory(Plasma)
     def plasma(self):
         """Return plasma instance."""
         return dict(path=self.path,
                     grid=self.plasmagrid, boundary=self.plasmaboundary)
 
-    @frame_factory('nova.biot.biotgrid.BiotGrid')
+    @frame_factory(BiotGrid)
     def grid(self):
         """Return grid biot instance."""
         return self.biot_kwargs
 
-    @frame_factory('nova.biot.biotplasmagrid.BiotPlasmaGrid')
+    @frame_factory(BiotPlasmaGrid)
     def plasmagrid(self):
         """Return plasma grid biot instance."""
         return self.biot_kwargs
 
-    @frame_factory('nova.biot.biotplasmaboundary.BiotPlasmaBoundary')
+    @frame_factory(BiotPlasmaBoundary)
     def plasmaboundary(self):
         """Return plasma firstwall biot instance."""
         return self.biot_kwargs
 
-    @frame_factory('nova.biot.biotpoint.BiotPoint')
+    @frame_factory(BiotPoint)
     def point(self):
         """Return point biot instance."""
         return self.biot_kwargs
 
-    @frame_factory('nova.biot.biotpoint.BiotPoint')
+    @frame_factory(BiotPoint)
     def probe(self):
         """Return biot probe instance."""
         return self.biot_kwargs
 
-    @frame_factory('nova.biot.biotloop.BiotLoop')
+    @frame_factory(BiotLoop)
     def loop(self):
         """Return biot loop instance."""
         return self.biot_kwargs
 
-    @frame_factory('nova.biot.biotinductance.BiotInductance')
+    @frame_factory(BiotInductance)
     def inductance(self):
         """Return biot inductance instance."""
         return self.biot_kwargs

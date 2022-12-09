@@ -1,6 +1,7 @@
 """Manage frame factroy methods."""
 from dataclasses import dataclass
 
+from nova.frame import (Coil, Ferritic, FirstWall, Shell, Turn, Winding)
 from nova.frame.frameset import FrameSet, frame_factory
 from nova.geometry.polyshape import PolyShape
 
@@ -40,32 +41,32 @@ class Frame(FrameSet):
                 setattr(self, attr, attrs[attr])
         self._expand_polyattrs()
 
-    @frame_factory('nova.frame.coil.Coil')
+    @frame_factory(Coil)
     def coil(self):
         """Return coil constructor."""
         return dict(turn=self.tcoil, delta=self.dcoil)
 
-    @frame_factory('nova.frame.ferritic.Ferritic')
+    @frame_factory(Ferritic)
     def ferritic(self):
         """Return ferritic insert constructor."""
         return dict(delta=self.delta)
 
-    @frame_factory('nova.frame.firstwall.FirstWall')
+    @frame_factory(FirstWall)
     def firstwall(self):
         """Return plasma firstwall constructor."""
         return dict(turn=self.tplasma, delta=-self.nplasma)
 
-    @frame_factory('nova.frame.shell.Shell')
+    @frame_factory(Shell)
     def shell(self):
         """Return shell constructor."""
         return dict(delta=self.dshell)
 
-    @frame_factory('nova.frame.turn.Turn')
+    @frame_factory(Turn)
     def turn(self):
         """Return 2D/3D coil turn constructor."""
         return dict(delta=self.delta)
 
-    @frame_factory('nova.frame.winding.Winding')
+    @frame_factory(Winding)
     def winding(self):
         """Return winding constructor."""
         return dict(delta=self.delta)

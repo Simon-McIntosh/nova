@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 
 from nova.biot.biot import Biot
-from nova.frame.control import Control
+from nova.control.control import Control
 from nova.frame.frame import Frame
 from nova.frame.frameset import FrameSet
 from nova.geometry.polygon import Polygon
@@ -95,3 +95,5 @@ if __name__ == '__main__':
 
     coilset.plasmagrid.svd_rank = 50
     coilset.plasmagrid.plot_svd(levels=coilset.grid.levels)
+
+    coilset.point

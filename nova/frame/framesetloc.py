@@ -1,10 +1,12 @@
 """Manage subframe access."""
 from dataclasses import dataclass, field
 from functools import cached_property
+from typing import Optional
 
-import numpy.typing as npt
+import numpy as np
 import xxhash
 
+from nova.frame.arraylocindexer import ArrayLocIndexer
 from nova.frame.framedata import FrameData
 from nova.frame.framespace import FrameSpace
 from nova.frame.error import SpaceKeyError
@@ -44,7 +46,7 @@ class LocIndexer:
             return None
         self.frame.loc[index, col] = value
 
-    def __getitem__(self, key) -> npt.ArrayLike:
+    def __getitem__(self, key) -> np.ndarray:
         """Return frame attribute."""
         index = self.frame.get_index(key)
         col = self.frame.get_col(key)
@@ -56,43 +58,6 @@ class LocIndexer:
             return getattr(self.frame, col)[index]
         self.frame.update_frame()
         return self.frame.loc[index, col]
-
-
-@dataclass
-class DataLocIndexer:
-    """Data Loc base class."""
-
-    name: str
-    frame: FrameSpace = field(repr=False)
-    _data: dict = field(init=False, repr=False)
-
-    def __setitem__(self, key, value):
-        """Set data array item in metaframe.data dict."""
-        self._data[key][:] = value
-
-    def __getitem__(self, key) -> npt.ArrayLike:
-        """Return data array item in metaframe.data dict."""
-        return self._data[key]
-
-
-@dataclass
-class ArrayLocIndexer(DataLocIndexer):
-    """Access views of cached metaframe.data arrays."""
-
-    attrs: list[str] = field(init=False, default_factory=list)
-
-    def __post_init__(self):
-        """Update referance data arrays."""
-        self.attrs = self.frame.attrs['metaframe'].array
-        self._data = {attr: self.frame[attr] for attr in self.attrs}
-
-    def __call__(self):
-        """Return list of frame array attributes."""
-        return list(self._data)
-
-    def __len__(self):
-        """Return frame array length."""
-        return len(self._data)
 
 
 @dataclass
@@ -135,6 +100,7 @@ class FrameSetLoc(FrameData):
 
     """
 
+    name: Optional[str] = None
     version: dict = field(init=False, default_factory=dict, repr=False)
 
     def __post_init__(self):

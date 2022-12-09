@@ -9,9 +9,9 @@ import scipy.interpolate
 
 import numpy as np
 from nova.definitions import root_dir
-from nova.structural.ansyspost import AnsysPost
-from nova.structural.fiducialcoil import FiducialCoil
-from nova.structural.morph import Morph
+from nova.assembly.ansyspost import AnsysPost
+from nova.assembly.fiducialcoil import FiducialCoil
+from nova.assembly.morph import Morph
 from nova.utilities import ANSYS
 
 

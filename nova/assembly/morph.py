@@ -7,9 +7,9 @@ import pyvista as pv
 import scipy.interpolate
 from sklearn.gaussian_process import kernels, GaussianProcessRegressor
 
-from nova.structural.ansyspost import AnsysPost
-from nova.structural.fiducialmesh import FiducialMesh
-from nova.structural.plotter import Plotter
+from nova.assembly.ansyspost import AnsysPost
+from nova.assembly.fiducialmesh import FiducialMesh
+from nova.assembly.plotter import Plotter
 
 
 @dataclass

@@ -222,7 +222,7 @@ class BiotGrid(BiotBaseGrid):
         """Return psi as 2D array."""
         return self.psi.reshape(self.shape)
 
-    def plot(self, attr='psi', axes=None, nulls=True, **kwargs):
+    def plot(self, attr='psi', axes=None, nulls=True, clabel=None, **kwargs):
         """Plot contours."""
         self.axes = axes
         if nulls:
@@ -233,4 +233,6 @@ class BiotGrid(BiotBaseGrid):
             **self.contour_kwargs(**kwargs))
         if isinstance(kwargs.get('levels', None), int):
             self.levels = QuadContourSet.levels
+        if clabel is not None:
+            self.axes.clabel(QuadContourSet, **clabel)
         return QuadContourSet.levels

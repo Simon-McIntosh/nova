@@ -1,7 +1,9 @@
 """Extend DataFrame - add subspace."""
+from functools import cached_property
 
 import numpy as np
 
+from nova.frame.arraylocindexer import ArrayLocIndexer
 from nova.frame.error import SpaceKeyError
 from nova.frame.framelink import FrameLink, LinkLocMixin, LinkIndexer
 from nova.frame.metamethod import PolyGeo, VtkGeo, PolyPlot, VtkPlot
@@ -120,6 +122,11 @@ class FrameSpace(SpaceIndexer, FrameLink):
             pass
         with self.setlock(True, 'subspace'):
             super().__setitem__(col, value)
+
+    @cached_property
+    def aloc(self):
+        """Return fast indexed array attributes."""
+        return ArrayLocIndexer('array', self)
 
 
 if __name__ == '__main__':

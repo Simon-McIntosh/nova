@@ -8,10 +8,10 @@ import numpy as np
 import pyvista as pv
 
 from nova.definitions import root_dir
-from nova.structural.ansyspost import AnsysPost
-from nova.structural.fiducialdata import FiducialData
-from nova.structural.morph import Morph
-from nova.structural.plotter import Plotter
+from nova.assembly.ansyspost import AnsysPost
+from nova.assembly.fiducialdata import FiducialData
+from nova.assembly.morph import Morph
+from nova.assembly.plotter import Plotter
 
 
 @dataclass

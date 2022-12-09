@@ -18,7 +18,8 @@ class MetaArray(MetaData):
     index: pandas.Index = field(repr=False, default=pandas.Index([]))
     data: dict[str, Iterable[Union[str, int, float]]] = field(
         init=False, default_factory=dict)
-    version: dict[str, int] = field(init=False, default_factory=dict)
+    version: dict[str, int] = field(
+        init=False, default_factory=lambda: dict(index=0))
 
     def __post_init__(self):
         """Set internal data variables and initialize version dict."""

@@ -54,7 +54,7 @@ def test_multi_xpoint(plot=False):
     coilset = CoilSet(dcoil=-5, nplasma=5)
     coilset.coil.insert(5, [-1.1, 1.1], 0.75, 0.75, Ic=[1, 1])
     coilset.firstwall.insert(dict(o=[5.25, 0, 0.5]), Ic=0.5)
-    coilset.grid.solve(3e2, 1.5, 'plasma')  # generate plasma grid
+    coilset.grid.solve(3e4, 1.5, 'plasma')  # generate plasma grid
     if plot:
         coilset.plot()
         coilset.grid.plot()

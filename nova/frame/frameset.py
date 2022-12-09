@@ -1,5 +1,6 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
 from dataclasses import dataclass, field
+from functools import cached_property, wraps
 from importlib import import_module
 from typing import Optional
 
@@ -12,6 +13,29 @@ from nova.frame.framedata import FrameData
 from nova.frame.framesetloc import FrameSetLoc
 from nova.frame.framespace import FrameSpace
 from nova.frame.select import Select
+
+
+def frame_factory(name: str):
+    """Automatic loader for frame methods."""
+    def decorator(method):
+        """Return initialized frame method."""
+        module_name = '.'.join(name.split('.')[:-1])
+        method_name = name.split('.')[-1]
+
+        module = import_module(module_name)
+        frame_method = getattr(module, method_name)
+
+        @wraps(frame_method)
+        @cached_property
+        def wrapper(self):
+            name = method.__name__
+            kwargs = method(self) | dict(name=name)
+            module = import_module(module_name)
+            instance = getattr(module, method_name)(*self.frames, **kwargs)
+            setattr(self, name, instance)
+            return instance
+        return wrapper
+    return decorator
 
 
 @dataclass

@@ -3,11 +3,11 @@ from dataclasses import dataclass
 
 from nova.biot.biotoperate import BiotOperate
 from nova.biot.biotsolve import BiotSolve
-from nova.frame.polyplot import Axes
+from nova.frame.baseplot import Plot
 
 
 @dataclass
-class BiotLoop(Axes, BiotOperate):
+class BiotLoop(Plot, BiotOperate):
     """Compute interaction across grid."""
 
     def solve(self, target):

@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 import numpy as np
 import pyvista as pv
 
-from nova.structural.fiducialdata import FiducialData
-from nova.structural.plotter import Plotter
+from nova.assembly.fiducialdata import FiducialData
+from nova.assembly.plotter import Plotter
 
 
 @dataclass

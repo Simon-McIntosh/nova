@@ -3,11 +3,11 @@ from dataclasses import dataclass
 
 from nova.biot.biotoperate import BiotOperate
 from nova.biot.biotsolve import BiotSolve
-from nova.frame.polyplot import Axes
+from nova.frame.baseplot import Plot
 
 
 @dataclass
-class BiotInductance(Axes, BiotOperate):
+class BiotInductance(Plot, BiotOperate):
     """Compute self interaction."""
 
     def solve(self, index=slice(None)):

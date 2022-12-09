@@ -1,6 +1,6 @@
 """Biot-Savart calculation for complete circular cylinders."""
 from dataclasses import dataclass
-from functools import cached_property
+from functools import cached_property, wraps
 from typing import ClassVar
 
 import numba
@@ -30,7 +30,7 @@ class CylinderConstants(BiotConstants):
     def __post_init__(self):
         """Build intergration parameters."""
         import quadpy
-        scheme = quadpy.c1.gauss_patterson(4)
+        scheme = quadpy.c1.gauss_patterson(5)
         self.phi_points = np.pi - self.alpha * (scheme.points + 1)
         self.phi_weights = scheme.weights * self.alpha / 2
         super().__post_init__()
@@ -90,8 +90,8 @@ class CylinderConstants(BiotConstants):
         """Return zeta coefficient calculated using Romberg integration."""
         #return np.sum(self.phi_weights * np.arcsinh(
         #    self.beta1(self.phi_points, shape=(..., np.newaxis))), axis=-1)
-        return zeta(self.r, self.rs, self.z, self.zs,
-                    self.phi_points, self.phi_weights)
+        #return zeta(self.r, self.rs, self.z, self.zs,
+        #            self.phi_points, self.phi_weights)
 
         result = np.zeros_like(self.r, np.float_)
         for phi, weight in zip(self.phi_points, self.phi_weights):
@@ -167,6 +167,14 @@ class BiotCylinder(CylinderConstants, BiotMatrix):
         return 1 / (2*np.pi*self.source('area')) * \
             ((data[..., 2] - data[..., 3]) - (data[..., 1] - data[..., 0]))
 
+    @property
+    def Ke(self):
+        #return np.ones_like(self.K[..., 0])
+        #return np.copy(self.k2[..., 0])
+        #_ = self.K
+        return self._intergrate(self.K)
+        #return np.copy(self.K[..., 0])
+
     @cached_property
     def Aphi(self):
         """Return Aphi dask array."""
@@ -202,8 +210,32 @@ if __name__ == '__main__':
     coilset.firstwall.insert(5.1, 0.52, 0.05, 0.05,
                              turn='s', tile=False, segment='cylinder')
 
-    coilset.saloc['Ic'] = 5e3
+    coilset.saloc['Ic'] = 1
+
+    coilset.aloc['nturn'] = 0
+    coilset.aloc['nturn'][64] = 1
+
+    coilset.grid.solve(1000, -0.75)
+    coilset.grid
+    coilset.plot()
+    coilset.grid.plot('psi', colors='C1', nulls=False, clabel={})
+    #coilset.grid.plot('ke', colors='C0', nulls=False, clabel={})
+
+    coilset = CoilSet(dcoil=-1, nplasma=15**2, field_attrs=['Psi'])
+    '''
+    coilset.coil.insert(5, 0.5, 0.01, 0.8, segment='cylinder')
+    coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, segment='cylinder')
+    coilset.coil.insert(5.1, 0.5-0.4, 0.2, 0.01, segment='cylinder')
+    coilset.coil.insert(5.2, 0.5, 0.01, 0.8, segment='cylinder')
+    '''
+    coilset.firstwall.insert(5.1, 0.52, 0.05, 0.05,
+                             turn='s', tile=False, segment='ring')
+
+    coilset.saloc['Ic'] = 1
+
+    coilset.aloc['nturn'] = 0
+    coilset.aloc['nturn'][64] = 1
+
     coilset.grid.solve(1000, -0.75)
 
-    # coilset.plot()
-    coilset.grid.plot('psi', colors='C1', nulls=True)
+    coilset.grid.plot('psi', colors='C2', nulls=False, clabel={})

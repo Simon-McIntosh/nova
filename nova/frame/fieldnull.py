@@ -13,7 +13,8 @@ from nova.geometry.pointloop import PointLoop
 class DataNull(Axes):
     """Store sort and remove field nulls."""
 
-    data: xarray.Dataset = field(repr=False, default_factory=xarray.Dataset)
+    data: xarray.Dataset | None = \
+        field(repr=False, default_factory=xarray.Dataset)
     loop: np.ndarray | None = field(repr=False, default=None)
     data_o: dict[str, np.ndarray] = field(init=False, default_factory=dict,
                                           repr=False)

@@ -1,6 +1,6 @@
 """Biot-Savart intergration constants."""
 from dataclasses import dataclass, field
-from functools import cached_property
+from functools import cached_property, wraps
 from typing import ClassVar
 
 import dask.array as da
@@ -13,6 +13,58 @@ Array = da.Array | np.ndarray
 # pylint: disable=W0631  # disable short names
 
 
+def unit_nudge(limit_factor=1.5, threshold_factor=3):
+    """
+    Nudge output to avoid unit singularities.
+
+    Parameters
+    ----------
+    limit_factor : float, optional
+        Limit factor multiplies the class eps such that as output tends to
+        unit the result tends to limit * self.eps. The default is 1.5.
+
+    threshold_factor : float, optional
+        Threshold factor above which linear nudging is applied.
+        This factor multiplies the class eps such that the transform is
+        applied when output > 1 - thershold * self.eps.
+        The default is None .
+
+    Raises
+    ------
+    ValueError
+        When limit_factor > threshold_factor.
+
+    Returns
+    -------
+    Nudged output.
+
+    """
+    if threshold_factor is not None and limit_factor is not None and \
+            limit_factor > threshold_factor:
+        raise ValueError('limit_factor > threshold_factor '
+                         f'{limit_factor} > {threshold_factor}')
+
+    def decorator(method):
+        @wraps(method)
+        def wrapper(self, *args, **kwargs):
+            output = method(self, *args, **kwargs)
+
+            def defactor(factor, eps, default):
+                if factor is None:
+                    return default
+                return factor*eps
+
+            limit = defactor(limit_factor, self.eps, 0)
+            threshold = defactor(threshold_factor, self.eps, 1)
+            delta = output - (1 - threshold)
+            unit_delta = delta / threshold
+            return np.where((output < 1 + limit) & (delta > 0),
+                            (1 - threshold) + unit_delta*(threshold - limit),
+                            output)
+        return wrapper
+    return decorator
+
+
 @dataclass
 class BiotConstants:
     """Manage biot intergration constants."""
@@ -22,7 +74,7 @@ class BiotConstants:
     r: Array = field(default_factory=lambda: da.zeros_like([]))
     z: Array = field(default_factory=lambda: da.zeros_like([]))
 
-    eps: ClassVar[np.float64] = 2 * np.finfo(float).eps
+    eps: ClassVar[np.float64] = 2*np.finfo(float).eps
 
     def sign(self, x):
         """Return sign of array -1 if x < 0 else 1."""
@@ -85,22 +137,40 @@ class BiotConstants:
                           3*self.rs**2 - 5*self.r**2) / (4*self.r)
 
     @staticmethod
-    def ellipk(m):
+    def _ellip(kind: str, /, *args, out=None, shape=None, where=True):
+        if out is None:
+            out = np.zeros_like(args[0], dtype=float, shape=shape)
+        func = getattr(scipy.special, f'ellip{kind}')
+        return func(*args, out=out, where=where)
+
+    @classmethod
+    def ellipk(cls, m):
         """Return complete elliptic intergral of the 1st kind."""
         return scipy.special.ellipk(m)
+        #return cls._ellip('k', m)
 
-    @staticmethod
-    def ellipe(m):
-        """Return complete elliptic intergral of the 1st kind."""
+    @classmethod
+    def ellipe(cls, m):
+        """Return complete elliptic intergral of the 2nd kind."""
         return scipy.special.ellipe(m)
+        #return cls._ellip('e', m)
 
-    @staticmethod
-    def ellippi(n, m):
+    @classmethod
+    def ellippi(cls, n, m):
         """
         Return complete elliptic intergral of the 3rd kind.
 
-        Taken from https://github.com/scipy/scipy/issues/4452.
+        Adapted from https://github.com/scipy/scipy/issues/4452.
         """
+        '''
+        x, y, z, p = 0, 1-m, 1, 1-n
+        rf = cls._ellip('rf', x, y, z, shape=m.shape) #, where=(m < 1))
+        #cls._ellip('rc', 0, 1, out=rf, where=np.isclose(y, 1))
+        rj = cls._ellip('rj', x, y, z, p, shape=m.shape) #, where=(m < 1))
+        #cls._ellip('rd', x, z, p, out=rj, where=np.isclose(y, p))
+        #cls._ellip('rd', x, y, p, out=rj, where=np.isclose(p, 1))
+        return rf + rj * n / 3
+        '''
         x, y, z, p = 0, 1-m, 1, 1-n
         rf = scipy.special.elliprf(x, y, z)
         rf[(y == 0) | (y == 1)] = scipy.special.elliprc(0, 1)
@@ -108,6 +178,15 @@ class BiotConstants:
         rj[y == p] = scipy.special.elliprd(x, z, p[y == p])
         rj[p == 1] = scipy.special.elliprd(x, y[p == 1], 1)
         return rf + rj * n / 3
+
+
+    #@unit_nudge()
+    def _np2_2(self):
+        return 2*self.r / (self.r + self.c)
+
+    #@unit_nudge()
+    def _np2_3(self):
+        return 4*self.r*self.rs / self.b**2
 
     @cached_property
     def np2(self) -> dict[int, np.ndarray]:

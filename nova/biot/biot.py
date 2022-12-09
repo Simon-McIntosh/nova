@@ -1,12 +1,9 @@
 """Manage biot methods."""
 from dataclasses import dataclass, field
-from functools import cached_property
-import inspect
-from typing import ClassVar
 
 from nova.biot.biotdata import BiotData
 from nova.database.netcdf import netCDF
-from nova.frame.frameset import FrameSet
+from nova.frame.frameset import FrameSet, frame_factory
 
 
 @dataclass
@@ -16,23 +13,11 @@ class Biot(FrameSet):
     field_attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     dfield: float = field(default=-1, repr=False)
 
-    _biotmethods: ClassVar[dict[str, str]] = dict(
-        plasma='.plasma.Plasma',
-        point='.biotpoint.BiotPoint',
-        grid='.biotgrid.BiotGrid',
-        plasmaboundary='.biotplasmaboundary.BiotPlasmaBoundary',
-        plasmagrid='.biotplasmagrid.BiotPlasmaGrid',
-        probe='.biotpoint.BiotPoint',
-        loop='.biotloop.BiotLoop',
-        inductance='.boitinductance.BiotInductance',
-        )
-
-    def _biotfactory(self):
-        """Return nammed biot instance."""
-        name = inspect.getframeinfo(inspect.currentframe().f_back, 0)[2]
-        method = self.import_method(self._biotmethods[name], 'nova.biot')
-        return method(*self.frames, path=self.path, name=name,
-                      filename=self.filename, attrs=self.field_attrs)
+    @property
+    def biot_kwargs(self):
+        """Return default biot factory kwargs."""
+        return dict(filename=self.filename, path=self.path,
+                    attrs=self.field_attrs)
 
     @property
     def biot_attrs(self):
@@ -48,47 +33,46 @@ class Biot(FrameSet):
                 attrs.append(attr)
         return attrs
 
-    @cached_property
+    @frame_factory('nova.biot.plasma.Plasma')
     def plasma(self):
         """Return plasma instance."""
-        Plasma = self.import_method(self._biotmethods['plasma'], 'nova.biot')
-        return Plasma(*self.frames, path=self.path,
-                      grid=self.plasmagrid, boundary=self.plasmaboundary)
+        return dict(path=self.path,
+                    grid=self.plasmagrid, boundary=self.plasmaboundary)
 
-    @cached_property
+    @frame_factory('nova.biot.biotgrid.BiotGrid')
     def grid(self):
         """Return grid biot instance."""
-        return self._biotfactory()
+        return self.biot_kwargs
 
-    @cached_property
+    @frame_factory('nova.biot.biotplasmagrid.BiotPlasmaGrid')
     def plasmagrid(self):
         """Return plasma grid biot instance."""
-        return self._biotfactory()
+        return self.biot_kwargs
 
-    @cached_property
+    @frame_factory('nova.biot.biotplasmaboundary.BiotPlasmaBoundary')
     def plasmaboundary(self):
         """Return plasma firstwall biot instance."""
-        return self._biotfactory()
+        return self.biot_kwargs
 
-    @cached_property
+    @frame_factory('nova.biot.biotpoint.BiotPoint')
     def point(self):
         """Return point biot instance."""
-        return self._biotfactory()
+        return self.biot_kwargs
 
-    @cached_property
+    @frame_factory('nova.biot.biotpoint.BiotPoint')
     def probe(self):
         """Return biot probe instance."""
-        return self._biotfactory()
+        return self.biot_kwargs
 
-    @cached_property
+    @frame_factory('nova.biot.biotloop.BiotLoop')
     def loop(self):
         """Return biot loop instance."""
-        return self._biotfactory()
+        return self.biot_kwargs
 
-    @cached_property
+    @frame_factory('nova.biot.biotinductance.BiotInductance')
     def inductance(self):
         """Return biot inductance instance."""
-        return self._biotfactory()
+        return self.biot_kwargs
 
     def clear_biot(self):
         """Clear all biot attributes."""

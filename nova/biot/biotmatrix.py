@@ -1,11 +1,11 @@
 """Biot-Savart calculation base class."""
 from dataclasses import dataclass, field
+from importlib import import_module
 from typing import ClassVar
 
 import numpy as np
 
 from nova.biot.biotset import BiotSet
-import scipy.constants
 
 
 @dataclass
@@ -14,9 +14,9 @@ class BiotMatrix(BiotSet):
 
     data: dict[str, np.ndarray] = field(init=False, repr=False,
                                         default_factory=dict)
+    attrs: dict[str, str] = field(default_factory=dict)
 
-    attrs: ClassVar[dict[str, str]] = dict()
-    mu_0: ClassVar[float] = scipy.constants.mu_0
+    mu_0: ClassVar[float] = import_module('scipy.constants').mu_0
 
     def __post_init__(self):
         """Initialize input data."""

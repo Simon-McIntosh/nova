@@ -7,16 +7,17 @@ __all__ = ['Coil',
            'Winding'
            ]
 
-from nova import DeferredImport as Imp
 from nova import ImportManager
 
-if ImportManager().state:
-    Coil = Imp('.frame.coil', 'Coil')
-    Ferritic = Imp('.frame.ferritic', 'Ferritic')
-    FirstWall = Imp('.frame.firstwall', 'FirstWall')
-    Shell = Imp('.frame.shell', 'Shell')
-    Turn = Imp('.frame.turn', 'Turn')
-    Winding = Imp('.frame.winding', 'Winding')
+imp = ImportManager(package='nova.frame')
+
+if imp.defer:
+    Coil = imp.load('.coil', 'Coil')
+    Ferritic = imp.load('.ferritic', 'Ferritic')
+    FirstWall = imp.load('.firstwall', 'FirstWall')
+    Shell = imp.load('.shell', 'Shell')
+    Turn = imp.load('.turn', 'Turn')
+    Winding = imp.load('.winding', 'Winding')
 else:
     from nova.frame.coil import Coil  # NOQA
     from nova.frame.ferritic import Ferritic  # NOQA

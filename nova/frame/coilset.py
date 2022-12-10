@@ -95,5 +95,3 @@ if __name__ == '__main__':
 
     coilset.plasmagrid.svd_rank = 50
     coilset.plasmagrid.plot_svd(levels=coilset.grid.levels)
-
-    coilset.point

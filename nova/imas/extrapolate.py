@@ -441,7 +441,7 @@ class Extrapolate(Plot, ExtrapolateMachine, ExtrapolationGrid, Database):
 if __name__ == '__main__':
 
     pass
-    '''
+
     # import doctest
     # doctest.testmod()
 
@@ -451,7 +451,7 @@ if __name__ == '__main__':
 
     extrapolate = Extrapolate(pulse, run, limit='ids')
 
-    extrapolate.ionize(35)
+    extrapolate.ionize(-1)
     extrapolate.plot_2d('psi')
     #extrapolate.plasmagrid.plot()
 
@@ -459,4 +459,3 @@ if __name__ == '__main__':
         extrapolate.plot_bar()
     except IndexError:
         pass
-    '''

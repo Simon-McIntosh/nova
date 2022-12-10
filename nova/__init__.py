@@ -38,8 +38,8 @@ class DeferredImport:
 class ImportManager:
     """Manage deferred import flags."""
 
-    package: str = 'nova'
     defer_default: str | bool = True
+    package: str = 'nova'
 
     @property
     def defer(self) -> bool:
@@ -52,7 +52,7 @@ class ImportManager:
         os.environ['NOVA_DEFERRED_IMPORT'] = str(defer)
 
     @property
-    def clear(self):
+    def unset(self):
         """Clear NOVA_DEFERRED_IMPORT flag."""
         try:
             del os.environ['NOVA_DEFERRED_IMPORT']

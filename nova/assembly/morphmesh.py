@@ -6,10 +6,10 @@ from typing import Union
 import pyvista as pv
 
 from nova.definitions import root_dir
-from nova.structural.ansyspost import AnsysPost
-from nova.structural.fiducialcoil import FiducialCoil
-from nova.structural.morph import Morph
-from nova.structural.plotter import Plotter
+from nova.assembly.ansyspost import AnsysPost
+from nova.assembly.fiducialcoil import FiducialCoil
+from nova.assembly.morph import Morph
+from nova.assembly.plotter import Plotter
 
 
 @dataclass
@@ -63,15 +63,15 @@ class MorphMesh(Plotter):
 
 if __name__ == '__main__':
 
-    fiducial = FiducialCoil('fiducial', 10)
-    base = AnsysPost('TFCgapsG10', 'k0', 'all')
+    #fiducial = FiducialCoil('fiducial', 10)
+    base = AnsysPost('TFCgapsG10', 'k0_wp', 'all')
+    base.warp(500)
+    #morph = MorphMesh(fiducial.mesh, base.mesh)
 
-    morph = MorphMesh(fiducial.mesh, base.mesh)
-
-    morph.mesh['displacement mm'] = 1e3*morph.mesh['delta']
-    plotter = morph.warp(0.1, 0, plotter=pv.Plotter())
-    plotter.update_scalar_bar_range(clim=[0, 6])
-    plotter.show()
+    #morph.mesh['displacement mm'] = 1e3*morph.mesh['delta']
+    #plotter = morph.warp(0.1, 0, plotter=pv.Plotter())
+    #plotter.update_scalar_bar_range(clim=[0, 6])
+    #plotter.show()
 
 
 

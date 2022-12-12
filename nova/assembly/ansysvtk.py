@@ -48,14 +48,14 @@ class AnsysVTK(AnsysPost):
 
 if __name__ == '__main__':
 
-    vtk = AnsysVTK(file='k1', subset='all')
+    vtk = AnsysVTK(file='k2', subset='all')
 
-    #vtk.mesh += AnsysVTK(file='w4', subset='case_ol').mesh
+    #vtk.mesh -= AnsysVTK(file='k1', subset='wp').mesh
     vtk.mesh['TFonly-cooldown'] = \
         vtk.mesh['TFonly'] - vtk.mesh['cooldown']
     #vtk.mesh = vtk.mesh.clip_box([-15, 15, -15, 15, -15, 0], invert=False)
     #vtk.mesh = vtk.mesh.clip_box([-5, 5, -5, 5, -0.5, 0], invert=False)
-    #vtk.warp(factor=50, opacity=0)
+    vtk.warp(factor=120, opacity=0, displace='TFonly-cooldown', view='xy')
 
-    vtk.animate('k1', 'TFonly-cooldown', view='iso',
-                max_factor=150, zoom=1.3, opacity=0)
+    #vtk.animate('k1', 'TFonly-cooldown', view='iso',
+    #            max_factor=150, zoom=1.3, opacity=0)

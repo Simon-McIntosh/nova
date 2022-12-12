@@ -123,9 +123,9 @@ class FiducialCoil(Plotter):
 
 if __name__ == '__main__':
 
-    fiducialcoil = FiducialCoil('fiducial', 10)
+    fiducialcoil = FiducialCoil('fiducial', 10, file='k0_wp')
     #fiducialcoil.mesh = fiducialcoil.mesh.slice((0, 0, 1))
-    #fiducialcoil.warp(500, opacity=1, displace='delta')
+    fiducialcoil.warp(150, opacity=0, displace='delta')
 
-    base = AnsysPost('TFCgapsG10', 'k0', 'all')
-    Morph(fiducialcoil.mesh).predict(base)
+    #base = AnsysPost('TFCgapsG10', 'k0', 'all')
+    #Morph(fiducialcoil.mesh).predict(base)

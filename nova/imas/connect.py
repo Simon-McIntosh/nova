@@ -203,7 +203,7 @@ if __name__ == '__main__':
 
     # MachineDatabase(user='hosokam', machine='ITER_MD').sync_shot('111001/202')
 
-    # MachineDatabase(machine='ITER_MD').sync_shot('150100/4')
+    MachineDatabase(machine='iter_md').sync_shot('150100/4')
 
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')
     # ScenarioDatabase(user='dubrovm').sync_shot('105028/1')
@@ -214,4 +214,4 @@ if __name__ == '__main__':
     #scenario.load_frame('workflow', 'CORSICA')
     #ScenarioDatabase().sync_workflow('CORSICA')
 
-    ScenarioDatabase().sync_shot('135011/7')
+    #ScenarioDatabase().sync_shot('135011/7')

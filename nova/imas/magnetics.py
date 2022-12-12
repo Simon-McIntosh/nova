@@ -14,6 +14,8 @@ class Magnetics(Database):
     pulse: int = 150100
     run: int = 4
     name: str = 'magnetics'
+    user: str = 'public'
+    machine: str = 'iter_md'
     data: pandas.DataFrame = field(init=False,
                                    default_factory=pandas.DataFrame)
 
@@ -41,7 +43,7 @@ class Magnetics(Database):
         """Extract magnetics data."""
         for diagnostic in self.diagnostic:
             name, identifier, diagnostic_name, diagnostic_type = [], [], [], []
-            for ids in self.load_ids(diagnostic):
+            for ids in self.get_ids(diagnostic):
                 name.append(ids.name)
                 identifier.append(ids.identifier)
                 diagnostic_name.append(diagnostic)

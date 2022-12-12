@@ -36,6 +36,7 @@ class AnsysPost(DataDir, Plotter):
     def load(self):
         """Load vtk mesh file."""
         try:
+            print(self.ansys_file)
             self.mesh = pv.read(self.ansys_file)
             self.time_support = self.mesh.field_data['time_support']
             self.time_scoping = self.mesh.field_data['time_scoping']
@@ -155,7 +156,9 @@ class AnsysPost(DataDir, Plotter):
 
 if __name__ == '__main__':
 
-    ansys = AnsysPost('TFCgapsG10', 'k1', 'all')
+    ansys = AnsysPost('TFCgapsG10', 'k1', 'wp')
+
+    #ansys.warp(500)
 
     '''
     ansys.select(0)

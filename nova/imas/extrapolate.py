@@ -447,11 +447,11 @@ if __name__ == '__main__':
 
     # pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
-    # pulse, run = 105028, 1  # DINA
+    pulse, run = 105028, 1  # DINA
 
-    extrapolate = Extrapolate(pulse, run, limit='ids')
+    extrapolate = Extrapolate(pulse, run)
 
-    extrapolate.ionize(-1)
+    extrapolate.ionize(30)
     extrapolate.plot_2d('psi')
     #extrapolate.plasmagrid.plot()
 

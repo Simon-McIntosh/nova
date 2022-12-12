@@ -162,12 +162,12 @@ if __name__ == '__main__':
     ccl.mesh['TFonly-cooldown'] = ccl.mesh['TFonly'] - ccl.mesh['cooldown']
 
 
-    mesh = ccl.mesh.slice(normal=[0, 0, 1])
-    clip = pv.Cylinder(direction=(0, 0, 1), radius=3)
-    ccl.mesh = mesh.clip_surface(clip, invert=True)
+    #mesh = ccl.mesh.slice(normal=[0, 0, 1])
+    #clip = pv.Cylinder(direction=(0, 0, 1), radius=3)
+    #ccl.mesh = mesh.clip_surface(clip, invert=True)
 
-    ccl.animate('TFonly-cooldown', 'iso')
-    #ccl.warp(100)
+    #ccl.animate('TFonly-cooldown', 'iso')
+    ccl.warp(100)
 
     # ccl.plot()
 

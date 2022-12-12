@@ -1,7 +1,7 @@
 """Manage access to IMAS database."""
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields, InitVar
-from typing import ClassVar, Type
+from typing import ClassVar, Optional, Type
 
 import xxhash
 
@@ -219,9 +219,20 @@ class Database:
         """Return dict of ids attributes."""
         return {attr: getattr(self, attr) for attr in self.attrs}
 
-    def get_ids(self):
-        """Get ids from pulse/run."""
-        with self._get_ids() as ids:
+    def get_ids(self, ids_path: Optional[str] = None):
+        """Return ids. Extend ids_path if not None."""
+        fullpath = '.'.join((item for item in [self.name, ids_path]
+                             if item is not None))
+        with self._get_ids() as db_entry:
+
+            ids_name = path.split('.', 1)
+            try:
+                ids_name, ids_path = path.split('.', 1)
+                return db_entry.partial_get(name, ids_path)
+            except ValueError:
+                return db_entry.get(self.name)
+
+
             self.ids = ids
 
     @contextmanager
@@ -243,11 +254,7 @@ class Database:
                             f'user {self.user}\n'
                             f'machine {self.machine}, '
                             f'backend: {self.backend}') from error
-        try:
-            name, ids_path = self.name.split('.', 1)
-            yield db_entry.partial_get(name, ids_path)
-        except ValueError:
-            yield db_entry.get(self.name)
+        yield db_entry
         db_entry.close()
 
     @property

@@ -28,6 +28,27 @@ def test_pf_active_properties():
     assert 'ITER_D_33NHXN' in pf_active.ids_data.ids_properties.source
 
 
+@mark['pf_active']
+def test_get_ids_path():
+    pf_active = Database(**ids_attrs['pf_active'])
+    assert pf_active.get_ids('coil')[0].name == 'Central Solenoid 3U (CS3U)'
+
+
+@mark['pf_active']
+def test_get_ids_partial_name():
+    pf_active = Database(**ids_attrs['pf_active']
+                         | dict(name='pf_active.coil'))
+    assert pf_active.get_ids()[0].name == 'Central Solenoid 3U (CS3U)'
+
+
+@mark['pf_active']
+def test_get_ids_partial_path():
+    pf_active = Database(**ids_attrs['pf_active']
+                         | dict(name=None))
+    assert pf_active.get_ids('pf_active.coil')[0].name == \
+        'Central Solenoid 3U (CS3U)'
+
+
 @mark['equilibrium']
 def test_equilibrium_attr_defaults():
     equilibrium = Database(**ids_attrs['equilibrium'])

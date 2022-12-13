@@ -170,7 +170,7 @@ class Database:
     def ids_data(self):
         """Return ids data, lazy load."""
         if self.ids is None:
-            self.get_ids()
+            self.ids = self.get_ids()
         return self.ids
 
     def load_database(self):
@@ -220,20 +220,13 @@ class Database:
         return {attr: getattr(self, attr) for attr in self.attrs}
 
     def get_ids(self, ids_path: Optional[str] = None):
-        """Return ids. Extend ids_path if not None."""
-        fullpath = '.'.join((item for item in [self.name, ids_path]
-                             if item is not None))
+        """Return ids. Extend name with ids_path if not None."""
+        ids_name = '.'.join((item for item in [self.name, ids_path]
+                             if item is not None)).split('.', 1)
         with self._get_ids() as db_entry:
-
-            ids_name = path.split('.', 1)
-            try:
-                ids_name, ids_path = path.split('.', 1)
-                return db_entry.partial_get(name, ids_path)
-            except ValueError:
-                return db_entry.get(self.name)
-
-
-            self.ids = ids
+            if len(ids_name) == 2:
+                return db_entry.partial_get(*ids_name)
+            return db_entry.get(*ids_name)
 
     @contextmanager
     def _get_ids(self):

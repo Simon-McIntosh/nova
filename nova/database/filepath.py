@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from importlib import import_module
 import os
 import sys
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 import appdirs
 if TYPE_CHECKING:
@@ -23,7 +23,8 @@ class FilePath:
     group: str | None = field(default=None, repr=True)
     path: str | None = field(default=None, repr=False)
     directory: str = 'user_data'
-    data: xarray.Dataset | None = field(default=None, repr=False)
+    data: xarray.Dataset | xarray.DataArray | None = \
+        field(default=None, repr=False)
 
     def __post_init__(self):
         """Forward post init for for cooperative inheritance."""
@@ -100,8 +101,10 @@ class FilePath:
         return '/'.join(labels)
 
     @staticmethod
-    def mode(file: str) -> str:
+    def mode(file: str, mode: Optional[str] = None) -> str:
         """Return netcdf file access mode."""
+        if mode is not None:
+            return mode
         if os.path.isfile(file):
             return 'a'
         return 'w'
@@ -110,6 +113,11 @@ class FilePath:
     def filepath(self):
         """Return full filepath for netCDF (.nc) data using default path."""
         return self.file(self.filename)
+
+    def _clear(self):
+        """Clear datafile at self.filepath."""
+        if os.path.isfile(self.filepath):
+            os.remove(self.filepath)
 
     @property
     def clear_cache(self):
@@ -133,11 +141,12 @@ class FilePath:
         xxh32.update(attrs.__str__())
         return xxh32.hexdigest()
 
-    def store(self, filename=None, path=None, group=None):
+    def store(self, filename=None, path=None, group=None, mode=None):
         """Store data within hdf file."""
         file = self.file(filename, path)
         group = self.netcdf_group(group)
-        self.data.to_netcdf(file, group=group, mode=self.mode(file))
+        mode = self.mode(file, mode)
+        self.data.to_netcdf(file, group=group, mode=mode)
         return self
 
     def load(self, filename=None, path=None, group=None):

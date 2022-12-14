@@ -71,8 +71,8 @@ class Magnetics(Plot, Database):
     def __post_init__(self):
         """Load data from magnetics IDS and build overview."""
         super().__post_init__()
-        #self.build_frame()
-        #self.build_summary()
+        self.build_frame()
+        self.build_summary()
         self.build_flux_loops()
 
     def __getitem__(self, key):

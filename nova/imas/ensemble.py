@@ -5,8 +5,8 @@ from warnings import warn
 import numpy as np
 import xarray
 
-from nova.database.filepath import FilePath
-from nova.imas.connect import Scenario
+from nova.database.netcdf import netCDF
+from nova.imas.connect import ScenarioDatabase
 from nova.imas.equilibrium import Equilibrium
 from nova.plot.plotter import LinePlot
 
@@ -16,13 +16,13 @@ class EnsembleAttrs:
     """Specify non-default attributes for Profile class."""
 
     workflow: str
-    name: str = 'equilibrium'
+    name: str | None = 'equilibrium'
     attrs: list[str] = field(
             default_factory=lambda: ['f_df_dpsi', 'dpressure_dpsi'])
 
 
 @dataclass
-class Ensemble(FilePath, LinePlot, EnsembleAttrs):
+class Ensemble(netCDF, LinePlot, EnsembleAttrs):
     """Manage workflow ensemble equilibrium 1d profile data."""
 
     filename: str = 'ensemble'
@@ -40,7 +40,7 @@ class Ensemble(FilePath, LinePlot, EnsembleAttrs):
 
     def build(self):
         """Build dataset."""
-        frame = Scenario().load_frame('workflow', self.workflow)
+        frame = ScenarioDatabase().load_frame('workflow', self.workflow)
         frame = self._format_columns(frame)
         data = xarray.Dataset.from_dataframe(frame)
         self.data = data.set_coords(frame.columns)

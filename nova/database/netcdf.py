@@ -1,7 +1,17 @@
 """Facilitate structured access to netCDF data."""
-from dataclasses import dataclass
+from __future__ import annotations
+from dataclasses import dataclass, field
+from importlib import import_module
+import os
+import sys
+from typing import TYPE_CHECKING
+
+import xxhash
 
 from nova.database.filepath import FilePath
+
+if TYPE_CHECKING:
+    import xarray
 
 
 @dataclass
@@ -9,7 +19,89 @@ class netCDF(FilePath):
     """Provide regulated access to netCDF database."""
 
     name: str | None = None
+    group: str | None = None
+    data: xarray.Dataset | xarray.DataArray | None = \
+        field(default=None, repr=False)
 
+    def __post_init__(self):
+        """Forward post init for for cooperative inheritance."""
+        if self.data is None:
+            self.data = import_module('xarray').Dataset()
+        super().__post_init__()
+
+    def _clear(self):
+        """Clear datafile at self.filepath."""
+        if os.path.isfile(self.filepath):
+            os.remove(self.filepath)
+
+    @property
+    def clear_cache(self):
+        """Clear cached datafile at self.filepath."""
+        if os.path.isfile(self.filepath):
+            remove = input('Confirm removal of the followig cached datafile:'
+                           f'\n{self.filepath}\nProceed (Y/n)?')
+            if remove == '' or remove.lower() == 'y':
+                os.remove(self.filepath)
+            return
+        sys.stdout.write(f'Cached datafile clear:\n{self.filepath}')
+
+    @property
+    def isfile(self):
+        """Return status of default netCDF file."""
+        return os.path.isfile(self.filepath)
+
+    def hash_attrs(self, attrs: dict) -> str:
+        """Return xxh32 hex hash of attrs dict."""
+        xxh32 = xxhash.xxh32()
+        xxh32.update(str(attrs))
+        return xxh32.hexdigest()
+
+    def netcdf_group(self, group=None):
+        """Return netcdf group."""
+        if group is None:
+            return self.netcdf_path(self.name)
+        return group
+
+    def netcdf_path(self, *labels, group_prefix=True) -> str | None:
+        """Return path for netcdf group."""
+        if group_prefix:
+            labels = (self.group,) + labels
+        labels = tuple(label for label in labels if label is not None)
+        if len(labels) == 0:
+            return None
+        return '/'.join(labels)
+
+    def get_filepath(self, filename=None, path=None):
+        """Return filepath, extend FilePath.get_filepath."""
+        filepath = super().get_filepath(filename, path)
+        if os.path.split(filepath)[1] and not os.path.splitext(filepath)[1]:
+            filepath = str(filepath) + '.nc'
+        return filepath
+
+    def store(self, filename=None, path=None, group=None, mode=None):
+        """Store data as group within netCDF file."""
+        filepath = self.get_filepath(filename, path)
+        group = self.netcdf_group(group)
+        mode = self.mode(filepath, mode)
+        if self.host is not None:  # remote write
+            with self.fsys.open(filepath, mode+'b') as file:
+                self.data.to_netcdf(file, mode=mode, group=group)
+        else:
+            self.data.to_netcdf(filepath, mode=mode, group=group)
+        self.data.close()
+        return self
+
+    def load(self, filename=None, path=None, group=None):
+        """Load dataset from file."""
+        filepath = self.get_filepath(filename, path)
+        group = self.netcdf_group(group)
+        with import_module('xarray').open_dataset(
+                filepath, group=group, cache=True) as data:
+            self.data = data
+            self.data.load()
+        return self
+
+    '''
     def store(self, filename=None, path=None):
         """Store data as netCDF in hdf5 file."""
         group = self.netcdf_path(self.name)
@@ -19,3 +111,4 @@ class netCDF(FilePath):
         """Load data from hdf5."""
         group = self.netcdf_path(self.name)
         return super().load(filename, path, group)
+    '''

@@ -10,7 +10,7 @@ from tqdm import tqdm
 import xarray
 
 import nova
-from nova.database.filepath import FilePath
+from nova.database.netcdf import netCDF
 from nova.frame.baseplot import Plot
 from nova.imas.magnetics import Magnetics
 
@@ -143,7 +143,7 @@ class SignalParameters:
     scale: float = 0
     alpha: float = 1
     frequency: float = 1
-    limit: tuple[int] = (-5000, 5000)
+    limit: tuple[int, int] = (-5000, 5000)
 
     def __post_init__(self):
         """Update sample number."""
@@ -209,18 +209,18 @@ class TypeCast:
 
 
 @dataclass
-class Signal(FilePath, Waveform, SignalParameters):
+class Signal(netCDF, Waveform, SignalParameters):
     """Manage base waveform parameters."""
 
-    filename: str = 'magnetics'
+    datapath: str = 'magnetics_6MHz'
     magnetics: Magnetics = field(default_factory=Magnetics)
-    dtype: str | np.dtype = 'uint32'
+    dtype: str | np.dtype = 'int32'
     _intergal: np.ndarray | None = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Initialize component waveforms."""
         super().__post_init__()
-        self.set_path('magnetics')
+        self.set_path(self.datapath)
         self.cast = TypeCast(self.dtype, self.limit)
         self.noise = FractalNoise(self.rng, self.sample_number,
                                   **self.noise_attrs)
@@ -264,26 +264,33 @@ class Signal(FilePath, Waveform, SignalParameters):
             self.generate()
         return self._intergral
 
-    def build_array(self, name):
-        """Return DataArray for single diagnostic."""
-        data = np.zeros((2, self.sample_number), dtype=self.dtype)
-        data[0] = self.cast.to_dtype(self.sample)
-        data[1] = self.cast.to_dtype(self.intergral)
-        return xarray.DataArray(data, name=name, coords=dict(
-            time=self.time.astype(np.float32),
-            signal=['proportional', 'intergral'],
-            signal_offset=self.cast.offset,
-            signal_multiplier=self.cast.multiplier),
+    def initialize_dataarray(self):
+        """Initialize DataArray for single diagnostic."""
+        self.data = xarray.DataArray(
+            np.zeros((2, self.sample_number), dtype=self.dtype),
+            coords=dict(
+                time=self.time.astype(np.float32),
+                signal=['proportional', 'intergral'],
+                signal_offset=self.cast.offset,
+                signal_multiplier=self.cast.multiplier),
             dims=('signal', 'time'),
-            attrs=self.metadata | dict(
-                diagnostic=self.magnetics['frame'].loc[name, :].to_json()))
+            attrs=self.metadata)
+
+    def update_dataarray(self, name):
+        """Update DataArrat with sample / intergral data."""
+        self.data.name = name
+        self.data[0] = self.cast.to_dtype(self.sample)
+        self.data[1] = self.cast.to_dtype(self.intergral)
+        self.data.attrs['diagnostic'] = \
+            self.magnetics['frame'].loc[name, :].to_json()
 
     def build(self):
         """Store samples to netCDF file."""
-        for name in tqdm(self.magnetics['frame'].index[:3]):
+        self.initialize_dataarray()
+        for name in tqdm(self.magnetics['frame'].index[:1]):
             self.generate()
-            self.data = self.build_array(name)
-        super().store(f'{name}.nc', mode='w')
+            self.update_dataarray(name)
+            super().store(f'{name}.nc', mode='w')
 
     def plot(self, axes=None):
         """Plot waveform."""
@@ -316,8 +323,8 @@ if __name__ == '__main__':
     frequency = 1e3
     signal = Signal(5, 2e5, offset=0.5, scale=0.1, frequency=frequency,
                     alpha=1, rng=2025)
-
     signal.build()
+    #print(signal.build_array(signal.magnetics['frame'].index[0]))
 
 
 '''

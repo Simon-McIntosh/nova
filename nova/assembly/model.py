@@ -6,17 +6,17 @@ from typing import ClassVar
 import numpy as np
 import xarray
 
-from nova.database.filepath import FilePath
+from nova.database.netcdf import netCDF
 
 
 @dataclass
 class DataAttrs:
     """Manage simulation and group dataset labels."""
 
-    name: str = None
+    name: str | None = None
     filename: str = 'vault'
     datapath: str = 'data/Assembly'
-    group: str = field(init=False, default=None)
+    group: str | None = field(init=False, default=None)
 
     def __post_init__(self):
         """Set dataset group for netCDF file load/store."""
@@ -27,10 +27,11 @@ class DataAttrs:
 
 
 @dataclass
-class Dataset(ABC, FilePath, DataAttrs):
+class Dataset(ABC, netCDF, DataAttrs):
     """Manage build, storage, and retrival of an xarray dataset."""
 
     filename: str = 'vault'
+    directory: str = 'root'
     data: xarray.Dataset = field(init=False, repr=False,
                                  default_factory=xarray.Dataset)
 

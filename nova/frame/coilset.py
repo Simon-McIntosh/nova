@@ -20,12 +20,12 @@ class CoilSet(Biot, Control, Frame):
     """
 
     filename: str = 'coilset'
-    datapath: str = 'nova'
+    dirname: str = '.nova'
 
-    def __post_init__(self):
-        """Set filepath."""
-        self.set_path(self.datapath)
-        super().__post_init__()
+    #def __post_init__(self):
+    ##    """Set filepath."""
+    #   self.set_path(self.datapath)
+    #   super().__post_init__()
 
     @property
     def coilset_attrs(self):

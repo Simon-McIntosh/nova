@@ -6,7 +6,7 @@ import numpy as np
 import xarray
 
 from nova.assembly.model import Dataset
-from nova.database.filepath import FilePath
+from nova.database.netcdf import netCDF
 
 
 @dataclass
@@ -37,7 +37,8 @@ class Model(Dataset):
 
     def build(self):
         """Load data extracted from Y26X3K_v1_0."""
-        data = FilePath('displace', path=self.path).load().data
+        data = netCDF('displace', directory='root',
+                      path=self.path).load().data
         self.data = xarray.Dataset(data.coords)
         self.data['coefficient'] = ['real', 'imag']
         self.data['signal_fft'] = xarray.DataArray(0., self.data.coords)

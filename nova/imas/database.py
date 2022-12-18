@@ -5,7 +5,8 @@ from typing import ClassVar, Optional, Type
 
 import xxhash
 
-from nova.database.filepath import FilePath
+from nova.database.netcdf import netCDF
+
 
 # _pylint: disable=too-many-ancestors
 
@@ -385,7 +386,7 @@ class DataAttrs:
 
 
 @dataclass
-class Datafile(FilePath):
+class Datafile(netCDF):
     """
     Provide cached acces to imas ids data.
 
@@ -399,12 +400,10 @@ class Datafile(FilePath):
 
     """
 
-    datapath: str = ''
-
     def __post_init__(self):
         """Set ids and filepath."""
         super().__post_init__()
-        self.set_path(self.datapath)
+        #self.set_path(self.datapath)
         self.load_build()
 
     def load_build(self):
@@ -428,13 +427,25 @@ class Datafile(FilePath):
 class IdsData(Datafile, Database):
     """Provide cached acces to imas ids data."""
 
-    datapath: str = 'imas'
+    dirname: str = '.nova.imas'
+
+    def __post_init__(self):
+        """Update filename and group."""
+        self.filename = f'{self.machine}_{self.pulse}_{self.run}'
+        self.group = self.name
+        super().__post_init__()
+
+
+    '''
+        if hasattr(super(), '__post_init__'):
+            super().__post_init__()
 
     def set_path(self, subpath=None):
         """Extend FilePath.set_path to update filename and group."""
         super().set_path(subpath)
         self.filename = f'{self.machine}_{self.pulse}_{self.run}'
         self.group = self.name
+    '''
 
 
 @dataclass
@@ -449,12 +460,18 @@ class CoilData(Datafile):
     :class:`~nova.imas.database.Datafile`
     """
 
-    datapath: str = 'nova'
+    dirname: str = '.nova'
 
-    def set_path(self, subpath=None):
-        """Extend FilePath.set_path to update filename and group."""
-        super().set_path(subpath)
+    def __post_init__(self):
+        """Update filename and group."""
         self.group = self.hash_attrs(self.group_attrs)
+        super().__post_init__()
+
+
+    #def set_path(self, subpath=None):
+    #    """Extend FilePath.set_path to update filename and group."""
+    ##    super().set_path(subpath)
+    #    self.group = self.hash_attrs(self.group_attrs)
 
     @property
     def group_attrs(self):

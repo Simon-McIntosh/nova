@@ -449,7 +449,7 @@ if __name__ == '__main__':
     pulse, run = 130506, 403  # CORSICA
     pulse, run = 105028, 1  # DINA
 
-    extrapolate = Extrapolate(pulse, run)
+    extrapolate = Extrapolate(pulse, run, ngrid=100, nplasma=100)
 
     extrapolate.ionize(30)
     extrapolate.plot_2d('psi')

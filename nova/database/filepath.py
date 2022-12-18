@@ -1,160 +1,198 @@
 """Manage file data access for frame and biot instances."""
 from __future__ import annotations
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
+from functools import wraps
 from importlib import import_module
 import os
-import sys
-from typing import Optional, TYPE_CHECKING
+from pathlib import Path
 
 import appdirs
-if TYPE_CHECKING:
-    import xarray
-import xxhash
+import fsspec
 
 import nova
 from nova.definitions import root_dir
+
+
+def starpath(func):
+    """Return resolved path with '.' replaced with '*'."""
+    @wraps(func)
+    def wrapper(path: str) -> str:
+        return func(path).replace('.', '*')
+    return wrapper
 
 
 @dataclass
 class FilePath:
     """Manage to access to data via store and load methods."""
 
-    filename: str | None = field(default=None, repr=True)
-    group: str | None = field(default=None, repr=True)
-    path: str | None = field(default=None, repr=False)
-    directory: str = 'user_data'
-    data: xarray.Dataset | xarray.DataArray | None = \
-        field(default=None, repr=False)
+    filename: str | None = None
+    dirname: Path | str = ''
+    basename: Path | str = 'user_data'
+    hostname: str | None = None
+    mkdepth: int = 3
+    fsys: fsspec.filesystem = field(init=False, repr=False)
 
     def __post_init__(self):
-        """Forward post init for for cooperative inheritance."""
-        if self.data is None:
-            self.data = import_module('xarray').Dataset()
+        """Set host and path. Forward post init for cooperative inheritance."""
+        self.host = self.hostname
+        self.path = self.dirname
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
 
-    @property
-    def _tag(self):
-        """Return nova tag."""
-        return nova.__version__.split('+')[0]
+    def appname_attrs(self, appname):
+        """Return app name attributes."""
+        if appname == 'dir':
+            return {}
 
-    def get_path(self, directory: str, subpath: str) -> str:
-        """Return full filepath."""
-        if hasattr(appdirs, (appattr := f'{directory}_dir')):
-            app = getattr(appdirs, appattr)
-            if subpath == 'nova':
-                return app(nova.__name__, version=self._tag)
-            if subpath == 'imas':
-                try:
-                    imas_name = import_module('imas').__name__
-                    return app(nova.__name__,
-                               version=f'{self._tag}/{imas_name}')
-                except ImportError:
-                    pass
-            return app(subpath)
-        if directory == 'root':
-            directory = root_dir
-        if not subpath:
-            return directory
-        return os.path.join(directory, subpath)
-
-    def set_path(self, subpath=None):
-        """Set default path."""
-        self.path = self.get_path(self.directory, subpath)
-
-    def check_path(self, path):
-        """Return self.path if path is None."""
-        if path is None:
-            if self.path is None:
-                raise FileNotFoundError('default path not set')
-            return self.path
-        return path
-
-    def check_dir(self, filename, path):
-        """Return full filepath, check and make directory."""
-        if not (directory := os.path.dirname(filename)):
-            directory = self.check_path(path)
-            filename = os.path.join(directory, filename)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        return filename
-
-    def file(self, filename=None, path=None, extension='.nc'):
-        """Return full netCDF file path and group."""
-        if filename is None:
-            filename = self.filename
-        if not os.path.splitext(filename)[1]:
-            filename += extension
-        return self.check_dir(filename, path)
-
-    def netcdf_group(self, group=None):
-        """Return netcdf group."""
-        if group is None:
-            return self.group
-        return group
-
-    def netcdf_path(self, *labels, group_prefix=True) -> str:
-        """Return path for netcdf group."""
-        if group_prefix:
-            labels = (self.group,) + labels
-        labels = tuple(label for label in labels if label is not None)
-        return '/'.join(labels)
+        if appname == 'nova':
+            return dict(appname=nova.__name__,
+                        version=nova.__version__.split('+')[0])
+        if appname == 'imas':
+            try:
+                imas_name = import_module('imas').__name__
+                version = f'{nova.__version__.split("+")[0]}/{imas_name}'
+                return dict(appname=nova.__name__, version=version)
+            except ImportError:
+                pass
+        return dict(appname=appname)
 
     @staticmethod
-    def mode(file: str, mode: Optional[str] = None) -> str:
-        """Return netcdf file access mode."""
-        if mode is not None:
-            return mode
-        if os.path.isfile(file):
-            return 'a'
-        return 'w'
+    @starpath
+    def _resolve_absolute(path: str) -> str:
+        """Return resolved absolute path."""
+
+        def get_appdir(path: str) -> str:
+            """Return appdir path."""
+            try:
+                return getattr(appdirs, f'{path}_dir')()
+            except AttributeError as error:
+                raise AttributeError(
+                    f'{path} is not a valid appdirs path') from error
+
+        match path.split('_'):
+            case ['root']:
+                return root_dir
+            case ['user', 'cache' | 'config' | 'data']:
+                return get_appdir(path)
+            case ['site', 'config' | 'data']:
+                return get_appdir(path)
+            case _:
+                raise ValueError(f'unable to resolve absolute path {path}')
+
+    @staticmethod
+    @starpath
+    def _resolve_relative(path: str) -> str:
+        """Return resolved relative path."""
+        match path:
+            case 'nova':
+                return os.path.join(nova.__name__,
+                                    nova.__version__.split('+')[0])
+            case 'imas':
+                try:
+                    return import_module('imas').__name__
+                except ImportError:
+                    return 'imas'
+            case str(path):
+                return path
+            case _:
+                raise ValueError(f'unable to resolve relative path {path}')
+
+    @property
+    def path(self):
+        """Manage file path."""
+        return self.dirname
+
+    @path.setter
+    def path(self, dirname: str):
+        if isinstance(dirname, Path):
+            self.dirname = dirname
+            self.checkpath()
+            return
+        match dirname.split('.'):
+            case [str(path)] if path[:1] == os.path.sep:
+                self.path = Path(dirname.replace('*', '.'))
+            case [str(path), *subpath] if path[:1] != os.path.sep:
+                if path == '':
+                    path = self.basename
+                path = self._resolve_absolute(path)
+                self.path = '.'.join((path, *subpath))
+            case [str(path), str(subpath), *rest]:
+                subpath = self._resolve_relative(subpath)
+                path = os.path.join(path, subpath)
+                self.path = '.'.join((path, *rest))
+            case _:
+                raise IndexError(f'unable to match dirname {dirname}')
+
+    def checkpath(self) -> str:
+        """Return dirname at which path exists. Raise if not found."""
+        dirname = self.path
+        for mkdepth in range(self.mkdepth):
+            if self.fsys.isdir(str(dirname)):
+                return dirname
+            dirname, tail = os.path.split(dirname)
+            if dirname == os.path.sep:
+                raise FileNotFoundError('root directory not found '
+                                        f'{os.path.join(dirname, tail)}')
+        raise FileNotFoundError(f'directory not found at mkdepth '
+                                f'{self.mkdepth} for {self.path}')
+
+    def mkdir(self, subpath=None):
+        """Make path if not found."""
+        path = self.path
+        if subpath is not None:
+            if not (dirname := os.path.dirname(subpath)):
+                path = os.path.join(path, subpath)
+        self.fsys.makedirs(path, exist_ok=True)
+        return path
+
+    def get_directory(self, filename, path):
+        """Return directory."""
+        if filename is None:
+            return self.mkdir(path)
+        return os.path.join(self.mkdir(path), filename)
+
+    def get_filepath(self, filename=None, path=None):
+        """Return filepath."""
+        if filename is None:
+            filename = self.filename
+        return self.get_directory(filename, path)
 
     @property
     def filepath(self):
-        """Return full filepath for netCDF (.nc) data using default path."""
-        return self.file(self.filename)
-
-    def _clear(self):
-        """Clear datafile at self.filepath."""
-        if os.path.isfile(self.filepath):
-            os.remove(self.filepath)
+        """Return full filepath."""
+        return self.get_filepath(self.filename)
 
     @property
-    def clear_cache(self):
-        """Clear cached datafile at self.filepath."""
-        if os.path.isfile(self.filepath):
-            remove = input('Confirm removal of the followig cached datafile:'
-                           f'\n{self.filepath}\nProceed (Y/n)?')
-            if remove == '' or remove.lower() == 'y':
-                os.remove(self.filepath)
-            return
-        sys.stdout.write(f'Cached datafile clear:\n{self.filepath}')
+    def host(self):
+        """Manage filesysetm on host."""
+        return self.hostname
 
-    @property
-    def isfile(self):
-        """Return status of default netCDF file."""
-        return os.path.isfile(self.filepath)
+    @host.setter
+    def host(self, hostname: str | None):
+        self.hostname = hostname
+        self.update_filesystem()
 
-    def hash_attrs(self, attrs: dict) -> str:
-        """Return xxh32 hex hash of attrs dict."""
-        xxh32 = xxhash.xxh32()
-        xxh32.update(attrs.__str__())
-        return xxh32.hexdigest()
+    def update_filesystem(self):
+        """Update fsspec filesystem attribute."""
+        match self.hostname:
+            case str():
+                self.fsys = fsspec.filesystem('ssh', host=self.hostname)
+            case None:
+                self.fsys = fsspec.filesystem('file')
 
-    def store(self, filename=None, path=None, group=None, mode=None):
-        """Store data within hdf file."""
-        file = self.file(filename, path)
-        group = self.netcdf_group(group)
-        mode = self.mode(file, mode)
-        self.data.to_netcdf(file, group=group, mode=mode)
-        return self
+    @staticmethod
+    def mode(filepath: str, mode=None) -> str:
+        """Return file access mode."""
+        if mode is not None:
+            return mode
+        if os.path.isfile(filepath):
+            return 'a'
+        return 'w'
 
-    def load(self, filename=None, path=None, group=None):
-        """Load dataset from file."""
-        file = self.file(filename, path)
-        group = self.netcdf_group(group)
-        with import_module('xarray').open_dataset(
-                file, group=group, cache=True) as data:
-            self.data = data
-            self.data.load()
-        return self
+
+if __name__ == '__main__':
+
+    filepath = FilePath(mkdepth=2, basename='root')
+
+    filepath.path = '.nova'
+    print(filepath.path)

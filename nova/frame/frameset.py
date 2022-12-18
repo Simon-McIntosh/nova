@@ -7,12 +7,12 @@ from typing import Optional
 import netCDF4
 import pandas
 
-from nova.database.filepath import FilePath
 from nova.database.netcdf import netCDF
 from nova.frame.framedata import FrameData
 from nova.frame.framesetloc import FrameSetLoc
 from nova.frame.framespace import FrameSpace
 from nova.frame.select import Select
+from nova.imas.database import IdsData
 
 
 def frame_factory(frame_method):
@@ -35,7 +35,7 @@ def frame_factory(frame_method):
 
 
 @dataclass
-class FrameSet(FilePath, FrameSetLoc):
+class FrameSet(netCDF, FrameSetLoc):
     """Manage FrameSet instances."""
 
     base: list[str] = field(repr=False, default_factory=lambda: [
@@ -113,9 +113,9 @@ class FrameSet(FilePath, FrameSetLoc):
 
     def load_metadata(self, filename=None, path=None):
         """Return metadata from netCDF file."""
-        file = self.file(filename, path)
+        filepath = self.get_filepath(filename, path)
         metadata = {}
-        with netCDF4.Dataset(file) as dataset:
+        with netCDF4.Dataset(filepath) as dataset:
             dataset = self.subset(dataset)
             if not hasattr(dataset, 'metadata'):
                 return {}
@@ -127,8 +127,8 @@ class FrameSet(FilePath, FrameSetLoc):
         """Store metadata to netCDF file."""
         if metadata is None:
             return
-        file = self.file(filename, path)
-        with netCDF4.Dataset(file, 'a') as dataset:
+        filepath = self.get_filepath(filename, path)
+        with netCDF4.Dataset(filepath, 'a') as dataset:
             dataset = self.subset(dataset)
             dataset.metadata = list(metadata)
             for attr in metadata:
@@ -136,28 +136,30 @@ class FrameSet(FilePath, FrameSetLoc):
 
     def load(self, filename=None, path=None):
         """Load frameset from file."""
-        file = self.file(filename, path)
-        self.frame.load(file, self.netcdf_path('frame'))
-        self.subframe.load(file, self.netcdf_path('subframe'))
+        filepath = self.get_filepath(filename, path)
+        self.frame.load(filepath, self.netcdf_path('frame'))
+        self.subframe.load(filepath, self.netcdf_path('subframe'))
         self.clear_frameset()
-        with netCDF4.Dataset(file) as dataset:
+        with netCDF4.Dataset(filepath) as dataset:
             dataset = self.subset(dataset)
             for attr in dataset.groups:
                 if attr in dir(self.__class__) and isinstance(
                         data := getattr(self, attr), netCDF):
                     data.group = self.group
-                    data.load(file)
+                    data.load(filepath)
         return self
 
     def store(self, filename=None, path=None):
         """Store frame, subframe and biot attrs as groups within hdf file."""
-        file = self.file(filename, path)
-        self.frame.store(file, self.netcdf_path('frame'), mode=self.mode(file))
-        self.subframe.store(file, self.netcdf_path('subframe'), mode='a')
+        filepath = self.get_filepath(filename, path)
+        self.frame.store(filepath, self.netcdf_path('frame'),
+                         mode=self.mode(filepath))
+        self.subframe.store(filepath, self.netcdf_path('subframe'), mode='a')
         for attr in self.__dict__:
-            if isinstance(data := getattr(self, attr), netCDF):
+            if isinstance(data := getattr(self, attr), netCDF) and \
+                    not isinstance(data, IdsData):
                 data.group = self.group
-                data.store(file)
+                data.store(filepath)
         return self
 
     def plot(self, index=None, axes=None, **kwargs):

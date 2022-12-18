@@ -147,7 +147,8 @@ testpaths = [
 filterwarnings = [
   "once::Warning",
   "ignore::DeprecationWarning",
-  "ignore::FutureWarning"
+  "ignore::FutureWarning",
+  "ignore::ImportWarning"
 ]
 
 [tool.mypy]

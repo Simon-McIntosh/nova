@@ -25,7 +25,7 @@ class Connect:
                                     default_factory=pandas.DataFrame)
 
     _space_columns: ClassVar[list[str]] = []
-    _modules: ClassVar[tuple[str]] = ('IMAS',)  # /3.36.0-4.10.1-2020b
+    _modules: ClassVar[tuple[str]] = ('IMAS',)
 
     def __post_init__(self):
         """Connect to cluster."""

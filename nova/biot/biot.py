@@ -18,7 +18,7 @@ class Biot(FrameSet):
     @property
     def biot_kwargs(self):
         """Return default biot factory kwargs."""
-        return dict(filename=self.filename, path=self.path,
+        return dict(filename=self.filename, dirname=self.path,
                     attrs=self.field_attrs)
 
     @property
@@ -38,7 +38,7 @@ class Biot(FrameSet):
     @frame_factory(Plasma)
     def plasma(self):
         """Return plasma instance."""
-        return dict(path=self.path,
+        return dict(dirname=self.path,
                     grid=self.plasmagrid, boundary=self.plasmaboundary)
 
     @frame_factory(BiotGrid)

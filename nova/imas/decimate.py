@@ -7,7 +7,6 @@ import scipy.spatial
 import sklearn
 import xarray
 
-from nova.database.filepath import FilePath
 from nova.imas.ensemble import Ensemble
 from nova.imas.equilibrium import Equilibrium
 from nova.linalg.basis import Bernstein, Svd

@@ -17,12 +17,14 @@ def test_space_setattr_error():
 def test_store_load():
     frameset = FrameSet(required=['rms'], additional=['Ic'])
     frameset.subframe.insert([2, 4], It=6, link=True)
-
     subframe = frameset.subframe
     with tempfile.NamedTemporaryFile() as tmp:
-        frameset.store(tmp.name)
+        frameset.filepath = tmp.name
+        frameset.store()
         del frameset
-        frameset = FrameSet().load(tmp.name)
+        frameset = FrameSet()
+        frameset.filepath = tmp.name
+        frameset.load()
     assert (frameset.subframe.link == subframe.link).all()
     assert np.isclose(frameset.sloc['Ic'], [6]).all()
 

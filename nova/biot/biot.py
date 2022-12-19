@@ -18,8 +18,7 @@ class Biot(FrameSet):
     @property
     def biot_kwargs(self):
         """Return default biot factory kwargs."""
-        return dict(filename=self.filename, dirname=self.path,
-                    attrs=self.field_attrs)
+        return dict(attrs=self.field_attrs)
 
     @property
     def biot_attrs(self):

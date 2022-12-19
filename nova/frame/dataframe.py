@@ -268,7 +268,7 @@ class DataFrame(FrameAttrs):
                 metadata['version'] = [metadata['version']]
         return metadata
 
-    def store(self, file: str, group=None, mode='w', vtk=False):
+    def store(self, filepath: str, group=None, mode='w', vtk=False):
         """Store dataframe as group in netCDF4 hdf5 file."""
         xframe = self.to_xarray()
         xframe.attrs = self.extract_metadata()
@@ -280,12 +280,12 @@ class DataFrame(FrameAttrs):
                 xframe[col].values = self._dumps(col)
             except KeyError:
                 pass
-        xframe.to_netcdf(file, group=group, mode=mode)
+        xframe.to_netcdf(filepath, group=group, mode=mode)
 
-    def load(self, file, group=None):
-        """Load dataframe from hdf file."""
+    def load(self, filepath, group=None):
+        """Load dataframe from netCDF file."""
         with import_module('xarray').open_dataset(
-                file, group=group, cache=True) as data:
+                filepath, group=group, cache=True) as data:
             data.load()
             metadata = self.insert_metadata(data.attrs)
             self.__init__(data.to_dataframe(), **metadata)

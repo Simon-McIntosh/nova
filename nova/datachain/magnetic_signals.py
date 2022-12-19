@@ -212,7 +212,7 @@ class TypeCast:
 class Signal(netCDF, Waveform, SignalParameters):
     """Manage base waveform parameters."""
 
-    datapath: str = 'magnetics_6MHz'
+    dirname: str = '.magnetics_6MHz'
     magnetics: Magnetics = field(default_factory=Magnetics)
     dtype: str | np.dtype = 'int32'
     _intergal: np.ndarray | None = field(init=False, repr=False, default=None)
@@ -220,7 +220,6 @@ class Signal(netCDF, Waveform, SignalParameters):
     def __post_init__(self):
         """Initialize component waveforms."""
         super().__post_init__()
-        self.set_path(self.datapath)
         self.cast = TypeCast(self.dtype, self.limit)
         self.noise = FractalNoise(self.rng, self.sample_number,
                                   **self.noise_attrs)
@@ -290,7 +289,7 @@ class Signal(netCDF, Waveform, SignalParameters):
         for name in tqdm(self.magnetics['frame'].index[:1]):
             self.generate()
             self.update_dataarray(name)
-            super().store(f'{name}.nc', mode='w')
+            self.store(f'{name}.nc', mode='w')
 
     def plot(self, axes=None):
         """Plot waveform."""

@@ -38,6 +38,17 @@ KEYPATH = dict(nova=os.path.join(nova.__name__,
                imas=IMASNAME, root=root_dir)
 
 
+def test_filepath():
+    filepath = FilePath(filename='tmp.nc', dirname='/tmp')
+    assert filepath.filepath == Path('/tmp/tmp.nc')
+
+
+def test_filepath_error():
+    filepath = FilePath(filename=None, dirname='/tmp')
+    with pytest.raises(FileNotFoundError):
+        filepath.filepath
+
+
 @pytest.mark.parametrize('path', [
     '/tmp', '/tmp.nova', '/tmp.nova.imas', '/tmp.nova.subpath',
     '/tmp.imas.subpath/data', '/tmp.imas.nova', 'site_config',
@@ -46,7 +57,7 @@ KEYPATH = dict(nova=os.path.join(nova.__name__,
     'root', 'root.diagnostic/data', 'root.nova', 'root.nova.subpath',
     'root.subpath.nova', 'root.nova.imas', 'root.subpath'])
 def test_path(path):
-    filepath = FilePath(mkdepth=4)
+    filepath = FilePath(parents=4)
     filepath.path = path
     default = filepath.basename
     paths = (path if len(path) > 0 else default for path in path.split('.'))
@@ -76,14 +87,14 @@ def test_ssh_appdirs_error():
 
 
 def test_mkdepth_error():
-    filepath = FilePath(mkdepth=2)
+    filepath = FilePath(parents=2)
     with pytest.raises(FileNotFoundError):
         filepath.path = 'root.imas.nova.data'
 
 
 @contextmanager
 def clear(path):
-    filepath = FilePath()
+    filepath = FilePath(parents=4)
     if filepath.fsys.isdir(path):
         filepath.fsys.delete(path, True)
     yield filepath
@@ -91,23 +102,32 @@ def clear(path):
         filepath.fsys.delete(path, True)
 
 
-@pytest.mark.parametrize('subpath', [None, '', '/signal'])
-def test_mkdir(subpath):
+@pytest.mark.parametrize('subpath', ['', 'signal'])
+def test_checkdir(subpath):
     path = '/tmp/_filepath/data'
     with clear(path) as filepath:
         filepath.path = path
-        path = filepath.mkdir(subpath)
-        assert filepath.fsys.isdir(path)
+        filepath.path /= subpath
+        filepath.makepath()
+        assert filepath.is_path()
 
 
 @mark_ssh
-def test_mkdir_ssh():
+def test_checkdir_ssh():
     path = '/tmp/_filepath'
     with clear(path) as filepath:
         filepath.host = HOSTNAME
         filepath.path = path
-        path = filepath.mkdir('data')
-        assert filepath.fsys.isdir(str(path))
+        filepath.path /= '.nova'
+        filepath.makepath()
+        assert filepath.is_path()
+
+
+def test_filepath_setter():
+    filepath = FilePath()
+    filepath.filepath = '/tmp/data/file.nc'
+    assert filepath.path == Path('/tmp/data')
+    assert filepath.filename == 'file.nc'
 
 
 if __name__ == '__main__':

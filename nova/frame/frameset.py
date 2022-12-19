@@ -12,7 +12,6 @@ from nova.frame.framedata import FrameData
 from nova.frame.framesetloc import FrameSetLoc
 from nova.frame.framespace import FrameSpace
 from nova.frame.select import Select
-from nova.imas.database import IdsData
 
 
 def frame_factory(frame_method):
@@ -24,7 +23,7 @@ def frame_factory(frame_method):
         @cached_property
         def wrapper(self):
             nonlocal frame_method
-            kwargs = method(self) | dict(name=method.__name__)
+            kwargs = dict(name=method.__name__) | method(self)
             try:
                 return frame_method(*self.frames, **kwargs)
             except TypeError:  # import_module from DeferredImport.load()
@@ -99,23 +98,15 @@ class FrameSet(netCDF, FrameSetLoc):
             delattr(self, attr)
 
     def subset(self, dataset):
-        """Return dataset subgroup."""
+        """Return group from dataset."""
         if self.group is not None:
             return dataset[self.group]
         return dataset
 
-    @property
-    def subgroup(self):
-        """Return netcdf group."""
-        if self.group is None:
-            return ''
-        return self.group
-
-    def load_metadata(self, filename=None, path=None):
+    def load_metadata(self):
         """Return metadata from netCDF file."""
-        filepath = self.get_filepath(filename, path)
         metadata = {}
-        with netCDF4.Dataset(filepath) as dataset:
+        with netCDF4.Dataset(self.filepath) as dataset:
             dataset = self.subset(dataset)
             if not hasattr(dataset, 'metadata'):
                 return {}
@@ -123,43 +114,41 @@ class FrameSet(netCDF, FrameSetLoc):
                 metadata[attr] = getattr(dataset, attr)
         return metadata
 
-    def store_metadata(self, filename=None, path=None, metadata=None):
+    def store_metadata(self, metadata=None):
         """Store metadata to netCDF file."""
         if metadata is None:
             return
-        filepath = self.get_filepath(filename, path)
-        with netCDF4.Dataset(filepath, 'a') as dataset:
+        with netCDF4.Dataset(self.filepath, 'a') as dataset:
             dataset = self.subset(dataset)
             dataset.metadata = list(metadata)
             for attr in metadata:
                 setattr(dataset, attr, metadata[attr])
 
-    def load(self, filename=None, path=None):
+    def load(self):
         """Load frameset from file."""
-        filepath = self.get_filepath(filename, path)
-        self.frame.load(filepath, self.netcdf_path('frame'))
-        self.subframe.load(filepath, self.netcdf_path('subframe'))
+        self.frame.load(self.filepath, self.subgroup('frame'))
+        self.subframe.load(self.filepath, self.subgroup('subframe'))
         self.clear_frameset()
-        with netCDF4.Dataset(filepath) as dataset:
+        with netCDF4.Dataset(self.filepath) as dataset:
             dataset = self.subset(dataset)
             for attr in dataset.groups:
                 if attr in dir(self.__class__) and isinstance(
                         data := getattr(self, attr), netCDF):
-                    data.group = self.group
-                    data.load(filepath)
+                    data.filepath = self.filepath
+                    data.group = self.subgroup(data.name)
+                    data.load()
         return self
 
-    def store(self, filename=None, path=None):
-        """Store frame, subframe and biot attrs as groups within hdf file."""
-        filepath = self.get_filepath(filename, path)
-        self.frame.store(filepath, self.netcdf_path('frame'),
-                         mode=self.mode(filepath))
-        self.subframe.store(filepath, self.netcdf_path('subframe'), mode='a')
+    def store(self):
+        """Store frame, subframe and methods as groups within netCDF file."""
+        self.frame.store(self.filepath, self.subgroup('frame'), self.mode())
+        self.subframe.store(self.filepath, self.subgroup('subframe'), 'a')
         for attr in self.__dict__:
-            if isinstance(data := getattr(self, attr), netCDF) and \
-                    not isinstance(data, IdsData):
-                data.group = self.group
-                data.store(filepath)
+            data = getattr(self, attr)
+            if isinstance(data, netCDF) and isinstance(data, FrameData):
+                data.filepath = self.filepath
+                data.group = self.subgroup(data.name)
+                data.store()
         return self
 
     def plot(self, index=None, axes=None, **kwargs):

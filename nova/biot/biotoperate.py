@@ -97,9 +97,9 @@ class BiotOperate(BiotData):
         for attr in self.attrs:
             self.update_turns(attr)
 
-    def load(self, filename=None, path=None):
+    def load(self):
         """Extend netCDF load."""
-        super().load(filename, path)
+        super().load()
         self.load_operators()
 
     def load_operators(self):

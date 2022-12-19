@@ -11,5 +11,5 @@ class Control(FrameSet):
 
     @frame_factory(Circuit)
     def circuit(self):
-        """Return coil constructor."""
-        return dict(dirname=self.path, filename=self.filename)
+        """Return circuit constructor kwargs."""
+        return dict()

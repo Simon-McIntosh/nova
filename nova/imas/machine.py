@@ -782,16 +782,16 @@ class Machine(CoilSet, MachineGeometry, CoilData):
         self.solve_biot()
         return self.store()
 
-    def load(self, filename=None, path=None):
+    def load(self):
         """Load machine geometry and data."""
-        super().load(filename, path)
-        self.metadata = self.load_metadata(filename, path)
+        super().load()
+        self.metadata = self.load_metadata()
         return self
 
-    def store(self, filename=None, path=None):
+    def store(self):
         """Store frameset, biot attributes and metadata."""
-        super().store(filename, path)
-        self.store_metadata(filename, path, self.metadata)
+        super().store()
+        self.store_metadata(self.metadata)
         return self
 
 

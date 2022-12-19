@@ -317,7 +317,7 @@ class Extrapolate(Plot, ExtrapolateMachine, ExtrapolationGrid, Database):
 
     alpha: float = 1.2e-6
     nturn: int = 10
-    filename: str = field(init=False, default='extrapolate')
+    filename: str = field(default='extrapolate')
     equilibrium: Equilibrium = field(init=False, repr=False)
     time_slice: TimeSlice = field(init=False, repr=False)
 
@@ -355,7 +355,7 @@ class Extrapolate(Plot, ExtrapolateMachine, ExtrapolationGrid, Database):
         """Build frameset and interpolation grid."""
         super().build(**kwargs)
         self.grid.solve(**self.grid_attrs)
-        return self.store(self.filename)
+        return self.store()
 
     @property
     def itime(self) -> int:

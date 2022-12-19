@@ -9,7 +9,6 @@ from nova.frame.framesetloc import FrameSetLoc
 class BiotData(netCDF, FrameSetLoc):
     """Biot solution abstract base class."""
 
-    name: str = field(default='')
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     classname: str = field(init=False)
 

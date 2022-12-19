@@ -197,8 +197,11 @@ def test_store_load_poly():
     coilset.coil.insert(10, 0.5, 0.95, 0.95, section='hex', turn='r',
                         nturn=-0.8)
     with tempfile.NamedTemporaryFile() as tmp:
-        coilset.store(tmp.name)
-        new_coilset = CoilSet().load(tmp.name)
+        coilset.filepath = tmp.name
+        coilset.store()
+        new_coilset = CoilSet()
+        new_coilset.filepath = tmp.name
+        new_coilset.load()
     assert np.isclose(coilset.frame.poly[0].area,
                       new_coilset.frame.poly[0].area)
 
@@ -208,8 +211,11 @@ def test_store_load_version():
     coilset.coil.insert(10, 0.5, 0.95, 0.95, section='hex', turn='r',
                         nturn=-0.8)
     with tempfile.NamedTemporaryFile() as tmp:
-        coilset.store(tmp.name)
-        new_coilset = CoilSet().load(tmp.name)
+        coilset.filepath = tmp.name
+        coilset.store()
+        new_coilset = CoilSet()
+        new_coilset.filepath = tmp.name
+        new_coilset.load()
     assert coilset.frame.version['index'] != new_coilset.frame.version['index']
 
 

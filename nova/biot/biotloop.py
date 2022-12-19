@@ -14,7 +14,7 @@ class BiotLoop(Plot, BiotOperate):
         """Solve Biot interaction at targets."""
         self.data = BiotSolve(self.subframe, target,
                               reduce=[True, True], turns=[True, True],
-                              columns=['Psi']).data
+                              columns=['Psi'], name=self.name).data
         # insert grid data
         self.data.coords['x'] = target.x.values
         self.data.coords['z'] = target.z.values

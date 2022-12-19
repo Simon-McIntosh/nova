@@ -18,8 +18,8 @@ if TYPE_CHECKING:
 class netCDF(FilePath):
     """Provide regulated access to netCDF database."""
 
-    name: str | None = None
     group: str | None = None
+    cache: bool = False
     data: xarray.Dataset | xarray.DataArray | None = \
         field(default=None, repr=False)
 
@@ -28,6 +28,19 @@ class netCDF(FilePath):
         if self.data is None:
             self.data = import_module('xarray').Dataset()
         super().__post_init__()
+
+    @FilePath.filepath.getter  # type: ignore
+    def filepath(self):
+        """Extend FilePath.filepath to include netCDF suffix."""
+        return super().filepath.with_suffix('.nc')
+
+    def subgroup(self, *subgroups: str) -> str | None:
+        """Return subgroup."""
+        subgroup = tuple(group for group in (self.group,) + subgroups
+                         if group is not None)
+        if len(subgroup) == 0:
+            return None
+        return '/'.join(subgroup)
 
     def _clear(self):
         """Clear datafile at self.filepath."""
@@ -45,17 +58,13 @@ class netCDF(FilePath):
             return
         sys.stdout.write(f'Cached datafile clear:\n{self.filepath}')
 
-    @property
-    def isfile(self):
-        """Return status of default netCDF file."""
-        return os.path.isfile(self.filepath)
-
     def hash_attrs(self, attrs: dict) -> str:
         """Return xxh32 hex hash of attrs dict."""
         xxh32 = xxhash.xxh32()
         xxh32.update(str(attrs))
         return xxh32.hexdigest()
 
+    '''
     def netcdf_group(self, group=None):
         """Return netcdf group."""
         if group is None:
@@ -77,26 +86,31 @@ class netCDF(FilePath):
         if os.path.split(filepath)[1] and not os.path.splitext(filepath)[1]:
             filepath = str(filepath) + '.nc'
         return filepath
+    '''
 
-    def store(self, filename=None, path=None, group=None, mode=None):
+    def mode(self, mode=None) -> str:
+        """Return file access mode."""
+        if mode is not None:
+            return mode
+        if self.is_file():
+            return 'a'
+        return 'w'
+
+    def store(self, mode=None):
         """Store data as group within netCDF file."""
-        filepath = self.get_filepath(filename, path)
-        group = self.netcdf_group(group)
-        mode = self.mode(filepath, mode)
+        mode = self.mode(mode)
         if self.host is not None:  # remote write
-            with self.fsys.open(filepath, mode+'b') as file:
-                self.data.to_netcdf(file, mode=mode, group=group)
+            with self.fsys.open(self.filepath, mode+'b') as file:
+                self.data.to_netcdf(file, mode=mode, group=self.group)
         else:
-            self.data.to_netcdf(filepath, mode=mode, group=group)
+            self.data.to_netcdf(self.filepath, mode=mode, group=self.group)
         self.data.close()
         return self
 
-    def load(self, filename=None, path=None, group=None):
+    def load(self):
         """Load dataset from file."""
-        filepath = self.get_filepath(filename, path)
-        group = self.netcdf_group(group)
         with import_module('xarray').open_dataset(
-                filepath, group=group, cache=True) as data:
+                self.filepath, group=self.group, cache=True) as data:
             self.data = data
             self.data.load()
         return self

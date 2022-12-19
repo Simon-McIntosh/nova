@@ -22,11 +22,6 @@ class CoilSet(Biot, Control, Frame):
     filename: str = 'coilset'
     dirname: str = '.nova'
 
-    #def __post_init__(self):
-    ##    """Set filepath."""
-    #   self.set_path(self.datapath)
-    #   super().__post_init__()
-
     @property
     def coilset_attrs(self):
         """Return coilset attrs."""
@@ -50,7 +45,7 @@ class CoilSet(Biot, Control, Frame):
 
 if __name__ == '__main__':
 
-    reload = True
+    reload = False
     if reload:
         coilset = CoilSet(dcoil=-5, nplasma=150)
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',

@@ -403,7 +403,6 @@ class Datafile(netCDF):
     def __post_init__(self):
         """Set ids and filepath."""
         super().__post_init__()
-        #self.set_path(self.datapath)
         self.load_build()
 
     def load_build(self):
@@ -419,7 +418,7 @@ class Datafile(netCDF):
         """
         try:
             self.load()
-        except (FileNotFoundError, OSError):  # KeyError, TypeError):
+        except (FileNotFoundError, OSError):
             self.build()
 
 
@@ -436,22 +435,10 @@ class IdsData(Datafile, Database):
         super().__post_init__()
 
 
-    '''
-        if hasattr(super(), '__post_init__'):
-            super().__post_init__()
-
-    def set_path(self, subpath=None):
-        """Extend FilePath.set_path to update filename and group."""
-        super().set_path(subpath)
-        self.filename = f'{self.machine}_{self.pulse}_{self.run}'
-        self.group = self.name
-    '''
-
-
 @dataclass
 class CoilData(Datafile):
     """
-    Provide cached acces to coilset data.
+    Provide cached access to coilset data.
 
     Extends: :class:`~nova.imas.database.Datafile`
 
@@ -466,12 +453,6 @@ class CoilData(Datafile):
         """Update filename and group."""
         self.group = self.hash_attrs(self.group_attrs)
         super().__post_init__()
-
-
-    #def set_path(self, subpath=None):
-    #    """Extend FilePath.set_path to update filename and group."""
-    ##    super().set_path(subpath)
-    #    self.group = self.hash_attrs(self.group_attrs)
 
     @property
     def group_attrs(self):

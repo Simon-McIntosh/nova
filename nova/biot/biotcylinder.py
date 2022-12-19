@@ -1,6 +1,6 @@
 """Biot-Savart calculation for complete circular cylinders."""
 from dataclasses import dataclass
-from functools import cached_property, wraps
+from functools import cached_property
 from typing import ClassVar
 
 import numba
@@ -90,8 +90,8 @@ class CylinderConstants(BiotConstants):
         """Return zeta coefficient calculated using Romberg integration."""
         #return np.sum(self.phi_weights * np.arcsinh(
         #    self.beta1(self.phi_points, shape=(..., np.newaxis))), axis=-1)
-        #return zeta(self.r, self.rs, self.z, self.zs,
-        #            self.phi_points, self.phi_weights)
+        return zeta(self.r, self.rs, self.z, self.zs,
+                    self.phi_points, self.phi_weights)
 
         result = np.zeros_like(self.r, np.float_)
         for phi, weight in zip(self.phi_points, self.phi_weights):
@@ -166,14 +166,6 @@ class BiotCylinder(CylinderConstants, BiotMatrix):
         """Return corner intergration."""
         return 1 / (2*np.pi*self.source('area')) * \
             ((data[..., 2] - data[..., 3]) - (data[..., 1] - data[..., 0]))
-
-    @property
-    def Ke(self):
-        #return np.ones_like(self.K[..., 0])
-        #return np.copy(self.k2[..., 0])
-        #_ = self.K
-        return self._intergrate(self.K)
-        #return np.copy(self.K[..., 0])
 
     @cached_property
     def Aphi(self):
